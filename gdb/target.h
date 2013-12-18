@@ -948,7 +948,7 @@ struct target_ops
     void (*to_goto_record_end) (struct target_ops *);
 
     /* Go to a specific location in the recorded execution trace.  */
-    void (*to_goto_record) (ULONGEST insn);
+    void (*to_goto_record) (struct target_ops *, ULONGEST insn);
 
     /* Disassemble SIZE instructions in the recorded execution trace from
        the current position.

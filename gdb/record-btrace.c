@@ -1832,7 +1832,7 @@ record_btrace_goto_end (struct target_ops *ops)
 /* The to_goto_record method of target record-btrace.  */
 
 static void
-record_btrace_goto (ULONGEST insn)
+record_btrace_goto (struct target_ops *self, ULONGEST insn)
 {
   struct thread_info *tp;
   struct btrace_insn_iterator it;

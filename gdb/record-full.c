@@ -1890,7 +1890,7 @@ record_full_goto_end (struct target_ops *self)
 /* The "to_goto_record" target method.  */
 
 static void
-record_full_goto (ULONGEST target_insn)
+record_full_goto (struct target_ops *self, ULONGEST target_insn)
 {
   struct record_full_entry *p = NULL;
 

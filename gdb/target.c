@@ -4396,7 +4396,7 @@ target_goto_record (ULONGEST insn)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_goto_record != NULL)
       {
-	t->to_goto_record (insn);
+	t->to_goto_record (t, insn);
 	return;
       }
 
