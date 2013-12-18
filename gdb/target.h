@@ -508,7 +508,8 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_ours) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_terminal_save_ours) (struct target_ops *);
+    void (*to_terminal_save_ours) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_info) (struct target_ops *, const char *, int);
     void (*to_kill) (struct target_ops *);
     void (*to_load) (struct target_ops *, char *, int);
