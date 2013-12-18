@@ -3483,7 +3483,7 @@ target_fileio_unlink (const char *filename, int *target_errno)
     {
       if (t->to_fileio_unlink != NULL)
 	{
-	  int ret = t->to_fileio_unlink (filename, target_errno);
+	  int ret = t->to_fileio_unlink (t, filename, target_errno);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,

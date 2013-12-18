@@ -328,7 +328,8 @@ inf_child_fileio_close (struct target_ops *self, int fd, int *target_errno)
 /* Unlink FILENAME on the target.  Return 0, or -1 if an error
    occurs (and set *TARGET_ERRNO).  */
 static int
-inf_child_fileio_unlink (const char *filename, int *target_errno)
+inf_child_fileio_unlink (struct target_ops *self,
+			 const char *filename, int *target_errno)
 {
   int ret;
 

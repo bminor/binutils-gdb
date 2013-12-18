@@ -740,7 +740,8 @@ struct target_ops
 
     /* Unlink FILENAME on the target.  Return 0, or -1 if an error
        occurs (and set *TARGET_ERRNO).  */
-    int (*to_fileio_unlink) (const char *filename, int *target_errno);
+    int (*to_fileio_unlink) (struct target_ops *,
+			     const char *filename, int *target_errno);
 
     /* Read value of symbolic link FILENAME on the target.  Return a
        null-terminated string allocated via xmalloc, or NULL if an error

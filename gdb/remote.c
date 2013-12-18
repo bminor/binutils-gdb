@@ -9770,7 +9770,8 @@ remote_hostio_close (struct target_ops *self, int fd, int *remote_errno)
    occurs (and set *REMOTE_ERRNO).  */
 
 static int
-remote_hostio_unlink (const char *filename, int *remote_errno)
+remote_hostio_unlink (struct target_ops *self,
+		      const char *filename, int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
@@ -10152,7 +10153,8 @@ remote_file_delete (const char *remote_file, int from_tty)
   if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
-  retcode = remote_hostio_unlink (remote_file, &remote_errno);
+  retcode = remote_hostio_unlink (find_target_at (process_stratum),
+				  remote_file, &remote_errno);
   if (retcode == -1)
     remote_hostio_error (remote_errno);
 
