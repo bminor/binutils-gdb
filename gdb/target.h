@@ -550,7 +550,7 @@ struct target_ops
     int (*to_find_memory_regions) (struct target_ops *,
 				   find_memory_region_ftype func, void *data);
     /* make_corefile_notes support method for gcore */
-    char * (*to_make_corefile_notes) (bfd *, int *);
+    char * (*to_make_corefile_notes) (struct target_ops *, bfd *, int *);
     /* get_bookmark support method for bookmarks */
     gdb_byte * (*to_get_bookmark) (char *, int);
     /* goto_bookmark support method for bookmarks */
@@ -1568,7 +1568,7 @@ extern char *target_thread_name (struct thread_info *);
  */
 
 #define target_make_corefile_notes(BFD, SIZE_P) \
-     (current_target.to_make_corefile_notes) (BFD, SIZE_P)
+     (current_target.to_make_corefile_notes) (&current_target, BFD, SIZE_P)
 
 /* Bookmark interfaces.  */
 #define target_get_bookmark(ARGS, FROM_TTY) \

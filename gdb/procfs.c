@@ -140,7 +140,8 @@ static char *procfs_pid_to_str (struct target_ops *, ptid_t);
 static int proc_find_memory_regions (struct target_ops *self,
 				     find_memory_region_ftype, void *);
 
-static char * procfs_make_note_section (bfd *, int *);
+static char * procfs_make_note_section (struct target_ops *self,
+					bfd *, int *);
 
 static int procfs_can_use_hw_breakpoint (struct target_ops *self,
 					 int, int, int);
@@ -5475,7 +5476,7 @@ find_stop_signal (void)
 }
 
 static char *
-procfs_make_note_section (bfd *obfd, int *note_size)
+procfs_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
 {
   struct cleanup *old_chain;
   gdb_gregset_t gregs;
@@ -5545,7 +5546,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
 }
 #else /* !Solaris */
 static char *
-procfs_make_note_section (bfd *obfd, int *note_size)
+procfs_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
 {
   error (_("gcore not implemented for this host."));
   return NULL;	/* lint */

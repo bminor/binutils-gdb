@@ -3779,7 +3779,8 @@ dummy_find_memory_regions (struct target_ops *self,
 
 /* Error-catcher for target_make_corefile_notes.  */
 static char *
-dummy_make_corefile_notes (bfd *ignore1, int *ignore2)
+dummy_make_corefile_notes (struct target_ops *self,
+			   bfd *ignore1, int *ignore2)
 {
   error (_("Command not implemented for this target."));
   return NULL;

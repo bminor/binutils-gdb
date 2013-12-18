@@ -1,5 +1,21 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_make_corefile_notes>: Add
+	argument.
+	(target_make_corefile_notes): Add argument.
+	* target.c (dummy_make_corefile_notes): Add 'self' argument.
+	* procfs.c (procfs_make_note_section): Add 'self' argument.
+	(procfs_make_note_section): Add 'self' argument.
+	(procfs_make_note_section): Add 'self' argument.
+	* linux-nat.c (linux_nat_make_corefile_notes): Add 'self'
+	argument.
+	* fbsd-nat.h (fbsd_make_corefile_notes): Add 'self' argument.
+	* fbsd-nat.c (fbsd_make_corefile_notes): Add 'self' argument.
+	* exec.c (exec_make_note_section): Add 'self' argument.
+	(exec_make_note_section): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_find_memory_regions>: Add
 	argument.
 	(target_find_memory_regions): Add argument.

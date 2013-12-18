@@ -849,7 +849,7 @@ exec_find_memory_regions (struct target_ops *self,
   return exec_do_find_memory_regions (func, data);
 }
 
-static char *exec_make_note_section (bfd *, int *);
+static char *exec_make_note_section (struct target_ops *self, bfd *, int *);
 
 /* Fill in the exec file target vector.  Very few entries need to be
    defined.  */
@@ -921,7 +921,7 @@ Show writing into executable and core files."), NULL,
 }
 
 static char *
-exec_make_note_section (bfd *obfd, int *note_size)
+exec_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
 {
   error (_("Can't create a corefile"));
 }

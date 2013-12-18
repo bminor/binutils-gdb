@@ -4097,7 +4097,8 @@ linux_nat_collect_thread_registers (const struct regcache *regcache,
    section for a corefile, and returns it in a malloc buffer.  */
 
 static char *
-linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
+linux_nat_make_corefile_notes (struct target_ops *self,
+			       bfd *obfd, int *note_size)
 {
   /* FIXME: uweigand/2011-10-06: Once all GNU/Linux architectures have been
      converted to gdbarch_core_regset_sections, this function can go away.  */

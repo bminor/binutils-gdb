@@ -35,6 +35,7 @@ extern int fbsd_find_memory_regions (struct target_ops *self,
 /* Create appropriate note sections for a corefile, returning them in
    allocated memory.  */
 
-extern char *fbsd_make_corefile_notes (bfd *obfd, int *note_size);
+extern char *fbsd_make_corefile_notes (struct target_ops *self,
+				       bfd *obfd, int *note_size);
 
 #endif /* fbsd-nat.h */

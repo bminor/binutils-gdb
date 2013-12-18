@@ -167,7 +167,7 @@ find_stop_signal (void)
    allocated memory.  */
 
 char *
-fbsd_make_corefile_notes (bfd *obfd, int *note_size)
+fbsd_make_corefile_notes (struct target_ops *self, bfd *obfd, int *note_size)
 {
   const struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
