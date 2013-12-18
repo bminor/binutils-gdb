@@ -933,7 +933,8 @@ struct target_ops
        If the core cannot be determined -- either for the specified
        thread, or right now, or in this debug session, or for this
        target -- return -1.  */
-    int (*to_core_of_thread) (struct target_ops *, ptid_t ptid);
+    int (*to_core_of_thread) (struct target_ops *, ptid_t ptid)
+      TARGET_DEFAULT_RETURN (-1);
 
     /* Verify that the memory in the [MEMADDR, MEMADDR+SIZE) range
        matches the contents of [DATA,DATA+SIZE).  Returns 1 if there's
