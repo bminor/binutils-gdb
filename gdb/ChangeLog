@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* tracepoint.c (tfile_get_tracepoint_status): Add 'self' argument.
+	* target.h (struct target_ops) <to_get_tracepoint_status>: Add
+	argument.
+	(target_get_tracepoint_status): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_tracepoint_status): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c (tfile_get_trace_status): Add 'self' argument.
 	* target.h (struct target_ops) <to_get_trace_status>: Add
 	argument.

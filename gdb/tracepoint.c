@@ -4793,7 +4793,8 @@ tfile_get_trace_status (struct target_ops *self, struct trace_status *ts)
 }
 
 static void
-tfile_get_tracepoint_status (struct breakpoint *tp, struct uploaded_tp *utp)
+tfile_get_tracepoint_status (struct target_ops *self,
+			     struct breakpoint *tp, struct uploaded_tp *utp)
 {
   /* Other bits of trace status were collected as part of opening the
      trace files, so nothing to do here.  */

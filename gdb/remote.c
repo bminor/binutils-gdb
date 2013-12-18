@@ -10773,7 +10773,7 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 }
 
 static void
-remote_get_tracepoint_status (struct breakpoint *bp,
+remote_get_tracepoint_status (struct target_ops *self, struct breakpoint *bp,
 			      struct uploaded_tp *utp)
 {
   struct remote_state *rs = get_remote_state ();
