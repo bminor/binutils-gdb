@@ -801,7 +801,8 @@ struct target_ops
     /* Tracepoint-related operations.  */
 
     /* Prepare the target for a tracing run.  */
-    void (*to_trace_init) (struct target_ops *);
+    void (*to_trace_init) (struct target_ops *)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Send full details of a tracepoint location to the target.  */
     void (*to_download_tracepoint) (struct target_ops *,

@@ -637,6 +637,19 @@ delegate_thread_architecture (struct target_ops *self, ptid_t arg1)
   return self->to_thread_architecture (self, arg1);
 }
 
+static void
+delegate_trace_init (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_trace_init (self);
+}
+
+static void
+tdefault_trace_init (struct target_ops *self)
+{
+  tcomplain ();
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -765,6 +778,8 @@ install_delegators (struct target_ops *ops)
     ops->to_supports_string_tracing = delegate_supports_string_tracing;
   if (ops->to_thread_architecture == NULL)
     ops->to_thread_architecture = delegate_thread_architecture;
+  if (ops->to_trace_init == NULL)
+    ops->to_trace_init = delegate_trace_init;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -828,5 +843,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_supports_enable_disable_tracepoint = tdefault_supports_enable_disable_tracepoint;
   ops->to_supports_string_tracing = tdefault_supports_string_tracing;
   ops->to_thread_architecture = default_thread_architecture;
+  ops->to_trace_init = tdefault_trace_init;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

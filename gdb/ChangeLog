@@ -2,6 +2,14 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_trace_init.
+	* target.h (struct target_ops) <to_trace_init>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_supports_string_tracing.
 	* target.h (struct target_ops) <to_supports_string_tracing>: Use
 	TARGET_DEFAULT_RETURN.
