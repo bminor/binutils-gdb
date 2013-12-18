@@ -826,7 +826,7 @@ struct target_ops
        may be set on the target.  If this operation is unsupported,
        return -1.  If for some reason the minimum length cannot be
        determined, return 0.  */
-    int (*to_get_min_fast_tracepoint_insn_len) (void);
+    int (*to_get_min_fast_tracepoint_insn_len) (struct target_ops *);
 
     /* Set the target's tracing behavior in response to unexpected
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
@@ -1844,7 +1844,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
 					   (buf), (offset), (len))
 
 #define target_get_min_fast_tracepoint_insn_len() \
-  (*current_target.to_get_min_fast_tracepoint_insn_len) ()
+  (*current_target.to_get_min_fast_tracepoint_insn_len) (&current_target)
 
 #define target_set_disconnected_tracing(val) \
   (*current_target.to_set_disconnected_tracing) (val)

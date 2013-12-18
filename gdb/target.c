@@ -902,7 +902,7 @@ update_current_target (void)
 	    (LONGEST (*) (struct target_ops *, gdb_byte *, ULONGEST, LONGEST))
 	    tcomplain);
   de_fault (to_get_min_fast_tracepoint_insn_len,
-	    (int (*) (void))
+	    (int (*) (struct target_ops *))
 	    return_minus_one);
   de_fault (to_set_disconnected_tracing,
 	    (void (*) (int))

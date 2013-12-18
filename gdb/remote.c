@@ -11083,7 +11083,7 @@ remote_traceframe_info (void)
    length is unknown.  */
 
 static int
-remote_get_min_fast_tracepoint_insn_len (void)
+remote_get_min_fast_tracepoint_insn_len (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
   char *reply;

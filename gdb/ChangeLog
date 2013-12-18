@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops)
+	<to_get_min_fast_tracepoint_insn_len>: Add argument.
+	(target_get_min_fast_tracepoint_insn_len): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_min_fast_tracepoint_insn_len): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_get_raw_trace_data>: Add
 	argument.
 	(target_get_raw_trace_data): Add argument.
