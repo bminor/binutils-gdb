@@ -472,6 +472,18 @@ tdefault_pid_to_exec_file (struct target_ops *self, int arg1)
   return 0;
 }
 
+static void
+delegate_log_command (struct target_ops *self, const char *arg1)
+{
+  self = self->beneath;
+  self->to_log_command (self, arg1);
+}
+
+static void
+tdefault_log_command (struct target_ops *self, const char *arg1)
+{
+}
+
 static int
 delegate_can_async_p (struct target_ops *self)
 {
@@ -608,6 +620,8 @@ install_delegators (struct target_ops *ops)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_pid_to_exec_file == NULL)
     ops->to_pid_to_exec_file = delegate_pid_to_exec_file;
+  if (ops->to_log_command == NULL)
+    ops->to_log_command = delegate_log_command;
   if (ops->to_can_async_p == NULL)
     ops->to_can_async_p = delegate_can_async_p;
   if (ops->to_is_async_p == NULL)
@@ -663,6 +677,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_thread_name = tdefault_thread_name;
   ops->to_rcmd = default_rcmd;
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
+  ops->to_log_command = tdefault_log_command;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;
   ops->to_async = tdefault_async;

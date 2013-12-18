@@ -650,7 +650,7 @@ update_current_target (void)
       /* Do not inherit to_xfer_partial.  */
       /* Do not inherit to_rcmd.  */
       /* Do not inherit to_pid_to_exec_file.  */
-      INHERIT (to_log_command, t);
+      /* Do not inherit to_log_command.  */
       INHERIT (to_stratum, t);
       /* Do not inherit to_has_all_memory.  */
       /* Do not inherit to_has_memory.  */

@@ -561,7 +561,8 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_rcmd);
     char *(*to_pid_to_exec_file) (struct target_ops *, int pid)
       TARGET_DEFAULT_RETURN (0);
-    void (*to_log_command) (struct target_ops *, const char *);
+    void (*to_log_command) (struct target_ops *, const char *)
+      TARGET_DEFAULT_IGNORE ();
     struct target_section_table *(*to_get_section_table) (struct target_ops *);
     enum strata to_stratum;
     int (*to_has_all_memory) (struct target_ops *);
@@ -1930,12 +1931,8 @@ extern char *target_fileio_read_stralloc (const char *filename);
 
 /* Command logging facility.  */
 
-#define target_log_command(p)						\
-  do									\
-    if (current_target.to_log_command)					\
-      (*current_target.to_log_command) (&current_target,		\
-					p);				\
-  while (0)
+#define target_log_command(p)					\
+  (*current_target.to_log_command) (&current_target, p)
 
 
 extern int target_core_of_thread (ptid_t ptid);
