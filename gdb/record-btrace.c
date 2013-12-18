@@ -1717,7 +1717,7 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 /* The to_can_execute_reverse method of target record-btrace.  */
 
 static int
-record_btrace_can_execute_reverse (void)
+record_btrace_can_execute_reverse (struct target_ops *self)
 {
   return 1;
 }

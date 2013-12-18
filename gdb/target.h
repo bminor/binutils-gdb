@@ -663,7 +663,7 @@ struct target_ops
 			     CORE_ADDR *found_addrp);
 
     /* Can target execute in reverse?  */
-    int (*to_can_execute_reverse) (void);
+    int (*to_can_execute_reverse) (struct target_ops *);
 
     /* The direction the target is currently executing.  Must be
        implemented on targets that support reverse execution and async
@@ -1698,7 +1698,7 @@ extern int target_masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask);
 /* Target can execute in reverse?  */
 #define target_can_execute_reverse \
      (current_target.to_can_execute_reverse ? \
-      current_target.to_can_execute_reverse () : 0)
+      current_target.to_can_execute_reverse (&current_target) : 0)
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 

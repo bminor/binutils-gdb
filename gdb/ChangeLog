@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_can_execute_reverse>: Add
+	argument.
+	(target_can_execute_reverse): Add argument.
+	* remote.c (remote_can_execute_reverse): Add 'self' argument.
+	* record-full.c (record_full_can_execute_reverse): Add 'self'
+	argument.
+	* record-btrace.c (record_btrace_can_execute_reverse): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* windows-nat.c (windows_get_ada_task_ptid): Add 'self' argument.
 	* target.h (struct target_ops) <to_get_ada_task_ptid>: Add
 	argument.

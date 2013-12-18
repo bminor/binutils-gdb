@@ -1693,7 +1693,7 @@ record_full_remove_breakpoint (struct target_ops *ops,
 /* "to_can_execute_reverse" method for process record target.  */
 
 static int
-record_full_can_execute_reverse (void)
+record_full_can_execute_reverse (struct target_ops *self)
 {
   return 1;
 }

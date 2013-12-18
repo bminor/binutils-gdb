@@ -10215,7 +10215,7 @@ remote_command (char *args, int from_tty)
 }
 
 static int
-remote_can_execute_reverse (void)
+remote_can_execute_reverse (struct target_ops *self)
 {
   if (remote_protocol_packets[PACKET_bs].support == PACKET_ENABLE
       || remote_protocol_packets[PACKET_bc].support == PACKET_ENABLE)
