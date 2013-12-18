@@ -789,7 +789,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, char *, int))
 	    tcomplain);
   de_fault (to_post_startup_inferior,
-	    (void (*) (ptid_t))
+	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   de_fault (to_insert_fork_catchpoint,
 	    (int (*) (int))
@@ -4857,9 +4857,9 @@ debug_to_load (struct target_ops *self, char *args, int from_tty)
 }
 
 static void
-debug_to_post_startup_inferior (ptid_t ptid)
+debug_to_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
-  debug_target.to_post_startup_inferior (ptid);
+  debug_target.to_post_startup_inferior (&debug_target, ptid);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_startup_inferior (%d)\n",
 		      ptid_get_pid (ptid));

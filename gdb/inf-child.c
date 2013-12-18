@@ -112,7 +112,7 @@ inf_child_open (char *arg, int from_tty)
 }
 
 static void
-inf_child_post_startup_inferior (ptid_t ptid)
+inf_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
   /* This version of Unix doesn't require a meaningful "post startup
      inferior" operation by a debugger.  */

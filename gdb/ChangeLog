@@ -1,5 +1,30 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_post_startup_inferior>: Add
+	argument.
+	(target_post_startup_inferior): Add argument.
+	* target.c (debug_to_post_startup_inferior): Add argument.
+	(update_current_target): Update.
+	* spu-linux-nat.c (spu_child_post_startup_inferior): Add 'self'
+	argument.
+	* linux-nat.c (linux_child_post_startup_inferior): Add 'self'
+	argument.
+	* inf-ptrace.c (inf_ptrace_post_startup_inferior): Add 'self'
+	argument.
+	* inf-child.c (inf_child_post_startup_inferior): Add 'self'
+	argument.
+	* i386-linux-nat.c (i386_linux_child_post_startup_inferior): Add
+	'self' argument.
+	(super_post_startup_inferior): Likewise.
+	* amd64-linux-nat.c (amd64_linux_child_post_startup_inferior): Add
+	'self' argument.
+	(super_post_startup_inferior): Likewise.
+	* aarch64-linux-nat.c (aarch64_linux_child_post_startup_inferior):
+	Add 'self' argument.
+	(super_post_startup_inferior): Likewise.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_load>: Add argument.
 	* target.c (target_load): Add argument.
 	(debug_to_load): Add argument.

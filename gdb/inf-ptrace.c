@@ -147,7 +147,7 @@ inf_ptrace_create_inferior (struct target_ops *ops,
 #ifdef PT_GET_PROCESS_STATE
 
 static void
-inf_ptrace_post_startup_inferior (ptid_t pid)
+inf_ptrace_post_startup_inferior (struct target_ops *self, ptid_t pid)
 {
   ptrace_event_t pe;
 

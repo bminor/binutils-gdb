@@ -497,7 +497,7 @@ struct target_ops
     void (*to_load) (struct target_ops *, char *, int);
     void (*to_create_inferior) (struct target_ops *, 
 				char *, char *, char **, int);
-    void (*to_post_startup_inferior) (ptid_t);
+    void (*to_post_startup_inferior) (struct target_ops *, ptid_t);
     int (*to_insert_fork_catchpoint) (int);
     int (*to_remove_fork_catchpoint) (int);
     int (*to_insert_vfork_catchpoint) (int);
@@ -1298,7 +1298,7 @@ void target_create_inferior (char *exec_file, char *args,
    Such targets will supply an appropriate definition for this function.  */
 
 #define target_post_startup_inferior(ptid) \
-     (*current_target.to_post_startup_inferior) (ptid)
+     (*current_target.to_post_startup_inferior) (&current_target, ptid)
 
 /* On some targets, we can catch an inferior fork or vfork event when
    it occurs.  These functions insert/remove an already-created

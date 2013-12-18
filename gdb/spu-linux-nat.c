@@ -401,7 +401,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
 /* Override the post_startup_inferior routine to continue running
    the inferior until the first spu_run system call.  */
 static void
-spu_child_post_startup_inferior (ptid_t ptid)
+spu_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
   int fd;
   ULONGEST addr;

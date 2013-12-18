@@ -568,13 +568,14 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-static void (*super_post_startup_inferior) (ptid_t ptid);
+static void (*super_post_startup_inferior) (struct target_ops *self,
+					    ptid_t ptid);
 
 static void
-amd64_linux_child_post_startup_inferior (ptid_t ptid)
+amd64_linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
   i386_cleanup_dregs ();
-  super_post_startup_inferior (ptid);
+  super_post_startup_inferior (self, ptid);
 }
 
 

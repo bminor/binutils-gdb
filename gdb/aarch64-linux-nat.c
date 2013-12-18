@@ -828,16 +828,18 @@ aarch64_linux_get_debug_reg_capacity (void)
     }
 }
 
-static void (*super_post_startup_inferior) (ptid_t ptid);
+static void (*super_post_startup_inferior) (struct target_ops *self,
+					    ptid_t ptid);
 
 /* Implement the "to_post_startup_inferior" target_ops method.  */
 
 static void
-aarch64_linux_child_post_startup_inferior (ptid_t ptid)
+aarch64_linux_child_post_startup_inferior (struct target_ops *self,
+					   ptid_t ptid)
 {
   aarch64_forget_process (ptid_get_pid (ptid));
   aarch64_linux_get_debug_reg_capacity ();
-  super_post_startup_inferior (ptid);
+  super_post_startup_inferior (self, ptid);
 }
 
 /* Implement the "to_read_description" target_ops method.  */

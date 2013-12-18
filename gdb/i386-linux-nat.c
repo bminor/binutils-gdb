@@ -982,13 +982,14 @@ i386_linux_resume (struct target_ops *ops,
     perror_with_name (("ptrace"));
 }
 
-static void (*super_post_startup_inferior) (ptid_t ptid);
+static void (*super_post_startup_inferior) (struct target_ops *self,
+					    ptid_t ptid);
 
 static void
-i386_linux_child_post_startup_inferior (ptid_t ptid)
+i386_linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
   i386_cleanup_dregs ();
-  super_post_startup_inferior (ptid);
+  super_post_startup_inferior (self, ptid);
 }
 
 /* Get Linux/x86 target description from running target.  */
