@@ -350,7 +350,7 @@ ravenscar_inferior_created (struct target_ops *target, int from_tty)
 }
 
 static ptid_t
-ravenscar_get_ada_task_ptid (long lwp, long thread)
+ravenscar_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (base_ptid), 0, thread);
 }

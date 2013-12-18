@@ -1,5 +1,27 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* windows-nat.c (windows_get_ada_task_ptid): Add 'self' argument.
+	* target.h (struct target_ops) <to_get_ada_task_ptid>: Add
+	argument.
+	(target_get_ada_task_ptid): Add argument.
+	* target.c (update_current_target): Update.
+	(default_get_ada_task_ptid): Add 'self' argument.
+	* sol-thread.c (sol_get_ada_task_ptid): Add 'self' argument.
+	* remote.c (remote_get_ada_task_ptid): Add 'self' argument.
+	* ravenscar-thread.c (ravenscar_get_ada_task_ptid): Add 'self'
+	argument.
+	* linux-thread-db.c (thread_db_get_ada_task_ptid): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_get_ada_task_ptid): Add 'self'
+	argument.
+	* dec-thread.c (dec_thread_get_ada_task_ptid): Add 'self'
+	argument.
+	* darwin-nat.c (darwin_get_ada_task_ptid): Add 'self' argument.
+	* aix-thread.c (aix_thread_get_ada_task_ptid): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_goto_bookmark>: Add argument.
 	(target_goto_bookmark): Add argument.
 	* target.c (dummy_goto_bookmark): Add 'self' argument.

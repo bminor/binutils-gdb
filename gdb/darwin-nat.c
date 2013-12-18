@@ -2005,7 +2005,7 @@ darwin_pid_to_exec_file (struct target_ops *self, int pid)
 }
 
 static ptid_t
-darwin_get_ada_task_ptid (long lwp, long thread)
+darwin_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   int i;
   darwin_thread_t *t;

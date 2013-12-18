@@ -641,7 +641,8 @@ struct target_ops
        based on LWP and THREAD.  These values are extracted from the
        task Private_Data section of the Ada Task Control Block, and
        their interpretation depends on the target.  */
-    ptid_t (*to_get_ada_task_ptid) (long lwp, long thread);
+    ptid_t (*to_get_ada_task_ptid) (struct target_ops *,
+				    long lwp, long thread);
 
     /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
        Return 0 if *READPTR is already at the end of the buffer.
@@ -1702,7 +1703,7 @@ extern int target_masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask);
 extern const struct target_desc *target_read_description (struct target_ops *);
 
 #define target_get_ada_task_ptid(lwp, tid) \
-     (*current_target.to_get_ada_task_ptid) (lwp,tid)
+     (*current_target.to_get_ada_task_ptid) (&current_target, lwp,tid)
 
 /* Utility implementation of searching memory.  */
 extern int simple_search_memory (struct target_ops* ops,

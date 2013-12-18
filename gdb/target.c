@@ -537,7 +537,7 @@ default_terminal_info (struct target_ops *self, const char *args, int from_tty)
    inferior_ptid.  */
 
 static ptid_t
-default_get_ada_task_ptid (long lwp, long tid)
+default_get_ada_task_ptid (struct target_ops *self, long lwp, long tid)
 {
   return ptid_build (ptid_get_pid (inferior_ptid), lwp, tid);
 }
@@ -837,7 +837,7 @@ update_current_target (void)
 	    default_thread_architecture);
   current_target.to_read_description = NULL;
   de_fault (to_get_ada_task_ptid,
-            (ptid_t (*) (long, long))
+            (ptid_t (*) (struct target_ops *, long, long))
             default_get_ada_task_ptid);
   de_fault (to_supports_multi_process,
 	    (int (*) (void))

@@ -1190,7 +1190,7 @@ thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
 }
 
 static ptid_t
-sol_get_ada_task_ptid (long lwp, long thread)
+sol_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   struct thread_info *thread_info =
     iterate_over_threads (thread_db_find_thread_from_tid, &thread);

@@ -2585,7 +2585,7 @@ windows_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 }
 
 static ptid_t
-windows_get_ada_task_ptid (long lwp, long thread)
+windows_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
 }

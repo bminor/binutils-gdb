@@ -1806,7 +1806,7 @@ aix_thread_extra_thread_info (struct target_ops *self,
 }
 
 static ptid_t
-aix_thread_get_ada_task_ptid (long lwp, long thread)
+aix_thread_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (inferior_ptid), 0, thread);
 }

@@ -2969,7 +2969,7 @@ remote_static_tracepoint_markers_by_strid (const char *strid)
 /* Implement the to_get_ada_task_ptid function for the remote targets.  */
 
 static ptid_t
-remote_get_ada_task_ptid (long lwp, long thread)
+remote_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
 }
