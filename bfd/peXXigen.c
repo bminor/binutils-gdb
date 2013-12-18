@@ -2205,7 +2205,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	  /* Align data before continuing.  */
 	  int align = (1 << section->alignment_power) - 1;
 
-	  data = (bfd_byte *) (((long) (data + align)) & ~ align);
+	  data = (bfd_byte *) (((ptrdiff_t) (data + align)) & ~ align);
 	  rva_bias += data - p;
 
 	  /* For reasons that are unclear .rsrc sections are sometimes created

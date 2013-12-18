@@ -1,3 +1,8 @@
+2013-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (rsrc_print_section): Use ptrdiff_t as the type for
+	pointer arithmetic.
+
 2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-arm.c (elf32_arm_post_process_headers): Call
@@ -107,6 +112,8 @@
 	(rsrc_process_section): New function - merges the contents of a
 	.rsrc section.
 	(_bfd_XXi_final_link_postscript): Call rsrc_process_section.
+	(rsrc_print_section): Fix mingw64 size issue.
+
 	* configure.in (AC_CHECK_HEADERS): Add wchar.h
 	* config.in: Regenerate.
 	* configure: Regenerate.
