@@ -888,7 +888,7 @@ struct target_ops
        is available in the read-only sections.  This method should not
        cache data; higher layers take care of caching, invalidating,
        and re-fetching when necessary.  */
-    struct traceframe_info *(*to_traceframe_info) (void);
+    struct traceframe_info *(*to_traceframe_info) (struct target_ops *);
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */
@@ -1876,7 +1876,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
 							   marker_id)
 
 #define target_traceframe_info() \
-  (*current_target.to_traceframe_info) ()
+  (*current_target.to_traceframe_info) (&current_target)
 
 #define target_use_agent(use) \
   (*current_target.to_use_agent) (use)

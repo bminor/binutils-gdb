@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* tracepoint.c (tfile_traceframe_info): Add 'self' argument.
+	* target.h (struct target_ops) <to_traceframe_info>: Add argument.
+	(target_traceframe_info): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_traceframe_info): Add 'self' argument.
+	* ctf.c (ctf_traceframe_info): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (target_static_tracepoint_markers_by_strid): Add
 	argument.
 	(struct target_ops) <to_static_tracepoint_markers_by_strid>: Add

@@ -1768,7 +1768,7 @@ ctf_thread_alive (struct target_ops *ops, ptid_t ptid)
    traceframe_info.  */
 
 static struct traceframe_info *
-ctf_traceframe_info (void)
+ctf_traceframe_info (struct target_ops *self)
 {
   struct traceframe_info *info = XCNEW (struct traceframe_info);
   const char *name;

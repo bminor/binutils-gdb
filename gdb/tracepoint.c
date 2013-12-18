@@ -5328,7 +5328,7 @@ build_traceframe_info (char blocktype, void *data)
 }
 
 static struct traceframe_info *
-tfile_traceframe_info (void)
+tfile_traceframe_info (struct target_ops *self)
 {
   struct traceframe_info *info = XCNEW (struct traceframe_info);
 

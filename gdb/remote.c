@@ -11054,7 +11054,7 @@ remote_set_circular_trace_buffer (struct target_ops *self, int val)
 }
 
 static struct traceframe_info *
-remote_traceframe_info (void)
+remote_traceframe_info (struct target_ops *self)
 {
   char *text;
 
