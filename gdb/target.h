@@ -859,7 +859,8 @@ struct target_ops
       operation fails.  */
     int (*to_trace_find) (struct target_ops *,
 			  enum trace_find_type type, int num,
-			  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp);
+			  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp)
+      TARGET_DEFAULT_RETURN (-1);
 
     /* Get the value of the trace state variable number TSV, returning
        1 if the value is known and writing the value itself into the
