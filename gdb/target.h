@@ -877,7 +877,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
 
     int (*to_upload_trace_state_variables) (struct target_ops *,
-					    struct uploaded_tsv **utsvp);
+					    struct uploaded_tsv **utsvp)
+      TARGET_DEFAULT_RETURN (0);
 
     LONGEST (*to_get_raw_trace_data) (struct target_ops *, gdb_byte *buf,
 				      ULONGEST offset, LONGEST len);

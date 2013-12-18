@@ -833,6 +833,19 @@ tdefault_upload_tracepoints (struct target_ops *self, struct uploaded_tp **arg1)
 }
 
 static int
+delegate_upload_trace_state_variables (struct target_ops *self, struct uploaded_tsv **arg1)
+{
+  self = self->beneath;
+  return self->to_upload_trace_state_variables (self, arg1);
+}
+
+static int
+tdefault_upload_trace_state_variables (struct target_ops *self, struct uploaded_tsv **arg1)
+{
+  return 0;
+}
+
+static int
 delegate_supports_btrace (struct target_ops *self)
 {
   self = self->beneath;
@@ -990,6 +1003,8 @@ install_delegators (struct target_ops *ops)
     ops->to_save_trace_data = delegate_save_trace_data;
   if (ops->to_upload_tracepoints == NULL)
     ops->to_upload_tracepoints = delegate_upload_tracepoints;
+  if (ops->to_upload_trace_state_variables == NULL)
+    ops->to_upload_trace_state_variables = delegate_upload_trace_state_variables;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1068,5 +1083,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_get_trace_state_variable_value = tdefault_get_trace_state_variable_value;
   ops->to_save_trace_data = tdefault_save_trace_data;
   ops->to_upload_tracepoints = tdefault_upload_tracepoints;
+  ops->to_upload_trace_state_variables = tdefault_upload_trace_state_variables;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
