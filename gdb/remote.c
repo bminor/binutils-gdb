@@ -8131,8 +8131,9 @@ extended_remote_run (char *args)
    environment.  */
 
 static void
-extended_remote_create_inferior_1 (char *exec_file, char *args,
-				   char **env, int from_tty)
+extended_remote_create_inferior (struct target_ops *ops,
+				 char *exec_file, char *args,
+				 char **env, int from_tty)
 {
   int run_worked;
   char *stop_reply;
@@ -8177,14 +8178,6 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
 
   /* Get updated offsets, if the stub uses qOffsets.  */
   get_offsets ();
-}
-
-static void
-extended_remote_create_inferior (struct target_ops *ops, 
-				 char *exec_file, char *args,
-				 char **env, int from_tty)
-{
-  extended_remote_create_inferior_1 (exec_file, args, env, from_tty);
 }
 
 
