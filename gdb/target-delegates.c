@@ -426,6 +426,19 @@ tdefault_has_exited (struct target_ops *self, int arg1, int arg2, int *arg3)
   return 0;
 }
 
+static char *
+delegate_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
+{
+  self = self->beneath;
+  return self->to_extra_thread_info (self, arg1);
+}
+
+static char *
+tdefault_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
+{
+  return 0;
+}
+
 static void
 delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
 {
@@ -561,6 +574,8 @@ install_delegators (struct target_ops *ops)
     ops->to_set_syscall_catchpoint = delegate_set_syscall_catchpoint;
   if (ops->to_has_exited == NULL)
     ops->to_has_exited = delegate_has_exited;
+  if (ops->to_extra_thread_info == NULL)
+    ops->to_extra_thread_info = delegate_extra_thread_info;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_can_async_p == NULL)
@@ -614,6 +629,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_remove_exec_catchpoint = tdefault_remove_exec_catchpoint;
   ops->to_set_syscall_catchpoint = tdefault_set_syscall_catchpoint;
   ops->to_has_exited = tdefault_has_exited;
+  ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_rcmd = default_rcmd;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;

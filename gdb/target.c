@@ -644,7 +644,7 @@ update_current_target (void)
       /* Do not inherit to_thread_alive.  */
       /* Do not inherit to_find_new_threads.  */
       /* Do not inherit to_pid_to_str.  */
-      INHERIT (to_extra_thread_info, t);
+      /* Do not inherit to_extra_thread_info.  */
       INHERIT (to_thread_name, t);
       INHERIT (to_stop, t);
       /* Do not inherit to_xfer_partial.  */
@@ -735,9 +735,6 @@ update_current_target (void)
   de_fault (to_can_run,
 	    (int (*) (struct target_ops *))
 	    return_zero);
-  de_fault (to_extra_thread_info,
-	    (char *(*) (struct target_ops *, struct thread_info *))
-	    return_null);
   de_fault (to_thread_name,
 	    (char *(*) (struct target_ops *, struct thread_info *))
 	    return_null);

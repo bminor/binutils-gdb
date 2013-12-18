@@ -2,6 +2,14 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_extra_thread_info.
+	* target.h (struct target_ops) <to_extra_thread_info>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_has_exited.
 	* target.h (struct target_ops) <to_has_exited>: Use
 	TARGET_DEFAULT_RETURN..
