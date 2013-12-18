@@ -588,7 +588,8 @@ struct target_ops
     char * (*to_make_corefile_notes) (struct target_ops *, bfd *, int *)
       TARGET_DEFAULT_FUNC (dummy_make_corefile_notes);
     /* get_bookmark support method for bookmarks */
-    gdb_byte * (*to_get_bookmark) (struct target_ops *, char *, int);
+    gdb_byte * (*to_get_bookmark) (struct target_ops *, char *, int)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
     /* goto_bookmark support method for bookmarks */
     void (*to_goto_bookmark) (struct target_ops *, gdb_byte *, int);
     /* Return the thread-local address at OFFSET in the

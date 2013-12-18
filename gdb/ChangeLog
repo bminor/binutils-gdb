@@ -2,6 +2,16 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_get_bookmark.
+	(dummy_get_bookmark): Remove.
+	(init_dummy_target): Don't inherit or default to_get_bookmark.
+	* target.h (struct target_ops) <to_get_bookmark>: Use
+	TARGET_DEFAULT_NORETURN
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_make_corefile_notes.
 	(init_dummy_target): Don't initialize to_make_corefile_notes.
 	* target.h (struct target_ops) <to_make_corefile_notes>: Use
