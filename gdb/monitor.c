@@ -2281,7 +2281,7 @@ monitor_stop (struct target_ops *self, ptid_t ptid)
    ourseleves here cause of a nasty echo.  */
 
 static void
-monitor_rcmd (char *command,
+monitor_rcmd (struct target_ops *self, char *command,
 	      struct ui_file *outbuf)
 {
   char *p;

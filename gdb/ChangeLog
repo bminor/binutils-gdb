@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_rcmd>: Add argument.
+	(target_rcmd): Add argument.
+	* target.c (debug_to_rcmd): Add argument.
+	(update_current_target, do_monitor_command): Update.
+	* remote.c (remote_rcmd): Add 'self' argument.
+	* monitor.c (monitor_rcmd): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* windows-nat.c (windows_stop): Add 'self' argument.
 	* target.h (struct target_ops) <to_stop>: Add argument.
 	* target.c (target_stop): Add argument.

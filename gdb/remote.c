@@ -8962,7 +8962,7 @@ remote_search_memory (struct target_ops* ops,
 }
 
 static void
-remote_rcmd (char *command,
+remote_rcmd (struct target_ops *self, char *command,
 	     struct ui_file *outbuf)
 {
   struct remote_state *rs = get_remote_state ();

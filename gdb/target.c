@@ -828,7 +828,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   de_fault (to_rcmd,
-	    (void (*) (char *, struct ui_file *))
+	    (void (*) (struct target_ops *, char *, struct ui_file *))
 	    tcomplain);
   de_fault (to_pid_to_exec_file,
 	    (char *(*) (int))
@@ -4996,10 +4996,10 @@ debug_to_stop (struct target_ops *self, ptid_t ptid)
 }
 
 static void
-debug_to_rcmd (char *command,
+debug_to_rcmd (struct target_ops *self, char *command,
 	       struct ui_file *outbuf)
 {
-  debug_target.to_rcmd (command, outbuf);
+  debug_target.to_rcmd (&debug_target, command, outbuf);
   fprintf_unfiltered (gdb_stdlog, "target_rcmd (%s, ...)\n", command);
 }
 
@@ -5075,10 +5075,11 @@ do_monitor_command (char *cmd,
 		 int from_tty)
 {
   if ((current_target.to_rcmd
-       == (void (*) (char *, struct ui_file *)) tcomplain)
+       == (void (*) (struct target_ops *, char *, struct ui_file *)) tcomplain)
       || (current_target.to_rcmd == debug_to_rcmd
 	  && (debug_target.to_rcmd
-	      == (void (*) (char *, struct ui_file *)) tcomplain)))
+	      == (void (*) (struct target_ops *,
+			    char *, struct ui_file *)) tcomplain)))
     error (_("\"monitor\" command not supported by this target."));
   target_rcmd (cmd, gdb_stdtarg);
 }

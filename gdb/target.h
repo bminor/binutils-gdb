@@ -525,7 +525,8 @@ struct target_ops
     char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *);
     char *(*to_thread_name) (struct target_ops *, struct thread_info *);
     void (*to_stop) (struct target_ops *, ptid_t);
-    void (*to_rcmd) (char *command, struct ui_file *output);
+    void (*to_rcmd) (struct target_ops *,
+		     char *command, struct ui_file *output);
     char *(*to_pid_to_exec_file) (int pid);
     void (*to_log_command) (const char *);
     struct target_section_table *(*to_get_section_table) (struct target_ops *);
@@ -1434,7 +1435,7 @@ extern void target_stop (ptid_t ptid);
    placed in OUTBUF.  */
 
 #define target_rcmd(command, outbuf) \
-     (*current_target.to_rcmd) (command, outbuf)
+     (*current_target.to_rcmd) (&current_target, command, outbuf)
 
 
 /* Does the target include all of memory, or only part of it?  This
