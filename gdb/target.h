@@ -462,7 +462,8 @@ struct target_ops
 				    struct gdbarch *, struct bp_target_info *)
       TARGET_DEFAULT_RETURN (-1);
     int (*to_remove_hw_breakpoint) (struct target_ops *,
-				    struct gdbarch *, struct bp_target_info *);
+				    struct gdbarch *, struct bp_target_info *)
+      TARGET_DEFAULT_RETURN (-1);
 
     /* Documentation of what the two routines below are expected to do is
        provided with the corresponding target_* macros.  */

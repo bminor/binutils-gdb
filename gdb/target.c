@@ -606,7 +606,7 @@ update_current_target (void)
       /* Do not inherit to_remove_breakpoint.  */
       /* Do not inherit to_can_use_hw_breakpoint.  */
       /* Do not inherit to_insert_hw_breakpoint.  */
-      INHERIT (to_remove_hw_breakpoint, t);
+      /* Do not inherit to_remove_hw_breakpoint.  */
       /* Do not inherit to_ranged_break_num_registers.  */
       INHERIT (to_insert_watchpoint, t);
       INHERIT (to_remove_watchpoint, t);
@@ -734,10 +734,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_remove_hw_breakpoint,
-	    (int (*) (struct target_ops *, struct gdbarch *,
-		      struct bp_target_info *))
-	    return_minus_one);
   de_fault (to_insert_watchpoint,
 	    (int (*) (struct target_ops *, CORE_ADDR, int, int,
 		      struct expression *))
