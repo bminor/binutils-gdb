@@ -10574,7 +10574,7 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 }
 
 static int
-remote_can_download_tracepoint (void)
+remote_can_download_tracepoint (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
   struct trace_status *ts;

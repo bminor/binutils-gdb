@@ -855,7 +855,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, struct bp_location *))
 	    tcomplain);
   de_fault (to_can_download_tracepoint,
-	    (int (*) (void))
+	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_download_trace_state_variable,
 	    (void (*) (struct trace_state_variable *))
