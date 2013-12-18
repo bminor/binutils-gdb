@@ -243,6 +243,18 @@ tdefault_terminal_init (struct target_ops *self)
 }
 
 static void
+delegate_terminal_inferior (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_terminal_inferior (self);
+}
+
+static void
+tdefault_terminal_inferior (struct target_ops *self)
+{
+}
+
+static void
 delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
 {
   self = self->beneath;
@@ -347,6 +359,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_accel_watchpoint_condition = delegate_can_accel_watchpoint_condition;
   if (ops->to_terminal_init == NULL)
     ops->to_terminal_init = delegate_terminal_init;
+  if (ops->to_terminal_inferior == NULL)
+    ops->to_terminal_inferior = delegate_terminal_inferior;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_can_async_p == NULL)
@@ -385,6 +399,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_region_ok_for_hw_watchpoint = default_region_ok_for_hw_watchpoint;
   ops->to_can_accel_watchpoint_condition = tdefault_can_accel_watchpoint_condition;
   ops->to_terminal_init = tdefault_terminal_init;
+  ops->to_terminal_inferior = tdefault_terminal_inferior;
   ops->to_rcmd = default_rcmd;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;

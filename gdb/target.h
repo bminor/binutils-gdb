@@ -502,7 +502,8 @@ struct target_ops
 					  CORE_ADDR, CORE_ADDR);
     void (*to_terminal_init) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_terminal_inferior) (struct target_ops *);
+    void (*to_terminal_inferior) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_ours_for_output) (struct target_ops *);
     void (*to_terminal_ours) (struct target_ops *);
     void (*to_terminal_save_ours) (struct target_ops *);
