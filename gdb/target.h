@@ -905,7 +905,8 @@ struct target_ops
        successful, 0 otherwise.  */
     int (*to_set_trace_notes) (struct target_ops *,
 			       const char *user, const char *notes,
-			       const char *stopnotes);
+			       const char *stopnotes)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Return the processor core that thread PTID was last seen on.
        This information is updated only when:
