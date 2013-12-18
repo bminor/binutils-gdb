@@ -843,7 +843,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_supports_enable_disable_tracepoint,
-	    (int (*) (void))
+	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_supports_string_tracing,
 	    (int (*) (void))

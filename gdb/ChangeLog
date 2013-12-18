@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops)
+	<to_supports_enable_disable_tracepoint>: Add argument.
+	(target_supports_enable_disable_tracepoint): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_supports_enable_disable_tracepoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_supports_multi_process>: Add
 	argument.
 	(target_supports_multi_process): Add argument.

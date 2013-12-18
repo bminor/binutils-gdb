@@ -676,7 +676,7 @@ struct target_ops
 
     /* Does this target support enabling and disabling tracepoints while a trace
        experiment is running?  */
-    int (*to_supports_enable_disable_tracepoint) (void);
+    int (*to_supports_enable_disable_tracepoint) (struct target_ops *);
 
     /* Does this target support disabling address space randomization?  */
     int (*to_supports_disable_randomization) (void);
@@ -1114,7 +1114,7 @@ int target_supports_disable_randomization (void);
    while a trace experiment is running.  */
 
 #define target_supports_enable_disable_tracepoint() \
-  (*current_target.to_supports_enable_disable_tracepoint) ()
+  (*current_target.to_supports_enable_disable_tracepoint) (&current_target)
 
 #define target_supports_string_tracing() \
   (*current_target.to_supports_string_tracing) ()

@@ -10290,7 +10290,7 @@ remote_supports_install_in_trace (void)
 }
 
 static int
-remote_supports_enable_disable_tracepoint (void)
+remote_supports_enable_disable_tracepoint (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
 
