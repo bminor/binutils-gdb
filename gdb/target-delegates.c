@@ -895,6 +895,18 @@ tdefault_set_circular_trace_buffer (struct target_ops *self, int arg1)
 {
 }
 
+static void
+delegate_set_trace_buffer_size (struct target_ops *self, LONGEST arg1)
+{
+  self = self->beneath;
+  self->to_set_trace_buffer_size (self, arg1);
+}
+
+static void
+tdefault_set_trace_buffer_size (struct target_ops *self, LONGEST arg1)
+{
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -1063,6 +1075,8 @@ install_delegators (struct target_ops *ops)
     ops->to_set_disconnected_tracing = delegate_set_disconnected_tracing;
   if (ops->to_set_circular_trace_buffer == NULL)
     ops->to_set_circular_trace_buffer = delegate_set_circular_trace_buffer;
+  if (ops->to_set_trace_buffer_size == NULL)
+    ops->to_set_trace_buffer_size = delegate_set_trace_buffer_size;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1146,5 +1160,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_get_min_fast_tracepoint_insn_len = tdefault_get_min_fast_tracepoint_insn_len;
   ops->to_set_disconnected_tracing = tdefault_set_disconnected_tracing;
   ops->to_set_circular_trace_buffer = tdefault_set_circular_trace_buffer;
+  ops->to_set_trace_buffer_size = tdefault_set_trace_buffer_size;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

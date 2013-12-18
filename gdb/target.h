@@ -898,7 +898,8 @@ struct target_ops
     void (*to_set_circular_trace_buffer) (struct target_ops *, int val)
       TARGET_DEFAULT_IGNORE ();
     /* Set the size of trace buffer in the target.  */
-    void (*to_set_trace_buffer_size) (struct target_ops *, LONGEST val);
+    void (*to_set_trace_buffer_size) (struct target_ops *, LONGEST val)
+      TARGET_DEFAULT_IGNORE ();
 
     /* Add/change textual notes about the trace run, returning 1 if
        successful, 0 otherwise.  */

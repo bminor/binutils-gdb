@@ -1,6 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't initialize
+	to_set_trace_buffer_size.
+	* target.h (struct target_ops) <to_set_trace_buffer_size>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
 	to_set_circular_trace_buffer.
 	* target.h (struct target_ops) <to_set_circular_trace_buffer>: Use
