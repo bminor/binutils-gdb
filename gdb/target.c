@@ -63,6 +63,8 @@ static ptid_t default_get_ada_task_ptid (struct target_ops *self,
 static int default_follow_fork (struct target_ops *self, int follow_child,
 				int detach_fork);
 
+static void default_mourn_inferior (struct target_ops *self);
+
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
@@ -2660,30 +2662,24 @@ target_follow_fork (int follow_child, int detach_fork)
   return retval;
 }
 
+static void
+default_mourn_inferior (struct target_ops *self)
+{
+  internal_error (__FILE__, __LINE__,
+		  _("could not find a target to follow mourn inferior"));
+}
+
 void
 target_mourn_inferior (void)
 {
-  struct target_ops *t;
+  current_target.to_mourn_inferior (&current_target);
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_mourn_inferior ()\n");
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_mourn_inferior != NULL)	
-	{
-	  t->to_mourn_inferior (t);
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_mourn_inferior ()\n");
-
-          /* We no longer need to keep handles on any of the object files.
-             Make sure to release them to avoid unnecessarily locking any
-             of them while we're not actually debugging.  */
-          bfd_cache_close_all ();
-
-	  return;
-	}
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  _("could not find a target to follow mourn inferior"));
+  /* We no longer need to keep handles on any of the object files.
+     Make sure to release them to avoid unnecessarily locking any
+     of them while we're not actually debugging.  */
+  bfd_cache_close_all ();
 }
 
 /* Look for a target which can describe architectural features, starting
