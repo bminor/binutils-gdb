@@ -115,7 +115,7 @@ record_stop (struct target_ops *t)
   DEBUG ("stop %s", t->to_shortname);
 
   if (t->to_stop_recording != NULL)
-    t->to_stop_recording ();
+    t->to_stop_recording (t);
 }
 
 /* Unpush the record target.  */

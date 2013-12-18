@@ -195,7 +195,7 @@ record_btrace_open (char *args, int from_tty)
 /* The to_stop_recording method of target record-btrace.  */
 
 static void
-record_btrace_stop_recording (void)
+record_btrace_stop_recording (struct target_ops *self)
 {
   struct thread_info *tp;
 

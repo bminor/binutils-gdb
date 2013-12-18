@@ -927,7 +927,7 @@ struct target_ops
 					 enum btrace_read_type type);
 
     /* Stop trace recording.  */
-    void (*to_stop_recording) (void);
+    void (*to_stop_recording) (struct target_ops *);
 
     /* Print information about the recording.  */
     void (*to_info_record) (void);

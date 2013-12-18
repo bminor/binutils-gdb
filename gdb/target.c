@@ -4266,7 +4266,7 @@ target_stop_recording (void)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_stop_recording != NULL)
       {
-	t->to_stop_recording ();
+	t->to_stop_recording (t);
 	return;
       }
 
