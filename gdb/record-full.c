@@ -1701,7 +1701,7 @@ record_full_can_execute_reverse (void)
 /* "to_get_bookmark" method for process record and prec over core.  */
 
 static gdb_byte *
-record_full_get_bookmark (char *args, int from_tty)
+record_full_get_bookmark (struct target_ops *self, char *args, int from_tty)
 {
   char *ret = NULL;
 

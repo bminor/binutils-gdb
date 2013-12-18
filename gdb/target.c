@@ -3788,7 +3788,7 @@ dummy_make_corefile_notes (struct target_ops *self,
 
 /* Error-catcher for target_get_bookmark.  */
 static gdb_byte *
-dummy_get_bookmark (char *ignore1, int ignore2)
+dummy_get_bookmark (struct target_ops *self, char *ignore1, int ignore2)
 {
   tcomplain ();
   return NULL;

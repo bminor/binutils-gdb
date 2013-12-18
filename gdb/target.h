@@ -552,7 +552,7 @@ struct target_ops
     /* make_corefile_notes support method for gcore */
     char * (*to_make_corefile_notes) (struct target_ops *, bfd *, int *);
     /* get_bookmark support method for bookmarks */
-    gdb_byte * (*to_get_bookmark) (char *, int);
+    gdb_byte * (*to_get_bookmark) (struct target_ops *, char *, int);
     /* goto_bookmark support method for bookmarks */
     void (*to_goto_bookmark) (gdb_byte *, int);
     /* Return the thread-local address at OFFSET in the
@@ -1572,7 +1572,7 @@ extern char *target_thread_name (struct thread_info *);
 
 /* Bookmark interfaces.  */
 #define target_get_bookmark(ARGS, FROM_TTY) \
-     (current_target.to_get_bookmark) (ARGS, FROM_TTY)
+     (current_target.to_get_bookmark) (&current_target, ARGS, FROM_TTY)
 
 #define target_goto_bookmark(ARG, FROM_TTY) \
      (current_target.to_goto_bookmark) (ARG, FROM_TTY)
