@@ -485,7 +485,8 @@ struct target_ops
     int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *)
       TARGET_DEFAULT_RETURN (0);
     int (*to_watchpoint_addr_within_range) (struct target_ops *,
-					    CORE_ADDR, CORE_ADDR, int);
+					    CORE_ADDR, CORE_ADDR, int)
+      TARGET_DEFAULT_FUNC (default_watchpoint_addr_within_range);
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
