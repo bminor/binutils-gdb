@@ -864,7 +864,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, struct bp_location *))
 	    tcomplain);
   de_fault (to_disable_tracepoint,
-	    (void (*) (struct bp_location *))
+	    (void (*) (struct target_ops *, struct bp_location *))
 	    tcomplain);
   de_fault (to_trace_set_readonly_regions,
 	    (void (*) (void))

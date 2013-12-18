@@ -10643,7 +10643,8 @@ remote_enable_tracepoint (struct target_ops *self,
 }
 
 static void
-remote_disable_tracepoint (struct bp_location *location)
+remote_disable_tracepoint (struct target_ops *self,
+			   struct bp_location *location)
 {
   struct remote_state *rs = get_remote_state ();
   char addr_buf[40];
