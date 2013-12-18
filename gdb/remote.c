@@ -9791,7 +9791,8 @@ remote_hostio_unlink (struct target_ops *self,
    occurs (and set *REMOTE_ERRNO).  */
 
 static char *
-remote_hostio_readlink (const char *filename, int *remote_errno)
+remote_hostio_readlink (struct target_ops *self,
+			const char *filename, int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;

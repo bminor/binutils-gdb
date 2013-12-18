@@ -3509,7 +3509,7 @@ target_fileio_readlink (const char *filename, int *target_errno)
     {
       if (t->to_fileio_readlink != NULL)
 	{
-	  char *ret = t->to_fileio_readlink (filename, target_errno);
+	  char *ret = t->to_fileio_readlink (t, filename, target_errno);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,

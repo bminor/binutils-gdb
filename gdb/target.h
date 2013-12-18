@@ -746,7 +746,8 @@ struct target_ops
     /* Read value of symbolic link FILENAME on the target.  Return a
        null-terminated string allocated via xmalloc, or NULL if an error
        occurs (and set *TARGET_ERRNO).  */
-    char *(*to_fileio_readlink) (const char *filename, int *target_errno);
+    char *(*to_fileio_readlink) (struct target_ops *,
+				 const char *filename, int *target_errno);
 
 
     /* Implement the "info proc" command.  */

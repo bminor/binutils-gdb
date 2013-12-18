@@ -344,7 +344,8 @@ inf_child_fileio_unlink (struct target_ops *self,
    null-terminated string allocated via xmalloc, or NULL if an error
    occurs (and set *TARGET_ERRNO).  */
 static char *
-inf_child_fileio_readlink (const char *filename, int *target_errno)
+inf_child_fileio_readlink (struct target_ops *self,
+			   const char *filename, int *target_errno)
 {
   /* We support readlink only on systems that also provide a compile-time
      maximum path length (PATH_MAX), at least for now.  */
