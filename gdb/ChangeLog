@@ -1,5 +1,10 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* frame.h (frame_id_build_unavailable_stack_special): New.
+	* frame.c (frame_id_build_unavailable_stack_special): New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* amd64-tdep.c (amd64_classify_insn_at, amd64_insn_is_call)
 	(amd64_insn_is_ret, amd64_insn_is_jump, amd64_jmp_p): New.
 	(amd64_init_abi): Add insn_is_call, insn_is_ret, and insn_is_jump
