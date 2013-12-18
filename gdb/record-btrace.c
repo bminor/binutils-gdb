@@ -398,7 +398,8 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
 /* The to_insn_history_range method of target record-btrace.  */
 
 static void
-record_btrace_insn_history_range (ULONGEST from, ULONGEST to, int flags)
+record_btrace_insn_history_range (struct target_ops *self,
+				  ULONGEST from, ULONGEST to, int flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_insn_history *history;
@@ -478,7 +479,7 @@ record_btrace_insn_history_from (struct target_ops *self,
 	end = ULONGEST_MAX;
     }
 
-  record_btrace_insn_history_range (begin, end, flags);
+  record_btrace_insn_history_range (self, begin, end, flags);
 }
 
 /* Print the instruction number range for a function call history line.  */

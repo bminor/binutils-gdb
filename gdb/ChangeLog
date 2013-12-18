@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_insn_history_range>: Add
+	argument.
+	* target.c (target_insn_history_range): Add argument.
+	* record-btrace.c (record_btrace_insn_history_range): Add 'self'
+	argument.
+	(record_btrace_insn_history_from): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_insn_history_from>: Add
 	argument.
 	* target.c (target_insn_history_from): Add argument.
