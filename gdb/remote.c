@@ -11352,7 +11352,7 @@ remote_augmented_libraries_svr4_read (void)
 /* Implementation of to_load.  */
 
 static void
-remote_load (char *name, int from_tty)
+remote_load (struct target_ops *self, char *name, int from_tty)
 {
   generic_load (name, from_tty);
 }

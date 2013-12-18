@@ -494,7 +494,7 @@ struct target_ops
     void (*to_terminal_save_ours) (struct target_ops *);
     void (*to_terminal_info) (struct target_ops *, const char *, int);
     void (*to_kill) (struct target_ops *);
-    void (*to_load) (char *, int);
+    void (*to_load) (struct target_ops *, char *, int);
     void (*to_create_inferior) (struct target_ops *, 
 				char *, char *, char **, int);
     void (*to_post_startup_inferior) (ptid_t);

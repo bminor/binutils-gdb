@@ -1213,7 +1213,7 @@ m32r_remove_breakpoint (struct target_ops *ops,
 }
 
 static void
-m32r_load (char *args, int from_tty)
+m32r_load (struct target_ops *self, char *args, int from_tty)
 {
   struct cleanup *old_chain;
   asection *section;

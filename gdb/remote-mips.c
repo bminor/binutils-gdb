@@ -128,7 +128,7 @@ static void pmon_download (char *buffer, int length);
 
 static void pmon_load_fast (char *file);
 
-static void mips_load (char *file, int from_tty);
+static void mips_load (struct target_ops *self, char *file, int from_tty);
 
 static int mips_make_srec (char *buffer, int type, CORE_ADDR memaddr,
 			   unsigned char *myaddr, int len);
@@ -3530,7 +3530,7 @@ pmon_load_fast (char *file)
 /* mips_load -- download a file.  */
 
 static void
-mips_load (char *file, int from_tty)
+mips_load (struct target_ops *self, char *file, int from_tty)
 {
   struct regcache *regcache;
 

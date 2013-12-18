@@ -142,7 +142,7 @@ static void debug_to_terminal_save_ours (struct target_ops *self);
 
 static void debug_to_terminal_ours (struct target_ops *self);
 
-static void debug_to_load (char *, int);
+static void debug_to_load (struct target_ops *self, char *, int);
 
 static int debug_to_can_run (void);
 
@@ -462,7 +462,7 @@ void
 target_load (char *arg, int from_tty)
 {
   target_dcache_invalidate ();
-  (*current_target.to_load) (arg, from_tty);
+  (*current_target.to_load) (&current_target, arg, from_tty);
 }
 
 void
@@ -786,7 +786,7 @@ update_current_target (void)
   de_fault (to_terminal_info,
 	    default_terminal_info);
   de_fault (to_load,
-	    (void (*) (char *, int))
+	    (void (*) (struct target_ops *, char *, int))
 	    tcomplain);
   de_fault (to_post_startup_inferior,
 	    (void (*) (ptid_t))
@@ -4849,9 +4849,9 @@ debug_to_terminal_info (struct target_ops *self,
 }
 
 static void
-debug_to_load (char *args, int from_tty)
+debug_to_load (struct target_ops *self, char *args, int from_tty)
 {
-  debug_target.to_load (args, from_tty);
+  debug_target.to_load (&debug_target, args, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_load (%s, %d)\n", args, from_tty);
 }

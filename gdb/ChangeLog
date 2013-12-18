@@ -1,5 +1,18 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_load>: Add argument.
+	* target.c (target_load): Add argument.
+	(debug_to_load): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_load): Add 'self' argument.
+	* remote-sim.c (gdbsim_load): Add 'self' argument.
+	* remote-mips.c (mips_load): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_load): Add 'self' argument.
+	* monitor.c (monitor_load): Add 'self' argument.
+	* m32r-rom.c (m32r_load_gen): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_terminal_info>: Add argument.
 	(target_terminal_info): Add argument.
 	* target.c (debug_to_terminal_info): Add argument.

@@ -196,7 +196,7 @@ m32r_load (char *filename, int from_tty)
 }
 
 static void
-m32r_load_gen (char *filename, int from_tty)
+m32r_load_gen (struct target_ops *self, char *filename, int from_tty)
 {
   generic_load (filename, from_tty);
 }

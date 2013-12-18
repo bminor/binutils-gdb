@@ -2199,7 +2199,7 @@ monitor_wait_srec_ack (void)
 /* monitor_load -- download a file.  */
 
 static void
-monitor_load (char *args, int from_tty)
+monitor_load (struct target_ops *self, char *args, int from_tty)
 {
   CORE_ADDR load_offset = 0;
   char **argv;
