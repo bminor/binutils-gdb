@@ -66,8 +66,6 @@ static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
 
 static int return_zero (void);
 
-static int return_minus_one (void);
-
 static void *return_null (void);
 
 void target_ignore (void);
@@ -705,7 +703,7 @@ update_current_target (void)
       /* Do not inherit to_upload_tracepoints.  */
       /* Do not inherit to_upload_trace_state_variables.  */
       /* Do not inherit to_get_raw_trace_data.  */
-      INHERIT (to_get_min_fast_tracepoint_insn_len, t);
+      /* Do not inherit to_get_min_fast_tracepoint_insn_len.  */
       INHERIT (to_set_disconnected_tracing, t);
       INHERIT (to_set_circular_trace_buffer, t);
       INHERIT (to_set_trace_buffer_size, t);
@@ -752,9 +750,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_get_min_fast_tracepoint_insn_len,
-	    (int (*) (struct target_ops *))
-	    return_minus_one);
   de_fault (to_set_disconnected_tracing,
 	    (void (*) (struct target_ops *, int))
 	    target_ignore);
@@ -3508,12 +3503,6 @@ static int
 return_zero (void)
 {
   return 0;
-}
-
-static int
-return_minus_one (void)
-{
-  return -1;
 }
 
 static void *

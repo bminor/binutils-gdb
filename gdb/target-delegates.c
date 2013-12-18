@@ -859,6 +859,19 @@ tdefault_get_raw_trace_data (struct target_ops *self, gdb_byte *arg1, ULONGEST a
 }
 
 static int
+delegate_get_min_fast_tracepoint_insn_len (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_get_min_fast_tracepoint_insn_len (self);
+}
+
+static int
+tdefault_get_min_fast_tracepoint_insn_len (struct target_ops *self)
+{
+  return -1;
+}
+
+static int
 delegate_supports_btrace (struct target_ops *self)
 {
   self = self->beneath;
@@ -1020,6 +1033,8 @@ install_delegators (struct target_ops *ops)
     ops->to_upload_trace_state_variables = delegate_upload_trace_state_variables;
   if (ops->to_get_raw_trace_data == NULL)
     ops->to_get_raw_trace_data = delegate_get_raw_trace_data;
+  if (ops->to_get_min_fast_tracepoint_insn_len == NULL)
+    ops->to_get_min_fast_tracepoint_insn_len = delegate_get_min_fast_tracepoint_insn_len;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1100,5 +1115,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_upload_tracepoints = tdefault_upload_tracepoints;
   ops->to_upload_trace_state_variables = tdefault_upload_trace_state_variables;
   ops->to_get_raw_trace_data = tdefault_get_raw_trace_data;
+  ops->to_get_min_fast_tracepoint_insn_len = tdefault_get_min_fast_tracepoint_insn_len;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

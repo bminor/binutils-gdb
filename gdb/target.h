@@ -888,7 +888,8 @@ struct target_ops
        may be set on the target.  If this operation is unsupported,
        return -1.  If for some reason the minimum length cannot be
        determined, return 0.  */
-    int (*to_get_min_fast_tracepoint_insn_len) (struct target_ops *);
+    int (*to_get_min_fast_tracepoint_insn_len) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (-1);
 
     /* Set the target's tracing behavior in response to unexpected
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */

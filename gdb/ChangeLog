@@ -2,6 +2,15 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_get_min_fast_tracepoint_insn_len.
+	(return_minus_one): Remove.
+	* target.h (struct target_ops)
+	<to_get_min_fast_tracepoint_insn_len>: Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_get_raw_trace_data.
 	* target.h (struct target_ops) <to_get_raw_trace_data>: Use
 	TARGET_DEFAULT_NORETURN.
