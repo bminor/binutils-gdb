@@ -1023,6 +1023,19 @@ tdefault_supports_btrace (struct target_ops *self)
   return 0;
 }
 
+static int
+delegate_augmented_libraries_svr4_read (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_augmented_libraries_svr4_read (self);
+}
+
+static int
+tdefault_augmented_libraries_svr4_read (struct target_ops *self)
+{
+  return 0;
+}
+
 static void
 install_delegators (struct target_ops *ops)
 {
@@ -1198,6 +1211,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_use_agent = delegate_can_use_agent;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
+  if (ops->to_augmented_libraries_svr4_read == NULL)
+    ops->to_augmented_libraries_svr4_read = delegate_augmented_libraries_svr4_read;
 }
 
 static void
@@ -1289,4 +1304,5 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_use_agent = tdefault_use_agent;
   ops->to_can_use_agent = tdefault_can_use_agent;
   ops->to_supports_btrace = tdefault_supports_btrace;
+  ops->to_augmented_libraries_svr4_read = tdefault_augmented_libraries_svr4_read;
 }

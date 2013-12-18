@@ -1060,7 +1060,8 @@ struct target_ops
 
     /* Nonzero if TARGET_OBJECT_LIBRARIES_SVR4 may be read with a
        non-empty annex.  */
-    int (*to_augmented_libraries_svr4_read) (struct target_ops *);
+    int (*to_augmented_libraries_svr4_read) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Those unwinders are tried before any other arch unwinders.  Use NULL if
        it is not used.  */

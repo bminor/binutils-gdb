@@ -713,7 +713,7 @@ update_current_target (void)
       /* Do not inherit to_traceframe_info.  */
       /* Do not inherit to_use_agent.  */
       /* Do not inherit to_can_use_agent.  */
-      INHERIT (to_augmented_libraries_svr4_read, t);
+      /* Do not inherit to_augmented_libraries_svr4_read.  */
       INHERIT (to_magic, t);
       INHERIT (to_supports_evaluation_of_breakpoint_conditions, t);
       INHERIT (to_can_run_breakpoint_commands, t);
@@ -752,9 +752,6 @@ update_current_target (void)
 	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_can_run_breakpoint_commands,
-	    (int (*) (struct target_ops *))
-	    return_zero);
-  de_fault (to_augmented_libraries_svr4_read,
 	    (int (*) (struct target_ops *))
 	    return_zero);
 
