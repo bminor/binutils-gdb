@@ -937,7 +937,8 @@ struct target_ops
     /* Look for a static tracepoint marker at ADDR, and fill in MARKER
        with its details.  Return 1 on success, 0 on failure.  */
     int (*to_static_tracepoint_marker_at) (struct target_ops *, CORE_ADDR,
-					   struct static_tracepoint_marker *marker);
+					   struct static_tracepoint_marker *marker)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Return a vector of all tracepoints markers string id ID, or all
        markers if ID is NULL.  */

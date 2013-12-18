@@ -946,6 +946,19 @@ tdefault_set_permissions (struct target_ops *self)
 }
 
 static int
+delegate_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, struct static_tracepoint_marker *arg2)
+{
+  self = self->beneath;
+  return self->to_static_tracepoint_marker_at (self, arg1, arg2);
+}
+
+static int
+tdefault_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, struct static_tracepoint_marker *arg2)
+{
+  return 0;
+}
+
+static int
 delegate_supports_btrace (struct target_ops *self)
 {
   self = self->beneath;
@@ -1121,6 +1134,8 @@ install_delegators (struct target_ops *ops)
     ops->to_get_tib_address = delegate_get_tib_address;
   if (ops->to_set_permissions == NULL)
     ops->to_set_permissions = delegate_set_permissions;
+  if (ops->to_static_tracepoint_marker_at == NULL)
+    ops->to_static_tracepoint_marker_at = delegate_static_tracepoint_marker_at;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1208,5 +1223,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_set_trace_notes = tdefault_set_trace_notes;
   ops->to_get_tib_address = tdefault_get_tib_address;
   ops->to_set_permissions = tdefault_set_permissions;
+  ops->to_static_tracepoint_marker_at = tdefault_static_tracepoint_marker_at;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
