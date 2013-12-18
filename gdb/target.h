@@ -816,7 +816,8 @@ struct target_ops
     int (*to_upload_tracepoints) (struct target_ops *,
 				  struct uploaded_tp **utpp);
 
-    int (*to_upload_trace_state_variables) (struct uploaded_tsv **utsvp);
+    int (*to_upload_trace_state_variables) (struct target_ops *,
+					    struct uploaded_tsv **utsvp);
 
     LONGEST (*to_get_raw_trace_data) (gdb_byte *buf,
 				      ULONGEST offset, LONGEST len);
@@ -1836,7 +1837,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_upload_tracepoints) (&current_target, utpp)
 
 #define target_upload_trace_state_variables(utsvp) \
-  (*current_target.to_upload_trace_state_variables) (utsvp)
+  (*current_target.to_upload_trace_state_variables) (&current_target, utsvp)
 
 #define target_get_raw_trace_data(buf,offset,len) \
   (*current_target.to_get_raw_trace_data) ((buf), (offset), (len))

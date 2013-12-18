@@ -896,7 +896,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *, struct uploaded_tp **))
 	    return_zero);
   de_fault (to_upload_trace_state_variables,
-	    (int (*) (struct uploaded_tsv **))
+	    (int (*) (struct target_ops *, struct uploaded_tsv **))
 	    return_zero);
   de_fault (to_get_raw_trace_data,
 	    (LONGEST (*) (gdb_byte *, ULONGEST, LONGEST))

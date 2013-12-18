@@ -205,7 +205,8 @@ static int remote_get_trace_status (struct target_ops *self,
 static int remote_upload_tracepoints (struct target_ops *self,
 				      struct uploaded_tp **utpp);
 
-static int remote_upload_trace_state_variables (struct uploaded_tsv **utsvp);
+static int remote_upload_trace_state_variables (struct target_ops *self,
+						struct uploaded_tsv **utsvp);
   
 static void remote_query_supported (void);
 
@@ -3443,7 +3444,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
     {
       struct uploaded_tsv *uploaded_tsvs = NULL;
 
-      remote_upload_trace_state_variables (&uploaded_tsvs);
+      remote_upload_trace_state_variables (target, &uploaded_tsvs);
       merge_uploaded_trace_state_variables (&uploaded_tsvs);
     }
 
@@ -11673,7 +11674,8 @@ remote_upload_tracepoints (struct target_ops *self, struct uploaded_tp **utpp)
 }
 
 static int
-remote_upload_trace_state_variables (struct uploaded_tsv **utsvp)
+remote_upload_trace_state_variables (struct target_ops *self,
+				     struct uploaded_tsv **utsvp)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;
