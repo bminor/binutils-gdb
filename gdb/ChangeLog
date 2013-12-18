@@ -1,5 +1,12 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_trace_start>: Add argument.
+	(target_trace_start): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_trace_start): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_trace_set_readonly_regions>:
 	Add argument.
 	(target_trace_set_readonly_regions): Add argument.

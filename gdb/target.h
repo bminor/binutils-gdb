@@ -784,7 +784,7 @@ struct target_ops
     void (*to_trace_set_readonly_regions) (struct target_ops *);
 
     /* Start a trace run.  */
-    void (*to_trace_start) (void);
+    void (*to_trace_start) (struct target_ops *);
 
     /* Get the current status of a tracing run.  */
     int (*to_get_trace_status) (struct trace_status *ts);
@@ -1803,7 +1803,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_disable_tracepoint) (&current_target, loc)
 
 #define target_trace_start() \
-  (*current_target.to_trace_start) ()
+  (*current_target.to_trace_start) (&current_target)
 
 #define target_trace_set_readonly_regions() \
   (*current_target.to_trace_set_readonly_regions) (&current_target)

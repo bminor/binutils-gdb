@@ -870,7 +870,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *))
 	    tcomplain);
   de_fault (to_trace_start,
-	    (void (*) (void))
+	    (void (*) (struct target_ops *))
 	    tcomplain);
   de_fault (to_get_trace_status,
 	    (int (*) (struct trace_status *))

@@ -10711,7 +10711,7 @@ Too many sections for read-only sections definition packet."));
 }
 
 static void
-remote_trace_start (void)
+remote_trace_start (struct target_ops *self)
 {
   putpkt ("QTStart");
   remote_get_noisy_reply (&target_buf, &target_buf_size);
