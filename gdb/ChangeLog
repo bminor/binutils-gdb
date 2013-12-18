@@ -1,3 +1,8 @@
+2013-12-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* value.c (value_entirely_unavailable): ARI fix: Move trailing
+	binary operator to the next line.  No actual code change.
+
 2013-12-17  Pedro Alves  <palves@redhat.com>
 
 	* frame.h (enum frame_id_stack_status): New enum.
