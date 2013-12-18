@@ -196,7 +196,7 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 static char *write_ptid (char *buf, const char *endbuf, ptid_t ptid);
 static ptid_t read_ptid (char *buf, char **obuf);
 
-static void remote_set_permissions (void);
+static void remote_set_permissions (struct target_ops *self);
 
 struct remote_state;
 static int remote_get_trace_status (struct target_ops *self,
@@ -3357,7 +3357,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
   /* If the stub wants to get a QAllow, compose one and send it.  */
   if (remote_protocol_packets[PACKET_QAllow].support != PACKET_DISABLE)
-    remote_set_permissions ();
+    remote_set_permissions (target);
 
   /* Next, we possibly activate noack mode.
 
@@ -3757,7 +3757,7 @@ remote_serial_open (char *name)
    permissions.  */
 
 void
-remote_set_permissions (void)
+remote_set_permissions (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
 

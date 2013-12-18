@@ -863,7 +863,7 @@ struct target_ops
 			       ptid_t ptid, CORE_ADDR *addr);
 
     /* Send the new settings of write permission variables.  */
-    void (*to_set_permissions) (void);
+    void (*to_set_permissions) (struct target_ops *);
 
     /* Look for a static tracepoint marker at ADDR, and fill in MARKER
        with its details.  Return 1 on success, 0 on failure.  */
@@ -1865,7 +1865,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_get_tib_address) (&current_target, (ptid), (addr))
 
 #define target_set_permissions() \
-  (*current_target.to_set_permissions) ()
+  (*current_target.to_set_permissions) (&current_target)
 
 #define target_static_tracepoint_marker_at(addr, marker) \
   (*current_target.to_static_tracepoint_marker_at) (addr, marker)

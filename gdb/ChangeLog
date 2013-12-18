@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_set_permissions>: Add argument.
+	(target_set_permissions): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_set_permissions): Add 'self' argument.
+	(remote_start_remote): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* windows-nat.c (windows_get_tib_address): Add 'self' argument.
 	* target.h (struct target_ops) <to_get_tib_address>: Add argument.
 	(target_get_tib_address): Add argument.
