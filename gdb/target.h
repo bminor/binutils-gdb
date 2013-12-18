@@ -459,7 +459,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     int (*to_ranged_break_num_registers) (struct target_ops *);
     int (*to_insert_hw_breakpoint) (struct target_ops *,
-				    struct gdbarch *, struct bp_target_info *);
+				    struct gdbarch *, struct bp_target_info *)
+      TARGET_DEFAULT_RETURN (-1);
     int (*to_remove_hw_breakpoint) (struct target_ops *,
 				    struct gdbarch *, struct bp_target_info *);
 
