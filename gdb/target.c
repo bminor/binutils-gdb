@@ -3870,13 +3870,8 @@ target_remove_mask_watchpoint (%s, %s, %d) = %d\n",
 int
 target_masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_masked_watch_num_registers != NULL)
-      return t->to_masked_watch_num_registers (t, addr, mask);
-
-  return -1;
+  return current_target.to_masked_watch_num_registers (&current_target,
+						       addr, mask);
 }
 
 /* The documentation for this function is in its prototype declaration

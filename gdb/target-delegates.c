@@ -281,6 +281,19 @@ tdefault_can_accel_watchpoint_condition (struct target_ops *self, CORE_ADDR arg1
   return 0;
 }
 
+static int
+delegate_masked_watch_num_registers (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2)
+{
+  self = self->beneath;
+  return self->to_masked_watch_num_registers (self, arg1, arg2);
+}
+
+static int
+tdefault_masked_watch_num_registers (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2)
+{
+  return -1;
+}
+
 static void
 delegate_terminal_init (struct target_ops *self)
 {
@@ -1176,6 +1189,8 @@ install_delegators (struct target_ops *ops)
     ops->to_region_ok_for_hw_watchpoint = delegate_region_ok_for_hw_watchpoint;
   if (ops->to_can_accel_watchpoint_condition == NULL)
     ops->to_can_accel_watchpoint_condition = delegate_can_accel_watchpoint_condition;
+  if (ops->to_masked_watch_num_registers == NULL)
+    ops->to_masked_watch_num_registers = delegate_masked_watch_num_registers;
   if (ops->to_terminal_init == NULL)
     ops->to_terminal_init = delegate_terminal_init;
   if (ops->to_terminal_inferior == NULL)
@@ -1345,6 +1360,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_watchpoint_addr_within_range = default_watchpoint_addr_within_range;
   ops->to_region_ok_for_hw_watchpoint = default_region_ok_for_hw_watchpoint;
   ops->to_can_accel_watchpoint_condition = tdefault_can_accel_watchpoint_condition;
+  ops->to_masked_watch_num_registers = tdefault_masked_watch_num_registers;
   ops->to_terminal_init = tdefault_terminal_init;
   ops->to_terminal_inferior = tdefault_terminal_inferior;
   ops->to_terminal_ours_for_output = tdefault_terminal_ours_for_output;
