@@ -134,7 +134,7 @@ static int debug_to_can_accel_watchpoint_condition (struct target_ops *self,
 
 static void debug_to_terminal_init (struct target_ops *self);
 
-static void debug_to_terminal_inferior (void);
+static void debug_to_terminal_inferior (struct target_ops *self);
 
 static void debug_to_terminal_ours_for_output (void);
 
@@ -500,7 +500,7 @@ target_terminal_inferior (void)
 
   /* If GDB is resuming the inferior in the foreground, install
      inferior's terminal modes.  */
-  (*current_target.to_terminal_inferior) ();
+  (*current_target.to_terminal_inferior) (&current_target);
 }
 
 static int
@@ -772,7 +772,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_terminal_inferior,
-	    (void (*) (void))
+	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_terminal_ours_for_output,
 	    (void (*) (void))
@@ -4807,9 +4807,9 @@ debug_to_terminal_init (struct target_ops *self)
 }
 
 static void
-debug_to_terminal_inferior (void)
+debug_to_terminal_inferior (struct target_ops *self)
 {
-  debug_target.to_terminal_inferior ();
+  debug_target.to_terminal_inferior (&debug_target);
 
   fprintf_unfiltered (gdb_stdlog, "target_terminal_inferior ()\n");
 }

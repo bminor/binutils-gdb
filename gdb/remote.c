@@ -5125,7 +5125,7 @@ Give up (and stop debugging it)? ")))
    is required.  */
 
 static void
-remote_terminal_inferior (void)
+remote_terminal_inferior (struct target_ops *self)
 {
   if (!target_async_permitted)
     /* Nothing to do.  */

@@ -176,7 +176,7 @@ extern void term_info (char *, int);
 
 extern void terminal_ours_for_output (void);
 
-extern void terminal_inferior (void);
+extern void terminal_inferior (struct target_ops *self);
 
 extern void terminal_init_inferior (struct target_ops *self);
 

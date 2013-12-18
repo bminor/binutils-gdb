@@ -882,7 +882,7 @@ go32_terminal_info (const char *args, int from_tty)
 }
 
 static void
-go32_terminal_inferior (void)
+go32_terminal_inferior (struct target_ops *self)
 {
   /* Redirect standard handles as child wants them.  */
   errno = 0;

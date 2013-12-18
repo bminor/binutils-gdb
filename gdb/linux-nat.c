@@ -4583,16 +4583,16 @@ static int async_terminal_is_ours = 1;
 /* target_terminal_inferior implementation.  */
 
 static void
-linux_nat_terminal_inferior (void)
+linux_nat_terminal_inferior (struct target_ops *self)
 {
   if (!target_is_async_p ())
     {
       /* Async mode is disabled.  */
-      terminal_inferior ();
+      terminal_inferior (self);
       return;
     }
 
-  terminal_inferior ();
+  terminal_inferior (self);
 
   /* Calls to target_terminal_*() are meant to be idempotent.  */
   if (!async_terminal_is_ours)

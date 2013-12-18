@@ -272,7 +272,7 @@ terminal_init_inferior (struct target_ops *self)
    This is preparation for starting or resuming the inferior.  */
 
 void
-terminal_inferior (void)
+terminal_inferior (struct target_ops *self)
 {
   struct inferior *inf;
   struct terminal_info *tinfo;

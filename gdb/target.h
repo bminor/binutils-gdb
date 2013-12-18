@@ -488,7 +488,7 @@ struct target_ops
     int (*to_masked_watch_num_registers) (struct target_ops *,
 					  CORE_ADDR, CORE_ADDR);
     void (*to_terminal_init) (struct target_ops *);
-    void (*to_terminal_inferior) (void);
+    void (*to_terminal_inferior) (struct target_ops *);
     void (*to_terminal_ours_for_output) (void);
     void (*to_terminal_ours) (void);
     void (*to_terminal_save_ours) (void);
