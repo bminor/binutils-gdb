@@ -311,6 +311,18 @@ tdefault_load (struct target_ops *self, char *arg1, int arg2)
 }
 
 static void
+delegate_post_startup_inferior (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  self->to_post_startup_inferior (self, arg1);
+}
+
+static void
+tdefault_post_startup_inferior (struct target_ops *self, ptid_t arg1)
+{
+}
+
+static void
 delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
 {
   self = self->beneath;
@@ -427,6 +439,8 @@ install_delegators (struct target_ops *ops)
     ops->to_terminal_info = delegate_terminal_info;
   if (ops->to_load == NULL)
     ops->to_load = delegate_load;
+  if (ops->to_post_startup_inferior == NULL)
+    ops->to_post_startup_inferior = delegate_post_startup_inferior;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_can_async_p == NULL)
@@ -471,6 +485,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_terminal_save_ours = tdefault_terminal_save_ours;
   ops->to_terminal_info = default_terminal_info;
   ops->to_load = tdefault_load;
+  ops->to_post_startup_inferior = tdefault_post_startup_inferior;
   ops->to_rcmd = default_rcmd;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;

@@ -517,7 +517,8 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
     void (*to_create_inferior) (struct target_ops *, 
 				char *, char *, char **, int);
-    void (*to_post_startup_inferior) (struct target_ops *, ptid_t);
+    void (*to_post_startup_inferior) (struct target_ops *, ptid_t)
+      TARGET_DEFAULT_IGNORE ();
     int (*to_insert_fork_catchpoint) (struct target_ops *, int);
     int (*to_remove_fork_catchpoint) (struct target_ops *, int);
     int (*to_insert_vfork_catchpoint) (struct target_ops *, int);
