@@ -683,7 +683,8 @@ struct target_ops
        all flash memory should be available for writing and the result
        of reading from areas written by 'to_flash_write' should be
        equal to what was written.  */
-    void (*to_flash_done) (struct target_ops *);
+    void (*to_flash_done) (struct target_ops *)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Describe the architecture-specific features of this target.
        Returns the description found, or NULL if no description

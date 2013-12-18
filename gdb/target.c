@@ -1766,18 +1766,9 @@ target_flash_erase (ULONGEST address, LONGEST length)
 void
 target_flash_done (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_flash_done != NULL)
-      {
-	if (targetdebug)
-	  fprintf_unfiltered (gdb_stdlog, "target_flash_done\n");
-	t->to_flash_done (t);
-	return;
-      }
-
-  tcomplain ();
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_flash_done\n");
+  current_target.to_flash_done (&current_target);
 }
 
 static void
