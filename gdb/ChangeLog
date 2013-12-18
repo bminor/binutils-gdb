@@ -1,5 +1,22 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* windows-nat.c (windows_pid_to_exec_file): Add 'self' argument.
+	* target.h (struct target_ops) <to_pid_to_exec_file>: Add
+	argument.
+	(target_pid_to_exec_file): Add argument.
+	* target.c (debug_to_pid_to_exec_file): Add argument.
+	(update_current_target): Update.
+	* nbsd-nat.h (nbsd_pid_to_exec_file): Add 'self' argument.
+	* nbsd-nat.c (nbsd_pid_to_exec_file): Add 'self' argument.
+	* linux-nat.c (linux_child_pid_to_exec_file): Add 'self' argument.
+	(linux_handle_extended_wait): Update.
+	* inf-child.c (inf_child_pid_to_exec_file): Add 'self' argument.
+	* fbsd-nat.h (fbsd_pid_to_exec_file): Add 'self' argument.
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Add 'self' argument.
+	* darwin-nat.c (darwin_pid_to_exec_file): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_rcmd>: Add argument.
 	(target_rcmd): Add argument.
 	* target.c (debug_to_rcmd): Add argument.

@@ -1989,7 +1989,7 @@ set_enable_mach_exceptions (char *args, int from_tty,
 }
 
 static char *
-darwin_pid_to_exec_file (int pid)
+darwin_pid_to_exec_file (struct target_ops *self, int pid)
 {
   char *path;
   int res;

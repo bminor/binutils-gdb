@@ -134,7 +134,7 @@ inf_child_can_run (struct target_ops *self)
 }
 
 static char *
-inf_child_pid_to_exec_file (int pid)
+inf_child_pid_to_exec_file (struct target_ops *self, int pid)
 {
   /* This version of Unix doesn't support translation of a process ID
      to the filename of the executable file.  */

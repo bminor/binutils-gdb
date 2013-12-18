@@ -23,7 +23,7 @@
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
-extern char *fbsd_pid_to_exec_file (int pid);
+extern char *fbsd_pid_to_exec_file (struct target_ops *self, int pid);
 
 /* Iterate over all the memory regions in the current inferior,
    calling FUNC for each memory region.  OBFD is passed as the last

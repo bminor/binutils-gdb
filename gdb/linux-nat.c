@@ -844,7 +844,7 @@ linux_nat_pass_signals (struct target_ops *self,
 /* Prototypes for local functions.  */
 static int stop_wait_callback (struct lwp_info *lp, void *data);
 static int linux_thread_alive (ptid_t ptid);
-static char *linux_child_pid_to_exec_file (int pid);
+static char *linux_child_pid_to_exec_file (struct target_ops *self, int pid);
 
 
 /* Convert wait status STATUS to a string.  Used for printing debug
@@ -2193,7 +2193,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 
       ourstatus->kind = TARGET_WAITKIND_EXECD;
       ourstatus->value.execd_pathname
-	= xstrdup (linux_child_pid_to_exec_file (pid));
+	= xstrdup (linux_child_pid_to_exec_file (NULL, pid));
 
       return 0;
     }
@@ -4033,7 +4033,7 @@ linux_nat_thread_name (struct target_ops *self, struct thread_info *thr)
    can be opened to get the symbols for the child process.  */
 
 static char *
-linux_child_pid_to_exec_file (int pid)
+linux_child_pid_to_exec_file (struct target_ops *self, int pid)
 {
   char *name1, *name2;
 

@@ -1994,7 +1994,7 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
 }
 
 static char *
-windows_pid_to_exec_file (int pid)
+windows_pid_to_exec_file (struct target_ops *self, int pid)
 {
   static char path[__PMAX];
 #ifdef __CYGWIN__

@@ -831,7 +831,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, char *, struct ui_file *))
 	    tcomplain);
   de_fault (to_pid_to_exec_file,
-	    (char *(*) (int))
+	    (char *(*) (struct target_ops *, int))
 	    return_null);
   de_fault (to_thread_architecture,
 	    default_thread_architecture);
@@ -5004,11 +5004,11 @@ debug_to_rcmd (struct target_ops *self, char *command,
 }
 
 static char *
-debug_to_pid_to_exec_file (int pid)
+debug_to_pid_to_exec_file (struct target_ops *self, int pid)
 {
   char *exec_file;
 
-  exec_file = debug_target.to_pid_to_exec_file (pid);
+  exec_file = debug_target.to_pid_to_exec_file (&debug_target, pid);
 
   fprintf_unfiltered (gdb_stdlog, "target_pid_to_exec_file (%d) = %s\n",
 		      pid, exec_file);

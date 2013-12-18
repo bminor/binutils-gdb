@@ -527,7 +527,7 @@ struct target_ops
     void (*to_stop) (struct target_ops *, ptid_t);
     void (*to_rcmd) (struct target_ops *,
 		     char *command, struct ui_file *output);
-    char *(*to_pid_to_exec_file) (int pid);
+    char *(*to_pid_to_exec_file) (struct target_ops *, int pid);
     void (*to_log_command) (const char *);
     struct target_section_table *(*to_get_section_table) (struct target_ops *);
     enum strata to_stratum;
@@ -1545,7 +1545,7 @@ extern char *target_thread_name (struct thread_info *);
    it must persist.  */
 
 #define target_pid_to_exec_file(pid) \
-     (current_target.to_pid_to_exec_file) (pid)
+     (current_target.to_pid_to_exec_file) (&current_target, pid)
 
 /* See the to_thread_architecture description in struct target_ops.  */
 
