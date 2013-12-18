@@ -1,6 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_insert_mask_watchpoint): Unconditionally
+	delegate.
+	* target.h (struct target_ops) <to_insert_mask_watchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_ranged_break_num_registers): Unconditionally
 	delegate.
 	* target.h (struct target_ops) <to_ranged_break_num_registers>:

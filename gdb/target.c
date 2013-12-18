@@ -3830,25 +3830,18 @@ target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
 int
 target_insert_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
 {
-  struct target_ops *t;
+  int ret;
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_insert_mask_watchpoint != NULL)
-      {
-	int ret;
+  ret = current_target.to_insert_mask_watchpoint (&current_target,
+						  addr, mask, rw);
 
-	ret = t->to_insert_mask_watchpoint (t, addr, mask, rw);
-
-	if (targetdebug)
-	  fprintf_unfiltered (gdb_stdlog, "\
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "\
 target_insert_mask_watchpoint (%s, %s, %d) = %d\n",
-			      core_addr_to_string (addr),
-			      core_addr_to_string (mask), rw, ret);
-
-	return ret;
-      }
-
-  return 1;
+			core_addr_to_string (addr),
+			core_addr_to_string (mask), rw, ret);
+  
+  return ret;
 }
 
 /* The documentation for this function is in its prototype declaration in

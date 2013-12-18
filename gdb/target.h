@@ -477,7 +477,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (-1);
 
     int (*to_insert_mask_watchpoint) (struct target_ops *,
-				      CORE_ADDR, CORE_ADDR, int);
+				      CORE_ADDR, CORE_ADDR, int)
+      TARGET_DEFAULT_RETURN (1);
     int (*to_remove_mask_watchpoint) (struct target_ops *,
 				      CORE_ADDR, CORE_ADDR, int);
     int (*to_stopped_by_watchpoint) (struct target_ops *)
