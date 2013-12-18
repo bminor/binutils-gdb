@@ -4899,7 +4899,8 @@ procfs_stopped_data_address (struct target_ops *targ, CORE_ADDR *addr)
 }
 
 static int
-procfs_insert_watchpoint (CORE_ADDR addr, int len, int type,
+procfs_insert_watchpoint (struct target_ops *self,
+			  CORE_ADDR addr, int len, int type,
 			  struct expression *cond)
 {
   if (!target_have_steppable_watchpoint

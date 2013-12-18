@@ -314,7 +314,8 @@ inf_ttrace_disable_page_protections (pid_t pid)
    type TYPE.  */
 
 static int
-inf_ttrace_insert_watchpoint (CORE_ADDR addr, int len, int type,
+inf_ttrace_insert_watchpoint (struct target_ops *self,
+			      CORE_ADDR addr, int len, int type,
 			      struct expression *cond)
 {
   const int pagesize = inf_ttrace_page_dict.pagesize;

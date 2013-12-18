@@ -1340,7 +1340,8 @@ aarch64_handle_watchpoint (int type, CORE_ADDR addr, int len, int is_insert)
    of the type TYPE.  Return 0 on success, -1 on failure.  */
 
 static int
-aarch64_linux_insert_watchpoint (CORE_ADDR addr, int len, int type,
+aarch64_linux_insert_watchpoint (struct target_ops *self,
+				 CORE_ADDR addr, int len, int type,
 				 struct expression *cond)
 {
   int ret;

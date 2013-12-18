@@ -461,7 +461,8 @@ struct target_ops
        provided with the corresponding target_* macros.  */
     int (*to_remove_watchpoint) (struct target_ops *,
 				 CORE_ADDR, int, int, struct expression *);
-    int (*to_insert_watchpoint) (CORE_ADDR, int, int, struct expression *);
+    int (*to_insert_watchpoint) (struct target_ops *,
+				 CORE_ADDR, int, int, struct expression *);
 
     int (*to_insert_mask_watchpoint) (struct target_ops *,
 				      CORE_ADDR, CORE_ADDR, int);
@@ -1615,7 +1616,8 @@ extern char *target_thread_name (struct thread_info *);
    -1 for failure.  */
 
 #define	target_insert_watchpoint(addr, len, type, cond) \
-     (*current_target.to_insert_watchpoint) (addr, len, type, cond)
+     (*current_target.to_insert_watchpoint) (&current_target,	\
+					     addr, len, type, cond)
 
 #define	target_remove_watchpoint(addr, len, type, cond) \
      (*current_target.to_remove_watchpoint) (&current_target,	\

@@ -542,7 +542,8 @@ is_power_of_2 (int val)
 }
 
 static int
-ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
+ia64_linux_insert_watchpoint (struct target_ops *self,
+			      CORE_ADDR addr, int len, int rw,
 			      struct expression *cond)
 {
   struct lwp_info *lp;
