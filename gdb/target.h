@@ -496,7 +496,8 @@ struct target_ops
 
     int (*to_can_accel_watchpoint_condition) (struct target_ops *,
 					      CORE_ADDR, int, int,
-					      struct expression *);
+					      struct expression *)
+      TARGET_DEFAULT_RETURN (0);
     int (*to_masked_watch_num_registers) (struct target_ops *,
 					  CORE_ADDR, CORE_ADDR);
     void (*to_terminal_init) (struct target_ops *);

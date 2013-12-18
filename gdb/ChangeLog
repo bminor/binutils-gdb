@@ -2,6 +2,14 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_can_accel_watchpoint_condition.
+	* target.h (struct target_ops)
+	<to_can_accel_watchpoint_condition>: Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_region_ok_for_hw_watchpoint.
 	* target.h (struct target_ops) <to_region_ok_for_hw_watchpoint>:
 	Use TARGET_DEFAULT_FUNC.

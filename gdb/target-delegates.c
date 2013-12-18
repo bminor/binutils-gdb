@@ -217,6 +217,19 @@ delegate_region_ok_for_hw_watchpoint (struct target_ops *self, CORE_ADDR arg1, i
   return self->to_region_ok_for_hw_watchpoint (self, arg1, arg2);
 }
 
+static int
+delegate_can_accel_watchpoint_condition (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+{
+  self = self->beneath;
+  return self->to_can_accel_watchpoint_condition (self, arg1, arg2, arg3, arg4);
+}
+
+static int
+tdefault_can_accel_watchpoint_condition (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+{
+  return 0;
+}
+
 static void
 delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
 {
@@ -318,6 +331,8 @@ install_delegators (struct target_ops *ops)
     ops->to_watchpoint_addr_within_range = delegate_watchpoint_addr_within_range;
   if (ops->to_region_ok_for_hw_watchpoint == NULL)
     ops->to_region_ok_for_hw_watchpoint = delegate_region_ok_for_hw_watchpoint;
+  if (ops->to_can_accel_watchpoint_condition == NULL)
+    ops->to_can_accel_watchpoint_condition = delegate_can_accel_watchpoint_condition;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_can_async_p == NULL)
@@ -354,6 +369,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_stopped_data_address = tdefault_stopped_data_address;
   ops->to_watchpoint_addr_within_range = default_watchpoint_addr_within_range;
   ops->to_region_ok_for_hw_watchpoint = default_region_ok_for_hw_watchpoint;
+  ops->to_can_accel_watchpoint_condition = tdefault_can_accel_watchpoint_condition;
   ops->to_rcmd = default_rcmd;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;
