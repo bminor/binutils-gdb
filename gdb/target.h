@@ -826,7 +826,8 @@ struct target_ops
 
     /* Disable a tracepoint on the target.  */
     void (*to_disable_tracepoint) (struct target_ops *,
-				   struct bp_location *location);
+				   struct bp_location *location)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Inform the target info of memory regions that are readonly
        (such as text sections), and so it should return data from

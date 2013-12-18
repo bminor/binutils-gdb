@@ -693,7 +693,7 @@ update_current_target (void)
       /* Do not inherit to_can_download_tracepoint.  */
       /* Do not inherit to_download_trace_state_variable.  */
       /* Do not inherit to_enable_tracepoint.  */
-      INHERIT (to_disable_tracepoint, t);
+      /* Do not inherit to_disable_tracepoint.  */
       INHERIT (to_trace_set_readonly_regions, t);
       INHERIT (to_trace_start, t);
       INHERIT (to_get_trace_status, t);
@@ -752,9 +752,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_disable_tracepoint,
-	    (void (*) (struct target_ops *, struct bp_location *))
-	    tcomplain);
   de_fault (to_trace_set_readonly_regions,
 	    (void (*) (struct target_ops *))
 	    tcomplain);
