@@ -1,5 +1,12 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_has_exited>: Add argument.
+	(target_has_exited): Add argument.
+	* target.c (debug_to_has_exited): Add argument.
+	(update_current_target): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_set_syscall_catchpoint>: Add
 	argument.
 	(target_set_syscall_catchpoint): Add argument.

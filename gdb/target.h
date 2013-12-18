@@ -507,7 +507,7 @@ struct target_ops
     int (*to_remove_exec_catchpoint) (struct target_ops *, int);
     int (*to_set_syscall_catchpoint) (struct target_ops *,
 				      int, int, int, int, int *);
-    int (*to_has_exited) (int, int, int *);
+    int (*to_has_exited) (struct target_ops *, int, int, int *);
     void (*to_mourn_inferior) (struct target_ops *);
     int (*to_can_run) (void);
 
@@ -1368,7 +1368,8 @@ int target_follow_fork (int follow_child, int detach_fork);
    exit code of PID, if any.  */
 
 #define target_has_exited(pid,wait_status,exit_status) \
-     (*current_target.to_has_exited) (pid,wait_status,exit_status)
+     (*current_target.to_has_exited) (&current_target, \
+				      pid,wait_status,exit_status)
 
 /* The debugger has completed a blocking wait() call.  There is now
    some process event that must be processed.  This function should

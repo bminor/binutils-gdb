@@ -813,7 +813,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *, int, int, int, int, int *))
 	    return_one);
   de_fault (to_has_exited,
-	    (int (*) (int, int, int *))
+	    (int (*) (struct target_ops *, int, int, int *))
 	    return_zero);
   de_fault (to_can_run,
 	    return_zero);
@@ -4944,11 +4944,13 @@ debug_to_remove_exec_catchpoint (struct target_ops *self, int pid)
 }
 
 static int
-debug_to_has_exited (int pid, int wait_status, int *exit_status)
+debug_to_has_exited (struct target_ops *self,
+		     int pid, int wait_status, int *exit_status)
 {
   int has_exited;
 
-  has_exited = debug_target.to_has_exited (pid, wait_status, exit_status);
+  has_exited = debug_target.to_has_exited (&debug_target,
+					   pid, wait_status, exit_status);
 
   fprintf_unfiltered (gdb_stdlog, "target_has_exited (%d, %d, %d) = %d\n",
 		      pid, wait_status, *exit_status, has_exited);
