@@ -781,7 +781,7 @@ struct target_ops
     /* Inform the target info of memory regions that are readonly
        (such as text sections), and so it should return data from
        those rather than look in the trace buffer.  */
-    void (*to_trace_set_readonly_regions) (void);
+    void (*to_trace_set_readonly_regions) (struct target_ops *);
 
     /* Start a trace run.  */
     void (*to_trace_start) (void);
@@ -1806,7 +1806,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_trace_start) ()
 
 #define target_trace_set_readonly_regions() \
-  (*current_target.to_trace_set_readonly_regions) ()
+  (*current_target.to_trace_set_readonly_regions) (&current_target)
 
 #define target_get_trace_status(ts) \
   (*current_target.to_get_trace_status) (ts)

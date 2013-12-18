@@ -867,7 +867,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, struct bp_location *))
 	    tcomplain);
   de_fault (to_trace_set_readonly_regions,
-	    (void (*) (void))
+	    (void (*) (struct target_ops *))
 	    tcomplain);
   de_fault (to_trace_start,
 	    (void (*) (void))

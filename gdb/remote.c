@@ -10661,7 +10661,7 @@ remote_disable_tracepoint (struct target_ops *self,
 }
 
 static void
-remote_trace_set_readonly_regions (void)
+remote_trace_set_readonly_regions (struct target_ops *self)
 {
   asection *s;
   bfd *abfd = NULL;
