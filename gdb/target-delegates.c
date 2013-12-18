@@ -845,6 +845,19 @@ tdefault_upload_trace_state_variables (struct target_ops *self, struct uploaded_
   return 0;
 }
 
+static LONGEST
+delegate_get_raw_trace_data (struct target_ops *self, gdb_byte *arg1, ULONGEST arg2, LONGEST arg3)
+{
+  self = self->beneath;
+  return self->to_get_raw_trace_data (self, arg1, arg2, arg3);
+}
+
+static LONGEST
+tdefault_get_raw_trace_data (struct target_ops *self, gdb_byte *arg1, ULONGEST arg2, LONGEST arg3)
+{
+  tcomplain ();
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -1005,6 +1018,8 @@ install_delegators (struct target_ops *ops)
     ops->to_upload_tracepoints = delegate_upload_tracepoints;
   if (ops->to_upload_trace_state_variables == NULL)
     ops->to_upload_trace_state_variables = delegate_upload_trace_state_variables;
+  if (ops->to_get_raw_trace_data == NULL)
+    ops->to_get_raw_trace_data = delegate_get_raw_trace_data;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1084,5 +1099,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_save_trace_data = tdefault_save_trace_data;
   ops->to_upload_tracepoints = tdefault_upload_tracepoints;
   ops->to_upload_trace_state_variables = tdefault_upload_trace_state_variables;
+  ops->to_get_raw_trace_data = tdefault_get_raw_trace_data;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

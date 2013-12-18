@@ -881,7 +881,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
 
     LONGEST (*to_get_raw_trace_data) (struct target_ops *, gdb_byte *buf,
-				      ULONGEST offset, LONGEST len);
+				      ULONGEST offset, LONGEST len)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Get the minimum length of instruction on which a fast tracepoint
        may be set on the target.  If this operation is unsupported,

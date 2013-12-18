@@ -704,7 +704,7 @@ update_current_target (void)
       /* Do not inherit to_save_trace_data.  */
       /* Do not inherit to_upload_tracepoints.  */
       /* Do not inherit to_upload_trace_state_variables.  */
-      INHERIT (to_get_raw_trace_data, t);
+      /* Do not inherit to_get_raw_trace_data.  */
       INHERIT (to_get_min_fast_tracepoint_insn_len, t);
       INHERIT (to_set_disconnected_tracing, t);
       INHERIT (to_set_circular_trace_buffer, t);
@@ -752,9 +752,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_get_raw_trace_data,
-	    (LONGEST (*) (struct target_ops *, gdb_byte *, ULONGEST, LONGEST))
-	    tcomplain);
   de_fault (to_get_min_fast_tracepoint_insn_len,
 	    (int (*) (struct target_ops *))
 	    return_minus_one);
