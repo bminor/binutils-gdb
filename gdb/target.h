@@ -468,7 +468,8 @@ struct target_ops
     /* Documentation of what the two routines below are expected to do is
        provided with the corresponding target_* macros.  */
     int (*to_remove_watchpoint) (struct target_ops *,
-				 CORE_ADDR, int, int, struct expression *);
+				 CORE_ADDR, int, int, struct expression *)
+      TARGET_DEFAULT_RETURN (-1);
     int (*to_insert_watchpoint) (struct target_ops *,
 				 CORE_ADDR, int, int, struct expression *)
       TARGET_DEFAULT_RETURN (-1);
