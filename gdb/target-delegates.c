@@ -335,6 +335,19 @@ tdefault_insert_fork_catchpoint (struct target_ops *self, int arg1)
   return 1;
 }
 
+static int
+delegate_remove_fork_catchpoint (struct target_ops *self, int arg1)
+{
+  self = self->beneath;
+  return self->to_remove_fork_catchpoint (self, arg1);
+}
+
+static int
+tdefault_remove_fork_catchpoint (struct target_ops *self, int arg1)
+{
+  return 1;
+}
+
 static void
 delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
 {
@@ -456,6 +469,8 @@ install_delegators (struct target_ops *ops)
     ops->to_post_startup_inferior = delegate_post_startup_inferior;
   if (ops->to_insert_fork_catchpoint == NULL)
     ops->to_insert_fork_catchpoint = delegate_insert_fork_catchpoint;
+  if (ops->to_remove_fork_catchpoint == NULL)
+    ops->to_remove_fork_catchpoint = delegate_remove_fork_catchpoint;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_can_async_p == NULL)
@@ -502,6 +517,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_load = tdefault_load;
   ops->to_post_startup_inferior = tdefault_post_startup_inferior;
   ops->to_insert_fork_catchpoint = tdefault_insert_fork_catchpoint;
+  ops->to_remove_fork_catchpoint = tdefault_remove_fork_catchpoint;
   ops->to_rcmd = default_rcmd;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;
