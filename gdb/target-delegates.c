@@ -985,6 +985,19 @@ tdefault_traceframe_info (struct target_ops *self)
 }
 
 static int
+delegate_use_agent (struct target_ops *self, int arg1)
+{
+  self = self->beneath;
+  return self->to_use_agent (self, arg1);
+}
+
+static int
+tdefault_use_agent (struct target_ops *self, int arg1)
+{
+  tcomplain ();
+}
+
+static int
 delegate_supports_btrace (struct target_ops *self)
 {
   self = self->beneath;
@@ -1166,6 +1179,8 @@ install_delegators (struct target_ops *ops)
     ops->to_static_tracepoint_markers_by_strid = delegate_static_tracepoint_markers_by_strid;
   if (ops->to_traceframe_info == NULL)
     ops->to_traceframe_info = delegate_traceframe_info;
+  if (ops->to_use_agent == NULL)
+    ops->to_use_agent = delegate_use_agent;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1256,5 +1271,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_static_tracepoint_marker_at = tdefault_static_tracepoint_marker_at;
   ops->to_static_tracepoint_markers_by_strid = tdefault_static_tracepoint_markers_by_strid;
   ops->to_traceframe_info = tdefault_traceframe_info;
+  ops->to_use_agent = tdefault_use_agent;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

@@ -963,7 +963,8 @@ struct target_ops
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */
-    int (*to_use_agent) (struct target_ops *, int use);
+    int (*to_use_agent) (struct target_ops *, int use)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Is the target able to use agent in current state?  */
     int (*to_can_use_agent) (struct target_ops *);
