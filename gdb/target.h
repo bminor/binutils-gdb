@@ -859,7 +859,8 @@ struct target_ops
 
     /* Return the address of the start of the Thread Information Block
        a Windows OS specific feature.  */
-    int (*to_get_tib_address) (ptid_t ptid, CORE_ADDR *addr);
+    int (*to_get_tib_address) (struct target_ops *,
+			       ptid_t ptid, CORE_ADDR *addr);
 
     /* Send the new settings of write permission variables.  */
     void (*to_set_permissions) (void);
@@ -1861,7 +1862,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
 					(user), (notes), (stopnotes))
 
 #define target_get_tib_address(ptid, addr) \
-  (*current_target.to_get_tib_address) ((ptid), (addr))
+  (*current_target.to_get_tib_address) (&current_target, (ptid), (addr))
 
 #define target_set_permissions() \
   (*current_target.to_set_permissions) ()

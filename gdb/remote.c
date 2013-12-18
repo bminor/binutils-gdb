@@ -9320,7 +9320,7 @@ remote_get_thread_local_address (struct target_ops *ops,
    Returns 1 if ptid is found and thread_local_base is non zero.  */
 
 static int
-remote_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+remote_get_tib_address (struct target_ops *self, ptid_t ptid, CORE_ADDR *addr)
 {
   if (remote_protocol_packets[PACKET_qGetTIBAddr].support != PACKET_DISABLE)
     {

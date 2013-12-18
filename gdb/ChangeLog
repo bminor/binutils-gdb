@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* windows-nat.c (windows_get_tib_address): Add 'self' argument.
+	* target.h (struct target_ops) <to_get_tib_address>: Add argument.
+	(target_get_tib_address): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_tib_address): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_set_trace_notes>: Add argument.
 	(target_set_trace_notes): Add argument.
 	* target.c (update_current_target): Update.

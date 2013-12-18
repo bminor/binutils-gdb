@@ -2570,7 +2570,8 @@ windows_xfer_partial (struct target_ops *ops, enum target_object object,
    Returns 1 if ptid is found and sets *ADDR to thread_local_base.  */
 
 static int
-windows_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+windows_get_tib_address (struct target_ops *self,
+			 ptid_t ptid, CORE_ADDR *addr)
 {
   thread_info *th;
 

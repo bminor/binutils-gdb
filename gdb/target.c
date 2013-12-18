@@ -918,7 +918,7 @@ update_current_target (void)
 		      const char *, const char *, const char *))
 	    return_zero);
   de_fault (to_get_tib_address,
-	    (int (*) (ptid_t, CORE_ADDR *))
+	    (int (*) (struct target_ops *, ptid_t, CORE_ADDR *))
 	    tcomplain);
   de_fault (to_set_permissions,
 	    (void (*) (void))
