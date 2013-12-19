@@ -4282,6 +4282,13 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	  else
 	    *addr = (uint32_t) (*addr + (offset64 << scale));
 	}
+
+      if (!irp->aflag)
+	{
+	  /* Since we are in 64-bit mode with ADDR32 prefix, zero-extend
+	     address from 32-bit to 64-bit.  */
+	    *addr = (uint32_t) *addr;
+	}
     }
   else
     {
