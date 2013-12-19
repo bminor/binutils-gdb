@@ -7048,7 +7048,8 @@ no_support_3dnow_data:
     case 0x0ffc:
     case 0x0ffd:
     case 0x0ffe:
-      switch (prefixes)
+      /* Mask out PREFIX_ADDR.  */
+      switch ((prefixes & ~PREFIX_ADDR))
         {
         case PREFIX_REPNZ:
           opcode |= 0xf20000;

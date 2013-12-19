@@ -1,5 +1,11 @@
 2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gdb/16305
+	* i386-tdep.c (i386_process_record): Mask out PREFIX_ADDR when
+	adding prefix to opcode.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gdb/16304
 	* i386-tdep.c (i386_record_lea_modrm_addr): Don't use 16-bit
 	address in 64-bit mode.
