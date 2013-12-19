@@ -39,7 +39,8 @@ static int print_field_values (struct type *, const gdb_byte *,
 			       struct ui_file *, int,
 			       const struct value *,
 			       const struct value_print_options *,
-			       int, struct type *, int);
+			       int, struct type *, int,
+			       const struct language_defn *);
 
 
 /* Make TYPE unsigned if its range of values includes no negatives.  */
@@ -536,7 +537,8 @@ print_variant_part (struct type *type, int field_num,
 		    const struct value *val,
 		    const struct value_print_options *options,
 		    int comma_needed,
-		    struct type *outer_type, int outer_offset)
+		    struct type *outer_type, int outer_offset,
+		    const struct language_defn *language)
 {
   struct type *var_type = TYPE_FIELD_TYPE (type, field_num);
   int which = ada_which_variant_applies (var_type, outer_type,
@@ -551,7 +553,7 @@ print_variant_part (struct type *type, int field_num,
        offset + TYPE_FIELD_BITPOS (type, field_num) / HOST_CHAR_BIT
        + TYPE_FIELD_BITPOS (var_type, which) / HOST_CHAR_BIT,
        stream, recurse, val, options,
-       comma_needed, outer_type, outer_offset);
+       comma_needed, outer_type, outer_offset, language);
 }
 
 /* Print out fields of value at VALADDR + OFFSET having structure type TYPE.
@@ -575,7 +577,8 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 		    const struct value *val,
 		    const struct value_print_options *options,
 		    int comma_needed,
-		    struct type *outer_type, int outer_offset)
+		    struct type *outer_type, int outer_offset,
+		    const struct language_defn *language)
 {
   int i, len;
 
@@ -594,7 +597,7 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 				(offset
 				 + TYPE_FIELD_BITPOS (type, i) / HOST_CHAR_BIT),
 				stream, recurse, val, options,
-				comma_needed, type, offset);
+				comma_needed, type, offset, language);
 	  continue;
 	}
       else if (ada_is_variant_part (type, i))
@@ -603,7 +606,7 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 	    print_variant_part (type, i, valaddr,
 				offset, stream, recurse, val,
 				options, comma_needed,
-				outer_type, outer_offset);
+				outer_type, outer_offset, language);
 	  continue;
 	}
 
@@ -657,7 +660,7 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 			 value_contents_for_printing (v),
 			 value_embedded_offset (v), 0,
 			 stream, recurse + 1, v,
-			 &opts, current_language);
+			 &opts, language);
 	    }
 	}
       else
@@ -665,11 +668,9 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 	  struct value_print_options opts = *options;
 
 	  opts.deref_ref = 0;
-	  ada_val_print (TYPE_FIELD_TYPE (type, i),
-			 valaddr,
-			 (offset
-			  + TYPE_FIELD_BITPOS (type, i) / HOST_CHAR_BIT),
-			 0, stream, recurse + 1, val, &opts);
+	  val_print (TYPE_FIELD_TYPE (type, i), valaddr,
+		     (offset + TYPE_FIELD_BITPOS (type, i) / HOST_CHAR_BIT),
+		     0, stream, recurse + 1, val, &opts, language);
 	}
       annotate_field_end ();
     }
@@ -963,7 +964,7 @@ ada_val_print_struct_union
 
   if (print_field_values (type, valaddr, offset_aligned,
 			  stream, recurse, original_value, options,
-			  0, type, offset_aligned) != 0
+			  0, type, offset_aligned, language) != 0
       && options->prettyformat)
     {
       fprintf_filtered (stream, "\n");

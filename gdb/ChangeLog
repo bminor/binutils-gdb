@@ -1,5 +1,15 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (print_field_values): Add "language" parameter.
+	Update calls to print_field_values and print_variant_part.
+	Pass new parameter "language" in call to val_print instead
+	of "current_language".  Replace call to ada_val_print by call
+	to val_print.
+	(print_variant_part): Add "language" parameter.
+	(ada_val_print_struct_union): Update call to print_field_values.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ui_memcpy): Delete.
 	(ada_print_floating): Update documentation.  Add empty line
 	between between function documentation and implementation.

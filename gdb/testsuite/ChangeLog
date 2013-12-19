@@ -1,5 +1,11 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/pp-rec-component.exp, gdb.ada/pp-rec-component.py,
+	gdb.ada/pp-rec-component/foo.adb, gdb.ada/pp-rec-component/pck.adb,
+	gdb.ada/pp-rec-component/pck.ads: New files.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.python/py-pp-integral.c: New file.
 	* gdb.python/py-pp-integral.py: New file.
 	* gdb.python/py-pp-integral.exp: New file.
