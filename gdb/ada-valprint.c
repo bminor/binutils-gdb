@@ -750,28 +750,6 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
   return comma_needed;
 }
 
-static void
-print_record (struct type *type, const gdb_byte *valaddr,
-	      int offset,
-	      struct ui_file *stream, int recurse,
-	      const struct value *val,
-	      const struct value_print_options *options)
-{
-  type = ada_check_typedef (type);
-
-  fprintf_filtered (stream, "(");
-
-  if (print_field_values (type, valaddr, offset,
-			  stream, recurse, val, options,
-			  0, type, offset) != 0 && options->prettyformat)
-    {
-      fprintf_filtered (stream, "\n");
-      print_spaces_filtered (2 * recurse, stream);
-    }
-
-  fprintf_filtered (stream, ")");
-}
-
 /* Implement Ada val_print-ing for GNAT arrays (Eg. fat pointers,
    thin pointers, etc).  */
 
@@ -1006,8 +984,18 @@ ada_val_print_struct_union
       return;
     }
 
-  print_record (type, valaddr, offset_aligned,
-		stream, recurse, original_value, options);
+  fprintf_filtered (stream, "(");
+
+  if (print_field_values (type, valaddr, offset_aligned,
+			  stream, recurse, original_value, options,
+			  0, type, offset_aligned) != 0
+      && options->prettyformat)
+    {
+      fprintf_filtered (stream, "\n");
+      print_spaces_filtered (2 * recurse, stream);
+    }
+
+  fprintf_filtered (stream, ")");
 }
 
 /* Implement Ada val_print'ing for the case where TYPE is
