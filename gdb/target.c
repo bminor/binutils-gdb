@@ -3552,24 +3552,14 @@ target_attach (char *args, int from_tty)
 int
 target_thread_alive (ptid_t ptid)
 {
-  struct target_ops *t;
+  int retval;
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_thread_alive != NULL)
-	{
-	  int retval;
+  retval = current_target.to_thread_alive (&current_target, ptid);
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_thread_alive (%d) = %d\n",
+			ptid_get_pid (ptid), retval);
 
-	  retval = t->to_thread_alive (t, ptid);
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_thread_alive (%d) = %d\n",
-				ptid_get_pid (ptid), retval);
-
-	  return retval;
-	}
-    }
-
-  return 0;
+  return retval;
 }
 
 void

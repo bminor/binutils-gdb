@@ -558,7 +558,8 @@ struct target_ops
     void (*to_program_signals) (struct target_ops *, int, unsigned char *)
       TARGET_DEFAULT_IGNORE ();
 
-    int (*to_thread_alive) (struct target_ops *, ptid_t ptid);
+    int (*to_thread_alive) (struct target_ops *, ptid_t ptid)
+      TARGET_DEFAULT_RETURN (0);
     void (*to_find_new_threads) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     char *(*to_pid_to_str) (struct target_ops *, ptid_t)
