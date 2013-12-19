@@ -3978,16 +3978,7 @@ target_goto_record_begin (void)
 void
 target_goto_record_end (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_goto_record_end != NULL)
-      {
-	t->to_goto_record_end (t);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_goto_record_end (&current_target);
 }
 
 /* See target.h.  */
