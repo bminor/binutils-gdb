@@ -79,6 +79,8 @@ static target_xfer_partial_ftype current_xfer_partial;
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
 						    ptid_t ptid);
 
+#include "target-delegates.c"
+
 static void init_dummy_target (void);
 
 static struct target_ops debug_target;
@@ -353,6 +355,8 @@ complete_target_initialization (struct target_ops *t)
 
   if (t->to_has_execution == NULL)
     t->to_has_execution = (int (*) (struct target_ops *, ptid_t)) return_zero;
+
+  install_delegators (t);
 }
 
 /* Add possible target architecture T to the list and add a new
@@ -559,6 +563,9 @@ update_current_target (void)
 
   /* First, reset current's contents.  */
   memset (&current_target, 0, sizeof (current_target));
+
+  /* Install the delegators.  */
+  install_delegators (&current_target);
 
 #define INHERIT(FIELD, TARGET) \
       if (!current_target.FIELD) \
@@ -3883,6 +3890,8 @@ init_dummy_target (void)
   dummy_target.to_stopped_data_address =
     (int (*) (struct target_ops *, CORE_ADDR *)) return_zero;
   dummy_target.to_magic = OPS_MAGIC;
+
+  install_dummy_methods (&dummy_target);
 }
 
 static void

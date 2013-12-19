@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	PR build/7701:
+	* target-delegates.c: New file.
+	* target.c: Include target-delegates.c.
+	(init_dummy_target): Call install_dummy_methods.
+	(complete_target_initialization): Call install_delegators.
+	* target.h (TARGET_DEFAULT_IGNORE, TARGET_DEFAULT_NORETURN)
+	(TARGET_DEFAULT_RETURN, TARGET_DEFAULT_FUNC): New defines.
+	* make-target-delegates: New file.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* record.c (find_record_target): Use find_target_at.
 	* target.c (find_target_at): New function.
 	* target.h (find_target_at): Declare.
