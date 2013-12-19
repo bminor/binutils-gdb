@@ -1,5 +1,13 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (print_record): Delete declaration.
+	(adjust_type_signedness, ada_val_print_1): Likewise.
+	(ada_val_print): Move function implementation down.
+	(print_variant_part, print_field_values, print_record):
+	Move function implementation up.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* python/py-type.c (typy_get_name): New function.
 	(type_object_getset): Add entry for attribute "name".
 	* NEWS: Add entry mentioning this new attribute.
