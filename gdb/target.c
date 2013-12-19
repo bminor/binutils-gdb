@@ -3799,16 +3799,7 @@ target_enable_btrace (ptid_t ptid)
 void
 target_disable_btrace (struct btrace_target_info *btinfo)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_disable_btrace != NULL)
-      {
-	t->to_disable_btrace (t, btinfo);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_disable_btrace (&current_target, btinfo);
 }
 
 /* See target.h.  */

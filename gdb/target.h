@@ -1005,7 +1005,8 @@ struct target_ops
 
     /* Disable branch tracing and deallocate TINFO.  */
     void (*to_disable_btrace) (struct target_ops *,
-			       struct btrace_target_info *tinfo);
+			       struct btrace_target_info *tinfo)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Disable branch tracing and deallocate TINFO.  This function is similar
        to to_disable_btrace, except that it is called during teardown and is
