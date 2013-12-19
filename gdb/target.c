@@ -4012,16 +4012,7 @@ target_goto_record (ULONGEST insn)
 void
 target_insn_history (int size, int flags)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_insn_history != NULL)
-      {
-	t->to_insn_history (t, size, flags);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_insn_history (&current_target, size, flags);
 }
 
 /* See target.h.  */
