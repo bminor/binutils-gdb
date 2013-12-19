@@ -1235,6 +1235,12 @@ static void
 arm_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
 {
+  static const char *const stap_integer_prefixes[] = { "#", NULL };
+  static const char *const stap_register_prefixes[] = { "r", NULL };
+  static const char *const stap_register_indirection_prefixes[] = { "[",
+								    NULL };
+  static const char *const stap_register_indirection_suffixes[] = { "]",
+								    NULL };
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   linux_init_abi (info, gdbarch);
@@ -1334,10 +1340,12 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_process_record (gdbarch, arm_process_record);
 
   /* SystemTap functions.  */
-  set_gdbarch_stap_integer_prefix (gdbarch, "#");
-  set_gdbarch_stap_register_prefix (gdbarch, "r");
-  set_gdbarch_stap_register_indirection_prefix (gdbarch, "[");
-  set_gdbarch_stap_register_indirection_suffix (gdbarch, "]");
+  set_gdbarch_stap_integer_prefixes (gdbarch, stap_integer_prefixes);
+  set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);
+  set_gdbarch_stap_register_indirection_prefixes (gdbarch,
+					  stap_register_indirection_prefixes);
+  set_gdbarch_stap_register_indirection_suffixes (gdbarch,
+					  stap_register_indirection_suffixes);
   set_gdbarch_stap_gdb_register_prefix (gdbarch, "r");
   set_gdbarch_stap_is_single_operand (gdbarch, arm_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,

@@ -1,3 +1,35 @@
+2013-12-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* amd64-tdep.c (amd64_init_abi): Declare SystemTap SDT probe
+	argument prefixes and suffixes.  Initialize gdbarch with them.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (stap_integer_prefix, stap_integer_suffix)
+	(stap_register_prefix, stap_register_suffix)
+	(stap_register_indirection_prefix)
+	(stap_register_indirection_suffix): Declare as "const char *const
+	*" instead of "const char *".  Adjust printing function.  Rename
+	all of the variables to the plural.
+	(pstring_list): New function.
+	* i386-tdep.c (i386_elf_init_abi): Declare SystemTap SDT probe
+	argument prefixes and suffixes.  Initialize gdbarch with them.
+	* ia64-linux-tdep.c (ia64_linux_init_abi): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* stap-probe.c (stap_is_generic_prefix): New function.
+	(stap_is_register_prefix): Likewise.
+	(stap_is_register_indirection_prefix): Likewise.
+	(stap_is_integer_prefix): Likewise.
+	(stap_generic_check_suffix): Likewise.
+	(stap_check_integer_suffix): Likewise.
+	(stap_check_register_suffix): Likewise.
+	(stap_check_register_indirection_suffix): Likewise.
+	(stap_parse_register_operand): Remove unecessary declarations for
+	variables holding prefix and suffix information.  Use the new
+	functions listed above for checking for prefixes and suffixes.
+	(stap_parse_single_operand): Likewise.
+
 2013-12-19  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	PR breakpoints/16297
