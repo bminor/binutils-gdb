@@ -1,3 +1,9 @@
+2013-12-19  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	PR breakpoints/16297
+	* breakpoint.c (breakpoint_hit_catch_syscall): Return immediately
+	when expected syscall is hit.
+
 2013-12-19  Tom Tromey  <tromey@redhat.com>
 
 	* ser-unix.c (hardwire_ops): New global.

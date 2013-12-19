@@ -47,7 +47,7 @@ if  { [prepare_for_testing ${testfile}.exp $testfile ${testfile}.c] } {
 
 # All (but the last) syscalls from the example code
 # They are ordered according to the file, so do not change this.
-set all_syscalls { "close" "chroot" }
+set all_syscalls { "close" "chroot" "pipe" "write" "read" }
 set all_syscalls_numbers { }
 
 # The last syscall (exit()) does not return, so
@@ -392,11 +392,12 @@ proc do_syscall_tests_without_xml {} {
 # This procedure fills the vector "all_syscalls_numbers" with the proper
 # numbers for the used syscalls according to the architecture.
 proc fill_all_syscalls_numbers {} {
-    global all_syscalls_numbers last_syscall_number
+    global all_syscalls_numbers last_syscall_number all_syscalls
 
-    set close_syscall [get_integer_valueof "close_syscall" -1]
-    set chroot_syscall [get_integer_valueof "chroot_syscall" -1]
-    set all_syscalls_numbers [list $close_syscall $chroot_syscall]
+    foreach syscall $all_syscalls {
+	lappend all_syscalls_numbers [get_integer_valueof "${syscall}_syscall" -1]
+    }
+
     set last_syscall_number [get_integer_valueof "exit_group_syscall" -1]
 }
 

@@ -1,3 +1,15 @@
+2013-12-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/16297
+	* gdb.base/catch-syscall.c (read_syscall, pipe_syscall)
+	(write_syscall): New variables.
+	(main): Create a pipe, write 1 byte in it, and read 1 byte from
+	it.
+	* gdb.base/catch-syscall.exp (all_syscalls): Include "pipe,
+	"write" and "read" syscalls.
+	(fill_all_syscalls_numbers): Improve the way to obtain syscalls
+	numbers.
+
 2013-12-19  Keven Boell  <keven.boell@intel.com>
 
 	* gdb.fortran/module.exp: Completion matches fortran module
