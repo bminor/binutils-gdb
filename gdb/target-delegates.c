@@ -1261,6 +1261,19 @@ tdefault_supports_btrace (struct target_ops *self)
 }
 
 static void
+delegate_goto_record (struct target_ops *self, ULONGEST arg1)
+{
+  self = self->beneath;
+  self->to_goto_record (self, arg1);
+}
+
+static void
+tdefault_goto_record (struct target_ops *self, ULONGEST arg1)
+{
+  tcomplain ();
+}
+
+static void
 delegate_insn_history (struct target_ops *self, int arg1, int arg2)
 {
   self = self->beneath;
@@ -1566,6 +1579,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_use_agent = delegate_can_use_agent;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
+  if (ops->to_goto_record == NULL)
+    ops->to_goto_record = delegate_goto_record;
   if (ops->to_insn_history == NULL)
     ops->to_insn_history = delegate_insn_history;
   if (ops->to_insn_history_from == NULL)
@@ -1691,6 +1706,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_use_agent = tdefault_use_agent;
   ops->to_can_use_agent = tdefault_can_use_agent;
   ops->to_supports_btrace = tdefault_supports_btrace;
+  ops->to_goto_record = tdefault_goto_record;
   ops->to_insn_history = tdefault_insn_history;
   ops->to_insn_history_from = tdefault_insn_history_from;
   ops->to_insn_history_range = tdefault_insn_history_range;

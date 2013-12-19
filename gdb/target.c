@@ -3995,16 +3995,7 @@ target_goto_record_end (void)
 void
 target_goto_record (ULONGEST insn)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_goto_record != NULL)
-      {
-	t->to_goto_record (t, insn);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_goto_record (&current_target, insn);
 }
 
 /* See target.h.  */
