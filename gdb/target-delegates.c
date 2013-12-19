@@ -1314,6 +1314,19 @@ tdefault_disable_btrace (struct target_ops *self, struct btrace_target_info *arg
 }
 
 static void
+delegate_teardown_btrace (struct target_ops *self, struct btrace_target_info *arg1)
+{
+  self = self->beneath;
+  self->to_teardown_btrace (self, arg1);
+}
+
+static void
+tdefault_teardown_btrace (struct target_ops *self, struct btrace_target_info *arg1)
+{
+  tcomplain ();
+}
+
+static void
 delegate_save_record (struct target_ops *self, const char *arg1)
 {
   self = self->beneath;
@@ -1707,6 +1720,8 @@ install_delegators (struct target_ops *ops)
     ops->to_supports_btrace = delegate_supports_btrace;
   if (ops->to_disable_btrace == NULL)
     ops->to_disable_btrace = delegate_disable_btrace;
+  if (ops->to_teardown_btrace == NULL)
+    ops->to_teardown_btrace = delegate_teardown_btrace;
   if (ops->to_save_record == NULL)
     ops->to_save_record = delegate_save_record;
   if (ops->to_delete_record == NULL)
@@ -1849,6 +1864,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_can_use_agent = tdefault_can_use_agent;
   ops->to_supports_btrace = tdefault_supports_btrace;
   ops->to_disable_btrace = tdefault_disable_btrace;
+  ops->to_teardown_btrace = tdefault_teardown_btrace;
   ops->to_save_record = tdefault_save_record;
   ops->to_delete_record = tdefault_delete_record;
   ops->to_record_is_replaying = tdefault_record_is_replaying;

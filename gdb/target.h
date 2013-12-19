@@ -1013,7 +1013,8 @@ struct target_ops
        only allowed to perform actions that are safe.  A counter-example would
        be attempting to talk to a remote target.  */
     void (*to_teardown_btrace) (struct target_ops *,
-				struct btrace_target_info *tinfo);
+				struct btrace_target_info *tinfo)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Read branch trace data for the thread indicated by BTINFO into DATA.
        DATA is cleared before new trace is added.

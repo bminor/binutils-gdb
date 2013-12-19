@@ -1,6 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_teardown_btrace): Unconditionally delegate.
+	* target.h (struct target_ops) <to_teardown_btrace>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_disable_btrace): Unconditionally delegate.
 	* target.h (struct target_ops) <to_disable_btrace>: Use
 	TARGET_DEFAULT_NORETURN.
