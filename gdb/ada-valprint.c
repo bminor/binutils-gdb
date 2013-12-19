@@ -289,32 +289,22 @@ char_at (const gdb_byte *string, int i, int type_len,
                                            type_len, byte_order);
 }
 
-/* Wrapper around memcpy to make it legal argument to ui_file_put.  */
-static void
-ui_memcpy (void *dest, const char *buffer, long len)
-{
-  memcpy (dest, buffer, (size_t) len);
-  ((char *) dest)[len] = '\0';
-}
-
 /* Print a floating-point value of type TYPE, pointed to in GDB by
    VALADDR, on STREAM.  Use Ada formatting conventions: there must be
    a decimal point, and at least one digit before and after the
-   point.  We use GNAT format for NaNs and infinities.  */
+   point.  We use the GNAT format for NaNs and infinities.  */
+
 static void
 ada_print_floating (const gdb_byte *valaddr, struct type *type,
 		    struct ui_file *stream)
 {
-  char buffer[64];
   char *s, *result;
   struct ui_file *tmp_stream = mem_fileopen ();
   struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_stream);
 
   print_floating (valaddr, type, tmp_stream);
-  ui_file_put (tmp_stream, ui_memcpy, buffer);
-  do_cleanups (cleanups);
-
-  result = buffer;
+  result = ui_file_xstrdup (tmp_stream, NULL);
+  make_cleanup (xfree, result);
 
   /* Modify for Ada rules.  */
 
@@ -348,9 +338,11 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
 	fprintf_filtered (stream, "%s.0", result);
       else
 	fprintf_filtered (stream, "%.*s.0%s", (int) (s-result), result, s);
-      return;
     }
-  fprintf_filtered (stream, "%s", result);
+  else
+    fprintf_filtered (stream, "%s", result);
+
+  do_cleanups (cleanups);
 }
 
 void

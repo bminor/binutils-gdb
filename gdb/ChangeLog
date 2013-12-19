@@ -1,5 +1,13 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ui_memcpy): Delete.
+	(ada_print_floating): Update documentation.  Add empty line
+	between between function documentation and implementation.
+	Delete variable "buffer".  Use ui_file_xstrdup in place of
+	ui_file_put.  Minor adjustments following this change.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_string): New function,
 	extracted from ada_val_print_array.
 	(ada_val_print_array): Replace extracted code by call
