@@ -1071,7 +1071,8 @@ struct target_ops
        If SIZE < 0, print abs (SIZE) functions before FROM; otherwise, print
        SIZE functions after FROM.  */
     void (*to_call_history_from) (struct target_ops *,
-				  ULONGEST begin, int size, int flags);
+				  ULONGEST begin, int size, int flags)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Print a function trace of an execution trace section from function BEGIN
        (inclusive) to function END (inclusive).  */

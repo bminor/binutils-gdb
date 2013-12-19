@@ -1261,6 +1261,19 @@ tdefault_supports_btrace (struct target_ops *self)
 }
 
 static void
+delegate_call_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int arg3)
+{
+  self = self->beneath;
+  self->to_call_history_from (self, arg1, arg2, arg3);
+}
+
+static void
+tdefault_call_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int arg3)
+{
+  tcomplain ();
+}
+
+static void
 delegate_call_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, int arg3)
 {
   self = self->beneath;
@@ -1501,6 +1514,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_use_agent = delegate_can_use_agent;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
+  if (ops->to_call_history_from == NULL)
+    ops->to_call_history_from = delegate_call_history_from;
   if (ops->to_call_history_range == NULL)
     ops->to_call_history_range = delegate_call_history_range;
   if (ops->to_augmented_libraries_svr4_read == NULL)
@@ -1616,6 +1631,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_use_agent = tdefault_use_agent;
   ops->to_can_use_agent = tdefault_can_use_agent;
   ops->to_supports_btrace = tdefault_supports_btrace;
+  ops->to_call_history_from = tdefault_call_history_from;
   ops->to_call_history_range = tdefault_call_history_range;
   ops->to_augmented_libraries_svr4_read = tdefault_augmented_libraries_svr4_read;
 }
