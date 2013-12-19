@@ -1,3 +1,23 @@
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/16304
+	* amd64-linux-tdep.c (amd64_canonicalize_syscall): Handle x32
+	system calls.
+	(amd64_x32_linux_record_tdep): New.
+	(amd64_linux_syscall_record_common): New function.
+	(amd64_linux_syscall_record): Call
+	amd64_linux_syscall_record_common with amd64_linux_record_tdep.
+	(amd64_x32_linux_syscall_record): Call
+	amd64_linux_syscall_record_common with
+	amd64_x32_linux_record_tdep.
+	(amd64_linux_init_abi_common): Move amd64_linux_record_tdep
+	initialization and tdep->i386_syscall_record setup to ...
+	(amd64_linux_init_abi): Here.
+	(amd64_x32_linux_init_abi): Initialize
+	amd64_x32_linux_record_tdep.  Set tdep->i386_syscall_record to
+	amd64_x32_linux_syscall_record.
+	* amd64-linux-tdep.h (amd64_x32_syscall): New enum.
+
 2013-12-19  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* amd64-tdep.c (amd64_init_abi): Declare SystemTap SDT probe
