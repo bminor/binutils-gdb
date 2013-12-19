@@ -1015,45 +1015,44 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
      So, for Ada values, we print the actual dereferenced value
      regardless.  */
   struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+  struct value *deref_val;
+  CORE_ADDR deref_val_int;
 
-  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
+  if (TYPE_CODE (elttype) == TYPE_CODE_UNDEF)
     {
-      CORE_ADDR deref_val_int;
-      struct value *deref_val;
-
-      deref_val = coerce_ref_if_computed (original_value);
-      if (deref_val)
-	{
-	  if (ada_is_tagged_type (value_type (deref_val), 1))
-	    deref_val = ada_tag_value_at_base_address (deref_val);
-
-	  common_val_print (deref_val, stream, recurse + 1, options,
-			    current_language);
-	  return;
-	}
-
-      deref_val_int = unpack_pointer (type, valaddr + offset_aligned);
-      if (deref_val_int != 0)
-	{
-	  deref_val =
-	    ada_value_ind (value_from_pointer
-			   (lookup_pointer_type (elttype),
-			    deref_val_int));
-
-	  if (ada_is_tagged_type (value_type (deref_val), 1))
-	    deref_val = ada_tag_value_at_base_address (deref_val);
-
-	  val_print (value_type (deref_val),
-		     value_contents_for_printing (deref_val),
-		     value_embedded_offset (deref_val),
-		     value_address (deref_val), stream, recurse + 1,
-		     deref_val, options, current_language);
-	}
-      else
-	fputs_filtered ("(null)", stream);
+      fputs_filtered ("<ref to undefined type>", stream);
+      return;
     }
-  else
-    fputs_filtered ("???", stream);
+
+  deref_val = coerce_ref_if_computed (original_value);
+  if (deref_val)
+    {
+      if (ada_is_tagged_type (value_type (deref_val), 1))
+	deref_val = ada_tag_value_at_base_address (deref_val);
+
+      common_val_print (deref_val, stream, recurse + 1, options,
+			language);
+      return;
+    }
+
+  deref_val_int = unpack_pointer (type, valaddr + offset_aligned);
+  if (deref_val_int == 0)
+    {
+      fputs_filtered ("(null)", stream);
+      return;
+    }
+
+  deref_val
+    = ada_value_ind (value_from_pointer (lookup_pointer_type (elttype),
+					 deref_val_int));
+  if (ada_is_tagged_type (value_type (deref_val), 1))
+    deref_val = ada_tag_value_at_base_address (deref_val);
+
+  val_print (value_type (deref_val),
+	     value_contents_for_printing (deref_val),
+	     value_embedded_offset (deref_val),
+	     value_address (deref_val), stream, recurse + 1,
+	     deref_val, options, language);
 }
 
 /* See the comment on ada_val_print.  This function differs in that it
