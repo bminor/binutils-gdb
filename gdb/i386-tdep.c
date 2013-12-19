@@ -4209,9 +4209,9 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
   ULONGEST offset64;
 
   *addr = 0;
-  if (irp->aflag)
+  if (irp->aflag || irp->regmap[X86_RECORD_R8_REGNUM])
     {
-      /* 32 bits */
+      /* 32/64 bits */
       int havesib = 0;
       uint8_t scale = 0;
       uint8_t byte;
