@@ -2039,7 +2039,7 @@ rsrc_print_resource_entries (FILE *        file,
 	{
 	  unsigned int len;
 	  len = bfd_get_16 (abfd, name);
-      
+
 	  fprintf (file, _("name: [val: %08lx len %d]: "), entry, len);
 	  if (name + 2 + len * 2 < dataend)
 	    {
@@ -2058,7 +2058,7 @@ rsrc_print_resource_entries (FILE *        file,
     }
   else
     fprintf (file, _("ID: %#08lx"), entry);
-	     
+
   entry = (long) bfd_get_32 (abfd, data + 4);
   fprintf (file, _(", Value: %#08lx\n"), entry);
 
@@ -2076,7 +2076,7 @@ rsrc_print_resource_entries (FILE *        file,
 	   addr = (long) bfd_get_32 (abfd, datastart + entry),
 	   size = (long) bfd_get_32 (abfd, datastart + entry + 4),
 	   (int) bfd_get_32 (abfd, datastart + entry + 8));
-	     
+
   /* Check that the reserved entry is 0.  */
   if (bfd_get_32 (abfd, datastart + entry + 12) != 0
       /* And that the data address/size is valid too.  */
@@ -2139,7 +2139,8 @@ rsrc_print_resource_directory (FILE *        file,
       bfd_byte * entry_end;
 
       entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, FALSE,
-					       datastart, data, dataend, rva_bias);
+					       datastart, data, dataend,
+					       rva_bias);
       data += 8;
       highest_data = max (highest_data, entry_end);
       if (entry_end >= dataend)
@@ -2196,7 +2197,8 @@ rsrc_print_section (bfd * abfd, void * vfile)
     {
       bfd_byte * p = data;
 
-      data = rsrc_print_resource_directory (file, abfd, 0, data, data, dataend, rva_bias);
+      data = rsrc_print_resource_directory (file, abfd, 0, data, data,
+					    dataend, rva_bias);
 
       if (data == dataend + 1)
 	fprintf (file, _("Corrupt .rsrc section detected!\n"));
@@ -2398,7 +2400,7 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   pe_print_reloc (abfd, vfile);
 
   rsrc_print_section (abfd, vfile);
-  
+
   return TRUE;
 }
 
@@ -2565,7 +2567,7 @@ rsrc_count_entries (bfd *          abfd,
 
   return datastart + addr - rva_bias + size;
 }
- 
+
 static bfd_byte *
 rsrc_count_directory (bfd *          abfd,
 		      bfd_byte *     datastart,
@@ -2628,7 +2630,7 @@ typedef struct rsrc_string
   unsigned int  len;
   bfd_byte *    string;
 } rsrc_string;
-  
+
 typedef struct rsrc_leaf
 {
   unsigned int  size;
@@ -2689,7 +2691,8 @@ rsrc_parse_entry (bfd *            abfd,
 	}
       else
 	{
-	  entry->name_id.name.len    = bfd_get_16 (abfd, datastart + val - rva_bias);
+	  entry->name_id.name.len    = bfd_get_16 (abfd, datastart + val
+						   - rva_bias);
 	  entry->name_id.name.string = datastart + val - rva_bias + 2;
 	}
     }
@@ -2739,6 +2742,7 @@ rsrc_parse_entries (bfd *            abfd,
 		    bfd_vma          rva_bias,
 		    rsrc_directory * parent)
 {
+  unsigned int i;
   rsrc_entry * entry;
 
   if (chain->num_entries == 0)
@@ -2753,7 +2757,6 @@ rsrc_parse_entries (bfd *            abfd,
 
   chain->first_entry = entry;
 
-  unsigned int i;
   for (i = chain->num_entries; i--;)
     {
       bfd_byte * entry_end;
@@ -2825,8 +2828,8 @@ typedef struct rsrc_write_data
   bfd_byte * next_string;
   bfd_byte * next_data;
   bfd_vma    rva_bias;
-} rsrc_write_data; 
-  
+} rsrc_write_data;
+
 static void
 rsrc_write_string (rsrc_write_data * data,
 		   rsrc_string *     string)
@@ -2847,7 +2850,8 @@ static void
 rsrc_write_leaf (rsrc_write_data * data,
 		 rsrc_leaf *       leaf)
 {
-  bfd_put_32 (data->abfd, rsrc_compute_rva (data, data->next_data), data->next_leaf);
+  bfd_put_32 (data->abfd, rsrc_compute_rva (data, data->next_data),
+	      data->next_leaf);
   bfd_put_32 (data->abfd, leaf->size,     data->next_leaf + 4);
   bfd_put_32 (data->abfd, leaf->codepage, data->next_leaf + 8);
   bfd_put_32 (data->abfd, 0 /*reserved*/, data->next_leaf + 12);
@@ -2894,6 +2898,8 @@ rsrc_write_directory (rsrc_write_data * data,
 {
   rsrc_entry * entry;
   unsigned int i;
+  bfd_byte * next_entry;
+  bfd_byte * nt;
 
   bfd_put_32 (data->abfd, dir->characteristics, data->next_table);
   bfd_put_32 (data->abfd, 0 /*dir->time*/, data->next_table + 4);
@@ -2903,10 +2909,11 @@ rsrc_write_directory (rsrc_write_data * data,
   bfd_put_16 (data->abfd, dir->ids.num_entries, data->next_table + 14);
 
   /* Compute where the entries and the next table will be placed.  */
-  bfd_byte * next_entry = data->next_table + 16;
-  data->next_table = next_entry + (dir->names.num_entries * 8) + (dir->ids.num_entries * 8);
-  bfd_byte * nt = data->next_table;
-  
+  next_entry = data->next_table + 16;
+  data->next_table = next_entry + (dir->names.num_entries * 8)
+    + (dir->ids.num_entries * 8);
+  nt = data->next_table;
+
   /* Write the entries.  */
   for (i = dir->names.num_entries, entry = dir->names.first_entry;
        i > 0 && entry != NULL;
@@ -2930,7 +2937,7 @@ rsrc_write_directory (rsrc_write_data * data,
   BFD_ASSERT (nt == next_entry);
 }
 
-#ifdef HAVE_WCHAR_H
+#if defined HAVE_WCHAR_H && ! defined __CYGWIN__ && ! defined __MINGW32__
 /* Return the length (number of units) of the first character in S,
    putting its 'ucs4_t' representation in *PUC.  */
 
@@ -2967,29 +2974,45 @@ u16_mbtouc (wchar_t * puc, const unsigned short * s, unsigned int n)
   *puc = 0xfffd;
   return 1;
 }
-#endif /* HAVE_WCHAR_H */
+#endif /* HAVE_WCHAR_H and not Cygwin/Mingw */
 
 /* Perform a comparison of two entries.  */
 static signed int
 rsrc_cmp (bfd_boolean is_name, rsrc_entry * a, rsrc_entry * b)
 {
+  signed int    res;
+  unsigned int  i;
+  bfd_byte *    astring;
+  unsigned int  alen;
+  bfd_byte *    bstring;
+  unsigned int  blen;
+
   if (! is_name)
-    return a->name_id.id - b->name_id.id; 
+    return a->name_id.id - b->name_id.id;
 
   /* We have to perform a case insenstive, unicode string comparison...  */
-  int res;
+  astring = a->name_id.name.string;
+  alen    = a->name_id.name.len;
+  bstring = b->name_id.name.string;
+  blen    = b->name_id.name.len;
 
+#if defined  __CYGWIN__ || defined __MINGW32__
+  /* Under Windows hosts (both Cygwin and Mingw types),
+     unicode == UTF-16 == wchar_t.  The case insensitive string comparison
+     function however goes by different names in the two environments...  */
+
+#undef rscpcmp
 #ifdef __CYGWIN__
-  /* Under Cygwin unicode == UTF-16 == wchar_t.
-     FIXME: The same is true for MingGW - we should test for that too.  */
-  res = wcsncasecmp ((const wchar_t *) astring + 2, (const wchar_t *) bstring + 2, min (alen, blen));
-#elif defined HAVE_WCHAR_H
-  unsigned int  i;
-  bfd_byte *    astring = a->name_id.name.string;
-  unsigned int  alen    = a->name_id.name.len;
-  bfd_byte *    bstring = b->name_id.name.string;
-  unsigned int  blen    = b->name_id.name.len;
+#define rscpcmp wcsncasecmp
+#endif
+#ifdef __MINGW32__
+#define rscpcmp wcsnicmp
+#endif
 
+  res = rscpcmp ((const wchar_t *) astring, (const wchar_t *) bstring,
+		 min (alen, blen));
+
+#elif defined HAVE_WCHAR_H
   res = 0;
   for (i = min (alen, blen); i--; astring += 2, bstring += 2)
     {
@@ -3007,8 +3030,10 @@ rsrc_cmp (bfd_boolean is_name, rsrc_entry * a, rsrc_entry * b)
       if (res)
 	break;
     }
+
 #else
-  res = memcmp (astring + 2, bstring + 2, min (alen, blen) * 2);
+  /* Do the best we can - a case sensitive, untranslated comparison.  */
+  res = memcmp (astring, bstring, min (alen, blen) * 2);
 #endif
 
   if (res == 0)
@@ -3035,11 +3060,13 @@ rsrc_resource_name (rsrc_entry * entry, rsrc_directory * dir)
 
   buffer[0] = 0;
 
-  if (dir != NULL && dir->entry != NULL && dir->entry->parent != NULL && dir->entry->parent->entry != NULL)
+  if (dir != NULL && dir->entry != NULL && dir->entry->parent != NULL
+      && dir->entry->parent->entry != NULL)
     {
       strcpy (buffer, "type: ");
       if (dir->entry->parent->entry->is_name)
-	rsrc_print_name (buffer + strlen (buffer), dir->entry->parent->entry->name_id.name);
+	rsrc_print_name (buffer + strlen (buffer),
+			 dir->entry->parent->entry->name_id.name);
       else
 	{
 	  unsigned int id = dir->entry->parent->entry->name_id.id;
@@ -3113,8 +3140,8 @@ rsrc_resource_name (rsrc_entry * entry, rsrc_directory * dir)
    This function is called when we have detected two string resources with
    match top-28-bit IDs.  We have to scan the string tables inside the leaves
    and discover if there are any real collisions.  If there are then we report
-   them and return FALSE.  Otherwise we copy any strings from B into A and then
-   return TRUE.  */
+   them and return FALSE.  Otherwise we copy any strings from B into A and
+   then return TRUE.  */
 
 static bfd_boolean
 rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
@@ -3122,13 +3149,17 @@ rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
 {
   unsigned int copy_needed = 0;
   unsigned int i;
+  bfd_byte * astring;
+  bfd_byte * bstring;
+  bfd_byte * new_data;
+  bfd_byte * nstring;
 
   /* Step one: Find out what we have to do.  */
   BFD_ASSERT (! a->is_dir);
-  bfd_byte * astring = a->value.leaf->data;
+  astring = a->value.leaf->data;
 
   BFD_ASSERT (! b->is_dir);
-  bfd_byte * bstring = b->value.leaf->data;
+  bstring = b->value.leaf->data;
 
   for (i = 0; i < 16; i++)
     {
@@ -3171,11 +3202,11 @@ rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
      (We never get string resources with fully empty string tables).
      We need to allocate an extra COPY_NEEDED bytes in A and then bring
      in B's strings.  */
-  bfd_byte * new_data = bfd_malloc (a->value.leaf->size + copy_needed);
+  new_data = bfd_malloc (a->value.leaf->size + copy_needed);
   if (new_data == NULL)
     return FALSE;
 
-  bfd_byte * nstring = new_data;
+  nstring = new_data;
   astring = a->value.leaf->data;
   bstring = b->value.leaf->data;
 
@@ -3199,13 +3230,13 @@ rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
 	  * nstring++ = 0;
 	  * nstring++ = 0;
 	}
-      
+
       astring += (alen + 1) * 2;
       bstring += (blen + 1) * 2;
     }
 
   BFD_ASSERT (nstring - new_data == (signed) (a->value.leaf->size + copy_needed));
-  
+
   free (a->value.leaf->data);
   a->value.leaf->data = new_data;
   a->value.leaf->size += copy_needed;
@@ -3217,7 +3248,7 @@ static void rsrc_merge (rsrc_entry *, rsrc_entry *);
 
 /* Sort the entries in given part of the directory.
    We use an old fashioned bubble sort because we are dealing
-   with lists and we want to handle matches specially.  */      
+   with lists and we want to handle matches specially.  */
 
 static void
 rsrc_sort_entries (rsrc_dir_chain *  chain,
@@ -3298,7 +3329,7 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 			  bfd_set_error (bfd_error_file_truncated);
 			  return;
 			}
-		      
+
 		      /* Unhook NEXT from the chain.  */
 		      /* FIXME: memory loss here.  */
 		      entry->next_entry = next->next_entry;
@@ -3386,7 +3417,7 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 
 /* Attach B's chain onto A.  */
 static void
-rsrc_attach_chain (struct rsrc_dir_chain * achain, struct rsrc_dir_chain * bchain)
+rsrc_attach_chain (rsrc_dir_chain * achain, rsrc_dir_chain * bchain)
 {
   if (bchain->num_entries == 0)
     return;
@@ -3403,7 +3434,7 @@ rsrc_attach_chain (struct rsrc_dir_chain * achain, struct rsrc_dir_chain * bchai
       achain->last_entry->next_entry = bchain->first_entry;
       achain->last_entry = bchain->last_entry;
     }
-  
+
   bchain->num_entries = 0;
   bchain->first_entry = bchain->last_entry = NULL;
 }
@@ -3411,19 +3442,22 @@ rsrc_attach_chain (struct rsrc_dir_chain * achain, struct rsrc_dir_chain * bchai
 static void
 rsrc_merge (struct rsrc_entry * a, struct rsrc_entry * b)
 {
+  rsrc_directory * adir;
+  rsrc_directory * bdir;
+
   BFD_ASSERT (a->is_dir);
   BFD_ASSERT (b->is_dir);
 
-  rsrc_directory * adir = a->value.directory;
-  rsrc_directory * bdir = b->value.directory;
-  
+  adir = a->value.directory;
+  bdir = b->value.directory;
+
   if (adir->characteristics != bdir->characteristics)
     {
       _bfd_error_handler (_(".rsrc merge failure: dirs with differing characteristics\n"));
       bfd_set_error (bfd_error_file_truncated);
       return;
     }
-  
+
   if (adir->major != bdir->major || adir->minor != bdir->minor)
     {
       _bfd_error_handler (_(".rsrc merge failure: differing directory versions\n"));
@@ -3450,37 +3484,45 @@ static void
 rsrc_process_section (bfd * abfd,
 		      struct coff_final_link_info * pfinfo)
 {
-  rsrc_directory new_table;
-  bfd_size_type  size;
-  asection *     sec;
+  rsrc_directory    new_table;
+  bfd_size_type     size;
+  asection *        sec;
+  pe_data_type *    pe;
+  bfd_vma           rva_bias;
+  bfd_byte *        data;
+  bfd_byte *        datastart;
+  bfd_byte *        dataend;
+  bfd_byte *        new_data;
+  unsigned int      num_resource_sets;
+  rsrc_directory *  type_tables;
+  rsrc_write_data   write_data;
+  unsigned int      indx;
 
   new_table.names.num_entries = 0;
   new_table.ids.num_entries = 0;
-  
+
   sec = bfd_get_section_by_name (abfd, ".rsrc");
   if (sec == NULL || (size = sec->rawsize) == 0)
     return;
 
-  pe_data_type * pe = pe_data (abfd);
+  pe = pe_data (abfd);
   if (pe == NULL)
     return;
 
-  bfd_vma rva_bias;
   rva_bias = sec->vma - pe->pe_opthdr.ImageBase;
 
-  bfd_byte * data = bfd_malloc (size);
+  data = bfd_malloc (size);
   if (data == NULL)
     return;
-
-  bfd_byte * datastart = data;
+  datastart = data;
 
   if (! bfd_get_section_contents (abfd, sec, data, 0, size))
     goto end;
 
   /* Step one: Walk the section, computing the size of the tables,
      leaves and data and decide if we need to do anything.  */
-  bfd_byte *    dataend   = data + size;
-  unsigned int  num_resource_sets = 0;
+  dataend   = data + size;
+  num_resource_sets = 0;
   sizeof_leaves = sizeof_strings = sizeof_tables_and_entries = 0;
 
   while (data < dataend)
@@ -3515,17 +3557,17 @@ rsrc_process_section (bfd * abfd,
   data = datastart;
   rva_bias = sec->vma - pe->pe_opthdr.ImageBase;
 
-  rsrc_directory * type_tables = bfd_malloc (num_resource_sets * sizeof * type_tables);
+  type_tables = bfd_malloc (num_resource_sets * sizeof * type_tables);
   if (type_tables == NULL)
     goto end;
 
-  unsigned int indx = 0;
+  indx = 0;
   while (data < dataend)
     {
       bfd_byte * p = data;
 
-      data = rsrc_parse_directory (abfd, type_tables + indx, data, data, dataend,
-				   rva_bias, NULL);
+      data = rsrc_parse_directory (abfd, type_tables + indx, data, data,
+				   dataend, rva_bias, NULL);
       data = (bfd_byte *) (((long) (data + 3)) & ~ 3);
       rva_bias += data - p;
       if (data == (dataend - 4))
@@ -3533,11 +3575,11 @@ rsrc_process_section (bfd * abfd,
       indx ++;
     }
   BFD_ASSERT (indx == num_resource_sets);
-  
+
   /* Step three: Merge the top level tables (there can be only one).
-     
+
      We must ensure that the merged entries are in ascending order.
-     
+
      We also thread the top level table entries from the old tree onto
      the new table, so that they can be pulled off later.  */
 
@@ -3555,7 +3597,7 @@ rsrc_process_section (bfd * abfd,
     rsrc_attach_chain (& new_table.names, & type_tables[indx].names);
 
   rsrc_sort_entries (& new_table.names, TRUE, & new_table);
-  
+
   /* Chain the ID entries onto the table.  */
   new_table.ids.first_entry = NULL;
   new_table.ids.last_entry = NULL;
@@ -3566,11 +3608,9 @@ rsrc_process_section (bfd * abfd,
   rsrc_sort_entries (& new_table.ids, FALSE, & new_table);
 
   /* Step four: Create new contents for the .rsrc section.  */
-  bfd_byte * new_data = bfd_malloc (size);
+  new_data = bfd_malloc (size);
   if (new_data == NULL)
     goto end;
-
-  rsrc_write_data  write_data;
 
   write_data.abfd        = abfd;
   write_data.datastart   = new_data;
@@ -3578,17 +3618,16 @@ rsrc_process_section (bfd * abfd,
   write_data.next_leaf   = new_data + sizeof_tables_and_entries;
   write_data.next_string = write_data.next_leaf + sizeof_leaves;
   write_data.next_data   = write_data.next_string + sizeof_strings;
-
-  write_data.rva_bias = sec->vma - pe->pe_opthdr.ImageBase;
+  write_data.rva_bias    = sec->vma - pe->pe_opthdr.ImageBase;
 
   rsrc_write_directory (& write_data, & new_table);
 
   /* Step five: Replace the old contents with the new.
      We recompute the size as we may have lost entries due to mergeing.  */
-  size = ((write_data.next_data - new_data) + 3) & ~3;
+  size = ((write_data.next_data - new_data) + 3) & ~ 3;
   bfd_set_section_contents (pfinfo->output_bfd, sec, new_data, 0, size);
   sec->size = sec->rawsize = size;
-  
+
  end:
   /* FIXME: Free the resource tree, if we have one.  */
   free (datastart);

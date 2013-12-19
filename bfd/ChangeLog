@@ -1,3 +1,11 @@
+2013-12-19  Pierre Muller  <muller@sourceware.org>
+
+	*  peXXigen.c (u16_mbtouc): Avoid unused function warning by excluding if
+	__CYGWIN__ or __MINGW32__ macro is defined.
+	(rsrc_cmp): Fix Windows host version and version without wchar header.
+	[__CYGWIN__, __MINGW32__]: Introduce rsrccmp macro.
+	Fix coding standard issues.
+
 2013-12-19  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_add_symbol_hook): New function.
