@@ -811,11 +811,9 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 	  fprintf_filtered (stream, "0x0");
 	}
       else
-	ada_val_print_1 (value_type (val),
-			 value_contents_for_printing (val),
-			 value_embedded_offset (val),
-			 value_address (val), stream, recurse,
-			 val, options, language);
+	val_print (value_type (val), value_contents_for_printing (val),
+		   value_embedded_offset (val), value_address (val),
+		   stream, recurse, val, options, language);
       value_free_to_mark (mark);
       return;
     }
@@ -873,17 +871,14 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 		= value_from_contents_and_address (type, valaddr + offset, 0);
 	      struct value *v = value_cast (target_type, v1);
 
-	      ada_val_print_1 (target_type,
-			       value_contents_for_printing (v),
-			       value_embedded_offset (v), 0,
-			       stream, recurse + 1, v, options,
-			       language);
+	      val_print (target_type, value_contents_for_printing (v),
+			 value_embedded_offset (v), 0, stream,
+			 recurse + 1, v, options, language);
 	    }
 	  else
-	    ada_val_print_1 (TYPE_TARGET_TYPE (type),
-			     valaddr, offset,
-			     address, stream, recurse,
-			     original_value, options, language);
+	    val_print (TYPE_TARGET_TYPE (type), valaddr, offset,
+		       address, stream, recurse, original_value,
+		       options, language);
 	  return;
 	}
       else
