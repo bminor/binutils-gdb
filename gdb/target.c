@@ -4029,16 +4029,7 @@ target_insn_history (int size, int flags)
 void
 target_insn_history_from (ULONGEST from, int size, int flags)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_insn_history_from != NULL)
-      {
-	t->to_insn_history_from (t, from, size, flags);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_insn_history_from (&current_target, from, size, flags);
 }
 
 /* See target.h.  */
