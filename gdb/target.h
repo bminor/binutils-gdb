@@ -1059,7 +1059,8 @@ struct target_ops
     /* Disassemble a section of the recorded execution trace from instruction
        BEGIN (inclusive) to instruction END (inclusive).  */
     void (*to_insn_history_range) (struct target_ops *,
-				   ULONGEST begin, ULONGEST end, int flags);
+				   ULONGEST begin, ULONGEST end, int flags)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Print a function trace of the recorded execution trace.
        If SIZE < 0, print abs (SIZE) preceding functions; otherwise, print SIZE
