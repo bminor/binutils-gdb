@@ -3947,13 +3947,7 @@ target_delete_record (void)
 int
 target_record_is_replaying (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_record_is_replaying != NULL)
-	return t->to_record_is_replaying (t);
-
-  return 0;
+  return current_target.to_record_is_replaying (&current_target);
 }
 
 /* See target.h.  */

@@ -1,6 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_record_is_replaying): Unconditionally
+	delegate.
+	* target.h (struct target_ops) <to_record_is_replaying>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_goto_record_begin): Unconditionally delegate.
 	* target.h (struct target_ops) <to_goto_record_begin>: Use
 	TARGET_DEFAULT_NORETURN.
