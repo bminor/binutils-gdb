@@ -706,7 +706,8 @@ struct target_ops
        Return -1 if there is insufficient buffer for a whole entry.
        Return 1 if an entry was read into *TYPEP and *VALP.  */
     int (*to_auxv_parse) (struct target_ops *ops, gdb_byte **readptr,
-                         gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
+                         gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+      TARGET_DEFAULT_FUNC (default_auxv_parse);
 
     /* Search SEARCH_SPACE_LEN bytes beginning at START_ADDR for the
        sequence of bytes in PATTERN with length PATTERN_LEN.

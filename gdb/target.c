@@ -44,6 +44,7 @@
 #include "tracepoint.h"
 #include "gdb/fileio.h"
 #include "agent.h"
+#include "auxv.h"
 
 static void target_info (char *, int);
 
