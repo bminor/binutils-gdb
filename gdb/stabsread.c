@@ -863,9 +863,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    /* NULL terminate the string.  */
 	    string_local[ind] = 0;
 	    range_type
-	      = create_range_type (NULL,
-				   objfile_type (objfile)->builtin_int,
-				   0, ind);
+	      = create_static_range_type (NULL,
+					  objfile_type (objfile)->builtin_int,
+					  0, ind);
 	    SYMBOL_TYPE (sym) = create_array_type (NULL,
 				  objfile_type (objfile)->builtin_char,
 				  range_type);
@@ -3615,7 +3615,7 @@ read_array_type (char **pp, struct type *type,
     }
 
   range_type =
-    create_range_type ((struct type *) NULL, index_type, lower, upper);
+    create_static_range_type ((struct type *) NULL, index_type, lower, upper);
   type = create_array_type (type, element_type, range_type);
 
   return type;
@@ -4245,7 +4245,8 @@ handle_true_range:
       index_type = objfile_type (objfile)->builtin_int;
     }
 
-  result_type = create_range_type ((struct type *) NULL, index_type, n2, n3);
+  result_type
+    = create_static_range_type ((struct type *) NULL, index_type, n2, n3);
   return (result_type);
 }
 

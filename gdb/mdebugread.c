@@ -1869,8 +1869,8 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
       ax++;
       rf = AUX_GET_WIDTH (bigend, ax);	/* bit size of array element */
 
-      range = create_range_type ((struct type *) NULL, indx,
-				 lower, upper);
+      range = create_static_range_type ((struct type *) NULL, indx,
+					lower, upper);
 
       t = create_array_type ((struct type *) NULL, *tpp, range);
 

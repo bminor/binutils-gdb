@@ -1842,9 +1842,9 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
 
 	  base_type = decode_type (cs, new_c_type, aux, objfile);
 	  index_type = objfile_type (objfile)->builtin_int;
-	  range_type =
-	    create_range_type ((struct type *) NULL, 
-			       index_type, 0, n - 1);
+	  range_type
+	    = create_static_range_type ((struct type *) NULL,
+					index_type, 0, n - 1);
 	  type =
 	    create_array_type ((struct type *) NULL, 
 			       base_type, range_type);

@@ -1,3 +1,17 @@
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* gdbtypes.c (create_static_range_type): Renamed from create_range_type.
+	* gdbtypes.h (create_static_range_type): Renamed from create_range_type.
+	* ada-lang.c: All uses of create_range_type updated.
+	* coffread.c: All uses of create_range_type updated.
+	* dwarf2read.c: All uses of create_range_type updated.
+	* f-exp.y: All uses of create_range_type updated.
+	* m2-valprint.c: All uses of create_range_type updated.
+	* mdebugread.c: All uses of create_range_type updated.
+	* stabsread.c: All uses of create_range_type updated.
+	* valops.c: All uses of create_range_type updated.
+	* valprint.c: All uses of create_range_type updated.
+
 2014-04-10  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (single_step_breakpoints)

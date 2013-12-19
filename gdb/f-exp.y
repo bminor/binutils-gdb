@@ -1,3 +1,4 @@
+
 /* YACC parser for Fortran expressions, for GDB.
    Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
@@ -577,10 +578,10 @@ ptype	:	typebase
 			if (array_size != -1)
 			  {
 			    range_type =
-			      create_range_type ((struct type *) NULL,
-						 parse_f_type (pstate)
-						 ->builtin_integer,
-						 0, array_size - 1);
+			      create_static_range_type ((struct type *) NULL,
+							parse_f_type (pstate)
+							->builtin_integer,
+							0, array_size - 1);
 			    follow_type =
 			      create_array_type ((struct type *) NULL,
 						 follow_type, range_type);

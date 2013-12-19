@@ -809,8 +809,8 @@ allocate_stub_method (struct type *type)
    sure it is TYPE_CODE_UNDEF before we bash it into a range type?  */
 
 struct type *
-create_range_type (struct type *result_type, struct type *index_type,
-		   LONGEST low_bound, LONGEST high_bound)
+create_static_range_type (struct type *result_type, struct type *index_type,
+			  LONGEST low_bound, LONGEST high_bound)
 {
   if (result_type == NULL)
     result_type = alloc_type_copy (index_type);
@@ -1019,7 +1019,7 @@ lookup_array_range_type (struct type *element_type,
   struct gdbarch *gdbarch = get_type_arch (element_type);
   struct type *index_type = builtin_type (gdbarch)->builtin_int;
   struct type *range_type
-    = create_range_type (NULL, index_type, low_bound, high_bound);
+    = create_static_range_type (NULL, index_type, low_bound, high_bound);
 
   return create_array_type (NULL, element_type, range_type);
 }

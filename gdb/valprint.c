@@ -597,7 +597,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_RANGE:
-      /* FIXME: create_range_type does not set the unsigned bit in a
+      /* FIXME: create_static_range_type does not set the unsigned bit in a
          range type (I think it probably should copy it from the
          target type), so we won't print values which are too large to
          fit in a signed integer correctly.  */
