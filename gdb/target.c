@@ -3961,16 +3961,7 @@ target_record_is_replaying (void)
 void
 target_goto_record_begin (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_goto_record_begin != NULL)
-      {
-	t->to_goto_record_begin (t);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_goto_record_begin (&current_target);
 }
 
 /* See target.h.  */

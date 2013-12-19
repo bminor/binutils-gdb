@@ -1,6 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_goto_record_begin): Unconditionally delegate.
+	* target.h (struct target_ops) <to_goto_record_begin>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_goto_record_end): Unconditionally delegate.
 	* target.h (struct target_ops) <to_goto_record_end>: Use
 	TARGET_DEFAULT_NORETURN.

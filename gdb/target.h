@@ -1035,7 +1035,8 @@ struct target_ops
     int (*to_record_is_replaying) (struct target_ops *);
 
     /* Go to the begin of the execution trace.  */
-    void (*to_goto_record_begin) (struct target_ops *);
+    void (*to_goto_record_begin) (struct target_ops *)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Go to the end of the execution trace.  */
     void (*to_goto_record_end) (struct target_ops *)
