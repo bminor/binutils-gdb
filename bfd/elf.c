@@ -3075,11 +3075,13 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	{
 	  d->rel.hdr->sh_link = elf_onesymtab (abfd);
 	  d->rel.hdr->sh_info = d->this_idx;
+	  d->rel.hdr->sh_flags |= SHF_INFO_LINK;
 	}
       if (d->rela.idx != 0)
 	{
 	  d->rela.hdr->sh_link = elf_onesymtab (abfd);
 	  d->rela.hdr->sh_info = d->this_idx;
+	  d->rela.hdr->sh_flags |= SHF_INFO_LINK;
 	}
 
       /* We need to set up sh_link for SHF_LINK_ORDER.  */
@@ -3166,7 +3168,10 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	    name += 5;
 	  s = bfd_get_section_by_name (abfd, name);
 	  if (s != NULL)
-	    d->this_hdr.sh_info = elf_section_data (s)->this_idx;
+	    {
+	      d->this_hdr.sh_info = elf_section_data (s)->this_idx;
+	      d->this_hdr.sh_flags |= SHF_INFO_LINK;
+	    }
 	  break;
 
 	case SHT_STRTAB:
