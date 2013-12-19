@@ -3930,16 +3930,7 @@ target_supports_delete_record (void)
 void
 target_delete_record (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_delete_record != NULL)
-      {
-	t->to_delete_record (t);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_delete_record (&current_target);
 }
 
 /* See target.h.  */

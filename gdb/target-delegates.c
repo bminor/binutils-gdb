@@ -1260,6 +1260,19 @@ tdefault_supports_btrace (struct target_ops *self)
   return 0;
 }
 
+static void
+delegate_delete_record (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_delete_record (self);
+}
+
+static void
+tdefault_delete_record (struct target_ops *self)
+{
+  tcomplain ();
+}
+
 static int
 delegate_record_is_replaying (struct target_ops *self)
 {
@@ -1618,6 +1631,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_use_agent = delegate_can_use_agent;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
+  if (ops->to_delete_record == NULL)
+    ops->to_delete_record = delegate_delete_record;
   if (ops->to_record_is_replaying == NULL)
     ops->to_record_is_replaying = delegate_record_is_replaying;
   if (ops->to_goto_record_begin == NULL)
@@ -1751,6 +1766,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_use_agent = tdefault_use_agent;
   ops->to_can_use_agent = tdefault_can_use_agent;
   ops->to_supports_btrace = tdefault_supports_btrace;
+  ops->to_delete_record = tdefault_delete_record;
   ops->to_record_is_replaying = tdefault_record_is_replaying;
   ops->to_goto_record_begin = tdefault_goto_record_begin;
   ops->to_goto_record_end = tdefault_goto_record_end;
