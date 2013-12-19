@@ -1,5 +1,9 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_1): Remove call to gdb_flush.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_1): Replace calls to
 	ada_val_print_1 by calls to val_print.
 

@@ -1044,7 +1044,6 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 
       break;
     }
-  gdb_flush (stream);
 }
 
 /* See val_print for a description of the various parameters of this
