@@ -669,7 +669,8 @@ struct target_ops
        This method should not cache data; if the memory map could
        change unexpectedly, it should be invalidated, and higher
        layers will re-fetch it.  */
-    VEC(mem_region_s) *(*to_memory_map) (struct target_ops *);
+    VEC(mem_region_s) *(*to_memory_map) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Erases the region of flash memory starting at ADDRESS, of
        length LENGTH.

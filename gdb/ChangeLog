@@ -1,6 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_memory_map): Unconditionally delegate.
+	* target.h (struct target_ops) <to_memory_map>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_thread_alive): Unconditionally delegate.
 	* target.h (struct target_ops) <to_thread_alive>: Use
 	TARGET_DEFAULT_RETURN.

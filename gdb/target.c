@@ -1719,14 +1719,7 @@ target_memory_map (void)
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog, "target_memory_map ()\n");
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_memory_map != NULL)
-      break;
-
-  if (t == NULL)
-    return NULL;
-
-  result = t->to_memory_map (t);
+  result = current_target.to_memory_map (&current_target);
   if (result == NULL)
     return NULL;
 
