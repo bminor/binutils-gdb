@@ -718,7 +718,8 @@ struct target_ops
     int (*to_search_memory) (struct target_ops *ops,
 			     CORE_ADDR start_addr, ULONGEST search_space_len,
 			     const gdb_byte *pattern, ULONGEST pattern_len,
-			     CORE_ADDR *found_addrp);
+			     CORE_ADDR *found_addrp)
+      TARGET_DEFAULT_FUNC (default_search_memory);
 
     /* Can target execute in reverse?  */
     int (*to_can_execute_reverse) (struct target_ops *)

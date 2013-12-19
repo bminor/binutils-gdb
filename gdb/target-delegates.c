@@ -790,6 +790,13 @@ delegate_auxv_parse (struct target_ops *self, gdb_byte **arg1, gdb_byte *arg2, C
 }
 
 static int
+delegate_search_memory (struct target_ops *self, CORE_ADDR arg1, ULONGEST arg2, const gdb_byte *arg3, ULONGEST arg4, CORE_ADDR *arg5)
+{
+  self = self->beneath;
+  return self->to_search_memory (self, arg1, arg2, arg3, arg4, arg5);
+}
+
+static int
 delegate_can_execute_reverse (struct target_ops *self)
 {
   self = self->beneath;
@@ -1603,6 +1610,8 @@ install_delegators (struct target_ops *ops)
     ops->to_get_ada_task_ptid = delegate_get_ada_task_ptid;
   if (ops->to_auxv_parse == NULL)
     ops->to_auxv_parse = delegate_auxv_parse;
+  if (ops->to_search_memory == NULL)
+    ops->to_search_memory = delegate_search_memory;
   if (ops->to_can_execute_reverse == NULL)
     ops->to_can_execute_reverse = delegate_can_execute_reverse;
   if (ops->to_execution_direction == NULL)
@@ -1783,6 +1792,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_flash_done = tdefault_flash_done;
   ops->to_get_ada_task_ptid = default_get_ada_task_ptid;
   ops->to_auxv_parse = default_auxv_parse;
+  ops->to_search_memory = default_search_memory;
   ops->to_can_execute_reverse = tdefault_can_execute_reverse;
   ops->to_execution_direction = default_execution_direction;
   ops->to_supports_multi_process = tdefault_supports_multi_process;

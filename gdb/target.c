@@ -66,6 +66,13 @@ static int default_follow_fork (struct target_ops *self, int follow_child,
 
 static void default_mourn_inferior (struct target_ops *self);
 
+static int default_search_memory (struct target_ops *ops,
+				  CORE_ADDR start_addr,
+				  ULONGEST search_space_len,
+				  const gdb_byte *pattern,
+				  ULONGEST pattern_len,
+				  CORE_ADDR *found_addrp);
+
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
@@ -2650,8 +2657,7 @@ target_read_description (struct target_ops *target)
   return NULL;
 }
 
-/* The default implementation of to_search_memory.
-   This implements a basic search of memory, reading target memory and
+/* This implements a basic search of memory, reading target memory and
    performing the search here (as opposed to performing the search in on the
    target side with, for example, gdbserver).  */
 
@@ -2758,6 +2764,20 @@ simple_search_memory (struct target_ops *ops,
   return 0;
 }
 
+/* Default implementation of memory-searching.  */
+
+static int
+default_search_memory (struct target_ops *self,
+		       CORE_ADDR start_addr, ULONGEST search_space_len,
+		       const gdb_byte *pattern, ULONGEST pattern_len,
+		       CORE_ADDR *found_addrp)
+{
+  /* Start over from the top of the target stack.  */
+  return simple_search_memory (current_target.beneath,
+			       start_addr, search_space_len,
+			       pattern, pattern_len, found_addrp);
+}
+
 /* Search SEARCH_SPACE_LEN bytes beginning at START_ADDR for the
    sequence of bytes in PATTERN with length PATTERN_LEN.
 
@@ -2770,34 +2790,15 @@ target_search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
 		      const gdb_byte *pattern, ULONGEST pattern_len,
 		      CORE_ADDR *found_addrp)
 {
-  struct target_ops *t;
   int found;
-
-  /* We don't use INHERIT to set current_target.to_search_memory,
-     so we have to scan the target stack and handle targetdebug
-     ourselves.  */
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog, "target_search_memory (%s, ...)\n",
 			hex_string (start_addr));
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_search_memory != NULL)
-      break;
-
-  if (t != NULL)
-    {
-      found = t->to_search_memory (t, start_addr, search_space_len,
-				   pattern, pattern_len, found_addrp);
-    }
-  else
-    {
-      /* If a special version of to_search_memory isn't available, use the
-	 simple version.  */
-      found = simple_search_memory (current_target.beneath,
-				    start_addr, search_space_len,
-				    pattern, pattern_len, found_addrp);
-    }
+  found = current_target.to_search_memory (&current_target, start_addr,
+					   search_space_len,
+					   pattern, pattern_len, found_addrp);
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog, "  = %d\n", found);

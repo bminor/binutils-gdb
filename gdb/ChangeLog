@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target-delegates.c: Rebuild.
+	* target.c (default_search_memory): New function.
+	(simple_search_memory): Update comment.
+	(target_search_memory): Unconditionally delegate.
+	* target.h (struct target_ops) <to_search_memory>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* auxv.c (default_auxv_parse): No longer static.
 	(target_auxv_parse): Unconditionally delegate.
 	* auxv.h (default_auxv_parse): Declare.
