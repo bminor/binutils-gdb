@@ -4063,16 +4063,7 @@ target_insn_history_range (ULONGEST begin, ULONGEST end, int flags)
 void
 target_call_history (int size, int flags)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_call_history != NULL)
-      {
-	t->to_call_history (t, size, flags);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_call_history (&current_target, size, flags);
 }
 
 /* See target.h.  */
