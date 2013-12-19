@@ -1300,6 +1300,19 @@ tdefault_supports_btrace (struct target_ops *self)
   return 0;
 }
 
+static struct btrace_target_info *
+delegate_enable_btrace (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  return self->to_enable_btrace (self, arg1);
+}
+
+static struct btrace_target_info *
+tdefault_enable_btrace (struct target_ops *self, ptid_t arg1)
+{
+  tcomplain ();
+}
+
 static void
 delegate_disable_btrace (struct target_ops *self, struct btrace_target_info *arg1)
 {
@@ -1731,6 +1744,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_use_agent = delegate_can_use_agent;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
+  if (ops->to_enable_btrace == NULL)
+    ops->to_enable_btrace = delegate_enable_btrace;
   if (ops->to_disable_btrace == NULL)
     ops->to_disable_btrace = delegate_disable_btrace;
   if (ops->to_teardown_btrace == NULL)
@@ -1878,6 +1893,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_use_agent = tdefault_use_agent;
   ops->to_can_use_agent = tdefault_can_use_agent;
   ops->to_supports_btrace = tdefault_supports_btrace;
+  ops->to_enable_btrace = tdefault_enable_btrace;
   ops->to_disable_btrace = tdefault_disable_btrace;
   ops->to_teardown_btrace = tdefault_teardown_btrace;
   ops->to_read_btrace = tdefault_read_btrace;

@@ -3784,14 +3784,7 @@ target_ranged_break_num_registers (void)
 struct btrace_target_info *
 target_enable_btrace (ptid_t ptid)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_enable_btrace != NULL)
-      return t->to_enable_btrace (t, ptid);
-
-  tcomplain ();
-  return NULL;
+  return current_target.to_enable_btrace (&current_target, ptid);
 }
 
 /* See target.h.  */
