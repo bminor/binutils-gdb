@@ -345,6 +345,11 @@ extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
 
 struct thread_info;		/* fwd decl for parameter list below: */
 
+/* The type of the callback to the to_async method.  */
+
+typedef void async_callback_ftype (enum inferior_event_type event_type,
+				   void *context);
+
 struct target_ops
   {
     struct target_ops *beneath;	/* To the target under this one.  */
@@ -486,7 +491,7 @@ struct target_ops
     /* ASYNC target controls */
     int (*to_can_async_p) (void);
     int (*to_is_async_p) (void);
-    void (*to_async) (void (*) (enum inferior_event_type, void *), void *);
+    void (*to_async) (async_callback_ftype *, void *);
     int (*to_supports_non_stop) (void);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (find_memory_region_ftype func, void *data);
