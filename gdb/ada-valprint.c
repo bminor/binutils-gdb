@@ -537,71 +537,6 @@ ada_printstr (struct ui_file *stream, struct type *type,
 	    options);
 }
 
-
-/* Assuming TYPE is a simple array, print the value of this array located
-   at VALADDR + OFFSET.  See ada_val_print for a description of the various
-   parameters of this function; they are identical.  */
-
-static void
-ada_val_print_array (struct type *type, const gdb_byte *valaddr,
-		     int offset, CORE_ADDR address,
-		     struct ui_file *stream, int recurse,
-		     const struct value *val,
-		     const struct value_print_options *options)
-{
-  /* For an array of chars, print with string syntax.  */
-  if (ada_is_string_type (type)
-      && (options->format == 0 || options->format == 's'))
-    {
-      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-      struct type *elttype = TYPE_TARGET_TYPE (type);
-      unsigned int eltlen;
-      unsigned int len;
-
-      /* We know that ELTTYPE cannot possibly be null, because we found
-	 that TYPE is a string-like type.  Similarly, the size of ELTTYPE
-	 should also be non-null, since it's a character-like type.  */
-      gdb_assert (elttype != NULL);
-      gdb_assert (TYPE_LENGTH (elttype) != 0);
-
-      eltlen = TYPE_LENGTH (elttype);
-      len = TYPE_LENGTH (type) / eltlen;
-
-      if (options->prettyformat_arrays)
-        print_spaces_filtered (2 + 2 * recurse, stream);
-
-      /* If requested, look for the first null char and only print
-         elements up to it.  */
-      if (options->stop_print_at_null)
-        {
-          int temp_len;
-
-          /* Look for a NULL char.  */
-          for (temp_len = 0;
-               (temp_len < len
-                && temp_len < options->print_max
-                && char_at (valaddr + offset,
-			    temp_len, eltlen, byte_order) != 0);
-               temp_len += 1);
-          len = temp_len;
-        }
-
-      printstr (stream, elttype, valaddr + offset, len, 0, eltlen, options);
-    }
-  else
-    {
-      fprintf_filtered (stream, "(");
-      print_optional_low_bound (stream, type, options);
-      if (TYPE_FIELD_BITSIZE (type, 0) > 0)
-        val_print_packed_array_elements (type, valaddr, offset,
-					 0, stream, recurse, val, options);
-      else
-        val_print_array_elements (type, valaddr, offset, address,
-				  stream, recurse, val, options, 0);
-      fprintf_filtered (stream, ")");
-    }
-}
-
 static int
 print_variant_part (struct type *type, int field_num,
 		    const gdb_byte *valaddr, int offset,
@@ -999,6 +934,72 @@ ada_val_print_struct_union
 }
 
 /* Implement Ada val_print'ing for the case where TYPE is
+   a TYPE_CODE_ARRAY.  */
+
+static void
+ada_val_print_array (struct type *type, const gdb_byte *valaddr,
+		     int offset, int offset_aligned, CORE_ADDR address,
+		     struct ui_file *stream, int recurse,
+		     const struct value *original_value,
+		     const struct value_print_options *options)
+{
+  /* For an array of chars, print with string syntax.  */
+  if (ada_is_string_type (type)
+      && (options->format == 0 || options->format == 's'))
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+      struct type *elttype = TYPE_TARGET_TYPE (type);
+      unsigned int eltlen;
+      unsigned int len;
+
+      /* We know that ELTTYPE cannot possibly be null, because we found
+	 that TYPE is a string-like type.  Similarly, the size of ELTTYPE
+	 should also be non-null, since it's a character-like type.  */
+      gdb_assert (elttype != NULL);
+      gdb_assert (TYPE_LENGTH (elttype) != 0);
+
+      eltlen = TYPE_LENGTH (elttype);
+      len = TYPE_LENGTH (type) / eltlen;
+
+      if (options->prettyformat_arrays)
+        print_spaces_filtered (2 + 2 * recurse, stream);
+
+      /* If requested, look for the first null char and only print
+         elements up to it.  */
+      if (options->stop_print_at_null)
+        {
+          int temp_len;
+
+          /* Look for a NULL char.  */
+          for (temp_len = 0;
+               (temp_len < len
+                && temp_len < options->print_max
+                && char_at (valaddr + offset_aligned,
+			    temp_len, eltlen, byte_order) != 0);
+               temp_len += 1);
+          len = temp_len;
+        }
+
+      printstr (stream, elttype, valaddr + offset_aligned, len, 0,
+		eltlen, options);
+    }
+  else
+    {
+      fprintf_filtered (stream, "(");
+      print_optional_low_bound (stream, type, options);
+      if (TYPE_FIELD_BITSIZE (type, 0) > 0)
+        val_print_packed_array_elements (type, valaddr, offset_aligned,
+					 0, stream, recurse,
+					 original_value, options);
+      else
+        val_print_array_elements (type, valaddr, offset_aligned, address,
+				  stream, recurse, original_value,
+				  options, 0);
+      fprintf_filtered (stream, ")");
+    }
+}
+
+/* Implement Ada val_print'ing for the case where TYPE is
    a TYPE_CODE_REF.  */
 
 static void
@@ -1123,7 +1124,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_ARRAY:
-      ada_val_print_array (type, valaddr, offset_aligned,
+      ada_val_print_array (type, valaddr, offset, offset_aligned,
 			   address, stream, recurse, original_value,
 			   options);
       return;

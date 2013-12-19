@@ -1,5 +1,11 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_array): Move implementation
+	down.  Rename parameter "offset" and "val" into "offset_aligned"
+	and "original_value" respectively.  Add parameter "offset".
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_ref): Rewrite by mostly
 	re-organizing the code. Change the "???" message printed
 	when target type is a TYPE_CODE_UNDEF into
