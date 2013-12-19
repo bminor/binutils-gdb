@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* record.c (record_stop): Unconditionally delegate.
+	* target-delegates.c: Rebuild.
+	* target.c (target_stop_recording): Unconditionally delegate.
+	* target.h (struct target_ops) <to_stop_recording>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target-delegates.c: Rebuild.
 	* target.c (target_enable_btrace): Unconditionally delegate.
 	* target.h (struct target_ops) <to_enable_btrace>: Use

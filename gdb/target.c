@@ -3818,16 +3818,7 @@ target_read_btrace (VEC (btrace_block_s) **btrace,
 void
 target_stop_recording (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_stop_recording != NULL)
-      {
-	t->to_stop_recording (t);
-	return;
-      }
-
-  /* This is optional.  */
+  current_target.to_stop_recording (&current_target);
 }
 
 /* See target.h.  */

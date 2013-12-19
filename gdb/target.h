@@ -1028,7 +1028,8 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Stop trace recording.  */
-    void (*to_stop_recording) (struct target_ops *);
+    void (*to_stop_recording) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
 
     /* Print information about the recording.  */
     void (*to_info_record) (struct target_ops *);
