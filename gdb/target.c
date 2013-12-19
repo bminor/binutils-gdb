@@ -4097,16 +4097,7 @@ target_call_history_from (ULONGEST begin, int size, int flags)
 void
 target_call_history_range (ULONGEST begin, ULONGEST end, int flags)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_call_history_range != NULL)
-      {
-	t->to_call_history_range (t, begin, end, flags);
-	return;
-      }
-
-  tcomplain ();
+  current_target.to_call_history_range (&current_target, begin, end, flags);
 }
 
 static void
