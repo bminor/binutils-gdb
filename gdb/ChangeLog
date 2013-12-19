@@ -1,5 +1,16 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_gnat_array): New function,
+	extracted from ada_val_print_1;
+	(ada_val_print_ptr, ada_val_print_num, ada_val_print_enum)
+	(ada_val_print_flt, ada_val_print_struct_union)
+	(ada_val_print_ref): Likewise.
+	(ada_val_print_1): Delete variables i and elttype.
+	Replace extracted-out code by call to corresponding
+	new functions.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_1): Remove call to gdb_flush.
 
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
