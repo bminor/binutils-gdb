@@ -1,7 +1,11 @@
 2013-12-19  Pierre Muller  <muller@sourceware.org>
 
-	*  peXXigen.c (u16_mbtouc): Avoid unused function warning by excluding if
-	__CYGWIN__ or __MINGW32__ macro is defined.
+	* peXXigen.c (rsrc_cmp): Fix unused variable warning.
+
+2013-12-19  Pierre Muller  <muller@sourceware.org>
+
+	* peXXigen.c (u16_mbtouc): Avoid unused function warning by excluding
+	if __CYGWIN__ or __MINGW32__ macro is defined.
 	(rsrc_cmp): Fix Windows host version and version without wchar header.
 	[__CYGWIN__, __MINGW32__]: Introduce rsrccmp macro.
 	Fix coding standard issues.

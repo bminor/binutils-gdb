@@ -2981,7 +2981,6 @@ static signed int
 rsrc_cmp (bfd_boolean is_name, rsrc_entry * a, rsrc_entry * b)
 {
   signed int    res;
-  unsigned int  i;
   bfd_byte *    astring;
   unsigned int  alen;
   bfd_byte *    bstring;
@@ -3013,24 +3012,26 @@ rsrc_cmp (bfd_boolean is_name, rsrc_entry * a, rsrc_entry * b)
 		 min (alen, blen));
 
 #elif defined HAVE_WCHAR_H
-  res = 0;
-  for (i = min (alen, blen); i--; astring += 2, bstring += 2)
-    {
-      wchar_t awc;
-      wchar_t bwc;
+  {
+    unsigned int  i;
+    res = 0;
+    for (i = min (alen, blen); i--; astring += 2, bstring += 2)
+      {
+	wchar_t awc;
+	wchar_t bwc;
 
-      /* Convert UTF-16 unicode characters into wchar_t characters so
-	 that we can then perform a case insensitive comparison.  */
-      int Alen = u16_mbtouc (& awc, (const unsigned short *) astring, 2);
-      int Blen = u16_mbtouc (& bwc, (const unsigned short *) bstring, 2);
+	/* Convert UTF-16 unicode characters into wchar_t characters so
+	   that we can then perform a case insensitive comparison.  */
+	int Alen = u16_mbtouc (& awc, (const unsigned short *) astring, 2);
+	int Blen = u16_mbtouc (& bwc, (const unsigned short *) bstring, 2);
 
-      if (Alen != Blen)
-	return Alen - Blen;
-      res = wcsncasecmp (& awc, & bwc, 1);
-      if (res)
-	break;
-    }
-
+	if (Alen != Blen)
+	  return Alen - Blen;
+	res = wcsncasecmp (& awc, & bwc, 1);
+	if (res)
+	  break;
+      }
+  }
 #else
   /* Do the best we can - a case sensitive, untranslated comparison.  */
   res = memcmp (astring, bstring, min (alen, blen) * 2);
