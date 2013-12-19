@@ -1326,6 +1326,19 @@ tdefault_teardown_btrace (struct target_ops *self, struct btrace_target_info *ar
   tcomplain ();
 }
 
+static enum btrace_error 
+delegate_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type  arg3)
+{
+  self = self->beneath;
+  return self->to_read_btrace (self, arg1, arg2, arg3);
+}
+
+static enum btrace_error 
+tdefault_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type  arg3)
+{
+  tcomplain ();
+}
+
 static void
 delegate_save_record (struct target_ops *self, const char *arg1)
 {
@@ -1722,6 +1735,8 @@ install_delegators (struct target_ops *ops)
     ops->to_disable_btrace = delegate_disable_btrace;
   if (ops->to_teardown_btrace == NULL)
     ops->to_teardown_btrace = delegate_teardown_btrace;
+  if (ops->to_read_btrace == NULL)
+    ops->to_read_btrace = delegate_read_btrace;
   if (ops->to_save_record == NULL)
     ops->to_save_record = delegate_save_record;
   if (ops->to_delete_record == NULL)
@@ -1865,6 +1880,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_supports_btrace = tdefault_supports_btrace;
   ops->to_disable_btrace = tdefault_disable_btrace;
   ops->to_teardown_btrace = tdefault_teardown_btrace;
+  ops->to_read_btrace = tdefault_read_btrace;
   ops->to_save_record = tdefault_save_record;
   ops->to_delete_record = tdefault_delete_record;
   ops->to_record_is_replaying = tdefault_record_is_replaying;

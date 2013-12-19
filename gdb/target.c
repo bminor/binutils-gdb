@@ -3817,14 +3817,7 @@ target_read_btrace (VEC (btrace_block_s) **btrace,
 		    struct btrace_target_info *btinfo,
 		    enum btrace_read_type type)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_read_btrace != NULL)
-      return t->to_read_btrace (t, btrace, btinfo, type);
-
-  tcomplain ();
-  return BTRACE_ERR_NOT_SUPPORTED;
+  return current_target.to_read_btrace (&current_target, btrace, btinfo, type);
 }
 
 /* See target.h.  */

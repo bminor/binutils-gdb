@@ -1023,7 +1023,8 @@ struct target_ops
     enum btrace_error (*to_read_btrace) (struct target_ops *self,
 					 VEC (btrace_block_s) **data,
 					 struct btrace_target_info *btinfo,
-					 enum btrace_read_type type);
+					 enum btrace_read_type type)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Stop trace recording.  */
     void (*to_stop_recording) (struct target_ops *);
