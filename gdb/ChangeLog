@@ -1,5 +1,13 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_string): New function,
+	extracted from ada_val_print_array.
+	(ada_val_print_array): Replace extracted code by call
+	to ada_val_print_string followed by a return.  Move
+	"else" branch to the function's top block.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_array): Move implementation
 	down.  Rename parameter "offset" and "val" into "offset_aligned"
 	and "original_value" respectively.  Add parameter "offset".
