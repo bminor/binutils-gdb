@@ -365,6 +365,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-intel64"
     if { ![istarget "*-*-mingw*"] } then {
       run_dump_test "x86-64-pcrel"
+      run_dump_test "x86-64-disassem"
     } else {
       run_dump_test "x86-64-w64-pcrel"
     }
@@ -558,7 +559,6 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-mpx-addr32"
     run_dump_test "x86-64-mpx-add-bnd-prefix"
     run_dump_test "x86-64-sha"
-    run_dump_test "x86-64-disassem"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
