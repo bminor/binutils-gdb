@@ -1,5 +1,11 @@
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_1): Add parameter "language".
+	Update calls to self accordingly.  Replace calls to c_val_print
+	by calls to val_print.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (print_record): Delete declaration.
 	(adjust_type_signedness, ada_val_print_1): Likewise.
 	(ada_val_print): Move function implementation down.

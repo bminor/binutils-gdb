@@ -780,7 +780,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 		 int offset, CORE_ADDR address,
 		 struct ui_file *stream, int recurse,
 		 const struct value *original_value,
-		 const struct value_print_options *options)
+		 const struct value_print_options *options,
+		 const struct language_defn *language)
 {
   int i;
   struct type *elttype;
@@ -814,7 +815,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 			 value_contents_for_printing (val),
 			 value_embedded_offset (val),
 			 value_address (val), stream, recurse,
-			 val, options);
+			 val, options, language);
       value_free_to_mark (mark);
       return;
     }
@@ -825,14 +826,14 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
   switch (TYPE_CODE (type))
     {
     default:
-      c_val_print (type, valaddr, offset, address, stream,
-		   recurse, original_value, options);
+      val_print (type, valaddr, offset, address, stream, recurse,
+		 original_value, options, language_def (language_c));
       break;
 
     case TYPE_CODE_PTR:
       {
-	c_val_print (type, valaddr, offset, address,
-		     stream, recurse, original_value, options);
+	val_print (type, valaddr, offset, address, stream, recurse,
+		   original_value, options, language_def (language_c));
 
 	if (ada_is_tag_type (type))
 	  {
@@ -875,13 +876,14 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 	      ada_val_print_1 (target_type,
 			       value_contents_for_printing (v),
 			       value_embedded_offset (v), 0,
-			       stream, recurse + 1, v, options);
+			       stream, recurse + 1, v, options,
+			       language);
 	    }
 	  else
 	    ada_val_print_1 (TYPE_TARGET_TYPE (type),
 			     valaddr, offset,
 			     address, stream, recurse,
-			     original_value, options);
+			     original_value, options, language);
 	  return;
 	}
       else
@@ -970,8 +972,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
     case TYPE_CODE_FLT:
       if (options->format)
 	{
-	  c_val_print (type, valaddr, offset, address, stream,
-		       recurse, original_value, options);
+	  val_print (type, valaddr, offset, address, stream, recurse,
+		     original_value, options, language_def (language_c));
 	  return;
 	}
       else
@@ -1066,7 +1068,8 @@ ada_val_print (struct type *type, const gdb_byte *valaddr,
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       ada_val_print_1 (type, valaddr, embedded_offset, address,
-		       stream, recurse, val, options);
+		       stream, recurse, val, options,
+		       current_language);
     }
 }
 
