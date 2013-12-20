@@ -1,5 +1,5 @@
 2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
-            Wei-Cheng Wang  <cole945@gmail.com>
+	    Wei-Cheng Wang  <cole945@gmail.com>
 	    Hui-Wen Ni  <sabrinanitw@gmail.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add nds32 target.
