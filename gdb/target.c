@@ -2470,24 +2470,15 @@ target_detach (const char *args, int from_tty)
 void
 target_disconnect (char *args, int from_tty)
 {
-  struct target_ops *t;
-
   /* If we're in breakpoints-always-inserted mode or if breakpoints
      are global across processes, we have to remove them before
      disconnecting.  */
   remove_breakpoints ();
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_disconnect != NULL)
-	{
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_disconnect (%s, %d)\n",
-				args, from_tty);
-	  t->to_disconnect (t, args, from_tty);
-	  return;
-	}
-
-  tcomplain ();
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_disconnect (%s, %d)\n",
+			args, from_tty);
+  current_target.to_disconnect (&current_target, args, from_tty);
 }
 
 ptid_t

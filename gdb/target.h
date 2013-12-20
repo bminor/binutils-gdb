@@ -409,7 +409,8 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_detach) (struct target_ops *ops, const char *, int)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_disconnect) (struct target_ops *, char *, int);
+    void (*to_disconnect) (struct target_ops *, char *, int)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
     void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());
     ptid_t (*to_wait) (struct target_ops *,

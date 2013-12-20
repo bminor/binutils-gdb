@@ -35,6 +35,19 @@ tdefault_detach (struct target_ops *self, const char *arg1, int arg2)
 }
 
 static void
+delegate_disconnect (struct target_ops *self, char *arg1, int arg2)
+{
+  self = self->beneath;
+  self->to_disconnect (self, arg1, arg2);
+}
+
+static void
+tdefault_disconnect (struct target_ops *self, char *arg1, int arg2)
+{
+  tcomplain ();
+}
+
+static void
 delegate_resume (struct target_ops *self, ptid_t arg1, int arg2, enum gdb_signal arg3)
 {
   self = self->beneath;
@@ -1542,6 +1555,8 @@ install_delegators (struct target_ops *ops)
     ops->to_post_attach = delegate_post_attach;
   if (ops->to_detach == NULL)
     ops->to_detach = delegate_detach;
+  if (ops->to_disconnect == NULL)
+    ops->to_disconnect = delegate_disconnect;
   if (ops->to_resume == NULL)
     ops->to_resume = delegate_resume;
   if (ops->to_wait == NULL)
@@ -1800,6 +1815,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_attach = find_default_attach;
   ops->to_post_attach = tdefault_post_attach;
   ops->to_detach = tdefault_detach;
+  ops->to_disconnect = tdefault_disconnect;
   ops->to_resume = tdefault_resume;
   ops->to_wait = tdefault_wait;
   ops->to_fetch_registers = tdefault_fetch_registers;

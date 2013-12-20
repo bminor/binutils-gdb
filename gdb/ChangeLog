@@ -1,5 +1,12 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target-delegates.c: Rebuild.
+	* target.c (target_disconnect): Unconditionally delegate.
+	* target.h (struct target_ops) <to_disconnect>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* record.c (record_stop): Unconditionally delegate.
 	* target-delegates.c: Rebuild.
 	* target.c (target_stop_recording): Unconditionally delegate.
