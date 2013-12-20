@@ -1,6 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_can_run.
+	(find_default_run_target): Check against delegate_can_run.
+	* target.h (struct target_ops) <to_can_run>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_disconnect): Unconditionally delegate.
 	* target.h (struct target_ops) <to_disconnect>: Use
 	TARGET_DEFAULT_NORETURN.

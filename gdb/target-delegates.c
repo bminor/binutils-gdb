@@ -530,6 +530,19 @@ delegate_mourn_inferior (struct target_ops *self)
   self->to_mourn_inferior (self);
 }
 
+static int
+delegate_can_run (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_can_run (self);
+}
+
+static int
+tdefault_can_run (struct target_ops *self)
+{
+  return 0;
+}
+
 static void
 delegate_pass_signals (struct target_ops *self, int arg1, unsigned char *arg2)
 {
@@ -1639,6 +1652,8 @@ install_delegators (struct target_ops *ops)
     ops->to_has_exited = delegate_has_exited;
   if (ops->to_mourn_inferior == NULL)
     ops->to_mourn_inferior = delegate_mourn_inferior;
+  if (ops->to_can_run == NULL)
+    ops->to_can_run = delegate_can_run;
   if (ops->to_pass_signals == NULL)
     ops->to_pass_signals = delegate_pass_signals;
   if (ops->to_program_signals == NULL)
@@ -1857,6 +1872,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_set_syscall_catchpoint = tdefault_set_syscall_catchpoint;
   ops->to_has_exited = tdefault_has_exited;
   ops->to_mourn_inferior = default_mourn_inferior;
+  ops->to_can_run = tdefault_can_run;
   ops->to_pass_signals = tdefault_pass_signals;
   ops->to_program_signals = tdefault_program_signals;
   ops->to_thread_alive = tdefault_thread_alive;

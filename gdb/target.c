@@ -653,7 +653,7 @@ update_current_target (void)
       /* Do not inherit to_set_syscall_catchpoint.  */
       /* Do not inherit to_has_exited.  */
       /* Do not inherit to_mourn_inferior.  */
-      INHERIT (to_can_run, t);
+      /* Do not inherit to_can_run.  */
       /* Do not inherit to_pass_signals.  */
       /* Do not inherit to_program_signals.  */
       /* Do not inherit to_thread_alive.  */
@@ -748,9 +748,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_can_run,
-	    (int (*) (struct target_ops *))
-	    return_zero);
   current_target.to_read_description = NULL;
 
 #undef de_fault
@@ -2852,7 +2849,7 @@ find_default_run_target (char *do_mesg)
   for (t = target_structs; t < target_structs + target_struct_size;
        ++t)
     {
-      if ((*t)->to_can_run && target_can_run (*t))
+      if ((*t)->to_can_run != delegate_can_run && target_can_run (*t))
 	{
 	  runable = *t;
 	  ++count;

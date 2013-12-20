@@ -547,7 +547,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     void (*to_mourn_inferior) (struct target_ops *)
       TARGET_DEFAULT_FUNC (default_mourn_inferior);
-    int (*to_can_run) (struct target_ops *);
+    int (*to_can_run) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
