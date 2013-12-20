@@ -1,3 +1,9 @@
+2013-12-20  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16218
+	* dwarf.c (read_and_display_attr_value): Only print a tab
+	character if it preceeds further text.
+
 2013-12-19  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf.c (fetch_indirect_string): Don't bias by section address.
