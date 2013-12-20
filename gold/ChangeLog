@@ -1,3 +1,16 @@
+2013-12-19  Dimitry Andric  <dimitry@andric.com>
+
+	* stringpool.cc (Stringpool_template::reserve): Add
+	HAVE_UNORDERED_MAP case.
+	* stringpool.cc (Stringpool_template::print_stats): Likewise.
+
+2013-12-18  Cary Coutant  <ccoutant@google.com>
+
+	* configure.ac: Check for <unordered_set> and <unordered_map>.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* system.h: Use <unordered_set> and <unordered_map> if available.
+
 2013-12-10  Roland McGrath  <mcgrathr@google.com>
 
 	* Makefile.am (install-exec-local): Prefix $(INSTALL_PROGRAM) uses

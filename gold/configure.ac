@@ -523,6 +523,7 @@ AC_CHECK_DECLS([basename, ffs, asprintf, vasprintf, snprintf, vsnprintf, strvers
 
 AC_LANG_PUSH(C++)
 
+AC_CHECK_HEADERS(unordered_set unordered_map)
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_HEADERS(byteswap.h)

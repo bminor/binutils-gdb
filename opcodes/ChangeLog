@@ -1,3 +1,9 @@
+2013-12-17  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* nds32-dis.c (sr_map): Add system register table for disassembling.
+	(usr_map): Fix typo.
+	* nds32-asm.c (keyword_sr): Add embedded debug registers.
+
 2013-12-17  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	* i386-dis.c (MOD_FF_REG_3): New.

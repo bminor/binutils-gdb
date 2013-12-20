@@ -1,5 +1,10 @@
+2013-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf_k1om.sh (IREL_IN_PLT): Define.
+	* emulparams/elf_l1om.sh (IREL_IN_PLT): Likewise.
+
 2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
-            Wei-Cheng Wang  <cole945@gmail.com>
+	    Wei-Cheng Wang  <cole945@gmail.com>
 	    Hui-Wen Ni  <sabrinanitw@gmail.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add nds32 target.

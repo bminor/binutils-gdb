@@ -167,6 +167,9 @@ static const char *mnemonic_fd2_cmp[] =
   "fcmpled", "fcmpled.e", "fcmpund", "fcmpund.e"
 };
 
+/* Register name table.  */
+/* General purpose register.  */
+
 static const char *gpr_map[] =
 {
   "$r0", "$r1", "$r2", "$r3", "$r4", "$r5", "$r6", "$r7",
@@ -175,10 +178,12 @@ static const char *gpr_map[] =
   "$r24", "$r25", "$r26", "$r27", "$fp", "$gp", "$lp", "$sp"
 };
 
+/* User special register.  */
+
 static const char *usr_map[][32] =
 {
   {
-    "d0,lo", "d0.hi", "d1,lo", "d1,hi", "4",  "5",  "6",  "7",
+    "d0.lo", "d0.hi", "d1.lo", "d1.hi", "4",  "5",  "6",  "7",
     "8",     "9",     "10",    "11",    "12", "13", "14", "15",
     "16",    "17",    "18",    "19",    "20", "21", "22", "23",
     "24",    "25",    "26",    "27",    "28", "29", "30", "pc"
@@ -187,12 +192,94 @@ static const char *usr_map[][32] =
     "DMA_CFG",     "DMA_GCSW",    "DMA_CHNSEL", "DMA_ACT",    "DMA_SETUP",
     "DMA_ISADDR",  "DMA_ESADDR",  "DMA_TCNT",   "DMA_STATUS", "DMA_2DSET",
     "10",          "11",          "12",         "13",         "14",
-    "15",          "16,",         "17",         "18",         "19",
-    "20",          "21",          "22",         "23",         "24,",
+    "15",          "16",          "17",         "18",         "19",
+    "20",          "21",          "22",         "23",         "24",
     "DMA_2DSCTL"
   },
   {
-    "PFMC0", "PFMC1", "PFMC2", "3", "PFMCTL"
+    "PFMC0", "PFMC1", "PFMC2", "3", "PFM_CTL"
+  }
+};
+
+/* System register.  */
+/* Major Minor Extension.  */
+static const char *sr_map[8][16][8] =
+{
+  {
+    {"CPU_VER", "CORE_ID"},
+    {"ICM_CFG"},
+    {"DCM_CFG"},
+    {"MMU_CFG"},
+    {"MSC_CFG"}
+  },
+  {
+    {"PSW", "IPSW", "P_IPSW"},
+    {"0", "IVB", "INT_CTRL"},
+    {"0", "EVA", "P_EVA"},
+    {"0", "ITYPE", "P_ITYPE"},
+    {"0", "MERR"},
+    {"0", "IPC", "P_IPC", "OIPC"},
+    {"0", "1", "P_P0"},
+    {"0", "1", "P_P1"},
+    {"INT_MASK", "INT_MASK2"},
+    {"INT_PEND", "INT_PEND2", "2", "3", "INT_TRIGGER"},
+    {"SP_USR", "SP_PRIV"},
+    {"INT_PRI", "INT_PRI2"}
+  },
+  {
+    {"MMU_CTL"},
+    {"L1_PPTB"},
+    {"TLB_VPN"},
+    {"TLB_DATA"},
+    {"TLB_MISC"},
+    {"VLPT_IDX"},
+    {"ILMB"},
+    {"DLMB"},
+    {"CACHE_CTL"},
+    {"HSMP_SADDR", "HSMP_EADDR"},
+    {"0"},
+    {"0"},
+    {"0"},
+    {"0"},
+    {"0"},
+    {"SDZ_CTL", "MISC_CTL"}
+  },
+  {
+    {"BPC0", "BPC1", "BPC2", "BPC3", "BPC4", "BPC5", "BPC6", "BPC7"},
+    {"BPA0", "BPA1", "BPA2", "BPA3", "BPA4", "BPA5", "BPA6", "BPA7"},
+    {"BPAM0", "BPAM1", "BPAM2", "BPAM3", "BPAM4", "BPAM5", "BPAM6", "BPAM7"},
+    {"BPV0", "BPV1", "BPV2", "BPV3", "BPV4", "BPV5", "BPV6", "BPV7"},
+    {"BPCID0", "BPCID1", "BPCID2", "BPCID3", "BPCID4", "BPCID5", "BPCID6", "BPCID7"},
+    {"EDM_CFG"},
+    {"EDMSW"},
+    {"EDM_CTL"},
+    {"EDM_DTR"},
+    {"BPMTC"},
+    {"DIMBR"},
+    {"EDM_PROBE"},
+    {"0"},
+    {"0"},
+    {"TECR0", "TECR1"}
+  },
+  {
+    {"PFMC0", "PFMC1", "PFMC2"},
+    {"PFM_CTL"},
+    {"0"},
+    {"0"},
+    {"PRUSR_ACC_CTL"},
+    {"FUCOP_CTL"}
+  },
+  {
+    {"DMA_CFG"},
+    {"DMA_GCSW"},
+    {"DMA_CHNSEL"},
+    {"DMA_ACT"},
+    {"DMA_SETUP"},
+    {"DMA_ISADDR"},
+    {"DMA_ESADDR"},
+    {"DMA_TCNT"},
+    {"DMA_STATUS"},
+    {"DMA_2DSET", "DMA_2DSCTL"}
   }
 };
 
@@ -763,8 +850,8 @@ print_insn32_misc (bfd_vma pc ATTRIBUTE_UNUSED, disassemble_info *info,
     case 0x2:			/* mfsr */
     case 0x3:			/* mtsr */
       /* FIXME: setend, setgie.  */
-      id = __GF (insn, 10, 10);
-      func (stream, "%s\t%s, %d", mnemonic_misc[op], gpr_map[rt], id);
+      func (stream, "%s\t%s, $%s", mnemonic_misc[op], gpr_map[rt],
+	    sr_map[__GF(insn, 17, 3)][__GF(insn, 13, 4)][__GF(insn, 10, 3)]);
       return;
     case 0x6:			/* teqz */
     case 0x7:			/* tnez */

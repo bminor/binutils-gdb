@@ -9922,7 +9922,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_plt_sym_val			ppc_elf_plt_sym_val
 #define elf_backend_action_discarded		ppc_elf_action_discarded
 #define elf_backend_init_index_section		_bfd_elf_init_1_index_section
-#define elf_backend_post_process_headers	_bfd_elf_set_osabi
 #define elf_backend_lookup_section_flags_hook	ppc_elf_lookup_section_flags
 #define elf_backend_section_processing		ppc_elf_section_processing
 

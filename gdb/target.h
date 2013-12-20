@@ -238,6 +238,15 @@ enum trace_find_type
 typedef struct static_tracepoint_marker *static_tracepoint_marker_p;
 DEF_VEC_P(static_tracepoint_marker_p);
 
+typedef LONGEST
+  target_xfer_partial_ftype (struct target_ops *ops,
+			     enum target_object object,
+			     const char *annex,
+			     gdb_byte *readbuf,
+			     const gdb_byte *writebuf,
+			     ULONGEST offset,
+			     LONGEST len);
+
 /* Request that OPS transfer up to LEN 8-bit bytes of the target's
    OBJECT.  The OFFSET, for a seekable object, specifies the
    starting point.  The ANNEX can be used to provide additional
@@ -319,12 +328,7 @@ extern char *target_read_stralloc (struct target_ops *ops,
 				   const char *annex);
 
 /* See target_ops->to_xfer_partial.  */
-
-extern LONGEST target_xfer_partial (struct target_ops *ops,
-				    enum target_object object,
-				    const char *annex,
-				    void *readbuf, const void *writebuf,
-				    ULONGEST offset, LONGEST len);
+extern target_xfer_partial_ftype target_xfer_partial;
 
 /* Wrappers to target read/write that perform memory transfers.  They
    throw an error if the memory transfer fails.

@@ -200,11 +200,7 @@ static int (*linux_nat_siginfo_fixup) (siginfo_t *,
 
 /* The saved to_xfer_partial method, inherited from inf-ptrace.c.
    Called by our to_xfer_partial.  */
-static LONGEST (*super_xfer_partial) (struct target_ops *, 
-				      enum target_object,
-				      const char *, gdb_byte *, 
-				      const gdb_byte *,
-				      ULONGEST, LONGEST);
+static target_xfer_partial_ftype *super_xfer_partial;
 
 static unsigned int debug_linux_nat;
 static void
@@ -1592,7 +1588,7 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
       /* Put the signal number in ARGS so that inf_ptrace_detach will
 	 pass it along with PTRACE_DETACH.  */
       tem = alloca (8);
-      sprintf (tem, "%d", (int) WSTOPSIG (status));
+      xsnprintf (tem, 8, "%d", (int) WSTOPSIG (status));
       args = tem;
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -4049,7 +4045,7 @@ linux_child_pid_to_exec_file (int pid)
   make_cleanup (xfree, name2);
   memset (name2, 0, PATH_MAX);
 
-  sprintf (name1, "/proc/%d/exe", pid);
+  xsnprintf (name1, PATH_MAX, "/proc/%d/exe", pid);
   if (readlink (name1, name2, PATH_MAX - 1) > 0)
     return name2;
   else
@@ -4135,7 +4131,8 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
 
   /* We could keep this file open and cache it - possibly one per
      thread.  That requires some juggling, but is even faster.  */
-  sprintf (filename, "/proc/%d/mem", ptid_get_pid (inferior_ptid));
+  xsnprintf (filename, sizeof filename, "/proc/%d/mem",
+	     ptid_get_pid (inferior_ptid));
   fd = gdb_open_cloexec (filename, O_RDONLY | O_LARGEFILE, 0);
   if (fd == -1)
     return 0;
@@ -4305,7 +4302,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending,
   sigemptyset (pending);
   sigemptyset (blocked);
   sigemptyset (ignored);
-  sprintf (fname, "/proc/%d/status", pid);
+  xsnprintf (fname, sizeof fname, "/proc/%d/status", pid);
   procfile = gdb_fopen_cloexec (fname, "r");
   if (procfile == NULL)
     error (_("Could not open %s"), fname);

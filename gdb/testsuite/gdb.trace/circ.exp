@@ -221,7 +221,7 @@ with_test_prefix "normal buffer" {
 	"first frame is at func0"
 
     gdb_test "tfind pc func9" \
-	".*Found trace frame $decimal, tracepoint $decimal.*" \
+	".*Found trace frame $decimal, tracepoint $decimal\r\n#0  func9 .*" \
 	"find frame for func9"
 }
 
@@ -282,6 +282,6 @@ with_test_prefix "circular buffer" {
 
     gdb_test \
 	"tfind pc func9" \
-	".*Found trace frame $decimal, tracepoint $decimal.*" \
+	".*Found trace frame $decimal, tracepoint $decimal\r\n#0  func9 .*" \
 	"find frame for func9"
 }

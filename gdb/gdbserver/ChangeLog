@@ -1,3 +1,8 @@
+2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* linux-aarch64-low.c (aarch64_linux_set_debug_regs): Set
+	iov.iov_len with the real length in use.
+
 2013-12-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (safe-ctype.o, lbasename.o): New rules.

@@ -1034,37 +1034,42 @@ extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid)
 extern void set_gdbarch_get_syscall_number (struct gdbarch *gdbarch, gdbarch_get_syscall_number_ftype *get_syscall_number);
 
 /* SystemTap related fields and functions.
-   Prefix used to mark an integer constant on the architecture's assembly
+   A NULL-terminated array of prefixes used to mark an integer constant
+   on the architecture's assembly.
    For example, on x86 integer constants are written as:
   
     $10 ;; integer constant 10
   
    in this case, this prefix would be the character `$'. */
 
-extern const char * gdbarch_stap_integer_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_integer_prefix (struct gdbarch *gdbarch, const char * stap_integer_prefix);
+extern const char *const * gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch, const char *const * stap_integer_prefixes);
 
-/* Suffix used to mark an integer constant on the architecture's assembly. */
+/* A NULL-terminated array of suffixes used to mark an integer constant
+   on the architecture's assembly. */
 
-extern const char * gdbarch_stap_integer_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_integer_suffix (struct gdbarch *gdbarch, const char * stap_integer_suffix);
+extern const char *const * gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch, const char *const * stap_integer_suffixes);
 
-/* Prefix used to mark a register name on the architecture's assembly.
+/* A NULL-terminated array of prefixes used to mark a register name on
+   the architecture's assembly.
    For example, on x86 the register name is written as:
   
     %eax ;; register eax
   
    in this case, this prefix would be the character `%'. */
 
-extern const char * gdbarch_stap_register_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_prefix (struct gdbarch *gdbarch, const char * stap_register_prefix);
+extern const char *const * gdbarch_stap_register_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_prefixes (struct gdbarch *gdbarch, const char *const * stap_register_prefixes);
 
-/* Suffix used to mark a register name on the architecture's assembly */
+/* A NULL-terminated array of suffixes used to mark a register name on
+   the architecture's assembly. */
 
-extern const char * gdbarch_stap_register_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_suffix (struct gdbarch *gdbarch, const char * stap_register_suffix);
+extern const char *const * gdbarch_stap_register_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_suffixes (struct gdbarch *gdbarch, const char *const * stap_register_suffixes);
 
-/* Prefix used to mark a register indirection on the architecture's assembly.
+/* A NULL-terminated array of prefixes used to mark a register
+   indirection on the architecture's assembly.
    For example, on x86 the register indirection is written as:
   
     (%eax) ;; indirecting eax
@@ -1074,10 +1079,11 @@ extern void set_gdbarch_stap_register_suffix (struct gdbarch *gdbarch, const cha
    Please note that we use the indirection prefix also for register
    displacement, e.g., `4(%eax)' on x86. */
 
-extern const char * gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch, const char * stap_register_indirection_prefix);
+extern const char *const * gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch, const char *const * stap_register_indirection_prefixes);
 
-/* Suffix used to mark a register indirection on the architecture's assembly.
+/* A NULL-terminated array of suffixes used to mark a register
+   indirection on the architecture's assembly.
    For example, on x86 the register indirection is written as:
   
     (%eax) ;; indirecting eax
@@ -1087,10 +1093,10 @@ extern void set_gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarc
    Please note that we use the indirection suffix also for register
    displacement, e.g., `4(%eax)' on x86. */
 
-extern const char * gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch, const char * stap_register_indirection_suffix);
+extern const char *const * gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch, const char *const * stap_register_indirection_suffixes);
 
-/* Prefix used to name a register using GDB's nomenclature.
+/* Prefix(es) used to name a register using GDB's nomenclature.
   
    For example, on PPC a register is represented by a number in the assembly
    language (e.g., `10' is the 10th general-purpose register).  However,

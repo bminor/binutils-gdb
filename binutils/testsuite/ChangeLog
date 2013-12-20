@@ -1,3 +1,17 @@
+2013-12-20  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16218
+	* binutils-all/dw2-1.W:	Update expected objdump output.
+	* binutils-all/i386/compressed-1a.d: Likewise.
+	* binutils-all/objdump.W: Likewise.
+	* binutils-all/x86-64/compressed-1a.d: Likewise.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16317
+	* binutils-all/readelf.s: Updated.
+	* binutils-all/readelf.s-64: Likewise.
+
 2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 	    Wei-Cheng Wang  <cole945@gmail.com>
 

@@ -1,3 +1,15 @@
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16317
+	* ld-elf/linkinfo1.s: New file.
+	* ld-elf/linkinfo1a.d: Likewise.
+	* ld-elf/linkinfo1b.d: Likewise.
+
+2013-12-18  Vidya Praveen  <vidyapraveen@arm.com>
+
+	* lib/ld-lib.exp (check_lto_available): Support cflags, ldflags and
+	test by compiling for an executable rather than shared library.
+
 2013-12-13  Vidya Praveen  <vidyapraveen@arm.com>
 
 	* lib/ld-lib.exp (default_ld_link): Use ldflags from board description

@@ -1,3 +1,33 @@
+2013-12-20  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16218
+	* gas/elf/dwarf2-1.d: Update expected objdump output.
+	* gas/elf/dwarf2-2.d: Likewise.
+	* gas/i386/dw2-compress-1.d: Likewise.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Don't run x86-64-disassem for mingw targets.
+
+2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/rm-simd-ext.d: New file.
+	* gas/aarch64/rm-simd-ext.l: Likewise.
+	* gas/aarch64/rm-simd-ext.s: Likewise.
+
+2013-12-17  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* gas/nds32/nds32.exp: Add system and user special register tests.
+	* gas/nds32/sys-reg.s: New test.
+	* gas/nds32/sys-reg.d: Likewise.
+	* gas/nds32/usr-spe-reg.s: Likewise.
+	* gas/nds32/usr-spe-reg.d: Likewise.
+	* gas/nds32/alu-2.d: Delete the new blank line at EOF.
+	* gas/nds32/br-1.d: Likewise.
+	* gas/nds32/br-2.d: Likewise.
+	* gas/nds32/ji-jr.d: Likewise.
+	* gas/nds32/lsi.d: Likewise.
+
 2013-12-17  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	* gas/i386/disassem.s: New.

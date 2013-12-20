@@ -1905,12 +1905,17 @@ i386_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct i386_frame_cache *cache = i386_frame_cache (this_frame, this_cache);
 
-  /* This marks the outermost frame.  */
-  if (cache->base == 0)
-    return;
-
-  /* See the end of i386_push_dummy_call.  */
-  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+  if (!cache->base_p)
+    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
+  else if (cache->base == 0)
+    {
+      /* This marks the outermost frame.  */
+    }
+  else
+    {
+      /* See the end of i386_push_dummy_call.  */
+      (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+    }
 }
 
 static enum unwind_stop_reason
@@ -2091,9 +2096,9 @@ i386_epilogue_frame_this_id (struct frame_info *this_frame,
     i386_epilogue_frame_cache (this_frame, this_cache);
 
   if (!cache->base_p)
-    return;
-
-  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
+  else
+    (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static struct value *
@@ -2284,10 +2289,12 @@ i386_sigtramp_frame_this_id (struct frame_info *this_frame, void **this_cache,
     i386_sigtramp_frame_cache (this_frame, this_cache);
 
   if (!cache->base_p)
-    return;
-
-  /* See the end of i386_push_dummy_call.  */
-  (*this_id) = frame_id_build (cache->base + 8, get_frame_pc (this_frame));
+    (*this_id) = frame_id_build_unavailable_stack (get_frame_pc (this_frame));
+  else
+    {
+      /* See the end of i386_push_dummy_call.  */
+      (*this_id) = frame_id_build (cache->base + 8, get_frame_pc (this_frame));
+    }
 }
 
 static struct value *
@@ -3919,14 +3926,23 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 void
 i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  static const char *const stap_integer_prefixes[] = { "$", NULL };
+  static const char *const stap_register_prefixes[] = { "%", NULL };
+  static const char *const stap_register_indirection_prefixes[] = { "(",
+								    NULL };
+  static const char *const stap_register_indirection_suffixes[] = { ")",
+								    NULL };
+
   /* We typically use stabs-in-ELF with the SVR4 register numbering.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
 
   /* Registering SystemTap handlers.  */
-  set_gdbarch_stap_integer_prefix (gdbarch, "$");
-  set_gdbarch_stap_register_prefix (gdbarch, "%");
-  set_gdbarch_stap_register_indirection_prefix (gdbarch, "(");
-  set_gdbarch_stap_register_indirection_suffix (gdbarch, ")");
+  set_gdbarch_stap_integer_prefixes (gdbarch, stap_integer_prefixes);
+  set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);
+  set_gdbarch_stap_register_indirection_prefixes (gdbarch,
+					  stap_register_indirection_prefixes);
+  set_gdbarch_stap_register_indirection_suffixes (gdbarch,
+					  stap_register_indirection_suffixes);
   set_gdbarch_stap_is_single_operand (gdbarch,
 				      i386_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
@@ -4193,9 +4209,9 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
   ULONGEST offset64;
 
   *addr = 0;
-  if (irp->aflag)
+  if (irp->aflag || irp->regmap[X86_RECORD_R8_REGNUM])
     {
-      /* 32 bits */
+      /* 32/64 bits */
       int havesib = 0;
       uint8_t scale = 0;
       uint8_t byte;
@@ -4265,6 +4281,13 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	    *addr += offset64 << scale;
 	  else
 	    *addr = (uint32_t) (*addr + (offset64 << scale));
+	}
+
+      if (!irp->aflag)
+	{
+	  /* Since we are in 64-bit mode with ADDR32 prefix, zero-extend
+	     address from 32-bit to 64-bit.  */
+	    *addr = (uint32_t) *addr;
 	}
     }
   else
@@ -7025,7 +7048,8 @@ no_support_3dnow_data:
     case 0x0ffc:
     case 0x0ffd:
     case 0x0ffe:
-      switch (prefixes)
+      /* Mask out PREFIX_ADDR.  */
+      switch ((prefixes & ~PREFIX_ADDR))
         {
         case PREFIX_REPNZ:
           opcode |= 0xf20000;

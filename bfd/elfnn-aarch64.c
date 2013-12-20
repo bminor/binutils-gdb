@@ -4538,31 +4538,6 @@ elfNN_aarch64_set_private_flags (bfd *abfd, flagword flags)
   return TRUE;
 }
 
-/* Copy backend specific data from one object module to another.  */
-
-static bfd_boolean
-elfNN_aarch64_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  flagword in_flags;
-
-  if (!is_aarch64_elf (ibfd) || !is_aarch64_elf (obfd))
-    return TRUE;
-
-  in_flags = elf_elfheader (ibfd)->e_flags;
-
-  elf_elfheader (obfd)->e_flags = in_flags;
-  elf_flags_init (obfd) = TRUE;
-
-  /* Also copy the EI_OSABI field.  */
-  elf_elfheader (obfd)->e_ident[EI_OSABI] =
-    elf_elfheader (ibfd)->e_ident[EI_OSABI];
-
-  /* Copy object attributes.  */
-  _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-  return TRUE;
-}
-
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -5504,7 +5479,7 @@ elfNN_aarch64_post_process_headers (bfd *abfd,
   i_ehdrp = elf_elfheader (abfd);
   i_ehdrp->e_ident[EI_ABIVERSION] = AARCH64_ELF_ABI_VERSION;
 
-  _bfd_elf_set_osabi (abfd, link_info);
+  _bfd_elf_post_process_headers (abfd, link_info);
 }
 
 static enum elf_reloc_type_class
@@ -7225,9 +7200,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define bfd_elfNN_close_and_cleanup             \
   elfNN_aarch64_close_and_cleanup
-
-#define bfd_elfNN_bfd_copy_private_bfd_data	\
-  elfNN_aarch64_copy_private_bfd_data
 
 #define bfd_elfNN_bfd_free_cached_info          \
   elfNN_aarch64_bfd_free_cached_info

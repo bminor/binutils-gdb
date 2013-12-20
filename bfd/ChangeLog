@@ -1,3 +1,112 @@
+2013-12-20  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (cie_eq): Return false when initial_insn_length
+	is too large.
+	(cie_compute_hash): Don't exceed bounds of initial_instructions.
+	(_bfd_elf_parse_eh_frame): Always set initial_insn_length, and
+	save as much of insns to initial_instructions[] as will fit.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16317
+	* elf.c (assign_section_numbers): Set the SHF_INFO_LINK bit for
+	SHT_REL/SHT_RELA sections when setting the sh_info field.
+
+2013-12-19  Pierre Muller  <muller@sourceware.org>
+
+	* peXXigen.c (rsrc_cmp): Fix unused variable warning.
+
+2013-12-19  Pierre Muller  <muller@sourceware.org>
+
+	* peXXigen.c (u16_mbtouc): Avoid unused function warning by excluding
+	if __CYGWIN__ or __MINGW32__ macro is defined.
+	(rsrc_cmp): Fix Windows host version and version without wchar header.
+	[__CYGWIN__, __MINGW32__]: Introduce rsrccmp macro.
+	Fix coding standard issues.
+
+2013-12-19  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_add_symbol_hook): New function.
+	(elf_backend_add_symbol_hook): Define.
+
+2013-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (rsrc_print_section): Use ptrdiff_t as the type for
+	pointer arithmetic.
+
+2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-arm.c (elf32_arm_post_process_headers): Call
+	_bfd_elf_post_process_headers.
+
+2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-spu.c (spu_elf_post_process_headers): Call
+	_bfd_elf_post_process_headers.
+	* elfxx-mips.c (_bfd_mips_post_process_headers): Likewise.
+
+2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_set_osabi): Renamed to ...
+	(_bfd_elf_post_process_headers): This.
+	* elf.c (_bfd_elf_compute_section_file_positions): Always
+	call elf_backend_post_process_headers.
+	(_bfd_elf_set_osabi): Renamed to ...
+	(_bfd_elf_post_process_headers): This.
+	* elf32-hppa.c (elf_backend_post_process_headers): Removed.
+	* elf32-i370.c (elf_backend_post_process_headers): Likewise.
+	* elf32-msp430.c (elf_backend_post_process_headers): Likewise.
+	* elf32-ppc.c (elf_backend_post_process_headers): Likewise.
+	* elf32-sparc.c (elf_backend_post_process_headers): Likewise.
+	* elf64-hppa.c (elf_backend_post_process_headers): Likewise.
+	* elf64-ppc.c (elf_backend_post_process_headers): Likewise.
+	* elf64-sparc.c (elf_backend_post_process_headers): Likewise.
+	* elf64-x86-64.c (elf_backend_post_process_headers): Likewise.
+	*  (elf_backend_post_process_headers): Likewise.
+	*  (elf_backend_post_process_headers): Likewise.
+	* elf32-i386.c (elf_backend_post_process_headers): Don't
+	define as _bfd_elf_set_osabi.
+	(elf_i386_fbsd_post_process_headers): Updated.
+	* elf32-mips.c (elf_fbsd_post_process_headers): Removed.
+	(elf_backend_post_process_headers): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_set_osabi): Removed.
+	(elf_backend_post_process_headers): Likewise.
+	* elf64-mips.c (elf_fbsd_post_process_headers): Removed.
+	(elf_backend_post_process_headers): Likewise.
+	* elfn32-mips.c (elf_fbsd_post_process_headers): Removed.
+	(elf_backend_post_process_headers): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_post_process_headers): Updated.
+	* elfxx-target.h (elf_backend_post_process_headers): Default
+	to _bfd_elf_post_process_headers.
+
+2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16318
+	* elf32-arm.c (elf32_arm_copy_private_bfd_data): Call
+	_bfd_elf_copy_private_bfd_data.
+	* elf32-bfin.c (bfin_elf_copy_private_bfd_data): Removed.
+	(elf32_bfinfdpic_copy_private_bfd_data): Likewise.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-frv.c (frv_elf_copy_private_bfd_data): Removed.
+	(elf32_frvfdpic_copy_private_bfd_data): Likewise.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-iq2000.c (iq2000_elf_copy_private_bfd_data): Removed.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-lm32.c (lm32_elf_copy_private_bfd_data): Removed.
+	(lm32_elf_fdpic_copy_private_bfd_data): Call
+	_bfd_elf_copy_private_bfd_data.
+	* elf32-mep.c (mep_elf_copy_private_bfd_data): Removed.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-msp430.c (elf32_msp430_copy_private_bfd_data): Removed.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-mt.c (mt_elf_copy_private_bfd_data): Removed.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-sh.c (sh_elf_set_private_flags): Removed.
+	(sh_elf_copy_private_data): Call _bfd_elf_copy_private_bfd_data
+	and sh_elf_set_mach_from_flags.
+	*  elfnn-aarch64.c (elfNN_aarch64_copy_private_bfd_data): Removed.
+	(bfd_elfNN_bfd_copy_private_bfd_data): Don't define.
+
 2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* peXXigen.c (rsrc_process_section): Rename index to indx.
@@ -34,6 +143,8 @@
 	(rsrc_process_section): New function - merges the contents of a
 	.rsrc section.
 	(_bfd_XXi_final_link_postscript): Call rsrc_process_section.
+	(rsrc_print_section): Fix mingw64 size issue.
+
 	* configure.in (AC_CHECK_HEADERS): Add wchar.h
 	* config.in: Regenerate.
 	* configure: Regenerate.

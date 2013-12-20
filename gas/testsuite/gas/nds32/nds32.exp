@@ -27,4 +27,6 @@ if { [istarget nds32*] } {
     run_dump_test "to-16bit-v1"
     run_dump_test "to-16bit-v2"
     run_dump_test "to-16bit-v3"
+    run_dump_test "usr-spe-reg"
+    run_dump_test "sys-reg"
 }

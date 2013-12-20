@@ -70,17 +70,9 @@ static void target_command (char *, int);
 
 static struct target_ops *find_default_run_target (char *);
 
-static LONGEST default_xfer_partial (struct target_ops *ops,
-				     enum target_object object,
-				     const char *annex, gdb_byte *readbuf,
-				     const gdb_byte *writebuf,
-				     ULONGEST offset, LONGEST len);
+static target_xfer_partial_ftype default_xfer_partial;
 
-static LONGEST current_xfer_partial (struct target_ops *ops,
-				     enum target_object object,
-				     const char *annex, gdb_byte *readbuf,
-				     const gdb_byte *writebuf,
-				     ULONGEST offset, LONGEST len);
+static target_xfer_partial_ftype current_xfer_partial;
 
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
 						    ptid_t ptid);
@@ -1695,7 +1687,7 @@ make_show_memory_breakpoints_cleanup (int show)
 LONGEST
 target_xfer_partial (struct target_ops *ops,
 		     enum target_object object, const char *annex,
-		     void *readbuf, const void *writebuf,
+		     gdb_byte *readbuf, const gdb_byte *writebuf,
 		     ULONGEST offset, LONGEST len)
 {
   LONGEST retval;

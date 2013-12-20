@@ -380,8 +380,8 @@ value_entirely_unavailable (struct value *value)
       struct range *t = VEC_index (range_s, value->unavailable, 0);
 
       if (t->offset == 0
-	  && t->length == (TARGET_CHAR_BIT *
-			   TYPE_LENGTH (value_enclosing_type (value))))
+	  && t->length == (TARGET_CHAR_BIT
+			   * TYPE_LENGTH (value_enclosing_type (value))))
 	return 1;
     }
 

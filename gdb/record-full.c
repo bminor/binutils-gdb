@@ -228,14 +228,7 @@ static void (*record_full_beneath_to_store_registers) (struct target_ops *,
 						       struct regcache *,
 						       int regno);
 static struct target_ops *record_full_beneath_to_xfer_partial_ops;
-static LONGEST
-  (*record_full_beneath_to_xfer_partial) (struct target_ops *ops,
-					  enum target_object object,
-					  const char *annex,
-					  gdb_byte *readbuf,
-					  const gdb_byte *writebuf,
-					  ULONGEST offset,
-					  LONGEST len);
+static target_xfer_partial_ftype *record_full_beneath_to_xfer_partial;
 static int
   (*record_full_beneath_to_insert_breakpoint) (struct gdbarch *,
 					       struct bp_target_info *);
@@ -807,13 +800,7 @@ static void (*tmp_to_store_registers) (struct target_ops *,
 				       struct regcache *,
 				       int regno);
 static struct target_ops *tmp_to_xfer_partial_ops;
-static LONGEST (*tmp_to_xfer_partial) (struct target_ops *ops,
-				       enum target_object object,
-				       const char *annex,
-				       gdb_byte *readbuf,
-				       const gdb_byte *writebuf,
-				       ULONGEST offset,
-				       LONGEST len);
+static target_xfer_partial_ftype *tmp_to_xfer_partial;
 static int (*tmp_to_insert_breakpoint) (struct gdbarch *,
 					struct bp_target_info *);
 static int (*tmp_to_remove_breakpoint) (struct gdbarch *,

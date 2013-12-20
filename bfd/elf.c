@@ -3075,11 +3075,13 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	{
 	  d->rel.hdr->sh_link = elf_onesymtab (abfd);
 	  d->rel.hdr->sh_info = d->this_idx;
+	  d->rel.hdr->sh_flags |= SHF_INFO_LINK;
 	}
       if (d->rela.idx != 0)
 	{
 	  d->rela.hdr->sh_link = elf_onesymtab (abfd);
 	  d->rela.hdr->sh_info = d->this_idx;
+	  d->rela.hdr->sh_flags |= SHF_INFO_LINK;
 	}
 
       /* We need to set up sh_link for SHF_LINK_ORDER.  */
@@ -3166,7 +3168,10 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	    name += 5;
 	  s = bfd_get_section_by_name (abfd, name);
 	  if (s != NULL)
-	    d->this_hdr.sh_info = elf_section_data (s)->this_idx;
+	    {
+	      d->this_hdr.sh_info = elf_section_data (s)->this_idx;
+	      d->this_hdr.sh_flags |= SHF_INFO_LINK;
+	    }
 	  break;
 
 	case SHT_STRTAB:
@@ -3457,8 +3462,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
     return FALSE;
 
   /* Post process the headers if necessary.  */
-  if (bed->elf_backend_post_process_headers)
-    (*bed->elf_backend_post_process_headers) (abfd, link_info);
+  (*bed->elf_backend_post_process_headers) (abfd, link_info);
 
   fsargs.failed = FALSE;
   fsargs.link_info = link_info;
@@ -10016,8 +10020,8 @@ asection _bfd_elf_large_com_section
 		      SEC_IS_COMMON, NULL, "LARGE_COMMON", 0);
 
 void
-_bfd_elf_set_osabi (bfd * abfd,
-		    struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
+_bfd_elf_post_process_headers (bfd * abfd,
+			       struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
 

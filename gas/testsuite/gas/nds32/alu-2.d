@@ -39,4 +39,3 @@ Disassembly of section .text:
 0+0074 <[^>]*> msubr32	\$r0, \$r1, \$r2
 0+0078 <[^>]*> mulr64	\$r0, \$r1, \$r2
 0+007c <[^>]*> mulsr64	\$r0, \$r1, \$r2
-

@@ -1,3 +1,70 @@
+2013-12-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/16297
+	* gdb.base/catch-syscall.c (read_syscall, pipe_syscall)
+	(write_syscall): New variables.
+	(main): Create a pipe, write 1 byte in it, and read 1 byte from
+	it.
+	* gdb.base/catch-syscall.exp (all_syscalls): Include "pipe,
+	"write" and "read" syscalls.
+	(fill_all_syscalls_numbers): Improve the way to obtain syscalls
+	numbers.
+
+2013-12-19  Keven Boell  <keven.boell@intel.com>
+
+	* gdb.fortran/module.exp: Completion matches fortran module
+	names as well. ptype/whatis on modules return a proper type.
+	Add new check for having the correct scope.
+
+2013-12-19  Keven Boell  <keven.boell@intel.com>
+
+	* gdb.fortran/type.f90: New file.
+	* gdb.fortran/whatis_type.f90: New file.
+
+2013-12-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/catch-syscall.c: Include <sys/syscall.h>.
+	(close_syscall, chroot_syscall, exit_group_syscall): New
+	variables.
+	* gdb.base/catch-syscall.exp: Replace gdb_compile by
+	prepare_for_testing.  Call fill_all_syscalls_numbers before
+	starting.  Replace gdb_exit, gdb_start, gdb_reinitialize_dir and
+	gdb_load by clean_restart.
+	(check_info_bp_any_syscall, check_info_bp_specific_syscall)
+	(check_info_bp_many_syscalls): Remove global gdb_prompt.
+	(check_call_to_syscall): Likewise.  Add global decimal.  Improve
+	testing regex.
+	(check_return_from_syscall): Likewise.
+	(check_continue, insert_catch_syscall_with_arg): Remove global
+	gdb_prompt.
+	(insert_catch_syscall_with_many_args): Likewise.  Add global
+	decimal.  Fix $filter_str.  Improve testing regex.
+	(check_for_program_end): Remove global gdb_prompt.
+	(test_catch_syscall_without_args): Likewise.  Add global decimal.
+	Improve testing regex.
+	(test_catch_syscall_with_args, test_catch_syscall_with_many_args)
+	(test_catch_syscall_with_wrong_args)
+	(test_catch_syscall_restarting_inferior)
+	(test_catch_syscall_fail_nodatadir): Remove global gdb_prompt.
+	(do_syscall_tests): Likewise.  Remove global srcdir.
+	(test_catch_syscall_without_args_noxml): Remove global gdb_prompt.
+	Add global last_syscall_number.  Test for the exact syscall number
+	to be caught.
+	(test_catch_syscall_with_args_noxml): Remove global gdb_prompt.
+	Add global all_syscalls_numbers.  Test each syscall number to be
+	caught, instead of only testing "close".
+	(test_catch_syscall_with_wrong_args_noxml): Remove global gdb_prompt.
+	(do_syscall_tests_without_xml): Likewise.  Remove global srcdir.
+	Remove stale comment.
+	(fill_all_syscalls_numbers): Add global last_syscall_number.  Fill
+	the correct syscall numbers using information from the inferior.
+
+2013-12-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/circ.exp: Expect frame info to be printed when
+	switching between frames with unavailable stack, but different
+	functions.
+
 2013-12-17  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.trace/unavailable-dwarf-piece.c: New file.

@@ -1,3 +1,18 @@
+2013-12-20  Tristan Gingold  <gingold@adacore.com>
+
+	* doc/c-arm.texi (ARM Directives): Remove duplicate .pad entry.
+
+2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (md_assemble): Defer the feature checking until
+	do_encode () succeeds.
+
+2013-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (rx_include): Rename 'eof' to 'last_char' in
+	order to avoid conflict with same named variable in MinGW system
+	header file.
+
 2013-12-13  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (mcu_types): Add some more 430X mcu names.

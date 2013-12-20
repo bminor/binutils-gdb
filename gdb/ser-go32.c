@@ -848,10 +848,9 @@ dos_sendbreak (struct serial *scb)
 }
 
 
-static struct serial_ops dos_ops =
+static const struct serial_ops dos_ops =
 {
   "hardwire",
-  0,
   dos_open,
   dos_close,
   NULL,				/* fdopen, not implemented */

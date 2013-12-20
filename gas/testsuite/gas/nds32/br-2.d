@@ -22,4 +22,3 @@ Disassembly of section .text:
 			14: R_NDS32_17_PCREL_RELA	.text
 0+0018 <[^>]*> bltzal	\$r0, 00000018 <foo\+0x18>
 			18: R_NDS32_17_PCREL_RELA	.text
-

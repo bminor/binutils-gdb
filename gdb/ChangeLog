@@ -1,3 +1,173 @@
+2013-12-20  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* nios2-linux-tdep.c (nios2_linux_sigreturn_init): Remove.
+	(nios2_linux_sigreturn_tramp_frame): Remove.
+	(nios2_linux_rt_sigreturn_tramp_frame): Update rt_sigreturn syscall
+	number.
+	(nios2_linux_syscall_next_pc): Likewise. Remove sigreturn case.
+	(nios2_linux_init_abi): Remove registration of
+	nios2_linux_sigreturn_tramp_frame.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/16305
+	* i386-tdep.c (i386_process_record): Mask out PREFIX_ADDR when
+	adding prefix to opcode.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/16304
+	* i386-tdep.c (i386_record_lea_modrm_addr): Don't use 16-bit
+	address in 64-bit mode.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/16304
+	* i386-tdep.c (i386_record_lea_modrm_addr): Zero-extend 32-bit
+	address to 64-bit in 64-bit mode.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/16304
+	* amd64-linux-tdep.c (amd64_canonicalize_syscall): Handle x32
+	system calls.
+	(amd64_x32_linux_record_tdep): New.
+	(amd64_linux_syscall_record_common): New function.
+	(amd64_linux_syscall_record): Call
+	amd64_linux_syscall_record_common with amd64_linux_record_tdep.
+	(amd64_x32_linux_syscall_record): Call
+	amd64_linux_syscall_record_common with
+	amd64_x32_linux_record_tdep.
+	(amd64_linux_init_abi_common): Move amd64_linux_record_tdep
+	initialization and tdep->i386_syscall_record setup to ...
+	(amd64_linux_init_abi): Here.
+	(amd64_x32_linux_init_abi): Initialize
+	amd64_x32_linux_record_tdep.  Set tdep->i386_syscall_record to
+	amd64_x32_linux_syscall_record.
+	* amd64-linux-tdep.h (amd64_x32_syscall): New enum.
+
+2013-12-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* amd64-tdep.c (amd64_init_abi): Declare SystemTap SDT probe
+	argument prefixes and suffixes.  Initialize gdbarch with them.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (stap_integer_prefix, stap_integer_suffix)
+	(stap_register_prefix, stap_register_suffix)
+	(stap_register_indirection_prefix)
+	(stap_register_indirection_suffix): Declare as "const char *const
+	*" instead of "const char *".  Adjust printing function.  Rename
+	all of the variables to the plural.
+	(pstring_list): New function.
+	* i386-tdep.c (i386_elf_init_abi): Declare SystemTap SDT probe
+	argument prefixes and suffixes.  Initialize gdbarch with them.
+	* ia64-linux-tdep.c (ia64_linux_init_abi): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* stap-probe.c (stap_is_generic_prefix): New function.
+	(stap_is_register_prefix): Likewise.
+	(stap_is_register_indirection_prefix): Likewise.
+	(stap_is_integer_prefix): Likewise.
+	(stap_generic_check_suffix): Likewise.
+	(stap_check_integer_suffix): Likewise.
+	(stap_check_register_suffix): Likewise.
+	(stap_check_register_indirection_suffix): Likewise.
+	(stap_parse_register_operand): Remove unecessary declarations for
+	variables holding prefix and suffix information.  Use the new
+	functions listed above for checking for prefixes and suffixes.
+	(stap_parse_single_operand): Likewise.
+
+2013-12-19  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	PR breakpoints/16297
+	* breakpoint.c (breakpoint_hit_catch_syscall): Return immediately
+	when expected syscall is hit.
+
+2013-12-19  Tom Tromey  <tromey@redhat.com>
+
+	* ser-unix.c (hardwire_ops): New global.
+	(_initialize_ser_hardwire): Use it.
+	* ser-tcp.c (tcp_ops): New global.
+	(_initialize_ser_tcp): Use it.
+	* ser-pipe.c (pipe_ops): New global.
+	(_initialize_ser_pipe): Use it.
+	* ser-mingw.c (hardwire_ops, tty_ops, pipe_ops, tcp_ops): New
+	globals.
+	(_initialize_ser_windows): Use them.
+
+2013-12-19  Tom Tromey  <tromey@redhat.com>
+
+	* serial.c (serial_ops_p): New typedef.
+	(serial_ops_list): Now a VEC.
+	(serial_interface_lookup): Return const.  Use VEC_iterate.
+	(serial_add_interface): Make parameter const.
+	(serial_open): Update.
+	(serial_fdopen_ops): Make 'ops' const.
+	(serial_pipe): Update.
+	* ser-tcp.c (_initialize_ser_tcp): Update.
+	* ser-pipe.c (_initialize_ser_pipe): Update.
+	* ser-unix.c (_initialize_ser_hardwire): Update.
+	* ser-mingw.c (_initialize_ser_windows): Update.
+	* ser-go32.c (dos_ops): Now const.  Update.
+	* serial.h (struct serial) <ops>: Now const.
+	(struct serial_ops) <next>: Remove.
+	(serial_add_interface): Make parameter const.
+
+2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-linux-nat.c (aarch64_linux_set_debug_regs): Set
+	iov.iov_len with the real length in use.
+
+2013-12-18  Yao Qi  <yao@codesourcery.com>
+
+	* target.h (target_xfer_partial_ftype): New typedef.
+	(target_xfer_partial): Update declaration.
+	* auxv.h (memory_xfer_auxv): Likewise.
+	* ia64-hpux-nat.c (super_xfer_partial): Likewise.
+	* ia64-linux-nat.c (super_xfer_partial): Likewise.
+	* linux-nat.c (super_xfer_partial): Likewise.
+	* procfs.c (procfs_xfer_partial): Likewise.
+	* record-full.c (record_full_beneath_to_xfer_partial):
+	(tmp_to_xfer_partial): Likewise.
+	* sparc-nat.c (inf_ptrace_xfer_partial): Likewise.
+	* target.c (default_xfer_partial): Likewise.
+	(current_xfer_partial): Likewise.
+	(target_xfer_partial): Change parameter type to 'gdb_byte *'.
+
+2013-12-18  Yao Qi  <yao@codesourcery.com>
+
+	* linux-nat.c (linux_proc_xfer_partial): Call xsnprintf instead
+	of sprintf.
+	(linux_nat_detach, linux_child_pid_to_exec_file): Likewise.
+	(linux_proc_pending_signals): Likewise.
+
+2013-12-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* value.c (value_entirely_unavailable): ARI fix: Move trailing
+	binary operator to the next line.  No actual code change.
+
+2013-12-17  Pedro Alves  <palves@redhat.com>
+
+	* frame.h (enum frame_id_stack_status): New enum.
+	(struct frame_id) <stack_addr>: Adjust comment.
+	<stack_addr_p>: Delete field, replaced with ...
+	<stack_status>: ... this new field.
+	(frame_id_build_unavailable_stack): Declare.
+	* frame.c (frame_addr_hash, fprint_field, outer_frame_id)
+	(frame_id_build_special): Adjust.
+	(frame_id_build_unavailable_stack): New function.
+	(frame_id_build, frame_id_build_wild): Adjust.
+	(frame_id_p, frame_id_eq, frame_id_inner): Adjust to take into
+	account frames with unavailable stack.
+
+	* amd64-tdep.c (amd64_frame_this_id)
+	(amd64_sigtramp_frame_this_id, amd64_epilogue_frame_this_id): Use
+	frame_id_build_unavailable_stack.
+	* dwarf2-frame.c (dwarf2_frame_this_id): Likewise.
+	* i386-tdep.c (i386_frame_this_id, i386_epilogue_frame_this_id)
+	(i386_sigtramp_frame_this_id):  Likewise.
+
 2013-12-17  Andrew Burgess  <aburgess@broadcom.com>
 
 	* dwarf2loc.c (read_pieced_value): Mark bits, not bytes
@@ -25,8 +195,8 @@
 
 2013-12-16  Pierre Muller  <muller@sourceware.org>
 
- 	Fix compilation error for cygwin native build.
- 	* windows-nat.c (windows_ensure_ntdll_loaded) [__USEWIDE]:
+	Fix compilation error for cygwin native build.
+	* windows-nat.c (windows_ensure_ntdll_loaded) [__USEWIDE]:
 	Call wcstombs.
 
 2013-12-16  Pedro Alves  <palves@redhat.com>
