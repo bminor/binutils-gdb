@@ -1,3 +1,7 @@
+2014-01-07  Tom Tromey  <tromey@redhat.com>
+
+	* config/tc-xc16x.h: Don't use ANSI_PROTOTYPES.
+
 2013-01-07  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add entry for "xgene-1"
