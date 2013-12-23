@@ -1,5 +1,11 @@
 2013-12-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.texinfo (Types In Python): Fix the documentation of
+	attribute "bitpos" in class gdb.Field for enum types.  Add
+	documentation for attribute "enumval" in that same class.
+
+2013-12-28  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo (GDB/MI Support Commands): Change @table into
 	@ftable.
 

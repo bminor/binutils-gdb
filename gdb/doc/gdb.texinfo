@@ -24337,10 +24337,13 @@ into one of these categories, an empty sequence will be returned.
 Each field is a @code{gdb.Field} object, with some pre-defined attributes:
 @table @code
 @item bitpos
-This attribute is not available for @code{static} fields (as in
-C@t{++} or Java).  For non-@code{static} fields, the value is the bit
-position of the field.  For @code{enum} fields, the value is the
-enumeration member's integer representation.
+This attribute is not available for @code{enum} or @code{static}
+(as in C@t{++} or Java) fields.  The value is the bit position of
+the field.
+
+@item enumval
+This attribute is only available for @code{enum} fields, and its value
+is the enumeration member's integer representation.
 
 @item name
 The name of the field, or @code{None} for anonymous fields.
