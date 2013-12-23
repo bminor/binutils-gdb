@@ -29212,16 +29212,16 @@ corresponding output for that command will also be prefixed by that same
 @code{@var{exec-async-output} | @var{status-async-output} | @var{notify-async-output}}
 
 @item @var{exec-async-output} @expansion{}
-@code{[ @var{token} ] "*" @var{async-output}}
+@code{[ @var{token} ] "*" @var{async-output nl}}
 
 @item @var{status-async-output} @expansion{}
-@code{[ @var{token} ] "+" @var{async-output}}
+@code{[ @var{token} ] "+" @var{async-output nl}}
 
 @item @var{notify-async-output} @expansion{}
-@code{[ @var{token} ] "=" @var{async-output}}
+@code{[ @var{token} ] "=" @var{async-output nl}}
 
 @item @var{async-output} @expansion{}
-@code{@var{async-class} ( "," @var{result} )* @var{nl}}
+@code{@var{async-class} ( "," @var{result} )*}
 
 @item @var{result-class} @expansion{}
 @code{"done" | "running" | "connected" | "error" | "exit"}
@@ -29253,13 +29253,13 @@ depending on the needs---this is still in development).
 @code{@var{console-stream-output} | @var{target-stream-output} | @var{log-stream-output}}
 
 @item @var{console-stream-output} @expansion{}
-@code{"~" @var{c-string}}
+@code{"~" @var{c-string nl}}
 
 @item @var{target-stream-output} @expansion{}
-@code{"@@" @var{c-string}}
+@code{"@@" @var{c-string nl}}
 
 @item @var{log-stream-output} @expansion{}
-@code{"&" @var{c-string}}
+@code{"&" @var{c-string nl}}
 
 @item @var{nl} @expansion{}
 @code{CR | CR-LF}
