@@ -35143,7 +35143,7 @@ Example output:
 
 The current list of features is:
 
-@table @samp
+@ftable @samp
 @item frozen-varobjs
 Indicates support for the @code{-var-set-frozen} command, as well
 as possible presense of the @code{frozen} field in the output
@@ -35177,7 +35177,7 @@ records, produced when trying to execute an undefined @sc{gdb/mi} command
 @item exec-run-start-option
 Indicates that the @code{-exec-run} command supports the @option{--start}
 option (@pxref{GDB/MI Program Execution}).
-@end table
+@end ftable
 
 @subheading The @code{-list-target-features} Command
 @findex -list-target-features
