@@ -1,3 +1,19 @@
+2013-12-23  Sergio Durigan JUnior  <sergiodj@redhat.com>
+
+	* stap-probe.c (struct stap_probe) <args_parsed>: Add comment.
+	(stap_is_generic_prefix): Delete extra brackets.  Reindent.
+	(stap_parse_register_operand): Remove spurious newlines.  Simplify
+	code to parse special token.
+	(stap_parse_argument_conditionally): Add gdb_assert.
+	(stap_parse_argument_1): Likewise.  Explicitly check for NULL and
+	NUL.
+	(stap_parse_probe_arguments): Likewise.
+	(handle_stap_probe): Likewise.  Reindent code.
+	(get_stap_base_address): Explicitly check for NULL.
+	(stap_get_probes): Likewise.  Reindent code.
+	(stap_relocate): Explicitly check for 0.
+	(stap_gen_info_probes_table_values): Likewise.
+
 2013-12-20  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* nios2-linux-tdep.c (nios2_linux_sigreturn_init): Remove.
