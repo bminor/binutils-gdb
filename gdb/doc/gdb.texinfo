@@ -24311,6 +24311,11 @@ The type code for this type.  The type code will be one of the
 @code{TYPE_CODE_} constants defined below.
 @end defvar
 
+@defvar Type.name
+The name of this type.  If this type has no name, then @code{None}
+is returned.
+@end defvar
+
 @defvar Type.sizeof
 The size of this type, in target @code{char} units.  Usually, a
 target's @code{char} type will be an 8-bit byte.  However, on some

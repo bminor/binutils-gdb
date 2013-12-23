@@ -1,3 +1,9 @@
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-pp-integral.c: New file.
+	* gdb.python/py-pp-integral.py: New file.
+	* gdb.python/py-pp-integral.exp: New file.
+
 2013-12-19  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/16297
