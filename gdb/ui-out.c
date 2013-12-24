@@ -102,7 +102,7 @@ struct ui_out
   {
     int flags;
     /* Specific implementation of ui-out.  */
-    struct ui_out_impl *impl;
+    const struct ui_out_impl *impl;
     void *data;
 
     /* Current level.  */
@@ -198,7 +198,7 @@ static void default_data_destroy (struct ui_out *uiout);
 
 /* This is the default ui-out implementation functions vector.  */
 
-struct ui_out_impl default_ui_out_impl =
+const struct ui_out_impl default_ui_out_impl =
 {
   default_table_begin,
   default_table_body,
@@ -1095,7 +1095,7 @@ ui_out_query_field (struct ui_out *uiout, int colno,
 /* Initalize private members at startup.  */
 
 struct ui_out *
-ui_out_new (struct ui_out_impl *impl, void *data,
+ui_out_new (const struct ui_out_impl *impl, void *data,
 	    int flags)
 {
   struct ui_out *uiout = XNEW (struct ui_out);

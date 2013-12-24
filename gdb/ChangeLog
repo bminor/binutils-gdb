@@ -1,3 +1,13 @@
+2014-02-28  Tom Tromey  <tromey@redhat.com>
+
+	* cli-out.c (cli_ui_out_impl): Now const.  Remove comment.
+	* cli-out.h (cli_ui_out_impl): Now const.
+	* mi/mi-out.c (mi_ui_out_impl): Now const.  Remove comment.
+	* ui-out.c (struct ui_out) <impl>: Now const.
+	(default_ui_out_impl): Now const.
+	(ui_out_new): Make 'impl' parameter const.
+	* ui-out.h (ui_out_new): Update.
+
 2014-02-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib-svr4.c (svr4_read_so_list): Initialize first_l_name to 0.
