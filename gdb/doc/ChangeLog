@@ -1,3 +1,17 @@
+2013-12-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Auto-loading): Move menu up.  Move discussion of
+	auto-loaded objfile scripts and .debug_gdb_scripts section to their
+	corresponding section in Extending GDB.
+	(Extending GDB): Move menu up.  New menu item "Auto-loading
+	extensions".
+	(Sequences): New menu item "Auto-loading sequences".
+	(Auto-loading sequences): New node.
+	(Python): Rename section from Scripting GDB to Extending GDB.
+	(Python Auto-loading): Update xref, refer to "Auto-loading extensions".
+	Move docs on ways to auto-load extensions to ...
+	(Auto-loading extensions): ... here.  New node.
+
 2013-12-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (GDB/MI): Add "GDB/MI Support Commands" entry
