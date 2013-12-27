@@ -615,28 +615,40 @@ maintenance_do_deprecate (char *text, int deprecate)
      memory.  */
   if (alias)
     {
-      if (alias->flags & MALLOCED_REPLACEMENT)
+      if (alias->malloced_replacement)
 	xfree (alias->replacement);
 
       if (deprecate)
-	alias->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
+	{
+	  alias->deprecated_warn_user = 1;
+	  alias->cmd_deprecated = 1;
+	}
       else
-	alias->flags &= ~(DEPRECATED_WARN_USER | CMD_DEPRECATED);
+	{
+	  alias->deprecated_warn_user = 0;
+	  alias->cmd_deprecated = 0;
+	}
       alias->replacement = replacement;
-      alias->flags |= MALLOCED_REPLACEMENT;
+      alias->malloced_replacement = 1;
       return;
     }
   else if (cmd)
     {
-      if (cmd->flags & MALLOCED_REPLACEMENT)
+      if (cmd->malloced_replacement)
 	xfree (cmd->replacement);
 
       if (deprecate)
-	cmd->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
+	{
+	  cmd->deprecated_warn_user = 1;
+	  cmd->cmd_deprecated = 1;
+	}
       else
-	cmd->flags &= ~(DEPRECATED_WARN_USER | CMD_DEPRECATED);
+	{
+	  cmd->deprecated_warn_user = 0;
+	  cmd->cmd_deprecated = 0;
+	}
       cmd->replacement = replacement;
-      cmd->flags |= MALLOCED_REPLACEMENT;
+      cmd->malloced_replacement = 1;
       return;
     }
   xfree (replacement);

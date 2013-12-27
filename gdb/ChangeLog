@@ -1,3 +1,18 @@
+2014-01-20  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (add_cmd, deprecate_cmd, add_alias_cmd)
+	(add_setshow_cmd_full, delete_cmd, lookup_cmd_1)
+	(deprecated_cmd_warning, complete_on_cmdlist): Update.
+	* cli/cli-decode.h (CMD_DEPRECATED, DEPRECATED_WARN_USER)
+	(MALLOCED_REPLACEMENT, DOC_ALLOCATED): Remove.
+	(struct cmd_list_element) <flags>: Remove.
+	<cmd_deprecated, deprecated_warn_user, malloced_replacement,
+	doc_allocated>: New fields.
+	<hook_in, allow_unknown, abbrev_flag, type, var_type>: Now
+	bitfields.
+	* maint.c (maintenance_do_deprecate): Update.
+	* top.c (execute_command): Update.
+
 2014-01-20  Baruch Siach  <baruch@tkos.co.il>
 
 	* xtensa-linux-nat.c: Include asm/ptrace.h.
