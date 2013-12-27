@@ -563,6 +563,29 @@ get_field_flag (PyObject *field, const char *flag_name)
   return flag_value;
 }
 
+/* Return the "type" attribute of a gdb.Field object.
+   Returns NULL on error, with a Python exception set.  */
+
+static struct type *
+get_field_type (PyObject *field)
+{
+  PyObject *ftype_obj = PyObject_GetAttrString (field, "type");
+  struct type *ftype;
+
+  if (ftype_obj == NULL)
+    return NULL;
+  ftype = type_object_to_type (ftype_obj);
+  Py_DECREF (ftype_obj);
+  if (ftype == NULL)
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("'type' attribute of gdb.Field object is not a "
+			 "gdb.Type object."));
+    }
+
+  return ftype;
+}
+
 /* Given string name or a gdb.Field object corresponding to an element inside
    a structure, return its value object.  Returns NULL on error, with a python
    exception set.  */
@@ -572,7 +595,8 @@ valpy_getitem (PyObject *self, PyObject *key)
 {
   value_object *self_value = (value_object *) self;
   char *field = NULL;
-  PyObject *base_class_type_object = NULL;
+  struct type *base_class_type = NULL, *field_type = NULL;
+  long bitpos = -1;
   volatile struct gdb_exception except;
   PyObject *result = NULL;
 
@@ -603,8 +627,8 @@ valpy_getitem (PyObject *self, PyObject *key)
 	return NULL;
       else if (is_base_class > 0)
 	{
-	  base_class_type_object = PyObject_GetAttrString (key, "type");
-	  if (base_class_type_object == NULL)
+	  base_class_type = get_field_type (key);
+	  if (base_class_type == NULL)
 	    return NULL;
 	}
       else
@@ -614,10 +638,40 @@ valpy_getitem (PyObject *self, PyObject *key)
 	  if (name_obj == NULL)
 	    return NULL;
 
-	  field = python_string_to_host_string (name_obj);
-	  Py_DECREF (name_obj);
-	  if (field == NULL)
-	    return NULL;
+	  if (name_obj != Py_None)
+	    {
+	      field = python_string_to_host_string (name_obj);
+	      Py_DECREF (name_obj);
+	      if (field == NULL)
+		return NULL;
+	    }
+	  else
+	    {
+	      PyObject *bitpos_obj;
+	      int valid;
+
+	      Py_DECREF (name_obj);
+
+	      if (!PyObject_HasAttrString (key, "bitpos"))
+		{
+		  PyErr_SetString (PyExc_AttributeError,
+				   _("gdb.Field object has no name and no "
+                                     "'bitpos' attribute."));
+
+		  return NULL;
+		}
+	      bitpos_obj = PyObject_GetAttrString (key, "bitpos");
+	      if (bitpos_obj == NULL)
+		return NULL;
+	      valid = gdb_py_int_as_long (bitpos_obj, &bitpos);
+	      Py_DECREF (bitpos_obj);
+	      if (!valid)
+		return NULL;
+
+	      field_type = get_field_type (key);
+	      if (field_type == NULL)
+		return NULL;
+	    }
 	}
     }
 
@@ -629,14 +683,12 @@ valpy_getitem (PyObject *self, PyObject *key)
 
       if (field)
 	res_val = value_struct_elt (&tmp, NULL, field, 0, NULL);
-      else if (base_class_type_object != NULL)
+      else if (bitpos >= 0)
+	res_val = value_struct_elt_bitpos (&tmp, bitpos, field_type,
+					   "struct/class/union");
+      else if (base_class_type != NULL)
 	{
-	  struct type *base_class_type, *val_type;
-
-	  base_class_type = type_object_to_type (base_class_type_object);
-	  Py_DECREF (base_class_type_object);
-	  if (base_class_type == NULL)
-	    error (_("Field type not an instance of gdb.Type."));
+	  struct type *val_type;
 
 	  val_type = check_typedef (value_type (tmp));
 	  if (TYPE_CODE (val_type) == TYPE_CODE_PTR)

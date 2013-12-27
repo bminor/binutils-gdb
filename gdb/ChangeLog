@@ -1,3 +1,14 @@
+2014-01-13  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/15464
+	PR python/16113
+	* valops.c (value_struct_elt_bitpos): New function
+	* py-type.c (convert_field): Set 'name' attribute of a gdb.Field
+	object to 'None' if the field name is an empty string ("").
+	* python/py-value.c (valpy_getitem): Use 'bitpos' and 'type'
+	attribute to look for a field when 'name' is 'None'.
+	(get_field_type): New function
+
 2014-01-14  Doug Evans  <dje@google.com>
 
 	PR symtab/16426
