@@ -378,7 +378,7 @@ extern void cmd_show_list (struct cmd_list_element *, int, char *);
 /* Used everywhere whenever at least one parameter is required and
    none is specified.  */
 
-extern void error_no_arg (char *) ATTRIBUTE_NORETURN;
+extern void error_no_arg (const char *) ATTRIBUTE_NORETURN;
 
 extern void dont_repeat (void);
 

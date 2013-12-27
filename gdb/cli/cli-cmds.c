@@ -204,7 +204,7 @@ static const char *script_ext_mode = script_ext_soft;
    none is supplied.  */
 
 void
-error_no_arg (char *why)
+error_no_arg (const char *why)
 {
   error (_("Argument required (%s)."), why);
 }
