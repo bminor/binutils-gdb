@@ -1,5 +1,11 @@
 2014-06-26  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-setshow.c (do_set_command): Make "arg" const.
+	(do_show_command): Make "arg" const.
+	* cli/cli-setshow.h (do_set_command, do_show_command): Update.
+
+2014-06-26  Tom Tromey  <tromey@redhat.com>
+
 	* record-full.c (record_full_get_bookmark): Make "args" const.
 	(record_full_goto_bookmark): Make "raw_bookmark" const.
 	* record.c (record_goto): New function.

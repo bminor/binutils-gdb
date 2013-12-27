@@ -148,7 +148,7 @@ is_unlimited_literal (const char *arg)
    other command).  C is the command list element for the command.  */
 
 void
-do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
+do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 {
   /* A flag to indicate the option is changed or not.  */
   int option_changed = 0;
@@ -233,13 +233,15 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 	if (arg != NULL)
 	  {
 	    /* Clear trailing whitespace of filename.  */
-	    char *ptr = arg + strlen (arg) - 1;
+	    const char *ptr = arg + strlen (arg) - 1;
+	    char *copy;
 
 	    while (ptr >= arg && (*ptr == ' ' || *ptr == '\t'))
 	      ptr--;
-	    *(ptr + 1) = '\0';
+	    copy = xstrndup (arg, ptr + 1 - arg);
 
-	    val = tilde_expand (arg);
+	    val = tilde_expand (copy);
+	    xfree (copy);
 	  }
 	else
 	  val = xstrdup ("");
@@ -564,7 +566,7 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
    other command).  C is the command list element for the command.  */
 
 void
-do_show_command (char *arg, int from_tty, struct cmd_list_element *c)
+do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
 {
   struct ui_out *uiout = current_uiout;
   struct cleanup *old_chain;
