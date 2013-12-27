@@ -1,5 +1,27 @@
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
+	* python/lib/gdb/__init__.py (current_progspace, objfiles)
+	(solib_name, block_for_pc, find_pc_line): New functions.
+	(execute_unwinders): Update.
+	* python/py-block.c (gdbpy_block_for_pc): Remove.
+	* python/py-inferior.c (infpy_get_progspace): New function.
+	(inferior_object_getset) <progspace>: Add.
+	* python/py-progspace.c (pspy_objfiles): Rewrite.
+	(pspy_solib_name, pspy_block_for_pc)
+	(pspy_find_pc_line, pspy_is_valid): New functions.
+	(progspace_object_methods): Add entries for solib_name,
+	block_for_pc, find_pc_line, is_valid.
+	* python/python-internal.h (gdbpy_block_for_pc)
+	(build_objfiles_list): Don't declare.
+	* python/python.c: Don't include solib.h.
+	(gdbpy_solib_name, gdbpy_find_pc_line)
+	(gdbpy_get_current_progspace, build_objfiles_list)
+	(gdbpy_objfiles): Remove.
+	(GdbMethods) <current_progspace, objfiles, block_for_pc,
+	solib_name, find_pc_line>: Remove entries.
+
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
 	* top.c (new_ui_command): Use GNU style for metasyntactic
 	variables.
 	* breakpoint.c (stopat_command): Use GNU style for metasyntactic

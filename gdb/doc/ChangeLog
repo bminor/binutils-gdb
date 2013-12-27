@@ -1,3 +1,11 @@
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Basic Python): Update docs for find_pc_line,
+	solib_name.
+	(Progspaces In Python): Update docs for current_progspace.
+	Document block_for_pc, find_pc_line, is_valid, nsolib_name.
+	Move method documentation before example.
+
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python.texi (Objfiles In Python): Update gdb.objfiles() doc.

@@ -328,7 +328,9 @@ Return the @code{gdb.Symtab_and_line} object corresponding to the
 @var{pc} value.  @xref{Symbol Tables In Python}.  If an invalid
 value of @var{pc} is passed as an argument, then the @code{symtab} and
 @code{line} attributes of the returned @code{gdb.Symtab_and_line} object
-will be @code{None} and 0 respectively.
+will be @code{None} and 0 respectively.  This is identical to
+@code{gdb.current_progspace().find_pc_line(pc)} and is included for
+historical compatibility.
 @end defun
 
 @findex gdb.post_event
@@ -448,7 +450,9 @@ never returned.
 @findex gdb.solib_name
 @defun gdb.solib_name (address)
 Return the name of the shared library holding the given @var{address}
-as a string, or @code{None}.
+as a string, or @code{None}.  This is identical to
+@code{gdb.current_progspace().solib_name(address)} and is included for
+historical compatibility.
 @end defun
 
 @findex gdb.decode_line 
@@ -4035,6 +4039,45 @@ The @code{frame_filters} attribute is a dictionary of frame filter
 objects.  @xref{Frame Filter API}, for more information.
 @end defvar
 
+A program space has the following methods:
+
+@findex Progspace.block_for_pc
+@defun Progspace.block_for_pc (pc)
+Return the innermost @code{gdb.Block} containing the given @var{pc}
+value.  If the block cannot be found for the @var{pc} value specified,
+the function will return @code{None}.
+@end defun
+
+@findex Progspace.find_pc_line
+@defun Progspace.find_pc_line (pc)
+Return the @code{gdb.Symtab_and_line} object corresponding to the
+@var{pc} value.  @xref{Symbol Tables In Python}.  If an invalid value
+of @var{pc} is passed as an argument, then the @code{symtab} and
+@code{line} attributes of the returned @code{gdb.Symtab_and_line}
+object will be @code{None} and 0 respectively.
+@end defun
+
+@findex Progspace.is_valid
+@defun Progspace.is_valid ()
+Returns @code{True} if the @code{gdb.Progspace} object is valid,
+@code{False} if not.  A @code{gdb.Progspace} object can become invalid
+if the program space file it refers to is not referenced by any
+inferior.  All other @code{gdb.Progspace} methods will throw an
+exception if it is invalid at the time the method is called.
+@end defun
+
+@findex Progspace.objfiles
+@defun Progspace.objfiles ()
+Return a sequence of all the objfiles referenced by this program
+space.  @xref{Objfiles In Python}.
+@end defun
+
+@findex Progspace.solib_name
+@defun Progspace.solib_name (address)
+Return the name of the shared library holding the given @var{address}
+as a string, or @code{None}.
+@end defun
+
 One may add arbitrary attributes to @code{gdb.Progspace} objects
 in the usual Python way.
 This is useful if, for example, one needs to do some extra record keeping
@@ -4078,14 +4121,6 @@ Starting program: /tmp/hello
 Hello.
 [Inferior 1 (process 4242) exited normally]
 @end smallexample
-
-A @code{gdb.Progspace} object has the following methods:
-
-@findex Progspace.objfiles
-@defun Progspace.objfiles ()
-Return a sequence of all the objfiles referenced by this program
-space.  @xref{Objfiles In Python}.
-@end defun
 
 @node Objfiles In Python
 @subsubsection Objfiles In Python
@@ -4515,7 +4550,9 @@ module:
 @defun gdb.block_for_pc (pc)
 Return the innermost @code{gdb.Block} containing the given @var{pc}
 value.  If the block cannot be found for the @var{pc} value specified,
-the function will return @code{None}.
+the function will return @code{None}.  This is identical to
+@code{gdb.current_progspace().block_for_pc(pc)} and is included for
+historical compatibility.
 @end defun
 
 A @code{gdb.Block} object has the following methods:

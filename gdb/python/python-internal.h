@@ -492,7 +492,6 @@ PyObject *gdbpy_current_recording (PyObject *self, PyObject *args);
 PyObject *gdbpy_stop_recording (PyObject *self, PyObject *args);
 PyObject *gdbpy_newest_frame (PyObject *self, PyObject *args);
 PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
-PyObject *gdbpy_block_for_pc (PyObject *self, PyObject *args);
 PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
 int gdbpy_is_field (PyObject *obj);
 PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
@@ -548,10 +547,6 @@ struct symtab *symtab_object_to_symtab (PyObject *obj);
 struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
-
-/* Return a Python list containing an Objfile object for each objfile in
-   PSPACE.  */
-gdbpy_ref<> build_objfiles_list (program_space *pspace);
 
 void gdbpy_initialize_gdb_readline (void);
 int gdbpy_initialize_auto_load (void)
