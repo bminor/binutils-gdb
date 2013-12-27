@@ -1,5 +1,10 @@
 2014-01-20  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-decode.h (struct cmd_list_element): Move all bitfields
+	together.
+
+2014-01-20  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-decode.c (add_cmd, deprecate_cmd, add_alias_cmd)
 	(add_setshow_cmd_full, delete_cmd, lookup_cmd_1)
 	(deprecated_cmd_warning, complete_on_cmdlist): Update.
