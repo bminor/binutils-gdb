@@ -1,3 +1,7 @@
+2014-01-13  Tom Tromey  <tromey@redhat.com>
+
+	* defs.h (deprecated_flush_hook): Remove.
+
 2014-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR threads/16216
