@@ -1,5 +1,12 @@
 2013-12-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* arm-linux-tdep.c (arm_stap_is_single_operand): Accept "$" as a
+	literal prefix.  Also accept no prefix at all.
+	(arm_stap_parse_special_token): Likewise.
+	(arm_linux_init_abi): Likewise.
+
+2013-12-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	PR tdep/15653
 	* NEWS: Mention SystemTap SDT probe support for AArch64 GNU/Linux.
 	* aarch64-linux-tdep.c: Include necessary headers for parsing of
