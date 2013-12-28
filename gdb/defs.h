@@ -729,10 +729,6 @@ extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
 						unsigned long num);
 
-/* Inhibit window interface if non-zero.  */
-
-extern int use_windows;
-
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */
 #ifndef ISATTY

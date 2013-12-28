@@ -1,5 +1,13 @@
 2014-01-13  Tom Tromey  <tromey@redhat.com>
 
+	* defs.h (use_windows): Remove.
+	* gdb.c (main): Update.
+	* main.c (captured_main, gdb_main): Update.
+	* main.h (struct captured_main_args) <use_windows>: Remove.
+	* top.c (use_windows): Remove.
+
+2014-01-13  Tom Tromey  <tromey@redhat.com>
+
 	* defs.h (deprecated_flush_hook): Remove.
 
 2014-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
