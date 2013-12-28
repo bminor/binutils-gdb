@@ -5408,7 +5408,7 @@ static struct notif_event *
 remote_notif_stop_alloc_reply (void)
 {
   struct notif_event *r
-    = (struct notif_event *) XMALLOC (struct stop_reply);
+    = (struct notif_event *) XNEW (struct stop_reply);
 
   r->dtr = stop_reply_dtr;
 

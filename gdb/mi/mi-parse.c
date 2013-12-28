@@ -237,7 +237,7 @@ struct mi_parse *
 mi_parse (const char *cmd, char **token)
 {
   const char *chp;
-  struct mi_parse *parse = XMALLOC (struct mi_parse);
+  struct mi_parse *parse = XNEW (struct mi_parse);
   struct cleanup *cleanup;
 
   memset (parse, 0, sizeof (*parse));

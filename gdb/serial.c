@@ -211,7 +211,7 @@ serial_open (const char *name)
   if (!ops)
     return NULL;
 
-  scb = XMALLOC (struct serial);
+  scb = XNEW (struct serial);
 
   scb->ops = ops;
 

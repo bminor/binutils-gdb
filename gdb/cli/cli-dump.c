@@ -396,7 +396,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
 
   c = add_cmd (name, all_commands, NULL, descr, &dump_cmdlist);
   c->completer =  filename_completer;
-  d = XMALLOC (struct dump_context);
+  d = XNEW (struct dump_context);
   d->func = func;
   d->mode = FOPEN_WB;
   set_cmd_context (c, d);
@@ -404,7 +404,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
 
   c = add_cmd (name, all_commands, NULL, descr, &append_cmdlist);
   c->completer =  filename_completer;
-  d = XMALLOC (struct dump_context);
+  d = XNEW (struct dump_context);
   d->func = func;
   d->mode = FOPEN_AB;
   set_cmd_context (c, d);

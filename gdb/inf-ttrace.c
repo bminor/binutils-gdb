@@ -195,7 +195,7 @@ inf_ttrace_add_page (pid_t pid, CORE_ADDR addr)
 		  addr, 0, (uintptr_t)&prot) == -1)
 	perror_with_name (("ttrace"));
       
-      page = XMALLOC (struct inf_ttrace_page);
+      page = XNEW (struct inf_ttrace_page);
       page->addr = addr;
       page->prot = prot;
       page->refcount = 0;

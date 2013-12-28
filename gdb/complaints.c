@@ -112,7 +112,7 @@ get_complaints (struct complaints **c)
 {
   if ((*c) != NULL)
     return (*c);
-  (*c) = XMALLOC (struct complaints);
+  (*c) = XNEW (struct complaints);
   (*c)->root = &complaint_sentinel;
   (*c)->series = ISOLATED_MESSAGE;
   (*c)->explanation = NULL;
@@ -140,7 +140,7 @@ find_complaint (struct complaints *complaints, const char *file,
     }
 
   /* Oops not seen before, fill in a new complaint.  */
-  complaint = XMALLOC (struct complain);
+  complaint = XNEW (struct complain);
   complaint->fmt = fmt;
   complaint->file = file;
   complaint->line = line;

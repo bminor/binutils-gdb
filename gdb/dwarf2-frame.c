@@ -518,7 +518,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	      {
 		struct dwarf2_frame_state_reg_info *new_rs;
 
-		new_rs = XMALLOC (struct dwarf2_frame_state_reg_info);
+		new_rs = XNEW (struct dwarf2_frame_state_reg_info);
 		*new_rs = fs->regs;
 		fs->regs.reg = dwarf2_frame_state_copy_regs (&fs->regs);
 		fs->regs.prev = new_rs;

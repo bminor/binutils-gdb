@@ -14724,7 +14724,7 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
   struct attr_abbrev *cur_attrs;
   unsigned int allocated_attrs;
 
-  abbrev_table = XMALLOC (struct abbrev_table);
+  abbrev_table = XNEW (struct abbrev_table);
   abbrev_table->offset = offset;
   obstack_init (&abbrev_table->abbrev_obstack);
   abbrev_table->abbrevs = obstack_alloc (&abbrev_table->abbrev_obstack,

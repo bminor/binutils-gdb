@@ -1,5 +1,52 @@
 2014-01-13  Tom Tromey  <tromey@redhat.com>
 
+	* defs.h (XMALLOC): Remove.
+	* avr-tdep.c (avr_gdbarch_init): Use XNEW, not XMALLOC.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cli-out.c (struct ui_out *): Likewise.
+	* cli/cli-dump.c (add_dump_command): Likewise.
+	(add_dump_command): Likewise.
+	* complaints.c (get_complaints): Likewise.
+	(find_complaint): Likewise.
+	* dwarf2-frame.c (execute_cfa_program): Likewise.
+	* dwarf2read.c (abbrev_table_read_table): Likewise.
+	* gdbarch.sh: Likewise.
+	* gdbarch.c: Rebuild.
+	* inf-ttrace.c (inf_ttrace_add_page): Likewise.
+	* interps.c (interp_new): Likewise.
+	* lm32-tdep.c (lm32_gdbarch_init): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* mi/mi-console.c (mi_console_file_new): Likewise.
+	* mi/mi-interp.c (mi_interpreter_init): Likewise.
+	* mi/mi-out.c (mi_out_new): Likewise.
+	* mi/mi-parse.c (mi_parse): Likewise.
+	* microblaze-tdep.c (microblaze_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* observer.c (xalloc_observer_list_node): Likewise.
+	* regcache.c (regcache_xmalloc_1): Likewise.
+	* reggroups.c (reggroup_new): Likewise.
+	(_initialize_reggroup): Likewise.
+	* registry.c (register_data_with_cleanup): Likewise.
+	* remote.c (remote_notif_stop_alloc_reply): Likewise.
+	* ser-base.c (serial_ttystate): Likewise.
+	* ser-mingw.c (make_pipe_state): Likewise.
+	* ser-pipe.c (pipe_open): Likewise.
+	* serial.c (serial_open): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* tui/tui-data.c (tui_alloc_generic_win_info): Likewise.
+	(tui_alloc_win_info): Likewise.
+	(tui_add_content_elements): Likewise.
+	* tui/tui-file.c (tui_file_new): Likewise.
+	* tui/tui-out.c (tui_out_new): Likewise.
+	* ui-file.c (mem_file_new): Likewise.
+	* ui-out.c (push_level): Likewise.
+	(make_cleanup_ui_out_end): Likewise.
+	(append_header_to_list): Likewise.
+	(ui_out_new): Likewise.
+	* user-regs.c (user_reg_add_builtin): Likewise.
+
+2014-01-13  Tom Tromey  <tromey@redhat.com>
+
 	* defs.h (XZALLOC): Remove.
 	* ada-lang.c (get_ada_inferior_data): Use XCNEW, not XZALLOC.
 	* ada-tasks.c (get_ada_tasks_pspace_data): Likewise.

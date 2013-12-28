@@ -85,7 +85,7 @@ user_reg_add_builtin (const char *name, user_reg_read_ftype *read,
 		      const void *baton)
 {
   append_user_reg (&builtin_user_regs, name, read, baton,
-		   XMALLOC (struct user_reg));
+		   XNEW (struct user_reg));
 }
 
 /* Per-architecture user registers.  Start with the builtin user

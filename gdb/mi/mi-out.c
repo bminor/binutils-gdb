@@ -411,7 +411,7 @@ mi_out_new (int mi_version)
 {
   int flags = 0;
 
-  mi_out_data *data = XMALLOC (mi_out_data);
+  mi_out_data *data = XNEW (mi_out_data);
   data->suppress_field_separator = 0;
   data->suppress_output = 0;
   data->mi_version = mi_version;

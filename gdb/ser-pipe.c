@@ -134,7 +134,7 @@ pipe_open (struct serial *scb, const char *name)
   if (err_pdes[1] != -1)
     close (err_pdes[1]);
   /* :end chunk */
-  state = XMALLOC (struct pipe_state);
+  state = XNEW (struct pipe_state);
   state->pid = pid;
   scb->fd = pdes[0];
   scb->error_fd = err_pdes[0];

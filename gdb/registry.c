@@ -35,9 +35,9 @@ register_data_with_cleanup (struct registry_data_registry *registry,
        curr = &(*curr)->next)
     ;
 
-  *curr = XMALLOC (struct registry_data_registration);
+  *curr = XNEW (struct registry_data_registration);
   (*curr)->next = NULL;
-  (*curr)->data = XMALLOC (struct registry_data);
+  (*curr)->data = XNEW (struct registry_data);
   (*curr)->data->index = registry->num_registrations++;
   (*curr)->data->save = save;
   (*curr)->data->free = free;

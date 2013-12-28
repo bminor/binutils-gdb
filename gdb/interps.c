@@ -93,7 +93,7 @@ interp_new (const char *name, const struct interp_procs *procs)
 {
   struct interp *new_interp;
 
-  new_interp = XMALLOC (struct interp);
+  new_interp = XNEW (struct interp);
 
   new_interp->name = xstrdup (name);
   new_interp->data = NULL;

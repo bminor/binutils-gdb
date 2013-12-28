@@ -83,7 +83,7 @@ static int report_initial_inferior (struct inferior *inf, void *closure);
 static void *
 mi_interpreter_init (struct interp *interp, int top_level)
 {
-  struct mi_interp *mi = XMALLOC (struct mi_interp);
+  struct mi_interp *mi = XNEW (struct mi_interp);
   const char *name;
   int mi_version;
 

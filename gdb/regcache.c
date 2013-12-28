@@ -217,7 +217,7 @@ regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
 
   gdb_assert (gdbarch != NULL);
   descr = regcache_descr (gdbarch);
-  regcache = XMALLOC (struct regcache);
+  regcache = XNEW (struct regcache);
   regcache->descr = descr;
   regcache->readonly_p = readonly_p;
   if (readonly_p)
