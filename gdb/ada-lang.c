@@ -358,7 +358,7 @@ get_ada_inferior_data (struct inferior *inf)
   data = inferior_data (inf, ada_inferior_data);
   if (data == NULL)
     {
-      data = XZALLOC (struct ada_inferior_data);
+      data = XCNEW (struct ada_inferior_data);
       set_inferior_data (inf, ada_inferior_data, data);
     }
 

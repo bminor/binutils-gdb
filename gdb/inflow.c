@@ -505,7 +505,7 @@ get_inflow_inferior_data (struct inferior *inf)
   info = inferior_data (inf, inflow_inferior_data);
   if (info == NULL)
     {
-      info = XZALLOC (struct terminal_info);
+      info = XCNEW (struct terminal_info);
       set_inferior_data (inf, inflow_inferior_data, info);
     }
 

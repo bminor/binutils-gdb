@@ -56,7 +56,7 @@ dummy_frame_push (struct infcall_suspend_state *caller_state,
 {
   struct dummy_frame *dummy_frame;
 
-  dummy_frame = XZALLOC (struct dummy_frame);
+  dummy_frame = XCNEW (struct dummy_frame);
   dummy_frame->caller_state = caller_state;
   dummy_frame->id = (*dummy_id);
   dummy_frame->next = dummy_frame_stack;

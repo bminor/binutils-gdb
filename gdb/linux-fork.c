@@ -81,7 +81,7 @@ add_fork (pid_t pid)
       add_fork (ptid_get_pid (inferior_ptid));	/* safe recursion */
     }
 
-  fp = XZALLOC (struct fork_info);
+  fp = XCNEW (struct fork_info);
   fp->ptid = ptid_build (pid, pid, 0);
   fp->num = ++highest_fork_num;
   fp->next = fork_list;

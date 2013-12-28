@@ -350,7 +350,7 @@ darwin_check_new_threads (struct inferior *inf)
 	  struct thread_info *tp;
 	  struct private_thread_info *pti;
 
-	  pti = XZALLOC (struct private_thread_info);
+	  pti = XCNEW (struct private_thread_info);
 	  pti->gdb_port = new_id;
 	  pti->msg_state = DARWIN_RUNNING;
 
@@ -1344,7 +1344,7 @@ darwin_attach_pid (struct inferior *inf)
   mach_port_t prev_not;
   exception_mask_t mask;
 
-  inf->private = XZALLOC (darwin_inferior);
+  inf->private = XCNEW (darwin_inferior);
 
   kret = task_for_pid (gdb_task, inf->pid, &inf->private->task);
   if (kret != KERN_SUCCESS)

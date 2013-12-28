@@ -6851,7 +6851,7 @@ save_infcall_suspend_state (void)
 	}
     }
 
-  inf_state = XZALLOC (struct infcall_suspend_state);
+  inf_state = XCNEW (struct infcall_suspend_state);
 
   if (siginfo_data)
     {

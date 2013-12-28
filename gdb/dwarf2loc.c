@@ -1414,7 +1414,7 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
 			int n_pieces, struct dwarf_expr_piece *pieces,
 			int addr_size)
 {
-  struct piece_closure *c = XZALLOC (struct piece_closure);
+  struct piece_closure *c = XCNEW (struct piece_closure);
   int i;
 
   c->refc = 1;

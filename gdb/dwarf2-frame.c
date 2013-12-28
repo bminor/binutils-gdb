@@ -1045,7 +1045,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   reset_cache_cleanup = make_cleanup (clear_pointer_cleanup, this_cache);
 
   /* Allocate and initialize the frame state.  */
-  fs = XZALLOC (struct dwarf2_frame_state);
+  fs = XCNEW (struct dwarf2_frame_state);
   old_chain = make_cleanup (dwarf2_frame_state_free, fs);
 
   /* Unwind the PC.

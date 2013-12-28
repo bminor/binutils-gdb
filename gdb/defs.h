@@ -556,7 +556,6 @@ extern int longest_to_int (LONGEST);
 /* Utility macros to allocate typed memory.  Avoids errors like:
    struct foo *foo = xmalloc (sizeof struct bar); and memset (foo,
    sizeof (struct foo), 0).  */
-#define XZALLOC(TYPE) ((TYPE*) xzalloc (sizeof (TYPE)))
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 #define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
 

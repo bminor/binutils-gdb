@@ -83,12 +83,12 @@ target_bfd_reopen (struct bfd *abfd)
   struct target_ops *t;
   struct target_bfd_data *data;
 
-  data = XZALLOC (struct target_bfd_data);
+  data = XCNEW (struct target_bfd_data);
   data->bfd = abfd;
   gdb_bfd_ref (abfd);
   build_section_table (abfd, &data->table.sections, &data->table.sections_end);
 
-  t = XZALLOC (struct target_ops);
+  t = XCNEW (struct target_ops);
   t->to_shortname = "bfd";
   t->to_longname = _("BFD backed target");
   t->to_doc = _("You should never see this");

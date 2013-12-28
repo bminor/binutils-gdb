@@ -799,7 +799,7 @@ default_symfile_segments (bfd *abfd)
   low = bfd_get_section_vma (abfd, sect);
   high = low + bfd_get_section_size (sect);
 
-  data = XZALLOC (struct symfile_segment_data);
+  data = XCNEW (struct symfile_segment_data);
   data->num_segments = 1;
   data->segment_bases = XCALLOC (1, CORE_ADDR);
   data->segment_sizes = XCALLOC (1, CORE_ADDR);

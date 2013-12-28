@@ -660,8 +660,8 @@ ptrmath_type_p (const struct language_defn *lang, struct type *type)
 static struct type *
 make_params (int num_types, struct type **param_types)
 {
-  struct type *type = XZALLOC (struct type);
-  TYPE_MAIN_TYPE (type) = XZALLOC (struct main_type);
+  struct type *type = XCNEW (struct type);
+  TYPE_MAIN_TYPE (type) = XCNEW (struct main_type);
   TYPE_LENGTH (type) = 1;
   TYPE_CODE (type) = TYPE_CODE_METHOD;
   TYPE_VPTR_FIELDNO (type) = -1;

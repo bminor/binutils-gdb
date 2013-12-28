@@ -386,7 +386,7 @@ inf_child_can_use_agent (void)
 struct target_ops *
 inf_child_target (void)
 {
-  struct target_ops *t = XZALLOC (struct target_ops);
+  struct target_ops *t = XCNEW (struct target_ops);
 
   t->to_shortname = "child";
   t->to_longname = "Unix child process";

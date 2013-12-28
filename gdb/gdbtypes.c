@@ -201,8 +201,8 @@ alloc_type_arch (struct gdbarch *gdbarch)
 
   /* Alloc the structure and start off with all fields zeroed.  */
 
-  type = XZALLOC (struct type);
-  TYPE_MAIN_TYPE (type) = XZALLOC (struct main_type);
+  type = XCNEW (struct type);
+  TYPE_MAIN_TYPE (type) = XCNEW (struct main_type);
 
   TYPE_OBJFILE_OWNED (type) = 0;
   TYPE_OWNER (type).gdbarch = gdbarch;
@@ -268,7 +268,7 @@ alloc_type_instance (struct type *oldtype)
   /* Allocate the structure.  */
 
   if (! TYPE_OBJFILE_OWNED (oldtype))
-    type = XZALLOC (struct type);
+    type = XCNEW (struct type);
   else
     type = OBSTACK_ZALLOC (&TYPE_OBJFILE (oldtype)->objfile_obstack,
 			   struct type);

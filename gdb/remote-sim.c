@@ -206,7 +206,7 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
 
   if (sim_data == NULL)
     {
-      sim_data = XZALLOC(struct sim_inferior_data);
+      sim_data = XCNEW(struct sim_inferior_data);
       set_inferior_data (inf, sim_inferior_data_key, sim_data);
 
       /* Allocate a ptid for this inferior.  */

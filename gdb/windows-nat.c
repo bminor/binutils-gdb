@@ -341,7 +341,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
   if ((th = thread_rec (id, FALSE)))
     return th;
 
-  th = XZALLOC (thread_info);
+  th = XCNEW (thread_info);
   th->id = id;
   th->h = h;
   th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
@@ -728,7 +728,7 @@ windows_make_so (const char *name, LPVOID load_addr)
 #endif
     }
 #endif
-  so = XZALLOC (struct so_list);
+  so = XCNEW (struct so_list);
   so->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
   so->lm_info->load_addr = load_addr;
   strcpy (so->so_original_name, name);

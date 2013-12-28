@@ -105,7 +105,7 @@ elf_symfile_segments (bfd *abfd)
   if (num_segments == 0)
     return NULL;
 
-  data = XZALLOC (struct symfile_segment_data);
+  data = XCNEW (struct symfile_segment_data);
   data->num_segments = num_segments;
   data->segment_bases = XCALLOC (num_segments, CORE_ADDR);
   data->segment_sizes = XCALLOC (num_segments, CORE_ADDR);

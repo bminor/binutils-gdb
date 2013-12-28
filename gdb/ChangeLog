@@ -1,3 +1,84 @@
+2014-01-13  Tom Tromey  <tromey@redhat.com>
+
+	* defs.h (XZALLOC): Remove.
+	* ada-lang.c (get_ada_inferior_data): Use XCNEW, not XZALLOC.
+	* ada-tasks.c (get_ada_tasks_pspace_data): Likewise.
+	(get_ada_tasks_inferior_data): Likewise.
+	* auto-load.c (get_auto_load_pspace_data): Likewise.
+	* auxv.c (get_auxv_inferior_data): Likewise.
+	* bfd-target.c (target_bfd_reopen): Likewise.
+	* breakpoint.c (get_catch_syscall_inferior_data): Likewise.
+	(deprecated_insert_raw_breakpoint): Likewise.
+	* bsd-uthread.c (bsd_uthread_pid_to_str): Likewise.
+	* corelow.c (core_open): Likewise.
+	* darwin-nat.c (darwin_check_new_threads): Likewise.
+	(darwin_attach_pid): Likewise.
+	* dummy-frame.c (dummy_frame_push): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_cache): Likewise.
+	* dwarf2loc.c (allocate_piece_closure): Likewise.
+	* elfread.c (elf_symfile_segments): Likewise.
+	* eval.c (ptrmath_type_p): Likewise.
+	* exceptions.c (EXCEPTIONS_SIGJMP_BUF): Likewise.
+	* gdbtypes.c (alloc_type_arch): Likewise.
+	(alloc_type_instance): Likewise.
+	* hppa-tdep.c (hppa_gdbarch_init): Likewise.
+	* inf-child.c (inf_child_can_use_agent): Likewise.
+	* inflow.c (get_inflow_inferior_data): Likewise.
+	* infrun.c (save_infcall_suspend_state): Likewise.
+	* jit.c (jit_reader_load): Likewise.
+	(get_jit_objfile_data): Likewise.
+	(get_jit_program_space_data): Likewise.
+	(jit_object_open_impl): Likewise.
+	(jit_symtab_open_impl): Likewise.
+	(jit_block_open_impl): Likewise.
+	(jit_frame_sniffer): Likewise.
+	* linux-fork.c (add_fork): Likewise.
+	* maint.c (make_command_stats_cleanup): Likewise.
+	* objfiles.c (get_objfile_pspace_data): Likewise.
+	* opencl-lang.c (struct lval_closure): Likewise.
+	* osdata.c (osdata_start_osdata): Likewise.
+	* progspace.c (new_address_space): Likewise.
+	(add_program_space): Likewise.
+	* remote-sim.c (get_sim_inferior_data): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* skip.c (Ignore): Likewise.
+	(skip_delete_command): Likewise.
+	* solib-aix.c (get_solib_aix_inferior_data): Likewise.
+	(library_list_start_library): Likewise.
+	(solib_aix_current_sos): Likewise.
+	* solib-darwin.c (get_darwin_info): Likewise.
+	(darwin_current_sos): Likewise.
+	* solib-dsbt.c (get_dsbt_info): Likewise.
+	* solib-ia64-hpux.c (new_so_list): Likewise.
+	(ia64_hpux_get_solib_linkage_addr): Likewise.
+	* solib-spu.c (append_ocl_sos): Likewise.
+	(spu_current_sos): Likewise.
+	* solib-svr4.c (get_svr4_info): Likewise.
+	(svr4_keep_data_in_core): Likewise.
+	(library_list_start_library): Likewise.
+	(svr4_default_sos): Likewise.
+	(svr4_read_so_list): Likewise.
+	* solib-target.c (library_list_start_library): Likewise.
+	(solib_target_current_sos): Likewise.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* symfile-debug.c (install_symfile_debug_logging): Likewise.
+	* symfile.c (default_symfile_segments): Likewise.
+	* target-descriptions.c (tdesc_data_init): Likewise.
+	(tdesc_create_reg): Likewise.
+	(struct tdesc_type *): Likewise.
+	(tdesc_create_vector): Likewise.
+	(tdesc_set_struct_size): Likewise.
+	(struct tdesc_type *): Likewise.
+	(tdesc_free_feature): Likewise.
+	(tdesc_create_feature): Likewise.
+	* windows-nat.c (windows_add_thread): Likewise.
+	(windows_make_so): Likewise.
+	* xml-support.c (gdb_xml_body_text): Likewise.
+	(gdb_xml_create_parser_and_cleanup): Likewise.
+	(xml_process_xincludes): Likewise.
+	* xml-syscall.c (allocate_syscalls_info): Likewise.
+	(syscall_create_syscall_desc): Likewise.
+
 2014-01-12  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* i386-tdep.c (i386_stap_parse_special_token_triplet): New

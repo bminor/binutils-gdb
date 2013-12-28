@@ -341,7 +341,7 @@ get_auxv_inferior_data (struct target_ops *ops)
   info = inferior_data (inf, auxv_inferior_data);
   if (info == NULL)
     {
-      info = XZALLOC (struct auxv_info);
+      info = XCNEW (struct auxv_info);
       info->length = target_read_alloc (ops, TARGET_OBJECT_AUXV,
 					NULL, &info->data);
       set_inferior_data (inf, auxv_inferior_data, info);

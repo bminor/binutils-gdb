@@ -119,7 +119,7 @@ library_list_start_library (struct gdb_xml_parser *parser,
 			    void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
   VEC(lm_info_p) **list = user_data;
-  struct lm_info *item = XZALLOC (struct lm_info);
+  struct lm_info *item = XCNEW (struct lm_info);
   const char *name = xml_find_attribute (attributes, "name")->value;
 
   item->name = xstrdup (name);
@@ -274,7 +274,7 @@ solib_target_current_sos (void)
   /* Build a struct so_list for each entry on the list.  */
   for (ix = 0; VEC_iterate (lm_info_p, library_list, ix, info); ix++)
     {
-      new_solib = XZALLOC (struct so_list);
+      new_solib = XCNEW (struct so_list);
       strncpy (new_solib->so_name, info->name, SO_NAME_MAX_PATH_SIZE - 1);
       new_solib->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       strncpy (new_solib->so_original_name, info->name,

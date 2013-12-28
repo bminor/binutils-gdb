@@ -348,7 +348,7 @@ core_open (char *filename, int from_tty)
 
   validate_files ();
 
-  core_data = XZALLOC (struct target_section_table);
+  core_data = XCNEW (struct target_section_table);
 
   /* Find the data section */
   if (build_section_table (core_bfd,
