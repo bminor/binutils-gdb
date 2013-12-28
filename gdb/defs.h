@@ -727,8 +727,6 @@ extern void (*deprecated_detach_hook) (void);
 extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 					     char *cmd, int from_tty);
 
-extern void (*deprecated_set_hook) (struct cmd_list_element * c);
-
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
 						unsigned long num);
 

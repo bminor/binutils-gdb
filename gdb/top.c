@@ -253,11 +253,6 @@ ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 void (*deprecated_call_command_hook) (struct cmd_list_element * c, 
 				      char *cmd, int from_tty);
 
-/* Called after a `set' command has finished.  Is only run if the
-   `set' command succeeded.  */
-
-void (*deprecated_set_hook) (struct cmd_list_element * c);
-
 /* Called when the current thread changes.  Argument is thread id.  */
 
 void (*deprecated_context_hook) (int id);

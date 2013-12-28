@@ -1,3 +1,9 @@
+2014-01-13  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-setshow.c (do_set_command): Update.
+	* defs.h (deprecated_set_hook): Remove.
+	* top.c (deprecated_set_hook): Remove.
+
 2014-01-13  Pedro Alves  <palves@redhat.com>
 
 	* tracepoint.c (tfile_fetch_registers): Don't infer the PC from
