@@ -1,5 +1,9 @@
 2014-01-16  Tom Tromey  <tromey@redhat.com>
 
+	* value.c (struct value) <regnum>: Move earlier.
+
+2014-01-16  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (extended_remote_create_inferior): Rename from
 	extended_remote_create_inferior_1.  Add "ops" argument.  Remove
 	old implementation.
