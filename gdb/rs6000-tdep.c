@@ -3954,7 +3954,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        - "set arch"		trust blindly
        - GDB startup		useless but harmless */
 
-  tdep = XCALLOC (1, struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   tdep->wordsize = wordsize;
   tdep->soft_float = soft_float;
   tdep->vector_abi = vector_abi;

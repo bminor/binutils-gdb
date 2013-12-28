@@ -1,5 +1,33 @@
 2014-01-13  Tom Tromey  <tromey@redhat.com>
 
+	* defs.h (XCALLOC): Remove.
+	* bcache.c (bcache_xmalloc): Use XCNEW, not XCALLOC.
+	(print_bcache_statistics): Use XCNEWVEC, not XCALLOC.
+	* dwarf2loc.c (allocate_piece_closure): Likewise.
+	* elfread.c (elf_symfile_segments): Likewise.
+	(elf_symfile_segments): Likewise.
+	* gdbtypes.c (copy_type_recursive): Likewise.
+	* i386-tdep.c (i386_gdbarch_init): Use XCNEW, not XCALLOC.
+	* jit.c (jit_frame_sniffer): Use XCNEWVEC, not XCALLOC.
+	* minsyms.c (prim_record_minimal_symbol_full): Use XCNEW, not
+	XCALLOC.
+	* mt-tdep.c (mt_gdbarch_init): Likewise.
+	* opencl-lang.c (allocate_lval_closure): Use XCNEWVEC, not
+	XCALLOC.
+	* psymtab.c (psymbol_compare): Use XCNEW, not XCALLOC.
+	* regcache.c (regcache_xmalloc_1): Use XCNEWVEC, not XCALLOC.
+	* registry.c (registry_alloc_data): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Use XCNEW, not XCALLOC.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* serial.c (serial_fdopen_ops): Likewise.
+	* solib-aix.c (solib_aix_get_section_offsets): Use XCNEWVEC, not
+	XCALLOC.
+	* spu-tdep.c (spu_gdbarch_init): Use XCNEW, not XCALLOC.
+	* symfile.c (default_symfile_segments): Use XCNEW and XCNEWVEC,
+	not XCALLOC.
+
+2014-01-13  Tom Tromey  <tromey@redhat.com>
+
 	* defs.h (XMALLOC): Remove.
 	* avr-tdep.c (avr_gdbarch_init): Use XNEW, not XMALLOC.
 	* bfin-tdep.c (bfin_gdbarch_init): Likewise.

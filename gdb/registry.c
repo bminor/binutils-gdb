@@ -51,7 +51,7 @@ registry_alloc_data (struct registry_data_registry *registry,
 {
   gdb_assert (fields->data == NULL);
   fields->num_data = registry->num_registrations;
-  fields->data = XCALLOC (fields->num_data, void *);
+  fields->data = XCNEWVEC (void *, fields->num_data);
 }
 
 void

@@ -223,16 +223,16 @@ regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
   if (readonly_p)
     {
       regcache->registers
-	= XCALLOC (descr->sizeof_cooked_registers, gdb_byte);
+	= XCNEWVEC (gdb_byte, descr->sizeof_cooked_registers);
       regcache->register_status
-	= XCALLOC (descr->sizeof_cooked_register_status, signed char);
+	= XCNEWVEC (signed char, descr->sizeof_cooked_register_status);
     }
   else
     {
       regcache->registers
-	= XCALLOC (descr->sizeof_raw_registers, gdb_byte);
+	= XCNEWVEC (gdb_byte, descr->sizeof_raw_registers);
       regcache->register_status
-	= XCALLOC (descr->sizeof_raw_register_status, signed char);
+	= XCNEWVEC (signed char, descr->sizeof_raw_register_status);
     }
   regcache->aspace = aspace;
   regcache->ptid = minus_one_ptid;

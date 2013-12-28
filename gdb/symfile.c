@@ -801,11 +801,11 @@ default_symfile_segments (bfd *abfd)
 
   data = XCNEW (struct symfile_segment_data);
   data->num_segments = 1;
-  data->segment_bases = XCALLOC (1, CORE_ADDR);
-  data->segment_sizes = XCALLOC (1, CORE_ADDR);
+  data->segment_bases = XCNEW (CORE_ADDR);
+  data->segment_sizes = XCNEW (CORE_ADDR);
 
   num_sections = bfd_count_sections (abfd);
-  data->segment_info = XCALLOC (num_sections, int);
+  data->segment_info = XCNEWVEC (int, num_sections);
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {

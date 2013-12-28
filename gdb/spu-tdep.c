@@ -2658,7 +2658,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* None found, so create a new architecture.  */
-  tdep = XCALLOC (1, struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   tdep->id = id;
   gdbarch = gdbarch_alloc (&info, tdep);
 

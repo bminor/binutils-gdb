@@ -1530,7 +1530,7 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
 struct psymbol_bcache *
 psymbol_bcache_init (void)
 {
-  struct psymbol_bcache *bcache = XCALLOC (1, struct psymbol_bcache);
+  struct psymbol_bcache *bcache = XCNEW (struct psymbol_bcache);
   bcache->bcache = bcache_xmalloc (psymbol_hash, psymbol_compare);
   return bcache;
 }

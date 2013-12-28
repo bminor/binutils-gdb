@@ -553,11 +553,6 @@ enum val_prettyformat
 
 extern int longest_to_int (LONGEST);
 
-/* Utility macros to allocate typed memory.  Avoids errors like:
-   struct foo *foo = xmalloc (sizeof struct bar); and memset (foo,
-   sizeof (struct foo), 0).  */
-#define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
-
 #include "common-utils.h"
 
 /* List of known OS ABIs.  If you change this, make sure to update the

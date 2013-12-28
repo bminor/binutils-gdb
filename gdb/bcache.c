@@ -313,7 +313,7 @@ bcache_xmalloc (unsigned long (*hash_function)(const void *, int length),
 					int length))
 {
   /* Allocate the bcache pre-zeroed.  */
-  struct bcache *b = XCALLOC (1, struct bcache);
+  struct bcache *b = XCNEW (struct bcache);
 
   if (hash_function)
     b->hash_function = hash_function;
@@ -372,8 +372,8 @@ print_bcache_statistics (struct bcache *c, char *type)
      lengths, and measure chain lengths.  */
   {
     unsigned int b;
-    int *chain_length = XCALLOC (c->num_buckets + 1, int);
-    int *entry_size = XCALLOC (c->unique_count + 1, int);
+    int *chain_length = XCNEWVEC (int, c->num_buckets + 1);
+    int *entry_size = XCNEWVEC (int, c->unique_count + 1);
     int stringi = 0;
 
     occupied_buckets = 0;
