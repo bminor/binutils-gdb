@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.6
 
+* GDB now supports SystemTap SDT probes on AArch64 GNU/Linux.
+
 * GDB now supports Fission DWP file format version 2.
   http://gcc.gnu.org/wiki/DebugFission
 
