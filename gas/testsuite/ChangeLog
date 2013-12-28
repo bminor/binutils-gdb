@@ -1,3 +1,10 @@
+2013-12-28  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	Adjust MMIX gas tests for recent bfd/elf.c change.
+	* gas/mmix/bspec-1.d: Adjust for SHF_INFO_LINK now set on RELA
+	sections.
+	* gas/mmix/bspec-2.d: Ditto.
+
 2013-12-20  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16218
