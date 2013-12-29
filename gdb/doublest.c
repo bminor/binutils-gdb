@@ -342,7 +342,7 @@ put_field (unsigned char *data, enum floatformat_byteorders order,
    restrictions.  */
 
 static void
-convert_doublest_to_floatformat (CONST struct floatformat *fmt,
+convert_doublest_to_floatformat (const struct floatformat *fmt,
 				 const DOUBLEST *from, void *to)
 {
   DOUBLEST dfrom;
