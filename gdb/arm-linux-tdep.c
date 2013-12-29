@@ -1113,6 +1113,9 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
   return dsc;
 }
 
+/* Implementation of `gdbarch_stap_is_single_operand', as defined in
+   gdbarch.h.  */
+
 static int
 arm_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
