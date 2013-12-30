@@ -1,3 +1,8 @@
+2013-12-30  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* peXXigen.c (rsrc_process_section): Use ptrdiff_t as the type for
+	pointer arithmetic.
+
 2013-12-20  Alan Modra  <amodra@gmail.com>
 
 	* elf-eh-frame.c (cie_eq): Return false when initial_insn_length
