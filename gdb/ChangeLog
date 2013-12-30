@@ -1,5 +1,9 @@
 2014-01-13  Tom Tromey  <tromey@redhat.com>
 
+	* gdbcore.h (deprecated_core_resize_section_table): Remove.
+
+2014-01-13  Tom Tromey  <tromey@redhat.com>
+
 	* defs.h (use_windows): Remove.
 	* gdb.c (main): Update.
 	* main.c (captured_main, gdb_main): Update.
