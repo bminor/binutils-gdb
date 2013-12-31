@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add --dump-section option to objcopy.
+
 * Add support for the Andes NDS32.
 
 Changes in 2.24:
