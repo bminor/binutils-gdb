@@ -101,8 +101,11 @@ struct objfile_data;
 
 struct entry_info
   {
-    /* The relocated value we should use for this objfile entry point.  */
+    /* The unrelocated value we should use for this objfile entry point.  */
     CORE_ADDR entry_point;
+
+    /* The index of the section in which the entry point appears.  */
+    int the_bfd_section_index;
 
     /* Set to 1 iff ENTRY_POINT contains a valid value.  */
     unsigned entry_point_p : 1;

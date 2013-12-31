@@ -1,5 +1,15 @@
 2014-01-15  Tom Tromey  <tromey@redhat.com>
 
+	* objfiles.c (entry_point_address_query): Relocate entry point
+	address.
+	(objfile_relocate1): Do not relocate entry point address.
+	* objfiles.h (struct entry_info) <entry_point>: Update comment.
+	<the_bfd_section_index>: New field.
+	* symfile.c (init_entry_point_info): Find the entry point's
+	section.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
 	* solib-frv.c (enable_break): Use entry_point_address_query.
 
 2014-01-15  Omair Javaid  <omair.javaid@linaro.org>

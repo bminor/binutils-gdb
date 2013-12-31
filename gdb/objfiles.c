@@ -367,7 +367,9 @@ entry_point_address_query (CORE_ADDR *entry_p)
   if (symfile_objfile == NULL || !symfile_objfile->ei.entry_point_p)
     return 0;
 
-  *entry_p = symfile_objfile->ei.entry_point;
+  *entry_p = (symfile_objfile->ei.entry_point
+	      + ANOFFSET (symfile_objfile->section_offsets,
+			  symfile_objfile->ei.the_bfd_section_index));
 
   return 1;
 }
@@ -793,22 +795,6 @@ objfile_relocate1 (struct objfile *objfile,
   /* Relocating different sections by different amounts may cause the symbols
      to be out of order.  */
   msymbols_sort (objfile);
-
-  if (objfile->ei.entry_point_p)
-    {
-      /* Relocate ei.entry_point with its section offset, use SECT_OFF_TEXT
-	 only as a fallback.  */
-      struct obj_section *s;
-      s = find_pc_section (objfile->ei.entry_point);
-      if (s)
-	{
-	  int idx = gdb_bfd_section_index (objfile->obfd, s->the_bfd_section);
-
-	  objfile->ei.entry_point += ANOFFSET (delta, idx);
-	}
-      else
-        objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-    }
 
   {
     int i;

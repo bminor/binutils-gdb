@@ -894,7 +894,9 @@ init_entry_point_info (struct objfile *objfile)
 
   if (objfile->ei.entry_point_p)
     {
+      struct obj_section *osect;
       CORE_ADDR entry_point =  objfile->ei.entry_point;
+      int found;
 
       /* Make certain that the address points at real code, and not a
 	 function descriptor.  */
@@ -907,6 +909,25 @@ init_entry_point_info (struct objfile *objfile)
 	 symbol table.  */
       objfile->ei.entry_point
 	= gdbarch_addr_bits_remove (get_objfile_arch (objfile), entry_point);
+
+      found = 0;
+      ALL_OBJFILE_OSECTIONS (objfile, osect)
+	{
+	  struct bfd_section *sect = osect->the_bfd_section;
+
+	  if (entry_point >= bfd_get_section_vma (objfile->obfd, sect)
+	      && entry_point < (bfd_get_section_vma (objfile->obfd, sect)
+				+ bfd_get_section_size (sect)))
+	    {
+	      objfile->ei.the_bfd_section_index
+		= gdb_bfd_section_index (objfile->obfd, sect);
+	      found = 1;
+	      break;
+	    }
+	}
+
+      if (!found)
+	objfile->ei.the_bfd_section_index = SECT_OFF_TEXT (objfile);
     }
 }
 
