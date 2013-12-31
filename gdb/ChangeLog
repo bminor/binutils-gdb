@@ -1,5 +1,14 @@
 2014-01-15  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.c (main_progspace_key): New global.
+	(struct main_info): New.
+	(name_of_main, language_of_main): Remove.
+	(get_main_info, main_info_cleanup): New function.
+	(set_main_name, main_name, main_language): Use get_main_info.
+	(_initialize_symtab): Initialize main_progspace_key.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
 	* dbxread.c (process_one_symbol): Update.
 	* dwarf2read.c (read_partial_die): Update.
 	* symfile.c (set_initial_language): Call main_language.

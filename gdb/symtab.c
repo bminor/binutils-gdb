@@ -104,6 +104,23 @@ void _initialize_symtab (void);
 
 /* */
 
+/* Program space key for finding name and language of "main".  */
+
+static const struct program_space_data *main_progspace_key;
+
+/* Type of the data stored on the program space.  */
+
+struct main_info
+{
+  /* Name of "main".  */
+
+  char *name_of_main;
+
+  /* Language of "main".  */
+
+  enum language language_of_main;
+};
+
 /* When non-zero, print debugging messages related to symtab creation.  */
 unsigned int symtab_create_debug = 0;
 
@@ -4998,22 +5015,56 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 }
 
 /* Track MAIN */
-static char *name_of_main;
-static enum language language_of_main = language_unknown;
+
+/* Return the "main_info" object for the current program space.  If
+   the object has not yet been created, create it and fill in some
+   default values.  */
+
+static struct main_info *
+get_main_info (void)
+{
+  struct main_info *info = program_space_data (current_program_space,
+					       main_progspace_key);
+
+  if (info == NULL)
+    {
+      info = XCNEW (struct main_info);
+      info->language_of_main = language_unknown;
+      set_program_space_data (current_program_space, main_progspace_key,
+			      info);
+    }
+
+  return info;
+}
+
+/* A cleanup to destroy a struct main_info when a progspace is
+   destroyed.  */
+
+static void
+main_info_cleanup (struct program_space *pspace, void *data)
+{
+  struct main_info *info = data;
+
+  if (info != NULL)
+    xfree (info->name_of_main);
+  xfree (info);
+}
 
 void
 set_main_name (const char *name, enum language lang)
 {
-  if (name_of_main != NULL)
+  struct main_info *info = get_main_info ();
+
+  if (info->name_of_main != NULL)
     {
-      xfree (name_of_main);
-      name_of_main = NULL;
-      language_of_main = language_unknown;
+      xfree (info->name_of_main);
+      info->name_of_main = NULL;
+      info->language_of_main = language_unknown;
     }
   if (name != NULL)
     {
-      name_of_main = xstrdup (name);
-      language_of_main = lang;
+      info->name_of_main = xstrdup (name);
+      info->language_of_main = lang;
     }
 }
 
@@ -5070,10 +5121,12 @@ find_main_name (void)
 char *
 main_name (void)
 {
-  if (name_of_main == NULL)
+  struct main_info *info = get_main_info ();
+
+  if (info->name_of_main == NULL)
     find_main_name ();
 
-  return name_of_main;
+  return info->name_of_main;
 }
 
 /* Return the language of the main function.  If it is not known,
@@ -5082,7 +5135,12 @@ main_name (void)
 enum language
 main_language (void)
 {
-  return language_of_main;
+  struct main_info *info = get_main_info ();
+
+  if (info->name_of_main == NULL)
+    find_main_name ();
+
+  return info->language_of_main;
 }
 
 /* Handle ``executable_changed'' events for the symtab module.  */
@@ -5270,6 +5328,9 @@ void
 _initialize_symtab (void)
 {
   initialize_ordinary_address_classes ();
+
+  main_progspace_key
+    = register_program_space_data_with_cleanup (NULL, main_info_cleanup);
 
   add_info ("variables", variables_info, _("\
 All global and static variable names, or those matching REGEXP."));
