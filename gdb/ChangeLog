@@ -1,3 +1,7 @@
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
+	* solib-frv.c (enable_break): Use entry_point_address_query.
+
 2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
 
 	* NEWS: Add note on improved process record-replay on
