@@ -4999,10 +4999,10 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 
 /* Track MAIN */
 static char *name_of_main;
-enum language language_of_main = language_unknown;
+static enum language language_of_main = language_unknown;
 
 void
-set_main_name (const char *name)
+set_main_name (const char *name, enum language lang)
 {
   if (name_of_main != NULL)
     {
@@ -5013,7 +5013,7 @@ set_main_name (const char *name)
   if (name != NULL)
     {
       name_of_main = xstrdup (name);
-      language_of_main = language_unknown;
+      language_of_main = lang;
     }
 }
 
@@ -5044,27 +5044,27 @@ find_main_name (void)
   new_main_name = ada_main_name ();
   if (new_main_name != NULL)
     {
-      set_main_name (new_main_name);
+      set_main_name (new_main_name, language_ada);
       return;
     }
 
   new_main_name = go_main_name ();
   if (new_main_name != NULL)
     {
-      set_main_name (new_main_name);
+      set_main_name (new_main_name, language_go);
       return;
     }
 
   new_main_name = pascal_main_name ();
   if (new_main_name != NULL)
     {
-      set_main_name (new_main_name);
+      set_main_name (new_main_name, language_pascal);
       return;
     }
 
   /* The languages above didn't identify the name of the main procedure.
      Fallback to "main".  */
-  set_main_name ("main");
+  set_main_name ("main", language_unknown);
 }
 
 char *
@@ -5076,13 +5076,22 @@ main_name (void)
   return name_of_main;
 }
 
+/* Return the language of the main function.  If it is not known,
+   return language_unknown.  */
+
+enum language
+main_language (void)
+{
+  return language_of_main;
+}
+
 /* Handle ``executable_changed'' events for the symtab module.  */
 
 static void
 symtab_observer_executable_changed (void)
 {
   /* NAME_OF_MAIN may no longer be the same, so reset it for now.  */
-  set_main_name (NULL);
+  set_main_name (NULL, language_unknown);
 }
 
 /* Return 1 if the supplied producer string matches the ARM RealView

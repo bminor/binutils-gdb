@@ -1,5 +1,19 @@
 2014-01-15  Tom Tromey  <tromey@redhat.com>
 
+	* dbxread.c (process_one_symbol): Update.
+	* dwarf2read.c (read_partial_die): Update.
+	* symfile.c (set_initial_language): Call main_language.
+	* symtab.c (language_of_main): Now static.
+	(set_main_name): Add 'lang' parameter.
+	(find_main_name): Update.
+	(main_language): New function.
+	(symtab_observer_executable_changed): Update.
+	* symtab.h (set_main_name): Update.
+	(language_of_main): Remove.
+	(main_language): Declare.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (init_entry_point_info): Use new "initialized" field.
 	Update.
 	* objfiles.h (struct entry_point) <initialized>: New field.

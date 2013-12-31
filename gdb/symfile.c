@@ -1654,11 +1654,9 @@ symbol_file_command (char *args, int from_tty)
 void
 set_initial_language (void)
 {
-  enum language lang = language_unknown;
+  enum language lang = main_language ();
 
-  if (language_of_main != language_unknown)
-    lang = language_of_main;
-  else
+  if (lang == language_unknown)
     {
       char *name = main_name ();
       struct symbol *sym = lookup_symbol (name, NULL, VAR_DOMAIN, NULL);
