@@ -203,6 +203,13 @@ struct objfile_per_bfd_storage
      containing the entry point, and the scope of the user's main() func.  */
 
   struct entry_info ei;
+
+  /* The name and language of any "main" found in this objfile.  The
+     name can be NULL, which means that the information was not
+     recorded.  */
+
+  const char *name_of_main;
+  enum language language_of_main;
 };
 
 /* Master structure for keeping track of each file from which
@@ -690,5 +697,10 @@ extern void default_iterate_over_objfiles_in_search_order
 void set_objfile_per_bfd (struct objfile *obj);
 
 const char *objfile_name (const struct objfile *objfile);
+
+/* Set the objfile's notion of the "main" name and language.  */
+
+extern void set_objfile_main_name (struct objfile *objfile,
+				   const char *name, enum language lang);
 
 #endif /* !defined (OBJFILES_H) */

@@ -152,6 +152,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
       obstack_init (&storage->storage_obstack);
       storage->filename_cache = bcache_xmalloc (NULL, NULL);
       storage->macro_cache = bcache_xmalloc (NULL, NULL);
+      storage->language_of_main = language_unknown;
     }
 
   return storage;
@@ -184,6 +185,20 @@ void
 set_objfile_per_bfd (struct objfile *objfile)
 {
   objfile->per_bfd = get_objfile_bfd_data (objfile, objfile->obfd);
+}
+
+/* Set the objfile's per-BFD notion of the "main" name and
+   language.  */
+
+void
+set_objfile_main_name (struct objfile *objfile,
+		       const char *name, enum language lang)
+{
+  if (objfile->per_bfd->name_of_main == NULL
+      || strcmp (objfile->per_bfd->name_of_main, name) != 0)
+    objfile->per_bfd->name_of_main
+      = obstack_copy0 (&objfile->per_bfd->storage_obstack, name, strlen (name));
+  objfile->per_bfd->language_of_main = lang;
 }
 
 

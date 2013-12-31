@@ -1,5 +1,20 @@
 2014-01-15  Tom Tromey  <tromey@redhat.com>
 
+	* dbxread.c (process_one_symbol): Use set_objfile_main_name.
+	* dwarf2read.c (read_partial_die): Use set_objfile_main_name.
+	* objfiles.c (get_objfile_bfd_data): Initialize language_of_main.
+	(set_objfile_main_name): New function.
+	* objfiles.h (struct objfile_per_bfd_storage) <name_of_main,
+	language_of_main>: New fields.
+	(set_objfile_main_name): Declare.
+	* symtab.c (find_main_name): Loop over objfiles to find the main
+	name and language.
+	(set_main_name): Now static.
+	(get_main_info): Add comment.
+	* symtab.h (set_main_name): Don't declare.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (main_progspace_key): New global.
 	(struct main_info): New.
 	(name_of_main, language_of_main): Remove.

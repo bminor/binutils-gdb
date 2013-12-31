@@ -1324,7 +1324,6 @@ extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
    FIXME: cagney/2001-03-20: Can't make main_name() const since some
    of the calling code currently assumes that the string isn't
    const.  */
-extern void set_main_name (const char *name, enum language lang);
 extern /*const */ char *main_name (void);
 extern enum language main_language (void);
 

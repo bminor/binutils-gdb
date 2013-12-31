@@ -5028,6 +5028,12 @@ get_main_info (void)
 
   if (info == NULL)
     {
+      /* It may seem strange to store the main name in the progspace
+	 and also in whatever objfile happens to see a main name in
+	 its debug info.  The reason for this is mainly historical:
+	 gdb returned "main" as the name even if no function named
+	 "main" was defined the program; and this approach lets us
+	 keep compatibility.  */
       info = XCNEW (struct main_info);
       info->language_of_main = language_unknown;
       set_program_space_data (current_program_space, main_progspace_key,
@@ -5050,7 +5056,7 @@ main_info_cleanup (struct program_space *pspace, void *data)
   xfree (info);
 }
 
-void
+static void
 set_main_name (const char *name, enum language lang)
 {
   struct main_info *info = get_main_info ();
@@ -5075,6 +5081,23 @@ static void
 find_main_name (void)
 {
   const char *new_main_name;
+  struct objfile *objfile;
+
+  /* First check the objfiles to see whether a debuginfo reader has
+     picked up the appropriate main name.  Historically the main name
+     was found in a more or less random way; this approach instead
+     relies on the order of objfile creation -- which still isn't
+     guaranteed to get the correct answer, but is just probably more
+     accurate.  */
+  ALL_OBJFILES (objfile)
+  {
+    if (objfile->per_bfd->name_of_main != NULL)
+      {
+	set_main_name (objfile->per_bfd->name_of_main,
+		       objfile->per_bfd->language_of_main);
+	return;
+      }
+  }
 
   /* Try to see if the main procedure is in Ada.  */
   /* FIXME: brobecker/2005-03-07: Another way of doing this would
