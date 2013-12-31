@@ -109,6 +109,9 @@ struct entry_info
 
     /* Set to 1 iff ENTRY_POINT contains a valid value.  */
     unsigned entry_point_p : 1;
+
+    /* Set to 1 iff this object was initialized.  */
+    unsigned initialized : 1;
   };
 
 /* Sections in an objfile.  The section offsets are stored in the
@@ -195,6 +198,11 @@ struct objfile_per_bfd_storage
      name, and the second is the demangled name or just a zero byte
      if the name doesn't demangle.  */
   struct htab *demangled_names_hash;
+
+  /* The per-objfile information about the entry point, the scope (file/func)
+     containing the entry point, and the scope of the user's main() func.  */
+
+  struct entry_info ei;
 };
 
 /* Master structure for keeping track of each file from which
@@ -317,11 +325,6 @@ struct objfile
        object module reader of this type.  */
 
     const struct sym_fns *sf;
-
-    /* The per-objfile information about the entry point, the scope (file/func)
-       containing the entry point, and the scope of the user's main() func.  */
-
-    struct entry_info ei;
 
     /* Per objfile data-pointers required by other GDB modules.  */
 

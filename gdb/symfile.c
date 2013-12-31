@@ -867,6 +867,12 @@ read_symbols (struct objfile *objfile, int add_flags)
 static void
 init_entry_point_info (struct objfile *objfile)
 {
+  struct entry_info *ei = &objfile->per_bfd->ei;
+
+  if (ei->initialized)
+    return;
+  ei->initialized = 1;
+
   /* Save startup file's range of PC addresses to help blockframe.c
      decide where the bottom of the stack is.  */
 
@@ -874,8 +880,8 @@ init_entry_point_info (struct objfile *objfile)
     {
       /* Executable file -- record its entry point so we'll recognize
          the startup file because it contains the entry point.  */
-      objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);
-      objfile->ei.entry_point_p = 1;
+      ei->entry_point = bfd_get_start_address (objfile->obfd);
+      ei->entry_point_p = 1;
     }
   else if (bfd_get_file_flags (objfile->obfd) & DYNAMIC
 	   && bfd_get_start_address (objfile->obfd) != 0)
@@ -883,19 +889,19 @@ init_entry_point_info (struct objfile *objfile)
       /* Some shared libraries may have entry points set and be
 	 runnable.  There's no clear way to indicate this, so just check
 	 for values other than zero.  */
-      objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);
-      objfile->ei.entry_point_p = 1;
+      ei->entry_point = bfd_get_start_address (objfile->obfd);
+      ei->entry_point_p = 1;
     }
   else
     {
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
-      objfile->ei.entry_point_p = 0;
+      ei->entry_point_p = 0;
     }
 
-  if (objfile->ei.entry_point_p)
+  if (ei->entry_point_p)
     {
       struct obj_section *osect;
-      CORE_ADDR entry_point =  objfile->ei.entry_point;
+      CORE_ADDR entry_point =  ei->entry_point;
       int found;
 
       /* Make certain that the address points at real code, and not a
@@ -907,7 +913,7 @@ init_entry_point_info (struct objfile *objfile)
 
       /* Remove any ISA markers, so that this matches entries in the
 	 symbol table.  */
-      objfile->ei.entry_point
+      ei->entry_point
 	= gdbarch_addr_bits_remove (get_objfile_arch (objfile), entry_point);
 
       found = 0;
@@ -919,7 +925,7 @@ init_entry_point_info (struct objfile *objfile)
 	      && entry_point < (bfd_get_section_vma (objfile->obfd, sect)
 				+ bfd_get_section_size (sect)))
 	    {
-	      objfile->ei.the_bfd_section_index
+	      ei->the_bfd_section_index
 		= gdb_bfd_section_index (objfile->obfd, sect);
 	      found = 1;
 	      break;
@@ -927,7 +933,7 @@ init_entry_point_info (struct objfile *objfile)
 	}
 
       if (!found)
-	objfile->ei.the_bfd_section_index = SECT_OFF_TEXT (objfile);
+	ei->the_bfd_section_index = SECT_OFF_TEXT (objfile);
     }
 }
 

@@ -364,12 +364,12 @@ get_objfile_arch (struct objfile *objfile)
 int
 entry_point_address_query (CORE_ADDR *entry_p)
 {
-  if (symfile_objfile == NULL || !symfile_objfile->ei.entry_point_p)
+  if (symfile_objfile == NULL || !symfile_objfile->per_bfd->ei.entry_point_p)
     return 0;
 
-  *entry_p = (symfile_objfile->ei.entry_point
+  *entry_p = (symfile_objfile->per_bfd->ei.entry_point
 	      + ANOFFSET (symfile_objfile->section_offsets,
-			  symfile_objfile->ei.the_bfd_section_index));
+			  symfile_objfile->per_bfd->ei.the_bfd_section_index));
 
   return 1;
 }

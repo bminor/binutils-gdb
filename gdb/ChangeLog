@@ -1,5 +1,14 @@
 2014-01-15  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (init_entry_point_info): Use new "initialized" field.
+	Update.
+	* objfiles.h (struct entry_point) <initialized>: New field.
+	(struct objfile_per_bfd_storage) <ei>: New field, moved from...
+	(struct objfile) <ei>: ...here.  Remove.
+	* objfiles.c (entry_point_address_query): Update.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
 	* objfiles.c (entry_point_address_query): Relocate entry point
 	address.
 	(objfile_relocate1): Do not relocate entry point address.
