@@ -1,5 +1,9 @@
 2014-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Update year range in copyright notice of all files.
+
+2014-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* top.c (print_gdb_version): Set copyright year to 2014.
 
 2014-01-01  Joel Brobecker  <brobecker@adacore.com>
