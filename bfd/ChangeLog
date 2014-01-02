@@ -1,3 +1,20 @@
+2014-01-02  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/11983
+	* archive.c (_bfd_get_elt_at_filepos): Store a copy of the
+	filename in the bfd's filename field.
+	* elfcode.h (bfd_from_remote_memory): Likewise.
+	* ieee.c (ieee_object_p): Likewise.
+	* mach-o.c (bfd_mach_o_fat_member_init): Likewise.
+	* oasys.c (oasys_openr_next_archived_file): Likewise.
+	* vms-lib.c (_bfd_vms_lib_get_module): Likewise.
+	* opncls.c (bfd_fopen): Likewise.
+	(bfd_openstreamr): Likewise.
+	(bfd_openr_iovec): Likewise.
+	(bfd_openw): Likewise.
+	(bfd_create): Likewise.
+	(_bfd_delete_bfd): Free filename.
+
 2013-12-30  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* peXXigen.c (rsrc_process_section): Use ptrdiff_t as the type for
