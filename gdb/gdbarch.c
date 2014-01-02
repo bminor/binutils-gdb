@@ -128,8 +128,8 @@ struct gdbarch
 
   /* basic architectural information.  */
   const struct bfd_arch_info * bfd_arch_info;
-  int byte_order;
-  int byte_order_for_code;
+  enum bfd_endian byte_order;
+  enum bfd_endian byte_order_for_code;
   enum gdb_osabi osabi;
   const struct target_desc * target_desc;
 
@@ -1473,7 +1473,7 @@ gdbarch_bfd_arch_info (struct gdbarch *gdbarch)
   return gdbarch->bfd_arch_info;
 }
 
-int
+enum bfd_endian
 gdbarch_byte_order (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -1482,7 +1482,7 @@ gdbarch_byte_order (struct gdbarch *gdbarch)
   return gdbarch->byte_order;
 }
 
-int
+enum bfd_endian
 gdbarch_byte_order_for_code (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);

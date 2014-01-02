@@ -91,10 +91,10 @@ typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
 extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbarch);
 /* set_gdbarch_bfd_arch_info() - not applicable - pre-initialized.  */
 
-extern int gdbarch_byte_order (struct gdbarch *gdbarch);
+extern enum bfd_endian gdbarch_byte_order (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order() - not applicable - pre-initialized.  */
 
-extern int gdbarch_byte_order_for_code (struct gdbarch *gdbarch);
+extern enum bfd_endian gdbarch_byte_order_for_code (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order_for_code() - not applicable - pre-initialized.  */
 
 extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
@@ -1342,9 +1342,9 @@ struct gdbarch_info
   const struct bfd_arch_info *bfd_arch_info;
 
   /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
-  int byte_order;
+  enum bfd_endian byte_order;
 
-  int byte_order_for_code;
+  enum bfd_endian byte_order_for_code;
 
   /* Use default: NULL (ZERO).  */
   bfd *abfd;
