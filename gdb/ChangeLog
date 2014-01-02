@@ -1,5 +1,16 @@
 2014-01-14  Yao Qi  <yao@codesourcery.com>
 
+	* gdbarch.sh (core_xfer_shared_libraries): Change its argument
+	'len''s type to ULONGEST.
+	(core_xfer_shared_libraries_aix): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* i386-cygwin-tdep.c (windows_core_xfer_shared_libraries):
+	Change type of 'len' to ULONGEST.
+	* rs6000-aix-tdep.c (rs6000_aix_ld_info_to_xml): Likewise.
+	(rs6000_aix_core_xfer_shared_libraries_aix): Likewise.
+
+2014-01-14  Yao Qi  <yao@codesourcery.com>
+
 	* common/linux-osdata.c (linux_xfer_osdata_processes): Change
 	type of 'len' to ULONGEST.
 	(linux_xfer_osdata_processgroups): Likewise.

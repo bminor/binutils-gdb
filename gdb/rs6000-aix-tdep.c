@@ -1013,7 +1013,7 @@ static LONGEST
 rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 					   gdb_byte *readbuf,
 					   ULONGEST offset,
-					   LONGEST len)
+					   ULONGEST len)
 {
   struct bfd_section *ldinfo_sec;
   int ldinfo_size;

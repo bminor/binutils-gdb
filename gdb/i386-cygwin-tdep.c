@@ -171,7 +171,7 @@ out:
 static LONGEST
 windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 				  gdb_byte *readbuf,
-				  ULONGEST offset, LONGEST len)
+				  ULONGEST offset, ULONGEST len)
 {
   struct obstack obstack;
   const char *buf;
