@@ -1,3 +1,8 @@
+2014-01-02  Asmwarrior  <asmwarrior@gmail.com>
+
+	PR binutils/14289
+	* pef.c (bfd_pef_xlib_read_header): Increase buffer size to 80.
+
 2014-01-02  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/11983
