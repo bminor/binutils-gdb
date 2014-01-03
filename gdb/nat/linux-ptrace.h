@@ -91,5 +91,6 @@ extern int linux_supports_tracefork (void);
 extern int linux_supports_traceclone (void);
 extern int linux_supports_tracevforkdone (void);
 extern int linux_supports_tracesysgood (void);
+extern void linux_ptrace_set_additional_flags (int);
 
 #endif /* COMMON_LINUX_PTRACE_H */

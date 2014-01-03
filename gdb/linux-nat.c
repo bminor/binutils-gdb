@@ -5033,6 +5033,14 @@ Enables printf debugging output."),
   sigdelset (&suspend_mask, SIGCHLD);
 
   sigemptyset (&blocked_mask);
+
+  /* Do not enable PTRACE_O_TRACEEXIT until GDB is more prepared to
+     support read-only process state.  */
+  linux_ptrace_set_additional_flags (PTRACE_O_TRACESYSGOOD
+				     | PTRACE_O_TRACEVFORKDONE
+				     | PTRACE_O_TRACEVFORK
+				     | PTRACE_O_TRACEFORK
+				     | PTRACE_O_TRACEEXEC);
 }
 
 

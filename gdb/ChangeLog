@@ -1,4 +1,16 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-ptrace.c (additional_flags): New global.
+	(linux_test_for_tracesysgood, linux_test_for_tracefork): Use
+	additional_flags; don't check GDBSERVER.
+	(linux_ptrace_set_additional_flags): New function.
+	* nat/linux-ptrace.h (linux_ptrace_set_additional_flags):
+	Declare.
+	* linux-nat.c (_initialize_linux_nat): Call
+	linux_ptrace_set_additional_flags.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
 
 	* make-target-delegates (munge_type, write_debugmethod): New
 	functions.
