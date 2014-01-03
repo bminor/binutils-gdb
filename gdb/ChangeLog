@@ -1,3 +1,8 @@
+2014-01-14  Yao Qi  <yao@codesourcery.com>
+
+	* rs6000-nat.c (rs6000_xfer_shared_libraries): Use
+	target_xfer_partial_ftype.
+
 2014-01-13  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/15464
