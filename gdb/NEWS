@@ -5,6 +5,10 @@
 
 *** Changes in GDB 7.7
 
+* Improved support for process record-replay and reverse debugging on
+  arm*-linux* targets.  Support for thumb32 and syscall instruction
+  recording has been added.
+
 * GDB now supports SystemTap SDT probes on AArch64 GNU/Linux.
 
 * GDB now supports Fission DWP file format version 2.

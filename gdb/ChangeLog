@@ -1,5 +1,10 @@
 2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
 
+	* NEWS: Add note on improved process record-replay on
+	arm*-linux* targets.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
 	* arm-tdep.c (enum arm_record_result): New enum.
 	(arm_record_unsupported_insn): New function.
 	(arm_record_coproc_data_proc): Removed.
