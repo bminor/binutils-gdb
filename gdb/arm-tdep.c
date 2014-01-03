@@ -12204,7 +12204,7 @@ thumb_record_misc (insn_decode_record *thumb_insn_r)
     {
       /* PUSH.  */
       register_bits = bits (thumb_insn_r->arm_insn, 0, 7);
-      regcache_raw_read_unsigned (reg_cache, ARM_PC_REGNUM, &u_regval);
+      regcache_raw_read_unsigned (reg_cache, ARM_SP_REGNUM, &u_regval);
       while (register_bits)
         {
           if (register_bits & 0x00000001)

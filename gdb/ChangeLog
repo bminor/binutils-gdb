@@ -1,5 +1,10 @@
 2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
 
+	* arm-tdep.c (thumb_record_misc): Update to use sp as base
+	register for push instruction recording.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
 	* arm-tdep.c (thumb_record_misc): Update to correct logical
 	error while recording ldm, ldmia and pop instructions.
 
