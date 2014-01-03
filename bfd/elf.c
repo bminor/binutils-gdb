@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
 
-   Copyright 1993-2013 Free Software Foundation, Inc.
+   Copyright 1993-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -4313,6 +4313,9 @@ elf_sort_sections (const void *arg1, const void *arg2)
 static file_ptr
 vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
 {
+  /* PR binutils/16199: Handle an alignment of zero.  */
+  if (maxpagesize == 0)
+    maxpagesize = 1;
   return ((vma - off) % maxpagesize);
 }
 
