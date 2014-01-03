@@ -1,5 +1,21 @@
 2014-01-14  Yao Qi  <yao@codesourcery.com>
 
+	* common/linux-osdata.c (linux_xfer_osdata_processes): Change
+	type of 'len' to ULONGEST.
+	(linux_xfer_osdata_processgroups): Likewise.
+	(linux_xfer_osdata_threads): Likewise.
+	(linux_xfer_osdata_fds): Likewise.
+	(linux_xfer_osdata_isockets): Likewise.
+	(linux_xfer_osdata_shm): Likewise.
+	(linux_xfer_osdata_sem): Likewise.
+	(linux_xfer_osdata_msg): Likewise.
+	(linux_common_xfer_osdata): Likewise.
+	(struct osdata_type) <getter>: Likewise.
+	* common/linux-osdata.h (linux_common_xfer_osdata): Update
+	the declaration.
+
+2014-01-14  Yao Qi  <yao@codesourcery.com>
+
 	* target.h (target_xfer_partial_ftype): Update.
 	(struct target_ops) <to_xfer_partial>: Change 'len' type to
 	ULONGEST.

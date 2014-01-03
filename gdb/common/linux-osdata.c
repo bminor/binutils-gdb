@@ -301,7 +301,7 @@ get_cores_used_by_process (PID_T pid, int *cores)
 
 static LONGEST
 linux_xfer_osdata_processes (gdb_byte *readbuf,
-			     ULONGEST offset, LONGEST len)
+			     ULONGEST offset, ULONGEST len)
 {
   /* We make the process list snapshot when the object starts to be read.  */
   static const char *buf;
@@ -449,7 +449,7 @@ compare_processes (const void *process1, const void *process2)
 
 static LONGEST
 linux_xfer_osdata_processgroups (gdb_byte *readbuf,
-				 ULONGEST offset, LONGEST len)
+				 ULONGEST offset, ULONGEST len)
 {
   /* We make the process list snapshot when the object starts to be read.  */
   static const char *buf;
@@ -565,7 +565,7 @@ linux_xfer_osdata_processgroups (gdb_byte *readbuf,
 
 static LONGEST
 linux_xfer_osdata_threads (gdb_byte *readbuf,
-			   ULONGEST offset, LONGEST len)
+			   ULONGEST offset, ULONGEST len)
 {
   /* We make the process list snapshot when the object starts to be read.  */
   static const char *buf;
@@ -679,7 +679,7 @@ linux_xfer_osdata_threads (gdb_byte *readbuf,
 
 static LONGEST
 linux_xfer_osdata_fds (gdb_byte *readbuf,
-		       ULONGEST offset, LONGEST len)
+		       ULONGEST offset, ULONGEST len)
 {
   /* We make the process list snapshot when the object starts to be read.  */
   static const char *buf;
@@ -986,7 +986,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 
 static LONGEST
 linux_xfer_osdata_isockets (gdb_byte *readbuf,
-			    ULONGEST offset, LONGEST len)
+			    ULONGEST offset, ULONGEST len)
 {
   static const char *buf;
   static LONGEST len_avail = -1;
@@ -1067,7 +1067,7 @@ group_from_gid (char *group, int maxlen, gid_t gid)
 
 static LONGEST
 linux_xfer_osdata_shm (gdb_byte *readbuf,
-		       ULONGEST offset, LONGEST len)
+		       ULONGEST offset, ULONGEST len)
 {
   static const char *buf;
   static LONGEST len_avail = -1;
@@ -1195,7 +1195,7 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
 
 static LONGEST
 linux_xfer_osdata_sem (gdb_byte *readbuf,
-		       ULONGEST offset, LONGEST len)
+		       ULONGEST offset, ULONGEST len)
 {
   static const char *buf;
   static LONGEST len_avail = -1;
@@ -1307,7 +1307,7 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
 
 static LONGEST
 linux_xfer_osdata_msg (gdb_byte *readbuf,
-		       ULONGEST offset, LONGEST len)
+		       ULONGEST offset, ULONGEST len)
 {
   static const char *buf;
   static LONGEST len_avail = -1;
@@ -1433,7 +1433,7 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
 
 static LONGEST
 linux_xfer_osdata_modules (gdb_byte *readbuf,
-			   ULONGEST offset, LONGEST len)
+			   ULONGEST offset, ULONGEST len)
 {
   static const char *buf;
   static LONGEST len_avail = -1;
@@ -1542,7 +1542,7 @@ struct osdata_type {
   char *type;
   char *title;
   char *description;
-  LONGEST (*getter) (gdb_byte *readbuf, ULONGEST offset, LONGEST len);
+  LONGEST (*getter) (gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
 } osdata_table[] = {
   { "processes", "Processes", "Listing of all processes",
     linux_xfer_osdata_processes },
@@ -1567,7 +1567,7 @@ struct osdata_type {
 
 LONGEST
 linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
-			  ULONGEST offset, LONGEST len)
+			  ULONGEST offset, ULONGEST len)
 {
   if (!annex || *annex == '\0')
     {
