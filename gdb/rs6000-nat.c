@@ -383,7 +383,7 @@ static LONGEST
 rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
 		     const gdb_byte *writebuf,
-		     ULONGEST offset, LONGEST len)
+		     ULONGEST offset, ULONGEST len)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   int arch64 = ARCH64 ();
@@ -686,7 +686,7 @@ static LONGEST
 rs6000_xfer_shared_libraries
   (struct target_ops *ops, enum target_object object,
    const char *annex, gdb_byte *readbuf, const gdb_byte *writebuf,
-   ULONGEST offset, LONGEST len)
+   ULONGEST offset, ULONGEST len)
 {
   gdb_byte *ldi_buf;
   ULONGEST result;

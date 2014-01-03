@@ -245,7 +245,7 @@ typedef LONGEST
 			     gdb_byte *readbuf,
 			     const gdb_byte *writebuf,
 			     ULONGEST offset,
-			     LONGEST len);
+			     ULONGEST len);
 
 /* Request that OPS transfer up to LEN 8-bit bytes of the target's
    OBJECT.  The OFFSET, for a seekable object, specifies the
@@ -537,7 +537,7 @@ struct target_ops
     LONGEST (*to_xfer_partial) (struct target_ops *ops,
 				enum target_object object, const char *annex,
 				gdb_byte *readbuf, const gdb_byte *writebuf,
-				ULONGEST offset, LONGEST len);
+				ULONGEST offset, ULONGEST len);
 
     /* Returns the memory map for the target.  A return value of NULL
        means that no memory map is available.  If a memory address

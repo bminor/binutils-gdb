@@ -1063,10 +1063,11 @@ gdbsim_prepare_to_store (struct regcache *regcache)
 static LONGEST
 gdbsim_xfer_memory (struct target_ops *target,
 		    gdb_byte *readbuf, const gdb_byte *writebuf,
-		    ULONGEST memaddr, LONGEST len)
+		    ULONGEST memaddr, ULONGEST len)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
+  int l;
 
   /* If this target doesn't have memory yet, return 0 causing the
      request to be passed to a lower target, hopefully an exec
@@ -1092,21 +1093,21 @@ gdbsim_xfer_memory (struct target_ops *target,
 			host_address_to_string (readbuf),
 			host_address_to_string (writebuf),
 			paddress (target_gdbarch (), memaddr),
-			plongest (len));
+			pulongest (len));
 
   if (writebuf)
     {
       if (remote_debug && len > 0)
 	dump_mem (writebuf, len);
-      len = sim_write (sim_data->gdbsim_desc, memaddr, writebuf, len);
+      l = sim_write (sim_data->gdbsim_desc, memaddr, writebuf, len);
     }
   else
     {
-      len = sim_read (sim_data->gdbsim_desc, memaddr, readbuf, len);
+      l = sim_read (sim_data->gdbsim_desc, memaddr, readbuf, len);
       if (remote_debug && len > 0)
 	dump_mem (readbuf, len);
     }
-  return len;
+  return l;
 }
 
 /* Target to_xfer_partial implementation.  */
@@ -1114,7 +1115,7 @@ gdbsim_xfer_memory (struct target_ops *target,
 static LONGEST
 gdbsim_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   switch (object)
     {

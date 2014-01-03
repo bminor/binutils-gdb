@@ -338,7 +338,7 @@ static LONGEST
 bsd_uthread_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const char *annex, gdb_byte *readbuf,
 			  const gdb_byte *writebuf,
-			  ULONGEST offset, LONGEST len)
+			  ULONGEST offset, ULONGEST len)
 {
   gdb_assert (ops->beneath->to_xfer_partial);
   return ops->beneath->to_xfer_partial (ops->beneath, object, annex, readbuf,

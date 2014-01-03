@@ -568,7 +568,7 @@ section_table_available_memory (VEC(mem_range_s) *memory,
 
 int
 section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
-				   ULONGEST offset, LONGEST len,
+				   ULONGEST offset, ULONGEST len,
 				   struct target_section *sections,
 				   struct target_section *sections_end,
 				   const char *section_name)
@@ -578,7 +578,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
   ULONGEST memaddr = offset;
   ULONGEST memend = memaddr + len;
 
-  if (len <= 0)
+  if (len == 0)
     internal_error (__FILE__, __LINE__,
 		    _("failed internal consistency check"));
 
@@ -639,7 +639,7 @@ static LONGEST
 exec_xfer_partial (struct target_ops *ops, enum target_object object,
 		   const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf,
-		   ULONGEST offset, LONGEST len)
+		   ULONGEST offset, ULONGEST len)
 {
   struct target_section_table *table = target_get_section_table (ops);
 

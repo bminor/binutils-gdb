@@ -1627,7 +1627,7 @@ static LONGEST
 record_full_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const char *annex, gdb_byte *readbuf,
 			  const gdb_byte *writebuf, ULONGEST offset,
-			  LONGEST len)
+			  ULONGEST len)
 {
   if (!record_full_gdb_operation_disable
       && (object == TARGET_OBJECT_MEMORY
@@ -2160,7 +2160,7 @@ record_full_core_xfer_partial (struct target_ops *ops,
 			       enum target_object object,
 			       const char *annex, gdb_byte *readbuf,
 			       const gdb_byte *writebuf, ULONGEST offset,
-			       LONGEST len)
+			       ULONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY)
     {

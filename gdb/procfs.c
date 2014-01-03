@@ -3976,7 +3976,7 @@ wait_again:
 static LONGEST
 procfs_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   switch (object)
     {

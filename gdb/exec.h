@@ -75,7 +75,7 @@ extern VEC(mem_range_s) *
    One, and only one, of readbuf or writebuf must be non-NULL.  */
 
 extern int section_table_xfer_memory_partial (gdb_byte *, const gdb_byte *,
-					      ULONGEST, LONGEST,
+					      ULONGEST, ULONGEST,
 					      struct target_section *,
 					      struct target_section *,
 					      const char *);

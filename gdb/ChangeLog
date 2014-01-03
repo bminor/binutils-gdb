@@ -1,5 +1,72 @@
 2014-01-14  Yao Qi  <yao@codesourcery.com>
 
+	* target.h (target_xfer_partial_ftype): Update.
+	(struct target_ops) <to_xfer_partial>: Change 'len' type to
+	ULONGEST.
+	* aix-thread.c (aix_thread_xfer_partial): Change type of
+	argument 'len' to ULONGEST.
+	* auxv.c (procfs_xfer_auxv): Likewise.
+	(ld_so_xfer_auxv): Likewise.
+	(memory_xfer_auxv): Likewise.
+	* bfd-target.c (target_bfd_xfer_partial): Likewise.
+	* bsd-kvm.c (bsd_kvm_xfer_partial): Likewise.
+	* bsd-uthread.c (bsd_uthread_xfer_partial): Likewise.
+	* corelow.c (core_xfer_partial): Likewise.
+	* ctf.c (ctf_xfer_partial): Likewise.
+	* darwin-nat.c (darwin_read_write_inferior): Likewise.  Use
+	'%u'.
+	(darwin_read_dyld_info): Likewise.
+	(darwin_xfer_partial): Likewise.
+	* exec.c (section_table_xfer_memory_partial): Likewise.
+	(exec_xfer_partial): Likewise.
+	* exec.h (section_table_xfer_memory_partial): Update
+	declaration.
+	* gnu-nat.c (gnu_xfer_memory): Likewise.  Call pulongest
+	instead of plongest.
+	(gnu_xfer_partial): Likewise.
+	* ia64-hpux-nat.c (ia64_hpux_xfer_memory): Likewise.
+	(ia64_hpux_xfer_solib_got): Likewise.
+	(ia64_hpux_xfer_partial): Likewise.
+	* ia64-linux-nat.c (ia64_linux_xfer_partial):
+	* inf-ptrace.c (inf_ptrace_xfer_partial):
+	* inf-ttrace.c (inf_ttrace_xfer_partial):
+	* linux-nat.c (linux_xfer_siginfo): Likewise.
+	(linux_nat_xfer_partial): Likewise.
+	(spu_enumerate_spu_ids, linux_proc_xfer_spu): Likewise.
+	(linux_nat_xfer_osdata, linux_xfer_partial): Likewise.
+	* monitor.c (monitor_xfer_memory): Likewise.
+	(monitor_xfer_partial): Likewise.
+	* procfs.c (procfs_xfer_partial): Likewise.
+	* record-full.c (record_full_xfer_partial): Likewise.
+	(record_full_core_xfer_partial): Likewise.
+	* remote-sim.c (gdbsim_xfer_memory): Likewise.  Call pulongest
+	instead of plongest.
+	(gdbsim_xfer_partial): Likewise.
+	* remote.c (remote_xfer_partial): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_ld_info_to_xml): Likewise.
+	* rs6000-aix-tdep.h (rs6000_aix_ld_info_to_xml): Update
+	declaration.
+	* rs6000-nat.c (rs6000_xfer_partial): Likewise.
+	(rs6000_xfer_shared_libraries): Likewise.
+	* sol-thread.c (sol_thread_xfer_partial): Likewise.
+	* sparc-nat.c (sparc_xfer_wcookie): Likewise.
+	(sparc_xfer_partial): Likewise.
+	* spu-linux-nat.c (spu_proc_xfer_spu): Likewise.
+	(spu_xfer_partial): Likewise.
+	* spu-multiarch.c (spu_xfer_partial): Likewise.
+	* target.c (target_read_live_memory): Likewise.
+	(memory_xfer_live_readonly_partial): Likewise.
+	(memory_xfer_partial, memory_xfer_partial_1): Likewise.
+	(target_xfer_partial, default_xfer_partial): Likewise.
+	(current_xfer_partial): Likewise.
+	* tracepoint.c (tfile_xfer_partial): Likewise.
+	* windows-nat.c (windows_xfer_memory): Likewise.  Call
+	pulongest instead of plongest.
+	(windows_xfer_partial): Likewise.
+	(windows_xfer_shared_libraries): Likewise.
+
+2014-01-14  Yao Qi  <yao@codesourcery.com>
+
 	* rs6000-nat.c (rs6000_xfer_shared_libraries): Use
 	target_xfer_partial_ftype.
 

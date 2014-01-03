@@ -2477,7 +2477,7 @@ out:
 
 static LONGEST
 gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
-		 CORE_ADDR memaddr, LONGEST len)
+		 CORE_ADDR memaddr, ULONGEST len)
 {
   task_t task = (gnu_current_inf
 		 ? (gnu_current_inf->task
@@ -2491,14 +2491,14 @@ gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
   if (writebuf != NULL)
     {
       inf_debug (gnu_current_inf, "writing %s[%s] <-- %s",
-		 paddress (target_gdbarch (), memaddr), plongest (len),
+		 paddress (target_gdbarch (), memaddr), pulongest (len),
 		 host_address_to_string (writebuf));
       res = gnu_write_inferior (task, memaddr, writebuf, len);
     }
   else
     {
       inf_debug (gnu_current_inf, "reading %s[%s] --> %s",
-		 paddress (target_gdbarch (), memaddr), plongest (len),
+		 paddress (target_gdbarch (), memaddr), pulongest (len),
 		 host_address_to_string (readbuf));
       res = gnu_read_inferior (task, memaddr, readbuf, len);
     }
@@ -2512,7 +2512,7 @@ gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 static LONGEST
 gnu_xfer_partial (struct target_ops *ops, enum target_object object,
 		  const char *annex, gdb_byte *readbuf,
-		  const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   switch (object)
     {

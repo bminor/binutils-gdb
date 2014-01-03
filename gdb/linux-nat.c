@@ -3865,7 +3865,7 @@ siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
 static LONGEST
 linux_xfer_siginfo (struct target_ops *ops, enum target_object object,
                     const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   int pid;
   siginfo_t siginfo;
@@ -3919,7 +3919,7 @@ static LONGEST
 linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
 			const char *annex, gdb_byte *readbuf,
 			const gdb_byte *writebuf,
-			ULONGEST offset, LONGEST len)
+			ULONGEST offset, ULONGEST len)
 {
   struct cleanup *old_chain;
   LONGEST xfer;
@@ -4155,7 +4155,7 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
 
 /* Enumerate spufs IDs for process PID.  */
 static LONGEST
-spu_enumerate_spu_ids (int pid, gdb_byte *buf, ULONGEST offset, LONGEST len)
+spu_enumerate_spu_ids (int pid, gdb_byte *buf, ULONGEST offset, ULONGEST len)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   LONGEST pos = 0;
@@ -4209,7 +4209,7 @@ static LONGEST
 linux_proc_xfer_spu (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
 		     const gdb_byte *writebuf,
-		     ULONGEST offset, LONGEST len)
+		     ULONGEST offset, ULONGEST len)
 {
   char buf[128];
   int fd = 0;
@@ -4332,7 +4332,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending,
 static LONGEST
 linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
 		       const char *annex, gdb_byte *readbuf,
-		       const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		       const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (object == TARGET_OBJECT_OSDATA);
 
@@ -4342,7 +4342,7 @@ linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
 static LONGEST
 linux_xfer_partial (struct target_ops *ops, enum target_object object,
                     const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   LONGEST xfer;
 

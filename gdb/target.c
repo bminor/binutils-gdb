@@ -1317,7 +1317,7 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 
 static LONGEST
 target_read_live_memory (enum target_object object,
-			 ULONGEST memaddr, gdb_byte *myaddr, LONGEST len)
+			 ULONGEST memaddr, gdb_byte *myaddr, ULONGEST len)
 {
   LONGEST ret;
   struct cleanup *cleanup;
@@ -1347,7 +1347,7 @@ static LONGEST
 memory_xfer_live_readonly_partial (struct target_ops *ops,
 				   enum target_object object,
 				   gdb_byte *readbuf, ULONGEST memaddr,
-				   LONGEST len)
+				   ULONGEST len)
 {
   struct target_section *secp;
   struct target_section_table *table;
@@ -1427,7 +1427,7 @@ raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
 static LONGEST
 memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 		       void *readbuf, const void *writebuf, ULONGEST memaddr,
-		       LONGEST len)
+		       ULONGEST len)
 {
   LONGEST res;
   int reg_len;
@@ -1625,7 +1625,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 static LONGEST
 memory_xfer_partial (struct target_ops *ops, enum target_object object,
 		     void *readbuf, const void *writebuf, ULONGEST memaddr,
-		     LONGEST len)
+		     ULONGEST len)
 {
   int res;
 
@@ -1690,7 +1690,7 @@ LONGEST
 target_xfer_partial (struct target_ops *ops,
 		     enum target_object object, const char *annex,
 		     gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST offset, LONGEST len)
+		     ULONGEST offset, ULONGEST len)
 {
   LONGEST retval;
 
@@ -1729,7 +1729,7 @@ target_xfer_partial (struct target_ops *ops,
 			  host_address_to_string (readbuf),
 			  host_address_to_string (writebuf),
 			  core_addr_to_string_nz (offset),
-			  plongest (len), plongest (retval));
+			  pulongest (len), plongest (retval));
 
       if (readbuf)
 	myaddr = readbuf;
@@ -1964,7 +1964,7 @@ show_trust_readonly (struct ui_file *file, int from_tty,
 static LONGEST
 default_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY
       && ops->deprecated_xfer_memory != NULL)
@@ -2010,7 +2010,7 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 static LONGEST
 current_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   if (ops->beneath != NULL)
     return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
