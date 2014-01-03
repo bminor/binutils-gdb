@@ -1,3 +1,8 @@
+2014-01-03  Doug Evans  <dje@google.com>
+
+	* nat/linux-waitpid.c (linux_debug): Remove extraneous \n from
+	output.
+
 2014-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Update year range in copyright notice of all files.
