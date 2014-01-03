@@ -11778,26 +11778,15 @@ arm_record_ld_st_multiple (insn_decode_record *arm_insn_r)
       while (register_bits)
       {
         if (register_bits & 0x00000001)
-          register_list[register_count++] = 1;
+          record_buf[index++] = register_count;
         register_bits = register_bits >> 1;
+        register_count++;
       }
 
         /* Extra space for Base Register and CPSR; wihtout optimization.  */
-        record_buf[register_count] = reg_src1;
-        record_buf[register_count + 1] = ARM_PS_REGNUM;
-        arm_insn_r->reg_rec_count = register_count + 2;
-
-        for (register_count = 0; register_count < no_of_regs; register_count++)
-          {
-            if  (register_list[register_count])
-              {
-                /* Register_count gives total no of registers
-                and dually working as reg number.  */
-                record_buf[index] = register_count;
-                index++;
-              }
-          }
-
+        record_buf[index++] = reg_src1;
+        record_buf[index++] = ARM_PS_REGNUM;
+        arm_insn_r->reg_rec_count = index;
     }
   else
     {
@@ -12201,22 +12190,15 @@ thumb_record_misc (insn_decode_record *thumb_insn_r)
       /* POP.  */
       register_bits = bits (thumb_insn_r->arm_insn, 0, 7);
       while (register_bits)
-        {
-          if (register_bits & 0x00000001)
-            register_list[register_count++] = 1;
-          register_bits = register_bits >> 1;
-        }
-      record_buf[register_count] = ARM_PS_REGNUM;
-      record_buf[register_count + 1] = ARM_SP_REGNUM;
-      thumb_insn_r->reg_rec_count = register_count + 2;
-      for (register_count = 0; register_count < 8; register_count++)
-        {
-          if  (register_list[register_count])
-            {
-              record_buf[index] = register_count;
-              index++;
-            }
-        }
+      {
+        if (register_bits & 0x00000001)
+          record_buf[index++] = register_count;
+        register_bits = register_bits >> 1;
+        register_count++;
+      }
+      record_buf[index++] = ARM_PS_REGNUM;
+      record_buf[index++] = ARM_SP_REGNUM;
+      thumb_insn_r->reg_rec_count = index;
     }
   else if (10 == opcode2)
     {
@@ -12313,19 +12295,12 @@ thumb_record_ldm_stm_swi (insn_decode_record *thumb_insn_r)
       while (register_bits)
         {
           if (register_bits & 0x00000001)
-            register_list[register_count++] = 1;
+            record_buf[index++] = register_count;
           register_bits = register_bits >> 1;
+          register_count++;
         }
-      record_buf[register_count] = reg_src1;
-      thumb_insn_r->reg_rec_count = register_count + 1;
-      for (register_count = 0; register_count < 8; register_count++)
-        {
-          if (register_list[register_count])
-            {
-              record_buf[index] = register_count;
-              index++;
-            }
-        }
+      record_buf[index++] = reg_src1;
+      thumb_insn_r->reg_rec_count = index;
     }
   else if (0 == opcode2)
     {
