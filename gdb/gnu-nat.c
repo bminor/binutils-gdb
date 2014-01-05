@@ -96,7 +96,6 @@ void inf_set_pid (struct inf *inf, pid_t pid);
 void inf_validate_procs (struct inf *inf);
 void inf_steal_exc_ports (struct inf *inf);
 void inf_restore_exc_ports (struct inf *inf);
-struct proc *inf_tid_to_proc (struct inf *inf, int tid);
 void inf_set_threads_resume_sc (struct inf *inf,
 				struct proc *run_thread,
 				int run_others);
