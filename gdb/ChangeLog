@@ -1,3 +1,17 @@
+2014-02-17  Yao Qi  <yao@codesourcery.com>
+
+	* gnu-nat.c (proc_get_exception_port): Use 'lu' insetad of 'd'
+	in format string.
+	(proc_steal_exc_port, make_proc, inf_set_pid): Likewise.
+	(inf_validate_procs, inf_signal): Likewise.
+	(S_exception_raise_request): Likewise.
+	(do_mach_notify_dead_name): Likewise.
+	(steal_exc_port): Likewise.
+	(gnu_read_inferior): Change 'copy_count''s type to
+	mach_msg_type_number_t.
+	(gnu_write_inferior): Likewise.  Use 'lx' instead of 'x' in
+	format string.
+
 2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* gnu-nat.c (struct inf): Change pending_execs member to a 1-bit

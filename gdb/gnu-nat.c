@@ -404,7 +404,7 @@ proc_get_exception_port (struct proc * proc, mach_port_t * port)
 error_t
 proc_set_exception_port (struct proc * proc, mach_port_t port)
 {
-  proc_debug (proc, "setting exception port: %d", port);
+  proc_debug (proc, "setting exception port: %lu", port);
   if (proc_is_task (proc))
     return task_set_exception_port (proc->port, port);
   else
@@ -444,7 +444,7 @@ proc_steal_exc_port (struct proc *proc, mach_port_t exc_port)
     {
       error_t err = 0;
 
-      proc_debug (proc, "inserting exception port: %d", exc_port);
+      proc_debug (proc, "inserting exception port: %lu", exc_port);
 
       if (cur_exc_port != exc_port)
 	/* Put in our exception port.  */
@@ -465,7 +465,7 @@ proc_steal_exc_port (struct proc *proc, mach_port_t exc_port)
 	  proc->saved_exc_port = cur_exc_port;
 	}
 
-      proc_debug (proc, "saved exception port: %d", proc->saved_exc_port);
+      proc_debug (proc, "saved exception port: %lu", proc->saved_exc_port);
 
       if (!err)
 	proc->exc_port = exc_port;
@@ -577,11 +577,11 @@ make_proc (struct inf *inf, mach_port_t port, int tid)
 				    MACH_MSG_TYPE_MAKE_SEND_ONCE,
 				    &prev_port);
   if (err)
-    warning (_("Couldn't request notification for port %d: %s"),
+    warning (_("Couldn't request notification for port %lu: %s"),
 	     port, safe_strerror (err));
   else
     {
-      proc_debug (proc, "notifications to: %d", inf->event_port);
+      proc_debug (proc, "notifications to: %lu", inf->event_port);
       if (prev_port != MACH_PORT_NULL)
 	mach_port_deallocate (mach_task_self (), prev_port);
     }
@@ -756,7 +756,7 @@ inf_set_pid (struct inf *inf, pid_t pid)
 	       pid, safe_strerror (err));
     }
 
-  inf_debug (inf, "setting task: %d", task_port);
+  inf_debug (inf, "setting task: %lu", task_port);
 
   if (inf->pause_sc)
     task_suspend (task_port);
@@ -1080,7 +1080,7 @@ inf_validate_procs (struct inf *inf)
 	    else
 	      inf->threads = thread;
 	    last = thread;
-	    proc_debug (thread, "new thread: %d", threads[i]);
+	    proc_debug (thread, "new thread: %lu", threads[i]);
 
 	    ptid = ptid_build (inf->pid, thread->tid, 0);
 
@@ -1345,7 +1345,7 @@ inf_signal (struct inf *inf, enum gdb_signal sig)
 	  struct exc_state *e = &w->exc;
 
 	  inf_debug (inf, "passing through exception:"
-		     " task = %d, thread = %d, exc = %d"
+		     " task = %lu, thread = %lu, exc = %d"
 		     ", code = %d, subcode = %d",
 		     w->thread->port, inf->task->port,
 		     e->exception, e->code, e->subcode);
@@ -1652,7 +1652,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
   struct proc *thread = inf_port_to_thread (inf, thread_port);
 
   inf_debug (waiting_inf,
-	     "thread = %d, task = %d, exc = %d, code = %d, subcode = %d",
+	     "thread = %lu, task = %lu, exc = %d, code = %d, subcode = %d",
 	     thread_port, task_port, exception, code, subcode);
 
   if (!thread)
@@ -1688,13 +1688,13 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 	{
 	  if (thread->exc_port == port)
 	    {
-	      inf_debug (waiting_inf, "Handler is thread exception port <%d>",
+	      inf_debug (waiting_inf, "Handler is thread exception port <%lu>",
 			 thread->saved_exc_port);
 	      inf->wait.exc.handler = thread->saved_exc_port;
 	    }
 	  else
 	    {
-	      inf_debug (waiting_inf, "Handler is task exception port <%d>",
+	      inf_debug (waiting_inf, "Handler is task exception port <%lu>",
 			 inf->task->saved_exc_port);
 	      inf->wait.exc.handler = inf->task->saved_exc_port;
 	      gdb_assert (inf->task->exc_port == port);
@@ -1745,7 +1745,7 @@ do_mach_notify_dead_name (mach_port_t notify, mach_port_t dead_port)
 {
   struct inf *inf = waiting_inf;
 
-  inf_debug (waiting_inf, "port = %d", dead_port);
+  inf_debug (waiting_inf, "port = %lu", dead_port);
 
   if (inf->task && inf->task->port == dead_port)
     {
@@ -2392,7 +2392,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr,
 	/* Check for holes in memory.  */
 	if (old_address != region_address)
 	  {
-	    warning (_("No memory at 0x%x. Nothing written"),
+	    warning (_("No memory at 0x%lx. Nothing written"),
 		     old_address);
 	    err = KERN_SUCCESS;
 	    length = 0;
@@ -2401,7 +2401,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr,
 
 	if (!(max_protection & VM_PROT_WRITE))
 	  {
-	    warning (_("Memory at address 0x%x is unwritable. "
+	    warning (_("Memory at address 0x%lx is unwritable. "
 		       "Nothing written"),
 		     old_address);
 	    err = KERN_SUCCESS;
@@ -2906,7 +2906,7 @@ steal_exc_port (struct proc *proc, mach_port_t name)
 				 name, MACH_MSG_TYPE_COPY_SEND,
 				 &port, &port_type);
   if (err)
-    error (_("Couldn't extract send right %d from inferior: %s"),
+    error (_("Couldn't extract send right %lu from inferior: %s"),
 	   name, safe_strerror (err));
 
   if (proc->saved_exc_port)
