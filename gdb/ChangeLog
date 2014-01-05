@@ -1,5 +1,10 @@
 2014-01-07  Yao Qi  <yao@codesourcery.com>
 
+	* gnu-nat.c (info_port_rights): Add qualifier const to
+	argument args.
+
+2014-01-07  Yao Qi  <yao@codesourcery.com>
+
 	* gnu-nat.c (trace_me): Use 'void' for empty argument list.
 
 2014-01-07  Yao Qi  <yao@codesourcery.com>

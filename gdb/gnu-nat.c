@@ -3070,7 +3070,7 @@ set_noninvasive_cmd (char *args, int from_tty)
 
 
 static void
-info_port_rights (char *args, mach_port_type_t only)
+info_port_rights (const char *args, mach_port_type_t only)
 {
   struct inf *inf = active_inf ();
   struct value *vmark = value_mark ();
