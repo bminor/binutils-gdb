@@ -299,7 +299,7 @@ cgen_trace_printf (SIM_CPU *cpu, char *fmt, ...)
 /* sprintf to a "stream" */
 
 int
-sim_disasm_sprintf VPARAMS ((SFILE *f, const char *format, ...))
+sim_disasm_sprintf (SFILE *f, const char *format, ...)
 {
 #ifndef __STDC__
   SFILE *f;

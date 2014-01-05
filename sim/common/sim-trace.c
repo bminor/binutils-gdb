@@ -1300,7 +1300,7 @@ trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
 }
 
 void
-trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
+trace_printf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...)
 {
 #if !defined __STDC__ && !defined ALMOST_STDC
   SIM_DESC sd;
@@ -1322,7 +1322,7 @@ trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
 }
 
 void
-debug_printf VPARAMS ((sim_cpu *cpu, const char *fmt, ...))
+debug_printf (sim_cpu *cpu, const char *fmt, ...)
 {
 #if !defined __STDC__ && !defined ALMOST_STDC
   sim_cpu *cpu;

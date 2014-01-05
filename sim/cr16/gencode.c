@@ -25,9 +25,9 @@
 #include "ansidecl.h"
 #include "opcode/cr16.h"
 
-static void write_header PARAMS ((void));
-static void write_opcodes PARAMS ((void));
-static void write_template PARAMS ((void));
+static void write_header (void);
+static void write_opcodes (void);
+static void write_template (void);
 
 int
 main (int argc, char *argv[])
@@ -53,7 +53,7 @@ write_header ()
   /* Loop over instruction table until a full match is found.  */
   for ( ; i < NUMOPCODES; i++)
   {
-   printf("void OP_%X_%X PARAMS ((void));\t\t/* %s */\n",cr16_instruction[i].match, (32 - cr16_instruction[i].match_bits), cr16_instruction[i].mnemonic);
+   printf("void OP_%X_%X (void);\t\t/* %s */\n",cr16_instruction[i].match, (32 - cr16_instruction[i].match_bits), cr16_instruction[i].mnemonic);
   }
 }
 

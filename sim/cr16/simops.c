@@ -189,10 +189,10 @@ move_to_cr (int cr, creg_t mask, creg_t val, int psw_hw_p)
 }
 
 #ifdef DEBUG
-static void trace_input_func PARAMS ((char *name,
-				      enum op_types in1,
-				      enum op_types in2,
-				      enum op_types in3));
+static void trace_input_func (char *name,
+			      enum op_types in1,
+			      enum op_types in2,
+			      enum op_types in3);
 
 #define trace_input(name, in1, in2, in3) do { if (cr16_debug) trace_input_func (name, in1, in2, in3); } while (0)
 

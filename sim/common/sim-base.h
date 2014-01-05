@@ -244,7 +244,7 @@ typedef struct {
 } sim_state_base;
 
 /* Functions for allocating/freeing a sim_state.  */
-SIM_DESC sim_state_alloc PARAMS ((SIM_OPEN_KIND kind, host_callback *callback));
-void sim_state_free PARAMS ((SIM_DESC));
+SIM_DESC sim_state_alloc (SIM_OPEN_KIND kind, host_callback *callback);
+void sim_state_free (SIM_DESC);
 
 #endif /* SIM_BASE_H */

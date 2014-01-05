@@ -99,10 +99,10 @@ struct sim_state {
       bfin_trace_queue (cpu, oldpc, newpc, hwloop); \
   } while (0)
 
-extern void trace_register PARAMS ((SIM_DESC sd,
-				    sim_cpu *cpu,
-				    const char *fmt,
-				    ...))
+extern void trace_register (SIM_DESC sd,
+			    sim_cpu *cpu,
+			    const char *fmt,
+			    ...)
      __attribute__((format (printf, 3, 4)));
 #define TRACE_REGISTER(cpu, fmt, ...) \
   do { \

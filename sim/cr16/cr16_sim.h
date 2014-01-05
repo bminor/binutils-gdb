@@ -421,8 +421,8 @@ enum
 #define SEXT32(x)	((((x)&0xffffffff)^(~0x7fffffff))+0x80000000)
 
 extern uint8 *dmem_addr (uint32 offset);
-extern uint8 *imem_addr PARAMS ((uint32));
-extern bfd_vma decode_pc PARAMS ((void));
+extern uint8 *imem_addr (uint32);
+extern bfd_vma decode_pc (void);
 
 #define	RB(x)	(*(dmem_addr(x)))
 #define SB(addr,data)	( RB(addr) = (data & 0xff))
@@ -433,12 +433,12 @@ extern bfd_vma decode_pc PARAMS ((void));
 #undef ENDIAN_INLINE
 
 #else
-extern uint32 get_longword PARAMS ((uint8 *));
-extern uint16 get_word PARAMS ((uint8 *));
-extern int64 get_longlong PARAMS ((uint8 *));
-extern void write_word PARAMS ((uint8 *addr, uint16 data));
-extern void write_longword PARAMS ((uint8 *addr, uint32 data));
-extern void write_longlong PARAMS ((uint8 *addr, int64 data));
+extern uint32 get_longword (uint8 *);
+extern uint16 get_word (uint8 *);
+extern int64 get_longlong (uint8 *);
+extern void write_word (uint8 *addr, uint16 data);
+extern void write_longword (uint8 *addr, uint32 data);
+extern void write_longlong (uint8 *addr, int64 data);
 #endif
 
 #define SW(addr,data)		write_word(dmem_addr(addr),data)
