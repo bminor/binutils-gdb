@@ -1,5 +1,14 @@
 2014-01-07  Tom Tromey  <tromey@redhat.com>
 
+	* bucomm.c (fatal, non_fatal): Replace obsolete VA_* macros with
+	stdarg macros.
+	* dlltool.c (inform): Replace obsolete VA_* macros with stdarg
+	macros.
+	* dllwrap.c (inform, warn): Replace obsolete VA_* macros with
+	stdarg macros.
+
+2014-01-07  Tom Tromey  <tromey@redhat.com>
+
 	* coffgrok.h (coff_ofile): Don't use PARAMS.
 	* nlmheader.y (strerror): Don't use PARAMS.
 

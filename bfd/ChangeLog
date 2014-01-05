@@ -1,3 +1,8 @@
+2014-01-07  Tom Tromey  <tromey@redhat.com>
+
+	* elf32-xtensa.c (vsprint_msg): Don't use old VA_* compatibility
+	wrappers.
+
 2014-01-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16199

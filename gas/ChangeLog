@@ -1,5 +1,10 @@
 2014-01-07  Tom Tromey  <tromey@redhat.com>
 
+	* config/tc-tic30.c (debug): Avoid old VA_* compatibility
+	wrappers.
+
+2014-01-07  Tom Tromey  <tromey@redhat.com>
+
 	* config/tc-microblaze.h (parse_cons_expression_microblaze): Don't
 	use PARAMS.
 
