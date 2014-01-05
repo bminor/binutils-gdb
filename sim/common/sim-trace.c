@@ -1309,7 +1309,7 @@ trace_printf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...)
 #endif
   va_list ap;
 
-  VA_START (ap, fmt);
+  va_start (ap, fmt);
 #if !defined __STDC__ && !defined ALMOST_STDC
   sd = va_arg (ap, SIM_DESC);
   cpu = va_arg (ap, sim_cpu *);
@@ -1330,7 +1330,7 @@ debug_printf (sim_cpu *cpu, const char *fmt, ...)
 #endif
   va_list ap;
 
-  VA_START (ap, fmt);
+  va_start (ap, fmt);
 #if !defined __STDC__ && !defined ALMOST_STDC
   cpu = va_arg (ap, sim_cpu *);
   fmt = va_arg (ap, const char *);

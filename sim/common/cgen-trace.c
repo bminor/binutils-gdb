@@ -308,7 +308,7 @@ sim_disasm_sprintf (SFILE *f, const char *format, ...)
   int n;
   va_list args;
 
-  VA_START (args, format);
+  va_start (args, format);
 #ifndef __STDC__
   f = va_arg (args, SFILE *);
   format = va_arg (args, char *);

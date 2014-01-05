@@ -173,7 +173,7 @@ xprintf (host_callback *callback, const char *fmt, ...)
 {
   va_list ap;
 
-  VA_START (ap, fmt);
+  va_start (ap, fmt);
 
   (*callback->vprintf_filtered) (callback, fmt, ap);
 
@@ -185,7 +185,7 @@ eprintf (host_callback *callback, const char *fmt, ...)
 {
   va_list ap;
 
-  VA_START (ap, fmt);
+  va_start (ap, fmt);
 
   (*callback->evprintf_filtered) (callback, fmt, ap);
 

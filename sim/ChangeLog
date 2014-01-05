@@ -1,5 +1,11 @@
 2014-01-06  Tom Tromey  <tromey@redhat.com>
 
+	* common/cgen-trace.c: Don't use old VA_* macros.
+	* common/sim-load.c (xprintf): Likewise.
+	* common/sim-trace.c (trace_printf, debug_printf): Likewise.
+
+2014-01-06  Tom Tromey  <tromey@redhat.com>
+
 	* README-HACKING: Don't use PARAMS.
 	* arm/wrapper.c: Don't use PARAMS.
 	* bfin/sim-main.h: Don't use PARAMS.
