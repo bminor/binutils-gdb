@@ -3002,9 +3002,8 @@ set_exceptions_cmd (char *args, int from_tty)
   struct inf *inf = cur_inf ();
   int val = parse_bool_arg (args, "set exceptions");
 
-  if (inf->task && inf->want_exceptions != val)
-    /* Make this take effect immediately in a running process.  */
-    /* XXX */ ;
+  /* Make this take effect immediately in a running process.  */
+  /* XXX */ ;
 
   inf->want_exceptions = val;
 }
