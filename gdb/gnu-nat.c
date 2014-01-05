@@ -2103,7 +2103,7 @@ gnu_create_inferior (struct target_ops *ops,
   struct inf *inf = cur_inf ();
   int pid;
 
-  void trace_me ()
+  void trace_me (void)
   {
     /* We're in the child; make this process stop as soon as it execs.  */
     inf_debug (inf, "tracing self");
