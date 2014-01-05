@@ -87,7 +87,7 @@ int gnu_debug_flag = 0;
 
 /* Forward decls */
 
-struct inf *make_inf ();
+static struct inf *make_inf ();
 void inf_clear_wait (struct inf *inf);
 void inf_cleanup (struct inf *inf);
 void inf_startup (struct inf *inf, int pid);
@@ -637,7 +637,7 @@ _proc_free (struct proc *proc)
 }
 
 
-struct inf *
+static struct inf *
 make_inf (void)
 {
   struct inf *inf = xmalloc (sizeof (struct inf));
@@ -873,7 +873,7 @@ inf_validate_task_sc (struct inf *inf)
    is.  If INF is running, the resume_sc count of INF's threads will
    be modified, and the signal thread will briefly be run to change
    the trace state.  */
-void
+static void
 inf_set_traced (struct inf *inf, int on)
 {
   if (on == inf->traced)
@@ -974,7 +974,7 @@ inf_tid_to_thread (struct inf *inf, int tid)
 }
 
 /* Converts a thread port to a struct proc.  */
-struct proc *
+static struct proc *
 inf_port_to_thread (struct inf *inf, mach_port_t port)
 {
   struct proc *thread = inf->threads;
@@ -1742,7 +1742,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 
 /* Fill in INF's wait field after a task has died without giving us more
    detailed information.  */
-void
+static void
 inf_task_died_status (struct inf *inf)
 {
   warning (_("Pid %d died with unknown exit status, using SIGKILL."),
