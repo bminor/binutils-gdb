@@ -1794,43 +1794,23 @@ do_mach_notify_dead_name (mach_port_t notify, mach_port_t dead_port)
 }
 
 
-static error_t
-ill_rpc (char *fun)
-{
-  warning (_("illegal rpc: %s"), fun);
-  return 0;
-}
+#define ILL_RPC(fun, ...) \
+  kern_return_t fun (__VA_ARGS__) \
+  { \
+    warning (_("illegal rpc: %s"), #fun); \
+    return 0; \
+  }
 
-error_t
-do_mach_notify_no_senders (mach_port_t notify, mach_port_mscount_t count)
-{
-  return ill_rpc ("do_mach_notify_no_senders");
-}
-
-error_t
-do_mach_notify_port_deleted (mach_port_t notify, mach_port_t name)
-{
-  return ill_rpc ("do_mach_notify_port_deleted");
-}
-
-error_t
-do_mach_notify_msg_accepted (mach_port_t notify, mach_port_t name)
-{
-  return ill_rpc ("do_mach_notify_msg_accepted");
-}
-
-error_t
-do_mach_notify_port_destroyed (mach_port_t notify, mach_port_t name)
-{
-  return ill_rpc ("do_mach_notify_port_destroyed");
-}
-
-error_t
-do_mach_notify_send_once (mach_port_t notify)
-{
-  return ill_rpc ("do_mach_notify_send_once");
-}
-
+ILL_RPC (do_mach_notify_no_senders,
+	 mach_port_t notify, mach_port_mscount_t count)
+ILL_RPC (do_mach_notify_port_deleted,
+	 mach_port_t notify, mach_port_t name)
+ILL_RPC (do_mach_notify_msg_accepted,
+	 mach_port_t notify, mach_port_t name)
+ILL_RPC (do_mach_notify_port_destroyed,
+	 mach_port_t notify, mach_port_t name)
+ILL_RPC (do_mach_notify_send_once,
+	 mach_port_t notify)
 
 /* Process_reply server routines.  We only use process_wait_reply.  */
 
@@ -1887,19 +1867,66 @@ S_proc_wait_reply (mach_port_t reply, error_t err,
   return 0;
 }
 
-error_t
-S_proc_setmsgport_reply (mach_port_t reply, error_t err,
-			 mach_port_t old_msg_port)
-{
-  return ill_rpc ("S_proc_setmsgport_reply");
-}
-
-error_t
-S_proc_getmsgport_reply (mach_port_t reply, error_t err, mach_port_t msg_port)
-{
-  return ill_rpc ("S_proc_getmsgport_reply");
-}
-
+ILL_RPC (S_proc_setmsgport_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 mach_port_t oldmsgport)
+ILL_RPC (S_proc_getmsgport_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 mach_port_t msgports)
+ILL_RPC (S_proc_pid2task_reply,
+	 mach_port_t reply_port, kern_return_t return_code, mach_port_t task)
+ILL_RPC (S_proc_task2pid_reply,
+	 mach_port_t reply_port, kern_return_t return_code, pid_t pid)
+ILL_RPC (S_proc_task2proc_reply,
+	 mach_port_t reply_port, kern_return_t return_code, mach_port_t proc)
+ILL_RPC (S_proc_proc2task_reply,
+	 mach_port_t reply_port, kern_return_t return_code, mach_port_t task)
+ILL_RPC (S_proc_pid2proc_reply,
+	 mach_port_t reply_port, kern_return_t return_code, mach_port_t proc)
+ILL_RPC (S_proc_getprocinfo_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 int flags, procinfo_t procinfo, mach_msg_type_number_t procinfoCnt,
+	 data_t threadwaits, mach_msg_type_number_t threadwaitsCnt)
+ILL_RPC (S_proc_getprocargs_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 data_t procargs, mach_msg_type_number_t procargsCnt)
+ILL_RPC (S_proc_getprocenv_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 data_t procenv, mach_msg_type_number_t procenvCnt)
+ILL_RPC (S_proc_getloginid_reply,
+	 mach_port_t reply_port, kern_return_t return_code, pid_t login_id)
+ILL_RPC (S_proc_getloginpids_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 pidarray_t pids, mach_msg_type_number_t pidsCnt)
+ILL_RPC (S_proc_getlogin_reply,
+	 mach_port_t reply_port, kern_return_t return_code, string_t logname)
+ILL_RPC (S_proc_getsid_reply,
+	 mach_port_t reply_port, kern_return_t return_code, pid_t sid)
+ILL_RPC (S_proc_getsessionpgids_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 pidarray_t pgidset, mach_msg_type_number_t pgidsetCnt)
+ILL_RPC (S_proc_getsessionpids_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 pidarray_t pidset, mach_msg_type_number_t pidsetCnt)
+ILL_RPC (S_proc_getsidport_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 mach_port_t sessport)
+ILL_RPC (S_proc_getpgrp_reply,
+	 mach_port_t reply_port, kern_return_t return_code, pid_t pgrp)
+ILL_RPC (S_proc_getpgrppids_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 pidarray_t pidset, mach_msg_type_number_t pidsetCnt)
+ILL_RPC (S_proc_get_tty_reply,
+	 mach_port_t reply_port, kern_return_t return_code, mach_port_t tty)
+ILL_RPC (S_proc_getnports_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 mach_msg_type_number_t nports)
+ILL_RPC (S_proc_is_important_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 boolean_t essential)
+ILL_RPC (S_proc_get_code_reply,
+	 mach_port_t reply_port, kern_return_t return_code,
+	 vm_address_t start_code, vm_address_t end_code)
 
 /* Msg_reply server routines.  We only use msg_sig_post_untraced_reply.  */
 
@@ -1933,12 +1960,8 @@ S_msg_sig_post_untraced_reply (mach_port_t reply, error_t err)
   return 0;
 }
 
-error_t
-S_msg_sig_post_reply (mach_port_t reply, error_t err)
-{
-  return ill_rpc ("S_msg_sig_post_reply");
-}
-
+ILL_RPC (S_msg_sig_post_reply,
+	 mach_port_t reply, error_t err)
 
 /* Returns the number of messages queued for the receive right PORT.  */
 static mach_port_msgcount_t

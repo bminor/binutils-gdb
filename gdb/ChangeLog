@@ -1,5 +1,25 @@
 2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gnu-nat.c (ill_rpc): Remove function; replaced with this...
+	(ILL_RPC): ... new macro.
+	(do_mach_notify_no_senders, do_mach_notify_port_deleted)
+	(do_mach_notify_msg_accepted, do_mach_notify_port_destroyed)
+	(do_mach_notify_send_once, S_proc_setmsgport_reply)
+	(S_proc_getmsgport_reply, S_msg_sig_post_reply): Generate stub
+	functions with ILL_RPC macro.
+	(S_proc_pid2task_reply, S_proc_task2pid_reply)
+	(S_proc_task2proc_reply, S_proc_proc2task_reply)
+	(S_proc_pid2proc_reply, S_proc_getprocinfo_reply)
+	(S_proc_getprocargs_reply, S_proc_getprocenv_reply)
+	(S_proc_getloginid_reply, S_proc_getloginpids_reply)
+	(S_proc_getlogin_reply, S_proc_getsid_reply)
+	(S_proc_getsessionpgids_reply, S_proc_getsessionpids_reply)
+	(S_proc_getsidport_reply, S_proc_getpgrp_reply)
+	(S_proc_getpgrppids_reply, S_proc_get_tty_reply)
+	(S_proc_getnports_reply, S_proc_is_important_reply)
+	(S_proc_get_code_reply): New stub functions, generated with
+	ILL_RPC macro.
+
 	* reply_mig_hack.awk: In phase 5, keep going if we have not yet
 	collected the type check structures.
 
