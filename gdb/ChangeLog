@@ -1,3 +1,7 @@
+2014-01-06  Sasha Smundak  <asmundak@google.com>
+
+	* jit.c: (jit_reader_load_command): Fix JIT reader path creation.
+
 2014-01-06  Tom Tromey  <tromey@redhat.com>
 
 	* doublest.c (convert_doublest_to_floatformat): Use const, not
