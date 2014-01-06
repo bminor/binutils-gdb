@@ -1,3 +1,8 @@
+2014-01-07  Tom Tromey  <tromey@redhat.com>
+
+	* coffgrok.h (coff_ofile): Don't use PARAMS.
+	* nlmheader.y (strerror): Don't use PARAMS.
+
 2013-12-31  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (dump_sections): New list.
