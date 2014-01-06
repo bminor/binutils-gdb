@@ -1,3 +1,7 @@
+2014-01-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* nds32-asm.c (parse_operand): Fix out-of-range integer constant.
+
 2013-12-17  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* nds32-dis.c (sr_map): Add system register table for disassembling.
