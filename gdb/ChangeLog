@@ -1,3 +1,7 @@
+2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* reply_mig_hack.awk: Don't expect to see the auto keyword.
+
 2014-02-14  Doug Evans  <dje@google.com>
 
 	* target.c (target_write_partial): Fix result type.
