@@ -57,21 +57,6 @@ struct gdb_bfd_section_data
 
 static htab_t all_bfds;
 
-/* See gdb_bfd.h.  */
-
-void
-gdb_bfd_stash_filename (struct bfd *abfd)
-{
-  char *name = bfd_get_filename (abfd);
-  char *data;
-
-  data = bfd_alloc (abfd, strlen (name) + 1);
-  strcpy (data, name);
-
-  /* Unwarranted chumminess with BFD.  */
-  abfd->filename = data;
-}
-
 /* An object of this type is stored in each BFD's user data.  */
 
 struct gdb_bfd_data
@@ -204,7 +189,6 @@ gdb_bfd_open (const char *name, const char *target, int fd)
   gdb_assert (!*slot);
   *slot = abfd;
 
-  gdb_bfd_stash_filename (abfd);
   gdb_bfd_ref (abfd);
   return abfd;
 }
@@ -490,10 +474,7 @@ gdb_bfd_fopen (const char *filename, const char *target, const char *mode,
   bfd *result = bfd_fopen (filename, target, mode, fd);
 
   if (result)
-    {
-      gdb_bfd_stash_filename (result);
-      gdb_bfd_ref (result);
-    }
+    gdb_bfd_ref (result);
 
   return result;
 }
@@ -506,10 +487,7 @@ gdb_bfd_openr (const char *filename, const char *target)
   bfd *result = bfd_openr (filename, target);
 
   if (result)
-    {
-      gdb_bfd_stash_filename (result);
-      gdb_bfd_ref (result);
-    }
+    gdb_bfd_ref (result);
 
   return result;
 }
@@ -522,10 +500,7 @@ gdb_bfd_openw (const char *filename, const char *target)
   bfd *result = bfd_openw (filename, target);
 
   if (result)
-    {
-      gdb_bfd_stash_filename (result);
-      gdb_bfd_ref (result);
-    }
+    gdb_bfd_ref (result);
 
   return result;
 }
@@ -553,10 +528,7 @@ gdb_bfd_openr_iovec (const char *filename, const char *target,
 				 pread_func, close_func, stat_func);
 
   if (result)
-    {
-      gdb_bfd_ref (result);
-      gdb_bfd_stash_filename (result);
-    }
+    gdb_bfd_ref (result);
 
   return result;
 }
@@ -603,10 +575,7 @@ gdb_bfd_fdopenr (const char *filename, const char *target, int fd)
   bfd *result = bfd_fdopenr (filename, target, fd);
 
   if (result)
-    {
-      gdb_bfd_ref (result);
-      gdb_bfd_stash_filename (result);
-    }
+    gdb_bfd_ref (result);
 
   return result;
 }

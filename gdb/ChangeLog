@@ -1,3 +1,20 @@
+2014-01-07  Hui Zhu  <hui@codesourcery.com>
+
+	* gdb_bfd.c (gdb_bfd_stash_filename): Removed.
+	(gdb_bfd_open): Removed gdb_bfd_stash_filename.
+	(gdb_bfd_fopen): Ditto.
+	(gdb_bfd_openr): Ditto.
+	(gdb_bfd_openw): Ditto.
+	(gdb_bfd_openr_iovec): Ditto.
+	(gdb_bfd_fdopenr): Ditto.
+	* gdb_bfd.h (gdb_bfd_stash_filename): Removed.
+	* solib-aix.c (solib_aix_bfd_open): Alloc object_bfd->filename
+	with xstrdup.
+	* solib-darwin.c (darwin_bfd_open): Alloc res->filename
+	with xstrdup.
+	* symfile-mem.c (symbol_file_add_from_memory): Removed
+	gdb_bfd_stash_filename.
+
 2014-01-03  Doug Evans  <dje@google.com>
 
 	* nat/linux-waitpid.c (linux_debug): Remove extraneous \n from
