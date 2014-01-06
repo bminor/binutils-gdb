@@ -1,5 +1,8 @@
 2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* reply_mig_hack.awk: In phase 5, keep going if we have not yet
+	collected the type check structures.
+
 	* reply_mig_hack.awk: Don't expect to see the auto keyword.
 
 2014-02-14  Doug Evans  <dje@google.com>

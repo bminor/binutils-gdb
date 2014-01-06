@@ -92,6 +92,12 @@ parse_phase == 5 && /^[ \t]*mig_external kern_return_t/ {
 }
 
 parse_phase == 5 && /^#if[ \t]TypeCheck/ {
+  # Keep going if we have not yet collected the type check structures.
+  if (num_checks == 0)
+    {
+      print; next;
+    }
+
   # The first args type checking statement; we need to insert our chunk of
   # code that bypasses all the type checks if this is an error return, after
   # which we're done until we get to the next function.  Handily, the size
