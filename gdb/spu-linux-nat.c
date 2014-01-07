@@ -610,6 +610,8 @@ spu_can_use_hw_breakpoint (int type, int cnt, int othertype)
   return 0;
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_spu_nat;
 
 /* Initialize SPU native target.  */
 void 
