@@ -379,7 +379,8 @@ spu_symbol_file_add_from_memory (int inferior_fd)
     {
       struct cleanup *cleanup = make_cleanup_bfd_unref (nbfd);
 
-      symbol_file_add_from_bfd (nbfd, SYMFILE_VERBOSE | SYMFILE_MAINLINE,
+      symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd),
+				SYMFILE_VERBOSE | SYMFILE_MAINLINE,
 				NULL, 0, NULL);
       do_cleanups (cleanup);
     }
