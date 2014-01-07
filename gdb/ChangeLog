@@ -1,3 +1,13 @@
+2014-01-08  Pierre Muller  <muller@sourceware.org>
+
+	Fix PR16201.
+	* coff-pe-read.c (struct read_pe_section_data): Add index field.
+	(add_pe_exported_sym): Use SECTION_DATA->INDEX for call
+	to prim_record_mininal_symbol_and_info.
+	(add_pe_forwarded_sym): Use known section number of forwarded symbol
+	in call to prim_record_minimal_symbol_and_info.
+	(read_pe_exported_syms): Set index field of section_data.
+
 2014-01-07  Andrew Pinski  <apinski@cavium.com>
 
 	* features/aarch64-core.xml (cpsr): Change to be 64bit.
