@@ -1,3 +1,7 @@
+2014-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/source-dir.exp: New file.
+
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/pp-rec-component.exp, gdb.ada/pp-rec-component.py,

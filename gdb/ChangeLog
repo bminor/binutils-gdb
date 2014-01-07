@@ -1,3 +1,8 @@
+2014-01-07  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* source.c (add_path): Fix check for duplicated paths in the previously
+	included paths.
+
 2014-01-07  Honggyu Kim  <hong.gyu.kim@lge.com>
 
 	* ada-lang.c: Remove duplicated include statements.
