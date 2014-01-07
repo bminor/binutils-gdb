@@ -45,8 +45,6 @@ osdata_parse (const char *xml)
 
 #else /* HAVE_LIBEXPAT */
 
-#include "xml-support.h"
-
 /* Internal parsing data passed to all XML callbacks.  */
 struct osdata_parsing_data
   {

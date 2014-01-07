@@ -57,7 +57,6 @@
 #include "stack.h"
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
-#include "target.h"
 
 #include <sys/types.h>
 #include <fcntl.h>

@@ -46,8 +46,6 @@
 
 #include "floatformat.h"
 
-#include "target.h"
-
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 

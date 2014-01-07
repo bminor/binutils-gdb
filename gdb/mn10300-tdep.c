@@ -26,7 +26,6 @@
 #include "gdb_assert.h"
 #include "gdbcore.h"	/* For write_memory_unsigned_integer.  */
 #include "value.h"
-#include "gdbtypes.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"

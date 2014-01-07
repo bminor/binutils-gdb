@@ -66,7 +66,6 @@
 #include "continuations.h"
 #include "stack.h"
 #include "skip.h"
-#include "gdb_regex.h"
 #include "ax-gdb.h"
 #include "dummy-frame.h"
 

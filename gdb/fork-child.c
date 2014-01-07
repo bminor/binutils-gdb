@@ -27,7 +27,6 @@
 #include "gdb_wait.h"
 #include "gdb_vfork.h"
 #include "gdbcore.h"
-#include "terminal.h"
 #include "gdbthread.h"
 #include "command.h" /* for dont_repeat () */
 #include "gdbcmd.h"

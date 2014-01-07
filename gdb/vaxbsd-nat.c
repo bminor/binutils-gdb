@@ -98,7 +98,6 @@ vaxbsd_store_inferior_registers (struct target_ops *ops,
 
 /* Support for debugging kernel virtual memory images.  */
 
-#include <sys/types.h>
 #include <machine/pcb.h>
 
 #include "bsd-kvm.h"

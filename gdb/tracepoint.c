@@ -45,7 +45,6 @@
 #include "filenames.h"
 #include "gdbthread.h"
 #include "stack.h"
-#include "gdbcore.h"
 #include "remote.h"
 #include "source.h"
 #include "ax.h"
@@ -55,7 +54,6 @@
 #include "cli/cli-utils.h"
 #include "probe.h"
 #include "ctf.h"
-#include "completer.h"
 #include "filestuff.h"
 
 /* readline include files */

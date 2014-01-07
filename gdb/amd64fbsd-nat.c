@@ -95,7 +95,6 @@ static int amd64fbsd32_r_reg_offset[I386_NUM_GREGS] =
 
 /* Support for debugging kernel virtual memory images.  */
 
-#include <sys/types.h>
 #include <machine/pcb.h>
 #include <osreldate.h>
 

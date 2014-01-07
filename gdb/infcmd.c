@@ -32,7 +32,6 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "language.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "completer.h"
 #include "ui-out.h"

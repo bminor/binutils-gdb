@@ -39,10 +39,8 @@
 #include <errno.h>
 #include <string.h>
 #include "gdb_assert.h"
-#include "cp-support.h"
 #include "observer.h"
 #include "objfiles.h"
-#include "symtab.h"
 #include "exceptions.h"
 
 extern unsigned int overload_debug;

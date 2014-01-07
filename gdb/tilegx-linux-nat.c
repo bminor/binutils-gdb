@@ -30,14 +30,11 @@
 
 #include <sys/procfs.h>
 
+/* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
-#include <sys/ptrace.h>
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
-
-/* Defines ps_err_e, struct ps_prochandle.  */
-#include "gdb_proc_service.h"
 
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
    the register sets in `struct user' that is used for a.out

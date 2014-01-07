@@ -29,7 +29,6 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"
-#include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "dwarf2-frame.h"

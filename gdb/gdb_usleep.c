@@ -18,7 +18,6 @@
 #include "defs.h"
 #include "gdb_usleep.h"
 #include "gdb_select.h"
-#include "gdb_usleep.h"
 
 #include <sys/time.h>
 

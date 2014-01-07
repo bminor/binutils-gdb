@@ -37,7 +37,6 @@
 #endif
 #include <sys/types.h>
 #include <sys/time.h>
-#include <signal.h>
 #include <time.h>
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"

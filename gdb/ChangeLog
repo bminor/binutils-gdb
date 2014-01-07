@@ -1,3 +1,44 @@
+2014-01-07  Honggyu Kim  <hong.gyu.kim@lge.com>
+
+	* ada-lang.c: Remove duplicated include statements.
+	* alphabsd-nat.c: Ditto.
+	* amd64-darwin-tdep.c: Ditto.
+	* amd64fbsd-nat.c: Ditto.
+	* auto-load.c: Ditto.
+	* ax-gdb.c: Ditto.
+	* breakpoint.c: Ditto.
+	* dbxread.c: Ditto.
+	* fork-child.c: Ditto.
+	* gdb_usleep.c: Ditto.
+	* i386-darwin-tdep.c: Ditto.
+	* i386fbsd-nat.c: Ditto.
+	* infcmd.c: Ditto.
+	* inferior.c: Ditto.
+	* jv-lang.c: Ditto.
+	* linux-nat.c: Ditto.
+	* linux-tdep.c: Ditto.
+	* m68kbsd-nat.c: Ditto.
+	* m68klinux-nat.c: Ditto.
+	* microblaze-tdep.c: Ditto.
+	* mips-linux-tdep.c: Ditto.
+	* mn10300-tdep.c: Ditto.
+	* nto-tdep.c: Ditto.
+	* opencl-lang.c: Ditto.
+	* osdata.c: Ditto.
+	* printcmd.c: Ditto.
+	* regcache.c: Ditto.
+	* remote-m32r-sdi.c: Ditto.
+	* remote.c: Ditto.
+	* symfile.c: Ditto.
+	* symtab.c: Ditto.
+	* tilegx-linux-nat.c: Ditto.
+	* tilegx-tdep.c: Ditto.
+	* tracepoint.c: Ditto.
+	* valops.c: Ditto.
+	* vaxbsd-nat.c: Ditto.
+	* windows-nat.c: Ditto.
+	* xtensa-tdep.c: Ditto.
+
 2014-01-07  Yao Qi  <yao@codesourcery.com>
 
 	* spu-linux-nat.c (_initialize_spu_nat): Declare.

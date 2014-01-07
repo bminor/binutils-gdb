@@ -32,8 +32,6 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 
-#include <string.h>
-
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>
 #endif

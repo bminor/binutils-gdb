@@ -36,7 +36,6 @@
 #include "gdb_vecs.h"
 #include "readline/tilde.h"
 #include "completer.h"
-#include "observer.h"
 #include "fnmatch.h"
 #include "top.h"
 #include "filestuff.h"

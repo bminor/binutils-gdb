@@ -27,7 +27,6 @@
 #include "gdbthread.h"
 #include "ui-out.h"
 #include "observer.h"
-#include "gdbthread.h"
 #include "gdbcore.h"
 #include "symfile.h"
 #include "environ.h"

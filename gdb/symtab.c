@@ -60,7 +60,6 @@
 #include "solist.h"
 #include "macrotab.h"
 #include "macroscope.h"
-#include "ada-lang.h"
 
 #include "psymtab.h"
 #include "parser-defs.h"

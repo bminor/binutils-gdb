@@ -41,7 +41,6 @@
 #include "linux-tdep.h"
 #include "objfiles.h"
 #include "solib-svr4.h"
-#include "symtab.h"
 #include "tilegx-tdep.h"
 #include "opcode/tilegx.h"
 

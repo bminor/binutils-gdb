@@ -58,7 +58,6 @@
 #include "block.h"
 
 #include "gdb_assert.h"
-#include <string.h>
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not

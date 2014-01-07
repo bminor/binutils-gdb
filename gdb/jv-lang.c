@@ -23,8 +23,6 @@
 #include "expression.h"
 #include "parser-defs.h"
 #include "language.h"
-#include "gdbtypes.h"
-#include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include <string.h>

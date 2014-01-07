@@ -43,7 +43,6 @@
 #include <sys/cygwin.h>
 #include <cygwin/version.h>
 #endif
-#include <signal.h>
 
 #include "buildsym.h"
 #include "filenames.h"

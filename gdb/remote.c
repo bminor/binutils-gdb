@@ -46,7 +46,6 @@
 #include "gdb_bfd.h"
 #include "filestuff.h"
 
-#include <ctype.h>
 #include <sys/time.h>
 
 #include "event-loop.h"

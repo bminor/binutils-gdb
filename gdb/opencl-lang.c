@@ -24,7 +24,6 @@
 #include "symtab.h"
 #include "expression.h"
 #include "parser-defs.h"
-#include "symtab.h"
 #include "language.h"
 #include "varobj.h"
 #include "c-lang.h"

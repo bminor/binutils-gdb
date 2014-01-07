@@ -157,7 +157,6 @@ alphabsd_store_inferior_registers (struct target_ops *ops,
 
 /* Support for debugging kernel virtual memory images.  */
 
-#include <sys/types.h>
 #include <sys/signal.h>
 #include <machine/pcb.h>
 

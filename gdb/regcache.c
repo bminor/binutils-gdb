@@ -26,7 +26,6 @@
 #include "reggroups.h"
 #include "gdb_assert.h"
 #include <string.h>
-#include "gdbcmd.h"		/* For maintenanceprintlist.  */
 #include "observer.h"
 #include "exceptions.h"
 #include "remote.h"

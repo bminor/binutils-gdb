@@ -32,7 +32,6 @@
 #include "cli/cli-utils.h"
 #include "arch-utils.h"
 #include "gdb_obstack.h"
-#include "cli/cli-utils.h"
 
 #include <ctype.h>
 

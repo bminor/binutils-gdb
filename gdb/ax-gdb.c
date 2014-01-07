@@ -34,7 +34,6 @@
 #include "block.h"
 #include "regcache.h"
 #include "user-regs.h"
-#include "language.h"
 #include "dictionary.h"
 #include "breakpoint.h"
 #include "tracepoint.h"
