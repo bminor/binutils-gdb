@@ -1,3 +1,9 @@
+2014-01-07  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* target.c (return_null): Define.
+	(update_current_target): Use it instead of return_zero for
+	functions that return a pointer.
+
 2014-01-07  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* source.c (add_path): Fix check for duplicated paths in the previously

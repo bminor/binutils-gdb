@@ -64,6 +64,8 @@ static int return_one (void);
 
 static int return_minus_one (void);
 
+static void *return_null (void);
+
 void target_ignore (void);
 
 static void target_command (char *, int);
@@ -806,10 +808,10 @@ update_current_target (void)
 	    return_zero);
   de_fault (to_extra_thread_info,
 	    (char *(*) (struct thread_info *))
-	    return_zero);
+	    return_null);
   de_fault (to_thread_name,
 	    (char *(*) (struct thread_info *))
-	    return_zero);
+	    return_null);
   de_fault (to_stop,
 	    (void (*) (ptid_t))
 	    target_ignore);
@@ -819,7 +821,7 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_pid_to_exec_file,
 	    (char *(*) (int))
-	    return_zero);
+	    return_null);
   de_fault (to_async,
 	    (void (*) (void (*) (enum inferior_event_type, void*), void*))
 	    tcomplain);
@@ -918,7 +920,7 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_traceframe_info,
 	    (struct traceframe_info * (*) (void))
-	    return_zero);
+	    return_null);
   de_fault (to_supports_evaluation_of_breakpoint_conditions,
 	    (int (*) (void))
 	    return_zero);
@@ -3632,6 +3634,12 @@ static int
 return_minus_one (void)
 {
   return -1;
+}
+
+static void *
+return_null (void)
+{
+  return 0;
 }
 
 /*
