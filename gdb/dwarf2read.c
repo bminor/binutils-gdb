@@ -12982,10 +12982,11 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
-  if (producer_is_icc (cu))
+  if (producer_is_icc (cu) && (TYPE_LENGTH (type) == 0))
     {
       /* ICC does not output the required DW_AT_declaration
 	 on incomplete types, but gives them a size of zero.  */
+      TYPE_STUB (type) = 1;
     }
   else
     TYPE_STUB_SUPPORTED (type) = 1;
