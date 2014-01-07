@@ -359,7 +359,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   ULONGEST addr;
   struct bfd *nbfd;
 
-  char id[128];
+  gdb_byte id[128];
   char annex[32];
   int len;
 
@@ -369,7 +369,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   if (len <= 0 || len >= sizeof id)
     return;
   id[len] = 0;
-  addr = strtoulst (id, NULL, 16);
+  addr = strtoulst ((const char *) id, NULL, 16);
   if (!addr)
     return;
 
@@ -596,7 +596,7 @@ spu_xfer_partial (struct target_ops *ops,
       if (spu_proc_xfer_spu (lslr_annex, buf, NULL, 0, sizeof buf) <= 0)
 	return ret;
 
-      lslr = strtoulst (buf, NULL, 16);
+      lslr = strtoulst ((const char *) buf, NULL, 16);
       return spu_proc_xfer_spu (mem_annex, readbuf, writebuf,
 				offset & lslr, len);
     }

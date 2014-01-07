@@ -1,5 +1,11 @@
 2014-01-08  Yao Qi  <yao@codesourcery.com>
 
+	* spu-linux-nat.c (spu_symbol_file_add_from_memory): Change
+	type of 'id' to gdb_byte.  Cast 'id' to 'const char *'.
+	(spu_xfer_partial): Cast 'buf' to 'const char *'.
+
+2014-01-08  Yao Qi  <yao@codesourcery.com>
+
 	* spu-linux-nat.c (spu_symbol_file_add_from_memory): Pass
 	return value of bfd_get_filename to symbol_file_add_from_bfd.
 
