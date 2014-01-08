@@ -2635,9 +2635,6 @@ handle_status (char *own_buf)
   /* GDB is connected, don't forward events to the target anymore.  */
   for_each_inferior (&all_processes, gdb_reattached_process);
 
-  discard_queued_stop_replies (-1);
-  for_each_inferior (&all_threads, clear_pending_status_callback);
-
   /* In non-stop mode, we must send a stop reply for each stopped
      thread.  In all-stop mode, just send one for the first stopped
      thread we find.  */
@@ -3139,6 +3136,12 @@ main (int argc, char *argv[])
       fprintf (stderr,
 	       "Remote side has terminated connection.  "
 	       "GDBserver will reopen the connection.\n");
+
+      /* Get rid of any pending statuses.  An eventual reconnection
+	 (by the same GDB instance or another) will refresh all its
+	 state from scratch.  */
+      discard_queued_stop_replies (-1);
+      for_each_inferior (&all_threads, clear_pending_status_callback);
 
       if (tracing)
 	{

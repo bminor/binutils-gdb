@@ -1,5 +1,11 @@
 2014-01-08  Pedro Alves  <palves@redhat.com>
 
+	* server.c (handle_status): Don't discard previous queued stop
+	replies or thread's pending status here.
+	(main) <disconnection>: Do it here instead.
+
+2014-01-08  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (struct thread_info) <status_pending_p>: New field.
 	* server.c (visit_actioned_threads, handle_pending_status): New
 	function.
