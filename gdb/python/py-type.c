@@ -1,6 +1,6 @@
 /* Python interface to types.
 
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -412,6 +412,18 @@ static PyObject *
 typy_items (PyObject *self, PyObject *args)
 {
   return typy_fields_items (self, iter_items);
+}
+
+/* Return the type's name, or None.  */
+
+static PyObject *
+typy_get_name (PyObject *self, void *closure)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  if (TYPE_NAME (type) == NULL)
+    Py_RETURN_NONE;
+  return PyString_FromString (TYPE_NAME (type));
 }
 
 /* Return the type's tag, or None.  */
@@ -1395,6 +1407,8 @@ static PyGetSetDef type_object_getset[] =
 {
   { "code", typy_get_code, NULL,
     "The code for this type.", NULL },
+  { "name", typy_get_name, NULL,
+    "The name for this type, or None.", NULL },
   { "sizeof", typy_get_sizeof, NULL,
     "The size of this type, in bytes.", NULL },
   { "tag", typy_get_tag, NULL,

@@ -1,6 +1,6 @@
 /* Native-dependent code for Alpha BSD's.
 
-   Copyright (C) 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -157,7 +157,6 @@ alphabsd_store_inferior_registers (struct target_ops *ops,
 
 /* Support for debugging kernel virtual memory images.  */
 
-#include <sys/types.h>
 #include <sys/signal.h>
 #include <machine/pcb.h>
 

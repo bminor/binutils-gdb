@@ -1,6 +1,6 @@
 /* SystemTap probe support for GDB.
 
-   Copyright (C) 2012-2013 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -102,7 +102,9 @@ struct stap_probe
      it.  */
   CORE_ADDR sem_addr;
 
+  /* One if the arguments have been parsed.  */
   unsigned int args_parsed : 1;
+
   union
     {
       const char *text;
@@ -370,15 +372,13 @@ stap_is_generic_prefix (struct gdbarch *gdbarch, const char *s,
     }
 
   for (p = prefixes; *p != NULL; ++p)
-    {
-      if (strncasecmp (s, *p, strlen (*p)) == 0)
-	{
-	  if (r != NULL)
-	    *r = *p;
+    if (strncasecmp (s, *p, strlen (*p)) == 0)
+      {
+	if (r != NULL)
+	  *r = *p;
 
-	  return 1;
-	}
-    }
+	return 1;
+      }
 
   return 0;
 }
@@ -556,15 +556,12 @@ stap_parse_register_operand (struct stap_parse_info *p)
   /* Simple flag to indicate whether we have seen a minus signal before
      certain number.  */
   int got_minus = 0;
-
   /* Flags to indicate whether this register access is being displaced and/or
      indirected.  */
   int disp_p = 0, indirect_p = 0;
   struct gdbarch *gdbarch = p->gdbarch;
-
   /* Needed to generate the register name as a part of an expression.  */
   struct stoken str;
-
   /* Variables used to extract the register name from the probe's
      argument.  */
   const char *start;
@@ -724,27 +721,23 @@ stap_parse_single_operand (struct stap_parse_info *p)
 
   /* We first try to parse this token as a "special token".  */
   if (gdbarch_stap_parse_special_token_p (gdbarch))
-    {
-      int ret = gdbarch_stap_parse_special_token (gdbarch, p);
+    if (gdbarch_stap_parse_special_token (gdbarch, p) != 0)
+      {
+	/* If the return value of the above function is not zero,
+	   it means it successfully parsed the special token.
 
-      if (ret)
-	{
-	  /* If the return value of the above function is not zero,
-	     it means it successfully parsed the special token.
-
-	     If it is NULL, we try to parse it using our method.  */
-	  return;
-	}
-    }
+	   If it is NULL, we try to parse it using our method.  */
+	return;
+      }
 
   if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+')
     {
       char c = *p->arg;
       int number;
-
       /* We use this variable to do a lookahead.  */
       const char *tmp = p->arg;
 
+      /* Skipping signal.  */
       ++tmp;
 
       /* This is an unary operation.  Here is a list of allowed tokens
@@ -872,6 +865,8 @@ stap_parse_single_operand (struct stap_parse_info *p)
 static void
 stap_parse_argument_conditionally (struct stap_parse_info *p)
 {
+  gdb_assert (gdbarch_stap_is_single_operand_p (p->gdbarch));
+
   if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+' /* Unary.  */
       || isdigit (*p->arg)
       || gdbarch_stap_is_single_operand (p->gdbarch, p->arg))
@@ -913,6 +908,8 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
      parse them depending on the precedence of the operators
      we find.  */
 
+  gdb_assert (p->arg != NULL);
+
   if (p->inside_paren_p)
     p->arg = skip_spaces_const (p->arg);
 
@@ -931,7 +928,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
      This loop shall continue until we run out of characters in the input,
      or until we find a close-parenthesis, which means that we've reached
      the end of a sub-expression.  */
-  while (p->arg && *p->arg && *p->arg != ')' && !isspace (*p->arg))
+  while (*p->arg != '\0' && *p->arg != ')' && !isspace (*p->arg))
     {
       const char *tmp_exp_buf;
       enum exp_opcode opcode;
@@ -967,7 +964,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
 
       /* While we still have operators, try to parse another
 	 right-side, but using the current right-side as a left-side.  */
-      while (*p->arg && stap_is_operator (p->arg))
+      while (*p->arg != '\0' && stap_is_operator (p->arg))
 	{
 	  enum exp_opcode lookahead_opcode;
 	  enum stap_operand_prec lookahead_prec;
@@ -1080,10 +1077,10 @@ stap_parse_probe_arguments (struct stap_probe *probe, struct gdbarch *gdbarch)
   probe->args_parsed = 1;
   probe->args_u.vec = NULL;
 
-  if (!cur || !*cur || *cur == ':')
+  if (cur == NULL || *cur == '\0' || *cur == ':')
     return;
 
-  while (*cur)
+  while (*cur != '\0')
     {
       struct stap_probe_arg arg;
       enum stap_arg_bitness b;
@@ -1099,7 +1096,7 @@ stap_parse_probe_arguments (struct stap_probe *probe, struct gdbarch *gdbarch)
 	 Where `N' can be [+,-][4,8].  This is not mandatory, so
 	 we check it here.  If we don't find it, go to the next
 	 state.  */
-      if ((*cur == '-' && cur[1] && cur[2] != '@')
+      if ((*cur == '-' && cur[1] != '\0' && cur[2] != '@')
 	  && cur[1] != '@')
 	arg.bitness = STAP_ARG_BITNESS_UNDEFINED;
       else
@@ -1501,7 +1498,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   ret->p.name = memchr (ret->p.provider, '\0',
 			(char *) el->data + el->size - ret->p.provider);
   /* Making sure there is a name.  */
-  if (!ret->p.name)
+  if (ret->p.name == NULL)
     {
       complaint (&symfile_complaints, _("corrupt probe name when "
 					"reading `%s'"),
@@ -1526,7 +1523,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   ret->p.address += (ANOFFSET (objfile->section_offsets,
 			       SECT_OFF_TEXT (objfile))
 		     + base - base_ref);
-  if (ret->sem_addr)
+  if (ret->sem_addr != 0)
     ret->sem_addr += (ANOFFSET (objfile->section_offsets,
 				SECT_OFF_DATA (objfile))
 		      + base - base_ref);
@@ -1539,9 +1536,9 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   if (probe_args != NULL)
     ++probe_args;
 
-  if (probe_args == NULL || (memchr (probe_args, '\0',
-				     (char *) el->data + el->size - ret->p.name)
-			     != el->data + el->size - 1))
+  if (probe_args == NULL
+      || (memchr (probe_args, '\0', (char *) el->data + el->size - ret->p.name)
+	  != el->data + el->size - 1))
     {
       complaint (&symfile_complaints, _("corrupt probe argument when "
 					"reading `%s'"),
@@ -1582,7 +1579,7 @@ get_stap_base_address (bfd *obfd, bfd_vma *base)
 
   bfd_map_over_sections (obfd, get_stap_base_address_1, (void *) &ret);
 
-  if (!ret)
+  if (ret == NULL)
     {
       complaint (&symfile_complaints, _("could not obtain base address for "
 					"SystemTap section on objfile `%s'."),
@@ -1590,7 +1587,7 @@ get_stap_base_address (bfd *obfd, bfd_vma *base)
       return 0;
     }
 
-  if (base)
+  if (base != NULL)
     *base = ret->vma;
 
   return 1;
@@ -1617,7 +1614,7 @@ stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
       return;
     }
 
-  if (!elf_tdata (obfd)->sdt_note_head)
+  if (elf_tdata (obfd)->sdt_note_head == NULL)
     {
       /* There isn't any probe here.  */
       return;
@@ -1631,7 +1628,9 @@ stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
     }
 
   /* Parsing each probe's information.  */
-  for (iter = elf_tdata (obfd)->sdt_note_head; iter; iter = iter->next)
+  for (iter = elf_tdata (obfd)->sdt_note_head;
+       iter != NULL;
+       iter = iter->next)
     {
       /* We first have to handle all the information about the
 	 probe which is present in the section.  */
@@ -1656,7 +1655,7 @@ stap_relocate (struct probe *probe_generic, CORE_ADDR delta)
   gdb_assert (probe_generic->pops == &stap_probe_ops);
 
   probe->p.address += delta;
-  if (probe->sem_addr)
+  if (probe->sem_addr != 0)
     probe->sem_addr += delta;
 }
 
@@ -1691,7 +1690,7 @@ stap_gen_info_probes_table_values (struct probe *probe_generic,
 
   gdbarch = get_objfile_arch (probe->p.objfile);
 
-  if (probe->sem_addr)
+  if (probe->sem_addr != 0)
     val = print_core_address (gdbarch, probe->sem_addr);
 
   VEC_safe_push (const_char_ptr, *ret, val);

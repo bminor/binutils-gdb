@@ -36,9 +36,9 @@
 
 /* Forward declarations */
 
-extern uint32	_get_sw PARAMS ((void));
-extern uint32	_get_cw PARAMS ((void));
-static void	__setfpucw PARAMS ((unsigned short fpu_control));
+extern uint32	_get_sw (void);
+extern uint32	_get_cw (void);
+static void	__setfpucw (unsigned short fpu_control);
 
 /* This host dependent routine should return the accrued exceptions */
 int

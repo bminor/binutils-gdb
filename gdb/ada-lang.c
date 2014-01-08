@@ -1,6 +1,6 @@
 /* Ada language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,7 +64,6 @@
 #include "value.h"
 #include "mi/mi-common.h"
 #include "arch-utils.h"
-#include "exceptions.h"
 #include "cli/cli-utils.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for

@@ -1,6 +1,6 @@
 /* Handle JIT code generation in the inferior for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -214,7 +214,7 @@ jit_reader_load_command (char *args, int from_tty)
   if (IS_ABSOLUTE_PATH (args))
     so_name = xstrdup (args);
   else
-    so_name = xstrprintf ("%s%s%s", SLASH_STRING, jit_reader_dir, args);
+    so_name = xstrprintf ("%s%s%s", jit_reader_dir, SLASH_STRING, args);
   prev_cleanup = make_cleanup (xfree, so_name);
 
   loaded_jit_reader = jit_reader_load (so_name);

@@ -1,6 +1,6 @@
 /* Handle OSF/1, Digital UNIX, and Tru64 shared libraries
    for GDB, the GNU Debugger.
-   Copyright (C) 1993-2013 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

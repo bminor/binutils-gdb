@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling windows child processes, for GDB.
 
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
 
@@ -43,7 +43,6 @@
 #include <sys/cygwin.h>
 #include <cygwin/version.h>
 #endif
-#include <signal.h>
 
 #include "buildsym.h"
 #include "filenames.h"

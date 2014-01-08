@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
 
-   Copyright 1993-2013 Free Software Foundation, Inc.
+   Copyright 1993-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -4184,11 +4184,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 			== (SEC_LOAD | SEC_HAS_CONTENTS))
 		      break;
 
-		  if (i == (unsigned) -1)
-		    continue;
-
-		  if (m->sections[i]->vma + m->sections[i]->size
-		      >= info->relro_end)
+		  if (i != (unsigned) -1)
 		    break;
 		}
 	    }
@@ -4313,6 +4309,9 @@ elf_sort_sections (const void *arg1, const void *arg2)
 static file_ptr
 vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
 {
+  /* PR binutils/16199: Handle an alignment of zero.  */
+  if (maxpagesize == 0)
+    maxpagesize = 1;
   return ((vma - off) % maxpagesize);
 }
 
@@ -4377,6 +4376,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int alloc;
   unsigned int i, j;
   bfd_vma header_pad = 0;
+  bfd_vma relro_start = 0, relro_end = 0;
 
   if (link_info == NULL
       && !_bfd_elf_map_sections_to_segments (abfd, link_info))
@@ -4446,6 +4446,23 @@ assign_file_positions_for_load_sections (bfd *abfd,
   else
     header_pad -= off;
   off += header_pad;
+
+  /* Get start and end of PT_GNU_RELRO segment.  */
+  if (link_info != NULL)
+    {
+      relro_start = link_info->relro_start;
+      relro_end = link_info->relro_end;
+    }
+  else
+    {
+      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
+	if (m->p_type == PT_GNU_RELRO)
+	  {
+	    relro_start = m->p_paddr;
+	    relro_end = relro_start + m->p_size;
+	    break;
+	  }
+    }
 
   for (m = elf_seg_map (abfd), p = phdrs, j = 0;
        m != NULL;
@@ -4789,6 +4806,23 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		p->p_flags |= PF_W;
 	    }
 	}
+
+      if (relro_start != 0
+	  && p->p_type == PT_LOAD
+	  && p->p_vaddr >= relro_start)
+	{
+	  /* If PT_LOAD segment doesn't fit PT_GNU_RELRO segment,
+	     adjust its p_filesz and p_memsz.  */
+	  if (p->p_vaddr + p->p_filesz < relro_end)
+	    {
+	      bfd_vma adjust = relro_end - (p->p_vaddr + p->p_filesz);
+	      p->p_filesz += adjust;
+	      off += adjust;
+	    }
+	  if (p->p_vaddr + p->p_memsz < relro_end)
+	    p->p_memsz += relro_end - (p->p_vaddr + p->p_memsz);
+	}
+
       off -= off_adjust;
 
       /* Check that all sections are in a PT_LOAD segment.

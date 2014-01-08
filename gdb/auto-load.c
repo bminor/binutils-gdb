@@ -1,6 +1,6 @@
 /* GDB routines for supporting auto-loaded scripts.
 
-   Copyright (C) 2012-2013 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,7 +36,6 @@
 #include "gdb_vecs.h"
 #include "readline/tilde.h"
 #include "completer.h"
-#include "observer.h"
 #include "fnmatch.h"
 #include "top.h"
 #include "filestuff.h"

@@ -1,6 +1,6 @@
 /* Multi-process control for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +27,6 @@
 #include "gdbthread.h"
 #include "ui-out.h"
 #include "observer.h"
-#include "gdbthread.h"
 #include "gdbcore.h"
 #include "symfile.h"
 #include "environ.h"

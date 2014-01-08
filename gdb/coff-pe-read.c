@@ -2,7 +2,7 @@
    convert to internal format, for GDB. Used as a last resort if no
    debugging symbols recognized.
 
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -53,6 +53,7 @@ struct read_pe_section_data
   unsigned long rva_end;	/* End offset within the pe.  */
   enum minimal_symbol_type ms_type;	/* Type to assign symbols in
 					   section.  */
+  unsigned int index;		/* BFD section number.  */
   char *section_name;		/* Recorded section name.  */
 };
 
@@ -93,7 +94,7 @@ read_pe_section_index (const char *section_name)
     }
 }
 
-/* Get the index of the named section in our own full arrayi.
+/* Get the index of the named section in our own full array.
    text, data and bss in that order.  Return PE_SECTION_INDEX_INVALID
    if passed an unrecognised section name.  */
 
@@ -175,11 +176,13 @@ add_pe_exported_sym (const char *sym_name,
 			" for entry \"%s\" in dll \"%s\"\n"),
 			section_data->section_name, sym_name, dll_name);
 
-  prim_record_minimal_symbol (qualified_name, vma,
-			      section_data->ms_type, objfile);
+  prim_record_minimal_symbol_and_info (qualified_name, vma,
+				       section_data->ms_type,
+				       section_data->index, objfile);
 
   /* Enter the plain name as well, which might not be unique.  */
-  prim_record_minimal_symbol (bare_name, vma, section_data->ms_type, objfile);
+  prim_record_minimal_symbol_and_info (bare_name, vma, section_data->ms_type,
+				       section_data->index, objfile);
   if (debug_coff_pe_read > 1)
     fprintf_unfiltered (gdb_stdlog, _("Adding exported symbol \"%s\""
 			" in dll \"%s\"\n"), sym_name, dll_name);
@@ -209,6 +212,7 @@ add_pe_forwarded_sym (const char *sym_name, const char *forward_dll_name,
   int forward_func_name_len = strlen (forward_func_name);
   int forward_len = forward_dll_name_len + forward_func_name_len + 2;
   char *forward_qualified_name = alloca (forward_len);
+  short section;
 
   xsnprintf (forward_qualified_name, forward_len, "%s!%s", forward_dll_name,
 	     forward_func_name);
@@ -242,6 +246,7 @@ add_pe_forwarded_sym (const char *sym_name, const char *forward_dll_name,
 
   vma = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
   msymtype = MSYMBOL_TYPE (msymbol.minsym);
+  section = SYMBOL_SECTION (msymbol.minsym);
 
   /* Generate a (hopefully unique) qualified name using the first part
      of the dll name, e.g. KERNEL32!AddAtomA.  This matches the style
@@ -254,10 +259,12 @@ add_pe_forwarded_sym (const char *sym_name, const char *forward_dll_name,
 
   qualified_name = xstrprintf ("%s!%s", dll_name, bare_name);
 
-  prim_record_minimal_symbol (qualified_name, vma, msymtype, objfile);
+  prim_record_minimal_symbol_and_info (qualified_name, vma, msymtype,
+				       section, objfile);
 
   /* Enter the plain name as well, which might not be unique.  */
-  prim_record_minimal_symbol (bare_name, vma, msymtype, objfile);
+  prim_record_minimal_symbol_and_info (bare_name, vma, msymtype,
+				       section, objfile);
   xfree (qualified_name);
   xfree (bare_name);
 
@@ -455,17 +462,25 @@ read_pe_exported_syms (struct objfile *objfile)
       unsigned long characteristics = pe_get32 (dll, secptr1 + 36);
       char sec_name[SCNNMLEN + 1];
       int sectix;
+      unsigned int bfd_section_index;
+      asection *section;
 
       bfd_seek (dll, (file_ptr) secptr1 + 0, SEEK_SET);
       bfd_bread (sec_name, (bfd_size_type) SCNNMLEN, dll);
       sec_name[SCNNMLEN] = '\0';
 
       sectix = read_pe_section_index (sec_name);
+      section = bfd_get_section_by_name (dll, sec_name);
+      if (section)
+	bfd_section_index = section->index;
+      else
+	bfd_section_index = -1;
 
       if (sectix != PE_SECTION_INDEX_INVALID)
 	{
 	  section_data[sectix].rva_start = vaddr;
 	  section_data[sectix].rva_end = vaddr + vsize;
+	  section_data[sectix].index = bfd_section_index;
 	}
       else
 	{
@@ -479,6 +494,7 @@ read_pe_exported_syms (struct objfile *objfile)
 	  section_data[otherix].rva_start = vaddr;
 	  section_data[otherix].rva_end = vaddr + vsize;
 	  section_data[otherix].vma_offset = 0;
+	  section_data[otherix].index = bfd_section_index;
 	  if (characteristics & IMAGE_SCN_CNT_CODE)
 	    section_data[otherix].ms_type = mst_text;
 	  else if (characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA)

@@ -1,3 +1,8 @@
+2014-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbserver.c (gdbserver_version): Set copyright year to 2014.
+	* gdbreplay.c (gdbreplay_version): Likewise.
+
 2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* linux-aarch64-low.c (aarch64_linux_set_debug_regs): Set

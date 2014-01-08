@@ -1,5 +1,5 @@
 /* SPU native-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2006-2013 Free Software Foundation, Inc.
+   Copyright (C) 2006-2014 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -359,7 +359,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   ULONGEST addr;
   struct bfd *nbfd;
 
-  char id[128];
+  gdb_byte id[128];
   char annex[32];
   int len;
 
@@ -369,7 +369,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   if (len <= 0 || len >= sizeof id)
     return;
   id[len] = 0;
-  addr = strtoulst (id, NULL, 16);
+  addr = strtoulst ((const char *) id, NULL, 16);
   if (!addr)
     return;
 
@@ -379,7 +379,8 @@ spu_symbol_file_add_from_memory (int inferior_fd)
     {
       struct cleanup *cleanup = make_cleanup_bfd_unref (nbfd);
 
-      symbol_file_add_from_bfd (nbfd, SYMFILE_VERBOSE | SYMFILE_MAINLINE,
+      symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd),
+				SYMFILE_VERBOSE | SYMFILE_MAINLINE,
 				NULL, 0, NULL);
       do_cleanups (cleanup);
     }
@@ -595,7 +596,7 @@ spu_xfer_partial (struct target_ops *ops,
       if (spu_proc_xfer_spu (lslr_annex, buf, NULL, 0, sizeof buf) <= 0)
 	return ret;
 
-      lslr = strtoulst (buf, NULL, 16);
+      lslr = strtoulst ((const char *) buf, NULL, 16);
       return spu_proc_xfer_spu (mem_annex, readbuf, writebuf,
 				offset & lslr, len);
     }
@@ -610,6 +611,8 @@ spu_can_use_hw_breakpoint (int type, int cnt, int othertype)
   return 0;
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_spu_nat;
 
 /* Initialize SPU native target.  */
 void 

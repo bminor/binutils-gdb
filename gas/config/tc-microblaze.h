@@ -1,6 +1,6 @@
 /* tc-microblaze.h -- Header file for tc-microblaze.c.
 
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2009, 2014 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -37,7 +37,7 @@
    of such expressions */
 #define TC_CONS_FIX_NEW cons_fix_new_microblaze
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) parse_cons_expression_microblaze (EXP, NBYTES)
-extern void parse_cons_expression_microblaze PARAMS ((expressionS *, int));
+extern void parse_cons_expression_microblaze (expressionS *, int);
 
 #define TC_FORCE_RELOCATION_SECTION(FIXP,SEG) 1
 #define UNDEFINED_DIFFERENCE_OK 1

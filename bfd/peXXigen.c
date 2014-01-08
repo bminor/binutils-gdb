@@ -3541,7 +3541,7 @@ rsrc_process_section (bfd * abfd,
 	}
 
       /* Align the data pointer - we assume 1^2 alignment.  */
-      data = (bfd_byte *) (((long) (data + 3)) & ~ 3);
+      data = (bfd_byte *) (((ptrdiff_t) (data + 3)) & ~ 3);
       rva_bias += data - p;
 
       if (data == (dataend - 4))
@@ -3569,7 +3569,7 @@ rsrc_process_section (bfd * abfd,
 
       data = rsrc_parse_directory (abfd, type_tables + indx, data, data,
 				   dataend, rva_bias, NULL);
-      data = (bfd_byte *) (((long) (data + 3)) & ~ 3);
+      data = (bfd_byte *) (((ptrdiff_t) (data + 3)) & ~ 3);
       rva_bias += data - p;
       if (data == (dataend - 4))
 	data = dataend;

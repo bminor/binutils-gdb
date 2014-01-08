@@ -1,6 +1,6 @@
 /* Parser for linespec for the GNU debugger, GDB.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -885,7 +885,7 @@ add_sal_to_sals (struct linespec_state *self,
 	  if (symname != NULL)
 	    canonical->suffix = xstrdup (symname);
 	  else
-	    canonical->suffix = NULL;
+	    canonical->suffix = xstrdup ("<unknown>");
 	  canonical->symtab = NULL;
 	}
     }

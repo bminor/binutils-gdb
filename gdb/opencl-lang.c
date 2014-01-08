@@ -1,5 +1,5 @@
 /* OpenCL language support for GDB, the GNU debugger.
-   Copyright (C) 2010-2013 Free Software Foundation, Inc.
+   Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
    Contributed by Ken Werner <ken.werner@de.ibm.com>.
 
@@ -24,7 +24,6 @@
 #include "symtab.h"
 #include "expression.h"
 #include "parser-defs.h"
-#include "symtab.h"
 #include "language.h"
 #include "varobj.h"
 #include "c-lang.h"

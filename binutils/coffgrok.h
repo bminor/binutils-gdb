@@ -1,5 +1,5 @@
 /* coffgrok.h
-   Copyright 2001, 2002, 2003, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2005, 2007, 2014 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -223,4 +223,4 @@ struct coff_sfile
      struct coff_sfile *sfile;
   };
 
-struct coff_ofile *coff_grok PARAMS ((bfd *));
+struct coff_ofile *coff_grok (bfd *);

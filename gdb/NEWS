@@ -1,7 +1,11 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.6
+*** Changes since GDB 7.7
+
+*** Changes in GDB 7.7
+
+* GDB now supports SystemTap SDT probes on AArch64 GNU/Linux.
 
 * GDB now supports Fission DWP file format version 2.
   http://gcc.gnu.org/wiki/DebugFission
@@ -42,6 +46,7 @@
   ** Line tables representation has been added.
   ** New attribute 'parent_type' for gdb.Field objects.
   ** gdb.Field objects can be used as subscripts on gdb.Value objects.
+  ** New attribute 'name' for gdb.Type objects.
 
 * New targets
 

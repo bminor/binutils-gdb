@@ -1,3 +1,10 @@
+2013-12-23  Bill Maddox  <maddox@google.com>
+
+	* demangle.h (enum gnu_v3_ctor_kinds):
+	Added literal gnu_v3_unified_ctor.
+	(enum gnu_v3_ctor_kinds):
+	Added literal gnu_v3_unified_dtor.
+
 2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 	    Wei-Cheng Wang  <cole945@gmail.com>
 

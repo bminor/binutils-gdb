@@ -1,6 +1,6 @@
 /* Reading symbol files from memory.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -101,14 +101,11 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
     error (_("Failed to read a valid object file image from memory."));
 
   gdb_bfd_ref (nbfd);
+  xfree (bfd_get_filename (nbfd));
   if (name == NULL)
-    nbfd->filename = "shared object read from target memory";
+    nbfd->filename = xstrdup ("shared object read from target memory");
   else
-    {
-      nbfd->filename = name;
-      gdb_bfd_stash_filename (nbfd);
-      xfree (name);
-    }
+    nbfd->filename = name;
 
   cleanup = make_cleanup_bfd_unref (nbfd);
 

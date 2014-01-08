@@ -1,6 +1,6 @@
 /* GNU/Linux on ARM target support.
 
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1113,10 +1113,13 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
   return dsc;
 }
 
+/* Implementation of `gdbarch_stap_is_single_operand', as defined in
+   gdbarch.h.  */
+
 static int
 arm_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
-  return (*s == '#' /* Literal number.  */
+  return (*s == '#' || *s == '$' || isdigit (*s) /* Literal number.  */
 	  || *s == '[' /* Register indirection or
 			  displacement.  */
 	  || isalpha (*s)); /* Register value.  */
@@ -1183,8 +1186,8 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 
       ++tmp;
       tmp = skip_spaces_const (tmp);
-      if (*tmp++ != '#')
-	return 0;
+      if (*tmp == '#' || *tmp == '$')
+	++tmp;
 
       if (*tmp == '-')
 	{
@@ -1235,7 +1238,7 @@ static void
 arm_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
 {
-  static const char *const stap_integer_prefixes[] = { "#", NULL };
+  static const char *const stap_integer_prefixes[] = { "#", "$", "", NULL };
   static const char *const stap_register_prefixes[] = { "r", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "[",
 								    NULL };

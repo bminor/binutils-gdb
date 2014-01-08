@@ -5407,7 +5407,8 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	    {
 	      if (expld.dataseg.base - (1 << max_alignment_power) < old_base)
 		expld.dataseg.base += expld.dataseg.pagesize;
-	      expld.dataseg.base -= (1 << max_alignment_power);
+	      /* Properly align base to max_alignment_power.  */
+	      expld.dataseg.base &= ~((1 << max_alignment_power) - 1);
 	      lang_reset_memory_regions ();
 	      one_lang_size_sections_pass (relax, check_regions);
 	    }

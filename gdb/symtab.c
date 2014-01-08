@@ -1,6 +1,6 @@
 /* Symbol table lookup for the GNU debugger, GDB.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -60,7 +60,6 @@
 #include "solist.h"
 #include "macrotab.h"
 #include "macroscope.h"
-#include "ada-lang.h"
 
 #include "psymtab.h"
 #include "parser-defs.h"

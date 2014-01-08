@@ -1,6 +1,6 @@
 /* GDB-specific functions for operating on agent expressions.
 
-   Copyright (C) 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,7 +34,6 @@
 #include "block.h"
 #include "regcache.h"
 #include "user-regs.h"
-#include "language.h"
 #include "dictionary.h"
 #include "breakpoint.h"
 #include "tracepoint.h"

@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,10 +39,8 @@
 #include <errno.h>
 #include <string.h>
 #include "gdb_assert.h"
-#include "cp-support.h"
 #include "observer.h"
 #include "objfiles.h"
-#include "symtab.h"
 #include "exceptions.h"
 
 extern unsigned int overload_debug;

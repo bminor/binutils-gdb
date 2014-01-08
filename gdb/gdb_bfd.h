@@ -1,6 +1,6 @@
 /* Definitions for BFD wrappers used by GDB.
 
-   Copyright (C) 2011-2013 Free Software Foundation, Inc.
+   Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,12 +23,6 @@
 #include "registry.h"
 
 DECLARE_REGISTRY (bfd);
-
-/* Make a copy ABFD's filename using bfd_alloc, and reassign it to the
-   BFD.  This ensures that the BFD's filename has the same lifetime as
-   the BFD itself.  */
-
-void gdb_bfd_stash_filename (struct bfd *abfd);
 
 /* Open a read-only (FOPEN_RB) BFD given arguments like bfd_fopen.
    Returns NULL on error.  On success, returns a new reference to the
@@ -79,22 +73,22 @@ int gdb_bfd_crc (struct bfd *abfd, unsigned long *crc_out);
 
 
 /* A wrapper for bfd_fopen that initializes the gdb-specific reference
-   count and calls gdb_bfd_stash_filename.  */
+   count.  */
 
 bfd *gdb_bfd_fopen (const char *, const char *, const char *, int);
 
 /* A wrapper for bfd_openr that initializes the gdb-specific reference
-   count and calls gdb_bfd_stash_filename.  */
+   count.  */
 
 bfd *gdb_bfd_openr (const char *, const char *);
 
 /* A wrapper for bfd_openw that initializes the gdb-specific reference
-   count and calls gdb_bfd_stash_filename.  */
+   count.  */
 
 bfd *gdb_bfd_openw (const char *, const char *);
 
 /* A wrapper for bfd_openr_iovec that initializes the gdb-specific
-   reference count and calls gdb_bfd_stash_filename.  */
+   reference count.  */
 
 bfd *gdb_bfd_openr_iovec (const char *filename, const char *target,
 			  void *(*open_func) (struct bfd *nbfd,
@@ -112,12 +106,12 @@ bfd *gdb_bfd_openr_iovec (const char *filename, const char *target,
 					    struct stat *sb));
 
 /* A wrapper for bfd_openr_next_archived_file that initializes the
-   gdb-specific reference count and calls gdb_bfd_stash_filename.  */
+   gdb-specific reference count.  */
 
 bfd *gdb_bfd_openr_next_archived_file (bfd *archive, bfd *previous);
 
 /* A wrapper for bfd_fdopenr that initializes the gdb-specific
-   reference count and calls gdb_bfd_stash_filename.  */
+   reference count.  */
 
 bfd *gdb_bfd_fdopenr (const char *filename, const char *target, int fd);
 

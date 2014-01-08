@@ -1,3 +1,7 @@
+2014-01-06  Tom Tromey  <tromey@redhat.com>
+
+	* bitset.h: Remove uses of PARAMS.
+
 2013-07-18  Andrew Neitsch  <andrew@neitsch.ca>
 
 	PR binutils/15728

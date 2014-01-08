@@ -1,3 +1,7 @@
+2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.cc (print_version): Update copyright year to 2014.
+
 2013-12-19  Dimitry Andric  <dimitry@andric.com>
 
 	* stringpool.cc (Stringpool_template::reserve): Add

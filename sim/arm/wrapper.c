@@ -1,5 +1,5 @@
 /* run front end support for arm
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
    This file is part of ARM SIM.
 
@@ -132,9 +132,9 @@ sim_size (size)
 }
 
 void
-ARMul_ConsolePrint VPARAMS ((ARMul_State * state,
-			     const char * format,
-			     ...))
+ARMul_ConsolePrint (ARMul_State * state,
+		    const char * format,
+		    ...)
 {
   va_list ap;
 
@@ -678,7 +678,7 @@ sim_fetch_register (sd, rn, memory, length)
 
 #ifdef SIM_TARGET_SWITCHES
 
-static void sim_target_parse_arg_array PARAMS ((char **));
+static void sim_target_parse_arg_array (char **);
 
 typedef struct
 {
