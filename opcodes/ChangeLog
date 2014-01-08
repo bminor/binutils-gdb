@@ -1,3 +1,7 @@
+2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (process_copyright): Update copyright year to 2014.
+
 2014-01-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* nds32-asm.c (parse_operand): Fix out-of-range integer constant.

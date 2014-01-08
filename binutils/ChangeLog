@@ -1,3 +1,7 @@
+2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.c (print_version): Update copyright year to 2014.
+
 2014-01-07  Tom Tromey  <tromey@redhat.com>
 
 	* bucomm.c (fatal, non_fatal): Replace obsolete VA_* macros with
