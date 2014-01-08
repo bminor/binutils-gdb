@@ -80,6 +80,19 @@
 
 	* spu-linux-nat.c (_initialize_spu_nat): Declare.
 
+2014-01-07  Yao Qi  <yao@codesourcery.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* aix-thread.c (pdc_read_regs): Cast parameter to uintptr_t.
+	(pdc_write_regs): Likewise.
+	(fetch_regs_kernel_thread): Likewise.
+	(store_regs_kernel_thread): Likewise.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-varobj.c (ada_varobj_adjust_for_child_access): Convert
+	tagged type objects to their actual type.
+
 2014-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-valprint.c (print_field_values): Add "language" parameter.
