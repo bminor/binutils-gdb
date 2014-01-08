@@ -1,3 +1,21 @@
+2014-01-08  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (struct thread_info) <status_pending_p>: New field.
+	* server.c (visit_actioned_threads, handle_pending_status): New
+	function.
+	(handle_v_cont): Factor out parts to ...
+	(resume): ... this new function.  If in all-stop, and a thread
+	being resumed has a pending status, report it without actually
+	resuming.
+	(myresume): Adjust to use the new 'resume' function.
+	(clear_pending_status_callback, set_pending_status_callback)
+	(find_status_pending_thread_callback): New functions.
+	(handle_status): Handle the case of multiple threads having
+	interesting statuses to report.  Report threads' real last signal
+	instead of always reporting GDB_SIGNAL_TRAP.  Look for a thread
+	with an interesting thread to report the status for, instead of
+	always reporting the status of the first thread.
+
 2014-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbserver.c (gdbserver_version): Set copyright year to 2014.

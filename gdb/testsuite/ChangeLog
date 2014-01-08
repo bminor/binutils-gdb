@@ -1,3 +1,8 @@
+2014-01-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/reconnect-signal.c: New file.
+	* gdb.threads/reconnect-signal.exp: New file.
+
 2014-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/source-dir.exp: New file.

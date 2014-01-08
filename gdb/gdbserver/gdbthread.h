@@ -36,6 +36,9 @@ struct thread_info
   /* The last wait status reported for this thread.  */
   struct target_waitstatus last_status;
 
+  /* True if LAST_STATUS hasn't been reported to GDB yet.  */
+  int status_pending_p;
+
   /* Given `while-stepping', a thread may be collecting data for more
      than one tracepoint simultaneously.  E.g.:
 

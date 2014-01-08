@@ -1,3 +1,15 @@
+2014-01-08  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_add_thread): Add threads silently if starting
+	up.
+	(remote_notice_new_inferior): If in all-stop, and starting up,
+	don't call notice_new_inferior.
+	(get_current_thread): New function, factored out from ...
+	(add_current_inferior_and_thread): ... this.  Adjust.
+	(remote_start_remote) <all-stop>: Fetch the thread list.  If we
+	found any thread, then select the remote's current thread as GDB's
+	current thread too.
+
 2014-01-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.
