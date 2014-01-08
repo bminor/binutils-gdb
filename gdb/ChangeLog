@@ -1,5 +1,12 @@
 2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gnu-nat.c (struct inf): Change pending_execs member to a 1-bit
+	flag.  Adjust all users; in particular...
+	(gnu_wait): ..., don't decrement its value in here...
+	(gnu_create_inferior): ..., and instead set the flag in here,
+	around the startup_inferior call, and call that one with
+	START_INFERIOR_TRAPS_EXPECTED.
+
 	* gnu-nat.c (ill_rpc): Remove function; replaced with this...
 	(ILL_RPC): ... new macro.
 	(do_mach_notify_no_senders, do_mach_notify_port_deleted)

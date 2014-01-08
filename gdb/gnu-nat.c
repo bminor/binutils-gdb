@@ -210,9 +210,9 @@ struct inf
     unsigned int no_wait:1;
 
     /* When starting a new inferior, we don't try to validate threads until all
-       the proper execs have been done.  This is a count of how many execs we
+       the proper execs have been done, which this flag states we still
        expect to happen.  */
-    unsigned pending_execs;
+    unsigned int pending_execs:1;
 
     /* Fields describing global state.  */
 
@@ -1568,26 +1568,14 @@ rewait:
 	   while execing.  */
 	{
 	  w->suppress = 1;
-	  inf_debug (inf, "pending_execs = %d, ignoring minor event",
-		     inf->pending_execs);
+	  inf_debug (inf, "pending_execs, ignoring minor event");
 	}
       else if (kind == TARGET_WAITKIND_STOPPED
 	       && w->status.value.sig == GDB_SIGNAL_TRAP)
 	/* Ah hah!  A SIGTRAP from the inferior while starting up probably
 	   means we've succesfully completed an exec!  */
 	{
-	  if (--inf->pending_execs == 0)
-	    /* We're done!  */
-	    {
-#if 0				/* do we need this?  */
-	      prune_threads (1);	/* Get rid of the old shell
-					   threads.  */
-	      renumber_threads (0);	/* Give our threads reasonable
-					   names.  */
-#endif
-	    }
-	  inf_debug (inf, "pending exec completed, pending_execs => %d",
-		     inf->pending_execs);
+	  inf_debug (inf, "one pending exec completed");
 	}
       else if (kind == TARGET_WAITKIND_STOPPED)
 	/* It's possible that this signal is because of a crashed process
@@ -2146,7 +2134,7 @@ gnu_create_inferior (struct target_ops *ops,
 
   push_target (ops);
 
-  inf->pending_execs = 2;
+  inf->pending_execs = 1;
   inf->nomsg = 1;
   inf->traced = 1;
 
@@ -2158,7 +2146,8 @@ gnu_create_inferior (struct target_ops *ops,
   thread_change_ptid (inferior_ptid,
 		      ptid_build (inf->pid, inf_pick_first_thread (), 0));
 
-  startup_inferior (inf->pending_execs);
+  startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
+  inf->pending_execs = 0;
 
   inf_validate_procinfo (inf);
   inf_update_signal_thread (inf);
