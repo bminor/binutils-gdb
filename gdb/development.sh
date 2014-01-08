@@ -18,4 +18,4 @@
 # Set to 'true' for development snapshots, 'false' for releases and
 # pre-releases.  When true, provide more thorough testing with
 # -lmcheck.
-development=true
+development=false

@@ -1,5 +1,9 @@
 2014-01-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* development.sh (development): Set to false.
+
+2014-01-08  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.7 branch created (79301218fa0f074c5656db0ec8972a5ddcf91fb5):
 	* version.in: Bump version to 7.6.90.DATE-cvs.
 
