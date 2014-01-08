@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.6
+*** Changes since GDB 7.7
+
+*** Changes in GDB 7.7
 
 * GDB now supports SystemTap SDT probes on AArch64 GNU/Linux.
 
