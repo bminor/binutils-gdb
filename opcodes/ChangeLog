@@ -1,3 +1,9 @@
+2014-01-09  Bradley Nelson  <bradnelson@google.com>
+	    Roland McGrath  <mcgrathr@google.com>
+
+	* i386-dis.c (print_insn): Do not touch all_prefixes[-1] when
+	last_rex_prefix is -1.
+
 2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (aarch64_pstatefields): Update.
