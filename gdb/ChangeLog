@@ -1,5 +1,22 @@
 2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
 
+	* arm-tdep.c (enum arm_record_result): New enum.
+	(arm_record_unsupported_insn): New function.
+	(arm_record_coproc_data_proc): Removed.
+	(thumb2_record_ld_st_multiple): New function.
+	(thumb2_record_ld_st_dual_ex_tbb): New function.
+	(thumb2_record_data_proc_sreg_mimm): New function.
+	(thumb2_record_ps_dest_generic): New function.
+	(thumb2_record_branch_misc_cntrl): New function.
+	(thumb2_record_str_single_data): New function.
+	(thumb2_record_ld_mem_hints): New function.
+	(thumb2_record_ld_word): New function.
+	(thumb2_record_lmul_lmla_div): New function.
+	(thumb2_record_decode_insn_handler): New function.
+	(decode_insn): Add thumb32 instruction handlers.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
 	* arm-linux-tdep.c: Include "record-full.h" and "linux-record.h".
 	(struct arm_linux_record_tdep): Declare.
 	(arm_canonicalize_syscall): New function.
