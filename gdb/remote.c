@@ -8313,6 +8313,12 @@ remote_insert_breakpoint (struct gdbarch *gdbarch,
 	}
     }
 
+  /* If this breakpoint has target-side commands but this stub doesn't
+     support Z0 packets, throw error.  */
+  if (!VEC_empty (agent_expr_p, bp_tgt->tcommands))
+    throw_error (NOT_SUPPORTED_ERROR, _("\
+Target doesn't support breakpoints that have target side commands."));
+
   return memory_insert_breakpoint (gdbarch, bp_tgt);
 }
 

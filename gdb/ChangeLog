@@ -1,3 +1,19 @@
+2014-01-09  Pedro Alves  <palves@redhat.com>
+	    Hui Zhu  <hui@codesourcery.com>
+
+	PR gdb/16101
+	* breakpoint.c (insert_bp_location): Rename hw_bp_err_string to
+	bp_err_string.  Don't mark the location shlib_disabled if the
+	error thrown wasn't a generic or memory error.  Catch errors
+	thrown while inserting breakpoints in overlayed code.  Output
+	error message of software breakpoints.
+	* remote.c (remote_insert_breakpoint): If this breakpoint has
+	target-side commands but this stub doesn't support Z0 packets,
+	throw NOT_SUPPORTED_ERROR error.
+	* exceptions.h (enum errors) <NOT_SUPPORTED_ERROR>: New error.
+	* target.h (target_insert_breakpoint): Extend comment.
+	(target_insert_hw_breakpoint): Add comment.
+
 2014-01-08  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_add_thread): Add threads silently if starting
