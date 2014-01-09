@@ -11917,27 +11917,38 @@ arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
   struct gdbarch_tdep *tdep = gdbarch_tdep (arm_insn_r->gdbarch);
   struct regcache *reg_cache = arm_insn_r->regcache;
   uint32_t ret = 0; /* function return value: -1:record failure ;  0:success  */
-
-  /* Handle SWI insn; system call would be handled over here.  */
+  ULONGEST u_regval = 0;
 
   arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 24, 27);
-  if (15 == arm_insn_r->opcode)
-  {
-    /* Handle arm syscall insn.  */
-    if (tdep->arm_swi_record != NULL)
-      {
-        ret = tdep->arm_swi_record(reg_cache);
-      }
-    else
-      {
-        printf_unfiltered (_("no syscall record support\n"));
-        ret = -1;
-      }
-  }
 
-  printf_unfiltered (_("Process record does not support instruction "
-                        "0x%0x at address %s.\n"),arm_insn_r->arm_insn,
-                        paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
+  /* Handle arm SWI/SVC system call instructions.  */
+  if (15 == arm_insn_r->opcode)
+    {
+      if (tdep->arm_syscall_record != NULL)
+        {
+          ULONGEST svc_operand, svc_number;
+
+          svc_operand = (0x00ffffff & arm_insn_r->arm_insn);
+
+          if (svc_operand)  /* OABI.  */
+            svc_number = svc_operand - 0x900000;
+          else /* EABI.  */
+            regcache_raw_read_unsigned (reg_cache, 7, &svc_number);
+
+          ret = tdep->arm_syscall_record (reg_cache, svc_number);
+        }
+      else
+        {
+          printf_unfiltered (_("no syscall record support\n"));
+          ret = -1;
+        }
+    }
+  else
+    {
+      arm_record_unsupported_insn (arm_insn_r);
+      ret = -1;
+    }
+
   return ret;
 }
 
@@ -12328,9 +12339,10 @@ thumb_record_ldm_stm_swi (insn_decode_record *thumb_insn_r)
   else if (0x1F == opcode1)
     {
         /* Handle arm syscall insn.  */
-        if (tdep->arm_swi_record != NULL)
+        if (tdep->arm_syscall_record != NULL)
           {
-            ret = tdep->arm_swi_record(reg_cache);
+            regcache_raw_read_unsigned (reg_cache, 7, &u_regval);
+            ret = tdep->arm_syscall_record (reg_cache, u_regval);
           }
         else
           {

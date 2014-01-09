@@ -1,5 +1,21 @@
 2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
 
+	* arm-linux-tdep.c: Include "record-full.h" and "linux-record.h".
+	(struct arm_linux_record_tdep): Declare.
+	(arm_canonicalize_syscall): New function.
+	(arm_all_but_pc_registers_record): New function.
+	(arm_linux_syscall_record): New function.
+	(arm_linux_init_abi): Add syscall recording constructs.
+	* arm-tdep.c (thumb_record_ldm_stm_swi): Update thumb syscall
+	decoding.  (arm_record_coproc_data_proc): Update arm syscall
+	decoding.
+	* arm-tdep.h (struct gdbarch_tdep) <arm_swi_record>: Remove.
+	<arm_syscall_record>: New field.
+	* configure.tgt (arm*-*-linux*): Add linux-record.o to
+	gdb_target_obs.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
 	* arm-tdep.c (thumb_record_misc): Update to use sp as base
 	register for push instruction recording.
 
