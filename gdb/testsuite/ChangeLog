@@ -1,3 +1,8 @@
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* lib/gdb.exp (supports_process_record): Return true for
+	arm*-linux*.  (supports_reverse): Likewise.
+
 2014-01-13  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/15464
