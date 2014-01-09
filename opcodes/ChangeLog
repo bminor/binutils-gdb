@@ -1,3 +1,9 @@
+2014-01-09  Bradley Nelson  <bradnelson@google.com>
+	    Roland McGrath  <mcgrathr@google.com>
+
+	* i386-dis.c (print_insn): Do not touch all_prefixes[-1] when
+	last_rex_prefix is -1.
+
 2014-01-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* nds32-asm.c (parse_operand): Fix out-of-range integer constant.
