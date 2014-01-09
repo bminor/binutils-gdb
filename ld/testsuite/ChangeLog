@@ -1,3 +1,8 @@
+2014-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/binutils.exp (binutils_test): Check if GNU_RELRO segment
+	is generated.
+
 2014-01-09  Vidya Praveen  <vidyapraveen@arm.com>
 
 	* lib/ld-lib.exp (check_lto_shared_available): New check.
