@@ -1,3 +1,8 @@
+2014-01-09  Vidya Praveen  <vidyapraveen@arm.com>
+
+	* lib/ld-lib.exp (check_lto_shared_available): New check.
+	* ld-plugin/lto.exp: Use check_lto_shared_available.
+
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14207

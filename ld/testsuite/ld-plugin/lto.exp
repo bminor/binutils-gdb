@@ -300,8 +300,7 @@ set lto_run_elf_tests {
 run_cc_link_tests $lto_link_tests
 
 # Restrict these to ELF targets that support shared libs and PIC.
-if { [is_elf_format]
-     && [run_host_cmd_yesno $CC "-shared -fPIC $srcdir/$subdir/dummy.c -o tmpdir/t.so"] } {
+if { [is_elf_format] && [check_lto_shared_available] } {
     run_cc_link_tests $lto_link_elf_tests
     set testname "PR ld/15146 (2)"
     set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
