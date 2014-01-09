@@ -10610,7 +10610,7 @@ vfp - VFP co-processor."),
 struct arm_mem_r
 {
   uint32_t len;    /* Record length.  */
-  CORE_ADDR addr;  /* Memory address.  */
+  uint32_t addr;   /* Memory address.  */
 };
 
 /* ARM instruction record contains opcode of current insn
