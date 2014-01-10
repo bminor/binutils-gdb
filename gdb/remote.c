@@ -6848,7 +6848,7 @@ check_binary_download (CORE_ADDR addr)
 
 static LONGEST
 remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
-			const gdb_byte *myaddr, ssize_t len,
+			const gdb_byte *myaddr, ULONGEST len,
 			char packet_format, int use_length)
 {
   struct remote_state *rs = get_remote_state ();
@@ -6865,7 +6865,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
     internal_error (__FILE__, __LINE__,
 		    _("remote_write_bytes_aux: bad packet format"));
 
-  if (len <= 0)
+  if (len == 0)
     return 0;
 
   payload_size = get_memory_write_packet_size ();
@@ -7003,7 +7003,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
    packet.  */
 
 static LONGEST
-remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
+remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len)
 {
   char *packet_format = 0;
 
