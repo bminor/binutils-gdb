@@ -1,3 +1,12 @@
+2014-03-20  Will Newton  <will.newton@linaro.org>
+
+	PR ld/16715
+	* elf32-arm.c (elf32_arm_check_relocs): Set
+	pointer_equality_needed for absolute references within
+	executable links.
+	(elf32_arm_finish_dynamic_symbol): Set st_value to zero
+	unless pointer_equality_needed is set.
+
 2014-03-19  Nick Clifton  <nickc@redhat.com>
 
 	* peXXigen.c (rsrc_process_section): Add code to scan input
