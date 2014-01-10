@@ -1,5 +1,10 @@
 2014-01-24  Yao Qi  <yao@codesourcery.com>
 
+	* remote.c (remote_read_bytes): Change type of len to ULONGEST.
+	* corelow.c (get_core_siginfo): Likewise.
+
+2014-01-24  Yao Qi  <yao@codesourcery.com>
+
 	* remote.c (remote_write_bytes_aux): Change type of 'len' to
 	ULONGEST.  Don't check 'len' is negative.
 	(remote_write_bytes):  Change type of 'len' to ULONGEST.

@@ -7039,7 +7039,7 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len)
    target_xfer_error' value) for error.  */
 
 static LONGEST
-remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len)
 {
   struct remote_state *rs = get_remote_state ();
   int max_buf_size;		/* Max size of packet output buffer.  */
@@ -7047,7 +7047,7 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   int todo;
   int i;
 
-  if (len <= 0)
+  if (len == 0)
     return 0;
 
   max_buf_size = get_memory_read_packet_size ();
