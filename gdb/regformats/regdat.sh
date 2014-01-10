@@ -18,18 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-move_if_change ()
-{
-    file=$1
-    if test -r ${file} && cmp -s "${file}" new-"${file}"
-    then
-	echo "${file} unchanged." 1>&2
-    else
-	mv new-"${file}" "${file}"
-	echo "${file} updated." 1>&2
-    fi
-}
-
 # Format of the input files
 read="type entry"
 
@@ -202,4 +190,4 @@ EOF
 
 # close things off
 exec 1>&2
-move_if_change $2
+mv -- "new-$2" "$2"

@@ -1,3 +1,7 @@
+2014-01-13  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* regformats/regdat.sh: Always rewrite the register file.
+
 2014-01-13  Pedro Alves  <palves@redhat.com>
 
         * Makefile.in (CHECK_HEADERS): New variable.
