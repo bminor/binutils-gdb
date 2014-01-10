@@ -1,5 +1,9 @@
 2014-01-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/pp-rec-component.exp: Remove path from "source" test.
+
+2014-01-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.python/py-pp-integral.exp: Remove path from "source" test.
 
 2014-01-09  Maciej W. Rozycki  <macro@codesourcery.com>
