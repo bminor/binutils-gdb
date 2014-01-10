@@ -1,3 +1,7 @@
+2014-01-10  Alan Modra  <amodra@gmail.com>
+
+	* ld-x86-64/pr14207.d: Adjust.
+
 2014-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/binutils.exp (binutils_test): Check if GNU_RELRO segment

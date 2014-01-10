@@ -5362,18 +5362,14 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
       && link_info.relro && expld.dataseg.relro_end)
     {
       /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END pair was seen, try
-	 to put expld.dataseg.relro on a (common) page boundary.  */
-      bfd_vma min_base, old_base, relro_end, maxpage;
+	 to put expld.dataseg.relro_end on a (common) page boundary.  */
+      bfd_vma min_base, relro_end, maxpage;
 
       expld.dataseg.phase = exp_dataseg_relro_adjust;
       maxpage = expld.dataseg.maxpagesize;
       /* MIN_BASE is the absolute minimum address we are allowed to start the
 	 read-write segment (byte before will be mapped read-only).  */
       min_base = (expld.dataseg.min_base + maxpage - 1) & ~(maxpage - 1);
-      /* OLD_BASE is the address for a feasible minimum address which will
-	 still not cause a data overlap inside MAXPAGE causing file offset skip
-	 by MAXPAGE.  */
-      old_base = expld.dataseg.base;
       expld.dataseg.base += (-expld.dataseg.relro_end
 			     & (expld.dataseg.pagesize - 1));
       /* Compute the expected PT_GNU_RELRO segment end.  */
@@ -5389,9 +5385,9 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
       if (expld.dataseg.relro_end > relro_end)
 	{
 	  /* The alignment of sections between DATA_SEGMENT_ALIGN
-	     and DATA_SEGMENT_RELRO_END caused huge padding to be
-	     inserted at DATA_SEGMENT_RELRO_END.  Try to start a bit lower so
-	     that the section alignments will fit in.  */
+	     and DATA_SEGMENT_RELRO_END can cause excessive padding to
+	     be inserted at DATA_SEGMENT_RELRO_END.  Try to start a
+	     bit lower so that the section alignments will fit in.  */
 	  asection *sec;
 	  unsigned int max_alignment_power = 0;
 
@@ -5405,9 +5401,10 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 
 	  if (((bfd_vma) 1 << max_alignment_power) < expld.dataseg.pagesize)
 	    {
-	      if (expld.dataseg.base - (1 << max_alignment_power) < old_base)
-		expld.dataseg.base += expld.dataseg.pagesize;
-	      /* Properly align base to max_alignment_power.  */
+	      /* Aligning the adjusted base guarantees the padding
+		 between sections won't change.  This is better than
+		 simply subtracting 1 << max_alignment_power which is
+		 what we used to do here.  */
 	      expld.dataseg.base &= ~((1 << max_alignment_power) - 1);
 	      lang_reset_memory_regions ();
 	      one_lang_size_sections_pass (relax, check_regions);
