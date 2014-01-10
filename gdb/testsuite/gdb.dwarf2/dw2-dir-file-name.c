@@ -64,8 +64,7 @@ FUNC (compdir_absolute_ldir_absolute_file_absolute_same)	\
 FUNC (compdir_absolute_ldir_absolute_file_absolute_different)
 
 #define FUNC(name)					\
-  asm (#name "_start: .globl " #name "_start\n");	\
-  static void						\
+  void							\
   name (void)						\
   {							\
     v++;						\
