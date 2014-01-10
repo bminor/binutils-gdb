@@ -2089,6 +2089,7 @@ your program too late, as the program would have already completed the
 elaboration phase.  Under these circumstances, insert breakpoints in your
 elaboration code before running your program.
 
+@anchor{set exec-wrapper}
 @kindex set exec-wrapper
 @item set exec-wrapper @var{wrapper}
 @itemx show exec-wrapper
@@ -2279,9 +2280,10 @@ your program.  You can abbreviate @code{environment} as @code{env}.
 @kindex set environment
 @item set environment @var{varname} @r{[}=@var{value}@r{]}
 Set environment variable @var{varname} to @var{value}.  The value
-changes for your program only, not for @value{GDBN} itself.  @var{value} may
-be any string; the values of environment variables are just strings, and
-any interpretation is supplied by your program itself.  The @var{value}
+changes for your program (and the shell @value{GDBN} uses to launch
+it), not for @value{GDBN} itself.  @var{value} may be any string; the
+values of environment variables are just strings, and any
+interpretation is supplied by your program itself.  The @var{value}
 parameter is optional; if it is eliminated, the variable is set to a
 null value.
 @c "any string" here does not include leading, trailing
@@ -2297,6 +2299,12 @@ set env USER = foo
 tells the debugged program, when subsequently run, that its user is named
 @samp{foo}.  (The spaces around @samp{=} are used for clarity here; they
 are not actually required.)
+
+Note that on Unix systems, @value{GDBN} runs your program via a shell,
+which also inherits the environment set with @code{set environment}.
+If necessary, you can avoid that by using the @samp{env} program as a
+wrapper instead of using @code{set environment}.  @xref{set
+exec-wrapper}, for an example doing just that.
 
 @kindex unset environment
 @item unset environment @var{varname}
