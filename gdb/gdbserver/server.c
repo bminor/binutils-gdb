@@ -2016,6 +2016,63 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 }
 
 static void gdb_wants_all_threads_stopped (void);
+static void resume (struct thread_resume *actions, size_t n);
+
+/* Call CALLBACK for any thread to which ACTIONS applies to.  Returns
+   true if CALLBACK returns true.  Returns false if no matching thread
+   is found or CALLBACK results false.  */
+
+static int
+visit_actioned_threads (const struct thread_resume *actions,
+			size_t num_actions,
+			int (*callback) (const struct thread_resume *,
+					 struct thread_info *))
+{
+  struct inferior_list_entry *entry;
+
+  for (entry = all_threads.head; entry != NULL; entry = entry->next)
+    {
+      size_t i;
+
+      for (i = 0; i < num_actions; i++)
+	{
+	  const struct thread_resume *action = &actions[i];
+
+	  if (ptid_equal (action->thread, minus_one_ptid)
+	      || ptid_equal (action->thread, entry->id)
+	      || ((ptid_get_pid (action->thread)
+		   == ptid_get_pid (entry->id))
+		  && ptid_get_lwp (action->thread) == -1))
+	    {
+	      struct thread_info *thread = (struct thread_info *) entry;
+
+	      if ((*callback) (action, thread))
+		return 1;
+	    }
+	}
+    }
+
+  return 0;
+}
+
+/* Callback for visit_actioned_threads.  If the thread has a pending
+   status to report, report it now.  */
+
+static int
+handle_pending_status (const struct thread_resume *resumption,
+		       struct thread_info *thread)
+{
+  if (thread->status_pending_p)
+    {
+      thread->status_pending_p = 0;
+
+      last_status = thread->last_status;
+      last_ptid = thread->entry.id;
+      prepare_resume_reply (own_buf, last_ptid, &last_status);
+      return 1;
+    }
+  return 0;
+}
 
 /* Parse vCont packets.  */
 void
@@ -2128,12 +2185,34 @@ handle_v_cont (char *own_buf)
     cont_thread = minus_one_ptid;
   set_desired_inferior (0);
 
-  if (!non_stop)
-    enable_async_io ();
-
-  (*the_target->resume) (resume_info, n);
-
+  resume (resume_info, n);
   free (resume_info);
+  return;
+
+err:
+  write_enn (own_buf);
+  free (resume_info);
+  return;
+}
+
+/* Resume target with ACTIONS, an array of NUM_ACTIONS elements.  */
+
+static void
+resume (struct thread_resume *actions, size_t num_actions)
+{
+  if (!non_stop)
+    {
+      /* Check if among the threads that GDB wants actioned, there's
+	 one with a pending status to report.  If so, skip actually
+	 resuming/stopping and report the pending event
+	 immediately.  */
+      if (visit_actioned_threads (actions, num_actions, handle_pending_status))
+	return;
+
+      enable_async_io ();
+    }
+
+  (*the_target->resume) (actions, num_actions);
 
   if (non_stop)
     write_ok (own_buf);
@@ -2157,12 +2236,6 @@ handle_v_cont (char *own_buf)
           || last_status.kind == TARGET_WAITKIND_SIGNALLED)
         mourn_inferior (find_process_pid (ptid_get_pid (last_ptid)));
     }
-  return;
-
-err:
-  write_enn (own_buf);
-  free (resume_info);
-  return;
 }
 
 /* Attach to a new program.  Return 1 if successful, 0 if failure.  */
@@ -2422,31 +2495,7 @@ myresume (char *own_buf, int step, int sig)
       n++;
     }
 
-  if (!non_stop)
-    enable_async_io ();
-
-  (*the_target->resume) (resume_info, n);
-
-  if (non_stop)
-    write_ok (own_buf);
-  else
-    {
-      last_ptid = mywait (minus_one_ptid, &last_status, 0, 1);
-
-      if (last_status.kind != TARGET_WAITKIND_EXITED
-          && last_status.kind != TARGET_WAITKIND_SIGNALLED)
-	{
-	  current_inferior->last_resume_kind = resume_stop;
-	  current_inferior->last_status = last_status;
-	}
-
-      prepare_resume_reply (own_buf, last_ptid, &last_status);
-      disable_async_io ();
-
-      if (last_status.kind == TARGET_WAITKIND_EXITED
-          || last_status.kind == TARGET_WAITKIND_SIGNALLED)
-        mourn_inferior (find_process_pid (ptid_get_pid (last_ptid)));
-    }
+  resume (resume_info, n);
 }
 
 /* Callback for for_each_inferior.  Make a new stop reply for each
@@ -2536,6 +2585,48 @@ gdb_reattached_process (struct inferior_list_entry *entry)
   process->gdb_detached = 0;
 }
 
+/* Callback for for_each_inferior.  Clear the thread's pending status
+   flag.  */
+
+static void
+clear_pending_status_callback (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+
+  thread->status_pending_p = 0;
+}
+
+/* Callback for for_each_inferior.  If the thread is stopped with an
+   interesting event, mark it as having a pending event.  */
+
+static void
+set_pending_status_callback (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+
+  if (thread->last_status.kind != TARGET_WAITKIND_STOPPED
+      || (thread->last_status.value.sig != GDB_SIGNAL_0
+	  /* A breakpoint, watchpoint or finished step from a previous
+	     GDB run isn't considered interesting for a new GDB run.
+	     If we left those pending, the new GDB could consider them
+	     random SIGTRAPs.  This leaves out real async traps.  We'd
+	     have to peek into the (target-specific) siginfo to
+	     distinguish those.  */
+	  && thread->last_status.value.sig != GDB_SIGNAL_TRAP))
+    thread->status_pending_p = 1;
+}
+
+/* Callback for find_inferior.  Return true if ENTRY (a thread) has a
+   pending status to report to GDB.  */
+
+static int
+find_status_pending_thread_callback (struct inferior_list_entry *entry, void *data)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+
+  return thread->status_pending_p;
+}
+
 /* Status handler for the '?' packet.  */
 
 static void
@@ -2550,7 +2641,6 @@ handle_status (char *own_buf)
 
   if (non_stop)
     {
-      discard_queued_stop_replies (-1);
       find_inferior (&all_threads, queue_stop_reply_callback, NULL);
 
       /* The first is sent immediatly.  OK is sent if there is no
@@ -2560,18 +2650,53 @@ handle_status (char *own_buf)
     }
   else
     {
+      struct inferior_list_entry *thread = NULL;
+
       pause_all (0);
       stabilize_threads ();
       gdb_wants_all_threads_stopped ();
 
-      if (all_threads.head)
-	{
-	  struct target_waitstatus status;
+      /* We can only report one status, but we might be coming out of
+	 non-stop -- if more than one thread is stopped with
+	 interesting events, leave events for the threads we're not
+	 reporting now pending.  They'll be reported the next time the
+	 threads are resumed.  Start by marking all interesting events
+	 as pending.  */
+      for_each_inferior (&all_threads, set_pending_status_callback);
 
-	  status.kind = TARGET_WAITKIND_STOPPED;
-	  status.value.sig = GDB_SIGNAL_TRAP;
-	  prepare_resume_reply (own_buf,
-				all_threads.head->id, &status);
+      /* Prefer the last thread that reported an event to GDB (even if
+	 that was a GDB_SIGNAL_TRAP).  */
+      if (last_status.kind != TARGET_WAITKIND_IGNORE
+	  && last_status.kind != TARGET_WAITKIND_EXITED
+	  && last_status.kind != TARGET_WAITKIND_SIGNALLED)
+	thread = find_inferior_id (&all_threads, last_ptid);
+
+      /* If the last event thread is not found for some reason, look
+	 for some other thread that might have an event to report.  */
+      if (thread == NULL)
+	thread = find_inferior (&all_threads,
+				find_status_pending_thread_callback, NULL);
+
+      /* If we're still out of luck, simply pick the first thread in
+	 the thread list.  */
+      if (thread == NULL)
+	thread = all_threads.head;
+
+      if (thread != NULL)
+	{
+	  struct thread_info *tp = (struct thread_info *) thread;
+
+	  /* We're reporting this event, so it's no longer
+	     pending.  */
+	  tp->status_pending_p = 0;
+
+	  /* GDB assumes the current thread is the thread we're
+	     reporting the status for.  */
+	  general_thread = thread->id;
+	  set_desired_inferior (1);
+
+	  gdb_assert (tp->last_status.kind != TARGET_WAITKIND_IGNORE);
+	  prepare_resume_reply (own_buf, tp->entry.id, &tp->last_status);
 	}
       else
 	strcpy (own_buf, "W00");
@@ -3011,6 +3136,12 @@ main (int argc, char *argv[])
       fprintf (stderr,
 	       "Remote side has terminated connection.  "
 	       "GDBserver will reopen the connection.\n");
+
+      /* Get rid of any pending statuses.  An eventual reconnection
+	 (by the same GDB instance or another) will refresh all its
+	 state from scratch.  */
+      discard_queued_stop_replies (-1);
+      for_each_inferior (&all_threads, clear_pending_status_callback);
 
       if (tracing)
 	{

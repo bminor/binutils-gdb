@@ -97,6 +97,9 @@ enum errors {
   /* An undefined command was executed.  */
   UNDEFINED_COMMAND_ERROR,
 
+  /* Requested feature, method, mechanism, etc. is not supported.  */
+  NOT_SUPPORTED_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };

@@ -1,3 +1,9 @@
+2014-01-09  Bradley Nelson  <bradnelson@google.com>
+	    Roland McGrath  <mcgrathr@google.com>
+
+	* i386-dis.c (print_insn): Do not touch all_prefixes[-1] when
+	last_rex_prefix is -1.
+
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (process_copyright): Update copyright year to 2014.

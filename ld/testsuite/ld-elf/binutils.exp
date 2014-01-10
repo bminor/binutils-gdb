@@ -1,5 +1,5 @@
 # Expect script for binutils tests
-#   Copyright 2006, 2007, 2008, 2009, 2010, 2012 Free Software Foundation, Inc.
+# Copyright 2006-2014 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -77,6 +77,30 @@ proc binutils_test { prog_name ld_options test {test_name ""}} {
 	send_log "$got\n"
 	unresolved "$test_name"
 	return
+    }
+
+    if [string match "*-z relro*" $ld_options] {
+	# Check if GNU_RELRO segment is generated.
+	set got [remote_exec host "grep GNU_RELRO tmpdir/$test.exp"]
+	if { ![string match "*GNU_RELRO*" $got] } then {
+	    set got [remote_exec host "cat tmpdir/$test.exp"]
+	    if { [string match "*.data.rel.ro*" $got]
+		 || [string match "*.dynamic*" $got]
+		 || [string match "*.got*" $got]
+		 || [string match "*.eh_frame*" $got]
+		 || [string match "*.gcc_except_table*" $got]
+		 || [string match "*.exception_ranges*" $got]
+		 || [string match "*.ctors*" $got]
+		 || [string match "*.dtors*" $got]
+		 || [string match "*.tdata*" $got]
+		 || [string match "*.preinit_array*" $got]
+		 || [string match "*.init_array*" $got]
+		 || [string match "*.fini_array*" $got] } then {
+		# Fail if GNU_RELRO segment isn't generated, but should.
+		fail "$test_name"
+		return
+	    }
+	}
     }
 
     send_log "$prog tmpdir/$test\n"

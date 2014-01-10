@@ -77,10 +77,7 @@ void xcoff_rtype2howto (arelent *, struct internal_reloc *);
 #define NO_COFF_SYMBOLS
 #define RTYPE2HOWTO(cache_ptr, dst) xcoff_rtype2howto (cache_ptr, dst)
 #define coff_mkobject _bfd_xcoff_mkobject
-#define coff_bfd_copy_private_bfd_data _bfd_xcoff_copy_private_bfd_data
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
-#define coff_bfd_reloc_type_lookup _bfd_xcoff_reloc_type_lookup
-#define coff_bfd_reloc_name_lookup _bfd_xcoff_reloc_name_lookup
 #ifdef AIX_CORE
 extern const bfd_target * rs6000coff_core_p (bfd *abfd);
 extern bfd_boolean rs6000coff_core_file_matches_executable_p
@@ -3995,6 +3992,85 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
   { SSUBTYP_DWRNGES, ".dwrnges",  TRUE }
 };
 
+/* For generic entry points.  */
+#define _bfd_xcoff_close_and_cleanup _bfd_archive_close_and_cleanup
+#define _bfd_xcoff_bfd_free_cached_info bfd_true
+#define _bfd_xcoff_new_section_hook coff_new_section_hook
+#define _bfd_xcoff_get_section_contents _bfd_generic_get_section_contents
+#define _bfd_xcoff_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
+
+/* For copy private data entry points.  */
+#define _bfd_xcoff_bfd_copy_private_bfd_data \
+  _bfd_xcoff_copy_private_bfd_data
+#define _bfd_xcoff_bfd_merge_private_bfd_data \
+  _bfd_generic_bfd_merge_private_bfd_data
+#define _bfd_xcoff_bfd_copy_private_section_data \
+  _bfd_generic_bfd_copy_private_section_data
+#define _bfd_xcoff_bfd_copy_private_symbol_data \
+   _bfd_generic_bfd_copy_private_symbol_data
+#define _bfd_xcoff_bfd_copy_private_header_data \
+   _bfd_generic_bfd_copy_private_header_data
+#define _bfd_xcoff_bfd_set_private_flags \
+   _bfd_generic_bfd_set_private_flags
+#define _bfd_xcoff_bfd_print_private_bfd_data \
+   _bfd_generic_bfd_print_private_bfd_data
+
+/* For archive entry points.  */
+#define _bfd_xcoff_slurp_extended_name_table \
+   _bfd_noarchive_slurp_extended_name_table
+#define _bfd_xcoff_construct_extended_name_table \
+   _bfd_noarchive_construct_extended_name_table
+#define _bfd_xcoff_truncate_arname bfd_dont_truncate_arname
+#define _bfd_xcoff_write_ar_hdr _bfd_generic_write_ar_hdr
+#define _bfd_xcoff_get_elt_at_index _bfd_generic_get_elt_at_index
+#define _bfd_xcoff_generic_stat_arch_elt _bfd_xcoff_stat_arch_elt
+#define _bfd_xcoff_update_armap_timestamp bfd_true
+
+/* For symbols entry points.  */
+#define _bfd_xcoff_get_symtab_upper_bound coff_get_symtab_upper_bound
+#define _bfd_xcoff_canonicalize_symtab coff_canonicalize_symtab
+#define _bfd_xcoff_make_empty_symbol coff_make_empty_symbol
+#define _bfd_xcoff_print_symbol coff_print_symbol
+#define _bfd_xcoff_get_symbol_info coff_get_symbol_info
+#define _bfd_xcoff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
+#define _bfd_xcoff_bfd_is_target_special_symbol \
+  coff_bfd_is_target_special_symbol
+#define _bfd_xcoff_get_lineno coff_get_lineno
+#define _bfd_xcoff_find_nearest_line xcoff_find_nearest_line
+#define _bfd_generic_find_nearest_line_discriminator \
+  xcoff_find_nearest_line_discriminator
+#define _bfd_xcoff_find_inliner_info coff_find_inliner_info
+#define _bfd_xcoff_bfd_make_debug_symbol coff_bfd_make_debug_symbol
+#define _bfd_xcoff_read_minisymbols _bfd_generic_read_minisymbols
+#define _bfd_xcoff_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
+
+/* For reloc entry points.  */
+#define _bfd_xcoff_get_reloc_upper_bound coff_get_reloc_upper_bound
+#define _bfd_xcoff_canonicalize_reloc coff_canonicalize_reloc
+#define _bfd_xcoff_bfd_reloc_type_lookup _bfd_xcoff_reloc_type_lookup
+#define _bfd_xcoff_bfd_reloc_name_lookup _bfd_xcoff_reloc_name_lookup
+
+/* For link entry points.  */
+#define _bfd_xcoff_bfd_get_relocated_section_contents \
+  bfd_generic_get_relocated_section_contents
+#define _bfd_xcoff_bfd_relax_section bfd_generic_relax_section
+#define _bfd_xcoff_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
+#define _bfd_xcoff_bfd_link_just_syms _bfd_generic_link_just_syms
+#define _bfd_xcoff_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
+#define _bfd_xcoff_bfd_link_split_section _bfd_generic_link_split_section
+#define _bfd_xcoff_bfd_gc_sections bfd_generic_gc_sections
+#define _bfd_xcoff_bfd_lookup_section_flags bfd_generic_lookup_section_flags
+#define _bfd_xcoff_bfd_merge_sections bfd_generic_merge_sections
+#define _bfd_xcoff_bfd_is_group_section bfd_generic_is_group_section
+#define _bfd_xcoff_bfd_discard_group bfd_generic_discard_group
+#define _bfd_xcoff_section_already_linked _bfd_generic_section_already_linked
+#define _bfd_xcoff_bfd_define_common_symbol _bfd_xcoff_define_common_symbol
+
+/* For dynamic symbols and relocs entry points.  */
+#define _bfd_xcoff_get_synthetic_symtab _bfd_nodynamic_get_synthetic_symtab
+
 static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
   {
     { /* COFF backend, defined in libcoff.h.  */
@@ -4151,91 +4227,15 @@ const bfd_target rs6000coff_vec =
       bfd_false
     },
 
-    /* Generic */
-    _bfd_archive_close_and_cleanup,
-    bfd_true,
-    coff_new_section_hook,
-    _bfd_generic_get_section_contents,
-    _bfd_generic_get_section_contents_in_window,
-
-    /* Copy */
-    _bfd_xcoff_copy_private_bfd_data,
-    _bfd_generic_bfd_merge_private_bfd_data,
-    _bfd_generic_init_private_section_data,
-    _bfd_generic_bfd_copy_private_section_data,
-    _bfd_generic_bfd_copy_private_symbol_data,
-    _bfd_generic_bfd_copy_private_header_data,
-    _bfd_generic_bfd_set_private_flags,
-    _bfd_generic_bfd_print_private_bfd_data,
-
-    /* Core */
+    BFD_JUMP_TABLE_GENERIC (_bfd_xcoff),
+    BFD_JUMP_TABLE_COPY (_bfd_xcoff),
     BFD_JUMP_TABLE_CORE (coff),
-
-    /* Archive */
-    _bfd_xcoff_slurp_armap,
-    _bfd_noarchive_slurp_extended_name_table,
-    _bfd_noarchive_construct_extended_name_table,
-    bfd_dont_truncate_arname,
-    _bfd_xcoff_write_armap,
-    _bfd_xcoff_read_ar_hdr,
-    _bfd_generic_write_ar_hdr,
-    _bfd_xcoff_openr_next_archived_file,
-    _bfd_generic_get_elt_at_index,
-    _bfd_xcoff_stat_arch_elt,
-    bfd_true,
-
-    /* Symbols */
-    coff_get_symtab_upper_bound,
-    coff_canonicalize_symtab,
-    coff_make_empty_symbol,
-    coff_print_symbol,
-    coff_get_symbol_info,
-    _bfd_xcoff_is_local_label_name,
-    coff_bfd_is_target_special_symbol,
-    coff_get_lineno,
-    xcoff_find_nearest_line,
-    xcoff_find_nearest_line_discriminator,
-    _bfd_generic_find_line,
-    coff_find_inliner_info,
-    coff_bfd_make_debug_symbol,
-    _bfd_generic_read_minisymbols,
-    _bfd_generic_minisymbol_to_symbol,
-
-    /* Reloc */
-    coff_get_reloc_upper_bound,
-    coff_canonicalize_reloc,
-    _bfd_xcoff_reloc_type_lookup,
-    _bfd_xcoff_reloc_name_lookup,
-
-    /* Write */
-    coff_set_arch_mach,
-    coff_set_section_contents,
-
-    /* Link */
-    _bfd_xcoff_sizeof_headers,
-    bfd_generic_get_relocated_section_contents,
-    bfd_generic_relax_section,
-    _bfd_xcoff_bfd_link_hash_table_create,
-    _bfd_generic_link_hash_table_free,
-    _bfd_xcoff_bfd_link_add_symbols,
-    _bfd_generic_link_just_syms,
-    _bfd_generic_copy_link_hash_symbol_type,
-    _bfd_xcoff_bfd_final_link,
-    _bfd_generic_link_split_section,
-    bfd_generic_gc_sections,
-    bfd_generic_lookup_section_flags,
-    bfd_generic_merge_sections,
-    bfd_generic_is_group_section,
-    bfd_generic_discard_group,
-    _bfd_generic_section_already_linked,
-    _bfd_xcoff_define_common_symbol,
-
-    /* Dynamic */
-    _bfd_xcoff_get_dynamic_symtab_upper_bound,
-    _bfd_xcoff_canonicalize_dynamic_symtab,
-    _bfd_nodynamic_get_synthetic_symtab,
-    _bfd_xcoff_get_dynamic_reloc_upper_bound,
-    _bfd_xcoff_canonicalize_dynamic_reloc,
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_xcoff),
+    BFD_JUMP_TABLE_SYMBOLS (_bfd_xcoff),
+    BFD_JUMP_TABLE_RELOCS (_bfd_xcoff),
+    BFD_JUMP_TABLE_WRITE (coff),
+    BFD_JUMP_TABLE_LINK (_bfd_xcoff),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_xcoff),
 
     /* Opposite endian version, none exists */
     NULL,
@@ -4407,91 +4407,15 @@ const bfd_target pmac_xcoff_vec =
       bfd_false
     },
 
-    /* Generic */
-    _bfd_archive_close_and_cleanup,
-    bfd_true,
-    coff_new_section_hook,
-    _bfd_generic_get_section_contents,
-    _bfd_generic_get_section_contents_in_window,
-
-    /* Copy */
-    _bfd_xcoff_copy_private_bfd_data,
-    _bfd_generic_bfd_merge_private_bfd_data,
-    _bfd_generic_init_private_section_data,
-    _bfd_generic_bfd_copy_private_section_data,
-    _bfd_generic_bfd_copy_private_symbol_data,
-    _bfd_generic_bfd_copy_private_header_data,
-    _bfd_generic_bfd_set_private_flags,
-    _bfd_generic_bfd_print_private_bfd_data,
-
-    /* Core */
+    BFD_JUMP_TABLE_GENERIC (_bfd_xcoff),
+    BFD_JUMP_TABLE_COPY (_bfd_xcoff),
     BFD_JUMP_TABLE_CORE (coff),
-
-    /* Archive */
-    _bfd_xcoff_slurp_armap,
-    _bfd_noarchive_slurp_extended_name_table,
-    _bfd_noarchive_construct_extended_name_table,
-    bfd_dont_truncate_arname,
-    _bfd_xcoff_write_armap,
-    _bfd_xcoff_read_ar_hdr,
-    _bfd_generic_write_ar_hdr,
-    _bfd_xcoff_openr_next_archived_file,
-    _bfd_generic_get_elt_at_index,
-    _bfd_xcoff_stat_arch_elt,
-    bfd_true,
-
-    /* Symbols */
-    coff_get_symtab_upper_bound,
-    coff_canonicalize_symtab,
-    coff_make_empty_symbol,
-    coff_print_symbol,
-    coff_get_symbol_info,
-    _bfd_xcoff_is_local_label_name,
-    coff_bfd_is_target_special_symbol,
-    coff_get_lineno,
-    xcoff_find_nearest_line,
-    _bfd_generic_find_nearest_line_discriminator,
-    _bfd_generic_find_line,
-    coff_find_inliner_info,
-    coff_bfd_make_debug_symbol,
-    _bfd_generic_read_minisymbols,
-    _bfd_generic_minisymbol_to_symbol,
-
-    /* Reloc */
-    coff_get_reloc_upper_bound,
-    coff_canonicalize_reloc,
-    _bfd_xcoff_reloc_type_lookup,
-    _bfd_xcoff_reloc_name_lookup,
-
-    /* Write */
-    coff_set_arch_mach,
-    coff_set_section_contents,
-
-    /* Link */
-    _bfd_xcoff_sizeof_headers,
-    bfd_generic_get_relocated_section_contents,
-    bfd_generic_relax_section,
-    _bfd_xcoff_bfd_link_hash_table_create,
-    _bfd_generic_link_hash_table_free,
-    _bfd_xcoff_bfd_link_add_symbols,
-    _bfd_generic_link_just_syms,
-    _bfd_generic_copy_link_hash_symbol_type,
-    _bfd_xcoff_bfd_final_link,
-    _bfd_generic_link_split_section,
-    bfd_generic_gc_sections,
-    bfd_generic_lookup_section_flags,
-    bfd_generic_merge_sections,
-    bfd_generic_is_group_section,
-    bfd_generic_discard_group,
-    _bfd_generic_section_already_linked,
-    _bfd_xcoff_define_common_symbol,
-
-    /* Dynamic */
-    _bfd_xcoff_get_dynamic_symtab_upper_bound,
-    _bfd_xcoff_canonicalize_dynamic_symtab,
-    _bfd_nodynamic_get_synthetic_symtab,
-    _bfd_xcoff_get_dynamic_reloc_upper_bound,
-    _bfd_xcoff_canonicalize_dynamic_reloc,
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_xcoff),
+    BFD_JUMP_TABLE_SYMBOLS (_bfd_xcoff),
+    BFD_JUMP_TABLE_RELOCS (_bfd_xcoff),
+    BFD_JUMP_TABLE_WRITE (coff),
+    BFD_JUMP_TABLE_LINK (_bfd_xcoff),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_xcoff),
 
     /* Opposite endian version, none exists */
     NULL,

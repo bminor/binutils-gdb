@@ -1,5 +1,10 @@
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (regbnd): Removed.
+	(vec_disp8): Likewise.
+
+2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* as.c (parse_args): Update copyright year to 2014.
 
 2014-01-07  Tom Tromey  <tromey@redhat.com>

@@ -1,3 +1,16 @@
+2014-01-10  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14207
+	PR ld/16322
+	PR binutils/16323
+	* ldlang.c (lang_size_sections): Remove unneeded RELRO base
+	adjust.  Tidy comments.
+	* ld.texinfo (DATA_SEGMENT_RELRO_END): Correct description.
+
+2014-01-10  Hans-Peter Nilsson  <hp@axis.com>
+
+	* emulparams/crislinux.sh (COMMONPAGESIZE): Define.
+
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14207
