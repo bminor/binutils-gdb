@@ -3605,6 +3605,299 @@ i386_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 	  || (*s == '%' && isalpha (s[1]))); /* Register access.  */
 }
 
+/* Helper function for i386_stap_parse_special_token.
+
+   This function parses operands of the form `-8+3+1(%rbp)', which
+   must be interpreted as `*(-8 + 3 - 1 + (void *) $eax)'.
+
+   Return 1 if the operand was parsed successfully, zero
+   otherwise.  */
+
+static int
+i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
+				       struct stap_parse_info *p)
+{
+  const char *s = p->arg;
+
+  if (isdigit (*s) || *s == '-' || *s == '+')
+    {
+      int got_minus[3];
+      int i;
+      long displacements[3];
+      const char *start;
+      char *regname;
+      int len;
+      struct stoken str;
+      char *endp;
+
+      got_minus[0] = 0;
+      if (*s == '+')
+	++s;
+      else if (*s == '-')
+	{
+	  ++s;
+	  got_minus[0] = 1;
+	}
+
+      displacements[0] = strtol (s, &endp, 10);
+      s = endp;
+
+      if (*s != '+' && *s != '-')
+	{
+	  /* We are not dealing with a triplet.  */
+	  return 0;
+	}
+
+      got_minus[1] = 0;
+      if (*s == '+')
+	++s;
+      else
+	{
+	  ++s;
+	  got_minus[1] = 1;
+	}
+
+      displacements[1] = strtol (s, &endp, 10);
+      s = endp;
+
+      if (*s != '+' && *s != '-')
+	{
+	  /* We are not dealing with a triplet.  */
+	  return 0;
+	}
+
+      got_minus[2] = 0;
+      if (*s == '+')
+	++s;
+      else
+	{
+	  ++s;
+	  got_minus[2] = 1;
+	}
+
+      displacements[2] = strtol (s, &endp, 10);
+      s = endp;
+
+      if (*s != '(' || s[1] != '%')
+	return 0;
+
+      s += 2;
+      start = s;
+
+      while (isalnum (*s))
+	++s;
+
+      if (*s++ != ')')
+	return 0;
+
+      len = s - start;
+      regname = alloca (len + 1);
+
+      strncpy (regname, start, len);
+      regname[len] = '\0';
+
+      if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
+	error (_("Invalid register name `%s' on expression `%s'."),
+	       regname, p->saved_arg);
+
+      for (i = 0; i < 3; i++)
+	{
+	  write_exp_elt_opcode (OP_LONG);
+	  write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
+	  write_exp_elt_longcst (displacements[i]);
+	  write_exp_elt_opcode (OP_LONG);
+	  if (got_minus[i])
+	    write_exp_elt_opcode (UNOP_NEG);
+	}
+
+      write_exp_elt_opcode (OP_REGISTER);
+      str.ptr = regname;
+      str.length = len;
+      write_exp_string (str);
+      write_exp_elt_opcode (OP_REGISTER);
+
+      write_exp_elt_opcode (UNOP_CAST);
+      write_exp_elt_type (builtin_type (gdbarch)->builtin_data_ptr);
+      write_exp_elt_opcode (UNOP_CAST);
+
+      write_exp_elt_opcode (BINOP_ADD);
+      write_exp_elt_opcode (BINOP_ADD);
+      write_exp_elt_opcode (BINOP_ADD);
+
+      write_exp_elt_opcode (UNOP_CAST);
+      write_exp_elt_type (lookup_pointer_type (p->arg_type));
+      write_exp_elt_opcode (UNOP_CAST);
+
+      write_exp_elt_opcode (UNOP_IND);
+
+      p->arg = s;
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/* Helper function for i386_stap_parse_special_token.
+
+   This function parses operands of the form `register base +
+   (register index * size) + offset', as represented in
+   `(%rcx,%rax,8)', or `[OFFSET](BASE_REG,INDEX_REG[,SIZE])'.
+
+   Return 1 if the operand was parsed successfully, zero
+   otherwise.  */
+
+static int
+i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
+					      struct stap_parse_info *p)
+{
+  const char *s = p->arg;
+
+  if (isdigit (*s) || *s == '(' || *s == '-' || *s == '+')
+    {
+      int offset_minus = 0;
+      long offset = 0;
+      int size_minus = 0;
+      long size = 0;
+      const char *start;
+      char *base;
+      int len_base;
+      char *index;
+      int len_index;
+      struct stoken base_token, index_token;
+
+      if (*s == '+')
+	++s;
+      else if (*s == '-')
+	{
+	  ++s;
+	  offset_minus = 1;
+	}
+
+      if (offset_minus && !isdigit (*s))
+	return 0;
+
+      if (isdigit (*s))
+	{
+	  char *endp;
+
+	  offset = strtol (s, &endp, 10);
+	  s = endp;
+	}
+
+      if (*s != '(' || s[1] != '%')
+	return 0;
+
+      s += 2;
+      start = s;
+
+      while (isalnum (*s))
+	++s;
+
+      if (*s != ',' || s[1] != '%')
+	return 0;
+
+      len_base = s - start;
+      base = alloca (len_base + 1);
+      strncpy (base, start, len_base);
+      base[len_base] = '\0';
+
+      if (user_reg_map_name_to_regnum (gdbarch, base, len_base) == -1)
+	error (_("Invalid register name `%s' on expression `%s'."),
+	       base, p->saved_arg);
+
+      s += 2;
+      start = s;
+
+      while (isalnum (*s))
+	++s;
+
+      len_index = s - start;
+      index = alloca (len_index + 1);
+      strncpy (index, start, len_index);
+      index[len_index] = '\0';
+
+      if (user_reg_map_name_to_regnum (gdbarch, index, len_index) == -1)
+	error (_("Invalid register name `%s' on expression `%s'."),
+	       index, p->saved_arg);
+
+      if (*s != ',' && *s != ')')
+	return 0;
+
+      if (*s == ',')
+	{
+	  char *endp;
+
+	  ++s;
+	  if (*s == '+')
+	    ++s;
+	  else if (*s == '-')
+	    {
+	      ++s;
+	      size_minus = 1;
+	    }
+
+	  size = strtol (s, &endp, 10);
+	  s = endp;
+
+	  if (*s != ')')
+	    return 0;
+	}
+
+      ++s;
+
+      if (offset)
+	{
+	  write_exp_elt_opcode (OP_LONG);
+	  write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
+	  write_exp_elt_longcst (offset);
+	  write_exp_elt_opcode (OP_LONG);
+	  if (offset_minus)
+	    write_exp_elt_opcode (UNOP_NEG);
+	}
+
+      write_exp_elt_opcode (OP_REGISTER);
+      base_token.ptr = base;
+      base_token.length = len_base;
+      write_exp_string (base_token);
+      write_exp_elt_opcode (OP_REGISTER);
+
+      if (offset)
+	write_exp_elt_opcode (BINOP_ADD);
+
+      write_exp_elt_opcode (OP_REGISTER);
+      index_token.ptr = index;
+      index_token.length = len_index;
+      write_exp_string (index_token);
+      write_exp_elt_opcode (OP_REGISTER);
+
+      if (size)
+	{
+	  write_exp_elt_opcode (OP_LONG);
+	  write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
+	  write_exp_elt_longcst (size);
+	  write_exp_elt_opcode (OP_LONG);
+	  if (size_minus)
+	    write_exp_elt_opcode (UNOP_NEG);
+	  write_exp_elt_opcode (BINOP_MUL);
+	}
+
+      write_exp_elt_opcode (BINOP_ADD);
+
+      write_exp_elt_opcode (UNOP_CAST);
+      write_exp_elt_type (lookup_pointer_type (p->arg_type));
+      write_exp_elt_opcode (UNOP_CAST);
+
+      write_exp_elt_opcode (UNOP_IND);
+
+      p->arg = s;
+
+      return 1;
+    }
+
+  return 0;
+}
+
 /* Implementation of `gdbarch_stap_parse_special_token', as defined in
    gdbarch.h.  */
 
@@ -3633,283 +3926,17 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 
   while (current_state != DONE)
     {
-      const char *s = p->arg;
-
       switch (current_state)
 	{
 	case TRIPLET:
-	    {
-	      if (isdigit (*s) || *s == '-' || *s == '+')
-		{
-		  int got_minus[3];
-		  int i;
-		  long displacements[3];
-		  const char *start;
-		  char *regname;
-		  int len;
-		  struct stoken str;
-		  char *endp;
+	  if (i386_stap_parse_special_token_triplet (gdbarch, p))
+	    return 1;
+	  break;
 
-		  got_minus[0] = 0;
-		  if (*s == '+')
-		    ++s;
-		  else if (*s == '-')
-		    {
-		      ++s;
-		      got_minus[0] = 1;
-		    }
-
-		  displacements[0] = strtol (s, &endp, 10);
-		  s = endp;
-
-		  if (*s != '+' && *s != '-')
-		    {
-		      /* We are not dealing with a triplet.  */
-		      break;
-		    }
-
-		  got_minus[1] = 0;
-		  if (*s == '+')
-		    ++s;
-		  else
-		    {
-		      ++s;
-		      got_minus[1] = 1;
-		    }
-
-		  displacements[1] = strtol (s, &endp, 10);
-		  s = endp;
-
-		  if (*s != '+' && *s != '-')
-		    {
-		      /* We are not dealing with a triplet.  */
-		      break;
-		    }
-
-		  got_minus[2] = 0;
-		  if (*s == '+')
-		    ++s;
-		  else
-		    {
-		      ++s;
-		      got_minus[2] = 1;
-		    }
-
-		  displacements[2] = strtol (s, &endp, 10);
-		  s = endp;
-
-		  if (*s != '(' || s[1] != '%')
-		    break;
-
-		  s += 2;
-		  start = s;
-
-		  while (isalnum (*s))
-		    ++s;
-
-		  if (*s++ != ')')
-		    break;
-
-		  len = s - start;
-		  regname = alloca (len + 1);
-
-		  strncpy (regname, start, len);
-		  regname[len] = '\0';
-
-		  if (user_reg_map_name_to_regnum (gdbarch,
-						   regname, len) == -1)
-		    error (_("Invalid register name `%s' "
-			     "on expression `%s'."),
-			   regname, p->saved_arg);
-
-		  for (i = 0; i < 3; i++)
-		    {
-		      write_exp_elt_opcode (OP_LONG);
-		      write_exp_elt_type
-			(builtin_type (gdbarch)->builtin_long);
-		      write_exp_elt_longcst (displacements[i]);
-		      write_exp_elt_opcode (OP_LONG);
-		      if (got_minus[i])
-			write_exp_elt_opcode (UNOP_NEG);
-		    }
-
-		  write_exp_elt_opcode (OP_REGISTER);
-		  str.ptr = regname;
-		  str.length = len;
-		  write_exp_string (str);
-		  write_exp_elt_opcode (OP_REGISTER);
-
-		  write_exp_elt_opcode (UNOP_CAST);
-		  write_exp_elt_type (builtin_type (gdbarch)->builtin_data_ptr);
-		  write_exp_elt_opcode (UNOP_CAST);
-
-		  write_exp_elt_opcode (BINOP_ADD);
-		  write_exp_elt_opcode (BINOP_ADD);
-		  write_exp_elt_opcode (BINOP_ADD);
-
-		  write_exp_elt_opcode (UNOP_CAST);
-		  write_exp_elt_type (lookup_pointer_type (p->arg_type));
-		  write_exp_elt_opcode (UNOP_CAST);
-
-		  write_exp_elt_opcode (UNOP_IND);
-
-		  p->arg = s;
-
-		  return 1;
-		}
-	      break;
-	    }
 	case THREE_ARG_DISPLACEMENT:
-	    {
-	      if (isdigit (*s) || *s == '(' || *s == '-' || *s == '+')
-		{
-		  int offset_minus = 0;
-		  long offset = 0;
-		  int size_minus = 0;
-		  long size = 0;
-		  const char *start;
-		  char *base;
-		  int len_base;
-		  char *index;
-		  int len_index;
-		  struct stoken base_token, index_token;
-
-		  if (*s == '+')
-		    ++s;
-		  else if (*s == '-')
-		    {
-		      ++s;
-		      offset_minus = 1;
-		    }
-
-		  if (offset_minus && !isdigit (*s))
-		    break;
-
-		  if (isdigit (*s))
-		    {
-		      char *endp;
-
-		      offset = strtol (s, &endp, 10);
-		      s = endp;
-		    }
-
-		  if (*s != '(' || s[1] != '%')
-		    break;
-
-		  s += 2;
-		  start = s;
-
-		  while (isalnum (*s))
-		    ++s;
-
-		  if (*s != ',' || s[1] != '%')
-		    break;
-
-		  len_base = s - start;
-		  base = alloca (len_base + 1);
-		  strncpy (base, start, len_base);
-		  base[len_base] = '\0';
-
-		  if (user_reg_map_name_to_regnum (gdbarch,
-						   base, len_base) == -1)
-		    error (_("Invalid register name `%s' "
-			     "on expression `%s'."),
-			   base, p->saved_arg);
-
-		  s += 2;
-		  start = s;
-
-		  while (isalnum (*s))
-		    ++s;
-
-		  len_index = s - start;
-		  index = alloca (len_index + 1);
-		  strncpy (index, start, len_index);
-		  index[len_index] = '\0';
-
-		  if (user_reg_map_name_to_regnum (gdbarch,
-						   index, len_index) == -1)
-		    error (_("Invalid register name `%s' "
-			     "on expression `%s'."),
-			   index, p->saved_arg);
-
-		  if (*s != ',' && *s != ')')
-		    break;
-
-		  if (*s == ',')
-		    {
-		      char *endp;
-
-		      ++s;
-		      if (*s == '+')
-			++s;
-		      else if (*s == '-')
-			{
-			  ++s;
-			  size_minus = 1;
-			}
-
-		      size = strtol (s, &endp, 10);
-		      s = endp;
-
-		      if (*s != ')')
-			break;
-		    }
-
-		  ++s;
-
-		  if (offset)
-		    {
-		      write_exp_elt_opcode (OP_LONG);
-		      write_exp_elt_type
-			(builtin_type (gdbarch)->builtin_long);
-		      write_exp_elt_longcst (offset);
-		      write_exp_elt_opcode (OP_LONG);
-		      if (offset_minus)
-			write_exp_elt_opcode (UNOP_NEG);
-		    }
-
-		  write_exp_elt_opcode (OP_REGISTER);
-		  base_token.ptr = base;
-		  base_token.length = len_base;
-		  write_exp_string (base_token);
-		  write_exp_elt_opcode (OP_REGISTER);
-
-		  if (offset)
-		    write_exp_elt_opcode (BINOP_ADD);
-
-		  write_exp_elt_opcode (OP_REGISTER);
-		  index_token.ptr = index;
-		  index_token.length = len_index;
-		  write_exp_string (index_token);
-		  write_exp_elt_opcode (OP_REGISTER);
-
-		  if (size)
-		    {
-		      write_exp_elt_opcode (OP_LONG);
-		      write_exp_elt_type
-			(builtin_type (gdbarch)->builtin_long);
-		      write_exp_elt_longcst (size);
-		      write_exp_elt_opcode (OP_LONG);
-		      if (size_minus)
-			write_exp_elt_opcode (UNOP_NEG);
-		      write_exp_elt_opcode (BINOP_MUL);
-		    }
-
-		  write_exp_elt_opcode (BINOP_ADD);
-
-		  write_exp_elt_opcode (UNOP_CAST);
-		  write_exp_elt_type (lookup_pointer_type (p->arg_type));
-		  write_exp_elt_opcode (UNOP_CAST);
-
-		  write_exp_elt_opcode (UNOP_IND);
-
-		  p->arg = s;
-
-		  return 1;
-		}
-	      break;
-	    }
+	  if (i386_stap_parse_special_token_three_arg_disp (gdbarch, p))
+	    return 1;
+	  break;
 	}
 
       /* Advancing to the next state.  */

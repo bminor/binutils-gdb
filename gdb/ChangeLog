@@ -1,3 +1,11 @@
+2014-01-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* i386-tdep.c (i386_stap_parse_special_token_triplet): New
+	function, with code from i386_stap_parse_special_token.
+	(i386_stap_parse_special_token_three_arg_disp): Likewise.
+	(i386_stap_parse_special_token): Move code to the two functions
+	above; simplify it.
+
 2014-01-09  Pedro Alves  <palves@redhat.com>
 	    Hui Zhu  <hui@codesourcery.com>
 
