@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.c (complete_target_initialization): Remove casts.  Use
+	return_zero_has_execution.
+	(return_zero): Add "ignore" argument.
+	(return_zero_has_execution): New function.
+	(init_dummy_target): Remove casts.  Use
+	return_zero_has_execution.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.c (update_current_target): Update comments.  Do not
 	INHERIT to_stratum.
 

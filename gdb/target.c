@@ -77,7 +77,9 @@ static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
 
-static int return_zero (void);
+static int return_zero (struct target_ops *);
+
+static int return_zero_has_execution (struct target_ops *, ptid_t);
 
 void target_ignore (void);
 
@@ -376,19 +378,19 @@ complete_target_initialization (struct target_ops *t)
     t->to_xfer_partial = default_xfer_partial;
 
   if (t->to_has_all_memory == NULL)
-    t->to_has_all_memory = (int (*) (struct target_ops *)) return_zero;
+    t->to_has_all_memory = return_zero;
 
   if (t->to_has_memory == NULL)
-    t->to_has_memory = (int (*) (struct target_ops *)) return_zero;
+    t->to_has_memory = return_zero;
 
   if (t->to_has_stack == NULL)
-    t->to_has_stack = (int (*) (struct target_ops *)) return_zero;
+    t->to_has_stack = return_zero;
 
   if (t->to_has_registers == NULL)
-    t->to_has_registers = (int (*) (struct target_ops *)) return_zero;
+    t->to_has_registers = return_zero;
 
   if (t->to_has_execution == NULL)
-    t->to_has_execution = (int (*) (struct target_ops *, ptid_t)) return_zero;
+    t->to_has_execution = return_zero_has_execution;
 
   install_delegators (t);
 }
@@ -3246,7 +3248,13 @@ default_thread_architecture (struct target_ops *ops, ptid_t ptid)
 }
 
 static int
-return_zero (void)
+return_zero (struct target_ops *ignore)
+{
+  return 0;
+}
+
+static int
+return_zero_has_execution (struct target_ops *ignore, ptid_t ignore2)
 {
   return 0;
 }
@@ -3361,12 +3369,11 @@ init_dummy_target (void)
   dummy_target.to_supports_disable_randomization
     = find_default_supports_disable_randomization;
   dummy_target.to_stratum = dummy_stratum;
-  dummy_target.to_has_all_memory = (int (*) (struct target_ops *)) return_zero;
-  dummy_target.to_has_memory = (int (*) (struct target_ops *)) return_zero;
-  dummy_target.to_has_stack = (int (*) (struct target_ops *)) return_zero;
-  dummy_target.to_has_registers = (int (*) (struct target_ops *)) return_zero;
-  dummy_target.to_has_execution
-    = (int (*) (struct target_ops *, ptid_t)) return_zero;
+  dummy_target.to_has_all_memory = return_zero;
+  dummy_target.to_has_memory = return_zero;
+  dummy_target.to_has_stack = return_zero;
+  dummy_target.to_has_registers = return_zero;
+  dummy_target.to_has_execution = return_zero_has_execution;
   dummy_target.to_magic = OPS_MAGIC;
 
   install_dummy_methods (&dummy_target);
