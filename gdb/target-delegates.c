@@ -801,6 +801,19 @@ tdefault_flash_done (struct target_ops *self)
   tcomplain ();
 }
 
+static const struct target_desc *
+delegate_read_description (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_read_description (self);
+}
+
+static const struct target_desc *
+tdefault_read_description (struct target_ops *self)
+{
+  return 0;
+}
+
 static ptid_t
 delegate_get_ada_task_ptid (struct target_ops *self, long arg1, long arg2)
 {
@@ -1700,6 +1713,8 @@ install_delegators (struct target_ops *ops)
     ops->to_flash_erase = delegate_flash_erase;
   if (ops->to_flash_done == NULL)
     ops->to_flash_done = delegate_flash_done;
+  if (ops->to_read_description == NULL)
+    ops->to_read_description = delegate_read_description;
   if (ops->to_get_ada_task_ptid == NULL)
     ops->to_get_ada_task_ptid = delegate_get_ada_task_ptid;
   if (ops->to_auxv_parse == NULL)
@@ -1896,6 +1911,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_memory_map = tdefault_memory_map;
   ops->to_flash_erase = tdefault_flash_erase;
   ops->to_flash_done = tdefault_flash_done;
+  ops->to_read_description = tdefault_read_description;
   ops->to_get_ada_task_ptid = default_get_ada_task_ptid;
   ops->to_auxv_parse = default_auxv_parse;
   ops->to_search_memory = default_search_memory;

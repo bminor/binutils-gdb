@@ -636,7 +636,7 @@ arm_linux_read_description (struct target_ops *ops)
 
   if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)
     {
-      return NULL;
+      return ops->beneath->to_read_description (ops->beneath);
     }
 
   if (arm_hwcap & HWCAP_IWMMXT)
@@ -681,7 +681,7 @@ arm_linux_read_description (struct target_ops *ops)
       return result;
     }
 
-  return NULL;
+  return ops->beneath->to_read_description (ops->beneath);
 }
 
 /* Information describing the hardware breakpoint capabilities.  */

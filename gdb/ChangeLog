@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* arm-linux-nat.c (arm_linux_read_description): Delegate when
+	needed.
+	* corelow.c (core_read_description): Delegate when needed.
+	* remote.c (remote_read_description): Delegate when needed.
+	* target-delegates.c: Rebuild.
+	* target.c (target_read_description): Rewrite.
+	* target.h (struct target_ops) <to_read_description>: Update
+	comment.  Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
 	to_can_run.

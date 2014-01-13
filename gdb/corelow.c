@@ -913,10 +913,16 @@ static const struct target_desc *
 core_read_description (struct target_ops *target)
 {
   if (core_gdbarch && gdbarch_core_read_description_p (core_gdbarch))
-    return gdbarch_core_read_description (core_gdbarch, 
-					  target, core_bfd);
+    {
+      const struct target_desc *result;
 
-  return NULL;
+      result = gdbarch_core_read_description (core_gdbarch, 
+					      target, core_bfd);
+      if (result != NULL)
+	return result;
+    }
+
+  return target->beneath->to_read_description (target->beneath);
 }
 
 static char *

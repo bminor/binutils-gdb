@@ -748,7 +748,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  current_target.to_read_description = NULL;
 
 #undef de_fault
 
@@ -2630,19 +2629,7 @@ target_mourn_inferior (void)
 const struct target_desc *
 target_read_description (struct target_ops *target)
 {
-  struct target_ops *t;
-
-  for (t = target; t != NULL; t = t->beneath)
-    if (t->to_read_description != NULL)
-      {
-	const struct target_desc *tdesc;
-
-	tdesc = t->to_read_description (t);
-	if (tdesc)
-	  return tdesc;
-      }
-
-  return NULL;
+  return target->to_read_description (target);
 }
 
 /* This implements a basic search of memory, reading target memory and

@@ -690,10 +690,12 @@ struct target_ops
     void (*to_flash_done) (struct target_ops *)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
-    /* Describe the architecture-specific features of this target.
-       Returns the description found, or NULL if no description
-       was available.  */
-    const struct target_desc *(*to_read_description) (struct target_ops *ops);
+    /* Describe the architecture-specific features of this target.  If
+       OPS doesn't have a description, this should delegate to the
+       "beneath" target.  Returns the description found, or NULL if no
+       description was available.  */
+    const struct target_desc *(*to_read_description) (struct target_ops *ops)
+	 TARGET_DEFAULT_RETURN (0);
 
     /* Build the PTID of the thread on which a given task is running,
        based on LWP and THREAD.  These values are extracted from the
