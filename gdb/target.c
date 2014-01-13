@@ -592,147 +592,31 @@ update_current_target (void)
   /* Install the delegators.  */
   install_delegators (&current_target);
 
+  current_target.to_stratum = target_stack->to_stratum;
+
 #define INHERIT(FIELD, TARGET) \
       if (!current_target.FIELD) \
 	current_target.FIELD = (TARGET)->FIELD
 
+  /* Do not add any new INHERITs here.  Instead, use the delegation
+     mechanism provided by make-target-delegates.  */
   for (t = target_stack; t; t = t->beneath)
     {
       INHERIT (to_shortname, t);
       INHERIT (to_longname, t);
       INHERIT (to_doc, t);
-      /* Do not inherit to_open.  */
-      /* Do not inherit to_close.  */
-      /* Do not inherit to_attach.  */
-      /* Do not inherit to_post_attach.  */
       INHERIT (to_attach_no_wait, t);
-      /* Do not inherit to_detach.  */
-      /* Do not inherit to_disconnect.  */
-      /* Do not inherit to_resume.  */
-      /* Do not inherit to_wait.  */
-      /* Do not inherit to_fetch_registers.  */
-      /* Do not inherit to_store_registers.  */
-      /* Do not inherit to_prepare_to_store.  */
       INHERIT (deprecated_xfer_memory, t);
-      /* Do not inherit to_files_info.  */
-      /* Do not inherit to_insert_breakpoint.  */
-      /* Do not inherit to_remove_breakpoint.  */
-      /* Do not inherit to_can_use_hw_breakpoint.  */
-      /* Do not inherit to_insert_hw_breakpoint.  */
-      /* Do not inherit to_remove_hw_breakpoint.  */
-      /* Do not inherit to_ranged_break_num_registers.  */
-      /* Do not inherit to_insert_watchpoint.  */
-      /* Do not inherit to_remove_watchpoint.  */
-      /* Do not inherit to_insert_mask_watchpoint.  */
-      /* Do not inherit to_remove_mask_watchpoint.  */
-      /* Do not inherit to_stopped_data_address.  */
       INHERIT (to_have_steppable_watchpoint, t);
       INHERIT (to_have_continuable_watchpoint, t);
-      /* Do not inherit to_stopped_by_watchpoint.  */
-      /* Do not inherit to_watchpoint_addr_within_range.  */
-      /* Do not inherit to_region_ok_for_hw_watchpoint.  */
-      /* Do not inherit to_can_accel_watchpoint_condition.  */
-      /* Do not inherit to_masked_watch_num_registers.  */
-      /* Do not inherit to_terminal_init.  */
-      /* Do not inherit to_terminal_inferior.  */
-      /* Do not inherit to_terminal_ours_for_output.  */
-      /* Do not inherit to_terminal_ours.  */
-      /* Do not inherit to_terminal_save_ours.  */
-      /* Do not inherit to_terminal_info.  */
-      /* Do not inherit to_kill.  */
-      /* Do not inherit to_load.  */
-      /* Do no inherit to_create_inferior.  */
-      /* Do not inherit to_post_startup_inferior.  */
-      /* Do not inherit to_insert_fork_catchpoint.  */
-      /* Do not inherit to_remove_fork_catchpoint.  */
-      /* Do not inherit to_insert_vfork_catchpoint.  */
-      /* Do not inherit to_remove_vfork_catchpoint.  */
-      /* Do not inherit to_follow_fork.  */
-      /* Do not inherit to_insert_exec_catchpoint.  */
-      /* Do not inherit to_remove_exec_catchpoint.  */
-      /* Do not inherit to_set_syscall_catchpoint.  */
-      /* Do not inherit to_has_exited.  */
-      /* Do not inherit to_mourn_inferior.  */
-      /* Do not inherit to_can_run.  */
-      /* Do not inherit to_pass_signals.  */
-      /* Do not inherit to_program_signals.  */
-      /* Do not inherit to_thread_alive.  */
-      /* Do not inherit to_find_new_threads.  */
-      /* Do not inherit to_pid_to_str.  */
-      /* Do not inherit to_extra_thread_info.  */
-      /* Do not inherit to_thread_name.  */
-      /* Do not inherit to_stop.  */
-      /* Do not inherit to_xfer_partial.  */
-      /* Do not inherit to_rcmd.  */
-      /* Do not inherit to_pid_to_exec_file.  */
-      /* Do not inherit to_log_command.  */
-      INHERIT (to_stratum, t);
-      /* Do not inherit to_has_all_memory.  */
-      /* Do not inherit to_has_memory.  */
-      /* Do not inherit to_has_stack.  */
-      /* Do not inherit to_has_registers.  */
-      /* Do not inherit to_has_execution.  */
       INHERIT (to_has_thread_control, t);
-      /* Do not inherit to_can_async_p.  */
-      /* Do not inherit to_is_async_p.  */
-      /* Do not inherit to_async.  */
-      /* Do not inherit to_find_memory_regions.  */
-      /* Do not inherit to_make_corefile_notes.  */
-      /* Do not inherit to_get_bookmark.  */
-      /* Do not inherit to_goto_bookmark.  */
-      /* Do not inherit to_get_thread_local_address.  */
-      /* Do not inherit to_can_execute_reverse.  */
-      /* Do not inherit to_execution_direction.  */
-      /* Do not inherit to_thread_architecture.  */
-      /* Do not inherit to_read_description.  */
-      /* Do not inherit to_get_ada_task_ptid.  */
-      /* Do not inherit to_search_memory.  */
-      /* Do not inherit to_supports_multi_process.  */
-      /* Do not inherit to_supports_enable_disable_tracepoint.  */
-      /* Do not inherit to_supports_string_tracing.  */
-      /* Do not inherit to_trace_init.  */
-      /* Do not inherit to_download_tracepoint.  */
-      /* Do not inherit to_can_download_tracepoint.  */
-      /* Do not inherit to_download_trace_state_variable.  */
-      /* Do not inherit to_enable_tracepoint.  */
-      /* Do not inherit to_disable_tracepoint.  */
-      /* Do not inherit to_trace_set_readonly_regions.  */
-      /* Do not inherit to_trace_start.  */
-      /* Do not inherit to_get_trace_status.  */
-      /* Do not inherit to_get_tracepoint_status.  */
-      /* Do not inherit to_trace_stop.  */
-      /* Do not inherit to_trace_find.  */
-      /* Do not inherit to_get_trace_state_variable_value.  */
-      /* Do not inherit to_save_trace_data.  */
-      /* Do not inherit to_upload_tracepoints.  */
-      /* Do not inherit to_upload_trace_state_variables.  */
-      /* Do not inherit to_get_raw_trace_data.  */
-      /* Do not inherit to_get_min_fast_tracepoint_insn_len.  */
-      /* Do not inherit to_set_disconnected_tracing.  */
-      /* Do not inherit to_set_circular_trace_buffer.  */
-      /* Do not inherit to_set_trace_buffer_size.  */
-      /* Do not inherit to_set_trace_notes.  */
-      /* Do not inherit to_get_tib_address.  */
-      /* Do not inherit to_set_permissions.  */
-      /* Do not inherit to_static_tracepoint_marker_at.  */
-      /* Do not inherit to_static_tracepoint_markers_by_strid.  */
-      /* Do not inherit to_traceframe_info.  */
-      /* Do not inherit to_use_agent.  */
-      /* Do not inherit to_can_use_agent.  */
-      /* Do not inherit to_augmented_libraries_svr4_read.  */
       INHERIT (to_magic, t);
-      /* Do not inherit
-	 to_supports_evaluation_of_breakpoint_conditions.  */
-      /* Do not inherit to_can_run_breakpoint_commands.  */
-      /* Do not inherit to_memory_map.  */
-      /* Do not inherit to_flash_erase.  */
-      /* Do not inherit to_flash_done.  */
     }
 #undef INHERIT
 
   /* Clean up a target struct so it no longer has any zero pointers in
-     it.  Some entries are defaulted to a method that print an error,
-     others are hard-wired to a standard recursive default.  */
+     it.  Do not add any new de_faults here.  Instead, use the
+     delegation mechanism provided by make-target-delegates.  */
 
 #define de_fault(field, value) \
   if (!current_target.field)               \

@@ -1,5 +1,10 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.c (update_current_target): Update comments.  Do not
+	INHERIT to_stratum.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* arm-linux-nat.c (arm_linux_read_description): Delegate when
 	needed.
 	* corelow.c (core_read_description): Delegate when needed.
