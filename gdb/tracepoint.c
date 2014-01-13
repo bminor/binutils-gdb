@@ -5060,7 +5060,17 @@ tfile_fetch_registers (struct target_ops *ops,
   /* We can often usefully guess that the PC is going to be the same
      as the address of the tracepoint.  */
   pc_regno = gdbarch_pc_regnum (gdbarch);
-  if (pc_regno >= 0 && (regno == -1 || regno == pc_regno))
+
+  /* XXX This guessing code below only works if the PC register isn't
+     a pseudo-register.  The value of a pseudo-register isn't stored
+     in the (non-readonly) regcache -- instead it's recomputed
+     (probably from some other cached raw register) whenever the
+     register is read.  This guesswork should probably move to some
+     higher layer.  */
+  if (pc_regno < 0 || pc_regno >= gdbarch_num_regs (gdbarch))
+    return;
+
+  if (regno == -1 || regno == pc_regno)
     {
       struct tracepoint *tp = get_tracepoint (tracepoint_number);
 

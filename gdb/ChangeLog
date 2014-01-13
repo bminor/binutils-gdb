@@ -1,3 +1,8 @@
+2014-01-13  Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (tfile_fetch_registers): Don't infer the PC from
+	the tracepoint if the PC is a pseudo-register.
+
 2014-01-13  Tom Tromey  <tromey@redhat.com>
 
 	* defs.h (XCALLOC): Remove.
