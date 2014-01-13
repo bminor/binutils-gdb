@@ -1,3 +1,23 @@
+2014-01-16  Tom Tromey  <tromey@redhat.com>
+
+	* windows-nat.c (windows_prepare_to_store): Add 'self' argument.
+	* target.h (struct target_ops) <to_prepare_to_store>: Add
+	argument.
+	(target_prepare_to_store): Add argument.
+	* target.c (debug_to_prepare_to_store): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_prepare_to_store): Add 'self' argument.
+	* remote-sim.c (gdbsim_prepare_to_store): Add 'self' argument.
+	* remote-mips.c (mips_prepare_to_store): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_prepare_to_store): Add 'self' argument.
+	* record-full.c (record_full_core_prepare_to_store): Add 'self'
+	argument.
+	* ravenscar-thread.c (ravenscar_prepare_to_store): Add argument.
+	* nto-procfs.c (procfs_prepare_to_store): Add 'self' argument.
+	* monitor.c (monitor_prepare_to_store): Add 'self' argument.
+	* inf-child.c (inf_child_prepare_to_store): Add 'self' argument.
+	* go32-nat.c (go32_prepare_to_store): Add 'self' argument.
+
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.h (replay) <replay>: New.

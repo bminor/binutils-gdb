@@ -1012,7 +1012,7 @@ m32r_store_register (struct target_ops *ops,
    debugged.  */
 
 static void
-m32r_prepare_to_store (struct regcache *regcache)
+m32r_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs.  */
   if (remote_debug)

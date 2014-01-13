@@ -2145,7 +2145,8 @@ record_full_core_fetch_registers (struct target_ops *ops,
 /* "to_prepare_to_store" method for prec over corefile.  */
 
 static void
-record_full_core_prepare_to_store (struct regcache *regcache)
+record_full_core_prepare_to_store (struct target_ops *self,
+				   struct regcache *regcache)
 {
 }
 

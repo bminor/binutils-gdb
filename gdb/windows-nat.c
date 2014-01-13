@@ -2468,7 +2468,7 @@ windows_kill_inferior (struct target_ops *ops)
 }
 
 static void
-windows_prepare_to_store (struct regcache *regcache)
+windows_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs.  */
 }

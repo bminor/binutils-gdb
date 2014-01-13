@@ -574,7 +574,7 @@ go32_store_registers (struct target_ops *ops,
 }
 
 static void
-go32_prepare_to_store (struct regcache *regcache)
+go32_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
 }
 

@@ -379,7 +379,7 @@ struct target_ops
 		       ptid_t, struct target_waitstatus *, int);
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int);
     void (*to_store_registers) (struct target_ops *, struct regcache *, int);
-    void (*to_prepare_to_store) (struct regcache *);
+    void (*to_prepare_to_store) (struct target_ops *, struct regcache *);
 
     /* Transfer LEN bytes of memory between GDB address MYADDR and
        target address MEMADDR.  If WRITE, transfer them to the target, else
@@ -1011,7 +1011,7 @@ extern void target_store_registers (struct regcache *regcache, int regs);
    debugged.  */
 
 #define	target_prepare_to_store(regcache)	\
-     (*current_target.to_prepare_to_store) (regcache)
+     (*current_target.to_prepare_to_store) (&current_target, regcache)
 
 /* Determine current address space of thread PTID.  */
 

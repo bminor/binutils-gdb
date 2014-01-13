@@ -85,7 +85,8 @@ static struct target_ops debug_target;
 
 static void debug_to_open (char *, int);
 
-static void debug_to_prepare_to_store (struct regcache *);
+static void debug_to_prepare_to_store (struct target_ops *self,
+				       struct regcache *);
 
 static void debug_to_files_info (struct target_ops *);
 
@@ -716,7 +717,7 @@ update_current_target (void)
 	    (void (*) (int))
 	    target_ignore);
   de_fault (to_prepare_to_store,
-	    (void (*) (struct regcache *))
+	    (void (*) (struct target_ops *, struct regcache *))
 	    noprocess);
   de_fault (deprecated_xfer_memory,
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
@@ -4463,9 +4464,9 @@ target_call_history_range (ULONGEST begin, ULONGEST end, int flags)
 }
 
 static void
-debug_to_prepare_to_store (struct regcache *regcache)
+debug_to_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
-  debug_target.to_prepare_to_store (regcache);
+  debug_target.to_prepare_to_store (&debug_target, regcache);
 
   fprintf_unfiltered (gdb_stdlog, "target_prepare_to_store ()\n");
 }

@@ -1427,7 +1427,7 @@ monitor_store_registers (struct target_ops *ops,
    debugged.  */
 
 static void
-monitor_prepare_to_store (struct regcache *regcache)
+monitor_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs.  */
 }
