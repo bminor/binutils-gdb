@@ -1,3 +1,9 @@
+2014-01-13  Ma Jiang  <ma.jiang@zte.com.cn>
+
+	PR ld/16202
+	* elf32-arm.c (elf32_arm_final_link_relocate): Refetch addends for
+	R_ARM_ABS8 and R_ARM_ABS16.
+
 2014-01-13  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): For @local call to ifunc,
