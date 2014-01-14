@@ -2432,6 +2432,7 @@ dwarf2_get_dwz_file (void)
 
   do_cleanups (cleanup);
 
+  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd, dwz_bfd);
   dwarf2_per_objfile->dwz_file = result;
   return result;
 }
@@ -10122,6 +10123,8 @@ lookup_dwo_unit_in_dwp (struct dwp_file *dwp_file, const char *comp_dir,
    If IS_DWP is TRUE, we're opening a DWP file, otherwise a DWO file.
    SEARCH_CWD is true if the current directory is to be searched.
    It will be searched before debug-file-directory.
+   If successful, the file is added to the bfd include table of the
+   objfile's bfd (see gdb_bfd_record_inclusion).
    If unable to find/open the file, return NULL.
    NOTE: This function is derived from symfile_bfd_open.  */
 
@@ -10168,6 +10171,12 @@ try_open_dwop_file (const char *file_name, int is_dwp, int search_cwd)
       gdb_bfd_unref (sym_bfd); /* This also closes desc.  */
       return NULL;
     }
+
+  /* Success.  Record the bfd as having been included by the objfile's bfd.
+     This is important because things like demangled_names_hash lives in the
+     objfile's per_bfd space and may have references to things like symbol
+     names that live in the DWO/DWP file's per_bfd space.  PR 16426.  */
+  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd, sym_bfd);
 
   return sym_bfd;
 }

@@ -1,3 +1,15 @@
+2014-01-14  Doug Evans  <dje@google.com>
+
+	PR symtab/16426
+	* dwarf2read.c (dwarf2_get_dwz_file): Call gdb_bfd_record_inclusion.
+	(try_open_dwop_file): Ditto.
+	* gdb_bfd.c: #include "vec.h".
+	(bfdp): New typedef.
+	(struct gdb_bfd_data): New member included_bfds.
+	(gdb_bfd_unref): Unref all included bfds.
+	(gdb_bfd_record_inclusion): New function.
+	* gdb_bfd.h (gdb_bfd_record_inclusion): Declare.
+
 2014-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR threads/16216

@@ -25,6 +25,7 @@
 #include "gdbcmd.h"
 #include "hashtab.h"
 #include "filestuff.h"
+#include "vec.h"
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #endif
@@ -34,6 +35,9 @@
 #define MAP_FAILED ((void *) -1)
 #endif
 #endif
+
+typedef bfd *bfdp;
+DEF_VEC_P (bfdp);
 
 /* An object of this type is stored in the section's user data when
    mapping a section.  */
@@ -83,6 +87,9 @@ struct gdb_bfd_data
   /* If the BFD comes from an archive, this points to the archive's
      BFD.  Otherwise, this is NULL.  */
   bfd *archive_bfd;
+
+  /* Table of all the bfds this bfd has included.  */
+  VEC (bfdp) *included_bfds;
 
   /* The registry.  */
   REGISTRY_FIELDS;
@@ -277,9 +284,10 @@ gdb_bfd_ref (struct bfd *abfd)
 void
 gdb_bfd_unref (struct bfd *abfd)
 {
+  int ix;
   struct gdb_bfd_data *gdata;
   struct gdb_bfd_cache_search search;
-  bfd *archive_bfd;
+  bfd *archive_bfd, *included_bfd;
 
   if (abfd == NULL)
     return;
@@ -306,6 +314,12 @@ gdb_bfd_unref (struct bfd *abfd)
       if (slot && *slot)
 	htab_clear_slot (gdb_bfd_cache, slot);
     }
+
+  for (ix = 0;
+       VEC_iterate (bfdp, gdata->included_bfds, ix, included_bfd);
+       ++ix)
+    gdb_bfd_unref (included_bfd);
+  VEC_free (bfdp, gdata->included_bfds);
 
   bfd_free_data (abfd);
   bfd_usrdata (abfd) = NULL;  /* Paranoia.  */
@@ -565,6 +579,18 @@ gdb_bfd_openr_next_archived_file (bfd *archive, bfd *previous)
     gdb_bfd_mark_parent (result, archive);
 
   return result;
+}
+
+/* See gdb_bfd.h.  */
+
+void
+gdb_bfd_record_inclusion (bfd *includer, bfd *includee)
+{
+  struct gdb_bfd_data *gdata;
+
+  gdb_bfd_ref (includee);
+  gdata = bfd_usrdata (includer);
+  VEC_safe_push (bfdp, gdata->included_bfds, includee);
 }
 
 /* See gdb_bfd.h.  */
