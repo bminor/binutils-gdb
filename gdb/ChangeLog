@@ -1,3 +1,27 @@
+2014-01-14  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* infrun.c (use_displaced_stepping): Use find_record_target
+	instead of RECORD_IS_USED.
+	(adjust_pc_after_break): Use record_full_is_used instead of
+	RECORD_IS_USED.
+	* record-btrace.c (record_btrace_open): Call record_preopen
+	instead of checking RECORD_IS_USED.
+	* record-full.c (record_full_shortname)
+	(record_full_core_shortname): New globals.
+	(record_full_is_used): New function.
+	(find_full_open): Call record_preopen instead of checking
+	RECORD_IS_USED.
+	(init_record_full_ops): Set the target's shortname to
+	record_full_shortname.
+	(init_record_full_core_ops): Set the target's shortname to
+	record_full_core_shortname.
+	* record-full.h (record_full_is_used): Declare.
+	* record.c (find_record_target): Make extern.
+	(record_preopen): New function.
+	* record.h (RECORD_IS_USED): Delete macro.
+	(find_record_target, record_preopen): Declare functions.
+
 2014-01-14  Yao Qi  <yao@codesourcery.com>
 
 	* gdbarch.sh (core_xfer_shared_libraries): Change its argument

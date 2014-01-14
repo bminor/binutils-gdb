@@ -57,9 +57,9 @@ struct cmd_list_element *info_record_cmdlist = NULL;
   if (record_debug)							\
     fprintf_unfiltered (gdb_stdlog, "record: " msg "\n", ##args)
 
-/* Find the record target in the target stack.  */
+/* See record.h.  */
 
-static struct target_ops *
+struct target_ops *
 find_record_target (void)
 {
   struct target_ops *t;
@@ -84,6 +84,17 @@ require_record_target (void)
 	     "Use one of the \"target record-<tab><tab>\" commands first."));
 
   return t;
+}
+
+/* See record.h.  */
+
+void
+record_preopen (void)
+{
+  /* Check if a record target is already running.  */
+  if (find_record_target () != NULL)
+    error (_("The process is already being recorded.  Use \"record stop\" to "
+	     "stop recording first."));
 }
 
 /* See record.h.  */

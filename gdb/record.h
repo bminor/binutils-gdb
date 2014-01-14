@@ -22,8 +22,6 @@
 
 struct cmd_list_element;
 
-#define RECORD_IS_USED	(current_target.to_stratum == record_stratum)
-
 extern unsigned int record_debug;
 
 /* Allow record targets to add their own sub-commands.  */
@@ -62,5 +60,13 @@ extern void record_mourn_inferior (struct target_ops *);
 
 /* The default "to_kill" target method for record targets.  */
 extern void record_kill (struct target_ops *);
+
+/* Find the record_stratum target in the current target stack.
+   Returns NULL if none is found.  */
+extern struct target_ops *find_record_target (void);
+
+/* This is to be called by record_stratum targets' open routine before
+   it does anything.  */
+extern void record_preopen (void);
 
 #endif /* _RECORD_H_ */

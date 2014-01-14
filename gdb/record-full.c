@@ -208,6 +208,19 @@ static ULONGEST record_full_insn_count;
 static struct target_ops record_full_ops;
 static struct target_ops record_full_core_ops;
 
+/* See record-full.h.  */
+
+int
+record_full_is_used (void)
+{
+  struct target_ops *t;
+
+  t = find_record_target ();
+  return (t == &record_full_ops
+	  || t == &record_full_core_ops);
+}
+
+
 /* Command lists for "set/show record full".  */
 static struct cmd_list_element *set_record_full_cmdlist;
 static struct cmd_list_element *show_record_full_cmdlist;
@@ -907,10 +920,7 @@ record_full_open (char *name, int from_tty)
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open\n");
 
-  /* Check if record target is already running.  */
-  if (current_target.to_stratum == record_stratum)
-    error (_("Process record target already running.  Use \"record stop\" to "
-             "stop record target first."));
+  record_preopen ();
 
   /* Reset the tmp beneath pointers.  */
   tmp_to_resume_ops = NULL;
