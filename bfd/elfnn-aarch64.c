@@ -3844,7 +3844,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
       value = (symbol_got_offset (input_bfd, h, r_symndx)
 	       + globals->root.sgot->output_section->vma
-	       + globals->root.sgot->output_section->output_offset);
+	       + globals->root.sgot->output_offset);
 
       value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						   0, weak_undef_p);
@@ -3873,10 +3873,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_TLSDESC_LDR:
       if (globals->root.sgot == NULL)
 	return bfd_reloc_notsupported;
-
       value = (symbol_tlsdesc_got_offset (input_bfd, h, r_symndx)
 	       + globals->root.sgotplt->output_section->vma
-	       + globals->root.sgotplt->output_section->output_offset
+	       + globals->root.sgotplt->output_offset
 	       + globals->sgotplt_jump_table_size);
 
       value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
@@ -6652,7 +6651,7 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
 
   plt_entry = plt->contents + h->plt.offset;
   plt_entry_address = plt->output_section->vma
-    + plt->output_section->output_offset + h->plt.offset;
+    + plt->output_offset + h->plt.offset;
   gotplt_entry_address = gotplt->output_section->vma +
     gotplt->output_offset + got_offset;
 
@@ -6959,7 +6958,7 @@ elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  + GOT_ENTRY_SIZE * 2);
 
   plt_base = htab->root.splt->output_section->vma +
-    htab->root.splt->output_section->output_offset;
+    htab->root.splt->output_offset;
 
   /* Fill in the top 21 bits for this: ADRP x16, PLT_GOT + n * 8.
      ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff */
