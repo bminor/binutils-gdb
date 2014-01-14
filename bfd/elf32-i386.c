@@ -2368,8 +2368,13 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      p->count -= p->pc_count;
-	      p->pc_count = 0;
+	      /* Don't update reloc count if there are any non
+		 pc-relative relocs.  */
+	      if (!h->pointer_equality_needed)
+		{
+		  p->count -= p->pc_count;
+		  p->pc_count = 0;
+		}
 	      if (p->count == 0)
 		*pp = p->next;
 	      else
