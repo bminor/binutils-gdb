@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright 1994-2013 Free Software Foundation, Inc.
+#   Copyright 1994-2014 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -199,10 +199,6 @@ proc default_ld_link { ld target objects } {
 	set flags ""
     }
 
-    if [board_info [target_info name] exists ldflags] {
-        append flags " [board_info [target_info name] ldflags]"
-    }
-
     remote_file host delete $target
 
     return [run_host_cmd_yesno "$ld" "$HOSTING_EMU $flags -o $target $objs $libs"]
@@ -219,10 +215,6 @@ proc default_ld_simple_link { ld target objects } {
 	set flags [big_or_little_endian]
     } else {
 	set flags ""
-    }
-
-    if [board_info [target_info name] exists ldflags] {
-        append flags " [board_info [target_info name] ldflags]"
     }
 
     # If we are compiling with gcc, we want to add gcc_ld_flag to
