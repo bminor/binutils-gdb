@@ -1,3 +1,11 @@
+2014-01-14  Michael Hudson-Doyle  <michael.hudson@linaro.org>
+	    Kugan Vivekanandarajah  <kugan.vivekanandarajah@linaro.org>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Use correct
+	offset while calculating relocation address.
+	(elfNN_aarch64_create_small_pltn_entry): Likewise.
+	(elfNN_aarch64_init_small_plt0_entry): Likewise.
+
 2014-01-13  Ma Jiang  <ma.jiang@zte.com.cn>
 
 	PR ld/16202
