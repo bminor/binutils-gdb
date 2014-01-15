@@ -3771,8 +3771,8 @@ dw2_map_matching_symbols (struct objfile *objfile,
 static void
 dw2_expand_symtabs_matching
   (struct objfile *objfile,
-   int (*file_matcher) (const char *, void *, int basenames),
-   int (*name_matcher) (const char *, void *),
+   expand_symtabs_file_matcher_ftype *file_matcher,
+   expand_symtabs_symbol_matcher_ftype *symbol_matcher,
    enum search_domain kind,
    void *data)
 {
@@ -3876,7 +3876,7 @@ dw2_expand_symtabs_matching
 
       name = index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]);
 
-      if (! (*name_matcher) (name, data))
+      if (! (*symbol_matcher) (name, data))
 	continue;
 
       /* The name was matched, now expand corresponding CUs that were

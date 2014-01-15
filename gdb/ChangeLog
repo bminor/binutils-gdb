@@ -1,5 +1,23 @@
 2014-01-14  Doug Evans  <dje@google.com>
 
+	* symfile.h (expand_symtabs_file_matcher_ftype): New typedef.
+	(expand_symtabs_symbol_matcher_ftype): New typedef.
+	(quick_symbol_functions.expand_symtabs_matching): Update to use.
+	expand_symtabs_file_matcher_ftype, expand_symtabs_symbol_matcher_ftype.
+	* symfile.c (expand_partial_symbol_names): Update to use
+	expand_symtabs_symbol_matcher_ftype.
+	* dwarf2read.c (dw2_expand_symtabs_matching): Update to use
+	expand_symtabs_file_matcher_ftype, expand_symtabs_symbol_matcher_ftype.
+	Arg name_matcher renamed to symbol_matcher.
+	* psymtab.c (recursively_search_psymtabs): Update to use
+	expand_symtabs_symbol_matcher_ftype.  Arg name_matcher renamed to
+	sym_matcher.
+	(expand_symtabs_matching_via_partial): Update to use
+	expand_symtabs_file_matcher_ftype, expand_symtabs_symbol_matcher_ftype.
+	Arg name_matcher renamed to symbol_matcher.
+
+2014-01-14  Doug Evans  <dje@google.com>
+
 	* psymtab.c (expand_partial_symbol_names): Delete, moved to symfile.c.
 	(map_partial_symbol_filenames): Ditto.
 	* psymtab.h (expand_partial_symbol_names): Delete, moved to symfile.h.

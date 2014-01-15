@@ -3843,7 +3843,7 @@ symfile_free_objfile (struct objfile *objfile)
    See quick_symbol_functions.expand_symtabs_matching for details.  */
 
 void
-expand_partial_symbol_names (int (*fun) (const char *, void *),
+expand_partial_symbol_names (expand_symtabs_symbol_matcher_ftype *fun,
 			     void *data)
 {
   struct objfile *objfile;

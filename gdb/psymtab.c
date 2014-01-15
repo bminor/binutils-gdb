@@ -1281,7 +1281,7 @@ static int
 recursively_search_psymtabs (struct partial_symtab *ps,
 			     struct objfile *objfile,
 			     enum search_domain kind,
-			     int (*name_matcher) (const char *, void *),
+			     expand_symtabs_symbol_matcher_ftype *sym_matcher,
 			     void *data)
 {
   struct partial_symbol **psym;
@@ -1304,7 +1304,7 @@ recursively_search_psymtabs (struct partial_symtab *ps,
 	continue;
 
       r = recursively_search_psymtabs (ps->dependencies[i],
-				       objfile, kind, name_matcher, data);
+				       objfile, kind, sym_matcher, data);
       if (r != 0)
 	{
 	  ps->searched_flag = PST_SEARCHED_AND_FOUND;
@@ -1346,7 +1346,7 @@ recursively_search_psymtabs (struct partial_symtab *ps,
 		   && PSYMBOL_CLASS (*psym) == LOC_BLOCK)
 	       || (kind == TYPES_DOMAIN
 		   && PSYMBOL_CLASS (*psym) == LOC_TYPEDEF))
-	      && (*name_matcher) (SYMBOL_SEARCH_NAME (*psym), data))
+	      && (*sym_matcher) (SYMBOL_SEARCH_NAME (*psym), data))
 	    {
 	      /* Found a match, so notify our caller.  */
 	      result = PST_SEARCHED_AND_FOUND;
@@ -1363,8 +1363,8 @@ recursively_search_psymtabs (struct partial_symtab *ps,
 static void
 expand_symtabs_matching_via_partial
   (struct objfile *objfile,
-   int (*file_matcher) (const char *, void *, int basenames),
-   int (*name_matcher) (const char *, void *),
+   expand_symtabs_file_matcher_ftype *file_matcher,
+   expand_symtabs_symbol_matcher_ftype *symbol_matcher,
    enum search_domain kind,
    void *data)
 {
@@ -1406,7 +1406,7 @@ expand_symtabs_matching_via_partial
 	    continue;
 	}
 
-      if (recursively_search_psymtabs (ps, objfile, kind, name_matcher, data))
+      if (recursively_search_psymtabs (ps, objfile, kind, symbol_matcher, data))
 	psymtab_to_symtab (objfile, ps);
     }
 }
