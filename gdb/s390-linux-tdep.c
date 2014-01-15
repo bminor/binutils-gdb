@@ -3196,7 +3196,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Otherwise create a new gdbarch for the specified machine type.  */
-  tdep = XCALLOC (1, struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   tdep->abi = tdep_abi;
   gdbarch = gdbarch_alloc (&info, tdep);
 

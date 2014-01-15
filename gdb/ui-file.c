@@ -393,7 +393,7 @@ static int mem_file_magic;
 static struct ui_file *
 mem_file_new (void)
 {
-  struct mem_file *stream = XMALLOC (struct mem_file);
+  struct mem_file *stream = XNEW (struct mem_file);
   struct ui_file *file = ui_file_new ();
 
   set_ui_file_data (file, stream, mem_file_delete);

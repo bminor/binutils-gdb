@@ -553,13 +553,6 @@ enum val_prettyformat
 
 extern int longest_to_int (LONGEST);
 
-/* Utility macros to allocate typed memory.  Avoids errors like:
-   struct foo *foo = xmalloc (sizeof struct bar); and memset (foo,
-   sizeof (struct foo), 0).  */
-#define XZALLOC(TYPE) ((TYPE*) xzalloc (sizeof (TYPE)))
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
-#define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
-
 #include "common-utils.h"
 
 /* List of known OS ABIs.  If you change this, make sure to update the
@@ -717,7 +710,6 @@ extern int (*deprecated_query_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);
 extern void (*deprecated_warning_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);
-extern void (*deprecated_flush_hook) (struct ui_file * stream);
 extern void (*deprecated_interactive_hook) (void);
 extern void (*deprecated_readline_begin_hook) (char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;
@@ -734,14 +726,8 @@ extern void (*deprecated_detach_hook) (void);
 extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 					     char *cmd, int from_tty);
 
-extern void (*deprecated_set_hook) (struct cmd_list_element * c);
-
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
 						unsigned long num);
-
-/* Inhibit window interface if non-zero.  */
-
-extern int use_windows;
 
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */

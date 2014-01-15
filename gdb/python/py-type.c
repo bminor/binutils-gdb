@@ -206,15 +206,23 @@ convert_field (struct type *type, int field)
       Py_DECREF (arg);
     }
 
+  arg = NULL;
   if (TYPE_FIELD_NAME (type, field))
-    arg = PyString_FromString (TYPE_FIELD_NAME (type, field));
-  else
+    {
+      const char *field_name = TYPE_FIELD_NAME (type, field);
+
+      if (field_name[0] != '\0')
+	{
+	  arg = PyString_FromString (TYPE_FIELD_NAME (type, field));
+	  if (arg == NULL)
+	    goto fail;
+	}
+    }
+  if (arg == NULL)
     {
       arg = Py_None;
       Py_INCREF (arg);
     }
-  if (!arg)
-    goto fail;
   if (PyObject_SetAttrString (result, "name", arg) < 0)
     goto failarg;
   Py_DECREF (arg);

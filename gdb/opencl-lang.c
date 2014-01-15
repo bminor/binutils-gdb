@@ -156,11 +156,11 @@ struct lval_closure
 static struct lval_closure *
 allocate_lval_closure (int *indices, int n, struct value *val)
 {
-  struct lval_closure *c = XZALLOC (struct lval_closure);
+  struct lval_closure *c = XCNEW (struct lval_closure);
 
   c->refc = 1;
   c->n = n;
-  c->indices = XCALLOC (n, int);
+  c->indices = XCNEWVEC (int, n);
   memcpy (c->indices, indices, n * sizeof (int));
   value_incref (val); /* Increment the reference counter of the value.  */
   c->val = val;

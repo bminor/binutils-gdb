@@ -358,7 +358,7 @@ get_ada_inferior_data (struct inferior *inf)
   data = inferior_data (inf, ada_inferior_data);
   if (data == NULL)
     {
-      data = XZALLOC (struct ada_inferior_data);
+      data = XCNEW (struct ada_inferior_data);
       set_inferior_data (inf, ada_inferior_data, data);
     }
 
@@ -5866,7 +5866,7 @@ symbol_completion_add (VEC(char_ptr) **sv,
 }
 
 /* An object of this type is passed as the user_data argument to the
-   expand_partial_symbol_names method.  */
+   expand_symtabs_matching method.  */
 struct add_partial_datum
 {
   VEC(char_ptr) **completions;
@@ -5878,9 +5878,10 @@ struct add_partial_datum
   int encoded;
 };
 
-/* A callback for expand_partial_symbol_names.  */
+/* A callback for expand_symtabs_matching.  */
+
 static int
-ada_expand_partial_symbol_name (const char *name, void *user_data)
+ada_complete_symbol_matcher (const char *name, void *user_data)
 {
   struct add_partial_datum *data = user_data;
   
@@ -5946,7 +5947,8 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     data.word = word;
     data.wild_match = wild_match_p;
     data.encoded = encoded_p;
-    expand_partial_symbol_names (ada_expand_partial_symbol_name, &data);
+    expand_symtabs_matching (NULL, ada_complete_symbol_matcher, ALL_DOMAIN,
+			     &data);
   }
 
   /* At this point scan through the misc symbol vectors and add each
@@ -12513,11 +12515,8 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
   struct objfile *objfile;
   struct symtab *s;
 
-  ALL_OBJFILES (objfile)
-    if (objfile->sf)
-      objfile->sf->qf->expand_symtabs_matching
-	(objfile, NULL, ada_exc_search_name_matches,
-	 VARIABLES_DOMAIN, preg);
+  expand_symtabs_matching (NULL, ada_exc_search_name_matches,
+			   VARIABLES_DOMAIN, preg);
 
   ALL_PRIMARY_SYMTABS (objfile, s)
     {

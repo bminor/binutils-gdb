@@ -498,14 +498,14 @@ serial_ttystate
 ser_base_get_tty_state (struct serial *scb)
 {
   /* Allocate a dummy.  */
-  return (serial_ttystate) XMALLOC (int);
+  return (serial_ttystate) XNEW (int);
 }
 
 serial_ttystate
 ser_base_copy_tty_state (struct serial *scb, serial_ttystate ttystate)
 {
   /* Allocate another dummy.  */
-  return (serial_ttystate) XMALLOC (int);
+  return (serial_ttystate) XNEW (int);
 }
 
 int

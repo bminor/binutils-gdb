@@ -1050,6 +1050,28 @@ check//%: force
 	    "$$target"; \
 	else true; fi
 
+# The set of headers checked by 'check-headers' by default.
+CHECK_HEADERS = $(HFILES_NO_SRCDIR)
+
+# Try to compile each header in isolation, thus ensuring headers are
+# self-contained.
+#
+# Defaults to checking all $HFILES_NO_SRCDIR headers.
+#
+# Do:
+#
+#    make check-headers CHECK_HEADERS="header.h list.h"
+#
+# to check specific headers.
+#
+check-headers:
+	@echo Checking headers.
+	for i in $(CHECK_HEADERS) ; do \
+		$(CC) -x c -c -fsyntax-only $(INTERNAL_CFLAGS) \
+			-include defs.h $(srcdir)/$$i ; \
+	done
+.PHONY: check-headers
+
 info install-info clean-info dvi pdf install-pdf html install-html: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 

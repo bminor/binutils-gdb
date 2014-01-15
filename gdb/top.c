@@ -86,11 +86,6 @@ const char gdbinit[] = GDBINIT;
 
 int inhibit_gdbinit = 0;
 
-/* If nonzero, and GDB has been configured to be able to use windows,
-   attempt to open them upon startup.  */
-
-int use_windows = 0;
-
 extern char lang_frame_mismatch_warn[];		/* language.c */
 
 /* Flag for whether we want to confirm potentially dangerous
@@ -252,11 +247,6 @@ ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 
 void (*deprecated_call_command_hook) (struct cmd_list_element * c, 
 				      char *cmd, int from_tty);
-
-/* Called after a `set' command has finished.  Is only run if the
-   `set' command succeeded.  */
-
-void (*deprecated_set_hook) (struct cmd_list_element * c);
 
 /* Called when the current thread changes.  Argument is thread id.  */
 

@@ -52,6 +52,20 @@ void gdb_bfd_unref (struct bfd *abfd);
 
 void gdb_bfd_mark_parent (bfd *child, bfd *parent);
 
+/* Mark INCLUDEE as being included by INCLUDER.
+   This is used to associate the life time of INCLUDEE with INCLUDER.
+   For example, with Fission, one file can refer to debug info in another
+   file, and internal tables we build for the main file (INCLUDER) may refer
+   to data contained in INCLUDEE.  Therefore we want to keep INCLUDEE around
+   at least as long as INCLUDER exists.
+
+   Note that this is different than gdb_bfd_mark_parent because in our case
+   lifetime tracking is based on the "parent" whereas in gdb_bfd_mark_parent
+   lifetime tracking is based on the "child".  Plus in our case INCLUDEE could
+   have multiple different "parents".  */
+
+void gdb_bfd_record_inclusion (bfd *includer, bfd *includee);
+
 /* Try to read or map the contents of the section SECT.  If
    successful, the section data is returned and *SIZE is set to the
    size of the section data; this may not be the same as the size

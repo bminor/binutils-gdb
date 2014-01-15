@@ -24,6 +24,6 @@
 
 extern int linux_common_core_of_thread (ptid_t ptid);
 extern LONGEST linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
-					 ULONGEST offset, LONGEST len);
+					 ULONGEST offset, ULONGEST len);
 
 #endif

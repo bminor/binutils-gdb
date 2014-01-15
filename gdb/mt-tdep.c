@@ -1149,7 +1149,7 @@ mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = XCALLOC (1, struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);

@@ -350,7 +350,7 @@ darwin_check_new_threads (struct inferior *inf)
 	  struct thread_info *tp;
 	  struct private_thread_info *pti;
 
-	  pti = XZALLOC (struct private_thread_info);
+	  pti = XCNEW (struct private_thread_info);
 	  pti->gdb_port = new_id;
 	  pti->msg_state = DARWIN_RUNNING;
 
@@ -1344,7 +1344,7 @@ darwin_attach_pid (struct inferior *inf)
   mach_port_t prev_not;
   exception_mask_t mask;
 
-  inf->private = XZALLOC (darwin_inferior);
+  inf->private = XCNEW (darwin_inferior);
 
   kret = task_for_pid (gdb_task, inf->pid, &inf->private->task);
   if (kret != KERN_SUCCESS)
@@ -1760,7 +1760,7 @@ darwin_thread_alive (struct target_ops *ops, ptid_t ptid)
 static int
 darwin_read_write_inferior (task_t task, CORE_ADDR addr,
 			    gdb_byte *rdaddr, const gdb_byte *wraddr,
-			    int length)
+			    ULONGEST length)
 {
   kern_return_t kret;
   mach_vm_address_t offset = addr & (mach_page_size - 1);
@@ -1772,8 +1772,8 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
   mach_vm_address_t region_address;
   mach_vm_size_t region_length;
 
-  inferior_debug (8, _("darwin_read_write_inferior(task=0x%x, %s, len=%d)\n"),
-		  task, core_addr_to_string (addr), length);
+  inferior_debug (8, _("darwin_read_write_inferior(task=0x%x, %s, len=%s)\n"),
+		  task, core_addr_to_string (addr), pulongest (length));
 
   /* Get memory from inferior with page aligned addresses.  */
   kret = mach_vm_read (task, low_address, aligned_length,
@@ -1894,7 +1894,7 @@ out:
 /* This is not available in Darwin 9.  */
 static int
 darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
-		       int length)
+		       ULONGEST length)
 {
   struct task_dyld_info task_dyld_info;
   mach_msg_type_number_t count = TASK_DYLD_INFO_COUNT;
@@ -1922,13 +1922,13 @@ static LONGEST
 darwin_xfer_partial (struct target_ops *ops,
 		     enum target_object object, const char *annex,
 		     gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST offset, LONGEST len)
+		     ULONGEST offset, ULONGEST len)
 {
   struct inferior *inf = current_inferior ();
 
   inferior_debug
-    (8, _("darwin_xfer_partial(%s, %d, rbuf=%s, wbuf=%s) pid=%u\n"),
-     core_addr_to_string (offset), (int)len,
+    (8, _("darwin_xfer_partial(%s, %s, rbuf=%s, wbuf=%s) pid=%u\n"),
+     core_addr_to_string (offset), pulongest (len),
      host_address_to_string (readbuf), host_address_to_string (writebuf),
      inf->pid);
 

@@ -520,7 +520,7 @@ ia64_hpux_get_register_from_save_state_t (int regnum, int reg_size)
 static LONGEST
 ia64_hpux_xfer_memory (struct target_ops *ops, const char *annex,
 		       gdb_byte *readbuf, const gdb_byte *writebuf,
-		       CORE_ADDR addr, LONGEST len)
+		       CORE_ADDR addr, ULONGEST len)
 {
   CORE_ADDR bsp, bspstore;
   CORE_ADDR start_addr, short_len;
@@ -643,7 +643,7 @@ ia64_hpux_xfer_uregs (struct target_ops *ops, const char *annex,
 static LONGEST
 ia64_hpux_xfer_solib_got (struct target_ops *ops, const char *annex,
 			  gdb_byte *readbuf, const gdb_byte *writebuf,
-			  ULONGEST offset, LONGEST len)
+			  ULONGEST offset, ULONGEST len)
 {
   CORE_ADDR fun_addr;
   /* The linkage pointer.  We use a uint64_t to make sure that the size
@@ -673,7 +673,7 @@ ia64_hpux_xfer_solib_got (struct target_ops *ops, const char *annex,
 static LONGEST
 ia64_hpux_xfer_partial (struct target_ops *ops, enum target_object object,
 			const char *annex, gdb_byte *readbuf,
-			const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+			const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   LONGEST val;
 

@@ -126,7 +126,7 @@ static const char *xml_syscall_file = NULL;
 static struct syscalls_info *
 allocate_syscalls_info (void)
 {
-  return XZALLOC (struct syscalls_info);
+  return XCNEW (struct syscalls_info);
 }
 
 static void
@@ -161,7 +161,7 @@ static void
 syscall_create_syscall_desc (struct syscalls_info *sysinfo,
                              const char *name, int number)
 {
-  struct syscall_desc *sysdesc = XZALLOC (struct syscall_desc);
+  struct syscall_desc *sysdesc = XCNEW (struct syscall_desc);
 
   sysdesc->name = xstrdup (name);
   sysdesc->number = number;

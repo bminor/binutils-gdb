@@ -67,7 +67,7 @@ osdata_start_osdata (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Seen more than on osdata element"));
 
   type = xml_find_attribute (attributes, "type")->value;
-  osdata = XZALLOC (struct osdata);
+  osdata = XCNEW (struct osdata);
   osdata->type = xstrdup (type);
   data->osdata = osdata;
 }

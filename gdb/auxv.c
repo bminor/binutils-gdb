@@ -42,7 +42,7 @@ static LONGEST
 procfs_xfer_auxv (gdb_byte *readbuf,
 		  const gdb_byte *writebuf,
 		  ULONGEST offset,
-		  LONGEST len)
+		  ULONGEST len)
 {
   char *pathname;
   int fd;
@@ -73,7 +73,7 @@ static LONGEST
 ld_so_xfer_auxv (gdb_byte *readbuf,
 		 const gdb_byte *writebuf,
 		 ULONGEST offset,
-		 LONGEST len)
+		 ULONGEST len)
 {
   struct minimal_symbol *msym;
   CORE_ADDR data_address, pointer_address;
@@ -209,7 +209,7 @@ memory_xfer_auxv (struct target_ops *ops,
 		  gdb_byte *readbuf,
 		  const gdb_byte *writebuf,
 		  ULONGEST offset,
-		  LONGEST len)
+		  ULONGEST len)
 {
   gdb_assert (object == TARGET_OBJECT_AUXV);
   gdb_assert (readbuf || writebuf);
@@ -341,7 +341,7 @@ get_auxv_inferior_data (struct target_ops *ops)
   info = inferior_data (inf, auxv_inferior_data);
   if (info == NULL)
     {
-      info = XZALLOC (struct auxv_info);
+      info = XCNEW (struct auxv_info);
       info->length = target_read_alloc (ops, TARGET_OBJECT_AUXV,
 					NULL, &info->data);
       set_inferior_data (inf, auxv_inferior_data, info);

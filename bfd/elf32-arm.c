@@ -8609,6 +8609,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       return bfd_reloc_ok;
 
     case R_ARM_ABS8:
+      /* PR 16202: Refectch the addend using the correct size.  */
+      if (globals->use_rel)
+	addend = bfd_get_8 (input_bfd, hit_data);
       value += addend;
 
       /* There is no way to tell whether the user intended to use a signed or
@@ -8621,6 +8624,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       return bfd_reloc_ok;
 
     case R_ARM_ABS16:
+      /* PR 16202: Refectch the addend using the correct size.  */
+      if (globals->use_rel)
+	addend = bfd_get_16 (input_bfd, hit_data);
       value += addend;
 
       /* See comment for R_ARM_ABS8.  */

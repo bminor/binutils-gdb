@@ -799,13 +799,13 @@ default_symfile_segments (bfd *abfd)
   low = bfd_get_section_vma (abfd, sect);
   high = low + bfd_get_section_size (sect);
 
-  data = XZALLOC (struct symfile_segment_data);
+  data = XCNEW (struct symfile_segment_data);
   data->num_segments = 1;
-  data->segment_bases = XCALLOC (1, CORE_ADDR);
-  data->segment_sizes = XCALLOC (1, CORE_ADDR);
+  data->segment_bases = XCNEW (CORE_ADDR);
+  data->segment_sizes = XCNEW (CORE_ADDR);
 
   num_sections = bfd_count_sections (abfd);
-  data->segment_info = XCALLOC (num_sections, int);
+  data->segment_info = XCNEWVEC (int, num_sections);
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {
@@ -3836,6 +3836,45 @@ symfile_free_objfile (struct objfile *objfile)
   /* Remove the target sections of user-added objfiles.  */
   if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
     remove_target_sections ((void *) objfile);
+}
+
+/* Wrapper around the quick_symbol_functions expand_symtabs_matching "method".
+   Expand all symtabs that match the specified criteria.
+   See quick_symbol_functions.expand_symtabs_matching for details.  */
+
+void
+expand_symtabs_matching (expand_symtabs_file_matcher_ftype *file_matcher,
+			 expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+			 enum search_domain kind,
+			 void *data)
+{
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+  {
+    if (objfile->sf)
+      objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
+						symbol_matcher, kind,
+						data);
+  }
+}
+
+/* Wrapper around the quick_symbol_functions map_symbol_filenames "method".
+   Map function FUN over every file.
+   See quick_symbol_functions.map_symbol_filenames for details.  */
+
+void
+map_symbol_filenames (symbol_filename_ftype *fun, void *data,
+		      int need_fullname)
+{
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+  {
+    if (objfile->sf)
+      objfile->sf->qf->map_symbol_filenames (objfile, fun, data,
+					     need_fullname);
+  }
 }
 
 void

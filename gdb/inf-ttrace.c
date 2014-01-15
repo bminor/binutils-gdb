@@ -195,7 +195,7 @@ inf_ttrace_add_page (pid_t pid, CORE_ADDR addr)
 		  addr, 0, (uintptr_t)&prot) == -1)
 	perror_with_name (("ttrace"));
       
-      page = XMALLOC (struct inf_ttrace_page);
+      page = XNEW (struct inf_ttrace_page);
       page->addr = addr;
       page->prot = prot;
       page->refcount = 0;
@@ -1226,7 +1226,7 @@ static LONGEST
 inf_ttrace_xfer_partial (struct target_ops *ops, enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
 			 const gdb_byte *writebuf,
-			 ULONGEST offset, LONGEST len)
+			 ULONGEST offset, ULONGEST len)
 {
   switch (object)
     {

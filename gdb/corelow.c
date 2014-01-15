@@ -348,7 +348,7 @@ core_open (char *filename, int from_tty)
 
   validate_files ();
 
-  core_data = XZALLOC (struct target_section_table);
+  core_data = XCNEW (struct target_section_table);
 
   /* Find the data section */
   if (build_section_table (core_bfd,
@@ -676,7 +676,7 @@ static LONGEST
 core_xfer_partial (struct target_ops *ops, enum target_object object,
 		   const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf, ULONGEST offset,
-		   LONGEST len)
+		   ULONGEST len)
 {
   switch (object)
     {

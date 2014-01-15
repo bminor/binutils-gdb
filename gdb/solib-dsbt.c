@@ -181,7 +181,7 @@ get_dsbt_info (void)
   if (info != NULL)
     return info;
 
-  info = XZALLOC (struct dsbt_info);
+  info = XCNEW (struct dsbt_info);
   set_program_space_data (current_program_space, solib_dsbt_pspace_data, info);
 
   info->lm_base_cache = 0;

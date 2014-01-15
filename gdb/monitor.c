@@ -2020,7 +2020,7 @@ monitor_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 
 static LONGEST
 monitor_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST memaddr, LONGEST len)
+		     ULONGEST memaddr, ULONGEST len)
 {
   int res;
 
@@ -2046,7 +2046,7 @@ monitor_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 static LONGEST
 monitor_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   switch (object)
     {

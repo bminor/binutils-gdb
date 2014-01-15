@@ -8238,7 +8238,7 @@ get_catch_syscall_inferior_data (struct inferior *inf)
   inf_data = inferior_data (inf, catch_syscall_inferior_data);
   if (inf_data == NULL)
     {
-      inf_data = XZALLOC (struct catch_syscall_inferior_data);
+      inf_data = XCNEW (struct catch_syscall_inferior_data);
       set_inferior_data (inf, catch_syscall_inferior_data, inf_data);
     }
 
@@ -14994,7 +14994,7 @@ deprecated_insert_raw_breakpoint (struct gdbarch *gdbarch,
 {
   struct bp_target_info *bp_tgt;
 
-  bp_tgt = XZALLOC (struct bp_target_info);
+  bp_tgt = XCNEW (struct bp_target_info);
 
   bp_tgt->placed_address_space = aspace;
   bp_tgt->placed_address = pc;

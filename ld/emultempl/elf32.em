@@ -1480,6 +1480,8 @@ gld${EMULATION_NAME}_before_allocation (void)
   const char *rpath;
   asection *sinterp;
   bfd *abfd;
+  struct elf_link_hash_entry *ehdr_start = NULL;
+  struct bfd_link_hash_entry ehdr_start_save;
 
   if (is_elf_hash_table (link_info.hash))
     {
@@ -1504,6 +1506,16 @@ gld${EMULATION_NAME}_before_allocation (void)
              _bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
              if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
                h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+	     /* Don't leave the symbol undefined.  Undefined hidden
+		symbols typically won't have dynamic relocations, but
+		we most likely will need dynamic relocations for
+		__ehdr_start if we are building a PIE or shared
+		library.  */
+	     ehdr_start = h;
+	     ehdr_start_save = h->root;
+	     h->root.type = bfd_link_hash_defined;
+	     h->root.u.def.section = bfd_abs_section_ptr;
+	     h->root.u.def.value = 0;
            }
        }
 
@@ -1620,6 +1632,14 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 
   if (!bfd_elf_size_dynsym_hash_dynstr (link_info.output_bfd, &link_info))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+
+  if (ehdr_start != NULL)
+    {
+      /* If we twiddled __ehdr_start to defined earlier, put it back
+	 as it was.  */
+      ehdr_start->root.type = ehdr_start_save.type;
+      ehdr_start->root.u = ehdr_start_save.u;
+    }
 }
 
 EOF

@@ -804,7 +804,7 @@ tdesc_data_init (struct obstack *obstack)
 struct tdesc_arch_data *
 tdesc_data_alloc (void)
 {
-  return XZALLOC (struct tdesc_arch_data);
+  return XCNEW (struct tdesc_arch_data);
 }
 
 /* Free something allocated by tdesc_data_alloc, if it is not going
@@ -1242,7 +1242,7 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		  int regnum, int save_restore, const char *group,
 		  int bitsize, const char *type)
 {
-  struct tdesc_reg *reg = XZALLOC (struct tdesc_reg);
+  struct tdesc_reg *reg = XCNEW (struct tdesc_reg);
 
   reg->name = xstrdup (name);
   reg->target_regnum = regnum;
@@ -1304,7 +1304,7 @@ struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
 		     struct tdesc_type *field_type, int count)
 {
-  struct tdesc_type *type = XZALLOC (struct tdesc_type);
+  struct tdesc_type *type = XCNEW (struct tdesc_type);
 
   type->name = xstrdup (name);
   type->kind = TDESC_TYPE_VECTOR;
@@ -1318,7 +1318,7 @@ tdesc_create_vector (struct tdesc_feature *feature, const char *name,
 struct tdesc_type *
 tdesc_create_struct (struct tdesc_feature *feature, const char *name)
 {
-  struct tdesc_type *type = XZALLOC (struct tdesc_type);
+  struct tdesc_type *type = XCNEW (struct tdesc_type);
 
   type->name = xstrdup (name);
   type->kind = TDESC_TYPE_STRUCT;
@@ -1341,7 +1341,7 @@ tdesc_set_struct_size (struct tdesc_type *type, LONGEST size)
 struct tdesc_type *
 tdesc_create_union (struct tdesc_feature *feature, const char *name)
 {
-  struct tdesc_type *type = XZALLOC (struct tdesc_type);
+  struct tdesc_type *type = XCNEW (struct tdesc_type);
 
   type->name = xstrdup (name);
   type->kind = TDESC_TYPE_UNION;
@@ -1354,7 +1354,7 @@ struct tdesc_type *
 tdesc_create_flags (struct tdesc_feature *feature, const char *name,
 		    LONGEST size)
 {
-  struct tdesc_type *type = XZALLOC (struct tdesc_type);
+  struct tdesc_type *type = XCNEW (struct tdesc_type);
 
   type->name = xstrdup (name);
   type->kind = TDESC_TYPE_FLAGS;
@@ -1436,7 +1436,7 @@ tdesc_free_feature (struct tdesc_feature *feature)
 struct tdesc_feature *
 tdesc_create_feature (struct target_desc *tdesc, const char *name)
 {
-  struct tdesc_feature *new_feature = XZALLOC (struct tdesc_feature);
+  struct tdesc_feature *new_feature = XCNEW (struct tdesc_feature);
 
   new_feature->name = xstrdup (name);
 
@@ -1447,7 +1447,7 @@ tdesc_create_feature (struct target_desc *tdesc, const char *name)
 struct target_desc *
 allocate_target_description (void)
 {
-  return XZALLOC (struct target_desc);
+  return XCNEW (struct target_desc);
 }
 
 static void

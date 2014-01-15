@@ -261,7 +261,7 @@ sparc_store_inferior_registers (struct target_ops *ops,
 static LONGEST
 sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   unsigned long wcookie = 0;
   char *buf = (char *)&wcookie;
@@ -318,7 +318,7 @@ target_xfer_partial_ftype *inf_ptrace_xfer_partial;
 static LONGEST
 sparc_xfer_partial (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   if (object == TARGET_OBJECT_WCOOKIE)
     return sparc_xfer_wcookie (ops, object, annex, readbuf, writebuf, 

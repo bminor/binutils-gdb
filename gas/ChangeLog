@@ -1,3 +1,11 @@
+2014-01-14  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16434
+	* config/tc-z80.c (wrong_match): Provide format string to
+	as_warn.
+	(parse_exp_not_indexed): Delete unused variable dummy.
+	(emit_byte): Delete unused variable fixp.
+
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (regbnd): Removed.

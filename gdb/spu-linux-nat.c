@@ -231,7 +231,7 @@ parse_spufs_run (int *fd, ULONGEST *addr)
 static LONGEST
 spu_proc_xfer_spu (const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf,
-		   ULONGEST offset, LONGEST len)
+		   ULONGEST offset, ULONGEST len)
 {
   char buf[128];
   int fd = 0;
@@ -563,7 +563,7 @@ static LONGEST
 spu_xfer_partial (struct target_ops *ops,
 		  enum target_object object, const char *annex,
 		  gdb_byte *readbuf, const gdb_byte *writebuf,
-		  ULONGEST offset, LONGEST len)
+		  ULONGEST offset, ULONGEST len)
 {
   if (object == TARGET_OBJECT_SPU)
     return spu_proc_xfer_spu (annex, readbuf, writebuf, offset, len);

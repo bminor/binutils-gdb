@@ -70,7 +70,7 @@ new_address_space (void)
 {
   struct address_space *aspace;
 
-  aspace = XZALLOC (struct address_space);
+  aspace = XCNEW (struct address_space);
   aspace->num = ++highest_address_space_num;
   address_space_alloc_data (aspace);
 
@@ -126,7 +126,7 @@ add_program_space (struct address_space *aspace)
 {
   struct program_space *pspace;
 
-  pspace = XZALLOC (struct program_space);
+  pspace = XCNEW (struct program_space);
 
   pspace->num = ++last_program_space_num;
   pspace->aspace = aspace;

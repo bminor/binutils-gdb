@@ -39,7 +39,7 @@ struct reggroup
 struct reggroup *
 reggroup_new (const char *name, enum reggroup_type type)
 {
-  struct reggroup *group = XMALLOC (struct reggroup);
+  struct reggroup *group = XNEW (struct reggroup);
 
   group->name = name;
   group->type = type;
@@ -277,13 +277,13 @@ _initialize_reggroup (void)
   reggroups_data = gdbarch_data_register_post_init (reggroups_init);
 
   /* The pre-defined list of groups.  */
-  add_group (&default_groups, general_reggroup, XMALLOC (struct reggroup_el));
-  add_group (&default_groups, float_reggroup, XMALLOC (struct reggroup_el));
-  add_group (&default_groups, system_reggroup, XMALLOC (struct reggroup_el));
-  add_group (&default_groups, vector_reggroup, XMALLOC (struct reggroup_el));
-  add_group (&default_groups, all_reggroup, XMALLOC (struct reggroup_el));
-  add_group (&default_groups, save_reggroup, XMALLOC (struct reggroup_el));
-  add_group (&default_groups, restore_reggroup, XMALLOC (struct reggroup_el));
+  add_group (&default_groups, general_reggroup, XNEW (struct reggroup_el));
+  add_group (&default_groups, float_reggroup, XNEW (struct reggroup_el));
+  add_group (&default_groups, system_reggroup, XNEW (struct reggroup_el));
+  add_group (&default_groups, vector_reggroup, XNEW (struct reggroup_el));
+  add_group (&default_groups, all_reggroup, XNEW (struct reggroup_el));
+  add_group (&default_groups, save_reggroup, XNEW (struct reggroup_el));
+  add_group (&default_groups, restore_reggroup, XNEW (struct reggroup_el));
 
   add_cmd ("reggroups", class_maintenance,
 	   maintenance_print_reggroups, _("\

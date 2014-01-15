@@ -142,8 +142,7 @@ record_btrace_open (char *args, int from_tty)
 
   DEBUG ("open");
 
-  if (RECORD_IS_USED)
-    error (_("The process is already being recorded."));
+  record_preopen ();
 
   if (!target_has_execution)
     error (_("The program is not being run."));

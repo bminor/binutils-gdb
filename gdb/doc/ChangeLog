@@ -1,3 +1,9 @@
+2014-01-15  Yuanhui Zhang  <asmwarrior@gmail.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Output Syntax): Add some missing "nl"
+	markers.  Remove one that was misplaced.
+
 2014-01-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Your Program's Environment) <set environment>:

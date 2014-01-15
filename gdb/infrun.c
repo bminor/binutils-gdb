@@ -1240,7 +1240,7 @@ use_displaced_stepping (struct gdbarch *gdbarch)
   return (((can_use_displaced_stepping == AUTO_BOOLEAN_AUTO && non_stop)
 	   || can_use_displaced_stepping == AUTO_BOOLEAN_TRUE)
 	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
-	  && !RECORD_IS_USED);
+	  && find_record_target () == NULL);
 }
 
 /* Clean out any stray displaced stepping state.  */
@@ -3048,7 +3048,7 @@ adjust_pc_after_break (struct execution_control_state *ecs)
     {
       struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
 
-      if (RECORD_IS_USED)
+      if (record_full_is_used ())
 	record_full_gdb_operation_disable_set ();
 
       /* When using hardware single-step, a SIGTRAP is reported for both
@@ -6851,7 +6851,7 @@ save_infcall_suspend_state (void)
 	}
     }
 
-  inf_state = XZALLOC (struct infcall_suspend_state);
+  inf_state = XCNEW (struct infcall_suspend_state);
 
   if (siginfo_data)
     {

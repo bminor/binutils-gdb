@@ -518,7 +518,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	      {
 		struct dwarf2_frame_state_reg_info *new_rs;
 
-		new_rs = XMALLOC (struct dwarf2_frame_state_reg_info);
+		new_rs = XNEW (struct dwarf2_frame_state_reg_info);
 		*new_rs = fs->regs;
 		fs->regs.reg = dwarf2_frame_state_copy_regs (&fs->regs);
 		fs->regs.prev = new_rs;
@@ -1045,7 +1045,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   reset_cache_cleanup = make_cleanup (clear_pointer_cleanup, this_cache);
 
   /* Allocate and initialize the frame state.  */
-  fs = XZALLOC (struct dwarf2_frame_state);
+  fs = XCNEW (struct dwarf2_frame_state);
   old_chain = make_cleanup (dwarf2_frame_state_free, fs);
 
   /* Unwind the PC.

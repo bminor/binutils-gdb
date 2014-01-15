@@ -967,7 +967,7 @@ rs6000_aix_shared_library_to_xml (struct ld_info *ldi,
 
 LONGEST
 rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
-			   gdb_byte *readbuf, ULONGEST offset, LONGEST len,
+			   gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
 			   int close_ldinfo_fd)
 {
   struct obstack obstack;
@@ -1013,7 +1013,7 @@ static LONGEST
 rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 					   gdb_byte *readbuf,
 					   ULONGEST offset,
-					   LONGEST len)
+					   ULONGEST len)
 {
   struct bfd_section *ldinfo_sec;
   int ldinfo_size;

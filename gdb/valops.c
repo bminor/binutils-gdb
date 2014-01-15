@@ -2246,6 +2246,51 @@ value_struct_elt (struct value **argp, struct value **args,
   return v;
 }
 
+/* Given *ARGP, a value of type structure or union, or a pointer/reference
+   to a structure or union, extract and return its component (field) of
+   type FTYPE at the specified BITPOS.
+   Throw an exception on error.  */
+
+struct value *
+value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
+			 const char *err)
+{
+  struct type *t;
+  struct value *v;
+  int i;
+  int nbases;
+
+  *argp = coerce_array (*argp);
+
+  t = check_typedef (value_type (*argp));
+
+  while (TYPE_CODE (t) == TYPE_CODE_PTR || TYPE_CODE (t) == TYPE_CODE_REF)
+    {
+      *argp = value_ind (*argp);
+      if (TYPE_CODE (check_typedef (value_type (*argp))) != TYPE_CODE_FUNC)
+	*argp = coerce_array (*argp);
+      t = check_typedef (value_type (*argp));
+    }
+
+  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
+      && TYPE_CODE (t) != TYPE_CODE_UNION)
+    error (_("Attempt to extract a component of a value that is not a %s."),
+	   err);
+
+  for (i = TYPE_N_BASECLASSES (t); i < TYPE_NFIELDS (t); i++)
+    {
+      if (!field_is_static (&TYPE_FIELD (t, i))
+	  && bitpos == TYPE_FIELD_BITPOS (t, i)
+	  && types_equal (ftype, TYPE_FIELD_TYPE (t, i)))
+	return value_primitive_field (*argp, 0, i, t);
+    }
+
+  error (_("No field with matching bitpos and type."));
+
+  /* Never hit.  */
+  return NULL;
+}
+
 /* Search through the methods of an object (and its bases) to find a
    specified method.  Return the pointer to the fn_field list of
    overloaded instances.

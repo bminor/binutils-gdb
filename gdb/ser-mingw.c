@@ -788,7 +788,7 @@ struct pipe_state
 static struct pipe_state *
 make_pipe_state (void)
 {
-  struct pipe_state *ps = XMALLOC (struct pipe_state);
+  struct pipe_state *ps = XNEW (struct pipe_state);
 
   memset (ps, 0, sizeof (*ps));
   ps->wait.read_event = INVALID_HANDLE_VALUE;

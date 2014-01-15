@@ -1,3 +1,12 @@
+2014-01-13  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/15464
+	PR python/16113
+	* gdb.python/py-type.c: Enhance test case.
+	* gdb.python/py-value-cc.cc: Likewise
+	* gdb.python/py-type.exp: Add new tests.
+	* gdb.python/py-value-cc.exp: Likewise
+
 2014-01-10  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 	    Pedro Alves <palves@redhat.com>
 

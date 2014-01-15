@@ -5408,7 +5408,7 @@ static struct notif_event *
 remote_notif_stop_alloc_reply (void)
 {
   struct notif_event *r
-    = (struct notif_event *) XMALLOC (struct stop_reply);
+    = (struct notif_event *) XNEW (struct stop_reply);
 
   r->dtr = stop_reply_dtr;
 
@@ -8862,7 +8862,7 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
 static LONGEST
 remote_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   struct remote_state *rs;
   int i;

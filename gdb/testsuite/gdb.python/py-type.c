@@ -21,6 +21,12 @@ struct s
   int b;
 };
 
+struct SS
+{
+  union { int x; char y; };
+  union { int a; char b; };
+};
+
 typedef struct s TS;
 TS ts;
 
@@ -58,6 +64,7 @@ main ()
 {
   int ar[2] = {1,2};
   struct s st;
+  struct SS ss;
 #ifdef __cplusplus
   C c;
   c.c = 1;
@@ -72,6 +79,8 @@ main ()
   st.b = 5;
 
   e = v2;
+
+  ss.x = 100;
   
   return 0;      /* break to inspect struct and array.  */
 }

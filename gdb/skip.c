@@ -101,7 +101,7 @@ Ignore file pending future shared library load? ")))
       filename = arg;
     }
 
-  e = XZALLOC (struct skiplist_entry);
+  e = XCNEW (struct skiplist_entry);
   e->filename = xstrdup (filename);
   e->enabled = 1;
 
@@ -295,7 +295,7 @@ skip_delete_command (char *arg, int from_tty)
 static void
 skip_function (const char *name)
 {
-  struct skiplist_entry *e = XZALLOC (struct skiplist_entry);
+  struct skiplist_entry *e = XCNEW (struct skiplist_entry);
 
   e->enabled = 1;
   e->function_name = xstrdup (name);

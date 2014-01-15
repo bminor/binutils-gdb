@@ -656,11 +656,11 @@ M:int:find_memory_regions:find_memory_region_ftype func, void *data:func, data
 
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
 # core file into buffer READBUF with length LEN.
-M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
+M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, ULONGEST len:readbuf, offset, len
 
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES_AIX formatted shared
 # libraries list from core file into buffer READBUF with length LEN.
-M:LONGEST:core_xfer_shared_libraries_aix:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
+M:LONGEST:core_xfer_shared_libraries_aix:gdb_byte *readbuf, ULONGEST offset, ULONGEST len:readbuf, offset, len
 
 # How the core target converts a PTID from a core file to a string.
 M:char *:core_pid_to_str:ptid_t ptid:ptid
@@ -1645,7 +1645,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
 
   /* Create an obstack for allocating all the per-architecture memory,
      then use that to allocate the architecture vector.  */
-  struct obstack *obstack = XMALLOC (struct obstack);
+  struct obstack *obstack = XNEW (struct obstack);
   obstack_init (obstack);
   gdbarch = obstack_alloc (obstack, sizeof (*gdbarch));
   memset (gdbarch, 0, sizeof (*gdbarch));
@@ -2005,9 +2005,9 @@ gdbarch_data_register (gdbarch_data_pre_init_ftype *pre_init,
   for (curr = &gdbarch_data_registry.registrations;
        (*curr) != NULL;
        curr = &(*curr)->next);
-  (*curr) = XMALLOC (struct gdbarch_data_registration);
+  (*curr) = XNEW (struct gdbarch_data_registration);
   (*curr)->next = NULL;
-  (*curr)->data = XMALLOC (struct gdbarch_data);
+  (*curr)->data = XNEW (struct gdbarch_data);
   (*curr)->data->index = gdbarch_data_registry.nr++;
   (*curr)->data->pre_init = pre_init;
   (*curr)->data->post_init = post_init;
@@ -2176,7 +2176,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
 			bfd_arch_info->printable_name,
 			host_address_to_string (init));
   /* Append it */
-  (*curr) = XMALLOC (struct gdbarch_registration);
+  (*curr) = XNEW (struct gdbarch_registration);
   (*curr)->bfd_architecture = bfd_architecture;
   (*curr)->init = init;
   (*curr)->dump_tdep = dump_tdep;
@@ -2320,7 +2320,7 @@ gdbarch_find_by_info (struct gdbarch_info info)
   /* Insert the new architecture into the front of the architecture
      list (keep the list sorted Most Recently Used).  */
   {
-    struct gdbarch_list *this = XMALLOC (struct gdbarch_list);
+    struct gdbarch_list *this = XNEW (struct gdbarch_list);
     this->next = rego->arches;
     this->gdbarch = new_gdbarch;
     rego->arches = this;
