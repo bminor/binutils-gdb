@@ -103,11 +103,56 @@ decoded_type_name (struct type *type)
     }
 }
 
-/* Print TYPE on STREAM, preferably as a range.  */
+/* Return nonzero if TYPE is a subrange type, and its bounds
+   are identical to the bounds of its subtype.  */
+
+static int
+type_is_full_subrange_of_target_type (struct type *type)
+{
+  struct type *subtype;
+
+  if (TYPE_CODE (type) != TYPE_CODE_RANGE)
+    return 0;
+
+  subtype = TYPE_TARGET_TYPE (type);
+  if (subtype == NULL)
+    return 0;
+
+  if (ada_discrete_type_low_bound (type)
+      != ada_discrete_type_low_bound (subtype))
+    return 0;
+
+  if (ada_discrete_type_high_bound (type)
+      != ada_discrete_type_high_bound (subtype))
+    return 0;
+
+  return 1;
+}
+
+/* Print TYPE on STREAM, preferably as a range if BOUNDS_PREFERED_P
+   is nonzero.  */
 
 static void
-print_range (struct type *type, struct ui_file *stream)
+print_range (struct type *type, struct ui_file *stream,
+	     int bounds_prefered_p)
 {
+  if (!bounds_prefered_p)
+    {
+      /* Try stripping all TYPE_CODE_RANGE layers whose bounds
+	 are identical to the bounds of their subtype.  When
+	 the bounds of both types match, it can allow us to
+	 print a range using the name of its base type, which
+	 is easier to read.  For instance, we would print...
+
+	     array (character) of ...
+
+	 ... instead of...
+
+	     array ('["00"]' .. '["ff"]') of ...  */
+      while (type_is_full_subrange_of_target_type (type))
+	type = TYPE_TARGET_TYPE (type);
+    }
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -204,10 +249,16 @@ print_dynamic_range_bound (struct type *type, const char *name, int name_len,
 }
 
 /* Print RAW_TYPE as a range type, using any bound information
-   following the GNAT encoding (if available).  */
+   following the GNAT encoding (if available).
+
+   If BOUNDS_PREFERED_P is nonzero, force the printing of the range
+   using its bounds.  Otherwise, try printing the range without
+   printing the value of the bounds, if possible (this is only
+   considered a hint, not a guaranty).  */
 
 static void
-print_range_type (struct type *raw_type, struct ui_file *stream)
+print_range_type (struct type *raw_type, struct ui_file *stream,
+		  int bounds_prefered_p)
 {
   const char *name;
   struct type *base_type;
@@ -224,7 +275,7 @@ print_range_type (struct type *raw_type, struct ui_file *stream)
 
   subtype_info = strstr (name, "___XD");
   if (subtype_info == NULL)
-    print_range (raw_type, stream);
+    print_range (raw_type, stream, bounds_prefered_p);
   else
     {
       int prefix_len = subtype_info - name;
@@ -344,7 +395,8 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	    {
 	      if (arr_type != type)
 		fprintf_filtered (stream, ", ");
-	      print_range (TYPE_INDEX_TYPE (arr_type), stream);
+	      print_range (TYPE_INDEX_TYPE (arr_type), stream,
+			   0 /* bounds_prefered_p */);
 	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
 		bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
 	    }
@@ -361,7 +413,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	      if (k > 0)
 		fprintf_filtered (stream, ", ");
 	      print_range_type (TYPE_FIELD_TYPE (range_desc_type, k),
-				stream);
+				stream, 0 /* bounds_prefered_p */);
 	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
 		bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
 	    }
@@ -818,7 +870,7 @@ ada_print_type (struct type *type0, const char *varstring,
 	    else
 	      {
 		fprintf_filtered (stream, "range ");
-		print_range_type (type, stream);
+		print_range_type (type, stream, 1 /* bounds_prefered_p */);
 	      }
 	  }
 	break;
@@ -831,7 +883,7 @@ ada_print_type (struct type *type0, const char *varstring,
 	else
 	  {
 	    fprintf_filtered (stream, "range ");
-	    print_range (type, stream);
+	    print_range (type, stream, 1 /* bounds_prefered_p */);
 	  }
 	break;
       case TYPE_CODE_FLT:
