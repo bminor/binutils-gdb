@@ -1,3 +1,13 @@
+2014-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16456
+	* genscripts.sh: Don't search directory with LIBPATH_SUFFIX_SKIP
+	suffix.
+	* emulparams/elf32_x86_64.sh (LIBPATH_SUFFIX_SKIP): Set to 64
+	for elf32_x86_64 emulation.
+	* emulparams/elf_i386.sh (LIBPATH_SUFFIX_SKIP): Set to 64
+	for elf_i386 emulation.
+
 2014-01-16  Alan Modra  <amodra@gmail.com>
 
 	* ld.h (fat_section_userdata_type, get_userdata): Move to..
