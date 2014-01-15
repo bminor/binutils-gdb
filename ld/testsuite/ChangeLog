@@ -1,3 +1,10 @@
+2014-01-15  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/ehdr_start-shared.d: New.
+	* ld-elf/ehdr_start-userdef.d: xfail frv.
+	* ld-elf/ehdr_start-weak.d: Likewise.
+	* ld-elf/ehdr_start.d: Likewise.
+
 2014-01-14  Vidya Praveen  <vidyapraveen@arm.com>
 
 	* lib/ld-lib.exp (default_ld_link): Remove support for ldflags.
