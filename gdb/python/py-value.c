@@ -577,11 +577,9 @@ get_field_type (PyObject *field)
   ftype = type_object_to_type (ftype_obj);
   Py_DECREF (ftype_obj);
   if (ftype == NULL)
-    {
-      PyErr_SetString (PyExc_TypeError,
-		       _("'type' attribute of gdb.Field object is not a "
-			 "gdb.Type object."));
-    }
+    PyErr_SetString (PyExc_TypeError,
+		     _("'type' attribute of gdb.Field object is not a "
+		       "gdb.Type object."));
 
   return ftype;
 }
