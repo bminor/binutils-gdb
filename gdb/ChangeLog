@@ -1,3 +1,13 @@
+2014-01-16  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c (go32_open, go32_close, go32_attach, go32_detach)
+	(go32_resume, go32_fetch_registers, store_register)
+	(go32_store_registers, go32_prepare_to_store)
+	(go32_xfer_memory, go32_files_info, go32_kill_inferior)
+	(go32_create_inferior, go32_can_run, go32_terminal_init)
+	(go32_terminal_inferior, go32_terminal_ours): Delete forward
+	declarations.
+
 2014-01-15  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (open_and_init_dwp_file): Use pulongest to print
