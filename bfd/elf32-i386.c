@@ -2390,12 +2390,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	}
 
       /* Also discard relocs on undefined weak syms with non-default
-    	 visibility.   Don't discard relocs against __ehdr_start which
-	 will be defined by assign_file_positions_for_non_load_sections
-	 later.  */
+    	 visibility.  */
       if (eh->dyn_relocs != NULL
-	  && h->root.type == bfd_link_hash_undefweak
-	  && strcmp (h->root.root.string, "__ehdr_start") != 0)
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    eh->dyn_relocs = NULL;
