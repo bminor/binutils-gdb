@@ -1,3 +1,8 @@
+2014-01-15  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (open_and_init_dwp_file): Use pulongest to print
+	uint32_t.
+
 2014-01-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* python/py-value.c (get_field_type): Remove unnecessary curly
