@@ -1,5 +1,10 @@
 2014-01-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-typeprint.c (print_range): Add missing empty line
+	after local declaration.
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (print_optional_low_bound): Get index_type's
 	target type for as long as it is a TYPE_CODE_RANGE.
 

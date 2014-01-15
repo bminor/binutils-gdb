@@ -131,6 +131,7 @@ print_range (struct type *type, struct ui_file *stream)
     case TYPE_CODE_ENUM:
       {
 	struct type *target_type;
+
 	target_type = TYPE_TARGET_TYPE (type);
 	if (target_type == NULL)
 	  target_type = type;
