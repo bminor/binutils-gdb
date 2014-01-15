@@ -368,10 +368,6 @@ typedef int (*find_memory_region_ftype) (CORE_ADDR addr, unsigned long size,
 					 int read, int write, int exec,
 					 int modified, void *data);
 
-/* Take over the 'find_mapped_memory' vector from exec.c.  */
-extern void exec_set_find_memory_regions
-  (int (*func) (find_memory_region_ftype func, void *data));
-
 /* Possible lvalue types.  Like enum language, this should be in
    value.h, but needs to be here for the same reason.  */
 

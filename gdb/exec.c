@@ -34,6 +34,7 @@
 #include "gdbthread.h"
 #include "progspace.h"
 #include "gdb_bfd.h"
+#include "gcore.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
@@ -61,10 +62,6 @@ void _initialize_exec (void);
 /* The target vector for executable files.  */
 
 struct target_ops exec_ops;
-
-/* Function used to implement to_find_memory_regions.  */
-
-static int (*exec_do_find_memory_regions) (find_memory_region_ftype, void *);
 
 /* True if the exec target is pushed on the stack.  */
 static int using_exec_ops;
@@ -834,21 +831,6 @@ exec_has_memory (struct target_ops *ops)
 	  != current_target_sections->sections_end);
 }
 
-/* Find mapped memory.  */
-
-extern void
-exec_set_find_memory_regions (int (*func) (find_memory_region_ftype, void *))
-{
-  exec_do_find_memory_regions = func;
-}
-
-static int
-exec_find_memory_regions (struct target_ops *self,
-			  find_memory_region_ftype func, void *data)
-{
-  return exec_do_find_memory_regions (func, data);
-}
-
 static char *exec_make_note_section (struct target_ops *self, bfd *, int *);
 
 /* Fill in the exec file target vector.  Very few entries need to be
@@ -873,7 +855,7 @@ Specify the filename of the executable file.";
   exec_ops.to_stratum = file_stratum;
   exec_ops.to_has_memory = exec_has_memory;
   exec_ops.to_make_corefile_notes = exec_make_note_section;
-  exec_ops.to_find_memory_regions = exec_find_memory_regions;
+  exec_ops.to_find_memory_regions = objfile_find_memory_regions;
   exec_ops.to_magic = OPS_MAGIC;
 }
 

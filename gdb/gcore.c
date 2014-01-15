@@ -471,8 +471,9 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
   return 0;
 }
 
-static int
-objfile_find_memory_regions (find_memory_region_ftype func, void *obfd)
+int
+objfile_find_memory_regions (struct target_ops *self,
+			     find_memory_region_ftype func, void *obfd)
 {
   /* Use objfile data to create memory sections.  */
   struct objfile *objfile;
@@ -607,5 +608,4 @@ Save a core file with the current state of the debugged process.\n\
 Argument is optional filename.  Default filename is 'core.<process_id>'."));
 
   add_com_alias ("gcore", "generate-core-file", class_files, 1);
-  exec_set_find_memory_regions (objfile_find_memory_regions);
 }

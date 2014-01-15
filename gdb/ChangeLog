@@ -1,5 +1,18 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* gcore.h (objfile_find_memory_regions): Declare.
+	* gcore.c (objfile_find_memory_regions): No longer static.  Add
+	"self" argument.
+	(_initialize_gcore): Don't call exec_set_find_memory_regions.
+	* exec.c: Include gcore.h.
+	(exec_set_find_memory_regions): Remove.
+	(exec_find_memory_regions): Remove.
+	(exec_do_find_memory_regions): Remove.
+	(init_exec_ops): Update.
+	* defs.h (exec_set_find_memory_regions): Remove.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target-delegates.c: Rebuild.
 	* target.h (struct target_ops) <to_extra_thread_info,
 	to_thread_name, to_pid_to_exec_file, to_get_section_table,
