@@ -10544,10 +10544,12 @@ open_and_init_dwp_file (void)
   if (dwp_file->cus->version != dwp_file->tus->version)
     {
       /* Technically speaking, we should try to limp along, but this is
-	 pretty bizarre.  */
-      error (_("Dwarf Error: DWP file CU version %d doesn't match"
-	       " TU version %d [in DWP file %s]"),
-	     dwp_file->cus->version, dwp_file->tus->version, dwp_name);
+	 pretty bizarre.  We use pulongest here because that's the established
+	 portability solution (e.g, we can use %u for uint32_t).  */
+      error (_("Dwarf Error: DWP file CU version %s doesn't match"
+	       " TU version %s [in DWP file %s]"),
+	     pulongest (dwp_file->cus->version),
+	     pulongest (dwp_file->tus->version), dwp_name);
     }
   dwp_file->version = dwp_file->cus->version;
 
