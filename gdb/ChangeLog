@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target-delegates.c: Rebuild.
+	* target.h (struct target_ops) <to_extra_thread_info,
+	to_thread_name, to_pid_to_exec_file, to_get_section_table,
+	to_memory_map, to_read_description, to_traceframe_info>: Use NULL,
+	not 0, in TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.c (complete_target_initialization): Remove casts.  Use
 	return_zero_has_execution.
 	(return_zero): Add "ignore" argument.

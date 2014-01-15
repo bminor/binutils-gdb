@@ -567,20 +567,20 @@ struct target_ops
     char *(*to_pid_to_str) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_FUNC (default_pid_to_str);
     char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *)
-      TARGET_DEFAULT_RETURN (0);
+      TARGET_DEFAULT_RETURN (NULL);
     char *(*to_thread_name) (struct target_ops *, struct thread_info *)
-      TARGET_DEFAULT_RETURN (0);
+      TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
     void (*to_rcmd) (struct target_ops *,
 		     char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
     char *(*to_pid_to_exec_file) (struct target_ops *, int pid)
-      TARGET_DEFAULT_RETURN (0);
+      TARGET_DEFAULT_RETURN (NULL);
     void (*to_log_command) (struct target_ops *, const char *)
       TARGET_DEFAULT_IGNORE ();
     struct target_section_table *(*to_get_section_table) (struct target_ops *)
-      TARGET_DEFAULT_RETURN (0);
+      TARGET_DEFAULT_RETURN (NULL);
     enum strata to_stratum;
     int (*to_has_all_memory) (struct target_ops *);
     int (*to_has_memory) (struct target_ops *);
@@ -672,7 +672,7 @@ struct target_ops
        change unexpectedly, it should be invalidated, and higher
        layers will re-fetch it.  */
     VEC(mem_region_s) *(*to_memory_map) (struct target_ops *)
-      TARGET_DEFAULT_RETURN (0);
+      TARGET_DEFAULT_RETURN (NULL);
 
     /* Erases the region of flash memory starting at ADDRESS, of
        length LENGTH.
@@ -695,7 +695,7 @@ struct target_ops
        "beneath" target.  Returns the description found, or NULL if no
        description was available.  */
     const struct target_desc *(*to_read_description) (struct target_ops *ops)
-	 TARGET_DEFAULT_RETURN (0);
+	 TARGET_DEFAULT_RETURN (NULL);
 
     /* Build the PTID of the thread on which a given task is running,
        based on LWP and THREAD.  These values are extracted from the
@@ -987,7 +987,7 @@ struct target_ops
        cache data; higher layers take care of caching, invalidating,
        and re-fetching when necessary.  */
     struct traceframe_info *(*to_traceframe_info) (struct target_ops *)
-      TARGET_DEFAULT_RETURN (0);
+      TARGET_DEFAULT_RETURN (NULL);
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */

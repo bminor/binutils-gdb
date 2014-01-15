@@ -609,7 +609,7 @@ delegate_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
 static char *
 tdefault_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
 {
-  return 0;
+  return NULL;
 }
 
 static char *
@@ -622,7 +622,7 @@ delegate_thread_name (struct target_ops *self, struct thread_info *arg1)
 static char *
 tdefault_thread_name (struct target_ops *self, struct thread_info *arg1)
 {
-  return 0;
+  return NULL;
 }
 
 static void
@@ -654,7 +654,7 @@ delegate_pid_to_exec_file (struct target_ops *self, int arg1)
 static char *
 tdefault_pid_to_exec_file (struct target_ops *self, int arg1)
 {
-  return 0;
+  return NULL;
 }
 
 static void
@@ -679,7 +679,7 @@ delegate_get_section_table (struct target_ops *self)
 static struct target_section_table *
 tdefault_get_section_table (struct target_ops *self)
 {
-  return 0;
+  return NULL;
 }
 
 static int
@@ -772,7 +772,7 @@ delegate_memory_map (struct target_ops *self)
 static VEC(mem_region_s) *
 tdefault_memory_map (struct target_ops *self)
 {
-  return 0;
+  return NULL;
 }
 
 static void
@@ -811,7 +811,7 @@ delegate_read_description (struct target_ops *self)
 static const struct target_desc *
 tdefault_read_description (struct target_ops *self)
 {
-  return 0;
+  return NULL;
 }
 
 static ptid_t
@@ -1297,7 +1297,7 @@ delegate_traceframe_info (struct target_ops *self)
 static struct traceframe_info *
 tdefault_traceframe_info (struct target_ops *self)
 {
-  return 0;
+  return NULL;
 }
 
 static int
