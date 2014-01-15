@@ -1,5 +1,10 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.c (update_current_target): Do not INHERIT to_doc or
+	to_magic.  Do not de_fault to_open or to_close.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* gcore.h (objfile_find_memory_regions): Declare.
 	* gcore.c (objfile_find_memory_regions): No longer static.  Add
 	"self" argument.

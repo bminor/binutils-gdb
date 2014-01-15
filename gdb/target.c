@@ -606,13 +606,11 @@ update_current_target (void)
     {
       INHERIT (to_shortname, t);
       INHERIT (to_longname, t);
-      INHERIT (to_doc, t);
       INHERIT (to_attach_no_wait, t);
       INHERIT (deprecated_xfer_memory, t);
       INHERIT (to_have_steppable_watchpoint, t);
       INHERIT (to_have_continuable_watchpoint, t);
       INHERIT (to_has_thread_control, t);
-      INHERIT (to_magic, t);
     }
 #undef INHERIT
 
@@ -624,12 +622,6 @@ update_current_target (void)
   if (!current_target.field)               \
     current_target.field = value
 
-  de_fault (to_open,
-	    (void (*) (char *, int))
-	    tcomplain);
-  de_fault (to_close,
-	    (void (*) (struct target_ops *))
-	    target_ignore);
   de_fault (deprecated_xfer_memory,
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
