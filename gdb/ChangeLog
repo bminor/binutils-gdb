@@ -1,3 +1,8 @@
+2014-01-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* python/py-type.c (convert_field): Add missing empty line
+	after declarations.
+
 2014-01-14  Doug Evans  <dje@google.com>
 
 	* symfile.h (expand_symtabs_matching): Renamed from

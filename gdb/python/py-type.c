@@ -210,6 +210,7 @@ convert_field (struct type *type, int field)
   if (TYPE_FIELD_NAME (type, field))
     {
       const char *field_name = TYPE_FIELD_NAME (type, field);
+
       if (field_name[0] != '\0')
 	{
 	  arg = PyString_FromString (TYPE_FIELD_NAME (type, field));
