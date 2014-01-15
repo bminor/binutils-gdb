@@ -1,5 +1,11 @@
 2014-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Revert the last
+	change.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewise.
+
+2014-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/16428
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Don't update reloc
 	count if there are any non pc-relative relocs.
