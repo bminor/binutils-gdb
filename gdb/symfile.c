@@ -3838,6 +3838,42 @@ symfile_free_objfile (struct objfile *objfile)
     remove_target_sections ((void *) objfile);
 }
 
+/* Wrapper around the quick_symbol_functions expand_symtabs_matching "method".
+   Expand all symtabs that match the specified criteria.
+   See quick_symbol_functions.expand_symtabs_matching for details.  */
+
+void
+expand_partial_symbol_names (int (*fun) (const char *, void *),
+			     void *data)
+{
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+  {
+    if (objfile->sf)
+      objfile->sf->qf->expand_symtabs_matching (objfile, NULL, fun,
+						ALL_DOMAIN, data);
+  }
+}
+
+/* Wrapper around the quick_symbol_functions map_symbol_filenames "method".
+   Map function FUN over every file.
+   See quick_symbol_functions.map_symbol_filenames for details.  */
+
+void
+map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data,
+			      int need_fullname)
+{
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+  {
+    if (objfile->sf)
+      objfile->sf->qf->map_symbol_filenames (objfile, fun, data,
+					     need_fullname);
+  }
+}
+
 void
 _initialize_symfile (void)
 {

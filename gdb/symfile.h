@@ -554,6 +554,12 @@ void free_symfile_segment_data (struct symfile_segment_data *data);
 
 extern struct cleanup *increment_reading_symtab (void);
 
+void expand_partial_symbol_names (int (*fun) (const char *, void *),
+				  void *data);
+
+void map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data,
+				   int need_fullname);
+
 /* From dwarf2read.c */
 
 /* Names for a dwarf2 debugging section.  The field NORMAL is the normal

@@ -1,3 +1,15 @@
+2014-01-14  Doug Evans  <dje@google.com>
+
+	* psymtab.c (expand_partial_symbol_names): Delete, moved to symfile.c.
+	(map_partial_symbol_filenames): Ditto.
+	* psymtab.h (expand_partial_symbol_names): Delete, moved to symfile.h.
+	(map_partial_symbol_filenames): Ditto.
+	* symfile.c (expand_partial_symbol_names): Moved here from psymtab.c.
+	(map_partial_symbol_filenames): Ditto.
+	* symfile.h (expand_partial_symbol_names): Moved here from psymtab.h.
+	(map_partial_symbol_filenames): Ditto.
+	* symtab.c: Delete #include "psymtab.h".
+
 2014-01-14  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

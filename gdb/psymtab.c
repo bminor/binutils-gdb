@@ -2088,34 +2088,6 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
 
 
 
-void
-expand_partial_symbol_names (int (*fun) (const char *, void *),
-			     void *data)
-{
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf)
-      objfile->sf->qf->expand_symtabs_matching (objfile, NULL, fun,
-						ALL_DOMAIN, data);
-  }
-}
-
-void
-map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data,
-			      int need_fullname)
-{
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf)
-      objfile->sf->qf->map_symbol_filenames (objfile, fun, data,
-					     need_fullname);
-  }
-}
-
 extern initialize_file_ftype _initialize_psymtab;
 
 void
