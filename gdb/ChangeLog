@@ -1,3 +1,8 @@
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (async_callback_ftype): New typedef.
+	(struct target_ops) <to_async>: Use it.
+
 2014-01-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* python/py-value.c (get_field_type): Remove unnecessary curly

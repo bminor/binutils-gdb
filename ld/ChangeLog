@@ -1,3 +1,9 @@
+2014-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Silence uninitialized warning on ehdr_start_save with older
+	GCC.
+
 2014-01-15  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Define
