@@ -1,5 +1,11 @@
 2014-01-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-typeprint.c (print_array_type, print_choices, print_range)
+	(print_range_bound, print_dynamic_range_bound, print_range_type):
+	Remove declaration.
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-typeprint.c (print_range): Add missing empty line
 	after local declaration.
 

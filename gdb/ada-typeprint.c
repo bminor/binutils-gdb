@@ -41,27 +41,10 @@ static int print_selected_record_field_types (struct type *, struct type *,
 					      int, int,
 					      struct ui_file *, int, int,
 					      const struct type_print_options *);
-   
+
 static int print_record_field_types (struct type *, struct type *,
 				     struct ui_file *, int, int,
 				     const struct type_print_options *);
-
-static void print_array_type (struct type *, struct ui_file *, int, int,
-			      const struct type_print_options *);
-
-static int print_choices (struct type *, int, struct ui_file *,
-			  struct type *);
-
-static void print_range (struct type *, struct ui_file *);
-
-static void print_range_bound (struct type *, char *, int *,
-			       struct ui_file *);
-
-static void
-print_dynamic_range_bound (struct type *, const char *, int,
-			   const char *, struct ui_file *);
-
-static void print_range_type (struct type *, struct ui_file *);
 
 
 
