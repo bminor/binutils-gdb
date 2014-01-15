@@ -3319,8 +3319,8 @@ sources_info (char *ignore, int from_tty)
 
   clear_filename_seen_cache (data.filename_seen_cache);
   data.first = 1;
-  map_partial_symbol_filenames (output_partial_symbol_filename, &data,
-				1 /*need_fullname*/);
+  map_symbol_filenames (output_partial_symbol_filename, &data,
+			1 /*need_fullname*/);
   printf_filtered ("\n");
 
   do_cleanups (cleanups);
@@ -3602,17 +3602,11 @@ search_symbols (char *regexp, enum search_domain kind,
 
   datum.nfiles = nfiles;
   datum.files = files;
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf)
-      objfile->sf->qf->expand_symtabs_matching (objfile,
-						(nfiles == 0
-						 ? NULL
-						 : search_symbols_file_matches),
-						search_symbols_name_matches,
-						kind,
-						&datum);
-  }
+  expand_symtabs_matching ((nfiles == 0
+			    ? NULL
+			    : search_symbols_file_matches),
+			   search_symbols_name_matches,
+			   kind, &datum);
 
   /* Here, we search through the minimal symbol tables for functions
      and variables that match, and force their symbols to be read.
@@ -4253,7 +4247,7 @@ completion_list_add_fields (struct symbol *sym, const char *sym_text,
 }
 
 /* Type of the user_data argument passed to add_macro_name or
-   expand_partial_symbol_name.  The contents are simply whatever is
+   symbol_completion_matcher.  The contents are simply whatever is
    needed by completion_list_add_name.  */
 struct add_name_data
 {
@@ -4278,10 +4272,10 @@ add_macro_name (const char *name, const struct macro_definition *ignore,
 			    datum->text, datum->word);
 }
 
-/* A callback for expand_partial_symbol_names.  */
+/* A callback for expand_symtabs_matching.  */
 
 static int
-expand_partial_symbol_name (const char *name, void *user_data)
+symbol_completion_matcher (const char *name, void *user_data)
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
 
@@ -4392,7 +4386,8 @@ default_make_symbol_completion_list_break_on (const char *text,
   /* Look through the partial symtabs for all symbols which begin
      by matching SYM_TEXT.  Expand all CUs that you find to the list.
      The real names will get added by COMPLETION_LIST_ADD_SYMBOL below.  */
-  expand_partial_symbol_names (expand_partial_symbol_name, &datum);
+  expand_symtabs_matching (NULL, symbol_completion_matcher, ALL_DOMAIN,
+			   &datum);
 
   /* At this point scan through the misc symbol vectors and add each
      symbol you find to the list.  Eventually we want to ignore
@@ -4806,8 +4801,8 @@ make_source_files_completion_list (const char *text, const char *word)
   datum.word = word;
   datum.text_len = text_len;
   datum.list = &list;
-  map_partial_symbol_filenames (maybe_add_partial_symtab_filename, &datum,
-				0 /*need_fullname*/);
+  map_symbol_filenames (maybe_add_partial_symtab_filename, &datum,
+			0 /*need_fullname*/);
 
   do_cleanups (cache_cleanup);
   discard_cleanups (back_to);

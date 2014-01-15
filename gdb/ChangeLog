@@ -1,5 +1,29 @@
 2014-01-14  Doug Evans  <dje@google.com>
 
+	* symfile.h (expand_symtabs_matching): Renamed from
+	expand_partial_symbol_names.  Update prototype.
+	(map_symbol_filenames): Renamed from map_partial_symbol_filenames.
+	* symfile.c (expand_symtabs_matching): Renamed from
+	expand_partial_symbol_names.  New args file_matcher, kind.
+	Rename arg fun to symbol_matcher.
+	(map_symbol_filenames): Renamed from map_partial_symbol_filenames.
+	* ada-lang.c (ada_complete_symbol_matcher): Renamed from
+	ada_expand_partial_symbol_name.
+	(ada_make_symbol_completion_list): Update to call
+	expand_symtabs_matching.
+	(ada_add_global_exceptions): Call expand_symtabs_matching.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_files): Update to
+	call map_symbol_filenames.
+	* symtab.c (sources_info): Update to call map_symbol_filenames.
+	(search_symbols): Call expand_symtabs_matching.
+	(symbol_completion_matcher): Renamed from expand_partial_symbol_name.
+	(default_make_symbol_completion_list_break_on): Update to call
+	expand_symtabs_matching.
+	(make_source_files_completion_list): Update to call
+	map_symbol_filenames.
+
+2014-01-14  Doug Evans  <dje@google.com>
+
 	* symfile.h (expand_symtabs_file_matcher_ftype): New typedef.
 	(expand_symtabs_symbol_matcher_ftype): New typedef.
 	(quick_symbol_functions.expand_symtabs_matching): Update to use.

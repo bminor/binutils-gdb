@@ -3843,16 +3843,19 @@ symfile_free_objfile (struct objfile *objfile)
    See quick_symbol_functions.expand_symtabs_matching for details.  */
 
 void
-expand_partial_symbol_names (expand_symtabs_symbol_matcher_ftype *fun,
-			     void *data)
+expand_symtabs_matching (expand_symtabs_file_matcher_ftype *file_matcher,
+			 expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+			 enum search_domain kind,
+			 void *data)
 {
   struct objfile *objfile;
 
   ALL_OBJFILES (objfile)
   {
     if (objfile->sf)
-      objfile->sf->qf->expand_symtabs_matching (objfile, NULL, fun,
-						ALL_DOMAIN, data);
+      objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
+						symbol_matcher, kind,
+						data);
   }
 }
 
@@ -3861,8 +3864,8 @@ expand_partial_symbol_names (expand_symtabs_symbol_matcher_ftype *fun,
    See quick_symbol_functions.map_symbol_filenames for details.  */
 
 void
-map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data,
-			      int need_fullname)
+map_symbol_filenames (symbol_filename_ftype *fun, void *data,
+		      int need_fullname)
 {
   struct objfile *objfile;
 

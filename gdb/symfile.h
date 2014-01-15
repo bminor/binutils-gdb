@@ -566,11 +566,12 @@ void free_symfile_segment_data (struct symfile_segment_data *data);
 
 extern struct cleanup *increment_reading_symtab (void);
 
-void expand_partial_symbol_names (int (*fun) (const char *, void *),
-				  void *data);
+void expand_symtabs_matching (expand_symtabs_file_matcher_ftype *,
+			      expand_symtabs_symbol_matcher_ftype *,
+			      enum search_domain kind, void *data);
 
-void map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data,
-				   int need_fullname);
+void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
+			   int need_fullname);
 
 /* From dwarf2read.c */
 
