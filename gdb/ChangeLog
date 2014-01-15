@@ -1,5 +1,10 @@
 2014-01-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* python/py-value.c (get_field_type): Remove unnecessary curly
+	braces for single-statement if block.
+
+2014-01-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* python/py-type.c (convert_field): Add missing empty line
 	after declarations.
 
