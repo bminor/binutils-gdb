@@ -4089,9 +4089,10 @@ mips_elf_pages_for_range (const struct mips_got_page_range *range)
 /* Record that G requires a page entry that can reach SEC + ADDEND.  */
 
 static bfd_boolean
-mips_elf_record_got_page_entry (struct mips_got_info *g,
+mips_elf_record_got_page_entry (struct mips_elf_traverse_got_arg *arg,
 				asection *sec, bfd_signed_vma addend)
 {
+  struct mips_got_info *g = arg->g;
   struct mips_got_page_entry lookup, *entry;
   struct mips_got_page_range **range_ptr, *range;
   bfd_vma old_pages, new_pages;
@@ -4108,7 +4109,7 @@ mips_elf_record_got_page_entry (struct mips_got_info *g,
   entry = (struct mips_got_page_entry *) *loc;
   if (!entry)
     {
-      entry = bfd_zalloc (sec->owner, sizeof (*entry));
+      entry = bfd_zalloc (arg->info->output_bfd, sizeof (*entry));
       if (!entry)
 	return FALSE;
 
@@ -4128,7 +4129,7 @@ mips_elf_record_got_page_entry (struct mips_got_info *g,
   range = *range_ptr;
   if (!range || addend < range->min_addend - 0xffff)
     {
-      range = bfd_zalloc (sec->owner, sizeof (*range));
+      range = bfd_zalloc (arg->info->output_bfd, sizeof (*range));
       if (!range)
 	return FALSE;
 
@@ -4248,7 +4249,7 @@ mips_elf_resolve_got_page_ref (void **refp, void *data)
       else
 	addend = isym->st_value + ref->addend;
     }
-  if (!mips_elf_record_got_page_entry (arg->g, sec, addend))
+  if (!mips_elf_record_got_page_entry (arg, sec, addend))
     {
       arg->g = NULL;
       return 0;
