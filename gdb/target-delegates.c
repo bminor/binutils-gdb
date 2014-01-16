@@ -1572,6 +1572,32 @@ tdefault_augmented_libraries_svr4_read (struct target_ops *self)
   return 0;
 }
 
+static const struct frame_unwind *
+delegate_get_unwinder (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_get_unwinder (self);
+}
+
+static const struct frame_unwind *
+tdefault_get_unwinder (struct target_ops *self)
+{
+  return NULL;
+}
+
+static const struct frame_unwind *
+delegate_get_tailcall_unwinder (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_get_tailcall_unwinder (self);
+}
+
+static const struct frame_unwind *
+tdefault_get_tailcall_unwinder (struct target_ops *self)
+{
+  return NULL;
+}
+
 static CORE_ADDR
 delegate_decr_pc_after_break (struct target_ops *self, struct gdbarch *arg1)
 {
@@ -1844,6 +1870,10 @@ install_delegators (struct target_ops *ops)
     ops->to_call_history_range = delegate_call_history_range;
   if (ops->to_augmented_libraries_svr4_read == NULL)
     ops->to_augmented_libraries_svr4_read = delegate_augmented_libraries_svr4_read;
+  if (ops->to_get_unwinder == NULL)
+    ops->to_get_unwinder = delegate_get_unwinder;
+  if (ops->to_get_tailcall_unwinder == NULL)
+    ops->to_get_tailcall_unwinder = delegate_get_tailcall_unwinder;
   if (ops->to_decr_pc_after_break == NULL)
     ops->to_decr_pc_after_break = delegate_decr_pc_after_break;
 }
@@ -1982,5 +2012,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_call_history_from = tdefault_call_history_from;
   ops->to_call_history_range = tdefault_call_history_range;
   ops->to_augmented_libraries_svr4_read = tdefault_augmented_libraries_svr4_read;
+  ops->to_get_unwinder = tdefault_get_unwinder;
+  ops->to_get_tailcall_unwinder = tdefault_get_tailcall_unwinder;
   ops->to_decr_pc_after_break = default_target_decr_pc_after_break;
 }

@@ -3822,13 +3822,7 @@ debug_to_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 const struct frame_unwind *
 target_get_unwinder (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_get_unwinder != NULL)
-      return t->to_get_unwinder;
-
-  return NULL;
+  return current_target.to_get_unwinder (&current_target);
 }
 
 /* See target.h.  */
@@ -3836,13 +3830,7 @@ target_get_unwinder (void)
 const struct frame_unwind *
 target_get_tailcall_unwinder (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_get_tailcall_unwinder != NULL)
-      return t->to_get_tailcall_unwinder;
-
-  return NULL;
+  return current_target.to_get_tailcall_unwinder (&current_target);
 }
 
 /* Default implementation of to_decr_pc_after_break.  */

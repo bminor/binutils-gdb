@@ -1307,6 +1307,22 @@ const struct frame_unwind record_btrace_tailcall_frame_unwind =
   record_btrace_frame_dealloc_cache
 };
 
+/* Implement the to_get_unwinder method.  */
+
+static const struct frame_unwind *
+record_btrace_to_get_unwinder (struct target_ops *self)
+{
+  return &record_btrace_frame_unwind;
+}
+
+/* Implement the to_get_tailcall_unwinder method.  */
+
+static const struct frame_unwind *
+record_btrace_to_get_tailcall_unwinder (struct target_ops *self)
+{
+  return &record_btrace_tailcall_frame_unwind;
+}
+
 /* Indicate that TP should be resumed according to FLAG.  */
 
 static void
@@ -1893,8 +1909,8 @@ init_record_btrace_ops (void)
   ops->to_fetch_registers = record_btrace_fetch_registers;
   ops->to_store_registers = record_btrace_store_registers;
   ops->to_prepare_to_store = record_btrace_prepare_to_store;
-  ops->to_get_unwinder = &record_btrace_frame_unwind;
-  ops->to_get_tailcall_unwinder = &record_btrace_tailcall_frame_unwind;
+  ops->to_get_unwinder = &record_btrace_to_get_unwinder;
+  ops->to_get_tailcall_unwinder = &record_btrace_to_get_tailcall_unwinder;
   ops->to_resume = record_btrace_resume;
   ops->to_wait = record_btrace_wait;
   ops->to_find_new_threads = record_btrace_find_new_threads;

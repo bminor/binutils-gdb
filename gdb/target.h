@@ -1108,10 +1108,14 @@ struct target_ops
     int (*to_augmented_libraries_svr4_read) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
 
-    /* Those unwinders are tried before any other arch unwinders.  Use NULL if
-       it is not used.  */
-    const struct frame_unwind *to_get_unwinder;
-    const struct frame_unwind *to_get_tailcall_unwinder;
+    /* Those unwinders are tried before any other arch unwinders.  If
+       SELF doesn't have unwinders, it should delegate to the
+       "beneath" target.  */
+    const struct frame_unwind *(*to_get_unwinder) (struct target_ops *self)
+      TARGET_DEFAULT_RETURN (NULL);
+
+    const struct frame_unwind *(*to_get_tailcall_unwinder) (struct target_ops *self)
+      TARGET_DEFAULT_RETURN (NULL);
 
     /* Return the number of bytes by which the PC needs to be decremented
        after executing a breakpoint instruction.

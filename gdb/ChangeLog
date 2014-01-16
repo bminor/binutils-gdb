@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.c (target_get_unwinder): Rewrite.
+	(target_get_tailcall_unwinder): Rewrite.
+	* record-btrace.c (record_btrace_to_get_unwinder): New function.
+	(record_btrace_to_get_tailcall_unwinder): New function.
+	(init_record_btrace_ops): Update.
+	* target.h (struct target_ops) <to_get_unwinder,
+	to_get_tailcall_unwinder>: Now function pointers.  Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* nto-procfs.c (procfs_remove_hw_breakpoint): Add 'self'
 	argument.
 	(init_procfs_ops): Correctly set to_remove_hw_breakpoint.
