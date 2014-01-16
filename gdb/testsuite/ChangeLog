@@ -1,3 +1,7 @@
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable.exp: Update expected text.
+
 2014-01-16  Omair Javaid  <Omair.Javaid@linaro.org>
 
 	* gdb.dwarf2/dw2-dos-drive.S: Increase text section size to 4
