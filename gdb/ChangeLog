@@ -1,3 +1,7 @@
+2014-01-16  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (open_and_init_dwp_file): Fix typo in comment.
+
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.h (btrace_thread_flag): New.
