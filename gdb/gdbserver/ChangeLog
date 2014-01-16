@@ -1,3 +1,8 @@
+2014-01-16  Doug Evans  <dje@google.com>
+
+	* dll.c (UNSPECIFIED_CORE_ADDR): New macro.
+	(match_dll): Use it.
+
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* target.h (target_ops) <read_btrace>: Change parameters and
