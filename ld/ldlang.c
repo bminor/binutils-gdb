@@ -70,7 +70,6 @@ static struct unique_sections *unique_section_list;
 
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
-static void init_map_userdata (bfd *, asection *, void *);
 static lang_input_statement_type *lookup_name (const char *);
 static struct bfd_hash_entry *lang_definedness_newfunc
  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
@@ -1974,7 +1973,6 @@ lang_map (void)
 {
   lang_memory_region_type *m;
   bfd_boolean dis_header_printed = FALSE;
-  bfd *p;
 
   LANG_FOR_EACH_INPUT_STATEMENT (file)
     {
@@ -2046,50 +2044,34 @@ lang_map (void)
   if (! link_info.reduce_memory_overheads)
     {
       obstack_begin (&map_obstack, 1000);
-      for (p = link_info.input_bfds; p != (bfd *) NULL; p = p->link_next)
-	bfd_map_over_sections (p, init_map_userdata, 0);
       bfd_link_hash_traverse (link_info.hash, sort_def_symbol, 0);
     }
   lang_statement_iteration ++;
   print_statements ();
 }
 
-static void
-init_map_userdata (bfd *abfd ATTRIBUTE_UNUSED,
-		   asection *sec,
-		   void *data ATTRIBUTE_UNUSED)
-{
-  fat_section_userdata_type *new_data
-    = ((fat_section_userdata_type *) (stat_alloc
-				      (sizeof (fat_section_userdata_type))));
-
-  ASSERT (get_userdata (sec) == NULL);
-  get_userdata (sec) = new_data;
-  new_data->map_symbol_def_tail = &new_data->map_symbol_def_head;
-  new_data->map_symbol_def_count = 0;
-}
-
 static bfd_boolean
 sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
 		 void *info ATTRIBUTE_UNUSED)
 {
-  if (hash_entry->type == bfd_link_hash_defined
-      || hash_entry->type == bfd_link_hash_defweak)
+  if ((hash_entry->type == bfd_link_hash_defined
+       || hash_entry->type == bfd_link_hash_defweak)
+      && hash_entry->u.def.section->owner != link_info.output_bfd
+      && hash_entry->u.def.section->owner != NULL)
     {
-      struct fat_user_section_struct *ud;
+      input_section_userdata_type *ud;
       struct map_symbol_def *def;
 
-      ud = (struct fat_user_section_struct *)
-	  get_userdata (hash_entry->u.def.section);
-      if  (! ud)
+      ud = ((input_section_userdata_type *)
+	    get_userdata (hash_entry->u.def.section));
+      if (!ud)
 	{
-	  /* ??? What do we have to do to initialize this beforehand?  */
-	  /* The first time we get here is bfd_abs_section...  */
-	  init_map_userdata (0, hash_entry->u.def.section, 0);
-	  ud = (struct fat_user_section_struct *)
-	      get_userdata (hash_entry->u.def.section);
+	  ud = (input_section_userdata_type *) stat_alloc (sizeof (*ud));
+	  get_userdata (hash_entry->u.def.section) = ud;
+	  ud->map_symbol_def_tail = &ud->map_symbol_def_head;
+	  ud->map_symbol_def_count = 0;
 	}
-      else if  (!ud->map_symbol_def_tail)
+      else if (!ud->map_symbol_def_tail)
 	ud->map_symbol_def_tail = &ud->map_symbol_def_head;
 
       def = (struct map_symbol_def *) obstack_alloc (&map_obstack, sizeof *def);
@@ -2121,14 +2103,6 @@ init_os (lang_output_section_statement_type *s, flagword flags)
     }
   s->bfd_section->output_section = s->bfd_section;
   s->bfd_section->output_offset = 0;
-
-  if (!link_info.reduce_memory_overheads)
-    {
-      fat_section_userdata_type *new_userdata = (fat_section_userdata_type *)
-	stat_alloc (sizeof (fat_section_userdata_type));
-      memset (new_userdata, 0, sizeof (fat_section_userdata_type));
-      get_userdata (s->bfd_section) = new_userdata;
-    }
 
   /* If there is a base address, make sure that any sections it might
      mention are initialized.  */
@@ -4083,8 +4057,8 @@ hash_entry_addr_cmp (const void *a, const void *b)
 static void
 print_all_symbols (asection *sec)
 {
-  struct fat_user_section_struct *ud =
-      (struct fat_user_section_struct *) get_userdata (sec);
+  input_section_userdata_type *ud
+    = (input_section_userdata_type *) get_userdata (sec);
   struct map_symbol_def *def;
   struct bfd_link_hash_entry **entries;
   unsigned int i;
