@@ -1,3 +1,9 @@
+2014-01-16  Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-tdep.c (s390_frame_unwind_cache): Swallow
+	NOT_AVAILABLE_ERROR errors while parsing the prologue or reading
+	the backchain.
+
 2014-01-16  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (open_and_init_dwp_file): Fix typo in comment.

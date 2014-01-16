@@ -2039,7 +2039,9 @@ static struct s390_unwind_cache *
 s390_frame_unwind_cache (struct frame_info *this_frame,
 			 void **this_prologue_cache)
 {
+  volatile struct gdb_exception ex;
   struct s390_unwind_cache *info;
+
   if (*this_prologue_cache)
     return *this_prologue_cache;
 
@@ -2050,10 +2052,15 @@ s390_frame_unwind_cache (struct frame_info *this_frame,
   info->frame_base = -1;
   info->local_base = -1;
 
-  /* Try to use prologue analysis to fill the unwind cache.
-     If this fails, fall back to reading the stack backchain.  */
-  if (!s390_prologue_frame_unwind_cache (this_frame, info))
-    s390_backchain_frame_unwind_cache (this_frame, info);
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      /* Try to use prologue analysis to fill the unwind cache.
+	 If this fails, fall back to reading the stack backchain.  */
+      if (!s390_prologue_frame_unwind_cache (this_frame, info))
+	s390_backchain_frame_unwind_cache (this_frame, info);
+    }
+  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
+    throw_exception (ex);
 
   return info;
 }
