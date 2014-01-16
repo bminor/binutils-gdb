@@ -947,7 +947,8 @@ procfs_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 }
 
 static int
-procfs_remove_hw_breakpoint (struct gdbarch *gdbarch,
+procfs_remove_hw_breakpoint (struct target_ops *self,
+			     struct gdbarch *gdbarch,
 			     struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address,
@@ -1402,7 +1403,7 @@ init_procfs_ops (void)
   procfs_ops.to_remove_breakpoint = procfs_remove_breakpoint;
   procfs_ops.to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
   procfs_ops.to_insert_hw_breakpoint = procfs_insert_hw_breakpoint;
-  procfs_ops.to_remove_hw_breakpoint = procfs_remove_breakpoint;
+  procfs_ops.to_remove_hw_breakpoint = procfs_remove_hw_breakpoint;
   procfs_ops.to_insert_watchpoint = procfs_insert_hw_watchpoint;
   procfs_ops.to_remove_watchpoint = procfs_remove_hw_watchpoint;
   procfs_ops.to_stopped_by_watchpoint = procfs_stopped_by_watchpoint;

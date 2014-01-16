@@ -1,5 +1,11 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* nto-procfs.c (procfs_remove_hw_breakpoint): Add 'self'
+	argument.
+	(init_procfs_ops): Correctly set to_remove_hw_breakpoint.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* record-btrace.c (record_btrace_decr_pc_after_break): Delegate
 	directly.
 	* target-delegates.c: Rebuild.
