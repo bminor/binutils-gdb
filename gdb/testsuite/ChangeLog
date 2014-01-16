@@ -1,3 +1,8 @@
+2014-01-16  Omair Javaid  <Omair.Javaid@linaro.org>
+
+	* gdb.dwarf2/dw2-dos-drive.S: Increase text section size to 4
+	bytes.
+
 2014-01-15  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.base/float.exp: Handle "aarch64*-*-*" targets.
