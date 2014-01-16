@@ -1117,7 +1117,8 @@ struct target_ops
        after executing a breakpoint instruction.
        Defaults to gdbarch_decr_pc_after_break (GDBARCH).  */
     CORE_ADDR (*to_decr_pc_after_break) (struct target_ops *ops,
-					 struct gdbarch *gdbarch);
+					 struct gdbarch *gdbarch)
+      TARGET_DEFAULT_FUNC (default_target_decr_pc_after_break);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?

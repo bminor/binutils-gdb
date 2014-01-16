@@ -1572,6 +1572,13 @@ tdefault_augmented_libraries_svr4_read (struct target_ops *self)
   return 0;
 }
 
+static CORE_ADDR
+delegate_decr_pc_after_break (struct target_ops *self, struct gdbarch *arg1)
+{
+  self = self->beneath;
+  return self->to_decr_pc_after_break (self, arg1);
+}
+
 static void
 install_delegators (struct target_ops *ops)
 {
@@ -1837,6 +1844,8 @@ install_delegators (struct target_ops *ops)
     ops->to_call_history_range = delegate_call_history_range;
   if (ops->to_augmented_libraries_svr4_read == NULL)
     ops->to_augmented_libraries_svr4_read = delegate_augmented_libraries_svr4_read;
+  if (ops->to_decr_pc_after_break == NULL)
+    ops->to_decr_pc_after_break = delegate_decr_pc_after_break;
 }
 
 static void
@@ -1973,4 +1982,5 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_call_history_from = tdefault_call_history_from;
   ops->to_call_history_range = tdefault_call_history_range;
   ops->to_augmented_libraries_svr4_read = tdefault_augmented_libraries_svr4_read;
+  ops->to_decr_pc_after_break = default_target_decr_pc_after_break;
 }

@@ -108,6 +108,9 @@ static int find_default_is_async_p (struct target_ops *ignore);
 static enum exec_direction_kind default_execution_direction
     (struct target_ops *self);
 
+static CORE_ADDR default_target_decr_pc_after_break (struct target_ops *ops,
+						     struct gdbarch *gdbarch);
+
 #include "target-delegates.c"
 
 static void init_dummy_target (void);
@@ -3842,16 +3845,12 @@ target_get_tailcall_unwinder (void)
   return NULL;
 }
 
-/* See target.h.  */
+/* Default implementation of to_decr_pc_after_break.  */
 
-CORE_ADDR
-forward_target_decr_pc_after_break (struct target_ops *ops,
+static CORE_ADDR
+default_target_decr_pc_after_break (struct target_ops *ops,
 				    struct gdbarch *gdbarch)
 {
-  for (; ops != NULL; ops = ops->beneath)
-    if (ops->to_decr_pc_after_break != NULL)
-      return ops->to_decr_pc_after_break (ops, gdbarch);
-
   return gdbarch_decr_pc_after_break (gdbarch);
 }
 
@@ -3860,7 +3859,7 @@ forward_target_decr_pc_after_break (struct target_ops *ops,
 CORE_ADDR
 target_decr_pc_after_break (struct gdbarch *gdbarch)
 {
-  return forward_target_decr_pc_after_break (current_target.beneath, gdbarch);
+  return current_target.to_decr_pc_after_break (&current_target, gdbarch);
 }
 
 static int

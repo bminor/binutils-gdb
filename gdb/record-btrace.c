@@ -1737,7 +1737,7 @@ record_btrace_decr_pc_after_break (struct target_ops *ops,
   if (record_btrace_is_replaying (ops))
     return 0;
 
-  return forward_target_decr_pc_after_break (ops->beneath, gdbarch);
+  return ops->beneath->to_decr_pc_after_break (ops->beneath, gdbarch);
 }
 
 /* The to_find_new_threads method of target record-btrace.  */

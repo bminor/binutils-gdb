@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* record-btrace.c (record_btrace_decr_pc_after_break): Delegate
+	directly.
+	* target-delegates.c: Rebuild.
+	* target.h (struct target_ops) <to_decr_pc_after_break>: Use
+	TARGET_DEFAULT_FUNC.
+	* target.c (default_target_decr_pc_after_break): Rename from
+	forward_target_decr_pc_after_break.  Simplify.
+	(target_decr_pc_after_break): Rely on delegation.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.c (update_current_target): Do not INHERIT to_doc or
 	to_magic.  Do not de_fault to_open or to_close.
 
