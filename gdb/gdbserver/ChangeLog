@@ -1,3 +1,8 @@
+2014-01-15  Doug Evans  <dje@google.com>
+
+	* inferiors.c (thread_id_to_gdb_id): Delete.
+	* inferiors.h (thread_id_to_gdb_id): Delete.
+
 2014-01-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (INCLUDE_CFLAGS): Remove trailing slash from
