@@ -413,8 +413,8 @@ if test -n "$GENERATE_AUTO_IMPORT_SCRIPT"; then
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xa
 fi
 
-case " $EMULATION_LIBPATH " in
-    *" ${EMULATION_NAME} "*) COMPILE_IN=true;;
+case "$COMPILE_IN: $EMULATION_LIBPATH " in
+    :*" ${EMULATION_NAME} "*) COMPILE_IN=yes;;
 esac
 
 # PR ld/5652:

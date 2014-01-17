@@ -1,3 +1,22 @@
+2014-01-17  Alan Modra  <amodra@gmail.com>
+
+	* genscripts.sh (COMPILE_IN): Don't set if already set.
+	* emulparams/nds32elf.sh: Don't clear EMULATION_LIBPATH, set
+	COMPILE_IN=no.
+	* emulparams/nds32elf16m.sh: Likewise.
+	* emulparams/nds32elf_linux.sh: Likewise.
+	* emultempl/aix.em: Test COMPILE_IN value is "yes".
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+
 2014-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16456
