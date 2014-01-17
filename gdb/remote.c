@@ -7873,7 +7873,7 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 static void
 remote_kill (struct target_ops *ops)
 {
-  struct gdb_exception ex;
+  volatile struct gdb_exception ex;
 
   /* Catch errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */

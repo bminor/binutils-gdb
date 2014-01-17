@@ -2396,7 +2396,7 @@ insert_bp_location (struct bp_location *bl,
 {
   enum errors bp_err = GDB_NO_ERROR;
   const char *bp_err_message = NULL;
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
 
   if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
     return 0;
