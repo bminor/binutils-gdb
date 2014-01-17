@@ -1,5 +1,13 @@
 2014-01-17  Doug Evans  <dje@google.com>
 
+	* common/gdb_vecs.c (delim_string_to_char_ptr_vec_append): New
+	function, contents of dirnames_to_char_ptr_vec_append moved here.
+	(delim_string_to_char_ptr_vec): New function.
+	(dirnames_to_char_ptr_vec_append): Rewrite.
+	* common/gdb_vecs.h (delim_string_to_char_ptr_vec): Declare.
+
+2014-01-17  Doug Evans  <dje@google.com>
+
 	* common/common-utils.h (FUNCTION_NAME): Renamed from ASSERT_FUNCTION,
 	and moved here ...
 	* common/gdb_assert.h (ASSERT_FUNCTION): ... from here.
