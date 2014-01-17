@@ -1,8 +1,8 @@
 2014-01-17  Pedro Alves  <palves@redhat.com>
 
 	PR PR16445
-	* linux-x86-low.c (linux-x86-low.c): Don't include elf/common.h if
-	ELFMAG0 is defined after including gdb_proc_service.h.
+	* linux-x86-low.c: Don't include elf/common.h if ELFMAG0 is
+	defined after including gdb_proc_service.h.
 
 2014-01-16  Doug Evans  <dje@google.com>
 
