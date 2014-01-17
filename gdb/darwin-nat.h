@@ -18,7 +18,7 @@
 #define __DARWIN_NAT_H__
 
 #include <mach/mach.h>
-#include "gdb_assert.h"
+#include "common-utils.h" /* For FUNCTION_NAME.  */
 
 /* Describe the mach exception handling state for a task.  This state is saved
    before being changed and restored when a process is detached.
@@ -136,10 +136,10 @@ extern mach_port_t darwin_port_set;
 /* A copy of mach_host_self ().  */
 extern mach_port_t darwin_host_self;
 
-/* ASSERT_FUNCTION is defined in gdb_assert.h (or not).  */
-#ifdef ASSERT_FUNCTION
+/* FUNCTION_NAME is defined in common-utils.h (or not).  */
+#ifdef FUNCTION_NAME
 #define MACH_CHECK_ERROR(ret) \
-  mach_check_error (ret, __FILE__, __LINE__, ASSERT_FUNCTION)
+  mach_check_error (ret, __FILE__, __LINE__, FUNCTION_NAME)
 #else
 #define MACH_CHECK_ERROR(ret) \
   mach_check_error (ret, __FILE__, __LINE__, "??")

@@ -1,3 +1,14 @@
+2014-01-17  Doug Evans  <dje@google.com>
+
+	* common/common-utils.h (FUNCTION_NAME): Renamed from ASSERT_FUNCTION,
+	and moved here ...
+	* common/gdb_assert.h (ASSERT_FUNCTION): ... from here.
+	#include "common-utils.h".
+	(gdb_assert, gdb_assert_fail, gdb_assert_not_reached): Update.
+	* common/vec.h (VEC_ASSERT_PASS): Update.
+	* darwin-nat.h: Replace #include of gdb_assert.h with common-utils.h.
+	(MACH_CHECK_ERROR): Update.
+
 2014-01-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdbarch.sh (gdbarch_address_class_name_to_type_flags): Add
