@@ -3,7 +3,40 @@
 
 *** Changes since GDB 7.7
 
+* The 'record instruction-history' command now starts counting instructions
+  at one.  This also affects the instruction ranges reported by the
+  'record function-call-history' command when given the /i modifier.
+
+* The command 'record function-call-history' supports a new modifier '/c' to
+  indent the function names based on their call stack depth.
+  The fields for the '/i' and '/l' modifier have been reordered.
+  The source line range is now prefixed with 'at'.
+  The instruction range is now prefixed with 'inst'.
+  Both ranges are now printed as '<from>, <to>' to allow copy&paste to the
+  "record instruction-history" and "list" commands.
+
+* The ranges given as arguments to the 'record function-call-history' and
+  'record instruction-history' commands are now inclusive.
+
+* The btrace record target now supports the 'record goto' command.
+  For locations inside the execution trace, the back trace is computed
+  based on the information stored in the execution trace.
+
+* The btrace record target supports limited reverse execution and replay.
+  The target does not record data and therefore does not allow reading
+  memory or registers.
+
+* New remote packets
+
+qXfer:btrace:read's annex
+  The qXfer:btrace:read packet supports a new annex 'delta' to read
+  branch trace incrementally.
+
 *** Changes in GDB 7.7
+
+* Improved support for process record-replay and reverse debugging on
+  arm*-linux* targets.  Support for thumb32 and syscall instruction
+  recording has been added.
 
 * GDB now supports SystemTap SDT probes on AArch64 GNU/Linux.
 

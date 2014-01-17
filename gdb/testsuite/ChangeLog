@@ -1,3 +1,97 @@
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/delta.exp: Check reverse stepi.
+	* gdb.btrace/tailcall.exp: Update.  Add stepping tests.
+	* gdb.btrace/finish.exp: New.
+	* gdb.btrace/next.exp: New.
+	* gdb.btrace/nexti.exp: New.
+	* gdb.btrace/record_goto.c: Add comments.
+	* gdb.btrace/step.exp: New.
+	* gdb.btrace/stepi.exp: New.
+	* gdb.btrace/multi-thread-step.c: New.
+	* gdb.btrace/multi-thread-step.exp: New.
+	* gdb.btrace/rn-dl-bind.c: New.
+	* gdb.btrace/rn-dl-bind.exp: New.
+	* gdb.btrace/data.c: New.
+	* gdb.btrace/data.exp: New.
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add new.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add delta.
+	* gdb.btrace/exception.exp: Update.
+	* gdb.btrace/instruction_history.exp: Update.
+	* gdb.btrace/record_goto.exp: Update.
+	* gdb.btrace/tailcall.exp: Update.
+	* gdb.btrace/unknown_functions.exp: Update.
+	* gdb.btrace/delta.exp: New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/record_goto.exp: Add backtrace test.
+	* gdb.btrace/tailcall.exp: Add backtrace test.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add record_goto.
+	* gdb.btrace/record_goto.c: New.
+	* gdb.btrace/record_goto.exp: New.
+	* gdb.btrace/x86-record_goto.S: New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/function_call_history.exp: Update tests.
+	* gdb.btrace/instruction_history.exp: Update tests.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/function_call_history.exp: Fix expected field
+	order for "record function-call-history".
+	Add new tests for "record function-call-history /c".
+	* gdb.btrace/exception.cc: New.
+	* gdb.btrace/exception.exp: New.
+	* gdb.btrace/tailcall.exp: New.
+	* gdb.btrace/x86-tailcall.S: New.
+	* gdb.btrace/x86-tailcall.c: New.
+	* gdb.btrace/unknown_functions.c: New.
+	* gdb.btrace/unknown_functions.exp: New.
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add new.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/instruction_history.exp: Update.
+	* gdb.btrace/function_call_history.exp: Update.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/function_call_history.exp: Fix expected function
+	trace.
+	* gdb.btrace/instruction_history.exp: Initialize traced.
+	Remove traced_functions.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/function_call_history.exp: Update
+	* gdb.btrace/instruction_history.exp: Update.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable.exp: Update expected text.
+
+2014-01-16  Omair Javaid  <Omair.Javaid@linaro.org>
+
+	* gdb.dwarf2/dw2-dos-drive.S: Increase text section size to 4
+	bytes.
+
+2014-01-15  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.base/float.exp: Handle "aarch64*-*-*" targets.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* lib/gdb.exp (supports_process_record): Return true for
+	arm*-linux*.  (supports_reverse): Likewise.
+
 2014-01-13  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/15464

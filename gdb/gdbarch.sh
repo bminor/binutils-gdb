@@ -628,6 +628,10 @@ v:int:cannot_step_breakpoint:::0:0::0
 v:int:have_nonsteppable_watchpoint:::0:0::0
 F:int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
 M:const char *:address_class_type_flags_to_name:int type_flags:type_flags
+
+# Return the appropriate type_flags for the supplied address class.
+# This function should return 1 if the address class was recognized and
+# type_flags was set, zero otherwise.
 M:int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:name, type_flags_ptr
 # Is a register in a group
 m:int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup::default_register_reggroup_p::0
@@ -994,6 +998,15 @@ m:void:iterate_over_objfiles_in_search_order:iterate_over_objfiles_in_search_ord
 
 # Ravenscar arch-dependent ops.
 v:struct ravenscar_arch_ops *:ravenscar_ops:::NULL:NULL::0:host_address_to_string (gdbarch->ravenscar_ops)
+
+# Return non-zero if the instruction at ADDR is a call; zero otherwise.
+m:int:insn_is_call:CORE_ADDR addr:addr::default_insn_is_call::0
+
+# Return non-zero if the instruction at ADDR is a return; zero otherwise.
+m:int:insn_is_ret:CORE_ADDR addr:addr::default_insn_is_ret::0
+
+# Return non-zero if the instruction at ADDR is a jump; zero otherwise.
+m:int:insn_is_jump:CORE_ADDR addr:addr::default_insn_is_jump::0
 EOF
 }
 

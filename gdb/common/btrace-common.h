@@ -42,7 +42,9 @@
    asynchronous, e.g. interrupts.  */
 struct btrace_block
 {
-  /* The address of the first byte of the first instruction in the block.  */
+  /* The address of the first byte of the first instruction in the block.
+     The address may be zero if we do not know the beginning of this block,
+     such as for the first block in a delta trace.  */
   CORE_ADDR begin;
 
   /* The address of the first byte of the last instruction in the block.  */
@@ -64,10 +66,31 @@ struct btrace_target_info;
 enum btrace_read_type
 {
   /* Send all available trace.  */
-  btrace_read_all,
+  BTRACE_READ_ALL,
 
   /* Send all available trace, if it changed.  */
-  btrace_read_new
+  BTRACE_READ_NEW,
+
+  /* Send the trace since the last request.  This will fail if the trace
+     buffer overflowed.  */
+  BTRACE_READ_DELTA
+};
+
+/* Enumeration of btrace errors.  */
+
+enum btrace_error
+{
+  /* No error.  Everything is OK.  */
+  BTRACE_ERR_NONE,
+
+  /* An unknown error.  */
+  BTRACE_ERR_UNKNOWN,
+
+  /* Branch tracing is not supported on this system.  */
+  BTRACE_ERR_NOT_SUPPORTED,
+
+  /* The branch trace buffer overflowed; no delta read possible.  */
+  BTRACE_ERR_OVERFLOW
 };
 
 #endif /* BTRACE_COMMON_H */

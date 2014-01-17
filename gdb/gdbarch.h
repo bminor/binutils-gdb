@@ -694,6 +694,10 @@ typedef const char * (gdbarch_address_class_type_flags_to_name_ftype) (struct gd
 extern const char * gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags);
 extern void set_gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name);
 
+/* Return the appropriate type_flags for the supplied address class.
+   This function should return 1 if the address class was recognized and
+   type_flags was set, zero otherwise. */
+
 extern int gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch);
 
 typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, const char *name, int *type_flags_ptr);
@@ -1266,6 +1270,24 @@ extern void set_gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *g
 
 extern struct ravenscar_arch_ops * gdbarch_ravenscar_ops (struct gdbarch *gdbarch);
 extern void set_gdbarch_ravenscar_ops (struct gdbarch *gdbarch, struct ravenscar_arch_ops * ravenscar_ops);
+
+/* Return non-zero if the instruction at ADDR is a call; zero otherwise. */
+
+typedef int (gdbarch_insn_is_call_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_insn_is_call (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_insn_is_call (struct gdbarch *gdbarch, gdbarch_insn_is_call_ftype *insn_is_call);
+
+/* Return non-zero if the instruction at ADDR is a return; zero otherwise. */
+
+typedef int (gdbarch_insn_is_ret_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_insn_is_ret (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_insn_is_ret (struct gdbarch *gdbarch, gdbarch_insn_is_ret_ftype *insn_is_ret);
+
+/* Return non-zero if the instruction at ADDR is a jump; zero otherwise. */
+
+typedef int (gdbarch_insn_is_jump_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_insn_is_jump (struct gdbarch *gdbarch, gdbarch_insn_is_jump_ftype *insn_is_jump);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

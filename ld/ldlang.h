@@ -313,6 +313,18 @@ typedef struct
   asection *section;
 } lang_input_section_type;
 
+/* For input sections, when writing a map file: head / tail of a linked
+   list of hash table entries for symbols defined in this section.  */
+typedef struct input_section_userdata_struct
+{
+  struct map_symbol_def *map_symbol_def_head;
+  struct map_symbol_def **map_symbol_def_tail;
+  unsigned long map_symbol_def_count;
+} input_section_userdata_type;
+
+#define get_userdata(x) ((x)->userdata)
+
+
 typedef struct lang_wild_statement_struct lang_wild_statement_type;
 
 typedef void (*callback_t) (lang_wild_statement_type *, struct wildcard_list *,

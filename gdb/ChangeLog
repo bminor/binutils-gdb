@@ -1,3 +1,570 @@
+2014-01-17  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* breakpoint.c (insert_bp_location): Add "volatile" keyword to "struct
+	gdb_exception" declaration.
+	* remote.c (getpkt_or_notif_sane): Likewise.
+
+2014-01-17  Doug Evans  <dje@google.com>
+
+	* common/gdb_vecs.c (delim_string_to_char_ptr_vec_append): New
+	function, contents of dirnames_to_char_ptr_vec_append moved here.
+	(delim_string_to_char_ptr_vec): New function.
+	(dirnames_to_char_ptr_vec_append): Rewrite.
+	* common/gdb_vecs.h (delim_string_to_char_ptr_vec): Declare.
+
+2014-01-17  Doug Evans  <dje@google.com>
+
+	* common/common-utils.h (FUNCTION_NAME): Renamed from ASSERT_FUNCTION,
+	and moved here ...
+	* common/gdb_assert.h (ASSERT_FUNCTION): ... from here.
+	#include "common-utils.h".
+	(gdb_assert, gdb_assert_fail, gdb_assert_not_reached): Update.
+	* common/vec.h (VEC_ASSERT_PASS): Update.
+	* darwin-nat.h: Replace #include of gdb_assert.h with common-utils.h.
+	(MACH_CHECK_ERROR): Update.
+
+2014-01-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbarch.sh (gdbarch_address_class_name_to_type_flags): Add
+	comments.
+	* gdbarch.h: Regenerate.
+
+2014-01-16  Tom Tromey  <tromey@redhat.com>
+
+	* value.c (struct value) <regnum>: Move earlier.
+
+2014-01-16  Tom Tromey  <tromey@redhat.com>
+
+	* remote.c (extended_remote_create_inferior): Rename from
+	extended_remote_create_inferior_1.  Add "ops" argument.  Remove
+	old implementation.
+
+2014-01-16  Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-tdep.c (s390_frame_unwind_cache): Swallow
+	NOT_AVAILABLE_ERROR errors while parsing the prologue or reading
+	the backchain.
+
+2014-01-16  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (open_and_init_dwp_file): Fix typo in comment.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.h (btrace_thread_flag): New.
+	(struct btrace_thread_info) <flags>: New.
+	* record-btrace.c (record_btrace_resume_thread)
+	(record_btrace_find_thread_to_move, btrace_step_no_history)
+	(btrace_step_stopped, record_btrace_start_replaying)
+	(record_btrace_step_thread, record_btrace_decr_pc_after_break)
+	(record_btrace_find_resume_thread): New.
+	(record_btrace_resume, record_btrace_wait): Extend.
+	(record_btrace_can_execute_reverse): New.
+	(record_btrace_open): Fail in non-stop mode.
+	(record_btrace_set_replay): Split into this, ...
+	(record_btrace_stop_replaying): ... this, ...
+	(record_btrace_clear_histories): ... and this.
+	(init_record_btrace_ops): Init to_can_execute_reverse.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* target.h (struct target_ops) <to_decr_pc_after_break>: New.
+	(forward_target_decr_pc_after_break)
+	(target_decr_pc_after_break): New.
+	* target.c (forward_target_decr_pc_after_break)
+	(target_decr_pc_after_break): New.
+	* aix-thread.c (aix_thread_wait): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* darwin-nat.c (cancel_breakpoint): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* infrun.c (adjust_pc_after_break): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* linux-nat.c (cancel_breakpoint): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* linux-thread-db.c (check_event): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* record-full.c (record_full_wait_1): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c: Include regcache.h.
+	(btrace_add_pc): New.
+	(btrace_enable): Call btrace_add_pc.
+	(btrace_is_empty): New.
+	* btrace.h (btrace_is_empty): New.
+	* record-btrace.c (require_btrace, record_btrace_info): Call
+	btrace_is_empty.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* common/linux-btrace.c (perf_event_read_bts, linux_read_btrace):
+	Support delta reads.
+	(linux_disable_btrace): Change return type.
+	* common/linux-btrace.h (linux_read_btrace): Change parameters
+	and return type to allow error reporting.  Update users.
+	(linux_disable_btrace): Change return type.  Update users.
+	* common/btrace-common.h (btrace_read_type) <BTRACE_READ_DELTA>:
+	New.
+	(btrace_error): New.
+	(btrace_block) <begin>: Comment on BEGIN == 0.
+	* btrace.c (btrace_compute_ftrace): Start from the end of
+	the current trace.
+	(btrace_stitch_trace, btrace_clear_history): New.
+	(btrace_fetch): Read delta trace, return if replaying.
+	(btrace_clear): Move clear history code to btrace_clear_history.
+	(parse_xml_btrace): Throw an error if parsing failed.
+	* target.h (struct target_ops) <to_read_btrace>: Change parameters
+	and return type to allow error reporting.
+	(target_read_btrace): Change parameters and return type to allow
+	error reporting.
+	* target.c (target_read_btrace): Update.
+	* remote.c (remote_read_btrace): Support delta reads.  Pass
+	errors on.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record.h (record_btrace_frame_unwind)
+	(record_btrace_tailcall_frame_unwind): New declarations.
+	* dwarf2-frame: Include record.h
+	(dwarf2_frame_cfa): Throw an error for btrace frames.
+	* record-btrace.c: Include hashtab.h.
+	(btrace_get_bfun_name): New.
+	(btrace_call_history): Call btrace_get_bfun_name.
+	(struct btrace_frame_cache): New.
+	(bfcache): New.
+	(bfcache_hash, bfcache_eq, bfcache_new): New.
+	(btrace_get_frame_function): New.
+	(record_btrace_frame_unwind_stop_reason): Allow unwinding.
+	(record_btrace_frame_this_id): Compute own id.
+	(record_btrace_frame_prev_register): Provide PC, throw_error
+	for all other registers.
+	(record_btrace_frame_sniffer): Detect btrace frames.
+	(record_btrace_tailcall_frame_sniffer): New.
+	(record_btrace_frame_dealloc_cache): New.
+	(record_btrace_frame_unwind): Add new functions.
+	(record_btrace_tailcall_frame_unwind): New.
+	(_initialize_record_btrace): Allocate cache.
+	* btrace.c (btrace_clear): Call reinit_frame_cache.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_set_replay)
+	(record_btrace_goto_begin, record_btrace_goto_end)
+	(record_btrace_goto): New.
+	(init_record_btrace_ops): Initialize them.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_find_new_threads)
+	(record_btrace_thread_alive): New.
+	(init_record_btrace_ops): Initialize to_find_new_threads and
+	to_thread_alive.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_resume): New.
+	(record_btrace_wait): New.
+	(init_record_btrace_ops): Initialize to_wait and to_resume.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_xfer_partial)
+	(record_btrace_insert_breakpoint, record_btrace_remove_breakpoint)
+	(record_btrace_allow_memory_access): New.
+	(init_record_btrace_ops): Initialize new methods.
+	* target.c (raw_memory_xfer_partial): Bail out if target reports
+	that this memory is not available.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* target.h (target_ops) <to_insert_breakpoint>
+	<to_remove_breakpoint>: Add target_ops parameter.
+	(forward_target_insert_breakpoint): New.
+	(forward_target_remove_breakpoint): New.
+	(memory_remove_breakpoint, memory_insert_breakpoint):
+	Add target_ops parameter.
+	* target.c (target_insert_breakpoint): Split into this and ...
+	(forward_target_insert_breakpoint): ... this.
+	(target_remove_breakpoint): Split into this and ...
+	(forward_target_remove_breakpoint): ... this.
+	(debug_to_insert_breakpoint): Add target_ops parameter.
+	Call forward_target_insert_breakpoint.
+	(debug_to_remove_breakpoint): Add target_ops parameter.
+	Call forward_target_remove_breakpoint.
+	(update_current_target): Do not inherit or default to_insert_breakpoint
+	and to_remove_breakpoint.
+	* corelow.c (ignore): Add target_ops parameter.
+	* exec.c (ignore): Add target_ops parameter.
+	* mem-break.c (memory_insert_breakpoint, memory_remove_breakpoint):
+	Add target_ops parameter.
+	* monitor.c (monitor_insert_breakpoint, monitor_remove_breakpoint):
+	Add target_ops parameter.
+	* nto-procfs.c (procfs_insert_breakpoint, procfs_remove_breakpoint):
+	Add target_ops parameter.
+	* record-full.c (record_full_beneath_to_insert_breakpoint)
+	(record_full_beneath_to_remove_breakpoint, tmp_to_insert_breakpoint)
+	(tmp_to_remove_breakpoint, record_full_insert_breakpoint)
+	(record_full_remove_breakpoint, record_full_core_insert_breakpoint)
+	(record_full_core_remove_breakpoint): Add target_ops parameter.
+	Update users.
+	(record_full_beneath_to_insert_breakpoint_ops)
+	(record_full_beneath_to_remove_breakpoint_ops)
+	(tmp_to_insert_breakpoint_ops, tmp_to_remove_breakpoint_ops): New.
+	(record_full_open): Initialize tmp_to_insert_breakpoint_ops,
+	tmp_to_remove_breakpoint_ops,
+	record_full_beneath_to_insert_breakpoint_ops, and
+	record_full_beneath_to_remove_breakpoint_ops.
+	* remote-m32r-sdi.c (m32r_insert_breakpoint)
+	(m32r_remove_breakpoint): Add target_ops parameter.
+	* remote-mips.c (mips_insert_breakpoint, mips_remove_breakpoint):
+	Add target_ops parameter.
+	* remote.c (remote_insert_breakpoint, remote_remove_breakpoint):
+	Add target_ops parameter.
+
+2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+            Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c: Include frame-unwind.h.
+	(record_btrace_frame_unwind_stop_reason)
+	(record_btrace_frame_this_id, record_btrace_frame_prev_register)
+	(record_btrace_frame_sniffer, record_btrace_frame_unwind):
+	New.
+	(init_record_btrace_ops): Install it.
+
+2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* frame.c (get_frame_unwind_stop_reason): Unconditionally call
+	get_prev_frame_1.
+
+2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2-frame.c (dwarf2_frame_cfa): Move UNWIND_UNAVAILABLE check
+	earlier.
+
+2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* frame-unwind.c: Include target.h.
+	(frame_unwind_try_unwinder): New function with code from ...
+	(frame_unwind_find_by_frame): ... here.  New variable
+	unwinder_from_target, call also target_get_unwinder)
+	(target_get_tailcall_unwinder, and frame_unwind_try_unwinder for it.
+	* target.c (target_get_unwinder, target_get_tailcall_unwinder): New.
+	* target.h (struct target_ops): New fields to_get_unwinder and
+	to_get_tailcall_unwinder.
+	(target_get_unwinder, target_get_tailcall_unwinder): New declarations.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_fetch_registers)
+	(record_btrace_store_registers)
+	(record_btrace_to_prepare_to_store): New.
+	(init_record_btrace_ops): Add the above.
+
+2014-01-16  Tom Tromey  <tromey@redhat.com>
+
+	* windows-nat.c (windows_prepare_to_store): Add 'self' argument.
+	* target.h (struct target_ops) <to_prepare_to_store>: Add
+	argument.
+	(target_prepare_to_store): Add argument.
+	* target.c (debug_to_prepare_to_store): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_prepare_to_store): Add 'self' argument.
+	* remote-sim.c (gdbsim_prepare_to_store): Add 'self' argument.
+	* remote-mips.c (mips_prepare_to_store): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_prepare_to_store): Add 'self' argument.
+	* record-full.c (record_full_core_prepare_to_store): Add 'self'
+	argument.
+	* ravenscar-thread.c (ravenscar_prepare_to_store): Add argument.
+	* nto-procfs.c (procfs_prepare_to_store): Add 'self' argument.
+	* monitor.c (monitor_prepare_to_store): Add 'self' argument.
+	* inf-child.c (inf_child_prepare_to_store): Add 'self' argument.
+	* go32-nat.c (go32_prepare_to_store): Add 'self' argument.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.h (replay) <replay>: New.
+	(btrace_is_replaying): New.
+	* btrace.c (btrace_clear): Free replay iterator.
+	(btrace_is_replaying): New.
+	* record-btrace.c (record_btrace_is_replaying): New.
+	(record_btrace_info): Print insn number if replaying.
+	(record_btrace_insn_history): Start at replay position.
+	(record_btrace_call_history): Start at replay position.
+	(init_record_btrace_ops): Init to_record_is_replaying.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_insn_history_range): Include
+	end.
+	(record_btrace_insn_history_from): Adjust range.
+	(record_btrace_call_history_range): Include
+	end.
+	(record_btrace_call_history_from): Adjust range.
+	* NEWS: Announce changes.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record.h (enum record_print_flag)
+	<record_print_indent_calls>: New.
+	* record.c (get_call_history_modifiers): Recognize /c modifier.
+	(_initialize_record): Document /c modifier.
+	* record-btrace.c (btrace_call_history): Add btinfo parameter.
+	Reorder fields.  Optionally indent the function name.  Update
+	all users.
+	* NEWS: Announce changes.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* common/linux-btrace.c (linux_enable_btrace): Enlarge buffer.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (ftrace_new_function): Start counting at one.
+	* record-btrace.c (record_btrace_info): Adjust number of calls
+	and insns.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (btrace_call_history_insn_range): Print
+	insn range as [begin, end].
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.h (struct btrace_func_link): New.
+	(enum btrace_function_flag): New.
+	(struct btrace_inst): Rename to ...
+	(struct btrace_insn): ...this. Update all users.
+	(struct btrace_func) <ibegin, iend>: Remove.
+	(struct btrace_func_link): New.
+	(struct btrace_func): Rename to ...
+	(struct btrace_function): ...this. Update all users.
+	(struct btrace_function) <segment, flow, up, insn, insn_offset)
+	(number, level, flags>: New.
+	(struct btrace_insn_iterator): Rename to ...
+	(struct btrace_insn_history): ...this.
+	Update all users.
+	(struct btrace_insn_iterator, btrace_call_iterator): New.
+	(struct btrace_target_info) <btrace, itrace, ftrace>: Remove.
+	(struct btrace_target_info) <begin, end, level>
+	<insn_history, call_history>: New.
+	(btrace_insn_get, btrace_insn_number, btrace_insn_begin)
+	(btrace_insn_end, btrace_insn_prev, btrace_insn_next)
+	(btrace_insn_cmp, btrace_find_insn_by_number, btrace_call_get)
+	(btrace_call_number, btrace_call_begin, btrace_call_end)
+	(btrace_call_prev, btrace_call_next, btrace_call_cmp)
+	(btrace_find_function_by_number, btrace_set_insn_history)
+	(btrace_set_call_history): New.
+	* btrace.c (btrace_init_insn_iterator)
+	(btrace_init_func_iterator, compute_itrace): Remove.
+	(ftrace_print_function_name, ftrace_print_filename)
+	(ftrace_skip_file): Change
+	parameter to const.
+	(ftrace_init_func): Remove.
+	(ftrace_debug): Use new btrace_function fields.
+	(ftrace_function_switched): Also consider gaining and
+	losing symbol information).
+	(ftrace_print_insn_addr, ftrace_new_call, ftrace_new_return)
+	(ftrace_new_switch, ftrace_find_caller, ftrace_new_function)
+	(ftrace_update_caller, ftrace_fixup_caller, ftrace_new_tailcall):
+	New.
+	(ftrace_new_function): Move. Remove debug print.
+	(ftrace_update_lines, ftrace_update_insns): New.
+	(ftrace_update_function): Check for call, ret, and jump.
+	(compute_ftrace): Renamed to ...
+	(btrace_compute_ftrace): ...this. Rewritten to compute call
+	stack.
+	(btrace_fetch, btrace_clear): Updated.
+	(btrace_insn_get, btrace_insn_number, btrace_insn_begin)
+	(btrace_insn_end, btrace_insn_prev, btrace_insn_next)
+	(btrace_insn_cmp, btrace_find_insn_by_number, btrace_call_get)
+	(btrace_call_number, btrace_call_begin, btrace_call_end)
+	(btrace_call_prev, btrace_call_next, btrace_call_cmp)
+	(btrace_find_function_by_number, btrace_set_insn_history)
+	(btrace_set_call_history): New.
+	* record-btrace.c (require_btrace): Use new btrace thread
+	info fields.
+	(record_btrace_info, btrace_insn_history)
+	(record_btrace_insn_history, record_btrace_insn_history_range):
+	Use new btrace thread info fields and new iterator.
+	(btrace_func_history_src_line): Rename to ...
+	(btrace_call_history_src_line): ...this. Use new btrace
+	thread info fields.
+	(btrace_func_history): Rename to ...
+	(btrace_call_history): ...this. Use new btrace thread info
+	fields and new iterator.
+	(record_btrace_call_history, record_btrace_call_history_range):
+	Use new btrace thread info fields and new iterator.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* frame.h (frame_id_build_unavailable_stack_special): New.
+	* frame.c (frame_id_build_unavailable_stack_special): New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* amd64-tdep.c (amd64_classify_insn_at, amd64_insn_is_call)
+	(amd64_insn_is_ret, amd64_insn_is_jump, amd64_jmp_p): New.
+	(amd64_init_abi): Add insn_is_call, insn_is_ret, and insn_is_jump
+	to gdbarch.
+	* i386-tdep.c (i386_insn_is_call, i386_insn_is_ret)
+	(i386_insn_is_jump, i386_jmp_p): New.
+	(i386_gdbarch_init): Add insn_is_call, insn_is_ret, and
+	insn_is_jump to gdbarch.
+	* gdbarch.sh (insn_is_call, insn_is_ret, insn_is_jump): New.
+	* gdbarch.h: Regenerated.
+	* gdbarch.c: Regenerated.
+	* arch-utils.h (default_insn_is_call, default_insn_is_ret)
+	(default_insn_is_jump): New.
+	* arch-utils.c (default_insn_is_call, default_insn_is_ret)
+	(default_insn_is_jump): New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* common/btrace-common.h (btrace_read_type) <btrace_read_all>:
+	Change to ...
+	(btrace_read_type) <BTRACE_READ_ALL>: ... this.  Update users.
+	(btrace_read_type) <btrace_read_new>: Change to ...
+	(btrace_read_type) <BTRACE_READ_NEW>: ... this.  Update users.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* common/linux-btrace.c (linux_read_btrace): Free trace from
+	previous iteration.
+
+2014-01-15  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (open_and_init_dwp_file): Use pulongest to print
+	uint32_t.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
+	* dbxread.c (process_one_symbol): Use set_objfile_main_name.
+	* dwarf2read.c (read_partial_die): Use set_objfile_main_name.
+	* objfiles.c (get_objfile_bfd_data): Initialize language_of_main.
+	(set_objfile_main_name): New function.
+	* objfiles.h (struct objfile_per_bfd_storage) <name_of_main,
+	language_of_main>: New fields.
+	(set_objfile_main_name): Declare.
+	* symtab.c (find_main_name): Loop over objfiles to find the main
+	name and language.
+	(set_main_name): Now static.
+	(get_main_info): Add comment.
+	* symtab.h (set_main_name): Don't declare.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (main_progspace_key): New global.
+	(struct main_info): New.
+	(name_of_main, language_of_main): Remove.
+	(get_main_info, main_info_cleanup): New function.
+	(set_main_name, main_name, main_language): Use get_main_info.
+	(_initialize_symtab): Initialize main_progspace_key.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
+	* dbxread.c (process_one_symbol): Update.
+	* dwarf2read.c (read_partial_die): Update.
+	* symfile.c (set_initial_language): Call main_language.
+	* symtab.c (language_of_main): Now static.
+	(set_main_name): Add 'lang' parameter.
+	(find_main_name): Update.
+	(main_language): New function.
+	(symtab_observer_executable_changed): Update.
+	* symtab.h (set_main_name): Update.
+	(language_of_main): Remove.
+	(main_language): Declare.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (init_entry_point_info): Use new "initialized" field.
+	Update.
+	* objfiles.h (struct entry_point) <initialized>: New field.
+	(struct objfile_per_bfd_storage) <ei>: New field, moved from...
+	(struct objfile) <ei>: ...here.  Remove.
+	* objfiles.c (entry_point_address_query): Update.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
+	* objfiles.c (entry_point_address_query): Relocate entry point
+	address.
+	(objfile_relocate1): Do not relocate entry point address.
+	* objfiles.h (struct entry_info) <entry_point>: Update comment.
+	<the_bfd_section_index>: New field.
+	* symfile.c (init_entry_point_info): Find the entry point's
+	section.
+
+2014-01-15  Tom Tromey  <tromey@redhat.com>
+
+	* solib-frv.c (enable_break): Use entry_point_address_query.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* NEWS: Add note on improved process record-replay on
+	arm*-linux* targets.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (enum arm_record_result): New enum.
+	(arm_record_unsupported_insn): New function.
+	(arm_record_coproc_data_proc): Removed.
+	(thumb2_record_ld_st_multiple): New function.
+	(thumb2_record_ld_st_dual_ex_tbb): New function.
+	(thumb2_record_data_proc_sreg_mimm): New function.
+	(thumb2_record_ps_dest_generic): New function.
+	(thumb2_record_branch_misc_cntrl): New function.
+	(thumb2_record_str_single_data): New function.
+	(thumb2_record_ld_mem_hints): New function.
+	(thumb2_record_ld_word): New function.
+	(thumb2_record_lmul_lmla_div): New function.
+	(thumb2_record_decode_insn_handler): New function.
+	(decode_insn): Add thumb32 instruction handlers.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-linux-tdep.c: Include "record-full.h" and "linux-record.h".
+	(struct arm_linux_record_tdep): Declare.
+	(arm_canonicalize_syscall): New function.
+	(arm_all_but_pc_registers_record): New function.
+	(arm_linux_syscall_record): New function.
+	(arm_linux_init_abi): Add syscall recording constructs.
+	* arm-tdep.c (thumb_record_ldm_stm_swi): Update thumb syscall
+	decoding.  (arm_record_coproc_data_proc): Update arm syscall
+	decoding.
+	* arm-tdep.h (struct gdbarch_tdep) <arm_swi_record>: Remove.
+	<arm_syscall_record>: New field.
+	* configure.tgt (arm*-*-linux*): Add linux-record.o to
+	gdb_target_obs.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (thumb_record_misc): Update to use sp as base
+	register for push instruction recording.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (thumb_record_misc): Update to correct logical
+	error while recording ldm, ldmia and pop instructions.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (struct arm_mem_r) <addr>: Change type to uint32_t.
+
+2014-01-15  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c (go32_open, go32_close, go32_attach, go32_detach)
+	(go32_resume, go32_fetch_registers, store_register)
+	(go32_store_registers, go32_prepare_to_store)
+	(go32_xfer_memory, go32_files_info, go32_kill_inferior)
+	(go32_create_inferior, go32_can_run, go32_terminal_init)
+	(go32_terminal_inferior, go32_terminal_ours): Delete forward
+	declarations.
+
 2014-01-15  Tom Tromey  <tromey@redhat.com>
 
 	* target.h (async_callback_ftype): New typedef.

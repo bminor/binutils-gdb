@@ -100,7 +100,8 @@ inf_child_post_attach (int pid)
    program being debugged.  */
 
 static void
-inf_child_prepare_to_store (struct regcache *regcache)
+inf_child_prepare_to_store (struct target_ops *self,
+			    struct regcache *regcache)
 {
 }
 

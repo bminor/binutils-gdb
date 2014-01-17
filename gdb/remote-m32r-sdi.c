@@ -1012,7 +1012,7 @@ m32r_store_register (struct target_ops *ops,
    debugged.  */
 
 static void
-m32r_prepare_to_store (struct regcache *regcache)
+m32r_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs.  */
   if (remote_debug)
@@ -1144,7 +1144,8 @@ m32r_mourn_inferior (struct target_ops *ops)
 }
 
 static int
-m32r_insert_breakpoint (struct gdbarch *gdbarch,
+m32r_insert_breakpoint (struct target_ops *ops,
+			struct gdbarch *gdbarch,
 			struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
@@ -1188,7 +1189,8 @@ m32r_insert_breakpoint (struct gdbarch *gdbarch,
 }
 
 static int
-m32r_remove_breakpoint (struct gdbarch *gdbarch,
+m32r_remove_breakpoint (struct target_ops *ops,
+			struct gdbarch *gdbarch,
 			struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;

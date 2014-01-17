@@ -1348,7 +1348,7 @@ handle_qxfer_btrace (const char *annex,
 {
   static struct buffer cache;
   struct thread_info *thread;
-  int type;
+  int type, result;
 
   if (the_target->read_btrace == NULL || writebuf != NULL)
     return -2;
@@ -1377,9 +1377,11 @@ handle_qxfer_btrace (const char *annex,
     }
 
   if (strcmp (annex, "all") == 0)
-    type = btrace_read_all;
+    type = BTRACE_READ_ALL;
   else if (strcmp (annex, "new") == 0)
-    type = btrace_read_new;
+    type = BTRACE_READ_NEW;
+  else if (strcmp (annex, "delta") == 0)
+    type = BTRACE_READ_DELTA;
   else
     {
       strcpy (own_buf, "E.Bad annex.");
@@ -1390,7 +1392,12 @@ handle_qxfer_btrace (const char *annex,
     {
       buffer_free (&cache);
 
-      target_read_btrace (thread->btrace, &cache, type);
+      result = target_read_btrace (thread->btrace, &cache, type);
+      if (result != 0)
+	{
+	  memcpy (own_buf, cache.buffer, cache.used_size);
+	  return -3;
+	}
     }
   else if (offset > cache.used_size)
     {

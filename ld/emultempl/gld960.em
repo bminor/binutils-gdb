@@ -74,7 +74,7 @@ static char *
 gld960_get_script (int *isfile)
 EOF
 
-if test -n "$COMPILE_IN"
+if test x"$COMPILE_IN" = xyes
 then
 # Scripts compiled in.
 

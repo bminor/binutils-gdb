@@ -27,6 +27,7 @@
 #include "exceptions.h"
 #include "gdb_assert.h"
 #include "gdb_obstack.h"
+#include "target.h"
 
 static struct gdbarch_data *frame_unwind_data;
 
@@ -88,6 +89,48 @@ frame_unwind_append_unwinder (struct gdbarch *gdbarch,
   (*ip)->unwinder = unwinder;
 }
 
+/* Call SNIFFER from UNWINDER.  If it succeeded set UNWINDER for
+   THIS_FRAME and return 1.  Otherwise the function keeps THIS_FRAME
+   unchanged and returns 0.  */
+
+static int
+frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
+                          const struct frame_unwind *unwinder)
+{
+  struct cleanup *old_cleanup;
+  volatile struct gdb_exception ex;
+  int res = 0;
+
+  old_cleanup = frame_prepare_for_sniffer (this_frame, unwinder);
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      res = unwinder->sniffer (unwinder, this_frame, this_cache);
+    }
+  if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
+    {
+      /* This usually means that not even the PC is available,
+        thus most unwinders aren't able to determine if they're
+        the best fit.  Keep trying.  Fallback prologue unwinders
+        should always accept the frame.  */
+      do_cleanups (old_cleanup);
+      return 0;
+    }
+  else if (ex.reason < 0)
+    throw_exception (ex);
+  else if (res)
+    {
+      discard_cleanups (old_cleanup);
+      return 1;
+    }
+  else
+    {
+      do_cleanups (old_cleanup);
+      return 0;
+    }
+  gdb_assert_not_reached ("frame_unwind_try_unwinder");
+}
+
 /* Iterate through sniffers for THIS_FRAME frame until one returns with an
    unwinder implementation.  THIS_FRAME->UNWIND must be NULL, it will get set
    by this function.  Possibly initialize THIS_CACHE.  */
@@ -98,37 +141,24 @@ frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
   struct frame_unwind_table_entry *entry;
+  const struct frame_unwind *unwinder_from_target;
+
+  unwinder_from_target = target_get_unwinder ();
+  if (unwinder_from_target != NULL
+      && frame_unwind_try_unwinder (this_frame, this_cache,
+                                   unwinder_from_target))
+    return;
+
+  unwinder_from_target = target_get_tailcall_unwinder ();
+  if (unwinder_from_target != NULL
+      && frame_unwind_try_unwinder (this_frame, this_cache,
+                                   unwinder_from_target))
+    return;
 
   for (entry = table->list; entry != NULL; entry = entry->next)
-    {
-      struct cleanup *old_cleanup;
-      volatile struct gdb_exception ex;
-      int res = 0;
+    if (frame_unwind_try_unwinder (this_frame, this_cache, entry->unwinder))
+      return;
 
-      old_cleanup = frame_prepare_for_sniffer (this_frame, entry->unwinder);
-
-      TRY_CATCH (ex, RETURN_MASK_ERROR)
-	{
-	  res = entry->unwinder->sniffer (entry->unwinder, this_frame,
-					  this_cache);
-	}
-      if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
-	{
-	  /* This usually means that not even the PC is available,
-	     thus most unwinders aren't able to determine if they're
-	     the best fit.  Keep trying.  Fallback prologue unwinders
-	     should always accept the frame.  */
-	}
-      else if (ex.reason < 0)
-	throw_exception (ex);
-      else if (res)
-        {
-          discard_cleanups (old_cleanup);
-          return;
-        }
-
-      do_cleanups (old_cleanup);
-    }
   internal_error (__FILE__, __LINE__, _("frame_unwind_find_by_frame failed"));
 }
 

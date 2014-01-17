@@ -77,14 +77,14 @@ default_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
 
 int
-memory_insert_breakpoint (struct gdbarch *gdbarch,
+memory_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   return gdbarch_memory_insert_breakpoint (gdbarch, bp_tgt);
 }
 
 int
-memory_remove_breakpoint (struct gdbarch *gdbarch,
+memory_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   return gdbarch_memory_remove_breakpoint (gdbarch, bp_tgt);

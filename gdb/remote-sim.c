@@ -81,7 +81,8 @@ static void gdbsim_close (void);
 static void gdbsim_detach (struct target_ops *ops, const char *args,
 			   int from_tty);
 
-static void gdbsim_prepare_to_store (struct regcache *regcache);
+static void gdbsim_prepare_to_store (struct target_ops *self,
+				     struct regcache *regcache);
 
 static void gdbsim_files_info (struct target_ops *target);
 
@@ -1052,7 +1053,7 @@ gdbsim_wait (struct target_ops *ops,
    debugged.  */
 
 static void
-gdbsim_prepare_to_store (struct regcache *regcache)
+gdbsim_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs.  */
 }

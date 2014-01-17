@@ -5705,7 +5705,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 
 #ifdef HAVE_LINUX_BTRACE
 
-/* Enable branch tracing.  */
+/* See to_enable_btrace target method.  */
 
 static struct btrace_target_info *
 linux_low_enable_btrace (ptid_t ptid)
@@ -5725,17 +5725,39 @@ linux_low_enable_btrace (ptid_t ptid)
   return tinfo;
 }
 
-/* Read branch trace data as btrace xml document.  */
+/* See to_disable_btrace target method.  */
 
-static void
+static int
+linux_low_disable_btrace (struct btrace_target_info *tinfo)
+{
+  enum btrace_error err;
+
+  err = linux_disable_btrace (tinfo);
+  return (err == BTRACE_ERR_NONE ? 0 : -1);
+}
+
+/* See to_read_btrace target method.  */
+
+static int
 linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
 		       int type)
 {
   VEC (btrace_block_s) *btrace;
   struct btrace_block *block;
+  enum btrace_error err;
   int i;
 
-  btrace = linux_read_btrace (tinfo, type);
+  btrace = NULL;
+  err = linux_read_btrace (&btrace, tinfo, type);
+  if (err != BTRACE_ERR_NONE)
+    {
+      if (err == BTRACE_ERR_OVERFLOW)
+	buffer_grow_str0 (buffer, "E.Overflow.");
+      else
+	buffer_grow_str0 (buffer, "E.Generic Error.");
+
+      return -1;
+    }
 
   buffer_grow_str (buffer, "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n");
   buffer_grow_str (buffer, "<btrace version=\"1.0\">\n");
@@ -5744,9 +5766,11 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
     buffer_xml_printf (buffer, "<block begin=\"0x%s\" end=\"0x%s\"/>\n",
 		       paddress (block->begin), paddress (block->end));
 
-  buffer_grow_str (buffer, "</btrace>\n");
+  buffer_grow_str0 (buffer, "</btrace>\n");
 
   VEC_free (btrace_block_s, btrace);
+
+  return 0;
 }
 #endif /* HAVE_LINUX_BTRACE */
 
@@ -5819,7 +5843,7 @@ static struct target_ops linux_target_ops = {
 #ifdef HAVE_LINUX_BTRACE
   linux_supports_btrace,
   linux_low_enable_btrace,
-  linux_disable_btrace,
+  linux_low_disable_btrace,
   linux_low_read_btrace,
 #else
   NULL,

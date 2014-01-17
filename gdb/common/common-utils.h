@@ -25,6 +25,19 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+/* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
+   which contains the name of the function currently being defined.
+   This is broken in G++ before version 2.6.
+   C9x has a similar variable called __func__, but prefer the GCC one since
+   it demangles C++ function names.  */
+#if (GCC_VERSION >= 2004)
+#define FUNCTION_NAME		__PRETTY_FUNCTION__
+#else
+#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#define FUNCTION_NAME		__func__
+#endif
+#endif
+
 extern void malloc_failure (long size) ATTRIBUTE_NORETURN;
 extern void internal_error (const char *file, int line, const char *, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 4);

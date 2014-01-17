@@ -1427,7 +1427,7 @@ monitor_store_registers (struct target_ops *ops,
    debugged.  */
 
 static void
-monitor_prepare_to_store (struct regcache *regcache)
+monitor_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs.  */
 }
@@ -2095,7 +2095,7 @@ monitor_mourn_inferior (struct target_ops *ops)
 /* Tell the monitor to add a breakpoint.  */
 
 static int
-monitor_insert_breakpoint (struct gdbarch *gdbarch,
+monitor_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
@@ -2132,7 +2132,7 @@ monitor_insert_breakpoint (struct gdbarch *gdbarch,
 /* Tell the monitor to remove a breakpoint.  */
 
 static int
-monitor_remove_breakpoint (struct gdbarch *gdbarch,
+monitor_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;

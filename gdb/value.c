@@ -216,6 +216,9 @@ struct value
   /* If the value has been released.  */
   unsigned int released : 1;
 
+  /* Register number if the value is from a register.  */
+  short regnum;
+
   /* Location of value (if lval).  */
   union
   {
@@ -323,9 +326,6 @@ struct value
      variables, put into the value history or exposed to Python are
      taken off this list.  */
   struct value *next;
-
-  /* Register number if the value is from a register.  */
-  short regnum;
 
   /* Actual contents of the value.  Target byte-order.  NULL or not
      valid if lazy is nonzero.  */

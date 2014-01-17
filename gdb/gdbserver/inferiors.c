@@ -106,21 +106,6 @@ add_thread (ptid_t thread_id, void *target_data)
 }
 
 ptid_t
-thread_id_to_gdb_id (ptid_t thread_id)
-{
-  struct inferior_list_entry *inf = all_threads.head;
-
-  while (inf != NULL)
-    {
-      if (ptid_equal (inf->id, thread_id))
-	return thread_id;
-      inf = inf->next;
-    }
-
-  return null_ptid;
-}
-
-ptid_t
 thread_to_gdb_id (struct thread_info *thread)
 {
   return thread->entry.id;

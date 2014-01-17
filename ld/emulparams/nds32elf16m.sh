@@ -14,6 +14,5 @@ MAXPAGESIZE=0x20
 EMBEDDED=yes
 COMMONPAGESIZE=0x20
 
-# Instruct genscripts.sh not to compile scripts in by COMPILE_IN
-# in order to use external linker scripts files.
-EMULATION_LIBPATH=
+# Use external linker script files.
+COMPILE_IN=no

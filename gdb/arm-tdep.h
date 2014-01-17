@@ -205,8 +205,8 @@ struct gdbarch_tdep
      instruction.  */
   CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
 
-   /* Parse swi insn args, sycall record.  */
-  int (*arm_swi_record) (struct regcache *regcache);
+   /* syscall record.  */
+  int (*arm_syscall_record) (struct regcache *regcache, unsigned long svc_number);
 };
 
 /* Structures used for displaced stepping.  */

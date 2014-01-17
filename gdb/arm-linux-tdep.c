@@ -44,6 +44,9 @@
 #include "gdbthread.h"
 #include "symfile.h"
 
+#include "record-full.h"
+#include "linux-record.h"
+
 #include "cli/cli-utils.h"
 #include "stap-probe.h"
 #include "parser-defs.h"
@@ -1234,6 +1237,92 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
   return 1;
 }
 
+/* ARM process record-replay constructs: syscall, signal etc.  */
+
+struct linux_record_tdep arm_linux_record_tdep;
+
+/* arm_canonicalize_syscall maps from the native arm Linux set
+   of syscall ids into a canonical set of syscall ids used by
+   process record.  */
+
+static enum gdb_syscall
+arm_canonicalize_syscall (int syscall)
+{
+  enum { sys_process_vm_writev = 377 };
+
+  if (syscall <= gdb_sys_sched_getaffinity)
+    return syscall;
+  else if (syscall >= 243 && syscall <= 247)
+    return syscall + 2;
+  else if (syscall >= 248 && syscall <= 253)
+    return syscall + 4;
+
+  return -1;
+}
+
+/* Record all registers but PC register for process-record.  */
+
+static int
+arm_all_but_pc_registers_record (struct regcache *regcache)
+{
+  int i;
+
+  for (i = 0; i < ARM_PC_REGNUM; i++)
+    {
+      if (record_full_arch_list_add_reg (regcache, ARM_A1_REGNUM + i))
+        return -1;
+    }
+
+  if (record_full_arch_list_add_reg (regcache, ARM_PS_REGNUM))
+    return -1;
+
+  return 0;
+}
+
+/* Handler for arm system call instruction recording.  */
+
+static int
+arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
+{
+  int ret = 0;
+  enum gdb_syscall syscall_gdb;
+
+  syscall_gdb = arm_canonicalize_syscall (svc_number);
+
+  if (syscall_gdb < 0)
+    {
+      printf_unfiltered (_("Process record and replay target doesn't "
+                           "support syscall number %s\n"),
+                           plongest (svc_number));
+      return -1;
+    }
+
+  if (syscall_gdb == gdb_sys_sigreturn
+      || syscall_gdb == gdb_sys_rt_sigreturn)
+   {
+     if (arm_all_but_pc_registers_record (regcache))
+       return -1;
+     return 0;
+   }
+
+  ret = record_linux_system_call (syscall_gdb, regcache,
+                                  &arm_linux_record_tdep);
+  if (ret != 0)
+    return ret;
+
+  /* Record the return value of the system call.  */
+  if (record_full_arch_list_add_reg (regcache, ARM_A1_REGNUM))
+    return -1;
+  /* Record LR.  */
+  if (record_full_arch_list_add_reg (regcache, ARM_LR_REGNUM))
+    return -1;
+  /* Record CPSR.  */
+  if (record_full_arch_list_add_reg (regcache, ARM_PS_REGNUM))
+    return -1;
+
+  return 0;
+}
+
 static void
 arm_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
@@ -1361,7 +1450,164 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_get_syscall_number (gdbarch, arm_linux_get_syscall_number);
 
   /* Syscall record.  */
-  tdep->arm_swi_record = NULL;
+  tdep->arm_syscall_record = arm_linux_syscall_record;
+
+  /* Initialize the arm_linux_record_tdep.  */
+  /* These values are the size of the type that will be used in a system
+     call.  They are obtained from Linux Kernel source.  */
+  arm_linux_record_tdep.size_pointer
+    = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+  arm_linux_record_tdep.size__old_kernel_stat = 32;
+  arm_linux_record_tdep.size_tms = 16;
+  arm_linux_record_tdep.size_loff_t = 8;
+  arm_linux_record_tdep.size_flock = 16;
+  arm_linux_record_tdep.size_oldold_utsname = 45;
+  arm_linux_record_tdep.size_ustat = 20;
+  arm_linux_record_tdep.size_old_sigaction = 140;
+  arm_linux_record_tdep.size_old_sigset_t = 128;
+  arm_linux_record_tdep.size_rlimit = 8;
+  arm_linux_record_tdep.size_rusage = 72;
+  arm_linux_record_tdep.size_timeval = 8;
+  arm_linux_record_tdep.size_timezone = 8;
+  arm_linux_record_tdep.size_old_gid_t = 2;
+  arm_linux_record_tdep.size_old_uid_t = 2;
+  arm_linux_record_tdep.size_fd_set = 128;
+  arm_linux_record_tdep.size_dirent = 268;
+  arm_linux_record_tdep.size_dirent64 = 276;
+  arm_linux_record_tdep.size_statfs = 64;
+  arm_linux_record_tdep.size_statfs64 = 84;
+  arm_linux_record_tdep.size_sockaddr = 16;
+  arm_linux_record_tdep.size_int
+    = gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT;
+  arm_linux_record_tdep.size_long
+    = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
+  arm_linux_record_tdep.size_ulong
+    = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
+  arm_linux_record_tdep.size_msghdr = 28;
+  arm_linux_record_tdep.size_itimerval = 16;
+  arm_linux_record_tdep.size_stat = 88;
+  arm_linux_record_tdep.size_old_utsname = 325;
+  arm_linux_record_tdep.size_sysinfo = 64;
+  arm_linux_record_tdep.size_msqid_ds = 88;
+  arm_linux_record_tdep.size_shmid_ds = 84;
+  arm_linux_record_tdep.size_new_utsname = 390;
+  arm_linux_record_tdep.size_timex = 128;
+  arm_linux_record_tdep.size_mem_dqinfo = 24;
+  arm_linux_record_tdep.size_if_dqblk = 68;
+  arm_linux_record_tdep.size_fs_quota_stat = 68;
+  arm_linux_record_tdep.size_timespec = 8;
+  arm_linux_record_tdep.size_pollfd = 8;
+  arm_linux_record_tdep.size_NFS_FHSIZE = 32;
+  arm_linux_record_tdep.size_knfsd_fh = 132;
+  arm_linux_record_tdep.size_TASK_COMM_LEN = 16;
+  arm_linux_record_tdep.size_sigaction = 140;
+  arm_linux_record_tdep.size_sigset_t = 8;
+  arm_linux_record_tdep.size_siginfo_t = 128;
+  arm_linux_record_tdep.size_cap_user_data_t = 12;
+  arm_linux_record_tdep.size_stack_t = 12;
+  arm_linux_record_tdep.size_off_t = arm_linux_record_tdep.size_long;
+  arm_linux_record_tdep.size_stat64 = 96;
+  arm_linux_record_tdep.size_gid_t = 2;
+  arm_linux_record_tdep.size_uid_t = 2;
+  arm_linux_record_tdep.size_PAGE_SIZE = 4096;
+  arm_linux_record_tdep.size_flock64 = 24;
+  arm_linux_record_tdep.size_user_desc = 16;
+  arm_linux_record_tdep.size_io_event = 32;
+  arm_linux_record_tdep.size_iocb = 64;
+  arm_linux_record_tdep.size_epoll_event = 12;
+  arm_linux_record_tdep.size_itimerspec
+    = arm_linux_record_tdep.size_timespec * 2;
+  arm_linux_record_tdep.size_mq_attr = 32;
+  arm_linux_record_tdep.size_siginfo = 128;
+  arm_linux_record_tdep.size_termios = 36;
+  arm_linux_record_tdep.size_termios2 = 44;
+  arm_linux_record_tdep.size_pid_t = 4;
+  arm_linux_record_tdep.size_winsize = 8;
+  arm_linux_record_tdep.size_serial_struct = 60;
+  arm_linux_record_tdep.size_serial_icounter_struct = 80;
+  arm_linux_record_tdep.size_hayes_esp_config = 12;
+  arm_linux_record_tdep.size_size_t = 4;
+  arm_linux_record_tdep.size_iovec = 8;
+
+  /* These values are the second argument of system call "sys_ioctl".
+     They are obtained from Linux Kernel source.  */
+  arm_linux_record_tdep.ioctl_TCGETS = 0x5401;
+  arm_linux_record_tdep.ioctl_TCSETS = 0x5402;
+  arm_linux_record_tdep.ioctl_TCSETSW = 0x5403;
+  arm_linux_record_tdep.ioctl_TCSETSF = 0x5404;
+  arm_linux_record_tdep.ioctl_TCGETA = 0x5405;
+  arm_linux_record_tdep.ioctl_TCSETA = 0x5406;
+  arm_linux_record_tdep.ioctl_TCSETAW = 0x5407;
+  arm_linux_record_tdep.ioctl_TCSETAF = 0x5408;
+  arm_linux_record_tdep.ioctl_TCSBRK = 0x5409;
+  arm_linux_record_tdep.ioctl_TCXONC = 0x540a;
+  arm_linux_record_tdep.ioctl_TCFLSH = 0x540b;
+  arm_linux_record_tdep.ioctl_TIOCEXCL = 0x540c;
+  arm_linux_record_tdep.ioctl_TIOCNXCL = 0x540d;
+  arm_linux_record_tdep.ioctl_TIOCSCTTY = 0x540e;
+  arm_linux_record_tdep.ioctl_TIOCGPGRP = 0x540f;
+  arm_linux_record_tdep.ioctl_TIOCSPGRP = 0x5410;
+  arm_linux_record_tdep.ioctl_TIOCOUTQ = 0x5411;
+  arm_linux_record_tdep.ioctl_TIOCSTI = 0x5412;
+  arm_linux_record_tdep.ioctl_TIOCGWINSZ = 0x5413;
+  arm_linux_record_tdep.ioctl_TIOCSWINSZ = 0x5414;
+  arm_linux_record_tdep.ioctl_TIOCMGET = 0x5415;
+  arm_linux_record_tdep.ioctl_TIOCMBIS = 0x5416;
+  arm_linux_record_tdep.ioctl_TIOCMBIC = 0x5417;
+  arm_linux_record_tdep.ioctl_TIOCMSET = 0x5418;
+  arm_linux_record_tdep.ioctl_TIOCGSOFTCAR = 0x5419;
+  arm_linux_record_tdep.ioctl_TIOCSSOFTCAR = 0x541a;
+  arm_linux_record_tdep.ioctl_FIONREAD = 0x541b;
+  arm_linux_record_tdep.ioctl_TIOCINQ = arm_linux_record_tdep.ioctl_FIONREAD;
+  arm_linux_record_tdep.ioctl_TIOCLINUX = 0x541c;
+  arm_linux_record_tdep.ioctl_TIOCCONS = 0x541d;
+  arm_linux_record_tdep.ioctl_TIOCGSERIAL = 0x541e;
+  arm_linux_record_tdep.ioctl_TIOCSSERIAL = 0x541f;
+  arm_linux_record_tdep.ioctl_TIOCPKT = 0x5420;
+  arm_linux_record_tdep.ioctl_FIONBIO = 0x5421;
+  arm_linux_record_tdep.ioctl_TIOCNOTTY = 0x5422;
+  arm_linux_record_tdep.ioctl_TIOCSETD = 0x5423;
+  arm_linux_record_tdep.ioctl_TIOCGETD = 0x5424;
+  arm_linux_record_tdep.ioctl_TCSBRKP = 0x5425;
+  arm_linux_record_tdep.ioctl_TIOCTTYGSTRUCT = 0x5426;
+  arm_linux_record_tdep.ioctl_TIOCSBRK = 0x5427;
+  arm_linux_record_tdep.ioctl_TIOCCBRK = 0x5428;
+  arm_linux_record_tdep.ioctl_TIOCGSID = 0x5429;
+  arm_linux_record_tdep.ioctl_TCGETS2 = 0x802c542a;
+  arm_linux_record_tdep.ioctl_TCSETS2 = 0x402c542b;
+  arm_linux_record_tdep.ioctl_TCSETSW2 = 0x402c542c;
+  arm_linux_record_tdep.ioctl_TCSETSF2 = 0x402c542d;
+  arm_linux_record_tdep.ioctl_TIOCGPTN = 0x80045430;
+  arm_linux_record_tdep.ioctl_TIOCSPTLCK = 0x40045431;
+  arm_linux_record_tdep.ioctl_FIONCLEX = 0x5450;
+  arm_linux_record_tdep.ioctl_FIOCLEX = 0x5451;
+  arm_linux_record_tdep.ioctl_FIOASYNC = 0x5452;
+  arm_linux_record_tdep.ioctl_TIOCSERCONFIG = 0x5453;
+  arm_linux_record_tdep.ioctl_TIOCSERGWILD = 0x5454;
+  arm_linux_record_tdep.ioctl_TIOCSERSWILD = 0x5455;
+  arm_linux_record_tdep.ioctl_TIOCGLCKTRMIOS = 0x5456;
+  arm_linux_record_tdep.ioctl_TIOCSLCKTRMIOS = 0x5457;
+  arm_linux_record_tdep.ioctl_TIOCSERGSTRUCT = 0x5458;
+  arm_linux_record_tdep.ioctl_TIOCSERGETLSR = 0x5459;
+  arm_linux_record_tdep.ioctl_TIOCSERGETMULTI = 0x545a;
+  arm_linux_record_tdep.ioctl_TIOCSERSETMULTI = 0x545b;
+  arm_linux_record_tdep.ioctl_TIOCMIWAIT = 0x545c;
+  arm_linux_record_tdep.ioctl_TIOCGICOUNT = 0x545d;
+  arm_linux_record_tdep.ioctl_TIOCGHAYESESP = 0x545e;
+  arm_linux_record_tdep.ioctl_TIOCSHAYESESP = 0x545f;
+  arm_linux_record_tdep.ioctl_FIOQSIZE = 0x5460;
+
+  /* These values are the second argument of system call "sys_fcntl"
+     and "sys_fcntl64".  They are obtained from Linux Kernel source.  */
+  arm_linux_record_tdep.fcntl_F_GETLK = 5;
+  arm_linux_record_tdep.fcntl_F_GETLK64 = 12;
+  arm_linux_record_tdep.fcntl_F_SETLK64 = 13;
+  arm_linux_record_tdep.fcntl_F_SETLKW64 = 14;
+
+  arm_linux_record_tdep.arg1 = ARM_A1_REGNUM + 1;
+  arm_linux_record_tdep.arg2 = ARM_A1_REGNUM + 2;
+  arm_linux_record_tdep.arg3 = ARM_A1_REGNUM + 3;
+  arm_linux_record_tdep.arg4 = ARM_A1_REGNUM + 3;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

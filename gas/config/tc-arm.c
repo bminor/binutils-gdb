@@ -14671,7 +14671,7 @@ do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour,
     {
     case neon_cvt_flavour_s32_f64:
       sz = 1;
-      op = 0;
+      op = 1;
       break;
     case neon_cvt_flavour_s32_f32:
       sz = 0;

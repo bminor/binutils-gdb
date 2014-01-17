@@ -804,6 +804,21 @@ default_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
   return language_pass_by_reference (type);
 }
 
+int default_insn_is_call (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return 0;
+}
+
+int default_insn_is_ret (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return 0;
+}
+
+int default_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return 0;
+}
+
 /* */
 
 /* -Wmissing-prototypes */

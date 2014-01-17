@@ -97,7 +97,8 @@ static void async_handle_remote_sigint_twice (int);
 
 static void remote_files_info (struct target_ops *ignore);
 
-static void remote_prepare_to_store (struct regcache *regcache);
+static void remote_prepare_to_store (struct target_ops *self,
+				     struct regcache *regcache);
 
 static void remote_open (char *name, int from_tty);
 
@@ -6466,7 +6467,7 @@ remote_fetch_registers (struct target_ops *ops,
    first.  */
 
 static void
-remote_prepare_to_store (struct regcache *regcache)
+remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
@@ -7872,7 +7873,7 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 static void
 remote_kill (struct target_ops *ops)
 {
-  struct gdb_exception ex;
+  volatile struct gdb_exception ex;
 
   /* Catch errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */
@@ -8130,8 +8131,9 @@ extended_remote_run (char *args)
    environment.  */
 
 static void
-extended_remote_create_inferior_1 (char *exec_file, char *args,
-				   char **env, int from_tty)
+extended_remote_create_inferior (struct target_ops *ops,
+				 char *exec_file, char *args,
+				 char **env, int from_tty)
 {
   int run_worked;
   char *stop_reply;
@@ -8176,14 +8178,6 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
 
   /* Get updated offsets, if the stub uses qOffsets.  */
   get_offsets ();
-}
-
-static void
-extended_remote_create_inferior (struct target_ops *ops, 
-				 char *exec_file, char *args,
-				 char **env, int from_tty)
-{
-  extended_remote_create_inferior_1 (exec_file, args, env, from_tty);
 }
 
 
@@ -8257,7 +8251,8 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
    which don't, we insert a traditional memory breakpoint.  */
 
 static int
-remote_insert_breakpoint (struct gdbarch *gdbarch,
+remote_insert_breakpoint (struct target_ops *ops,
+			  struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   /* Try the "Z" s/w breakpoint packet if it is not already disabled.
@@ -8319,11 +8314,12 @@ remote_insert_breakpoint (struct gdbarch *gdbarch,
     throw_error (NOT_SUPPORTED_ERROR, _("\
 Target doesn't support breakpoints that have target side commands."));
 
-  return memory_insert_breakpoint (gdbarch, bp_tgt);
+  return memory_insert_breakpoint (ops, gdbarch, bp_tgt);
 }
 
 static int
-remote_remove_breakpoint (struct gdbarch *gdbarch,
+remote_remove_breakpoint (struct target_ops *ops,
+			  struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
@@ -8353,7 +8349,7 @@ remote_remove_breakpoint (struct gdbarch *gdbarch,
       return (rs->buf[0] == 'E');
     }
 
-  return memory_remove_breakpoint (gdbarch, bp_tgt);
+  return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
 }
 
 static int
@@ -11486,13 +11482,14 @@ remote_teardown_btrace (struct btrace_target_info *tinfo)
 
 /* Read the branch trace.  */
 
-static VEC (btrace_block_s) *
-remote_read_btrace (struct btrace_target_info *tinfo,
+static enum btrace_error
+remote_read_btrace (VEC (btrace_block_s) **btrace,
+		    struct btrace_target_info *tinfo,
 		    enum btrace_read_type type)
 {
   struct packet_config *packet = &remote_protocol_packets[PACKET_qXfer_btrace];
   struct remote_state *rs = get_remote_state ();
-  VEC (btrace_block_s) *btrace = NULL;
+  struct cleanup *cleanup;
   const char *annex;
   char *xml;
 
@@ -11505,11 +11502,14 @@ remote_read_btrace (struct btrace_target_info *tinfo,
 
   switch (type)
     {
-    case btrace_read_all:
+    case BTRACE_READ_ALL:
       annex = "all";
       break;
-    case btrace_read_new:
+    case BTRACE_READ_NEW:
       annex = "new";
+      break;
+    case BTRACE_READ_DELTA:
+      annex = "delta";
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -11519,15 +11519,14 @@ remote_read_btrace (struct btrace_target_info *tinfo,
 
   xml = target_read_stralloc (&current_target,
                               TARGET_OBJECT_BTRACE, annex);
-  if (xml != NULL)
-    {
-      struct cleanup *cleanup = make_cleanup (xfree, xml);
+  if (xml == NULL)
+    return BTRACE_ERR_UNKNOWN;
 
-      btrace = parse_xml_btrace (xml);
-      do_cleanups (cleanup);
-    }
+  cleanup = make_cleanup (xfree, xml);
+  *btrace = parse_xml_btrace (xml);
+  do_cleanups (cleanup);
 
-  return btrace;
+  return BTRACE_ERR_NONE;
 }
 
 static int

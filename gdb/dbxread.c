@@ -3250,7 +3250,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	 N_MAIN within a given objfile, complain() and choose
 	 arbitrarily.  (kingdon) */
       if (name != NULL)
-	set_main_name (name);
+	set_objfile_main_name (objfile, name, language_unknown);
       break;
 
       /* The following symbol types can be ignored.  */

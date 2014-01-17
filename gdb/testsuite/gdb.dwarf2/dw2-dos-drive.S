@@ -15,7 +15,8 @@
 
 	.text
 pc_start:
-	.byte	0
+        /* Enough space to fit at least one instruction.  */
+	.4byte	0
 pc_end:
 
 	.section	.debug_info

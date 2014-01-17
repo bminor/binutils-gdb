@@ -1,3 +1,29 @@
+2014-01-17  Pedro Alves  <palves@redhat.com>
+
+	PR build/16445
+	* linux-x86-low.c: Don't include elf/common.h if ELFMAG0 is
+	defined after including gdb_proc_service.h.
+
+2014-01-16  Doug Evans  <dje@google.com>
+
+	* dll.c (UNSPECIFIED_CORE_ADDR): New macro.
+	(match_dll): Use it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* target.h (target_ops) <read_btrace>: Change parameters and
+	return type to allow error reporting.
+	* server.c (handle_qxfer_btrace): Support delta reads.  Pass
+	trace reading errors on.
+	* linux-low.c (linux_low_read_btrace): Pass trace reading
+	errors on.
+	(linux_low_disable_btrace): New.
+
+2014-01-15  Doug Evans  <dje@google.com>
+
+	* inferiors.c (thread_id_to_gdb_id): Delete.
+	* inferiors.h (thread_id_to_gdb_id): Delete.
+
 2014-01-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (INCLUDE_CFLAGS): Remove trailing slash from
