@@ -26,9 +26,14 @@
 #include "i387-fp.h"
 #include "i386-low.h"
 #include "i386-xstate.h"
-#include "elf/common.h"
 
 #include "gdb_proc_service.h"
+/* Don't include elf/common.h if linux/elf.h got included by
+   gdb_proc_service.h.  */
+#ifndef ELFMAG0
+#include "elf/common.h"
+#endif
+
 #include "agent.h"
 #include "tdesc.h"
 #include "tracepoint.h"
