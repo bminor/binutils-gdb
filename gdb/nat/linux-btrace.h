@@ -32,6 +32,24 @@
 
 struct target_ops;
 
+#if HAVE_LINUX_PERF_EVENT_H
+/* A Linux perf event buffer.  */
+struct perf_event_buffer
+{
+  /* The mapped memory.  */
+  const uint8_t *mem;
+
+  /* The size of the mapped memory in bytes.  */
+  unsigned long long size;
+
+  /* A pointer to the data_head field for this buffer. */
+  volatile unsigned long long *data_head;
+
+  /* The data_head value from the last read.  */
+  unsigned long long last_head;
+};
+#endif /* HAVE_LINUX_PERF_EVENT_H */
+
 /* Branch trace target information per thread.  */
 struct btrace_target_info
 {
@@ -42,16 +60,14 @@ struct btrace_target_info
   /* The ptid of this thread.  */
   ptid_t ptid;
 
-  /* The mmap configuration mapping the branch trace perf_event buffer.
-
-     file      .. the file descriptor
-     buffer    .. the mmapped memory buffer
-     size      .. the buffer's size in pages without the configuration page
-     data_head .. the data head from the last read  */
+  /* The perf event file.  */
   int file;
-  void *buffer;
-  size_t size;
-  unsigned long data_head;
+
+  /* The perf event configuration page. */
+  volatile struct perf_event_mmap_page *header;
+
+  /* The BTS perf event buffer.  */
+  struct perf_event_buffer bts;
 #endif /* HAVE_LINUX_PERF_EVENT_H */
 
   /* The size of a pointer in bits for this thread.

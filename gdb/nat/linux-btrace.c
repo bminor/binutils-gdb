@@ -59,45 +59,12 @@ struct perf_event_sample
   struct perf_event_bts bts;
 };
 
-/* Get the perf_event header.  */
+/* Return non-zero if there is new data in PEVENT; zero otherwise.  */
 
-static inline volatile struct perf_event_mmap_page *
-perf_event_header (struct btrace_target_info* tinfo)
+static int
+perf_event_new_data (const struct perf_event_buffer *pev)
 {
-  return tinfo->buffer;
-}
-
-/* Get the size of the perf_event mmap buffer.  */
-
-static inline size_t
-perf_event_mmap_size (const struct btrace_target_info *tinfo)
-{
-  /* The branch trace buffer is preceded by a configuration page.  */
-  return (tinfo->size + 1) * PAGE_SIZE;
-}
-
-/* Get the size of the perf_event buffer.  */
-
-static inline size_t
-perf_event_buffer_size (struct btrace_target_info* tinfo)
-{
-  return tinfo->size * PAGE_SIZE;
-}
-
-/* Get the start address of the perf_event buffer.  */
-
-static inline const uint8_t *
-perf_event_buffer_begin (struct btrace_target_info* tinfo)
-{
-  return ((const uint8_t *) tinfo->buffer) + PAGE_SIZE;
-}
-
-/* Get the end address of the perf_event buffer.  */
-
-static inline const uint8_t *
-perf_event_buffer_end (struct btrace_target_info* tinfo)
-{
-  return perf_event_buffer_begin (tinfo) + perf_event_buffer_size (tinfo);
+  return *pev->data_head != pev->last_head;
 }
 
 /* Check whether an address is in the kernel.  */
@@ -162,11 +129,12 @@ perf_event_sample_ok (const struct perf_event_sample *sample)
 
 static VEC (btrace_block_s) *
 perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
-		     const uint8_t *end, const uint8_t *start, size_t size)
+		     const uint8_t *end, const uint8_t *start,
+		     unsigned long long size)
 {
   VEC (btrace_block_s) *btrace = NULL;
   struct perf_event_sample sample;
-  size_t read = 0;
+  unsigned long long read = 0;
   struct btrace_block block = { 0, 0 };
   struct regcache *regcache;
 
@@ -432,6 +400,7 @@ linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
 struct btrace_target_info *
 linux_enable_btrace (ptid_t ptid)
 {
+  struct perf_event_mmap_page *header;
   struct btrace_target_info *tinfo;
   int pid, pg;
 
@@ -467,15 +436,24 @@ linux_enable_btrace (ptid_t ptid)
   for (pg = 4; pg >= 0; --pg)
     {
       /* The number of pages we request needs to be a power of two.  */
-      tinfo->size = 1 << pg;
-      tinfo->buffer = mmap (NULL, perf_event_mmap_size (tinfo),
-			    PROT_READ, MAP_SHARED, tinfo->file, 0);
-      if (tinfo->buffer == MAP_FAILED)
-	continue;
-
-      return tinfo;
+      header = mmap (NULL, ((1 << pg) + 1) * PAGE_SIZE, PROT_READ, MAP_SHARED,
+		     tinfo->file, 0);
+      if (header != MAP_FAILED)
+	break;
     }
 
+  if (header == MAP_FAILED)
+    goto err_file;
+
+  tinfo->header = header;
+  tinfo->bts.mem = ((const uint8_t *) header) + PAGE_SIZE;
+  tinfo->bts.size = (1 << pg) * PAGE_SIZE;
+  tinfo->bts.data_head = &header->data_head;
+  tinfo->bts.last_head = 0;
+
+  return tinfo;
+
+ err_file:
   /* We were not able to allocate any buffer.  */
   close (tinfo->file);
 
@@ -489,27 +467,11 @@ linux_enable_btrace (ptid_t ptid)
 enum btrace_error
 linux_disable_btrace (struct btrace_target_info *tinfo)
 {
-  int errcode;
-
-  errno = 0;
-  errcode = munmap (tinfo->buffer, perf_event_mmap_size (tinfo));
-  if (errcode != 0)
-    return BTRACE_ERR_UNKNOWN;
-
+  munmap((void *) tinfo->header, tinfo->bts.size + PAGE_SIZE);
   close (tinfo->file);
   xfree (tinfo);
 
   return BTRACE_ERR_NONE;
-}
-
-/* Check whether the branch trace has changed.  */
-
-static int
-linux_btrace_has_changed (struct btrace_target_info *tinfo)
-{
-  volatile struct perf_event_mmap_page *header = perf_event_header (tinfo);
-
-  return header->data_head != tinfo->data_head;
 }
 
 /* Read branch trace data in BTS format for the thread given by TINFO into
@@ -520,24 +482,25 @@ linux_read_bts (struct btrace_data_bts *btrace,
 		struct btrace_target_info *tinfo,
 		enum btrace_read_type type)
 {
-  volatile struct perf_event_mmap_page *header;
+  struct perf_event_buffer *pevent;
   const uint8_t *begin, *end, *start;
-  unsigned long data_head, data_tail, retries = 5;
-  size_t buffer_size, size;
+  unsigned long long data_head, data_tail, buffer_size, size;
+  unsigned int retries = 5;
+
+  pevent = &tinfo->bts;
 
   /* For delta reads, we return at least the partial last block containing
      the current PC.  */
-  if (type == BTRACE_READ_NEW && !linux_btrace_has_changed (tinfo))
+  if (type == BTRACE_READ_NEW && !perf_event_new_data (pevent))
     return BTRACE_ERR_NONE;
 
-  header = perf_event_header (tinfo);
-  buffer_size = perf_event_buffer_size (tinfo);
-  data_tail = tinfo->data_head;
+  buffer_size = pevent->size;
+  data_tail = pevent->last_head;
 
   /* We may need to retry reading the trace.  See below.  */
   while (retries--)
     {
-      data_head = header->data_head;
+      data_head = *pevent->data_head;
 
       /* Delete any leftover trace from the previous iteration.  */
       VEC_free (btrace_block_s, btrace->blocks);
@@ -569,13 +532,13 @@ linux_read_bts (struct btrace_data_bts *btrace,
 	}
 
       /* Data_head keeps growing; the buffer itself is circular.  */
-      begin = perf_event_buffer_begin (tinfo);
+      begin = pevent->mem;
       start = begin + data_head % buffer_size;
 
       if (data_head <= buffer_size)
 	end = start;
       else
-	end = perf_event_buffer_end (tinfo);
+	end = begin + pevent->size;
 
       btrace->blocks = perf_event_read_bts (tinfo, begin, end, start, size);
 
@@ -584,11 +547,11 @@ linux_read_bts (struct btrace_data_bts *btrace,
 	 kernel might be writing the last branch trace records.
 
 	 Let's check whether the data head moved while we read the trace.  */
-      if (data_head == header->data_head)
+      if (data_head == *pevent->data_head)
 	break;
     }
 
-  tinfo->data_head = data_head;
+  pevent->last_head = data_head;
 
   /* Prune the incomplete last block (i.e. the first one of inferior execution)
      if we're not doing a delta read.  There is no way of filling in its zeroed

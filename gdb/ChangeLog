@@ -1,5 +1,16 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* nat/linux-btrace.h (perf_event_buffer): New.
+	(btrace_target_info) <buffer, size, data_head>: Replace with ...
+	<bts>: ... this.
+	* nat/linux-btrace.c (perf_event_header, perf_event_mmap_size)
+	(perf_event_buffer_size, perf_event_buffer_begin)
+	(perf_event_buffer_end, linux_btrace_has_changed): Removed.
+	Updated users.
+	(perf_event_new_data): New.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (btrace_enable): Pass BTRACE_FORMAT_BTS.
 	* record-btrace.c (record_btrace_open): Remove call to
 	target_supports_btrace.
