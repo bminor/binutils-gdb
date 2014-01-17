@@ -1,3 +1,15 @@
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* utils.h (pulongest, plongest, phex_nz): Don't declare.
+	Include print-utils.h.
+	* utils.c (NUMCELLS, CELLSIZE, get_cell, decimal2str, pulongest)
+	(plongest, thirty_two, phex_nz): Remove.
+	* Makefile.in (SFILES): Add common/print-utils.c.
+	(OBS): Add print-utils.o.
+	(print-utils-ipa.o): New target.
+	(print-utils.o): New target.
+	(IPA_OBJS): Add print-utils-ipa.o.
+
 2014-02-06  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (SFILES): Fix indentation.

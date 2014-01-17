@@ -23,6 +23,7 @@
 
 #include "cleanups.h"
 #include "exceptions.h"
+#include "print-utils.h"
 
 extern void initialize_utils (void);
 
@@ -245,8 +246,6 @@ extern void fputstrn_unfiltered (const char *str, int n, int quotr,
 /* Display the host ADDR on STREAM formatted as ``0x%x''.  */
 extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
 
-extern const char *host_address_to_string (const void *addr);
-
 /* Convert CORE_ADDR to string in platform-specific manner.
    This is usually formatted similar to 0x%lx.  */
 extern const char *paddress (struct gdbarch *gdbarch, CORE_ADDR addr);
@@ -261,26 +260,7 @@ extern const char *print_core_address (struct gdbarch *gdbarch,
 extern hashval_t core_addr_hash (const void *ap);
 extern int core_addr_eq (const void *ap, const void *bp);
 
-/* %d for LONGEST */
-extern char *plongest (LONGEST l);
-/* %u for ULONGEST */
-extern char *pulongest (ULONGEST l);
-
-extern char *phex (ULONGEST l, int sizeof_l);
-extern char *phex_nz (ULONGEST l, int sizeof_l);
-extern char *int_string (LONGEST, int, int, int, int);
-
-/* Convert a CORE_ADDR into a HEX string with leading zeros.
-   The output from core_addr_to_string() can be passed direct to
-   string_to_core_addr().  */
-extern const char *core_addr_to_string (const CORE_ADDR addr);
-extern const char *core_addr_to_string_nz (const CORE_ADDR addr);
 extern CORE_ADDR string_to_core_addr (const char *my_string);
-
-/* Return a string that contains a number formatted as a hex
-   string.  */
-extern char *hex_string (LONGEST);
-extern char *hex_string_custom (LONGEST, int);
 
 extern void fprintf_symbol_filtered (struct ui_file *, const char *,
 				     enum language, int);

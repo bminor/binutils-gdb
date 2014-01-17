@@ -839,7 +839,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/gdb_vecs.c common/common-utils.c common/xml-utils.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
-	target/waitstatus.c
+	target/waitstatus.c common/print-utils.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -921,7 +921,8 @@ common/format.h common/host-defs.h utils.h common/queue.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h common/linux-btrace.h \
 ctf.h common/i386-cpuid.h common/i386-gcc-cpuid.h target/resume.h \
-target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h
+target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h \
+common/print-utils.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1019,7 +1020,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	inferior.o osdata.o gdb_usleep.o record.o record-full.o gcore.o \
 	gdb_vecs.o jit.o progspace.o skip.o probe.o \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
-	format.o registry.o btrace.o record-btrace.o waitstatus.o
+	format.o registry.o btrace.o record-btrace.o waitstatus.o \
+	print-utils.o
 
 TSOBS = inflow.o
 
@@ -2138,6 +2140,10 @@ linux-btrace.o: ${srcdir}/common/linux-btrace.c
 
 mips-linux-watch.o: ${srcdir}/common/mips-linux-watch.c
 	$(COMPILE) $(srcdir)/common/mips-linux-watch.c
+	$(POSTCOMPILE)
+
+print-utils.o: ${srcdir}/common/print-utils.c
+	$(COMPILE) $(srcdir)/common/print-utils.c
 	$(POSTCOMPILE)
 
 #
