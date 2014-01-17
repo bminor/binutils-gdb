@@ -694,6 +694,10 @@ typedef const char * (gdbarch_address_class_type_flags_to_name_ftype) (struct gd
 extern const char * gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags);
 extern void set_gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name);
 
+/* Return the appropriate type_flags for the supplied address class.
+   This function should return 1 if the address class was recognized and
+   type_flags was set, zero otherwise. */
+
 extern int gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch);
 
 typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, const char *name, int *type_flags_ptr);
