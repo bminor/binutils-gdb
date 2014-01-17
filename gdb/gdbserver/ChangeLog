@@ -1,5 +1,15 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* server.c (handle_btrace_general_set): Remove call to
+	target_supports_btrace.
+	(supported_btrace_packets): New.
+	(handle_query): Call supported_btrace_packets.
+	* target.h: include btrace-common.h.
+	(btrace_target_info): Removed.
+	(supports_btrace, target_supports_btrace): Update parameters.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* Makefile.in (SFILES): Add common/btrace-common.c.
 	(OBS): Add common/btrace-common.o.
 	(btrace-common.o): Add build rules.

@@ -1,5 +1,27 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (btrace_enable): Pass BTRACE_FORMAT_BTS.
+	* record-btrace.c (record_btrace_open): Remove call to
+	target_supports_btrace.
+	* remote.c (remote_supports_btrace): Update parameters.
+	* target.c (target_supports_btrace): Update parameters.
+	* target.h (to_supports_btrace, target_supports_btrace): Update
+	parameters.
+	* target-delegates.c: Regenerate.
+	* target-debug.h (target_debug_print_enum_btrace_format): New.
+	* nat/linux-btrace.c
+	(kernel_supports_btrace): Rename into ...
+	(kernel_supports_bts): ... this.  Update users.  Update warning text.
+	(intel_supports_btrace): Rename into ...
+	(intel_supports_bts): ... this.  Update users.
+	(cpu_supports_btrace): Rename into ...
+	(cpu_supports_bts): ... this.  Update users.
+	(linux_supports_btrace): Update parameters.  Split into this and ...
+	(linux_supports_bts): ... this.
+	* nat/linux-btrace.h (linux_supports_btrace): Update parameters.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* Makefile.in (SFILES): Add common/btrace-common.c.
 	(COMMON_OBS): Add common/btrace-common.o.
 	(btrace-common.o): Add build rules.

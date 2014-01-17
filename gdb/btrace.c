@@ -731,7 +731,7 @@ btrace_enable (struct thread_info *tp)
   if (tp->btrace.target != NULL)
     return;
 
-  if (!target_supports_btrace ())
+  if (!target_supports_btrace (BTRACE_FORMAT_BTS))
     error (_("Target does not support branch tracing."));
 
   DEBUG ("enable thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));

@@ -3085,26 +3085,28 @@ debug_can_use_agent (struct target_ops *self)
 }
 
 static int
-delegate_supports_btrace (struct target_ops *self)
+delegate_supports_btrace (struct target_ops *self, enum btrace_format arg1)
 {
   self = self->beneath;
-  return self->to_supports_btrace (self);
+  return self->to_supports_btrace (self, arg1);
 }
 
 static int
-tdefault_supports_btrace (struct target_ops *self)
+tdefault_supports_btrace (struct target_ops *self, enum btrace_format arg1)
 {
   return 0;
 }
 
 static int
-debug_supports_btrace (struct target_ops *self)
+debug_supports_btrace (struct target_ops *self, enum btrace_format arg1)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_supports_btrace (...)\n", debug_target.to_shortname);
-  result = debug_target.to_supports_btrace (&debug_target);
+  result = debug_target.to_supports_btrace (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_supports_btrace (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_enum_btrace_format (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);

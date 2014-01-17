@@ -26,9 +26,9 @@
 #include "target/wait.h"
 #include "target/waitstatus.h"
 #include "mem-break.h"
+#include "btrace-common.h"
 
 struct emit_ops;
-struct btrace_target_info;
 struct buffer;
 struct process_info;
 
@@ -355,7 +355,7 @@ struct target_ops
   int (*supports_agent) (void);
 
   /* Check whether the target supports branch tracing.  */
-  int (*supports_btrace) (struct target_ops *);
+  int (*supports_btrace) (struct target_ops *, enum btrace_format);
 
   /* Enable branch tracing for @ptid and allocate a branch trace target
      information struct for reading and for disabling branch trace.  */
@@ -489,9 +489,9 @@ int kill_inferior (int);
   (the_target->supports_agent ? \
    (*the_target->supports_agent) () : 0)
 
-#define target_supports_btrace()			\
+#define target_supports_btrace(format)			\
   (the_target->supports_btrace				\
-   ? (*the_target->supports_btrace) (the_target) : 0)
+   ? (*the_target->supports_btrace) (the_target, format) : 0)
 
 #define target_enable_btrace(ptid) \
   (*the_target->enable_btrace) (ptid)

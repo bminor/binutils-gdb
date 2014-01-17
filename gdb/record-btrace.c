@@ -199,9 +199,6 @@ record_btrace_open (const char *args, int from_tty)
   if (!target_has_execution)
     error (_("The program is not being run."));
 
-  if (!target_supports_btrace ())
-    error (_("Target does not support branch tracing."));
-
   if (non_stop)
     error (_("Record btrace can't debug inferior in non-stop mode."));
 

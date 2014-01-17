@@ -248,10 +248,10 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
   return btrace;
 }
 
-/* Check whether the kernel supports branch tracing.  */
+/* Check whether the kernel supports BTS.  */
 
 static int
-kernel_supports_btrace (void)
+kernel_supports_bts (void)
 {
   struct perf_event_attr attr;
   pid_t child, pid;
@@ -262,14 +262,14 @@ kernel_supports_btrace (void)
   switch (child)
     {
     case -1:
-      warning (_("test branch tracing: cannot fork: %s."), strerror (errno));
+      warning (_("test bts: cannot fork: %s."), strerror (errno));
       return 0;
 
     case 0:
       status = ptrace (PTRACE_TRACEME, 0, NULL, NULL);
       if (status != 0)
 	{
-	  warning (_("test branch tracing: cannot PTRACE_TRACEME: %s."),
+	  warning (_("test bts: cannot PTRACE_TRACEME: %s."),
 		   strerror (errno));
 	  _exit (1);
 	}
@@ -277,7 +277,7 @@ kernel_supports_btrace (void)
       status = raise (SIGTRAP);
       if (status != 0)
 	{
-	  warning (_("test branch tracing: cannot raise SIGTRAP: %s."),
+	  warning (_("test bts: cannot raise SIGTRAP: %s."),
 		   strerror (errno));
 	  _exit (1);
 	}
@@ -288,14 +288,14 @@ kernel_supports_btrace (void)
       pid = waitpid (child, &status, 0);
       if (pid != child)
 	{
-	  warning (_("test branch tracing: bad pid %ld, error: %s."),
+	  warning (_("test bts: bad pid %ld, error: %s."),
 		   (long) pid, strerror (errno));
 	  return 0;
 	}
 
       if (!WIFSTOPPED (status))
 	{
-	  warning (_("test branch tracing: expected stop. status: %d."),
+	  warning (_("test bts: expected stop. status: %d."),
 		   status);
 	  return 0;
 	}
@@ -320,10 +320,10 @@ kernel_supports_btrace (void)
       pid = waitpid (child, &status, 0);
       if (pid != child)
 	{
-	  warning (_("test branch tracing: bad pid %ld, error: %s."),
+	  warning (_("test bts: bad pid %ld, error: %s."),
 		   (long) pid, strerror (errno));
 	  if (!WIFSIGNALED (status))
-	    warning (_("test branch tracing: expected killed. status: %d."),
+	    warning (_("test bts: expected killed. status: %d."),
 		     status);
 	}
 
@@ -331,10 +331,10 @@ kernel_supports_btrace (void)
     }
 }
 
-/* Check whether an Intel cpu supports branch tracing.  */
+/* Check whether an Intel cpu supports BTS.  */
 
 static int
-intel_supports_btrace (void)
+intel_supports_bts (void)
 {
   unsigned int cpuid, model, family;
 
@@ -372,10 +372,10 @@ intel_supports_btrace (void)
   return 1;
 }
 
-/* Check whether the cpu supports branch tracing.  */
+/* Check whether the cpu supports BTS.  */
 
 static int
-cpu_supports_btrace (void)
+cpu_supports_bts (void)
 {
   unsigned int ebx, ecx, edx;
 
@@ -384,30 +384,47 @@ cpu_supports_btrace (void)
 
   if (ebx == signature_INTEL_ebx && ecx == signature_INTEL_ecx
       && edx == signature_INTEL_edx)
-    return intel_supports_btrace ();
+    return intel_supports_bts ();
 
   /* Don't know about others.  Let's assume they do.  */
   return 1;
 }
 
-/* See linux-btrace.h.  */
+/* Check whether the linux target supports BTS.  */
 
-int
-linux_supports_btrace (struct target_ops *ops)
+static int
+linux_supports_bts (void)
 {
   static int cached;
 
   if (cached == 0)
     {
-      if (!kernel_supports_btrace ())
+      if (!kernel_supports_bts ())
 	cached = -1;
-      else if (!cpu_supports_btrace ())
+      else if (!cpu_supports_bts ())
 	cached = -1;
       else
 	cached = 1;
     }
 
   return cached > 0;
+}
+
+/* See linux-btrace.h.  */
+
+int
+linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
+{
+  switch (format)
+    {
+    case BTRACE_FORMAT_NONE:
+      return 0;
+
+    case BTRACE_FORMAT_BTS:
+      return linux_supports_bts ();
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
 }
 
 /* See linux-btrace.h.  */
@@ -602,7 +619,7 @@ linux_read_btrace (struct btrace_data *btrace,
 /* See linux-btrace.h.  */
 
 int
-linux_supports_btrace (struct target_ops *ops)
+linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
 {
   return 0;
 }

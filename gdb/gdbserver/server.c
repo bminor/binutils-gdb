@@ -426,12 +426,6 @@ handle_btrace_general_set (char *own_buf)
 
   op = own_buf + strlen ("Qbtrace:");
 
-  if (!target_supports_btrace ())
-    {
-      strcpy (own_buf, "E.Target does not support branch tracing.");
-      return -1;
-    }
-
   if (ptid_equal (general_thread, null_ptid)
       || ptid_equal (general_thread, minus_one_ptid))
     {
@@ -1692,6 +1686,20 @@ crc32 (CORE_ADDR base, int len, unsigned int crc)
   return (unsigned long long) crc;
 }
 
+/* Add supported btrace packets to BUF.  */
+
+static void
+supported_btrace_packets (char *buf)
+{
+  if (target_supports_btrace (BTRACE_FORMAT_BTS))
+    strcat (buf, ";Qbtrace:bts+");
+  else
+    return;
+
+  strcat (buf, ";Qbtrace:off+");
+  strcat (buf, ";qXfer:btrace:read+");
+}
+
 /* Handle all of the extended 'q' packets.  */
 
 void
@@ -1923,12 +1931,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_agent ())
 	strcat (own_buf, ";QAgent+");
 
-      if (target_supports_btrace ())
-	{
-	  strcat (own_buf, ";Qbtrace:bts+");
-	  strcat (own_buf, ";Qbtrace:off+");
-	  strcat (own_buf, ";qXfer:btrace:read+");
-	}
+      supported_btrace_packets (own_buf);
 
       return;
     }

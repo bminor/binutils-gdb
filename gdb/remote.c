@@ -11324,16 +11324,23 @@ struct btrace_target_info
 /* Check whether the target supports branch tracing.  */
 
 static int
-remote_supports_btrace (struct target_ops *self)
+remote_supports_btrace (struct target_ops *self, enum btrace_format format)
 {
   if (packet_support (PACKET_Qbtrace_off) != PACKET_ENABLE)
-    return 0;
-  if (packet_support (PACKET_Qbtrace_bts) != PACKET_ENABLE)
     return 0;
   if (packet_support (PACKET_qXfer_btrace) != PACKET_ENABLE)
     return 0;
 
-  return 1;
+  switch (format)
+    {
+      case BTRACE_FORMAT_NONE:
+	return 0;
+
+      case BTRACE_FORMAT_BTS:
+	return (packet_support (PACKET_Qbtrace_bts) == PACKET_ENABLE);
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
 }
 
 /* Enable branch tracing.  */

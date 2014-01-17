@@ -3389,6 +3389,14 @@ target_ranged_break_num_registers (void)
 
 /* See target.h.  */
 
+int
+target_supports_btrace (enum btrace_format format)
+{
+  return current_target.to_supports_btrace (&current_target, format);
+}
+
+/* See target.h.  */
+
 struct btrace_target_info *
 target_enable_btrace (ptid_t ptid)
 {
