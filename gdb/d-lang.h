@@ -22,6 +22,10 @@
 
 #include "symtab.h"
 
+/* Defined in d-lang.c  */
+
+extern const char *d_main_name (void);
+
 extern char *d_demangle (const char *mangled, int options);
 
 extern void d_val_print (struct type *type, const gdb_byte *valaddr,

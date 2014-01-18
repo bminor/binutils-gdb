@@ -29,6 +29,27 @@
 
 #include <ctype.h>
 
+/* The name of the symbol to use to get the name of the main subprogram.  */
+static const char D_MAIN[] = "D main";
+
+/* Function returning the special symbol name used by D for the main
+   procedure in the main program if it is found in minimal symbol list.
+   This function tries to find minimal symbols so that it finds them even
+   if the program was compiled without debugging information.  */
+
+const char *
+d_main_name (void)
+{
+  struct minimal_symbol *msym;
+
+  msym = lookup_minimal_symbol (D_MAIN, NULL, NULL);
+  if (msym != NULL)
+    return D_MAIN;
+
+  /* No known entry procedure found, the main program is probably not D.  */
+  return NULL;
+}
+
 /* Extract identifiers from MANGLED_STR and append it to TEMPBUF.
    Return 1 on success or 0 on failure.  */
 static int

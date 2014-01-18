@@ -5122,6 +5122,13 @@ find_main_name (void)
       return;
     }
 
+  new_main_name = d_main_name ();
+  if (new_main_name != NULL)
+    {
+      set_main_name (new_main_name, language_d);
+      return;
+    }
+
   new_main_name = go_main_name ();
   if (new_main_name != NULL)
     {
