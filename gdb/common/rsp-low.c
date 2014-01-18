@@ -163,10 +163,6 @@ bin2hex (const gdb_byte *bin, char *hex, int count)
 {
   int i;
 
-  /* May use a length, or a nul-terminated string as input.  */
-  if (count == 0)
-    count = strlen ((char *) bin);
-
   for (i = 0; i < count; i++)
     {
       *hex++ = tohex ((*bin >> 4) & 0xf);

@@ -3092,7 +3092,7 @@ encode_source_string (int tpnum, ULONGEST addr,
 	   srctype, 0, (int) strlen (src));
   if (strlen (buf) + strlen (src) * 2 >= buf_size)
     error (_("Source string too long for buffer"));
-  bin2hex ((gdb_byte *) src, buf + strlen (buf), 0);
+  bin2hex ((gdb_byte *) src, buf + strlen (buf), strlen (src));
   return -1;
 }
 
@@ -3211,7 +3211,7 @@ tfile_write_status (struct trace_file_writer *self,
     {
       char *buf = (char *) alloca (strlen (ts->stop_desc) * 2 + 1);
 
-      bin2hex ((gdb_byte *) ts->stop_desc, buf, 0);
+      bin2hex ((gdb_byte *) ts->stop_desc, buf, strlen (ts->stop_desc));
       fprintf (writer->fp, ":%s", buf);
     }
   fprintf (writer->fp, ":%x", ts->stopping_tracepoint);
@@ -3241,14 +3241,14 @@ tfile_write_status (struct trace_file_writer *self,
     {
       char *buf = (char *) alloca (strlen (ts->notes) * 2 + 1);
 
-      bin2hex ((gdb_byte *) ts->notes, buf, 0);
+      bin2hex ((gdb_byte *) ts->notes, buf, strlen (ts->notes));
       fprintf (writer->fp, ";notes:%s", buf);
     }
   if (ts->user_name != NULL)
     {
       char *buf = (char *) alloca (strlen (ts->user_name) * 2 + 1);
 
-      bin2hex ((gdb_byte *) ts->user_name, buf, 0);
+      bin2hex ((gdb_byte *) ts->user_name, buf, strlen (ts->user_name));
       fprintf (writer->fp, ";username:%s", buf);
     }
   fprintf (writer->fp, "\n");
@@ -3268,7 +3268,7 @@ tfile_write_uploaded_tsv (struct trace_file_writer *self,
   if (utsv->name)
     {
       buf = (char *) xmalloc (strlen (utsv->name) * 2 + 1);
-      bin2hex ((gdb_byte *) (utsv->name), buf, 0);
+      bin2hex ((gdb_byte *) (utsv->name), buf, strlen (utsv->name));
     }
 
   fprintf (writer->fp, "tsv %x:%s:%x:%s\n",

@@ -7868,7 +7868,8 @@ extended_remote_run (char *args)
 
   if (strlen (remote_exec_file) * 2 + len >= get_remote_packet_size ())
     error (_("Remote file name too long for run packet"));
-  len += 2 * bin2hex ((gdb_byte *) remote_exec_file, rs->buf + len, 0);
+  len += 2 * bin2hex ((gdb_byte *) remote_exec_file, rs->buf + len,
+		      strlen (remote_exec_file));
 
   gdb_assert (args != NULL);
   if (*args)
@@ -7884,7 +7885,8 @@ extended_remote_run (char *args)
 	  if (strlen (argv[i]) * 2 + 1 + len >= get_remote_packet_size ())
 	    error (_("Argument list too long for run packet"));
 	  rs->buf[len++] = ';';
-	  len += 2 * bin2hex ((gdb_byte *) argv[i], rs->buf + len, 0);
+	  len += 2 * bin2hex ((gdb_byte *) argv[i], rs->buf + len,
+			      strlen (argv[i]));
 	}
       do_cleanups (back_to);
     }
@@ -8974,7 +8976,7 @@ remote_rcmd (char *command,
     error (_("\"monitor\" command ``%s'' is too long."), command);
 
   /* Encode the actual command.  */
-  bin2hex ((gdb_byte *) command, p, 0);
+  bin2hex ((gdb_byte *) command, p, strlen (command));
 
   if (putpkt (rs->buf) < 0)
     error (_("Communication problem with target."));
@@ -10591,7 +10593,7 @@ remote_download_trace_state_variable (struct trace_state_variable *tsv)
   p = rs->buf + strlen (rs->buf);
   if ((p - rs->buf) + strlen (tsv->name) * 2 >= get_remote_packet_size ())
     error (_("Trace state variable name too long for tsv definition packet"));
-  p += 2 * bin2hex ((gdb_byte *) (tsv->name), p, 0);
+  p += 2 * bin2hex ((gdb_byte *) (tsv->name), p, strlen (tsv->name));
   *p++ = '\0';
   putpkt (rs->buf);
   remote_get_noisy_reply (&target_buf, &target_buf_size);
@@ -10921,7 +10923,7 @@ remote_save_trace_data (const char *filename)
   p += strlen (p);
   if ((p - rs->buf) + strlen (filename) * 2 >= get_remote_packet_size ())
     error (_("Remote file name too long for trace save packet"));
-  p += 2 * bin2hex ((gdb_byte *) filename, p, 0);
+  p += 2 * bin2hex ((gdb_byte *) filename, p, strlen (filename));
   *p++ = '\0';
   putpkt (rs->buf);
   reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
@@ -11126,21 +11128,21 @@ remote_set_trace_notes (const char *user, const char *notes,
   if (user)
     {
       buf += xsnprintf (buf, endbuf - buf, "user:");
-      nbytes = bin2hex ((gdb_byte *) user, buf, 0);
+      nbytes = bin2hex ((gdb_byte *) user, buf, strlen (user));
       buf += 2 * nbytes;
       *buf++ = ';';
     }
   if (notes)
     {
       buf += xsnprintf (buf, endbuf - buf, "notes:");
-      nbytes = bin2hex ((gdb_byte *) notes, buf, 0);
+      nbytes = bin2hex ((gdb_byte *) notes, buf, strlen (notes));
       buf += 2 * nbytes;
       *buf++ = ';';
     }
   if (stop_notes)
     {
       buf += xsnprintf (buf, endbuf - buf, "tstop:");
-      nbytes = bin2hex ((gdb_byte *) stop_notes, buf, 0);
+      nbytes = bin2hex ((gdb_byte *) stop_notes, buf, strlen (stop_notes));
       buf += 2 * nbytes;
       *buf++ = ';';
     }

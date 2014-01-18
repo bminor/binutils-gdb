@@ -1,5 +1,14 @@
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
+	* common/rsp-low.c (bin2hex): Never take strlen of argument.
+	* remote.c (extended_remote_run, remote_rcmd)
+	(remote_download_trace_state_variable, remote_save_trace_data)
+	(remote_set_trace_notes): Update.
+	* tracepoint.c (encode_source_string, tfile_write_status)
+	(tfile_write_uploaded_tsv): Update.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c: Include rsp-low.h.
 	* remote.h (hex2bin, bin2hex, unpack_varlen_hex): Don't declare.
 	* remote.c: Include rsp-low.h.
