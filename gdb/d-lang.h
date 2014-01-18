@@ -62,6 +62,8 @@ extern char *d_demangle (const char *mangled, int options);
 
 extern const struct builtin_d_type *builtin_d_type (struct gdbarch *);
 
+/* Defined in d-support.c  */
+
 extern const char *d_parse_symbol (struct obstack *, const char *);
 
 /* Defined in d-valprint.c  */

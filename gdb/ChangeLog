@@ -1,5 +1,17 @@
 2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
 
+	* Makefile.in (SFILES): Add d-support.c.
+	(COMMON_OBS): Add d-support.o.
+	* d-lang.h (d_parse_symbol): Add comment, now defined in
+	d-support.c.
+	* d-lang.c (parse_call_convention)
+	(parse_attributes, parse_function_types)
+	(parse_function_args, parse_type, parse_identifier)
+	(call_convention_p, d_parse_symbol): Move functions to ...
+	* d-support.c: ... New file.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
 	* d-lang.h (d_parse_symbol): Add declaration.
 	* d-lang.c (extract_identifiers)
 	(extract_type_info): Remove functions.
