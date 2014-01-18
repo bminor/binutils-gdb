@@ -244,7 +244,7 @@ static const struct language_defn d_language_defn =
   range_check_off,
   case_sensitive_on,
   array_row_major,
-  macro_expansion_c,
+  macro_expansion_no,
   &exp_descriptor_c,
   c_parse,
   c_error,
