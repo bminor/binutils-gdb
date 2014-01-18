@@ -1,5 +1,20 @@
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
+	* tracepoint.c: Include rsp-low.h.
+	* remote.h (hex2bin, bin2hex, unpack_varlen_hex): Don't declare.
+	* remote.c: Include rsp-low.h.
+	(hexchars, ishex, unpack_varlen_hex, pack_nibble, pack_hex_byte)
+	(fromhex, hex2bin, tohex, bin2hex, remote_escape_output)
+	(remote_unescape_input): Move to common/rsp-low.c.
+	* common/rsp-low.h: New file.
+	* common/rsp-low.c: New file.
+	* Makefile.in (SFILES): Add common/rsp-low.c.
+	(HFILES_NO_SRCDIR): Add common/rsp-low.h.
+	(COMMON_OBS): Add rsp-low.o.
+	(rsp-low.o): New target.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
 	* utils.h: Include print-utils.h.
 	(host_address_to_string, plongest, pulongest, phex, phex_nz)
 	(int_string, core_addr_to_string, core_addr_to_string_nz)

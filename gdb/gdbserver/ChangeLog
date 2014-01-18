@@ -1,5 +1,23 @@
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
+	* tracepoint.c: Include rsp-low.h.
+	* server.c: Include rsp-low.h.
+	* remote-utils.h (convert_ascii_to_int, convert_int_to_ascii)
+	(unhexify, hexify, remote_escape_output, unpack_varlen_hex): Don't
+	declare.
+	* remote-utils.c: Include rsp-low.h.
+	(fromhex, hexchars, ishex, unhexify, tohex, hexify)
+	(remote_escape_output, remote_unescape_input, unpack_varlen_hex)
+	(convert_int_to_ascii, convert_ascii_to_int): Move to
+	common/rsp-low.c.
+	* regcache.c: Include rsp-low.h.
+	* ax.c: Include rsp-low.h.
+	* Makefile.in (SFILES): Add common/rsp-low.c.
+	(OBS): Add rsp-low.o.
+	(rsp-low.o): New target.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
 	* utils.h (pulongest, plongest, phex_nz): Don't declare.
 	Include print-utils.h.
 	* utils.c (NUMCELLS, CELLSIZE, get_cell, decimal2str, pulongest)

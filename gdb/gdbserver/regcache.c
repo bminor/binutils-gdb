@@ -20,6 +20,7 @@
 #include "regdef.h"
 #include "gdbthread.h"
 #include "tdesc.h"
+#include "rsp-low.h"
 
 #include <stdlib.h>
 #include <string.h>

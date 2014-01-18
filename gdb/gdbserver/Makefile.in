@@ -163,7 +163,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
 	$(srcdir)/common/buffer.c $(srcdir)/common/linux-btrace.c \
 	$(srcdir)/common/filestuff.c $(srcdir)/target/waitstatus.c \
-	$(srcdir)/common/mips-linux-watch.c $(srcdir)/common/print-utils.c
+	$(srcdir)/common/mips-linux-watch.c $(srcdir)/common/print-utils.c \
+	$(srcdir)/common/rsp-low.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -176,7 +177,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       target.o waitstatus.o utils.o debug.o version.o vec.o gdb_vecs.o \
       mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
-      tdesc.o print-utils.o $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
+      tdesc.o print-utils.o rsp-low.o $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@
@@ -483,6 +484,9 @@ signals.o: ../common/signals.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 print-utils.o: ../common/print-utils.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+rsp-low.o: ../common/rsp-low.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 linux-procfs.o: ../common/linux-procfs.c

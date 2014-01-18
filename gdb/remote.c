@@ -45,6 +45,7 @@
 #include "target-descriptions.h"
 #include "gdb_bfd.h"
 #include "filestuff.h"
+#include "rsp-low.h"
 
 #include <sys/time.h>
 
@@ -124,8 +125,6 @@ static void remote_serial_write (const char *str, int len);
 
 static void remote_kill (struct target_ops *ops);
 
-static int tohex (int nib);
-
 static int remote_can_async_p (void);
 
 static int remote_is_async_p (void);
@@ -154,8 +153,6 @@ static void init_extended_remote_ops (void);
 
 static void remote_stop (ptid_t);
 
-static int ishex (int ch, int *val);
-
 static int stubhex (int ch);
 
 static int hexnumstr (char *, ULONGEST);
@@ -175,8 +172,6 @@ static int stub_unpack_int (char *buff, int fieldlength);
 static ptid_t remote_current_thread (ptid_t oldptid);
 
 static void remote_find_new_threads (void);
-
-static int fromhex (int a);
 
 static int putpkt_binary (char *buf, int cnt);
 
@@ -1937,13 +1932,7 @@ struct gdb_ext_thread_info
 
 #define BUF_THREAD_ID_SIZE (OPAQUETHREADBYTES * 2)
 
-char *unpack_varlen_hex (char *buff, ULONGEST *result);
-
 static char *unpack_nibble (char *buf, int *val);
-
-static char *pack_nibble (char *buf, int nibble);
-
-static char *pack_hex_byte (char *pkt, int /* unsigned char */ byte);
 
 static char *unpack_byte (char *buf, int *value);
 
@@ -2071,31 +2060,6 @@ read_ptid (char *buf, char **obuf)
   return ptid_build (pid, 0, tid);
 }
 
-/* Encode 64 bits in 16 chars of hex.  */
-
-static const char hexchars[] = "0123456789abcdef";
-
-static int
-ishex (int ch, int *val)
-{
-  if ((ch >= 'a') && (ch <= 'f'))
-    {
-      *val = ch - 'a' + 10;
-      return 1;
-    }
-  if ((ch >= 'A') && (ch <= 'F'))
-    {
-      *val = ch - 'A' + 10;
-      return 1;
-    }
-  if ((ch >= '0') && (ch <= '9'))
-    {
-      *val = ch - '0';
-      return 1;
-    }
-  return 0;
-}
-
 static int
 stubhex (int ch)
 {
@@ -2125,43 +2089,11 @@ stub_unpack_int (char *buff, int fieldlength)
   return retval;
 }
 
-char *
-unpack_varlen_hex (char *buff,	/* packet to parse */
-		   ULONGEST *result)
-{
-  int nibble;
-  ULONGEST retval = 0;
-
-  while (ishex (*buff, &nibble))
-    {
-      buff++;
-      retval = retval << 4;
-      retval |= nibble & 0x0f;
-    }
-  *result = retval;
-  return buff;
-}
-
 static char *
 unpack_nibble (char *buf, int *val)
 {
   *val = fromhex (*buf++);
   return buf;
-}
-
-static char *
-pack_nibble (char *buf, int nibble)
-{
-  *buf++ = hexchars[(nibble & 0x0f)];
-  return buf;
-}
-
-static char *
-pack_hex_byte (char *pkt, int byte)
-{
-  *pkt++ = hexchars[(byte >> 4) & 0xf];
-  *pkt++ = hexchars[(byte & 0xf)];
-  return pkt;
 }
 
 static char *
@@ -4665,68 +4597,6 @@ extended_remote_attach (struct target_ops *ops, char *args, int from_tty)
   extended_remote_attach_1 (ops, args, from_tty);
 }
 
-/* Convert hex digit A to a number.  */
-
-static int
-fromhex (int a)
-{
-  if (a >= '0' && a <= '9')
-    return a - '0';
-  else if (a >= 'a' && a <= 'f')
-    return a - 'a' + 10;
-  else if (a >= 'A' && a <= 'F')
-    return a - 'A' + 10;
-  else
-    error (_("Reply contains invalid hex digit %d"), a);
-}
-
-int
-hex2bin (const char *hex, gdb_byte *bin, int count)
-{
-  int i;
-
-  for (i = 0; i < count; i++)
-    {
-      if (hex[0] == 0 || hex[1] == 0)
-	{
-	  /* Hex string is short, or of uneven length.
-	     Return the count that has been converted so far.  */
-	  return i;
-	}
-      *bin++ = fromhex (hex[0]) * 16 + fromhex (hex[1]);
-      hex += 2;
-    }
-  return i;
-}
-
-/* Convert number NIB to a hex digit.  */
-
-static int
-tohex (int nib)
-{
-  if (nib < 10)
-    return '0' + nib;
-  else
-    return 'a' + nib - 10;
-}
-
-int
-bin2hex (const gdb_byte *bin, char *hex, int count)
-{
-  int i;
-
-  /* May use a length, or a nul-terminated string as input.  */
-  if (count == 0)
-    count = strlen ((char *) bin);
-
-  for (i = 0; i < count; i++)
-    {
-      *hex++ = tohex ((*bin >> 4) & 0xf);
-      *hex++ = tohex (*bin++ & 0xf);
-    }
-  *hex = 0;
-  return i;
-}
 
 /* Check for the availability of vCont.  This function should also check
    the response.  */
@@ -6677,91 +6547,6 @@ remote_address_masked (CORE_ADDR addr)
       addr &= mask;
     }
   return addr;
-}
-
-/* Convert BUFFER, binary data at least LEN bytes long, into escaped
-   binary data in OUT_BUF.  Set *OUT_LEN to the length of the data
-   encoded in OUT_BUF, and return the number of bytes in OUT_BUF
-   (which may be more than *OUT_LEN due to escape characters).  The
-   total number of bytes in the output buffer will be at most
-   OUT_MAXLEN.  */
-
-static int
-remote_escape_output (const gdb_byte *buffer, int len,
-		      gdb_byte *out_buf, int *out_len,
-		      int out_maxlen)
-{
-  int input_index, output_index;
-
-  output_index = 0;
-  for (input_index = 0; input_index < len; input_index++)
-    {
-      gdb_byte b = buffer[input_index];
-
-      if (b == '$' || b == '#' || b == '}')
-	{
-	  /* These must be escaped.  */
-	  if (output_index + 2 > out_maxlen)
-	    break;
-	  out_buf[output_index++] = '}';
-	  out_buf[output_index++] = b ^ 0x20;
-	}
-      else
-	{
-	  if (output_index + 1 > out_maxlen)
-	    break;
-	  out_buf[output_index++] = b;
-	}
-    }
-
-  *out_len = input_index;
-  return output_index;
-}
-
-/* Convert BUFFER, escaped data LEN bytes long, into binary data
-   in OUT_BUF.  Return the number of bytes written to OUT_BUF.
-   Raise an error if the total number of bytes exceeds OUT_MAXLEN.
-
-   This function reverses remote_escape_output.  It allows more
-   escaped characters than that function does, in particular because
-   '*' must be escaped to avoid the run-length encoding processing
-   in reading packets.  */
-
-static int
-remote_unescape_input (const gdb_byte *buffer, int len,
-		       gdb_byte *out_buf, int out_maxlen)
-{
-  int input_index, output_index;
-  int escaped;
-
-  output_index = 0;
-  escaped = 0;
-  for (input_index = 0; input_index < len; input_index++)
-    {
-      gdb_byte b = buffer[input_index];
-
-      if (output_index + 1 > out_maxlen)
-	{
-	  warning (_("Received too much data from remote target;"
-		     " ignoring overflow."));
-	  return output_index;
-	}
-
-      if (escaped)
-	{
-	  out_buf[output_index++] = b ^ 0x20;
-	  escaped = 0;
-	}
-      else if (b == '}')
-	escaped = 1;
-      else
-	out_buf[output_index++] = b;
-    }
-
-  if (escaped)
-    error (_("Unmatched escape character in target response."));
-
-  return output_index;
 }
 
 /* Determine whether the remote target supports binary downloading.

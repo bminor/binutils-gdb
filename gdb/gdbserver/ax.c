@@ -20,6 +20,7 @@
 #include "ax.h"
 #include "format.h"
 #include "tracepoint.h"
+#include "rsp-low.h"
 
 static void ax_vdebug (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 

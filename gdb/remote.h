@@ -39,12 +39,6 @@ extern void getpkt (char **buf, long *sizeof_buf, int forever);
 
 extern int putpkt (char *buf);
 
-extern int hex2bin (const char *hex, gdb_byte *bin, int count);
-
-extern int bin2hex (const gdb_byte *bin, char *hex, int count);
-
-extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
-
 void register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				     const struct target_desc *tdesc);
 void register_remote_support_xml (const char *);

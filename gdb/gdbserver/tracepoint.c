@@ -20,6 +20,7 @@
 #include "tracepoint.h"
 #include "gdbthread.h"
 #include "agent.h"
+#include "rsp-low.h"
 
 #include <ctype.h>
 #include <fcntl.h>

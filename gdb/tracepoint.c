@@ -55,6 +55,7 @@
 #include "probe.h"
 #include "ctf.h"
 #include "filestuff.h"
+#include "rsp-low.h"
 
 /* readline include files */
 #include "readline/readline.h"

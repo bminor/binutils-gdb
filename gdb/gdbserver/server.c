@@ -21,6 +21,7 @@
 #include "agent.h"
 #include "notif.h"
 #include "tdesc.h"
+#include "rsp-low.h"
 
 #include <ctype.h>
 #include <unistd.h>
