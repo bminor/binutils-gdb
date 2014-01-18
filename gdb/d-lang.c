@@ -257,6 +257,103 @@ static const struct op_print d_op_print_tab[] =
   {NULL, 0, 0, 0}
 };
 
+/* Mapping of all D basic data types into the language vector.  */
+
+enum d_primitive_types {
+  d_primitive_type_void,
+  d_primitive_type_bool,
+  d_primitive_type_byte,
+  d_primitive_type_ubyte,
+  d_primitive_type_short,
+  d_primitive_type_ushort,
+  d_primitive_type_int,
+  d_primitive_type_uint,
+  d_primitive_type_long,
+  d_primitive_type_ulong,
+  d_primitive_type_cent,    /* Signed 128 bit integer.  */
+  d_primitive_type_ucent,   /* Unsigned 128 bit integer.  */
+  d_primitive_type_float,
+  d_primitive_type_double,
+  d_primitive_type_real,
+  d_primitive_type_ifloat,  /* Imaginary float types.  */
+  d_primitive_type_idouble,
+  d_primitive_type_ireal,
+  d_primitive_type_cfloat,  /* Complex number of two float values.  */
+  d_primitive_type_cdouble,
+  d_primitive_type_creal,
+  d_primitive_type_char,    /* Unsigned character types.  */
+  d_primitive_type_wchar,
+  d_primitive_type_dchar,
+  nr_d_primitive_types
+};
+
+/* Implements the la_language_arch_info language_defn routine
+   for language D.  */
+
+static void
+d_language_arch_info (struct gdbarch *gdbarch,
+		      struct language_arch_info *lai)
+{
+  const struct builtin_d_type *builtin = builtin_d_type (gdbarch);
+
+  lai->string_char_type = builtin->builtin_char;
+  lai->primitive_type_vector
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_d_primitive_types + 1,
+			      struct type *);
+
+  lai->primitive_type_vector [d_primitive_type_void]
+    = builtin->builtin_void;
+  lai->primitive_type_vector [d_primitive_type_bool]
+    = builtin->builtin_bool;
+  lai->primitive_type_vector [d_primitive_type_byte]
+    = builtin->builtin_byte;
+  lai->primitive_type_vector [d_primitive_type_ubyte]
+    = builtin->builtin_ubyte;
+  lai->primitive_type_vector [d_primitive_type_short]
+    = builtin->builtin_short;
+  lai->primitive_type_vector [d_primitive_type_ushort]
+    = builtin->builtin_ushort;
+  lai->primitive_type_vector [d_primitive_type_int]
+    = builtin->builtin_int;
+  lai->primitive_type_vector [d_primitive_type_uint]
+    = builtin->builtin_uint;
+  lai->primitive_type_vector [d_primitive_type_long]
+    = builtin->builtin_long;
+  lai->primitive_type_vector [d_primitive_type_ulong]
+    = builtin->builtin_ulong;
+  lai->primitive_type_vector [d_primitive_type_cent]
+    = builtin->builtin_cent;
+  lai->primitive_type_vector [d_primitive_type_ucent]
+    = builtin->builtin_ucent;
+  lai->primitive_type_vector [d_primitive_type_float]
+    = builtin->builtin_float;
+  lai->primitive_type_vector [d_primitive_type_double]
+    = builtin->builtin_double;
+  lai->primitive_type_vector [d_primitive_type_real]
+    = builtin->builtin_real;
+  lai->primitive_type_vector [d_primitive_type_ifloat]
+    = builtin->builtin_ifloat;
+  lai->primitive_type_vector [d_primitive_type_idouble]
+    = builtin->builtin_idouble;
+  lai->primitive_type_vector [d_primitive_type_ireal]
+    = builtin->builtin_ireal;
+  lai->primitive_type_vector [d_primitive_type_cfloat]
+    = builtin->builtin_cfloat;
+  lai->primitive_type_vector [d_primitive_type_cdouble]
+    = builtin->builtin_cdouble;
+  lai->primitive_type_vector [d_primitive_type_creal]
+    = builtin->builtin_creal;
+  lai->primitive_type_vector [d_primitive_type_char]
+    = builtin->builtin_char;
+  lai->primitive_type_vector [d_primitive_type_wchar]
+    = builtin->builtin_wchar;
+  lai->primitive_type_vector [d_primitive_type_dchar]
+    = builtin->builtin_dchar;
+
+  lai->bool_type_symbol = "bool";
+  lai->bool_type_default = builtin->builtin_bool;
+}
+
 static const struct language_defn d_language_defn =
 {
   "d",
@@ -291,7 +388,7 @@ static const struct language_defn d_language_defn =
   0,				/* String lower bound.  */
   default_word_break_characters,
   default_make_symbol_completion_list,
-  c_language_arch_info,
+  d_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
@@ -301,11 +398,102 @@ static const struct language_defn d_language_defn =
   LANG_MAGIC
 };
 
+/* Build all D language types for the specified architecture.  */
+
+static void *
+build_d_types (struct gdbarch *gdbarch)
+{
+  struct builtin_d_type *builtin_d_type
+    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_d_type);
+
+  /* Basic types.  */
+  builtin_d_type->builtin_void
+    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+  builtin_d_type->builtin_bool
+    = arch_boolean_type (gdbarch, 8, 1, "bool");
+  builtin_d_type->builtin_byte
+    = arch_integer_type (gdbarch, 8, 0, "byte");
+  builtin_d_type->builtin_ubyte
+    = arch_integer_type (gdbarch, 8, 1, "ubyte");
+  builtin_d_type->builtin_short
+    = arch_integer_type (gdbarch, 16, 0, "short");
+  builtin_d_type->builtin_ushort
+    = arch_integer_type (gdbarch, 16, 1, "ushort");
+  builtin_d_type->builtin_int
+    = arch_integer_type (gdbarch, 32, 0, "int");
+  builtin_d_type->builtin_uint
+    = arch_integer_type (gdbarch, 32, 1, "uint");
+  builtin_d_type->builtin_long
+    = arch_integer_type (gdbarch, 64, 0, "long");
+  builtin_d_type->builtin_ulong
+    = arch_integer_type (gdbarch, 64, 1, "ulong");
+  builtin_d_type->builtin_cent
+    = arch_integer_type (gdbarch, 128, 0, "cent");
+  builtin_d_type->builtin_ucent
+    = arch_integer_type (gdbarch, 128, 1, "ucent");
+  builtin_d_type->builtin_float
+    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+		       "float", NULL);
+  builtin_d_type->builtin_double
+    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+		       "double", NULL);
+  builtin_d_type->builtin_real
+    = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+		       "real", NULL);
+
+  TYPE_INSTANCE_FLAGS (builtin_d_type->builtin_byte)
+    |= TYPE_INSTANCE_FLAG_NOTTEXT;
+  TYPE_INSTANCE_FLAGS (builtin_d_type->builtin_ubyte)
+    |= TYPE_INSTANCE_FLAG_NOTTEXT;
+
+  /* Imaginary and complex types.  */
+  builtin_d_type->builtin_ifloat
+    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+		       "ifloat", NULL);
+  builtin_d_type->builtin_idouble
+    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+		       "idouble", NULL);
+  builtin_d_type->builtin_ireal
+    = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+		       "ireal", NULL);
+  builtin_d_type->builtin_cfloat
+    = arch_complex_type (gdbarch, "cfloat",
+			 builtin_d_type->builtin_float);
+  builtin_d_type->builtin_cdouble
+    = arch_complex_type (gdbarch, "cdouble",
+			 builtin_d_type->builtin_double);
+  builtin_d_type->builtin_creal
+    = arch_complex_type (gdbarch, "creal",
+			 builtin_d_type->builtin_real);
+
+  /* Character types.  */
+  builtin_d_type->builtin_char
+    = arch_character_type (gdbarch, 8, 1, "char");
+  builtin_d_type->builtin_wchar
+    = arch_character_type (gdbarch, 16, 1, "wchar");
+  builtin_d_type->builtin_dchar
+    = arch_character_type (gdbarch, 32, 1, "dchar");
+
+  return builtin_d_type;
+}
+
+static struct gdbarch_data *d_type_data;
+
+/* Return the D type table for the specified architecture.  */
+
+const struct builtin_d_type *
+builtin_d_type (struct gdbarch *gdbarch)
+{
+  return gdbarch_data (gdbarch, d_type_data);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_d_language;
 
 void
 _initialize_d_language (void)
 {
+  d_type_data = gdbarch_data_register_post_init (build_d_types);
+
   add_language (&d_language_defn);
 }
