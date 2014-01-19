@@ -2708,7 +2708,7 @@ cmd_qtdpsrc (char *own_buf)
   packet = unpack_varlen_hex (packet, &slen);
   ++packet; /* skip a colon */
   src = xmalloc (slen + 1);
-  nbytes = unhexify (src, packet, strlen (packet) / 2);
+  nbytes = hex2bin (packet, (gdb_byte *) src, strlen (packet) / 2);
   src[nbytes] = '\0';
 
   newlast = xmalloc (sizeof (struct source_string));
@@ -2750,7 +2750,7 @@ cmd_qtdv (char *own_buf)
 
   nbytes = strlen (packet) / 2;
   varname = xmalloc (nbytes + 1);
-  nbytes = unhexify (varname, packet, nbytes);
+  nbytes = hex2bin (packet, (gdb_byte *) varname, nbytes);
   varname[nbytes] = '\0';
 
   tsv = create_trace_state_variable (num, 1);
@@ -4108,7 +4108,7 @@ cmd_qtnotes (char *own_buf)
 	  packet = strchr (packet, ';');
 	  nbytes = (packet - saved) / 2;
 	  user = xmalloc (nbytes + 1);
-	  nbytes = unhexify (user, saved, nbytes);
+	  nbytes = hex2bin (saved, (gdb_byte *) user, nbytes);
 	  user[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
 	  trace_debug ("User is '%s'", user);
@@ -4122,7 +4122,7 @@ cmd_qtnotes (char *own_buf)
 	  packet = strchr (packet, ';');
 	  nbytes = (packet - saved) / 2;
 	  notes = xmalloc (nbytes + 1);
-	  nbytes = unhexify (notes, saved, nbytes);
+	  nbytes = hex2bin (saved, (gdb_byte *) notes, nbytes);
 	  notes[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
 	  trace_debug ("Notes is '%s'", notes);
@@ -4136,7 +4136,7 @@ cmd_qtnotes (char *own_buf)
 	  packet = strchr (packet, ';');
 	  nbytes = (packet - saved) / 2;
 	  stopnote = xmalloc (nbytes + 1);
-	  nbytes = unhexify (stopnote, saved, nbytes);
+	  nbytes = hex2bin (saved, (gdb_byte *) stopnote, nbytes);
 	  stopnote[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
 	  trace_debug ("tstop note is '%s'", stopnote);

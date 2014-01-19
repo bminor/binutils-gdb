@@ -36,8 +36,6 @@ extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 
 extern int hex2bin (const char *hex, gdb_byte *bin, int count);
 
-extern int unhexify (char *bin, const char *hex, int count);
-
 extern void convert_ascii_to_int (const char *from, unsigned char *to, int n);
 
 extern int bin2hex (const gdb_byte *bin, char *hex, int count);

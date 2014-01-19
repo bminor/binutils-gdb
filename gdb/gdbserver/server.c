@@ -2025,7 +2025,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  return;
 	}
 
-      if ((len % 2) != 0 || unhexify (mon, own_buf + 6, len / 2) != len / 2)
+      if ((len % 2) != 0
+	  || hex2bin (own_buf + 6, (gdb_byte *) mon, len / 2) != len / 2)
 	{
 	  write_enn (own_buf);
 	  free (mon);
@@ -2408,7 +2409,7 @@ handle_v_run (char *own_buf)
 	{
 	  /* FIXME: Fail request if out of memory instead of dying.  */
 	  new_argv[i] = xmalloc (1 + (next_p - p) / 2);
-	  unhexify (new_argv[i], p, (next_p - p) / 2);
+	  hex2bin (p, (gdb_byte *) new_argv[i], (next_p - p) / 2);
 	  new_argv[i][(next_p - p) / 2] = '\0';
 	}
 

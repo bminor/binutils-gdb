@@ -1,5 +1,10 @@
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
+	* common/rsp-low.h (unhexify): Don't declare.
+	* common/rsp-low.c (unhexify): Remove.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
 	* common/rsp-low.h (convert_int_to_ascii): Don't declare.
 	* common/rsp-low.c (convert_int_to_ascii): Remove.
 
