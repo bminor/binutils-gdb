@@ -77,12 +77,14 @@ AC_PROG_MAKE_SET
 # build it in the same directory, when building in the source dir.
 ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"])
 
+ACX_CONFIGURE_DIR(["../../libiberty"], ["build-libiberty-gdbserver"])
+
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h linux/elf.h dnl
 		 errno.h fcntl.h signal.h sys/file.h malloc.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h)
-AC_CHECK_FUNCS(gettimeofday pread pwrite pread64 readlink)
+AC_CHECK_FUNCS(pread pwrite pread64 readlink)
 AC_REPLACE_FUNCS(vasprintf vsnprintf)
 
 GDB_AC_COMMON

@@ -36,7 +36,7 @@ void
 debug_printf (const char *msg, ...)
 {
   va_list args;
-#if defined (HAVE_GETTIMEOFDAY) && !defined (IN_PROCESS_AGENT)
+#if !defined (IN_PROCESS_AGENT)
   /* N.B. Not thread safe, and can't be used, as is, with IPA.  */
   static int new_line = 1;
 
@@ -57,7 +57,7 @@ debug_printf (const char *msg, ...)
   vfprintf (stderr, msg, args);
   va_end (args);
 
-#if defined (HAVE_GETTIMEOFDAY) && !defined (IN_PROCESS_AGENT)
+#if !defined (IN_PROCESS_AGENT)
   if (*msg)
     new_line = msg[strlen (msg) - 1] == '\n';
 #endif

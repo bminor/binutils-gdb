@@ -1,3 +1,24 @@
+2014-06-12  Tom Tromey  <tromey@redhat.com>
+
+	* debug.c (debug_printf): Remove HAVE_GETTIMEOFDAY checks.
+	* server.c (monitor_show_help): Remove HAVE_GETTIMEOFDAY check.
+	(parse_debug_format_options): Likewise.
+	(gdbserver_usage): Likewise.
+	* Makefile.in (LIBIBERTY_BUILDDIR, LIBIBERTY): New variables.
+	(SUBDIRS, REQUIRED_SUBDIRS): Add libiberty.
+	(gdbserver$(EXEEXT), gdbreplay$(EXEEXT)): Depend on and link
+	against libiberty.
+	($(LIBGNU)): Depend on libiberty.
+	(all-lib): Recurse into all subdirs.
+	(install-only): Invoke "install" target in subdirs.
+	(vasprintf.o, vsnprintf.o, safe-ctype.o, lbasename.o): Remove
+	targets.
+	* configure: Rebuild.
+	* configure.ac: Add ACX_CONFIGURE_DIR for libiberty.  Don't check
+	for vasprintf, vsnprintf, or gettimeofday.
+	* configure.srv: Don't add safe-ctype.o or lbasename.o to
+	srv_tgtobj.
+
 2014-06-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* development.sh: Delete.

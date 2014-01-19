@@ -83,6 +83,9 @@ CC-LD=${CC}
 INCLUDE_DIR =  ${srcdir}/../../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
 
+LIBIBERTY_BUILDDIR = build-libiberty-gdbserver
+LIBIBERTY = $(LIBIBERTY_BUILDDIR)/libiberty.a
+
 # Where is ust?  These will be empty if ust was not available.
 ustlibs = @ustlibs@
 ustinc = @ustinc@
@@ -191,14 +194,14 @@ XML_BUILTIN = @srv_xmlbuiltin@
 IPA_DEPFILES = @IPA_DEPFILES@
 extra_libraries = @extra_libraries@
 
-SUBDIRS = $(GNULIB_BUILDDIR)
+SUBDIRS = $(GNULIB_BUILDDIR) $(LIBIBERTY_BUILDDIR)
 CLEANDIRS = $(SUBDIRS)
 
 # List of subdirectories in the build tree that must exist.
 # This is used to force build failures in existing trees when
 # a new directory is added.
 # The format here is for the `case' shell command.
-REQUIRED_SUBDIRS = $(GNULIB_BUILDDIR)
+REQUIRED_SUBDIRS = $(GNULIB_BUILDDIR) | $(LIBIBERTY_BUILDDIR)
 
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
@@ -259,7 +262,10 @@ install-only:
 	fi; \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir); \
 	$(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+	# Note that we run install and not install-only, as the latter
+	# is not part of GNU standards and in particular not provided
+	# in libiberty.
+	@$(MAKE) $(FLAGS_TO_PASS) DO=install "DODIRS=$(SUBDIRS)" subdir_do
 
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
@@ -277,20 +283,20 @@ install-html:
 clean-info: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
-gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(LIBGNU)
+gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(LIBGNU) $(LIBIBERTY)
 	rm -f gdbserver$(EXEEXT)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
-	$(LIBGNU) $(GDBSERVER_LIBS) $(XM_CLIBS)
+	$(LIBGNU) $(LIBIBERTY) $(GDBSERVER_LIBS) $(XM_CLIBS)
 
-$(LIBGNU) $(GNULIB_H): all-lib
-all-lib: $(GNULIB_BUILDDIR)/Makefile
-	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=$(GNULIB_BUILDDIR) subdir_do
+$(LIBGNU) $(LIBIBERTY) $(GNULIB_H): all-lib
+all-lib: $(GNULIB_BUILDDIR)/Makefile $(LIBIBERTY_BUILDDIR)/Makefile
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS="$(SUBDIRS)" subdir_do
 .PHONY: all-lib
 
-gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU)
+gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU) $(LIBIBERTY)
 	rm -f gdbreplay$(EXEEXT)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
-	  $(XM_CLIBS) $(LIBGNU)
+	  $(XM_CLIBS) $(LIBGNU) $(LIBIBERTY)
 
 IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o tdesc-ipa.o print-utils-ipa.o rsp-low-ipa.o ${IPA_DEPFILES}
 
@@ -546,23 +552,6 @@ mips-linux-watch.o: ../common/mips-linux-watch.c
 # Native object files rules from ../nat
 
 linux-waitpid.o: ../nat/linux-waitpid.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-# We build vasprintf with -DHAVE_CONFIG_H because we want that unit to
-# include our config.h file.  Otherwise, some system headers do not get
-# included, and the compiler emits a warning about implicitly defined
-# functions (missing declaration).
-vasprintf.o: $(srcdir)/../../libiberty/vasprintf.c
-	$(COMPILE) $< -DHAVE_CONFIG_H
-	$(POSTCOMPILE)
-vsnprintf.o: $(srcdir)/../../libiberty/vsnprintf.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-safe-ctype.o: $(srcdir)/../../libiberty/safe-ctype.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-lbasename.o: $(srcdir)/../../libiberty/lbasename.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

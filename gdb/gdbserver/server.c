@@ -696,9 +696,7 @@ monitor_show_help (void)
   monitor_output ("  set debug-format option1[,option2,...]\n");
   monitor_output ("    Add additional information to debugging messages\n");
   monitor_output ("    Options: all, none");
-#ifdef HAVE_GETTIMEOFDAY
   monitor_output (", timestamp");
-#endif
   monitor_output ("\n");
   monitor_output ("  exit\n");
   monitor_output ("    Quit GDBserver\n");
@@ -974,14 +972,12 @@ parse_debug_format_options (const char *arg, int is_monitor)
 	  if (is_monitor)
 	    monitor_output ("All extra debug format options disabled.\n");
 	}
-#ifdef HAVE_GETTIMEOFDAY
       else if (strcmp (option, "timestamp") == 0)
 	{
 	  debug_timestamp = 1;
 	  if (is_monitor)
 	    monitor_output ("Timestamps will be added to debug output.\n");
 	}
-#endif
       else if (*option == '\0')
 	{
 	  /* An empty option, e.g., "--debug-format=foo,,bar", is ignored.  */
@@ -2887,9 +2883,7 @@ gdbserver_usage (FILE *stream)
 	   "                          Options:\n"
 	   "                            all\n"
 	   "                            none\n"
-#ifdef HAVE_GETTIMEOFDAY
 	   "                            timestamp\n"
-#endif
 	   "  --remote-debug        Enable remote protocol debugging output.\n"
 	   "  --version             Display version information and exit.\n"
 	   "  --wrapper WRAPPER --  Run WRAPPER to start new programs.\n"
