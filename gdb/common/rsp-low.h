@@ -42,8 +42,6 @@ extern void convert_ascii_to_int (const char *from, unsigned char *to, int n);
 
 extern int bin2hex (const gdb_byte *bin, char *hex, int count);
 
-extern int hexify (char *hex, const char *bin, int count);
-
 extern void convert_int_to_ascii (const unsigned char *from, char *to, int n);
 
 /* Convert BUFFER, binary data at least LEN bytes long, into escaped

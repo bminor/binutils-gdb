@@ -1,5 +1,10 @@
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
+	* common/rsp-low.h (hexify): Don't declare.
+	* common/rsp-low.c (hexify): Remove.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
 	* common/rsp-low.c (hexify): Never take strlen of argument.
 
 2014-02-12  Tom Tromey  <tromey@redhat.com>

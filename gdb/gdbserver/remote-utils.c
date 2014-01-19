@@ -1399,7 +1399,8 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
 
   /* Send the request.  */
   strcpy (own_buf, "qSymbol:");
-  hexify (own_buf + strlen ("qSymbol:"), name, strlen (name));
+  bin2hex ((const gdb_byte *) name, own_buf + strlen ("qSymbol:"),
+	  strlen (name));
   if (putpkt (own_buf) < 0)
     return -1;
 
@@ -1562,7 +1563,7 @@ monitor_output (const char *msg)
   char *buf = xmalloc (len * 2 + 2);
 
   buf[0] = 'O';
-  hexify (buf + 1, msg, len);
+  bin2hex ((const gdb_byte *) msg, buf + 1, len);
 
   putpkt (buf);
   free (buf);

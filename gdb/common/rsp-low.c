@@ -172,20 +172,6 @@ bin2hex (const gdb_byte *bin, char *hex, int count)
   return i;
 }
 
-int
-hexify (char *hex, const char *bin, int count)
-{
-  int i;
-
-  for (i = 0; i < count; i++)
-    {
-      *hex++ = tohex ((*bin >> 4) & 0xf);
-      *hex++ = tohex (*bin++ & 0xf);
-    }
-  *hex = 0;
-  return i;
-}
-
 void
 convert_int_to_ascii (const unsigned char *from, char *to, int n)
 {

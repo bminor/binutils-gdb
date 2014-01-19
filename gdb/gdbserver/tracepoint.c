@@ -3623,17 +3623,17 @@ cmd_qtstatus (char *packet)
   str = (tracing_user_name ? tracing_user_name : "");
   slen = strlen (str);
   buf1 = (char *) alloca (slen * 2 + 1);
-  hexify (buf1, str, slen);
+  bin2hex ((gdb_byte *) str, buf1, slen);
 
   str = (tracing_notes ? tracing_notes : "");
   slen = strlen (str);
   buf2 = (char *) alloca (slen * 2 + 1);
-  hexify (buf2, str, slen);
+  bin2hex ((gdb_byte *) str, buf2, slen);
 
   str = (tracing_stop_note ? tracing_stop_note : "");
   slen = strlen (str);
   buf3 = (char *) alloca (slen * 2 + 1);
-  hexify (buf3, str, slen);
+  bin2hex ((gdb_byte *) str, buf3, slen);
 
   trace_debug ("Returning trace status as %d, stop reason %s",
 	       tracing, tracing_stop_reason);

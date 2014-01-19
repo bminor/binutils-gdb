@@ -1,5 +1,11 @@
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
+	* remote-utils.c (look_up_one_symbol, monitor_output): Use
+	bin2hex, not hexify.
+	* tracepoint.c (cmd_qtstatus): Likewise.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
 	* remote-utils.c (monitor_output): Pass explicit length to
 	hexify.
 
