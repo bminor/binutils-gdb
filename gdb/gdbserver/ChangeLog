@@ -1,5 +1,10 @@
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
+	* remote-utils.c (monitor_output): Pass explicit length to
+	hexify.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c: Include rsp-low.h.
 	* server.c: Include rsp-low.h.
 	* remote-utils.h (convert_ascii_to_int, convert_int_to_ascii)

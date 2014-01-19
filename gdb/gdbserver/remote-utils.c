@@ -1558,10 +1558,11 @@ relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 void
 monitor_output (const char *msg)
 {
-  char *buf = xmalloc (strlen (msg) * 2 + 2);
+  int len = strlen (msg);
+  char *buf = xmalloc (len * 2 + 2);
 
   buf[0] = 'O';
-  hexify (buf + 1, msg, 0);
+  hexify (buf + 1, msg, len);
 
   putpkt (buf);
   free (buf);

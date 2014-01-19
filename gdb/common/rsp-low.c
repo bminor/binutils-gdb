@@ -177,10 +177,6 @@ hexify (char *hex, const char *bin, int count)
 {
   int i;
 
-  /* May use a length, or a nul-terminated string as input. */
-  if (count == 0)
-    count = strlen (bin);
-
   for (i = 0; i < count; i++)
     {
       *hex++ = tohex ((*bin >> 4) & 0xf);
