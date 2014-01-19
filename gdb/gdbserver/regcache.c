@@ -234,7 +234,7 @@ registers_from_string (struct regcache *regcache, char *buf)
       if (len > tdesc->registers_size * 2)
 	len = tdesc->registers_size * 2;
     }
-  convert_ascii_to_int (buf, registers, len / 2);
+  hex2bin (buf, registers, len / 2);
 }
 
 struct reg *

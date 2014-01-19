@@ -3624,7 +3624,7 @@ process_serial_event (void)
       break;
     case 'C':
       require_running (own_buf);
-      convert_ascii_to_int (own_buf + 1, &sig, 1);
+      hex2bin (own_buf + 1, &sig, 1);
       if (gdb_signal_to_host_p (sig))
 	signal = gdb_signal_to_host (sig);
       else
@@ -3633,7 +3633,7 @@ process_serial_event (void)
       break;
     case 'S':
       require_running (own_buf);
-      convert_ascii_to_int (own_buf + 1, &sig, 1);
+      hex2bin (own_buf + 1, &sig, 1);
       if (gdb_signal_to_host_p (sig))
 	signal = gdb_signal_to_host (sig);
       else

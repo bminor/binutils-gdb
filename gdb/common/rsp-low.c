@@ -127,18 +127,6 @@ hex2bin (const char *hex, gdb_byte *bin, int count)
   return i;
 }
 
-void
-convert_ascii_to_int (const char *from, unsigned char *to, int n)
-{
-  int nib1, nib2;
-  while (n--)
-    {
-      nib1 = fromhex (*from++);
-      nib2 = fromhex (*from++);
-      *to++ = (((nib1 & 0x0f) << 4) & 0xf0) | (nib2 & 0x0f);
-    }
-}
-
 int
 bin2hex (const gdb_byte *bin, char *hex, int count)
 {

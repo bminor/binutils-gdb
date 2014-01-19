@@ -1270,7 +1270,7 @@ decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
   if (*to_p == NULL)
     *to_p = xmalloc (*len_ptr);
 
-  convert_ascii_to_int (&from[i++], *to_p, *len_ptr);
+  hex2bin (&from[i++], *to_p, *len_ptr);
 }
 
 int

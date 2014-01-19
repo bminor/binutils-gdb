@@ -105,7 +105,7 @@ gdb_parse_agent_expr (char **actparm)
   aexpr = xmalloc (sizeof (struct agent_expr));
   aexpr->length = xlen;
   aexpr->bytes = xmalloc (xlen);
-  convert_ascii_to_int (act, aexpr->bytes, xlen);
+  hex2bin (act, aexpr->bytes, xlen);
   *actparm = act + (xlen * 2);
   return aexpr;
 }
