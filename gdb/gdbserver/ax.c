@@ -120,7 +120,7 @@ gdb_unparse_agent_expr (struct agent_expr *aexpr)
   char *rslt;
 
   rslt = xmalloc (2 * aexpr->length + 1);
-  convert_int_to_ascii (aexpr->bytes, rslt, aexpr->length);
+  bin2hex (aexpr->bytes, rslt, aexpr->length);
   return rslt;
 }
 

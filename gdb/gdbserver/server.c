@@ -3602,7 +3602,7 @@ process_serial_event (void)
       if (res < 0)
 	write_enn (own_buf);
       else
-	convert_int_to_ascii (mem_buf, own_buf, res);
+	bin2hex (mem_buf, own_buf, res);
       break;
     case 'M':
       require_running (own_buf);

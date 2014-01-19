@@ -1423,7 +1423,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
       decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
       mem_buf = xmalloc (mem_len);
       if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
-	convert_int_to_ascii (mem_buf, own_buf, mem_len);
+	bin2hex (mem_buf, own_buf, mem_len);
       else
 	write_enn (own_buf);
       free (mem_buf);
@@ -1507,7 +1507,7 @@ relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 	  decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
 	  mem_buf = xmalloc (mem_len);
 	  if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
-	    convert_int_to_ascii (mem_buf, own_buf, mem_len);
+	    bin2hex (mem_buf, own_buf, mem_len);
 	  else
 	    write_enn (own_buf);
 	}

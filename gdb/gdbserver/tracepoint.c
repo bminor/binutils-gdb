@@ -3663,7 +3663,7 @@ cmd_qtstatus (char *packet)
       p = stop_reason_rsp = alloca (strlen ("terror:") + hexstr_len + 1);
       strcpy (p, "terror:");
       p += strlen (p);
-      convert_int_to_ascii ((gdb_byte *) result_name, p, strlen (result_name));
+      bin2hex ((gdb_byte *) result_name, p, strlen (result_name));
     }
 
   /* If this was a forced stop, include any stop note that was supplied.  */
@@ -3782,7 +3782,7 @@ response_source (char *packet,
 
   len = strlen (src->str);
   buf = alloca (len * 2 + 1);
-  convert_int_to_ascii ((gdb_byte *) src->str, buf, len);
+  bin2hex ((gdb_byte *) src->str, buf, len);
 
   sprintf (packet, "Z%x:%s:%s:%x:%x:%s",
 	   tpoint->number, paddress (tpoint->address),
@@ -3871,7 +3871,7 @@ response_tsv (char *packet, struct trace_state_variable *tsv)
     {
       namelen = strlen (tsv->name);
       buf = alloca (namelen * 2 + 1);
-      convert_int_to_ascii ((gdb_byte *) tsv->name, buf, namelen);
+      bin2hex ((gdb_byte *) tsv->name, buf, namelen);
     }
 
   sprintf (packet, "%x:%s:%x:%s", tsv->number, phex_nz (tsv->initial_value, 0),
@@ -4041,7 +4041,7 @@ cmd_qtbuffer (char *own_buf)
   if (num >= (PBUFSIZ - 16) / 2 )
     num = (PBUFSIZ - 16) / 2;
 
-  convert_int_to_ascii (tbp, own_buf, num);
+  bin2hex (tbp, own_buf, num);
 }
 
 static void
@@ -6930,7 +6930,7 @@ cstr_to_hexstr (const char *str)
 {
   int len = strlen (str);
   char *hexstr = xmalloc (len * 2 + 1);
-  convert_int_to_ascii ((gdb_byte *) str, hexstr, len);
+  bin2hex ((gdb_byte *) str, hexstr, len);
   return hexstr;
 }
 

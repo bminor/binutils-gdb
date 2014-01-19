@@ -207,8 +207,7 @@ registers_to_string (struct regcache *regcache, char *buf)
     {
       if (regcache->register_status[i] == REG_VALID)
 	{
-	  convert_int_to_ascii (registers, buf,
-				register_size (tdesc, i));
+	  bin2hex (registers, buf, register_size (tdesc, i));
 	  buf += register_size (tdesc, i) * 2;
 	}
       else
@@ -419,8 +418,8 @@ collect_register (struct regcache *regcache, int n, void *buf)
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)
 {
-  convert_int_to_ascii (register_data (regcache, n, 1), buf,
-			register_size (regcache->tdesc, n));
+  bin2hex (register_data (regcache, n, 1), buf,
+	   register_size (regcache->tdesc, n));
 }
 
 void

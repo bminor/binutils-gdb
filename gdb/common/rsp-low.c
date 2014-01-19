@@ -172,22 +172,6 @@ bin2hex (const gdb_byte *bin, char *hex, int count)
   return i;
 }
 
-void
-convert_int_to_ascii (const unsigned char *from, char *to, int n)
-{
-  int nib;
-  int ch;
-  while (n--)
-    {
-      ch = *from++;
-      nib = ((ch & 0xf0) >> 4) & 0x0f;
-      *to++ = tohex (nib);
-      nib = ch & 0x0f;
-      *to++ = tohex (nib);
-    }
-  *to++ = 0;
-}
-
 int
 remote_escape_output (const gdb_byte *buffer, int len,
 		      gdb_byte *out_buf, int *out_len,
