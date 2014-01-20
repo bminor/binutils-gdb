@@ -218,6 +218,12 @@ set build_tests {
   {"Build needed2"
    "tmpdir/libneeded2c.o -Wl,--as-needed tmpdir/libneeded2a.so tmpdir/libneeded2b.so" ""
    {dummy.c} {} "needed2"}
+  {"Build libpr2404a.so"
+   "-shared" "-fPIC"
+   {pr2404a.c} {} "libpr2404a.so"}
+  {"Build libpr2404b.a"
+   "" ""
+   {pr2404b.c} {} "libpr2404b.a"}
 }
 
 run_cc_link_tests $build_tests
@@ -365,6 +371,9 @@ set run_tests {
     {"Run relmain"
      "--no-as-needed -rpath=tmpdir -Ltmpdir -lrel" ""
      {relmain.c} "relmain" "relmain.out"}
+    {"Run pr2404"
+     "tmpdir/pr2404b.o tmpdir/libpr2404a.so" ""
+     {dummy.c} "pr2404" "pr2404.out"}
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
