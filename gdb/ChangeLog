@@ -1,5 +1,11 @@
 2014-02-05  Yao Qi  <yao@codesourcery.com>
 
+	* remote.c (remote_pass_signals): Remove local 'buf' and use
+	rs->buf.
+	(remote_program_signals): Likewise.
+
+2014-02-05  Yao Qi  <yao@codesourcery.com>
+
 	* ctf.c: Include "inferior.h" and "gdbthread.h".
 	(CTF_PID): A new macro.
 	(ctf_open): Call inferior_appeared and add_thread_silent.

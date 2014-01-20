@@ -1732,11 +1732,9 @@ remote_pass_signals (int numsigs, unsigned char *pass_signals)
       *p = 0;
       if (!rs->last_pass_packet || strcmp (rs->last_pass_packet, pass_packet))
 	{
-	  char *buf = rs->buf;
-
 	  putpkt (pass_packet);
 	  getpkt (&rs->buf, &rs->buf_size, 0);
-	  packet_ok (buf, &remote_protocol_packets[PACKET_QPassSignals]);
+	  packet_ok (rs->buf, &remote_protocol_packets[PACKET_QPassSignals]);
 	  if (rs->last_pass_packet)
 	    xfree (rs->last_pass_packet);
 	  rs->last_pass_packet = pass_packet;
@@ -1785,11 +1783,9 @@ remote_program_signals (int numsigs, unsigned char *signals)
       if (!rs->last_program_signals_packet
 	  || strcmp (rs->last_program_signals_packet, packet) != 0)
 	{
-	  char *buf = rs->buf;
-
 	  putpkt (packet);
 	  getpkt (&rs->buf, &rs->buf_size, 0);
-	  packet_ok (buf, &remote_protocol_packets[PACKET_QProgramSignals]);
+	  packet_ok (rs->buf, &remote_protocol_packets[PACKET_QProgramSignals]);
 	  xfree (rs->last_program_signals_packet);
 	  rs->last_program_signals_packet = packet;
 	}
