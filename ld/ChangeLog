@@ -1,3 +1,21 @@
+2014-01-20  Guy Martin <gmsoft@tuxicoman.be>
+	    Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (lang_output_section_get): Define.
+	* ldlang.c (lang_output_section_get): Likewise.
+	(init_os): Set the output_section userdata to the output
+	section statement.
+	* emultempl/hppaelf.em: Use lang_output_section_get instead of
+	lang_output_section_find where applicable.
+	* emultempl/aarch64elf.em: Likewise.
+	* emultempl/aix.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/metagelf.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+
 2014-01-17  Alan Modra  <amodra@gmail.com>
 
 	* genscripts.sh (COMPILE_IN): Don't set if already set.

@@ -1376,6 +1376,14 @@ lang_memory_default (asection * section)
   return lang_memory_region_lookup (DEFAULT_MEMORY_REGION, FALSE);
 }
 
+/* Get the output section statement directly from the userdata.  */
+
+lang_output_section_statement_type *
+lang_output_section_get (const asection *output_section)
+{
+  return get_userdata (output_section);
+}
+
 /* Find or create an output_section_statement with the given NAME.
    If CONSTRAINT is non-zero match one with that constraint, otherwise
    match any non-negative constraint.  If CREATE, always make a
@@ -2103,6 +2111,10 @@ init_os (lang_output_section_statement_type *s, flagword flags)
     }
   s->bfd_section->output_section = s->bfd_section;
   s->bfd_section->output_offset = 0;
+
+  /* Set the userdata of the output section to the output section
+     statement to avoid lookup.  */
+  get_userdata (s->bfd_section) = s;
 
   /* If there is a base address, make sure that any sections it might
      mention are initialized.  */

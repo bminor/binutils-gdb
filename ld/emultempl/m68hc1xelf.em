@@ -250,7 +250,6 @@ m68hc11elf_add_stub_section (const char *stub_sec_name,
   asection *stub_sec;
   flagword flags;
   asection *output_section;
-  const char *secname;
   lang_output_section_statement_type *os;
   struct hook_stub_info info;
 
@@ -262,8 +261,7 @@ m68hc11elf_add_stub_section (const char *stub_sec_name,
     goto err_ret;
 
   output_section = tramp_section->output_section;
-  secname = bfd_get_section_name (output_section->owner, output_section);
-  os = lang_output_section_find (secname);
+  os = lang_output_section_get (output_section);
 
   /* Try to put the new section at the same place as an existing
      .tramp section.  Such .tramp section exists in most cases and

@@ -584,6 +584,8 @@ extern lang_input_statement_type *lang_add_input_file
   (const char *, lang_input_file_enum_type, const char *);
 extern void lang_add_keepsyms_file
   (const char *);
+extern lang_output_section_statement_type *lang_output_section_get
+  (const asection *);
 extern lang_output_section_statement_type *lang_output_section_statement_lookup
   (const char *, int, bfd_boolean);
 extern lang_output_section_statement_type *next_matching_output_section_statement
