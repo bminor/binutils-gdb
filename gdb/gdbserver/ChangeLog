@@ -1,5 +1,9 @@
 2014-06-12  Tom Tromey  <tromey@redhat.com>
 
+	* utils.c (freeargv): Remove.
+
+2014-06-12  Tom Tromey  <tromey@redhat.com>
+
 	* debug.c (debug_printf): Remove HAVE_GETTIMEOFDAY checks.
 	* server.c (monitor_show_help): Remove HAVE_GETTIMEOFDAY check.
 	(parse_debug_format_options): Likewise.
