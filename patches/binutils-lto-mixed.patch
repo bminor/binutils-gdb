@@ -1,4 +1,4 @@
-From fad376ce296ef7efcbfd09249d6db9c9a5906fcb Mon Sep 17 00:00:00 2001
+From 369e32894e598e8c04db1bb77d456154b1539849 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 4 Nov 2013 09:17:45 -0800
 Subject: [PATCH] Add lto and none-lto input support for ld -r
@@ -1090,10 +1090,10 @@ index cd3bcdd..decd37f 100644
  /* The next three section types are defined by Solaris, and are named
     SHT_SUNW*.  We use them in GNU code, so we also define SHT_GNU*
 diff --git a/ld/emultempl/aarch64elf.em b/ld/emultempl/aarch64elf.em
-index b3279bf..54b9460 100644
+index b631feb..7f706cd 100644
 --- a/ld/emultempl/aarch64elf.em
 +++ b/ld/emultempl/aarch64elf.em
-@@ -264,7 +264,7 @@ gld${EMULATION_NAME}_after_allocation (void)
+@@ -262,7 +262,7 @@ gld${EMULATION_NAME}_after_allocation (void)
  }
  
  static void
@@ -1102,7 +1102,7 @@ index b3279bf..54b9460 100644
  {
    if (! link_info.relocatable)
      {
-@@ -276,7 +276,7 @@ gld${EMULATION_NAME}_finish (void)
+@@ -274,7 +274,7 @@ gld${EMULATION_NAME}_finish (void)
  	}
      }
  
@@ -1111,7 +1111,7 @@ index b3279bf..54b9460 100644
  }
  
  /* This is a convenient point to tell BFD about target specific flags.
-@@ -413,4 +413,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=aarch64_elf_create_output_section_statem
+@@ -411,4 +411,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=aarch64_elf_create_output_section_statem
  LDEMUL_BEFORE_PARSE=gld"${EMULATION_NAME}"_before_parse
  
  # Call the extra arm-elf function
@@ -1131,10 +1131,10 @@ index 21064ad..ec0965a 100644
  EOF
  
 diff --git a/ld/emultempl/armelf.em b/ld/emultempl/armelf.em
-index eee6af1..dda213e 100644
+index 85e924f..369e01d 100644
 --- a/ld/emultempl/armelf.em
 +++ b/ld/emultempl/armelf.em
-@@ -365,7 +365,7 @@ gld${EMULATION_NAME}_after_allocation (void)
+@@ -363,7 +363,7 @@ gld${EMULATION_NAME}_after_allocation (void)
  }
  
  static void
@@ -1143,7 +1143,7 @@ index eee6af1..dda213e 100644
  {
    struct bfd_link_hash_entry * h;
  
-@@ -388,7 +388,7 @@ gld${EMULATION_NAME}_finish (void)
+@@ -386,7 +386,7 @@ gld${EMULATION_NAME}_finish (void)
  	}
      }
  
@@ -1152,14 +1152,14 @@ index eee6af1..dda213e 100644
  
    if (thumb_entry_symbol)
      {
-@@ -689,4 +689,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=arm_elf_create_output_section_statements
+@@ -687,4 +687,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=arm_elf_create_output_section_statements
  LDEMUL_BEFORE_PARSE=gld"${EMULATION_NAME}"_before_parse
  
  # Call the extra arm-elf function
 -LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 +LDEMUL_FINISH=arm_finish
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index 9a2fe89..6cca6a0 100644
+index a4f04f1..9df20d0 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
 @@ -68,6 +68,7 @@ static void gld${EMULATION_NAME}_before_allocation (void);
@@ -1170,7 +1170,7 @@ index 9a2fe89..6cca6a0 100644
  EOF
  
  if [ "x${USE_LIBPATH}" = xyes ] ; then
-@@ -1776,6 +1777,8 @@ output_rel_find (asection *sec, int isdyn)
+@@ -1796,6 +1797,8 @@ output_rel_find (asection *sec, int isdyn)
    return last;
  }
  
@@ -1179,7 +1179,7 @@ index 9a2fe89..6cca6a0 100644
  /* Place an orphan section.  We use this to put random SHF_ALLOC
     sections in the right segment.  */
  
-@@ -1784,7 +1787,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1804,7 +1807,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
  				   const char *secname,
  				   int constraint)
  {
@@ -1188,7 +1188,7 @@ index 9a2fe89..6cca6a0 100644
      {
        { ".text",
  	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE,
-@@ -1811,6 +1814,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1831,6 +1834,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
  	SEC_HAS_CONTENTS,
  	0, 0, 0, 0 },
      };
@@ -1196,7 +1196,7 @@ index 9a2fe89..6cca6a0 100644
    enum orphan_save_index
      {
        orphan_text = 0,
-@@ -1822,7 +1826,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1842,7 +1846,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
        orphan_sdata,
        orphan_nonalloc
      };
@@ -1204,7 +1204,7 @@ index 9a2fe89..6cca6a0 100644
    struct orphan_save *place;
    lang_output_section_statement_type *after;
    lang_output_section_statement_type *os;
-@@ -1899,15 +1902,22 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1919,15 +1922,22 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
  
    if (!orphan_init_done)
      {
@@ -1228,7 +1228,7 @@ index 9a2fe89..6cca6a0 100644
        orphan_init_done = 1;
      }
  
-@@ -1977,6 +1987,27 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1997,6 +2007,27 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
  EOF
  fi
  
@@ -1256,7 +1256,7 @@ index 9a2fe89..6cca6a0 100644
  if test x"$LDEMUL_AFTER_ALLOCATION" != xgld"$EMULATION_NAME"_after_allocation; then
  fragment <<EOF
  
-@@ -2527,7 +2558,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+@@ -2547,7 +2578,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
    ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
    "${EMULATION_NAME}",
    "${OUTPUT_FORMAT}",
@@ -1266,10 +1266,10 @@ index 9a2fe89..6cca6a0 100644
    ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
    ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},
 diff --git a/ld/emultempl/ppc64elf.em b/ld/emultempl/ppc64elf.em
-index f2085d7..00398bb 100644
+index c126297..d54c914 100644
 --- a/ld/emultempl/ppc64elf.em
 +++ b/ld/emultempl/ppc64elf.em
-@@ -532,7 +532,7 @@ gld${EMULATION_NAME}_after_allocation (void)
+@@ -530,7 +530,7 @@ gld${EMULATION_NAME}_after_allocation (void)
  /* Final emulation specific call.  */
  
  static void
@@ -1278,7 +1278,7 @@ index f2085d7..00398bb 100644
  {
    /* e_entry on PowerPC64 points to the function descriptor for
       _start.  If _start is missing, default to the first function
-@@ -564,7 +564,7 @@ gld${EMULATION_NAME}_finish (void)
+@@ -562,7 +562,7 @@ gld${EMULATION_NAME}_finish (void)
      }
  
    ppc64_elf_restore_symbols (&link_info);
@@ -1287,7 +1287,7 @@ index f2085d7..00398bb 100644
  }
  
  
-@@ -866,6 +866,6 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
+@@ -864,6 +864,6 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
  #
  LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
  LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
@@ -1296,10 +1296,10 @@ index f2085d7..00398bb 100644
  LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
  LDEMUL_NEW_VERS_PATTERN=gld${EMULATION_NAME}_new_vers_pattern
 diff --git a/ld/emultempl/spuelf.em b/ld/emultempl/spuelf.em
-index e14fa26..1dbc88a 100644
+index 8feb8bf..4f22a27 100644
 --- a/ld/emultempl/spuelf.em
 +++ b/ld/emultempl/spuelf.em
-@@ -416,7 +416,7 @@ spu_elf_relink (void)
+@@ -417,7 +417,7 @@ spu_elf_relink (void)
  /* Final emulation specific call.  */
  
  static void
@@ -1308,7 +1308,7 @@ index e14fa26..1dbc88a 100644
  {
    if (is_spu_target ())
      {
-@@ -432,7 +432,7 @@ gld${EMULATION_NAME}_finish (void)
+@@ -433,7 +433,7 @@ gld${EMULATION_NAME}_finish (void)
  	einfo ("%P: --auto-overlay ignored with zero local store range\n");
      }
  
@@ -1317,7 +1317,7 @@ index e14fa26..1dbc88a 100644
  }
  
  static char *
-@@ -832,5 +832,5 @@ PARSE_AND_LIST_ARGS_CASES='
+@@ -833,5 +833,5 @@ PARSE_AND_LIST_ARGS_CASES='
  
  LDEMUL_AFTER_OPEN=spu_after_open
  LDEMUL_BEFORE_ALLOCATION=spu_before_allocation
@@ -1339,7 +1339,7 @@ index 16baef8..2efbc56 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index c5e7a3d..591a6e1 100644
+index 9e35527..8690329 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -1370,7 +1370,7 @@ index c5e7a3d..591a6e1 100644
  
  /* Forward declarations.  */
  static void exp_init_os (etree_type *);
-@@ -87,6 +94,10 @@ static void lang_record_phdrs (void);
+@@ -86,6 +93,10 @@ static void lang_record_phdrs (void);
  static void lang_do_version_exports_section (void);
  static void lang_finalize_version_expr_head
    (struct bfd_elf_version_expr_head *);
@@ -1381,7 +1381,7 @@ index c5e7a3d..591a6e1 100644
  
  /* Exported variables.  */
  const char *output_target;
-@@ -1202,14 +1213,17 @@ output_section_statement_table_free (void)
+@@ -1201,14 +1212,17 @@ output_section_statement_table_free (void)
  /* Build enough state so that the parser can build its tree.  */
  
  void
@@ -1401,19 +1401,19 @@ index c5e7a3d..591a6e1 100644
    lang_list_init (stat_ptr);
  
    lang_list_init (&input_file_chain);
-@@ -1228,18 +1242,20 @@ lang_init (void)
-      simpler to re-use working machinery than using a linked list in terms
-      of code-complexity here in ld, besides the initialization which just
-      looks like other code here.  */
+@@ -1223,18 +1237,20 @@ lang_init (void)
+ 
+   /* The value "13" is ad-hoc, somewhat related to the expected number of
+      assignments in a linker script.  */
 -  if (!bfd_hash_table_init_n (&lang_definedness_table,
 -			      lang_definedness_newfunc,
 -			      sizeof (struct lang_definedness_hash_entry),
--			      3))
+-			      13))
 +  if (!object_only
 +      && !bfd_hash_table_init_n (&lang_definedness_table,
 +				 lang_definedness_newfunc,
 +				 sizeof (struct lang_definedness_hash_entry),
-+				 3))
++				 13))
      einfo (_("%P%F: can not create hash table: %E\n"));
  }
  
@@ -1428,7 +1428,7 @@ index c5e7a3d..591a6e1 100644
    output_section_statement_table_free ();
  }
  
-@@ -2769,6 +2785,12 @@ load_symbols (lang_input_statement_type *entry,
+@@ -2751,6 +2767,12 @@ load_symbols (lang_input_statement_type *entry,
  		  loaded = FALSE;
  		}
  
@@ -1441,7 +1441,7 @@ index c5e7a3d..591a6e1 100644
  	      subsbfd = member;
  	      if (!(*link_info.callbacks
  		    ->add_archive_element) (&link_info, member,
-@@ -6659,7 +6681,38 @@ lang_process (void)
+@@ -6621,7 +6643,38 @@ lang_process (void)
  	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
  	}
      }
@@ -1480,7 +1480,7 @@ index c5e7a3d..591a6e1 100644
  
    link_info.gc_sym_list = &entry_symbol;
    if (entry_symbol.name == NULL)
-@@ -8059,3 +8112,963 @@ lang_ld_feature (char *str)
+@@ -8021,3 +8074,963 @@ lang_ld_feature (char *str)
        p = q;
      }
  }
@@ -2445,10 +2445,10 @@ index c5e7a3d..591a6e1 100644
 +      }
 +}
 diff --git a/ld/ldlang.h b/ld/ldlang.h
-index 2dbec5a..1754457 100644
+index 8c815c6..387427b 100644
 --- a/ld/ldlang.h
 +++ b/ld/ldlang.h
-@@ -488,9 +488,9 @@ extern lang_statement_list_type input_file_chain;
+@@ -502,9 +502,9 @@ extern lang_statement_list_type input_file_chain;
  extern int lang_statement_iteration;
  
  extern void lang_init
@@ -2460,7 +2460,7 @@ index 2dbec5a..1754457 100644
  extern lang_memory_region_type * lang_memory_region_lookup
    (const char * const, bfd_boolean);
  extern void lang_memory_region_alias
-@@ -660,4 +660,45 @@ ldlang_override_segment_assignment
+@@ -675,4 +675,45 @@ ldlang_override_segment_assignment
  extern void
  lang_ld_feature (char *);
  
@@ -3329,5 +3329,5 @@ index 0000000..0b14948
 + 0x0+1 \(NEEDED\) +Shared library: \[libgcc_s.so.[0-9]+\]
 +#...
 -- 
-1.8.4.2
+1.8.3.1
 
