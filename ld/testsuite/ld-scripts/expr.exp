@@ -25,3 +25,4 @@ run_dump_test expr2
 run_dump_test sane1
 run_dump_test assign-loc
 run_dump_test pr14962
+run_dump_test pr14962-2

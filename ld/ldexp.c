@@ -575,13 +575,10 @@ fold_name (etree_type *tree)
       break;
 
     case DEFINED:
-      if (expld.phase == lang_first_phase_enum)
-	lang_track_definedness (tree->name.name);
-      else
+      if (expld.phase != lang_first_phase_enum)
 	{
 	  struct bfd_link_hash_entry *h;
-	  int def_iteration
-	    = lang_symbol_definition_iteration (tree->name.name);
+	  struct lang_definedness_hash_entry *def;
 
 	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 					    &link_info,
@@ -591,15 +588,33 @@ fold_name (etree_type *tree)
 		      && (h->type == bfd_link_hash_defined
 			  || h->type == bfd_link_hash_defweak
 			  || h->type == bfd_link_hash_common)
-		      && (def_iteration == lang_statement_iteration
-			  || def_iteration == -1));
+		      && ((def = lang_symbol_defined (tree->name.name)) == NULL
+			  || def->by_object
+			  || def->iteration == (lang_statement_iteration & 1)));
 	}
       break;
 
     case NAME:
       if (expld.assign_name != NULL
 	  && strcmp (expld.assign_name, tree->name.name) == 0)
-	expld.assign_name = NULL;
+	{
+	  /* Self-assignment is only allowed for absolute symbols
+	     defined in a linker script.  */
+	  struct bfd_link_hash_entry *h;
+	  struct lang_definedness_hash_entry *def;
+
+	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
+					    &link_info,
+					    tree->name.name,
+					    FALSE, FALSE, TRUE);
+	  if (!(h != NULL
+		&& (h->type == bfd_link_hash_defined
+		    || h->type == bfd_link_hash_defweak)
+		&& h->u.def.section == bfd_abs_section_ptr
+		&& (def = lang_symbol_defined (tree->name.name)) != NULL
+		&& def->iteration == (lang_statement_iteration & 1)))
+	    expld.assign_name = NULL;
+	}
       if (expld.phase == lang_first_phase_enum)
 	;
       else if (tree->name.name[0] == '.' && tree->name.name[1] == 0)
