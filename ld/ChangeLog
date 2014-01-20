@@ -1,3 +1,7 @@
+2014-01-20  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* emulparams/aarch64linux.sh (ELF_INTERPRETER_NAME): Define.
+
 2014-01-20  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.h (struct lang_definedness_hash_entry): Add by_object and
