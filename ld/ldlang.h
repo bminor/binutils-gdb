@@ -465,7 +465,9 @@ struct unique_sections
 struct lang_definedness_hash_entry
 {
   struct bfd_hash_entry root;
-  int iteration;
+  unsigned int by_object : 1;
+  unsigned int by_script : 1;
+  unsigned int iteration : 1;
 };
 
 /* Used by place_orphan to keep track of orphan sections and statements.  */
@@ -584,6 +586,8 @@ extern lang_input_statement_type *lang_add_input_file
   (const char *, lang_input_file_enum_type, const char *);
 extern void lang_add_keepsyms_file
   (const char *);
+extern lang_output_section_statement_type *lang_output_section_get
+  (const asection *);
 extern lang_output_section_statement_type *lang_output_section_statement_lookup
   (const char *, int, bfd_boolean);
 extern lang_output_section_statement_type *next_matching_output_section_statement
@@ -656,8 +660,7 @@ extern void lang_add_unique
   (const char *);
 extern const char *lang_get_output_target
   (void);
-extern void lang_track_definedness (const char *);
-extern int lang_symbol_definition_iteration (const char *);
+extern struct lang_definedness_hash_entry *lang_symbol_defined (const char *);
 extern void lang_update_definedness
   (const char *, struct bfd_link_hash_entry *);
 

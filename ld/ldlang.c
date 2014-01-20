@@ -107,7 +107,7 @@ struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
 
  /* Functions that traverse the linker script and might evaluate
-    DEFINED() need to increment this.  */
+    DEFINED() need to increment this at the start of the traversal.  */
 int lang_statement_iteration = 0;
 
 etree_type *base; /* Relocation base - or null */
@@ -1221,16 +1221,12 @@ lang_init (void)
 
   abs_output_section->bfd_section = bfd_abs_section_ptr;
 
-  /* The value "3" is ad-hoc, somewhat related to the expected number of
-     DEFINED expressions in a linker script.  For most default linker
-     scripts, there are none.  Why a hash table then?  Well, it's somewhat
-     simpler to re-use working machinery than using a linked list in terms
-     of code-complexity here in ld, besides the initialization which just
-     looks like other code here.  */
+  /* The value "13" is ad-hoc, somewhat related to the expected number of
+     assignments in a linker script.  */
   if (!bfd_hash_table_init_n (&lang_definedness_table,
 			      lang_definedness_newfunc,
 			      sizeof (struct lang_definedness_hash_entry),
-			      3))
+			      13))
     einfo (_("%P%F: can not create hash table: %E\n"));
 }
 
@@ -1374,6 +1370,14 @@ lang_memory_default (asection * section)
 	}
     }
   return lang_memory_region_lookup (DEFAULT_MEMORY_REGION, FALSE);
+}
+
+/* Get the output section statement directly from the userdata.  */
+
+lang_output_section_statement_type *
+lang_output_section_get (const asection *output_section)
+{
+  return get_userdata (output_section);
 }
 
 /* Find or create an output_section_statement with the given NAME.
@@ -2046,7 +2050,7 @@ lang_map (void)
       obstack_begin (&map_obstack, 1000);
       bfd_link_hash_traverse (link_info.hash, sort_def_symbol, 0);
     }
-  lang_statement_iteration ++;
+  lang_statement_iteration++;
   print_statements ();
 }
 
@@ -2103,6 +2107,10 @@ init_os (lang_output_section_statement_type *s, flagword flags)
     }
   s->bfd_section->output_section = s->bfd_section;
   s->bfd_section->output_offset = 0;
+
+  /* Set the userdata of the output section to the output section
+     statement to avoid lookup.  */
+  get_userdata (s->bfd_section) = s;
 
   /* If there is a base address, make sure that any sections it might
      mention are initialized.  */
@@ -3274,15 +3282,6 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
     einfo ("%F");
 }
 
-/* Add a symbol to a hash of symbols used in DEFINED (NAME) expressions.  */
-
-void
-lang_track_definedness (const char *name)
-{
-  if (bfd_hash_lookup (&lang_definedness_table, name, TRUE, FALSE) == NULL)
-    einfo (_("%P%F: bfd_hash_lookup failed creating symbol %s\n"), name);
-}
-
 /* New-function for the definedness hash table.  */
 
 static struct bfd_hash_entry *
@@ -3300,28 +3299,22 @@ lang_definedness_newfunc (struct bfd_hash_entry *entry,
   if (ret == NULL)
     einfo (_("%P%F: bfd_hash_allocate failed creating symbol %s\n"), name);
 
-  ret->iteration = -1;
+  ret->by_object = 0;
+  ret->by_script = 0;
+  ret->iteration = 0;
   return &ret->root;
 }
 
-/* Return the iteration when the definition of NAME was last updated.  A
-   value of -1 means that the symbol is not defined in the linker script
-   or the command line, but may be defined in the linker symbol table.  */
+/* Called during processing of linker script script expressions.
+   For symbols assigned in a linker script, return a struct describing
+   where the symbol is defined relative to the current expression,
+   otherwise return NULL.  */
 
-int
-lang_symbol_definition_iteration (const char *name)
+struct lang_definedness_hash_entry *
+lang_symbol_defined (const char *name)
 {
-  struct lang_definedness_hash_entry *defentry
-    = (struct lang_definedness_hash_entry *)
-    bfd_hash_lookup (&lang_definedness_table, name, FALSE, FALSE);
-
-  /* We've already created this one on the presence of DEFINED in the
-     script, so it can't be NULL unless something is borked elsewhere in
-     the code.  */
-  if (defentry == NULL)
-    FAIL ();
-
-  return defentry->iteration;
+  return ((struct lang_definedness_hash_entry *)
+	  bfd_hash_lookup (&lang_definedness_table, name, FALSE, FALSE));
 }
 
 /* Update the definedness state of NAME.  */
@@ -3331,25 +3324,20 @@ lang_update_definedness (const char *name, struct bfd_link_hash_entry *h)
 {
   struct lang_definedness_hash_entry *defentry
     = (struct lang_definedness_hash_entry *)
-    bfd_hash_lookup (&lang_definedness_table, name, FALSE, FALSE);
+    bfd_hash_lookup (&lang_definedness_table, name, TRUE, FALSE);
 
-  /* We don't keep track of symbols not tested with DEFINED.  */
   if (defentry == NULL)
-    return;
+    einfo (_("%P%F: bfd_hash_lookup failed creating symbol %s\n"), name);
 
-  /* If the symbol was already defined, and not from an earlier statement
-     iteration, don't update the definedness iteration, because that'd
-     make the symbol seem defined in the linker script at this point, and
-     it wasn't; it was defined in some object.  If we do anyway, DEFINED
-     would start to yield false before this point and the construct "sym =
-     DEFINED (sym) ? sym : X;" would change sym to X despite being defined
-     in an object.  */
-  if (h->type != bfd_link_hash_undefined
+  /* If the symbol was already defined, and not by a script, then it
+     must be defined by an object file.  */
+  if (!defentry->by_script
+      && h->type != bfd_link_hash_undefined
       && h->type != bfd_link_hash_common
-      && h->type != bfd_link_hash_new
-      && defentry->iteration == -1)
-    return;
+      && h->type != bfd_link_hash_new)
+    defentry->by_object = 1;
 
+  defentry->by_script = 1;
   defentry->iteration = lang_statement_iteration;
 }
 

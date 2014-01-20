@@ -1,3 +1,20 @@
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: New file.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/primitive-types.exp: New file.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* configure.ac: Create gdb.dlang/Makefile.
+	* configure: Regenerate.
+	* Makefile.in (ALL_SUBDIRS): Add gdb.dlang.
+	* gdb.dlang/Makefile.in: New file.
+	* lib/d-support.exp: New file.
+	* lib/gdb.exp (skip_d_tests): New proc.
+
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/delta.exp: Check reverse stepi.

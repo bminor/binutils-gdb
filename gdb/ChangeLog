@@ -1,3 +1,57 @@
+2014-01-20  Baruch Siach  <baruch@tkos.co.il>
+
+	* xtensa-linux-nat.c: Include asm/ptrace.h.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* Makefile.in (SFILES): Add d-support.c.
+	(COMMON_OBS): Add d-support.o.
+	* d-lang.h (d_parse_symbol): Add comment, now defined in
+	d-support.c.
+	* d-lang.c (parse_call_convention)
+	(parse_attributes, parse_function_types)
+	(parse_function_args, parse_type, parse_identifier)
+	(call_convention_p, d_parse_symbol): Move functions to ...
+	* d-support.c: ... New file.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-lang.h (d_parse_symbol): Add declaration.
+	* d-lang.c (extract_identifiers)
+	(extract_type_info): Remove functions.
+	(parse_call_convention, parse_attributes)
+	(parse_function_types, parse_function_args)
+	(parse_type, parse_identifier, call_convention_p)
+	(d_parse_symbol): New functions.
+	(d_demangle): Use d_parse_symbol to demangle D symbols.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-lang.h (struct builtin_d_type): New data type.
+	(builtin_d_type): Add declaration.
+	* d-lang.c (d_language_arch_info, build_d_types)
+	(builtin_d_type): New functions.
+	(enum d_primitive_types): New data type.
+	(d_language_defn): Change c_language_arch_info to
+	d_language_arch_info.
+	(d_type_data): New static variable.
+	(_initialize_d_language): Initialize d_type_data.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-lang.h (d_main_name): Add declaration.
+	* d-lang.c (d_main_name): New function.
+	* symtab.c (find_main_name): Add call to d_main_name.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-lang.c (d_language_defn): Change macro_expansion_c to
+	macro_expansion_no.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* MAINTAINERS: Add myself as a write-after-approval maintainer.
+
 2014-01-17  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* breakpoint.c (insert_bp_location): Add "volatile" keyword to "struct

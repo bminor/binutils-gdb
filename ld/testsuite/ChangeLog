@@ -1,3 +1,20 @@
+2014-01-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2404
+	* ld-elf/pr2404.out: New file.
+	* ld-elf/pr2404a.c: Likewise.
+	* ld-elf/pr2404b.c: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Build libpr2404a.so and
+	libpr2404b.a.
+	(run_tests): Run pr2404.
+
+2014-01-20  Alan Modra  <amodra@gmail.com>
+
+	* ld-scripts/pr14962-2.d,
+	* ld-scripts/pr14962-2.t: New test.
+	* ld-scripts/expr.exp: Run it.
+
 2014-01-15  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/ehdr_start-shared.d: New.
