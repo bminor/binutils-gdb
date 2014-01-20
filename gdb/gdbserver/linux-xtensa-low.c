@@ -24,7 +24,7 @@
 void init_registers_xtensa (void);
 extern const struct target_desc *tdesc_xtensa;
 
-#include <sys/ptrace.h>
+#include <asm/ptrace.h>
 #include <xtensa-config.h>
 
 #include "xtensa-xtregs.c"

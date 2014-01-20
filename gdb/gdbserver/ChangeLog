@@ -1,3 +1,8 @@
+2014-01-20  Baruch Siach  <baruch@tkos.co.il>
+
+	* linux-xtensa-low.c: Include asm/ptrace.h instead of
+	sys/ptrace.h.
+
 2014-01-17  Pedro Alves  <palves@redhat.com>
 
 	PR build/16445
