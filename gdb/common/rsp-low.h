@@ -28,13 +28,34 @@ extern int fromhex (int a);
 
 extern int tohex (int nib);
 
+/* Write a character representing the low order four bits of NIBBLE in
+   hex to *BUF.  Returns BUF+1.  */
+
 extern char *pack_nibble (char *buf, int nibble);
+
+/* Write the low byte of BYTE in hex to *BUF.  Returns BUF+2.  */
 
 extern char *pack_hex_byte (char *pkt, int byte);
 
+/* Read hex digits from BUFF and convert to a number, which is stored
+   in RESULT.  Reads until a non-hex digit is seen.  Returns a pointer
+   to the terminating character.  */
+
 extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 
+/* HEX is a string of characters representing hexadecimal digits.
+   Convert pairs of hex digits to bytes and store sequentially into
+   BIN.  COUNT is the maximum number of characters to convert.  This
+   will convert fewer characters if the number of hex characters
+   actually seen is odd, or if HEX terminates before COUNT characters.
+   Returns the number of characters actually converted.  */
+
 extern int hex2bin (const char *hex, gdb_byte *bin, int count);
+
+/* Convert some bytes to a hexadecimal representation.  BIN holds the
+   bytes to convert.  COUNT says how many bytes to convert.  The
+   resulting characters are stored in HEX, followed by a NUL
+   character.  Returns the number of bytes actually converted.  */
 
 extern int bin2hex (const gdb_byte *bin, char *hex, int count);
 

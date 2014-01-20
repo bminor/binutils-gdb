@@ -27,7 +27,7 @@
 
 #include "rsp-low.h"
 
-/* Convert hex digit A to a number.  */
+/* See rsp-low.h.  */
 
 int
 fromhex (int a)
@@ -41,6 +41,8 @@ fromhex (int a)
   else
     error (_("Reply contains invalid hex digit %d"), a);
 }
+
+/* See rsp-low.h.  */
 
 int
 tohex (int nib)
@@ -76,12 +78,16 @@ ishex (int ch, int *val)
   return 0;
 }
 
+/* See rsp-low.h.  */
+
 char *
 pack_nibble (char *buf, int nibble)
 {
   *buf++ = hexchars[(nibble & 0x0f)];
   return buf;
 }
+
+/* See rsp-low.h.  */
 
 char *
 pack_hex_byte (char *pkt, int byte)
@@ -90,6 +96,8 @@ pack_hex_byte (char *pkt, int byte)
   *pkt++ = hexchars[(byte & 0xf)];
   return pkt;
 }
+
+/* See rsp-low.h.  */
 
 char *
 unpack_varlen_hex (char *buff,	/* packet to parse */
@@ -107,6 +115,8 @@ unpack_varlen_hex (char *buff,	/* packet to parse */
   *result = retval;
   return buff;
 }
+
+/* See rsp-low.h.  */
 
 int
 hex2bin (const char *hex, gdb_byte *bin, int count)
@@ -127,6 +137,8 @@ hex2bin (const char *hex, gdb_byte *bin, int count)
   return i;
 }
 
+/* See rsp-low.h.  */
+
 int
 bin2hex (const gdb_byte *bin, char *hex, int count)
 {
@@ -140,6 +152,8 @@ bin2hex (const gdb_byte *bin, char *hex, int count)
   *hex = 0;
   return i;
 }
+
+/* See rsp-low.h.  */
 
 int
 remote_escape_output (const gdb_byte *buffer, int len,
@@ -172,6 +186,8 @@ remote_escape_output (const gdb_byte *buffer, int len,
   *out_len = input_index;
   return output_index;
 }
+
+/* See rsp-low.h.  */
 
 int
 remote_unescape_input (const gdb_byte *buffer, int len,
