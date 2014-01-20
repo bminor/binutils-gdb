@@ -5518,9 +5518,6 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   thread_args.stop_signal = stop_signal;
   proc_iterate_over_threads (pi, procfs_corefile_thread_callback,
 			     &thread_args);
-
-  /* There should be always at least one thread.  */
-  gdb_assert (thread_args.note_data != note_data);
   note_data = thread_args.note_data;
 
   auxv_len = target_read_alloc (&current_target, TARGET_OBJECT_AUXV,
