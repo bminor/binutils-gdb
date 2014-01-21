@@ -2,7 +2,7 @@ dnl Autoconf configure script for GDB, the GNU debugger.
 dnl Copyright (C) 1995-2014 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
-dnl 
+dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 3 of the License, or
@@ -30,6 +30,7 @@ AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
 ACX_LARGEFILE
 AM_PROG_CC_STDC
+AM_PROG_INSTALL_STRIP
 
 AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_SYSTEM
@@ -76,7 +77,7 @@ AC_SUBST(localedir)
 
 if test x"$USE_NLS" = xyes; then
    CONFIG_ALL="$CONFIG_ALL all-po"
-   CONFIG_CLEAN="$CONFIG_CLEAN clean-po"		   
+   CONFIG_CLEAN="$CONFIG_CLEAN clean-po"
    CONFIG_INSTALL="$CONFIG_INSTALL install-po"
    CONFIG_UNINSTALL="$CONFIG_UNINSTALL uninstall-po"
 fi
@@ -548,7 +549,7 @@ AS_HELP_STRING([--with-iconv-bin=PATH], [specify where to find the iconv program
 # On alpha-osf, it appears that libtermcap and libcurses are not compatible.
 # There is a very specific comment in /usr/include/curses.h explaining that
 # termcap routines built into libcurses must not be used.
-# 
+#
 # The symptoms we observed so far is GDB unexpectedly changing
 # the terminal settings when tgetent is called - this is particularly
 # visible as the output is missing carriage returns, and so rapidly
@@ -625,7 +626,7 @@ case $host_os in
   go32* | *djgpp*)
     ac_cv_search_tgetent="none required"
     ;;
-  *mingw32*)	 
+  *mingw32*)
     ac_cv_search_tgetent="none required"
     CONFIG_OBS="$CONFIG_OBS windows-termcap.o"
     ;;
@@ -1343,7 +1344,7 @@ AC_CACHE_VAL(gdb_cv_have_ptrace_getregs,
 		[gdb_cv_have_ptrace_getregs=no])])
 AC_MSG_RESULT($gdb_cv_have_ptrace_getregs)
 if test $gdb_cv_have_ptrace_getregs = yes; then
-  AC_DEFINE(HAVE_PTRACE_GETREGS, 1, 
+  AC_DEFINE(HAVE_PTRACE_GETREGS, 1,
   [Define if sys/ptrace.h defines the PTRACE_GETREGS request.])
 fi
 
@@ -1537,7 +1538,7 @@ fi
 
 # Check if the compiler and runtime support scanning long doubles.
 
-AC_CACHE_CHECK([for long double support in scanf], 
+AC_CACHE_CHECK([for long double support in scanf],
                gdb_cv_scanf_has_long_double,
                [AC_RUN_IFELSE([AC_LANG_PROGRAM(
 [[#include <stdio.h>]],
@@ -1914,13 +1915,13 @@ fi
 case ${host} in
   *mingw32*)
     AC_DEFINE(USE_WIN32API, 1,
-              [Define if we should use the Windows API, instead of the 
-	       POSIX API.  On Windows, we use the Windows API when 
-	       building for MinGW, but the POSIX API when building 
+              [Define if we should use the Windows API, instead of the
+	       POSIX API.  On Windows, we use the Windows API when
+	       building for MinGW, but the POSIX API when building
 	       for Cygwin.])
     WIN32LIBS="$WIN32LIBS -lws2_32"
     ;;
-esac	    
+esac
 AC_SUBST(WIN32LIBS)
 
 # Add ELF support to GDB, but only if BFD includes ELF support.
@@ -2032,7 +2033,7 @@ if test "${enable_gdbtk}" = "yes"; then
           # If building tcl in the same src tree, private headers
           # are not needed, but we need to be sure to use the right
           # headers library
-	  TCL_INCLUDE="-I${TCL_SRC_DIR}/generic"          
+	  TCL_INCLUDE="-I${TCL_SRC_DIR}/generic"
           TCL_LIBRARY="${TCL_BUILD_LIB_SPEC}"
           TCL_DEPS="../tcl/${configdir}${TCL_LIB_FILE}"
         fi
@@ -2045,7 +2046,7 @@ if test "${enable_gdbtk}" = "yes"; then
         # Check for in-tree Tk
         intree="no"
         if test "${TK_SRC_DIR}" = "${topdir}/tk"; then
-          intree="yes" 
+          intree="yes"
         fi
 
         # Find Tk private headers
@@ -2102,8 +2103,8 @@ AC_SUBST(GDBTK_SRC_DIR)
 
 AC_PATH_X
 
-# Unlike the sim directory, whether a simulator is linked is controlled by 
-# presence of a gdb_sim definition in the target configure.tgt entry.  
+# Unlike the sim directory, whether a simulator is linked is controlled by
+# presence of a gdb_sim definition in the target configure.tgt entry.
 # This code just checks for a few cases where we'd like to ignore those
 # definitions, even when they're present in the '.mt' file.  These cases
 # are when --disable-sim is specified, or if the simulator directory is
@@ -2253,7 +2254,7 @@ else
 			struct bt_ctf_event *event = NULL;
 			const struct bt_definition *scope;
 
-			scope = bt_ctf_get_top_level_scope (event, 
+			scope = bt_ctf_get_top_level_scope (event,
 			      				   BT_STREAM_EVENT_HEADER);
 		        bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
 			])
