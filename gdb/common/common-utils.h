@@ -39,7 +39,7 @@
 #define FUNCTION_NAME		__PRETTY_FUNCTION__
 #else
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#define FUNCTION_NAME		__func__
+#define FUNCTION_NAME		__func__  /* ARI: func */
 #endif
 #endif
 

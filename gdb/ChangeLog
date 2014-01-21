@@ -1,5 +1,10 @@
 2014-01-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* common/common-utils.h: Add "ARI:" comment beside __func__
+	reference.
+
+2014-01-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* common/common-utils.h (FUNCTION_NAME): Expand the macro's
 	documentation a bit.
 
