@@ -1,3 +1,8 @@
+2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2404
+	* ld-elf/shared.exp: Add a PIE test for PR ld/2404.
+
 2014-01-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2404

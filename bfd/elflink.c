@@ -1090,9 +1090,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
      the type of existing regular definition mismatch.  We only do it
      if the existing regular definition won't be dynamic.  */
   if (pold_alignment == NULL
-      && !info->shared
-      && !info->export_dynamic
-      && !h->ref_dynamic
       && newdyn
       && newdef
       && !olddyn

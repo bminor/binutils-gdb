@@ -453,3 +453,29 @@ set run_cxx_tests {
 
 run_cc_link_tests $build_cxx_tests
 run_ld_link_exec_tests [] $run_cxx_tests
+
+if { [istarget *-*-linux*]
+     || [istarget *-*-nacl*]
+     || [istarget *-*-gnu*] } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build libpr2404b.a with PIE" \
+	    "" \
+	    "-fPIE" \
+	    { pr2404b.c } \
+	    {} \
+	    "libpr2404b.a" \
+	] \
+    ]
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run pr2404 with PIE" \
+	    "-pie tmpdir/pr2404b.o tmpdir/libpr2404a.so" \
+	    "" \
+	    { dummy.c } \
+	    "pr2404pie" \
+	    "pr2404.out" \
+	    "-fPIE" \
+	] \
+    ]
+}
