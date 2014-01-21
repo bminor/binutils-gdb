@@ -1,5 +1,13 @@
 2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/16467
+	* elflink.c (_bfd_elf_merge_symbol): When types of the existing
+	regular default symbol definition and the versioned dynamic
+	symbol definition mismatch, skip the default symbol definition
+	if one of them is IFUNC.
+
+2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/2404
 	* elflink.c (_bfd_elf_merge_symbol): Don't check info->shared,
 	info->export_dynamic nor h->ref_dynamic for type mismatch when

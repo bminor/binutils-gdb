@@ -1092,11 +1092,14 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && newdyn
       && newdef
       && !olddyn
-      && (olddef || h->root.type == bfd_link_hash_common)
-      && ELF_ST_TYPE (sym->st_info) != h->type
-      && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
-      && h->type != STT_NOTYPE
-      && !(newfunc && oldfunc))
+      && (((olddef || h->root.type == bfd_link_hash_common)
+	   && ELF_ST_TYPE (sym->st_info) != h->type
+	   && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+	   && h->type != STT_NOTYPE
+	   && !(newfunc && oldfunc))
+	  || (olddef
+	      && ((h->type == STT_GNU_IFUNC)
+		  != (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)))))
     {
       *skip = TRUE;
       return TRUE;

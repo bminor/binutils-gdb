@@ -1,5 +1,19 @@
 2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/16467
+	* ld-ifunc/dummy.c: New file.
+	* ld-ifunc/pr16467.out: Likewise.
+	* ld-ifunc/pr16467a.c: Likewise.
+	* ld-ifunc/pr16467a.map: Likewise.
+	* ld-ifunc/pr16467b.c: Likewise.
+	* ld-ifunc/pr16467b.map: Likewise.
+	* ld-ifunc/pr16467c.c: Likewise.
+
+	* ld-ifunc/ifunc.exp (run_cc_link_tests): New.
+	(run_ld_link_exec_tests): Run pr16467.
+
+2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/2404
 	* ld-elf/shared.exp: Add a PIE test for PR ld/2404.
 
