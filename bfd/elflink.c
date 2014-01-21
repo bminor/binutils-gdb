@@ -1087,8 +1087,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   /* When we try to create a default indirect symbol from the dynamic
      definition with the default version, we skip it if its type and
-     the type of existing regular definition mismatch.  We only do it
-     if the existing regular definition won't be dynamic.  */
+     the type of existing regular definition mismatch.  */
   if (pold_alignment == NULL
       && newdyn
       && newdef
