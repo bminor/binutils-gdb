@@ -1,3 +1,8 @@
+2014-01-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/common-utils.h (FUNCTION_NAME): Expand the macro's
+	documentation a bit.
+
 2014-01-21  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.ac: Call AM_PROG_INSTALL_STRIP.

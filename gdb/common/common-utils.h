@@ -25,7 +25,12 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-/* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
+/* If possible, define FUNCTION_NAME, a macro containing the name of
+   the function being defined.  Since this macro may not always be
+   defined, all uses must be protected by appropriate macro definition
+   checks (Eg: "#ifdef FUNCTION_NAME").
+
+   Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
    which contains the name of the function currently being defined.
    This is broken in G++ before version 2.6.
    C9x has a similar variable called __func__, but prefer the GCC one since
