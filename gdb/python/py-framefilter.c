@@ -1218,11 +1218,11 @@ py_print_frame (PyObject *filter, int flags, enum py_frame_args args_type,
 		  gdbpy_convert_exception (except);
 		  goto error;
 		}
+	      Py_DECREF (py_func);
 	    }
-	  Py_DECREF (py_func);
+	  else
+	    goto error;
 	}
-      else
-	goto error;
     }
 
 

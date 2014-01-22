@@ -177,6 +177,17 @@ gdb_test "bt 1" \
     "#0  end_func \\(foo=21, bar=\"Param\", fb=, bf=\{nothing = \"Foo Bar\", f = 42, s = 19\}\\) at .*py-framefilter.c.*" \
     "bt 1 no addresss"
 
+gdb_test_no_output "set python print-stack message" \
+    "Set python print-stack to message for Error filter"
+gdb_test_no_output  "enable frame-filter global Error" \
+    "enable frame-filter global Error"
+set test "bt 1 with Error filter"
+gdb_test_multiple "bt 1" $test {
+    -re "Python Exception .*whoops:.*$gdb_prompt $" {
+	pass $test
+    }
+}
+
 remote_file host delete ${remote_python_file}
 
 # Test with no debuginfo
