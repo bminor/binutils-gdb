@@ -1,5 +1,11 @@
 2014-01-23  Tom Tromey  <tromey@redhat.com>
 
+	PR python/16487:
+	* python/py-framefilter.c (py_print_frame): Don't call Py_DECREF
+	on a NULL pointer.  Move "goto error" to correct place.
+
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/16491:
 	* python/py-framefilter.c (apply_frame_filter): Call
 	ensure_python_env after computing gdbarch.

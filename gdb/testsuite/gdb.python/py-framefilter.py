@@ -128,5 +128,25 @@ class FrameElider ():
     def filter (self, frame_iter):
         return ElidingIterator (frame_iter)
 
+# A simple decorator that gives an error when computing the function.
+class ErrorInName(FrameDecorator):
+    def __init__(self, frame):
+        FrameDecorator.__init__(self, frame)
+
+    def function(self):
+        raise RuntimeError('whoops')
+
+# A filter that supplies buggy frames.  Disabled by default.
+class ErrorFilter():
+    def __init__ (self):
+        self.name = "Error"
+        self.priority = 1
+        self.enabled = False
+        gdb.frame_filters [self.name] = self
+
+    def filter(self, frame_iter):
+        return itertools.imap(ErrorInName, frame_iter)
+
 FrameFilter()
 FrameElider()
+ErrorFilter()
