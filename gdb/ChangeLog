@@ -1,3 +1,7 @@
+2014-01-22  Pedro Alves  <palves@redhat.com>
+
+	* xtensa-config.c: Include defs.h.
+
 2014-01-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* common/common-utils.h: Add "ARI:" comment beside __func__
