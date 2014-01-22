@@ -1,3 +1,7 @@
+2014-01-22  Baruch Siach  <baruch@tkos.co.il>
+
+	* xtensa-tdep.h (xtensa_elf_greg_t): Change type to uint32_t.
+
 2014-01-22  Pedro Alves  <palves@redhat.com>
 
 	* xtensa-config.c: Include defs.h.
