@@ -1,3 +1,26 @@
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_add_object_symbols): Call minfo for --as-needed.
+
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (STK_LINKER): Comment typo fix.
+
+2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16467
+	* elflink.c (_bfd_elf_merge_symbol): When types of the existing
+	regular default symbol definition and the versioned dynamic
+	symbol definition mismatch, skip the default symbol definition
+	if one of them is IFUNC.
+
+2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2404
+	* elflink.c (_bfd_elf_merge_symbol): Don't check info->shared,
+	info->export_dynamic nor h->ref_dynamic for type mismatch when
+	adding the default version.
+
 2014-01-16  Alan Modra  <amodra@gmail.com>
 
 	* elfxx-mips.c (mips_elf_record_got_page_entry): Pass in a

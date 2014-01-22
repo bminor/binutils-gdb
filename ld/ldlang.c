@@ -67,6 +67,7 @@ static struct bfd_hash_table lang_definedness_table;
 static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
 static struct unique_sections *unique_section_list;
+static struct asneeded_minfo *asneeded_list_head;
 
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
@@ -105,6 +106,7 @@ bfd_boolean lang_float_flag = FALSE;
 bfd_boolean delete_output_file_on_failure = FALSE;
 struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
+struct asneeded_minfo **asneeded_list_tail;
 
  /* Functions that traverse the linker script and might evaluate
     DEFINED() need to increment this at the start of the traversal.  */
@@ -1228,6 +1230,9 @@ lang_init (void)
 			      sizeof (struct lang_definedness_hash_entry),
 			      13))
     einfo (_("%P%F: can not create hash table: %E\n"));
+
+  asneeded_list_head = NULL;
+  asneeded_list_tail = &asneeded_list_head;
 }
 
 void
@@ -1951,6 +1956,43 @@ lang_insert_orphan (asection *s,
 	}
     }
   return os;
+}
+
+static void
+lang_print_asneeded (void)
+{
+  struct asneeded_minfo *m;
+  char buf[100];
+
+  if (asneeded_list_head == NULL)
+    return;
+
+  sprintf (buf, _("\nAs-needed library included "
+		  "to satisfy reference by file (symbol)\n\n"));
+  minfo ("%s", buf);
+
+  for (m = asneeded_list_head; m != NULL; m = m->next)
+    {
+      size_t len;
+
+      minfo ("%s", m->soname);
+      len = strlen (m->soname);
+
+      if (len >= 29)
+	{
+	  print_nl ();
+	  len = 0;
+	}
+      while (len < 30)
+	{
+	  print_space ();
+	  ++len;
+	}
+
+      if (m->ref != NULL)
+	minfo ("%B ", m->ref);
+      minfo ("(%T)\n", m->name);
+    }
 }
 
 static void
@@ -3935,7 +3977,8 @@ print_assignment (lang_assignment_statement_type *assignment,
       const char *dst = assignment->exp->assign.dst;
 
       is_dot = (dst[0] == '.' && dst[1] == 0);
-      expld.assign_name = dst;
+      if (!is_dot)
+	expld.assign_name = dst;
       tree = assignment->exp->assign.src;
     }
 
@@ -6628,6 +6671,8 @@ lang_process (void)
     link_info.gc_sym_list = ldlang_undef_chain_list_head;
 
   ldemul_after_open ();
+  if (config.map_file != NULL)
+    lang_print_asneeded ();
 
   bfd_section_already_linked_table_free ();
 

@@ -440,7 +440,7 @@ execute_command (char *p, int from_tty)
       /* If this command has been pre-hooked, run the hook first.  */
       execute_cmd_pre_hook (c);
 
-      if (c->flags & DEPRECATED_WARN_USER)
+      if (c->deprecated_warn_user)
 	deprecated_cmd_warning (line);
 
       /* c->user_commands would be NULL in the case of a python command.  */

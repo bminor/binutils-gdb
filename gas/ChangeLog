@@ -1,3 +1,30 @@
+2014-01-22  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-msp430.c (msp430_refsym): New: ".refsym <symbol>"
+	* doc/c-msp430.texi (MSP430 Directives): Document it.
+
+2014-01-22  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	* config/tc-i386.c (check_VecOperands): Remove regzmm from AVX2
+	gather assert.
+
+2014-01-22  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	PR gas/16489
+	* config/tc-i386.c (check_VecOperands): Add check for invalid
+	register set in AVX512 gathers.
+
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-tic4x.c (md_shortopts): s/CONST/const/.
+
+2014-01-21  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rl78.c (require_end_of_expr): New.
+	(md_operand): Call it.
+	(rl78_cons_fix_new): Mark LO16, HI16, ahd HI8 internal relocations
+	as not overflowing.
+
 2014-01-17  Will Newton  <will.newton@linaro.org>
 
 	* config/tc-arm.c (do_vfp_nsyn_cvt_fpv8): Set OP to 1

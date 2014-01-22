@@ -26,6 +26,8 @@
   The target does not record data and therefore does not allow reading
   memory or registers.
 
+* The "catch syscall" command now works on s390*-linux* targets.
+
 * New remote packets
 
 qXfer:btrace:read's annex

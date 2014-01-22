@@ -1,3 +1,39 @@
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (asneeded_list_head, asneeded_list_tail): New vars.
+	(lang_init): Initialise them.
+	(lang_print_asneeded): New function.
+	(lang_process): Call lang_print_asneeded.
+	* ldlang.h (struct asneeded_minfo): New.
+	(asneeded_list_tail): Declare.
+	* ldmain.c (add_archive_element): Improve archive map heading.
+	* ldmisc.c (minfo): Stash --as-needed info.
+
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
+	* ld.h (struct map_symbol_def): Move to..
+	* ldlang.h: ..here.
+	* ldlang.c (print_assignment): Don't set expld.assign_name to dot.
+
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Output Section Discarding): Mention assigning to dot
+	as a way of keeping otherwise empty sections.
+	* ldexp.c (is_dot, is_value, is_sym_value, is_dot_ne_0,
+	is_dot_plus_0, is_align_conditional): New predicates.
+	(exp_fold_tree_1): Set SEC_KEEP when assigning to dot inside an
+	output section, except for some special cases.
+	* scripttempl/elfmicroblaze.sc: Use canonical form to align at
+	end of .heap and .stack.
+
+2014-01-20  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* emulparams/aarch64linuxb.sh (ELF_INTERPRETER_NAME): Define.
+
+2014-01-20  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* emulparams/aarch64linux.sh (ELF_INTERPRETER_NAME): Define.
+
 2014-01-20  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.h (struct lang_definedness_hash_entry): Add by_object and

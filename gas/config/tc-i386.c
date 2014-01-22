@@ -4374,11 +4374,9 @@ check_VecOperands (const insn_template *t)
       if (i.reg_operands == 2 && !i.mask)
 	{
 	  gas_assert (i.types[0].bitfield.regxmm
-		      || i.types[0].bitfield.regymm
-		      || i.types[0].bitfield.regzmm);
+		      || i.types[0].bitfield.regymm);
 	  gas_assert (i.types[2].bitfield.regxmm
-		      || i.types[2].bitfield.regymm
-		      || i.types[2].bitfield.regzmm);
+		      || i.types[2].bitfield.regymm);
 	  if (operand_check == check_none)
 	    return 0;
 	  if (register_number (i.op[0].regs)
@@ -4394,6 +4392,22 @@ check_VecOperands (const insn_template *t)
 	      return 1;
 	    }
 	  as_warn (_("mask, index, and destination registers should be distinct"));
+	}
+      else if (i.reg_operands == 1 && i.mask)
+	{
+	  if ((i.types[1].bitfield.regymm
+	       || i.types[1].bitfield.regzmm)
+	      && (register_number (i.op[1].regs)
+		  == register_number (i.index_reg)))
+	    {
+	      if (operand_check == check_error)
+		{
+		  i.error = invalid_vector_register_set;
+		  return 1;
+		}
+	      if (operand_check != check_none)
+		as_warn (_("index and destination registers should be distinct"));
+	    }
 	}
     }
 

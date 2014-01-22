@@ -1257,6 +1257,15 @@ msp430_section (int arg)
   obj_elf_section (arg);
 }
 
+static void
+msp430_refsym (int arg ATTRIBUTE_UNUSED)
+{
+  char sym_name[1024];
+  input_line_pointer = extract_word (input_line_pointer, sym_name, 1024);
+
+  (void) symbol_find_or_make (sym_name);
+}
+
 const pseudo_typeS md_pseudo_table[] =
 {
   {"arch", msp430_set_arch, OPTION_MMCU},
@@ -1267,6 +1276,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"sect", msp430_section, 0},
   {"sect.s", msp430_section, 0},
   {"pushsection", msp430_section, 1},
+  {"refsym", msp430_refsym, 0},
   {NULL, NULL, 0}
 };
 

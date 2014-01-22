@@ -4406,9 +4406,9 @@ scripts.
 @cindex discarding sections
 @cindex sections, discarding
 @cindex removing sections
-The linker will not create output sections with no contents.  This is
-for convenience when referring to input sections that may or may not
-be present in any of the input files.  For example:
+The linker will not normally create output sections with no contents.
+This is for convenience when referring to input sections that may or
+may not be present in any of the input files.  For example:
 @smallexample
 .foo : @{ *(.foo) @}
 @end smallexample
@@ -4416,7 +4416,12 @@ be present in any of the input files.  For example:
 will only create a @samp{.foo} section in the output file if there is a
 @samp{.foo} section in at least one input file, and if the input
 sections are not all empty.  Other link script directives that allocate
-space in an output section will also create the output section.
+space in an output section will also create the output section.  So
+too will assignments to dot even if the assignment does not create
+space, except for @samp{. = 0}, @samp{. = . + 0}, @samp{. = sym},
+@samp{. = . + sym} and @samp{. = ALIGN (. != 0, expr, 1)} when
+@samp{sym} is an absolute symbol of value 0 defined in the script.
+This allows you to force output of an empty section with @samp{. = .}.
 
 The linker will ignore address assignments (@pxref{Output Section Address})
 on discarded output sections, except when the linker script defines

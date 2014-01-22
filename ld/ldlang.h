@@ -313,6 +313,11 @@ typedef struct
   asection *section;
 } lang_input_section_type;
 
+struct map_symbol_def {
+  struct bfd_link_hash_entry *entry;
+  struct map_symbol_def *next;
+};
+
 /* For input sections, when writing a map file: head / tail of a linked
    list of hash table entries for symbols defined in this section.  */
 typedef struct input_section_userdata_struct
@@ -482,6 +487,14 @@ struct orphan_save
   lang_output_section_statement_type **os_tail;
 };
 
+struct asneeded_minfo
+{
+  struct asneeded_minfo *next;
+  const char *soname;
+  bfd *ref;
+  const char *name;
+};
+
 extern struct lang_phdr *lang_phdr_list;
 extern struct lang_nocrossrefs *nocrossref_list;
 extern const char *output_target;
@@ -500,6 +513,7 @@ extern lang_statement_list_type file_chain;
 extern lang_statement_list_type input_file_chain;
 
 extern int lang_statement_iteration;
+extern struct asneeded_minfo **asneeded_list_tail;
 
 extern void lang_init
   (void);

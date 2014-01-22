@@ -1,3 +1,69 @@
+2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* syscalls/s390x-linux.xml: New file.
+	* syscalls/s390-linux.xml: New file.
+	* s390-linux-tdep.c (XML_SYSCALL_FILENAME_S390): New macro.
+	(XML_SYSCALL_FILENAME_S390X): Likewise.
+	(op_svc): New enum value for SVC opcode.
+	(s390_sigtramp_frame_sniffer): Replace literal by 'op_svc'.
+	(s390_linux_get_syscall_number): New function.
+	(s390_gdbarch_init): Register '*get_syscall_number' and the
+	syscall xml file name.
+	* data-directory/Makefile.in (SYSCALLS_FILES): Add
+	"s390-linux.xml" and "s390x-linux.xml".
+	* NEWS: Announce new feature.
+
+2014-01-22  Baruch Siach  <baruch@tkos.co.il>
+
+	* xtensa-tdep.h (xtensa_elf_greg_t): Change type to uint32_t.
+
+2014-01-22  Pedro Alves  <palves@redhat.com>
+
+	* xtensa-config.c: Include defs.h.
+
+2014-01-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/common-utils.h: Add "ARI:" comment beside __func__
+	reference.
+
+2014-01-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/common-utils.h (FUNCTION_NAME): Expand the macro's
+	documentation a bit.
+
+2014-01-21  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.ac: Call AM_PROG_INSTALL_STRIP.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+	* Makefile.in (install_sh, INSTALL_STRIP_PROGRAM, STRIP):
+	New substituted	variables.
+	(install-strip): New target.
+	(INSTALL_SCRIPT): New substituted variable.
+	(FLAGS_TO_PASS): Add it.
+	(install-only): Use $(INSTALL_SCRIPT) rather than
+	$(INSTALL_PROGRAM) for gcore.
+
+2014-01-20  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.h (struct cmd_list_element): Move all bitfields
+	together.
+
+2014-01-20  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (add_cmd, deprecate_cmd, add_alias_cmd)
+	(add_setshow_cmd_full, delete_cmd, lookup_cmd_1)
+	(deprecated_cmd_warning, complete_on_cmdlist): Update.
+	* cli/cli-decode.h (CMD_DEPRECATED, DEPRECATED_WARN_USER)
+	(MALLOCED_REPLACEMENT, DOC_ALLOCATED): Remove.
+	(struct cmd_list_element) <flags>: Remove.
+	<cmd_deprecated, deprecated_warn_user, malloced_replacement,
+	doc_allocated>: New fields.
+	<hook_in, allow_unknown, abbrev_flag, type, var_type>: Now
+	bitfields.
+	* maint.c (maintenance_do_deprecate): Update.
+	* top.c (execute_command): Update.
+
 2014-01-20  Baruch Siach  <baruch@tkos.co.il>
 
 	* xtensa-linux-nat.c: Include asm/ptrace.h.
