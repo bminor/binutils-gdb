@@ -1,3 +1,14 @@
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Output Section Discarding): Mention assigning to dot
+	as a way of keeping otherwise empty sections.
+	* ldexp.c (is_dot, is_value, is_sym_value, is_dot_ne_0,
+	is_dot_plus_0, is_align_conditional): New predicates.
+	(exp_fold_tree_1): Set SEC_KEEP when assigning to dot inside an
+	output section, except for some special cases.
+	* scripttempl/elfmicroblaze.sc: Use canonical form to align at
+	end of .heap and .stack.
+
 2014-01-20  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* emulparams/aarch64linuxb.sh (ELF_INTERPRETER_NAME): Define.

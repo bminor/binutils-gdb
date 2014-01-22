@@ -181,7 +181,6 @@ SECTIONS
   }
   _bss_end__ = . ; __bss_end__ = . ;
   . = ALIGN(32 / 8);
-  . = ALIGN(32 / 8);
   __end__ = . ;
   _end = .; PROVIDE (end = .);
   /* Stabs debugging sections.  */
