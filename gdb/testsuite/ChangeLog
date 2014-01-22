@@ -1,5 +1,9 @@
 2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
+	* gdb.base/catch-syscall.exp: Activate test on s390*-linux.
+
+2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
 	* gdb.trace/entry-values.exp: Remove excess space character from
 	regex patterns.  Handle s390 call instruction.
 

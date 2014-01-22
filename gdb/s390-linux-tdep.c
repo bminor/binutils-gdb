@@ -45,6 +45,7 @@
 #include "linux-tdep.h"
 #include "s390-linux-tdep.h"
 #include "auxv.h"
+#include "xml-syscall.h"
 
 #include "stap-probe.h"
 #include "ax.h"
@@ -65,6 +66,9 @@
 #include "features/s390x-linux64v1.c"
 #include "features/s390x-linux64v2.c"
 #include "features/s390x-te-linux64.c"
+
+#define XML_SYSCALL_FILENAME_S390 "syscalls/s390-linux.xml"
+#define XML_SYSCALL_FILENAME_S390X "syscalls/s390x-linux.xml"
 
 /* The tdep structure.  */
 
@@ -905,6 +909,7 @@ enum
     op1_brxhg= 0xec,   op2_brxhg= 0x44,
     op_brxle = 0x85,
     op1_brxlg= 0xec,   op2_brxlg= 0x45,
+    op_svc   = 0x0a,
   };
 
 
@@ -2328,7 +2333,7 @@ s390_sigtramp_frame_sniffer (const struct frame_unwind *self,
   if (target_read_memory (pc, sigreturn, 2))
     return 0;
 
-  if (sigreturn[0] != 0x0a /* svc */)
+  if (sigreturn[0] != op_svc)
     return 0;
 
   if (sigreturn[1] != 119 /* sigreturn */
@@ -2346,6 +2351,36 @@ static const struct frame_unwind s390_sigtramp_frame_unwind = {
   NULL,
   s390_sigtramp_frame_sniffer
 };
+
+/* Retrieve the syscall number at a ptrace syscall-stop.  Return -1
+   upon error. */
+
+static LONGEST
+s390_linux_get_syscall_number (struct gdbarch *gdbarch,
+			       ptid_t ptid)
+{
+  struct regcache *regs = get_thread_regcache (ptid);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  ULONGEST pc;
+  ULONGEST svc_number = -1;
+  unsigned opcode;
+
+  /* Assume that the PC points after the 2-byte SVC instruction.  We
+     don't currently support SVC via EXECUTE. */
+  regcache_cooked_read_unsigned (regs, tdep->pc_regnum, &pc);
+  pc -= 2;
+  opcode = read_memory_unsigned_integer ((CORE_ADDR) pc, 1, byte_order);
+  if (opcode != op_svc)
+    return -1;
+
+  svc_number = read_memory_unsigned_integer ((CORE_ADDR) pc + 1, 1,
+					     byte_order);
+  if (svc_number == 0)
+    regcache_cooked_read_unsigned (regs, S390_R1_REGNUM, &svc_number);
+
+  return svc_number;
+}
 
 
 /* Frame base handling.  */
@@ -3265,6 +3300,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, s390_frame_align);
   set_gdbarch_return_value (gdbarch, s390_return_value);
 
+  /* Syscall handling.  */
+  set_gdbarch_get_syscall_number (gdbarch, s390_linux_get_syscall_number);
+
   /* Frame handling.  */
   dwarf2_frame_set_init_reg (gdbarch, s390_dwarf2_frame_init_reg);
   dwarf2_frame_set_adjust_regnum (gdbarch, s390_adjust_frame_regnum);
@@ -3302,6 +3340,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
       set_solib_svr4_fetch_link_map_offsets
 	(gdbarch, svr4_ilp32_fetch_link_map_offsets);
+
+      set_xml_syscall_file_name (XML_SYSCALL_FILENAME_S390);
 
       if (have_upper)
 	{
@@ -3346,6 +3386,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						    s390_address_class_type_flags_to_name);
       set_gdbarch_address_class_name_to_type_flags (gdbarch,
 						    s390_address_class_name_to_type_flags);
+
+      set_xml_syscall_file_name (XML_SYSCALL_FILENAME_S390);
 
       if (have_linux_v2)
 	set_gdbarch_core_regset_sections (gdbarch,

@@ -1,3 +1,18 @@
+2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* syscalls/s390x-linux.xml: New file.
+	* syscalls/s390-linux.xml: New file.
+	* s390-linux-tdep.c (XML_SYSCALL_FILENAME_S390): New macro.
+	(XML_SYSCALL_FILENAME_S390X): Likewise.
+	(op_svc): New enum value for SVC opcode.
+	(s390_sigtramp_frame_sniffer): Replace literal by 'op_svc'.
+	(s390_linux_get_syscall_number): New function.
+	(s390_gdbarch_init): Register '*get_syscall_number' and the
+	syscall xml file name.
+	* data-directory/Makefile.in (SYSCALLS_FILES): Add
+	"s390-linux.xml" and "s390x-linux.xml".
+	* NEWS: Announce new feature.
+
 2014-01-22  Baruch Siach  <baruch@tkos.co.il>
 
 	* xtensa-tdep.h (xtensa_elf_greg_t): Change type to uint32_t.
