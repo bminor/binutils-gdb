@@ -1,3 +1,9 @@
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16491:
+	* python/py-framefilter.c (apply_frame_filter): Call
+	ensure_python_env after computing gdbarch.
+
 2014-01-23  Yao Qi  <yao@codesourcery.com>
 
 	* target.c (raw_memory_xfer_partial): Change argument type
