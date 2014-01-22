@@ -1,4 +1,4 @@
-From 369e32894e598e8c04db1bb77d456154b1539849 Mon Sep 17 00:00:00 2001
+From 27ef344287a7b58062e7f92c1eaefc5a54d75650 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 4 Nov 2013 09:17:45 -0800
 Subject: [PATCH] Add lto and none-lto input support for ld -r
@@ -562,10 +562,10 @@ index 3815e32..c523993 100644
    { STRING_COMMA_LEN (".gnu.version_d"),   0, SHT_GNU_verdef,  0 },
    { STRING_COMMA_LEN (".gnu.version_r"),   0, SHT_GNU_verneed, 0 },
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 7dcafd6..42434ca 100644
+index 88967c8..c066e0c 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
-@@ -2448,6 +2448,20 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
+@@ -2447,6 +2447,20 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
      }
    else
      {
@@ -586,7 +586,7 @@ index 7dcafd6..42434ca 100644
        /* Unfortunately, NON_ELF is only correct if the symbol
  	 was first seen in a non-ELF file.  Fortunately, if the symbol
  	 was first seen in an ELF file, we're probably OK unless the
-@@ -5072,6 +5086,9 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
+@@ -5074,6 +5088,9 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
  	     something wrong with the archive.  */
  	  if (element->archive_pass != 0)
  	    {
@@ -1339,7 +1339,7 @@ index 16baef8..2efbc56 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index 9e35527..8690329 100644
+index 1a0d48f..b521f5c 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -1360,17 +1360,17 @@ index 9e35527..8690329 100644
  #ifndef offsetof
  #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
  #endif
-@@ -67,6 +71,9 @@ static struct bfd_hash_table lang_definedness_table;
- static lang_statement_list_type *stat_save[10];
+@@ -68,6 +72,9 @@ static lang_statement_list_type *stat_save[10];
  static lang_statement_list_type **stat_save_ptr = &stat_save[0];
  static struct unique_sections *unique_section_list;
+ static struct asneeded_minfo *asneeded_list_head;
 +static cmdline_list_type cmdline_object_only_file_list;
 +static cmdline_list_type cmdline_object_only_archive_list;
 +static cmdline_list_type cmdline_temp_object_only_list;
  
  /* Forward declarations.  */
  static void exp_init_os (etree_type *);
-@@ -86,6 +93,10 @@ static void lang_record_phdrs (void);
+@@ -87,6 +94,10 @@ static void lang_record_phdrs (void);
  static void lang_do_version_exports_section (void);
  static void lang_finalize_version_expr_head
    (struct bfd_elf_version_expr_head *);
@@ -1381,7 +1381,7 @@ index 9e35527..8690329 100644
  
  /* Exported variables.  */
  const char *output_target;
-@@ -1201,14 +1212,17 @@ output_section_statement_table_free (void)
+@@ -1203,14 +1214,17 @@ output_section_statement_table_free (void)
  /* Build enough state so that the parser can build its tree.  */
  
  void
@@ -1401,7 +1401,7 @@ index 9e35527..8690329 100644
    lang_list_init (stat_ptr);
  
    lang_list_init (&input_file_chain);
-@@ -1223,18 +1237,20 @@ lang_init (void)
+@@ -1225,10 +1239,11 @@ lang_init (void)
  
    /* The value "13" is ad-hoc, somewhat related to the expected number of
       assignments in a linker script.  */
@@ -1415,6 +1415,9 @@ index 9e35527..8690329 100644
 +				 sizeof (struct lang_definedness_hash_entry),
 +				 13))
      einfo (_("%P%F: can not create hash table: %E\n"));
+ 
+   asneeded_list_head = NULL;
+@@ -1236,10 +1251,11 @@ lang_init (void)
  }
  
  void
@@ -1428,7 +1431,7 @@ index 9e35527..8690329 100644
    output_section_statement_table_free ();
  }
  
-@@ -2751,6 +2767,12 @@ load_symbols (lang_input_statement_type *entry,
+@@ -2793,6 +2809,12 @@ load_symbols (lang_input_statement_type *entry,
  		  loaded = FALSE;
  		}
  
@@ -1441,7 +1444,7 @@ index 9e35527..8690329 100644
  	      subsbfd = member;
  	      if (!(*link_info.callbacks
  		    ->add_archive_element) (&link_info, member,
-@@ -6621,7 +6643,38 @@ lang_process (void)
+@@ -6664,7 +6686,38 @@ lang_process (void)
  	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
  	}
      }
@@ -1480,7 +1483,7 @@ index 9e35527..8690329 100644
  
    link_info.gc_sym_list = &entry_symbol;
    if (entry_symbol.name == NULL)
-@@ -8021,3 +8074,963 @@ lang_ld_feature (char *str)
+@@ -8066,3 +8119,963 @@ lang_ld_feature (char *str)
        p = q;
      }
  }
@@ -2445,11 +2448,11 @@ index 9e35527..8690329 100644
 +      }
 +}
 diff --git a/ld/ldlang.h b/ld/ldlang.h
-index 8c815c6..387427b 100644
+index 7236c1c..ad3f255 100644
 --- a/ld/ldlang.h
 +++ b/ld/ldlang.h
-@@ -502,9 +502,9 @@ extern lang_statement_list_type input_file_chain;
- extern int lang_statement_iteration;
+@@ -516,9 +516,9 @@ extern int lang_statement_iteration;
+ extern struct asneeded_minfo **asneeded_list_tail;
  
  extern void lang_init
 -  (void);
@@ -2460,7 +2463,7 @@ index 8c815c6..387427b 100644
  extern lang_memory_region_type * lang_memory_region_lookup
    (const char * const, bfd_boolean);
  extern void lang_memory_region_alias
-@@ -675,4 +675,45 @@ ldlang_override_segment_assignment
+@@ -689,4 +689,45 @@ ldlang_override_segment_assignment
  extern void
  lang_ld_feature (char *);
  
@@ -2519,7 +2522,7 @@ index 99f4282..023564f 100644
    OPTION_DEFAULT_SCRIPT,
    OPTION_PRINT_OUTPUT_FORMAT,
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 019df71..8b93bdd 100644
+index 00f79ec..e540159 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
 @@ -220,6 +220,9 @@ main (int argc, char **argv)
@@ -2615,7 +2618,7 @@ index 019df71..8b93bdd 100644
  
    ldlang_add_file (input);
  
-@@ -1467,3 +1450,38 @@ notice (struct bfd_link_info *info,
+@@ -1468,3 +1451,38 @@ notice (struct bfd_link_info *info,
  
    return TRUE;
  }
@@ -3329,5 +3332,5 @@ index 0000000..0b14948
 + 0x0+1 \(NEEDED\) +Shared library: \[libgcc_s.so.[0-9]+\]
 +#...
 -- 
-1.8.3.1
+1.8.4.2
 
