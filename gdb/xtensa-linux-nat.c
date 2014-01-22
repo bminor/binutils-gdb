@@ -37,6 +37,7 @@
 #include <fcntl.h>
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
+#include <asm/ptrace.h>
 
 #include "gregset.h"
 #include "xtensa-tdep.h"

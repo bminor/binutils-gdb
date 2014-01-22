@@ -23,7 +23,7 @@
 /* Defined in auto-generated file reg-xtensa.c.  */
 void init_registers_xtensa (void);
 
-#include <sys/ptrace.h>
+#include <asm/ptrace.h>
 #include <xtensa-config.h>
 
 #include "xtensa-xtregs.c"

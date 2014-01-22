@@ -1,3 +1,8 @@
+2014-01-22  Baruch Siach  <baruch@tkos.co.il>
+
+	* linux-xtensa-low.c: Include asm/ptrace.h instead of
+	sys/ptrace.h.
+
 2013-09-16  Will Newton  <will.newton@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_linux_set_debug_regs): Zero
