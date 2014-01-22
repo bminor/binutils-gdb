@@ -1,5 +1,12 @@
 2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
+	* gdb.dwarf2/dw2-dir-file-name.c (FUNC): Insert alignment and
+	define "*_start" label.  Make "name" static.
+	* gdb.dwarf2/dw2-dir-file-name.exp: Replace references to
+	${name} by references to ${name}_start.
+
+2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
 	* gdb.base/info-macros.exp: Remove "debug" from the compile
 	options.
 

@@ -63,8 +63,16 @@ FUNC (compdir_absolute_ldir_absolute_file_relative_different)	\
 FUNC (compdir_absolute_ldir_absolute_file_absolute_same)	\
 FUNC (compdir_absolute_ldir_absolute_file_absolute_different)
 
+/* Notes: (1) The '*_start' label below is needed because 'name' may
+   point to a function descriptor instead of to the actual code.  (2)
+   The '.balign' should specify the highest possible function
+   alignment across all supported architectures, such that the label
+   never points into the alignment gap.  */
+
 #define FUNC(name)					\
-  void							\
+  asm (".balign 8");					\
+  asm (#name "_start: .globl " #name "_start\n");	\
+  static void						\
   name (void)						\
   {							\
     v++;						\
