@@ -1,3 +1,7 @@
+2014-01-22  Baruch Siach  <baruch@tkos.co.il>
+
+	* xtensa-linux-nat.c: Include asm/ptrace.h.
+
 2014-01-21  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.ac: Call AM_PROG_INSTALL_STRIP.

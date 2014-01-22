@@ -1,3 +1,8 @@
+2014-01-22  Baruch Siach  <baruch@tkos.co.il>
+
+	* linux-xtensa-low.c: Include asm/ptrace.h instead of
+	sys/ptrace.h.
+
 2014-01-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (INCLUDE_CFLAGS): Remove trailing slash from
