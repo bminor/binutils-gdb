@@ -18507,6 +18507,7 @@ connections and even in the @kbd{target extended-remote} mode.  The
 multiple instances of @code{gdbserver} running on the same host, since each
 instance closes its port after the first connection.
 
+@anchor{Other Command-Line Arguments for gdbserver}
 @subsubsection Other Command-Line Arguments for @code{gdbserver}
 
 @cindex @option{--debug}, @code{gdbserver} option
@@ -18516,6 +18517,23 @@ status information about the debugging process.
 The @option{--remote-debug} option tells @code{gdbserver} to display
 remote protocol debug output.  These options are intended for
 @code{gdbserver} development and for bug reports to the developers.
+
+@cindex @option{--debug-format}, @code{gdbserver} option
+The @option{--debug-format=option1[,option2,...]} option tells
+@code{gdbserver} to include additional information in each output.
+Possible options are:
+
+@table @code
+@item none
+Turn off all extra information in debugging output.
+@item all
+Turn on all extra information in debugging output.
+@item timestamps
+Include a timestamp in each line of debugging output.
+@end table
+
+Options are processed in order.  Thus, for example, if @option{none}
+appears last then no additional information is added to debugging output.
 
 @cindex @option{--wrapper}, @code{gdbserver} option
 The @option{--wrapper} option specifies a wrapper to launch programs
@@ -18586,6 +18604,22 @@ Disable or enable general debugging messages.
 @itemx monitor set remote-debug 1
 Disable or enable specific debugging messages associated with the remote
 protocol (@pxref{Remote Protocol}).
+
+@item monitor set debug-format option1@r{[},option2,...@r{]}
+Specify additional text to add to debugging messages.
+Possible options are:
+
+@table @code
+@item none
+Turn off all extra information in debugging output.
+@item all
+Turn on all extra information in debugging output.
+@item timestamps
+Include a timestamp in each line of debugging output.
+@end table
+
+Options are processed in order.  Thus, for example, if @option{none}
+appears last then no additional information is added to debugging output.
 
 @item monitor set libthread-db-search-path [PATH]
 @cindex gdbserver, search path for @code{libthread_db}
@@ -44341,6 +44375,11 @@ the developers.
 Instruct @code{gdbserver} to display remote protocol debug output.
 This option is intended for @code{gdbserver} development and for bug reports to
 the developers.
+
+@item --debug-format=option1@r{[},option2,...@r{]}
+Instruct @code{gdbserver} to include extra information in each line
+of debugging output.
+@xref{Other Command-Line Arguments for gdbserver}.
 
 @item --wrapper
 Specify a wrapper to launch programs

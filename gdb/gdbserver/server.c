@@ -22,10 +22,12 @@
 #include "notif.h"
 #include "tdesc.h"
 
+#include <ctype.h>
 #include <unistd.h>
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif
+#include "gdb_vecs.h"
 #include "gdb_wait.h"
 #include "btrace-common.h"
 #include "filestuff.h"
@@ -65,10 +67,6 @@ int non_stop;
 int disable_randomization = 1;
 
 static char **program_argv, **wrapper_argv;
-
-/* Enable miscellaneous debugging output.  The name is historical - it
-   was originally used to debug LinuxThreads support.  */
-int debug_threads;
 
 /* Enable debugging of h/w breakpoint/watchpoint support.  */
 int debug_hw_points;
@@ -222,8 +220,8 @@ start_inferior (char **argv)
     {
       int i;
       for (i = 0; new_argv[i]; ++i)
-	fprintf (stderr, "new_argv[%d] = \"%s\"\n", i, new_argv[i]);
-      fflush (stderr);
+	debug_printf ("new_argv[%d] = \"%s\"\n", i, new_argv[i]);
+      debug_flush ();
     }
 
 #ifdef SIGTTOU
@@ -694,6 +692,13 @@ monitor_show_help (void)
   monitor_output ("    Enable h/w breakpoint/watchpoint debugging messages\n");
   monitor_output ("  set remote-debug <0|1>\n");
   monitor_output ("    Enable remote protocol debugging messages\n");
+  monitor_output ("  set debug-format option1[,option2,...]\n");
+  monitor_output ("    Add additional information to debugging messages\n");
+  monitor_output ("    Options: all, none");
+#ifdef HAVE_GETTIMEOFDAY
+  monitor_output (", timestamp");
+#endif
+  monitor_output ("\n");
   monitor_output ("  exit\n");
   monitor_output ("    Quit GDBserver\n");
 }
@@ -921,6 +926,80 @@ handle_search_memory (char *own_buf, int packet_len)
       return;					\
     }
 
+/* Parse options to --debug-format= and "monitor set debug-format".
+   ARG is the text after "--debug-format=" or "monitor set debug-format".
+   IS_MONITOR is non-zero if we're invoked via "monitor set debug-format".
+   This triggers calls to monitor_output.
+   The result is NULL if all options were parsed ok, otherwise an error
+   message which the caller must free.
+
+   N.B. These commands affect all debug format settings, they are not
+   cumulative.  If a format is not specified, it is turned off.
+   However, we don't go to extra trouble with things like
+   "monitor set debug-format all,none,timestamp".
+   Instead we just parse them one at a time, in order.
+
+   The syntax for "monitor set debug" we support here is not identical
+   to gdb's "set debug foo on|off" because we also use this function to
+   parse "--debug-format=foo,bar".  */
+
+static char *
+parse_debug_format_options (const char *arg, int is_monitor)
+{
+  VEC (char_ptr) *options;
+  int ix;
+  char *option;
+
+  /* First turn all debug format options off.  */
+  debug_timestamp = 0;
+
+  /* First remove leading spaces, for "monitor set debug-format".  */
+  while (isspace (*arg))
+    ++arg;
+
+  options = delim_string_to_char_ptr_vec (arg, ',');
+
+  for (ix = 0; VEC_iterate (char_ptr, options, ix, option); ++ix)
+    {
+      if (strcmp (option, "all") == 0)
+	{
+	  debug_timestamp = 1;
+	  if (is_monitor)
+	    monitor_output ("All extra debug format options enabled.\n");
+	}
+      else if (strcmp (option, "none") == 0)
+	{
+	  debug_timestamp = 0;
+	  if (is_monitor)
+	    monitor_output ("All extra debug format options disabled.\n");
+	}
+#ifdef HAVE_GETTIMEOFDAY
+      else if (strcmp (option, "timestamp") == 0)
+	{
+	  debug_timestamp = 1;
+	  if (is_monitor)
+	    monitor_output ("Timestamps will be added to debug output.\n");
+	}
+#endif
+      else if (*option == '\0')
+	{
+	  /* An empty option, e.g., "--debug-format=foo,,bar", is ignored.  */
+	  continue;
+	}
+      else
+	{
+	  char *msg = xstrprintf ("Unknown debug-format argument: \"%s\"\n",
+				  option);
+
+	  free_char_ptr_vec (options);
+	  return msg;
+	}
+    }
+
+  free_char_ptr_vec (options);
+  return NULL;
+}
+
 /* Handle monitor commands not handled by target-specific handlers.  */
 
 static void
@@ -955,6 +1034,21 @@ handle_monitor_command (char *mon, char *own_buf)
     {
       remote_debug = 0;
       monitor_output ("Protocol debug output disabled.\n");
+    }
+  else if (strncmp (mon, "set debug-format ",
+		    sizeof ("set debug-format ") - 1) == 0)
+    {
+      char *error_msg
+	= parse_debug_format_options (mon + sizeof ("set debug-format ") - 1,
+				      1);
+
+      if (error_msg != NULL)
+	{
+	  monitor_output (error_msg);
+	  monitor_show_help ();
+	  write_enn (own_buf);
+	  xfree (error_msg);
+	}
     }
   else if (strcmp (mon, "help") == 0)
     monitor_show_help ();
@@ -2535,10 +2629,9 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
 	      char *status_string
 		= target_waitstatus_to_string (&thread->last_status);
 
-	      fprintf (stderr,
-		       "Reporting thread %s as already stopped with %s\n",
-		       target_pid_to_str (entry->id),
-		       status_string);
+	      debug_printf ("Reporting thread %s as already stopped with %s\n",
+			    target_pid_to_str (entry->id),
+			    status_string);
 
 	      xfree (status_string);
 	    }
@@ -2733,6 +2826,14 @@ gdbserver_usage (FILE *stream)
 	   "\n"
 	   "Options:\n"
 	   "  --debug               Enable general debugging output.\n"
+	   "  --debug-format=opt1[,opt2,...]\n"
+	   "                        Specify extra content in debugging output.\n"
+	   "                          Options:\n"
+	   "                            all\n"
+	   "                            none\n"
+#ifdef HAVE_GETTIMEOFDAY
+	   "                            timestamp\n"
+#endif
 	   "  --remote-debug        Enable remote protocol debugging output.\n"
 	   "  --version             Display version information and exit.\n"
 	   "  --wrapper WRAPPER --  Run WRAPPER to start new programs.\n"
@@ -2908,6 +3009,20 @@ main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--debug") == 0)
 	debug_threads = 1;
+      else if (strncmp (*next_arg,
+			"--debug-format=",
+			sizeof ("--debug-format=") - 1) == 0)
+	{
+	  char *error_msg
+	    = parse_debug_format_options ((*next_arg)
+					  + sizeof ("--debug-format=") - 1, 0);
+
+	  if (error_msg != NULL)
+	    {
+	      fprintf (stderr, "%s", error_msg);
+	      exit (1);
+	    }
+	}
       else if (strcmp (*next_arg, "--remote-debug") == 0)
 	remote_debug = 1;
       else if (strcmp (*next_arg, "--disable-packet") == 0)
@@ -3204,14 +3319,14 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 	{
 	  /* Conditional expression.  */
 	  if (debug_threads)
-	    fprintf (stderr, "Found breakpoint condition.\n");
+	    debug_printf ("Found breakpoint condition.\n");
 	  add_breakpoint_condition (point_addr, &dataptr);
 	}
       else if (strncmp (dataptr, "cmds:", strlen ("cmds:")) == 0)
 	{
 	  dataptr += strlen ("cmds:");
 	  if (debug_threads)
-	    fprintf (stderr, "Found breakpoint commands %s.\n", dataptr);
+	    debug_printf ("Found breakpoint commands %s.\n", dataptr);
 	  persist = (*dataptr == '1');
 	  dataptr += 2;
 	  add_breakpoint_commands (point_addr, &dataptr, persist);
@@ -3316,7 +3431,7 @@ process_serial_event (void)
 	  if (!non_stop)
 	    {
 	      if (debug_threads)
-		fprintf (stderr, "Forcing non-stop mode\n");
+		debug_printf ("Forcing non-stop mode\n");
 
 	      non_stop = 1;
 	      start_non_stop (1);
@@ -3709,7 +3824,7 @@ int
 handle_serial_event (int err, gdb_client_data client_data)
 {
   if (debug_threads)
-    fprintf (stderr, "handling possible serial event\n");
+    debug_printf ("handling possible serial event\n");
 
   /* Really handle it.  */
   if (process_serial_event () < 0)
@@ -3728,7 +3843,7 @@ int
 handle_target_event (int err, gdb_client_data client_data)
 {
   if (debug_threads)
-    fprintf (stderr, "handling possible target event\n");
+    debug_printf ("handling possible target event\n");
 
   last_ptid = mywait (minus_one_ptid, &last_status,
 		      TARGET_WNOHANG, 1);
@@ -3770,10 +3885,10 @@ handle_target_event (int err, gdb_client_data client_data)
 	      struct thread_resume resume_info;
 
 	      if (debug_threads)
-		fprintf (stderr,
-			 "GDB not connected; forwarding event %d for [%s]\n",
-			 (int) last_status.kind,
-			 target_pid_to_str (last_ptid));
+		debug_printf ("GDB not connected; forwarding event %d for"
+			      " [%s]\n",
+			      (int) last_status.kind,
+			      target_pid_to_str (last_ptid));
 
 	      resume_info.thread = last_ptid;
 	      resume_info.kind = resume_continue;
@@ -3781,9 +3896,9 @@ handle_target_event (int err, gdb_client_data client_data)
 	      (*the_target->resume) (&resume_info, 1);
 	    }
 	  else if (debug_threads)
-	    fprintf (stderr, "GDB not connected; ignoring event %d for [%s]\n",
-		     (int) last_status.kind,
-		     target_pid_to_str (last_ptid));
+	    debug_printf ("GDB not connected; ignoring event %d for [%s]\n",
+			  (int) last_status.kind,
+			  target_pid_to_str (last_ptid));
 	}
       else
 	{

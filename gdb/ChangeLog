@@ -1,3 +1,8 @@
+2014-01-22  Doug Evans  <dje@google.com>
+
+	New gdbserver option --debug-format=timestamp.
+	* NEWS: Mention it.
+
 2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
 	* syscalls/s390x-linux.xml: New file.
