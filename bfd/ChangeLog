@@ -1,3 +1,7 @@
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (STK_LINKER): Comment typo fix.
+
 2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16467

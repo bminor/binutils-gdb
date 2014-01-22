@@ -133,7 +133,7 @@ static bfd_vma opd_entry_value
 /* Offsets to some stack save slots.  */
 #define STK_LR 16
 #define STK_TOC(htab) (htab->opd_abi ? 40 : 24)
-/* This one is dodgy.  ABIv2 does not have a linker word, so use the
+/* This one is dodgy.  ELFv2 does not have a linker word, so use the
    CR save slot.  Used only by optimised __tls_get_addr call stub,
    relying on __tls_get_addr_opt not saving CR..  */
 #define STK_LINKER(htab) (htab->opd_abi ? 32 : 8)
