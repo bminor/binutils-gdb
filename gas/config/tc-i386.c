@@ -4395,6 +4395,22 @@ check_VecOperands (const insn_template *t)
 	    }
 	  as_warn (_("mask, index, and destination registers should be distinct"));
 	}
+      else if (i.reg_operands == 1 && i.mask)
+	{
+	  if ((i.types[1].bitfield.regymm
+	       || i.types[1].bitfield.regzmm)
+	      && (register_number (i.op[1].regs)
+		  == register_number (i.index_reg)))
+	    {
+	      if (operand_check == check_error)
+		{
+		  i.error = invalid_vector_register_set;
+		  return 1;
+		}
+	      if (operand_check != check_none)
+		as_warn (_("index and destination registers should be distinct"));
+	    }
+	}
     }
 
   /* Check if broadcast is supported by the instruction and is applied
