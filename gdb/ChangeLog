@@ -1,5 +1,10 @@
 2014-01-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c: Remove "#ifdef UI_OUT" condition for including
+	"ui-out.h".
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-typeprint (type_is_full_subrange_of_target_type):
 	New function.
 	(print_range): Add parameter bounds_prefered_p.  If not set,
