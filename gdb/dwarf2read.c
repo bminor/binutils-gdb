@@ -13107,6 +13107,69 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
     new_symbol (die, type, cu);
 }
 
+/* Assuming DIE is an enumeration type, and TYPE is its associated type,
+   update TYPE using some information only available in DIE's children.  */
+
+static void
+update_enumeration_type_from_children (struct die_info *die,
+				       struct type *type,
+				       struct dwarf2_cu *cu)
+{
+  struct obstack obstack;
+  struct die_info *child_die = die->child;
+  int unsigned_enum = 1;
+  int flag_enum = 1;
+  ULONGEST mask = 0;
+  struct cleanup *old_chain;
+
+  obstack_init (&obstack);
+  old_chain = make_cleanup_obstack_free (&obstack);
+
+  while (child_die != NULL && child_die->tag)
+    {
+      struct attribute *attr;
+      LONGEST value;
+      const gdb_byte *bytes;
+      struct dwarf2_locexpr_baton *baton;
+      const char *name;
+      if (child_die->tag != DW_TAG_enumerator)
+	continue;
+
+      attr = dwarf2_attr (child_die, DW_AT_const_value, cu);
+      if (attr == NULL)
+	continue;
+
+      name = dwarf2_name (child_die, cu);
+      if (name == NULL)
+	name = "<anonymous enumerator>";
+
+      dwarf2_const_value_attr (attr, type, name, &obstack, cu,
+			       &value, &bytes, &baton);
+      if (value < 0)
+	{
+	  unsigned_enum = 0;
+	  flag_enum = 0;
+	}
+      else if ((mask & value) != 0)
+	flag_enum = 0;
+      else
+	mask |= value;
+
+      /* If we already know that the enum type is neither unsigned, nor
+	 a flag type, no need to look at the rest of the enumerates.  */
+      if (!unsigned_enum && !flag_enum)
+	break;
+      child_die = sibling_die (child_die);
+    }
+
+  if (unsigned_enum)
+    TYPE_UNSIGNED (type) = 1;
+  if (flag_enum)
+    TYPE_FLAG_ENUM (type) = 1;
+
+  do_cleanups (old_chain);
+}
+
 /* Given a DW_AT_enumeration_type die, set its type.  We do not
    complete the type's fields yet, or create any symbols.  */
 
@@ -13156,6 +13219,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   if (die_is_declaration (die, cu))
     TYPE_STUB (type) = 1;
 
+  /* Finish the creation of this type by using the enum's children.  */
+  update_enumeration_type_from_children (die, type, cu);
+
   return set_die_type (die, type, cu);
 }
 
@@ -13180,10 +13246,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
       struct symbol *sym;
       struct field *fields = NULL;
       int num_fields = 0;
-      int unsigned_enum = 1;
       const char *name;
-      int flag_enum = 1;
-      ULONGEST mask = 0;
 
       child_die = die->child;
       while (child_die && child_die->tag)
@@ -13198,15 +13261,6 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      if (name)
 		{
 		  sym = new_symbol (child_die, this_type, cu);
-		  if (SYMBOL_VALUE (sym) < 0)
-		    {
-		      unsigned_enum = 0;
-		      flag_enum = 0;
-		    }
-		  else if ((mask & SYMBOL_VALUE (sym)) != 0)
-		    flag_enum = 0;
-		  else
-		    mask |= SYMBOL_VALUE (sym);
 
 		  if ((num_fields % DW_FIELD_ALLOC_CHUNK) == 0)
 		    {
@@ -13237,10 +13291,6 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 		  sizeof (struct field) * num_fields);
 	  xfree (fields);
 	}
-      if (unsigned_enum)
-	TYPE_UNSIGNED (this_type) = 1;
-      if (flag_enum)
-	TYPE_FLAG_ENUM (this_type) = 1;
     }
 
   /* If we are reading an enum from a .debug_types unit, and the enum

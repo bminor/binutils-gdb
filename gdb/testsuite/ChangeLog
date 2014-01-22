@@ -1,5 +1,9 @@
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.dwarf2/arr-subrange.c, gdb.dwarf2/arr-subrange.exp: New files.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.dwarf2/arr-stride.c: New file.
 	* gdb.dwarf2/arr-stride.exp: New file.
 

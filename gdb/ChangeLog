@@ -1,3 +1,11 @@
+2014-02-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (update_enumeration_type_from_children): New
+	function, mostly extracted from process_structure_scope.
+	(read_enumeration_type): Call update_enumeration_type_from_children.
+	(process_enumeration_scope): Do not set THIS_TYPE's flag_unsigned
+	and flag_flag_enum fields.
+
 2014-02-26  Pedro Alves  <palves@redhat.com>
 
 	* bsd-uthread.c (bsd_uthread_xfer_partial): Delete function.
