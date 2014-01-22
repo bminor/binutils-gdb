@@ -1,5 +1,9 @@
 2014-01-22  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (elf_link_add_object_symbols): Call minfo for --as-needed.
+
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (STK_LINKER): Comment typo fix.
 
 2014-01-21  H.J. Lu  <hongjiu.lu@intel.com>

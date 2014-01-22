@@ -1,5 +1,16 @@
 2014-01-22  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (asneeded_list_head, asneeded_list_tail): New vars.
+	(lang_init): Initialise them.
+	(lang_print_asneeded): New function.
+	(lang_process): Call lang_print_asneeded.
+	* ldlang.h (struct asneeded_minfo): New.
+	(asneeded_list_tail): Declare.
+	* ldmain.c (add_archive_element): Improve archive map heading.
+	* ldmisc.c (minfo): Stash --as-needed info.
+
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
 	* ld.h (struct map_symbol_def): Move to..
 	* ldlang.h: ..here.
 	* ldlang.c (print_assignment): Don't set expld.assign_name to dot.

@@ -841,7 +841,8 @@ add_archive_element (struct bfd_link_info *info,
 	{
 	  char buf[100];
 
-	  sprintf (buf, _("Archive member included because of file (symbol)\n\n"));
+	  sprintf (buf, _("Archive member included "
+			  "to satisfy reference by file (symbol)\n\n"));
 	  minfo ("%s", buf);
 	  header_printed = TRUE;
 	}

@@ -4437,6 +4437,9 @@ error_free_dyn:
 	      int ret;
 	      const char *soname = elf_dt_name (abfd);
 
+	      info->callbacks->minfo ("%!", soname, old_bfd,
+				      h->root.root.string);
+
 	      /* A symbol from a library loaded via DT_NEEDED of some
 		 other library is referenced by a regular object.
 		 Add a DT_NEEDED entry for it.  Issue an error if
