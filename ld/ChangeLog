@@ -1,3 +1,9 @@
+2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16498
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Improve
+	orphaned TLS section handling.
+
 2014-01-24  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_output_section_find_by_flags): Be careful to

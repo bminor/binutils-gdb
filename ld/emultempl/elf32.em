@@ -1812,6 +1812,9 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       { ".rodata",
 	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA,
 	0, 0, 0, 0 },
+      { ".tdata",
+	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_THREAD_LOCAL,
+	0, 0, 0, 0 },
       { ".data",
 	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_DATA,
 	0, 0, 0, 0 },
@@ -1835,6 +1838,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
     {
       orphan_text = 0,
       orphan_rodata,
+      orphan_tdata,
       orphan_data,
       orphan_bss,
       orphan_rel,
@@ -1962,6 +1966,8 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
     place = &hold[orphan_bss];
   else if ((s->flags & SEC_SMALL_DATA) != 0)
     place = &hold[orphan_sdata];
+  else if ((s->flags & SEC_THREAD_LOCAL) != 0)
+    place = &hold[orphan_tdata];
   else if ((s->flags & SEC_READONLY) == 0)
     place = &hold[orphan_data];
   else if (((iself && (sh_type == SHT_RELA || sh_type == SHT_REL))
