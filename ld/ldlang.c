@@ -3935,7 +3935,8 @@ print_assignment (lang_assignment_statement_type *assignment,
       const char *dst = assignment->exp->assign.dst;
 
       is_dot = (dst[0] == '.' && dst[1] == 0);
-      expld.assign_name = dst;
+      if (!is_dot)
+	expld.assign_name = dst;
       tree = assignment->exp->assign.src;
     }
 

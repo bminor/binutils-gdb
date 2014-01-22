@@ -1,5 +1,9 @@
 2014-01-22  Alan Modra  <amodra@gmail.com>
 
+	* ld-scripts/pr14962-2.d: Correct target triple.
+
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
 	* ld-shared/elf-offset.ld: Align end of .bss with canonical form
 	of ALIGN that allows an empty .bss to be removed.
 	* ld-arm/arm-dyn.ld: Likewise.

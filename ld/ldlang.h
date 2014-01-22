@@ -313,6 +313,11 @@ typedef struct
   asection *section;
 } lang_input_section_type;
 
+struct map_symbol_def {
+  struct bfd_link_hash_entry *entry;
+  struct map_symbol_def *next;
+};
+
 /* For input sections, when writing a map file: head / tail of a linked
    list of hash table entries for symbols defined in this section.  */
 typedef struct input_section_userdata_struct

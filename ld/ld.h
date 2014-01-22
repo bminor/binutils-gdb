@@ -104,11 +104,6 @@ struct wildcard_list {
   struct wildcard_spec spec;
 };
 
-struct map_symbol_def {
-  struct bfd_link_hash_entry *entry;
-  struct map_symbol_def *next;
-};
-
 #define BYTE_SIZE	(1)
 #define SHORT_SIZE	(2)
 #define LONG_SIZE	(4)

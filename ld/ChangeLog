@@ -1,5 +1,11 @@
 2014-01-22  Alan Modra  <amodra@gmail.com>
 
+	* ld.h (struct map_symbol_def): Move to..
+	* ldlang.h: ..here.
+	* ldlang.c (print_assignment): Don't set expld.assign_name to dot.
+
+2014-01-22  Alan Modra  <amodra@gmail.com>
+
 	* ld.texinfo (Output Section Discarding): Mention assigning to dot
 	as a way of keeping otherwise empty sections.
 	* ldexp.c (is_dot, is_value, is_sym_value, is_dot_ne_0,
