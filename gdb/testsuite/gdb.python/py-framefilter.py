@@ -30,8 +30,11 @@ class Reverse_Function (FrameDecorator):
         fname = str (self.fobj.function())
         if (fname == None or fname == ""):
             return None
+        if fname == 'end_func':
+            extra = self.fobj.inferior_frame().read_var('str').string()
         else:
-            fname = fname[::-1]
+            extra = ''
+        fname = fname[::-1] + extra
         return fname
 
 class Dummy (FrameDecorator):

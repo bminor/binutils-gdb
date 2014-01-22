@@ -1,3 +1,9 @@
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16491:
+	* python/py-framefilter.c (apply_frame_filter): Call
+	ensure_python_env after computing gdbarch.
+
 2014-01-22  Baruch Siach  <baruch@tkos.co.il>
 
 	* xtensa-tdep.h (xtensa_elf_greg_t): Change type to uint32_t.
