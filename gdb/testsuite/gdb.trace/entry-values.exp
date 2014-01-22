@@ -57,7 +57,7 @@ gdb_test_multiple $test $test {
 
 set test "disassemble foo+$foo_length,+10"
 gdb_test_multiple $test $test {
-    -re ".*($hex) <foo\\+$foo_length>:\[^\r\n\]+\r\n\[ \]+($hex) .*\.\r\n$gdb_prompt $" {
+    -re ".*($hex) <foo\\+$foo_length>:\[^\r\n\]+\r\n\[ \]+($hex).*\.\r\n$gdb_prompt $" {
 	set start $expect_out(1,string)
 	set end $expect_out(2,string)
 
@@ -77,6 +77,8 @@ set bar_call_foo ""
 
 if { [istarget "arm*-*-*"] || [istarget "aarch64*-*-*"] } {
     set call_insn "bl"
+} elseif { [istarget "s390*-*-*"] } {
+    set call_insn "brasl"
 } else {
     set call_insn "call"
 }
@@ -109,7 +111,7 @@ if { [string equal $bar_call_foo ""] || [string equal $bar_length ""] } {
 
 set test "disassemble bar+$bar_length,+10"
 gdb_test_multiple $test $test {
-    -re ".*($hex) <bar\\+$bar_length>:\[^\r\n\]+\r\n\[ \]+($hex) .*\.\r\n$gdb_prompt $" {
+    -re ".*($hex) <bar\\+$bar_length>:\[^\r\n\]+\r\n\[ \]+($hex).*\.\r\n$gdb_prompt $" {
 	set start $expect_out(1,string)
 	set end $expect_out(2,string)
 
