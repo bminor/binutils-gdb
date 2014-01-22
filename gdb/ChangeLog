@@ -1,5 +1,12 @@
 2014-01-23  Tom Tromey  <tromey@redhat.com>
 
+	PR python/16485:
+	* python/lib/gdb/FrameDecorator.py: (FrameVars.fetch_frame_args):
+	Handle exception from frame.block.
+	(FrameVars.fetch_frame_locals): Likewise.
+
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/16487:
 	* python/py-framefilter.c (py_print_frame): Don't call Py_DECREF
 	on a NULL pointer.  Move "goto error" to correct place.
