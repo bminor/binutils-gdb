@@ -1,5 +1,9 @@
 2014-01-22  Doug Evans  <dje@google.com>
 
+	* gdbthread.h (gdb_id_to_thread): Delete, unused.
+
+2014-01-22  Doug Evans  <dje@google.com>
+
 	* configure.ac (AC_CHECK_FUNCS): Add test for gettimeofday.
 	* configure: Regenerate.
 	* config.in: Regenerate.
