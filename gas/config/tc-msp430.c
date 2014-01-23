@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002-2013 Free Software Foundation, Inc.
+  Copyright (C) 2002-2014 Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -1152,23 +1152,6 @@ msp430_set_arch (int option)
 		     target_is_430x () ? bfd_mach_msp430x : bfd_mach_msp11);
 }
 
-static void
-show_mcu_list (FILE * stream)
-{
-  int i;
-
-  fprintf (stream, _("Known MCU names:\n"));
-
-  for (i = 0; mcu_types[i].name; i++)
-    {
-      fprintf (stream, "%14.14s", mcu_types[i].name);
-      if ((i % 6) == 5)
-	fprintf (stream, "\n");
-    }
-
-  fprintf (stream, "\n");
-}
-
 int
 md_parse_option (int c, char * arg)
 {
@@ -1184,31 +1167,30 @@ md_parse_option (int c, char * arg)
 	if (strcasecmp (mcu_types[i].name, arg) == 0)
 	  break;
 
-      if (mcu_types[i].name == NULL)
+      if (mcu_types[i].name != NULL)
 	{
-	  show_mcu_list (stderr);
-	  as_fatal (_("unknown MCU: %s\n"), arg);
+	  /* Allow switching to the same or a lesser architecture.  */
+	  if (msp430_mcu == &default_mcu || msp430_mcu->isa >= mcu_types[i].isa)
+	    msp430_mcu = mcu_types + i;
+	  else
+	    as_fatal (_("redefinition of mcu type '%s' to '%s'"),
+		      msp430_mcu->name, mcu_types[i].name);
 	}
-
-      /* Allow switching to the same or a lesser architecture.  */
-      if (msp430_mcu == &default_mcu || msp430_mcu->isa >= mcu_types[i].isa)
-	msp430_mcu = mcu_types + i;
-      else
-	as_fatal (_("redefinition of mcu type '%s' to '%s'"),
-		  msp430_mcu->name, mcu_types[i].name);
+      /* It is not an error if we do not match the MCU name.  */
       return 1;
-
+      
     case OPTION_MCPU:
-      if (strcmp (arg, "430") == 0)
+      if (strcmp (arg, "430") == 0
+	  || strcasecmp (arg, "msp430") == 0)
 	msp430_mcu = & default_mcu;
-      else if (strcmp (arg, "430x") == 0
-	       || strcmp (arg, "430X") == 0)
+      else if (strcasecmp (arg, "430x") == 0
+	       || strcasecmp (arg, "msp430x") == 0)
 	msp430_mcu = & msp430x_mcu;
-      else if (strcasecmp (arg, "430xv2") == 0)
+      else if (strcasecmp (arg, "430xv2") == 0
+	       || strcasecmp (arg, "msp430xv2") == 0)
 	msp430_mcu = & msp430xv2_mcu;
       else
 	as_fatal (_("unrecognised argument to -mcpu option '%s'"), arg);
-
       return 1;
 
     case OPTION_RELAX:
@@ -1315,8 +1297,6 @@ md_show_usage (FILE * stream)
 	   _("  -mn - enable generation of NOP after changing interrupts\n"));
   fprintf (stream,
 	   _("  -md - Force copying of data from ROM to RAM at startup\n"));
-
-  show_mcu_list (stream);
 }
 
 symbolS *
