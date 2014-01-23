@@ -4117,11 +4117,31 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  /* Mandated PF_R.  */
 	  m->p_flags = PF_R;
 	  m->p_flags_valid = 1;
+	  s = first_tls;
 	  for (i = 0; i < (unsigned int) tls_count; ++i)
 	    {
-	      BFD_ASSERT (first_tls->flags & SEC_THREAD_LOCAL);
-	      m->sections[i] = first_tls;
-	      first_tls = first_tls->next;
+	      if ((s->flags & SEC_THREAD_LOCAL) == 0)
+		{
+		  _bfd_error_handler
+		    (_("%B: TLS sections are not adjacent:"), abfd);
+		  s = first_tls;
+		  i = 0;
+		  while (i < (unsigned int) tls_count)
+		    {
+		      if ((s->flags & SEC_THREAD_LOCAL) != 0)
+			{
+			  _bfd_error_handler (_("	    TLS: %A"), s);
+			  i++;
+			}
+		      else
+			_bfd_error_handler (_("	non-TLS: %A"), s);
+		      s = s->next;
+		    }
+		  bfd_set_error (bfd_error_bad_value);
+		  goto error_return;
+		}
+	      m->sections[i] = s;
+	      s = s->next;
 	    }
 
 	  *pm = m;
