@@ -1394,8 +1394,8 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
    the target below it.  So, we must manually try all targets.  */
 
 static LONGEST
-raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
-			 const void *writebuf, ULONGEST memaddr, LONGEST len)
+raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
+			 const gdb_byte *writebuf, ULONGEST memaddr, LONGEST len)
 {
   LONGEST res;
 
@@ -1427,7 +1427,7 @@ raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
 
 static LONGEST
 memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
-		       void *readbuf, const void *writebuf, ULONGEST memaddr,
+		       gdb_byte *readbuf, const gdb_byte *writebuf, ULONGEST memaddr,
 		       ULONGEST len)
 {
   LONGEST res;
@@ -1625,7 +1625,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
 static LONGEST
 memory_xfer_partial (struct target_ops *ops, enum target_object object,
-		     void *readbuf, const void *writebuf, ULONGEST memaddr,
+		     gdb_byte *readbuf, const gdb_byte *writebuf, ULONGEST memaddr,
 		     ULONGEST len)
 {
   int res;

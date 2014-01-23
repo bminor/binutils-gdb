@@ -1,3 +1,33 @@
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16485:
+	* python/lib/gdb/FrameDecorator.py: (FrameVars.fetch_frame_args):
+	Handle exception from frame.block.
+	(FrameVars.fetch_frame_locals): Likewise.
+
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16487:
+	* python/py-framefilter.c (py_print_frame): Don't call Py_DECREF
+	on a NULL pointer.  Move "goto error" to correct place.
+
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16491:
+	* python/py-framefilter.c (apply_frame_filter): Call
+	ensure_python_env after computing gdbarch.
+
+2014-01-23  Yao Qi  <yao@codesourcery.com>
+
+	* target.c (raw_memory_xfer_partial): Change argument type
+	from void * to gdb_byte *.
+	(memory_xfer_partial_1, memory_xfer_partial): Likewise.
+
+2014-01-22  Doug Evans  <dje@google.com>
+
+	New gdbserver option --debug-format=timestamp.
+	* NEWS: Mention it.
+
 2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
 	* syscalls/s390x-linux.xml: New file.

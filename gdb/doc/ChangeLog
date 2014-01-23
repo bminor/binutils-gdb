@@ -1,3 +1,8 @@
+2014-01-22  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Server): Mention --debug-format=all|none|timestamp.
+	(gdbserver man): Ditto.
+
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo: Document limited reverse/replay support

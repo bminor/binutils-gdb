@@ -59,7 +59,7 @@ m32r_get_pc (struct regcache *regcache)
   unsigned long pc;
   collect_register_by_name (regcache, "pc", &pc);
   if (debug_threads)
-    fprintf (stderr, "stop pc is %08lx\n", pc);
+    debug_printf ("stop pc is %08lx\n", pc);
   return pc;
 }
 

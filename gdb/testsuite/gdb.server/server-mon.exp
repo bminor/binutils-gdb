@@ -50,3 +50,7 @@ gdb_test "monitor set debug 1" "Debug output enabled\\."
 gdb_test "monitor set debug 0" "Debug output disabled\\."
 gdb_test "monitor set remote-debug 1" "Protocol debug output enabled\\."
 gdb_test "monitor set remote-debug 0" "Protocol debug output disabled\\."
+gdb_test "monitor set debug-format all" \
+    "All extra debug format options enabled\\."
+gdb_test "monitor set debug-format none" \
+    "All extra debug format options disabled\\."

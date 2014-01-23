@@ -110,7 +110,6 @@ extern ptid_t cont_thread;
 extern ptid_t general_thread;
 
 extern int server_waiting;
-extern int debug_threads;
 extern int debug_hw_points;
 extern int pass_signals[];
 extern int program_signals[];
@@ -146,6 +145,7 @@ extern int handle_target_event (int err, gdb_client_data client_data);
 
 #include "common-utils.h"
 #include "utils.h"
+#include "debug.h"
 
 #include "gdb_assert.h"
 

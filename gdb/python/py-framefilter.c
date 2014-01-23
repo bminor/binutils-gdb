@@ -1218,11 +1218,11 @@ py_print_frame (PyObject *filter, int flags, enum py_frame_args args_type,
 		  gdbpy_convert_exception (except);
 		  goto error;
 		}
+	      Py_DECREF (py_func);
 	    }
-	  Py_DECREF (py_func);
+	  else
+	    goto error;
 	}
-      else
-	goto error;
     }
 
 
@@ -1477,17 +1477,17 @@ apply_frame_filter (struct frame_info *frame, int flags,
   if (!gdb_python_initialized)
     return PY_BT_NO_FILTERS;
 
-  cleanups = ensure_python_env (gdbarch, current_language);
-
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       gdbarch = get_frame_arch (frame);
     }
   if (except.reason < 0)
     {
-      gdbpy_convert_exception (except);
-      goto error;
+      /* Let gdb try to print the stack trace.  */
+      return PY_BT_NO_FILTERS;
     }
+
+  cleanups = ensure_python_env (gdbarch, current_language);
 
   iterable = bootstrap_python_frame_filters (frame, frame_low, frame_high);
 

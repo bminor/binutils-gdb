@@ -1,3 +1,50 @@
+2014-01-22  Doug Evans  <dje@google.com>
+
+	* gdbthread.h (gdb_id_to_thread): Delete, unused.
+
+2014-01-22  Doug Evans  <dje@google.com>
+
+	* configure.ac (AC_CHECK_FUNCS): Add test for gettimeofday.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in (SFILES): Add debug.c.
+	(OBS): Add debug.o.
+	* debug.c: New file.
+	* debug.h: New file.
+	* linux-aarch64-low.c (*): Update all debugging printfs to use
+	debug_printf instead of fprintf.
+	* linux-arm-low.c (*): Ditto.
+	* linux-cris-low.c (*): Ditto.
+	* linux-crisv32-low.c (*): Ditto.
+	* linux-m32r-low.c (*): Ditto.
+	* linux-sparc-low.c (*): Ditto.
+	* linux-x86.c (*): Ditto.
+	* linux-low.c (*): Ditto.
+	(linux_wait_1): Add calls to debug_enter, debug_exit.
+	(linux_wait): Remove redundant debugging printf.
+	(stop_all_lwps): Add calls to debug_enter, debug_exit.
+	(linux_resume, unstop_all_lwps): Ditto.
+	* mem-break.c (*): Update all debugging printfs to use
+	debug_printf instead of fprintf.
+	* remote-utils.c (*): Ditto.
+	* thread-db.c (*): Ditto.
+	* server.c #include <ctype.h>, "gdb_vecs.h".
+	(debug_threads): Moved to debug.c.
+	(*): Update all debugging printfs to use debug_printf instead of
+	fprintf.
+	(start_inferior): Replace call to fflush with call to debug_flush.
+	(monitor_show_help): Mention set debug-format.
+	(parse_debug_format_options): New function.
+	(handle_monitor_command): Handle "monitor set debug-format".
+	(gdbserver_usage): Mention --debug-format.
+	(main): Parse --debug-format.
+	* server.h (debug_threads): Declaration moved to debug.h.
+	#include "debug.h".
+	* tracepoint.c (trace_debug_1) [!IN_PROCESS_AGENT]: Add version of
+	trace_debug_1 that uses debug_printf.
+	(tracepoint_look_up_symbols): Update all debugging printfs to use
+	debug_printf instead of fprintf.
+
 2014-01-20  Baruch Siach  <baruch@tkos.co.il>
 
 	* linux-xtensa-low.c: Include asm/ptrace.h instead of

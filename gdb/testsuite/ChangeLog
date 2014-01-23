@@ -1,3 +1,21 @@
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16487:
+	* gdb.python/py-framefilter.exp: Add test using "Error" filter.
+	* gdb.python/py-framefilter.py (ErrorInName, ErrorFilter): New
+	classes.
+
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16491:
+	* gdb.python/py-framefilter.py (Reverse_Function.function): Read a
+	string from an inferior frame.
+	* gdb.python/py-framefilter-mi.exp: Update.
+
+2014-01-22  Doug Evans  <dje@google.com>
+
+	* gdb.server/server-mon.exp: Add tests for "set debug-format".
+
 2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
 	* gdb.base/catch-syscall.exp: Activate test on s390*-linux.
