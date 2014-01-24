@@ -1,3 +1,13 @@
+2014-01-24  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc_build_one_stub): Correct reloc count passed
+	to get_relocs for ELFv2.
+	(STK_LINKER): Comment typo fix.
+
+	2013-12-16  Andreas Schwab  <schwab@suse.de>
+	* elf64-ppc.c (ppc64_elf_relocate_section): Add newline to error
+	message.
+
 2013-12-20  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): If merging a new weak

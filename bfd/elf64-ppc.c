@@ -134,7 +134,7 @@ static bfd_vma opd_entry_value
 /* Offsets to some stack save slots.  */
 #define STK_LR 16
 #define STK_TOC(htab) (htab->opd_abi ? 40 : 24)
-/* This one is dodgy.  ABIv2 does not have a linker word, so use the
+/* This one is dodgy.  ELFv2 does not have a linker word, so use the
    CR save slot.  Used only by optimised __tls_get_addr call stub,
    relying on __tls_get_addr_opt not saving CR..  */
 #define STK_LINKER(htab) (htab->opd_abi ? 32 : 8)
@@ -10751,10 +10751,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  r = get_relocs (stub_entry->stub_sec,
-			  (2
-			   + (PPC_HA (off) != 0)
-			   + (htab->plt_static_chain
-			      && PPC_HA (off + 16) == PPC_HA (off))));
+			  ((PPC_HA (off) != 0)
+			   + (htab->opd_abi
+			      ? 2 + (htab->plt_static_chain
+				     && PPC_HA (off + 16) == PPC_HA (off))
+			      : 1)));
 	  if (r == NULL)
 	    return FALSE;
 	  r[0].r_offset = loc - stub_entry->stub_sec->contents;
@@ -13653,7 +13654,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		{
 		  info->callbacks->einfo
 		    (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
-		       "recompile with -fPIC"),
+		       "recompile with -fPIC\n"),
 		     input_bfd, input_section, rel->r_offset, sym_name);
 
 		  bfd_set_error (bfd_error_bad_value);
