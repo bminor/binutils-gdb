@@ -10750,10 +10750,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  r = get_relocs (stub_entry->stub_sec,
-			  (2
-			   + (PPC_HA (off) != 0)
-			   + (htab->plt_static_chain
-			      && PPC_HA (off + 16) == PPC_HA (off))));
+			  ((PPC_HA (off) != 0)
+			   + (htab->opd_abi
+			      ? 2 + (htab->plt_static_chain
+				     && PPC_HA (off + 16) == PPC_HA (off))
+			      : 1)));
 	  if (r == NULL)
 	    return FALSE;
 	  r[0].r_offset = loc - stub_entry->stub_sec->contents;
