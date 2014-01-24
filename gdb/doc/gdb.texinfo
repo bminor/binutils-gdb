@@ -6417,12 +6417,16 @@ For architecture environments that support process record and replay,
 @kindex record full
 @kindex record btrace
 @kindex record btrace bts
+@kindex record btrace pt
 @kindex record bts
+@kindex record pt
 @kindex rec
 @kindex rec full
 @kindex rec btrace
 @kindex rec btrace bts
+@kindex rec btrace pt
 @kindex rec bts
+@kindex rec pt
 @item record @var{method}
 This command starts the process record and replay target.  The
 recording method can be specified as parameter.  Without a parameter
@@ -6438,8 +6442,9 @@ execution.
 @item btrace @var{format}
 Hardware-supported instruction recording.  This method does not record
 data.  Further, the data is collected in a ring buffer so old data will
-be overwritten when the buffer is full.  It allows limited replay and
-reverse execution.
+be overwritten when the buffer is full.  It allows limited reverse
+execution.  Variables and registers are not available during reverse
+execution.
 
 The recording format can be specified as parameter.  Without a parameter
 the command chooses the recording format.  The following recording
@@ -6451,6 +6456,21 @@ formats are available:
 Use the @dfn{Branch Trace Store} (@acronym{BTS}) recording format.  In
 this format, the processor stores a from/to record for each executed
 branch in the btrace ring buffer.
+
+@item pt
+@cindex Intel(R) Processor Trace
+Use the @dfn{Intel(R) Processor Trace} recording format.  In this
+format, the processor stores the execution trace in a compressed form
+that is afterwards decoded by @value{GDBN}.
+
+The trace can be recorded with very low overhead.  The compressed
+trace format also allows small trace buffers to already contain a big
+number of instructions compared to @acronym{BTS}.
+
+Decoding the recorded execution trace, on the other hand, is more
+expensive than decoding @acronym{BTS} trace.  This is mostly due to the
+increased number of instructions to process.  You should increase the
+buffer-size with care.
 @end table
 
 Not all recording formats may be available on all processors.
@@ -6460,9 +6480,6 @@ The process record and replay target can only debug a process that is
 already running.  Therefore, you need first to start the process with
 the @kbd{run} or @kbd{start} commands, and then start the recording
 with the @kbd{record @var{method}} command.
-
-Both @code{record @var{method}} and @code{rec @var{method}} are
-aliases of @code{target record-@var{method}}.
 
 @cindex displaced stepping, and process record and replay
 Displaced stepping (@pxref{Maintenance Commands,, displaced stepping})
@@ -6629,6 +6646,29 @@ also need longer to process the branch trace data before it can be used.
 Show the current setting of the requested ring buffer size for branch
 tracing in @acronym{BTS} format.
 
+@kindex set record btrace pt
+@item set record btrace pt buffer-size @var{size}
+@itemx set record btrace pt buffer-size unlimited
+Set the requested ring buffer size for branch tracing in Intel(R)
+Processor Trace format.  Default is 16KB.
+
+If @var{size} is a positive number, then @value{GDBN} will try to
+allocate a buffer of at least @var{size} bytes for each new thread
+that uses the btrace recording method and the Intel(R) Processor Trace
+format.  The actually obtained buffer size may differ from the
+requested @var{size}.  Use the @code{info record} command to see the
+actual buffer size for each thread.
+
+If @var{limit} is @code{unlimited} or zero, @value{GDBN} will try to
+allocate a buffer of 4MB.
+
+Bigger buffers mean longer traces.  On the other hand, @value{GDBN} will
+also need longer to process the branch trace data before it can be used.
+
+@item show record btrace pt buffer-size @var{size}
+Show the current setting of the requested ring buffer size for branch
+tracing in Intel(R) Processor Trace format.
+
 @kindex info record
 @item info record
 Show various statistics about the recording depending on the recording
@@ -6670,6 +6710,12 @@ Whether in record mode or replay mode.
 @end itemize
 
 For the @code{bts} recording format, it also shows:
+@itemize @bullet
+@item
+Size of the perf ring buffer.
+@end itemize
+
+For the @code{pt} recording format, it also shows:
 @itemize @bullet
 @item
 Size of the perf ring buffer.
@@ -36294,7 +36340,17 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{Qbtrace:pt}
+@tab Yes
+@tab @samp{-}
+@tab Yes
+
 @item @samp{Qbtrace-conf:bts:size}
+@tab Yes
+@tab @samp{-}
+@tab Yes
+
+@item @samp{Qbtrace-conf:pt:size}
 @tab Yes
 @tab @samp{-}
 @tab Yes
@@ -36580,8 +36636,14 @@ The remote stub understands the @samp{Qbtrace:off} packet.
 @item Qbtrace:bts
 The remote stub understands the @samp{Qbtrace:bts} packet.
 
+@item Qbtrace:pt
+The remote stub understands the @samp{Qbtrace:pt} packet.
+
 @item Qbtrace-conf:bts:size
 The remote stub understands the @samp{Qbtrace-conf:bts:size} packet.
+
+@item Qbtrace-conf:pt:size
+The remote stub understands the @samp{Qbtrace-conf:pt:size} packet.
 
 @item swbreak
 The remote stub reports the @samp{swbreak} stop reason for memory
@@ -37027,7 +37089,18 @@ A badly formed request or an error was encountered.
 @end table
 
 @item Qbtrace:bts
-Enable branch tracing for the current thread using bts tracing.
+Enable branch tracing for the current thread using Branch Trace Store.
+
+Reply:
+@table @samp
+@item OK
+Branch tracing has been enabled.
+@item E.errtext
+A badly formed request or an error was encountered.
+@end table
+
+@item Qbtrace:pt
+Enable branch tracing for the current thread using Intel(R) Processor Trace.
 
 Reply:
 @table @samp
@@ -37051,6 +37124,18 @@ A badly formed request or an error was encountered.
 @item Qbtrace-conf:bts:size=@var{value}
 Set the requested ring buffer size for new threads that use the
 btrace recording method in bts format.
+
+Reply:
+@table @samp
+@item OK
+The ring buffer size has been set.
+@item E.errtext
+A badly formed request or an error was encountered.
+@end table
+
+@item Qbtrace-conf:pt:size=@var{value}
+Set the requested ring buffer size for new threads that use the
+btrace recording method in pt format.
 
 Reply:
 @table @samp
@@ -39611,12 +39696,24 @@ and ending at @var{end}:
 The formal DTD for the branch trace format is given below:
 
 @smallexample
-<!ELEMENT btrace  (block)* >
+<!ELEMENT btrace  (block* | pt) >
 <!ATTLIST btrace  version CDATA   #FIXED "1.0">
 
 <!ELEMENT block        EMPTY>
 <!ATTLIST block        begin  CDATA   #REQUIRED
                        end    CDATA   #REQUIRED>
+
+<!ELEMENT pt (pt-config?, raw?)>
+
+<!ELEMENT pt-config (cpu?)>
+
+<!ELEMENT cpu EMPTY>
+<!ATTLIST cpu vendor   CDATA #REQUIRED
+              family   CDATA #REQUIRED
+              model    CDATA #REQUIRED
+              stepping CDATA #REQUIRED>
+
+<!ELEMENT raw (#PCDATA)>
 @end smallexample
 
 @node Branch Trace Configuration Format
@@ -39637,6 +39734,13 @@ This thread uses the @dfn{Branch Trace Store} (@acronym{BTS}) format.
 @item size
 The size of the @acronym{BTS} ring buffer in bytes.
 @end table
+@item pt
+This thread uses the @dfn{Intel(R) Processor Trace} (@acronym{Intel(R)
+PT}) format.
+@table @code
+@item size
+The size of the @acronym{Intel(R) PT} ring buffer in bytes.
+@end table
 @end table
 
 @value{GDBN} must be linked with the Expat library to support XML
@@ -39645,11 +39749,14 @@ branch trace configuration discovery.  @xref{Expat}.
 The formal DTD for the branch trace configuration format is given below:
 
 @smallexample
-<!ELEMENT btrace-conf	(bts?)>
+<!ELEMENT btrace-conf	(bts?, pt?)>
 <!ATTLIST btrace-conf	version	CDATA	#FIXED "1.0">
 
 <!ELEMENT bts	EMPTY>
 <!ATTLIST bts	size	CDATA	#IMPLIED>
+
+<!ELEMENT pt	EMPTY>
+<!ATTLIST pt	size	CDATA	#IMPLIED>
 @end smallexample
 
 @include agentexpr.texi

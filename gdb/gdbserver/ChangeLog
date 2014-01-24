@@ -1,3 +1,13 @@
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* linux-low.c: Include "rsp-low.h"
+	(linux_low_encode_pt_config, linux_low_encode_raw): New.
+	(linux_low_read_btrace): Support BTRACE_FORMAT_PT.
+	(linux_low_btrace_conf): Support BTRACE_FORMAT_PT.
+	(handle_btrace_enable_pt): New.
+	(handle_btrace_general_set): Support "pt".
+	(handle_btrace_conf_general_set): Support "pt:size".
+
 2015-06-29  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* linux-aarch64-low.c (aarch64_supports_z_point_type): Enable for

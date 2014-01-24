@@ -33,6 +33,9 @@ btrace_format_string (enum btrace_format format)
 
     case BTRACE_FORMAT_BTS:
       return _("Branch Trace Store");
+
+    case BTRACE_FORMAT_PT:
+      return _("Intel(R) Processor Trace");
     }
 
   internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
@@ -60,6 +63,10 @@ btrace_data_fini (struct btrace_data *data)
     case BTRACE_FORMAT_BTS:
       VEC_free (btrace_block_s, data->variant.bts.blocks);
       return;
+
+    case BTRACE_FORMAT_PT:
+      xfree (data->variant.pt.data);
+      return;
     }
 
   internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
@@ -77,6 +84,9 @@ btrace_data_empty (struct btrace_data *data)
 
     case BTRACE_FORMAT_BTS:
       return VEC_empty (btrace_block_s, data->variant.bts.blocks);
+
+    case BTRACE_FORMAT_PT:
+      return (data->variant.pt.size == 0);
     }
 
   internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));

@@ -29,6 +29,10 @@
 #include "btrace-common.h"
 #include "target/waitstatus.h" /* For enum target_stop_reason.  */
 
+#if defined (HAVE_LIBIPT)
+#  include <intel-pt.h>
+#endif
+
 struct thread_info;
 struct btrace_function;
 
@@ -95,6 +99,21 @@ enum btrace_bts_error
 
   /* The instruction size could not be determined.  */
   BDE_BTS_INSN_SIZE
+};
+
+/* Decode errors for the Intel(R) Processor Trace recording format.  */
+enum btrace_pt_error
+{
+  /* The user cancelled trace processing.  */
+  BDE_PT_USER_QUIT = 1,
+
+  /* Tracing was temporarily disabled.  */
+  BDE_PT_DISABLED,
+
+  /* Trace recording overflowed.  */
+  BDE_PT_OVERFLOW
+
+  /* Negative numbers are used by the decoder library.  */
 };
 
 /* A branch trace function segment.

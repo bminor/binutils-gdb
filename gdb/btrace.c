@@ -31,6 +31,11 @@
 #include "filenames.h"
 #include "xml-support.h"
 #include "regcache.h"
+#include "rsp-low.h"
+
+#include <inttypes.h>
+
+static void btrace_add_pc (struct thread_info *tp);
 
 /* Print a record debug message.  Use do ... while (0) to avoid ambiguities
    when used in if statements.  */
@@ -686,6 +691,260 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
   btinfo->level = -level;
 }
 
+#if defined (HAVE_LIBIPT)
+
+static enum btrace_insn_class
+pt_reclassify_insn (enum pt_insn_class iclass)
+{
+  switch (iclass)
+    {
+    case ptic_call:
+      return BTRACE_INSN_CALL;
+
+    case ptic_return:
+      return BTRACE_INSN_RETURN;
+
+    case ptic_jump:
+      return BTRACE_INSN_JUMP;
+
+    default:
+      return BTRACE_INSN_OTHER;
+    }
+}
+
+/* Add function branch trace using DECODER.  */
+
+static void
+ftrace_add_pt (struct pt_insn_decoder *decoder,
+	       struct btrace_function **pbegin,
+	       struct btrace_function **pend, int *plevel,
+	       unsigned int *ngaps)
+{
+  struct btrace_function *begin, *end, *upd;
+  uint64_t offset;
+  int errcode, nerrors;
+
+  begin = *pbegin;
+  end = *pend;
+  nerrors = 0;
+  for (;;)
+    {
+      struct btrace_insn btinsn;
+      struct pt_insn insn;
+
+      errcode = pt_insn_sync_forward (decoder);
+      if (errcode < 0)
+	{
+	  if (errcode != -pte_eos)
+	    warning (_("Failed to synchronize onto the Intel(R) Processor "
+		       "Trace stream: %s."), pt_errstr (pt_errcode (errcode)));
+	  break;
+	}
+
+      memset (&btinsn, 0, sizeof (btinsn));
+      for (;;)
+	{
+	  errcode = pt_insn_next (decoder, &insn, sizeof(insn));
+	  if (errcode < 0)
+	    break;
+
+	  /* Look for gaps in the trace - unless we're at the beginning.  */
+	  if (begin != NULL)
+	    {
+	      /* Tracing is disabled and re-enabled each time we enter the
+		 kernel.  Most times, we continue from the same instruction we
+		 stopped before.  This is indicated via the RESUMED instruction
+		 flag.  The ENABLED instruction flag means that we continued
+		 from some other instruction.  Indicate this as a trace gap.  */
+	      if (insn.enabled)
+		*pend = end = ftrace_new_gap (end, BDE_PT_DISABLED);
+
+	      /* Indicate trace overflows.  */
+	      if (insn.resynced)
+		*pend = end = ftrace_new_gap (end, BDE_PT_OVERFLOW);
+	    }
+
+	  upd = ftrace_update_function (end, insn.ip);
+	  if (upd != end)
+	    {
+	      *pend = end = upd;
+
+	      if (begin == NULL)
+		*pbegin = begin = upd;
+	    }
+
+	  /* Maintain the function level offset.  */
+	  *plevel = min (*plevel, end->level);
+
+	  btinsn.pc = (CORE_ADDR) insn.ip;
+	  btinsn.size = (gdb_byte) insn.size;
+	  btinsn.iclass = pt_reclassify_insn (insn.iclass);
+
+	  ftrace_update_insns (end, &btinsn);
+	}
+
+      if (errcode == -pte_eos)
+	break;
+
+      /* If the gap is at the very beginning, we ignore it - we will have
+	 less trace, but we won't have any holes in the trace.  */
+      if (begin == NULL)
+	continue;
+
+      pt_insn_get_offset (decoder, &offset);
+
+      warning (_("Failed to decode Intel(R) Processor Trace near trace "
+		 "offset 0x%" PRIx64 " near recorded PC 0x%" PRIx64 ": %s."),
+	       offset, insn.ip, pt_errstr (pt_errcode (errcode)));
+
+      /* Indicate the gap in the trace.  */
+      *pend = end = ftrace_new_gap (end, errcode);
+      *ngaps += 1;
+    }
+
+  if (nerrors > 0)
+    warning (_("The recorded execution trace may have gaps."));
+}
+
+/* A callback function to allow the trace decoder to read the inferior's
+   memory.  */
+
+static int
+btrace_pt_readmem_callback (gdb_byte *buffer, size_t size,
+			    const struct pt_asid *asid, CORE_ADDR pc,
+			    void *context)
+{
+  int errcode;
+
+  TRY
+    {
+      errcode = target_read_code (pc, buffer, size);
+      if (errcode != 0)
+	return -pte_nomap;
+    }
+  CATCH (error, RETURN_MASK_ERROR)
+    {
+      return -pte_nomap;
+    }
+  END_CATCH
+
+  return size;
+}
+
+/* Translate the vendor from one enum to another.  */
+
+static enum pt_cpu_vendor
+pt_translate_cpu_vendor (enum btrace_cpu_vendor vendor)
+{
+  switch (vendor)
+    {
+    default:
+      return pcv_unknown;
+
+    case CV_INTEL:
+      return pcv_intel;
+    }
+}
+
+/* Finalize the function branch trace after decode.  */
+
+static void btrace_finalize_ftrace_pt (struct pt_insn_decoder *decoder,
+				       struct thread_info *tp, int level)
+{
+  pt_insn_free_decoder (decoder);
+
+  /* LEVEL is the minimal function level of all btrace function segments.
+     Define the global level offset to -LEVEL so all function levels are
+     normalized to start at zero.  */
+  tp->btrace.level = -level;
+
+  /* Add a single last instruction entry for the current PC.
+     This allows us to compute the backtrace at the current PC using both
+     standard unwind and btrace unwind.
+     This extra entry is ignored by all record commands.  */
+  btrace_add_pc (tp);
+}
+
+/* Compute the function branch trace from Intel(R) Processor Trace.  */
+
+static void
+btrace_compute_ftrace_pt (struct thread_info *tp,
+			  const struct btrace_data_pt *btrace)
+{
+  struct btrace_thread_info *btinfo;
+  struct pt_insn_decoder *decoder;
+  struct pt_config config;
+  int level, errcode;
+
+  if (btrace->size == 0)
+    return;
+
+  btinfo = &tp->btrace;
+  level = btinfo->begin != NULL ? -btinfo->level : INT_MAX;
+
+  pt_config_init(&config);
+  config.begin = btrace->data;
+  config.end = btrace->data + btrace->size;
+
+  config.cpu.vendor = pt_translate_cpu_vendor (btrace->config.cpu.vendor);
+  config.cpu.family = btrace->config.cpu.family;
+  config.cpu.model = btrace->config.cpu.model;
+  config.cpu.stepping = btrace->config.cpu.stepping;
+
+  errcode = pt_cpu_errata (&config.errata, &config.cpu);
+  if (errcode < 0)
+    error (_("Failed to configure the Intel(R) Processor Trace decoder: %s."),
+	   pt_errstr (pt_errcode (errcode)));
+
+  decoder = pt_insn_alloc_decoder (&config);
+  if (decoder == NULL)
+    error (_("Failed to allocate the Intel(R) Processor Trace decoder."));
+
+  TRY
+    {
+      struct pt_image *image;
+
+      image = pt_insn_get_image(decoder);
+      if (image == NULL)
+	error (_("Failed to configure the Intel(R) Processor Trace decoder."));
+
+      errcode = pt_image_set_callback(image, btrace_pt_readmem_callback, NULL);
+      if (errcode < 0)
+	error (_("Failed to configure the Intel(R) Processor Trace decoder: "
+		 "%s."), pt_errstr (pt_errcode (errcode)));
+
+      ftrace_add_pt (decoder, &btinfo->begin, &btinfo->end, &level,
+		     &btinfo->ngaps);
+    }
+  CATCH (error, RETURN_MASK_ALL)
+    {
+      /* Indicate a gap in the trace if we quit trace processing.  */
+      if (error.reason == RETURN_QUIT && btinfo->end != NULL)
+	{
+	  btinfo->end = ftrace_new_gap (btinfo->end, BDE_PT_USER_QUIT);
+	  btinfo->ngaps++;
+	}
+
+      btrace_finalize_ftrace_pt (decoder, tp, level);
+
+      throw_exception (error);
+    }
+  END_CATCH
+
+  btrace_finalize_ftrace_pt (decoder, tp, level);
+}
+
+#else /* defined (HAVE_LIBIPT)  */
+
+static void
+btrace_compute_ftrace_pt (struct thread_info *tp,
+			  const struct btrace_data_pt *btrace)
+{
+  internal_error (__FILE__, __LINE__, _("Unexpected branch trace format."));
+}
+
+#endif /* defined (HAVE_LIBIPT)  */
+
 /* Compute the function branch trace from a block branch trace BTRACE for
    a thread given by BTINFO.  */
 
@@ -701,6 +960,10 @@ btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace)
 
     case BTRACE_FORMAT_BTS:
       btrace_compute_ftrace_bts (tp, &btrace->variant.bts);
+      return;
+
+    case BTRACE_FORMAT_PT:
+      btrace_compute_ftrace_pt (tp, &btrace->variant.pt);
       return;
     }
 
@@ -911,6 +1174,10 @@ btrace_stitch_trace (struct btrace_data *btrace, struct thread_info *tp)
 
     case BTRACE_FORMAT_BTS:
       return btrace_stitch_bts (&btrace->variant.bts, tp);
+
+    case BTRACE_FORMAT_PT:
+      /* Delta reads are not supported.  */
+      return -1;
     }
 
   internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
@@ -1095,10 +1362,129 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
   block->end = *end;
 }
 
+/* Parse a "raw" xml record.  */
+
+static void
+parse_xml_raw (struct gdb_xml_parser *parser, const char *body_text,
+	       gdb_byte **pdata, unsigned long *psize)
+{
+  struct cleanup *cleanup;
+  gdb_byte *data, *bin;
+  unsigned long size;
+  size_t len;
+
+  len = strlen (body_text);
+  size = len / 2;
+
+  if ((size_t) size * 2 != len)
+    gdb_xml_error (parser, _("Bad raw data size."));
+
+  bin = data = xmalloc (size);
+  cleanup = make_cleanup (xfree, data);
+
+  /* We use hex encoding - see common/rsp-low.h.  */
+  while (len > 0)
+    {
+      char hi, lo;
+
+      hi = *body_text++;
+      lo = *body_text++;
+
+      if (hi == 0 || lo == 0)
+	gdb_xml_error (parser, _("Bad hex encoding."));
+
+      *bin++ = fromhex (hi) * 16 + fromhex (lo);
+      len -= 2;
+    }
+
+  discard_cleanups (cleanup);
+
+  *pdata = data;
+  *psize = size;
+}
+
+/* Parse a btrace pt-config "cpu" xml record.  */
+
+static void
+parse_xml_btrace_pt_config_cpu (struct gdb_xml_parser *parser,
+				const struct gdb_xml_element *element,
+				void *user_data,
+				VEC (gdb_xml_value_s) *attributes)
+{
+  struct btrace_data *btrace;
+  const char *vendor;
+  ULONGEST *family, *model, *stepping;
+
+  vendor = xml_find_attribute (attributes, "vendor")->value;
+  family = xml_find_attribute (attributes, "family")->value;
+  model = xml_find_attribute (attributes, "model")->value;
+  stepping = xml_find_attribute (attributes, "stepping")->value;
+
+  btrace = user_data;
+
+  if (strcmp (vendor, "GenuineIntel") == 0)
+    btrace->variant.pt.config.cpu.vendor = CV_INTEL;
+
+  btrace->variant.pt.config.cpu.family = *family;
+  btrace->variant.pt.config.cpu.model = *model;
+  btrace->variant.pt.config.cpu.stepping = *stepping;
+}
+
+/* Parse a btrace pt "raw" xml record.  */
+
+static void
+parse_xml_btrace_pt_raw (struct gdb_xml_parser *parser,
+			 const struct gdb_xml_element *element,
+			 void *user_data, const char *body_text)
+{
+  struct btrace_data *btrace;
+
+  btrace = user_data;
+  parse_xml_raw (parser, body_text, &btrace->variant.pt.data,
+		 &btrace->variant.pt.size);
+}
+
+/* Parse a btrace "pt" xml record.  */
+
+static void
+parse_xml_btrace_pt (struct gdb_xml_parser *parser,
+		     const struct gdb_xml_element *element,
+		     void *user_data, VEC (gdb_xml_value_s) *attributes)
+{
+  struct btrace_data *btrace;
+
+  btrace = user_data;
+  btrace->format = BTRACE_FORMAT_PT;
+  btrace->variant.pt.config.cpu.vendor = CV_UNKNOWN;
+  btrace->variant.pt.data = NULL;
+  btrace->variant.pt.size = 0;
+}
+
 static const struct gdb_xml_attribute block_attributes[] = {
   { "begin", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { "end", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_attribute btrace_pt_config_cpu_attributes[] = {
+  { "vendor", GDB_XML_AF_NONE, NULL, NULL },
+  { "family", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "model", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "stepping", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element btrace_pt_config_children[] = {
+  { "cpu", btrace_pt_config_cpu_attributes, NULL, GDB_XML_EF_OPTIONAL,
+    parse_xml_btrace_pt_config_cpu, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element btrace_pt_children[] = {
+  { "pt-config", NULL, btrace_pt_config_children, GDB_XML_EF_OPTIONAL, NULL,
+    NULL },
+  { "raw", NULL, NULL, GDB_XML_EF_OPTIONAL, NULL, parse_xml_btrace_pt_raw },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
 static const struct gdb_xml_attribute btrace_attributes[] = {
@@ -1109,6 +1495,8 @@ static const struct gdb_xml_attribute btrace_attributes[] = {
 static const struct gdb_xml_element btrace_children[] = {
   { "block", block_attributes, NULL,
     GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL, parse_xml_btrace_block, NULL },
+  { "pt", NULL, btrace_pt_children, GDB_XML_EF_OPTIONAL, parse_xml_btrace_pt,
+    NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
@@ -1166,8 +1554,32 @@ parse_xml_btrace_conf_bts (struct gdb_xml_parser *parser,
 
   size = xml_find_attribute (attributes, "size");
   if (size != NULL)
-    conf->bts.size = (unsigned int) * (ULONGEST *) size->value;
+    conf->bts.size = (unsigned int) *(ULONGEST *) size->value;
 }
+
+/* Parse a btrace-conf "pt" xml record.  */
+
+static void
+parse_xml_btrace_conf_pt (struct gdb_xml_parser *parser,
+			  const struct gdb_xml_element *element,
+			  void *user_data, VEC (gdb_xml_value_s) *attributes)
+{
+  struct btrace_config *conf;
+  struct gdb_xml_value *size;
+
+  conf = user_data;
+  conf->format = BTRACE_FORMAT_PT;
+  conf->pt.size = 0;
+
+  size = xml_find_attribute (attributes, "size");
+  if (size != NULL)
+    conf->pt.size = (unsigned int) *(ULONGEST *) size->value;
+}
+
+static const struct gdb_xml_attribute btrace_conf_pt_attributes[] = {
+  { "size", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
 
 static const struct gdb_xml_attribute btrace_conf_bts_attributes[] = {
   { "size", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
@@ -1177,6 +1589,8 @@ static const struct gdb_xml_attribute btrace_conf_bts_attributes[] = {
 static const struct gdb_xml_element btrace_conf_children[] = {
   { "bts", btrace_conf_bts_attributes, NULL, GDB_XML_EF_OPTIONAL,
     parse_xml_btrace_conf_bts, NULL },
+  { "pt", btrace_conf_pt_attributes, NULL, GDB_XML_EF_OPTIONAL,
+    parse_xml_btrace_conf_pt, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 

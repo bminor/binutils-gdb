@@ -1,5 +1,67 @@
 2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* NEWS: Announce new commands "record btrace pt" and "record pt".
+	Announce new options "set|show record btrace pt buffer-size".
+	* btrace.c: Include "rsp-low.h".
+	Include "inttypes.h".
+	(btrace_add_pc): Add forward declaration.
+	(pt_reclassify_insn, ftrace_add_pt, btrace_pt_readmem_callback)
+	(pt_translate_cpu_vendor, btrace_finalize_ftrace_pt)
+	(btrace_compute_ftrace_pt): New.
+	(btrace_compute_ftrace): Support BTRACE_FORMAT_PT.
+	(check_xml_btrace_version): Update version check.
+	(parse_xml_raw, parse_xml_btrace_pt_config_cpu)
+	(parse_xml_btrace_pt_raw, parse_xml_btrace_pt)
+	(btrace_pt_config_cpu_attributes, btrace_pt_config_children)
+	(btrace_pt_children): New.
+	(btrace_children): Add support for "pt".
+	(parse_xml_btrace_conf_pt, btrace_conf_pt_attributes): New.
+	(btrace_conf_children): Add support for "pt".
+	* btrace.h: Include "intel-pt.h".
+	(btrace_pt_error): New.
+	* common/btrace-common.c (btrace_format_string, btrace_data_fini)
+	(btrace_data_empty): Support BTRACE_FORMAT_PT.
+	* common/btrace-common.h (btrace_format): Add BTRACE_FORMAT_PT.
+	(struct btrace_config_pt): New.
+	(struct btrace_config)<pt>: New.
+	(struct btrace_data_pt_config, struct btrace_data_pt): New.
+	(struct btrace_data)<pt>: New.
+	* features/btrace-conf.dtd (btrace-conf)<pt>: New.
+	(pt): New.
+	* features/btrace.dtd (btrace)<pt>: New.
+	(pt, pt-config, cpu): New.
+	* nat/linux-btrace.c (perf_event_read, perf_event_read_all)
+	(perf_event_pt_event_type, kernel_supports_pt)
+	(linux_supports_pt): New.
+	(linux_supports_btrace): Support BTRACE_FORMAT_PT.
+	(linux_enable_bts): Free tinfo on error.
+	(linux_enable_pt): New.
+	(linux_enable_btrace): Support BTRACE_FORMAT_PT.
+	(linux_disable_pt): New.
+	(linux_disable_btrace): Support BTRACE_FORMAT_PT.
+	(linux_fill_btrace_pt_config, linux_read_pt): New.
+	(linux_read_btrace): Support BTRACE_FORMAT_PT.
+	* nat/linux-btrace.h (struct btrace_tinfo_pt): New.
+	(struct btrace_target_info)<pt>: New.
+	* record-btrace.c (set_record_btrace_pt_cmdlist)
+	(show_record_btrace_pt_cmdlist): New.
+	(record_btrace_print_pt_conf): New.
+	(record_btrace_print_conf): Support BTRACE_FORMAT_PT.
+	(btrace_ui_out_decode_error): Support BTRACE_FORMAT_PT.
+	(cmd_record_btrace_pt_start): New.
+	(cmd_record_btrace_start): Support BTRACE_FORMAT_PT.
+	(cmd_set_record_btrace_pt, cmd_show_record_btrace_pt): New.
+	(_initialize_record_btrace): Add new commands.
+	* remote.c (PACKET_Qbtrace_pt, PACKET_Qbtrace_conf_pt_size): New.
+	(remote_protocol_features): Add "Qbtrace:pt".
+	Add "Qbtrace-conf:pt:size".
+	(remote_supports_btrace): Support BTRACE_FORMAT_PT.
+	(btrace_sync_conf): Support PACKET_Qbtrace_conf_pt_size.
+	(remote_enable_btrace): Support BTRACE_FORMAT_PT.
+	(_initialize_remote): Add new commands.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* configure.ac: check for libipt
 	* configure: Regenerate.
 	* config.in: Regenerate.

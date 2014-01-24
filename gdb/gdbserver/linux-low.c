@@ -21,6 +21,7 @@
 #include "nat/linux-osdata.h"
 #include "agent.h"
 #include "tdesc.h"
+#include "rsp-low.h"
 
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
@@ -6461,6 +6462,55 @@ linux_low_disable_btrace (struct btrace_target_info *tinfo)
   return (err == BTRACE_ERR_NONE ? 0 : -1);
 }
 
+/* Encode an Intel(R) Processor Trace configuration.  */
+
+static void
+linux_low_encode_pt_config (struct buffer *buffer,
+			    const struct btrace_data_pt_config *config)
+{
+  buffer_grow_str (buffer, "<pt-config>\n");
+
+  switch (config->cpu.vendor)
+    {
+    case CV_INTEL:
+      buffer_xml_printf (buffer, "<cpu vendor=\"GenuineIntel\" family=\"%u\" "
+			 "model=\"%u\" stepping=\"%u\"/>\n",
+			 config->cpu.family, config->cpu.model,
+			 config->cpu.stepping);
+      break;
+
+    default:
+      break;
+    }
+
+  buffer_grow_str (buffer, "</pt-config>\n");
+}
+
+/* Encode a raw buffer.  */
+
+static void
+linux_low_encode_raw (struct buffer *buffer, const gdb_byte *data,
+		      unsigned int size)
+{
+  if (size == 0)
+    return;
+
+  /* We use hex encoding - see common/rsp-low.h.  */
+  buffer_grow_str (buffer, "<raw>\n");
+
+  while (size-- > 0)
+    {
+      char elem[2];
+
+      elem[0] = tohex ((*data >> 4) & 0xf);
+      elem[1] = tohex (*data++ & 0xf);
+
+      buffer_grow (buffer, elem, 2);
+    }
+
+  buffer_grow_str (buffer, "</raw>\n");
+}
+
 /* See to_read_btrace target method.  */
 
 static int
@@ -6482,15 +6532,14 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
       else
 	buffer_grow_str0 (buffer, "E.Generic Error.");
 
-      btrace_data_fini (&btrace);
-      return -1;
+      goto err;
     }
 
   switch (btrace.format)
     {
     case BTRACE_FORMAT_NONE:
       buffer_grow_str0 (buffer, "E.No Trace.");
-      break;
+      goto err;
 
     case BTRACE_FORMAT_BTS:
       buffer_grow_str (buffer, "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n");
@@ -6505,15 +6554,31 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
       buffer_grow_str0 (buffer, "</btrace>\n");
       break;
 
-    default:
-      buffer_grow_str0 (buffer, "E.Unknown Trace Format.");
+    case BTRACE_FORMAT_PT:
+      buffer_grow_str (buffer, "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n");
+      buffer_grow_str (buffer, "<btrace version=\"1.0\">\n");
+      buffer_grow_str (buffer, "<pt>\n");
 
-      btrace_data_fini (&btrace);
-      return -1;
+      linux_low_encode_pt_config (buffer, &btrace.variant.pt.config);
+
+      linux_low_encode_raw (buffer, btrace.variant.pt.data,
+			    btrace.variant.pt.size);
+
+      buffer_grow_str (buffer, "</pt>\n");
+      buffer_grow_str0 (buffer, "</btrace>\n");
+      break;
+
+    default:
+      buffer_grow_str0 (buffer, "E.Unsupported Trace Format.");
+      goto err;
     }
 
   btrace_data_fini (&btrace);
   return 0;
+
+err:
+  btrace_data_fini (&btrace);
+  return -1;
 }
 
 /* See to_btrace_conf target method.  */
@@ -6539,6 +6604,12 @@ linux_low_btrace_conf (const struct btrace_target_info *tinfo,
 	  buffer_xml_printf (buffer, "<bts");
 	  buffer_xml_printf (buffer, " size=\"0x%x\"", conf->bts.size);
 	  buffer_xml_printf (buffer, " />\n");
+	  break;
+
+	case BTRACE_FORMAT_PT:
+	  buffer_xml_printf (buffer, "<pt");
+	  buffer_xml_printf (buffer, " size=\"0x%x\"", conf->pt.size);
+	  buffer_xml_printf (buffer, "/>\n");
 	  break;
 	}
     }
