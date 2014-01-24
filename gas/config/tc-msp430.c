@@ -1220,6 +1220,18 @@ md_parse_option (int c, char * arg)
   return 0;
 }
 
+/* The intention here is to have the mere presence of these sections
+   cause the object to have a reference to a well-known symbol.  This
+   reference pulls in the bits of the runtime (crt0) that initialize
+   these sections.  Thus, for example, the startup code to call
+   memset() to initialize .bss will only be linked in when there is a
+   non-empty .bss section.  Otherwise, the call would exist but have a
+   zero length parameter, which is a waste of memory and cycles.
+
+   The code which initializes these sections should have a global
+   label for these symbols, and should be marked with KEEP() in the
+   linker script.
+ */
 static void
 msp430_section (int arg)
 {
@@ -1230,13 +1242,46 @@ msp430_section (int arg)
       || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_init_bss");
 
-  if (move_data
-      && (strncmp (name, ".data", 5) == 0
-	  || strncmp (name, ".gnu.linkonce.d.", 16) == 0))
+  if (strncmp (name, ".data", 5) == 0
+      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_movedata");
 
   input_line_pointer = saved_ilp;
   obj_elf_section (arg);
+}
+
+void
+msp430_frob_section (asection *sec)
+{
+  const char *name = sec->name;
+
+  if (sec->size == 0)
+    return;
+
+  if (strncmp (name, ".bss", 4) == 0
+      || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
+    (void) symbol_find_or_make ("__crt0_init_bss");
+
+  if (strncmp (name, ".data", 5) == 0
+      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
+    (void) symbol_find_or_make ("__crt0_movedata");
+}
+
+static void
+msp430_lcomm (int ignore ATTRIBUTE_UNUSED)
+{
+  symbolS *symbolP = s_comm_internal (0, s_lcomm_internal);
+
+  if (symbolP)
+    symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
+  (void) symbol_find_or_make ("__crt0_init_bss");
+}
+
+static void
+msp430_comm (int needs_align)
+{
+  s_comm_internal (needs_align, elf_common_parse);
+  (void) symbol_find_or_make ("__crt0_init_bss");
 }
 
 static void
@@ -1259,6 +1304,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"sect.s", msp430_section, 0},
   {"pushsection", msp430_section, 1},
   {"refsym", msp430_refsym, 0},
+  {"comm", msp430_comm, 0},
+  {"lcomm", msp430_lcomm, 0},
   {NULL, NULL, 0}
 };
 
