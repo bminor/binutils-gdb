@@ -1,6 +1,6 @@
 	.globl	data
 	.data
-	.align 32
+	.p2align 5
 	.type	data, %object
 	.size	data, 120
 data:
@@ -8,14 +8,14 @@ data:
 	.zero	116
 	.globl	foo
 	.section	.tbss,"awT",%nobits
-	.align 4
+	.p2align 2
 	.type	foo, %object
 	.size	foo, 4
 foo:
 	.zero	4
 	.globl	bar
 	.section	.tdata,"awT",%progbits
-	.align 16
+	.p2align 4
 	.type	bar, %object
 	.size	bar, 80
 bar:
