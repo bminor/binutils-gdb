@@ -1,3 +1,20 @@
+2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/pr16498a.s: Replace .align with .p2align.
+
+2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16498
+	* ld-elf/pr16498b.d: New file.
+	* ld-elf/pr16498b.t: Likewise.
+
+2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16498
+	* ld-elf/pr16498a.d: New file.
+	* ld-elf/pr16498a.s: Likewise.
+	* ld-elf/pr16498a.t: Likewise.
+
 2014-01-22  Alan Modra  <amodra@gmail.com>
 
 	* ld-scripts/pr14962-2.d: Correct target triple.

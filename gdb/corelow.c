@@ -649,7 +649,7 @@ add_to_spuid_list (bfd *abfd, asection *asect, void *list_p)
    the to_xfer_partial interface.  */
 
 static LONGEST
-get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, LONGEST len)
+get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   asection *section;
   char *section_name;

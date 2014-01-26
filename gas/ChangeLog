@@ -1,3 +1,22 @@
+2014-01-24  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-msp430.c (msp430_section): Always flag data sections,
+	regardless of -md.
+	(msp430_frob_section): New.  Make sure all sections are noticed if
+	they have content.
+	(msp430_lcomm): New.  Flag bss if .lcomm is seen.
+	(msp430_comm): New.  Likewise.
+	(md_pseudo_table): Add them.
+	* config/tc-msp430.h (msp430_frob_section): Declare.
+	(tc_frob_section): Define.
+
+2014-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (show_mcu_list): Delete.
+	(md_parse_option): Accept any MCU name.  Accept several more
+	variants for the -mcpu option.
+	(md_show_usage): Do not call show_mcu_list.
+
 2014-01-22  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-msp430.c (msp430_refsym): New: ".refsym <symbol>"

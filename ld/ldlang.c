@@ -1495,7 +1495,7 @@ lang_output_section_find_by_flags (const asection *sec,
 				   lang_match_sec_type_func match_type)
 {
   lang_output_section_statement_type *first, *look, *found;
-  flagword flags;
+  flagword look_flags, sec_flags, differ;
 
   /* We know the first statement on this list is *ABS*.  May as well
      skip it.  */
@@ -1503,21 +1503,22 @@ lang_output_section_find_by_flags (const asection *sec,
   first = first->next;
 
   /* First try for an exact match.  */
+  sec_flags = sec->flags;
   found = NULL;
   for (look = first; look; look = look->next)
     {
-      flags = look->flags;
+      look_flags = look->flags;
       if (look->bfd_section != NULL)
 	{
-	  flags = look->bfd_section->flags;
+	  look_flags = look->bfd_section->flags;
 	  if (match_type && !match_type (link_info.output_bfd,
 					 look->bfd_section,
 					 sec->owner, sec))
 	    continue;
 	}
-      flags ^= sec->flags;
-      if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY
-		     | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+      differ = look_flags ^ sec_flags;
+      if (!(differ & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY
+		      | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
 	found = look;
     }
   if (found != NULL)
@@ -1527,115 +1528,144 @@ lang_output_section_find_by_flags (const asection *sec,
       return found;
     }
 
-  if ((sec->flags & SEC_CODE) != 0
-      && (sec->flags & SEC_ALLOC) != 0)
+  if ((sec_flags & SEC_CODE) != 0
+      && (sec_flags & SEC_ALLOC) != 0)
     {
       /* Try for a rw code section.  */
       for (look = first; look; look = look->next)
 	{
-	  flags = look->flags;
+	  look_flags = look->flags;
 	  if (look->bfd_section != NULL)
 	    {
-	      flags = look->bfd_section->flags;
+	      look_flags = look->bfd_section->flags;
 	      if (match_type && !match_type (link_info.output_bfd,
 					     look->bfd_section,
 					     sec->owner, sec))
 		continue;
 	    }
-	  flags ^= sec->flags;
-	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			 | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+	  differ = look_flags ^ sec_flags;
+	  if (!(differ & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			  | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
 	    found = look;
 	}
     }
-  else if ((sec->flags & (SEC_READONLY | SEC_THREAD_LOCAL)) != 0
-	   && (sec->flags & SEC_ALLOC) != 0)
+  else if ((sec_flags & SEC_READONLY) != 0
+	   && (sec_flags & SEC_ALLOC) != 0)
     {
       /* .rodata can go after .text, .sdata2 after .rodata.  */
       for (look = first; look; look = look->next)
 	{
-	  flags = look->flags;
+	  look_flags = look->flags;
 	  if (look->bfd_section != NULL)
 	    {
-	      flags = look->bfd_section->flags;
+	      look_flags = look->bfd_section->flags;
 	      if (match_type && !match_type (link_info.output_bfd,
 					     look->bfd_section,
 					     sec->owner, sec))
 		continue;
 	    }
-	  flags ^= sec->flags;
-	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			 | SEC_READONLY | SEC_SMALL_DATA))
-	      || (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			     | SEC_READONLY))
-		  && !(look->flags & SEC_SMALL_DATA))
-	      || (!(flags & (SEC_THREAD_LOCAL | SEC_ALLOC))
-		  && (look->flags & SEC_THREAD_LOCAL)
-		  && (!(flags & SEC_LOAD)
-		      || (look->flags & SEC_LOAD))))
+	  differ = look_flags ^ sec_flags;
+	  if (!(differ & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			  | SEC_READONLY | SEC_SMALL_DATA))
+	      || (!(differ & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			      | SEC_READONLY))
+		  && !(look_flags & SEC_SMALL_DATA)))
 	    found = look;
 	}
     }
-  else if ((sec->flags & SEC_SMALL_DATA) != 0
-	   && (sec->flags & SEC_ALLOC) != 0)
+  else if ((sec_flags & SEC_THREAD_LOCAL) != 0
+	   && (sec_flags & SEC_ALLOC) != 0)
+    {
+      /* .tdata can go after .data, .tbss after .tdata.  Treat .tbss
+	 as if it were a loaded section, and don't use match_type.  */
+      bfd_boolean seen_thread_local = FALSE;
+
+      match_type = NULL;
+      for (look = first; look; look = look->next)
+	{
+	  look_flags = look->flags;
+	  if (look->bfd_section != NULL)
+	    look_flags = look->bfd_section->flags;
+
+	  differ = look_flags ^ (sec_flags | SEC_LOAD | SEC_HAS_CONTENTS);
+	  if (!(differ & (SEC_THREAD_LOCAL | SEC_ALLOC)))
+	    {
+	      /* .tdata and .tbss must be adjacent and in that order.  */
+	      if (!(look_flags & SEC_LOAD)
+		  && (sec_flags & SEC_LOAD))
+		/* ..so if we're at a .tbss section and we're placing
+		   a .tdata section stop looking and return the
+		   previous section.  */
+		break;
+	      found = look;
+	      seen_thread_local = TRUE;
+	    }
+	  else if (seen_thread_local)
+	    break;
+	  else if (!(differ & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD)))
+	    found = look;
+	}
+    }
+  else if ((sec_flags & SEC_SMALL_DATA) != 0
+	   && (sec_flags & SEC_ALLOC) != 0)
     {
       /* .sdata goes after .data, .sbss after .sdata.  */
       for (look = first; look; look = look->next)
 	{
-	  flags = look->flags;
+	  look_flags = look->flags;
 	  if (look->bfd_section != NULL)
 	    {
-	      flags = look->bfd_section->flags;
+	      look_flags = look->bfd_section->flags;
 	      if (match_type && !match_type (link_info.output_bfd,
 					     look->bfd_section,
 					     sec->owner, sec))
 		continue;
 	    }
-	  flags ^= sec->flags;
-	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			 | SEC_THREAD_LOCAL))
-	      || ((look->flags & SEC_SMALL_DATA)
-		  && !(sec->flags & SEC_HAS_CONTENTS)))
+	  differ = look_flags ^ sec_flags;
+	  if (!(differ & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			  | SEC_THREAD_LOCAL))
+	      || ((look_flags & SEC_SMALL_DATA)
+		  && !(sec_flags & SEC_HAS_CONTENTS)))
 	    found = look;
 	}
     }
-  else if ((sec->flags & SEC_HAS_CONTENTS) != 0
-	   && (sec->flags & SEC_ALLOC) != 0)
+  else if ((sec_flags & SEC_HAS_CONTENTS) != 0
+	   && (sec_flags & SEC_ALLOC) != 0)
     {
       /* .data goes after .rodata.  */
       for (look = first; look; look = look->next)
 	{
-	  flags = look->flags;
+	  look_flags = look->flags;
 	  if (look->bfd_section != NULL)
 	    {
-	      flags = look->bfd_section->flags;
+	      look_flags = look->bfd_section->flags;
 	      if (match_type && !match_type (link_info.output_bfd,
 					     look->bfd_section,
 					     sec->owner, sec))
 		continue;
 	    }
-	  flags ^= sec->flags;
-	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			 | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+	  differ = look_flags ^ sec_flags;
+	  if (!(differ & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			  | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
 	    found = look;
 	}
     }
-  else if ((sec->flags & SEC_ALLOC) != 0)
+  else if ((sec_flags & SEC_ALLOC) != 0)
     {
       /* .bss goes after any other alloc section.  */
       for (look = first; look; look = look->next)
 	{
-	  flags = look->flags;
+	  look_flags = look->flags;
 	  if (look->bfd_section != NULL)
 	    {
-	      flags = look->bfd_section->flags;
+	      look_flags = look->bfd_section->flags;
 	      if (match_type && !match_type (link_info.output_bfd,
 					     look->bfd_section,
 					     sec->owner, sec))
 		continue;
 	    }
-	  flags ^= sec->flags;
-	  if (!(flags & SEC_ALLOC))
+	  differ = look_flags ^ sec_flags;
+	  if (!(differ & SEC_ALLOC))
 	    found = look;
 	}
     }
@@ -1644,11 +1674,11 @@ lang_output_section_find_by_flags (const asection *sec,
       /* non-alloc go last.  */
       for (look = first; look; look = look->next)
 	{
-	  flags = look->flags;
+	  look_flags = look->flags;
 	  if (look->bfd_section != NULL)
-	    flags = look->bfd_section->flags;
-	  flags ^= sec->flags;
-	  if (!(flags & SEC_DEBUGGING))
+	    look_flags = look->bfd_section->flags;
+	  differ = look_flags ^ sec_flags;
+	  if (!(differ & SEC_DEBUGGING))
 	    found = look;
 	}
       return found;

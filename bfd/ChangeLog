@@ -1,7 +1,12 @@
+2014-01-24  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc_build_one_stub): Correct reloc count passed
+	to get_relocs for ELFv2.
+
 2014-01-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16498
-	* elf.c (_bfd_elf_map_sections_to_segments): Issue a linker error 
+	* elf.c (_bfd_elf_map_sections_to_segments): Issue a linker error
 	if TLS sections are not adjacent.
 
 2014-01-22  Alan Modra  <amodra@gmail.com>
