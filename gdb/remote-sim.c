@@ -1124,7 +1124,7 @@ gdbsim_xfer_partial (struct target_ops *ops, enum target_object object,
       return gdbsim_xfer_memory (ops, readbuf, writebuf, offset, len);
 
     default:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 

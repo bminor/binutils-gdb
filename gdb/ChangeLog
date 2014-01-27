@@ -1,5 +1,39 @@
 2014-02-07  Yao Qi  <yao@codesourcery.com>
 
+	* auxv.c (procfs_xfer_auxv): Replace -1 with TARGET_XFER_E_IO.
+	(ld_so_xfer_auxv): Likewise.
+	* bfd-target.c (target_bfd_xfer_partial): Likewise.
+	* bsd-kvm.c (bsd_kvm_xfer_partial): Likewise.
+	* corelow.c (core_xfer_partial): Likewise.
+	* ctf.c (ctf_xfer_partial): Likewise.
+	* darwin-nat.c (darwin_read_dyld_info): Likewise.
+	(darwin_xfer_partial): Likewise.
+	* exec.c (exec_xfer_partial): Likewise.
+	* gnu-nat.c (gnu_xfer_partial): Likewise.
+	* ia64-hpux-nat.c (ia64_hpux_xfer_uregs): Likewise.
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Likewise.
+	* inf-ttrace.c (inf_ttrace_xfer_partial): Likewise.
+	* linux-nat.c (linux_xfer_siginfo): Likewise.
+	(linux_proc_xfer_spu): Likewise.
+	* procfs.c (procfs_xfer_partial): Likewise.
+	* record-full.c (record_full_xfer_partial): Likewise.
+	(record_full_core_xfer_partial): Likewise.
+	* remote-sim.c (gdbsim_xfer_partial): Likewise.
+	* remote.c (remote_write_qxfer): Likewise.
+	(remote_write_qxfer, remote_read_qxfer): Likewise.
+	(remote_xfer_partial): Likewise.
+	* rs6000-nat.c (rs6000_xfer_partial): Likewise.
+	(rs6000_xfer_shared_libraries): Likewise.
+	* sparc-nat.c (sparc_xfer_wcookie): Likewise.
+	* spu-linux-nat.c (spu_proc_xfer_spu): Likewise.
+	(spu_xfer_partial): Likewise.
+	* target.c (memory_xfer_partial_1): Likewise.
+	* tracepoint.c (tfile_xfer_partial): Likewise.
+	* windows-nat.c (windows_xfer_shared_libraries): Likewise.
+	(windows_xfer_partial): Likewise.
+
+2014-02-07  Yao Qi  <yao@codesourcery.com>
+
 	* gdbarch.sh (core_xfer_shared_libraries): Returns ULONGEST.  Add
 	comments.
 	(core_xfer_shared_libraries_aix): Likewise.

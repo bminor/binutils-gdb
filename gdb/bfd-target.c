@@ -55,7 +55,7 @@ target_bfd_xfer_partial (struct target_ops *ops,
 						  NULL);
       }
     default:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 

@@ -1542,12 +1542,12 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
     {
     case MEM_RO:
       if (writebuf != NULL)
-	return -1;
+	return TARGET_XFER_E_IO;
       break;
 
     case MEM_WO:
       if (readbuf != NULL)
-	return -1;
+	return TARGET_XFER_E_IO;
       break;
 
     case MEM_FLASH:
@@ -1557,7 +1557,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
       break;
 
     case MEM_NONE:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 
   if (!ptid_equal (inferior_ptid, null_ptid))

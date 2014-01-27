@@ -650,7 +650,7 @@ exec_xfer_partial (struct target_ops *ops, enum target_object object,
 					      table->sections_end,
 					      NULL);
   else
-    return -1;
+    return TARGET_XFER_E_IO;
 }
 
 

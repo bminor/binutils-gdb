@@ -630,7 +630,7 @@ ia64_hpux_xfer_uregs (struct target_ops *ops, const char *annex,
 
   status = ia64_hpux_read_register_from_save_state_t (offset, readbuf, len);
   if (status < 0)
-    return -1;
+    return TARGET_XFER_E_IO;
   return len;
 }
 

@@ -2520,7 +2520,7 @@ gnu_xfer_partial (struct target_ops *ops, enum target_object object,
       return gnu_xfer_memory (readbuf, writebuf, offset, len);
 
     default:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 

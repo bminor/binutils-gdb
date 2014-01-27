@@ -1907,7 +1907,7 @@ darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
   kret = task_info (task, TASK_DYLD_INFO, (task_info_t) &task_dyld_info, &count);
   MACH_CHECK_ERROR (kret);
   if (kret != KERN_SUCCESS)
-    return -1;
+    return TARGET_XFER_E_IO;
   /* Truncate.  */
   if (addr + length > sz)
     length = sz - addr;
@@ -1942,12 +1942,12 @@ darwin_xfer_partial (struct target_ops *ops,
       if (writebuf != NULL || readbuf == NULL)
         {
           /* Support only read.  */
-          return -1;
+          return TARGET_XFER_E_IO;
         }
       return darwin_read_dyld_info (inf->private->task, offset, readbuf, len);
 #endif
     default:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 
 }

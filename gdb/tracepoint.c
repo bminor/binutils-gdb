@@ -5120,7 +5120,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 {
   /* We're only doing regular memory for now.  */
   if (object != TARGET_OBJECT_MEMORY)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   if (readbuf == NULL)
     error (_("tfile_xfer_partial: trace file is read-only"));
@@ -5199,7 +5199,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
     }
 
   /* Indicate failure to find the requested memory block.  */
-  return -1;
+  return TARGET_XFER_E_IO;
 }
 
 /* Iterate through the blocks of a trace frame, looking for a 'V'

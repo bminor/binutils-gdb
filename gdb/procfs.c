@@ -3987,7 +3987,7 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
       if (writebuf)
 	return (*ops->deprecated_xfer_memory) (offset, (gdb_byte *) writebuf,
 					       len, 1/*write*/, NULL, ops);
-      return -1;
+      return TARGET_XFER_E_IO;
 
 #ifdef NEW_PROC_API
     case TARGET_OBJECT_AUXV:
@@ -3999,7 +3999,7 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
       if (ops->beneath != NULL)
 	return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
 					      readbuf, writebuf, offset, len);
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 

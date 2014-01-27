@@ -2514,7 +2514,7 @@ windows_xfer_shared_libraries (struct target_ops *ops,
   struct so_list *so;
 
   if (writebuf)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   obstack_init (&obstack);
   obstack_grow_str (&obstack, "<library-list>\n");
@@ -2557,7 +2557,7 @@ windows_xfer_partial (struct target_ops *ops, enum target_object object,
       if (ops->beneath != NULL)
 	return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
 					      readbuf, writebuf, offset, len);
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 
