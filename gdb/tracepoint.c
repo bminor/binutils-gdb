@@ -5113,10 +5113,11 @@ tfile_fetch_registers (struct target_ops *ops,
     }
 }
 
-static LONGEST
+static enum target_xfer_status
 tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		    ULONGEST *xfered_len)
 {
   /* We're only doing regular memory for now.  */
   if (object != TARGET_OBJECT_MEMORY)
@@ -5157,7 +5158,8 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	      if (maddr != offset)
 	        lseek (trace_fd, offset - maddr, SEEK_CUR);
 	      tfile_read (readbuf, amt);
-	      return amt;
+	      *xfered_len = amt;
+	      return TARGET_XFER_OK;
 	    }
 
 	  /* Skip over this block.  */
@@ -5191,9 +5193,9 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	      if (amt > len)
 		amt = len;
 
-	      amt = bfd_get_section_contents (exec_bfd, s,
-					      readbuf, offset - vma, amt);
-	      return amt;
+	      *xfered_len = bfd_get_section_contents (exec_bfd, s,
+						      readbuf, offset - vma, amt);
+	      return TARGET_XFER_OK;
 	    }
 	}
     }

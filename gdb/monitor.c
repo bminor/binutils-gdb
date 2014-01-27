@@ -2018,9 +2018,9 @@ monitor_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 /* Helper for monitor_xfer_partial that handles memory transfers.
    Arguments are like target_xfer_partial.  */
 
-static LONGEST
+static enum target_xfer_status
 monitor_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST memaddr, ULONGEST len)
+		     ULONGEST memaddr, ULONGEST len, ULONGEST *xfered_len)
 {
   int res;
 
@@ -2036,22 +2036,27 @@ monitor_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
       res = monitor_read_memory (memaddr, readbuf, len);
     }
 
-  if (res == 0)
+  if (res <= 0)
     return TARGET_XFER_E_IO;
-  return res;
+  else
+    {
+      *xfered_len = (ULONGEST) res;
+      return TARGET_XFER_OK;
+    }
 }
 
 /* Target to_xfer_partial implementation.  */
 
-static LONGEST
+static enum target_xfer_status
 monitor_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		      ULONGEST *xfered_len)
 {
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      return monitor_xfer_memory (readbuf, writebuf, offset, len);
+      return monitor_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
 
     default:
       return TARGET_XFER_E_IO;

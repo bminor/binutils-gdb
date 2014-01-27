@@ -1359,11 +1359,11 @@ ctf_fetch_registers (struct target_ops *ops,
    OFFSET is within the range, read the contents from events to
    READBUF.  */
 
-static LONGEST
+static enum target_xfer_status
 ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 		  const char *annex, gdb_byte *readbuf,
 		  const gdb_byte *writebuf, ULONGEST offset,
-		  ULONGEST len)
+		  ULONGEST len, ULONGEST *xfered_len)
 {
   /* We're only doing regular memory for now.  */
   if (object != TARGET_OBJECT_MEMORY)
@@ -1449,7 +1449,13 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 	      /* Restore the position.  */
 	      bt_iter_set_pos (bt_ctf_get_iter (ctf_iter), pos);
 
-	      return amt;
+	      if (amt == 0)
+		return TARGET_XFER_EOF;
+	      else
+		{
+		  *xfered_len = amt;
+		  return TARGET_XFER_OK;
+		}
 	    }
 
 	  if (bt_iter_next (bt_ctf_get_iter (ctf_iter)) < 0)
@@ -1487,7 +1493,14 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	      amt = bfd_get_section_contents (exec_bfd, s,
 					      readbuf, offset - vma, amt);
-	      return amt;
+
+	      if (amt == 0)
+		return TARGET_XFER_EOF;
+	      else
+		{
+		  *xfered_len = amt;
+		  return TARGET_XFER_OK;
+		}
 	    }
 	}
     }

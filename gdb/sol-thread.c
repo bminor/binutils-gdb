@@ -542,13 +542,13 @@ sol_thread_store_registers (struct target_ops *ops,
    target_write_partial for details of each variant.  One, and only
    one, of readbuf or writebuf must be non-NULL.  */
 
-static LONGEST
+static enum target_xfer_status
 sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const char *annex, gdb_byte *readbuf,
 			  const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len)
+			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  int retval;
+  enum target_xfer_status retval;
   struct cleanup *old_chain;
   struct target_ops *beneath = find_target_beneath (ops);
 
@@ -564,8 +564,8 @@ sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
       inferior_ptid = procfs_first_available ();
     }
 
-  retval = beneath->to_xfer_partial (beneath, object, annex,
-				     readbuf, writebuf, offset, len);
+  retval = beneath->to_xfer_partial (beneath, object, annex, readbuf,
+				     writebuf, offset, len, xfered_len);
 
   do_cleanups (old_chain);
 

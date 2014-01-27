@@ -38,15 +38,16 @@
 /* This function handles access via /proc/PID/auxv, which is a common
    method for native targets.  */
 
-static LONGEST
+static enum target_xfer_status
 procfs_xfer_auxv (gdb_byte *readbuf,
 		  const gdb_byte *writebuf,
 		  ULONGEST offset,
-		  ULONGEST len)
+		  ULONGEST len,
+		  ULONGEST *xfered_len)
 {
   char *pathname;
   int fd;
-  LONGEST n;
+  ssize_t l;
 
   pathname = xstrprintf ("/proc/%d/auxv", ptid_get_pid (inferior_ptid));
   fd = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
@@ -56,24 +57,32 @@ procfs_xfer_auxv (gdb_byte *readbuf,
 
   if (offset != (ULONGEST) 0
       && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
-    n = -1;
+    l = -1;
   else if (readbuf != NULL)
-    n = read (fd, readbuf, len);
+    l = read (fd, readbuf, (size_t) len);
   else
-    n = write (fd, writebuf, len);
+    l = write (fd, writebuf, (size_t) len);
 
   (void) close (fd);
 
-  return n;
+  if (l < 0)
+    return TARGET_XFER_E_IO;
+  else if (l == 0)
+    return TARGET_XFER_EOF;
+  else
+    {
+      *xfered_len = (ULONGEST) l;
+      return TARGET_XFER_OK;
+    }
 }
 
 /* This function handles access via ld.so's symbol `_dl_auxv'.  */
 
-static LONGEST
+static enum target_xfer_status
 ld_so_xfer_auxv (gdb_byte *readbuf,
 		 const gdb_byte *writebuf,
 		 ULONGEST offset,
-		 ULONGEST len)
+		 ULONGEST len, ULONGEST *xfered_len)
 {
   struct minimal_symbol *msym;
   CORE_ADDR data_address, pointer_address;
@@ -132,7 +141,10 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   if (writebuf != NULL)
     {
       if (target_write_memory (data_address, writebuf, len) == 0)
-	return len;
+	{
+	  *xfered_len = (ULONGEST) len;
+	  return TARGET_XFER_OK;
+	}
       else
 	return TARGET_XFER_E_IO;
     }
@@ -147,7 +159,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
 	return TARGET_XFER_E_IO;
 
       if (extract_typed_address (ptr_buf, ptr_type) == AT_NULL)
-	return 0;
+	return TARGET_XFER_EOF;
     }
 
   retval = 0;
@@ -166,12 +178,12 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
 
       block &= -auxv_pair_size;
       if (block == 0)
-	return retval;
+	break;
 
       if (target_read_memory (data_address, readbuf, block) != 0)
 	{
 	  if (block <= auxv_pair_size)
-	    return retval;
+	    break;
 
 	  block = auxv_pair_size;
 	  continue;
@@ -189,27 +201,31 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
 	  retval += auxv_pair_size;
 
 	  if (extract_typed_address (readbuf, ptr_type) == AT_NULL)
-	    return retval;
+	    {
+	      *xfered_len = (ULONGEST) retval;
+	      return TARGET_XFER_OK;
+	    }
 
 	  readbuf += auxv_pair_size;
 	  block -= auxv_pair_size;
 	}
     }
 
-  return retval;
+  *xfered_len = (ULONGEST) retval;
+  return TARGET_XFER_OK;
 }
 
 /* This function is called like a to_xfer_partial hook, but must be
    called with TARGET_OBJECT_AUXV.  It handles access to AUXV.  */
 
-LONGEST
+enum target_xfer_status
 memory_xfer_auxv (struct target_ops *ops,
 		  enum target_object object,
 		  const char *annex,
 		  gdb_byte *readbuf,
 		  const gdb_byte *writebuf,
 		  ULONGEST offset,
-		  ULONGEST len)
+		  ULONGEST len, ULONGEST *xfered_len)
 {
   gdb_assert (object == TARGET_OBJECT_AUXV);
   gdb_assert (readbuf || writebuf);
@@ -223,14 +239,14 @@ memory_xfer_auxv (struct target_ops *ops,
 
   if (current_inferior ()->attach_flag != 0)
     {
-      LONGEST retval;
+      enum target_xfer_status ret;
 
-      retval = ld_so_xfer_auxv (readbuf, writebuf, offset, len);
-      if (retval != -1)
-	return retval;
+      ret = ld_so_xfer_auxv (readbuf, writebuf, offset, len, xfered_len);
+      if (ret != TARGET_XFER_E_IO)
+	return ret;
     }
 
-  return procfs_xfer_auxv (readbuf, writebuf, offset, len);
+  return procfs_xfer_auxv (readbuf, writebuf, offset, len, xfered_len);
 }
 
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.

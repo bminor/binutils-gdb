@@ -334,15 +334,15 @@ bsd_uthread_store_registers (struct target_ops *ops,
 /* FIXME: This function is only there because otherwise GDB tries to
    invoke deprecate_xfer_memory.  */
 
-static LONGEST
+static enum target_xfer_status
 bsd_uthread_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const char *annex, gdb_byte *readbuf,
 			  const gdb_byte *writebuf,
-			  ULONGEST offset, ULONGEST len)
+			  ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   gdb_assert (ops->beneath->to_xfer_partial);
   return ops->beneath->to_xfer_partial (ops->beneath, object, annex, readbuf,
-					writebuf, offset, len);
+					writebuf, offset, len, xfered_len);
 }
 
 static ptid_t

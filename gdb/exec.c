@@ -566,9 +566,10 @@ section_table_available_memory (VEC(mem_range_s) *memory,
   return memory;
 }
 
-int
+enum target_xfer_status
 section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   ULONGEST offset, ULONGEST len,
+				   ULONGEST *xfered_len,
 				   struct target_section *sections,
 				   struct target_section *sections_end,
 				   const char *section_name)
@@ -602,7 +603,14 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 		res = bfd_get_section_contents (abfd, asect,
 						readbuf, memaddr - p->addr,
 						len);
-	      return (res != 0) ? len : 0;
+
+	      if (res != 0)
+		{
+		  *xfered_len = len;
+		  return TARGET_XFER_OK;
+		}
+	      else
+		return TARGET_XFER_EOF;
 	    }
 	  else if (memaddr >= p->endaddr)
 	    {
@@ -621,12 +629,18 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 		res = bfd_get_section_contents (abfd, asect,
 						readbuf, memaddr - p->addr,
 						len);
-	      return (res != 0) ? len : 0;
+	      if (res != 0)
+		{
+		  *xfered_len = len;
+		  return TARGET_XFER_OK;
+		}
+	      else
+		return TARGET_XFER_EOF;
 	    }
         }
     }
 
-  return 0;			/* We can't help.  */
+  return TARGET_XFER_EOF;		/* We can't help.  */
 }
 
 static struct target_section_table *
@@ -635,17 +649,17 @@ exec_get_section_table (struct target_ops *ops)
   return current_target_sections;
 }
 
-static LONGEST
+static enum target_xfer_status
 exec_xfer_partial (struct target_ops *ops, enum target_object object,
 		   const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf,
-		   ULONGEST offset, ULONGEST len)
+		   ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   struct target_section_table *table = target_get_section_table (ops);
 
   if (object == TARGET_OBJECT_MEMORY)
     return section_table_xfer_memory_partial (readbuf, writebuf,
-					      offset, len,
+					      offset, len, xfered_len,
 					      table->sections,
 					      table->sections_end,
 					      NULL);

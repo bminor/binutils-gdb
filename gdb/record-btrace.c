@@ -802,11 +802,11 @@ record_btrace_is_replaying (void)
 
 /* The to_xfer_partial method of target record-btrace.  */
 
-static LONGEST
+static enum target_xfer_status
 record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 			    const char *annex, gdb_byte *readbuf,
 			    const gdb_byte *writebuf, ULONGEST offset,
-			    ULONGEST len)
+			    ULONGEST len, ULONGEST *xfered_len)
 {
   struct target_ops *t;
 
@@ -821,7 +821,10 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	    /* We do not allow writing memory in general.  */
 	    if (writebuf != NULL)
-	      return TARGET_XFER_E_UNAVAILABLE;
+	      {
+		*xfered_len = len;
+		return TARGET_XFER_E_UNAVAILABLE;
+	      }
 
 	    /* We allow reading readonly memory.  */
 	    section = target_section_by_addr (ops, offset);
@@ -838,6 +841,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 		  }
 	      }
 
+	    *xfered_len = len;
 	    return TARGET_XFER_E_UNAVAILABLE;
 	  }
 	}
@@ -847,8 +851,9 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
   for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
     if (ops->to_xfer_partial != NULL)
       return ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
-				   offset, len);
+				   offset, len, xfered_len);
 
+  *xfered_len = len;
   return TARGET_XFER_E_UNAVAILABLE;
 }
 

@@ -2475,9 +2475,9 @@ out:
 
 /* Helper for gnu_xfer_partial that handles memory transfers.  */
 
-static LONGEST
+static enum target_xfer_status
 gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
-		 CORE_ADDR memaddr, ULONGEST len)
+		 CORE_ADDR memaddr, ULONGEST len, ULONGEST *xfered_len)
 {
   task_t task = (gnu_current_inf
 		 ? (gnu_current_inf->task
@@ -2502,23 +2502,28 @@ gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 		 host_address_to_string (readbuf));
       res = gnu_read_inferior (task, memaddr, readbuf, len);
     }
+  gdb_assert (res >= 0);
   if (res == 0)
     return TARGET_XFER_E_IO;
-  return res;
+  else
+    {
+      *xfered_len = (ULONGEST) res;
+      return TARGET_XFER_OK;
+    }
 }
 
 /* Target to_xfer_partial implementation.  */
 
-static LONGEST
+static enum target_xfer_status
 gnu_xfer_partial (struct target_ops *ops, enum target_object object,
 		  const char *annex, gdb_byte *readbuf,
-		  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		  ULONGEST *xfered_len)
 {
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      return gnu_xfer_memory (readbuf, writebuf, offset, len);
-
+      return gnu_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
     default:
       return TARGET_XFER_E_IO;
     }

@@ -1,3 +1,98 @@
+2014-02-11  Yao Qi  <yao@codesourcery.com>
+
+	* target.h (enum target_xfer_error): Rename to ...
+	(enum target_xfer_status): ... it.  New.  All users updated.
+	(enum target_xfer_status) <TARGET_XFER_OK>, <TARGET_XFER_EOF>:
+	New.
+	(TARGET_XFER_STATUS_ERROR_P): New macro.
+	(target_xfer_error_to_string): Remove declaration.
+	(target_xfer_status_to_string): Declare.
+	(target_xfer_partial_ftype): Adjust it.
+	(struct target_ops) <to_xfer_partial>: Return
+	target_xfer_status.  Add argument xfered_len.  Update
+	comments.
+	* target.c (target_xfer_error_to_string): Rename to ...
+	(target_xfer_status_to_string): ... it.  New.  All callers
+	updated.
+	(target_read_live_memory): Likewise.  Call target_xfer_partial
+	instead of target_read.
+	(memory_xfer_live_readonly_partial): Return
+	target_xfer_status.  Add argument xfered_len.
+	(raw_memory_xfer_partial): Likewise.
+	(memory_xfer_partial_1): Likewise.
+	(memory_xfer_partial): Likewise.
+	(target_xfer_partial): Likewise.  Check *XFERED_LEN is set
+	properly.  Update debug message.
+	(default_xfer_partial, current_xfer_partial): Likewise.
+	(target_write_partial): Likewise.
+	(target_read_partial): Likewise.  All callers updated.
+	(read_whatever_is_readable): Likewise.
+	(target_write_with_progress): Likewise.
+	(target_read_alloc_1): Likewise.
+
+	* aix-thread.c (aix_thread_xfer_partial): Likewise.
+	* auxv.c (procfs_xfer_auxv): Likewise.
+	(ld_so_xfer_auxv, memory_xfer_auxv): Likewise.
+	* bfd-target.c (target_bfd_xfer_partial): Likewise.
+	* bsd-kvm.c (bsd_kvm_xfer_partial): Likewise.
+	* bsd-uthread.c (bsd_uthread_xfer_partia): Likewise.
+	* corefile.c (read_memory): Adjust.
+	* corelow.c (core_xfer_partial): Likewise.
+	* ctf.c (ctf_xfer_partial): Likewise.
+	* darwin-nat.c (darwin_read_dyld_info): Likewise.  All callers
+	updated.
+	(darwin_xfer_partial): Likewise.
+	* exec.c (section_table_xfer_memory_partial): Likewise.  All
+	callers updated.
+	(exec_xfer_partial): Likewise.
+	* exec.h (section_table_xfer_memory_partial): Update
+	declaration.
+	* gnu-nat.c (gnu_xfer_memory): Likewise.  Assert 'res' is not
+	negative.
+	(gnu_xfer_partial): Likewise.
+	* ia64-hpux-nat.c (ia64_hpux_xfer_memory_no_bs): Likewise.
+	(ia64_hpux_xfer_memory, ia64_hpux_xfer_uregs): Likewise.
+	(ia64_hpux_xfer_solib_got): Likewise.
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Likewise.  Change
+	type of 'partial_len' to ULONGEST.
+	* inf-ttrace.c (inf_ttrace_xfer_partial): Likewise.
+	* linux-nat.c (linux_xfer_siginfo ): Likewise.
+	(linux_nat_xfer_partial): Likewise.
+	(linux_proc_xfer_partial, linux_xfer_partial): Likewise.
+	(linux_proc_xfer_spu, linux_nat_xfer_osdata): Likewise.
+	* monitor.c (monitor_xfer_memory): Likewise.
+	(monitor_xfer_partial): Likewise.
+	* procfs.c (procfs_xfer_partial): Likewise.
+	* record-btrace.c (record_btrace_xfer_partial): Likewise.
+	* record-full.c (record_full_xfer_partial): Likewise.
+	(record_full_core_xfer_partial): Likewise.
+	* remote-sim.c (gdbsim_xfer_memory): Likewise.
+	(gdbsim_xfer_partial): Likewise.
+	* remote.c (remote_write_bytes_aux): Likewise.  All callers
+	updated.
+	(remote_write_bytes, remote_read_bytes): Likewise.  All
+	callers updated.
+	(remote_flash_erase): Likewise.  All callers updated.
+	(remote_write_qxfer): Likewise.  All callers updated.
+	(remote_read_qxfer): Likewise.  All callers updated.
+	(remote_xfer_partial): Likewise.
+	* rs6000-nat.c (rs6000_xfer_partial): Likewise.
+	(rs6000_xfer_shared_libraries): Likewise.
+	* sol-thread.c (sol_thread_xfer_partial): Likewise.
+	(sol_thread_xfer_partial): Likewise.
+	* sparc-nat.c (sparc_xfer_wcookie): Likewise.
+	(sparc_xfer_partial): Likewise.
+	* spu-linux-nat.c (spu_proc_xfer_spu): Likewise.  All callers
+	updated.
+	(spu_xfer_partial): Likewise.
+	* spu-multiarch.c (spu_xfer_partial): Likewise.
+	* tracepoint.c (tfile_xfer_partial): Likewise.
+	* windows-nat.c (windows_xfer_memory): Likewise.
+	(windows_xfer_shared_libraries): Likewise.
+	(windows_xfer_partial): Likewise.
+	* valprint.c: Replace 'target_xfer_error' with
+	'target_xfer_status' in comments.
+
 2014-02-11  Simon Marchi  <simon.marchi@ericsson.com>  (tiny patch)
 
 	Checked in by Joel Brobecker <brobecker@adacore.com>.

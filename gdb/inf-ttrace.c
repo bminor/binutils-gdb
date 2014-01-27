@@ -1222,16 +1222,26 @@ inf_ttrace_xfer_memory (CORE_ADDR addr, ULONGEST len,
   return len;
 }
 
-static LONGEST
+static enum target_xfer_status
 inf_ttrace_xfer_partial (struct target_ops *ops, enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
 			 const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len)
+			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      return inf_ttrace_xfer_memory (offset, len, readbuf, writebuf);
+      {
+	LONGEST val = inf_ttrace_xfer_memory (offset, len, readbuf, writebuf);
+
+	if (val == 0)
+	  return TARGET_XFER_EOF;
+	else
+	  {
+	    *xfered_len = (ULONGEST) val;
+	    return TARGET_XFER_OK;
+	  }
+      }
 
     case TARGET_OBJECT_UNWIND_TABLE:
       return TARGET_XFER_E_IO;

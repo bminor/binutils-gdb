@@ -1185,7 +1185,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 }
 
 const char *
-target_xfer_error_to_string (enum target_xfer_error err)
+target_xfer_status_to_string (enum target_xfer_status err)
 {
 #define CASE(X) case X: return #X
   switch (err)
@@ -1312,11 +1312,12 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 /* Read memory from the live target, even if currently inspecting a
    traceframe.  The return is the same as that of target_read.  */
 
-static LONGEST
+static enum target_xfer_status
 target_read_live_memory (enum target_object object,
-			 ULONGEST memaddr, gdb_byte *myaddr, ULONGEST len)
+			 ULONGEST memaddr, gdb_byte *myaddr, ULONGEST len,
+			 ULONGEST *xfered_len)
 {
-  LONGEST ret;
+  enum target_xfer_status ret;
   struct cleanup *cleanup;
 
   /* Switch momentarily out of tfind mode so to access live memory.
@@ -1326,8 +1327,8 @@ target_read_live_memory (enum target_object object,
   cleanup = make_cleanup_restore_traceframe_number ();
   set_traceframe_number (-1);
 
-  ret = target_read (current_target.beneath, object, NULL,
-		     myaddr, memaddr, len);
+  ret = target_xfer_partial (current_target.beneath, object, NULL,
+			     myaddr, NULL, memaddr, len, xfered_len);
 
   do_cleanups (cleanup);
   return ret;
@@ -1340,11 +1341,11 @@ target_read_live_memory (enum target_object object,
    For interface/parameters/return description see target.h,
    to_xfer_partial.  */
 
-static LONGEST
+static enum target_xfer_status
 memory_xfer_live_readonly_partial (struct target_ops *ops,
 				   enum target_object object,
 				   gdb_byte *readbuf, ULONGEST memaddr,
-				   ULONGEST len)
+				   ULONGEST len, ULONGEST *xfered_len)
 {
   struct target_section *secp;
   struct target_section_table *table;
@@ -1368,7 +1369,7 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
 		{
 		  /* Entire transfer is within this section.  */
 		  return target_read_live_memory (object, memaddr,
-						  readbuf, len);
+						  readbuf, len, xfered_len);
 		}
 	      else if (memaddr >= p->endaddr)
 		{
@@ -1380,30 +1381,32 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
 		  /* This section overlaps the transfer.  Just do half.  */
 		  len = p->endaddr - memaddr;
 		  return target_read_live_memory (object, memaddr,
-						  readbuf, len);
+						  readbuf, len, xfered_len);
 		}
 	    }
 	}
     }
 
-  return 0;
+  return TARGET_XFER_EOF;
 }
 
 /* Read memory from more than one valid target.  A core file, for
    instance, could have some of memory but delegate other bits to
    the target below it.  So, we must manually try all targets.  */
 
-static LONGEST
+static enum target_xfer_status
 raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
-			 const gdb_byte *writebuf, ULONGEST memaddr, LONGEST len)
+			 const gdb_byte *writebuf, ULONGEST memaddr, LONGEST len,
+			 ULONGEST *xfered_len)
 {
-  LONGEST res;
+  enum target_xfer_status res;
 
   do
     {
       res = ops->to_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-				  readbuf, writebuf, memaddr, len);
-      if (res > 0)
+				  readbuf, writebuf, memaddr, len,
+				  xfered_len);
+      if (res == TARGET_XFER_OK)
 	break;
 
       /* Stop if the target reports that the memory is not available.  */
@@ -1425,12 +1428,12 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
 /* Perform a partial memory transfer.
    For docs see target.h, to_xfer_partial.  */
 
-static LONGEST
+static enum target_xfer_status
 memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 		       gdb_byte *readbuf, const gdb_byte *writebuf, ULONGEST memaddr,
-		       ULONGEST len)
+		       ULONGEST len, ULONGEST *xfered_len)
 {
-  LONGEST res;
+  enum target_xfer_status res;
   int reg_len;
   struct mem_region *region;
   struct inferior *inf;
@@ -1449,7 +1452,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
 	  memaddr = overlay_mapped_address (memaddr, section);
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
-						    memaddr, len,
+						    memaddr, len, xfered_len,
 						    table->sections,
 						    table->sections_end,
 						    section_name);
@@ -1470,7 +1473,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	{
 	  table = target_get_section_table (ops);
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
-						    memaddr, len,
+						    memaddr, len, xfered_len,
 						    table->sections,
 						    table->sections_end,
 						    NULL);
@@ -1511,13 +1514,17 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
 	      /* This goes through the topmost target again.  */
 	      res = memory_xfer_live_readonly_partial (ops, object,
-						       readbuf, memaddr, len);
-	      if (res > 0)
-		return res;
-
-	      /* No use trying further, we know some memory starting
-		 at MEMADDR isn't available.  */
-	      return TARGET_XFER_E_UNAVAILABLE;
+						       readbuf, memaddr,
+						       len, xfered_len);
+	      if (res == TARGET_XFER_OK)
+		return TARGET_XFER_OK;
+	      else
+		{
+		  /* No use trying further, we know some memory starting
+		     at MEMADDR isn't available.  */
+		  *xfered_len = len;
+		  return TARGET_XFER_E_UNAVAILABLE;
+		}
 	    }
 
 	  /* Don't try to read more than how much is available, in
@@ -1575,19 +1582,23 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	  || (code_cache_enabled_p () && object == TARGET_OBJECT_CODE_MEMORY)))
     {
       DCACHE *dcache = target_dcache_get_or_init ();
+      int l;
 
       if (readbuf != NULL)
-	res = dcache_xfer_memory (ops, dcache, memaddr, readbuf, reg_len, 0);
+	l = dcache_xfer_memory (ops, dcache, memaddr, readbuf, reg_len, 0);
       else
 	/* FIXME drow/2006-08-09: If we're going to preserve const
 	   correctness dcache_xfer_memory should take readbuf and
 	   writebuf.  */
-	res = dcache_xfer_memory (ops, dcache, memaddr, (void *) writebuf,
+	l = dcache_xfer_memory (ops, dcache, memaddr, (void *) writebuf,
 				  reg_len, 1);
-      if (res <= 0)
-	return -1;
+      if (l <= 0)
+	return TARGET_XFER_E_IO;
       else
-	return res;
+	{
+	  *xfered_len = (ULONGEST) l;
+	  return TARGET_XFER_OK;
+	}
     }
 
   /* If none of those methods found the memory we wanted, fall back
@@ -1595,14 +1606,19 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
      to_xfer_partial is enough; if it doesn't recognize an object
      it will call the to_xfer_partial of the next target down.
      But for memory this won't do.  Memory is the only target
-     object which can be read from more than one valid target.  */
-  res = raw_memory_xfer_partial (ops, readbuf, writebuf, memaddr, reg_len);
+     object which can be read from more than one valid target.
+     A core file, for instance, could have some of memory but
+     delegate other bits to the target below it.  So, we must
+     manually try all targets.  */
+
+  res = raw_memory_xfer_partial (ops, readbuf, writebuf, memaddr, reg_len,
+				 xfered_len);
 
   /* Make sure the cache gets updated no matter what - if we are writing
      to the stack.  Even if this write is not tagged as such, we still need
      to update the cache.  */
 
-  if (res > 0
+  if (res == TARGET_XFER_OK
       && inf != NULL
       && writebuf != NULL
       && target_dcache_init_p ()
@@ -1612,7 +1628,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
     {
       DCACHE *dcache = target_dcache_get ();
 
-      dcache_update (dcache, memaddr, (void *) writebuf, res);
+      dcache_update (dcache, memaddr, (void *) writebuf, reg_len);
     }
 
   /* If we still haven't got anything, return the last error.  We
@@ -1623,25 +1639,26 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 /* Perform a partial memory transfer.  For docs see target.h,
    to_xfer_partial.  */
 
-static LONGEST
+static enum target_xfer_status
 memory_xfer_partial (struct target_ops *ops, enum target_object object,
-		     gdb_byte *readbuf, const gdb_byte *writebuf, ULONGEST memaddr,
-		     ULONGEST len)
+		     gdb_byte *readbuf, const gdb_byte *writebuf,
+		     ULONGEST memaddr, ULONGEST len, ULONGEST *xfered_len)
 {
-  int res;
+  enum target_xfer_status res;
 
   /* Zero length requests are ok and require no work.  */
   if (len == 0)
-    return 0;
+    return TARGET_XFER_EOF;
 
   /* Fill in READBUF with breakpoint shadows, or WRITEBUF with
      breakpoint insns, thus hiding out from higher layers whether
      there are software breakpoints inserted in the code stream.  */
   if (readbuf != NULL)
     {
-      res = memory_xfer_partial_1 (ops, object, readbuf, NULL, memaddr, len);
+      res = memory_xfer_partial_1 (ops, object, readbuf, NULL, memaddr, len,
+				   xfered_len);
 
-      if (res > 0 && !show_memory_breakpoints)
+      if (res == TARGET_XFER_OK && !show_memory_breakpoints)
 	breakpoint_xfer_memory (readbuf, NULL, NULL, memaddr, res);
     }
   else
@@ -1661,7 +1678,8 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
       memcpy (buf, writebuf, len);
 
       breakpoint_xfer_memory (NULL, buf, writebuf, memaddr, len);
-      res = memory_xfer_partial_1 (ops, object, NULL, buf, memaddr, len);
+      res = memory_xfer_partial_1 (ops, object, NULL, buf, memaddr, len,
+				   xfered_len);
 
       do_cleanups (old_chain);
     }
@@ -1687,23 +1705,26 @@ make_show_memory_breakpoints_cleanup (int show)
 
 /* For docs see target.h, to_xfer_partial.  */
 
-LONGEST
+enum target_xfer_status
 target_xfer_partial (struct target_ops *ops,
 		     enum target_object object, const char *annex,
 		     gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST offset, ULONGEST len)
+		     ULONGEST offset, ULONGEST len,
+		     ULONGEST *xfered_len)
 {
-  LONGEST retval;
+  enum target_xfer_status retval;
 
   gdb_assert (ops->to_xfer_partial != NULL);
 
   /* Transfer is done when LEN is zero.  */
   if (len == 0)
-    return 0;
+    return TARGET_XFER_EOF;
 
   if (writebuf && !may_write_memory)
     error (_("Writing to memory is not allowed (addr %s, len %s)"),
 	   core_addr_to_string_nz (offset), plongest (len));
+
+  *xfered_len = 0;
 
   /* If this is a memory transfer, let the memory-specific code
      have a look at it instead.  Memory transfers are more
@@ -1711,15 +1732,16 @@ target_xfer_partial (struct target_ops *ops,
   if (object == TARGET_OBJECT_MEMORY || object == TARGET_OBJECT_STACK_MEMORY
       || object == TARGET_OBJECT_CODE_MEMORY)
     retval = memory_xfer_partial (ops, object, readbuf,
-				  writebuf, offset, len);
+				  writebuf, offset, len, xfered_len);
   else if (object == TARGET_OBJECT_RAW_MEMORY)
     {
       /* Request the normal memory object from other layers.  */
-      retval = raw_memory_xfer_partial (ops, readbuf, writebuf, offset, len);
+      retval = raw_memory_xfer_partial (ops, readbuf, writebuf, offset, len,
+					xfered_len);
     }
   else
     retval = ops->to_xfer_partial (ops, object, annex, readbuf,
-				   writebuf, offset, len);
+				   writebuf, offset, len, xfered_len);
 
   if (targetdebug)
     {
@@ -1727,25 +1749,26 @@ target_xfer_partial (struct target_ops *ops,
 
       fprintf_unfiltered (gdb_stdlog,
 			  "%s:target_xfer_partial "
-			  "(%d, %s, %s, %s, %s, %s) = %s",
+			  "(%d, %s, %s, %s, %s, %s) = %d, %s",
 			  ops->to_shortname,
 			  (int) object,
 			  (annex ? annex : "(null)"),
 			  host_address_to_string (readbuf),
 			  host_address_to_string (writebuf),
 			  core_addr_to_string_nz (offset),
-			  pulongest (len), plongest (retval));
+			  pulongest (len), retval,
+			  pulongest (*xfered_len));
 
       if (readbuf)
 	myaddr = readbuf;
       if (writebuf)
 	myaddr = writebuf;
-      if (retval > 0 && myaddr != NULL)
+      if (retval == TARGET_XFER_OK && myaddr != NULL)
 	{
 	  int i;
 
 	  fputs_unfiltered (", bytes =", gdb_stdlog);
-	  for (i = 0; i < retval; i++)
+	  for (i = 0; i < *xfered_len; i++)
 	    {
 	      if ((((intptr_t) &(myaddr[i])) & 0xf) == 0)
 		{
@@ -1763,12 +1786,19 @@ target_xfer_partial (struct target_ops *ops,
 
       fputc_unfiltered ('\n', gdb_stdlog);
     }
+
+  /* Check implementations of to_xfer_partial update *XFERED_LEN
+     properly.  Do assertion after printing debug messages, so that we
+     can find more clues on assertion failure from debugging messages.  */
+  if (retval == TARGET_XFER_OK || retval == TARGET_XFER_E_UNAVAILABLE)
+    gdb_assert (*xfered_len > 0);
+
   return retval;
 }
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Returns either 0 for success or
-   a target_xfer_error value if any error occurs.
+   TARGET_XFER_E_IO if any error occurs.
 
    If an error occurs, no guarantee is made about the contents of the data at
    MYADDR.  In particular, the caller should not depend upon partial reads
@@ -1837,7 +1867,7 @@ target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 }
 
 /* Write LEN bytes from MYADDR to target memory at address MEMADDR.
-   Returns either 0 for success or a target_xfer_error value if any
+   Returns either 0 for success or TARGET_XFER_E_IO if any
    error occurs.  If an error occurs, no guarantee is made about how
    much data got written.  Callers that can deal with partial writes
    should call target_write.  */
@@ -1855,7 +1885,7 @@ target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 }
 
 /* Write LEN bytes from MYADDR to target raw memory at address
-   MEMADDR.  Returns either 0 for success or a target_xfer_error value
+   MEMADDR.  Returns either 0 for success or TARGET_XFER_E_IO
    if any error occurs.  If an error occurs, no guarantee is made
    about how much data got written.  Callers that can deal with
    partial writes should call target_write.  */
@@ -1966,10 +1996,11 @@ show_trust_readonly (struct ui_file *file, int from_tty,
 
 /* More generic transfers.  */
 
-static LONGEST
+static enum target_xfer_status
 default_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		      ULONGEST *xfered_len)
 {
   if (object == TARGET_OBJECT_MEMORY
       && ops->deprecated_xfer_memory != NULL)
@@ -1993,55 +2024,64 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 	xfered = ops->deprecated_xfer_memory (offset, readbuf, len, 
 					      0/*read*/, NULL, ops);
       if (xfered > 0)
-	return xfered;
+	{
+	  *xfered_len = (ULONGEST) xfered;
+	  return TARGET_XFER_E_IO;
+	}
       else if (xfered == 0 && errno == 0)
 	/* "deprecated_xfer_memory" uses 0, cross checked against
            ERRNO as one indication of an error.  */
-	return 0;
+	return TARGET_XFER_EOF;
       else
-	return -1;
+	return TARGET_XFER_E_IO;
     }
   else if (ops->beneath != NULL)
     return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					  readbuf, writebuf, offset, len);
+					  readbuf, writebuf, offset, len,
+					  xfered_len);
   else
-    return -1;
+    return TARGET_XFER_E_IO;
 }
 
 /* The xfer_partial handler for the topmost target.  Unlike the default,
    it does not need to handle memory specially; it just passes all
    requests down the stack.  */
 
-static LONGEST
+static enum target_xfer_status
 current_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		      ULONGEST *xfered_len)
 {
   if (ops->beneath != NULL)
     return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					  readbuf, writebuf, offset, len);
+					  readbuf, writebuf, offset, len,
+					  xfered_len);
   else
-    return -1;
+    return TARGET_XFER_E_IO;
 }
 
 /* Target vector read/write partial wrapper functions.  */
 
-static LONGEST
+static enum target_xfer_status
 target_read_partial (struct target_ops *ops,
 		     enum target_object object,
 		     const char *annex, gdb_byte *buf,
-		     ULONGEST offset, LONGEST len)
+		     ULONGEST offset, ULONGEST len,
+		     ULONGEST *xfered_len)
 {
-  return target_xfer_partial (ops, object, annex, buf, NULL, offset, len);
+  return target_xfer_partial (ops, object, annex, buf, NULL, offset, len,
+			      xfered_len);
 }
 
 static LONGEST
 target_write_partial (struct target_ops *ops,
 		      enum target_object object,
 		      const char *annex, const gdb_byte *buf,
-		      ULONGEST offset, LONGEST len)
+		      ULONGEST offset, LONGEST len, ULONGEST *xfered_len)
 {
-  return target_xfer_partial (ops, object, annex, NULL, buf, offset, len);
+  return target_xfer_partial (ops, object, annex, NULL, buf, offset, len,
+			      xfered_len);
 }
 
 /* Wrappers to perform the full transfer.  */
@@ -2058,17 +2098,25 @@ target_read (struct target_ops *ops,
 
   while (xfered < len)
     {
-      LONGEST xfer = target_read_partial (ops, object, annex,
-					  (gdb_byte *) buf + xfered,
-					  offset + xfered, len - xfered);
+      ULONGEST xfered_len;
+      enum target_xfer_status status;
+
+      status = target_read_partial (ops, object, annex,
+				    (gdb_byte *) buf + xfered,
+				    offset + xfered, len - xfered,
+				    &xfered_len);
 
       /* Call an observer, notifying them of the xfer progress?  */
-      if (xfer == 0)
+      if (status == TARGET_XFER_EOF)
 	return xfered;
-      if (xfer < 0)
+      else if (status == TARGET_XFER_OK)
+	{
+	  xfered += xfered_len;
+	  QUIT;
+	}
+      else
 	return -1;
-      xfered += xfer;
-      QUIT;
+
     }
   return len;
 }
@@ -2104,6 +2152,7 @@ read_whatever_is_readable (struct target_ops *ops,
   ULONGEST current_end = end;
   int forward;
   memory_read_result_s r;
+  ULONGEST xfered_len;
 
   /* If we previously failed to read 1 byte, nothing can be done here.  */
   if (end - begin <= 1)
@@ -2116,13 +2165,14 @@ read_whatever_is_readable (struct target_ops *ops,
      if not.  This heuristic is meant to permit reading accessible memory
      at the boundary of accessible region.  */
   if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-			   buf, begin, 1) == 1)
+			   buf, begin, 1, &xfered_len) == TARGET_XFER_OK)
     {
       forward = 1;
       ++current_begin;
     }
   else if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-				buf + (end-begin) - 1, end - 1, 1) == 1)
+				buf + (end-begin) - 1, end - 1, 1,
+				&xfered_len) == TARGET_XFER_OK)
     {
       forward = 0;
       --current_end;
@@ -2297,19 +2347,24 @@ target_write_with_progress (struct target_ops *ops,
 
   while (xfered < len)
     {
-      LONGEST xfer = target_write_partial (ops, object, annex,
-					   (gdb_byte *) buf + xfered,
-					   offset + xfered, len - xfered);
+      ULONGEST xfered_len;
+      enum target_xfer_status status;
 
-      if (xfer == 0)
+      status = target_write_partial (ops, object, annex,
+				     (gdb_byte *) buf + xfered,
+				     offset + xfered, len - xfered,
+				     &xfered_len);
+
+      if (status == TARGET_XFER_EOF)
 	return xfered;
-      if (xfer < 0)
+      if (TARGET_XFER_STATUS_ERROR_P (status))
 	return -1;
 
+      gdb_assert (status == TARGET_XFER_OK);
       if (progress)
-	(*progress) (xfer, baton);
+	(*progress) (xfered_len, baton);
 
-      xfered += xfer;
+      xfered += xfered_len;
       QUIT;
     }
   return len;
@@ -2339,7 +2394,6 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
 {
   size_t buf_alloc, buf_pos;
   gdb_byte *buf;
-  LONGEST n;
 
   /* This function does not have a length parameter; it reads the
      entire OBJECT).  Also, it doesn't support objects fetched partly
@@ -2355,15 +2409,14 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
   buf_pos = 0;
   while (1)
     {
-      n = target_read_partial (ops, object, annex, &buf[buf_pos],
-			       buf_pos, buf_alloc - buf_pos - padding);
-      if (n < 0)
-	{
-	  /* An error occurred.  */
-	  xfree (buf);
-	  return -1;
-	}
-      else if (n == 0)
+      ULONGEST xfered_len;
+      enum target_xfer_status status;
+
+      status = target_read_partial (ops, object, annex, &buf[buf_pos],
+				    buf_pos, buf_alloc - buf_pos - padding,
+				    &xfered_len);
+
+      if (status == TARGET_XFER_EOF)
 	{
 	  /* Read all there was.  */
 	  if (buf_pos == 0)
@@ -2372,8 +2425,14 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
 	    *buf_p = buf;
 	  return buf_pos;
 	}
+      else if (status != TARGET_XFER_OK)
+	{
+	  /* An error occurred.  */
+	  xfree (buf);
+	  return TARGET_XFER_E_IO;
+	}
 
-      buf_pos += n;
+      buf_pos += xfered_len;
 
       /* If the buffer is filling up, expand it.  */
       if (buf_alloc < buf_pos * 2)

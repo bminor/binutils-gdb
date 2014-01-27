@@ -1061,10 +1061,10 @@ gdbsim_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 /* Helper for gdbsim_xfer_partial that handles memory transfers.
    Arguments are like target_xfer_partial.  */
 
-static LONGEST
+static enum target_xfer_status
 gdbsim_xfer_memory (struct target_ops *target,
 		    gdb_byte *readbuf, const gdb_byte *writebuf,
-		    ULONGEST memaddr, ULONGEST len)
+		    ULONGEST memaddr, ULONGEST len, ULONGEST *xfered_len)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
@@ -1074,7 +1074,7 @@ gdbsim_xfer_memory (struct target_ops *target,
      request to be passed to a lower target, hopefully an exec
      file.  */
   if (!target->to_has_memory (target))
-    return 0;
+    return TARGET_XFER_EOF;
 
   if (!sim_data->program_loaded)
     error (_("No program loaded."));
@@ -1108,20 +1108,30 @@ gdbsim_xfer_memory (struct target_ops *target,
       if (remote_debug && len > 0)
 	dump_mem (readbuf, len);
     }
-  return l;
+  if (l > 0)
+    {
+      *xfered_len = (ULONGEST) l;
+      return TARGET_XFER_OK;
+    }
+  else if (l == 0)
+    return TARGET_XFER_EOF;
+  else
+    return TARGET_XFER_E_IO;
 }
 
 /* Target to_xfer_partial implementation.  */
 
-static LONGEST
+static enum target_xfer_status
 gdbsim_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		     ULONGEST *xfered_len)
 {
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      return gdbsim_xfer_memory (ops, readbuf, writebuf, offset, len);
+      return gdbsim_xfer_memory (ops, readbuf, writebuf, offset, len,
+				 xfered_len);
 
     default:
       return TARGET_XFER_E_IO;

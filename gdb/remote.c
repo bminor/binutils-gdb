@@ -6838,14 +6838,15 @@ check_binary_download (CORE_ADDR addr)
    If USE_LENGTH is 0, then the <LENGTH> field and the preceding comma
    are omitted.
 
-   Returns the number of bytes transferred, or a negative value (an
-   'enum target_xfer_error' value) for error.  Only transfer a single
-   packet.  */
+   Return the transferred status, error or OK (an
+   'enum target_xfer_status' value).  Save the number of bytes
+   transferred in *XFERED_LEN.  Only transfer a single packet.  */
 
-static LONGEST
+static enum target_xfer_status
 remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
 			const gdb_byte *myaddr, ULONGEST len,
-			char packet_format, int use_length)
+			ULONGEST *xfered_len, char packet_format,
+			int use_length)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;
@@ -6862,7 +6863,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
 		    _("remote_write_bytes_aux: bad packet format"));
 
   if (len == 0)
-    return 0;
+    return TARGET_XFER_EOF;
 
   payload_size = get_memory_write_packet_size ();
 
@@ -6985,7 +6986,8 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
 
   /* Return NR_BYTES, not TODO, in case escape chars caused us to send
      fewer bytes than we'd planned.  */
-  return nr_bytes;
+  *xfered_len = (ULONGEST) nr_bytes;
+  return TARGET_XFER_OK;
 }
 
 /* Write memory data directly to the remote machine.
@@ -6994,12 +6996,13 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.
 
-   Returns number of bytes transferred, or a negative value (an 'enum
-   target_xfer_error' value) for error.  Only transfer a single
-   packet.  */
+   Return the transferred status, error or OK (an
+   'enum target_xfer_status' value).  Save the number of bytes
+   transferred in *XFERED_LEN.  Only transfer a single packet.  */
 
-static LONGEST
-remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len)
+static enum target_xfer_status
+remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len,
+		    ULONGEST *xfered_len)
 {
   char *packet_format = 0;
 
@@ -7022,7 +7025,8 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len)
     }
 
   return remote_write_bytes_aux (packet_format,
-				 memaddr, myaddr, len, packet_format[0], 1);
+				 memaddr, myaddr, len, xfered_len,
+				 packet_format[0], 1);
 }
 
 /* Read memory data directly from the remote machine.
@@ -7031,11 +7035,13 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len)
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.
 
-   Returns number of bytes transferred, or a negative value (an 'enum
-   target_xfer_error' value) for error.  */
+   Return the transferred status, error or OK (an
+   'enum target_xfer_status' value).  Save the number of bytes
+   transferred in *XFERED_LEN.  */
 
-static LONGEST
-remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len)
+static enum target_xfer_status
+remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
+		   ULONGEST *xfered_len)
 {
   struct remote_state *rs = get_remote_state ();
   int max_buf_size;		/* Max size of packet output buffer.  */
@@ -7072,7 +7078,8 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len)
   p = rs->buf;
   i = hex2bin (p, myaddr, todo);
   /* Return what we have.  Let higher layers handle partial reads.  */
-  return i;
+  *xfered_len = (ULONGEST) i;
+  return TARGET_XFER_OK;
 }
 
 
@@ -7144,18 +7151,19 @@ remote_flash_erase (struct target_ops *ops,
   do_cleanups (back_to);
 }
 
-static LONGEST
-remote_flash_write (struct target_ops *ops,
-                    ULONGEST address, LONGEST length,
-                    const gdb_byte *data)
+static enum target_xfer_status
+remote_flash_write (struct target_ops *ops, ULONGEST address,
+		    ULONGEST length, ULONGEST *xfered_len,
+		    const gdb_byte *data)
 {
   int saved_remote_timeout = remote_timeout;
-  LONGEST ret;
+  enum target_xfer_status ret;
   struct cleanup *back_to = make_cleanup (restore_remote_timeout,
-                                          &saved_remote_timeout);
+					  &saved_remote_timeout);
 
   remote_timeout = remote_flash_timeout;
-  ret = remote_write_bytes_aux ("vFlashWrite:", address, data, length, 'X', 0);
+  ret = remote_write_bytes_aux ("vFlashWrite:", address, data, length,
+				xfered_len,'X', 0);
   do_cleanups (back_to);
 
   return ret;
@@ -8737,10 +8745,10 @@ the loaded file\n"));
    into remote target.  The number of bytes written to the remote
    target is returned, or -1 for error.  */
 
-static LONGEST
+static enum target_xfer_status
 remote_write_qxfer (struct target_ops *ops, const char *object_name,
                     const char *annex, const gdb_byte *writebuf, 
-                    ULONGEST offset, LONGEST len, 
+                    ULONGEST offset, LONGEST len, ULONGEST *xfered_len,
                     struct packet_config *packet)
 {
   int i, buf_len;
@@ -8768,7 +8776,9 @@ remote_write_qxfer (struct target_ops *ops, const char *object_name,
     return TARGET_XFER_E_IO;
 
   unpack_varlen_hex (rs->buf, &n);
-  return n;
+
+  *xfered_len = n;
+  return TARGET_XFER_OK;
 }
 
 /* Read OBJECT_NAME/ANNEX from the remote target using a qXfer packet.
@@ -8778,10 +8788,11 @@ remote_write_qxfer (struct target_ops *ops, const char *object_name,
    EOF.  PACKET is checked and updated to indicate whether the remote
    target supports this object.  */
 
-static LONGEST
+static enum target_xfer_status
 remote_read_qxfer (struct target_ops *ops, const char *object_name,
 		   const char *annex,
 		   gdb_byte *readbuf, ULONGEST offset, LONGEST len,
+		   ULONGEST *xfered_len,
 		   struct packet_config *packet)
 {
   struct remote_state *rs = get_remote_state ();
@@ -8797,7 +8808,8 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
       if (strcmp (object_name, rs->finished_object) == 0
 	  && strcmp (annex ? annex : "", rs->finished_annex) == 0
 	  && offset == rs->finished_offset)
-	return 0;
+	return TARGET_XFER_EOF;
+
 
       /* Otherwise, we're now reading something different.  Discard
 	 the cache.  */
@@ -8848,13 +8860,20 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
       rs->finished_offset = offset + i;
     }
 
-  return i;
+  if (i == 0)
+    return TARGET_XFER_EOF;
+  else
+    {
+      *xfered_len = i;
+      return TARGET_XFER_OK;
+    }
 }
 
-static LONGEST
+static enum target_xfer_status
 remote_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		     ULONGEST *xfered_len)
 {
   struct remote_state *rs;
   int i;
@@ -8869,20 +8888,16 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   /* Handle memory using the standard memory routines.  */
   if (object == TARGET_OBJECT_MEMORY)
     {
-      LONGEST xfered;
-
       /* If the remote target is connected but not running, we should
 	 pass this request down to a lower stratum (e.g. the executable
 	 file).  */
       if (!target_has_execution)
-	return 0;
+	return TARGET_XFER_EOF;
 
       if (writebuf != NULL)
-	xfered = remote_write_bytes (offset, writebuf, len);
+	return remote_write_bytes (offset, writebuf, len, xfered_len);
       else
-	xfered = remote_read_bytes (offset, readbuf, len);
-
-      return xfered;
+	return remote_read_bytes (offset, readbuf, len, xfered_len);
     }
 
   /* Handle SPU memory using qxfer packets.  */
@@ -8890,12 +8905,12 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       if (readbuf)
 	return remote_read_qxfer (ops, "spu", annex, readbuf, offset, len,
-				  &remote_protocol_packets
-				    [PACKET_qXfer_spu_read]);
+				  xfered_len, &remote_protocol_packets
+				  [PACKET_qXfer_spu_read]);
       else
 	return remote_write_qxfer (ops, "spu", annex, writebuf, offset, len,
-				   &remote_protocol_packets
-				     [PACKET_qXfer_spu_write]);
+				   xfered_len, &remote_protocol_packets
+				   [PACKET_qXfer_spu_write]);
     }
 
   /* Handle extra signal info using qxfer packets.  */
@@ -8903,11 +8918,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       if (readbuf)
 	return remote_read_qxfer (ops, "siginfo", annex, readbuf, offset, len,
-				  &remote_protocol_packets
+				  xfered_len, &remote_protocol_packets
 				  [PACKET_qXfer_siginfo_read]);
       else
 	return remote_write_qxfer (ops, "siginfo", annex,
-				   writebuf, offset, len,
+				   writebuf, offset, len, xfered_len,
 				   &remote_protocol_packets
 				   [PACKET_qXfer_siginfo_write]);
     }
@@ -8916,7 +8931,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       if (readbuf)
 	return remote_read_qxfer (ops, "statictrace", annex,
-				  readbuf, offset, len,
+				  readbuf, offset, len, xfered_len,
 				  &remote_protocol_packets
 				  [PACKET_qXfer_statictrace_read]);
       else
@@ -8931,7 +8946,8 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       switch (object)
 	{
 	case TARGET_OBJECT_FLASH:
-	  return remote_flash_write (ops, offset, len, writebuf);
+	  return remote_flash_write (ops, offset, len, xfered_len,
+				     writebuf);
 
 	default:
 	  return TARGET_XFER_E_IO;
@@ -8949,56 +8965,62 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
     case TARGET_OBJECT_AUXV:
       gdb_assert (annex == NULL);
       return remote_read_qxfer (ops, "auxv", annex, readbuf, offset, len,
+				xfered_len,
 				&remote_protocol_packets[PACKET_qXfer_auxv]);
 
     case TARGET_OBJECT_AVAILABLE_FEATURES:
       return remote_read_qxfer
-	(ops, "features", annex, readbuf, offset, len,
+	(ops, "features", annex, readbuf, offset, len, xfered_len,
 	 &remote_protocol_packets[PACKET_qXfer_features]);
 
     case TARGET_OBJECT_LIBRARIES:
       return remote_read_qxfer
-	(ops, "libraries", annex, readbuf, offset, len,
+	(ops, "libraries", annex, readbuf, offset, len, xfered_len,
 	 &remote_protocol_packets[PACKET_qXfer_libraries]);
 
     case TARGET_OBJECT_LIBRARIES_SVR4:
       return remote_read_qxfer
-	(ops, "libraries-svr4", annex, readbuf, offset, len,
+	(ops, "libraries-svr4", annex, readbuf, offset, len, xfered_len,
 	 &remote_protocol_packets[PACKET_qXfer_libraries_svr4]);
 
     case TARGET_OBJECT_MEMORY_MAP:
       gdb_assert (annex == NULL);
       return remote_read_qxfer (ops, "memory-map", annex, readbuf, offset, len,
+				 xfered_len,
 				&remote_protocol_packets[PACKET_qXfer_memory_map]);
 
     case TARGET_OBJECT_OSDATA:
       /* Should only get here if we're connected.  */
       gdb_assert (rs->remote_desc);
       return remote_read_qxfer
-       (ops, "osdata", annex, readbuf, offset, len,
+	(ops, "osdata", annex, readbuf, offset, len, xfered_len,
         &remote_protocol_packets[PACKET_qXfer_osdata]);
 
     case TARGET_OBJECT_THREADS:
       gdb_assert (annex == NULL);
       return remote_read_qxfer (ops, "threads", annex, readbuf, offset, len,
+				xfered_len,
 				&remote_protocol_packets[PACKET_qXfer_threads]);
 
     case TARGET_OBJECT_TRACEFRAME_INFO:
       gdb_assert (annex == NULL);
       return remote_read_qxfer
-	(ops, "traceframe-info", annex, readbuf, offset, len,
+	(ops, "traceframe-info", annex, readbuf, offset, len, xfered_len,
 	 &remote_protocol_packets[PACKET_qXfer_traceframe_info]);
 
     case TARGET_OBJECT_FDPIC:
       return remote_read_qxfer (ops, "fdpic", annex, readbuf, offset, len,
+				xfered_len,
 				&remote_protocol_packets[PACKET_qXfer_fdpic]);
 
     case TARGET_OBJECT_OPENVMS_UIB:
       return remote_read_qxfer (ops, "uib", annex, readbuf, offset, len,
+				xfered_len,
 				&remote_protocol_packets[PACKET_qXfer_uib]);
 
     case TARGET_OBJECT_BTRACE:
       return remote_read_qxfer (ops, "btrace", annex, readbuf, offset, len,
+				xfered_len,
         &remote_protocol_packets[PACKET_qXfer_btrace]);
 
     default:
@@ -9049,7 +9071,8 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   getpkt (&rs->buf, &rs->buf_size, 0);
   strcpy ((char *) readbuf, rs->buf);
 
-  return strlen ((char *) readbuf);
+  *xfered_len = strlen ((char *) readbuf);
+  return TARGET_XFER_OK;
 }
 
 static int

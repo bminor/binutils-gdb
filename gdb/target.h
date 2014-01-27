@@ -203,10 +203,16 @@ enum target_object
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
-/* Possible error codes returned by target_xfer_partial, etc.  */
+/* Possible values returned by target_xfer_partial, etc.  */
 
-enum target_xfer_error
+enum target_xfer_status
 {
+  /* Some bytes are transferred.  */
+  TARGET_XFER_OK = 1,
+
+  /* No further transfer is possible.  */
+  TARGET_XFER_EOF = 0,
+
   /* Generic I/O error.  Note that it's important that this is '-1',
      as we still have target_xfer-related code returning hardcoded
      '-1' on error.  */
@@ -219,9 +225,11 @@ enum target_xfer_error
   /* Keep list in sync with target_xfer_error_to_string.  */
 };
 
+#define TARGET_XFER_STATUS_ERROR_P(STATUS) ((STATUS) < TARGET_XFER_EOF)
+
 /* Return the string form of ERR.  */
 
-extern const char *target_xfer_error_to_string (enum target_xfer_error err);
+extern const char *target_xfer_status_to_string (enum target_xfer_status err);
 
 /* Enumeration of the kinds of traceframe searches that a target may
    be able to perform.  */
@@ -238,14 +246,15 @@ enum trace_find_type
 typedef struct static_tracepoint_marker *static_tracepoint_marker_p;
 DEF_VEC_P(static_tracepoint_marker_p);
 
-typedef LONGEST
+typedef enum target_xfer_status
   target_xfer_partial_ftype (struct target_ops *ops,
 			     enum target_object object,
 			     const char *annex,
 			     gdb_byte *readbuf,
 			     const gdb_byte *writebuf,
 			     ULONGEST offset,
-			     ULONGEST len);
+			     ULONGEST len,
+			     ULONGEST *xfered_len);
 
 /* Request that OPS transfer up to LEN 8-bit bytes of the target's
    OBJECT.  The OFFSET, for a seekable object, specifies the
@@ -518,13 +527,14 @@ struct target_ops
        starting point.  The ANNEX can be used to provide additional
        data-specific information to the target.
 
-       Return the number of bytes actually transfered, zero when no
-       further transfer is possible, and a negative error code (really
-       an 'enum target_xfer_error' value) when the transfer is not
-       supported.  Return of a positive value smaller than LEN does
-       not indicate the end of the object, only the end of the
-       transfer; higher level code should continue transferring if
-       desired.  This is handled in target.c.
+       Return the transferred status, error or OK (an
+       'enum target_xfer_status' value).  Save the number of bytes
+       actually transferred in *XFERED_LEN if transfer is successful
+       (TARGET_XFER_OK) or the number unavailable bytes if the requested
+       data is unavailable (TARGET_XFER_E_UNAVAILABLE).  *XFERED_LEN
+       smaller than LEN does not indicate the end of the object, only
+       the end of the transfer; higher level code should continue
+       transferring if desired.  This is handled in target.c.
 
        The interface does not support a "retry" mechanism.  Instead it
        assumes that at least one byte will be transfered on each
@@ -541,10 +551,13 @@ struct target_ops
        See target_read and target_write for more information.  One,
        and only one, of readbuf or writebuf must be non-NULL.  */
 
-    LONGEST (*to_xfer_partial) (struct target_ops *ops,
-				enum target_object object, const char *annex,
-				gdb_byte *readbuf, const gdb_byte *writebuf,
-				ULONGEST offset, ULONGEST len);
+    enum target_xfer_status (*to_xfer_partial) (struct target_ops *ops,
+						enum target_object object,
+						const char *annex,
+						gdb_byte *readbuf,
+						const gdb_byte *writebuf,
+						ULONGEST offset, ULONGEST len,
+						ULONGEST *xfered_len);
 
     /* Returns the memory map for the target.  A return value of NULL
        means that no memory map is available.  If a memory address

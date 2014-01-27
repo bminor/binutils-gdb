@@ -1892,9 +1892,9 @@ out:
 
 #ifdef TASK_DYLD_INFO_COUNT
 /* This is not available in Darwin 9.  */
-static int
+static enum target_xfer_status
 darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
-		       ULONGEST length)
+		       ULONGEST length, ULONGEST *xfered_len)
 {
   struct task_dyld_info task_dyld_info;
   mach_msg_type_number_t count = TASK_DYLD_INFO_COUNT;
@@ -1902,7 +1902,7 @@ darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
   kern_return_t kret;
 
   if (addr >= sz)
-    return 0;
+    return TARGET_XFER_EOF;
 
   kret = task_info (task, TASK_DYLD_INFO, (task_info_t) &task_dyld_info, &count);
   MACH_CHECK_ERROR (kret);
@@ -1912,7 +1912,8 @@ darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
   if (addr + length > sz)
     length = sz - addr;
   memcpy (rdaddr, (char *)&task_dyld_info + addr, length);
-  return length;
+  *xfered_len = (ULONGEST) length;
+  return TARGET_XFER_OK;
 }
 #endif
 
@@ -1922,7 +1923,7 @@ static LONGEST
 darwin_xfer_partial (struct target_ops *ops,
 		     enum target_object object, const char *annex,
 		     gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST offset, ULONGEST len)
+		     ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   struct inferior *inf = current_inferior ();
 
@@ -1935,8 +1936,19 @@ darwin_xfer_partial (struct target_ops *ops,
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      return darwin_read_write_inferior (inf->private->task, offset,
-                                         readbuf, writebuf, len);
+      {
+	int l = darwin_read_write_inferior (inf->private->task, offset,
+					    readbuf, writebuf, len);
+
+	if (l == 0)
+	  return TARGET_XFER_EOF;
+	else
+	  {
+	    gdb_assert (l > 0);
+	    *xfered_len = (ULONGEST) l;
+	    return TARGET_XFER_OK;
+	  }
+      }
 #ifdef TASK_DYLD_INFO_COUNT
     case TARGET_OBJECT_DARWIN_DYLD_INFO:
       if (writebuf != NULL || readbuf == NULL)
@@ -1944,7 +1956,8 @@ darwin_xfer_partial (struct target_ops *ops,
           /* Support only read.  */
           return TARGET_XFER_E_IO;
         }
-      return darwin_read_dyld_info (inf->private->task, offset, readbuf, len);
+      return darwin_read_dyld_info (inf->private->task, offset, readbuf, len,
+				    xfered_len);
 #endif
     default:
       return TARGET_XFER_E_IO;
