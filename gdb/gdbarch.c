@@ -3532,7 +3532,7 @@ gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch)
   return gdbarch->core_xfer_shared_libraries != NULL;
 }
 
-LONGEST
+ULONGEST
 gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);
@@ -3556,7 +3556,7 @@ gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch)
   return gdbarch->core_xfer_shared_libraries_aix != NULL;
 }
 
-LONGEST
+ULONGEST
 gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);

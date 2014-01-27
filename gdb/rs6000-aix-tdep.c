@@ -965,14 +965,14 @@ rs6000_aix_shared_library_to_xml (struct ld_info *ldi,
    as the consumer of the XML library list might live in a different
    process.  */
 
-LONGEST
+ULONGEST
 rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
 			   gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
 			   int close_ldinfo_fd)
 {
   struct obstack obstack;
   const char *buf;
-  LONGEST len_avail;
+  ULONGEST len_avail;
 
   obstack_init (&obstack);
   obstack_grow_str (&obstack, "<library-list-aix version=\"1.0\">\n");
@@ -1009,7 +1009,7 @@ rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
 
 /* Implement the core_xfer_shared_libraries_aix gdbarch method.  */
 
-static LONGEST
+static ULONGEST
 rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 					   gdb_byte *readbuf,
 					   ULONGEST offset,

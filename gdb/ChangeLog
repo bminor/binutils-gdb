@@ -1,5 +1,18 @@
 2014-02-07  Yao Qi  <yao@codesourcery.com>
 
+	* gdbarch.sh (core_xfer_shared_libraries): Returns ULONGEST.  Add
+	comments.
+	(core_xfer_shared_libraries_aix): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* i386-cygwin-tdep.c (windows_core_xfer_shared_libraries): Return
+	ULONGEST.  Change 'len_avail' type to ULONGEST.
+	* rs6000-aix-tdep.c (rs6000_aix_ld_info_to_xml): Likewise.
+	* rs6000-aix-tdep.h (rs6000_aix_ld_info_to_xml): Update
+	declaration.
+	(rs6000_aix_core_xfer_shared_libraries_aix): Return ULONGEST.
+
+2014-02-07  Yao Qi  <yao@codesourcery.com>
+
 	* corefile.c (memory_error): Get 'exception' from ERR and pass
 	'exception' to throw_error.
 

@@ -672,12 +672,15 @@ F:char *:elfcore_write_linux_prpsinfo:bfd *obfd, char *note_data, int *note_size
 M:int:find_memory_regions:find_memory_region_ftype func, void *data:func, data
 
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
-# core file into buffer READBUF with length LEN.
-M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, ULONGEST len:readbuf, offset, len
+# core file into buffer READBUF with length LEN.  Return the number of bytes read
+# (zero indicates failure).
+# failed, otherwise, return the red length of READBUF.
+M:ULONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, ULONGEST len:readbuf, offset, len
 
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES_AIX formatted shared
 # libraries list from core file into buffer READBUF with length LEN.
-M:LONGEST:core_xfer_shared_libraries_aix:gdb_byte *readbuf, ULONGEST offset, ULONGEST len:readbuf, offset, len
+# Return the number of bytes read (zero indicates failure).
+M:ULONGEST:core_xfer_shared_libraries_aix:gdb_byte *readbuf, ULONGEST offset, ULONGEST len:readbuf, offset, len
 
 # How the core target converts a PTID from a core file to a string.
 M:char *:core_pid_to_str:ptid_t ptid:ptid
