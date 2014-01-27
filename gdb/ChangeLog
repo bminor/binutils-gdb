@@ -1,3 +1,45 @@
+2014-01-27  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_close): Call btrace_teardown
+	for all threads.
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: Remove "#ifdef UI_OUT" condition for including
+	"ui-out.h".
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-typeprint (type_is_full_subrange_of_target_type):
+	New function.
+	(print_range): Add parameter bounds_prefered_p.  If not set,
+	try printing range types using the name of their base type.
+	(print_range_type): Add parameter bounds_prefered_p.
+	Use it in call to print_range.
+	(print_array_type, ada_print_type): Update calls to print_range
+	and print_range_type.
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-typeprint.c (print_array_type, print_choices, print_range)
+	(print_range_bound, print_dynamic_range_bound, print_range_type):
+	Remove declaration.
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-typeprint.c (print_range): Add missing empty line
+	after local declaration.
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint.c (print_optional_low_bound): Get index_type's
+	target type for as long as it is a TYPE_CODE_RANGE.
+
+2014-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* procfs.c (procfs_make_note_section): Remove assertion and
+	associated comment.
+
 2014-01-24  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (remote_read_bytes): Change type of len to ULONGEST.

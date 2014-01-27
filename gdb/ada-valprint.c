@@ -79,7 +79,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
 
   index_type = TYPE_INDEX_TYPE (type);
 
-  if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
+  while (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
     {
       /* We need to know what the base type is, in order to do the
          appropriate check below.  Otherwise, if this is a subrange

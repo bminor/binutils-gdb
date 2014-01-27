@@ -1,5 +1,9 @@
 2014-01-23  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.ada/array_char_idx: New testcase.
+
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/16487:
 	* gdb.python/py-framefilter.exp: Add test using "Error" filter.
 	* gdb.python/py-framefilter.py (ErrorInName, ErrorFilter): New

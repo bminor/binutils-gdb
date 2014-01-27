@@ -44,9 +44,7 @@
 #include "ada-lang.h"
 #include "completer.h"
 #include <sys/stat.h>
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 #include "block.h"
 #include "infcall.h"
 #include "dictionary.h"
