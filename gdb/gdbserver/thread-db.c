@@ -1,5 +1,5 @@
 /* Thread management interface, for the remote server for GDB.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -194,7 +194,7 @@ thread_db_create_event (CORE_ADDR where)
     fatal ("unexpected thread_db->td_ta_event_getmsg_p == NULL");
 
   if (debug_threads)
-    fprintf (stderr, "Thread creation event.\n");
+    debug_printf ("Thread creation event.\n");
 
   /* FIXME: This assumes we don't get another event.
      In the LinuxThreads implementation, this is safe,
@@ -289,8 +289,8 @@ find_one_thread (ptid_t ptid)
 	   lwpid, thread_db_err_str (err));
 
   if (debug_threads)
-    fprintf (stderr, "Found thread %ld (LWP %d)\n",
-	     ti.ti_tid, ti.ti_lid);
+    debug_printf ("Found thread %ld (LWP %d)\n",
+		  ti.ti_tid, ti.ti_lid);
 
   if (lwpid != ti.ti_lid)
     {
@@ -326,8 +326,8 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
   struct lwp_info *lwp;
 
   if (debug_threads)
-    fprintf (stderr, "Attaching to thread %ld (LWP %d)\n",
-	     ti_p->ti_tid, ti_p->ti_lid);
+    debug_printf ("Attaching to thread %ld (LWP %d)\n",
+		  ti_p->ti_tid, ti_p->ti_lid);
   linux_attach_lwp (ti_p->ti_lid);
   lwp = find_lwp_pid (pid_to_ptid (ti_p->ti_lid));
   if (lwp == NULL)
@@ -432,8 +432,8 @@ thread_db_find_new_threads (void)
 					 TD_THR_LOWEST_PRIORITY,
 					 TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
       if (debug_threads)
-	fprintf (stderr, "Found %d threads in iteration %d.\n",
-		 new_thread_count, iteration);
+	debug_printf ("Found %d threads in iteration %d.\n",
+		      new_thread_count, iteration);
 
       if (new_thread_count != 0)
 	{
@@ -546,7 +546,7 @@ thread_db_load_search (void)
   if (err != TD_OK)
     {
       if (debug_threads)
-	fprintf (stderr, "td_ta_new(): %s\n", thread_db_err_str (err));
+	debug_printf ("td_ta_new(): %s\n", thread_db_err_str (err));
       free (tdb);
       proc->private->thread_db = NULL;
       return 0;
@@ -595,7 +595,7 @@ try_thread_db_load_1 (void *handle)
       if ((a) == NULL)						\
 	{							\
 	  if (debug_threads)					\
-	    fprintf (stderr, "dlsym: %s\n", dlerror ());	\
+	    debug_printf ("dlsym: %s\n", dlerror ());		\
 	  if (required)						\
 	    {							\
 	      free (tdb);					\
@@ -613,7 +613,7 @@ try_thread_db_load_1 (void *handle)
   if (err != TD_OK)
     {
       if (debug_threads)
-	fprintf (stderr, "td_ta_new(): %s\n", thread_db_err_str (err));
+	debug_printf ("td_ta_new(): %s\n", thread_db_err_str (err));
       free (tdb);
       proc->private->thread_db = NULL;
       return 0;
@@ -663,13 +663,13 @@ try_thread_db_load (const char *library)
   void *handle;
 
   if (debug_threads)
-    fprintf (stderr, "Trying host libthread_db library: %s.\n",
-	     library);
+    debug_printf ("Trying host libthread_db library: %s.\n",
+		  library);
   handle = dlopen (library, RTLD_NOW);
   if (handle == NULL)
     {
       if (debug_threads)
-	fprintf (stderr, "dlopen failed: %s.\n", dlerror ());
+	debug_printf ("dlopen failed: %s.\n", dlerror ());
       return 0;
     }
 
@@ -786,7 +786,7 @@ thread_db_load_search (void)
 
   free_char_ptr_vec (dir_vec);
   if (debug_threads)
-    fprintf (stderr, "thread_db_load_search returning %d\n", rc);
+    debug_printf ("thread_db_load_search returning %d\n", rc);
   return rc;
 }
 

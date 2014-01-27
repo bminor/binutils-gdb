@@ -1,5 +1,5 @@
 /* YACC parser for Fortran expressions, for GDB.
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -1175,21 +1175,35 @@ yylex (void)
     char *tmp = copy_name (yylval.sval);
     struct symbol *sym;
     struct field_of_this_result is_a_field_of_this;
+    enum domain_enum_tag lookup_domains[] =
+    {
+      STRUCT_DOMAIN,
+      VAR_DOMAIN,
+      MODULE_DOMAIN
+    };
+    int i;
     int hextype;
-    
-    /* Initialize this in case we *don't* use it in this call; that
-       way we can refer to it unconditionally below.  */
-    memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
-    sym = lookup_symbol (tmp, expression_context_block,
-			 VAR_DOMAIN,
-			 parse_language->la_language == language_cplus
-			 ? &is_a_field_of_this : NULL);
-    if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+    for (i = 0; i < ARRAY_SIZE (lookup_domains); ++i)
       {
-	yylval.tsym.type = SYMBOL_TYPE (sym);
-	return TYPENAME;
+	/* Initialize this in case we *don't* use it in this call; that
+	   way we can refer to it unconditionally below.  */
+	memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
+
+	sym = lookup_symbol (tmp, expression_context_block,
+			     lookup_domains[i],
+			     parse_language->la_language == language_cplus
+			     ? &is_a_field_of_this : NULL);
+	if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+	  {
+	    yylval.tsym.type = SYMBOL_TYPE (sym);
+	    return TYPENAME;
+	  }
+
+	if (sym)
+	  break;
       }
+
     yylval.tsym.type
       = language_lookup_primitive_type_by_name (parse_language,
 						parse_gdbarch, tmp);

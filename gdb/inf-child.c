@@ -1,7 +1,7 @@
 /* Default child (native) target interface, for GDB when running under
    Unix.
 
-   Copyright (C) 1988-2013 Free Software Foundation, Inc.
+   Copyright (C) 1988-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -100,7 +100,8 @@ inf_child_post_attach (int pid)
    program being debugged.  */
 
 static void
-inf_child_prepare_to_store (struct regcache *regcache)
+inf_child_prepare_to_store (struct target_ops *self,
+			    struct regcache *regcache)
 {
 }
 
@@ -386,7 +387,7 @@ inf_child_can_use_agent (void)
 struct target_ops *
 inf_child_target (void)
 {
-  struct target_ops *t = XZALLOC (struct target_ops);
+  struct target_ops *t = XCNEW (struct target_ops);
 
   t->to_shortname = "child";
   t->to_longname = "Unix child process";

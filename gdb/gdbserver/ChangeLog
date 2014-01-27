@@ -1,3 +1,144 @@
+2014-01-22  Doug Evans  <dje@google.com>
+
+	* gdbthread.h (gdb_id_to_thread): Delete, unused.
+
+2014-01-22  Doug Evans  <dje@google.com>
+
+	* configure.ac (AC_CHECK_FUNCS): Add test for gettimeofday.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in (SFILES): Add debug.c.
+	(OBS): Add debug.o.
+	* debug.c: New file.
+	* debug.h: New file.
+	* linux-aarch64-low.c (*): Update all debugging printfs to use
+	debug_printf instead of fprintf.
+	* linux-arm-low.c (*): Ditto.
+	* linux-cris-low.c (*): Ditto.
+	* linux-crisv32-low.c (*): Ditto.
+	* linux-m32r-low.c (*): Ditto.
+	* linux-sparc-low.c (*): Ditto.
+	* linux-x86.c (*): Ditto.
+	* linux-low.c (*): Ditto.
+	(linux_wait_1): Add calls to debug_enter, debug_exit.
+	(linux_wait): Remove redundant debugging printf.
+	(stop_all_lwps): Add calls to debug_enter, debug_exit.
+	(linux_resume, unstop_all_lwps): Ditto.
+	* mem-break.c (*): Update all debugging printfs to use
+	debug_printf instead of fprintf.
+	* remote-utils.c (*): Ditto.
+	* thread-db.c (*): Ditto.
+	* server.c #include <ctype.h>, "gdb_vecs.h".
+	(debug_threads): Moved to debug.c.
+	(*): Update all debugging printfs to use debug_printf instead of
+	fprintf.
+	(start_inferior): Replace call to fflush with call to debug_flush.
+	(monitor_show_help): Mention set debug-format.
+	(parse_debug_format_options): New function.
+	(handle_monitor_command): Handle "monitor set debug-format".
+	(gdbserver_usage): Mention --debug-format.
+	(main): Parse --debug-format.
+	* server.h (debug_threads): Declaration moved to debug.h.
+	#include "debug.h".
+	* tracepoint.c (trace_debug_1) [!IN_PROCESS_AGENT]: Add version of
+	trace_debug_1 that uses debug_printf.
+	(tracepoint_look_up_symbols): Update all debugging printfs to use
+	debug_printf instead of fprintf.
+
+2014-01-20  Baruch Siach  <baruch@tkos.co.il>
+
+	* linux-xtensa-low.c: Include asm/ptrace.h instead of
+	sys/ptrace.h.
+
+2014-01-17  Pedro Alves  <palves@redhat.com>
+
+	PR build/16445
+	* linux-x86-low.c: Don't include elf/common.h if ELFMAG0 is
+	defined after including gdb_proc_service.h.
+
+2014-01-16  Doug Evans  <dje@google.com>
+
+	* dll.c (UNSPECIFIED_CORE_ADDR): New macro.
+	(match_dll): Use it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* target.h (target_ops) <read_btrace>: Change parameters and
+	return type to allow error reporting.
+	* server.c (handle_qxfer_btrace): Support delta reads.  Pass
+	trace reading errors on.
+	* linux-low.c (linux_low_read_btrace): Pass trace reading
+	errors on.
+	(linux_low_disable_btrace): New.
+
+2014-01-15  Doug Evans  <dje@google.com>
+
+	* inferiors.c (thread_id_to_gdb_id): Delete.
+	* inferiors.h (thread_id_to_gdb_id): Delete.
+
+2014-01-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (INCLUDE_CFLAGS): Remove trailing slash from
+	"-I$(srcdir)/../".  Fixes MinGW compilation errors with old GCC
+	versions.
+
+2014-01-08  Pedro Alves  <palves@redhat.com>
+
+	* server.c (handle_status): Don't discard previous queued stop
+	replies or thread's pending status here.
+	(main) <disconnection>: Do it here instead.
+
+2014-01-08  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (struct thread_info) <status_pending_p>: New field.
+	* server.c (visit_actioned_threads, handle_pending_status): New
+	function.
+	(handle_v_cont): Factor out parts to ...
+	(resume): ... this new function.  If in all-stop, and a thread
+	being resumed has a pending status, report it without actually
+	resuming.
+	(myresume): Adjust to use the new 'resume' function.
+	(clear_pending_status_callback, set_pending_status_callback)
+	(find_status_pending_thread_callback): New functions.
+	(handle_status): Handle the case of multiple threads having
+	interesting statuses to report.  Report threads' real last signal
+	instead of always reporting GDB_SIGNAL_TRAP.  Look for a thread
+	with an interesting thread to report the status for, instead of
+	always reporting the status of the first thread.
+
+2014-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbserver.c (gdbserver_version): Set copyright year to 2014.
+	* gdbreplay.c (gdbreplay_version): Likewise.
+
+2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* linux-aarch64-low.c (aarch64_linux_set_debug_regs): Set
+	iov.iov_len with the real length in use.
+
+2013-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (safe-ctype.o, lbasename.o): New rules.
+	* configure.srv: Add safe-ctype.o and lbasename.o to srv_tgtobj
+	for all targets that use win32-low.c.
+	* win32-low.c (win32_ensure_ntdll_loaded): New function.
+	(do_initial_child_stuff): Add call to win32_ensure_ntdll_loaded.
+
+2013-12-13  Pedro Alves  <palves@redhat.com>
+
+	* target.c (mywait): Set OURSTATUS->KIND to TARGET_WAITKIND_STOPPED
+	if equal to TARGET_WAITKIND_LOADED.
+	* win32-low.c (cached_status): New static global.
+	(win32_wait): Add declaration.
+	(do_initial_child_stuff): Flush all initial pending debug events
+	up to the initial breakpoint.
+	(win32_wait): If CACHED_STATUS was set, return that instead
+	of doing a real wait.  Remove the code resuming the execution
+	of the inferior after receiving a TARGET_WAITKIND_LOADED event
+	during the initial phase.  Also remove the code changing
+	OURSTATUS->KIND from TARGET_WAITKIND_LOADED to
+	TARGET_WAITKIND_STOPPED.
+
 2013-12-11  Yao Qi  <yao@codesourcery.com>
 
 	* notif.c (handle_notif_ack): Return 0 if no notification

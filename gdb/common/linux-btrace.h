@@ -1,6 +1,6 @@
 /* Linux-dependent part of branch trace support for GDB, and GDBserver.
 
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -61,17 +61,18 @@ struct btrace_target_info
   int ptr_bits;
 };
 
-/* Check whether branch tracing is supported.  */
+/* See to_supports_btrace in target.h.  */
 extern int linux_supports_btrace (void);
 
-/* Enable branch tracing for @ptid.  */
+/* See to_enable_btrace in target.h.  */
 extern struct btrace_target_info *linux_enable_btrace (ptid_t ptid);
 
-/* Disable branch tracing and deallocate @tinfo.  */
-extern int linux_disable_btrace (struct btrace_target_info *tinfo);
+/* See to_disable_btrace in target.h.  */
+extern enum btrace_error linux_disable_btrace (struct btrace_target_info *ti);
 
-/* Read branch trace data.  */
-extern VEC (btrace_block_s) *linux_read_btrace (struct btrace_target_info *,
-						enum btrace_read_type);
+/* See to_read_btrace in target.h.  */
+extern enum btrace_error linux_read_btrace (VEC (btrace_block_s) **btrace,
+					    struct btrace_target_info *btinfo,
+					    enum btrace_read_type type);
 
 #endif /* LINUX_BTRACE_H */

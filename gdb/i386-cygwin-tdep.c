@@ -1,6 +1,6 @@
 /* Target-dependent code for Cygwin running on i386's, for GDB.
 
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -171,7 +171,7 @@ out:
 static LONGEST
 windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 				  gdb_byte *readbuf,
-				  ULONGEST offset, LONGEST len)
+				  ULONGEST offset, ULONGEST len)
 {
   struct obstack obstack;
   const char *buf;

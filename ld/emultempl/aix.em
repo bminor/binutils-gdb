@@ -854,7 +854,7 @@ gld${EMULATION_NAME}_before_allocation (void)
       /* Remove this section from the list of the output section.
 	 This assumes we know what the script looks like.  */
       is = NULL;
-      os = lang_output_section_find (sec->output_section->name);
+      os = lang_output_section_get (sec->output_section);
       if (os == NULL)
 	einfo ("%P%F: can't find output section %s\n",
 	       sec->output_section->name);
@@ -1399,7 +1399,7 @@ static char *
 gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
-if test -n "$COMPILE_IN"
+if test x"$COMPILE_IN" = xyes
 then
 # Scripts compiled in.
 

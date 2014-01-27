@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -802,6 +802,21 @@ default_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
      parameter if the return value should be passed by reference, as
      specified in ABI.  */
   return language_pass_by_reference (type);
+}
+
+int default_insn_is_call (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return 0;
+}
+
+int default_insn_is_ret (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return 0;
+}
+
+int default_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return 0;
 }
 
 /* */

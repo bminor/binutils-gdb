@@ -1,6 +1,6 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -86,7 +86,7 @@ EXCEPTIONS_SIGJMP_BUF *
 exceptions_state_mc_init (volatile struct gdb_exception *exception,
 			  return_mask mask)
 {
-  struct catcher *new_catcher = XZALLOC (struct catcher);
+  struct catcher *new_catcher = XCNEW (struct catcher);
 
   /* Start with no exception, save it's address.  */
   exception->reason = 0;

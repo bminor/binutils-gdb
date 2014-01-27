@@ -1,5 +1,5 @@
 /* Vector API for GDB.
-   Copyright (C) 2004-2013 Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
    Contributed by Nathan Sidwell <nathan@codesourcery.com>
 
    This file is part of GDB.
@@ -398,7 +398,7 @@ extern void *vec_o_reserve (void *, int, size_t, size_t);
 #define VEC_ASSERT_PASS ,file_,line_
 #define vec_assert(expr, op) \
   ((void)((expr) ? 0 : (gdb_assert_fail (op, file_, line_, \
-					 ASSERT_FUNCTION), 0)))
+					 FUNCTION_NAME), 0)))
 
 #define VEC(T) VEC_##T
 #define VEC_OP(T,OP) VEC_##T##_##OP

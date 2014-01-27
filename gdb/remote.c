@@ -1,6 +1,6 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
 
-   Copyright (C) 1988-2013 Free Software Foundation, Inc.
+   Copyright (C) 1988-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,7 +46,6 @@
 #include "gdb_bfd.h"
 #include "filestuff.h"
 
-#include <ctype.h>
 #include <sys/time.h>
 
 #include "event-loop.h"
@@ -98,7 +97,8 @@ static void async_handle_remote_sigint_twice (int);
 
 static void remote_files_info (struct target_ops *ignore);
 
-static void remote_prepare_to_store (struct regcache *regcache);
+static void remote_prepare_to_store (struct target_ops *self,
+				     struct regcache *regcache);
 
 static void remote_open (char *name, int from_tty);
 
@@ -1562,7 +1562,18 @@ remote_add_inferior (int fake_pid_p, int pid, int attached)
 static void
 remote_add_thread (ptid_t ptid, int running)
 {
-  add_thread (ptid);
+  struct remote_state *rs = get_remote_state ();
+
+  /* GDB historically didn't pull threads in the initial connection
+     setup.  If the remote target doesn't even have a concept of
+     threads (e.g., a bare-metal target), even if internally we
+     consider that a single-threaded target, mentioning a new thread
+     might be confusing to the user.  Be silent then, preserving the
+     age old behavior.  */
+  if (rs->starting_up)
+    add_thread_silent (ptid);
+  else
+    add_thread (ptid);
 
   set_executing (ptid, running);
   set_running (ptid, running);
@@ -1640,9 +1651,15 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 
       /* If we found a new inferior, let the common code do whatever
 	 it needs to with it (e.g., read shared libraries, insert
-	 breakpoints).  */
+	 breakpoints), unless we're just setting up an all-stop
+	 connection.  */
       if (inf != NULL)
-	notice_new_inferior (currthread, running, 0);
+	{
+	  struct remote_state *rs = get_remote_state ();
+
+	  if (non_stop || !rs->starting_up)
+	    notice_new_inferior (currthread, running, 0);
+	}
     }
 }
 
@@ -3310,6 +3327,28 @@ stop_reply_extract_thread (char *stop_reply)
   return null_ptid;
 }
 
+/* Determine the remote side's current thread.  If we have a stop
+   reply handy (in WAIT_STATUS), maybe it's a T stop reply with a
+   "thread" register we can extract the current thread from.  If not,
+   ask the remote which is the current thread with qC.  The former
+   method avoids a roundtrip.  */
+
+static ptid_t
+get_current_thread (char *wait_status)
+{
+  ptid_t ptid;
+
+  /* Note we don't use remote_parse_stop_reply as that makes use of
+     the target architecture, which we haven't yet fully determined at
+     this point.  */
+  if (wait_status != NULL)
+    ptid = stop_reply_extract_thread (wait_status);
+  if (ptid_equal (ptid, null_ptid))
+    ptid = remote_current_thread (inferior_ptid);
+
+  return ptid;
+}
+
 /* Query the remote target for which is the current thread/process,
    add it to our tables, and update INFERIOR_PTID.  The caller is
    responsible for setting the state such that the remote end is ready
@@ -3330,18 +3369,8 @@ add_current_inferior_and_thread (char *wait_status)
 
   inferior_ptid = null_ptid;
 
-  /* Now, if we have thread information, update inferior_ptid.  First
-     if we have a stop reply handy, maybe it's a T stop reply with a
-     "thread" register we can extract the current thread from.  If
-     not, ask the remote which is the current thread, with qC.  The
-     former method avoids a roundtrip.  Note we don't use
-     remote_parse_stop_reply as that makes use of the target
-     architecture, which we haven't yet fully determined at this
-     point.  */
-  if (wait_status != NULL)
-    ptid = stop_reply_extract_thread (wait_status);
-  if (ptid_equal (ptid, null_ptid))
-    ptid = remote_current_thread (inferior_ptid);
+  /* Now, if we have thread information, update inferior_ptid.  */
+  ptid = get_current_thread (wait_status);
 
   if (!ptid_equal (ptid, null_ptid))
     {
@@ -3511,10 +3540,35 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	  strcpy (wait_status, rs->buf);
 	}
 
+      /* Fetch thread list.  */
+      target_find_new_threads ();
+
       /* Let the stub know that we want it to return the thread.  */
       set_continue_thread (minus_one_ptid);
 
-      add_current_inferior_and_thread (wait_status);
+      if (thread_count () == 0)
+	{
+	  /* Target has no concept of threads at all.  GDB treats
+	     non-threaded target as single-threaded; add a main
+	     thread.  */
+	  add_current_inferior_and_thread (wait_status);
+	}
+      else
+	{
+	  /* We have thread information; select the thread the target
+	     says should be current.  If we're reconnecting to a
+	     multi-threaded program, this will ideally be the thread
+	     that last reported an event before GDB disconnected.  */
+	  inferior_ptid = get_current_thread (wait_status);
+	  if (ptid_equal (inferior_ptid, null_ptid))
+	    {
+	      /* Odd... The target was able to list threads, but not
+		 tell us which thread was current (no "thread"
+		 register in T stop reply?).  Just pick the first
+		 thread in the thread list then.  */
+	      inferior_ptid = thread_list->ptid;
+	    }
+	}
 
       /* init_wait_for_inferior should be called before get_offsets in order
 	 to manage `inserted' flag in bp loc in a correct state.
@@ -5355,7 +5409,7 @@ static struct notif_event *
 remote_notif_stop_alloc_reply (void)
 {
   struct notif_event *r
-    = (struct notif_event *) XMALLOC (struct stop_reply);
+    = (struct notif_event *) XNEW (struct stop_reply);
 
   r->dtr = stop_reply_dtr;
 
@@ -6413,7 +6467,7 @@ remote_fetch_registers (struct target_ops *ops,
    first.  */
 
 static void
-remote_prepare_to_store (struct regcache *regcache)
+remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
@@ -6794,7 +6848,7 @@ check_binary_download (CORE_ADDR addr)
 
 static LONGEST
 remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
-			const gdb_byte *myaddr, ssize_t len,
+			const gdb_byte *myaddr, ULONGEST len,
 			char packet_format, int use_length)
 {
   struct remote_state *rs = get_remote_state ();
@@ -6811,7 +6865,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
     internal_error (__FILE__, __LINE__,
 		    _("remote_write_bytes_aux: bad packet format"));
 
-  if (len <= 0)
+  if (len == 0)
     return 0;
 
   payload_size = get_memory_write_packet_size ();
@@ -6949,7 +7003,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
    packet.  */
 
 static LONGEST
-remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
+remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len)
 {
   char *packet_format = 0;
 
@@ -6985,7 +7039,7 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
    target_xfer_error' value) for error.  */
 
 static LONGEST
-remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len)
 {
   struct remote_state *rs = get_remote_state ();
   int max_buf_size;		/* Max size of packet output buffer.  */
@@ -6993,7 +7047,7 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   int todo;
   int i;
 
-  if (len <= 0)
+  if (len == 0)
     return 0;
 
   max_buf_size = get_memory_read_packet_size ();
@@ -7819,7 +7873,7 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 static void
 remote_kill (struct target_ops *ops)
 {
-  struct gdb_exception ex;
+  volatile struct gdb_exception ex;
 
   /* Catch errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */
@@ -8077,8 +8131,9 @@ extended_remote_run (char *args)
    environment.  */
 
 static void
-extended_remote_create_inferior_1 (char *exec_file, char *args,
-				   char **env, int from_tty)
+extended_remote_create_inferior (struct target_ops *ops,
+				 char *exec_file, char *args,
+				 char **env, int from_tty)
 {
   int run_worked;
   char *stop_reply;
@@ -8123,14 +8178,6 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
 
   /* Get updated offsets, if the stub uses qOffsets.  */
   get_offsets ();
-}
-
-static void
-extended_remote_create_inferior (struct target_ops *ops, 
-				 char *exec_file, char *args,
-				 char **env, int from_tty)
-{
-  extended_remote_create_inferior_1 (exec_file, args, env, from_tty);
 }
 
 
@@ -8204,7 +8251,8 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
    which don't, we insert a traditional memory breakpoint.  */
 
 static int
-remote_insert_breakpoint (struct gdbarch *gdbarch,
+remote_insert_breakpoint (struct target_ops *ops,
+			  struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   /* Try the "Z" s/w breakpoint packet if it is not already disabled.
@@ -8260,11 +8308,18 @@ remote_insert_breakpoint (struct gdbarch *gdbarch,
 	}
     }
 
-  return memory_insert_breakpoint (gdbarch, bp_tgt);
+  /* If this breakpoint has target-side commands but this stub doesn't
+     support Z0 packets, throw error.  */
+  if (!VEC_empty (agent_expr_p, bp_tgt->tcommands))
+    throw_error (NOT_SUPPORTED_ERROR, _("\
+Target doesn't support breakpoints that have target side commands."));
+
+  return memory_insert_breakpoint (ops, gdbarch, bp_tgt);
 }
 
 static int
-remote_remove_breakpoint (struct gdbarch *gdbarch,
+remote_remove_breakpoint (struct target_ops *ops,
+			  struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
@@ -8294,7 +8349,7 @@ remote_remove_breakpoint (struct gdbarch *gdbarch,
       return (rs->buf[0] == 'E');
     }
 
-  return memory_remove_breakpoint (gdbarch, bp_tgt);
+  return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
 }
 
 static int
@@ -8803,7 +8858,7 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
 static LONGEST
 remote_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   struct remote_state *rs;
   int i;
@@ -11427,13 +11482,14 @@ remote_teardown_btrace (struct btrace_target_info *tinfo)
 
 /* Read the branch trace.  */
 
-static VEC (btrace_block_s) *
-remote_read_btrace (struct btrace_target_info *tinfo,
+static enum btrace_error
+remote_read_btrace (VEC (btrace_block_s) **btrace,
+		    struct btrace_target_info *tinfo,
 		    enum btrace_read_type type)
 {
   struct packet_config *packet = &remote_protocol_packets[PACKET_qXfer_btrace];
   struct remote_state *rs = get_remote_state ();
-  VEC (btrace_block_s) *btrace = NULL;
+  struct cleanup *cleanup;
   const char *annex;
   char *xml;
 
@@ -11446,11 +11502,14 @@ remote_read_btrace (struct btrace_target_info *tinfo,
 
   switch (type)
     {
-    case btrace_read_all:
+    case BTRACE_READ_ALL:
       annex = "all";
       break;
-    case btrace_read_new:
+    case BTRACE_READ_NEW:
       annex = "new";
+      break;
+    case BTRACE_READ_DELTA:
+      annex = "delta";
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -11460,15 +11519,14 @@ remote_read_btrace (struct btrace_target_info *tinfo,
 
   xml = target_read_stralloc (&current_target,
                               TARGET_OBJECT_BTRACE, annex);
-  if (xml != NULL)
-    {
-      struct cleanup *cleanup = make_cleanup (xfree, xml);
+  if (xml == NULL)
+    return BTRACE_ERR_UNKNOWN;
 
-      btrace = parse_xml_btrace (xml);
-      do_cleanups (cleanup);
-    }
+  cleanup = make_cleanup (xfree, xml);
+  *btrace = parse_xml_btrace (xml);
+  do_cleanups (cleanup);
 
-  return btrace;
+  return BTRACE_ERR_NONE;
 }
 
 static int

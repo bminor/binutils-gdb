@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright 1994-2013 Free Software Foundation, Inc.
+#   Copyright 1994-2014 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -293,6 +293,10 @@ proc default_ld_compile { cc source object } {
 	set flags "$flags $CXXFLAGS"
     } else {
 	set flags "$flags $CFLAGS"
+    }
+
+    if [board_info [target_info name] exists cflags] {
+        append flags " [board_info [target_info name] cflags]"
     }
 
     if [board_info [target_info name] exists multilib_flags] {
@@ -1596,6 +1600,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget moxie-*-*]
 	 && ![istarget msp430-*-*]
 	 && ![istarget mt-*-*]
+	 && ![istarget nds32*-*-*]
 	 && ![istarget openrisc-*-*]
 	 && ![istarget or32-*-*]
 	 && ![istarget pj-*-*]
@@ -1631,6 +1636,17 @@ proc check_plugin_api_available { } {
 proc check_lto_available { } {
     global lto_available_saved
     global CC
+
+    set flags ""
+
+    if [board_info [target_info name] exists cflags] {
+        append flags " [board_info [target_info name] cflags]"
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+        append flags " [board_info [target_info name] ldflags]"
+    }
+
     if {![info exists lto_available_saved]} {
 	# Check if gcc supports -flto -fuse-linker-plugin
 	if { [which $CC] == 0 } {
@@ -1639,11 +1655,11 @@ proc check_lto_available { } {
 	}
 	set basename "lto"
 	set src ${basename}[pid].c
-	set output ${basename}[pid].so
+	set output ${basename}[pid].out
 	set f [open $src "w"]
-	puts $f ""
+	puts $f "int main() { return 0; }"
 	close $f
-	set status [remote_exec host $CC "-shared -B[pwd]/tmpdir/ld/ -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
+	set status [remote_exec host $CC "$flags -B[pwd]/tmpdir/ld/ -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
 	if { [lindex $status 0] == 0 } {
 	    set lto_available_saved 1
 	} else {
@@ -1653,6 +1669,45 @@ proc check_lto_available { } {
 	file delete $output
     }
     return $lto_available_saved
+}
+
+# Returns true if the target compiler supports LTO and -shared
+proc check_lto_shared_available { } {
+    global lto_shared_available_saved
+    global CC
+
+    set flags ""
+
+    if [board_info [target_info name] exists cflags] {
+        append flags " [board_info [target_info name] cflags]"
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+        append flags " [board_info [target_info name] ldflags]"
+    }
+
+    if {![info exists lto_shared_available_saved]} {
+	# Check if gcc supports -flto -fuse-linker-plugin -shared
+	if { [which $CC] == 0 } {
+	    set lto_shared_available_saved 0
+	    return 0
+	}
+	set basename "lto_shared"
+	set src ${basename}[pid].c
+	set output ${basename}[pid].so
+	set f [open $src "w"]
+	puts $f ""
+	close $f
+	set status [remote_exec host $CC "$flags -shared -fPIC -B[pwd]/tmpdir/ld/ -flto -fuse-linker-plugin $src -o $output"]
+	if { [lindex $status 0] == 0 } {
+	    set lto_shared_available_saved 1
+	} else {
+	    set lto_shared_available_saved 0
+	}
+	file delete $src
+	file delete $output
+    }
+    return $lto_shared_available_saved
 }
 
 # Check if the assembler supports CFI statements.

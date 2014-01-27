@@ -1,5 +1,5 @@
 /* Interface GDB to the GNU Hurd.
-   Copyright (C) 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -87,7 +87,7 @@ int gnu_debug_flag = 0;
 
 /* Forward decls */
 
-struct inf *make_inf ();
+static struct inf *make_inf ();
 void inf_clear_wait (struct inf *inf);
 void inf_cleanup (struct inf *inf);
 void inf_startup (struct inf *inf, int pid);
@@ -96,7 +96,6 @@ void inf_set_pid (struct inf *inf, pid_t pid);
 void inf_validate_procs (struct inf *inf);
 void inf_steal_exc_ports (struct inf *inf);
 void inf_restore_exc_ports (struct inf *inf);
-struct proc *inf_tid_to_proc (struct inf *inf, int tid);
 void inf_set_threads_resume_sc (struct inf *inf,
 				struct proc *run_thread,
 				int run_others);
@@ -638,7 +637,7 @@ _proc_free (struct proc *proc)
 }
 
 
-struct inf *
+static struct inf *
 make_inf (void)
 {
   struct inf *inf = xmalloc (sizeof (struct inf));
@@ -874,7 +873,7 @@ inf_validate_task_sc (struct inf *inf)
    is.  If INF is running, the resume_sc count of INF's threads will
    be modified, and the signal thread will briefly be run to change
    the trace state.  */
-void
+static void
 inf_set_traced (struct inf *inf, int on)
 {
   if (on == inf->traced)
@@ -975,7 +974,7 @@ inf_tid_to_thread (struct inf *inf, int tid)
 }
 
 /* Converts a thread port to a struct proc.  */
-struct proc *
+static struct proc *
 inf_port_to_thread (struct inf *inf, mach_port_t port)
 {
   struct proc *thread = inf->threads;
@@ -1743,7 +1742,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 
 /* Fill in INF's wait field after a task has died without giving us more
    detailed information.  */
-void
+static void
 inf_task_died_status (struct inf *inf)
 {
   warning (_("Pid %d died with unknown exit status, using SIGKILL."),
@@ -2104,7 +2103,7 @@ gnu_create_inferior (struct target_ops *ops,
   struct inf *inf = cur_inf ();
   int pid;
 
-  void trace_me ()
+  void trace_me (void)
   {
     /* We're in the child; make this process stop as soon as it execs.  */
     inf_debug (inf, "tracing self");
@@ -2478,7 +2477,7 @@ out:
 
 static LONGEST
 gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
-		 CORE_ADDR memaddr, LONGEST len)
+		 CORE_ADDR memaddr, ULONGEST len)
 {
   task_t task = (gnu_current_inf
 		 ? (gnu_current_inf->task
@@ -2492,14 +2491,14 @@ gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
   if (writebuf != NULL)
     {
       inf_debug (gnu_current_inf, "writing %s[%s] <-- %s",
-		 paddress (target_gdbarch (), memaddr), plongest (len),
+		 paddress (target_gdbarch (), memaddr), pulongest (len),
 		 host_address_to_string (writebuf));
       res = gnu_write_inferior (task, memaddr, writebuf, len);
     }
   else
     {
       inf_debug (gnu_current_inf, "reading %s[%s] --> %s",
-		 paddress (target_gdbarch (), memaddr), plongest (len),
+		 paddress (target_gdbarch (), memaddr), pulongest (len),
 		 host_address_to_string (readbuf));
       res = gnu_read_inferior (task, memaddr, readbuf, len);
     }
@@ -2513,7 +2512,7 @@ gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 static LONGEST
 gnu_xfer_partial (struct target_ops *ops, enum target_object object,
 		  const char *annex, gdb_byte *readbuf,
-		  const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   switch (object)
     {
@@ -3003,9 +3002,8 @@ set_exceptions_cmd (char *args, int from_tty)
   struct inf *inf = cur_inf ();
   int val = parse_bool_arg (args, "set exceptions");
 
-  if (inf->task && inf->want_exceptions != val)
-    /* Make this take effect immediately in a running process.  */
-    /* XXX */ ;
+  /* Make this take effect immediately in a running process.  */
+  /* XXX */ ;
 
   inf->want_exceptions = val;
 }
@@ -3071,7 +3069,7 @@ set_noninvasive_cmd (char *args, int from_tty)
 
 
 static void
-info_port_rights (char *args, mach_port_type_t only)
+info_port_rights (const char *args, mach_port_type_t only)
 {
   struct inf *inf = active_inf ();
   struct value *vmark = value_mark ();
@@ -3439,6 +3437,10 @@ to the thread's initial suspend-count when gdb notices the threads."),
 }
 
 
+
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_gnu_nat;
+
 void
 _initialize_gnu_nat (void)
 {

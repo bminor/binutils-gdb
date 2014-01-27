@@ -1,6 +1,6 @@
 /* Work with executable files, for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -75,7 +75,7 @@ extern VEC(mem_range_s) *
    One, and only one, of readbuf or writebuf must be non-NULL.  */
 
 extern int section_table_xfer_memory_partial (gdb_byte *, const gdb_byte *,
-					      ULONGEST, LONGEST,
+					      ULONGEST, ULONGEST,
 					      struct target_section *,
 					      struct target_section *,
 					      const char *);

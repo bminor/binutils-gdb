@@ -3,7 +3,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -91,10 +91,10 @@ typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
 extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbarch);
 /* set_gdbarch_bfd_arch_info() - not applicable - pre-initialized.  */
 
-extern int gdbarch_byte_order (struct gdbarch *gdbarch);
+extern enum bfd_endian gdbarch_byte_order (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order() - not applicable - pre-initialized.  */
 
-extern int gdbarch_byte_order_for_code (struct gdbarch *gdbarch);
+extern enum bfd_endian gdbarch_byte_order_for_code (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order_for_code() - not applicable - pre-initialized.  */
 
 extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
@@ -694,6 +694,10 @@ typedef const char * (gdbarch_address_class_type_flags_to_name_ftype) (struct gd
 extern const char * gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags);
 extern void set_gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name);
 
+/* Return the appropriate type_flags for the supplied address class.
+   This function should return 1 if the address class was recognized and
+   type_flags was set, zero otherwise. */
+
 extern int gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch);
 
 typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, const char *name, int *type_flags_ptr);
@@ -761,8 +765,8 @@ extern void set_gdbarch_find_memory_regions (struct gdbarch *gdbarch, gdbarch_fi
 
 extern int gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch);
 
-typedef LONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
-extern LONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
+typedef LONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern LONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries);
 
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES_AIX formatted shared
@@ -770,8 +774,8 @@ extern void set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb
 
 extern int gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch);
 
-typedef LONGEST (gdbarch_core_xfer_shared_libraries_aix_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
-extern LONGEST gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
+typedef LONGEST (gdbarch_core_xfer_shared_libraries_aix_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern LONGEST gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix);
 
 /* How the core target converts a PTID from a core file to a string. */
@@ -1034,37 +1038,42 @@ extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid)
 extern void set_gdbarch_get_syscall_number (struct gdbarch *gdbarch, gdbarch_get_syscall_number_ftype *get_syscall_number);
 
 /* SystemTap related fields and functions.
-   Prefix used to mark an integer constant on the architecture's assembly
+   A NULL-terminated array of prefixes used to mark an integer constant
+   on the architecture's assembly.
    For example, on x86 integer constants are written as:
   
     $10 ;; integer constant 10
   
    in this case, this prefix would be the character `$'. */
 
-extern const char * gdbarch_stap_integer_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_integer_prefix (struct gdbarch *gdbarch, const char * stap_integer_prefix);
+extern const char *const * gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch, const char *const * stap_integer_prefixes);
 
-/* Suffix used to mark an integer constant on the architecture's assembly. */
+/* A NULL-terminated array of suffixes used to mark an integer constant
+   on the architecture's assembly. */
 
-extern const char * gdbarch_stap_integer_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_integer_suffix (struct gdbarch *gdbarch, const char * stap_integer_suffix);
+extern const char *const * gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch, const char *const * stap_integer_suffixes);
 
-/* Prefix used to mark a register name on the architecture's assembly.
+/* A NULL-terminated array of prefixes used to mark a register name on
+   the architecture's assembly.
    For example, on x86 the register name is written as:
   
     %eax ;; register eax
   
    in this case, this prefix would be the character `%'. */
 
-extern const char * gdbarch_stap_register_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_prefix (struct gdbarch *gdbarch, const char * stap_register_prefix);
+extern const char *const * gdbarch_stap_register_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_prefixes (struct gdbarch *gdbarch, const char *const * stap_register_prefixes);
 
-/* Suffix used to mark a register name on the architecture's assembly */
+/* A NULL-terminated array of suffixes used to mark a register name on
+   the architecture's assembly. */
 
-extern const char * gdbarch_stap_register_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_suffix (struct gdbarch *gdbarch, const char * stap_register_suffix);
+extern const char *const * gdbarch_stap_register_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_suffixes (struct gdbarch *gdbarch, const char *const * stap_register_suffixes);
 
-/* Prefix used to mark a register indirection on the architecture's assembly.
+/* A NULL-terminated array of prefixes used to mark a register
+   indirection on the architecture's assembly.
    For example, on x86 the register indirection is written as:
   
     (%eax) ;; indirecting eax
@@ -1074,10 +1083,11 @@ extern void set_gdbarch_stap_register_suffix (struct gdbarch *gdbarch, const cha
    Please note that we use the indirection prefix also for register
    displacement, e.g., `4(%eax)' on x86. */
 
-extern const char * gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch, const char * stap_register_indirection_prefix);
+extern const char *const * gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch, const char *const * stap_register_indirection_prefixes);
 
-/* Suffix used to mark a register indirection on the architecture's assembly.
+/* A NULL-terminated array of suffixes used to mark a register
+   indirection on the architecture's assembly.
    For example, on x86 the register indirection is written as:
   
     (%eax) ;; indirecting eax
@@ -1087,10 +1097,10 @@ extern void set_gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarc
    Please note that we use the indirection suffix also for register
    displacement, e.g., `4(%eax)' on x86. */
 
-extern const char * gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch, const char * stap_register_indirection_suffix);
+extern const char *const * gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch, const char *const * stap_register_indirection_suffixes);
 
-/* Prefix used to name a register using GDB's nomenclature.
+/* Prefix(es) used to name a register using GDB's nomenclature.
   
    For example, on PPC a register is represented by a number in the assembly
    language (e.g., `10' is the 10th general-purpose register).  However,
@@ -1261,6 +1271,24 @@ extern void set_gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *g
 extern struct ravenscar_arch_ops * gdbarch_ravenscar_ops (struct gdbarch *gdbarch);
 extern void set_gdbarch_ravenscar_ops (struct gdbarch *gdbarch, struct ravenscar_arch_ops * ravenscar_ops);
 
+/* Return non-zero if the instruction at ADDR is a call; zero otherwise. */
+
+typedef int (gdbarch_insn_is_call_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_insn_is_call (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_insn_is_call (struct gdbarch *gdbarch, gdbarch_insn_is_call_ftype *insn_is_call);
+
+/* Return non-zero if the instruction at ADDR is a return; zero otherwise. */
+
+typedef int (gdbarch_insn_is_ret_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_insn_is_ret (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_insn_is_ret (struct gdbarch *gdbarch, gdbarch_insn_is_ret_ftype *insn_is_ret);
+
+/* Return non-zero if the instruction at ADDR is a jump; zero otherwise. */
+
+typedef int (gdbarch_insn_is_jump_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_insn_is_jump (struct gdbarch *gdbarch, gdbarch_insn_is_jump_ftype *insn_is_jump);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 
@@ -1336,9 +1364,9 @@ struct gdbarch_info
   const struct bfd_arch_info *bfd_arch_info;
 
   /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
-  int byte_order;
+  enum bfd_endian byte_order;
 
-  int byte_order_for_code;
+  enum bfd_endian byte_order_for_code;
 
   /* Use default: NULL (ZERO).  */
   bfd *abfd;

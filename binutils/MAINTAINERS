@@ -109,6 +109,8 @@ responsibility among the other maintainers.
   MN10300	   Alexandre Oliva <aoliva@redhat.com>
   Moxie		   Anthony Green <green@moxielogic.com>
   MSP430	   Dmitry Diky <diwil@spec.ru>
+  NDS32		   Kuan-Lin Chen <kuanlinchentw@gmail.com>
+  NDS32		   Wei-Cheng Wang <cole945@gmail.com>
   NetBSD support   Matt Thomas <matt@netbsd.org>
   Nios II	   Sandra Loosemore <sandra@codesourcery.com>
   Nios II	   Andrew Jenner <andrew@codesourcery.com>

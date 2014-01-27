@@ -1,5 +1,5 @@
 /* UI_FILE - a generic STDIO like output stream.
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,7 +57,7 @@ static int tui_file_magic;
 static struct ui_file *
 tui_file_new (void)
 {
-  struct tui_stream *tui = XMALLOC (struct tui_stream);
+  struct tui_stream *tui = XNEW (struct tui_stream);
   struct ui_file *file = ui_file_new ();
 
   set_ui_file_data (file, tui, tui_file_delete);

@@ -82,7 +82,7 @@ static unsigned long tic4x_oplevel = 0;   /* Opcode level */
 #define OPTION_ENHANCED (OPTION_MD_BASE + 7)
 #define OPTION_REV      (OPTION_MD_BASE + 8)
 
-CONST char *md_shortopts = "bm:prs";
+const char *md_shortopts = "bm:prs";
 struct option md_longopts[] =
 {
   { "mcpu",   required_argument, NULL, OPTION_CPU },

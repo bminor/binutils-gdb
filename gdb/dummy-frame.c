@@ -1,6 +1,6 @@
 /* Code dealing with dummy stack frames, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -56,7 +56,7 @@ dummy_frame_push (struct infcall_suspend_state *caller_state,
 {
   struct dummy_frame *dummy_frame;
 
-  dummy_frame = XZALLOC (struct dummy_frame);
+  dummy_frame = XCNEW (struct dummy_frame);
   dummy_frame->caller_state = caller_state;
   dummy_frame->id = (*dummy_id);
   dummy_frame->next = dummy_frame_stack;

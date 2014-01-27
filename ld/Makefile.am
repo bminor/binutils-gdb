@@ -397,6 +397,12 @@ ALL_EMULATION_SOURCES = \
 	emsp430xW425.c \
 	emsp430xW427.c \
 	emsp430X.c \
+	ends32elf.c \
+	ends32elf16m.c \
+	ends32elf_linux.c \
+	ends32belf.c \
+	ends32belf16m.c \
+	ends32belf_linux.c \
 	enews.c \
 	ens32knbsd.c \
 	eor32.c \
@@ -1753,6 +1759,30 @@ emsp430X.c: $(srcdir)/emulparams/msp430all.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} msp430X "$(tdir_msp430X)" msp430all
+ends32elf.c: $(srcdir)/emulparams/nds32elf.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} nds32elf "$(tdir_nds32)"
+ends32elf16m.c: $(srcdir)/emulparams/nds32elf16m.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} nds32elf16m "$(tdir_nds32)"
+ends32belf.c: $(srcdir)/emulparams/nds32belf.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} nds32belf "$(tdir_nds32belf)"
+ends32belf16m.c: $(srcdir)/emulparams/nds32belf16m.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} nds32belf16m "$(tdir_nds32belf)"
+ends32elf_linux.c: $(srcdir)/emulparams/nds32elf_linux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} nds32elf_linux "$(tdir_nds32elf_linux)"
+ends32belf_linux.c: $(srcdir)/emulparams/nds32belf_linux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} nds32belf_linux "$(tdir_nds32belf_linux)"
 enews.c: $(srcdir)/emulparams/news.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} news "$(tdir_news)"

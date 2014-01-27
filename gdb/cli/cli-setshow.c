@@ -1,6 +1,6 @@
 /* Handle set and show GDB commands.
 
-   Copyright (C) 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -452,8 +452,6 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
       error (_("gdb internal error: bad var_type in do_setshow_command"));
     }
   c->func (c, NULL, from_tty);
-  if (deprecated_set_hook)
-    deprecated_set_hook (c);
 
   if (notify_command_param_changed_p (option_changed, c))
     {

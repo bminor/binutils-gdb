@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -337,9 +337,7 @@ ia64_hpux_store_registers (struct target_ops *ops,
    need to be handled manually.  So we override this routine and
    delegate back if we detect that we are not in a special case.  */
 
-static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
-				      const char *, gdb_byte *,
-				      const gdb_byte *, ULONGEST, LONGEST);
+static target_xfer_partial_ftype *super_xfer_partial;
 
 /* The "xfer_partial" routine for a memory region that is completely
    outside of the backing-store region.  */
@@ -522,7 +520,7 @@ ia64_hpux_get_register_from_save_state_t (int regnum, int reg_size)
 static LONGEST
 ia64_hpux_xfer_memory (struct target_ops *ops, const char *annex,
 		       gdb_byte *readbuf, const gdb_byte *writebuf,
-		       CORE_ADDR addr, LONGEST len)
+		       CORE_ADDR addr, ULONGEST len)
 {
   CORE_ADDR bsp, bspstore;
   CORE_ADDR start_addr, short_len;
@@ -645,7 +643,7 @@ ia64_hpux_xfer_uregs (struct target_ops *ops, const char *annex,
 static LONGEST
 ia64_hpux_xfer_solib_got (struct target_ops *ops, const char *annex,
 			  gdb_byte *readbuf, const gdb_byte *writebuf,
-			  ULONGEST offset, LONGEST len)
+			  ULONGEST offset, ULONGEST len)
 {
   CORE_ADDR fun_addr;
   /* The linkage pointer.  We use a uint64_t to make sure that the size
@@ -675,7 +673,7 @@ ia64_hpux_xfer_solib_got (struct target_ops *ops, const char *annex,
 static LONGEST
 ia64_hpux_xfer_partial (struct target_ops *ops, enum target_object object,
 			const char *annex, gdb_byte *readbuf,
-			const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+			const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   LONGEST val;
 

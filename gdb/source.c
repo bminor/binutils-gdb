@@ -1,5 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -574,17 +574,33 @@ add_path (char *dirname, char **which_path, int parse_separators)
 	char tinybuf[2];
 
 	p = *which_path;
-	/* FIXME: we should use realpath() or its work-alike
-	   before comparing.  Then all the code above which
-	   removes excess slashes and dots could simply go away.  */
-	if (!filename_cmp (p, name))
+	while (1)
 	  {
-	    /* Found it in the search path, remove old copy.  */
-	    if (p > *which_path)
-	      p--;		/* Back over leading separator.  */
-	    if (prefix > p - *which_path)
-	      goto skip_dup;	/* Same dir twice in one cmd.  */
-	    memmove (p, &p[len + 1], strlen (&p[len + 1]) + 1);	/* Copy from next \0 or  : */
+	    /* FIXME: we should use realpath() or its work-alike
+	       before comparing.  Then all the code above which
+	       removes excess slashes and dots could simply go away.  */
+	    if (!filename_ncmp (p, name, len)
+		&& (p[len] == '\0' || p[len] == DIRNAME_SEPARATOR))
+	      {
+		/* Found it in the search path, remove old copy.  */
+		if (p > *which_path)
+		  {
+		    /* Back over leading separator.  */
+		    p--;
+		  }
+		if (prefix > p - *which_path)
+		  {
+		    /* Same dir twice in one cmd.  */
+		    goto skip_dup;
+		  }
+		/* Copy from next '\0' or ':'.  */
+		memmove (p, &p[len + 1], strlen (&p[len + 1]) + 1);
+	      }
+	    p = strchr (p, DIRNAME_SEPARATOR);
+	    if (p != 0)
+	      ++p;
+	    else
+	      break;
 	  }
 
 	tinybuf[0] = DIRNAME_SEPARATOR;

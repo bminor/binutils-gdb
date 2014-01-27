@@ -1,6 +1,6 @@
 /* Remote debugging interface for boot monitors, for GDB.
 
-   Copyright (C) 1990-2013 Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Rob Savoye for Cygnus.
    Resurrected from the ashes by Stu Grossman.
@@ -1427,7 +1427,7 @@ monitor_store_registers (struct target_ops *ops,
    debugged.  */
 
 static void
-monitor_prepare_to_store (struct regcache *regcache)
+monitor_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs.  */
 }
@@ -2020,7 +2020,7 @@ monitor_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 
 static LONGEST
 monitor_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST memaddr, LONGEST len)
+		     ULONGEST memaddr, ULONGEST len)
 {
   int res;
 
@@ -2046,7 +2046,7 @@ monitor_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 static LONGEST
 monitor_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   switch (object)
     {
@@ -2095,7 +2095,7 @@ monitor_mourn_inferior (struct target_ops *ops)
 /* Tell the monitor to add a breakpoint.  */
 
 static int
-monitor_insert_breakpoint (struct gdbarch *gdbarch,
+monitor_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
@@ -2132,7 +2132,7 @@ monitor_insert_breakpoint (struct gdbarch *gdbarch,
 /* Tell the monitor to remove a breakpoint.  */
 
 static int
-monitor_remove_breakpoint (struct gdbarch *gdbarch,
+monitor_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;

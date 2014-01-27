@@ -1,6 +1,6 @@
 /* Ada language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,9 +44,7 @@
 #include "ada-lang.h"
 #include "completer.h"
 #include <sys/stat.h>
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 #include "block.h"
 #include "infcall.h"
 #include "dictionary.h"
@@ -64,7 +62,6 @@
 #include "value.h"
 #include "mi/mi-common.h"
 #include "arch-utils.h"
-#include "exceptions.h"
 #include "cli/cli-utils.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
@@ -359,7 +356,7 @@ get_ada_inferior_data (struct inferior *inf)
   data = inferior_data (inf, ada_inferior_data);
   if (data == NULL)
     {
-      data = XZALLOC (struct ada_inferior_data);
+      data = XCNEW (struct ada_inferior_data);
       set_inferior_data (inf, ada_inferior_data, data);
     }
 
@@ -2788,9 +2785,9 @@ ada_index_type (struct type *type, int n, const char *name)
    by run-time quantities other than discriminants.  */
 
 static LONGEST
-ada_array_bound_from_type (struct type * arr_type, int n, int which)
+ada_array_bound_from_type (struct type *arr_type, int n, int which)
 {
-  struct type *type, *elt_type, *index_type_desc, *index_type;
+  struct type *type, *index_type_desc, *index_type;
   int i;
 
   gdb_assert (which == 0 || which == 1);
@@ -2806,17 +2803,20 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which)
   else
     type = arr_type;
 
-  elt_type = type;
-  for (i = n; i > 1; i--)
-    elt_type = TYPE_TARGET_TYPE (type);
-
   index_type_desc = ada_find_parallel_type (type, "___XA");
   ada_fixup_array_indexes_type (index_type_desc);
   if (index_type_desc != NULL)
     index_type = to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, n - 1),
 				      NULL);
   else
-    index_type = TYPE_INDEX_TYPE (elt_type);
+    {
+      struct type *elt_type = check_typedef (type);
+
+      for (i = 1; i < n; i++)
+	elt_type = check_typedef (TYPE_TARGET_TYPE (elt_type));
+
+      index_type = TYPE_INDEX_TYPE (elt_type);
+    }
 
   return
     (LONGEST) (which == 0
@@ -5864,7 +5864,7 @@ symbol_completion_add (VEC(char_ptr) **sv,
 }
 
 /* An object of this type is passed as the user_data argument to the
-   expand_partial_symbol_names method.  */
+   expand_symtabs_matching method.  */
 struct add_partial_datum
 {
   VEC(char_ptr) **completions;
@@ -5876,9 +5876,10 @@ struct add_partial_datum
   int encoded;
 };
 
-/* A callback for expand_partial_symbol_names.  */
+/* A callback for expand_symtabs_matching.  */
+
 static int
-ada_expand_partial_symbol_name (const char *name, void *user_data)
+ada_complete_symbol_matcher (const char *name, void *user_data)
 {
   struct add_partial_datum *data = user_data;
   
@@ -5944,7 +5945,8 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     data.word = word;
     data.wild_match = wild_match_p;
     data.encoded = encoded_p;
-    expand_partial_symbol_names (ada_expand_partial_symbol_name, &data);
+    expand_symtabs_matching (NULL, ada_complete_symbol_matcher, ALL_DOMAIN,
+			     &data);
   }
 
   /* At this point scan through the misc symbol vectors and add each
@@ -12511,11 +12513,8 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
   struct objfile *objfile;
   struct symtab *s;
 
-  ALL_OBJFILES (objfile)
-    if (objfile->sf)
-      objfile->sf->qf->expand_symtabs_matching
-	(objfile, NULL, ada_exc_search_name_matches,
-	 VARIABLES_DOMAIN, preg);
+  expand_symtabs_matching (NULL, ada_exc_search_name_matches,
+			   VARIABLES_DOMAIN, preg);
 
   ALL_PRIMARY_SYMTABS (objfile, s)
     {

@@ -123,6 +123,8 @@ _bfd_delete_bfd (bfd *abfd)
       objalloc_free ((struct objalloc *) abfd->memory);
     }
 
+  if (abfd->filename)
+    free ((char *) abfd->filename);
   free (abfd->arelt_data);
   free (abfd);
 }
@@ -181,6 +183,9 @@ DESCRIPTION
 	<<system_call>> error.
 
 	On error, @var{fd} is always closed.
+
+	A copy of the @var{filename} argument is stored in the newly created
+	BFD.  It can be accessed via the bfd_get_filename() macro.
 */
 
 bfd *
@@ -220,7 +225,10 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
     }
 
   /* OK, put everything where it belongs.  */
-  nbfd->filename = filename;
+
+  /* PR 11983: Do not cache the original filename, but
+     rather make a copy - the original might go away.  */
+  nbfd->filename = xstrdup (filename);
 
   /* Figure out whether the user is opening the file for reading,
      writing, or both, by looking at the MODE argument.  */
@@ -266,6 +274,9 @@ DESCRIPTION
 	If <<NULL>> is returned then an error has occured.   Possible errors
 	are <<bfd_error_no_memory>>, <<bfd_error_invalid_target>> or
 	<<system_call>> error.
+
+	A copy of the @var{filename} argument is stored in the newly created
+	BFD.  It can be accessed via the bfd_get_filename() macro.
 */
 
 bfd *
@@ -307,6 +318,9 @@ DESCRIPTION
 	<<bfd_error_invalid_target>> and <<bfd_error_system_call>>.
 
 	On error, @var{fd} is closed.
+
+	A copy of the @var{filename} argument is stored in the newly created
+	BFD.  It can be accessed via the bfd_get_filename() macro.
 */
 
 bfd *
@@ -349,12 +363,15 @@ FUNCTION
 	bfd_openstreamr
 
 SYNOPSIS
-	bfd *bfd_openstreamr (const char *, const char *, void *);
+	bfd *bfd_openstreamr (const char * filename, const char * target, void * stream);
 
 DESCRIPTION
 
 	Open a BFD for read access on an existing stdio stream.  When
 	the BFD is passed to <<bfd_close>>, the stream will be closed.
+
+	A copy of the @var{filename} argument is stored in the newly created
+	BFD.  It can be accessed via the bfd_get_filename() macro.
 */
 
 bfd *
@@ -376,7 +393,9 @@ bfd_openstreamr (const char *filename, const char *target, void *streamarg)
     }
 
   nbfd->iostream = stream;
-  nbfd->filename = filename;
+  /* PR 11983: Do not cache the original filename, but
+     rather make a copy - the original might go away.  */
+  nbfd->filename = xstrdup (filename);
   nbfd->direction = read_direction;
 
   if (! bfd_cache_init (nbfd))
@@ -441,6 +460,8 @@ DESCRIPTION
 	occurred.  Possible errors are <<bfd_error_no_memory>>,
 	<<bfd_error_invalid_target>> and <<bfd_error_system_call>>.
 
+	A copy of the @var{filename} argument is stored in the newly created
+	BFD.  It can be accessed via the bfd_get_filename() macro.
 */
 
 struct opncls
@@ -566,7 +587,9 @@ bfd_openr_iovec (const char *filename, const char *target,
       return NULL;
     }
 
-  nbfd->filename = filename;
+  /* PR 11983: Do not cache the original filename, but
+     rather make a copy - the original might go away.  */
+  nbfd->filename = xstrdup (filename);
   nbfd->direction = read_direction;
 
   /* `open_p (...)' would get expanded by an the open(2) syscall macro.  */
@@ -607,6 +630,9 @@ DESCRIPTION
 
 	Possible errors are <<bfd_error_system_call>>, <<bfd_error_no_memory>>,
 	<<bfd_error_invalid_target>>.
+
+	A copy of the @var{filename} argument is stored in the newly created
+	BFD.  It can be accessed via the bfd_get_filename() macro.
 */
 
 bfd *
@@ -628,7 +654,9 @@ bfd_openw (const char *filename, const char *target)
       return NULL;
     }
 
-  nbfd->filename = filename;
+  /* PR 11983: Do not cache the original filename, but
+     rather make a copy - the original might go away.  */
+  nbfd->filename = xstrdup (filename);
   nbfd->direction = write_direction;
 
   if (bfd_open_file (nbfd) == NULL)
@@ -765,6 +793,9 @@ DESCRIPTION
 	Create a new BFD in the manner of <<bfd_openw>>, but without
 	opening a file. The new BFD takes the target from the target
 	used by @var{templ}. The format is always set to <<bfd_object>>.
+
+	A copy of the @var{filename} argument is stored in the newly created
+	BFD.  It can be accessed via the bfd_get_filename() macro.
 */
 
 bfd *
@@ -775,7 +806,9 @@ bfd_create (const char *filename, bfd *templ)
   nbfd = _bfd_new_bfd ();
   if (nbfd == NULL)
     return NULL;
-  nbfd->filename = filename;
+  /* PR 11983: Do not cache the original filename, but
+     rather make a copy - the original might go away.  */
+  nbfd->filename = xstrdup (filename);
   if (templ)
     nbfd->xvec = templ->xvec;
   nbfd->direction = no_direction;
@@ -1132,8 +1165,8 @@ SYNOPSIS
 	char *bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out);
 
 DESCRIPTION
-	fetch the filename and CRC32 value for any separate debuginfo
-	associated with @var{abfd}. Return NULL if no such info found,
+	Fetch the filename and CRC32 value for any separate debuginfo
+	associated with @var{abfd}.  Return NULL if no such info found,
 	otherwise return filename and update @var{crc32_out}.  The
 	returned filename is allocated with @code{malloc}; freeing it
 	is the responsibility of the caller.

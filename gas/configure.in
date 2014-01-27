@@ -363,6 +363,75 @@ changequote([,])dnl
         using_cgen=yes
 	;;
 
+      nds32)
+        # Decide BASELINE, REDUCED_REGS, FPU_DP_EXT, FPU_SP_EXT features
+	# based on arch_name.
+	AC_MSG_CHECKING(for default configuration of --with-arch)
+	if test "x${with_arch}" != x; then
+	  case ${with_arch} in
+            v2j | v2s | v2f | v2 | v3m | v3j | v3s | v3f | v3 )
+	      AC_DEFINE_UNQUOTED(NDS32_DEFAULT_ARCH_NAME, "$with_arch",
+				 [Define value for nds32_arch_name])
+              ;;
+	    *)
+	      AC_MSG_ERROR(This kind of arch name does *NOT* exist!)
+	      ;;
+          esac
+	fi
+	AC_MSG_RESULT($with_arch)
+
+        # Decide features one by one.
+        AC_MSG_CHECKING(for default configuration of --enable-dx-regs)
+	if test "x${enable_dx_regs}" == xyes; then
+	  AC_DEFINE(NDS32_DEFAULT_DX_REGS, 1,
+		    [Define value for nds32_dx_regs])
+	else
+	  AC_DEFINE(NDS32_DEFAULT_DX_REGS, 0,
+		    [Define default value for nds32_dx_regs])
+	fi
+	AC_MSG_RESULT($enable_dx_regs)
+
+        AC_MSG_CHECKING(for default configuration of --enable-perf-ext)
+	if test "x${enable_perf_ext}" == xno; then
+	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT, 0,
+		    [Define value for nds32_perf_ext])
+	else
+	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT, 1,
+		    [Define default value for nds32_perf_ext])
+	fi
+	AC_MSG_RESULT($enable_perf_ext)
+
+        AC_MSG_CHECKING(for default configuration of --enable-perf-ext2)
+	if test "x${enable_perf_ext2}" == xno; then
+	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT2, 0,
+		    [Define value for nds32_perf_ext2])
+	else
+	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT2, 1,
+		    [Define default value for nds32_perf_ext2])
+	fi
+	AC_MSG_RESULT($enable_perf_ext2)
+
+        AC_MSG_CHECKING(for default configuration of --enable-string-ext)
+	if test "x${enable_string_ext}" == xno; then
+	  AC_DEFINE(NDS32_DEFAULT_STRING_EXT, 0,
+		    [Define value for nds32_string_ext])
+	else
+	  AC_DEFINE(NDS32_DEFAULT_STRING_EXT, 1,
+		    [Define default value for nds32_string_ext])
+	fi
+	AC_MSG_RESULT($enable_string_ext)
+
+        AC_MSG_CHECKING(for default configuration of --enable-audio-ext)
+	if test "x${enable_audio_ext}" == xno; then
+	  AC_DEFINE(NDS32_DEFAULT_AUDIO_EXT, 0,
+		    [Define value for nds32_audio_ext])
+	else
+	  AC_DEFINE(NDS32_DEFAULT_AUDIO_EXT, 1,
+		    [Define default value for nds32_audio_ext])
+	fi
+	AC_MSG_RESULT($enable_audio_ext)
+	;;
+
       i386 | s390 | sparc)
 	if test $this_target = $target ; then
 	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])

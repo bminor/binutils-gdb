@@ -1,4 +1,4 @@
-/* Copyright (C) 1992-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -251,7 +251,7 @@ get_ada_tasks_pspace_data (struct program_space *pspace)
   data = program_space_data (pspace, ada_tasks_pspace_data_handle);
   if (data == NULL)
     {
-      data = XZALLOC (struct ada_tasks_pspace_data);
+      data = XCNEW (struct ada_tasks_pspace_data);
       set_program_space_data (pspace, ada_tasks_pspace_data_handle, data);
     }
 
@@ -278,7 +278,7 @@ get_ada_tasks_inferior_data (struct inferior *inf)
   data = inferior_data (inf, ada_tasks_inferior_data_handle);
   if (data == NULL)
     {
-      data = XZALLOC (struct ada_tasks_inferior_data);
+      data = XCNEW (struct ada_tasks_inferior_data);
       set_inferior_data (inf, ada_tasks_inferior_data_handle, data);
     }
 

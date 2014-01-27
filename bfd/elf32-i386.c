@@ -5094,8 +5094,6 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define elf_backend_plt_sym_val		      elf_i386_plt_sym_val
 #define elf_backend_hash_symbol		      elf_i386_hash_symbol
 #define elf_backend_add_symbol_hook           elf_i386_add_symbol_hook
-#undef	elf_backend_post_process_headers
-#define	elf_backend_post_process_headers	_bfd_elf_set_osabi
 
 #define elf_backend_section_from_bfd_section \
   _bfd_elf_sharable_section_from_bfd_section
@@ -5128,7 +5126,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
 static void
 elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 {
-  _bfd_elf_set_osabi (abfd, info);
+  _bfd_elf_post_process_headers (abfd, info);
 
 #ifdef OLD_FREEBSD_ABI_LABEL
   /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
@@ -5190,7 +5188,6 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
 #undef	elf_backend_post_process_headers
-#define	elf_backend_post_process_headers	_bfd_elf_set_osabi
 #undef	elf_backend_static_tls_alignment
 
 /* NaCl uses substantially different PLT entries for the same effects.  */
@@ -5384,7 +5381,6 @@ static const struct elf_i386_backend_data elf_i386_vxworks_arch_bed =
 #define	elf_backend_arch_data	&elf_i386_vxworks_arch_bed
 
 #undef elf_backend_relocs_compatible
-#undef elf_backend_post_process_headers
 #undef elf_backend_add_symbol_hook
 #define elf_backend_add_symbol_hook \
   elf_vxworks_add_symbol_hook

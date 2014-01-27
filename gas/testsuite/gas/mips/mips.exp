@@ -971,6 +971,18 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "cp0sel-names-mips64r2"
     run_dump_test "cp0sel-names-sb1"
 
+    run_dump_test "cp1-names-numeric"
+    run_dump_test "cp1-names-r3000"
+    run_dump_test "cp1-names-r4000" \
+		  { { {name} {(r4000)} } { {objdump} {-M cp0-names=r4000} } }
+    run_dump_test "cp1-names-r4000" \
+		  { { {name} {(r4400)} } { {objdump} {-M cp0-names=r4400} } }
+    run_dump_test "cp1-names-mips32"
+    run_dump_test "cp1-names-mips32r2"
+    run_dump_test "cp1-names-mips64"
+    run_dump_test "cp1-names-mips64r2"
+    run_dump_test "cp1-names-sb1"
+
     run_dump_test "hwr-names-numeric"
     run_dump_test "hwr-names-mips32r2"
     run_dump_test "hwr-names-mips64r2"

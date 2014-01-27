@@ -1,6 +1,6 @@
 /* Interface between GDB and target environments, including files and processes
 
-   Copyright (C) 1990-2013 Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -238,6 +238,15 @@ enum trace_find_type
 typedef struct static_tracepoint_marker *static_tracepoint_marker_p;
 DEF_VEC_P(static_tracepoint_marker_p);
 
+typedef LONGEST
+  target_xfer_partial_ftype (struct target_ops *ops,
+			     enum target_object object,
+			     const char *annex,
+			     gdb_byte *readbuf,
+			     const gdb_byte *writebuf,
+			     ULONGEST offset,
+			     ULONGEST len);
+
 /* Request that OPS transfer up to LEN 8-bit bytes of the target's
    OBJECT.  The OFFSET, for a seekable object, specifies the
    starting point.  The ANNEX can be used to provide additional
@@ -319,12 +328,7 @@ extern char *target_read_stralloc (struct target_ops *ops,
 				   const char *annex);
 
 /* See target_ops->to_xfer_partial.  */
-
-extern LONGEST target_xfer_partial (struct target_ops *ops,
-				    enum target_object object,
-				    const char *annex,
-				    void *readbuf, const void *writebuf,
-				    ULONGEST offset, LONGEST len);
+extern target_xfer_partial_ftype target_xfer_partial;
 
 /* Wrappers to target read/write that perform memory transfers.  They
    throw an error if the memory transfer fails.
@@ -340,6 +344,11 @@ extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
 					    enum bfd_endian byte_order);
 
 struct thread_info;		/* fwd decl for parameter list below: */
+
+/* The type of the callback to the to_async method.  */
+
+typedef void async_callback_ftype (enum inferior_event_type event_type,
+				   void *context);
 
 struct target_ops
   {
@@ -370,7 +379,7 @@ struct target_ops
 		       ptid_t, struct target_waitstatus *, int);
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int);
     void (*to_store_registers) (struct target_ops *, struct regcache *, int);
-    void (*to_prepare_to_store) (struct regcache *);
+    void (*to_prepare_to_store) (struct target_ops *, struct regcache *);
 
     /* Transfer LEN bytes of memory between GDB address MYADDR and
        target address MEMADDR.  If WRITE, transfer them to the target, else
@@ -399,8 +408,10 @@ struct target_ops
 				   struct target_ops *target);
 
     void (*to_files_info) (struct target_ops *);
-    int (*to_insert_breakpoint) (struct gdbarch *, struct bp_target_info *);
-    int (*to_remove_breakpoint) (struct gdbarch *, struct bp_target_info *);
+    int (*to_insert_breakpoint) (struct target_ops *, struct gdbarch *,
+				 struct bp_target_info *);
+    int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
+				 struct bp_target_info *);
     int (*to_can_use_hw_breakpoint) (int, int, int);
     int (*to_ranged_break_num_registers) (struct target_ops *);
     int (*to_insert_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
@@ -482,7 +493,7 @@ struct target_ops
     /* ASYNC target controls */
     int (*to_can_async_p) (void);
     int (*to_is_async_p) (void);
-    void (*to_async) (void (*) (enum inferior_event_type, void *), void *);
+    void (*to_async) (async_callback_ftype *, void *);
     int (*to_supports_non_stop) (void);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (find_memory_region_ftype func, void *data);
@@ -533,7 +544,7 @@ struct target_ops
     LONGEST (*to_xfer_partial) (struct target_ops *ops,
 				enum target_object object, const char *annex,
 				gdb_byte *readbuf, const gdb_byte *writebuf,
-				ULONGEST offset, LONGEST len);
+				ULONGEST offset, ULONGEST len);
 
     /* Returns the memory map for the target.  A return value of NULL
        means that no memory map is available.  If a memory address
@@ -828,9 +839,13 @@ struct target_ops
        be attempting to talk to a remote target.  */
     void (*to_teardown_btrace) (struct btrace_target_info *tinfo);
 
-    /* Read branch trace data.  */
-    VEC (btrace_block_s) *(*to_read_btrace) (struct btrace_target_info *,
-					     enum btrace_read_type);
+    /* Read branch trace data for the thread indicated by BTINFO into DATA.
+       DATA is cleared before new trace is added.
+       The branch trace will start with the most recent block and continue
+       towards older blocks.  */
+    enum btrace_error (*to_read_btrace) (VEC (btrace_block_s) **data,
+					 struct btrace_target_info *btinfo,
+					 enum btrace_read_type type);
 
     /* Stop trace recording.  */
     void (*to_stop_recording) (void);
@@ -869,7 +884,7 @@ struct target_ops
     void (*to_insn_history_from) (ULONGEST from, int size, int flags);
 
     /* Disassemble a section of the recorded execution trace from instruction
-       BEGIN (inclusive) to instruction END (exclusive).  */
+       BEGIN (inclusive) to instruction END (inclusive).  */
     void (*to_insn_history_range) (ULONGEST begin, ULONGEST end, int flags);
 
     /* Print a function trace of the recorded execution trace.
@@ -884,12 +899,23 @@ struct target_ops
     void (*to_call_history_from) (ULONGEST begin, int size, int flags);
 
     /* Print a function trace of an execution trace section from function BEGIN
-       (inclusive) to function END (exclusive).  */
+       (inclusive) to function END (inclusive).  */
     void (*to_call_history_range) (ULONGEST begin, ULONGEST end, int flags);
 
     /* Nonzero if TARGET_OBJECT_LIBRARIES_SVR4 may be read with a
        non-empty annex.  */
     int (*to_augmented_libraries_svr4_read) (void);
+
+    /* Those unwinders are tried before any other arch unwinders.  Use NULL if
+       it is not used.  */
+    const struct frame_unwind *to_get_unwinder;
+    const struct frame_unwind *to_get_tailcall_unwinder;
+
+    /* Return the number of bytes by which the PC needs to be decremented
+       after executing a breakpoint instruction.
+       Defaults to gdbarch_decr_pc_after_break (GDBARCH).  */
+    CORE_ADDR (*to_decr_pc_after_break) (struct target_ops *ops,
+					 struct gdbarch *gdbarch);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1002,7 +1028,7 @@ extern void target_store_registers (struct regcache *regcache, int regs);
    debugged.  */
 
 #define	target_prepare_to_store(regcache)	\
-     (*current_target.to_prepare_to_store) (regcache)
+     (*current_target.to_prepare_to_store) (&current_target, regcache)
 
 /* Determine current address space of thread PTID.  */
 
@@ -1123,12 +1149,31 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 #define	target_files_info()	\
      (*current_target.to_files_info) (&current_target)
 
-/* Insert a breakpoint at address BP_TGT->placed_address in the target
-   machine.  Result is 0 for success, non-zero for error.  */
+/* Insert a hardware breakpoint at address BP_TGT->placed_address in
+   the target machine.  Returns 0 for success, and returns non-zero or
+   throws an error (with a detailed failure reason error code and
+   message) otherwise.
+   Start the target search at OPS.  */
+
+extern int forward_target_insert_breakpoint (struct target_ops *ops,
+					     struct gdbarch *gdbarch,
+					     struct bp_target_info *bp_tgt);
+
+/* Insert a hardware breakpoint at address BP_TGT->placed_address in
+   the target machine.  Returns 0 for success, and returns non-zero or
+   throws an error (with a detailed failure reason error code and
+   message) otherwise.  */
 
 extern int target_insert_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt);
 
+/* Remove a breakpoint at address BP_TGT->placed_address in the target
+   machine.  Result is 0 for success, non-zero for error.
+   Start the target search at OPS.  */
+
+extern int forward_target_remove_breakpoint (struct target_ops *ops,
+					     struct gdbarch *gdbarch,
+					     struct bp_target_info *bp_tgt);
 /* Remove a breakpoint at address BP_TGT->placed_address in the target
    machine.  Result is 0 for success, non-zero for error.  */
 
@@ -1553,6 +1598,11 @@ extern int target_insert_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
 
 extern int target_remove_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
 
+/* Insert a hardware breakpoint at address BP_TGT->placed_address in
+   the target machine.  Returns 0 for success, and returns non-zero or
+   throws an error (with a detailed failure reason error code and
+   message) otherwise.  */
+
 #define target_insert_hw_breakpoint(gdbarch, bp_tgt) \
      (*current_target.to_insert_hw_breakpoint) (gdbarch, bp_tgt)
 
@@ -1775,6 +1825,12 @@ extern char *target_fileio_read_stralloc (const char *filename);
 
 extern int target_core_of_thread (ptid_t ptid);
 
+/* See to_get_unwinder in struct target_ops.  */
+extern const struct frame_unwind *target_get_unwinder (void);
+
+/* See to_get_tailcall_unwinder in struct target_ops.  */
+extern const struct frame_unwind *target_get_tailcall_unwinder (void);
+
 /* Verify that the memory in the [MEMADDR, MEMADDR+SIZE) range matches
    the contents of [DATA,DATA+SIZE).  Returns 1 if there's a match, 0
    if there's a mismatch, and -1 if an error is encountered while
@@ -1870,10 +1926,10 @@ extern struct target_section_table *target_get_section_table
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint (struct gdbarch *,
+extern int memory_remove_breakpoint (struct target_ops *, struct gdbarch *,
 				     struct bp_target_info *);
 
-extern int memory_insert_breakpoint (struct gdbarch *,
+extern int memory_insert_breakpoint (struct target_ops *, struct gdbarch *,
 				     struct bp_target_info *);
 
 extern int default_memory_remove_breakpoint (struct gdbarch *,
@@ -1952,8 +2008,9 @@ extern void target_disable_btrace (struct btrace_target_info *btinfo);
 extern void target_teardown_btrace (struct btrace_target_info *btinfo);
 
 /* See to_read_btrace in struct target_ops.  */
-extern VEC (btrace_block_s) *target_read_btrace (struct btrace_target_info *,
-						 enum btrace_read_type);
+extern enum btrace_error target_read_btrace (VEC (btrace_block_s) **,
+					     struct btrace_target_info *,
+					     enum btrace_read_type);
 
 /* See to_stop_recording in struct target_ops.  */
 extern void target_stop_recording (void);
@@ -1999,5 +2056,12 @@ extern void target_call_history_from (ULONGEST begin, int size, int flags);
 
 /* See to_call_history_range.  */
 extern void target_call_history_range (ULONGEST begin, ULONGEST end, int flags);
+
+/* See to_decr_pc_after_break.  Start searching for the target at OPS.  */
+extern CORE_ADDR forward_target_decr_pc_after_break (struct target_ops *ops,
+						     struct gdbarch *gdbarch);
+
+/* See to_decr_pc_after_break.  */
+extern CORE_ADDR target_decr_pc_after_break (struct gdbarch *gdbarch);
 
 #endif /* !defined (TARGET_H) */

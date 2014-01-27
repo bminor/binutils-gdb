@@ -127,6 +127,11 @@ include/elf/
 
 ld/
 
+2014-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (cmdline_add_object_only_section): Save BFD filename
+	to be used after bfd_close ().
+
 2012-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (lang_process): Replace trace_file_tries with

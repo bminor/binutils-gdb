@@ -1,6 +1,6 @@
 /* Target-dependent code for the Xtensa port of GDB, the GNU debugger.
 
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,7 +37,6 @@
 #include "dwarf2.h"
 #include "dwarf2-frame.h"
 #include "dwarf2loc.h"
-#include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 

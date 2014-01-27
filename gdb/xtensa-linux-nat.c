@@ -1,6 +1,6 @@
 /* Xtensa GNU/Linux native support.
 
-   Copyright (C) 2007-2013 Free Software Foundation, Inc.
+   Copyright (C) 2007-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
+#include <asm/ptrace.h>
 
 #include "gregset.h"
 #include "xtensa-tdep.h"

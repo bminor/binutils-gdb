@@ -1,3 +1,295 @@
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.ada/array_char_idx: New testcase.
+
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16487:
+	* gdb.python/py-framefilter.exp: Add test using "Error" filter.
+	* gdb.python/py-framefilter.py (ErrorInName, ErrorFilter): New
+	classes.
+
+2014-01-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/16491:
+	* gdb.python/py-framefilter.py (Reverse_Function.function): Read a
+	string from an inferior frame.
+	* gdb.python/py-framefilter-mi.exp: Update.
+
+2014-01-22  Doug Evans  <dje@google.com>
+
+	* gdb.server/server-mon.exp: Add tests for "set debug-format".
+
+2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* gdb.base/catch-syscall.exp: Activate test on s390*-linux.
+
+2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* gdb.trace/entry-values.exp: Remove excess space character from
+	regex patterns.  Handle s390 call instruction.
+
+2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* gdb.dwarf2/dw2-dir-file-name.c (FUNC): Insert alignment and
+	define "*_start" label.  Make "name" static.
+	* gdb.dwarf2/dw2-dir-file-name.exp: Replace references to
+	${name} by references to ${name}_start.
+
+2014-01-22  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* gdb.base/info-macros.exp: Remove "debug" from the compile
+	options.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: New file.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/primitive-types.exp: New file.
+
+2014-01-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* configure.ac: Create gdb.dlang/Makefile.
+	* configure: Regenerate.
+	* Makefile.in (ALL_SUBDIRS): Add gdb.dlang.
+	* gdb.dlang/Makefile.in: New file.
+	* lib/d-support.exp: New file.
+	* lib/gdb.exp (skip_d_tests): New proc.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/delta.exp: Check reverse stepi.
+	* gdb.btrace/tailcall.exp: Update.  Add stepping tests.
+	* gdb.btrace/finish.exp: New.
+	* gdb.btrace/next.exp: New.
+	* gdb.btrace/nexti.exp: New.
+	* gdb.btrace/record_goto.c: Add comments.
+	* gdb.btrace/step.exp: New.
+	* gdb.btrace/stepi.exp: New.
+	* gdb.btrace/multi-thread-step.c: New.
+	* gdb.btrace/multi-thread-step.exp: New.
+	* gdb.btrace/rn-dl-bind.c: New.
+	* gdb.btrace/rn-dl-bind.exp: New.
+	* gdb.btrace/data.c: New.
+	* gdb.btrace/data.exp: New.
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add new.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add delta.
+	* gdb.btrace/exception.exp: Update.
+	* gdb.btrace/instruction_history.exp: Update.
+	* gdb.btrace/record_goto.exp: Update.
+	* gdb.btrace/tailcall.exp: Update.
+	* gdb.btrace/unknown_functions.exp: Update.
+	* gdb.btrace/delta.exp: New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/record_goto.exp: Add backtrace test.
+	* gdb.btrace/tailcall.exp: Add backtrace test.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add record_goto.
+	* gdb.btrace/record_goto.c: New.
+	* gdb.btrace/record_goto.exp: New.
+	* gdb.btrace/x86-record_goto.S: New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/function_call_history.exp: Update tests.
+	* gdb.btrace/instruction_history.exp: Update tests.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/function_call_history.exp: Fix expected field
+	order for "record function-call-history".
+	Add new tests for "record function-call-history /c".
+	* gdb.btrace/exception.cc: New.
+	* gdb.btrace/exception.exp: New.
+	* gdb.btrace/tailcall.exp: New.
+	* gdb.btrace/x86-tailcall.S: New.
+	* gdb.btrace/x86-tailcall.c: New.
+	* gdb.btrace/unknown_functions.c: New.
+	* gdb.btrace/unknown_functions.exp: New.
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add new.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/instruction_history.exp: Update.
+	* gdb.btrace/function_call_history.exp: Update.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/function_call_history.exp: Fix expected function
+	trace.
+	* gdb.btrace/instruction_history.exp: Initialize traced.
+	Remove traced_functions.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/function_call_history.exp: Update
+	* gdb.btrace/instruction_history.exp: Update.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable.exp: Update expected text.
+
+2014-01-16  Omair Javaid  <Omair.Javaid@linaro.org>
+
+	* gdb.dwarf2/dw2-dos-drive.S: Increase text section size to 4
+	bytes.
+
+2014-01-15  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.base/float.exp: Handle "aarch64*-*-*" targets.
+
+2014-01-15  Omair Javaid  <omair.javaid@linaro.org>
+
+	* lib/gdb.exp (supports_process_record): Return true for
+	arm*-linux*.  (supports_reverse): Likewise.
+
+2014-01-13  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/15464
+	PR python/16113
+	* gdb.python/py-type.c: Enhance test case.
+	* gdb.python/py-value-cc.cc: Likewise
+	* gdb.python/py-type.exp: Add new tests.
+	* gdb.python/py-value-cc.exp: Likewise
+
+2014-01-10  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* gdb.dwarf2/dw2-dir-file-name.c (FUNC): Remove "*_start" symbol.
+	Make "name" extern.
+	* gdb.dwarf2/dw2-dir-file-name.exp (out_cu, out_line): Replace
+	references to ${name}_start by references to ${name}.
+
+2014-01-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/pp-rec-component.exp: Remove path from "source" test.
+
+2014-01-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-pp-integral.exp: Remove path from "source" test.
+
+2014-01-09  Maciej W. Rozycki  <macro@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-info-os.exp: Connect to the target with
+        mi_gdb_target_load.
+
+2014-01-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/reconnect-signal.c: New file.
+	* gdb.threads/reconnect-signal.exp: New file.
+
+2014-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/source-dir.exp: New file.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_interface: New testcase.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/pp-rec-component.exp, gdb.ada/pp-rec-component.py,
+	gdb.ada/pp-rec-component/foo.adb, gdb.ada/pp-rec-component/pck.adb,
+	gdb.ada/pp-rec-component/pck.ads: New files.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-pp-integral.c: New file.
+	* gdb.python/py-pp-integral.py: New file.
+	* gdb.python/py-pp-integral.exp: New file.
+
+2013-12-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/16297
+	* gdb.base/catch-syscall.c (read_syscall, pipe_syscall)
+	(write_syscall): New variables.
+	(main): Create a pipe, write 1 byte in it, and read 1 byte from
+	it.
+	* gdb.base/catch-syscall.exp (all_syscalls): Include "pipe,
+	"write" and "read" syscalls.
+	(fill_all_syscalls_numbers): Improve the way to obtain syscalls
+	numbers.
+
+2013-12-19  Keven Boell  <keven.boell@intel.com>
+
+	* gdb.fortran/module.exp: Completion matches fortran module
+	names as well. ptype/whatis on modules return a proper type.
+	Add new check for having the correct scope.
+
+2013-12-19  Keven Boell  <keven.boell@intel.com>
+
+	* gdb.fortran/type.f90: New file.
+	* gdb.fortran/whatis_type.f90: New file.
+
+2013-12-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/catch-syscall.c: Include <sys/syscall.h>.
+	(close_syscall, chroot_syscall, exit_group_syscall): New
+	variables.
+	* gdb.base/catch-syscall.exp: Replace gdb_compile by
+	prepare_for_testing.  Call fill_all_syscalls_numbers before
+	starting.  Replace gdb_exit, gdb_start, gdb_reinitialize_dir and
+	gdb_load by clean_restart.
+	(check_info_bp_any_syscall, check_info_bp_specific_syscall)
+	(check_info_bp_many_syscalls): Remove global gdb_prompt.
+	(check_call_to_syscall): Likewise.  Add global decimal.  Improve
+	testing regex.
+	(check_return_from_syscall): Likewise.
+	(check_continue, insert_catch_syscall_with_arg): Remove global
+	gdb_prompt.
+	(insert_catch_syscall_with_many_args): Likewise.  Add global
+	decimal.  Fix $filter_str.  Improve testing regex.
+	(check_for_program_end): Remove global gdb_prompt.
+	(test_catch_syscall_without_args): Likewise.  Add global decimal.
+	Improve testing regex.
+	(test_catch_syscall_with_args, test_catch_syscall_with_many_args)
+	(test_catch_syscall_with_wrong_args)
+	(test_catch_syscall_restarting_inferior)
+	(test_catch_syscall_fail_nodatadir): Remove global gdb_prompt.
+	(do_syscall_tests): Likewise.  Remove global srcdir.
+	(test_catch_syscall_without_args_noxml): Remove global gdb_prompt.
+	Add global last_syscall_number.  Test for the exact syscall number
+	to be caught.
+	(test_catch_syscall_with_args_noxml): Remove global gdb_prompt.
+	Add global all_syscalls_numbers.  Test each syscall number to be
+	caught, instead of only testing "close".
+	(test_catch_syscall_with_wrong_args_noxml): Remove global gdb_prompt.
+	(do_syscall_tests_without_xml): Likewise.  Remove global srcdir.
+	Remove stale comment.
+	(fill_all_syscalls_numbers): Add global last_syscall_number.  Fill
+	the correct syscall numbers using information from the inferior.
+
+2013-12-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/circ.exp: Expect frame info to be printed when
+	switching between frames with unavailable stack, but different
+	functions.
+
+2013-12-17  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.trace/unavailable-dwarf-piece.c: New file.
+	* gdb.trace/unavailable-dwarf-piece.exp: New file.
+
+2013-12-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.perf/skip-prologue.c: New.
+	* gdb.perf/skip-prologue.exp: New.
+	* gdb.perf/skip-prologue.py: New.
+
+2013-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/arraydim: New testcase.
+
 2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/16113
@@ -33576,6 +33868,6 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 ;; version-control: never
 ;; End:
 
-    Copyright 1993-2013 Free Software Foundation, Inc.
+    Copyright 1993-2014 Free Software Foundation, Inc.
   Copying and distribution of this file, with or without modification,
   are permitted provided the copyright notice and this notice are preserved.

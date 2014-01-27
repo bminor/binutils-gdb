@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -81,6 +81,11 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
     server_waiting = 1;
 
   ret = (*the_target->wait) (ptid, ourstatus, options);
+
+  /* We don't expose _LOADED events to gdbserver core.  See the
+     `dlls_changed' global.  */
+  if (ourstatus->kind == TARGET_WAITKIND_LOADED)
+    ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
   /* If GDB is connected through TCP/serial, then GDBserver will most
      probably be running on its own terminal/console, so it's nice to

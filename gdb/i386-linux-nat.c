@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux i386.
 
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1084,10 +1084,10 @@ i386_linux_enable_btrace (ptid_t ptid)
 static void
 i386_linux_disable_btrace (struct btrace_target_info *tinfo)
 {
-  int errcode = linux_disable_btrace (tinfo);
+  enum btrace_error errcode = linux_disable_btrace (tinfo);
 
-  if (errcode != 0)
-    error (_("Could not disable branch tracing: %s."), safe_strerror (errcode));
+  if (errcode != BTRACE_ERR_NONE)
+    error (_("Could not disable branch tracing."));
 }
 
 /* Teardown branch tracing.  */

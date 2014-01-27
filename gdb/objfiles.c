@@ -1,6 +1,6 @@
 /* GDB routines for manipulating objfiles.
 
-   Copyright (C) 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -102,7 +102,7 @@ get_objfile_pspace_data (struct program_space *pspace)
   info = program_space_data (pspace, objfiles_pspace_data);
   if (info == NULL)
     {
-      info = XZALLOC (struct objfile_pspace_info);
+      info = XCNEW (struct objfile_pspace_info);
       set_program_space_data (pspace, objfiles_pspace_data, info);
     }
 
@@ -152,6 +152,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
       obstack_init (&storage->storage_obstack);
       storage->filename_cache = bcache_xmalloc (NULL, NULL);
       storage->macro_cache = bcache_xmalloc (NULL, NULL);
+      storage->language_of_main = language_unknown;
     }
 
   return storage;
@@ -184,6 +185,20 @@ void
 set_objfile_per_bfd (struct objfile *objfile)
 {
   objfile->per_bfd = get_objfile_bfd_data (objfile, objfile->obfd);
+}
+
+/* Set the objfile's per-BFD notion of the "main" name and
+   language.  */
+
+void
+set_objfile_main_name (struct objfile *objfile,
+		       const char *name, enum language lang)
+{
+  if (objfile->per_bfd->name_of_main == NULL
+      || strcmp (objfile->per_bfd->name_of_main, name) != 0)
+    objfile->per_bfd->name_of_main
+      = obstack_copy0 (&objfile->per_bfd->storage_obstack, name, strlen (name));
+  objfile->per_bfd->language_of_main = lang;
 }
 
 
@@ -364,10 +379,12 @@ get_objfile_arch (struct objfile *objfile)
 int
 entry_point_address_query (CORE_ADDR *entry_p)
 {
-  if (symfile_objfile == NULL || !symfile_objfile->ei.entry_point_p)
+  if (symfile_objfile == NULL || !symfile_objfile->per_bfd->ei.entry_point_p)
     return 0;
 
-  *entry_p = symfile_objfile->ei.entry_point;
+  *entry_p = (symfile_objfile->per_bfd->ei.entry_point
+	      + ANOFFSET (symfile_objfile->section_offsets,
+			  symfile_objfile->per_bfd->ei.the_bfd_section_index));
 
   return 1;
 }
@@ -793,22 +810,6 @@ objfile_relocate1 (struct objfile *objfile,
   /* Relocating different sections by different amounts may cause the symbols
      to be out of order.  */
   msymbols_sort (objfile);
-
-  if (objfile->ei.entry_point_p)
-    {
-      /* Relocate ei.entry_point with its section offset, use SECT_OFF_TEXT
-	 only as a fallback.  */
-      struct obj_section *s;
-      s = find_pc_section (objfile->ei.entry_point);
-      if (s)
-	{
-	  int idx = gdb_bfd_section_index (objfile->obfd, s->the_bfd_section);
-
-	  objfile->ei.entry_point += ANOFFSET (delta, idx);
-	}
-      else
-        objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-    }
 
   {
     int i;

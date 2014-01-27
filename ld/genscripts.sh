@@ -160,6 +160,7 @@ append_to_lib_path()
       if [ "x${use_sysroot}" = "xyes" ] ; then
 	lib="=${lib}"
       fi
+      skip_lib=no
       if test -n "${LIBPATH_SUFFIX}"; then
 	case "${lib}" in
 	  *${LIBPATH_SUFFIX})
@@ -169,18 +170,27 @@ append_to_lib_path()
 	      *) lib_path1=${lib_path1}:${lib} ;;
 	    esac ;;
 	  *)
-	    case :${lib_path1}: in
-	      *:${lib}${LIBPATH_SUFFIX}:*) ;;
-	      ::) lib_path1=${lib}${LIBPATH_SUFFIX} ;;
-	      *) lib_path1=${lib_path1}:${lib}${LIBPATH_SUFFIX} ;;
-	    esac ;;
+	    if test -n "${LIBPATH_SUFFIX_SKIP}"; then
+	      case "${lib}" in
+		*${LIBPATH_SUFFIX_SKIP}) skip_lib=yes ;;
+	      esac
+	    fi
+	    if test "${skip_lib}" = "no"; then
+	      case :${lib_path1}: in
+		*:${lib}${LIBPATH_SUFFIX}:*) ;;
+		::) lib_path1=${lib}${LIBPATH_SUFFIX} ;;
+	        *) lib_path1=${lib_path1}:${lib}${LIBPATH_SUFFIX} ;;
+	      esac
+	    fi ;;
 	esac
       fi
-      case :${lib_path1}:${lib_path2}: in
-	*:${lib}:*) ;;
-	*::) lib_path2=${lib} ;;
-	*) lib_path2=${lib_path2}:${lib} ;;
-      esac
+      if test "${skip_lib}" = "no"; then
+	case :${lib_path1}:${lib_path2}: in
+	  *:${lib}:*) ;;
+	  *::) lib_path2=${lib} ;;
+	  *) lib_path2=${lib_path2}:${lib} ;;
+	esac
+      fi
     done
   fi
 }
@@ -403,8 +413,8 @@ if test -n "$GENERATE_AUTO_IMPORT_SCRIPT"; then
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xa
 fi
 
-case " $EMULATION_LIBPATH " in
-    *" ${EMULATION_NAME} "*) COMPILE_IN=true;;
+case "$COMPILE_IN: $EMULATION_LIBPATH " in
+    :*" ${EMULATION_NAME} "*) COMPILE_IN=yes;;
 esac
 
 # PR ld/5652:

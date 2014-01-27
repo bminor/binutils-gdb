@@ -1,6 +1,6 @@
 /* Handle JIT code generation in the inferior for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -189,7 +189,7 @@ jit_reader_load (const char *file_name)
   if (funcs->reader_version != GDB_READER_INTERFACE_VERSION)
     error (_("Reader version does not match GDB version."));
 
-  new_reader = XZALLOC (struct jit_reader);
+  new_reader = XCNEW (struct jit_reader);
   new_reader->functions = funcs;
   new_reader->handle = so;
 
@@ -214,7 +214,7 @@ jit_reader_load_command (char *args, int from_tty)
   if (IS_ABSOLUTE_PATH (args))
     so_name = xstrdup (args);
   else
-    so_name = xstrprintf ("%s%s%s", SLASH_STRING, jit_reader_dir, args);
+    so_name = xstrprintf ("%s%s%s", jit_reader_dir, SLASH_STRING, args);
   prev_cleanup = make_cleanup (xfree, so_name);
 
   loaded_jit_reader = jit_reader_load (so_name);
@@ -288,7 +288,7 @@ get_jit_objfile_data (struct objfile *objf)
   objf_data = objfile_data (objf, jit_objfile_data);
   if (objf_data == NULL)
     {
-      objf_data = XZALLOC (struct jit_objfile_data);
+      objf_data = XCNEW (struct jit_objfile_data);
       set_objfile_data (objf, jit_objfile_data, objf_data);
     }
 
@@ -318,7 +318,7 @@ get_jit_program_space_data (void)
   ps_data = program_space_data (current_program_space, jit_program_space_data);
   if (ps_data == NULL)
     {
-      ps_data = XZALLOC (struct jit_program_space_data);
+      ps_data = XCNEW (struct jit_program_space_data);
       set_program_space_data (current_program_space, jit_program_space_data,
 			      ps_data);
     }
@@ -504,7 +504,7 @@ jit_object_open_impl (struct gdb_symbol_callbacks *cb)
   /* CB is not required right now, but sometime in the future we might
      need a handle to it, and we'd like to do that without breaking
      the ABI.  */
-  return XZALLOC (struct gdb_object);
+  return XCNEW (struct gdb_object);
 }
 
 /* Readers call into this function to open a new gdb_symtab, which,
@@ -519,7 +519,7 @@ jit_symtab_open_impl (struct gdb_symbol_callbacks *cb,
 
   /* CB stays unused.  See comment in jit_object_open_impl.  */
 
-  ret = XZALLOC (struct gdb_symtab);
+  ret = XCNEW (struct gdb_symtab);
   ret->file_name = file_name ? xstrdup (file_name) : xstrdup ("");
   ret->next = object->symtabs;
   object->symtabs = ret;
@@ -557,7 +557,7 @@ jit_block_open_impl (struct gdb_symbol_callbacks *cb,
                      struct gdb_symtab *symtab, struct gdb_block *parent,
                      GDB_CORE_ADDR begin, GDB_CORE_ADDR end, const char *name)
 {
-  struct gdb_block *block = XZALLOC (struct gdb_block);
+  struct gdb_block *block = XCNEW (struct gdb_block);
 
   block->next = symtab->blocks;
   block->begin = (CORE_ADDR) begin;
@@ -1181,11 +1181,11 @@ jit_frame_sniffer (const struct frame_unwind *self,
 
   gdb_assert (!*cache);
 
-  *cache = XZALLOC (struct jit_unwind_private);
+  *cache = XCNEW (struct jit_unwind_private);
   priv_data = *cache;
   priv_data->registers =
-    XCALLOC (gdbarch_num_regs (get_frame_arch (this_frame)),
-             struct gdb_reg_value *);
+    XCNEWVEC (struct gdb_reg_value *,	      
+	      gdbarch_num_regs (get_frame_arch (this_frame)));
   priv_data->this_frame = this_frame;
 
   callbacks.priv_data = priv_data;

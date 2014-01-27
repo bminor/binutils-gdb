@@ -1,0 +1,807 @@
+diff --git a/ChangeLog.pr16496 b/ChangeLog.pr16496
+new file mode 100644
+index 0000000..ef188ab
+--- /dev/null
++++ b/ChangeLog.pr16496
+@@ -0,0 +1,46 @@
++bfd/
++
++2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR binutils/16496
++	* elf-bfd.h (bfd_elf_get_symbol_version_string): New.
++	* elf.c (bfd_elf_get_symbol_version_string): New.  Extracted
++	from bfd_elf_print_symbol.
++	(bfd_elf_print_symbol): Use it.
++
++binutils/
++
++2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR binutils/16496
++	* objdump.c (objdump_print_symname): Call
++	bfd_elf_get_symbol_version_string to get ELF symbol version
++	string.  Append version string if needed.
++
++	* readelf.c (versioned_symbol_info): New enum.
++	(get_symbol_version_string): New.  Extracted from
++	process_symbol_table.
++	(dump_relocations): Add a new argument to indicate if dynamic
++	symbol table is used.  Use get_symbol_version_string to get
++	symbol version string for dynamic symbol.  Append version string
++	if needed.
++	(process_relocs): Updated dump_relocations call.
++	(process_symbol_table): Use get_symbol_version_string.
++
++ld/testsuite/
++
++2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR binutils/16496
++	* ld-cris/weakref3.d: Add symbol version string to versioned
++	symbol names in dynamic relocation.
++	* ld-cris/weakref4.d: Likewise.
++	* ld-elfvers/vers24.rd: Likewise.
++
++	* ld-elf/pr16496a.c: New file.
++	* ld-elf/pr16496a.map: Likewise.
++	* ld-elf/pr16496b.c: Likewise.
++	* ld-elf/pr16496b.od: Likewise.
++
++	* ld-elf/shared.exp (build_tests): Add libpr16496a.so and
++	libpr16496b.so tests.
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index 0aab5fa..b9c55e7 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -1767,6 +1767,8 @@ extern bfd_boolean _bfd_elf_copy_private_bfd_data
+   (bfd *, bfd *);
+ extern bfd_boolean _bfd_elf_print_private_bfd_data
+   (bfd *, void *);
++const char * bfd_elf_get_symbol_version_string
++  (bfd *, asymbol *, bfd_boolean *);
+ extern void bfd_elf_print_symbol
+   (bfd *, void *, asymbol *, bfd_print_symbol_type);
+ 
+diff --git a/bfd/elf.c b/bfd/elf.c
+index c0303fc..5783d88 100644
+--- a/bfd/elf.c
++++ b/bfd/elf.c
+@@ -1396,6 +1396,53 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
+   return FALSE;
+ }
+ 
++/* Get version string.  */
++
++const char *
++bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
++				   bfd_boolean *hidden)
++{
++  const char *version_string = NULL;
++  if (elf_dynversym (abfd) != 0
++      && (elf_dynverdef (abfd) != 0 || elf_dynverref (abfd) != 0))
++    {
++      unsigned int vernum = ((elf_symbol_type *) symbol)->version;
++
++      *hidden = (vernum & VERSYM_HIDDEN) != 0;
++      vernum &= VERSYM_VERSION;
++
++      if (vernum == 0)
++	version_string = "";
++      else if (vernum == 1)
++	version_string = "Base";
++      else if (vernum <= elf_tdata (abfd)->cverdefs)
++	version_string =
++	  elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
++      else
++	{
++	  Elf_Internal_Verneed *t;
++
++	  version_string = "";
++	  for (t = elf_tdata (abfd)->verref;
++	       t != NULL;
++	       t = t->vn_nextref)
++	    {
++	      Elf_Internal_Vernaux *a;
++
++	      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
++		{
++		  if (a->vna_other == vernum)
++		    {
++		      version_string = a->vna_nodename;
++		      break;
++		    }
++		}
++	    }
++	}
++    }
++  return version_string;
++}
++
+ /* Display ELF-specific fields of a symbol.  */
+ 
+ void
+@@ -1422,6 +1469,8 @@ bfd_elf_print_symbol (bfd *abfd,
+ 	const struct elf_backend_data *bed;
+ 	unsigned char st_other;
+ 	bfd_vma val;
++	const char *version_string;
++	bfd_boolean hidden;
+ 
+ 	section_name = symbol->section ? symbol->section->name : "(*none*)";
+ 
+@@ -1447,45 +1496,12 @@ bfd_elf_print_symbol (bfd *abfd,
+ 	bfd_fprintf_vma (abfd, file, val);
+ 
+ 	/* If we have version information, print it.  */
+-	if (elf_dynversym (abfd) != 0
+-	    && (elf_dynverdef (abfd) != 0
+-		|| elf_dynverref (abfd) != 0))
++	version_string = bfd_elf_get_symbol_version_string (abfd,
++							    symbol,
++							    &hidden);
++	if (version_string)
+ 	  {
+-	    unsigned int vernum;
+-	    const char *version_string;
+-
+-	    vernum = ((elf_symbol_type *) symbol)->version & VERSYM_VERSION;
+-
+-	    if (vernum == 0)
+-	      version_string = "";
+-	    else if (vernum == 1)
+-	      version_string = "Base";
+-	    else if (vernum <= elf_tdata (abfd)->cverdefs)
+-	      version_string =
+-		elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+-	    else
+-	      {
+-		Elf_Internal_Verneed *t;
+-
+-		version_string = "";
+-		for (t = elf_tdata (abfd)->verref;
+-		     t != NULL;
+-		     t = t->vn_nextref)
+-		  {
+-		    Elf_Internal_Vernaux *a;
+-
+-		    for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+-		      {
+-			if (a->vna_other == vernum)
+-			  {
+-			    version_string = a->vna_nodename;
+-			    break;
+-			  }
+-		      }
+-		  }
+-	      }
+-
+-	    if ((((elf_symbol_type *) symbol)->version & VERSYM_HIDDEN) == 0)
++	    if (!hidden)
+ 	      fprintf (file, "  %-11s", version_string);
+ 	    else
+ 	      {
+diff --git a/binutils/objdump.c b/binutils/objdump.c
+index 0098ae7..af7bfce 100644
+--- a/binutils/objdump.c
++++ b/binutils/objdump.c
+@@ -792,7 +792,8 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
+ 		       asymbol *sym)
+ {
+   char *alloc;
+-  const char *name;
++  const char *name, *version_string = NULL;
++  bfd_boolean hidden = FALSE;
+ 
+   alloc = NULL;
+   name = bfd_asymbol_name (sym);
+@@ -804,10 +805,26 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
+ 	name = alloc;
+     }
+ 
++  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
++    version_string = bfd_elf_get_symbol_version_string (abfd, sym,
++							&hidden);
++
++  if (bfd_is_und_section (bfd_get_section (sym)))
++    hidden = TRUE;
++
+   if (inf != NULL)
+-    (*inf->fprintf_func) (inf->stream, "%s", name);
++    {
++      (*inf->fprintf_func) (inf->stream, "%s", name);
++      if (version_string && *version_string != '\0')
++	(*inf->fprintf_func) (inf->stream, hidden ? "@%s" : "@@%s",
++			      version_string);
++    }
+   else
+-    printf ("%s", name);
++    {
++      printf ("%s", name);
++      if (version_string && *version_string != '\0')
++	printf (hidden ? "@%s" : "@@%s", version_string);
++    }
+ 
+   if (alloc != NULL)
+     free (alloc);
+diff --git a/binutils/readelf.c b/binutils/readelf.c
+index 7d228d6..669cda7 100644
+--- a/binutils/readelf.c
++++ b/binutils/readelf.c
+@@ -271,6 +271,20 @@ typedef enum print_mode
+ }
+ print_mode;
+ 
++/* Versioned symbol info.  */
++enum versioned_symbol_info
++{
++  symbol_undefined,
++  symbol_hidden,
++  symbol_public
++};
++
++static const char *get_symbol_version_string
++  (FILE *file, int is_dynsym, const char *strtab,
++   unsigned long int strtab_size, unsigned int si,
++   Elf_Internal_Sym *psym, enum versioned_symbol_info *sym_info,
++   unsigned short *vna_other);
++
+ #define UNKNOWN -1
+ 
+ #define SECTION_NAME(X)						\
+@@ -926,7 +940,8 @@ dump_relocations (FILE * file,
+ 		  unsigned long nsyms,
+ 		  char * strtab,
+ 		  unsigned long strtablen,
+-		  int is_rela)
++		  int is_rela,
++		  int is_dynsym)
+ {
+   unsigned int i;
+   Elf_Internal_Rela * rels;
+@@ -1360,9 +1375,20 @@ dump_relocations (FILE * file,
+ 	  else
+ 	    {
+ 	      Elf_Internal_Sym * psym;
++	      const char * version_string;
++	      enum versioned_symbol_info sym_info;
++	      unsigned short vna_other;
+ 
+ 	      psym = symtab + symtab_index;
+ 
++	      version_string
++		= get_symbol_version_string (file, is_dynsym,
++					     strtab, strtablen,
++					     symtab_index,
++					     psym,
++					     &sym_info,
++					     &vna_other);
++
+ 	      printf (" ");
+ 
+ 	      if (ELF_ST_TYPE (psym->st_info) == STT_GNU_IFUNC)
+@@ -1389,6 +1415,9 @@ dump_relocations (FILE * file,
+ 		    name = strtab + psym->st_name;
+ 
+ 		  len = print_symbol (width, name);
++		  if (version_string)
++		    printf (sym_info == symbol_public ? "@@%s" : "@%s", 
++			    version_string);
+ 		  printf ("()%-*s", len <= width ? (width + 1) - len : 1, " ");
+ 		}
+ 	      else
+@@ -1446,7 +1475,12 @@ dump_relocations (FILE * file,
+ 	      else if (psym->st_name >= strtablen)
+ 		printf (_("<corrupt string table index: %3ld>"), psym->st_name);
+ 	      else
+-		print_symbol (22, strtab + psym->st_name);
++		{
++		  print_symbol (22, strtab + psym->st_name);
++		  if (version_string)
++		    printf (sym_info == symbol_public ? "@@%s" : "@%s", 
++			    version_string);
++		}
+ 
+ 	      if (is_rela)
+ 		{
+@@ -5920,7 +5954,8 @@ process_relocs (FILE * file)
+ 				offset_from_vma (file, rel_offset, rel_size),
+ 				rel_size,
+ 				dynamic_symbols, num_dynamic_syms,
+-				dynamic_strings, dynamic_strings_length, is_rela);
++				dynamic_strings, dynamic_strings_length,
++				is_rela, 1);
+ 	    }
+ 	}
+ 
+@@ -5995,14 +6030,16 @@ process_relocs (FILE * file)
+ 		    }
+ 
+ 		  dump_relocations (file, rel_offset, rel_size,
+-				    symtab, nsyms, strtab, strtablen, is_rela);
++				    symtab, nsyms, strtab, strtablen,
++				    is_rela,
++				    symsec->sh_type == SHT_DYNSYM);
+ 		  if (strtab)
+ 		    free (strtab);
+ 		  free (symtab);
+ 		}
+ 	      else
+ 		dump_relocations (file, rel_offset, rel_size,
+-				  NULL, 0, NULL, 0, is_rela);
++				  NULL, 0, NULL, 0, is_rela, 0);
+ 
+ 	      found = 1;
+ 	    }
+@@ -9581,6 +9618,181 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
+   putchar ('\n');
+ }
+ 
++static const char *
++get_symbol_version_string (FILE *file, int is_dynsym,
++			   const char *strtab,
++			   unsigned long int strtab_size,
++			   unsigned int si, Elf_Internal_Sym *psym,
++			   enum versioned_symbol_info *sym_info,
++			   unsigned short *vna_other)
++{
++  const char *version_string = NULL;
++
++  if (is_dynsym
++      && version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
++    {
++      unsigned char data[2];
++      unsigned short vers_data;
++      unsigned long offset;
++      int is_nobits;
++      int check_def;
++
++      offset = offset_from_vma
++	(file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
++	 sizeof data + si * sizeof (vers_data));
++
++      if (get_data (&data, file, offset + si * sizeof (vers_data),
++		    sizeof (data), 1, _("version data")) == NULL)
++	return NULL;
++
++      vers_data = byte_get (data, 2);
++
++      is_nobits = (psym->st_shndx < elf_header.e_shnum
++		   && section_headers[psym->st_shndx].sh_type
++		   == SHT_NOBITS);
++
++      check_def = (psym->st_shndx != SHN_UNDEF);
++
++      if ((vers_data & VERSYM_HIDDEN) || vers_data > 1)
++	{
++	  if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
++	      && (is_nobits || ! check_def))
++	    {
++	      Elf_External_Verneed evn;
++	      Elf_Internal_Verneed ivn;
++	      Elf_Internal_Vernaux ivna;
++
++	      /* We must test both.  */
++	      offset = offset_from_vma
++		(file, version_info[DT_VERSIONTAGIDX (DT_VERNEED)],
++		 sizeof evn);
++
++	      do
++		{
++		  unsigned long vna_off;
++
++		  if (get_data (&evn, file, offset, sizeof (evn), 1,
++				_("version need")) == NULL)
++		    {
++		      ivna.vna_next = 0;
++		      ivna.vna_other = 0;
++		      ivna.vna_name = 0;
++		      break;
++		    }
++
++		  ivn.vn_aux  = BYTE_GET (evn.vn_aux);
++		  ivn.vn_next = BYTE_GET (evn.vn_next);
++
++		  vna_off = offset + ivn.vn_aux;
++
++		  do
++		    {
++		      Elf_External_Vernaux evna;
++
++		      if (get_data (&evna, file, vna_off,
++				    sizeof (evna), 1,
++				    _("version need aux (3)")) == NULL)
++			{
++			  ivna.vna_next = 0;
++			  ivna.vna_other = 0;
++			  ivna.vna_name = 0;
++			}
++		      else
++			{
++			  ivna.vna_other = BYTE_GET (evna.vna_other);
++			  ivna.vna_next  = BYTE_GET (evna.vna_next);
++			  ivna.vna_name  = BYTE_GET (evna.vna_name);
++			}
++
++		      vna_off += ivna.vna_next;
++		    }
++		  while (ivna.vna_other != vers_data
++			 && ivna.vna_next != 0);
++
++		  if (ivna.vna_other == vers_data)
++		    break;
++
++		  offset += ivn.vn_next;
++		}
++	      while (ivn.vn_next != 0);
++
++	      if (ivna.vna_other == vers_data)
++		{
++		  *sym_info = symbol_undefined;
++		  *vna_other = ivna.vna_other;
++		  version_string = (ivna.vna_name < strtab_size
++				    ? strtab + ivna.vna_name
++				    : _("<corrupt>"));
++		  check_def = 0;
++		}
++	      else if (! is_nobits)
++		error (_("bad dynamic symbol\n"));
++	      else
++		check_def = 1;
++	    }
++
++	  if (check_def)
++	    {
++	      if (vers_data != 0x8001
++		  && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
++		{
++		  Elf_Internal_Verdef ivd;
++		  Elf_Internal_Verdaux ivda;
++		  Elf_External_Verdaux evda;
++		  unsigned long off;
++
++		  off = offset_from_vma
++		    (file,
++		     version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
++		     sizeof (Elf_External_Verdef));
++
++		  do
++		    {
++		      Elf_External_Verdef evd;
++
++		      if (get_data (&evd, file, off, sizeof (evd),
++				    1, _("version def")) == NULL)
++			{
++			  ivd.vd_ndx = 0;
++			  ivd.vd_aux = 0;
++			  ivd.vd_next = 0;
++			}
++		      else
++			{
++			  ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
++			  ivd.vd_aux = BYTE_GET (evd.vd_aux);
++			  ivd.vd_next = BYTE_GET (evd.vd_next);
++			}
++
++		      off += ivd.vd_next;
++		    }
++		  while (ivd.vd_ndx != (vers_data & VERSYM_VERSION)
++			 && ivd.vd_next != 0);
++
++		  off -= ivd.vd_next;
++		  off += ivd.vd_aux;
++
++		  if (get_data (&evda, file, off, sizeof (evda),
++				1, _("version def aux")) == NULL)
++		    return version_string;
++
++		  ivda.vda_name = BYTE_GET (evda.vda_name);
++
++		  if (psym->st_name != ivda.vda_name)
++		    {
++		      *sym_info = ((vers_data & VERSYM_HIDDEN) != 0
++				   ? symbol_hidden : symbol_public);
++		      version_string = (ivda.vda_name < strtab_size
++					? strtab + ivda.vda_name
++					: _("<corrupt>"));
++		    }
++		}
++	    }
++	}
++    }
++  return version_string;
++}
++
+ /* Dump the symbol table.  */
+ static int
+ process_symbol_table (FILE * file)
+@@ -9877,6 +10089,10 @@ process_symbol_table (FILE * file)
+ 
+ 	  for (si = 0, psym = symtab; si < num_syms; si++, psym++)
+ 	    {
++	      const char *version_string;
++	      enum versioned_symbol_info sym_info;
++	      unsigned short vna_other;
++
+ 	      printf ("%6d: ", si);
+ 	      print_vma (psym->st_value, LONG_HEX);
+ 	      putchar (' ');
+@@ -9893,163 +10109,18 @@ process_symbol_table (FILE * file)
+ 	      print_symbol (25, psym->st_name < strtab_size
+ 			    ? strtab + psym->st_name : _("<corrupt>"));
+ 
+-	      if (section->sh_type == SHT_DYNSYM
+-		  && version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
++	      version_string
++		= get_symbol_version_string (file,
++					     section->sh_type == SHT_DYNSYM,
++					     strtab, strtab_size, si,
++					     psym, &sym_info, &vna_other);
++	      if (version_string)
+ 		{
+-		  unsigned char data[2];
+-		  unsigned short vers_data;
+-		  unsigned long offset;
+-		  int is_nobits;
+-		  int check_def;
+-
+-		  offset = offset_from_vma
+-		    (file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
+-		     sizeof data + si * sizeof (vers_data));
+-
+-		  if (get_data (&data, file, offset + si * sizeof (vers_data),
+-				sizeof (data), 1, _("version data")) == NULL)
+-		    break;
+-
+-		  vers_data = byte_get (data, 2);
+-
+-		  is_nobits = (psym->st_shndx < elf_header.e_shnum
+-			       && section_headers[psym->st_shndx].sh_type
+-				  == SHT_NOBITS);
+-
+-		  check_def = (psym->st_shndx != SHN_UNDEF);
+-
+-		  if ((vers_data & VERSYM_HIDDEN) || vers_data > 1)
+-		    {
+-		      if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
+-			  && (is_nobits || ! check_def))
+-			{
+-			  Elf_External_Verneed evn;
+-			  Elf_Internal_Verneed ivn;
+-			  Elf_Internal_Vernaux ivna;
+-
+-			  /* We must test both.  */
+-			  offset = offset_from_vma
+-			    (file, version_info[DT_VERSIONTAGIDX (DT_VERNEED)],
+-			     sizeof evn);
+-
+-			  do
+-			    {
+-			      unsigned long vna_off;
+-
+-			      if (get_data (&evn, file, offset, sizeof (evn), 1,
+-					    _("version need")) == NULL)
+-				{
+-				  ivna.vna_next = 0;
+-				  ivna.vna_other = 0;
+-				  ivna.vna_name = 0;
+-				  break;
+-				}
+-
+-			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
+-			      ivn.vn_next = BYTE_GET (evn.vn_next);
+-
+-			      vna_off = offset + ivn.vn_aux;
+-
+-			      do
+-				{
+-				  Elf_External_Vernaux evna;
+-
+-				  if (get_data (&evna, file, vna_off,
+-						sizeof (evna), 1,
+-						_("version need aux (3)")) == NULL)
+-				    {
+-				      ivna.vna_next = 0;
+-				      ivna.vna_other = 0;
+-				      ivna.vna_name = 0;
+-				    }
+-				  else
+-				    {
+-				      ivna.vna_other = BYTE_GET (evna.vna_other);
+-				      ivna.vna_next  = BYTE_GET (evna.vna_next);
+-				      ivna.vna_name  = BYTE_GET (evna.vna_name);
+-				    }
+-
+-				  vna_off += ivna.vna_next;
+-				}
+-			      while (ivna.vna_other != vers_data
+-				     && ivna.vna_next != 0);
+-
+-			      if (ivna.vna_other == vers_data)
+-				break;
+-
+-			      offset += ivn.vn_next;
+-			    }
+-			  while (ivn.vn_next != 0);
+-
+-			  if (ivna.vna_other == vers_data)
+-			    {
+-			      printf ("@%s (%d)",
+-				      ivna.vna_name < strtab_size
+-				      ? strtab + ivna.vna_name : _("<corrupt>"),
+-				      ivna.vna_other);
+-			      check_def = 0;
+-			    }
+-			  else if (! is_nobits)
+-			    error (_("bad dynamic symbol\n"));
+-			  else
+-			    check_def = 1;
+-			}
+-
+-		      if (check_def)
+-			{
+-			  if (vers_data != 0x8001
+-			      && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
+-			    {
+-			      Elf_Internal_Verdef ivd;
+-			      Elf_Internal_Verdaux ivda;
+-			      Elf_External_Verdaux evda;
+-			      unsigned long off;
+-
+-			      off = offset_from_vma
+-				(file,
+-				 version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
+-				 sizeof (Elf_External_Verdef));
+-
+-			      do
+-				{
+-				  Elf_External_Verdef evd;
+-
+-				  if (get_data (&evd, file, off, sizeof (evd),
+-						1, _("version def")) == NULL)
+-				    {
+-				      ivd.vd_ndx = 0;
+-				      ivd.vd_aux = 0;
+-				      ivd.vd_next = 0;
+-				    }
+-				  else
+-				    {
+-				      ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
+-				      ivd.vd_aux = BYTE_GET (evd.vd_aux);
+-				      ivd.vd_next = BYTE_GET (evd.vd_next);
+-				    }
+-
+-				  off += ivd.vd_next;
+-				}
+-			      while (ivd.vd_ndx != (vers_data & VERSYM_VERSION)
+-				     && ivd.vd_next != 0);
+-
+-			      off -= ivd.vd_next;
+-			      off += ivd.vd_aux;
+-
+-			      if (get_data (&evda, file, off, sizeof (evda),
+-					    1, _("version def aux")) == NULL)
+-				break;
+-
+-			      ivda.vda_name = BYTE_GET (evda.vda_name);
+-
+-			      if (psym->st_name != ivda.vda_name)
+-				printf ((vers_data & VERSYM_HIDDEN)
+-					? "@%s" : "@@%s",
+-					ivda.vda_name < strtab_size
+-					? strtab + ivda.vda_name : _("<corrupt>"));
+-			    }
+-			}
+-		    }
++		  if (sym_info == symbol_undefined)
++		    printf ("@%s (%d)", version_string, vna_other);
++		  else
++		    printf (sym_info == symbol_hidden ? "@%s" : "@@%s",
++			    version_string);
+ 		}
+ 
+ 	      putchar ('\n');
+diff --git a/ld/testsuite/ld-cris/weakref3.d b/ld/testsuite/ld-cris/weakref3.d
+index aea3ad6..4807106 100644
+--- a/ld/testsuite/ld-cris/weakref3.d
++++ b/ld/testsuite/ld-cris/weakref3.d
+@@ -16,11 +16,11 @@
+ #...
+ Relocation section '.rela.dyn' at offset 0x... contains 1 entries:
+  Offset +Info +Type +Sym.Value +Sym. Name \+ Addend
+-.* R_CRIS_COPY .* __expobj2 \+ 0
++.* R_CRIS_COPY .* __expobj2@TST3 \+ 0
+ 
+ Relocation section '.rela.plt' at offset 0x... contains 1 entries:
+  Offset +Info +Type +Sym.Value +Sym. Name \+ Addend
+-.* R_CRIS_JUMP_SLOT .* expfn2 \+ 0
++.* R_CRIS_JUMP_SLOT .* expfn2@TST3 \+ 0
+ 
+ The decoding of unwind sections for machine type Axis Communications 32-bit embedded processor is not currently supported.
+ 
+diff --git a/ld/testsuite/ld-cris/weakref4.d b/ld/testsuite/ld-cris/weakref4.d
+index 79de291..aed0f39 100644
+--- a/ld/testsuite/ld-cris/weakref4.d
++++ b/ld/testsuite/ld-cris/weakref4.d
+@@ -17,7 +17,7 @@
+ #...
+ Relocation section '.rela.dyn' at offset 0x... contains 1 entries:
+ #...
+-.* R_CRIS_COPY .* __expobj2 \+ 0
++.* R_CRIS_COPY .* __expobj2@TST3 \+ 0
+ 
+ The decoding of unwind sections for machine type Axis Communications 32-bit embedded processor is not currently supported.
+ 
+diff --git a/ld/testsuite/ld-elf/pr16496a.c b/ld/testsuite/ld-elf/pr16496a.c
+new file mode 100644
+index 0000000..35e8555
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr16496a.c
+@@ -0,0 +1,4 @@
++void
++sd_get_seats (void)
++{
++}
+diff --git a/ld/testsuite/ld-elf/pr16496a.map b/ld/testsuite/ld-elf/pr16496a.map
+new file mode 100644
+index 0000000..d677f37
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr16496a.map
+@@ -0,0 +1,4 @@
++LIBSYSTEMD_209 {
++global:
++        sd_get_seats;
++};
+diff --git a/ld/testsuite/ld-elf/pr16496b.c b/ld/testsuite/ld-elf/pr16496b.c
+new file mode 100644
+index 0000000..94a0f30
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr16496b.c
+@@ -0,0 +1,5 @@
++void sd_get_seats (void);
++void call_sd_get_seats (void)
++{
++  sd_get_seats ();
++}
+diff --git a/ld/testsuite/ld-elf/pr16496b.od b/ld/testsuite/ld-elf/pr16496b.od
+new file mode 100644
+index 0000000..6fb54c1
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr16496b.od
+@@ -0,0 +1,3 @@
++#...
++.* sd_get_seats@LIBSYSTEMD_209
++#pass
+diff --git a/ld/testsuite/ld-elf/shared.exp b/ld/testsuite/ld-elf/shared.exp
+index bbfd464..da5f8e4 100644
+--- a/ld/testsuite/ld-elf/shared.exp
++++ b/ld/testsuite/ld-elf/shared.exp
+@@ -224,6 +224,15 @@ set build_tests {
+   {"Build libpr2404b.a"
+    "" ""
+    {pr2404b.c} {} "libpr2404b.a"}
++  {"Build libpr16496a.so"
++   "-shared -Wl,--version-script=pr16496a.map" "-fPIC"
++   {pr16496a.c} {} "libpr16496a.so"}
++  {"Build libpr16496b.a"
++   "" "-fPIC"
++   {pr16496b.c} {} "libpr16496b.a"}
++  {"Build libpr16496b.so"
++   "-shared tmpdir/pr16496b.o tmpdir/libpr16496a.so" ""
++   {dummy.c} {{objdump {-R} pr16496b.od}} "libpr16496b.so"}
+ }
+ 
+ run_cc_link_tests $build_tests
+diff --git a/ld/testsuite/ld-elfvers/vers24.rd b/ld/testsuite/ld-elfvers/vers24.rd
+index fb464f9..2360447 100644
+--- a/ld/testsuite/ld-elfvers/vers24.rd
++++ b/ld/testsuite/ld-elfvers/vers24.rd
+@@ -1,7 +1,7 @@
+ Relocation section .*
+ # Ensure there is a dynamic relocation against x
+ #...
+-[0-9a-f]+ +[0-9a-f]+ R_.* +_?x(| \+ 0)
++[0-9a-f]+ +[0-9a-f]+ R_.* +_?x@VERS.0(| \+ 0)
+ #...
+ Symbol table '.dynsym' contains [0-9]+ entries:
+ # And ensure the dynamic symbol table contains at least x@VERS.0

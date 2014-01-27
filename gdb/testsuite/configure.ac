@@ -1,7 +1,7 @@
 #                                                       -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-# Copyright 2002-2013 Free Software Foundation, Inc.
+# Copyright 2002-2014 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -91,7 +91,8 @@ AC_OUTPUT([Makefile \
   gdb.ada/Makefile \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.btrace/Makefile \
   gdb.cell/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile \
-  gdb.fortran/Makefile gdb.go/Makefile gdb.server/Makefile gdb.java/Makefile \
+  gdb.dlang/Makefile gdb.fortran/Makefile gdb.go/Makefile \
+  gdb.server/Makefile gdb.java/Makefile \
   gdb.hp/Makefile gdb.hp/gdb.objdbg/Makefile gdb.hp/gdb.base-hp/Makefile \
   gdb.hp/gdb.aCC/Makefile gdb.hp/gdb.compat/Makefile \
   gdb.hp/gdb.defects/Makefile gdb.linespec/Makefile \

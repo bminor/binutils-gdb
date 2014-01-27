@@ -1,5 +1,5 @@
 /* Remote utility routines for the remote server for GDB.
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -161,7 +161,7 @@ handle_accept_event (int err, gdb_client_data client_data)
   socklen_t tmp;
 
   if (debug_threads)
-    fprintf (stderr, "handling possible accept event\n");
+    debug_printf ("handling possible accept event\n");
 
   tmp = sizeof (sockaddr);
   remote_desc = accept (listen_desc, (struct sockaddr *) &sockaddr, &tmp);
@@ -1315,8 +1315,8 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 		      struct target_waitstatus *status)
 {
   if (debug_threads)
-    fprintf (stderr, "Writing resume reply for %s:%d\n",
-	     target_pid_to_str (ptid), status->kind);
+    debug_printf ("Writing resume reply for %s:%d\n",
+		  target_pid_to_str (ptid), status->kind);
 
   switch (status->kind)
     {

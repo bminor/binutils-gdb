@@ -20,7 +20,10 @@ SHARABLE_SECTIONS=yes
 case "$target" in
   x86_64*-linux* | i[3-7]86*-linux*)
     case "$EMULATION_NAME" in
-      *i386*) LIBPATH_SUFFIX=32 ;;
+      *i386*)
+	LIBPATH_SUFFIX=32
+	LIBPATH_SUFFIX_SKIP=64
+	;;
     esac
     ;;
 esac

@@ -6,7 +6,7 @@ Section Headers:
 # On the normal MIPS systems, sections must be aligned to 16 byte
 # boundaries. On IA64, text sections are aligned to 16 byte boundaries.
  +\[ 1\] .text +PROGBITS +00000000 0000(34|40) 0000(08|10) 00 +AX +0 +0 +(.|..)
- +\[ 2\] .rel.+text +REL. +0+ 0+.* 00000. 0. +. +1 +4
+ +\[ 2\] .rel.+text +REL. +0+ 0+.* 0000.. 0. +I +. +1 +4
 # MIPS targets put .rela.text here.
 #...
  +\[ .\] .data +PROGBITS +00000000 0000(3c|48|50) 0000(04|10) 00 +WA +0 +0 +(.|..)

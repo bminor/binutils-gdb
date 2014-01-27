@@ -1,6 +1,6 @@
 /* MI Command Set - MI parser.
 
-   Copyright (C) 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -237,7 +237,7 @@ struct mi_parse *
 mi_parse (const char *cmd, char **token)
 {
   const char *chp;
-  struct mi_parse *parse = XMALLOC (struct mi_parse);
+  struct mi_parse *parse = XNEW (struct mi_parse);
   struct cleanup *cleanup;
 
   memset (parse, 0, sizeof (*parse));

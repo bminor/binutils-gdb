@@ -1,6 +1,6 @@
 /* Symbol table definitions for GDB.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -417,6 +417,10 @@ typedef enum domain_enum_tag
      `foo' in the STRUCT_DOMAIN.  */
 
   STRUCT_DOMAIN,
+
+  /* MODULE_DOMAIN is used in Fortran to hold module type names.  */
+
+  MODULE_DOMAIN,
 
   /* LABEL_DOMAIN may be used for names of labels (for gotos).  */
 
@@ -1320,9 +1324,8 @@ extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
    FIXME: cagney/2001-03-20: Can't make main_name() const since some
    of the calling code currently assumes that the string isn't
    const.  */
-extern void set_main_name (const char *name);
 extern /*const */ char *main_name (void);
-extern enum language language_of_main;
+extern enum language main_language (void);
 
 /* Check global symbols in objfile.  */
 struct symbol *lookup_global_symbol_from_objfile (const struct objfile *,

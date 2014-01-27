@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
 
-   Copyright 1993-2013 Free Software Foundation, Inc.
+   Copyright 1993-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1396,6 +1396,53 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
   return FALSE;
 }
 
+/* Get version string.  */
+
+const char *
+bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
+				   bfd_boolean *hidden)
+{
+  const char *version_string = NULL;
+  if (elf_dynversym (abfd) != 0
+      && (elf_dynverdef (abfd) != 0 || elf_dynverref (abfd) != 0))
+    {
+      unsigned int vernum = ((elf_symbol_type *) symbol)->version;
+
+      *hidden = (vernum & VERSYM_HIDDEN) != 0;
+      vernum &= VERSYM_VERSION;
+
+      if (vernum == 0)
+	version_string = "";
+      else if (vernum == 1)
+	version_string = "Base";
+      else if (vernum <= elf_tdata (abfd)->cverdefs)
+	version_string =
+	  elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+      else
+	{
+	  Elf_Internal_Verneed *t;
+
+	  version_string = "";
+	  for (t = elf_tdata (abfd)->verref;
+	       t != NULL;
+	       t = t->vn_nextref)
+	    {
+	      Elf_Internal_Vernaux *a;
+
+	      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		{
+		  if (a->vna_other == vernum)
+		    {
+		      version_string = a->vna_nodename;
+		      break;
+		    }
+		}
+	    }
+	}
+    }
+  return version_string;
+}
+
 /* Display ELF-specific fields of a symbol.  */
 
 void
@@ -1422,6 +1469,8 @@ bfd_elf_print_symbol (bfd *abfd,
 	const struct elf_backend_data *bed;
 	unsigned char st_other;
 	bfd_vma val;
+	const char *version_string;
+	bfd_boolean hidden;
 
 	section_name = symbol->section ? symbol->section->name : "(*none*)";
 
@@ -1447,45 +1496,12 @@ bfd_elf_print_symbol (bfd *abfd,
 	bfd_fprintf_vma (abfd, file, val);
 
 	/* If we have version information, print it.  */
-	if (elf_dynversym (abfd) != 0
-	    && (elf_dynverdef (abfd) != 0
-		|| elf_dynverref (abfd) != 0))
+	version_string = bfd_elf_get_symbol_version_string (abfd,
+							    symbol,
+							    &hidden);
+	if (version_string)
 	  {
-	    unsigned int vernum;
-	    const char *version_string;
-
-	    vernum = ((elf_symbol_type *) symbol)->version & VERSYM_VERSION;
-
-	    if (vernum == 0)
-	      version_string = "";
-	    else if (vernum == 1)
-	      version_string = "Base";
-	    else if (vernum <= elf_tdata (abfd)->cverdefs)
-	      version_string =
-		elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
-	    else
-	      {
-		Elf_Internal_Verneed *t;
-
-		version_string = "";
-		for (t = elf_tdata (abfd)->verref;
-		     t != NULL;
-		     t = t->vn_nextref)
-		  {
-		    Elf_Internal_Vernaux *a;
-
-		    for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
-		      {
-			if (a->vna_other == vernum)
-			  {
-			    version_string = a->vna_nodename;
-			    break;
-			  }
-		      }
-		  }
-	      }
-
-	    if ((((elf_symbol_type *) symbol)->version & VERSYM_HIDDEN) == 0)
+	    if (!hidden)
 	      fprintf (file, "  %-11s", version_string);
 	    else
 	      {
@@ -3080,11 +3096,13 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	{
 	  d->rel.hdr->sh_link = elf_onesymtab (abfd);
 	  d->rel.hdr->sh_info = d->this_idx;
+	  d->rel.hdr->sh_flags |= SHF_INFO_LINK;
 	}
       if (d->rela.idx != 0)
 	{
 	  d->rela.hdr->sh_link = elf_onesymtab (abfd);
 	  d->rela.hdr->sh_info = d->this_idx;
+	  d->rela.hdr->sh_flags |= SHF_INFO_LINK;
 	}
 
       /* We need to set up sh_link for SHF_LINK_ORDER.  */
@@ -3468,8 +3486,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
     return FALSE;
 
   /* Post process the headers if necessary.  */
-  if (bed->elf_backend_post_process_headers)
-    (*bed->elf_backend_post_process_headers) (abfd, link_info);
+  (*bed->elf_backend_post_process_headers) (abfd, link_info);
 
   fsargs.failed = FALSE;
   fsargs.link_info = link_info;
@@ -4168,11 +4185,31 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  /* Mandated PF_R.  */
 	  m->p_flags = PF_R;
 	  m->p_flags_valid = 1;
+	  s = first_tls;
 	  for (i = 0; i < (unsigned int) tls_count; ++i)
 	    {
-	      BFD_ASSERT (first_tls->flags & SEC_THREAD_LOCAL);
-	      m->sections[i] = first_tls;
-	      first_tls = first_tls->next;
+	      if ((s->flags & SEC_THREAD_LOCAL) == 0)
+		{
+		  _bfd_error_handler
+		    (_("%B: TLS sections are not adjacent:"), abfd);
+		  s = first_tls;
+		  i = 0;
+		  while (i < (unsigned int) tls_count)
+		    {
+		      if ((s->flags & SEC_THREAD_LOCAL) != 0)
+			{
+			  _bfd_error_handler (_("	    TLS: %A"), s);
+			  i++;
+			}
+		      else
+			_bfd_error_handler (_("	non-TLS: %A"), s);
+		      s = s->next;
+		    }
+		  bfd_set_error (bfd_error_bad_value);
+		  goto error_return;
+		}
+	      m->sections[i] = s;
+	      s = s->next;
 	    }
 
 	  *pm = m;
@@ -4414,6 +4451,9 @@ elf_sort_sections (const void *arg1, const void *arg2)
 static file_ptr
 vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
 {
+  /* PR binutils/16199: Handle an alignment of zero.  */
+  if (maxpagesize == 0)
+    maxpagesize = 1;
   return ((vma - off) % maxpagesize);
 }
 
@@ -4478,7 +4518,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int alloc;
   unsigned int i, j;
   bfd_vma header_pad = 0;
-  bfd_vma relro_start = 0, relro_end = 0;
 
   if (link_info == NULL
       && !_bfd_elf_map_sections_to_segments (abfd, link_info))
@@ -4548,23 +4587,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
   else
     header_pad -= off;
   off += header_pad;
-
-  /* Get start and end of PT_GNU_RELRO segment.  */
-  if (link_info != NULL)
-    {
-      relro_start = link_info->relro_start;
-      relro_end = link_info->relro_end;
-    }
-  else
-    {
-      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
-	if (m->p_type == PT_GNU_RELRO)
-	  {
-	    relro_start = m->p_paddr;
-	    relro_end = relro_start + m->p_size;
-	    break;
-	  }
-    }
 
   for (m = elf_seg_map (abfd), p = phdrs, j = 0;
        m != NULL;
@@ -4910,22 +4932,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    }
 	}
 
-      if (relro_start != 0
-	  && p->p_type == PT_LOAD
-	  && p->p_vaddr >= relro_start)
-	{
-	  /* If PT_LOAD segment doesn't fit PT_GNU_RELRO segment,
-	     adjust its p_filesz and p_memsz.  */
-	  if (p->p_vaddr + p->p_filesz < relro_end)
-	    {
-	      bfd_vma adjust = relro_end - (p->p_vaddr + p->p_filesz);
-	      p->p_filesz += adjust;
-	      off += adjust;
-	    }
-	  if (p->p_vaddr + p->p_memsz < relro_end)
-	    p->p_memsz += relro_end - (p->p_vaddr + p->p_memsz);
-	}
-
       off -= off_adjust;
 
       /* Check that all sections are in a PT_LOAD segment.
@@ -5127,14 +5133,11 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		{
 		  if (lp->p_type == PT_LOAD
 		      && lp->p_vaddr < link_info->relro_end
-		      && lp->p_vaddr + lp->p_filesz >= link_info->relro_end
 		      && lm->count != 0
 		      && lm->sections[0]->vma >= link_info->relro_start)
 		    break;
 		}
 
-	      /* PR ld/14207.  If the RELRO segment doesn't fit in the
-		 LOAD segment, it should be removed.  */
 	      BFD_ASSERT (lm != NULL);
 	    }
 	  else
@@ -10160,8 +10163,8 @@ asection _bfd_elf_large_com_section
 		      SEC_IS_COMMON, NULL, "LARGE_COMMON", 0);
 
 void
-_bfd_elf_set_osabi (bfd * abfd,
-		    struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
+_bfd_elf_post_process_headers (bfd * abfd,
+			       struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
 

@@ -347,6 +347,23 @@ md_number_to_chars (char * buf, valueT val, int n)
   number_to_chars_littleendian (buf, val, n);
 }
 
+static void
+require_end_of_expr (char *fname)
+{
+  while (* input_line_pointer == ' '
+	 || * input_line_pointer == '\t')
+    input_line_pointer ++;
+
+  if (! * input_line_pointer
+      || strchr ("\n\r,", * input_line_pointer)
+      || strchr (comment_chars, * input_line_pointer)
+      || strchr (line_comment_chars, * input_line_pointer)
+      || strchr (line_separator_chars, * input_line_pointer))
+    return;
+
+  as_bad (_("%%%s() must be outermost term in expression"), fname);
+}
+
 static struct
 {
   char * fname;
@@ -388,6 +405,8 @@ md_operand (expressionS * exp ATTRIBUTE_UNUSED)
     input_line_pointer ++;
 
   exp->X_md = reloc;
+
+  require_end_of_expr (reloc_functions[i].fname);
 }
 
 void
@@ -552,6 +571,7 @@ rl78_cons_fix_new (fragS *	frag,
 		 expressionS *  exp)
 {
   bfd_reloc_code_real_type type;
+  fixS *fixP;
 
   switch (size)
     {
@@ -601,7 +621,21 @@ rl78_cons_fix_new (fragS *	frag,
 	type = BFD_RELOC_RL78_DIFF;
     }
 
-  fix_new_exp (frag, where, (int) size, exp, 0, type);
+  fixP = fix_new_exp (frag, where, (int) size, exp, 0, type);
+  switch (exp->X_md)
+    {
+      /* These are intended to have values larger than the container,
+	 since the backend puts only the portion we need in it.
+	 However, we don't have a backend-specific reloc for them as
+	 they're handled with complex relocations.  */
+    case BFD_RELOC_RL78_LO16:
+    case BFD_RELOC_RL78_HI16:
+    case BFD_RELOC_RL78_HI8:
+      fixP->fx_no_overflow = 1;
+      break;
+    default:
+      break;
+    }
 }
 
 /* No relaxation just yet */

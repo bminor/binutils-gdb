@@ -1,5 +1,5 @@
 /* Cell SPU GNU/Linux multi-architecture debugging support.
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -248,7 +248,7 @@ spu_store_registers (struct target_ops *ops,
 static LONGEST
 spu_xfer_partial (struct target_ops *ops, enum target_object object,
 		  const char *annex, gdb_byte *readbuf,
-		  const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   struct target_ops *ops_beneath = find_target_beneath (ops);
   while (ops_beneath && !ops_beneath->to_xfer_partial)

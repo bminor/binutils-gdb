@@ -206,6 +206,8 @@ TARGET_LIBOPCODES_CFILES = \
 	mt-dis.c \
 	mt-ibld.c \
 	mt-opc.c \
+	nds32-asm.c \
+	nds32-dis.c \
 	nios2-dis.c \
 	nios2-opc.c \
 	ns32k-dis.c \

@@ -1,6 +1,6 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
 
-   Copyright (C) 1993-2013 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
@@ -90,7 +90,8 @@ static int mips_map_regno (struct gdbarch *, int);
 
 static void mips_set_register (int regno, ULONGEST value);
 
-static void mips_prepare_to_store (struct regcache *regcache);
+static void mips_prepare_to_store (struct target_ops *self,
+				   struct regcache *regcache);
 
 static int mips_fetch_word (CORE_ADDR addr, unsigned int *valp);
 
@@ -2064,7 +2065,7 @@ mips_fetch_registers (struct target_ops *ops,
    registers, so this function doesn't have to do anything.  */
 
 static void
-mips_prepare_to_store (struct regcache *regcache)
+mips_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
 }
 
@@ -2362,27 +2363,27 @@ mips_mourn_inferior (struct target_ops *ops)
    target contents.  */
 
 static int
-mips_insert_breakpoint (struct gdbarch *gdbarch,
+mips_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			struct bp_target_info *bp_tgt)
 {
   if (monitor_supports_breakpoints)
     return mips_set_breakpoint (bp_tgt->placed_address, MIPS_INSN32_SIZE,
 				BREAK_FETCH);
   else
-    return memory_insert_breakpoint (gdbarch, bp_tgt);
+    return memory_insert_breakpoint (ops, gdbarch, bp_tgt);
 }
 
 /* Remove a breakpoint.  */
 
 static int
-mips_remove_breakpoint (struct gdbarch *gdbarch,
+mips_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			struct bp_target_info *bp_tgt)
 {
   if (monitor_supports_breakpoints)
     return mips_clear_breakpoint (bp_tgt->placed_address, MIPS_INSN32_SIZE,
 				  BREAK_FETCH);
   else
-    return memory_remove_breakpoint (gdbarch, bp_tgt);
+    return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
 }
 
 /* Tell whether this target can support a hardware breakpoint.  CNT

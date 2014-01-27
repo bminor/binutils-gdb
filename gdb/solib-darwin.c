@@ -1,6 +1,6 @@
 /* Handle Darwin shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -103,7 +103,7 @@ get_darwin_info (void)
   if (info != NULL)
     return info;
 
-  info = XZALLOC (struct darwin_info);
+  info = XCNEW (struct darwin_info);
   set_program_space_data (current_program_space,
 			  solib_darwin_pspace_data, info);
   return info;
@@ -304,7 +304,7 @@ darwin_current_sos (void)
 	break;
 
       /* Create and fill the new so_list element.  */
-      dnew = XZALLOC (struct darwin_so_list);
+      dnew = XCNEW (struct darwin_so_list);
       new = &dnew->sl;
       old_chain = make_cleanup (xfree, dnew);
 
@@ -617,6 +617,12 @@ darwin_bfd_open (char *pathname)
       error (_("`%s': not a shared-library: %s"),
 	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
     }
+
+  /* The current filename for fat-binary BFDs is a name generated
+     by BFD, usually a string containing the name of the architecture.
+     Reset its value to the actual filename.  */
+  xfree (bfd_get_filename (res));
+  res->filename = xstrdup (pathname);
 
   gdb_bfd_unref (abfd);
   return res;

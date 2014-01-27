@@ -1,6 +1,6 @@
 /* Simulate breakpoints by patching locations in the target system, for GDB.
 
-   Copyright (C) 1990-2013 Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -77,14 +77,14 @@ default_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
 
 int
-memory_insert_breakpoint (struct gdbarch *gdbarch,
+memory_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   return gdbarch_memory_insert_breakpoint (gdbarch, bp_tgt);
 }
 
 int
-memory_remove_breakpoint (struct gdbarch *gdbarch,
+memory_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   return gdbarch_memory_remove_breakpoint (gdbarch, bp_tgt);

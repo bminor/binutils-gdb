@@ -1,3 +1,82 @@
+2014-01-22  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Server): Mention --debug-format=all|none|timestamp.
+	(gdbserver man): Ditto.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo: Document limited reverse/replay support
+	for target record-btrace.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Update documentation.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Document new /c
+	modifier accepted by "record function-call-history".
+	Add /i modifier to "record function-call-history" example.
+
+2014-01-15  Yuanhui Zhang  <asmwarrior@gmail.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Output Syntax): Add some missing "nl"
+	markers.  Remove one that was misplaced.
+
+2014-01-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Your Program's Environment) <set environment>:
+	Mention the shell, and point at 'set exec-wrapper'.
+
+2014-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Types In Python): Document new attribute Types.name.
+
+2013-12-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Types In Python): Clarify the documentation
+	of attribute gdb.Field.bitpos.
+
+2013-12-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Types In Python): Fix the documentation of
+	attribute "bitpos" in class gdb.Field for enum types.  Add
+	documentation for attribute "enumval" in that same class.
+
+2013-12-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Support Commands): Change @table into
+	@ftable.
+
+2013-12-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Auto-loading): Move menu up.  Move discussion of
+	auto-loaded objfile scripts and .debug_gdb_scripts section to their
+	corresponding section in Extending GDB.
+	(Extending GDB): Move menu up.  New menu item "Auto-loading
+	extensions".
+	(Sequences): New menu item "Auto-loading sequences".
+	(Auto-loading sequences): New node.
+	(Python): Rename section from Scripting GDB to Extending GDB.
+	(Python Auto-loading): Update xref, refer to "Auto-loading extensions".
+	Move docs on ways to auto-load extensions to ...
+	(Auto-loading extensions): ... here.  New node.
+
+2013-12-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI): Add "GDB/MI Support Commands" entry
+	in menu.
+	(GDB/MI Variable Objects): Adjust reference to "-list-features"
+	command, now in a new node.
+	(GDB/MI Support Commands): New node, with its contents being
+	extracted from the "GDB/MI Miscellaneous Commands" node.
+	A small paragraph introducing the section is also added at
+	the start.
+	(GDB/MI Miscellaneous Commands): Delete the description of the
+	-info-gdb-mi-command, -list-features and -list-target-features
+	commands, now hosted in the "GDB/MI Support Commands" node.
+
 2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/16113

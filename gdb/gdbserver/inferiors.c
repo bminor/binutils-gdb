@@ -1,5 +1,5 @@
 /* Inferior process information for the remote server for GDB.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -103,21 +103,6 @@ add_thread (ptid_t thread_id, void *target_data)
     current_inferior = new_thread;
 
   new_thread->target_data = target_data;
-}
-
-ptid_t
-thread_id_to_gdb_id (ptid_t thread_id)
-{
-  struct inferior_list_entry *inf = all_threads.head;
-
-  while (inf != NULL)
-    {
-      if (ptid_equal (inf->id, thread_id))
-	return thread_id;
-      inf = inf->next;
-    }
-
-  return null_ptid;
 }
 
 ptid_t

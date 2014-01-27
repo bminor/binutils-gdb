@@ -218,6 +218,21 @@ set build_tests {
   {"Build needed2"
    "tmpdir/libneeded2c.o -Wl,--as-needed tmpdir/libneeded2a.so tmpdir/libneeded2b.so" ""
    {dummy.c} {} "needed2"}
+  {"Build libpr2404a.so"
+   "-shared" "-fPIC"
+   {pr2404a.c} {} "libpr2404a.so"}
+  {"Build libpr2404b.a"
+   "" ""
+   {pr2404b.c} {} "libpr2404b.a"}
+  {"Build libpr16496a.so"
+   "-shared -Wl,--version-script=pr16496a.map" "-fPIC"
+   {pr16496a.c} {} "libpr16496a.so"}
+  {"Build libpr16496b.a"
+   "" "-fPIC"
+   {pr16496b.c} {} "libpr16496b.a"}
+  {"Build libpr16496b.so"
+   "-shared tmpdir/pr16496b.o tmpdir/libpr16496a.so" ""
+   {dummy.c} {{objdump {-R} pr16496b.od}} "libpr16496b.so"}
 }
 
 run_cc_link_tests $build_tests
@@ -365,6 +380,9 @@ set run_tests {
     {"Run relmain"
      "--no-as-needed -rpath=tmpdir -Ltmpdir -lrel" ""
      {relmain.c} "relmain" "relmain.out"}
+    {"Run pr2404"
+     "tmpdir/pr2404b.o tmpdir/libpr2404a.so" ""
+     {dummy.c} "pr2404" "pr2404.out"}
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
@@ -444,3 +462,29 @@ set run_cxx_tests {
 
 run_cc_link_tests $build_cxx_tests
 run_ld_link_exec_tests [] $run_cxx_tests
+
+if { [istarget *-*-linux*]
+     || [istarget *-*-nacl*]
+     || [istarget *-*-gnu*] } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build libpr2404b.a with PIE" \
+	    "" \
+	    "-fPIE" \
+	    { pr2404b.c } \
+	    {} \
+	    "libpr2404b.a" \
+	] \
+    ]
+    run_ld_link_exec_tests [] [list \
+	[list \
+	    "Run pr2404 with PIE" \
+	    "-pie tmpdir/pr2404b.o tmpdir/libpr2404a.so" \
+	    "" \
+	    { dummy.c } \
+	    "pr2404pie" \
+	    "pr2404.out" \
+	    "-fPIE" \
+	] \
+    ]
+}

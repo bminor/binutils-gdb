@@ -1,6 +1,6 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-2013 Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -427,7 +427,7 @@ get_svr4_info (void)
   if (info != NULL)
     return info;
 
-  info = XZALLOC (struct svr4_info);
+  info = XCNEW (struct svr4_info);
   set_program_space_data (current_program_space, solib_svr4_pspace_data, info);
   return info;
 }
@@ -949,7 +949,7 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   if (!ldsomap)
     return 0;
 
-  new = XZALLOC (struct so_list);
+  new = XCNEW (struct so_list);
   old_chain = make_cleanup (xfree, new);
   new->lm_info = lm_info_read (ldsomap);
   make_cleanup (xfree, new->lm_info);
@@ -1126,8 +1126,8 @@ library_list_start_library (struct gdb_xml_parser *parser,
   ULONGEST *l_ldp = xml_find_attribute (attributes, "l_ld")->value;
   struct so_list *new_elem;
 
-  new_elem = XZALLOC (struct so_list);
-  new_elem->lm_info = XZALLOC (struct lm_info);
+  new_elem = XCNEW (struct so_list);
+  new_elem->lm_info = XCNEW (struct lm_info);
   new_elem->lm_info->lm_addr = *lmp;
   new_elem->lm_info->l_addr_inferior = *l_addrp;
   new_elem->lm_info->l_ld = *l_ldp;
@@ -1279,7 +1279,7 @@ svr4_default_sos (void)
   if (!info->debug_loader_offset_p)
     return NULL;
 
-  new = XZALLOC (struct so_list);
+  new = XCNEW (struct so_list);
 
   new->lm_info = xzalloc (sizeof (struct lm_info));
 
@@ -1316,7 +1316,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
       int errcode;
       char *buffer;
 
-      new = XZALLOC (struct so_list);
+      new = XCNEW (struct so_list);
       old_chain = make_cleanup_free_so (new);
 
       new->lm_info = lm_info_read (lm);

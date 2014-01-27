@@ -378,25 +378,25 @@ test_msa:
 	sld.w	$w4,$w5[$6]
 	sld.d	$w7,$w8[$9]
 	sldi.b	$w10,$w11[0]
-	sldi.b	$w12,$w13[31]
+	sldi.b	$w12,$w13[15]
 	sldi.h	$w14,$w15[0]
-	sldi.h	$w16,$w17[15]
+	sldi.h	$w16,$w17[7]
 	sldi.w	$w18,$w19[0]
-	sldi.w	$w20,$w21[7]
+	sldi.w	$w20,$w21[3]
 	sldi.d	$w22,$w23[0]
-	sldi.d	$w24,$w25[3]
+	sldi.d	$w24,$w25[1]
 	splat.b	$w26,$w27[$28]
 	splat.h	$w29,$w30[$31]
 	splat.w	$w0,$w1[$2]
 	splat.d	$w3,$w4[$5]
 	splati.b	$w6,$w7[0]
-	splati.b	$w8,$w9[31]
+	splati.b	$w8,$w9[15]
 	splati.h	$w10,$w11[0]
-	splati.h	$w12,$w13[15]
+	splati.h	$w12,$w13[7]
 	splati.w	$w14,$w15[0]
-	splati.w	$w16,$w17[7]
+	splati.w	$w16,$w17[3]
 	splati.d	$w18,$w19[0]
-	splati.d	$w20,$w21[3]
+	splati.d	$w20,$w21[1]
 	pckev.b	$w22,$w23,$w24
 	pckev.h	$w25,$w26,$w27
 	pckev.w	$w28,$w29,$w30
@@ -522,31 +522,31 @@ test_msa:
 	nlzc.w	$w7,$w8
 	nlzc.d	$w9,$w10
 	copy_s.b	$11,$w12[0]
-	copy_s.b	$13,$w14[31]
+	copy_s.b	$13,$w14[15]
 	copy_s.h	$15,$w16[0]
-	copy_s.h	$17,$w18[15]
+	copy_s.h	$17,$w18[7]
 	copy_s.w	$19,$w20[0]
-	copy_s.w	$21,$w22[7]
+	copy_s.w	$21,$w22[3]
 	copy_u.b	$27,$w28[0]
-	copy_u.b	$29,$w30[31]
+	copy_u.b	$29,$w30[15]
 	copy_u.h	$31,$w0[0]
-	copy_u.h	$1,$w2[15]
+	copy_u.h	$1,$w2[7]
 	copy_u.w	$3,$w4[0]
-	copy_u.w	$5,$w6[7]
+	copy_u.w	$5,$w6[3]
 	insert.b	$w11[0],$12
-	insert.b	$w13[31],$14
+	insert.b	$w13[15],$14
 	insert.h	$w15[0],$16
-	insert.h	$w17[15],$18
+	insert.h	$w17[7],$18
 	insert.w	$w19[0],$20
-	insert.w	$w21[7],$22
+	insert.w	$w21[3],$22
 	insve.b	$w27[0],$w28[0]
-	insve.b	$w29[31],$w30[0]
+	insve.b	$w29[15],$w30[0]
 	insve.h	$w31[0],$w0[0]
-	insve.h	$w1[15],$w2[0]
+	insve.h	$w1[7],$w2[0]
 	insve.w	$w3[0],$w4[0]
-	insve.w	$w5[7],$w6[0]
+	insve.w	$w5[3],$w6[0]
 	insve.d	$w7[0],$w8[0]
-	insve.d	$w9[3],$w10[0]
+	insve.d	$w9[1],$w10[0]
 1:
 	bnz.b	$w11,. + 4 + (-32768 << insn_log2)
 	nop

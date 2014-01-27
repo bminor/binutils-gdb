@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Free Software Foundation, Inc.
+# Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -66,10 +66,10 @@ mi_continue_to_line [gdb_get_line_number {Backtrace end breakpoint} ${srcfile}] 
   "step to breakpoint"
 
 mi_gdb_test "-stack-list-frames" \
-    "\\^done,stack=\\\[frame={level=\"0\",addr=\"$hex\",func=\"cnuf_dne\".*},frame={level=\"1\",addr=\"$hex\",func=\"acnuf\".*},frame={level=\"2\",addr=\"$hex\",func=\"bcnuf\".*},frame={level=\"3\",addr=\"$hex\",func=\"acnuf\".*},frame={level=\"22\",addr=\"$hex\",func=\"1cnuf\".*,children=\\\[frame={level=\"23\",addr=\"$hex\",func=\"func2\".*}\\\]},frame={level=\"24\",addr=\"$hex\",func=\"3cnuf\".*},frame={level=\"27\",addr=\"$hex\",func=\"niam\".*}\\\].*" \
+    "\\^done,stack=\\\[frame={level=\"0\",addr=\"$hex\",func=\"cnuf_dne.*\".*},frame={level=\"1\",addr=\"$hex\",func=\"acnuf\".*},frame={level=\"2\",addr=\"$hex\",func=\"bcnuf\".*},frame={level=\"3\",addr=\"$hex\",func=\"acnuf\".*},frame={level=\"22\",addr=\"$hex\",func=\"1cnuf\".*,children=\\\[frame={level=\"23\",addr=\"$hex\",func=\"func2\".*}\\\]},frame={level=\"24\",addr=\"$hex\",func=\"3cnuf\".*},frame={level=\"27\",addr=\"$hex\",func=\"niam\".*}\\\].*" \
     "filtered stack listing"
 mi_gdb_test "-stack-list-frames 0 3" \
-    "\\^done,stack=\\\[frame={level=\"0\",addr=\"$hex\",func=\"cnuf_dne\".*},frame={level=\"1\",addr=\"$hex\",func=\"acnuf\".*},frame={level=\"2\",addr=\"$hex\",func=\"bcnuf\".*},frame={level=\"3\",addr=\"$hex\",func=\"acnuf\".*}\\\]" \
+    "\\^done,stack=\\\[frame={level=\"0\",addr=\"$hex\",func=\"cnuf_dne.*\".*},frame={level=\"1\",addr=\"$hex\",func=\"acnuf\".*},frame={level=\"2\",addr=\"$hex\",func=\"bcnuf\".*},frame={level=\"3\",addr=\"$hex\",func=\"acnuf\".*}\\\]" \
     "filtered stack list 0 3"
 mi_gdb_test "-stack-list-frames 22 24" \
     "\\^done,stack=\\\[frame={level=\"22\",addr=\"$hex\",func=\"1cnuf\".*,children=\\\[frame={level=\"23\",addr=\"$hex\",func=\"func2\".*}\\\]},frame={level=\"24\",addr=\"$hex\",func=\"3cnuf\".*}\\\]" \

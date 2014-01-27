@@ -1,6 +1,6 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
 
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
@@ -129,12 +129,7 @@ static ptid_t procfs_wait (struct target_ops *,
 static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
-static LONGEST procfs_xfer_partial (struct target_ops *ops,
-				    enum target_object object,
-				    const char *annex,
-				    gdb_byte *readbuf,
-				    const gdb_byte *writebuf,
-				    ULONGEST offset, LONGEST len);
+static target_xfer_partial_ftype procfs_xfer_partial;
 
 static int procfs_thread_alive (struct target_ops *ops, ptid_t);
 
@@ -3981,7 +3976,7 @@ wait_again:
 static LONGEST
 procfs_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   switch (object)
     {
@@ -5523,9 +5518,6 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   thread_args.stop_signal = stop_signal;
   proc_iterate_over_threads (pi, procfs_corefile_thread_callback,
 			     &thread_args);
-
-  /* There should be always at least one thread.  */
-  gdb_assert (thread_args.note_data != note_data);
   note_data = thread_args.note_data;
 
   auxv_len = target_read_alloc (&current_target, TARGET_OBJECT_AUXV,

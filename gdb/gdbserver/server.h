@@ -1,5 +1,5 @@
 /* Common definitions for remote server for GDB.
-   Copyright (C) 1993-2013 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -110,7 +110,6 @@ extern ptid_t cont_thread;
 extern ptid_t general_thread;
 
 extern int server_waiting;
-extern int debug_threads;
 extern int debug_hw_points;
 extern int pass_signals[];
 extern int program_signals[];
@@ -146,6 +145,7 @@ extern int handle_target_event (int err, gdb_client_data client_data);
 
 #include "common-utils.h"
 #include "utils.h"
+#include "debug.h"
 
 #include "gdb_assert.h"
 

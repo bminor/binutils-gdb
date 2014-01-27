@@ -1,5 +1,5 @@
 /* MI Command Set - file commands.
-   Copyright (C) 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -100,8 +100,8 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
     ui_out_end (uiout, ui_out_type_tuple);
   }
 
-  map_partial_symbol_filenames (print_partial_file_name, NULL,
-				1 /*need_fullname*/);
+  map_symbol_filenames (print_partial_file_name, NULL,
+			1 /*need_fullname*/);
 
   ui_out_end (uiout, ui_out_type_list);
 }

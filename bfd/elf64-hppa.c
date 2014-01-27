@@ -4103,8 +4103,6 @@ const struct elf_size_info hppa64_elf_size_info =
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
 #undef ELF_OSABI
 #define ELF_OSABI			ELFOSABI_GNU
-#undef elf_backend_post_process_headers
-#define elf_backend_post_process_headers _bfd_elf_set_osabi
 #undef elf64_bed
 #define elf64_bed			elf64_hppa_linux_bed
 

@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2013 Free Software Foundation, Inc.
+# Copyright (C) 1989-2014 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -106,7 +106,7 @@ GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 # e.g.: "target/wait.h".
 #
 INCLUDE_CFLAGS = -I. -I${srcdir} -I$(srcdir)/../common \
-	-I$(srcdir)/../regformats -I$(srcdir)/../ -I$(INCLUDE_DIR) \
+	-I$(srcdir)/../regformats -I$(srcdir)/.. -I$(INCLUDE_DIR) \
 	$(INCGNU)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
@@ -141,7 +141,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/mem-break.c $(srcdir)/proc-service.c \
 	$(srcdir)/proc-service.list $(srcdir)/regcache.c \
 	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
-	$(srcdir)/thread-db.c $(srcdir)/utils.c \
+	$(srcdir)/thread-db.c $(srcdir)/utils.c $(srcdir)/debug.c \
 	$(srcdir)/linux-arm-low.c $(srcdir)/linux-bfin-low.c \
 	$(srcdir)/linux-cris-low.c $(srcdir)/linux-crisv32-low.c \
 	${srcdir}/i386-low.c $(srcdir)/i387-fp.c \
@@ -173,7 +173,7 @@ SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
-      target.o waitstatus.o utils.o version.o vec.o gdb_vecs.o \
+      target.o waitstatus.o utils.o debug.o version.o vec.o gdb_vecs.o \
       mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
       tdesc.o $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
@@ -541,6 +541,12 @@ vasprintf.o: $(srcdir)/../../libiberty/vasprintf.c
 	$(COMPILE) $< -DHAVE_CONFIG_H
 	$(POSTCOMPILE)
 vsnprintf.o: $(srcdir)/../../libiberty/vsnprintf.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+safe-ctype.o: $(srcdir)/../../libiberty/safe-ctype.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+lbasename.o: $(srcdir)/../../libiberty/lbasename.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

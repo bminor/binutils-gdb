@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Free Software Foundation, Inc.
+# Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -258,7 +258,10 @@ class FrameVars(object):
         are no frame local variables, return an empty list."""
         lvars = []
 
-        block = self.frame.block()
+        try:
+            block = self.frame.block()
+        except RuntimeError:
+            block = None
 
         while block != None:
             if block.is_global or block.is_static:
@@ -279,7 +282,12 @@ class FrameVars(object):
         there are no frame argument variables, return an empty list."""
 
         args = []
-        block = self.frame.block()
+
+        try:
+            block = self.frame.block()
+        except RuntimeError:
+            block = None
+
         while block != None:
             if block.function != None:
                 break

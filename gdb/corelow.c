@@ -1,6 +1,6 @@
 /* Core dump and executable file functions below target vector, for GDB.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -348,7 +348,7 @@ core_open (char *filename, int from_tty)
 
   validate_files ();
 
-  core_data = XZALLOC (struct target_section_table);
+  core_data = XCNEW (struct target_section_table);
 
   /* Find the data section */
   if (build_section_table (core_bfd,
@@ -649,7 +649,7 @@ add_to_spuid_list (bfd *abfd, asection *asect, void *list_p)
    the to_xfer_partial interface.  */
 
 static LONGEST
-get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, LONGEST len)
+get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   asection *section;
   char *section_name;
@@ -676,7 +676,7 @@ static LONGEST
 core_xfer_partial (struct target_ops *ops, enum target_object object,
 		   const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf, ULONGEST offset,
-		   LONGEST len)
+		   ULONGEST len)
 {
   switch (object)
     {
@@ -842,7 +842,8 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
    breakpoint_init_inferior).  */
 
 static int
-ignore (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt)
+ignore (struct target_ops *ops, struct gdbarch *gdbarch,
+	struct bp_target_info *bp_tgt)
 {
   return 0;
 }

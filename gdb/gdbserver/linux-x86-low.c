@@ -1,6 +1,6 @@
 /* GNU/Linux/x86-64 specific low level interface, for the remote server
    for GDB.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,9 +26,14 @@
 #include "i387-fp.h"
 #include "i386-low.h"
 #include "i386-xstate.h"
-#include "elf/common.h"
 
 #include "gdb_proc_service.h"
+/* Don't include elf/common.h if linux/elf.h got included by
+   gdb_proc_service.h.  */
+#ifndef ELFMAG0
+#include "elf/common.h"
+#endif
+
 #include "agent.h"
 #include "tdesc.h"
 #include "tracepoint.h"
@@ -2022,8 +2027,8 @@ add_insns (unsigned char *start, int len)
   CORE_ADDR buildaddr = current_insn_ptr;
 
   if (debug_threads)
-    fprintf (stderr, "Adding %d bytes of insn at %s\n",
-	     len, paddress (buildaddr));
+    debug_printf ("Adding %d bytes of insn at %s\n",
+		  len, paddress (buildaddr));
 
   append_insns (&buildaddr, len, start);
   current_insn_ptr = buildaddr;

@@ -1,6 +1,6 @@
 /* Linux-dependent part of branch trace support for GDB, and GDBserver.
 
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -172,11 +172,11 @@ perf_event_sample_ok (const struct perf_event_sample *sample)
 
 static VEC (btrace_block_s) *
 perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
-		     const uint8_t *end, const uint8_t *start)
+		     const uint8_t *end, const uint8_t *start, size_t size)
 {
   VEC (btrace_block_s) *btrace = NULL;
   struct perf_event_sample sample;
-  size_t read = 0, size = (end - begin);
+  size_t read = 0;
   struct btrace_block block = { 0, 0 };
   struct regcache *regcache;
 
@@ -251,6 +251,13 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
       /* Start the next block.  */
       block.end = psample->bts.from;
     }
+
+  /* Push the last block (i.e. the first one of inferior execution), as well.
+     We don't know where it ends, but we know where it starts.  If we're
+     reading delta trace, we can fill in the start address later on.
+     Otherwise we will prune it.  */
+  block.begin = 0;
+  VEC_safe_push (btrace_block_s, btrace, &block);
 
   return btrace;
 }
@@ -423,7 +430,7 @@ struct btrace_target_info *
 linux_enable_btrace (ptid_t ptid)
 {
   struct btrace_target_info *tinfo;
-  int pid;
+  int pid, pg;
 
   tinfo = xzalloc (sizeof (*tinfo));
   tinfo->ptid = ptid;
@@ -451,17 +458,22 @@ linux_enable_btrace (ptid_t ptid)
   if (tinfo->file < 0)
     goto err;
 
-  /* We hard-code the trace buffer size.
-     At some later time, we should make this configurable.  */
-  tinfo->size = 1;
-  tinfo->buffer = mmap (NULL, perf_event_mmap_size (tinfo),
-			PROT_READ, MAP_SHARED, tinfo->file, 0);
-  if (tinfo->buffer == MAP_FAILED)
-    goto err_file;
+  /* We try to allocate as much buffer as we can get.
+     We could allow the user to specify the size of the buffer, but then
+     we'd leave this search for the maximum buffer size to him.  */
+  for (pg = 4; pg >= 0; --pg)
+    {
+      /* The number of pages we request needs to be a power of two.  */
+      tinfo->size = 1 << pg;
+      tinfo->buffer = mmap (NULL, perf_event_mmap_size (tinfo),
+			    PROT_READ, MAP_SHARED, tinfo->file, 0);
+      if (tinfo->buffer == MAP_FAILED)
+	continue;
 
-  return tinfo;
+      return tinfo;
+    }
 
- err_file:
+  /* We were not able to allocate any buffer.  */
   close (tinfo->file);
 
  err:
@@ -471,7 +483,7 @@ linux_enable_btrace (ptid_t ptid)
 
 /* See linux-btrace.h.  */
 
-int
+enum btrace_error
 linux_disable_btrace (struct btrace_target_info *tinfo)
 {
   int errcode;
@@ -479,12 +491,12 @@ linux_disable_btrace (struct btrace_target_info *tinfo)
   errno = 0;
   errcode = munmap (tinfo->buffer, perf_event_mmap_size (tinfo));
   if (errcode != 0)
-    return errno;
+    return BTRACE_ERR_UNKNOWN;
 
   close (tinfo->file);
   xfree (tinfo);
 
-  return 0;
+  return BTRACE_ERR_NONE;
 }
 
 /* Check whether the branch trace has changed.  */
@@ -499,41 +511,69 @@ linux_btrace_has_changed (struct btrace_target_info *tinfo)
 
 /* See linux-btrace.h.  */
 
-VEC (btrace_block_s) *
-linux_read_btrace (struct btrace_target_info *tinfo,
+enum btrace_error
+linux_read_btrace (VEC (btrace_block_s) **btrace,
+		   struct btrace_target_info *tinfo,
 		   enum btrace_read_type type)
 {
-  VEC (btrace_block_s) *btrace = NULL;
   volatile struct perf_event_mmap_page *header;
   const uint8_t *begin, *end, *start;
-  unsigned long data_head, retries = 5;
-  size_t buffer_size;
+  unsigned long data_head, data_tail, retries = 5;
+  size_t buffer_size, size;
 
-  if (type == btrace_read_new && !linux_btrace_has_changed (tinfo))
-    return NULL;
+  /* For delta reads, we return at least the partial last block containing
+     the current PC.  */
+  if (type == BTRACE_READ_NEW && !linux_btrace_has_changed (tinfo))
+    return BTRACE_ERR_NONE;
 
   header = perf_event_header (tinfo);
   buffer_size = perf_event_buffer_size (tinfo);
+  data_tail = tinfo->data_head;
 
   /* We may need to retry reading the trace.  See below.  */
   while (retries--)
     {
       data_head = header->data_head;
 
-      /* If there's new trace, let's read it.  */
-      if (data_head != tinfo->data_head)
+      /* Delete any leftover trace from the previous iteration.  */
+      VEC_free (btrace_block_s, *btrace);
+
+      if (type == BTRACE_READ_DELTA)
 	{
-	  /* Data_head keeps growing; the buffer itself is circular.  */
-	  begin = perf_event_buffer_begin (tinfo);
-	  start = begin + data_head % buffer_size;
+	  /* Determine the number of bytes to read and check for buffer
+	     overflows.  */
 
-	  if (data_head <= buffer_size)
-	    end = start;
-	  else
-	    end = perf_event_buffer_end (tinfo);
+	  /* Check for data head overflows.  We might be able to recover from
+	     those but they are very unlikely and it's not really worth the
+	     effort, I think.  */
+	  if (data_head < data_tail)
+	    return BTRACE_ERR_OVERFLOW;
 
-	  btrace = perf_event_read_bts (tinfo, begin, end, start);
+	  /* If the buffer is smaller than the trace delta, we overflowed.  */
+	  size = data_head - data_tail;
+	  if (buffer_size < size)
+	    return BTRACE_ERR_OVERFLOW;
 	}
+      else
+	{
+	  /* Read the entire buffer.  */
+	  size = buffer_size;
+
+	  /* Adjust the size if the buffer has not overflowed, yet.  */
+	  if (data_head < size)
+	    size = data_head;
+	}
+
+      /* Data_head keeps growing; the buffer itself is circular.  */
+      begin = perf_event_buffer_begin (tinfo);
+      start = begin + data_head % buffer_size;
+
+      if (data_head <= buffer_size)
+	end = start;
+      else
+	end = perf_event_buffer_end (tinfo);
+
+      *btrace = perf_event_read_bts (tinfo, begin, end, start, size);
 
       /* The stopping thread notifies its ptracer before it is scheduled out.
 	 On multi-core systems, the debugger might therefore run while the
@@ -546,7 +586,13 @@ linux_read_btrace (struct btrace_target_info *tinfo,
 
   tinfo->data_head = data_head;
 
-  return btrace;
+  /* Prune the incomplete last block (i.e. the first one of inferior execution)
+     if we're not doing a delta read.  There is no way of filling in its zeroed
+     BEGIN element.  */
+  if (!VEC_empty (btrace_block_s, *btrace) && type != BTRACE_READ_DELTA)
+    VEC_pop (btrace_block_s, *btrace);
+
+  return BTRACE_ERR_NONE;
 }
 
 #else /* !HAVE_LINUX_PERF_EVENT_H */
@@ -569,19 +615,20 @@ linux_enable_btrace (ptid_t ptid)
 
 /* See linux-btrace.h.  */
 
-int
+enum btrace_error
 linux_disable_btrace (struct btrace_target_info *tinfo)
 {
-  return ENOSYS;
+  return BTRACE_ERR_NOT_SUPPORTED;
 }
 
 /* See linux-btrace.h.  */
 
-VEC (btrace_block_s) *
-linux_read_btrace (struct btrace_target_info *tinfo,
+enum btrace_error
+linux_read_btrace (VEC (btrace_block_s) **btrace,
+		   struct btrace_target_info *tinfo,
 		   enum btrace_read_type type)
 {
-  return NULL;
+  return BTRACE_ERR_NOT_SUPPORTED;
 }
 
 #endif /* !HAVE_LINUX_PERF_EVENT_H */

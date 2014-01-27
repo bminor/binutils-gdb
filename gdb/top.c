@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -85,11 +85,6 @@ extern void initialize_all_files (void);
 const char gdbinit[] = GDBINIT;
 
 int inhibit_gdbinit = 0;
-
-/* If nonzero, and GDB has been configured to be able to use windows,
-   attempt to open them upon startup.  */
-
-int use_windows = 0;
 
 extern char lang_frame_mismatch_warn[];		/* language.c */
 
@@ -252,11 +247,6 @@ ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 
 void (*deprecated_call_command_hook) (struct cmd_list_element * c, 
 				      char *cmd, int from_tty);
-
-/* Called after a `set' command has finished.  Is only run if the
-   `set' command succeeded.  */
-
-void (*deprecated_set_hook) (struct cmd_list_element * c);
 
 /* Called when the current thread changes.  Argument is thread id.  */
 
@@ -450,7 +440,7 @@ execute_command (char *p, int from_tty)
       /* If this command has been pre-hooked, run the hook first.  */
       execute_cmd_pre_hook (c);
 
-      if (c->flags & DEPRECATED_WARN_USER)
+      if (c->deprecated_warn_user)
 	deprecated_cmd_warning (line);
 
       /* c->user_commands would be NULL in the case of a python command.  */
@@ -1102,7 +1092,7 @@ print_gdb_version (struct ui_file *stream)
   /* Second line is a copyright notice.  */
 
   fprintf_filtered (stream,
-		    "Copyright (C) 2013 Free Software Foundation, Inc.\n");
+		    "Copyright (C) 2014 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on

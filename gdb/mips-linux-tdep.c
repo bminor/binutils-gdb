@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright (C) 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,7 +32,6 @@
 #include "gdbtypes.h"
 #include "objfiles.h"
 #include "solib.h"
-#include "solib-svr4.h"
 #include "solist.h"
 #include "symtab.h"
 #include "target-descriptions.h"

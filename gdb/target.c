@@ -1,6 +1,6 @@
 /* Select target systems and architectures at runtime for GDB.
 
-   Copyright (C) 1990-2013 Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -64,23 +64,17 @@ static int return_one (void);
 
 static int return_minus_one (void);
 
+static void *return_null (void);
+
 void target_ignore (void);
 
 static void target_command (char *, int);
 
 static struct target_ops *find_default_run_target (char *);
 
-static LONGEST default_xfer_partial (struct target_ops *ops,
-				     enum target_object object,
-				     const char *annex, gdb_byte *readbuf,
-				     const gdb_byte *writebuf,
-				     ULONGEST offset, LONGEST len);
+static target_xfer_partial_ftype default_xfer_partial;
 
-static LONGEST current_xfer_partial (struct target_ops *ops,
-				     enum target_object object,
-				     const char *annex, gdb_byte *readbuf,
-				     const gdb_byte *writebuf,
-				     ULONGEST offset, LONGEST len);
+static target_xfer_partial_ftype current_xfer_partial;
 
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
 						    ptid_t ptid);
@@ -91,14 +85,15 @@ static struct target_ops debug_target;
 
 static void debug_to_open (char *, int);
 
-static void debug_to_prepare_to_store (struct regcache *);
+static void debug_to_prepare_to_store (struct target_ops *self,
+				       struct regcache *);
 
 static void debug_to_files_info (struct target_ops *);
 
-static int debug_to_insert_breakpoint (struct gdbarch *,
+static int debug_to_insert_breakpoint (struct target_ops *, struct gdbarch *,
 				       struct bp_target_info *);
 
-static int debug_to_remove_breakpoint (struct gdbarch *,
+static int debug_to_remove_breakpoint (struct target_ops *, struct gdbarch *,
 				       struct bp_target_info *);
 
 static int debug_to_can_use_hw_breakpoint (int, int, int);
@@ -590,8 +585,8 @@ update_current_target (void)
       INHERIT (to_prepare_to_store, t);
       INHERIT (deprecated_xfer_memory, t);
       INHERIT (to_files_info, t);
-      INHERIT (to_insert_breakpoint, t);
-      INHERIT (to_remove_breakpoint, t);
+      /* Do not inherit to_insert_breakpoint.  */
+      /* Do not inherit to_remove_breakpoint.  */
       INHERIT (to_can_use_hw_breakpoint, t);
       INHERIT (to_insert_hw_breakpoint, t);
       INHERIT (to_remove_hw_breakpoint, t);
@@ -722,7 +717,7 @@ update_current_target (void)
 	    (void (*) (int))
 	    target_ignore);
   de_fault (to_prepare_to_store,
-	    (void (*) (struct regcache *))
+	    (void (*) (struct target_ops *, struct regcache *))
 	    noprocess);
   de_fault (deprecated_xfer_memory,
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
@@ -731,10 +726,6 @@ update_current_target (void)
   de_fault (to_files_info,
 	    (void (*) (struct target_ops *))
 	    target_ignore);
-  de_fault (to_insert_breakpoint,
-	    memory_insert_breakpoint);
-  de_fault (to_remove_breakpoint,
-	    memory_remove_breakpoint);
   de_fault (to_can_use_hw_breakpoint,
 	    (int (*) (int, int, int))
 	    return_zero);
@@ -814,10 +805,10 @@ update_current_target (void)
 	    return_zero);
   de_fault (to_extra_thread_info,
 	    (char *(*) (struct thread_info *))
-	    return_zero);
+	    return_null);
   de_fault (to_thread_name,
 	    (char *(*) (struct thread_info *))
-	    return_zero);
+	    return_null);
   de_fault (to_stop,
 	    (void (*) (ptid_t))
 	    target_ignore);
@@ -827,7 +818,7 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_pid_to_exec_file,
 	    (char *(*) (int))
-	    return_zero);
+	    return_null);
   de_fault (to_async,
 	    (void (*) (void (*) (enum inferior_event_type, void*), void*))
 	    tcomplain);
@@ -926,7 +917,7 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_traceframe_info,
 	    (struct traceframe_info * (*) (void))
-	    return_zero);
+	    return_null);
   de_fault (to_supports_evaluation_of_breakpoint_conditions,
 	    (int (*) (void))
 	    return_zero);
@@ -1323,7 +1314,7 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 
 static LONGEST
 target_read_live_memory (enum target_object object,
-			 ULONGEST memaddr, gdb_byte *myaddr, LONGEST len)
+			 ULONGEST memaddr, gdb_byte *myaddr, ULONGEST len)
 {
   LONGEST ret;
   struct cleanup *cleanup;
@@ -1353,7 +1344,7 @@ static LONGEST
 memory_xfer_live_readonly_partial (struct target_ops *ops,
 				   enum target_object object,
 				   gdb_byte *readbuf, ULONGEST memaddr,
-				   LONGEST len)
+				   ULONGEST len)
 {
   struct target_section *secp;
   struct target_section_table *table;
@@ -1403,8 +1394,8 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
    the target below it.  So, we must manually try all targets.  */
 
 static LONGEST
-raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
-			 const void *writebuf, ULONGEST memaddr, LONGEST len)
+raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
+			 const gdb_byte *writebuf, ULONGEST memaddr, LONGEST len)
 {
   LONGEST res;
 
@@ -1413,6 +1404,10 @@ raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
       res = ops->to_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
 				  readbuf, writebuf, memaddr, len);
       if (res > 0)
+	break;
+
+      /* Stop if the target reports that the memory is not available.  */
+      if (res == TARGET_XFER_E_UNAVAILABLE)
 	break;
 
       /* We want to continue past core files to executables, but not
@@ -1432,8 +1427,8 @@ raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
 
 static LONGEST
 memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
-		       void *readbuf, const void *writebuf, ULONGEST memaddr,
-		       LONGEST len)
+		       gdb_byte *readbuf, const gdb_byte *writebuf, ULONGEST memaddr,
+		       ULONGEST len)
 {
   LONGEST res;
   int reg_len;
@@ -1630,8 +1625,8 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
 static LONGEST
 memory_xfer_partial (struct target_ops *ops, enum target_object object,
-		     void *readbuf, const void *writebuf, ULONGEST memaddr,
-		     LONGEST len)
+		     gdb_byte *readbuf, const gdb_byte *writebuf, ULONGEST memaddr,
+		     ULONGEST len)
 {
   int res;
 
@@ -1695,8 +1690,8 @@ make_show_memory_breakpoints_cleanup (int show)
 LONGEST
 target_xfer_partial (struct target_ops *ops,
 		     enum target_object object, const char *annex,
-		     void *readbuf, const void *writebuf,
-		     ULONGEST offset, LONGEST len)
+		     gdb_byte *readbuf, const gdb_byte *writebuf,
+		     ULONGEST offset, ULONGEST len)
 {
   LONGEST retval;
 
@@ -1735,7 +1730,7 @@ target_xfer_partial (struct target_ops *ops,
 			  host_address_to_string (readbuf),
 			  host_address_to_string (writebuf),
 			  core_addr_to_string_nz (offset),
-			  plongest (len), plongest (retval));
+			  pulongest (len), plongest (retval));
 
       if (readbuf)
 	myaddr = readbuf;
@@ -1970,7 +1965,7 @@ show_trust_readonly (struct ui_file *file, int from_tty,
 static LONGEST
 default_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY
       && ops->deprecated_xfer_memory != NULL)
@@ -2016,7 +2011,7 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 static LONGEST
 current_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
 {
   if (ops->beneath != NULL)
     return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
@@ -2462,6 +2457,22 @@ get_target_memory_unsigned (struct target_ops *ops, CORE_ADDR addr,
   return extract_unsigned_integer (buf, len, byte_order);
 }
 
+/* See target.h.  */
+
+int
+forward_target_insert_breakpoint (struct target_ops *ops,
+				  struct gdbarch *gdbarch,
+				  struct bp_target_info *bp_tgt)
+{
+  for (; ops != NULL; ops = ops->beneath)
+    if (ops->to_insert_breakpoint != NULL)
+      return ops->to_insert_breakpoint (ops, gdbarch, bp_tgt);
+
+  return memory_insert_breakpoint (ops, gdbarch, bp_tgt);
+}
+
+/* See target.h.  */
+
 int
 target_insert_breakpoint (struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
@@ -2472,12 +2483,15 @@ target_insert_breakpoint (struct gdbarch *gdbarch,
       return 1;
     }
 
-  return (*current_target.to_insert_breakpoint) (gdbarch, bp_tgt);
+  return forward_target_insert_breakpoint (&current_target, gdbarch, bp_tgt);
 }
 
+/* See target.h.  */
+
 int
-target_remove_breakpoint (struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
+forward_target_remove_breakpoint (struct target_ops *ops,
+				  struct gdbarch *gdbarch,
+				  struct bp_target_info *bp_tgt)
 {
   /* This is kind of a weird case to handle, but the permission might
      have been changed after breakpoints were inserted - in which case
@@ -2489,7 +2503,20 @@ target_remove_breakpoint (struct gdbarch *gdbarch,
       return 1;
     }
 
-  return (*current_target.to_remove_breakpoint) (gdbarch, bp_tgt);
+  for (; ops != NULL; ops = ops->beneath)
+    if (ops->to_remove_breakpoint != NULL)
+      return ops->to_remove_breakpoint (ops, gdbarch, bp_tgt);
+
+  return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
+}
+
+/* See target.h.  */
+
+int
+target_remove_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
+{
+  return forward_target_remove_breakpoint (&current_target, gdbarch, bp_tgt);
 }
 
 static void
@@ -3642,6 +3669,12 @@ return_minus_one (void)
   return -1;
 }
 
+static void *
+return_null (void)
+{
+  return 0;
+}
+
 /*
  * Find the next target down the stack from the specified target.
  */
@@ -4199,18 +4232,19 @@ target_teardown_btrace (struct btrace_target_info *btinfo)
 
 /* See target.h.  */
 
-VEC (btrace_block_s) *
-target_read_btrace (struct btrace_target_info *btinfo,
+enum btrace_error
+target_read_btrace (VEC (btrace_block_s) **btrace,
+		    struct btrace_target_info *btinfo,
 		    enum btrace_read_type type)
 {
   struct target_ops *t;
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_read_btrace != NULL)
-      return t->to_read_btrace (btinfo, type);
+      return t->to_read_btrace (btrace, btinfo, type);
 
   tcomplain ();
-  return NULL;
+  return BTRACE_ERR_NOT_SUPPORTED;
 }
 
 /* See target.h.  */
@@ -4463,11 +4497,60 @@ target_call_history_range (ULONGEST begin, ULONGEST end, int flags)
 }
 
 static void
-debug_to_prepare_to_store (struct regcache *regcache)
+debug_to_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
-  debug_target.to_prepare_to_store (regcache);
+  debug_target.to_prepare_to_store (&debug_target, regcache);
 
   fprintf_unfiltered (gdb_stdlog, "target_prepare_to_store ()\n");
+}
+
+/* See target.h.  */
+
+const struct frame_unwind *
+target_get_unwinder (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_get_unwinder != NULL)
+      return t->to_get_unwinder;
+
+  return NULL;
+}
+
+/* See target.h.  */
+
+const struct frame_unwind *
+target_get_tailcall_unwinder (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_get_tailcall_unwinder != NULL)
+      return t->to_get_tailcall_unwinder;
+
+  return NULL;
+}
+
+/* See target.h.  */
+
+CORE_ADDR
+forward_target_decr_pc_after_break (struct target_ops *ops,
+				    struct gdbarch *gdbarch)
+{
+  for (; ops != NULL; ops = ops->beneath)
+    if (ops->to_decr_pc_after_break != NULL)
+      return ops->to_decr_pc_after_break (ops, gdbarch);
+
+  return gdbarch_decr_pc_after_break (gdbarch);
+}
+
+/* See target.h.  */
+
+CORE_ADDR
+target_decr_pc_after_break (struct gdbarch *gdbarch)
+{
+  return forward_target_decr_pc_after_break (current_target.beneath, gdbarch);
 }
 
 static int
@@ -4520,12 +4603,12 @@ debug_to_files_info (struct target_ops *target)
 }
 
 static int
-debug_to_insert_breakpoint (struct gdbarch *gdbarch,
+debug_to_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			    struct bp_target_info *bp_tgt)
 {
   int retval;
 
-  retval = debug_target.to_insert_breakpoint (gdbarch, bp_tgt);
+  retval = forward_target_insert_breakpoint (&debug_target, gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_insert_breakpoint (%s, xxx) = %ld\n",
@@ -4535,12 +4618,12 @@ debug_to_insert_breakpoint (struct gdbarch *gdbarch,
 }
 
 static int
-debug_to_remove_breakpoint (struct gdbarch *gdbarch,
+debug_to_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			    struct bp_target_info *bp_tgt)
 {
   int retval;
 
-  retval = debug_target.to_remove_breakpoint (gdbarch, bp_tgt);
+  retval = forward_target_remove_breakpoint (&debug_target, gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_remove_breakpoint (%s, xxx) = %ld\n",

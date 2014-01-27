@@ -131,6 +131,7 @@
 #include "elf/moxie.h"
 #include "elf/mt.h"
 #include "elf/msp430.h"
+#include "elf/nds32.h"
 #include "elf/nios2.h"
 #include "elf/or32.h"
 #include "elf/pj.h"
@@ -269,6 +270,20 @@ typedef enum print_mode
   LONG_HEX
 }
 print_mode;
+
+/* Versioned symbol info.  */
+enum versioned_symbol_info
+{
+  symbol_undefined,
+  symbol_hidden,
+  symbol_public
+};
+
+static const char *get_symbol_version_string
+  (FILE *file, int is_dynsym, const char *strtab,
+   unsigned long int strtab_size, unsigned int si,
+   Elf_Internal_Sym *psym, enum versioned_symbol_info *sym_info,
+   unsigned short *vna_other);
 
 #define UNKNOWN -1
 
@@ -626,6 +641,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_MSP430:
     case EM_MSP430_OLD:
     case EM_MT:
+    case EM_NDS32:
     case EM_NIOS32:
     case EM_PPC64:
     case EM_PPC:
@@ -924,7 +940,8 @@ dump_relocations (FILE * file,
 		  unsigned long nsyms,
 		  char * strtab,
 		  unsigned long strtablen,
-		  int is_rela)
+		  int is_rela,
+		  int is_dynsym)
 {
   unsigned int i;
   Elf_Internal_Rela * rels;
@@ -1144,6 +1161,10 @@ dump_relocations (FILE * file,
 	  rtype = elf_msp430_reloc_type (type);
 	  break;
 
+	case EM_NDS32:
+	  rtype = elf_nds32_reloc_type (type);
+	  break;
+
 	case EM_PPC:
 	  rtype = elf_ppc_reloc_type (type);
 	  break;
@@ -1354,8 +1375,19 @@ dump_relocations (FILE * file,
 	  else
 	    {
 	      Elf_Internal_Sym * psym;
+	      const char * version_string;
+	      enum versioned_symbol_info sym_info;
+	      unsigned short vna_other;
 
 	      psym = symtab + symtab_index;
+
+	      version_string
+		= get_symbol_version_string (file, is_dynsym,
+					     strtab, strtablen,
+					     symtab_index,
+					     psym,
+					     &sym_info,
+					     &vna_other);
 
 	      printf (" ");
 
@@ -1383,6 +1415,9 @@ dump_relocations (FILE * file,
 		    name = strtab + psym->st_name;
 
 		  len = print_symbol (width, name);
+		  if (version_string)
+		    printf (sym_info == symbol_public ? "@@%s" : "@%s", 
+			    version_string);
 		  printf ("()%-*s", len <= width ? (width + 1) - len : 1, " ");
 		}
 	      else
@@ -1442,7 +1477,12 @@ dump_relocations (FILE * file,
 	      else if (psym->st_name >= strtablen)
 		printf (_("<corrupt string table index: %3ld>"), psym->st_name);
 	      else
-		print_symbol (22, strtab + psym->st_name);
+		{
+		  print_symbol (22, strtab + psym->st_name);
+		  if (version_string)
+		    printf (sym_info == symbol_public ? "@@%s" : "@%s", 
+			    version_string);
+		}
 
 	      if (is_rela)
 		{
@@ -2309,6 +2349,207 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
     strcat (buf,_(", <unknown>"));
 }
 
+static void
+decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
+{
+  unsigned abi;
+  unsigned arch;
+  unsigned config;
+  unsigned version;
+  int has_fpu = 0;
+  int r = 0;
+
+  static const char *ABI_STRINGS[] =
+  {
+    "ABI v0", /* use r5 as return register; only used in N1213HC */
+    "ABI v1", /* use r0 as return register */
+    "ABI v2", /* use r0 as return register and don't reserve 24 bytes for arguments */
+    "ABI v2fp", /* for FPU */
+    "AABI"
+  };
+  static const char *VER_STRINGS[] =
+  {
+    "Andes ELF V1.3 or older",
+    "Andes ELF V1.3.1",
+    "Andes ELF V1.4"
+  };
+  static const char *ARCH_STRINGS[] =
+  {
+    "",
+    "Andes Star v1.0",
+    "Andes Star v2.0",
+    "Andes Star v3.0",
+    "Andes Star v3.0m"
+  };
+
+  abi = EF_NDS_ABI & e_flags;
+  arch = EF_NDS_ARCH & e_flags;
+  config = EF_NDS_INST & e_flags;
+  version = EF_NDS32_ELF_VERSION & e_flags;
+
+  memset (buf, 0, size);
+
+  switch (abi)
+    {
+    case E_NDS_ABI_V0:
+    case E_NDS_ABI_V1:
+    case E_NDS_ABI_V2:
+    case E_NDS_ABI_V2FP:
+    case E_NDS_ABI_AABI:
+      /* In case there are holes in the array.  */
+      r += snprintf (buf + r, size - r, ", %s", ABI_STRINGS[abi >> EF_NDS_ABI_SHIFT]);
+      break;
+
+    default:
+      r += snprintf (buf + r, size - r, ", <unrecognized ABI>");
+      break;
+    }
+
+  switch (version)
+    {
+    case E_NDS32_ELF_VER_1_2:
+    case E_NDS32_ELF_VER_1_3:
+    case E_NDS32_ELF_VER_1_4:
+      r += snprintf (buf + r, size - r, ", %s", VER_STRINGS[version >> EF_NDS32_ELF_VERSION_SHIFT]);
+      break;
+
+    default:
+      r += snprintf (buf + r, size - r, ", <unrecognized ELF version number>");
+      break;
+    }
+
+  if (E_NDS_ABI_V0 == abi)
+    {
+      /* OLD ABI; only used in N1213HC, has performance extension 1.  */
+      r += snprintf (buf + r, size - r, ", Andes Star v1.0, N1213HC, MAC, PERF1");
+      if (arch == E_NDS_ARCH_STAR_V1_0)
+	r += snprintf (buf + r, size -r, ", 16b"); /* has 16-bit instructions */
+      return;
+    }
+
+  switch (arch)
+    {
+    case E_NDS_ARCH_STAR_V1_0:
+    case E_NDS_ARCH_STAR_V2_0:
+    case E_NDS_ARCH_STAR_V3_0:
+    case E_NDS_ARCH_STAR_V3_M:
+      r += snprintf (buf + r, size - r, ", %s", ARCH_STRINGS[arch >> EF_NDS_ARCH_SHIFT]);
+      break;
+
+    default:
+      r += snprintf (buf + r, size - r, ", <unrecognized architecture>");
+      /* ARCH version determines how the e_flags are interpreted.
+	 If it is unknown, we cannot proceed.  */
+      return;
+    }
+
+  /* Newer ABI; Now handle architecture specific flags.  */
+  if (arch == E_NDS_ARCH_STAR_V1_0)
+    {
+      if (config & E_NDS32_HAS_MFUSR_PC_INST)
+	r += snprintf (buf + r, size -r, ", MFUSR_PC");
+
+      if (!(config & E_NDS32_HAS_NO_MAC_INST))
+	r += snprintf (buf + r, size -r, ", MAC");
+
+      if (config & E_NDS32_HAS_DIV_INST)
+	r += snprintf (buf + r, size -r, ", DIV");
+
+      if (config & E_NDS32_HAS_16BIT_INST)
+	r += snprintf (buf + r, size -r, ", 16b");
+    }
+  else
+    {
+      if (config & E_NDS32_HAS_MFUSR_PC_INST)
+	{
+	  if (version <= E_NDS32_ELF_VER_1_3)
+	    r += snprintf (buf + r, size -r, ", [B8]");
+	  else
+	    r += snprintf (buf + r, size -r, ", EX9");
+	}
+
+      if (config & E_NDS32_HAS_MAC_DX_INST)
+	r += snprintf (buf + r, size -r, ", MAC_DX");
+
+      if (config & E_NDS32_HAS_DIV_DX_INST)
+	r += snprintf (buf + r, size -r, ", DIV_DX");
+
+      if (config & E_NDS32_HAS_16BIT_INST)
+	{
+	  if (version <= E_NDS32_ELF_VER_1_3)
+	    r += snprintf (buf + r, size -r, ", 16b");
+	  else
+	    r += snprintf (buf + r, size -r, ", IFC");
+	}
+    }
+
+  if (config & E_NDS32_HAS_EXT_INST)
+    r += snprintf (buf + r, size -r, ", PERF1");
+
+  if (config & E_NDS32_HAS_EXT2_INST)
+    r += snprintf (buf + r, size -r, ", PERF2");
+
+  if (config & E_NDS32_HAS_FPU_INST)
+    {
+      has_fpu = 1;
+      r += snprintf (buf + r, size -r, ", FPU_SP");
+    }
+
+  if (config & E_NDS32_HAS_FPU_DP_INST)
+    {
+      has_fpu = 1;
+      r += snprintf (buf + r, size -r, ", FPU_DP");
+    }
+
+  if (config & E_NDS32_HAS_FPU_MAC_INST)
+    {
+      has_fpu = 1;
+      r += snprintf (buf + r, size -r, ", FPU_MAC");
+    }
+
+  if (has_fpu)
+    {
+      switch ((config & E_NDS32_FPU_REG_CONF) >> E_NDS32_FPU_REG_CONF_SHIFT)
+	{
+	case E_NDS32_FPU_REG_8SP_4DP:
+	  r += snprintf (buf + r, size -r, ", FPU_REG:8/4");
+	  break;
+	case E_NDS32_FPU_REG_16SP_8DP:
+	  r += snprintf (buf + r, size -r, ", FPU_REG:16/8");
+	  break;
+	case E_NDS32_FPU_REG_32SP_16DP:
+	  r += snprintf (buf + r, size -r, ", FPU_REG:32/16");
+	  break;
+	case E_NDS32_FPU_REG_32SP_32DP:
+	  r += snprintf (buf + r, size -r, ", FPU_REG:32/32");
+	  break;
+	}
+    }
+
+  if (config & E_NDS32_HAS_AUDIO_INST)
+    r += snprintf (buf + r, size -r, ", AUDIO");
+
+  if (config & E_NDS32_HAS_STRING_INST)
+    r += snprintf (buf + r, size -r, ", STR");
+
+  if (config & E_NDS32_HAS_REDUCED_REGS)
+    r += snprintf (buf + r, size -r, ", 16REG");
+
+  if (config & E_NDS32_HAS_VIDEO_INST)
+    {
+      if (version <= E_NDS32_ELF_VER_1_3)
+	r += snprintf (buf + r, size -r, ", VIDEO");
+      else
+	r += snprintf (buf + r, size -r, ", SATURATION");
+    }
+
+  if (config & E_NDS32_HAS_ENCRIPT_INST)
+    r += snprintf (buf + r, size -r, ", ENCRP");
+
+  if (config & E_NDS32_HAS_L2C_INST)
+    r += snprintf (buf + r, size -r, ", L2C");
+}
+
 static char *
 get_machine_flags (unsigned e_flags, unsigned e_machine)
 {
@@ -2649,6 +2890,10 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_ARCH_64R2: strcat (buf, ", mips64r2"); break;
 	    default: strcat (buf, _(", unknown ISA")); break;
 	    }
+	  break;
+
+	case EM_NDS32:
+	  decode_NDS32_machine_flags (e_flags, buf, sizeof buf);
 	  break;
 
 	case EM_SH:
@@ -5713,7 +5958,8 @@ process_relocs (FILE * file)
 				offset_from_vma (file, rel_offset, rel_size),
 				rel_size,
 				dynamic_symbols, num_dynamic_syms,
-				dynamic_strings, dynamic_strings_length, is_rela);
+				dynamic_strings, dynamic_strings_length,
+				is_rela, 1);
 	    }
 	}
 
@@ -5788,14 +6034,16 @@ process_relocs (FILE * file)
 		    }
 
 		  dump_relocations (file, rel_offset, rel_size,
-				    symtab, nsyms, strtab, strtablen, is_rela);
+				    symtab, nsyms, strtab, strtablen,
+				    is_rela,
+				    symsec->sh_type == SHT_DYNSYM);
 		  if (strtab)
 		    free (strtab);
 		  free (symtab);
 		}
 	      else
 		dump_relocations (file, rel_offset, rel_size,
-				  NULL, 0, NULL, 0, is_rela);
+				  NULL, 0, NULL, 0, is_rela, 0);
 
 	      found = 1;
 	    }
@@ -9377,6 +9625,181 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
   putchar ('\n');
 }
 
+static const char *
+get_symbol_version_string (FILE *file, int is_dynsym,
+			   const char *strtab,
+			   unsigned long int strtab_size,
+			   unsigned int si, Elf_Internal_Sym *psym,
+			   enum versioned_symbol_info *sym_info,
+			   unsigned short *vna_other)
+{
+  const char *version_string = NULL;
+
+  if (is_dynsym
+      && version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
+    {
+      unsigned char data[2];
+      unsigned short vers_data;
+      unsigned long offset;
+      int is_nobits;
+      int check_def;
+
+      offset = offset_from_vma
+	(file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
+	 sizeof data + si * sizeof (vers_data));
+
+      if (get_data (&data, file, offset + si * sizeof (vers_data),
+		    sizeof (data), 1, _("version data")) == NULL)
+	return NULL;
+
+      vers_data = byte_get (data, 2);
+
+      is_nobits = (psym->st_shndx < elf_header.e_shnum
+		   && section_headers[psym->st_shndx].sh_type
+		   == SHT_NOBITS);
+
+      check_def = (psym->st_shndx != SHN_UNDEF);
+
+      if ((vers_data & VERSYM_HIDDEN) || vers_data > 1)
+	{
+	  if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
+	      && (is_nobits || ! check_def))
+	    {
+	      Elf_External_Verneed evn;
+	      Elf_Internal_Verneed ivn;
+	      Elf_Internal_Vernaux ivna;
+
+	      /* We must test both.  */
+	      offset = offset_from_vma
+		(file, version_info[DT_VERSIONTAGIDX (DT_VERNEED)],
+		 sizeof evn);
+
+	      do
+		{
+		  unsigned long vna_off;
+
+		  if (get_data (&evn, file, offset, sizeof (evn), 1,
+				_("version need")) == NULL)
+		    {
+		      ivna.vna_next = 0;
+		      ivna.vna_other = 0;
+		      ivna.vna_name = 0;
+		      break;
+		    }
+
+		  ivn.vn_aux  = BYTE_GET (evn.vn_aux);
+		  ivn.vn_next = BYTE_GET (evn.vn_next);
+
+		  vna_off = offset + ivn.vn_aux;
+
+		  do
+		    {
+		      Elf_External_Vernaux evna;
+
+		      if (get_data (&evna, file, vna_off,
+				    sizeof (evna), 1,
+				    _("version need aux (3)")) == NULL)
+			{
+			  ivna.vna_next = 0;
+			  ivna.vna_other = 0;
+			  ivna.vna_name = 0;
+			}
+		      else
+			{
+			  ivna.vna_other = BYTE_GET (evna.vna_other);
+			  ivna.vna_next  = BYTE_GET (evna.vna_next);
+			  ivna.vna_name  = BYTE_GET (evna.vna_name);
+			}
+
+		      vna_off += ivna.vna_next;
+		    }
+		  while (ivna.vna_other != vers_data
+			 && ivna.vna_next != 0);
+
+		  if (ivna.vna_other == vers_data)
+		    break;
+
+		  offset += ivn.vn_next;
+		}
+	      while (ivn.vn_next != 0);
+
+	      if (ivna.vna_other == vers_data)
+		{
+		  *sym_info = symbol_undefined;
+		  *vna_other = ivna.vna_other;
+		  version_string = (ivna.vna_name < strtab_size
+				    ? strtab + ivna.vna_name
+				    : _("<corrupt>"));
+		  check_def = 0;
+		}
+	      else if (! is_nobits)
+		error (_("bad dynamic symbol\n"));
+	      else
+		check_def = 1;
+	    }
+
+	  if (check_def)
+	    {
+	      if (vers_data != 0x8001
+		  && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
+		{
+		  Elf_Internal_Verdef ivd;
+		  Elf_Internal_Verdaux ivda;
+		  Elf_External_Verdaux evda;
+		  unsigned long off;
+
+		  off = offset_from_vma
+		    (file,
+		     version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
+		     sizeof (Elf_External_Verdef));
+
+		  do
+		    {
+		      Elf_External_Verdef evd;
+
+		      if (get_data (&evd, file, off, sizeof (evd),
+				    1, _("version def")) == NULL)
+			{
+			  ivd.vd_ndx = 0;
+			  ivd.vd_aux = 0;
+			  ivd.vd_next = 0;
+			}
+		      else
+			{
+			  ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
+			  ivd.vd_aux = BYTE_GET (evd.vd_aux);
+			  ivd.vd_next = BYTE_GET (evd.vd_next);
+			}
+
+		      off += ivd.vd_next;
+		    }
+		  while (ivd.vd_ndx != (vers_data & VERSYM_VERSION)
+			 && ivd.vd_next != 0);
+
+		  off -= ivd.vd_next;
+		  off += ivd.vd_aux;
+
+		  if (get_data (&evda, file, off, sizeof (evda),
+				1, _("version def aux")) == NULL)
+		    return version_string;
+
+		  ivda.vda_name = BYTE_GET (evda.vda_name);
+
+		  if (psym->st_name != ivda.vda_name)
+		    {
+		      *sym_info = ((vers_data & VERSYM_HIDDEN) != 0
+				   ? symbol_hidden : symbol_public);
+		      version_string = (ivda.vda_name < strtab_size
+					? strtab + ivda.vda_name
+					: _("<corrupt>"));
+		    }
+		}
+	    }
+	}
+    }
+  return version_string;
+}
+
 /* Dump the symbol table.  */
 static int
 process_symbol_table (FILE * file)
@@ -9679,6 +10102,10 @@ process_symbol_table (FILE * file)
 
 	  for (si = 0, psym = symtab; si < num_syms; si++, psym++)
 	    {
+	      const char *version_string;
+	      enum versioned_symbol_info sym_info;
+	      unsigned short vna_other;
+
 	      printf ("%6d: ", si);
 	      print_vma (psym->st_value, LONG_HEX);
 	      putchar (' ');
@@ -9700,163 +10127,18 @@ process_symbol_table (FILE * file)
 	      print_symbol (25, psym->st_name < strtab_size
 			    ? strtab + psym->st_name : _("<corrupt>"));
 
-	      if (section->sh_type == SHT_DYNSYM
-		  && version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
+	      version_string
+		= get_symbol_version_string (file,
+					     section->sh_type == SHT_DYNSYM,
+					     strtab, strtab_size, si,
+					     psym, &sym_info, &vna_other);
+	      if (version_string)
 		{
-		  unsigned char data[2];
-		  unsigned short vers_data;
-		  unsigned long offset;
-		  int is_nobits;
-		  int check_def;
-
-		  offset = offset_from_vma
-		    (file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
-		     sizeof data + si * sizeof (vers_data));
-
-		  if (get_data (&data, file, offset + si * sizeof (vers_data),
-				sizeof (data), 1, _("version data")) == NULL)
-		    break;
-
-		  vers_data = byte_get (data, 2);
-
-		  is_nobits = (psym->st_shndx < elf_header.e_shnum
-			       && section_headers[psym->st_shndx].sh_type
-				  == SHT_NOBITS);
-
-		  check_def = (psym->st_shndx != SHN_UNDEF);
-
-		  if ((vers_data & VERSYM_HIDDEN) || vers_data > 1)
-		    {
-		      if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
-			  && (is_nobits || ! check_def))
-			{
-			  Elf_External_Verneed evn;
-			  Elf_Internal_Verneed ivn;
-			  Elf_Internal_Vernaux ivna;
-
-			  /* We must test both.  */
-			  offset = offset_from_vma
-			    (file, version_info[DT_VERSIONTAGIDX (DT_VERNEED)],
-			     sizeof evn);
-
-			  do
-			    {
-			      unsigned long vna_off;
-
-			      if (get_data (&evn, file, offset, sizeof (evn), 1,
-					    _("version need")) == NULL)
-				{
-				  ivna.vna_next = 0;
-				  ivna.vna_other = 0;
-				  ivna.vna_name = 0;
-				  break;
-				}
-
-			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
-			      ivn.vn_next = BYTE_GET (evn.vn_next);
-
-			      vna_off = offset + ivn.vn_aux;
-
-			      do
-				{
-				  Elf_External_Vernaux evna;
-
-				  if (get_data (&evna, file, vna_off,
-						sizeof (evna), 1,
-						_("version need aux (3)")) == NULL)
-				    {
-				      ivna.vna_next = 0;
-				      ivna.vna_other = 0;
-				      ivna.vna_name = 0;
-				    }
-				  else
-				    {
-				      ivna.vna_other = BYTE_GET (evna.vna_other);
-				      ivna.vna_next  = BYTE_GET (evna.vna_next);
-				      ivna.vna_name  = BYTE_GET (evna.vna_name);
-				    }
-
-				  vna_off += ivna.vna_next;
-				}
-			      while (ivna.vna_other != vers_data
-				     && ivna.vna_next != 0);
-
-			      if (ivna.vna_other == vers_data)
-				break;
-
-			      offset += ivn.vn_next;
-			    }
-			  while (ivn.vn_next != 0);
-
-			  if (ivna.vna_other == vers_data)
-			    {
-			      printf ("@%s (%d)",
-				      ivna.vna_name < strtab_size
-				      ? strtab + ivna.vna_name : _("<corrupt>"),
-				      ivna.vna_other);
-			      check_def = 0;
-			    }
-			  else if (! is_nobits)
-			    error (_("bad dynamic symbol\n"));
-			  else
-			    check_def = 1;
-			}
-
-		      if (check_def)
-			{
-			  if (vers_data != 0x8001
-			      && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
-			    {
-			      Elf_Internal_Verdef ivd;
-			      Elf_Internal_Verdaux ivda;
-			      Elf_External_Verdaux evda;
-			      unsigned long off;
-
-			      off = offset_from_vma
-				(file,
-				 version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
-				 sizeof (Elf_External_Verdef));
-
-			      do
-				{
-				  Elf_External_Verdef evd;
-
-				  if (get_data (&evd, file, off, sizeof (evd),
-						1, _("version def")) == NULL)
-				    {
-				      ivd.vd_ndx = 0;
-				      ivd.vd_aux = 0;
-				      ivd.vd_next = 0;
-				    }
-				  else
-				    {
-				      ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
-				      ivd.vd_aux = BYTE_GET (evd.vd_aux);
-				      ivd.vd_next = BYTE_GET (evd.vd_next);
-				    }
-
-				  off += ivd.vd_next;
-				}
-			      while (ivd.vd_ndx != (vers_data & VERSYM_VERSION)
-				     && ivd.vd_next != 0);
-
-			      off -= ivd.vd_next;
-			      off += ivd.vd_aux;
-
-			      if (get_data (&evda, file, off, sizeof (evda),
-					    1, _("version def aux")) == NULL)
-				break;
-
-			      ivda.vda_name = BYTE_GET (evda.vda_name);
-
-			      if (psym->st_name != ivda.vda_name)
-				printf ((vers_data & VERSYM_HIDDEN)
-					? "@%s" : "@@%s",
-					ivda.vda_name < strtab_size
-					? strtab + ivda.vda_name : _("<corrupt>"));
-			    }
-			}
-		    }
+		  if (sym_info == symbol_undefined)
+		    printf ("@%s (%d)", version_string, vna_other);
+		  else
+		    printf (sym_info == symbol_hidden ? "@%s" : "@@%s",
+			    version_string);
 		}
 
 	      putchar ('\n');
@@ -10279,6 +10561,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_MSP430_32 or R_MSP320_ABS32.  */
     case EM_MT:
       return reloc_type == 2; /* R_MT_32.  */
+    case EM_NDS32:
+      return reloc_type == 20; /* R_NDS32_RELA.  */
     case EM_ALTERA_NIOS2:
       return reloc_type == 12; /* R_NIOS2_BFD_RELOC_32.  */
     case EM_NIOS32:
@@ -10532,6 +10816,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
 	return reloc_type == 2; /* R_MSP430_ABS16.  */
     case EM_MSP430_OLD:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
+    case EM_NDS32:
+      return reloc_type == 19; /* R_NDS32_RELA.  */
     case EM_ALTERA_NIOS2:
       return reloc_type == 13; /* R_NIOS2_BFD_RELOC_16.  */
     case EM_NIOS32:
@@ -10595,6 +10881,12 @@ is_none_reloc (unsigned int reloc_type)
       return reloc_type == 0;
     case EM_AARCH64:
       return reloc_type == 0 || reloc_type == 256;
+    case EM_NDS32:
+      return (reloc_type == 0       /* R_XTENSA_NONE.  */
+	      || reloc_type == 204  /* R_NDS32_DIFF8.  */
+	      || reloc_type == 205  /* R_NDS32_DIFF16.  */
+	      || reloc_type == 206  /* R_NDS32_DIFF32.  */
+	      || reloc_type == 207  /* R_NDS32_ULEB128.  */);
     case EM_XTENSA_OLD:
     case EM_XTENSA:
       return (reloc_type == 0      /* R_XTENSA_NONE.  */
@@ -13000,6 +13292,40 @@ process_mips_specific (FILE * file)
 }
 
 static int
+process_nds32_specific (FILE * file)
+{
+  Elf_Internal_Shdr *sect = NULL;
+
+  sect = find_section (".nds32_e_flags");
+  if (sect != NULL)
+    {
+      unsigned int *flag;
+
+      printf ("\nNDS32 elf flags section:\n");
+      flag = get_data (NULL, file, sect->sh_offset, 1,
+		       sect->sh_size, _("NDS32 elf flags section"));
+
+      switch ((*flag) & 0x3)
+	{
+	case 0:
+	  printf ("(VEC_SIZE):\tNo entry.\n");
+	  break;
+	case 1:
+	  printf ("(VEC_SIZE):\t4 bytes\n");
+	  break;
+	case 2:
+	  printf ("(VEC_SIZE):\t16 bytes\n");
+	  break;
+	case 3:
+	  printf ("(VEC_SIZE):\treserved\n");
+	  break;
+	}
+    }
+
+  return TRUE;
+}
+
+static int
 process_gnu_liblist (FILE * file)
 {
   Elf_Internal_Shdr * section;
@@ -13824,6 +14150,9 @@ process_arch_specific (FILE * file)
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
       return process_mips_specific (file);
+      break;
+    case EM_NDS32:
+      return process_nds32_specific (file);
       break;
     case EM_PPC:
       return process_power_specific (file);

@@ -27,7 +27,7 @@ main_test (void)
   struct A c = { { 'x' } };
 
   inside_main = 1;
-  
+
   if (memcmp (b.c, x, 32) || c.c[0] != 'x' || memcmp (c.c + 1, x + 32, 31))
     abort ();
   if (__builtin_memcpy (y, x, i) != y || memcmp (x, y, 64))

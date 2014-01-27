@@ -2392,17 +2392,6 @@ elf32_msp430_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   return elf32_msp430_merge_mspabi_attributes (ibfd, obfd);
 }
 
-/* Copy backend specific data from one object module to another.  */
-
-static bfd_boolean
-elf32_msp430_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  /* Copy object attributes.  */
-  _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-  return TRUE;
-}
-
 static bfd_boolean
 msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 {
@@ -2439,7 +2428,6 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 #define elf_backend_obj_attrs_handle_unknown 	elf32_msp430_obj_attrs_handle_unknown
 #undef  elf_backend_obj_attrs_arg_type
 #define elf_backend_obj_attrs_arg_type		elf32_msp430_obj_attrs_arg_type
-#define bfd_elf32_bfd_copy_private_bfd_data	elf32_msp430_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	elf32_msp430_merge_private_bfd_data
 
 #define ELF_ARCH		bfd_arch_msp430
@@ -2458,7 +2446,6 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 #define elf_backend_can_gc_sections          1
 #define elf_backend_final_write_processing   bfd_elf_msp430_final_write_processing
 #define elf_backend_object_p		     elf32_msp430_object_p
-#define elf_backend_post_process_headers     _bfd_elf_set_osabi
 #define bfd_elf32_bfd_relax_section	     msp430_elf_relax_section
 #define bfd_elf32_bfd_is_target_special_symbol	msp430_elf_is_target_special_symbol
 

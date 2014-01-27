@@ -240,7 +240,7 @@ bfd_plugin_get_symbols_in_object_only (bfd *abfd)
       else
 	continue;
 
-      s = bfd_alloc (abfd, sizeof (asymbol)); 
+      s = bfd_alloc (abfd, sizeof (asymbol));
       BFD_ASSERT (s);
       added_syms[added_nsyms++] = s;
 

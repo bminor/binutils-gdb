@@ -1,5 +1,5 @@
 /* Tracepoint code for remote server for GDB.
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -61,6 +61,8 @@
 
 */
 
+#ifdef IN_PROCESS_AGENT
+
 static void trace_vdebug (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 static void
@@ -80,6 +82,19 @@ trace_vdebug (const char *fmt, ...)
     if (level <= debug_threads)		\
       trace_vdebug ((fmt), ##args);		\
   } while (0)
+
+#else
+
+#define trace_debug_1(level, fmt, args...)	\
+  do {						\
+    if (level <= debug_threads)			\
+      {						\
+	debug_printf ((fmt), ##args);		\
+	debug_printf ("\n");			\
+      }						\
+  } while (0)
+
+#endif
 
 #define trace_debug(FMT, args...)		\
   trace_debug_1 (1, FMT, ##args)
@@ -338,7 +353,7 @@ tracepoint_look_up_symbols (void)
       if (look_up_one_symbol (symbol_list[i].name, addrp, 1) == 0)
 	{
 	  if (debug_threads)
-	    fprintf (stderr, "symbol `%s' not found\n", symbol_list[i].name);
+	    debug_printf ("symbol `%s' not found\n", symbol_list[i].name);
 	  return;
 	}
     }

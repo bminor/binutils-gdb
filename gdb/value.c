@@ -1,6 +1,6 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -216,6 +216,9 @@ struct value
   /* If the value has been released.  */
   unsigned int released : 1;
 
+  /* Register number if the value is from a register.  */
+  short regnum;
+
   /* Location of value (if lval).  */
   union
   {
@@ -324,25 +327,31 @@ struct value
      taken off this list.  */
   struct value *next;
 
-  /* Register number if the value is from a register.  */
-  short regnum;
-
   /* Actual contents of the value.  Target byte-order.  NULL or not
      valid if lazy is nonzero.  */
   gdb_byte *contents;
 
   /* Unavailable ranges in CONTENTS.  We mark unavailable ranges,
      rather than available, since the common and default case is for a
-     value to be available.  This is filled in at value read time.  */
+     value to be available.  This is filled in at value read time.  The
+     unavailable ranges are tracked in bits.  */
   VEC(range_s) *unavailable;
 };
 
 int
-value_bytes_available (const struct value *value, int offset, int length)
+value_bits_available (const struct value *value, int offset, int length)
 {
   gdb_assert (!value->lazy);
 
   return !ranges_contain (value->unavailable, offset, length);
+}
+
+int
+value_bytes_available (const struct value *value, int offset, int length)
+{
+  return value_bits_available (value,
+			       offset * TARGET_CHAR_BIT,
+			       length * TARGET_CHAR_BIT);
 }
 
 int
@@ -371,7 +380,8 @@ value_entirely_unavailable (struct value *value)
       struct range *t = VEC_index (range_s, value->unavailable, 0);
 
       if (t->offset == 0
-	  && t->length == TYPE_LENGTH (value_enclosing_type (value)))
+	  && t->length == (TARGET_CHAR_BIT
+			   * TYPE_LENGTH (value_enclosing_type (value))))
 	return 1;
     }
 
@@ -379,7 +389,7 @@ value_entirely_unavailable (struct value *value)
 }
 
 void
-mark_value_bytes_unavailable (struct value *value, int offset, int length)
+mark_value_bits_unavailable (struct value *value, int offset, int length)
 {
   range_s newr;
   int i;
@@ -543,6 +553,14 @@ mark_value_bytes_unavailable (struct value *value, int offset, int length)
     }
 }
 
+void
+mark_value_bytes_unavailable (struct value *value, int offset, int length)
+{
+  mark_value_bits_unavailable (value,
+			       offset * TARGET_CHAR_BIT,
+			       length * TARGET_CHAR_BIT);
+}
+
 /* Find the first range in RANGES that overlaps the range defined by
    OFFSET and LENGTH, starting at element POS in the RANGES vector,
    Returns the index into RANGES where such overlapping range was
@@ -562,10 +580,118 @@ find_first_range_overlap (VEC(range_s) *ranges, int pos,
   return -1;
 }
 
-int
-value_available_contents_eq (const struct value *val1, int offset1,
-			     const struct value *val2, int offset2,
-			     int length)
+/* Compare LENGTH_BITS of memory at PTR1 + OFFSET1_BITS with the memory at
+   PTR2 + OFFSET2_BITS.  Return 0 if the memory is the same, otherwise
+   return non-zero.
+
+   It must always be the case that:
+     OFFSET1_BITS % TARGET_CHAR_BIT == OFFSET2_BITS % TARGET_CHAR_BIT
+
+   It is assumed that memory can be accessed from:
+     PTR + (OFFSET_BITS / TARGET_CHAR_BIT)
+   to:
+     PTR + ((OFFSET_BITS + LENGTH_BITS + TARGET_CHAR_BIT - 1)
+            / TARGET_CHAR_BIT)  */
+static int
+memcmp_with_bit_offsets (const gdb_byte *ptr1, size_t offset1_bits,
+			 const gdb_byte *ptr2, size_t offset2_bits,
+			 size_t length_bits)
+{
+  gdb_assert (offset1_bits % TARGET_CHAR_BIT
+	      == offset2_bits % TARGET_CHAR_BIT);
+
+  if (offset1_bits % TARGET_CHAR_BIT != 0)
+    {
+      size_t bits;
+      gdb_byte mask, b1, b2;
+
+      /* The offset from the base pointers PTR1 and PTR2 is not a complete
+	 number of bytes.  A number of bits up to either the next exact
+	 byte boundary, or LENGTH_BITS (which ever is sooner) will be
+	 compared.  */
+      bits = TARGET_CHAR_BIT - offset1_bits % TARGET_CHAR_BIT;
+      gdb_assert (bits < sizeof (mask) * TARGET_CHAR_BIT);
+      mask = (1 << bits) - 1;
+
+      if (length_bits < bits)
+	{
+	  mask &= ~(gdb_byte) ((1 << (bits - length_bits)) - 1);
+	  bits = length_bits;
+	}
+
+      /* Now load the two bytes and mask off the bits we care about.  */
+      b1 = *(ptr1 + offset1_bits / TARGET_CHAR_BIT) & mask;
+      b2 = *(ptr2 + offset2_bits / TARGET_CHAR_BIT) & mask;
+
+      if (b1 != b2)
+	return 1;
+
+      /* Now update the length and offsets to take account of the bits
+	 we've just compared.  */
+      length_bits -= bits;
+      offset1_bits += bits;
+      offset2_bits += bits;
+    }
+
+  if (length_bits % TARGET_CHAR_BIT != 0)
+    {
+      size_t bits;
+      size_t o1, o2;
+      gdb_byte mask, b1, b2;
+
+      /* The length is not an exact number of bytes.  After the previous
+	 IF.. block then the offsets are byte aligned, or the
+	 length is zero (in which case this code is not reached).  Compare
+	 a number of bits at the end of the region, starting from an exact
+	 byte boundary.  */
+      bits = length_bits % TARGET_CHAR_BIT;
+      o1 = offset1_bits + length_bits - bits;
+      o2 = offset2_bits + length_bits - bits;
+
+      gdb_assert (bits < sizeof (mask) * TARGET_CHAR_BIT);
+      mask = ((1 << bits) - 1) << (TARGET_CHAR_BIT - bits);
+
+      gdb_assert (o1 % TARGET_CHAR_BIT == 0);
+      gdb_assert (o2 % TARGET_CHAR_BIT == 0);
+
+      b1 = *(ptr1 + o1 / TARGET_CHAR_BIT) & mask;
+      b2 = *(ptr2 + o2 / TARGET_CHAR_BIT) & mask;
+
+      if (b1 != b2)
+	return 1;
+
+      length_bits -= bits;
+    }
+
+  if (length_bits > 0)
+    {
+      /* We've now taken care of any stray "bits" at the start, or end of
+	 the region to compare, the remainder can be covered with a simple
+	 memcmp.  */
+      gdb_assert (offset1_bits % TARGET_CHAR_BIT == 0);
+      gdb_assert (offset2_bits % TARGET_CHAR_BIT == 0);
+      gdb_assert (length_bits % TARGET_CHAR_BIT == 0);
+
+      return memcmp (ptr1 + offset1_bits / TARGET_CHAR_BIT,
+		     ptr2 + offset2_bits / TARGET_CHAR_BIT,
+		     length_bits / TARGET_CHAR_BIT);
+    }
+
+  /* Length is zero, regions match.  */
+  return 0;
+}
+
+/* Helper function for value_available_contents_eq. The only difference is
+   that this function is bit rather than byte based.
+
+   Compare LENGTH bits of VAL1's contents starting at OFFSET1 bits with
+   LENGTH bits of VAL2's contents starting at OFFSET2 bits.  Return true
+   if the available bits match.  */
+
+static int
+value_available_contents_bits_eq (const struct value *val1, int offset1,
+				  const struct value *val2, int offset2,
+				  int length)
 {
   int idx1 = 0, idx2 = 0;
 
@@ -585,9 +711,9 @@ value_available_contents_eq (const struct value *val1, int offset1,
 
       /* The usual case is for both values to be completely available.  */
       if (idx1 == -1 && idx2 == -1)
-	return (memcmp (val1->contents + offset1,
-			val2->contents + offset2,
-			length) == 0);
+	return (memcmp_with_bit_offsets (val1->contents, offset1,
+					 val2->contents, offset2,
+					 length) == 0);
       /* The contents only match equal if the available set matches as
 	 well.  */
       else if (idx1 == -1 || idx2 == -1)
@@ -620,9 +746,8 @@ value_available_contents_eq (const struct value *val1, int offset1,
 	return 0;
 
       /* Compare the _available_ contents.  */
-      if (memcmp (val1->contents + offset1,
-		  val2->contents + offset2,
-		  l1) != 0)
+      if (memcmp_with_bit_offsets (val1->contents, offset1,
+				   val2->contents, offset2, l1) != 0)
 	return 0;
 
       length -= h1;
@@ -631,6 +756,16 @@ value_available_contents_eq (const struct value *val1, int offset1,
     }
 
   return 1;
+}
+
+int
+value_available_contents_eq (const struct value *val1, int offset1,
+			     const struct value *val2, int offset2,
+			     int length)
+{
+  return value_available_contents_bits_eq (val1, offset1 * TARGET_CHAR_BIT,
+					   val2, offset2 * TARGET_CHAR_BIT,
+					   length * TARGET_CHAR_BIT);
 }
 
 /* Prototypes for local functions.  */
@@ -972,6 +1107,7 @@ value_contents_copy_raw (struct value *dst, int dst_offset,
 {
   range_s *r;
   int i;
+  int src_bit_offset, dst_bit_offset, bit_length;
 
   /* A lazy DST would make that this copy operation useless, since as
      soon as DST's contents were un-lazied (by a later value_contents
@@ -990,17 +1126,20 @@ value_contents_copy_raw (struct value *dst, int dst_offset,
 	  length);
 
   /* Copy the meta-data, adjusted.  */
+  src_bit_offset = src_offset * TARGET_CHAR_BIT;
+  dst_bit_offset = dst_offset * TARGET_CHAR_BIT;
+  bit_length = length * TARGET_CHAR_BIT;
   for (i = 0; VEC_iterate (range_s, src->unavailable, i, r); i++)
     {
       ULONGEST h, l;
 
-      l = max (r->offset, src_offset);
-      h = min (r->offset + r->length, src_offset + length);
+      l = max (r->offset, src_bit_offset);
+      h = min (r->offset + r->length, src_bit_offset + bit_length);
 
       if (l < h)
-	mark_value_bytes_unavailable (dst,
-				      dst_offset + (l - src_offset),
-				      h - l);
+	mark_value_bits_unavailable (dst,
+				     dst_bit_offset + (l - src_bit_offset),
+				     h - l);
     }
 }
 
@@ -2884,8 +3023,8 @@ unpack_value_bits_as_long_1 (struct type *field_type, const gdb_byte *valaddr,
   read_offset = bitpos / 8;
 
   if (original_value != NULL
-      && !value_bytes_available (original_value, embedded_offset + read_offset,
-				 bytes_read))
+      && !value_bits_available (original_value, embedded_offset + bitpos,
+				bitsize))
     return 0;
 
   val = extract_unsigned_integer (valaddr + embedded_offset + read_offset,

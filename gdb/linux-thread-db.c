@@ -1,6 +1,6 @@
 /* libthread_db assisted debugging support, generic parts.
 
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -838,7 +838,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
    relative, or just LIBTHREAD_DB.  */
 
 static int
-try_thread_db_load (const char *library)
+try_thread_db_load (const char *library, int check_auto_load_safe)
 {
   void *handle;
   struct thread_db_info *info;
@@ -846,6 +846,25 @@ try_thread_db_load (const char *library)
   if (libthread_db_debug)
     printf_unfiltered (_("Trying host libthread_db library: %s.\n"),
                        library);
+
+  if (check_auto_load_safe)
+    {
+      if (access (library, R_OK) != 0)
+	{
+	  /* Do not print warnings by file_is_auto_load_safe if the library does
+	     not exist at this place.  */
+	  if (libthread_db_debug)
+	    printf_unfiltered (_("open failed: %s.\n"), safe_strerror (errno));
+	  return 0;
+	}
+
+      if (!file_is_auto_load_safe (library, _("auto-load: Loading libthread-db "
+					      "library \"%s\" from explicit "
+					      "directory.\n"),
+				   library))
+	return 0;
+    }
+
   handle = dlopen (library, RTLD_NOW);
   if (handle == NULL)
     {
@@ -919,12 +938,7 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
     }
   strcat (cp, LIBTHREAD_DB_SO);
 
-  if (!file_is_auto_load_safe (path, _("auto-load: Loading libthread-db "
-				       "library \"%s\" from $pdir.\n"),
-			       path))
-    result = 0;
-  else
-    result = try_thread_db_load (path);
+  result = try_thread_db_load (path, 1);
 
   do_cleanups (cleanup);
   return result;
@@ -970,7 +984,7 @@ try_thread_db_load_from_pdir (const char *subdir)
 static int
 try_thread_db_load_from_sdir (void)
 {
-  return try_thread_db_load (LIBTHREAD_DB_SO);
+  return try_thread_db_load (LIBTHREAD_DB_SO, 0);
 }
 
 /* Try to load libthread_db from directory DIR of length DIR_LEN.
@@ -993,13 +1007,7 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
   path[dir_len] = '/';
   strcpy (path + dir_len + 1, LIBTHREAD_DB_SO);
 
-  if (!file_is_auto_load_safe (path, _("auto-load: Loading libthread-db "
-				       "library \"%s\" from explicit "
-				       "directory.\n"),
-			       path))
-    result = 0;
-  else
-    result = try_thread_db_load (path);
+  result = try_thread_db_load (path, 1);
 
   do_cleanups (cleanup);
   return result;
@@ -1394,7 +1402,7 @@ check_event (ptid_t ptid)
 
   /* Bail out early if we're not at a thread event breakpoint.  */
   stop_pc = regcache_read_pc (regcache)
-	    - gdbarch_decr_pc_after_break (gdbarch);
+	    - target_decr_pc_after_break (gdbarch);
   if (stop_pc != info->td_create_bp_addr
       && stop_pc != info->td_death_bp_addr)
     return;

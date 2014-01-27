@@ -1,5 +1,5 @@
 /* Multi-thread control defs for remote server for GDB.
-   Copyright (C) 1993-2013 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,6 +36,9 @@ struct thread_info
   /* The last wait status reported for this thread.  */
   struct target_waitstatus last_status;
 
+  /* True if LAST_STATUS hasn't been reported to GDB yet.  */
+  int status_pending_p;
+
   /* Given `while-stepping', a thread may be collecting data for more
      than one tracepoint simultaneously.  E.g.:
 
@@ -71,8 +74,8 @@ void remove_thread (struct thread_info *thread);
 void add_thread (ptid_t ptid, void *target_data);
 
 struct thread_info *find_thread_ptid (ptid_t ptid);
-struct thread_info *gdb_id_to_thread (unsigned int);
 
 /* Get current thread ID (Linux task ID).  */
 #define current_ptid ((struct inferior_list_entry *) current_inferior)->id
+
 #endif /* GDB_THREAD_H */

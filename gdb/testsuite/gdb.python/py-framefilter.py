@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Free Software Foundation, Inc.
+# Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +30,11 @@ class Reverse_Function (FrameDecorator):
         fname = str (self.fobj.function())
         if (fname == None or fname == ""):
             return None
+        if fname == 'end_func':
+            extra = self.fobj.inferior_frame().read_var('str').string()
         else:
-            fname = fname[::-1]
+            extra = ''
+        fname = fname[::-1] + extra
         return fname
 
 class Dummy (FrameDecorator):
@@ -125,5 +128,25 @@ class FrameElider ():
     def filter (self, frame_iter):
         return ElidingIterator (frame_iter)
 
+# A simple decorator that gives an error when computing the function.
+class ErrorInName(FrameDecorator):
+    def __init__(self, frame):
+        FrameDecorator.__init__(self, frame)
+
+    def function(self):
+        raise RuntimeError('whoops')
+
+# A filter that supplies buggy frames.  Disabled by default.
+class ErrorFilter():
+    def __init__ (self):
+        self.name = "Error"
+        self.priority = 1
+        self.enabled = False
+        gdb.frame_filters [self.name] = self
+
+    def filter(self, frame_iter):
+        return itertools.imap(ErrorInName, frame_iter)
+
 FrameFilter()
 FrameElider()
+ErrorFilter()

@@ -29,6 +29,7 @@
 @set MIPS
 @set MMIX
 @set MSP430
+@set NDS32
 @set POWERPC
 @set POWERPC64
 @set Renesas
@@ -4409,9 +4410,9 @@ scripts.
 @cindex discarding sections
 @cindex sections, discarding
 @cindex removing sections
-The linker will not create output sections with no contents.  This is
-for convenience when referring to input sections that may or may not
-be present in any of the input files.  For example:
+The linker will not normally create output sections with no contents.
+This is for convenience when referring to input sections that may or
+may not be present in any of the input files.  For example:
 @smallexample
 .foo : @{ *(.foo) @}
 @end smallexample
@@ -4419,7 +4420,12 @@ be present in any of the input files.  For example:
 will only create a @samp{.foo} section in the output file if there is a
 @samp{.foo} section in at least one input file, and if the input
 sections are not all empty.  Other link script directives that allocate
-space in an output section will also create the output section.
+space in an output section will also create the output section.  So
+too will assignments to dot even if the assignment does not create
+space, except for @samp{. = 0}, @samp{. = . + 0}, @samp{. = sym},
+@samp{. = . + sym} and @samp{. = ALIGN (. != 0, expr, 1)} when
+@samp{sym} is an absolute symbol of value 0 defined in the script.
+This allows you to force output of an empty section with @samp{. = .}.
 
 The linker will ignore address assignments (@pxref{Output Section Address})
 on discarded output sections, except when the linker script defines
@@ -5919,13 +5925,15 @@ evaluation purposes.
 @item DATA_SEGMENT_RELRO_END(@var{offset}, @var{exp})
 @kindex DATA_SEGMENT_RELRO_END(@var{offset}, @var{exp})
 This defines the end of the @code{PT_GNU_RELRO} segment when
-@samp{-z relro} option is used.  Second argument is returned.
+@samp{-z relro} option is used.
 When @samp{-z relro} option is not present, @code{DATA_SEGMENT_RELRO_END}
 does nothing, otherwise @code{DATA_SEGMENT_ALIGN} is padded so that
 @var{exp} + @var{offset} is aligned to the most commonly used page
 boundary for particular target.  If present in the linker script,
 it must always come in between @code{DATA_SEGMENT_ALIGN} and
-@code{DATA_SEGMENT_END}.
+@code{DATA_SEGMENT_END}.  Evaluates to the second argument plus any
+padding needed at the end of the @code{PT_GNU_RELRO} segment due to
+section alignment.
 
 @smallexample
   . = DATA_SEGMENT_RELRO_END(24, .);
@@ -6097,6 +6105,9 @@ functionality are not listed.
 @end ifset
 @ifset MSP430
 * MSP430::			@command{ld} and MSP430
+@end ifset
+@ifset NDS32
+* NDS32::			@command{ld} and NDS32
 @end ifset
 @ifset POWERPC
 * PowerPC ELF32::		@command{ld} and PowerPC 32-bit ELF Support
@@ -6681,6 +6692,54 @@ in this section will not be uploaded to the MPU.
 Denotes a portion of RAM located above @samp{.bss} section.
 
 The last two sections are used by gcc.
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset NDS32
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node NDS32
+@section @code{ld} and NDS32
+@kindex relaxing on NDS32
+For NDS32, there are some options to select relaxation behavior.  The linker
+relaxes objects according to these options.
+
+@table @code
+@item @samp{--m[no-]fp-as-gp}
+Disable/enable fp-as-gp relaxation.
+
+@item @samp{--mexport-symbols=FILE}
+Exporting symbols and their address into FILE as linker script.
+
+@item @samp{--m[no-]ex9}
+Disable/enable link-time EX9 relaxation.
+
+@item @samp{--mexport-ex9=FILE}
+Export the EX9 table after linking.
+
+@item @samp{--mimport-ex9=FILE}
+Import the Ex9 table for EX9 relaxation.
+
+@item @samp{--mupdate-ex9}
+Update the existing EX9 table.
+
+@item @samp{--mex9-limit=NUM}
+Maximum number of entries in the ex9 table.
+
+@item @samp{--mex9-loop-aware}
+Avoid generating the EX9 instruction inside the loop.
+
+@item @samp{--m[no-]ifc}
+Disable/enable the link-time IFC optimization.
+
+@item @samp{--mifc-loop-aware}
+Avoid generating the IFC instruction inside the loop.
 @end table
 
 @ifclear GENERIC

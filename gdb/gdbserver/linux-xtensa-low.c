@@ -1,5 +1,5 @@
 /* GNU/Linux/Xtensa specific low level interface, for the remote server for GDB.
-   Copyright (C) 2007-2013 Free Software Foundation, Inc.
+   Copyright (C) 2007-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +24,7 @@
 void init_registers_xtensa (void);
 extern const struct target_desc *tdesc_xtensa;
 
-#include <sys/ptrace.h>
+#include <asm/ptrace.h>
 #include <xtensa-config.h>
 
 #include "xtensa-xtregs.c"

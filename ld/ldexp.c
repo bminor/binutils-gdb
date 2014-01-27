@@ -575,13 +575,10 @@ fold_name (etree_type *tree)
       break;
 
     case DEFINED:
-      if (expld.phase == lang_first_phase_enum)
-	lang_track_definedness (tree->name.name);
-      else
+      if (expld.phase != lang_first_phase_enum)
 	{
 	  struct bfd_link_hash_entry *h;
-	  int def_iteration
-	    = lang_symbol_definition_iteration (tree->name.name);
+	  struct lang_definedness_hash_entry *def;
 
 	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 					    &link_info,
@@ -591,15 +588,33 @@ fold_name (etree_type *tree)
 		      && (h->type == bfd_link_hash_defined
 			  || h->type == bfd_link_hash_defweak
 			  || h->type == bfd_link_hash_common)
-		      && (def_iteration == lang_statement_iteration
-			  || def_iteration == -1));
+		      && ((def = lang_symbol_defined (tree->name.name)) == NULL
+			  || def->by_object
+			  || def->iteration == (lang_statement_iteration & 1)));
 	}
       break;
 
     case NAME:
       if (expld.assign_name != NULL
 	  && strcmp (expld.assign_name, tree->name.name) == 0)
-	expld.assign_name = NULL;
+	{
+	  /* Self-assignment is only allowed for absolute symbols
+	     defined in a linker script.  */
+	  struct bfd_link_hash_entry *h;
+	  struct lang_definedness_hash_entry *def;
+
+	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
+					    &link_info,
+					    tree->name.name,
+					    FALSE, FALSE, TRUE);
+	  if (!(h != NULL
+		&& (h->type == bfd_link_hash_defined
+		    || h->type == bfd_link_hash_defweak)
+		&& h->u.def.section == bfd_abs_section_ptr
+		&& (def = lang_symbol_defined (tree->name.name)) != NULL
+		&& def->iteration == (lang_statement_iteration & 1)))
+	    expld.assign_name = NULL;
+	}
       if (expld.phase == lang_first_phase_enum)
 	;
       else if (tree->name.name[0] == '.' && tree->name.name[1] == 0)
@@ -775,6 +790,89 @@ fold_name (etree_type *tree)
     }
 }
 
+/* Return true if TREE is '.'.  */
+ 
+static bfd_boolean
+is_dot (const etree_type *tree)
+{
+  return (tree->type.node_class == etree_name
+	  && tree->type.node_code == NAME
+	  && tree->name.name[0] == '.'
+	  && tree->name.name[1] == 0);
+}
+
+/* Return true if TREE is a constant equal to VAL.  */
+
+static bfd_boolean
+is_value (const etree_type *tree, bfd_vma val)
+{
+  return (tree->type.node_class == etree_value
+	  && tree->value.value == val);
+}
+
+/* Return true if TREE is an absolute symbol equal to VAL defined in
+   a linker script.  */
+
+static bfd_boolean
+is_sym_value (const etree_type *tree, bfd_vma val)
+{
+  struct bfd_link_hash_entry *h;
+  struct lang_definedness_hash_entry *def;
+
+  return (tree->type.node_class == etree_name
+	  && tree->type.node_code == NAME
+	  && (def = lang_symbol_defined (tree->name.name)) != NULL
+	  && def->by_script
+	  && def->iteration == (lang_statement_iteration & 1)
+	  && (h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
+						&link_info,
+						tree->name.name,
+						FALSE, FALSE, TRUE)) != NULL
+	  && h->type == bfd_link_hash_defined
+	  && h->u.def.section == bfd_abs_section_ptr
+	  && h->u.def.value == val);
+}
+
+/* Return true if TREE is ". != 0".  */
+
+static bfd_boolean
+is_dot_ne_0 (const etree_type *tree)
+{
+  return (tree->type.node_class == etree_binary
+	  && tree->type.node_code == NE
+	  && is_dot (tree->binary.lhs)
+	  && is_value (tree->binary.rhs, 0));
+}
+
+/* Return true if TREE is ". = . + 0" or ". = . + sym" where sym is an
+   absolute constant with value 0 defined in a linker script.  */
+
+static bfd_boolean
+is_dot_plus_0 (const etree_type *tree)
+{
+  return (tree->type.node_class == etree_binary
+	  && tree->type.node_code == '+'
+	  && is_dot (tree->binary.lhs)
+	  && (is_value (tree->binary.rhs, 0)
+	      || is_sym_value (tree->binary.rhs, 0)));
+}
+
+/* Return true if TREE is "ALIGN (. != 0 ? some_expression : 1)".  */
+
+static bfd_boolean
+is_align_conditional (const etree_type *tree)
+{
+  if (tree->type.node_class == etree_unary
+      && tree->type.node_code == ALIGN_K)
+    {
+      tree = tree->unary.child;
+      return (tree->type.node_class == etree_trinary
+	      && is_dot_ne_0 (tree->trinary.cond)
+	      && is_value (tree->trinary.rhs, 1));
+    }
+  return 0;
+}
+
 static void
 exp_fold_tree_1 (etree_type *tree)
 {
@@ -838,6 +936,20 @@ exp_fold_tree_1 (etree_type *tree)
 	      expld.assigning_to_dot = TRUE;
 	      exp_fold_tree_1 (tree->assign.src);
 	      expld.assigning_to_dot = FALSE;
+
+	      /* If we are assigning to dot inside an output section
+		 arrange to keep the section, except for certain
+		 expressions that evaluate to zero.  We ignore . = 0,
+		 . = . + 0, and . = ALIGN (. != 0 ? expr : 1).  */
+	      if (expld.phase == lang_mark_phase_enum
+		  && expld.section != bfd_abs_section_ptr
+		  && !(expld.result.valid_p
+		       && expld.result.value == 0
+		       && (is_value (tree->assign.src, 0)
+			   || is_sym_value (tree->assign.src, 0)
+			   || is_dot_plus_0 (tree->assign.src)
+			   || is_align_conditional (tree->assign.src))))
+		expld.section->flags |= SEC_KEEP;
 
 	      if (!expld.result.valid_p)
 		{

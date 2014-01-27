@@ -3,7 +3,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -86,6 +86,35 @@ pstring (const char *string)
   return string;
 }
 
+/* Helper function to print a list of strings, represented as "const
+   char *const *".  The list is printed comma-separated.  */
+
+static char *
+pstring_list (const char *const *list)
+{
+  static char ret[100];
+  const char *const *p;
+  size_t offset = 0;
+
+  if (list == NULL)
+    return "(null)";
+
+  ret[0] = '\0';
+  for (p = list; *p != NULL && offset < sizeof (ret); ++p)
+    {
+      size_t s = xsnprintf (ret + offset, sizeof (ret) - offset, "%s, ", *p);
+      offset += 2 + s;
+    }
+
+  if (offset > 0)
+    {
+      gdb_assert (offset - 2 < sizeof (ret));
+      ret[offset - 2] = '\0';
+    }
+
+  return ret;
+}
+
 
 /* Maintain the struct gdbarch object.  */
 
@@ -99,8 +128,8 @@ struct gdbarch
 
   /* basic architectural information.  */
   const struct bfd_arch_info * bfd_arch_info;
-  int byte_order;
-  int byte_order_for_code;
+  enum bfd_endian byte_order;
+  enum bfd_endian byte_order_for_code;
   enum gdb_osabi osabi;
   const struct target_desc * target_desc;
 
@@ -265,12 +294,12 @@ struct gdbarch
   gdbarch_get_siginfo_type_ftype *get_siginfo_type;
   gdbarch_record_special_symbol_ftype *record_special_symbol;
   gdbarch_get_syscall_number_ftype *get_syscall_number;
-  const char * stap_integer_prefix;
-  const char * stap_integer_suffix;
-  const char * stap_register_prefix;
-  const char * stap_register_suffix;
-  const char * stap_register_indirection_prefix;
-  const char * stap_register_indirection_suffix;
+  const char *const * stap_integer_prefixes;
+  const char *const * stap_integer_suffixes;
+  const char *const * stap_register_prefixes;
+  const char *const * stap_register_suffixes;
+  const char *const * stap_register_indirection_prefixes;
+  const char *const * stap_register_indirection_suffixes;
   const char * stap_gdb_register_prefix;
   const char * stap_gdb_register_suffix;
   gdbarch_stap_is_single_operand_ftype *stap_is_single_operand;
@@ -288,6 +317,9 @@ struct gdbarch
   gdbarch_core_info_proc_ftype *core_info_proc;
   gdbarch_iterate_over_objfiles_in_search_order_ftype *iterate_over_objfiles_in_search_order;
   struct ravenscar_arch_ops * ravenscar_ops;
+  gdbarch_insn_is_call_ftype *insn_is_call;
+  gdbarch_insn_is_ret_ftype *insn_is_ret;
+  gdbarch_insn_is_jump_ftype *insn_is_jump;
 };
 
 
@@ -438,12 +470,12 @@ struct gdbarch startup_gdbarch =
   0,  /* get_siginfo_type */
   0,  /* record_special_symbol */
   0,  /* get_syscall_number */
-  0,  /* stap_integer_prefix */
-  0,  /* stap_integer_suffix */
-  0,  /* stap_register_prefix */
-  0,  /* stap_register_suffix */
-  0,  /* stap_register_indirection_prefix */
-  0,  /* stap_register_indirection_suffix */
+  0,  /* stap_integer_prefixes */
+  0,  /* stap_integer_suffixes */
+  0,  /* stap_register_prefixes */
+  0,  /* stap_register_suffixes */
+  0,  /* stap_register_indirection_prefixes */
+  0,  /* stap_register_indirection_suffixes */
   0,  /* stap_gdb_register_prefix */
   0,  /* stap_gdb_register_suffix */
   0,  /* stap_is_single_operand */
@@ -461,6 +493,9 @@ struct gdbarch startup_gdbarch =
   0,  /* core_info_proc */
   default_iterate_over_objfiles_in_search_order,  /* iterate_over_objfiles_in_search_order */
   NULL,  /* ravenscar_ops */
+  default_insn_is_call,  /* insn_is_call */
+  default_insn_is_ret,  /* insn_is_ret */
+  default_insn_is_jump,  /* insn_is_jump */
   /* startup_gdbarch() */
 };
 
@@ -476,7 +511,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
 
   /* Create an obstack for allocating all the per-architecture memory,
      then use that to allocate the architecture vector.  */
-  struct obstack *obstack = XMALLOC (struct obstack);
+  struct obstack *obstack = XNEW (struct obstack);
   obstack_init (obstack);
   gdbarch = obstack_alloc (obstack, sizeof (*gdbarch));
   memset (gdbarch, 0, sizeof (*gdbarch));
@@ -552,6 +587,9 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->gen_return_address = default_gen_return_address;
   gdbarch->iterate_over_objfiles_in_search_order = default_iterate_over_objfiles_in_search_order;
   gdbarch->ravenscar_ops = NULL;
+  gdbarch->insn_is_call = default_insn_is_call;
+  gdbarch->insn_is_ret = default_insn_is_ret;
+  gdbarch->insn_is_jump = default_insn_is_jump;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -744,12 +782,12 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of get_siginfo_type, has predicate.  */
   /* Skip verify of record_special_symbol, has predicate.  */
   /* Skip verify of get_syscall_number, has predicate.  */
-  /* Skip verify of stap_integer_prefix, invalid_p == 0 */
-  /* Skip verify of stap_integer_suffix, invalid_p == 0 */
-  /* Skip verify of stap_register_prefix, invalid_p == 0 */
-  /* Skip verify of stap_register_suffix, invalid_p == 0 */
-  /* Skip verify of stap_register_indirection_prefix, invalid_p == 0 */
-  /* Skip verify of stap_register_indirection_suffix, invalid_p == 0 */
+  /* Skip verify of stap_integer_prefixes, invalid_p == 0 */
+  /* Skip verify of stap_integer_suffixes, invalid_p == 0 */
+  /* Skip verify of stap_register_prefixes, invalid_p == 0 */
+  /* Skip verify of stap_register_suffixes, invalid_p == 0 */
+  /* Skip verify of stap_register_indirection_prefixes, invalid_p == 0 */
+  /* Skip verify of stap_register_indirection_suffixes, invalid_p == 0 */
   /* Skip verify of stap_gdb_register_prefix, invalid_p == 0 */
   /* Skip verify of stap_gdb_register_suffix, invalid_p == 0 */
   /* Skip verify of stap_is_single_operand, has predicate.  */
@@ -766,6 +804,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of core_info_proc, has predicate.  */
   /* Skip verify of iterate_over_objfiles_in_search_order, invalid_p == 0 */
   /* Skip verify of ravenscar_ops, invalid_p == 0 */
+  /* Skip verify of insn_is_call, invalid_p == 0 */
+  /* Skip verify of insn_is_ret, invalid_p == 0 */
+  /* Skip verify of insn_is_jump, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -1099,6 +1140,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: inner_than = <%s>\n",
                       host_address_to_string (gdbarch->inner_than));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: insn_is_call = <%s>\n",
+                      host_address_to_string (gdbarch->insn_is_call));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: insn_is_jump = <%s>\n",
+                      host_address_to_string (gdbarch->insn_is_jump));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: insn_is_ret = <%s>\n",
+                      host_address_to_string (gdbarch->insn_is_ret));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: int_bit = %s\n",
                       plongest (gdbarch->int_bit));
   fprintf_unfiltered (file,
@@ -1351,11 +1401,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: stap_gdb_register_suffix = %s\n",
                       pstring (gdbarch->stap_gdb_register_suffix));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stap_integer_prefix = %s\n",
-                      pstring (gdbarch->stap_integer_prefix));
+                      "gdbarch_dump: stap_integer_prefixes = %s\n",
+                      pstring_list (gdbarch->stap_integer_prefixes));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stap_integer_suffix = %s\n",
-                      pstring (gdbarch->stap_integer_suffix));
+                      "gdbarch_dump: stap_integer_suffixes = %s\n",
+                      pstring_list (gdbarch->stap_integer_suffixes));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_stap_is_single_operand_p() = %d\n",
                       gdbarch_stap_is_single_operand_p (gdbarch));
@@ -1369,17 +1419,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: stap_parse_special_token = <%s>\n",
                       host_address_to_string (gdbarch->stap_parse_special_token));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stap_register_indirection_prefix = %s\n",
-                      pstring (gdbarch->stap_register_indirection_prefix));
+                      "gdbarch_dump: stap_register_indirection_prefixes = %s\n",
+                      pstring_list (gdbarch->stap_register_indirection_prefixes));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stap_register_indirection_suffix = %s\n",
-                      pstring (gdbarch->stap_register_indirection_suffix));
+                      "gdbarch_dump: stap_register_indirection_suffixes = %s\n",
+                      pstring_list (gdbarch->stap_register_indirection_suffixes));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stap_register_prefix = %s\n",
-                      pstring (gdbarch->stap_register_prefix));
+                      "gdbarch_dump: stap_register_prefixes = %s\n",
+                      pstring_list (gdbarch->stap_register_prefixes));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stap_register_suffix = %s\n",
-                      pstring (gdbarch->stap_register_suffix));
+                      "gdbarch_dump: stap_register_suffixes = %s\n",
+                      pstring_list (gdbarch->stap_register_suffixes));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_static_transform_name_p() = %d\n",
                       gdbarch_static_transform_name_p (gdbarch));
@@ -1444,7 +1494,7 @@ gdbarch_bfd_arch_info (struct gdbarch *gdbarch)
   return gdbarch->bfd_arch_info;
 }
 
-int
+enum bfd_endian
 gdbarch_byte_order (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -1453,7 +1503,7 @@ gdbarch_byte_order (struct gdbarch *gdbarch)
   return gdbarch->byte_order;
 }
 
-int
+enum bfd_endian
 gdbarch_byte_order_for_code (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3450,7 +3500,7 @@ gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch)
 }
 
 LONGEST
-gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len)
+gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_xfer_shared_libraries != NULL);
@@ -3474,7 +3524,7 @@ gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch)
 }
 
 LONGEST
-gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len)
+gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_xfer_shared_libraries_aix != NULL);
@@ -4004,106 +4054,106 @@ set_gdbarch_get_syscall_number (struct gdbarch *gdbarch,
   gdbarch->get_syscall_number = get_syscall_number;
 }
 
-const char *
-gdbarch_stap_integer_prefix (struct gdbarch *gdbarch)
+const char *const *
+gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_integer_prefix, invalid_p == 0 */
+  /* Skip verify of stap_integer_prefixes, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_integer_prefix called\n");
-  return gdbarch->stap_integer_prefix;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_integer_prefixes called\n");
+  return gdbarch->stap_integer_prefixes;
 }
 
 void
-set_gdbarch_stap_integer_prefix (struct gdbarch *gdbarch,
-                                 const char * stap_integer_prefix)
+set_gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch,
+                                   const char *const * stap_integer_prefixes)
 {
-  gdbarch->stap_integer_prefix = stap_integer_prefix;
+  gdbarch->stap_integer_prefixes = stap_integer_prefixes;
 }
 
-const char *
-gdbarch_stap_integer_suffix (struct gdbarch *gdbarch)
+const char *const *
+gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_integer_suffix, invalid_p == 0 */
+  /* Skip verify of stap_integer_suffixes, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_integer_suffix called\n");
-  return gdbarch->stap_integer_suffix;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_integer_suffixes called\n");
+  return gdbarch->stap_integer_suffixes;
 }
 
 void
-set_gdbarch_stap_integer_suffix (struct gdbarch *gdbarch,
-                                 const char * stap_integer_suffix)
+set_gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch,
+                                   const char *const * stap_integer_suffixes)
 {
-  gdbarch->stap_integer_suffix = stap_integer_suffix;
+  gdbarch->stap_integer_suffixes = stap_integer_suffixes;
 }
 
-const char *
-gdbarch_stap_register_prefix (struct gdbarch *gdbarch)
+const char *const *
+gdbarch_stap_register_prefixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_register_prefix, invalid_p == 0 */
+  /* Skip verify of stap_register_prefixes, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_register_prefix called\n");
-  return gdbarch->stap_register_prefix;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_register_prefixes called\n");
+  return gdbarch->stap_register_prefixes;
 }
 
 void
-set_gdbarch_stap_register_prefix (struct gdbarch *gdbarch,
-                                  const char * stap_register_prefix)
+set_gdbarch_stap_register_prefixes (struct gdbarch *gdbarch,
+                                    const char *const * stap_register_prefixes)
 {
-  gdbarch->stap_register_prefix = stap_register_prefix;
+  gdbarch->stap_register_prefixes = stap_register_prefixes;
 }
 
-const char *
-gdbarch_stap_register_suffix (struct gdbarch *gdbarch)
+const char *const *
+gdbarch_stap_register_suffixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_register_suffix, invalid_p == 0 */
+  /* Skip verify of stap_register_suffixes, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_register_suffix called\n");
-  return gdbarch->stap_register_suffix;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_register_suffixes called\n");
+  return gdbarch->stap_register_suffixes;
 }
 
 void
-set_gdbarch_stap_register_suffix (struct gdbarch *gdbarch,
-                                  const char * stap_register_suffix)
+set_gdbarch_stap_register_suffixes (struct gdbarch *gdbarch,
+                                    const char *const * stap_register_suffixes)
 {
-  gdbarch->stap_register_suffix = stap_register_suffix;
+  gdbarch->stap_register_suffixes = stap_register_suffixes;
 }
 
-const char *
-gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch)
+const char *const *
+gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_register_indirection_prefix, invalid_p == 0 */
+  /* Skip verify of stap_register_indirection_prefixes, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_register_indirection_prefix called\n");
-  return gdbarch->stap_register_indirection_prefix;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_register_indirection_prefixes called\n");
+  return gdbarch->stap_register_indirection_prefixes;
 }
 
 void
-set_gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch,
-                                              const char * stap_register_indirection_prefix)
+set_gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch,
+                                                const char *const * stap_register_indirection_prefixes)
 {
-  gdbarch->stap_register_indirection_prefix = stap_register_indirection_prefix;
+  gdbarch->stap_register_indirection_prefixes = stap_register_indirection_prefixes;
 }
 
-const char *
-gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch)
+const char *const *
+gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_register_indirection_suffix, invalid_p == 0 */
+  /* Skip verify of stap_register_indirection_suffixes, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_register_indirection_suffix called\n");
-  return gdbarch->stap_register_indirection_suffix;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_register_indirection_suffixes called\n");
+  return gdbarch->stap_register_indirection_suffixes;
 }
 
 void
-set_gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch,
-                                              const char * stap_register_indirection_suffix)
+set_gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch,
+                                                const char *const * stap_register_indirection_suffixes)
 {
-  gdbarch->stap_register_indirection_suffix = stap_register_indirection_suffix;
+  gdbarch->stap_register_indirection_suffixes = stap_register_indirection_suffixes;
 }
 
 const char *
@@ -4422,6 +4472,57 @@ set_gdbarch_ravenscar_ops (struct gdbarch *gdbarch,
   gdbarch->ravenscar_ops = ravenscar_ops;
 }
 
+int
+gdbarch_insn_is_call (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->insn_is_call != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_insn_is_call called\n");
+  return gdbarch->insn_is_call (gdbarch, addr);
+}
+
+void
+set_gdbarch_insn_is_call (struct gdbarch *gdbarch,
+                          gdbarch_insn_is_call_ftype insn_is_call)
+{
+  gdbarch->insn_is_call = insn_is_call;
+}
+
+int
+gdbarch_insn_is_ret (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->insn_is_ret != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_insn_is_ret called\n");
+  return gdbarch->insn_is_ret (gdbarch, addr);
+}
+
+void
+set_gdbarch_insn_is_ret (struct gdbarch *gdbarch,
+                         gdbarch_insn_is_ret_ftype insn_is_ret)
+{
+  gdbarch->insn_is_ret = insn_is_ret;
+}
+
+int
+gdbarch_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->insn_is_jump != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_insn_is_jump called\n");
+  return gdbarch->insn_is_jump (gdbarch, addr);
+}
+
+void
+set_gdbarch_insn_is_jump (struct gdbarch *gdbarch,
+                          gdbarch_insn_is_jump_ftype insn_is_jump)
+{
+  gdbarch->insn_is_jump = insn_is_jump;
+}
+
 
 /* Keep a registry of per-architecture data-pointers required by GDB
    modules.  */
@@ -4461,9 +4562,9 @@ gdbarch_data_register (gdbarch_data_pre_init_ftype *pre_init,
   for (curr = &gdbarch_data_registry.registrations;
        (*curr) != NULL;
        curr = &(*curr)->next);
-  (*curr) = XMALLOC (struct gdbarch_data_registration);
+  (*curr) = XNEW (struct gdbarch_data_registration);
   (*curr)->next = NULL;
-  (*curr)->data = XMALLOC (struct gdbarch_data);
+  (*curr)->data = XNEW (struct gdbarch_data);
   (*curr)->data->index = gdbarch_data_registry.nr++;
   (*curr)->data->pre_init = pre_init;
   (*curr)->data->post_init = post_init;
@@ -4632,7 +4733,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
 			bfd_arch_info->printable_name,
 			host_address_to_string (init));
   /* Append it */
-  (*curr) = XMALLOC (struct gdbarch_registration);
+  (*curr) = XNEW (struct gdbarch_registration);
   (*curr)->bfd_architecture = bfd_architecture;
   (*curr)->init = init;
   (*curr)->dump_tdep = dump_tdep;
@@ -4776,7 +4877,7 @@ gdbarch_find_by_info (struct gdbarch_info info)
   /* Insert the new architecture into the front of the architecture
      list (keep the list sorted Most Recently Used).  */
   {
-    struct gdbarch_list *this = XMALLOC (struct gdbarch_list);
+    struct gdbarch_list *this = XNEW (struct gdbarch_list);
     this->next = rego->arches;
     this->gdbarch = new_gdbarch;
     rego->arches = this;

@@ -4283,6 +4283,20 @@ ppc_elf_check_relocs (bfd *abfd,
 	      htab->plt_type = PLT_OLD;
 	      htab->old_bfd = abfd;
 	    }
+	  if (h != NULL && h->type == STT_GNU_IFUNC)
+	    {
+	      if (info->shared)
+		{
+		  info->callbacks->einfo (_("%P: %H: @local call to ifunc %s\n"),
+					  abfd, sec, rel->r_offset,
+					  h->root.root.string);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+	      h->needs_plt = 1;
+	      if (!update_plt_info (abfd, &h->plt.plist, NULL, 0))
+		return FALSE;
+	    }
 	  break;
 
 	  /* This relocation describes the C++ object vtable hierarchy.
@@ -6481,7 +6495,9 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    return FALSE;
 	}
 
-      if (htab->glink != NULL && htab->glink->size != 0)
+      if (htab->plt_type == PLT_NEW
+	  && htab->glink != NULL
+	  && htab->glink->size != 0)
 	{
 	  if (!add_dynamic_entry (DT_PPC_GOT, 0))
 	    return FALSE;
@@ -7863,7 +7879,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      unresolved_reloc = FALSE;
 	      if (htab->plt_type == PLT_NEW
 		  || !htab->elf.dynamic_sections_created
-		  || h == NULL)
+		  || h == NULL
+		  || h->dynindx == -1)
 		relocation = (htab->glink->output_section->vma
 			      + htab->glink->output_offset
 			      + (ent->glink_offset & ~1));
@@ -9922,7 +9939,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_plt_sym_val			ppc_elf_plt_sym_val
 #define elf_backend_action_discarded		ppc_elf_action_discarded
 #define elf_backend_init_index_section		_bfd_elf_init_1_index_section
-#define elf_backend_post_process_headers	_bfd_elf_set_osabi
 #define elf_backend_lookup_section_flags_hook	ppc_elf_lookup_section_flags
 #define elf_backend_section_processing		ppc_elf_section_processing
 

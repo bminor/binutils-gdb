@@ -2627,26 +2627,6 @@ lm32_elf_always_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 }
 
 static bfd_boolean
-lm32_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = TRUE;
-
-  /* Copy object attributes.  */
-  _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-  return TRUE;
-}
-
-
-static bfd_boolean
 lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   unsigned i;
@@ -2655,7 +2635,7 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
 
-  if (! lm32_elf_copy_private_bfd_data (ibfd, obfd))
+  if (! _bfd_elf_copy_private_bfd_data (ibfd, obfd))
     return FALSE;
 
   if (! elf_tdata (ibfd) || ! elf_tdata (ibfd)->phdr

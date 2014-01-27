@@ -1,6 +1,6 @@
 /* MI Interpreter Definitions and Commands for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -83,7 +83,7 @@ static int report_initial_inferior (struct inferior *inf, void *closure);
 static void *
 mi_interpreter_init (struct interp *interp, int top_level)
 {
-  struct mi_interp *mi = XMALLOC (struct mi_interp);
+  struct mi_interp *mi = XNEW (struct mi_interp);
   const char *name;
   int mi_version;
 

@@ -1,6 +1,6 @@
 /* Process record and replay target for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,9 +57,9 @@ struct cmd_list_element *info_record_cmdlist = NULL;
   if (record_debug)							\
     fprintf_unfiltered (gdb_stdlog, "record: " msg "\n", ##args)
 
-/* Find the record target in the target stack.  */
+/* See record.h.  */
 
-static struct target_ops *
+struct target_ops *
 find_record_target (void)
 {
   struct target_ops *t;
@@ -84,6 +84,17 @@ require_record_target (void)
 	     "Use one of the \"target record-<tab><tab>\" commands first."));
 
   return t;
+}
+
+/* See record.h.  */
+
+void
+record_preopen (void)
+{
+  /* Check if a record target is already running.  */
+  if (find_record_target () != NULL)
+    error (_("The process is already being recorded.  Use \"record stop\" to "
+	     "stop recording first."));
 }
 
 /* See record.h.  */
@@ -575,6 +586,9 @@ get_call_history_modifiers (char **arg)
 	    case 'i':
 	      modifiers |= RECORD_PRINT_INSN_RANGE;
 	      break;
+	    case 'c':
+	      modifiers |= RECORD_PRINT_INDENT_CALLS;
+	      break;
 	    default:
 	      error (_("Invalid modifier: %c."), *args);
 	    }
@@ -809,6 +823,7 @@ function.\n\
 Without modifiers, it prints the function name.\n\
 With a /l modifier, the source file and line number range is included.\n\
 With a /i modifier, the instruction number range is included.\n\
+With a /c modifier, the output is indented based on the call stack depth.\n\
 With no argument, prints ten more lines after the previous ten-line print.\n\
 \"record function-call-history -\" prints ten lines before a previous ten-line \
 print.\n\

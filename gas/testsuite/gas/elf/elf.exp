@@ -94,6 +94,7 @@ if { [is_elf_format] } then {
     if {![istarget "mn10300-*-*"]
 	&& ![istarget "xtensa*-*-*"]
 	&& ![istarget "msp430*-*-*"]
+	&& ![istarget "nds32*-*-*"]
 	&& ![istarget "am3*-*-*"]} then {
       run_dump_test "ehopt0"
     }
@@ -111,6 +112,7 @@ if { [is_elf_format] } then {
 	    run_dump_test "file"
 	}
     }
+    setup_xfail "nds32*-*-*"
     run_dump_test "group0a"
     run_dump_test "group0b"
     run_dump_test "group0c"

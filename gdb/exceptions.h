@@ -1,6 +1,6 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -96,6 +96,9 @@ enum errors {
 
   /* An undefined command was executed.  */
   UNDEFINED_COMMAND_ERROR,
+
+  /* Requested feature, method, mechanism, etc. is not supported.  */
+  NOT_SUPPORTED_ERROR,
 
   /* Add more errors here.  */
   NR_ERRORS

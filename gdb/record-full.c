@@ -1,6 +1,6 @@
 /* Process record and replay target for GDB, the GNU debugger.
 
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -208,6 +208,19 @@ static ULONGEST record_full_insn_count;
 static struct target_ops record_full_ops;
 static struct target_ops record_full_core_ops;
 
+/* See record-full.h.  */
+
+int
+record_full_is_used (void)
+{
+  struct target_ops *t;
+
+  t = find_record_target ();
+  return (t == &record_full_ops
+	  || t == &record_full_core_ops);
+}
+
+
 /* Command lists for "set/show record full".  */
 static struct cmd_list_element *set_record_full_cmdlist;
 static struct cmd_list_element *show_record_full_cmdlist;
@@ -228,20 +241,17 @@ static void (*record_full_beneath_to_store_registers) (struct target_ops *,
 						       struct regcache *,
 						       int regno);
 static struct target_ops *record_full_beneath_to_xfer_partial_ops;
-static LONGEST
-  (*record_full_beneath_to_xfer_partial) (struct target_ops *ops,
-					  enum target_object object,
-					  const char *annex,
-					  gdb_byte *readbuf,
-					  const gdb_byte *writebuf,
-					  ULONGEST offset,
-					  LONGEST len);
+static target_xfer_partial_ftype *record_full_beneath_to_xfer_partial;
 static int
-  (*record_full_beneath_to_insert_breakpoint) (struct gdbarch *,
+  (*record_full_beneath_to_insert_breakpoint) (struct target_ops *,
+					       struct gdbarch *,
 					       struct bp_target_info *);
+static struct target_ops *record_full_beneath_to_insert_breakpoint_ops;
 static int
-  (*record_full_beneath_to_remove_breakpoint) (struct gdbarch *,
+  (*record_full_beneath_to_remove_breakpoint) (struct target_ops *,
+					       struct gdbarch *,
 					       struct bp_target_info *);
+static struct target_ops *record_full_beneath_to_remove_breakpoint_ops;
 static int (*record_full_beneath_to_stopped_by_watchpoint) (void);
 static int (*record_full_beneath_to_stopped_data_address) (struct target_ops *,
 							   CORE_ADDR *);
@@ -807,17 +817,13 @@ static void (*tmp_to_store_registers) (struct target_ops *,
 				       struct regcache *,
 				       int regno);
 static struct target_ops *tmp_to_xfer_partial_ops;
-static LONGEST (*tmp_to_xfer_partial) (struct target_ops *ops,
-				       enum target_object object,
-				       const char *annex,
-				       gdb_byte *readbuf,
-				       const gdb_byte *writebuf,
-				       ULONGEST offset,
-				       LONGEST len);
-static int (*tmp_to_insert_breakpoint) (struct gdbarch *,
+static target_xfer_partial_ftype *tmp_to_xfer_partial;
+static int (*tmp_to_insert_breakpoint) (struct target_ops *, struct gdbarch *,
 					struct bp_target_info *);
-static int (*tmp_to_remove_breakpoint) (struct gdbarch *,
+static struct target_ops *tmp_to_insert_breakpoint_ops;
+static int (*tmp_to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
 					struct bp_target_info *);
+static struct target_ops *tmp_to_remove_breakpoint_ops;
 static int (*tmp_to_stopped_by_watchpoint) (void);
 static int (*tmp_to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
 static int (*tmp_to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
@@ -920,10 +926,7 @@ record_full_open (char *name, int from_tty)
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open\n");
 
-  /* Check if record target is already running.  */
-  if (current_target.to_stratum == record_stratum)
-    error (_("Process record target already running.  Use \"record stop\" to "
-             "stop record target first."));
+  record_preopen ();
 
   /* Reset the tmp beneath pointers.  */
   tmp_to_resume_ops = NULL;
@@ -939,6 +942,8 @@ record_full_open (char *name, int from_tty)
   tmp_to_stopped_by_watchpoint = NULL;
   tmp_to_stopped_data_address = NULL;
   tmp_to_async = NULL;
+  tmp_to_insert_breakpoint_ops = NULL;
+  tmp_to_remove_breakpoint_ops = NULL;
 
   /* Set the beneath function pointers.  */
   for (t = current_target.beneath; t != NULL; t = t->beneath)
@@ -964,9 +969,15 @@ record_full_open (char *name, int from_tty)
 	  tmp_to_xfer_partial_ops = t;
         }
       if (!tmp_to_insert_breakpoint)
-	tmp_to_insert_breakpoint = t->to_insert_breakpoint;
+	{
+	  tmp_to_insert_breakpoint = t->to_insert_breakpoint;
+	  tmp_to_insert_breakpoint_ops = t;
+	}
       if (!tmp_to_remove_breakpoint)
-	tmp_to_remove_breakpoint = t->to_remove_breakpoint;
+	{
+	  tmp_to_remove_breakpoint = t->to_remove_breakpoint;
+	  tmp_to_remove_breakpoint_ops = t;
+	}
       if (!tmp_to_stopped_by_watchpoint)
 	tmp_to_stopped_by_watchpoint = t->to_stopped_by_watchpoint;
       if (!tmp_to_stopped_data_address)
@@ -993,7 +1004,9 @@ record_full_open (char *name, int from_tty)
   record_full_beneath_to_xfer_partial_ops = tmp_to_xfer_partial_ops;
   record_full_beneath_to_xfer_partial = tmp_to_xfer_partial;
   record_full_beneath_to_insert_breakpoint = tmp_to_insert_breakpoint;
+  record_full_beneath_to_insert_breakpoint_ops = tmp_to_insert_breakpoint_ops;
   record_full_beneath_to_remove_breakpoint = tmp_to_remove_breakpoint;
+  record_full_beneath_to_remove_breakpoint_ops = tmp_to_remove_breakpoint_ops;
   record_full_beneath_to_stopped_by_watchpoint = tmp_to_stopped_by_watchpoint;
   record_full_beneath_to_stopped_data_address = tmp_to_stopped_data_address;
   record_full_beneath_to_async = tmp_to_async;
@@ -1270,7 +1283,7 @@ record_full_wait_1 (struct target_ops *ops,
 			  struct gdbarch *gdbarch
 			    = get_regcache_arch (regcache);
 			  CORE_ADDR decr_pc_after_break
-			    = gdbarch_decr_pc_after_break (gdbarch);
+			    = target_decr_pc_after_break (gdbarch);
 			  if (decr_pc_after_break)
 			    regcache_write_pc (regcache,
 					       tmp_pc + decr_pc_after_break);
@@ -1343,7 +1356,7 @@ record_full_wait_1 (struct target_ops *ops,
 	  tmp_pc = regcache_read_pc (regcache);
 	  if (breakpoint_inserted_here_p (aspace, tmp_pc))
 	    {
-	      int decr_pc_after_break = gdbarch_decr_pc_after_break (gdbarch);
+	      int decr_pc_after_break = target_decr_pc_after_break (gdbarch);
 
 	      if (record_debug)
 		fprintf_unfiltered (gdb_stdlog,
@@ -1425,7 +1438,7 @@ record_full_wait_1 (struct target_ops *ops,
 		  if (breakpoint_inserted_here_p (aspace, tmp_pc))
 		    {
 		      int decr_pc_after_break
-			= gdbarch_decr_pc_after_break (gdbarch);
+			= target_decr_pc_after_break (gdbarch);
 
 		      if (record_debug)
 			fprintf_unfiltered (gdb_stdlog,
@@ -1640,7 +1653,7 @@ static LONGEST
 record_full_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const char *annex, gdb_byte *readbuf,
 			  const gdb_byte *writebuf, ULONGEST offset,
-			  LONGEST len)
+			  ULONGEST len)
 {
   if (!record_full_gdb_operation_disable
       && (object == TARGET_OBJECT_MEMORY
@@ -1758,7 +1771,8 @@ record_full_init_record_breakpoints (void)
    when recording.  */
 
 static int
-record_full_insert_breakpoint (struct gdbarch *gdbarch,
+record_full_insert_breakpoint (struct target_ops *ops,
+			       struct gdbarch *gdbarch,
 			       struct bp_target_info *bp_tgt)
 {
   struct record_full_breakpoint *bp;
@@ -1775,7 +1789,9 @@ record_full_insert_breakpoint (struct gdbarch *gdbarch,
       int ret;
 
       old_cleanups = record_full_gdb_operation_disable_set ();
-      ret = record_full_beneath_to_insert_breakpoint (gdbarch, bp_tgt);
+      ops = record_full_beneath_to_insert_breakpoint_ops;
+      ret = record_full_beneath_to_insert_breakpoint (ops, gdbarch,
+						      bp_tgt);
       do_cleanups (old_cleanups);
 
       if (ret != 0)
@@ -1795,7 +1811,8 @@ record_full_insert_breakpoint (struct gdbarch *gdbarch,
 /* "to_remove_breakpoint" method for process record target.  */
 
 static int
-record_full_remove_breakpoint (struct gdbarch *gdbarch,
+record_full_remove_breakpoint (struct target_ops *ops,
+			       struct gdbarch *gdbarch,
 			       struct bp_target_info *bp_tgt)
 {
   struct record_full_breakpoint *bp;
@@ -1815,7 +1832,9 @@ record_full_remove_breakpoint (struct gdbarch *gdbarch,
 	      int ret;
 
 	      old_cleanups = record_full_gdb_operation_disable_set ();
-	      ret = record_full_beneath_to_remove_breakpoint (gdbarch, bp_tgt);
+	      ops = record_full_beneath_to_remove_breakpoint_ops;
+	      ret = record_full_beneath_to_remove_breakpoint (ops, gdbarch,
+							      bp_tgt);
 	      do_cleanups (old_cleanups);
 
 	      if (ret != 0)
@@ -2148,7 +2167,8 @@ record_full_core_fetch_registers (struct target_ops *ops,
 /* "to_prepare_to_store" method for prec over corefile.  */
 
 static void
-record_full_core_prepare_to_store (struct regcache *regcache)
+record_full_core_prepare_to_store (struct target_ops *self,
+				   struct regcache *regcache)
 {
 }
 
@@ -2173,7 +2193,7 @@ record_full_core_xfer_partial (struct target_ops *ops,
 			       enum target_object object,
 			       const char *annex, gdb_byte *readbuf,
 			       const gdb_byte *writebuf, ULONGEST offset,
-			       LONGEST len)
+			       ULONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY)
     {
@@ -2264,7 +2284,8 @@ record_full_core_xfer_partial (struct target_ops *ops,
 /* "to_insert_breakpoint" method for prec over corefile.  */
 
 static int
-record_full_core_insert_breakpoint (struct gdbarch *gdbarch,
+record_full_core_insert_breakpoint (struct target_ops *ops,
+				    struct gdbarch *gdbarch,
 				    struct bp_target_info *bp_tgt)
 {
   return 0;
@@ -2273,7 +2294,8 @@ record_full_core_insert_breakpoint (struct gdbarch *gdbarch,
 /* "to_remove_breakpoint" method for prec over corefile.  */
 
 static int
-record_full_core_remove_breakpoint (struct gdbarch *gdbarch,
+record_full_core_remove_breakpoint (struct target_ops *ops,
+				    struct gdbarch *gdbarch,
 				    struct bp_target_info *bp_tgt)
 {
   return 0;

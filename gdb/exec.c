@@ -1,6 +1,6 @@
 /* Work with executable files, for GDB. 
 
-   Copyright (C) 1988-2013 Free Software Foundation, Inc.
+   Copyright (C) 1988-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -568,7 +568,7 @@ section_table_available_memory (VEC(mem_range_s) *memory,
 
 int
 section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
-				   ULONGEST offset, LONGEST len,
+				   ULONGEST offset, ULONGEST len,
 				   struct target_section *sections,
 				   struct target_section *sections_end,
 				   const char *section_name)
@@ -578,7 +578,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
   ULONGEST memaddr = offset;
   ULONGEST memend = memaddr + len;
 
-  if (len <= 0)
+  if (len == 0)
     internal_error (__FILE__, __LINE__,
 		    _("failed internal consistency check"));
 
@@ -639,7 +639,7 @@ static LONGEST
 exec_xfer_partial (struct target_ops *ops, enum target_object object,
 		   const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf,
-		   ULONGEST offset, LONGEST len)
+		   ULONGEST offset, ULONGEST len)
 {
   struct target_section_table *table = target_get_section_table (ops);
 
@@ -801,7 +801,8 @@ exec_set_section_address (const char *filename, int index, CORE_ADDR address)
    breakpoint_init_inferior).  */
 
 static int
-ignore (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt)
+ignore (struct target_ops *ops, struct gdbarch *gdbarch,
+	struct bp_target_info *bp_tgt)
 {
   return 0;
 }

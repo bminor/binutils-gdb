@@ -1,5 +1,5 @@
 /* Read HP PA/Risc object files for GDB.
-   Copyright (C) 1991-2013 Free Software Foundation, Inc.
+   Copyright (C) 1991-2014 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
    This file is part of GDB.
@@ -54,7 +54,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
   asection *shlib_info;
   struct som_external_symbol_dictionary_record *buf, *bufp, *endbufp;
   char *symname;
-  CONST int symsize = sizeof (struct som_external_symbol_dictionary_record);
+  const int symsize = sizeof (struct som_external_symbol_dictionary_record);
 
 
 #define text_offset ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile))

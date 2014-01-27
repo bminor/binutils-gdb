@@ -1,6 +1,6 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2011, 2012 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2011, 2012, 2014 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -881,17 +881,18 @@ dlltmp (char **buf, const char *fmt)
 }
 
 static void
-inform VPARAMS ((const char * message, ...))
+inform (const char * message, ...)
 {
-  VA_OPEN (args, message);
-  VA_FIXEDARG (args, const char *, message);
+  va_list args;
+
+  va_start (args, message);
 
   if (!verbose)
     return;
 
   report (message, args);
 
-  VA_CLOSE (args);
+  va_end (args);
 }
 
 static const char *

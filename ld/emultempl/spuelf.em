@@ -138,8 +138,9 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
   lang_output_section_statement_type *os;
 
   if (o != NULL)
-    output_name = o->name;
-  os = lang_output_section_find (output_name);
+    os = lang_output_section_get (o);
+  else
+    os = lang_output_section_find (output_name);
   if (os == NULL)
     {
       os = gld${EMULATION_NAME}_place_orphan (s, output_name, 0);

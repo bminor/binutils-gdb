@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.
 
@@ -1414,14 +1414,14 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
 			int n_pieces, struct dwarf_expr_piece *pieces,
 			int addr_size)
 {
-  struct piece_closure *c = XZALLOC (struct piece_closure);
+  struct piece_closure *c = XCNEW (struct piece_closure);
   int i;
 
   c->refc = 1;
   c->per_cu = per_cu;
   c->n_pieces = n_pieces;
   c->addr_size = addr_size;
-  c->pieces = XCALLOC (n_pieces, struct dwarf_expr_piece);
+  c->pieces = XCNEWVEC (struct dwarf_expr_piece, n_pieces);
 
   memcpy (c->pieces, pieces, n_pieces * sizeof (struct dwarf_expr_piece));
   for (i = 0; i < n_pieces; ++i)
@@ -1709,7 +1709,7 @@ read_pieced_value (struct value *v)
 		    if (optim)
 		      set_value_optimized_out (v, 1);
 		    if (unavail)
-		      mark_value_bytes_unavailable (v, offset, this_size);
+		      mark_value_bits_unavailable (v, offset, this_size_bits);
 		  }
 	      }
 	    else

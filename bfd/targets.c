@@ -673,6 +673,10 @@ extern const bfd_target bfd_elf32_ntradbigmips_vec;
 extern const bfd_target bfd_elf32_ntradlittlemips_vec;
 extern const bfd_target bfd_elf32_ntradbigmips_freebsd_vec;
 extern const bfd_target bfd_elf32_ntradlittlemips_freebsd_vec;
+extern const bfd_target bfd_elf32_nds32be_vec;
+extern const bfd_target bfd_elf32_nds32le_vec;
+extern const bfd_target bfd_elf32_nds32belin_vec;
+extern const bfd_target bfd_elf32_nds32lelin_vec;
 extern const bfd_target bfd_elf32_openrisc_vec;
 extern const bfd_target bfd_elf32_or32_big_vec;
 extern const bfd_target bfd_elf32_pj_vec;
@@ -1061,6 +1065,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf32_ntradbigmips_freebsd_vec,
 	&bfd_elf32_ntradlittlemips_freebsd_vec,
 #endif
+	&bfd_elf32_nds32be_vec,
+	&bfd_elf32_nds32le_vec,
+	&bfd_elf32_nds32belin_vec,
+	&bfd_elf32_nds32lelin_vec,
 	&bfd_elf32_openrisc_vec,
 	&bfd_elf32_or32_big_vec,
 	&bfd_elf32_pj_vec,

@@ -6582,34 +6582,19 @@ sh_elf_get_flags_from_mach (unsigned long mach)
 }
 #endif /* not sh_elf_set_mach_from_flags */
 
-#ifndef sh_elf_set_private_flags
-/* Function to keep SH specific file flags.  */
-
-static bfd_boolean
-sh_elf_set_private_flags (bfd *abfd, flagword flags)
-{
-  BFD_ASSERT (! elf_flags_init (abfd)
-	      || elf_elfheader (abfd)->e_flags == flags);
-
-  elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = TRUE;
-  return sh_elf_set_mach_from_flags (abfd);
-}
-#endif /* not sh_elf_set_private_flags */
-
 #ifndef sh_elf_copy_private_data
 /* Copy backend specific data from one object module to another */
 
 static bfd_boolean
 sh_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 {
-  /* Copy object attributes.  */
-  _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
   if (! is_sh_elf (ibfd) || ! is_sh_elf (obfd))
     return TRUE;
 
-  return sh_elf_set_private_flags (obfd, elf_elfheader (ibfd)->e_flags);
+  if (! _bfd_elf_copy_private_bfd_data (ibfd, obfd))
+    return FALSE;
+
+  return sh_elf_set_mach_from_flags (obfd);
 }
 #endif /* not sh_elf_copy_private_data */
 

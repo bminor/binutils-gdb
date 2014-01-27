@@ -1,6 +1,6 @@
 /* Output generating routines for GDB.
 
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -131,7 +131,7 @@ push_level (struct ui_out *uiout,
   struct ui_out_level *current;
 
   uiout->level++;
-  current = XMALLOC (struct ui_out_level);
+  current = XNEW (struct ui_out_level);
   current->field_count = 0;
   current->type = type;
   VEC_safe_push (ui_out_level_p, uiout->levels, current);
@@ -443,7 +443,7 @@ make_cleanup_ui_out_end (struct ui_out *uiout,
 {
   struct ui_out_end_cleanup_data *end_cleanup_data;
 
-  end_cleanup_data = XMALLOC (struct ui_out_end_cleanup_data);
+  end_cleanup_data = XNEW (struct ui_out_end_cleanup_data);
   end_cleanup_data->uiout = uiout;
   end_cleanup_data->type = type;
   return make_cleanup (do_cleanup_end, end_cleanup_data);
@@ -964,7 +964,7 @@ append_header_to_list (struct ui_out *uiout,
 {
   struct ui_out_hdr *temphdr;
 
-  temphdr = XMALLOC (struct ui_out_hdr);
+  temphdr = XNEW (struct ui_out_hdr);
   temphdr->width = width;
   temphdr->alignment = alignment;
   /* We have to copy the column title as the original may be an
@@ -1098,8 +1098,8 @@ struct ui_out *
 ui_out_new (struct ui_out_impl *impl, void *data,
 	    int flags)
 {
-  struct ui_out *uiout = XMALLOC (struct ui_out);
-  struct ui_out_level *current = XMALLOC (struct ui_out_level);
+  struct ui_out *uiout = XNEW (struct ui_out);
+  struct ui_out_level *current = XNEW (struct ui_out_level);
 
   uiout->data = data;
   uiout->impl = impl;

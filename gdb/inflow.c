@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -505,7 +505,7 @@ get_inflow_inferior_data (struct inferior *inf)
   info = inferior_data (inf, inflow_inferior_data);
   if (info == NULL)
     {
-      info = XZALLOC (struct terminal_info);
+      info = XCNEW (struct terminal_info);
       set_inferior_data (inf, inflow_inferior_data, info);
     }
 

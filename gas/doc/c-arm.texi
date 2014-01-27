@@ -564,13 +564,6 @@ incrementally to the architecture being compiled for.
 @item .arm
 This performs the same action as @var{.code 32}.
 
-@anchor{arm_pad}
-@cindex @code{.pad} directive, ARM
-@item .pad #@var{count}
-Generate unwinder annotations for a stack adjustment of @var{count} bytes.
-A positive value indicates the function prologue allocated stack space by
-decrementing the stack pointer.
-
 @c BBBBBBBBBBBBBBBBBBBBBBBBBB
 
 @cindex @code{.bss} directive, ARM
@@ -770,6 +763,7 @@ This directive writes 12-byte packed floating-point values to the
 output section.  These are not compatible with current ARM processors
 or ABIs.
 
+@anchor{arm_pad}
 @cindex @code{.pad} directive, ARM
 @item .pad #@var{count}
 Generate unwinder annotations for a stack adjustment of @var{count} bytes.

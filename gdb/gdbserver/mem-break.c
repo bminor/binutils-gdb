@@ -1,5 +1,5 @@
 /* Memory breakpoint operations for the remote server for GDB.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -197,10 +197,9 @@ set_raw_breakpoint_at (CORE_ADDR where)
   if (err != 0)
     {
       if (debug_threads)
-	fprintf (stderr,
-		 "Failed to read shadow memory of"
-		 " breakpoint at 0x%s (%s).\n",
-		 paddress (where), strerror (err));
+	debug_printf ("Failed to read shadow memory of"
+		      " breakpoint at 0x%s (%s).\n",
+		      paddress (where), strerror (err));
       free (bp);
       return NULL;
     }
@@ -211,9 +210,8 @@ set_raw_breakpoint_at (CORE_ADDR where)
   if (err != 0)
     {
       if (debug_threads)
-	fprintf (stderr,
-		 "Failed to insert breakpoint at 0x%s (%s).\n",
-		 paddress (where), strerror (err));
+	debug_printf ("Failed to insert breakpoint at 0x%s (%s).\n",
+		      paddress (where), strerror (err));
       free (bp);
       return NULL;
     }
@@ -334,10 +332,9 @@ delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel)
 		  *bp_link = prev_bp_link;
 
 		  if (debug_threads)
-		    fprintf (stderr,
-			     "Failed to uninsert fast tracepoint jump "
-			     "at 0x%s (%s) while deleting it.\n",
-			     paddress (bp->pc), strerror (ret));
+		    debug_printf ("Failed to uninsert fast tracepoint jump "
+				  "at 0x%s (%s) while deleting it.\n",
+				  paddress (bp->pc), strerror (ret));
 		  return ret;
 		}
 
@@ -398,10 +395,9 @@ set_fast_tracepoint_jump (CORE_ADDR where,
   if (err != 0)
     {
       if (debug_threads)
-	fprintf (stderr,
-		 "Failed to read shadow memory of"
-		 " fast tracepoint at 0x%s (%s).\n",
-		 paddress (where), strerror (err));
+	debug_printf ("Failed to read shadow memory of"
+		      " fast tracepoint at 0x%s (%s).\n",
+		      paddress (where), strerror (err));
       free (jp);
       return NULL;
     }
@@ -424,9 +420,8 @@ set_fast_tracepoint_jump (CORE_ADDR where,
   if (err != 0)
     {
       if (debug_threads)
-	fprintf (stderr,
-		 "Failed to insert fast tracepoint jump at 0x%s (%s).\n",
-		 paddress (where), strerror (err));
+	debug_printf ("Failed to insert fast tracepoint jump at 0x%s (%s).\n",
+		      paddress (where), strerror (err));
 
       /* Unlink it.  */
       proc->fast_tracepoint_jumps = jp->next;
@@ -450,10 +445,9 @@ uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc)
       /* This can happen when we remove all breakpoints while handling
 	 a step-over.  */
       if (debug_threads)
-	fprintf (stderr,
-		 "Could not find fast tracepoint jump at 0x%s "
-		 "in list (uninserting).\n",
-		 paddress (pc));
+	debug_printf ("Could not find fast tracepoint jump at 0x%s "
+		      "in list (uninserting).\n",
+		      paddress (pc));
       return;
     }
 
@@ -480,9 +474,9 @@ uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc)
 	  jp->inserted = 1;
 
 	  if (debug_threads)
-	    fprintf (stderr,
-		     "Failed to uninsert fast tracepoint jump at 0x%s (%s).\n",
-		     paddress (pc), strerror (err));
+	    debug_printf ("Failed to uninsert fast tracepoint jump at"
+			  " 0x%s (%s).\n",
+			  paddress (pc), strerror (err));
 	}
     }
 }
@@ -500,10 +494,9 @@ reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
       /* This can happen when we remove breakpoints when a tracepoint
 	 hit causes a tracing stop, while handling a step-over.  */
       if (debug_threads)
-	fprintf (stderr,
-		 "Could not find fast tracepoint jump at 0x%s "
-		 "in list (reinserting).\n",
-		 paddress (where));
+	debug_printf ("Could not find fast tracepoint jump at 0x%s "
+		      "in list (reinserting).\n",
+		      paddress (where));
       return;
     }
 
@@ -528,9 +521,9 @@ reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
       jp->inserted = 0;
 
       if (debug_threads)
-	fprintf (stderr,
-		 "Failed to reinsert fast tracepoint jump at 0x%s (%s).\n",
-		 paddress (where), strerror (err));
+	debug_printf ("Failed to reinsert fast tracepoint jump at"
+		      " 0x%s (%s).\n",
+		      paddress (where), strerror (err));
     }
 }
 
@@ -598,10 +591,9 @@ delete_raw_breakpoint (struct process_info *proc, struct raw_breakpoint *todel)
 		  *bp_link = prev_bp_link;
 
 		  if (debug_threads)
-		    fprintf (stderr,
-			     "Failed to uninsert raw breakpoint "
-			     "at 0x%s (%s) while deleting it.\n",
-			     paddress (bp->pc), strerror (ret));
+		    debug_printf ("Failed to uninsert raw breakpoint "
+				  "at 0x%s (%s) while deleting it.\n",
+				  paddress (bp->pc), strerror (ret));
 		  return ret;
 		}
 
@@ -932,9 +924,9 @@ gdb_no_commands_at_breakpoint (CORE_ADDR where)
     return 0;
 
   if (debug_threads)
-    fprintf (stderr, "at 0x%s, bp command_list is 0x%s\n",
-	     paddress (where),
-	     phex_nz ((uintptr_t) bp->command_list, 0));
+    debug_printf ("at 0x%s, bp command_list is 0x%s\n",
+		  paddress (where),
+		  phex_nz ((uintptr_t) bp->command_list, 0));
   return (bp->command_list == NULL);
 }
 
@@ -1034,9 +1026,8 @@ uninsert_raw_breakpoint (struct raw_breakpoint *bp)
 	  bp->inserted = 1;
 
 	  if (debug_threads)
-	    fprintf (stderr,
-		     "Failed to uninsert raw breakpoint at 0x%s (%s).\n",
-		     paddress (bp->pc), strerror (err));
+	    debug_printf ("Failed to uninsert raw breakpoint at 0x%s (%s).\n",
+			  paddress (bp->pc), strerror (err));
 	}
     }
 }
@@ -1052,10 +1043,9 @@ uninsert_breakpoints_at (CORE_ADDR pc)
       /* This can happen when we remove all breakpoints while handling
 	 a step-over.  */
       if (debug_threads)
-	fprintf (stderr,
-		 "Could not find breakpoint at 0x%s "
-		 "in list (uninserting).\n",
-		 paddress (pc));
+	debug_printf ("Could not find breakpoint at 0x%s "
+		      "in list (uninserting).\n",
+		      paddress (pc));
       return;
     }
 
@@ -1087,9 +1077,8 @@ reinsert_raw_breakpoint (struct raw_breakpoint *bp)
   if (err == 0)
     bp->inserted = 1;
   else if (debug_threads)
-    fprintf (stderr,
-	     "Failed to reinsert breakpoint at 0x%s (%s).\n",
-	     paddress (bp->pc), strerror (err));
+    debug_printf ("Failed to reinsert breakpoint at 0x%s (%s).\n",
+		  paddress (bp->pc), strerror (err));
 }
 
 void
@@ -1103,10 +1092,9 @@ reinsert_breakpoints_at (CORE_ADDR pc)
       /* This can happen when we remove all breakpoints while handling
 	 a step-over.  */
       if (debug_threads)
-	fprintf (stderr,
-		 "Could not find raw breakpoint at 0x%s "
-		 "in list (reinserting).\n",
-		 paddress (pc));
+	debug_printf ("Could not find raw breakpoint at 0x%s "
+		      "in list (reinserting).\n",
+		      paddress (pc));
       return;
     }
 

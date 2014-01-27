@@ -1,6 +1,6 @@
 /* Output generating routines for GDB CLI.
 
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -150,7 +150,7 @@ tui_out_new (struct ui_file *stream)
 {
   int flags = 0;
 
-  tui_out_data *data = XMALLOC (tui_out_data);
+  tui_out_data *data = XNEW (tui_out_data);
 
   /* Initialize base "class".  */
   cli_out_data_ctor (&data->base, stream);

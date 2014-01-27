@@ -1,6 +1,6 @@
 /* Serial interface for raw TCP connections on Un*x like systems.
 
-   Copyright (C) 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -372,6 +372,36 @@ show_tcp_cmd (char *args, int from_tty)
   help_list (tcp_show_cmdlist, "show tcp ", -1, gdb_stdout);
 }
 
+#ifndef USE_WIN32API
+
+/* The TCP ops.  */
+
+static const struct serial_ops tcp_ops =
+{
+  "tcp",
+  net_open,
+  net_close,
+  NULL,
+  ser_base_readchar,
+  ser_base_write,
+  ser_base_flush_output,
+  ser_base_flush_input,
+  ser_tcp_send_break,
+  ser_base_raw,
+  ser_base_get_tty_state,
+  ser_base_copy_tty_state,
+  ser_base_set_tty_state,
+  ser_base_print_tty_state,
+  ser_base_noflush_set_tty_state,
+  ser_base_setbaudrate,
+  ser_base_setstopbits,
+  ser_base_drain_output,
+  ser_base_async,
+  net_read_prim,
+  net_write_prim
+};
+
+#endif /* USE_WIN32API */
 
 void
 _initialize_ser_tcp (void)
@@ -380,32 +410,7 @@ _initialize_ser_tcp (void)
   /* Do nothing; the TCP serial operations will be initialized in
      ser-mingw.c.  */
 #else
-  struct serial_ops *ops;
-
-  ops = XMALLOC (struct serial_ops);
-  memset (ops, 0, sizeof (struct serial_ops));
-  ops->name = "tcp";
-  ops->next = 0;
-  ops->open = net_open;
-  ops->close = net_close;
-  ops->readchar = ser_base_readchar;
-  ops->write = ser_base_write;
-  ops->flush_output = ser_base_flush_output;
-  ops->flush_input = ser_base_flush_input;
-  ops->send_break = ser_tcp_send_break;
-  ops->go_raw = ser_base_raw;
-  ops->get_tty_state = ser_base_get_tty_state;
-  ops->copy_tty_state = ser_base_copy_tty_state;
-  ops->set_tty_state = ser_base_set_tty_state;
-  ops->print_tty_state = ser_base_print_tty_state;
-  ops->noflush_set_tty_state = ser_base_noflush_set_tty_state;
-  ops->setbaudrate = ser_base_setbaudrate;
-  ops->setstopbits = ser_base_setstopbits;
-  ops->drain_output = ser_base_drain_output;
-  ops->async = ser_base_async;
-  ops->read_prim = net_read_prim;
-  ops->write_prim = net_write_prim;
-  serial_add_interface (ops);
+  serial_add_interface (&tcp_ops);
 #endif /* USE_WIN32API */
 
   add_prefix_cmd ("tcp", class_maintenance, set_tcp_cmd, _("\

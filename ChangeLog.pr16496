@@ -1,0 +1,46 @@
+bfd/
+
+2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16496
+	* elf-bfd.h (bfd_elf_get_symbol_version_string): New.
+	* elf.c (bfd_elf_get_symbol_version_string): New.  Extracted
+	from bfd_elf_print_symbol.
+	(bfd_elf_print_symbol): Use it.
+
+binutils/
+
+2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16496
+	* objdump.c (objdump_print_symname): Call
+	bfd_elf_get_symbol_version_string to get ELF symbol version
+	string.  Append version string if needed.
+
+	* readelf.c (versioned_symbol_info): New enum.
+	(get_symbol_version_string): New.  Extracted from
+	process_symbol_table.
+	(dump_relocations): Add a new argument to indicate if dynamic
+	symbol table is used.  Use get_symbol_version_string to get
+	symbol version string for dynamic symbol.  Append version string
+	if needed.
+	(process_relocs): Updated dump_relocations call.
+	(process_symbol_table): Use get_symbol_version_string.
+
+ld/testsuite/
+
+2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16496
+	* ld-cris/weakref3.d: Add symbol version string to versioned
+	symbol names in dynamic relocation.
+	* ld-cris/weakref4.d: Likewise.
+	* ld-elfvers/vers24.rd: Likewise.
+
+	* ld-elf/pr16496a.c: New file.
+	* ld-elf/pr16496a.map: Likewise.
+	* ld-elf/pr16496b.c: Likewise.
+	* ld-elf/pr16496b.od: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add libpr16496a.so and
+	libpr16496b.so tests.

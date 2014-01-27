@@ -1,6 +1,6 @@
 /* MI Console code.
 
-   Copyright (C) 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -52,7 +52,7 @@ struct ui_file *
 mi_console_file_new (struct ui_file *raw, const char *prefix, char quote)
 {
   struct ui_file *ui_file = ui_file_new ();
-  struct mi_console_file *mi_console = XMALLOC (struct mi_console_file);
+  struct mi_console_file *mi_console = XNEW (struct mi_console_file);
 
   mi_console->magic = &mi_console_file_magic;
   mi_console->raw = raw;

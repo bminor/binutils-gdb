@@ -1,5 +1,5 @@
 /* Handle FR-V (FDPIC) shared libraries for GDB, the GNU Debugger.
-   Copyright (C) 2004-2013 Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -721,6 +721,7 @@ static int
 enable_break (void)
 {
   asection *interp_sect;
+  CORE_ADDR entry_point;
 
   if (symfile_objfile == NULL)
     {
@@ -730,7 +731,7 @@ enable_break (void)
       return 0;
     }
 
-  if (!symfile_objfile->ei.entry_point_p)
+  if (!entry_point_address_query (&entry_point))
     {
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
@@ -751,15 +752,13 @@ enable_break (void)
       return 0;
     }
 
-  create_solib_event_breakpoint (target_gdbarch (),
-				 symfile_objfile->ei.entry_point);
+  create_solib_event_breakpoint (target_gdbarch (), entry_point);
 
   if (solib_frv_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"enable_break: solib event breakpoint "
 			"placed at entry point: %s\n",
-			hex_string_custom (symfile_objfile->ei.entry_point,
-					   8));
+			hex_string_custom (entry_point, 8));
   return 1;
 }
 

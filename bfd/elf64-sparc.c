@@ -922,8 +922,6 @@ const struct elf_size_info elf64_sparc_size_info =
 /* Section 5.2.4 of the ABI specifies a 256-byte boundary for the table.  */
 #define elf_backend_plt_alignment 8
 
-#define elf_backend_post_process_headers	_bfd_elf_set_osabi
-
 #include "elf64-target.h"
 
 /* FreeBSD support */

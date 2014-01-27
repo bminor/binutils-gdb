@@ -1,6 +1,6 @@
 /* Linux-specific functions to retrieve OS data.
    
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,6 @@
 
 extern int linux_common_core_of_thread (ptid_t ptid);
 extern LONGEST linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
-					 ULONGEST offset, LONGEST len);
+					 ULONGEST offset, ULONGEST len);
 
 #endif

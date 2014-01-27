@@ -1,6 +1,6 @@
 /* Debug logging for the symbol file functions for the GNU debugger, GDB.
 
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -575,7 +575,7 @@ install_symfile_debug_logging (struct objfile *objfile)
   real_sf = objfile->sf;
 
   /* Alas we have to preserve NULL entries in REAL_SF.  */
-  debug_data = XZALLOC (struct debug_sym_fns_data);
+  debug_data = XCNEW (struct debug_sym_fns_data);
 
 #define COPY_SF_PTR(from, to, name, func)	\
   do {						\

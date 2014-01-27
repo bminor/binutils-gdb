@@ -1,6 +1,6 @@
 /* GDB routines for supporting auto-loaded scripts.
 
-   Copyright (C) 2012-2013 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,7 +36,6 @@
 #include "gdb_vecs.h"
 #include "readline/tilde.h"
 #include "completer.h"
-#include "observer.h"
 #include "fnmatch.h"
 #include "top.h"
 #include "filestuff.h"
@@ -596,7 +595,7 @@ get_auto_load_pspace_data (struct program_space *pspace)
   info = program_space_data (pspace, auto_load_pspace_data);
   if (info == NULL)
     {
-      info = XZALLOC (struct auto_load_pspace_info);
+      info = XCNEW (struct auto_load_pspace_info);
       set_program_space_data (pspace, auto_load_pspace_data, info);
     }
 

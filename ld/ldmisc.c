@@ -484,7 +484,22 @@ minfo (const char *fmt, ...)
       va_list arg;
 
       va_start (arg, fmt);
-      vfinfo (config.map_file, fmt, arg, FALSE);
+      if (fmt[0] == '%' && fmt[1] == '!' && fmt[2] == 0)
+	{
+	  /* Stash info about --as-needed shared libraries.  Print
+	     later so they don't appear intermingled with archive
+	     library info.  */
+	  struct asneeded_minfo *m = xmalloc (sizeof *m);
+
+	  m->next = NULL;
+	  m->soname = va_arg (arg, const char *);
+	  m->ref = va_arg (arg, bfd *);
+	  m->name = va_arg (arg, const char *);
+	  *asneeded_list_tail = m;
+	  asneeded_list_tail = &m->next;
+	}
+      else
+	vfinfo (config.map_file, fmt, arg, FALSE);
       va_end (arg);
     }
 }

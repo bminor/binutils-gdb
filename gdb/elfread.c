@@ -1,6 +1,6 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
 
-   Copyright (C) 1991-2013 Free Software Foundation, Inc.
+   Copyright (C) 1991-2014 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -105,10 +105,10 @@ elf_symfile_segments (bfd *abfd)
   if (num_segments == 0)
     return NULL;
 
-  data = XZALLOC (struct symfile_segment_data);
+  data = XCNEW (struct symfile_segment_data);
   data->num_segments = num_segments;
-  data->segment_bases = XCALLOC (num_segments, CORE_ADDR);
-  data->segment_sizes = XCALLOC (num_segments, CORE_ADDR);
+  data->segment_bases = XCNEWVEC (CORE_ADDR, num_segments);
+  data->segment_sizes = XCNEWVEC (CORE_ADDR, num_segments);
 
   for (i = 0; i < num_segments; i++)
     {
@@ -117,7 +117,7 @@ elf_symfile_segments (bfd *abfd)
     }
 
   num_sections = bfd_count_sections (abfd);
-  data->segment_info = XCALLOC (num_sections, int);
+  data->segment_info = XCNEWVEC (int, num_sections);
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {
