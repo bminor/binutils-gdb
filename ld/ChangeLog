@@ -1,3 +1,10 @@
+2014-01-28  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am: Remove obsolete MSP430 emulations.
+	* configure.tgt: Likewise.
+	* emulparams/msp430all.sh: Likewise.
+	* Makefile.in: Regenerate.
+
 2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16498
