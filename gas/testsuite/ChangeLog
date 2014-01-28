@@ -1,3 +1,9 @@
+2014-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16317
+	* gas/ia64/group-2.d: Expect I attribute with RELA sections.
+	* gas/ia64/xdata.d: Likewise.
+
 2014-01-22  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	PR gas/16489
