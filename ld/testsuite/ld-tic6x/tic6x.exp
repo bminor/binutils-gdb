@@ -195,7 +195,5 @@ check_osabi_tic6x "C6X shared library OSABI, BE" tmpdir/libtestb.so
 check_osabi_tic6x "C6X dynamic app OSABI, LE" tmpdir/dynapp-1
 check_osabi_tic6x "C6X dynamic app OSABI, BE" tmpdir/dynapp-1b
 
-set expected_osabi "UNIX - System V"
-
 check_osabi_tic6x "C6X relocatable link OSABI, LE" tmpdir/shlib.o
 check_osabi_tic6x "C6X relocatable link OSABI, BE" tmpdir/shlibb.o
