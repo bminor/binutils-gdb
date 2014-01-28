@@ -89,18 +89,18 @@ gdb_breakpoint "foo" allow-pending
 gdb_breakpoint "bar" allow-pending
 
 # Run to the first stop and check that only the first library is loaded.
-gdb_continue_to_breakpoint "library load #1" "stop .*"
+gdb_continue_to_breakpoint "library load #1" "\\.?stop .*"
 check_info_shared "info sharedlibrary #2" 1 0
 
 # Run to the second stop and check that both libraries are loaded.
-gdb_continue_to_breakpoint "library load #2" "stop .*"
+gdb_continue_to_breakpoint "library load #2" "\\.?stop .*"
 check_info_shared "info sharedlibrary #3" 1 1
 
 # Check that the next stop is in foo.
-gdb_continue_to_breakpoint "library function #1" "foo .*"
+gdb_continue_to_breakpoint "library function #1" "\\.?foo .*"
 
 # Check that the next stop is in bar.
-gdb_continue_to_breakpoint "library function #2" "bar .*"
+gdb_continue_to_breakpoint "library function #2" "\\.?bar .*"
 
 # Restart the inferior and make sure there are no breakpoint reset
 # errors.  These can happen with the probes-based runtime linker
@@ -124,23 +124,23 @@ gdb_test_multiple "" $test {
 check_info_shared "info sharedlibrary #4" 0 0
 
 # Run to the first stop and check that only the first library is loaded.
-gdb_continue_to_breakpoint "library load #3" "stop .*"
+gdb_continue_to_breakpoint "library load #3" "\\.?stop .*"
 check_info_shared "info sharedlibrary #5" 1 0
 
 # Run to the second stop and check that both libraries are loaded.
-gdb_continue_to_breakpoint "library load #4" "stop .*"
+gdb_continue_to_breakpoint "library load #4" "\\.?stop .*"
 check_info_shared "info sharedlibrary #6" 1 1
 
 # Check that the next stop is in foo.
-gdb_continue_to_breakpoint "library function #3" "foo .*"
+gdb_continue_to_breakpoint "library function #3" "\\.?foo .*"
 
 # Check that the next stop is in bar.
-gdb_continue_to_breakpoint "library function #4" "bar .*"
+gdb_continue_to_breakpoint "library function #4" "\\.?bar .*"
 
 # Run to the next stop and check that the first library has been unloaded.
-gdb_continue_to_breakpoint "library unload #1" "stop .*"
+gdb_continue_to_breakpoint "library unload #1" "\\.?stop .*"
 check_info_shared "info sharedlibrary #7" 0 1
 
 # Run to the last stop and check that both libraries are gone.
-gdb_continue_to_breakpoint "library unload #2" "stop .*"
+gdb_continue_to_breakpoint "library unload #2" "\\.?stop .*"
 check_info_shared "info sharedlibrary #8" 0 0
