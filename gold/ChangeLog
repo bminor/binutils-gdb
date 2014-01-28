@@ -1,3 +1,34 @@
+2014-01-28  Cary Coutant  <ccoutant@google.com>
+
+	Add .gdb_index version 7 support.
+
+	* gold/dwarf_reader.cc: include <utility> (for make_pair).
+	(Dwarf_abbrev_table::do_read_abbrevs): Check for compressed
+	debug sections.
+	(Dwarf_ranges_table::read_ranges_table): Likewise.
+	(Dwarf_pubnames_table::read_section): Check for GNU-style
+	sections, and for compressed debug sections.
+	(Dwarf_pubnames_table::read_header): Compute end address of table.
+	(Dwarf_pubnames_table::next_name): Return flag_byte.  Check
+	for end of list by offset, not by offset == 0.
+	(Dwarf_info_reader::do_read_string_table): Check for compressed
+	debug sections.
+	* gold/dwarf_reader.h (Dwarf_pubnames_table::Dwarf_pubnames_table):
+	Initialize new data members.
+	(Dwarf_pubnames_table::next_name): return flag_byte.
+	(Dwarf_pubnames_table::end_of_table_): New data member.
+	(Dwarf_pubnames_table::is_gnu_style_): New data member.
+	* gold/gdb-index.cc (gdb_index_version): Update to version 7.
+	(Gdb_index_info_reader::read_pubtable): Read flag_byte.
+	(Gdb_index_info_reader::read_pubnames_and_pubtypes): Don't
+	read skeleton type unit DIEs.
+	(Gdb_index::add_symbol): Add flag_byte; adjust all callers.
+	(Gdb_index::do_write): Write flag_byte.
+	* gold/gdb-index.h (Gdb_index::add_symbol): Add flags parameter.
+	(Gdb_index::Cu_vector): Store flags along with cu indexes.
+	* gold/testsuite/gdb_index_test_3.sh: Allow versions 4-7.
+	* gold/testsuite/gdb_index_test_comm.sh: Likewise.
+
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.cc (print_version): Update copyright year to 2014.
