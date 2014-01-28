@@ -1,3 +1,7 @@
+2014-01-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc64-tdep.c (ppc64_standard_linkage7): Fix typo.
+
 2014-01-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (maint_set_ada_cmdlist, maint_show_ada_cmdlist):
