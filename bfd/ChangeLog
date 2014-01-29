@@ -1,3 +1,31 @@
+2014-04-16  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline patches for ppc476 workaround
+	2014-02-03  Alan Modra  <amodra@gmail.com>
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Add params.
+	Delete emit_stub_syms, no_tls_get_addr_opt.  Update all uses.
+	(ppc_elf_link_params): New function.
+	(ppc_elf_create_glink): Align .glink to 64 bytes for ppc476
+	workaround.
+	(ppc_elf_select_plt_layout): Remove plt_style and emit_stub_syms
+	parameters.  Use htab->params instead.
+	(ppc_elf_tls_setup): Remove no_tls_get_addr_opt parameter.
+	(ppc_elf_size_dynamic_sections): Align __glink_PLTresolve to
+	64 bytes for ppc476 workaround.
+	(struct ppc_elf_relax_info): New.
+	(ppc_elf_relax_section): Exclude linker created sections and
+	those too small to hold one instruction.  Don't add another
+	branch 	around trampolines on later relax passes.  Don't
+	generate trampolines for undefined symbols when !relocatable,
+	nor for plugin symbols.  Allocate space for ppc476 workaround
+	patch area.  Free fixups on error return path.
+	(ppc_elf_relocate_section): Handle ppc476 workaround patching.
+	* elf32-ppc.h (struct ppc_elf_params): New.
+	(ppc_elf_select_plt_layout, ppc_elf_tls_setup): Update prototype.
+	(ppc_elf_link_params): Declare.
+	* section.c (SEC_INFO_TYPE_TARGET): Define.
+	* bfd-in2.h: Regenerate.
+
 2014-04-15  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* (elfNN_aarch64_tls_relax): Fix instruction mask.
