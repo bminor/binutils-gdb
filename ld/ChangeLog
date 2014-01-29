@@ -1,3 +1,16 @@
+2014-02-03  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc32elf.em (no_tls_get_addr_opt, emit_stub_syms)
+	plt_style): Delete.  Adjust all refs to instead use..
+	(params): ..this.  New variable.
+	(ppc_after_open_output): New function.  Tweak params and pass to
+	ppc_elf_link_params.
+	(ppc_after_open): Adjust ppc_elf_select_plt_layout call.
+	(ppc_before_allocation): Adjust ppc_elf_tls_setup call.  Enable
+	relaxation for ppc476 workaround.
+	(PARSE_AND_LIST_*): Add --{no-,}ppc476-workaround support.
+	(LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS): Define.
+
 2014-02-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* ld/ld.texinfo: Change ALIGN_WITH_INPUT documentation.

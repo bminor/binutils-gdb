@@ -35,14 +35,23 @@ fragment <<EOF
 
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;
-static int no_tls_get_addr_opt = 0;
 
-/* Whether to emit symbols for stubs.  */
-static int emit_stub_syms = -1;
-
-/* Chooses the correct place for .plt and .got.  */
-static enum ppc_elf_plt_type plt_style = PLT_UNSET;
+/* Choose the correct place for .got.  */
 static int old_got = 0;
+
+static struct ppc_elf_params params = { PLT_UNSET, -1, 0, 0, 0, 0 };
+
+static void
+ppc_after_open_output (void)
+{
+  if (params.emit_stub_syms < 0)
+    params.emit_stub_syms = link_info.emitrelocations || link_info.shared;
+  if (params.pagesize == 0)
+    params.pagesize = config.commonpagesize;
+  if (link_info.relocatable)
+    params.ppc476_workaround = 0;
+  ppc_elf_link_params (&link_info, &params);
+}
 
 static void
 ppc_after_open (void)
@@ -57,10 +66,7 @@ ppc_after_open (void)
       lang_output_section_statement_type *plt_os[2];
       lang_output_section_statement_type *got_os[2];
 
-      if (emit_stub_syms < 0)
-	emit_stub_syms = link_info.emitrelocations || link_info.shared;
-      new_plt = ppc_elf_select_plt_layout (link_info.output_bfd, &link_info,
-					   plt_style, emit_stub_syms);
+      new_plt = ppc_elf_select_plt_layout (link_info.output_bfd, &link_info);
       if (new_plt < 0)
 	einfo ("%X%P: select_plt_layout problem %E\n");
 
@@ -107,8 +113,7 @@ ppc_before_allocation (void)
 {
   if (is_ppc_elf (link_info.output_bfd))
     {
-      if (ppc_elf_tls_setup (link_info.output_bfd, &link_info,
-			     no_tls_get_addr_opt)
+      if (ppc_elf_tls_setup (link_info.output_bfd, &link_info)
 	  && !notlsopt)
 	{
 	  if (!ppc_elf_tls_optimize (link_info.output_bfd, &link_info))
@@ -121,9 +126,12 @@ ppc_before_allocation (void)
 
   gld${EMULATION_NAME}_before_allocation ();
 
+  if (RELAXATION_ENABLED)
+    params.branch_trampolines = 1;
+
   /* Turn on relaxation if executable sections have addresses that
      might make branches overflow.  */
-  if (RELAXATION_DISABLED_BY_DEFAULT)
+  else if (!RELAXATION_DISABLED_BY_USER)
     {
       bfd_vma low = (bfd_vma) -1;
       bfd_vma high = 0;
@@ -150,8 +158,11 @@ ppc_before_allocation (void)
 	    high = o->vma + o->rawsize - 1;
 	}
       if (high > low && high - low > (1 << 25) - 1)
-	ENABLE_RELAXATION;
+	params.branch_trampolines = 1;
     }
+
+  if (params.ppc476_workaround || params.branch_trampolines)
+    ENABLE_RELAXATION;
 }
 
 EOF
@@ -186,6 +197,8 @@ PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
 #define OPTION_OLD_GOT			(OPTION_OLD_PLT + 1)
 #define OPTION_STUBSYMS			(OPTION_OLD_GOT + 1)
 #define OPTION_NO_STUBSYMS		(OPTION_STUBSYMS + 1)
+#define OPTION_PPC476_WORKAROUND	(OPTION_NO_STUBSYMS + 1)
+#define OPTION_NO_PPC476_WORKAROUND	(OPTION_PPC476_WORKAROUND + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
@@ -196,6 +209,8 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "secure-plt", no_argument, NULL, OPTION_NEW_PLT },
   { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
   { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },
+  { "ppc476-workaround", optional_argument, NULL, OPTION_PPC476_WORKAROUND },
+  { "no-ppc476-workaround", no_argument, NULL, OPTION_NO_PPC476_WORKAROUND },
 '
 
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
@@ -206,17 +221,20 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n\
   --secure-plt                Use new-style PLT if possible.\n\
   --bss-plt                   Force old-style BSS PLT.\n\
-  --sdata-got                 Force GOT location just before .sdata.\n"
+  --sdata-got                 Force GOT location just before .sdata.\n\
+  --ppc476-workaround [=pagesize]\n\
+                              Avoid a cache bug on ppc476.\n\
+  --no-ppc476-workaround      Disable workaround.\n"
 		   ));
 '
 
 PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
     case OPTION_STUBSYMS:
-      emit_stub_syms = 1;
+      params.emit_stub_syms = 1;
       break;
 
     case OPTION_NO_STUBSYMS:
-      emit_stub_syms = 0;
+      params.emit_stub_syms = 0;
       break;
 
     case OPTION_NO_TLS_OPT:
@@ -224,15 +242,15 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       break;
 
     case OPTION_NO_TLS_GET_ADDR_OPT:
-      no_tls_get_addr_opt = 1;
+      params.no_tls_get_addr_opt = 1;
       break;
 
     case OPTION_NEW_PLT:
-      plt_style = PLT_NEW;
+      params.plt_style = PLT_NEW;
       break;
 
     case OPTION_OLD_PLT:
-      plt_style = PLT_OLD;
+      params.plt_style = PLT_OLD;
       break;
 
     case OPTION_OLD_GOT:
@@ -241,11 +259,29 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_TRADITIONAL_FORMAT:
       notlsopt = 1;
-      no_tls_get_addr_opt = 1;
+      params.no_tls_get_addr_opt = 1;
       return FALSE;
+
+    case OPTION_PPC476_WORKAROUND:
+      params.ppc476_workaround = 1;
+      if (optarg != NULL)
+	{
+	  char *end;
+	  params.pagesize = strtoul (optarg, &end, 0);
+	  if (*end
+	      || (params.pagesize < 4096 && params.pagesize != 0)
+	      || params.pagesize != (params.pagesize & -params.pagesize))
+	    einfo (_("%P%F: invalid pagesize `%s'\''\n"), optarg);
+	}
+      break;
+
+    case OPTION_NO_PPC476_WORKAROUND:
+      params.ppc476_workaround = 0;
+      break;
 '
 
 # Put these extra ppc32elf routines in ld_${EMULATION_NAME}_emulation
 #
+LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_after_open_output
 LDEMUL_AFTER_OPEN=ppc_after_open
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
