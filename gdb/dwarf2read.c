@@ -13281,6 +13281,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   int ndim = 0;
   struct cleanup *back_to;
   const char *name;
+  unsigned int bit_stride = 0;
 
   element_type = die_type (die, cu);
 
@@ -13289,13 +13290,22 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (type)
     return type;
 
+  attr = dwarf2_attr (die, DW_AT_byte_stride, cu);
+  if (attr != NULL)
+    bit_stride = DW_UNSND (attr) * 8;
+
+  attr = dwarf2_attr (die, DW_AT_bit_stride, cu);
+  if (attr != NULL)
+    bit_stride = DW_UNSND (attr);
+
   /* Irix 6.2 native cc creates array types without children for
      arrays with unspecified length.  */
   if (die->child == NULL)
     {
       index_type = objfile_type (objfile)->builtin_int;
       range_type = create_range_type (NULL, index_type, 0, -1);
-      type = create_array_type (NULL, element_type, range_type);
+      type = create_array_type_with_stride (NULL, element_type, range_type,
+					    bit_stride);
       return set_die_type (die, type, cu);
     }
 
@@ -13335,12 +13345,14 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
       int i = 0;
 
       while (i < ndim)
-	type = create_array_type (NULL, type, range_types[i++]);
+	type = create_array_type_with_stride (NULL, type, range_types[i++],
+					      bit_stride);
     }
   else
     {
       while (ndim-- > 0)
-	type = create_array_type (NULL, type, range_types[ndim]);
+	type = create_array_type_with_stride (NULL, type, range_types[ndim],
+					      bit_stride);
     }
 
   /* Understand Dwarf2 support for vector types (like they occur on

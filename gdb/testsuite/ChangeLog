@@ -1,3 +1,8 @@
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/arr-stride.c: New file.
+	* gdb.dwarf2/arr-stride.exp: New file.
+
 2014-02-26  Pedro Alves  <palves@redhat.com>
 
 	* gdb.ada/tasks.exp: Set a task-specific breakpoint at break_me
