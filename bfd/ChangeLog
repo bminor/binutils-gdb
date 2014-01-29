@@ -1,3 +1,17 @@
+2014-04-24  Nick Clifton  <nickc@redhat.com>
+
+	2014-01-29  Nick Clifton  <nickc@redhat.com>
+	PR build/16873
+	* bfd-in.h (bfd_set_section_vma): Delete.
+	(bfd_set_section_alignment): Delete.
+	(bfd_set_section_userdata): Delete.
+	(bfd_set_cacheable): Delete.
+	* bfd.c (bfd_set_cacheable): New static inline function.
+	* section.c (bfd_set_section_userdata): Likewise.
+	(bfd_set_section_vma): Likewise.
+	(bfd_set_section_alignment): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2014-03-12  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/16696
