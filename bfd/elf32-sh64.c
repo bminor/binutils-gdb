@@ -199,7 +199,8 @@ sh64_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 		  == elf_elfheader (ibfd)->e_flags));
 
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  return TRUE;
+
+  return _bfd_elf_copy_private_bfd_data (ibfd, obfd);
 }
 
 static bfd_boolean

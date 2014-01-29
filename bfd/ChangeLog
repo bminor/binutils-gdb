@@ -1,5 +1,14 @@
 2014-01-29  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/16318
+	* elf32-metag.c (elf_metag_post_process_headers): Call
+	_bfd_elf_post_process_headers.
+	* elf32-sh64.c (sh64_elf_copy_private_data): Call
+	_bfd_elf_copy_private_data.
+	* elf64-sh64.c (sh_elf64_copy_private_data_internal): Likewise.
+
+2014-01-29  Nick Clifton  <nickc@redhat.com>
+
 	* bfd-in.h (bfd_set_section_vma): Delete.
 	(bfd_set_section_alignment): Delete.
 	(bfd_set_section_userdata): Delete.
