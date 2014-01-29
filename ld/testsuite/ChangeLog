@@ -1,3 +1,10 @@
+2014-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/rdynamic-1.c: New file.
+	* ld-elf/rdynamic-1.rd: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add rdynamic-1.
+
 2014-01-28  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16317

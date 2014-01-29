@@ -224,6 +224,9 @@ set build_tests {
   {"Build libpr2404b.a"
    "" ""
    {pr2404b.c} {} "libpr2404b.a"}
+  {"Build rdynamic-1"
+   "-rdynamic -Wl,--gc-sections" "-ffunction-sections"
+   {rdynamic-1.c} {{readelf {-s} rdynamic-1.rd}} "rdynamic-1"}
 }
 
 run_cc_link_tests $build_tests
