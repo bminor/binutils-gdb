@@ -1,5 +1,19 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.h (btrace_insn_class): New.
+	(btrace_insn) <size, iclass>: New.
+	* btrace.c (ftrace_find_call): Update parameters.  Update users.
+	Use instruction classification.
+	(ftrace_new_return): Update parameters.  Update users.
+	(ftrace_update_function): Update parameters.  Update users.  Use
+	instruction classification.
+	(ftrace_update_insns): Update parameters.  Update users.
+	(ftrace_classify_insn): New.
+	(btrace_compute_ftrace_bts): Fill in new btrace_insn fields.  Add
+	TRY_CATCH around call to gdb_insn_length.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (btrace_compute_ftrace_bts, btrace_compute_ftrace):
 	Update parameters.  Update users.
 

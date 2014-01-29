@@ -31,6 +31,22 @@
 struct thread_info;
 struct btrace_function;
 
+/* A coarse instruction classification.  */
+enum btrace_insn_class
+{
+  /* The instruction is something not listed below.  */
+  BTRACE_INSN_OTHER,
+
+  /* The instruction is a function call.  */
+  BTRACE_INSN_CALL,
+
+  /* The instruction is a function return.  */
+  BTRACE_INSN_RETURN,
+
+  /* The instruction is an unconditional jump.  */
+  BTRACE_INSN_JUMP
+};
+
 /* A branch trace instruction.
 
    This represents a single instruction in a branch trace.  */
@@ -38,6 +54,12 @@ struct btrace_insn
 {
   /* The address of this instruction.  */
   CORE_ADDR pc;
+
+  /* The size of this instruction in bytes.  */
+  gdb_byte size;
+
+  /* The instruction class of this instruction.  */
+  enum btrace_insn_class iclass;
 };
 
 /* A vector of branch trace instructions.  */

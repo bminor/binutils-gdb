@@ -330,20 +330,18 @@ ftrace_find_caller (struct btrace_function *bfun,
    tail calls ending with a jump).  */
 
 static struct btrace_function *
-ftrace_find_call (struct gdbarch *gdbarch, struct btrace_function *bfun)
+ftrace_find_call (struct btrace_function *bfun)
 {
   for (; bfun != NULL; bfun = bfun->up)
     {
       struct btrace_insn *last;
-      CORE_ADDR pc;
 
       /* We do not allow empty function segments.  */
       gdb_assert (!VEC_empty (btrace_insn_s, bfun->insn));
 
       last = VEC_last (btrace_insn_s, bfun->insn);
-      pc = last->pc;
 
-      if (gdbarch_insn_is_call (gdbarch, pc))
+      if (last->iclass == BTRACE_INSN_CALL)
 	break;
     }
 
@@ -355,8 +353,7 @@ ftrace_find_call (struct gdbarch *gdbarch, struct btrace_function *bfun)
    MFUN and FUN are the symbol information we have for this function.  */
 
 static struct btrace_function *
-ftrace_new_return (struct gdbarch *gdbarch,
-		   struct btrace_function *prev,
+ftrace_new_return (struct btrace_function *prev,
 		   struct minimal_symbol *mfun,
 		   struct symbol *fun)
 {
@@ -391,7 +388,7 @@ ftrace_new_return (struct gdbarch *gdbarch,
 	 wrong or that the call is simply not included in the trace.  */
 
       /* Let's search for some actual call.  */
-      caller = ftrace_find_call (gdbarch, prev->up);
+      caller = ftrace_find_call (prev->up);
       if (caller == NULL)
 	{
 	  /* There is no call in PREV's back trace.  We assume that the
@@ -454,8 +451,7 @@ ftrace_new_switch (struct btrace_function *prev,
    Return the chronologically latest function segment, never NULL.  */
 
 static struct btrace_function *
-ftrace_update_function (struct gdbarch *gdbarch,
-			struct btrace_function *bfun, CORE_ADDR pc)
+ftrace_update_function (struct btrace_function *bfun, CORE_ADDR pc)
 {
   struct bound_minimal_symbol bmfun;
   struct minimal_symbol *mfun;
@@ -485,24 +481,29 @@ ftrace_update_function (struct gdbarch *gdbarch,
 
   if (last != NULL)
     {
-      CORE_ADDR lpc;
-
-      lpc = last->pc;
-
-      /* Check for returns.  */
-      if (gdbarch_insn_is_ret (gdbarch, lpc))
-	return ftrace_new_return (gdbarch, bfun, mfun, fun);
-
-      /* Check for calls.  */
-      if (gdbarch_insn_is_call (gdbarch, lpc))
+      switch (last->iclass)
 	{
-	  int size;
+	case BTRACE_INSN_RETURN:
+	  return ftrace_new_return (bfun, mfun, fun);
 
-	  size = gdb_insn_length (gdbarch, lpc);
-
+	case BTRACE_INSN_CALL:
 	  /* Ignore calls to the next instruction.  They are used for PIC.  */
-	  if (lpc + size != pc)
-	    return ftrace_new_call (bfun, mfun, fun);
+	  if (last->pc + last->size == pc)
+	    break;
+
+	  return ftrace_new_call (bfun, mfun, fun);
+
+	case BTRACE_INSN_JUMP:
+	  {
+	    CORE_ADDR start;
+
+	    start = get_pc_function_start (pc);
+
+	    /* If we can't determine the function for PC, we treat a jump at
+	       the end of the block as tail call.  */
+	    if (start == 0 || start == pc)
+	      return ftrace_new_tailcall (bfun, mfun, fun);
+	  }
 	}
     }
 
@@ -513,24 +514,6 @@ ftrace_update_function (struct gdbarch *gdbarch,
 		    ftrace_print_insn_addr (last),
 		    ftrace_print_function_name (bfun),
 		    ftrace_print_filename (bfun));
-
-      if (last != NULL)
-	{
-	  CORE_ADDR start, lpc;
-
-	  start = get_pc_function_start (pc);
-
-	  /* If we can't determine the function for PC, we treat a jump at
-	     the end of the block as tail call.  */
-	  if (start == 0)
-	    start = pc;
-
-	  lpc = last->pc;
-
-	  /* Jumps indicate optimized tail calls.  */
-	  if (start == pc && gdbarch_insn_is_jump (gdbarch, lpc))
-	    return ftrace_new_tailcall (bfun, mfun, fun);
-	}
 
       return ftrace_new_switch (bfun, mfun, fun);
     }
@@ -574,15 +557,35 @@ ftrace_update_lines (struct btrace_function *bfun, CORE_ADDR pc)
 /* Add the instruction at PC to BFUN's instructions.  */
 
 static void
-ftrace_update_insns (struct btrace_function *bfun, CORE_ADDR pc)
+ftrace_update_insns (struct btrace_function *bfun,
+		     const struct btrace_insn *insn)
 {
-  struct btrace_insn *insn;
-
-  insn = VEC_safe_push (btrace_insn_s, bfun->insn, NULL);
-  insn->pc = pc;
+  VEC_safe_push (btrace_insn_s, bfun->insn, insn);
 
   if (record_debug > 1)
     ftrace_debug (bfun, "update insn");
+}
+
+/* Classify the instruction at PC.  */
+
+static enum btrace_insn_class
+ftrace_classify_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  volatile struct gdb_exception error;
+  enum btrace_insn_class iclass;
+
+  iclass = BTRACE_INSN_OTHER;
+  TRY_CATCH (error, RETURN_MASK_ERROR)
+    {
+      if (gdbarch_insn_is_call (gdbarch, pc))
+	iclass = BTRACE_INSN_CALL;
+      else if (gdbarch_insn_is_ret (gdbarch, pc))
+	iclass = BTRACE_INSN_RETURN;
+      else if (gdbarch_insn_is_jump (gdbarch, pc))
+	iclass = BTRACE_INSN_JUMP;
+    }
+
+  return iclass;
 }
 
 /* Compute the function branch trace from BTS trace.  */
@@ -616,6 +619,8 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 
       for (;;)
 	{
+	  volatile struct gdb_exception error;
+	  struct btrace_insn insn;
 	  int size;
 
 	  /* We should hit the end of the block.  Warn if we went too far.  */
@@ -626,7 +631,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	      break;
 	    }
 
-	  end = ftrace_update_function (gdbarch, end, pc);
+	  end = ftrace_update_function (end, pc);
 	  if (begin == NULL)
 	    begin = end;
 
@@ -635,16 +640,22 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  if (blk != 0)
 	    level = min (level, end->level);
 
-	  ftrace_update_insns (end, pc);
+	  size = 0;
+	  TRY_CATCH (error, RETURN_MASK_ERROR)
+	    size = gdb_insn_length (gdbarch, pc);
+
+	  insn.pc = pc;
+	  insn.size = size;
+	  insn.iclass = ftrace_classify_insn (gdbarch, pc);
+
+	  ftrace_update_insns (end, &insn);
 	  ftrace_update_lines (end, pc);
 
 	  /* We're done once we pushed the instruction at the end.  */
 	  if (block->end == pc)
 	    break;
 
-	  size = gdb_insn_length (gdbarch, pc);
-
-	  /* Make sure we terminate if we fail to compute the size.  */
+	  /* We can't continue if we fail to compute the size.  */
 	  if (size <= 0)
 	    {
 	      warning (_("Recorded trace may be incomplete around %s."),
