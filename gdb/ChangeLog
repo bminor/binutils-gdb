@@ -1,3 +1,9 @@
+2014-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc64-linux-tdep.c (sparc64_linux_step_trap): Get PC from
+          the sigreturn register save area only if the syscall is
+          sigreturn.
+
 2014-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* valops.c (value_slice): Minor reformatting.

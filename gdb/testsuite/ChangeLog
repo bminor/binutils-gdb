@@ -1,3 +1,10 @@
+2014-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.arch/sparc-sysstep.exp: New file.
+	* gdb.arch/sparc-sysstep.c: Likewise.
+
+	* gdb.arch/Makefile.in (EXECUTABLES): Add sparc-sysstep.
+
 2014-01-28  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* gdb.base/info-shared.exp: Expect leading `.' on ppc64's symbols.
