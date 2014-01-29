@@ -1,5 +1,9 @@
 2014-02-07  Yao Qi  <yao@codesourcery.com>
 
+	* target.c (target_xfer_partial): Return zero if LEN is zero.
+
+2014-02-07  Yao Qi  <yao@codesourcery.com>
+
 	* auxv.c (procfs_xfer_auxv): Replace -1 with TARGET_XFER_E_IO.
 	(ld_so_xfer_auxv): Likewise.
 	* bfd-target.c (target_bfd_xfer_partial): Likewise.

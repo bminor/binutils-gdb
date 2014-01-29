@@ -1697,6 +1697,10 @@ target_xfer_partial (struct target_ops *ops,
 
   gdb_assert (ops->to_xfer_partial != NULL);
 
+  /* Transfer is done when LEN is zero.  */
+  if (len == 0)
+    return 0;
+
   if (writebuf && !may_write_memory)
     error (_("Writing to memory is not allowed (addr %s, len %s)"),
 	   core_addr_to_string_nz (offset), plongest (len));
