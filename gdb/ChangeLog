@@ -1,5 +1,10 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (btrace_compute_ftrace_bts, btrace_compute_ftrace):
+	Update parameters.  Update users.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (parse_xml_btrace_conf_bts): Add size.
 	(btrace_conf_bts_attributes): New.
 	(btrace_conf_children): Add attributes.

@@ -588,15 +588,17 @@ ftrace_update_insns (struct btrace_function *bfun, CORE_ADDR pc)
 /* Compute the function branch trace from BTS trace.  */
 
 static void
-btrace_compute_ftrace_bts (struct btrace_thread_info *btinfo,
+btrace_compute_ftrace_bts (struct thread_info *tp,
 			   const struct btrace_data_bts *btrace)
 {
+  struct btrace_thread_info *btinfo;
   struct btrace_function *begin, *end;
   struct gdbarch *gdbarch;
   unsigned int blk;
   int level;
 
   gdbarch = target_gdbarch ();
+  btinfo = &tp->btrace;
   begin = btinfo->begin;
   end = btinfo->end;
   level = begin != NULL ? -btinfo->level : INT_MAX;
@@ -676,8 +678,7 @@ btrace_compute_ftrace_bts (struct btrace_thread_info *btinfo,
    a thread given by BTINFO.  */
 
 static void
-btrace_compute_ftrace (struct btrace_thread_info *btinfo,
-		       struct btrace_data *btrace)
+btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace)
 {
   DEBUG ("compute ftrace");
 
@@ -687,7 +688,7 @@ btrace_compute_ftrace (struct btrace_thread_info *btinfo,
       return;
 
     case BTRACE_FORMAT_BTS:
-      btrace_compute_ftrace_bts (btinfo, &btrace->variant.bts);
+      btrace_compute_ftrace_bts (tp, &btrace->variant.bts);
       return;
     }
 
@@ -718,7 +719,7 @@ btrace_add_pc (struct thread_info *tp)
   block->begin = pc;
   block->end = pc;
 
-  btrace_compute_ftrace (&tp->btrace, &btrace);
+  btrace_compute_ftrace (tp, &btrace);
 
   do_cleanups (cleanup);
 }
@@ -964,7 +965,7 @@ btrace_fetch (struct thread_info *tp)
   if (!btrace_data_empty (&btrace))
     {
       btrace_clear_history (btinfo);
-      btrace_compute_ftrace (btinfo, &btrace);
+      btrace_compute_ftrace (tp, &btrace);
     }
 
   do_cleanups (cleanup);
