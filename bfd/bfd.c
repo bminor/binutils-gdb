@@ -311,6 +311,14 @@ CODE_FRAGMENT
 .  unsigned int selective_search : 1;
 .};
 .
+.{* See note beside bfd_set_section_userdata.  *}
+.static inline bfd_boolean
+.bfd_set_cacheable (bfd * abfd, bfd_boolean val)
+.{
+.  abfd->cacheable = val;
+.  return TRUE;
+.}
+.
 */
 
 #include "sysdep.h"

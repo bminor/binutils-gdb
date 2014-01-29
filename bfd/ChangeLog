@@ -1,3 +1,15 @@
+2014-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* bfd-in.h (bfd_set_section_vma): Delete.
+	(bfd_set_section_alignment): Delete.
+	(bfd_set_section_userdata): Delete.
+	(bfd_set_cacheable): Delete.
+	* bfd.c (bfd_set_cacheable): New static inline function.
+	* section.c (bfd_set_section_userdata): Likewise.
+	(bfd_set_section_vma): Likewise.
+	(bfd_set_section_alignment): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2014-01-28  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2.c (find_abstract_instance_name): For DW_FORM_ref_addr
