@@ -1,3 +1,7 @@
+2014-01-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* auxv.c (fprint_target_auxv): Handle AT_HWCAP2.
+
 2014-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc64-linux-tdep.c (sparc64_linux_step_trap): Get PC from

@@ -1,3 +1,7 @@
+2014-01-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* common.h (AT_HWCAP2): Define.
+
 2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 	    Wei-Cheng Wang  <cole945@gmail.com>
 
