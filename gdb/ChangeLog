@@ -1,3 +1,17 @@
+2014-02-05  Yao Qi  <yao@codesourcery.com>
+
+	Revert this patch:
+
+	2013-05-24  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (TFILE_PID): Remove.
+	(tfile_open): Don't add thread and inferior.
+	(tfile_close): Don't set 'inferior_ptid'.  Don't call
+	exit_inferior_silent.
+	(tfile_thread_alive): Remove.
+	(init_tfile_ops): Don't set field 'to_thread_alive' of
+	tfile_ops.
+
 2014-02-04  Christian Eggers  <ceggers@gmx.de>  (tiny change)
 
 	* remote.c (remote_start_remote): Call remote_check_symbols even

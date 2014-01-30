@@ -1,3 +1,11 @@
+2014-02-05  Yao Qi  <yao@codesourcery.com>
+
+	Revert this patch:
+
+	2013-05-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.exp: Test inferior and thread.
+
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/sigbpt.exp: Do not use "*" when setting breakpoint
