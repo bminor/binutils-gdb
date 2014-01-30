@@ -1,5 +1,10 @@
 2014-02-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* python/lib/gdb/printing.py (RegexpCollectionPrettyPrinter):
+	Use the type's name if its basic type does not have a tag.
+
+2014-02-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (read_subrange_type): Add comment.
 
 2014-02-27  Joel Brobecker  <brobecker@adacore.com>

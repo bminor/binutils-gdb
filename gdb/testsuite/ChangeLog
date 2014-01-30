@@ -1,5 +1,11 @@
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* testsuite/gdb.python/py-pp-re-notag.c: New file.
+	* testsuite/gdb.python/py-pp-re-notag.ex: New file.
+	* testsuite/gdb.python/py-pp-re-notag.p: New file.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.dwarf2/arr-subrange.c, gdb.dwarf2/arr-subrange.exp: New files.
 
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
