@@ -26,6 +26,8 @@
 #include <sys/stat.h>
 #include "exec.h"
 #include "completer.h"
+#include "inferior.h"
+#include "gdbthread.h"
 
 #include <ctype.h>
 
@@ -75,6 +77,8 @@
 #define CTF_EVENT_ID_STATUS 4
 #define CTF_EVENT_ID_TSV_DEF 5
 #define CTF_EVENT_ID_TP_DEF 6
+
+#define CTF_PID (2)
 
 /* The state kept while writing the CTF datastream file.  */
 
@@ -1188,6 +1192,10 @@ ctf_open (char *dirname, int from_tty)
   trace_dirname = xstrdup (dirname);
   push_target (&ctf_ops);
 
+  inferior_appeared (current_inferior (), CTF_PID);
+  inferior_ptid = pid_to_ptid (CTF_PID);
+  add_thread_silent (inferior_ptid);
+
   merge_uploaded_trace_state_variables (&uploaded_tsvs);
   merge_uploaded_tracepoints (&uploaded_tps);
 }
@@ -1198,9 +1206,15 @@ ctf_open (char *dirname, int from_tty)
 static void
 ctf_close (void)
 {
+  int pid;
+
   ctf_destroy ();
   xfree (trace_dirname);
   trace_dirname = NULL;
+
+  pid = ptid_get_pid (inferior_ptid);
+  inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff.  */
+  exit_inferior_silent (pid);
 
   trace_reset_local_state ();
 }
@@ -1725,6 +1739,15 @@ ctf_has_registers (struct target_ops *ops)
   return get_traceframe_number () != -1;
 }
 
+/* This is the implementation of target_ops method to_thread_alive.
+   CTF trace data has one thread faked by GDB.  */
+
+static int
+ctf_thread_alive (struct target_ops *ops, ptid_t ptid)
+{
+  return 1;
+}
+
 /* This is the implementation of target_ops method to_traceframe_info.
    Iterate the events whose name is "memory", in current
    frame, extract memory range information, and return them in
@@ -1831,6 +1854,7 @@ Specify the filename of the CTF directory.";
   ctf_ops.to_has_stack = ctf_has_stack;
   ctf_ops.to_has_registers = ctf_has_registers;
   ctf_ops.to_traceframe_info = ctf_traceframe_info;
+  ctf_ops.to_thread_alive = ctf_thread_alive;
   ctf_ops.to_magic = OPS_MAGIC;
 }
 

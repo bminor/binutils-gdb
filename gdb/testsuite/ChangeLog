@@ -1,5 +1,10 @@
 2014-02-05  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/report.exp (use_collected_data): Test the output
+	of "info threads" and "info inferiors".
+
+2014-02-05  Yao Qi  <yao@codesourcery.com>
+
 	Revert this patch:
 
 	2013-05-24  Yao Qi  <yao@codesourcery.com>
