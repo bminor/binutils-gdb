@@ -1,5 +1,16 @@
 2014-02-11  Yao Qi  <yao@codesourcery.com>
 
+	* aix-thread.c (aix_thread_xfer_partial): Update comments.
+	* auxv.c (procfs_xfer_auxv, memory_xfer_auxv): Likewise.
+	* bsd-uthread.c (bsd_uthread_xfer_partial): Likewise.
+	* gnu-nat.c (gnu_xfer_memory): Likewise.
+	* inf-ptrace.c (inf_ptrace_xfer_partial):  Likewise.
+	* rs6000-nat.c (rs6000_xfer_partial): Likewise.
+	* sparc-nat.c (sparc_xfer_wcookie): Likewise.
+	* spu-linux-nat.c (spu_proc_xfer_spu): Likewise.
+
+2014-02-11  Yao Qi  <yao@codesourcery.com>
+
 	* target.h (enum target_xfer_error): Rename to ...
 	(enum target_xfer_status): ... it.  New.  All users updated.
 	(enum target_xfer_status) <TARGET_XFER_OK>, <TARGET_XFER_EOF>:

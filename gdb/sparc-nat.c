@@ -256,7 +256,8 @@ sparc_store_inferior_registers (struct target_ops *ops,
 }
 
 
-/* Fetch StackGhost Per-Process XOR cookie.  */
+/* Implement the to_xfer_partial target_ops method for
+   TARGET_OBJECT_WCOOKIE.  Fetch StackGhost Per-Process XOR cookie.  */
 
 static enum target_xfer_status
 sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,

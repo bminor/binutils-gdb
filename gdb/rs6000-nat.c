@@ -374,10 +374,7 @@ rs6000_store_inferior_registers (struct target_ops *ops,
     }
 }
 
-
-/* Attempt a transfer all LEN bytes starting at OFFSET between the
-   inferior's OBJECT:ANNEX space and GDB's READBUF/WRITEBUF buffer.
-   Return the number of bytes actually transferred.  */
+/* Implement the to_xfer_partial target_ops method.  */
 
 static enum target_xfer_status
 rs6000_xfer_partial (struct target_ops *ops, enum target_object object,

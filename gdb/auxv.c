@@ -35,8 +35,9 @@
 #include <fcntl.h>
 
 
-/* This function handles access via /proc/PID/auxv, which is a common
-   method for native targets.  */
+/* Implement the to_xfer_partial target_ops method.  This function
+   handles access via /proc/PID/auxv, which is a common method for
+   native targets.  */
 
 static enum target_xfer_status
 procfs_xfer_auxv (gdb_byte *readbuf,
@@ -215,8 +216,8 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   return TARGET_XFER_OK;
 }
 
-/* This function is called like a to_xfer_partial hook, but must be
-   called with TARGET_OBJECT_AUXV.  It handles access to AUXV.  */
+/* Implement the to_xfer_partial target_ops method for
+   TARGET_OBJECT_AUXV.  It handles access to AUXV.  */
 
 enum target_xfer_status
 memory_xfer_auxv (struct target_ops *ops,

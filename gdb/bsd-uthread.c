@@ -331,8 +331,9 @@ bsd_uthread_store_registers (struct target_ops *ops,
     }
 }
 
-/* FIXME: This function is only there because otherwise GDB tries to
-   invoke deprecate_xfer_memory.  */
+/* Implement the to_xfer_partial target_ops method.  FIXME: This
+   function is only there because otherwise GDB tries to invoke
+   deprecate_xfer_memory.  */
 
 static enum target_xfer_status
 bsd_uthread_xfer_partial (struct target_ops *ops, enum target_object object,

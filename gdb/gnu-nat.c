@@ -2473,7 +2473,8 @@ out:
 
 
 
-/* Helper for gnu_xfer_partial that handles memory transfers.  */
+/* Implement the to_xfer_partial target_ops method for
+   TARGET_OBJECT_MEMORY.  */
 
 static enum target_xfer_status
 gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,

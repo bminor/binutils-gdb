@@ -226,8 +226,10 @@ parse_spufs_run (int *fd, ULONGEST *addr)
 }
 
 
-/* Copy LEN bytes at OFFSET in spufs file ANNEX into/from READBUF or WRITEBUF,
+/* Implement the to_xfer_partial target_ops method for TARGET_OBJECT_SPU.
+   Copy LEN bytes at OFFSET in spufs file ANNEX into/from READBUF or WRITEBUF,
    using the /proc file system.  */
+
 static enum target_xfer_status
 spu_proc_xfer_spu (const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf,
