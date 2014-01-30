@@ -1,5 +1,40 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (ftrace_find_call): Skip gaps.
+	(ftrace_new_function): Initialize level.
+	(ftrace_new_call, ftrace_new_tailcall, ftrace_new_return)
+	(ftrace_new_switch): Update
+	level computation.
+	(ftrace_new_gap): New.
+	(ftrace_update_function): Create new function after gap.
+	(btrace_compute_ftrace_bts): Create gap on error.
+	(btrace_stitch_bts): Update parameters.  Clear trace if it
+	becomes empty.
+	(btrace_stitch_trace): Update parameters.  Update callers.
+	(btrace_clear): Reset the number of gaps.
+	(btrace_insn_get): Return NULL if the iterator points to a gap.
+	(btrace_insn_number): Return zero if the iterator points to a gap.
+	(btrace_insn_end): Allow gaps at the end.
+	(btrace_insn_next, btrace_insn_prev, btrace_insn_cmp): Handle gaps.
+	(btrace_find_insn_by_number): Assert that the found iterator does
+	not point to a gap.
+	(btrace_call_next, btrace_call_prev): Assert that the last function
+	is not a gap.
+	* btrace.h (btrace_bts_error): New.
+	(btrace_function): Update comment.
+	(btrace_function) <insn, insn_offset, number>: Update comment.
+	(btrace_function) <errcode>: New.
+	(btrace_thread_info) <ngaps>: New.
+	(btrace_thread_info) <replay>: Update comment.
+	(btrace_insn_get): Update comment.
+	* record-btrace.c (btrace_ui_out_decode_error): New.
+	(record_btrace_info): Print number of gaps.
+	(btrace_insn_history, btrace_call_history): Call
+	btrace_ui_out_decode_error for gaps.
+	(record_btrace_step_thread, record_btrace_start_replaying): Skip gaps.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/btrace-common.h (btrace_cpu_vendor, btrace_cpu): New.
 	* nat/linux-btrace.c: (btrace_this_cpu): New.
 	(cpu_supports_bts): Call btrace_this_cpu.

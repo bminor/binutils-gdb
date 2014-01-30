@@ -86,12 +86,25 @@ enum btrace_function_flag
   BFUN_UP_LINKS_TO_TAILCALL = (1 << 1)
 };
 
+/* Decode errors for the BTS recording format.  */
+enum btrace_bts_error
+{
+  /* The instruction trace overflowed the end of the trace block.  */
+  BDE_BTS_OVERFLOW = 1,
+
+  /* The instruction size could not be determined.  */
+  BDE_BTS_INSN_SIZE
+};
+
 /* A branch trace function segment.
 
    This represents a function segment in a branch trace, i.e. a consecutive
    number of instructions belonging to the same function.
 
-   We do not allow function segments without any instructions.  */
+   In case of decode errors, we add an empty function segment to indicate
+   the gap in the trace.
+
+   We do not allow function segments without instructions otherwise.  */
 struct btrace_function
 {
   /* The full and minimal symbol for the function.  Both may be NULL.  */
@@ -110,14 +123,23 @@ struct btrace_function
   struct btrace_function *up;
 
   /* The instructions in this function segment.
-     The instruction vector will never be empty.  */
+     The instruction vector will be empty if the function segment
+     represents a decode error.  */
   VEC (btrace_insn_s) *insn;
 
+  /* The error code of a decode error that led to a gap.
+     Must be zero unless INSN is empty; non-zero otherwise.  */
+  int errcode;
+
   /* The instruction number offset for the first instruction in this
-     function segment.  */
+     function segment.
+     If INSN is empty this is the insn_offset of the succeding function
+     segment in control-flow order.  */
   unsigned int insn_offset;
 
-  /* The function number in control-flow order.  */
+  /* The function number in control-flow order.
+     If INSN is empty indicating a gap in the trace due to a decode error,
+     we still count the gap as a function.  */
   unsigned int number;
 
   /* The function level in a back trace across the entire branch trace.
@@ -223,6 +245,9 @@ struct btrace_thread_info
      becomes zero.  */
   int level;
 
+  /* The number of gaps in the trace.  */
+  unsigned int ngaps;
+
   /* A bit-vector of btrace_thread_flag.  */
   enum btrace_thread_flag flags;
 
@@ -232,7 +257,9 @@ struct btrace_thread_info
   /* The function call history iterator.  */
   struct btrace_call_history *call_history;
 
-  /* The current replay position.  NULL if not replaying.  */
+  /* The current replay position.  NULL if not replaying.
+     Gaps are skipped during replay, so REPLAY always points to a valid
+     instruction.  */
   struct btrace_insn_iterator *replay;
 };
 
@@ -270,7 +297,8 @@ extern void parse_xml_btrace (struct btrace_data *data, const char *xml);
 extern void parse_xml_btrace_conf (struct btrace_config *conf, const char *xml);
 
 /* Dereference a branch trace instruction iterator.  Return a pointer to the
-   instruction the iterator points to.  */
+   instruction the iterator points to.
+   May return NULL if the iterator points to a gap in the trace.  */
 extern const struct btrace_insn *
   btrace_insn_get (const struct btrace_insn_iterator *);
 

@@ -223,6 +223,7 @@ ftrace_new_function (struct btrace_function *prev,
       bfun->number = prev->number + 1;
       bfun->insn_offset = (prev->insn_offset
 			   + VEC_length (btrace_insn_s, prev->insn));
+      bfun->level = prev->level;
     }
 
   return bfun;
@@ -276,7 +277,7 @@ ftrace_new_call (struct btrace_function *caller,
 
   bfun = ftrace_new_function (caller, mfun, fun);
   bfun->up = caller;
-  bfun->level = caller->level + 1;
+  bfun->level += 1;
 
   ftrace_debug (bfun, "new call");
 
@@ -296,7 +297,7 @@ ftrace_new_tailcall (struct btrace_function *caller,
 
   bfun = ftrace_new_function (caller, mfun, fun);
   bfun->up = caller;
-  bfun->level = caller->level + 1;
+  bfun->level += 1;
   bfun->flags |= BFUN_UP_LINKS_TO_TAILCALL;
 
   ftrace_debug (bfun, "new tail call");
@@ -336,8 +337,9 @@ ftrace_find_call (struct btrace_function *bfun)
     {
       struct btrace_insn *last;
 
-      /* We do not allow empty function segments.  */
-      gdb_assert (!VEC_empty (btrace_insn_s, bfun->insn));
+      /* Skip gaps.  */
+      if (bfun->errcode != 0)
+	continue;
 
       last = VEC_last (btrace_insn_s, bfun->insn);
 
@@ -438,10 +440,30 @@ ftrace_new_switch (struct btrace_function *prev,
      be wrong at this point.  */
   bfun = ftrace_new_function (prev, mfun, fun);
 
-  /* We keep the function level.  */
-  bfun->level = prev->level;
-
   ftrace_debug (bfun, "new switch");
+
+  return bfun;
+}
+
+/* Add a new function segment for a gap in the trace due to a decode error.
+   PREV is the chronologically preceding function segment.
+   ERRCODE is the format-specific error code.  */
+
+static struct btrace_function *
+ftrace_new_gap (struct btrace_function *prev, int errcode)
+{
+  struct btrace_function *bfun;
+
+  /* We hijack prev if it was empty.  */
+  if (prev != NULL && prev->errcode == 0
+      && VEC_empty (btrace_insn_s, prev->insn))
+    bfun = prev;
+  else
+    bfun = ftrace_new_function (prev, NULL, NULL);
+
+  bfun->errcode = errcode;
+
+  ftrace_debug (bfun, "new gap");
 
   return bfun;
 }
@@ -468,8 +490,8 @@ ftrace_update_function (struct btrace_function *bfun, CORE_ADDR pc)
   if (fun == NULL && mfun == NULL)
     DEBUG_FTRACE ("no symbol at %s", core_addr_to_string_nz (pc));
 
-  /* If we didn't have a function before, we create one.  */
-  if (bfun == NULL)
+  /* If we didn't have a function or if we had a gap before, we create one.  */
+  if (bfun == NULL || bfun->errcode != 0)
     return ftrace_new_function (bfun, mfun, fun);
 
   /* Check the last instruction, if we have one.
@@ -597,13 +619,14 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
   struct btrace_thread_info *btinfo;
   struct btrace_function *begin, *end;
   struct gdbarch *gdbarch;
-  unsigned int blk;
+  unsigned int blk, ngaps;
   int level;
 
   gdbarch = target_gdbarch ();
   btinfo = &tp->btrace;
   begin = btinfo->begin;
   end = btinfo->end;
+  ngaps = btinfo->ngaps;
   level = begin != NULL ? -btinfo->level : INT_MAX;
   blk = VEC_length (btrace_block_s, btrace->blocks);
 
@@ -626,8 +649,16 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  /* We should hit the end of the block.  Warn if we went too far.  */
 	  if (block->end < pc)
 	    {
-	      warning (_("Recorded trace may be corrupted around %s."),
-		       core_addr_to_string_nz (pc));
+	      /* Indicate the gap in the trace - unless we're at the
+		 beginning.  */
+	      if (begin != NULL)
+		{
+		  warning (_("Recorded trace may be corrupted around %s."),
+			   core_addr_to_string_nz (pc));
+
+		  end = ftrace_new_gap (end, BDE_BTS_OVERFLOW);
+		  ngaps += 1;
+		}
 	      break;
 	    }
 
@@ -660,6 +691,12 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	    {
 	      warning (_("Recorded trace may be incomplete around %s."),
 		       core_addr_to_string_nz (pc));
+
+	      /* Indicate the gap in the trace.  We just added INSN so we're
+		 not at the beginning.  */
+	      end = ftrace_new_gap (end, BDE_BTS_INSN_SIZE);
+	      ngaps += 1;
+
 	      break;
 	    }
 
@@ -678,6 +715,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 
   btinfo->begin = begin;
   btinfo->end = end;
+  btinfo->ngaps = ngaps;
 
   /* LEVEL is the minimal function level of all btrace function segments.
      Define the global level offset to -LEVEL so all function levels are
@@ -808,20 +846,30 @@ btrace_teardown (struct thread_info *tp)
 /* Stitch branch trace in BTS format.  */
 
 static int
-btrace_stitch_bts (struct btrace_data_bts *btrace,
-		   const struct btrace_thread_info *btinfo)
+btrace_stitch_bts (struct btrace_data_bts *btrace, struct thread_info *tp)
 {
+  struct btrace_thread_info *btinfo;
   struct btrace_function *last_bfun;
   struct btrace_insn *last_insn;
   btrace_block_s *first_new_block;
 
+  btinfo = &tp->btrace;
   last_bfun = btinfo->end;
   gdb_assert (last_bfun != NULL);
+  gdb_assert (!VEC_empty (btrace_block_s, btrace->blocks));
+
+  /* If the existing trace ends with a gap, we just glue the traces
+     together.  We need to drop the last (i.e. chronologically first) block
+     of the new trace,  though, since we can't fill in the start address.*/
+  if (VEC_empty (btrace_insn_s, last_bfun->insn))
+    {
+      VEC_pop (btrace_block_s, btrace->blocks);
+      return 0;
+    }
 
   /* Beware that block trace starts with the most recent block, so the
      chronologically first block in the new trace is the last block in
      the new trace's block vector.  */
-  gdb_assert (!VEC_empty (btrace_block_s, btrace->blocks));
   first_new_block = VEC_last (btrace_block_s, btrace->blocks);
   last_insn = VEC_last (btrace_insn_s, last_bfun->insn);
 
@@ -869,18 +917,25 @@ btrace_stitch_bts (struct btrace_data_bts *btrace,
      been the only instruction in this function segment.
      This violates the invariant but will be remedied shortly by
      btrace_compute_ftrace when we add the new trace.  */
+
+  /* The only case where this would hurt is if the entire trace consisted
+     of just that one instruction.  If we remove it, we might turn the now
+     empty btrace function segment into a gap.  But we don't want gaps at
+     the beginning.  To avoid this, we remove the entire old trace.  */
+  if (last_bfun == btinfo->begin && VEC_empty (btrace_insn_s, last_bfun->insn))
+    btrace_clear (tp);
+
   return 0;
 }
 
 /* Adjust the block trace in order to stitch old and new trace together.
    BTRACE is the new delta trace between the last and the current stop.
-   BTINFO is the old branch trace until the last stop.
-   May modifx BTRACE as well as the existing trace in BTINFO.
+   TP is the traced thread.
+   May modifx BTRACE as well as the existing trace in TP.
    Return 0 on success, -1 otherwise.  */
 
 static int
-btrace_stitch_trace (struct btrace_data *btrace,
-		     const struct btrace_thread_info *btinfo)
+btrace_stitch_trace (struct btrace_data *btrace, struct thread_info *tp)
 {
   /* If we don't have trace, there's nothing to do.  */
   if (btrace_data_empty (btrace))
@@ -892,7 +947,7 @@ btrace_stitch_trace (struct btrace_data *btrace,
       return 0;
 
     case BTRACE_FORMAT_BTS:
-      return btrace_stitch_bts (&btrace->variant.bts, btinfo);
+      return btrace_stitch_bts (&btrace->variant.bts, tp);
     }
 
   internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
@@ -946,7 +1001,7 @@ btrace_fetch (struct thread_info *tp)
       if (errcode == 0)
 	{
 	  /* Success.  Let's try to stitch the traces together.  */
-	  errcode = btrace_stitch_trace (&btrace, btinfo);
+	  errcode = btrace_stitch_trace (&btrace, tp);
 	}
       else
 	{
@@ -1009,6 +1064,7 @@ btrace_clear (struct thread_info *tp)
 
   btinfo->begin = NULL;
   btinfo->end = NULL;
+  btinfo->ngaps = 0;
 
   btrace_clear_history (btinfo);
 }
@@ -1206,6 +1262,10 @@ btrace_insn_get (const struct btrace_insn_iterator *it)
   index = it->index;
   bfun = it->function;
 
+  /* Check if the iterator points to a gap in the trace.  */
+  if (bfun->errcode != 0)
+    return NULL;
+
   /* The index is within the bounds of this function's instruction vector.  */
   end = VEC_length (btrace_insn_s, bfun->insn);
   gdb_assert (0 < end);
@@ -1222,6 +1282,11 @@ btrace_insn_number (const struct btrace_insn_iterator *it)
   const struct btrace_function *bfun;
 
   bfun = it->function;
+
+  /* Return zero if the iterator points to a gap in the trace.  */
+  if (bfun->errcode != 0)
+    return 0;
+
   return bfun->insn_offset + it->index;
 }
 
@@ -1254,12 +1319,16 @@ btrace_insn_end (struct btrace_insn_iterator *it,
   if (bfun == NULL)
     error (_("No trace."));
 
-  /* The last instruction in the last function is the current instruction.
-     We point to it - it is one past the end of the execution trace.  */
   length = VEC_length (btrace_insn_s, bfun->insn);
 
+  /* The last function may either be a gap or it contains the current
+     instruction, which is one past the end of the execution trace; ignore
+     it.  */
+  if (length > 0)
+    length -= 1;
+
   it->function = bfun;
-  it->index = length - 1;
+  it->index = length;
 }
 
 /* See btrace.h.  */
@@ -1279,6 +1348,25 @@ btrace_insn_next (struct btrace_insn_iterator *it, unsigned int stride)
       unsigned int end, space, adv;
 
       end = VEC_length (btrace_insn_s, bfun->insn);
+
+      /* An empty function segment represents a gap in the trace.  We count
+	 it as one instruction.  */
+      if (end == 0)
+	{
+	  const struct btrace_function *next;
+
+	  next = bfun->flow.next;
+	  if (next == NULL)
+	    break;
+
+	  stride -= 1;
+	  steps += 1;
+
+	  bfun = next;
+	  index = 0;
+
+	  continue;
+	}
 
       gdb_assert (0 < end);
       gdb_assert (index < end);
@@ -1354,12 +1442,20 @@ btrace_insn_prev (struct btrace_insn_iterator *it, unsigned int stride)
 	  bfun = prev;
 	  index = VEC_length (btrace_insn_s, bfun->insn);
 
-	  /* There is at least one instruction in this function segment.  */
-	  gdb_assert (index > 0);
+	  /* An empty function segment represents a gap in the trace.  We count
+	     it as one instruction.  */
+	  if (index == 0)
+	    {
+	      stride -= 1;
+	      steps += 1;
+
+	      continue;
+	    }
 	}
 
       /* Advance the iterator as far as possible within this segment.  */
       adv = min (index, stride);
+
       stride -= adv;
       index -= adv;
       steps += adv;
@@ -1386,6 +1482,37 @@ btrace_insn_cmp (const struct btrace_insn_iterator *lhs,
   lnum = btrace_insn_number (lhs);
   rnum = btrace_insn_number (rhs);
 
+  /* A gap has an instruction number of zero.  Things are getting more
+     complicated if gaps are involved.
+
+     We take the instruction number offset from the iterator's function.
+     This is the number of the first instruction after the gap.
+
+     This is OK as long as both lhs and rhs point to gaps.  If only one of
+     them does, we need to adjust the number based on the other's regular
+     instruction number.  Otherwise, a gap might compare equal to an
+     instruction.  */
+
+  if (lnum == 0 && rnum == 0)
+    {
+      lnum = lhs->function->insn_offset;
+      rnum = rhs->function->insn_offset;
+    }
+  else if (lnum == 0)
+    {
+      lnum = lhs->function->insn_offset;
+
+      if (lnum == rnum)
+	lnum -= 1;
+    }
+  else if (rnum == 0)
+    {
+      rnum = rhs->function->insn_offset;
+
+      if (rnum == lnum)
+	rnum -= 1;
+    }
+
   return (int) (lnum - rnum);
 }
 
@@ -1397,16 +1524,25 @@ btrace_find_insn_by_number (struct btrace_insn_iterator *it,
 			    unsigned int number)
 {
   const struct btrace_function *bfun;
-  unsigned int end;
+  unsigned int end, length;
 
   for (bfun = btinfo->end; bfun != NULL; bfun = bfun->flow.prev)
-    if (bfun->insn_offset <= number)
-      break;
+    {
+      /* Skip gaps. */
+      if (bfun->errcode != 0)
+	continue;
+
+      if (bfun->insn_offset <= number)
+	break;
+    }
 
   if (bfun == NULL)
     return 0;
 
-  end = bfun->insn_offset + VEC_length (btrace_insn_s, bfun->insn);
+  length = VEC_length (btrace_insn_s, bfun->insn);
+  gdb_assert (length > 0);
+
+  end = bfun->insn_offset + length;
   if (end <= number)
     return 0;
 

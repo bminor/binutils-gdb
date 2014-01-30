@@ -50,7 +50,7 @@ gdb_continue_to_breakpoint "cont to $bp_location" ".*$srcfile2:$bp_location.*"
 set traced {}
 set testname "determine number of recorded instructions"
 gdb_test_multiple "info record" $testname {
-    -re "Active record target: record-btrace\r\n.*\r\nRecorded \(\[0-9\]*\) instructions in \(\[0-9\]*\) functions for thread 1 .*\\.\r\n$gdb_prompt $" {
+    -re "Active record target: record-btrace\r\n.*\r\nRecorded \(\[0-9\]*\) instructions in \(\[0-9\]*\) functions \\\(0 gaps\\\) for thread 1 .*\\.\r\n$gdb_prompt $" {
         set traced $expect_out(1,string)
         pass $testname
     }

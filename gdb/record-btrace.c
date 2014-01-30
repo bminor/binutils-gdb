@@ -366,7 +366,7 @@ record_btrace_info (struct target_ops *self)
   struct btrace_thread_info *btinfo;
   const struct btrace_config *conf;
   struct thread_info *tp;
-  unsigned int insns, calls;
+  unsigned int insns, calls, gaps;
 
   DEBUG ("info");
 
@@ -384,6 +384,7 @@ record_btrace_info (struct target_ops *self)
 
   insns = 0;
   calls = 0;
+  gaps = 0;
 
   if (!btrace_is_empty (tp))
     {
@@ -395,17 +396,84 @@ record_btrace_info (struct target_ops *self)
       calls = btrace_call_number (&call);
 
       btrace_insn_end (&insn, btinfo);
-      btrace_insn_prev (&insn, 1);
+
       insns = btrace_insn_number (&insn);
+      if (insns != 0)
+	{
+	  /* The last instruction does not really belong to the trace.  */
+	  insns -= 1;
+	}
+      else
+	{
+	  unsigned int steps;
+
+	  /* Skip gaps at the end.  */
+	  do
+	    {
+	      steps = btrace_insn_prev (&insn, 1);
+	      if (steps == 0)
+		break;
+
+	      insns = btrace_insn_number (&insn);
+	    }
+	  while (insns == 0);
+	}
+
+      gaps = btinfo->ngaps;
     }
 
-  printf_unfiltered (_("Recorded %u instructions in %u functions for thread "
-		       "%d (%s).\n"), insns, calls, tp->num,
-		     target_pid_to_str (tp->ptid));
+  printf_unfiltered (_("Recorded %u instructions in %u functions (%u gaps) "
+		       "for thread %d (%s).\n"), insns, calls, gaps,
+		     tp->num, target_pid_to_str (tp->ptid));
 
   if (btrace_is_replaying (tp))
     printf_unfiltered (_("Replay in progress.  At instruction %u.\n"),
 		       btrace_insn_number (btinfo->replay));
+}
+
+/* Print a decode error.  */
+
+static void
+btrace_ui_out_decode_error (struct ui_out *uiout, int errcode,
+			    enum btrace_format format)
+{
+  const char *errstr;
+  int is_error;
+
+  errstr = _("unknown");
+  is_error = 1;
+
+  switch (format)
+    {
+    default:
+      break;
+
+    case BTRACE_FORMAT_BTS:
+      switch (errcode)
+	{
+	default:
+	  break;
+
+	case BDE_BTS_OVERFLOW:
+	  errstr = _("instruction overflow");
+	  break;
+
+	case BDE_BTS_INSN_SIZE:
+	  errstr = _("unknown instruction");
+	  break;
+	}
+      break;
+    }
+
+  ui_out_text (uiout, _("["));
+  if (is_error)
+    {
+      ui_out_text (uiout, _("decode error ("));
+      ui_out_field_int (uiout, "errcode", errcode);
+      ui_out_text (uiout, _("): "));
+    }
+  ui_out_text (uiout, errstr);
+  ui_out_text (uiout, _("]\n"));
 }
 
 /* Print an unsigned int.  */
@@ -420,6 +488,7 @@ ui_out_field_uint (struct ui_out *uiout, const char *fld, unsigned int val)
 
 static void
 btrace_insn_history (struct ui_out *uiout,
+		     const struct btrace_thread_info *btinfo,
 		     const struct btrace_insn_iterator *begin,
 		     const struct btrace_insn_iterator *end, int flags)
 {
@@ -437,13 +506,30 @@ btrace_insn_history (struct ui_out *uiout,
 
       insn = btrace_insn_get (&it);
 
-      /* Print the instruction index.  */
-      ui_out_field_uint (uiout, "index", btrace_insn_number (&it));
-      ui_out_text (uiout, "\t");
+      /* A NULL instruction indicates a gap in the trace.  */
+      if (insn == NULL)
+	{
+	  const struct btrace_config *conf;
 
-      /* Disassembly with '/m' flag may not produce the expected result.
-	 See PR gdb/11833.  */
-      gdb_disassembly (gdbarch, uiout, NULL, flags, 1, insn->pc, insn->pc + 1);
+	  conf = btrace_conf (btinfo);
+
+	  /* We have trace so we must have a configuration.  */
+	  gdb_assert (conf != NULL);
+
+	  btrace_ui_out_decode_error (uiout, it.function->errcode,
+				      conf->format);
+	}
+      else
+	{
+	  /* Print the instruction index.  */
+	  ui_out_field_uint (uiout, "index", btrace_insn_number (&it));
+	  ui_out_text (uiout, "\t");
+
+	  /* Disassembly with '/m' flag may not produce the expected result.
+	     See PR gdb/11833.  */
+	  gdb_disassembly (gdbarch, uiout, NULL, flags, 1, insn->pc,
+			   insn->pc + 1);
+	}
     }
 }
 
@@ -520,7 +606,7 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
     }
 
   if (covered > 0)
-    btrace_insn_history (uiout, &begin, &end, flags);
+    btrace_insn_history (uiout, btinfo, &begin, &end, flags);
   else
     {
       if (size < 0)
@@ -580,7 +666,7 @@ record_btrace_insn_history_range (struct target_ops *self,
       btrace_insn_next (&end, 1);
     }
 
-  btrace_insn_history (uiout, &begin, &end, flags);
+  btrace_insn_history (uiout, btinfo, &begin, &end, flags);
   btrace_set_insn_history (btinfo, &begin, &end);
 
   do_cleanups (uiout_cleanup);
@@ -720,6 +806,21 @@ btrace_call_history (struct ui_out *uiout,
       /* Print the function index.  */
       ui_out_field_uint (uiout, "index", bfun->number);
       ui_out_text (uiout, "\t");
+
+      /* Indicate gaps in the trace.  */
+      if (bfun->errcode != 0)
+	{
+	  const struct btrace_config *conf;
+
+	  conf = btrace_conf (btinfo);
+
+	  /* We have trace so we must have a configuration.  */
+	  gdb_assert (conf != NULL);
+
+	  btrace_ui_out_decode_error (uiout, bfun->errcode, conf->format);
+
+	  continue;
+	}
 
       if ((flags & RECORD_PRINT_INDENT_CALLS) != 0)
 	{
@@ -1534,6 +1635,16 @@ record_btrace_start_replaying (struct thread_info *tp)
       replay = xmalloc (sizeof (*replay));
       btrace_insn_end (replay, btinfo);
 
+      /* Skip gaps at the end of the trace.  */
+      while (btrace_insn_get (replay) == NULL)
+	{
+	  unsigned int steps;
+
+	  steps = btrace_insn_prev (replay, 1);
+	  if (steps == 0)
+	    error (_("No trace."));
+	}
+
       /* We're not replaying, yet.  */
       gdb_assert (btinfo->replay == NULL);
       btinfo->replay = replay;
@@ -1729,9 +1840,17 @@ record_btrace_step_thread (struct thread_info *tp)
       if (replay == NULL)
 	return btrace_step_no_history ();
 
-      /* We are always able to step at least once.  */
-      steps = btrace_insn_next (replay, 1);
-      gdb_assert (steps == 1);
+      /* Skip gaps during replay.  */
+      do
+	{
+	  steps = btrace_insn_next (replay, 1);
+	  if (steps == 0)
+	    {
+	      record_btrace_stop_replaying (tp);
+	      return btrace_step_no_history ();
+	    }
+	}
+      while (btrace_insn_get (replay) == NULL);
 
       /* Determine the end of the instruction trace.  */
       btrace_insn_end (&end, btinfo);
@@ -1747,10 +1866,16 @@ record_btrace_step_thread (struct thread_info *tp)
       if (replay == NULL)
 	replay = record_btrace_start_replaying (tp);
 
-      /* If we can't step any further, we reached the end of the history.  */
-      steps = btrace_insn_prev (replay, 1);
-      if (steps == 0)
-	return btrace_step_no_history ();
+      /* If we can't step any further, we reached the end of the history.
+	 Skip gaps during replay.  */
+      do
+	{
+	  steps = btrace_insn_prev (replay, 1);
+	  if (steps == 0)
+	    return btrace_step_no_history ();
+
+	}
+      while (btrace_insn_get (replay) == NULL);
 
       return btrace_step_stopped ();
 
@@ -1769,9 +1894,19 @@ record_btrace_step_thread (struct thread_info *tp)
 	{
 	  const struct btrace_insn *insn;
 
-	  /* We are always able to step at least once.  */
-	  steps = btrace_insn_next (replay, 1);
-	  gdb_assert (steps == 1);
+	  /* Skip gaps during replay.  */
+	  do
+	    {
+	      steps = btrace_insn_next (replay, 1);
+	      if (steps == 0)
+		{
+		  record_btrace_stop_replaying (tp);
+		  return btrace_step_no_history ();
+		}
+
+	      insn = btrace_insn_get (replay);
+	    }
+	  while (insn == NULL);
 
 	  /* We stop replaying if we reached the end of the trace.  */
 	  if (btrace_insn_cmp (replay, &end) == 0)
@@ -1779,9 +1914,6 @@ record_btrace_step_thread (struct thread_info *tp)
 	      record_btrace_stop_replaying (tp);
 	      return btrace_step_no_history ();
 	    }
-
-	  insn = btrace_insn_get (replay);
-	  gdb_assert (insn);
 
 	  DEBUG ("stepping %d (%s) ... %s", tp->num,
 		 target_pid_to_str (tp->ptid),
@@ -1803,13 +1935,17 @@ record_btrace_step_thread (struct thread_info *tp)
 	{
 	  const struct btrace_insn *insn;
 
-	  /* If we can't step any further, we're done.  */
-	  steps = btrace_insn_prev (replay, 1);
-	  if (steps == 0)
-	    return btrace_step_no_history ();
+	  /* If we can't step any further, we reached the end of the history.
+	     Skip gaps during replay.  */
+	  do
+	    {
+	      steps = btrace_insn_prev (replay, 1);
+	      if (steps == 0)
+		return btrace_step_no_history ();
 
-	  insn = btrace_insn_get (replay);
-	  gdb_assert (insn);
+	      insn = btrace_insn_get (replay);
+	    }
+	  while (insn == NULL);
 
 	  DEBUG ("reverse-stepping %d (%s) ... %s", tp->num,
 		 target_pid_to_str (tp->ptid),
