@@ -1,3 +1,10 @@
+2014-01-30  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+	    Jan Beulich  <jbeulich@suse.com>
+
+	PR binutils/16490
+	* i386-dis.c (OP_E_memory): Fix shift computation for
+	vex_vsib_q_w_dq_mode.
+
 2014-01-09  Bradley Nelson  <bradnelson@google.com>
 	    Roland McGrath  <mcgrathr@google.com>
 
