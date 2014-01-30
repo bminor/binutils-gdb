@@ -3560,7 +3560,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 93 b4 b9 00 04 00 00 	vgatherqpd 0x400\(%ecx,%zmm7,4\),%zmm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 fd 7b 00 00 00 	vgatherqps 0x7b\(%ebp,%zmm7,8\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 fd 7b 00 00 00 	vgatherqps 0x7b\(%ebp,%zmm7,8\),%ymm6\{%k1\}
-[ 	]*[a-f0-9]+:	62 f2 7d 49 93 74 38 40 	vgatherqps 0x200\(%eax,%zmm7,1\),%ymm6\{%k1\}
+[ 	]*[a-f0-9]+:	62 f2 7d 49 93 74 38 40 	vgatherqps 0x100\(%eax,%zmm7,1\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 b9 00 04 00 00 	vgatherqps 0x400\(%ecx,%zmm7,4\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 48 42 f5    	vgetexppd %zmm5,%zmm6
 [ 	]*[a-f0-9]+:	62 f2 fd 4f 42 f5    	vgetexppd %zmm5,%zmm6\{%k7\}
@@ -4727,7 +4727,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 90 b4 b9 00 04 00 00 	vpgatherdq 0x400\(%ecx,%ymm7,4\),%zmm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 fd 7b 00 00 00 	vpgatherqd 0x7b\(%ebp,%zmm7,8\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 fd 7b 00 00 00 	vpgatherqd 0x7b\(%ebp,%zmm7,8\),%ymm6\{%k1\}
-[ 	]*[a-f0-9]+:	62 f2 7d 49 91 74 38 40 	vpgatherqd 0x200\(%eax,%zmm7,1\),%ymm6\{%k1\}
+[ 	]*[a-f0-9]+:	62 f2 7d 49 91 74 38 40 	vpgatherqd 0x100\(%eax,%zmm7,1\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 b9 00 04 00 00 	vpgatherqd 0x400\(%ecx,%zmm7,4\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 49 91 b4 fd 7b 00 00 00 	vpgatherqq 0x7b\(%ebp,%zmm7,8\),%zmm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 49 91 b4 fd 7b 00 00 00 	vpgatherqq 0x7b\(%ebp,%zmm7,8\),%zmm6\{%k1\}
@@ -5005,7 +5005,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a0 b4 b9 00 04 00 00 	vpscatterdq %zmm6,0x400\(%ecx,%ymm7,4\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 fd 7b 00 00 00 	vpscatterqd %ymm6,0x7b\(%ebp,%zmm7,8\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 fd 7b 00 00 00 	vpscatterqd %ymm6,0x7b\(%ebp,%zmm7,8\)\{%k1\}
-[ 	]*[a-f0-9]+:	62 f2 7d 49 a1 74 38 40 	vpscatterqd %ymm6,0x200\(%eax,%zmm7,1\)\{%k1\}
+[ 	]*[a-f0-9]+:	62 f2 7d 49 a1 74 38 40 	vpscatterqd %ymm6,0x100\(%eax,%zmm7,1\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 b9 00 04 00 00 	vpscatterqd %ymm6,0x400\(%ecx,%zmm7,4\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a1 b4 fd 7b 00 00 00 	vpscatterqq %zmm6,0x7b\(%ebp,%zmm7,8\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a1 b4 fd 7b 00 00 00 	vpscatterqq %zmm6,0x7b\(%ebp,%zmm7,8\)\{%k1\}
@@ -5428,7 +5428,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a3 b4 b9 00 04 00 00 	vscatterqpd %zmm6,0x400\(%ecx,%zmm7,4\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 fd 7b 00 00 00 	vscatterqps %ymm6,0x7b\(%ebp,%zmm7,8\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 fd 7b 00 00 00 	vscatterqps %ymm6,0x7b\(%ebp,%zmm7,8\)\{%k1\}
-[ 	]*[a-f0-9]+:	62 f2 7d 49 a3 74 38 40 	vscatterqps %ymm6,0x200\(%eax,%zmm7,1\)\{%k1\}
+[ 	]*[a-f0-9]+:	62 f2 7d 49 a3 74 38 40 	vscatterqps %ymm6,0x100\(%eax,%zmm7,1\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 b9 00 04 00 00 	vscatterqps %ymm6,0x400\(%ecx,%zmm7,4\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f1 d5 48 c6 f4 ab 	vshufpd \$0xab,%zmm4,%zmm5,%zmm6
 [ 	]*[a-f0-9]+:	62 f1 d5 4f c6 f4 ab 	vshufpd \$0xab,%zmm4,%zmm5,%zmm6\{%k7\}
@@ -10174,7 +10174,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 93 b4 b9 00 04 00 00 	vgatherqpd 0x400\(%ecx,%zmm7,4\),%zmm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 fd 85 ff ff ff 	vgatherqps -0x7b\(%ebp,%zmm7,8\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 fd 85 ff ff ff 	vgatherqps -0x7b\(%ebp,%zmm7,8\),%ymm6\{%k1\}
-[ 	]*[a-f0-9]+:	62 f2 7d 49 93 74 38 40 	vgatherqps 0x200\(%eax,%zmm7,1\),%ymm6\{%k1\}
+[ 	]*[a-f0-9]+:	62 f2 7d 49 93 74 38 40 	vgatherqps 0x100\(%eax,%zmm7,1\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 b9 00 04 00 00 	vgatherqps 0x400\(%ecx,%zmm7,4\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 48 42 f5    	vgetexppd %zmm5,%zmm6
 [ 	]*[a-f0-9]+:	62 f2 fd 4f 42 f5    	vgetexppd %zmm5,%zmm6\{%k7\}
@@ -11341,7 +11341,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 90 b4 b9 00 04 00 00 	vpgatherdq 0x400\(%ecx,%ymm7,4\),%zmm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 fd 85 ff ff ff 	vpgatherqd -0x7b\(%ebp,%zmm7,8\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 fd 85 ff ff ff 	vpgatherqd -0x7b\(%ebp,%zmm7,8\),%ymm6\{%k1\}
-[ 	]*[a-f0-9]+:	62 f2 7d 49 91 74 38 40 	vpgatherqd 0x200\(%eax,%zmm7,1\),%ymm6\{%k1\}
+[ 	]*[a-f0-9]+:	62 f2 7d 49 91 74 38 40 	vpgatherqd 0x100\(%eax,%zmm7,1\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 b9 00 04 00 00 	vpgatherqd 0x400\(%ecx,%zmm7,4\),%ymm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 49 91 b4 fd 85 ff ff ff 	vpgatherqq -0x7b\(%ebp,%zmm7,8\),%zmm6\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 49 91 b4 fd 85 ff ff ff 	vpgatherqq -0x7b\(%ebp,%zmm7,8\),%zmm6\{%k1\}
@@ -11619,7 +11619,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a0 b4 b9 00 04 00 00 	vpscatterdq %zmm6,0x400\(%ecx,%ymm7,4\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 fd 85 ff ff ff 	vpscatterqd %ymm6,-0x7b\(%ebp,%zmm7,8\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 fd 85 ff ff ff 	vpscatterqd %ymm6,-0x7b\(%ebp,%zmm7,8\)\{%k1\}
-[ 	]*[a-f0-9]+:	62 f2 7d 49 a1 74 38 40 	vpscatterqd %ymm6,0x200\(%eax,%zmm7,1\)\{%k1\}
+[ 	]*[a-f0-9]+:	62 f2 7d 49 a1 74 38 40 	vpscatterqd %ymm6,0x100\(%eax,%zmm7,1\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 b9 00 04 00 00 	vpscatterqd %ymm6,0x400\(%ecx,%zmm7,4\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a1 b4 fd 85 ff ff ff 	vpscatterqq %zmm6,-0x7b\(%ebp,%zmm7,8\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a1 b4 fd 85 ff ff ff 	vpscatterqq %zmm6,-0x7b\(%ebp,%zmm7,8\)\{%k1\}
@@ -12042,7 +12042,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a3 b4 b9 00 04 00 00 	vscatterqpd %zmm6,0x400\(%ecx,%zmm7,4\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 fd 85 ff ff ff 	vscatterqps %ymm6,-0x7b\(%ebp,%zmm7,8\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 fd 85 ff ff ff 	vscatterqps %ymm6,-0x7b\(%ebp,%zmm7,8\)\{%k1\}
-[ 	]*[a-f0-9]+:	62 f2 7d 49 a3 74 38 40 	vscatterqps %ymm6,0x200\(%eax,%zmm7,1\)\{%k1\}
+[ 	]*[a-f0-9]+:	62 f2 7d 49 a3 74 38 40 	vscatterqps %ymm6,0x100\(%eax,%zmm7,1\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 b9 00 04 00 00 	vscatterqps %ymm6,0x400\(%ecx,%zmm7,4\)\{%k1\}
 [ 	]*[a-f0-9]+:	62 f1 d5 48 c6 f4 ab 	vshufpd \$0xab,%zmm4,%zmm5,%zmm6
 [ 	]*[a-f0-9]+:	62 f1 d5 4f c6 f4 ab 	vshufpd \$0xab,%zmm4,%zmm5,%zmm6\{%k7\}

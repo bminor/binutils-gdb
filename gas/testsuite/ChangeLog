@@ -1,3 +1,12 @@
+2014-01-30  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+	    Jan Beulich  <jbeulich@suse.com>
+
+	PR binutils/16490
+	* gas/i386/avx512f.d: Fix test output.
+	* gas/i386/avx512f-intel.d: Likewise.
+	* gas/i386/x86-64-avx512f.d: Likewise.
+	* gas/i386/x86-64-avx512f-intel.d: Likewise.
+
 2013-12-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	Adjust MMIX gas tests for recent bfd/elf.c change.
