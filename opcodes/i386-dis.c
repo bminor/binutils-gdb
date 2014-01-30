@@ -14206,12 +14206,10 @@ OP_E_memory (int bytemode, int sizeflag)
       switch (bytemode)
 	{
 	case vex_vsib_d_w_dq_mode:
+	case vex_vsib_q_w_dq_mode:
 	case evex_x_gscat_mode:
 	case xmm_mdq_mode:
 	  shift = vex.w ? 3 : 2;
-	  break;
-	case vex_vsib_q_w_dq_mode:
-	  shift = 3;
 	  break;
 	case x_mode:
 	case evex_half_bcst_xmmq_mode:
