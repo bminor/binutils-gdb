@@ -1,5 +1,14 @@
 2014-02-05  Yao Qi  <yao@codesourcery.com>
 
+	* ctf.c: Include "inferior.h" and "gdbthread.h".
+	(CTF_PID): A new macro.
+	(ctf_open): Call inferior_appeared and add_thread_silent.
+	(ctf_close): Call exit_inferior_silent and set inferior_ptid.
+	(ctf_thread_alive): New function.
+	(init_ctf_ops): Install ctf_thread_alive to to_thread_alive.
+
+2014-02-05  Yao Qi  <yao@codesourcery.com>
+
 	Revert this patch:
 
 	2013-05-24  Yao Qi  <yao@codesourcery.com>
