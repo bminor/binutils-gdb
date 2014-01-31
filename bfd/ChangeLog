@@ -1,3 +1,49 @@
+2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* bfd-in2.h: Update from reloc.c.
+	* elf32-nios2.c: Include elf32-nios2.h.
+	(elf_nios2_howto_table_rel): Add entry for R_NIOS2_CALL26_NOAT.
+	(nios2_reloc_map): Likewise.
+	(enum elf32_nios2_stub_type): Declare.
+	(struct elf32_nios2_stub_hash_entry): Declare.
+	(nios2_stub_hash_entry, nios2_stub_hash_lookup): New macros.
+	(struct elf32_nios2_link_hash_entry): Add hsh_cache field.
+	(struct elf32_nios2_link_hash_table): Add new fields bstab,
+	stub_bfd, add_stub_section, layout_sections_again, stub_group,
+	bfd_count, top_index, input_list, all_local_syms.
+	(nios2_call26_stub_entry): New.
+	(nios2_elf32_install_imm16): Move up in file.
+	(nios2_elf32_install_data): Move up in file.
+	(hiadj): Move up in file.
+	(stub_hash_newfunc): New.
+	(link_hash_newfunc): Initialize hsh_cache field.
+	(STUB_SUFFIX): New.
+	(nios2_stub_name): New.
+	(nios2_get_stub_entry): New.
+	(nios2_add_stub): New.
+	(nios2_elf32_setup_section_lists): New.
+	(nios2_elf32_next_input_section): New.
+	(CALL26_SEGMENT): New.
+	(MAX_STUB_SECTION_SIZE): New.
+	(group_sections): New.
+	(nios2_type_of_stub): New.
+	(nios2_build_one_stub): New.
+	(nios2_size_one_stub): New.
+	(get_local_syms): New.
+	(nios2_elf32_size_stubs): New.
+	(nios2_elf32_build_stubs): New.
+	(nios2_elf32_do_call26_relocate): Correct CALL26 overflow test.
+	(nios2_elf32_relocate_section): Handle R_NIOS2_CALL26_NOAT.  Add
+	trampolines for R_NIOS2_CALL26 stubs.
+	(nios2_elf32_check_relocs): Handle R_NIOS2_CALL26_NOAT.
+	(nios2_elf32_gc_sweep_hook): Likewise.
+	(nios2_elf32_link_hash_table_create): Initialize the stub hash table.
+	(nios2_elf32_link_hash_table_free): New.
+	(bfd_elf32_bfd_link_hash_table_free): Define.
+	* elf32-nios2.h: New file.
+	* libbfd.h: Update from reloc.c.
+	* reloc.c (BFD_RELOC_NIOS2_CALL26_NOAT): New.
+
 2014-01-29  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16318

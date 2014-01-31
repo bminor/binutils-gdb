@@ -1,3 +1,13 @@
+2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* Makefile.am (enios2elf.c, enios2linux.c): Update dependencies.
+	* Makefile.in: Regenerated.
+	* emulparams/nios2elf.sh (EXTRA_EM_FILE): Set.
+	* emulparams/nios2linux.sh (EXTRA_EM_FILE): Set.
+	* emultempl/nios2elf.em: New file.
+	* gen-doc.texi (NIOSII): Set.
+	* ld.texinfo (NIOSII): Set.
+
 2014-01-28  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am: Remove obsolete MSP430 emulations.

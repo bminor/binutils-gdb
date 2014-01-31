@@ -1139,6 +1139,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_U16
 		  || fixP->fx_r_type == BFD_RELOC_16_PCREL
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CALL26
+		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CALL26_NOAT
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_IMM5
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CACHE_OPX
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_IMM6
@@ -1595,7 +1596,10 @@ nios2_assemble_args_m (nios2_insn_infoS *insn_info)
       unsigned long immed
 	= nios2_assemble_expression (insn_info->insn_tokens[1], insn_info,
 				     insn_info->insn_reloc,
-				     BFD_RELOC_NIOS2_CALL26, 0);
+				     (nios2_as_options.noat
+				      ? BFD_RELOC_NIOS2_CALL26_NOAT
+				      : BFD_RELOC_NIOS2_CALL26),
+				     0);
 
       SET_INSN_FIELD (IMM26, insn_info->insn_code, immed);
       nios2_check_assembly (insn_info->insn_code, insn_info->insn_tokens[2]);
@@ -2728,7 +2732,10 @@ md_assemble (char *op_str)
 		   && !nios2_as_options.noat
 		   && insn->insn_nios2_opcode->pinfo & NIOS2_INSN_CALL
 		   && insn->insn_reloc
-		   && insn->insn_reloc->reloc_type == BFD_RELOC_NIOS2_CALL26)
+		   && ((insn->insn_reloc->reloc_type
+			== BFD_RELOC_NIOS2_CALL26)
+		       || (insn->insn_reloc->reloc_type
+			   == BFD_RELOC_NIOS2_CALL26_NOAT)))
 	    output_call (insn);
 	  else if (insn->insn_nios2_opcode->pinfo & NIOS2_INSN_ANDI)
 	    output_andi (insn);

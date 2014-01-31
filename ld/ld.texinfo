@@ -30,6 +30,7 @@
 @set MMIX
 @set MSP430
 @set NDS32
+@set NIOSII
 @set POWERPC
 @set POWERPC64
 @set Renesas
@@ -1604,6 +1605,9 @@ This option is only supported on a few targets.
 @end ifset
 @ifset M68HC11
 @xref{M68HC11/68HC12,,@command{ld} and the 68HC11 and 68HC12}.
+@end ifset
+@ifset NIOSII
+@xref{Nios II,,@command{ld} and the Altera Nios II}.
 @end ifset
 @ifset POWERPC
 @xref{PowerPC ELF32,,@command{ld} and PowerPC 32-bit ELF Support}.
@@ -6105,6 +6109,9 @@ functionality are not listed.
 @ifset NDS32
 * NDS32::			@command{ld} and NDS32
 @end ifset
+@ifset NIOSII
+* Nios II::			@command{ld} and the Altera Nios II
+@end ifset
 @ifset POWERPC
 * PowerPC ELF32::		@command{ld} and PowerPC 32-bit ELF Support
 @end ifset
@@ -6737,6 +6744,43 @@ Disable/enable the link-time IFC optimization.
 @item @samp{--mifc-loop-aware}
 Avoid generating the IFC instruction inside the loop.
 @end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset NIOSII
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node Nios II
+@section @command{ld} and the Altera Nios II
+@cindex Nios II call relaxation
+@kindex --relax on Nios II
+
+Call and immediate jump instructions on Nios II processors are limited to
+transferring control to addresses in the same 256MB memory segment,
+which may result in @command{ld} giving
+@samp{relocation truncated to fit} errors with very large programs.
+The command-line option @option{--relax} enables the generation of
+trampolines that can access the entire 32-bit address space for calls
+outside the normal @code{call} and @code{jmpi} address range.  These
+trampolines are inserted at section boundaries, so may not themselves
+be reachable if an input section and its associated call trampolines are
+larger than 256MB.
+
+The @option{--relax} option is enabled by default unless @option{-r}
+is also specified.  You can disable trampoline generation by using the
+@option{--no-relax} linker option.  You can also disable this optimization
+locally by using the @samp{set .noat} directive in assembly-language
+source files, as the linker-inserted trampolines use the @code{at}
+register as a temporary.
+
+Note that the linker @option{--relax} option is independent of assembler
+relaxation options, and that using the GNU assembler's @option{-relax-all}
+option interferes with the linker's more selective call instruction relaxation.
 
 @ifclear GENERIC
 @lowersections

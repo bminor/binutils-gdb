@@ -18,6 +18,7 @@
 @set MMIX
 @set MSP430
 @set NDS32
+@set NIOSII
 @set POWERPC
 @set POWERPC64
 @set Renesas
