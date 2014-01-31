@@ -236,8 +236,6 @@ extern const char *ada_decode (const char*);
 
 extern enum language ada_update_initial_language (enum language);
 
-extern void clear_ada_sym_cache (void);
-
 extern int ada_lookup_symbol_list (const char *, const struct block *,
                                    domain_enum, struct ada_symbol_info**);
 

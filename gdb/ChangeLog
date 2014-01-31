@@ -1,3 +1,7 @@
+2014-01-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h (clear_ada_sym_cache): Delete.
+
 2014-01-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* auxv.c (fprint_target_auxv): Handle AT_HWCAP2.
