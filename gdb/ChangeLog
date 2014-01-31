@@ -1,5 +1,13 @@
 2014-02-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-tasks.c (ada_tasks_new_objfile_observer): Renames
+	ada_new_objfile_observer.
+	(ada_tasks_normal_stop_observer): Renames ada_normal_stop_observer.
+	(_initialize_tasks): Update uses of ada_new_objfile_observer
+	and ada_tasks_normal_stop_observer.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp): Set the type of the value
 	returned by the 'Length attribute to integer.
 

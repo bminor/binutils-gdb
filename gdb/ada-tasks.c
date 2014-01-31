@@ -1385,7 +1385,7 @@ ada_tasks_invalidate_inferior_data (struct inferior *inf)
 /* The 'normal_stop' observer notification callback.  */
 
 static void
-ada_normal_stop_observer (struct bpstats *unused_args, int unused_args2)
+ada_tasks_normal_stop_observer (struct bpstats *unused_args, int unused_args2)
 {
   /* The inferior has been resumed, and just stopped. This means that
      our task_list needs to be recomputed before it can be used again.  */
@@ -1395,7 +1395,7 @@ ada_normal_stop_observer (struct bpstats *unused_args, int unused_args2)
 /* A routine to be called when the objfiles have changed.  */
 
 static void
-ada_new_objfile_observer (struct objfile *objfile)
+ada_tasks_new_objfile_observer (struct objfile *objfile)
 {
   struct inferior *inf;
 
@@ -1438,8 +1438,8 @@ _initialize_tasks (void)
   ada_tasks_inferior_data_handle = register_inferior_data ();
 
   /* Attach various observers.  */
-  observer_attach_normal_stop (ada_normal_stop_observer);
-  observer_attach_new_objfile (ada_new_objfile_observer);
+  observer_attach_normal_stop (ada_tasks_normal_stop_observer);
+  observer_attach_new_objfile (ada_tasks_new_objfile_observer);
 
   /* Some new commands provided by this module.  */
   add_info ("tasks", info_tasks_command,
