@@ -1,4 +1,13 @@
 2014-01-31  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	PR gas/16488
+	* gas/i386/inval-avx512f.s: Add test for incorrect memory operand
+	for gather/scatter instructions.
+	* gas/i386/x86-64-inval-avx512f.s: Likewise.
+	* gas/i386/inval-avx512f.l: Adjust correspondingly.
+	* gas/i386/x86-64-inval-avx512f.l: Likewise.
+
+2014-01-31  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 	    Jan Beulich  <jbeulich@suse.com>
 
 	PR binutils/16490
