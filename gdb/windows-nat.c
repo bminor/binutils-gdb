@@ -2672,12 +2672,17 @@ _initialize_windows_nat (void)
   c = add_com ("dll-symbols", class_files, dll_symbol_command,
 	       _("Load dll library symbols from FILE."));
   set_cmd_completer (c, filename_completer);
+  deprecate_cmd (c, "sharedlibrary");
 
-  add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
+  c = add_com ("add-shared-symbol-files", class_files, dll_symbol_command,
+	       _("Load dll library symbols from FILE."));
+  set_cmd_completer (c, filename_completer);
+  deprecate_cmd (c, "sharedlibrary");
 
-  add_com_alias ("add-shared-symbol-files", "dll-symbols", class_alias, 1);
-
-  add_com_alias ("assf", "dll-symbols", class_alias, 1);
+  c = add_com ("assf", class_files, dll_symbol_command,
+	       _("Load dll library symbols from FILE."));
+  set_cmd_completer (c, filename_completer);
+  deprecate_cmd (c, "sharedlibrary");
 
 #ifdef __CYGWIN__
   add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\

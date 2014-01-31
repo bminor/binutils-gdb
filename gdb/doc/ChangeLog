@@ -1,3 +1,11 @@
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Files): Document "add-shared-symbol-files"
+	and "assf" as being deprecated.
+	(Cygwin Native): Likewise for "dll-symbols".
+	(Non-debug DLL Symbols): Remove reference to "dll-symbols"
+	as a way to force the loading of symbols from a DLL.
+
 2014-02-19  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python.texi (Values From Inferior): Add description about the

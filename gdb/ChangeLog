@@ -1,5 +1,13 @@
 2014-02-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (_initialize_windows_nat): Deprecate the
+	"dll-symbols" command.  Turn the "add-shared-symbol-files"
+	and "assf" aliases into commands, and deprecate them as well.
+	* NEWS: Add entry explaining that "dll-symbols" and its two
+	aliases are now deprecated.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* dec-thread.c (dec_thread_get_ada_task_ptid): Avoid unescaped
 	new-line in debug string.  Remove trailing spaces.
 

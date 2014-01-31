@@ -91,6 +91,10 @@ qXfer:btrace:read's annex
 * New targets
 PowerPC64 GNU/Linux little-endian	powerpc64le-*-linux*
 
+* The "dll-symbols" command, and its two aliases ("add-shared-symbol-files"
+  and "assf"), have been deprecated.  Use the "sharedlibrary" command, or
+  its alias "share", instead.
+
 *** Changes in GDB 7.7
 
 * Improved support for process record-replay and reverse debugging on
