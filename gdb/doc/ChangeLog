@@ -1,3 +1,8 @@
+2014-01-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Glitches): Document the new "maint ada set/show
+	ignore-descriptive-types". commands.
+
 2014-01-22  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Server): Mention --debug-format=all|none|timestamp.

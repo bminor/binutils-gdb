@@ -15712,6 +15712,37 @@ recommended to leave this setting to @code{on} unless necessary.
 
 @end table
 
+@cindex GNAT descriptive types
+@cindex GNAT encoding
+Internally, the debugger also relies on the compiler following a number
+of conventions known as the @samp{GNAT Encoding}, all documented in
+@file{gcc/ada/exp_dbug.ads} in the GCC sources. This encoding describes
+how the debugging information should be generated for certain types.
+In particular, this convention makes use of @dfn{descriptive types},
+which are artificial types generated purely to help the debugger.
+
+These encodings were defined at a time when the debugging information
+format used was not powerful enough to describe some of the more complex
+types available in Ada.  Since DWARF allows us to express nearly all
+Ada features, the long-term goal is to slowly replace these descriptive
+types by their pure DWARF equivalent.  To facilitate that transition,
+a new maintenance option is available to force the debugger to ignore
+those descriptive types.  It allows the user to quickly evaluate how
+well @value{GDBN} works without them.
+
+@table @code
+
+@kindex maint ada set ignore-descriptive-types
+@item maintenance ada set ignore-descriptive-types [on|off]
+Control whether the debugger should ignore descriptive types.
+The default is not to ignore descriptives types (@code{off}).
+
+@kindex maint ada show ignore-descriptive-types
+@item maintenance ada show ignore-descriptive-types
+Show if descriptive types are ignored by @value{GDBN}.
+
+@end table
+
 @node Unsupported Languages
 @section Unsupported Languages
 

@@ -3561,7 +3561,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 93 b4 b9 00 04 00 00 	vgatherqpd zmm6\{k1\},ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 fd 7b 00 00 00 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 fd 7b 00 00 00 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]
-[ 	]*[a-f0-9]+:	62 f2 7d 49 93 74 38 40 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[eax\+zmm7\*1\+0x200\]
+[ 	]*[a-f0-9]+:	62 f2 7d 49 93 74 38 40 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[eax\+zmm7\*1\+0x100\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 b9 00 04 00 00 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]
 [ 	]*[a-f0-9]+:	62 f2 fd 48 42 f5    	vgetexppd zmm6,zmm5
 [ 	]*[a-f0-9]+:	62 f2 fd 4f 42 f5    	vgetexppd zmm6\{k7\},zmm5
@@ -4728,7 +4728,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 90 b4 b9 00 04 00 00 	vpgatherdq zmm6\{k1\},ZMMWORD PTR \[ecx\+ymm7\*4\+0x400\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 fd 7b 00 00 00 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 fd 7b 00 00 00 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b]
-[ 	]*[a-f0-9]+:	62 f2 7d 49 91 74 38 40 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[eax\+zmm7\*1\+0x200\]
+[ 	]*[a-f0-9]+:	62 f2 7d 49 91 74 38 40 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[eax\+zmm7\*1\+0x100\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 b9 00 04 00 00 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]
 [ 	]*[a-f0-9]+:	62 f2 fd 49 91 b4 fd 7b 00 00 00 	vpgatherqq zmm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]
 [ 	]*[a-f0-9]+:	62 f2 fd 49 91 b4 fd 7b 00 00 00 	vpgatherqq zmm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]
@@ -5006,7 +5006,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a0 b4 b9 00 04 00 00 	vpscatterdq ZMMWORD PTR \[ecx\+ymm7\*4\+0x400\]\{k1\},zmm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 fd 7b 00 00 00 	vpscatterqd ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 fd 7b 00 00 00 	vpscatterqd ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]\{k1\},ymm6
-[ 	]*[a-f0-9]+:	62 f2 7d 49 a1 74 38 40 	vpscatterqd ZMMWORD PTR \[eax\+zmm7\*1\+0x200\]\{k1\},ymm6
+[ 	]*[a-f0-9]+:	62 f2 7d 49 a1 74 38 40 	vpscatterqd ZMMWORD PTR \[eax\+zmm7\*1\+0x100\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 b9 00 04 00 00 	vpscatterqd ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a1 b4 fd 7b 00 00 00 	vpscatterqq ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]\{k1\},zmm6
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a1 b4 fd 7b 00 00 00 	vpscatterqq ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]\{k1\},zmm6
@@ -5429,7 +5429,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a3 b4 b9 00 04 00 00 	vscatterqpd ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]\{k1\},zmm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 fd 7b 00 00 00 	vscatterqps ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 fd 7b 00 00 00 	vscatterqps ZMMWORD PTR \[ebp\+zmm7\*8\+0x7b\]\{k1\},ymm6
-[ 	]*[a-f0-9]+:	62 f2 7d 49 a3 74 38 40 	vscatterqps ZMMWORD PTR \[eax\+zmm7\*1\+0x200\]\{k1\},ymm6
+[ 	]*[a-f0-9]+:	62 f2 7d 49 a3 74 38 40 	vscatterqps ZMMWORD PTR \[eax\+zmm7\*1\+0x100\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 b9 00 04 00 00 	vscatterqps ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f1 d5 48 c6 f4 ab 	vshufpd zmm6,zmm5,zmm4,0xab
 [ 	]*[a-f0-9]+:	62 f1 d5 4f c6 f4 ab 	vshufpd zmm6\{k7\},zmm5,zmm4,0xab
@@ -10175,7 +10175,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 93 b4 b9 00 04 00 00 	vgatherqpd zmm6\{k1\},ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 fd 85 ff ff ff 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 fd 85 ff ff ff 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]
-[ 	]*[a-f0-9]+:	62 f2 7d 49 93 74 38 40 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[eax\+zmm7\*1\+0x200\]
+[ 	]*[a-f0-9]+:	62 f2 7d 49 93 74 38 40 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[eax\+zmm7\*1\+0x100\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 93 b4 b9 00 04 00 00 	vgatherqps ymm6\{k1\},ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]
 [ 	]*[a-f0-9]+:	62 f2 fd 48 42 f5    	vgetexppd zmm6,zmm5
 [ 	]*[a-f0-9]+:	62 f2 fd 4f 42 f5    	vgetexppd zmm6\{k7\},zmm5
@@ -11342,7 +11342,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 90 b4 b9 00 04 00 00 	vpgatherdq zmm6\{k1\},ZMMWORD PTR \[ecx\+ymm7\*4\+0x400\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 fd 85 ff ff ff 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 fd 85 ff ff ff 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]
-[ 	]*[a-f0-9]+:	62 f2 7d 49 91 74 38 40 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[eax\+zmm7\*1\+0x200\]
+[ 	]*[a-f0-9]+:	62 f2 7d 49 91 74 38 40 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[eax\+zmm7\*1\+0x100\]
 [ 	]*[a-f0-9]+:	62 f2 7d 49 91 b4 b9 00 04 00 00 	vpgatherqd ymm6\{k1\},ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]
 [ 	]*[a-f0-9]+:	62 f2 fd 49 91 b4 fd 85 ff ff ff 	vpgatherqq zmm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]
 [ 	]*[a-f0-9]+:	62 f2 fd 49 91 b4 fd 85 ff ff ff 	vpgatherqq zmm6\{k1\},ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]
@@ -11620,7 +11620,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a0 b4 b9 00 04 00 00 	vpscatterdq ZMMWORD PTR \[ecx\+ymm7\*4\+0x400\]\{k1\},zmm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 fd 85 ff ff ff 	vpscatterqd ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 fd 85 ff ff ff 	vpscatterqd ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]\{k1\},ymm6
-[ 	]*[a-f0-9]+:	62 f2 7d 49 a1 74 38 40 	vpscatterqd ZMMWORD PTR \[eax\+zmm7\*1\+0x200\]\{k1\},ymm6
+[ 	]*[a-f0-9]+:	62 f2 7d 49 a1 74 38 40 	vpscatterqd ZMMWORD PTR \[eax\+zmm7\*1\+0x100\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a1 b4 b9 00 04 00 00 	vpscatterqd ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a1 b4 fd 85 ff ff ff 	vpscatterqq ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]\{k1\},zmm6
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a1 b4 fd 85 ff ff ff 	vpscatterqq ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]\{k1\},zmm6
@@ -12043,7 +12043,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 fd 49 a3 b4 b9 00 04 00 00 	vscatterqpd ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]\{k1\},zmm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 fd 85 ff ff ff 	vscatterqps ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 fd 85 ff ff ff 	vscatterqps ZMMWORD PTR \[ebp\+zmm7\*8-0x7b\]\{k1\},ymm6
-[ 	]*[a-f0-9]+:	62 f2 7d 49 a3 74 38 40 	vscatterqps ZMMWORD PTR \[eax\+zmm7\*1\+0x200\]\{k1\},ymm6
+[ 	]*[a-f0-9]+:	62 f2 7d 49 a3 74 38 40 	vscatterqps ZMMWORD PTR \[eax\+zmm7\*1\+0x100\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f2 7d 49 a3 b4 b9 00 04 00 00 	vscatterqps ZMMWORD PTR \[ecx\+zmm7\*4\+0x400\]\{k1\},ymm6
 [ 	]*[a-f0-9]+:	62 f1 d5 48 c6 f4 ab 	vshufpd zmm6,zmm5,zmm4,0xab
 [ 	]*[a-f0-9]+:	62 f1 d5 4f c6 f4 ab 	vshufpd zmm6\{k7\},zmm5,zmm4,0xab

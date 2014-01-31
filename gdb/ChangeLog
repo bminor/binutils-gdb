@@ -1,3 +1,40 @@
+2014-01-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h (clear_ada_sym_cache): Delete.
+
+2014-01-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* auxv.c (fprint_target_auxv): Handle AT_HWCAP2.
+
+2014-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc64-linux-tdep.c (sparc64_linux_step_trap): Get PC from
+          the sigreturn register save area only if the syscall is
+          sigreturn.
+
+2014-01-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* valops.c (value_slice): Minor reformatting.
+
+2014-01-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc64-tdep.c (ppc64_standard_linkage7): Fix typo.
+
+2014-01-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (maint_set_ada_cmdlist, maint_show_ada_cmdlist):
+	New static globals.
+	(maint_set_ada_cmd, maint_show_ada_cmd): New functions.
+	(ada_ignore_descriptive_types_p): New static global.
+	(find_parallel_type_by_descriptive_type): Return immediately
+	if ada_ignore_descriptive_types_p is set.
+	(_initialize_ada_language): Register new commands "maintenance
+	set ada", "maintenance show ada", "maintenance set ada
+	ignore-descriptive-types" and "maintenance show ada
+	ignore-descriptive-types".
+	* NEWS: Add entry for new "maint ada set/show
+	ignore-descriptive-types" commands.
+
 2014-01-27  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record-btrace.c (record_btrace_close): Call btrace_teardown

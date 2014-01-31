@@ -3,6 +3,15 @@
 
 *** Changes since GDB 7.7
 
+* New options
+
+maint ada set ignore-descriptive-types (on|off)
+maint ada show ignore-descriptive-types
+  Control whether the debugger should ignore descriptive types in Ada
+  programs.  The default is not to ignore the descriptive types.  See
+  the user manual for more details on descriptive types and the intended
+  usage of this option.
+
 * New features in the GDB remote stub, GDBserver
 
   ** New option --debug-format=option1[,option2,...] allows one to add

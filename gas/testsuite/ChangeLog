@@ -1,3 +1,34 @@
+2014-01-31  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	PR gas/16488
+	* gas/i386/inval-avx512f.s: Add test for incorrect memory operand
+	for gather/scatter instructions.
+	* gas/i386/x86-64-inval-avx512f.s: Likewise.
+	* gas/i386/inval-avx512f.l: Adjust correspondingly.
+	* gas/i386/x86-64-inval-avx512f.l: Likewise.
+
+2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gas/nios2/call26_noat.d: New.
+	* gas/nios2/call26_noat.s: New.
+	* gas/nios2/call_noat.d: New.
+	* gas/nios2/call_noat.s: New.
+
+2014-01-30  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+	    Jan Beulich  <jbeulich@suse.com>
+
+	PR binutils/16490
+	* gas/i386/avx512f.d: Fix test output.
+	* gas/i386/avx512f-intel.d: Likewise.
+	* gas/i386/x86-64-avx512f.d: Likewise.
+	* gas/i386/x86-64-avx512f-intel.d: Likewise.
+
+2014-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16317
+	* gas/ia64/group-2.d: Expect I attribute with RELA sections.
+	* gas/ia64/xdata.d: Likewise.
+
 2014-01-22  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	PR gas/16489

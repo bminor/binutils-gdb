@@ -1,3 +1,9 @@
+2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* config/tc-nios2.c (md_apply_fix): Handle BFD_RELOC_NIOS2_CALL26_NOAT.
+	(nios2_assemble_args_m): Likewise.
+	(md_assemble): Likewise.
+
 2014-01-24  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-msp430.c (msp430_section): Always flag data sections,

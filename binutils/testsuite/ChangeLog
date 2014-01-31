@@ -1,3 +1,13 @@
+2014-01-29  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16318
+	* binutils-all/strip-10.d: Revert previous delta.
+
+2014-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16318
+	* binutils-all/strip-10.d: Allow "System V" in the osabi field.
+
 2013-12-20  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16218

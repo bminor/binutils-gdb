@@ -1,3 +1,11 @@
+2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2.h (elf_nios2_reloc_type): Add R_NIOS2_CALL26_NOAT.
+
+2014-01-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* common.h (AT_HWCAP2): Define.
+
 2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 	    Wei-Cheng Wang  <cole945@gmail.com>
 

@@ -1,3 +1,54 @@
+2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* ld-nios2/relax_call26.s: New.
+	* ld-nios2/relax_call26_boundary.ld: New.
+	* ld-nios2/relax_call26_boundary.s: New.
+	* ld-nios2/relax_call26_boundary_c8.d: New.
+	* ld-nios2/relax_call26_boundary_cc.d: New.
+	* ld-nios2/relax_call26_boundary_d0.d: New.
+	* ld-nios2/relax_call26_boundary_d4.d: New.
+	* ld-nios2/relax_call26_boundary_d8.d: New.
+	* ld-nios2/relax_call26_boundary_dc.d: New.
+	* ld-nios2/relax_call26_boundary_f0.d: New.
+	* ld-nios2/relax_call26_boundary_f4.d: New.
+	* ld-nios2/relax_call26_boundary_f8.d: New.
+	* ld-nios2/relax_call26_boundary_fc.d: New.
+	* ld-nios2/relax_call26_cache.d: New.
+	* ld-nios2/relax_call26_cache.ld: New.
+	* ld-nios2/relax_call26_cache.s: New.
+	* ld-nios2/relax_call26_multi.d: New.
+	* ld-nios2/relax_call26_multi.ld: New.
+	* ld-nios2/relax_call26_norelax.d: New.
+	* ld-nios2/relax_call26_shared.d: New.
+	* ld-nios2/relax_call26_shared.ld: New.
+
+2014-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/rdynamic-1.c: New file.
+	* ld-elf/rdynamic-1.rd: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add rdynamic-1.
+
+2014-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16317
+	* ld-tic6x/shlib-1.rd: Expect I attribute with RELA sections.
+	* ld-tic6x/shlib-1b.rd: Likewise.
+	* ld-tic6x/shlib-1r.rd: Likewise.
+	* ld-tic6x/shlib-1rb.rd: Likewise.
+	* ld-tic6x/shlib-app-1rd: Likewise.
+	* ld-tic6x/shlib-app-1b.rd: Likewise.
+	* ld-tic6x/shlib-app-1r.rd: Likewise.
+	* ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* ld-tic6x/shlib-noindex.rd: Likewise.
+	* ld-tic6x/static-app-1.rd: Likewise.
+	* ld-tic6x/static-app-1b.rd: Likewise.
+	* ld-tic6x/static-app-1r.rd: Likewise.
+	* ld-tic6x/static-app-1rb.rd: Likewise.
+	PR binutils/16318
+	* ld-tic6x/tic6x.exp: Expect C6000 osabi value in relocatable
+	objects.
+
 2014-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/pr16498a.s: Replace .align with .p2align.

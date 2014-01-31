@@ -3614,32 +3614,33 @@ value_slice (struct value *array, int lowbound, int length)
      done with it.  */
   slice_range_type = create_range_type ((struct type *) NULL,
 					TYPE_TARGET_TYPE (range_type),
-					lowbound, 
+					lowbound,
 					lowbound + length - 1);
 
-    {
-      struct type *element_type = TYPE_TARGET_TYPE (array_type);
-      LONGEST offset =
-	(lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
+  {
+    struct type *element_type = TYPE_TARGET_TYPE (array_type);
+    LONGEST offset
+      = (lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
 
-      slice_type = create_array_type ((struct type *) NULL, 
-				      element_type,
-				      slice_range_type);
-      TYPE_CODE (slice_type) = TYPE_CODE (array_type);
+    slice_type = create_array_type ((struct type *) NULL,
+				    element_type,
+				    slice_range_type);
+    TYPE_CODE (slice_type) = TYPE_CODE (array_type);
 
-      if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
-	slice = allocate_value_lazy (slice_type);
-      else
-	{
-	  slice = allocate_value (slice_type);
-	  value_contents_copy (slice, 0, array, offset,
-			       TYPE_LENGTH (slice_type));
-	}
+    if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
+      slice = allocate_value_lazy (slice_type);
+    else
+      {
+	slice = allocate_value (slice_type);
+	value_contents_copy (slice, 0, array, offset,
+			     TYPE_LENGTH (slice_type));
+      }
 
-      set_value_component_location (slice, array);
-      VALUE_FRAME_ID (slice) = VALUE_FRAME_ID (array);
-      set_value_offset (slice, value_offset (array) + offset);
-    }
+    set_value_component_location (slice, array);
+    VALUE_FRAME_ID (slice) = VALUE_FRAME_ID (array);
+    set_value_offset (slice, value_offset (array) + offset);
+  }
+
   return slice;
 }
 

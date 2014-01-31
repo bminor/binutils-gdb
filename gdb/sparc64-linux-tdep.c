@@ -111,7 +111,9 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
 static CORE_ADDR
 sparc64_linux_step_trap (struct frame_info *frame, unsigned long insn)
 {
-  if (insn == 0x91d0206d)
+  /* __NR_rt_sigreturn is 101  */
+  if ((insn == 0x91d0206d)
+      && (get_frame_register_unsigned (frame, SPARC_G1_REGNUM) == 101))
     {
       struct gdbarch *gdbarch = get_frame_arch (frame);
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
