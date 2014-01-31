@@ -225,7 +225,7 @@ index 0098ae7..af7bfce 100644
    if (alloc != NULL)
      free (alloc);
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index 7d228d6..669cda7 100644
+index 7d228d6..1b945d2 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
 @@ -271,6 +271,20 @@ typedef enum print_mode
@@ -285,7 +285,7 @@ index 7d228d6..669cda7 100644
  
  		  len = print_symbol (width, name);
 +		  if (version_string)
-+		    printf (sym_info == symbol_public ? "@@%s" : "@%s", 
++		    printf (sym_info == symbol_public ? "@@%s" : "@%s",
 +			    version_string);
  		  printf ("()%-*s", len <= width ? (width + 1) - len : 1, " ");
  		}
@@ -298,7 +298,7 @@ index 7d228d6..669cda7 100644
 +		{
 +		  print_symbol (22, strtab + psym->st_name);
 +		  if (version_string)
-+		    printf (sym_info == symbol_public ? "@@%s" : "@%s", 
++		    printf (sym_info == symbol_public ? "@@%s" : "@%s",
 +			    version_string);
 +		}
  
@@ -773,13 +773,13 @@ index 0000000..6fb54c1
 +.* sd_get_seats@LIBSYSTEMD_209
 +#pass
 diff --git a/ld/testsuite/ld-elf/shared.exp b/ld/testsuite/ld-elf/shared.exp
-index bbfd464..da5f8e4 100644
+index 981ce71..63ec119 100644
 --- a/ld/testsuite/ld-elf/shared.exp
 +++ b/ld/testsuite/ld-elf/shared.exp
-@@ -224,6 +224,15 @@ set build_tests {
-   {"Build libpr2404b.a"
-    "" ""
-    {pr2404b.c} {} "libpr2404b.a"}
+@@ -227,6 +227,15 @@ set build_tests {
+   {"Build rdynamic-1"
+    "-rdynamic -Wl,--gc-sections" "-ffunction-sections"
+    {rdynamic-1.c} {{readelf {-s} rdynamic-1.rd}} "rdynamic-1"}
 +  {"Build libpr16496a.so"
 +   "-shared -Wl,--version-script=pr16496a.map" "-fPIC"
 +   {pr16496a.c} {} "libpr16496a.so"}
