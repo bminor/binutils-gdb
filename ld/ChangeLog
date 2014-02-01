@@ -1,3 +1,9 @@
+2014-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Fix typo in
+	call to bfd_set_section_vma exposed by recent bfd_set_section_vma
+	change.
+
 2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* Makefile.am (enios2elf.c, enios2linux.c): Update dependencies.
