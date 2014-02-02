@@ -1,3 +1,13 @@
+2014-02-02  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* elf32-nios2.c (struct elf32_nios2_link_hash_table): Add
+	h_gp_got field.
+	(nios2_elf32_relocate_section): Use got_base to adjust
+	GOT-pointer-relative relocations relative to _gp_got.
+	(create_got_section): Create _gp_got symbol.
+	(nios2_elf32_finish_dynamic_symbol): Make _gp_got absolute.
+	(nios2_elf32_size_dynamic_sections): Set _gp_got offset.
+
 2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* bfd-in2.h: Update from reloc.c.

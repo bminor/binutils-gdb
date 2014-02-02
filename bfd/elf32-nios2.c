@@ -892,6 +892,9 @@ struct elf32_nios2_link_hash_table
     asection *srelbss;
     asection *sbss;
 
+    /* GOT pointer symbol _gp_got.  */
+    struct elf_link_hash_entry *h_gp_got;
+
     union {
       bfd_signed_vma refcount;
       bfd_vma offset;
@@ -2671,6 +2674,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
   asection *splt;
   asection *sreloc = NULL;
   bfd_vma *local_got_offsets;
+  bfd_vma got_base;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -2680,6 +2684,11 @@ nios2_elf32_relocate_section (bfd *output_bfd,
   sgot = htab->root.sgot;
   splt = htab->root.splt;
   local_got_offsets = elf_local_got_offsets (input_bfd);
+
+  if (elf32_nios2_hash_table (info)->h_gp_got == NULL)
+    got_base = 0;
+  else
+    got_base = elf32_nios2_hash_table (info)->h_gp_got->root.u.def.value;
 
   for (rel = relocs; rel < relend; rel++)
     {
@@ -3026,10 +3035,11 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	      if (use_plt && info->shared)
 		{
 		  off = ((h->plt.offset - 24) / 12 + 3) * 4;
-		  relocation = htab->root.sgotplt->output_offset + off;
+		  relocation = (htab->root.sgotplt->output_offset + off
+				- got_base);
 		}
 	      else
-		relocation = sgot->output_offset + off;
+		relocation = sgot->output_offset + off - got_base;
 
 	      /* This relocation does not use the addend.  */
 	      rel->r_addend = 0;
@@ -3042,8 +3052,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	    case R_NIOS2_GOTOFF_LO:
 	    case R_NIOS2_GOTOFF_HA:
 	    case R_NIOS2_GOTOFF:
-	      /* Relocation is relative to the start of the
-		 global offset table.  */
+	      /* Relocation is relative to the global offset table pointer.  */
 
 	      BFD_ASSERT (sgot != NULL);
 	      if (sgot == NULL)
@@ -3052,12 +3061,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		  break;
 		}
 
-	      /* Note that sgot->output_offset is not involved in this
-		 calculation.  We always want the start of .got.  If we
-		 define _GLOBAL_OFFSET_TABLE in a different way, as is
-		 permitted by the ABI, we might have to change this
-		 calculation.  */
-	      relocation -= sgot->output_section->vma;
+	      /* Adjust the relocation to be relative to the GOT pointer.  */
+	      relocation -= (sgot->output_section->vma
+			     + sgot->output_offset - got_base);
+
 	      switch (howto->type)
 		{
 		case R_NIOS2_GOTOFF_LO:
@@ -3127,7 +3134,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		  htab->tls_ldm_got.offset |= 1;
 		}
 
-	      relocation = (htab->root.sgot->output_offset + off);
+	      relocation = htab->root.sgot->output_offset + off - got_base;
 
 	      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 					    contents, rel->r_offset,
@@ -3284,7 +3291,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
 		if ((tls_type & GOT_TLS_GD) && r_type != R_NIOS2_TLS_GD16)
 		  off += 8;
-		relocation = (htab->root.sgot->output_offset + off);
+		relocation = htab->root.sgot->output_offset + off - got_base;
 
 		r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 					      contents, rel->r_offset,
@@ -3489,6 +3496,7 @@ static bfd_boolean
 create_got_section (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf32_nios2_link_hash_table *htab;
+  struct elf_link_hash_entry *h;
 
   htab = elf32_nios2_hash_table (info);
 
@@ -3498,6 +3506,16 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   /* In order for the two loads in .PLTresolve to share the same %hiadj,
      _GLOBAL_OFFSET_TABLE_ must be aligned to a 16-byte boundary.  */
   if (!bfd_set_section_alignment (dynobj, htab->root.sgotplt, 4))
+    return FALSE;
+
+  /* The Nios II ABI specifies that GOT-relative relocations are relative
+     to the linker-created symbol _gp_got, rather than using
+     _GLOBAL_OFFSET_TABLE_ directly.  In particular, the latter always
+     points to the base of the GOT while _gp_got may include a bias.  */
+  h = _bfd_elf_define_linkage_sym (dynobj, info, htab->root.sgotplt,
+				   "_gp_got");
+  elf32_nios2_hash_table (info)->h_gp_got = h;
+  if (h == NULL)
     return FALSE;
 
   return TRUE;
@@ -4178,9 +4196,10 @@ nios2_elf32_finish_dynamic_symbol (bfd *output_bfd,
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
-  /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
+  /* Mark _DYNAMIC, _GLOBAL_OFFSET_TABLE_, and _gp_got as absolute.  */
   if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || h == elf_hash_table (info)->hgot)
+      || h == elf_hash_table (info)->hgot
+      || h == elf32_nios2_hash_table (info)->h_gp_got)
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
@@ -4845,6 +4864,16 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
   elf_link_hash_traverse (& htab->root, allocate_dynrelocs, info);
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      /* If the .got section is more than 0x8000 bytes, we add
+	 0x8000 to the value of _gp_got, so that 16-bit relocations
+	 have a greater chance of working. */
+      if (htab->root.sgot->size >= 0x8000
+	  && elf32_nios2_hash_table (info)->h_gp_got->root.u.def.value == 0)
+	elf32_nios2_hash_table (info)->h_gp_got->root.u.def.value = 0x8000;
+    }
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
