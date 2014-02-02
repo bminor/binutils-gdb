@@ -4808,7 +4808,7 @@ lang_size_sections_1
 	{
 	case lang_output_section_statement_enum:
 	  {
-	    bfd_vma newdot, after;
+	    bfd_vma newdot, after, dotdelta;
 	    lang_output_section_statement_type *os;
 	    lang_memory_region_type *r;
 	    int section_alignment = 0;
@@ -4874,6 +4874,7 @@ lang_size_sections_1
 	      }
 
 	    newdot = dot;
+	    dotdelta = 0;
 	    if (bfd_is_abs_section (os->bfd_section))
 	      {
 		/* No matter what happens, an abs section starts at zero.  */
@@ -4942,13 +4943,14 @@ lang_size_sections_1
 		    bfd_vma savedot = newdot;
 		    newdot = align_power (newdot, section_alignment);
 
-		    if (newdot != savedot
+		    dotdelta = newdot - savedot;
+		    if (dotdelta != 0
 			&& (config.warn_section_align
 			    || os->addr_tree != NULL)
 			&& expld.phase != lang_mark_phase_enum)
 		      einfo (_("%P: warning: changing start of section"
 			       " %s by %lu bytes\n"),
-			     os->name, (unsigned long) (newdot - savedot));
+			     os->name, (unsigned long) dotdelta);
 		  }
 
 		bfd_set_section_vma (0, os->bfd_section, newdot);
@@ -4996,15 +4998,20 @@ lang_size_sections_1
 	      {
 		bfd_vma lma = os->lma_region->current;
 
-		/* When LMA_REGION is the same as REGION, align the LMA
-		   as we did for the VMA, possibly including alignment
-		   from the bfd section.  If a different region, then
-		   only align according to the value in the output
-		   statement unless specified otherwise.  */
-		if (os->lma_region != os->region && !os->align_lma_with_input)
-		  section_alignment = os->section_alignment;
-		if (section_alignment > 0)
-		  lma = align_power (lma, section_alignment);
+		if (os->align_lma_with_input)
+		  lma += dotdelta;
+		else
+		  {
+		    /* When LMA_REGION is the same as REGION, align the LMA
+		       as we did for the VMA, possibly including alignment
+		       from the bfd section.  If a different region, then
+		       only align according to the value in the output
+		       statement.  */
+		    if (os->lma_region != os->region)
+		      section_alignment = os->section_alignment;
+		    if (section_alignment > 0)
+		      lma = align_power (lma, section_alignment);
+		  }
 		os->bfd_section->lma = lma;
 	      }
 	    else if (r->last_os != NULL
@@ -5080,7 +5087,10 @@ lang_size_sections_1
 	    if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
 		|| (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
 		|| link_info.relocatable)
-	      dot += TO_ADDR (os->bfd_section->size);
+	      dotdelta = TO_ADDR (os->bfd_section->size);
+	    else
+	      dotdelta = 0;
+	    dot += dotdelta;
 
 	    if (os->update_dot_tree != 0)
 	      exp_fold_tree (os->update_dot_tree, bfd_abs_section_ptr, &dot);
@@ -5100,10 +5110,10 @@ lang_size_sections_1
 				   os->bfd_section->vma);
 
 		if (os->lma_region != NULL && os->lma_region != os->region
-		    && (os->bfd_section->flags & SEC_LOAD))
+		    && ((os->bfd_section->flags & SEC_LOAD)
+			|| os->align_lma_with_input))
 		  {
-		    os->lma_region->current
-		      = os->bfd_section->lma + TO_ADDR (os->bfd_section->size);
+		    os->lma_region->current = os->bfd_section->lma + dotdelta;
 
 		    if (check_regions)
 		      os_region_check (os, os->lma_region, NULL,

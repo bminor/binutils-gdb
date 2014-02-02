@@ -1,3 +1,11 @@
+2014-02-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* ld/ld.texinfo: Change ALIGN_WITH_INPUT documentation.
+	* ld/ldlang.c (lang_size_sections_1): Add dotdelta
+	variable which reflects the VMA change due to alignment
+	requirements.  Use dotdelta do change the LMA if
+	ALIGN_WITH_INPUT is requested.
+
 2014-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Fix typo in

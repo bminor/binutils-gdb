@@ -4609,10 +4609,8 @@ for (dst = &_bstart; dst< &_bend; dst++)
 @cindex forcing output section alignment
 @cindex output section alignment
 You can increase an output section's alignment by using ALIGN.  As an
-alternative you can force the output section alignment to the maximum alignment
-of all its input sections with ALIGN_WITH_INPUT.  The alignment forced by
-ALIGN_WITH_INPUT is used even in case the load and virtual memory regions are
-different.
+alternative you can enforce that the difference between the VMA and LMA remains
+intact throughout this output section with the ALIGN_WITH_INPUT attribute.
 
 @node Forced Input Alignment
 @subsubsection Forced Input Alignment
