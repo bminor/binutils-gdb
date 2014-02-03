@@ -1,5 +1,15 @@
 2014-02-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (get_windows_debug_event): Ignore
+	LOAD_DLL_DEBUG_EVENT and UNLOAD_DLL_DEBUG_EVENT
+	if windows_initialization_done == 0.
+	(windows_add_all_dlls): Renames windows_ensure_ntdll_loaded.
+	Adjust implementation to always load all DLLs.
+	(do_initial_windows_stuff): Replace call to
+	windows_ensure_ntdll_loaded by call to windows_add_all_dlls.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.c (_initialize_windows_nat): Deprecate the
 	"dll-symbols" command.  Turn the "add-shared-symbol-files"
 	and "assf" aliases into commands, and deprecate them as well.

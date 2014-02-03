@@ -1576,7 +1576,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     (unsigned) current_event.dwThreadId,
 		     "LOAD_DLL_DEBUG_EVENT"));
       CloseHandle (current_event.u.LoadDll.hFile);
-      if (saw_create != 1)
+      if (saw_create != 1 || ! windows_initialization_done)
 	break;
       catch_errors (handle_load_dll, NULL, (char *) "", RETURN_MASK_ALL);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
@@ -1589,7 +1589,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "UNLOAD_DLL_DEBUG_EVENT"));
-      if (saw_create != 1)
+      if (saw_create != 1 || ! windows_initialization_done)
 	break;
       catch_errors (handle_unload_dll, NULL, (char *) "", RETURN_MASK_ALL);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
@@ -1722,31 +1722,17 @@ windows_wait (struct target_ops *ops,
     }
 }
 
-/* On certain versions of Windows, the information about ntdll.dll
-   is not available yet at the time we get the LOAD_DLL_DEBUG_EVENT,
-   thus preventing us from reporting this DLL as an SO. This has been
-   witnessed on Windows 8.1, for instance.  A possible explanation
-   is that ntdll.dll might be mapped before the SO info gets created
-   by the Windows system -- ntdll.dll is the first DLL to be reported
-   via LOAD_DLL_DEBUG_EVENT and other DLLs do not seem to suffer from
-   that problem.
-
-   If we indeed are missing ntdll.dll, this function tries to recover
-   from this issue, after the fact.  Do nothing if we encounter any
-   issue trying to locate that DLL.  */
+/* Iterate over all DLLs currently mapped by our inferior, and
+   add them to our list of solibs.  */
 
 static void
-windows_ensure_ntdll_loaded (void)
+windows_add_all_dlls (void)
 {
   struct so_list *so;
   HMODULE dummy_hmodule;
   DWORD cb_needed;
   HMODULE *hmodules;
   int i;
-
-  for (so = solib_start.next; so != NULL; so = so->next)
-    if (FILENAME_CMP (lbasename (so->so_name), "ntdll.dll") == 0)
-      return;  /* ntdll.dll already loaded, nothing to do.  */
 
   if (EnumProcessModules (current_process_handle, &dummy_hmodule,
 			  sizeof (HMODULE), &cb_needed) == 0)
@@ -1760,7 +1746,7 @@ windows_ensure_ntdll_loaded (void)
 			  cb_needed, &cb_needed) == 0)
     return;
 
-  for (i = 0; i < (int) (cb_needed / sizeof (HMODULE)); i++)
+  for (i = 1; i < (int) (cb_needed / sizeof (HMODULE)); i++)
     {
       MODULEINFO mi;
 #ifdef __USEWIDE
@@ -1781,12 +1767,9 @@ windows_ensure_ntdll_loaded (void)
 #else
       name = dll_name;
 #endif
-      if (FILENAME_CMP (lbasename (name), "ntdll.dll") == 0)
-	{
-	  solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
-	  solib_end = solib_end->next;
-	  return;
-	}
+
+      solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
+      solib_end = solib_end->next;
     }
 }
 
@@ -1843,13 +1826,9 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
 	break;
     }
 
-  /* FIXME: brobecker/2013-12-10: We should try another approach where
-     we first ignore all DLL load/unload events up until this point,
-     and then iterate over all modules to create the associated shared
-     objects.  This is a fairly significant change, however, and we are
-     close to creating a release branch, so we are delaying it a bit,
-     after the branch is created.  */
-  windows_ensure_ntdll_loaded ();
+  /* Now that the inferior has been started and all DLLs have been mapped,
+     we can iterate over all DLLs and load them in.  */
+  windows_add_all_dlls ();
 
   windows_initialization_done = 1;
   inf->control.stop_soon = NO_STOP_QUIETLY;
