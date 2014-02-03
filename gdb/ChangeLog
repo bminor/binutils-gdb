@@ -1,5 +1,13 @@
 2014-02-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (get_module_name): Delete.
+	(windows_get_exec_module_filename): New function, mostly
+	inspired from get_module_name.
+	(windows_pid_to_exec_file): Replace call to get_module_name
+	by call to windows_get_exec_module_filename.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.c (handle_load_dll): Rewrite this function's
 	introductory comment.  Remove code using get_module_name
 	to get the DLL's name.

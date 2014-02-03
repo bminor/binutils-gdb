@@ -527,79 +527,6 @@ windows_store_inferior_registers (struct target_ops *ops,
     do_windows_store_inferior_registers (regcache, r);
 }
 
-/* Get the name of a given module at given base address.  If base_address
-   is zero return the first loaded module (which is always the name of the
-   executable).  */
-static int
-get_module_name (LPVOID base_address, char *dll_name_ret)
-{
-  DWORD len;
-  MODULEINFO mi;
-  int i;
-  HMODULE dh_buf[1];
-  HMODULE *DllHandle = dh_buf;	/* Set to temporary storage for
-				   initial query.  */
-  DWORD cbNeeded;
-#ifdef __CYGWIN__
-  cygwin_buf_t pathbuf[__PMAX];	/* Temporary storage prior to converting to
-				   posix form.  __PMAX is always enough
-				   as long as SO_NAME_MAX_PATH_SIZE is defined
-				   as 512.  */
-#endif
-
-  cbNeeded = 0;
-  /* Find size of buffer needed to handle list of modules loaded in
-     inferior.  */
-  if (!EnumProcessModules (current_process_handle, DllHandle,
-			   sizeof (HMODULE), &cbNeeded) || !cbNeeded)
-    goto failed;
-
-  /* Allocate correct amount of space for module list.  */
-  DllHandle = (HMODULE *) alloca (cbNeeded);
-  if (!DllHandle)
-    goto failed;
-
-  /* Get the list of modules.  */
-  if (!EnumProcessModules (current_process_handle, DllHandle, cbNeeded,
-				 &cbNeeded))
-    goto failed;
-
-  for (i = 0; i < (int) (cbNeeded / sizeof (HMODULE)); i++)
-    {
-      /* Get information on this module.  */
-      if (!GetModuleInformation (current_process_handle, DllHandle[i],
-				 &mi, sizeof (mi)))
-	error (_("Can't get module info"));
-
-      if (!base_address || mi.lpBaseOfDll == base_address)
-	{
-	  /* Try to find the name of the given module.  */
-#ifdef __CYGWIN__
-	  /* Cygwin prefers that the path be in /x/y/z format.  */
-	  len = GetModuleFileNameEx (current_process_handle,
-				      DllHandle[i], pathbuf, __PMAX);
-	  if (len == 0)
-	    error (_("Error getting dll name: %u."),
-		   (unsigned) GetLastError ());
-	  if (cygwin_conv_path (CCP_WIN_W_TO_POSIX, pathbuf, dll_name_ret,
-				__PMAX) < 0)
-	    error (_("Error converting dll name to POSIX: %d."), errno);
-#else
-	  len = GetModuleFileNameEx (current_process_handle,
-				      DllHandle[i], dll_name_ret, __PMAX);
-	  if (len == 0)
-	    error (_("Error getting dll name: %u."),
-		   (unsigned) GetLastError ());
-#endif
-	  return 1;	/* success */
-	}
-    }
-
-failed:
-  dll_name_ret[0] = '\0';
-  return 0;		/* failure */
-}
-
 /* Encapsulate the information required in a call to
    symbol_file_add_args.  */
 struct safe_symbol_file_add_args
@@ -1953,6 +1880,60 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
   unpush_target (ops);
 }
 
+/* Try to determine the executable filename.
+
+   EXE_NAME_RET is a pointer to a buffer whose size is EXE_NAME_MAX_LEN.
+
+   Upon success, the filename is stored inside EXE_NAME_RET, and
+   this function returns nonzero.
+
+   Otherwise, this function returns zero and the contents of
+   EXE_NAME_RET is undefined.  */
+
+static int
+windows_get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len)
+{
+  DWORD len;
+  HMODULE dh_buf;
+  DWORD cbNeeded;
+
+  cbNeeded = 0;
+  if (!EnumProcessModules (current_process_handle, &dh_buf,
+			   sizeof (HMODULE), &cbNeeded) || !cbNeeded)
+    return 0;
+
+  /* We know the executable is always first in the list of modules,
+     which we just fetched.  So no need to fetch more.  */
+
+#ifdef __CYGWIN__
+  {
+    /* Cygwin prefers that the path be in /x/y/z format, so extract
+       the filename into a temporary buffer first, and then convert it
+       to POSIX format into the destination buffer.  */
+    cygwin_buf_t *pathbuf = alloca (exe_name_max_len * sizeof (cygwin_buf_t));
+
+    len = GetModuleFileNameEx (current_process_handle,
+			       dh_buf, pathbuf, exe_name_max_len);
+    if (len == 0)
+      error (_("Error getting executable filename: %u."),
+	     (unsigned) GetLastError ());
+    if (cygwin_conv_path (CCP_WIN_W_TO_POSIX, pathbuf, exe_name_ret,
+			  exe_name_max_len) < 0)
+      error (_("Error converting executable filename to POSIX: %d."), errno);
+  }
+#else
+  len = GetModuleFileNameEx (current_process_handle,
+			     dh_buf, exe_name_ret, exe_name_max_len);
+  if (len == 0)
+    error (_("Error getting executable filename: %u."),
+	   (unsigned) GetLastError ());
+#endif
+
+    return 1;	/* success */
+}
+
+/* The pid_to_exec_file target_ops method for this platform.  */
+
 static char *
 windows_pid_to_exec_file (struct target_ops *self, int pid)
 {
@@ -1973,7 +1954,7 @@ windows_pid_to_exec_file (struct target_ops *self, int pid)
 
   /* If we get here then either Cygwin is hosed, this isn't a Cygwin version
      of gdb, or we're trying to debug a non-Cygwin windows executable.  */
-  if (!get_module_name (0, path))
+  if (!windows_get_exec_module_filename (path, sizeof (path)))
     path[0] = '\0';
 
   return path;
