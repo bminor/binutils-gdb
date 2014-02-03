@@ -35,6 +35,7 @@
 #endif
 #include <paths.h>
 #include "readline/readline.h"
+#include <sys/param.h>
 #include <sys/proc.h>
 #include <sys/user.h>
 
