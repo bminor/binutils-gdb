@@ -214,7 +214,16 @@ extern void btrace_data_init (struct btrace_data *data);
 /* Cleanup DATA.  */
 extern void btrace_data_fini (struct btrace_data *data);
 
+/* Clear DATA.  */
+extern void btrace_data_clear (struct btrace_data *data);
+
 /* Return non-zero if DATA is empty; zero otherwise.  */
 extern int btrace_data_empty (struct btrace_data *data);
+
+/* Append the branch trace data from SRC to the end of DST.
+   Both SRC and DST must use the same format.
+   Returns zero on success; a negative number otherwise.  */
+extern int btrace_data_append (struct btrace_data *dst,
+			       const struct btrace_data *src);
 
 #endif /* BTRACE_COMMON_H */

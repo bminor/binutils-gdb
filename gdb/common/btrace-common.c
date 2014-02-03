@@ -91,3 +91,90 @@ btrace_data_empty (struct btrace_data *data)
 
   internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
 }
+
+/* See btrace-common.h.  */
+
+void
+btrace_data_clear (struct btrace_data *data)
+{
+  btrace_data_fini (data);
+  btrace_data_init (data);
+}
+
+/* See btrace-common.h.  */
+
+int
+btrace_data_append (struct btrace_data *dst,
+		    const struct btrace_data *src)
+{
+  switch (src->format)
+    {
+    case BTRACE_FORMAT_NONE:
+      return 0;
+
+    case BTRACE_FORMAT_BTS:
+      switch (dst->format)
+	{
+	default:
+	  return -1;
+
+	case BTRACE_FORMAT_NONE:
+	  dst->format = BTRACE_FORMAT_BTS;
+	  dst->variant.bts.blocks = NULL;
+
+	  /* Fall-through.  */
+	case BTRACE_FORMAT_BTS:
+	  {
+	    unsigned int blk;
+
+	    /* We copy blocks in reverse order to have the oldest block at
+	       index zero.  */
+	    blk = VEC_length (btrace_block_s, src->variant.bts.blocks);
+	    while (blk != 0)
+	      {
+		btrace_block_s *block;
+
+		block = VEC_index (btrace_block_s, src->variant.bts.blocks,
+				   --blk);
+
+		VEC_safe_push (btrace_block_s, dst->variant.bts.blocks, block);
+	      }
+	  }
+	}
+      return 0;
+
+    case BTRACE_FORMAT_PT:
+      switch (dst->format)
+	{
+	default:
+	  return -1;
+
+	case BTRACE_FORMAT_NONE:
+	  dst->format = BTRACE_FORMAT_PT;
+	  dst->variant.pt.data = NULL;
+	  dst->variant.pt.size = 0;
+
+	  /* fall-through.  */
+	case BTRACE_FORMAT_BTS:
+	  {
+	    gdb_byte *data;
+	    unsigned long size;
+
+	    size = src->variant.pt.size + dst->variant.pt.size;
+	    data = xmalloc (size);
+
+	    memcpy (data, dst->variant.pt.data, dst->variant.pt.size);
+	    memcpy (data + dst->variant.pt.size, src->variant.pt.data,
+		    src->variant.pt.size);
+
+	    xfree (dst->variant.pt.data);
+
+	    dst->variant.pt.data = data;
+	    dst->variant.pt.size = size;
+	  }
+	}
+      return 0;
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+}

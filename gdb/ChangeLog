@@ -1,5 +1,15 @@
 2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (btrace_fetch): Append the new trace data.
+	(btrace_clear): Clear the stored trace data.
+	* btrace.h (btrace_thread_info) <data>: New.
+	* common/btrace-common.h (btrace_data_clear)
+	(btrace_data_append): New.
+	* common/btrace-common.c (btrace_data_clear)
+	(btrace_data_append): New.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* nat/linux-btrace.c (linux_enable_bts): Check for
 	PERF_ATTR_SIZE_VER5.
 	Check for data_offset and data_size fields.  Use them.

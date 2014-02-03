@@ -248,6 +248,9 @@ struct btrace_thread_info
      the underlying architecture.  */
   struct btrace_target_info *target;
 
+  /* The raw branch trace data for the below branch trace.  */
+  struct btrace_data data;
+
   /* The current branch trace for this thread (both inclusive).
 
      The last instruction of END is the current instruction, which is not

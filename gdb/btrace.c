@@ -1260,6 +1260,10 @@ btrace_fetch (struct thread_info *tp)
   /* Compute the trace, provided we have any.  */
   if (!btrace_data_empty (&btrace))
     {
+      /* Store the raw trace data.  The stored data will be cleared in
+	 btrace_clear, so we always append the new trace.  */
+      btrace_data_append (&btinfo->data, &btrace);
+
       btrace_clear_history (btinfo);
       btrace_compute_ftrace (tp, &btrace);
     }
@@ -1296,6 +1300,7 @@ btrace_clear (struct thread_info *tp)
   btinfo->end = NULL;
   btinfo->ngaps = 0;
 
+  btrace_data_clear (&btinfo->data);
   btrace_clear_history (btinfo);
 }
 
