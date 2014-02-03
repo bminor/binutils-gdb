@@ -670,6 +670,62 @@ static reloc_howto_type elf_nios2_howto_table_rel[] = {
 	 0xffffffc0,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  HOWTO (R_NIOS2_GOT_LO,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 6,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GOT_LO",
+	 FALSE,
+	 0x003fffc0,
+	 0x003fffc0,
+	 FALSE),
+
+  HOWTO (R_NIOS2_GOT_HA,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 6,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_GOT_HA",
+	 FALSE,
+	 0x003fffc0,
+	 0x003fffc0,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CALL_LO,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 6,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_CALL_LO",
+	 FALSE,
+	 0x003fffc0,
+	 0x003fffc0,
+	 FALSE),
+
+  HOWTO (R_NIOS2_CALL_HA,
+	 0,
+	 2,
+	 16,
+	 FALSE,
+	 6,
+	 complain_overflow_dont,
+	 bfd_elf_generic_reloc,
+	 "R_NIOS2_CALL_HA",
+	 FALSE,
+	 0x003fffc0,
+	 0x003fffc0,
+	 FALSE),
+
 /* Add other relocations here.  */
 };
 
@@ -749,6 +805,10 @@ static const struct elf_reloc_map nios2_reloc_map[] = {
   {BFD_RELOC_NIOS2_RELATIVE, R_NIOS2_RELATIVE},
   {BFD_RELOC_NIOS2_GOTOFF, R_NIOS2_GOTOFF},
   {BFD_RELOC_NIOS2_CALL26_NOAT, R_NIOS2_CALL26_NOAT},
+  {BFD_RELOC_NIOS2_GOT_LO, R_NIOS2_GOT_LO},
+  {BFD_RELOC_NIOS2_GOT_HA, R_NIOS2_GOT_HA},
+  {BFD_RELOC_NIOS2_CALL_LO, R_NIOS2_CALL_LO},
+  {BFD_RELOC_NIOS2_CALL_HA, R_NIOS2_CALL_HA},
 };
 
 enum elf32_nios2_stub_type
@@ -839,10 +899,11 @@ struct elf32_nios2_link_hash_entry
      a dynamic GOT reloc in shared objects, only a dynamic PLT reloc.  Lazy
      linking will not work if the dynamic GOT reloc exists.
      To check for this condition efficiently, we compare got_types_used against
-     CALL16_USED, meaning
-     (got_types_used & (GOT16_USED | CALL16_USED)) == CALL16_USED.  */
-#define GOT16_USED	1
-#define CALL16_USED	2
+     CALL_USED, meaning
+     (got_types_used & (GOT_USED | CALL_USED)) == CALL_USED.
+  */
+#define GOT_USED	1
+#define CALL_USED	2
   unsigned char got_types_used;
 };
 
@@ -2942,6 +3003,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
 	    case R_NIOS2_GOT16:
 	    case R_NIOS2_CALL16:
+	    case R_NIOS2_GOT_LO:
+	    case R_NIOS2_GOT_HA:
+	    case R_NIOS2_CALL_LO:
+	    case R_NIOS2_CALL_HA:
 	      /* Relocation is to the entry for this symbol in the
 		 global offset table.  */
 	      if (sgot == NULL)
@@ -2957,7 +3022,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		  bfd_boolean dyn;
 
 		  eh = (struct elf32_nios2_link_hash_entry *)h;
-		  use_plt = (eh->got_types_used == CALL16_USED
+		  use_plt = (eh->got_types_used == CALL_USED
 			     && h->plt.offset != (bfd_vma) -1);
 
 		  off = h->got.offset;
@@ -3044,9 +3109,30 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	      /* This relocation does not use the addend.  */
 	      rel->r_addend = 0;
 
-	      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
-					    contents, rel->r_offset,
-					    relocation, rel->r_addend);
+	      switch (howto->type)
+		{
+		case R_NIOS2_GOT_LO:
+		case R_NIOS2_CALL_LO:
+		  r = nios2_elf32_do_lo16_relocate (input_bfd, howto,
+						    input_section, contents,
+						    rel->r_offset, relocation,
+						    rel->r_addend);
+		  break;
+		case R_NIOS2_GOT_HA:
+		case R_NIOS2_CALL_HA:
+		  r = nios2_elf32_do_hiadj16_relocate (input_bfd, howto,
+						       input_section, contents,
+						       rel->r_offset,
+						       relocation,
+						       rel->r_addend);
+		  break;
+		default:
+		  r = _bfd_final_link_relocate (howto, input_bfd,
+						input_section, contents,
+						rel->r_offset, relocation,
+						rel->r_addend);
+		  break;
+		}
 	      break;
 
 	    case R_NIOS2_GOTOFF_LO:
@@ -3671,7 +3757,11 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
       switch (r_type)
 	{
 	case R_NIOS2_GOT16:
+	case R_NIOS2_GOT_LO:
+	case R_NIOS2_GOT_HA:
 	case R_NIOS2_CALL16:
+	case R_NIOS2_CALL_LO:
+	case R_NIOS2_CALL_HA:
 	case R_NIOS2_TLS_GD16:
 	case R_NIOS2_TLS_IE16:
 	  /* This symbol requires a global offset table entry.  */
@@ -3682,7 +3772,11 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      {
 	      default:
 	      case R_NIOS2_GOT16:
+	      case R_NIOS2_GOT_LO:
+	      case R_NIOS2_GOT_HA:
 	      case R_NIOS2_CALL16:
+	      case R_NIOS2_CALL_LO:
+	      case R_NIOS2_CALL_HA:
 		tls_type = GOT_NORMAL;
 		break;
 	      case R_NIOS2_TLS_GD16:
@@ -3719,7 +3813,9 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  = (struct elf32_nios2_link_hash_entry *)h;
 		h->got.refcount++;
 		old_tls_type = elf32_nios2_hash_entry(h)->tls_type;
-		if (r_type == R_NIOS2_CALL16)
+		if (r_type == R_NIOS2_CALL16
+		    || r_type == R_NIOS2_CALL_LO
+		    || r_type == R_NIOS2_CALL_HA)
 		  {
 		    /* Make sure a plt entry is created for this symbol if
 		       it turns out to be a function defined by a dynamic
@@ -3727,10 +3823,10 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    h->plt.refcount++;
 		    h->needs_plt = 1;
 		    h->type = STT_FUNC;
-		    eh->got_types_used |= CALL16_USED;
+		    eh->got_types_used |= CALL_USED;
 		  }
 		else
-		  eh->got_types_used |= GOT16_USED;
+		  eh->got_types_used |= GOT_USED;
 	      }
 	    else
 	      {
@@ -3964,7 +4060,11 @@ nios2_elf32_gc_sweep_hook (bfd *abfd,
       switch (r_type)
 	{
 	case R_NIOS2_GOT16:
+	case R_NIOS2_GOT_LO:
+	case R_NIOS2_GOT_HA:
 	case R_NIOS2_CALL16:
+	case R_NIOS2_CALL_LO:
+	case R_NIOS2_CALL_HA:
 	  if (h != NULL)
 	    {
 	      if (h->got.refcount > 0)
@@ -4114,7 +4214,7 @@ nios2_elf32_finish_dynamic_symbol (bfd *output_bfd,
 	}
     }
 
-  use_plt = (eh->got_types_used == CALL16_USED
+  use_plt = (eh->got_types_used == CALL_USED
 	     && h->plt.offset != (bfd_vma) -1);
 
   if (!use_plt && h->got.offset != (bfd_vma) -1
@@ -4587,7 +4687,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
     }
 
   eh = (struct elf32_nios2_link_hash_entry *) h;
-  use_plt = (eh->got_types_used == CALL16_USED
+  use_plt = (eh->got_types_used == CALL_USED
 	     && h->plt.offset != (bfd_vma) -1);
 
   if (h->got.refcount > 0)

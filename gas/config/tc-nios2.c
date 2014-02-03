@@ -1139,7 +1139,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_U16
 		  || fixP->fx_r_type == BFD_RELOC_16_PCREL
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CALL26
-		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CALL26_NOAT
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_IMM5
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CACHE_OPX
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_IMM6
@@ -1165,6 +1164,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_TLS_LE16
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_GOTOFF
 		  || fixP->fx_r_type == BFD_RELOC_NIOS2_TLS_DTPREL
+		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CALL26_NOAT
+		  || fixP->fx_r_type == BFD_RELOC_NIOS2_GOT_LO
+		  || fixP->fx_r_type == BFD_RELOC_NIOS2_GOT_HA
+		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CALL_LO
+		  || fixP->fx_r_type == BFD_RELOC_NIOS2_CALL_HA
 		  /* Add other relocs here as we generate them.  */
 		  ));
 
@@ -1301,21 +1305,28 @@ struct nios2_special_relocS
   bfd_reloc_code_real_type reloc_type;
 };
 
+/* This table is sorted so that prefix strings are listed after the longer
+   strings that include them -- e.g., %got after %got_hiadj, etc.  */
+
 struct nios2_special_relocS nios2_special_reloc[] = {
   {"%hiadj", BFD_RELOC_NIOS2_HIADJ16},
   {"%hi", BFD_RELOC_NIOS2_HI16},
   {"%lo", BFD_RELOC_NIOS2_LO16},
   {"%gprel", BFD_RELOC_NIOS2_GPREL},
+  {"%call_lo", BFD_RELOC_NIOS2_CALL_LO},
+  {"%call_hiadj", BFD_RELOC_NIOS2_CALL_HA},
   {"%call", BFD_RELOC_NIOS2_CALL16},
   {"%gotoff_lo", BFD_RELOC_NIOS2_GOTOFF_LO},
   {"%gotoff_hiadj", BFD_RELOC_NIOS2_GOTOFF_HA},
+  {"%gotoff", BFD_RELOC_NIOS2_GOTOFF},
+  {"%got_hiadj", BFD_RELOC_NIOS2_GOT_HA},
+  {"%got_lo", BFD_RELOC_NIOS2_GOT_LO},
+  {"%got", BFD_RELOC_NIOS2_GOT16},
   {"%tls_gd", BFD_RELOC_NIOS2_TLS_GD16},
   {"%tls_ldm", BFD_RELOC_NIOS2_TLS_LDM16},
   {"%tls_ldo", BFD_RELOC_NIOS2_TLS_LDO16},
   {"%tls_ie", BFD_RELOC_NIOS2_TLS_IE16},
   {"%tls_le", BFD_RELOC_NIOS2_TLS_LE16},
-  {"%gotoff", BFD_RELOC_NIOS2_GOTOFF},
-  {"%got", BFD_RELOC_NIOS2_GOT16}
 };
 
 #define NIOS2_NUM_SPECIAL_RELOCS \
@@ -2824,7 +2835,12 @@ nios2_fix_adjustable (fixS *fixp)
       || fixp->fx_r_type == BFD_RELOC_NIOS2_TLS_DTPMOD
       || fixp->fx_r_type == BFD_RELOC_NIOS2_TLS_DTPREL
       || fixp->fx_r_type == BFD_RELOC_NIOS2_TLS_TPREL
-      || fixp->fx_r_type == BFD_RELOC_NIOS2_GOTOFF)
+      || fixp->fx_r_type == BFD_RELOC_NIOS2_GOTOFF
+      || fixp->fx_r_type == BFD_RELOC_NIOS2_GOT_LO
+      || fixp->fx_r_type == BFD_RELOC_NIOS2_GOT_HA
+      || fixp->fx_r_type == BFD_RELOC_NIOS2_CALL_LO
+      || fixp->fx_r_type == BFD_RELOC_NIOS2_CALL_HA
+      )
     return 0;
 
   return 1;

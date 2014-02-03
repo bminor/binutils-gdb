@@ -1,3 +1,17 @@
+2014-02-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* reloc.c (BFD_RELOC_NIOS2_GOT_LO, BFD_RELOC_NIOS2_GOT_HA): New.
+	(BFD_RELOC_NIOS2_CALL_LO, BFD_RELOC_NIOS2_CALL_HA): New.
+	* libbfd.h: Regenerated.
+	* bfd-in2.h: Regenerated.
+	* elf32-nios2.c (elf_nios2_howto_table_rel): Add new relocations.
+	(nios2_reloc_map): Likewise.
+	(GOT_USED, CALL_USED): Renamed from GOT16_USED and CALL16_USED.
+	Fixed all references.
+	(nios2_elf32_relocate_section): Add new relocations.
+	(nios2_elf32_check_relocs): Likewise.
+	(nios2_elf32_gc_sweep_hook): Likewise.
+
 2014-02-03  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (struct ppc_elf_link_hash_table): Add params.
