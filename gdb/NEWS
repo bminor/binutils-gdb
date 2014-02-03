@@ -116,6 +116,19 @@ record btrace pt
 record pt
   Start branch trace recording using Intel(R) Processor Trace format.
 
+maint info btrace
+  Print information about branch tracing internals.
+
+maint btrace packet-history
+  Print the raw branch tracing data.
+
+maint btrace clear-packet-history
+  Discard the stored raw branch tracing data.
+
+maint btrace clear
+  Discard all branch tracing data.  It will be fetched and processed
+  anew by the next "record" command.
+
 * New options
 
 set debug dwarf-die
@@ -172,6 +185,10 @@ set|show record btrace pt buffer-size
   Intel(R) Processor Trace format.
   The obtained size may differ from the requested size.  Use "info
   record" to see the obtained buffer size.
+
+maint set|show btrace pt skip-pad
+  Set and show whether PAD packets are skipped when computing the
+  packet history.
 
 * The command 'thread apply all' can now support new option '-ascending'
   to call its specified command for all threads in ascending order.

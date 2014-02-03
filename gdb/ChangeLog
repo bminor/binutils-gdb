@@ -1,5 +1,26 @@
 2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c: Include gdbcmd.h, cli/cli-utils.h, and ctype.h.
+	(maint_btrace_cmdlist, maint_btrace_set_cmdlist)
+	(maint_btrace_show_cmdlist, maint_btrace_pt_set_cmdlist)
+	(maint_btrace_pt_show_cmdlist, maint_btrace_pt_skip_pad)
+	(btrace_maint_clear): New.
+	(btrace_fetch, btrace_clear): Call btrace_maint_clear.
+	(pt_print_packet, btrace_maint_decode_pt)
+	(btrace_maint_update_pt_packets, btrace_maint_update_packets)
+	(btrace_maint_print_packets, get_uint, get_context_size, no_chunk)
+	(maint_btrace_packet_history_cmd)
+	(maint_btrace_clear_packet_history_cmd, maint_btrace_clear_cmd)
+	(maint_btrace_cmd, maint_btrace_set_cmd, maint_btrace_show_cmd)
+	(maint_btrace_pt_set_cmd, maint_btrace_pt_show_cmd)
+	(maint_info_btrace_cmd, _initialize_btrace): New.
+	* btrace.h (btrace_pt_packet, btrace_pt_packet_s)
+	(btrace_maint_packet_history, btrace_maint_info): New.
+	(btrace_thread_info) <maint>: New.
+	* NEWS: Announce it.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (btrace_fetch): Append the new trace data.
 	(btrace_clear): Clear the stored trace data.
 	* btrace.h (btrace_thread_info) <data>: New.

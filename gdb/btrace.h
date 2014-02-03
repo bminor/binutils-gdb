@@ -233,6 +233,66 @@ enum btrace_thread_flag
   BTHR_MOVE = (BTHR_STEP | BTHR_RSTEP | BTHR_CONT | BTHR_RCONT)
 };
 
+#if defined (HAVE_LIBIPT)
+/* A packet.  */
+struct btrace_pt_packet
+{
+  /* The offset in the trace stream.  */
+  uint64_t offset;
+
+  /* The decode error code.  */
+  enum pt_error_code errcode;
+
+  /* The decoded packet.  Only valid if ERRCODE == pte_ok.  */
+  struct pt_packet packet;
+};
+
+/* Define functions operating on a vector of packets.  */
+typedef struct btrace_pt_packet btrace_pt_packet_s;
+DEF_VEC_O (btrace_pt_packet_s);
+#endif /* defined (HAVE_LIBIPT)  */
+
+/* Branch trace iteration state for "maintenance btrace packet-history".  */
+struct btrace_maint_packet_history
+{
+  /* The branch trace packet range from BEGIN (inclusive) to
+     END (exclusive) that has been covered last time.  */
+  unsigned int begin;
+  unsigned int end;
+};
+
+/* Branch trace maintenance information per thread.
+
+   This information is used by "maintenance btrace" commands.  */
+struct btrace_maint_info
+{
+  /* Most information is format-specific.
+     The format can be found in the BTRACE.DATA.FORMAT field of each thread.  */
+  union
+  {
+    /* BTRACE.DATA.FORMAT == BTRACE_FORMAT_BTS  */
+    struct
+    {
+      /* The packet history iterator.
+	 We are iterating over BTRACE.DATA.FORMAT.VARIANT.BTS.BLOCKS.  */
+      struct btrace_maint_packet_history packet_history;
+    } bts;
+
+#if defined (HAVE_LIBIPT)
+    /* BTRACE.DATA.FORMAT == BTRACE_FORMAT_PT  */
+    struct
+    {
+      /* A vector of decoded packets.  */
+      VEC (btrace_pt_packet_s) *packets;
+
+      /* The packet history iterator.
+	 We are iterating over the above PACKETS vector.  */
+      struct btrace_maint_packet_history packet_history;
+    } pt;
+#endif /* defined (HAVE_LIBIPT)  */
+  } variant;
+};
+
 /* Branch trace information per thread.
 
    This represents the branch trace configuration as well as the entry point
@@ -284,6 +344,9 @@ struct btrace_thread_info
 
   /* Why the thread stopped, if we need to track it.  */
   enum target_stop_reason stop_reason;
+
+  /* Maintenance information.  */
+  struct btrace_maint_info maint;
 };
 
 /* Enable branch tracing for a thread.  */

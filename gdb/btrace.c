@@ -32,8 +32,21 @@
 #include "xml-support.h"
 #include "regcache.h"
 #include "rsp-low.h"
+#include "gdbcmd.h"
+#include "cli/cli-utils.h"
 
 #include <inttypes.h>
+#include <ctype.h>
+
+/* Command lists for btrace maintenance commands.  */
+static struct cmd_list_element *maint_btrace_cmdlist;
+static struct cmd_list_element *maint_btrace_set_cmdlist;
+static struct cmd_list_element *maint_btrace_show_cmdlist;
+static struct cmd_list_element *maint_btrace_pt_set_cmdlist;
+static struct cmd_list_element *maint_btrace_pt_show_cmdlist;
+
+/* Control whether to skip PAD packets when computing the packet history.  */
+static int maint_btrace_pt_skip_pad = 1;
 
 static void btrace_add_pc (struct thread_info *tp);
 
@@ -1197,6 +1210,33 @@ btrace_clear_history (struct btrace_thread_info *btinfo)
   btinfo->replay = NULL;
 }
 
+/* Clear the branch trace maintenance histories in BTINFO.  */
+
+static void
+btrace_maint_clear (struct btrace_thread_info *btinfo)
+{
+  switch (btinfo->data.format)
+    {
+    default:
+      break;
+
+    case BTRACE_FORMAT_BTS:
+      btinfo->maint.variant.bts.packet_history.begin = 0;
+      btinfo->maint.variant.bts.packet_history.end = 0;
+      break;
+
+#if defined (HAVE_LIBIPT)
+    case BTRACE_FORMAT_PT:
+      xfree (btinfo->maint.variant.pt.packets);
+
+      btinfo->maint.variant.pt.packets = NULL;
+      btinfo->maint.variant.pt.packet_history.begin = 0;
+      btinfo->maint.variant.pt.packet_history.end = 0;
+      break;
+#endif /* defined (HAVE_LIBIPT)  */
+    }
+}
+
 /* See btrace.h.  */
 
 void
@@ -1263,6 +1303,7 @@ btrace_fetch (struct thread_info *tp)
       /* Store the raw trace data.  The stored data will be cleared in
 	 btrace_clear, so we always append the new trace.  */
       btrace_data_append (&btinfo->data, &btrace);
+      btrace_maint_clear (btinfo);
 
       btrace_clear_history (btinfo);
       btrace_compute_ftrace (tp, &btrace);
@@ -1300,6 +1341,8 @@ btrace_clear (struct thread_info *tp)
   btinfo->end = NULL;
   btinfo->ngaps = 0;
 
+  /* Must clear the maint data before - it depends on BTINFO->DATA.  */
+  btrace_maint_clear (btinfo);
   btrace_data_clear (&btinfo->data);
   btrace_clear_history (btinfo);
 }
@@ -2202,4 +2245,694 @@ struct cleanup *
 make_cleanup_btrace_data (struct btrace_data *data)
 {
   return make_cleanup (do_btrace_data_cleanup, data);
+}
+
+#if defined (HAVE_LIBIPT)
+
+/* Print a single packet.  */
+
+static void
+pt_print_packet (const struct pt_packet *packet)
+{
+  switch (packet->type)
+    {
+    default:
+      printf_unfiltered (("[??: %x]"), packet->type);
+      break;
+
+    case ppt_psb:
+      printf_unfiltered (("psb"));
+      break;
+
+    case ppt_psbend:
+      printf_unfiltered (("psbend"));
+      break;
+
+    case ppt_pad:
+      printf_unfiltered (("pad"));
+      break;
+
+    case ppt_tip:
+      printf_unfiltered (("tip %u: 0x%" PRIx64 ""),
+			 packet->payload.ip.ipc,
+			 packet->payload.ip.ip);
+      break;
+
+    case ppt_tip_pge:
+      printf_unfiltered (("tip.pge %u: 0x%" PRIx64 ""),
+			 packet->payload.ip.ipc,
+			 packet->payload.ip.ip);
+      break;
+
+    case ppt_tip_pgd:
+      printf_unfiltered (("tip.pgd %u: 0x%" PRIx64 ""),
+			 packet->payload.ip.ipc,
+			 packet->payload.ip.ip);
+      break;
+
+    case ppt_fup:
+      printf_unfiltered (("fup %u: 0x%" PRIx64 ""),
+			 packet->payload.ip.ipc,
+			 packet->payload.ip.ip);
+      break;
+
+    case ppt_tnt_8:
+      printf_unfiltered (("tnt-8 %u: 0x%" PRIx64 ""),
+			 packet->payload.tnt.bit_size,
+			 packet->payload.tnt.payload);
+      break;
+
+    case ppt_tnt_64:
+      printf_unfiltered (("tnt-64 %u: 0x%" PRIx64 ""),
+			 packet->payload.tnt.bit_size,
+			 packet->payload.tnt.payload);
+      break;
+
+    case ppt_pip:
+      printf_unfiltered (("pip %" PRIx64 ""), packet->payload.pip.cr3);
+      break;
+
+    case ppt_tsc:
+      printf_unfiltered (("tsc %" PRIx64 ""), packet->payload.tsc.tsc);
+      break;
+
+    case ppt_cbr:
+      printf_unfiltered (("cbr %u"), packet->payload.cbr.ratio);
+      break;
+
+    case ppt_mode:
+      switch (packet->payload.mode.leaf)
+	{
+	default:
+	  printf_unfiltered (("mode %u"), packet->payload.mode.leaf);
+	  break;
+
+	case pt_mol_exec:
+	  printf_unfiltered (("mode.exec%s%s"),
+			     packet->payload.mode.bits.exec.csl
+			     ? (" cs.l") : (""),
+			     packet->payload.mode.bits.exec.csd
+			     ? (" cs.d") : (""));
+	  break;
+
+	case pt_mol_tsx:
+	  printf_unfiltered (("mode.tsx%s%s"),
+			     packet->payload.mode.bits.tsx.intx
+			     ? (" intx") : (""),
+			     packet->payload.mode.bits.tsx.abrt
+			     ? (" abrt") : (""));
+	  break;
+	}
+      break;
+
+    case ppt_ovf:
+      printf_unfiltered (("ovf"));
+      break;
+
+    }
+}
+
+/* Decode packets into MAINT using DECODER.  */
+
+static void
+btrace_maint_decode_pt (struct btrace_maint_info *maint,
+			struct pt_packet_decoder *decoder)
+{
+  int errcode;
+
+  for (;;)
+    {
+      struct btrace_pt_packet packet;
+
+      errcode = pt_pkt_sync_forward (decoder);
+      if (errcode < 0)
+	break;
+
+      for (;;)
+	{
+	  pt_pkt_get_offset (decoder, &packet.offset);
+
+	  errcode = pt_pkt_next (decoder, &packet.packet,
+				 sizeof(packet.packet));
+	  if (errcode < 0)
+	    break;
+
+	  if (maint_btrace_pt_skip_pad == 0 || packet.packet.type != ppt_pad)
+	    {
+	      packet.errcode = pt_errcode (errcode);
+	      VEC_safe_push (btrace_pt_packet_s, maint->variant.pt.packets,
+			     &packet);
+	    }
+	}
+
+      if (errcode == -pte_eos)
+	break;
+
+      packet.errcode = pt_errcode (errcode);
+      VEC_safe_push (btrace_pt_packet_s, maint->variant.pt.packets,
+		     &packet);
+
+      warning (_("Error at trace offset 0x%" PRIx64 ": %s."),
+	       packet.offset, pt_errstr (packet.errcode));
+    }
+
+  if (errcode != -pte_eos)
+    warning (_("Failed to synchronize onto the Intel(R) Processor Trace "
+	       "stream: %s."), pt_errstr (pt_errcode (errcode)));
+}
+
+/* Update the packet history in BTINFO.  */
+
+static void
+btrace_maint_update_pt_packets (struct btrace_thread_info *btinfo)
+{
+  volatile struct gdb_exception except;
+  struct pt_packet_decoder *decoder;
+  struct btrace_data_pt *pt;
+  struct pt_config config;
+  int errcode;
+
+  pt = &btinfo->data.variant.pt;
+
+  /* Nothing to do if there is no trace.  */
+  if (pt->size == 0)
+    return;
+
+  memset (&config, 0, sizeof(config));
+
+  config.size = sizeof (config);
+  config.begin = pt->data;
+  config.end = pt->data + pt->size;
+
+  config.cpu.vendor = pt_translate_cpu_vendor (pt->config.cpu.vendor);
+  config.cpu.family = pt->config.cpu.family;
+  config.cpu.model = pt->config.cpu.model;
+  config.cpu.stepping = pt->config.cpu.stepping;
+
+  errcode = pt_cpu_errata (&config.errata, &config.cpu);
+  if (errcode < 0)
+    error (_("Failed to configure the Intel(R) Processor Trace decoder: %s."),
+	   pt_errstr (pt_errcode (errcode)));
+
+  decoder = pt_pkt_alloc_decoder (&config);
+  if (decoder == NULL)
+    error (_("Failed to allocate the Intel(R) Processor Trace decoder."));
+
+  TRY
+    {
+      btrace_maint_decode_pt (&btinfo->maint, decoder);
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      pt_pkt_free_decoder (decoder);
+
+      if (except.reason < 0)
+	throw_exception (except);
+    }
+  END_CATCH
+
+  pt_pkt_free_decoder (decoder);
+}
+
+#endif /* !defined (HAVE_LIBIPT)  */
+
+/* Update the packet maintenance information for BTINFO and store the
+   low and high bounds into BEGIN and END, respectively.
+   Store the current iterator state into FROM and TO.  */
+
+static void
+btrace_maint_update_packets (struct btrace_thread_info *btinfo,
+			     unsigned int *begin, unsigned int *end,
+			     unsigned int *from, unsigned int *to)
+{
+  switch (btinfo->data.format)
+    {
+    default:
+      *begin = 0;
+      *end = 0;
+      *from = 0;
+      *to = 0;
+      break;
+
+    case BTRACE_FORMAT_BTS:
+      /* Nothing to do - we operate directly on BTINFO->DATA.  */
+      *begin = 0;
+      *end = VEC_length (btrace_block_s, btinfo->data.variant.bts.blocks);
+      *from = btinfo->maint.variant.bts.packet_history.begin;
+      *to = btinfo->maint.variant.bts.packet_history.end;
+      break;
+
+#if defined (HAVE_LIBIPT)
+    case BTRACE_FORMAT_PT:
+      if (VEC_empty (btrace_pt_packet_s, btinfo->maint.variant.pt.packets))
+	btrace_maint_update_pt_packets (btinfo);
+
+      *begin = 0;
+      *end = VEC_length (btrace_pt_packet_s, btinfo->maint.variant.pt.packets);
+      *from = btinfo->maint.variant.pt.packet_history.begin;
+      *to = btinfo->maint.variant.pt.packet_history.end;
+      break;
+#endif /* defined (HAVE_LIBIPT)  */
+    }
+}
+
+/* Print packets in BTINFO from BEGIN (inclusive) until END (exclusive) and
+   update the current iterator position.  */
+
+static void
+btrace_maint_print_packets (struct btrace_thread_info *btinfo,
+			    unsigned int begin, unsigned int end)
+{
+  switch (btinfo->data.format)
+    {
+    default:
+      break;
+
+    case BTRACE_FORMAT_BTS:
+      {
+	VEC (btrace_block_s) *blocks;
+	unsigned int blk;
+
+	blocks = btinfo->data.variant.bts.blocks;
+	for (blk = begin; blk < end; ++blk)
+	  {
+	    const btrace_block_s *block;
+
+	    block = VEC_index (btrace_block_s, blocks, blk);
+
+	    printf_unfiltered ("%u\tbegin: %s, end: %s\n", blk,
+			       core_addr_to_string_nz (block->begin),
+			       core_addr_to_string_nz (block->end));
+	  }
+
+	btinfo->maint.variant.bts.packet_history.begin = begin;
+	btinfo->maint.variant.bts.packet_history.end = end;
+      }
+      break;
+
+#if defined (HAVE_LIBIPT)
+    case BTRACE_FORMAT_PT:
+      {
+	VEC (btrace_pt_packet_s) *packets;
+	unsigned int pkt;
+
+	packets = btinfo->maint.variant.pt.packets;
+	for (pkt = begin; pkt < end; ++pkt)
+	  {
+	    const struct btrace_pt_packet *packet;
+
+	    packet = VEC_index (btrace_pt_packet_s, packets, pkt);
+
+	    printf_unfiltered ("%u\t", pkt);
+	    printf_unfiltered ("0x%" PRIx64 "\t", packet->offset);
+
+	    if (packet->errcode == pte_ok)
+	      pt_print_packet (&packet->packet);
+	    else
+	      printf_unfiltered ("[error: %s]", pt_errstr (packet->errcode));
+
+	    printf_unfiltered ("\n");
+	  }
+
+	btinfo->maint.variant.pt.packet_history.begin = begin;
+	btinfo->maint.variant.pt.packet_history.end = end;
+      }
+      break;
+#endif /* defined (HAVE_LIBIPT)  */
+    }
+}
+
+/* Read a number from an argument string.  */
+
+static unsigned int
+get_uint (char **arg)
+{
+  char *begin, *end, *pos;
+  unsigned long number;
+
+  begin = *arg;
+  pos = skip_spaces (begin);
+
+  if (!isdigit (*pos))
+    error (_("Expected positive number, got: %s."), pos);
+
+  number = strtoul (pos, &end, 10);
+  if (number > UINT_MAX)
+    error (_("Number too big."));
+
+  *arg += (end - begin);
+
+  return (unsigned int) number;
+}
+
+/* Read a context size from an argument string.  */
+
+static int
+get_context_size (char **arg)
+{
+  char *pos;
+  int number;
+
+  pos = skip_spaces (*arg);
+
+  if (!isdigit (*pos))
+    error (_("Expected positive number, got: %s."), pos);
+
+  return strtol (pos, arg, 10);
+}
+
+/* Complain about junk at the end of an argument string.  */
+
+static void
+no_chunk (char *arg)
+{
+  if (*arg != 0)
+    error (_("Junk after argument: %s."), arg);
+}
+
+/* The "maintenance btrace packet-history" command.  */
+
+static void
+maint_btrace_packet_history_cmd (char *arg, int from_tty)
+{
+  struct btrace_thread_info *btinfo;
+  struct thread_info *tp;
+  unsigned int size, begin, end, from, to;
+
+  tp = find_thread_ptid (inferior_ptid);
+  if (tp == NULL)
+    error (_("No thread."));
+
+  size = 10;
+  btinfo = &tp->btrace;
+
+  btrace_maint_update_packets (btinfo, &begin, &end, &from, &to);
+  if (begin == end)
+    {
+      printf_unfiltered (_("No trace.\n"));
+      return;
+    }
+
+  if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
+    {
+      from = to;
+
+      if (end - from < size)
+	size = end - from;
+      to = from + size;
+    }
+  else if (strcmp (arg, "-") == 0)
+    {
+      to = from;
+
+      if (to - begin < size)
+	size = to - begin;
+      from = to - size;
+    }
+  else
+    {
+      from = get_uint (&arg);
+      if (end <= from)
+	error (_("'%u' is out of range."), from);
+
+      arg = skip_spaces (arg);
+      if (*arg == ',')
+	{
+	  arg = skip_spaces (++arg);
+
+	  if (*arg == '+')
+	    {
+	      arg += 1;
+	      size = get_context_size (&arg);
+
+	      no_chunk (arg);
+
+	      if (end - from < size)
+		size = end - from;
+	      to = from + size;
+	    }
+	  else if (*arg == '-')
+	    {
+	      arg += 1;
+	      size = get_context_size (&arg);
+
+	      no_chunk (arg);
+
+	      /* Include the packet given as first argument.  */
+	      from += 1;
+	      to = from;
+
+	      if (to - begin < size)
+		size = to - begin;
+	      from = to - size;
+	    }
+	  else
+	    {
+	      to = get_uint (&arg);
+
+	      /* Include the packet at the second argument and silently
+		 truncate the range.  */
+	      if (to < end)
+		to += 1;
+	      else
+		to = end;
+
+	      no_chunk (arg);
+	    }
+	}
+      else
+	{
+	  no_chunk (arg);
+
+	  if (end - from < size)
+	    size = end - from;
+	  to = from + size;
+	}
+
+      dont_repeat ();
+    }
+
+  btrace_maint_print_packets (btinfo, from, to);
+}
+
+/* The "maintenance btrace clear-packet-history" command.  */
+
+static void
+maint_btrace_clear_packet_history_cmd (char *args, int from_tty)
+{
+  struct btrace_thread_info *btinfo;
+  struct thread_info *tp;
+
+  if (args != NULL && *args != 0)
+    error (_("Invalid argument."));
+
+  tp = find_thread_ptid (inferior_ptid);
+  if (tp == NULL)
+    error (_("No thread."));
+
+  btinfo = &tp->btrace;
+
+  /* Must clear the maint data before - it depends on BTINFO->DATA.  */
+  btrace_maint_clear (btinfo);
+  btrace_data_clear (&btinfo->data);
+}
+
+/* The "maintenance btrace clear" command.  */
+
+static void
+maint_btrace_clear_cmd (char *args, int from_tty)
+{
+  struct btrace_thread_info *btinfo;
+  struct thread_info *tp;
+
+  if (args != NULL && *args != 0)
+    error (_("Invalid argument."));
+
+  tp = find_thread_ptid (inferior_ptid);
+  if (tp == NULL)
+    error (_("No thread."));
+
+  btrace_clear (tp);
+}
+
+/* The "maintenance btrace" command.  */
+
+static void
+maint_btrace_cmd (char *args, int from_tty)
+{
+  help_list (maint_btrace_cmdlist, "maintenance btrace ", all_commands,
+	     gdb_stdout);
+}
+
+/* The "maintenance set btrace" command.  */
+
+static void
+maint_btrace_set_cmd (char *args, int from_tty)
+{
+  help_list (maint_btrace_set_cmdlist, "maintenance set btrace ", all_commands,
+	     gdb_stdout);
+}
+
+/* The "maintenance show btrace" command.  */
+
+static void
+maint_btrace_show_cmd (char *args, int from_tty)
+{
+  help_list (maint_btrace_show_cmdlist, "maintenance show btrace ",
+	     all_commands, gdb_stdout);
+}
+
+/* The "maintenance set btrace pt" command.  */
+
+static void
+maint_btrace_pt_set_cmd (char *args, int from_tty)
+{
+  help_list (maint_btrace_pt_set_cmdlist, "maintenance set btrace pt ",
+	     all_commands, gdb_stdout);
+}
+
+/* The "maintenance show btrace pt" command.  */
+
+static void
+maint_btrace_pt_show_cmd (char *args, int from_tty)
+{
+  help_list (maint_btrace_pt_show_cmdlist, "maintenance show btrace pt ",
+	     all_commands, gdb_stdout);
+}
+
+/* The "maintenance info btrace" command.  */
+
+static void
+maint_info_btrace_cmd (char *args, int from_tty)
+{
+  struct btrace_thread_info *btinfo;
+  struct thread_info *tp;
+  const struct btrace_config *conf;
+
+  if (args != NULL && *args != 0)
+    error (_("Invalid argument."));
+
+  tp = find_thread_ptid (inferior_ptid);
+  if (tp == NULL)
+    error (_("No thread."));
+
+  btinfo = &tp->btrace;
+
+  conf = btrace_conf (btinfo);
+  if (conf == NULL)
+    error (_("No btrace configuration."));
+
+  printf_unfiltered (_("Format: %s.\n"),
+		     btrace_format_string (conf->format));
+
+  switch (conf->format)
+    {
+    default:
+      break;
+
+    case BTRACE_FORMAT_BTS:
+      printf_unfiltered (_("Number of packets: %u.\n"),
+			 VEC_length (btrace_block_s,
+				     btinfo->data.variant.bts.blocks));
+      break;
+
+#if defined (HAVE_LIBIPT)
+    case BTRACE_FORMAT_PT:
+      {
+	struct pt_version version;
+
+	version = pt_library_version ();
+	printf_unfiltered (_("Version: %u.%u.%u%s.\n"), version.major,
+			   version.minor, version.build,
+			   version.ext != NULL ? version.ext : "");
+
+	btrace_maint_update_pt_packets (btinfo);
+	printf_unfiltered (_("Number of packets: %u.\n"),
+			   VEC_length (btrace_pt_packet_s,
+				       btinfo->maint.variant.pt.packets));
+      }
+      break;
+#endif /* defined (HAVE_LIBIPT)  */
+    }
+}
+
+/* The "maint show btrace pt skip-pad" show value function. */
+
+static void
+show_maint_btrace_pt_skip_pad  (struct ui_file *file, int from_tty,
+				  struct cmd_list_element *c,
+				  const char *value)
+{
+  fprintf_filtered (file, _("Skip PAD packets is %s.\n"), value);
+}
+
+
+/* Initialize btrace maintenance commands.  */
+
+void _initialize_btrace (void);
+void
+_initialize_btrace (void)
+{
+  add_cmd ("btrace", class_maintenance, maint_info_btrace_cmd,
+	   _("Info about branch tracing data."), &maintenanceinfolist);
+
+  add_prefix_cmd ("btrace", class_maintenance, maint_btrace_cmd,
+		  _("Branch tracing maintenance commands."),
+		  &maint_btrace_cmdlist, "maintenance btrace ",
+		  0, &maintenancelist);
+
+  add_prefix_cmd ("btrace", class_maintenance, maint_btrace_set_cmd, _("\
+Set branch tracing specific variables."),
+                  &maint_btrace_set_cmdlist, "maintenance set btrace ",
+                  0, &maintenance_set_cmdlist);
+
+  add_prefix_cmd ("pt", class_maintenance, maint_btrace_pt_set_cmd, _("\
+Set Intel(R) Processor Trace specific variables."),
+                  &maint_btrace_pt_set_cmdlist, "maintenance set btrace pt ",
+                  0, &maint_btrace_set_cmdlist);
+
+  add_prefix_cmd ("btrace", class_maintenance, maint_btrace_show_cmd, _("\
+Show branch tracing specific variables."),
+                  &maint_btrace_show_cmdlist, "maintenance show btrace ",
+                  0, &maintenance_show_cmdlist);
+
+  add_prefix_cmd ("pt", class_maintenance, maint_btrace_pt_show_cmd, _("\
+Show Intel(R) Processor Trace specific variables."),
+                  &maint_btrace_pt_show_cmdlist, "maintenance show btrace pt ",
+                  0, &maint_btrace_show_cmdlist);
+
+  add_setshow_boolean_cmd ("skip-pad", class_maintenance,
+			   &maint_btrace_pt_skip_pad, _("\
+Set whether PAD packets should be skipped in the btrace packet history."), _("\
+Show whether PAD packets should be skipped in the btrace packet history."),_("\
+When enabled, PAD packets are ignored in the btrace packet history."),
+			   NULL, show_maint_btrace_pt_skip_pad,
+			   &maint_btrace_pt_set_cmdlist,
+			   &maint_btrace_pt_show_cmdlist);
+
+  add_cmd ("packet-history", class_maintenance, maint_btrace_packet_history_cmd,
+	   _("Print the raw branch tracing data.\n\
+With no argument, print ten more packets after the previous ten-line print.\n\
+With '-' as argument print ten packets before a previous ten-line print.\n\
+One argument specifies the starting packet of a ten-line print.\n\
+Two arguments with comma between specify starting and ending packets to \
+print.\n\
+Preceded with '+'/'-' the second argument specifies the distance from the \
+first.\n"),
+	   &maint_btrace_cmdlist);
+
+  add_cmd ("clear-packet-history", class_maintenance,
+	   maint_btrace_clear_packet_history_cmd,
+	   _("Clears the branch tracing packet history.\n\
+Discards the raw branch tracing data but not the execution history data.\n\
+"),
+	   &maint_btrace_cmdlist);
+
+  add_cmd ("clear", class_maintenance, maint_btrace_clear_cmd,
+	   _("Clears the branch tracing data.\n\
+Discards the raw branch tracing data and the execution history data.\n\
+The next 'record' command will fetch the branch tracing data anew.\n\
+"),
+	   &maint_btrace_cmdlist);
+
 }

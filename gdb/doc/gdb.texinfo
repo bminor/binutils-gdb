@@ -33980,6 +33980,66 @@ Shared library events.
 This prints information about each @code{bfd} object that is known to
 @value{GDBN}.  @xref{Top, , BFD, bfd, The Binary File Descriptor Library}.
 
+@kindex maint info btrace
+@item maint info btrace
+Pint information about raw branch tracing data.
+
+@kindex maint btrace packet-history
+@item maint btrace packet-history
+Print the raw branch trace packets that are used to compute the
+execution history for the @samp{record btrace} command.  Both the
+information and the format in which it is printed depend on the btrace
+recording format.
+
+@table @code
+@item bts
+For the BTS recording format, print a list of blocks of sequential
+code.  For each block, the following information is printed:
+
+@table @asis
+@item Block number
+Newer blocks have higher numbers.  The oldest block has number zero.
+@item Lowest @samp{PC}
+@item Highest @samp{PC}
+@end table
+
+@item pt
+For the Intel(R) Processor Trace recording format, print a list of
+Intel(R) Processor Trace packets.  For each packet, the following
+information is printed:
+
+@table @asis
+@item Packet number
+Newer packets have higher numbers.  The oldest packet has number zero.
+@item Trace offset
+The packet's offset in the trace stream.
+@item Packet opcode and payload
+@end table
+@end table
+
+@kindex maint btrace clear-packet-history
+@item maint btrace clear-packet-history
+Discards the cached packet history printed by the @samp{maint btrace
+packet-history} command.  The history will be computed again when
+needed.
+
+@kindex maint btrace clear
+@item maint btrace clear
+Discard the branch trace data.  The data will be fetched anew and the
+branch trace will be recomputed when needed.
+
+This implicitly truncates the branch trace to a single branch trace
+buffer.  When updating branch trace incrementally, the branch trace
+available to @value{GDBN} may be bigger than a single branch trace
+buffer.
+
+@kindex maint set btrace pt skip-pad
+@item maint set btrace pt skip-pad
+@kindex maint show btrace pt skip-pad
+@item maint show btrace pt skip-pad
+Control whether @value{GDBN} will skip PAD packets when computing the
+packet history.
+
 @kindex set displaced-stepping
 @kindex show displaced-stepping
 @cindex displaced stepping support
