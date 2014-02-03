@@ -1,5 +1,11 @@
 2014-02-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (handle_load_dll): Rewrite this function's
+	introductory comment.  Remove code using get_module_name
+	to get the DLL's name.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.c (get_windows_debug_event): Ignore
 	LOAD_DLL_DEBUG_EVENT and UNLOAD_DLL_DEBUG_EVENT
 	if windows_initialization_done == 0.

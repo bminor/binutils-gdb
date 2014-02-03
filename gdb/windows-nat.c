@@ -835,45 +835,26 @@ get_image_name (HANDLE h, void *address, int unicode)
   return buf;
 }
 
-/* Wait for child to do something.  Return pid of child, or -1 in case
-   of error; store status through argument pointer OURSTATUS.  */
+/* Handle a DLL load event, and return 1.
+
+   This function assumes that this event did not occur during inferior
+   initialization, where their event info may be incomplete (see
+   do_initial_windows_stuff and windows_add_all_dlls for more info
+   on how we handle DLL loading during that phase).  */
+
 static int
 handle_load_dll (void *dummy)
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
-  char dll_buf[__PMAX];
-  char *dll_name = NULL;
-
-  dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
-
-  /* Try getting the DLL name by searching the list of known modules
-     and matching their base address against this new DLL's base address.
-
-     FIXME: brobecker/2013-12-10:
-     It seems odd to be going through this search if the DLL name could
-     simply be extracted via "event->lpImageName".  Moreover, some
-     experimentation with various versions of Windows seem to indicate
-     that it might still be too early for this DLL to be listed when
-     querying the system about the current list of modules, thus making
-     this attempt pointless.
-
-     This code can therefore probably be removed.  But at the time of
-     this writing, we are too close to creating the GDB 7.7 branch
-     for us to make such a change.  We are therefore defering it.  */
-
-  if (!get_module_name (event->lpBaseOfDll, dll_buf))
-    dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
-
-  dll_name = dll_buf;
+  char *dll_name;
 
   /* Try getting the DLL name via the lpImageName field of the event.
      Note that Microsoft documents this fields as strictly optional,
      in the sense that it might be NULL.  And the first DLL event in
      particular is explicitly documented as "likely not pass[ed]"
      (source: MSDN LOAD_DLL_DEBUG_INFO structure).  */
-  if (*dll_name == '\0')
-    dll_name = get_image_name (current_process_handle,
-			       event->lpImageName, event->fUnicode);
+  dll_name = get_image_name (current_process_handle,
+			     event->lpImageName, event->fUnicode);
   if (!dll_name)
     return 1;
 
