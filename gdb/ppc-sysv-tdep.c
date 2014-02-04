@@ -1352,8 +1352,9 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 	  word = unpack_long (type, val);
 
 	  /* Convert any function code addresses into descriptors.  */
-	  if (TYPE_CODE (type) == TYPE_CODE_PTR
-	      || TYPE_CODE (type) == TYPE_CODE_REF)
+	  if (tdep->elf_abi == POWERPC_ELF_V1
+	      && (TYPE_CODE (type) == TYPE_CODE_PTR
+		  || TYPE_CODE (type) == TYPE_CODE_REF))
 	    {
 	      struct type *target_type
 		= check_typedef (TYPE_TARGET_TYPE (type));
@@ -1553,24 +1554,32 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
      breakpoint.  */
   regcache_cooked_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
 
-  /* Use the func_addr to find the descriptor, and use that to find
-     the TOC.  If we're calling via a function pointer, the pointer
-     itself identifies the descriptor.  */
-  {
-    struct type *ftype = check_typedef (value_type (function));
-    CORE_ADDR desc_addr = value_as_address (function);
+  /* In the ELFv1 ABI, use the func_addr to find the descriptor, and use
+     that to find the TOC.  If we're calling via a function pointer,
+     the pointer itself identifies the descriptor.  */
+  if (tdep->elf_abi == POWERPC_ELF_V1)
+    {
+      struct type *ftype = check_typedef (value_type (function));
+      CORE_ADDR desc_addr = value_as_address (function);
 
-    if (TYPE_CODE (ftype) == TYPE_CODE_PTR
-	|| convert_code_addr_to_desc_addr (func_addr, &desc_addr))
-      {
-	/* The TOC is the second double word in the descriptor.  */
-	CORE_ADDR toc =
-	  read_memory_unsigned_integer (desc_addr + tdep->wordsize,
-					tdep->wordsize, byte_order);
-	regcache_cooked_write_unsigned (regcache,
-					tdep->ppc_gp0_regnum + 2, toc);
-      }
-  }
+      if (TYPE_CODE (ftype) == TYPE_CODE_PTR
+	  || convert_code_addr_to_desc_addr (func_addr, &desc_addr))
+	{
+	  /* The TOC is the second double word in the descriptor.  */
+	  CORE_ADDR toc =
+	    read_memory_unsigned_integer (desc_addr + tdep->wordsize,
+					  tdep->wordsize, byte_order);
+
+	  regcache_cooked_write_unsigned (regcache,
+					  tdep->ppc_gp0_regnum + 2, toc);
+	}
+    }
+
+  /* In the ELFv2 ABI, we need to pass the target address in r12 since
+     we may be calling a global entry point.  */
+  if (tdep->elf_abi == POWERPC_ELF_V2)
+    regcache_cooked_write_unsigned (regcache,
+				    tdep->ppc_gp0_regnum + 12, func_addr);
 
   return sp;
 }

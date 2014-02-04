@@ -1,5 +1,15 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Only call
+	set_gdbarch_convert_from_func_ptr_addr and
+	set_gdbarch_elf_make_msymbol_special for ELFv1.
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_param): Only handle
+	function descriptors on ELFv1.
+	(ppc64_sysv_abi_push_dummy_call): Likewise.  On ELFv2,
+	set up r12 at function entry.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-tdep.h (enum powerpc_elf_abi): New data type.
 	(struct gdbarch_tdep): New member elf_abi.
 
