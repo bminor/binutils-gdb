@@ -1101,6 +1101,160 @@ convert_code_addr_to_desc_addr (CORE_ADDR code_addr, CORE_ADDR *desc_addr)
   return 1;
 }
 
+/* Walk down the type tree of TYPE counting consecutive base elements.
+   If *FIELD_TYPE is NULL, then set it to the first valid floating point
+   or vector type.  If a non-floating point or vector type is found, or
+   if a floating point or vector type that doesn't match a non-NULL
+   *FIELD_TYPE is found, then return -1, otherwise return the count in the
+   sub-tree.  */
+
+static LONGEST
+ppc64_aggregate_candidate (struct type *type,
+			   struct type **field_type)
+{
+  type = check_typedef (type);
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
+      if (!*field_type)
+	*field_type = type;
+      if (TYPE_CODE (*field_type) == TYPE_CODE (type)
+	  && TYPE_LENGTH (*field_type) == TYPE_LENGTH (type))
+	return 1;
+      break;
+
+    case TYPE_CODE_COMPLEX:
+      type = TYPE_TARGET_TYPE (type);
+      if (TYPE_CODE (type) == TYPE_CODE_FLT
+	  || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+	{
+	  if (!*field_type)
+	    *field_type = type;
+	  if (TYPE_CODE (*field_type) == TYPE_CODE (type)
+	      && TYPE_LENGTH (*field_type) == TYPE_LENGTH (type))
+	    return 2;
+	}
+      break;
+
+    case TYPE_CODE_ARRAY:
+      if (TYPE_VECTOR (type))
+	{
+	  if (!*field_type)
+	    *field_type = type;
+	  if (TYPE_CODE (*field_type) == TYPE_CODE (type)
+	      && TYPE_LENGTH (*field_type) == TYPE_LENGTH (type))
+	    return 1;
+	}
+      else
+	{
+	  LONGEST count, low_bound, high_bound;
+
+	  count = ppc64_aggregate_candidate
+		   (TYPE_TARGET_TYPE (type), field_type);
+	  if (count == -1)
+	    return -1;
+
+	  if (!get_array_bounds (type, &low_bound, &high_bound))
+	    return -1;
+	  count *= high_bound - low_bound;
+
+	  /* There must be no padding.  */
+	  if (count == 0)
+	    return TYPE_LENGTH (type) == 0 ? 0 : -1;
+	  else if (TYPE_LENGTH (type) != count * TYPE_LENGTH (*field_type))
+	    return -1;
+
+	  return count;
+	}
+      break;
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+	{
+	  LONGEST count = 0;
+	  int i;
+
+	  for (i = 0; i < TYPE_NFIELDS (type); i++)
+	    {
+	      LONGEST sub_count;
+
+	      if (field_is_static (&TYPE_FIELD (type, i)))
+		continue;
+
+	      sub_count = ppc64_aggregate_candidate
+			   (TYPE_FIELD_TYPE (type, i), field_type);
+	      if (sub_count == -1)
+		return -1;
+
+	      if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+		count += sub_count;
+	      else
+		count = max (count, sub_count);
+	    }
+
+	  /* There must be no padding.  */
+	  if (count == 0)
+	    return TYPE_LENGTH (type) == 0 ? 0 : -1;
+	  else if (TYPE_LENGTH (type) != count * TYPE_LENGTH (*field_type))
+	    return -1;
+
+	  return count;
+	}
+      break;
+
+    default:
+      break;
+    }
+
+  return -1;
+}
+
+/* If an argument of type TYPE is a homogeneous float or vector aggregate
+   that shall be passed in FP/vector registers according to the ELFv2 ABI,
+   return the homogeneous element type in *ELT_TYPE and the number of
+   elements in *N_ELTS, and return non-zero.  Otherwise, return zero.  */
+
+static int
+ppc64_elfv2_abi_homogeneous_aggregate (struct type *type,
+				       struct type **elt_type, int *n_elts)
+{
+  /* Complex types at the top level are treated separately.  However,
+     complex types can be elements of homogeneous aggregates.  */
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION
+      || (TYPE_CODE (type) == TYPE_CODE_ARRAY && !TYPE_VECTOR (type)))
+    {
+      struct type *field_type = NULL;
+      LONGEST field_count = ppc64_aggregate_candidate (type, &field_type);
+
+      if (field_count > 0)
+	{
+	  int n_regs = ((TYPE_CODE (field_type) == TYPE_CODE_FLT
+			 || TYPE_CODE (field_type) == TYPE_CODE_DECFLOAT)?
+			(TYPE_LENGTH (field_type) + 7) >> 3 : 1);
+
+	  /* The ELFv2 ABI allows homogeneous aggregates to occupy
+	     up to 8 registers.  */
+	  if (field_count * n_regs <= 8)
+	    {
+	      if (elt_type)
+		*elt_type = field_type;
+	      if (n_elts)
+		*n_elts = (int) field_count;
+	      /* Note that field_count is LONGEST since it may hold the size
+		 of an array, while *n_elts is int since its value is bounded
+		 by the number of registers used for argument passing.  The
+		 cast cannot overflow due to the bounds checking above.  */
+	      return 1;
+	    }
+	}
+    }
+
+  return 0;
+}
+
 /* Structure holding the next argument position.  */
 struct ppc64_sysv_argpos
   {
@@ -1388,6 +1542,29 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 
 	  if (TYPE_CODE (type) == TYPE_CODE_FLT)
 	    ppc64_sysv_abi_push_freg (gdbarch, type, val, argpos);
+	}
+
+      /* In the ELFv2 ABI, homogeneous floating-point or vector
+	 aggregates are passed in a series of registers.  */
+      if (tdep->elf_abi == POWERPC_ELF_V2)
+	{
+	  struct type *eltype;
+	  int i, nelt;
+
+	  if (ppc64_elfv2_abi_homogeneous_aggregate (type, &eltype, &nelt))
+	    for (i = 0; i < nelt; i++)
+	      {
+		const gdb_byte *elval = val + i * TYPE_LENGTH (eltype);
+
+		if (TYPE_CODE (eltype) == TYPE_CODE_FLT
+		    || TYPE_CODE (eltype) == TYPE_CODE_DECFLOAT)
+		  ppc64_sysv_abi_push_freg (gdbarch, eltype, elval, argpos);
+		else if (TYPE_CODE (eltype) == TYPE_CODE_ARRAY
+			 && TYPE_VECTOR (eltype)
+			 && tdep->vector_abi == POWERPC_VEC_ALTIVEC
+			 && TYPE_LENGTH (eltype) == 16)
+		  ppc64_sysv_abi_push_vreg (gdbarch, elval, argpos);
+	      }
 	}
     }
 }
@@ -1831,6 +2008,72 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
       if (readbuf != NULL)
 	regcache_cooked_read_part (regcache, regnum,
 				   offset, TYPE_LENGTH (valtype), readbuf);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+
+  /* In the ELFv2 ABI, homogeneous floating-point or vector
+     aggregates are returned in registers.  */
+  if (tdep->elf_abi == POWERPC_ELF_V2
+      && ppc64_elfv2_abi_homogeneous_aggregate (valtype, &eltype, &nelt))
+    {
+      for (i = 0; i < nelt; i++)
+	{
+	  ok = ppc64_sysv_abi_return_value_base (gdbarch, eltype, regcache,
+						 readbuf, writebuf, i);
+	  gdb_assert (ok);
+
+	  if (readbuf)
+	    readbuf += TYPE_LENGTH (eltype);
+	  if (writebuf)
+	    writebuf += TYPE_LENGTH (eltype);
+	}
+
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+
+  /* In the ELFv2 ABI, aggregate types of up to 16 bytes are
+     returned in registers r3:r4.  */
+  if (tdep->elf_abi == POWERPC_ELF_V2
+      && TYPE_LENGTH (valtype) <= 16
+      && (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (valtype) == TYPE_CODE_UNION
+	  || (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
+	      && !TYPE_VECTOR (valtype))))
+    {
+      int n_regs = ((TYPE_LENGTH (valtype) + tdep->wordsize - 1)
+		    / tdep->wordsize);
+      int i;
+
+      for (i = 0; i < n_regs; i++)
+	{
+	  gdb_byte regval[MAX_REGISTER_SIZE];
+	  int regnum = tdep->ppc_gp0_regnum + 3 + i;
+	  int offset = i * tdep->wordsize;
+	  int len = TYPE_LENGTH (valtype) - offset;
+
+	  if (len > tdep->wordsize)
+	    len = tdep->wordsize;
+
+	  if (writebuf != NULL)
+	    {
+	      memset (regval, 0, sizeof regval);
+	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
+		  && offset == 0)
+		memcpy (regval + tdep->wordsize - len, writebuf, len);
+	      else
+		memcpy (regval, writebuf + offset, len);
+	      regcache_cooked_write (regcache, regnum, regval);
+	    }
+	  if (readbuf != NULL)
+	    {
+	      regcache_cooked_read (regcache, regnum, regval);
+	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
+		  && offset == 0)
+		memcpy (readbuf, regval + tdep->wordsize - len, len);
+	      else
+		memcpy (readbuf + offset, regval, len);
+	    }
+	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 

@@ -1,5 +1,13 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-sysv-tdep.c (ppc64_aggregate_candidate): New routine.
+	(ppc64_elfv2_abi_homogeneous_aggregate): Likewise.
+	(ppc64_sysv_abi_push_param): Handle ELFv2 homogeneous structs.
+	(ppc64_sysv_abi_return_value): Likewise.  Also, handle small
+	structures returned in GPRs.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Use correct
 	offset to the stack parameter list for the ELFv2 ABI.
 
