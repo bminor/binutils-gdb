@@ -1232,7 +1232,10 @@ ppc64_sysv_abi_push_freg (struct gdbarch *gdbarch,
       if (argpos->regcache && argpos->freg <= 13)
 	{
 	  int regnum = tdep->ppc_fp0_regnum + argpos->freg;
-	  int offset = 8 - TYPE_LENGTH (type);
+	  int offset = 0;
+
+	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	    offset = 8 - TYPE_LENGTH (type);
 
 	  regcache_cooked_write_part (argpos->regcache, regnum,
 				      offset, TYPE_LENGTH (type), val);
@@ -1641,7 +1644,10 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
       && TYPE_CODE (valtype) == TYPE_CODE_DECFLOAT)
     {
       int regnum = tdep->ppc_fp0_regnum + 1 + index;
-      int offset = 8 - TYPE_LENGTH (valtype);
+      int offset = 0;
+
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	offset = 8 - TYPE_LENGTH (valtype);
 
       if (writebuf != NULL)
 	regcache_cooked_write_part (regcache, regnum,
