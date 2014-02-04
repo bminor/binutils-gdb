@@ -1,3 +1,7 @@
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* NEWS: Document new target powerpc64le-*-linux*.
+
 2014-02-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64obsd-tdep.c (sparc64obsd_gregset): New variable.
