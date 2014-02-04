@@ -2404,7 +2404,10 @@ xcoff_write_archive_contents_big (bfd *abfd)
       PRINT20 (ahdrp->nextoff, iterator.next.offset);
 
       if (!do_pad (abfd, iterator.current.leading_padding))
-	return FALSE;
+	{
+	  free (offsets);
+	  return FALSE;
+	}
 
       BFD_ASSERT (iterator.current.offset == bfd_tell (abfd));
       namlen = iterator.current.padded_namlen;
@@ -2414,7 +2417,10 @@ xcoff_write_archive_contents_big (bfd *abfd)
 	  || bfd_seek (iterator.current.member, 0, SEEK_SET) != 0
 	  || !do_copy (abfd, iterator.current.member)
 	  || !do_pad (abfd, iterator.current.trailing_padding))
-	return FALSE;
+	{
+	  free (offsets);
+	  return FALSE;
+	}
 
       offsets[i] = iterator.current.offset;
       prevoff = iterator.current.offset;
@@ -2459,7 +2465,10 @@ xcoff_write_archive_contents_big (bfd *abfd)
   member_table_size += member_table_size & 1;
   member_table = bfd_zmalloc (member_table_size);
   if (member_table == NULL)
-    return FALSE;
+    {
+      free (offsets);
+      return FALSE;
+    }
 
   hdr = (struct xcoff_ar_hdr_big *) member_table;
 

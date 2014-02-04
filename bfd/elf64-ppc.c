@@ -4168,19 +4168,31 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
   /* Init the stub hash table too.  */
   if (!bfd_hash_table_init (&htab->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct ppc_stub_hash_entry)))
-    return NULL;
+    {
+      _bfd_elf_link_hash_table_free ((struct bfd_link_hash_table *) htab);
+      return NULL;
+    }
 
   /* And the branch hash table.  */
   if (!bfd_hash_table_init (&htab->branch_hash_table, branch_hash_newfunc,
 			    sizeof (struct ppc_branch_hash_entry)))
-    return NULL;
+    {
+      bfd_hash_table_free (&htab->stub_hash_table);
+      _bfd_elf_link_hash_table_free ((struct bfd_link_hash_table *) htab);
+      return NULL;
+    }
 
   htab->tocsave_htab = htab_try_create (1024,
 					tocsave_htab_hash,
 					tocsave_htab_eq,
 					NULL);
   if (htab->tocsave_htab == NULL)
-    return NULL;
+    {
+      bfd_hash_table_free (&htab->branch_hash_table);
+      bfd_hash_table_free (&htab->stub_hash_table);
+      _bfd_elf_link_hash_table_free ((struct bfd_link_hash_table *) htab);
+      return NULL;
+    }
 
   /* Initializing two fields of the union is just cosmetic.  We really
      only care about glist, but when compiled on a 32-bit host the
@@ -8073,7 +8085,10 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 	      relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
 						    info->keep_memory);
 	      if (relstart == NULL)
-		return FALSE;
+		{
+		  free (toc_ref);
+		  return FALSE;
+		}
 
 	      relend = relstart + sec->reloc_count;
 	      for (rel = relstart; rel < relend; rel++)
@@ -8781,7 +8796,10 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
 						info->keep_memory);
 	  if (relstart == NULL)
-	    goto error_ret;
+	    {
+	      free (used);
+	      goto error_ret;
+	    }
 
 	  /* Mark toc entries referenced as used.  */
 	  do
