@@ -1,5 +1,13 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-tdep.h (enum powerpc_elf_abi): New data type.
+	(struct gdbarch_tdep): New member elf_abi.
+
+	* rs6000-tdep.c: Include "elf/ppc64.h".
+	(rs6000_gdbarch_init): Detect ELF ABI version.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_freg): Use correct order
 	within a register pair holding a DFP 128-bit value on little-endian.
 	(ppc64_sysv_abi_return_value_base): Likewise.

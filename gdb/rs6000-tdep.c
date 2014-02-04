@@ -48,6 +48,7 @@
 
 #include "elf-bfd.h"
 #include "elf/ppc.h"
+#include "elf/ppc64.h"
 
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
@@ -3554,6 +3555,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum auto_boolean soft_float_flag = powerpc_soft_float_global;
   int soft_float;
   enum powerpc_vector_abi vector_abi = powerpc_vector_abi_global;
+  enum powerpc_elf_abi elf_abi = POWERPC_ELF_AUTO;
   int have_fpu = 1, have_spe = 0, have_mq = 0, have_altivec = 0, have_dfp = 0,
       have_vsx = 0;
   int tdesc_wordsize = -1;
@@ -3860,6 +3862,21 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
 #ifdef HAVE_ELF
+  if (from_elf_exec)
+    {
+      switch (elf_elfheader (info.abfd)->e_flags & EF_PPC64_ABI)
+	{
+	case 1:
+	  elf_abi = POWERPC_ELF_V1;
+	  break;
+	case 2:
+	  elf_abi = POWERPC_ELF_V2;
+	  break;
+	default:
+	  break;
+	}
+    }
+
   if (soft_float_flag == AUTO_BOOLEAN_AUTO && from_elf_exec)
     {
       switch (bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
@@ -3895,6 +3912,21 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
     }
 #endif
+
+  /* At this point, the only supported ELF-based 64-bit little-endian
+     operating system is GNU/Linux, and this uses the ELFv2 ABI by
+     default.  All other supported ELF-based operating systems use the
+     ELFv1 ABI by default.  Therefore, if the ABI marker is missing,
+     e.g. because we run a legacy binary, or have attached to a process
+     and have not found any associated binary file, set the default
+     according to this heuristic.  */
+  if (elf_abi == POWERPC_ELF_AUTO)
+    {
+      if (wordsize == 8 && info.byte_order == BFD_ENDIAN_LITTLE)
+        elf_abi = POWERPC_ELF_V2;
+      else
+        elf_abi = POWERPC_ELF_V1;
+    }
 
   if (soft_float_flag == AUTO_BOOLEAN_TRUE)
     soft_float = 1;
@@ -3938,6 +3970,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
          meaningful, because 64-bit CPUs can run in 32-bit mode.  So, perform
          separate word size check.  */
       tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->elf_abi != elf_abi)
+	continue;
       if (tdep && tdep->soft_float != soft_float)
 	continue;
       if (tdep && tdep->vector_abi != vector_abi)
@@ -3960,6 +3994,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep = XCNEW (struct gdbarch_tdep);
   tdep->wordsize = wordsize;
+  tdep->elf_abi = elf_abi;
   tdep->soft_float = soft_float;
   tdep->vector_abi = vector_abi;
 

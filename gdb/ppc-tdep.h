@@ -182,6 +182,15 @@ extern void ppc_collect_vsxregset (const struct regset *regset,
 
 /* Private data that this module attaches to struct gdbarch.  */
 
+/* ELF ABI version used by the inferior.  */
+enum powerpc_elf_abi
+{
+  POWERPC_ELF_AUTO,
+  POWERPC_ELF_V1,
+  POWERPC_ELF_V2,
+  POWERPC_ELF_LAST
+};
+
 /* Vector ABI used by the inferior.  */
 enum powerpc_vector_abi
 {
@@ -196,6 +205,8 @@ struct gdbarch_tdep
   {
     int wordsize;		/* Size in bytes of fixed-point word.  */
     int soft_float;		/* Avoid FP registers for arguments?  */
+
+    enum powerpc_elf_abi elf_abi;	/* ELF ABI version.  */
 
     /* How to pass vector arguments.  Never set to AUTO or LAST.  */
     enum powerpc_vector_abi vector_abi;
