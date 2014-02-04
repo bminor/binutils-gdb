@@ -1474,9 +1474,13 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	  argpos.regcache = regcache;
 	  argpos.refparam = align_down (sp - refparam_size, 16);
 	  argpos.gparam = align_down (argpos.refparam - gparam_size, 16);
-	  /* Add in space for the TOC, link editor double word,
-	     compiler double word, LR save area, CR save area.  */
-	  sp = align_down (argpos.gparam - 48, 16);
+	  /* Add in space for the TOC, link editor double word (v1 only),
+	     compiler double word (v1 only), LR save area, CR save area,
+	     and backchain.  */
+	  if (tdep->elf_abi == POWERPC_ELF_V1)
+	    sp = align_down (argpos.gparam - 48, 16);
+	  else
+	    sp = align_down (argpos.gparam - 32, 16);
 	}
 
       /* If the function is returning a `struct', then there is an
