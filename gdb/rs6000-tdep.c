@@ -2672,10 +2672,10 @@ dfp_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   else
     {
       status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				  2 * reg_index + 1, buffer + 8);
+				  2 * reg_index + 1, buffer);
       if (status == REG_VALID)
 	status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				    2 * reg_index, buffer);
+				    2 * reg_index, buffer + 8);
     }
 
   return status;
@@ -2701,9 +2701,9 @@ dfp_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   else
     {
       regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
-			  2 * reg_index + 1, buffer + 8);
+			  2 * reg_index + 1, buffer);
       regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
-			  2 * reg_index, buffer);
+			  2 * reg_index, buffer + 8);
     }
 }
 

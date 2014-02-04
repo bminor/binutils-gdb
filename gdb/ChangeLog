@@ -1,5 +1,13 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_freg): Use correct order
+	within a register pair holding a DFP 128-bit value on little-endian.
+	(ppc64_sysv_abi_return_value_base): Likewise.
+	* rs6000-tdep.c (dfp_pseudo_register_read): Likewise.
+	(dfp_pseudo_register_write): Likewise.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_freg): Use correct
 	offset on little-endian when passing _Decimal32.
 	(ppc64_sysv_abi_return_value_base): Likewise for return values.

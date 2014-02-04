@@ -1,5 +1,9 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.arch/powerpc-d128-regs.exp: Enable on powerpc64*-*.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.arch/vsx-regs.exp: Check target endianness.  Provide variants
 	of the test patterns for use on little-endian systems.
 

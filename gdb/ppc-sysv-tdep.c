@@ -1270,9 +1270,11 @@ ppc64_sysv_abi_push_freg (struct gdbarch *gdbarch,
       if (argpos->regcache && argpos->freg <= 12)
 	{
 	  int regnum = tdep->ppc_fp0_regnum + argpos->freg;
+	  int lopart = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 8 : 0;
+	  int hipart = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
-	  regcache_cooked_write (argpos->regcache, regnum, val);
-	  regcache_cooked_write (argpos->regcache, regnum + 1, val + 8);
+	  regcache_cooked_write (argpos->regcache, regnum, val + hipart);
+	  regcache_cooked_write (argpos->regcache, regnum + 1, val + lopart);
 	}
 
       argpos->freg += 2;
@@ -1685,16 +1687,18 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
       && TYPE_CODE (valtype) == TYPE_CODE_DECFLOAT)
     {
       int regnum = tdep->ppc_fp0_regnum + 2 + 2 * index;
+      int lopart = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 8 : 0;
+      int hipart = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
       if (writebuf != NULL)
 	{
-	  regcache_cooked_write (regcache, regnum, writebuf);
-	  regcache_cooked_write (regcache, regnum + 1, writebuf + 8);
+	  regcache_cooked_write (regcache, regnum, writebuf + hipart);
+	  regcache_cooked_write (regcache, regnum + 1, writebuf + lopart);
 	}
       if (readbuf != NULL)
 	{
-	  regcache_cooked_read (regcache, regnum, readbuf);
-	  regcache_cooked_read (regcache, regnum + 1, readbuf + 8);
+	  regcache_cooked_read (regcache, regnum, readbuf + hipart);
+	  regcache_cooked_read (regcache, regnum + 1, readbuf + lopart);
 	}
       return 1;
     }
