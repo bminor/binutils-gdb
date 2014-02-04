@@ -1,5 +1,10 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_val): Use correct
+	offset on little-endian when passing small structures.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-sysv-tdep.c (get_decimal_float_return_value): Update comment.
 	(struct ppc64_sysv_argpos): New data structure.
 	(ppc64_sysv_abi_push_float): Remove.

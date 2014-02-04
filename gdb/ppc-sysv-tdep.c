@@ -1150,7 +1150,8 @@ ppc64_sysv_abi_push_val (struct gdbarch *gdbarch,
      doubleword are right-aligned and those larger are left-aligned.
      GCC versions before 3.4 implemented this incorrectly; see
      <http://gcc.gnu.org/gcc-3.4/powerpc-abi.html>.  */
-  if (len < tdep->wordsize)
+  if (len < tdep->wordsize
+      && gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     offset = tdep->wordsize - len;
 
   if (argpos->regcache)
