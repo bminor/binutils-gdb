@@ -2950,6 +2950,8 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
       /* Skip "first line" of function (which is actually its prologue).  */
       pc += gdbarch_deprecated_function_start_offset (gdbarch);
+      if (gdbarch_skip_entrypoint_p (gdbarch))
+        pc = gdbarch_skip_entrypoint (gdbarch, pc);
       if (skip)
 	pc = gdbarch_skip_prologue (gdbarch, pc);
 

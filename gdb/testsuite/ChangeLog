@@ -1,5 +1,12 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.base/sigbpt.exp: Do not use "*" when setting breakpoint
+	on a function.
+	* gdb.base/step-bt.c: Call hello via function pointer to make
+	sure its first instruction is executed on powerpc64le-linux.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.arch/powerpc-d128-regs.exp: Enable on powerpc64*-*.
 
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>

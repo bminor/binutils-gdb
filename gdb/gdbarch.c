@@ -229,6 +229,7 @@ struct gdbarch
   gdbarch_return_in_first_hidden_param_p_ftype *return_in_first_hidden_param_p;
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_skip_main_prologue_ftype *skip_main_prologue;
+  gdbarch_skip_entrypoint_ftype *skip_entrypoint;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
   gdbarch_remote_breakpoint_from_pc_ftype *remote_breakpoint_from_pc;
@@ -405,6 +406,7 @@ struct gdbarch startup_gdbarch =
   default_return_in_first_hidden_param_p,  /* return_in_first_hidden_param_p */
   0,  /* skip_prologue */
   0,  /* skip_main_prologue */
+  0,  /* skip_entrypoint */
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
   default_remote_breakpoint_from_pc,  /* remote_breakpoint_from_pc */
@@ -714,6 +716,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->skip_prologue == 0)
     fprintf_unfiltered (log, "\n\tskip_prologue");
   /* Skip verify of skip_main_prologue, has predicate.  */
+  /* Skip verify of skip_entrypoint, has predicate.  */
   if (gdbarch->inner_than == 0)
     fprintf_unfiltered (log, "\n\tinner_than");
   if (gdbarch->breakpoint_from_pc == 0)
@@ -1352,6 +1355,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: single_step_through_delay = <%s>\n",
                       host_address_to_string (gdbarch->single_step_through_delay));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_skip_entrypoint_p() = %d\n",
+                      gdbarch_skip_entrypoint_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: skip_entrypoint = <%s>\n",
+                      host_address_to_string (gdbarch->skip_entrypoint));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_skip_main_prologue_p() = %d\n",
                       gdbarch_skip_main_prologue_p (gdbarch));
@@ -2700,6 +2709,30 @@ set_gdbarch_skip_main_prologue (struct gdbarch *gdbarch,
                                 gdbarch_skip_main_prologue_ftype skip_main_prologue)
 {
   gdbarch->skip_main_prologue = skip_main_prologue;
+}
+
+int
+gdbarch_skip_entrypoint_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->skip_entrypoint != NULL;
+}
+
+CORE_ADDR
+gdbarch_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR ip)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->skip_entrypoint != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_entrypoint called\n");
+  return gdbarch->skip_entrypoint (gdbarch, ip);
+}
+
+void
+set_gdbarch_skip_entrypoint (struct gdbarch *gdbarch,
+                             gdbarch_skip_entrypoint_ftype skip_entrypoint)
+{
+  gdbarch->skip_entrypoint = skip_entrypoint;
 }
 
 int

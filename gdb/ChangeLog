@@ -1,5 +1,16 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (skip_entrypoint): New callback.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* symtab.c (skip_prologue_sal): Call gdbarch_skip_entrypoint.
+	* infrun.c (fill_in_stop_func): Likewise.
+	* ppc-linux-tdep.c: Include "elf/ppc64.h".
+	(ppc_elfv2_elf_make_msymbol_special): New function.
+	(ppc_elfv2_skip_entrypoint): Likewise.
+	(ppc_linux_init_abi): Install them for ELFv2.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-sysv-tdep.c (ppc64_aggregate_candidate): New routine.
 	(ppc64_elfv2_abi_homogeneous_aggregate): Likewise.
 	(ppc64_sysv_abi_push_param): Handle ELFv2 homogeneous structs.
