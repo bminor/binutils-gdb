@@ -1,3 +1,8 @@
+2014-02-04  Christian Eggers  <ceggers@gmx.de>  (tiny change)
+
+	* remote.c (remote_start_remote): Call remote_check_symbols even
+	if only symbol-file (not file) has been given.
+
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh (skip_entrypoint): New callback.

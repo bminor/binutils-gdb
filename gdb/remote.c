@@ -3668,7 +3668,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   /* If we connected to a live target, do some additional setup.  */
   if (target_has_execution)
     {
-      if (exec_bfd) 	/* No use without an exec file.  */
+      if (symfile_objfile) 	/* No use without a symbol-file.  */
 	remote_check_symbols ();
     }
 
