@@ -1,3 +1,8 @@
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/altivec-regs.exp: Use gdb_test_multiple for endian test.
+	(decimal_vector): Fix for little-endian.
+
 2014-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gdb.arch/sparc-sysstep.exp: New file.
