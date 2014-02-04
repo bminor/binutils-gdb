@@ -1,3 +1,11 @@
+2014-02-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Rewrite 
+	dwarf2_to_gdb[] table using symbolic constants.  Adjust
+	penultimate entry from number representing the PC register
+	to symbolic constant representing the MDR register.  Add
+	constant for the PC register to the end of the table.
+
 2014-02-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* bsd-kvm.c: Include <sys/param.h>
