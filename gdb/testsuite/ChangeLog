@@ -1,5 +1,10 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.arch/vsx-regs.exp: Check target endianness.  Provide variants
+	of the test patterns for use on little-endian systems.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.arch/altivec-regs.exp: Use gdb_test_multiple for endian test.
 	(decimal_vector): Fix for little-endian.
 

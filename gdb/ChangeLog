@@ -1,5 +1,12 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* rs6000-tdep.c (efpr_pseudo_register_read): Use correct offset
+	of the overlapped FP register within the VSX register on little-
+	endian platforms.
+	(efpr_pseudo_register_write): Likewise.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_val): Use correct
 	offset on little-endian when passing small structures.
 

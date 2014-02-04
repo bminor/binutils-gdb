@@ -2779,10 +2779,12 @@ efpr_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+  int offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
   /* Read the portion that overlaps the VMX register.  */
-  return regcache_raw_read_part (regcache, tdep->ppc_vr0_regnum + reg_index, 0,
-				 register_size (gdbarch, reg_nr), buffer);
+  return regcache_raw_read_part (regcache, tdep->ppc_vr0_regnum + reg_index,
+				 offset, register_size (gdbarch, reg_nr),
+				 buffer);
 }
 
 /* Write method for POWER7 Extended FP pseudo-registers.  */
@@ -2792,10 +2794,12 @@ efpr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+  int offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
   /* Write the portion that overlaps the VMX register.  */
-  regcache_raw_write_part (regcache, tdep->ppc_vr0_regnum + reg_index, 0,
-			   register_size (gdbarch, reg_nr), buffer);
+  regcache_raw_write_part (regcache, tdep->ppc_vr0_regnum + reg_index,
+			   offset, register_size (gdbarch, reg_nr),
+			   buffer);
 }
 
 static enum register_status
