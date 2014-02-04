@@ -1,3 +1,11 @@
+2014-02-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64obsd-tdep.c (sparc64obsd_gregset): New variable.
+	(sparc64obsd_supply_gregset): Handle registers sets used in ELF
+	core dumps.
+	(sparc64obsd_init_abi): Adjust minimum size of the general purpose
+	register set used in ELF core dumps.  Add floating-point register set.
+
 2014-02-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Rewrite 
