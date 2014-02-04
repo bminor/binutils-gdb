@@ -1,5 +1,19 @@
 2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-sysv-tdep.c (get_decimal_float_return_value): Update comment.
+	(struct ppc64_sysv_argpos): New data structure.
+	(ppc64_sysv_abi_push_float): Remove.
+	(ppc64_sysv_abi_push_val): New function.
+	(ppc64_sysv_abi_push_integer): Likewise.
+	(ppc64_sysv_abi_push_freg): Likewise.
+	(ppc64_sysv_abi_push_vreg): Likewise.
+	(ppc64_sysv_abi_push_param): Likewise.
+	(ppc64_sysv_abi_push_dummy_call): Refactor to use those new routines.
+	(ppc64_sysv_abi_return_value_base): New function.
+	(ppc64_sysv_abi_return_value): Refactor to use it.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* NEWS: Document new target powerpc64le-*-linux*.
 
 2014-02-04  Mark Kettenis  <kettenis@gnu.org>
