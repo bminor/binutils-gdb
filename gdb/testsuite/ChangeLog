@@ -1,3 +1,8 @@
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* gdb.base/vla-sideeffect.c: New file.
+	* gdb.base/vla-sideeffect.exp: New file.
+
 2014-04-14  David Blaikie <dblaikie@gmail.com>
 
 	* gdb.mi/non-stop.c: Add return value for non-void function return

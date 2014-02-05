@@ -1,5 +1,15 @@
 2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* eval.c (evaluate_subexp_for_sizeof): Add enum noside argument.
+	(evaluate_subexp_standard): Pass noside argument.
+	(evaluate_subexp_for_sizeof) <BINOP_SUBSCRIPT>: Handle subscript case
+	if noside equals EVAL_NORMAL. If the subscript yields a vla type
+	re-evaluate subscript operation with EVAL_NORMAL to enable sideffects.
+	* gdbtypes.c (resolve_dynamic_bounds): Mark bound as evaluated.
+	* gdbtypes.h (enum range_flags): Add RANGE_EVALUATED case.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* findvar.c (default_read_var_value): Resolve dynamic bounds if location
 	points to a constant blob.
 
