@@ -549,6 +549,7 @@ General_options::parse_dynamic_list(const char*, const char* arg,
 {
   if (!read_dynamic_list(arg, cmdline, &this->dynamic_list_))
     gold::gold_fatal(_("unable to parse dynamic-list script file %s"), arg);
+  this->have_dynamic_list_ = true;
 }
 
 void
@@ -918,6 +919,7 @@ General_options::General_options()
     do_demangle_(false),
     plugins_(NULL),
     dynamic_list_(),
+    have_dynamic_list_(false),
     incremental_mode_(INCREMENTAL_OFF),
     incremental_disposition_(INCREMENTAL_STARTUP),
     incremental_startup_disposition_(INCREMENTAL_CHECK),
@@ -1198,6 +1200,13 @@ General_options::finalize()
   // Normalize library_path() by adding the sysroot to all directories
   // in the path, as appropriate.
   this->add_sysroot();
+
+  // --dynamic-list overrides -Bsymbolic and -Bsymbolic-functions.
+  if (this->have_dynamic_list())
+    {
+      this->set_Bsymbolic(false);
+      this->set_Bsymbolic_functions(false);
+    }
 
   // Now that we've normalized the options, check for contradictory ones.
   if (this->shared() && this->is_static())
