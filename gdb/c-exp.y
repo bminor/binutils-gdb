@@ -169,8 +169,10 @@ static struct stoken operator_stoken (const char *);
 static void check_parameter_typelist (VEC (type_ptr) *);
 static void write_destructor_name (struct stoken);
 
+#ifdef YYBISON
 static void c_print_token (FILE *file, int type, YYSTYPE value);
 #define YYPRINT(FILE, TYPE, VALUE) c_print_token (FILE, TYPE, VALUE)
+#endif
 %}
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
@@ -3201,6 +3203,8 @@ c_parse (void)
   return result;
 }
 
+#ifdef YYBISON
+
 /* This is called via the YYPRINT macro when parser debugging is
    enabled.  It prints a token's value.  */
 
@@ -3254,6 +3258,8 @@ c_print_token (FILE *file, int type, YYSTYPE value)
       break;
     }
 }
+
+#endif
 
 void
 yyerror (char *msg)

@@ -1,3 +1,8 @@
+2014-02-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* c-exp.y (YYPRINT, c_print_token): Only define if YYBISON is
+	defined.
+
 2014-02-05  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (remote_pass_signals): Remove local 'buf' and use
