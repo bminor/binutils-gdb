@@ -1,3 +1,8 @@
+2014-02-06  Cary Coutant  <ccoutant@google.com>
+
+	PR binutils/16444
+	* readelf.c (print_gnu_note): Add support for NT_GNU_GOLD_VERSION.
+
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.c (print_version): Update copyright year to 2014.
