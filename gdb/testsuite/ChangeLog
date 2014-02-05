@@ -1,3 +1,8 @@
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* vla-sideeffect.c: New file.
+	* vla-sideeffect.exp: New file.
+
 2014-04-11  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/completion.exp: Check file exists before running tests

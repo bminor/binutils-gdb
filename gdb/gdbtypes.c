@@ -1708,6 +1708,7 @@ resolve_dynamic_bounds (struct type *type, CORE_ADDR addr)
   range_type = create_range_type (NULL,
 				  TYPE_TARGET_TYPE (range_type),
 				  &low_bound, &high_bound);
+  TYPE_RANGE_DATA (range_type)->flag_bound_evaluated = 1;
   return create_array_type (copy_type (type),
 			    elt_type,
 			    range_type);

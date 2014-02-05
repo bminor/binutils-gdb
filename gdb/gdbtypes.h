@@ -668,6 +668,11 @@ struct main_type
 	 subrange. This affects how the final hight bound is computed.  */
 
       int flag_upper_bound_is_count : 1;
+
+      /* True if LOW or/and HIGH are resolved into a static bound from
+	 a dynamic one.  */
+
+      int flag_bound_evaluated : 1;
     } *bounds;
 
   } flds_bnds;
