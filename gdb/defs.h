@@ -159,13 +159,9 @@ extern char *debug_file_directory;
    handler.  Otherwise, SIGINT simply sets a flag; code that might
    take a long time, and which ought to be interruptible, checks this
    flag using the QUIT macro.
-   
-   If GDB is built with Python support, it uses Python's low-level
-   interface to implement the flag.  This approach makes it possible
-   for Python and GDB SIGINT handling to coexist seamlessly.
 
-   If GDB is built without Python, it instead uses its traditional
-   variables.  */
+   These functions use the extension_language_ops API to allow extension
+   language(s) and GDB SIGINT handling to coexist seamlessly.  */
 
 /* Clear the quit flag.  */
 extern void clear_quit_flag (void);

@@ -53,7 +53,7 @@
 #include <string.h>
 
 #include "symfile.h"
-#include "python/python.h"
+#include "extension.h"
 
 void (*deprecated_selected_frame_level_changed_hook) (int);
 
@@ -1708,7 +1708,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
   int i;
   struct frame_info *trailing;
   int trailing_level, py_start = 0, py_end = 0;
-  enum py_bt_status result = PY_BT_ERROR;
+  enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
 
   if (!target_has_stack)
     error (_("No stack."));
@@ -1782,7 +1782,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
   if (! no_filters)
     {
       int flags = PRINT_LEVEL | PRINT_FRAME_INFO | PRINT_ARGS;
-      enum py_frame_args arg_type;
+      enum ext_lang_frame_args arg_type;
 
       if (show_locals)
 	flags |= PRINT_LOCALS;
@@ -1794,13 +1794,14 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
       else
 	arg_type = NO_VALUES;
 
-      result = apply_frame_filter (get_current_frame (), flags, arg_type,
-				   current_uiout, py_start, py_end);
-
+      result = apply_ext_lang_frame_filter (get_current_frame (), flags,
+					    arg_type, current_uiout,
+					    py_start, py_end);
     }
+
   /* Run the inbuilt backtrace if there are no filters registered, or
      "no-filters" has been specified from the command.  */
-  if (no_filters ||  result == PY_BT_NO_FILTERS)
+  if (no_filters ||  result == EXT_LANG_BT_NO_FILTERS)
     {
       for (i = 0, fi = trailing; fi && count--; i++, fi = get_prev_frame (fi))
 	{

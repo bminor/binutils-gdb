@@ -40,7 +40,6 @@
 #include "valprint.h"
 #include "gdb_obstack.h"
 #include "objfiles.h"
-#include "python/python.h"
 
 #include "gdb_assert.h"
 

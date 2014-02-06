@@ -30,8 +30,6 @@
 #include "cp-abi.h"
 #include "python.h"
 
-#ifdef HAVE_PYTHON
-
 #include "python-internal.h"
 
 /* Even though Python scalar types directly map to host types, we use
@@ -163,7 +161,8 @@ valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *keywords)
 /* Iterate over all the Value objects, calling preserve_one_value on
    each.  */
 void
-preserve_python_values (struct objfile *objfile, htab_t copied_types)
+gdbpy_preserve_values (const struct extension_language_defn *extlang,
+		       struct objfile *objfile, htab_t copied_types)
 {
   value_object *iter;
 
@@ -1702,13 +1701,3 @@ PyTypeObject value_object_type = {
   0,				  /* tp_alloc */
   valpy_new			  /* tp_new */
 };
-
-#else
-
-void
-preserve_python_values (struct objfile *objfile, htab_t copied_types)
-{
-  /* Nothing.  */
-}
-
-#endif /* HAVE_PYTHON */

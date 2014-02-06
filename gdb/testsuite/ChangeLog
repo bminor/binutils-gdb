@@ -1,3 +1,10 @@
+2014-02-06  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-breakpoint.exp (test_bkpt_eval_funcs): Update expected
+	output.
+
+	* gdb.gdb/python-interrupts.exp: New file.
+
 2014-02-05  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/report.exp (use_collected_data): Test the output

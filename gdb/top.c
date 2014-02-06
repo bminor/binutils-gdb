@@ -45,7 +45,7 @@
 #include "main.h"
 #include "event-loop.h"
 #include "gdbthread.h"
-#include "python/python.h"
+#include "extension.h"
 #include "interps.h"
 #include "observer.h"
 #include "maint.h"
@@ -1850,11 +1850,9 @@ gdb_init (char *argv0)
   if (deprecated_init_ui_hook)
     deprecated_init_ui_hook (argv0);
 
-#ifdef HAVE_PYTHON
-  /* Python initialization can require various commands to be
+  /* Python initialization, for example, can require various commands to be
      installed.  For example "info pretty-printer" needs the "info"
      prefix to be installed.  Keep things simple and just do final
-     python initialization here.  */
-  finish_python_initialization ();
-#endif
+     script initialization here.  */
+  finish_ext_lang_initialization ();
 }

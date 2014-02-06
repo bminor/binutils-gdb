@@ -79,7 +79,7 @@
 #undef savestring
 
 #include "mi/mi-common.h"
-#include "python/python.h"
+#include "extension.h"
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind
@@ -1047,14 +1047,18 @@ condition_command (char *arg, int from_tty)
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
       {
-	/* Check if this breakpoint has a Python object assigned to
-	   it, and if it has a definition of the "stop"
-	   method.  This method and conditions entered into GDB from
-	   the CLI are mutually exclusive.  */
-	if (b->py_bp_object
-	    && gdbpy_breakpoint_has_py_cond (b->py_bp_object))
-	  error (_("Cannot set a condition where a Python 'stop' "
-		   "method has been defined in the breakpoint."));
+	/* Check if this breakpoint has a "stop" method implemented in an
+	   extension language.  This method and conditions entered into GDB
+	   from the CLI are mutually exclusive.  */
+	const struct extension_language_defn *extlang
+	  = get_breakpoint_cond_ext_lang (b, EXT_LANG_NONE);
+
+	if (extlang != NULL)
+	  {
+	    error (_("Only one stop condition allowed.  There is currently"
+		     " a %s stop condition defined for this breakpoint."),
+		   ext_lang_capitalized_name (extlang));
+	  }
 	set_breakpoint_condition (b, p, from_tty);
 
 	if (is_breakpoint (b))
@@ -5188,9 +5192,9 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
       return;
     }
 
-  /* Evaluate Python breakpoints that have a "stop" method implemented.  */
-  if (b->py_bp_object)
-    bs->stop = gdbpy_should_stop (b->py_bp_object);
+  /* Evaluate extension language breakpoints that have a "stop" method
+     implemented.  */
+  bs->stop = breakpoint_ext_lang_cond_says_stop (b);
 
   if (is_watchpoint (b))
     {

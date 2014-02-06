@@ -52,9 +52,7 @@
 #include "ctf.h"
 #include "ada-lang.h"
 #include "linespec.h"
-#ifdef HAVE_PYTHON
-#include "python/python-internal.h"
-#endif
+#include "extension.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -1820,10 +1818,8 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "undefined-command-error-code");
       ui_out_field_string (uiout, NULL, "exec-run-start-option");
 
-#if HAVE_PYTHON
-      if (gdb_python_initialized)
+      if (ext_lang_initialized_p (get_ext_lang_defn (EXT_LANG_PYTHON)))
 	ui_out_field_string (uiout, NULL, "python");
-#endif
 
       do_cleanups (cleanup);
       return;

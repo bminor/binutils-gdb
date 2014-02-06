@@ -1,3 +1,208 @@
+2014-02-06  Doug Evans  <xdje42@gmail.com>
+
+	* configure.ac (libpython checking): Remove all but python.o from
+	CONFIG_OBS.  Remove all but python.c from CONFIG_SRCS.
+	* configure: Regenerate.
+
+	* Makefile.in (SFILES): Add extension.c.
+	(HFILES_NO_SRCDIR): Add extension.h, extension-priv.h
+	(COMMON_OBS): Add extension.o.
+	* extension.h: New file.
+	* extension-priv.h: New file.
+	* extension.c: New file.
+
+	* python/python-internal.h: #include "extension.h".
+	(gdbpy_auto_load_enabled): Declare.
+	(gdbpy_apply_val_pretty_printer): Declare.
+	(gdbpy_apply_frame_filter): Declare.
+	(gdbpy_preserve_values): Declare.
+	(gdbpy_breakpoint_cond_says_stop): Declare.
+	(gdbpy_breakpoint_has_cond): Declare.
+	(void source_python_script_for_objfile): Delete.
+	* python/python.c: #include "extension-priv.h".
+	Delete inclusion of "observer.h".
+	(extension_language_python): Moved here and renamed from
+	script_language_python in py-auto-load.c.
+	Redefined to be of type extension_language_defn.
+	(python_extension_script_ops): New global.
+	(python_extension_ops): New global.
+	(struct python_env): New member previous_active.
+	(restore_python_env): Call restore_active_ext_lang.
+	(ensure_python_env): Call set_active_ext_lang.
+	(gdbpy_clear_quit_flag): Renamed from clear_quit_flag, made static.
+	New arg extlang.
+	(gdbpy_set_quit_flag): Renamed from set_quit_flag, made static.
+	New arg extlang.
+	(gdbpy_check_quit_flag): Renamed from check_quit_flag, made static.
+	New arg extlang.
+	(gdbpy_eval_from_control_command): Renamed from
+	eval_python_from_control_command, made static.  New arg extlang.
+	(gdbpy_source_script) Renamed from source_python_script, made static.
+	New arg extlang.
+	(gdbpy_before_prompt_hook): Renamed from before_prompt_hook.  Change
+	result to int.  New arg extlang.
+	(gdbpy_source_objfile_script): Renamed from
+	source_python_script_for_objfile, made static.  New arg extlang.
+	(gdbpy_start_type_printers): Renamed from start_type_printers, made
+	static.  New args extlang, extlang_printers.  Change result type to
+	"void".
+	(gdbpy_apply_type_printers): Renamed from apply_type_printers, made
+	static.  New arg extlang.  Rename arg printers to extlang_printers
+	and change type to ext_lang_type_printers *.
+	(gdbpy_free_type_printers): Renamed from free_type_printers, made
+	static.  Replace argument arg with extlang, extlang_printers.
+	(!HAVE_PYTHON, eval_python_from_control_command): Delete.
+	(!HAVE_PYTHON, source_python_script): Delete.
+	(!HAVE_PYTHON, gdbpy_should_stop): Delete.
+	(!HAVE_PYTHON, gdbpy_breakpoint_has_py_cond): Delete.
+	(!HAVE_PYTHON, start_type_printers): Delete.
+	(!HAVE_PYTHON, apply_type_printers): Delete.
+	(!HAVE_PYTHON, free_type_printers): Delete.
+	(_initialize_python): Delete call to observer_attach_before_prompt.
+	(finalize_python): Set/restore active extension language.
+	(gdbpy_finish_initialization) Renamed from
+	finish_python_initialization, made static.  New arg extlang.
+	(gdbpy_initialized): New function.
+	* python/python.h: #include "extension.h".  Delete #include
+	"value.h", "mi/mi-cmds.h".
+	(extension_language_python): Declare.
+	(GDBPY_AUTO_FILE_NAME): Delete.
+	(enum py_bt_status): Moved to extension.h and renamed to
+	ext_lang_bt_status.
+	(enum frame_filter_flags): Moved to extension.h.
+	(enum py_frame_args): Moved to extension.h and renamed to
+	ext_lang_frame_args.
+	(finish_python_initialization): Delete.
+	(eval_python_from_control_command): Delete.
+	(source_python_script): Delete.
+	(apply_val_pretty_printer): Delete.
+	(apply_frame_filter): Delete.
+	(preserve_python_values): Delete.
+	(gdbpy_script_language_defn): Delete.
+	(gdbpy_should_stop, gdbpy_breakpoint_has_py_cond): Delete.
+	(start_type_printers, apply_type_printers, free_type_printers): Delete.
+
+	* auto-load.c: #include "extension.h".
+	(GDB_AUTO_FILE_NAME): Delete.
+	(auto_load_gdb_scripts_enabled): Make public.  New arg extlang.
+	(script_language_gdb): Delete, moved to extension.c and renamed to
+	extension_language_gdb.
+	(source_gdb_script_for_objfile): Delete.
+	(auto_load_pspace_info): New member unsupported_script_warning_printed.
+	(loaded_script): Change type of language member to
+	struct extension_language_defn *.
+	(init_loaded_scripts_info): Initialize
+	unsupported_script_warning_printed.
+	(maybe_add_script): Make static.  Change type of language arg to
+	struct extension_language_defn *.
+	(clear_section_scripts): Reset unsupported_script_warning_printed.
+	(auto_load_objfile_script_1): Rewrite to use extension language API.
+	(auto_load_objfile_script): Make public.  Remove support-compiled-in
+	and auto-load-enabled checks, moved to auto_load_scripts_for_objfile.
+	(source_section_scripts): Rewrite to use extension language API.
+	(load_auto_scripts_for_objfile): Rewrite to use
+	auto_load_scripts_for_objfile.
+	(collect_matching_scripts_data): Change type of language member to
+	struct extension_language_defn *.
+	(auto_load_info_scripts): Change type of language arg to
+	struct extension_language_defn *.
+	(unsupported_script_warning_print): New function.
+	(script_not_found_warning_print): Make static.
+	(_initialize_auto_load): Rewrite construction of scripts-directory
+	help.
+	* auto-load.h (struct objfile): Add forward decl.
+	(struct script_language): Delete.
+	(struct auto_load_pspace_info): Add forward decl.
+	(struct extension_language_defn): Add forward decl.
+	(maybe_add_script): Delete.
+	(auto_load_objfile_script): Declare.
+	(script_not_found_warning_print): Delete.
+	(auto_load_info_scripts): Update prototype.
+	(auto_load_gdb_scripts_enabled): Declare.
+	* python/py-auto-load.c (gdbpy_auto_load_enabled): Renamed from
+	auto_load_python_scripts_enabled and made public.
+	(script_language_python): Delete, moved to python.c.
+	(gdbpy_script_language_defn): Delete.
+	(info_auto_load_python_scripts): Update to use
+	extension_language_python.
+
+	* breakpoint.c (condition_command): Replace call to
+	gdbpy_breakpoint_has_py_cond with call to get_breakpoint_cond_ext_lang.
+	(bpstat_check_breakpoint_conditions): Replace call to gdbpy_should_stop
+	with call to breakpoint_ext_lang_cond_says_stop.
+	* python/py-breakpoint.c (gdbpy_breakpoint_cond_says_stop): Renamed
+	from gdbpy_should_stop.  Change result type to enum scr_bp_stop.
+	New arg slang.  Return SCR_BP_STOP_UNSET if py_bp_object is NULL.
+	(gdbpy_breakpoint_has_cond): Renamed from gdbpy_breakpoint_has_py_cond.
+	New arg slang.
+	(local_setattro): Print name of extension language with existing
+	stop condition.
+
+	* valprint.c (val_print, value_print): Update to call
+	apply_ext_lang_val_pretty_printer.
+	* cp-valprint.c (cp_print_value): Update call to
+	apply_ext_lang_val_pretty_printer.
+	* python/py-prettyprint.c: Remove #ifdef HAVE_PYTHON.
+	(gdbpy_apply_val_pretty_printer): Renamed from
+	apply_val_pretty_printer.  New arg extlang.
+	(!HAVE_PYTHON, apply_val_pretty_printer): Delete.
+
+	* cli/cli-cmds.c (source_script_from_stream): Rewrite to use
+	extension language API.
+	* cli/cli-script.c (execute_control_command): Update to call
+	eval_ext_lang_from_control_command.
+
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames): Update to use
+	enum ext_lang_bt_status values.  Update call to
+	apply_ext_lang_frame_filter.
+	(mi_cmd_stack_list_locals): Ditto.
+	(mi_cmd_stack_list_args): Ditto.
+	(mi_cmd_stack_list_variables): Ditto.
+	* mi/mi-main.c: Delete #include "python/python-internal.h".
+	Add #include "extension.h".
+	(mi_cmd_list_features): Replace reference to python internal variable
+	gdb_python_initialized with call to ext_lang_initialized_p.
+
+	* stack.c (backtrace_command_1): Update to use enum ext_lang_bt_status.
+	Update to use enum ext_lang_frame_args.  Update to call
+	apply_ext_lang_frame_filter.
+	* python/py-framefilter.c (extract_sym): Update to use enum
+	ext_lang_bt_status.
+	(extract_value, py_print_type, py_print_value): Ditto.
+	(py_print_single_arg, enumerate_args, enumerate_locals): Ditto.
+	(py_mi_print_variables, py_print_locals, py_print_args): Ditto.
+	(py_print_frame): Ditto.
+	(gdbpy_apply_frame_filter): Renamed from apply_frame_filter.
+	New arg extlang.  Update to use enum ext_lang_bt_status.
+
+	* top.c (gdb_init): Delete #ifdef HAVE_PYTHON call to
+	finish_python_initialization.  Replace with call to
+	finish_ext_lang_initialization.
+
+	* typeprint.c (do_free_global_table): Update to call
+	free_ext_lang_type_printers.
+	(create_global_typedef_table): Update to call
+	start_ext_lang_type_printers.
+	(find_global_typedef): Update to call apply_ext_lang_type_printers.
+	* typeprint.h (struct ext_lang_type_printers): Add forward decl.
+	(type_print_options): Change type of global_printers from "void *"
+	to "struct ext_lang_type_printers *".
+
+	* value.c (preserve_values): Update to call preserve_ext_lang_values.
+	* python/py-value.c: Remove #ifdef HAVE_PYTHON.
+	(gdbpy_preserve_values): Renamed from preserve_python_values.
+	New arg extlang.
+	(!HAVE_PYTHON, preserve_python_values): Delete.
+
+	* utils.c (quit_flag): Delete, moved to extension.c.
+	(clear_quit_flag, set_quit_flag, check_quit_flag): Delete, moved to
+	extension.c.
+
+	* eval.c: Delete #include "python/python.h".
+	* main.c: Delete #include "python/python.h".
+
+	* defs.h: Update comment.
+
 2014-02-06  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.7 released.

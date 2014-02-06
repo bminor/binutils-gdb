@@ -39,7 +39,6 @@
 #include "main.h"
 #include "source.h"
 #include "cli/cli-cmds.h"
-#include "python/python.h"
 #include "objfiles.h"
 #include "auto-load.h"
 #include "maint.h"

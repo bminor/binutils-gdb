@@ -32,7 +32,7 @@
 #include "cli/cli-script.h"
 #include "gdb_assert.h"
 
-#include "python/python.h"
+#include "extension.h"
 #include "interps.h"
 
 /* Prototypes for local functions.  */
@@ -590,7 +590,7 @@ execute_control_command (struct command_line *cmd)
 
     case python_control:
       {
-	eval_python_from_control_command (cmd);
+	eval_ext_lang_from_control_command (cmd);
 	ret = simple_control;
 	break;
       }
