@@ -1,3 +1,8 @@
+2014-02-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix i386-sse-stack-align.exp regression since GDB_PARALLEL.
+	* gdb.arch/i386-sse-stack-align.exp: Use standard_output_file.
+
 2014-02-06  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.python/py-breakpoint.exp (test_bkpt_eval_funcs): Update expected
