@@ -1,5 +1,9 @@
 2014-02-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 7.7.
+
+2014-02-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Change "Changes since GDB 7.6" to "Changes in GDB 7.7".
 
 2014-02-05  Yao Qi  <yao@codesourcery.com>
