@@ -1,0 +1,95 @@
+diff --git a/ChangeLog.pr16530 b/ChangeLog.pr16530
+new file mode 100644
+index 0000000..50aaa99
+--- /dev/null
++++ b/ChangeLog.pr16530
+@@ -0,0 +1,18 @@
++bfd/
++
++2014-02-06  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR gold/16530
++	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Mark symbol in
++	executables if it matches dynamic_list.
++
++ld/testsuite/
++
++2014-02-06  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR gold/16530
++	* ld-elf/dynamic-1.c: New file.
++	* ld-elf/dynamic-1.rd: Likewise.
++	* ld-elf/dynamic-1.syms: Likewise.
++
++	* ld-elf/shared.exp (build_tests): Add dynamic-1.
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index 88967c8..a783dd3 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -12131,11 +12131,15 @@ bfd_boolean
+ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
+ {
+   struct bfd_link_info *info = (struct bfd_link_info *) inf;
++  struct bfd_elf_dynamic_list *d = info->dynamic_list;
+ 
+   if ((h->root.type == bfd_link_hash_defined
+        || h->root.type == bfd_link_hash_defweak)
+       && (h->ref_dynamic
+-	  || ((!info->executable || info->export_dynamic)
++	  || ((!info->executable
++	       || info->export_dynamic
++	       || (d != NULL
++		   && (*d->match) (&d->head, NULL, h->root.root.string)))
+ 	      && h->def_regular
+ 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
+ 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
+diff --git a/ld/testsuite/ld-elf/dynamic-1.c b/ld/testsuite/ld-elf/dynamic-1.c
+new file mode 100644
+index 0000000..439ffd1
+--- /dev/null
++++ b/ld/testsuite/ld-elf/dynamic-1.c
+@@ -0,0 +1,10 @@
++void
++dynamic ()
++{
++}
++
++int
++main ()
++{
++  return 0;
++}
+diff --git a/ld/testsuite/ld-elf/dynamic-1.rd b/ld/testsuite/ld-elf/dynamic-1.rd
+new file mode 100644
+index 0000000..2c2f23b
+--- /dev/null
++++ b/ld/testsuite/ld-elf/dynamic-1.rd
+@@ -0,0 +1,5 @@
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +FUNC +GLOBAL +DEFAULT +[0-9]+ +_?dynamic
++#...
+diff --git a/ld/testsuite/ld-elf/dynamic-1.syms b/ld/testsuite/ld-elf/dynamic-1.syms
+new file mode 100644
+index 0000000..c9517f8
+--- /dev/null
++++ b/ld/testsuite/ld-elf/dynamic-1.syms
+@@ -0,0 +1,3 @@
++{
++  dynamic;
++};
+diff --git a/ld/testsuite/ld-elf/shared.exp b/ld/testsuite/ld-elf/shared.exp
+index 981ce71..949851f 100644
+--- a/ld/testsuite/ld-elf/shared.exp
++++ b/ld/testsuite/ld-elf/shared.exp
+@@ -236,6 +236,9 @@ set build_tests {
+   {"Build libpr16496b.so"
+    "-shared tmpdir/pr16496b.o tmpdir/libpr16496a.so" ""
+    {dummy.c} {{objdump {-R} pr16496b.od}} "libpr16496b.so"}
++  {"Build dynamic-1"
++   "-Wl,--dynamic-list,dynamic-1.syms -Wl,--gc-sections" "-ffunction-sections"
++   {dynamic-1.c} {{readelf {-s} dynamic-1.rd}} "dynamic-1"}
+ }
+ 
+ run_cc_link_tests $build_tests
