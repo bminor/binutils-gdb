@@ -1,3 +1,44 @@
+2014-02-06  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-breakpoint.exp (test_bkpt_eval_funcs): Update expected
+	output.
+
+	* gdb.gdb/python-interrupts.exp: New file.
+
+2014-02-05  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/report.exp (use_collected_data): Test the output
+	of "info threads" and "info inferiors".
+
+2014-02-05  Yao Qi  <yao@codesourcery.com>
+
+	Revert this patch:
+
+	2013-05-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.exp: Test inferior and thread.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/sigbpt.exp: Do not use "*" when setting breakpoint
+	on a function.
+	* gdb.base/step-bt.c: Call hello via function pointer to make
+	sure its first instruction is executed on powerpc64le-linux.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/powerpc-d128-regs.exp: Enable on powerpc64*-*.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/vsx-regs.exp: Check target endianness.  Provide variants
+	of the test patterns for use on little-endian systems.
+
+2014-02-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/altivec-regs.exp: Use gdb_test_multiple for endian test.
+	(decimal_vector): Fix for little-endian.
+
 2014-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gdb.arch/sparc-sysstep.exp: New file.

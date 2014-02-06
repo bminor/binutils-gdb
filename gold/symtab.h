@@ -576,8 +576,14 @@ class Symbol
     if (!parameters->options().shared())
       return false;
 
-    // If the user used -Bsymbolic, then nothing is preemptible.
-    if (parameters->options().Bsymbolic())
+    // If the symbol was named in a --dynamic-list script, it is preemptible.
+    if (parameters->options().in_dynamic_list(this->name()))
+      return true;
+
+    // If the user used -Bsymbolic or provided a --dynamic-list script,
+    // then nothing (else) is preemptible.
+    if (parameters->options().Bsymbolic()
+        || parameters->options().have_dynamic_list())
       return false;
 
     // If the user used -Bsymbolic-functions, then functions are not

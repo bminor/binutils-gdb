@@ -112,12 +112,6 @@ static int debug_timestamp = 0;
 
 int job_control;
 
-#ifndef HAVE_PYTHON
-/* Nonzero means a quit has been requested.  */
-
-int quit_flag;
-#endif /* HAVE_PYTHON */
-
 /* Nonzero means quit immediately if Control-C is typed now, rather
    than waiting until QUIT is executed.  Be careful in setting this;
    code which executes with immediate_quit set has to be very careful
@@ -130,41 +124,6 @@ int quit_flag;
    expect to block), call QUIT after setting immediate_quit.  */
 
 int immediate_quit;
-
-#ifndef HAVE_PYTHON
-
-/* Clear the quit flag.  */
-
-void
-clear_quit_flag (void)
-{
-  quit_flag = 0;
-}
-
-/* Set the quit flag.  */
-
-void
-set_quit_flag (void)
-{
-  quit_flag = 1;
-}
-
-/* Return true if the quit flag has been set, false otherwise.  */
-
-int
-check_quit_flag (void)
-{
-  /* This is written in a particular way to avoid races.  */
-  if (quit_flag)
-    {
-      quit_flag = 0;
-      return 1;
-    }
-
-  return 0;
-}
-
-#endif /* HAVE_PYTHON */
 
 /* Nonzero means that strings with character values >0x7F should be printed
    as octal escapes.  Zero means just print the value (e.g. it's an

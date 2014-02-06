@@ -1,3 +1,13 @@
+2014-02-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* ld-scripts/rgn-at9.d: New file.
+	* ld-scripts/rgn-at9.t: Likewise.
+	* ld-scripts/rgn-at10.d: Likewise.
+	* ld-scripts/rgn-at10.s: Likewise.
+	* ld-scripts/rgn-at10.t: Likewise.
+	* ld-scripts/rgn-at11.d: Likewise.
+	* ld-scripts/rgn-at11.t: Likewise.
+
 2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* ld-nios2/relax_call26.s: New.

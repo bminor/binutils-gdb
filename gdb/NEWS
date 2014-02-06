@@ -51,6 +51,9 @@ qXfer:btrace:read's annex
   The qXfer:btrace:read packet supports a new annex 'delta' to read
   branch trace incrementally.
 
+* New targets
+PowerPC64 GNU/Linux little-endian	powerpc64le-*-linux*
+
 *** Changes in GDB 7.7
 
 * Improved support for process record-replay and reverse debugging on

@@ -1437,6 +1437,7 @@ typedef struct bfd_section
 #define SEC_INFO_TYPE_MERGE     2
 #define SEC_INFO_TYPE_EH_FRAME  3
 #define SEC_INFO_TYPE_JUST_SYMS 4
+#define SEC_INFO_TYPE_TARGET    5
 
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;
@@ -5226,6 +5227,10 @@ a matching LO8XG part.  */
   BFD_RELOC_NIOS2_RELATIVE,
   BFD_RELOC_NIOS2_GOTOFF,
   BFD_RELOC_NIOS2_CALL26_NOAT,
+  BFD_RELOC_NIOS2_GOT_LO,
+  BFD_RELOC_NIOS2_GOT_HA,
+  BFD_RELOC_NIOS2_CALL_LO,
+  BFD_RELOC_NIOS2_CALL_HA,
 
 /* IQ2000 Relocations.  */
   BFD_RELOC_IQ2000_OFFSET_16,

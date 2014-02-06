@@ -26,9 +26,29 @@ enum ppc_elf_plt_type
   PLT_VXWORKS
 };
 
-int ppc_elf_select_plt_layout (bfd *, struct bfd_link_info *,
-			       enum ppc_elf_plt_type, int);
-asection *ppc_elf_tls_setup (bfd *, struct bfd_link_info *, int);
+/* Various options passed from the linker to bfd backend.  */
+struct ppc_elf_params
+{
+  /* Chooses the type of .plt.  */
+  enum ppc_elf_plt_type plt_style;
+
+  /* Whether to emit symbols for stubs.  */
+  int emit_stub_syms;
+
+  /* Whether to emit special stub for __tls_get_addr calls.  */
+  int no_tls_get_addr_opt;
+
+  /* Insert trampolines for branches that won't reach their destination.  */
+  int branch_trampolines;
+
+  /* Avoid execution falling into new page.  */
+  int ppc476_workaround;
+  int pagesize;
+};
+
+void ppc_elf_link_params (struct bfd_link_info *, struct ppc_elf_params *);
+int ppc_elf_select_plt_layout (bfd *, struct bfd_link_info *);
+asection *ppc_elf_tls_setup (bfd *, struct bfd_link_info *);
 bfd_boolean ppc_elf_tls_optimize (bfd *, struct bfd_link_info *);
 void ppc_elf_set_sdata_syms (bfd *, struct bfd_link_info *);
 extern bfd_boolean ppc_elf_modify_segment_map (bfd *,

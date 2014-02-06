@@ -38,7 +38,7 @@
 #include "valprint.h"
 #include "cli/cli-decode.h"
 #include "exceptions.h"
-#include "python/python.h"
+#include "extension.h"
 #include <ctype.h>
 #include "tracepoint.h"
 #include "cp-abi.h"
@@ -2405,7 +2405,7 @@ preserve_values (struct objfile *objfile)
   for (var = internalvars; var; var = var->next)
     preserve_one_internalvar (var, objfile, copied_types);
 
-  preserve_python_values (objfile, copied_types);
+  preserve_ext_lang_values (objfile, copied_types);
 
   htab_delete (copied_types);
 }

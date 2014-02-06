@@ -197,7 +197,7 @@ proc use_collected_data { data_source } {
 	global tdp1 tdp2 tdp3 tdp4 tdp5 tdp6
 	global testline1 testline2 testline3 testline4 testline5 testline6
 	global pcreg fpreg spreg
-	global srcfile srcdir subdir
+	global srcfile srcdir subdir binfile
 	global arg1 arg3
 	global decimal hex gdb_prompt
 	#
@@ -397,6 +397,11 @@ proc use_collected_data { data_source } {
 		}
 	    }
 	}
+
+	# There is always a thread of an inferior, either a live one or
+	# a faked one.
+	gdb_test "info threads" "\\* ${decimal}    (process|Thread) ${decimal}\[ \t\].*"
+	gdb_test "info inferiors" "\\* 1    process ${decimal} \[ \t\]+${binfile}.*"
     }
 }
 

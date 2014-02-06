@@ -102,7 +102,7 @@ mmix_after_allocation (void)
      This section is only present when there are register symbols.  */
   sec = bfd_get_section_by_name (link_info.output_bfd, MMIX_REG_SECTION_NAME);
   if (sec != NULL)
-    bfd_set_section_vma (abfd, sec, 0);
+    bfd_set_section_vma (sec->owner, sec, 0);
 
   if (!_bfd_mmix_after_linker_allocation (link_info.output_bfd, &link_info))
     {

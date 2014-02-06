@@ -1258,7 +1258,8 @@ Symbol_table::add_from_relobj(
 	  && res->is_externally_visible()
 	  && !res->is_from_dynobj()
           && (parameters->options().shared()
-	      || parameters->options().export_dynamic()))
+	      || parameters->options().export_dynamic()
+	      || parameters->options().in_dynamic_list(res->name())))
         this->gc_mark_symbol(res);
 
       if (is_defined_in_discarded_section)

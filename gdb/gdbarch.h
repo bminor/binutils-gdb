@@ -486,6 +486,24 @@ typedef CORE_ADDR (gdbarch_skip_main_prologue_ftype) (struct gdbarch *gdbarch, C
 extern CORE_ADDR gdbarch_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern void set_gdbarch_skip_main_prologue (struct gdbarch *gdbarch, gdbarch_skip_main_prologue_ftype *skip_main_prologue);
 
+/* On some platforms, a single function may provide multiple entry points,
+   e.g. one that is used for function-pointer calls and a different one
+   that is used for direct function calls.
+   In order to ensure that breakpoints set on the function will trigger
+   no matter via which entry point the function is entered, a platform
+   may provide the skip_entrypoint callback.  It is called with IP set
+   to the main entry point of a function (as determined by the symbol table),
+   and should return the address of the innermost entry point, where the
+   actual breakpoint needs to be set.  Note that skip_entrypoint is used
+   by GDB common code even when debugging optimized code, where skip_prologue
+   is not used. */
+
+extern int gdbarch_skip_entrypoint_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_skip_entrypoint_ftype) (struct gdbarch *gdbarch, CORE_ADDR ip);
+extern CORE_ADDR gdbarch_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR ip);
+extern void set_gdbarch_skip_entrypoint (struct gdbarch *gdbarch, gdbarch_skip_entrypoint_ftype *skip_entrypoint);
+
 typedef int (gdbarch_inner_than_ftype) (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int gdbarch_inner_than (struct gdbarch *gdbarch, CORE_ADDR lhs, CORE_ADDR rhs);
 extern void set_gdbarch_inner_than (struct gdbarch *gdbarch, gdbarch_inner_than_ftype *inner_than);

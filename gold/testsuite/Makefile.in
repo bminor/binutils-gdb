@@ -78,7 +78,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = incremental_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.sh gc_tls_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.sh icf_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_dynamic_list_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_so_test.sh \
@@ -109,7 +111,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.stdout icf_test.map \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_dynamic_list_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.map \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test_1.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test_2.stdout \
@@ -132,7 +136,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test.cmdline \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test gc_tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test pr14265 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_test.map \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_dynamic_list_test icf_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.map \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test icf_safe_test.map \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_so_test \
@@ -318,6 +323,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_phdrs_script_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test script_test_11 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2
 @GCC_FALSE@script_test_1_DEPENDENCIES =
@@ -823,6 +829,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_phdrs_script_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_11$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__EXEEXT_23 = plugin_test_1$(EXEEXT) \
@@ -967,6 +974,11 @@ discard_locals_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 discard_locals_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(discard_locals_test_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_dynamic_list_2_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list_2.$(OBJEXT)
+dynamic_list_2_OBJECTS = $(am_dynamic_list_2_OBJECTS)
+dynamic_list_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(dynamic_list_2_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_exception_same_shared_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_main.$(OBJEXT)
 exception_same_shared_test_OBJECTS =  \
@@ -1773,6 +1785,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(common_test_1_SOURCES) $(common_test_2_SOURCES) \
 	$(constructor_static_test_SOURCES) $(constructor_test_SOURCES) \
 	$(copy_test_SOURCES) $(discard_locals_test_SOURCES) \
+	$(dynamic_list_2_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
 	$(exception_separate_shared_12_test_SOURCES) \
 	$(exception_separate_shared_21_test_SOURCES) \
@@ -2516,6 +2529,10 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@tls_script_test_DEPENDENCIES = $(tls_test_DEPENDENCIES) $(srcdir)/script_test_4.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@tls_script_test_LDFLAGS = $(tls_test_LDFLAGS) -Wl,-T,$(srcdir)/script_test_4.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@tls_script_test_LDADD = $(tls_test_LDADD)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list_2_SOURCES = dynamic_list_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list_2_DEPENDENCIES = gcctestdir/ld dynamic_list_lib1.so dynamic_list_lib2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list_2_LDFLAGS = -Bgcctestdir/ -L. -Wl,-R,. -Wl,--no-as-needed
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list_2_LDADD = dynamic_list_lib1.so dynamic_list_lib2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_SOURCES = thin_archive_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_DEPENDENCIES = gcctestdir/ld libthin1.a alt/libthin2.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_LDFLAGS = -Bgcctestdir/ -Lalt
@@ -2711,6 +2728,9 @@ copy_test$(EXEEXT): $(copy_test_OBJECTS) $(copy_test_DEPENDENCIES)
 discard_locals_test$(EXEEXT): $(discard_locals_test_OBJECTS) $(discard_locals_test_DEPENDENCIES) 
 	@rm -f discard_locals_test$(EXEEXT)
 	$(discard_locals_test_LINK) $(discard_locals_test_OBJECTS) $(discard_locals_test_LDADD) $(LIBS)
+dynamic_list_2$(EXEEXT): $(dynamic_list_2_OBJECTS) $(dynamic_list_2_DEPENDENCIES) 
+	@rm -f dynamic_list_2$(EXEEXT)
+	$(dynamic_list_2_LINK) $(dynamic_list_2_OBJECTS) $(dynamic_list_2_LDADD) $(LIBS)
 exception_same_shared_test$(EXEEXT): $(exception_same_shared_test_OBJECTS) $(exception_same_shared_test_DEPENDENCIES) 
 	@rm -f exception_same_shared_test$(EXEEXT)
 	$(exception_same_shared_test_LINK) $(exception_same_shared_test_OBJECTS) $(exception_same_shared_test_LDADD) $(LIBS)
@@ -3449,6 +3469,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constructor_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copy_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/discard_locals_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynamic_list_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_main.Po@am__quote@
@@ -3808,6 +3829,8 @@ gc_orphan_section_test.sh.log: gc_orphan_section_test.sh
 	@p='gc_orphan_section_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 pr14265.sh.log: pr14265.sh
 	@p='pr14265.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+gc_dynamic_list_test.sh.log: gc_dynamic_list_test.sh
+	@p='gc_dynamic_list_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_test.sh.log: icf_test.sh
 	@p='icf_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_keep_unique_test.sh.log: icf_keep_unique_test.sh
@@ -4134,6 +4157,8 @@ tls_script_test.log: tls_script_test$(EXEEXT)
 	@p='tls_script_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_11.log: script_test_11$(EXEEXT)
 	@p='script_test_11$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+dynamic_list_2.log: dynamic_list_2$(EXEEXT)
+	@p='dynamic_list_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 thin_archive_test_1.log: thin_archive_test_1$(EXEEXT)
 	@p='thin_archive_test_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 thin_archive_test_2.log: thin_archive_test_2$(EXEEXT)
@@ -4451,6 +4476,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -Wl,-T,$(srcdir)/pr14265.t -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pr14265.stdout: pr14265
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) --format=bsd --numeric-sort $< > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_dynamic_list_test.o: gc_dynamic_list_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -ffunction-sections -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_dynamic_list_test: gc_dynamic_list_test.o gcctestdir/ld $(srcdir)/gc_dynamic_list_test.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -Wl,--dynamic-list,$(srcdir)/gc_dynamic_list_test.t gc_dynamic_list_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_dynamic_list_test.stdout: gc_dynamic_list_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) gc_dynamic_list_test > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test.o: icf_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test: icf_test.o gcctestdir/ld
@@ -4979,6 +5010,16 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list.stdout: dynamic_list
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -W --dyn-syms dynamic_list > dynamic_list.stdout
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list_lib1.so: gcctestdir/ld dynamic_list_lib1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared dynamic_list_lib1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list_lib1.o: dynamic_list_lib1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list_lib2.so: gcctestdir/ld dynamic_list_lib2.o $(srcdir)/dynamic_list_2.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--dynamic-list,$(srcdir)/dynamic_list_2.t dynamic_list_lib2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list_lib2.o: dynamic_list_lib2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@libthin1.a: thin_archive_test_1.o alt/thin_archive_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@

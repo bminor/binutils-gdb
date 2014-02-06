@@ -13576,6 +13576,17 @@ print_gnu_note (Elf_Internal_Note *pnote)
 		major, minor, subminor);
       }
       break;
+
+    case NT_GNU_GOLD_VERSION:
+      {
+	unsigned long i;
+
+	printf (_("    Version: "));
+	for (i = 0; i < pnote->descsz && pnote->descdata[i] != '\0'; ++i)
+	  printf ("%c", pnote->descdata[i]);
+	printf ("\n");
+      }
+      break;
     }
 
   return 1;

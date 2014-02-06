@@ -372,7 +372,7 @@ proc test_bkpt_eval_funcs { } {
 	    "Set breakpoint" 0
 	set test_cond {cond $bpnum}
 	gdb_test "$test_cond \"foo==3\"" \
-	    "Cannot set a condition where a Python.*" \
+	    "Only one stop condition allowed.  There is currently a Python.*" \
 	    "Check you cannot add a CLI condition to a Python breakpoint that has defined stop"
 	gdb_py_test_silent_cmd "python eval_bp2 = basic(\"$cond_bp\")" \
 	    "Set breakpoint" 0
@@ -385,7 +385,7 @@ proc test_bkpt_eval_funcs { } {
 	    "end" ""
 
 	gdb_test "python eval_bp2.stop = stop_func"  \
-	    "RuntimeError: Cannot set 'stop' method.*" \
+	    "RuntimeError: Only one stop condition allowed.  There is currently a GDB.*" \
 	    "Assign stop function to a breakpoint that has a condition"
 
 	delete_breakpoints

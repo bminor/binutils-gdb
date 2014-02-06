@@ -32,7 +32,7 @@
 #include "doublest.h"
 #include "exceptions.h"
 #include "dfp.h"
-#include "python/python.h"
+#include "extension.h"
 #include "ada-lang.h"
 #include "gdb_obstack.h"
 #include "charset.h"
@@ -770,9 +770,9 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
   if (!options->raw)
     {
-      ret = apply_val_pretty_printer (type, valaddr, embedded_offset,
-				      address, stream, recurse,
-				      val, options, language);
+      ret = apply_ext_lang_val_pretty_printer (type, valaddr, embedded_offset,
+					       address, stream, recurse,
+					       val, options, language);
       if (ret)
 	return;
     }
@@ -876,12 +876,13 @@ value_print (struct value *val, struct ui_file *stream,
 
   if (!options->raw)
     {
-      int r = apply_val_pretty_printer (value_type (val),
-					value_contents_for_printing (val),
-					value_embedded_offset (val),
-					value_address (val),
-					stream, 0,
-					val, options, current_language);
+      int r
+	= apply_ext_lang_val_pretty_printer (value_type (val),
+					     value_contents_for_printing (val),
+					     value_embedded_offset (val),
+					     value_address (val),
+					     stream, 0,
+					     val, options, current_language);
 
       if (r)
 	return;

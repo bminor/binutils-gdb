@@ -50,7 +50,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-utils.h"
 
-#include "python/python.h"
+#include "extension.h"
 
 #ifdef TUI
 #include "tui/tui.h"	/* For tui_active et.al.  */
@@ -522,21 +522,33 @@ find_and_open_script (const char *script_file, int search_path,
 static void
 source_script_from_stream (FILE *stream, const char *file)
 {
-  if (script_ext_mode != script_ext_off
-      && strlen (file) > 3 && !strcmp (&file[strlen (file) - 3], ".py"))
+  if (script_ext_mode != script_ext_off)
     {
-      if (have_python ())
-	source_python_script (stream, file);
-      else if (script_ext_mode == script_ext_soft)
+      const struct extension_language_defn *extlang
+	= get_ext_lang_of_file (file);
+
+      if (extlang != NULL)
 	{
-	  /* Fallback to GDB script mode.  */
-	  script_from_file (stream, file);
+	  if (ext_lang_present_p (extlang))
+	    {
+	      script_sourcer_func *sourcer
+		= ext_lang_script_sourcer (extlang);
+
+	      gdb_assert (sourcer != NULL);
+	      sourcer (extlang, stream, file);
+	      return;
+	    }
+	  else if (script_ext_mode == script_ext_soft)
+	    {
+	      /* Assume the file is a gdb script.
+		 This is handled below.  */
+	    }
+	  else
+	    throw_ext_lang_unsupported (extlang);
 	}
-      else
-	error (_("Python scripting is not supported in this copy of GDB."));
     }
-  else
-    script_from_file (stream, file);
+
+  script_from_file (stream, file);
 }
 
 /* Worker to perform the "source" command.

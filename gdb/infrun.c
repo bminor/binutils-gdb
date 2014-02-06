@@ -3159,6 +3159,10 @@ fill_in_stop_func (struct gdbarch *gdbarch,
       ecs->stop_func_start
 	+= gdbarch_deprecated_function_start_offset (gdbarch);
 
+      if (gdbarch_skip_entrypoint_p (gdbarch))
+	ecs->stop_func_start = gdbarch_skip_entrypoint (gdbarch,
+							ecs->stop_func_start);
+
       ecs->stop_func_filled_in = 1;
     }
 }

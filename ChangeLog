@@ -1,3 +1,9 @@
+2014-02-04  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR target/59788
+	* ltmain.sh (opt_duplicate_compiler_generated_deps): Enable on
+	*solaris2*.
+
 2013-12-19  Keven Boell  <keven.boell@intel.com>
 
 	* cp-namespace.c (cp_lookup_nested_symbol): Enable

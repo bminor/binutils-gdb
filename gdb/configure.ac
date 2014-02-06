@@ -1045,11 +1045,10 @@ if test "${have_libpython}" != no; then
   AC_MSG_RESULT(${python_has_threads})
   CPPFLAGS="${saved_CPPFLAGS}"
 else
-  # Even if Python support is not compiled in, we need to have these files
-  # included.
-  CONFIG_OBS="$CONFIG_OBS python.o py-value.o py-prettyprint.o py-auto-load.o"
-  CONFIG_SRCS="$CONFIG_SRCS python/python.c python/py-value.c \
-	python/py-prettyprint.c python/py-auto-load.c"
+  # Even if Python support is not compiled in, we need to have this file
+  # included so that the "python" command, et.al., still exists.
+  CONFIG_OBS="$CONFIG_OBS python.o"
+  CONFIG_SRCS="$CONFIG_SRCS python/python.c"
 fi
 AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_CPPFLAGS)

@@ -530,6 +530,19 @@ m:int:return_in_first_hidden_param_p:struct type *type:type::default_return_in_f
 
 m:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 M:CORE_ADDR:skip_main_prologue:CORE_ADDR ip:ip
+# On some platforms, a single function may provide multiple entry points,
+# e.g. one that is used for function-pointer calls and a different one
+# that is used for direct function calls.
+# In order to ensure that breakpoints set on the function will trigger
+# no matter via which entry point the function is entered, a platform
+# may provide the skip_entrypoint callback.  It is called with IP set
+# to the main entry point of a function (as determined by the symbol table),
+# and should return the address of the innermost entry point, where the
+# actual breakpoint needs to be set.  Note that skip_entrypoint is used
+# by GDB common code even when debugging optimized code, where skip_prologue
+# is not used.
+M:CORE_ADDR:skip_entrypoint:CORE_ADDR ip:ip
+
 f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
 m:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
 # Return the adjusted address and kind to use for Z0/Z1 packets.

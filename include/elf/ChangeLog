@@ -1,3 +1,9 @@
+2014-02-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2.h (R_NIOS2_GOT_LO, R_NIOS2_GOT_HA): New.
+	(R_NIOS2_CALL_LO, R_NIOS2_CALL_HA): New.
+	(R_NIOS2_ILLEGAL): Adjust.
+
 2014-01-30  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2.h (elf_nios2_reloc_type): Add R_NIOS2_CALL26_NOAT.

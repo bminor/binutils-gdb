@@ -1,3 +1,44 @@
+2014-02-05  Cary Coutant  <ccoutant@google.com>
+
+	Fix issues with gold undefined symbol diagnostics.
+
+	PR binutils/15435
+	* errors.cc (Errors::undefined_symbol): Move undef vtable symbol
+	check to here.
+	* target-reloc.h (is_strong_undefined): New function.
+	(relocate_section): Move undef vtable symbol check from here.
+	Check for is_strong_undefined.
+
+2014-02-05  Cary Coutant  <ccoutant@google.com>
+    
+	Fix problems with the --dynamic-list option.
+
+	PR gold/13577
+	* options.cc (General_options::parse_dynamic_list):
+	Set have_dynamic_list_.
+	(General_options::General_options): Initialize have_dynamic_list_.
+	(General_options::finalize): Turn off -Bsymbolic and
+	-Bsymbolic-functions if --dynamic-list provided.
+	* options.h (General_options::have_dynamic_list): New function.
+	(General_options::have_dynamic_list_): New data member.
+	* symtab.h (Symbol::is_preemptible): Handle --dynamic-list
+	correctly.
+   
+	PR gold/16530
+	* symtab.cc (Symbol_table::add_from_relobj): If symbol is named
+	in --dynamic-list, mark it.
+   
+	* testsuite/Makefile.am (gc_dynamic_list_test.sh): New test case.
+	(dynamic_list_2): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/dynamic_list_2.cc: New file.
+	* testsuite/dynamic_list_2.t: New file.
+	* testsuite/dynamic_list_lib1.cc: New file.
+	* testsuite/dynamic_list_lib2.cc: New file.
+	* testsuite/gc_dynamic_list_test.c: New file.
+	* testsuite/gc_dynamic_list_test.sh: New file.
+	* testsuite/gc_dynamic_list_test.t: New file.
+
 2014-01-28  Cary Coutant  <ccoutant@google.com>
 
 	Add .gdb_index version 7 support.
