@@ -1,3 +1,12 @@
+2014-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/16530
+	* ld-elf/dynamic-1.c: New file.
+	* ld-elf/dynamic-1.rd: Likewise.
+	* ld-elf/dynamic-1.syms: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add dynamic-1.
+
 2014-02-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* ld-scripts/rgn-at9.d: New file.

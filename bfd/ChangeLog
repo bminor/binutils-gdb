@@ -1,3 +1,9 @@
+2014-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/16530
+	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Mark symbol in
+	executables if it matches dynamic_list.
+
 2014-02-10  Alan Modra  <amodra@gmail.com>
 
 	* po/SRC-POTFILES.in: Regenerate.
