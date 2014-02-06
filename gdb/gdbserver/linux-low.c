@@ -1756,7 +1756,7 @@ ptid_t step_over_bkpt;
    child.  Store the stop status through the status pointer WSTAT.
    OPTIONS is passed to the waitpid call.  Return 0 if no child stop
    event was found and OPTIONS contains WNOHANG.  Return the PID of
-   the stopped child otherwise.  */
+   the stopped child and update current_inferior otherwise.  */
 
 static int
 linux_wait_for_event (ptid_t ptid, int *wstat, int options)
@@ -2680,6 +2680,9 @@ retry:
 	  event_child->status_pending = w;
 
 	  select_event_lwp (&event_child);
+
+	  /* current_inferior and event_child must stay in sync.  */
+	  current_inferior = get_lwp_thread (event_child);
 
 	  event_child->status_pending_p = 0;
 	  w = event_child->status_pending;

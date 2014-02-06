@@ -1,3 +1,8 @@
+2014-02-05  Doug Evans  <dje@google.com>
+
+	* linux-low.c (linux_wait_for_event): Improve comment.
+	(linux_wait_1): Keep current_inferior in sync with event_child.
+
 2014-01-22  Doug Evans  <dje@google.com>
 
 	* gdbthread.h (gdb_id_to_thread): Delete, unused.
