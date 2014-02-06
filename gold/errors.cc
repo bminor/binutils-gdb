@@ -193,6 +193,11 @@ Errors::undefined_symbol(const Symbol* sym, const std::string& location)
     fprintf(stderr,
             _("%s: %s: undefined reference to '%s', version '%s'\n"),
 	    location.c_str(), zmsg, sym->demangled_name().c_str(), version);
+
+  if (sym->is_cxx_vtable())
+    gold_info(_("%s: the vtable symbol may be undefined because "
+		"the class is missing its key function"),
+	      program_name);
 }
 
 // Issue a debugging message.
