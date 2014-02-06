@@ -1,3 +1,7 @@
+2014-02-06  Andrew Pinski  <apinski@cavium.com>
+
+	* mips.h (E_MIPS_MACH_OCTEON3): New enum constant.
+
 2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* x86_64.h (R_X86_64_PC32_BND): New.
