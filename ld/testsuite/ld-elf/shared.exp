@@ -206,6 +206,9 @@ set build_tests {
   {"Build librel.so"
    "-shared" "-fPIC"
    {rel.c} {} "librel.so"}
+  {"Build dynamic-1"
+   "-Wl,--dynamic-list,dynamic-1.syms -Wl,--gc-sections" "-ffunction-sections"
+   {dynamic-1.c} {{readelf {-s} dynamic-1.rd}} "dynamic-1"}
 }
 
 run_cc_link_tests $build_tests
