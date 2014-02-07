@@ -2,6 +2,7 @@
 
 	* extension-priv.h (extension_language_script_ops): Add comment.
 	(extension_language_ops): Add comment.
+	(active_ext_lang_state): Fix typo in comment.
 
 2014-02-07  Pedro Alves  <palves@redhat.com>
 
