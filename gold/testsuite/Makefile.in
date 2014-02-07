@@ -208,7 +208,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @NATIVE_LINKER_FALSE@exception_test_DEPENDENCIES =
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = exception_static_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = weak_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_2
 @GCC_FALSE@weak_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@weak_test_DEPENDENCIES =
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = weak_undef_nonpic_test
@@ -777,7 +778,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test$(EXEEXT)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_11 = exception_static_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_12 = weak_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_2$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_13 = weak_undef_nonpic_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_14 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test$(EXEEXT) \
@@ -1773,6 +1775,11 @@ weak_undef_nonpic_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 weak_undef_test_OBJECTS = $(am_weak_undef_test_OBJECTS)
 weak_undef_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(weak_undef_test_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_undef_test_2_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_2.$(OBJEXT)
+weak_undef_test_2_OBJECTS = $(am_weak_undef_test_2_OBJECTS)
+weak_undef_test_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(weak_undef_test_2_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -1860,7 +1867,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(ver_test_2_SOURCES) $(ver_test_6_SOURCES) \
 	$(ver_test_8_SOURCES) $(ver_test_9_SOURCES) \
 	$(weak_alias_test_SOURCES) weak_plt.c $(weak_test_SOURCES) \
-	$(weak_undef_nonpic_test_SOURCES) $(weak_undef_test_SOURCES)
+	$(weak_undef_nonpic_test_SOURCES) $(weak_undef_test_SOURCES) \
+	$(weak_undef_test_2_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -2361,6 +2369,10 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib.so alt/weak_undef_lib.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,alt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_LDADD = -L . weak_undef_lib.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_2_SOURCES = weak_undef_test_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_2_DEPENDENCIES = gcctestdir/ld libweak_undef_2.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_2_LDFLAGS = -Bgcctestdir/ -u weak_undef_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_2_LDADD = -L . -lweak_undef_2
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_nonpic_test_SOURCES = weak_undef_test.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_nonpic_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib_nonpic.so alt/weak_undef_lib_nonpic.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,alt
@@ -3451,6 +3463,9 @@ weak_undef_nonpic_test$(EXEEXT): $(weak_undef_nonpic_test_OBJECTS) $(weak_undef_
 weak_undef_test$(EXEEXT): $(weak_undef_test_OBJECTS) $(weak_undef_test_DEPENDENCIES) 
 	@rm -f weak_undef_test$(EXEEXT)
 	$(weak_undef_test_LINK) $(weak_undef_test_OBJECTS) $(weak_undef_test_LDADD) $(LIBS)
+weak_undef_test_2$(EXEEXT): $(weak_undef_test_2_OBJECTS) $(weak_undef_test_2_DEPENDENCIES) 
+	@rm -f weak_undef_test_2$(EXEEXT)
+	$(weak_undef_test_2_LINK) $(weak_undef_test_2_OBJECTS) $(weak_undef_test_2_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -3572,6 +3587,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_plt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test_2.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -4063,6 +4079,8 @@ weak_test.log: weak_test$(EXEEXT)
 	@p='weak_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 weak_undef_test.log: weak_undef_test$(EXEEXT)
 	@p='weak_undef_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+weak_undef_test_2.log: weak_undef_test_2$(EXEEXT)
+	@p='weak_undef_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 weak_undef_nonpic_test.log: weak_undef_nonpic_test$(EXEEXT)
 	@p='weak_undef_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 weak_alias_test.log: weak_alias_test$(EXEEXT)
@@ -4660,6 +4678,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@alt/weak_undef_lib.so: weak_undef_file2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libweak_undef_2.a: weak_undef_file3.o weak_undef_file4.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file3.o: weak_undef_file3.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file4.o: weak_undef_file4.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file1_nonpic.o: weak_undef_file1.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file2_nonpic.o: weak_undef_file2.cc
