@@ -1,5 +1,10 @@
 2014-02-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp): Set the type of the value
+	returned by the 'Length attribute to integer.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (_initialize_ada_language): Initialize
 	cache_space obstack.
 

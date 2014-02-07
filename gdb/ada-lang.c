@@ -10410,10 +10410,15 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             if (ada_is_constrained_packed_array_type (value_type (arg1)))
               arg1 = ada_coerce_to_simple_array (arg1);
 
-            type = ada_index_type (value_type (arg1), tem,
-				   ada_attribute_name (op));
-            if (type == NULL)
+            if (op == OP_ATR_LENGTH)
 	      type = builtin_type (exp->gdbarch)->builtin_int;
+	    else
+	      {
+		type = ada_index_type (value_type (arg1), tem,
+				       ada_attribute_name (op));
+		if (type == NULL)
+		  type = builtin_type (exp->gdbarch)->builtin_int;
+	      }
 
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
               return allocate_value (type);
@@ -10466,9 +10471,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             if (ada_is_constrained_packed_array_type (type_arg))
               type_arg = decode_constrained_packed_array_type (type_arg);
 
-            type = ada_index_type (type_arg, tem, ada_attribute_name (op));
-            if (type == NULL)
+	    if (op == OP_ATR_LENGTH)
 	      type = builtin_type (exp->gdbarch)->builtin_int;
+	    else
+	      {
+		type = ada_index_type (type_arg, tem, ada_attribute_name (op));
+		if (type == NULL)
+		  type = builtin_type (exp->gdbarch)->builtin_int;
+	      }
 
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
               return allocate_value (type);
