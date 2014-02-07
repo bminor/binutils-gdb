@@ -86,7 +86,10 @@ struct extension_language_defn
 
 /* The interface for loading scripts from external extension languages,
    as well as GDB's own scripting language.
-   All of these methods are required to be implemented.  */
+   All of these methods are required to be implemented.
+
+   By convention all of these functions take a pseudo-this parameter
+   as the first argument.  */
 
 struct extension_language_script_ops
 {
@@ -112,7 +115,10 @@ struct extension_language_script_ops
    makes no use of these.  There is no (current) intention to split
    extension_language_ops up any further.
    All of these methods are optional and may be NULL, except where
-   otherwise indicated.  */
+   otherwise indicated.
+
+   By convention all of these functions take a pseudo-this parameter
+   as the first argument.  */
 
 struct extension_language_ops
 {
@@ -264,7 +270,7 @@ struct signal_handler
 };
 
 /* State necessary to restore the currently active extension language
-   to is previous value.  */
+   to its previous value.  */
 
 struct active_ext_lang_state
 {

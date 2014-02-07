@@ -1,3 +1,8 @@
+2014-02-07  Doug Evans  <dje@google.com>
+
+	* extension-priv.h (extension_language_script_ops): Add comment.
+	(extension_language_ops): Add comment.
+
 2014-02-07  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (handle_signal_stop) <signal arrives while stepping
