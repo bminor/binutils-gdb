@@ -1,3 +1,9 @@
+2014-02-07  Pedro Alves  <pedro@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-after-sr-lock.c: New file.
+	* gdb.threads/step-after-sr-lock.exp: New file.
+
 2014-02-07  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/stepi-random-signal.exp: Set SIGCHLD to print.
