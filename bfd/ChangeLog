@@ -1,3 +1,7 @@
+2014-02-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* cache.c (bfd_cache_max_open): Cast RLIM_INFINITY to rlim_t.
+
 2014-01-24  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc_build_one_stub): Correct reloc count passed
