@@ -2288,7 +2288,7 @@ gnu_read_inferior (task_t task, CORE_ADDR addr, gdb_byte *myaddr, int length)
   vm_size_t aligned_length =
   (vm_size_t) round_page (addr + length) - low_address;
   pointer_t copied;
-  int copy_count;
+  mach_msg_type_number_t copy_count;
 
   /* Get memory from inferior with page aligned addresses.  */
   err = vm_read (task, low_address, aligned_length, &copied, &copy_count);
@@ -2335,7 +2335,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr,
   vm_size_t aligned_length =
   (vm_size_t) round_page (addr + length) - low_address;
   pointer_t copied;
-  int copy_count;
+  mach_msg_type_number_t copy_count;
   int deallocate = 0;
 
   char *errstr = "Bug in gnu_write_inferior";
