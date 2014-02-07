@@ -82,7 +82,7 @@ bfd_cache_max_open (void)
 #ifdef HAVE_GETRLIMIT
       struct rlimit rlim;
       if (getrlimit (RLIMIT_NOFILE, &rlim) == 0
-	  && rlim.rlim_cur != RLIM_INFINITY)
+	  && rlim.rlim_cur != (rlim_t) RLIM_INFINITY)
 	max = rlim.rlim_cur / 8;
       else
 #endif /* HAVE_GETRLIMIT */
