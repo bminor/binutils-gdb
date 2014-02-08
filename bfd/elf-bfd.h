@@ -1342,6 +1342,11 @@ struct elf_backend_data
      other file in the link needs to have a .note.GNU-stack section
      for a PT_GNU_STACK segment to be created.  */
   unsigned default_execstack : 1;
+
+  /* True if elf_section_data(sec)->this_hdr.contents is sec->rawsize
+     in length rather than sec->size in length, if sec->rawsize is
+     non-zero and smaller than sec->size.  */
+  unsigned caches_rawsize : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data

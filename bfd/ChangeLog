@@ -1,3 +1,17 @@
+2014-02-09  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add caches_rawsize.
+	* elfxx-target.h (elf_backend_caches_rawsize): Define.
+	(elfNN_bed): Init new field.
+	* elflink.c (elf_link_input_bfd): Handle caches_rawsize.
+	* elf32-ppc.c (shared_stub_entry): Zero addi offset.
+	(ppc_elf_relax_section): Don't reallocate section here, write
+	stubs, or write out relocs for ld -r here..
+	(ppc_elf_relocate_section): ..instead write stubs here, and use
+	existing code to write out relocs for ld -r.  Fix offset
+	adjustment on reloc for little-endian.
+	(elf_backend_caches_rawsize): Define.
+
 2014-02-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* cache.c (bfd_cache_max_open): Cast RLIM_INFINITY to rlim_t.

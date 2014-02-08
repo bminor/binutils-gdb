@@ -6623,7 +6623,7 @@ static const int shared_stub_entry[] =
     0x429f0005, /* bcl 20, 31, .Lxxx */
     0x7d8802a6, /* mflr 12 */
     0x3d8c0000, /* addis 12, 12, (xxx-.Lxxx)@ha */
-    0x398c0008, /* addi 12, 12, (xxx-.Lxxx)@l */
+    0x398c0000, /* addi 12, 12, (xxx-.Lxxx)@l */
     0x7c0803a6, /* mtlr 0 */
     0x7d8903a6, /* mtctr 12 */
     0x4e800420, /* bctr */
@@ -6645,10 +6645,7 @@ struct ppc_elf_relax_info
 /* This function implements long branch trampolines, and the ppc476
    icache bug workaround.  Any section needing trampolines or patch
    space for the workaround has its size extended so that we can
-   add trampolines at the end of the section.  FIXME: We write out
-   trampoline templates here and later modify them in
-   relocate_section.  We'd save a realloc if we left writing the
-   templates to relocate_section.  */
+   add trampolines at the end of the section.  */
 
 static bfd_boolean
 ppc_elf_relax_section (bfd *abfd,
@@ -6704,12 +6701,14 @@ ppc_elf_relax_section (bfd *abfd,
     isec->rawsize = isec->size;
   trampbase = isec->size;
 
+  BFD_ASSERT (isec->sec_info_type == SEC_INFO_TYPE_NONE
+	      || isec->sec_info_type == SEC_INFO_TYPE_TARGET);
+  isec->sec_info_type = SEC_INFO_TYPE_TARGET;
+
   if (htab->params->ppc476_workaround)
     {
       if (elf_section_data (isec)->sec_info == NULL)
 	{
-	  BFD_ASSERT (isec->sec_info_type == SEC_INFO_TYPE_NONE);
-	  isec->sec_info_type = SEC_INFO_TYPE_TARGET;
 	  elf_section_data (isec)->sec_info
 	    = bfd_zalloc (abfd, sizeof (struct ppc_elf_relax_info));
 	  if (elf_section_data (isec)->sec_info == NULL)
@@ -7082,66 +7081,11 @@ ppc_elf_relax_section (bfd *abfd,
 	    {
 	      relax_info->workaround_size = newsize;
 	      workaround_change = TRUE;
-	      if (contents == NULL)
-		{
-		  if (elf_section_data (isec)->this_hdr.contents != NULL)
-		    contents = elf_section_data (isec)->this_hdr.contents;
-		  else if (!bfd_malloc_and_get_section (abfd, isec, &contents))
-		    goto error_return;
-		}
 	    }
 	  /* Ensure relocate_section is called.  */
 	  isec->flags |= SEC_RELOC;
 	}
       newsize = trampoff + relax_info->workaround_size;
-    }
-
-  if (changes || workaround_change)
-    {
-      contents = bfd_realloc_or_free (contents, newsize);
-      if (contents == NULL)
-	goto error_return;
-
-      /* Branch around the trampolines.  */
-      if (maybe_pasted)
-	{
-	  bfd_vma val = B + newsize - isec->rawsize;
-	  bfd_put_32 (abfd, val, contents + isec->rawsize);
-	}
-    }
-
-  /* Write out the trampolines.  */
-  if (changes)
-    {
-      const int *stub;
-      bfd_byte *dest;
-      int i, size;
-
-      dest = contents + trampbase;
-      if (maybe_pasted && trampbase == isec->rawsize)
-	dest += 4;
-
-      if (link_info->shared)
-	{
-	  stub = shared_stub_entry;
-	  size = ARRAY_SIZE (shared_stub_entry);
-	}
-      else
-	{
-	  stub = stub_entry;
-	  size = ARRAY_SIZE (stub_entry);
-	}
-
-      i = 0;
-      while (dest < contents + trampoff)
-	{
-	  bfd_put_32 (abfd, stub[i], dest);
-	  i++;
-	  if (i == size)
-	    i = 0;
-	  dest += 4;
-	}
-      BFD_ASSERT (i == 0);
     }
 
   if (changes || workaround_change)
@@ -7162,7 +7106,7 @@ ppc_elf_relax_section (bfd *abfd,
   if (contents != NULL
       && elf_section_data (isec)->this_hdr.contents != contents)
     {
-      if (!changes && !workaround_change && !link_info->keep_memory)
+      if (!changes && !link_info->keep_memory)
 	free (contents);
       else
 	{
@@ -7202,27 +7146,6 @@ ppc_elf_relax_section (bfd *abfd,
     free (internal_relocs);
 
   *again = changes != 0 || workaround_change;
-  if (!*again && link_info->relocatable && htab->params->branch_trampolines)
-    {
-      /* Convert the internal relax relocs to external form.  */
-      for (irel = internal_relocs; irel < irelend; irel++)
-	if (ELF32_R_TYPE (irel->r_info) == R_PPC_RELAX)
-	  {
-	    unsigned long r_symndx = ELF32_R_SYM (irel->r_info);
-
-	    /* Rewrite the reloc and convert one of the trailing nop
-	       relocs to describe this relocation.  */
-	    BFD_ASSERT (ELF32_R_TYPE (irelend[-1].r_info) == R_PPC_NONE);
-	    /* The relocs are at the bottom 2 bytes */
-	    irel[0].r_offset += 2;
-	    memmove (irel + 1, irel, (irelend - irel - 1) * sizeof (*irel));
-	    irel[0].r_info = ELF32_R_INFO (r_symndx, R_PPC_ADDR16_HA);
-	    irel[1].r_offset += 4;
-	    irel[1].r_info = ELF32_R_INFO (r_symndx, R_PPC_ADDR16_LO);
-	    irel++;
-	  }
-    }
-
   return TRUE;
 
  error_return:
@@ -7639,7 +7562,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		 addend specifies the GOT pointer offset within .got2.  */
 	      rel->r_addend += got2->output_offset;
 	    }
-	  continue;
+	  if (r_type != R_PPC_RELAX_PLT
+	      && r_type != R_PPC_RELAX_PLTREL24
+	      && r_type != R_PPC_RELAX)
+	    continue;
 	}
 
       /* TLS optimizations.  Replace instruction sequences and relocs
@@ -8554,36 +8480,59 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  /* Fall thru */
 
 	case R_PPC_RELAX:
-	  if (info->shared)
-	    relocation -= (input_section->output_section->vma
-			   + input_section->output_offset
-			   + rel->r_offset - 4);
-
 	  {
-	    unsigned long t0;
-	    unsigned long t1;
+	    const int *stub;
+	    size_t size;
+	    size_t insn_offset = rel->r_offset;
+	    unsigned int insn;
 
-	    t0 = bfd_get_32 (output_bfd, contents + rel->r_offset);
-	    t1 = bfd_get_32 (output_bfd, contents + rel->r_offset + 4);
+	    if (info->shared)
+	      {
+		relocation -= (input_section->output_section->vma
+			       + input_section->output_offset
+			       + rel->r_offset - 4);
+		stub = shared_stub_entry;
+		bfd_put_32 (output_bfd, stub[0], contents + insn_offset - 12);
+		bfd_put_32 (output_bfd, stub[1], contents + insn_offset - 8);
+		bfd_put_32 (output_bfd, stub[2], contents + insn_offset - 4);
+		stub += 3;
+		size = ARRAY_SIZE (shared_stub_entry) - 3;
+	      }
+	    else
+	      {
+		stub = stub_entry;
+		size = ARRAY_SIZE (stub_entry);
+	      }
 
-	    /* We're clearing the bits for R_PPC_ADDR16_HA
-	       and R_PPC_ADDR16_LO here.  */
-	    t0 &= ~0xffff;
-	    t1 &= ~0xffff;
-
-	    /* t0 is HA, t1 is LO */
 	    relocation += addend;
-	    t0 |= ((relocation + 0x8000) >> 16) & 0xffff;
-	    t1 |= relocation & 0xffff;
+	    if (info->relocatable)
+	      relocation = 0;
 
-	    bfd_put_32 (output_bfd, t0, contents + rel->r_offset);
-	    bfd_put_32 (output_bfd, t1, contents + rel->r_offset + 4);
+	    /* First insn is HA, second is LO.  */
+	    insn = *stub++;
+	    insn |= ((relocation + 0x8000) >> 16) & 0xffff;
+	    bfd_put_32 (output_bfd, insn, contents + insn_offset);
+	    insn_offset += 4;
+
+	    insn = *stub++;
+	    insn |= relocation & 0xffff;
+	    bfd_put_32 (output_bfd, insn, contents + insn_offset);
+	    insn_offset += 4;
+	    size -= 2;
+
+	    while (size != 0)
+	      {
+		insn = *stub++;
+		--size;
+		bfd_put_32 (output_bfd, insn, contents + insn_offset);
+		insn_offset += 4;
+	      }
 
 	    /* Rewrite the reloc and convert one of the trailing nop
 	       relocs to describe this relocation.  */
 	    BFD_ASSERT (ELF32_R_TYPE (relend[-1].r_info) == R_PPC_NONE);
 	    /* The relocs are at the bottom 2 bytes */
-	    rel[0].r_offset += 2;
+	    rel[0].r_offset += d_offset;
 	    memmove (rel + 1, rel, (relend - rel - 1) * sizeof (*rel));
 	    rel[0].r_info = ELF32_R_INFO (r_symndx, R_PPC_ADDR16_HA);
 	    rel[1].r_offset += 4;
@@ -9173,6 +9122,16 @@ ppc_elf_relocate_section (bfd *output_bfd,
 #ifdef DEBUG
   fprintf (stderr, "\n");
 #endif
+
+  if (input_section->sec_info_type == SEC_INFO_TYPE_TARGET
+      && input_section->size != input_section->rawsize
+      && (strcmp (input_section->output_section->name, ".init") == 0
+	  || strcmp (input_section->output_section->name, ".fini") == 0))
+    {
+      /* Branch around the trampolines.  */
+      unsigned int insn = B + input_section->size - input_section->rawsize;
+      bfd_put_32 (input_bfd, insn, contents + input_section->rawsize);
+    }
 
   if (htab->params->ppc476_workaround
       && input_section->sec_info_type == SEC_INFO_TYPE_TARGET)
@@ -10137,6 +10096,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_can_gc_sections	1
 #define elf_backend_can_refcount	1
 #define elf_backend_rela_normal		1
+#define elf_backend_caches_rawsize	1
 
 #define bfd_elf32_mkobject			ppc_elf_mkobject
 #define bfd_elf32_bfd_merge_private_bfd_data	ppc_elf_merge_private_bfd_data

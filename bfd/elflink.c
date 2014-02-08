@@ -9549,7 +9549,16 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	 file, so the contents field will not have been set by any of
 	 the routines which work on output files.  */
       if (elf_section_data (o)->this_hdr.contents != NULL)
-	contents = elf_section_data (o)->this_hdr.contents;
+	{
+	  contents = elf_section_data (o)->this_hdr.contents;
+	  if (bed->caches_rawsize
+	      && o->rawsize != 0
+	      && o->rawsize < o->size)
+	    {
+	      memcpy (flinfo->contents, contents, o->rawsize);
+	      contents = flinfo->contents;
+	    }
+	}
       else
 	{
 	  contents = flinfo->contents;
