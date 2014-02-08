@@ -1,3 +1,8 @@
+2014-02-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (all-lib): Remove.
+	($(LIBGNU) $(GNULIB_H)): Replace with gits of remove all-lib target.
+
 2014-02-07  Doug Evans  <dje@google.com>
 
 	* extension-priv.h (extension_language_script_ops): Add comment.
