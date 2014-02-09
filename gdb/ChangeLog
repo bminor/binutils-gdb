@@ -1,3 +1,9 @@
+2014-02-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix Python stack corruption.
+	* python/py-linetable.c (ltpy_get_pcs_for_line, ltpy_has_line): Use
+	gdb_py_longest.
+
 2014-02-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 7.7.0.DATE-cvs.
