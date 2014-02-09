@@ -1,3 +1,8 @@
+2014-02-10  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2014-01-30  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 	    Jan Beulich  <jbeulich@suse.com>
 

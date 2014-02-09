@@ -1,3 +1,7 @@
+2014-02-10  Alan Modra  <amodra@gmail.com>
+
+	* po/ld.pot: Regenerate.
+
 2014-02-03  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc32elf.em (no_tls_get_addr_opt, emit_stub_syms)
