@@ -1,5 +1,16 @@
 2014-02-23  Yao Qi  <yao@codesourcery.com>
 
+	* tracefile-tfile.c (tfile_has_all_memory): Remove.
+	(tfile_has_memory): Remove.
+	(init_tfile_ops): Don't set fields to_has_all_memory and
+	to_has_memory of tfile_ops.
+	* tracefile.c (tracefile_has_all_memory): New function.
+	(tracefile_has_memory): New function.
+	(init_tracefile_ops): Initialize fields to_has_all_memory and
+	to_has_memory of 'ops'.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
 	* ctf.c (ctf_has_stack, ctf_has_registers): Remove.
 	(ctf_thread_alive, ctf_get_trace_status): Remove.
 	(init_ctf_ops): Don't set some fields of ctf_ops.  Call

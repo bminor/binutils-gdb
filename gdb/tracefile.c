@@ -376,6 +376,22 @@ trace_save_ctf (const char *dirname, int target_does_save)
   do_cleanups (back_to);
 }
 
+/* This is the implementation of target_ops method to_has_all_memory.  */
+
+static int
+tracefile_has_all_memory (struct target_ops *ops)
+{
+  return 1;
+}
+
+/* This is the implementation of target_ops method to_has_memory.  */
+
+static int
+tracefile_has_memory (struct target_ops *ops)
+{
+  return 1;
+}
+
 /* This is the implementation of target_ops method to_has_stack.
    The target has a stack when GDB has already selected one trace
    frame.  */
@@ -424,6 +440,8 @@ init_tracefile_ops (struct target_ops *ops)
 {
   ops->to_stratum = process_stratum;
   ops->to_get_trace_status = tracefile_get_trace_status;
+  ops->to_has_all_memory = tracefile_has_all_memory;
+  ops->to_has_memory = tracefile_has_memory;
   ops->to_has_stack = tracefile_has_stack;
   ops->to_has_registers = tracefile_has_registers;
   ops->to_thread_alive = tracefile_thread_alive;

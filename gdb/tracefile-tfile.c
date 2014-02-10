@@ -1012,18 +1012,6 @@ tfile_get_trace_state_variable_value (struct target_ops *self,
   return found;
 }
 
-static int
-tfile_has_all_memory (struct target_ops *ops)
-{
-  return 1;
-}
-
-static int
-tfile_has_memory (struct target_ops *ops)
-{
-  return 1;
-}
-
 /* Callback for traceframe_walk_blocks.  Builds a traceframe_info
    object for the tfile target's current traceframe.  */
 
@@ -1105,8 +1093,6 @@ init_tfile_ops (void)
   tfile_ops.to_trace_find = tfile_trace_find;
   tfile_ops.to_get_trace_state_variable_value
     = tfile_get_trace_state_variable_value;
-  tfile_ops.to_has_all_memory = tfile_has_all_memory;
-  tfile_ops.to_has_memory = tfile_has_memory;
   tfile_ops.to_traceframe_info = tfile_traceframe_info;
 }
 
