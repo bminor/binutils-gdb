@@ -1,3 +1,35 @@
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (REMOTE_OBS): Append tracefile.o and
+	tracefile-tfile.o.
+	(HFILES_NO_SRCDIR): Add tracefile.h.
+	* ctf.c: Include "tracefile.h".
+	* tracefile.h: New file.
+	* tracefile.c: New file
+	* tracefile-tfile.c: New file.
+	* tracepoint.c: Include "tracefile.h".
+	(free_uploaded_tps, free_uploaded_tsvs): Remove declarations.
+	(stop_reason_names): Add const.
+	(trace_file_writer_xfree): Move it to tracefile.c.
+	(trace_save, trace_save_command, trace_save_tfile): Likewise.
+	(trace_save_ctf): Likewise.
+	(struct tfile_trace_file_writer): Move it to tracefile-tfile.c.
+	(tfile_target_save, tfile_dtor, tfile_start): Likewise.
+	(tfile_write_header, tfile_write_regblock_type): Likewise.
+	(tfile_write_status, tfile_write_uploaded_tsv): Likewise.
+	(tfile_write_uploaded_tp, tfile_write_definition_end): Likewise.
+	(tfile_write_raw_data, tfile_end): Likewise.
+	(tfile_trace_file_writer_new): Likewise.
+	(free_uploaded_tp): Make it extern.
+	(free_uploaded_tsv): Make it extern.
+	(_initialize_tracepoint): Move code to register command 'tsave'
+	to tracefile.c.
+	* tracepoint.h (stop_reason_names): Declare.
+	(struct trace_frame_write_ops): Move it to tracefile.h.
+	(struct trace_file_write_ops): Likewise.
+	(struct trace_file_writer): Likewise.
+	(free_uploaded_tsvs, free_uploaded_tps): Declare.
+
 2014-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/16594
