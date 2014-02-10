@@ -19,6 +19,7 @@
 
 2014-02-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	PR build/16550
 	* cache.c (bfd_cache_max_open): Cast RLIM_INFINITY to rlim_t.
 
 2014-02-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
