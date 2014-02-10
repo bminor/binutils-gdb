@@ -1,5 +1,16 @@
 2014-02-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (HASH_SIZE): New macro.
+	(struct cache_entry): New type.
+	(cache_space, cache): New static globals.
+	(ada_clear_symbol_cache, find_entry): New functions.
+	(lookup_cached_symbol, cache_symbol): Implement.
+	(ada_new_objfile_observer, ada_free_objfile_observer): New.
+	(_initialize_ada_language): Attach ada_new_objfile_observer
+	and ada_free_objfile_observer.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_add_block_symbols, add_defn_to_vec)
 	(lookup_cached_symbol, ada_add_local_symbols): Add "const" to
 	struct block * parameter.
