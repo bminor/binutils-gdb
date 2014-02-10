@@ -1,6 +1,11 @@
 2014-02-10  Gary Benson  <gbenson@redhat.com>
 
 	* symfile-debug.c (debug_qf_expand_symtabs_matching):
+	Rename name_matcher to symbol_matcher.
+
+2014-02-10  Gary Benson  <gbenson@redhat.com>
+
+	* symfile-debug.c (debug_qf_expand_symtabs_matching):
 	Use expand_symtabs_file_matcher_ftype and
 	expand_symtabs_symbol_matcher_ftype.
 
