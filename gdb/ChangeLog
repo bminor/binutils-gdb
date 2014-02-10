@@ -1,5 +1,25 @@
 2014-02-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (struct cache_entry, HASH_SIZE): Move definition up.
+	(struct ada_symbol_cache): New.
+	(ada_free_symbol_cache): Forward declare.
+	(struct ada_pspace_data): New.
+	(ada_pspace_data_handle): New static global.
+	(get_ada_pspace_data, ada_pspace_data_cleanup)
+	(ada_init_symbol_cache, ada_free_symbol_cache): New functions.
+	(cache_space, cache): Delete, now folded inside struct
+	ada_pspace_data.
+	(ada_get_symbol_cache): New function.
+	(ada_clear_symbol_cache, find_entry, cache_symbol): Adjust
+	implementation.
+	(_initialize_ada_language): Remove initialization of cache_space.
+	Move call to observer_attach_inferior_exit up, grouping it
+	with the other observer registrations inside this function.
+	Rename command to be more general.  Add call to
+	register_program_space_data_with_cleanup.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (ada_tasks_new_objfile_observer): Renames
 	ada_new_objfile_observer.
 	(ada_tasks_normal_stop_observer): Renames ada_normal_stop_observer.
