@@ -573,7 +573,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
       }
 
     case TARGET_OBJECT_UNWIND_TABLE:
-      return -1;
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_AUXV:
 #if defined (PT_IO) && defined (PIOD_READ_AUXV)
@@ -584,7 +584,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	struct ptrace_io_desc piod;
 
 	if (writebuf)
-	  return -1;
+	  return TARGET_XFER_E_IO;
 	piod.piod_op = PIOD_READ_AUXV;
 	piod.piod_addr = readbuf;
 	piod.piod_offs = (void *) (long) offset;
@@ -596,13 +596,13 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	  return piod.piod_len;
       }
 #endif
-      return -1;
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_WCOOKIE:
-      return -1;
+      return TARGET_XFER_E_IO;
 
     default:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 

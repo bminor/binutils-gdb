@@ -272,7 +272,7 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   if (offset == sizeof (unsigned long))
     return 0;			/* Signal EOF.  */
   if (offset > sizeof (unsigned long))
-    return -1;
+    return TARGET_XFER_E_IO;
 
 #ifdef PT_WCOOKIE
   /* If PT_WCOOKIE is defined (by <sys/ptrace.h>), assume we're

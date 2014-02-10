@@ -168,14 +168,14 @@ out:
   return;
 }
 
-static LONGEST
+static ULONGEST
 windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 				  gdb_byte *readbuf,
 				  ULONGEST offset, ULONGEST len)
 {
   struct obstack obstack;
   const char *buf;
-  LONGEST len_avail;
+  ULONGEST len_avail;
   struct cpms_data data = { gdbarch, &obstack, 0 };
 
   obstack_init (&obstack);

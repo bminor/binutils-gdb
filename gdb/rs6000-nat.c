@@ -476,7 +476,7 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
       }
 
     default:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 
@@ -697,7 +697,7 @@ rs6000_xfer_shared_libraries
   gdb_assert (target_has_execution);
 
   if (writebuf)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   ldi_buf = rs6000_ptrace_ldinfo (inferior_ptid);
   gdb_assert (ldi_buf != NULL);

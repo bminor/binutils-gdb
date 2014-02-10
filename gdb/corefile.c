@@ -221,6 +221,7 @@ void
 memory_error (enum target_xfer_error err, CORE_ADDR memaddr)
 {
   char *str;
+  enum errors exception = GDB_NO_ERROR;
 
   /* Build error string.  */
   str = memory_error_message (err, target_gdbarch (), memaddr);
@@ -230,15 +231,15 @@ memory_error (enum target_xfer_error err, CORE_ADDR memaddr)
   switch (err)
     {
     case TARGET_XFER_E_IO:
-      err = MEMORY_ERROR;
+      exception = MEMORY_ERROR;
       break;
     case TARGET_XFER_E_UNAVAILABLE:
-      err = NOT_AVAILABLE_ERROR;
+      exception = NOT_AVAILABLE_ERROR;
       break;
     }
 
   /* Throw it.  */
-  throw_error (err, ("%s"), str);
+  throw_error (exception, ("%s"), str);
 }
 
 /* Same as target_read_memory, but report an error if can't read.  */

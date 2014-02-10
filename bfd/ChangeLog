@@ -1,3 +1,33 @@
+2014-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/16530
+	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Mark symbol in
+	executables if it matches dynamic_list.
+
+2014-02-10  Alan Modra  <amodra@gmail.com>
+
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2014-02-09  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add caches_rawsize.
+	* elfxx-target.h (elf_backend_caches_rawsize): Define.
+	(elfNN_bed): Init new field.
+	* elflink.c (elf_link_input_bfd): Handle caches_rawsize.
+	* elf32-ppc.c (shared_stub_entry): Zero addi offset.
+	(ppc_elf_relax_section): Don't reallocate section here, write
+	stubs, or write out relocs for ld -r here..
+	(ppc_elf_relocate_section): ..instead write stubs here, and use
+	existing code to write out relocs for ld -r.  Fix offset
+	adjustment on reloc for little-endian.
+	(elf_backend_caches_rawsize): Define.
+
+2014-02-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR build/16550
+	* cache.c (bfd_cache_max_open): Cast RLIM_INFINITY to rlim_t.
+
 2014-02-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* coff-rs6000.c (xcoff_write_archive_contents_big): Free OFFSETS in

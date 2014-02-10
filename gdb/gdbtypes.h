@@ -1545,6 +1545,10 @@ extern struct type *lookup_unsigned_typename (const struct language_defn *,
 extern struct type *lookup_signed_typename (const struct language_defn *,
 					    struct gdbarch *, const char *);
 
+extern void get_unsigned_type_max (struct type *, ULONGEST *);
+
+extern void get_signed_type_minmax (struct type *, LONGEST *, LONGEST *);
+
 extern struct type *check_typedef (struct type *);
 
 #define CHECK_TYPEDEF(TYPE)			\

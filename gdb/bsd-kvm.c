@@ -143,7 +143,7 @@ bsd_kvm_xfer_partial (struct target_ops *ops, enum target_object object,
       return bsd_kvm_xfer_memory (offset, len, readbuf, writebuf);
 
     default:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 

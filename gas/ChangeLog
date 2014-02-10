@@ -1,3 +1,8 @@
+2014-02-10  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+	* po/gas.pot: Regenerate.
+
 2014-02-03  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* config/tc-nios2.c (md_apply_fix): Test for new relocs.

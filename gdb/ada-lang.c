@@ -109,13 +109,13 @@ static int full_match (const char *, const char *);
 static struct value *make_array_descriptor (struct type *, struct value *);
 
 static void ada_add_block_symbols (struct obstack *,
-                                   struct block *, const char *,
+                                   const struct block *, const char *,
                                    domain_enum, struct objfile *, int);
 
 static int is_nonfunction (struct ada_symbol_info *, int);
 
 static void add_defn_to_vec (struct obstack *, struct symbol *,
-                             struct block *);
+                             const struct block *);
 
 static int num_defns_collected (struct obstack *);
 
@@ -273,6 +273,45 @@ static void ada_forward_operator_length (struct expression *, int, int *,
 static struct type *ada_find_any_type (const char *name);
 
 
+/* The result of a symbol lookup to be stored in our symbol cache.  */
+
+struct cache_entry
+{
+  /* The name used to perform the lookup.  */
+  const char *name;
+  /* The namespace used during the lookup.  */
+  domain_enum namespace;
+  /* The symbol returned by the lookup, or NULL if no matching symbol
+     was found.  */
+  struct symbol *sym;
+  /* The block where the symbol was found, or NULL if no matching
+     symbol was found.  */
+  const struct block *block;
+  /* A pointer to the next entry with the same hash.  */
+  struct cache_entry *next;
+};
+
+/* The Ada symbol cache, used to store the result of Ada-mode symbol
+   lookups in the course of executing the user's commands.
+
+   The cache is implemented using a simple, fixed-sized hash.
+   The size is fixed on the grounds that there are not likely to be
+   all that many symbols looked up during any given session, regardless
+   of the size of the symbol table.  If we decide to go to a resizable
+   table, let's just use the stuff from libiberty instead.  */
+
+#define HASH_SIZE 1009
+
+struct ada_symbol_cache
+{
+  /* An obstack used to store the entries in our cache.  */
+  struct obstack cache_space;
+
+  /* The root of the hash table used to implement our symbol cache.  */
+  struct cache_entry *root[HASH_SIZE];
+};
+
+static void ada_free_symbol_cache (struct ada_symbol_cache *sym_cache);
 
 /* Maximum-sized dynamic type.  */
 static unsigned int varsize_limit;
@@ -396,6 +435,51 @@ ada_inferior_exit (struct inferior *inf)
 {
   ada_inferior_data_cleanup (inf, NULL);
   set_inferior_data (inf, ada_inferior_data, NULL);
+}
+
+
+			/* program-space-specific data.  */
+
+/* This module's per-program-space data.  */
+struct ada_pspace_data
+{
+  /* The Ada symbol cache.  */
+  struct ada_symbol_cache *sym_cache;
+};
+
+/* Key to our per-program-space data.  */
+static const struct program_space_data *ada_pspace_data_handle;
+
+/* Return this module's data for the given program space (PSPACE).
+   If not is found, add a zero'ed one now.
+
+   This function always returns a valid object.  */
+
+static struct ada_pspace_data *
+get_ada_pspace_data (struct program_space *pspace)
+{
+  struct ada_pspace_data *data;
+
+  data = program_space_data (pspace, ada_pspace_data_handle);
+  if (data == NULL)
+    {
+      data = XCNEW (struct ada_pspace_data);
+      set_program_space_data (pspace, ada_pspace_data_handle, data);
+    }
+
+  return data;
+}
+
+/* The cleanup callback for this module's per-program-space data.  */
+
+static void
+ada_pspace_data_cleanup (struct program_space *pspace, void *data)
+{
+  struct ada_pspace_data *pspace_data = data;
+
+  if (pspace_data->sym_cache != NULL)
+    ada_free_symbol_cache (pspace_data->sym_cache);
+  xfree (pspace_data);
 }
 
                         /* Utilities */
@@ -4245,20 +4329,138 @@ make_array_descriptor (struct type *type, struct value *arr)
     return descriptor;
 }
 
-/* Dummy definitions for an experimental caching module that is not
- * used in the public sources.  */
+                                /* Symbol Cache Module */
+
+/* Performance measurements made as of 2010-01-15 indicate that
+   this cache does bring some noticeable improvements.  Depending
+   on the type of entity being printed, the cache can make it as much
+   as an order of magnitude faster than without it.
+
+   The descriptive type DWARF extension has significantly reduced
+   the need for this cache, at least when DWARF is being used.  However,
+   even in this case, some expensive name-based symbol searches are still
+   sometimes necessary - to find an XVZ variable, mostly.  */
+
+/* Initialize the contents of SYM_CACHE.  */
+
+static void
+ada_init_symbol_cache (struct ada_symbol_cache *sym_cache)
+{
+  obstack_init (&sym_cache->cache_space);
+  memset (sym_cache->root, '\000', sizeof (sym_cache->root));
+}
+
+/* Free the memory used by SYM_CACHE.  */
+
+static void
+ada_free_symbol_cache (struct ada_symbol_cache *sym_cache)
+{
+  obstack_free (&sym_cache->cache_space, NULL);
+  xfree (sym_cache);
+}
+
+/* Return the symbol cache associated to the given program space PSPACE.
+   If not allocated for this PSPACE yet, allocate and initialize one.  */
+
+static struct ada_symbol_cache *
+ada_get_symbol_cache (struct program_space *pspace)
+{
+  struct ada_pspace_data *pspace_data = get_ada_pspace_data (pspace);
+  struct ada_symbol_cache *sym_cache = pspace_data->sym_cache;
+
+  if (sym_cache == NULL)
+    {
+      sym_cache = XCNEW (struct ada_symbol_cache);
+      ada_init_symbol_cache (sym_cache);
+    }
+
+  return sym_cache;
+}
+
+/* Clear all entries from the symbol cache.  */
+
+static void
+ada_clear_symbol_cache (void)
+{
+  struct ada_symbol_cache *sym_cache
+    = ada_get_symbol_cache (current_program_space);
+
+  obstack_free (&sym_cache->cache_space, NULL);
+  ada_init_symbol_cache (sym_cache);
+}
+
+/* Search our cache for an entry matching NAME and NAMESPACE.
+   Return it if found, or NULL otherwise.  */
+
+static struct cache_entry **
+find_entry (const char *name, domain_enum namespace)
+{
+  struct ada_symbol_cache *sym_cache
+    = ada_get_symbol_cache (current_program_space);
+  int h = msymbol_hash (name) % HASH_SIZE;
+  struct cache_entry **e;
+
+  for (e = &sym_cache->root[h]; *e != NULL; e = &(*e)->next)
+    {
+      if (namespace == (*e)->namespace && strcmp (name, (*e)->name) == 0)
+        return e;
+    }
+  return NULL;
+}
+
+/* Search the symbol cache for an entry matching NAME and NAMESPACE.
+   Return 1 if found, 0 otherwise.
+
+   If an entry was found and SYM is not NULL, set *SYM to the entry's
+   SYM.  Same principle for BLOCK if not NULL.  */
 
 static int
 lookup_cached_symbol (const char *name, domain_enum namespace,
-                      struct symbol **sym, struct block **block)
+                      struct symbol **sym, const struct block **block)
 {
-  return 0;
+  struct cache_entry **e = find_entry (name, namespace);
+
+  if (e == NULL)
+    return 0;
+  if (sym != NULL)
+    *sym = (*e)->sym;
+  if (block != NULL)
+    *block = (*e)->block;
+  return 1;
 }
+
+/* Assuming that (SYM, BLOCK) is the result of the lookup of NAME
+   in domain NAMESPACE, save this result in our symbol cache.  */
 
 static void
 cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
               const struct block *block)
 {
+  struct ada_symbol_cache *sym_cache
+    = ada_get_symbol_cache (current_program_space);
+  int h;
+  char *copy;
+  struct cache_entry *e;
+
+  /* If the symbol is a local symbol, then do not cache it, as a search
+     for that symbol depends on the context.  To determine whether
+     the symbol is local or not, we check the block where we found it
+     against the global and static blocks of its associated symtab.  */
+  if (sym
+      && BLOCKVECTOR_BLOCK (BLOCKVECTOR (sym->symtab), GLOBAL_BLOCK) != block
+      && BLOCKVECTOR_BLOCK (BLOCKVECTOR (sym->symtab), STATIC_BLOCK) != block)
+    return;
+
+  h = msymbol_hash (name) % HASH_SIZE;
+  e = (struct cache_entry *) obstack_alloc (&sym_cache->cache_space,
+					    sizeof (*e));
+  e->next = sym_cache->root[h];
+  sym_cache->root[h] = e;
+  e->name = copy = obstack_alloc (&sym_cache->cache_space, strlen (name) + 1);
+  strcpy (copy, name);
+  e->sym = sym;
+  e->namespace = namespace;
+  e->block = block;
 }
 
                                 /* Symbol Lookup */
@@ -4374,7 +4576,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 static void
 add_defn_to_vec (struct obstack *obstackp,
                  struct symbol *sym,
-                 struct block *block)
+                 const struct block *block)
 {
   int i;
   struct ada_symbol_info *prevDefns = defns_collected (obstackp, 0);
@@ -4932,7 +5134,7 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
 
 static void
 ada_add_local_symbols (struct obstack *obstackp, const char *name,
-                       struct block *block, domain_enum domain,
+                       const struct block *block, domain_enum domain,
                        int wild_match_p)
 {
   int block_depth = 0;
@@ -5163,7 +5365,7 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
 			       int full_search)
 {
   struct symbol *sym;
-  struct block *block;
+  const struct block *block;
   const char *name;
   const int wild_match_p = should_use_wild_match (name0);
   int cacheIfUnique;
@@ -5177,9 +5379,7 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
   /* Search specified block and its superiors.  */
 
   name = name0;
-  block = (struct block *) block0;      /* FIXME: No cast ought to be
-                                           needed, but adding const will
-                                           have a cascade effect.  */
+  block = block0;
 
   /* Special case: If the user specifies a symbol name inside package
      Standard, do a non-wild matching of the symbol name without
@@ -5626,7 +5826,7 @@ full_match (const char *sym_name, const char *search_name)
 
 static void
 ada_add_block_symbols (struct obstack *obstackp,
-                       struct block *block, const char *name,
+                       const struct block *block, const char *name,
                        domain_enum domain, struct objfile *objfile,
                        int wild)
 {
@@ -10303,10 +10503,15 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             if (ada_is_constrained_packed_array_type (value_type (arg1)))
               arg1 = ada_coerce_to_simple_array (arg1);
 
-            type = ada_index_type (value_type (arg1), tem,
-				   ada_attribute_name (op));
-            if (type == NULL)
+            if (op == OP_ATR_LENGTH)
 	      type = builtin_type (exp->gdbarch)->builtin_int;
+	    else
+	      {
+		type = ada_index_type (value_type (arg1), tem,
+				       ada_attribute_name (op));
+		if (type == NULL)
+		  type = builtin_type (exp->gdbarch)->builtin_int;
+	      }
 
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
               return allocate_value (type);
@@ -10359,9 +10564,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             if (ada_is_constrained_packed_array_type (type_arg))
               type_arg = decode_constrained_packed_array_type (type_arg);
 
-            type = ada_index_type (type_arg, tem, ada_attribute_name (op));
-            if (type == NULL)
+	    if (op == OP_ATR_LENGTH)
 	      type = builtin_type (exp->gdbarch)->builtin_int;
+	    else
+	      {
+		type = ada_index_type (type_arg, tem, ada_attribute_name (op));
+		if (type == NULL)
+		  type = builtin_type (exp->gdbarch)->builtin_int;
+	      }
 
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
               return allocate_value (type);
@@ -13297,6 +13507,22 @@ initialize_ada_catchpoint_ops (void)
   ops->print_recreate = print_recreate_catch_assert;
 }
 
+/* This module's 'new_objfile' observer.  */
+
+static void
+ada_new_objfile_observer (struct objfile *objfile)
+{
+  ada_clear_symbol_cache ();
+}
+
+/* This module's 'free_objfile' observer.  */
+
+static void
+ada_free_objfile_observer (struct objfile *objfile)
+{
+  ada_clear_symbol_cache ();
+}
+
 void
 _initialize_ada_language (void)
 {
@@ -13375,8 +13601,14 @@ DWARF attribute."),
     (256, htab_hash_string, (int (*)(const void *, const void *)) streq,
      NULL, xcalloc, xfree);
 
-  /* Setup per-inferior data.  */
+  /* The ada-lang observers.  */
+  observer_attach_new_objfile (ada_new_objfile_observer);
+  observer_attach_free_objfile (ada_free_objfile_observer);
   observer_attach_inferior_exit (ada_inferior_exit);
+
+  /* Setup various context-specific data.  */
   ada_inferior_data
     = register_inferior_data_with_cleanup (NULL, ada_inferior_data_cleanup);
+  ada_pspace_data_handle
+    = register_program_space_data_with_cleanup (NULL, ada_pspace_data_cleanup);
 }

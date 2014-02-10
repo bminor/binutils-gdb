@@ -280,6 +280,58 @@ SUBDIR_TUI_LDFLAGS=
 SUBDIR_TUI_CFLAGS= \
 	-DTUI=1
 
+# Guile sub directory definitons for guile support.
+
+SUBDIR_GUILE_OBS = \
+	guile.o \
+	scm-arch.o \
+	scm-auto-load.o \
+	scm-block.o \
+	scm-breakpoint.o \
+	scm-disasm.o \
+	scm-exception.o \
+	scm-frame.o \
+	scm-iterator.o \
+	scm-lazy-string.o \
+	scm-objfile.o \
+	scm-math.o \
+	scm-ports.o \
+	scm-pretty-print.o \
+	scm-safe-call.o \
+	scm-gsmob.o \
+	scm-string.o \
+	scm-symbol.o \
+	scm-symtab.o \
+	scm-type.o \
+	scm-utils.o \
+	scm-value.o
+SUBDIR_GUILE_SRCS = \
+	guile/guile.c \
+	guile/scm-arch.c \
+	guile/scm-auto-load.c \
+	guile/scm-block.c \
+	guile/scm-breakpoint.c \
+	guile/scm-disasm.c \
+	guile/scm-exception.c \
+	guile/scm-frame.c \
+	guile/scm-iterator.c \
+	guile/scm-lazy-string.c \
+	guile/scm-objfile.c \
+	guile/scm-math.c \
+	guile/scm-ports.c \
+	guile/scm-pretty-print.c \
+	guile/scm-safe-call.c \
+	guile/scm-gsmob.c \
+	guile/scm-string.c \
+	guile/scm-symbol.c \
+	guile/scm-symtab.c \
+	guile/scm-type.c \
+	guile/scm-utils.c \
+	guile/scm-value.c
+SUBDIR_GUILE_DEPS =
+SUBDIR_GUILE_LDFLAGS=
+SUBDIR_GUILE_CFLAGS=
+
 #
 # python sub directory definitons
 #
@@ -460,7 +512,7 @@ CFLAGS = @CFLAGS@
 # are sometimes a little generic, we think that the risk of collision
 # with other header files is high.  If that happens, we try to mitigate
 # a bit the consequences by putting the Python includes last in the list.
-INTERNAL_CPPFLAGS = @CPPFLAGS@ @PYTHON_CPPFLAGS@
+INTERNAL_CPPFLAGS = @CPPFLAGS@ @GUILE_CPPFLAGS@ @PYTHON_CPPFLAGS@
 
 # Need to pass this to testsuite for "make check".  Probably should be
 # consistent with top-level Makefile.in and gdb/testsuite/Makefile.in
@@ -493,7 +545,8 @@ INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_
 # XM_CLIBS, defined in *config files, have host-dependent libs.
 # LIBIBERTY appears twice on purpose.
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
-	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ @PYTHON_LIBS@ \
+	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) \
+	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) \
 	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU)
 CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
@@ -1125,6 +1178,9 @@ install-strip:
 	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install-only
+
+install-guile:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(GDB_DATADIR)/guile/gdb
 
 install-python:
 	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(GDB_DATADIR)/python/gdb
@@ -2177,7 +2233,99 @@ tui-winsource.o: $(srcdir)/tui/tui-winsource.c
 	$(COMPILE) $(srcdir)/tui/tui-winsource.c
 	$(POSTCOMPILE)
 
+# gdb/guile dependencies
 #
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the sub-directory.
+
+guile.o: $(srcdir)/guile/guile.c
+	$(COMPILE) $(srcdir)/guile/guile.c
+	$(POSTCOMPILE)
+
+scm-arch.o: $(srcdir)/guile/scm-arch.c
+	$(COMPILE) $(srcdir)/guile/scm-arch.c
+	$(POSTCOMPILE)
+
+scm-auto-load.o: $(srcdir)/guile/scm-auto-load.c
+	$(COMPILE) $(srcdir)/guile/scm-auto-load.c
+	$(POSTCOMPILE)
+
+scm-block.o: $(srcdir)/guile/scm-block.c
+	$(COMPILE) $(srcdir)/guile/scm-block.c
+	$(POSTCOMPILE)
+
+scm-breakpoint.o: $(srcdir)/guile/scm-breakpoint.c
+	$(COMPILE) $(srcdir)/guile/scm-breakpoint.c
+	$(POSTCOMPILE)
+
+scm-disasm.o: $(srcdir)/guile/scm-disasm.c
+	$(COMPILE) $(srcdir)/guile/scm-disasm.c
+	$(POSTCOMPILE)
+
+scm-exception.o: $(srcdir)/guile/scm-exception.c
+	$(COMPILE) $(srcdir)/guile/scm-exception.c
+	$(POSTCOMPILE)
+
+scm-frame.o: $(srcdir)/guile/scm-frame.c
+	$(COMPILE) $(srcdir)/guile/scm-frame.c
+	$(POSTCOMPILE)
+
+scm-iterator.o: $(srcdir)/guile/scm-iterator.c
+	$(COMPILE) $(srcdir)/guile/scm-iterator.c
+	$(POSTCOMPILE)
+
+scm-lazy-string.o: $(srcdir)/guile/scm-lazy-string.c
+	$(COMPILE) $(srcdir)/guile/scm-lazy-string.c
+	$(POSTCOMPILE)
+
+scm-math.o: $(srcdir)/guile/scm-math.c
+	$(COMPILE) $(srcdir)/guile/scm-math.c
+	$(POSTCOMPILE)
+
+scm-objfile.o: $(srcdir)/guile/scm-objfile.c
+	$(COMPILE) $(srcdir)/guile/scm-objfile.c
+	$(POSTCOMPILE)
+
+scm-ports.o: $(srcdir)/guile/scm-ports.c
+	$(COMPILE) $(srcdir)/guile/scm-ports.c
+	$(POSTCOMPILE)
+
+scm-pretty-print.o: $(srcdir)/guile/scm-pretty-print.c
+	$(COMPILE) $(srcdir)/guile/scm-pretty-print.c
+	$(POSTCOMPILE)
+
+scm-safe-call.o: $(srcdir)/guile/scm-safe-call.c
+	$(COMPILE) $(srcdir)/guile/scm-safe-call.c
+	$(POSTCOMPILE)
+
+scm-gsmob.o: $(srcdir)/guile/scm-gsmob.c
+	$(COMPILE) $(srcdir)/guile/scm-gsmob.c
+	$(POSTCOMPILE)
+
+scm-string.o: $(srcdir)/guile/scm-string.c
+	$(COMPILE) $(srcdir)/guile/scm-string.c
+	$(POSTCOMPILE)
+
+scm-symbol.o: $(srcdir)/guile/scm-symbol.c
+	$(COMPILE) $(srcdir)/guile/scm-symbol.c
+	$(POSTCOMPILE)
+
+scm-symtab.o: $(srcdir)/guile/scm-symtab.c
+	$(COMPILE) $(srcdir)/guile/scm-symtab.c
+	$(POSTCOMPILE)
+
+scm-type.o: $(srcdir)/guile/scm-type.c
+	$(COMPILE) $(srcdir)/guile/scm-type.c
+	$(POSTCOMPILE)
+
+scm-utils.o: $(srcdir)/guile/scm-utils.c
+	$(COMPILE) $(srcdir)/guile/scm-utils.c
+	$(POSTCOMPILE)
+
+scm-value.o: $(srcdir)/guile/scm-value.c
+	$(COMPILE) $(srcdir)/guile/scm-value.c
+	$(POSTCOMPILE)
+
 # gdb/python/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing

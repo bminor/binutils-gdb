@@ -710,6 +710,18 @@ alt/weak_undef_lib.so: weak_undef_file2.o
 	test -d alt || mkdir -p alt
 	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2.o
 
+check_PROGRAMS += weak_undef_test_2
+weak_undef_test_2_SOURCES = weak_undef_test_2.cc
+weak_undef_test_2_DEPENDENCIES = gcctestdir/ld libweak_undef_2.a
+weak_undef_test_2_LDFLAGS = -Bgcctestdir/ -u weak_undef_2
+weak_undef_test_2_LDADD = -L . -lweak_undef_2
+libweak_undef_2.a: weak_undef_file3.o weak_undef_file4.o
+	$(TEST_AR) rc $@ $^
+weak_undef_file3.o: weak_undef_file3.cc
+	$(CXXCOMPILE) -c -o $@ $<
+weak_undef_file4.o: weak_undef_file4.cc
+	$(CXXCOMPILE) -c -o $@ $<
+
 if FN_PTRS_IN_SO_WITHOUT_PIC
 check_PROGRAMS += weak_undef_nonpic_test
 MOSTLYCLEANFILES += alt/weak_undef_lib_nonpic.so

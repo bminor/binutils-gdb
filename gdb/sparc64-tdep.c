@@ -1196,6 +1196,7 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, default_stabs_argument_has_addr);
 
   set_gdbarch_skip_prologue (gdbarch, sparc64_skip_prologue);
+  set_gdbarch_in_function_epilogue_p (gdbarch, sparc_in_function_epilogue_p);
 
   /* Hook in the DWARF CFI frame unwinder.  */
   dwarf2_frame_set_init_reg (gdbarch, sparc64_dwarf2_frame_init_reg);

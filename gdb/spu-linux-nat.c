@@ -244,7 +244,7 @@ spu_proc_xfer_spu (const char *annex, gdb_byte *readbuf,
   xsnprintf (buf, sizeof buf, "/proc/%d/fd/%s", pid, annex);
   fd = open (buf, writebuf? O_WRONLY : O_RDONLY);
   if (fd <= 0)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   if (offset != 0
       && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
@@ -601,7 +601,7 @@ spu_xfer_partial (struct target_ops *ops,
 				offset & lslr, len);
     }
 
-  return -1;
+  return TARGET_XFER_E_IO;
 }
 
 /* Override the to_can_use_hw_breakpoint routine.  */

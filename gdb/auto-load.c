@@ -39,7 +39,7 @@
 #include "top.h"
 #include "filestuff.h"
 #include "extension.h"
-#include "python/python.h"
+#include "gdb/section-scripts.h"
 
 /* The section to look in for auto-loaded scripts (in file formats that
    support sections).
@@ -877,18 +877,22 @@ source_section_scripts (struct objfile *objfile, const char *section_name,
       char *full_path;
       int opened, in_hash_table;
       struct cleanup *back_to;
-      /* At the moment we only support python scripts in .debug_gdb_scripts,
-	 but that can change.  */
-      const struct extension_language_defn *language
-	= &extension_language_python;
+      const struct extension_language_defn *language;
       objfile_script_sourcer_func *sourcer;
 
-      if (*p != 1)
+      switch (*p)
 	{
+	case SECTION_SCRIPT_ID_PYTHON_FILE:
+	  language = get_ext_lang_defn (EXT_LANG_PYTHON);
+	  break;
+	case SECTION_SCRIPT_ID_SCHEME_FILE:
+	  language = get_ext_lang_defn (EXT_LANG_GUILE);
+	  break;
+	default:
 	  warning (_("Invalid entry in %s section"), section_name);
 	  /* We could try various heuristics to find the next valid entry,
 	     but it's safer to just punt.  */
-	  break;
+	  return;
 	}
       file = ++p;
 
@@ -1395,6 +1399,8 @@ _initialize_auto_load (void)
 {
   struct cmd_list_element *cmd;
   char *scripts_directory_help, *gdb_name_help, *python_name_help;
+  char *guile_name_help;
+  const char *suffix;
 
   auto_load_pspace_data
     = register_program_space_data_with_cleanup (NULL,
@@ -1439,16 +1445,26 @@ Usage: info auto-load local-gdbinit"),
 
   auto_load_dir = xstrdup (AUTO_LOAD_DIR);
 
+  suffix = ext_lang_auto_load_suffix (get_ext_lang_defn (EXT_LANG_GDB));
   gdb_name_help
     = xstrprintf (_("\
 GDB scripts:    OBJFILE%s\n"),
-		  ext_lang_auto_load_suffix (&extension_language_gdb));
+		  suffix);
   python_name_help = NULL;
 #ifdef HAVE_PYTHON
+  suffix = ext_lang_auto_load_suffix (get_ext_lang_defn (EXT_LANG_PYTHON));
   python_name_help
     = xstrprintf (_("\
 Python scripts: OBJFILE%s\n"),
-		  ext_lang_auto_load_suffix (&extension_language_python));
+		  suffix);
+#endif
+  guile_name_help = NULL;
+#ifdef HAVE_GUILE
+  suffix = ext_lang_auto_load_suffix (get_ext_lang_defn (EXT_LANG_GUILE));
+  guile_name_help
+    = xstrprintf (_("\
+Guile scripts:  OBJFILE%s\n"),
+		  suffix);
 #endif
   scripts_directory_help
     = xstrprintf (_("\
@@ -1456,7 +1472,7 @@ Automatically loaded scripts are located in one of the directories listed\n\
 by this option.\n\
 \n\
 Script names:\n\
-%s%s\
+%s%s%s\
 \n\
 This option is ignored for the kinds of scripts \
 having 'set auto-load ... off'.\n\
@@ -1464,7 +1480,8 @@ Directories listed here need to be present also \
 in the 'set auto-load safe-path'\n\
 option."),
 		  gdb_name_help,
-		  python_name_help ? python_name_help : "");
+		  python_name_help ? python_name_help : "",
+		  guile_name_help ? guile_name_help : "");
 
   add_setshow_optional_filename_cmd ("scripts-directory", class_support,
 				     &auto_load_dir, _("\
@@ -1477,6 +1494,7 @@ Show the list of directories from which to load auto-loaded scripts."),
   xfree (scripts_directory_help);
   xfree (python_name_help);
   xfree (gdb_name_help);
+  xfree (guile_name_help);
 
   auto_load_safe_path = xstrdup (AUTO_LOAD_SAFE_PATH);
   auto_load_safe_path_vec_update ();

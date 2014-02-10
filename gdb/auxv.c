@@ -52,7 +52,7 @@ procfs_xfer_auxv (gdb_byte *readbuf,
   fd = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
   xfree (pathname);
   if (fd < 0)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   if (offset != (ULONGEST) 0
       && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
@@ -86,10 +86,10 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
 
   msym = lookup_minimal_symbol ("_dl_auxv", NULL, NULL);
   if (msym == NULL)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   if (MSYMBOL_SIZE (msym) != ptr_size)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   /* POINTER_ADDRESS is a location where the `_dl_auxv' variable
      resides.  DATA_ADDRESS is the inferior value present in
@@ -118,14 +118,14 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
      11440.  */
 
   if (target_read_memory (pointer_address, ptr_buf, ptr_size) != 0)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   data_address = extract_typed_address (ptr_buf, ptr_type);
 
   /* Possibly still not initialized such as during an inferior
      startup.  */
   if (data_address == 0)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   data_address += offset;
 
@@ -134,7 +134,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
       if (target_write_memory (data_address, writebuf, len) == 0)
 	return len;
       else
-	return -1;
+	return TARGET_XFER_E_IO;
     }
 
   /* Stop if trying to read past the existing AUXV block.  The final
@@ -144,7 +144,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
     {
       if (target_read_memory (data_address - auxv_pair_size, ptr_buf,
 			      ptr_size) != 0)
-	return -1;
+	return TARGET_XFER_E_IO;
 
       if (extract_typed_address (ptr_buf, ptr_type) == AT_NULL)
 	return 0;

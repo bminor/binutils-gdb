@@ -1234,16 +1234,16 @@ inf_ttrace_xfer_partial (struct target_ops *ops, enum target_object object,
       return inf_ttrace_xfer_memory (offset, len, readbuf, writebuf);
 
     case TARGET_OBJECT_UNWIND_TABLE:
-      return -1;
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_AUXV:
-      return -1;
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_WCOOKIE:
-      return -1;
+      return TARGET_XFER_E_IO;
 
     default:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 }
 

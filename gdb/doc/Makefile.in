@@ -130,6 +130,7 @@ GDB_DOC_BUILD_INCLUDES = \
 	GDBvn.texi
 GDB_DOC_FILES = \
 	$(srcdir)/gdb.texinfo \
+	$(srcdir)/guile.texi \
 	$(GDB_DOC_SOURCE_INCLUDES) \
 	$(GDB_DOC_BUILD_INCLUDES)
 

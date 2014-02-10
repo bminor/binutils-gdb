@@ -779,21 +779,24 @@ extern int gdbarch_find_memory_regions (struct gdbarch *gdbarch, find_memory_reg
 extern void set_gdbarch_find_memory_regions (struct gdbarch *gdbarch, gdbarch_find_memory_regions_ftype *find_memory_regions);
 
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
-   core file into buffer READBUF with length LEN. */
+   core file into buffer READBUF with length LEN.  Return the number of bytes read
+   (zero indicates failure).
+   failed, otherwise, return the red length of READBUF. */
 
 extern int gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch);
 
-typedef LONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
-extern LONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+typedef ULONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern ULONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries);
 
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES_AIX formatted shared
-   libraries list from core file into buffer READBUF with length LEN. */
+   libraries list from core file into buffer READBUF with length LEN.
+   Return the number of bytes read (zero indicates failure). */
 
 extern int gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch);
 
-typedef LONGEST (gdbarch_core_xfer_shared_libraries_aix_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
-extern LONGEST gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+typedef ULONGEST (gdbarch_core_xfer_shared_libraries_aix_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern ULONGEST gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix);
 
 /* How the core target converts a PTID from a core file to a string. */

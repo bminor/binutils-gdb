@@ -1,3 +1,263 @@
+2014-02-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-tdep.c (sparc_in_function_epilogue_p): New function.
+	(X_RETTURN): New macro.
+	* sparc-tdep.h: sparc_in_function_epilogue_p prototype.
+
+	* sparc64-tdep.c (sparc64_init_abi): Hook
+	sparc_in_function_epilogue_p.
+
+2014-02-10  Gary Benson  <gbenson@redhat.com>
+
+	* symfile-debug.c (debug_qf_expand_symtabs_matching):
+	Rename name_matcher to symbol_matcher.
+
+2014-02-10  Gary Benson  <gbenson@redhat.com>
+
+	* symfile-debug.c (debug_qf_expand_symtabs_matching):
+	Use expand_symtabs_file_matcher_ftype and
+	expand_symtabs_symbol_matcher_ftype.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (struct cache_entry, HASH_SIZE): Move definition up.
+	(struct ada_symbol_cache): New.
+	(ada_free_symbol_cache): Forward declare.
+	(struct ada_pspace_data): New.
+	(ada_pspace_data_handle): New static global.
+	(get_ada_pspace_data, ada_pspace_data_cleanup)
+	(ada_init_symbol_cache, ada_free_symbol_cache): New functions.
+	(cache_space, cache): Delete, now folded inside struct
+	ada_pspace_data.
+	(ada_get_symbol_cache): New function.
+	(ada_clear_symbol_cache, find_entry, cache_symbol): Adjust
+	implementation.
+	(_initialize_ada_language): Remove initialization of cache_space.
+	Move call to observer_attach_inferior_exit up, grouping it
+	with the other observer registrations inside this function.
+	Rename command to be more general.  Add call to
+	register_program_space_data_with_cleanup.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (ada_tasks_new_objfile_observer): Renames
+	ada_new_objfile_observer.
+	(ada_tasks_normal_stop_observer): Renames ada_normal_stop_observer.
+	(_initialize_tasks): Update uses of ada_new_objfile_observer
+	and ada_tasks_normal_stop_observer.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Set the type of the value
+	returned by the 'Length attribute to integer.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (_initialize_ada_language): Initialize
+	cache_space obstack.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (HASH_SIZE): New macro.
+	(struct cache_entry): New type.
+	(cache_space, cache): New static globals.
+	(ada_clear_symbol_cache, find_entry): New functions.
+	(lookup_cached_symbol, cache_symbol): Implement.
+	(ada_new_objfile_observer, ada_free_objfile_observer): New.
+	(_initialize_ada_language): Attach ada_new_objfile_observer
+	and ada_free_objfile_observer.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_add_block_symbols, add_defn_to_vec)
+	(lookup_cached_symbol, ada_add_local_symbols): Add "const" to
+	struct block * parameter.
+	(ada_lookup_symbol_list_worker): Constify local variable "block".
+	Remove cast which is no longer necessary.
+
+2014-02-10  Doug Evans  <xdje42@gmail.com>
+
+	Add Guile as an extension language.
+	* NEWS: Mention Guile scripting.
+	* Makefile.in (SUBDIR_GUILE_OBS): New variable.
+	(SUBDIR_GUILE_SRCS, SUBDIR_GUILE_DEPS): New variables
+	(SUBDIR_GUILE_LDFLAGS, SUBDIR_GUILE_CFLAGS): New variables.
+	(INTERNAL_CPPFLAGS): Add GUILE_CPPFLAGS.
+	(CLIBS): Add GUILE_LIBS.
+	(install-guile): New rule.
+	(guile.o): New rule.
+	(scm-arch.o, scm-auto-load.o, scm-block.o): New rules.
+	(scm-breakpoint.o, scm-disasm.o, scm-exception.o): New rules.
+	(scm-frame.o, scm-iterator.o, scm-lazy-string.o): New rules.
+	(scm-math.o, scm-objfile.o, scm-ports.o): New rules.
+	(scm-pretty-print.o, scm-safe-call.o, scm-gsmob.o): New rules.
+	(scm-string.o, scm-symbol.o, scm-symtab.o): New rules.
+	(scm-type.o, scm-utils.o, scm-value.o): New rules.
+	* configure.ac: New option --with-guile.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* auto-load.c: Remove #include "python/python.h".  Add #include
+	"gdb/section-scripts.h".
+	(source_section_scripts): Handle Guile scripts.
+	(_initialize_auto_load): Add name of Guile objfile script to
+	scripts-directory help text.
+	* breakpoint.c (condition_command): Tweak comment to include Scheme.
+	* breakpoint.h (gdbscm_breakpoint_object): Add forward decl.
+	(struct breakpoint): New member scm_bp_object.
+	* defs.h (enum command_control_type): New value guile_control.
+	* cli/cli-cmds.c: Remove #include "python/python.h".  Add #include
+	"extension.h".
+	(show_user): Update comment.
+	(_initialize_cli_cmds): Update help text for "show user".  Update help
+	text for max-user-call-depth.
+	* cli/cli-script.c: Remove #include "python/python.h".  Add #include
+	"extension.h".
+	(multi_line_command_p): Add guile_control.
+	(print_command_lines): Handle guile_control.
+	(execute_control_command, recurse_read_control_structure): Ditto.
+	(process_next_line): Recognize "guile" commands.
+	* disasm.c (gdb_disassemble_info): Make non-static.
+	* disasm.h: #include "dis-asm.h".
+	(struct gdbarch): Add forward decl.
+	(gdb_disassemble_info): Declare.
+	* extension.c: #include "guile/guile.h".
+	(extension_languages): Add guile.
+	(get_ext_lang_defn): Handle EXT_LANG_GDB.
+	* extension.h (enum extension_language): New value EXT_LANG_GUILE.
+	* gdbtypes.c (get_unsigned_type_max): New function.
+	(get_signed_type_minmax): New function.
+	* gdbtypes.h (get_unsigned_type_max): Declare.
+	(get_signed_type_minmax): Declare.
+	* guile/README: New file.
+	* guile/guile-internal.h: New file.
+	* guile/guile.c: New file.
+	* guile/guile.h: New file.
+	* guile/scm-arch.c: New file.
+	* guile/scm-auto-load.c: New file.
+	* guile/scm-block.c: New file.
+	* guile/scm-breakpoint.c: New file.
+	* guile/scm-disasm.c: New file.
+	* guile/scm-exception.c: New file.
+	* guile/scm-frame.c: New file.
+	* guile/scm-gsmob.c: New file.
+	* guile/scm-iterator.c: New file.
+	* guile/scm-lazy-string.c: New file.
+	* guile/scm-math.c: New file.
+	* guile/scm-objfile.c: New file.
+	* guile/scm-ports.c: New file.
+	* guile/scm-pretty-print.c: New file.
+	* guile/scm-safe-call.c: New file.
+	* guile/scm-string.c: New file.
+	* guile/scm-symbol.c: New file.
+	* guile/scm-symtab.c: New file.
+	* guile/scm-type.c: New file.
+	* guile/scm-utils.c: New file.
+	* guile/scm-value.c: New file.
+	* guile/lib/gdb.scm: New file.
+	* guile/lib/gdb/boot.scm: New file.
+	* guile/lib/gdb/experimental.scm: New file.
+	* guile/lib/gdb/init.scm: New file.
+	* guile/lib/gdb/iterator.scm: New file.
+	* guile/lib/gdb/printing.scm: New file.
+	* guile/lib/gdb/types.scm: New file.
+	* data-directory/Makefile.in (GUILE_SRCDIR): New variable.
+	(VPATH): Add $(GUILE_SRCDIR).
+	(GUILE_DIR): New variable.
+	(GUILE_INSTALL_DIR, GUILE_FILES): New variables.
+	(all): Add stamp-guile dependency.
+	(stamp-guile): New rule.
+	(clean-guile, install-guile, uninstall-guile): New rules.
+	(install-only): Add install-guile dependency.
+	(uninstall): Add uninstall-guile dependency.
+	(clean): Add clean-guile dependency.
+
+2014-02-09  Doug Evans  <xdje42@gmail.com>
+
+	Revert this patch (which I approved, mea culpa).
+
+	2014-02-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (all-lib): Remove.
+	($(LIBGNU) $(GNULIB_H)): Replace with gits of remove all-lib target.
+
+2014-02-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix Python stack corruption.
+	* python/py-linetable.c (ltpy_get_pcs_for_line, ltpy_has_line): Use
+	gdb_py_longest.
+
+2014-02-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (all-lib): Remove.
+	($(LIBGNU) $(GNULIB_H)): Replace with gits of remove all-lib target.
+
+2014-02-07  Doug Evans  <dje@google.com>
+
+	* extension-priv.h (extension_language_script_ops): Add comment.
+	(extension_language_ops): Add comment.
+	(active_ext_lang_state): Fix typo in comment.
+
+2014-02-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_signal_stop) <signal arrives while stepping
+	over a breakpoint>: Switch back to the stepping thread.
+
+2014-02-07  Yao Qi  <yao@codesourcery.com>
+
+	* target.c (target_xfer_partial): Return zero if LEN is zero.
+
+2014-02-07  Yao Qi  <yao@codesourcery.com>
+
+	* auxv.c (procfs_xfer_auxv): Replace -1 with TARGET_XFER_E_IO.
+	(ld_so_xfer_auxv): Likewise.
+	* bfd-target.c (target_bfd_xfer_partial): Likewise.
+	* bsd-kvm.c (bsd_kvm_xfer_partial): Likewise.
+	* corelow.c (core_xfer_partial): Likewise.
+	* ctf.c (ctf_xfer_partial): Likewise.
+	* darwin-nat.c (darwin_read_dyld_info): Likewise.
+	(darwin_xfer_partial): Likewise.
+	* exec.c (exec_xfer_partial): Likewise.
+	* gnu-nat.c (gnu_xfer_partial): Likewise.
+	* ia64-hpux-nat.c (ia64_hpux_xfer_uregs): Likewise.
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Likewise.
+	* inf-ttrace.c (inf_ttrace_xfer_partial): Likewise.
+	* linux-nat.c (linux_xfer_siginfo): Likewise.
+	(linux_proc_xfer_spu): Likewise.
+	* procfs.c (procfs_xfer_partial): Likewise.
+	* record-full.c (record_full_xfer_partial): Likewise.
+	(record_full_core_xfer_partial): Likewise.
+	* remote-sim.c (gdbsim_xfer_partial): Likewise.
+	* remote.c (remote_write_qxfer): Likewise.
+	(remote_write_qxfer, remote_read_qxfer): Likewise.
+	(remote_xfer_partial): Likewise.
+	* rs6000-nat.c (rs6000_xfer_partial): Likewise.
+	(rs6000_xfer_shared_libraries): Likewise.
+	* sparc-nat.c (sparc_xfer_wcookie): Likewise.
+	* spu-linux-nat.c (spu_proc_xfer_spu): Likewise.
+	(spu_xfer_partial): Likewise.
+	* target.c (memory_xfer_partial_1): Likewise.
+	* tracepoint.c (tfile_xfer_partial): Likewise.
+	* windows-nat.c (windows_xfer_shared_libraries): Likewise.
+	(windows_xfer_partial): Likewise.
+
+2014-02-07  Yao Qi  <yao@codesourcery.com>
+
+	* gdbarch.sh (core_xfer_shared_libraries): Returns ULONGEST.  Add
+	comments.
+	(core_xfer_shared_libraries_aix): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* i386-cygwin-tdep.c (windows_core_xfer_shared_libraries): Return
+	ULONGEST.  Change 'len_avail' type to ULONGEST.
+	* rs6000-aix-tdep.c (rs6000_aix_ld_info_to_xml): Likewise.
+	* rs6000-aix-tdep.h (rs6000_aix_ld_info_to_xml): Update
+	declaration.
+	(rs6000_aix_core_xfer_shared_libraries_aix): Return ULONGEST.
+
+2014-02-07  Yao Qi  <yao@codesourcery.com>
+
+	* corefile.c (memory_error): Get 'exception' from ERR and pass
+	'exception' to throw_error.
+
 2014-02-06  Doug Evans  <xdje42@gmail.com>
 
 	* configure.ac (libpython checking): Remove all but python.o from

@@ -1,3 +1,100 @@
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/tick_length_array_enum_idx: New testcase.
+
+2014-02-10  Doug Evans  <xdje42@gmail.com>
+
+	* configure.ac (AC_OUTPUT): Add gdb.guile.
+	* configure: Regenerate.
+	* lib/gdb-guile.exp: New file.
+	* lib/gdb.exp (get_target_charset): New function.
+	* gdb.base/help.exp: Update expected output from "apropos apropos".
+	* gdb.guile/Makefile.in: New file.
+	* gdb.guile/guile.exp: New file.
+	* gdb.guile/scm-arch.c: New file.
+	* gdb.guile/scm-arch.exp: New file.
+	* gdb.guile/scm-block.c: New file.
+	* gdb.guile/scm-block.exp: New file.
+	* gdb.guile/scm-breakpoint.c: New file.
+	* gdb.guile/scm-breakpoint.exp: New file.
+	* gdb.guile/scm-disasm.c: New file.
+	* gdb.guile/scm-disasm.exp: New file.
+	* gdb.guile/scm-equal.c: New file.
+	* gdb.guile/scm-equal.exp: New file.
+	* gdb.guile/scm-error.exp: New file.
+	* gdb.guile/scm-error.scm: New file.
+	* gdb.guile/scm-frame-args.c: New file.
+	* gdb.guile/scm-frame-args.exp: New file.
+	* gdb.guile/scm-frame-args.scm: New file.
+	* gdb.guile/scm-frame-inline.c: New file.
+	* gdb.guile/scm-frame-inline.exp: New file.
+	* gdb.guile/scm-frame.c: New file.
+	* gdb.guile/scm-frame.exp: New file.
+	* gdb.guile/scm-generics.exp: New file.
+	* gdb.guile/scm-gsmob.exp: New file.
+	* gdb.guile/scm-iterator.c: New file.
+	* gdb.guile/scm-iterator.exp: New file.
+	* gdb.guile/scm-math.c: New file.
+	* gdb.guile/scm-math.exp: New file.
+	* gdb.guile/scm-objfile-script-gdb.in: New file.
+	* gdb.guile/scm-objfile-script.c: New file.
+	* gdb.guile/scm-objfile-script.exp: New file.
+	* gdb.guile/scm-objfile.c: New file.
+	* gdb.guile/scm-objfile.exp: New file.
+	* gdb.guile/scm-ports.exp: New file.
+	* gdb.guile/scm-pretty-print.c: New file.
+	* gdb.guile/scm-pretty-print.exp: New file.
+	* gdb.guile/scm-pretty-print.scm: New file.
+	* gdb.guile/scm-section-script.c: New file.
+	* gdb.guile/scm-section-script.exp: New file.
+	* gdb.guile/scm-section-script.scm: New file.
+	* gdb.guile/scm-symbol.c: New file.
+	* gdb.guile/scm-symbol.exp: New file.
+	* gdb.guile/scm-symtab-2.c: New file.
+	* gdb.guile/scm-symtab.c: New file.
+	* gdb.guile/scm-symtab.exp: New file.
+	* gdb.guile/scm-type.c: New file.
+	* gdb.guile/scm-type.exp: New file.
+	* gdb.guile/scm-value-cc.cc: New file.
+	* gdb.guile/scm-value-cc.exp: New file.
+	* gdb.guile/scm-value.c: New file.
+	* gdb.guile/scm-value.exp: New file.
+	* gdb.guile/source2.scm: New file.
+	* gdb.guile/types-module.cc: New file.
+	* gdb.guile/types-module.exp: New file.
+
+2014-02-10  Yao Qi  <yao@codesourcery.com>
+
+	PR testsuite/16543
+	* configure.ac: Append gdb.gdb/Makefile in AC_OUTPUT.
+	* configure: Regenerated.
+	* Makefile.in: New file.
+
+2014-02-08  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* gdb.python/py-framefilter.exp: Fix typo.
+
+2014-02-08  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-breakpoint-changed.exp (test_insert_delete_modify): Test
+	that no =breakpoint-modified is emitted when breakpoints are
+	modified through MI commands.
+
+2014-02-07  Pedro Alves  <pedro@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-after-sr-lock.c: New file.
+	* gdb.threads/step-after-sr-lock.exp: New file.
+
+2014-02-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/stepi-random-signal.exp: Set SIGCHLD to print.
+
+2014-02-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix i386-sse-stack-align.exp regression since GDB_PARALLEL.
+	* gdb.arch/i386-sse-stack-align.exp: Use standard_output_file.
+
 2014-02-06  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.python/py-breakpoint.exp (test_bkpt_eval_funcs): Update expected

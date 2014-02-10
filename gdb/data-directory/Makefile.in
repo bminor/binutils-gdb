@@ -19,8 +19,9 @@
 srcdir = @srcdir@
 SYSCALLS_SRCDIR = $(srcdir)/../syscalls
 PYTHON_SRCDIR = $(srcdir)/../python/lib
+GUILE_SRCDIR = $(srcdir)/../guile/lib
 SYSTEM_GDBINIT_SRCDIR = $(srcdir)/../system-gdbinit
-VPATH = $(srcdir):$(SYSCALLS_SRCDIR):$(PYTHON_SRCDIR):$(SYSTEM_GDBINIT_SRCDIR)
+VPATH = $(srcdir):$(SYSCALLS_SRCDIR):$(PYTHON_SRCDIR):$(GUILE_SRCDIR):$(SYSTEM_GDBINIT_SRCDIR)
 
 top_srcdir = @top_srcdir@
 top_builddir = @top_builddir@
@@ -72,6 +73,17 @@ PYTHON_FILES = \
 	gdb/function/__init__.py \
 	gdb/function/strfns.py
 
+GUILE_DIR = guile
+GUILE_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(GUILE_DIR)
+GUILE_FILES = \
+	./gdb.scm \
+	gdb/boot.scm \
+	gdb/experimental.scm \
+	gdb/init.scm \
+	gdb/iterator.scm \
+	gdb/printing.scm \
+	gdb/types.scm
+
 SYSTEM_GDBINIT_DIR = system-gdbinit
 SYSTEM_GDBINIT_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(SYSTEM_GDBINIT_DIR)
 SYSTEM_GDBINIT_FILES = \
@@ -111,7 +123,7 @@ FLAGS_TO_PASS = \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
 .PHONY: all
-all: stamp-syscalls stamp-python stamp-system-gdbinit
+all: stamp-syscalls stamp-python stamp-guile stamp-system-gdbinit
 
 # For portability's sake, we need to handle systems that don't have
 # symbolic links.
@@ -195,6 +207,43 @@ uninstall-python:
 	  done \
 	done
 
+stamp-guile: Makefile $(GUILE_FILES)
+	rm -rf ./$(GUILE_DIR)
+	files='$(GUILE_FILES)' ; \
+	for file in $$files ; do \
+	  dir=`echo "$$file" | sed 's,/[^/]*$$,,'` ; \
+	  $(INSTALL_DIR) ./$(GUILE_DIR)/$$dir ; \
+	  $(INSTALL_DATA) $(GUILE_SRCDIR)/$$file ./$(GUILE_DIR)/$$dir ; \
+	done
+	touch $@
+
+.PHONY: clean-guile
+clean-guile:
+	rm -rf $(GUILE_DIR)
+	rm -f stamp-guile
+
+.PHONY: install-guile
+install-guile:
+	files='$(GUILE_FILES)' ; \
+	for file in $$files ; do \
+	  dir=`echo "$$file" | sed 's,/[^/]*$$,,'` ; \
+	  $(INSTALL_DIR) $(GUILE_INSTALL_DIR)/$$dir ; \
+	  $(INSTALL_DATA) ./$(GUILE_DIR)/$$file $(GUILE_INSTALL_DIR)/$$dir ; \
+	done
+
+.PHONY: uninstall-guile
+uninstall-guile:
+	files='$(GUILE_FILES)' ; \
+	for file in $$files ; do \
+	  slashdir=`echo "/$$file" | sed 's,/[^/]*$$,,'` ; \
+	  rm -f $(GUILE_INSTALL_DIR)/$$file ; \
+	  while test "x$$file" != "x$$slashdir" ; do \
+	    rmdir 2>/dev/null "$(GUILE_INSTALL_DIR)$$slashdir" ; \
+	    file="$$slashdir" ; \
+	    slashdir=`echo "$$file" | sed 's,/[^/]*$$,,'` ; \
+	  done \
+	done
+
 stamp-system-gdbinit: Makefile $(SYSTEM_GDBINIT_FILES)
 	rm -rf ./$(SYSTEM_GDBINIT_DIR)
 	mkdir ./$(SYSTEM_GDBINIT_DIR)
@@ -246,13 +295,15 @@ install: all
 	@$(MAKE) $(FLAGS_TO_PASS) install-only
 
 .PHONY: install-only
-install-only: install-syscalls install-python install-system-gdbinit
+install-only: install-syscalls install-python install-guile \
+	install-system-gdbinit
 
 .PHONY: uninstall
-uninstall: uninstall-syscalls uninstall-python uninstall-system-gdbinit
+uninstall: uninstall-syscalls uninstall-python uninstall-guile \
+	uninstall-system-gdbinit
 
 .PHONY: clean
-clean: clean-syscalls clean-python clean-system-gdbinit
+clean: clean-syscalls clean-python clean-guile clean-system-gdbinit
 
 .PHONY: maintainer-clean realclean distclean
 maintainer-clean realclean distclean: clean

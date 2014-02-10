@@ -1493,7 +1493,7 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
     }
 
   /* Indicate failure to find the requested memory block.  */
-  return -1;
+  return TARGET_XFER_E_IO;
 }
 
 /* This is the implementation of target_ops method

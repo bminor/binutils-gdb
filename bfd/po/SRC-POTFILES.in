@@ -109,6 +109,7 @@ cpu-mmix.c
 cpu-moxie.c
 cpu-msp430.c
 cpu-mt.c
+cpu-nds32.c
 cpu-nios2.c
 cpu-ns32k.c
 cpu-openrisc.c
@@ -202,6 +203,7 @@ elf32-mips.c
 elf32-moxie.c
 elf32-msp430.c
 elf32-mt.c
+elf32-nds32.c
 elf32-nios2.c
 elf32-openrisc.c
 elf32-or32.c

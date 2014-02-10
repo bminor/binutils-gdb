@@ -4399,6 +4399,23 @@ proc get_sizeof { type default } {
     return [get_integer_valueof "sizeof (${type})" $default]
 }
 
+proc get_target_charset { } {
+    global gdb_prompt
+
+    gdb_test_multiple "show target-charset" "" {
+	-re "The target character set is \"auto; currently (\[^\"\]*)\".*$gdb_prompt $" {
+	    return $expect_out(1,string)
+	}
+	-re "The target character set is \"(\[^\"\]*)\".*$gdb_prompt $" {
+	    return $expect_out(1,string)
+	}
+    }
+
+    # Pick a reasonable default.
+    warning "Unable to read target-charset."
+    return "UTF-8"
+}
+
 # Get the current value for remotetimeout and return it.
 proc get_remotetimeout { } {
     global gdb_prompt

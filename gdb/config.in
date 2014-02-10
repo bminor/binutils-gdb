@@ -159,6 +159,9 @@
 /* Define if <sys/procfs.h> has gregset_t. */
 #undef HAVE_GREGSET_T
 
+/* Define if Guile interpreter is being linked in. */
+#undef HAVE_GUILE
+
 /* Define if you have the iconv() function. */
 #undef HAVE_ICONV
 

@@ -1542,12 +1542,12 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
     {
     case MEM_RO:
       if (writebuf != NULL)
-	return -1;
+	return TARGET_XFER_E_IO;
       break;
 
     case MEM_WO:
       if (readbuf != NULL)
-	return -1;
+	return TARGET_XFER_E_IO;
       break;
 
     case MEM_FLASH:
@@ -1557,7 +1557,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
       break;
 
     case MEM_NONE:
-      return -1;
+      return TARGET_XFER_E_IO;
     }
 
   if (!ptid_equal (inferior_ptid, null_ptid))
@@ -1696,6 +1696,10 @@ target_xfer_partial (struct target_ops *ops,
   LONGEST retval;
 
   gdb_assert (ops->to_xfer_partial != NULL);
+
+  /* Transfer is done when LEN is zero.  */
+  if (len == 0)
+    return 0;
 
   if (writebuf && !may_write_memory)
     error (_("Writing to memory is not allowed (addr %s, len %s)"),

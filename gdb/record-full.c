@@ -1685,7 +1685,7 @@ record_full_xfer_partial (struct target_ops *ops, enum target_object object,
 	    fprintf_unfiltered (gdb_stdlog,
 				"Process record: failed to record "
 				"execution log.");
-	  return -1;
+	  return TARGET_XFER_E_IO;
 	}
       if (record_full_arch_list_add_end ())
 	{
@@ -1694,7 +1694,7 @@ record_full_xfer_partial (struct target_ops *ops, enum target_object object,
 	    fprintf_unfiltered (gdb_stdlog,
 				"Process record: failed to record "
 				"execution log.");
-	  return -1;
+	  return TARGET_XFER_E_IO;
 	}
       record_full_list->next = record_full_arch_list_head;
       record_full_arch_list_head->prev = record_full_list;
@@ -2270,7 +2270,7 @@ record_full_core_xfer_partial (struct target_ops *ops,
 		}
 	    }
 
-	  return -1;
+	  return TARGET_XFER_E_IO;
 	}
       else
 	error (_("You can't do that without a process to debug."));

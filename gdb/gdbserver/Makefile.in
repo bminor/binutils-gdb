@@ -163,7 +163,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
 	$(srcdir)/common/buffer.c $(srcdir)/common/linux-btrace.c \
 	$(srcdir)/common/filestuff.c $(srcdir)/target/waitstatus.c \
-    $(srcdir)/common/mips-linux-watch.c
+	$(srcdir)/common/mips-linux-watch.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 

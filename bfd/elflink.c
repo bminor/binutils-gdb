@@ -9549,7 +9549,16 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	 file, so the contents field will not have been set by any of
 	 the routines which work on output files.  */
       if (elf_section_data (o)->this_hdr.contents != NULL)
-	contents = elf_section_data (o)->this_hdr.contents;
+	{
+	  contents = elf_section_data (o)->this_hdr.contents;
+	  if (bed->caches_rawsize
+	      && o->rawsize != 0
+	      && o->rawsize < o->size)
+	    {
+	      memcpy (flinfo->contents, contents, o->rawsize);
+	      contents = flinfo->contents;
+	    }
+	}
       else
 	{
 	  contents = flinfo->contents;
@@ -12131,11 +12140,15 @@ bfd_boolean
 bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
+  struct bfd_elf_dynamic_list *d = info->dynamic_list;
 
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && (h->ref_dynamic
-	  || ((!info->executable || info->export_dynamic)
+	  || ((!info->executable
+	       || info->export_dynamic
+	       || (d != NULL
+		   && (*d->match) (&d->head, NULL, h->root.root.string)))
 	      && h->def_regular
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
