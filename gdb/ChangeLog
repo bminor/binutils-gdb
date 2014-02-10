@@ -1,5 +1,32 @@
 2014-02-23  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (TFILE_PID): Move it to tracefile-tfile.c.
+	(O_LARGEFILE): Likewise.
+	(tfile_ops): Likewise.
+	(TRACE_HEADER_SIZE): Likewise.
+	(trace_fd, trace_frames_offset, cur_offset): Likewise.
+	(cur_data_size): Likewise.
+	(tfile_read, tfile_open, tfile_interp_line): Likewise.
+	(tfile_close, tfile_files_info): Likewise.
+	(tfile_get_trace_status): Likewise.
+	(tfile_get_tracepoint_status): Likewise.
+	(tfile_get_traceframe_address): Likewise.
+	(tfile_trace_find, match_blocktype): Likewise.
+	(traceframe_walk_blocks, traceframe_find_block_type): Likewise.
+	(tfile_fetch_registers, tfile_xfer_partial): Likewise.
+	(tfile_get_trace_state_variable_value): Likewise.
+	(tfile_has_all_memory, tfile_has_memory): Likewise.
+	(tfile_has_stack, tfile_has_registers): Likewise.
+	(tfile_thread_alive, build_traceframe_info): Likewise.
+	(tfile_traceframe_info, init_tfile_ops): Likewise.
+	(_initialize_tracepoint): Don't call init_tfile_ops
+	and add_target_with_completer.
+	* tracefile-tfile.c: Include regcache.h, inferior.h, gdbthread.h,
+	exec.h, completer.h and filenames.h.
+	(_initialize_tracefile_tfile): New function.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (REMOTE_OBS): Append tracefile.o and
 	tracefile-tfile.o.
 	(HFILES_NO_SRCDIR): Add tracefile.h.
