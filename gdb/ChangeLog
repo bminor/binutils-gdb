@@ -1,3 +1,9 @@
+2014-02-10  Gary Benson  <gbenson@redhat.com>
+
+	* symfile-debug.c (debug_qf_expand_symtabs_matching):
+	Use expand_symtabs_file_matcher_ftype and
+	expand_symtabs_symbol_matcher_ftype.
+
 2014-02-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (struct cache_entry, HASH_SIZE): Move definition up.
