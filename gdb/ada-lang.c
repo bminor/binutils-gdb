@@ -13493,6 +13493,7 @@ DWARF attribute."),
      NULL, NULL, &maint_set_ada_cmdlist, &maint_show_ada_cmdlist);
 
   obstack_init (&symbol_list_obstack);
+  obstack_init (&cache_space);
 
   decoded_names_store = htab_create_alloc
     (256, htab_hash_string, (int (*)(const void *, const void *)) streq,

@@ -1,5 +1,10 @@
 2014-02-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (_initialize_ada_language): Initialize
+	cache_space obstack.
+
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (HASH_SIZE): New macro.
 	(struct cache_entry): New type.
 	(cache_space, cache): New static globals.
