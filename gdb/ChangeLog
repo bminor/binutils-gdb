@@ -1,5 +1,9 @@
 2014-02-12  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* nios2-tdep.c (nios2_stub_frame_base): Remove global.
+
+2014-02-12  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* tic6x-tdep.c (tic6x_gdbarch_init): Call frame_base_set_default.
 
 2014-02-12  Mark Kettenis  <kettenis@gnu.org>

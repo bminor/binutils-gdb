@@ -1354,14 +1354,6 @@ static const struct frame_unwind nios2_stub_frame_unwind =
   nios2_stub_frame_sniffer
 };
 
-static const struct frame_base nios2_stub_frame_base =
-{
-  &nios2_stub_frame_unwind,
-  nios2_stub_frame_base_address,
-  nios2_stub_frame_base_address,
-  nios2_stub_frame_base_address
-};
-
 /* Helper function to read an instruction at PC.  */
 
 static unsigned long
