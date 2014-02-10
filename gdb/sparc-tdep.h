@@ -193,6 +193,9 @@ extern struct sparc_frame_cache *
 extern struct sparc_frame_cache *
   sparc32_frame_cache (struct frame_info *this_frame, void **this_cache);
 
+extern int
+  sparc_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
+
 
 
 extern int sparc_software_single_step (struct frame_info *frame);

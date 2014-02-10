@@ -88,6 +88,9 @@ struct regset;
 #define X_DISP19(i) ((((i) & 0x7ffff) ^ 0x40000) - 0x40000)
 #define X_DISP10(i) ((((((i) >> 11) && 0x300) | (((i) >> 5) & 0xff)) ^ 0x200) - 0x200)
 #define X_SIMM13(i) ((((i) & 0x1fff) ^ 0x1000) - 0x1000)
+/* Macros to identify some instructions.  */
+/* RETURN (RETT in V8) */
+#define X_RETTURN(i) ((X_OP (i) == 0x2) && (X_OP3 (i) == 0x39))
 
 /* Fetch the instruction at PC.  Instructions are always big-endian
    even if the processor operates in little-endian mode.  */
@@ -450,6 +453,29 @@ sparc32_pseudo_register_write (struct gdbarch *gdbarch,
   regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);
   regcache_raw_write (regcache, regnum, buf);
   regcache_raw_write (regcache, regnum + 1, buf + 4);
+}
+
+/* Implement "in_function_epilogue_p".  */
+
+int
+sparc_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  /* This function must return true if we are one instruction after an
+     instruction that destroyed the stack frame of the current
+     function.  The SPARC instructions used to restore the callers
+     stack frame are RESTORE and RETURN/RETT.
+
+     Of these RETURN/RETT is a branch instruction and thus we return
+     true if we are in its delay slot.
+
+     RESTORE is almost always found in the delay slot of a branch
+     instruction that transfers control to the caller, such as JMPL.
+     Thus the next instruction is in the caller frame and we don't
+     need to do anything about it.  */
+
+  unsigned int insn = sparc_fetch_instruction (pc - 4);
+
+  return X_RETTURN (insn);
 }
 
 

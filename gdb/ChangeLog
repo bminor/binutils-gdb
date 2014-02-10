@@ -1,3 +1,12 @@
+2014-02-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-tdep.c (sparc_in_function_epilogue_p): New function.
+	(X_RETTURN): New macro.
+	* sparc-tdep.h: sparc_in_function_epilogue_p prototype.
+
+	* sparc64-tdep.c (sparc64_init_abi): Hook
+	sparc_in_function_epilogue_p.
+
 2014-02-10  Gary Benson  <gbenson@redhat.com>
 
 	* symfile-debug.c (debug_qf_expand_symtabs_matching):
