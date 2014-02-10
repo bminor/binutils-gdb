@@ -51,10 +51,10 @@ index 0000000..ef188ab
 +	* ld-elf/shared.exp (build_tests): Add libpr16496a.so and
 +	libpr16496b.so tests.
 diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
-index 0aab5fa..b9c55e7 100644
+index 76cac2f..a7d7890 100644
 --- a/bfd/elf-bfd.h
 +++ b/bfd/elf-bfd.h
-@@ -1767,6 +1767,8 @@ extern bfd_boolean _bfd_elf_copy_private_bfd_data
+@@ -1772,6 +1772,8 @@ extern bfd_boolean _bfd_elf_copy_private_bfd_data
    (bfd *, bfd *);
  extern bfd_boolean _bfd_elf_print_private_bfd_data
    (bfd *, void *);
@@ -225,7 +225,7 @@ index 0098ae7..af7bfce 100644
    if (alloc != NULL)
      free (alloc);
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index 7d228d6..1b945d2 100644
+index 150e84f..b5266e1 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
 @@ -271,6 +271,20 @@ typedef enum print_mode
@@ -304,7 +304,7 @@ index 7d228d6..1b945d2 100644
  
  	      if (is_rela)
  		{
-@@ -5920,7 +5954,8 @@ process_relocs (FILE * file)
+@@ -5921,7 +5955,8 @@ process_relocs (FILE * file)
  				offset_from_vma (file, rel_offset, rel_size),
  				rel_size,
  				dynamic_symbols, num_dynamic_syms,
@@ -314,7 +314,7 @@ index 7d228d6..1b945d2 100644
  	    }
  	}
  
-@@ -5995,14 +6030,16 @@ process_relocs (FILE * file)
+@@ -5996,14 +6031,16 @@ process_relocs (FILE * file)
  		    }
  
  		  dump_relocations (file, rel_offset, rel_size,
@@ -333,7 +333,7 @@ index 7d228d6..1b945d2 100644
  
  	      found = 1;
  	    }
-@@ -9581,6 +9618,181 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
+@@ -9582,6 +9619,181 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
    putchar ('\n');
  }
  
@@ -515,7 +515,7 @@ index 7d228d6..1b945d2 100644
  /* Dump the symbol table.  */
  static int
  process_symbol_table (FILE * file)
-@@ -9877,6 +10089,10 @@ process_symbol_table (FILE * file)
+@@ -9878,6 +10090,10 @@ process_symbol_table (FILE * file)
  
  	  for (si = 0, psym = symtab; si < num_syms; si++, psym++)
  	    {
@@ -526,7 +526,7 @@ index 7d228d6..1b945d2 100644
  	      printf ("%6d: ", si);
  	      print_vma (psym->st_value, LONG_HEX);
  	      putchar (' ');
-@@ -9893,163 +10109,18 @@ process_symbol_table (FILE * file)
+@@ -9894,163 +10110,18 @@ process_symbol_table (FILE * file)
  	      print_symbol (25, psym->st_name < strtab_size
  			    ? strtab + psym->st_name : _("<corrupt>"));
  
@@ -773,13 +773,13 @@ index 0000000..6fb54c1
 +.* sd_get_seats@LIBSYSTEMD_209
 +#pass
 diff --git a/ld/testsuite/ld-elf/shared.exp b/ld/testsuite/ld-elf/shared.exp
-index 981ce71..63ec119 100644
+index 949851f..c3344ef 100644
 --- a/ld/testsuite/ld-elf/shared.exp
 +++ b/ld/testsuite/ld-elf/shared.exp
-@@ -227,6 +227,15 @@ set build_tests {
-   {"Build rdynamic-1"
-    "-rdynamic -Wl,--gc-sections" "-ffunction-sections"
-    {rdynamic-1.c} {{readelf {-s} rdynamic-1.rd}} "rdynamic-1"}
+@@ -230,6 +230,15 @@ set build_tests {
+   {"Build dynamic-1"
+    "-Wl,--dynamic-list,dynamic-1.syms -Wl,--gc-sections" "-ffunction-sections"
+    {dynamic-1.c} {{readelf {-s} dynamic-1.rd}} "dynamic-1"}
 +  {"Build libpr16496a.so"
 +   "-shared -Wl,--version-script=pr16496a.map" "-fPIC"
 +   {pr16496a.c} {} "libpr16496a.so"}
