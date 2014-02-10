@@ -46,6 +46,15 @@ extern int build_section_table (struct bfd *, struct target_section **,
 
 extern int resize_section_table (struct target_section_table *, int);
 
+/* Read from mappable read-only sections of BFD executable files.
+   Return TARGET_XFER_OK, if read is successful.  Return
+   TARGET_XFER_EOF if read is done.  Return TARGET_XFER_E_IO
+   otherwise.  */
+
+extern enum target_xfer_status
+  exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset,
+			       ULONGEST len, ULONGEST *xfered_len);
+
 /* Appends all read-only memory ranges found in the target section
    table defined by SECTIONS and SECTIONS_END, starting at (and
    intersected with) MEMADDR for LEN bytes.  Returns the augmented

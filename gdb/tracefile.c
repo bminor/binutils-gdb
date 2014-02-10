@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "tracefile.h"
 #include "ctf.h"
+#include "exec.h"
 
 /* Helper macros.  */
 

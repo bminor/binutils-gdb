@@ -1,5 +1,13 @@
 2014-02-23  Yao Qi  <yao@codesourcery.com>
 
+	* ctf.c (ctf_xfer_partial): Move code to ...
+	* exec.c (exec_read_partial_read_only): ... it.  New function.
+	* tracefile-tfile.c (tfile_xfer_partial): Likewise.
+	* tracefile.c: Include "exec.h".
+	* exec.h (exec_read_partial_read_only): Declare.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
 	* tracefile-tfile.c (tfile_has_all_memory): Remove.
 	(tfile_has_memory): Remove.
 	(init_tfile_ops): Don't set fields to_has_all_memory and

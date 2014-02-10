@@ -938,41 +938,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	}
     }
 
-  /* It's unduly pedantic to refuse to look at the executable for
-     read-only pieces; so do the equivalent of readonly regions aka
-     QTro packet.  */
-  /* FIXME account for relocation at some point.  */
-  if (exec_bfd)
-    {
-      asection *s;
-      bfd_size_type size;
-      bfd_vma vma;
-
-      for (s = exec_bfd->sections; s; s = s->next)
-	{
-	  if ((s->flags & SEC_LOAD) == 0
-	      || (s->flags & SEC_READONLY) == 0)
-	    continue;
-
-	  vma = s->vma;
-	  size = bfd_get_section_size (s);
-	  if (vma <= offset && offset < (vma + size))
-	    {
-	      ULONGEST amt;
-
-	      amt = (vma + size) - offset;
-	      if (amt > len)
-		amt = len;
-
-	      *xfered_len = bfd_get_section_contents (exec_bfd, s,
-						      readbuf, offset - vma, amt);
-	      return TARGET_XFER_OK;
-	    }
-	}
-    }
-
-  /* Indicate failure to find the requested memory block.  */
-  return TARGET_XFER_E_IO;
+  return exec_read_partial_read_only (readbuf, offset, len, xfered_len);
 }
 
 /* Iterate through the blocks of a trace frame, looking for a 'V'

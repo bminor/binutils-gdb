@@ -1467,47 +1467,7 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
       bt_iter_set_pos (bt_ctf_get_iter (ctf_iter), pos);
     }
 
-  /* It's unduly pedantic to refuse to look at the executable for
-     read-only pieces; so do the equivalent of readonly regions aka
-     QTro packet.  */
-  if (exec_bfd != NULL)
-    {
-      asection *s;
-      bfd_size_type size;
-      bfd_vma vma;
-
-      for (s = exec_bfd->sections; s; s = s->next)
-	{
-	  if ((s->flags & SEC_LOAD) == 0
-	      || (s->flags & SEC_READONLY) == 0)
-	    continue;
-
-	  vma = s->vma;
-	  size = bfd_get_section_size (s);
-	  if (vma <= offset && offset < (vma + size))
-	    {
-	      ULONGEST amt;
-
-	      amt = (vma + size) - offset;
-	      if (amt > len)
-		amt = len;
-
-	      amt = bfd_get_section_contents (exec_bfd, s,
-					      readbuf, offset - vma, amt);
-
-	      if (amt == 0)
-		return TARGET_XFER_EOF;
-	      else
-		{
-		  *xfered_len = amt;
-		  return TARGET_XFER_OK;
-		}
-	    }
-	}
-    }
-
-  /* Indicate failure to find the requested memory block.  */
-  return TARGET_XFER_E_IO;
+  return exec_read_partial_read_only (readbuf, offset, len, xfered_len);
 }
 
 /* This is the implementation of target_ops method
