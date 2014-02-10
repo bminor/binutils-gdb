@@ -1,3 +1,14 @@
+2014-02-10  Doug Evans  <xdje42@gmail.com>
+
+	* Makefile.in (GDB_DOC_FILES): Add guile.texi.
+	* gdb.texinfo (Auto-loading): Add set/show auto-load guile-scripts.
+	(Extending GDB): New menu entries Guile, Multiple Extension Languages.
+	(Guile docs): Include guile.texi.
+	(objfile-gdbdotext file): Add objfile-gdb.scm.
+	(dotdebug_gdb_scripts section): Mention Guile scripts.
+	(Multiple Extension Languages): New node.
+	* guile.texi: New file.
+
 2014-01-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Ada Glitches): Document the new "maint ada set/show

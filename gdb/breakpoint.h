@@ -29,6 +29,7 @@
 struct value;
 struct block;
 struct gdbpy_breakpoint_object;
+struct gdbscm_breakpoint_object;
 struct get_number_or_range_state;
 struct thread_info;
 struct bpstats;
@@ -739,6 +740,9 @@ struct breakpoint
        can sometimes be NULL for enabled GDBs as not all breakpoint
        types are tracked by the scripting language API.  */
     struct gdbpy_breakpoint_object *py_bp_object;
+
+    /* Same as py_bp_object, but for Scheme.  */
+    struct gdbscm_breakpoint_object *scm_bp_object;
   };
 
 /* An instance of this type is used to represent a watchpoint.  It

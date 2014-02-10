@@ -1,3 +1,99 @@
+2014-02-10  Doug Evans  <xdje42@gmail.com>
+
+	Add Guile as an extension language.
+	* NEWS: Mention Guile scripting.
+	* Makefile.in (SUBDIR_GUILE_OBS): New variable.
+	(SUBDIR_GUILE_SRCS, SUBDIR_GUILE_DEPS): New variables
+	(SUBDIR_GUILE_LDFLAGS, SUBDIR_GUILE_CFLAGS): New variables.
+	(INTERNAL_CPPFLAGS): Add GUILE_CPPFLAGS.
+	(CLIBS): Add GUILE_LIBS.
+	(install-guile): New rule.
+	(guile.o): New rule.
+	(scm-arch.o, scm-auto-load.o, scm-block.o): New rules.
+	(scm-breakpoint.o, scm-disasm.o, scm-exception.o): New rules.
+	(scm-frame.o, scm-iterator.o, scm-lazy-string.o): New rules.
+	(scm-math.o, scm-objfile.o, scm-ports.o): New rules.
+	(scm-pretty-print.o, scm-safe-call.o, scm-gsmob.o): New rules.
+	(scm-string.o, scm-symbol.o, scm-symtab.o): New rules.
+	(scm-type.o, scm-utils.o, scm-value.o): New rules.
+	* configure.ac: New option --with-guile.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* auto-load.c: Remove #include "python/python.h".  Add #include
+	"gdb/section-scripts.h".
+	(source_section_scripts): Handle Guile scripts.
+	(_initialize_auto_load): Add name of Guile objfile script to
+	scripts-directory help text.
+	* breakpoint.c (condition_command): Tweak comment to include Scheme.
+	* breakpoint.h (gdbscm_breakpoint_object): Add forward decl.
+	(struct breakpoint): New member scm_bp_object.
+	* defs.h (enum command_control_type): New value guile_control.
+	* cli/cli-cmds.c: Remove #include "python/python.h".  Add #include
+	"extension.h".
+	(show_user): Update comment.
+	(_initialize_cli_cmds): Update help text for "show user".  Update help
+	text for max-user-call-depth.
+	* cli/cli-script.c: Remove #include "python/python.h".  Add #include
+	"extension.h".
+	(multi_line_command_p): Add guile_control.
+	(print_command_lines): Handle guile_control.
+	(execute_control_command, recurse_read_control_structure): Ditto.
+	(process_next_line): Recognize "guile" commands.
+	* disasm.c (gdb_disassemble_info): Make non-static.
+	* disasm.h: #include "dis-asm.h".
+	(struct gdbarch): Add forward decl.
+	(gdb_disassemble_info): Declare.
+	* extension.c: #include "guile/guile.h".
+	(extension_languages): Add guile.
+	(get_ext_lang_defn): Handle EXT_LANG_GDB.
+	* extension.h (enum extension_language): New value EXT_LANG_GUILE.
+	* gdbtypes.c (get_unsigned_type_max): New function.
+	(get_signed_type_minmax): New function.
+	* gdbtypes.h (get_unsigned_type_max): Declare.
+	(get_signed_type_minmax): Declare.
+	* guile/README: New file.
+	* guile/guile-internal.h: New file.
+	* guile/guile.c: New file.
+	* guile/guile.h: New file.
+	* guile/scm-arch.c: New file.
+	* guile/scm-auto-load.c: New file.
+	* guile/scm-block.c: New file.
+	* guile/scm-breakpoint.c: New file.
+	* guile/scm-disasm.c: New file.
+	* guile/scm-exception.c: New file.
+	* guile/scm-frame.c: New file.
+	* guile/scm-gsmob.c: New file.
+	* guile/scm-iterator.c: New file.
+	* guile/scm-lazy-string.c: New file.
+	* guile/scm-math.c: New file.
+	* guile/scm-objfile.c: New file.
+	* guile/scm-ports.c: New file.
+	* guile/scm-pretty-print.c: New file.
+	* guile/scm-safe-call.c: New file.
+	* guile/scm-string.c: New file.
+	* guile/scm-symbol.c: New file.
+	* guile/scm-symtab.c: New file.
+	* guile/scm-type.c: New file.
+	* guile/scm-utils.c: New file.
+	* guile/scm-value.c: New file.
+	* guile/lib/gdb.scm: New file.
+	* guile/lib/gdb/boot.scm: New file.
+	* guile/lib/gdb/experimental.scm: New file.
+	* guile/lib/gdb/init.scm: New file.
+	* guile/lib/gdb/iterator.scm: New file.
+	* guile/lib/gdb/printing.scm: New file.
+	* guile/lib/gdb/types.scm: New file.
+	* data-directory/Makefile.in (GUILE_SRCDIR): New variable.
+	(VPATH): Add $(GUILE_SRCDIR).
+	(GUILE_DIR): New variable.
+	(GUILE_INSTALL_DIR, GUILE_FILES): New variables.
+	(all): Add stamp-guile dependency.
+	(stamp-guile): New rule.
+	(clean-guile, install-guile, uninstall-guile): New rules.
+	(install-only): Add install-guile dependency.
+	(uninstall): Add uninstall-guile dependency.
+	(clean): Add clean-guile dependency.
+
 2014-02-09  Doug Evans  <xdje42@gmail.com>
 
 	Revert this patch (which I approved, mea culpa).

@@ -1054,6 +1054,154 @@ AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(PYTHON_LIBS)
 
+# -------------------- #
+# Check for libguile.  #
+# -------------------- #
+
+dnl We check guile with pkg-config.
+
+AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
+
+dnl Utility to simplify finding libguile.
+dnl $1 = pkg-config-program
+dnl $2 = space-separate list of guile versions to try
+dnl $3 = yes|no, indicating whether to flag errors or ignore them
+dnl $4 = the shell variable to assign the result to
+dnl      If libguile is found we store "yes" here.
+
+AC_DEFUN([AC_TRY_LIBGUILE],
+[
+  pkg_config=$1
+  guile_version_list=$2
+  flag_errors=$3
+  define([have_libguile_var],$4)
+  if test "${pkg_config}" = "missing"; then
+    AC_ERROR(pkg-config program not found)
+  fi
+  if test ! -f "${pkg_config}"; then
+    AC_ERROR(pkg-config program ${pkg_config} not found)
+  fi
+  found_usable_guile=checking
+  AC_MSG_CHECKING([for usable guile from ${pkg_config}])
+  for guile_version in ${guile_version_list}; do
+    ${pkg_config} --exists ${guile_version} 2>/dev/null
+    if test $? != 0; then
+      continue
+    fi
+    dnl pkg-config says the package exists, so if we get an error now,
+    dnl that's bad.
+    new_CPPFLAGS=`${pkg_config} --cflags ${guile_version}`
+    if test $? != 0; then
+      AC_ERROR(failure running pkg-config --cflags ${guile_version})
+    fi
+    new_LIBS=`${pkg_config} --libs ${guile_version}`
+    if test $? != 0; then
+      AC_ERROR(failure running pkg-config --libs ${guile_version})
+    fi
+    dnl If we get this far, great.
+    found_usable_guile=${guile_version}
+    break
+  done
+  if test "${found_usable_guile}" = "checking"; then
+    if test "${flag_errors}" = "yes"; then
+      AC_ERROR(unable to find usable guile version from "${guile_version_list}")
+    else
+      found_usable_guile=no
+    fi
+  fi
+  dnl One final sanity check.
+  dnl The user could have said --with-guile=python-2.7.
+  if test "${found_usable_guile}" != no; then
+    save_CPPFLAGS=$CPPFLAGS
+    save_LIBS=$LIBS
+    CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
+    LIBS="$LIBS $new_LIBS"
+    AC_LINK_IFELSE(AC_LANG_PROGRAM([[#include "libguile.h"]],
+                                   [[scm_init_guile ();]]),
+                   [have_libguile_var=yes
+                    GUILE_CPPFLAGS=$new_CPPFLAGS
+                    GUILE_LIBS=$new_LIBS],
+                   [found_usable_guile=no])
+    CPPFLAGS=$save_CPPFLAGS
+    LIBS=$save_LIBS
+    if test "${found_usable_guile}" = no; then
+      if test "${flag_errors}" = yes; then
+        AC_MSG_FAILURE(linking guile version ${guile_version} test program failed)
+      fi
+    fi
+  fi
+  AC_MSG_RESULT([${found_usable_guile}])
+])
+
+dnl There are several different values for --with-guile:
+dnl
+dnl no -   Don't include guile support.
+dnl yes -  Include guile support, error if it's missing.
+dnl        The pkg-config program must be in $PATH.
+dnl auto - Same as "yes", but if guile is missing from the system,
+dnl        fall back to "no".
+dnl guile-version [guile-version-choice-2 ...] -
+dnl        A space-separated list of guile package versions to try.
+dnl        These are passed to pkg-config as-is.
+dnl        E.g., guile-2.0 or guile-2.2-uninstalled
+dnl        This requires making sure PKG_CONFIG_PATH is set appropriately.
+dnl /path/to/pkg-config -
+dnl        Use this pkg-config program.
+dnl        NOTE: This needn't be the "real" pkg-config program.
+dnl        It could be a shell script.  It is invoked as:
+dnl        pkg-config --exists $version
+dnl        pkg-config --cflags $version
+dnl        pkg-config --libs $version
+dnl        $version will be the default guile version (currently guile-2.0),
+dnl        but the program is free to ignore this.
+
+AC_ARG_WITH(guile,
+  AS_HELP_STRING([--with-guile@<:@=GUILE@:>@], [include guile support (auto/yes/no/<guile-version>/<pkg-config-program>)]),
+  [], [with_guile=auto])
+AC_MSG_CHECKING([whether to use guile])
+AC_MSG_RESULT([$with_guile])
+
+try_guile_versions="guile-2.0"
+have_libguile=no
+case "${with_guile}" in
+no)
+  AC_MSG_WARN([guile support disabled; some features will be unavailable.])
+  ;;
+auto)
+  AC_TRY_LIBGUILE(${pkg_config_prog_path}, ${try_guile_versions}, no, have_libguile)
+  ;;
+yes)
+  AC_TRY_LIBGUILE(${pkg_config_prog_path}, ${try_guile_versions}, yes, have_libguile)
+  ;;
+[[\\/]]* | ?:[[\\/]]*)
+  AC_TRY_LIBGUILE(${with_guile}, ${try_guile_versions}, yes, have_libguile)
+  ;;
+"" | */*)
+  # Disallow --with=guile="" and --with-guile=foo/bar.
+  AC_ERROR(invalid value for --with-guile)
+  ;;
+*)
+  # A space separate list of guile versions to try, in order.
+  AC_TRY_LIBGUILE(${pkg_config_prog_path}, ${with_guile}, yes, have_libguile)
+  ;;
+esac
+
+if test "${have_libguile}" != no; then
+  AC_DEFINE(HAVE_GUILE, 1, [Define if Guile interpreter is being linked in.])
+  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GUILE_OBS)"
+  CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_GUILE_DEPS)"
+  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_GUILE_SRCS)"
+  CONFIG_INSTALL="$CONFIG_INSTALL install-guile"
+  ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_GUILE_CFLAGS)"
+else
+  # Even if Guile support is not compiled in, we need to have these files
+  # included.
+  CONFIG_OBS="$CONFIG_OBS guile.o"
+  CONFIG_SRCS="$CONFIG_SRCS guile/guile.c"
+fi
+AC_SUBST(GUILE_CPPFLAGS)
+AC_SUBST(GUILE_LIBS)
+
 # --------------------- #
 # Check for libmcheck.  #
 # --------------------- #

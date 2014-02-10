@@ -22324,6 +22324,12 @@ These are @value{GDBN} control commands for the auto-loading:
 @tab Show setting of @value{GDBN} Python scripts.
 @item @xref{info auto-load python-scripts}.
 @tab Show state of @value{GDBN} Python scripts.
+@item @xref{set auto-load guile-scripts}.
+@tab Control for @value{GDBN} Guile scripts.
+@item @xref{show auto-load guile-scripts}.
+@tab Show setting of @value{GDBN} Guile scripts.
+@item @xref{info auto-load guile-scripts}.
+@tab Show state of @value{GDBN} Guile scripts.
 @item @xref{set auto-load scripts-directory}.
 @tab Control for @value{GDBN} auto-loaded scripts location.
 @item @xref{show auto-load scripts-directory}.
@@ -22950,7 +22956,9 @@ being debugged.
 @menu
 * Sequences::                Canned Sequences of @value{GDBN} Commands
 * Python::                   Extending @value{GDBN} using Python
+* Guile::                    Extending @value{GDBN} using Guile
 * Auto-loading extensions::  Automatically loading extensions
+* Multiple Extension Languages:: Working with multiple extension languages
 * Aliases::                  Creating new spellings of existing commands
 @end menu
 
@@ -27953,6 +27961,9 @@ substitute_prompt (``frame: \f,
 @end smallexample
 @end table
 
+@c Guile docs live in a separate file.
+@include guile.texi
+
 @node Auto-loading extensions
 @section Auto-loading extensions
 @cindex auto-loading extensions
@@ -27998,6 +28009,8 @@ where @var{ext} is the file extension for the extension language:
 GDB's own command language
 @item @file{@var{objfile}-gdb.py}
 Python
+@item @file{@var{objfile}-gdb.scm}
+Guile
 @end table
 
 @var{script-name} is formed by ensuring that the file name of @var{objfile}
@@ -28091,6 +28104,7 @@ for example, this GCC macro for Python scripts.
 @end example
 
 @noindent
+For Guile scripts, replace @code{.byte 1} with @code{.byte 3}.
 Then one can reference the macro in a header or source file like this:
 
 @example
@@ -28161,6 +28175,26 @@ cumbersome.  It may be easier to specify the scripts in the
 @code{.debug_gdb_scripts} section as relative paths, and add a path to the
 top of the source tree to the source search path.
 @end itemize
+
+@node Multiple Extension Languages
+@section Multiple Extension Languages
+
+The Guile and Python extension languages do not share any state,
+and generally do not interfere with each other.
+There are some things to be aware of, however.
+
+@subsection Python comes first
+
+Python was @value{GDBN}'s first extension language, and to avoid breaking
+existing behaviour Python comes first.  This is generally solved by the
+``first one wins'' principle.  @value{GDBN} maintains a list of enabled
+extension languages, and when it makes a call to an extension language,
+(say to pretty-print a value), it tries each in turn until an extension
+language indicates it has performed the request (e.g., has returned the
+pretty-printed form of a value).
+This extends to errors while performing such requests: If an error happens
+while, for example, trying to pretty-print an object then the error is
+reported and any following extension languages are not tried.
 
 @node Aliases
 @section Creating new spellings of existing commands

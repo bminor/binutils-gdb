@@ -1,3 +1,64 @@
+2014-02-10  Doug Evans  <xdje42@gmail.com>
+
+	* configure.ac (AC_OUTPUT): Add gdb.guile.
+	* configure: Regenerate.
+	* lib/gdb-guile.exp: New file.
+	* lib/gdb.exp (get_target_charset): New function.
+	* gdb.base/help.exp: Update expected output from "apropos apropos".
+	* gdb.guile/Makefile.in: New file.
+	* gdb.guile/guile.exp: New file.
+	* gdb.guile/scm-arch.c: New file.
+	* gdb.guile/scm-arch.exp: New file.
+	* gdb.guile/scm-block.c: New file.
+	* gdb.guile/scm-block.exp: New file.
+	* gdb.guile/scm-breakpoint.c: New file.
+	* gdb.guile/scm-breakpoint.exp: New file.
+	* gdb.guile/scm-disasm.c: New file.
+	* gdb.guile/scm-disasm.exp: New file.
+	* gdb.guile/scm-equal.c: New file.
+	* gdb.guile/scm-equal.exp: New file.
+	* gdb.guile/scm-error.exp: New file.
+	* gdb.guile/scm-error.scm: New file.
+	* gdb.guile/scm-frame-args.c: New file.
+	* gdb.guile/scm-frame-args.exp: New file.
+	* gdb.guile/scm-frame-args.scm: New file.
+	* gdb.guile/scm-frame-inline.c: New file.
+	* gdb.guile/scm-frame-inline.exp: New file.
+	* gdb.guile/scm-frame.c: New file.
+	* gdb.guile/scm-frame.exp: New file.
+	* gdb.guile/scm-generics.exp: New file.
+	* gdb.guile/scm-gsmob.exp: New file.
+	* gdb.guile/scm-iterator.c: New file.
+	* gdb.guile/scm-iterator.exp: New file.
+	* gdb.guile/scm-math.c: New file.
+	* gdb.guile/scm-math.exp: New file.
+	* gdb.guile/scm-objfile-script-gdb.in: New file.
+	* gdb.guile/scm-objfile-script.c: New file.
+	* gdb.guile/scm-objfile-script.exp: New file.
+	* gdb.guile/scm-objfile.c: New file.
+	* gdb.guile/scm-objfile.exp: New file.
+	* gdb.guile/scm-ports.exp: New file.
+	* gdb.guile/scm-pretty-print.c: New file.
+	* gdb.guile/scm-pretty-print.exp: New file.
+	* gdb.guile/scm-pretty-print.scm: New file.
+	* gdb.guile/scm-section-script.c: New file.
+	* gdb.guile/scm-section-script.exp: New file.
+	* gdb.guile/scm-section-script.scm: New file.
+	* gdb.guile/scm-symbol.c: New file.
+	* gdb.guile/scm-symbol.exp: New file.
+	* gdb.guile/scm-symtab-2.c: New file.
+	* gdb.guile/scm-symtab.c: New file.
+	* gdb.guile/scm-symtab.exp: New file.
+	* gdb.guile/scm-type.c: New file.
+	* gdb.guile/scm-type.exp: New file.
+	* gdb.guile/scm-value-cc.cc: New file.
+	* gdb.guile/scm-value-cc.exp: New file.
+	* gdb.guile/scm-value.c: New file.
+	* gdb.guile/scm-value.exp: New file.
+	* gdb.guile/source2.scm: New file.
+	* gdb.guile/types-module.cc: New file.
+	* gdb.guile/types-module.exp: New file.
+
 2014-02-10  Yao Qi  <yao@codesourcery.com>
 
 	PR testsuite/16543

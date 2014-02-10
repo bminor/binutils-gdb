@@ -124,4 +124,4 @@ gdb_test "apropos \\\(print\[\^ bsiedf\\\".-\]\\\)" "handle -- Specify how to ha
 # test apropos >1 word string
 gdb_test "apropos handle signal" "handle -- Specify how to handle signals"
 # test apropos apropos
-gdb_test "apropos apropos" "apropos -- Search for commands matching a REGEXP"
+gdb_test "apropos apropos" "apropos -- Search for commands matching a REGEXP.*"

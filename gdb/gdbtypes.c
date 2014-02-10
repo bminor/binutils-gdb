@@ -1446,6 +1446,40 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
   error (_("Type %s has no component named %s."), typename, name);
 }
 
+/* Store in *MAX the largest number representable by unsigned integer type
+   TYPE.  */
+
+void
+get_unsigned_type_max (struct type *type, ULONGEST *max)
+{
+  unsigned int n;
+
+  CHECK_TYPEDEF (type);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_INT && TYPE_UNSIGNED (type));
+  gdb_assert (TYPE_LENGTH (type) <= sizeof (ULONGEST));
+
+  /* Written this way to avoid overflow.  */
+  n = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+  *max = ((((ULONGEST) 1 << (n - 1)) - 1) << 1) | 1;
+}
+
+/* Store in *MIN, *MAX the smallest and largest numbers representable by
+   signed integer type TYPE.  */
+
+void
+get_signed_type_minmax (struct type *type, LONGEST *min, LONGEST *max)
+{
+  unsigned int n;
+
+  CHECK_TYPEDEF (type);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_INT && !TYPE_UNSIGNED (type));
+  gdb_assert (TYPE_LENGTH (type) <= sizeof (LONGEST));
+
+  n = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+  *min = -((ULONGEST) 1 << (n - 1));
+  *max = ((ULONGEST) 1 << (n - 1)) - 1;
+}
+
 /* Lookup the vptr basetype/fieldno values for TYPE.
    If found store vptr_basetype in *BASETYPEP if non-NULL, and return
    vptr_fieldno.  Also, if found and basetype is from the same objfile,

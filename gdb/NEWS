@@ -3,7 +3,38 @@
 
 *** Changes since GDB 7.7
 
+* Guile scripting
+
+  GDB now has support for scripting using Guile.  Whether this is
+  available is determined at configure time.
+  Guile version 2.0 or greater is required.
+  Guile version 2.0.9 is well tested, earlier 2.0 versions are not.
+
+* New commands (for set/show, see "New options" below)
+
+guile [code]
+gu [code]
+  Invoke CODE by passing it to the Guile interpreter.
+
+guile-repl
+gr
+  Start a Guile interactive prompt (or "repl" for "read-eval-print loop").
+
+info auto-load guile-scripts [regexp]
+  Print the list of automatically loaded Guile scripts.
+
+* The source command is now capable of sourcing Guile scripts.
+  This feature is dependent on the debugger being built with Guile support.
+
 * New options
+
+set guile print-stack (none|message|full)
+show guile print-stack
+  Show a stack trace when an error is encountered in a Guile script.
+
+set auto-load guile-scripts (on|off)
+show auto-load guile-scripts
+  Control auto-loading of Guile script files.
 
 maint ada set ignore-descriptive-types (on|off)
 maint ada show ignore-descriptive-types
