@@ -561,17 +561,6 @@ tfile_files_info (struct target_ops *t)
   printf_filtered ("\t`%s'\n", trace_filename);
 }
 
-/* The trace status for a file is that tracing can never be run.  */
-
-static int
-tfile_get_trace_status (struct target_ops *self, struct trace_status *ts)
-{
-  /* Other bits of trace status were collected as part of opening the
-     trace files, so nothing to do here.  */
-
-  return -1;
-}
-
 static void
 tfile_get_tracepoint_status (struct target_ops *self,
 			     struct breakpoint *tp, struct uploaded_tp *utp)
@@ -1035,24 +1024,6 @@ tfile_has_memory (struct target_ops *ops)
   return 1;
 }
 
-static int
-tfile_has_stack (struct target_ops *ops)
-{
-  return get_traceframe_number () != -1;
-}
-
-static int
-tfile_has_registers (struct target_ops *ops)
-{
-  return get_traceframe_number () != -1;
-}
-
-static int
-tfile_thread_alive (struct target_ops *ops, ptid_t ptid)
-{
-  return 1;
-}
-
 /* Callback for traceframe_walk_blocks.  Builds a traceframe_info
    object for the tfile target's current traceframe.  */
 
@@ -1119,6 +1090,8 @@ tfile_traceframe_info (struct target_ops *self)
 static void
 init_tfile_ops (void)
 {
+  init_tracefile_ops (&tfile_ops);
+
   tfile_ops.to_shortname = "tfile";
   tfile_ops.to_longname = "Local trace dump file";
   tfile_ops.to_doc
@@ -1128,19 +1101,13 @@ init_tfile_ops (void)
   tfile_ops.to_fetch_registers = tfile_fetch_registers;
   tfile_ops.to_xfer_partial = tfile_xfer_partial;
   tfile_ops.to_files_info = tfile_files_info;
-  tfile_ops.to_get_trace_status = tfile_get_trace_status;
   tfile_ops.to_get_tracepoint_status = tfile_get_tracepoint_status;
   tfile_ops.to_trace_find = tfile_trace_find;
   tfile_ops.to_get_trace_state_variable_value
     = tfile_get_trace_state_variable_value;
-  tfile_ops.to_stratum = process_stratum;
   tfile_ops.to_has_all_memory = tfile_has_all_memory;
   tfile_ops.to_has_memory = tfile_has_memory;
-  tfile_ops.to_has_stack = tfile_has_stack;
-  tfile_ops.to_has_registers = tfile_has_registers;
   tfile_ops.to_traceframe_info = tfile_traceframe_info;
-  tfile_ops.to_thread_alive = tfile_thread_alive;
-  tfile_ops.to_magic = OPS_MAGIC;
 }
 
 extern initialize_file_ftype _initialize_tracefile_tfile;

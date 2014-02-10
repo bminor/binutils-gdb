@@ -1734,35 +1734,6 @@ ctf_trace_find (struct target_ops *self, enum trace_find_type type, int num,
   return -1;
 }
 
-/* This is the implementation of target_ops method to_has_stack.
-   The target has a stack when GDB has already selected one trace
-   frame.  */
-
-static int
-ctf_has_stack (struct target_ops *ops)
-{
-  return get_traceframe_number () != -1;
-}
-
-/* This is the implementation of target_ops method to_has_registers.
-   The target has registers when GDB has already selected one trace
-   frame.  */
-
-static int
-ctf_has_registers (struct target_ops *ops)
-{
-  return get_traceframe_number () != -1;
-}
-
-/* This is the implementation of target_ops method to_thread_alive.
-   CTF trace data has one thread faked by GDB.  */
-
-static int
-ctf_thread_alive (struct target_ops *ops, ptid_t ptid)
-{
-  return 1;
-}
-
 /* This is the implementation of target_ops method to_traceframe_info.
    Iterate the events whose name is "memory", in current
    frame, extract memory range information, and return them in
@@ -1835,23 +1806,12 @@ ctf_traceframe_info (struct target_ops *self)
   return info;
 }
 
-/* This is the implementation of target_ops method to_get_trace_status.
-   The trace status for a file is that tracing can never be run.  */
-
-static int
-ctf_get_trace_status (struct target_ops *self, struct trace_status *ts)
-{
-  /* Other bits of trace status were collected as part of opening the
-     trace files, so nothing to do here.  */
-
-  return -1;
-}
-
 static void
 init_ctf_ops (void)
 {
   memset (&ctf_ops, 0, sizeof (ctf_ops));
 
+  init_tracefile_ops (&ctf_ops);
   ctf_ops.to_shortname = "ctf";
   ctf_ops.to_longname = "CTF file";
   ctf_ops.to_doc = "Use a CTF directory as a target.\n\
@@ -1861,16 +1821,10 @@ Specify the filename of the CTF directory.";
   ctf_ops.to_fetch_registers = ctf_fetch_registers;
   ctf_ops.to_xfer_partial = ctf_xfer_partial;
   ctf_ops.to_files_info = ctf_files_info;
-  ctf_ops.to_get_trace_status = ctf_get_trace_status;
   ctf_ops.to_trace_find = ctf_trace_find;
   ctf_ops.to_get_trace_state_variable_value
     = ctf_get_trace_state_variable_value;
-  ctf_ops.to_stratum = process_stratum;
-  ctf_ops.to_has_stack = ctf_has_stack;
-  ctf_ops.to_has_registers = ctf_has_registers;
   ctf_ops.to_traceframe_info = ctf_traceframe_info;
-  ctf_ops.to_thread_alive = ctf_thread_alive;
-  ctf_ops.to_magic = OPS_MAGIC;
 }
 
 #endif

@@ -111,4 +111,6 @@ struct trace_file_writer
 
 extern struct trace_file_writer *tfile_trace_file_writer_new (void);
 
+extern void init_tracefile_ops (struct target_ops *ops);
+
 #endif /* TRACEFILE_H */

@@ -1,5 +1,23 @@
 2014-02-23  Yao Qi  <yao@codesourcery.com>
 
+	* ctf.c (ctf_has_stack, ctf_has_registers): Remove.
+	(ctf_thread_alive, ctf_get_trace_status): Remove.
+	(init_ctf_ops): Don't set some fields of ctf_ops.  Call
+	init_tracefile_ops.
+	* tracefile-tfile.c (tfile_get_trace_status): Remove.
+	(tfile_has_stack, tfile_has_registers): Remove.
+	(tfile_thread_alive): Remove.
+	(init_tfile_ops): Don't set some fields of tfile_ops.  Call
+	init_tracefile_ops.
+	* tracefile.c (tracefile_has_stack): New function.
+	(tracefile_has_registers): New function.
+	(tracefile_thread_alive): New function.
+	(tracefile_get_trace_status): New function.
+	(init_tracefile_ops): New function.
+	* tracefile.h (init_tracefile_ops): Declare.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (TFILE_PID): Move it to tracefile-tfile.c.
 	(O_LARGEFILE): Likewise.
 	(tfile_ops): Likewise.
