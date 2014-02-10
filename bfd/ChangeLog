@@ -1,3 +1,8 @@
+2014-02-17  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR build/16550
+	* cache.c (bfd_cache_max_open): Cast RLIM_INFINITY to rlim_t.
+
 2014-01-07  Tom Tromey  <tromey@redhat.com>
 
 	* elf32-xtensa.c (vsprint_msg): Don't use old VA_* compatibility
