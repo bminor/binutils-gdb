@@ -1,3 +1,8 @@
+2014-02-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.threads/step-after-sr-lock.exp: Avoid executing
+	"kill -SIGUSR1 -1".
+
 2014-02-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/tick_length_array_enum_idx: New testcase.
