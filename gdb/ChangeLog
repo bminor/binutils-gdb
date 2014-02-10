@@ -1,3 +1,11 @@
+2014-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_add_block_symbols, add_defn_to_vec)
+	(lookup_cached_symbol, ada_add_local_symbols): Add "const" to
+	struct block * parameter.
+	(ada_lookup_symbol_list_worker): Constify local variable "block".
+	Remove cast which is no longer necessary.
+
 2014-02-10  Doug Evans  <xdje42@gmail.com>
 
 	Add Guile as an extension language.

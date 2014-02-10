@@ -109,13 +109,13 @@ static int full_match (const char *, const char *);
 static struct value *make_array_descriptor (struct type *, struct value *);
 
 static void ada_add_block_symbols (struct obstack *,
-                                   struct block *, const char *,
+                                   const struct block *, const char *,
                                    domain_enum, struct objfile *, int);
 
 static int is_nonfunction (struct ada_symbol_info *, int);
 
 static void add_defn_to_vec (struct obstack *, struct symbol *,
-                             struct block *);
+                             const struct block *);
 
 static int num_defns_collected (struct obstack *);
 
@@ -4250,7 +4250,7 @@ make_array_descriptor (struct type *type, struct value *arr)
 
 static int
 lookup_cached_symbol (const char *name, domain_enum namespace,
-                      struct symbol **sym, struct block **block)
+                      struct symbol **sym, const struct block **block)
 {
   return 0;
 }
@@ -4374,7 +4374,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 static void
 add_defn_to_vec (struct obstack *obstackp,
                  struct symbol *sym,
-                 struct block *block)
+                 const struct block *block)
 {
   int i;
   struct ada_symbol_info *prevDefns = defns_collected (obstackp, 0);
@@ -4932,7 +4932,7 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
 
 static void
 ada_add_local_symbols (struct obstack *obstackp, const char *name,
-                       struct block *block, domain_enum domain,
+                       const struct block *block, domain_enum domain,
                        int wild_match_p)
 {
   int block_depth = 0;
@@ -5163,7 +5163,7 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
 			       int full_search)
 {
   struct symbol *sym;
-  struct block *block;
+  const struct block *block;
   const char *name;
   const int wild_match_p = should_use_wild_match (name0);
   int cacheIfUnique;
@@ -5177,9 +5177,7 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
   /* Search specified block and its superiors.  */
 
   name = name0;
-  block = (struct block *) block0;      /* FIXME: No cast ought to be
-                                           needed, but adding const will
-                                           have a cascade effect.  */
+  block = block0;
 
   /* Special case: If the user specifies a symbol name inside package
      Standard, do a non-wild matching of the symbol name without
@@ -5626,7 +5624,7 @@ full_match (const char *sym_name, const char *search_name)
 
 static void
 ada_add_block_symbols (struct obstack *obstackp,
-                       struct block *block, const char *name,
+                       const struct block *block, const char *name,
                        domain_enum domain, struct objfile *objfile,
                        int wild)
 {
