@@ -1265,8 +1265,10 @@ gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 # Convenience rule to handle recursion.
-$(LIBGNU) $(GNULIB_H): $(GNULIB_BUILDDIR)/Makefile
+$(LIBGNU) $(GNULIB_H): all-lib
+all-lib: $(GNULIB_BUILDDIR)/Makefile
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=$(GNULIB_BUILDDIR) subdir_do
+.PHONY: all-lib
 
 # Convenience rule to handle recursion.
 .PHONY: all-data-directory
