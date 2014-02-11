@@ -1,3 +1,8 @@
+2014-02-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile-debug.c (debug_qf_expand_symtabs_matching): Reformat
+	function parameters.
+
 2014-02-10  Will Newton  <will.newton@linaro.org>
 
 	* elfread.c (elf_rel_plt_read): Look for a .got section if
