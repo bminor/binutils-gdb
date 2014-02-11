@@ -1,5 +1,13 @@
 2014-02-23  Yao Qi  <yao@codesourcery.com>
 
+	* exec.c (section_table_read_available_memory): New function.
+	* exec.h (section_table_read_available_memory): Declare.
+	* ctf.c (ctf_xfer_partial): Call
+	section_table_read_available_memory.
+	* tracefile-tfile.c (tfile_xfer_partial): Likewise.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
 	* ctf.c (ctf_xfer_partial): Move code to ...
 	* exec.c (exec_read_partial_read_only): ... it.  New function.
 	* tracefile-tfile.c (tfile_xfer_partial): Likewise.

@@ -1465,9 +1465,14 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 
       /* Restore the position.  */
       bt_iter_set_pos (bt_ctf_get_iter (ctf_iter), pos);
-    }
 
-  return exec_read_partial_read_only (readbuf, offset, len, xfered_len);
+      return exec_read_partial_read_only (readbuf, offset, len, xfered_len);
+    }
+  else
+    {
+      /* Fallback to reading from read-only sections.  */
+      return section_table_read_available_memory (readbuf, offset, len, xfered_len);
+    }
 }
 
 /* This is the implementation of target_ops method

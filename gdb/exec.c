@@ -615,6 +615,60 @@ section_table_available_memory (VEC(mem_range_s) *memory,
 }
 
 enum target_xfer_status
+section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
+				     ULONGEST len, ULONGEST *xfered_len)
+{
+  VEC(mem_range_s) *available_memory = NULL;
+  struct target_section_table *table;
+  struct cleanup *old_chain;
+  mem_range_s *r;
+  int i;
+
+  table = target_get_section_table (&exec_ops);
+  available_memory = section_table_available_memory (available_memory,
+						     offset, len,
+						     table->sections,
+						     table->sections_end);
+
+  old_chain = make_cleanup (VEC_cleanup(mem_range_s),
+			    &available_memory);
+
+  normalize_mem_ranges (available_memory);
+
+  for (i = 0;
+       VEC_iterate (mem_range_s, available_memory, i, r);
+       i++)
+    {
+      if (mem_ranges_overlap (r->start, r->length, offset, len))
+	{
+	  CORE_ADDR end;
+	  enum target_xfer_status status;
+
+	  /* Get the intersection window.  */
+	  end = min (offset + len, r->start + r->length);
+
+	  gdb_assert (end - offset <= len);
+
+	  if (offset >= r->start)
+	    status = exec_read_partial_read_only (readbuf, offset,
+						  end - offset,
+						  xfered_len);
+	  else
+	    {
+	      *xfered_len = r->start - offset;
+	      status = TARGET_XFER_E_UNAVAILABLE;
+	    }
+	  do_cleanups (old_chain);
+	  return status;
+	}
+    }
+  do_cleanups (old_chain);
+
+  *xfered_len = len;
+  return TARGET_XFER_E_UNAVAILABLE;
+}
+
+enum target_xfer_status
 section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   ULONGEST offset, ULONGEST len,
 				   ULONGEST *xfered_len,

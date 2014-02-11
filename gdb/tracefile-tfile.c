@@ -936,9 +936,15 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	  /* Skip over this block.  */
 	  pos += (8 + 2 + mlen);
 	}
-    }
 
-  return exec_read_partial_read_only (readbuf, offset, len, xfered_len);
+      return exec_read_partial_read_only (readbuf, offset, len, xfered_len);
+    }
+  else
+    {
+      /* Fallback to reading from read-only sections.  */
+      return section_table_read_available_memory (readbuf, offset, len,
+						  xfered_len);
+    }
 }
 
 /* Iterate through the blocks of a trace frame, looking for a 'V'
