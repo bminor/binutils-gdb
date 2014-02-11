@@ -1058,10 +1058,6 @@ AC_SUBST(PYTHON_LIBS)
 # Check for libguile.  #
 # -------------------- #
 
-dnl We check guile with pkg-config.
-
-AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
-
 dnl Utility to simplify finding libguile.
 dnl $1 = pkg-config-program
 dnl $2 = space-separate list of guile versions to try
@@ -1075,12 +1071,6 @@ AC_DEFUN([AC_TRY_LIBGUILE],
   guile_version_list=$2
   flag_errors=$3
   define([have_libguile_var],$4)
-  if test "${pkg_config}" = "missing"; then
-    AC_ERROR(pkg-config program not found)
-  fi
-  if test ! -f "${pkg_config}"; then
-    AC_ERROR(pkg-config program ${pkg_config} not found)
-  fi
   found_usable_guile=checking
   AC_MSG_CHECKING([for usable guile from ${pkg_config}])
   for guile_version in ${guile_version_list}; do
@@ -1092,11 +1082,11 @@ AC_DEFUN([AC_TRY_LIBGUILE],
     dnl that's bad.
     new_CPPFLAGS=`${pkg_config} --cflags ${guile_version}`
     if test $? != 0; then
-      AC_ERROR(failure running pkg-config --cflags ${guile_version})
+      AC_MSG_ERROR([failure running pkg-config --cflags ${guile_version}])
     fi
     new_LIBS=`${pkg_config} --libs ${guile_version}`
     if test $? != 0; then
-      AC_ERROR(failure running pkg-config --libs ${guile_version})
+      AC_MSG_ERROR([failure running pkg-config --libs ${guile_version}])
     fi
     dnl If we get this far, great.
     found_usable_guile=${guile_version}
@@ -1104,7 +1094,7 @@ AC_DEFUN([AC_TRY_LIBGUILE],
   done
   if test "${found_usable_guile}" = "checking"; then
     if test "${flag_errors}" = "yes"; then
-      AC_ERROR(unable to find usable guile version from "${guile_version_list}")
+      AC_MSG_ERROR([unable to find usable guile version from "${guile_version_list}"])
     else
       found_usable_guile=no
     fi
@@ -1126,7 +1116,7 @@ AC_DEFUN([AC_TRY_LIBGUILE],
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
       if test "${flag_errors}" = yes; then
-        AC_MSG_FAILURE(linking guile version ${guile_version} test program failed)
+        AC_MSG_FAILURE([linking guile version ${guile_version} test program failed])
       fi
     fi
   fi
@@ -1161,6 +1151,9 @@ AC_ARG_WITH(guile,
 AC_MSG_CHECKING([whether to use guile])
 AC_MSG_RESULT([$with_guile])
 
+dnl We check guile with pkg-config.
+AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
+
 try_guile_versions="guile-2.0"
 have_libguile=no
 case "${with_guile}" in
@@ -1168,20 +1161,34 @@ no)
   AC_MSG_WARN([guile support disabled; some features will be unavailable.])
   ;;
 auto)
-  AC_TRY_LIBGUILE(${pkg_config_prog_path}, ${try_guile_versions}, no, have_libguile)
+  if test "${pkg_config_prog_path}" = "missing"; then
+    AC_MSG_WARN([pkg-config not found, guile support disabled])
+  else
+    AC_TRY_LIBGUILE(${pkg_config_prog_path}, ${try_guile_versions}, no, have_libguile)
+  fi
   ;;
 yes)
+  if test "${pkg_config_prog_path}" = "missing"; then
+    AC_MSG_ERROR([pkg-config not found])
+  fi
   AC_TRY_LIBGUILE(${pkg_config_prog_path}, ${try_guile_versions}, yes, have_libguile)
   ;;
 [[\\/]]* | ?:[[\\/]]*)
-  AC_TRY_LIBGUILE(${with_guile}, ${try_guile_versions}, yes, have_libguile)
+  if test -x "${with_guile}"; then
+    AC_TRY_LIBGUILE(${with_guile}, ${try_guile_versions}, yes, have_libguile)
+  else
+    AC_MSG_ERROR([Guile config program not executable: ${with_guile}])
+  fi
   ;;
 "" | */*)
   # Disallow --with=guile="" and --with-guile=foo/bar.
-  AC_ERROR(invalid value for --with-guile)
+  AC_MSG_ERROR([invalid value for --with-guile])
   ;;
 *)
   # A space separate list of guile versions to try, in order.
+  if test "${pkg_config_prog_path}" = "missing"; then
+    AC_MSG_ERROR([pkg-config not found])
+  fi
   AC_TRY_LIBGUILE(${pkg_config_prog_path}, ${with_guile}, yes, have_libguile)
   ;;
 esac

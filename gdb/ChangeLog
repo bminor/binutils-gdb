@@ -1,3 +1,10 @@
+2014-02-11  Doug Evans  <xdje42@gmail.com>
+
+	* configure.ac: Don't crash if pkg-config is not found and guile
+	wasn't explicitly requested.  Use AC_MSG_ERROR instead of AC_ERROR
+	in guile checks.
+	* configure: Regenerate.
+
 2014-02-11  Yao Qi  <yao@codesourcery.com>
 
 	* aix-thread.c (aix_thread_xfer_partial): Update comments.

@@ -8692,6 +8692,22 @@ fi
 # -------------------- #
 
 
+
+
+
+
+# Check whether --with-guile was given.
+if test "${with_guile+set}" = set; then :
+  withval=$with_guile;
+else
+  with_guile=auto
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use guile" >&5
+$as_echo_n "checking whether to use guile... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_guile" >&5
+$as_echo "$with_guile" >&6; }
+
 # Extract the first word of "pkg-config", so it can be a program name with args.
 set dummy pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -8734,23 +8750,6 @@ fi
 
 
 
-
-
-
-
-
-# Check whether --with-guile was given.
-if test "${with_guile+set}" = set; then :
-  withval=$with_guile;
-else
-  with_guile=auto
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use guile" >&5
-$as_echo_n "checking whether to use guile... " >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_guile" >&5
-$as_echo "$with_guile" >&6; }
-
 try_guile_versions="guile-2.0"
 have_libguile=no
 case "${with_guile}" in
@@ -8759,17 +8758,15 @@ no)
 $as_echo "$as_me: WARNING: guile support disabled; some features will be unavailable." >&2;}
   ;;
 auto)
+  if test "${pkg_config_prog_path}" = "missing"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: pkg-config not found, guile support disabled" >&5
+$as_echo "$as_me: WARNING: pkg-config not found, guile support disabled" >&2;}
+  else
 
   pkg_config=${pkg_config_prog_path}
   guile_version_list=${try_guile_versions}
   flag_errors=no
 
-  if test "${pkg_config}" = "missing"; then
-    as_fn_error "pkg-config program not found" "$LINENO" 5
-  fi
-  if test ! -f "${pkg_config}"; then
-    as_fn_error "pkg-config program ${pkg_config} not found" "$LINENO" 5
-  fi
   found_usable_guile=checking
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for usable guile from ${pkg_config}" >&5
 $as_echo_n "checking for usable guile from ${pkg_config}... " >&6; }
@@ -8835,19 +8832,17 @@ See \`config.log' for more details." "$LINENO" 5; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_guile}" >&5
 $as_echo "${found_usable_guile}" >&6; }
 
+  fi
   ;;
 yes)
+  if test "${pkg_config_prog_path}" = "missing"; then
+    as_fn_error "pkg-config not found" "$LINENO" 5
+  fi
 
   pkg_config=${pkg_config_prog_path}
   guile_version_list=${try_guile_versions}
   flag_errors=yes
 
-  if test "${pkg_config}" = "missing"; then
-    as_fn_error "pkg-config program not found" "$LINENO" 5
-  fi
-  if test ! -f "${pkg_config}"; then
-    as_fn_error "pkg-config program ${pkg_config} not found" "$LINENO" 5
-  fi
   found_usable_guile=checking
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for usable guile from ${pkg_config}" >&5
 $as_echo_n "checking for usable guile from ${pkg_config}... " >&6; }
@@ -8915,17 +8910,12 @@ $as_echo "${found_usable_guile}" >&6; }
 
   ;;
 [\\/]* | ?:[\\/]*)
+  if test -x "${with_guile}"; then
 
   pkg_config=${with_guile}
   guile_version_list=${try_guile_versions}
   flag_errors=yes
 
-  if test "${pkg_config}" = "missing"; then
-    as_fn_error "pkg-config program not found" "$LINENO" 5
-  fi
-  if test ! -f "${pkg_config}"; then
-    as_fn_error "pkg-config program ${pkg_config} not found" "$LINENO" 5
-  fi
   found_usable_guile=checking
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for usable guile from ${pkg_config}" >&5
 $as_echo_n "checking for usable guile from ${pkg_config}... " >&6; }
@@ -8991,6 +8981,9 @@ See \`config.log' for more details." "$LINENO" 5; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_guile}" >&5
 $as_echo "${found_usable_guile}" >&6; }
 
+  else
+    as_fn_error "Guile config program not executable: ${with_guile}" "$LINENO" 5
+  fi
   ;;
 "" | */*)
   # Disallow --with=guile="" and --with-guile=foo/bar.
@@ -8998,17 +8991,14 @@ $as_echo "${found_usable_guile}" >&6; }
   ;;
 *)
   # A space separate list of guile versions to try, in order.
+  if test "${pkg_config_prog_path}" = "missing"; then
+    as_fn_error "pkg-config not found" "$LINENO" 5
+  fi
 
   pkg_config=${pkg_config_prog_path}
   guile_version_list=${with_guile}
   flag_errors=yes
 
-  if test "${pkg_config}" = "missing"; then
-    as_fn_error "pkg-config program not found" "$LINENO" 5
-  fi
-  if test ! -f "${pkg_config}"; then
-    as_fn_error "pkg-config program ${pkg_config} not found" "$LINENO" 5
-  fi
   found_usable_guile=checking
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for usable guile from ${pkg_config}" >&5
 $as_echo_n "checking for usable guile from ${pkg_config}... " >&6; }
