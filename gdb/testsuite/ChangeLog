@@ -1,3 +1,8 @@
+2014-02-11  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dwp-symlink.exp: Rewrite to use remote_* commands instead
+	of Tcl file commands.
+
 2014-02-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.threads/step-after-sr-lock.exp: Avoid executing
