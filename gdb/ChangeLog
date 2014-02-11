@@ -1,3 +1,8 @@
+2014-02-11  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+        * sparc64-tdep.c (sparc64_store_arguments): Do not align complex
+        double float arguments to 16-byte in the argument slots.
+
 2014-02-11  Doug Evans  <xdje42@gmail.com>
 
 	* configure.ac: Don't crash if pkg-config is not found and guile

@@ -831,7 +831,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
                  quad-aligned, and thus a hole might be introduced
                  into the parameter array to force alignment."  Skip
                  an element if necessary.  */
-	      if (num_elements % 2)
+	      if ((num_elements % 2) && sparc64_16_byte_align_p (type))
 		num_elements++;
 	    }
 	  else
@@ -890,7 +890,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
       if (sparc64_structure_or_union_p (type)
 	  || (sparc64_complex_floating_p (type) && len == 32))
 	{
-	  /* Structure or Union arguments.  */
+	  /* Structure, Union or long double Complex arguments.  */
 	  gdb_assert (len <= 16);
 	  memset (buf, 0, sizeof (buf));
 	  valbuf = memcpy (buf, valbuf, len);
@@ -908,7 +908,25 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	  if (element < 16)
 	    sparc64_store_floating_fields (regcache, type, valbuf, element, 0);
 	}
-      else if (sparc64_floating_p (type) || sparc64_complex_floating_p (type))
+      else if (sparc64_complex_floating_p (type))
+	{
+	  /* Float Complex or double Complex arguments.  */
+	  if (element < 16)
+	    {
+	      regnum = SPARC64_D0_REGNUM + element;
+
+	      if (len == 16)
+		{
+		  if (regnum < SPARC64_D30_REGNUM)
+		    regcache_cooked_write (regcache, regnum + 1, valbuf + 8);
+		  if (regnum < SPARC64_D10_REGNUM)
+		    regcache_cooked_write (regcache,
+					   SPARC_O0_REGNUM + element + 1,
+					   valbuf + 8);
+		}
+	    }
+	}
+      else if (sparc64_floating_p (type))
 	{
 	  /* Floating arguments.  */
 	  if (len == 16)
