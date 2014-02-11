@@ -1,3 +1,8 @@
+2014-02-11  Simon Marchi  <simon.marchi@ericsson.com>  (tiny patch)
+
+	Checked in by Joel Brobecker <brobecker@adacore.com>.
+	* mi/mi-main.c (mi_cmd_data_write_memory_bytes): Fix comment.
+
 2014-02-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* symfile-debug.c (debug_qf_expand_symtabs_matching): Reformat
