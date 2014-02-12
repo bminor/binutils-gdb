@@ -1,3 +1,7 @@
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* nios2-tdep.c (nios2_stub_frame_base_address): Remove.
+
 2014-02-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Call obsd_init_abi.
