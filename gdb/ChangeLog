@@ -1,3 +1,16 @@
+2014-02-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* obsd-tdep.h (obsd_init_abi): New prototype.
+	* obsd-tdep.c: Define enum with OpenBSD signal numbers.
+	(obsd_gdb_signal_from_target, obsd_gdb_signal_to_target)
+	(obsd_init_abi): New functions.
+	* i386obsd-tdep.c: Include "obsd-tdep.h".
+	(i386obsd_init_abi): Call obsd_init_abi.
+	* amd64obsd-tdep.c: Include "obsd-tdep.h".
+	(amd64obsd_init_abi): Call obsd_init_abi.
+	* configure.tgt (i[34567]86-*-openbsd*, x86_64-*-openbsd*): Add
+	obsd-tdep.c to gdb_target_obs.
+
 2014-02-11  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
         * sparc64-tdep.c (sparc64_store_arguments): Do not align complex

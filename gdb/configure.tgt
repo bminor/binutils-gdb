@@ -199,7 +199,7 @@ i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
 i[34567]86-*-openbsd*)
 	# Target: OpenBSD/i386
 	gdb_target_obs="i386-tdep.o i387-tdep.o i386bsd-tdep.o i386obsd-tdep.o \
-			bsd-uthread.o solib-svr4.o"
+			obsd-tdep.o bsd-uthread.o solib-svr4.o"
 	;;
 i[34567]86-*-nto*)
 	# Target: Intel 386 running qnx6.
@@ -685,7 +685,7 @@ x86_64-*-openbsd*)
 	# Target: OpenBSD/amd64
 	gdb_target_obs="amd64-tdep.o amd64obsd-tdep.o i386-tdep.o \
 			i387-tdep.o i386bsd-tdep.o i386obsd-tdep.o \
-			bsd-uthread.o solib-svr4.o"
+			obsd-tdep.o bsd-uthread.o solib-svr4.o"
 	;;
 xtensa*-*-linux*)	gdb_target=linux
 	# Target: GNU/Linux Xtensa

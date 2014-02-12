@@ -23,5 +23,6 @@
 struct gdbarch;
 
 CORE_ADDR obsd_skip_solib_resolver (struct gdbarch *, CORE_ADDR);
+void obsd_init_abi (struct gdbarch_info, struct gdbarch *);
 
 #endif /* obsd-tdep.h */

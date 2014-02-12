@@ -32,6 +32,7 @@
 #include "gdb_assert.h"
 #include <string.h>
 
+#include "obsd-tdep.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
 #include "solib-svr4.h"
@@ -459,6 +460,7 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   amd64_init_abi (info, gdbarch);
+  obsd_init_abi (info, gdbarch);
 
   /* Initialize general-purpose register set details.  */
   tdep->gregset_reg_offset = amd64obsd_r_reg_offset;
