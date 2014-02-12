@@ -171,7 +171,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
   TYPE_TAG_NAME (t) = "gdb_gnu_v3_abi_vtable";
   INIT_CPLUS_SPECIFIC (t);
 
-  return t;
+  return make_type_with_address_space (t, TYPE_INSTANCE_FLAG_CODE_SPACE);
 }
 
 

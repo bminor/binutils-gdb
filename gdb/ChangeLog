@@ -1,4 +1,10 @@
 2014-02-12  Pedro Alves  <palves@redhat.com>
+	    Kevin Buettner <kevinb@redhat.com>
+
+	* gnu-v3-abi.c (build_gdb_vtable_type): Return a type marked with
+	TYPE_INSTANCE_FLAG_CODE_SPACE.
+
+2014-02-12  Pedro Alves  <palves@redhat.com>
 
 	* h8300-tdep.c (pseudo_from_raw_register)
 	(raw_from_pseudo_register): New functions.
