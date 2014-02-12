@@ -1,5 +1,9 @@
 2014-02-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Call obsd_init_abi.
+
+2014-02-12  Mark Kettenis  <kettenis@gnu.org>
+
 	* inf-ptrace.c (inf_ptrace_xfer_partial): Return TARGET_XFER_EOF
 	if a PT_IO ptrace request returns sucessfully but indicates that 0
 	bytes were transferred.
