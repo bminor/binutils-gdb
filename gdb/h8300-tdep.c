@@ -1164,15 +1164,55 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
     }
 }
 
+/* Helpers for h8300_pseudo_register_read.  We expose ccr/exr as
+   pseudo-registers to users with smaller sizes than the corresponding
+   raw registers.  These helpers extend/narrow the values.  */
+
+static enum register_status
+pseudo_from_raw_register (struct gdbarch *gdbarch, struct regcache *regcache,
+			  gdb_byte *buf, int pseudo_regno, int raw_regno)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum register_status status;
+  ULONGEST val;
+
+  status = regcache_raw_read_unsigned (regcache, raw_regno, &val);
+  if (status == REG_VALID)
+    store_unsigned_integer (buf,
+			    register_size (gdbarch, pseudo_regno),
+			    byte_order, val);
+  return status;
+}
+
+/* See pseudo_from_raw_register.  */
+
+static void
+raw_from_pseudo_register (struct gdbarch *gdbarch, struct regcache *regcache,
+			  const gdb_byte *buf, int raw_regno, int pseudo_regno)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  ULONGEST val;
+
+  val = extract_unsigned_integer (buf, register_size (gdbarch, pseudo_regno),
+				  byte_order);
+  regcache_raw_write_unsigned (regcache, raw_regno, val);
+}
+
 static enum register_status
 h8300_pseudo_register_read (struct gdbarch *gdbarch,
 			    struct regcache *regcache, int regno,
 			    gdb_byte *buf)
 {
   if (regno == E_PSEUDO_CCR_REGNUM (gdbarch))
-    return regcache_raw_read (regcache, E_CCR_REGNUM, buf);
+    {
+      return pseudo_from_raw_register (gdbarch, regcache, buf,
+				       regno, E_CCR_REGNUM);
+    }
   else if (regno == E_PSEUDO_EXR_REGNUM (gdbarch))
-    return regcache_raw_read (regcache, E_EXR_REGNUM, buf);
+    {
+      return pseudo_from_raw_register (gdbarch, regcache, buf,
+				       regno, E_EXR_REGNUM);
+    }
   else
     return regcache_raw_read (regcache, regno, buf);
 }
@@ -1183,9 +1223,9 @@ h8300_pseudo_register_write (struct gdbarch *gdbarch,
 			     const gdb_byte *buf)
 {
   if (regno == E_PSEUDO_CCR_REGNUM (gdbarch))
-    regcache_raw_write (regcache, E_CCR_REGNUM, buf);
+    raw_from_pseudo_register (gdbarch, regcache, buf, E_CCR_REGNUM, regno);
   else if (regno == E_PSEUDO_EXR_REGNUM (gdbarch))
-    regcache_raw_write (regcache, E_EXR_REGNUM, buf);
+    raw_from_pseudo_register (gdbarch, regcache, buf, E_EXR_REGNUM, regno);
   else
     regcache_raw_write (regcache, regno, buf);
 }
