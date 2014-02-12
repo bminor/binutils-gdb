@@ -1,5 +1,12 @@
 2014-02-12  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_relax_section): Enable ppc476 workaround
+	for ld -r, when code sections are sufficiently aligned.
+	* elf32-ppc.h (struct ppc_elf_params): Delete pagesize.  Add
+	pagesize_p2.
+
+2014-02-12  Alan Modra  <amodra@gmail.com>
+
 	PR gold/15530
 	* elf64-ppc.c (ppc64_elf_gc_mark_dynamic_ref): Support
 	--export-dynamic and --dynamic-list marking of symbols.

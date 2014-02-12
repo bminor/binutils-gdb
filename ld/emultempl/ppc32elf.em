@@ -39,6 +39,8 @@ static int notlsopt = 0;
 /* Choose the correct place for .got.  */
 static int old_got = 0;
 
+static bfd_vma pagesize = 0;
+
 static struct ppc_elf_params params = { PLT_UNSET, -1, 0, 0, 0, 0 };
 
 static void
@@ -46,8 +48,9 @@ ppc_after_open_output (void)
 {
   if (params.emit_stub_syms < 0)
     params.emit_stub_syms = link_info.emitrelocations || link_info.shared;
-  if (params.pagesize == 0)
-    params.pagesize = config.commonpagesize;
+  if (pagesize == 0)
+    pagesize = config.commonpagesize;
+  params.pagesize_p2 = bfd_log2 (pagesize);
   if (link_info.relocatable)
     params.ppc476_workaround = 0;
   ppc_elf_link_params (&link_info, &params);
@@ -267,10 +270,10 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       if (optarg != NULL)
 	{
 	  char *end;
-	  params.pagesize = strtoul (optarg, &end, 0);
+	  pagesize = strtoul (optarg, &end, 0);
 	  if (*end
-	      || (params.pagesize < 4096 && params.pagesize != 0)
-	      || params.pagesize != (params.pagesize & -params.pagesize))
+	      || (pagesize < 4096 && pagesize != 0)
+	      || pagesize != (pagesize & -pagesize))
 	    einfo (_("%P%F: invalid pagesize `%s'\''\n"), optarg);
 	}
       break;
