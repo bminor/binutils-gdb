@@ -6677,7 +6677,7 @@ ppc_elf_relax_section (bfd *abfd,
      do anything.  The linker doesn't support mixing -shared and -r
      anyway.  */
   if (link_info->relocatable && link_info->shared)
-     return TRUE;
+    return TRUE;
 
   htab = ppc_elf_hash_table (link_info);
   if (htab == NULL)
@@ -7045,16 +7045,18 @@ ppc_elf_relax_section (bfd *abfd,
 
   workaround_change = FALSE;
   newsize = trampoff;
-  if (htab->params->ppc476_workaround)
+  if (htab->params->ppc476_workaround
+      && (!link_info->relocatable
+	  || isec->output_section->alignment_power >= htab->params->pagesize_p2))
     {
       bfd_vma addr, end_addr;
       unsigned int crossings;
-      unsigned int pagesize = htab->params->pagesize;
+      bfd_vma pagesize = (bfd_vma) 1 << htab->params->pagesize_p2;
 
       addr = isec->output_section->vma + isec->output_offset;
       end_addr = addr + trampoff - 1;
       addr &= -pagesize;
-      crossings = ((end_addr & -pagesize) - addr) / pagesize;
+      crossings = ((end_addr & -pagesize) - addr) >> htab->params->pagesize_p2;
       if (crossings != 0)
 	{
 	  /* Keep space aligned, to ensure the patch code itself does
@@ -9156,11 +9158,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 #endif
 
   if (htab->params->ppc476_workaround
-      && input_section->sec_info_type == SEC_INFO_TYPE_TARGET)
+      && input_section->sec_info_type == SEC_INFO_TYPE_TARGET
+      && (!info->relocatable
+	  || (input_section->output_section->alignment_power
+	      >= htab->params->pagesize_p2)))
     {
       struct ppc_elf_relax_info *relax_info;
       bfd_vma start_addr, end_addr, addr;
-      unsigned int pagesize = htab->params->pagesize;
+      bfd_vma pagesize = (bfd_vma) 1 << htab->params->pagesize_p2;
 
       relax_info = elf_section_data (input_section)->sec_info;
       if (relax_info->workaround_size != 0)

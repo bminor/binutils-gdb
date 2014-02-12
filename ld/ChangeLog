@@ -1,6 +1,11 @@
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches for ppc476 workaround
+	2014-02-12  Alan Modra  <amodra@gmail.com>
+	* emultempl/ppc32elf.em (pagesize): New static var.
+	(ppc_after_open_output): Set params.pagesize_p2 from pagesize.
+	(PARSE_AND_LIST_ARGS_CASES): Adjust to use pagesize.
+
 	2014-02-03  Alan Modra  <amodra@gmail.com>
 	* emultempl/ppc32elf.em (no_tls_get_addr_opt, emit_stub_syms)
 	plt_style): Delete.  Adjust all refs to instead use..
