@@ -1,3 +1,8 @@
+2014-03-10  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Resolve tagged types to
+	full view in the case of UNOP_IND and STRUCTOP_STRUCT.
+
 2014-03-10  Hui Zhu  <hui@codesourcery.com>
 
 	* target.h (target_insert_breakpoint): Remove "hardware" from its
