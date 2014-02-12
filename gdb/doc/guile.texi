@@ -886,7 +886,7 @@ The length must be a Scheme integer and not a @code{<gdb:value>} integer.
 @end deffn
 
 @c TODO: line length
-@deffn {Scheme Procedure} value->lazy-string value @r{[}#:encoding encoding@r{]} @r{[}#:length length@r{]})
+@deffn {Scheme Procedure} value->lazy-string value @r{[}#:encoding encoding@r{]} @r{[}#:length length@r{]}
 If this @code{<gdb:value>} represents a string, then this method
 converts @var{value} to a @code{<gdb:lazy-string} (@pxref{Lazy Strings
 In Guile}).  Otherwise, this method will throw an exception.
@@ -2854,7 +2854,7 @@ Furthermore, the disassembler can take a Guile port as input,
 allowing one to disassemble from any source, and not just target memory.
 
 @c TODO: line length
-@deffn {Scheme Procedure} arch-disassemble arch start-pc @r{[}#:port port@r{]} @r{[}#:offset offset@r{]} @r{[}#:size size@r{]} @r{[}#:count count@r{]})
+@deffn {Scheme Procedure} arch-disassemble arch start-pc @r{[}#:port port@r{]} @r{[}#:offset offset@r{]} @r{[}#:size size@r{]} @r{[}#:count count@r{]}
 Return a list of disassembled instructions starting from the memory
 address @var{start-pc}.
 

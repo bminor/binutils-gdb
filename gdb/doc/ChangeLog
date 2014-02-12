@@ -1,3 +1,9 @@
+2014-02-11  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* docs/guile.texi (Values From Inferior In Guile): Remove stray
+	parantheses for deffn.
+	(Disassembly In Guile): Ditto.
+
 2014-02-10  Stan Shebs  <stan@codesourcery.com>
 
 	Add Doxygen support.
