@@ -489,9 +489,9 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	errno = 0;
 	if (ptrace (PT_IO, pid, (caddr_t)&piod, 0) == 0)
 	  {
-	    *xfered_len = piod.piod_len;
 	    /* Return the actual number of bytes read or written.  */
-	    return TARGET_XFER_OK;
+	    *xfered_len = piod.piod_len;
+	    return (piod.piod_len == 0) ? TARGET_XFER_EOF : TARGET_XFER_OK;
 	  }
 	/* If the PT_IO request is somehow not supported, fallback on
 	   using PT_WRITE_D/PT_READ_D.  Otherwise we will return zero
@@ -595,9 +595,9 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	errno = 0;
 	if (ptrace (PT_IO, pid, (caddr_t)&piod, 0) == 0)
 	  {
-	    *xfered_len = piod.piod_len;
 	    /* Return the actual number of bytes read or written.  */
-	    return TARGET_XFER_OK;
+	    *xfered_len = piod.piod_len;
+	    return (piod.piod_len == 0) ? TARGET_XFER_EOF : TARGET_XFER_OK;
 	  }
       }
 #endif

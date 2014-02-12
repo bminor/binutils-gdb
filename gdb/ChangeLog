@@ -1,3 +1,9 @@
+2014-02-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Return TARGET_XFER_EOF
+	if a PT_IO ptrace request returns sucessfully but indicates that 0
+	bytes were transferred.
+
 2014-02-12  Pedro Alves  <palves@redhat.com>
 	    Kevin Buettner <kevinb@redhat.com>
 
