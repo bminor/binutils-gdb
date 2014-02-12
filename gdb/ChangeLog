@@ -1,3 +1,9 @@
+2014-02-12  Pedro Alves  <palves@redhat.com>
+
+	* h8300-tdep.c (h8300_register_sim_regno): New function.
+	(h8300_gdbarch_init): Install h8300_register_sim_regno as
+	gdbarch_register_sim_regno hook.
+
 2014-02-12  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* nios2-tdep.c (nios2_stub_frame_base): Remove global.
