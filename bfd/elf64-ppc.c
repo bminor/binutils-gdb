@@ -6153,6 +6153,7 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
   struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) h;
   struct ppc_link_hash_entry *fdh;
+  struct bfd_elf_dynamic_list *d = info->dynamic_list;
 
   /* Dynamic linking info is on the func descriptor sym.  */
   fdh = defined_func_desc (eh);
@@ -6162,10 +6163,14 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
   if ((eh->elf.root.type == bfd_link_hash_defined
        || eh->elf.root.type == bfd_link_hash_defweak)
       && (eh->elf.ref_dynamic
-	  || (!info->executable
-	      && eh->elf.def_regular
+	  || (eh->elf.def_regular
 	      && ELF_ST_VISIBILITY (eh->elf.other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (eh->elf.other) != STV_HIDDEN
+	      && (!info->executable
+		  || info->export_dynamic
+		  || (eh->elf.dynamic
+		      && d != NULL
+		      && (*d->match) (&d->head, NULL, eh->elf.root.root.string)))
 	      && (strchr (eh->elf.root.root.string, ELF_VER_CHR) != NULL
 		  || !bfd_hide_sym_by_version (info->version_info,
 					       eh->elf.root.root.string)))))
