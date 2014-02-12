@@ -1,6 +1,13 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
+	2014-02-12  Alan Modra  <amodra@gmail.com>
+	PR gold/15530
+	* elf64-ppc.c (ppc64_elf_gc_mark_dynamic_ref): Support
+	--export-dynamic and --dynamic-list marking of symbols.
+	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Reorder
+	cheap tests first.
+
 	2014-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 	PR gold/16530
 	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Mark symbol in
