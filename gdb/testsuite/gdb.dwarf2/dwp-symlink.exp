@@ -87,5 +87,44 @@ gdb_test "cd .." "Working directory .*"
 gdb_test "ptype main" {type = int \(int, char \*\*\)} \
     "relative path, binary symlink, dwp at symlink"
 
+# Rename the dwp file back to its original name.
+remote_exec host "mv -f [standard_output_file ${thelink}.dwp] [standard_output_file ${testfile}.dwp]"
+
 # N.B. At this point the active gdb is in, essentially, some random directory.
 # Restart a new copy if you add more tests here.
+
+# Now verify that the following scenario works:
+# dir1/real-binary-with-random-name
+# dir2/real-dwp-with-random-name
+# dir3/symlink-to-real-binary
+# dir3/symlink-to-real-binary.dwp
+
+set dwp_bin_dir [standard_output_file dwp-dir1]
+set dwp_dwp_dir [standard_output_file dwp-dir2]
+set dwp_symlink_dir [standard_output_file dwp-dir3]
+set dwp_real_binary "dwp-abc"
+set dwp_real_dwp "dwp-def"
+set dwp_symlink_binary "dwp-symlink-binary"
+set dwp_symlink_dwp "${dwp_symlink_binary}.dwp"
+
+remote_exec host "rm -rf ${dwp_bin_dir}"
+remote_exec host "rm -rf ${dwp_dwp_dir}"
+remote_exec host "rm -rf ${dwp_symlink_dir}"
+remote_exec host "mkdir ${dwp_bin_dir}"
+remote_exec host "mkdir ${dwp_dwp_dir}"
+remote_exec host "mkdir ${dwp_symlink_dir}"
+remote_exec host "cp [standard_output_file $testfile] ${dwp_bin_dir}/${dwp_real_binary}"
+remote_exec host "cp [standard_output_file ${testfile}.dwp] ${dwp_dwp_dir}/${dwp_real_dwp}"
+# We don't test for failure to create the symlink here.
+# We assume that if the above symlinks are created ok, these will be too.
+remote_exec host "ln -sf ${dwp_bin_dir}/${dwp_real_binary} ${dwp_symlink_dir}/${dwp_symlink_binary}"
+remote_exec host "ln -sf ${dwp_dwp_dir}/${dwp_real_dwp} ${dwp_symlink_dir}/${dwp_symlink_dwp}"
+
+clean_restart "${dwp_symlink_dir}/${dwp_symlink_binary}"
+
+if ![runto_main] {
+    return -1
+}
+
+gdb_test {print argv[0]} "/${dwp_symlink_binary}\"" \
+    "separate executable/dwp symlinks"

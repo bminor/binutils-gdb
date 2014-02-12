@@ -1,3 +1,12 @@
+2014-02-12  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/Makefile.in (EXECUTABLES): Add dwp-symlink.
+	(MISCELLANEOUS): New variable.
+	(clean): rm -rf $(MISCELLANEOUS).
+	* gdb.dwarf2/dwp-symlink.exp: Test the case where the executable and
+	dwp live in the same directory as symlinks, with each symlink pointed
+	to a differently named file in a different directory.
+
 2014-02-11  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/dwp-symlink.exp: Rewrite to use remote_* commands instead
