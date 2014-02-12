@@ -1,5 +1,11 @@
 2014-02-12  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_relax_section): Don't build long-branch
+	stubs for calls to __tls_get_addr that we know will later be
+	optimised away.
+
+2014-02-12  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc_elf_relax_section): Enable ppc476 workaround
 	for ld -r, when code sections are sufficiently aligned.
 	* elf32-ppc.h (struct ppc_elf_params): Delete pagesize.  Add

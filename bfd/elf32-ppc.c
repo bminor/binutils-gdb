@@ -6831,6 +6831,62 @@ ppc_elf_relax_section (bfd *abfd,
 	      else
 		continue;
 
+	      /* If this branch is to __tls_get_addr then we may later
+		 optimise away the call.  We won't be needing a long-
+		 branch stub in that case.  */
+	      if (link_info->executable
+		  && !link_info->relocatable
+		  && h == htab->tls_get_addr
+		  && irel != internal_relocs)
+		{
+		  unsigned long t_symndx = ELF32_R_SYM (irel[-1].r_info);
+		  unsigned long t_rtype = ELF32_R_TYPE (irel[-1].r_info);
+		  unsigned int tls_mask = 0;
+
+		  /* The previous reloc should be one of R_PPC_TLSGD or
+		     R_PPC_TLSLD, or for older object files, a reloc
+		     on the __tls_get_addr arg setup insn.  Get tls
+		     mask bits from the symbol on that reloc.  */
+		  if (t_symndx < symtab_hdr->sh_info)
+		    {
+		      bfd_vma *local_got_offsets = elf_local_got_offsets (abfd);
+
+		      if (local_got_offsets != NULL)
+			{
+			  struct plt_entry **local_plt = (struct plt_entry **)
+			    (local_got_offsets + symtab_hdr->sh_info);
+			  char *lgot_masks = (char *)
+			    (local_plt + symtab_hdr->sh_info);
+			  tls_mask = lgot_masks[t_symndx];
+			}
+		    }
+		  else
+		    {
+		      struct elf_link_hash_entry *th
+			= elf_sym_hashes (abfd)[t_symndx - symtab_hdr->sh_info];
+
+		      while (th->root.type == bfd_link_hash_indirect
+			     || th->root.type == bfd_link_hash_warning)
+			th = (struct elf_link_hash_entry *) th->root.u.i.link;
+
+		      tls_mask
+			= ((struct ppc_elf_link_hash_entry *) th)->tls_mask;
+		    }
+
+		  /* The mask bits tell us if the call will be
+		     optimised away.  */
+		  if ((tls_mask & TLS_TLS) != 0 && (tls_mask & TLS_GD) == 0
+		      && (t_rtype == R_PPC_TLSGD
+			  || t_rtype == R_PPC_GOT_TLSGD16
+			  || t_rtype == R_PPC_GOT_TLSGD16_LO))
+		    continue;
+		  if ((tls_mask & TLS_TLS) != 0 && (tls_mask & TLS_LD) == 0
+		      && (t_rtype == R_PPC_TLSLD
+			  || t_rtype == R_PPC_GOT_TLSLD16
+			  || t_rtype == R_PPC_GOT_TLSLD16_LO))
+		    continue;
+		}
+
 	      sym_type = h->type;
 	    }
 
