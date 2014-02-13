@@ -1,3 +1,14 @@
+2014-02-13  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* cris-tdep.c (cris_supply_gregset): Remove zerobuf.
+	(_initialize_cris_tdep): Remove cris_set_cmdlist, cris_show_cmdlist.
+	* h8300-tdep.c (setmachinelist): Remove global.
+	* hppa-tdep.c (hppa_sigtramp): Remove global.
+	* mipsnbsd-tdep.c (sigtramp_retcode_mipsel, sigtramp_retcode_mipseb
+	RETCODE_NWORDS, RETCODE_SIZE): Wrap code with #if 0.
+	* ravenscar-thread.c (update_target_observer): Remove global.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Remove segment_regs.
+
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
 	* common/rsp-low.c: Update comments.

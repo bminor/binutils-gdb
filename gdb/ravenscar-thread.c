@@ -52,8 +52,6 @@ static const char first_task_name[] = "system__tasking__debug__first_task";
 static const char ravenscar_runtime_initializer[] =
   "system__bb__threads__initialize";
 
-static struct observer *update_target_observer = NULL;
-
 static void ravenscar_find_new_threads (struct target_ops *ops);
 static ptid_t ravenscar_running_thread (void);
 static char *ravenscar_extra_thread_info (struct thread_info *tp);

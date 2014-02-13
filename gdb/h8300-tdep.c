@@ -937,8 +937,6 @@ h8300h_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-static struct cmd_list_element *setmachinelist;
-
 /* Implementation of 'register_sim_regno' gdbarch method.  */
 
 static int

@@ -211,6 +211,8 @@ mipsnbsd_fill_fpreg (const struct regcache *regcache, char *fpregs, int regno)
 			      * mips_isa_regsize (gdbarch)));
 }
 
+#if 0
+
 /* Under NetBSD/mips, signal handler invocations can be identified by the
    designated code sequence that is used to return from a signal handler.
    In particular, the return address of a signal handler points to the
@@ -243,6 +245,8 @@ static const unsigned char sigtramp_retcode_mipseb[RETCODE_SIZE] =
   0x24, 0x02, 0x01, 0x27,	/* li v0, 295 */
   0x00, 0x00, 0x00, 0x0c,	/* syscall */
 };
+
+#endif
 
 /* Figure out where the longjmp will land.  We expect that we have
    just entered longjmp and haven't yet setup the stack frame, so the
