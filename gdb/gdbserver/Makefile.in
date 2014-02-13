@@ -292,7 +292,7 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS) $(LIBGNU)
 
-IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o tdesc-ipa.o print-utils-ipa.o ${IPA_DEPFILES}
+IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o tdesc-ipa.o print-utils-ipa.o rsp-low-ipa.o ${IPA_DEPFILES}
 
 IPA_LIB=libinproctrace.so
 
@@ -473,6 +473,9 @@ tdesc-ipa.o: tdesc.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 print-utils-ipa.o: ../common/print-utils.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+rsp-low-ipa.o: ../common/rsp-low.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 

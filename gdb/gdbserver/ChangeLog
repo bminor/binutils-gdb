@@ -1,3 +1,8 @@
+2014-02-14  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (IPA_OBJS): Append rsp-low-ipa.o.
+	(rsp-low-ipa.o): New target.
+
 2014-02-12  Tom Tromey  <tromey@redhat.com>
 
 	* ax.c (gdb_parse_agent_expr): Use hex2bin, not
