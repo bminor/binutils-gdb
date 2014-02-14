@@ -1,3 +1,10 @@
+2020-12-22  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* Makefile.in (ALLDEPFILES): Add arc-linux-nat.c.
+	* configure.host (host to gdb names): Add arc*-*-linux*.
+	* configure.nat (gdb_host_cpu): Add arc.
+	* arc-linux-nat.c: New.
+
 2020-12-22  Shahab Vahedi  <shahab@synopsys.com>
 
 	* arc-linux-tdep.c (supply_register): New.
