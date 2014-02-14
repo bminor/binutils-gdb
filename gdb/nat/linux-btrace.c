@@ -59,6 +59,41 @@ struct perf_event_sample
   struct perf_event_bts bts;
 };
 
+/* Identify the cpu we're running on.  */
+static struct btrace_cpu
+btrace_this_cpu (void)
+{
+  struct btrace_cpu cpu;
+  unsigned int eax, ebx, ecx, edx;
+  int ok;
+
+  memset (&cpu, 0, sizeof (cpu));
+
+  ok = x86_cpuid (0, &eax, &ebx, &ecx, &edx);
+  if (ok != 0)
+    {
+      if (ebx == signature_INTEL_ebx && ecx == signature_INTEL_ecx
+	  && edx == signature_INTEL_edx)
+	{
+	  unsigned int cpuid, ignore;
+
+	  ok = x86_cpuid (1, &cpuid, &ignore, &ignore, &ignore);
+	  if (ok != 0)
+	    {
+	      cpu.vendor = CV_INTEL;
+
+	      cpu.family = (cpuid >> 8) & 0xf;
+	      cpu.model = (cpuid >> 4) & 0xf;
+
+	      if (cpu.family == 0x6)
+		cpu.model += (cpuid >> 12) & 0xf0;
+	    }
+	}
+    }
+
+  return cpu;
+}
+
 /* Return non-zero if there is new data in PEVENT; zero otherwise.  */
 
 static int
@@ -302,22 +337,12 @@ kernel_supports_bts (void)
 /* Check whether an Intel cpu supports BTS.  */
 
 static int
-intel_supports_bts (void)
+intel_supports_bts (const struct btrace_cpu *cpu)
 {
-  unsigned int cpuid, model, family;
-
-  if (!x86_cpuid (1, &cpuid, NULL, NULL, NULL))
-    return 0;
-
-  family = (cpuid >> 8) & 0xf;
-  model = (cpuid >> 4) & 0xf;
-
-  switch (family)
+  switch (cpu->family)
     {
     case 0x6:
-      model += (cpuid >> 12) & 0xf0;
-
-      switch (model)
+      switch (cpu->model)
 	{
 	case 0x1a: /* Nehalem */
 	case 0x1f:
@@ -345,17 +370,18 @@ intel_supports_bts (void)
 static int
 cpu_supports_bts (void)
 {
-  unsigned int ebx, ecx, edx;
+  struct btrace_cpu cpu;
 
-  if (!x86_cpuid (0, NULL, &ebx, &ecx, &edx))
-    return 0;
+  cpu = btrace_this_cpu ();
+  switch (cpu.vendor)
+    {
+    default:
+      /* Don't know about others.  Let's assume they do.  */
+      return 1;
 
-  if (ebx == signature_INTEL_ebx && ecx == signature_INTEL_ecx
-      && edx == signature_INTEL_edx)
-    return intel_supports_bts ();
-
-  /* Don't know about others.  Let's assume they do.  */
-  return 1;
+    case CV_INTEL:
+      return intel_supports_bts (&cpu);
+    }
 }
 
 /* Check whether the linux target supports BTS.  */

@@ -61,6 +61,34 @@ enum btrace_format
   BTRACE_FORMAT_BTS
 };
 
+/* An enumeration of cpu vendors.  */
+
+enum btrace_cpu_vendor
+{
+  /* We do not know this vendor.  */
+  CV_UNKNOWN,
+
+  /* Intel.  */
+  CV_INTEL
+};
+
+/* A cpu identifier.  */
+
+struct btrace_cpu
+{
+  /* The processor vendor.  */
+  enum btrace_cpu_vendor vendor;
+
+  /* The cpu family.  */
+  unsigned short family;
+
+  /* The cpu model.  */
+  unsigned char model;
+
+  /* The cpu stepping.  */
+  unsigned char stepping;
+};
+
 /* A BTS configuration.  */
 
 struct btrace_config_bts

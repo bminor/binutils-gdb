@@ -1,5 +1,12 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* common/btrace-common.h (btrace_cpu_vendor, btrace_cpu): New.
+	* nat/linux-btrace.c: (btrace_this_cpu): New.
+	(cpu_supports_bts): Call btrace_this_cpu.
+	(intel_supports_bts): Add cpu parameter.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.h (btrace_insn_class): New.
 	(btrace_insn) <size, iclass>: New.
 	* btrace.c (ftrace_find_call): Update parameters.  Update users.
