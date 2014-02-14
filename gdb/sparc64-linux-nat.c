@@ -80,6 +80,8 @@ _initialize_sparc64_linux_nat (void)
   /* Fill in the generic GNU/Linux methods.  */
   t = linux_target ();
 
+  sparc_fpregset = &sparc64_bsd_fpregset;
+
   /* Add our register access methods.  */
   t->to_fetch_registers = sparc_fetch_inferior_registers;
   t->to_store_registers = sparc_store_inferior_registers;
