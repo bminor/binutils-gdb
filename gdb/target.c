@@ -2074,7 +2074,7 @@ target_read_partial (struct target_ops *ops,
 			      xfered_len);
 }
 
-static LONGEST
+static enum target_xfer_status
 target_write_partial (struct target_ops *ops,
 		      enum target_object object,
 		      const char *annex, const gdb_byte *buf,
