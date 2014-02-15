@@ -2483,8 +2483,7 @@ mi_cmd_trace_find (char *command, char **argv, int argc)
       return;
     }
 
-  if (current_trace_status ()->running)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (strcmp (mode, "frame-number") == 0)
     {

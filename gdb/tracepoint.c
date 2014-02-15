@@ -2443,6 +2443,15 @@ tfind_1 (enum trace_find_type type, int num,
     }
 }
 
+/* Error on looking at traceframes while trace is running.  */
+
+void
+check_trace_running (struct trace_status *status)
+{
+  if (status->running && status->filename == NULL)
+    error (_("May not look at trace frames while trace is running."));
+}
+
 /* trace_find_command takes a trace frame number n, 
    sends "QTFrame:<n>" to the target, 
    and accepts a reply that may contain several optional pieces
@@ -2463,9 +2472,7 @@ trace_find_command (char *args, int from_tty)
 { /* This should only be called with a numeric argument.  */
   int frameno = -1;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
   
   if (args == 0 || *args == 0)
     { /* TFIND with no args means find NEXT trace frame.  */
@@ -2515,9 +2522,7 @@ trace_find_pc_command (char *args, int from_tty)
 {
   CORE_ADDR pc;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
     pc = regcache_read_pc (get_current_regcache ());
@@ -2534,9 +2539,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
   int tdp;
   struct tracepoint *tp;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
     {
@@ -2574,9 +2577,7 @@ trace_find_line_command (char *args, int from_tty)
   struct symtab_and_line sal;
   struct cleanup *old_chain;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
     {
@@ -2640,9 +2641,7 @@ trace_find_range_command (char *args, int from_tty)
   static CORE_ADDR start, stop;
   char *tmp;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
     { /* XXX FIXME: what should default behavior be?  */

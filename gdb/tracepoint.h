@@ -334,6 +334,8 @@ extern void query_if_trace_running (int from_tty);
 extern void disconnect_tracing (void);
 extern void trace_reset_local_state (void);
 
+extern void check_trace_running (struct trace_status *);
+
 extern void start_tracing (char *notes);
 extern void stop_tracing (char *notes);
 

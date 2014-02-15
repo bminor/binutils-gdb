@@ -1,5 +1,18 @@
 2014-03-06  Yao Qi  <yao@codesourcery.com>
 
+	PR breakpoints/16508
+	* tracepoint.c (check_trace_running): New function.
+	(trace_find_command): Move code to check_trace_running and
+	call check_trace_running.
+	(trace_find_pc_command): Likewise.
+	(trace_find_tracepoint_command): Likewise.
+	(trace_find_line_command): Likewise.
+	(trace_find_range_command): Likewise.
+	* tracepoint.h (check_trace_running): Likewise.
+	* mi/mi-main.c (mi_cmd_trace_find): Call check_trace_running.
+
+2014-03-06  Yao Qi  <yao@codesourcery.com>
+
 	* target.h (struct target_ops) <to_traceframe_info>: Use
 	TARGET_DEFAULT_NORETURN (tcomplain ()).
 	* target-delegates.c: Regenerated.
