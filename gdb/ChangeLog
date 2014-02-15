@@ -1,3 +1,16 @@
+2014-02-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (attr_value_as_address): New function.
+	(dwarf2_find_base_address, read_call_site_scope): Use
+	attr_value_as_address in place of DW_ADDR.
+	(dwarf2_get_pc_bounds): Use attr_value_as_address to get
+	the low and high addresses.  Slight rework of the handling
+	of the high pc being a constant form, and limit it to
+	DWARF verson 4 or higher.
+	(dwarf2_record_block_ranges): Likewise.
+	(read_partial_die): Likewise.
+	(new_symbol_full): Use attr_value_as_address in place of DW_ADDR.
+
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
 	* exec.c (exec_file_attach): Hold a reference to exec_bfd.

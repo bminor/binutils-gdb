@@ -1,5 +1,14 @@
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.dwarf2/dw2-abs-hi-pc-hello-dbg.S: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc-hello.c: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc-world-dbg.S: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc-world.c: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc.c: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc.exp: New file.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* testsuite/gdb.python/py-pp-re-notag.c: New file.
 	* testsuite/gdb.python/py-pp-re-notag.ex: New file.
 	* testsuite/gdb.python/py-pp-re-notag.p: New file.
