@@ -1,3 +1,8 @@
+2014-02-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix "ERROR: no fileid for" in the testsuite.
+	* lib/gdb.exp (gdb_finish): Check gdb_spawn_id.
+
 2014-02-12  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/Makefile.in (EXECUTABLES): Add dwp-symlink.
