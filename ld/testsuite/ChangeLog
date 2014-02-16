@@ -1,3 +1,8 @@
+2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* ld-elfweak/elfweak.exp (setup_xfail_gnu_hurd): Remove function
+	and all usage of it.
+
 2014-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/16530
