@@ -1,4 +1,4 @@
-2014-02-16  Doug Evans  <xdje42@gmail.com>
+2014-02-17  Doug Evans  <xdje42@gmail.com>
 
 	* Makefile.in (SUBDIR_GUILE_OBS): Resort alphabetically.
 	(SUBDIR_GUILE_SRCS): Ditto.
