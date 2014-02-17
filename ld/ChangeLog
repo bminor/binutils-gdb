@@ -1,3 +1,10 @@
+2014-06-12  Alan Modra  <amodra@gmail.com>
+
+	Backport mainline patches
+	2014-02-17  Alan Modra  <amodra@gmail.com>
+	* emultemps/ppc64elf.em (params): New static struct replacing
+	various other static vars.  Adjust code throughout file.
+
 2014-05-11  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	Backport from master
