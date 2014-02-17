@@ -1,5 +1,10 @@
 2014-02-17  Alan Modra  <amodra@gmail.com>
 
+	* emultemps/ppc64elf.em (params): New static struct replacing
+	various other static vars.  Adjust code throughout file.
+
+2014-02-17  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/ppc32elf.em (ppc_after_open_output): Really enable
 	ppc476 workaround for ld -r.
 
