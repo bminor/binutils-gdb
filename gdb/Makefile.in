@@ -291,6 +291,7 @@ SUBDIR_GUILE_OBS = \
 	scm-disasm.o \
 	scm-exception.o \
 	scm-frame.o \
+	scm-gsmob.o \
 	scm-iterator.o \
 	scm-lazy-string.o \
 	scm-objfile.o \
@@ -298,7 +299,6 @@ SUBDIR_GUILE_OBS = \
 	scm-ports.o \
 	scm-pretty-print.o \
 	scm-safe-call.o \
-	scm-gsmob.o \
 	scm-string.o \
 	scm-symbol.o \
 	scm-symtab.o \
@@ -314,6 +314,7 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-disasm.c \
 	guile/scm-exception.c \
 	guile/scm-frame.c \
+	guile/scm-gsmob.c \
 	guile/scm-iterator.c \
 	guile/scm-lazy-string.c \
 	guile/scm-objfile.c \
@@ -321,7 +322,6 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-ports.c \
 	guile/scm-pretty-print.c \
 	guile/scm-safe-call.c \
-	guile/scm-gsmob.c \
 	guile/scm-string.c \
 	guile/scm-symbol.c \
 	guile/scm-symtab.c \
@@ -2280,6 +2280,10 @@ scm-frame.o: $(srcdir)/guile/scm-frame.c
 	$(COMPILE) $(srcdir)/guile/scm-frame.c
 	$(POSTCOMPILE)
 
+scm-gsmob.o: $(srcdir)/guile/scm-gsmob.c
+	$(COMPILE) $(srcdir)/guile/scm-gsmob.c
+	$(POSTCOMPILE)
+
 scm-iterator.o: $(srcdir)/guile/scm-iterator.c
 	$(COMPILE) $(srcdir)/guile/scm-iterator.c
 	$(POSTCOMPILE)
@@ -2306,10 +2310,6 @@ scm-pretty-print.o: $(srcdir)/guile/scm-pretty-print.c
 
 scm-safe-call.o: $(srcdir)/guile/scm-safe-call.c
 	$(COMPILE) $(srcdir)/guile/scm-safe-call.c
-	$(POSTCOMPILE)
-
-scm-gsmob.o: $(srcdir)/guile/scm-gsmob.c
-	$(COMPILE) $(srcdir)/guile/scm-gsmob.c
 	$(POSTCOMPILE)
 
 scm-string.o: $(srcdir)/guile/scm-string.c

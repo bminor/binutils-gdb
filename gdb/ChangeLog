@@ -1,3 +1,9 @@
+2014-02-16  Doug Evans  <xdje42@gmail.com>
+
+	* Makefile.in (SUBDIR_GUILE_OBS): Resort alphabetically.
+	(SUBDIR_GUILE_SRCS): Ditto.
+	(scm-gsmob.o): Ditto.
+
 2014-02-17  Yao Qi  <yao@codesourcery.com>
 
 	* gnu-nat.c (ILL_RPC): Declare defined function.
