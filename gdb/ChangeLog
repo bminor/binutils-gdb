@@ -1,3 +1,10 @@
+2014-02-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (rl78_g10_register_name): New function.
+	(rl78_return_value): Add g10 support.
+	(rl78_gdbarch_init): Register rl78_g10_register_name for the
+	g10.
+
 2014-02-17  Doug Evans  <xdje42@gmail.com>
 
 	* Makefile.in (SUBDIR_GUILE_OBS): Resort alphabetically.
