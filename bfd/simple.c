@@ -101,14 +101,23 @@ struct saved_output_info
   asection *section;
 };
 
+struct saved_offsets
+{
+  int section_count;
+  struct saved_output_info *sections;
+};
+
 static void
 simple_save_output_info (bfd *abfd ATTRIBUTE_UNUSED,
 			 asection *section,
 			 void *ptr)
 {
-  struct saved_output_info *output_info = (struct saved_output_info *) ptr;
-  output_info[section->index].offset = section->output_offset;
-  output_info[section->index].section = section->output_section;
+  struct saved_offsets *saved_offsets = (struct saved_offsets *) ptr;
+  struct saved_output_info *output_info;
+
+  output_info = &saved_offsets->sections[section->index];
+  output_info->offset = section->output_offset;
+  output_info->section = section->output_section;
   if ((section->flags & SEC_DEBUGGING) != 0
       || section->output_section == NULL)
     {
@@ -122,9 +131,15 @@ simple_restore_output_info (bfd *abfd ATTRIBUTE_UNUSED,
 			    asection *section,
 			    void *ptr)
 {
-  struct saved_output_info *output_info = (struct saved_output_info *) ptr;
-  section->output_offset = output_info[section->index].offset;
-  section->output_section = output_info[section->index].section;
+  struct saved_offsets *saved_offsets = (struct saved_offsets *) ptr;
+  struct saved_output_info *output_info;
+
+  if (section->index >= saved_offsets->section_count)
+    return;
+
+  output_info = &saved_offsets->sections[section->index];
+  section->output_offset = output_info->offset;
+  section->output_section = output_info->section;
 }
 
 /*
@@ -157,7 +172,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   struct bfd_link_callbacks callbacks;
   bfd_byte *contents, *data;
   int storage_needed;
-  void *saved_offsets;
+  struct saved_offsets saved_offsets;
 
   /* Don't apply relocation on executable and shared library.  See
      PR 4756.  */
@@ -215,15 +230,16 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
      section->output_offset to equal section->vma, which we do by setting
      section->output_section to point back to section.  Save the original
      output offset and output section to restore later.  */
-  saved_offsets = malloc (sizeof (struct saved_output_info)
-			  * abfd->section_count);
-  if (saved_offsets == NULL)
+  saved_offsets.section_count = abfd->section_count;
+  saved_offsets.sections = malloc (sizeof (*saved_offsets.sections)
+				   * saved_offsets.section_count);
+  if (saved_offsets.sections == NULL)
     {
       if (data)
 	free (data);
       return NULL;
     }
-  bfd_map_over_sections (abfd, simple_save_output_info, saved_offsets);
+  bfd_map_over_sections (abfd, simple_save_output_info, &saved_offsets);
 
   if (symbol_table == NULL)
     {
@@ -245,8 +261,8 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   if (contents == NULL && data != NULL)
     free (data);
 
-  bfd_map_over_sections (abfd, simple_restore_output_info, saved_offsets);
-  free (saved_offsets);
+  bfd_map_over_sections (abfd, simple_restore_output_info, &saved_offsets);
+  free (saved_offsets.sections);
 
   _bfd_generic_link_hash_table_free (link_info.hash);
   return contents;

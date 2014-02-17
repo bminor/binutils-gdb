@@ -1,3 +1,11 @@
+2014-02-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR binutils/16595
+	* simple.c (struct saved_offsets): New.
+	(simple_save_output_info): Use it for ptr.
+	(simple_restore_output_info): Use it for ptr.  Check section_count.
+	(bfd_simple_get_relocated_section_contents): Use it for saved_offsets.
+
 2014-02-17  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.h (struct ppc64_elf_params): Define.
