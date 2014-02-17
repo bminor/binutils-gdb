@@ -1,6 +1,11 @@
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches for ppc476 workaround
+	2014-02-17  Alan Modra  <amodra@gmail.com>
+	* elf32-ppc.c (ppc_elf_relocate_section): Move relocs on insns
+	patched for ppc476 workaround.  Reapply branch taken/not taken
+	relocs.
+
 	2014-02-12  Alan Modra  <amodra@gmail.com>
 	* elf32-ppc.c (ppc_elf_relax_section): Enable ppc476 workaround
 	for ld -r, when code sections are sufficiently aligned.

@@ -9196,13 +9196,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     the word alone.  */
 	  is_data = FALSE;
 	  lo = relocs;
-	  hi = lo + input_section->reloc_count;
+	  hi = relend;
+	  rel = NULL;
 	  while (lo < hi)
 	    {
 	      rel = lo + (hi - lo) / 2;
 	      if (rel->r_offset < offset)
 		lo = rel + 1;
-	      else if (rel->r_offset > offset)
+	      else if (rel->r_offset > offset + 3)
 		hi = rel;
 	      else
 		{
@@ -9251,12 +9252,53 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  patch_addr = (patch_addr + 15) & -16;
 	  patch_off = patch_addr - start_addr;
 	  bfd_put_32 (input_bfd, B + patch_off - offset, contents + offset);
+
+	  if (rel != NULL
+	      && rel->r_offset >= offset
+	      && rel->r_offset < offset + 4)
+	    {
+	      /* If the insn we are patching had a reloc, adjust the
+		 reloc r_offset so that the reloc applies to the moved
+		 location.  This matters for -r and --emit-relocs.  */
+	      if (rel + 1 != relend)
+		{
+		  Elf_Internal_Rela tmp = *rel;
+
+		  /* Keep the relocs sorted by r_offset.  */
+		  memmove (rel, rel + 1, (relend - (rel + 1)) * sizeof (*rel));
+		  relend[-1] = tmp;
+		}
+	      relend[-1].r_offset += patch_off - offset;
+	    }
+	  else
+	    rel = NULL;
+
 	  if ((insn & (0x3f << 26)) == (16u << 26) /* bc */
 	      && (insn & 2) == 0 /* relative */)
 	    {
 	      bfd_vma delta = ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 
 	      delta += offset - patch_off;
+	      if (info->relocatable && rel != NULL)
+		delta = 0;
+	      if (!info->relocatable && rel != NULL)
+		{
+		  enum elf_ppc_reloc_type r_type;
+
+		  r_type = ELF32_R_TYPE (relend[-1].r_info);
+		  if (r_type == R_PPC_REL14_BRTAKEN)
+		    insn |= BRANCH_PREDICT_BIT;
+		  else if (r_type == R_PPC_REL14_BRNTAKEN)
+		    insn &= ~BRANCH_PREDICT_BIT;
+		  else
+		    BFD_ASSERT (r_type == R_PPC_REL14);
+
+		  if ((r_type == R_PPC_REL14_BRTAKEN
+		       || r_type == R_PPC_REL14_BRNTAKEN)
+		      && delta + 0x8000 < 0x10000
+		      && (bfd_signed_vma) delta < 0)
+		    insn ^= BRANCH_PREDICT_BIT;
+		}
 	      if (delta + 0x8000 < 0x10000)
 		{
 		  bfd_put_32 (input_bfd,
@@ -9270,6 +9312,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		}
 	      else
 		{
+		  if (rel != NULL)
+		    {
+		      unsigned int r_sym = ELF32_R_SYM (relend[-1].r_info);
+
+		      relend[-1].r_offset += 8;
+		      relend[-1].r_info = ELF32_R_INFO (r_sym, R_PPC_REL24);
+		    }
 		  bfd_put_32 (input_bfd,
 			      (insn & ~0xfffc) | 8,
 			      contents + patch_off);

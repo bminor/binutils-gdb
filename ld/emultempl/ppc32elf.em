@@ -51,8 +51,6 @@ ppc_after_open_output (void)
   if (pagesize == 0)
     pagesize = config.commonpagesize;
   params.pagesize_p2 = bfd_log2 (pagesize);
-  if (link_info.relocatable)
-    params.ppc476_workaround = 0;
   ppc_elf_link_params (&link_info, &params);
 }
 

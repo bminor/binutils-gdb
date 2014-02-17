@@ -1,6 +1,10 @@
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches for ppc476 workaround
+	2014-02-17  Alan Modra  <amodra@gmail.com>
+	* emultempl/ppc32elf.em (ppc_after_open_output): Really enable
+	ppc476 workaround for ld -r.
+
 	2014-02-12  Alan Modra  <amodra@gmail.com>
 	* emultempl/ppc32elf.em (pagesize): New static var.
 	(ppc_after_open_output): Set params.pagesize_p2 from pagesize.
