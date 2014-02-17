@@ -157,12 +157,6 @@ set_initial_gprs ()
     cpu.asregs.sregs[i] = 0;
 }
 
-static void
-interrupt ()
-{
-  cpu.asregs.exception = SIGINT;
-}
-
 /* Write a 1 byte value to memory.  */
 
 static void INLINE 
@@ -258,11 +252,9 @@ sim_resume (sd, step, siggnal)
   word pc, opc;
   unsigned long long insts;
   unsigned short inst;
-  void (* sigsave)();
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
   address_word cia = CIA_GET (scpu);
 
-  sigsave = signal (SIGINT, interrupt);
   cpu.asregs.exception = step ? SIGTRAP: 0;
   pc = cpu.asregs.regs[PC_REGNO];
   insts = cpu.asregs.insts;
@@ -1022,8 +1014,6 @@ sim_resume (sd, step, siggnal)
   /* Hide away the things we've cached while executing.  */
   cpu.asregs.regs[PC_REGNO] = pc;
   cpu.asregs.insts += insts;		/* instructions done ... */
-
-  signal (SIGINT, sigsave);
 }
 
 int

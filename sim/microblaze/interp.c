@@ -368,12 +368,6 @@ set_initial_gprs ()
 
 }
 
-static void
-interrupt ()
-{
-  CPU.exception = SIGINT;
-}
-
 /* Functions so that trapped open/close don't interfere with the
    parent's functions.  We say that we can't close the descriptors
    that we didn't open.  exit() and cleanup() get in trouble here,
@@ -515,7 +509,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   int needfetch;
   word inst;
   enum microblaze_instr op;
-  void (*sigsave)();
   int memops;
   int bonus_cycles;
   int insts;
@@ -532,7 +525,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   short num_delay_slot; /* UNUSED except as reqd parameter */
   enum microblaze_instr_type insn_type;
 
-  sigsave = signal (SIGINT, interrupt);
   CPU.exception = step ? SIGTRAP : 0;
 
   memops = 0;
@@ -697,8 +689,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   CPU.cycles += insts;		/* and each takes a cycle */
   CPU.cycles += bonus_cycles;	/* and extra cycles for branches */
   CPU.cycles += memops; 	/* and memop cycle delays */
-
-  signal (SIGINT, sigsave);
 }
 
 
