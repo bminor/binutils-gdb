@@ -1,3 +1,12 @@
+2014-02-17  Ludovic Courtès  <ludo@gnu.org>
+
+	* doc/guile.texi (Writing a Guile Pretty-Printer) <example>:
+	Remove 'string-begins-with' procedure.  Add 'pretty-printer'
+	parameter to 'str-lookup-function' procedure.  Look for
+	the "std::string<" prefix.
+	(Frames In Guile): Add 'frame' parameter to 'frame-read-var'.
+	Adjust description.
+
 2014-02-11  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* docs/guile.texi (Values From Inferior In Guile): Remove stray
