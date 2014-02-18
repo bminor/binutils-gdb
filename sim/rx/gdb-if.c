@@ -650,52 +650,35 @@ int siggnal;
 
 
 /* Given a signal number used by the RX bsp (that is, newlib),
-   return a host signal number.  (Oddly, the gdb/sim interface uses
-   host signal numbers...)  */
-int
-rx_signal_to_host (int rx)
+   return a target signal number used by GDB.  */
+static int
+rx_signal_to_gdb_signal (int rx)
 {
   switch (rx)
     {
     case 4:
-#ifdef SIGILL
-      return SIGILL;
-#else
-      return SIGSEGV;
-#endif
+      return GDB_SIGNAL_ILL;
 
     case 5:
-      return SIGTRAP;
+      return GDB_SIGNAL_TRAP;
 
     case 10:
-#ifdef SIGBUS
-      return SIGBUS;
-#else
-      return SIGSEGV;
-#endif
+      return GDB_SIGNAL_BUS;
 
     case 11:
-      return SIGSEGV;
+      return GDB_SIGNAL_SEGV;
 
     case 24:
-#ifdef SIGXCPU
-      return SIGXCPU;
-#else
-      break;
-#endif
+      return GDB_SIGNAL_XCPU;
 
     case 2:
-      return SIGINT;
+      return GDB_SIGNAL_INT;
 
     case 8:
-#ifdef SIGFPE
-      return SIGFPE;
-#else
-      break;
-#endif
+      return GDB_SIGNAL_FPE;
 
     case 6:
-      return SIGABRT;
+      return GDB_SIGNAL_ABRT;
     }
 
   return 0;
@@ -720,7 +703,7 @@ handle_step (int rc)
   else if (RX_STOPPED (rc))
     {
       reason = sim_stopped;
-      siggnal = rx_signal_to_host (RX_STOP_SIG (rc));
+      siggnal = rx_signal_to_gdb_signal (RX_STOP_SIG (rc));
     }
   else
     {
