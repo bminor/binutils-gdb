@@ -1,3 +1,10 @@
+2014-02-19  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/16220
+	* gdbarch.sh: Remove startup_gdbarch.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Likewise.
+
 2014-02-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* rl78-tdep.c (rl78_g10_register_name): New function.

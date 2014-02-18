@@ -74,11 +74,6 @@ struct elf_internal_linux_prpsinfo;
 /* This is a convenience wrapper for 'current_inferior ()->gdbarch'.  */
 extern struct gdbarch *target_gdbarch (void);
 
-/* The initial, default architecture.  It uses host values (for want of a better
-   choice).  */
-extern struct gdbarch startup_gdbarch;
-
-
 /* Callback type for the 'iterate_over_objfiles_in_search_order'
    gdbarch  method.  */
 
