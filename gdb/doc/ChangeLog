@@ -1,3 +1,7 @@
+2014-02-26  Ludovic Courtès  <ludo@gnu.org>
+
+	* gdb/doc/guile.texi (Basic Guile): Document 'history-append!'.
+
 2014-02-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Files): Document "add-shared-symbol-files"

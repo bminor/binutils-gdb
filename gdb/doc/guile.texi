@@ -278,6 +278,15 @@ history contains the result of evaluating an expression from Guile's
 command line.
 @end deffn
 
+@deffn {Scheme Procedure} history-append! value
+Append @var{value}, an instance of @code{<gdb:value>}, to @value{GDBN}'s
+value history.  Return its index in the history.
+
+Putting into history values returned by Guile extensions will allow
+the user convenient access to those values via CLI history
+facilities.
+@end deffn
+
 @deffn {Scheme Procedure} parse-and-eval expression
 Parse @var{expression} as an expression in the current language,
 evaluate it, and return the result as a @code{<gdb:value>}.

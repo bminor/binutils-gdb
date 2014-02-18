@@ -1,3 +1,8 @@
+2014-02-26  Ludovic Courtès  <ludo@gnu.org>
+
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Add
+	test for 'history-append!'.
+
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/dw2-abs-hi-pc-hello-dbg.S: New file.
