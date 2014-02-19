@@ -164,7 +164,7 @@ check-single:
 	$(DO_RUNTEST) $(RUNTESTFLAGS)
 
 check-parallel:
-	-rm -rf cache
+	-rm -rf cache outputs temp
 	$(MAKE) -k do-check-parallel; \
 	$(SHELL) $(srcdir)/dg-extract-results.sh \
 	  `find outputs -name gdb.sum -print` > gdb.sum; \

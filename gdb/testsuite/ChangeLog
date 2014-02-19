@@ -1,3 +1,7 @@
+2014-02-18  Doug Evans  <dje@google.com>
+
+	* Makefile.in (check-parallel): rm -rf outputs temp.
+
 2014-02-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix "ERROR: no fileid for" in the testsuite.
