@@ -1,3 +1,7 @@
+2014-02-18  Jack Carter  <jack.carter@imgtec.com>
+
+	* ld-mips-elf/pic-and-nonpic-3a.sd: Check DYNAMIC segment flags.
+
 2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* ld-elfweak/elfweak.exp (setup_xfail_gnu_hurd): Remove function
