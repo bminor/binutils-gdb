@@ -1,5 +1,14 @@
 2014-02-18  Doug Evans  <dje@google.com>
 
+	* Makefile.in (TESTS): New variable.
+	(expanded_tests, expanded_tests_or_none): New variables
+	(check-single): Pass $(expanded_tests_or_none) to runtest.
+	(check-parallel): Only run tests in $(TESTS) if non-empty.
+	(check/no-matching-tests-found): New rule.
+	* README: Document TESTS makefile variable.
+
+2014-02-18  Doug Evans  <dje@google.com>
+
 	* Makefile.in (check-parallel): rm -rf outputs temp.
 
 2014-02-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
