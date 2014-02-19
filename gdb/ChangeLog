@@ -1,3 +1,12 @@
+2014-02-24  Pedro Alves  <palves@redhat.com>
+
+	* procfs.c (procfs_target): Don't install procfs_xfer_memory as
+	deprecated_xfer_memory hook.
+	(procfs_xfer_partial): Call procfs_xfer_memory instead
+	of the deprecated_xfer_memory target hook.
+	(procfs_xfer_memory): Adjust interface as a to_xfer_partial
+	helper.
+
 2014-02-24  Yuanhui Zhang  <asmwarrior@gmail.com>
 
 	* windows-nat.c (windows_xfer_shared_libraries): Return
