@@ -6841,7 +6841,7 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 
   /* Provide any missing _save* and _rest* functions.  */
   htab->sfpr->size = 0;
-  if (!info->relocatable)
+  if (htab->params->save_restore_funcs)
     for (i = 0; i < sizeof (funcs) / sizeof (funcs[0]); i++)
       if (!sfpr_define (info, &funcs[i]))
 	return FALSE;
