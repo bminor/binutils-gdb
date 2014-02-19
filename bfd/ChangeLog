@@ -1,3 +1,9 @@
+2014-02-19  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.h (struct ppc64_elf_params): Add save_restore_funcs.
+	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Use it to control
+	provision of out-of-line register save/restore routines.
+
 2014-02-18  Jack Carter  <jack.carter@imgtec.com>
 
         * elfxx-mips.c(_bfd_mips_elf_modify_segment_map): Deleted hard coding of

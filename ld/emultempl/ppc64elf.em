@@ -39,7 +39,7 @@ static struct ppc64_elf_params params = { NULL,
 					  &ppc_layout_sections_again,
 					  1, 0, 0,
 					  ${DEFAULT_PLT_STATIC_CHAIN-0}, -1, 0,
-					  0, -1};
+					  0, -1, -1};
 
 /* Fake input file for stubs.  */
 static lang_input_statement_type *stub_file;
@@ -96,6 +96,8 @@ ppc_create_output_section_statements (void)
   stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
   ldlang_add_file (stub_file);
   params.stub_bfd = stub_file->the_bfd;
+  if (params.save_restore_funcs < 0)
+    params.save_restore_funcs = !link_info.relocatable;
   if (!ppc64_elf_init_stub_bfd (&link_info, &params))
     einfo ("%F%P: can not init BFD: %E\n");
 }
@@ -646,7 +648,9 @@ PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
 #define OPTION_NO_PLT_ALIGN		(OPTION_PLT_ALIGN + 1)
 #define OPTION_STUBSYMS			(OPTION_NO_PLT_ALIGN + 1)
 #define OPTION_NO_STUBSYMS		(OPTION_STUBSYMS + 1)
-#define OPTION_DOTSYMS			(OPTION_NO_STUBSYMS + 1)
+#define OPTION_SAVRES			(OPTION_NO_STUBSYMS + 1)
+#define OPTION_NO_SAVRES		(OPTION_SAVRES + 1)
+#define OPTION_DOTSYMS			(OPTION_NO_SAVRES + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
 #define OPTION_NO_TLS_GET_ADDR_OPT	(OPTION_NO_TLS_OPT + 1)
@@ -669,6 +673,8 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
+  { "save-restore-funcs", no_argument, NULL, OPTION_SAVRES },
+  { "no-save-restore-funcs", no_argument, NULL, OPTION_NO_SAVRES },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
   { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },
   { "no-opd-optimize", no_argument, NULL, OPTION_NO_OPD_OPT },
@@ -721,6 +727,14 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
 		   ));
   fprintf (file, _("\
   --no-dotsyms                Don'\''t do anything special in version scripts.\n"
+		   ));
+  fprintf (file, _("\
+  --save-restore-funcs        Provide register save and restore routines used\n\
+                                by gcc -Os code.  Defaults to on for normal\n\
+                                final link, off for ld -r.\n"
+		   ));
+  fprintf (file, _("\
+  --no-save-restore-funcs     Don'\''t provide these routines.\n"
 		   ));
   fprintf (file, _("\
   --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n"
@@ -803,6 +817,14 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_NO_DOTSYMS:
       dotsyms = 0;
+      break;
+
+    case OPTION_SAVRES:
+      params.save_restore_funcs = 1;
+      break;
+
+    case OPTION_NO_SAVRES:
+      params.save_restore_funcs = 0;
       break;
 
     case OPTION_NO_TLS_OPT:

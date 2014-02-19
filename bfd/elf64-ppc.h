@@ -55,6 +55,9 @@ struct ppc64_elf_params
 
   /* Whether to emit symbols for stubs.  */
   int emit_stub_syms;
+
+  /* Whether to generate out-of-line register save/restore for gcc -Os code.  */
+  int save_restore_funcs;
 };
 
 bfd_boolean ppc64_elf_init_stub_bfd
