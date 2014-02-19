@@ -1,5 +1,53 @@
 2014-02-19  Doug Evans  <dje@google.com>
 
+	* dll.c (clear_dlls): Replace accessing list implemention details
+	with API function.
+	* gdbthread.h (get_first_thread): Declare.
+	* inferiors.c (for_each_inferior_with_data): New function.
+	(get_first_thread): New function.
+	(find_thread_ptid): Simplify.
+	(get_first_inferior): New function.
+	(clear_list): Delete.
+	(one_inferior_p): New function.
+	(clear_inferior_list): New function.
+	(clear_inferiors): Update.
+	* inferiors.h (for_each_inferior_with_data): Declare.
+	(clear_inferior_list): Declare.
+	(one_inferior_p): Declare.
+	(get_first_inferior): Declare.
+	* linux-low.c (linux_wait_for_event): Replace accessing list
+	implemention details with API function.
+	* server.c (target_running): Ditto.
+	(accumulate_file_name_length): New function.
+	(emit_dll_description): New function.
+	(handle_qxfer_libraries): Replace accessing list implemention
+	details with API function.
+	(handle_qxfer_threads_worker): New function.
+	(handle_qxfer_threads_proper): Replace accessing list implemention
+	details with API function.
+	(handle_query): Ditto.
+	(visit_actioned_threads_callback_ftype): New typedef.
+	(visit_actioned_threads_data): New struct.
+	(visit_actioned_threads): Rewrite to be find_inferior callback.
+	(resume): Call find_inferior.
+	(handle_status): Replace accessing list implemention
+	details with API function.
+	(process_serial_event): Replace accessing list implemention details
+	with API function.
+	* target.c (set_desired_inferior): Replace accessing list implemention
+	details with API function.
+	* tracepoint.c (same_process_p): New function.
+	(gdb_agent_about_to_close): Replace accessing list implemention
+	details with API function.
+	* win32-low.c (child_delete_thread): Replace accessing list
+	implemention details with API function.
+	(match_dll_by_basename): New function.
+	(dll_is_loaded_by_basename): New function.
+	(win32_ensure_ntdll_loaded): Replace accessing list implemention
+	details call to dll_is_loaded_by_basename.
+
+2014-02-19  Doug Evans  <dje@google.com>
+
 	* dll.h (struct dll_info): Add comment.
 	* gdbthread.h (struct thread_info): Add comment.
 	(current_ptid): Simplify.

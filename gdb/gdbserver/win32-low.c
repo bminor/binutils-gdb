@@ -232,7 +232,7 @@ child_delete_thread (DWORD pid, DWORD tid)
   ptid_t ptid;
 
   /* If the last thread is exiting, just return.  */
-  if (all_threads.head == all_threads.tail)
+  if (one_inferior_p (&all_threads))
     return;
 
   ptid = ptid_build (pid, tid, 0);
@@ -1142,6 +1142,28 @@ failed:
 }
 
 #ifndef _WIN32_WCE
+
+/* Helper routine for dll_is_loaded_by_basename.
+   Return non-zero if the basename in ARG matches the DLL in INF.  */
+
+static int
+match_dll_by_basename (struct inferior_list_entry *inf, void *arg)
+{
+  struct dll_info *iter = (void *) inf;
+  const char *basename = arg;
+
+  return strcasecmp (lbasename (iter->name), basename) == 0;
+}
+
+/* Return non-zero if the DLL specified by BASENAME is loaded.  */
+
+static int
+dll_is_loaded_by_basename (const char *basename)
+{
+  return find_inferior (&all_dlls, match_dll_by_basename,
+			(void *) basename) != NULL;
+}
+
 /* On certain versions of Windows, the information about ntdll.dll
    is not available yet at the time we get the LOAD_DLL_DEBUG_EVENT,
    thus preventing us from reporting this DLL as an SO. This has been
@@ -1158,20 +1180,14 @@ failed:
 static void
 win32_ensure_ntdll_loaded (void)
 {
-  struct inferior_list_entry *dll_e;
   size_t i;
   HMODULE dh_buf[1];
   HMODULE *DllHandle = dh_buf;
   DWORD cbNeeded;
   BOOL ok;
 
-  for (dll_e = all_dlls.head; dll_e != NULL; dll_e = dll_e->next)
-    {
-      struct dll_info *dll = (struct dll_info *) dll_e;
-
-      if (strcasecmp (lbasename (dll->name), "ntdll.dll") == 0)
-	return;
-    }
+  if (dll_is_loaded_by_basename ("ntdll.dll"))
+    return;
 
   if (!load_psapi ())
     return;

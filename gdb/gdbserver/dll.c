@@ -110,5 +110,5 @@ void
 clear_dlls (void)
 {
   for_each_inferior (&all_dlls, free_one_dll);
-  all_dlls.head = all_dlls.tail = NULL;
+  clear_inferior_list (&all_dlls);
 }

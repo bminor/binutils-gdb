@@ -1872,7 +1872,7 @@ linux_wait_for_event (ptid_t ptid, int *wstat, int options)
 
 	  if (!non_stop)
 	    {
-	      current_inferior = (struct thread_info *) all_threads.head;
+	      current_inferior = get_first_thread ();
 	      if (debug_threads)
 		debug_printf ("Current inferior is now %ld\n",
 			      lwpid_of (get_thread_lwp (current_inferior)));

@@ -86,9 +86,20 @@ void add_inferior_to_list (struct inferior_list *list,
 void for_each_inferior (struct inferior_list *list,
 			void (*action) (struct inferior_list_entry *));
 
+void for_each_inferior_with_data
+  (struct inferior_list *list,
+   void (*action) (struct inferior_list_entry *, void *),
+   void *data);
+
+void clear_inferior_list (struct inferior_list *list);
+
+int one_inferior_p (struct inferior_list *list);
+
 extern struct thread_info *current_inferior;
 void remove_inferior (struct inferior_list *list,
 		      struct inferior_list_entry *entry);
+
+struct inferior_list_entry *get_first_inferior (struct inferior_list *list);
 
 struct process_info *add_process (int pid, int attached);
 void remove_process (struct process_info *process);
