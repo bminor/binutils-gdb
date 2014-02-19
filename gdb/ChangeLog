@@ -1,5 +1,10 @@
 2014-02-19  Pedro Alves  <palves@redhat.com>
 
+	* common/ptid.h (struct ptid): Mention that process_stratum
+	targets should prefer ptid.lwp.
+
+2014-02-19  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_thread_alive, write_ptid, read_ptid)
 	(read_ptid, remote_newthread_step, remote_threads_extra_info)
 	(remote_get_ada_task_ptid, append_resumption, remote_stop_ns)
