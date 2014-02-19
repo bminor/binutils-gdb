@@ -1879,7 +1879,7 @@ remote_thread_alive (struct target_ops *ops, ptid_t ptid)
     /* The main thread is always alive.  */
     return 1;
 
-  if (ptid_get_pid (ptid) != 0 && ptid_get_tid (ptid) == 0)
+  if (ptid_get_pid (ptid) != 0 && ptid_get_lwp (ptid) == 0)
     /* The main thread is always alive.  This can happen after a
        vAttach, if the remote side doesn't support
        multi-threading.  */
@@ -2017,7 +2017,7 @@ write_ptid (char *buf, const char *endbuf, ptid_t ptid)
       else
 	buf += xsnprintf (buf, endbuf - buf, "p%x.", pid);
     }
-  tid = ptid_get_tid (ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid < 0)
     buf += xsnprintf (buf, endbuf - buf, "-%x", -tid);
   else
@@ -2047,7 +2047,7 @@ read_ptid (char *buf, char **obuf)
       pp = unpack_varlen_hex (p + 1, &tid);
       if (obuf)
 	*obuf = pp;
-      return ptid_build (pid, 0, tid);
+      return ptid_build (pid, tid, 0);
     }
 
   /* No multi-process.  Just a tid.  */
@@ -2064,7 +2064,7 @@ read_ptid (char *buf, char **obuf)
 
   if (obuf)
     *obuf = pp;
-  return ptid_build (pid, 0, tid);
+  return ptid_build (pid, tid, 0);
 }
 
 static int
@@ -2557,7 +2557,7 @@ static int
 remote_newthread_step (threadref *ref, void *context)
 {
   int pid = ptid_get_pid (inferior_ptid);
-  ptid_t ptid = ptid_build (pid, 0, threadref_to_int (ref));
+  ptid_t ptid = ptid_build (pid, threadref_to_int (ref), 0);
 
   if (!in_thread_list (ptid))
     add_thread (ptid);
@@ -2826,7 +2826,7 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
 		    _("remote_threads_extra_info"));
 
   if (ptid_equal (tp->ptid, magic_null_ptid)
-      || (ptid_get_pid (tp->ptid) != 0 && ptid_get_tid (tp->ptid) == 0))
+      || (ptid_get_pid (tp->ptid) != 0 && ptid_get_lwp (tp->ptid) == 0))
     /* This is the main thread which was added by GDB.  The remote
        server doesn't know about it.  */
     return NULL;
@@ -2865,7 +2865,7 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
   rs->use_threadextra_query = 0;
   set = TAG_THREADID | TAG_EXISTS | TAG_THREADNAME
     | TAG_MOREDISPLAY | TAG_DISPLAY;
-  int_to_threadref (&id, ptid_get_tid (tp->ptid));
+  int_to_threadref (&id, ptid_get_lwp (tp->ptid));
   if (remote_get_threadinfo (&id, set, &threadinfo))
     if (threadinfo.active)
       {
@@ -2975,7 +2975,7 @@ remote_static_tracepoint_markers_by_strid (struct target_ops *self,
 static ptid_t
 remote_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
-  return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
+  return ptid_build (ptid_get_pid (inferior_ptid), lwp, 0);
 }
 
 
@@ -4725,7 +4725,7 @@ append_resumption (char *p, char *endp,
       ptid_t nptid;
 
       /* All (-1) threads of process.  */
-      nptid = ptid_build (ptid_get_pid (ptid), 0, -1);
+      nptid = ptid_build (ptid_get_pid (ptid), -1, 0);
 
       p += xsnprintf (p, endp - p, ":");
       p = write_ptid (p, endp, nptid);
@@ -5040,7 +5040,7 @@ remote_stop_ns (ptid_t ptid)
 
       if (ptid_is_pid (ptid))
 	  /* All (-1) threads of process.  */
-	nptid = ptid_build (ptid_get_pid (ptid), 0, -1);
+	nptid = ptid_build (ptid_get_pid (ptid), -1, 0);
       else
 	{
 	  /* Small optimization: if we already have a stop reply for
@@ -9113,7 +9113,7 @@ threadalive_test (char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
   int pid = ptid_get_pid (inferior_ptid);
-  ptid_t ptid = ptid_build (pid, 0, sample_thread);
+  ptid_t ptid = ptid_build (pid, sample_thread, 0);
 
   if (remote_thread_alive (ptid))
     printf_filtered ("PASS: Thread alive test\n");
@@ -9261,10 +9261,10 @@ remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
 	xsnprintf (buf, sizeof buf, "Thread <main>");
       else if (rs->extended && remote_multi_process_p (rs))
 	xsnprintf (buf, sizeof buf, "Thread %d.%ld",
-		   ptid_get_pid (ptid), ptid_get_tid (ptid));
+		   ptid_get_pid (ptid), ptid_get_lwp (ptid));
       else
 	xsnprintf (buf, sizeof buf, "Thread %ld",
-		   ptid_get_tid (ptid));
+		   ptid_get_lwp (ptid));
       return buf;
     }
 }
@@ -12150,11 +12150,11 @@ stepping is supported by the target.  The default is on."),
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);
 
-  /* Take advantage of the fact that the LWP field is not used, to tag
+  /* Take advantage of the fact that the TID field is not used, to tag
      special ptids with it set to != 0.  */
-  magic_null_ptid = ptid_build (42000, 1, -1);
-  not_sent_ptid = ptid_build (42000, 1, -2);
-  any_thread_ptid = ptid_build (42000, 1, 0);
+  magic_null_ptid = ptid_build (42000, -1, 1);
+  not_sent_ptid = ptid_build (42000, -2, 1);
+  any_thread_ptid = ptid_build (42000, 0, 1);
 
   target_buf_size = 2048;
   target_buf = xmalloc (target_buf_size);
