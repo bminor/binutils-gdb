@@ -296,6 +296,10 @@ the native maintainer when resolving ABI issues.
 	ms1		--target=ms1-elf ,-Werror
 			Kevin Buettner		kevinb@redhat.com
 
+	nios2		--target=nios2-elf ,-Werror
+			--target=nios2-linux-gnu ,-Werror
+			Yao Qi			yao@codesourcery.com
+
 	ns32k		Deleted
 
 	pa		--target=hppa-elf ,-Werror
