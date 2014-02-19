@@ -175,10 +175,10 @@ index 0000000..3ccf957
 +	* ldmain.c (main): Initialize link_info.sharable_sections.
 +	* scripttempl/elf.sc: Support sharable sections.
 diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
-index add80b3..525d4b9 100644
+index 76cac2f..4f119af 100644
 --- a/bfd/elf-bfd.h
 +++ b/bfd/elf-bfd.h
-@@ -1210,8 +1210,9 @@ struct elf_backend_data
+@@ -1211,8 +1211,9 @@ struct elf_backend_data
    /* Return TRUE if we can merge 2 definitions.  */
    bfd_boolean (*merge_symbol) (struct elf_link_hash_entry *,
  			       const Elf_Internal_Sym *, asection **,
@@ -189,7 +189,7 @@ index add80b3..525d4b9 100644
  
    /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
    bfd_boolean (*elf_hash_symbol) (struct elf_link_hash_entry *);
-@@ -2148,6 +2149,24 @@ extern bfd_boolean bfd_elf_link_add_symbols
+@@ -2154,6 +2155,24 @@ extern bfd_boolean bfd_elf_link_add_symbols
    (bfd *, struct bfd_link_info *);
  extern bfd_boolean _bfd_elf_add_dynamic_entry
    (struct bfd_link_info *, bfd_vma, bfd_vma);
@@ -215,10 +215,10 @@ index add80b3..525d4b9 100644
  extern bfd_boolean bfd_elf_link_record_dynamic_symbol
    (struct bfd_link_info *, struct elf_link_hash_entry *);
 diff --git a/bfd/elf.c b/bfd/elf.c
-index 8df38ee..88c182e 100644
+index c0303fc..ea5f888 100644
 --- a/bfd/elf.c
 +++ b/bfd/elf.c
-@@ -2102,6 +2102,8 @@ static const struct bfd_elf_special_section special_sections_g[] =
+@@ -2106,6 +2106,8 @@ static const struct bfd_elf_special_section special_sections_g[] =
    { STRING_COMMA_LEN (".gnu.liblist"),     0, SHT_GNU_LIBLIST, SHF_ALLOC },
    { STRING_COMMA_LEN (".gnu.conflict"),    0, SHT_RELA,        SHF_ALLOC },
    { STRING_COMMA_LEN (".gnu.hash"),        0, SHT_GNU_HASH,    SHF_ALLOC },
@@ -227,7 +227,7 @@ index 8df38ee..88c182e 100644
    { NULL,                        0,        0, 0,               0 }
  };
  
-@@ -2156,6 +2158,8 @@ static const struct bfd_elf_special_section special_sections_s[] =
+@@ -2160,6 +2162,8 @@ static const struct bfd_elf_special_section special_sections_s[] =
    /* See struct bfd_elf_special_section declaration for the semantics of
       this special case where .prefix_length != strlen (.prefix).  */
    { ".stabstr",			5,  3, SHT_STRTAB, 0 },
@@ -236,7 +236,7 @@ index 8df38ee..88c182e 100644
    { NULL,                       0,  0, 0,          0 }
  };
  
-@@ -3615,6 +3619,32 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
+@@ -3623,6 +3627,32 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
  	}
      }
  
@@ -269,7 +269,7 @@ index 8df38ee..88c182e 100644
    /* Let the backend count up any program headers it might need.  */
    bed = get_elf_backend_data (abfd);
    if (bed->elf_backend_additional_program_headers)
-@@ -3785,6 +3815,8 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
+@@ -3793,6 +3823,8 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
        bfd_boolean phdr_in_segment = TRUE;
        bfd_boolean writable;
        int tls_count = 0;
@@ -278,7 +278,7 @@ index 8df38ee..88c182e 100644
        asection *first_tls = NULL;
        asection *dynsec, *eh_frame_hdr;
        bfd_size_type amt;
-@@ -4093,6 +4125,22 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
+@@ -4101,6 +4133,22 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
  		first_tls = s;
  	      tls_count++;
  	    }
@@ -301,7 +301,7 @@ index 8df38ee..88c182e 100644
  	}
  
        /* If there are any SHF_TLS output sections, add PT_TLS segment.  */
-@@ -4120,6 +4168,60 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
+@@ -4148,6 +4196,60 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
  	  pm = &m->next;
  	}
  
@@ -362,7 +362,7 @@ index 8df38ee..88c182e 100644
        /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
  	 segment.  */
        eh_frame_hdr = elf_eh_frame_hdr (abfd);
-@@ -4661,6 +4763,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
+@@ -4688,6 +4790,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
  	  align = (bfd_size_type) 1 << bfd_get_section_alignment (abfd, sec);
  
  	  if ((p->p_type == PT_LOAD
@@ -371,7 +371,7 @@ index 8df38ee..88c182e 100644
  	      && (this_hdr->sh_type != SHT_NOBITS
  		  || ((this_hdr->sh_flags & SHF_ALLOC) != 0
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 560e05c..bd5a1d2 100644
+index 4d391e1..e932d6f 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
 @@ -819,6 +819,9 @@ struct elf_i386_link_hash_table
@@ -441,7 +441,7 @@ index 560e05c..bd5a1d2 100644
  	       || s == htab->sdynbss)
  	{
  	  /* Strip these too.  */
-@@ -4682,20 +4701,26 @@ do_glob_dat:
+@@ -4683,20 +4702,26 @@ do_glob_dat:
    if (h->needs_copy)
      {
        Elf_Internal_Rela rel;
@@ -470,7 +470,7 @@ index 560e05c..bd5a1d2 100644
      }
  
    return TRUE;
-@@ -5016,7 +5041,8 @@ elf_i386_add_symbol_hook (bfd * abfd,
+@@ -5017,7 +5042,8 @@ elf_i386_add_symbol_hook (bfd * abfd,
  	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
      elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
  
@@ -480,9 +480,9 @@ index 560e05c..bd5a1d2 100644
  }
  
  #define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
-@@ -5070,6 +5096,19 @@ elf_i386_add_symbol_hook (bfd * abfd,
- #undef	elf_backend_post_process_headers
- #define	elf_backend_post_process_headers	_bfd_elf_set_osabi
+@@ -5069,6 +5095,19 @@ elf_i386_add_symbol_hook (bfd * abfd,
+ #define elf_backend_hash_symbol		      elf_i386_hash_symbol
+ #define elf_backend_add_symbol_hook           elf_i386_add_symbol_hook
  
 +#define elf_backend_section_from_bfd_section \
 +  _bfd_elf_sharable_section_from_bfd_section
@@ -501,10 +501,10 @@ index 560e05c..bd5a1d2 100644
  
  /* FreeBSD support.  */
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index f748641..bc5b578 100644
+index aa6fd80..16f6c5e 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
-@@ -771,6 +771,9 @@ struct elf_x86_64_link_hash_table
+@@ -856,6 +856,9 @@ struct elf_x86_64_link_hash_table
    bfd_vma next_jump_slot_index;
    /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
    bfd_vma next_irelative_index;
@@ -514,7 +514,7 @@ index f748641..bc5b578 100644
  };
  
  /* Get the x86-64 ELF linker hash table from a link_info structure.  */
-@@ -968,10 +971,19 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
+@@ -1055,10 +1058,19 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
  
    htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
    if (!info->shared)
@@ -536,7 +536,7 @@ index f748641..bc5b578 100644
      abort ();
  
    if (!info->no_ld_generated_unwind_info
-@@ -2248,6 +2260,8 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
+@@ -2391,6 +2403,8 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
    if (htab == NULL)
      return FALSE;
  
@@ -545,7 +545,7 @@ index f748641..bc5b578 100644
    /* We must generate a R_X86_64_COPY reloc to tell the dynamic linker
       to copy the initial value out of the dynamic object and into the
       runtime process image.  */
-@@ -2255,12 +2269,16 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
+@@ -2398,12 +2412,16 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
      {
        const struct elf_backend_data *bed;
        bed = get_elf_backend_data (info->output_bfd);
@@ -565,15 +565,15 @@ index f748641..bc5b578 100644
    return _bfd_elf_adjust_dynamic_copy (h, s);
  }
  
-@@ -2960,6 +2978,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
- 	  || s == htab->elf.iplt
+@@ -3140,6 +3158,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
  	  || s == htab->elf.igotplt
+ 	  || s == htab->plt_bnd
  	  || s == htab->plt_eh_frame
 +	  || s == htab->sdynsharablebss
  	  || s == htab->sdynbss)
  	{
  	  /* Strip this section if we don't need it; see the
-@@ -4720,13 +4739,19 @@ do_glob_dat:
+@@ -5003,13 +5022,19 @@ do_glob_dat:
    if (h->needs_copy)
      {
        Elf_Internal_Rela rela;
@@ -594,7 +594,7 @@ index f748641..bc5b578 100644
  	abort ();
  
        rela.r_offset = (h->root.u.def.value
-@@ -4734,7 +4759,7 @@ do_glob_dat:
+@@ -5017,7 +5042,7 @@ do_glob_dat:
  		       + h->root.u.def.section->output_offset);
        rela.r_info = htab->r_info (h->dynindx, R_X86_64_COPY);
        rela.r_addend = 0;
@@ -603,7 +603,7 @@ index f748641..bc5b578 100644
      }
  
    return TRUE;
-@@ -5069,7 +5094,8 @@ elf_x86_64_add_symbol_hook (bfd *abfd,
+@@ -5466,7 +5491,8 @@ elf_x86_64_add_symbol_hook (bfd *abfd,
  	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
      elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
  
@@ -613,7 +613,7 @@ index f748641..bc5b578 100644
  }
  
  
-@@ -5085,7 +5111,8 @@ elf_x86_64_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
+@@ -5482,7 +5508,8 @@ elf_x86_64_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
        *index_return = SHN_X86_64_LCOMMON;
        return TRUE;
      }
@@ -623,7 +623,7 @@ index f748641..bc5b578 100644
  }
  
  /* Process a symbol.  */
-@@ -5103,22 +5130,26 @@ elf_x86_64_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
+@@ -5500,22 +5527,26 @@ elf_x86_64_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
        asym->value = elfsym->internal_elf_sym.st_size;
        /* Common symbol doesn't set BSF_GLOBAL.  */
        asym->flags &= ~BSF_GLOBAL;
@@ -652,7 +652,7 @@ index f748641..bc5b578 100644
    else
      return SHN_X86_64_LCOMMON;
  }
-@@ -5127,7 +5158,7 @@ static asection *
+@@ -5524,7 +5555,7 @@ static asection *
  elf_x86_64_common_section (asection *sec)
  {
    if ((elf_section_flags (sec) & SHF_X86_64_LARGE) == 0)
@@ -661,7 +661,7 @@ index f748641..bc5b578 100644
    else
      return &_bfd_elf_large_com_section;
  }
-@@ -5137,9 +5168,12 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
+@@ -5534,9 +5565,12 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
  			 const Elf_Internal_Sym *sym,
  			 asection **psec,
  			 bfd_boolean newdef,
@@ -675,7 +675,7 @@ index f748641..bc5b578 100644
  {
    /* A normal common symbol and a large common symbol result in a
       normal common symbol.  We turn the large common symbol into a
-@@ -5148,7 +5182,8 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
+@@ -5545,7 +5579,8 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
        && h->root.type == bfd_link_hash_common
        && !newdef
        && bfd_is_com_section (*psec)
@@ -685,7 +685,7 @@ index f748641..bc5b578 100644
      {
        if (sym->st_shndx == SHN_COMMON
  	  && (elf_section_flags (oldsec) & SHF_X86_64_LARGE) != 0)
-@@ -5156,13 +5191,19 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
+@@ -5553,13 +5588,19 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
  	  h->root.u.c.p->section
  	    = bfd_make_section_old_way (oldbfd, "COMMON");
  	  h->root.u.c.p->section->flags = SEC_ALLOC;
@@ -708,7 +708,7 @@ index f748641..bc5b578 100644
  
  static int
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 1e6abd9..e187d91 100644
+index 28ccf53..f4c63f5 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
 @@ -385,6 +385,27 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
@@ -739,7 +739,7 @@ index 1e6abd9..e187d91 100644
  	}
      }
  
-@@ -1347,7 +1368,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
+@@ -1346,7 +1367,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
       backend to check if we can merge them.  */
    if (bed->merge_symbol != NULL)
      {
@@ -749,7 +749,7 @@ index 1e6abd9..e187d91 100644
  	return FALSE;
        sec = *psec;
      }
-@@ -13047,3 +13069,207 @@ elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
+@@ -13074,3 +13096,207 @@ elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
    BFD_ASSERT (loc + bed->s->sizeof_rel <= s->contents + s->size);
    bed->s->swap_reloc_out (abfd, rel, loc);
  }
@@ -958,7 +958,7 @@ index 1e6abd9..e187d91 100644
 +  return TRUE;
 +}
 diff --git a/bfd/elfnn-ia64.c b/bfd/elfnn-ia64.c
-index 117b4c8..33c7ee4 100644
+index ef340cf..73a3f2e 100644
 --- a/bfd/elfnn-ia64.c
 +++ b/bfd/elfnn-ia64.c
 @@ -1055,7 +1055,8 @@ elfNN_ia64_add_symbol_hook (bfd *abfd,
@@ -992,10 +992,10 @@ index 117b4c8..33c7ee4 100644
     SHF_LINK_ORDER. But it doesn't set the sh_link or sh_info fields.
     We don't want to flood users with so many error messages. We turn
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index 0389f14..cdc18ba 100644
+index 150e84f..50710e0 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
-@@ -1406,6 +1406,8 @@ dump_relocations (FILE * file,
+@@ -1412,6 +1412,8 @@ dump_relocations (FILE * file,
  			sec_name = "ABS";
  		      else if (psym->st_shndx == SHN_COMMON)
  			sec_name = "COMMON";
@@ -1004,7 +1004,7 @@ index 0389f14..cdc18ba 100644
  		      else if ((elf_header.e_machine == EM_MIPS
  				&& psym->st_shndx == SHN_MIPS_SCOMMON)
  			       || (elf_header.e_machine == EM_TI_C6000
-@@ -3035,6 +3037,7 @@ get_segment_type (unsigned long p_type)
+@@ -3247,6 +3249,7 @@ get_segment_type (unsigned long p_type)
      case PT_SHLIB:	return "SHLIB";
      case PT_PHDR:	return "PHDR";
      case PT_TLS:	return "TLS";
@@ -1012,7 +1012,7 @@ index 0389f14..cdc18ba 100644
  
      case PT_GNU_EH_FRAME:
  			return "GNU_EH_FRAME";
-@@ -9264,6 +9267,8 @@ get_symbol_index_type (unsigned int type)
+@@ -9478,6 +9481,8 @@ get_symbol_index_type (unsigned int type)
      case SHN_UNDEF:	return "UND";
      case SHN_ABS:	return "ABS";
      case SHN_COMMON:	return "COM";
@@ -1115,7 +1115,7 @@ index 1ac0738..8f6f2dc 100644
       flags.  */
    unsigned int execstack: 1;
 diff --git a/include/elf/common.h b/include/elf/common.h
-index cd3bcdd..4f5e4b6 100644
+index 2e3e43a..ed9478b 100644
 --- a/include/elf/common.h
 +++ b/include/elf/common.h
 @@ -437,6 +437,7 @@
@@ -1146,7 +1146,7 @@ index cd3bcdd..4f5e4b6 100644
     become part of an executable or shared library.  */
  
 diff --git a/ld/emulparams/elf32_x86_64.sh b/ld/emulparams/elf32_x86_64.sh
-index d34297b..9fb8982 100644
+index 11d17ad..012ca78 100644
 --- a/ld/emulparams/elf32_x86_64.sh
 +++ b/ld/emulparams/elf32_x86_64.sh
 @@ -16,6 +16,7 @@ LARGE_SECTIONS=yes
@@ -1167,7 +1167,7 @@ index 7e5e54d..d8cf531 100644
  SMALL_DATA_DTOR=" "
 +SHARABLE_SECTIONS=yes
 diff --git a/ld/emulparams/elf_i386.sh b/ld/emulparams/elf_i386.sh
-index add700f..dc2d6ef 100644
+index 93f1992..31df4b6 100644
 --- a/ld/emulparams/elf_i386.sh
 +++ b/ld/emulparams/elf_i386.sh
 @@ -13,6 +13,7 @@ GENERATE_PIE_SCRIPT=yes
@@ -1179,19 +1179,19 @@ index add700f..dc2d6ef 100644
  # Linux modify the default library search path to first include
  # a 32-bit specific directory.
 diff --git a/ld/emulparams/elf_x86_64.sh b/ld/emulparams/elf_x86_64.sh
-index 4842257..e9cd479 100644
+index d8cb6bf..0ef63e4 100644
 --- a/ld/emulparams/elf_x86_64.sh
 +++ b/ld/emulparams/elf_x86_64.sh
-@@ -16,6 +16,7 @@ LARGE_SECTIONS=yes
- LARGE_BSS_AFTER_BSS=
- SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 24 ? 24 : 0"
+@@ -18,6 +18,7 @@ SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 24 ? 24 : 0"
  IREL_IN_PLT=
+ # Reuse TINY_READONLY_SECTION which is placed right after .plt section.
+ TINY_READONLY_SECTION=".plt.bnd      ${RELOCATING-0} : { *(.plt.bnd) }"
 +SHARABLE_SECTIONS=yes
  
  if [ "x${host}" = "x${target}" ]; then
    case " $EMULATION_LIBPATH " in
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index 682f5e5..510ca2f 100644
+index fda0e68..a9a0896 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
 @@ -105,6 +105,7 @@ gld${EMULATION_NAME}_before_parse (void)
@@ -1202,7 +1202,7 @@ index 682f5e5..510ca2f 100644
  }
  
  EOF
-@@ -1816,6 +1817,12 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
+@@ -1855,6 +1856,12 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
    int iself = s->owner->xvec->flavour == bfd_target_elf_flavour;
    unsigned int sh_type = iself ? elf_section_type (s) : SHT_NULL;
  
@@ -1216,7 +1216,7 @@ index 682f5e5..510ca2f 100644
        && link_info.combreloc
        && (s->flags & SEC_ALLOC))
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 019df71..8a5f01f 100644
+index 00f79ec..a609106 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
 @@ -289,6 +289,7 @@ main (int argc, char **argv)
@@ -1280,6 +1280,3 @@ index e8126cb..922a906 100644
    ${REL_SDATA}
    ${REL_SBSS}
    ${REL_SDATA2}
--- 
-1.8.3.1
-
