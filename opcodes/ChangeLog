@@ -1,3 +1,11 @@
+2014-02-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (output_cpu_flags): Don't output trailing space.
+	(output_opcode_modifier): Likewise.
+	(output_operand_type): Likewise.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2014-02-12  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* i386-dis.c (MOD enum): Add MOD_0FC7_REG_3, MOD_0FC7_REG_4,

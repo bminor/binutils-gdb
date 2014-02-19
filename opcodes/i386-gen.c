@@ -713,7 +713,10 @@ output_cpu_flags (FILE *table, bitfield *flags, unsigned int size,
 
   for (i = 0; i < size - 1; i++)
     {
-      fprintf (table, "%d, ", flags[i].value);
+      if (((i + 1) % 20) != 0)
+	fprintf (table, "%d, ", flags[i].value);
+      else
+	fprintf (table, "%d,", flags[i].value);
       if (((i + 1) % 20) == 0)
 	{
 	  /* We need \\ for macro.  */
@@ -801,7 +804,10 @@ output_opcode_modifier (FILE *table, bitfield *modifier, unsigned int size)
 
   for (i = 0; i < size - 1; i++)
     {
-      fprintf (table, "%d, ", modifier[i].value);
+      if (((i + 1) % 20) != 0)
+        fprintf (table, "%d, ", modifier[i].value);
+      else
+        fprintf (table, "%d,", modifier[i].value);
       if (((i + 1) % 20) == 0)
 	fprintf (table, "\n      ");
     }
@@ -842,12 +848,15 @@ output_operand_type (FILE *table, bitfield *types, unsigned int size,
 
   for (i = 0; i < size - 1; i++)
     {
-      fprintf (table, "%d, ", types[i].value);
+      if (((i + 1) % 20) != 0)
+	fprintf (table, "%d, ", types[i].value);
+      else
+	fprintf (table, "%d,", types[i].value);
       if (((i + 1) % 20) == 0)
 	{
 	  /* We need \\ for macro.  */
 	  if (macro)
-	    fprintf (table, "\\\n%s", indent);
+	    fprintf (table, " \\\n%s", indent);
 	  else
 	    fprintf (table, "\n%s", indent);
 	}
