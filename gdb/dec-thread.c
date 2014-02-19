@@ -687,12 +687,13 @@ dec_thread_new_objfile_observer (struct objfile *objfile)
 /* The "to_get_ada_task_ptid" method of the dec_thread_ops.  */
 
 static ptid_t
-dec_thread_get_ada_task_ptid (long lwp, long thread)
+dec_thread_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   int i;
   struct dec_thread_info *info;
 
-  debug ("dec_thread_get_ada_task_ptid (lwp=0x%lx, thread=0x%lx)",
+  debug ("dec_thread_get_ada_task_ptid (struct target_ops *self,
+  lwp=0x%lx, thread=0x%lx)",
          lwp, thread);
 
   for (i = 0; VEC_iterate (dec_thread_info_s, dec_thread_list, i, info);

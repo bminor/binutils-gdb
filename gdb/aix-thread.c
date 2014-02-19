@@ -1678,23 +1678,21 @@ aix_thread_store_registers (struct target_ops *ops,
     }
 }
 
-/* Attempt a transfer all LEN bytes starting at OFFSET between the
-   inferior's OBJECT:ANNEX space and GDB's READBUF/WRITEBUF buffer.
-   Return the number of bytes actually transferred.  */
+/* Implement the to_xfer_partial target_ops method.  */
 
-static LONGEST
+static enum target_xfer_status
 aix_thread_xfer_partial (struct target_ops *ops, enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
 			 const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len)
+			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
-  LONGEST xfer;
+  enum target_xfer_status xfer;
   struct target_ops *beneath = find_target_beneath (ops);
 
   inferior_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-  xfer = beneath->to_xfer_partial (beneath, object, annex,
-				   readbuf, writebuf, offset, len);
+  xfer = beneath->to_xfer_partial (beneath, object, annex, readbuf,
+				   writebuf, offset, len, xfered_len);
 
   do_cleanups (old_chain);
   return xfer;
@@ -1750,7 +1748,8 @@ aix_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
    THREAD, for use in "info threads" output.  */
 
 static char *
-aix_thread_extra_thread_info (struct thread_info *thread)
+aix_thread_extra_thread_info (struct target_ops *self,
+			      struct thread_info *thread)
 {
   struct ui_file *buf;
   int status;
@@ -1807,7 +1806,7 @@ aix_thread_extra_thread_info (struct thread_info *thread)
 }
 
 static ptid_t
-aix_thread_get_ada_task_ptid (long lwp, long thread)
+aix_thread_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (inferior_ptid), 0, thread);
 }

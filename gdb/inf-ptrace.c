@@ -147,7 +147,7 @@ inf_ptrace_create_inferior (struct target_ops *ops,
 #ifdef PT_GET_PROCESS_STATE
 
 static void
-inf_ptrace_post_startup_inferior (ptid_t pid)
+inf_ptrace_post_startup_inferior (struct target_ops *self, ptid_t pid)
 {
   ptrace_event_t pe;
 
@@ -246,7 +246,7 @@ inf_ptrace_attach (struct target_ops *ops, char *args, int from_tty)
 #ifdef PT_GET_PROCESS_STATE
 
 static void
-inf_ptrace_post_attach (int pid)
+inf_ptrace_post_attach (struct target_ops *self, int pid)
 {
   ptrace_event_t pe;
 
@@ -321,7 +321,7 @@ inf_ptrace_kill (struct target_ops *ops)
 /* Stop the inferior.  */
 
 static void
-inf_ptrace_stop (ptid_t ptid)
+inf_ptrace_stop (struct target_ops *self, ptid_t ptid)
 {
   /* Send a SIGINT to the process group.  This acts just like the user
      typed a ^C on the controlling terminal.  Note that using a
@@ -455,15 +455,13 @@ inf_ptrace_wait (struct target_ops *ops,
   return pid_to_ptid (pid);
 }
 
-/* Attempt a transfer all LEN bytes starting at OFFSET between the
-   inferior's OBJECT:ANNEX space and GDB's READBUF/WRITEBUF buffer.
-   Return the number of bytes actually transferred.  */
+/* Implement the to_xfer_partial target_ops method.  */
 
-static LONGEST
+static enum target_xfer_status
 inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
 			 const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len)
+			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
 
@@ -490,13 +488,16 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	errno = 0;
 	if (ptrace (PT_IO, pid, (caddr_t)&piod, 0) == 0)
-	  /* Return the actual number of bytes read or written.  */
-	  return piod.piod_len;
+	  {
+	    /* Return the actual number of bytes read or written.  */
+	    *xfered_len = piod.piod_len;
+	    return (piod.piod_len == 0) ? TARGET_XFER_EOF : TARGET_XFER_OK;
+	  }
 	/* If the PT_IO request is somehow not supported, fallback on
 	   using PT_WRITE_D/PT_READ_D.  Otherwise we will return zero
 	   to indicate failure.  */
 	if (errno != EINVAL)
-	  return 0;
+	  return TARGET_XFER_EOF;
       }
 #endif
       {
@@ -506,7 +507,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	  gdb_byte byte[sizeof (PTRACE_TYPE_RET)];
 	} buffer;
 	ULONGEST rounded_offset;
-	LONGEST partial_len;
+	ULONGEST partial_len;
 
 	/* Round the start offset down to the next long word
 	   boundary.  */
@@ -552,7 +553,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 			(PTRACE_TYPE_ARG3)(uintptr_t)rounded_offset,
 			buffer.word);
 		if (errno)
-		  return 0;
+		  return TARGET_XFER_EOF;
 	      }
 	  }
 
@@ -563,13 +564,14 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 				  (PTRACE_TYPE_ARG3)(uintptr_t)rounded_offset,
 				  0);
 	    if (errno)
-	      return 0;
+	      return TARGET_XFER_EOF;
 	    /* Copy appropriate bytes out of the buffer.  */
 	    memcpy (readbuf, buffer.byte + (offset - rounded_offset),
 		    partial_len);
 	  }
 
-	return partial_len;
+	*xfered_len = partial_len;
+	return TARGET_XFER_OK;
       }
 
     case TARGET_OBJECT_UNWIND_TABLE:
@@ -592,8 +594,11 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	errno = 0;
 	if (ptrace (PT_IO, pid, (caddr_t)&piod, 0) == 0)
-	  /* Return the actual number of bytes read or written.  */
-	  return piod.piod_len;
+	  {
+	    /* Return the actual number of bytes read or written.  */
+	    *xfered_len = piod.piod_len;
+	    return (piod.piod_len == 0) ? TARGET_XFER_EOF : TARGET_XFER_OK;
+	  }
       }
 #endif
       return TARGET_XFER_E_IO;

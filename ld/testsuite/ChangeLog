@@ -1,3 +1,20 @@
+2014-02-19  Igor Zamyatin  <igor.zamyatin@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/mpx.exp: Run bnd-ifunc-1 and bnd-plt-1.
+	* ld-x86-64/bnd-ifunc-1.d: New file.
+	* ld-x86-64/bnd-ifunc-1.s: Likewise.
+	* ld-x86-64/bnd-plt-1.d: Likewise.
+
+2014-02-18  Jack Carter  <jack.carter@imgtec.com>
+
+	* ld-mips-elf/pic-and-nonpic-3a.sd: Check DYNAMIC segment flags.
+
+2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* ld-elfweak/elfweak.exp (setup_xfail_gnu_hurd): Remove function
+	and all usage of it.
+
 2014-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/16530

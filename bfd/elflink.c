@@ -12145,13 +12145,14 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && (h->ref_dynamic
-	  || ((!info->executable
-	       || info->export_dynamic
-	       || (d != NULL
-		   && (*d->match) (&d->head, NULL, h->root.root.string)))
-	      && h->def_regular
+	  || (h->def_regular
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
+	      && (!info->executable
+		  || info->export_dynamic
+		  || (h->dynamic
+		      && d != NULL
+		      && (*d->match) (&d->head, NULL, h->root.root.string)))
 	      && (strchr (h->root.root.string, ELF_VER_CHR) != NULL
 		  || !bfd_hide_sym_by_version (info->version_info,
 					       h->root.root.string)))))

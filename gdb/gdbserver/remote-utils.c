@@ -22,6 +22,7 @@
 #include "gdbthread.h"
 #include "tdesc.h"
 #include "dll.h"
+#include "rsp-low.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -417,65 +418,9 @@ remote_close (void)
   reset_readchar ();
 }
 
-/* Convert hex digit A to a number.  */
-
-static int
-fromhex (int a)
-{
-  if (a >= '0' && a <= '9')
-    return a - '0';
-  else if (a >= 'a' && a <= 'f')
-    return a - 'a' + 10;
-  else
-    error ("Reply contains invalid hex digit");
-  return 0;
-}
-
 #endif
 
-static const char hexchars[] = "0123456789abcdef";
-
-static int
-ishex (int ch, int *val)
-{
-  if ((ch >= 'a') && (ch <= 'f'))
-    {
-      *val = ch - 'a' + 10;
-      return 1;
-    }
-  if ((ch >= 'A') && (ch <= 'F'))
-    {
-      *val = ch - 'A' + 10;
-      return 1;
-    }
-  if ((ch >= '0') && (ch <= '9'))
-    {
-      *val = ch - '0';
-      return 1;
-    }
-  return 0;
-}
-
 #ifndef IN_PROCESS_AGENT
-
-int
-unhexify (char *bin, const char *hex, int count)
-{
-  int i;
-
-  for (i = 0; i < count; i++)
-    {
-      if (hex[0] == 0 || hex[1] == 0)
-	{
-	  /* Hex string is short, or of uneven length.
-	     Return the count that has been converted so far. */
-	  return i;
-	}
-      *bin++ = fromhex (hex[0]) * 16 + fromhex (hex[1]);
-      hex += 2;
-    }
-  return i;
-}
 
 void
 decode_address (CORE_ADDR *addrp, const char *start, int len)
@@ -512,117 +457,7 @@ decode_address_to_semicolon (CORE_ADDR *addrp, const char *start)
 
 #endif
 
-/* Convert number NIB to a hex digit.  */
-
-static int
-tohex (int nib)
-{
-  if (nib < 10)
-    return '0' + nib;
-  else
-    return 'a' + nib - 10;
-}
-
 #ifndef IN_PROCESS_AGENT
-
-int
-hexify (char *hex, const char *bin, int count)
-{
-  int i;
-
-  /* May use a length, or a nul-terminated string as input. */
-  if (count == 0)
-    count = strlen (bin);
-
-  for (i = 0; i < count; i++)
-    {
-      *hex++ = tohex ((*bin >> 4) & 0xf);
-      *hex++ = tohex (*bin++ & 0xf);
-    }
-  *hex = 0;
-  return i;
-}
-
-/* Convert BUFFER, binary data at least LEN bytes long, into escaped
-   binary data in OUT_BUF.  Set *OUT_LEN to the length of the data
-   encoded in OUT_BUF, and return the number of bytes in OUT_BUF
-   (which may be more than *OUT_LEN due to escape characters).  The
-   total number of bytes in the output buffer will be at most
-   OUT_MAXLEN.  */
-
-int
-remote_escape_output (const gdb_byte *buffer, int len,
-		      gdb_byte *out_buf, int *out_len,
-		      int out_maxlen)
-{
-  int input_index, output_index;
-
-  output_index = 0;
-  for (input_index = 0; input_index < len; input_index++)
-    {
-      gdb_byte b = buffer[input_index];
-
-      if (b == '$' || b == '#' || b == '}' || b == '*')
-	{
-	  /* These must be escaped.  */
-	  if (output_index + 2 > out_maxlen)
-	    break;
-	  out_buf[output_index++] = '}';
-	  out_buf[output_index++] = b ^ 0x20;
-	}
-      else
-	{
-	  if (output_index + 1 > out_maxlen)
-	    break;
-	  out_buf[output_index++] = b;
-	}
-    }
-
-  *out_len = input_index;
-  return output_index;
-}
-
-/* Convert BUFFER, escaped data LEN bytes long, into binary data
-   in OUT_BUF.  Return the number of bytes written to OUT_BUF.
-   Raise an error if the total number of bytes exceeds OUT_MAXLEN.
-
-   This function reverses remote_escape_output.  It allows more
-   escaped characters than that function does, in particular because
-   '*' must be escaped to avoid the run-length encoding processing
-   in reading packets.  */
-
-static int
-remote_unescape_input (const gdb_byte *buffer, int len,
-		       gdb_byte *out_buf, int out_maxlen)
-{
-  int input_index, output_index;
-  int escaped;
-
-  output_index = 0;
-  escaped = 0;
-  for (input_index = 0; input_index < len; input_index++)
-    {
-      gdb_byte b = buffer[input_index];
-
-      if (output_index + 1 > out_maxlen)
-	error ("Received too much data from the target.");
-
-      if (escaped)
-	{
-	  out_buf[output_index++] = b ^ 0x20;
-	  escaped = 0;
-	}
-      else if (b == '}')
-	escaped = 1;
-      else
-	out_buf[output_index++] = b;
-    }
-
-  if (escaped)
-    error ("Unmatched escape character in target response.");
-
-  return output_index;
-}
 
 /* Look for a sequence of characters which can be run-length encoded.
    If there are any, update *CSUM and *P.  Otherwise, output the
@@ -669,23 +504,6 @@ try_rle (char *buf, int remaining, unsigned char *csum, char **p)
 }
 
 #endif
-
-char *
-unpack_varlen_hex (char *buff,	/* packet to parse */
-		   ULONGEST *result)
-{
-  int nibble;
-  ULONGEST retval = 0;
-
-  while (ishex (*buff, &nibble))
-    {
-      buff++;
-      retval = retval << 4;
-      retval |= nibble & 0x0f;
-    }
-  *result = retval;
-  return buff;
-}
 
 #ifndef IN_PROCESS_AGENT
 
@@ -1230,35 +1048,7 @@ write_enn (char *buf)
 
 #endif
 
-void
-convert_int_to_ascii (const unsigned char *from, char *to, int n)
-{
-  int nib;
-  int ch;
-  while (n--)
-    {
-      ch = *from++;
-      nib = ((ch & 0xf0) >> 4) & 0x0f;
-      *to++ = tohex (nib);
-      nib = ch & 0x0f;
-      *to++ = tohex (nib);
-    }
-  *to++ = 0;
-}
-
 #ifndef IN_PROCESS_AGENT
-
-void
-convert_ascii_to_int (const char *from, unsigned char *to, int n)
-{
-  int nib1, nib2;
-  while (n--)
-    {
-      nib1 = fromhex (*from++);
-      nib2 = fromhex (*from++);
-      *to++ = (((nib1 & 0x0f) << 4) & 0xf0) | (nib2 & 0x0f);
-    }
-}
 
 static char *
 outreg (struct regcache *regcache, int regno, char *buf)
@@ -1480,7 +1270,7 @@ decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
   if (*to_p == NULL)
     *to_p = xmalloc (*len_ptr);
 
-  convert_ascii_to_int (&from[i++], *to_p, *len_ptr);
+  hex2bin (&from[i++], *to_p, *len_ptr);
 }
 
 int
@@ -1609,7 +1399,8 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
 
   /* Send the request.  */
   strcpy (own_buf, "qSymbol:");
-  hexify (own_buf + strlen ("qSymbol:"), name, strlen (name));
+  bin2hex ((const gdb_byte *) name, own_buf + strlen ("qSymbol:"),
+	  strlen (name));
   if (putpkt (own_buf) < 0)
     return -1;
 
@@ -1632,7 +1423,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
       decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
       mem_buf = xmalloc (mem_len);
       if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
-	convert_int_to_ascii (mem_buf, own_buf, mem_len);
+	bin2hex (mem_buf, own_buf, mem_len);
       else
 	write_enn (own_buf);
       free (mem_buf);
@@ -1716,7 +1507,7 @@ relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 	  decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
 	  mem_buf = xmalloc (mem_len);
 	  if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
-	    convert_int_to_ascii (mem_buf, own_buf, mem_len);
+	    bin2hex (mem_buf, own_buf, mem_len);
 	  else
 	    write_enn (own_buf);
 	}
@@ -1768,10 +1559,11 @@ relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 void
 monitor_output (const char *msg)
 {
-  char *buf = xmalloc (strlen (msg) * 2 + 2);
+  int len = strlen (msg);
+  char *buf = xmalloc (len * 2 + 2);
 
   buf[0] = 'O';
-  hexify (buf + 1, msg, 0);
+  bin2hex ((const gdb_byte *) msg, buf + 1, len);
 
   putpkt (buf);
   free (buf);

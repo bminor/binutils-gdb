@@ -131,6 +131,7 @@ GDB_DOC_BUILD_INCLUDES = \
 GDB_DOC_FILES = \
 	$(srcdir)/gdb.texinfo \
 	$(srcdir)/guile.texi \
+	$(srcdir)/python.texi \
 	$(GDB_DOC_SOURCE_INCLUDES) \
 	$(GDB_DOC_BUILD_INCLUDES)
 
@@ -185,6 +186,43 @@ ps: gdb.ps stabs.ps refcard.ps annotate.ps
 html: $(HTMLFILES)
 pdf: $(PDFFILES)
 man: $(MANS)
+
+DOXYGEN = doxygen
+doxyedit = sed -e 's,@srcdir\@,$(srcdir),g'
+
+doxy:	doxy/index.html \
+	doxy/gdb-api/index.html \
+	doxy/gdb-xref/index.html \
+	doxy/gdbserver/index.html
+
+doxy/index.html: $(srcdir)/doxy-index.in
+	-mkdir -p doxy
+	cp $(srcdir)/doxy-index.in doxy/index.html
+
+doxy/gdb-api/index.html: Doxyfile-gdb-api Doxyfile-base
+	-mkdir -p doxy
+	$(DOXYGEN) Doxyfile-gdb-api
+
+doxy/gdb-xref/index.html: Doxyfile-gdb-xref Doxyfile-base
+	-mkdir -p doxy
+	$(DOXYGEN) Doxyfile-gdb-xref
+
+doxy/gdbserver/index.html: Doxyfile-gdbserver Doxyfile-base
+	-mkdir -p doxy
+	$(DOXYGEN) Doxyfile-gdbserver
+
+Doxyfile-base:	$(srcdir)/Doxyfile-base.in 
+	$(doxyedit) $(srcdir)/Doxyfile-base.in >Doxyfile-base
+
+Doxyfile-gdb-api:	$(srcdir)/Doxyfile-gdb-api.in 
+	$(doxyedit) $(srcdir)/Doxyfile-gdb-api.in >Doxyfile-gdb-api
+
+Doxyfile-gdb-xref:	$(srcdir)/Doxyfile-gdb-xref.in
+	$(doxyedit) $(srcdir)/Doxyfile-gdb-xref.in >Doxyfile-gdb-xref
+
+Doxyfile-gdbserver:	$(srcdir)/Doxyfile-gdbserver.in
+	$(doxyedit) $(srcdir)/Doxyfile-gdbserver.in >Doxyfile-gdbserver
+
 all-doc: info dvi ps # pdf
 diststuff: info man
 	rm -f gdb-cfg.texi GDBvn.texi

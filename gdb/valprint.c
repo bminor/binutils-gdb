@@ -1727,7 +1727,7 @@ val_print_array_elements (struct type *type,
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Returns a count of the bytes
-   actually read, and optionally a target_xfer_error value in the
+   actually read, and optionally a target_xfer_status value in the
    location pointed to by ERRPTR if ERRPTR is non-null.  */
 
 /* FIXME: cagney/1999-10-14: Only used by val_print_string.  Can this
@@ -1771,7 +1771,7 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
    each.  Fetch at most FETCHLIMIT characters.  BUFFER will be set to a newly
    allocated buffer containing the string, which the caller is responsible to
    free, and BYTES_READ will be set to the number of bytes read.  Returns 0 on
-   success, or a target_xfer_error on failure.
+   success, or a target_xfer_status on failure.
 
    If LEN > 0, reads the lesser of LEN or FETCHLIMIT characters
    (including eventual NULs in the middle or end of the string).

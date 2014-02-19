@@ -21,6 +21,7 @@
 #include "agent.h"
 #include "notif.h"
 #include "tdesc.h"
+#include "rsp-low.h"
 
 #include <ctype.h>
 #include <unistd.h>
@@ -2024,7 +2025,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  return;
 	}
 
-      if ((len % 2) != 0 || unhexify (mon, own_buf + 6, len / 2) != len / 2)
+      if ((len % 2) != 0
+	  || hex2bin (own_buf + 6, (gdb_byte *) mon, len / 2) != len / 2)
 	{
 	  write_enn (own_buf);
 	  free (mon);
@@ -2407,7 +2409,7 @@ handle_v_run (char *own_buf)
 	{
 	  /* FIXME: Fail request if out of memory instead of dying.  */
 	  new_argv[i] = xmalloc (1 + (next_p - p) / 2);
-	  unhexify (new_argv[i], p, (next_p - p) / 2);
+	  hex2bin (p, (gdb_byte *) new_argv[i], (next_p - p) / 2);
 	  new_argv[i][(next_p - p) / 2] = '\0';
 	}
 
@@ -3601,7 +3603,7 @@ process_serial_event (void)
       if (res < 0)
 	write_enn (own_buf);
       else
-	convert_int_to_ascii (mem_buf, own_buf, res);
+	bin2hex (mem_buf, own_buf, res);
       break;
     case 'M':
       require_running (own_buf);
@@ -3622,7 +3624,7 @@ process_serial_event (void)
       break;
     case 'C':
       require_running (own_buf);
-      convert_ascii_to_int (own_buf + 1, &sig, 1);
+      hex2bin (own_buf + 1, &sig, 1);
       if (gdb_signal_to_host_p (sig))
 	signal = gdb_signal_to_host (sig);
       else
@@ -3631,7 +3633,7 @@ process_serial_event (void)
       break;
     case 'S':
       require_running (own_buf);
-      convert_ascii_to_int (own_buf + 1, &sig, 1);
+      hex2bin (own_buf + 1, &sig, 1);
       if (gdb_signal_to_host_p (sig))
 	signal = gdb_signal_to_host (sig);
       else

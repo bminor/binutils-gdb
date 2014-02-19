@@ -204,7 +204,7 @@ bsd_uthread_activate (struct objfile *objfile)
 /* Cleanup due to deactivation.  */
 
 static void
-bsd_uthread_close (void)
+bsd_uthread_close (struct target_ops *self)
 {
   bsd_uthread_active = 0;
   bsd_uthread_thread_run_addr = 0;
@@ -331,18 +331,19 @@ bsd_uthread_store_registers (struct target_ops *ops,
     }
 }
 
-/* FIXME: This function is only there because otherwise GDB tries to
-   invoke deprecate_xfer_memory.  */
+/* Implement the to_xfer_partial target_ops method.  FIXME: This
+   function is only there because otherwise GDB tries to invoke
+   deprecate_xfer_memory.  */
 
-static LONGEST
+static enum target_xfer_status
 bsd_uthread_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const char *annex, gdb_byte *readbuf,
 			  const gdb_byte *writebuf,
-			  ULONGEST offset, ULONGEST len)
+			  ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   gdb_assert (ops->beneath->to_xfer_partial);
   return ops->beneath->to_xfer_partial (ops->beneath, object, annex, readbuf,
-					writebuf, offset, len);
+					writebuf, offset, len, xfered_len);
 }
 
 static ptid_t
@@ -482,7 +483,8 @@ static char *bsd_uthread_state[] =
    INFO.  */
 
 static char *
-bsd_uthread_extra_thread_info (struct thread_info *info)
+bsd_uthread_extra_thread_info (struct target_ops *self,
+			       struct thread_info *info)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR addr = ptid_get_tid (info->ptid);

@@ -1204,7 +1204,7 @@ ctf_open (char *dirname, int from_tty)
    CTF iterator and context.  */
 
 static void
-ctf_close (void)
+ctf_close (struct target_ops *self)
 {
   int pid;
 
@@ -1359,11 +1359,11 @@ ctf_fetch_registers (struct target_ops *ops,
    OFFSET is within the range, read the contents from events to
    READBUF.  */
 
-static LONGEST
+static enum target_xfer_status
 ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 		  const char *annex, gdb_byte *readbuf,
 		  const gdb_byte *writebuf, ULONGEST offset,
-		  ULONGEST len)
+		  ULONGEST len, ULONGEST *xfered_len)
 {
   /* We're only doing regular memory for now.  */
   if (object != TARGET_OBJECT_MEMORY)
@@ -1449,7 +1449,13 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 	      /* Restore the position.  */
 	      bt_iter_set_pos (bt_ctf_get_iter (ctf_iter), pos);
 
-	      return amt;
+	      if (amt == 0)
+		return TARGET_XFER_EOF;
+	      else
+		{
+		  *xfered_len = amt;
+		  return TARGET_XFER_OK;
+		}
 	    }
 
 	  if (bt_iter_next (bt_ctf_get_iter (ctf_iter)) < 0)
@@ -1487,7 +1493,14 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	      amt = bfd_get_section_contents (exec_bfd, s,
 					      readbuf, offset - vma, amt);
-	      return amt;
+
+	      if (amt == 0)
+		return TARGET_XFER_EOF;
+	      else
+		{
+		  *xfered_len = amt;
+		  return TARGET_XFER_OK;
+		}
 	    }
 	}
     }
@@ -1503,7 +1516,8 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
    true, otherwise return false.  */
 
 static int
-ctf_get_trace_state_variable_value (int tsvnum, LONGEST *val)
+ctf_get_trace_state_variable_value (struct target_ops *self,
+				    int tsvnum, LONGEST *val)
 {
   struct bt_iter_pos *pos;
   int found = 0;
@@ -1620,7 +1634,7 @@ ctf_get_traceframe_address (void)
    number in it.  Return traceframe number when matched.  */
 
 static int
-ctf_trace_find (enum trace_find_type type, int num,
+ctf_trace_find (struct target_ops *self, enum trace_find_type type, int num,
 		CORE_ADDR addr1, CORE_ADDR addr2, int *tpp)
 {
   int ret = -1;
@@ -1754,7 +1768,7 @@ ctf_thread_alive (struct target_ops *ops, ptid_t ptid)
    traceframe_info.  */
 
 static struct traceframe_info *
-ctf_traceframe_info (void)
+ctf_traceframe_info (struct target_ops *self)
 {
   struct traceframe_info *info = XCNEW (struct traceframe_info);
   const char *name;
@@ -1824,7 +1838,7 @@ ctf_traceframe_info (void)
    The trace status for a file is that tracing can never be run.  */
 
 static int
-ctf_get_trace_status (struct trace_status *ts)
+ctf_get_trace_status (struct target_ops *self, struct trace_status *ts)
 {
   /* Other bits of trace status were collected as part of opening the
      trace files, so nothing to do here.  */

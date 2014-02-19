@@ -1,3 +1,9 @@
+2014-02-17  Mike Frysinger  <vapier@gentoo.org>
+
+	PR gdb/16450
+	* interp.c (control_c): Delete.
+	(sim_resume): Delete signal(SIGINT) handling.
+
 2013-09-23  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

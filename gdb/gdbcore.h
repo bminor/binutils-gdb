@@ -41,12 +41,12 @@ extern int have_core_file_p (void);
 
 /* Report a memory error with error().  */
 
-extern void memory_error (enum target_xfer_error status, CORE_ADDR memaddr);
+extern void memory_error (enum target_xfer_status status, CORE_ADDR memaddr);
 
 /* The string 'memory_error' would use as exception message.  Space
    for the result is malloc'd, caller must free.  */
 
-extern char *memory_error_message (enum target_xfer_error err,
+extern char *memory_error_message (enum target_xfer_status err,
 				   struct gdbarch *gdbarch, CORE_ADDR memaddr);
 
 /* Like target_read_memory, but report an error if can't read.  */

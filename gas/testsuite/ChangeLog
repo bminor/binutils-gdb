@@ -1,3 +1,25 @@
+2014-02-12  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/clflushopt-intel.d: New.
+	* gas/i386/clflushopt.d: Ditto.
+	* gas/i386/clflushopt.s: Ditto.
+	* gas/i386/i386.exp: Run new tests.
+	* gas/i386/x86-64-clflushopt-intel.d: New.
+	* gas/i386/x86-64-clflushopt.d: Ditto.
+	* gas/i386/x86-64-clflushopt.s: Ditto.
+	* gas/i386/x86-64-xsavec-intel.d: Ditto.
+	* gas/i386/x86-64-xsavec.d: Ditto.
+	* gas/i386/x86-64-xsavec.s: Ditto.
+	* gas/i386/x86-64-xsaves-intel.d: Ditto.
+	* gas/i386/x86-64-xsaves.d: Ditto.
+	* gas/i386/x86-64-xsaves.s: Ditto.
+	* gas/i386/xsavec-intel.d: Ditto.
+	* gas/i386/xsavec.d: Ditto.
+	* gas/i386/xsavec.s: Ditto.
+	* gas/i386/xsaves-intel.d: Ditto.
+	* gas/i386/xsaves.d: Ditto.
+	* gas/i386/xsaves.s: Ditto.
+
 2014-01-31  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	PR gas/16488

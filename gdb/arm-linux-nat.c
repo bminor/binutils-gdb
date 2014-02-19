@@ -636,7 +636,7 @@ arm_linux_read_description (struct target_ops *ops)
 
   if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)
     {
-      return NULL;
+      return ops->beneath->to_read_description (ops->beneath);
     }
 
   if (arm_hwcap & HWCAP_IWMMXT)
@@ -681,7 +681,7 @@ arm_linux_read_description (struct target_ops *ops)
       return result;
     }
 
-  return NULL;
+  return ops->beneath->to_read_description (ops->beneath);
 }
 
 /* Information describing the hardware breakpoint capabilities.  */
@@ -747,7 +747,8 @@ arm_linux_get_hw_watchpoint_count (void)
 /* Have we got a free break-/watch-point available for use?  Returns -1 if
    there is not an appropriate resource available, otherwise returns 1.  */
 static int
-arm_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
+arm_linux_can_use_hw_breakpoint (struct target_ops *self,
+				 int type, int cnt, int ot)
 {
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)
@@ -1036,7 +1037,8 @@ arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
 
 /* Insert a Hardware breakpoint.  */
 static int
-arm_linux_insert_hw_breakpoint (struct gdbarch *gdbarch, 
+arm_linux_insert_hw_breakpoint (struct target_ops *self,
+				struct gdbarch *gdbarch, 
 				struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;
@@ -1054,7 +1056,8 @@ arm_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
 
 /* Remove a hardware breakpoint.  */
 static int
-arm_linux_remove_hw_breakpoint (struct gdbarch *gdbarch, 
+arm_linux_remove_hw_breakpoint (struct target_ops *self,
+				struct gdbarch *gdbarch, 
 				struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;
@@ -1073,7 +1076,8 @@ arm_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
 /* Are we able to use a hardware watchpoint for the LEN bytes starting at 
    ADDR?  */
 static int
-arm_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+arm_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
+				       CORE_ADDR addr, int len)
 {
   const struct arm_linux_hwbp_cap *cap = arm_linux_get_hwbp_cap ();
   CORE_ADDR max_wp_length, aligned_addr;
@@ -1105,7 +1109,8 @@ arm_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 
 /* Insert a Hardware breakpoint.  */
 static int
-arm_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
+arm_linux_insert_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
@@ -1123,7 +1128,8 @@ arm_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 
 /* Remove a hardware breakpoint.  */
 static int
-arm_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
+arm_linux_remove_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
@@ -1171,10 +1177,10 @@ arm_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 
 /* Has the target been stopped by hitting a watchpoint?  */
 static int
-arm_linux_stopped_by_watchpoint (void)
+arm_linux_stopped_by_watchpoint (struct target_ops *ops)
 {
   CORE_ADDR addr;
-  return arm_linux_stopped_data_address (&current_target, &addr);
+  return arm_linux_stopped_data_address (ops, &addr);
 }
 
 static int

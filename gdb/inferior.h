@@ -125,9 +125,9 @@ extern int disable_randomization;
 
 extern void generic_mourn_inferior (void);
 
-extern void terminal_save_ours (void);
+extern void terminal_save_ours (struct target_ops *self);
 
-extern void terminal_ours (void);
+extern void terminal_ours (struct target_ops *self);
 
 extern CORE_ADDR unsigned_pointer_to_address (struct gdbarch *gdbarch,
 					      struct type *type,
@@ -170,15 +170,15 @@ extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct frame_info *frame,
 					  int regnum, int all);
 
-extern void child_terminal_info (const char *, int);
+extern void child_terminal_info (struct target_ops *self, const char *, int);
 
 extern void term_info (char *, int);
 
-extern void terminal_ours_for_output (void);
+extern void terminal_ours_for_output (struct target_ops *self);
 
-extern void terminal_inferior (void);
+extern void terminal_inferior (struct target_ops *self);
 
-extern void terminal_init_inferior (void);
+extern void terminal_init_inferior (struct target_ops *self);
 
 extern void terminal_init_inferior_with_pgrp (int pgrp);
 

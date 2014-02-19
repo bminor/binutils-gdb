@@ -118,7 +118,8 @@ spu_thread_architecture (struct target_ops *ops, ptid_t ptid)
 
 /* Override the to_region_ok_for_hw_watchpoint routine.  */
 static int
-spu_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+spu_region_ok_for_hw_watchpoint (struct target_ops *self,
+				 CORE_ADDR addr, int len)
 {
   struct target_ops *ops_beneath = find_target_beneath (&spu_ops);
   while (ops_beneath && !ops_beneath->to_region_ok_for_hw_watchpoint)
@@ -129,7 +130,8 @@ spu_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
     return 0;
 
   if (ops_beneath)
-    return ops_beneath->to_region_ok_for_hw_watchpoint (addr, len);
+    return ops_beneath->to_region_ok_for_hw_watchpoint (ops_beneath,
+							addr, len);
 
   return 0;
 }
@@ -245,10 +247,11 @@ spu_store_registers (struct target_ops *ops,
 }
 
 /* Override the to_xfer_partial routine.  */
-static LONGEST
+static enum target_xfer_status
 spu_xfer_partial (struct target_ops *ops, enum target_object object,
 		  const char *annex, gdb_byte *readbuf,
-		  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		  ULONGEST *xfered_len)
 {
   struct target_ops *ops_beneath = find_target_beneath (ops);
   while (ops_beneath && !ops_beneath->to_xfer_partial)
@@ -263,15 +266,15 @@ spu_xfer_partial (struct target_ops *ops, enum target_object object,
       char mem_annex[32], lslr_annex[32];
       gdb_byte buf[32];
       ULONGEST lslr;
-      LONGEST ret;
+      enum target_xfer_status ret;
 
       if (fd >= 0)
 	{
 	  xsnprintf (mem_annex, sizeof mem_annex, "%d/mem", fd);
 	  ret = ops_beneath->to_xfer_partial (ops_beneath, TARGET_OBJECT_SPU,
 					      mem_annex, readbuf, writebuf,
-					      addr, len);
-	  if (ret > 0)
+					      addr, len, xfered_len);
+	  if (ret == TARGET_XFER_OK)
 	    return ret;
 
 	  /* SPU local store access wraps the address around at the
@@ -282,18 +285,19 @@ spu_xfer_partial (struct target_ops *ops, enum target_object object,
 	  memset (buf, 0, sizeof buf);
 	  if (ops_beneath->to_xfer_partial (ops_beneath, TARGET_OBJECT_SPU,
 					    lslr_annex, buf, NULL,
-					    0, sizeof buf) <= 0)
+					    0, sizeof buf, xfered_len)
+	      != TARGET_XFER_OK)
 	    return ret;
 
 	  lslr = strtoulst ((char *) buf, NULL, 16);
 	  return ops_beneath->to_xfer_partial (ops_beneath, TARGET_OBJECT_SPU,
 					       mem_annex, readbuf, writebuf,
-					       addr & lslr, len);
+					       addr & lslr, len, xfered_len);
 	}
     }
 
   return ops_beneath->to_xfer_partial (ops_beneath, object, annex,
-				       readbuf, writebuf, offset, len);
+				       readbuf, writebuf, offset, len, xfered_len);
 }
 
 /* Override the to_search_memory routine.  */

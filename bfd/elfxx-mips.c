@@ -11919,18 +11919,6 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 	if ((*pm)->p_type == PT_DYNAMIC)
 	  break;
       m = *pm;
-      if (m != NULL && IRIX_COMPAT (abfd) == ict_none)
-	{
-	  /* For a normal mips executable the permissions for the PT_DYNAMIC
-	     segment are read, write and execute. We do that here since
-	     the code in elf.c sets only the read permission. This matters
-	     sometimes for the dynamic linker.  */
-	  if (bfd_get_section_by_name (abfd, ".dynamic") != NULL)
-	    {
-	      m->p_flags = PF_R | PF_W | PF_X;
-	      m->p_flags_valid = 1;
-	    }
-	}
       /* GNU/Linux binaries do not need the extended PT_DYNAMIC section.
 	 glibc's dynamic linker has traditionally derived the number of
 	 tags from the p_filesz field, and sometimes allocates stack

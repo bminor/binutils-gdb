@@ -1468,7 +1468,7 @@ read_and_display_attr_value (unsigned long attribute,
   unsigned char * orig_data = data;
   unsigned int bytes_read;
 
-  if (data == end)
+  if (data == end && form != DW_FORM_flag_present)
     {
       warn (_("corrupt attribute\n"));
       return data;

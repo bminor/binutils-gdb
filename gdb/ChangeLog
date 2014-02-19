@@ -1,3 +1,2645 @@
+2014-02-19  Pedro Alves  <palves@redhat.com>
+
+	* common/ptid.h (struct ptid): Mention that process_stratum
+	targets should prefer ptid.lwp.
+
+2014-02-19  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_thread_alive, write_ptid, read_ptid)
+	(read_ptid, remote_newthread_step, remote_threads_extra_info)
+	(remote_get_ada_task_ptid, append_resumption, remote_stop_ns)
+	(threadalive_test, remote_pid_to_str): Use the ptid.lwp field to
+	store remote thread ids rather than ptid.tid.
+	(_initialize_remote): Adjust.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (target_get_unwinder): Rewrite.
+	(target_get_tailcall_unwinder): Rewrite.
+	* record-btrace.c (record_btrace_to_get_unwinder): New function.
+	(record_btrace_to_get_tailcall_unwinder): New function.
+	(init_record_btrace_ops): Update.
+	* target.h (struct target_ops) <to_get_unwinder,
+	to_get_tailcall_unwinder>: Now function pointers.  Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* nto-procfs.c (procfs_remove_hw_breakpoint): Add 'self'
+	argument.
+	(init_procfs_ops): Correctly set to_remove_hw_breakpoint.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* record-btrace.c (record_btrace_decr_pc_after_break): Delegate
+	directly.
+	* target-delegates.c: Rebuild.
+	* target.h (struct target_ops) <to_decr_pc_after_break>: Use
+	TARGET_DEFAULT_FUNC.
+	* target.c (default_target_decr_pc_after_break): Rename from
+	forward_target_decr_pc_after_break.  Simplify.
+	(target_decr_pc_after_break): Rely on delegation.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (update_current_target): Do not INHERIT to_doc or
+	to_magic.  Do not de_fault to_open or to_close.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* gcore.h (objfile_find_memory_regions): Declare.
+	* gcore.c (objfile_find_memory_regions): No longer static.  Add
+	"self" argument.
+	(_initialize_gcore): Don't call exec_set_find_memory_regions.
+	* exec.c: Include gcore.h.
+	(exec_set_find_memory_regions): Remove.
+	(exec_find_memory_regions): Remove.
+	(exec_do_find_memory_regions): Remove.
+	(init_exec_ops): Update.
+	* defs.h (exec_set_find_memory_regions): Remove.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.h (struct target_ops) <to_extra_thread_info,
+	to_thread_name, to_pid_to_exec_file, to_get_section_table,
+	to_memory_map, to_read_description, to_traceframe_info>: Use NULL,
+	not 0, in TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (complete_target_initialization): Remove casts.  Use
+	return_zero_has_execution.
+	(return_zero): Add "ignore" argument.
+	(return_zero_has_execution): New function.
+	(init_dummy_target): Remove casts.  Use
+	return_zero_has_execution.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (update_current_target): Update comments.  Do not
+	INHERIT to_stratum.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* arm-linux-nat.c (arm_linux_read_description): Delegate when
+	needed.
+	* corelow.c (core_read_description): Delegate when needed.
+	* remote.c (remote_read_description): Delegate when needed.
+	* target-delegates.c: Rebuild.
+	* target.c (target_read_description): Rewrite.
+	* target.h (struct target_ops) <to_read_description>: Update
+	comment.  Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_can_run.
+	(find_default_run_target): Check against delegate_can_run.
+	* target.h (struct target_ops) <to_can_run>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_disconnect): Unconditionally delegate.
+	* target.h (struct target_ops) <to_disconnect>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* record.c (record_stop): Unconditionally delegate.
+	* target-delegates.c: Rebuild.
+	* target.c (target_stop_recording): Unconditionally delegate.
+	* target.h (struct target_ops) <to_stop_recording>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_enable_btrace): Unconditionally delegate.
+	* target.h (struct target_ops) <to_enable_btrace>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_read_btrace): Unconditionally delegate.
+	* target.h (struct target_ops) <to_read_btrace>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_teardown_btrace): Unconditionally delegate.
+	* target.h (struct target_ops) <to_teardown_btrace>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_disable_btrace): Unconditionally delegate.
+	* target.h (struct target_ops) <to_disable_btrace>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (default_search_memory): New function.
+	(simple_search_memory): Update comment.
+	(target_search_memory): Unconditionally delegate.
+	* target.h (struct target_ops) <to_search_memory>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* auxv.c (default_auxv_parse): No longer static.
+	(target_auxv_parse): Unconditionally delegate.
+	* auxv.h (default_auxv_parse): Declare.
+	* target-delegates.c: Rebuild.
+	* target.c: Include auxv.h.
+	* target.h (struct target_ops) <to_auxv_parse>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_memory_map): Unconditionally delegate.
+	* target.h (struct target_ops) <to_memory_map>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_thread_alive): Unconditionally delegate.
+	* target.h (struct target_ops) <to_thread_alive>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_save_record): Unconditionally delegate.
+	* target.h (struct target_ops) <to_save_record>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_delete_record): Unconditionally delegate.
+	* target.h (struct target_ops) <to_delete_record>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_record_is_replaying): Unconditionally
+	delegate.
+	* target.h (struct target_ops) <to_record_is_replaying>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_goto_record_begin): Unconditionally delegate.
+	* target.h (struct target_ops) <to_goto_record_begin>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_goto_record_end): Unconditionally delegate.
+	* target.h (struct target_ops) <to_goto_record_end>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_goto_record): Unconditionally delegate.
+	* target.h (struct target_ops) <to_goto_record>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_insn_history): Unconditionally delegate.
+	* target.h (struct target_ops) <to_insn_history>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_insn_history_from): Unconditionally delegate.
+	* target.h (struct target_ops) <to_insn_history_from>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_insn_history_range): Unconditionally delegate.
+	* target.h (struct target_ops) <to_insn_history_range>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_call_history): Unconditionally delegate.
+	* target.h (struct target_ops) <to_call_history>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_call_history_from): Unconditionally delegate.
+	* target.h (struct target_ops) <to_call_history_from>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_call_history_range): Unconditionally delegate.
+	* target.h (struct target_ops) <to_call_history_range>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_verify_memory): Unconditionally delegate.
+	* target.h (struct target_ops) <to_verify_memory>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_core_of_thread): Unconditionally delegate.
+	* target.h (struct target_ops) <to_core_of_thread>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_flash_done): Unconditionally delegate.
+	* target.h (struct target_ops) <to_flash_done>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_flash_erase): Unconditionally delegate.
+	* target.h (struct target_ops) <to_flash_erase>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_get_section_table): Unconditionally delegate.
+	* target.h (struct target_ops) <to_get_section_table>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_pid_to_str): Unconditionally delegate.
+	(init_dummy_target): Don't initialize to_pid_to_str.
+	(default_pid_to_str): Rename from dummy_pid_to_str.
+	* target.h (struct target_ops) <to_pid_to_str>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_find_new_threads): Unconditionally delegate.
+	* target.h (struct target_ops) <to_find_new_threads>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_program_signals): Unconditionally delegate.
+	* target.h (struct target_ops) <to_program_signals>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_pass_signals): Unconditionally delegate.
+	* target.h (struct target_ops) <to_pass_signals>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (default_mourn_inferior): New function.
+	(target_mourn_inferior): Unconditionally delegate.
+	* target.h (struct target_ops) <to_mourn_inferior>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (default_follow_fork): New function.
+	(target_follow_fork): Unconditionally delegate.
+	* target.h (struct target_ops) <to_follow_fork>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_kill): Unconditionally delegate.
+	* target.h (struct target_ops) <to_kill>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_masked_watch_num_registers): Unconditionally
+	delegate.
+	* target.h (struct target_ops) <to_masked_watch_num_registers>:
+	Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_remove_mask_watchpoint): Unconditionally
+	delegate.
+	* target.h (struct target_ops) <to_remove_mask_watchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_insert_mask_watchpoint): Unconditionally
+	delegate.
+	* target.h (struct target_ops) <to_insert_mask_watchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_ranged_break_num_registers): Unconditionally
+	delegate.
+	* target.h (struct target_ops) <to_ranged_break_num_registers>:
+	Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_fetch_registers): Unconditionally delegate.
+	* target.h (struct target_ops) <to_fetch_registers>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_stop.
+	* target.h (struct target_ops) <to_stop>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_can_run_breakpoint_commands.
+	* target.h (struct target_ops) <to_can_run_breakpoint_commands>:
+	Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_supports_evaluation_of_breakpoint_conditions.
+	* target.h (struct target_ops)
+	<to_supports_evaluation_of_breakpoint_conditions>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_augmented_libraries_svr4_read.
+	* target.h (struct target_ops) <to_augmented_libraries_svr4_read>:
+	Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_can_use_agent.
+	* target.h (struct target_ops) <to_can_use_agent>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_use_agent.
+	* target.h (struct target_ops) <to_use_agent>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_traceframe_info.
+	(return_null): Remove.
+	* target.h (struct target_ops) <to_traceframe_info>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_static_tracepoint_markers_by_strid.
+	* target.h (struct target_ops)
+	<to_static_tracepoint_markers_by_strid>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_static_tracepoint_marker_at.
+	* target.h (struct target_ops) <to_static_tracepoint_marker_at>:
+	Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_set_permissions.
+	* target.h (struct target_ops) <to_set_permissions>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_get_tib_address.
+	* target.h (struct target_ops) <to_get_tib_address>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_set_trace_notes.
+	* target.h (struct target_ops) <to_set_trace_notes>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't initialize
+	to_set_trace_buffer_size.
+	* target.h (struct target_ops) <to_set_trace_buffer_size>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_set_circular_trace_buffer.
+	* target.h (struct target_ops) <to_set_circular_trace_buffer>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_set_disconnected_tracing.
+	* target.h (struct target_ops) <to_set_disconnected_tracing>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_get_min_fast_tracepoint_insn_len.
+	(return_minus_one): Remove.
+	* target.h (struct target_ops)
+	<to_get_min_fast_tracepoint_insn_len>: Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_get_raw_trace_data.
+	* target.h (struct target_ops) <to_get_raw_trace_data>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_upload_trace_state_variables.
+	* target.h (struct target_ops) <to_upload_trace_state_variables>:
+	Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_upload_tracepoints.
+	* target.h (struct target_ops) <to_upload_tracepoints>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_save_trace_data.
+	* target.h (struct target_ops) <to_save_trace_data>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_get_trace_state_variable_value.
+	* target.h (struct target_ops)
+	<to_get_trace_state_variable_value>: Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_trace_find.
+	* target.h (struct target_ops): Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_trace_stop.
+	* target.h (struct target_ops) <to_trace_stop>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_get_tracepoint_status.
+	* target.h (struct target_ops) <to_get_tracepoint_status>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_get_trace_status.
+	* target.h (struct target_ops) <to_get_trace_status>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_trace_start.
+	* target.h (struct target_ops) <to_trace_start>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_trace_set_readonly_regions.
+	* target.h (struct target_ops) <to_trace_set_readonly_regions>:
+	Use TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_disable_tracepoint.
+	* target.h (struct target_ops) <to_disable_tracepoint>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_enable_tracepoint.
+	* target.h (struct target_ops) <to_enable_tracepoint>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_download_trace_state_variable.
+	* target.h (struct target_ops) <to_download_trace_state_variable>:
+	Use TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_can_download_tracepoint.
+	* target.h (struct target_ops) <to_can_download_tracepoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_download_tracepoint.
+	* target.h (struct target_ops) <to_download_tracepoint>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_trace_init.
+	* target.h (struct target_ops) <to_trace_init>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_supports_string_tracing.
+	* target.h (struct target_ops) <to_supports_string_tracing>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_supports_enable_disable_tracepoint.
+	* target.h (struct target_ops)
+	<to_supports_enable_disable_tracepoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_supports_multi_process.
+	* target.h (struct target_ops) <to_supports_multi_process>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_get_ada_task_ptid.
+	* target.h (struct target_ops) <to_get_ada_task_ptid>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_thread_architecture.
+	* target.h (struct target_ops) <to_thread_architecture>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_execution_direction.
+	* target.h (struct target_ops) <to_execution_direction>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_can_execute_reverse.
+	* target.h (struct target_ops) <to_can_execute_reverse>: Use
+	TARGET_DEFAULT_RETURN.
+	(target_can_execute_reverse): Unconditionally delegate.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_goto_bookmark.
+	(dummy_goto_bookmark): Remove.
+	(init_dummy_target): Don't inherit or default to_goto_bookmark.
+	* target.h (struct target_ops) <to_goto_bookmark>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_get_bookmark.
+	(dummy_get_bookmark): Remove.
+	(init_dummy_target): Don't inherit or default to_get_bookmark.
+	* target.h (struct target_ops) <to_get_bookmark>: Use
+	TARGET_DEFAULT_NORETURN
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_make_corefile_notes.
+	(init_dummy_target): Don't initialize to_make_corefile_notes.
+	* target.h (struct target_ops) <to_make_corefile_notes>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_find_memory_regions.
+	(init_dummy_target): Don't initialize to_find_memory_regions.
+	* target.h (struct target_ops) <to_find_memory_regions>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_log_command.
+	* target.h (struct target_ops) <to_log_command>: Use
+	TARGET_DEFAULT_IGNORE.
+	(target_log_command): Unconditionally delegate.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_pid_to_exec_file.
+	* target.h (struct target_ops) <to_pid_to_exec_file>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_thread_name.
+	(target_thread_name): Unconditionally delegate.
+	* target.h (struct target_ops) <to_thread_name>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_extra_thread_info.
+	* target.h (struct target_ops) <to_extra_thread_info>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_has_exited.
+	* target.h (struct target_ops) <to_has_exited>: Use
+	TARGET_DEFAULT_RETURN..
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_set_syscall_catchpoint.
+	(return_one): Remove.
+	* target.h (struct target_ops) <to_set_syscall_catchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_insert_exec_catchpoint.
+	* target.h (struct target_ops) <to_insert_exec_catchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-01-08  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_insert_exec_catchpoint.
+	* target.h (struct target_ops) <to_insert_exec_catchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_remove_vfork_catchpoint.
+	* target.h (struct target_ops) <to_remove_vfork_catchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_insert_vfork_catchpoint.
+	* target.h (struct target_ops) <to_insert_vfork_catchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_remove_fork_catchpoint.
+	* target.h (struct target_ops) <to_remove_fork_catchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_insert_fork_catchpoint.
+	* target.h (struct target_ops) <to_insert_fork_catchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_post_startup_inferior.
+	* target.h (struct target_ops) <to_post_startup_inferior>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_load.
+	* target.h (struct target_ops) <to_load>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_terminal_info.
+	* target.h (struct target_ops) <to_terminal_info>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_terminal_save_ours.
+	* target.h (struct target_ops) <to_terminal_save_ours>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_terminal_ours.
+	* target.h (struct target_ops) <to_terminal_ours>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_terminal_ours_for_output.
+	* target.h (struct target_ops) <to_terminal_ours_for_output>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_terminal_inferior.
+	* target.h (struct target_ops) <to_terminal_inferior>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_terminal_init.
+	* target.h (struct target_ops) <to_terminal_init>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_can_accel_watchpoint_condition.
+	* target.h (struct target_ops)
+	<to_can_accel_watchpoint_condition>: Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_region_ok_for_hw_watchpoint.
+	* target.h (struct target_ops) <to_region_ok_for_hw_watchpoint>:
+	Use TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_watchpoint_addr_within_range.
+	* target.h (struct target_ops) <to_watchpoint_addr_within_range>:
+	Use TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_remove_watchpoint.
+	* target.h (struct target_ops) <to_remove_watchpoint>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_insert_watchpoint.
+	* target.h (struct target_ops) <to_insert_watchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_remove_hw_breakpoint.
+	* target.h (struct target_ops) <to_remove_hw_breakpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_insert_hw_breakpoint.
+	* target.h (struct target_ops) <to_insert_hw_breakpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_can_use_hw_breakpoint.
+	* target.h (struct target_ops) <to_can_use_hw_breakpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_files_info.
+	* target.h (struct target_ops) <to_files_info>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_store.
+	* target.h (struct target_ops) <to_store>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_post_attach.
+	* target.h (struct target_ops) <to_post_attach>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_rcmd.
+	(default_rcmd): New function.
+	(do_monitor_command): Unconditionally delegate.
+	* target.h (struct target_ops) <to_rmcd>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (init_dummy_target): Don't initialize to_attach.
+	(target_attach): Unconditionally delegate.
+	* target.h (struct target_ops) <to_attach>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (target_detach): Unconditionally delegate.
+	(init_dummy_target): Don't initialize to_detach.
+	* target.h (struct target_ops) <to_detach>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_augmented_libraries_svr4_read>:
+	Add argument.
+	(target_augmented_libraries_svr4_read): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_augmented_libraries_svr4_read): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_call_history_range>: Add
+	argument.
+	* target.c (target_call_history_range): Add argument.
+	* record-btrace.c (record_btrace_call_history_range): Add 'self'
+	argument.
+	(record_btrace_call_history_from): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_call_history_from>: Add
+	argument.
+	* target.c (target_call_history_from): Add argument.
+	* record-btrace.c (record_btrace_call_history_from): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_call_history>: Add argument.
+	* target.c (target_call_history): Add argument.
+	* record-btrace.c (record_btrace_call_history): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_insn_history_range>: Add
+	argument.
+	* target.c (target_insn_history_range): Add argument.
+	* record-btrace.c (record_btrace_insn_history_range): Add 'self'
+	argument.
+	(record_btrace_insn_history_from): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_insn_history_from>: Add
+	argument.
+	* target.c (target_insn_history_from): Add argument.
+	* record-btrace.c (record_btrace_insn_history_from): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_insn_history>: Add argument.
+	* target.c (target_insn_history): Add argument.
+	* record-btrace.c (record_btrace_insn_history): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_goto_record>: Add argument.
+	* target.c (target_goto_record): Add argument.
+	* record-full.c (record_full_goto): Add 'self' argument.
+	* record-btrace.c (record_btrace_goto): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_goto_record_end>: Add argument.
+	* target.c (target_goto_record_end): Add argument.
+	* record-full.c (record_full_goto_end): Add 'self' argument.
+	* record-btrace.c (record_btrace_goto_end): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_goto_record_begin>: Add
+	argument.
+	* target.c (target_goto_record_begin): Add argument.
+	* record-full.c (record_full_goto_begin): Add 'self' argument.
+	* record-btrace.c (record_btrace_goto_begin): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_record_is_replaying>: Add
+	argument.
+	* target.c (target_record_is_replaying): Add argument.
+	* record-full.c (record_full_is_replaying): Add 'self' argument.
+	* record-btrace.c (record_btrace_is_replaying): Add 'self'
+	argument.
+	(record_btrace_xfer_partial, record_btrace_store_registers)
+	(record_btrace_prepare_to_store, record_btrace_resume)
+	(record_btrace_wait, record_btrace_decr_pc_after_break)
+	(record_btrace_find_new_threads, record_btrace_thread_alive):
+	Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_delete_record>: Add argument.
+	* target.c (target_delete_record): Add argument.
+	* record-full.c (record_full_delete): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_save_record>: Add argument.
+	* target.c (target_save_record): Add argument.
+	* record-full.c (record_full_save): Add 'self' argument.
+	(record_full_save): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_info_record>: Add argument.
+	* target.c (target_info_record): Add argument.
+	* record.c (info_record_command): Add argument.
+	* record-full.c (record_full_info): Add 'self' argument.
+	* record-btrace.c (record_btrace_info): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_stop_recording>: Add argument.
+	* target.c (target_stop_recording): Add argument.
+	* record.c (record_stop): Add argument.
+	* record-btrace.c (record_btrace_stop_recording): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_read_btrace>: Add argument.
+	* target.c (struct target_ops) <to_read_btrace>: Add argument.
+	* remote.c (struct target_ops) <to_read_btrace>: Add 'self'
+	argument.
+	* amd64-linux-nat.c (amd64_linux_read_btrace): New function.
+	(_initialize_amd64_linux_nat): Use it.
+	* i386-linux-nat.c (i386_linux_read_btrace): New function.
+	(_initialize_i386_linux_nat): Use it.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_teardown_btrace>: Add argument.
+	* target.c (target_teardown_btrace): Add argument.
+	* remote.c (remote_teardown_btrace): Add 'self' argument.
+	* i386-linux-nat.c (i386_linux_teardown_btrace): Add 'self'
+	argument.
+	* amd64-linux-nat.c (amd64_linux_teardown_btrace): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_disable_btrace>: Add argument.
+	* target.c (target_disable_btrace): Add argument.
+	* remote.c (remote_disable_btrace): Add 'self' argument.
+	* i386-linux-nat.c (i386_linux_disable_btrace): Add 'self'
+	argument.
+	* amd64-linux-nat.c (amd64_linux_disable_btrace): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_enable_btrace>: Add argument.
+	* target.c (target_enable_btrace): Add argument.
+	* remote.c (remote_enable_btrace): Add 'self' argument.
+	* i386-linux-nat.c (i386_linux_enable_btrace): Add 'self'
+	argument.
+	* amd64-linux-nat.c (amd64_linux_enable_btrace): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_can_use_agent>: Add argument.
+	(target_can_use_agent): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_can_use_agent): Add 'self' argument.
+	* inf-child.c (inf_child_can_use_agent): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_use_agent>: Add argument.
+	(target_use_agent): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_use_agent): Add 'self' argument.
+	* inf-child.c (inf_child_use_agent): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (tfile_traceframe_info): Add 'self' argument.
+	* target.h (struct target_ops) <to_traceframe_info>: Add argument.
+	(target_traceframe_info): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_traceframe_info): Add 'self' argument.
+	* ctf.c (ctf_traceframe_info): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (target_static_tracepoint_markers_by_strid): Add
+	argument.
+	(struct target_ops) <to_static_tracepoint_markers_by_strid>: Add
+	'self' argument.
+	* target.c (update_current_target): Update.
+	* remote.c (struct target_ops)
+	<to_static_tracepoint_markers_by_strid>: Add 'self' argument.
+	* linux-nat.c (struct target_ops)
+	<to_static_tracepoint_markers_by_strid>: Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_static_tracepoint_marker_at>:
+	Add argument.
+	(target_static_tracepoint_marker_at): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_static_tracepoint_marker_at): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_set_permissions>: Add argument.
+	(target_set_permissions): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_set_permissions): Add 'self' argument.
+	(remote_start_remote): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* windows-nat.c (windows_get_tib_address): Add 'self' argument.
+	* target.h (struct target_ops) <to_get_tib_address>: Add argument.
+	(target_get_tib_address): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_tib_address): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_set_trace_notes>: Add argument.
+	(target_set_trace_notes): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_set_trace_notes): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_set_trace_buffer_size>: Add
+	argument.
+	(target_set_trace_buffer_size): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_set_trace_buffer_size): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_set_circular_trace_buffer>: Add
+	argument.
+	(target_set_circular_trace_buffer): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_set_circular_trace_buffer): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_set_disconnected_tracing>: Add
+	argument.
+	(target_set_disconnected_tracing): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_set_disconnected_tracing): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops)
+	<to_get_min_fast_tracepoint_insn_len>: Add argument.
+	(target_get_min_fast_tracepoint_insn_len): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_min_fast_tracepoint_insn_len): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_get_raw_trace_data>: Add
+	argument.
+	(target_get_raw_trace_data): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_raw_trace_data): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_upload_trace_state_variables>:
+	Add argument.
+	(target_upload_trace_state_variables): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_upload_trace_state_variables): Add 'self'
+	argument.
+	(remote_start_remote): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_upload_tracepoints>: Add
+	argument.
+	(target_upload_tracepoints): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_upload_tracepoints): Add 'self' argument.
+	(remote_start_remote): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_save_trace_data>: Add argument.
+	(target_save_trace_data): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_save_trace_data): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (tfile_get_trace_state_variable_value): Add 'self'
+	argument.
+	* target.h (struct target_ops)
+	<to_get_trace_state_variable_value>: Add argument.
+	(target_get_trace_state_variable_value): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_trace_state_variable_value): Add 'self'
+	argument.
+	* ctf.c (ctf_get_trace_state_variable_value): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (tfile_trace_find): Add 'self' argument.
+	* target.h (struct target_ops) <to_trace_find>: Add argument.
+	(target_trace_find): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_trace_find): Add 'self' argument.
+	* ctf.c (ctf_trace_find): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_trace_stop>: Add argument.
+	(target_trace_stop): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_trace_stop): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (tfile_get_tracepoint_status): Add 'self' argument.
+	* target.h (struct target_ops) <to_get_tracepoint_status>: Add
+	argument.
+	(target_get_tracepoint_status): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_tracepoint_status): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (tfile_get_trace_status): Add 'self' argument.
+	* target.h (struct target_ops) <to_get_trace_status>: Add
+	argument.
+	(target_get_trace_status): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_trace_status): Add 'self' argument.
+	(remote_start_remote, remote_can_download_tracepoint): Update.
+	* ctf.c (ctf_get_trace_status): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_trace_start>: Add argument.
+	(target_trace_start): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_trace_start): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_trace_set_readonly_regions>:
+	Add argument.
+	(target_trace_set_readonly_regions): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_trace_set_readonly_regions): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_disable_tracepoint>: Add
+	argument.
+	(target_disable_tracepoint): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_disable_tracepoint): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_enable_tracepoint>: Add
+	argument.
+	(target_enable_tracepoint): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_enable_tracepoint): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_download_trace_state_variable>:
+	Add argument.
+	(target_download_trace_state_variable): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_download_trace_state_variable): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_can_download_tracepoint>: Add
+	argument.
+	(target_can_download_tracepoint): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_can_download_tracepoint): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_download_tracepoint>: Add
+	argument.
+	(target_download_tracepoint): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_download_tracepoint): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_trace_init>: Add argument.
+	(target_trace_init): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_trace_init): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_readlink>: Add argument.
+	* target.c (target_fileio_readlink): Add argument.
+	* remote.c (remote_hostio_readlink): Add 'self' argument.
+	* inf-child.c (inf_child_fileio_readlink): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_unlink>: Add argument.
+	* target.c (target_fileio_unlink): Add argument.
+	* remote.c (remote_hostio_unlink): Add 'self' argument.
+	(remote_file_delete): Update.
+	* inf-child.c (inf_child_fileio_unlink): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_close>: Add argument.
+	* target.c (target_fileio_close): Add argument.
+	* remote.c (remote_hostio_close): Add 'self' argument.
+	(remote_hostio_close_cleanup): Update.
+	(remote_bfd_iovec_close, remote_file_put, remote_file_get):
+	Update.
+	* inf-child.c (inf_child_fileio_close): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_pread>: Add argument.
+	* target.c (target_fileio_pread): Add argument.
+	* remote.c (remote_hostio_pread): Add 'self' argument.
+	(remote_bfd_iovec_pread, remote_file_get): Update.
+	* inf-child.c (inf_child_fileio_pread): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_pwrite>: Add argument.
+	* target.c (target_fileio_pwrite): Add argument.
+	* remote.c (remote_hostio_pwrite): Add 'self' argument.
+	(remote_file_put): Update.
+	* inf-child.c (inf_child_fileio_pwrite): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_open>: Add argument.
+	* target.c (target_fileio_open): Add argument.
+	* remote.c (remote_hostio_open): Add 'self' argument.
+	(remote_bfd_iovec_open): Add 'self' argument.
+	(remote_file_put): Add 'self' argument.
+	(remote_file_get): Add 'self' argument.
+	* inf-child.c (inf_child_fileio_open): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_can_run_breakpoint_commands>:
+	Add argument.
+	(target_can_run_breakpoint_commands): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_can_run_breakpoint_commands): Add 'self'
+	argument.
+	(remote_insert_breakpoint): Add 'self' argument.
+	(remote_insert_hw_breakpoint): Add 'self' argument.
+	(remote_can_run_breakpoint_commands): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops)
+	<to_supports_evaluation_of_breakpoint_conditions>: Add argument.
+	(target_supports_evaluation_of_breakpoint_conditions): Add
+	argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_supports_cond_breakpoints): Add 'self'
+	argument.
+	(remote_insert_breakpoint): Add 'self' argument.
+	(remote_insert_hw_breakpoint): Add 'self' argument.
+	(remote_supports_cond_breakpoints): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_supports_string_tracing>: Add
+	argument.
+	(target_supports_string_tracing): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_supports_string_tracing): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops)
+	<to_supports_disable_randomization>: Add argument.
+	* target.c (find_default_supports_disable_randomization): Add
+	argument.
+	(target_supports_disable_randomization): Add argument.
+	(find_default_supports_disable_randomization): Add 'self'
+	argument.
+	* remote.c (extended_remote_supports_disable_randomization): Add
+	'self' argument.
+	(remote_supports_disable_randomization): Add 'self' argument.
+	(extended_remote_create_inferior): Update.
+	* linux-nat.c (linux_nat_supports_disable_randomization): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops)
+	<to_supports_enable_disable_tracepoint>: Add argument.
+	(target_supports_enable_disable_tracepoint): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_supports_enable_disable_tracepoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_supports_multi_process>: Add
+	argument.
+	(target_supports_multi_process): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_supports_multi_process): Add 'self' argument.
+	* linux-nat.c (linux_nat_supports_multi_process): Add 'self'
+	argument.
+	* darwin-nat.c (darwin_supports_multi_process): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_execution_direction>: Add
+	argument.
+	(target_execution_direction): Add argument.
+	* target.c (default_execution_direction): Add 'self' argument.
+	* record-full.c (record_full_execution_direction): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_can_execute_reverse>: Add
+	argument.
+	(target_can_execute_reverse): Add argument.
+	* remote.c (remote_can_execute_reverse): Add 'self' argument.
+	* record-full.c (record_full_can_execute_reverse): Add 'self'
+	argument.
+	* record-btrace.c (record_btrace_can_execute_reverse): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* windows-nat.c (windows_get_ada_task_ptid): Add 'self' argument.
+	* target.h (struct target_ops) <to_get_ada_task_ptid>: Add
+	argument.
+	(target_get_ada_task_ptid): Add argument.
+	* target.c (update_current_target): Update.
+	(default_get_ada_task_ptid): Add 'self' argument.
+	* sol-thread.c (sol_get_ada_task_ptid): Add 'self' argument.
+	* remote.c (remote_get_ada_task_ptid): Add 'self' argument.
+	* ravenscar-thread.c (ravenscar_get_ada_task_ptid): Add 'self'
+	argument.
+	* linux-thread-db.c (thread_db_get_ada_task_ptid): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_get_ada_task_ptid): Add 'self'
+	argument.
+	* dec-thread.c (dec_thread_get_ada_task_ptid): Add 'self'
+	argument.
+	* darwin-nat.c (darwin_get_ada_task_ptid): Add 'self' argument.
+	* aix-thread.c (aix_thread_get_ada_task_ptid): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_goto_bookmark>: Add argument.
+	(target_goto_bookmark): Add argument.
+	* target.c (dummy_goto_bookmark): Add 'self' argument.
+	* record-full.c (record_full_goto_bookmark): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_get_bookmark>: Add argument.
+	(target_get_bookmark): Add argument.
+	* target.c (dummy_get_bookmark): Add 'self' argument.
+	* record-full.c (record_full_get_bookmark): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_make_corefile_notes>: Add
+	argument.
+	(target_make_corefile_notes): Add argument.
+	* target.c (dummy_make_corefile_notes): Add 'self' argument.
+	* procfs.c (procfs_make_note_section): Add 'self' argument.
+	(procfs_make_note_section): Add 'self' argument.
+	(procfs_make_note_section): Add 'self' argument.
+	* linux-nat.c (linux_nat_make_corefile_notes): Add 'self'
+	argument.
+	* fbsd-nat.h (fbsd_make_corefile_notes): Add 'self' argument.
+	* fbsd-nat.c (fbsd_make_corefile_notes): Add 'self' argument.
+	* exec.c (exec_make_note_section): Add 'self' argument.
+	(exec_make_note_section): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_find_memory_regions>: Add
+	argument.
+	(target_find_memory_regions): Add argument.
+	* target.c (dummy_find_memory_regions): Add 'self' argument.
+	* procfs.c (proc_find_memory_regions): Add 'self' argument.
+	* gnu-nat.c (gnu_find_memory_regions): Add 'self' argument.
+	* fbsd-nat.h (fbsd_find_memory_regions): Add 'self' argument.
+	* fbsd-nat.c (fbsd_find_memory_regions): Add 'self' argument.
+	* exec. (exec_do_find_memory_regions): New global.
+	(exec_set_find_memory_regions): Rewrite.
+	(exec_find_memory_regions): New function.
+	(init_exec_ops): Use exec_find_memory_regions.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_supports_non_stop>: Add
+	argument.
+	* target.c (find_default_supports_non_stop): Add argument.
+	(target_supports_non_stop): Add argument.
+	(find_default_supports_non_stop): Add 'self' argument.
+	* remote.c (remote_supports_non_stop): Add 'self' argument.
+	* linux-nat.c (linux_nat_supports_non_stop): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_log_command>: Add argument.
+	(target_log_command): Add argument.
+	* serial.h (serial_log_command): Add 'self' argument.
+	* serial.c (serial_log_command): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* windows-nat.c (windows_pid_to_exec_file): Add 'self' argument.
+	* target.h (struct target_ops) <to_pid_to_exec_file>: Add
+	argument.
+	(target_pid_to_exec_file): Add argument.
+	* target.c (debug_to_pid_to_exec_file): Add argument.
+	(update_current_target): Update.
+	* nbsd-nat.h (nbsd_pid_to_exec_file): Add 'self' argument.
+	* nbsd-nat.c (nbsd_pid_to_exec_file): Add 'self' argument.
+	* linux-nat.c (linux_child_pid_to_exec_file): Add 'self' argument.
+	(linux_handle_extended_wait): Update.
+	* inf-child.c (inf_child_pid_to_exec_file): Add 'self' argument.
+	* fbsd-nat.h (fbsd_pid_to_exec_file): Add 'self' argument.
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Add 'self' argument.
+	* darwin-nat.c (darwin_pid_to_exec_file): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_rcmd>: Add argument.
+	(target_rcmd): Add argument.
+	* target.c (debug_to_rcmd): Add argument.
+	(update_current_target, do_monitor_command): Update.
+	* remote.c (remote_rcmd): Add 'self' argument.
+	* monitor.c (monitor_rcmd): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* windows-nat.c (windows_stop): Add 'self' argument.
+	* target.h (struct target_ops) <to_stop>: Add argument.
+	* target.c (target_stop): Add argument.
+	(debug_to_stop): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_stop): Add 'self' argument.
+	* remote-sim.c (gdbsim_stop): Add 'self' argument.
+	(gdbsim_cntrl_c): Update.
+	* remote-m32r-sdi.c (m32r_stop): Add 'self' argument.
+	* procfs.c (procfs_stop): Add 'self' argument.
+	* nto-procfs.c (procfs_stop): Add 'self' argument.
+	* monitor.c (monitor_stop): Add 'self' argument.
+	(monitor_open): Update.
+	* linux-nat.c (linux_nat_stop): Add argument.
+	* inf-ptrace.c (inf_ptrace_stop): Add 'self' argument.
+	* gnu-nat.c (gnu_stop): Add 'self' argument.
+	* darwin-nat.c (darwin_stop): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_thread_name>: Add argument.
+	* target.c (target_thread_name): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_nat_thread_name): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_extra_thread_info>: Add
+	argument.
+	(target_extra_thread_info): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_threads_extra_info): Add 'self' argument.
+	* ravenscar-thread.c (ravenscar_extra_thread_info): Add 'self'
+	argument.
+	* nto-tdep.h (nto_extra_thread_info): Add 'self' argument.
+	* nto-tdep.c (nto_extra_thread_info): Add 'self' argument.
+	* linux-thread-db.c (thread_db_extra_thread_info): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_extra_thread_info): Add 'self'
+	argument.
+	* bsd-uthread.c (bsd_uthread_extra_thread_info): Add 'self'
+	argument.
+	* aix-thread.c (aix_thread_extra_thread_info): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_program_signals>: Add argument.
+	* target.c (target_program_signals): Add argument.
+	* remote.c (remote_program_signals): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_pass_signals>: Add argument.
+	* target.c (target_pass_signals): Add argument.
+	* remote.c (remote_pass_signals): Add 'self' argument.
+	(remote_start_remote): Update.
+	* procfs.c (procfs_pass_signals): Add 'self' argument.
+	* nto-procfs.c (procfs_pass_signals): Add 'self' argument.
+	* linux-nat.c (linux_nat_pass_signals): Add 'self' argument.
+	(linux_nat_create_inferior, linux_nat_attach): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* windows-nat.c (windows_can_run): Add 'self' argument.
+	* target.h (struct target_ops) <to_can_run>: Add argument.
+	(target_can_run): Add argument.
+	* target.c (debug_to_can_run): Add argument.
+	(update_current_target): Update.
+	* nto-procfs.c (procfs_can_run): Add 'self' argument.
+	* inf-child.c (inf_child_can_run): Add 'self' argument.
+	* go32-nat.c (go32_can_run): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_has_exited>: Add argument.
+	(target_has_exited): Add argument.
+	* target.c (debug_to_has_exited): Add argument.
+	(update_current_target): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_set_syscall_catchpoint>: Add
+	argument.
+	(target_set_syscall_catchpoint): Add argument.
+	* linux-nat.c (linux_child_set_syscall_catchpoint): Add 'self'
+	argument.
+	* target.c (update_current_target): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_remove_exec_catchpoint>: Add
+	argument.
+	(target_remove_exec_catchpoint): Add argument.
+	* target.c (debug_to_remove_exec_catchpoint): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_child_remove_exec_catchpoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_insert_exec_catchpoint>: Add
+	argument.
+	(target_insert_exec_catchpoint): Add argument.
+	* target.c (debug_to_insert_exec_catchpoint): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_child_insert_exec_catchpoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_remove_vfork_catchpoint>: Add
+	argument.
+	(target_remove_vfork_catchpoint): Add argument.
+	* target.c (debug_to_remove_vfork_catchpoint): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_child_remove_vfork_catchpoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_insert_vfork_catchpoint>: Add
+	argument.
+	(target_insert_vfork_catchpoint): Add argument.
+	* target.c (debug_to_insert_vfork_catchpoint): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_child_insert_vfork_catchpoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_remove_fork_catchpoint>: Add
+	argument.
+	(target_remove_fork_catchpoint): Add argument.
+	* target.c (debug_to_remove_fork_catchpoint): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_child_remove_fork_catchpoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_insert_fork_catchpoint>: Add
+	argument.
+	(target_insert_fork_catchpoint): Add argument.
+	* target.c (debug_to_insert_fork_catchpoint): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_child_insert_fork_catchpoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_post_startup_inferior>: Add
+	argument.
+	(target_post_startup_inferior): Add argument.
+	* target.c (debug_to_post_startup_inferior): Add argument.
+	(update_current_target): Update.
+	* spu-linux-nat.c (spu_child_post_startup_inferior): Add 'self'
+	argument.
+	* linux-nat.c (linux_child_post_startup_inferior): Add 'self'
+	argument.
+	* inf-ptrace.c (inf_ptrace_post_startup_inferior): Add 'self'
+	argument.
+	* inf-child.c (inf_child_post_startup_inferior): Add 'self'
+	argument.
+	* i386-linux-nat.c (i386_linux_child_post_startup_inferior): Add
+	'self' argument.
+	(super_post_startup_inferior): Likewise.
+	* amd64-linux-nat.c (amd64_linux_child_post_startup_inferior): Add
+	'self' argument.
+	(super_post_startup_inferior): Likewise.
+	* aarch64-linux-nat.c (aarch64_linux_child_post_startup_inferior):
+	Add 'self' argument.
+	(super_post_startup_inferior): Likewise.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_load>: Add argument.
+	* target.c (target_load): Add argument.
+	(debug_to_load): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_load): Add 'self' argument.
+	* remote-sim.c (gdbsim_load): Add 'self' argument.
+	* remote-mips.c (mips_load): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_load): Add 'self' argument.
+	* monitor.c (monitor_load): Add 'self' argument.
+	* m32r-rom.c (m32r_load_gen): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_terminal_info>: Add argument.
+	(target_terminal_info): Add argument.
+	* target.c (debug_to_terminal_info): Add argument.
+	(default_terminal_info): Likewise.
+	* inflow.c (child_terminal_info): Add 'self' argument.
+	* inferior.h (child_terminal_info): Add 'self' argument.
+	* go32-nat.c (go32_terminal_info): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_terminal_save_ours>: Add
+	argument.
+	(target_terminal_save_ours): Add argument.
+	* target.c (debug_to_terminal_save_ours): Add argument.
+	(update_current_target): Update.
+	* inflow.c (terminal_save_ours): Add 'self' argument.
+	* inferior.h (terminal_save_ours): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_terminal_ours>: Add argument.
+	(target_terminal_ours): Add argument.
+	* target.c (debug_to_terminal_ours): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_terminal_ours): Add 'self' argument.
+	(remote_close): Update.
+	* linux-nat.c (linux_nat_terminal_ours): Add 'self' argument.
+	* inflow.c (terminal_ours): Add 'self' argument.
+	* inferior.h (terminal_ours): Add 'self' argument.
+	* go32-nat.c (go32_terminal_ours): Add 'self' argument.
+
+2014-02-19  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_terminal_ours_for_output>: Add
+	argument.
+	(target_terminal_ours_for_output): Add argument.
+	* target.c (debug_to_terminal_ours_for_output): Add argument.
+	(update_current_target): Update.
+	* inflow.c (terminal_ours_for_output): Add 'self' argument.
+	* inferior.h (terminal_ours_for_output): Add 'self' argument.
+	* go32-nat.c (go32_terminal_ours): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_terminal_inferior>: Add
+	argument.
+	* target.c (target_terminal_inferior): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_terminal_inferior): Add 'self' argument.
+	* linux-nat.c (linux_nat_terminal_inferior): Add 'self' argument.
+	* inflow.c (terminal_inferior): Add 'self' argument.
+	* inferior.h (terminal_inferior): Add 'self' argument.
+	* go32-nat.c (go32_terminal_inferior): Add 'self' argument.
+	(go32_terminal_inferior): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_terminal_init>: Add argument.
+	(target_terminal_init): Add argument.
+	* target.c (debug_to_terminal_init): Add argument.
+	(update_current_target): Update.
+	* inflow.c (terminal_init_inferior): Add 'self' argument.
+	* inferior.h (terminal_init_inferior): Add 'self' argument.
+	* go32-nat.c (go32_terminal_init): Add 'self' argument.
+	* gnu-nat.c (gnu_terminal_init_inferior): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops)
+	<to_can_accel_watchpoint_condition>: Add argument.
+	(target_can_accel_watchpoint_condition): Add argument.
+	* target.c (debug_to_can_accel_watchpoint_condition): Add
+	argument.
+	(update_current_target): Update.
+	* ppc-linux-nat.c (ppc_linux_can_accel_watchpoint_condition): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_region_ok_for_hw_watchpoint>:
+	Add argument.
+	(target_region_ok_for_hw_watchpoint): Add argument.
+	* target.c (debug_to_region_ok_for_hw_watchpoint): Add argument.
+	(default_region_ok_for_hw_watchpoint): Add argument.
+	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint): Add argument.
+	* s390-linux-nat.c (s390_region_ok_for_hw_watchpoint): Add 'self'
+	argument.
+	* remote.c (remote_region_ok_for_hw_watchpoint): Add 'self'
+	argument.
+	* procfs.c (procfs_region_ok_for_hw_watchpoint): Add 'self'
+	argument.
+	* ppc-linux-nat.c (ppc_linux_region_ok_for_hw_watchpoint): Add
+	'self' argument.
+	* mips-linux-nat.c (mips_linux_region_ok_for_hw_watchpoint): Add
+	'self' argument.
+	* inf-ttrace.c (inf_ttrace_region_ok_for_hw_watchpoint): Add
+	'self' argument.
+	* i386-nat.c (i386_region_ok_for_watchpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_region_ok_for_hw_watchpoint): Add
+	'self' argument.
+	* aarch64-linux-nat.c (aarch64_linux_region_ok_for_hw_watchpoint):
+	Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_insert_watchpoint>: Add
+	argument.
+	(target_insert_watchpoint): Add argument.
+	* target.c (debug_to_insert_watchpoint): Add argument.
+	(update_current_target): Update.
+	* s390-linux-nat.c (s390_insert_watchpoint): Add 'self' argument.
+	* remote.c (remote_insert_watchpoint): Add 'self' argument.
+	* remote-mips.c (mips_insert_watchpoint): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_insert_watchpoint): Add 'self' argument.
+	* procfs.c (procfs_insert_watchpoint): Add 'self' argument.
+	* ppc-linux-nat.c (ppc_linux_insert_watchpoint): Add 'self'
+	argument.
+	* nto-procfs.c (procfs_insert_hw_watchpoint): Add 'self' argument.
+	(procfs_insert_hw_watchpoint): Add 'self' argument.
+	* mips-linux-nat.c (mips_linux_insert_watchpoint): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_insert_watchpoint): Add 'self'
+	argument.
+	* ia64-linux-nat.c (ia64_linux_insert_watchpoint): Add 'self'
+	argument.
+	* i386-nat.c (i386_insert_watchpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_insert_watchpoint): Add 'self'
+	argument.
+	* aarch64-linux-nat.c (aarch64_linux_insert_watchpoint): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_remove_watchpoint>: Add
+	argument.
+	(target_remove_watchpoint): Add argument.
+	* target.c (debug_to_remove_watchpoint): Add argument.
+	(update_current_target): Update.
+	* s390-linux-nat.c (s390_remove_watchpoint): Add 'self' argument.
+	* remote.c (remote_remove_watchpoint): Add 'self' argument.
+	* remote-mips.c (mips_remove_watchpoint): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_remove_watchpoint): Add 'self' argument.
+	* procfs.c (procfs_remove_watchpoint): Add 'self' argument.
+	* ppc-linux-nat.c (ppc_linux_remove_watchpoint): Add 'self'
+	argument.
+	* nto-procfs.c (procfs_remove_hw_watchpoint): Add 'self' argument.
+	* mips-linux-nat.c (mips_linux_remove_watchpoint): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_remove_watchpoint): Add 'self'
+	argument.
+	* ia64-linux-nat.c (ia64_linux_remove_watchpoint): Add 'self'
+	argument.
+	* i386-nat.c (i386_remove_watchpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_remove_watchpoint): Add 'self'
+	argument.
+	* aarch64-linux-nat.c (aarch64_linux_remove_watchpoint): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_remove_hw_breakpoint>: Add
+	argument.
+	(target_remove_hw_breakpoint): Add argument.
+	* target.c (debug_to_remove_hw_breakpoint): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_remove_hw_breakpoint): Add 'self' argument.
+	* ppc-linux-nat.c (ppc_linux_remove_hw_breakpoint): Add 'self'
+	argument.
+	* i386-nat.c (i386_remove_hw_breakpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_remove_hw_breakpoint): Add 'self'
+	argument.
+	* aarch64-linux-nat.c (aarch64_linux_remove_hw_breakpoint): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_insert_hw_breakpoint>: Add
+	argument.
+	(target_insert_hw_breakpoint): Add argument.
+	* target.c (debug_to_insert_hw_breakpoint): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_insert_hw_breakpoint): Add 'self' argument.
+	* ppc-linux-nat.c (ppc_linux_insert_hw_breakpoint): Add 'self'
+	argument.
+	* nto-procfs.c (procfs_insert_hw_breakpoint): Add 'self' argument.
+	* i386-nat.c (i386_insert_hw_breakpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_insert_hw_breakpoint): Add 'self'
+	argument.
+	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_can_use_hw_breakpoint>: Add
+	argument.
+	(target_can_use_hardware_watchpoint): Add argument.
+	* target.c (debug_to_can_use_hw_breakpoint): Add argument.
+	(update_current_target): Update.
+	* spu-linux-nat.c (spu_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* s390-linux-nat.c (s390_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* remote.c (remote_check_watch_resources): Add 'self' argument.
+	* remote-mips.c (mips_can_use_watchpoint): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_can_use_hw_watchpoint): Add 'self'
+	argument.
+	* procfs.c (procfs_can_use_hw_breakpoint): Add 'self' argument.
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* nto-procfs.c (procfs_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* mips-linux-nat.c (mips_linux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* ia64-linux-nat.c (ia64_linux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* ia64-hpux-nat.c (ia64_hpux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* i386-nat.c (i386_can_use_hw_breakpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_post_attach>: Add argument.
+	(target_post_attach): Add argument.
+	* target.c (debug_to_post_attach): Add argument.
+	(update_current_target): Update.
+	* spu-linux-nat.c (spu_child_post_attach): Add 'self' argument.
+	* nto-procfs.c (procfs_post_attach): Add 'self' argument.
+	* linux-nat.c (linux_child_post_attach): Add 'self' argument.
+	* inf-ptrace.c (inf_ptrace_post_attach): Add 'self' argument.
+	* inf-child.c (inf_child_post_attach): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* windows-nat.c (windows_close): Add 'self' argument.
+	* tracepoint.c (tfile_close): Add 'self' argument.
+	* target.h (struct target_ops) <to_close>: Add argument.
+	* target.c (target_close): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_close): Add 'self' argument.
+	* remote-sim.c (gdbsim_close): Add 'self' argument.
+	* remote-mips.c (mips_close): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_close): Add 'self' argument.
+	* record-full.c (record_full_close): Add 'self' argument.
+	* record-btrace.c (record_btrace_close): Add 'self' argument.
+	* monitor.h (monitor_close): Add 'self' argument.
+	* monitor.c (monitor_close): Add 'self' argument.
+	* mips-linux-nat.c (mips_linux_close): Add 'self' argument.
+	* linux-nat.c (linux_nat_close): Add argument.
+	* go32-nat.c (go32_close): Add 'self' argument.
+	* exec.c (exec_close_1): Add 'self' argument.
+	* ctf.c (ctf_close): Add 'self' argument.
+	* corelow.c (core_close): Add 'self' argument.
+	(core_close_cleanup): Update.
+	* bsd-uthread.c (bsd_uthread_close): Add 'self' argument.
+	* bsd-kvm.c (bsd_kvm_close): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* remote.c (remote_load): New function.
+	(init_remote_ops): Use it.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* common/linux-btrace.c (linux_supports_btrace): Add "ops"
+	argument.
+	* common/linux-btrace.h (linux_supports_btrace): Update.
+	* remote.c (remote_supports_btrace): Add "self" argument.
+	* target-delegates.c: Rebuild.
+	* target.c (target_supports_btrace): Remove.
+	* target.h (struct target_ops) <to_supports_btrace>: Add
+	target_ops argument.
+	(target_supports_btrace): New define.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* record-full.c (record_full_beneath_to_resume_ops)
+	(record_full_beneath_to_resume, record_full_beneath_to_wait_ops)
+	(record_full_beneath_to_wait)
+	(record_full_beneath_to_store_registers_ops)
+	(record_full_beneath_to_store_registers)
+	(record_full_beneath_to_xfer_partial_ops)
+	(record_full_beneath_to_xfer_partial)
+	(record_full_beneath_to_insert_breakpoint_ops)
+	(record_full_beneath_to_insert_breakpoint)
+	(record_full_beneath_to_remove_breakpoint_ops)
+	(record_full_beneath_to_remove_breakpoint)
+	(record_full_beneath_to_stopped_by_watchpoint)
+	(record_full_beneath_to_stopped_data_address)
+	(record_full_beneath_to_async, tmp_to_resume_ops, tmp_to_resume)
+	(tmp_to_wait_ops, tmp_to_wait, tmp_to_store_registers_ops)
+	(tmp_to_store_registers, tmp_to_xfer_partial_ops)
+	(tmp_to_xfer_partial, tmp_to_instmp_to_insert_breakpoint_ops)
+	(tmp_to_insert_breakpoint, tmp_to_remove_breakpoint_ops)
+	(tmp_to_remove_breakpoint, tmp_to_stopped_by_watchpoint)
+	(tmp_to_stopped_data_address, tmp_to_async): Remove.
+	(record_full_open_1, record_full_open): Update.  Use RECORD_IS_USED.
+	(record_full_resume, record_full_wait_1)
+	(record_full_stopped_by_watchpoint, record_full_stopped_data_address)
+	(record_full_store_registers, record_full_xfer_partial)
+	(record_full_insert_breakpoint, record_full_remove_breakpoint)
+	(record_full_async, record_full_core_xfer_partial): Use target
+	delegation.
+	* target-delegates.c: Rebuild.
+	* target.c (current_xfer_partial): Remove.
+	(update_current_target): Do not INHERIT or de_fault
+	to_insert_breakpoint, to_remove_breakpoint,
+	to_stopped_data_address, to_stopped_by_watchpoint, to_can_async_p,
+	to_is_async_p, to_async.  Do not set to_xfer_partial field.
+	(default_xfer_partial): Simplify.
+	(current_xfer_partial): Remove.
+	(target_wait, target_resume): Simplify.
+	(find_default_can_async_p, find_default_is_async_p): Update.
+	(init_dummy_target): Don't set to_can_async_p, to_is_async_p,
+	to_xfer_partial, to_stopped_by_watchpoint,
+	to_stopped_data_address.
+	(target_store_registers): Simplify.
+	(forward_target_remove_breakpoint)
+	(forward_target_insert_breakpoint): Remove.
+	(target_remove_breakpoint, target_insert_breakpoint)
+	(debug_to_insert_breakpoint, debug_to_remove_breakpoint): Update.
+	* target.h (struct target_ops) <to_resume, to_wait,
+	to_store_registers, to_insert_breakpoint, to_remove_breakpoint,
+	to_stopped_by_watchpoint, to_stopped_data_address, to_can_async_p,
+	to_is_async_p, to_async, to_xfer_partial>: Add TARGET_DEFAULT
+	markup.
+	(forward_target_remove_breakpoint)
+	(forward_target_insert_breakpoint): Remove.
+	* record-btrace.c (record_btrace_remove_breakpoint): Delegate
+	directly.
+	(record_btrace_insert_breakpoint): Delegate directly.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	PR build/7701:
+	* target-delegates.c: New file.
+	* target.c: Include target-delegates.c.
+	(init_dummy_target): Call install_dummy_methods.
+	(complete_target_initialization): Call install_delegators.
+	* target.h (TARGET_DEFAULT_IGNORE, TARGET_DEFAULT_NORETURN)
+	(TARGET_DEFAULT_RETURN, TARGET_DEFAULT_FUNC): New defines.
+	* make-target-delegates: New file.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* record.c (find_record_target): Use find_target_at.
+	* target.c (find_target_at): New function.
+	* target.h (find_target_at): Declare.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* aarch64-linux-nat.c (aarch64_linux_stopped_by_watchpoint):
+	Add 'ops' argument.
+	* arm-linux-nat.c (arm_linux_stopped_by_watchpoint): Add
+	'ops' argument.
+	* i386-nat.c (i386_stopped_by_watchpoint): Add 'ops' argument.
+	* ia64-linux-nat.c (ia64_linux_stopped_by_watchpoint): Add
+	'ops' argument.
+	* inf-ttrace.c (inf_ttrace_stopped_by_watchpoint): Add 'ops'
+	argument.
+	* linux-nat.c (save_sigtrap): Update.
+	(linux_nat_stopped_by_watchpoint, linux_nat_is_async_p)
+	(linux_nat_can_async_p, linux_nat_async): Add 'ops' argument.
+	(linux_nat_close): Update.
+	* mips-linux-nat.c (mips_linux_stopped_by_watchpoint): Add 'ops'
+	argument.
+	* ppc-linux-nat.c (ppc_linux_stopped_by_watchpoint): Add 'ops'
+	argument.
+	* procfs.c (procfs_stopped_by_watchpoint): Add 'ops' argument.
+	* record-full.c (record_full_beneath_to_stopped_by_watchpoint)
+	(record_full_beneath_to_async, tmp_to_stopped_by_watchpoint)
+	(tmp_to_async): Add 'ops' argument.
+	(record_full_stopped_by_watchpoint, record_full_async)
+	(record_full_can_async_p, record_full_is_async_p): Add 'ops'
+	argument.
+	* remote-m32r-sdi.c (m32r_insert_breakpoint, m32r_remove_breakpoint)
+	(m32r_stopped_by_watchpoint): Add 'ops' argument.
+	* remote-mips.c	(mips_stopped_by_watchpoint): Add 'ops' argument.
+	* remote.c (remote_stopped_by_watchpoint_p, remote_can_async_p)
+	(remote_is_async_p, remote_async): Add 'ops' argument.
+	(remote_stopped_data_address): Update.
+	* s390-nat.c (s390_stopped_by_watchpoint): Add 'ops' argument.
+	* target.c (update_current_target)
+	(find_default_can_async_p, find_default_is_async_p): Update.
+	(init_dummy_target): Update.
+	(debug_to_stopped_by_watchpoint): Add 'ops' argument.
+	* target.h (struct target_ops) <to_stopped_by_watchpoint,
+	to_can_async_p, to_is_async_p, to_async>: Add 'ops' argument.
+	(target_can_async_p, target_is_async_p, target_async)
+	(target_stopped_by_watchpoint): Update.
+
+2014-02-19  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/16220
+	* gdbarch.sh: Remove startup_gdbarch.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Likewise.
+
+2014-02-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (rl78_g10_register_name): New function.
+	(rl78_return_value): Add g10 support.
+	(rl78_gdbarch_init): Register rl78_g10_register_name for the
+	g10.
+
+2014-02-17  Doug Evans  <xdje42@gmail.com>
+
+	* Makefile.in (SUBDIR_GUILE_OBS): Resort alphabetically.
+	(SUBDIR_GUILE_SRCS): Ditto.
+	(scm-gsmob.o): Ditto.
+
+2014-02-17  Yao Qi  <yao@codesourcery.com>
+
+	* gnu-nat.c (ILL_RPC): Declare defined function.
+
+2014-02-17  Yao Qi  <yao@codesourcery.com>
+
+	* gnu-nat.c (gnu_read_inferior): Change 'copy_count' type to
+	mach_msg_type_number_t.
+	(gnu_write_inferior): Likewise.
+
+2014-02-17  Yao Qi  <yao@codesourcery.com>
+
+	* gnu-nat.c (proc_get_exception_port): Use 'lu' insetad of 'd'
+	in format string.
+	(proc_steal_exc_port, make_proc, inf_set_pid): Likewise.
+	(inf_validate_procs, inf_signal): Likewise.
+	(S_exception_raise_request): Likewise.
+	(do_mach_notify_dead_name): Likewise.
+	(steal_exc_port): Likewise.
+	(gnu_read_inferior): Change 'copy_count''s type to
+	mach_msg_type_number_t.
+	(gnu_write_inferior): Likewise.  Use 'lx' instead of 'x' in
+	format string.
+
+2014-02-16  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gnu-nat.c (struct inf): Change pending_execs member to a 1-bit
+	flag.  Adjust all users; in particular...
+	(gnu_wait): ..., don't decrement its value in here...
+	(gnu_create_inferior): ..., and instead set the flag in here,
+	around the startup_inferior call, and call that one with
+	START_INFERIOR_TRAPS_EXPECTED.
+
+	* gnu-nat.c (ill_rpc): Remove function; replaced with this...
+	(ILL_RPC): ... new macro.
+	(do_mach_notify_no_senders, do_mach_notify_port_deleted)
+	(do_mach_notify_msg_accepted, do_mach_notify_port_destroyed)
+	(do_mach_notify_send_once, S_proc_setmsgport_reply)
+	(S_proc_getmsgport_reply, S_msg_sig_post_reply): Generate stub
+	functions with ILL_RPC macro.
+	(S_proc_pid2task_reply, S_proc_task2pid_reply)
+	(S_proc_task2proc_reply, S_proc_proc2task_reply)
+	(S_proc_pid2proc_reply, S_proc_getprocinfo_reply)
+	(S_proc_getprocargs_reply, S_proc_getprocenv_reply)
+	(S_proc_getloginid_reply, S_proc_getloginpids_reply)
+	(S_proc_getlogin_reply, S_proc_getsid_reply)
+	(S_proc_getsessionpgids_reply, S_proc_getsessionpids_reply)
+	(S_proc_getsidport_reply, S_proc_getpgrp_reply)
+	(S_proc_getpgrppids_reply, S_proc_get_tty_reply)
+	(S_proc_getnports_reply, S_proc_is_important_reply)
+	(S_proc_get_code_reply): New stub functions, generated with
+	ILL_RPC macro.
+
+	* reply_mig_hack.awk: In phase 5, keep going if we have not yet
+	collected the type check structures.
+
+	* reply_mig_hack.awk: Don't expect to see the auto keyword.
+
+2014-02-14  Doug Evans  <dje@google.com>
+
+	* target.c (target_write_partial): Fix result type.
+
+2014-02-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc64-linux-nat.c (_initialize_sparc64_linux_nat): Register
+	the proper offsets to access fpregset_t.
+
+2014-02-13  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* cris-tdep.c (cris_supply_gregset): Remove zerobuf.
+	(_initialize_cris_tdep): Remove cris_set_cmdlist, cris_show_cmdlist.
+	* h8300-tdep.c (setmachinelist): Remove global.
+	* hppa-tdep.c (hppa_sigtramp): Remove global.
+	* mipsnbsd-tdep.c (sigtramp_retcode_mipsel, sigtramp_retcode_mipseb
+	RETCODE_NWORDS, RETCODE_SIZE): Wrap code with #if 0.
+	* ravenscar-thread.c (update_target_observer): Remove global.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Remove segment_regs.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* common/rsp-low.c: Update comments.
+	* common/rsp-low.h: Update comments.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* common/rsp-low.c (convert_ascii_to_int): Remove.
+	* common/rsp-low.h (convert_ascii_to_int): Don't declare.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* common/rsp-low.h (unhexify): Don't declare.
+	* common/rsp-low.c (unhexify): Remove.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* common/rsp-low.h (convert_int_to_ascii): Don't declare.
+	* common/rsp-low.c (convert_int_to_ascii): Remove.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* common/rsp-low.h (hexify): Don't declare.
+	* common/rsp-low.c (hexify): Remove.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* common/rsp-low.c (hexify): Never take strlen of argument.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* common/rsp-low.c (bin2hex): Never take strlen of argument.
+	* remote.c (extended_remote_run, remote_rcmd)
+	(remote_download_trace_state_variable, remote_save_trace_data)
+	(remote_set_trace_notes): Update.
+	* tracepoint.c (encode_source_string, tfile_write_status)
+	(tfile_write_uploaded_tsv): Update.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c: Include rsp-low.h.
+	* remote.h (hex2bin, bin2hex, unpack_varlen_hex): Don't declare.
+	* remote.c: Include rsp-low.h.
+	(hexchars, ishex, unpack_varlen_hex, pack_nibble, pack_hex_byte)
+	(fromhex, hex2bin, tohex, bin2hex, remote_escape_output)
+	(remote_unescape_input): Move to common/rsp-low.c.
+	* common/rsp-low.h: New file.
+	* common/rsp-low.c: New file.
+	* Makefile.in (SFILES): Add common/rsp-low.c.
+	(HFILES_NO_SRCDIR): Add common/rsp-low.h.
+	(COMMON_OBS): Add rsp-low.o.
+	(rsp-low.o): New target.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* utils.h: Include print-utils.h.
+	(host_address_to_string, plongest, pulongest, phex, phex_nz)
+	(int_string, core_addr_to_string, core_addr_to_string_nz)
+	(hex_string, hex_string_custom): Don't declare.
+	* utils.c (NUMCELLS, CELLSIZE, get_cell, decimal2str, pulongest)
+	(plongest, thirty_two, phex, phex_nz, octal2str, hex_string)
+	(hex_string_custom, int_string, core_addr_to_string)
+	(core_addr_to_string_nz, host_address_to_string): Move to
+	common/print-utils.c.
+	* common/print-utils.h: New file.
+	* common/print-utils.c: New file
+	* Makefile.in (SFILES): Add common/print-utils.c.
+	(HFILES_NO_SRCDIR): Add common/print-utils.h.
+	(COMMON_OBS): Add print-utils.o.
+	(print-utils.o): New target.
+
+2014-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* nios2-tdep.c (nios2_stub_frame_base_address): Remove.
+
+2014-02-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Call obsd_init_abi.
+
+2014-02-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Return TARGET_XFER_EOF
+	if a PT_IO ptrace request returns sucessfully but indicates that 0
+	bytes were transferred.
+
+2014-02-12  Pedro Alves  <palves@redhat.com>
+	    Kevin Buettner <kevinb@redhat.com>
+
+	* gnu-v3-abi.c (build_gdb_vtable_type): Return a type marked with
+	TYPE_INSTANCE_FLAG_CODE_SPACE.
+
+2014-02-12  Pedro Alves  <palves@redhat.com>
+
+	* h8300-tdep.c (pseudo_from_raw_register)
+	(raw_from_pseudo_register): New functions.
+	(h8300_pseudo_register_read, h8300_pseudo_register_write): Use
+	them.
+
+2014-02-12  Pedro Alves  <palves@redhat.com>
+
+	* h8300-tdep.c (h8300_register_sim_regno): New function.
+	(h8300_gdbarch_init): Install h8300_register_sim_regno as
+	gdbarch_register_sim_regno hook.
+
+2014-02-12  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* nios2-tdep.c (nios2_stub_frame_base): Remove global.
+
+2014-02-12  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* tic6x-tdep.c (tic6x_gdbarch_init): Call frame_base_set_default.
+
+2014-02-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* obsd-tdep.h (obsd_init_abi): New prototype.
+	* obsd-tdep.c: Define enum with OpenBSD signal numbers.
+	(obsd_gdb_signal_from_target, obsd_gdb_signal_to_target)
+	(obsd_init_abi): New functions.
+	* i386obsd-tdep.c: Include "obsd-tdep.h".
+	(i386obsd_init_abi): Call obsd_init_abi.
+	* amd64obsd-tdep.c: Include "obsd-tdep.h".
+	(amd64obsd_init_abi): Call obsd_init_abi.
+	* configure.tgt (i[34567]86-*-openbsd*, x86_64-*-openbsd*): Add
+	obsd-tdep.c to gdb_target_obs.
+
+2014-02-11  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+        * sparc64-tdep.c (sparc64_store_arguments): Do not align complex
+        double float arguments to 16-byte in the argument slots.
+
+2014-02-11  Doug Evans  <xdje42@gmail.com>
+
+	* configure.ac: Don't crash if pkg-config is not found and guile
+	wasn't explicitly requested.  Use AC_MSG_ERROR instead of AC_ERROR
+	in guile checks.
+	* configure: Regenerate.
+
+2014-02-11  Yao Qi  <yao@codesourcery.com>
+
+	* aix-thread.c (aix_thread_xfer_partial): Update comments.
+	* auxv.c (procfs_xfer_auxv, memory_xfer_auxv): Likewise.
+	* bsd-uthread.c (bsd_uthread_xfer_partial): Likewise.
+	* gnu-nat.c (gnu_xfer_memory): Likewise.
+	* inf-ptrace.c (inf_ptrace_xfer_partial):  Likewise.
+	* rs6000-nat.c (rs6000_xfer_partial): Likewise.
+	* sparc-nat.c (sparc_xfer_wcookie): Likewise.
+	* spu-linux-nat.c (spu_proc_xfer_spu): Likewise.
+
+2014-02-11  Yao Qi  <yao@codesourcery.com>
+
+	* target.h (enum target_xfer_error): Rename to ...
+	(enum target_xfer_status): ... it.  New.  All users updated.
+	(enum target_xfer_status) <TARGET_XFER_OK>, <TARGET_XFER_EOF>:
+	New.
+	(TARGET_XFER_STATUS_ERROR_P): New macro.
+	(target_xfer_error_to_string): Remove declaration.
+	(target_xfer_status_to_string): Declare.
+	(target_xfer_partial_ftype): Adjust it.
+	(struct target_ops) <to_xfer_partial>: Return
+	target_xfer_status.  Add argument xfered_len.  Update
+	comments.
+	* target.c (target_xfer_error_to_string): Rename to ...
+	(target_xfer_status_to_string): ... it.  New.  All callers
+	updated.
+	(target_read_live_memory): Likewise.  Call target_xfer_partial
+	instead of target_read.
+	(memory_xfer_live_readonly_partial): Return
+	target_xfer_status.  Add argument xfered_len.
+	(raw_memory_xfer_partial): Likewise.
+	(memory_xfer_partial_1): Likewise.
+	(memory_xfer_partial): Likewise.
+	(target_xfer_partial): Likewise.  Check *XFERED_LEN is set
+	properly.  Update debug message.
+	(default_xfer_partial, current_xfer_partial): Likewise.
+	(target_write_partial): Likewise.
+	(target_read_partial): Likewise.  All callers updated.
+	(read_whatever_is_readable): Likewise.
+	(target_write_with_progress): Likewise.
+	(target_read_alloc_1): Likewise.
+
+	* aix-thread.c (aix_thread_xfer_partial): Likewise.
+	* auxv.c (procfs_xfer_auxv): Likewise.
+	(ld_so_xfer_auxv, memory_xfer_auxv): Likewise.
+	* bfd-target.c (target_bfd_xfer_partial): Likewise.
+	* bsd-kvm.c (bsd_kvm_xfer_partial): Likewise.
+	* bsd-uthread.c (bsd_uthread_xfer_partia): Likewise.
+	* corefile.c (read_memory): Adjust.
+	* corelow.c (core_xfer_partial): Likewise.
+	* ctf.c (ctf_xfer_partial): Likewise.
+	* darwin-nat.c (darwin_read_dyld_info): Likewise.  All callers
+	updated.
+	(darwin_xfer_partial): Likewise.
+	* exec.c (section_table_xfer_memory_partial): Likewise.  All
+	callers updated.
+	(exec_xfer_partial): Likewise.
+	* exec.h (section_table_xfer_memory_partial): Update
+	declaration.
+	* gnu-nat.c (gnu_xfer_memory): Likewise.  Assert 'res' is not
+	negative.
+	(gnu_xfer_partial): Likewise.
+	* ia64-hpux-nat.c (ia64_hpux_xfer_memory_no_bs): Likewise.
+	(ia64_hpux_xfer_memory, ia64_hpux_xfer_uregs): Likewise.
+	(ia64_hpux_xfer_solib_got): Likewise.
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Likewise.  Change
+	type of 'partial_len' to ULONGEST.
+	* inf-ttrace.c (inf_ttrace_xfer_partial): Likewise.
+	* linux-nat.c (linux_xfer_siginfo ): Likewise.
+	(linux_nat_xfer_partial): Likewise.
+	(linux_proc_xfer_partial, linux_xfer_partial): Likewise.
+	(linux_proc_xfer_spu, linux_nat_xfer_osdata): Likewise.
+	* monitor.c (monitor_xfer_memory): Likewise.
+	(monitor_xfer_partial): Likewise.
+	* procfs.c (procfs_xfer_partial): Likewise.
+	* record-btrace.c (record_btrace_xfer_partial): Likewise.
+	* record-full.c (record_full_xfer_partial): Likewise.
+	(record_full_core_xfer_partial): Likewise.
+	* remote-sim.c (gdbsim_xfer_memory): Likewise.
+	(gdbsim_xfer_partial): Likewise.
+	* remote.c (remote_write_bytes_aux): Likewise.  All callers
+	updated.
+	(remote_write_bytes, remote_read_bytes): Likewise.  All
+	callers updated.
+	(remote_flash_erase): Likewise.  All callers updated.
+	(remote_write_qxfer): Likewise.  All callers updated.
+	(remote_read_qxfer): Likewise.  All callers updated.
+	(remote_xfer_partial): Likewise.
+	* rs6000-nat.c (rs6000_xfer_partial): Likewise.
+	(rs6000_xfer_shared_libraries): Likewise.
+	* sol-thread.c (sol_thread_xfer_partial): Likewise.
+	(sol_thread_xfer_partial): Likewise.
+	* sparc-nat.c (sparc_xfer_wcookie): Likewise.
+	(sparc_xfer_partial): Likewise.
+	* spu-linux-nat.c (spu_proc_xfer_spu): Likewise.  All callers
+	updated.
+	(spu_xfer_partial): Likewise.
+	* spu-multiarch.c (spu_xfer_partial): Likewise.
+	* tracepoint.c (tfile_xfer_partial): Likewise.
+	* windows-nat.c (windows_xfer_memory): Likewise.
+	(windows_xfer_shared_libraries): Likewise.
+	(windows_xfer_partial): Likewise.
+	* valprint.c: Replace 'target_xfer_error' with
+	'target_xfer_status' in comments.
+
+2014-02-11  Simon Marchi  <simon.marchi@ericsson.com>  (tiny patch)
+
+	Checked in by Joel Brobecker <brobecker@adacore.com>.
+	* mi/mi-main.c (mi_cmd_data_write_memory_bytes): Fix comment.
+
+2014-02-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile-debug.c (debug_qf_expand_symtabs_matching): Reformat
+	function parameters.
+
+2014-02-10  Will Newton  <will.newton@linaro.org>
+
+	* elfread.c (elf_rel_plt_read): Look for a .got section if
+	looking up .got.plt fails.
+	(elf_gnu_ifunc_resolve_by_got): Call gdbarch_addr_bits_remove
+	on address passed to elf_gnu_ifunc_record_cache.
+	(elf_gnu_ifunc_resolve_addr): Likewise.
+	(elf_gnu_ifunc_resolver_return_stop): Likewise.
+
 2014-02-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-tdep.c (sparc_in_function_epilogue_p): New function.

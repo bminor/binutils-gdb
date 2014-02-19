@@ -1444,7 +1444,8 @@ have_ptrace_hwdebug_interface (void)
 }
 
 static int
-ppc_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
+ppc_linux_can_use_hw_breakpoint (struct target_ops *self,
+				 int type, int cnt, int ot)
 {
   int total_hw_wp, total_hw_bp;
 
@@ -1496,7 +1497,8 @@ ppc_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
 }
 
 static int
-ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+ppc_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
+				       CORE_ADDR addr, int len)
 {
   /* Handle sub-8-byte quantities.  */
   if (len <= 0)
@@ -1672,7 +1674,8 @@ ppc_linux_ranged_break_num_registers (struct target_ops *target)
    success, 1 if hardware breakpoints are not supported or -1 for failure.  */
 
 static int
-ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
+ppc_linux_insert_hw_breakpoint (struct target_ops *self,
+				struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;
@@ -1708,7 +1711,8 @@ ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
 }
 
 static int
-ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
+ppc_linux_remove_hw_breakpoint (struct target_ops *self,
+				struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;
@@ -2011,7 +2015,8 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
    the condition expression, thus only triggering the watchpoint when it is
    true.  */
 static int
-ppc_linux_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
+ppc_linux_can_accel_watchpoint_condition (struct target_ops *self,
+					  CORE_ADDR addr, int len, int rw,
 					  struct expression *cond)
 {
   CORE_ADDR data_value;
@@ -2073,7 +2078,8 @@ create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
 }
 
 static int
-ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
+ppc_linux_insert_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
@@ -2141,7 +2147,8 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 }
 
 static int
-ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
+ppc_linux_remove_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
@@ -2283,10 +2290,10 @@ ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 }
 
 static int
-ppc_linux_stopped_by_watchpoint (void)
+ppc_linux_stopped_by_watchpoint (struct target_ops *ops)
 {
   CORE_ADDR addr;
-  return ppc_linux_stopped_data_address (&current_target, &addr);
+  return ppc_linux_stopped_data_address (ops, &addr);
 }
 
 static int

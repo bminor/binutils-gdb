@@ -1,3 +1,40 @@
+2014-02-18  Doug Evans  <dje@google.com>
+
+	* Makefile.in (TESTS): New variable.
+	(expanded_tests, expanded_tests_or_none): New variables
+	(check-single): Pass $(expanded_tests_or_none) to runtest.
+	(check-parallel): Only run tests in $(TESTS) if non-empty.
+	(check/no-matching-tests-found): New rule.
+	* README: Document TESTS makefile variable.
+
+2014-02-18  Doug Evans  <dje@google.com>
+
+	* Makefile.in (check-parallel): rm -rf outputs temp.
+
+2014-02-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix "ERROR: no fileid for" in the testsuite.
+	* lib/gdb.exp (gdb_finish): Check gdb_spawn_id.
+
+2014-02-12  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/Makefile.in (EXECUTABLES): Add dwp-symlink.
+	(MISCELLANEOUS): New variable.
+	(clean): rm -rf $(MISCELLANEOUS).
+	* gdb.dwarf2/dwp-symlink.exp: Test the case where the executable and
+	dwp live in the same directory as symlinks, with each symlink pointed
+	to a differently named file in a different directory.
+
+2014-02-11  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dwp-symlink.exp: Rewrite to use remote_* commands instead
+	of Tcl file commands.
+
+2014-02-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.threads/step-after-sr-lock.exp: Avoid executing
+	"kill -SIGUSR1 -1".
+
 2014-02-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/tick_length_array_enum_idx: New testcase.

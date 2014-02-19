@@ -1,3 +1,91 @@
+2014-02-19  Igor Zamyatin  <igor.zamyatin@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_bnd_plt0_entry): New.
+	(elf_x86_64_legacy_plt_entry): Likewise.
+	(elf_x86_64_bnd_plt_entry): Likewise.
+	(elf_x86_64_legacy_plt2_entry): Likewise.
+	(elf_x86_64_bnd_plt2_entry): Likewise.
+	(elf_x86_64_bnd_arch_bed): Likewise.
+	(elf_x86_64_link_hash_entry): Add has_bnd_reloc and plt_bnd.
+	(elf_x86_64_link_hash_table): Add plt_bnd.
+	(elf_x86_64_link_hash_newfunc): Initialize has_bnd_reloc and
+	plt_bnd.
+	(elf_x86_64_copy_indirect_symbol): Also copy has_bnd_reloc.
+	(elf_x86_64_check_relocs): Create the second PLT for Intel MPX
+	in 64-bit mode.
+	(elf_x86_64_allocate_dynrelocs): Handle the second PLT for IFUNC
+	symbols.  Resolve call to the second PLT if it is created.
+	(elf_x86_64_size_dynamic_sections): Keep the second PLT section.
+	(elf_x86_64_relocate_section): Resolve PLT references to the
+	second PLT if it is created.
+	(elf_x86_64_finish_dynamic_symbol): Use BND PLT0 and fill the
+	second PLT entry for BND relocation.
+	(elf_x86_64_finish_dynamic_sections): Use MPX backend data if
+	the second PLT is created.
+	(elf_x86_64_get_synthetic_symtab): New.
+	(bfd_elf64_get_synthetic_symtab): Likewise.  Undefine for NaCl.
+
+2014-02-19  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.h (struct ppc64_elf_params): Add save_restore_funcs.
+	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Use it to control
+	provision of out-of-line register save/restore routines.
+
+2014-02-18  Jack Carter  <jack.carter@imgtec.com>
+
+        * elfxx-mips.c(_bfd_mips_elf_modify_segment_map): Deleted hard coding of
+        PT_DYNAMIC segment flags.
+
+2014-02-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR binutils/16595
+	* simple.c (struct saved_offsets): New.
+	(simple_save_output_info): Use it for ptr.
+	(simple_restore_output_info): Use it for ptr.  Check section_count.
+	(bfd_simple_get_relocated_section_contents): Use it for saved_offsets.
+
+2014-02-17  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.h (struct ppc64_elf_params): Define.
+	(ppc64_elf_init_stub_bfd, ppc64_elf_edit_opd, ppc64_elf_tls_setup,
+	ppc64_elf_setup_section_lists, ppc64_elf_size_stubs,
+	ppc64_elf_build_stubs): Update prototype.
+	* elf64-ppp.c (struct ppc_link_hash_table): Add params, delete other
+	fields now in params.  Adjust code throughout file.
+	(ppc64_elf_init_stub_bfd): Delete "abfd" parameter, add "params".
+	Save params pointer in htab.
+	(ppc64_elf_edit_opd, ppc64_elf_tls_setup,
+	ppc64_elf_setup_section_lists, ppc64_elf_size_stubs,
+	ppc64_elf_build_stubs): Remove parameters now in "params".
+
+2014-02-17  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Move relocs on insns
+	patched for ppc476 workaround.  Reapply branch taken/not taken
+	relocs.
+
+2014-02-12  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relax_section): Don't build long-branch
+	stubs for calls to __tls_get_addr that we know will later be
+	optimised away.
+
+2014-02-12  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relax_section): Enable ppc476 workaround
+	for ld -r, when code sections are sufficiently aligned.
+	* elf32-ppc.h (struct ppc_elf_params): Delete pagesize.  Add
+	pagesize_p2.
+
+2014-02-12  Alan Modra  <amodra@gmail.com>
+
+	PR gold/15530
+	* elf64-ppc.c (ppc64_elf_gc_mark_dynamic_ref): Support
+	--export-dynamic and --dynamic-list marking of symbols.
+	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Reorder
+	cheap tests first.
+
 2014-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/16530

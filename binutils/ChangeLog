@@ -1,3 +1,8 @@
+2014-02-11  Cary Coutant  <ccoutant@google.com>
+
+	* binutils/dwarf.c (read_and_display_attr_value): Don't warn
+	for zero-length attribute value.
+
 2014-02-10  Alan Modra  <amodra@gmail.com>
 
 	* po/binutils.pot: Regenerate.

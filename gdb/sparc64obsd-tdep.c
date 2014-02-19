@@ -421,6 +421,7 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_unwinder (gdbarch, &sparc64obsd_trapframe_unwind);
 
   sparc64_init_abi (info, gdbarch);
+  obsd_init_abi (info, gdbarch);
 
   /* OpenBSD/sparc64 has SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets

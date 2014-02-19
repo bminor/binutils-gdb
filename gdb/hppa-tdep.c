@@ -2775,18 +2775,6 @@ static struct insn_pattern hppa_plt_stub[] = {
   { 0, 0 }
 };
 
-static struct insn_pattern hppa_sigtramp[] = {
-  /* ldi 0, %r25 or ldi 1, %r25 */
-  { 0x34190000, 0xfffffffd },
-  /* ldi __NR_rt_sigreturn, %r20 */
-  { 0x3414015a, 0xffffffff },
-  /* be,l 0x100(%sr2, %r0), %sr0, %r31 */
-  { 0xe4008200, 0xffffffff },
-  /* nop */
-  { 0x08000240, 0xffffffff },
-  { 0, 0 }
-};
-
 /* Maximum number of instructions on the patterns above.  */
 #define HPPA_MAX_INSN_PATTERN_LEN	4
 

@@ -151,6 +151,30 @@ them, both to stdout and in the test suite log file.
 
 This setting is only meaningful in conjunction with GDB_PARALLEL.
 
+TESTS
+
+This variable is used to specify which set of tests to run.
+It is passed to make (not runtest) and its contents are a space separated
+list of tests to run.
+
+If using GNU make then the contents are wildcard-expanded using
+GNU make's $(wildcard) function.  Test paths must be fully specified,
+relative to the "testsuite" subdirectory.  This allows one to run all
+tests in a subdirectory by passing "gdb.subdir/*.exp".
+If for some strange reason one wanted to run all tests that begin with
+the letter "d" that is also possible: TESTS="*/d*.exp".
+
+Do not write */*.exp to specify all tests (assuming all tests are only
+nested one level deep, which is not necessarily true).  This will pick up
+.exp files in ancillary directories like "lib" and "config".
+Instead write gdb.*/*.exp.
+
+Example:
+
+	make -j10 check TESTS="gdb.server/[s-w]*.exp */x*.exp"
+
+If not using GNU make then the value is passed directly to runtest.
+If not specified, all tests are run.
 
 Testsuite Configuration
 ***********************

@@ -1,3 +1,8 @@
+2014-02-17  Aaro Koskinen  <aaro.koskinen@iki.fi>
+
+	PR gdb/12202
+	* Makefile.in (psim): Delete $(LIBS) from dependency.
+
 2013-10-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	* Makefile.in (srcsim): New variable.
@@ -35,8 +40,7 @@
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/7205
-
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	* Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-03-14  Michael Haubenwallner  <michael.haubenwallner@salomon.at>
 

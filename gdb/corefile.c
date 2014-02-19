@@ -194,7 +194,7 @@ Use the \"file\" or \"exec-file\" command."));
 
 
 char *
-memory_error_message (enum target_xfer_error err,
+memory_error_message (enum target_xfer_status err,
 		      struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
   switch (err)
@@ -209,8 +209,8 @@ memory_error_message (enum target_xfer_error err,
 			 paddress (gdbarch, memaddr));
     default:
       internal_error (__FILE__, __LINE__,
-		      "unhandled target_xfer_error: %s (%s)",
-		      target_xfer_error_to_string (err),
+		      "unhandled target_xfer_status: %s (%s)",
+		      target_xfer_status_to_string (err),
 		      plongest (err));
     }
 }
@@ -218,7 +218,7 @@ memory_error_message (enum target_xfer_error err,
 /* Report a memory error by throwing a suitable exception.  */
 
 void
-memory_error (enum target_xfer_error err, CORE_ADDR memaddr)
+memory_error (enum target_xfer_status err, CORE_ADDR memaddr)
 {
   char *str;
   enum errors exception = GDB_NO_ERROR;
@@ -247,20 +247,27 @@ memory_error (enum target_xfer_error err, CORE_ADDR memaddr)
 void
 read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 {
-  LONGEST xfered = 0;
+  ULONGEST xfered = 0;
 
   while (xfered < len)
     {
-      LONGEST xfer = target_xfer_partial (current_target.beneath,
-					  TARGET_OBJECT_MEMORY, NULL,
-					  myaddr + xfered, NULL,
-					  memaddr + xfered, len - xfered);
+      enum target_xfer_status status;
+      ULONGEST xfered_len;
 
-      if (xfer == 0)
+      status = target_xfer_partial (current_target.beneath,
+				    TARGET_OBJECT_MEMORY, NULL,
+				    myaddr + xfered, NULL,
+				    memaddr + xfered, len - xfered,
+				    &xfered_len);
+
+      if (status == TARGET_XFER_EOF)
 	memory_error (TARGET_XFER_E_IO, memaddr + xfered);
-      if (xfer < 0)
-	memory_error (xfer, memaddr + xfered);
-      xfered += xfer;
+
+      if (TARGET_XFER_STATUS_ERROR_P (status))
+	memory_error (status, memaddr + xfered);
+
+      gdb_assert (status == TARGET_XFER_OK);
+      xfered += xfered_len;
       QUIT;
     }
 }

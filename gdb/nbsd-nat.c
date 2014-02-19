@@ -25,7 +25,7 @@
    the child process identified by PID.  */
 
 char *
-nbsd_pid_to_exec_file (int pid)
+nbsd_pid_to_exec_file (struct target_ops *self, int pid)
 {
   size_t len = PATH_MAX;
   char *buf = xcalloc (len, sizeof (char));

@@ -1,0 +1,253 @@
+#!/usr/bin/perl
+
+# Copyright (C) 2013-2014 Free Software Foundation, Inc.
+#
+# This file is part of GDB.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# Usage:
+#    make-target-delegates target.h > target-delegates.c
+
+# The line we search for in target.h that marks where we should start
+# looking for methods.
+$TRIGGER = qr,^struct target_ops$,;
+# The end of the methods part.
+$ENDER = qr,^\s*};$,;
+
+# Match a C symbol.
+$SYMBOL = qr,[a-zA-Z_][a-zA-Z0-9_]*,;
+# Match the name part of a method in struct target_ops.
+$NAME_PART = qr,\(\*(?<name>${SYMBOL}+)\)\s,;
+# Match the start of arguments to a method.
+$ARGS_PART = qr,(?<args>\(.*)$,;
+# Match indentation.
+$INTRO_PART = qr,^\s*,;
+
+# Match the return type when it is "ordinary".
+$SIMPLE_RETURN_PART = qr,[^\(]+,;
+# Match the return type when it is a VEC.
+$VEC_RETURN_PART = qr,VEC\s*\([^\)]+\)[^\(]*,;
+
+# Match the TARGET_DEFAULT_* attribute for a method.
+$TARGET_DEFAULT_PART = qr,TARGET_DEFAULT_(?<style>[A-Z_]+)\s*\((?<default_arg>.*)\),;
+
+# Match the introductory line to a method definition.
+$METHOD = ($INTRO_PART . "(?<return_type>" . $SIMPLE_RETURN_PART
+	   . "|" . $VEC_RETURN_PART . ")"
+	   . $NAME_PART . $ARGS_PART);
+
+# Match the arguments and trailing attribute of a method definition.
+$METHOD_TRAILER = qr,(?<args>\(.+\))\s*${TARGET_DEFAULT_PART};$,;
+
+sub trim($) {
+    my ($result) = @_;
+    $result =~ s,^\s*(\S*)\s*$,\1,;
+    return $result;
+}
+
+# Read from the input files until we find the trigger line.
+# Die if not found.
+sub find_trigger() {
+    while (<>) {
+	chomp;
+	return if m/$TRIGGER/;
+    }
+
+    die "could not find trigger line\n";
+}
+
+# Parse arguments into a list.
+sub parse_argtypes($) {
+    my ($typestr) = @_;
+
+    $typestr =~ s/^\((.*)\)$/\1/;
+
+    my (@typelist) = split (/,\s*/, $typestr);
+    my (@result, $iter, $onetype);
+
+    foreach $iter (@typelist) {
+	if ($iter =~ m/^(enum\s+${SYMBOL}\s*)(${SYMBOL})?$/) {
+	    $onetype = $1;
+	} elsif ($iter =~ m/^(.*(enum\s+)?${SYMBOL}.*(\s|\*))${SYMBOL}+$/) {
+	    $onetype = $1;
+	} elsif ($iter eq 'void') {
+	    next;
+	} else {
+	    $onetype = $iter;
+	}
+	push @result, trim ($onetype);
+    }
+
+    return @result;
+}
+
+sub dname($) {
+    my ($name) = @_;
+    $name =~ s/to_/delegate_/;
+    return $name;
+}
+
+# Write function header given name, return type, and argtypes.
+# Returns a list of actual argument names.
+sub write_function_header($$@) {
+    my ($name, $return_type, @argtypes) = @_;
+
+    print "static " . $return_type . "\n";
+    print $name . ' (';
+
+    my $iter;
+    my @argdecls;
+    my @actuals;
+    my $i = 0;
+    foreach $iter (@argtypes) {
+	my $val = $iter;
+
+	if ($iter !~ m,\*$,) {
+	    $val .= ' ';
+	}
+
+	my $vname;
+	if ($i == 0) {
+	    # Just a random nicety.
+	    $vname = 'self';
+	} else {
+	    $vname .= "arg$i";
+	}
+	$val .= $vname;
+
+	push @argdecls, $val;
+	push @actuals, $vname;
+	++$i;
+    }
+
+    print join (', ', @argdecls) . ")\n";
+    print "{\n";
+
+    return @actuals;
+}
+
+# Write out a delegation function.
+sub write_delegator($$@) {
+    my ($name, $return_type, @argtypes) = @_;
+
+    my (@names) = write_function_header (dname ($name), $return_type,
+					 @argtypes);
+
+    print "  $names[0] = $names[0]->beneath;\n";
+    print "  ";
+    if ($return_type ne 'void') {
+	print "return ";
+    }
+    print "$names[0]->" . $name . " (";
+    print join (', ', @names);
+    print ");\n";
+    print "}\n\n";
+}
+
+sub tdname ($) {
+    my ($name) = @_;
+    $name =~ s/to_/tdefault_/;
+    return $name;
+}
+
+# Write out a default function.
+sub write_tdefault($$$$@) {
+    my ($content, $style, $name, $return_type, @argtypes) = @_;
+
+    if ($style eq 'FUNC') {
+	return $content;
+    }
+
+    write_function_header (tdname ($name), $return_type, @argtypes);
+
+    if ($style eq 'RETURN') {
+	print "  return $content;\n";
+    } elsif ($style eq 'NORETURN') {
+	print "  $content;\n";
+    } elsif ($style eq 'IGNORE') {
+	# Nothing.
+    } else {
+	die "unrecognized style: $style\n";
+    }
+
+    print "}\n\n";
+
+    return tdname ($name);
+}
+
+print "/* THIS FILE IS GENERATED -*- buffer-read-only: t -*- */\n";
+print "/* vi:set ro: */\n\n";
+print "/* To regenerate this file, run:*/\n";
+print "/*      make-target-delegates target.h > target-delegates.c */\n";
+
+find_trigger();
+
+%tdefault_names = ();
+@delegators = ();
+$current_line = '';
+while (<>) {
+    chomp;
+    last if m/$ENDER/;
+
+    if ($current_line ne '') {
+	s/^\s*//;
+	$current_line .= $_;
+    } elsif (m/$METHOD/) {
+	$name = $+{name};
+	$current_line = $+{args};
+	$return_type = trim ($+{return_type});
+    }
+
+    if ($current_line =~ /\);\s*$/) {
+	if ($current_line =~ m,$METHOD_TRAILER,) {
+	    $current_args = $+{args};
+	    $tdefault = $+{default_arg};
+	    $style = $+{style};
+
+	    @argtypes = parse_argtypes ($current_args);
+
+	    # The first argument must be "this" to be delegatable.
+	    if ($argtypes[0] =~ /\s*struct\s+target_ops\s*\*\s*/) {
+		write_delegator ($name, $return_type, @argtypes);
+
+		push @delegators, $name;
+
+		$tdefault_names{$name} = write_tdefault ($tdefault, $style,
+							 $name, $return_type,
+							 @argtypes);
+	    }
+	}
+
+	$current_line = '';
+    }
+}
+
+# Now the delegation code.
+print "static void\ninstall_delegators (struct target_ops *ops)\n{\n";
+
+for $iter (@delegators) {
+    print "  if (ops->" . $iter . " == NULL)\n";
+    print "    ops->" . $iter . " = " . dname ($iter) . ";\n";
+}
+print "}\n\n";
+
+# Now the default method code.
+print "static void\ninstall_dummy_methods (struct target_ops *ops)\n{\n";
+
+for $iter (@delegators) {
+    print "  ops->" . $iter . " = " . $tdefault_names{$iter} . ";\n";
+}
+print "}\n";

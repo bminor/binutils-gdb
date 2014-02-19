@@ -130,7 +130,7 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
 }
 
 void
-serial_log_command (const char *cmd)
+serial_log_command (struct target_ops *self, const char *cmd)
 {
   if (!serial_logfp)
     return;

@@ -291,6 +291,7 @@ SUBDIR_GUILE_OBS = \
 	scm-disasm.o \
 	scm-exception.o \
 	scm-frame.o \
+	scm-gsmob.o \
 	scm-iterator.o \
 	scm-lazy-string.o \
 	scm-objfile.o \
@@ -298,7 +299,6 @@ SUBDIR_GUILE_OBS = \
 	scm-ports.o \
 	scm-pretty-print.o \
 	scm-safe-call.o \
-	scm-gsmob.o \
 	scm-string.o \
 	scm-symbol.o \
 	scm-symtab.o \
@@ -314,6 +314,7 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-disasm.c \
 	guile/scm-exception.c \
 	guile/scm-frame.c \
+	guile/scm-gsmob.c \
 	guile/scm-iterator.c \
 	guile/scm-lazy-string.c \
 	guile/scm-objfile.c \
@@ -321,7 +322,6 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-ports.c \
 	guile/scm-pretty-print.c \
 	guile/scm-safe-call.c \
-	guile/scm-gsmob.c \
 	guile/scm-string.c \
 	guile/scm-symbol.c \
 	guile/scm-symtab.c \
@@ -839,7 +839,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/gdb_vecs.c common/common-utils.c common/xml-utils.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
-	target/waitstatus.c
+	target/waitstatus.c common/print-utils.c common/rsp-low.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -921,7 +921,8 @@ common/format.h common/host-defs.h utils.h common/queue.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h common/linux-btrace.h \
 ctf.h common/i386-cpuid.h common/i386-gcc-cpuid.h target/resume.h \
-target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h
+target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h \
+common/print-utils.h common/rsp-low.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1019,7 +1020,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	inferior.o osdata.o gdb_usleep.o record.o record-full.o gcore.o \
 	gdb_vecs.o jit.o progspace.o skip.o probe.o \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
-	format.o registry.o btrace.o record-btrace.o waitstatus.o
+	format.o registry.o btrace.o record-btrace.o waitstatus.o \
+	print-utils.o rsp-low.o
 
 TSOBS = inflow.o
 
@@ -2140,6 +2142,14 @@ mips-linux-watch.o: ${srcdir}/common/mips-linux-watch.c
 	$(COMPILE) $(srcdir)/common/mips-linux-watch.c
 	$(POSTCOMPILE)
 
+print-utils.o: ${srcdir}/common/print-utils.c
+	$(COMPILE) $(srcdir)/common/print-utils.c
+	$(POSTCOMPILE)
+
+rsp-low.o: ${srcdir}/common/rsp-low.c
+	$(COMPILE) $(srcdir)/common/rsp-low.c
+	$(POSTCOMPILE)
+
 #
 # gdb/target/ dependencies
 #
@@ -2270,6 +2280,10 @@ scm-frame.o: $(srcdir)/guile/scm-frame.c
 	$(COMPILE) $(srcdir)/guile/scm-frame.c
 	$(POSTCOMPILE)
 
+scm-gsmob.o: $(srcdir)/guile/scm-gsmob.c
+	$(COMPILE) $(srcdir)/guile/scm-gsmob.c
+	$(POSTCOMPILE)
+
 scm-iterator.o: $(srcdir)/guile/scm-iterator.c
 	$(COMPILE) $(srcdir)/guile/scm-iterator.c
 	$(POSTCOMPILE)
@@ -2296,10 +2310,6 @@ scm-pretty-print.o: $(srcdir)/guile/scm-pretty-print.c
 
 scm-safe-call.o: $(srcdir)/guile/scm-safe-call.c
 	$(COMPILE) $(srcdir)/guile/scm-safe-call.c
-	$(POSTCOMPILE)
-
-scm-gsmob.o: $(srcdir)/guile/scm-gsmob.c
-	$(COMPILE) $(srcdir)/guile/scm-gsmob.c
 	$(POSTCOMPILE)
 
 scm-string.o: $(srcdir)/guile/scm-string.c

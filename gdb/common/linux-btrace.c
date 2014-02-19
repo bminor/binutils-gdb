@@ -407,7 +407,7 @@ cpu_supports_btrace (void)
 /* See linux-btrace.h.  */
 
 int
-linux_supports_btrace (void)
+linux_supports_btrace (struct target_ops *ops)
 {
   static int cached;
 
@@ -600,7 +600,7 @@ linux_read_btrace (VEC (btrace_block_s) **btrace,
 /* See linux-btrace.h.  */
 
 int
-linux_supports_btrace (void)
+linux_supports_btrace (struct target_ops *ops)
 {
   return 0;
 }

@@ -1766,7 +1766,7 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
   else
     {
       /* Pattern is longer than or equal to count:
-         just copy len bytes.  */
+         just copy count bytes.  */
       data = databuf;
     }
 

@@ -165,7 +165,7 @@ static int windows_initialization_done;
 #define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
-static void windows_stop (ptid_t);
+static void windows_stop (struct target_ops *self, ptid_t);
 static int windows_thread_alive (struct target_ops *, ptid_t);
 static void windows_kill_inferior (struct target_ops *);
 
@@ -1994,7 +1994,7 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
 }
 
 static char *
-windows_pid_to_exec_file (int pid)
+windows_pid_to_exec_file (struct target_ops *self, int pid)
 {
   static char path[__PMAX];
 #ifdef __CYGWIN__
@@ -2403,7 +2403,7 @@ windows_mourn_inferior (struct target_ops *ops)
    ^C on the controlling terminal.  */
 
 static void
-windows_stop (ptid_t ptid)
+windows_stop (struct target_ops *self, ptid_t ptid)
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));
@@ -2413,9 +2413,9 @@ windows_stop (ptid_t ptid)
 /* Helper for windows_xfer_partial that handles memory transfers.
    Arguments are like target_xfer_partial.  */
 
-static LONGEST
+static enum target_xfer_status
 windows_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST memaddr, ULONGEST len)
+		     ULONGEST memaddr, ULONGEST len, ULONGEST *xfered_len)
 {
   SIZE_T done = 0;
   BOOL success;
@@ -2443,10 +2443,11 @@ windows_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
       if (!success)
 	lasterror = GetLastError ();
     }
+  *xfered_len = (ULONGEST) done;
   if (!success && lasterror == ERROR_PARTIAL_COPY && done > 0)
-    return done;
+    return TARGET_XFER_OK;
   else
-    return success ? done : TARGET_XFER_E_IO;
+    return success ? TARGET_XFER_OK : TARGET_XFER_E_IO;
 }
 
 static void
@@ -2474,13 +2475,13 @@ windows_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 }
 
 static int
-windows_can_run (void)
+windows_can_run (struct target_ops *self)
 {
   return 1;
 }
 
 static void
-windows_close (void)
+windows_close (struct target_ops *self)
 {
   DEBUG_EVENTS (("gdb: windows_close, inferior_ptid=%d\n",
 		ptid_get_pid (inferior_ptid)));
@@ -2502,11 +2503,12 @@ windows_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-static LONGEST
+static enum target_xfer_status
 windows_xfer_shared_libraries (struct target_ops *ops,
-			     enum target_object object, const char *annex,
-			     gdb_byte *readbuf, const gdb_byte *writebuf,
-			     ULONGEST offset, ULONGEST len)
+			       enum target_object object, const char *annex,
+			       gdb_byte *readbuf, const gdb_byte *writebuf,
+			       ULONGEST offset, ULONGEST len,
+			       ULONGEST *xfered_len)
 {
   struct obstack obstack;
   const char *buf;
@@ -2536,27 +2538,30 @@ windows_xfer_shared_libraries (struct target_ops *ops,
     }
 
   obstack_free (&obstack, NULL);
-  return len;
+  *xfered_len = (ULONGEST) len;
+  return TARGET_XFER_OK;
 }
 
-static LONGEST
+static enum target_xfer_status
 windows_xfer_partial (struct target_ops *ops, enum target_object object,
-		    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		      const char *annex, gdb_byte *readbuf,
+		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		      ULONGEST *xfered_len)
 {
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      return windows_xfer_memory (readbuf, writebuf, offset, len);
+      return windows_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
 
     case TARGET_OBJECT_LIBRARIES:
       return windows_xfer_shared_libraries (ops, object, annex, readbuf,
-					  writebuf, offset, len);
+					    writebuf, offset, len, xfered_len);
 
     default:
       if (ops->beneath != NULL)
 	return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					      readbuf, writebuf, offset, len);
+					      readbuf, writebuf, offset, len,
+					      xfered_len);
       return TARGET_XFER_E_IO;
     }
 }
@@ -2565,7 +2570,8 @@ windows_xfer_partial (struct target_ops *ops, enum target_object object,
    Returns 1 if ptid is found and sets *ADDR to thread_local_base.  */
 
 static int
-windows_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+windows_get_tib_address (struct target_ops *self,
+			 ptid_t ptid, CORE_ADDR *addr)
 {
   thread_info *th;
 
@@ -2580,7 +2586,7 @@ windows_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 }
 
 static ptid_t
-windows_get_ada_task_ptid (long lwp, long thread)
+windows_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
 }

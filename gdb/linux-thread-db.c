@@ -1772,7 +1772,8 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
    INFO.  */
 
 static char *
-thread_db_extra_thread_info (struct thread_info *info)
+thread_db_extra_thread_info (struct target_ops *self,
+			     struct thread_info *info)
 {
   if (info->private == NULL)
     return NULL;
@@ -1874,7 +1875,7 @@ thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
 /* Implement the to_get_ada_task_ptid target method for this target.  */
 
 static ptid_t
-thread_db_get_ada_task_ptid (long lwp, long thread)
+thread_db_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   struct thread_info *thread_info;
 

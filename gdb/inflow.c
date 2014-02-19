@@ -245,7 +245,7 @@ terminal_init_inferior_with_pgrp (int pgrp)
    and gdb must be able to restore it correctly.  */
 
 void
-terminal_save_ours (void)
+terminal_save_ours (struct target_ops *self)
 {
   if (gdb_has_a_terminal ())
     {
@@ -255,7 +255,7 @@ terminal_save_ours (void)
 }
 
 void
-terminal_init_inferior (void)
+terminal_init_inferior (struct target_ops *self)
 {
 #ifdef PROCESS_GROUP_TYPE
   /* This is for Lynx, and should be cleaned up by having Lynx be a separate
@@ -272,7 +272,7 @@ terminal_init_inferior (void)
    This is preparation for starting or resuming the inferior.  */
 
 void
-terminal_inferior (void)
+terminal_inferior (struct target_ops *self)
 {
   struct inferior *inf;
   struct terminal_info *tinfo;
@@ -353,7 +353,7 @@ terminal_inferior (void)
    should be called to get back to a normal state of affairs.  */
 
 void
-terminal_ours_for_output (void)
+terminal_ours_for_output (struct target_ops *self)
 {
   terminal_ours_1 (1);
 }
@@ -363,7 +363,7 @@ terminal_ours_for_output (void)
    so they can be restored properly later.  */
 
 void
-terminal_ours (void)
+terminal_ours (struct target_ops *self)
 {
   terminal_ours_1 (0);
 }
@@ -562,7 +562,7 @@ term_info (char *arg, int from_tty)
 }
 
 void
-child_terminal_info (const char *args, int from_tty)
+child_terminal_info (struct target_ops *self, const char *args, int from_tty)
 {
   struct inferior *inf;
   struct terminal_info *tinfo;

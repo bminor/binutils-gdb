@@ -374,16 +374,13 @@ rs6000_store_inferior_registers (struct target_ops *ops,
     }
 }
 
+/* Implement the to_xfer_partial target_ops method.  */
 
-/* Attempt a transfer all LEN bytes starting at OFFSET between the
-   inferior's OBJECT:ANNEX space and GDB's READBUF/WRITEBUF buffer.
-   Return the number of bytes actually transferred.  */
-
-static LONGEST
+static enum target_xfer_status
 rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
 		     const gdb_byte *writebuf,
-		     ULONGEST offset, ULONGEST len)
+		     ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   int arch64 = ARCH64 ();
@@ -393,7 +390,7 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
     case TARGET_OBJECT_LIBRARIES_AIX:
       return rs6000_xfer_shared_libraries (ops, object, annex,
 					   readbuf, writebuf,
-					   offset, len);
+					   offset, len, xfered_len);
     case TARGET_OBJECT_MEMORY:
       {
 	union
@@ -451,7 +448,7 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
 			       (int *) (uintptr_t) rounded_offset,
 			       buffer.word, NULL);
 	    if (errno)
-	      return 0;
+	      return TARGET_XFER_EOF;
 	  }
 
 	if (readbuf)
@@ -465,14 +462,15 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
 					     (int *)(uintptr_t)rounded_offset,
 					     0, NULL);
 	    if (errno)
-	      return 0;
+	      return TARGET_XFER_EOF;
 
 	    /* Copy appropriate bytes out of the buffer.  */
 	    memcpy (readbuf, buffer.byte + (offset - rounded_offset),
 		    partial_len);
 	  }
 
-	return partial_len;
+	*xfered_len = (ULONGEST) partial_len;
+	return TARGET_XFER_OK;
       }
 
     default:
@@ -682,11 +680,11 @@ rs6000_ptrace_ldinfo (ptid_t ptid)
 /* Implement the to_xfer_partial target_ops method for
    TARGET_OBJECT_LIBRARIES_AIX objects.  */
 
-static LONGEST
+static enum target_xfer_status
 rs6000_xfer_shared_libraries
   (struct target_ops *ops, enum target_object object,
    const char *annex, gdb_byte *readbuf, const gdb_byte *writebuf,
-   ULONGEST offset, ULONGEST len)
+   ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   gdb_byte *ldi_buf;
   ULONGEST result;
@@ -707,7 +705,14 @@ rs6000_xfer_shared_libraries
   xfree (ldi_buf);
 
   do_cleanups (cleanup);
-  return result;
+
+  if (result == 0)
+    return TARGET_XFER_EOF;
+  else
+    {
+      *xfered_len = result;
+      return TARGET_XFER_OK;
+    }
 }
 
 void _initialize_rs6000_nat (void);

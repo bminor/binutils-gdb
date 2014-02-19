@@ -2,6 +2,18 @@
 
 	* po/gold.pot: Regenerate.
 
+2014-02-06  Cary Coutant  <ccoutant@google.com>
+
+	Fix problem where -u is ignored when a weak undef is seen.
+
+	* archive.cc (Library_base::should_include_member): Reorder
+	code to check for -u option if a weak undef has already been seen.
+	* testsuite/Makefile.am (weak_undef_test_2): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/weak_undef_file3.cc: New file.
+	* testsuite/weak_undef_file4.cc: New file.
+	* testsuite/weak_undef_test_2.cc: New file.
+
 2014-02-05  Cary Coutant  <ccoutant@google.com>
 
 	Fix issues with gold undefined symbol diagnostics.

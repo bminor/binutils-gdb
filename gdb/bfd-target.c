@@ -36,12 +36,13 @@ struct target_bfd_data
   struct target_section_table table;
 };
 
-static LONGEST
+static enum target_xfer_status
 target_bfd_xfer_partial (struct target_ops *ops,
 			 enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
 			 const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len)
+			 ULONGEST offset, ULONGEST len,
+			 ULONGEST *xfered_len)
 {
   switch (object)
     {
@@ -49,7 +50,7 @@ target_bfd_xfer_partial (struct target_ops *ops,
       {
 	struct target_bfd_data *data = ops->to_data;
 	return section_table_xfer_memory_partial (readbuf, writebuf,
-						  offset, len,
+						  offset, len, xfered_len,
 						  data->table.sections,
 						  data->table.sections_end,
 						  NULL);

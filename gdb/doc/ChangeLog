@@ -1,3 +1,38 @@
+2014-02-17  Doug Evans  <xdje42@gmail.com>
+
+	* Makefile.in (GDB_DOC_FILES): Add python.texi.
+	* gdb.texinfo (Python): Moved to ...
+	* python.texi: ... here.  New file.
+
+2014-02-17  Ludovic Courtès  <ludo@gnu.org>
+
+	* guile.texi (Writing a Guile Pretty-Printer) <example>:
+	Remove 'string-begins-with' procedure.  Add 'pretty-printer'
+	parameter to 'str-lookup-function' procedure.  Look for
+	the "std::string<" prefix.
+	(Frames In Guile): Add 'frame' parameter to 'frame-read-var'.
+	Adjust description.
+
+2014-02-11  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* guile.texi (Values From Inferior In Guile): Remove stray
+	parantheses for deffn.
+	(Disassembly In Guile): Ditto.
+
+2014-02-10  Stan Shebs  <stan@codesourcery.com>
+
+	Add Doxygen support.
+	* Makefile.in (doxy): New action, generates Doxygen files.
+	(DOXYGEN): New.
+	(doxyedit): New.
+	* Doxyfile-base.in: New file.
+	* Doxyfile-gdb-api.in: New file.
+	* Doxyfile-gdb-xref.in: New file.
+	* Doxyfile-gdbserver.in: New file.
+	* doxy-index.in: New file.
+	* filter-for-doxygen: New file.
+	* filter-params.pl: New file.
+
 2014-02-10  Doug Evans  <xdje42@gmail.com>
 
 	* Makefile.in (GDB_DOC_FILES): Add guile.texi.

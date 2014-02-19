@@ -886,7 +886,7 @@ The length must be a Scheme integer and not a @code{<gdb:value>} integer.
 @end deffn
 
 @c TODO: line length
-@deffn {Scheme Procedure} value->lazy-string value @r{[}#:encoding encoding@r{]} @r{[}#:length length@r{]})
+@deffn {Scheme Procedure} value->lazy-string value @r{[}#:encoding encoding@r{]} @r{[}#:length length@r{]}
 If this @code{<gdb:value>} represents a string, then this method
 converts @var{value} to a @code{<gdb:lazy-string} (@pxref{Lazy Strings
 In Guile}).  Otherwise, this method will throw an exception.
@@ -1545,14 +1545,11 @@ And here is an example showing how a lookup function for the printer
 example above might be written.
 
 @smallexample
-(define (string-begins-with str prefix)
-  (= (string-prefix-length str prefix) (string-length prefix)))
-
-(define (str-lookup-function value)
+(define (str-lookup-function pretty-printer value)
   (let ((tag (type-tag (value-type value))))
     (and tag
-         (string-begins-with tag "my::string<")
-         (make-std-string-printer value))))
+         (string-prefix? "std::string<" tag)
+         (make-my-string-printer value))))
 @end smallexample
 
 Then to register this printer in the global printer list:
@@ -1893,8 +1890,8 @@ Return the frame's @code{<gdb:sal>} (symtab and line) object.
 @xref{Symbol Tables In Guile}.
 @end deffn
 
-@deffn {Scheme Procedure} frame-read-var variable @r{[}#:block block@r{]}
-Return the value of @var{variable} in this frame.  If the optional
+@deffn {Scheme Procedure} frame-read-var frame variable @r{[}#:block block@r{]}
+Return the value of @var{variable} in @var{frame}.  If the optional
 argument @var{block} is provided, search for the variable from that
 block; otherwise start at the frame's current block (which is
 determined by the frame's current program counter).  @var{variable}
@@ -2854,7 +2851,7 @@ Furthermore, the disassembler can take a Guile port as input,
 allowing one to disassemble from any source, and not just target memory.
 
 @c TODO: line length
-@deffn {Scheme Procedure} arch-disassemble arch start-pc @r{[}#:port port@r{]} @r{[}#:offset offset@r{]} @r{[}#:size size@r{]} @r{[}#:count count@r{]})
+@deffn {Scheme Procedure} arch-disassemble arch start-pc @r{[}#:port port@r{]} @r{[}#:offset offset@r{]} @r{[}#:size size@r{]} @r{[}#:count count@r{]}
 Return a list of disassembled instructions starting from the memory
 address @var{start-pc}.
 

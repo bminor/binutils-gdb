@@ -68,6 +68,9 @@ gdb_continue_to_breakpoint "run to breakpoint"
 gdb_test "info threads" "" "info threads with thread 3"
 
 set testpid [get_value "pid" "get pid of inferior"]
+if { $testpid == -1 } {
+    return -1
+}
 
 gdb_test "set scheduler-locking on"
 

@@ -568,13 +568,14 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-static void (*super_post_startup_inferior) (ptid_t ptid);
+static void (*super_post_startup_inferior) (struct target_ops *self,
+					    ptid_t ptid);
 
 static void
-amd64_linux_child_post_startup_inferior (ptid_t ptid)
+amd64_linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
   i386_cleanup_dregs ();
-  super_post_startup_inferior (ptid);
+  super_post_startup_inferior (self, ptid);
 }
 
 
@@ -1149,7 +1150,7 @@ amd64_linux_read_description (struct target_ops *ops)
 /* Enable branch tracing.  */
 
 static struct btrace_target_info *
-amd64_linux_enable_btrace (ptid_t ptid)
+amd64_linux_enable_btrace (struct target_ops *self, ptid_t ptid)
 {
   struct btrace_target_info *tinfo;
   struct gdbarch *gdbarch;
@@ -1171,7 +1172,8 @@ amd64_linux_enable_btrace (ptid_t ptid)
 /* Disable branch tracing.  */
 
 static void
-amd64_linux_disable_btrace (struct btrace_target_info *tinfo)
+amd64_linux_disable_btrace (struct target_ops *self,
+			    struct btrace_target_info *tinfo)
 {
   enum btrace_error errcode = linux_disable_btrace (tinfo);
 
@@ -1182,10 +1184,20 @@ amd64_linux_disable_btrace (struct btrace_target_info *tinfo)
 /* Teardown branch tracing.  */
 
 static void
-amd64_linux_teardown_btrace (struct btrace_target_info *tinfo)
+amd64_linux_teardown_btrace (struct target_ops *self,
+			     struct btrace_target_info *tinfo)
 {
   /* Ignore errors.  */
   linux_disable_btrace (tinfo);
+}
+
+static enum btrace_error
+amd64_linux_read_btrace (struct target_ops *self,
+			 VEC (btrace_block_s) **data,
+			 struct btrace_target_info *btinfo,
+			 enum btrace_read_type type)
+{
+  return linux_read_btrace (data, btinfo, type);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
@@ -1231,7 +1243,7 @@ _initialize_amd64_linux_nat (void)
   t->to_enable_btrace = amd64_linux_enable_btrace;
   t->to_disable_btrace = amd64_linux_disable_btrace;
   t->to_teardown_btrace = amd64_linux_teardown_btrace;
-  t->to_read_btrace = linux_read_btrace;
+  t->to_read_btrace = amd64_linux_read_btrace;
 
   /* Register the target.  */
   linux_nat_add_target (t);

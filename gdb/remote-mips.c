@@ -84,7 +84,7 @@ static void ddb_open (char *name, int from_tty);
 
 static void lsi_open (char *name, int from_tty);
 
-static void mips_close (void);
+static void mips_close (struct target_ops *self);
 
 static int mips_map_regno (struct gdbarch *, int);
 
@@ -128,7 +128,7 @@ static void pmon_download (char *buffer, int length);
 
 static void pmon_load_fast (char *file);
 
-static void mips_load (char *file, int from_tty);
+static void mips_load (struct target_ops *self, char *file, int from_tty);
 
 static int mips_make_srec (char *buffer, int type, CORE_ADDR memaddr,
 			   unsigned char *myaddr, int len);
@@ -1732,7 +1732,7 @@ lsi_open (char *name, int from_tty)
 /* Close a connection to the remote board.  */
 
 static void
-mips_close (void)
+mips_close (struct target_ops *self)
 {
   if (mips_is_open)
     {
@@ -2391,7 +2391,8 @@ mips_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
    implements the target_can_use_hardware_watchpoint macro.  */
 
 static int
-mips_can_use_watchpoint (int type, int cnt, int othertype)
+mips_can_use_watchpoint (struct target_ops *self,
+			 int type, int cnt, int othertype)
 {
   return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
 }
@@ -2425,7 +2426,8 @@ calculate_mask (CORE_ADDR addr, int len)
    watchpoint.  */
 
 static int
-mips_insert_watchpoint (CORE_ADDR addr, int len, int type,
+mips_insert_watchpoint (struct target_ops *self,
+			CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   if (mips_set_breakpoint (addr, len, type))
@@ -2437,7 +2439,8 @@ mips_insert_watchpoint (CORE_ADDR addr, int len, int type,
 /* Remove a watchpoint.  */
 
 static int
-mips_remove_watchpoint (CORE_ADDR addr, int len, int type,
+mips_remove_watchpoint (struct target_ops *self,
+			CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   if (mips_clear_breakpoint (addr, len, type))
@@ -2450,7 +2453,7 @@ mips_remove_watchpoint (CORE_ADDR addr, int len, int type,
    if not.  */
 
 static int
-mips_stopped_by_watchpoint (void)
+mips_stopped_by_watchpoint (struct target_ops *ops)
 {
   return hit_watchpoint;
 }
@@ -3527,7 +3530,7 @@ pmon_load_fast (char *file)
 /* mips_load -- download a file.  */
 
 static void
-mips_load (char *file, int from_tty)
+mips_load (struct target_ops *self, char *file, int from_tty)
 {
   struct regcache *regcache;
 

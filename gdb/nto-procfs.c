@@ -57,7 +57,7 @@ static procfs_run run;
 
 static void procfs_open (char *, int);
 
-static int procfs_can_run (void);
+static int procfs_can_run (struct target_ops *self);
 
 static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
@@ -67,15 +67,18 @@ static void init_procfs_ops (void);
 
 static ptid_t do_attach (ptid_t ptid);
 
-static int procfs_can_use_hw_breakpoint (int, int, int);
+static int procfs_can_use_hw_breakpoint (struct target_ops *self,
+					 int, int, int);
 
-static int procfs_insert_hw_watchpoint (CORE_ADDR addr, int len, int type,
+static int procfs_insert_hw_watchpoint (struct target_ops *self,
+					CORE_ADDR addr, int len, int type,
 					struct expression *cond);
 
-static int procfs_remove_hw_watchpoint (CORE_ADDR addr, int len, int type,
+static int procfs_remove_hw_watchpoint (struct target_ops *self,
+					CORE_ADDR addr, int len, int type,
 					struct expression *cond);
 
-static int procfs_stopped_by_watchpoint (void);
+static int procfs_stopped_by_watchpoint (struct target_ops *ops);
 
 /* These two globals are only ever set in procfs_open(), but are
    referenced elsewhere.  'nto_procfs_node' is a flag used to say
@@ -606,7 +609,7 @@ procfs_files_info (struct target_ops *ignore)
 /* Mark our target-struct as eligible for stray "run" and "attach"
    commands.  */
 static int
-procfs_can_run (void)
+procfs_can_run (struct target_ops *self)
 {
   return 1;
 }
@@ -648,7 +651,7 @@ procfs_attach (struct target_ops *ops, char *args, int from_tty)
 }
 
 static void
-procfs_post_attach (pid_t pid)
+procfs_post_attach (struct target_ops *self, pid_t pid)
 {
   if (exec_bfd)
     solib_create_inferior_hook (0);
@@ -936,7 +939,7 @@ procfs_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 }
 
 static int
-procfs_insert_hw_breakpoint (struct gdbarch *gdbarch,
+procfs_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			     struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address,
@@ -944,7 +947,8 @@ procfs_insert_hw_breakpoint (struct gdbarch *gdbarch,
 }
 
 static int
-procfs_remove_hw_breakpoint (struct gdbarch *gdbarch,
+procfs_remove_hw_breakpoint (struct target_ops *self,
+			     struct gdbarch *gdbarch,
 			     struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address,
@@ -1215,7 +1219,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
 }
 
 static void
-procfs_stop (ptid_t ptid)
+procfs_stop (struct target_ops *self, ptid_t ptid)
 {
   devctl (ctl_fd, DCMD_PROC_STOP, NULL, 0, 0);
 }
@@ -1333,7 +1337,8 @@ procfs_store_registers (struct target_ops *ops,
 /* Set list of signals to be handled in the target.  */
 
 static void
-procfs_pass_signals (int numsigs, unsigned char *pass_signals)
+procfs_pass_signals (struct target_ops *self,
+		     int numsigs, unsigned char *pass_signals)
 {
   int signo;
 
@@ -1398,7 +1403,7 @@ init_procfs_ops (void)
   procfs_ops.to_remove_breakpoint = procfs_remove_breakpoint;
   procfs_ops.to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
   procfs_ops.to_insert_hw_breakpoint = procfs_insert_hw_breakpoint;
-  procfs_ops.to_remove_hw_breakpoint = procfs_remove_breakpoint;
+  procfs_ops.to_remove_hw_breakpoint = procfs_remove_hw_breakpoint;
   procfs_ops.to_insert_watchpoint = procfs_insert_hw_watchpoint;
   procfs_ops.to_remove_watchpoint = procfs_remove_hw_watchpoint;
   procfs_ops.to_stopped_by_watchpoint = procfs_stopped_by_watchpoint;
@@ -1488,27 +1493,30 @@ procfs_hw_watchpoint (int addr, int len, int type)
 }
 
 static int
-procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
+procfs_can_use_hw_breakpoint (struct target_ops *self,
+			      int type, int cnt, int othertype)
 {
   return 1;
 }
 
 static int
-procfs_remove_hw_watchpoint (CORE_ADDR addr, int len, int type,
+procfs_remove_hw_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int type,
 			     struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, -1, type);
 }
 
 static int
-procfs_insert_hw_watchpoint (CORE_ADDR addr, int len, int type,
+procfs_insert_hw_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int type,
 			     struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, len, type);
 }
 
 static int
-procfs_stopped_by_watchpoint (void)
+procfs_stopped_by_watchpoint (struct target_ops *ops)
 {
   return 0;
 }

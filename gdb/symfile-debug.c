@@ -283,11 +283,11 @@ debug_qf_map_matching_symbols (struct objfile *objfile,
 }
 
 static void
-debug_qf_expand_symtabs_matching (struct objfile *objfile,
-				expand_symtabs_file_matcher_ftype *file_matcher,
-			    expand_symtabs_symbol_matcher_ftype *symbol_matcher,
-				  enum search_domain kind,
-				  void *data)
+debug_qf_expand_symtabs_matching
+  (struct objfile *objfile,
+   expand_symtabs_file_matcher_ftype *file_matcher,
+   expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+   enum search_domain kind, void *data)
 {
   const struct debug_sym_fns_data *debug_data =
     objfile_data (objfile, symfile_debug_objfile_data_key);

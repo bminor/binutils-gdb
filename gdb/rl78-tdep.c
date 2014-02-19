@@ -385,6 +385,136 @@ rl78_register_name (struct gdbarch *gdbarch, int regnr)
   return reg_names[regnr];
 }
 
+/* Implement the "register_name" gdbarch method for the g10 variant.  */
+
+static const char *
+rl78_g10_register_name (struct gdbarch *gdbarch, int regnr)
+{
+  static const char *const reg_names[] =
+  {
+    "",		/* bank0_r0 */
+    "",		/* bank0_r1 */
+    "",		/* bank0_r2 */
+    "",		/* bank0_r3 */
+    "",		/* bank0_r4 */
+    "",		/* bank0_r5 */
+    "",		/* bank0_r6 */
+    "",		/* bank0_r7 */
+
+    "",		/* bank1_r0 */
+    "",		/* bank1_r1 */
+    "",		/* bank1_r2 */
+    "",		/* bank1_r3 */
+    "",		/* bank1_r4 */
+    "",		/* bank1_r5 */
+    "",		/* bank1_r6 */
+    "",		/* bank1_r7 */
+
+    "",		/* bank2_r0 */
+    "",		/* bank2_r1 */
+    "",		/* bank2_r2 */
+    "",		/* bank2_r3 */
+    "",		/* bank2_r4 */
+    "",		/* bank2_r5 */
+    "",		/* bank2_r6 */
+    "",		/* bank2_r7 */
+
+    "",		/* bank3_r0 */
+    "",		/* bank3_r1 */
+    "",		/* bank3_r2 */
+    "",		/* bank3_r3 */
+    "",		/* bank3_r4 */
+    "",		/* bank3_r5 */
+    "",		/* bank3_r6 */
+    "",		/* bank3_r7 */
+
+    "psw",
+    "es",
+    "cs",
+    "",
+
+    "",		/* spl */
+    "",		/* sph */
+    "pmc",
+    "mem",
+
+    "pc",
+    "sp",
+
+    "x",
+    "a",
+    "c",
+    "b",
+    "e",
+    "d",
+    "l",
+    "h",
+
+    "ax",
+    "bc",
+    "de",
+    "hl",
+
+    "bank0_r0",
+    "bank0_r1",
+    "bank0_r2",
+    "bank0_r3",
+    "bank0_r4",
+    "bank0_r5",
+    "bank0_r6",
+    "bank0_r7",
+
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    "bank0_rp0",
+    "bank0_rp1",
+    "bank0_rp2",
+    "bank0_rp3",
+
+    "",
+    "",
+    "",
+    "",
+
+    "",
+    "",
+    "",
+    "",
+
+    "",
+    "",
+    "",
+    ""
+  };
+
+  return reg_names[regnr];
+}
+
 /* Implement the "register_reggroup_p" gdbarch method.  */
 
 static int
@@ -974,6 +1104,7 @@ rl78_return_value (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST valtype_len = TYPE_LENGTH (valtype);
+  int is_g10 = gdbarch_tdep (gdbarch)->elf_flags & E_FLAG_RL78_G10;
 
   if (valtype_len > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -982,15 +1113,21 @@ rl78_return_value (struct gdbarch *gdbarch,
     {
       ULONGEST u;
       int argreg = RL78_RAW_BANK1_R0_REGNUM;
+      CORE_ADDR g10_raddr = 0xffec8;
       int offset = 0;
 
       while (valtype_len > 0)
 	{
-	  regcache_cooked_read_unsigned (regcache, argreg, &u);
+	  if (is_g10)
+	    u = read_memory_integer (g10_raddr, 1,
+	                             gdbarch_byte_order (gdbarch));
+	  else
+	    regcache_cooked_read_unsigned (regcache, argreg, &u);
 	  store_unsigned_integer (readbuf + offset, 1, byte_order, u);
 	  valtype_len -= 1;
 	  offset += 1;
 	  argreg++;
+	  g10_raddr++;
 	}
     }
 
@@ -998,15 +1135,22 @@ rl78_return_value (struct gdbarch *gdbarch,
     {
       ULONGEST u;
       int argreg = RL78_RAW_BANK1_R0_REGNUM;
+      CORE_ADDR g10_raddr = 0xffec8;
       int offset = 0;
 
       while (valtype_len > 0)
 	{
 	  u = extract_unsigned_integer (writebuf + offset, 1, byte_order);
-	  regcache_cooked_write_unsigned (regcache, argreg, u);
+	  if (is_g10) {
+	    gdb_byte b = u & 0xff;
+	    write_memory (g10_raddr, &b, 1);
+	  }
+	  else
+	    regcache_cooked_write_unsigned (regcache, argreg, u);
 	  valtype_len -= 1;
 	  offset += 1;
 	  argreg++;
+	  g10_raddr++;
 	}
     }
 
@@ -1140,7 +1284,10 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Registers.  */
   set_gdbarch_num_regs (gdbarch, RL78_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, RL78_NUM_PSEUDO_REGS);
-  set_gdbarch_register_name (gdbarch, rl78_register_name);
+  if (tdep->elf_flags & E_FLAG_RL78_G10)
+    set_gdbarch_register_name (gdbarch, rl78_g10_register_name);
+  else
+    set_gdbarch_register_name (gdbarch, rl78_register_name);
   set_gdbarch_register_type (gdbarch, rl78_register_type);
   set_gdbarch_pc_regnum (gdbarch, RL78_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, RL78_SP_REGNUM);

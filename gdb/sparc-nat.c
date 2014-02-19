@@ -256,12 +256,14 @@ sparc_store_inferior_registers (struct target_ops *ops,
 }
 
 
-/* Fetch StackGhost Per-Process XOR cookie.  */
+/* Implement the to_xfer_partial target_ops method for
+   TARGET_OBJECT_WCOOKIE.  Fetch StackGhost Per-Process XOR cookie.  */
 
-static LONGEST
+static enum target_xfer_status
 sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		    ULONGEST *xfered_len)
 {
   unsigned long wcookie = 0;
   char *buf = (char *)&wcookie;
@@ -270,7 +272,7 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   gdb_assert (readbuf && writebuf == NULL);
 
   if (offset == sizeof (unsigned long))
-    return 0;			/* Signal EOF.  */
+    return TARGET_XFER_EOF;			/* Signal EOF.  */
   if (offset > sizeof (unsigned long))
     return TARGET_XFER_E_IO;
 
@@ -310,22 +312,24 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
     len = sizeof (unsigned long) - offset;
 
   memcpy (readbuf, buf + offset, len);
-  return len;
+  *xfered_len = (ULONGEST) len;
+  return TARGET_XFER_OK;
 }
 
 target_xfer_partial_ftype *inf_ptrace_xfer_partial;
 
-static LONGEST
+static enum target_xfer_status
 sparc_xfer_partial (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len)
+		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		    ULONGEST *xfered_len)
 {
   if (object == TARGET_OBJECT_WCOOKIE)
     return sparc_xfer_wcookie (ops, object, annex, readbuf, writebuf, 
-			       offset, len);
+			       offset, len, xfered_len);
 
   return inf_ptrace_xfer_partial (ops, object, annex, readbuf, writebuf,
-				  offset, len);
+				  offset, len, xfered_len);
 }
 
 /* Create a prototype generic SPARC target.  The client can override

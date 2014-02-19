@@ -52,11 +52,10 @@ static const char first_task_name[] = "system__tasking__debug__first_task";
 static const char ravenscar_runtime_initializer[] =
   "system__bb__threads__initialize";
 
-static struct observer *update_target_observer = NULL;
-
 static void ravenscar_find_new_threads (struct target_ops *ops);
 static ptid_t ravenscar_running_thread (void);
-static char *ravenscar_extra_thread_info (struct thread_info *tp);
+static char *ravenscar_extra_thread_info (struct target_ops *self,
+					  struct thread_info *tp);
 static int ravenscar_thread_alive (struct target_ops *ops, ptid_t ptid);
 static void ravenscar_fetch_registers (struct target_ops *ops,
                                        struct regcache *regcache, int regnum);
@@ -242,7 +241,7 @@ ravenscar_running_thread (void)
 }
 
 static char *
-ravenscar_extra_thread_info (struct thread_info *tp)
+ravenscar_extra_thread_info (struct target_ops *self, struct thread_info *tp)
 {
   return "Ravenscar task";
 }
@@ -351,7 +350,7 @@ ravenscar_inferior_created (struct target_ops *target, int from_tty)
 }
 
 static ptid_t
-ravenscar_get_ada_task_ptid (long lwp, long thread)
+ravenscar_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (base_ptid), 0, thread);
 }

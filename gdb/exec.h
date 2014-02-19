@@ -74,11 +74,13 @@ extern VEC(mem_range_s) *
 
    One, and only one, of readbuf or writebuf must be non-NULL.  */
 
-extern int section_table_xfer_memory_partial (gdb_byte *, const gdb_byte *,
-					      ULONGEST, ULONGEST,
-					      struct target_section *,
-					      struct target_section *,
-					      const char *);
+extern enum target_xfer_status
+  section_table_xfer_memory_partial (gdb_byte *,
+				     const gdb_byte *,
+				     ULONGEST, ULONGEST, ULONGEST *,
+				     struct target_section *,
+				     struct target_section *,
+				     const char *);
 
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);

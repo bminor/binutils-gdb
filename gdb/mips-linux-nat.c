@@ -512,7 +512,8 @@ mips_show_dr (const char *func, CORE_ADDR addr,
    handle the specified watch type.  */
 
 static int
-mips_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
+mips_linux_can_use_hw_breakpoint (struct target_ops *self,
+				  int type, int cnt, int ot)
 {
   int i;
   uint32_t wanted_mask, irw_mask;
@@ -553,7 +554,7 @@ mips_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
    register triggered.  */
 
 static int
-mips_linux_stopped_by_watchpoint (void)
+mips_linux_stopped_by_watchpoint (struct target_ops *ops)
 {
   int n;
   int num_valid;
@@ -588,7 +589,8 @@ mips_linux_stopped_data_address (struct target_ops *t, CORE_ADDR *paddr)
    the specified region can be covered by the watch registers.  */
 
 static int
-mips_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+mips_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
+					CORE_ADDR addr, int len)
 {
   struct pt_watch_regs dummy_regs;
   int i;
@@ -644,7 +646,8 @@ mips_linux_new_thread (struct lwp_info *lp)
    watch.  Return zero on success.  */
 
 static int
-mips_linux_insert_watchpoint (CORE_ADDR addr, int len, int type,
+mips_linux_insert_watchpoint (struct target_ops *self,
+			      CORE_ADDR addr, int len, int type,
 			      struct expression *cond)
 {
   struct pt_watch_regs regs;
@@ -697,7 +700,8 @@ mips_linux_insert_watchpoint (CORE_ADDR addr, int len, int type,
    Return zero on success.  */
 
 static int
-mips_linux_remove_watchpoint (CORE_ADDR addr, int len, int type,
+mips_linux_remove_watchpoint (struct target_ops *self,
+			      CORE_ADDR addr, int len, int type,
 			      struct expression *cond)
 {
   int retval;
@@ -744,7 +748,7 @@ mips_linux_remove_watchpoint (CORE_ADDR addr, int len, int type,
    super implementation.  */
 
 static void
-mips_linux_close (void)
+mips_linux_close (struct target_ops *self)
 {
   struct mips_watchpoint *w;
   struct mips_watchpoint *nw;

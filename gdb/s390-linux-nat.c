@@ -433,7 +433,7 @@ struct watch_area
 static struct watch_area *watch_base = NULL;
 
 static int
-s390_stopped_by_watchpoint (void)
+s390_stopped_by_watchpoint (struct target_ops *ops)
 {
   per_lowcore_bits per_lowcore;
   ptrace_area parea;
@@ -508,7 +508,8 @@ s390_fix_watch_points (struct lwp_info *lp)
 }
 
 static int
-s390_insert_watchpoint (CORE_ADDR addr, int len, int type,
+s390_insert_watchpoint (struct target_ops *self,
+			CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   struct lwp_info *lp;
@@ -529,7 +530,8 @@ s390_insert_watchpoint (CORE_ADDR addr, int len, int type,
 }
 
 static int
-s390_remove_watchpoint (CORE_ADDR addr, int len, int type,
+s390_remove_watchpoint (struct target_ops *self,
+			CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   struct lwp_info *lp;
@@ -557,13 +559,15 @@ s390_remove_watchpoint (CORE_ADDR addr, int len, int type,
 }
 
 static int
-s390_can_use_hw_breakpoint (int type, int cnt, int othertype)
+s390_can_use_hw_breakpoint (struct target_ops *self,
+			    int type, int cnt, int othertype)
 {
   return type == bp_hardware_watchpoint;
 }
 
 static int
-s390_region_ok_for_hw_watchpoint (CORE_ADDR addr, int cnt)
+s390_region_ok_for_hw_watchpoint (struct target_ops *self,
+				  CORE_ADDR addr, int cnt)
 {
   return 1;
 }

@@ -234,7 +234,6 @@ static int dr_ref_count[4];
 #define SOME_PID 42
 
 static int prog_has_started = 0;
-
 static void go32_mourn_inferior (struct target_ops *ops);
 
 static struct target_ops go32_ops;
@@ -347,7 +346,7 @@ go32_open (char *name, int from_tty)
 }
 
 static void
-go32_close (void)
+go32_close (struct target_ops *self)
 {
 }
 
@@ -738,7 +737,7 @@ go32_mourn_inferior (struct target_ops *ops)
 }
 
 static int
-go32_can_run (void)
+go32_can_run (struct target_ops *self)
 {
   return 1;
 }
@@ -846,14 +845,14 @@ static int inf_terminal_mode;
 static int terminal_is_ours = 1;
 
 static void
-go32_terminal_init (void)
+go32_terminal_init (struct target_ops *self)
 {
   inf_mode_valid = 0;	/* Reinitialize, in case they are restarting child.  */
   terminal_is_ours = 1;
 }
 
 static void
-go32_terminal_info (const char *args, int from_tty)
+go32_terminal_info (struct target_ops *self, const char *args, int from_tty)
 {
   printf_unfiltered ("Inferior's terminal is in %s mode.\n",
 		     !inf_mode_valid
@@ -883,7 +882,7 @@ go32_terminal_info (const char *args, int from_tty)
 }
 
 static void
-go32_terminal_inferior (void)
+go32_terminal_inferior (struct target_ops *self)
 {
   /* Redirect standard handles as child wants them.  */
   errno = 0;
@@ -904,7 +903,7 @@ go32_terminal_inferior (void)
 }
 
 static void
-go32_terminal_ours (void)
+go32_terminal_ours (struct target_ops *self)
 {
   /* Switch to cooked mode on the gdb terminal and save the inferior
      terminal mode to be restored when it is resumed.  */

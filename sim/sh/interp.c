@@ -1261,16 +1261,6 @@ trap (i, regs, insn_ptr, memory, maskl, maskw, endianw)
   return 0;
 }
 
-void
-control_c (sig, code, scp, addr)
-     int sig;
-     int code;
-     char *scp;
-     char *addr;
-{
-  raise_exception (SIGINT);
-}
-
 static int
 div1 (R, iRn2, iRn1/*, T*/)
      int *R;
@@ -1979,7 +1969,6 @@ sim_resume (sd, step, siggnal)
   register int endianw = global_endianw;
 
   int tick_start = get_now ();
-  void (*prev) ();
   void (*prev_fpe) ();
 
   register unsigned short *jump_table = sh_jump_table;
@@ -1996,7 +1985,6 @@ sim_resume (sd, step, siggnal)
   register unsigned char *memory;
   register unsigned int sbit = ((unsigned int) 1 << 31);
 
-  prev = signal (SIGINT, control_c);
   prev_fpe = signal (SIGFPE, SIG_IGN);
 
   init_pointers ();
@@ -2134,7 +2122,6 @@ sim_resume (sd, step, siggnal)
     }
 
   signal (SIGFPE, prev_fpe);
-  signal (SIGINT, prev);
 }
 
 int

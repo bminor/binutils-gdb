@@ -43,7 +43,7 @@ struct ppc_elf_params
 
   /* Avoid execution falling into new page.  */
   int ppc476_workaround;
-  int pagesize;
+  unsigned int pagesize_p2;
 };
 
 void ppc_elf_link_params (struct bfd_link_info *, struct ppc_elf_params *);

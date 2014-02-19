@@ -1308,6 +1308,7 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   frame_unwind_append_unwinder (gdbarch, &tic6x_stub_unwind);
   frame_unwind_append_unwinder (gdbarch, &tic6x_frame_unwind);
+  frame_base_set_default (gdbarch, &tic6x_frame_base);
 
   dwarf2_frame_set_init_reg (gdbarch, tic6x_dwarf2_frame_init_reg);
 

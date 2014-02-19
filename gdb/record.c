@@ -62,13 +62,7 @@ struct cmd_list_element *info_record_cmdlist = NULL;
 struct target_ops *
 find_record_target (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_stratum == record_stratum)
-      return t;
-
-  return NULL;
+  return find_target_at (record_stratum);
 }
 
 /* Check that recording is active.  Throw an error, if it isn't.  */
@@ -120,8 +114,7 @@ record_stop (struct target_ops *t)
 {
   DEBUG ("stop %s", t->to_shortname);
 
-  if (t->to_stop_recording != NULL)
-    t->to_stop_recording ();
+  t->to_stop_recording (t);
 }
 
 /* Unpush the record target.  */
@@ -293,7 +286,7 @@ info_record_command (char *args, int from_tty)
 
   printf_filtered (_("Active record target: %s\n"), t->to_shortname);
   if (t->to_info_record != NULL)
-    t->to_info_record ();
+    t->to_info_record (t);
 }
 
 /* The "record save" command.  */

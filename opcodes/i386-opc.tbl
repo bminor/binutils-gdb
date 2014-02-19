@@ -4291,3 +4291,25 @@ vscatterpf1qps, 1, 0x66C7, 6, 1, CpuAVX512PF, Modrm|EVex=1|Masking=2|NoDefMask|V
 prefetchwt1, 1, 0x0F0D, 2, 2, CpuAVX512PF, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 // AVX512PF instructions end.
+
+// CLFLUSHOPT instructions.
+
+clflushopt, 1, 0x660fae, 0x7, 2, CpuClflushOpt, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+
+// CLFLUSHOPT instructions end.
+
+// XSAVES/XRSTORS instructions.
+
+xrstors, 1, 0xfc7, 0x3, 2, CpuXSAVES, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xrstors64, 1, 0xfc7, 0x3, 2, CpuXSAVES|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xsaves, 1, 0xfc7, 0x5, 2, CpuXSAVES, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xsaves64, 1, 0xfc7, 0x5, 2, CpuXSAVES|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+
+// XSAVES instructions end.
+
+// XSAVEC instructions.
+
+xsavec, 1, 0xfc7, 0x4, 2, CpuXSAVEC, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xsavec64, 1, 0xfc7, 0x4, 2, CpuXSAVEC|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+
+// XSAVEC instructions end.

@@ -34,6 +34,7 @@
 #include "gdbthread.h"
 #include "progspace.h"
 #include "gdb_bfd.h"
+#include "gcore.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
@@ -112,7 +113,7 @@ exec_close (void)
    sections and closes all executable bfds from all program spaces.  */
 
 static void
-exec_close_1 (void)
+exec_close_1 (struct target_ops *self)
 {
   using_exec_ops = 0;
 
@@ -566,9 +567,10 @@ section_table_available_memory (VEC(mem_range_s) *memory,
   return memory;
 }
 
-int
+enum target_xfer_status
 section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   ULONGEST offset, ULONGEST len,
+				   ULONGEST *xfered_len,
 				   struct target_section *sections,
 				   struct target_section *sections_end,
 				   const char *section_name)
@@ -602,7 +604,14 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 		res = bfd_get_section_contents (abfd, asect,
 						readbuf, memaddr - p->addr,
 						len);
-	      return (res != 0) ? len : 0;
+
+	      if (res != 0)
+		{
+		  *xfered_len = len;
+		  return TARGET_XFER_OK;
+		}
+	      else
+		return TARGET_XFER_EOF;
 	    }
 	  else if (memaddr >= p->endaddr)
 	    {
@@ -621,12 +630,18 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 		res = bfd_get_section_contents (abfd, asect,
 						readbuf, memaddr - p->addr,
 						len);
-	      return (res != 0) ? len : 0;
+	      if (res != 0)
+		{
+		  *xfered_len = len;
+		  return TARGET_XFER_OK;
+		}
+	      else
+		return TARGET_XFER_EOF;
 	    }
         }
     }
 
-  return 0;			/* We can't help.  */
+  return TARGET_XFER_EOF;		/* We can't help.  */
 }
 
 static struct target_section_table *
@@ -635,17 +650,17 @@ exec_get_section_table (struct target_ops *ops)
   return current_target_sections;
 }
 
-static LONGEST
+static enum target_xfer_status
 exec_xfer_partial (struct target_ops *ops, enum target_object object,
 		   const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf,
-		   ULONGEST offset, ULONGEST len)
+		   ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   struct target_section_table *table = target_get_section_table (ops);
 
   if (object == TARGET_OBJECT_MEMORY)
     return section_table_xfer_memory_partial (readbuf, writebuf,
-					      offset, len,
+					      offset, len, xfered_len,
 					      table->sections,
 					      table->sections_end,
 					      NULL);
@@ -816,15 +831,7 @@ exec_has_memory (struct target_ops *ops)
 	  != current_target_sections->sections_end);
 }
 
-/* Find mapped memory.  */
-
-extern void
-exec_set_find_memory_regions (int (*func) (find_memory_region_ftype, void *))
-{
-  exec_ops.to_find_memory_regions = func;
-}
-
-static char *exec_make_note_section (bfd *, int *);
+static char *exec_make_note_section (struct target_ops *self, bfd *, int *);
 
 /* Fill in the exec file target vector.  Very few entries need to be
    defined.  */
@@ -848,6 +855,7 @@ Specify the filename of the executable file.";
   exec_ops.to_stratum = file_stratum;
   exec_ops.to_has_memory = exec_has_memory;
   exec_ops.to_make_corefile_notes = exec_make_note_section;
+  exec_ops.to_find_memory_regions = objfile_find_memory_regions;
   exec_ops.to_magic = OPS_MAGIC;
 }
 
@@ -895,7 +903,7 @@ Show writing into executable and core files."), NULL,
 }
 
 static char *
-exec_make_note_section (bfd *obfd, int *note_size)
+exec_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
 {
   error (_("Can't create a corefile"));
 }

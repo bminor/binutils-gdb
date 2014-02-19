@@ -20,6 +20,7 @@
 #include "regdef.h"
 #include "gdbthread.h"
 #include "tdesc.h"
+#include "rsp-low.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -206,8 +207,7 @@ registers_to_string (struct regcache *regcache, char *buf)
     {
       if (regcache->register_status[i] == REG_VALID)
 	{
-	  convert_int_to_ascii (registers, buf,
-				register_size (tdesc, i));
+	  bin2hex (registers, buf, register_size (tdesc, i));
 	  buf += register_size (tdesc, i) * 2;
 	}
       else
@@ -234,7 +234,7 @@ registers_from_string (struct regcache *regcache, char *buf)
       if (len > tdesc->registers_size * 2)
 	len = tdesc->registers_size * 2;
     }
-  convert_ascii_to_int (buf, registers, len / 2);
+  hex2bin (buf, registers, len / 2);
 }
 
 struct reg *
@@ -418,8 +418,8 @@ collect_register (struct regcache *regcache, int n, void *buf)
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)
 {
-  convert_int_to_ascii (register_data (regcache, n, 1), buf,
-			register_size (regcache->tdesc, n));
+  bin2hex (register_data (regcache, n, 1), buf,
+	   register_size (regcache->tdesc, n));
 }
 
 void
