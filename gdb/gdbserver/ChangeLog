@@ -1,3 +1,31 @@
+2014-02-19  Doug Evans  <dje@google.com>
+
+	* dll.h (struct dll_info): Add comment.
+	* gdbthread.h (struct thread_info): Add comment.
+	(current_ptid): Simplify.
+	* inferiors.c (add_process): Update.
+	(remove_process): Update.
+	* inferiors.h (struct process_info): Rename member "head" to "entry".
+	* linux-low.c (delete_lwp): Update.
+	(add_lwp): Update.
+	(last_thread_of_process_p): Update.
+	(kill_one_lwp_callback, linux_kill): Update.
+	(status_pending_p_callback): Update.
+	(wait_for_sigstop): Update.  Simplify read of ptid.
+	(start_step_over): Update.
+	* linux-low.h (ptid_of, pid_of, lwpid_of): Update.
+	(get_lwp_thread): Update.
+	(struct lwp_info): Rename member "head" to "entry".
+	* regcache.h (inferior_list_entry): Delete.
+	* server.c (kill_inferior_callback): Update.
+	(detach_or_kill_inferior_callback): Update.
+	(print_started_pid): Update.
+	(print_attached_pid): Update.
+	(process_serial_event): Simplify read of ptid.
+	* thread-db.c (thread_db_create_event): Update.
+	(thread_db_get_tls_address): Update.
+	* win32-low.c (current_inferior_ptid): Simplify.
+
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target.h (struct target_ops) <supports_btrace>: Add target_ops

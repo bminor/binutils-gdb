@@ -347,7 +347,7 @@ static void
 delete_lwp (struct lwp_info *lwp)
 {
   remove_thread (get_lwp_thread (lwp));
-  remove_inferior (&all_lwps, &lwp->head);
+  remove_inferior (&all_lwps, &lwp->entry);
   free (lwp->arch_private);
   free (lwp);
 }
@@ -533,12 +533,12 @@ add_lwp (ptid_t ptid)
   lwp = (struct lwp_info *) xmalloc (sizeof (*lwp));
   memset (lwp, 0, sizeof (*lwp));
 
-  lwp->head.id = ptid;
+  lwp->entry.id = ptid;
 
   if (the_low_target.new_thread != NULL)
     lwp->arch_private = the_low_target.new_thread ();
 
-  add_inferior_to_list (&all_lwps, &lwp->head);
+  add_inferior_to_list (&all_lwps, &lwp->entry);
 
   return lwp;
 }
@@ -865,7 +865,7 @@ second_thread_of_pid_p (struct inferior_list_entry *entry, void *args)
 static int
 last_thread_of_process_p (struct thread_info *thread)
 {
-  ptid_t ptid = ((struct inferior_list_entry *)thread)->id;
+  ptid_t ptid = thread->entry.id;
   int pid = ptid_get_pid (ptid);
   struct counter counter = { pid , 0 };
 
@@ -941,7 +941,7 @@ kill_one_lwp_callback (struct inferior_list_entry *entry, void *args)
       linux_kill_one_lwp (lwp);
 
       /* Make sure it died.  The loop is most likely unnecessary.  */
-      pid = linux_wait_for_event (lwp->head.id, &wstat, __WALL);
+      pid = linux_wait_for_event (lwp->entry.id, &wstat, __WALL);
     } while (pid > 0 && WIFSTOPPED (wstat));
 
   return 0;
@@ -986,7 +986,7 @@ linux_kill (int pid)
 	  linux_kill_one_lwp (lwp);
 
 	  /* Make sure it died.  The loop is most likely unnecessary.  */
-	  lwpid = linux_wait_for_event (lwp->head.id, &wstat, __WALL);
+	  lwpid = linux_wait_for_event (lwp->entry.id, &wstat, __WALL);
 	} while (lwpid > 0 && WIFSTOPPED (wstat));
     }
 
@@ -1223,7 +1223,7 @@ status_pending_p_callback (struct inferior_list_entry *entry, void *arg)
   /* Check if we're only interested in events from a specific process
      or its lwps.  */
   if (!ptid_equal (minus_one_ptid, ptid)
-      && ptid_get_pid (ptid) != ptid_get_pid (lwp->head.id))
+      && ptid_get_pid (ptid) != ptid_get_pid (lwp->entry.id))
     return 0;
 
   thread = get_lwp_thread (lwp);
@@ -2929,11 +2929,11 @@ wait_for_sigstop (struct inferior_list_entry *entry)
 
   saved_inferior = current_inferior;
   if (saved_inferior != NULL)
-    saved_tid = ((struct inferior_list_entry *) saved_inferior)->id;
+    saved_tid = saved_inferior->entry.id;
   else
     saved_tid = null_ptid; /* avoid bogus unused warning */
 
-  ptid = lwp->head.id;
+  ptid = lwp->entry.id;
 
   if (debug_threads)
     debug_printf ("wait_for_sigstop: pulling one event\n");
@@ -3610,7 +3610,7 @@ start_step_over (struct lwp_info *lwp)
   linux_resume_one_lwp (lwp, step, 0, NULL);
 
   /* Require next event from this LWP.  */
-  step_over_bkpt = lwp->head.id;
+  step_over_bkpt = lwp->entry.id;
   return 1;
 }
 

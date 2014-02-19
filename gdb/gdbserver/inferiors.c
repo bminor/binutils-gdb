@@ -235,10 +235,10 @@ add_process (int pid, int attached)
 
   process = xcalloc (1, sizeof (*process));
 
-  process->head.id = pid_to_ptid (pid);
+  process->entry.id = pid_to_ptid (pid);
   process->attached = attached;
 
-  add_inferior_to_list (&all_processes, &process->head);
+  add_inferior_to_list (&all_processes, &process->entry);
 
   return process;
 }
@@ -252,7 +252,7 @@ remove_process (struct process_info *process)
 {
   clear_symbol_cache (&process->symbol_cache);
   free_all_breakpoints (process);
-  remove_inferior (&all_processes, &process->head);
+  remove_inferior (&all_processes, &process->entry);
   free (process);
 }
 

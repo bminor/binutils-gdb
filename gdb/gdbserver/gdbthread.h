@@ -26,7 +26,10 @@ struct btrace_target_info;
 
 struct thread_info
 {
+  /* This must appear first.  See inferiors.h.
+     The list iterator functions assume it.  */
   struct inferior_list_entry entry;
+
   void *target_data;
   void *regcache_data;
 
@@ -76,6 +79,6 @@ void add_thread (ptid_t ptid, void *target_data);
 struct thread_info *find_thread_ptid (ptid_t ptid);
 
 /* Get current thread ID (Linux task ID).  */
-#define current_ptid ((struct inferior_list_entry *) current_inferior)->id
+#define current_ptid (current_inferior->entry.id)
 
 #endif /* GDB_THREAD_H */

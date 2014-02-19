@@ -2881,7 +2881,7 @@ static void
 kill_inferior_callback (struct inferior_list_entry *entry)
 {
   struct process_info *process = (struct process_info *) entry;
-  int pid = ptid_get_pid (process->head.id);
+  int pid = ptid_get_pid (process->entry.id);
 
   kill_inferior (pid);
   discard_queued_stop_replies (pid);
@@ -2896,7 +2896,7 @@ static void
 detach_or_kill_inferior_callback (struct inferior_list_entry *entry)
 {
   struct process_info *process = (struct process_info *) entry;
-  int pid = ptid_get_pid (process->head.id);
+  int pid = ptid_get_pid (process->entry.id);
 
   if (process->attached)
     detach_inferior (pid);
@@ -2916,7 +2916,7 @@ print_started_pid (struct inferior_list_entry *entry)
 
   if (! process->attached)
     {
-      int pid = ptid_get_pid (process->head.id);
+      int pid = ptid_get_pid (process->entry.id);
       fprintf (stderr, " %d", pid);
     }
 }
@@ -2931,7 +2931,7 @@ print_attached_pid (struct inferior_list_entry *entry)
 
   if (process->attached)
     {
-      int pid = ptid_get_pid (process->head.id);
+      int pid = ptid_get_pid (process->entry.id);
       fprintf (stderr, " %d", pid);
     }
 }
@@ -3518,7 +3518,7 @@ process_serial_event (void)
 		  break;
 		}
 
-	      thread_id = ((struct inferior_list_entry *)thread)->id;
+	      thread_id = thread->entry.id;
 	    }
 	  else
 	    {

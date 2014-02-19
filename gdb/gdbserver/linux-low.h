@@ -223,19 +223,19 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
-#define ptid_of(proc) ((proc)->head.id)
-#define pid_of(proc) ptid_get_pid ((proc)->head.id)
-#define lwpid_of(proc) ptid_get_lwp ((proc)->head.id)
+#define ptid_of(proc) ((proc)->entry.id)
+#define pid_of(proc) ptid_get_pid ((proc)->entry.id)
+#define lwpid_of(proc) ptid_get_lwp ((proc)->entry.id)
 
 #define get_lwp(inf) ((struct lwp_info *)(inf))
 #define get_thread_lwp(thr) (get_lwp (inferior_target_data (thr)))
 #define get_lwp_thread(proc) ((struct thread_info *)			\
 			      find_inferior_id (&all_threads,		\
-						get_lwp (proc)->head.id))
+						get_lwp (proc)->entry.id))
 
 struct lwp_info
 {
-  struct inferior_list_entry head;
+  struct inferior_list_entry entry;
 
   /* If this flag is set, the next SIGSTOP will be ignored (the
      process will be immediately resumed).  This means that either we

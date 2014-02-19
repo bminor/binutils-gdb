@@ -114,7 +114,7 @@ static void win32_ensure_ntdll_loaded (void);
 static ptid_t
 current_inferior_ptid (void)
 {
-  return ((struct inferior_list_entry*) current_inferior)->id;
+  return current_ptid;
 }
 
 /* The current debug event from WaitForDebugEvent.  */

@@ -19,7 +19,6 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
-struct inferior_list_entry;
 struct thread_info;
 struct target_desc;
 

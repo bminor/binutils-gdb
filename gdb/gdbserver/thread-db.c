@@ -210,7 +210,7 @@ thread_db_create_event (CORE_ADDR where)
      created threads.  */
   lwp = get_thread_lwp (current_inferior);
   if (lwp->thread_known == 0)
-    find_one_thread (lwp->head.id);
+    find_one_thread (current_inferior->entry.id);
 
   /* msg.event == TD_EVENT_CREATE */
 
@@ -502,7 +502,7 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 
   lwp = get_thread_lwp (thread);
   if (!lwp->thread_known)
-    find_one_thread (lwp->head.id);
+    find_one_thread (thread->entry.id);
   if (!lwp->thread_known)
     return TD_NOTHR;
 

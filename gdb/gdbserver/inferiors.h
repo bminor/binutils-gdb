@@ -42,7 +42,9 @@ struct process_info_private;
 
 struct process_info
 {
-  struct inferior_list_entry head;
+  /* This must appear first.
+     The list iterator functions assume it.  */
+  struct inferior_list_entry entry;
 
   /* Nonzero if this child process was attached rather than
      spawned.  */
@@ -105,6 +107,7 @@ struct inferior_list_entry *find_inferior
       void *arg);
 struct inferior_list_entry *find_inferior_id (struct inferior_list *list,
 					      ptid_t id);
+
 void *inferior_target_data (struct thread_info *);
 void set_inferior_target_data (struct thread_info *, void *);
 void *inferior_regcache_data (struct thread_info *);
