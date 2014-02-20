@@ -1,5 +1,10 @@
 2014-02-20  Tom Tromey  <tromey@redhat.com>
 
+	* varobj.h (c_varobj_ops, cplus_varobj_ops, java_varobj_ops)
+	(ada_varobj_ops): Mark "extern".
+
+2014-02-20  Tom Tromey  <tromey@redhat.com>
+
 	* dbxread.c (read_dbx_symtab): Remove last_o_file_start.
 
 2014-02-20  Doug Evans  <xdje42@gmail.com>
