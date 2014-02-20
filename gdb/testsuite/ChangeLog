@@ -1,3 +1,12 @@
+2014-02-20  lin zuojian  <manjian2006@gmail.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/16581
+	* gdb.dwarf2/dw2-icycle.S: New file.
+	* gdb.dwarf2/dw2-icycle.c: New file.
+	* gdb.dwarf2/dw2-icycle.exp: New file.
+
 2014-02-19  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/py-value-cc.cc: Improve test case to enable testing

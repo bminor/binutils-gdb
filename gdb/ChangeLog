@@ -1,3 +1,14 @@
+2014-02-20  lin zuojian  <manjian2006@gmail.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/16581
+	* dwarf2read.c (struct die_info): New member in_process.
+	(reset_die_in_process): New function.
+	(process_die): Set it at the start, reset when returning.
+	(inherit_abstract_dies): Only call process_die if origin_child_die
+	not already being processed.
+
 2014-02-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-nat.c (handle_unload_dll): Add function documentation.
