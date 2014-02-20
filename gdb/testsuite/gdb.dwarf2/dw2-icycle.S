@@ -33,7 +33,7 @@ p__top:
 .LFE2:
 .Letext0:
 
-	.section	.debug_info,"",@progbits
+	.section	.debug_info
 .Ldebug_info0:
 	.4byte	.Ledebug_info0 - .Lsdebug_info0  /* Length of CU Info */
 .Lsdebug_info0:
@@ -118,7 +118,7 @@ p__top:
 	.byte	0	/* end of children of DIE 0xb */
 .Ledebug_info0:
 
-	.section	.debug_abbrev,"",@progbits
+	.section	.debug_abbrev
 .Ldebug_abbrev0:
 	.uleb128 0x1	/* (abbrev code) */
 	.uleb128 0x11	/* (TAG: DW_TAG_compile_unit) */
