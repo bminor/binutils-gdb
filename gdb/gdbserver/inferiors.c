@@ -178,8 +178,8 @@ remove_thread (struct thread_info *thread)
 struct inferior_list_entry *
 get_first_inferior (struct inferior_list *list)
 {
-  if (all_threads.head != NULL)
-    return all_threads.head;
+  if (list->head != NULL)
+    return list->head;
   return NULL;
 }
 

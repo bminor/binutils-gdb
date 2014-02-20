@@ -1,3 +1,7 @@
+2014-02-20  Doug Evans  <dje@google.com>
+
+	* inferiors.c (get_first_inferior): Fix buglet.
+
 2014-02-19  Doug Evans  <dje@google.com>
 
 	* gdbthread.h (add_thread): Change result type to struct thread_info *.
