@@ -84,9 +84,6 @@ _start:
 	vscatterpf1qps	256(%eax,%zmm7){%k1}	 # AVX512PF
 	vscatterpf1qps	1024(%ecx,%zmm7,4){%k1}	 # AVX512PF
 
-	prefetchwt1	(%ecx)	 # AVX512PF
-	prefetchwt1	-123456(%esp,%esi,8)	 # AVX512PF
-
 	.intel_syntax noprefix
 	vgatherpf0dpd	ZMMWORD PTR [ebp+ymm7*8-123]{k1}	 # AVX512PF
 	vgatherpf0dpd	ZMMWORD PTR [ebp+ymm7*8-123]{k1}	 # AVX512PF
@@ -167,7 +164,4 @@ _start:
 	vscatterpf1qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
 	vscatterpf1qps	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
 	vscatterpf1qps	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
-
-	prefetchwt1	BYTE PTR [ecx]	 # AVX512PF
-	prefetchwt1	BYTE PTR [esp+esi*8-123456]	 # AVX512PF
 

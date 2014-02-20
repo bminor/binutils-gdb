@@ -1,6 +1,20 @@
 2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2014-02-21  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CPU_PREFETCHWT1_FLAGS/
+	(cpu_flags): Add CpuPREFETCHWT1.
+	* i386-init.h: Regenerate.
+	* i386-opc.h (CpuPREFETCHWT1): New.
+	(i386_cpu_flags): Add cpuprefetchwt1.
+	* i386-opc.tbl: Change CPU of prefetchwt1 from CpuAVX512PF to
+	CpuPREFETCHWT1.
+	* i386-tbl.h: Regenerate.
+
+2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
 	2013-10-08  Jan Beulich <jbeulich@suse.com>
 
 	* i386-opc.tbl (invlpg): Use Anysize instead of Unspecified.

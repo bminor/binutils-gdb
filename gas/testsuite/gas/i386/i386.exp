@@ -273,6 +273,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "xsavec-intel"
     run_dump_test "xsaves"
     run_dump_test "xsaves-intel"
+    run_dump_test "prefetchwt1"
+    run_dump_test "prefetchwt1-intel"
     run_dump_test "disassem"
 
     # These tests require support for 8 and 16 bit relocs,
@@ -566,6 +568,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-xsavec-intel"
     run_dump_test "x86-64-xsaves"
     run_dump_test "x86-64-xsaves-intel"
+    run_dump_test "x86-64-prefetchwt1"
+    run_dump_test "x86-64-prefetchwt1-intel"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
