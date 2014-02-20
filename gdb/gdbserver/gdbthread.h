@@ -74,7 +74,7 @@ struct thread_info
 extern struct inferior_list all_threads;
 
 void remove_thread (struct thread_info *thread);
-void add_thread (ptid_t ptid, void *target_data);
+struct thread_info *add_thread (ptid_t ptid, void *target_data);
 
 struct thread_info *get_first_thread (void);
 

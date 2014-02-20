@@ -104,7 +104,7 @@ remove_inferior (struct inferior_list *list,
     list->tail = *cur;
 }
 
-void
+struct thread_info *
 add_thread (ptid_t thread_id, void *target_data)
 {
   struct thread_info *new_thread = xmalloc (sizeof (*new_thread));
@@ -121,6 +121,8 @@ add_thread (ptid_t thread_id, void *target_data)
     current_inferior = new_thread;
 
   new_thread->target_data = target_data;
+
+  return new_thread;
 }
 
 ptid_t

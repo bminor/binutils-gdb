@@ -229,13 +229,16 @@ extern struct linux_target_ops the_low_target;
 
 #define get_lwp(inf) ((struct lwp_info *)(inf))
 #define get_thread_lwp(thr) (get_lwp (inferior_target_data (thr)))
-#define get_lwp_thread(proc) ((struct thread_info *)			\
-			      find_inferior_id (&all_threads,		\
-						get_lwp (proc)->entry.id))
+#define get_lwp_thread(lwp) ((lwp)->thread)
 
 struct lwp_info
 {
   struct inferior_list_entry entry;
+
+  /* Backlink to the thread_info object.
+     It is the "main" representation of the thread, we just contain
+     linux-specific subordinate data.  */
+  struct thread_info *thread;
 
   /* If this flag is set, the next SIGSTOP will be ignored (the
      process will be immediately resumed).  This means that either we

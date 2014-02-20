@@ -409,7 +409,6 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
 
       ptid = ptid_build (pid_of (event_child), new_pid, 0);
       new_lwp = add_lwp (ptid);
-      add_thread (ptid, new_lwp);
 
       /* Either we're going to immediately resume the new thread
 	 or leave it stopped.  linux_resume_one_lwp is a nop if it
@@ -539,6 +538,7 @@ add_lwp (ptid_t ptid)
     lwp->arch_private = the_low_target.new_thread ();
 
   add_inferior_to_list (&all_lwps, &lwp->entry);
+  lwp->thread = add_thread (ptid, lwp);
 
   return lwp;
 }
@@ -632,7 +632,6 @@ linux_create_inferior (char *program, char **allargs)
 
   ptid = ptid_build (pid, pid, 0);
   new_lwp = add_lwp (ptid);
-  add_thread (ptid, new_lwp);
   new_lwp->must_set_ptrace_flags = 1;
 
   return pid;
@@ -683,7 +682,6 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
     }
 
   new_lwp = add_lwp (ptid);
-  add_thread (ptid, new_lwp);
 
   /* We need to wait for SIGSTOP before being able to make the next
      ptrace call on this LWP.  */

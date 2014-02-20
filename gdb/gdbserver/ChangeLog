@@ -1,5 +1,15 @@
 2014-02-19  Doug Evans  <dje@google.com>
 
+	* gdbthread.h (add_thread): Change result type to struct thread_info *.
+	* inferiors.c (add_thread): Change result type to struct thread_info *.
+	All callers updated.
+	(add_lwp): Call add_thread here instead of in callers.
+	All callers updated.
+	* linux-low.h (get_lwp_thread): Rewrite.
+	(struct lwp_info): New member "thread".
+
+2014-02-19  Doug Evans  <dje@google.com>
+
 	* linux-low.c (add_lwp): Change result to struct lwp_info *.
 	All callers updated.
 
