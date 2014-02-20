@@ -638,7 +638,8 @@ struct aarch64_dr_update_callback_param
 static int
 debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
 {
-  struct lwp_info *lwp = (struct lwp_info *) entry;
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct lwp_info *lwp = get_thread_lwp (thread);
   struct aarch64_dr_update_callback_param *param_p
     = (struct aarch64_dr_update_callback_param *) ptr;
   int pid = param_p->pid;
@@ -653,7 +654,7 @@ debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
       fprintf (stderr, "debug_reg_change_callback: \n\tOn entry:\n");
       fprintf (stderr, "\tpid%d, tid: %ld, dr_changed_bp=0x%llx, "
 	       "dr_changed_wp=0x%llx\n",
-	       pid, lwpid_of (lwp), info->dr_changed_bp,
+	       pid, lwpid_of (thread), info->dr_changed_bp,
 	       info->dr_changed_wp);
     }
 
@@ -662,7 +663,7 @@ debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
   dr_changed = *dr_changed_ptr;
 
   /* Only update the threads of this process.  */
-  if (pid_of (lwp) == pid)
+  if (pid_of (thread) == pid)
     {
       gdb_assert (idx >= 0
 		  && (idx <= (is_watchpoint ? aarch64_num_wp_regs
@@ -703,7 +704,8 @@ debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
     {
       fprintf (stderr, "\tOn exit:\n\tpid%d, tid: %ld, dr_changed_bp=0x%llx, "
 	       "dr_changed_wp=0x%llx\n",
-	       pid, lwpid_of (lwp), info->dr_changed_bp, info->dr_changed_wp);
+	       pid, lwpid_of (thread), info->dr_changed_bp,
+	       info->dr_changed_wp);
     }
 
   return 0;
@@ -721,12 +723,12 @@ aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
   struct aarch64_dr_update_callback_param param;
 
   /* Only update the threads of this process.  */
-  param.pid = pid_of (get_thread_lwp (current_inferior));
+  param.pid = pid_of (current_inferior);
 
   param.is_watchpoint = is_watchpoint;
   param.idx = idx;
 
-  find_inferior (&all_lwps, debug_reg_change_callback, (void *) &param);
+  find_inferior (&all_threads, debug_reg_change_callback, (void *) &param);
 }
 
 
@@ -1048,7 +1050,7 @@ aarch64_stopped_data_address (void)
   int pid, i;
   struct aarch64_debug_reg_state *state;
 
-  pid = lwpid_of (get_thread_lwp (current_inferior));
+  pid = lwpid_of (current_inferior);
 
   /* Get the siginfo.  */
   if (ptrace (PTRACE_GETSIGINFO, pid, NULL, &siginfo) != 0)
@@ -1145,7 +1147,8 @@ aarch64_linux_new_thread (void)
 static void
 aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
 {
-  ptid_t ptid = ptid_of (lwp);
+  struct thread_info *thread = get_lwp_thread (lwp);
+  ptid_t ptid = ptid_of (thread);
   struct arch_lwp_info *info = lwp->arch_private;
 
   if (DR_HAS_CHANGED (info->dr_changed_bp)
@@ -1157,7 +1160,7 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
 	= &proc->private->arch_private->debug_reg_state;
 
       if (debug_hw_points)
-	fprintf (stderr, "prepare_to_resume thread %ld\n", lwpid_of (lwp));
+	fprintf (stderr, "prepare_to_resume thread %ld\n", lwpid_of (thread));
 
       /* Watchpoints.  */
       if (DR_HAS_CHANGED (info->dr_changed_wp))
@@ -1195,7 +1198,7 @@ aarch64_arch_setup (void)
 
   current_process ()->tdesc = tdesc_aarch64;
 
-  pid = lwpid_of (get_thread_lwp (current_inferior));
+  pid = lwpid_of (current_inferior);
   iov.iov_base = &dreg_state;
   iov.iov_len = sizeof (dreg_state);
 

@@ -72,6 +72,10 @@ struct process_info
   struct process_info_private *private;
 };
 
+#define ptid_of(inf) ((inf)->entry.id)
+#define pid_of(inf) ptid_get_pid ((inf)->entry.id)
+#define lwpid_of(inf) ptid_get_lwp ((inf)->entry.id)
+
 /* Return a pointer to the process that corresponds to the current
    thread (current_inferior).  It is an error to call this if there is
    no current thread selected.  */

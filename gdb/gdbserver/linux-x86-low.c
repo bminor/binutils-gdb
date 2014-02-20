@@ -285,7 +285,8 @@ x86_get_thread_area (int lwpid, CORE_ADDR *addr)
 
   {
     struct lwp_info *lwp = find_lwp_pid (pid_to_ptid (lwpid));
-    struct regcache *regcache = get_thread_regcache (get_lwp_thread (lwp), 1);
+    struct thread_info *thr = get_lwp_thread (lwp);
+    struct regcache *regcache = get_thread_regcache (thr, 1);
     unsigned int desc[4];
     ULONGEST gs = 0;
     const int reg_thread_area = 3; /* bits to scale down register value.  */
@@ -296,7 +297,7 @@ x86_get_thread_area (int lwpid, CORE_ADDR *addr)
     idx = gs >> reg_thread_area;
 
     if (ptrace (PTRACE_GET_THREAD_AREA,
-		lwpid_of (lwp),
+		lwpid_of (thr),
 		(void *) (long) idx, (unsigned long) &desc) < 0)
       return -1;
 
@@ -538,11 +539,12 @@ static int
 update_debug_registers_callback (struct inferior_list_entry *entry,
 				 void *pid_p)
 {
-  struct lwp_info *lwp = (struct lwp_info *) entry;
+  struct thread_info *thr = (struct thread_info *) entry;
+  struct lwp_info *lwp = get_thread_lwp (thr);
   int pid = *(int *) pid_p;
 
   /* Only update the threads of this process.  */
-  if (pid_of (lwp) == pid)
+  if (pid_of (thr) == pid)
     {
       /* The actual update is done later just before resuming the lwp,
 	 we just mark that the registers need updating.  */
@@ -563,12 +565,12 @@ void
 i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
 {
   /* Only update the threads of this process.  */
-  int pid = pid_of (get_thread_lwp (current_inferior));
+  int pid = pid_of (current_inferior);
 
   if (! (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR))
     fatal ("Invalid debug register %d", regnum);
 
-  find_inferior (&all_lwps, update_debug_registers_callback, &pid);
+  find_inferior (&all_threads, update_debug_registers_callback, &pid);
 }
 
 /* Return the inferior's debug register REGNUM.  */
@@ -576,8 +578,7 @@ i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
 CORE_ADDR
 i386_dr_low_get_addr (int regnum)
 {
-  struct lwp_info *lwp = get_thread_lwp (current_inferior);
-  ptid_t ptid = ptid_of (lwp);
+  ptid_t ptid = ptid_of (current_inferior);
 
   /* DR6 and DR7 are retrieved with some other way.  */
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
@@ -591,9 +592,9 @@ void
 i386_dr_low_set_control (const struct i386_debug_reg_state *state)
 {
   /* Only update the threads of this process.  */
-  int pid = pid_of (get_thread_lwp (current_inferior));
+  int pid = pid_of (current_inferior);
 
-  find_inferior (&all_lwps, update_debug_registers_callback, &pid);
+  find_inferior (&all_threads, update_debug_registers_callback, &pid);
 }
 
 /* Return the inferior's DR7 debug control register.  */
@@ -601,8 +602,7 @@ i386_dr_low_set_control (const struct i386_debug_reg_state *state)
 unsigned
 i386_dr_low_get_control (void)
 {
-  struct lwp_info *lwp = get_thread_lwp (current_inferior);
-  ptid_t ptid = ptid_of (lwp);
+  ptid_t ptid = ptid_of (current_inferior);
 
   return x86_linux_dr_get (ptid, DR_CONTROL);
 }
@@ -613,8 +613,7 @@ i386_dr_low_get_control (void)
 unsigned
 i386_dr_low_get_status (void)
 {
-  struct lwp_info *lwp = get_thread_lwp (current_inferior);
-  ptid_t ptid = ptid_of (lwp);
+  ptid_t ptid = ptid_of (current_inferior);
 
   return x86_linux_dr_get (ptid, DR_STATUS);
 }
@@ -728,7 +727,7 @@ x86_linux_new_thread (void)
 static void
 x86_linux_prepare_to_resume (struct lwp_info *lwp)
 {
-  ptid_t ptid = ptid_of (lwp);
+  ptid_t ptid = ptid_of (get_lwp_thread (lwp));
   int clear_status = 0;
 
   if (lwp->arch_private->debug_registers_changed)
@@ -1170,7 +1169,7 @@ x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
 {
 #ifdef __x86_64__
   unsigned int machine;
-  int tid = lwpid_of (get_thread_lwp (current_inferior));
+  int tid = lwpid_of (current_inferior);
   int is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
@@ -1255,7 +1254,7 @@ x86_linux_read_description (void)
   static uint64_t xcr0;
   struct regset_info *regset;
 
-  tid = lwpid_of (get_thread_lwp (current_inferior));
+  tid = lwpid_of (current_inferior);
 
   is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 

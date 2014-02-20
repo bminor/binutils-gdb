@@ -536,11 +536,12 @@ struct update_registers_data
 static int
 update_registers_callback (struct inferior_list_entry *entry, void *arg)
 {
-  struct lwp_info *lwp = (struct lwp_info *) entry;
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct lwp_info *lwp = get_thread_lwp (thread);
   struct update_registers_data *data = (struct update_registers_data *) arg;
 
   /* Only update the threads of the current process.  */
-  if (pid_of (lwp) == pid_of (get_thread_lwp (current_inferior)))
+  if (pid_of (thread) == pid_of (current_inferior))
     {
       /* The actual update is done later just before resuming the lwp,
          we just mark that the registers need updating.  */
@@ -589,7 +590,7 @@ arm_insert_point (char type, CORE_ADDR addr, int len)
       {
 	struct update_registers_data data = { watch, i };
 	pts[i] = p;
-	find_inferior (&all_lwps, update_registers_callback, &data);
+	find_inferior (&all_threads, update_registers_callback, &data);
 	return 0;
       }
 
@@ -628,7 +629,7 @@ arm_remove_point (char type, CORE_ADDR addr, int len)
       {
 	struct update_registers_data data = { watch, i };
 	pts[i].control = arm_hwbp_control_disable (pts[i].control);
-	find_inferior (&all_lwps, update_registers_callback, &data);
+	find_inferior (&all_threads, update_registers_callback, &data);
 	return 0;
       }
 
@@ -649,7 +650,7 @@ arm_stopped_by_watchpoint (void)
 
   /* Retrieve siginfo.  */
   errno = 0;
-  ptrace (PTRACE_GETSIGINFO, lwpid_of (lwp), 0, &siginfo);
+  ptrace (PTRACE_GETSIGINFO, lwpid_of (current_inferior), 0, &siginfo);
   if (errno != 0)
     return 0;
 
@@ -707,8 +708,9 @@ arm_new_thread (void)
 static void
 arm_prepare_to_resume (struct lwp_info *lwp)
 {
-  int pid = lwpid_of (lwp);
-  struct process_info *proc = find_process_pid (pid_of (lwp));
+  struct thread_info *thread = get_lwp_thread (lwp);
+  int pid = lwpid_of (thread);
+  struct process_info *proc = find_process_pid (pid_of (thread));
   struct arch_process_info *proc_info = proc->private->arch_private;
   struct arch_lwp_info *lwp_info = lwp->arch_private;
   int i;
@@ -780,7 +782,7 @@ arm_get_hwcap (unsigned long *valp)
 static const struct target_desc *
 arm_read_description (void)
 {
-  int pid = lwpid_of (get_thread_lwp (current_inferior));
+  int pid = lwpid_of (current_inferior);
 
   /* Query hardware watchpoint/breakpoint capabilities.  */
   arm_linux_init_hwbp_cap (pid);

@@ -1,5 +1,145 @@
 2014-02-20  Doug Evans  <dje@google.com>
 
+	* inferiors.h (ptid_of): Move here from linux-low.h.
+	(pid_of, lwpid_of): Ditto.
+	* linux-aarch64-low.c (debug_reg_change_callback): Update, "entry"
+	parameter is a struct thread_info * now.
+	(aarch64_notify_debug_reg_change): Fetch pid from current_inferior
+	directly.  Pass &all_threads to find_inferior instead of &all_lwps.
+	(aarch64_stopped_data_address): Fetch lwpid from current_inferior
+	directly.
+	(aarch64_linux_prepare_to_resume): Fetch ptid from thread.
+	(aarch64_arch_setup): Fetch lwpid from current_inferior directly.
+	* linux-arm-low.c (update_registers_callback): Update, "entry"
+	parameter is a struct thread_info * now.
+	Fetch lwpid from current_inferior directly.
+	(arm_insert_point): Pass &all_threads to find_inferior instead of
+	&all_lwps.
+	(arm_remove_point): Ditto.
+	(arm_stopped_by_watchpoint): Fetch lwp from current_inferior.
+	(arm_prepare_to_resume): Fetch pid from thread.
+	(arm_read_description): Fetch lwpid from current_inferior directly.
+	* linux-low.c (all_lwps): Delete.
+	(delete_lwp): Delete call to remove_inferior.
+	(handle_extended_wait): Fetch lwpid from thread.
+	(add_lwp): Don't set lwp->entry.id.  Remove call to
+	add_inferior_to_list.
+	(linux_attach_lwp_1): Fetch pid from current_inferior directly.
+	(linux_kill_one_lwp): Fetch ptid,lwpid from thread.
+	(kill_one_lwp_callback): Ditto.
+	(linux_kill): Don't dereference NULL pointer.
+	Fetch ptid,lwpid from thread.
+	(get_detach_signal): Fetch ptid from thread.
+	(linux_detach_one_lwp): Fetch ptid,lwpid from thread.
+	Simplify call to regcache_invalidate_thread.
+	(delete_lwp_callback): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch pid from thread.
+	(linux_mourn): Pass &all_threads to find_inferior instead of &all_lwps.
+	(status_pending_p_callback): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch ptid from thread.
+	(find_lwp_pid): Update, "entry" parameter is a
+	struct thread_info * now.
+	(linux_wait_for_lwp): Fetch pid from thread.
+	(linux_fast_tracepoint_collecting): Fetch lwpid from thread.
+	(maybe_move_out_of_jump_pad): Fetch lwpid from current_inferior.
+	(enqueue_one_deferred_signal): Fetch lwpid from thread.
+	(dequeue_one_deferred_signal): Ditto.
+	(cancel_breakpoint): Fetch ptid from current_inferior.
+	(linux_wait_for_event): Pass &all_threads to find_inferior,
+	not &all_lwps.  Fetch ptid, lwpid from thread.
+	(count_events_callback): Update, "entry" parameter is a
+	struct thread_info * now.
+	(select_singlestep_lwp_callback): Ditto.
+	(select_event_lwp_callback): Ditto.
+	(cancel_breakpoints_callback): Ditto.
+	(linux_cancel_breakpoints): Pass &all_threads to find_inferior,
+	not &all_lwps.
+	(select_event_lwp): Ditto.  Fetch ptid from event_thread.
+	(unsuspend_one_lwp): Update, "entry" parameter is a
+	struct thread_info * now.
+	(unsuspend_all_lwps): Pass &all_threads to find_inferior,
+	not &all_lwps.
+	(linux_stabilize_threads): Ditto.  And for for_each_inferior.
+	Fetch lwpid from thread, not lwp.
+	(linux_wait_1): Fetch ptid, lwpid from current_inferior.
+	Pass &all_threads to find_inferior, not &all_lwps.
+	(send_sigstop): Fetch lwpid from thread, not lwp.
+	(send_sigstop_callback): Update, "entry" parameter is a
+	struct thread_info * now.
+	(suspend_and_send_sigstop_callback): Ditto.
+	(wait_for_sigstop): Ditto.  Fetch ptid, lwpid from thread, lwp.
+	(stuck_in_jump_pad_callback): Update, "entry" parameter is a
+	struct thread_info * now.
+	(move_out_of_jump_pad_callback): Ditto.  Fetch ptid, lwpid
+	from thread, lwp.
+	(lwp_running): Update, "entry" parameter is a
+	struct thread_info * now.
+	(stop_all_lwps): Fetch ptid from thread.
+	Pass &all_threads to find_inferior, for_each_inferior, not &all_lwps.
+	(linux_resume_one_lwp): Fetch lwpid from thread.
+	(linux_set_resume_request): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch pid, lwpid from thread.
+	(resume_status_pending_p): Update, "entry" parameter is a
+	struct thread_info * now.
+	(need_step_over_p): Ditto.  Fetch lwpid from thread.
+	(start_step_over): Fetch lwpid from thread.
+	(linux_resume_one_thread): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch lwpid from thread.
+	(linux_resume): Pass &all_threads to find_inferior, not &all_lwps.
+	(proceed_one_lwp): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch lwpid from thread.
+	(unsuspend_and_proceed_one_lwp): Update, "entry" parameter is a
+	struct thread_info * now.
+	(proceed_all_lwps): Pass &all_threads to find_inferior, not &all_lwps.
+	(unstop_all_lwps): Ditto.  Fetch lwpid from thread.
+	(regsets_fetch_inferior_registers): Fetch lwpid from current_inferior
+	directly.
+	(regsets_store_inferior_registers): Ditto.
+	(fetch_register, store_register): Ditto.
+	(linux_read_memory, linux_write_memory): Ditto.
+	(linux_request_interrupt): Ditto.
+	(linux_read_auxv): Ditto.
+	(linux_xfer_siginfo): Ditto.
+	(linux_qxfer_spu): Ditto.
+	(linux_qxfer_libraries_svr4): Ditto.
+	* linux-low.h (ptid_of, pid_of, lwpid_of): Delete,
+	moved to inferiors.h.
+	(get_lwp): Delete.
+	(get_thread_lwp): Update.
+	(struct lwp_info): Delete member "entry".  Simplify comment for
+	member "thread".
+	(all_lwps): Delete.
+	* linux-mips-low.c (mips_read_description): Fetch lwpid from
+	current_inferior directly.
+	(update_watch_registers_callback): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch pid from thread.
+	(mips_linux_prepare_to_resume): Fetch ptid from thread.
+	(mips_insert_point): Fetch lwpid from current_inferior.
+	Pass &all_threads to find_inferior, not &all_lwps.
+	(mips_remove_point): Pass &all_threads to find_inferior, not &all_lwps.
+	(mips_stopped_by_watchpoint): Fetch lwpid from current_inferior
+	directly.
+	(mips_stopped_data_address): Ditto.
+	* linux-s390-low.c (s390_arch_setup): Fetch pid from current_inferior
+	directly.
+	* linux-tile-low.c (tile_arch_setup): Ditto.
+	* linux-x86-low.c (x86_get_thread_area): Fetch lwpid from thread.
+	(update_debug_registers_callback): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch pid from thread.
+	(i386_dr_low_set_addr): Fetch pid from current_inferior directly.
+	Pass &all_threads to find_inferior, not &all_lwps.
+	(i386_dr_low_get_addr): Fetch ptid from current_inferior directly.
+	(i386_dr_low_set_control): Fetch pid from current_inferior directly.
+	Pass &all_threads to find_inferior, not &all_lwps.
+	(i386_dr_low_get_control): Fetch ptid from current_inferior directly.
+	(i386_dr_low_get_status): Ditto.
+	(x86_linux_prepare_to_resume): Fetch ptid from thread.
+	(x86_siginfo_fixup): Fetch lwpid from current_inferior directly.
+	(x86_linux_read_description): Ditto.
+	* proc-service.c (ps_getpid): Fetch pid from current_inferior directly.
+
+2014-02-20  Doug Evans  <dje@google.com>
+
 	* inferiors.c (get_first_inferior): Fix buglet.
 
 2014-02-19  Doug Evans  <dje@google.com>
