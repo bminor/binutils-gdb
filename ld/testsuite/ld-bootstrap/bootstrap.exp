@@ -49,9 +49,13 @@ if [check_plugin_api_available] {
 # order to test -r.  Then link the result into an executable, ld1, to
 # really test -r.  Use ld1 to link a fresh ld, ld2.  Use ld2 to link a
 # new ld, ld3.  ld2 and ld3 should be identical.
+set test_flags {"" "strip" "--static" "--traditional-format"
+		"--no-keep-memory" "--relax"}
+if { [istarget "powerpc-*-*"] } {
+    lappend test_flags "--ppc476-workaround"
+}
 
-foreach flags {"" "strip" "--static" "--traditional-format"
-	       "--no-keep-memory" "--relax"} {
+foreach flags $test_flags {
     set do_strip "no"
     if {"$flags" == "strip"} { 
 	set testname "bootstrap with $flags"
@@ -67,6 +71,10 @@ foreach flags {"" "strip" "--static" "--traditional-format"
     set partial_flags "$flags"
     if { "$flags" == "--static" || "$flags" == "--relax" } {
 	set partial_flags ""
+    }
+
+    if { $partial_flags == "--ppc476-workaround" } {
+	append partial_flags " -T $srcdir/$subdir/ppc476.t"
     }
 
     # This test can only be run if we have the ld build directory,
