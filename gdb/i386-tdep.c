@@ -3694,6 +3694,9 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  got_minus[0] = 1;
 	}
 
+      if (!isdigit ((unsigned char) *s))
+	return 0;
+
       displacements[0] = strtol (s, &endp, 10);
       s = endp;
 
@@ -3711,6 +3714,9 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  ++s;
 	  got_minus[1] = 1;
 	}
+
+      if (!isdigit ((unsigned char) *s))
+	return 0;
 
       displacements[1] = strtol (s, &endp, 10);
       s = endp;
@@ -3730,6 +3736,9 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  got_minus[2] = 1;
 	}
 
+      if (!isdigit ((unsigned char) *s))
+	return 0;
+
       displacements[2] = strtol (s, &endp, 10);
       s = endp;
 
@@ -3745,7 +3754,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       if (*s++ != ')')
 	return 0;
 
-      len = s - start;
+      len = s - start - 1;
       regname = alloca (len + 1);
 
       strncpy (regname, start, len);

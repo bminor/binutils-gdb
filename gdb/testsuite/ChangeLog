@@ -1,3 +1,12 @@
+2014-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR tdep/16397
+	* gdb.arch/amd64-stap-special-operands.exp: New file.
+	* gdb.arch/amd64-stap-three-arg-disp.S: Likewise.
+	* gdb.arch/amd64-stap-three-arg-disp.c: Likewise.
+	* gdb.arch/amd64-stap-triplet.S: Likewise.
+	* gdb.arch/amd64-stap-triplet.c: Likewise.
+
 2014-02-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/dw2-icycle.S: Remove second and third parameters

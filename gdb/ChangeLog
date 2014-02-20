@@ -1,3 +1,10 @@
+2014-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR tdep/16397
+	* i386-tdep.c (i386_stap_parse_special_token_triplet): Check if a
+	number comes after the + or - signs.  Adjust length of register
+	name to be extracted.
+
 2014-02-20  Tom Tromey  <tromey@redhat.com>
 
 	* varobj.h (c_varobj_ops, cplus_varobj_ops, java_varobj_ops)
