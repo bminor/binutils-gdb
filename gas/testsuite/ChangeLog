@@ -1,3 +1,18 @@
+2014-02-21  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/avx512pf-intel.d: Remove prefetchwt1.
+	* gas/i386/avx512pf.s: Ditto.
+	* gas/i386/avx512pf.d: Ditto.
+	* gas/i386/x86-64-avx512pf-intel.d: Ditto.
+	* gas/i386/x86-64-avx512pf.s: Ditto.
+	* gas/i386/x86-64-avx512pf.d: Ditto.
+	* gas/i386/prefetchwt1-intel.d: New file.
+	* gas/i386/prefetchwt1.s: Ditto.
+	* gas/i386/prefetchwt1.d: Ditto.
+	* gas/i386/x86-64-prefetchwt1-intel.d: Ditto.
+	* gas/i386/x86-64-prefetchwt1.s: Ditto.
+	* gas/i386/x86-64-prefetchwt1.d: Ditto.
+
 2014-02-20  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/avx512cd-intel.d: Remove vptestnmq, vptestnmd.

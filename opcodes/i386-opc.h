@@ -175,6 +175,8 @@ enum
   CpuXSAVES,
   /* XSAVEC instruction required */
   CpuXSAVEC,
+  /* PREFETCHWT1 instruction required */
+  CpuPREFETCHWT1,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -269,6 +271,7 @@ typedef union i386_cpu_flags
       unsigned int cpuclflushopt:1;
       unsigned int cpuxsaves:1;
       unsigned int cpuxsavec:1;
+      unsigned int cpuprefetchwt1:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused

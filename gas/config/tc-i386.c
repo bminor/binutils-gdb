@@ -910,6 +910,8 @@ static const arch_entry cpu_arch[] =
     CPU_XSAVEC_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".xsaves"), PROCESSOR_UNKNOWN,
     CPU_XSAVES_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".prefetchwt1"), PROCESSOR_UNKNOWN,
+    CPU_PREFETCHWT1_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF
