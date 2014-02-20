@@ -1,5 +1,12 @@
 2014-02-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (handle_unload_dll): Add function documentation.
+	(do_initial_windows_stuff): Add comment explaining why we wait
+	until after inferior initialization has finished before
+	processing all DLLs.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.c (get_module_name): Delete.
 	(windows_get_exec_module_filename): New function, mostly
 	inspired from get_module_name.

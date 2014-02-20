@@ -802,6 +802,14 @@ windows_free_so (struct so_list *so)
   xfree (so);
 }
 
+/* Handle a DLL unload event.
+   Return 1 if successful, or zero otherwise.
+
+   This function assumes that this event did not occur during inferior
+   initialization, where their event info may be incomplete (see
+   do_initial_windows_stuff and windows_add_all_dlls for more info
+   on how we handle DLL loading during that phase).  */
+
 static int
 handle_unload_dll (void *dummy)
 {
@@ -1735,7 +1743,20 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
     }
 
   /* Now that the inferior has been started and all DLLs have been mapped,
-     we can iterate over all DLLs and load them in.  */
+     we can iterate over all DLLs and load them in.
+
+     We avoid doing it any earlier because, on certain versions of Windows,
+     LOAD_DLL_DEBUG_EVENTs are sometimes not complete.  In particular,
+     we have seen on Windows 8.1 that the ntdll.dll load event does not
+     include the DLL name, preventing us from creating an associated SO.
+     A possible explanation is that ntdll.dll might be mapped before
+     the SO info gets created by the Windows system -- ntdll.dll is
+     the first DLL to be reported via LOAD_DLL_DEBUG_EVENT and other DLLs
+     do not seem to suffer from that problem.
+
+     Rather than try to work around this sort of issue, it is much
+     simpler to just ignore DLL load/unload events during the startup
+     phase, and then process them all in one batch now.  */
   windows_add_all_dlls ();
 
   windows_initialization_done = 1;
