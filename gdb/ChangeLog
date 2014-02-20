@@ -1,3 +1,7 @@
+2014-02-20  Tom Tromey  <tromey@redhat.com>
+
+	* dbxread.c (read_dbx_symtab): Remove last_o_file_start.
+
 2014-02-20  Doug Evans  <xdje42@gmail.com>
 
 	* guile/scm-gsmob.c (gdbscm_init_eqable_gsmob): New arg containing_scm.

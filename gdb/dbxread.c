@@ -1199,7 +1199,6 @@ read_dbx_symtab (struct objfile *objfile)
   char *namestring;
   int nsl;
   int past_first_source_file = 0;
-  CORE_ADDR last_o_file_start = 0;
   CORE_ADDR last_function_start = 0;
   struct cleanup *back_to;
   bfd *abfd;
@@ -1391,7 +1390,6 @@ read_dbx_symtab (struct objfile *objfile)
 		}
 	      else
 		past_first_source_file = 1;
-	      last_o_file_start = nlist.n_value;
 	    }
 	  else
 	    goto record_it;
