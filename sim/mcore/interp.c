@@ -2130,7 +2130,7 @@ sim_kill (sd)
 void
 sim_do_command (sd, cmd)
      SIM_DESC sd;
-     char * cmd;
+     const char *cmd;
 {
   /* Nothing there yet; it's all an error.  */
   

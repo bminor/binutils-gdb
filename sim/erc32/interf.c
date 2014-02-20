@@ -479,7 +479,7 @@ sim_trace (sd)
 void
 sim_do_command(sd, cmd)
      SIM_DESC sd;
-    char           *cmd;
+     const char *cmd;
 {
     exec_cmd(&sregs, cmd);
 }

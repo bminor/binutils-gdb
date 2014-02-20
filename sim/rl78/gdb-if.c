@@ -499,9 +499,10 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason_p, int *sigrc_p)
    command.  */
 
 void
-sim_do_command (SIM_DESC sd, char *cmd)
+sim_do_command (SIM_DESC sd, const char *cmd)
 {
-  char *args;
+  const char *args;
+  char *p = strdup (cmd);
 
   check_desc (sd);
 
@@ -512,8 +513,6 @@ sim_do_command (SIM_DESC sd, char *cmd)
     }
   else
     {
-      char *p = cmd;
-
       /* Skip leading whitespace.  */
       while (isspace (*p))
 	p++;
@@ -561,6 +560,8 @@ sim_do_command (SIM_DESC sd, char *cmd)
   else
     printf ("The 'sim' command expects either 'trace' or 'verbose'"
 	    " as a subcommand.\n");
+
+  free (p);
 }
 
 /* Stub for command completion.  */

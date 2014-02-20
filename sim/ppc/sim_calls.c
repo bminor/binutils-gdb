@@ -247,7 +247,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 }
 
 void
-sim_do_command (SIM_DESC sd, char *cmd)
+sim_do_command (SIM_DESC sd, const char *cmd)
 {
   TRACE(trace_gdb, ("sim_do_commands(cmd=%s) called\n",
 		    cmd ? cmd : "(null)"));

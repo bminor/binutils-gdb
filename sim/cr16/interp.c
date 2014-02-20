@@ -1561,7 +1561,7 @@ sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 void
 sim_do_command (sd, cmd)
      SIM_DESC sd;
-     char *cmd;
+     const char *cmd;
 { 
   (*cr16_callback->printf_filtered) (cr16_callback, "sim_do_command: %s\n",cmd);
 }
