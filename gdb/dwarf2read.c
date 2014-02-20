@@ -8017,6 +8017,7 @@ static void
 reset_die_in_process (void *arg)
 {
   struct die_info *die = arg;
+
   die->in_process = 0;
 }
 
