@@ -219,7 +219,8 @@ extern void gdbscm_init_gsmob (gdb_smob *base);
 
 extern void gdbscm_init_chained_gsmob (chained_gdb_smob *base);
 
-extern void gdbscm_init_eqable_gsmob (eqable_gdb_smob *base);
+extern void gdbscm_init_eqable_gsmob (eqable_gdb_smob *base,
+				      SCM containing_scm);
 
 extern SCM gdbscm_mark_gsmob (gdb_smob *base);
 
@@ -242,8 +243,7 @@ extern eqable_gdb_smob **gdbscm_find_eqable_gsmob_ptr_slot
   (htab_t htab, eqable_gdb_smob *base);
 
 extern void gdbscm_fill_eqable_gsmob_ptr_slot (eqable_gdb_smob **slot,
-					       eqable_gdb_smob *base,
-					       SCM containing_scm);
+					       eqable_gdb_smob *base);
 
 extern void gdbscm_clear_eqable_gsmob_ptr_slot (htab_t htab,
 						eqable_gdb_smob *base);

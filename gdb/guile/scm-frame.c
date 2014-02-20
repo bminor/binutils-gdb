@@ -201,7 +201,7 @@ frscm_make_frame_smob (void)
   f_smob->inferior = NULL;
   f_smob->frame_id_is_next = 0;
   f_scm = scm_new_smob (frame_smob_tag, (scm_t_bits) f_smob);
-  gdbscm_init_eqable_gsmob (&f_smob->base);
+  gdbscm_init_eqable_gsmob (&f_smob->base, f_scm);
 
   return f_scm;
 }
@@ -275,7 +275,7 @@ frscm_scm_from_frame (struct frame_info *frame, struct inferior *inferior)
   f_smob->inferior = inferior;
   f_smob->frame_id_is_next = frame_id_is_next;
 
-  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &f_smob->base, f_scm);
+  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &f_smob->base);
 
   return f_scm;
 }

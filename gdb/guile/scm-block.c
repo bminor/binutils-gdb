@@ -193,7 +193,7 @@ bkscm_make_block_smob (void)
   b_smob->block = NULL;
   b_smob->objfile = NULL;
   b_scm = scm_new_smob (block_smob_tag, (scm_t_bits) b_smob);
-  gdbscm_init_eqable_gsmob (&b_smob->base);
+  gdbscm_init_eqable_gsmob (&b_smob->base, b_scm);
 
   return b_scm;
 }
@@ -237,7 +237,7 @@ bkscm_scm_from_block (const struct block *block, struct objfile *objfile)
   b_smob = (block_smob *) SCM_SMOB_DATA (b_scm);
   b_smob->block = block;
   b_smob->objfile = objfile;
-  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &b_smob->base, b_scm);
+  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &b_smob->base);
 
   return b_scm;
 }
