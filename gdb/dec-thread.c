@@ -692,15 +692,15 @@ dec_thread_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
   int i;
   struct dec_thread_info *info;
 
-  debug ("dec_thread_get_ada_task_ptid (struct target_ops *self,
-  lwp=0x%lx, thread=0x%lx)",
+  debug ("dec_thread_get_ada_task_ptid (struct target_ops *self,"
+	 " lwp=0x%lx, thread=0x%lx)",
          lwp, thread);
 
   for (i = 0; VEC_iterate (dec_thread_info_s, dec_thread_list, i, info);
        i++)
     if (info->info.teb == (pthread_t) thread)
       return ptid_build_from_info (*info);
-  
+
   warning (_("Could not find thread id from THREAD = 0x%lx"), thread);
   return inferior_ptid;
 }
