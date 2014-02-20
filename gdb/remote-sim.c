@@ -564,7 +564,7 @@ static void
 gdbsim_load (struct target_ops *self, char *args, int fromtty)
 {
   char **argv;
-  char *prog;
+  const char *prog;
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
 

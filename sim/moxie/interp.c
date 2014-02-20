@@ -1230,7 +1230,7 @@ load_dtb (SIM_DESC sd, const char *filename)
 SIM_RC
 sim_load (sd, prog, abfd, from_tty)
      SIM_DESC sd;
-     char * prog;
+     const char * prog;
      bfd * abfd;
      int from_tty;
 {

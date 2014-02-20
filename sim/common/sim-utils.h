@@ -45,7 +45,7 @@ unsigned long sim_elapsed_time_since (SIM_ELAPSED_TIME start);
 
 /* Utilities for manipulating the load image.  */
 
-SIM_RC sim_analyze_program (SIM_DESC sd, char *prog_name,
+SIM_RC sim_analyze_program (SIM_DESC sd, const char *prog_name,
 			    struct bfd *prog_bfd);
 
 /* Load program PROG into the simulator using the function DO_LOAD.
@@ -63,7 +63,7 @@ SIM_RC sim_analyze_program (SIM_DESC sd, char *prog_name,
 typedef int sim_write_fn (SIM_DESC sd, SIM_ADDR mem,
 			  const unsigned char *buf, int length);
 struct bfd *sim_load_file (SIM_DESC sd, const char *myname,
-			   host_callback *callback, char *prog,
+			   host_callback *callback, const char *prog,
 			   struct bfd *prog_bfd, int verbose_p,
 			   int lma_p, sim_write_fn do_load);
 

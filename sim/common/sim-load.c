@@ -57,7 +57,7 @@ static void xprintf_bfd_vma (host_callback *, bfd_vma);
 
 bfd *
 sim_load_file (SIM_DESC sd, const char *myname, host_callback *callback,
-	       char *prog, bfd *prog_bfd, int verbose_p, int lma_p,
+	       const char *prog, bfd *prog_bfd, int verbose_p, int lma_p,
 	       sim_write_fn do_write)
 {
   asection *s;

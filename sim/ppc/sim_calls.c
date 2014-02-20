@@ -97,7 +97,7 @@ sim_close (SIM_DESC sd, int quitting)
 
 
 SIM_RC
-sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
+sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 {
   TRACE(trace_gdb, ("sim_load(prog=%s, from_tty=%d) called\n",
 		    prog, from_tty));
