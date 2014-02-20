@@ -1,5 +1,10 @@
 2014-03-06  Yao Qi  <yao@codesourcery.com>
 
+	* cli/cli-utils.c (get_number_trailer): Add '\n' at the end of
+	message.
+
+2014-03-06  Yao Qi  <yao@codesourcery.com>
+
 	PR breakpoints/16508
 	* tracepoint.c (check_trace_running): New function.
 	(trace_find_command): Move code to check_trace_running and
