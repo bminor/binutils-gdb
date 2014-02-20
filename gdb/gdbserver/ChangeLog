@@ -1,5 +1,6 @@
 2014-02-20  Doug Evans  <dje@google.com>
 
+	Remove global all_lwps.
 	* inferiors.h (ptid_of): Move here from linux-low.h.
 	(pid_of, lwpid_of): Ditto.
 	* linux-aarch64-low.c (debug_reg_change_callback): Update, "entry"
