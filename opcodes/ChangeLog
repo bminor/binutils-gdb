@@ -1,3 +1,9 @@
+2014-02-20  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-opc.tbl: Change CPU of vptestnmq, vptestnmd from CpuAVX512CD,
+	to CpuAVX512F.
+	* i386-tbl.h: Regenerate.
+
 2014-02-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (output_cpu_flags): Don't output trailing space.

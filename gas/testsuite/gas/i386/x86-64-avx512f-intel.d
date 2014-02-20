@@ -7003,6 +7003,32 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 62 95 50 77 b2 00 04 00 00 	vpermi2pd zmm30,zmm29,QWORD PTR \[rdx\+0x400\]\{1to8\}
 [ 	]*[a-f0-9]+:	62 62 95 50 77 72 80 	vpermi2pd zmm30,zmm29,QWORD PTR \[rdx-0x400\]\{1to8\}
 [ 	]*[a-f0-9]+:	62 62 95 50 77 b2 f8 fb ff ff 	vpermi2pd zmm30,zmm29,QWORD PTR \[rdx-0x408\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 92 16 40 27 ec    	vptestnmd k5,zmm29,zmm28
+[ 	]*[a-f0-9]+:	62 92 16 47 27 ec    	vptestnmd k5\{k7\},zmm29,zmm28
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 29    	vptestnmd k5,zmm29,ZMMWORD PTR \[rcx\]
+[ 	]*[a-f0-9]+:	62 b2 16 40 27 ac f0 23 01 00 00 	vptestnmd k5,zmm29,ZMMWORD PTR \[rax\+r14\*8\+0x123\]
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 29    	vptestnmd k5,zmm29,DWORD PTR \[rcx\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 6a 7f 	vptestnmd k5,zmm29,ZMMWORD PTR \[rdx\+0x1fc0\]
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 aa 00 20 00 00 	vptestnmd k5,zmm29,ZMMWORD PTR \[rdx\+0x2000\]
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 6a 80 	vptestnmd k5,zmm29,ZMMWORD PTR \[rdx-0x2000\]
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 aa c0 df ff ff 	vptestnmd k5,zmm29,ZMMWORD PTR \[rdx-0x2040\]
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 6a 7f 	vptestnmd k5,zmm29,DWORD PTR \[rdx\+0x1fc\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 aa 00 02 00 00 	vptestnmd k5,zmm29,DWORD PTR \[rdx\+0x200\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 6a 80 	vptestnmd k5,zmm29,DWORD PTR \[rdx-0x200\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 aa fc fd ff ff 	vptestnmd k5,zmm29,DWORD PTR \[rdx-0x204\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 92 96 40 27 ec    	vptestnmq k5,zmm29,zmm28
+[ 	]*[a-f0-9]+:	62 92 96 47 27 ec    	vptestnmq k5\{k7\},zmm29,zmm28
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 29    	vptestnmq k5,zmm29,ZMMWORD PTR \[rcx\]
+[ 	]*[a-f0-9]+:	62 b2 96 40 27 ac f0 23 01 00 00 	vptestnmq k5,zmm29,ZMMWORD PTR \[rax\+r14\*8\+0x123\]
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 29    	vptestnmq k5,zmm29,QWORD PTR \[rcx\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 6a 7f 	vptestnmq k5,zmm29,ZMMWORD PTR \[rdx\+0x1fc0\]
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 aa 00 20 00 00 	vptestnmq k5,zmm29,ZMMWORD PTR \[rdx\+0x2000\]
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 6a 80 	vptestnmq k5,zmm29,ZMMWORD PTR \[rdx-0x2000\]
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 aa c0 df ff ff 	vptestnmq k5,zmm29,ZMMWORD PTR \[rdx-0x2040\]
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 6a 7f 	vptestnmq k5,zmm29,QWORD PTR \[rdx\+0x3f8\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 aa 00 04 00 00 	vptestnmq k5,zmm29,QWORD PTR \[rdx\+0x400\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 6a 80 	vptestnmq k5,zmm29,QWORD PTR \[rdx-0x400\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 aa f8 fb ff ff 	vptestnmq k5,zmm29,QWORD PTR \[rdx-0x408\]\{1to8\}
 [ 	]*[a-f0-9]+:	62 01 95 40 58 f4    	vaddpd zmm30,zmm29,zmm28
 [ 	]*[a-f0-9]+:	62 01 95 47 58 f4    	vaddpd zmm30\{k7\},zmm29,zmm28
 [ 	]*[a-f0-9]+:	62 01 95 c7 58 f4    	vaddpd zmm30\{k7\}\{z\},zmm29,zmm28
@@ -13997,4 +14023,30 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 62 95 50 77 b2 00 04 00 00 	vpermi2pd zmm30,zmm29,QWORD PTR \[rdx\+0x400\]\{1to8\}
 [ 	]*[a-f0-9]+:	62 62 95 50 77 72 80 	vpermi2pd zmm30,zmm29,QWORD PTR \[rdx-0x400\]\{1to8\}
 [ 	]*[a-f0-9]+:	62 62 95 50 77 b2 f8 fb ff ff 	vpermi2pd zmm30,zmm29,QWORD PTR \[rdx-0x408\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 92 16 40 27 ec    	vptestnmd k5,zmm29,zmm28
+[ 	]*[a-f0-9]+:	62 92 16 47 27 ec    	vptestnmd k5\{k7\},zmm29,zmm28
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 29    	vptestnmd k5,zmm29,ZMMWORD PTR \[rcx\]
+[ 	]*[a-f0-9]+:	62 b2 16 40 27 ac f0 34 12 00 00 	vptestnmd k5,zmm29,ZMMWORD PTR \[rax\+r14\*8\+0x1234\]
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 29    	vptestnmd k5,zmm29,DWORD PTR \[rcx\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 6a 7f 	vptestnmd k5,zmm29,ZMMWORD PTR \[rdx\+0x1fc0\]
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 aa 00 20 00 00 	vptestnmd k5,zmm29,ZMMWORD PTR \[rdx\+0x2000\]
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 6a 80 	vptestnmd k5,zmm29,ZMMWORD PTR \[rdx-0x2000\]
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 aa c0 df ff ff 	vptestnmd k5,zmm29,ZMMWORD PTR \[rdx-0x2040\]
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 6a 7f 	vptestnmd k5,zmm29,DWORD PTR \[rdx\+0x1fc\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 aa 00 02 00 00 	vptestnmd k5,zmm29,DWORD PTR \[rdx\+0x200\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 6a 80 	vptestnmd k5,zmm29,DWORD PTR \[rdx-0x200\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 aa fc fd ff ff 	vptestnmd k5,zmm29,DWORD PTR \[rdx-0x204\]\{1to16\}
+[ 	]*[a-f0-9]+:	62 92 96 40 27 ec    	vptestnmq k5,zmm29,zmm28
+[ 	]*[a-f0-9]+:	62 92 96 47 27 ec    	vptestnmq k5\{k7\},zmm29,zmm28
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 29    	vptestnmq k5,zmm29,ZMMWORD PTR \[rcx\]
+[ 	]*[a-f0-9]+:	62 b2 96 40 27 ac f0 34 12 00 00 	vptestnmq k5,zmm29,ZMMWORD PTR \[rax\+r14\*8\+0x1234\]
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 29    	vptestnmq k5,zmm29,QWORD PTR \[rcx\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 6a 7f 	vptestnmq k5,zmm29,ZMMWORD PTR \[rdx\+0x1fc0\]
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 aa 00 20 00 00 	vptestnmq k5,zmm29,ZMMWORD PTR \[rdx\+0x2000\]
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 6a 80 	vptestnmq k5,zmm29,ZMMWORD PTR \[rdx-0x2000\]
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 aa c0 df ff ff 	vptestnmq k5,zmm29,ZMMWORD PTR \[rdx-0x2040\]
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 6a 7f 	vptestnmq k5,zmm29,QWORD PTR \[rdx\+0x3f8\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 aa 00 04 00 00 	vptestnmq k5,zmm29,QWORD PTR \[rdx\+0x400\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 6a 80 	vptestnmq k5,zmm29,QWORD PTR \[rdx-0x400\]\{1to8\}
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 aa f8 fb ff ff 	vptestnmq k5,zmm29,QWORD PTR \[rdx-0x408\]\{1to8\}
 #pass
