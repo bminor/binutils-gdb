@@ -1,6 +1,24 @@
 2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2014-02-20  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/avx512cd-intel.d: Remove vptestnmq, vptestnmd.
+	* gas/i386/avx512cd.s: Ditto.
+	* gas/i386/avx512cd.d: Ditto.
+	* gas/i386/x86-64-avx512cd-intel.d: Ditto.
+	* gas/i386/x86-64-avx512cd.s: Ditto.
+	* gas/i386/x86-64-avx512cd.d: Ditto.
+	* gas/i386/avx512f-intel.d: Add vptestnmq, vptestnmd.
+	* gas/i386/avx512f.s: Ditto.
+	* gas/i386/avx512f.d: Ditto.
+	* gas/i386/x86-64-avx512f-intel.d: Ditto.
+	* gas/i386/x86-64-avx512f.s: Ditto.
+	* gas/i386/x86-64-avx512f.d: Ditto.
+
+2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
 	2014-02-12  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/clflushopt-intel.d: New.

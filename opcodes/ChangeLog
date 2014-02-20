@@ -1,6 +1,15 @@
 2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2014-02-20  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-opc.tbl: Change CPU of vptestnmq, vptestnmd from CpuAVX512CD,
+	to CpuAVX512F.
+	* i386-tbl.h: Regenerate.
+
+2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
 	2014-02-12  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* i386-dis.c (MOD enum): Add MOD_0FC7_REG_3, MOD_0FC7_REG_4,
