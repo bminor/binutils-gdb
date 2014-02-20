@@ -1,4 +1,9 @@
-2014-02-21  Ilya Tocar  <ilya.tocar@intel.com>
+2014-02-25  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-opc.tbl: Remove wrong variant of vcvtps2ph
+	* i386-tbl.h: Regenerate.
+
+2014-02-20  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CPU_PREFETCHWT1_FLAGS/
 	(cpu_flags): Add CpuPREFETCHWT1.
