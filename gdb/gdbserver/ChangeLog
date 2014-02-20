@@ -1,5 +1,9 @@
 2014-02-19  Doug Evans  <dje@google.com>
 
+	* inferiors.c (add_thread): Fix whitespace.
+
+2014-02-19  Doug Evans  <dje@google.com>
+
 	* dll.c (clear_dlls): Replace accessing list implemention details
 	with API function.
 	* gdbthread.h (get_first_thread): Declare.

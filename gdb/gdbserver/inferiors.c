@@ -115,7 +115,7 @@ add_thread (ptid_t thread_id, void *target_data)
   new_thread->last_resume_kind = resume_continue;
   new_thread->last_status.kind = TARGET_WAITKIND_IGNORE;
 
-  add_inferior_to_list (&all_threads, & new_thread->entry);
+  add_inferior_to_list (&all_threads, &new_thread->entry);
 
   if (current_inferior == NULL)
     current_inferior = new_thread;
