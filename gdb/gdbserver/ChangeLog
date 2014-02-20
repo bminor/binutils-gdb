@@ -1,5 +1,10 @@
 2014-02-19  Doug Evans  <dje@google.com>
 
+	* linux-low.c (add_lwp): Change result to struct lwp_info *.
+	All callers updated.
+
+2014-02-19  Doug Evans  <dje@google.com>
+
 	* inferiors.c (add_thread): Fix whitespace.
 
 2014-02-19  Doug Evans  <dje@google.com>

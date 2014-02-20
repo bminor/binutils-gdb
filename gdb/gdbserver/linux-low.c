@@ -226,7 +226,7 @@ static void linux_resume (struct thread_resume *resume_info, size_t n);
 static void stop_all_lwps (int suspend, struct lwp_info *except);
 static void unstop_all_lwps (int unsuspend, struct lwp_info *except);
 static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
-static void *add_lwp (ptid_t ptid);
+static struct lwp_info *add_lwp (ptid_t ptid);
 static int linux_stopped_by_watchpoint (void);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 static void proceed_all_lwps (void);
@@ -408,7 +408,7 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
 	}
 
       ptid = ptid_build (pid_of (event_child), new_pid, 0);
-      new_lwp = (struct lwp_info *) add_lwp (ptid);
+      new_lwp = add_lwp (ptid);
       add_thread (ptid, new_lwp);
 
       /* Either we're going to immediately resume the new thread
@@ -525,7 +525,7 @@ get_stop_pc (struct lwp_info *lwp)
   return stop_pc;
 }
 
-static void *
+static struct lwp_info *
 add_lwp (ptid_t ptid)
 {
   struct lwp_info *lwp;
@@ -682,7 +682,7 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
       ptid = ptid_build (pid, lwpid, 0);
     }
 
-  new_lwp = (struct lwp_info *) add_lwp (ptid);
+  new_lwp = add_lwp (ptid);
   add_thread (ptid, new_lwp);
 
   /* We need to wait for SIGSTOP before being able to make the next
