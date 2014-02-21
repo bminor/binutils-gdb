@@ -96,11 +96,8 @@ linux_common_core_of_thread (ptid_t ptid)
 	}
     }
 
-  p = strchr (content, '(');
-
-  /* Skip ")".  */
-  if (p != NULL)
-    p = strchr (p, ')');
+  /* ps command also relies on no trailing fields ever contain ')'.  */
+  p = strrchr (content, ')');
   if (p != NULL)
     p++;
 
@@ -258,11 +255,10 @@ get_process_owner (uid_t *owner, PID_T pid)
 }
 
 /* Find the CPU cores used by process PID and return them in CORES.
-   CORES points to an array of at least sysconf(_SC_NPROCESSOR_ONLN)
-   elements.  */
+   CORES points to an array of NUM_CORES elements.  */
 
 static int
-get_cores_used_by_process (PID_T pid, int *cores)
+get_cores_used_by_process (PID_T pid, int *cores, const int num_cores)
 {
   char taskdir[sizeof ("/proc/") + MAX_PID_T_STRLEN + sizeof ("/task") - 1];
   DIR *dir;
@@ -286,7 +282,7 @@ get_cores_used_by_process (PID_T pid, int *cores)
 	  core = linux_common_core_of_thread (ptid_build ((pid_t) pid,
 							  (pid_t) tid, 0));
 
-	  if (core >= 0)
+	  if (core >= 0 && core < num_cores)
 	    {
 	      ++cores[core];
 	      ++task_count;
@@ -350,7 +346,7 @@ linux_xfer_osdata_processes (gdb_byte *readbuf,
 
 	      /* Find CPU cores used by the process.  */
 	      cores = (int *) xcalloc (num_cores, sizeof (int));
-	      task_count = get_cores_used_by_process (pid, cores);
+	      task_count = get_cores_used_by_process (pid, cores, num_cores);
 	      cores_str = (char *) xcalloc (task_count, sizeof ("4294967295") + 1);
 
 	      for (i = 0; i < num_cores && task_count > 0; ++i)

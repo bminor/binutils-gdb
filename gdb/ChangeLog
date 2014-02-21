@@ -1,3 +1,13 @@
+2014-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/16594
+	* common/linux-osdata.c (linux_common_core_of_thread): Find the end of
+	process name.
+	(get_cores_used_by_process): New parameter num_cores, use it.
+	(linux_xfer_osdata_processes): Pass num_cores to it.
+	* linux-tdep.c (linux_info_proc, linux_fill_prpsinfo): Find the end of
+	process name.
+
 2014-02-21  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
 	* target.c (memory_xfer_partial): Fix length arg in call to
