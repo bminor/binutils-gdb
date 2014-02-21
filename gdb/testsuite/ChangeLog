@@ -1,3 +1,11 @@
+2014-02-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-after-sr-lock.c: Rename to ...
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.c: ... this.
+	* gdb.threads/step-after-sr-lock.exp: Rename to ...
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	... this.
+
 2014-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR tdep/16397
