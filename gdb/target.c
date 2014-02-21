@@ -1348,7 +1348,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 				   xfered_len);
 
       if (res == TARGET_XFER_OK && !show_memory_breakpoints)
-	breakpoint_xfer_memory (readbuf, NULL, NULL, memaddr, res);
+	breakpoint_xfer_memory (readbuf, NULL, NULL, memaddr, *xfered_len);
     }
   else
     {

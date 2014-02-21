@@ -1,3 +1,8 @@
+2014-02-21  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* target.c (memory_xfer_partial): Fix length arg in call to
+	breakpoint_xfer_memory.
+
 2014-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR tdep/16397
