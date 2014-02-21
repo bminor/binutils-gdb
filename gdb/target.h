@@ -772,7 +772,8 @@ struct target_ops
        The default implementation always returns the inferior's
        address space.  */
     struct address_space *(*to_thread_address_space) (struct target_ops *,
-						      ptid_t);
+						      ptid_t)
+      TARGET_DEFAULT_FUNC (default_thread_address_space);
 
     /* Target file operations.  */
 

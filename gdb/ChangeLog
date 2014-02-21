@@ -1,3 +1,11 @@
+2014-06-04  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (default_thread_address_space): New function.
+	(target_thread_address_space): Simplify.
+	* target.h (struct target_ops) <to_thread_address_space>: Add
+	TARGET_DEFAULT_FUNC.
+
 2014-06-04  Doug Evans  <xdje42@gmail.com>
 
 	* guile/scm-type.c (type_smob): Remove duplicate typedef.

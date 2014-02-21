@@ -78,6 +78,9 @@ static int default_verify_memory (struct target_ops *self,
 				  const gdb_byte *data,
 				  CORE_ADDR memaddr, ULONGEST size);
 
+static struct address_space *default_thread_address_space
+     (struct target_ops *self, ptid_t ptid);
+
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int return_zero (struct target_ops *);
@@ -2610,30 +2613,10 @@ target_get_osdata (const char *type)
   return target_read_stralloc (t, TARGET_OBJECT_OSDATA, type);
 }
 
-/* Determine the current address space of thread PTID.  */
-
-struct address_space *
-target_thread_address_space (ptid_t ptid)
+static struct address_space *
+default_thread_address_space (struct target_ops *self, ptid_t ptid)
 {
-  struct address_space *aspace;
   struct inferior *inf;
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_thread_address_space != NULL)
-	{
-	  aspace = t->to_thread_address_space (t, ptid);
-	  gdb_assert (aspace);
-
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_thread_address_space (%s) = %d\n",
-				target_pid_to_str (ptid),
-				address_space_num (aspace));
-	  return aspace;
-	}
-    }
 
   /* Fall-back to the "main" address space of the inferior.  */
   inf = find_inferior_pid (ptid_get_pid (ptid));
@@ -2645,6 +2628,25 @@ target_thread_address_space (ptid_t ptid)
 		    target_pid_to_str (ptid));
 
   return inf->aspace;
+}
+
+/* Determine the current address space of thread PTID.  */
+
+struct address_space *
+target_thread_address_space (ptid_t ptid)
+{
+  struct address_space *aspace;
+
+  aspace = current_target.to_thread_address_space (&current_target, ptid);
+  gdb_assert (aspace != NULL);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_thread_address_space (%s) = %d\n",
+			target_pid_to_str (ptid),
+			address_space_num (aspace));
+
+  return aspace;
 }
 
 
