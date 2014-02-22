@@ -1,5 +1,10 @@
 2014-03-06  Yao Qi  <yao@codesourcery.com>
 
+	* reverse.c (goto_bookmark_command): Add local 'p'.  Emit error
+	early if get_number returns zero.  Use 'p' instead of 'args'.
+
+2014-03-06  Yao Qi  <yao@codesourcery.com>
+
 	* cli/cli-utils.c (get_number_trailer): Add '\n' at the end of
 	message.
 
