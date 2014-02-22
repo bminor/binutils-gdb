@@ -1,5 +1,12 @@
 2014-03-06  Yao Qi  <yao@codesourcery.com>
 
+	* breakpoint.c (get_tracepoint_by_number): Remove argument
+	optional_p.  All callers updated.  Adjust comments.  Update
+	output message.
+	* breakpoint.h (get_tracepoint_by_number): Update declaration.
+
+2014-03-06  Yao Qi  <yao@codesourcery.com>
+
 	* reverse.c (goto_bookmark_command): Add local 'p'.  Emit error
 	early if get_number returns zero.  Use 'p' instead of 'args'.
 
