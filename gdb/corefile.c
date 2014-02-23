@@ -260,13 +260,10 @@ read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 				    memaddr + xfered, len - xfered,
 				    &xfered_len);
 
-      if (status == TARGET_XFER_EOF)
-	memory_error (TARGET_XFER_E_IO, memaddr + xfered);
+      if (status != TARGET_XFER_OK)
+	memory_error (status == TARGET_XFER_EOF ? TARGET_XFER_E_IO : status,
+		      memaddr + xfered);
 
-      if (TARGET_XFER_STATUS_ERROR_P (status))
-	memory_error (status, memaddr + xfered);
-
-      gdb_assert (status == TARGET_XFER_OK);
       xfered += xfered_len;
       QUIT;
     }

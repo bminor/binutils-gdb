@@ -2002,12 +2002,9 @@ target_write_with_progress (struct target_ops *ops,
 				     offset + xfered, len - xfered,
 				     &xfered_len);
 
-      if (status == TARGET_XFER_EOF)
-	return xfered;
-      if (TARGET_XFER_STATUS_ERROR_P (status))
-	return -1;
+      if (status != TARGET_XFER_OK)
+	return status == TARGET_XFER_EOF ? xfered : -1;
 
-      gdb_assert (status == TARGET_XFER_OK);
       if (progress)
 	(*progress) (xfered_len, baton);
 

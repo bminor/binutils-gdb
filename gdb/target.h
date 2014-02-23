@@ -225,8 +225,6 @@ enum target_xfer_status
   /* Keep list in sync with target_xfer_error_to_string.  */
 };
 
-#define TARGET_XFER_STATUS_ERROR_P(STATUS) ((STATUS) < TARGET_XFER_EOF)
-
 /* Return the string form of ERR.  */
 
 extern const char *target_xfer_status_to_string (enum target_xfer_status err);

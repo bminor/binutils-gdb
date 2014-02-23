@@ -1,3 +1,9 @@
+2014-02-24  Yao Qi  <yao@codesourcery.com>
+
+	* target.h (TARGET_XFER_STATUS_ERROR_P): Remove.
+	* corefile.c (read_memory): Adjusted.
+	* target.c (target_write_with_progress): Adjusted.
+
 2014-02-23  Yao Qi  <yao@codesourcery.com>
 
 	Revert two patches:
