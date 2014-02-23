@@ -222,12 +222,13 @@ enum target_xfer_status
      unavailable.  */
   TARGET_XFER_E_UNAVAILABLE = -2,
 
-  /* Keep list in sync with target_xfer_error_to_string.  */
+  /* Keep list in sync with target_xfer_status_to_string.  */
 };
 
-/* Return the string form of ERR.  */
+/* Return the string form of STATUS.  */
 
-extern const char *target_xfer_status_to_string (enum target_xfer_status err);
+extern const char *
+  target_xfer_status_to_string (enum target_xfer_status status);
 
 /* Enumeration of the kinds of traceframe searches that a target may
    be able to perform.  */

@@ -1,5 +1,13 @@
 2014-02-24  Yao Qi  <yao@codesourcery.com>
 
+	* target.c (target_xfer_status_to_string): Rename argument err
+	to status.
+	* target.h (target_xfer_status_to_string): Update declaration.
+	Replace target_xfer_error_to_string with
+	target_xfer_status_to_string in comment.
+
+2014-02-24  Yao Qi  <yao@codesourcery.com>
+
 	* mips-linux-nat.c (super_close): Update its type.
 	(mips_linux_close): Pass 'self' to super_close.
 

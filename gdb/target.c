@@ -880,10 +880,10 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 }
 
 const char *
-target_xfer_status_to_string (enum target_xfer_status err)
+target_xfer_status_to_string (enum target_xfer_status status)
 {
 #define CASE(X) case X: return #X
-  switch (err)
+  switch (status)
     {
       CASE(TARGET_XFER_E_IO);
       CASE(TARGET_XFER_E_UNAVAILABLE);
