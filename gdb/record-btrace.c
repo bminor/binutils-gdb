@@ -827,7 +827,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	    if (writebuf != NULL)
 	      {
 		*xfered_len = len;
-		return TARGET_XFER_E_UNAVAILABLE;
+		return TARGET_XFER_UNAVAILABLE;
 	      }
 
 	    /* We allow reading readonly memory.  */
@@ -846,7 +846,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	      }
 
 	    *xfered_len = len;
-	    return TARGET_XFER_E_UNAVAILABLE;
+	    return TARGET_XFER_UNAVAILABLE;
 	  }
 	}
     }
@@ -858,7 +858,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 				   offset, len, xfered_len);
 
   *xfered_len = len;
-  return TARGET_XFER_E_UNAVAILABLE;
+  return TARGET_XFER_UNAVAILABLE;
 }
 
 /* The to_insert_breakpoint method of target record-btrace.  */

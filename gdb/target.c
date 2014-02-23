@@ -886,7 +886,7 @@ target_xfer_status_to_string (enum target_xfer_status status)
   switch (status)
     {
       CASE(TARGET_XFER_E_IO);
-      CASE(TARGET_XFER_E_UNAVAILABLE);
+      CASE(TARGET_XFER_UNAVAILABLE);
     default:
       return "<unknown>";
     }
@@ -1099,7 +1099,7 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
 	break;
 
       /* Stop if the target reports that the memory is not available.  */
-      if (res == TARGET_XFER_E_UNAVAILABLE)
+      if (res == TARGET_XFER_UNAVAILABLE)
 	break;
 
       /* We want to continue past core files to executables, but not
@@ -1212,7 +1212,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 		  /* No use trying further, we know some memory starting
 		     at MEMADDR isn't available.  */
 		  *xfered_len = len;
-		  return TARGET_XFER_E_UNAVAILABLE;
+		  return TARGET_XFER_UNAVAILABLE;
 		}
 	    }
 
@@ -1479,7 +1479,7 @@ target_xfer_partial (struct target_ops *ops,
   /* Check implementations of to_xfer_partial update *XFERED_LEN
      properly.  Do assertion after printing debug messages, so that we
      can find more clues on assertion failure from debugging messages.  */
-  if (retval == TARGET_XFER_OK || retval == TARGET_XFER_E_UNAVAILABLE)
+  if (retval == TARGET_XFER_OK || retval == TARGET_XFER_UNAVAILABLE)
     gdb_assert (*xfered_len > 0);
 
   return retval;

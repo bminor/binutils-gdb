@@ -213,14 +213,13 @@ enum target_xfer_status
   /* No further transfer is possible.  */
   TARGET_XFER_EOF = 0,
 
+  /* The piece of the object requested is unavailable.  */
+  TARGET_XFER_UNAVAILABLE = 2,
+
   /* Generic I/O error.  Note that it's important that this is '-1',
      as we still have target_xfer-related code returning hardcoded
      '-1' on error.  */
   TARGET_XFER_E_IO = -1,
-
-  /* Transfer failed because the piece of the object requested is
-     unavailable.  */
-  TARGET_XFER_E_UNAVAILABLE = -2,
 
   /* Keep list in sync with target_xfer_status_to_string.  */
 };
@@ -628,7 +627,7 @@ struct target_ops
        'enum target_xfer_status' value).  Save the number of bytes
        actually transferred in *XFERED_LEN if transfer is successful
        (TARGET_XFER_OK) or the number unavailable bytes if the requested
-       data is unavailable (TARGET_XFER_E_UNAVAILABLE).  *XFERED_LEN
+       data is unavailable (TARGET_XFER_UNAVAILABLE).  *XFERED_LEN
        smaller than LEN does not indicate the end of the object, only
        the end of the transfer; higher level code should continue
        transferring if desired.  This is handled in target.c.

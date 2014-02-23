@@ -661,7 +661,7 @@ section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
 	  else
 	    {
 	      *xfered_len = r->start - offset;
-	      status = TARGET_XFER_E_UNAVAILABLE;
+	      status = TARGET_XFER_UNAVAILABLE;
 	    }
 	  do_cleanups (old_chain);
 	  return status;
@@ -670,7 +670,7 @@ section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
   do_cleanups (old_chain);
 
   *xfered_len = len;
-  return TARGET_XFER_E_UNAVAILABLE;
+  return TARGET_XFER_UNAVAILABLE;
 }
 
 enum target_xfer_status

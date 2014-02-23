@@ -82,7 +82,7 @@ extern enum target_xfer_status
 
 /* Read from mappable read-only sections of BFD executable files.
    Similar to exec_read_partial_read_only, but return
-   TARGET_XFER_E_UNAVAILABLE if data is unavailable.  */
+   TARGET_XFER_UNAVAILABLE if data is unavailable.  */
 
 extern enum target_xfer_status
   section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,

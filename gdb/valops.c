@@ -964,7 +964,7 @@ read_value_memory (struct value *val, int embedded_offset,
 
       if (status == TARGET_XFER_OK)
 	/* nothing */;
-      else if (status == TARGET_XFER_E_UNAVAILABLE)
+      else if (status == TARGET_XFER_UNAVAILABLE)
 	mark_value_bytes_unavailable (val, embedded_offset + xfered,
 				      xfered_len);
       else if (status == TARGET_XFER_EOF)

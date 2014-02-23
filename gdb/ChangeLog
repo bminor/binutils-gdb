@@ -1,5 +1,20 @@
 2014-02-24  Yao Qi  <yao@codesourcery.com>
 
+	* target.h (enum target_xfer_status)
+	<TARGET_XFER_E_UNAVAILABLE>: Rename it to ...
+	<TARGET_XFER_UNAVAILABLE>: ... it with setting value 2
+	explicitly.  New.
+	* corefile.c (memory_error_message): User updated.
+	* exec.c (section_table_read_available_memory): Likewise.
+	* record-btrace.c (record_btrace_xfer_partial): Likewise.
+	* target.c (target_xfer_status_to_string): Likewise.
+	(raw_memory_xfer_partial): Likewise.
+	(memory_xfer_partial_1, target_xfer_partial): Likewise.
+	* valops.c (read_value_memory): Likewise.
+	* exec.h: Update comments.
+
+2014-02-24  Yao Qi  <yao@codesourcery.com>
+
 	* target.c (target_xfer_status_to_string): Rename argument err
 	to status.
 	* target.h (target_xfer_status_to_string): Update declaration.

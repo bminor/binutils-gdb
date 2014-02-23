@@ -204,7 +204,7 @@ memory_error_message (enum target_xfer_status err,
 	 bounds.  */
       return xstrprintf (_("Cannot access memory at address %s"),
 			 paddress (gdbarch, memaddr));
-    case TARGET_XFER_E_UNAVAILABLE:
+    case TARGET_XFER_UNAVAILABLE:
       return xstrprintf (_("Memory at address %s unavailable."),
 			 paddress (gdbarch, memaddr));
     default:
@@ -233,7 +233,7 @@ memory_error (enum target_xfer_status err, CORE_ADDR memaddr)
     case TARGET_XFER_E_IO:
       exception = MEMORY_ERROR;
       break;
-    case TARGET_XFER_E_UNAVAILABLE:
+    case TARGET_XFER_UNAVAILABLE:
       exception = NOT_AVAILABLE_ERROR;
       break;
     }
