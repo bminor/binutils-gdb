@@ -1,5 +1,15 @@
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* win32-low.c (psapi_get_dll_name,
+	* win32_CreateToolhelp32Snapshot): Delete.
+	(win32_CreateToolhelp32Snapshot, win32_Module32First)
+	(win32_Module32Next, load_toolhelp, toolhelp_get_dll_name):
+	Delete.
+	(handle_load_dll): Add function description.
+	Remove code using psapi_get_dll_name and toolhelp_get_dll_name.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* win32-low.c (win32_add_one_solib): Add 0x1000 to load_addr.
 	Add comment.
 	(win32_add_all_dlls): Remove 0x1000 offset applied to DLL
