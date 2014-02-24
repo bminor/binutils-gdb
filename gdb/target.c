@@ -81,8 +81,6 @@ static int return_zero (struct target_ops *);
 
 static int return_zero_has_execution (struct target_ops *, ptid_t);
 
-void target_ignore (void);
-
 static void target_command (char *, int);
 
 static struct target_ops *find_default_run_target (char *);
@@ -463,11 +461,6 @@ add_deprecated_target_alias (struct target_ops *t, char *alias)
 }
 
 /* Stub functions */
-
-void
-target_ignore (void)
-{
-}
 
 void
 target_kill (void)

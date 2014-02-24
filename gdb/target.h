@@ -2187,9 +2187,6 @@ extern void update_target_permissions (void);
 
 /* Imported from machine dependent code.  */
 
-/* Blank target vector entries are initialized to target_ignore.  */
-void target_ignore (void);
-
 /* See to_supports_btrace in struct target_ops.  */
 #define target_supports_btrace() \
   (current_target.to_supports_btrace (&current_target))

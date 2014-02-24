@@ -1,3 +1,8 @@
+2014-02-25  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (target_ignore): Don't declare.
+	* target.c (target_ignore): Remove.
+
 2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/16626
