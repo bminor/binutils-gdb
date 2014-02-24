@@ -1,5 +1,28 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* sparc-linux-tdep.c (sparc32_linux_gregset)
+	(sparc32_linux_fpregset): New static regset structures.
+	(sparc32_linux_init_abi): Drop dynamic regset allocations.
+	* sparc-tdep.h (struct gdbarch_tdep): Constify 'gregset' and
+	'fpregset' fields.
+	* sparc64-linux-tdep.c: (sparc64_linux_gregset)
+	(sparc64_linux_fpregset): New static regset structures.
+	(sparc64_linux_init_abi): Drop dynamic regset allocations.
+	* sparc64fbsd-tdep.c (sparc64fbsd_gregset, sparc64fbsd_fpregset):
+	New static regset structures.
+	(sparc64fbsd_init_abi): Drop dynamic regset allocations.
+	* sparc64nbsd-tdep.c (sparc64nbsd_gregset, sparc64nbsd_fpregset):
+	New static regset structures.
+	(sparc64nbsd_init_abi): Drop dynamic regset allocations.
+	* sparc64obsd-tdep.c (sparc64obsd_gregset, sparc64obsd_fpregset):
+	New static regset structures.
+	(sparc64obsd_init_abi): Drop dynamic regset allocations.
+	* sparcnbsd-tdep.c (sparc32nbsd_gregset, sparc32nbsd_fpregset):
+	New static regset structures.
+	(sparc32nbsd_init_abi): Drop dynamic regset allocations.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* sparc-linux-nat.c (supply_gregset, supply_fpregset)
 	(fill_gregset, fill_fpregset, _initialize_sparc_linux_nat): Rename
 	register maps ("regmaps") from "*regset" to "*regmap".  Do this

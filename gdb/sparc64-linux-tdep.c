@@ -280,6 +280,20 @@ sparc64_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 
 
 
+static const struct regset sparc64_linux_gregset =
+  {
+    NULL,
+    sparc64_linux_supply_core_gregset,
+    sparc64_linux_collect_core_gregset
+  };
+
+static const struct regset sparc64_linux_fpregset =
+  {
+    NULL,
+    sparc64_linux_supply_core_fpregset,
+    sparc64_linux_collect_core_fpregset
+  };
+
 static void
 sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -287,12 +301,10 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   linux_init_abi (info, gdbarch);
 
-  tdep->gregset = regset_alloc (gdbarch, sparc64_linux_supply_core_gregset,
-				sparc64_linux_collect_core_gregset);
+  tdep->gregset = &sparc64_linux_gregset;
   tdep->sizeof_gregset = 288;
 
-  tdep->fpregset = regset_alloc (gdbarch, sparc64_linux_supply_core_fpregset,
-				 sparc64_linux_collect_core_fpregset);
+  tdep->fpregset = &sparc64_linux_fpregset;
   tdep->sizeof_fpregset = 280;
 
   tramp_frame_prepend_unwinder (gdbarch, &sparc64_linux_rt_sigframe);

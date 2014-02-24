@@ -58,9 +58,9 @@ struct gdbarch_tdep
   int npc_regnum;
 
   /* Register sets.  */
-  struct regset *gregset;
+  const struct regset *gregset;
   size_t sizeof_gregset;
-  struct regset *fpregset;
+  const struct regset *fpregset;
   size_t sizeof_fpregset;
 
   /* Offset of saved PC in jmp_buf.  */

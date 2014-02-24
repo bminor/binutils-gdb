@@ -209,17 +209,25 @@ static const struct frame_unwind sparc64fbsd_sigtramp_frame_unwind =
 };
 
 
+static const struct regset sparc64fbsd_gregset =
+  {
+    NULL, sparc64fbsd_supply_gregset, sparc64fbsd_collect_gregset
+  };
+
+static const struct regset sparc64fbsd_fpregset =
+  {
+    NULL, sparc64fbsd_supply_fpregset, sparc64fbsd_collect_fpregset
+  };
+
 static void
 sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = regset_alloc (gdbarch, sparc64fbsd_supply_gregset,
-				sparc64fbsd_collect_gregset);
+  tdep->gregset = &sparc64fbsd_gregset;
   tdep->sizeof_gregset = 256;
 
-  tdep->fpregset = regset_alloc (gdbarch, sparc64fbsd_supply_fpregset,
-				 sparc64fbsd_collect_fpregset);
+  tdep->fpregset = &sparc64fbsd_fpregset;
   tdep->sizeof_fpregset = 272;
 
   frame_unwind_append_unwinder (gdbarch, &sparc64fbsd_sigtramp_frame_unwind);

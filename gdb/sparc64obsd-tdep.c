@@ -403,15 +403,24 @@ sparc64obsd_collect_uthread(const struct regcache *regcache,
 }
 
 
+static const struct regset sparc64obsd_gregset =
+  {
+    NULL, sparc64obsd_supply_gregset, NULL
+  };
+
+static const struct regset sparc64obsd_fpregset =
+  {
+    NULL, sparc64obsd_supply_fpregset, NULL
+  };
+
 static void
 sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = regset_alloc (gdbarch, sparc64obsd_supply_gregset, NULL);
+  tdep->gregset = &sparc64obsd_gregset;
   tdep->sizeof_gregset = 288;
-
-  tdep->fpregset = regset_alloc (gdbarch, sparc64obsd_supply_fpregset, NULL);
+  tdep->fpregset = &sparc64obsd_fpregset;
   tdep->sizeof_fpregset = 272;
 
   /* Make sure we can single-step "new" syscalls.  */

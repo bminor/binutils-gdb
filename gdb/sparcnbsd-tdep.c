@@ -283,6 +283,16 @@ sparcnbsd_step_trap (struct frame_info *frame, unsigned long insn)
 }
 
 
+static const struct regset sparc32nbsd_gregset =
+  {
+    NULL, sparc32nbsd_supply_gregset, NULL
+  };
+
+static const struct regset sparc32nbsd_fpregset =
+  {
+    NULL, sparc32nbsd_supply_fpregset, NULL
+  };
+
 static void
 sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -292,10 +302,10 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
-  tdep->gregset = regset_alloc (gdbarch, sparc32nbsd_supply_gregset, NULL);
+  tdep->gregset = &sparc32nbsd_gregset;
   tdep->sizeof_gregset = 20 * 4;
 
-  tdep->fpregset = regset_alloc (gdbarch, sparc32nbsd_supply_fpregset, NULL);
+  tdep->fpregset = &sparc32nbsd_fpregset;
   tdep->sizeof_fpregset = 33 * 4;
 
   /* Make sure we can single-step "new" syscalls.  */

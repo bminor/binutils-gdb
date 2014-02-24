@@ -403,6 +403,20 @@ sparc32_linux_gdb_signal_to_target (struct gdbarch *gdbarch,
 
 
 
+static const struct regset sparc32_linux_gregset =
+  {
+    NULL,
+    sparc32_linux_supply_core_gregset,
+    sparc32_linux_collect_core_gregset
+  };
+
+static const struct regset sparc32_linux_fpregset =
+  {
+    NULL,
+    sparc32_linux_supply_core_fpregset,
+    sparc32_linux_collect_core_fpregset
+  };
+
 static void
 sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -410,12 +424,10 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   linux_init_abi (info, gdbarch);
 
-  tdep->gregset = regset_alloc (gdbarch, sparc32_linux_supply_core_gregset,
-				sparc32_linux_collect_core_gregset);
+  tdep->gregset = &sparc32_linux_gregset;
   tdep->sizeof_gregset = 152;
 
-  tdep->fpregset = regset_alloc (gdbarch, sparc32_linux_supply_core_fpregset,
-				 sparc32_linux_collect_core_fpregset);
+  tdep->fpregset = &sparc32_linux_fpregset;
   tdep->sizeof_fpregset = 396;
 
   tramp_frame_prepend_unwinder (gdbarch, &sparc32_linux_sigframe);

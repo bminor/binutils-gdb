@@ -237,15 +237,25 @@ static const struct frame_unwind sparc64nbsd_sigcontext_frame_unwind =
 };
 
 
+static const struct regset sparc64nbsd_gregset =
+  {
+    NULL, sparc64nbsd_supply_gregset, NULL
+  };
+
+static const struct regset sparc64nbsd_fpregset =
+  {
+    NULL, sparc64nbsd_supply_fpregset, NULL
+  };
+
 static void
 sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = regset_alloc (gdbarch, sparc64nbsd_supply_gregset, NULL);
+  tdep->gregset = &sparc64nbsd_gregset;
   tdep->sizeof_gregset = 160;
 
-  tdep->fpregset = regset_alloc (gdbarch, sparc64nbsd_supply_fpregset, NULL);
+  tdep->fpregset =  &sparc64nbsd_fpregset;
   tdep->sizeof_fpregset = 272;
 
   /* Make sure we can single-step "new" syscalls.  */
