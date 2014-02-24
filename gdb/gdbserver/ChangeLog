@@ -1,5 +1,16 @@
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* win32-low.c (win32_add_one_solib): Add 0x1000 to load_addr.
+	Add comment.
+	(win32_add_all_dlls): Remove 0x1000 offset applied to DLL
+	base address when calling win32_add_one_solib.
+	(handle_load_dll): Delete local variable load_addr.
+	Remove 0x1000 offset applied to DLL base address when calling
+	win32_add_one_solib.
+	(handle_unload_dll): Add comment.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* win32-low.c (win32_add_all_dlls): Renames
 	win32_ensure_ntdll_loaded.  Rewrite function documentation.
 	Adjust implementation to always load all DLLs.

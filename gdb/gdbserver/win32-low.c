@@ -971,6 +971,11 @@ win32_add_one_solib (const char *name, CORE_ADDR load_addr)
   HANDLE h = FindFirstFileA (name, &w32_fd);
 #endif
 
+  /* The symbols in a dll are offset by 0x1000, which is the
+     offset from 0 of the first byte in an image - because
+     of the file header and the section alignment. */
+  load_addr += 0x1000;
+
   if (h == INVALID_HANDLE_VALUE)
     strcpy (buf, name);
   else
@@ -1215,11 +1220,7 @@ win32_add_all_dlls (void)
 					 dll_name,
 					 MAX_PATH) == 0)
 	continue;
-      /* The symbols in a dll are offset by 0x1000, which is the
-	 offset from 0 of the first byte in an image - because
-	 of the file header and the section alignment. */
-      win32_add_one_solib (dll_name,
-			   (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll + 0x1000);
+      win32_add_one_solib (dll_name, (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll);
     }
 }
 #endif
@@ -1315,7 +1316,6 @@ handle_load_dll (void)
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   char dll_buf[MAX_PATH + 1];
   char *dll_name = NULL;
-  CORE_ADDR load_addr;
 
   dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
@@ -1340,12 +1340,7 @@ handle_load_dll (void)
   if (!dll_name)
     return;
 
-  /* The symbols in a dll are offset by 0x1000, which is the
-     offset from 0 of the first byte in an image - because
-     of the file header and the section alignment. */
-
-  load_addr = (CORE_ADDR) (uintptr_t) event->lpBaseOfDll + 0x1000;
-  win32_add_one_solib (dll_name, load_addr);
+  win32_add_one_solib (dll_name, (CORE_ADDR) (uintptr_t) event->lpBaseOfDll);
 }
 
 /* Handle a DLL unload event.
@@ -1360,6 +1355,10 @@ handle_unload_dll (void)
 {
   CORE_ADDR load_addr =
 	  (CORE_ADDR) (uintptr_t) current_event.u.UnloadDll.lpBaseOfDll;
+
+  /* The symbols in a dll are offset by 0x1000, which is the
+     offset from 0 of the first byte in an image - because
+     of the file header and the section alignment. */
   load_addr += 0x1000;
   unloaded_dll (NULL, load_addr);
 }
