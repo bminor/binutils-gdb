@@ -1,3 +1,7 @@
+2014-02-24  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (run_on_host): Log error output if program fails.
+
 2014-02-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/step-after-sr-lock.c: Rename to ...
