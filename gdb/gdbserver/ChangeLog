@@ -1,3 +1,20 @@
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-low.c (win32_add_all_dlls): Renames
+	win32_ensure_ntdll_loaded.  Rewrite function documentation.
+	Adjust implementation to always load all DLLs.
+	Add 0x1000 offset to DLL base address when calling
+	win32_add_one_solib.
+	(child_initialization_done): New static global.
+	(do_initial_child_stuff): Set child_initialization_done to
+	zero during child initialization, and 1 after.  Replace call
+	to win32_ensure_ntdll_loaded by call to win32_add_all_dlls.
+	Add comment.
+	(match_dll_by_basename, dll_is_loaded_by_basename): Delete.
+	(handle_unload_dll): Add function documentation.
+	(get_child_debug_event): Ignore load and unload DLL events
+	during child initialization.
+
 2014-02-20  Doug Evans  <dje@google.com>
 
 	Remove global all_lwps.

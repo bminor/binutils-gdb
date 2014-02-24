@@ -106,7 +106,7 @@ static ptid_t win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			  int options);
 static void win32_resume (struct thread_resume *resume_info, size_t n);
 #ifndef _WIN32_WCE
-static void win32_ensure_ntdll_loaded (void);
+static void win32_add_all_dlls (void);
 #endif
 
 /* Get the thread ID from the current selected inferior (the current
@@ -324,6 +324,10 @@ child_init_thread_list (void)
   for_each_inferior (&all_threads, delete_thread_info);
 }
 
+/* Zero during the child initialization phase, and nonzero otherwise.  */
+
+static int child_initialization_done = 0;
+
 static void
 do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 {
@@ -343,6 +347,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
   proc = add_process (pid, attached);
   proc->tdesc = win32_tdesc;
   child_init_thread_list ();
+  child_initialization_done = 0;
 
   if (the_low_target.initial_stuff != NULL)
     (*the_low_target.initial_stuff) ();
@@ -376,8 +381,25 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
     }
 
 #ifndef _WIN32_WCE
-  win32_ensure_ntdll_loaded ();
+  /* Now that the inferior has been started and all DLLs have been mapped,
+     we can iterate over all DLLs and load them in.
+
+     We avoid doing it any earlier because, on certain versions of Windows,
+     LOAD_DLL_DEBUG_EVENTs are sometimes not complete.  In particular,
+     we have seen on Windows 8.1 that the ntdll.dll load event does not
+     include the DLL name, preventing us from creating an associated SO.
+     A possible explanation is that ntdll.dll might be mapped before
+     the SO info gets created by the Windows system -- ntdll.dll is
+     the first DLL to be reported via LOAD_DLL_DEBUG_EVENT and other DLLs
+     do not seem to suffer from that problem.
+
+     Rather than try to work around this sort of issue, it is much
+     simpler to just ignore DLL load/unload events during the startup
+     phase, and then process them all in one batch now.  */
+  win32_add_all_dlls ();
 #endif
+
+  child_initialization_done = 1;
 }
 
 /* Resume all artificially suspended threads if we are continuing
@@ -1143,51 +1165,17 @@ failed:
 
 #ifndef _WIN32_WCE
 
-/* Helper routine for dll_is_loaded_by_basename.
-   Return non-zero if the basename in ARG matches the DLL in INF.  */
-
-static int
-match_dll_by_basename (struct inferior_list_entry *inf, void *arg)
-{
-  struct dll_info *iter = (void *) inf;
-  const char *basename = arg;
-
-  return strcasecmp (lbasename (iter->name), basename) == 0;
-}
-
-/* Return non-zero if the DLL specified by BASENAME is loaded.  */
-
-static int
-dll_is_loaded_by_basename (const char *basename)
-{
-  return find_inferior (&all_dlls, match_dll_by_basename,
-			(void *) basename) != NULL;
-}
-
-/* On certain versions of Windows, the information about ntdll.dll
-   is not available yet at the time we get the LOAD_DLL_DEBUG_EVENT,
-   thus preventing us from reporting this DLL as an SO. This has been
-   witnessed on Windows 8.1, for instance.  A possible explanation
-   is that ntdll.dll might be mapped before the SO info gets created
-   by the Windows system -- ntdll.dll is the first DLL to be reported
-   via LOAD_DLL_DEBUG_EVENT and other DLLs do not seem to suffer from
-   that problem.
-
-   If we indeed are missing ntdll.dll, this function tries to recover
-   from this issue, after the fact.  Do nothing if we encounter any
-   issue trying to locate that DLL.  */
+/* Iterate over all DLLs currently mapped by our inferior, and
+   add them to our list of solibs.  */
 
 static void
-win32_ensure_ntdll_loaded (void)
+win32_add_all_dlls (void)
 {
   size_t i;
   HMODULE dh_buf[1];
   HMODULE *DllHandle = dh_buf;
   DWORD cbNeeded;
   BOOL ok;
-
-  if (dll_is_loaded_by_basename ("ntdll.dll"))
-    return;
 
   if (!load_psapi ())
     return;
@@ -1212,7 +1200,7 @@ win32_ensure_ntdll_loaded (void)
   if (!ok)
     return;
 
-  for (i = 0; i < ((size_t) cbNeeded / sizeof (HMODULE)); i++)
+  for (i = 1; i < ((size_t) cbNeeded / sizeof (HMODULE)); i++)
     {
       MODULEINFO mi;
       char dll_name[MAX_PATH];
@@ -1227,12 +1215,11 @@ win32_ensure_ntdll_loaded (void)
 					 dll_name,
 					 MAX_PATH) == 0)
 	continue;
-      if (strcasecmp (lbasename (dll_name), "ntdll.dll") == 0)
-	{
-	  win32_add_one_solib (dll_name,
-			       (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll);
-	  return;
-	}
+      /* The symbols in a dll are offset by 0x1000, which is the
+	 offset from 0 of the first byte in an image - because
+	 of the file header and the section alignment. */
+      win32_add_one_solib (dll_name,
+			   (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll + 0x1000);
     }
 }
 #endif
@@ -1360,6 +1347,13 @@ handle_load_dll (void)
   load_addr = (CORE_ADDR) (uintptr_t) event->lpBaseOfDll + 0x1000;
   win32_add_one_solib (dll_name, load_addr);
 }
+
+/* Handle a DLL unload event.
+
+   This function assumes that this event did not occur during inferior
+   initialization, where their event info may be incomplete (see
+   do_initial_child_stuff and win32_add_one_solib for more info
+   on how we handle DLL loading during that phase).  */
 
 static void
 handle_unload_dll (void)
@@ -1675,6 +1669,8 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       CloseHandle (current_event.u.LoadDll.hFile);
+      if (! child_initialization_done)
+	break;
       handle_load_dll ();
 
       ourstatus->kind = TARGET_WAITKIND_LOADED;
@@ -1686,6 +1682,8 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
+      if (! child_initialization_done)
+	break;
       handle_unload_dll ();
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.sig = GDB_SIGNAL_TRAP;
