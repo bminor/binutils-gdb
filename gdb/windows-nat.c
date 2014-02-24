@@ -2501,7 +2501,7 @@ windows_xfer_shared_libraries (struct target_ops *ops,
 
   obstack_free (&obstack, NULL);
   *xfered_len = (ULONGEST) len;
-  return TARGET_XFER_OK;
+  return len != 0 ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
 
 static enum target_xfer_status
