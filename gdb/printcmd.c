@@ -985,16 +985,11 @@ print_command_1 (const char *exp, int voidprint)
       struct value_print_options opts;
       int histindex = record_latest_value (val);
 
-      if (histindex >= 0)
-	annotate_value_history_begin (histindex, value_type (val));
-      else
-	annotate_value_begin (value_type (val));
+      annotate_value_history_begin (histindex, value_type (val));
 
-      if (histindex >= 0)
-	printf_filtered ("$%d = ", histindex);
+      printf_filtered ("$%d = ", histindex);
 
-      if (histindex >= 0)
-	annotate_value_history_value ();
+      annotate_value_history_value ();
 
       get_formatted_print_options (&opts, format);
       opts.raw = fmt.raw;
@@ -1002,10 +997,7 @@ print_command_1 (const char *exp, int voidprint)
       print_formatted (val, fmt.size, &opts, gdb_stdout);
       printf_filtered ("\n");
 
-      if (histindex >= 0)
-	annotate_value_history_end ();
-      else
-	annotate_value_end ();
+      annotate_value_history_end ();
     }
 
   do_cleanups (old_chain);

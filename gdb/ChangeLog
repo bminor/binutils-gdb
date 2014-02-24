@@ -1,3 +1,9 @@
+2014-02-24  Doug Evans  <dje@google.com>
+
+	* value.c (record_latest_value): Fix comment.
+	* printcmd.c (print_command_1): Remove code to handle -1 return from
+	record_latest_value.
+
 2014-02-24  Pedro Alves  <palves@redhat.com>
 
 	* procfs.c (procfs_target): Don't install procfs_xfer_memory as

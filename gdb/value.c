@@ -1642,9 +1642,7 @@ set_value_component_location (struct value *component,
 /* Access to the value history.  */
 
 /* Record a new value in the value history.
-   Returns the absolute history index of the entry.
-   Result of -1 indicates the value was not saved; otherwise it is the
-   value history index of this new item.  */
+   Returns the absolute history index of the entry.  */
 
 int
 record_latest_value (struct value *val)
