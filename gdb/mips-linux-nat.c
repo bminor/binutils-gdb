@@ -63,7 +63,7 @@ static void (*super_fetch_registers) (struct target_ops *,
 static void (*super_store_registers) (struct target_ops *,
 				      struct regcache *, int);
 
-static void (*super_close) (void);
+static void (*super_close) (struct target_ops *);
 
 /* Map gdb internal register number to ptrace ``address''.
    These ``addresses'' are normally defined in <asm/ptrace.h>. 
@@ -764,7 +764,7 @@ mips_linux_close (struct target_ops *self)
   current_watches = NULL;
 
   if (super_close)
-    super_close ();
+    super_close (self);
 }
 
 void _initialize_mips_linux_nat (void);
