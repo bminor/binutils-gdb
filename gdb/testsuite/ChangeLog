@@ -5,6 +5,9 @@
 	* gdb.base/auto-load.c: New file.
 	* gdb.base/auto-load.exp: New file.
 
+	PR gdb/16626
+	* gdb.base/auto-load.exp: Fix out-of-srctree run.
+
 2014-02-05  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/report.exp (use_collected_data): Test the output
