@@ -791,17 +791,17 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
       make_cleanup_fclose (input);
 
       is_safe
-	= file_is_auto_load_safe (filename,
+	= file_is_auto_load_safe (debugfile,
 				  _("auto-load: Loading %s script \"%s\""
 				    " by extension for objfile \"%s\".\n"),
-				  language->name, filename,
+				  language->name, debugfile,
 				  objfile_name (objfile));
 
       /* Add this script to the hash table too so
 	 "info auto-load ${lang}-scripts" can print it.  */
       pspace_info
 	= get_auto_load_pspace_data_for_loading (current_program_space);
-      maybe_add_script (pspace_info, is_safe, filename, filename, language);
+      maybe_add_script (pspace_info, is_safe, debugfile, debugfile, language);
 
       /* To preserve existing behaviour we don't check for whether the
 	 script was already in the table, and always load it.

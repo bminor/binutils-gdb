@@ -1,3 +1,10 @@
+2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/16626
+	* gdb.base/auto-load-script: New file.
+	* gdb.base/auto-load.c: New file.
+	* gdb.base/auto-load.exp: New file.
+
 2014-02-05  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/report.exp (use_collected_data): Test the output

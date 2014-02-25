@@ -1,3 +1,9 @@
+2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/16626
+	* auto-load.c (auto_load_objfile_script_1): Change filename to
+	debugfile.
+
 2014-02-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix Python stack corruption.
