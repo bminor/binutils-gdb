@@ -20,8 +20,8 @@ if [is_remote host] {
 }
 
 set targetdir "${binfile}.dir"
-set sourcescript "${binfile}-script"
-set targetscriptdir "${targetdir}/[file dirname ${sourcescript}]"
+set sourcescript "${srcdir}/${subdir}/${testfile}-script"
+set targetscriptdir "${targetdir}/[file dirname ${binfile}]"
 set targetscript "${targetscriptdir}/${testfile}-gdb.gdb"
 
 remote_exec host "rm -rf ${targetdir}"
