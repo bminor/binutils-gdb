@@ -1,3 +1,8 @@
+2014-02-25  Hui Zhu  <hui@codesourcery.com>
+
+	* target.h (target_ops): Fix TARGET_DEFAULT_RETURN of
+	to_traceframe_info.
+
 2014-02-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* rl78-tdep.c ( RL78_BANK0_RP0_PTR_REGNUM, RL78_BANK0_RP1_PTR_REGNUM)

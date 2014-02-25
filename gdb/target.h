@@ -976,7 +976,7 @@ struct target_ops
        higher layers take care of caching, invalidating, and
        re-fetching when necessary.  */
     struct traceframe_info *(*to_traceframe_info) (struct target_ops *)
-       TARGET_DEFAULT_RETURN (tcomplain ());
+       TARGET_DEFAULT_RETURN (NULL);
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */
