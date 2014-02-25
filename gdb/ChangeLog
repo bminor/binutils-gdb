@@ -1,3 +1,9 @@
+2014-02-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-linux-nat.c (ia64_linux_xfer_partial): Add function
+	documentation.  Adjust prototype to match the target_ops
+	to_xfer_partial method.  Adjust implementation accordingly.
+
 2014-02-25  Hui Zhu  <hui@codesourcery.com>
 
 	* target.h (target_ops): Fix TARGET_DEFAULT_RETURN of

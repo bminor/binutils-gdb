@@ -838,18 +838,36 @@ ia64_linux_store_registers (struct target_ops *ops,
 
 static target_xfer_partial_ftype *super_xfer_partial;
 
-static LONGEST 
+/* Implement the to_xfer_partial target_ops method.  */
+
+static enum target_xfer_status
 ia64_linux_xfer_partial (struct target_ops *ops,
 			 enum target_object object,
 			 const char *annex,
 			 gdb_byte *readbuf, const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len)
+			 ULONGEST offset, ULONGEST len,
+			 ULONGEST *xfered_len)
 {
-  if (object == TARGET_OBJECT_UNWIND_TABLE && writebuf == NULL && offset == 0)
-    return syscall (__NR_getunwind, readbuf, len);
+  if (object == TARGET_OBJECT_UNWIND_TABLE && readbuf != NULL)
+    {
+      gdb_byte *tmp_buf = alloca (offset + len);
+      ULONGEST xfered;
+
+      xfered = syscall (__NR_getunwind, readbuf, offset + len);
+      if (xfered <= 0)
+	return TARGET_XFER_E_IO;
+      else if (xfered <= offset)
+	return TARGET_XFER_EOF;
+      else
+	{
+	  memcpy (readbuf, tmp_buf + offset, xfered - offset);
+	  *xfered_len = xfered - offset;
+	  return TARGET_XFER_OK;
+	}
+    }
 
   return super_xfer_partial (ops, object, annex, readbuf, writebuf,
-			     offset, len);
+			     offset, len, xfered_len);
 }
 
 /* For break.b instruction ia64 CPU forgets the immediate value and generates
