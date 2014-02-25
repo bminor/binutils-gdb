@@ -63,21 +63,18 @@ p__top:
 	.uleb128 0x1	/* DW_AT_frame_base */
 	.byte	0x9c	/* DW_OP_call_frame_cfa */
 			/* DW_AT_GNU_all_call_sites */
-	.4byte	.S0x4fc - .Ldebug_info0	/* DW_AT_sibling */
 .S0x1e0:
 	.uleb128 0x15	/* (DIE (0x1e0) DW_TAG_subprogram) */
 	.ascii	"p__top__middle\0" /* DW_AT_name */
 	.byte	0x1	/* DW_AT_decl_file (p.adb) */
 	.byte	0x4	/* DW_AT_decl_line */
 	.byte	0x1	/* DW_AT_inline */
-	.4byte	.S0x374 - .Ldebug_info0	/* DW_AT_sibling */
 .S0x202:
 	.uleb128 0x15	/* (DIE (0x202) DW_TAG_subprogram) */
 	.ascii	"p__top__middle__inside\0" /* DW_AT_name */
 	.byte	0x1	/* DW_AT_decl_file (p.adb) */
 	.byte	0x5	/* DW_AT_decl_line */
 	.byte	0x1	/* DW_AT_inline */
-	.4byte	.S0x225	- .Ldebug_info0 /* DW_AT_sibling */
 	.byte	0	/* end of children of DIE 0x202 */
 .S0x225:
 	.uleb128 0x18	/* (DIE (0x225) DW_TAG_subprogram) */
@@ -95,7 +92,6 @@ p__top:
 	.4byte	.LBE6-.LFB4	/* DW_AT_high_pc */
 	.byte	0x1	/* DW_AT_call_file (p.adb) */
 	.byte	0x14	/* DW_AT_call_line */
-	.4byte	.S0x374	- .Ldebug_info0 /* DW_AT_sibling */
 	.byte	0	/* end of children of DIE 0x247 */
 	.byte	0	/* end of children of DIE 0x225 */
 	.byte	0	/* end of children of DIE 0x1e0 */
@@ -167,8 +163,6 @@ p__top:
 	.uleb128 0x18	/* (DW_FORM_exprloc) */
 	.uleb128 0x2117	/* (DW_AT_GNU_all_call_sites) */
 	.uleb128 0x19	/* (DW_FORM_flag_present) */
-	.uleb128 0x1	/* (DW_AT_sibling) */
-	.uleb128 0x13	/* (DW_FORM_ref4) */
 	.byte	0
 	.byte	0
 	.uleb128 0x15	/* (abbrev code) */
@@ -182,8 +176,6 @@ p__top:
 	.uleb128 0xb	/* (DW_FORM_data1) */
 	.uleb128 0x20	/* (DW_AT_inline) */
 	.uleb128 0xb	/* (DW_FORM_data1) */
-	.uleb128 0x1	/* (DW_AT_sibling) */
-	.uleb128 0x13	/* (DW_FORM_ref4) */
 	.byte	0
 	.byte	0
 	.uleb128 0x18	/* (abbrev code) */
@@ -216,8 +208,6 @@ p__top:
 	.uleb128 0xb	/* (DW_FORM_data1) */
 	.uleb128 0x59	/* (DW_AT_call_line) */
 	.uleb128 0xb	/* (DW_FORM_data1) */
-	.uleb128 0x1	/* (DW_AT_sibling) */
-	.uleb128 0x13	/* (DW_FORM_ref4) */
 	.byte	0
 	.byte	0
 	.uleb128 0x23	/* (abbrev code) */

@@ -1,3 +1,8 @@
+2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix dw2-icycle.exp -fsanitize=address GDB crash.
+	* gdb.dwarf2/dw2-icycle.S: Remove all DW_AT_sibling.
+
 2014-02-24  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (run_on_host): Log error output if program fails.
