@@ -1,3 +1,24 @@
+2014-02-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c ( RL78_BANK0_RP0_PTR_REGNUM, RL78_BANK0_RP1_PTR_REGNUM)
+	(RL78_BANK0_RP2_PTR_REGNUM, RL78_BANK0_RP3_PTR_REGNUM)
+	(RL78_BANK1_RP0_PTR_REGNUM, RL78_BANK1_RP1_PTR_REGNUM)
+	(RL78_BANK1_RP2_PTR_REGNUM, RL78_BANK1_RP3_PTR_REGNUM)
+	(RL78_BANK2_RP0_PTR_REGNUM, RL78_BANK2_RP1_PTR_REGNUM)
+	(RL78_BANK2_RP2_PTR_REGNUM, RL78_BANK2_RP3_PTR_REGNUM)
+	(RL78_BANK3_RP0_PTR_REGNUM, RL78_BANK3_RP1_PTR_REGNUM)
+	(RL78_BANK3_RP2_PTR_REGNUM, RL78_BANK3_RP3_PTR_REGNUM):
+	New constants.
+	(rl78_register_type): Use a data pointer type for SP and
+	new pseudo registers mentioned above.  Use a 16 bit integer
+	type for all other register pairs.
+	(rl78_register_name, rl78_g10_register_name): Update for
+	new pseudo registers.
+	(rl78_pseudo_register_read): Likewise.
+	(rl78_pseudo_register_write): Likewise.
+	(rl78_dwarf_reg_to_regnum): Return register numbers representing
+	to the newly added pseudo registers.
+
 2014-02-24  Doug Evans  <dje@google.com>
 
 	* value.c (record_latest_value): Fix comment.
