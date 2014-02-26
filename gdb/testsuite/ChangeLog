@@ -1,3 +1,9 @@
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* gdb.ada/tasks.exp: Set a task-specific breakpoint at break_me
+	that won't ever trigger.  Make sure that GDB reports the correct
+	breakpoint that caused the stop.
+
 2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/16626

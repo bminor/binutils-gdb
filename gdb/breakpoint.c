@@ -5159,7 +5159,6 @@ bpstat_check_watchpoint (bpstat bs)
 static void
 bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 {
-  int thread_id = pid_to_thread_id (ptid);
   const struct bp_location *bl;
   struct breakpoint *b;
   int value_is_zero = 0;
@@ -5184,9 +5183,12 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
       return;
     }
 
-  /* If this is a thread-specific breakpoint, don't waste cpu evaluating the
-     condition if this isn't the specified thread.  */
-  if (b->thread != -1 && b->thread != thread_id)
+  /* If this is a thread/task-specific breakpoint, don't waste cpu
+     evaluating the condition if this isn't the specified
+     thread/task.  */
+  if ((b->thread != -1 && b->thread != pid_to_thread_id (ptid))
+      || (b->task != 0 && b->task != ada_get_task_number (ptid)))
+
     {
       bs->stop = 0;
       return;
