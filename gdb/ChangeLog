@@ -1,3 +1,11 @@
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* remote-mips.c (mips_xfer_memory): Adjust as to_xfer_partial
+	helper.
+	(mips_xfer_partial): New function.
+	(_initialize_remote_mips): Don't install a deprecated_xfer_memory
+	hook.  Install a to_xfer_partial hook.
+
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.h (create_array_type_with_stride): Add declaration.
