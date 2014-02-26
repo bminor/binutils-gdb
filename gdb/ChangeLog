@@ -1,5 +1,11 @@
 2014-02-26  Pedro Alves  <palves@redhat.com>
 
+	* bsd-uthread.c (bsd_uthread_xfer_partial): Delete function.
+	(bsd_uthread_target): Don't install bsd_uthread_xfer_partial as
+	to_xfer_partial method.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
 	* target.c (complete_target_initialization): Don't install
 	default_xfer_partial as to_xfer_partial hook.
 	(nomemory): Delete.
