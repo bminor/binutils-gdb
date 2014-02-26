@@ -1,5 +1,13 @@
 2014-02-26  Pedro Alves  <palves@redhat.com>
 
+	* remote-m32r-sdi.c (send_data): Constify 'buf' parameter.
+	(m32r_xfer_memory): Adjust as a to_xfer_partial helper.
+	(m32r_xfer_partial): New function.
+	(init_m32r_ops): Don't install a deprecated_xfer_memory hook.
+	Install a to_xfer_partial hook.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
 	* remote-mips.c (mips_xfer_memory): Adjust as to_xfer_partial
 	helper.
 	(mips_xfer_partial): New function.
