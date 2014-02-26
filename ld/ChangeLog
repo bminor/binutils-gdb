@@ -1,3 +1,11 @@
+2014-02-26  Dan Mick  <dan.mick@inktank.com>
+
+	PR ld/16569
+	* ldcref.c (cref_sort_array): Compare unmangled names unless
+	demanglng has been requiested.
+	(output_one_cref): Output unmangled name unless demangling has
+	been requested.
+
 2014-02-19  Igor Zamyatin  <igor.zamyatin@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
