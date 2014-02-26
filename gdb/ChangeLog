@@ -1,5 +1,17 @@
 2014-02-26  Pedro Alves  <palves@redhat.com>
 
+	* target.c (complete_target_initialization): Don't install
+	default_xfer_partial as to_xfer_partial hook.
+	(nomemory): Delete.
+	(update_current_target): Don't INHERIT nor de_fault
+	deprecated_xfer_memory.  Delete de_fault macro.
+	(default_xfer_partial, deprecated_debug_xfer_memory): Delete.
+	(setup_target_debug): Don't install a deprecated_xfer_memory hook.
+	* target.h (struct target_ops) <deprecated_xfer_memory>: Delete
+	field.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
 	* go32-nat.c (my_write_child): New function.
 	(go32_xfer_memory): Rewrite as to_xfer_partial helper.
 	(go32_xfer_partial): New function.

@@ -421,32 +421,6 @@ struct target_ops
     void (*to_prepare_to_store) (struct target_ops *, struct regcache *)
       TARGET_DEFAULT_NORETURN (noprocess ());
 
-    /* Transfer LEN bytes of memory between GDB address MYADDR and
-       target address MEMADDR.  If WRITE, transfer them to the target, else
-       transfer them from the target.  TARGET is the target from which we
-       get this function.
-
-       Return value, N, is one of the following:
-
-       0 means that we can't handle this.  If errno has been set, it is the
-       error which prevented us from doing it (FIXME: What about bfd_error?).
-
-       positive (call it N) means that we have transferred N bytes
-       starting at MEMADDR.  We might be able to handle more bytes
-       beyond this length, but no promises.
-
-       negative (call its absolute value N) means that we cannot
-       transfer right at MEMADDR, but we could transfer at least
-       something at MEMADDR + N.
-
-       NOTE: cagney/2004-10-01: This has been entirely superseeded by
-       to_xfer_partial and inferior inheritance.  */
-
-    int (*deprecated_xfer_memory) (CORE_ADDR memaddr, gdb_byte *myaddr,
-				   int len, int write,
-				   struct mem_attrib *attrib,
-				   struct target_ops *target);
-
     void (*to_files_info) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     int (*to_insert_breakpoint) (struct target_ops *, struct gdbarch *,
