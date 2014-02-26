@@ -1,3 +1,12 @@
+2014-02-26  Pedro Alves  <pedro@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/16292
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.c: New
+	file.
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp: New
+	file.
+
 2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/16626
