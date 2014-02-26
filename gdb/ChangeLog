@@ -1,5 +1,13 @@
 2014-02-26  Pedro Alves  <palves@redhat.com>
 
+	* go32-nat.c (my_write_child): New function.
+	(go32_xfer_memory): Rewrite as to_xfer_partial helper.
+	(go32_xfer_partial): New function.
+	(init_go32_ops): Don't install a deprecated_xfer_memory hook.
+	Instead install a to_xfer_partial hook.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
 	* nto-procfs.c (procfs_xfer_memory): Adjust interface as a
 	to_xfer_partial helper.  Rewrite.
 	(procfs_xfer_partial): New function.

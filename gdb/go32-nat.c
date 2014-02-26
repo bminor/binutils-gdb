@@ -577,31 +577,66 @@ go32_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
 }
 
+
+/* Const-correct version of DJGPP's write_child, which unfortunately
+   takes a non-const buffer pointer.  */
+
 static int
-go32_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
-		  struct mem_attrib *attrib, struct target_ops *target)
+my_write_child (unsigned child_addr, const void *buf, unsigned len)
 {
-  if (write)
+  static void *buffer = NULL;
+  static unsigned buffer_len = 0;
+  int res;
+
+  if (buffer_len < len)
     {
-      if (write_child (memaddr, myaddr, len))
-	{
-	  return 0;
-	}
-      else
-	{
-	  return len;
-	}
+      buffer = xrealloc (buffer, len);
+      buffer_len = len;
     }
+
+  memcpy (buffer, buf, len);
+  res = write_child (child_addr, buffer, len);
+  return res;
+}
+
+/* Helper for go32_xfer_partial that handles memory transfers.
+   Arguments are like target_xfer_partial.  */
+
+static enum target_xfer_status
+go32_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
+		  ULONGEST memaddr, ULONGEST len, ULONGEST *xfered_len)
+{
+  int res;
+
+  if (writebuf != NULL)
+    res = my_write_child (memaddr, writebuf, len);
   else
+    res = read_child (memaddr, readbuf, len);
+
+  if (res <= 0)
+    return TARGET_XFER_E_IO;
+
+  *xfered_len = res;
+  return TARGET_XFER_OK;
+}
+
+/* Target to_xfer_partial implementation.  */
+
+static enum target_xfer_status
+go32_xfer_partial (struct target_ops *ops, enum target_object object,
+		   const char *annex, gdb_byte *readbuf,
+		   const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		   ULONGEST *xfered_len)
+{
+  switch (object)
     {
-      if (read_child (memaddr, myaddr, len))
-	{
-	  return 0;
-	}
-      else
-	{
-	  return len;
-	}
+    case TARGET_OBJECT_MEMORY:
+      return go32_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
+
+    default:
+      return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					    readbuf, writebuf, offset, len,
+					    xfered_len);
     }
 }
 
@@ -957,7 +992,7 @@ init_go32_ops (void)
   go32_ops.to_fetch_registers = go32_fetch_registers;
   go32_ops.to_store_registers = go32_store_registers;
   go32_ops.to_prepare_to_store = go32_prepare_to_store;
-  go32_ops.deprecated_xfer_memory = go32_xfer_memory;
+  go32_ops.to_xfer_partial = go32_xfer_partial;
   go32_ops.to_files_info = go32_files_info;
   go32_ops.to_insert_breakpoint = memory_insert_breakpoint;
   go32_ops.to_remove_breakpoint = memory_remove_breakpoint;
