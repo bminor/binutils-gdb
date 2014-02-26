@@ -850,20 +850,31 @@ ia64_linux_xfer_partial (struct target_ops *ops,
 {
   if (object == TARGET_OBJECT_UNWIND_TABLE && readbuf != NULL)
     {
-      gdb_byte *tmp_buf = alloca (offset + len);
-      ULONGEST xfered;
+      static long gate_table_size;
+      gdb_byte *tmp_buf;
+      long res;
 
-      xfered = syscall (__NR_getunwind, readbuf, offset + len);
-      if (xfered <= 0)
+      /* Probe for the table size once.  */
+      if (gate_table_size == 0)
+        gate_table_size = syscall (__NR_getunwind, NULL, 0);
+      if (gate_table_size < 0)
 	return TARGET_XFER_E_IO;
-      else if (xfered <= offset)
+
+      if (offset >= gate_table_size)
 	return TARGET_XFER_EOF;
-      else
-	{
-	  memcpy (readbuf, tmp_buf + offset, xfered - offset);
-	  *xfered_len = xfered - offset;
-	  return TARGET_XFER_OK;
-	}
+
+      tmp_buf = alloca (gate_table_size);
+      res = syscall (__NR_getunwind, tmp_buf, gate_table_size);
+      if (res < 0)
+	return TARGET_XFER_E_IO;
+      gdb_assert (res == gate_table_size);
+
+      if (offset + len > gate_table_size)
+	len = gate_table_size - offset;
+
+      memcpy (readbuf, tmp_buf + offset, len);
+      *xfered_len = len;
+      return TARGET_XFER_OK;
     }
 
   return super_xfer_partial (ops, object, annex, readbuf, writebuf,
