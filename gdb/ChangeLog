@@ -3252,6 +3252,7 @@
 
 2014-02-07  Pedro Alves  <palves@redhat.com>
 
+	PR breakpoints/16292
 	* infrun.c (handle_signal_stop) <signal arrives while stepping
 	over a breakpoint>: Switch back to the stepping thread.
 
