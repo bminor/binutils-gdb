@@ -14522,6 +14522,13 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
+  /* Normally, the DWARF producers are expected to use a signed
+     constant form (Eg. DW_FORM_sdata) to express negative bounds.
+     But this is unfortunately not always the case, as witnessed
+     with GCC, for instance, where the ambiguous DW_FORM_dataN form
+     is used instead.  To work around that ambiguity, we treat
+     the bounds as signed, and thus sign-extend their values, when
+     the base type is signed.  */
   negative_mask =
     (LONGEST) -1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1);
   if (!TYPE_UNSIGNED (base_type) && (low & negative_mask))

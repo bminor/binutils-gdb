@@ -1,5 +1,9 @@
 2014-02-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* dwarf2read.c (read_subrange_type): Add comment.
+
+2014-02-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (update_enumeration_type_from_children): New
 	function, mostly extracted from process_structure_scope.
 	(read_enumeration_type): Call update_enumeration_type_from_children.
