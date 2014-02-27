@@ -1,3 +1,9 @@
+2014-02-28  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* valops.c (find_oload_champ): Remove unneccesary argument METHOD.
+	(find_overload_match): Update call to find_oload_champ.
+	(find_oload_champ_namespace_loop): Likewise
+
 2014-02-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (ALLDEPFILES): Add sparc64obsd-nat.c.

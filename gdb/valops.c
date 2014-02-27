@@ -69,7 +69,7 @@ int find_oload_champ_namespace_loop (struct value **, int,
 				     struct badness_vector **, int *,
 				     const int no_adl);
 
-static int find_oload_champ (struct value **, int, int, int,
+static int find_oload_champ (struct value **, int, int,
 			     struct fn_field *, struct symbol **,
 			     struct badness_vector **);
 
@@ -2469,9 +2469,9 @@ find_overload_match (struct value **args, int nargs,
       if (fns_ptr)
 	{
 	  gdb_assert (TYPE_DOMAIN_TYPE (fns_ptr[0].type) != NULL);
-	  method_oload_champ = find_oload_champ (args, nargs, method,
+	  method_oload_champ = find_oload_champ (args, nargs,
 	                                         num_fns, fns_ptr,
-	                                         oload_syms, &method_badness);
+	                                         NULL, &method_badness);
 
 	  method_match_quality =
 	      classify_oload_match (method_badness, nargs,
@@ -2784,7 +2784,7 @@ find_oload_champ_namespace_loop (struct value **args, int nargs,
   while (new_oload_syms[num_fns])
     ++num_fns;
 
-  new_oload_champ = find_oload_champ (args, nargs, 0, num_fns,
+  new_oload_champ = find_oload_champ (args, nargs, num_fns,
 				      NULL, new_oload_syms,
 				      &new_oload_champ_bv);
 
@@ -2823,15 +2823,16 @@ find_oload_champ_namespace_loop (struct value **args, int nargs,
 
 /* Look for a function to take NARGS args of ARGS.  Find
    the best match from among the overloaded methods or functions
-   (depending on METHOD) given by FNS_PTR or OLOAD_SYMS, respectively.
-   The number of methods/functions in the list is given by NUM_FNS.
+   given by FNS_PTR or OLOAD_SYMS, respectively.  One, and only one of
+   FNS_PTR and OLOAD_SYMS can be non-NULL.  The number of
+   methods/functions in the non-NULL list is given by NUM_FNS.
    Return the index of the best match; store an indication of the
    quality of the match in OLOAD_CHAMP_BV.
 
    It is the caller's responsibility to free *OLOAD_CHAMP_BV.  */
 
 static int
-find_oload_champ (struct value **args, int nargs, int method,
+find_oload_champ (struct value **args, int nargs,
 		  int num_fns, struct fn_field *fns_ptr,
 		  struct symbol **oload_syms,
 		  struct badness_vector **oload_champ_bv)
@@ -2845,31 +2846,37 @@ find_oload_champ (struct value **args, int nargs, int method,
   int oload_ambiguous = 0;
   /* 0 => no ambiguity, 1 => two good funcs, 2 => incomparable funcs.  */
 
+  /* A champion can be found among methods alone, or among functions
+     alone, but not both.  */
+  gdb_assert ((fns_ptr != NULL) + (oload_syms != NULL) == 1);
+
   *oload_champ_bv = NULL;
 
   /* Consider each candidate in turn.  */
   for (ix = 0; ix < num_fns; ix++)
     {
       int jj;
-      int static_offset = oload_method_static (method, fns_ptr, ix);
+      int static_offset;
       int nparms;
       struct type **parm_types;
 
-      if (method)
+      if (fns_ptr != NULL)
 	{
 	  nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (fns_ptr, ix));
+	  static_offset = oload_method_static (1, fns_ptr, ix);
 	}
       else
 	{
 	  /* If it's not a method, this is the proper place.  */
 	  nparms = TYPE_NFIELDS (SYMBOL_TYPE (oload_syms[ix]));
+	  static_offset = 0;
 	}
 
       /* Prepare array of parameter types.  */
       parm_types = (struct type **) 
 	xmalloc (nparms * (sizeof (struct type *)));
       for (jj = 0; jj < nparms; jj++)
-	parm_types[jj] = (method
+	parm_types[jj] = (fns_ptr != NULL
 			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj].type)
 			  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), 
 					     jj));
@@ -2907,7 +2914,7 @@ find_oload_champ (struct value **args, int nargs, int method,
       xfree (parm_types);
       if (overload_debug)
 	{
-	  if (method)
+	  if (fns_ptr)
 	    fprintf_filtered (gdb_stderr,
 			      "Overloaded method instance %s, # of parms %d\n",
 			      fns_ptr[ix].physname, nparms);
