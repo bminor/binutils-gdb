@@ -214,6 +214,8 @@ static void linux_resume_one_lwp (struct lwp_info *lwp,
 static void linux_resume (struct thread_resume *resume_info, size_t n);
 static void stop_all_lwps (int suspend, struct lwp_info *except);
 static void unstop_all_lwps (int unsuspend, struct lwp_info *except);
+static int linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
+					  int *wstat, int options);
 static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
 static struct lwp_info *add_lwp (ptid_t ptid);
 static int linux_stopped_by_watchpoint (void);
@@ -276,7 +278,7 @@ static int linux_event_pipe[2] = { -1, -1 };
 #define target_is_async_p() (linux_event_pipe[0] != -1)
 
 static void send_sigstop (struct lwp_info *lwp);
-static void wait_for_sigstop (struct inferior_list_entry *entry);
+static void wait_for_sigstop (void);
 
 /* Return non-zero if HEADER is a 64-bit ELF file.  */
 
@@ -335,7 +337,12 @@ linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine)
 static void
 delete_lwp (struct lwp_info *lwp)
 {
-  remove_thread (get_lwp_thread (lwp));
+  struct thread_info *thr = get_lwp_thread (lwp);
+
+  if (debug_threads)
+    debug_printf ("deleting %ld\n", lwpid_of (thr));
+
+  remove_thread (thr);
   free (lwp->arch_private);
   free (lwp);
 }
@@ -395,6 +402,11 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
 	  else if (!WIFSTOPPED (status))
 	    warning ("wait returned unexpected status 0x%x", status);
 	}
+
+      if (debug_threads)
+	debug_printf ("HEW: Got clone event "
+		      "from LWP %ld, new child is LWP %ld\n",
+		      lwpid_of (event_thr), new_pid);
 
       ptid = ptid_build (pid_of (event_thr), new_pid, 0);
       new_lwp = add_lwp (ptid);
@@ -847,10 +859,8 @@ second_thread_of_pid_p (struct inferior_list_entry *entry, void *args)
 }
 
 static int
-last_thread_of_process_p (struct thread_info *thread)
+last_thread_of_process_p (int pid)
 {
-  ptid_t ptid = thread->entry.id;
-  int pid = ptid_get_pid (ptid);
   struct counter counter = { pid , 0 };
 
   return (find_inferior (&all_threads,
@@ -1252,152 +1262,107 @@ find_lwp_pid (ptid_t ptid)
   return get_thread_lwp ((struct thread_info *) thread);
 }
 
-static struct lwp_info *
-linux_wait_for_lwp (ptid_t ptid, int *wstatp, int options)
+/* Return the number of known LWPs in the tgid given by PID.  */
+
+static int
+num_lwps (int pid)
 {
-  int ret;
-  int to_wait_for = -1;
-  struct lwp_info *child;
-  struct thread_info *thread;
+  struct inferior_list_entry *inf, *tmp;
+  int count = 0;
 
-  if (debug_threads)
-    debug_printf ("linux_wait_for_lwp: %s\n", target_pid_to_str (ptid));
-
-  if (ptid_equal (ptid, minus_one_ptid))
-    to_wait_for = -1;			/* any child */
-  else
-    to_wait_for = ptid_get_lwp (ptid);	/* this lwp only */
-
-  options |= __WALL;
-
-retry:
-
-  ret = my_waitpid (to_wait_for, wstatp, options);
-  if (ret == 0 || (ret == -1 && errno == ECHILD && (options & WNOHANG)))
-    return NULL;
-  else if (ret == -1)
-    perror_with_name ("waitpid");
-
-  if (debug_threads
-      && (!WIFSTOPPED (*wstatp)
-	  || (WSTOPSIG (*wstatp) != 32
-	      && WSTOPSIG (*wstatp) != 33)))
-    debug_printf ("Got an event from %d (%x)\n", ret, *wstatp);
-
-  child = find_lwp_pid (pid_to_ptid (ret));
-  if (child != NULL)
-    thread = get_lwp_thread (child);
-  else
-    thread = NULL;
-
-  /* If we didn't find a process, one of two things presumably happened:
-     - A process we started and then detached from has exited.  Ignore it.
-     - A process we are controlling has forked and the new child's stop
-     was reported to us by the kernel.  Save its PID.  */
-  if (child == NULL && WIFSTOPPED (*wstatp))
+  ALL_INFERIORS (&all_threads, inf, tmp)
     {
-      add_to_pid_list (&stopped_pids, ret, *wstatp);
-      goto retry;
+      if (ptid_get_pid (inf->id) == pid)
+	count++;
     }
-  else if (child == NULL)
-    goto retry;
 
-  child->stopped = 1;
+  return count;
+}
 
-  child->last_status = *wstatp;
+/* Detect zombie thread group leaders, and "exit" them.  We can't reap
+   their exits until all other threads in the group have exited.  */
 
-  if (WIFSTOPPED (*wstatp))
+static void
+check_zombie_leaders (void)
+{
+  struct process_info *proc, *tmp;
+
+  ALL_PROCESSES (proc, tmp)
     {
-      struct process_info *proc;
+      pid_t leader_pid = pid_of (proc);
+      struct lwp_info *leader_lp;
 
-      /* Architecture-specific setup after inferior is running.  This
-	 needs to happen after we have attached to the inferior and it
-	 is stopped for the first time, but before we access any
-	 inferior registers.  */
-      proc = find_process_pid (pid_of (thread));
-      if (proc->private->new_inferior)
+      leader_lp = find_lwp_pid (pid_to_ptid (leader_pid));
+
+      if (debug_threads)
+	debug_printf ("leader_pid=%d, leader_lp!=NULL=%d, "
+		      "num_lwps=%d, zombie=%d\n",
+		      leader_pid, leader_lp!= NULL, num_lwps (leader_pid),
+		      linux_proc_pid_is_zombie (leader_pid));
+
+      if (leader_lp != NULL
+	  /* Check if there are other threads in the group, as we may
+	     have raced with the inferior simply exiting.  */
+	  && !last_thread_of_process_p (leader_pid)
+	  && linux_proc_pid_is_zombie (leader_pid))
 	{
-	  struct thread_info *saved_inferior;
+	  /* A leader zombie can mean one of two things:
 
-	  saved_inferior = current_inferior;
-	  current_inferior = thread;
+	     - It exited, and there's an exit status pending
+	     available, or only the leader exited (not the whole
+	     program).  In the latter case, we can't waitpid the
+	     leader's exit status until all other threads are gone.
 
-	  the_low_target.arch_setup ();
+	     - There are 3 or more threads in the group, and a thread
+	     other than the leader exec'd.  On an exec, the Linux
+	     kernel destroys all other threads (except the execing
+	     one) in the thread group, and resets the execing thread's
+	     tid to the tgid.  No exit notification is sent for the
+	     execing thread -- from the ptracer's perspective, it
+	     appears as though the execing thread just vanishes.
+	     Until we reap all other threads except the leader and the
+	     execing thread, the leader will be zombie, and the
+	     execing thread will be in `D (disc sleep)'.  As soon as
+	     all other threads are reaped, the execing thread changes
+	     it's tid to the tgid, and the previous (zombie) leader
+	     vanishes, giving place to the "new" leader.  We could try
+	     distinguishing the exit and exec cases, by waiting once
+	     more, and seeing if something comes out, but it doesn't
+	     sound useful.  The previous leader _does_ go away, and
+	     we'll re-add the new one once we see the exec event
+	     (which is just the same as what would happen if the
+	     previous leader did exit voluntarily before some other
+	     thread execs).  */
 
-	  current_inferior = saved_inferior;
+	  if (debug_threads)
+	    fprintf (stderr,
+		     "CZL: Thread group leader %d zombie "
+		     "(it exited, or another thread execd).\n",
+		     leader_pid);
 
-	  proc->private->new_inferior = 0;
+	  delete_lwp (leader_lp);
 	}
     }
+}
 
-  /* Fetch the possibly triggered data watchpoint info and store it in
-     CHILD.
+/* Callback for `find_inferior'.  Returns the first LWP that is not
+   stopped.  ARG is a PTID filter.  */
 
-     On some archs, like x86, that use debug registers to set
-     watchpoints, it's possible that the way to know which watched
-     address trapped, is to check the register that is used to select
-     which address to watch.  Problem is, between setting the
-     watchpoint and reading back which data address trapped, the user
-     may change the set of watchpoints, and, as a consequence, GDB
-     changes the debug registers in the inferior.  To avoid reading
-     back a stale stopped-data-address when that happens, we cache in
-     LP the fact that a watchpoint trapped, and the corresponding data
-     address, as soon as we see CHILD stop with a SIGTRAP.  If GDB
-     changes the debug registers meanwhile, we have the cached data we
-     can rely on.  */
+static int
+not_stopped_callback (struct inferior_list_entry *entry, void *arg)
+{
+  struct thread_info *thr = (struct thread_info *) entry;
+  struct lwp_info *lwp;
+  ptid_t filter = *(ptid_t *) arg;
 
-  if (WIFSTOPPED (*wstatp) && WSTOPSIG (*wstatp) == SIGTRAP)
-    {
-      if (the_low_target.stopped_by_watchpoint == NULL)
-	{
-	  child->stopped_by_watchpoint = 0;
-	}
-      else
-	{
-	  struct thread_info *saved_inferior;
+  if (!ptid_match (ptid_of (thr), filter))
+    return 0;
 
-	  saved_inferior = current_inferior;
-	  current_inferior = get_lwp_thread (child);
+  lwp = get_thread_lwp (thr);
+  if (!lwp->stopped)
+    return 1;
 
-	  child->stopped_by_watchpoint
-	    = the_low_target.stopped_by_watchpoint ();
-
-	  if (child->stopped_by_watchpoint)
-	    {
-	      if (the_low_target.stopped_data_address != NULL)
-		child->stopped_data_address
-		  = the_low_target.stopped_data_address ();
-	      else
-		child->stopped_data_address = 0;
-	    }
-
-	  current_inferior = saved_inferior;
-	}
-    }
-
-  /* Store the STOP_PC, with adjustment applied.  This depends on the
-     architecture being defined already (so that CHILD has a valid
-     regcache), and on LAST_STATUS being set (to check for SIGTRAP or
-     not).  */
-  if (WIFSTOPPED (*wstatp))
-    child->stop_pc = get_stop_pc (child);
-
-  if (debug_threads
-      && WIFSTOPPED (*wstatp)
-      && the_low_target.get_pc != NULL)
-    {
-      struct thread_info *saved_inferior = current_inferior;
-      struct regcache *regcache;
-      CORE_ADDR pc;
-
-      current_inferior = get_lwp_thread (child);
-      regcache = get_thread_regcache (current_inferior, 1);
-      pc = (*the_low_target.get_pc) (regcache);
-      debug_printf ("linux_wait_for_lwp: pc is 0x%lx\n", (long) pc);
-      current_inferior = saved_inferior;
-    }
-
-  return child;
+  return 0;
 }
 
 /* This function should only be called if the LWP got a SIGTRAP.
@@ -1749,23 +1714,259 @@ cancel_breakpoint (struct lwp_info *lwp)
   return 0;
 }
 
+/* Do low-level handling of the event, and check if we should go on
+   and pass it to caller code.  Return the affected lwp if we are, or
+   NULL otherwise.  */
+
+static struct lwp_info *
+linux_low_filter_event (ptid_t filter_ptid, int lwpid, int wstat)
+{
+  struct lwp_info *child;
+  struct thread_info *thread;
+
+  child = find_lwp_pid (pid_to_ptid (lwpid));
+
+  /* If we didn't find a process, one of two things presumably happened:
+     - A process we started and then detached from has exited.  Ignore it.
+     - A process we are controlling has forked and the new child's stop
+     was reported to us by the kernel.  Save its PID.  */
+  if (child == NULL && WIFSTOPPED (wstat))
+    {
+      add_to_pid_list (&stopped_pids, lwpid, wstat);
+      return NULL;
+    }
+  else if (child == NULL)
+    return NULL;
+
+  thread = get_lwp_thread (child);
+
+  child->stopped = 1;
+
+  child->last_status = wstat;
+
+  if (WIFSTOPPED (wstat))
+    {
+      struct process_info *proc;
+
+      /* Architecture-specific setup after inferior is running.  This
+	 needs to happen after we have attached to the inferior and it
+	 is stopped for the first time, but before we access any
+	 inferior registers.  */
+      proc = find_process_pid (pid_of (thread));
+      if (proc->private->new_inferior)
+	{
+	  struct thread_info *saved_inferior;
+
+	  saved_inferior = current_inferior;
+	  current_inferior = thread;
+
+	  the_low_target.arch_setup ();
+
+	  current_inferior = saved_inferior;
+
+	  proc->private->new_inferior = 0;
+	}
+    }
+
+  /* Store the STOP_PC, with adjustment applied.  This depends on the
+     architecture being defined already (so that CHILD has a valid
+     regcache), and on LAST_STATUS being set (to check for SIGTRAP or
+     not).  */
+  if (WIFSTOPPED (wstat))
+    {
+      if (debug_threads
+	  && the_low_target.get_pc != NULL)
+	{
+	  struct thread_info *saved_inferior;
+	  struct regcache *regcache;
+	  CORE_ADDR pc;
+
+	  saved_inferior = current_inferior;
+	  current_inferior = thread;
+	  regcache = get_thread_regcache (current_inferior, 1);
+	  pc = (*the_low_target.get_pc) (regcache);
+	  debug_printf ("linux_low_filter_event: pc is 0x%lx\n", (long) pc);
+	  current_inferior = saved_inferior;
+	}
+
+      child->stop_pc = get_stop_pc (child);
+    }
+
+  /* Fetch the possibly triggered data watchpoint info and store it in
+     CHILD.
+
+     On some archs, like x86, that use debug registers to set
+     watchpoints, it's possible that the way to know which watched
+     address trapped, is to check the register that is used to select
+     which address to watch.  Problem is, between setting the
+     watchpoint and reading back which data address trapped, the user
+     may change the set of watchpoints, and, as a consequence, GDB
+     changes the debug registers in the inferior.  To avoid reading
+     back a stale stopped-data-address when that happens, we cache in
+     LP the fact that a watchpoint trapped, and the corresponding data
+     address, as soon as we see CHILD stop with a SIGTRAP.  If GDB
+     changes the debug registers meanwhile, we have the cached data we
+     can rely on.  */
+
+  if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SIGTRAP)
+    {
+      if (the_low_target.stopped_by_watchpoint == NULL)
+	{
+	  child->stopped_by_watchpoint = 0;
+	}
+      else
+	{
+	  struct thread_info *saved_inferior;
+
+	  saved_inferior = current_inferior;
+	  current_inferior = thread;
+
+	  child->stopped_by_watchpoint
+	    = the_low_target.stopped_by_watchpoint ();
+
+	  if (child->stopped_by_watchpoint)
+	    {
+	      if (the_low_target.stopped_data_address != NULL)
+		child->stopped_data_address
+		  = the_low_target.stopped_data_address ();
+	      else
+		child->stopped_data_address = 0;
+	    }
+
+	  current_inferior = saved_inferior;
+	}
+    }
+
+  if (WIFSTOPPED (wstat) && child->must_set_ptrace_flags)
+    {
+      linux_enable_event_reporting (lwpid);
+      child->must_set_ptrace_flags = 0;
+    }
+
+  if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SIGTRAP
+      && wstat >> 16 != 0)
+    {
+      handle_extended_wait (child, wstat);
+      return NULL;
+    }
+
+  if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SIGSTOP
+      && child->stop_expected)
+    {
+      if (debug_threads)
+	debug_printf ("Expected stop.\n");
+      child->stop_expected = 0;
+
+      if (thread->last_resume_kind == resume_stop)
+	{
+	  /* We want to report the stop to the core.  Treat the
+	     SIGSTOP as a normal event.  */
+	}
+      else if (stopping_threads != NOT_STOPPING_THREADS)
+	{
+	  /* Stopping threads.  We don't want this SIGSTOP to end up
+	     pending in the FILTER_PTID handling below.  */
+	  return NULL;
+	}
+      else
+	{
+	  /* Filter out the event.  */
+	  linux_resume_one_lwp (child, child->stepping, 0, NULL);
+	  return NULL;
+	}
+    }
+
+    /* Check if the thread has exited.  */
+  if ((WIFEXITED (wstat) || WIFSIGNALED (wstat))
+      && num_lwps (pid_of (thread)) > 1)
+    {
+      if (debug_threads)
+	debug_printf ("LLW: %d exited.\n", lwpid);
+
+	 /* If there is at least one more LWP, then the exit signal
+	    was not the end of the debugged application and should be
+	    ignored.  */
+      delete_lwp (child);
+      return NULL;
+    }
+
+  if (!ptid_match (ptid_of (thread), filter_ptid))
+    {
+      if (debug_threads)
+	debug_printf ("LWP %d got an event %06x, leaving pending.\n",
+		      lwpid, wstat);
+
+      if (WIFSTOPPED (wstat))
+	{
+	  child->status_pending_p = 1;
+	  child->status_pending = wstat;
+
+	  if (WSTOPSIG (wstat) != SIGSTOP)
+	    {
+	      /* Cancel breakpoint hits.  The breakpoint may be
+		 removed before we fetch events from this process to
+		 report to the core.  It is best not to assume the
+		 moribund breakpoints heuristic always handles these
+		 cases --- it could be too many events go through to
+		 the core before this one is handled.  All-stop always
+		 cancels breakpoint hits in all threads.  */
+	      if (non_stop
+		  && WSTOPSIG (wstat) == SIGTRAP
+		  && cancel_breakpoint (child))
+		{
+		  /* Throw away the SIGTRAP.  */
+		  child->status_pending_p = 0;
+
+		  if (debug_threads)
+		    debug_printf ("LLW: LWP %d hit a breakpoint while"
+				  " waiting for another process;"
+				  " cancelled it\n", lwpid);
+		}
+	    }
+	}
+      else if (WIFEXITED (wstat) || WIFSIGNALED (wstat))
+	{
+	  if (debug_threads)
+	    debug_printf ("LLWE: process %d exited while fetching "
+			  "event from another LWP\n", lwpid);
+
+	  /* This was the last lwp in the process.  Since events are
+	     serialized to GDB core, and we can't report this one
+	     right now, but GDB core and the other target layers will
+	     want to be notified about the exit code/signal, leave the
+	     status pending for the next time we're able to report
+	     it.  */
+	  mark_lwp_dead (child, wstat);
+	}
+
+      return NULL;
+    }
+
+  return child;
+}
+
 /* When the event-loop is doing a step-over, this points at the thread
    being stepped.  */
 ptid_t step_over_bkpt;
 
-/* Wait for an event from child PID.  If PID is -1, wait for any
-   child.  Store the stop status through the status pointer WSTAT.
-   OPTIONS is passed to the waitpid call.  Return 0 if no child stop
-   event was found and OPTIONS contains WNOHANG.  Return the PID of
-   the stopped child and update current_inferior otherwise.  */
+/* Wait for an event from child(ren) WAIT_PTID, and return any that
+   match FILTER_PTID (leaving others pending).  The PTIDs can be:
+   minus_one_ptid, to specify any child; a pid PTID, specifying all
+   lwps of a thread group; or a PTID representing a single lwp.  Store
+   the stop status through the status pointer WSTAT.  OPTIONS is
+   passed to the waitpid call.  Return 0 if no event was found and
+   OPTIONS contains WNOHANG.  Return -1 if no unwaited-for children
+   was found.  Return the PID of the stopped child otherwise.  */
 
 static int
-linux_wait_for_event (ptid_t ptid, int *wstat, int options)
+linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
+			       int *wstatp, int options)
 {
   struct thread_info *event_thread;
   struct lwp_info *event_child, *requested_child;
-  ptid_t wait_ptid;
+  sigset_t block_mask, prev_mask;
 
+ retry:
   /* N.B. event_thread points to the thread_info struct that contains
      event_child.  Keep them in sync.  */
   event_thread = NULL;
@@ -1774,18 +1975,18 @@ linux_wait_for_event (ptid_t ptid, int *wstat, int options)
 
   /* Check for a lwp with a pending status.  */
 
-  if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
+  if (ptid_equal (filter_ptid, minus_one_ptid) || ptid_is_pid (filter_ptid))
     {
       event_thread = (struct thread_info *)
-	find_inferior (&all_threads, status_pending_p_callback, &ptid);
+	find_inferior (&all_threads, status_pending_p_callback, &filter_ptid);
       if (event_thread != NULL)
 	event_child = get_thread_lwp (event_thread);
       if (debug_threads && event_thread)
 	debug_printf ("Got a pending child %ld\n", lwpid_of (event_thread));
     }
-  else
+  else if (!ptid_equal (filter_ptid, null_ptid))
     {
-      requested_child = find_lwp_pid (ptid);
+      requested_child = find_lwp_pid (filter_ptid);
 
       if (stopping_threads == NOT_STOPPING_THREADS
 	  && requested_child->status_pending_p
@@ -1814,146 +2015,142 @@ linux_wait_for_event (ptid_t ptid, int *wstat, int options)
       if (debug_threads)
 	debug_printf ("Got an event from pending child %ld (%04x)\n",
 		      lwpid_of (event_thread), event_child->status_pending);
-      *wstat = event_child->status_pending;
+      *wstatp = event_child->status_pending;
       event_child->status_pending_p = 0;
       event_child->status_pending = 0;
       current_inferior = event_thread;
       return lwpid_of (event_thread);
     }
 
-  if (ptid_is_pid (ptid))
-    {
-      /* A request to wait for a specific tgid.  This is not possible
-	 with waitpid, so instead, we wait for any child, and leave
-	 children we're not interested in right now with a pending
-	 status to report later.  */
-      wait_ptid = minus_one_ptid;
-    }
-  else
-    wait_ptid = ptid;
+  /* But if we don't find a pending event, we'll have to wait.
 
-  /* We only enter this loop if no process has a pending wait status.  Thus
-     any action taken in response to a wait status inside this loop is
-     responding as soon as we detect the status, not after any pending
-     events.  */
-  while (1)
-    {
-      event_child = linux_wait_for_lwp (wait_ptid, wstat, options);
+     We only enter this loop if no process has a pending wait status.
+     Thus any action taken in response to a wait status inside this
+     loop is responding as soon as we detect the status, not after any
+     pending events.  */
 
-      if ((options & WNOHANG) && event_child == NULL)
+  /* Make sure SIGCHLD is blocked until the sigsuspend below.  Block
+     all signals while here.  */
+  sigfillset (&block_mask);
+  sigprocmask (SIG_BLOCK, &block_mask, &prev_mask);
+
+  while (event_child == NULL)
+    {
+      pid_t ret = 0;
+
+      /* Always use -1 and WNOHANG, due to couple of a kernel/ptrace
+	 quirks:
+
+	 - If the thread group leader exits while other threads in the
+	   thread group still exist, waitpid(TGID, ...) hangs.  That
+	   waitpid won't return an exit status until the other threads
+	   in the group are reaped.
+
+	 - When a non-leader thread execs, that thread just vanishes
+	   without reporting an exit (so we'd hang if we waited for it
+	   explicitly in that case).  The exec event is reported to
+	   the TGID pid (although we don't currently enable exec
+	   events).  */
+      errno = 0;
+      ret = my_waitpid (-1, wstatp, options | WNOHANG);
+
+      if (debug_threads)
+	debug_printf ("LWFE: waitpid(-1, ...) returned %d, %s\n",
+		      ret, errno ? strerror (errno) : "ERRNO-OK");
+
+      if (ret > 0)
+	{
+	  if (debug_threads)
+	    {
+	      debug_printf ("LLW: waitpid %ld received %s\n",
+			    (long) ret, status_to_str (*wstatp));
+	    }
+
+	  event_child = linux_low_filter_event (filter_ptid,
+						ret, *wstatp);
+	  if (event_child != NULL)
+	    {
+	      /* We got an event to report to the core.  */
+	      event_thread = get_lwp_thread (event_child);
+	      break;
+	    }
+
+	  /* Retry until nothing comes out of waitpid.  A single
+	     SIGCHLD can indicate more than one child stopped.  */
+	  continue;
+	}
+
+      /* Check for zombie thread group leaders.  Those can't be reaped
+	 until all other threads in the thread group are.  */
+      check_zombie_leaders ();
+
+      /* If there are no resumed children left in the set of LWPs we
+	 want to wait for, bail.  We can't just block in
+	 waitpid/sigsuspend, because lwps might have been left stopped
+	 in trace-stop state, and we'd be stuck forever waiting for
+	 their status to change (which would only happen if we resumed
+	 them).  Even if WNOHANG is set, this return code is preferred
+	 over 0 (below), as it is more detailed.  */
+      if ((find_inferior (&all_threads,
+			  not_stopped_callback,
+			  &wait_ptid) == NULL))
+	{
+	  if (debug_threads)
+	    debug_printf ("LLW: exit (no unwaited-for LWP)\n");
+	  sigprocmask (SIG_SETMASK, &prev_mask, NULL);
+	  return -1;
+	}
+
+      /* No interesting event to report to the caller.  */
+      if ((options & WNOHANG))
 	{
 	  if (debug_threads)
 	    debug_printf ("WNOHANG set, no event found\n");
+
+	  sigprocmask (SIG_SETMASK, &prev_mask, NULL);
 	  return 0;
 	}
 
-      if (event_child == NULL)
-	error ("event from unknown child");
+      /* Block until we get an event reported with SIGCHLD.  */
+      if (debug_threads)
+	debug_printf ("sigsuspend'ing\n");
 
-      event_thread = get_lwp_thread (event_child);
-      if (ptid_is_pid (ptid)
-	  && ptid_get_pid (ptid) != ptid_get_pid (ptid_of (event_thread)))
-	{
-	  if (! WIFSTOPPED (*wstat))
-	    mark_lwp_dead (event_child, *wstat);
-	  else
-	    {
-	      event_child->status_pending_p = 1;
-	      event_child->status_pending = *wstat;
-	    }
-	  continue;
-	}
+      sigsuspend (&prev_mask);
+      sigprocmask (SIG_SETMASK, &prev_mask, NULL);
+      goto retry;
+    }
 
-      current_inferior = event_thread;
+  sigprocmask (SIG_SETMASK, &prev_mask, NULL);
 
-      /* Check for thread exit.  */
-      if (! WIFSTOPPED (*wstat))
-	{
-	  if (debug_threads)
-	    debug_printf ("LWP %ld exiting\n", lwpid_of (event_thread));
+  current_inferior = event_thread;
 
-	  /* If the last thread is exiting, just return.  */
-	  if (last_thread_of_process_p (current_inferior))
-	    {
-	      if (debug_threads)
-		debug_printf ("LWP %ld is last lwp of process\n",
-			      lwpid_of (event_thread));
-	      return lwpid_of (event_thread);
-	    }
+  /* Check for thread exit.  */
+  if (! WIFSTOPPED (*wstatp))
+    {
+      gdb_assert (last_thread_of_process_p (pid_of (event_thread)));
 
-	  if (!non_stop)
-	    {
-	      current_inferior = get_first_thread ();
-	      if (debug_threads)
-		debug_printf ("Current inferior is now %ld\n",
-			      lwpid_of (current_inferior));
-	    }
-	  else
-	    {
-	      current_inferior = NULL;
-	      if (debug_threads)
-		debug_printf ("Current inferior is now <NULL>\n");
-	    }
-
-	  /* If we were waiting for this particular child to do something...
-	     well, it did something.  */
-	  if (requested_child != NULL)
-	    {
-	      int lwpid = lwpid_of (event_thread);
-
-	      /* Cancel the step-over operation --- the thread that
-		 started it is gone.  */
-	      if (finish_step_over (event_child))
-		unstop_all_lwps (1, event_child);
-	      delete_lwp (event_child);
-	      return lwpid;
-	    }
-
-	  delete_lwp (event_child);
-
-	  /* Wait for a more interesting event.  */
-	  continue;
-	}
-
-      if (event_child->must_set_ptrace_flags)
-	{
-	  linux_enable_event_reporting (lwpid_of (event_thread));
-	  event_child->must_set_ptrace_flags = 0;
-	}
-
-      if (WIFSTOPPED (*wstat) && WSTOPSIG (*wstat) == SIGTRAP
-	  && *wstat >> 16 != 0)
-	{
-	  handle_extended_wait (event_child, *wstat);
-	  continue;
-	}
-
-      if (WIFSTOPPED (*wstat)
-	  && WSTOPSIG (*wstat) == SIGSTOP
-	  && event_child->stop_expected)
-	{
-	  int should_stop;
-
-	  if (debug_threads)
-	    debug_printf ("Expected stop.\n");
-	  event_child->stop_expected = 0;
-
-	  should_stop = (current_inferior->last_resume_kind == resume_stop
-			 || stopping_threads != NOT_STOPPING_THREADS);
-
-	  if (!should_stop)
-	    {
-	      linux_resume_one_lwp (event_child,
-				    event_child->stepping, 0, NULL);
-	      continue;
-	    }
-	}
-
+      if (debug_threads)
+	debug_printf ("LWP %d is the last lwp of process.  "
+		      "Process %ld exiting.\n",
+		      pid_of (event_thread), lwpid_of (event_thread));
       return lwpid_of (event_thread);
     }
 
-  /* NOTREACHED */
-  return 0;
+  return lwpid_of (event_thread);
+}
+
+/* Wait for an event from child(ren) PTID.  PTIDs can be:
+   minus_one_ptid, to specify any child; a pid PTID, specifying all
+   lwps of a thread group; or a PTID representing a single lwp.  Store
+   the stop status through the status pointer WSTAT.  OPTIONS is
+   passed to the waitpid call.  Return 0 if no event was found and
+   OPTIONS contains WNOHANG.  Return -1 if no unwaited-for children
+   was found.  Return the PID of the stopped child otherwise.  */
+
+static int
+linux_wait_for_event (ptid_t ptid, int *wstatp, int options)
+{
+  return linux_wait_for_event_filtered (ptid, ptid, wstatp, options);
 }
 
 /* Count the LWP's that have had events.  */
@@ -2322,70 +2519,69 @@ retry:
       pid = linux_wait_for_event (step_over_bkpt, &w, options & ~WNOHANG);
     }
 
-  if (pid == 0) /* only if TARGET_WNOHANG */
+  if (pid == 0)
+    {
+      gdb_assert (target_options & TARGET_WNOHANG);
+
+      if (debug_threads)
+	{
+	  debug_printf ("linux_wait_1 ret = null_ptid, "
+			"TARGET_WAITKIND_IGNORE\n");
+	  debug_exit ();
+	}
+
+      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+      return null_ptid;
+    }
+  else if (pid == -1)
     {
       if (debug_threads)
 	{
-	  debug_printf ("linux_wait_1 ret = null_ptid\n");
+	  debug_printf ("linux_wait_1 ret = null_ptid, "
+			"TARGET_WAITKIND_NO_RESUMED\n");
 	  debug_exit ();
 	}
+
+      ourstatus->kind = TARGET_WAITKIND_NO_RESUMED;
       return null_ptid;
     }
 
   event_child = get_thread_lwp (current_inferior);
 
-  /* If we are waiting for a particular child, and it exited,
-     linux_wait_for_event will return its exit status.  Similarly if
-     the last child exited.  If this is not the last child, however,
-     do not report it as exited until there is a 'thread exited' response
-     available in the remote protocol.  Instead, just wait for another event.
-     This should be safe, because if the thread crashed we will already
-     have reported the termination signal to GDB; that should stop any
-     in-progress stepping operations, etc.
-
-     Report the exit status of the last thread to exit.  This matches
-     LinuxThreads' behavior.  */
-
-  if (last_thread_of_process_p (current_inferior))
+  /* linux_wait_for_event only returns an exit status for the last
+     child of a process.  Report it.  */
+  if (WIFEXITED (w) || WIFSIGNALED (w))
     {
-      if (WIFEXITED (w) || WIFSIGNALED (w))
+      if (WIFEXITED (w))
 	{
-	  if (WIFEXITED (w))
+	  ourstatus->kind = TARGET_WAITKIND_EXITED;
+	  ourstatus->value.integer = WEXITSTATUS (w);
+
+	  if (debug_threads)
 	    {
-	      ourstatus->kind = TARGET_WAITKIND_EXITED;
-	      ourstatus->value.integer = WEXITSTATUS (w);
-
-	      if (debug_threads)
-		{
-		  debug_printf ("linux_wait_1 ret = %s, exited with "
-				"retcode %d\n",
-				target_pid_to_str (ptid_of (current_inferior)),
-				WEXITSTATUS (w));
-		  debug_exit ();
-		}
+	      debug_printf ("linux_wait_1 ret = %s, exited with "
+			    "retcode %d\n",
+			    target_pid_to_str (ptid_of (current_inferior)),
+			    WEXITSTATUS (w));
+	      debug_exit ();
 	    }
-	  else
-	    {
-	      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	      ourstatus->value.sig = gdb_signal_from_host (WTERMSIG (w));
-
-	      if (debug_threads)
-		{
-		  debug_printf ("linux_wait_1 ret = %s, terminated with "
-				"signal %d\n",
-				target_pid_to_str (ptid_of (current_inferior)),
-				WTERMSIG (w));
-		  debug_exit ();
-		}
-	    }
-
-	  return ptid_of (current_inferior);
 	}
-    }
-  else
-    {
-      if (!WIFSTOPPED (w))
-	goto retry;
+      else
+	{
+	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	  ourstatus->value.sig = gdb_signal_from_host (WTERMSIG (w));
+
+	  if (debug_threads)
+	    {
+	      debug_printf ("linux_wait_1 ret = %s, terminated with "
+			    "signal %d\n",
+			    target_pid_to_str (ptid_of (current_inferior)),
+			    WTERMSIG (w));
+	      debug_exit ();
+	    }
+	}
+
+      return ptid_of (current_inferior);
     }
 
   /* If this event was not handled before, and is not a SIGTRAP, we
@@ -2929,24 +3125,15 @@ mark_lwp_dead (struct lwp_info *lwp, int wstat)
   lwp->stop_expected = 0;
 }
 
-static void
-wait_for_sigstop (struct inferior_list_entry *entry)
-{
-  struct thread_info *thread = (struct thread_info *) entry;
-  struct lwp_info *lwp = get_thread_lwp (thread);
-  struct thread_info *saved_inferior;
-  int wstat;
-  ptid_t saved_tid;
-  ptid_t ptid;
-  int pid;
+/* Wait for all children to stop for the SIGSTOPs we just queued.  */
 
-  if (lwp->stopped)
-    {
-      if (debug_threads)
-	debug_printf ("wait_for_sigstop: LWP %ld already stopped\n",
-		      lwpid_of (thread));
-      return;
-    }
+static void
+wait_for_sigstop (void)
+{
+  struct thread_info *saved_inferior;
+  ptid_t saved_tid;
+  int wstat;
+  int ret;
 
   saved_inferior = current_inferior;
   if (saved_inferior != NULL)
@@ -2954,50 +3141,15 @@ wait_for_sigstop (struct inferior_list_entry *entry)
   else
     saved_tid = null_ptid; /* avoid bogus unused warning */
 
-  ptid = thread->entry.id;
-
   if (debug_threads)
-    debug_printf ("wait_for_sigstop: pulling one event\n");
+    debug_printf ("wait_for_sigstop: pulling events\n");
 
-  pid = linux_wait_for_event (ptid, &wstat, __WALL);
-
-  /* If we stopped with a non-SIGSTOP signal, save it for later
-     and record the pending SIGSTOP.  If the process exited, just
-     return.  */
-  if (WIFSTOPPED (wstat))
-    {
-      if (debug_threads)
-	debug_printf ("LWP %ld stopped with signal %d\n",
-		      lwpid_of (thread), WSTOPSIG (wstat));
-
-      if (WSTOPSIG (wstat) != SIGSTOP)
-	{
-	  if (debug_threads)
-	    debug_printf ("LWP %ld stopped with non-sigstop status %06x\n",
-			  lwpid_of (thread), wstat);
-
-	  lwp->status_pending_p = 1;
-	  lwp->status_pending = wstat;
-	}
-    }
-  else
-    {
-      if (debug_threads)
-	debug_printf ("Process %d exited while stopping LWPs\n", pid);
-
-      lwp = find_lwp_pid (pid_to_ptid (pid));
-      if (lwp)
-	{
-	  /* Leave this status pending for the next time we're able to
-	     report it.  In the mean time, we'll report this lwp as
-	     dead to GDB, so GDB doesn't try to read registers and
-	     memory from it.  This can only happen if this was the
-	     last thread of the process; otherwise, PID is removed
-	     from the thread tables before linux_wait_for_event
-	     returns.  */
-	  mark_lwp_dead (lwp, wstat);
-	}
-    }
+  /* Passing NULL_PTID as filter indicates we want all events to be
+     left pending.  Eventually this returns when there are no
+     unwaited-for children left.  */
+  ret = linux_wait_for_event_filtered (minus_one_ptid, null_ptid,
+				       &wstat, __WALL);
+  gdb_assert (ret == -1);
 
   if (saved_inferior == NULL || linux_thread_alive (saved_tid))
     current_inferior = saved_inferior;
@@ -3124,7 +3276,7 @@ stop_all_lwps (int suspend, struct lwp_info *except)
     find_inferior (&all_threads, suspend_and_send_sigstop_callback, except);
   else
     find_inferior (&all_threads, send_sigstop_callback, except);
-  for_each_inferior (&all_threads, wait_for_sigstop);
+  wait_for_sigstop ();
   stopping_threads = NOT_STOPPING_THREADS;
 
   if (debug_threads)

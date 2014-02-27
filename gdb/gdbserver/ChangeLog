@@ -1,3 +1,31 @@
+2014-02-27  Pedro Alves  <palves@redhat.com>
+
+	PR 12702
+	* inferiors.h (A_I_NEXT, ALL_INFERIORS_TYPE, ALL_PROCESSES): New
+	macros.
+	* linux-low.c (delete_lwp, handle_extended_wait): Add debug
+	output.
+	(last_thread_of_process_p): Take a PID argument instead of a
+	thread pointer.
+	(linux_wait_for_lwp): Delete.
+	(num_lwps, check_zombie_leaders, not_stopped_callback): New
+	functions.
+	(linux_low_filter_event): New function, party factored out from
+	linux_wait_for_event.
+	(linux_wait_for_event): Rename to ...
+	(linux_wait_for_event_filtered): ... this.  Add new filter ptid
+	argument.  Partly rewrite.  Always use waitpid(-1, WNOHANG) and
+	sigsuspend.  Check for zombie leaders.
+	(linux_wait_for_event): Reimplement as wrapper around
+	linux_wait_for_event_filtered.
+	(linux_wait_1): Handle TARGET_WAITKIND_NO_RESUMED.  Assume that if
+	a normal or signal exit is seen, it's the whole process exiting.
+	(wait_for_sigstop): No longer a for_each_inferior callback.
+	Rewrite on top of linux_wait_for_event_filtered.
+	(stop_all_lwps): Call wait_for_sigstop directly.
+	* server.c (resume, handle_target_event): Handle
+	TARGET_WAITKIND_NO_RESUMED.
+
 2014-02-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* win32-low.c (psapi_get_dll_name,

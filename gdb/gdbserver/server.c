@@ -2367,8 +2367,18 @@ resume (struct thread_resume *actions, size_t num_actions)
     {
       last_ptid = mywait (minus_one_ptid, &last_status, 0, 1);
 
+      if (last_status.kind == TARGET_WAITKIND_NO_RESUMED)
+	{
+	  /* No proper RSP support for this yet.  At least return
+	     error.  */
+	  sprintf (own_buf, "E.No unwaited-for children left.");
+	  disable_async_io ();
+	  return;
+	}
+
       if (last_status.kind != TARGET_WAITKIND_EXITED
-          && last_status.kind != TARGET_WAITKIND_SIGNALLED)
+          && last_status.kind != TARGET_WAITKIND_SIGNALLED
+	  && last_status.kind != TARGET_WAITKIND_NO_RESUMED)
 	current_inferior->last_status = last_status;
 
       /* From the client's perspective, all-stop mode always stops all
@@ -3897,7 +3907,11 @@ handle_target_event (int err, gdb_client_data client_data)
   last_ptid = mywait (minus_one_ptid, &last_status,
 		      TARGET_WNOHANG, 1);
 
-  if (last_status.kind != TARGET_WAITKIND_IGNORE)
+  if (last_status.kind == TARGET_WAITKIND_NO_RESUMED)
+    {
+      /* No RSP support for this yet.  */
+    }
+  else if (last_status.kind != TARGET_WAITKIND_IGNORE)
     {
       int pid = ptid_get_pid (last_ptid);
       struct process_info *process = find_process_pid (pid);

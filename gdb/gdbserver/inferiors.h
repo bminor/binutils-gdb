@@ -99,6 +99,28 @@ void clear_inferior_list (struct inferior_list *list);
 
 int one_inferior_p (struct inferior_list *list);
 
+/* Helper for ALL_INFERIORS_TYPE.  Gets the next element starting at
+   CUR, if CUR is not NULL.  */
+#define A_I_NEXT(type, list, cur)					\
+  ((cur) != NULL							\
+   ? (type *) ((struct inferior_list_entry *) cur)->next		\
+   : NULL)
+
+/* Iterate over all inferiors of type TYPE in LIST, open loop
+   style.  */
+#define ALL_INFERIORS_TYPE(type, list, cur, tmp)				\
+  for ((cur) = (type *) (list)->head, (tmp) = A_I_NEXT (type, list, cur); \
+       (cur) != NULL;							\
+       (cur) = (tmp), (tmp) = A_I_NEXT (type, list, cur))
+
+/* Iterate over all inferiors in LIST, open loop style.  */
+#define ALL_INFERIORS(list, cur, tmp)				\
+  ALL_INFERIORS_TYPE (struct inferior_list_entry, list, cur, tmp)
+
+/* Iterate over all processes, open loop style.  */
+#define ALL_PROCESSES(cur, tmp)					\
+  ALL_INFERIORS_TYPE (struct process_info, &all_processes, cur, tmp)
+
 extern struct thread_info *current_inferior;
 void remove_inferior (struct inferior_list *list,
 		      struct inferior_list_entry *entry);
