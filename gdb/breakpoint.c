@@ -3146,10 +3146,10 @@ static const char *const longjmp_names[] =
 struct breakpoint_objfile_data
 {
   /* Minimal symbol for "_ovly_debug_event" (if any).  */
-  struct minimal_symbol *overlay_msym;
+  struct bound_minimal_symbol overlay_msym;
 
   /* Minimal symbol(s) for "longjmp", "siglongjmp", etc. (if any).  */
-  struct minimal_symbol *longjmp_msym[NUM_LONGJMP_NAMES];
+  struct bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES];
 
   /* True if we have looked for longjmp probes.  */
   int longjmp_searched;
@@ -3158,10 +3158,10 @@ struct breakpoint_objfile_data
   VEC (probe_p) *longjmp_probes;
 
   /* Minimal symbol for "std::terminate()" (if any).  */
-  struct minimal_symbol *terminate_msym;
+  struct bound_minimal_symbol terminate_msym;
 
   /* Minimal symbol for "_Unwind_DebugHook" (if any).  */
-  struct minimal_symbol *exception_msym;
+  struct bound_minimal_symbol exception_msym;
 
   /* True if we have looked for exception probes.  */
   int exception_searched;
@@ -3226,24 +3226,24 @@ create_overlay_event_breakpoint (void)
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
-      if (msym_not_found_p (bp_objfile_data->overlay_msym))
+      if (msym_not_found_p (bp_objfile_data->overlay_msym.minsym))
 	continue;
 
-      if (bp_objfile_data->overlay_msym == NULL)
+      if (bp_objfile_data->overlay_msym.minsym == NULL)
 	{
-	  struct minimal_symbol *m;
+	  struct bound_minimal_symbol m;
 
 	  m = lookup_minimal_symbol_text (func_name, objfile);
-	  if (m == NULL)
+	  if (m.minsym == NULL)
 	    {
 	      /* Avoid future lookups in this objfile.  */
-	      bp_objfile_data->overlay_msym = &msym_not_found;
+	      bp_objfile_data->overlay_msym.minsym = &msym_not_found;
 	      continue;
 	    }
 	  bp_objfile_data->overlay_msym = m;
 	}
 
-      addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->overlay_msym);
+      addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->overlay_msym);
       b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
                                       bp_overlay_event,
 				      &internal_breakpoint_ops);
@@ -3342,25 +3342,25 @@ create_longjmp_master_breakpoint (void)
 	  const char *func_name;
 	  CORE_ADDR addr;
 
-	  if (msym_not_found_p (bp_objfile_data->longjmp_msym[i]))
+	  if (msym_not_found_p (bp_objfile_data->longjmp_msym[i].minsym))
 	    continue;
 
 	  func_name = longjmp_names[i];
-	  if (bp_objfile_data->longjmp_msym[i] == NULL)
+	  if (bp_objfile_data->longjmp_msym[i].minsym == NULL)
 	    {
-	      struct minimal_symbol *m;
+	      struct bound_minimal_symbol m;
 
 	      m = lookup_minimal_symbol_text (func_name, objfile);
-	      if (m == NULL)
+	      if (m.minsym == NULL)
 		{
 		  /* Prevent future lookups in this objfile.  */
-		  bp_objfile_data->longjmp_msym[i] = &msym_not_found;
+		  bp_objfile_data->longjmp_msym[i].minsym = &msym_not_found;
 		  continue;
 		}
 	      bp_objfile_data->longjmp_msym[i] = m;
 	    }
 
-	  addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
+	  addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
 	  b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
 					  &internal_breakpoint_ops);
 	  b->addr_string = xstrdup (func_name);
@@ -3397,25 +3397,25 @@ create_std_terminate_master_breakpoint (void)
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
-      if (msym_not_found_p (bp_objfile_data->terminate_msym))
+      if (msym_not_found_p (bp_objfile_data->terminate_msym.minsym))
 	continue;
 
-      if (bp_objfile_data->terminate_msym == NULL)
+      if (bp_objfile_data->terminate_msym.minsym == NULL)
 	{
-	  struct minimal_symbol *m;
+	  struct bound_minimal_symbol m;
 
 	  m = lookup_minimal_symbol (func_name, NULL, objfile);
-	  if (m == NULL || (MSYMBOL_TYPE (m) != mst_text
-			    && MSYMBOL_TYPE (m) != mst_file_text))
+	  if (m.minsym == NULL || (MSYMBOL_TYPE (m.minsym) != mst_text
+				   && MSYMBOL_TYPE (m.minsym) != mst_file_text))
 	    {
 	      /* Prevent future lookups in this objfile.  */
-	      bp_objfile_data->terminate_msym = &msym_not_found;
+	      bp_objfile_data->terminate_msym.minsym = &msym_not_found;
 	      continue;
 	    }
 	  bp_objfile_data->terminate_msym = m;
 	}
 
-      addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->terminate_msym);
+      addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->terminate_msym);
       b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
                                       bp_std_terminate_master,
 				      &internal_breakpoint_ops);
@@ -3496,26 +3496,26 @@ create_exception_master_breakpoint (void)
 
       /* Otherwise, try the hook function.  */
 
-      if (msym_not_found_p (bp_objfile_data->exception_msym))
+      if (msym_not_found_p (bp_objfile_data->exception_msym.minsym))
 	continue;
 
       gdbarch = get_objfile_arch (objfile);
 
-      if (bp_objfile_data->exception_msym == NULL)
+      if (bp_objfile_data->exception_msym.minsym == NULL)
 	{
-	  struct minimal_symbol *debug_hook;
+	  struct bound_minimal_symbol debug_hook;
 
 	  debug_hook = lookup_minimal_symbol (func_name, NULL, objfile);
-	  if (debug_hook == NULL)
+	  if (debug_hook.minsym == NULL)
 	    {
-	      bp_objfile_data->exception_msym = &msym_not_found;
+	      bp_objfile_data->exception_msym.minsym = &msym_not_found;
 	      continue;
 	    }
 
 	  bp_objfile_data->exception_msym = debug_hook;
 	}
 
-      addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
+      addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
       addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
 						 &current_target);
       b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
@@ -5159,7 +5159,6 @@ bpstat_check_watchpoint (bpstat bs)
 static void
 bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 {
-  int thread_id = pid_to_thread_id (ptid);
   const struct bp_location *bl;
   struct breakpoint *b;
   int value_is_zero = 0;
@@ -5184,9 +5183,12 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
       return;
     }
 
-  /* If this is a thread-specific breakpoint, don't waste cpu evaluating the
-     condition if this isn't the specified thread.  */
-  if (b->thread != -1 && b->thread != thread_id)
+  /* If this is a thread/task-specific breakpoint, don't waste cpu
+     evaluating the condition if this isn't the specified
+     thread/task.  */
+  if ((b->thread != -1 && b->thread != pid_to_thread_id (ptid))
+      || (b->task != 0 && b->task != ada_get_task_number (ptid)))
+
     {
       bs->stop = 0;
       return;
@@ -9990,7 +9992,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 
 	      msym = lookup_minimal_symbol_by_pc (sal->pc);
 	      if (msym.minsym)
-		sal->section = SYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
+		sal->section = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
 
 	      do_cleanups (old_chain);
 	    }

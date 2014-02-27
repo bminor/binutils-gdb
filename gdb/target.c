@@ -75,19 +75,13 @@ static int default_search_memory (struct target_ops *ops,
 
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
-static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
-
 static int return_zero (struct target_ops *);
 
 static int return_zero_has_execution (struct target_ops *, ptid_t);
 
-void target_ignore (void);
-
 static void target_command (char *, int);
 
 static struct target_ops *find_default_run_target (char *);
-
-static target_xfer_partial_ftype default_xfer_partial;
 
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
 						    ptid_t ptid);
@@ -377,8 +371,6 @@ void
 complete_target_initialization (struct target_ops *t)
 {
   /* Provide default values for all "must have" methods.  */
-  if (t->to_xfer_partial == NULL)
-    t->to_xfer_partial = default_xfer_partial;
 
   if (t->to_has_all_memory == NULL)
     t->to_has_all_memory = return_zero;
@@ -465,11 +457,6 @@ add_deprecated_target_alias (struct target_ops *t, char *alias)
 /* Stub functions */
 
 void
-target_ignore (void)
-{
-}
-
-void
 target_kill (void)
 {
   if (targetdebug)
@@ -521,14 +508,6 @@ target_terminal_inferior (void)
   /* If GDB is resuming the inferior in the foreground, install
      inferior's terminal modes.  */
   (*current_target.to_terminal_inferior) (&current_target);
-}
-
-static int
-nomemory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-	  struct target_ops *t)
-{
-  errno = EIO;			/* Can't read/write this location.  */
-  return 0;			/* No bytes handled.  */
 }
 
 static void
@@ -610,27 +589,11 @@ update_current_target (void)
       INHERIT (to_shortname, t);
       INHERIT (to_longname, t);
       INHERIT (to_attach_no_wait, t);
-      INHERIT (deprecated_xfer_memory, t);
       INHERIT (to_have_steppable_watchpoint, t);
       INHERIT (to_have_continuable_watchpoint, t);
       INHERIT (to_has_thread_control, t);
     }
 #undef INHERIT
-
-  /* Clean up a target struct so it no longer has any zero pointers in
-     it.  Do not add any new de_faults here.  Instead, use the
-     delegation mechanism provided by make-target-delegates.  */
-
-#define de_fault(field, value) \
-  if (!current_target.field)               \
-    current_target.field = value
-
-  de_fault (deprecated_xfer_memory,
-	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
-		      struct mem_attrib *, struct target_ops *))
-	    nomemory);
-
-#undef de_fault
 
   /* Finally, position the target-stack beneath the squashed
      "current_target".  That way code looking for a non-inherited
@@ -880,13 +843,13 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 }
 
 const char *
-target_xfer_status_to_string (enum target_xfer_status err)
+target_xfer_status_to_string (enum target_xfer_status status)
 {
 #define CASE(X) case X: return #X
-  switch (err)
+  switch (status)
     {
       CASE(TARGET_XFER_E_IO);
-      CASE(TARGET_XFER_E_UNAVAILABLE);
+      CASE(TARGET_XFER_UNAVAILABLE);
     default:
       return "<unknown>";
     }
@@ -1099,7 +1062,7 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
 	break;
 
       /* Stop if the target reports that the memory is not available.  */
-      if (res == TARGET_XFER_E_UNAVAILABLE)
+      if (res == TARGET_XFER_UNAVAILABLE)
 	break;
 
       /* We want to continue past core files to executables, but not
@@ -1212,7 +1175,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 		  /* No use trying further, we know some memory starting
 		     at MEMADDR isn't available.  */
 		  *xfered_len = len;
-		  return TARGET_XFER_E_UNAVAILABLE;
+		  return TARGET_XFER_UNAVAILABLE;
 		}
 	    }
 
@@ -1348,7 +1311,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 				   xfered_len);
 
       if (res == TARGET_XFER_OK && !show_memory_breakpoints)
-	breakpoint_xfer_memory (readbuf, NULL, NULL, memaddr, res);
+	breakpoint_xfer_memory (readbuf, NULL, NULL, memaddr, *xfered_len);
     }
   else
     {
@@ -1479,7 +1442,7 @@ target_xfer_partial (struct target_ops *ops,
   /* Check implementations of to_xfer_partial update *XFERED_LEN
      properly.  Do assertion after printing debug messages, so that we
      can find more clues on assertion failure from debugging messages.  */
-  if (retval == TARGET_XFER_OK || retval == TARGET_XFER_E_UNAVAILABLE)
+  if (retval == TARGET_XFER_OK || retval == TARGET_XFER_UNAVAILABLE)
     gdb_assert (*xfered_len > 0);
 
   return retval;
@@ -1656,56 +1619,6 @@ show_trust_readonly (struct ui_file *file, int from_tty,
   fprintf_filtered (file,
 		    _("Mode for reading from readonly sections is %s.\n"),
 		    value);
-}
-
-/* More generic transfers.  */
-
-static enum target_xfer_status
-default_xfer_partial (struct target_ops *ops, enum target_object object,
-		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		      ULONGEST *xfered_len)
-{
-  if (object == TARGET_OBJECT_MEMORY
-      && ops->deprecated_xfer_memory != NULL)
-    /* If available, fall back to the target's
-       "deprecated_xfer_memory" method.  */
-    {
-      int xfered = -1;
-
-      errno = 0;
-      if (writebuf != NULL)
-	{
-	  void *buffer = xmalloc (len);
-	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
-
-	  memcpy (buffer, writebuf, len);
-	  xfered = ops->deprecated_xfer_memory (offset, buffer, len,
-						1/*write*/, NULL, ops);
-	  do_cleanups (cleanup);
-	}
-      if (readbuf != NULL)
-	xfered = ops->deprecated_xfer_memory (offset, readbuf, len, 
-					      0/*read*/, NULL, ops);
-      if (xfered > 0)
-	{
-	  *xfered_len = (ULONGEST) xfered;
-	  return TARGET_XFER_E_IO;
-	}
-      else if (xfered == 0 && errno == 0)
-	/* "deprecated_xfer_memory" uses 0, cross checked against
-           ERRNO as one indication of an error.  */
-	return TARGET_XFER_EOF;
-      else
-	return TARGET_XFER_E_IO;
-    }
-  else
-    {
-      gdb_assert (ops->beneath != NULL);
-      return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					    readbuf, writebuf, offset, len,
-					    xfered_len);
-    }
 }
 
 /* Target vector read/write partial wrapper functions.  */
@@ -2002,12 +1915,9 @@ target_write_with_progress (struct target_ops *ops,
 				     offset + xfered, len - xfered,
 				     &xfered_len);
 
-      if (status == TARGET_XFER_EOF)
-	return xfered;
-      if (TARGET_XFER_STATUS_ERROR_P (status))
-	return -1;
+      if (status != TARGET_XFER_OK)
+	return status == TARGET_XFER_EOF ? xfered : -1;
 
-      gdb_assert (status == TARGET_XFER_OK);
       if (progress)
 	(*progress) (xfered_len, baton);
 
@@ -3850,47 +3760,6 @@ target_decr_pc_after_break (struct gdbarch *gdbarch)
   return current_target.to_decr_pc_after_break (&current_target, gdbarch);
 }
 
-static int
-deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
-			      int write, struct mem_attrib *attrib,
-			      struct target_ops *target)
-{
-  int retval;
-
-  retval = debug_target.deprecated_xfer_memory (memaddr, myaddr, len, write,
-						attrib, target);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_xfer_memory (%s, xxx, %d, %s, xxx) = %d",
-		      paddress (target_gdbarch (), memaddr), len,
-		      write ? "write" : "read", retval);
-
-  if (retval > 0)
-    {
-      int i;
-
-      fputs_unfiltered (", bytes =", gdb_stdlog);
-      for (i = 0; i < retval; i++)
-	{
-	  if ((((intptr_t) &(myaddr[i])) & 0xf) == 0)
-	    {
-	      if (targetdebug < 2 && i > 0)
-		{
-		  fprintf_unfiltered (gdb_stdlog, " ...");
-		  break;
-		}
-	      fprintf_unfiltered (gdb_stdlog, "\n");
-	    }
-
-	  fprintf_unfiltered (gdb_stdlog, " %02x", myaddr[i] & 0xff);
-	}
-    }
-
-  fputc_unfiltered ('\n', gdb_stdlog);
-
-  return retval;
-}
-
 static void
 debug_to_files_info (struct target_ops *target)
 {
@@ -4319,7 +4188,6 @@ setup_target_debug (void)
   current_target.to_open = debug_to_open;
   current_target.to_post_attach = debug_to_post_attach;
   current_target.to_prepare_to_store = debug_to_prepare_to_store;
-  current_target.deprecated_xfer_memory = deprecated_debug_xfer_memory;
   current_target.to_files_info = debug_to_files_info;
   current_target.to_insert_breakpoint = debug_to_insert_breakpoint;
   current_target.to_remove_breakpoint = debug_to_remove_breakpoint;

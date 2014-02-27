@@ -46,16 +46,14 @@ extern int build_section_table (struct bfd *, struct target_section **,
 
 extern int resize_section_table (struct target_section_table *, int);
 
-/* Appends all read-only memory ranges found in the target section
-   table defined by SECTIONS and SECTIONS_END, starting at (and
-   intersected with) MEMADDR for LEN bytes.  Returns the augmented
-   VEC.  */
+/* Read from mappable read-only sections of BFD executable files.
+   Return TARGET_XFER_OK, if read is successful.  Return
+   TARGET_XFER_EOF if read is done.  Return TARGET_XFER_E_IO
+   otherwise.  */
 
-extern VEC(mem_range_s) *
-  section_table_available_memory (VEC(mem_range_s) *ranges,
-				  CORE_ADDR memaddr, ULONGEST len,
-				  struct target_section *sections,
-				  struct target_section *sections_end);
+extern enum target_xfer_status
+  exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset,
+			       ULONGEST len, ULONGEST *xfered_len);
 
 /* Read or write from mappable sections of BFD executable files.
 
@@ -81,6 +79,14 @@ extern enum target_xfer_status
 				     struct target_section *,
 				     struct target_section *,
 				     const char *);
+
+/* Read from mappable read-only sections of BFD executable files.
+   Similar to exec_read_partial_read_only, but return
+   TARGET_XFER_UNAVAILABLE if data is unavailable.  */
+
+extern enum target_xfer_status
+  section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
+				       ULONGEST len, ULONGEST *xfered_len);
 
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);

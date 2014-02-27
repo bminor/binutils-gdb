@@ -20,16 +20,17 @@
 #include "defs.h"
 #include "frame.h"
 #include "symtab.h"
+#include "objfiles.h"
 
 #include "obsd-tdep.h"
 
 CORE_ADDR
 obsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol("_dl_bind", NULL, NULL);
-  if (msym && SYMBOL_VALUE_ADDRESS (msym) == pc)
+  if (msym.minsym && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
     return frame_unwind_caller_pc (get_current_frame ());
   else
     return find_solib_trampoline_target (get_current_frame (), pc);
@@ -288,6 +289,31 @@ obsd_gdb_signal_to_target (struct gdbarch *gdbarch,
   return -1;
 }
 
+static int
+obsd_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr,
+		 gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  struct type *int_type = builtin_type (gdbarch)->builtin_int;
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+  const int sizeof_auxv_type = TYPE_LENGTH (int_type);
+  const int sizeof_auxv_val = TYPE_LENGTH (ptr_type);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  gdb_byte *ptr = *readptr;
+
+  if (endptr == ptr)
+    return 0;
+
+  if (endptr - ptr < 2 * sizeof_auxv_val)
+    return -1;
+
+  *typep = extract_unsigned_integer (ptr, sizeof_auxv_type, byte_order);
+  ptr += sizeof_auxv_val;	/* Alignment.  */
+  *valp = extract_unsigned_integer (ptr, sizeof_auxv_val, byte_order);
+  ptr += sizeof_auxv_val;
+
+  *readptr = ptr;
+  return 1;
+}
 
 void
 obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -296,4 +322,7 @@ obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      obsd_gdb_signal_from_target);
   set_gdbarch_gdb_signal_to_target (gdbarch,
 				    obsd_gdb_signal_to_target);
+
+  /* Unlike Linux, OpenBSD actually follows the ELF standard.  */
+  set_gdbarch_auxv_parse (gdbarch, obsd_auxv_parse);
 }

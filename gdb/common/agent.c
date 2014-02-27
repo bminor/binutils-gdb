@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "target.h"
 #include "inferior.h" /* for non_stop */
+#include "objfiles.h"
 #endif
 
 #include <string.h>
@@ -98,12 +99,12 @@ agent_look_up_symbols (void *arg)
 
       if (look_up_one_symbol (symbol_list[i].name, addrp, 1) == 0)
 #else
-      struct minimal_symbol *sym =
+      struct bound_minimal_symbol sym =
 	lookup_minimal_symbol (symbol_list[i].name, NULL,
 			       (struct objfile *) arg);
 
-      if (sym != NULL)
-	*addrp = SYMBOL_VALUE_ADDRESS (sym);
+      if (sym.minsym != NULL)
+	*addrp = BMSYMBOL_VALUE_ADDRESS (sym);
       else
 #endif
 	{

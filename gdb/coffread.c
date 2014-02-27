@@ -669,7 +669,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 
       ALL_OBJFILE_MSYMBOLS (objfile, msym)
 	{
-	  const char *name = SYMBOL_LINKAGE_NAME (msym);
+	  const char *name = MSYMBOL_LINKAGE_NAME (msym);
 
 	  /* If the minimal symbols whose name are prefixed by "__imp_"
 	     or "_imp_", get rid of the prefix, and search the minimal
@@ -680,14 +680,15 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 		  || strncmp (name, "_imp_", 5) == 0))
 	    {
 	      const char *name1 = (name[1] == '_' ? &name[7] : &name[6]);
-	      struct minimal_symbol *found;
+	      struct bound_minimal_symbol found;
 
 	      found = lookup_minimal_symbol (name1, NULL, objfile);
 	      /* If found, there are symbols named "_imp_foo" and "foo"
 		 respectively in OBJFILE.  Set the type of symbol "foo"
 		 as 'mst_solib_trampoline'.  */
-	      if (found != NULL && MSYMBOL_TYPE (found) == mst_text)
-		MSYMBOL_TYPE (found) = mst_solib_trampoline;
+	      if (found.minsym != NULL
+		  && MSYMBOL_TYPE (found.minsym) == mst_text)
+		MSYMBOL_TYPE (found.minsym) = mst_solib_trampoline;
 	    }
 	}
     }
@@ -872,8 +873,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	     minsyms.  */
 	  int section = cs_to_section (cs, objfile);
 
-	  tmpaddr = cs->c_value + ANOFFSET (objfile->section_offsets,
-					    SECT_OFF_TEXT (objfile));
+	  tmpaddr = cs->c_value;
 	  record_minimal_symbol (cs, tmpaddr, mst_text,
 				 section, objfile);
 
@@ -975,6 +975,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 	    enum minimal_symbol_type ms_type;
 	    int sec;
+	    CORE_ADDR offset = 0;
 
 	    if (cs->c_secnum == N_UNDEF)
 	      {
@@ -1006,7 +1007,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
  		    || cs->c_sclass == C_THUMBEXTFUNC
  		    || cs->c_sclass == C_THUMBEXT
  		    || (pe_file && (cs->c_sclass == C_STAT)))
-		  tmpaddr += ANOFFSET (objfile->section_offsets, sec);
+		  offset = ANOFFSET (objfile->section_offsets, sec);
 
 		if (bfd_section->flags & SEC_CODE)
 		  {
@@ -1045,7 +1046,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 		sym = process_coff_symbol
 		  (cs, &main_aux, objfile);
-		SYMBOL_VALUE (sym) = tmpaddr;
+		SYMBOL_VALUE (sym) = tmpaddr + offset;
 		SYMBOL_SECTION (sym) = sec;
 	      }
 	  }

@@ -308,7 +308,7 @@ debug_qf_expand_symtabs_matching
 
 static struct symtab *
 debug_qf_find_pc_sect_symtab (struct objfile *objfile,
-			      struct minimal_symbol *msymbol,
+			      struct bound_minimal_symbol msymbol,
 			      CORE_ADDR pc,
 			      struct obj_section *section,
 			      int warn_if_readin)
@@ -320,7 +320,7 @@ debug_qf_find_pc_sect_symtab (struct objfile *objfile,
   fprintf_filtered (gdb_stdlog,
 		    "qf->find_pc_sect_symtab (%s, %s, %s, %s, %d)\n",
 		    debug_objfile_name (objfile),
-		    host_address_to_string (msymbol),
+		    host_address_to_string (msymbol.minsym),
 		    hex_string (pc),
 		    host_address_to_string (section),
 		    warn_if_readin);

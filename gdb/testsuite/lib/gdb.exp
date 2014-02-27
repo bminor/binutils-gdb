@@ -4621,6 +4621,7 @@ proc run_on_host { test program args } {
  	pass $test
  	return 0
     } else {
+	verbose -log "run_on_host failed: $output"
 	fail $test
 	return -1
     }

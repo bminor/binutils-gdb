@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998-2013 Free Software Foundation, Inc.
+   Copyright 1998-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2140,14 +2140,26 @@ static const bfd_vma elf32_arm_plt0_entry [] =
   0x00000000,		/* &GOT[0] - .          */
 };
 
-/* Subsequent entries in a procedure linkage table look like
-   this.  */
-static const bfd_vma elf32_arm_plt_entry [] =
+/* By default subsequent entries in a procedure linkage table look like
+   this. Offsets that don't fit into 28 bits will cause link error.  */
+static const bfd_vma elf32_arm_plt_entry_short [] =
 {
   0xe28fc600,		/* add   ip, pc, #0xNN00000 */
   0xe28cca00,		/* add	 ip, ip, #0xNN000   */
   0xe5bcf000,		/* ldr	 pc, [ip, #0xNNN]!  */
 };
+
+/* When explicitly asked, we'll use this "long" entry format
+   which can cope with arbitrary displacements.  */
+static const bfd_vma elf32_arm_plt_entry_long [] =
+{
+  0xe28fc200,           /* add   ip, pc, #0xN0000000 */
+  0xe28cc600,		/* add   ip, ip, #0xNN00000  */
+  0xe28cca00,		/* add	 ip, ip, #0xNN000    */
+  0xe5bcf000,		/* ldr	 pc, [ip, #0xNNN]!   */
+};
+
+static bfd_boolean elf32_arm_use_long_plt_entry = FALSE;
 
 #endif
 
@@ -3464,7 +3476,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->plt_entry_size = 16;
 #else
   ret->plt_header_size = 20;
-  ret->plt_entry_size = 12;
+  ret->plt_entry_size = elf32_arm_use_long_plt_entry ? 16 : 12;
 #endif
   ret->use_rel = 1;
   ret->obfd = abfd;
@@ -6027,6 +6039,15 @@ arm_make_glue_section (bfd * abfd, const char * name)
   return TRUE;
 }
 
+/* Set size of .plt entries.  This function is called from the
+   linker scripts in ld/emultempl/{armelf}.em.  */
+
+void
+bfd_elf32_arm_use_long_plt (void)
+{
+  elf32_arm_use_long_plt_entry = TRUE;
+}
+
 /* Add the glue sections to ABFD.  This function is called from the
    linker scripts in ld/emultempl/{armelf}.em.  */
 
@@ -7705,8 +7726,6 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	     of the PLT stub.  */
 	  got_displacement = got_address - (plt_address + 8);
 
-	  BFD_ASSERT ((got_displacement & 0xf0000000) == 0);
-
 	  if (elf32_arm_plt_needs_thumb_stub_p (info, arm_plt))
 	    {
 	      put_thumb_insn (htab, output_bfd,
@@ -7715,21 +7734,45 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 			      elf32_arm_plt_thumb_stub[1], ptr - 2);
 	    }
 
-	  put_arm_insn (htab, output_bfd,
-			elf32_arm_plt_entry[0]
-			| ((got_displacement & 0x0ff00000) >> 20),
-			ptr + 0);
-	  put_arm_insn (htab, output_bfd,
-			elf32_arm_plt_entry[1]
-			| ((got_displacement & 0x000ff000) >> 12),
-			ptr+ 4);
-	  put_arm_insn (htab, output_bfd,
-			elf32_arm_plt_entry[2]
-			| (got_displacement & 0x00000fff),
-			ptr + 8);
+	  if (!elf32_arm_use_long_plt_entry)
+	    {
+	      BFD_ASSERT ((got_displacement & 0xf0000000) == 0);
+
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry_short[0]
+			    | ((got_displacement & 0x0ff00000) >> 20),
+			    ptr + 0);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry_short[1]
+			    | ((got_displacement & 0x000ff000) >> 12),
+			    ptr+ 4);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry_short[2]
+			    | (got_displacement & 0x00000fff),
+			    ptr + 8);
 #ifdef FOUR_WORD_PLT
-	  bfd_put_32 (output_bfd, elf32_arm_plt_entry[3], ptr + 12);
+	      bfd_put_32 (output_bfd, elf32_arm_plt_entry_short[3], ptr + 12);
 #endif
+	    }
+	  else
+	    {
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry_long[0]
+			    | ((got_displacement & 0xf0000000) >> 28),
+			    ptr + 0);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry_long[1]
+			    | ((got_displacement & 0x0ff00000) >> 20),
+			    ptr + 4);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry_long[2]
+			    | ((got_displacement & 0x000ff000) >> 12),
+			    ptr+ 8);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry_long[3]
+			    | (got_displacement & 0x00000fff),
+			    ptr + 12);
+	    }
 	}
 
       /* Fill in the entry in the .rel(a).(i)plt section.  */

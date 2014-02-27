@@ -16923,6 +16923,9 @@ For this command to work, you must have used @code{symbol-file} or
 @kindex assf
 @item add-shared-symbol-files @var{library-file}
 @itemx assf @var{library-file}
+This command is deprecated and will be removed in future versions
+of @value{GDBN}.  Use the @code{sharedlibrary} command instead.
+
 The @code{add-shared-symbol-files} command can currently be used only
 in the Cygwin build of @value{GDBN} on MS-Windows OS, where it is an
 alias for the @code{dll-symbols} command (@pxref{Cygwin Native}).
@@ -19901,6 +19904,9 @@ This is a Cygwin-specific alias of @code{info shared}.
 
 @kindex dll-symbols
 @item dll-symbols
+This command is deprecated and will be removed in future versions
+of @value{GDBN}.  Use the @code{sharedlibrary} command instead.
+
 This command loads symbols from a dll similarly to
 add-sym command but without the need to specify a base address.
 
@@ -19998,13 +20004,7 @@ describes working with such symbols, known internally to @value{GDBN} as
 Note that before the debugged program has started execution, no DLLs
 will have been loaded.  The easiest way around this problem is simply to
 start the program --- either by setting a breakpoint or letting the
-program run once to completion.  It is also possible to force
-@value{GDBN} to load a particular DLL before starting the executable ---
-see the shared library information in @ref{Files}, or the
-@code{dll-symbols} command in @ref{Cygwin Native}.  Currently,
-explicitly loading symbols from a DLL with no debugging information will
-cause the symbol names to be duplicated in @value{GDBN}'s lookup table,
-which may adversely affect symbol lookup performance.
+program run once to completion.
 
 @subsubsection DLL Name Prefixes
 

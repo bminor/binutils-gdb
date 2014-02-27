@@ -21,16 +21,17 @@
 #include "frame.h"
 #include "symtab.h"
 #include "inferior.h"
+#include "objfiles.h"
 
 #include "sol2-tdep.h"
 
 CORE_ADDR
 sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol("elf_bndr", NULL, NULL);
-  if (msym && SYMBOL_VALUE_ADDRESS (msym) == pc)
+  if (msym.minsym && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 
   return 0;

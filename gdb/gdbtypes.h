@@ -1529,8 +1529,12 @@ extern struct type *lookup_function_type_with_arguments (struct type *,
 extern struct type *create_range_type (struct type *, struct type *, LONGEST,
 				       LONGEST);
 
+extern struct type *create_array_type_with_stride
+  (struct type *, struct type *, struct type *, unsigned int);
+
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);
+
 extern struct type *lookup_array_range_type (struct type *, LONGEST, LONGEST);
 
 extern struct type *create_string_type (struct type *, struct type *,

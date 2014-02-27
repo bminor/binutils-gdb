@@ -1,3 +1,34 @@
+2014-02-27  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Replace IMM0 with
+	FPIMM0 for fcmeq, fcmgt, fcmge, fcmlt and fcmle.
+
+2014-02-27  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (print_register_offset_address): Call
+	get_int_reg_name to prepare the register name.
+
+2014-02-25  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-opc.tbl: Remove wrong variant of vcvtps2ph
+	* i386-tbl.h: Regenerate.
+
+2014-02-20  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CPU_PREFETCHWT1_FLAGS/
+	(cpu_flags): Add CpuPREFETCHWT1.
+	* i386-init.h: Regenerate.
+	* i386-opc.h (CpuPREFETCHWT1): New.
+	(i386_cpu_flags): Add cpuprefetchwt1.
+	* i386-opc.tbl: Cahnge CPU of prefetchwt1 from CpuAVX512PF to CpuPREFETCHWT1.
+	* i386-tbl.h: Regenerate.
+
+2014-02-20  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-opc.tbl: Change CPU of vptestnmq, vptestnmd from CpuAVX512CD,
+	to CpuAVX512F.
+	* i386-tbl.h: Regenerate.
+
 2014-02-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (output_cpu_flags): Don't output trailing space.

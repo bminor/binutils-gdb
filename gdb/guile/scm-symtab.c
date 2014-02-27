@@ -184,7 +184,7 @@ stscm_make_symtab_smob (void)
 
   st_smob->symtab = NULL;
   st_scm = scm_new_smob (symtab_smob_tag, (scm_t_bits) st_smob);
-  gdbscm_init_eqable_gsmob (&st_smob->base);
+  gdbscm_init_eqable_gsmob (&st_smob->base, st_scm);
 
   return st_scm;
 }
@@ -226,7 +226,7 @@ stscm_scm_from_symtab (struct symtab *symtab)
   st_scm = stscm_make_symtab_smob ();
   st_smob = (symtab_smob *) SCM_SMOB_DATA (st_scm);
   st_smob->symtab = symtab;
-  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &st_smob->base, st_scm);
+  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &st_smob->base);
  
   return st_scm;
 }

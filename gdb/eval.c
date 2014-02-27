@@ -1113,7 +1113,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (value_as_long (target) == 0)
  	  return value_from_longest (long_type, 0);
 	
-	if (lookup_minimal_symbol ("objc_msg_lookup", 0, 0))
+	if (lookup_minimal_symbol ("objc_msg_lookup", 0, 0).minsym)
 	  gnu_runtime = 1;
 	
 	/* Find the method dispatch (Apple runtime) or method lookup

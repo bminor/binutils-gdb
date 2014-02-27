@@ -318,6 +318,7 @@ struct gdbarch
   gdbarch_insn_is_call_ftype *insn_is_call;
   gdbarch_insn_is_ret_ftype *insn_is_ret;
   gdbarch_insn_is_jump_ftype *insn_is_jump;
+  gdbarch_auxv_parse_ftype *auxv_parse;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -628,6 +629,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of insn_is_call, invalid_p == 0 */
   /* Skip verify of insn_is_ret, invalid_p == 0 */
   /* Skip verify of insn_is_jump, invalid_p == 0 */
+  /* Skip verify of auxv_parse, has predicate.  */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -690,6 +692,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: auto_wide_charset = <%s>\n",
                       host_address_to_string (gdbarch->auto_wide_charset));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_auxv_parse_p() = %d\n",
+                      gdbarch_auxv_parse_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: auxv_parse = <%s>\n",
+                      host_address_to_string (gdbarch->auxv_parse));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_ax_pseudo_register_collect_p() = %d\n",
                       gdbarch_ax_pseudo_register_collect_p (gdbarch));
@@ -4372,6 +4380,30 @@ set_gdbarch_insn_is_jump (struct gdbarch *gdbarch,
                           gdbarch_insn_is_jump_ftype insn_is_jump)
 {
   gdbarch->insn_is_jump = insn_is_jump;
+}
+
+int
+gdbarch_auxv_parse_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->auxv_parse != NULL;
+}
+
+int
+gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->auxv_parse != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_auxv_parse called\n");
+  return gdbarch->auxv_parse (gdbarch, readptr, endptr, typep, valp);
+}
+
+void
+set_gdbarch_auxv_parse (struct gdbarch *gdbarch,
+                        gdbarch_auxv_parse_ftype auxv_parse)
+{
+  gdbarch->auxv_parse = auxv_parse;
 }
 
 

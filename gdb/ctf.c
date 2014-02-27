@@ -28,6 +28,7 @@
 #include "completer.h"
 #include "inferior.h"
 #include "gdbthread.h"
+#include "tracefile.h"
 
 #include <ctype.h>
 
@@ -1464,49 +1465,14 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 
       /* Restore the position.  */
       bt_iter_set_pos (bt_ctf_get_iter (ctf_iter), pos);
-    }
 
-  /* It's unduly pedantic to refuse to look at the executable for
-     read-only pieces; so do the equivalent of readonly regions aka
-     QTro packet.  */
-  if (exec_bfd != NULL)
+      return exec_read_partial_read_only (readbuf, offset, len, xfered_len);
+    }
+  else
     {
-      asection *s;
-      bfd_size_type size;
-      bfd_vma vma;
-
-      for (s = exec_bfd->sections; s; s = s->next)
-	{
-	  if ((s->flags & SEC_LOAD) == 0
-	      || (s->flags & SEC_READONLY) == 0)
-	    continue;
-
-	  vma = s->vma;
-	  size = bfd_get_section_size (s);
-	  if (vma <= offset && offset < (vma + size))
-	    {
-	      ULONGEST amt;
-
-	      amt = (vma + size) - offset;
-	      if (amt > len)
-		amt = len;
-
-	      amt = bfd_get_section_contents (exec_bfd, s,
-					      readbuf, offset - vma, amt);
-
-	      if (amt == 0)
-		return TARGET_XFER_EOF;
-	      else
-		{
-		  *xfered_len = amt;
-		  return TARGET_XFER_OK;
-		}
-	    }
-	}
+      /* Fallback to reading from read-only sections.  */
+      return section_table_read_available_memory (readbuf, offset, len, xfered_len);
     }
-
-  /* Indicate failure to find the requested memory block.  */
-  return TARGET_XFER_E_IO;
 }
 
 /* This is the implementation of target_ops method
@@ -1733,35 +1699,6 @@ ctf_trace_find (struct target_ops *self, enum trace_find_type type, int num,
   return -1;
 }
 
-/* This is the implementation of target_ops method to_has_stack.
-   The target has a stack when GDB has already selected one trace
-   frame.  */
-
-static int
-ctf_has_stack (struct target_ops *ops)
-{
-  return get_traceframe_number () != -1;
-}
-
-/* This is the implementation of target_ops method to_has_registers.
-   The target has registers when GDB has already selected one trace
-   frame.  */
-
-static int
-ctf_has_registers (struct target_ops *ops)
-{
-  return get_traceframe_number () != -1;
-}
-
-/* This is the implementation of target_ops method to_thread_alive.
-   CTF trace data has one thread faked by GDB.  */
-
-static int
-ctf_thread_alive (struct target_ops *ops, ptid_t ptid)
-{
-  return 1;
-}
-
 /* This is the implementation of target_ops method to_traceframe_info.
    Iterate the events whose name is "memory", in current
    frame, extract memory range information, and return them in
@@ -1834,23 +1771,12 @@ ctf_traceframe_info (struct target_ops *self)
   return info;
 }
 
-/* This is the implementation of target_ops method to_get_trace_status.
-   The trace status for a file is that tracing can never be run.  */
-
-static int
-ctf_get_trace_status (struct target_ops *self, struct trace_status *ts)
-{
-  /* Other bits of trace status were collected as part of opening the
-     trace files, so nothing to do here.  */
-
-  return -1;
-}
-
 static void
 init_ctf_ops (void)
 {
   memset (&ctf_ops, 0, sizeof (ctf_ops));
 
+  init_tracefile_ops (&ctf_ops);
   ctf_ops.to_shortname = "ctf";
   ctf_ops.to_longname = "CTF file";
   ctf_ops.to_doc = "Use a CTF directory as a target.\n\
@@ -1860,16 +1786,10 @@ Specify the filename of the CTF directory.";
   ctf_ops.to_fetch_registers = ctf_fetch_registers;
   ctf_ops.to_xfer_partial = ctf_xfer_partial;
   ctf_ops.to_files_info = ctf_files_info;
-  ctf_ops.to_get_trace_status = ctf_get_trace_status;
   ctf_ops.to_trace_find = ctf_trace_find;
   ctf_ops.to_get_trace_state_variable_value
     = ctf_get_trace_state_variable_value;
-  ctf_ops.to_stratum = process_stratum;
-  ctf_ops.to_has_stack = ctf_has_stack;
-  ctf_ops.to_has_registers = ctf_has_registers;
   ctf_ops.to_traceframe_info = ctf_traceframe_info;
-  ctf_ops.to_thread_alive = ctf_thread_alive;
-  ctf_ops.to_magic = OPS_MAGIC;
 }
 
 #endif

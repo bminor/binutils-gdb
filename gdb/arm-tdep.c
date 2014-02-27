@@ -472,10 +472,10 @@ skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
 
   msym = lookup_minimal_symbol_by_pc (pc);
   if (msym.minsym != NULL
-      && SYMBOL_VALUE_ADDRESS (msym.minsym) == pc
-      && SYMBOL_LINKAGE_NAME (msym.minsym) != NULL)
+      && BMSYMBOL_VALUE_ADDRESS (msym) == pc
+      && MSYMBOL_LINKAGE_NAME (msym.minsym) != NULL)
     {
-      const char *name = SYMBOL_LINKAGE_NAME (msym.minsym);
+      const char *name = MSYMBOL_LINKAGE_NAME (msym.minsym);
 
       /* The GNU linker's Thumb call stub to foo is named
 	 __foo_from_thumb.  */
@@ -1300,7 +1300,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
      instruction sequence is not for stack protector.  If symbol is
      removed, we conservatively think this sequence is for stack protector.  */
   if (stack_chk_guard.minsym
-      && strncmp (SYMBOL_LINKAGE_NAME (stack_chk_guard.minsym),
+      && strncmp (MSYMBOL_LINKAGE_NAME (stack_chk_guard.minsym),
 		  "__stack_chk_guard",
 		  strlen ("__stack_chk_guard")) != 0)
    return pc;
@@ -9263,7 +9263,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
     {
       char *target_name;
       int target_len = namelen - 2;
-      struct minimal_symbol *minsym;
+      struct bound_minimal_symbol minsym;
       struct objfile *objfile;
       struct obj_section *sec;
 
@@ -9279,8 +9279,8 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
       sec = find_pc_section (pc);
       objfile = (sec == NULL) ? NULL : sec->objfile;
       minsym = lookup_minimal_symbol (target_name, NULL, objfile);
-      if (minsym != NULL)
-	return SYMBOL_VALUE_ADDRESS (minsym);
+      if (minsym.minsym != NULL)
+	return BMSYMBOL_VALUE_ADDRESS (minsym);
       else
 	return 0;
     }

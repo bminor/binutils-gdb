@@ -281,13 +281,13 @@ static CORE_ADDR debug_base;	/* Base of dynamic linker structures.  */
 static CORE_ADDR
 locate_base (void)
 {
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
   CORE_ADDR address = 0;
 
   msymbol = lookup_minimal_symbol (DEBUG_BASE, NULL, symfile_objfile);
-  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+  if ((msymbol.minsym != NULL) && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
     {
-      address = SYMBOL_VALUE_ADDRESS (msymbol);
+      address = BMSYMBOL_VALUE_ADDRESS (msymbol);
     }
   return (address);
 }

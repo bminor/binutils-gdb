@@ -213,23 +213,21 @@ enum target_xfer_status
   /* No further transfer is possible.  */
   TARGET_XFER_EOF = 0,
 
+  /* The piece of the object requested is unavailable.  */
+  TARGET_XFER_UNAVAILABLE = 2,
+
   /* Generic I/O error.  Note that it's important that this is '-1',
      as we still have target_xfer-related code returning hardcoded
      '-1' on error.  */
   TARGET_XFER_E_IO = -1,
 
-  /* Transfer failed because the piece of the object requested is
-     unavailable.  */
-  TARGET_XFER_E_UNAVAILABLE = -2,
-
-  /* Keep list in sync with target_xfer_error_to_string.  */
+  /* Keep list in sync with target_xfer_status_to_string.  */
 };
 
-#define TARGET_XFER_STATUS_ERROR_P(STATUS) ((STATUS) < TARGET_XFER_EOF)
+/* Return the string form of STATUS.  */
 
-/* Return the string form of ERR.  */
-
-extern const char *target_xfer_status_to_string (enum target_xfer_status err);
+extern const char *
+  target_xfer_status_to_string (enum target_xfer_status status);
 
 /* Enumeration of the kinds of traceframe searches that a target may
    be able to perform.  */
@@ -423,32 +421,6 @@ struct target_ops
     void (*to_prepare_to_store) (struct target_ops *, struct regcache *)
       TARGET_DEFAULT_NORETURN (noprocess ());
 
-    /* Transfer LEN bytes of memory between GDB address MYADDR and
-       target address MEMADDR.  If WRITE, transfer them to the target, else
-       transfer them from the target.  TARGET is the target from which we
-       get this function.
-
-       Return value, N, is one of the following:
-
-       0 means that we can't handle this.  If errno has been set, it is the
-       error which prevented us from doing it (FIXME: What about bfd_error?).
-
-       positive (call it N) means that we have transferred N bytes
-       starting at MEMADDR.  We might be able to handle more bytes
-       beyond this length, but no promises.
-
-       negative (call its absolute value N) means that we cannot
-       transfer right at MEMADDR, but we could transfer at least
-       something at MEMADDR + N.
-
-       NOTE: cagney/2004-10-01: This has been entirely superseeded by
-       to_xfer_partial and inferior inheritance.  */
-
-    int (*deprecated_xfer_memory) (CORE_ADDR memaddr, gdb_byte *myaddr,
-				   int len, int write,
-				   struct mem_attrib *attrib,
-				   struct target_ops *target);
-
     void (*to_files_info) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     int (*to_insert_breakpoint) (struct target_ops *, struct gdbarch *,
@@ -629,7 +601,7 @@ struct target_ops
        'enum target_xfer_status' value).  Save the number of bytes
        actually transferred in *XFERED_LEN if transfer is successful
        (TARGET_XFER_OK) or the number unavailable bytes if the requested
-       data is unavailable (TARGET_XFER_E_UNAVAILABLE).  *XFERED_LEN
+       data is unavailable (TARGET_XFER_UNAVAILABLE).  *XFERED_LEN
        smaller than LEN does not indicate the end of the object, only
        the end of the transfer; higher level code should continue
        transferring if desired.  This is handled in target.c.
@@ -974,20 +946,11 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Return a traceframe info object describing the current
-       traceframe's contents.  If the target doesn't support
-       traceframe info, return NULL.  If the current traceframe is not
-       selected (the current traceframe number is -1), the target can
-       choose to return either NULL or an empty traceframe info.  If
-       NULL is returned, for example in remote target, GDB will read
-       from the live inferior.  If an empty traceframe info is
-       returned, for example in tfile target, which means the
-       traceframe info is available, but the requested memory is not
-       available in it.  GDB will try to see if the requested memory
-       is available in the read-only sections.  This method should not
-       cache data; higher layers take care of caching, invalidating,
-       and re-fetching when necessary.  */
+       traceframe's contents.  This method should not cache data;
+       higher layers take care of caching, invalidating, and
+       re-fetching when necessary.  */
     struct traceframe_info *(*to_traceframe_info) (struct target_ops *)
-      TARGET_DEFAULT_RETURN (NULL);
+       TARGET_DEFAULT_RETURN (NULL);
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */
@@ -2197,9 +2160,6 @@ extern void update_target_permissions (void);
 
 
 /* Imported from machine dependent code.  */
-
-/* Blank target vector entries are initialized to target_ignore.  */
-void target_ignore (void);
 
 /* See to_supports_btrace in struct target_ops.  */
 #define target_supports_btrace() \

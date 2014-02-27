@@ -148,13 +148,13 @@ gdbscm_init_chained_gsmob (chained_gdb_smob *base)
 
 /* Initialize an eqable_gdb_smob.
    This is the same as gdbscm_init_gsmob except that it also sets
-   containing_scm to #f.  */
+   BASE->containing_scm to CONTAINING_SCM.  */
 
 void
-gdbscm_init_eqable_gsmob (eqable_gdb_smob *base)
+gdbscm_init_eqable_gsmob (eqable_gdb_smob *base, SCM containing_scm)
 {
   gdbscm_init_gsmob ((gdb_smob *) base);
-  base->containing_scm = SCM_BOOL_F;
+  base->containing_scm = containing_scm;
 }
 
 /* Call this from each smob's "mark" routine.
@@ -419,16 +419,13 @@ gdbscm_find_eqable_gsmob_ptr_slot (htab_t htab, eqable_gdb_smob *base)
   return (eqable_gdb_smob **) slot;
 }
 
-/* Record CONTAINING_SCM as the object containing BASE, and record it in
-   SLOT.  SLOT must be the result of calling gdbscm_find_eqable_gsmob_ptr_slot
-   on BASE (or equivalent for lookup).  */
+/* Record BASE in SLOT.  SLOT must be the result of calling
+   gdbscm_find_eqable_gsmob_ptr_slot on BASE (or equivalent for lookup).  */
 
 void
 gdbscm_fill_eqable_gsmob_ptr_slot (eqable_gdb_smob **slot,
-				   eqable_gdb_smob *base,
-				   SCM containing_scm)
+				   eqable_gdb_smob *base)
 {
-  base->containing_scm = containing_scm;
   *slot = base;
 }
 

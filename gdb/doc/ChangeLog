@@ -1,3 +1,20 @@
+2014-02-26  Ludovic Courtès  <ludo@gnu.org>
+
+	* gdb/doc/guile.texi (Basic Guile): Document 'history-append!'.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Files): Document "add-shared-symbol-files"
+	and "assf" as being deprecated.
+	(Cygwin Native): Likewise for "dll-symbols".
+	(Non-debug DLL Symbols): Remove reference to "dll-symbols"
+	as a way to force the loading of symbols from a DLL.
+
+2014-02-19  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python.texi (Values From Inferior): Add description about the
+	new feature.
+
 2014-02-17  Doug Evans  <xdje42@gmail.com>
 
 	* Makefile.in (GDB_DOC_FILES): Add python.texi.

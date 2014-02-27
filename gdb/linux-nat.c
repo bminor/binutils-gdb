@@ -67,6 +67,7 @@
 #include "buffer.h"
 #include "target-descriptions.h"
 #include "filestuff.h"
+#include "objfiles.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -847,31 +848,6 @@ static int linux_thread_alive (ptid_t ptid);
 static char *linux_child_pid_to_exec_file (struct target_ops *self, int pid);
 
 
-/* Convert wait status STATUS to a string.  Used for printing debug
-   messages only.  */
-
-static char *
-status_to_str (int status)
-{
-  static char buf[64];
-
-  if (WIFSTOPPED (status))
-    {
-      if (WSTOPSIG (status) == SYSCALL_SIGTRAP)
-	snprintf (buf, sizeof (buf), "%s (stopped at syscall)",
-		  strsignal (SIGTRAP));
-      else
-	snprintf (buf, sizeof (buf), "%s (stopped)",
-		  strsignal (WSTOPSIG (status)));
-    }
-  else if (WIFSIGNALED (status))
-    snprintf (buf, sizeof (buf), "%s (terminated)",
-	      strsignal (WTERMSIG (status)));
-  else
-    snprintf (buf, sizeof (buf), "%d (exited)", WEXITSTATUS (status));
-
-  return buf;
-}
 
 /* Destroy and free LP.  */
 
@@ -5031,14 +5007,14 @@ Enables printf debugging output."),
 static int
 get_signo (const char *name)
 {
-  struct minimal_symbol *ms;
+  struct bound_minimal_symbol ms;
   int signo;
 
   ms = lookup_minimal_symbol (name, NULL, NULL);
-  if (ms == NULL)
+  if (ms.minsym == NULL)
     return 0;
 
-  if (target_read_memory (SYMBOL_VALUE_ADDRESS (ms), (gdb_byte *) &signo,
+  if (target_read_memory (BMSYMBOL_VALUE_ADDRESS (ms), (gdb_byte *) &signo,
 			  sizeof (signo)) != 0)
     return 0;
 

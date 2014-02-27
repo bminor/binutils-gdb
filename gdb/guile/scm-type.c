@@ -283,7 +283,7 @@ tyscm_make_type_smob (void)
   t_smob->type = NULL;
 
   t_scm = scm_new_smob (type_smob_tag, (scm_t_bits) t_smob);
-  gdbscm_init_eqable_gsmob (&t_smob->base);
+  gdbscm_init_eqable_gsmob (&t_smob->base, t_scm);
 
   return t_scm;
 }
@@ -326,7 +326,7 @@ tyscm_scm_from_type (struct type *type)
   t_scm = tyscm_make_type_smob ();
   t_smob = (type_smob *) SCM_SMOB_DATA (t_scm);
   t_smob->type = type;
-  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &t_smob->base, t_scm);
+  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &t_smob->base);
 
   return t_scm;
 }

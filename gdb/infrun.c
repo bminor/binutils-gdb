@@ -7092,20 +7092,6 @@ discard_infcall_control_state (struct infcall_control_state *inf_status)
   xfree (inf_status);
 }
 
-int
-ptid_match (ptid_t ptid, ptid_t filter)
-{
-  if (ptid_equal (filter, minus_one_ptid))
-    return 1;
-  if (ptid_is_pid (filter)
-      && ptid_get_pid (ptid) == ptid_get_pid (filter))
-    return 1;
-  else if (ptid_equal (ptid, filter))
-    return 1;
-
-  return 0;
-}
-
 /* restore_inferior_ptid() will be used by the cleanup machinery
    to restore the inferior_ptid value saved in a call to
    save_inferior_ptid().  */

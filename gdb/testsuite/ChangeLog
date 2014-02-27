@@ -1,3 +1,95 @@
+2014-02-26  Ludovic Courtès  <ludo@gnu.org>
+
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Add
+	test for 'history-append!'.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-abs-hi-pc-hello-dbg.S: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc-hello.c: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc-world-dbg.S: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc-world.c: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc.c: New file.
+	* gdb.dwarf2/dw2-abs-hi-pc.exp: New file.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* testsuite/gdb.python/py-pp-re-notag.c: New file.
+	* testsuite/gdb.python/py-pp-re-notag.ex: New file.
+	* testsuite/gdb.python/py-pp-re-notag.p: New file.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/arr-subrange.c, gdb.dwarf2/arr-subrange.exp: New files.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/arr-stride.c: New file.
+	* gdb.dwarf2/arr-stride.exp: New file.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* gdb.ada/tasks.exp: Set a task-specific breakpoint at break_me
+	that won't ever trigger.  Make sure that GDB reports the correct
+	breakpoint that caused the stop.
+
+2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/16626
+	* gdb.base/auto-load-script: New file.
+	* gdb.base/auto-load.c: New file.
+	* gdb.base/auto-load.exp: New file.
+
+	PR gdb/16626
+	* gdb.base/auto-load.exp: Fix out-of-srctree run.
+
+2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix dw2-icycle.exp -fsanitize=address GDB crash.
+	* gdb.dwarf2/dw2-icycle.S: Remove all DW_AT_sibling.
+
+2014-02-24  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (run_on_host): Log error output if program fails.
+
+2014-02-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-after-sr-lock.c: Rename to ...
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.c: ... this.
+	* gdb.threads/step-after-sr-lock.exp: Rename to ...
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	... this.
+
+2014-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR tdep/16397
+	* gdb.arch/amd64-stap-special-operands.exp: New file.
+	* gdb.arch/amd64-stap-three-arg-disp.S: Likewise.
+	* gdb.arch/amd64-stap-three-arg-disp.c: Likewise.
+	* gdb.arch/amd64-stap-triplet.S: Likewise.
+	* gdb.arch/amd64-stap-triplet.c: Likewise.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-icycle.S: Remove second and third parameters
+	in .section pseudo-op.
+
+2014-02-20  lin zuojian  <manjian2006@gmail.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/16581
+	* gdb.dwarf2/dw2-icycle.S: New file.
+	* gdb.dwarf2/dw2-icycle.c: New file.
+	* gdb.dwarf2/dw2-icycle.exp: New file.
+
+2014-02-19  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-value-cc.cc: Improve test case to enable testing
+	operations on gdb.Value objects.
+	* gdb.python/py-value-cc.exp: Add new test to test operations on
+	gdb.Value objects.
+
 2014-02-18  Doug Evans  <dje@google.com>
 
 	* Makefile.in (TESTS): New variable.

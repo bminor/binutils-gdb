@@ -1168,17 +1168,17 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 					    SYMBOL_LINKAGE_NAME (sym))
 	     != SYMBOL_LINKAGE_NAME (sym))
 	{
-	  struct minimal_symbol *msym;
+	  struct bound_minimal_symbol msym;
 
 	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym),
 					NULL, objfile);
-	  if (msym != NULL)
+	  if (msym.minsym != NULL)
 	    {
 	      const char *new_name = gdbarch_static_transform_name
 		(gdbarch, SYMBOL_LINKAGE_NAME (sym));
 
 	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
-	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
+	      SYMBOL_VALUE_ADDRESS (sym) = BMSYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -1360,17 +1360,17 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 					    SYMBOL_LINKAGE_NAME (sym))
 	     != SYMBOL_LINKAGE_NAME (sym))
 	{
-	  struct minimal_symbol *msym;
+	  struct bound_minimal_symbol msym;
 
 	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym), 
 					NULL, objfile);
-	  if (msym != NULL)
+	  if (msym.minsym != NULL)
 	    {
 	      const char *new_name = gdbarch_static_transform_name
 		(gdbarch, SYMBOL_LINKAGE_NAME (sym));
 
 	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
-	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
+	      SYMBOL_VALUE_ADDRESS (sym) = BMSYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -4654,11 +4654,11 @@ scan_file_globals (struct objfile *objfile)
 	  /* Get the hash index and check all the symbols
 	     under that hash index.  */
 
-	  hash = hashname (SYMBOL_LINKAGE_NAME (msymbol));
+	  hash = hashname (MSYMBOL_LINKAGE_NAME (msymbol));
 
 	  for (sym = global_sym_chain[hash]; sym;)
 	    {
-	      if (strcmp (SYMBOL_LINKAGE_NAME (msymbol),
+	      if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
 			  SYMBOL_LINKAGE_NAME (sym)) == 0)
 		{
 		  /* Splice this symbol out of the hash chain and
@@ -4680,14 +4680,15 @@ scan_file_globals (struct objfile *objfile)
 		      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
 			{
 			  fix_common_block (sym,
-					    SYMBOL_VALUE_ADDRESS (msymbol));
+					    MSYMBOL_VALUE_ADDRESS (resolve_objfile,
+								   msymbol));
 			}
 		      else
 			{
 			  SYMBOL_VALUE_ADDRESS (sym)
-			    = SYMBOL_VALUE_ADDRESS (msymbol);
+			    = MSYMBOL_VALUE_ADDRESS (resolve_objfile, msymbol);
 			}
-		      SYMBOL_SECTION (sym) = SYMBOL_SECTION (msymbol);
+		      SYMBOL_SECTION (sym) = MSYMBOL_SECTION (msymbol);
 		    }
 
 		  if (prev)

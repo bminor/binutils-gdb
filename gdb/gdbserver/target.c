@@ -34,7 +34,7 @@ set_desired_inferior (int use_general)
     found = find_thread_ptid (cont_thread);
 
   if (found == NULL)
-    current_inferior = (struct thread_info *) all_threads.head;
+    current_inferior = get_first_thread ();
   else
     current_inferior = found;
 }

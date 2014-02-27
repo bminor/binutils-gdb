@@ -41,6 +41,7 @@
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
 #include "linespec.h"
+#include "objfiles.h"
 
 #include "valprint.h"
 #include "c-lang.h"
@@ -712,14 +713,14 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 
     case LOC_UNRESOLVED:
       {
-	struct minimal_symbol *msym
+	struct bound_minimal_symbol msym
 	  = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
 
-	if (!msym)
+	if (!msym.minsym)
 	  error (_("Couldn't resolve symbol `%s'."), SYMBOL_PRINT_NAME (var));
 
 	/* Push the address of the variable.  */
-	ax_const_l (ax, SYMBOL_VALUE_ADDRESS (msym));
+	ax_const_l (ax, BMSYMBOL_VALUE_ADDRESS (msym));
 	value->kind = axs_lvalue_memory;
       }
       break;

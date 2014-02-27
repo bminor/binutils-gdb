@@ -355,8 +355,8 @@ amd64_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  call_dest = pc + 5 + extract_signed_integer (buf, 4, byte_order);
  	  s = lookup_minimal_symbol_by_pc (call_dest);
  	  if (s.minsym != NULL
- 	      && SYMBOL_LINKAGE_NAME (s.minsym) != NULL
- 	      && strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "__main") == 0)
+ 	      && MSYMBOL_LINKAGE_NAME (s.minsym) != NULL
+ 	      && strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "__main") == 0)
  	    pc += 5;
  	}
     }
@@ -1144,7 +1144,7 @@ amd64_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	= (indirect_addr
 	   ? lookup_minimal_symbol_by_pc (indirect_addr).minsym
 	   : NULL);
-      const char *symname = indsym ? SYMBOL_LINKAGE_NAME (indsym) : NULL;
+      const char *symname = indsym ? MSYMBOL_LINKAGE_NAME (indsym) : NULL;
 
       if (symname)
 	{

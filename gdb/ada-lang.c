@@ -894,7 +894,7 @@ enum language
 ada_update_initial_language (enum language lang)
 {
   if (lookup_minimal_symbol ("adainit", (const char *) NULL,
-                             (struct objfile *) NULL) != NULL)
+                             (struct objfile *) NULL).minsym != NULL)
     return language_ada;
 
   return lang;
@@ -907,7 +907,7 @@ ada_update_initial_language (enum language lang)
 char *
 ada_main_name (void)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   static char *main_program_name = NULL;
 
   /* For Ada, the name of the main procedure is stored in a specific
@@ -917,12 +917,12 @@ ada_main_name (void)
      in Ada.  */
   msym = lookup_minimal_symbol (ADA_MAIN_PROGRAM_SYMBOL_NAME, NULL, NULL);
 
-  if (msym != NULL)
+  if (msym.minsym != NULL)
     {
       CORE_ADDR main_program_name_addr;
       int err_code;
 
-      main_program_name_addr = SYMBOL_VALUE_ADDRESS (msym);
+      main_program_name_addr = BMSYMBOL_VALUE_ADDRESS (msym);
       if (main_program_name_addr == 0)
         error (_("Invalid address for Ada main program name."));
 
@@ -4661,7 +4661,7 @@ ada_lookup_simple_minsym (const char *name)
 
   ALL_MSYMBOLS (objfile, msymbol)
   {
-    if (match_name (SYMBOL_LINKAGE_NAME (msymbol), name, wild_match_p)
+    if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), name, wild_match_p)
         && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
       {
 	result.minsym = msymbol;
@@ -6182,7 +6182,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   ALL_MSYMBOLS (objfile, msymbol)
   {
     QUIT;
-    symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (msymbol),
+    symbol_completion_add (&completions, MSYMBOL_LINKAGE_NAME (msymbol),
 			   text, text_len, text0, word, wild_match_p,
 			   encoded_p);
   }
@@ -11317,10 +11317,10 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 	 the name of the exception being raised (this name is printed in
 	 the catchpoint message, and is also used when trying to catch
 	 a specific exception).  We do not handle this case for now.  */
-      struct minimal_symbol *msym
+      struct bound_minimal_symbol msym
 	= lookup_minimal_symbol (einfo->catch_exception_sym, NULL, NULL);
 
-      if (msym && MSYMBOL_TYPE (msym) != mst_solib_trampoline)
+      if (msym.minsym && MSYMBOL_TYPE (msym.minsym) != mst_solib_trampoline)
 	error (_("Your Ada runtime appears to be missing some debugging "
 		 "information.\nCannot insert Ada exception catchpoint "
 		 "in this configuration."));
@@ -12673,7 +12673,7 @@ ada_add_standard_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 	  if (msymbol.minsym != NULL)
 	    {
 	      struct ada_exc_info info
-		= {standard_exc[i], SYMBOL_VALUE_ADDRESS (msymbol.minsym)};
+		= {standard_exc[i], BMSYMBOL_VALUE_ADDRESS (msymbol)};
 
 	      VEC_safe_push (ada_exc_info, *exceptions, &info);
 	    }

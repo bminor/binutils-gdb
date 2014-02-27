@@ -836,6 +836,7 @@ static void
 read_symbols (struct objfile *objfile, int add_flags)
 {
   (*objfile->sf->sym_read) (objfile, add_flags);
+  objfile->per_bfd->minsyms_read = 1;
 
   /* find_separate_debug_file_in_section should be called only if there is
      single binary with no existing separate debug info file.  */
@@ -2608,12 +2609,6 @@ reread_symbols (void)
 	  objfile->psymtabs_addrmap = NULL;
 	  objfile->free_psymtabs = NULL;
 	  objfile->template_symbols = NULL;
-	  objfile->msymbols = NULL;
-	  objfile->minimal_symbol_count = 0;
-	  memset (&objfile->msymbol_hash, 0,
-		  sizeof (objfile->msymbol_hash));
-	  memset (&objfile->msymbol_demangled_hash, 0,
-		  sizeof (objfile->msymbol_demangled_hash));
 
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
@@ -3532,7 +3527,7 @@ read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr,
 static int
 simple_read_overlay_table (void)
 {
-  struct minimal_symbol *novlys_msym;
+  struct bound_minimal_symbol novlys_msym;
   struct bound_minimal_symbol ovly_table_msym;
   struct gdbarch *gdbarch;
   int word_size;
@@ -3540,7 +3535,7 @@ simple_read_overlay_table (void)
 
   simple_free_overlay_table ();
   novlys_msym = lookup_minimal_symbol ("_novlys", NULL, NULL);
-  if (! novlys_msym)
+  if (! novlys_msym.minsym)
     {
       error (_("Error reading inferior's overlay table: "
              "couldn't find `_novlys' variable\n"
@@ -3561,11 +3556,11 @@ simple_read_overlay_table (void)
   word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   byte_order = gdbarch_byte_order (gdbarch);
 
-  cache_novlys = read_memory_integer (SYMBOL_VALUE_ADDRESS (novlys_msym),
+  cache_novlys = read_memory_integer (BMSYMBOL_VALUE_ADDRESS (novlys_msym),
 				      4, byte_order);
   cache_ovly_table
     = (void *) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
-  cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym.minsym);
+  cache_ovly_table_base = BMSYMBOL_VALUE_ADDRESS (ovly_table_msym);
   read_target_long_array (cache_ovly_table_base,
                           (unsigned int *) cache_ovly_table,
                           cache_novlys * 4, word_size, byte_order);
@@ -3633,15 +3628,15 @@ simple_overlay_update (struct obj_section *osect)
       {
 	/* Does its cached location match what's currently in the
 	   symtab?  */
-	struct minimal_symbol *minsym
+	struct bound_minimal_symbol minsym
 	  = lookup_minimal_symbol ("_ovly_table", NULL, NULL);
 
-	if (minsym == NULL)
+	if (minsym.minsym == NULL)
 	  error (_("Error reading inferior's overlay table: couldn't "
 		   "find `_ovly_table' array\n"
 		   "in inferior.  Use `overlay manual' mode."));
 	
-	if (cache_ovly_table_base == SYMBOL_VALUE_ADDRESS (minsym))
+	if (cache_ovly_table_base == BMSYMBOL_VALUE_ADDRESS (minsym))
 	  /* Then go ahead and try to look up this single section in
 	     the cache.  */
 	  if (simple_overlay_update_1 (osect))

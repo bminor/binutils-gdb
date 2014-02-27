@@ -7002,6 +7002,32 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 62 95 50 77 b2 00 04 00 00 	vpermi2pd 0x400\(%rdx\)\{1to8\},%zmm29,%zmm30
 [ 	]*[a-f0-9]+:	62 62 95 50 77 72 80 	vpermi2pd -0x400\(%rdx\)\{1to8\},%zmm29,%zmm30
 [ 	]*[a-f0-9]+:	62 62 95 50 77 b2 f8 fb ff ff 	vpermi2pd -0x408\(%rdx\)\{1to8\},%zmm29,%zmm30
+[ 	]*[a-f0-9]+:	62 92 16 40 27 ec    	vptestnmd %zmm28,%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 92 16 47 27 ec    	vptestnmd %zmm28,%zmm29,%k5\{%k7\}
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 29    	vptestnmd \(%rcx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 b2 16 40 27 ac f0 23 01 00 00 	vptestnmd 0x123\(%rax,%r14,8\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 29    	vptestnmd \(%rcx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 6a 7f 	vptestnmd 0x1fc0\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 aa 00 20 00 00 	vptestnmd 0x2000\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 6a 80 	vptestnmd -0x2000\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 aa c0 df ff ff 	vptestnmd -0x2040\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 6a 7f 	vptestnmd 0x1fc\(%rdx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 aa 00 02 00 00 	vptestnmd 0x200\(%rdx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 6a 80 	vptestnmd -0x200\(%rdx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 aa fc fd ff ff 	vptestnmd -0x204\(%rdx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 92 96 40 27 ec    	vptestnmq %zmm28,%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 92 96 47 27 ec    	vptestnmq %zmm28,%zmm29,%k5\{%k7\}
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 29    	vptestnmq \(%rcx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 b2 96 40 27 ac f0 23 01 00 00 	vptestnmq 0x123\(%rax,%r14,8\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 29    	vptestnmq \(%rcx\)\{1to8\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 6a 7f 	vptestnmq 0x1fc0\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 aa 00 20 00 00 	vptestnmq 0x2000\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 6a 80 	vptestnmq -0x2000\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 aa c0 df ff ff 	vptestnmq -0x2040\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 6a 7f 	vptestnmq 0x3f8\(%rdx\)\{1to8\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 aa 00 04 00 00 	vptestnmq 0x400\(%rdx\)\{1to8\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 6a 80 	vptestnmq -0x400\(%rdx\)\{1to8\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 aa f8 fb ff ff 	vptestnmq -0x408\(%rdx\)\{1to8\},%zmm29,%k5
 [ 	]*[a-f0-9]+:	62 01 95 40 58 f4    	vaddpd %zmm28,%zmm29,%zmm30
 [ 	]*[a-f0-9]+:	62 01 95 47 58 f4    	vaddpd %zmm28,%zmm29,%zmm30\{%k7\}
 [ 	]*[a-f0-9]+:	62 01 95 c7 58 f4    	vaddpd %zmm28,%zmm29,%zmm30\{%k7\}\{z\}
@@ -13996,4 +14022,30 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 62 95 50 77 b2 00 04 00 00 	vpermi2pd 0x400\(%rdx\)\{1to8\},%zmm29,%zmm30
 [ 	]*[a-f0-9]+:	62 62 95 50 77 72 80 	vpermi2pd -0x400\(%rdx\)\{1to8\},%zmm29,%zmm30
 [ 	]*[a-f0-9]+:	62 62 95 50 77 b2 f8 fb ff ff 	vpermi2pd -0x408\(%rdx\)\{1to8\},%zmm29,%zmm30
+[ 	]*[a-f0-9]+:	62 92 16 40 27 ec    	vptestnmd %zmm28,%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 92 16 47 27 ec    	vptestnmd %zmm28,%zmm29,%k5\{%k7\}
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 29    	vptestnmd \(%rcx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 b2 16 40 27 ac f0 34 12 00 00 	vptestnmd 0x1234\(%rax,%r14,8\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 29    	vptestnmd \(%rcx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 6a 7f 	vptestnmd 0x1fc0\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 aa 00 20 00 00 	vptestnmd 0x2000\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 6a 80 	vptestnmd -0x2000\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 40 27 aa c0 df ff ff 	vptestnmd -0x2040\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 6a 7f 	vptestnmd 0x1fc\(%rdx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 aa 00 02 00 00 	vptestnmd 0x200\(%rdx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 6a 80 	vptestnmd -0x200\(%rdx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 16 50 27 aa fc fd ff ff 	vptestnmd -0x204\(%rdx\)\{1to16\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 92 96 40 27 ec    	vptestnmq %zmm28,%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 92 96 47 27 ec    	vptestnmq %zmm28,%zmm29,%k5\{%k7\}
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 29    	vptestnmq \(%rcx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 b2 96 40 27 ac f0 34 12 00 00 	vptestnmq 0x1234\(%rax,%r14,8\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 29    	vptestnmq \(%rcx\)\{1to8\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 6a 7f 	vptestnmq 0x1fc0\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 aa 00 20 00 00 	vptestnmq 0x2000\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 6a 80 	vptestnmq -0x2000\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 40 27 aa c0 df ff ff 	vptestnmq -0x2040\(%rdx\),%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 6a 7f 	vptestnmq 0x3f8\(%rdx\)\{1to8\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 aa 00 04 00 00 	vptestnmq 0x400\(%rdx\)\{1to8\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 6a 80 	vptestnmq -0x400\(%rdx\)\{1to8\},%zmm29,%k5
+[ 	]*[a-f0-9]+:	62 f2 96 50 27 aa f8 fb ff ff 	vptestnmq -0x408\(%rdx\)\{1to8\},%zmm29,%k5
 #pass

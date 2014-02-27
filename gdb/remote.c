@@ -3670,7 +3670,7 @@ remote_check_symbols (void)
 {
   struct remote_state *rs = get_remote_state ();
   char *msg, *reply, *tmp;
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
   int end;
 
   /* The remote side has no concept of inferiors that aren't running
@@ -3701,16 +3701,18 @@ remote_check_symbols (void)
 
   while (strncmp (reply, "qSymbol:", 8) == 0)
     {
+      struct bound_minimal_symbol sym;
+
       tmp = &reply[8];
       end = hex2bin (tmp, (gdb_byte *) msg, strlen (tmp) / 2);
       msg[end] = '\0';
       sym = lookup_minimal_symbol (msg, NULL, NULL);
-      if (sym == NULL)
+      if (sym.minsym == NULL)
 	xsnprintf (msg, get_remote_packet_size (), "qSymbol::%s", &reply[8]);
       else
 	{
 	  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
-	  CORE_ADDR sym_addr = SYMBOL_VALUE_ADDRESS (sym);
+	  CORE_ADDR sym_addr = BMSYMBOL_VALUE_ADDRESS (sym);
 
 	  /* If this is a function address, return the start of code
 	     instead of any data function descriptor.  */
@@ -11057,11 +11059,6 @@ static struct traceframe_info *
 remote_traceframe_info (struct target_ops *self)
 {
   char *text;
-
-  /* If current traceframe is not selected, don't bother the remote
-     stub.  */
-  if (get_traceframe_number () < 0)
-    return NULL;
 
   text = target_read_stralloc (&current_target,
 			       TARGET_OBJECT_TRACEFRAME_INFO, NULL);

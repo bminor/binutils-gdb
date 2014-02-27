@@ -28,6 +28,7 @@
 #include "c-lang.h"
 #include "cp-abi.h"
 #include "target.h"
+#include "objfiles.h"
 
 
 /* A helper for c_textual_element_type.  This checks the name of the
@@ -316,12 +317,12 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	      /* If 'symbol_print' is set, we did the work above.  */
 	      if (!options->symbol_print
 		  && (msymbol.minsym != NULL)
-		  && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol.minsym)))
+		  && (vt_address == BMSYMBOL_VALUE_ADDRESS (msymbol)))
 		{
 		  if (want_space)
 		    fputs_filtered (" ", stream);
 		  fputs_filtered (" <", stream);
-		  fputs_filtered (SYMBOL_PRINT_NAME (msymbol.minsym), stream);
+		  fputs_filtered (MSYMBOL_PRINT_NAME (msymbol.minsym), stream);
 		  fputs_filtered (">", stream);
 		  want_space = 1;
 		}
@@ -338,7 +339,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 		    fputs_filtered (" ", stream);
 
 		  if (msymbol.minsym != NULL)
-		    wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol.minsym),
+		    wsym = lookup_symbol (MSYMBOL_LINKAGE_NAME (msymbol.minsym),
 					  block, VAR_DOMAIN,
 					  &is_this_fld);
 

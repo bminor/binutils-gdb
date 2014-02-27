@@ -192,7 +192,7 @@ struct notif_server notif_stop =
 static int
 target_running (void)
 {
-  return all_threads.head != NULL;
+  return get_first_thread () != NULL;
 }
 
 static int
@@ -1136,6 +1136,48 @@ handle_qxfer_features (const char *annex,
   return len;
 }
 
+/* Worker routine for handle_qxfer_libraries.
+   Add to the length pointed to by ARG a conservative estimate of the
+   length needed to transmit the file name of INF.  */
+
+static void
+accumulate_file_name_length (struct inferior_list_entry *inf, void *arg)
+{
+  struct dll_info *dll = (struct dll_info *) inf;
+  unsigned int *total_len = arg;
+
+  /* Over-estimate the necessary memory.  Assume that every character
+     in the library name must be escaped.  */
+  *total_len += 128 + 6 * strlen (dll->name);
+}
+
+/* Worker routine for handle_qxfer_libraries.
+   Emit the XML to describe the library in INF.  */
+
+static void
+emit_dll_description (struct inferior_list_entry *inf, void *arg)
+{
+  struct dll_info *dll = (struct dll_info *) inf;
+  char **p_ptr = arg;
+  char *p = *p_ptr;
+  char *name;
+
+  strcpy (p, "  <library name=\"");
+  p = p + strlen (p);
+  name = xml_escape_text (dll->name);
+  strcpy (p, name);
+  free (name);
+  p = p + strlen (p);
+  strcpy (p, "\"><segment address=\"");
+  p = p + strlen (p);
+  sprintf (p, "0x%lx", (long) dll->base_addr);
+  p = p + strlen (p);
+  strcpy (p, "\"/></library>\n");
+  p = p + strlen (p);
+
+  *p_ptr = p;
+}
+
 /* Handle qXfer:libraries:read.  */
 
 static int
@@ -1145,7 +1187,6 @@ handle_qxfer_libraries (const char *annex,
 {
   unsigned int total_len;
   char *document, *p;
-  struct inferior_list_entry *dll_ptr;
 
   if (writebuf != NULL)
     return -2;
@@ -1153,11 +1194,9 @@ handle_qxfer_libraries (const char *annex,
   if (annex[0] != '\0' || !target_running ())
     return -1;
 
-  /* Over-estimate the necessary memory.  Assume that every character
-     in the library name must be escaped.  */
   total_len = 64;
-  for (dll_ptr = all_dlls.head; dll_ptr != NULL; dll_ptr = dll_ptr->next)
-    total_len += 128 + 6 * strlen (((struct dll_info *) dll_ptr)->name);
+  for_each_inferior_with_data (&all_dlls, accumulate_file_name_length,
+			       &total_len);
 
   document = malloc (total_len);
   if (document == NULL)
@@ -1166,24 +1205,7 @@ handle_qxfer_libraries (const char *annex,
   strcpy (document, "<library-list>\n");
   p = document + strlen (document);
 
-  for (dll_ptr = all_dlls.head; dll_ptr != NULL; dll_ptr = dll_ptr->next)
-    {
-      struct dll_info *dll = (struct dll_info *) dll_ptr;
-      char *name;
-
-      strcpy (p, "  <library name=\"");
-      p = p + strlen (p);
-      name = xml_escape_text (dll->name);
-      strcpy (p, name);
-      free (name);
-      p = p + strlen (p);
-      strcpy (p, "\"><segment address=\"");
-      p = p + strlen (p);
-      sprintf (p, "0x%lx", (long) dll->base_addr);
-      p = p + strlen (p);
-      strcpy (p, "\"/></library>\n");
-      p = p + strlen (p);
-    }
+  for_each_inferior_with_data (&all_dlls, emit_dll_description, &p);
 
   strcpy (p, "</library-list>\n");
 
@@ -1285,36 +1307,43 @@ handle_qxfer_statictrace (const char *annex,
   return nbytes;
 }
 
+/* Helper for handle_qxfer_threads_proper.
+   Emit the XML to describe the thread of INF.  */
+
+static void
+handle_qxfer_threads_worker (struct inferior_list_entry *inf, void *arg)
+{
+  struct thread_info *thread = (struct thread_info *) inf;
+  struct buffer *buffer = arg;
+  ptid_t ptid = thread_to_gdb_id (thread);
+  char ptid_s[100];
+  int core = target_core_of_thread (ptid);
+  char core_s[21];
+
+  write_ptid (ptid_s, ptid);
+
+  if (core != -1)
+    {
+      sprintf (core_s, "%d", core);
+      buffer_xml_printf (buffer, "<thread id=\"%s\" core=\"%s\"/>\n",
+			 ptid_s, core_s);
+    }
+  else
+    {
+      buffer_xml_printf (buffer, "<thread id=\"%s\"/>\n",
+			 ptid_s);
+    }
+}
+
 /* Helper for handle_qxfer_threads.  */
 
 static void
 handle_qxfer_threads_proper (struct buffer *buffer)
 {
-  struct inferior_list_entry *thread;
-
   buffer_grow_str (buffer, "<threads>\n");
 
-  for (thread = all_threads.head; thread; thread = thread->next)
-    {
-      ptid_t ptid = thread_to_gdb_id ((struct thread_info *)thread);
-      char ptid_s[100];
-      int core = target_core_of_thread (ptid);
-      char core_s[21];
-
-      write_ptid (ptid_s, ptid);
-
-      if (core != -1)
-	{
-	  sprintf (core_s, "%d", core);
-	  buffer_xml_printf (buffer, "<thread id=\"%s\" core=\"%s\"/>\n",
-			     ptid_s, core_s);
-	}
-      else
-	{
-	  buffer_xml_printf (buffer, "<thread id=\"%s\"/>\n",
-			     ptid_s);
-	}
-    }
+  for_each_inferior_with_data (&all_threads, handle_qxfer_threads_worker,
+			       buffer);
 
   buffer_grow_str0 (buffer, "</threads>\n");
 }
@@ -1702,7 +1731,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	gdb_id = general_thread;
       else
 	{
-	  thread_ptr = all_threads.head;
+	  thread_ptr = get_first_inferior (&all_threads);
 	  gdb_id = thread_to_gdb_id ((struct thread_info *)thread_ptr);
 	}
 
@@ -1743,7 +1772,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  ptid_t gdb_id;
 
 	  require_running (own_buf);
-	  thread_ptr = all_threads.head;
+	  thread_ptr = get_first_inferior (&all_threads);
 
 	  *own_buf++ = 'm';
 	  gdb_id = thread_to_gdb_id ((struct thread_info *)thread_ptr);
@@ -2121,37 +2150,47 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 static void gdb_wants_all_threads_stopped (void);
 static void resume (struct thread_resume *actions, size_t n);
 
+/* The callback that is passed to visit_actioned_threads.  */
+typedef int (visit_actioned_threads_callback_ftype)
+  (const struct thread_resume *, struct thread_info *);
+
+/* Struct to pass data to visit_actioned_threads.  */
+
+struct visit_actioned_threads_data
+{
+  const struct thread_resume *actions;
+  size_t num_actions;
+  visit_actioned_threads_callback_ftype *callback;
+};
+
 /* Call CALLBACK for any thread to which ACTIONS applies to.  Returns
    true if CALLBACK returns true.  Returns false if no matching thread
-   is found or CALLBACK results false.  */
+   is found or CALLBACK results false.
+   Note: This function is itself a callback for find_inferior.  */
 
 static int
-visit_actioned_threads (const struct thread_resume *actions,
-			size_t num_actions,
-			int (*callback) (const struct thread_resume *,
-					 struct thread_info *))
+visit_actioned_threads (struct inferior_list_entry *entry, void *datap)
 {
-  struct inferior_list_entry *entry;
+  struct visit_actioned_threads_data *data = datap;
+  const struct thread_resume *actions = data->actions;
+  size_t num_actions = data->num_actions;
+  visit_actioned_threads_callback_ftype *callback = data->callback;
+  size_t i;
 
-  for (entry = all_threads.head; entry != NULL; entry = entry->next)
+  for (i = 0; i < num_actions; i++)
     {
-      size_t i;
+      const struct thread_resume *action = &actions[i];
 
-      for (i = 0; i < num_actions; i++)
+      if (ptid_equal (action->thread, minus_one_ptid)
+	  || ptid_equal (action->thread, entry->id)
+	  || ((ptid_get_pid (action->thread)
+	       == ptid_get_pid (entry->id))
+	      && ptid_get_lwp (action->thread) == -1))
 	{
-	  const struct thread_resume *action = &actions[i];
+	  struct thread_info *thread = (struct thread_info *) entry;
 
-	  if (ptid_equal (action->thread, minus_one_ptid)
-	      || ptid_equal (action->thread, entry->id)
-	      || ((ptid_get_pid (action->thread)
-		   == ptid_get_pid (entry->id))
-		  && ptid_get_lwp (action->thread) == -1))
-	    {
-	      struct thread_info *thread = (struct thread_info *) entry;
-
-	      if ((*callback) (action, thread))
-		return 1;
-	    }
+	  if ((*callback) (action, thread))
+	    return 1;
 	}
     }
 
@@ -2309,7 +2348,12 @@ resume (struct thread_resume *actions, size_t num_actions)
 	 one with a pending status to report.  If so, skip actually
 	 resuming/stopping and report the pending event
 	 immediately.  */
-      if (visit_actioned_threads (actions, num_actions, handle_pending_status))
+      struct visit_actioned_threads_data data;
+
+      data.actions = actions;
+      data.num_actions = num_actions;
+      data.callback = handle_pending_status;
+      if (find_inferior (&all_threads, visit_actioned_threads, &data) != NULL)
 	return;
 
       enable_async_io ();
@@ -2323,8 +2367,18 @@ resume (struct thread_resume *actions, size_t num_actions)
     {
       last_ptid = mywait (minus_one_ptid, &last_status, 0, 1);
 
+      if (last_status.kind == TARGET_WAITKIND_NO_RESUMED)
+	{
+	  /* No proper RSP support for this yet.  At least return
+	     error.  */
+	  sprintf (own_buf, "E.No unwaited-for children left.");
+	  disable_async_io ();
+	  return;
+	}
+
       if (last_status.kind != TARGET_WAITKIND_EXITED
-          && last_status.kind != TARGET_WAITKIND_SIGNALLED)
+          && last_status.kind != TARGET_WAITKIND_SIGNALLED
+	  && last_status.kind != TARGET_WAITKIND_NO_RESUMED)
 	current_inferior->last_status = last_status;
 
       /* From the client's perspective, all-stop mode always stops all
@@ -2782,7 +2836,7 @@ handle_status (char *own_buf)
       /* If we're still out of luck, simply pick the first thread in
 	 the thread list.  */
       if (thread == NULL)
-	thread = all_threads.head;
+	thread = get_first_inferior (&all_threads);
 
       if (thread != NULL)
 	{
@@ -2881,7 +2935,7 @@ static void
 kill_inferior_callback (struct inferior_list_entry *entry)
 {
   struct process_info *process = (struct process_info *) entry;
-  int pid = ptid_get_pid (process->head.id);
+  int pid = ptid_get_pid (process->entry.id);
 
   kill_inferior (pid);
   discard_queued_stop_replies (pid);
@@ -2896,7 +2950,7 @@ static void
 detach_or_kill_inferior_callback (struct inferior_list_entry *entry)
 {
   struct process_info *process = (struct process_info *) entry;
-  int pid = ptid_get_pid (process->head.id);
+  int pid = ptid_get_pid (process->entry.id);
 
   if (process->attached)
     detach_inferior (pid);
@@ -2916,7 +2970,7 @@ print_started_pid (struct inferior_list_entry *entry)
 
   if (! process->attached)
     {
-      int pid = ptid_get_pid (process->head.id);
+      int pid = ptid_get_pid (process->entry.id);
       fprintf (stderr, " %d", pid);
     }
 }
@@ -2931,7 +2985,7 @@ print_attached_pid (struct inferior_list_entry *entry)
 
   if (process->attached)
     {
-      int pid = ptid_get_pid (process->head.id);
+      int pid = ptid_get_pid (process->entry.id);
       fprintf (stderr, " %d", pid);
     }
 }
@@ -3518,7 +3572,7 @@ process_serial_event (void)
 		  break;
 		}
 
-	      thread_id = ((struct inferior_list_entry *)thread)->id;
+	      thread_id = thread->entry.id;
 	    }
 	  else
 	    {
@@ -3541,7 +3595,10 @@ process_serial_event (void)
 		    (struct thread_info *) find_inferior_id (&all_threads,
 							     general_thread);
 		  if (thread == NULL)
-		    thread_id = all_threads.head->id;
+		    {
+		      thread = get_first_thread ();
+		      thread_id = thread->entry.id;
+		    }
 		}
 
 	      general_thread = thread_id;
@@ -3850,7 +3907,11 @@ handle_target_event (int err, gdb_client_data client_data)
   last_ptid = mywait (minus_one_ptid, &last_status,
 		      TARGET_WNOHANG, 1);
 
-  if (last_status.kind != TARGET_WAITKIND_IGNORE)
+  if (last_status.kind == TARGET_WAITKIND_NO_RESUMED)
+    {
+      /* No RSP support for this yet.  */
+    }
+  else if (last_status.kind != TARGET_WAITKIND_IGNORE)
     {
       int pid = ptid_get_pid (last_ptid);
       struct process_info *process = find_process_pid (pid);

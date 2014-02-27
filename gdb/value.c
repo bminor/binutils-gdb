@@ -1642,9 +1642,7 @@ set_value_component_location (struct value *component,
 /* Access to the value history.  */
 
 /* Record a new value in the value history.
-   Returns the absolute history index of the entry.
-   Result of -1 indicates the value was not saved; otherwise it is the
-   value history index of this new item.  */
+   Returns the absolute history index of the entry.  */
 
 int
 record_latest_value (struct value *val)
@@ -2752,15 +2750,15 @@ value_static_field (struct type *type, int fieldno)
 	{
 	  /* With some compilers, e.g. HP aCC, static data members are
 	     reported as non-debuggable symbols.  */
-	  struct minimal_symbol *msym = lookup_minimal_symbol (phys_name,
-							       NULL, NULL);
+	  struct bound_minimal_symbol msym
+	    = lookup_minimal_symbol (phys_name, NULL, NULL);
 
-	  if (!msym)
+	  if (!msym.minsym)
 	    return allocate_optimized_out_value (type);
 	  else
 	    {
 	      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
-				      SYMBOL_VALUE_ADDRESS (msym));
+				      BMSYMBOL_VALUE_ADDRESS (msym));
 	    }
 	}
       else
@@ -2976,7 +2974,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
       set_value_address (v,
 	gdbarch_convert_from_func_ptr_addr
-	   (gdbarch, SYMBOL_VALUE_ADDRESS (msym.minsym), &current_target));
+	   (gdbarch, BMSYMBOL_VALUE_ADDRESS (msym), &current_target));
     }
 
   if (arg1p)

@@ -294,7 +294,6 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
   /* We could use obstack_specify_allocation here instead, but
      gdb_obstack.h specifies the alloc/dealloc functions.  */
   obstack_init (&objfile->objfile_obstack);
-  terminate_minimal_symbol_table (objfile);
 
   objfile_alloc_data (objfile);
 
@@ -333,6 +332,8 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
 
   objfile->per_bfd = get_objfile_bfd_data (objfile, abfd);
   objfile->pspace = current_program_space;
+
+  terminate_minimal_symbol_table (objfile);
 
   /* Initialize the section indexes for this objfile, so that we can
      later detect if they are used w/o being properly assigned to.  */
@@ -801,17 +802,6 @@ objfile_relocate1 (struct objfile *objfile,
     objfile->sf->qf->relocate (objfile, new_offsets, delta);
 
   {
-    struct minimal_symbol *msym;
-
-    ALL_OBJFILE_MSYMBOLS (objfile, msym)
-      if (SYMBOL_SECTION (msym) >= 0)
-      SYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta, SYMBOL_SECTION (msym));
-  }
-  /* Relocating different sections by different amounts may cause the symbols
-     to be out of order.  */
-  msymbols_sort (objfile);
-
-  {
     int i;
 
     for (i = 0; i < objfile->num_sections; ++i)
@@ -1040,7 +1030,7 @@ have_minimal_symbols (void)
 
   ALL_OBJFILES (ofp)
   {
-    if (ofp->minimal_symbol_count > 0)
+    if (ofp->per_bfd->minimal_symbol_count > 0)
       {
 	return 1;
       }

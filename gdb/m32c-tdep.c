@@ -40,6 +40,7 @@
 #include "reggroups.h"
 #include "prologue-value.h"
 #include "target.h"
+#include "objfiles.h"
 
 
 /* The m32c tdep structure.  */
@@ -2240,14 +2241,14 @@ m32c_return_value (struct gdbarch *gdbarch,
 	  /* Everything else is passed in mem0, using as many bytes as
 	     needed.  This is not what the Renesas tools do, but it's
 	     what GCC does at the moment.  */
-	  struct minimal_symbol *mem0
+	  struct bound_minimal_symbol mem0
 	    = lookup_minimal_symbol ("mem0", NULL, NULL);
 
-	  if (! mem0)
+	  if (! mem0.minsym)
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     "its address."));
-	  read_memory (SYMBOL_VALUE_ADDRESS (mem0), readbuf, valtype_len);
+	  read_memory (BMSYMBOL_VALUE_ADDRESS (mem0), readbuf, valtype_len);
 	}
     }
 
@@ -2272,14 +2273,14 @@ m32c_return_value (struct gdbarch *gdbarch,
 	  /* Everything else is passed in mem0, using as many bytes as
 	     needed.  This is not what the Renesas tools do, but it's
 	     what GCC does at the moment.  */
-	  struct minimal_symbol *mem0
+	  struct bound_minimal_symbol mem0
 	    = lookup_minimal_symbol ("mem0", NULL, NULL);
 
-	  if (! mem0)
+	  if (! mem0.minsym)
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     " its address."));
-	  write_memory (SYMBOL_VALUE_ADDRESS (mem0), writebuf, valtype_len);
+	  write_memory (BMSYMBOL_VALUE_ADDRESS (mem0), writebuf, valtype_len);
 	}
     }
 
@@ -2450,7 +2451,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
     {
       const char *func_name;
       char *tramp_name;
-      struct minimal_symbol *tramp_msym;
+      struct bound_minimal_symbol tramp_msym;
 
       /* Try to find a linker symbol at this address.  */
       struct bound_minimal_symbol func_msym
@@ -2461,7 +2462,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
                "couldn't find a symbol at that address, to find trampoline."),
                paddress (gdbarch, addr));
 
-      func_name = SYMBOL_LINKAGE_NAME (func_msym.minsym);
+      func_name = MSYMBOL_LINKAGE_NAME (func_msym.minsym);
       tramp_name = xmalloc (strlen (func_name) + 5);
       strcpy (tramp_name, func_name);
       strcat (tramp_name, ".plt");
@@ -2473,7 +2474,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
          the name any more.  */
       xfree (tramp_name);
 
-      if (! tramp_msym)
+      if (! tramp_msym.minsym)
 	{
 	  CORE_ADDR ptrval;
 
@@ -2505,7 +2506,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       else
 	{
 	  /* The trampoline's address is our pointer.  */
-	  addr = SYMBOL_VALUE_ADDRESS (tramp_msym);
+	  addr = BMSYMBOL_VALUE_ADDRESS (tramp_msym);
 	}
     }
 
@@ -2536,13 +2537,13 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
 
       if (ptr_msym.minsym)
         {
-          const char *ptr_msym_name = SYMBOL_LINKAGE_NAME (ptr_msym.minsym);
+          const char *ptr_msym_name = MSYMBOL_LINKAGE_NAME (ptr_msym.minsym);
           int len = strlen (ptr_msym_name);
 
           if (len > 4
               && strcmp (ptr_msym_name + len - 4, ".plt") == 0)
             {
-	      struct minimal_symbol *func_msym;
+	      struct bound_minimal_symbol func_msym;
               /* We have a .plt symbol; try to find the symbol for the
                  corresponding function.
 
@@ -2557,8 +2558,8 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
 
               /* If we do have such a symbol, return its value as the
                  function's true address.  */
-              if (func_msym)
-                ptr = SYMBOL_VALUE_ADDRESS (func_msym);
+              if (func_msym.minsym)
+                ptr = BMSYMBOL_VALUE_ADDRESS (func_msym);
             }
         }
       else

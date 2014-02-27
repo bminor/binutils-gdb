@@ -159,7 +159,7 @@ syscm_make_symbol_smob (void)
 
   s_smob->symbol = NULL;
   s_scm = scm_new_smob (symbol_smob_tag, (scm_t_bits) s_smob);
-  gdbscm_init_eqable_gsmob (&s_smob->base);
+  gdbscm_init_eqable_gsmob (&s_smob->base, s_scm);
 
   return s_scm;
 }
@@ -202,7 +202,7 @@ syscm_scm_from_symbol (struct symbol *symbol)
   s_scm = syscm_make_symbol_smob ();
   s_smob = (symbol_smob *) SCM_SMOB_DATA (s_scm);
   s_smob->symbol = symbol;
-  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &s_smob->base, s_scm);
+  gdbscm_fill_eqable_gsmob_ptr_slot (slot, &s_smob->base);
 
   return s_scm;
 }

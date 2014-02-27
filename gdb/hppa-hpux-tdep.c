@@ -84,7 +84,7 @@ hppa32_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   minsym = lookup_minimal_symbol_by_pc (pc);
   if (minsym.minsym
-      && strcmp (SYMBOL_LINKAGE_NAME (minsym.minsym), ".stub") == 0)
+      && strcmp (MSYMBOL_LINKAGE_NAME (minsym.minsym), ".stub") == 0)
     return 1;
 
   /* Get the unwind descriptor corresponding to PC, return zero
@@ -168,7 +168,7 @@ hppa64_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (! minsym.minsym)
     return 0;
 
-  sec = SYMBOL_OBJ_SECTION (minsym.objfile, minsym.minsym)->the_bfd_section;
+  sec = MSYMBOL_OBJ_SECTION (minsym.objfile, minsym.minsym)->the_bfd_section;
 
   if (bfd_get_section_vma (sec->owner, sec) <= pc
       && pc < (bfd_get_section_vma (sec->owner, sec)
@@ -370,8 +370,8 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  ALL_MSYMBOLS (objfile, msymbol)
 	  {
 	    if (MSYMBOL_TYPE (msymbol) == mst_text
-		&& strcmp (SYMBOL_LINKAGE_NAME (msymbol),
-			    SYMBOL_LINKAGE_NAME (msym.minsym)) == 0)
+		&& strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
+			   MSYMBOL_LINKAGE_NAME (msym.minsym)) == 0)
 	      {
 		function_found = 1;
 		break;
@@ -460,7 +460,7 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  (curr_inst == 0xeaa0d002))
 	{
 	  struct bound_minimal_symbol stubsym;
-	  struct minimal_symbol *libsym;
+	  struct bound_minimal_symbol libsym;
 
 	  stubsym = lookup_minimal_symbol_by_pc (loc);
 	  if (stubsym.minsym == NULL)
@@ -469,16 +469,16 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
-	  libsym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (stubsym.minsym),
+	  libsym = lookup_minimal_symbol (MSYMBOL_LINKAGE_NAME (stubsym.minsym),
 					  NULL, NULL);
-	  if (libsym == NULL)
+	  if (libsym.minsym == NULL)
 	    {
 	      warning (_("Unable to find library symbol for %s."),
-		       SYMBOL_PRINT_NAME (stubsym.minsym));
+		       MSYMBOL_PRINT_NAME (stubsym.minsym));
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
-	  return SYMBOL_VALUE (libsym);
+	  return MSYMBOL_VALUE (libsym.minsym);
 	}
 
       /* Does it look like bl X,%rp or bl X,%r0?  Another way to do a
@@ -973,7 +973,7 @@ hppa64_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
       gdb_byte buf[2 * HPPA_INSN_SIZE];
       int offset;
 
-      find_pc_partial_function (SYMBOL_VALUE_ADDRESS (msym), &name,
+      find_pc_partial_function (MSYMBOL_VALUE_ADDRESS (obj, msym), &name,
       				&begin, &end);
 
       if (name == NULL || begin == 0 || end == 0)
@@ -1014,7 +1014,7 @@ hppa_hpux_find_import_stub_for_addr (CORE_ADDR funcaddr)
 {
   struct objfile *objfile;
   struct bound_minimal_symbol funsym;
-  struct minimal_symbol *stubsym;
+  struct bound_minimal_symbol stubsym;
   CORE_ADDR stubaddr;
 
   funsym = lookup_minimal_symbol_by_pc (funcaddr);
@@ -1023,19 +1023,19 @@ hppa_hpux_find_import_stub_for_addr (CORE_ADDR funcaddr)
   ALL_OBJFILES (objfile)
     {
       stubsym = lookup_minimal_symbol_solib_trampoline
-	(SYMBOL_LINKAGE_NAME (funsym.minsym), objfile);
+	(MSYMBOL_LINKAGE_NAME (funsym.minsym), objfile);
 
-      if (stubsym)
+      if (stubsym.minsym)
 	{
 	  struct unwind_table_entry *u;
 
-	  u = find_unwind_entry (SYMBOL_VALUE (stubsym));
+	  u = find_unwind_entry (MSYMBOL_VALUE (stubsym.minsym));
 	  if (u == NULL 
 	      || (u->stub_unwind.stub_type != IMPORT
 		  && u->stub_unwind.stub_type != IMPORT_SHLIB))
 	    continue;
 
-          stubaddr = SYMBOL_VALUE (stubsym);
+          stubaddr = MSYMBOL_VALUE (stubsym.minsym);
 
 	  /* If we found an IMPORT stub, then we can stop searching;
 	     if we found an IMPORT_SHLIB, we want to continue the search
@@ -1096,10 +1096,10 @@ hppa_hpux_find_dummy_bpaddr (CORE_ADDR addr)
       find_pc_partial_function (addr, NULL, &func, NULL);
       ALL_OBJFILE_MSYMBOLS (sec->objfile, msym)
 	{
-	  u = find_unwind_entry (SYMBOL_VALUE_ADDRESS (msym));
-	  if (func != SYMBOL_VALUE_ADDRESS (msym) 
+	  u = find_unwind_entry (MSYMBOL_VALUE_ADDRESS (sec->objfile, msym));
+	  if (func != MSYMBOL_VALUE_ADDRESS (sec->objfile, msym) 
 	      && (!u || u->stub_unwind.stub_type == 0))
-	    return SYMBOL_VALUE_ADDRESS (msym);
+	    return MSYMBOL_VALUE_ADDRESS (sec->objfile, msym);
 	}
     }
 

@@ -114,3 +114,17 @@ ptid_tid_p (ptid_t ptid)
 
   return (ptid_get_tid (ptid) != 0);
 }
+
+int
+ptid_match (ptid_t ptid, ptid_t filter)
+{
+  if (ptid_equal (filter, minus_one_ptid))
+    return 1;
+  if (ptid_is_pid (filter)
+      && ptid_get_pid (ptid) == ptid_get_pid (filter))
+    return 1;
+  else if (ptid_equal (ptid, filter))
+    return 1;
+
+  return 0;
+}

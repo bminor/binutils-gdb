@@ -550,7 +550,7 @@ static CORE_ADDR
 lm_base (void)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  struct minimal_symbol *got_sym;
+  struct bound_minimal_symbol got_sym;
   CORE_ADDR addr;
   gdb_byte buf[TIC6X_PTR_SIZE];
   struct dsbt_info *info = get_dsbt_info ();
@@ -570,9 +570,9 @@ lm_base (void)
   got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL,
 				   symfile_objfile);
 
-  if (got_sym != 0)
+  if (got_sym.minsym != 0)
     {
-      addr = SYMBOL_VALUE_ADDRESS (got_sym);
+      addr = BMSYMBOL_VALUE_ADDRESS (got_sym);
       if (solib_dsbt_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "lm_base: get addr %x by _GLOBAL_OFFSET_TABLE_.\n",

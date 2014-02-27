@@ -59,6 +59,14 @@ proc test_value_in_inferior {} {
     gdb_test "gu (print (value-field s \"a\"))" \
 	"= 3" "access element inside struct using string name"
 
+    # Append value in the value history.
+    gdb_scm_test_silent_cmd "gu (define i (history-append! (make-value 42)))" \
+	"append 42"
+
+    gdb_test "gu i" "\[0-9\]+"
+    gdb_test "gu (history-ref i)" "#<gdb:value 42>"
+    gdb_test "p \$" "= 42"
+
     # Test dereferencing the argv pointer.
 
     # Just get inferior variable argv the value history, available to guile.

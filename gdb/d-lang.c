@@ -37,10 +37,10 @@ static const char D_MAIN[] = "D main";
 const char *
 d_main_name (void)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol (D_MAIN, NULL, NULL);
-  if (msym != NULL)
+  if (msym.minsym != NULL)
     return D_MAIN;
 
   /* No known entry procedure found, the main program is probably not D.  */

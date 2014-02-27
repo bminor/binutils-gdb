@@ -1747,7 +1747,7 @@ spu_get_overlay_table (struct objfile *objfile)
 {
   enum bfd_endian byte_order = bfd_big_endian (objfile->obfd)?
 		   BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
-  struct minimal_symbol *ovly_table_msym, *ovly_buf_table_msym;
+  struct bound_minimal_symbol ovly_table_msym, ovly_buf_table_msym;
   CORE_ADDR ovly_table_base, ovly_buf_table_base;
   unsigned ovly_table_size, ovly_buf_table_size;
   struct spu_overlay_table *tbl;
@@ -1760,19 +1760,19 @@ spu_get_overlay_table (struct objfile *objfile)
     return tbl;
 
   ovly_table_msym = lookup_minimal_symbol ("_ovly_table", NULL, objfile);
-  if (!ovly_table_msym)
+  if (!ovly_table_msym.minsym)
     return NULL;
 
   ovly_buf_table_msym = lookup_minimal_symbol ("_ovly_buf_table",
 					       NULL, objfile);
-  if (!ovly_buf_table_msym)
+  if (!ovly_buf_table_msym.minsym)
     return NULL;
 
-  ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym);
-  ovly_table_size = MSYMBOL_SIZE (ovly_table_msym);
+  ovly_table_base = BMSYMBOL_VALUE_ADDRESS (ovly_table_msym);
+  ovly_table_size = MSYMBOL_SIZE (ovly_table_msym.minsym);
 
-  ovly_buf_table_base = SYMBOL_VALUE_ADDRESS (ovly_buf_table_msym);
-  ovly_buf_table_size = MSYMBOL_SIZE (ovly_buf_table_msym);
+  ovly_buf_table_base = BMSYMBOL_VALUE_ADDRESS (ovly_buf_table_msym);
+  ovly_buf_table_size = MSYMBOL_SIZE (ovly_buf_table_msym.minsym);
 
   ovly_table = xmalloc (ovly_table_size);
   read_memory (ovly_table_base, ovly_table, ovly_table_size);
@@ -1898,7 +1898,7 @@ spu_overlay_new_objfile (struct objfile *objfile)
 static void
 spu_catch_start (struct objfile *objfile)
 {
-  struct minimal_symbol *minsym;
+  struct bound_minimal_symbol minsym;
   struct symtab *symtab;
   CORE_ADDR pc;
   char buf[32];
@@ -1918,13 +1918,14 @@ spu_catch_start (struct objfile *objfile)
   /* There can be multiple symbols named "main".  Search for the
      "main" in *this* objfile.  */
   minsym = lookup_minimal_symbol ("main", NULL, objfile);
-  if (!minsym)
+  if (!minsym.minsym)
     return;
 
   /* If we have debugging information, try to use it -- this
      will allow us to properly skip the prologue.  */
-  pc = SYMBOL_VALUE_ADDRESS (minsym);
-  symtab = find_pc_sect_symtab (pc, SYMBOL_OBJ_SECTION (objfile, minsym));
+  pc = BMSYMBOL_VALUE_ADDRESS (minsym);
+  symtab = find_pc_sect_symtab (pc, MSYMBOL_OBJ_SECTION (minsym.objfile,
+							 minsym.minsym));
   if (symtab != NULL)
     {
       struct blockvector *bv = BLOCKVECTOR (symtab);
@@ -1981,7 +1982,7 @@ spu_objfile_from_frame (struct frame_info *frame)
 static void
 flush_ea_cache (void)
 {
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
   struct objfile *obj;
 
   if (!has_stack_frames ())
@@ -1993,7 +1994,7 @@ flush_ea_cache (void)
 
   /* Lookup inferior function __cache_flush.  */
   msymbol = lookup_minimal_symbol ("__cache_flush", NULL, obj);
-  if (msymbol != NULL)
+  if (msymbol.minsym != NULL)
     {
       struct type *type;
       CORE_ADDR addr;
@@ -2001,7 +2002,7 @@ flush_ea_cache (void)
       type = objfile_type (obj)->builtin_void;
       type = lookup_function_type (type);
       type = lookup_pointer_type (type);
-      addr = SYMBOL_VALUE_ADDRESS (msymbol);
+      addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
       call_function_by_hand (value_from_pointer (type, addr), 0, NULL);
     }

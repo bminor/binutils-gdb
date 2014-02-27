@@ -266,7 +266,7 @@ static CORE_ADDR
 lm_base (void)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  struct minimal_symbol *got_sym;
+  struct bound_minimal_symbol got_sym;
   CORE_ADDR addr;
   gdb_byte buf[FRV_PTR_SIZE];
 
@@ -284,7 +284,7 @@ lm_base (void)
 
   got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL,
                                    symfile_objfile);
-  if (got_sym == 0)
+  if (got_sym.minsym == 0)
     {
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
@@ -292,7 +292,7 @@ lm_base (void)
       return 0;
     }
 
-  addr = SYMBOL_VALUE_ADDRESS (got_sym) + 8;
+  addr = BMSYMBOL_VALUE_ADDRESS (got_sym) + 8;
 
   if (solib_frv_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -919,14 +919,14 @@ frv_relocate_section_addresses (struct so_list *so,
 static CORE_ADDR
 main_got (void)
 {
-  struct minimal_symbol *got_sym;
+  struct bound_minimal_symbol got_sym;
 
   got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_",
 				   NULL, symfile_objfile);
-  if (got_sym == 0)
+  if (got_sym.minsym == 0)
     return 0;
 
-  return SYMBOL_VALUE_ADDRESS (got_sym);
+  return BMSYMBOL_VALUE_ADDRESS (got_sym);
 }
 
 /* Find the global pointer for the given function address ADDR.  */

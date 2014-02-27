@@ -838,18 +838,47 @@ ia64_linux_store_registers (struct target_ops *ops,
 
 static target_xfer_partial_ftype *super_xfer_partial;
 
-static LONGEST 
+/* Implement the to_xfer_partial target_ops method.  */
+
+static enum target_xfer_status
 ia64_linux_xfer_partial (struct target_ops *ops,
 			 enum target_object object,
 			 const char *annex,
 			 gdb_byte *readbuf, const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len)
+			 ULONGEST offset, ULONGEST len,
+			 ULONGEST *xfered_len)
 {
-  if (object == TARGET_OBJECT_UNWIND_TABLE && writebuf == NULL && offset == 0)
-    return syscall (__NR_getunwind, readbuf, len);
+  if (object == TARGET_OBJECT_UNWIND_TABLE && readbuf != NULL)
+    {
+      static long gate_table_size;
+      gdb_byte *tmp_buf;
+      long res;
+
+      /* Probe for the table size once.  */
+      if (gate_table_size == 0)
+        gate_table_size = syscall (__NR_getunwind, NULL, 0);
+      if (gate_table_size < 0)
+	return TARGET_XFER_E_IO;
+
+      if (offset >= gate_table_size)
+	return TARGET_XFER_EOF;
+
+      tmp_buf = alloca (gate_table_size);
+      res = syscall (__NR_getunwind, tmp_buf, gate_table_size);
+      if (res < 0)
+	return TARGET_XFER_E_IO;
+      gdb_assert (res == gate_table_size);
+
+      if (offset + len > gate_table_size)
+	len = gate_table_size - offset;
+
+      memcpy (readbuf, tmp_buf + offset, len);
+      *xfered_len = len;
+      return TARGET_XFER_OK;
+    }
 
   return super_xfer_partial (ops, object, annex, readbuf, writebuf,
-			     offset, len);
+			     offset, len, xfered_len);
 }
 
 /* For break.b instruction ia64 CPU forgets the immediate value and generates

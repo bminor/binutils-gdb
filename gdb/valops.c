@@ -160,7 +160,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
 	  type = lookup_pointer_type (builtin_type (gdbarch)->builtin_char);
 	  type = lookup_function_type (type);
 	  type = lookup_pointer_type (type);
-	  maddr = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
+	  maddr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
 	  if (objf_p)
 	    *objf_p = objfile;
@@ -949,81 +949,31 @@ read_value_memory (struct value *val, int embedded_offset,
 		   int stack, CORE_ADDR memaddr,
 		   gdb_byte *buffer, size_t length)
 {
-  if (length)
+  ULONGEST xfered = 0;
+
+  while (xfered < length)
     {
-      VEC(mem_range_s) *available_memory;
+      enum target_xfer_status status;
+      ULONGEST xfered_len;
 
-      if (!traceframe_available_memory (&available_memory, memaddr, length))
-	{
-	  if (stack)
-	    read_stack (memaddr, buffer, length);
-	  else
-	    read_memory (memaddr, buffer, length);
-	}
+      status = target_xfer_partial (current_target.beneath,
+				    TARGET_OBJECT_MEMORY, NULL,
+				    buffer + xfered, NULL,
+				    memaddr + xfered, length - xfered,
+				    &xfered_len);
+
+      if (status == TARGET_XFER_OK)
+	/* nothing */;
+      else if (status == TARGET_XFER_UNAVAILABLE)
+	mark_value_bytes_unavailable (val, embedded_offset + xfered,
+				      xfered_len);
+      else if (status == TARGET_XFER_EOF)
+	memory_error (TARGET_XFER_E_IO, memaddr + xfered);
       else
-	{
-	  struct target_section_table *table;
-	  struct cleanup *old_chain;
-	  CORE_ADDR unavail;
-	  mem_range_s *r;
-	  int i;
+	memory_error (status, memaddr + xfered);
 
-	  /* Fallback to reading from read-only sections.  */
-	  table = target_get_section_table (&exec_ops);
-	  available_memory =
-	    section_table_available_memory (available_memory,
-					    memaddr, length,
-					    table->sections,
-					    table->sections_end);
-
-	  old_chain = make_cleanup (VEC_cleanup(mem_range_s),
-				    &available_memory);
-
-	  normalize_mem_ranges (available_memory);
-
-	  /* Mark which bytes are unavailable, and read those which
-	     are available.  */
-
-	  unavail = memaddr;
-
-	  for (i = 0;
-	       VEC_iterate (mem_range_s, available_memory, i, r);
-	       i++)
-	    {
-	      if (mem_ranges_overlap (r->start, r->length,
-				      memaddr, length))
-		{
-		  CORE_ADDR lo1, hi1, lo2, hi2;
-		  CORE_ADDR start, end;
-
-		  /* Get the intersection window.  */
-		  lo1 = memaddr;
-		  hi1 = memaddr + length;
-		  lo2 = r->start;
-		  hi2 = r->start + r->length;
-		  start = max (lo1, lo2);
-		  end = min (hi1, hi2);
-
-		  gdb_assert (end - memaddr <= length);
-
-		  if (start > unavail)
-		    mark_value_bytes_unavailable (val,
-						  (embedded_offset
-						   + unavail - memaddr),
-						  start - unavail);
-		  unavail = end;
-
-		  read_memory (start, buffer + start - memaddr, end - start);
-		}
-	    }
-
-	  if (unavail != memaddr + length)
-	    mark_value_bytes_unavailable (val,
-					  embedded_offset + unavail - memaddr,
-					  (memaddr + length) - unavail);
-
-	  do_cleanups (old_chain);
-	}
+      xfered += xfered_len;
+      QUIT;
     }
 }
 

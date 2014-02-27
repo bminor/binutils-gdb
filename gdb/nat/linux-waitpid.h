@@ -24,4 +24,8 @@
    __WALL for systems where that is not available.  */
 extern int my_waitpid (int pid, int *status, int flags);
 
+/* Convert wait status STATUS to a string.  Used for printing debug
+   messages only.  */
+extern char *status_to_str (int status);
+
 #endif /* LINUX_WAITPID_H */

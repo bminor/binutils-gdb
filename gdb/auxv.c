@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "observer.h"
 #include "filestuff.h"
+#include "objfiles.h"
 
 #include "auxv.h"
 #include "elf/common.h"
@@ -85,7 +86,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
 		 ULONGEST offset,
 		 ULONGEST len, ULONGEST *xfered_len)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   CORE_ADDR data_address, pointer_address;
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   size_t ptr_size = TYPE_LENGTH (ptr_type);
@@ -95,17 +96,17 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   size_t block;
 
   msym = lookup_minimal_symbol ("_dl_auxv", NULL, NULL);
-  if (msym == NULL)
+  if (msym.minsym == NULL)
     return TARGET_XFER_E_IO;
 
-  if (MSYMBOL_SIZE (msym) != ptr_size)
+  if (MSYMBOL_SIZE (msym.minsym) != ptr_size)
     return TARGET_XFER_E_IO;
 
   /* POINTER_ADDRESS is a location where the `_dl_auxv' variable
      resides.  DATA_ADDRESS is the inferior value present in
      `_dl_auxv', therefore the real inferior AUXV address.  */
 
-  pointer_address = SYMBOL_VALUE_ADDRESS (msym);
+  pointer_address = BMSYMBOL_VALUE_ADDRESS (msym);
 
   /* The location of the _dl_auxv symbol may no longer be correct if
      ld.so runs at a different address than the one present in the
@@ -286,6 +287,11 @@ int
 target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
                   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
+  struct gdbarch *gdbarch = target_gdbarch();
+
+  if (gdbarch_auxv_parse_p (gdbarch))
+    return gdbarch_auxv_parse (gdbarch, readptr, endptr, typep, valp);
+
   return current_target.to_auxv_parse (&current_target, readptr, endptr,
 				       typep, valp);
 }

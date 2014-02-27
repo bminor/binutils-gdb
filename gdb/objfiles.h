@@ -151,7 +151,6 @@ struct obj_section
 
 struct objstats
   {
-    int n_minsyms;		/* Number of minimal symbols read */
     int n_psyms;		/* Number of partial symbols read */
     int n_syms;			/* Number of full symbols read */
     int n_stabs;		/* Number of ".stabs" read (if applicable) */
@@ -210,6 +209,44 @@ struct objfile_per_bfd_storage
 
   const char *name_of_main;
   enum language language_of_main;
+
+  /* Each file contains a pointer to an array of minimal symbols for all
+     global symbols that are defined within the file.  The array is
+     terminated by a "null symbol", one that has a NULL pointer for the
+     name and a zero value for the address.  This makes it easy to walk
+     through the array when passed a pointer to somewhere in the middle
+     of it.  There is also a count of the number of symbols, which does
+     not include the terminating null symbol.  The array itself, as well
+     as all the data that it points to, should be allocated on the
+     objfile_obstack for this file.  */
+
+  struct minimal_symbol *msymbols;
+  int minimal_symbol_count;
+
+  /* The number of minimal symbols read, before any minimal symbol
+     de-duplication is applied.  Note in particular that this has only
+     a passing relationship with the actual size of the table above;
+     use minimal_symbol_count if you need the true size.  */
+  int n_minsyms;
+
+  /* This is true if minimal symbols have already been read.  Symbol
+     readers can use this to bypass minimal symbol reading.  Also, the
+     minimal symbol table management code in minsyms.c uses this to
+     suppress new minimal symbols.  You might think that MSYMBOLS or
+     MINIMAL_SYMBOL_COUNT could be used for this, but it is possible
+     for multiple readers to install minimal symbols into a given
+     per-BFD.  */
+
+  unsigned int minsyms_read : 1;
+
+  /* This is a hash table used to index the minimal symbols by name.  */
+
+  struct minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE];
+
+  /* This hash table is used to index the minimal symbols by their
+     demangled names.  */
+
+  struct minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE];
 };
 
 /* Master structure for keeping track of each file from which
@@ -302,28 +339,6 @@ struct objfile
 
     struct psymbol_allocation_list global_psymbols;
     struct psymbol_allocation_list static_psymbols;
-
-    /* Each file contains a pointer to an array of minimal symbols for all
-       global symbols that are defined within the file.  The array is
-       terminated by a "null symbol", one that has a NULL pointer for the
-       name and a zero value for the address.  This makes it easy to walk
-       through the array when passed a pointer to somewhere in the middle
-       of it.  There is also a count of the number of symbols, which does
-       not include the terminating null symbol.  The array itself, as well
-       as all the data that it points to, should be allocated on the
-       objfile_obstack for this file.  */
-
-    struct minimal_symbol *msymbols;
-    int minimal_symbol_count;
-
-    /* This is a hash table used to index the minimal symbols by name.  */
-
-    struct minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE];
-
-    /* This hash table is used to index the minimal symbols by their
-       demangled names.  */
-
-    struct minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE];
 
     /* Structure which keeps track of functions that manipulate objfile's
        of the same type as this objfile.  I.e. the function to read partial
@@ -588,8 +603,10 @@ extern void default_iterate_over_objfiles_in_search_order
 
 /* Traverse all minimal symbols in one objfile.  */
 
-#define	ALL_OBJFILE_MSYMBOLS(objfile, m) \
-    for ((m) = (objfile) -> msymbols; SYMBOL_LINKAGE_NAME(m) != NULL; (m)++)
+#define	ALL_OBJFILE_MSYMBOLS(objfile, m)	\
+    for ((m) = (objfile)->per_bfd->msymbols;	\
+	 MSYMBOL_LINKAGE_NAME (m) != NULL;	\
+	 (m)++)
 
 /* Traverse all symtabs in all objfiles in the current symbol
    space.  */

@@ -1305,6 +1305,17 @@ typedef int (gdbarch_insn_is_jump_ftype) (struct gdbarch *gdbarch, CORE_ADDR add
 extern int gdbarch_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_insn_is_jump (struct gdbarch *gdbarch, gdbarch_insn_is_jump_ftype *insn_is_jump);
 
+/* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
+   Return 0 if *READPTR is already at the end of the buffer.
+   Return -1 if there is insufficient buffer for a whole entry.
+   Return 1 if an entry was read into *TYPEP and *VALP. */
+
+extern int gdbarch_auxv_parse_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_auxv_parse_ftype) (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
+extern int gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
+extern void set_gdbarch_auxv_parse (struct gdbarch *gdbarch, gdbarch_auxv_parse_ftype *auxv_parse);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 

@@ -1,3 +1,51 @@
+2014-02-27  Yuri Gribov  <y.gribov@samsung.com>
+
+	* emultempl/armelf.em (OPTION_LONG_PLT): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add long-plt.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Handle long-plt.
+	* ld.texinfo: Document --long-plt.
+
+2014-02-27  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf32ppcvxworks.sh: Source plt_unwind.sh and
+	use ppc32elf.em.
+	* emultempl/ppc32elf.em (ppc_after_open): Don't compile for
+	vxworks.
+	(LDEMUL_AFTER_OPEN): Don't set for vxworks.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Exclude
+	-secure-plt, -bss-plt and -sdata-got when vxworks.
+
+2014-02-27  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (all_emul_extra_binaries): New variable.  Populated
+	by invoking configure.tgt.
+	(EMUL_EXTRA_BINARIES): New substitution.
+	* configure: Regenerate.
+	* configure.tgt (target_extra_binaries): New variable.  Set to
+	default-manifest.o for Cygwin and MinGW targets.
+	* Makefile.am (EMUL_EXTRA_BINARIES): New variable.  Initialised
+	by the configure script.
+	(ALL_EMUL_EXTRA_BINARIES): New variable.
+	(default-manifest.o): New rule to build the default manifest.
+	(ld_new_DEPENDENCIES): Add EMUL_EXTRA_BINARIES.
+	(install-data-local): Add EMUL_EXTRA_BINARIES.
+	* Makefile.in: Regenerate.
+	* ld.texinfo: Document default manifest support.
+	* emulparams/i386pe.sh (DEFAULT_MANIFEST): Define.
+	* emulparams/i386pep.sh (DEFAULT_MANIFEST): Define.
+	* emultempl/default-manifest.rc: New file.
+	* scripttempl/pe.sc (R_RSRC): Include DEFAULT_MANIFEST, if defined.
+	* scripttempl/pep.sc (R_RSRC): Likewise.
+
+2014-02-26  Dan Mick  <dan.mick@inktank.com>
+
+	PR ld/16569
+	* ldcref.c (cref_sort_array): Compare unmangled names unless
+	demanglng has been requiested.
+	(output_one_cref): Output unmangled name unless demangling has
+	been requested.
+
 2014-02-19  Igor Zamyatin  <igor.zamyatin@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

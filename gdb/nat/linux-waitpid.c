@@ -28,6 +28,8 @@
 #include "nat/linux-waitpid.h"
 #include "gdb_wait.h"
 
+#include <string.h>
+
 /* Print debugging output based on the format string FORMAT and
    its parameters.  */
 
@@ -47,6 +49,32 @@ linux_debug (const char *format, ...)
 #endif
 }
 
+/* Convert wait status STATUS to a string.  Used for printing debug
+   messages only.  */
+
+char *
+status_to_str (int status)
+{
+  static char buf[64];
+
+  if (WIFSTOPPED (status))
+    {
+      if (WSTOPSIG (status) == SYSCALL_SIGTRAP)
+	snprintf (buf, sizeof (buf), "%s (stopped at syscall)",
+		  strsignal (SIGTRAP));
+      else
+	snprintf (buf, sizeof (buf), "%s (stopped)",
+		  strsignal (WSTOPSIG (status)));
+    }
+  else if (WIFSIGNALED (status))
+    snprintf (buf, sizeof (buf), "%s (terminated)",
+	      strsignal (WTERMSIG (status)));
+  else
+    snprintf (buf, sizeof (buf), "%d (exited)", WEXITSTATUS (status));
+
+  return buf;
+}
+
 /* Wrapper function for waitpid which handles EINTR, and emulates
    __WALL for systems where that is not available.  */
 
@@ -64,15 +92,19 @@ my_waitpid (int pid, int *status, int flags)
 
       wnohang = (flags & WNOHANG) != 0;
       flags &= ~(__WALL | __WCLONE);
-      flags |= WNOHANG;
 
-      /* Block all signals while here.  This avoids knowing about
-	 LinuxThread's signals.  */
-      sigfillset (&block_mask);
-      sigprocmask (SIG_BLOCK, &block_mask, &org_mask);
+      if (!wnohang)
+	{
+	  flags |= WNOHANG;
 
-      /* ... except during the sigsuspend below.  */
-      sigemptyset (&wake_mask);
+	  /* Block all signals while here.  This avoids knowing about
+	     LinuxThread's signals.  */
+	  sigfillset (&block_mask);
+	  sigprocmask (SIG_BLOCK, &block_mask, &org_mask);
+
+	  /* ... except during the sigsuspend below.  */
+	  sigemptyset (&wake_mask);
+	}
 
       while (1)
 	{
@@ -101,7 +133,8 @@ my_waitpid (int pid, int *status, int flags)
 	  flags ^= __WCLONE;
 	}
 
-      sigprocmask (SIG_SETMASK, &org_mask, NULL);
+      if (!wnohang)
+	sigprocmask (SIG_SETMASK, &org_mask, NULL);
     }
   else
     {

@@ -325,9 +325,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 	      && bfd_get_section_by_name (abfd, ".plt") != NULL)
 	    continue;
 
-	  symaddr += ANOFFSET (objfile->section_offsets,
-			       gdb_bfd_section_index (objfile->obfd, sect));
-
 	  msym = record_minimal_symbol
 	    (sym->name, strlen (sym->name), copy_names,
 	     symaddr, mst_solib_trampoline, sect, objfile);
@@ -367,13 +364,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 	     interested in will have a section.  */
 	  /* Bfd symbols are section relative.  */
 	  symaddr = sym->value + sym->section->vma;
-	  /* Relocate all non-absolute and non-TLS symbols by the
-	     section offset.  */
-	  if (sym->section != bfd_abs_section_ptr
-	      && !(sym->section->flags & SEC_THREAD_LOCAL))
-	    {
-	      symaddr += offset;
-	    }
 	  /* For non-absolute symbols, use the type of the section
 	     they are relative to, to intuit text/data.  Bfd provides
 	     no way of figuring this out for absolute symbols.  */
@@ -409,7 +399,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 		{
 		  if (sym->name[0] == '.')
 		    continue;
-		  symaddr += offset;
 		}
 	    }
 	  else if (sym->section->flags & SEC_CODE)
@@ -765,10 +754,10 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   msym = lookup_minimal_symbol_by_pc (addr);
   if (msym.minsym == NULL)
     return 0;
-  if (SYMBOL_VALUE_ADDRESS (msym.minsym) != addr)
+  if (BMSYMBOL_VALUE_ADDRESS (msym) != addr)
     return 0;
   /* minimal symbols have always SYMBOL_OBJ_SECTION non-NULL.  */
-  sect = SYMBOL_OBJ_SECTION (msym.objfile, msym.minsym)->the_bfd_section;
+  sect = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym)->the_bfd_section;
   objfile = msym.objfile;
 
   /* If .plt jumps back to .plt the symbol is still deferred for later
@@ -884,20 +873,20 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       CORE_ADDR pointer_address, addr;
       asection *plt;
       gdb_byte *buf = alloca (ptr_size);
-      struct minimal_symbol *msym;
+      struct bound_minimal_symbol msym;
 
       msym = lookup_minimal_symbol (name_got_plt, NULL, objfile);
-      if (msym == NULL)
+      if (msym.minsym == NULL)
 	continue;
-      if (MSYMBOL_TYPE (msym) != mst_slot_got_plt)
+      if (MSYMBOL_TYPE (msym.minsym) != mst_slot_got_plt)
 	continue;
-      pointer_address = SYMBOL_VALUE_ADDRESS (msym);
+      pointer_address = BMSYMBOL_VALUE_ADDRESS (msym);
 
       plt = bfd_get_section_by_name (obfd, ".plt");
       if (plt == NULL)
 	continue;
 
-      if (MSYMBOL_SIZE (msym) != ptr_size)
+      if (MSYMBOL_SIZE (msym.minsym) != ptr_size)
 	continue;
       if (target_read_memory (pointer_address, buf, ptr_size) != 0)
 	continue;
@@ -1091,39 +1080,14 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   update_breakpoint_locations (b, sals, sals_end);
 }
 
-/* Scan and build partial symbols for a symbol file.
-   We have been initialized by a call to elf_symfile_init, which
-   currently does nothing.
-
-   SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
-   in each section.  We simplify it down to a single offset for all
-   symbols.  FIXME.
-
-   This function only does the minimum work necessary for letting the
-   user "name" things symbolically; it does not read the entire symtab.
-   Instead, it reads the external and static symbols and puts them in partial
-   symbol tables.  When more extensive information is requested of a
-   file, the corresponding partial symbol table is mutated into a full
-   fledged symbol table by going back and reading the symbols
-   for real.
-
-   We look for sections with specific names, to tell us what debug
-   format to look for:  FIXME!!!
-
-   elfstab_build_psymtabs() handles STABS symbols;
-   mdebug_build_psymtabs() handles ECOFF debugging information.
-
-   Note that ELF files have a "minimal" symbol table, which looks a lot
-   like a COFF symbol table, but has only the minimal information necessary
-   for linking.  We process this also, and use the information to
-   build gdb's minimal symbol table.  This gives us some minimal debugging
-   capability even for files compiled without -g.  */
+/* A helper function for elf_symfile_read that reads the minimal
+   symbols.  */
 
 static void
-elf_symfile_read (struct objfile *objfile, int symfile_flags)
+elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
+			  const struct elfinfo *ei)
 {
   bfd *synth_abfd, *abfd = objfile->obfd;
-  struct elfinfo ei;
   struct cleanup *back_to;
   long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
   asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
@@ -1137,10 +1101,23 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 			  objfile_name (objfile));
     }
 
+  /* If we already have minsyms, then we can skip some work here.
+     However, if there were stabs or mdebug sections, we go ahead and
+     redo all the work anyway, because the psym readers for those
+     kinds of debuginfo need extra information found here.  This can
+     go away once all types of symbols are in the per-BFD object.  */
+  if (objfile->per_bfd->minsyms_read
+      && ei->stabsect == NULL
+      && ei->mdebugsect == NULL)
+    {
+      if (symtab_create_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "... minimal symbols previously read\n");
+      return;
+    }
+
   init_minimal_symbol_collection ();
   back_to = make_cleanup_discard_minimal_symbols ();
-
-  memset ((char *) &ei, 0, sizeof (ei));
 
   /* Allocate struct to keep track of the symfile.  */
   dbx = XCNEW (struct dbx_symfile_info);
@@ -1245,12 +1222,46 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 
   if (symtab_create_debug)
     fprintf_unfiltered (gdb_stdlog, "Done reading minimal symbols.\n");
+}
 
-  /* Now process debugging information, which is contained in
-     special ELF sections.  */
+/* Scan and build partial symbols for a symbol file.
+   We have been initialized by a call to elf_symfile_init, which
+   currently does nothing.
 
-  /* We first have to find them...  */
+   SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
+   in each section.  We simplify it down to a single offset for all
+   symbols.  FIXME.
+
+   This function only does the minimum work necessary for letting the
+   user "name" things symbolically; it does not read the entire symtab.
+   Instead, it reads the external and static symbols and puts them in partial
+   symbol tables.  When more extensive information is requested of a
+   file, the corresponding partial symbol table is mutated into a full
+   fledged symbol table by going back and reading the symbols
+   for real.
+
+   We look for sections with specific names, to tell us what debug
+   format to look for:  FIXME!!!
+
+   elfstab_build_psymtabs() handles STABS symbols;
+   mdebug_build_psymtabs() handles ECOFF debugging information.
+
+   Note that ELF files have a "minimal" symbol table, which looks a lot
+   like a COFF symbol table, but has only the minimal information necessary
+   for linking.  We process this also, and use the information to
+   build gdb's minimal symbol table.  This gives us some minimal debugging
+   capability even for files compiled without -g.  */
+
+static void
+elf_symfile_read (struct objfile *objfile, int symfile_flags)
+{
+  bfd *abfd = objfile->obfd;
+  struct elfinfo ei;
+
+  memset ((char *) &ei, 0, sizeof (ei));
   bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
+
+  elf_read_minimal_symbols (objfile, symfile_flags, &ei);
 
   /* ELF debugging information is inserted into the psymtab in the
      order of least informative first - most informative last.  Since

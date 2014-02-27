@@ -24,6 +24,7 @@
 #include "symtab.h"
 #include "target.h"
 #include "regcache.h"
+#include "objfiles.h"
 
 #include "gdb_proc_service.h"
 
@@ -194,7 +195,7 @@ ps_err_e
 ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
 		   const char *name, psaddr_t *sym_addr)
 {
-  struct minimal_symbol *ms;
+  struct bound_minimal_symbol ms;
   struct cleanup *old_chain = save_current_program_space ();
   struct inferior *inf = find_inferior_pid (ptid_get_pid (ph->ptid));
   ps_err_e result;
@@ -203,11 +204,11 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
 
   /* FIXME: kettenis/2000-09-03: What should we do with OBJ?  */
   ms = lookup_minimal_symbol (name, NULL, NULL);
-  if (ms == NULL)
+  if (ms.minsym == NULL)
     result = PS_NOSYM;
   else
     {
-      *sym_addr = core_addr_to_ps_addr (SYMBOL_VALUE_ADDRESS (ms));
+      *sym_addr = core_addr_to_ps_addr (BMSYMBOL_VALUE_ADDRESS (ms));
       result = PS_OK;
     }
 

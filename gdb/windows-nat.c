@@ -527,79 +527,6 @@ windows_store_inferior_registers (struct target_ops *ops,
     do_windows_store_inferior_registers (regcache, r);
 }
 
-/* Get the name of a given module at given base address.  If base_address
-   is zero return the first loaded module (which is always the name of the
-   executable).  */
-static int
-get_module_name (LPVOID base_address, char *dll_name_ret)
-{
-  DWORD len;
-  MODULEINFO mi;
-  int i;
-  HMODULE dh_buf[1];
-  HMODULE *DllHandle = dh_buf;	/* Set to temporary storage for
-				   initial query.  */
-  DWORD cbNeeded;
-#ifdef __CYGWIN__
-  cygwin_buf_t pathbuf[__PMAX];	/* Temporary storage prior to converting to
-				   posix form.  __PMAX is always enough
-				   as long as SO_NAME_MAX_PATH_SIZE is defined
-				   as 512.  */
-#endif
-
-  cbNeeded = 0;
-  /* Find size of buffer needed to handle list of modules loaded in
-     inferior.  */
-  if (!EnumProcessModules (current_process_handle, DllHandle,
-			   sizeof (HMODULE), &cbNeeded) || !cbNeeded)
-    goto failed;
-
-  /* Allocate correct amount of space for module list.  */
-  DllHandle = (HMODULE *) alloca (cbNeeded);
-  if (!DllHandle)
-    goto failed;
-
-  /* Get the list of modules.  */
-  if (!EnumProcessModules (current_process_handle, DllHandle, cbNeeded,
-				 &cbNeeded))
-    goto failed;
-
-  for (i = 0; i < (int) (cbNeeded / sizeof (HMODULE)); i++)
-    {
-      /* Get information on this module.  */
-      if (!GetModuleInformation (current_process_handle, DllHandle[i],
-				 &mi, sizeof (mi)))
-	error (_("Can't get module info"));
-
-      if (!base_address || mi.lpBaseOfDll == base_address)
-	{
-	  /* Try to find the name of the given module.  */
-#ifdef __CYGWIN__
-	  /* Cygwin prefers that the path be in /x/y/z format.  */
-	  len = GetModuleFileNameEx (current_process_handle,
-				      DllHandle[i], pathbuf, __PMAX);
-	  if (len == 0)
-	    error (_("Error getting dll name: %u."),
-		   (unsigned) GetLastError ());
-	  if (cygwin_conv_path (CCP_WIN_W_TO_POSIX, pathbuf, dll_name_ret,
-				__PMAX) < 0)
-	    error (_("Error converting dll name to POSIX: %d."), errno);
-#else
-	  len = GetModuleFileNameEx (current_process_handle,
-				      DllHandle[i], dll_name_ret, __PMAX);
-	  if (len == 0)
-	    error (_("Error getting dll name: %u."),
-		   (unsigned) GetLastError ());
-#endif
-	  return 1;	/* success */
-	}
-    }
-
-failed:
-  dll_name_ret[0] = '\0';
-  return 0;		/* failure */
-}
-
 /* Encapsulate the information required in a call to
    symbol_file_add_args.  */
 struct safe_symbol_file_add_args
@@ -835,45 +762,26 @@ get_image_name (HANDLE h, void *address, int unicode)
   return buf;
 }
 
-/* Wait for child to do something.  Return pid of child, or -1 in case
-   of error; store status through argument pointer OURSTATUS.  */
+/* Handle a DLL load event, and return 1.
+
+   This function assumes that this event did not occur during inferior
+   initialization, where their event info may be incomplete (see
+   do_initial_windows_stuff and windows_add_all_dlls for more info
+   on how we handle DLL loading during that phase).  */
+
 static int
 handle_load_dll (void *dummy)
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
-  char dll_buf[__PMAX];
-  char *dll_name = NULL;
-
-  dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
-
-  /* Try getting the DLL name by searching the list of known modules
-     and matching their base address against this new DLL's base address.
-
-     FIXME: brobecker/2013-12-10:
-     It seems odd to be going through this search if the DLL name could
-     simply be extracted via "event->lpImageName".  Moreover, some
-     experimentation with various versions of Windows seem to indicate
-     that it might still be too early for this DLL to be listed when
-     querying the system about the current list of modules, thus making
-     this attempt pointless.
-
-     This code can therefore probably be removed.  But at the time of
-     this writing, we are too close to creating the GDB 7.7 branch
-     for us to make such a change.  We are therefore defering it.  */
-
-  if (!get_module_name (event->lpBaseOfDll, dll_buf))
-    dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
-
-  dll_name = dll_buf;
+  char *dll_name;
 
   /* Try getting the DLL name via the lpImageName field of the event.
      Note that Microsoft documents this fields as strictly optional,
      in the sense that it might be NULL.  And the first DLL event in
      particular is explicitly documented as "likely not pass[ed]"
      (source: MSDN LOAD_DLL_DEBUG_INFO structure).  */
-  if (*dll_name == '\0')
-    dll_name = get_image_name (current_process_handle,
-			       event->lpImageName, event->fUnicode);
+  dll_name = get_image_name (current_process_handle,
+			     event->lpImageName, event->fUnicode);
   if (!dll_name)
     return 1;
 
@@ -893,6 +801,14 @@ windows_free_so (struct so_list *so)
     xfree (so->lm_info);
   xfree (so);
 }
+
+/* Handle a DLL unload event.
+   Return 1 if successful, or zero otherwise.
+
+   This function assumes that this event did not occur during inferior
+   initialization, where their event info may be incomplete (see
+   do_initial_windows_stuff and windows_add_all_dlls for more info
+   on how we handle DLL loading during that phase).  */
 
 static int
 handle_unload_dll (void *dummy)
@@ -1576,7 +1492,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     (unsigned) current_event.dwThreadId,
 		     "LOAD_DLL_DEBUG_EVENT"));
       CloseHandle (current_event.u.LoadDll.hFile);
-      if (saw_create != 1)
+      if (saw_create != 1 || ! windows_initialization_done)
 	break;
       catch_errors (handle_load_dll, NULL, (char *) "", RETURN_MASK_ALL);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
@@ -1589,7 +1505,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "UNLOAD_DLL_DEBUG_EVENT"));
-      if (saw_create != 1)
+      if (saw_create != 1 || ! windows_initialization_done)
 	break;
       catch_errors (handle_unload_dll, NULL, (char *) "", RETURN_MASK_ALL);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
@@ -1722,31 +1638,17 @@ windows_wait (struct target_ops *ops,
     }
 }
 
-/* On certain versions of Windows, the information about ntdll.dll
-   is not available yet at the time we get the LOAD_DLL_DEBUG_EVENT,
-   thus preventing us from reporting this DLL as an SO. This has been
-   witnessed on Windows 8.1, for instance.  A possible explanation
-   is that ntdll.dll might be mapped before the SO info gets created
-   by the Windows system -- ntdll.dll is the first DLL to be reported
-   via LOAD_DLL_DEBUG_EVENT and other DLLs do not seem to suffer from
-   that problem.
-
-   If we indeed are missing ntdll.dll, this function tries to recover
-   from this issue, after the fact.  Do nothing if we encounter any
-   issue trying to locate that DLL.  */
+/* Iterate over all DLLs currently mapped by our inferior, and
+   add them to our list of solibs.  */
 
 static void
-windows_ensure_ntdll_loaded (void)
+windows_add_all_dlls (void)
 {
   struct so_list *so;
   HMODULE dummy_hmodule;
   DWORD cb_needed;
   HMODULE *hmodules;
   int i;
-
-  for (so = solib_start.next; so != NULL; so = so->next)
-    if (FILENAME_CMP (lbasename (so->so_name), "ntdll.dll") == 0)
-      return;  /* ntdll.dll already loaded, nothing to do.  */
 
   if (EnumProcessModules (current_process_handle, &dummy_hmodule,
 			  sizeof (HMODULE), &cb_needed) == 0)
@@ -1760,7 +1662,7 @@ windows_ensure_ntdll_loaded (void)
 			  cb_needed, &cb_needed) == 0)
     return;
 
-  for (i = 0; i < (int) (cb_needed / sizeof (HMODULE)); i++)
+  for (i = 1; i < (int) (cb_needed / sizeof (HMODULE)); i++)
     {
       MODULEINFO mi;
 #ifdef __USEWIDE
@@ -1781,12 +1683,9 @@ windows_ensure_ntdll_loaded (void)
 #else
       name = dll_name;
 #endif
-      if (FILENAME_CMP (lbasename (name), "ntdll.dll") == 0)
-	{
-	  solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
-	  solib_end = solib_end->next;
-	  return;
-	}
+
+      solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
+      solib_end = solib_end->next;
     }
 }
 
@@ -1843,13 +1742,22 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
 	break;
     }
 
-  /* FIXME: brobecker/2013-12-10: We should try another approach where
-     we first ignore all DLL load/unload events up until this point,
-     and then iterate over all modules to create the associated shared
-     objects.  This is a fairly significant change, however, and we are
-     close to creating a release branch, so we are delaying it a bit,
-     after the branch is created.  */
-  windows_ensure_ntdll_loaded ();
+  /* Now that the inferior has been started and all DLLs have been mapped,
+     we can iterate over all DLLs and load them in.
+
+     We avoid doing it any earlier because, on certain versions of Windows,
+     LOAD_DLL_DEBUG_EVENTs are sometimes not complete.  In particular,
+     we have seen on Windows 8.1 that the ntdll.dll load event does not
+     include the DLL name, preventing us from creating an associated SO.
+     A possible explanation is that ntdll.dll might be mapped before
+     the SO info gets created by the Windows system -- ntdll.dll is
+     the first DLL to be reported via LOAD_DLL_DEBUG_EVENT and other DLLs
+     do not seem to suffer from that problem.
+
+     Rather than try to work around this sort of issue, it is much
+     simpler to just ignore DLL load/unload events during the startup
+     phase, and then process them all in one batch now.  */
+  windows_add_all_dlls ();
 
   windows_initialization_done = 1;
   inf->control.stop_soon = NO_STOP_QUIETLY;
@@ -1993,6 +1901,60 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
   unpush_target (ops);
 }
 
+/* Try to determine the executable filename.
+
+   EXE_NAME_RET is a pointer to a buffer whose size is EXE_NAME_MAX_LEN.
+
+   Upon success, the filename is stored inside EXE_NAME_RET, and
+   this function returns nonzero.
+
+   Otherwise, this function returns zero and the contents of
+   EXE_NAME_RET is undefined.  */
+
+static int
+windows_get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len)
+{
+  DWORD len;
+  HMODULE dh_buf;
+  DWORD cbNeeded;
+
+  cbNeeded = 0;
+  if (!EnumProcessModules (current_process_handle, &dh_buf,
+			   sizeof (HMODULE), &cbNeeded) || !cbNeeded)
+    return 0;
+
+  /* We know the executable is always first in the list of modules,
+     which we just fetched.  So no need to fetch more.  */
+
+#ifdef __CYGWIN__
+  {
+    /* Cygwin prefers that the path be in /x/y/z format, so extract
+       the filename into a temporary buffer first, and then convert it
+       to POSIX format into the destination buffer.  */
+    cygwin_buf_t *pathbuf = alloca (exe_name_max_len * sizeof (cygwin_buf_t));
+
+    len = GetModuleFileNameEx (current_process_handle,
+			       dh_buf, pathbuf, exe_name_max_len);
+    if (len == 0)
+      error (_("Error getting executable filename: %u."),
+	     (unsigned) GetLastError ());
+    if (cygwin_conv_path (CCP_WIN_W_TO_POSIX, pathbuf, exe_name_ret,
+			  exe_name_max_len) < 0)
+      error (_("Error converting executable filename to POSIX: %d."), errno);
+  }
+#else
+  len = GetModuleFileNameEx (current_process_handle,
+			     dh_buf, exe_name_ret, exe_name_max_len);
+  if (len == 0)
+    error (_("Error getting executable filename: %u."),
+	   (unsigned) GetLastError ());
+#endif
+
+    return 1;	/* success */
+}
+
+/* The pid_to_exec_file target_ops method for this platform.  */
+
 static char *
 windows_pid_to_exec_file (struct target_ops *self, int pid)
 {
@@ -2013,7 +1975,7 @@ windows_pid_to_exec_file (struct target_ops *self, int pid)
 
   /* If we get here then either Cygwin is hosed, this isn't a Cygwin version
      of gdb, or we're trying to debug a non-Cygwin windows executable.  */
-  if (!get_module_name (0, path))
+  if (!windows_get_exec_module_filename (path, sizeof (path)))
     path[0] = '\0';
 
   return path;
@@ -2539,7 +2501,7 @@ windows_xfer_shared_libraries (struct target_ops *ops,
 
   obstack_free (&obstack, NULL);
   *xfered_len = (ULONGEST) len;
-  return TARGET_XFER_OK;
+  return len != 0 ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
 
 static enum target_xfer_status
@@ -2672,12 +2634,17 @@ _initialize_windows_nat (void)
   c = add_com ("dll-symbols", class_files, dll_symbol_command,
 	       _("Load dll library symbols from FILE."));
   set_cmd_completer (c, filename_completer);
+  deprecate_cmd (c, "sharedlibrary");
 
-  add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
+  c = add_com ("add-shared-symbol-files", class_files, dll_symbol_command,
+	       _("Load dll library symbols from FILE."));
+  set_cmd_completer (c, filename_completer);
+  deprecate_cmd (c, "sharedlibrary");
 
-  add_com_alias ("add-shared-symbol-files", "dll-symbols", class_alias, 1);
-
-  add_com_alias ("assf", "dll-symbols", class_alias, 1);
+  c = add_com ("assf", class_files, dll_symbol_command,
+	       _("Load dll library symbols from FILE."));
+  set_cmd_completer (c, filename_completer);
+  deprecate_cmd (c, "sharedlibrary");
 
 #ifdef __CYGWIN__
   add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\

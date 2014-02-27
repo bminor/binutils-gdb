@@ -822,11 +822,11 @@ mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 static CORE_ADDR
 mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct minimal_symbol *resolver;
+  struct bound_minimal_symbol resolver;
 
   resolver = lookup_minimal_symbol ("__dl_runtime_resolve", NULL, NULL);
 
-  if (resolver && SYMBOL_VALUE_ADDRESS (resolver) == pc)
+  if (resolver.minsym && BMSYMBOL_VALUE_ADDRESS (resolver) == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 
   return glibc_skip_solib_resolver (gdbarch, pc);

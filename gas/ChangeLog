@@ -1,3 +1,8 @@
+2014-02-21  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .prefetchwt1.
+	* doc/c-i386.texi: Document .prefetchwt1/prefetchwt1.
+
 2014-02-12  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .clflushopt, .xsavec, .xsaves.

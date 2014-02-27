@@ -550,7 +550,7 @@ btrace_get_bfun_name (const struct btrace_function *bfun)
   if (sym != NULL)
     return SYMBOL_PRINT_NAME (sym);
   else if (msym != NULL)
-    return SYMBOL_PRINT_NAME (msym);
+    return MSYMBOL_PRINT_NAME (msym);
   else
     return "??";
 }
@@ -594,7 +594,7 @@ btrace_call_history (struct ui_out *uiout,
       if (sym != NULL)
 	ui_out_field_string (uiout, "function", SYMBOL_PRINT_NAME (sym));
       else if (msym != NULL)
-	ui_out_field_string (uiout, "function", SYMBOL_PRINT_NAME (msym));
+	ui_out_field_string (uiout, "function", MSYMBOL_PRINT_NAME (msym));
       else if (!ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "function", "??");
 
@@ -827,7 +827,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	    if (writebuf != NULL)
 	      {
 		*xfered_len = len;
-		return TARGET_XFER_E_UNAVAILABLE;
+		return TARGET_XFER_UNAVAILABLE;
 	      }
 
 	    /* We allow reading readonly memory.  */
@@ -846,7 +846,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	      }
 
 	    *xfered_len = len;
-	    return TARGET_XFER_E_UNAVAILABLE;
+	    return TARGET_XFER_UNAVAILABLE;
 	  }
 	}
     }
@@ -858,7 +858,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 				   offset, len, xfered_len);
 
   *xfered_len = len;
-  return TARGET_XFER_E_UNAVAILABLE;
+  return TARGET_XFER_UNAVAILABLE;
 }
 
 /* The to_insert_breakpoint method of target record-btrace.  */

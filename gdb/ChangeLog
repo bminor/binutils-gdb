@@ -1,3 +1,950 @@
+2014-02-27  Pedro Alves  <palves@redhat.com>
+
+	* nat/linux-waitpid.c (my_waitpid): Only block signals if WNOHANG
+	isn't set.
+
+2014-02-27  Pedro Alves  <palves@redhat.com>
+
+	PR 12702
+	* linux-nat.c (status_to_str): Moved to nat/linux-waitpid.c.
+	* nat/linux-waitpid.c: Include string.h.
+	(status_to_str): Moved here and made extern.
+	* nat/linux-waitpid.h (status_to_str): New declaration.
+
+2014-02-27  Hui Zhu  <hui@codesourcery.com>
+
+	PR 12702
+	* infrun.c (ptid_match): Move ...
+	* common/ptid.c (ptid_match): ... here.
+	* inferior.h (ptid_match): Move ...
+	* common/ptid.h (ptid_match): ... here.
+
+2014-02-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips64obsd-tdep.c (mips64obsd_init_abi): Call obsd_init_abi.
+	* configure.tgt (mips64*-*-openbsd*): Add obsd-tdep.c to
+	gdb_target_obs.
+
+2014-02-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* obsd-tdep.c (obsd_auxv_parse): New function.
+	(obsd_init_abi): Set auxv_parse.
+
+	* gdbarch.sh (auxv_parse): New.
+	* gdbarch.h: Regenerated.
+	* gdbarch.c: Regenerated.
+	* auxv.c (target_auxv_parse): Call gdbarch_parse_auxv if provided.
+
+2014-02-26  Ludovic Courtès  <ludo@gnu.org>
+
+	* guile/scm-value.c (gdbscm_history_append_x): New function.
+	(value_functions): Add it.
+
+2014-02-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (attr_value_as_address): New function.
+	(dwarf2_find_base_address, read_call_site_scope): Use
+	attr_value_as_address in place of DW_ADDR.
+	(dwarf2_get_pc_bounds): Use attr_value_as_address to get
+	the low and high addresses.  Slight rework of the handling
+	of the high pc being a constant form, and limit it to
+	DWARF verson 4 or higher.
+	(dwarf2_record_block_ranges): Likewise.
+	(read_partial_die): Likewise.
+	(new_symbol_full): Use attr_value_as_address in place of DW_ADDR.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* exec.c (exec_file_attach): Hold a reference to exec_bfd.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* elfread.c (elf_read_minimal_symbols): Return early if
+	minimal symbols have already been read.  Add "ei" parameter.
+	(elf_symfile_read): Call elf_read_minimal_symbols earlier.
+	* minsyms.c (prim_record_minimal_symbol_full): Update.
+	* objfiles.h (struct objstats) <n_minsyms>: Move...
+	(struct objfile_per_bfd_storage) <n_minsyms>: ... here.
+	* symmisc.c (print_objfile_statistics): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* elfread.c (elf_read_minimal_symbols): New function, from
+	elf_symfile_read.
+	(elf_symfile_read): Call it.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol, iterate_over_minimal_symbols)
+	(lookup_minimal_symbol_text, lookup_minimal_symbol_by_pc_name)
+	(lookup_minimal_symbol_solib_trampoline)
+	(lookup_minimal_symbol_by_pc_section_1)
+	(lookup_minimal_symbol_and_objfile): Update.
+	(prim_record_minimal_symbol_full): Use the per-BFD obstack.
+	Don't allocate a minimal symbol if minsyms have already been read.
+	(build_minimal_symbol_hash_tables): Update.
+	(install_minimal_symbols): Do nothing if minsyms already read.
+	Use the per-BFD obstack.
+	(terminate_minimal_symbol_table): Use the per-BFD obstack.
+	* objfiles.c (allocate_objfile): Call
+	terminate_minimal_symbol_table later.
+	(have_minimal_symbols): Update.
+	* objfiles.h (struct objfile_per_bfd_storage) <msymbols,
+	minimal_symbol_count, msymbol_hash, msymbol_demangled_hash>:
+	Move from struct objfile.
+	<minsyms_read>: New field.
+	(struct objfile) <msymbols, minimal_symbol_count,
+	msymbol_hash, msymbol_demangled_hash>: Move.
+	(ALL_OBJFILE_MSYMBOLS): Update.
+	* symfile.c (read_symbols): Set minsyms_read.
+	(reread_symbols): Update.
+	* symmisc.c (dump_objfile, dump_msymbols): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* minsyms.c (msymbols_sort): Remove.
+	* minsyms.h (msymbols_sort): Remove.
+	* objfiles.c (objfile_relocate1): Don't relocate minsyms.
+	* symtab.h (MSYMBOL_VALUE_ADDRESS): Use objfile offsets.
+	* elfread.c (elf_symtab_read): Don't add section offsets.
+	* xcoffread.c (record_minimal_symbol): Don't add section offset
+	to minimal symbol address.
+	* somread.c (text_offset, data_offset): Remove.
+	(som_symtab_read): Don't add section offsets to minimal symbol
+	addresses.
+	* coff-pe-read.c (add_pe_forwarded_sym, read_pe_exported_syms):
+	Don't add section offsets to minimal symbols.
+	* coffread.c (coff_symtab_read): Don't add section offsets
+	to minimal symbol addresses.
+	* machoread.c (macho_symtab_add_minsym): Don't add section offset
+	to minimal symbol addresses.
+	* mipsread.c (read_alphacoff_dynamic_symtab): Don't add
+	section offset to minimal symbol addresses.
+	* mdebugread.c (parse_partial_symbols): Don't add section
+	offset to minimal symbol addresses.
+	* dbxread.c (read_dbx_dynamic_symtab): Don't add section
+	offset to minimal symbol addresses.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c (ada_main_name): Update.
+	(ada_add_standard_exceptions): Update.
+	* ada-tasks.c (ada_tasks_inferior_data_sniffer): Update.
+	* aix-thread.c (pdc_symbol_addrs, pd_enable): Update.
+	* arm-tdep.c (skip_prologue_function, arm_skip_stub): Update.
+	* auxv.c (ld_so_xfer_auxv): Update.
+	* avr-tdep.c (avr_scan_prologue): Update.
+	* ax-gdb.c (gen_var_ref): Update.
+	* blockframe.c (get_pc_function_start)
+	(find_pc_partial_function_gnu_ifunc): Update.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint): Update.
+	* bsd-uthread.c (bsd_uthread_lookup_address): Update.
+	* c-valprint.c (c_val_print): Update.
+	* coff-pe-read.c (add_pe_forwarded_sym): Update.
+	* common/agent.c (agent_look_up_symbols): Update.
+	* dbxread.c (find_stab_function_addr, end_psymtab): Update.
+	* dwarf2loc.c (call_site_to_target_addr): Update.
+	* dwarf2read.c (dw2_find_pc_sect_symtab): Update.
+	* elfread.c (elf_gnu_ifunc_record_cache)
+	(elf_gnu_ifunc_resolve_by_got): Update.
+	* findvar.c (default_read_var_value): Update.
+	* frame.c (inside_main_func): Update.
+	* frv-tdep.c (frv_frame_this_id): Update.
+	* glibc-tdep.c (glibc_skip_solib_resolver): Update.
+	* gnu-v3-abi.c (gnuv3_get_typeid, gnuv3_skip_trampoline):
+	Update.
+	* hppa-hpux-tdep.c (hppa64_hpux_search_dummy_call_sequence)
+	(hppa_hpux_find_dummy_bpaddr): Update.
+	* hppa-tdep.c (hppa_symbol_address): Update.
+	* infcmd.c (until_next_command): Update.
+	* jit.c (jit_read_descriptor, jit_breakpoint_re_set_internal):
+	Update.
+	* linespec.c (minsym_found, add_minsym): Update.
+	* linux-nat.c (get_signo): Update.
+	* linux-thread-db.c (inferior_has_bug): Update.
+	* m32c-tdep.c (m32c_return_value)
+	(m32c_m16c_address_to_pointer): Update.
+	* m32r-tdep.c (m32r_frame_this_id): Update.
+	* m68hc11-tdep.c (m68hc11_get_register_info): Update.
+	* machoread.c (macho_resolve_oso_sym_with_minsym): Update.
+	* maint.c (maintenance_translate_address): Update.
+	* minsyms.c (lookup_minimal_symbol_by_pc_name): Update.
+	(frob_address): New function.
+	(lookup_minimal_symbol_by_pc_section_1): Use raw addresses,
+	frob_address.  Rename parameter to "pc_in".
+	(compare_minimal_symbols, compact_minimal_symbols): Use raw
+	addresses.
+	(find_solib_trampoline_target, minimal_symbol_upper_bound):
+	Update.
+	* mips-linux-tdep.c (mips_linux_skip_resolver): Update.
+	* mips-tdep.c (mips_skip_pic_trampoline_code): Update.
+	* objc-lang.c (find_objc_msgsend): Update.
+	* objfiles.c (objfile_relocate1): Update.
+	* obsd-tdep.c (obsd_skip_solib_resolver): Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* parse.c (write_exp_msymbol): Update.
+	* ppc-linux-tdep.c (ppc_linux_spe_context_lookup)
+	(ppc_elfv2_skip_entrypoint): Update.
+	* ppc-sysv-tdep.c (convert_code_addr_to_desc_addr): Update.
+	* printcmd.c (build_address_symbolic, msym_info)
+	(address_info): Update.
+	* proc-service.c (ps_pglobal_lookup): Update.
+	* psymtab.c (find_pc_sect_psymtab_closer)
+	(find_pc_sect_psymtab, find_pc_sect_symtab_from_partial):
+	Change msymbol parameter to bound_minimal_symbol.
+	* ravenscar-thread.c (get_running_thread_id): Update.
+	* remote.c (remote_check_symbols): Update.
+	* sh64-tdep.c (sh64_elf_make_msymbol_special): Use raw
+	address.
+	* sol2-tdep.c (sol2_skip_solib_resolver): Update.
+	* solib-dsbt.c (lm_base): Update.
+	* solib-frv.c (lm_base, main_got): Update.
+	* solib-irix.c (locate_base): Update.
+	* solib-som.c (som_solib_create_inferior_hook)
+	(link_map_start): Update.
+	* solib-spu.c (spu_enable_break, ocl_enable_break): Update.
+	* solib-svr4.c (elf_locate_base, enable_break): Update.
+	* spu-tdep.c (spu_get_overlay_table, spu_catch_start)
+	(flush_ea_cache): Update.
+	* stabsread.c (define_symbol, scan_file_globals): Update.
+	* stack.c (find_frame_funname): Update.
+	* symfile-debug.c (debug_qf_expand_symtabs_matching)
+	(debug_qf_find_pc_sect_symtab): Update.
+	* symfile.c (simple_read_overlay_table)
+	(simple_overlay_update): Update.
+	* symfile.h (struct quick_symbol_functions)
+	<find_pc_sect_symtab>: Change type of msymbol to
+	bound_minimal_symbol.
+	* symmisc.c (dump_msymbols): Update.
+	* symtab.c (find_pc_sect_symtab_via_partial)
+	(find_pc_sect_psymtab, find_pc_sect_line, skip_prologue_sal)
+	(search_symbols, print_msymbol_info): Update.
+	* symtab.h (MSYMBOL_VALUE_RAW_ADDRESS): New macro.
+	(MSYMBOL_VALUE_ADDRESS): Redefine.
+	(BMSYMBOL_VALUE_ADDRESS): New macro.
+	* tracepoint.c (scope_info): Update.
+	* tui/tui-disasm.c (tui_find_disassembly_address)
+	(tui_get_begin_asm_address): Update.
+	* valops.c (find_function_in_inferior): Update.
+	* value.c (value_static_field, value_fn_field): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c (ada_update_initial_language): Update.
+	(ada_main_name, ada_has_this_exception_support): Update.
+	* ada-tasks.c (ada_tasks_inferior_data_sniffer): Update.
+	* aix-thread.c (pdc_symbol_addrs, pd_enable): Update.
+	* arm-tdep.c (arm_skip_stub): Update.
+	* auxv.c (ld_so_xfer_auxv): Update.
+	* avr-tdep.c (avr_scan_prologue): Update.
+	* ax-gdb.c (gen_var_ref): Update.
+	* breakpoint.c (struct breakpoint_objfile_data)
+	<overlay_msym, longjmp_msym, terminate_msym, exception_msym>: Change
+	type to bound_minimal_symbol.
+	(create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint): Update.
+	* bsd-uthread.c (bsd_uthread_lookup_address): Update.
+	* c-exp.y (classify_name): Update.
+	* coffread.c (coff_symfile_read): Update.
+	* common/agent.c (agent_look_up_symbols): Update.
+	* d-lang.c (d_main_name): Update.
+	* dbxread.c (find_stab_function_addr, end_psymtab): Update.
+	* dec-thread.c (enable_dec_thread): Update.
+	* dwarf2loc.c (call_site_to_target_addr): Update.
+	* elfread.c (elf_gnu_ifunc_resolve_by_got): Update.
+	* eval.c (evaluate_subexp_standard): Update.
+	* findvar.c (struct minsym_lookup_data) <result>: Change type
+	to bound_minimal_symbol.
+	<objfile>: Remove.
+	(minsym_lookup_iterator_cb, default_read_var_value): Update.
+	* frame.c (inside_main_func): Update.
+	* frv-tdep.c (frv_frame_this_id): Update.
+	* gcore.c (call_target_sbrk): Update.
+	* glibc-tdep.c (glibc_skip_solib_resolver): Update.
+	* gnu-v3-abi.c (gnuv3_get_typeid, gnuv3_skip_trampoline):
+	Update.
+	* go-lang.c (go_main_name): Update.
+	* hppa-hpux-tdep.c (hppa_hpux_skip_trampoline_code)
+	(hppa_hpux_find_import_stub_for_addr): Update.
+	* hppa-tdep.c (hppa_extract_17,	hppa_lookup_stub_minimal_symbol):
+	Update.  Change return type.
+	* hppa-tdep.h (hppa_lookup_stub_minimal_symbol): Change return
+	type.
+	* jit.c (jit_breakpoint_re_set_internal): Update.
+	* linux-fork.c (inferior_call_waitpid, checkpoint_command):
+	Update.
+	* linux-nat.c (get_signo): Update.
+	* linux-thread-db.c (inferior_has_bug): Update
+	* m32c-tdep.c (m32c_return_value)
+	(m32c_m16c_address_to_pointer): Update.
+	* m32r-tdep.c (m32r_frame_this_id): Update.
+	* m68hc11-tdep.c (m68hc11_get_register_info): Update.
+	* machoread.c (macho_resolve_oso_sym_with_minsym): Update.
+	* minsyms.c (lookup_minimal_symbol_internal): Rename to
+	lookup_minimal_symbol.  Change return type.
+	(lookup_minimal_symbol): Remove.
+	(lookup_bound_minimal_symbol): Update.
+	(lookup_minimal_symbol_text): Change return type.
+	(lookup_minimal_symbol_solib_trampoline): Change return type.
+	* minsyms.h (lookup_minimal_symbol, lookup_minimal_symbol_text)
+	(lookup_minimal_symbol_solib_trampoline): Change return type.
+	* mips-linux-tdep.c (mips_linux_skip_resolver): Update.
+	* objc-lang.c (lookup_objc_class, lookup_child_selector)
+	(value_nsstring, find_imps): Update.
+	* obsd-tdep.c (obsd_skip_solib_resolver): Update.
+	* p-lang.c (pascal_main_name): Update.
+	* ppc-linux-tdep.c (ppc_linux_spe_context_lookup): Update.
+	* ppc-sysv-tdep.c (convert_code_addr_to_desc_addr): Update.
+	* proc-service.c (ps_pglobal_lookup): Update.
+	* ravenscar-thread.c (get_running_thread_msymbol): Change
+	return type.
+	(has_ravenscar_runtime, get_running_thread_id): Update.
+	* remote.c (remote_check_symbols): Update.
+	* sol-thread.c (ps_pglobal_lookup): Update.
+	* sol2-tdep.c (sol2_skip_solib_resolver): Update.
+	* solib-dsbt.c (lm_base): Update.
+	* solib-frv.c (lm_base, frv_relocate_section_addresses):
+	Update.
+	* solib-irix.c (locate_base): Update.
+	* solib-som.c (som_solib_create_inferior_hook)
+	(som_solib_desire_dynamic_linker_symbols, link_map_start):
+	Update.
+	* solib-spu.c (spu_enable_break): Update.
+	* solib-svr4.c (elf_locate_base, enable_break): Update.
+	* spu-tdep.c (spu_get_overlay_table, spu_catch_start)
+	(flush_ea_cache): Update.
+	* stabsread.c (define_symbol): Update.
+	* symfile.c (simple_read_overlay_table): Update.
+	* symtab.c (find_pc_sect_line): Update.
+	* tracepoint.c (scope_info): Update.
+	* tui-disasm.c (tui_get_begin_asm_address): Update.
+	* value.c (value_static_field): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* minsyms.c (prim_record_minimal_symbol_full): Use
+	SET_MSYMBOL_VALUE_ADDRESS.
+	* objfiles.c (objfile_relocate1): Use SET_MSYMBOL_VALUE_ADDRESS.
+	* sh64-tdep.c (sh64_elf_make_msymbol_special): Use
+	SET_MSYMBOL_VALUE_ADDRESS.
+	* symtab.h (MSYMBOL_VALUE_ADDRESS): Expand to an rvalue.
+	(SET_MSYMBOL_VALUE_ADDRESS): New macro.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (struct minimal_symbol) <mginfo>: Rename from ginfo.
+	(MSYMBOL_VALUE, MSYMBOL_VALUE_ADDRESS, MSYMBOL_VALUE_BYTES)
+	(MSYMBOL_BLOCK_VALUE, MSYMBOL_VALUE_CHAIN, MSYMBOL_LANGUAGE)
+	(MSYMBOL_SECTION, MSYMBOL_OBJ_SECTION, MSYMBOL_NATURAL_NAME)
+	(MSYMBOL_LINKAGE_NAME, MSYMBOL_PRINT_NAME, MSYMBOL_DEMANGLED_NAME)
+	(MSYMBOL_SET_LANGUAGE, MSYMBOL_SEARCH_NAME)
+	(MSYMBOL_MATCHES_SEARCH_NAME, MSYMBOL_SET_NAMES): New macros.
+	* ada-lang.c (ada_main_name): Update.
+	(ada_lookup_simple_minsym): Update.
+	(ada_make_symbol_completion_list): Update.
+	(ada_add_standard_exceptions): Update.
+	* ada-tasks.c (read_atcb, ada_tasks_inferior_data_sniffer): Update.
+	* aix-thread.c (pdc_symbol_addrs, pd_enable): Update.
+	* amd64-windows-tdep.c (amd64_skip_main_prologue): Update.
+	* arm-tdep.c (skip_prologue_function): Update.
+	(arm_skip_stack_protector, arm_skip_stub): Update.
+	* arm-wince-tdep.c (arm_pe_skip_trampoline_code): Update.
+	(arm_wince_skip_main_prologue): Update.
+	* auxv.c (ld_so_xfer_auxv): Update.
+	* avr-tdep.c (avr_scan_prologue): Update.
+	* ax-gdb.c (gen_var_ref): Update.
+	* block.c (call_site_for_pc): Update.
+	* blockframe.c (get_pc_function_start): Update.
+	(find_pc_partial_function_gnu_ifunc): Update.
+	* breakpoint.c (create_overlay_event_breakpoint): Update.
+	(create_longjmp_master_breakpoint): Update.
+	(create_std_terminate_master_breakpoint): Update.
+	(create_exception_master_breakpoint): Update.
+	(resolve_sal_pc): Update.
+	* bsd-uthread.c (bsd_uthread_lookup_address): Update.
+	* btrace.c (ftrace_print_function_name, ftrace_function_switched):
+	Update.
+	* c-valprint.c (c_val_print): Update.
+	* coff-pe-read.c (add_pe_forwarded_sym): Update.
+	* coffread.c (coff_symfile_read): Update.
+	* common/agent.c (agent_look_up_symbols): Update.
+	* dbxread.c (find_stab_function_addr): Update.
+	(end_psymtab): Update.
+	* dwarf2loc.c (call_site_to_target_addr): Update.
+	(func_verify_no_selftailcall): Update.
+	(tailcall_dump): Update.
+	(call_site_find_chain_1): Update.
+	(dwarf_expr_reg_to_entry_parameter): Update.
+	* elfread.c (elf_gnu_ifunc_record_cache): Update.
+	(elf_gnu_ifunc_resolve_by_got): Update.
+	* f-valprint.c (info_common_command): Update.
+	* findvar.c (read_var_value): Update.
+	* frame.c (get_prev_frame_1): Update.
+	(inside_main_func): Update.
+	* frv-tdep.c (frv_skip_main_prologue): Update.
+	(frv_frame_this_id): Update.
+	* glibc-tdep.c (glibc_skip_solib_resolver): Update.
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Update.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Update.
+	(gnuv3_skip_trampoline): Update.
+	* hppa-hpux-tdep.c (hppa32_hpux_in_solib_call_trampoline): Update.
+	(hppa64_hpux_in_solib_call_trampoline): Update.
+	(hppa_hpux_skip_trampoline_code): Update.
+	(hppa64_hpux_search_dummy_call_sequence): Update.
+	(hppa_hpux_find_import_stub_for_addr): Update.
+	(hppa_hpux_find_dummy_bpaddr): Update.
+	* hppa-tdep.c (hppa_symbol_address)
+	(hppa_lookup_stub_minimal_symbol): Update.
+	* i386-tdep.c (i386_skip_main_prologue): Update.
+	(i386_pe_skip_trampoline_code): Update.
+	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Update.
+	* infcall.c (get_function_name): Update.
+	* infcmd.c (until_next_command): Update.
+	* jit.c (jit_breakpoint_re_set_internal): Update.
+	(jit_inferior_init): Update.
+	* linespec.c (minsym_found): Update.
+	(add_minsym): Update.
+	* linux-fork.c (info_checkpoints_command): Update.
+	* linux-nat.c (get_signo): Update.
+	* linux-thread-db.c (inferior_has_bug): Update.
+	* m32c-tdep.c (m32c_return_value): Update.
+	(m32c_m16c_address_to_pointer): Update.
+	(m32c_m16c_pointer_to_address): Update.
+	* m32r-tdep.c (m32r_frame_this_id): Update.
+	* m68hc11-tdep.c (m68hc11_get_register_info): Update.
+	* machoread.c (macho_resolve_oso_sym_with_minsym): Update.
+	* maint.c (maintenance_translate_address): Update.
+	* minsyms.c (add_minsym_to_hash_table): Update.
+	(add_minsym_to_demangled_hash_table): Update.
+	(msymbol_objfile): Update.
+	(lookup_minimal_symbol): Update.
+	(iterate_over_minimal_symbols): Update.
+	(lookup_minimal_symbol_text): Update.
+	(lookup_minimal_symbol_by_pc_name): Update.
+	(lookup_minimal_symbol_solib_trampoline): Update.
+	(lookup_minimal_symbol_by_pc_section_1): Update.
+	(lookup_minimal_symbol_and_objfile): Update.
+	(prim_record_minimal_symbol_full): Update.
+	(compare_minimal_symbols): Update.
+	(compact_minimal_symbols): Update.
+	(build_minimal_symbol_hash_tables): Update.
+	(install_minimal_symbols): Update.
+	(terminate_minimal_symbol_table): Update.
+	(find_solib_trampoline_target): Update.
+	(minimal_symbol_upper_bound): Update.
+	* mips-linux-tdep.c (mips_linux_skip_resolver): Update.
+	* mips-tdep.c (mips_stub_frame_sniffer): Update.
+	(mips_skip_pic_trampoline_code): Update.
+	* msp430-tdep.c (msp430_skip_trampoline_code): Update.
+	* objc-lang.c (selectors_info): Update.
+	(classes_info): Update.
+	(find_methods): Update.
+	(find_imps): Update.
+	(find_objc_msgsend): Update.
+	* objfiles.c (objfile_relocate1): Update.
+	* objfiles.h (ALL_OBJFILE_MSYMBOLS): Update.
+	* obsd-tdep.c (obsd_skip_solib_resolver): Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* parse.c (write_exp_msymbol): Update.
+	* ppc-linux-tdep.c (powerpc_linux_in_dynsym_resolve_code)
+	(ppc_linux_spe_context_lookup, ppc_elfv2_skip_entrypoint): Update.
+	* ppc-sysv-tdep.c (convert_code_addr_to_desc_addr): Update.
+	* printcmd.c (build_address_symbolic): Update.
+	(sym_info): Update.
+	(address_info): Update.
+	* proc-service.c (ps_pglobal_lookup): Update.
+	* psymtab.c (find_pc_sect_psymtab_closer): Update.
+	(find_pc_sect_psymtab): Update.
+	* python/py-framefilter.c (py_print_frame): Update.
+	* ravenscar-thread.c (get_running_thread_id): Update.
+	* record-btrace.c (btrace_call_history, btrace_get_bfun_name):
+	Update.
+	* remote.c (remote_check_symbols): Update.
+	* rs6000-tdep.c (rs6000_skip_main_prologue): Update.
+	(rs6000_skip_trampoline_code): Update.
+	* sh64-tdep.c (sh64_elf_make_msymbol_special): Update.
+	* sol2-tdep.c (sol2_skip_solib_resolver): Update.
+	* solib-dsbt.c (lm_base): Update.
+	* solib-frv.c (lm_base): Update.
+	(main_got): Update.
+	* solib-irix.c (locate_base): Update.
+	* solib-som.c (som_solib_create_inferior_hook): Update.
+	(som_solib_desire_dynamic_linker_symbols): Update.
+	(link_map_start): Update.
+	* solib-spu.c (spu_enable_break): Update.
+	(ocl_enable_break): Update.
+	* solib-svr4.c (elf_locate_base): Update.
+	(enable_break): Update.
+	* spu-tdep.c (spu_get_overlay_table): Update.
+	(spu_catch_start): Update.
+	(flush_ea_cache): Update.
+	* stabsread.c (define_symbol): Update.
+	(scan_file_globals): Update.
+	* stack.c (find_frame_funname): Update.
+	(frame_info): Update.
+	* symfile.c (simple_read_overlay_table): Update.
+	(simple_overlay_update): Update.
+	* symmisc.c (dump_msymbols): Update.
+	* symtab.c (fixup_section): Update.
+	(find_pc_sect_line): Update.
+	(skip_prologue_sal): Update.
+	(search_symbols): Update.
+	(print_msymbol_info): Update.
+	(rbreak_command): Update.
+	(MCOMPLETION_LIST_ADD_SYMBOL): New macro.
+	(completion_list_objc_symbol): Update.
+	(default_make_symbol_completion_list_break_on): Update.
+	* tracepoint.c (scope_info): Update.
+	* tui/tui-disasm.c (tui_find_disassembly_address): Update.
+	(tui_get_begin_asm_address): Update.
+	* valops.c (find_function_in_inferior): Update.
+	* value.c (value_static_field): Update.
+	(value_fn_field): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* blockframe.c (find_pc_partial_function_gnu_ifunc): Use
+	bound minimal symbols.  Move code that knows about minsym
+	table layout...
+	* minsyms.c (minimal_symbol_upper_bound): ... here.  New
+	function.
+	* minsyms.h (minimal_symbol_upper_bound): Declare.
+	* objc-lang.c (find_objc_msgsend): Use bound minimal symbols,
+	minimal_symbol_upper_bound.
+
+2014-02-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* python/lib/gdb/printing.py (RegexpCollectionPrettyPrinter):
+	Use the type's name if its basic type does not have a tag.
+
+2014-02-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (read_subrange_type): Add comment.
+
+2014-02-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (update_enumeration_type_from_children): New
+	function, mostly extracted from process_structure_scope.
+	(read_enumeration_type): Call update_enumeration_type_from_children.
+	(process_enumeration_scope): Do not set THIS_TYPE's flag_unsigned
+	and flag_flag_enum fields.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* bsd-uthread.c (bsd_uthread_xfer_partial): Delete function.
+	(bsd_uthread_target): Don't install bsd_uthread_xfer_partial as
+	to_xfer_partial method.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* target.c (complete_target_initialization): Don't install
+	default_xfer_partial as to_xfer_partial hook.
+	(nomemory): Delete.
+	(update_current_target): Don't INHERIT nor de_fault
+	deprecated_xfer_memory.  Delete de_fault macro.
+	(default_xfer_partial, deprecated_debug_xfer_memory): Delete.
+	(setup_target_debug): Don't install a deprecated_xfer_memory hook.
+	* target.h (struct target_ops) <deprecated_xfer_memory>: Delete
+	field.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c (my_write_child): New function.
+	(go32_xfer_memory): Rewrite as to_xfer_partial helper.
+	(go32_xfer_partial): New function.
+	(init_go32_ops): Don't install a deprecated_xfer_memory hook.
+	Instead install a to_xfer_partial hook.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* nto-procfs.c (procfs_xfer_memory): Adjust interface as a
+	to_xfer_partial helper.  Rewrite.
+	(procfs_xfer_partial): New function.
+	(init_procfs_ops): Don't install a deprecated_xfer_memory hook.
+	Install a to_xfer_partial hook.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* remote-m32r-sdi.c (send_data): Constify 'buf' parameter.
+	(m32r_xfer_memory): Adjust as a to_xfer_partial helper.
+	(m32r_xfer_partial): New function.
+	(init_m32r_ops): Don't install a deprecated_xfer_memory hook.
+	Install a to_xfer_partial hook.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* remote-mips.c (mips_xfer_memory): Adjust as to_xfer_partial
+	helper.
+	(mips_xfer_partial): New function.
+	(_initialize_remote_mips): Don't install a deprecated_xfer_memory
+	hook.  Install a to_xfer_partial hook.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.h (create_array_type_with_stride): Add declaration.
+	* gdbtypes.c (create_array_type_with_stride): New function,
+	renaming create_array_type, but with an added parameter
+	called "bit_stride".
+	(create_array_type): Re-implement using
+	create_array_type_with_stride.
+	* dwarf2read.c (read_array_type): Add support for DW_AT_byte_stride
+	and DW_AT_bit_stride attributes.
+
+2014-02-26  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bpstat_check_breakpoint_conditions): Handle
+	task-specific breakpoints.
+
+2014-02-25  Pedro Alves  <palves@redhat.com>
+
+	* ia64-linux-nat.c (ia64_linux_xfer_partial): Reimplement
+	handling of object == TARGET_OBJECT_UNWIND_TABLE.
+
+2014-02-25  Stan Shebs  <stan@codesourcery.com>
+
+	* defs.h: Annotate comments for Doxygen.
+
+2014-02-25  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (target_ignore): Don't declare.
+	* target.c (target_ignore): Remove.
+
+2014-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/16626
+	* auto-load.c (auto_load_objfile_script_1): Change filename to
+	debugfile.
+
+2014-02-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-linux-nat.c (ia64_linux_xfer_partial): Add function
+	documentation.  Adjust prototype to match the target_ops
+	to_xfer_partial method.  Adjust implementation accordingly.
+
+2014-02-25  Hui Zhu  <hui@codesourcery.com>
+
+	* target.h (target_ops): Fix TARGET_DEFAULT_RETURN of
+	to_traceframe_info.
+
+2014-02-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (RL78_BANK0_RP0_PTR_REGNUM, RL78_BANK0_RP1_PTR_REGNUM)
+	(RL78_BANK0_RP2_PTR_REGNUM, RL78_BANK0_RP3_PTR_REGNUM)
+	(RL78_BANK1_RP0_PTR_REGNUM, RL78_BANK1_RP1_PTR_REGNUM)
+	(RL78_BANK1_RP2_PTR_REGNUM, RL78_BANK1_RP3_PTR_REGNUM)
+	(RL78_BANK2_RP0_PTR_REGNUM, RL78_BANK2_RP1_PTR_REGNUM)
+	(RL78_BANK2_RP2_PTR_REGNUM, RL78_BANK2_RP3_PTR_REGNUM)
+	(RL78_BANK3_RP0_PTR_REGNUM, RL78_BANK3_RP1_PTR_REGNUM)
+	(RL78_BANK3_RP2_PTR_REGNUM, RL78_BANK3_RP3_PTR_REGNUM):
+	New constants.
+	(rl78_register_type): Use a data pointer type for SP and
+	new pseudo registers mentioned above.  Use a 16 bit integer
+	type for all other register pairs.
+	(rl78_register_name, rl78_g10_register_name): Update for
+	new pseudo registers.
+	(rl78_pseudo_register_read): Likewise.
+	(rl78_pseudo_register_write): Likewise.
+	(rl78_dwarf_reg_to_regnum): Return register numbers representing
+	to the newly added pseudo registers.
+
+2014-02-24  Doug Evans  <dje@google.com>
+
+	* value.c (record_latest_value): Fix comment.
+	* printcmd.c (print_command_1): Remove code to handle -1 return from
+	record_latest_value.
+
+2014-02-24  Pedro Alves  <palves@redhat.com>
+
+	* procfs.c (procfs_target): Don't install procfs_xfer_memory as
+	deprecated_xfer_memory hook.
+	(procfs_xfer_partial): Call procfs_xfer_memory instead
+	of the deprecated_xfer_memory target hook.
+	(procfs_xfer_memory): Adjust interface as a to_xfer_partial
+	helper.
+
+2014-02-24  Yuanhui Zhang  <asmwarrior@gmail.com>
+
+	* windows-nat.c (windows_xfer_shared_libraries): Return
+	TARGET_XFER_EOF if LEN is zero to fix an assert failure when
+	requested object is TARGET_OBJECT_LIBRARIES.
+
+2014-02-24  Yao Qi  <yao@codesourcery.com>
+
+	* target.h (enum target_xfer_status)
+	<TARGET_XFER_E_UNAVAILABLE>: Rename it to ...
+	<TARGET_XFER_UNAVAILABLE>: ... it with setting value 2
+	explicitly.  New.
+	* corefile.c (memory_error_message): User updated.
+	* exec.c (section_table_read_available_memory): Likewise.
+	* record-btrace.c (record_btrace_xfer_partial): Likewise.
+	* target.c (target_xfer_status_to_string): Likewise.
+	(raw_memory_xfer_partial): Likewise.
+	(memory_xfer_partial_1, target_xfer_partial): Likewise.
+	* valops.c (read_value_memory): Likewise.
+	* exec.h: Update comments.
+
+2014-02-24  Yao Qi  <yao@codesourcery.com>
+
+	* target.c (target_xfer_status_to_string): Rename argument err
+	to status.
+	* target.h (target_xfer_status_to_string): Update declaration.
+	Replace target_xfer_error_to_string with
+	target_xfer_status_to_string in comment.
+
+2014-02-24  Yao Qi  <yao@codesourcery.com>
+
+	* mips-linux-nat.c (super_close): Update its type.
+	(mips_linux_close): Pass 'self' to super_close.
+
+2014-02-24  Yao Qi  <yao@codesourcery.com>
+
+	* target.h (TARGET_XFER_STATUS_ERROR_P): Remove.
+	* corefile.c (read_memory): Adjusted.
+	* target.c (target_write_with_progress): Adjusted.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	Revert two patches:
+
+	2013-10-25  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (remote_traceframe_info): Return early if
+	traceframe is not selected.
+
+	2013-07-19  Yao Qi  <yao@codesourcery.com>
+
+	* target.c (update_current_target): Change the default action
+	of 'to_traceframe_info' from tcomplain to return_zero.
+	* target.h (struct target_ops) <to_traceframe_info>: Add more
+	comments.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	* valops.c (read_value_memory): Rewrite it.  Call
+	target_xfer_partial in a loop.
+	* exec.h (section_table_available_memory): Remove declaration.
+	Move comments to ...
+	* exec.c (section_table_available_memory): ... here.  Make it
+	static.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	* exec.c (section_table_read_available_memory): New function.
+	* exec.h (section_table_read_available_memory): Declare.
+	* ctf.c (ctf_xfer_partial): Call
+	section_table_read_available_memory.
+	* tracefile-tfile.c (tfile_xfer_partial): Likewise.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_xfer_partial): Move code to ...
+	* exec.c (exec_read_partial_read_only): ... it.  New function.
+	* tracefile-tfile.c (tfile_xfer_partial): Likewise.
+	* tracefile.c: Include "exec.h".
+	* exec.h (exec_read_partial_read_only): Declare.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	* tracefile-tfile.c (tfile_has_all_memory): Remove.
+	(tfile_has_memory): Remove.
+	(init_tfile_ops): Don't set fields to_has_all_memory and
+	to_has_memory of tfile_ops.
+	* tracefile.c (tracefile_has_all_memory): New function.
+	(tracefile_has_memory): New function.
+	(init_tracefile_ops): Initialize fields to_has_all_memory and
+	to_has_memory of 'ops'.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_has_stack, ctf_has_registers): Remove.
+	(ctf_thread_alive, ctf_get_trace_status): Remove.
+	(init_ctf_ops): Don't set some fields of ctf_ops.  Call
+	init_tracefile_ops.
+	* tracefile-tfile.c (tfile_get_trace_status): Remove.
+	(tfile_has_stack, tfile_has_registers): Remove.
+	(tfile_thread_alive): Remove.
+	(init_tfile_ops): Don't set some fields of tfile_ops.  Call
+	init_tracefile_ops.
+	* tracefile.c (tracefile_has_stack): New function.
+	(tracefile_has_registers): New function.
+	(tracefile_thread_alive): New function.
+	(tracefile_get_trace_status): New function.
+	(init_tracefile_ops): New function.
+	* tracefile.h (init_tracefile_ops): Declare.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (TFILE_PID): Move it to tracefile-tfile.c.
+	(O_LARGEFILE): Likewise.
+	(tfile_ops): Likewise.
+	(TRACE_HEADER_SIZE): Likewise.
+	(trace_fd, trace_frames_offset, cur_offset): Likewise.
+	(cur_data_size): Likewise.
+	(tfile_read, tfile_open, tfile_interp_line): Likewise.
+	(tfile_close, tfile_files_info): Likewise.
+	(tfile_get_trace_status): Likewise.
+	(tfile_get_tracepoint_status): Likewise.
+	(tfile_get_traceframe_address): Likewise.
+	(tfile_trace_find, match_blocktype): Likewise.
+	(traceframe_walk_blocks, traceframe_find_block_type): Likewise.
+	(tfile_fetch_registers, tfile_xfer_partial): Likewise.
+	(tfile_get_trace_state_variable_value): Likewise.
+	(tfile_has_all_memory, tfile_has_memory): Likewise.
+	(tfile_has_stack, tfile_has_registers): Likewise.
+	(tfile_thread_alive, build_traceframe_info): Likewise.
+	(tfile_traceframe_info, init_tfile_ops): Likewise.
+	(_initialize_tracepoint): Don't call init_tfile_ops
+	and add_target_with_completer.
+	* tracefile-tfile.c: Include regcache.h, inferior.h, gdbthread.h,
+	exec.h, completer.h and filenames.h.
+	(_initialize_tracefile_tfile): New function.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (REMOTE_OBS): Append tracefile.o and
+	tracefile-tfile.o.
+	(HFILES_NO_SRCDIR): Add tracefile.h.
+	* ctf.c: Include "tracefile.h".
+	* tracefile.h: New file.
+	* tracefile.c: New file
+	* tracefile-tfile.c: New file.
+	* tracepoint.c: Include "tracefile.h".
+	(free_uploaded_tps, free_uploaded_tsvs): Remove declarations.
+	(stop_reason_names): Add const.
+	(trace_file_writer_xfree): Move it to tracefile.c.
+	(trace_save, trace_save_command, trace_save_tfile): Likewise.
+	(trace_save_ctf): Likewise.
+	(struct tfile_trace_file_writer): Move it to tracefile-tfile.c.
+	(tfile_target_save, tfile_dtor, tfile_start): Likewise.
+	(tfile_write_header, tfile_write_regblock_type): Likewise.
+	(tfile_write_status, tfile_write_uploaded_tsv): Likewise.
+	(tfile_write_uploaded_tp, tfile_write_definition_end): Likewise.
+	(tfile_write_raw_data, tfile_end): Likewise.
+	(tfile_trace_file_writer_new): Likewise.
+	(free_uploaded_tp): Make it extern.
+	(free_uploaded_tsv): Make it extern.
+	(_initialize_tracepoint): Move code to register command 'tsave'
+	to tracefile.c.
+	* tracepoint.h (stop_reason_names): Declare.
+	(struct trace_frame_write_ops): Move it to tracefile.h.
+	(struct trace_file_write_ops): Likewise.
+	(struct trace_file_writer): Likewise.
+	(free_uploaded_tsvs, free_uploaded_tps): Declare.
+
+2014-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/16594
+	* common/linux-osdata.c (linux_common_core_of_thread): Find the end of
+	process name.
+	(get_cores_used_by_process): New parameter num_cores, use it.
+	(linux_xfer_osdata_processes): Pass num_cores to it.
+	* linux-tdep.c (linux_info_proc, linux_fill_prpsinfo): Find the end of
+	process name.
+
+2014-02-21  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* target.c (memory_xfer_partial): Fix length arg in call to
+	breakpoint_xfer_memory.
+
+2014-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR tdep/16397
+	* i386-tdep.c (i386_stap_parse_special_token_triplet): Check if a
+	number comes after the + or - signs.  Adjust length of register
+	name to be extracted.
+
+2014-02-20  Tom Tromey  <tromey@redhat.com>
+
+	* varobj.h (c_varobj_ops, cplus_varobj_ops, java_varobj_ops)
+	(ada_varobj_ops): Mark "extern".
+
+2014-02-20  Tom Tromey  <tromey@redhat.com>
+
+	* dbxread.c (read_dbx_symtab): Remove last_o_file_start.
+
+2014-02-20  Doug Evans  <xdje42@gmail.com>
+
+	* guile/scm-gsmob.c (gdbscm_init_eqable_gsmob): New arg containing_scm.
+	All callers updated.
+	(gdbscm_fill_eqable_gsmob_ptr_slot): Delete arg containing_scm.
+	All callers updated.
+	* guile/guile-internal.h (gdbscm_init_eqable_gsmob): Update.
+	(gdbscm_fill_eqable_gsmob_ptr_slot): Update.
+
+2014-02-20  lin zuojian  <manjian2006@gmail.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/16581
+	* dwarf2read.c (struct die_info): New member in_process.
+	(reset_die_in_process): New function.
+	(process_die): Set it at the start, reset when returning.
+	(inherit_abstract_dies): Only call process_die if origin_child_die
+	not already being processed.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (handle_unload_dll): Add function documentation.
+	(do_initial_windows_stuff): Add comment explaining why we wait
+	until after inferior initialization has finished before
+	processing all DLLs.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (get_module_name): Delete.
+	(windows_get_exec_module_filename): New function, mostly
+	inspired from get_module_name.
+	(windows_pid_to_exec_file): Replace call to get_module_name
+	by call to windows_get_exec_module_filename.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (handle_load_dll): Rewrite this function's
+	introductory comment.  Remove code using get_module_name
+	to get the DLL's name.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (get_windows_debug_event): Ignore
+	LOAD_DLL_DEBUG_EVENT and UNLOAD_DLL_DEBUG_EVENT
+	if windows_initialization_done == 0.
+	(windows_add_all_dlls): Renames windows_ensure_ntdll_loaded.
+	Adjust implementation to always load all DLLs.
+	(do_initial_windows_stuff): Replace call to
+	windows_ensure_ntdll_loaded by call to windows_add_all_dlls.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (_initialize_windows_nat): Deprecate the
+	"dll-symbols" command.  Turn the "add-shared-symbol-files"
+	and "assf" aliases into commands, and deprecate them as well.
+	* NEWS: Add entry explaining that "dll-symbols" and its two
+	aliases are now deprecated.
+
+2014-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* dec-thread.c (dec_thread_get_ada_task_ptid): Avoid unescaped
+	new-line in debug string.  Remove trailing spaces.
+
+2014-02-19  Stan Shebs  <stan@codesourcery.com>
+
+	* darwin-nat.c (darwin_xfer_partial): Fix return type.
+
+2014-02-19  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* NEWS: Add entry for the new feature
+	* python/py-value.c (valpy_binop): Call value_x_binop for struct
+	and class values.
+
+2014-02-19  Stan Shebs  <stan@codesourcery.com>
+
+	* MAINTAINERS: List Yao Qi as nios2 maintainer.
+
 2014-02-19  Pedro Alves  <palves@redhat.com>
 
 	* common/ptid.h (struct ptid): Mention that process_stratum
@@ -2841,6 +3788,7 @@
 
 2014-02-07  Pedro Alves  <palves@redhat.com>
 
+	PR breakpoints/16292
 	* infrun.c (handle_signal_stop) <signal arrives while stepping
 	over a breakpoint>: Switch back to the stepping thread.
 

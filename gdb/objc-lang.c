@@ -120,9 +120,9 @@ lookup_objc_class (struct gdbarch *gdbarch, char *classname)
       return 0;
     }
 
-  if (lookup_minimal_symbol("objc_lookUpClass", 0, 0))
+  if (lookup_minimal_symbol("objc_lookUpClass", 0, 0).minsym)
     function = find_function_in_inferior("objc_lookUpClass", NULL);
-  else if (lookup_minimal_symbol ("objc_lookup_class", 0, 0))
+  else if (lookup_minimal_symbol ("objc_lookup_class", 0, 0).minsym)
     function = find_function_in_inferior("objc_lookup_class", NULL);
   else
     {
@@ -149,9 +149,9 @@ lookup_child_selector (struct gdbarch *gdbarch, char *selname)
       return 0;
     }
 
-  if (lookup_minimal_symbol("sel_getUid", 0, 0))
+  if (lookup_minimal_symbol("sel_getUid", 0, 0).minsym)
     function = find_function_in_inferior("sel_getUid", NULL);
-  else if (lookup_minimal_symbol ("sel_get_any_uid", 0, 0))
+  else if (lookup_minimal_symbol ("sel_get_any_uid", 0, 0).minsym)
     function = find_function_in_inferior("sel_get_any_uid", NULL);
   else
     {
@@ -181,17 +181,17 @@ value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
   stringValue[2] = value_string(ptr, len, char_type);
   stringValue[2] = value_coerce_array(stringValue[2]);
   /* _NSNewStringFromCString replaces "istr" after Lantern2A.  */
-  if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0))
+  if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0).minsym)
     {
       function = find_function_in_inferior("_NSNewStringFromCString", NULL);
       nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
     }
-  else if (lookup_minimal_symbol("istr", 0, 0))
+  else if (lookup_minimal_symbol("istr", 0, 0).minsym)
     {
       function = find_function_in_inferior("istr", NULL);
       nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
     }
-  else if (lookup_minimal_symbol("+[NSString stringWithCString:]", 0, 0))
+  else if (lookup_minimal_symbol("+[NSString stringWithCString:]", 0, 0).minsym)
     {
       function
 	= find_function_in_inferior("+[NSString stringWithCString:]", NULL);
@@ -594,7 +594,7 @@ selectors_info (char *regexp, int from_tty)
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      name = SYMBOL_NATURAL_NAME (msymbol);
+      name = MSYMBOL_NATURAL_NAME (msymbol);
       if (name
           && (name[0] == '-' || name[0] == '+')
 	  && name[1] == '[')		/* Got a method name.  */
@@ -608,7 +608,7 @@ selectors_info (char *regexp, int from_tty)
 	    {
 	      complaint (&symfile_complaints, 
 			 _("Bad method name '%s'"), 
-			 SYMBOL_NATURAL_NAME (msymbol));
+			 MSYMBOL_NATURAL_NAME (msymbol));
 	      continue;
 	    }
 	  if (regexp == NULL || re_exec(++name) != 0)
@@ -632,7 +632,7 @@ selectors_info (char *regexp, int from_tty)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  name = SYMBOL_NATURAL_NAME (msymbol);
+	  name = MSYMBOL_NATURAL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')		/* Got a method name.  */
@@ -745,7 +745,7 @@ classes_info (char *regexp, int from_tty)
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      name = SYMBOL_NATURAL_NAME (msymbol);
+      name = MSYMBOL_NATURAL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')			/* Got a method name.  */
@@ -769,7 +769,7 @@ classes_info (char *regexp, int from_tty)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  name = SYMBOL_NATURAL_NAME (msymbol);
+	  name = MSYMBOL_NATURAL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')			/* Got a method name.  */
@@ -994,7 +994,7 @@ find_methods (char type, const char *class, const char *category,
 
 	  /* Check the symbol name first as this can be done entirely without
 	     sending any query to the target.  */
-	  symname = SYMBOL_NATURAL_NAME (msymbol);
+	  symname = MSYMBOL_NATURAL_NAME (msymbol);
 	  if (symname == NULL)
 	    continue;
 
@@ -1152,11 +1152,12 @@ find_imps (const char *method, VEC (const_char_ptr) **symbol_names)
 		       SYMBOL_NATURAL_NAME (sym));
       else
 	{
-	  struct minimal_symbol *msym = lookup_minimal_symbol (selector, 0, 0);
+	  struct bound_minimal_symbol msym
+	    = lookup_minimal_symbol (selector, 0, 0);
 
-	  if (msym != NULL) 
+	  if (msym.minsym != NULL) 
 	    VEC_safe_push (const_char_ptr, *symbol_names,
-			   SYMBOL_NATURAL_NAME (msym));
+			   MSYMBOL_NATURAL_NAME (msym.minsym));
 	}
     }
 
@@ -1260,25 +1261,23 @@ find_objc_msgsend (void)
 
   for (i = 0; i < nmethcalls; i++)
     {
-      struct minimal_symbol *func;
+      struct bound_minimal_symbol func;
 
       /* Try both with and without underscore.  */
-      func = lookup_minimal_symbol (methcalls[i].name, NULL, NULL);
-      if ((func == NULL) && (methcalls[i].name[0] == '_'))
+      func = lookup_bound_minimal_symbol (methcalls[i].name);
+      if ((func.minsym == NULL) && (methcalls[i].name[0] == '_'))
 	{
-	  func = lookup_minimal_symbol (methcalls[i].name + 1, NULL, NULL);
+	  func = lookup_bound_minimal_symbol (methcalls[i].name + 1);
 	}
-      if (func == NULL)
+      if (func.minsym == NULL)
 	{ 
 	  methcalls[i].begin = 0;
 	  methcalls[i].end = 0;
 	  continue; 
 	}
 
-      methcalls[i].begin = SYMBOL_VALUE_ADDRESS (func);
-      do {
-	methcalls[i].end = SYMBOL_VALUE_ADDRESS (++func);
-      } while (methcalls[i].begin == methcalls[i].end);
+      methcalls[i].begin = BMSYMBOL_VALUE_ADDRESS (func);
+      methcalls[i].end = minimal_symbol_upper_bound (func);
     }
 }
 

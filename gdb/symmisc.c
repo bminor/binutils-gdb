@@ -111,9 +111,9 @@ print_objfile_statistics (void)
     if (OBJSTAT (objfile, n_stabs) > 0)
       printf_filtered (_("  Number of \"stab\" symbols read: %d\n"),
 		       OBJSTAT (objfile, n_stabs));
-    if (OBJSTAT (objfile, n_minsyms) > 0)
+    if (objfile->per_bfd->n_minsyms > 0)
       printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
-		       OBJSTAT (objfile, n_minsyms));
+		       objfile->per_bfd->n_minsyms);
     if (OBJSTAT (objfile, n_psyms) > 0)
       printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
 		       OBJSTAT (objfile, n_psyms));
@@ -168,7 +168,7 @@ dump_objfile (struct objfile *objfile)
   printf_filtered (", bfd at ");
   gdb_print_host_address (objfile->obfd, gdb_stdout);
   printf_filtered (", %d minsyms\n\n",
-		   objfile->minimal_symbol_count);
+		   objfile->per_bfd->minimal_symbol_count);
 
   if (objfile->sf)
     objfile->sf->qf->dump (objfile);
@@ -204,7 +204,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
   char ms_type;
 
   fprintf_filtered (outfile, "\nObject file %s:\n\n", objfile_name (objfile));
-  if (objfile->minimal_symbol_count == 0)
+  if (objfile->per_bfd->minimal_symbol_count == 0)
     {
       fprintf_filtered (outfile, "No minimal symbols found.\n");
       return;
@@ -212,7 +212,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
   index = 0;
   ALL_OBJFILE_MSYMBOLS (objfile, msymbol)
     {
-      struct obj_section *section = SYMBOL_OBJ_SECTION (objfile, msymbol);
+      struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 
       switch (MSYMBOL_TYPE (msymbol))
 	{
@@ -251,9 +251,10 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	  break;
 	}
       fprintf_filtered (outfile, "[%2d] %c ", index, ms_type);
-      fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (msymbol)),
+      fputs_filtered (paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (objfile,
+								msymbol)),
 		      outfile);
-      fprintf_filtered (outfile, " %s", SYMBOL_LINKAGE_NAME (msymbol));
+      fprintf_filtered (outfile, " %s", MSYMBOL_LINKAGE_NAME (msymbol));
       if (section)
 	{
 	  if (section->the_bfd_section != NULL)
@@ -264,19 +265,19 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	    fprintf_filtered (outfile, " spurious section %ld",
 			      (long) (section - objfile->sections));
 	}
-      if (SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
+      if (MSYMBOL_DEMANGLED_NAME (msymbol) != NULL)
 	{
-	  fprintf_filtered (outfile, "  %s", SYMBOL_DEMANGLED_NAME (msymbol));
+	  fprintf_filtered (outfile, "  %s", MSYMBOL_DEMANGLED_NAME (msymbol));
 	}
       if (msymbol->filename)
 	fprintf_filtered (outfile, "  %s", msymbol->filename);
       fputs_filtered ("\n", outfile);
       index++;
     }
-  if (objfile->minimal_symbol_count != index)
+  if (objfile->per_bfd->minimal_symbol_count != index)
     {
       warning (_("internal error:  minimal symbol count %d != %d"),
-	       objfile->minimal_symbol_count, index);
+	       objfile->per_bfd->minimal_symbol_count, index);
     }
   fprintf_filtered (outfile, "\n");
 }

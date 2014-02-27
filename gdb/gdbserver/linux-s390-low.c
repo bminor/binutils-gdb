@@ -422,7 +422,7 @@ s390_arch_setup (void)
   struct regset_info *regset;
 
   /* Check whether the kernel supports extra register sets.  */
-  int pid = pid_of (get_thread_lwp (current_inferior));
+  int pid = pid_of (current_inferior);
   int have_regset_last_break
     = s390_check_regset (pid, NT_S390_LAST_BREAK, 8);
   int have_regset_system_call

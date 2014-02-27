@@ -476,7 +476,9 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
 	  p = skip_spaces_const (p);
 	  if (*p == '(')
 	    {
-	      const char *ep = strchr (p, ')');
+	      /* ps command also relies on no trailing fields
+		 ever contain ')'.  */
+	      const char *ep = strrchr (p, ')');
 	      if (ep != NULL)
 		{
 		  printf_filtered ("Exec file: %.*s\n",
@@ -1331,12 +1333,14 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
 
   proc_stat = skip_spaces (proc_stat);
 
-  /* Getting rid of the executable name, since we already have it.  We
-     know that this name will be in parentheses, so we can safely look
-     for the close-paren.  */
-  while (*proc_stat != ')')
-    ++proc_stat;
-  ++proc_stat;
+  /* ps command also relies on no trailing fields ever contain ')'.  */
+  proc_stat = strrchr (proc_stat, ')');
+  if (proc_stat == NULL)
+    {
+      do_cleanups (c);
+      return 1;
+    }
+  proc_stat++;
 
   proc_stat = skip_spaces (proc_stat);
 

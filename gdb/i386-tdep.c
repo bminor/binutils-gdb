@@ -1808,8 +1808,8 @@ i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  call_dest = call_dest & 0xffffffffU;
  	  s = lookup_minimal_symbol_by_pc (call_dest);
  	  if (s.minsym != NULL
- 	      && SYMBOL_LINKAGE_NAME (s.minsym) != NULL
- 	      && strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "__main") == 0)
+ 	      && MSYMBOL_LINKAGE_NAME (s.minsym) != NULL
+ 	      && strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "__main") == 0)
  	    pc += 5;
  	}
     }
@@ -3562,7 +3562,7 @@ i386_pe_skip_trampoline_code (struct frame_info *frame,
 	read_memory_unsigned_integer (pc + 2, 4, byte_order);
       struct minimal_symbol *indsym =
 	indirect ? lookup_minimal_symbol_by_pc (indirect).minsym : 0;
-      const char *symname = indsym ? SYMBOL_LINKAGE_NAME (indsym) : 0;
+      const char *symname = indsym ? MSYMBOL_LINKAGE_NAME (indsym) : 0;
 
       if (symname)
 	{
@@ -3694,6 +3694,9 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  got_minus[0] = 1;
 	}
 
+      if (!isdigit ((unsigned char) *s))
+	return 0;
+
       displacements[0] = strtol (s, &endp, 10);
       s = endp;
 
@@ -3711,6 +3714,9 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  ++s;
 	  got_minus[1] = 1;
 	}
+
+      if (!isdigit ((unsigned char) *s))
+	return 0;
 
       displacements[1] = strtol (s, &endp, 10);
       s = endp;
@@ -3730,6 +3736,9 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  got_minus[2] = 1;
 	}
 
+      if (!isdigit ((unsigned char) *s))
+	return 0;
+
       displacements[2] = strtol (s, &endp, 10);
       s = endp;
 
@@ -3745,7 +3754,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       if (*s++ != ')')
 	return 0;
 
-      len = s - start;
+      len = s - start - 1;
       regname = alloca (len + 1);
 
       strncpy (regname, start, len);

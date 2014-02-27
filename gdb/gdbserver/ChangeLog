@@ -1,3 +1,309 @@
+2014-02-27  Pedro Alves  <palves@redhat.com>
+
+	PR 12702
+	* inferiors.h (A_I_NEXT, ALL_INFERIORS_TYPE, ALL_PROCESSES): New
+	macros.
+	* linux-low.c (delete_lwp, handle_extended_wait): Add debug
+	output.
+	(last_thread_of_process_p): Take a PID argument instead of a
+	thread pointer.
+	(linux_wait_for_lwp): Delete.
+	(num_lwps, check_zombie_leaders, not_stopped_callback): New
+	functions.
+	(linux_low_filter_event): New function, party factored out from
+	linux_wait_for_event.
+	(linux_wait_for_event): Rename to ...
+	(linux_wait_for_event_filtered): ... this.  Add new filter ptid
+	argument.  Partly rewrite.  Always use waitpid(-1, WNOHANG) and
+	sigsuspend.  Check for zombie leaders.
+	(linux_wait_for_event): Reimplement as wrapper around
+	linux_wait_for_event_filtered.
+	(linux_wait_1): Handle TARGET_WAITKIND_NO_RESUMED.  Assume that if
+	a normal or signal exit is seen, it's the whole process exiting.
+	(wait_for_sigstop): No longer a for_each_inferior callback.
+	Rewrite on top of linux_wait_for_event_filtered.
+	(stop_all_lwps): Call wait_for_sigstop directly.
+	* server.c (resume, handle_target_event): Handle
+	TARGET_WAITKIND_NO_RESUMED.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-low.c (psapi_get_dll_name,
+	* win32_CreateToolhelp32Snapshot): Delete.
+	(win32_CreateToolhelp32Snapshot, win32_Module32First)
+	(win32_Module32Next, load_toolhelp, toolhelp_get_dll_name):
+	Delete.
+	(handle_load_dll): Add function description.
+	Remove code using psapi_get_dll_name and toolhelp_get_dll_name.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-low.c (win32_add_one_solib): Add 0x1000 to load_addr.
+	Add comment.
+	(win32_add_all_dlls): Remove 0x1000 offset applied to DLL
+	base address when calling win32_add_one_solib.
+	(handle_load_dll): Delete local variable load_addr.
+	Remove 0x1000 offset applied to DLL base address when calling
+	win32_add_one_solib.
+	(handle_unload_dll): Add comment.
+
+2014-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-low.c (win32_add_all_dlls): Renames
+	win32_ensure_ntdll_loaded.  Rewrite function documentation.
+	Adjust implementation to always load all DLLs.
+	Add 0x1000 offset to DLL base address when calling
+	win32_add_one_solib.
+	(child_initialization_done): New static global.
+	(do_initial_child_stuff): Set child_initialization_done to
+	zero during child initialization, and 1 after.  Replace call
+	to win32_ensure_ntdll_loaded by call to win32_add_all_dlls.
+	Add comment.
+	(match_dll_by_basename, dll_is_loaded_by_basename): Delete.
+	(handle_unload_dll): Add function documentation.
+	(get_child_debug_event): Ignore load and unload DLL events
+	during child initialization.
+
+2014-02-20  Doug Evans  <dje@google.com>
+
+	Remove global all_lwps.
+	* inferiors.h (ptid_of): Move here from linux-low.h.
+	(pid_of, lwpid_of): Ditto.
+	* linux-aarch64-low.c (debug_reg_change_callback): Update, "entry"
+	parameter is a struct thread_info * now.
+	(aarch64_notify_debug_reg_change): Fetch pid from current_inferior
+	directly.  Pass &all_threads to find_inferior instead of &all_lwps.
+	(aarch64_stopped_data_address): Fetch lwpid from current_inferior
+	directly.
+	(aarch64_linux_prepare_to_resume): Fetch ptid from thread.
+	(aarch64_arch_setup): Fetch lwpid from current_inferior directly.
+	* linux-arm-low.c (update_registers_callback): Update, "entry"
+	parameter is a struct thread_info * now.
+	Fetch lwpid from current_inferior directly.
+	(arm_insert_point): Pass &all_threads to find_inferior instead of
+	&all_lwps.
+	(arm_remove_point): Ditto.
+	(arm_stopped_by_watchpoint): Fetch lwp from current_inferior.
+	(arm_prepare_to_resume): Fetch pid from thread.
+	(arm_read_description): Fetch lwpid from current_inferior directly.
+	* linux-low.c (all_lwps): Delete.
+	(delete_lwp): Delete call to remove_inferior.
+	(handle_extended_wait): Fetch lwpid from thread.
+	(add_lwp): Don't set lwp->entry.id.  Remove call to
+	add_inferior_to_list.
+	(linux_attach_lwp_1): Fetch pid from current_inferior directly.
+	(linux_kill_one_lwp): Fetch ptid,lwpid from thread.
+	(kill_one_lwp_callback): Ditto.
+	(linux_kill): Don't dereference NULL pointer.
+	Fetch ptid,lwpid from thread.
+	(get_detach_signal): Fetch ptid from thread.
+	(linux_detach_one_lwp): Fetch ptid,lwpid from thread.
+	Simplify call to regcache_invalidate_thread.
+	(delete_lwp_callback): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch pid from thread.
+	(linux_mourn): Pass &all_threads to find_inferior instead of &all_lwps.
+	(status_pending_p_callback): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch ptid from thread.
+	(find_lwp_pid): Update, "entry" parameter is a
+	struct thread_info * now.
+	(linux_wait_for_lwp): Fetch pid from thread.
+	(linux_fast_tracepoint_collecting): Fetch lwpid from thread.
+	(maybe_move_out_of_jump_pad): Fetch lwpid from current_inferior.
+	(enqueue_one_deferred_signal): Fetch lwpid from thread.
+	(dequeue_one_deferred_signal): Ditto.
+	(cancel_breakpoint): Fetch ptid from current_inferior.
+	(linux_wait_for_event): Pass &all_threads to find_inferior,
+	not &all_lwps.  Fetch ptid, lwpid from thread.
+	(count_events_callback): Update, "entry" parameter is a
+	struct thread_info * now.
+	(select_singlestep_lwp_callback): Ditto.
+	(select_event_lwp_callback): Ditto.
+	(cancel_breakpoints_callback): Ditto.
+	(linux_cancel_breakpoints): Pass &all_threads to find_inferior,
+	not &all_lwps.
+	(select_event_lwp): Ditto.  Fetch ptid from event_thread.
+	(unsuspend_one_lwp): Update, "entry" parameter is a
+	struct thread_info * now.
+	(unsuspend_all_lwps): Pass &all_threads to find_inferior,
+	not &all_lwps.
+	(linux_stabilize_threads): Ditto.  And for for_each_inferior.
+	Fetch lwpid from thread, not lwp.
+	(linux_wait_1): Fetch ptid, lwpid from current_inferior.
+	Pass &all_threads to find_inferior, not &all_lwps.
+	(send_sigstop): Fetch lwpid from thread, not lwp.
+	(send_sigstop_callback): Update, "entry" parameter is a
+	struct thread_info * now.
+	(suspend_and_send_sigstop_callback): Ditto.
+	(wait_for_sigstop): Ditto.  Fetch ptid, lwpid from thread, lwp.
+	(stuck_in_jump_pad_callback): Update, "entry" parameter is a
+	struct thread_info * now.
+	(move_out_of_jump_pad_callback): Ditto.  Fetch ptid, lwpid
+	from thread, lwp.
+	(lwp_running): Update, "entry" parameter is a
+	struct thread_info * now.
+	(stop_all_lwps): Fetch ptid from thread.
+	Pass &all_threads to find_inferior, for_each_inferior, not &all_lwps.
+	(linux_resume_one_lwp): Fetch lwpid from thread.
+	(linux_set_resume_request): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch pid, lwpid from thread.
+	(resume_status_pending_p): Update, "entry" parameter is a
+	struct thread_info * now.
+	(need_step_over_p): Ditto.  Fetch lwpid from thread.
+	(start_step_over): Fetch lwpid from thread.
+	(linux_resume_one_thread): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch lwpid from thread.
+	(linux_resume): Pass &all_threads to find_inferior, not &all_lwps.
+	(proceed_one_lwp): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch lwpid from thread.
+	(unsuspend_and_proceed_one_lwp): Update, "entry" parameter is a
+	struct thread_info * now.
+	(proceed_all_lwps): Pass &all_threads to find_inferior, not &all_lwps.
+	(unstop_all_lwps): Ditto.  Fetch lwpid from thread.
+	(regsets_fetch_inferior_registers): Fetch lwpid from current_inferior
+	directly.
+	(regsets_store_inferior_registers): Ditto.
+	(fetch_register, store_register): Ditto.
+	(linux_read_memory, linux_write_memory): Ditto.
+	(linux_request_interrupt): Ditto.
+	(linux_read_auxv): Ditto.
+	(linux_xfer_siginfo): Ditto.
+	(linux_qxfer_spu): Ditto.
+	(linux_qxfer_libraries_svr4): Ditto.
+	* linux-low.h (ptid_of, pid_of, lwpid_of): Delete,
+	moved to inferiors.h.
+	(get_lwp): Delete.
+	(get_thread_lwp): Update.
+	(struct lwp_info): Delete member "entry".  Simplify comment for
+	member "thread".
+	(all_lwps): Delete.
+	* linux-mips-low.c (mips_read_description): Fetch lwpid from
+	current_inferior directly.
+	(update_watch_registers_callback): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch pid from thread.
+	(mips_linux_prepare_to_resume): Fetch ptid from thread.
+	(mips_insert_point): Fetch lwpid from current_inferior.
+	Pass &all_threads to find_inferior, not &all_lwps.
+	(mips_remove_point): Pass &all_threads to find_inferior, not &all_lwps.
+	(mips_stopped_by_watchpoint): Fetch lwpid from current_inferior
+	directly.
+	(mips_stopped_data_address): Ditto.
+	* linux-s390-low.c (s390_arch_setup): Fetch pid from current_inferior
+	directly.
+	* linux-tile-low.c (tile_arch_setup): Ditto.
+	* linux-x86-low.c (x86_get_thread_area): Fetch lwpid from thread.
+	(update_debug_registers_callback): Update, "entry" parameter is a
+	struct thread_info * now.  Fetch pid from thread.
+	(i386_dr_low_set_addr): Fetch pid from current_inferior directly.
+	Pass &all_threads to find_inferior, not &all_lwps.
+	(i386_dr_low_get_addr): Fetch ptid from current_inferior directly.
+	(i386_dr_low_set_control): Fetch pid from current_inferior directly.
+	Pass &all_threads to find_inferior, not &all_lwps.
+	(i386_dr_low_get_control): Fetch ptid from current_inferior directly.
+	(i386_dr_low_get_status): Ditto.
+	(x86_linux_prepare_to_resume): Fetch ptid from thread.
+	(x86_siginfo_fixup): Fetch lwpid from current_inferior directly.
+	(x86_linux_read_description): Ditto.
+	* proc-service.c (ps_getpid): Fetch pid from current_inferior directly.
+
+2014-02-20  Doug Evans  <dje@google.com>
+
+	* inferiors.c (get_first_inferior): Fix buglet.
+
+2014-02-19  Doug Evans  <dje@google.com>
+
+	* gdbthread.h (add_thread): Change result type to struct thread_info *.
+	* inferiors.c (add_thread): Change result type to struct thread_info *.
+	All callers updated.
+	(add_lwp): Call add_thread here instead of in callers.
+	All callers updated.
+	* linux-low.h (get_lwp_thread): Rewrite.
+	(struct lwp_info): New member "thread".
+
+2014-02-19  Doug Evans  <dje@google.com>
+
+	* linux-low.c (add_lwp): Change result to struct lwp_info *.
+	All callers updated.
+
+2014-02-19  Doug Evans  <dje@google.com>
+
+	* inferiors.c (add_thread): Fix whitespace.
+
+2014-02-19  Doug Evans  <dje@google.com>
+
+	* dll.c (clear_dlls): Replace accessing list implemention details
+	with API function.
+	* gdbthread.h (get_first_thread): Declare.
+	* inferiors.c (for_each_inferior_with_data): New function.
+	(get_first_thread): New function.
+	(find_thread_ptid): Simplify.
+	(get_first_inferior): New function.
+	(clear_list): Delete.
+	(one_inferior_p): New function.
+	(clear_inferior_list): New function.
+	(clear_inferiors): Update.
+	* inferiors.h (for_each_inferior_with_data): Declare.
+	(clear_inferior_list): Declare.
+	(one_inferior_p): Declare.
+	(get_first_inferior): Declare.
+	* linux-low.c (linux_wait_for_event): Replace accessing list
+	implemention details with API function.
+	* server.c (target_running): Ditto.
+	(accumulate_file_name_length): New function.
+	(emit_dll_description): New function.
+	(handle_qxfer_libraries): Replace accessing list implemention
+	details with API function.
+	(handle_qxfer_threads_worker): New function.
+	(handle_qxfer_threads_proper): Replace accessing list implemention
+	details with API function.
+	(handle_query): Ditto.
+	(visit_actioned_threads_callback_ftype): New typedef.
+	(visit_actioned_threads_data): New struct.
+	(visit_actioned_threads): Rewrite to be find_inferior callback.
+	(resume): Call find_inferior.
+	(handle_status): Replace accessing list implemention
+	details with API function.
+	(process_serial_event): Replace accessing list implemention details
+	with API function.
+	* target.c (set_desired_inferior): Replace accessing list implemention
+	details with API function.
+	* tracepoint.c (same_process_p): New function.
+	(gdb_agent_about_to_close): Replace accessing list implemention
+	details with API function.
+	* win32-low.c (child_delete_thread): Replace accessing list
+	implemention details with API function.
+	(match_dll_by_basename): New function.
+	(dll_is_loaded_by_basename): New function.
+	(win32_ensure_ntdll_loaded): Replace accessing list implemention
+	details call to dll_is_loaded_by_basename.
+
+2014-02-19  Doug Evans  <dje@google.com>
+
+	* dll.h (struct dll_info): Add comment.
+	* gdbthread.h (struct thread_info): Add comment.
+	(current_ptid): Simplify.
+	* inferiors.c (add_process): Update.
+	(remove_process): Update.
+	* inferiors.h (struct process_info): Rename member "head" to "entry".
+	* linux-low.c (delete_lwp): Update.
+	(add_lwp): Update.
+	(last_thread_of_process_p): Update.
+	(kill_one_lwp_callback, linux_kill): Update.
+	(status_pending_p_callback): Update.
+	(wait_for_sigstop): Update.  Simplify read of ptid.
+	(start_step_over): Update.
+	* linux-low.h (ptid_of, pid_of, lwpid_of): Update.
+	(get_lwp_thread): Update.
+	(struct lwp_info): Rename member "head" to "entry".
+	* regcache.h (inferior_list_entry): Delete.
+	* server.c (kill_inferior_callback): Update.
+	(detach_or_kill_inferior_callback): Update.
+	(print_started_pid): Update.
+	(print_attached_pid): Update.
+	(process_serial_event): Simplify read of ptid.
+	* thread-db.c (thread_db_create_event): Update.
+	(thread_db_get_tls_address): Update.
+	* win32-low.c (current_inferior_ptid): Simplify.
+
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target.h (struct target_ops) <supports_btrace>: Add target_ops

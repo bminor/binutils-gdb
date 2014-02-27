@@ -584,7 +584,7 @@ SER_HARDWIRE = @SER_HARDWIRE@
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
 REMOTE_OBS = remote.o dcache.o tracepoint.o ax-general.o ax-gdb.o remote-fileio.o \
-	remote-notif.o ctf.o
+	remote-notif.o ctf.o tracefile.o tracefile-tfile.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS = @SIM_OBS@
@@ -894,7 +894,7 @@ doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h \
 rs6000-tdep.h rs6000-aix-tdep.h \
 common/gdb_locale.h arch-utils.h trad-frame.h gnu-nat.h \
 language.h nbsd-tdep.h solib-svr4.h \
-macroexp.h ui-file.h regcache.h tracepoint.h i386-tdep.h \
+macroexp.h ui-file.h regcache.h tracepoint.h tracefile.h i386-tdep.h \
 inf-child.h p-lang.h event-top.h gdbtypes.h user-regs.h \
 regformats/regdef.h config/alpha/nm-osf3.h  config/i386/nm-i386gnu.h \
 config/i386/nm-fbsd.h \

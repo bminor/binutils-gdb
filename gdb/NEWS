@@ -82,8 +82,18 @@ qXfer:btrace:read's annex
   The qXfer:btrace:read packet supports a new annex 'delta' to read
   branch trace incrementally.
 
+* Python Scripting
+
+  ** Valid Python operations on gdb.Value objects representing
+     structs/classes invoke the corresponding overloaded operators if
+     available.
+
 * New targets
 PowerPC64 GNU/Linux little-endian	powerpc64le-*-linux*
+
+* The "dll-symbols" command, and its two aliases ("add-shared-symbol-files"
+  and "assf"), have been deprecated.  Use the "sharedlibrary" command, or
+  its alias "share", instead.
 
 *** Changes in GDB 7.7
 

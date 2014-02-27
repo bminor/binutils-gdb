@@ -490,11 +490,11 @@ maintenance_translate_address (char *arg, int from_tty)
 
   if (sym.minsym)
     {
-      const char *symbol_name = SYMBOL_PRINT_NAME (sym.minsym);
+      const char *symbol_name = MSYMBOL_PRINT_NAME (sym.minsym);
       const char *symbol_offset
-	= pulongest (address - SYMBOL_VALUE_ADDRESS (sym.minsym));
+	= pulongest (address - BMSYMBOL_VALUE_ADDRESS (sym));
 
-      sect = SYMBOL_OBJ_SECTION(sym.objfile, sym.minsym);
+      sect = MSYMBOL_OBJ_SECTION(sym.objfile, sym.minsym);
       if (sect != NULL)
 	{
 	  const char *section_name;

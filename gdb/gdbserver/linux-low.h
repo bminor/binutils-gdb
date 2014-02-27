@@ -223,19 +223,23 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
-#define ptid_of(proc) ((proc)->head.id)
-#define pid_of(proc) ptid_get_pid ((proc)->head.id)
-#define lwpid_of(proc) ptid_get_lwp ((proc)->head.id)
+#define get_thread_lwp(thr) ((struct lwp_info *) (inferior_target_data (thr)))
+#define get_lwp_thread(lwp) ((lwp)->thread)
 
-#define get_lwp(inf) ((struct lwp_info *)(inf))
-#define get_thread_lwp(thr) (get_lwp (inferior_target_data (thr)))
-#define get_lwp_thread(proc) ((struct thread_info *)			\
-			      find_inferior_id (&all_threads,		\
-						get_lwp (proc)->head.id))
+/* This struct is recorded in the target_data field of struct thread_info.
+
+   On linux ``all_threads'' is keyed by the LWP ID, which we use as the
+   GDB protocol representation of the thread ID.  Threads also have
+   a "process ID" (poorly named) which is (presently) the same as the
+   LWP ID.
+
+   There is also ``all_processes'' is keyed by the "overall process ID",
+   which GNU/Linux calls tgid, "thread group ID".  */
 
 struct lwp_info
 {
-  struct inferior_list_entry head;
+  /* Backlink to the parent object.  */
+  struct thread_info *thread;
 
   /* If this flag is set, the next SIGSTOP will be ignored (the
      process will be immediately resumed).  This means that either we
@@ -336,8 +340,6 @@ struct lwp_info
   /* Arch-specific additions.  */
   struct arch_lwp_info *arch_private;
 };
-
-extern struct inferior_list all_lwps;
 
 int linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine);
 

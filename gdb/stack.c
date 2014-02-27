@@ -47,6 +47,7 @@
 #include "inline-frame.h"
 #include "linespec.h"
 #include "cli/cli-utils.h"
+#include "objfiles.h"
 
 #include "gdb_assert.h"
 #include <ctype.h>
@@ -1076,14 +1077,14 @@ find_frame_funname (struct frame_info *frame, char **funname,
 	memset (&msymbol, 0, sizeof (msymbol));
 
       if (msymbol.minsym != NULL
-	  && (SYMBOL_VALUE_ADDRESS (msymbol.minsym)
+	  && (BMSYMBOL_VALUE_ADDRESS (msymbol)
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
 	{
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
-	  *funname = xstrdup (SYMBOL_PRINT_NAME (msymbol.minsym));
-	  *funlang = SYMBOL_LANGUAGE (msymbol.minsym);
+	  *funname = xstrdup (MSYMBOL_PRINT_NAME (msymbol.minsym));
+	  *funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
 	}
       else
 	{
@@ -1119,8 +1120,8 @@ find_frame_funname (struct frame_info *frame, char **funname,
       msymbol = lookup_minimal_symbol_by_pc (pc);
       if (msymbol.minsym != NULL)
 	{
-	  *funname = xstrdup (SYMBOL_PRINT_NAME (msymbol.minsym));
-	  *funlang = SYMBOL_LANGUAGE (msymbol.minsym);
+	  *funname = xstrdup (MSYMBOL_PRINT_NAME (msymbol.minsym));
+	  *funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
 	}
     }
 }
@@ -1459,8 +1460,8 @@ frame_info (char *addr_exp, int from_tty)
       msymbol = lookup_minimal_symbol_by_pc (frame_pc);
       if (msymbol.minsym != NULL)
 	{
-	  funname = SYMBOL_PRINT_NAME (msymbol.minsym);
-	  funlang = SYMBOL_LANGUAGE (msymbol.minsym);
+	  funname = MSYMBOL_PRINT_NAME (msymbol.minsym);
+	  funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
 	}
     }
   calling_frame_info = get_prev_frame (fi);

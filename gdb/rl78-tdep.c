@@ -178,6 +178,29 @@ enum
   RL78_BANK3_RP2_REGNUM,
   RL78_BANK3_RP3_REGNUM,
 
+  /* These are the same as the above 16 registers, but have
+     a pointer type for use as base registers in expression
+     evaluation.  These are not user visible registers.  */
+  RL78_BANK0_RP0_PTR_REGNUM,
+  RL78_BANK0_RP1_PTR_REGNUM,
+  RL78_BANK0_RP2_PTR_REGNUM,
+  RL78_BANK0_RP3_PTR_REGNUM,
+
+  RL78_BANK1_RP0_PTR_REGNUM,
+  RL78_BANK1_RP1_PTR_REGNUM,
+  RL78_BANK1_RP2_PTR_REGNUM,
+  RL78_BANK1_RP3_PTR_REGNUM,
+
+  RL78_BANK2_RP0_PTR_REGNUM,
+  RL78_BANK2_RP1_PTR_REGNUM,
+  RL78_BANK2_RP2_PTR_REGNUM,
+  RL78_BANK2_RP3_PTR_REGNUM,
+
+  RL78_BANK3_RP0_PTR_REGNUM,
+  RL78_BANK3_RP1_PTR_REGNUM,
+  RL78_BANK3_RP2_PTR_REGNUM,
+  RL78_BANK3_RP3_PTR_REGNUM,
+
   RL78_NUM_TOTAL_REGS,
   RL78_NUM_PSEUDO_REGS = RL78_NUM_TOTAL_REGS - RL78_NUM_REGS
 };
@@ -251,8 +274,12 @@ rl78_register_type (struct gdbarch *gdbarch, int reg_nr)
 	   || (RL78_BANK0_R0_REGNUM <= reg_nr
 	       && reg_nr <= RL78_BANK3_R7_REGNUM))
     return tdep->rl78_int8;
-  else
+  else if (reg_nr == RL78_SP_REGNUM
+           || (RL78_BANK0_RP0_PTR_REGNUM <= reg_nr 
+	       && reg_nr <= RL78_BANK3_RP3_PTR_REGNUM))
     return tdep->rl78_data_pointer;
+  else
+    return tdep->rl78_int16;
 }
 
 /* Implement the "register_name" gdbarch method.  */
@@ -379,7 +406,12 @@ rl78_register_name (struct gdbarch *gdbarch, int regnr)
     "bank3_rp0",
     "bank3_rp1",
     "bank3_rp2",
-    "bank3_rp3"
+    "bank3_rp3",
+
+    /* The 16 register slots would be named
+       bank0_rp0_ptr_regnum ... bank3_rp3_ptr_regnum, but we don't
+       want these to be user visible registers.  */
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
   };
 
   return reg_names[regnr];
@@ -509,7 +541,12 @@ rl78_g10_register_name (struct gdbarch *gdbarch, int regnr)
     "",
     "",
     "",
-    ""
+    "",
+
+    /* The 16 register slots would be named
+       bank0_rp0_ptr_regnum ... bank3_rp3_ptr_regnum, but we don't
+       want these to be user visible registers.  */
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
   };
 
   return reg_names[regnr];
@@ -595,6 +632,15 @@ rl78_pseudo_register_read (struct gdbarch *gdbarch,
       if (status == REG_VALID)
 	status = regcache_raw_read (regcache, raw_regnum + 1, buffer + 1);
     }
+  else if (RL78_BANK0_RP0_PTR_REGNUM <= reg && reg <= RL78_BANK3_RP3_PTR_REGNUM)
+    {
+      int raw_regnum = 2 * (reg - RL78_BANK0_RP0_PTR_REGNUM)
+                       + RL78_RAW_BANK0_R0_REGNUM;
+
+      status = regcache_raw_read (regcache, raw_regnum, buffer);
+      if (status == REG_VALID)
+	status = regcache_raw_read (regcache, raw_regnum + 1, buffer + 1);
+    }
   else if (reg == RL78_SP_REGNUM)
     {
       status = regcache_raw_read (regcache, RL78_SPL_REGNUM, buffer);
@@ -661,6 +707,14 @@ rl78_pseudo_register_write (struct gdbarch *gdbarch,
   else if (RL78_BANK0_RP0_REGNUM <= reg && reg <= RL78_BANK3_RP3_REGNUM)
     {
       int raw_regnum = 2 * (reg - RL78_BANK0_RP0_REGNUM)
+                       + RL78_RAW_BANK0_R0_REGNUM;
+
+      regcache_raw_write (regcache, raw_regnum, buffer);
+      regcache_raw_write (regcache, raw_regnum + 1, buffer + 1);
+    }
+  else if (RL78_BANK0_RP0_PTR_REGNUM <= reg && reg <= RL78_BANK3_RP3_PTR_REGNUM)
+    {
+      int raw_regnum = 2 * (reg - RL78_BANK0_RP0_PTR_REGNUM)
                        + RL78_RAW_BANK0_R0_REGNUM;
 
       regcache_raw_write (regcache, raw_regnum, buffer);
@@ -1056,9 +1110,10 @@ rl78_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   if (0 <= reg && reg <= 31)
     {
       if ((reg & 1) == 0)
-        /* Map even registers to their 16-bit counterparts.  This
-	   is usually what is required from the DWARF info.  */
-	return (reg >> 1) + RL78_BANK0_RP0_REGNUM;
+        /* Map even registers to their 16-bit counterparts which have a
+	   pointer type.  This is usually what is required from the DWARF
+	   info.  */
+	return (reg >> 1) + RL78_BANK0_RP0_PTR_REGNUM;
       else
 	return reg;
     }

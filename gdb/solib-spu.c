@@ -408,7 +408,7 @@ spu_lookup_lib_symbol (const struct objfile *objfile,
 static int
 spu_enable_break (struct objfile *objfile)
 {
-  struct minimal_symbol *spe_event_sym = NULL;
+  struct bound_minimal_symbol spe_event_sym;
 
   /* The libspe library will call __spe_context_update_event whenever any
      SPE context is allocated or destroyed.  */
@@ -416,9 +416,9 @@ spu_enable_break (struct objfile *objfile)
 					 NULL, objfile);
 
   /* Place a solib_event breakpoint on the symbol.  */
-  if (spe_event_sym)
+  if (spe_event_sym.minsym)
     {
-      CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (spe_event_sym);
+      CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (spe_event_sym);
 
       addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (), addr,
                                                  &current_target);
@@ -434,8 +434,8 @@ spu_enable_break (struct objfile *objfile)
 static void
 ocl_enable_break (struct objfile *objfile)
 {
-  struct minimal_symbol *event_sym = NULL;
-  struct minimal_symbol *addr_sym = NULL;
+  struct bound_minimal_symbol event_sym;
+  struct bound_minimal_symbol addr_sym;
 
   /* The OpenCL runtime on the SPU will call __opencl_program_update_event
      whenever an OpenCL program is loaded.  */
@@ -445,10 +445,10 @@ ocl_enable_break (struct objfile *objfile)
      at opencl_elf_image_address.  */
   addr_sym = lookup_minimal_symbol ("opencl_elf_image_address", NULL, objfile);
 
-  if (event_sym && addr_sym)
+  if (event_sym.minsym && addr_sym.minsym)
     {
       /* Place a solib_event breakpoint on the symbol.  */
-      CORE_ADDR event_addr = SYMBOL_VALUE_ADDRESS (event_sym);
+      CORE_ADDR event_addr = BMSYMBOL_VALUE_ADDRESS (event_sym);
       create_solib_event_breakpoint (get_objfile_arch (objfile), event_addr);
 
       /* Store the address of the symbol that will point to OpenCL program
@@ -459,7 +459,7 @@ ocl_enable_break (struct objfile *objfile)
 		  &objfile->objfile_obstack,
 		  objfile->sections_end - objfile->sections,
 		  CORE_ADDR);
-	  *ocl_program_addr_base = SYMBOL_VALUE_ADDRESS (addr_sym);
+	  *ocl_program_addr_base = BMSYMBOL_VALUE_ADDRESS (addr_sym);
 	  set_objfile_data (objfile, ocl_program_data_key,
 			    ocl_program_addr_base);
         }

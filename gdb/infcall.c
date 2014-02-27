@@ -358,7 +358,7 @@ get_function_name (CORE_ADDR funaddr, char *buf, int buf_size)
     struct bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (funaddr);
 
     if (msymbol.minsym)
-      return SYMBOL_PRINT_NAME (msymbol.minsym);
+      return MSYMBOL_PRINT_NAME (msymbol.minsym);
   }
 
   {
