@@ -1,3 +1,11 @@
+2014-02-27  Pedro Alves  <palves@redhat.com>
+
+	PR 12702
+	* linux-nat.c (status_to_str): Moved to nat/linux-waitpid.c.
+	* nat/linux-waitpid.c: Include string.h.
+	(status_to_str): Moved here and made extern.
+	* nat/linux-waitpid.h (status_to_str): New declaration.
+
 2014-02-27  Hui Zhu  <hui@codesourcery.com>
 
 	PR 12702

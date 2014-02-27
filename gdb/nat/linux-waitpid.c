@@ -28,6 +28,8 @@
 #include "nat/linux-waitpid.h"
 #include "gdb_wait.h"
 
+#include <string.h>
+
 /* Print debugging output based on the format string FORMAT and
    its parameters.  */
 
@@ -45,6 +47,32 @@ linux_debug (const char *format, ...)
 #else
   /* GDB-specific debugging output.  */
 #endif
+}
+
+/* Convert wait status STATUS to a string.  Used for printing debug
+   messages only.  */
+
+char *
+status_to_str (int status)
+{
+  static char buf[64];
+
+  if (WIFSTOPPED (status))
+    {
+      if (WSTOPSIG (status) == SYSCALL_SIGTRAP)
+	snprintf (buf, sizeof (buf), "%s (stopped at syscall)",
+		  strsignal (SIGTRAP));
+      else
+	snprintf (buf, sizeof (buf), "%s (stopped)",
+		  strsignal (WSTOPSIG (status)));
+    }
+  else if (WIFSIGNALED (status))
+    snprintf (buf, sizeof (buf), "%s (terminated)",
+	      strsignal (WTERMSIG (status)));
+  else
+    snprintf (buf, sizeof (buf), "%d (exited)", WEXITSTATUS (status));
+
+  return buf;
 }
 
 /* Wrapper function for waitpid which handles EINTR, and emulates
