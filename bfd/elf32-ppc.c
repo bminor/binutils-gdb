@@ -1,7 +1,5 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3252,6 +3250,7 @@ static struct bfd_link_hash_table *
 ppc_elf_link_hash_table_create (bfd *abfd)
 {
   struct ppc_elf_link_hash_table *ret;
+  static struct ppc_elf_params default_params = { PLT_OLD, 0, 1, 0, 0, 4096 };
 
   ret = bfd_zmalloc (sizeof (struct ppc_elf_link_hash_table));
   if (ret == NULL)
@@ -3270,6 +3269,8 @@ ppc_elf_link_hash_table_create (bfd *abfd)
   ret->elf.init_plt_refcount.glist = NULL;
   ret->elf.init_plt_offset.offset = 0;
   ret->elf.init_plt_offset.glist = NULL;
+
+  ret->params = &default_params;
 
   ret->sdata[0].name = ".sdata";
   ret->sdata[0].sym_name = "_SDA_BASE_";

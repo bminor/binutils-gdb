@@ -1,3 +1,8 @@
+2014-02-27  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_link_hash_table_create): Provide default
+	params for targets that don't use ppc32elf.em.
+
 2014-02-20  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* elf32-nios2.c (nios2_elf32_relocate_section): Fix calculation
