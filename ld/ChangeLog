@@ -8,6 +8,28 @@
 	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Exclude
 	-secure-plt, -bss-plt and -sdata-got when vxworks.
 
+2014-02-27  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (all_emul_extra_binaries): New variable.  Populated
+	by invoking configure.tgt.
+	(EMUL_EXTRA_BINARIES): New substitution.
+	* configure: Regenerate.
+	* configure.tgt (target_extra_binaries): New variable.  Set to
+	default-manifest.o for Cygwin and MinGW targets.
+	* Makefile.am (EMUL_EXTRA_BINARIES): New variable.  Initialised
+	by the configure script.
+	(ALL_EMUL_EXTRA_BINARIES): New variable.
+	(default-manifest.o): New rule to build the default manifest.
+	(ld_new_DEPENDENCIES): Add EMUL_EXTRA_BINARIES.
+	(install-data-local): Add EMUL_EXTRA_BINARIES.
+	* Makefile.in: Regenerate.
+	* ld.texinfo: Document default manifest support.
+	* emulparams/i386pe.sh (DEFAULT_MANIFEST): Define.
+	* emulparams/i386pep.sh (DEFAULT_MANIFEST): Define.
+	* emultempl/default-manifest.rc: New file.
+	* scripttempl/pe.sc (R_RSRC): Include DEFAULT_MANIFEST, if defined.
+	* scripttempl/pep.sc (R_RSRC): Likewise.
+
 2014-02-26  Dan Mick  <dan.mick@inktank.com>
 
 	PR ld/16569

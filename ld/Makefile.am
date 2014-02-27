@@ -59,6 +59,8 @@ scriptdir = $(tooldir)/lib
 EMUL = @EMUL@
 EMULATION_OFILES = @EMULATION_OFILES@
 EMUL_EXTRA_OFILES = @EMUL_EXTRA_OFILES@
+EMUL_EXTRA_BINARIES = @EMUL_EXTRA_BINARIES@
+
 
 # Search path to override the default search path for -lfoo libraries.
 # If LIB_PATH is empty, the ones in the script (if any) are left alone.
@@ -488,6 +490,9 @@ ALL_EMUL_EXTRA_OFILES = \
 	deffilep.@OBJEXT@ \
 	pe-dll.@OBJEXT@ \
 	pep-dll.@OBJEXT@
+
+ALL_EMUL_EXTRA_BINARIES = \
+	default-manifest.@OBJEXT@
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -1921,6 +1926,10 @@ eshlelf64_nbsd.c: $(srcdir)/emulparams/shlelf64_nbsd.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf64_nbsd "$(tdir_shlelf64_nbsd)"
 
+# Rule to create a manifest file for Cygwin and Mingw.
+default-manifest.o: $(srcdir)/emultempl/default-manifest.rc
+	../binutils/windres -o $@ $<
+
 # We need this for automake to use YLWRAP.
 EXTRA_ld_new_SOURCES = deffilep.y ldlex.l
 # Allow dependency tracking to work for these files, too.
@@ -1928,7 +1937,8 @@ EXTRA_ld_new_SOURCES += pep-dll.c pe-dll.c
 
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c $(PLUGIN_C)
-ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
+ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(EMUL_EXTRA_BINARIES) \
+		      $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
 # Dependency tracking for the generated emulation files.
@@ -2074,9 +2084,9 @@ install-exec-local: ld-new$(EXEEXT) install-binPROGRAMS
 	  fi; \
 	fi
 
-install-data-local:
+install-data-local: $(EMUL_EXTRA_BINARIES)
 	$(mkinstalldirs) $(DESTDIR)$(scriptdir)/ldscripts
-	for f in ldscripts/*; do \
+	for f in ldscripts/* $(EMUL_EXTRA_BINARIES); do \
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
 

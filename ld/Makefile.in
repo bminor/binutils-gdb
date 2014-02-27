@@ -219,6 +219,7 @@ EGREP = @EGREP@
 EMUL = @EMUL@
 EMULATION_LIBPATH = @EMULATION_LIBPATH@
 EMULATION_OFILES = @EMULATION_OFILES@
+EMUL_EXTRA_BINARIES = @EMUL_EXTRA_BINARIES@
 EMUL_EXTRA_OFILES = @EMUL_EXTRA_OFILES@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
@@ -388,6 +389,7 @@ AM_CFLAGS = $(WARN_CFLAGS)
 # We can't put the scripts in $(datadir) because the SEARCH_DIR
 # directives need to be different for native and cross linkers.
 scriptdir = $(tooldir)/lib
+EMUL_DEPS = 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
@@ -795,6 +797,9 @@ ALL_EMUL_EXTRA_OFILES = \
 	pe-dll.@OBJEXT@ \
 	pep-dll.@OBJEXT@
 
+ALL_EMUL_EXTRA_BINARIES = \
+	default-manifest.@OBJEXT@
+
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c ldcref.c pe-dll.c pep-dll.c ldlex-wrapper.c \
@@ -838,7 +843,9 @@ EXTRA_ld_new_SOURCES = deffilep.y ldlex.l pep-dll.c pe-dll.c \
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c $(PLUGIN_C)
 
-ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
+ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(EMUL_EXTRA_BINARIES) \
+		      $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
+
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
 # A test program for C++ constructors and destructors.
@@ -3353,6 +3360,10 @@ eshlelf64_nbsd.c: $(srcdir)/emulparams/shlelf64_nbsd.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf64_nbsd "$(tdir_shlelf64_nbsd)"
 
+# Rule to create a manifest file for Cygwin and Mingw.
+default-manifest.o: $(srcdir)/emultempl/default-manifest.rc
+	../binutils/windres -o $@ $<
+
 check-DEJAGNU: site.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
 	r=`pwd`; export r; \
@@ -3438,9 +3449,9 @@ install-exec-local: ld-new$(EXEEXT) install-binPROGRAMS
 	  fi; \
 	fi
 
-install-data-local:
+install-data-local: $(EMUL_EXTRA_BINARIES)
 	$(mkinstalldirs) $(DESTDIR)$(scriptdir)/ldscripts
-	for f in ldscripts/*; do \
+	for f in ldscripts/* $(EMUL_EXTRA_BINARIES); do \
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
 diststuff: info $(EXTRA_DIST)
