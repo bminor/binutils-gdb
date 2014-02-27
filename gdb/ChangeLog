@@ -1,5 +1,11 @@
 2014-02-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* mips64obsd-tdep.c (mips64obsd_init_abi): Call obsd_init_abi.
+	* configure.tgt (mips64*-*-openbsd*): Add obsd-tdep.c to
+	gdb_target_obs.
+
+2014-02-27  Mark Kettenis  <kettenis@gnu.org>
+
 	* obsd-tdep.c (obsd_auxv_parse): New function.
 	(obsd_init_abi): Set auxv_parse.
 

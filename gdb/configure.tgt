@@ -372,7 +372,7 @@ mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 	;;
 mips64*-*-openbsd*)
 	# Target: OpenBSD/mips64
-	gdb_target_obs="mips-tdep.o mips64obsd-tdep.o solib-svr4.o"
+	gdb_target_obs="mips-tdep.o mips64obsd-tdep.o obsd-tdep.o solib-svr4.o"
 	;;
 mips*-*-elf)
 	# Target: MIPS ELF
