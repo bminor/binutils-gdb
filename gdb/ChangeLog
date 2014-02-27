@@ -1,3 +1,10 @@
+2014-02-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* obsd-nat.h: New file.
+	* obsd-nat.c: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add obsd-nat.h.
+	(ALLDEPFILES): Add obsd-nat.c.
+
 2014-02-28  Tom Tromey  <tromey@redhat.com>
 
 	* cli-out.c (cli_ui_out_impl): Now const.  Remove comment.
