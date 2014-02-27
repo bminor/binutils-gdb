@@ -1,3 +1,8 @@
+2014-02-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Additional PR 8882 fix.
+	* solib-svr4.c (svr4_read_so_list): Change first to first_l_name.
+
 2014-02-27  Pedro Alves  <palves@redhat.com>
 
 	* nat/linux-waitpid.c (my_waitpid): Only block signals if WNOHANG

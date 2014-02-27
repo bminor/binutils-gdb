@@ -1306,7 +1306,7 @@ static int
 svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 		   struct so_list ***link_ptr_ptr, int ignore_first)
 {
-  struct so_list *first = NULL;
+  CORE_ADDR first_l_name;
   CORE_ADDR next_lm;
 
   for (; lm != 0; prev_lm = lm, lm = next_lm)
@@ -1346,7 +1346,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	{
 	  struct svr4_info *info = get_svr4_info ();
 
-	  first = new;
+	  first_l_name = new->lm_info->l_name;
 	  info->main_lm_addr = new->lm_info->lm_addr;
 	  do_cleanups (old_chain);
 	  continue;
@@ -1361,8 +1361,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	     inferior executable, then this is not a normal shared
 	     object, but (most likely) a vDSO.  In this case, silently
 	     skip it; otherwise emit a warning. */
-	  if (first == NULL
-	      || new->lm_info->l_name != first->lm_info->l_name)
+	  if (first_l_name == 0 || new->lm_info->l_name != first_l_name)
 	    warning (_("Can't read pathname for load map: %s."),
 		     safe_strerror (errcode));
 	  do_cleanups (old_chain);
