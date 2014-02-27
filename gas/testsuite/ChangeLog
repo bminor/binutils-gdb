@@ -1,3 +1,8 @@
+2014-02-27  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/ldst-reg-reg-offset.s: Add tests.
+	* gas/aarch64/ldst-reg-reg-offset.d: Update.
+
 2014-01-31  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	PR gas/16488

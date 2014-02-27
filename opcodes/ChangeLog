@@ -1,3 +1,8 @@
+2014-02-27  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (print_register_offset_address): Call
+	get_int_reg_name to prepare the register name.
+
 2014-01-30  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 	    Jan Beulich  <jbeulich@suse.com>
 

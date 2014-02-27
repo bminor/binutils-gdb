@@ -86,3 +86,9 @@
 func:
 	ld_or_st	str
 	ld_or_st	ldr
+
+	/* When the index register is of register 31, it should be ZR.  */
+	ldr	x1, [sp, xzr, sxtx #3]
+	str	x1, [sp, xzr, sxtx #3]
+	ldr	w1, [sp, wzr, sxtw #2]
+	str	w1, [sp, wzr, sxtw #2]
