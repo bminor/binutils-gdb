@@ -83,4 +83,14 @@ int ptid_lwp_p (ptid_t ptid);
 /* Return true if PTID's tid member is non-zero.  */
 int ptid_tid_p (ptid_t ptid);
 
+/* Returns true if PTID matches filter FILTER.  FILTER can be the wild
+   card MINUS_ONE_PTID (all ptid match it); can be a ptid representing
+   a process (ptid_is_pid returns true), in which case, all lwps and
+   threads of that given process match, lwps and threads of other
+   processes do not; or, it can represent a specific thread, in which
+   case, only that thread will match true.  PTID must represent a
+   specific LWP or THREAD, it can never be a wild card.  */
+
+extern int ptid_match (ptid_t ptid, ptid_t filter);
+
 #endif

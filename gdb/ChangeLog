@@ -1,3 +1,11 @@
+2014-02-27  Hui Zhu  <hui@codesourcery.com>
+
+	PR 12702
+	* infrun.c (ptid_match): Move ...
+	* common/ptid.c (ptid_match): ... here.
+	* inferior.h (ptid_match): Move ...
+	* common/ptid.h (ptid_match): ... here.
+
 2014-02-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* mips64obsd-tdep.c (mips64obsd_init_abi): Call obsd_init_abi.
