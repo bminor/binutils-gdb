@@ -287,6 +287,11 @@ int
 target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
                   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
+  struct gdbarch *gdbarch = target_gdbarch();
+
+  if (gdbarch_auxv_parse_p (gdbarch))
+    return gdbarch_auxv_parse (gdbarch, readptr, endptr, typep, valp);
+
   return current_target.to_auxv_parse (&current_target, readptr, endptr,
 				       typep, valp);
 }

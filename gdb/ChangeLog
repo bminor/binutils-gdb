@@ -1,3 +1,10 @@
+2014-02-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (auxv_parse): New.
+	* gdbarch.h: Regenerated.
+	* gdbarch.c: Regenerated.
+	* auxv.c (target_auxv_parse): Call gdbarch_parse_auxv if provided.
+
 2014-02-26  Ludovic Courtès  <ludo@gnu.org>
 
 	* guile/scm-value.c (gdbscm_history_append_x): New function.
