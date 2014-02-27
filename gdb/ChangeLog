@@ -1,5 +1,10 @@
 2014-02-27  Pedro Alves  <palves@redhat.com>
 
+	* nat/linux-waitpid.c (my_waitpid): Only block signals if WNOHANG
+	isn't set.
+
+2014-02-27  Pedro Alves  <palves@redhat.com>
+
 	PR 12702
 	* linux-nat.c (status_to_str): Moved to nat/linux-waitpid.c.
 	* nat/linux-waitpid.c: Include string.h.

@@ -92,15 +92,19 @@ my_waitpid (int pid, int *status, int flags)
 
       wnohang = (flags & WNOHANG) != 0;
       flags &= ~(__WALL | __WCLONE);
-      flags |= WNOHANG;
 
-      /* Block all signals while here.  This avoids knowing about
-	 LinuxThread's signals.  */
-      sigfillset (&block_mask);
-      sigprocmask (SIG_BLOCK, &block_mask, &org_mask);
+      if (!wnohang)
+	{
+	  flags |= WNOHANG;
 
-      /* ... except during the sigsuspend below.  */
-      sigemptyset (&wake_mask);
+	  /* Block all signals while here.  This avoids knowing about
+	     LinuxThread's signals.  */
+	  sigfillset (&block_mask);
+	  sigprocmask (SIG_BLOCK, &block_mask, &org_mask);
+
+	  /* ... except during the sigsuspend below.  */
+	  sigemptyset (&wake_mask);
+	}
 
       while (1)
 	{
@@ -129,7 +133,8 @@ my_waitpid (int pid, int *status, int flags)
 	  flags ^= __WCLONE;
 	}
 
-      sigprocmask (SIG_SETMASK, &org_mask, NULL);
+      if (!wnohang)
+	sigprocmask (SIG_SETMASK, &org_mask, NULL);
     }
   else
     {
