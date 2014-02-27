@@ -1,3 +1,8 @@
+2014-02-27  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/fp-const0-parsing.s: New test.
+	* gas/aarch64/fp-const0-parsing.d: Likewise.
+
 2014-02-27  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/ldst-reg-reg-offset.s: Add tests.

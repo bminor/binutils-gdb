@@ -1,3 +1,8 @@
+2014-02-27  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Replace IMM0 with
+	FPIMM0 for fcmeq, fcmgt, fcmge, fcmlt and fcmle.
+
 2014-02-27  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (print_register_offset_address): Call
