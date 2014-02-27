@@ -1,5 +1,9 @@
 2014-02-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib-svr4.c (svr4_read_so_list): Initialize first_l_name to 0.
+
+2014-02-27  Mark Kettenis  <kettenis@gnu.org>
+
 	* sparc-nat.c (sparc_xfer_wcookie): Always use process ID.
 
 2014-02-27  Jan Kratochvil  <jan.kratochvil@redhat.com>

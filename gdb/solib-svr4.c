@@ -1306,7 +1306,7 @@ static int
 svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 		   struct so_list ***link_ptr_ptr, int ignore_first)
 {
-  CORE_ADDR first_l_name;
+  CORE_ADDR first_l_name = 0;
   CORE_ADDR next_lm;
 
   for (; lm != 0; prev_lm = lm, lm = next_lm)
