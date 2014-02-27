@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 1991-2013 Free Software Foundation, Inc.
+#   Copyright 1991-2014 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -28,10 +28,10 @@ fragment <<EOF
 #include "ldctor.h"
 #include "elf/arm.h"
 
-static char *thumb_entry_symbol = NULL;
+static char * thumb_entry_symbol = NULL;
 static int byteswap_code = 0;
 static int target1_is_rel = 0${TARGET1_IS_REL};
-static char *target2_type = "${TARGET2_TYPE}";
+static char * target2_type = "${TARGET2_TYPE}";
 static int fix_v4bx = 0;
 static int use_blx = 0;
 static bfd_arm_vfp11_fix vfp11_denorm_fix = BFD_ARM_VFP11_FIX_DEFAULT;
@@ -531,6 +531,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_MERGE_EXIDX_ENTRIES   316
 #define OPTION_FIX_ARM1176		317
 #define OPTION_NO_FIX_ARM1176		318
+#define OPTION_LONG_PLT		        319
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -555,6 +556,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "no-merge-exidx-entries", no_argument, NULL, OPTION_NO_MERGE_EXIDX_ENTRIES },
   { "fix-arm1176", no_argument, NULL, OPTION_FIX_ARM1176 },
   { "no-fix-arm1176", no_argument, NULL, OPTION_NO_FIX_ARM1176 },
+  { "long-plt", no_argument, NULL, OPTION_LONG_PLT },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -572,6 +574,8 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --no-wchar-size-warning     Don'\''t warn about objects with incompatible\n"
 		   "                                wchar_t sizes\n"));
   fprintf (file, _("  --pic-veneer                Always generate PIC interworking veneers\n"));
+  fprintf (file, _("  --long-plt                  Generate long .plt entries\n"
+           "                              to handle large .plt/.got displacements\n"));
   fprintf (file, _("\
   --stub-group-size=N         Maximum size of a group of input sections that\n\
                                can be handled by one stub section.  A negative\n\
@@ -674,6 +678,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
    case OPTION_NO_FIX_ARM1176:
       fix_arm1176 = 0;
+      break;
+
+   case OPTION_LONG_PLT:
+      bfd_elf32_arm_use_long_plt ();
       break;
 '
 

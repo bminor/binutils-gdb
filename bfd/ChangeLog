@@ -1,3 +1,13 @@
+2014-02-27  Yuri Gribov  <y.gribov@samsung.com>
+
+	* bfd-in.h: Add export of bfd_elf32_arm_use_long_plt.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (elf32_arm_plt_entry_long): New array.
+	(elf32_arm_link_hash_table_create): Set plt_entry_size to 16 if
+	using long PLT entries.
+	(bfd_elf32_arm_use_long_plt): New function.
+	(elf32_arm_populate_plt_entry): Add support for long PLT entries.
+
 2014-02-27  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_link_hash_table_create): Provide default

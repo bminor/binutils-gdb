@@ -1,3 +1,11 @@
+2014-02-27  Yuri Gribov  <y.gribov@samsung.com>
+
+	* emultempl/armelf.em (OPTION_LONG_PLT): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add long-plt.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Handle long-plt.
+	* ld.texinfo: Document --long-plt.
+
 2014-02-27  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/elf32ppcvxworks.sh: Source plt_unwind.sh and

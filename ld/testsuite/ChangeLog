@@ -1,3 +1,9 @@
+2014-02-27  Yuri Gribov  <y.gribov@samsung.com>
+
+	* ld-arm/long-plt-format.s: New test case.
+	* ld-arm/long-plt-format.d: Expected disassembly.
+	* ld-arm/arm-elf.exp: Run the new test.
+
 2014-02-27  Nick Clifton  <nickc@redhat.com>
 
 	* ld-pe/longsecn-1.d: Allow for extra sections.
