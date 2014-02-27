@@ -3252,6 +3252,7 @@ static struct bfd_link_hash_table *
 ppc_elf_link_hash_table_create (bfd *abfd)
 {
   struct ppc_elf_link_hash_table *ret;
+  static struct ppc_elf_params default_params = { PLT_OLD, 0, 1, 0, 0, 4096 };
 
   ret = bfd_zmalloc (sizeof (struct ppc_elf_link_hash_table));
   if (ret == NULL)
@@ -3270,6 +3271,8 @@ ppc_elf_link_hash_table_create (bfd *abfd)
   ret->elf.init_plt_refcount.glist = NULL;
   ret->elf.init_plt_offset.offset = 0;
   ret->elf.init_plt_offset.glist = NULL;
+
+  ret->params = &default_params;
 
   ret->sdata[0].name = ".sdata";
   ret->sdata[0].sym_name = "_SDA_BASE_";

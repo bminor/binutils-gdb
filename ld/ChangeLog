@@ -1,6 +1,15 @@
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches for ppc476 workaround
+	2014-02-27  Alan Modra  <amodra@gmail.com>
+	* emulparams/elf32ppcvxworks.sh: Source plt_unwind.sh and
+	use ppc32elf.em.
+	* emultempl/ppc32elf.em (ppc_after_open): Don't compile for
+	vxworks.
+	(LDEMUL_AFTER_OPEN): Don't set for vxworks.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Exclude
+	-secure-plt, -bss-plt and -sdata-got when vxworks.
+
 	2014-02-17  Alan Modra  <amodra@gmail.com>
 	* emultempl/ppc32elf.em (ppc_after_open_output): Really enable
 	ppc476 workaround for ld -r.

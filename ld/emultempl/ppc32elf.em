@@ -54,6 +54,11 @@ ppc_after_open_output (void)
   ppc_elf_link_params (&link_info, &params);
 }
 
+EOF
+
+# No --secure-plt, --bss-plt, or --sdata-got for vxworks.
+if test -z "$VXWORKS_BASE_EM_FILE" ; then
+  fragment <<EOF
 static void
 ppc_after_open (void)
 {
@@ -109,6 +114,9 @@ ppc_after_open (void)
   gld${EMULATION_NAME}_after_open ();
 }
 
+EOF
+fi
+fragment <<EOF
 static void
 ppc_before_allocation (void)
 {
@@ -206,10 +214,14 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
-  { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },
+  { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },'
+if test -z "$VXWORKS_BASE_EM_FILE" ; then
+  PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "secure-plt", no_argument, NULL, OPTION_NEW_PLT },
   { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
-  { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },
+  { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },'
+fi
+PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "ppc476-workaround", optional_argument, NULL, OPTION_PPC476_WORKAROUND },
   { "no-ppc476-workaround", no_argument, NULL, OPTION_NO_PPC476_WORKAROUND },
 '
@@ -219,10 +231,14 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   --emit-stub-syms            Label linker stubs with a symbol.\n\
   --no-emit-stub-syms         Don'\''t label linker stubs with a symbol.\n\
   --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n\
-  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n\
+  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n'
+if test -z "$VXWORKS_BASE_EM_FILE" ; then
+  PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'\
   --secure-plt                Use new-style PLT if possible.\n\
   --bss-plt                   Force old-style BSS PLT.\n\
-  --sdata-got                 Force GOT location just before .sdata.\n\
+  --sdata-got                 Force GOT location just before .sdata.\n'
+fi
+PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'\
   --ppc476-workaround [=pagesize]\n\
                               Avoid a cache bug on ppc476.\n\
   --no-ppc476-workaround      Disable workaround.\n"
@@ -284,5 +300,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 # Put these extra ppc32elf routines in ld_${EMULATION_NAME}_emulation
 #
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_after_open_output
-LDEMUL_AFTER_OPEN=ppc_after_open
+if test -z "$VXWORKS_BASE_EM_FILE" ; then
+  LDEMUL_AFTER_OPEN=ppc_after_open
+fi
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
