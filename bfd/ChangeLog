@@ -1,3 +1,9 @@
+2014-02-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/16643
+	* elflink.c (elf_gc_sweep): Call gc_sweep_hook for exactly
+	the same conditions we called check_relocs.
+
 2014-02-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* cache.c (bfd_cache_max_open): Cast RLIM_INFINITY to rlim_t.
