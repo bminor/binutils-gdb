@@ -1,3 +1,9 @@
+2014-02-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/16643
+	* elflink.c (elf_gc_sweep): Call gc_sweep_hook for exactly
+	the same conditions we called check_relocs.
+
 2014-02-27  Yuri Gribov  <y.gribov@samsung.com>
 
 	* bfd-in.h: Add export of bfd_elf32_arm_use_long_plt.
