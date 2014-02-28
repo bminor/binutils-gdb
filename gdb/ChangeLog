@@ -1,5 +1,7 @@
 2014-02-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* Makefile.in (ALLDEPFILES): Add sparc64obsd-nat.c.
+
 	* configure.host (sparc64-*-openbsd*): Set gdb_host to obsd64.
 	* config/sparc/obsd64.mh: New file.
 	* sparc64obsd-nat.c: New file.

@@ -1666,7 +1666,8 @@ ALLDEPFILES = \
 	sparc-sol2-nat.c sparc-sol2-tdep.c sparc64-sol2-tdep.c \
 	sparc-nat.c sparc-tdep.c sparc64-linux-nat.c sparc64-linux-tdep.c \
 	sparc64-nat.c sparc64-tdep.c sparc64fbsd-nat.c sparc64fbsd-tdep.c \
-	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
+	sparc64nbsd-nat.c sparc64nbsd-tdep.c \
+	sparc64obsd-nat.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
 	sparc-ravenscar-thread.c \
 	spu-linux-nat.c spu-tdep.c spu-multiarch.c solib-spu.c \
