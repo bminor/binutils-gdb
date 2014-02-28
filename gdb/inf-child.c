@@ -392,6 +392,15 @@ inf_child_can_use_agent (struct target_ops *self)
   return agent_loaded_p ();
 }
 
+/* Default implementation of the to_can_async_p and
+   to_supports_non_stop methods.  */
+
+static int
+return_zero (struct target_ops *ignore)
+{
+  return 0;
+}
+
 struct target_ops *
 inf_child_target (void)
 {
@@ -416,6 +425,10 @@ inf_child_target (void)
   t->to_post_startup_inferior = inf_child_post_startup_inferior;
   t->to_follow_fork = inf_child_follow_fork;
   t->to_can_run = inf_child_can_run;
+  /* We must default these because they must be implemented by any
+     target that can run.  */
+  t->to_can_async_p = return_zero;
+  t->to_supports_non_stop = return_zero;
   t->to_pid_to_exec_file = inf_child_pid_to_exec_file;
   t->to_stratum = process_stratum;
   t->to_has_all_memory = default_child_has_all_memory;

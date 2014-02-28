@@ -1,3 +1,10 @@
+2014-03-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/corefile.exp (corefile_test_run, corefile_test_attach):
+	New procs.  Add target-async tests.
+	* gdb.reverse/break-precsave.exp (precsave_tests): New proc.
+	Add target-async tests.
+
 2014-03-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.dwarf2/dw2-ifort-parameter.c (func): Define labels

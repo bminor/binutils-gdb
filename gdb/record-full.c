@@ -1750,20 +1750,6 @@ record_full_goto_bookmark (struct target_ops *self,
   return;
 }
 
-static int
-record_full_can_async_p (struct target_ops *ops)
-{
-  /* We only enable async when the user specifically asks for it.  */
-  return target_async_permitted;
-}
-
-static int
-record_full_is_async_p (struct target_ops *ops)
-{
-  /* We only enable async when the user specifically asks for it.  */
-  return target_async_permitted;
-}
-
 static enum exec_direction_kind
 record_full_execution_direction (struct target_ops *self)
 {
@@ -1916,7 +1902,6 @@ init_record_full_ops (void)
   record_full_ops.to_detach = record_detach;
   record_full_ops.to_mourn_inferior = record_mourn_inferior;
   record_full_ops.to_kill = record_kill;
-  record_full_ops.to_create_inferior = find_default_create_inferior;
   record_full_ops.to_store_registers = record_full_store_registers;
   record_full_ops.to_xfer_partial = record_full_xfer_partial;
   record_full_ops.to_insert_breakpoint = record_full_insert_breakpoint;
@@ -1928,8 +1913,6 @@ init_record_full_ops (void)
   /* Add bookmark target methods.  */
   record_full_ops.to_get_bookmark = record_full_get_bookmark;
   record_full_ops.to_goto_bookmark = record_full_goto_bookmark;
-  record_full_ops.to_can_async_p = record_full_can_async_p;
-  record_full_ops.to_is_async_p = record_full_is_async_p;
   record_full_ops.to_execution_direction = record_full_execution_direction;
   record_full_ops.to_info_record = record_full_info;
   record_full_ops.to_save_record = record_full_save;
@@ -2174,8 +2157,6 @@ init_record_full_core_ops (void)
   /* Add bookmark target methods.  */
   record_full_core_ops.to_get_bookmark = record_full_get_bookmark;
   record_full_core_ops.to_goto_bookmark = record_full_goto_bookmark;
-  record_full_core_ops.to_can_async_p = record_full_can_async_p;
-  record_full_core_ops.to_is_async_p = record_full_is_async_p;
   record_full_core_ops.to_execution_direction
     = record_full_execution_direction;
   record_full_core_ops.to_info_record = record_full_info;

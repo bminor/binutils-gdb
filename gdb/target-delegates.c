@@ -4,13 +4,6 @@
 /* To regenerate this file, run:*/
 /*      make-target-delegates target.h > target-delegates.c */
 static void
-delegate_attach (struct target_ops *self, char *arg1, int arg2)
-{
-  self = self->beneath;
-  self->to_attach (self, arg1, arg2);
-}
-
-static void
 delegate_post_attach (struct target_ops *self, int arg1)
 {
   self = self->beneath;
@@ -690,10 +683,22 @@ delegate_can_async_p (struct target_ops *self)
 }
 
 static int
+tdefault_can_async_p (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
 delegate_is_async_p (struct target_ops *self)
 {
   self = self->beneath;
   return self->to_is_async_p (self);
+}
+
+static int
+tdefault_is_async_p (struct target_ops *self)
+{
+  return 0;
 }
 
 static void
@@ -707,6 +712,19 @@ static void
 tdefault_async (struct target_ops *self, async_callback_ftype *arg1, void *arg2)
 {
   tcomplain ();
+}
+
+static int
+delegate_supports_non_stop (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_supports_non_stop (self);
+}
+
+static int
+tdefault_supports_non_stop (struct target_ops *self)
+{
+  return 0;
 }
 
 static int
@@ -1608,8 +1626,6 @@ delegate_decr_pc_after_break (struct target_ops *self, struct gdbarch *arg1)
 static void
 install_delegators (struct target_ops *ops)
 {
-  if (ops->to_attach == NULL)
-    ops->to_attach = delegate_attach;
   if (ops->to_post_attach == NULL)
     ops->to_post_attach = delegate_post_attach;
   if (ops->to_detach == NULL)
@@ -1730,6 +1746,8 @@ install_delegators (struct target_ops *ops)
     ops->to_is_async_p = delegate_is_async_p;
   if (ops->to_async == NULL)
     ops->to_async = delegate_async;
+  if (ops->to_supports_non_stop == NULL)
+    ops->to_supports_non_stop = delegate_supports_non_stop;
   if (ops->to_find_memory_regions == NULL)
     ops->to_find_memory_regions = delegate_find_memory_regions;
   if (ops->to_make_corefile_notes == NULL)
@@ -1881,7 +1899,6 @@ install_delegators (struct target_ops *ops)
 static void
 install_dummy_methods (struct target_ops *ops)
 {
-  ops->to_attach = find_default_attach;
   ops->to_post_attach = tdefault_post_attach;
   ops->to_detach = tdefault_detach;
   ops->to_disconnect = tdefault_disconnect;
@@ -1939,9 +1956,10 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
   ops->to_log_command = tdefault_log_command;
   ops->to_get_section_table = tdefault_get_section_table;
-  ops->to_can_async_p = find_default_can_async_p;
-  ops->to_is_async_p = find_default_is_async_p;
+  ops->to_can_async_p = tdefault_can_async_p;
+  ops->to_is_async_p = tdefault_is_async_p;
   ops->to_async = tdefault_async;
+  ops->to_supports_non_stop = tdefault_supports_non_stop;
   ops->to_find_memory_regions = dummy_find_memory_regions;
   ops->to_make_corefile_notes = dummy_make_corefile_notes;
   ops->to_get_bookmark = tdefault_get_bookmark;

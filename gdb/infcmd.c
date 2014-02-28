@@ -503,6 +503,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   struct cleanup *old_chain;
   ptid_t ptid;
   struct ui_out *uiout = current_uiout;
+  struct target_ops *run_target;
 
   dont_repeat ();
 
@@ -531,7 +532,9 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   exec_file = (char *) get_exec_file (0);
 
-  if (non_stop && !target_supports_non_stop ())
+  run_target = find_run_target ();
+
+  if (non_stop && !run_target->to_supports_non_stop (run_target))
     error (_("The target does not support running in non-stop mode."));
 
   /* We keep symbols from add-symbol-file, on the grounds that the
@@ -544,7 +547,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   if (!args)
     {
-      if (target_can_async_p ())
+      if (run_target->to_can_async_p (run_target))
 	async_disable_stdin ();
     }
   else
@@ -553,12 +556,12 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
       /* If we get a request for running in the bg but the target
          doesn't support it, error out.  */
-      if (async_exec && !target_can_async_p ())
+      if (async_exec && !run_target->to_can_async_p (run_target))
 	error (_("Asynchronous execution not supported on this target."));
 
       /* If we don't get a request of running in the bg, then we need
          to simulate synchronous (fg) execution.  */
-      if (!async_exec && target_can_async_p ())
+      if (!async_exec && run_target->to_can_async_p (run_target))
 	{
 	  /* Simulate synchronous execution.  */
 	  async_disable_stdin ();
@@ -585,9 +588,12 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
-  target_create_inferior (exec_file, get_inferior_args (),
-			  environ_vector (current_inferior ()->environment),
-			  from_tty);
+  run_target->to_create_inferior (run_target, exec_file, get_inferior_args (),
+				  environ_vector (current_inferior ()->environment),
+				  from_tty);
+  /* to_create_inferior should push the target, so after this point we
+     shouldn't refer to run_target again.  */
+  run_target = NULL;
 
   /* We're starting off a new process.  When we get out of here, in
      non-stop mode, finish the state of all threads of that process,
@@ -2515,6 +2521,7 @@ attach_command (char *args, int from_tty)
 {
   int async_exec = 0;
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+  struct target_ops *attach_target;
 
   dont_repeat ();		/* Not for the faint of heart */
 
@@ -2534,7 +2541,9 @@ attach_command (char *args, int from_tty)
      this function should probably be moved into target_pre_inferior.  */
   target_pre_inferior (from_tty);
 
-  if (non_stop && !target_supports_non_stop ())
+  attach_target = find_attach_target ();
+
+  if (non_stop && !attach_target->to_supports_non_stop (attach_target))
     error (_("Cannot attach to this target in non-stop mode"));
 
   if (args)
@@ -2543,20 +2552,23 @@ attach_command (char *args, int from_tty)
 
       /* If we get a request for running in the bg but the target
          doesn't support it, error out.  */
-      if (async_exec && !target_can_async_p ())
+      if (async_exec && !attach_target->to_can_async_p (attach_target))
 	error (_("Asynchronous execution not supported on this target."));
     }
 
   /* If we don't get a request of running in the bg, then we need
      to simulate synchronous (fg) execution.  */
-  if (!async_exec && target_can_async_p ())
+  if (!async_exec && attach_target->to_can_async_p (attach_target))
     {
       /* Simulate synchronous execution.  */
       async_disable_stdin ();
       make_cleanup ((make_cleanup_ftype *)async_enable_stdin, NULL);
     }
 
-  target_attach (args, from_tty);
+  attach_target->to_attach (attach_target, args, from_tty);
+  /* to_attach should push the target, so after this point we
+     shouldn't refer to attach_target again.  */
+  attach_target = NULL;
 
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */

@@ -95,10 +95,6 @@ static char *dummy_make_corefile_notes (struct target_ops *self,
 
 static char *default_pid_to_str (struct target_ops *ops, ptid_t ptid);
 
-static int find_default_can_async_p (struct target_ops *ignore);
-
-static int find_default_is_async_p (struct target_ops *ignore);
-
 static enum exec_direction_kind default_execution_direction
     (struct target_ops *self);
 
@@ -387,6 +383,12 @@ complete_target_initialization (struct target_ops *t)
   if (t->to_has_execution == NULL)
     t->to_has_execution = return_zero_has_execution;
 
+  /* These methods can be called on an unpushed target and so require
+     a default implementation if the target might plausibly be the
+     default run target.  */
+  gdb_assert (t->to_can_run == NULL || (t->to_can_async_p != NULL
+					&& t->to_supports_non_stop != NULL));
+
   install_delegators (t);
 }
 
@@ -470,29 +472,6 @@ target_load (char *arg, int from_tty)
 {
   target_dcache_invalidate ();
   (*current_target.to_load) (&current_target, arg, from_tty);
-}
-
-void
-target_create_inferior (char *exec_file, char *args,
-			char **env, int from_tty)
-{
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_create_inferior != NULL)	
-	{
-	  t->to_create_inferior (t, exec_file, args, env, from_tty);
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_create_inferior (%s, %s, xxx, %d)\n",
-				exec_file, args, from_tty);
-	  return;
-	}
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  _("could not find a target to create inferior"));
 }
 
 void
@@ -2632,79 +2611,46 @@ find_default_run_target (char *do_mesg)
   return runable;
 }
 
-void
-find_default_attach (struct target_ops *ops, char *args, int from_tty)
+/* See target.h.  */
+
+struct target_ops *
+find_attach_target (void)
 {
   struct target_ops *t;
 
-  t = find_default_run_target ("attach");
-  (t->to_attach) (t, args, from_tty);
-  return;
+  /* If a target on the current stack can attach, use it.  */
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_attach != NULL)
+	break;
+    }
+
+  /* Otherwise, use the default run target for attaching.  */
+  if (t == NULL)
+    t = find_default_run_target ("attach");
+
+  return t;
 }
 
-void
-find_default_create_inferior (struct target_ops *ops,
-			      char *exec_file, char *allargs, char **env,
-			      int from_tty)
+/* See target.h.  */
+
+struct target_ops *
+find_run_target (void)
 {
   struct target_ops *t;
 
-  t = find_default_run_target ("run");
-  (t->to_create_inferior) (t, exec_file, allargs, env, from_tty);
-  return;
-}
+  /* If a target on the current stack can attach, use it.  */
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_create_inferior != NULL)
+	break;
+    }
 
-static int
-find_default_can_async_p (struct target_ops *ignore)
-{
-  struct target_ops *t;
+  /* Otherwise, use the default run target.  */
+  if (t == NULL)
+    t = find_default_run_target ("run");
 
-  /* This may be called before the target is pushed on the stack;
-     look for the default process stratum.  If there's none, gdb isn't
-     configured with a native debugger, and target remote isn't
-     connected yet.  */
-  t = find_default_run_target (NULL);
-  if (t && t->to_can_async_p != delegate_can_async_p)
-    return (t->to_can_async_p) (t);
-  return 0;
-}
-
-static int
-find_default_is_async_p (struct target_ops *ignore)
-{
-  struct target_ops *t;
-
-  /* This may be called before the target is pushed on the stack;
-     look for the default process stratum.  If there's none, gdb isn't
-     configured with a native debugger, and target remote isn't
-     connected yet.  */
-  t = find_default_run_target (NULL);
-  if (t && t->to_is_async_p != delegate_is_async_p)
-    return (t->to_is_async_p) (t);
-  return 0;
-}
-
-static int
-find_default_supports_non_stop (struct target_ops *self)
-{
-  struct target_ops *t;
-
-  t = find_default_run_target (NULL);
-  if (t && t->to_supports_non_stop)
-    return (t->to_supports_non_stop) (t);
-  return 0;
-}
-
-int
-target_supports_non_stop (void)
-{
-  struct target_ops *t;
-
-  for (t = &current_target; t != NULL; t = t->beneath)
-    if (t->to_supports_non_stop)
-      return t->to_supports_non_stop (t);
-
-  return 0;
+  return t;
 }
 
 /* Implement the "info proc" command.  */
@@ -3256,8 +3202,6 @@ init_dummy_target (void)
   dummy_target.to_shortname = "None";
   dummy_target.to_longname = "None";
   dummy_target.to_doc = "";
-  dummy_target.to_create_inferior = find_default_create_inferior;
-  dummy_target.to_supports_non_stop = find_default_supports_non_stop;
   dummy_target.to_supports_disable_randomization
     = find_default_supports_disable_randomization;
   dummy_target.to_stratum = dummy_stratum;
@@ -3291,15 +3235,6 @@ target_close (struct target_ops *targ)
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog, "target_close ()\n");
-}
-
-void
-target_attach (char *args, int from_tty)
-{
-  current_target.to_attach (&current_target, args, from_tty);
-  if (targetdebug)
-    fprintf_unfiltered (gdb_stdlog, "target_attach (%s, %d)\n",
-			args, from_tty);
 }
 
 int

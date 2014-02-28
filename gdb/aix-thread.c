@@ -959,12 +959,9 @@ new_objfile (struct objfile *objfile)
 /* Attach to process specified by ARGS.  */
 
 static void
-aix_thread_attach (struct target_ops *ops, char *args, int from_tty)
+aix_thread_inferior_created (struct target_ops *ops, int from_tty)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
-  
-  beneath->to_attach (beneath, args, from_tty);
-  pd_activate (1);
+  pd_enable ();
 }
 
 /* Detach from the process attached to by aix_thread_attach().  */
@@ -1823,15 +1820,12 @@ init_aix_thread_ops (void)
   aix_thread_ops.to_longname = _("AIX pthread support");
   aix_thread_ops.to_doc = _("AIX pthread support");
 
-  aix_thread_ops.to_attach = aix_thread_attach;
   aix_thread_ops.to_detach = aix_thread_detach;
   aix_thread_ops.to_resume = aix_thread_resume;
   aix_thread_ops.to_wait = aix_thread_wait;
   aix_thread_ops.to_fetch_registers = aix_thread_fetch_registers;
   aix_thread_ops.to_store_registers = aix_thread_store_registers;
   aix_thread_ops.to_xfer_partial = aix_thread_xfer_partial;
-  /* No need for aix_thread_ops.to_create_inferior, because we activate thread
-     debugging when the inferior reaches pd_brk_addr.  */
   aix_thread_ops.to_mourn_inferior = aix_thread_mourn_inferior;
   aix_thread_ops.to_thread_alive = aix_thread_thread_alive;
   aix_thread_ops.to_pid_to_str = aix_thread_pid_to_str;
@@ -1854,6 +1848,10 @@ _initialize_aix_thread (void)
 
   /* Notice when object files get loaded and unloaded.  */
   observer_attach_new_objfile (new_objfile);
+
+  /* Add ourselves to inferior_created event chain.
+     This is needed to enable the thread target on "attach".  */
+  observer_attach_inferior_created (aix_thread_inferior_created);
 
   add_setshow_boolean_cmd ("aix-thread", class_maintenance, &debug_aix_thread,
 			   _("Set debugging of AIX thread module."),
