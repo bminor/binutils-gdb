@@ -31,7 +31,7 @@
 #include "obsd-nat.h"
 
 /* OpenBSD 5.2 and later include rthreads which uses a thread model
-   that maps userlan threads directly onto kernel threads in a 1:1
+   that maps userland threads directly onto kernel threads in a 1:1
    fashion.  */
 
 #ifdef PT_GET_THREAD_FIRST
@@ -56,7 +56,7 @@ obsd_find_new_threads (struct target_ops *ops)
   pid_t pid = ptid_get_pid (inferior_ptid);
   struct ptrace_thread_state pts;
 
-  if (ptrace(PT_GET_THREAD_FIRST, pid, (caddr_t)&pts, sizeof pts) == -1)
+  if (ptrace (PT_GET_THREAD_FIRST, pid, (caddr_t)&pts, sizeof pts) == -1)
     perror_with_name (("ptrace"));
 
   while (pts.pts_tid != -1)
@@ -71,7 +71,7 @@ obsd_find_new_threads (struct target_ops *ops)
 	    add_thread (ptid);
 	}
 
-      if (ptrace(PT_GET_THREAD_NEXT, pid, (caddr_t)&pts, sizeof pts) == -1)
+      if (ptrace (PT_GET_THREAD_NEXT, pid, (caddr_t)&pts, sizeof pts) == -1)
 	perror_with_name (("ptrace"));
     }
 }
