@@ -1,3 +1,7 @@
+2014-03-01  Senthil Kumar Selvaraj <senthil_kumar.selvaraj@atmel.com>
+
+	* config/tc-avr.c: Remove atxmega16x1.
+
 2014-02-28  Alan Modra  <amodra@gmail.com>
 
 	* dwarf2dbg.c (out_debug_line): Correct .debug_line header_length

@@ -261,7 +261,6 @@ static struct mcu_type_s mcu_types[] =
   {"atmega2564rfr2", AVR_ISA_AVR6, bfd_mach_avr6},
   {"atxmega16a4", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
   {"atxmega16d4", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
-  {"atxmega16x1", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
   {"atxmega32a4", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
   {"atxmega32d4", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
   {"atxmega32x1", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
