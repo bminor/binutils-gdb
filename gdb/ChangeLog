@@ -1,3 +1,9 @@
+2014-03-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64obsd-nat.c (_initialize_amd64obsd_nat): Call
+	obsd_add_target instead of add_target.
+	* config/i386/obsd64.mh (NATDEPFILES): Add obsd-nat.o.
+
 2014-02-28  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* valops.c (find_oload_champ): Remove unneccesary argument METHOD.
