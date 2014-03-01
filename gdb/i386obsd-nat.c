@@ -64,7 +64,7 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   if ((pcb->pcb_flags & PCB_SAVECTX) == 0)
     {
       /* Yes, we have a frame that matches cpu_switch().  */
-      read_memory (pcb->pcb_esp, (char *) &sf, sizeof sf);
+      read_memory (pcb->pcb_esp, (gdb_byte *) &sf, sizeof sf);
       pcb->pcb_esp += sizeof (struct switchframe);
       regcache_raw_supply (regcache, I386_EDI_REGNUM, &sf.sf_edi);
       regcache_raw_supply (regcache, I386_ESI_REGNUM, &sf.sf_esi);
