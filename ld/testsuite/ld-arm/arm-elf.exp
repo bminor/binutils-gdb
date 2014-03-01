@@ -188,7 +188,7 @@ set armelftests_common {
      "" {exec-got-1b.s}
      {{readelf --relocs exec-got-1.d}}
      "exec-got-1"}
-    {"Long PLT entries in executables" "--long-plt -shared --section-start=.plt=0x200 --section-start=.got=0xf0000300" ""
+    {"Long PLT entries in executables" "--long-plt -shared --section-start=.plt=0x1000 --section-start=.got=0xf0001100" ""
      "" {long-plt-format.s}
      {{objdump "-d -j .plt" long-plt-format.d}}
      "long-plt-format"}
