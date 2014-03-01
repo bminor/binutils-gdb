@@ -1,5 +1,12 @@
 2014-03-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386obsd-nat.c: Include "obsd-nat.h".
+	(_initialize_i386obsd_nat): Call obsd_add_target instead of
+	add_target.
+	* config/i386/obsd.mh (NATDEPFILES): Add obsd-nat.o.
+
+2014-03-01  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386obsd-nat.c (i386obsd_supply_pcb): Cast 'sf' to 'gdb_byte *'.
 
 2014-03-01  Mark Kettenis  <kettenis@gnu.org>

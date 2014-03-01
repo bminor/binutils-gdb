@@ -28,6 +28,7 @@
 
 #include "i386-tdep.h"
 #include "i386bsd-nat.h"
+#include "obsd-nat.h"
 #include "bsd-kvm.h"
 
 static int
@@ -94,8 +95,8 @@ void _initialize_i386obsd_nat (void);
 void
 _initialize_i386obsd_nat (void)
 {
-  /* We've got nothing to add to the common *BSD/i386 target.  */
-  add_target (i386bsd_target ());
+  /* Add some extra features to the common *BSD/i386 target.  */
+  obsd_add_target (i386bsd_target ());
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (i386obsd_supply_pcb);
