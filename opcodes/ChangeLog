@@ -1,3 +1,7 @@
+2014-03-03  Alan Modra  <amodra@gmail.com>
+
+	* i386-gen.c (process_copyright): Emit copyright notice on one line.
+
 2014-02-28  Alan Modra  <amodra@gmail.com>
 
 	* msp430-decode.c: Regenerate.

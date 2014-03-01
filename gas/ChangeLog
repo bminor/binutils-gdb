@@ -1,3 +1,13 @@
+2014-03-03  Alan Modra  <amodra@gmail.com>
+
+	* config/bfin-lex-wrapper.c: Correct copyright date.
+	* config/tc-frv.c: Correct copyright punctuation.
+	* config/tc-ip2k.c: Likewise.
+	* config/tc-iq2000.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic4x.h: Likewise.
+
 2014-03-01  Senthil Kumar Selvaraj <senthil_kumar.selvaraj@atmel.com>
 
 	* config/tc-avr.c: Remove atxmega16x1.
