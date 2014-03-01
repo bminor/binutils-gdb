@@ -25,7 +25,7 @@
 #include "gdb_assert.h"
 #include <sys/types.h>
 #include <sys/ptrace.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 
 #include "inf-child.h"
 #include "obsd-nat.h"

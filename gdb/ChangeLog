@@ -1,5 +1,9 @@
 2014-03-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* obsd-nat.c: Include "gdb_wait.h" instead of <sys/wait.h>.
+
+2014-03-01  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386obsd-nat.c: Include "obsd-nat.h".
 	(_initialize_i386obsd_nat): Call obsd_add_target instead of
 	add_target.
