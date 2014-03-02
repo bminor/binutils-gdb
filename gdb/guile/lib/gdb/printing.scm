@@ -47,6 +47,6 @@ If OBJ is #f, add MATCHER to the global list."
 	((objfile? obj)
 	 (set-objfile-pretty-printers! obj
 				       (append! (objfile-pretty-printers obj)
-						matcher)))
+						(list matcher))))
 	(else
 	 (%assert-type #f obj SCM_ARG1 'append-pretty-printer!))))

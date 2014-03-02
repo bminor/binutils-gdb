@@ -1,3 +1,7 @@
+2014-03-02  Doug Evans  <xdje42@gmail.com>
+
+	* guile/lib/gdb/printing.scm (append-pretty-printer!): Fix thinko.
+
 2014-03-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* obsd-nat.c: Include "gdb_wait.h" instead of <sys/wait.h>.
