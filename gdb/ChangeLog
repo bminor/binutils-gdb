@@ -1,5 +1,10 @@
 2014-03-02  Doug Evans  <xdje42@gmail.com>
 
+	* infrun.c (handle_signal_stop): Replace test for
+	TARGET_WAITKIND_STOPPED with an assert.
+
+2014-03-02  Doug Evans  <xdje42@gmail.com>
+
 	* guile/scm-objfile.c (ofscm_mark_objfile_smob): Fix typo in comment.
 
 2014-03-02  Doug Evans  <xdje42@gmail.com>

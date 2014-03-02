@@ -3781,22 +3781,20 @@ handle_signal_stop (struct execution_control_state *ecs)
   enum stop_kind stop_soon;
   int random_signal;
 
-  if (ecs->ws.kind == TARGET_WAITKIND_STOPPED)
-    {
-      /* Do we need to clean up the state of a thread that has
-	 completed a displaced single-step?  (Doing so usually affects
-	 the PC, so do it here, before we set stop_pc.)  */
-      displaced_step_fixup (ecs->ptid,
-			    ecs->event_thread->suspend.stop_signal);
+  gdb_assert (ecs->ws.kind == TARGET_WAITKIND_STOPPED);
 
-      /* If we either finished a single-step or hit a breakpoint, but
-	 the user wanted this thread to be stopped, pretend we got a
-	 SIG0 (generic unsignaled stop).  */
+  /* Do we need to clean up the state of a thread that has
+     completed a displaced single-step?  (Doing so usually affects
+     the PC, so do it here, before we set stop_pc.)  */
+  displaced_step_fixup (ecs->ptid,
+			ecs->event_thread->suspend.stop_signal);
 
-      if (ecs->event_thread->stop_requested
-	  && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
-	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
-    }
+  /* If we either finished a single-step or hit a breakpoint, but
+     the user wanted this thread to be stopped, pretend we got a
+     SIG0 (generic unsignaled stop).  */
+  if (ecs->event_thread->stop_requested
+      && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
+    ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 
   stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
