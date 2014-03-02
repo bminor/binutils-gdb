@@ -1,5 +1,9 @@
 2014-03-02  Doug Evans  <xdje42@gmail.com>
 
+	* guile/scm-objfile.c (ofscm_mark_objfile_smob): Fix typo in comment.
+
+2014-03-02  Doug Evans  <xdje42@gmail.com>
+
 	* guile/lib/gdb/printing.scm (append-pretty-printer!): Fix thinko.
 
 2014-03-01  Mark Kettenis  <kettenis@gnu.org>
