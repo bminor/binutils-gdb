@@ -1,3 +1,8 @@
+2014-04-18  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* valops.c (oload_method_static): Remove unnecessary argument
+	METHOD.  Update all callers.
+
 2014-04-18  Pedro alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

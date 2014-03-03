@@ -73,7 +73,7 @@ static int find_oload_champ (struct value **, int, int,
 			     struct fn_field *, struct symbol **,
 			     struct badness_vector **);
 
-static int oload_method_static (int, struct fn_field *, int);
+static int oload_method_static_p (struct fn_field *, int);
 
 enum oload_classification { STANDARD, NON_STANDARD, INCOMPATIBLE };
 
@@ -2488,8 +2488,8 @@ find_overload_match (struct value **args, int nargs,
 
 	  method_match_quality =
 	      classify_oload_match (method_badness, nargs,
-	                            oload_method_static (method, fns_ptr,
-	                                                 method_oload_champ));
+	                            oload_method_static_p (fns_ptr,
+							   method_oload_champ));
 
 	  make_cleanup (xfree, method_badness);
 	}
@@ -2637,7 +2637,7 @@ find_overload_match (struct value **args, int nargs,
     }
 
   if (staticp != NULL)
-    *staticp = oload_method_static (method, fns_ptr, method_oload_champ);
+    *staticp = oload_method_static_p (fns_ptr, method_oload_champ);
 
   if (method_oload_champ >= 0)
     {
@@ -2876,7 +2876,7 @@ find_oload_champ (struct value **args, int nargs,
       if (fns_ptr != NULL)
 	{
 	  nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (fns_ptr, ix));
-	  static_offset = oload_method_static (1, fns_ptr, ix);
+	  static_offset = oload_method_static_p (fns_ptr, ix);
 	}
       else
 	{
@@ -2954,10 +2954,9 @@ find_oload_champ (struct value **args, int nargs,
    a non-static method or a function that isn't a method.  */
 
 static int
-oload_method_static (int method, struct fn_field *fns_ptr, int index)
+oload_method_static_p (struct fn_field *fns_ptr, int index)
 {
-  if (method && fns_ptr && index >= 0
-      && TYPE_FN_FIELD_STATIC_P (fns_ptr, index))
+  if (fns_ptr && index >= 0 && TYPE_FN_FIELD_STATIC_P (fns_ptr, index))
     return 1;
   else
     return 0;
