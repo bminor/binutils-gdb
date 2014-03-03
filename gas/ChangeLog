@@ -1,3 +1,15 @@
+2014-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/msp430.c: Replace known mcu array with known
+	msp430 ISA mcu name array.
+	Accept any name for -mmcu option.
+	Add -mz option to warn about missing NOP following an interrupt
+	status change.
+	(check_for_nop): New.
+	(msp430_operands): Emit a warning, if requested, when an interrupt
+	changing instruction is not followed by a NOP.
+	* doc/c-msp430.c: Document -mz option.
+
 2014-03-03  Alan Modra  <amodra@gmail.com>
 
 	* config/bfin-lex-wrapper.c: Correct copyright date.
