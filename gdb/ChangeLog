@@ -1,5 +1,14 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* alpha-linux-tdep.c (alpha_linux_regset_from_core_section): Remove.
+	(alpha_linux_iterate_over_regset_sections): New.
+	(alpha_linux_init_abi): Adjust gdbarch initialization.
+	* alphabsd-tdep.h (alphanbsd_regset_from_core_section): Remove
+	prototype.
+	(alphanbsd_iterate_over_regset_sections): New prototype.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* aarch64-linux-tdep.c (aarch64_linux_regset_from_core_section):
 	Remove.
 	(aarch64_linux_iterate_over_regset_sections): New.

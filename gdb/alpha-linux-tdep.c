@@ -230,20 +230,16 @@ static const struct regset alpha_linux_fpregset =
   alpha_linux_supply_fpregset, alpha_linux_collect_fpregset
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-alpha_linux_regset_from_core_section (struct gdbarch *gdbarch,
-				      const char *sect_name, size_t sect_size)
+static void
+alpha_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					  iterate_over_regset_sections_cb *cb,
+					  void *cb_data,
+					  const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= 32 * 8)
-    return &alpha_linux_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= 32 * 8)
-    return &alpha_linux_fpregset;
-
-  return NULL;
+  cb (".reg", 32 * 8, &alpha_linux_gregset, NULL, cb_data);
+  cb (".reg2", 32 * 8, &alpha_linux_fpregset, NULL, cb_data);
 }
 
 /* Implementation of `gdbarch_gdb_signal_from_target', as defined in
@@ -383,8 +379,8 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
 
-  set_gdbarch_regset_from_core_section
-    (gdbarch, alpha_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, alpha_linux_iterate_over_regset_sections);
 
   set_gdbarch_gdb_signal_from_target (gdbarch,
 				      alpha_linux_gdb_signal_from_target);
