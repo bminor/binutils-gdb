@@ -141,19 +141,19 @@ alphanbsd_aout_supply_gregset (const struct regset *regset,
 
 /* NetBSD/alpha register sets.  */
 
-static struct regset alphanbsd_gregset =
+static const struct regset alphanbsd_gregset =
 {
   NULL,
   alphanbsd_supply_gregset
 };
 
-static struct regset alphanbsd_fpregset =
+static const struct regset alphanbsd_fpregset =
 {
   NULL,
   alphanbsd_supply_fpregset
 };
 
-static struct regset alphanbsd_aout_gregset =
+static const struct regset alphanbsd_aout_gregset =
 {
   NULL,
   alphanbsd_aout_supply_gregset

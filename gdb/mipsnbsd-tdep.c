@@ -103,13 +103,13 @@ mipsnbsd_supply_gregset (const struct regset *regset,
 
 /* NetBSD/mips register sets.  */
 
-static struct regset mipsnbsd_gregset =
+static const struct regset mipsnbsd_gregset =
 {
   NULL,
   mipsnbsd_supply_gregset
 };
 
-static struct regset mipsnbsd_fpregset =
+static const struct regset mipsnbsd_fpregset =
 {
   NULL,
   mipsnbsd_supply_fpregset

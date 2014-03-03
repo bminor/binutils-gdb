@@ -135,14 +135,14 @@ rs6000_aix_collect_regset (const struct regset *regset,
 
 /* AIX register set.  */
 
-static struct regset rs6000_aix32_regset =
+static const struct regset rs6000_aix32_regset =
 {
   &rs6000_aix32_reg_offsets,
   rs6000_aix_supply_regset,
   rs6000_aix_collect_regset,
 };
 
-static struct regset rs6000_aix64_regset =
+static const struct regset rs6000_aix64_regset =
 {
   &rs6000_aix64_reg_offsets,
   rs6000_aix_supply_regset,

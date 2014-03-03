@@ -28,7 +28,7 @@ struct regset;
 extern struct ppc_reg_offsets ppcnbsd_reg_offsets;
 
 /* Register sets for NetBSD/powerpc.  */
-extern struct regset ppcnbsd_gregset;
-extern struct regset ppcnbsd_fpregset;
+extern const struct regset ppcnbsd_gregset;
+extern const struct regset ppcnbsd_fpregset;
 
 #endif /* ppcnbsd-tdep.h */

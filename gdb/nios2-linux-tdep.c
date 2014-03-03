@@ -73,7 +73,7 @@ nios2_supply_gregset (const struct regset *regset,
       }
 }
 
-static struct regset nios2_core_regset =
+static const struct regset nios2_core_regset =
 {
   NULL,
   nios2_supply_gregset,

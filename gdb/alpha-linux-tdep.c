@@ -206,13 +206,13 @@ alpha_linux_supply_fpregset (const struct regset *regset,
     regcache_raw_supply (regcache, ALPHA_FPCR_REGNUM, regs + 31 * 8);
 }
 
-static struct regset alpha_linux_gregset =
+static const struct regset alpha_linux_gregset =
 {
   NULL,
   alpha_linux_supply_gregset
 };
 
-static struct regset alpha_linux_fpregset =
+static const struct regset alpha_linux_fpregset =
 {
   NULL,
   alpha_linux_supply_fpregset

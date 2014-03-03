@@ -1,3 +1,35 @@
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* alpha-linux-tdep.c (alpha_linux_gregset, alpha_linux_fpregset):
+	Constify structures.
+	* alphanbsd-tdep.c (alphanbsd_gregset, alphanbsd_fpregset)
+	(alphanbsd_aout_gregset): Likewise.
+	* armbsd-tdep.c (armbsd_gregset, armbsd_fpregset): Likewise.
+	* frv-linux-tdep.c (frv_linux_gregset, frv_linux_fpregset):
+	Likewise.
+	* hppa-hpux-tdep.c (hppa_hpux_regset): Likewise.
+	* hppa-linux-tdep.c (hppa_linux_regset, hppa_linux_fpregset):
+	Likewise.
+	* hppanbsd-tdep.c (hppanbsd_gregset): Likewise.
+	* hppaobsd-tdep.c (hppaobsd_gregset, hppaobsd_fpregset): Likewise.
+	* m32r-linux-tdep.c (m32r_linux_gregset): Likewise.
+	* m68kbsd-tdep.c (m68kbsd_gregset, m68kbsd_fpregset): Likewise.
+	* m88k-tdep.c (m88k_gregset): Likewise.
+	* mips64obsd-tdep.c (mips64obsd_gregset): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_gregset, mipsnbsd_fpregset): Likewise.
+	* nios2-linux-tdep.c (nios2_core_regset): Likewise.
+	* ppcfbsd-tdep.c (ppc32_fbsd_fpregset): Likewise.
+	* ppcnbsd-tdep.c (ppcnbsd_gregset, ppcnbsd_fpregset): Likewise.
+	* ppcnbsd-tdep.h (ppcnbsd_gregset, ppcnbsd_fpregset): Likewise.
+	* ppcobsd-tdep.c (ppcobsd_gregset, ppcobsd_fpregset): Likewise.
+	* ppcobsd-tdep.h (ppcobsd_gregset, ppcobsd_fpregset): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix32_regset, rs6000_aix64_regset):
+	Likewise.
+	* sh-tdep.c (sh_corefile_gregset, sh_corefile_fpregset): Likewise.
+	* sh-tdep.h (sh_corefile_gregset): Likewise.
+	* tilegx-linux-tdep.c (tilegx_linux_regset): Likewise.
+	* vax-tdep.c (vax_gregset): Likewise.
+
 2014-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix TLS access for -static -pthread.

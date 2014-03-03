@@ -115,7 +115,7 @@ static const struct regset ppc64_fbsd_gregset = {
 
 /* 32-/64-bit floating-point register set.  */
 
-static struct regset ppc32_fbsd_fpregset = {
+static const struct regset ppc32_fbsd_fpregset = {
   &ppc32_fbsd_reg_offsets,
   ppc_supply_fpregset,
   ppc_collect_fpregset

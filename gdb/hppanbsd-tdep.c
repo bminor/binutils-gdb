@@ -181,7 +181,7 @@ hppanbsd_supply_gregset (const struct regset *regset,
 
 /* NetBSD/hppa register set.  */
 
-static struct regset hppanbsd_gregset =
+static const struct regset hppanbsd_gregset =
 {
   NULL,
   hppanbsd_supply_gregset

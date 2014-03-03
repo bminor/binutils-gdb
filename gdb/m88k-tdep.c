@@ -799,7 +799,7 @@ m88k_supply_gregset (const struct regset *regset,
 
 /* Motorola 88000 register set.  */
 
-static struct regset m88k_gregset =
+static const struct regset m88k_gregset =
 {
   NULL,
   m88k_supply_gregset

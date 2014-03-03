@@ -2195,14 +2195,14 @@ sh_corefile_collect_regset (const struct regset *regset,
 /* The following two regsets have the same contents, so it is tempting to
    unify them, but they are distiguished by their address, so don't.  */
 
-struct regset sh_corefile_gregset =
+const struct regset sh_corefile_gregset =
 {
   NULL,
   sh_corefile_supply_regset,
   sh_corefile_collect_regset
 };
 
-static struct regset sh_corefile_fpregset =
+static const struct regset sh_corefile_fpregset =
 {
   NULL,
   sh_corefile_supply_regset,
