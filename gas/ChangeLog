@@ -1,6 +1,8 @@
 2014-03-03  Alan Modra  <amodra@gmail.com>
 
 	* config/bfin-lex-wrapper.c: Correct copyright date.
+	* config/obj-fdpicelf.c: Likewise.
+	* config/obj-fdpicelf.h: Likewise.
 	* config/tc-frv.c: Correct copyright punctuation.
 	* config/tc-ip2k.c: Likewise.
 	* config/tc-iq2000.c: Likewise.
