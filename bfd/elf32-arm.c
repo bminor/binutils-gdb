@@ -2125,7 +2125,7 @@ static const bfd_vma elf32_arm_plt_entry [] =
   0x00000000,		/* unused		*/
 };
 
-#else
+#else /* not FOUR_WORD_PLT */
 
 /* The first entry in a procedure linkage table looks like
    this.  It is set up so that any shared library function that is
@@ -2161,7 +2161,34 @@ static const bfd_vma elf32_arm_plt_entry_long [] =
 
 static bfd_boolean elf32_arm_use_long_plt_entry = FALSE;
 
-#endif
+#endif /* not FOUR_WORD_PLT */
+
+/* The first entry in a procedure linkage table looks like this.
+   It is set up so that any shared library function that is called before the
+   relocation has been set up calls the dynamic linker first.  */
+static const bfd_vma elf32_thumb2_plt0_entry [] =
+{
+  /* NOTE: As this is a mixture of 16-bit and 32-bit instructions,
+     an instruction maybe encoded to one or two array elements.  */
+  0xf8dfb500,		/* push    {lr}          */
+  0x44fee008,		/* ldr.w   lr, [pc, #8]  */
+                        /* add     lr, pc        */
+  0xff08f85e,		/* ldr.w   pc, [lr, #8]! */
+  0x00000000,		/* &GOT[0] - .           */
+};
+
+/* Subsequent entries in a procedure linkage table for thumb only target
+   look like this.  */
+static const bfd_vma elf32_thumb2_plt_entry [] =
+{
+  /* NOTE: As this is a mixture of 16-bit and 32-bit instructions,
+     an instruction maybe encoded to one or two array elements.  */
+  0x0c00f240,		/* movw    ip, #0xNNNN    */
+  0x0c00f2c0,		/* movt    ip, #0xNNNN    */
+  0xf8dc44fc,           /* add     ip, pc         */
+  0xbf00f000            /* ldr.w   pc, [ip]       */
+                        /* nop                    */
+};
 
 /* The format of the first entry in the procedure linkage table
    for a VxWorks executable.  */
@@ -3329,6 +3356,37 @@ create_ifunc_sections (struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Determine if we're dealing with a Thumb only architecture.  */
+
+static bfd_boolean
+using_thumb_only (struct elf32_arm_link_hash_table *globals)
+{
+  int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+				       Tag_CPU_arch);
+  int profile;
+
+  if (arch == TAG_CPU_ARCH_V6_M || arch == TAG_CPU_ARCH_V6S_M)
+    return TRUE;
+
+  if (arch != TAG_CPU_ARCH_V7 && arch != TAG_CPU_ARCH_V7E_M)
+    return FALSE;
+
+  profile = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+				      Tag_CPU_arch_profile);
+
+  return profile == 'M';
+}
+
+/* Determine if we're dealing with a Thumb-2 object.  */
+
+static bfd_boolean
+using_thumb2 (struct elf32_arm_link_hash_table *globals)
+{
+  int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+				       Tag_CPU_arch);
+  return arch == TAG_CPU_ARCH_V6T2 || arch >= TAG_CPU_ARCH_V7;
+}
+
 /* Create .plt, .rel(a).plt, .got, .got.plt, .rel(a).got, .dynbss, and
    .rel(a).bss sections in DYNOBJ, and set up shortcuts to them in our
    hash table.  */
@@ -3371,6 +3429,22 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 	  htab->plt_entry_size
 	    = 4 * ARRAY_SIZE (elf32_arm_vxworks_exec_plt_entry);
 	}
+    }
+  else
+    {
+      /* PR ld/16017
+	 Test for thumb only architectures.  Note - we cannot just call
+	 using_thumb_only() as the attributes in the output bfd have not been
+	 initialised at this point, so instead we use the input bfd.  */
+      bfd * saved_obfd = htab->obfd;
+
+      htab->obfd = dynobj;
+      if (using_thumb_only (htab))
+	{
+	  htab->plt_header_size = 4 * ARRAY_SIZE (elf32_thumb2_plt0_entry);
+	  htab->plt_entry_size  = 4 * ARRAY_SIZE (elf32_thumb2_plt_entry);
+	}
+      htab->obfd = saved_obfd;
     }
 
   if (!htab->root.splt
@@ -3501,37 +3575,6 @@ elf32_arm_hash_table_free (struct bfd_link_hash_table *hash)
 
   bfd_hash_table_free (&ret->stub_hash_table);
   _bfd_elf_link_hash_table_free (hash);
-}
-
-/* Determine if we're dealing with a Thumb only architecture.  */
-
-static bfd_boolean
-using_thumb_only (struct elf32_arm_link_hash_table *globals)
-{
-  int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				       Tag_CPU_arch);
-  int profile;
-
-  if (arch == TAG_CPU_ARCH_V6_M || arch == TAG_CPU_ARCH_V6S_M)
-    return TRUE;
-
-  if (arch != TAG_CPU_ARCH_V7 && arch != TAG_CPU_ARCH_V7E_M)
-    return FALSE;
-
-  profile = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				      Tag_CPU_arch_profile);
-
-  return profile == 'M';
-}
-
-/* Determine if we're dealing with a Thumb-2 object.  */
-
-static bfd_boolean
-using_thumb2 (struct elf32_arm_link_hash_table *globals)
-{
-  int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				       Tag_CPU_arch);
-  return arch == TAG_CPU_ARCH_V6T2 || arch >= TAG_CPU_ARCH_V7;
 }
 
 /* Determine what kind of NOPs are available.  */
@@ -7710,13 +7753,43 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else if (using_thumb_only (htab))
 	{
-	  /* PR ld/16017: Do not generate ARM instructions for
-	     the PLT if compiling for a thumb-only target.
+	  /* PR ld/16017: Generate thumb only PLT entries.  */
+          if (!using_thumb2 (htab))
+	    {
+	      /* FIXME: We ought to be able to generate thumb-1 PLT
+		 instructions...  */
+	      _bfd_error_handler (_("%B: Warning: thumb-1 mode PLT generation not currently supported"),
+				  output_bfd);
+	      return FALSE;
+	    }
 
-	     FIXME: We ought to be able to generate thumb PLT instructions...  */
-	  _bfd_error_handler (_("%B: Warning: thumb mode PLT generation not currently supported"),
-			      output_bfd);
-	  return FALSE;
+	  /* Calculate the displacement between the PLT slot and the entry in
+	     the GOT.  The 12-byte offset accounts for the value produced by
+	     adding to pc in the 3rd instruction of the PLT stub.  */
+	  got_displacement = got_address - (plt_address + 12);
+
+	  /* As we are using 32 bit instructions we have to use 'put_arm_insn'
+	     instead of 'put_thumb_insn'.  */
+	  put_arm_insn (htab, output_bfd,
+			elf32_thumb2_plt_entry[0]
+			| ((got_displacement & 0x000000ff) << 16)
+			| ((got_displacement & 0x00000700) << 20)
+			| ((got_displacement & 0x00000800) >>  1)
+			| ((got_displacement & 0x0000f000) >> 12),
+			ptr + 0);
+	  put_arm_insn (htab, output_bfd,
+			elf32_thumb2_plt_entry[1]
+			| ((got_displacement & 0x00ff0000)      )
+			| ((got_displacement & 0x07000000) <<  4)
+			| ((got_displacement & 0x08000000) >> 17)
+			| ((got_displacement & 0xf0000000) >> 28),
+			ptr + 4);
+	  put_arm_insn (htab, output_bfd,
+			elf32_thumb2_plt_entry[2],
+			ptr + 8);
+	  put_arm_insn (htab, output_bfd,
+			elf32_thumb2_plt_entry[3],
+			ptr + 12);
 	}
       else
 	{
@@ -8961,7 +9034,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		     + splt->output_offset
 		     + plt_offset);
 
-	    if (globals->use_blx && r_type == R_ARM_THM_CALL)
+	    if (globals->use_blx
+		&& r_type == R_ARM_THM_CALL
+		&& ! using_thumb_only (globals))
 	      {
 		/* If the Thumb BLX instruction is available, convert
 		   the BL to a BLX instruction to call the ARM-mode
@@ -8971,8 +9046,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      }
 	    else
 	      {
-		/* Target the Thumb stub before the ARM PLT entry.  */
-		value -= PLT_THUMB_STUB_SIZE;
+		if (! using_thumb_only (globals))
+		  /* Target the Thumb stub before the ARM PLT entry.  */
+		  value -= PLT_THUMB_STUB_SIZE;
 		branch_type = ST_BRANCH_TO_THUMB;
 	      }
 	    *unresolved_reloc_p = FALSE;
@@ -14427,6 +14503,20 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	  else if (htab->nacl_p)
 	    arm_nacl_put_plt0 (htab, output_bfd, splt,
 			       got_address + 8 - (plt_address + 16));
+	  else if (using_thumb_only (htab))
+	    {
+	      got_displacement = got_address - (plt_address + 12);
+
+	      plt0_entry = elf32_thumb2_plt0_entry;
+	      put_arm_insn (htab, output_bfd, plt0_entry[0],
+			    splt->contents + 0);
+	      put_arm_insn (htab, output_bfd, plt0_entry[1],
+			    splt->contents + 4);
+	      put_arm_insn (htab, output_bfd, plt0_entry[2],
+			    splt->contents + 8);
+
+	      bfd_put_32 (output_bfd, got_displacement, splt->contents + 12);
+	    }
 	  else
 	    {
 	      got_displacement = got_address - (plt_address + 16);
@@ -14765,6 +14855,11 @@ elf32_arm_output_plt_map_1 (output_arch_syminfo *osi,
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
 	return FALSE;
     }
+  else if (using_thumb_only (htab))
+    {
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
+	return FALSE;
+    }  
   else
     {
       bfd_boolean thumb_stub_p;
@@ -15094,6 +15189,15 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
       else if (htab->nacl_p)
 	{
 	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0))
+	    return FALSE;
+	}
+      else if (using_thumb_only (htab))
+	{
+	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_THUMB, 0))
+	    return FALSE;
+	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_DATA, 12))
+	    return FALSE;
+	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_THUMB, 16))
 	    return FALSE;
 	}
       else if (!htab->symbian_p)

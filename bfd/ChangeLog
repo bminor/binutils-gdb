@@ -1,3 +1,21 @@
+2014-03-04  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16017
+	* elf32-arm.c (elf32_thumb2_plt0_entry): New array.
+	(elf32_thumb2_plt_entry): New array.
+	(elf32_arm_create_dynamic_sections): Set PLT entry sizes when
+	using thumb2 based PLT.
+	(elf32_arm_populate_plt_entry): Handle generating Thumb2 based PLT
+	entries.
+	(elf32_arm_final_link_relocate): Do not bias jumps to Thumb based
+	PLT entries.
+	(elf32_arm_finish_dynamic_sections): Handle creation of Thumb2
+	based PLT 0-entry.
+	(elf32_arm_output_plt_map_1): Handle creation of local symbols for
+	Thumb2 based PLT 0-entry.
+	(elf32_arm_output_arch_local_syms): Handle creation of local
+	symbols for Thumb2 based PLT entries.
+
 2014-02-28  Alan Modra  <amodra@gmail.com>
 
 	PR ld/16643
