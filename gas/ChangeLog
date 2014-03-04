@@ -1,4 +1,4 @@
-2014-03-04  Heiher <r@hev.cc>
+2014-03-04  Heiher  <r@hev.cc>
 
 	* config/tc-mips.c (mips_cpu_info_table): Use ISA_MIPS64R2 for
 	Loongson-3A.
