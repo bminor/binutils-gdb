@@ -1,3 +1,8 @@
+2014-03-04  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (ALL_EMUL_EXTRA_BINARIES): Remove default-manifest.
+	* Makefile.in: Regenerate.
+
 2014-02-27  Yuri Gribov  <y.gribov@samsung.com>
 
 	* emultempl/armelf.em (OPTION_LONG_PLT): Define.
