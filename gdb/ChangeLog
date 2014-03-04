@@ -1,3 +1,9 @@
+2014-03-06  Yao Qi  <yao@codesourcery.com>
+
+	* target.h (struct target_ops) <to_traceframe_info>: Use
+	TARGET_DEFAULT_NORETURN (tcomplain ()).
+	* target-delegates.c: Regenerated.
+
 2014-03-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/16575
