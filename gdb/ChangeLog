@@ -1,5 +1,11 @@
 2014-03-20  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/14135
+	* top.c (execute_command): Only dispatch events if the command
+	started the target.
+
+2014-03-20  Tom Tromey  <tromey@redhat.com>
+
 	PR cli/15718
 	* infcall.c: Include event-top.h.
 	(run_inferior_call): Call async_disable_stdin if needed.
