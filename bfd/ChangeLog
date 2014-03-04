@@ -1,3 +1,10 @@
+2014-03-04  Heiher <r@hev.cc>
+
+	* elfxx-mips.c (mips_set_isa_flags): Use E_MIPS_ARCH_64R2 for
+	Loongson-3A.
+	(mips_mach_extensions): Make bfd_mach_mips_loongson_3a an
+	extension of bfd_mach_mipsisa64r2.
+
 2014-03-04  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16017

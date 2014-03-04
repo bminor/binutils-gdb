@@ -1,3 +1,7 @@
+2014-03-04  Heiher <r@hev.cc>
+
+	* mips-dis.c (mips_arch_choices): Usee ISA_MIPS64R2 for Loongson-3A.
+
 2014-03-04  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Move the udi* instructions
