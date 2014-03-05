@@ -2531,25 +2531,16 @@ parse_toc_entry (enum toc_size_qualifier *toc_kind)
 }
 #endif
 
-#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
+#ifdef OBJ_XCOFF
 /* See whether a symbol is in the TOC section.  */
 
 static int
 ppc_is_toc_sym (symbolS *sym)
 {
-#ifdef OBJ_XCOFF
   return (symbol_get_tc (sym)->symbol_class == XMC_TC
 	  || symbol_get_tc (sym)->symbol_class == XMC_TC0);
-#endif
-#ifdef OBJ_ELF
-  const char *sname = segment_name (S_GET_SEGMENT (sym));
-  if (ppc_obj64)
-    return strcmp (sname, ".toc") == 0;
-  else
-    return strcmp (sname, ".got") == 0;
-#endif
 }
-#endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
+#endif
 
 
 #ifdef OBJ_ELF
@@ -3280,25 +3271,17 @@ md_assemble (char *str)
 		   && (operand->bitm & 0xfff0) == 0xfff0
 		   && operand->shift == 0)
 	    {
+	      reloc = BFD_RELOC_16;
+#ifdef OBJ_ELF
+	      if (ppc_obj64
+		  && (operand->flags & PPC_OPERAND_DS) != 0)
+		reloc = BFD_RELOC_PPC64_ADDR16_DS;
+#endif
+#ifdef OBJ_XCOFF
 	      /* Note: the symbol may be not yet defined.  */
 	      if (ppc_is_toc_sym (ex.X_add_symbol))
-		{
-		  reloc = BFD_RELOC_PPC_TOC16;
-#ifdef OBJ_ELF
-		  if (ppc_obj64
-		      && (operand->flags & PPC_OPERAND_DS) != 0)
-		    reloc = BFD_RELOC_PPC64_TOC16_DS;
+		reloc = BFD_RELOC_PPC_TOC16;
 #endif
-		}
-	      else
-		{
-		  reloc = BFD_RELOC_16;
-#ifdef OBJ_ELF
-		  if (ppc_obj64
-		      && (operand->flags & PPC_OPERAND_DS) != 0)
-		    reloc = BFD_RELOC_PPC64_ADDR16_DS;
-#endif
-		}
 	    }
 #endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
 
