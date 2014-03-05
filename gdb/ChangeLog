@@ -1,3 +1,17 @@
+2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_allow_memory_access): Remove.
+	(replay_memory_access_read_only, replay_memory_access_read_write)
+	(replay_memory_access_types, replay_memory_access)
+	(set_record_btrace_cmdlist, show_record_btrace_cmdlist)
+	(cmd_set_record_btrace, cmd_show_record_btrace)
+	(cmd_show_replay_memory_access): New.
+	(record_btrace_xfer_partial, record_btrace_insert_breakpoint)
+	(record_btrace_remove_breakpoint): Replace
+	record_btrace_allow_memory_access with replay_memory_access.
+	(_initialize_record_btrace): Add commands.
+	* NEWS: Announce it.
+
 2014-05-22  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* aarch64-linux-nat.c (asm/ptrace.h): Include.

@@ -6451,6 +6451,28 @@ results.
 @item show record full memory-query
 Show the current setting of @code{memory-query}.
 
+@kindex set record btrace
+The @code{btrace} record target does not trace data.  As a
+convenience, when replaying, @value{GDBN} reads read-only memory off
+the live program directly, assuming that the addresses of the
+read-only areas don't change.  This for example makes it possible to
+disassemble code while replaying, but not to print variables.
+In some cases, being able to inspect variables might be useful.
+You can use the following command for that:
+
+@item set record btrace replay-memory-access
+Control the behavior of the @code{btrace} recording method when
+accessing memory during replay.  If @code{read-only} (the default),
+@value{GDBN} will only allow accesses to read-only memory.
+If @code{read-write}, @value{GDBN} will allow accesses to read-only
+and to read-write memory.  Beware that the accessed memory corresponds
+to the live target and not necessarily to the current replay
+position.
+
+@kindex show record btrace
+@item show record btrace replay-memory-access
+Show the current setting of @code{replay-memory-access}.
+
 @kindex info record
 @item info record
 Show various statistics about the recording depending on the recording

@@ -1,3 +1,8 @@
+2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Document "set/show btrace
+	replay-memory-access".
+
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Starting): Document "set/show

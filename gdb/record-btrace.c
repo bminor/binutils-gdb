@@ -43,8 +43,22 @@ static struct target_ops record_btrace_ops;
 /* A new thread observer enabling branch tracing for the new thread.  */
 static struct observer *record_btrace_thread_observer;
 
-/* Temporarily allow memory accesses.  */
-static int record_btrace_allow_memory_access;
+/* Memory access types used in set/show record btrace replay-memory-access.  */
+static const char replay_memory_access_read_only[] = "read-only";
+static const char replay_memory_access_read_write[] = "read-write";
+static const char *const replay_memory_access_types[] =
+{
+  replay_memory_access_read_only,
+  replay_memory_access_read_write,
+  NULL
+};
+
+/* The currently allowed replay memory access type.  */
+static const char *replay_memory_access = replay_memory_access_read_only;
+
+/* Command lists for "set/show record btrace".  */
+static struct cmd_list_element *set_record_btrace_cmdlist;
+static struct cmd_list_element *show_record_btrace_cmdlist;
 
 /* Print a record-btrace debug message.  Use do ... while (0) to avoid
    ambiguities when used in if statements.  */
@@ -816,7 +830,8 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
   struct target_ops *t;
 
   /* Filter out requests that don't make sense during replay.  */
-  if (!record_btrace_allow_memory_access && record_btrace_is_replaying (ops))
+  if (replay_memory_access == replay_memory_access_read_only
+      && record_btrace_is_replaying (ops))
     {
       switch (object)
 	{
@@ -870,18 +885,19 @@ record_btrace_insert_breakpoint (struct target_ops *ops,
 				 struct bp_target_info *bp_tgt)
 {
   volatile struct gdb_exception except;
-  int old, ret;
+  const char *old;
+  int ret;
 
   /* Inserting breakpoints requires accessing memory.  Allow it for the
      duration of this function.  */
-  old = record_btrace_allow_memory_access;
-  record_btrace_allow_memory_access = 1;
+  old = replay_memory_access;
+  replay_memory_access = replay_memory_access_read_write;
 
   ret = 0;
   TRY_CATCH (except, RETURN_MASK_ALL)
     ret = ops->beneath->to_insert_breakpoint (ops->beneath, gdbarch, bp_tgt);
 
-  record_btrace_allow_memory_access = old;
+  replay_memory_access = old;
 
   if (except.reason < 0)
     throw_exception (except);
@@ -897,18 +913,19 @@ record_btrace_remove_breakpoint (struct target_ops *ops,
 				 struct bp_target_info *bp_tgt)
 {
   volatile struct gdb_exception except;
-  int old, ret;
+  const char *old;
+  int ret;
 
   /* Removing breakpoints requires accessing memory.  Allow it for the
      duration of this function.  */
-  old = record_btrace_allow_memory_access;
-  record_btrace_allow_memory_access = 1;
+  old = replay_memory_access;
+  replay_memory_access = replay_memory_access_read_write;
 
   ret = 0;
   TRY_CATCH (except, RETURN_MASK_ALL)
     ret = ops->beneath->to_remove_breakpoint (ops->beneath, gdbarch, bp_tgt);
 
-  record_btrace_allow_memory_access = old;
+  replay_memory_access = old;
 
   if (except.reason < 0)
     throw_exception (except);
@@ -1939,6 +1956,32 @@ cmd_record_btrace_start (char *args, int from_tty)
   execute_command ("target record-btrace", from_tty);
 }
 
+/* The "set record btrace" command.  */
+
+static void
+cmd_set_record_btrace (char *args, int from_tty)
+{
+  cmd_show_list (set_record_btrace_cmdlist, from_tty, "");
+}
+
+/* The "show record btrace" command.  */
+
+static void
+cmd_show_record_btrace (char *args, int from_tty)
+{
+  cmd_show_list (show_record_btrace_cmdlist, from_tty, "");
+}
+
+/* The "show record btrace replay-memory-access" command.  */
+
+static void
+cmd_show_replay_memory_access (struct ui_file *file, int from_tty,
+			       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (gdb_stdout, _("Replay memory access is %s.\n"),
+		    replay_memory_access);
+}
+
 void _initialize_record_btrace (void);
 
 /* Initialize btrace commands.  */
@@ -1950,6 +1993,29 @@ _initialize_record_btrace (void)
 	   _("Start branch trace recording."),
 	   &record_cmdlist);
   add_alias_cmd ("b", "btrace", class_obscure, 1, &record_cmdlist);
+
+  add_prefix_cmd ("btrace", class_support, cmd_set_record_btrace,
+		  _("Set record options"), &set_record_btrace_cmdlist,
+		  "set record btrace ", 0, &set_record_cmdlist);
+
+  add_prefix_cmd ("btrace", class_support, cmd_show_record_btrace,
+		  _("Show record options"), &show_record_btrace_cmdlist,
+		  "show record btrace ", 0, &show_record_cmdlist);
+
+  add_setshow_enum_cmd ("replay-memory-access", no_class,
+			replay_memory_access_types, &replay_memory_access, _("\
+Set what memory accesses are allowed during replay."), _("\
+Show what memory accesses are allowed during replay."),
+			   _("Default is READ-ONLY.\n\n\
+The btrace record target does not trace data.\n\
+The memory therefore corresponds to the live target and not \
+to the current replay position.\n\n\
+When READ-ONLY, allow accesses to read-only memory during replay.\n\
+When READ-WRITE, allow accesses to read-only and read-write memory during \
+replay."),
+			   NULL, cmd_show_replay_memory_access,
+			   &set_record_btrace_cmdlist,
+			   &show_record_btrace_cmdlist);
 
   init_record_btrace_ops ();
   add_target (&record_btrace_ops);

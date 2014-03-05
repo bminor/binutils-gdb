@@ -67,6 +67,10 @@ set auto-connect-native-target
   native target for the run, attach, etc. commands when not connected
   to any target yet.  See also "target native" below.
 
+set record btrace replay-memory-access (read-only|read-write)
+show record btrace replay-memory-access
+  Control what memory accesses are allowed during replay.
+
 * New features in the GDB remote stub, GDBserver
 
   ** New option --debug-format=option1[,option2,...] allows one to add
