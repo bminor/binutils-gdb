@@ -3133,103 +3133,6 @@ md_assemble (char *str)
 		      break;
 		    }
 		}
-
-	      /* For the absolute forms of branches, convert the PC
-		 relative form back into the absolute.  */
-	      if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
-		{
-		  switch (reloc)
-		    {
-		    case BFD_RELOC_PPC_B26:
-		      reloc = BFD_RELOC_PPC_BA26;
-		      break;
-		    case BFD_RELOC_PPC_B16:
-		      reloc = BFD_RELOC_PPC_BA16;
-		      break;
-		    case BFD_RELOC_PPC_B16_BRTAKEN:
-		      reloc = BFD_RELOC_PPC_BA16_BRTAKEN;
-		      break;
-		    case BFD_RELOC_PPC_B16_BRNTAKEN:
-		      reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;
-		      break;
-		    default:
-		      break;
-		    }
-		}
-
-	      switch (reloc)
-		{
-		case BFD_RELOC_PPC_TOC16:
-		  toc_reloc_types |= has_small_toc_reloc;
-		  break;
-		case BFD_RELOC_PPC64_TOC16_LO:
-		case BFD_RELOC_PPC64_TOC16_HI:
-		case BFD_RELOC_PPC64_TOC16_HA:
-		  toc_reloc_types |= has_large_toc_reloc;
-		  break;
-		default:
-		  break;
-		}
-
-	      if ((operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
-		{
-		  switch (reloc)
-		    {
-		    case BFD_RELOC_16:
-		      reloc = BFD_RELOC_PPC64_ADDR16_DS;
-		      break;
-		    case BFD_RELOC_LO16:
-		      reloc = BFD_RELOC_PPC64_ADDR16_LO_DS;
-		      break;
-		    case BFD_RELOC_16_GOTOFF:
-		      reloc = BFD_RELOC_PPC64_GOT16_DS;
-		      break;
-		    case BFD_RELOC_LO16_GOTOFF:
-		      reloc = BFD_RELOC_PPC64_GOT16_LO_DS;
-		      break;
-		    case BFD_RELOC_LO16_PLTOFF:
-		      reloc = BFD_RELOC_PPC64_PLT16_LO_DS;
-		      break;
-		    case BFD_RELOC_16_BASEREL:
-		      reloc = BFD_RELOC_PPC64_SECTOFF_DS;
-		      break;
-		    case BFD_RELOC_LO16_BASEREL:
-		      reloc = BFD_RELOC_PPC64_SECTOFF_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC_TOC16:
-		      reloc = BFD_RELOC_PPC64_TOC16_DS;
-		      break;
-		    case BFD_RELOC_PPC64_TOC16_LO:
-		      reloc = BFD_RELOC_PPC64_TOC16_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC64_PLTGOT16:
-		      reloc = BFD_RELOC_PPC64_PLTGOT16_DS;
-		      break;
-		    case BFD_RELOC_PPC64_PLTGOT16_LO:
-		      reloc = BFD_RELOC_PPC64_PLTGOT16_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC_DTPREL16:
-		      reloc = BFD_RELOC_PPC64_DTPREL16_DS;
-		      break;
-		    case BFD_RELOC_PPC_DTPREL16_LO:
-		      reloc = BFD_RELOC_PPC64_DTPREL16_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC_TPREL16:
-		      reloc = BFD_RELOC_PPC64_TPREL16_DS;
-		      break;
-		    case BFD_RELOC_PPC_TPREL16_LO:
-		      reloc = BFD_RELOC_PPC64_TPREL16_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC_GOT_DTPREL16:
-		    case BFD_RELOC_PPC_GOT_DTPREL16_LO:
-		    case BFD_RELOC_PPC_GOT_TPREL16:
-		    case BFD_RELOC_PPC_GOT_TPREL16_LO:
-		      break;
-		    default:
-		      as_bad (_("unsupported relocation for DS offset field"));
-		      break;
-		    }
-		}
 	    }
 #endif /* OBJ_ELF */
 
@@ -3238,11 +3141,13 @@ md_assemble (char *str)
 	  /* Determine a BFD reloc value based on the operand information.
 	     We are only prepared to turn a few of the operands into
 	     relocs.  */
-	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
+	  else if ((operand->flags & (PPC_OPERAND_RELATIVE
+				      | PPC_OPERAND_ABSOLUTE)) != 0
 		   && operand->bitm == 0x3fffffc
 		   && operand->shift == 0)
 	    reloc = BFD_RELOC_PPC_B26;
-	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
+	  else if ((operand->flags & (PPC_OPERAND_RELATIVE
+				      | PPC_OPERAND_ABSOLUTE)) != 0
 		   && operand->bitm == 0xfffc
 		   && operand->shift == 0)
 	    reloc = BFD_RELOC_PPC_B16;
@@ -3258,32 +3163,120 @@ md_assemble (char *str)
 		   && operand->bitm == 0x1fffffe
 		   && operand->shift == 0)
 	    reloc = BFD_RELOC_PPC_VLE_REL24;
-	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
-		   && operand->bitm == 0x3fffffc
-		   && operand->shift == 0)
-	    reloc = BFD_RELOC_PPC_BA26;
-	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
-		   && operand->bitm == 0xfffc
-		   && operand->shift == 0)
-	    reloc = BFD_RELOC_PPC_BA16;
-#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
-	  else if ((operand->flags & PPC_OPERAND_PARENS) != 0
+	  else if ((operand->flags & PPC_OPERAND_NEGATIVE) == 0
 		   && (operand->bitm & 0xfff0) == 0xfff0
 		   && operand->shift == 0)
 	    {
 	      reloc = BFD_RELOC_16;
-#ifdef OBJ_ELF
-	      if (ppc_obj64
-		  && (operand->flags & PPC_OPERAND_DS) != 0)
-		reloc = BFD_RELOC_PPC64_ADDR16_DS;
-#endif
 #ifdef OBJ_XCOFF
 	      /* Note: the symbol may be not yet defined.  */
-	      if (ppc_is_toc_sym (ex.X_add_symbol))
+	      if ((operand->flags & PPC_OPERAND_PARENS) != 0
+		  && ppc_is_toc_sym (ex.X_add_symbol))
 		reloc = BFD_RELOC_PPC_TOC16;
 #endif
 	    }
-#endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
+
+	  /* For the absolute forms of branches, convert the PC
+	     relative form back into the absolute.  */
+	  if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
+	    {
+	      switch (reloc)
+		{
+		case BFD_RELOC_PPC_B26:
+		  reloc = BFD_RELOC_PPC_BA26;
+		  break;
+		case BFD_RELOC_PPC_B16:
+		  reloc = BFD_RELOC_PPC_BA16;
+		  break;
+#ifdef OBJ_ELF
+		case BFD_RELOC_PPC_B16_BRTAKEN:
+		  reloc = BFD_RELOC_PPC_BA16_BRTAKEN;
+		  break;
+		case BFD_RELOC_PPC_B16_BRNTAKEN:
+		  reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;
+		  break;
+#endif
+		default:
+		  break;
+		}
+	    }
+
+#ifdef OBJ_ELF
+	  switch (reloc)
+	    {
+	    case BFD_RELOC_PPC_TOC16:
+	      toc_reloc_types |= has_small_toc_reloc;
+	      break;
+	    case BFD_RELOC_PPC64_TOC16_LO:
+	    case BFD_RELOC_PPC64_TOC16_HI:
+	    case BFD_RELOC_PPC64_TOC16_HA:
+	      toc_reloc_types |= has_large_toc_reloc;
+	      break;
+	    default:
+	      break;
+	    }
+
+	  if (ppc_obj64
+	      && (operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
+	    {
+	      switch (reloc)
+		{
+		case BFD_RELOC_16:
+		  reloc = BFD_RELOC_PPC64_ADDR16_DS;
+		  break;
+		case BFD_RELOC_LO16:
+		  reloc = BFD_RELOC_PPC64_ADDR16_LO_DS;
+		  break;
+		case BFD_RELOC_16_GOTOFF:
+		  reloc = BFD_RELOC_PPC64_GOT16_DS;
+		  break;
+		case BFD_RELOC_LO16_GOTOFF:
+		  reloc = BFD_RELOC_PPC64_GOT16_LO_DS;
+		  break;
+		case BFD_RELOC_LO16_PLTOFF:
+		  reloc = BFD_RELOC_PPC64_PLT16_LO_DS;
+		  break;
+		case BFD_RELOC_16_BASEREL:
+		  reloc = BFD_RELOC_PPC64_SECTOFF_DS;
+		  break;
+		case BFD_RELOC_LO16_BASEREL:
+		  reloc = BFD_RELOC_PPC64_SECTOFF_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_TOC16:
+		  reloc = BFD_RELOC_PPC64_TOC16_DS;
+		  break;
+		case BFD_RELOC_PPC64_TOC16_LO:
+		  reloc = BFD_RELOC_PPC64_TOC16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC64_PLTGOT16:
+		  reloc = BFD_RELOC_PPC64_PLTGOT16_DS;
+		  break;
+		case BFD_RELOC_PPC64_PLTGOT16_LO:
+		  reloc = BFD_RELOC_PPC64_PLTGOT16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_DTPREL16:
+		  reloc = BFD_RELOC_PPC64_DTPREL16_DS;
+		  break;
+		case BFD_RELOC_PPC_DTPREL16_LO:
+		  reloc = BFD_RELOC_PPC64_DTPREL16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_TPREL16:
+		  reloc = BFD_RELOC_PPC64_TPREL16_DS;
+		  break;
+		case BFD_RELOC_PPC_TPREL16_LO:
+		  reloc = BFD_RELOC_PPC64_TPREL16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_GOT_DTPREL16:
+		case BFD_RELOC_PPC_GOT_DTPREL16_LO:
+		case BFD_RELOC_PPC_GOT_TPREL16:
+		case BFD_RELOC_PPC_GOT_TPREL16_LO:
+		  break;
+		default:
+		  as_bad (_("unsupported relocation for DS offset field"));
+		  break;
+		}
+	    }
+#endif
 
 	  /* We need to generate a fixup for this expression.  */
 	  if (fc >= MAX_INSN_FIXUPS)

@@ -1,5 +1,12 @@
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (md_assemble): Move code adjusting reloc types
+	later.  Merge absolute and relative branch reloc selection.
+	Generate 16-bit relocs for most 16-bit insn fields given a
+	non-constant expression.
+
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (ppc_is_toc_sym): Remove OBJ_ELF support.
 	(md_assemble): Don't call ppc_is_toc_sym for ELF.
 
