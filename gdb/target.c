@@ -1074,6 +1074,23 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
     }
   while (ops != NULL);
 
+  /* The cache works at the raw memory level.  Make sure the cache
+     gets updated with raw contents no matter what kind of memory
+     object was originally being written.  Note we do write-through
+     first, so that if it fails, we don't write to the cache contents
+     that never made it to the target.  */
+  if (writebuf != NULL
+      && !ptid_equal (inferior_ptid, null_ptid)
+      && target_dcache_init_p ()
+      && (stack_cache_enabled_p () || code_cache_enabled_p ()))
+    {
+      DCACHE *dcache = target_dcache_get ();
+
+      /* Note that writing to an area of memory which wasn't present
+	 in the cache doesn't cause it to be loaded in.  */
+      dcache_update (dcache, res, memaddr, writebuf, *xfered_len);
+    }
+
   return res;
 }
 
@@ -1225,6 +1242,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
     inf = NULL;
 
   if (inf != NULL
+      && readbuf != NULL
       /* The dcache reads whole cache lines; that doesn't play well
 	 with reading from a trace buffer, because reading outside of
 	 the collected memory range fails.  */
@@ -1234,23 +1252,9 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	  || (code_cache_enabled_p () && object == TARGET_OBJECT_CODE_MEMORY)))
     {
       DCACHE *dcache = target_dcache_get_or_init ();
-      int l;
 
-      if (readbuf != NULL)
-	l = dcache_xfer_memory (ops, dcache, memaddr, readbuf, reg_len, 0);
-      else
-	/* FIXME drow/2006-08-09: If we're going to preserve const
-	   correctness dcache_xfer_memory should take readbuf and
-	   writebuf.  */
-	l = dcache_xfer_memory (ops, dcache, memaddr, (void *) writebuf,
-				  reg_len, 1);
-      if (l <= 0)
-	return TARGET_XFER_E_IO;
-      else
-	{
-	  *xfered_len = (ULONGEST) l;
-	  return TARGET_XFER_OK;
-	}
+      return dcache_read_memory_partial (ops, dcache, memaddr, readbuf,
+					 reg_len, xfered_len);
     }
 
   /* If none of those methods found the memory we wanted, fall back
@@ -1265,23 +1269,6 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
   res = raw_memory_xfer_partial (ops, readbuf, writebuf, memaddr, reg_len,
 				 xfered_len);
-
-  /* Make sure the cache gets updated no matter what - if we are writing
-     to the stack.  Even if this write is not tagged as such, we still need
-     to update the cache.  */
-
-  if (res == TARGET_XFER_OK
-      && inf != NULL
-      && writebuf != NULL
-      && target_dcache_init_p ()
-      && !region->attrib.cache
-      && ((stack_cache_enabled_p () && object != TARGET_OBJECT_STACK_MEMORY)
-	  || (code_cache_enabled_p () && object != TARGET_OBJECT_CODE_MEMORY)))
-    {
-      DCACHE *dcache = target_dcache_get ();
-
-      dcache_update (dcache, memaddr, (void *) writebuf, reg_len);
-    }
 
   /* If we still haven't got anything, return the last error.  We
      give up.  */

@@ -1,3 +1,11 @@
+2014-03-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/16575
+	* gdb.base/breakpoint-shadow.exp (compare_disassembly): New
+	procedure.
+	(top level): Adjust to use it.  Add tests that exercise breakpoint
+	interaction with the code-cache.
+
 2014-02-26  Ludovic Courtès  <ludo@gnu.org>
 
 	* gdb.guile/scm-value.exp (test_value_in_inferior): Add

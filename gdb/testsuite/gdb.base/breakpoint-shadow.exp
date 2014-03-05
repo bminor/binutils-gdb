@@ -44,14 +44,36 @@ gdb_test_multiple "disass main" $test {
 gdb_test "b [gdb_get_line_number "break-first"]" "Breakpoint \[0-9\] at .*" "First breakpoint placed"
 gdb_test "b [gdb_get_line_number "break-second"]" "Breakpoint \[0-9\] at .*" "Second breakpoint placed"
 
-set test "disassembly with breakpoints"
-gdb_test_multiple "disass main" $test {
-    -re $match {
-    	set got $expect_out(1,string)
-	if [string equal -nocase $orig $got] {
-	    pass $test
-	} else {
-	    fail $test
+# Disassemble main, and compare the output to the original output
+# before breakpoints were inserted.  TEST is used as test message.
+
+proc test_disassembly {test} {
+    global match orig
+
+    gdb_test_multiple "disass main" $test {
+	-re $match {
+	    set got $expect_out(1,string)
+	    if [string equal -nocase $orig $got] {
+		pass $test
+	    } else {
+		fail $test
+	    }
 	}
     }
 }
+
+test_disassembly "disassembly with breakpoints"
+
+# Now check the interaction between the code cache and breakpoint
+# always-inserted mode.
+
+# Recreate the code cache when breakpoints are already inserted.
+gdb_test_no_output "set code-cache off"
+gdb_test_no_output "set code-cache on"
+
+test_disassembly "disassembly with breakpoints, fresh code cache"
+
+# Delete breakpoints.  This should update the code cache as well.
+delete_breakpoints
+
+test_disassembly "disassembly without breakpoints, no stale breakpoints"
