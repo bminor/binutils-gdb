@@ -149,6 +149,10 @@ START_RELOC_NUMBERS (elf_ppc64_reloc_type)
   RELOC_NUMBER (R_PPC64_DTPREL16_HIGH,	   114)
   RELOC_NUMBER (R_PPC64_DTPREL16_HIGHA,	   115)
 
+/* Added for ELFv2.  */
+  RELOC_NUMBER (R_PPC64_REL24_NOTOC,	   116)
+  RELOC_NUMBER (R_PPC64_ADDR64_LOCAL,	   117)
+
 #ifndef RELOC_MACROS_GEN_FUNC
 /* Fake relocation only used internally by ld.  */
   RELOC_NUMBER (R_PPC64_LO_DS_OPT,	   128)

@@ -1,3 +1,13 @@
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_howto_raw): Add R_PPC64_ADDR64_LOCAL entry.
+	(ppc64_elf_reloc_type_lookup): Support R_PPC64_ADDR64_LOCAL.
+	(ppc64_elf_check_relocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	* Add BFD_RELOC_PPC64_ADDR64_LOCAL.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2014-03-04  Heiher  <r@hev.cc>
 
 	* elfxx-mips.c (mips_set_isa_flags): Use E_MIPS_ARCH_64R2 for

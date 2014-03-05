@@ -5482,6 +5482,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_PPC64_DTPREL16_HIGHESTA:
     case elfcpp::R_PPC64_TLSGD:
     case elfcpp::R_PPC64_TLSLD:
+    case elfcpp::R_PPC64_ADDR64_LOCAL:
       break;
 
     case elfcpp::R_POWERPC_GOT16:
@@ -5928,6 +5929,7 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_PPC64_DTPREL16_HIGHESTA:
     case elfcpp::R_PPC64_TLSGD:
     case elfcpp::R_PPC64_TLSLD:
+    case elfcpp::R_PPC64_ADDR64_LOCAL:
       break;
 
     case elfcpp::R_POWERPC_GOT16:
@@ -7137,6 +7139,13 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       value -= dtp_offset;
       break;
 
+    case elfcpp::R_PPC64_ADDR64_LOCAL:
+      if (gsym != NULL)
+	value += object->ppc64_local_entry_offset(gsym);
+      else
+	value += object->ppc64_local_entry_offset(r_sym);
+      break;
+
     default:
       break;
     }
@@ -7339,6 +7348,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_ADDR64:
     case elfcpp::R_PPC64_REL64:
     case elfcpp::R_PPC64_TOC:
+    case elfcpp::R_PPC64_ADDR64_LOCAL:
       Reloc::addr64(view, value);
       break;
 

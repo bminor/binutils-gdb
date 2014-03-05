@@ -2095,6 +2095,21 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  /* Like ADDR64, but use local entry point of function.  */
+  HOWTO (R_PPC64_ADDR64_LOCAL,	/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0=byte, 1=short, 2=long, 4=64 bits) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC64_ADDR64_LOCAL", /* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ONES (64),		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_PPC64_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
@@ -2382,6 +2397,8 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_HI16_PCREL:			r = R_PPC64_REL16_HI;
       break;
     case BFD_RELOC_HI16_S_PCREL:		r = R_PPC64_REL16_HA;
+      break;
+    case BFD_RELOC_PPC64_ADDR64_LOCAL:		r = R_PPC64_ADDR64_LOCAL;
       break;
     case BFD_RELOC_VTABLE_INHERIT:		r = R_PPC64_GNU_VTINHERIT;
       break;
@@ -5398,6 +5415,21 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_REL16_LO:
 	case R_PPC64_REL16_HI:
 	case R_PPC64_REL16_HA:
+	  break;
+
+	  /* Not supported as a dynamic relocation.  */
+	case R_PPC64_ADDR64_LOCAL:
+	  if (info->shared)
+	    {
+	      if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
+		ppc_howto_init ();
+	      info->callbacks->einfo (_("%P: %H: %s reloc unsupported "
+					"in shared libraries and PIEs.\n"),
+				      abfd, sec, rel->r_offset,
+				      ppc64_elf_howto_table[r_type]->name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
 	  break;
 
 	case R_PPC64_TOC16:
@@ -14132,6 +14164,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_DTPREL16_HIGHEST:
 	case R_PPC64_DTPREL16_HIGHESTA:
 	  addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
+	  break;
+
+	case R_PPC64_ADDR64_LOCAL:
+	  addend += PPC64_LOCAL_ENTRY_OFFSET (h != NULL
+					      ? h->elf.other
+					      : sym->st_other);
 	  break;
 
 	case R_PPC64_DTPMOD64:

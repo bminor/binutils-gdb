@@ -271,6 +271,8 @@ if [ supports_ppc64 ] then {
     run_dump_test "relbrlt"
     run_dump_test "elfv2so"
     run_dump_test "elfv2exe"
+    run_dump_test "elfv2-2so"
+    run_dump_test "elfv2-2exe"
 }
 
 if { [istarget "powerpc*-eabi*"] } {

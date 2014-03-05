@@ -3259,6 +3259,7 @@ instruction.  */
   BFD_RELOC_PPC64_PLTGOT16_LO_DS,
   BFD_RELOC_PPC64_ADDR16_HIGH,
   BFD_RELOC_PPC64_ADDR16_HIGHA,
+  BFD_RELOC_PPC64_ADDR64_LOCAL,
 
 /* PowerPC and PowerPC64 thread-local storage relocations.  */
   BFD_RELOC_PPC_TLS,

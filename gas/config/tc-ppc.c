@@ -1952,6 +1952,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP64 ("dtprel@highera",	BFD_RELOC_PPC64_DTPREL16_HIGHERA),
     MAP64 ("dtprel@highest",	BFD_RELOC_PPC64_DTPREL16_HIGHEST),
     MAP64 ("dtprel@highesta",	BFD_RELOC_PPC64_DTPREL16_HIGHESTA),
+    MAP64 ("localentry",	BFD_RELOC_PPC64_ADDR64_LOCAL),
     MAP64 ("tprel@high",	BFD_RELOC_PPC64_TPREL16_HIGH),
     MAP64 ("tprel@higha",	BFD_RELOC_PPC64_TPREL16_HIGHA),
     MAP64 ("tprel@higher",	BFD_RELOC_PPC64_TPREL16_HIGHER),
@@ -6844,6 +6845,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_PPC64_HIGHEST_S:
 	case BFD_RELOC_PPC64_ADDR16_HIGH:
 	case BFD_RELOC_PPC64_ADDR16_HIGHA:
+	case BFD_RELOC_PPC64_ADDR64_LOCAL:
 	  break;
 
 	case BFD_RELOC_PPC_DTPMOD:
