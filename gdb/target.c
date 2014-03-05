@@ -1418,6 +1418,23 @@ raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
     }
   while (ops != NULL);
 
+  /* The cache works at the raw memory level.  Make sure the cache
+     gets updated with raw contents no matter what kind of memory
+     object was originally being written.  Note we do write-through
+     first, so that if it fails, we don't write to the cache contents
+     that never made it to the target.  */
+  if (writebuf != NULL
+      && !ptid_equal (inferior_ptid, null_ptid)
+      && target_dcache_init_p ()
+      && (stack_cache_enabled_p () || code_cache_enabled_p ()))
+    {
+      DCACHE *dcache = target_dcache_get ();
+
+      /* Note that writing to an area of memory which wasn't present
+	 in the cache doesn't cause it to be loaded in.  */
+      dcache_update (dcache, res, memaddr, writebuf, len);
+    }
+
   return res;
 }
 
@@ -1565,6 +1582,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
     inf = NULL;
 
   if (inf != NULL
+      && readbuf != NULL
       /* The dcache reads whole cache lines; that doesn't play well
 	 with reading from a trace buffer, because reading outside of
 	 the collected memory range fails.  */
@@ -1575,18 +1593,8 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
     {
       DCACHE *dcache = target_dcache_get_or_init ();
 
-      if (readbuf != NULL)
-	res = dcache_xfer_memory (ops, dcache, memaddr, readbuf, reg_len, 0);
-      else
-	/* FIXME drow/2006-08-09: If we're going to preserve const
-	   correctness dcache_xfer_memory should take readbuf and
-	   writebuf.  */
-	res = dcache_xfer_memory (ops, dcache, memaddr, (void *) writebuf,
-				  reg_len, 1);
-      if (res <= 0)
-	return -1;
-      else
-	return res;
+      return dcache_read_memory_partial (ops, dcache, memaddr, readbuf,
+					 reg_len);
     }
 
   /* If none of those methods found the memory we wanted, fall back
@@ -1596,23 +1604,6 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
      But for memory this won't do.  Memory is the only target
      object which can be read from more than one valid target.  */
   res = raw_memory_xfer_partial (ops, readbuf, writebuf, memaddr, reg_len);
-
-  /* Make sure the cache gets updated no matter what - if we are writing
-     to the stack.  Even if this write is not tagged as such, we still need
-     to update the cache.  */
-
-  if (res > 0
-      && inf != NULL
-      && writebuf != NULL
-      && target_dcache_init_p ()
-      && !region->attrib.cache
-      && ((stack_cache_enabled_p () && object != TARGET_OBJECT_STACK_MEMORY)
-	  || (code_cache_enabled_p () && object != TARGET_OBJECT_CODE_MEMORY)))
-    {
-      DCACHE *dcache = target_dcache_get ();
-
-      dcache_update (dcache, memaddr, (void *) writebuf, res);
-    }
 
   /* If we still haven't got anything, return the last error.  We
      give up.  */

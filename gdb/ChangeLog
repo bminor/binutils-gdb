@@ -1,3 +1,20 @@
+2014-03-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/16575
+	* dcache.c (dcache_poke_byte): Constify ptr parameter.  Return
+	void.  Update comment.
+	(dcache_xfer_memory): Delete.
+	(dcache_read_memory_partial): New, based on the read bits of
+	dcache_xfer_memory.
+	(dcache_update): Add status parameter.  Use ULONGEST for len, and
+	adjust.  Discard cache lines if the reason for the update was
+	error.
+	* dcache.h (dcache_xfer_memory): Delete declaration.
+	(dcache_read_memory_partial): New declaration.
+	(dcache_update): Update prototype.
+	* target.c (raw_memory_xfer_partial): Update the dcache here.
+	(memory_xfer_partial_1): Don't handle dcache writes here.
+
 2014-02-26  Pedro Alves  <palves@redhat.com>
 
 	PR breakpoints/16292

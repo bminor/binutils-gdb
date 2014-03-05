@@ -1,3 +1,11 @@
+2014-03-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/16575
+	* gdb.base/breakpoint-shadow.exp (compare_disassembly): New
+	procedure.
+	(top level): Adjust to use it.  Add tests that exercise breakpoint
+	interaction with the code-cache.
+
 2014-02-26  Pedro Alves  <pedro@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
