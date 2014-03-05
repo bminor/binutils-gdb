@@ -1,3 +1,7 @@
+2014-03-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/data.exp: Update expected output.
+
 2014-03-06  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/pr16508.exp: New file.
