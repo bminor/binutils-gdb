@@ -1,3 +1,7 @@
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
 2014-01-21  Tom Tromey  <tromey@redhat.com>
 
 	* ansidecl.h (ANSI_PROTOTYPES, PTRCONST, LONG_DOUBLE, PARAMS)

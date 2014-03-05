@@ -1,6 +1,5 @@
 /* BFD back-end for PowerPC PECOFF files.
-   Copyright 1995, 1996, 1999, 2001, 2005, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

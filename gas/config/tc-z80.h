@@ -1,5 +1,5 @@
 /* this is tc-z80.h
-   Copyright 2005, 2006, 2007, 2012 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
 
    Contributed by Arnold Metselaar <arnold_m@operamail.com>
 

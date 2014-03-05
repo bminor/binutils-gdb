@@ -1,7 +1,6 @@
 %{/* deflex.l - Lexer for .def files */
 
-/* Copyright 1995, 1997, 1998, 1999, 2002, 2003, 2004, 2005, 2007
-   Free Software Foundation, Inc.
+/* Copyright (C) 1995-2014 Free Software Foundation, Inc.
    
    This file is part of GNU Binutils.
    

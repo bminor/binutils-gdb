@@ -1,6 +1,5 @@
 /* BFD back-end for Intel 386 PE IMAGE COFF files.
-   Copyright 1995, 1996, 1999, 2002, 2004, 2005, 2006, 2007, 2009
-   Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

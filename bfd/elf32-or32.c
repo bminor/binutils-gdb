@@ -1,5 +1,5 @@
 /* OR32-specific support for 32-bit ELF
-   Copyright 2002, 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    Contributed by Ivan Guzvinec  <ivang@opencores.org>
 
    This file is part of BFD, the Binary File Descriptor library.

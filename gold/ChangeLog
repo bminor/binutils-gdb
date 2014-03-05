@@ -1,5 +1,9 @@
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
+	Update copyright years.
+
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::Scan::local, global): Support
 	R_PPC64_ADDR64_LOCAL.
 	(Target_powerpc::Relocate::relocate): Likewise.
@@ -15588,7 +15592,7 @@
 
 	* Added source code to GNU binutils.
 
-Copyright (C) 2008-2013 Free Software Foundation, Inc.
+Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

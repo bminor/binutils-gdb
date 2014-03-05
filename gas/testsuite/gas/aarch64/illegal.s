@@ -1,7 +1,7 @@
 /* illegal.s Test file for AArch64 instructions that should be rejected
    by the assembler.
 
-   Copyright 2011, 2012 Free Software Foundation, Inc.  Contributed by ARM Ltd.
+   Copyright (C) 2011-2014 Free Software Foundation, Inc.  Contributed by ARM Ltd.
 
    This file is part of GAS.
 

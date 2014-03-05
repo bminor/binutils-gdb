@@ -1,6 +1,5 @@
 /* Print National Semiconductor 32000 instructions.
-   Copyright 1986, 1988, 1991, 1992, 1994, 1998, 2001, 2002, 2005, 2007,
-   2009  Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 

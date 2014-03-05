@@ -1,6 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2000, 2001, 2003, 2005, 2007, 2008, 2009
-#   Free Software Foundation, Inc.
+#   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 #   Written by Michael Sokolov <msokolov@ivan.Harhan.ORG>, based on armelf.em
 #
 # This file is part of the GNU Binutils.

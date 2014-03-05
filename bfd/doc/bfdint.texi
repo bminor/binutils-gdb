@@ -1,7 +1,5 @@
 \input texinfo
-@c Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2009, 2013
-@c Free Software Foundation, Inc.
+@c Copyright (C) 1988-2014 Free Software Foundation, Inc.
 @setfilename bfdint.info
 
 @settitle BFD Internals
@@ -16,9 +14,7 @@
 @copying
 This file documents the internals of the BFD library.
 
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1998, 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2009
-Free Software Foundation, Inc.
+Copyright @copyright{} 1988-2014 Free Software Foundation, Inc.
 Contributed by Cygnus Support.
 
 Permission is granted to copy, distribute and/or modify this document

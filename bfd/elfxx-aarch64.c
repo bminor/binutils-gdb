@@ -1,5 +1,5 @@
 /* AArch64-specific support for ELF.
-   Copyright 2009-2013  Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.

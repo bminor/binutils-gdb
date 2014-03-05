@@ -1,3 +1,7 @@
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
 2014-03-04  Heiher  <r@hev.cc>
 
 	* mips-dis.c (mips_arch_choices): Usee ISA_MIPS64R2 for Loongson-3A.

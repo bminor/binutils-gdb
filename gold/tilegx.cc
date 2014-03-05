@@ -1,6 +1,6 @@
 // tilegx.cc -- tilegx target support for gold.
 
-// Copyright 2012, 2013 Free Software Foundation, Inc.
+// Copyright (C) 2012-2014 Free Software Foundation, Inc.
 // Written by Jiong Wang (jiwang@tilera.com)
 
 // This file is part of gold.

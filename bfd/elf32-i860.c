@@ -1,7 +1,5 @@
 /* Intel i860 specific support for 32-bit ELF.
-   Copyright 1993, 1995, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    Full i860 support contributed by Jason Eckhardt <jle@cygnus.com>.
 

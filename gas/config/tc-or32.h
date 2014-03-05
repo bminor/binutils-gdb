@@ -1,5 +1,5 @@
 /* tc-or32.h -- Assemble for the OpenRISC 1000.
-   Copyright (C) 2002, 2003. 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    Contributed by Damjan Lampret <lampret@opencores.org>.
    Based upon a29k port.
 

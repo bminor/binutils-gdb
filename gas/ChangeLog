@@ -1,5 +1,9 @@
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
+	Update copyright years.
+
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (ppc_elf_suffix): Support @localentry.
 	(md_apply_fix): Support R_PPC64_ADDR64_LOCAL.
 

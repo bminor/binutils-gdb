@@ -1,6 +1,6 @@
 /* AArch64 assembler/disassembler support.
 
-   Copyright 2009, 2010, 2011, 2012, 2013  Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GNU Binutils.

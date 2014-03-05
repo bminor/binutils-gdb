@@ -1,6 +1,5 @@
 /* BFD library support routines for the AVR architecture.
-   Copyright 1999, 2000, 2002, 2005, 2006, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of BFD, the Binary File Descriptor library.

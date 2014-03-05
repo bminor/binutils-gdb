@@ -1,7 +1,5 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
-   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1988-2014 Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
