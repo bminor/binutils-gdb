@@ -188,10 +188,6 @@ set armelftests_common {
      "" {exec-got-1b.s}
      {{readelf --relocs exec-got-1.d}}
      "exec-got-1"}
-    {"Long PLT entries in executables" "--long-plt -shared --section-start=.plt=0x1000 --section-start=.got=0xf0001100" ""
-     "" {long-plt-format.s}
-     {{objdump "-d -j .plt" long-plt-format.d}}
-     "long-plt-format"}
     {"abs call" "-T arm.ld" "" "" {abs-call-1.s}
      {{objdump -d abs-call-1.d}}
      "abs-call-1"}
@@ -460,6 +456,10 @@ set armelftests_nonacl {
       {objdump {-s -j.data -j.got} ifunc-17.gd}
       {readelf -r ifunc-17.rd}}
      "ifunc-17"}
+    {"Long PLT entries in executables" "--long-plt -shared --section-start=.plt=0x1000 --section-start=.got=0xf0001100" ""
+     "" {long-plt-format.s}
+     {{objdump "-d -j .plt" long-plt-format.d}}
+     "long-plt-format"}
 }
 
 run_ld_link_tests $armelftests_common
