@@ -66,6 +66,9 @@
 #include "observer.h"
 #include <string.h>
 #include "procfs.h"
+#include "symtab.h"
+#include "minsyms.h"
+#include "objfiles.h"
 
 struct target_ops sol_thread_ops;
 
@@ -768,7 +771,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
   if (!ms.minsym)
     return PS_NOSYM;
 
-  *ld_symbol_addr = SYMBOL_VALUE_ADDRESS (ms.minsym);
+  *ld_symbol_addr = BMSYMBOL_VALUE_ADDRESS (ms);
   return PS_OK;
 }
 
@@ -1140,7 +1143,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 
 	  printf_filtered ("   startfunc=%s",
 			   msym.minsym
-			   ? SYMBOL_PRINT_NAME (msym.minsym)
+			   ? MSYMBOL_PRINT_NAME (msym.minsym)
 			   : paddress (target_gdbarch (), ti.ti_startfunc));
 	}
 
@@ -1152,7 +1155,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 
 	  printf_filtered ("   sleepfunc=%s",
 			   msym.minsym
-			   ? SYMBOL_PRINT_NAME (msym.minsym)
+			   ? MSYMBOL_PRINT_NAME (msym.minsym)
 			   : paddress (target_gdbarch (), ti.ti_pc));
 	}
 

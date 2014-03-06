@@ -1,3 +1,10 @@
+2014-03-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* sol-thread.c: #include "symtab.h", "minsym.h" and "objfiles.h".
+	(ps_pglobal_lookup): Use BMSYMBOL_VALUE_ADDRESS instead of
+	SYMBOL_VALUE_ADDRESS.
+	(info_cb): MSYMBOL_PRINT_NAME instead of SYMBOL_PRINT_NAME.
+
 2014-03-06  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (get_tracepoint_by_number): Remove argument
