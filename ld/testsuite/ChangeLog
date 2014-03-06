@@ -1,3 +1,9 @@
+2014-03-06  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-arm/gc-hidden-1.d: Remove target, add not-target to match
+	other ELF-only tests in this directory.  Loosen regexps so they
+	don't care what the exact addresses are.
+
 2013-12-11  Will Newton  <will.newton@linaro.org>
 
 	* ld-aarch64/ifunc-21.d: Make test more generic to support
