@@ -1446,7 +1446,10 @@ public:
   {
     CHECK_NONE,
     CHECK_SIGNED,
-    CHECK_BITFIELD
+    CHECK_UNSIGNED,
+    CHECK_BITFIELD,
+    CHECK_LOW_INSN,
+    CHECK_HIGH_INSN
   };
 
   enum Status
@@ -1472,12 +1475,20 @@ private:
 
   template<int valsize>
   static inline bool
-  has_overflow_bitfield(Address value)
+  has_overflow_unsigned(Address value)
   {
     Address limit = static_cast<Address>(1) << ((valsize - 1) >> 1);
     limit <<= ((valsize - 1) >> 1);
     limit <<= ((valsize - 1) - 2 * ((valsize - 1) >> 1));
-    return value > (limit << 1) - 1 && value + limit > (limit << 1) - 1;
+    return value > (limit << 1) - 1;
+  }
+
+  template<int valsize>
+  static inline bool
+  has_overflow_bitfield(Address value)
+  {
+    return (has_overflow_unsigned<valsize>(value)
+	    && has_overflow_signed<valsize>(value));
   }
 
   template<int valsize>
@@ -1487,6 +1498,11 @@ private:
     if (overflow == CHECK_SIGNED)
       {
 	if (has_overflow_signed<valsize>(value))
+	  return STATUS_OVERFLOW;
+      }
+    else if (overflow == CHECK_UNSIGNED)
+      {
+	if (has_overflow_unsigned<valsize>(value))
 	  return STATUS_OVERFLOW;
       }
     else if (overflow == CHECK_BITFIELD)
@@ -7250,6 +7266,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     }
 
   typename Reloc::Overflow_check overflow = Reloc::CHECK_NONE;
+  elfcpp::Shdr<size, big_endian> shdr(relinfo->data_shdr);
   switch (r_type)
     {
     case elfcpp::R_POWERPC_ADDR32:
@@ -7263,14 +7280,17 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	overflow = Reloc::CHECK_SIGNED;
       break;
 
-    case elfcpp::R_POWERPC_ADDR24:
-    case elfcpp::R_POWERPC_ADDR16:
     case elfcpp::R_POWERPC_UADDR16:
-    case elfcpp::R_PPC64_ADDR16_DS:
-    case elfcpp::R_POWERPC_ADDR14:
-    case elfcpp::R_POWERPC_ADDR14_BRTAKEN:
-    case elfcpp::R_POWERPC_ADDR14_BRNTAKEN:
       overflow = Reloc::CHECK_BITFIELD;
+      break;
+
+    case elfcpp::R_POWERPC_ADDR16:
+      // We really should have three separate relocations,
+      // one for 16-bit data, one for insns with 16-bit signed fields,
+      // and one for insns with 16-bit unsigned fields.
+      overflow = Reloc::CHECK_BITFIELD;
+      if ((shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) != 0)
+	overflow = Reloc::CHECK_LOW_INSN;
       break;
 
     case elfcpp::R_POWERPC_ADDR16_HI:
@@ -7299,17 +7319,31 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_GOT_DTPREL16_HA:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
-      if (size == 32)
-	break;
-    case elfcpp::R_POWERPC_REL24:
-    case elfcpp::R_PPC_PLTREL24:
-    case elfcpp::R_PPC_LOCAL24PC:
+      if (size != 32)
+	overflow = Reloc::CHECK_HIGH_INSN;
+      break;
+
     case elfcpp::R_POWERPC_REL16:
     case elfcpp::R_PPC64_TOC16:
     case elfcpp::R_POWERPC_GOT16:
     case elfcpp::R_POWERPC_SECTOFF:
     case elfcpp::R_POWERPC_TPREL16:
     case elfcpp::R_POWERPC_DTPREL16:
+    case elfcpp::R_POWERPC_GOT_TLSGD16:
+    case elfcpp::R_POWERPC_GOT_TLSLD16:
+    case elfcpp::R_POWERPC_GOT_TPREL16:
+    case elfcpp::R_POWERPC_GOT_DTPREL16:
+      overflow = Reloc::CHECK_LOW_INSN;
+      break;
+
+    case elfcpp::R_POWERPC_ADDR24:
+    case elfcpp::R_POWERPC_ADDR14:
+    case elfcpp::R_POWERPC_ADDR14_BRTAKEN:
+    case elfcpp::R_POWERPC_ADDR14_BRNTAKEN:
+    case elfcpp::R_PPC64_ADDR16_DS:
+    case elfcpp::R_POWERPC_REL24:
+    case elfcpp::R_PPC_PLTREL24:
+    case elfcpp::R_PPC_LOCAL24PC:
     case elfcpp::R_PPC64_TPREL16_DS:
     case elfcpp::R_PPC64_DTPREL16_DS:
     case elfcpp::R_PPC64_TOC16_DS:
@@ -7318,12 +7352,26 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_REL14:
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
-    case elfcpp::R_POWERPC_GOT_TLSGD16:
-    case elfcpp::R_POWERPC_GOT_TLSLD16:
-    case elfcpp::R_POWERPC_GOT_TPREL16:
-    case elfcpp::R_POWERPC_GOT_DTPREL16:
       overflow = Reloc::CHECK_SIGNED;
       break;
+    }
+
+  if (overflow == Reloc::CHECK_LOW_INSN
+      || overflow == Reloc::CHECK_HIGH_INSN)
+    {
+      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+
+      overflow = Reloc::CHECK_SIGNED;
+      if (overflow == Reloc::CHECK_LOW_INSN
+	  ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
+	     || (insn & (0x3f << 26)) == 24u << 26 /* ori */
+	     || (insn & (0x3f << 26)) == 26u << 26 /* xori */
+	     || (insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
+	  : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
+	     || (insn & (0x3f << 26)) == 25u << 26 /* oris */
+	     || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
+	overflow = Reloc::CHECK_UNSIGNED;
     }
 
   typename Powerpc_relocate_functions<size, big_endian>::Status status
