@@ -449,7 +449,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
       len = hdr->sh_size - 1;
       while (len > 0)
 	{
-	  int namelen;
+	  unsigned namelen;
 	  bfd_vma section_len;
 	  int vendor;
 
@@ -458,8 +458,11 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	  if (section_len > len)
 	    section_len = len;
 	  len -= section_len;
-	  namelen = strlen ((char *) p) + 1;
-	  section_len -= namelen + 4;
+	  section_len -= 4;
+	  namelen = strnlen ((char *) p, section_len) + 1;
+	  if (namelen == 0 || namelen >= section_len)
+	    break;
+	  section_len -= namelen;
 	  if (std_sec && strcmp ((char *) p, std_sec) == 0)
 	    vendor = OBJ_ATTR_PROC;
 	  else if (strcmp ((char *) p, "gnu") == 0)
