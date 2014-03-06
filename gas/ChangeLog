@@ -1,3 +1,26 @@
+2014-03-06  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+	Vishnu KS <Vishnu.k_s@atmel.com>
+	Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+	Soundararajan <Soundararajan.dhakshinamoorthy@atmel.com>
+
+	* gas/tc-avr.c: Add new devices
+	avr25: ata5272, attiny828
+	avr35: ata5505, attiny1634
+	avr4: atmega8a, ata6285, ata6286, atmega48pa
+	avr5: at90pwm161, ata5790, ata5795, atmega164pa, atmega165pa,
+	atmega168pa, atmega32a, atmega64rfr2, atmega644rfr2, atmega64a,
+	atmega16hva2
+	avr51: atmega128a, atmega1284
+	avrxmega2: atxmega16a4u, atxmega16c4, atxmega32a4u, atxmega32c4,
+	atxmega32e5, atxmega16e5, atxmega8e5
+	avrxmega4: atxmega64a3u, atxmega64a4u, atxmega64b1, atxmega64b3,
+	atxmega64c3, atxmega64d4
+	avrxmega6: atxmega128a3u, atxmega128b3, atxmega128c3,
+	atxmega128d4, atxmega192a3u, atxmega192c3, atxmega256a3u,
+	atxmega256c3, atxmega384c3, atxmega384d3
+	avrxmega7: atxmega128a4u
+	* doc/c-avr.texi: Ditto.
+
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
 	Update copyright years.
