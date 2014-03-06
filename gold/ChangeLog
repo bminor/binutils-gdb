@@ -1,3 +1,15 @@
+2014-03-07  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Powerpc_relocate_functions::Overflow_check): Add
+	CHECK_UNSIGNED, CHECK_LOW_INSN, CHECK_HIGH_INSN.
+	(Powerpc_relocate_functions::has_overflow_unsigned): New function.
+	(Powerpc_relocate_functions::has_overflow_bitfield,
+	overflowed): Use the above.
+	(Target_powerpc::Relocate::relocate): Correct overflow checking
+	for a number of relocations.  Modify overflow test for 16-bit
+	fields in instructions to signed/unsigned according to whether
+	the field takes a signed or unsigned value.
+
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
 	Update copyright years.

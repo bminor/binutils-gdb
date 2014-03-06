@@ -1,3 +1,13 @@
+2014-03-08  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_howto_raw): Use complain_overflow_signed
+	for R_PPC64_ADDR14, R_PPC64_ADDR14_BRTAKEN, R_PPC64_ADDR14_BRNTAKEN,
+	R_PPC64_SECTOFF, R_PPC64_ADDR16_DS, R_PPC64_SECTOFF_DS,
+	R_PPC64_REL16 entries.  Use complain_overflow_dont for R_PPC64_TOC.
+	(ppc64_elf_relocate_section): Modify overflow test for 16-bit
+	fields in instructions to signed/unsigned according to whether
+	the field takes a signed or unsigned value.
+
 2014-03-07  Pedro Alves  <palves@redhat.com>
 
 	* rs6000-core.c (rs6000coff_core_p): Cast pointers to bfd_vma
