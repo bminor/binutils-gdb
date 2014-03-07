@@ -1,5 +1,13 @@
 2014-03-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.dwarf2/dw2-ifort-parameter.c (func): Define labels
+	'func_start' and 'func_end' for the beginning and end of the
+	function code, respectively.
+	* gdb.dwarf2/dw2-ifort-parameter.exp: Use 'func_start' and
+	'func_end' instead of 'func' and 'main'.
+
+2014-03-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.dwarf2/dw2-ifort-parameter-debug.S: Remove.
 	* gdb.dwarf2/dw2-ifort-parameter.exp: Use Dwarf::assemble to
 	generate the debug info assembler source.

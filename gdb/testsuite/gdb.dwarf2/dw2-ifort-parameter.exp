@@ -29,14 +29,14 @@ set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     declare_labels int_label
 
-    extern main func ptr
+    extern func_start func_end ptr
 
     cu {} {
 	compile_unit {
 	    {name file1.txt}
 	    {language @DW_LANG_C}
-	    {low_pc func addr}
-	    {high_pc main addr}
+	    {low_pc func_start addr}
+	    {high_pc func_end addr}
 	} {
 	    int_label: base_type {
 		{name int}
@@ -47,8 +47,8 @@ Dwarf::assemble $asm_file {
 	    subprogram {
 		{external 1 flag}
 		{name func}
-		{low_pc func addr}
-		{high_pc main addr}
+		{low_pc func_start addr}
+		{high_pc func_end addr}
 	    } {
 		formal_parameter {
 		    {name param}
