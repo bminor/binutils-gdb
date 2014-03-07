@@ -258,6 +258,10 @@ ld/
 
 ld/testsuite/
 
+2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-plugin/lto.exp: Add test for nm on mixed LTO/non-LTO object.
+
 2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12430

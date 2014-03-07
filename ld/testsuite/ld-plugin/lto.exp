@@ -450,6 +450,18 @@ run_dump_test "lto-5r"
 remote_exec host "mv" "tmpdir/dump tmpdir/lto-5.o"
 run_dump_test "lto-10r"
 remote_exec host "mv" "tmpdir/dump tmpdir/lto-10.o"
+set testname "nm mixed object"
+set lto_plugin [run_host_cmd "$CC" "-print-prog-name=liblto_plugin.so tmpdir/lto-10.o"]
+if { [ regexp "liblto_plugin.so" $lto_plugin ] } {
+    set exec_output [run_host_cmd "$NM" "--plugin $lto_plugin tmpdir/lto-10.o"]
+    if { [ regexp "T main" $exec_output ] } {
+	pass $testname
+    } {
+	fail $testname
+    }
+} {
+    fail $testname
+ }
 
 run_cc_link_tests $lto_link_symbol_tests
 
