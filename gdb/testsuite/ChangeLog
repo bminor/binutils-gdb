@@ -1,5 +1,17 @@
 2014-03-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.dwarf2/arr-stride.exp: Exploit 'prepare_for_testing'.
+	* gdb.dwarf2/arr-subrange.exp: Likewise.
+	* gdb.dwarf2/dwz.exp: Likewise.
+	* gdb.dwarf2/method-ptr.exp: Likewise.
+	* gdb.dwarf2/missing-sig-type.exp: Likewise.
+	* gdb.dwarf2/subrange.exp: Likewise.
+	* gdb.dwarf2/implptrconst.exp: Exploit 'build_executable'.
+	* gdb.dwarf2/implptrpiece.exp: Likewise.
+	* gdb.dwarf2/nostaticblock.exp: Likewise.
+
+2014-03-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* lib/gdb.exp (build_executable_from_specs): Don't prepend source
 	directory to absolute path name arguments.
 
