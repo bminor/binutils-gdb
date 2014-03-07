@@ -1,5 +1,11 @@
 2014-03-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.dwarf2/dw2-ifort-parameter-debug.S: Remove.
+	* gdb.dwarf2/dw2-ifort-parameter.exp: Use Dwarf::assemble to
+	generate the debug info assembler source.
+
+2014-03-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.dwarf2/arr-stride.exp: Exploit 'prepare_for_testing'.
 	* gdb.dwarf2/arr-subrange.exp: Likewise.
 	* gdb.dwarf2/dwz.exp: Likewise.
