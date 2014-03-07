@@ -192,7 +192,7 @@ addr_in_swap_list (bfd_vma addr)
 }
 
 SIM_RC
-sim_load (SIM_DESC sd, char *prog, struct bfd *abfd, int from_tty)
+sim_load (SIM_DESC sd, const char *prog, struct bfd *abfd, int from_tty)
 {
   check_desc (sd);
 

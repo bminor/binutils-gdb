@@ -50,7 +50,7 @@ get_number_trailer (char **pp, int trailer)
 	    retval = value_as_long (val);
 	  else
 	    {
-	      printf_filtered (_("History value must have integer type."));
+	      printf_filtered (_("History value must have integer type.\n"));
 	      retval = 0;
 	    }
 	}

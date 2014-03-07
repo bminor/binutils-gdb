@@ -391,28 +391,9 @@ debug_sym_get_probes (struct objfile *objfile)
   return retval;
 }
 
-static void
-debug_sym_relocate_probe (struct objfile *objfile,
-			  const struct section_offsets *new_offsets,
-			  const struct section_offsets *delta)
-{
-  const struct debug_sym_fns_data *debug_data =
-    objfile_data (objfile, symfile_debug_objfile_data_key);
-
-  fprintf_filtered (gdb_stdlog,
-		    "probes->sym_relocate_probe (%s, %s, %s)\n",
-		    debug_objfile_name (objfile),
-		    host_address_to_string (new_offsets),
-		    host_address_to_string (delta));
-
-  debug_data->real_sf->sym_probe_fns->sym_relocate_probe
-    (objfile, new_offsets, delta);
-}
-
 static const struct sym_probe_fns debug_sym_probe_fns =
 {
   debug_sym_get_probes,
-  debug_sym_relocate_probe
 };
 
 /* Debugging version of struct sym_fns.  */

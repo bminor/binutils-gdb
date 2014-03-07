@@ -1,3 +1,7 @@
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
 2012-11-14  Tristan Gingold  <gingold@adacore.com>
 
 	* external.h (mach_o_entry_point_command_external)
@@ -67,7 +71,7 @@
 
 	* loader.h: New file.
 
-Copyright (C) 2011-2012 Free Software Foundation, Inc.
+Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

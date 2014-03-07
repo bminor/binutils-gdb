@@ -1,5 +1,5 @@
 /* tc-score7.c -- Assembler for Score7
-   Copyright 2009, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
    Contributed by:
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)

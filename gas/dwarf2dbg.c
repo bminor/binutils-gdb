@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -1515,7 +1515,7 @@ static void
 out_debug_line (segT line_seg)
 {
   expressionS exp;
-  symbolS *prologue_end;
+  symbolS *prologue_start, *prologue_end;
   symbolS *line_end;
   struct line_seg *s;
   int sizeof_offset;
@@ -1527,10 +1527,14 @@ out_debug_line (segT line_seg)
   out_two (DWARF2_LINE_VERSION);
 
   /* Length of the prologue following this length.  */
+  prologue_start = symbol_temp_make ();
   prologue_end = symbol_temp_make ();
+  exp.X_op = O_subtract;
   exp.X_add_symbol = prologue_end;
-  exp.X_add_number = - (4 + 2 + 4);
+  exp.X_op_symbol = prologue_start;
+  exp.X_add_number = 0;
   emit_expr (&exp, sizeof_offset);
+  symbol_set_value_now (prologue_start);
 
   /* Parameters of the state machine.  */
   out_byte (DWARF2_LINE_MIN_INSN_LENGTH);

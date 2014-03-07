@@ -993,15 +993,7 @@ symbol_search_name (const struct general_symbol_info *gsymbol)
 void
 init_sal (struct symtab_and_line *sal)
 {
-  sal->pspace = NULL;
-  sal->symtab = 0;
-  sal->section = 0;
-  sal->line = 0;
-  sal->pc = 0;
-  sal->end = 0;
-  sal->explicit_pc = 0;
-  sal->explicit_line = 0;
-  sal->probe = NULL;
+  memset (sal, 0, sizeof (*sal));
 }
 
 

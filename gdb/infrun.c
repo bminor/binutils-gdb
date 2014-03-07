@@ -3781,22 +3781,20 @@ handle_signal_stop (struct execution_control_state *ecs)
   enum stop_kind stop_soon;
   int random_signal;
 
-  if (ecs->ws.kind == TARGET_WAITKIND_STOPPED)
-    {
-      /* Do we need to clean up the state of a thread that has
-	 completed a displaced single-step?  (Doing so usually affects
-	 the PC, so do it here, before we set stop_pc.)  */
-      displaced_step_fixup (ecs->ptid,
-			    ecs->event_thread->suspend.stop_signal);
+  gdb_assert (ecs->ws.kind == TARGET_WAITKIND_STOPPED);
 
-      /* If we either finished a single-step or hit a breakpoint, but
-	 the user wanted this thread to be stopped, pretend we got a
-	 SIG0 (generic unsignaled stop).  */
+  /* Do we need to clean up the state of a thread that has
+     completed a displaced single-step?  (Doing so usually affects
+     the PC, so do it here, before we set stop_pc.)  */
+  displaced_step_fixup (ecs->ptid,
+			ecs->event_thread->suspend.stop_signal);
 
-      if (ecs->event_thread->stop_requested
-	  && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
-	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
-    }
+  /* If we either finished a single-step or hit a breakpoint, but
+     the user wanted this thread to be stopped, pretend we got a
+     SIG0 (generic unsignaled stop).  */
+  if (ecs->event_thread->stop_requested
+      && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
+    ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 
   stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
@@ -5653,7 +5651,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 
 static void
 insert_exception_resume_from_probe (struct thread_info *tp,
-				    const struct probe *probe,
+				    const struct bound_probe *probe,
 				    struct frame_info *frame)
 {
   struct value *arg_value;
@@ -5687,7 +5685,7 @@ check_exception_resume (struct execution_control_state *ecs,
 			struct frame_info *frame)
 {
   volatile struct gdb_exception e;
-  const struct probe *probe;
+  struct bound_probe probe;
   struct symbol *func;
 
   /* First see if this exception unwinding breakpoint was set via a
@@ -5695,9 +5693,9 @@ check_exception_resume (struct execution_control_state *ecs,
      CFA and the HANDLER.  We ignore the CFA, extract the handler, and
      set a breakpoint there.  */
   probe = find_probe_by_pc (get_frame_pc (frame));
-  if (probe)
+  if (probe.probe)
     {
-      insert_exception_resume_from_probe (ecs->event_thread, probe, frame);
+      insert_exception_resume_from_probe (ecs->event_thread, &probe, frame);
       return;
     }
 

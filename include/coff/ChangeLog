@@ -1,3 +1,7 @@
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
 2013-12-06  Tristan Gingold  <gingold@adacore.com>
 
 	* pe.h (UWOP_EPILOG, UWOP_PARE): Define.
@@ -363,7 +367,7 @@
 
 For older changes see ChangeLog-9103
 
-Copyright (C) 2004-2012 Free Software Foundation, Inc.
+Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

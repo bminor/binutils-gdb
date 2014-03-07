@@ -1,6 +1,5 @@
 /* AVR ELF support for BFD.
-   Copyright 1999, 2000, 2004, 2006, 2010, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of BFD, the Binary File Descriptor library.

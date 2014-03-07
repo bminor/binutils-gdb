@@ -1297,7 +1297,7 @@ delegate_traceframe_info (struct target_ops *self)
 static struct traceframe_info *
 tdefault_traceframe_info (struct target_ops *self)
 {
-  return NULL;
+  tcomplain ();
 }
 
 static int

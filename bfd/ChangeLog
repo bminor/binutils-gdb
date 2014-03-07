@@ -1,3 +1,59 @@
+2014-03-07  Pedro Alves  <palves@redhat.com>
+
+	* rs6000-core.c (rs6000coff_core_p): Cast pointers to bfd_vma
+	through ptr_to_uint instead of through long.
+
+2014-03-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 16664
+	* elf-attrs.c (_bfd_elf_parse_attributes): Add checks for corrupt
+	attribute section names.
+
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_howto_raw): Add R_PPC64_ADDR64_LOCAL entry.
+	(ppc64_elf_reloc_type_lookup): Support R_PPC64_ADDR64_LOCAL.
+	(ppc64_elf_check_relocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	* Add BFD_RELOC_PPC64_ADDR64_LOCAL.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2014-03-04  Heiher  <r@hev.cc>
+
+	* elfxx-mips.c (mips_set_isa_flags): Use E_MIPS_ARCH_64R2 for
+	Loongson-3A.
+	(mips_mach_extensions): Make bfd_mach_mips_loongson_3a an
+	extension of bfd_mach_mipsisa64r2.
+
+2014-03-04  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16017
+	* elf32-arm.c (elf32_thumb2_plt0_entry): New array.
+	(elf32_thumb2_plt_entry): New array.
+	(elf32_arm_create_dynamic_sections): Set PLT entry sizes when
+	using thumb2 based PLT.
+	(elf32_arm_populate_plt_entry): Handle generating Thumb2 based PLT
+	entries.
+	(elf32_arm_final_link_relocate): Do not bias jumps to Thumb based
+	PLT entries.
+	(elf32_arm_finish_dynamic_sections): Handle creation of Thumb2
+	based PLT 0-entry.
+	(elf32_arm_output_plt_map_1): Handle creation of local symbols for
+	Thumb2 based PLT 0-entry.
+	(elf32_arm_output_arch_local_syms): Handle creation of local
+	symbols for Thumb2 based PLT entries.
+
+2014-02-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/16643
+	* elflink.c (elf_gc_sweep): Call gc_sweep_hook for exactly
+	the same conditions we called check_relocs.
+
 2014-02-27  Yuri Gribov  <y.gribov@samsung.com>
 
 	* bfd-in.h: Add export of bfd_elf32_arm_use_long_plt.

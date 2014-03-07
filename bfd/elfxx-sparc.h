@@ -1,6 +1,5 @@
 /* SPARC ELF specific backend routines.
-   Copyright 2005, 2006, 2007, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

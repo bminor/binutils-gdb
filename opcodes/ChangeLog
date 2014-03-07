@@ -1,3 +1,24 @@
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
+2014-03-04  Heiher  <r@hev.cc>
+
+	* mips-dis.c (mips_arch_choices): Usee ISA_MIPS64R2 for Loongson-3A.
+
+2014-03-04  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Move the udi* instructions
+	so that they come after the Loongson extensions.
+
+2014-03-03  Alan Modra  <amodra@gmail.com>
+
+	* i386-gen.c (process_copyright): Emit copyright notice on one line.
+
+2014-02-28  Alan Modra  <amodra@gmail.com>
+
+	* msp430-decode.c: Regenerate.
+
 2014-02-27  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Replace IMM0 with

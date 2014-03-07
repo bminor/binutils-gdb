@@ -1,3 +1,17 @@
+2014-03-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16664
+	* readelf.c (process_attributes): Add checks for corrupt
+	attribute section names.
+
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
+2014-03-03  Alan Modra  <amodra@gmail.com>
+
+	* README: Add "Copyright Notices" paragraph.
+
 2014-02-11  Cary Coutant  <ccoutant@google.com>
 
 	* binutils/dwarf.c (read_and_display_attr_value): Don't warn

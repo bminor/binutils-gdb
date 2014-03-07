@@ -1,5 +1,5 @@
 /* Table of opcodes for the OpenRISC 1000 ISA.
-   Copyright 2002, 2003, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    Contributed by Damjan Lampret (lampret@opencores.org).
    
    This file is part of or1k_gen_isa, or1ksim, GDB and GAS.

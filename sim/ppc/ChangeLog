@@ -1,3 +1,7 @@
+2014-03-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim_calls.c (sim_load): Add const to prog.
+
 2014-02-17  Aaro Koskinen  <aaro.koskinen@iki.fi>
 
 	PR gdb/12202

@@ -1,6 +1,5 @@
 /* tc-rx.h - header file for Renesas RX
-   Copyright 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 

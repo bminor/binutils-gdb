@@ -1,6 +1,5 @@
 /* Intel i386 Mach-O support for BFD.
-   Copyright 2009
-   Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

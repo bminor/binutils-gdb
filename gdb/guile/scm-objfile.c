@@ -72,7 +72,7 @@ ofscm_mark_objfile_smob (SCM self)
   scm_gc_mark (o_smob->pretty_printers);
 
   /* We don't mark containing_scm here.  It is just a backlink to our
-     container, and is gc'protected until the objfile is deleted.  */
+     container, and is gc-protected until the objfile is deleted.  */
 
   /* Do this last.  */
   return gdbscm_mark_gsmob (&o_smob->base);

@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -12420,7 +12420,7 @@ process_attributes (FILE * file,
 
 	  while (len > 0)
 	    {
-	      int namelen;
+	      unsigned int namelen;
 	      bfd_boolean public_section;
 	      bfd_boolean gnu_section;
 
@@ -12429,12 +12429,21 @@ process_attributes (FILE * file,
 
 	      if (section_len > len)
 		{
-		  printf (_("ERROR: Bad section length (%d > %d)\n"),
-			  (int) section_len, (int) len);
+		  error (_("Length of attribute (%u) greater than length of section (%u)\n"),
+			  (unsigned) section_len, (unsigned) len);
 		  section_len = len;
 		}
 
 	      len -= section_len;
+	      section_len -= 4;
+
+	      namelen = strnlen ((char *) p, section_len) + 1;
+	      if (namelen == 0 || namelen >= section_len)
+		{
+		  error (_("Corrupt attribute section name\n"));
+		  break;
+		}
+
 	      printf (_("Attribute Section: %s\n"), p);
 
 	      if (public_name && streq ((char *) p, public_name))
@@ -12447,10 +12456,8 @@ process_attributes (FILE * file,
 	      else
 		gnu_section = FALSE;
 
-	      namelen = strlen ((char *) p) + 1;
 	      p += namelen;
-	      section_len -= namelen + 4;
-
+	      section_len -= namelen;
 	      while (section_len > 0)
 		{
 		  int tag = *(p++);
@@ -12460,8 +12467,8 @@ process_attributes (FILE * file,
 		  size = byte_get (p, 4);
 		  if (size > section_len)
 		    {
-		      printf (_("ERROR: Bad subsection length (%d > %d)\n"),
-			      (int) size, (int) section_len);
+		      error (_("Bad subsection length (%u > %u)\n"),
+			      (unsigned) size, (unsigned) section_len);
 		      size = section_len;
 		    }
 
@@ -12520,7 +12527,7 @@ process_attributes (FILE * file,
 	    }
 	}
       else
-	printf (_("Unknown format '%c'\n"), *p);
+	printf (_("Unknown format '%c' (%d)\n"), *p, *p);
 
       free (contents);
     }

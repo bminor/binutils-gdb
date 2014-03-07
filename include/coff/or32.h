@@ -1,5 +1,5 @@
 /* COFF specification for OpenRISC 1000.
-   Copyright (C) 1993-2000, 2002, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
    Contributed by David Wood @ New York University.
    Modified by Johan Rydberg, <johan.rydberg@netinsight.se>
 

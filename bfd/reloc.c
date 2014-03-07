@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright 1990-2013 Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2899,6 +2899,8 @@ ENUMX
   BFD_RELOC_PPC64_ADDR16_HIGH
 ENUMX
   BFD_RELOC_PPC64_ADDR16_HIGHA
+ENUMX
+  BFD_RELOC_PPC64_ADDR64_LOCAL
 ENUMDOC
   Power(rs6000) and PowerPC relocations.
 

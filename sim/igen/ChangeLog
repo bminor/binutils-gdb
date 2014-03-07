@@ -1,3 +1,7 @@
+2014-03-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2013-11-25  Steve Ellcey  <sellcey@mips.com>
 
 	* igen/Makefile.in (igen): Use BUILD_CFLAGS in link.

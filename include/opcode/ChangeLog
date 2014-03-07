@@ -1,3 +1,7 @@
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
 2013-12-16  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* mips.h: Updated description of +o, +u, +v and +w for MIPS and
@@ -1952,7 +1956,7 @@
 
 For older changes see ChangeLog-9103
 
-Copyright (C) 2004-2012 Free Software Foundation, Inc.
+Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

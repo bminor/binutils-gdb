@@ -2,8 +2,7 @@
 # It does some substitutions.
 fragment <<EOF
 /* A vanilla emulation with no defaults
-   Copyright 1991, 1992, 1994, 2000, 2001, 2002, 2003, 2005, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright (C) 1991-2014 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
    This file is part of the GNU Binutils.

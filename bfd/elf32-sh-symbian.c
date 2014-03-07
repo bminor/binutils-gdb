@@ -1,6 +1,5 @@
 /* Renesas / SuperH specific support for Symbian 32-bit ELF files
-   Copyright 2004, 2005, 2006, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
    Contributed by Red Hat
 
    This file is part of BFD, the Binary File Descriptor library.

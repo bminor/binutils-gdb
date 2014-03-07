@@ -1,6 +1,6 @@
 // plugin.h -- plugin manager for gold      -*- C++ -*-
 
-// Copyright 2008, 2009, 2010, 2011, 2013 Free Software Foundation, Inc.
+// Copyright (C) 2008-2014 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.

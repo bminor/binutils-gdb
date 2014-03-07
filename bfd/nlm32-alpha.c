@@ -1,6 +1,5 @@
 /* Support for 32-bit Alpha NLM (NetWare Loadable Module)
-   Copyright 1993, 1994, 2000, 2001, 2002, 2003, 2004, 2005, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.

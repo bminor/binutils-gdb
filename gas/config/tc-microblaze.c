@@ -1,6 +1,6 @@
 /* tc-microblaze.c -- Assemble code for Xilinx MicroBlaze
 
-   Copyright 2009, 2010, 2012 Free Software Foundation.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 

@@ -37,8 +37,8 @@ gdb_test "next" ".*main\.3.*"
 gdb_test "reverse-step" ".*test\.4.*"
 
 # we can't read memory while we're replaying
-gdb_test "print glob" "Memory at .* unavailable\."
-gdb_test "print loc" "Memory at .* unavailable\."
+gdb_test "print glob" "unavailable\[^\\\r\\\n\]*"
+gdb_test "print loc" "unavailable\[^\\\r\\\n\]*"
 
 # stop replaying and try again
 gdb_test "record goto end"

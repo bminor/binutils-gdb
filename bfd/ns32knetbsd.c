@@ -1,6 +1,5 @@
 /* BFD back-end for NetBSD/ns32k a.out-ish binaries.
-   Copyright 1990, 1991, 1992, 1994, 1995, 1998, 2000, 2001, 2002, 2005,
-   2007, 2012  Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

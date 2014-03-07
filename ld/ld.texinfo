@@ -1,6 +1,6 @@
 \input texinfo
 @setfilename ld.info
-@c Copyright 1991-2014 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2014 Free Software Foundation, Inc.
 @syncodeindex ky cp
 @c man begin INCLUDE
 @include configdoc.texi

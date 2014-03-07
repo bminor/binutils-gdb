@@ -1,6 +1,5 @@
 /* tc-moxie.c -- Assemble code for moxie
-   Copyright 2009, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 

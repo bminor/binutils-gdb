@@ -4974,7 +4974,7 @@ sim_close (SIM_DESC sd, int quitting)
 /* Called by gdb to load a program into memory.  */
 
 SIM_RC
-sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
+sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 {
   bfd *prog_bfd;
 

@@ -349,10 +349,7 @@ field_separator (void)
 
 /* This is the CLI ui-out implementation functions vector */
 
-/* FIXME: This can be initialized dynamically after default is set to
-   handle initial output in main.c */
-
-struct ui_out_impl cli_ui_out_impl =
+const struct ui_out_impl cli_ui_out_impl =
 {
   cli_table_begin,
   cli_table_body,

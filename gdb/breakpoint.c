@@ -3323,7 +3323,9 @@ create_longjmp_master_breakpoint (void)
 	    {
 	      struct breakpoint *b;
 
-	      b = create_internal_breakpoint (gdbarch, probe->address,
+	      b = create_internal_breakpoint (gdbarch,
+					      get_probe_address (probe,
+								 objfile),
 					      bp_longjmp_master,
 					      &internal_breakpoint_ops);
 	      b->addr_string = xstrdup ("-probe-stap libc:longjmp");
@@ -3484,7 +3486,9 @@ create_exception_master_breakpoint (void)
 	    {
 	      struct breakpoint *b;
 
-	      b = create_internal_breakpoint (gdbarch, probe->address,
+	      b = create_internal_breakpoint (gdbarch,
+					      get_probe_address (probe,
+								 objfile),
 					      bp_exception_master,
 					      &internal_breakpoint_ops);
 	      b->addr_string = xstrdup ("-probe-stap libgcc:unwind");
@@ -9023,7 +9027,8 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->requested_address = sal->pc;
   loc->address = adjusted_address;
   loc->pspace = sal->pspace;
-  loc->probe = sal->probe;
+  loc->probe.probe = sal->probe;
+  loc->probe.objfile = sal->objfile;
   gdb_assert (loc->pspace != NULL);
   loc->section = sal->section;
   loc->gdbarch = loc_gdbarch;
@@ -13340,7 +13345,9 @@ bkpt_probe_insert_location (struct bp_location *bl)
     {
       /* The insertion was successful, now let's set the probe's semaphore
 	 if needed.  */
-      bl->probe->pops->set_semaphore (bl->probe, bl->gdbarch);
+      bl->probe.probe->pops->set_semaphore (bl->probe.probe,
+					    bl->probe.objfile,
+					    bl->gdbarch);
     }
 
   return v;
@@ -13350,7 +13357,9 @@ static int
 bkpt_probe_remove_location (struct bp_location *bl)
 {
   /* Let's clear the semaphore before removing the location.  */
-  bl->probe->pops->clear_semaphore (bl->probe, bl->gdbarch);
+  bl->probe.probe->pops->clear_semaphore (bl->probe.probe,
+					  bl->probe.objfile,
+					  bl->gdbarch);
 
   return bkpt_remove_location (bl);
 }
@@ -15523,7 +15532,7 @@ trace_pass_command (char *args, int from_tty)
     }
   else if (*args == '\0')
     {
-      t1 = get_tracepoint_by_number (&args, NULL, 1);
+      t1 = get_tracepoint_by_number (&args, NULL);
       if (t1)
 	trace_pass_set_count (t1, count, from_tty);
     }
@@ -15534,7 +15543,7 @@ trace_pass_command (char *args, int from_tty)
       init_number_or_range (&state, args);
       while (!state.finished)
 	{
-	  t1 = get_tracepoint_by_number (&args, &state, 1);
+	  t1 = get_tracepoint_by_number (&args, &state);
 	  if (t1)
 	    trace_pass_set_count (t1, count, from_tty);
 	}
@@ -15575,12 +15584,12 @@ get_tracepoint_by_number_on_target (int num)
 
 /* Utility: parse a tracepoint number and look it up in the list.
    If STATE is not NULL, use, get_number_or_range_state and ignore ARG.
-   If OPTIONAL_P is true, then if the argument is missing, the most
-   recent tracepoint (tracepoint_count) is returned.  */
+   If the argument is missing, the most recent tracepoint
+   (tracepoint_count) is returned.  */
+
 struct tracepoint *
 get_tracepoint_by_number (char **arg,
-			  struct get_number_or_range_state *state,
-			  int optional_p)
+			  struct get_number_or_range_state *state)
 {
   struct breakpoint *t;
   int tpnum;
@@ -15592,12 +15601,7 @@ get_tracepoint_by_number (char **arg,
       tpnum = get_number_or_range (state);
     }
   else if (arg == NULL || *arg == NULL || ! **arg)
-    {
-      if (optional_p)
-	tpnum = tracepoint_count;
-      else
-	error_no_arg (_("tracepoint number"));
-    }
+    tpnum = tracepoint_count;
   else
     tpnum = get_number (arg);
 
@@ -15607,8 +15611,7 @@ get_tracepoint_by_number (char **arg,
 	printf_filtered (_("bad tracepoint number at or near '%s'\n"), 
 			 instring);
       else
-	printf_filtered (_("Tracepoint argument missing "
-			   "and no previous tracepoint\n"));
+	printf_filtered (_("No previous tracepoint\n"));
       return NULL;
     }
 

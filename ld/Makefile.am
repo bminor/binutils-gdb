@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright 2012-2014 Free Software Foundation
+#   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -491,8 +491,7 @@ ALL_EMUL_EXTRA_OFILES = \
 	pe-dll.@OBJEXT@ \
 	pep-dll.@OBJEXT@
 
-ALL_EMUL_EXTRA_BINARIES = \
-	default-manifest.@OBJEXT@
+ALL_EMUL_EXTRA_BINARIES = 
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \

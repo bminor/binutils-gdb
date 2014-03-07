@@ -1,6 +1,5 @@
 /* BFD back-end for MCore PECOFF files.
-   Copyright 1999, 2002, 2005, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

@@ -1,6 +1,5 @@
 /* tc-bfin.c -- Assembler for the ADI Blackfin.
-   Copyright 2005, 2006, 2007, 2008, 2009, 2010
-   Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 

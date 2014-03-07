@@ -1,5 +1,5 @@
 /* OR1K ELF support for BFD. Derived from ppc.h.
-   Copyright (C) 2002, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    Contributed by Ivan Guzvinec  <ivang@opencores.org>
 
    This file is part of BFD, the Binary File Descriptor library.

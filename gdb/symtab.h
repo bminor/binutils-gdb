@@ -1221,6 +1221,9 @@ struct symtab_and_line
 
   /* The probe associated with this symtab_and_line.  */
   struct probe *probe;
+  /* If PROBE is not NULL, then this is the objfile in which the probe
+     originated.  */
+  struct objfile *objfile;
 };
 
 extern void init_sal (struct symtab_and_line *sal);

@@ -25,6 +25,7 @@
 #include "ax.h"
 #include "command.h"
 #include "break-common.h"
+#include "probe.h"
 
 struct value;
 struct block;
@@ -437,7 +438,7 @@ struct bp_location
 
   /* If the location comes from a probe point, this is the probe associated
      with it.  */
-  struct probe *probe;
+  struct bound_probe probe;
 
   char *function_name;
 
@@ -1490,8 +1491,7 @@ extern struct tracepoint *get_tracepoint_by_number_on_target (int num);
 /* Find a tracepoint by parsing a number in the supplied string.  */
 extern struct tracepoint *
      get_tracepoint_by_number (char **arg, 
-			       struct get_number_or_range_state *state,
-			       int optional_p);
+			       struct get_number_or_range_state *state);
 
 /* Return a vector of all tracepoints currently defined.  The vector
    is newly allocated; the caller should free when done with it.  */

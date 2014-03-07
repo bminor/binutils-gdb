@@ -1306,7 +1306,7 @@ static int
 svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 		   struct so_list ***link_ptr_ptr, int ignore_first)
 {
-  struct so_list *first = NULL;
+  CORE_ADDR first_l_name = 0;
   CORE_ADDR next_lm;
 
   for (; lm != 0; prev_lm = lm, lm = next_lm)
@@ -1346,7 +1346,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	{
 	  struct svr4_info *info = get_svr4_info ();
 
-	  first = new;
+	  first_l_name = new->lm_info->l_name;
 	  info->main_lm_addr = new->lm_info->lm_addr;
 	  do_cleanups (old_chain);
 	  continue;
@@ -1361,8 +1361,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	     inferior executable, then this is not a normal shared
 	     object, but (most likely) a vDSO.  In this case, silently
 	     skip it; otherwise emit a warning. */
-	  if (first == NULL
-	      || new->lm_info->l_name != first->lm_info->l_name)
+	  if (first_l_name == 0 || new->lm_info->l_name != first_l_name)
 	    warning (_("Can't read pathname for load map: %s."),
 		     safe_strerror (errcode));
 	  do_cleanups (old_chain);
@@ -1569,6 +1568,9 @@ struct probe_and_action
   /* The probe.  */
   struct probe *probe;
 
+  /* The relocated address of the probe.  */
+  CORE_ADDR address;
+
   /* The action.  */
   enum probe_action action;
 };
@@ -1580,7 +1582,7 @@ hash_probe_and_action (const void *p)
 {
   const struct probe_and_action *pa = p;
 
-  return (hashval_t) pa->probe->address;
+  return (hashval_t) pa->address;
 }
 
 /* Returns non-zero if the probe_and_actions referenced by p1 and p2
@@ -1592,14 +1594,15 @@ equal_probe_and_action (const void *p1, const void *p2)
   const struct probe_and_action *pa1 = p1;
   const struct probe_and_action *pa2 = p2;
 
-  return pa1->probe->address == pa2->probe->address;
+  return pa1->address == pa2->address;
 }
 
 /* Register a solib event probe and its associated action in the
    probes table.  */
 
 static void
-register_solib_event_probe (struct probe *probe, enum probe_action action)
+register_solib_event_probe (struct probe *probe, CORE_ADDR address,
+			    enum probe_action action)
 {
   struct svr4_info *info = get_svr4_info ();
   struct probe_and_action lookup, *pa;
@@ -1612,11 +1615,13 @@ register_solib_event_probe (struct probe *probe, enum probe_action action)
 					    xfree, xcalloc, xfree);
 
   lookup.probe = probe;
+  lookup.address = address;
   slot = htab_find_slot (info->probes_table, &lookup, INSERT);
   gdb_assert (*slot == HTAB_EMPTY_ENTRY);
 
   pa = XCNEW (struct probe_and_action);
   pa->probe = probe;
+  pa->address = address;
   pa->action = action;
 
   *slot = pa;
@@ -1629,12 +1634,10 @@ register_solib_event_probe (struct probe *probe, enum probe_action action)
 static struct probe_and_action *
 solib_event_probe_at (struct svr4_info *info, CORE_ADDR address)
 {
-  struct probe lookup_probe;
   struct probe_and_action lookup;
   void **slot;
 
-  lookup_probe.address = address;
-  lookup.probe = &lookup_probe;
+  lookup.address = address;
   slot = htab_find_slot (info->probes_table, &lookup, NO_INSERT);
 
   if (slot == NULL)
@@ -1935,7 +1938,8 @@ svr4_update_solib_event_breakpoints (void)
 
 static void
 svr4_create_probe_breakpoints (struct gdbarch *gdbarch,
-			       VEC (probe_p) **probes)
+			       VEC (probe_p) **probes,
+			       struct objfile *objfile)
 {
   int i;
 
@@ -1949,8 +1953,10 @@ svr4_create_probe_breakpoints (struct gdbarch *gdbarch,
 	   VEC_iterate (probe_p, probes[i], ix, probe);
 	   ++ix)
 	{
-	  create_solib_event_breakpoint (gdbarch, probe->address);
-	  register_solib_event_probe (probe, action);
+	  CORE_ADDR address = get_probe_address (probe, objfile);
+
+	  create_solib_event_breakpoint (gdbarch, address);
+	  register_solib_event_probe (probe, address, action);
 	}
     }
 
@@ -2035,7 +2041,7 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 	    }
 
 	  if (all_probes_found)
-	    svr4_create_probe_breakpoints (gdbarch, probes);
+	    svr4_create_probe_breakpoints (gdbarch, probes, os->objfile);
 
 	  for (i = 0; i < NUM_PROBES; i++)
 	    VEC_free (probe_p, probes[i]);

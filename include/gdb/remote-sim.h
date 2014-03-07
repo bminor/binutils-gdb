@@ -1,6 +1,6 @@
 /* This file defines the interface between the simulator and gdb.
 
-   Copyright 1993-2014 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -140,7 +140,7 @@ void sim_close (SIM_DESC sd, int quitting);
    Such manipulation should probably (?) occure in
    sim_create_inferior. */
 
-SIM_RC sim_load (SIM_DESC sd, char *prog, struct bfd *abfd, int from_tty);
+SIM_RC sim_load (SIM_DESC sd, const char *prog, struct bfd *abfd, int from_tty);
 
 
 /* Prepare to run the simulated program.

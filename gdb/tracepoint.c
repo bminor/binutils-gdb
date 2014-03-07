@@ -653,7 +653,7 @@ trace_actions_command (char *args, int from_tty)
   struct tracepoint *t;
   struct command_line *l;
 
-  t = get_tracepoint_by_number (&args, NULL, 1);
+  t = get_tracepoint_by_number (&args, NULL);
   if (t)
     {
       char *tmpbuf =
@@ -1860,8 +1860,10 @@ start_tracing (char *notes)
       t->number_on_target = b->number;
 
       for (loc = b->loc; loc; loc = loc->next)
-	if (loc->probe != NULL)
-	  loc->probe->pops->set_semaphore (loc->probe, loc->gdbarch);
+	if (loc->probe.probe != NULL)
+	  loc->probe.probe->pops->set_semaphore (loc->probe.probe,
+						 loc->probe.objfile,
+						 loc->gdbarch);
 
       if (bp_location_downloaded)
 	observer_notify_breakpoint_modified (b);
@@ -1957,8 +1959,10 @@ stop_tracing (char *note)
 	     but we don't really care if this semaphore goes out of sync.
 	     That's why we are decrementing it here, but not taking care
 	     in other places.  */
-	  if (loc->probe != NULL)
-	    loc->probe->pops->clear_semaphore (loc->probe, loc->gdbarch);
+	  if (loc->probe.probe != NULL)
+	    loc->probe.probe->pops->clear_semaphore (loc->probe.probe,
+						     loc->probe.objfile,
+						     loc->gdbarch);
 	}
     }
 
@@ -2439,6 +2443,15 @@ tfind_1 (enum trace_find_type type, int num,
     }
 }
 
+/* Error on looking at traceframes while trace is running.  */
+
+void
+check_trace_running (struct trace_status *status)
+{
+  if (status->running && status->filename == NULL)
+    error (_("May not look at trace frames while trace is running."));
+}
+
 /* trace_find_command takes a trace frame number n, 
    sends "QTFrame:<n>" to the target, 
    and accepts a reply that may contain several optional pieces
@@ -2459,9 +2472,7 @@ trace_find_command (char *args, int from_tty)
 { /* This should only be called with a numeric argument.  */
   int frameno = -1;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
   
   if (args == 0 || *args == 0)
     { /* TFIND with no args means find NEXT trace frame.  */
@@ -2511,9 +2522,7 @@ trace_find_pc_command (char *args, int from_tty)
 {
   CORE_ADDR pc;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
     pc = regcache_read_pc (get_current_regcache ());
@@ -2530,9 +2539,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
   int tdp;
   struct tracepoint *tp;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
     {
@@ -2570,9 +2577,7 @@ trace_find_line_command (char *args, int from_tty)
   struct symtab_and_line sal;
   struct cleanup *old_chain;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
     {
@@ -2636,9 +2641,7 @@ trace_find_range_command (char *args, int from_tty)
   static CORE_ADDR start, stop;
   char *tmp;
 
-  if (current_trace_status ()->running
-      && current_trace_status ()->filename == NULL)
-    error (_("May not look at trace frames while trace is running."));
+  check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
     { /* XXX FIXME: what should default behavior be?  */

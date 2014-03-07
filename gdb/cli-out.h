@@ -37,7 +37,7 @@ struct cli_ui_out_data
     int suppress_output;
   };
 
-extern struct ui_out_impl cli_ui_out_impl;
+extern const struct ui_out_impl cli_ui_out_impl;
 
 
 extern struct ui_out *cli_out_new (struct ui_file *stream);

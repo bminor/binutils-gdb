@@ -1,7 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -1952,6 +1950,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP64 ("dtprel@highera",	BFD_RELOC_PPC64_DTPREL16_HIGHERA),
     MAP64 ("dtprel@highest",	BFD_RELOC_PPC64_DTPREL16_HIGHEST),
     MAP64 ("dtprel@highesta",	BFD_RELOC_PPC64_DTPREL16_HIGHESTA),
+    MAP64 ("localentry",	BFD_RELOC_PPC64_ADDR64_LOCAL),
     MAP64 ("tprel@high",	BFD_RELOC_PPC64_TPREL16_HIGH),
     MAP64 ("tprel@higha",	BFD_RELOC_PPC64_TPREL16_HIGHA),
     MAP64 ("tprel@higher",	BFD_RELOC_PPC64_TPREL16_HIGHER),
@@ -2531,25 +2530,16 @@ parse_toc_entry (enum toc_size_qualifier *toc_kind)
 }
 #endif
 
-#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
+#ifdef OBJ_XCOFF
 /* See whether a symbol is in the TOC section.  */
 
 static int
 ppc_is_toc_sym (symbolS *sym)
 {
-#ifdef OBJ_XCOFF
   return (symbol_get_tc (sym)->symbol_class == XMC_TC
 	  || symbol_get_tc (sym)->symbol_class == XMC_TC0);
-#endif
-#ifdef OBJ_ELF
-  const char *sname = segment_name (S_GET_SEGMENT (sym));
-  if (ppc_obj64)
-    return strcmp (sname, ".toc") == 0;
-  else
-    return strcmp (sname, ".got") == 0;
-#endif
 }
-#endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
+#endif
 
 
 #ifdef OBJ_ELF
@@ -3142,103 +3132,6 @@ md_assemble (char *str)
 		      break;
 		    }
 		}
-
-	      /* For the absolute forms of branches, convert the PC
-		 relative form back into the absolute.  */
-	      if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
-		{
-		  switch (reloc)
-		    {
-		    case BFD_RELOC_PPC_B26:
-		      reloc = BFD_RELOC_PPC_BA26;
-		      break;
-		    case BFD_RELOC_PPC_B16:
-		      reloc = BFD_RELOC_PPC_BA16;
-		      break;
-		    case BFD_RELOC_PPC_B16_BRTAKEN:
-		      reloc = BFD_RELOC_PPC_BA16_BRTAKEN;
-		      break;
-		    case BFD_RELOC_PPC_B16_BRNTAKEN:
-		      reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;
-		      break;
-		    default:
-		      break;
-		    }
-		}
-
-	      switch (reloc)
-		{
-		case BFD_RELOC_PPC_TOC16:
-		  toc_reloc_types |= has_small_toc_reloc;
-		  break;
-		case BFD_RELOC_PPC64_TOC16_LO:
-		case BFD_RELOC_PPC64_TOC16_HI:
-		case BFD_RELOC_PPC64_TOC16_HA:
-		  toc_reloc_types |= has_large_toc_reloc;
-		  break;
-		default:
-		  break;
-		}
-
-	      if ((operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
-		{
-		  switch (reloc)
-		    {
-		    case BFD_RELOC_16:
-		      reloc = BFD_RELOC_PPC64_ADDR16_DS;
-		      break;
-		    case BFD_RELOC_LO16:
-		      reloc = BFD_RELOC_PPC64_ADDR16_LO_DS;
-		      break;
-		    case BFD_RELOC_16_GOTOFF:
-		      reloc = BFD_RELOC_PPC64_GOT16_DS;
-		      break;
-		    case BFD_RELOC_LO16_GOTOFF:
-		      reloc = BFD_RELOC_PPC64_GOT16_LO_DS;
-		      break;
-		    case BFD_RELOC_LO16_PLTOFF:
-		      reloc = BFD_RELOC_PPC64_PLT16_LO_DS;
-		      break;
-		    case BFD_RELOC_16_BASEREL:
-		      reloc = BFD_RELOC_PPC64_SECTOFF_DS;
-		      break;
-		    case BFD_RELOC_LO16_BASEREL:
-		      reloc = BFD_RELOC_PPC64_SECTOFF_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC_TOC16:
-		      reloc = BFD_RELOC_PPC64_TOC16_DS;
-		      break;
-		    case BFD_RELOC_PPC64_TOC16_LO:
-		      reloc = BFD_RELOC_PPC64_TOC16_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC64_PLTGOT16:
-		      reloc = BFD_RELOC_PPC64_PLTGOT16_DS;
-		      break;
-		    case BFD_RELOC_PPC64_PLTGOT16_LO:
-		      reloc = BFD_RELOC_PPC64_PLTGOT16_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC_DTPREL16:
-		      reloc = BFD_RELOC_PPC64_DTPREL16_DS;
-		      break;
-		    case BFD_RELOC_PPC_DTPREL16_LO:
-		      reloc = BFD_RELOC_PPC64_DTPREL16_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC_TPREL16:
-		      reloc = BFD_RELOC_PPC64_TPREL16_DS;
-		      break;
-		    case BFD_RELOC_PPC_TPREL16_LO:
-		      reloc = BFD_RELOC_PPC64_TPREL16_LO_DS;
-		      break;
-		    case BFD_RELOC_PPC_GOT_DTPREL16:
-		    case BFD_RELOC_PPC_GOT_DTPREL16_LO:
-		    case BFD_RELOC_PPC_GOT_TPREL16:
-		    case BFD_RELOC_PPC_GOT_TPREL16_LO:
-		      break;
-		    default:
-		      as_bad (_("unsupported relocation for DS offset field"));
-		      break;
-		    }
-		}
 	    }
 #endif /* OBJ_ELF */
 
@@ -3247,11 +3140,13 @@ md_assemble (char *str)
 	  /* Determine a BFD reloc value based on the operand information.
 	     We are only prepared to turn a few of the operands into
 	     relocs.  */
-	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
+	  else if ((operand->flags & (PPC_OPERAND_RELATIVE
+				      | PPC_OPERAND_ABSOLUTE)) != 0
 		   && operand->bitm == 0x3fffffc
 		   && operand->shift == 0)
 	    reloc = BFD_RELOC_PPC_B26;
-	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
+	  else if ((operand->flags & (PPC_OPERAND_RELATIVE
+				      | PPC_OPERAND_ABSOLUTE)) != 0
 		   && operand->bitm == 0xfffc
 		   && operand->shift == 0)
 	    reloc = BFD_RELOC_PPC_B16;
@@ -3267,40 +3162,120 @@ md_assemble (char *str)
 		   && operand->bitm == 0x1fffffe
 		   && operand->shift == 0)
 	    reloc = BFD_RELOC_PPC_VLE_REL24;
-	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
-		   && operand->bitm == 0x3fffffc
-		   && operand->shift == 0)
-	    reloc = BFD_RELOC_PPC_BA26;
-	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
-		   && operand->bitm == 0xfffc
-		   && operand->shift == 0)
-	    reloc = BFD_RELOC_PPC_BA16;
-#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
-	  else if ((operand->flags & PPC_OPERAND_PARENS) != 0
+	  else if ((operand->flags & PPC_OPERAND_NEGATIVE) == 0
 		   && (operand->bitm & 0xfff0) == 0xfff0
 		   && operand->shift == 0)
 	    {
+	      reloc = BFD_RELOC_16;
+#ifdef OBJ_XCOFF
 	      /* Note: the symbol may be not yet defined.  */
-	      if (ppc_is_toc_sym (ex.X_add_symbol))
-		{
-		  reloc = BFD_RELOC_PPC_TOC16;
-#ifdef OBJ_ELF
-		  if (ppc_obj64
-		      && (operand->flags & PPC_OPERAND_DS) != 0)
-		    reloc = BFD_RELOC_PPC64_TOC16_DS;
+	      if ((operand->flags & PPC_OPERAND_PARENS) != 0
+		  && ppc_is_toc_sym (ex.X_add_symbol))
+		reloc = BFD_RELOC_PPC_TOC16;
 #endif
-		}
-	      else
+	    }
+
+	  /* For the absolute forms of branches, convert the PC
+	     relative form back into the absolute.  */
+	  if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
+	    {
+	      switch (reloc)
 		{
-		  reloc = BFD_RELOC_16;
+		case BFD_RELOC_PPC_B26:
+		  reloc = BFD_RELOC_PPC_BA26;
+		  break;
+		case BFD_RELOC_PPC_B16:
+		  reloc = BFD_RELOC_PPC_BA16;
+		  break;
 #ifdef OBJ_ELF
-		  if (ppc_obj64
-		      && (operand->flags & PPC_OPERAND_DS) != 0)
-		    reloc = BFD_RELOC_PPC64_ADDR16_DS;
+		case BFD_RELOC_PPC_B16_BRTAKEN:
+		  reloc = BFD_RELOC_PPC_BA16_BRTAKEN;
+		  break;
+		case BFD_RELOC_PPC_B16_BRNTAKEN:
+		  reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;
+		  break;
 #endif
+		default:
+		  break;
 		}
 	    }
-#endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
+
+#ifdef OBJ_ELF
+	  switch (reloc)
+	    {
+	    case BFD_RELOC_PPC_TOC16:
+	      toc_reloc_types |= has_small_toc_reloc;
+	      break;
+	    case BFD_RELOC_PPC64_TOC16_LO:
+	    case BFD_RELOC_PPC64_TOC16_HI:
+	    case BFD_RELOC_PPC64_TOC16_HA:
+	      toc_reloc_types |= has_large_toc_reloc;
+	      break;
+	    default:
+	      break;
+	    }
+
+	  if (ppc_obj64
+	      && (operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
+	    {
+	      switch (reloc)
+		{
+		case BFD_RELOC_16:
+		  reloc = BFD_RELOC_PPC64_ADDR16_DS;
+		  break;
+		case BFD_RELOC_LO16:
+		  reloc = BFD_RELOC_PPC64_ADDR16_LO_DS;
+		  break;
+		case BFD_RELOC_16_GOTOFF:
+		  reloc = BFD_RELOC_PPC64_GOT16_DS;
+		  break;
+		case BFD_RELOC_LO16_GOTOFF:
+		  reloc = BFD_RELOC_PPC64_GOT16_LO_DS;
+		  break;
+		case BFD_RELOC_LO16_PLTOFF:
+		  reloc = BFD_RELOC_PPC64_PLT16_LO_DS;
+		  break;
+		case BFD_RELOC_16_BASEREL:
+		  reloc = BFD_RELOC_PPC64_SECTOFF_DS;
+		  break;
+		case BFD_RELOC_LO16_BASEREL:
+		  reloc = BFD_RELOC_PPC64_SECTOFF_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_TOC16:
+		  reloc = BFD_RELOC_PPC64_TOC16_DS;
+		  break;
+		case BFD_RELOC_PPC64_TOC16_LO:
+		  reloc = BFD_RELOC_PPC64_TOC16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC64_PLTGOT16:
+		  reloc = BFD_RELOC_PPC64_PLTGOT16_DS;
+		  break;
+		case BFD_RELOC_PPC64_PLTGOT16_LO:
+		  reloc = BFD_RELOC_PPC64_PLTGOT16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_DTPREL16:
+		  reloc = BFD_RELOC_PPC64_DTPREL16_DS;
+		  break;
+		case BFD_RELOC_PPC_DTPREL16_LO:
+		  reloc = BFD_RELOC_PPC64_DTPREL16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_TPREL16:
+		  reloc = BFD_RELOC_PPC64_TPREL16_DS;
+		  break;
+		case BFD_RELOC_PPC_TPREL16_LO:
+		  reloc = BFD_RELOC_PPC64_TPREL16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_GOT_DTPREL16:
+		case BFD_RELOC_PPC_GOT_DTPREL16_LO:
+		case BFD_RELOC_PPC_GOT_TPREL16:
+		case BFD_RELOC_PPC_GOT_TPREL16_LO:
+		  break;
+		default:
+		  as_bad (_("unsupported relocation for DS offset field"));
+		  break;
+		}
+	    }
+#endif
 
 	  /* We need to generate a fixup for this expression.  */
 	  if (fc >= MAX_INSN_FIXUPS)
@@ -6868,6 +6843,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_PPC64_HIGHEST_S:
 	case BFD_RELOC_PPC64_ADDR16_HIGH:
 	case BFD_RELOC_PPC64_ADDR16_HIGHA:
+	case BFD_RELOC_PPC64_ADDR64_LOCAL:
 	  break;
 
 	case BFD_RELOC_PPC_DTPMOD:

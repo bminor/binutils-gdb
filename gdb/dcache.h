@@ -32,12 +32,13 @@ DCACHE *dcache_init (void);
 /* Free a DCACHE.  */
 void dcache_free (DCACHE *);
 
-/* Simple to call from <remote>_xfer_memory.  */
+enum target_xfer_status
+  dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
+			      CORE_ADDR memaddr, gdb_byte *myaddr,
+			      ULONGEST len, ULONGEST *xfered_len);
 
-int dcache_xfer_memory (struct target_ops *ops, DCACHE *cache, CORE_ADDR mem,
-			gdb_byte *my, int len, int should_write);
-
-void dcache_update (DCACHE *dcache, CORE_ADDR memaddr, gdb_byte *myaddr,
-		    int len);
+void dcache_update (DCACHE *dcache, enum target_xfer_status status,
+		    CORE_ADDR memaddr, const gdb_byte *myaddr,
+		    ULONGEST len);
 
 #endif /* DCACHE_H */

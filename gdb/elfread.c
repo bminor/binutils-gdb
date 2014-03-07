@@ -63,9 +63,9 @@ struct elfinfo
     asection *mdebugsect;	/* Section pointer for .mdebug section */
   };
 
-/* Per-objfile data for probe info.  */
+/* Per-BFD data for probe info.  */
 
-static const struct objfile_data *probe_key = NULL;
+static const struct bfd_data *probe_key = NULL;
 
 static void free_elfinfo (void *);
 
@@ -1496,12 +1496,12 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 static VEC (probe_p) *
 elf_get_probes (struct objfile *objfile)
 {
-  VEC (probe_p) *probes_per_objfile;
+  VEC (probe_p) *probes_per_bfd;
 
   /* Have we parsed this objfile's probes already?  */
-  probes_per_objfile = objfile_data (objfile, probe_key);
+  probes_per_bfd = bfd_data (objfile->obfd, probe_key);
 
-  if (!probes_per_objfile)
+  if (!probes_per_bfd)
     {
       int ix;
       const struct probe_ops *probe_ops;
@@ -1510,40 +1510,25 @@ elf_get_probes (struct objfile *objfile)
 	 objfile.  */
       for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, probe_ops);
 	   ix++)
-	probe_ops->get_probes (&probes_per_objfile, objfile);
+	probe_ops->get_probes (&probes_per_bfd, objfile);
 
-      if (probes_per_objfile == NULL)
+      if (probes_per_bfd == NULL)
 	{
-	  VEC_reserve (probe_p, probes_per_objfile, 1);
-	  gdb_assert (probes_per_objfile != NULL);
+	  VEC_reserve (probe_p, probes_per_bfd, 1);
+	  gdb_assert (probes_per_bfd != NULL);
 	}
 
-      set_objfile_data (objfile, probe_key, probes_per_objfile);
+      set_bfd_data (objfile->obfd, probe_key, probes_per_bfd);
     }
 
-  return probes_per_objfile;
-}
-
-/* Implementation of `sym_relocate_probe', as documented in symfile.h.  */
-
-static void
-elf_symfile_relocate_probe (struct objfile *objfile,
-			    const struct section_offsets *new_offsets,
-			    const struct section_offsets *delta)
-{
-  int ix;
-  VEC (probe_p) *probes = objfile_data (objfile, probe_key);
-  struct probe *probe;
-
-  for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
-    probe->pops->relocate (probe, ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
+  return probes_per_bfd;
 }
 
 /* Helper function used to free the space allocated for storing SystemTap
    probe information.  */
 
 static void
-probe_key_free (struct objfile *objfile, void *d)
+probe_key_free (bfd *abfd, void *d)
 {
   int ix;
   VEC (probe_p) *probes = d;
@@ -1562,7 +1547,6 @@ probe_key_free (struct objfile *objfile, void *d)
 static const struct sym_probe_fns elf_probe_fns =
 {
   elf_get_probes,		    /* sym_get_probes */
-  elf_symfile_relocate_probe,	    /* sym_relocate_probe */
 };
 
 /* Register that we are able to handle ELF object file formats.  */
@@ -1630,7 +1614,7 @@ static const struct gnu_ifunc_fns elf_gnu_ifunc_fns =
 void
 _initialize_elfread (void)
 {
-  probe_key = register_objfile_data_with_cleanup (NULL, probe_key_free);
+  probe_key = register_bfd_data_with_cleanup (NULL, probe_key_free);
   add_symtab_fns (bfd_target_elf_flavour, &elf_sym_fns);
 
   elf_objfile_gnu_ifunc_cache_data = register_objfile_data ();
