@@ -2006,9 +2006,13 @@ int target_verify_memory (const gdb_byte *data,
 /* Routines for maintenance of the target structures...
 
    complete_target_initialization: Finalize a target_ops by filling in
-   any fields needed by the target implementation.
+   any fields needed by the target implementation.  Unnecessary for
+   targets which are registered via add_target, as this part gets
+   taken care of then.
 
    add_target:   Add a target to the list of all possible targets.
+   This only makes sense for targets that should be activated using
+   the "target TARGET_NAME ..." command.
 
    push_target:  Make this target the top of the stack of currently used
    targets, within its particular stratum of the stack.  Result
