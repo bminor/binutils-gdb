@@ -1,5 +1,10 @@
 bfd/
 
+2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* format.c (bfd_check_format_matches): Don't check the plugin
+	target twice.
+
 2012-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* plugin.c (add_symbols): Set tdata.plugin_data before calling
