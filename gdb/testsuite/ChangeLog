@@ -1,3 +1,8 @@
+2014-03-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp (build_executable_from_specs): Don't prepend source
+	directory to absolute path name arguments.
+
 2014-03-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/tagged_access: New testcase.
