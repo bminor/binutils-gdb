@@ -1,3 +1,17 @@
+2014-03-07  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c: Include inf-child.h.
+	(go32_ops): Delete global.
+	(go32_close, go32_detach, go32_prepare_to_store, go32_can_run):
+	Delete methods.
+	(go32_create_inferior): Push the passed in target pointer instead
+	of referencing go32_ops.
+	(init_go32_ops): Delete function.  Moved parts to _initialize_go32_nat.
+	(go32_target): New function, based on init_go32_ops, but inherit
+	inf_child_target.
+	(_initialize_go32_nat): Use go32_target.  Move parts of
+	init_go32_ops here.
+
 2014-03-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* sol-thread.c: #include "symtab.h", "minsym.h" and "objfiles.h".
