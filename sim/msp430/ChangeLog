@@ -1,5 +1,15 @@
 2015-03-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* aclocal.m4, configure: Regenerate.
+	* configure.ac: Call the common inline & warning macros.
+	* msp430-sim.c: Include unistd.h & trace.h.
+	* trace.c: Include trace.h.
+	(load_file_and_line): Move FILE* decl to top of scope.
+	* trace.h (msp430_get_current_source_location): Adjust prototype to
+	match the function definition.
+
+2015-03-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_RUN_OBJS): Delete.
 
 2015-02-24  Nick Clifton  <nickc@redhat.com>

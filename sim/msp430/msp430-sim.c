@@ -24,12 +24,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <unistd.h>
 #include <assert.h>
 #include "bfd.h"
 #include "opcode/msp430-decode.h"
 #include "sim-main.h"
 #include "dis-asm.h"
 #include "targ-vals.h"
+#include "trace.h"
 
 static int
 loader_write_mem (SIM_DESC sd,
