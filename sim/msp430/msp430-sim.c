@@ -249,9 +249,14 @@ sim_create_inferior (SIM_DESC sd,
   int c;
   int new_pc;
 
+  /* Set the PC to the default reset vector if available.  */
   c = sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, resetv, 0xfffe, 2);
-
   new_pc = resetv[0] + 256 * resetv[1];
+
+  /* If the reset vector isn't initialized, then use the ELF entry.  */
+  if (abfd != NULL && !new_pc)
+    new_pc = bfd_get_start_address (abfd);
+
   sim_pc_set (MSP430_CPU (sd), new_pc);
   msp430_pc_store (MSP430_CPU (sd), new_pc);
 
