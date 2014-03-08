@@ -1,5 +1,17 @@
 2014-03-08  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_howto_raw): Correct overflow check for
+	many relocations.  Correct bitsize and rightshift too for a number
+	of VLE relocs.  Describe R_PPC_VLE_SDA21 and R_PPC_VLE_SDA21_LO.
+	Correct dst_mask on R_PPC_VLE_SDA21_LO.
+	(ppc_elf_vle_split16): Tidy, delete unnecessary prototype.
+	(ppc_elf_relocate_section): Modify overflow test for 16-bit
+	fields in instructions to signed/unsigned according to whether
+	the field takes a signed or unsigned value.  Tidy vle split16 code.
+	Correct R_PPC_VLE_SDA21 and R_PPC_VLE_SDA21_LO handling.
+
+2014-03-08  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_howto_raw): Use complain_overflow_signed
 	for R_PPC64_ADDR14, R_PPC64_ADDR14_BRTAKEN, R_PPC64_ADDR14_BRNTAKEN,
 	R_PPC64_SECTOFF, R_PPC64_ADDR16_DS, R_PPC64_SECTOFF_DS,
