@@ -16449,7 +16449,7 @@ read_str_index (const struct die_reader_specs *reader,
 		struct dwarf2_cu *cu, ULONGEST str_index)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  const char *dwo_name = objfile_name (objfile);
+  const char *objf_name = objfile_name (objfile);
   bfd *abfd = objfile->obfd;
   struct dwarf2_section_info *str_section = &reader->dwo_file->sections.str;
   struct dwarf2_section_info *str_offsets_section =
@@ -16463,15 +16463,15 @@ read_str_index (const struct die_reader_specs *reader,
   if (str_section->buffer == NULL)
     error (_("%s used without .debug_str.dwo section"
 	     " in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, objf_name);
   if (str_offsets_section->buffer == NULL)
     error (_("%s used without .debug_str_offsets.dwo section"
 	     " in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, objf_name);
   if (str_index * cu->header.offset_size >= str_offsets_section->size)
     error (_("%s pointing outside of .debug_str_offsets.dwo"
 	     " section in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, objf_name);
   info_ptr = (str_offsets_section->buffer
 	      + str_index * cu->header.offset_size);
   if (cu->header.offset_size == 4)
@@ -16481,7 +16481,7 @@ read_str_index (const struct die_reader_specs *reader,
   if (str_offset >= str_section->size)
     error (_("Offset from %s pointing outside of"
 	     " .debug_str.dwo section in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, objf_name);
   return (const char *) (str_section->buffer + str_offset);
 }
 

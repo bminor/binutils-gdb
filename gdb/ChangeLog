@@ -1,5 +1,9 @@
 2014-03-07  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (read_str_index): Rename local dwo_name to objf_name.
+
+2014-03-07  Doug Evans  <dje@google.com>
+
 	* dwarf2read.c (read_cutu_die_from_dwo): Fix function comment.
 	Remove unused local comp_dir_attr.  Assert exactly one of
 	stub_comp_unit_die, stub_comp_dir is non-NULL.
