@@ -2371,6 +2371,25 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 {
   std::vector<Symbol*> as_needed_sym;
 
+  // Allow a target to set dynsym indexes.
+  if (parameters->target().has_custom_set_dynsym_indexes())
+    {
+      std::vector<Symbol*> dyn_symbols;
+      for (Symbol_table_type::iterator p = this->table_.begin();
+           p != this->table_.end();
+           ++p)
+        {
+          Symbol* sym = p->second;
+          if (!sym->should_add_dynsym_entry(this))
+            sym->set_dynsym_index(-1U);
+          else
+            dyn_symbols.push_back(sym);
+        }
+
+      return parameters->target().set_dynsym_indexes(&dyn_symbols, index, syms,
+                                                     dynpool, versions, this);
+    }
+
   for (Symbol_table_type::iterator p = this->table_.begin();
        p != this->table_.end();
        ++p)

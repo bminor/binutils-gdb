@@ -1,3 +1,12 @@
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* symtab.cc (Symbol_table::set_dynsym_indexes): Allow a target to set
+	dynsym indexes.
+	* target.h (Target::has_custom_set_dynsym_indexes): New function.
+	(Target::do_has_custom_set_dynsym_indexes): New function.
+	(Target::set_dynsym_indexes): New function.
+	(Target::do_set_dynsym_indexes): New function.
+
 2014-03-07  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relocate_functions::Overflow_check): Add
