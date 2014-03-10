@@ -1,3 +1,7 @@
+2014-03-10  Tristan Gingold  <gingold@adacore.com>
+
+	* ticoff.h: Removed.
+
 2014-03-08  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_howto_raw): Correct overflow check for
