@@ -470,6 +470,11 @@ class Target
                                        versions, symtab);
   }
 
+  // Get the custom dynamic tag value.
+  unsigned int
+  dynamic_tag_custom_value(elfcpp::DT tag) const
+  { return this->do_dynamic_tag_custom_value(tag); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -751,6 +756,11 @@ class Target
   do_set_dynsym_indexes(std::vector<Symbol*>*, unsigned int,
                         std::vector<Symbol*>*, Stringpool*, Versions*,
                         Symbol_table*) const
+  { gold_unreachable(); }
+
+  // This may be overridden by the child class.
+  virtual unsigned int
+  do_dynamic_tag_custom_value(elfcpp::DT) const
   { gold_unreachable(); }
 
  private:

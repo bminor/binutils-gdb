@@ -1,4 +1,15 @@
 2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+  
+	* output.cc (Output_data_dynamic::Dynamic_entry::write):
+	Get the value of DYNAMIC_CUSTOM dynamic entry.
+	* output.h (Output_data_dynamic::add_custom): New function.
+	(Dynamic_entry::Dynamic_entry): New constructor for DYNAMIC_CUSTOM
+	dynamic entry.
+	(enum Dynamic_entry::Classification): Add DYNAMIC_CUSTOM.
+	* target.h (Target::dynamic_tag_custom_value): New function.
+	(Target::do_dynamic_tag_custom_value): New function.
+
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
 	* symtab.cc (Symbol_table::set_dynsym_indexes): Allow a target to set
 	dynsym indexes.
