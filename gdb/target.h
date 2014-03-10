@@ -1319,7 +1319,7 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 #define	target_files_info()	\
      (*current_target.to_files_info) (&current_target)
 
-/* Insert a hardware breakpoint at address BP_TGT->placed_address in
+/* Insert a breakpoint at address BP_TGT->placed_address in
    the target machine.  Returns 0 for success, and returns non-zero or
    throws an error (with a detailed failure reason error code and
    message) otherwise.  */

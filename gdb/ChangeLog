@@ -1,3 +1,8 @@
+2014-03-10  Hui Zhu  <hui@codesourcery.com>
+
+	* target.h (target_insert_breakpoint): Remove "hardware" from its
+	comments.
+
 2014-03-07  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_str_index): Rename local dwo_name to objf_name.
