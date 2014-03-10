@@ -10112,7 +10112,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
              The latter should be shown as usual (as a pointer), whereas
              a reference should mostly be transparent to the user.  */
           if (ada_is_tagged_type (type, 0)
-              || (TYPE_CODE(type) == TYPE_CODE_REF
+              || (TYPE_CODE (type) == TYPE_CODE_REF
                   && ada_is_tagged_type (TYPE_TARGET_TYPE (type), 0)))
           {
             /* Tagged types are a little special in the fact that the real
@@ -10740,8 +10740,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                This means that we need to evaluate completely the
                expression in order to get its type.  */
 
-	      if ((TYPE_CODE(type) == TYPE_CODE_REF
-		   || TYPE_CODE(type) == TYPE_CODE_PTR)
+	      if ((TYPE_CODE (type) == TYPE_CODE_REF
+		   || TYPE_CODE (type) == TYPE_CODE_PTR)
 		  && ada_is_tagged_type (TYPE_TARGET_TYPE (type), 0))
 		{
 		  arg1 = evaluate_subexp (NULL_TYPE, exp, &preeval_pos,
