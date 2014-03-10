@@ -1,5 +1,11 @@
 2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
+	* symtab.cc (Sized_symbol<32>::init_output_data):
+	Instantiate the template.
+	(Sized_symbol<64>::init_output_data): Likewise.
+
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
 	* symtab.cc (Symbol_table::sized_write_globals): Allow a target to
 	adjust dynamic symbol value.
 	* target.h (Target::adjust_dyn_symbol): New function.

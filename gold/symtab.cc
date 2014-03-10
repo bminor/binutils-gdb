@@ -3644,6 +3644,32 @@ Symbol_table::define_with_copy_reloc<64>(
     elfcpp::Elf_types<64>::Elf_Addr value);
 #endif
 
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+template
+void
+Sized_symbol<32>::init_output_data(const char* name, const char* version,
+				   Output_data* od, Value_type value,
+				   Size_type symsize, elfcpp::STT type,
+				   elfcpp::STB binding,
+				   elfcpp::STV visibility,
+				   unsigned char nonvis,
+				   bool offset_is_from_end,
+				   bool is_predefined);
+#endif
+
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+template
+void
+Sized_symbol<64>::init_output_data(const char* name, const char* version,
+				   Output_data* od, Value_type value,
+				   Size_type symsize, elfcpp::STT type,
+				   elfcpp::STB binding,
+				   elfcpp::STV visibility,
+				   unsigned char nonvis,
+				   bool offset_is_from_end,
+				   bool is_predefined);
+#endif
+
 #ifdef HAVE_TARGET_32_LITTLE
 template
 void
