@@ -475,6 +475,11 @@ class Target
   dynamic_tag_custom_value(elfcpp::DT tag) const
   { return this->do_dynamic_tag_custom_value(tag); }
 
+  // Adjust the value written to the dynamic symbol table.
+  void
+  adjust_dyn_symbol(const Symbol* sym, unsigned char* view) const
+  { this->do_adjust_dyn_symbol(sym, view); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -762,6 +767,11 @@ class Target
   virtual unsigned int
   do_dynamic_tag_custom_value(elfcpp::DT) const
   { gold_unreachable(); }
+
+  // This may be overridden by the child class.
+  virtual void
+  do_adjust_dyn_symbol(const Symbol*, unsigned char*) const
+  { }
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are

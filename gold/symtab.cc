@@ -3012,6 +3012,8 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
 	  this->sized_write_symbol<size, big_endian>(sym, dynsym_value, shndx,
 						     binding, dynpool, pd);
+          // Allow a target to adjust dynamic symbol value.
+          parameters->target().adjust_dyn_symbol(sym, pd);
 	}
     }
 
