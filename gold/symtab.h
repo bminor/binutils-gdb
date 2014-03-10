@@ -259,6 +259,11 @@ class Symbol
   nonvis() const
   { return this->nonvis_; }
 
+  // Set the non-visibility part of the st_other field.
+  void
+  set_nonvis(unsigned int nonvis)
+  { this->nonvis_ = nonvis; }
+
   // Return whether this symbol is a forwarder.  This will never be
   // true of a symbol found in the hash table, but may be true of
   // symbol pointers attached to object files.

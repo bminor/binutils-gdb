@@ -1,5 +1,9 @@
 2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
+	* symtab.h (Symbol::set_nonvis): New function.
+
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
 	* symtab.cc (Sized_symbol<32>::init_output_data):
 	Instantiate the template.
 	(Sized_symbol<64>::init_output_data): Likewise.
