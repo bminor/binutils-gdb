@@ -1,3 +1,9 @@
+2014-03-11  Alan Modra  <amodra@gmail.com>
+
+	PR 16686
+	* coff-rs6000.c: Include stdint.h.
+	* coff64-rs6000.c: Likewise.
+
 2014-03-10  Tristan Gingold  <gingold@adacore.com>
 
 	* ticoff.h: Removed.
