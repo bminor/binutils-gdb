@@ -799,6 +799,30 @@ proc mi_gdb_test { args } {
     return $result
 }
 
+# Collect output sent to the console output stream until UNTIL is
+# seen.  UNTIL is a regular expression.  MESSAGE is the message to be
+# printed in case of timeout.
+
+proc mi_gdb_expect_cli_output {until message} {
+
+    set output ""
+    gdb_expect {
+	-re "~\"(\[^\r\n\]+)\"\r\n" {
+	    append output $expect_out(1,string)
+	    exp_continue
+	}
+	-notransfer -re "$until" {
+	    # Done
+	}
+	timeout {
+	    fail "$message (timeout)"
+	    return ""
+	}
+    }
+
+    return $output
+}
+
 #
 # MI run command.  (A modified version of gdb_run_cmd)
 #

@@ -37,6 +37,7 @@
 #include "gdb.h"
 #include "objfiles.h"
 #include "tracepoint.h"
+#include "cli-out.h"
 
 /* These are the interpreter setup, etc. functions for the MI
    interpreter.  */
@@ -231,6 +232,10 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
     error (_("-interpreter-exec: could not find interpreter \"%s\""),
 	   argv[0]);
 
+  /* Note that unlike the CLI version of this command, we don't
+     actually set INTERP_TO_USE as the current interpreter, as we
+     still want gdb_stdout, etc. to point at MI streams.  */
+
   /* Insert the MI out hooks, making sure to also call the
      interpreter's hooks if it has any.  */
   /* KRS: We shouldn't need this... Events should be installed and
@@ -415,6 +420,26 @@ mi_inferior_removed (struct inferior *inf)
   gdb_flush (mi->event_channel);
 }
 
+/* Cleanup that restores a previous current uiout.  */
+
+static void
+restore_current_uiout_cleanup (void *arg)
+{
+  struct ui_out *saved_uiout = arg;
+
+  current_uiout = saved_uiout;
+}
+
+/* Cleanup that destroys the a ui_out object.  */
+
+static void
+ui_out_free_cleanup (void *arg)
+{
+  struct ui_out *uiout = arg;
+
+  ui_out_destroy (uiout);
+}
+
 static void
 mi_on_normal_stop (struct bpstats *bs, int print_frame)
 {
@@ -444,6 +469,58 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	  print_stop_event (&last);
 
 	  current_uiout = saved_uiout;
+	}
+      /* Otherwise, frame information has already been printed by
+	 normal_stop.  */
+      else
+	{
+	  /* Breakpoint hits should always be mirrored to the console.
+	     Deciding what to mirror to the console wrt to breakpoints
+	     and random stops gets messy real fast.  E.g., say "s"
+	     trips on a breakpoint.  We'd clearly want to mirror the
+	     event to the console in this case.  But what about more
+	     complicated cases like "s&; thread n; s&", and one of
+	     those steps spawning a new thread, and that thread
+	     hitting a breakpoint?  It's impossible in general to
+	     track whether the thread had any relation to the commands
+	     that had been executed.  So we just simplify and always
+	     mirror breakpoints and random events to the console.
+
+	     Also, CLI execution commands (-interpreter-exec console
+	     "next", for example) in async mode have the opposite
+	     issue as described in the "then" branch above --
+	     normal_stop has already printed frame information to MI
+	     uiout, but nothing has printed the same information to
+	     the CLI channel.  We should print the source line to the
+	     console when stepping or other similar commands, iff the
+	     step was started by a console command (but not if it was
+	     started with -exec-step or similar).  */
+	  struct thread_info *tp = inferior_thread ();
+
+	  if ((!tp->control.stop_step
+		  && !tp->control.proceed_to_finish)
+	      || (tp->control.command_interp != NULL
+		  && tp->control.command_interp != top_level_interpreter ()))
+	    {
+	      struct mi_interp *mi = top_level_interpreter_data ();
+	      struct target_waitstatus last;
+	      ptid_t last_ptid;
+	      struct ui_out *cli_uiout;
+	      struct cleanup *old_chain;
+
+	      /* Sets the current uiout to a new temporary CLI uiout
+		 assigned to STREAM.  */
+	      cli_uiout = cli_out_new (mi->out);
+	      old_chain = make_cleanup (ui_out_free_cleanup, cli_uiout);
+
+	      make_cleanup (restore_current_uiout_cleanup, current_uiout);
+	      current_uiout = cli_uiout;
+
+	      get_last_target_status (&last_ptid, &last);
+	      print_stop_event (&last);
+
+	      do_cleanups (old_chain);
+	    }
 	}
 
       ui_out_field_int (mi_uiout, "thread-id",

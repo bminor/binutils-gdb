@@ -1,5 +1,29 @@
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/13860
+	* gdbthread.h (struct thread_control_state): New field
+	`command_interp'.
+	* infrun.c (follow_fork): Copy the new thread control field to the
+	child fork thread.
+	(clear_proceed_status_thread): Clear the new thread control field.
+	(proceed): Set the new thread control field.
+	* interps.h (command_interp): Declare.
+	* interps.c (command_interpreter): New global.
+	(command_interp): New function.
+	(interp_exec): Set `command_interpreter' while here.
+	* cli-out.c (cli_uiout_dtor): New function.
+	(cli_ui_out_impl): Install it.
+	* mi/mi-interp.c: Include cli-out.h.
+	(mi_cmd_interpreter_exec): Add comment.
+	(restore_current_uiout_cleanup): New function.
+	(ui_out_free_cleanup): New function.
+	(mi_on_normal_stop): If finishing an execution command started by
+	a CLI command, or any kind of breakpoint-like event triggered,
+	print the stop event to the output (CLI) stream.
+	* mi/mi-out.c (mi_ui_out_impl): Install NULL `dtor' handler.
+
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-cmds.c (list_command): Handle the first "list" after the
 	current source line having changed.
 	* frame.h (set_current_sal_from_frame): Remove 'center' parameter.

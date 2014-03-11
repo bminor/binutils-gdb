@@ -1,5 +1,18 @@
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/13860
+	* gdb.mi/mi-cli.exp (line_callee4_next_step): New global.
+	(top level): Test that output related to execution commands is
+	sent to the console with CLI commands, but not with MI commands.
+	Test that breakpoint events are always mirrored to the console.
+	Also expect the new source line to be output after a "next" in
+	async mode too.  Make it a pass/fail test.
+	* gdb.mi/mi-solib.exp: Test that the CLI solib event note is
+	output.
+	* lib/mi-support.exp (mi_gdb_expect_cli_output): New procedure.
+
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/list.exp (build_pattern, test_list): New procedures.
 	Use them to test variations of "list" after reaching a breakpoint.
 	* gdb.mi/mi-cli.exp (line_main_callme_2): New global.

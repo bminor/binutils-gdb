@@ -122,6 +122,11 @@ struct thread_control_state
   /* Chain containing status of breakpoint(s) the thread stopped
      at.  */
   bpstat stop_bpstat;
+
+  /* The interpreter that issued the execution command.  NULL if the
+     thread was resumed as a result of a command applied to some other
+     thread (e.g., "next" with scheduler-locking off).  */
+  struct interp *command_interp;
 };
 
 /* Inferior thread specific part of `struct infcall_suspend_state'.

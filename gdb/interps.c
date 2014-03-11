@@ -318,6 +318,29 @@ current_interp_display_prompt_p (void)
 						      data);
 }
 
+/* The interpreter that is active while `interp_exec' is active, NULL
+   at all other times.  */
+static struct interp *command_interpreter;
+
+/* The interpreter that was active when a command was executed.
+   Normally that'd always be CURRENT_INTERPRETER, except that MI's
+   -interpreter-exec command doesn't actually flip the current
+   interpreter when running its sub-command.  The
+   `command_interpreter' global tracks when interp_exec is called
+   (IOW, when -interpreter-exec is called).  If that is set, it is
+   INTERP in '-interpreter-exec INTERP "CMD"' or in 'interpreter-exec
+   INTERP "CMD".  Otherwise, interp_exec isn't active, and so the
+   interpreter running the command is the current interpreter.  */
+
+struct interp *
+command_interp (void)
+{
+  if (command_interpreter != NULL)
+    return command_interpreter;
+  else
+    return current_interpreter;
+}
+
 /* Run the current command interpreter's main loop.  */
 void
 current_interp_command_loop (void)
@@ -351,9 +374,20 @@ interp_set_quiet (struct interp *interp, int quiet)
 struct gdb_exception
 interp_exec (struct interp *interp, const char *command_str)
 {
+  struct gdb_exception ex;
+  struct interp *save_command_interp;
+
   gdb_assert (interp->procs->exec_proc != NULL);
 
-  return interp->procs->exec_proc (interp->data, command_str);
+  /* See `command_interp' for why we do this.  */
+  save_command_interp = command_interpreter;
+  command_interpreter = interp;
+
+  ex = interp->procs->exec_proc (interp->data, command_str);
+
+  command_interpreter = save_command_interp;
+
+  return ex;
 }
 
 /* A convenience routine that nulls out all the common command hooks.

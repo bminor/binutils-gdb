@@ -40,6 +40,17 @@ static void out_field_fmt (struct ui_out *uiout, int fldno,
 			   const char *fldname,
 			   const char *format,...) ATTRIBUTE_PRINTF (4, 5);
 
+/* The destructor.  */
+
+static void
+cli_uiout_dtor (struct ui_out *ui_out)
+{
+  cli_out_data *data = ui_out_data (ui_out);
+
+  VEC_free (ui_filep, data->streams);
+  xfree (data);
+}
+
 /* These are the CLI output functions */
 
 /* Mark beginning of a table */
@@ -367,7 +378,7 @@ const struct ui_out_impl cli_ui_out_impl =
   cli_wrap_hint,
   cli_flush,
   cli_redirect,
-  0,
+  cli_uiout_dtor,
   0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
 };
 

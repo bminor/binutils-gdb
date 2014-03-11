@@ -60,4 +60,15 @@ mi_gdb_test "777-gdb-set stop-on-solib-events 1" "777\\^done" \
 # commands still cause the correct MI output to be generated.
 mi_run_with_cli
 
+# Also test that the CLI solib event note is output.
+set test "CLI prints solib event"
+gdb_expect {
+    -re "~\"Stopped due to shared library event \\(no libraries added or removed\\)\\\\n" {
+	pass "$test"
+    }
+    timeout {
+	fail "$test (timeout)"
+    }
+}
+
 mi_expect_stop solib-event .* .* .* .* .* "check for solib event"
