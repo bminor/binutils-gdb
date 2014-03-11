@@ -561,6 +561,20 @@ initialize_gdb_module (void *data)
   gdb_scheme_initialized = 1;
 }
 
+/* Utility to call scm_c_define_module+initialize_gdb_module from
+   within scm_with_guile.  */
+
+static void *
+call_initialize_gdb_module (void *data)
+{
+  /* Most of the initialization is done by initialize_gdb_module.
+     It is called via scm_c_define_module so that the initialization is
+     performed within the desired module.  */
+  scm_c_define_module (gdbscm_module_name, initialize_gdb_module, NULL);
+
+  return NULL;
+}
+
 /* A callback to finish Guile initialization after gdb has finished all its
    initialization.
    This is the extension_language_ops.finish_initialization "method".  */
@@ -697,20 +711,14 @@ _initialize_guile (void)
   install_gdb_commands ();
 
 #if HAVE_GUILE
-  /* The Guile docs say scm_init_guile isn't as portable as the other Guile
-     initialization routines.  However, this is the easiest to use.
-     We can switch to a more portable routine if/when the need arises
-     and if it can be used with gdb.  */
-  scm_init_guile ();
-
   /* The Python support puts the C side in module "_gdb", leaving the Python
      side to define module "gdb" which imports "_gdb".  There is evidently no
      similar convention in Guile so we skip this.  */
 
-  /* The rest of the initialization is done by initialize_gdb_module.
-     scm_c_define_module is used as it allows us to perform the initialization
-     within the desired module.  */
-  scm_c_define_module (gdbscm_module_name, initialize_gdb_module, NULL);
+  /* scm_with_guile is the most portable way to initialize Guile.
+     Plus we need to initialize the Guile support while in Guile mode
+     (e.g., called from within a call to scm_with_guile).  */
+  scm_with_guile (call_initialize_gdb_module, NULL);
 
   /* Set Guile's backtrace to match the "set guile print-stack" default.
      [N.B. The two settings are still separate.]

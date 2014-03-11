@@ -1,3 +1,9 @@
+2014-03-10  Doug Evans  <xdje42@gmail.com>
+
+	* guile/guile.c (call_initialize_gdb_module): New function.
+	(initialize_guile): Replace call to scm_init_guile with call to
+	scm_with_guile.
+
 2014-03-10  Joel Brobecker  <brobecker@adacore.com>
 
         * ada-lang.c (ada_evaluate_subexp): Add missing space before '('
