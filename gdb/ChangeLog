@@ -1,5 +1,11 @@
 2014-03-22  Yao Qi  <yao@codesourcery.com>
 
+	* remote.c (remote_read_bytes): Move code on reading from the
+	remote stub to ...
+	(remote_read_bytes_1): ... here.  New function.
+
+2014-03-22  Yao Qi  <yao@codesourcery.com>
+
 	* ctf.c (ctf_xfer_partial): Check the return value of
 	exec_read_partial_read_only, if it is not TARGET_XFER_OK,
 	return TARGET_XFER_UNAVAILABLE.

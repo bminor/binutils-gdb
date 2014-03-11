@@ -6824,6 +6824,56 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len,
 				 packet_format[0], 1);
 }
 
+/* Read memory data directly from the remote machine.
+   This does not use the data cache; the data cache uses this.
+   MEMADDR is the address in the remote memory space.
+   MYADDR is the address of the buffer in our space.
+   LEN is the number of bytes.
+
+   Return the transferred status, error or OK (an
+   'enum target_xfer_status' value).  Save the number of bytes
+   transferred in *XFERED_LEN.  */
+
+static enum target_xfer_status
+remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
+		     ULONGEST *xfered_len)
+{
+  struct remote_state *rs = get_remote_state ();
+  int max_buf_size;		/* Max size of packet output buffer.  */
+  char *p;
+  int todo;
+  int i;
+
+  max_buf_size = get_memory_read_packet_size ();
+  /* The packet buffer will be large enough for the payload;
+     get_memory_packet_size ensures this.  */
+
+  /* Number if bytes that will fit.  */
+  todo = min (len, max_buf_size / 2);
+
+  /* Construct "m"<memaddr>","<len>".  */
+  memaddr = remote_address_masked (memaddr);
+  p = rs->buf;
+  *p++ = 'm';
+  p += hexnumstr (p, (ULONGEST) memaddr);
+  *p++ = ',';
+  p += hexnumstr (p, (ULONGEST) todo);
+  *p = '\0';
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  if (rs->buf[0] == 'E'
+      && isxdigit (rs->buf[1]) && isxdigit (rs->buf[2])
+      && rs->buf[3] == '\0')
+    return TARGET_XFER_E_IO;
+  /* Reply describes memory byte by byte, each byte encoded as two hex
+     characters.  */
+  p = rs->buf;
+  i = hex2bin (p, myaddr, todo);
+  /* Return what we have.  Let higher layers handle partial reads.  */
+  *xfered_len = (ULONGEST) i;
+  return TARGET_XFER_OK;
+}
+
 /* Read memory from the live target, even if currently inspecting a
    traceframe.  The return is the same as that of target_read.  */
 
@@ -6905,26 +6955,14 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
   return TARGET_XFER_EOF;
 }
 
-/* Read memory data directly from the remote machine.
-   This does not use the data cache; the data cache uses this.
-   MEMADDR is the address in the remote memory space.
-   MYADDR is the address of the buffer in our space.
-   LEN is the number of bytes.
-
-   Return the transferred status, error or OK (an
-   'enum target_xfer_status' value).  Save the number of bytes
-   transferred in *XFERED_LEN.  */
+/* Similar to remote_read_bytes_1, but it reads from the remote stub
+   first if the requested memory is unavailable in traceframe.
+   Otherwise, fall back to remote_read_bytes_1.  */
 
 static enum target_xfer_status
 remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 		   gdb_byte *myaddr, ULONGEST len, ULONGEST *xfered_len)
 {
-  struct remote_state *rs = get_remote_state ();
-  int max_buf_size;		/* Max size of packet output buffer.  */
-  char *p;
-  int todo;
-  int i;
-
   if (len == 0)
     return 0;
 
@@ -6985,34 +7023,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 	}
     }
 
-  max_buf_size = get_memory_read_packet_size ();
-  /* The packet buffer will be large enough for the payload;
-     get_memory_packet_size ensures this.  */
-
-  /* Number if bytes that will fit.  */
-  todo = min (len, max_buf_size / 2);
-
-  /* Construct "m"<memaddr>","<len>".  */
-  memaddr = remote_address_masked (memaddr);
-  p = rs->buf;
-  *p++ = 'm';
-  p += hexnumstr (p, (ULONGEST) memaddr);
-  *p++ = ',';
-  p += hexnumstr (p, (ULONGEST) todo);
-  *p = '\0';
-  putpkt (rs->buf);
-  getpkt (&rs->buf, &rs->buf_size, 0);
-  if (rs->buf[0] == 'E'
-      && isxdigit (rs->buf[1]) && isxdigit (rs->buf[2])
-      && rs->buf[3] == '\0')
-    return TARGET_XFER_E_IO;
-  /* Reply describes memory byte by byte, each byte encoded as two hex
-     characters.  */
-  p = rs->buf;
-  i = hex2bin (p, myaddr, todo);
-  /* Return what we have.  Let higher layers handle partial reads.  */
-  *xfered_len = (ULONGEST) i;
-  return TARGET_XFER_OK;
+  return remote_read_bytes_1 (memaddr, myaddr, len, xfered_len);
 }
 
 
