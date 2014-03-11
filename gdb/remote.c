@@ -6874,43 +6874,16 @@ remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
   return TARGET_XFER_OK;
 }
 
-/* Read memory from the live target, even if currently inspecting a
-   traceframe.  The return is the same as that of target_read.  */
-
-static enum target_xfer_status
-target_read_live_memory (enum target_object object,
-			 ULONGEST memaddr, gdb_byte *myaddr, ULONGEST len,
-			 ULONGEST *xfered_len)
-{
-  enum target_xfer_status ret;
-  struct cleanup *cleanup;
-
-  /* Switch momentarily out of tfind mode so to access live memory.
-     Note that this must not clear global state, such as the frame
-     cache, which must still remain valid for the previous traceframe.
-     We may be _building_ the frame cache at this point.  */
-  cleanup = make_cleanup_restore_traceframe_number ();
-  set_traceframe_number (-1);
-
-  ret = target_xfer_partial (current_target.beneath, object, NULL,
-			     myaddr, NULL, memaddr, len, xfered_len);
-
-  do_cleanups (cleanup);
-  return ret;
-}
-
-/* Using the set of read-only target sections of OPS, read live
-   read-only memory.  Note that the actual reads start from the
-   top-most target again.
+/* Using the set of read-only target sections of remote, read live
+   read-only memory.
 
    For interface/parameters/return description see target.h,
    to_xfer_partial.  */
 
 static enum target_xfer_status
-memory_xfer_live_readonly_partial (struct target_ops *ops,
-				   enum target_object object,
-				   gdb_byte *readbuf, ULONGEST memaddr,
-				   ULONGEST len, ULONGEST *xfered_len)
+remote_xfer_live_readonly_partial (struct target_ops *ops, gdb_byte *readbuf,
+				   ULONGEST memaddr, ULONGEST len,
+				   ULONGEST *xfered_len)
 {
   struct target_section *secp;
   struct target_section_table *table;
@@ -6933,8 +6906,8 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
 	      if (memend <= p->endaddr)
 		{
 		  /* Entire transfer is within this section.  */
-		  return target_read_live_memory (object, memaddr,
-						  readbuf, len, xfered_len);
+		  return remote_read_bytes_1 (memaddr, readbuf, len,
+					      xfered_len);
 		}
 	      else if (memaddr >= p->endaddr)
 		{
@@ -6945,8 +6918,8 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
 		{
 		  /* This section overlaps the transfer.  Just do half.  */
 		  len = p->endaddr - memaddr;
-		  return target_read_live_memory (object, memaddr,
-						  readbuf, len, xfered_len);
+		  return remote_read_bytes_1 (memaddr, readbuf, len,
+					      xfered_len);
 		}
 	    }
 	}
@@ -6998,9 +6971,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 	      do_cleanups (old_chain);
 
 	      /* This goes through the topmost target again.  */
-	      res = memory_xfer_live_readonly_partial (ops,
-						       TARGET_OBJECT_MEMORY,
-						       myaddr, memaddr,
+	      res = remote_xfer_live_readonly_partial (ops, myaddr, memaddr,
 						       len, xfered_len);
 	      if (res == TARGET_XFER_OK)
 		return TARGET_XFER_OK;

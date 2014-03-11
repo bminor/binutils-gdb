@@ -1,5 +1,17 @@
 2014-03-22  Yao Qi  <yao@codesourcery.com>
 
+	* remote.c (target_read_live_memory): Remove.
+	(memory_xfer_live_readonly_partial): Rename it to
+	remote_xfer_live_readonly_partial.  Remove argument 'object'.
+	All callers updated.  Call remote_read_bytes_1
+	instead of target_read_live_memory.
+	* tracepoint.c (set_traceframe_number): Remove.
+	(make_cleanup_restore_traceframe_number): Likewise .
+	* tracepoint.h (set_traceframe_number): Remove declaration.
+	(make_cleanup_restore_traceframe_number): Likewise.
+
+2014-03-22  Yao Qi  <yao@codesourcery.com>
+
 	* remote.c (remote_read_bytes): Move code on reading from the
 	remote stub to ...
 	(remote_read_bytes_1): ... here.  New function.
