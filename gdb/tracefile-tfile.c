@@ -900,6 +900,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
   if (get_traceframe_number () != -1)
     {
       int pos = 0;
+      enum target_xfer_status res;
 
       /* Iterate through the traceframe's blocks, looking for
 	 memory.  */
@@ -937,7 +938,20 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	  pos += (8 + 2 + mlen);
 	}
 
-      return exec_read_partial_read_only (readbuf, offset, len, xfered_len);
+      /* Requested memory is unavailable in the context of traceframes,
+	 and this address falls within a read-only section, fallback
+	 to reading from executable.  */
+      res = exec_read_partial_read_only (readbuf, offset, len, xfered_len);
+
+      if (res == TARGET_XFER_OK)
+	return TARGET_XFER_OK;
+      else
+	{
+	  /* No use trying further, we know some memory starting
+	     at MEMADDR isn't available.  */
+	  *xfered_len = len;
+	  return TARGET_XFER_UNAVAILABLE;
+	}
     }
   else
     {

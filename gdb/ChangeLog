@@ -1,3 +1,17 @@
+2014-03-22  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_xfer_partial): Check the return value of
+	exec_read_partial_read_only, if it is not TARGET_XFER_OK,
+	return TARGET_XFER_UNAVAILABLE.
+	* tracefile-tfile.c (tfile_xfer_partial): Likewise.
+	* target.c (target_read_live_memory): Move it to remote.c.
+	(memory_xfer_live_readonly_partial): Likewise.
+	(memory_xfer_partial_1): Move some code to remote_read_bytes.
+	* remote.c (target_read_live_memory): Moved from target.c.
+	(memory_xfer_live_readonly_partial): Likewise.
+	(remote_read_bytes): Factored out from
+	memory_xfer_partial_1.
+
 2014-03-21  Daniel Gutson  <daniel.gutson@tallertechnologies.com>
 
 	* extension.c (eval_ext_lang_from_control_command): Avoid dereferencing
