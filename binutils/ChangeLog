@@ -1,3 +1,8 @@
+2014-03-12  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+
+	PR binutils/16567
+	* deflex.l: Add noinput and nounput options.
+
 2014-03-12  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
