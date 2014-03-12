@@ -42,12 +42,11 @@
 #include "command.h"
 #include "regcache.h"
 #include "solib.h"
+#include "inf-child.h"
 
 #define NULL_PID		0
 #define _DEBUG_FLAG_TRACE	(_DEBUG_FLAG_TRACE_EXEC|_DEBUG_FLAG_TRACE_RD|\
 		_DEBUG_FLAG_TRACE_WR|_DEBUG_FLAG_TRACE_MODIFY)
-
-static struct target_ops procfs_ops;
 
 int ctl_fd;
 
@@ -56,10 +55,6 @@ static void (*ofunc) ();
 static procfs_run run;
 
 static void procfs_open (char *, int);
-
-static int procfs_can_run (struct target_ops *self);
-
-static void init_procfs_ops (void);
 
 static ptid_t do_attach (ptid_t ptid);
 
@@ -602,14 +597,6 @@ procfs_files_info (struct target_ops *ignore)
 		     target_pid_to_str (inferior_ptid), nto_procfs_path);
 }
 
-/* Mark our target-struct as eligible for stray "run" and "attach"
-   commands.  */
-static int
-procfs_can_run (struct target_ops *self)
-{
-  return 1;
-}
-
 /* Attach to process PID, then initialize for debugging it.  */
 static void
 procfs_attach (struct target_ops *ops, char *args, int from_tty)
@@ -917,7 +904,7 @@ procfs_detach (struct target_ops *ops, const char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (pid);
   init_thread_list ();
-  unpush_target (&procfs_ops);	/* Pop out of handling an inferior.  */
+  unpush_target (ops);	/* Pop out of handling an inferior.  */
 }
 
 static int
@@ -1036,7 +1023,7 @@ procfs_mourn_inferior (struct target_ops *ops)
     }
   inferior_ptid = null_ptid;
   init_thread_list ();
-  unpush_target (&procfs_ops);
+  unpush_target (ops);
   generic_mourn_inferior ();
 }
 
@@ -1240,13 +1227,6 @@ procfs_kill_inferior (struct target_ops *ops)
   target_mourn_inferior ();
 }
 
-/* Store register REGNO, or all registers if REGNO == -1, from the contents
-   of REGISTERS.  */
-static void
-procfs_prepare_to_store (struct target_ops *self, struct regcache *regcache)
-{
-}
-
 /* Fill buf with regset and return devctl cmd to do the setting.  Return
    -1 if we fail to get the regset.  Store size of regset in regsize.  */
 static int
@@ -1390,56 +1370,48 @@ procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return buf;
 }
 
-static void
-init_procfs_ops (void)
+/* Create a nto-procfs target.  */
+
+static struct target_ops *
+procfs_target (void)
 {
-  procfs_ops.to_shortname = "procfs";
-  procfs_ops.to_longname = "QNX Neutrino procfs child process";
-  procfs_ops.to_doc =
-    "QNX Neutrino procfs child process (started by the \"run\" command).\n\
+  struct target_ops *t = inf_child_target ();
+
+  t->to_shortname = "procfs";
+  t->to_longname = "QNX Neutrino procfs child process";
+  t->to_doc
+    = "QNX Neutrino procfs child process (started by the \"run\" command).\n\
 	target procfs <node>";
-  procfs_ops.to_open = procfs_open;
-  procfs_ops.to_attach = procfs_attach;
-  procfs_ops.to_post_attach = procfs_post_attach;
-  procfs_ops.to_detach = procfs_detach;
-  procfs_ops.to_resume = procfs_resume;
-  procfs_ops.to_wait = procfs_wait;
-  procfs_ops.to_fetch_registers = procfs_fetch_registers;
-  procfs_ops.to_store_registers = procfs_store_registers;
-  procfs_ops.to_prepare_to_store = procfs_prepare_to_store;
-  procfs_ops.to_xfer_partial = procfs_xfer_partial;
-  procfs_ops.to_files_info = procfs_files_info;
-  procfs_ops.to_insert_breakpoint = procfs_insert_breakpoint;
-  procfs_ops.to_remove_breakpoint = procfs_remove_breakpoint;
-  procfs_ops.to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
-  procfs_ops.to_insert_hw_breakpoint = procfs_insert_hw_breakpoint;
-  procfs_ops.to_remove_hw_breakpoint = procfs_remove_hw_breakpoint;
-  procfs_ops.to_insert_watchpoint = procfs_insert_hw_watchpoint;
-  procfs_ops.to_remove_watchpoint = procfs_remove_hw_watchpoint;
-  procfs_ops.to_stopped_by_watchpoint = procfs_stopped_by_watchpoint;
-  procfs_ops.to_terminal_init = terminal_init_inferior;
-  procfs_ops.to_terminal_inferior = terminal_inferior;
-  procfs_ops.to_terminal_ours_for_output = terminal_ours_for_output;
-  procfs_ops.to_terminal_ours = terminal_ours;
-  procfs_ops.to_terminal_info = child_terminal_info;
-  procfs_ops.to_kill = procfs_kill_inferior;
-  procfs_ops.to_create_inferior = procfs_create_inferior;
-  procfs_ops.to_mourn_inferior = procfs_mourn_inferior;
-  procfs_ops.to_can_run = procfs_can_run;
-  procfs_ops.to_pass_signals = procfs_pass_signals;
-  procfs_ops.to_thread_alive = procfs_thread_alive;
-  procfs_ops.to_find_new_threads = procfs_find_new_threads;
-  procfs_ops.to_pid_to_str = procfs_pid_to_str;
-  procfs_ops.to_stop = procfs_stop;
-  procfs_ops.to_stratum = process_stratum;
-  procfs_ops.to_has_all_memory = default_child_has_all_memory;
-  procfs_ops.to_has_memory = default_child_has_memory;
-  procfs_ops.to_has_stack = default_child_has_stack;
-  procfs_ops.to_has_registers = default_child_has_registers;
-  procfs_ops.to_has_execution = default_child_has_execution;
-  procfs_ops.to_magic = OPS_MAGIC;
-  procfs_ops.to_have_continuable_watchpoint = 1;
-  procfs_ops.to_extra_thread_info = nto_extra_thread_info;
+  t->to_open = procfs_open;
+  t->to_attach = procfs_attach;
+  t->to_post_attach = procfs_post_attach;
+  t->to_detach = procfs_detach;
+  t->to_resume = procfs_resume;
+  t->to_wait = procfs_wait;
+  t->to_fetch_registers = procfs_fetch_registers;
+  t->to_store_registers = procfs_store_registers;
+  t->to_xfer_partial = procfs_xfer_partial;
+  t->to_files_info = procfs_files_info;
+  t->to_insert_breakpoint = procfs_insert_breakpoint;
+  t->to_remove_breakpoint = procfs_remove_breakpoint;
+  t->to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
+  t->to_insert_hw_breakpoint = procfs_insert_hw_breakpoint;
+  t->to_remove_hw_breakpoint = procfs_remove_hw_breakpoint;
+  t->to_insert_watchpoint = procfs_insert_hw_watchpoint;
+  t->to_remove_watchpoint = procfs_remove_hw_watchpoint;
+  t->to_stopped_by_watchpoint = procfs_stopped_by_watchpoint;
+  t->to_kill = procfs_kill_inferior;
+  t->to_create_inferior = procfs_create_inferior;
+  t->to_mourn_inferior = procfs_mourn_inferior;
+  t->to_pass_signals = procfs_pass_signals;
+  t->to_thread_alive = procfs_thread_alive;
+  t->to_find_new_threads = procfs_find_new_threads;
+  t->to_pid_to_str = procfs_pid_to_str;
+  t->to_stop = procfs_stop;
+  t->to_have_continuable_watchpoint = 1;
+  t->to_extra_thread_info = nto_extra_thread_info;
+
+  return t;
 }
 
 #define OSTYPE_NTO 1
@@ -1448,9 +1420,10 @@ void
 _initialize_procfs (void)
 {
   sigset_t set;
+  struct target_ops *t;
 
-  init_procfs_ops ();
-  add_target (&procfs_ops);
+  t = procfs_target ();
+  add_target (t);
 
   /* We use SIGUSR1 to gain control after we block waiting for a process.
      We use sigwaitevent to wait.  */

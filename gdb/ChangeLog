@@ -1,5 +1,18 @@
 2014-03-12  Pedro Alves  <palves@redhat.com>
 
+	* nto-procfs.c: Include inf-child.h.
+	(procfs_ops): Delete global.
+	(procfs_can_run): Delete method.
+	(procfs_detach, procfs_mourn_inferior): Unpush the passed in
+	target pointer instead of referencing procfs_ops.
+	(procfs_prepare_to_store): Delete.
+	(init_procfs_ops): Delete function.
+	(procfs_target): New function, based on init_procfs_ops, but
+	inherit inf_child_target.
+	(_initialize_procfs): Use procfs_target.
+
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
 	* windows-nat.c: Include inf-child.h.
 	(windows_ops): Delete global.
 	(windows_open, windows_prepare_to_store, windows_can_run): Delete
