@@ -1,3 +1,9 @@
+2014-03-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16652
+	* doc/binutils.texi (ar cmdline): Move --plugin command line
+	option to after the command option.
+
 2014-03-12  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	PR binutils/16567
