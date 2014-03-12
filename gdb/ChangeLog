@@ -1,3 +1,11 @@
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (prepare_execution_command): New function, factored out
+	from several execution commands.
+	(run_command_1, continue_command, step_1, jump_command)
+	(signal_command, until_command, advance_command, finish_command)
+	(attach_command): Use prepare_execution_command.
+
 2014-03-12  Omair Javaid  <omair.javaid@linaro.org>
 
 	* arm-linux-nat.c (arm_linux_get_hwbp_cap): Updated.
