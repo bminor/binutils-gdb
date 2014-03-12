@@ -1,3 +1,15 @@
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c: Include inf-child.h.
+	(windows_ops): Delete global.
+	(windows_open, windows_prepare_to_store, windows_can_run): Delete
+	methods.
+	(init_windows_ops): Delete function.
+	(windows_target): New function, based on init_windows_ops, but
+	inherit inf_child_target.
+	(_initialize_windows_nat): Use windows_target.  Install x86
+	specific target methods here.
+
 2014-03-10  Doug Evans  <xdje42@gmail.com>
 
 	* guile/guile.c (call_initialize_gdb_module): New function.

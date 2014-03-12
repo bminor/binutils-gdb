@@ -66,6 +66,7 @@
 #include "windows-nat.h"
 #include "i386-nat.h"
 #include "complaints.h"
+#include "inf-child.h"
 
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
@@ -92,8 +93,6 @@ static BOOL WINAPI (*OpenProcessToken)(HANDLE, DWORD, PHANDLE);
 static BOOL WINAPI (*GetCurrentConsoleFont) (HANDLE, BOOL,
 					     CONSOLE_FONT_INFO *);
 static COORD WINAPI (*GetConsoleFontSize) (HANDLE, DWORD);
-
-static struct target_ops windows_ops;
 
 #undef STARTUPINFO
 #undef CreateProcess
@@ -1993,12 +1992,6 @@ windows_files_info (struct target_ops *ignore)
 		     target_pid_to_str (inferior_ptid));
 }
 
-static void
-windows_open (char *arg, int from_tty)
-{
-  error (_("Use the \"run\" command to start a Unix child process."));
-}
-
 /* Modify CreateProcess parameters for use of a new separate console.
    Parameters are:
    *FLAGS: DWORD parameter for general process creation flags.
@@ -2431,18 +2424,6 @@ windows_kill_inferior (struct target_ops *ops)
 }
 
 static void
-windows_prepare_to_store (struct target_ops *self, struct regcache *regcache)
-{
-  /* Do nothing, since we can store individual regs.  */
-}
-
-static int
-windows_can_run (struct target_ops *self)
-{
-  return 1;
-}
-
-static void
 windows_close (struct target_ops *self)
 {
   DEBUG_EVENTS (("gdb: windows_close, inferior_ptid=%d\n",
@@ -2553,62 +2534,35 @@ windows_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
   return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
 }
 
-static void
-init_windows_ops (void)
+static struct target_ops *
+windows_target (void)
 {
-  windows_ops.to_shortname = "child";
-  windows_ops.to_longname = "Win32 child process";
-  windows_ops.to_doc = "Win32 child process (started by the \"run\" command).";
-  windows_ops.to_open = windows_open;
-  windows_ops.to_close = windows_close;
-  windows_ops.to_attach = windows_attach;
-  windows_ops.to_attach_no_wait = 1;
-  windows_ops.to_detach = windows_detach;
-  windows_ops.to_resume = windows_resume;
-  windows_ops.to_wait = windows_wait;
-  windows_ops.to_fetch_registers = windows_fetch_inferior_registers;
-  windows_ops.to_store_registers = windows_store_inferior_registers;
-  windows_ops.to_prepare_to_store = windows_prepare_to_store;
-  windows_ops.to_xfer_partial = windows_xfer_partial;
-  windows_ops.to_files_info = windows_files_info;
-  windows_ops.to_insert_breakpoint = memory_insert_breakpoint;
-  windows_ops.to_remove_breakpoint = memory_remove_breakpoint;
-  windows_ops.to_terminal_init = terminal_init_inferior;
-  windows_ops.to_terminal_inferior = terminal_inferior;
-  windows_ops.to_terminal_ours_for_output = terminal_ours_for_output;
-  windows_ops.to_terminal_ours = terminal_ours;
-  windows_ops.to_terminal_save_ours = terminal_save_ours;
-  windows_ops.to_terminal_info = child_terminal_info;
-  windows_ops.to_kill = windows_kill_inferior;
-  windows_ops.to_create_inferior = windows_create_inferior;
-  windows_ops.to_mourn_inferior = windows_mourn_inferior;
-  windows_ops.to_can_run = windows_can_run;
-  windows_ops.to_thread_alive = windows_thread_alive;
-  windows_ops.to_pid_to_str = windows_pid_to_str;
-  windows_ops.to_stop = windows_stop;
-  windows_ops.to_stratum = process_stratum;
-  windows_ops.to_has_all_memory = default_child_has_all_memory;
-  windows_ops.to_has_memory = default_child_has_memory;
-  windows_ops.to_has_stack = default_child_has_stack;
-  windows_ops.to_has_registers = default_child_has_registers;
-  windows_ops.to_has_execution = default_child_has_execution;
-  windows_ops.to_pid_to_exec_file = windows_pid_to_exec_file;
-  windows_ops.to_get_ada_task_ptid = windows_get_ada_task_ptid;
-  windows_ops.to_get_tib_address = windows_get_tib_address;
+  struct target_ops *t = inf_child_target ();
 
-  i386_use_watchpoints (&windows_ops);
+  t->to_shortname = "child";
+  t->to_longname = "Win32 child process";
+  t->to_doc = "Win32 child process (started by the \"run\" command).";
+  t->to_close = windows_close;
+  t->to_attach = windows_attach;
+  t->to_attach_no_wait = 1;
+  t->to_detach = windows_detach;
+  t->to_resume = windows_resume;
+  t->to_wait = windows_wait;
+  t->to_fetch_registers = windows_fetch_inferior_registers;
+  t->to_store_registers = windows_store_inferior_registers;
+  t->to_xfer_partial = windows_xfer_partial;
+  t->to_files_info = windows_files_info;
+  t->to_kill = windows_kill_inferior;
+  t->to_create_inferior = windows_create_inferior;
+  t->to_mourn_inferior = windows_mourn_inferior;
+  t->to_thread_alive = windows_thread_alive;
+  t->to_pid_to_str = windows_pid_to_str;
+  t->to_stop = windows_stop;
+  t->to_pid_to_exec_file = windows_pid_to_exec_file;
+  t->to_get_ada_task_ptid = windows_get_ada_task_ptid;
+  t->to_get_tib_address = windows_get_tib_address;
 
-  i386_dr_low.set_control = cygwin_set_dr7;
-  i386_dr_low.set_addr = cygwin_set_dr;
-  i386_dr_low.get_addr = cygwin_get_dr;
-  i386_dr_low.get_status = cygwin_get_dr6;
-  i386_dr_low.get_control = cygwin_get_dr7;
-
-  /* i386_dr_low.debug_register_length field is set by
-     calling i386_set_debug_register_length function
-     in processor windows specific native file.  */
-
-  windows_ops.to_magic = OPS_MAGIC;
+  return t;
 }
 
 static void
@@ -2624,8 +2578,23 @@ void
 _initialize_windows_nat (void)
 {
   struct cmd_list_element *c;
+  struct target_ops *t;
 
-  init_windows_ops ();
+  t = windows_target ();
+
+  i386_use_watchpoints (t);
+
+  i386_dr_low.set_control = cygwin_set_dr7;
+  i386_dr_low.set_addr = cygwin_set_dr;
+  i386_dr_low.get_addr = cygwin_get_dr;
+  i386_dr_low.get_status = cygwin_get_dr6;
+  i386_dr_low.get_control = cygwin_get_dr7;
+
+  /* i386_dr_low.debug_register_length field is set by
+     calling i386_set_debug_register_length function
+     in processor windows specific native file.  */
+
+  add_target (t);
 
 #ifdef __CYGWIN__
   cygwin_internal (CW_SET_DOS_FILE_WARNING, 0);
@@ -2711,7 +2680,6 @@ Show whether to display kernel exceptions in child process."), NULL,
   add_cmd ("selector", class_info, display_selectors,
 	   _("Display selectors infos."),
 	   &info_w32_cmdlist);
-  add_target (&windows_ops);
   deprecated_init_ui_hook = set_windows_aliases;
 }
 
