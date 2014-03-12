@@ -1,5 +1,9 @@
 2014-03-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/default.exp: Don't test "target procfs".
+
+2014-03-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/default.exp: Update "target child" and "target procfs"
 	tests to not expect "Unix".
 

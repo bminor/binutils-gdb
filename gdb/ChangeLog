@@ -1,5 +1,10 @@
 2014-03-13  Pedro Alves  <palves@redhat.com>
 
+	* procfs.c (procfs_target): Don't override to_shortname,
+	to_longname or to_doc.
+
+2014-03-13  Pedro Alves  <palves@redhat.com>
+
 	* inf-child.c (inf_child_open, inf_child_target): Don't mention
 	Unix in user visible strings.
 
