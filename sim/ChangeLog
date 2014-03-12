@@ -1,3 +1,7 @@
+2014-03-12  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add myself as the maintainer for the MSP430.
+
 2014-03-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.tgt (msp430*-*-*): Set sim_testsuite to yes.
