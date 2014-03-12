@@ -1,3 +1,7 @@
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS): Add TESTS.
+
 2014-03-12  Tom Tromey  <tromey@redhat.com>
 
 	* inf-child.c (return_zero): New function.
