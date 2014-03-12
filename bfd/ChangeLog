@@ -1,3 +1,9 @@
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/16696
+	* rs6000-core.c (rs6000coff_core_p): Cast pointers to bfd_vma
+	through ptr_to_uint instead of through long.
+
 2014-02-17  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR build/16550
