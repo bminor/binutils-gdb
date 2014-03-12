@@ -1,3 +1,12 @@
+2014-03-12  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16688
+	* config/tc-aarch64.c (literal_expression): New structure.
+	(literal_pool): Replace exp array with literal_expression array.
+	(add_to_lit_pool): When adding a bignum cache the big value.
+	(s_ltorg): When emitting a bignum initialise the global bignum
+	array from the cached value.
+
 2014-03-12  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
