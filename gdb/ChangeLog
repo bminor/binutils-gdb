@@ -1,3 +1,32 @@
+2014-03-12  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-linux-nat.c (arm_linux_get_hwbp_cap): Updated.
+	(MAX_BPTS): Define.
+	(MAX_WPTS): Define.
+	(struct arm_linux_thread_points): Removed.
+	(struct arm_linux_process_info): New.
+	(DEF_VEC_P (arm_linux_thread_points_p)): Removed.
+	(VEC(arm_linux_thread_points_p) *arm_threads): Removed.
+	(arm_linux_find_breakpoints_by_tid): Removed.
+	(struct arch_lwp_info): New.
+	(arm_linux_find_process_pid): New functions.
+	(arm_linux_add_process): New functions.
+	(arm_linux_process_info_get): New functions.
+	(arm_linux_forget_process): New function.
+	(arm_linux_get_debug_reg_state): New function.
+	(struct update_registers_data): New.
+	(update_registers_callback): New function.
+	(arm_linux_insert_hw_breakpoint1): Updated.
+	(arm_linux_remove_hw_breakpoint1): Updated.
+	(arm_linux_insert_hw_breakpoint): Updated.
+	(arm_linux_remove_hw_breakpoint): Updated.
+	(arm_linux_insert_watchpoint): Updated.
+	(arm_linux_remove_watchpoint): Updated.
+	(arm_linux_new_thread): Updated.
+	(arm_linux_prepare_to_resume): New function.
+	(arm_linux_new_fork): New function.
+	(_initialize_arm_linux_nat): Updated.
+
 2014-03-12  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (TARGET_FLAGS_TO_PASS): Add TESTS.
