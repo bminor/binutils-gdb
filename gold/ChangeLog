@@ -1,3 +1,7 @@
+2014-03-12  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
 2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
 	* symtab.h (Symbol::set_nonvis): New function.

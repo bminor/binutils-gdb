@@ -1,5 +1,9 @@
 2014-03-12  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.in: Regenerate.
+
+2014-03-12  Alan Modra  <amodra@gmail.com>
+
 	PR 16690
 	* elf.c (copy_elf_program_header): Ignore first section lma if
 	non-alloc.
