@@ -1,5 +1,13 @@
 2014-03-12  Pedro Alves  <palves@redhat.com>
 
+	* inf-child.c: Update top comment to not mention Unix.  Add
+	generic comment describing how this target is meant to be used.
+	(inf_child_post_attach, inf_child_post_startup_inferior)
+	(inf_child_follow_fork, inf_child_pid_to_exec_file): Don't mention
+	Unix in comment.
+
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
 	* nto-procfs.c: Include inf-child.h.
 	(procfs_ops): Delete global.
 	(procfs_can_run): Delete method.
