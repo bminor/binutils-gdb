@@ -1,3 +1,9 @@
+2014-03-13  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/16612
+	* gdb.guile/scm-value.ep (test_value_after_death): Do a garbage
+	collect after discarding symbols.
+
 2014-03-13  Ludovic Courtès  <ludo@gnu.org>
 	    Doug Evans  <xdje42@gmail.com>
 

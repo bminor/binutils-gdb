@@ -1,5 +1,11 @@
 2014-03-13  Doug Evans  <xdje42@gmail.com>
 
+	PR guile/16612
+	* guile/scm-type.c (tyscm_copy_type_recursive): Move type to its
+	new eq?-hashtab.
+
+2014-03-13  Doug Evans  <xdje42@gmail.com>
+
 	* value.c (record_latest_value): Call release_value_or_incref
 	instead of release_value.
 

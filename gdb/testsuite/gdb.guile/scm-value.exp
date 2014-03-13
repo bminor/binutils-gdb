@@ -286,6 +286,9 @@ proc test_value_after_death {} {
 	"Discard symbol table from.*y or n. $" \
 	"y"
 
+    # First do a garbage collect to delete anything unused.  PR 16612.
+    gdb_scm_test_silent_cmd "gu (gc)" "garbage collect"
+
     # Now create a value using that type.  Relies on arg0, created by
     # test_value_in_inferior.
     gdb_scm_test_silent_cmd "gu (define castval (value-cast arg0 (type-pointer ptrtype)))" \
