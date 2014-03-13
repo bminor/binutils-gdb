@@ -29,18 +29,19 @@
    languages using a common representation defined in gdbtypes.h.
 
    The main data structure is main_type; it consists of a code (such
-   as TYPE_CODE_ENUM for enumeration types), a number of
+   as #TYPE_CODE_ENUM for enumeration types), a number of
    generally-useful fields such as the printable name, and finally a
-   field type_specific that is a union of info specific to particular
-   languages or other special cases (such as calling convention).
+   field main_type::type_specific that is a union of info specific to
+   particular languages or other special cases (such as calling
+   convention).
 
-   The available type codes are defined in enum type_code.  The enum
+   The available type codes are defined in enum #type_code.  The enum
    includes codes both for types that are common across a variety
    of languages, and for types that are language-specific.
 
-   Most accesses to type fields go through macros such as TYPE_CODE
-   and TYPE_FN_FIELD_CONST.  These are written such that they can be
-   used as both rvalues and lvalues.
+   Most accesses to type fields go through macros such as
+   #TYPE_CODE(thistype) and #TYPE_FN_FIELD_CONST(thisfn, n).  These are
+   written such that they can be used as both rvalues and lvalues.
  */
 
 #include "hashtab.h"

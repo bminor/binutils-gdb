@@ -1,3 +1,8 @@
+2014-04-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdbtypes.h: Update comments to link to types and macros'
+	definitions.
+
 2014-04-16  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdbtypes.h: Remove definition of the macro TYPE_FN_FIELDS.
