@@ -12,7 +12,7 @@ Disassembly of section \.text:
    4:	9c0000e1 	ldr	q1, 20 <\.text\+0x20>
    8:	9c000142 	ldr	q2, 30 <\.text\+0x30>
    c:	9c0001a3 	ldr	q3, 40 <\.text\+0x40>
-  10:	00000000 	.word	0x00000000
+  10:	5a827999 	.word	0x5a827999
   14:	5a827999 	.word	0x5a827999
   18:	5a827999 	.word	0x5a827999
   1c:	5a827999 	.word	0x5a827999
@@ -20,7 +20,7 @@ Disassembly of section \.text:
   24:	6ed9eba1 	.word	0x6ed9eba1
   28:	6ed9eba1 	.word	0x6ed9eba1
   2c:	6ed9eba1 	.word	0x6ed9eba1
-  30:	11223344 	.word	0x11223344
+  30:	8f1bbcdc 	.word	0x8f1bbcdc
   34:	8f1bbcdc 	.word	0x8f1bbcdc
   38:	8f1bbcdc 	.word	0x8f1bbcdc
   3c:	8f1bbcdc 	.word	0x8f1bbcdc
