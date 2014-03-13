@@ -1,3 +1,8 @@
+2014-03-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/default.exp: Update "target child" and "target procfs"
+	tests to not expect "Unix".
+
 2014-03-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/corefile.exp (corefile_test_run, corefile_test_attach):
