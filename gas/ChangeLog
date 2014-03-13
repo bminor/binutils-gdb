@@ -1,3 +1,10 @@
+2014-03-13  Richard Earnshaw  <rearnsha@arm.com>
+	    Jiong Wang  <Jiong.Wang@arm.com>
+
+	* doc/c-aarch64.texi: Clean up some formatting issues.
+	(AArch64 Options): Document -mcpu and -march.
+	(AArch64 Extensions): New node.
+
 2014-03-13  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-i386.c (use_big_obj): Declare.
