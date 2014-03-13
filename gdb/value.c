@@ -1659,7 +1659,11 @@ record_latest_value (struct value *val)
      from.  This is a bit dubious, because then *&$1 does not just return $1
      but the current contents of that location.  c'est la vie...  */
   val->modifiable = 0;
-  release_value (val);
+
+  /* The value may have already been released, in which case we're adding a
+     new reference for its entry in the history.  That is why we call
+     release_value_or_incref here instead of release_value.  */
+  release_value_or_incref (val);
 
   /* Here we treat value_history_count as origin-zero
      and applying to the value being stored now.  */

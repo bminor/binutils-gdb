@@ -1,3 +1,9 @@
+2014-03-13  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Verify value added
+	to history survives a gc.
+
 2014-03-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/default.exp: Don't test "target procfs".

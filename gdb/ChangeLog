@@ -1,3 +1,8 @@
+2014-03-13  Doug Evans  <xdje42@gmail.com>
+
+	* value.c (record_latest_value): Call release_value_or_incref
+	instead of release_value.
+
 2014-03-13  Pedro Alves  <palves@redhat.com>
 
 	* procfs.c (procfs_target): Don't override to_shortname,
