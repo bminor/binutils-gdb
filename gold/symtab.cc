@@ -2371,6 +2371,25 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 {
   std::vector<Symbol*> as_needed_sym;
 
+  // Allow a target to set dynsym indexes.
+  if (parameters->target().has_custom_set_dynsym_indexes())
+    {
+      std::vector<Symbol*> dyn_symbols;
+      for (Symbol_table_type::iterator p = this->table_.begin();
+           p != this->table_.end();
+           ++p)
+        {
+          Symbol* sym = p->second;
+          if (!sym->should_add_dynsym_entry(this))
+            sym->set_dynsym_index(-1U);
+          else
+            dyn_symbols.push_back(sym);
+        }
+
+      return parameters->target().set_dynsym_indexes(&dyn_symbols, index, syms,
+                                                     dynpool, versions, this);
+    }
+
   for (Symbol_table_type::iterator p = this->table_.begin();
        p != this->table_.end();
        ++p)
@@ -2993,6 +3012,8 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
 	  this->sized_write_symbol<size, big_endian>(sym, dynsym_value, shndx,
 						     binding, dynpool, pd);
+          // Allow a target to adjust dynamic symbol value.
+          parameters->target().adjust_dyn_symbol(sym, pd);
 	}
     }
 
@@ -3621,6 +3642,32 @@ Symbol_table::define_with_copy_reloc<64>(
     Sized_symbol<64>* sym,
     Output_data* posd,
     elfcpp::Elf_types<64>::Elf_Addr value);
+#endif
+
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+template
+void
+Sized_symbol<32>::init_output_data(const char* name, const char* version,
+				   Output_data* od, Value_type value,
+				   Size_type symsize, elfcpp::STT type,
+				   elfcpp::STB binding,
+				   elfcpp::STV visibility,
+				   unsigned char nonvis,
+				   bool offset_is_from_end,
+				   bool is_predefined);
+#endif
+
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+template
+void
+Sized_symbol<64>::init_output_data(const char* name, const char* version,
+				   Output_data* od, Value_type value,
+				   Size_type symsize, elfcpp::STT type,
+				   elfcpp::STB binding,
+				   elfcpp::STV visibility,
+				   unsigned char nonvis,
+				   bool offset_is_from_end,
+				   bool is_predefined);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

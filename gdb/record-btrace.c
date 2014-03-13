@@ -1893,7 +1893,6 @@ init_record_btrace_ops (void)
   ops->to_disconnect = record_disconnect;
   ops->to_mourn_inferior = record_mourn_inferior;
   ops->to_kill = record_kill;
-  ops->to_create_inferior = find_default_create_inferior;
   ops->to_stop_recording = record_btrace_stop_recording;
   ops->to_info_record = record_btrace_info;
   ops->to_insn_history = record_btrace_insn_history;

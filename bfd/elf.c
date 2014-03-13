@@ -6259,7 +6259,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    phdr_included = TRUE;
 	}
 
-      lowest_section = first_section;
+      lowest_section = NULL;
       if (section_count != 0)
 	{
 	  unsigned int isec = 0;
@@ -6276,7 +6276,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 		    {
 		      bfd_vma seg_off;
 
-		      if (section->lma < lowest_section->lma)
+		      if (lowest_section == NULL
+			  || section->lma < lowest_section->lma)
 			lowest_section = section;
 
 		      /* Section lmas are set up from PT_LOAD header

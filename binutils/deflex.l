@@ -1,3 +1,5 @@
+%option noinput nounput
+
 %{/* deflex.l - Lexer for .def files */
 
 /* Copyright (C) 1995-2014 Free Software Foundation, Inc.
@@ -26,8 +28,6 @@
 #include "libiberty.h"
 #include "defparse.h"
 #include "dlltool.h"
-
-#define YY_NO_UNPUT
 
 int linenumber;
 

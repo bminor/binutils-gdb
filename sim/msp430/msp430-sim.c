@@ -249,9 +249,14 @@ sim_create_inferior (SIM_DESC sd,
   int c;
   int new_pc;
 
+  /* Set the PC to the default reset vector if available.  */
   c = sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, resetv, 0xfffe, 2);
-
   new_pc = resetv[0] + 256 * resetv[1];
+
+  /* If the reset vector isn't initialized, then use the ELF entry.  */
+  if (abfd != NULL && !new_pc)
+    new_pc = bfd_get_start_address (abfd);
+
   sim_pc_set (MSP430_CPU (sd), new_pc);
   msp430_pc_store (MSP430_CPU (sd), new_pc);
 
@@ -895,7 +900,7 @@ maybe_perform_syscall (SIM_DESC sd, int call_addr)
 
       if (TRACE_SYSCALL_P (MSP430_CPU (sd)))
 	trace_generic (sd, MSP430_CPU (sd), TRACE_SYSCALL_IDX,
-		       "returns %d", sc.result);
+		       "returns %ld", sc.result);
 
       MSP430_CPU (sd)->state.regs[12] = sc.result;
       return 1;
@@ -982,7 +987,7 @@ msp430_step_once (SIM_DESC sd)
 
       sim_core_read_buffer (sd, MSP430_CPU (sd), 0, b, opcode_pc, opsize);
 
-      init_disassemble_info (&info, stderr, fprintf);
+      init_disassemble_info (&info, stderr, (fprintf_ftype) fprintf);
       info.private_data = sd;
       info.read_memory_func = msp430_dis_read;
       fprintf (stderr, "%#8x  ", opcode_pc);

@@ -1,4 +1,4 @@
-/* Low level Unix child interface, for GDB when running under Unix.
+/* Base/prototype target for default child (native) targets.
 
    Copyright (C) 2004-2014 Free Software Foundation, Inc.
 

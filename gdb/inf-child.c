@@ -1,5 +1,4 @@
-/* Default child (native) target interface, for GDB when running under
-   Unix.
+/* Base/prototype target for default child (native) targets.
 
    Copyright (C) 1988-2014 Free Software Foundation, Inc.
 
@@ -17,6 +16,11 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+/* This file provides a common base class/target that all native
+   target implementations extend, by calling inf_child_target to get a
+   new prototype target and then overriding target methods as
+   necessary.  */
 
 #include "defs.h"
 #include "regcache.h"
@@ -89,8 +93,8 @@ inf_child_store_inferior_registers (struct target_ops *ops,
 static void
 inf_child_post_attach (struct target_ops *self, int pid)
 {
-  /* This version of Unix doesn't require a meaningful "post attach"
-     operation by a debugger.  */
+  /* This target doesn't require a meaningful "post attach" operation
+     by a debugger.  */
 }
 
 /* Get ready to modify the registers array.  On machines which store
@@ -108,22 +112,21 @@ inf_child_prepare_to_store (struct target_ops *self,
 static void
 inf_child_open (char *arg, int from_tty)
 {
-  error (_("Use the \"run\" command to start a Unix child process."));
+  error (_("Use the \"run\" command to start a child process."));
 }
 
 static void
 inf_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
-  /* This version of Unix doesn't require a meaningful "post startup
-     inferior" operation by a debugger.  */
+  /* This target doesn't require a meaningful "post startup inferior"
+     operation by a debugger.  */
 }
 
 static int
 inf_child_follow_fork (struct target_ops *ops, int follow_child,
 		       int detach_fork)
 {
-  /* This version of Unix doesn't support following fork or vfork
-     events.  */
+  /* This target doesn't support following fork or vfork events.  */
   return 0;
 }
 
@@ -136,8 +139,8 @@ inf_child_can_run (struct target_ops *self)
 static char *
 inf_child_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  /* This version of Unix doesn't support translation of a process ID
-     to the filename of the executable file.  */
+  /* This target doesn't support translation of a process ID to the
+     filename of the executable file.  */
   return NULL;
 }
 
@@ -389,14 +392,23 @@ inf_child_can_use_agent (struct target_ops *self)
   return agent_loaded_p ();
 }
 
+/* Default implementation of the to_can_async_p and
+   to_supports_non_stop methods.  */
+
+static int
+return_zero (struct target_ops *ignore)
+{
+  return 0;
+}
+
 struct target_ops *
 inf_child_target (void)
 {
   struct target_ops *t = XCNEW (struct target_ops);
 
   t->to_shortname = "child";
-  t->to_longname = "Unix child process";
-  t->to_doc = "Unix child process (started by the \"run\" command).";
+  t->to_longname = "Child process";
+  t->to_doc = "Child process (started by the \"run\" command).";
   t->to_open = inf_child_open;
   t->to_post_attach = inf_child_post_attach;
   t->to_fetch_registers = inf_child_fetch_inferior_registers;
@@ -413,6 +425,10 @@ inf_child_target (void)
   t->to_post_startup_inferior = inf_child_post_startup_inferior;
   t->to_follow_fork = inf_child_follow_fork;
   t->to_can_run = inf_child_can_run;
+  /* We must default these because they must be implemented by any
+     target that can run.  */
+  t->to_can_async_p = return_zero;
+  t->to_supports_non_stop = return_zero;
   t->to_pid_to_exec_file = inf_child_pid_to_exec_file;
   t->to_stratum = process_stratum;
   t->to_has_all_memory = default_child_has_all_memory;

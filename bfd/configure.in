@@ -942,6 +942,7 @@ do
     i386pei_vec)		tb="$tb pei-i386.lo peigen.lo cofflink.lo" ;;
     x86_64pe_vec)		tb="$tb pe-x86_64.lo pex64igen.lo cofflink.lo"; target_size=64 ;;
     x86_64pei_vec)		tb="$tb pei-x86_64.lo pex64igen.lo cofflink.lo"; target_size=64 ;;
+    x86_64pe_bigobj_vec)	tb="$tb pe-x86_64.lo pex64igen.lo cofflink.lo"; target_size=64 ;;
     i860coff_vec)		tb="$tb coff-i860.lo cofflink.lo" ;;
     icoff_big_vec)		tb="$tb coff-i960.lo cofflink.lo" ;;
     icoff_little_vec)		tb="$tb coff-i960.lo cofflink.lo" ;;

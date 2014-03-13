@@ -184,10 +184,6 @@ procfs_target (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_shortname = "procfs";
-  t->to_longname = "Unix /proc child process";
-  t->to_doc =
-    "Unix /proc child process (started by the \"run\" command).";
   t->to_create_inferior = procfs_create_inferior;
   t->to_kill = procfs_kill_inferior;
   t->to_mourn_inferior = procfs_mourn_inferior;

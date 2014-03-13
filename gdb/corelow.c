@@ -999,14 +999,12 @@ init_core_ops (void)
     "Use a core file as a target.  Specify the filename of the core file.";
   core_ops.to_open = core_open;
   core_ops.to_close = core_close;
-  core_ops.to_attach = find_default_attach;
   core_ops.to_detach = core_detach;
   core_ops.to_fetch_registers = get_core_registers;
   core_ops.to_xfer_partial = core_xfer_partial;
   core_ops.to_files_info = core_files_info;
   core_ops.to_insert_breakpoint = ignore;
   core_ops.to_remove_breakpoint = ignore;
-  core_ops.to_create_inferior = find_default_create_inferior;
   core_ops.to_thread_alive = core_thread_alive;
   core_ops.to_read_description = core_read_description;
   core_ops.to_pid_to_str = core_pid_to_str;

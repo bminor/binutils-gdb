@@ -936,7 +936,7 @@ sim_stop_reason (sd, reason, sigrc)
 void
 sim_do_command (sd, cmd)
      SIM_DESC sd ATTRIBUTE_UNUSED;
-     char *cmd ATTRIBUTE_UNUSED;
+     const char *cmd ATTRIBUTE_UNUSED;
 {  
   (*sim_callback->printf_filtered)
     (sim_callback,

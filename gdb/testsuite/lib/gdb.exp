@@ -4260,14 +4260,21 @@ proc build_executable_from_specs {testname executable options args} {
     if [string match gdb_compile_shlib* $func] {
 	set sources_path {}
 	foreach {s local_options} $args {
-	    lappend sources_path "${srcdir}/${subdir}/${s}"
+	    if { [regexp "^/" "$s"] } then {
+		lappend sources_path "$s"
+	    } else {
+		lappend sources_path "$srcdir/$subdir/$s"
+	    }
 	}
 	set ret [$func $sources_path "${binfile}" $options]
     } else {
 	set objects {}
 	set i 0
 	foreach {s local_options} $args {
-	    if  { [gdb_compile "${srcdir}/${subdir}/${s}" "${binfile}${i}.o" object $local_options] != "" } {
+	    if { ! [regexp "^/" "$s"] } then {
+		set s "$srcdir/$subdir/$s"
+	    }
+	    if  { [gdb_compile "${s}" "${binfile}${i}.o" object $local_options] != "" } {
 		untested $testname
 		return -1
 	    }

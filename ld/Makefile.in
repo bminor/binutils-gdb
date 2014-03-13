@@ -16,7 +16,7 @@
 @SET_MAKE@
 
 #
-#   Copyright 2012-2014 Free Software Foundation
+#   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -389,7 +389,6 @@ AM_CFLAGS = $(WARN_CFLAGS)
 # We can't put the scripts in $(datadir) because the SEARCH_DIR
 # directives need to be different for native and cross linkers.
 scriptdir = $(tooldir)/lib
-EMUL_DEPS = 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
@@ -797,8 +796,7 @@ ALL_EMUL_EXTRA_OFILES = \
 	pe-dll.@OBJEXT@ \
 	pep-dll.@OBJEXT@
 
-ALL_EMUL_EXTRA_BINARIES =
-
+ALL_EMUL_EXTRA_BINARIES = 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c ldcref.c pe-dll.c pep-dll.c ldlex-wrapper.c \

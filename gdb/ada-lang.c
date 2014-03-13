@@ -9878,6 +9878,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
   enum exp_opcode op;
   int tem;
   int pc;
+  int preeval_pos;
   struct value *arg1 = NULL, *arg2 = NULL, *arg3;
   struct type *type;
   int nargs, oplen;
@@ -10111,7 +10112,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
              The latter should be shown as usual (as a pointer), whereas
              a reference should mostly be transparent to the user.  */
           if (ada_is_tagged_type (type, 0)
-              || (TYPE_CODE(type) == TYPE_CODE_REF
+              || (TYPE_CODE (type) == TYPE_CODE_REF
                   && ada_is_tagged_type (TYPE_TARGET_TYPE (type), 0)))
           {
             /* Tagged types are a little special in the fact that the real
@@ -10713,6 +10714,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         return arg1;
 
     case UNOP_IND:
+      preeval_pos = *pos;
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
@@ -10733,10 +10735,26 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                    /* In C you can dereference an array to get the 1st elt.  */
                    || TYPE_CODE (type) == TYPE_CODE_ARRAY)
             {
-              type = to_static_fixed_type
-                (ada_aligned_type
-                 (ada_check_typedef (TYPE_TARGET_TYPE (type))));
-              check_size (type);
+            /* As mentioned in the OP_VAR_VALUE case, tagged types can
+               only be determined by inspecting the object's tag.
+               This means that we need to evaluate completely the
+               expression in order to get its type.  */
+
+	      if ((TYPE_CODE (type) == TYPE_CODE_REF
+		   || TYPE_CODE (type) == TYPE_CODE_PTR)
+		  && ada_is_tagged_type (TYPE_TARGET_TYPE (type), 0))
+		{
+		  arg1 = evaluate_subexp (NULL_TYPE, exp, &preeval_pos,
+					  EVAL_NORMAL);
+		  type = value_type (ada_value_ind (arg1));
+		}
+	      else
+		{
+		  type = to_static_fixed_type
+		    (ada_aligned_type
+		     (ada_check_typedef (TYPE_TARGET_TYPE (type))));
+		}
+	      check_size (type);
               return value_zero (type, lval_memory);
             }
           else if (TYPE_CODE (type) == TYPE_CODE_INT)
@@ -10780,6 +10798,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case STRUCTOP_STRUCT:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+      preeval_pos = *pos;
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
@@ -10792,13 +10811,21 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               type = ada_lookup_struct_elt_type (type1,
                                                  &exp->elts[pc + 2].string,
                                                  1, 1, NULL);
+
+	      /* If the field is not found, check if it exists in the
+		 extension of this object's type. This means that we
+		 need to evaluate completely the expression.  */
+
               if (type == NULL)
-                /* In this case, we assume that the field COULD exist
-                   in some extension of the type.  Return an object of 
-                   "type" void, which will match any formal 
-                   (see ada_type_match).  */
-                return value_zero (builtin_type (exp->gdbarch)->builtin_void,
-				   lval_memory);
+		{
+		  arg1 = evaluate_subexp (NULL_TYPE, exp, &preeval_pos,
+					  EVAL_NORMAL);
+		  arg1 = ada_value_struct_elt (arg1,
+					       &exp->elts[pc + 2].string,
+					       0);
+		  arg1 = unwrap_value (arg1);
+		  type = value_type (ada_to_fixed_value (arg1));
+		}
             }
           else
             type =

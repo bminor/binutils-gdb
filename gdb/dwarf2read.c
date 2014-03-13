@@ -4947,7 +4947,7 @@ init_cu_die_reader (struct die_reader_specs *reader,
    STUB_COMP_DIR is similar to STUB_COMP_UNIT_DIE: When reading a TU directly
    from the DWO file, bypassing the stub, it contains the DW_AT_comp_dir
    attribute of the referencing CU.  Exactly one of STUB_COMP_UNIT_DIE and
-   COMP_DIR must be non-NULL.
+   STUB_COMP_DIR must be non-NULL.
    *RESULT_READER,*RESULT_INFO_PTR,*RESULT_COMP_UNIT_DIE,*RESULT_HAS_CHILDREN
    are filled in with the info of the DIE from the DWO file.
    ABBREV_TABLE_PROVIDED is non-zero if the caller of init_cutu_and_read_dies
@@ -4976,11 +4976,10 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
   int i,num_extra_attrs;
   struct dwarf2_section_info *dwo_abbrev_section;
   struct attribute *attr;
-  struct attribute comp_dir_attr;
   struct die_info *comp_unit_die;
 
-  /* Both can't be provided.  */
-  gdb_assert (! (stub_comp_unit_die && stub_comp_dir));
+  /* Exactly one of these must be provided.  */
+  gdb_assert ((stub_comp_unit_die != NULL) + (stub_comp_dir != NULL) == 1);
 
   /* These attributes aren't processed until later:
      DW_AT_stmt_list, DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges.
@@ -16450,7 +16449,7 @@ read_str_index (const struct die_reader_specs *reader,
 		struct dwarf2_cu *cu, ULONGEST str_index)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  const char *dwo_name = objfile_name (objfile);
+  const char *objf_name = objfile_name (objfile);
   bfd *abfd = objfile->obfd;
   struct dwarf2_section_info *str_section = &reader->dwo_file->sections.str;
   struct dwarf2_section_info *str_offsets_section =
@@ -16464,15 +16463,15 @@ read_str_index (const struct die_reader_specs *reader,
   if (str_section->buffer == NULL)
     error (_("%s used without .debug_str.dwo section"
 	     " in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, objf_name);
   if (str_offsets_section->buffer == NULL)
     error (_("%s used without .debug_str_offsets.dwo section"
 	     " in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, objf_name);
   if (str_index * cu->header.offset_size >= str_offsets_section->size)
     error (_("%s pointing outside of .debug_str_offsets.dwo"
 	     " section in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, objf_name);
   info_ptr = (str_offsets_section->buffer
 	      + str_index * cu->header.offset_size);
   if (cu->header.offset_size == 4)
@@ -16482,7 +16481,7 @@ read_str_index (const struct die_reader_specs *reader,
   if (str_offset >= str_section->size)
     error (_("Offset from %s pointing outside of"
 	     " .debug_str.dwo section in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, objf_name);
   return (const char *) (str_section->buffer + str_offset);
 }
 

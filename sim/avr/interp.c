@@ -1831,7 +1831,7 @@ sim_kill (SIM_DESC sd)
 }
 
 void
-sim_do_command (SIM_DESC sd, char *cmd)
+sim_do_command (SIM_DESC sd, const char *cmd)
 {
   /* Nothing there yet; it's all an error.  */
   

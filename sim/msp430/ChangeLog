@@ -1,3 +1,13 @@
+2014-03-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* msp430-sim.c (sim_create_inferior): Set new_pc to the result of
+	bfd_get_start_address when abfd is not NULL and new_pc is zero.
+
+2014-03-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* msp430-sim (maybe_perform_syscall): Change %d to %ld.
+	(msp430_step_once): Cast fprintf to fprintf_ftype.
+
 2013-09-23  Alan Modra  <amodra@gmail.com>
 
 	* aclocal.m4, configure: Regenerate.

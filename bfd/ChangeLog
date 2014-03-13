@@ -1,5 +1,87 @@
+2014-03-13  Tristan Gingold  <gingold@adacore.com>
+
+	* peicode.h (pe_ILF_object_p): Adjust, as the version number
+	has been read.
+	(pe_bfd_object_p): Also read version number to detect ILF.
+	* pe-x86_64.c (COFF_WITH_PE_BIGOBJ): Define.
+	(x86_64pe_bigobj_vec): Define
+	* coffcode.h (bfd_coff_backend_data): Add _bfd_coff_max_nscns field.
+	(bfd_coff_max_nscns): New macro.
+	(coff_compute_section_file_positions): Use unsigned int for
+	target_index.  Compare with bfd_coff_max_nscns.
+	(bfd_coff_std_swap_table, ticoff0_swap_table, ticoff1_swap_table):
+	Set a value for _bfd_coff_max_nscns.
+	(header_bigobj_classid): New constant.
+	(coff_bigobj_swap_filehdr_in, coff_bigobj_swap_filehdr_out)
+	(coff_bigobj_swap_sym_in, coff_bigobj_swap_sym_out)
+	(coff_bigobj_swap_aux_in, coff_bigobj_swap_aux_out): New
+	functions.
+	(bigobj_swap_table): New table.
+	* libcoff.h: Regenerate.
+	* coff-sh.c (bfd_coff_small_swap_table): Likewise.
+	* coff-alpha.c (alpha_ecoff_backend_data): Add value for
+	_bfd_coff_max_nscns.
+	* coff-mips.c (mips_ecoff_backend_data): Likewise.
+	* coff-rs6000.c (bfd_xcoff_backend_data)
+	(bfd_pmac_xcoff_backend_data): Likewise.
+	* coff64-rs6000.c (bfd_xcoff_backend_data)
+	(bfd_xcoff_aix5_backend_data): Likewise.
+	* targets.c (x86_64pe_bigobj_vec): Declare.
+	* configure.in (x86_64pe_bigobj_vec): New vector.
+	* configure: Regenerate.
+	* config.bfd: Add bigobj object format for Windows targets.
+
+2014-03-12  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16671
+	* elf32-arm.c (elf32_arm_add_symbol_hook): Check for ARM format
+	before testing for vxworks.
+
+2014-03-12  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
+2014-03-12  Alan Modra  <amodra@gmail.com>
+
+	PR 16690
+	* elf.c (copy_elf_program_header): Ignore first section lma if
+	non-alloc.
+
+2014-03-11  Alan Modra  <amodra@gmail.com>
+
+	PR 16686
+	* coff-rs6000.c: Include stdint.h.
+	* coff64-rs6000.c: Likewise.
+
+2014-03-10  Tristan Gingold  <gingold@adacore.com>
+
+	* ticoff.h: Removed.
+
+2014-03-08  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_howto_raw): Correct overflow check for
+	many relocations.  Correct bitsize and rightshift too for a number
+	of VLE relocs.  Describe R_PPC_VLE_SDA21 and R_PPC_VLE_SDA21_LO.
+	Correct dst_mask on R_PPC_VLE_SDA21_LO.
+	(ppc_elf_vle_split16): Tidy, delete unnecessary prototype.
+	(ppc_elf_relocate_section): Modify overflow test for 16-bit
+	fields in instructions to signed/unsigned according to whether
+	the field takes a signed or unsigned value.  Tidy vle split16 code.
+	Correct R_PPC_VLE_SDA21 and R_PPC_VLE_SDA21_LO handling.
+
+2014-03-08  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_howto_raw): Use complain_overflow_signed
+	for R_PPC64_ADDR14, R_PPC64_ADDR14_BRTAKEN, R_PPC64_ADDR14_BRNTAKEN,
+	R_PPC64_SECTOFF, R_PPC64_ADDR16_DS, R_PPC64_SECTOFF_DS,
+	R_PPC64_REL16 entries.  Use complain_overflow_dont for R_PPC64_TOC.
+	(ppc64_elf_relocate_section): Modify overflow test for 16-bit
+	fields in instructions to signed/unsigned according to whether
+	the field takes a signed or unsigned value.
+
 2014-03-07  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/16696
 	* rs6000-core.c (rs6000coff_core_p): Cast pointers to bfd_vma
 	through ptr_to_uint instead of through long.
 

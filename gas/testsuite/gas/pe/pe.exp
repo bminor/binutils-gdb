@@ -48,3 +48,11 @@ if ([istarget "x86_64-*-mingw*"]) then {
 	run_dump_test "peseh-x64-5"
 	run_dump_test "peseh-x64-6"
 }
+
+# Big obj
+
+
+if ([istarget "x86_64-*-mingw*"]) then {
+        # Currently only supported on x86_64
+	run_dump_test "big-obj"
+}

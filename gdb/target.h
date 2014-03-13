@@ -401,8 +401,15 @@ struct target_ops
        to xfree everything (including the "struct target_ops").  */
     void (*to_xclose) (struct target_ops *targ);
     void (*to_close) (struct target_ops *);
-    void (*to_attach) (struct target_ops *ops, char *, int)
-      TARGET_DEFAULT_FUNC (find_default_attach);
+    /* Attaches to a process on the target side.  Arguments are as
+       passed to the `attach' command by the user.  This routine can
+       be called when the target is not on the target-stack, if the
+       target_can_run routine returns 1; in that case, it must push
+       itself onto the stack.  Upon exit, the target should be ready
+       for normal operations, and should be ready to deliver the
+       status of the process immediately (without waiting) to an
+       upcoming target_wait call.  */
+    void (*to_attach) (struct target_ops *ops, char *, int);
     void (*to_post_attach) (struct target_ops *, int)
       TARGET_DEFAULT_IGNORE ();
     void (*to_detach) (struct target_ops *ops, const char *, int)
@@ -494,6 +501,11 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (noprocess ());
     void (*to_load) (struct target_ops *, char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
+    /* Start an inferior process and set inferior_ptid to its pid.
+       EXEC_FILE is the file to run.
+       ALLARGS is a string containing the arguments to the program.
+       ENV is the environment vector to pass.  Errors reported with error().
+       On VxWorks and various standalone systems, we ignore exec_file.  */
     void (*to_create_inferior) (struct target_ops *, 
 				char *, char *, char **, int);
     void (*to_post_startup_inferior) (struct target_ops *, ptid_t)
@@ -519,6 +531,9 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     void (*to_mourn_inferior) (struct target_ops *)
       TARGET_DEFAULT_FUNC (default_mourn_inferior);
+    /* Note that to_can_run is special and can be invoked on an
+       unpushed target.  Targets defining this method must also define
+       to_can_async_p and to_supports_non_stop.  */
     int (*to_can_run) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
 
@@ -561,14 +576,18 @@ struct target_ops
     int (*to_has_execution) (struct target_ops *, ptid_t);
     int to_has_thread_control;	/* control thread execution */
     int to_attach_no_wait;
-    /* ASYNC target controls */
+    /* This method must be implemented in some situations.  See the
+       comment on 'to_can_run'.  */
     int (*to_can_async_p) (struct target_ops *)
-      TARGET_DEFAULT_FUNC (find_default_can_async_p);
+      TARGET_DEFAULT_RETURN (0);
     int (*to_is_async_p) (struct target_ops *)
-      TARGET_DEFAULT_FUNC (find_default_is_async_p);
+      TARGET_DEFAULT_RETURN (0);
     void (*to_async) (struct target_ops *, async_callback_ftype *, void *)
       TARGET_DEFAULT_NORETURN (tcomplain ());
-    int (*to_supports_non_stop) (struct target_ops *);
+    /* This method must be implemented in some situations.  See the
+       comment on 'to_can_run'.  */
+    int (*to_supports_non_stop) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (struct target_ops *,
 				   find_memory_region_ftype func, void *data)
@@ -1117,15 +1136,17 @@ extern struct target_ops current_target;
 
 void target_close (struct target_ops *targ);
 
-/* Attaches to a process on the target side.  Arguments are as passed
-   to the `attach' command by the user.  This routine can be called
-   when the target is not on the target-stack, if the target_can_run
-   routine returns 1; in that case, it must push itself onto the stack.
-   Upon exit, the target should be ready for normal operations, and
-   should be ready to deliver the status of the process immediately
-   (without waiting) to an upcoming target_wait call.  */
+/* Find the correct target to use for "attach".  If a target on the
+   current stack supports attaching, then it is returned.  Otherwise,
+   the default run target is returned.  */
 
-void target_attach (char *, int);
+extern struct target_ops *find_attach_target (void);
+
+/* Find the correct target to use for "run".  If a target on the
+   current stack supports creating a new inferior, then it is
+   returned.  Otherwise, the default run target is returned.  */
+
+extern struct target_ops *find_run_target (void);
 
 /* Some targets don't generate traps when attaching to the inferior,
    or their target_attach implementation takes care of the waiting.
@@ -1319,7 +1340,7 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 #define	target_files_info()	\
      (*current_target.to_files_info) (&current_target)
 
-/* Insert a hardware breakpoint at address BP_TGT->placed_address in
+/* Insert a breakpoint at address BP_TGT->placed_address in
    the target machine.  Returns 0 for success, and returns non-zero or
    throws an error (with a detailed failure reason error code and
    message) otherwise.  */
@@ -1392,15 +1413,6 @@ extern void target_kill (void);
    arguments, as it pleases.  */
 
 extern void target_load (char *arg, int from_tty);
-
-/* Start an inferior process and set inferior_ptid to its pid.
-   EXEC_FILE is the file to run.
-   ALLARGS is a string containing the arguments to the program.
-   ENV is the environment vector to pass.  Errors reported with error().
-   On VxWorks and various standalone systems, we ignore exec_file.  */
-
-void target_create_inferior (char *exec_file, char *args,
-			     char **env, int from_tty);
 
 /* Some targets (such as ttrace-based HPUX) don't allow us to request
    notification of inferior events such as fork and vork immediately
@@ -1579,8 +1591,8 @@ extern int target_has_registers_1 (void);
    target is currently executing; for some targets, that's the same as
    whether or not the target is capable of execution, but there are
    also targets which can be current while not executing.  In that
-   case this will become true after target_create_inferior or
-   target_attach.  */
+   case this will become true after to_create_inferior or
+   to_attach.  */
 
 extern int target_has_execution_1 (ptid_t);
 
@@ -1615,8 +1627,6 @@ extern int target_async_permitted;
 
 /* Is the target in asynchronous execution mode?  */
 #define target_is_async_p() (current_target.to_is_async_p (&current_target))
-
-int target_supports_non_stop (void);
 
 /* Put the target in async mode with the specified callback function.  */
 #define target_async(CALLBACK,CONTEXT) \
@@ -2006,9 +2016,13 @@ int target_verify_memory (const gdb_byte *data,
 /* Routines for maintenance of the target structures...
 
    complete_target_initialization: Finalize a target_ops by filling in
-   any fields needed by the target implementation.
+   any fields needed by the target implementation.  Unnecessary for
+   targets which are registered via add_target, as this part gets
+   taken care of then.
 
    add_target:   Add a target to the list of all possible targets.
+   This only makes sense for targets that should be activated using
+   the "target TARGET_NAME ..." command.
 
    push_target:  Make this target the top of the stack of currently used
    targets, within its particular stratum of the stack.  Result

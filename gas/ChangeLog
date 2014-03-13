@@ -1,3 +1,28 @@
+2014-03-13  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-i386.c (use_big_obj): Declare.
+	(OPTION_MBIG_OBJ): Define.
+	(md_longopts): Add -mbig-obj option.
+	(md_parse_option): Handle it.
+	(md_show_usage): Display help for this option.
+	(i386_target_format): Use bigobj for x86-64 if -mbig-obj.
+	* doc/c-i386.texi: Document the option.
+
+2014-03-12  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16688
+	* config/tc-aarch64.c (literal_expression): New structure.
+	(literal_pool): Replace exp array with literal_expression array.
+	(add_to_lit_pool): When adding a bignum cache the big value.
+	(s_ltorg): When emitting a bignum initialise the global bignum
+	array from the cached value.
+
+2014-03-12  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2014-03-06  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
 	Vishnu KS <Vishnu.k_s@atmel.com>
 	Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>

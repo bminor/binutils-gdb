@@ -747,10 +747,7 @@ gdb_test "step" "The program is not being run." "step #2"
 gdb_test "symbol-file" ".*" "symbol-file"
 
 #test target child
-gdb_test "target child" "Use the \"run\" command to start a Unix child process.*|Undefined target command: \"child\".  *Try \"help target\".*" "target child"
-
-#test target procfs
-gdb_test "target procfs" "Use the \"run\" command to start a Unix child process.*|Undefined target command: \"procfs\".  *Try \"help target\".*" "target procfs"
+gdb_test "target child" "Use the \"run\" command to start a child process.*|Undefined target command: \"child\".  *Try \"help target\".*" "target child"
 
 #test target core
 send_gdb "target core\n"

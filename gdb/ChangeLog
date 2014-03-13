@@ -1,3 +1,174 @@
+2014-03-13  Pedro Alves  <palves@redhat.com>
+
+	* procfs.c (procfs_target): Don't override to_shortname,
+	to_longname or to_doc.
+
+2014-03-13  Pedro Alves  <palves@redhat.com>
+
+	* inf-child.c (inf_child_open, inf_child_target): Don't mention
+	Unix in user visible strings.
+
+2014-03-12  Stan Shebs  <stan@codesourcery.com>
+
+	* gdbtypes.h: Annotate comments for Doxygen, add a page
+	block comment with some general info.
+
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (prepare_execution_command): New function, factored out
+	from several execution commands.
+	(run_command_1, continue_command, step_1, jump_command)
+	(signal_command, until_command, advance_command, finish_command)
+	(attach_command): Use prepare_execution_command.
+
+2014-03-12  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-linux-nat.c (arm_linux_get_hwbp_cap): Updated.
+	(MAX_BPTS): Define.
+	(MAX_WPTS): Define.
+	(struct arm_linux_thread_points): Removed.
+	(struct arm_linux_process_info): New.
+	(DEF_VEC_P (arm_linux_thread_points_p)): Removed.
+	(VEC(arm_linux_thread_points_p) *arm_threads): Removed.
+	(arm_linux_find_breakpoints_by_tid): Removed.
+	(struct arch_lwp_info): New.
+	(arm_linux_find_process_pid): New functions.
+	(arm_linux_add_process): New functions.
+	(arm_linux_process_info_get): New functions.
+	(arm_linux_forget_process): New function.
+	(arm_linux_get_debug_reg_state): New function.
+	(struct update_registers_data): New.
+	(update_registers_callback): New function.
+	(arm_linux_insert_hw_breakpoint1): Updated.
+	(arm_linux_remove_hw_breakpoint1): Updated.
+	(arm_linux_insert_hw_breakpoint): Updated.
+	(arm_linux_remove_hw_breakpoint): Updated.
+	(arm_linux_insert_watchpoint): Updated.
+	(arm_linux_remove_watchpoint): Updated.
+	(arm_linux_new_thread): Updated.
+	(arm_linux_prepare_to_resume): New function.
+	(arm_linux_new_fork): New function.
+	(_initialize_arm_linux_nat): Updated.
+
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS): Add TESTS.
+
+2014-03-12  Tom Tromey  <tromey@redhat.com>
+
+	* inf-child.c (return_zero): New function.
+	(inf_child_target): Set to_can_async_p, to_supports_non_stop.
+	* aix-thread.c (aix_thread_inferior_created): New function.
+	(aix_thread_attach): Remove.
+	(init_aix_thread_ops): Don't set to_attach.
+	(_initialize_aix_thread): Register inferior_created observer.
+	* corelow.c (init_core_ops): Don't set to_attach or
+	to_create_inferior.
+	* exec.c (init_exec_ops): Don't set to_attach or
+	to_create_inferior.
+	* infcmd.c (run_command_1): Use find_run_target.  Make direct
+	target calls.
+	(attach_command): Use find_attach_target.  Make direct target
+	calls.
+	* record-btrace.c (init_record_btrace_ops): Don't set
+	to_create_inferior.
+	* record-full.c (record_full_can_async_p, record_full_is_async_p):
+	Remove.
+	(init_record_full_ops, init_record_full_core_ops): Update.  Don't
+	set to_create_inferior.
+	* target.c (complete_target_initialization): Add assertion.
+	(target_create_inferior): Remove.
+	(find_default_attach, find_default_create_inferior): Remove.
+	(find_attach_target, find_run_target): New functions.
+	(find_default_is_async_p, find_default_can_async_p)
+	(target_supports_non_stop, target_attach): Remove.
+	(init_dummy_target): Don't set to_create_inferior or
+	to_supports_non_stop.
+	* target.h (struct target_ops) <to_attach>: Add comment.  Remove
+	TARGET_DEFAULT_FUNC.
+	<to_create_inferior>: Add comment.
+	<to_can_async_p, to_is_async_p, to_supports_non_stop>: Use
+	TARGET_DEFAULT_RETURN.
+	<to_can_async_p, to_supports_non_stop, to_can_run>: Add comments.
+	(find_attach_target, find_run_target): Declare.
+	(target_create_inferior): Remove.
+	(target_has_execution_1): Update comment.
+	(target_supports_non_stop): Remove.
+	* target-delegates.c: Rebuild.
+
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+        * inf-child.h: Update comment to not mention Unix.
+
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	* inf-child.c: Update top comment to not mention Unix.  Add
+	generic comment describing how this target is meant to be used.
+	(inf_child_post_attach, inf_child_post_startup_inferior)
+	(inf_child_follow_fork, inf_child_pid_to_exec_file): Don't mention
+	Unix in comment.
+
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	* nto-procfs.c: Include inf-child.h.
+	(procfs_ops): Delete global.
+	(procfs_can_run): Delete method.
+	(procfs_detach, procfs_mourn_inferior): Unpush the passed in
+	target pointer instead of referencing procfs_ops.
+	(procfs_prepare_to_store): Delete.
+	(init_procfs_ops): Delete function.
+	(procfs_target): New function, based on init_procfs_ops, but
+	inherit inf_child_target.
+	(_initialize_procfs): Use procfs_target.
+
+2014-03-12  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c: Include inf-child.h.
+	(windows_ops): Delete global.
+	(windows_open, windows_prepare_to_store, windows_can_run): Delete
+	methods.
+	(init_windows_ops): Delete function.
+	(windows_target): New function, based on init_windows_ops, but
+	inherit inf_child_target.
+	(_initialize_windows_nat): Use windows_target.  Install x86
+	specific target methods here.
+
+2014-03-10  Doug Evans  <xdje42@gmail.com>
+
+	* guile/guile.c (call_initialize_gdb_module): New function.
+	(initialize_guile): Replace call to scm_init_guile with call to
+	scm_with_guile.
+
+2014-03-10  Joel Brobecker  <brobecker@adacore.com>
+
+        * ada-lang.c (ada_evaluate_subexp): Add missing space before '('
+        in call to TYPE_CODE macro.
+
+2014-03-10  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <UNOP_IND, STRUCTOP_STRUCT>:
+	Resolve tagged types to full view.
+
+2014-03-10  Hui Zhu  <hui@codesourcery.com>
+
+	* target.h (target_insert_breakpoint): Remove "hardware" from its
+	comments.
+
+2014-03-07  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (read_str_index): Rename local dwo_name to objf_name.
+
+2014-03-07  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (read_cutu_die_from_dwo): Fix function comment.
+	Remove unused local comp_dir_attr.  Assert exactly one of
+	stub_comp_unit_die, stub_comp_dir is non-NULL.
+
+2014-03-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.h (complete_target_initialization, add_target):
+	Add comment.
+
 2014-03-07  Pedro Alves  <palves@redhat.com>
 
 	* go32-nat.c: Include inf-child.h.

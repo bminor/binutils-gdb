@@ -358,6 +358,85 @@ typedef struct
 #define IMAGE_WEAK_EXTERN_SEARCH_LIBRARY	2
 #define IMAGE_WEAK_EXTERN_SEARCH_ALIAS		3
 
+/* Bigobj header.  */
+struct external_ANON_OBJECT_HEADER_BIGOBJ
+{
+  /* ANON_OBJECT_HEADER_V2 header.  */
+  char Sig1[2];
+  char Sig2[2];
+  char Version[2];
+  char Machine[2];
+  char TimeDateStamp[4];
+  char ClassID[16];
+  char SizeOfData[4];
+  char Flags[4];
+  char MetaDataSize[4];
+  char MetaDataOffset[4];
+
+  /* BIGOBJ specific.  */
+  char NumberOfSections[4];
+  char PointerToSymbolTable[4];
+  char NumberOfSymbols[4];
+};
+
+#define FILHSZ_BIGOBJ (14 * 4)
+
+struct external_SYMBOL_EX
+{
+  union
+  {
+    char e_name[E_SYMNMLEN];
+
+    struct
+    {
+      char e_zeroes[4];
+      char e_offset[4];
+    } e;
+  } e;
+
+  char e_value[4];
+  char e_scnum[4];
+  char e_type[2];
+  char e_sclass[1];
+  char e_numaux[1];
+} ATTRIBUTE_PACKED ;
+
+#define	SYMENT_BIGOBJ	struct external_SYMBOL_EX
+#define	SYMESZ_BIGOBJ	20
+
+#define FILNMLEN_BIGOBJ	20
+
+union external_AUX_SYMBOL_EX
+{
+  struct
+  {
+    char WeakDefaultSymIndex[4];
+    char WeakSearchType[4];
+    char rgbReserved[12];
+  } Sym;
+
+  struct
+  {
+    char Name[FILNMLEN_BIGOBJ];
+  } File;
+
+  struct
+  {
+    char Length[4];	/* section length */
+    char NumberOfRelocations[2];	/* # relocation entries */
+    char NumberOfLinenumbers[2];	/* # line numbers */
+    char Checksum[4];		   /* section COMDAT checksum	      */
+    char Number[2];	   /* COMDAT associated section index */
+    char Selection[1];		   /* COMDAT selection number	      */
+    char bReserved[1];
+    char HighNumber[2];           /* High bits of COMDAT associated sec.  */
+    char rgbReserved[2];
+  } Section;
+} ATTRIBUTE_PACKED;
+
+#define	AUXENT_BIGOBJ	union external_AUX_SYMBOL_EX
+#define	AUXESZ_BIGOBJ	20
+
 /* .pdata/.xdata defines and structures for x64 PE+ for exception handling.  */
 
 /* .pdata in exception directory.  */

@@ -73,7 +73,7 @@ struct internal_filehdr
 
   /* Standard coff internal info.  */
   unsigned short f_magic;	/* magic number			*/
-  unsigned short f_nscns;	/* number of sections		*/
+  unsigned int   f_nscns;	/* number of sections		*/
   long f_timdat;		/* time & date stamp		*/
   bfd_vma f_symptr;		/* file pointer to symtab	*/
   long f_nsyms;			/* number of symtab entries	*/

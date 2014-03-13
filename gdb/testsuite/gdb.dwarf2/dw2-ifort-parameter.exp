@@ -22,10 +22,50 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile .c dw2-ifort-parameter-debug.S
+standard_testfile .c dw2-ifort-parameter-dw.S
+
+# Make some DWARF for the test.
+set asm_file [standard_output_file $srcfile2]
+Dwarf::assemble $asm_file {
+    declare_labels int_label
+
+    extern func_start func_end ptr
+
+    cu {} {
+	compile_unit {
+	    {name file1.txt}
+	    {language @DW_LANG_C}
+	    {low_pc func_start addr}
+	    {high_pc func_end addr}
+	} {
+	    int_label: base_type {
+		{name int}
+		{byte_size 4 sdata}
+		{encoding @DW_ATE_signed}
+	    }
+
+	    subprogram {
+		{external 1 flag}
+		{name func}
+		{low_pc func_start addr}
+		{high_pc func_end addr}
+	    } {
+		formal_parameter {
+		    {name param}
+		    {variable_parameter 1 flag}
+		    {type :$int_label}
+		    {location {
+			addr ptr
+			deref
+		    } SPECIAL_expr}
+		}
+	    }
+	}
+    }
+}
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} \
-	  [list $srcfile $srcfile2] {nodebug}] } {
+	  [list $srcfile $asm_file] {nodebug}] } {
     return -1
 }
 

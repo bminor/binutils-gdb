@@ -766,7 +766,8 @@ TARGET_FLAGS_TO_PASS = \
 	"MAKEHTML=$(MAKEHTML)" \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
-	"FORCE_PARALLEL=$(FORCE_PARALLEL)"
+	"FORCE_PARALLEL=$(FORCE_PARALLEL)" \
+	"TESTS=$(TESTS)"
 
 # All source files that go into linking GDB.
 # Links made at configuration time should not be specified here, since

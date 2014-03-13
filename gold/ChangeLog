@@ -1,3 +1,56 @@
+2014-03-12  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* symtab.h (Symbol::set_nonvis): New function.
+
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* symtab.cc (Sized_symbol<32>::init_output_data):
+	Instantiate the template.
+	(Sized_symbol<64>::init_output_data): Likewise.
+
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* symtab.cc (Symbol_table::sized_write_globals): Allow a target to
+	adjust dynamic symbol value.
+	* target.h (Target::adjust_dyn_symbol): New function.
+	(Target::do_adjust_dyn_symbol): New function.
+
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+  
+	* output.cc (Output_data_dynamic::Dynamic_entry::write):
+	Get the value of DYNAMIC_CUSTOM dynamic entry.
+	* output.h (Output_data_dynamic::add_custom): New function.
+	(Dynamic_entry::Dynamic_entry): New constructor for DYNAMIC_CUSTOM
+	dynamic entry.
+	(enum Dynamic_entry::Classification): Add DYNAMIC_CUSTOM.
+	* target.h (Target::dynamic_tag_custom_value): New function.
+	(Target::do_dynamic_tag_custom_value): New function.
+
+2014-03-10  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* symtab.cc (Symbol_table::set_dynsym_indexes): Allow a target to set
+	dynsym indexes.
+	* target.h (Target::has_custom_set_dynsym_indexes): New function.
+	(Target::do_has_custom_set_dynsym_indexes): New function.
+	(Target::set_dynsym_indexes): New function.
+	(Target::do_set_dynsym_indexes): New function.
+
+2014-03-07  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Powerpc_relocate_functions::Overflow_check): Add
+	CHECK_UNSIGNED, CHECK_LOW_INSN, CHECK_HIGH_INSN.
+	(Powerpc_relocate_functions::has_overflow_unsigned): New function.
+	(Powerpc_relocate_functions::has_overflow_bitfield,
+	overflowed): Use the above.
+	(Target_powerpc::Relocate::relocate): Correct overflow checking
+	for a number of relocations.  Modify overflow test for 16-bit
+	fields in instructions to signed/unsigned according to whether
+	the field takes a signed or unsigned value.
+
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
 	Update copyright years.

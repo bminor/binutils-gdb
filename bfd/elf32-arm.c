@@ -15861,6 +15861,9 @@ elf32_arm_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
+  if (elf32_arm_hash_table (info) == NULL)
+    return FALSE;
+
   if (elf32_arm_hash_table (info)->vxworks_p
       && !elf_vxworks_add_symbol_hook (abfd, info, sym, namep,
 				       flagsp, secp, valp))

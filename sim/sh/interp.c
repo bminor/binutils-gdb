@@ -473,7 +473,7 @@ int valid[16];
 #define UNDEF(x)
 #endif
 
-static void parse_and_set_memory_size (char *str);
+static void parse_and_set_memory_size (const char *str);
 static int IOMEM (int addr, int write, int value);
 static struct loop_bounds get_loop_bounds (int, int, unsigned char *,
 					   unsigned char *, int, int);
@@ -2663,7 +2663,7 @@ sim_open (kind, cb, abfd, argv)
 
 static void
 parse_and_set_memory_size (str)
-     char *str;
+     const char *str;
 {
   int n;
 
@@ -2739,9 +2739,9 @@ sim_create_inferior (sd, prog_bfd, argv, env)
 void
 sim_do_command (sd, cmd)
      SIM_DESC sd;
-     char *cmd;
+     const char *cmd;
 {
-  char *sms_cmd = "set-memory-size";
+  const char *sms_cmd = "set-memory-size";
   int cmdsize;
 
   if (cmd == NULL || *cmd == '\0')

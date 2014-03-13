@@ -36,6 +36,7 @@
 #include "elfcpp.h"
 #include "options.h"
 #include "parameters.h"
+#include "stringpool.h"
 #include "debug.h"
 
 namespace gold
@@ -61,6 +62,7 @@ class Output_section;
 class Input_objects;
 class Task;
 struct Symbol_location;
+class Versions;
 
 // The abstract class for target specific handling.
 
@@ -453,6 +455,31 @@ class Target
   entry_symbol_name() const
   { return this->pti_->entry_symbol_name; }
 
+  // Whether the target has a custom set_dynsym_indexes method.
+  bool
+  has_custom_set_dynsym_indexes() const
+  { return this->do_has_custom_set_dynsym_indexes(); }
+
+  // Custom set_dynsym_indexes method for a target.
+  unsigned int
+  set_dynsym_indexes(std::vector<Symbol*>* dyn_symbols, unsigned int index,
+                     std::vector<Symbol*>* syms, Stringpool* dynpool,
+                     Versions* versions, Symbol_table* symtab) const
+  {
+    return this->do_set_dynsym_indexes(dyn_symbols, index, syms, dynpool,
+                                       versions, symtab);
+  }
+
+  // Get the custom dynamic tag value.
+  unsigned int
+  dynamic_tag_custom_value(elfcpp::DT tag) const
+  { return this->do_dynamic_tag_custom_value(tag); }
+
+  // Adjust the value written to the dynamic symbol table.
+  void
+  adjust_dyn_symbol(const Symbol* sym, unsigned char* view) const
+  { this->do_adjust_dyn_symbol(sym, view); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -722,6 +749,28 @@ class Target
   // This may be overridden by the child class.
   virtual void
   do_gc_mark_symbol(Symbol_table*, Symbol*) const
+  { }
+
+  // This may be overridden by the child class.
+  virtual bool
+  do_has_custom_set_dynsym_indexes() const
+  { return false; }
+
+  // This may be overridden by the child class.
+  virtual unsigned int
+  do_set_dynsym_indexes(std::vector<Symbol*>*, unsigned int,
+                        std::vector<Symbol*>*, Stringpool*, Versions*,
+                        Symbol_table*) const
+  { gold_unreachable(); }
+
+  // This may be overridden by the child class.
+  virtual unsigned int
+  do_dynamic_tag_custom_value(elfcpp::DT) const
+  { gold_unreachable(); }
+
+  // This may be overridden by the child class.
+  virtual void
+  do_adjust_dyn_symbol(const Symbol*, unsigned char*) const
   { }
 
  private:

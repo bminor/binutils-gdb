@@ -273,7 +273,7 @@ void sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc);
    Simulators should be prepared to deal with any combination of NULL
    or empty CMD. */
 
-void sim_do_command (SIM_DESC sd, char *cmd);
+void sim_do_command (SIM_DESC sd, const char *cmd);
 
 /* Complete a command based on the available sim commands.  Returns an
    array of possible matches.  */

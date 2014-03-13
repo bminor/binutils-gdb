@@ -283,6 +283,11 @@ The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
 This option forces the assembler to add BND prefix to all branches, even
 if such prefix was not explicitly specified in the source code.
 
+@cindex @samp{-mbig-obj} option, x86-64
+@item -mbig-obj
+On x86-64 PE/COFF target this option forces the use of big object file
+format, which allows more than 32768 sections.
+
 @end table
 @c man end
 
