@@ -27,6 +27,7 @@ PROJECT_NAME = "GDB (API)"
 # everything.)
 
 INPUT = @srcdir@/../defs.h \
+        @srcdir@/../gdbtypes.h \
         @srcdir@/../minsyms.h \
         @srcdir@/../utils.h
 

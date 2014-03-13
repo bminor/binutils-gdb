@@ -1,3 +1,8 @@
+2014-03-12  Stan Shebs  <stan@codesourcery.com>
+
+	* gdbtypes.h: Annotate comments for Doxygen, add a page
+	block comment with some general info.
+
 2014-03-12  Pedro Alves  <palves@redhat.com>
 
 	* infcmd.c (prepare_execution_command): New function, factored out
