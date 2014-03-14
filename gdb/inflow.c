@@ -46,7 +46,7 @@ extern void _initialize_inflow (void);
 
 static void pass_signal (int);
 
-static void terminal_ours_1 (int);
+static void child_terminal_ours_1 (int);
 
 /* Record terminal status separately for debugger and inferior.  */
 
@@ -209,13 +209,11 @@ gdb_has_a_terminal (void)
     fprintf_unfiltered(gdb_stderr, "[%s failed in terminal_inferior: %s]\n", \
 	    what, safe_strerror (errno))
 
-static void terminal_ours_1 (int);
-
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
 
 void
-terminal_init_inferior_with_pgrp (int pgrp)
+child_terminal_init_with_pgrp (int pgrp)
 {
   struct inferior *inf = current_inferior ();
   struct terminal_info *tinfo = get_inflow_inferior_data (inf);
@@ -245,7 +243,7 @@ terminal_init_inferior_with_pgrp (int pgrp)
    and gdb must be able to restore it correctly.  */
 
 void
-terminal_save_ours (struct target_ops *self)
+child_terminal_save_ours (struct target_ops *self)
 {
   if (gdb_has_a_terminal ())
     {
@@ -255,16 +253,16 @@ terminal_save_ours (struct target_ops *self)
 }
 
 void
-terminal_init_inferior (struct target_ops *self)
+child_terminal_init (struct target_ops *self)
 {
 #ifdef PROCESS_GROUP_TYPE
-  /* This is for Lynx, and should be cleaned up by having Lynx be a separate
-     debugging target with a version of target_terminal_init_inferior which
-     passes in the process group to a generic routine which does all the work
-     (and the non-threaded child_terminal_init_inferior can just pass in
-     inferior_ptid to the same routine).  */
+  /* This is for Lynx, and should be cleaned up by having Lynx be a
+     separate debugging target with a version of target_terminal_init
+     which passes in the process group to a generic routine which does
+     all the work (and the non-threaded child_terminal_init can just
+     pass in inferior_ptid to the same routine).  */
   /* We assume INFERIOR_PID is also the child's process group.  */
-  terminal_init_inferior_with_pgrp (ptid_get_pid (inferior_ptid));
+  child_terminal_init_with_pgrp (ptid_get_pid (inferior_ptid));
 #endif /* PROCESS_GROUP_TYPE */
 }
 
@@ -272,7 +270,7 @@ terminal_init_inferior (struct target_ops *self)
    This is preparation for starting or resuming the inferior.  */
 
 void
-terminal_inferior (struct target_ops *self)
+child_terminal_inferior (struct target_ops *self)
 {
   struct inferior *inf;
   struct terminal_info *tinfo;
@@ -353,9 +351,9 @@ terminal_inferior (struct target_ops *self)
    should be called to get back to a normal state of affairs.  */
 
 void
-terminal_ours_for_output (struct target_ops *self)
+child_terminal_ours_for_output (struct target_ops *self)
 {
-  terminal_ours_1 (1);
+  child_terminal_ours_1 (1);
 }
 
 /* Put our terminal settings into effect.
@@ -363,9 +361,9 @@ terminal_ours_for_output (struct target_ops *self)
    so they can be restored properly later.  */
 
 void
-terminal_ours (struct target_ops *self)
+child_terminal_ours (struct target_ops *self)
 {
-  terminal_ours_1 (0);
+  child_terminal_ours_1 (0);
 }
 
 /* output_only is not used, and should not be used unless we introduce
@@ -373,7 +371,7 @@ terminal_ours (struct target_ops *self)
    flags.  */
 
 static void
-terminal_ours_1 (int output_only)
+child_terminal_ours_1 (int output_only)
 {
   struct inferior *inf;
   struct terminal_info *tinfo;
@@ -446,7 +444,7 @@ terminal_ours_1 (int output_only)
 	     such situations as well.  */
 	  if (result == -1)
 	    fprintf_unfiltered (gdb_stderr,
-				"[tcsetpgrp failed in terminal_ours: %s]\n",
+				"[tcsetpgrp failed in child_terminal_ours: %s]\n",
 				safe_strerror (errno));
 #endif
 #endif /* termios */

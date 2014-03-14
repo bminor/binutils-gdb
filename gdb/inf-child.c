@@ -416,11 +416,11 @@ inf_child_target (void)
   t->to_prepare_to_store = inf_child_prepare_to_store;
   t->to_insert_breakpoint = memory_insert_breakpoint;
   t->to_remove_breakpoint = memory_remove_breakpoint;
-  t->to_terminal_init = terminal_init_inferior;
-  t->to_terminal_inferior = terminal_inferior;
-  t->to_terminal_ours_for_output = terminal_ours_for_output;
-  t->to_terminal_save_ours = terminal_save_ours;
-  t->to_terminal_ours = terminal_ours;
+  t->to_terminal_init = child_terminal_init;
+  t->to_terminal_inferior = child_terminal_inferior;
+  t->to_terminal_ours_for_output = child_terminal_ours_for_output;
+  t->to_terminal_save_ours = child_terminal_save_ours;
+  t->to_terminal_ours = child_terminal_ours;
   t->to_terminal_info = child_terminal_info;
   t->to_post_startup_inferior = inf_child_post_startup_inferior;
   t->to_follow_fork = inf_child_follow_fork;

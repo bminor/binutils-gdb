@@ -4568,11 +4568,11 @@ linux_nat_terminal_inferior (struct target_ops *self)
   if (!target_is_async_p ())
     {
       /* Async mode is disabled.  */
-      terminal_inferior (self);
+      child_terminal_inferior (self);
       return;
     }
 
-  terminal_inferior (self);
+  child_terminal_inferior (self);
 
   /* Calls to target_terminal_*() are meant to be idempotent.  */
   if (!async_terminal_is_ours)
@@ -4591,14 +4591,14 @@ linux_nat_terminal_ours (struct target_ops *self)
   if (!target_is_async_p ())
     {
       /* Async mode is disabled.  */
-      terminal_ours (self);
+      child_terminal_ours (self);
       return;
     }
 
   /* GDB should never give the terminal to the inferior if the
      inferior is running in the background (run&, continue&, etc.),
      but claiming it sure should.  */
-  terminal_ours (self);
+  child_terminal_ours (self);
 
   if (async_terminal_is_ours)
     return;

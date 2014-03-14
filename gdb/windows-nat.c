@@ -1725,7 +1725,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
      current thread until we report an event out of windows_wait.  */
   inferior_ptid = pid_to_ptid (pid);
 
-  terminal_init_inferior_with_pgrp (pid);
+  child_terminal_init_with_pgrp (pid);
   target_terminal_inferior ();
 
   windows_initialization_done = 0;
