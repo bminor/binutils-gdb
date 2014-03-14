@@ -2250,14 +2250,14 @@ decode_constrained_packed_array (struct value *arr)
 {
   struct type *type;
 
-  arr = ada_coerce_ref (arr);
-
-  /* If our value is a pointer, then dererence it.  Make sure that
-     this operation does not cause the target type to be fixed, as
-     this would indirectly cause this array to be decoded.  The rest
-     of the routine assumes that the array hasn't been decoded yet,
-     so we use the basic "value_ind" routine to perform the dereferencing,
-     as opposed to using "ada_value_ind".  */
+  /* If our value is a pointer, then dereference it. Likewise if
+     the value is a reference.  Make sure that this operation does not
+     cause the target type to be fixed, as this would indirectly cause
+     this array to be decoded.  The rest of the routine assumes that
+     the array hasn't been decoded yet, so we use the basic "coerce_ref"
+     and "value_ind" routines to perform the dereferencing, as opposed
+     to using "ada_coerce_ref" or "ada_value_ind".  */
+  arr = coerce_ref (arr);
   if (TYPE_CODE (ada_check_typedef (value_type (arr))) == TYPE_CODE_PTR)
     arr = value_ind (arr);
 
