@@ -1875,7 +1875,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
 	  bfd_byte * contents = xmalloc (size);
 	  if (bfd_get_section_contents (ibfd, sec, contents, 0, size))
-	    fwrite (contents, 1, size, f);
+	    {
+	      if (fwrite (contents, 1, size, f) != size)
+		fatal (_("error writing section contents to %s (error: %s)"),
+		       pdump->filename,
+		       strerror (errno));
+	    }
 	  else
 	    bfd_nonfatal_message (NULL, ibfd, sec,
 				  _("could not retrieve section contents"));

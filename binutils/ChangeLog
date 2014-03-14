@@ -1,3 +1,7 @@
+2014-03-14  Anthony Green  <green@moxielogic.com>
+
+	* objcopy.c (copy_object): Check fwrite return code.
+
 2014-03-14  Meador Inge  <meadori@codesourcery.com>
 
          * dwarf.c (strnlen): Move prototype ...
