@@ -1509,7 +1509,13 @@ gld${EMULATION_NAME}_open_dynamic_archive (const char *arch,
   if (!entry->flags.maybe_archive)
     return FALSE;
 
-  path = concat (search->name, "/lib", entry->filename, arch, ".a", NULL);
+  if (entry->flags.full_name_provided)
+    path = concat (search->name, "/", entry->filename,
+		   (const char *) NULL);
+  else
+    path = concat (search->name, "/lib", entry->filename, arch, ".a",
+		   (const char *) NULL);
+
   if (!ldfile_try_open_bfd (path, entry))
     {
       free (path);

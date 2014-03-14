@@ -235,6 +235,9 @@ struct lang_input_statement_flags
   /* 1 means this file was specified in a -l option.  */
   unsigned int maybe_archive : 1;
 
+  /* 1 means this file was specified in a -l:namespec option.  */
+  unsigned int full_name_provided : 1;
+
   /* 1 means search a set of directories for this file.  */
   unsigned int search_dirs : 1;
 
