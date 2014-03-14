@@ -1,3 +1,7 @@
+2014-03-15  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/vle-reloc-3.d: Remove addresses.
+
 2014-03-14  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/vle.ld: Place .PPC.EMB.sdata0 within 32k of 0.
