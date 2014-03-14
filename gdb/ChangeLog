@@ -1,3 +1,8 @@
+2014-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* MAINTAINERS (The Official FSF-appointed GDB Maintainers)
+	(Global Maintainers): Remove Jan Kratochvil.
+
 2014-03-14  Pedro Alves  <palves@redhat.com>
 
 	* inferior.h (terminal_ours_for_output): Rename to ...
