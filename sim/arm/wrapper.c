@@ -37,6 +37,7 @@
 #include "gdb/sim-arm.h"
 #include "gdb/signals.h"
 #include "libiberty.h"
+#include "iwmmxt.h"
 
 host_callback *sim_callback;
 
@@ -58,6 +59,54 @@ static int verbosity;
 static int big_endian;
 
 int stop_simulator;
+
+#include "dis-asm.h"
+
+int trace = 0;
+int disas = 0;
+int trace_funcs = 0;
+
+static struct disassemble_info  info;
+static char opbuf[1000];
+
+static int
+op_printf (char *buf, char *fmt, ...)
+{
+  int ret;
+  va_list ap;
+
+  va_start (ap, fmt);
+  ret = vsprintf (opbuf + strlen (opbuf), fmt, ap);
+  va_end (ap);
+  return ret;
+}
+
+static int
+sim_dis_read (bfd_vma                     memaddr ATTRIBUTE_UNUSED,
+	      bfd_byte *                  ptr,
+	      unsigned int                length,
+	      struct disassemble_info *   info)
+{
+  ARMword val = (ARMword) *((ARMword *) info->application_data);
+
+  while (length--)
+    {
+      * ptr ++ = val & 0xFF;
+      val >>= 8;
+    }
+  return 0;
+}
+
+void
+print_insn (ARMword instr)
+{
+  int size;
+
+  opbuf[0] = 0;
+  info.application_data = & instr;
+  size = print_insn_little_arm (0, & info);
+  fprintf (stderr, " %*s\n", size, opbuf);
+}
 
 /* Cirrus DSP registers.
 
@@ -192,10 +241,9 @@ sim_read (sd, addr, buffer, size)
 int
 sim_trace (sd)
      SIM_DESC sd ATTRIBUTE_UNUSED;
-{  
-  (*sim_callback->printf_filtered)
-    (sim_callback,
-     "This simulator does not support tracing\n");
+{
+  trace = 1;
+  sim_resume (sd, 0, 0);
   return 1;
 }
 
@@ -269,9 +317,9 @@ sim_create_inferior (sd, abfd, argv, env)
       /* We wouldn't set the machine type with earlier toolchains, so we
 	 explicitly select a processor capable of supporting all ARMs in
 	 32bit mode.  */
-      /* We choose the XScale rather than the iWMMXt, because the iWMMXt
-	 removes the FPE emulator, since it conflicts with its coprocessors.
-	 For the most generic ARM support, we want the FPE emulator in place.  */
+      ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_v6_Prop);
+      break;
+
     case bfd_mach_arm_XScale:
       ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop | ARM_v6_Prop);
       break;
@@ -351,6 +399,16 @@ sim_create_inferior (sd, abfd, argv, env)
       ARMul_SetCPSR (state, SVC32MODE);
     }
   
+  memset (& info, 0, sizeof (info));
+  INIT_DISASSEMBLE_INFO (info, stdout, op_printf);
+  info.read_memory_func = sim_dis_read;
+  info.arch = bfd_get_arch (abfd);
+  info.mach = bfd_get_mach (abfd);
+  info.endian_code = BFD_ENDIAN_LITTLE;
+  if (info.mach == 0)
+    info.arch = bfd_arch_arm;
+  disassemble_init_for_target (& info);
+
   if (argv != NULL)
     {
       /* Set up the command line by laboriously stringing together
@@ -676,8 +734,6 @@ sim_fetch_register (sd, rn, memory, length)
   return length;
 }
 
-#ifdef SIM_TARGET_SWITCHES
-
 static void sim_target_parse_arg_array (char **);
 
 typedef struct
@@ -717,6 +773,34 @@ sim_target_parse_command_line (argc, argv)
 
       if ((ptr == NULL) || (* ptr != '-'))
 	break;
+
+      if (strcmp (ptr, "-t") == 0)
+	{
+	  trace = 1;
+	  continue;
+	}
+      
+      if (strcmp (ptr, "-z") == 0)
+	{
+	  /* Remove this option from the argv array.  */
+	  for (arg = i; arg < argc; arg ++)
+	    argv[arg] = argv[arg + 1];
+	  argc --;
+	  i --;
+	  trace_funcs = 1;
+	  continue;
+	}
+      
+      if (strcmp (ptr, "-d") == 0)
+	{
+	  /* Remove this option from the argv array.  */
+	  for (arg = i; arg < argc; arg ++)
+	    argv[arg] = argv[arg + 1];
+	  argc --;
+	  i --;
+	  disas = 1;
+	  continue;
+	}
 
       if (strncmp (ptr, SWI_SWITCH, sizeof SWI_SWITCH - 1) != 0)
 	continue;
@@ -789,8 +873,9 @@ sim_target_display_usage (help)
   fprintf (stream, "%s=<list>  Comma seperated list of SWI protocols to supoport.\n\
                 This list can contain: NONE, DEMON, ANGEL, REDBOOT and/or ALL.\n",
 	   SWI_SWITCH);
+  fprintf (stream, "-d\t\tEnable disassembly of instructions during tracing.\n");
+  fprintf (stream, "-z\t\tTrace entering and leaving functions.\n\n");
 }
-#endif
 
 SIM_DESC
 sim_open (kind, ptr, abfd, argv)
@@ -852,6 +937,21 @@ sim_open (kind, ptr, abfd, argv)
 		  (sim_callback, "Unrecognised argument to -E option\n");
 		break;
 	      }
+	  }
+	else if (argv[i][0] == '-' && argv[i][1] == 't')
+	  {
+	    trace = 1;
+	    break;
+	  }
+	else if (argv[i][0] == '-' && argv[i][1] == 'z')
+	  {
+	    trace_funcs = 1;
+	    break;
+	  }
+	else if (argv[i][0] == '-' && argv[i][1] == 'd')
+	  {
+	    disas = 1;
+	    break;
 	  }
 	else if (argv[i][0] == '-' && argv[i][1] == 'm')
 	  {
