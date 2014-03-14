@@ -112,6 +112,10 @@ extern int snprintf(char *, size_t, const char *, ...);
 extern int vsnprintf(char *, size_t, const char *, va_list);
 #endif
 
+#if !HAVE_DECL_STRNLEN
+size_t strnlen (const char *, size_t);
+#endif
+
 #ifndef O_RDONLY
 #define O_RDONLY 0
 #endif

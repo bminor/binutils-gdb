@@ -29,10 +29,6 @@
 #include "dwarf.h"
 #include "gdb/gdb-index.h"
 
-#if !HAVE_DECL_STRNLEN
-size_t strnlen (const char *, size_t);
-#endif
-
 static const char *regname (unsigned int regno, int row);
 
 static int have_frame_base;

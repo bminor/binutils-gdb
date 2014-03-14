@@ -170,6 +170,10 @@ extern int fseeko64 (FILE *stream, off64_t offset, int whence);
 #endif
 #endif
 
+#if !HAVE_DECL_STRNLEN
+size_t strnlen (const char *, size_t);
+#endif
+
 /* Define offsetof for those systems which lack it */
 
 #ifndef offsetof

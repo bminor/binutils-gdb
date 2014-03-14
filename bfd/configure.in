@@ -239,6 +239,7 @@ AC_CHECK_DECLS(stpcpy)
 AC_CHECK_DECLS(strstr)
 AC_CHECK_DECLS(snprintf)
 AC_CHECK_DECLS(vsnprintf)
+AC_CHECK_DECLS(strnlen)
 
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 # This is used only by compress.c.

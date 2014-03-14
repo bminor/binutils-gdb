@@ -1,3 +1,10 @@
+2014-03-14  Meador Inge  <meadori@codesourcery.com>
+
+	 * configure.in: Add strnlen to AC_CHECK_DECLS.
+	 * config.in: Regenerate.
+         * configure: Regenerate.
+	 * sysdep.h (strnlen): Add prototype.
+
 2014-03-14  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Correct overflow
