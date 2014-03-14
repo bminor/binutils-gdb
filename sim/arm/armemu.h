@@ -402,7 +402,7 @@ extern ARMword isize;
   do						\
     {						\
       if (DESTReg == 15)			\
-	WriteR15Branch (state, d);		\
+	WriteR15Load (state, d);		\
       else					\
 	DEST = d;				\
     }						\

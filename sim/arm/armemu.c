@@ -1,7 +1,7 @@
 /*  armemu.c -- Main instruction emulation:  ARM7 Instruction Emulator.
     Copyright (C) 1994 Advanced RISC Machines Ltd.
     Modifications to add arch. v4 support by <jsmith@cygnus.com>.
- 
+    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
@@ -25,6 +25,7 @@ static ARMword  GetDPSRegRHS        (ARMul_State *, ARMword);
 static void     WriteR15            (ARMul_State *, ARMword);
 static void     WriteSR15           (ARMul_State *, ARMword);
 static void     WriteR15Branch      (ARMul_State *, ARMword);
+static void     WriteR15Load        (ARMul_State *, ARMword);
 static ARMword  GetLSRegRHS         (ARMul_State *, ARMword);
 static ARMword  GetLS7RHS           (ARMul_State *, ARMword);
 static unsigned LoadWord            (ARMul_State *, ARMword, ARMword);
@@ -4212,6 +4213,17 @@ WriteR15Branch (ARMul_State * state, ARMword src)
 #endif
 }
 
+/* Before ARM_v5 LDR and LDM of pc did not change mode.  */
+
+static void
+WriteR15Load (ARMul_State * state, ARMword src)
+{
+  if (state->is_v5)
+    WriteR15Branch (state, src);
+  else
+    WriteR15 (state, src);
+}
+
 /* This routine evaluates most Load and Store register RHS's.  It is
    intended to be called from the macro LSRegRHS, which filters the
    common case of an unshifted register with in line code.  */
@@ -4724,7 +4736,7 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
 
   if (BIT (15) && !state->Aborted)
     /* PC is in the reg list.  */
-    WriteR15Branch (state, PC);
+    WriteR15Load (state, PC);
 
   /* To write back the final register.  */
   ARMul_Icycles (state, 1, 0L);

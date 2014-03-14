@@ -1,3 +1,11 @@
+2014-03-14  David McQuillan  <dmcq@tao-group.com>
+
+	PR sim/8388
+	* armemu.c (WriteR15Load): New function.  Determines if the state
+	can be changed upon a write to R15.
+	(LoadMult): Use WriteR15Load.
+	* armemu.h (WRITEDESTB): Use WriteR15Load.
+
 2014-03-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* wrapper.c (sim_do_command): Add const to cmd.
