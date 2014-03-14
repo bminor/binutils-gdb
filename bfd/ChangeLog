@@ -1,3 +1,9 @@
+2014-03-25  Will Newton  <will.newton@linaro.org>
+
+	 * elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_sections):
+	 Set value of DT_PLTRELSZ and DT_RELASZ based on the size
+	 of input sections rather than output sections.
+
 2014-03-20  Will Newton  <will.newton@linaro.org>
 
 	PR ld/16715
