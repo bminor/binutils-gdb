@@ -1,6 +1,10 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2014-03-14  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/vle.ld: Place .PPC.EMB.sdata0 within 32k of 0.
+	* ld-powerpc/vle-reloc-3.d: Update.
+
 	2014-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 	PR gold/16530
 	* ld-elf/dynamic-1.c: New file.

@@ -8855,11 +8855,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		/* And the final 11 bits of the value to bits 21 to 31.  */
 		insn |= relocation & 0x7ff;
 
-		/* Use _bfd_final_link_relocate to report overflow,
-		   but do so with a value that won't modify the insn.  */
-		if (relocation + 0x80000 > 0x100000)
-		  addend = 0x100000;
-		relocation = 0;
+		bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
+
+		if (r_type == R_PPC_VLE_SDA21
+		    && ((relocation + 0x80000) & 0xffffffff) > 0x100000)
+		  goto overflow;
+		continue;
 	      }
 	    else if (r_type == R_PPC_EMB_SDA21
 		     || r_type == R_PPC_VLE_SDA21
@@ -9156,6 +9157,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	{
 	  if (r == bfd_reloc_overflow)
 	    {
+	    overflow:
 	      if (warned)
 		continue;
 	      if (h != NULL
