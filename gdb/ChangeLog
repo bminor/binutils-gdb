@@ -1,3 +1,8 @@
+2014-03-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* python/py-value.c (get_field_flag): Cast flag_name argument to
+	PyObject_GetAttrString to support Python 2.4.
+
 2014-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* MAINTAINERS (The Official FSF-appointed GDB Maintainers)
