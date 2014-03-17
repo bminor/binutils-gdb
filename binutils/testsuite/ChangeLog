@@ -1,3 +1,7 @@
+2014-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/readelf.ss: Add skip of MSP430 defined symbols.
+
 2014-01-29  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16318
