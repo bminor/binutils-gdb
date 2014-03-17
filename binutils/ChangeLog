@@ -1,3 +1,7 @@
+2014-03-17  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_load_command): Handle lazy load dylib.
+
 2014-03-14  Anthony Green  <green@moxielogic.com>
 
 	* objcopy.c (copy_object): Check fwrite return code.

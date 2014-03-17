@@ -938,6 +938,7 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
       }
       break;
     case BFD_MACH_O_LC_LOAD_DYLIB:
+    case BFD_MACH_O_LC_LAZY_LOAD_DYLIB:
     case BFD_MACH_O_LC_LOAD_WEAK_DYLIB:
     case BFD_MACH_O_LC_REEXPORT_DYLIB:
     case BFD_MACH_O_LC_ID_DYLIB:
