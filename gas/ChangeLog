@@ -1,3 +1,9 @@
+2014-03-17  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16694
+	* config/tc-arm.c (tc_arm_regname_to_dw2regnum): Parse VFP
+	registers as well.
+
 2014-03-13  Richard Earnshaw  <rearnsha@arm.com>
 	    Jiong Wang  <Jiong.Wang@arm.com>
 

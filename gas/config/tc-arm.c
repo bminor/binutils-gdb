@@ -4134,15 +4134,24 @@ s_arm_unwind_save (int arch_v6)
       s_arm_unwind_save_fpa (reg->number);
       return;
 
-    case REG_TYPE_RN:	  s_arm_unwind_save_core ();   return;
+    case REG_TYPE_RN:
+      s_arm_unwind_save_core ();
+      return;
+
     case REG_TYPE_VFD:
       if (arch_v6)
 	s_arm_unwind_save_vfp_armv6 ();
       else
 	s_arm_unwind_save_vfp ();
       return;
-    case REG_TYPE_MMXWR:  s_arm_unwind_save_mmxwr ();  return;
-    case REG_TYPE_MMXWCG: s_arm_unwind_save_mmxwcg (); return;
+
+    case REG_TYPE_MMXWR:
+      s_arm_unwind_save_mmxwr ();
+      return;
+
+    case REG_TYPE_MMXWCG:
+      s_arm_unwind_save_mmxwcg ();
+      return;
 
     default:
       as_bad (_(".unwind_save does not support this kind of register"));
@@ -21019,11 +21028,19 @@ int
 tc_arm_regname_to_dw2regnum (char *regname)
 {
   int reg = arm_reg_parse (&regname, REG_TYPE_RN);
+  if (reg != FAIL)
+    return reg;
 
-  if (reg == FAIL)
-    return -1;
+  /* PR 16694: Allow VFP registers as well.  */
+  reg = arm_reg_parse (&regname, REG_TYPE_VFS);
+  if (reg != FAIL)
+    return 64 + reg;
 
-  return reg;
+  reg = arm_reg_parse (&regname, REG_TYPE_VFD);
+  if (reg != FAIL)
+    return reg + 256;
+
+  return -1;
 }
 
 #ifdef TE_PE
