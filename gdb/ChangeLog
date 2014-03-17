@@ -1,3 +1,9 @@
+2014-03-17  Tristan Gingold  <gingold@adacore.com>
+
+	* solib-darwin.c (DYLD_VERSION_MAX): Increase value.
+	(darwin_solib_create_inferior_hook): Emit a warning if version
+	is unhandled.
+
 2014-03-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* python/py-value.c (get_field_flag): Cast flag_name argument to
