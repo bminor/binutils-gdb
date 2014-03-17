@@ -31,6 +31,7 @@
 #include "mach-o.h"
 #include "mach-o/external.h"
 #include "mach-o/codesign.h"
+#include "mach-o/unwind.h"
 
 /* Index of the options in the options[] array.  */
 #define OPT_HEADER 0
@@ -40,6 +41,7 @@
 #define OPT_DYSYMTAB 4
 #define OPT_CODESIGN 5
 #define OPT_SEG_SPLIT_INFO 6
+#define OPT_COMPACT_UNWIND 7
 
 /* List of actions.  */
 static struct objdump_private_option options[] =
@@ -51,6 +53,7 @@ static struct objdump_private_option options[] =
     { "dysymtab", 0 },
     { "codesign", 0 },
     { "seg_split_info", 0 },
+    { "compact_unwind", 0 },
     { NULL, 0 }
   };
 
@@ -68,6 +71,7 @@ For Mach-O files:\n\
   dysymtab       Display the dynamic symbol table\n\
   codesign       Display code signature\n\
   seg_split_info Display segment split info\n\
+  compact_unwind Display compact unwinding info\n\
 "));
 }
 
@@ -322,7 +326,7 @@ dump_section_map (bfd *abfd)
 }
 
 static void
-dump_section (bfd *abfd ATTRIBUTE_UNUSED, bfd_mach_o_section *sec)
+dump_section_header (bfd *abfd ATTRIBUTE_UNUSED, bfd_mach_o_section *sec)
 {
   printf (" Section: %-16s %-16s (bfdname: %s)\n",
            sec->sectname, sec->segname, sec->bfdsection->name);
@@ -391,7 +395,7 @@ dump_segment (bfd *abfd ATTRIBUTE_UNUSED, bfd_mach_o_load_command *cmd)
   printf ("   nsects: %lu  ", seg->nsects);
   printf (" flags: %lx\n", seg->flags);
   for (sec = seg->sect_head; sec != NULL; sec = sec->next)
-    dump_section (abfd, sec);
+    dump_section_header (abfd, sec);
 }
 
 static void
@@ -1088,6 +1092,437 @@ dump_load_commands (bfd *abfd, unsigned int cmd32, unsigned int cmd64)
     }
 }
 
+static const char * const unwind_x86_64_regs[] =
+  {"", "rbx", "r12", "r13", "r14", "r15", "rbp", "???" };
+
+static const char * const unwind_x86_regs[] =
+  {"", "ebx", "ecx", "edx", "edi", "edi", "ebp", "???" };
+
+/* Dump x86 or x86-64 compact unwind encoding.  Works for both architecture,
+   as the encoding is the same (but not register names).  */
+
+static void
+dump_unwind_encoding_x86 (unsigned int encoding, unsigned int sz,
+			  const char * const regs_name[])
+{
+  unsigned int mode;
+
+  mode = encoding & MACH_O_UNWIND_X86_64_MODE_MASK;
+  switch (mode)
+    {
+    case MACH_O_UNWIND_X86_64_MODE_RBP_FRAME:
+      {
+	unsigned int regs;
+	char pfx = sz == 8 ? 'R' : 'E';
+
+	regs = encoding & MACH_O_UNWIND_X86_64_RBP_FRAME_REGSITERS;
+	printf (" %cSP frame", pfx);
+	if (regs != 0)
+	  {
+	    unsigned int offset;
+	    int i;
+
+	    offset = (encoding & MACH_O_UNWIND_X86_64_RBP_FRAME_OFFSET) >> 16;
+	    printf (" at %cBP-%u:", pfx, offset * sz);
+	    for (i = 0; i < 5; i++)
+	      {
+		unsigned int reg = (regs >> (i * 3)) & 0x7;
+		if (reg != MACH_O_UNWIND_X86_64_REG_NONE)
+		  printf (" %s", regs_name[reg]);
+	      }
+	  }
+      }
+      break;
+    case MACH_O_UNWIND_X86_64_MODE_STACK_IMMD:
+    case MACH_O_UNWIND_X86_64_MODE_STACK_IND:
+      {
+	unsigned int stack_size;
+	unsigned int reg_count;
+	unsigned int reg_perm;
+	unsigned int regs[6];
+	int i, j;
+
+	printf (" frameless");
+	stack_size =
+	  (encoding & MACH_O_UNWIND_X86_64_FRAMELESS_STACK_SIZE) >> 16;
+	reg_count =
+	  (encoding & MACH_O_UNWIND_X86_64_FRAMELESS_REG_COUNT) >> 10;
+	reg_perm = encoding & MACH_O_UNWIND_X86_64_FRAMELESS_REG_PERMUTATION;
+
+	if (mode == MACH_O_UNWIND_X86_64_MODE_STACK_IMMD)
+	  printf (" size: 0x%03x", stack_size * sz);
+	else
+	  {
+	    unsigned int stack_adj;
+
+	    stack_adj =
+	      (encoding & MACH_O_UNWIND_X86_64_FRAMELESS_STACK_ADJUST) >> 13;
+	    printf (" size at 0x%03x + 0x%02x", stack_size, stack_adj);
+	  }
+	/* Registers are coded using arithmetic compression: the register
+	   is indexed in range 0-6, the second in range 0-5, the third in
+	   range 0-4, etc.  Already used registers are removed in next
+	   ranges.  */
+#define DO_PERM(R, NUM) R = reg_perm / NUM; reg_perm -= R * NUM
+	switch (reg_count)
+	  {
+	  case 6:
+	  case 5:
+	    DO_PERM (regs[0], 120);
+	    DO_PERM (regs[1], 24);
+	    DO_PERM (regs[2], 6);
+	    DO_PERM (regs[3], 2);
+	    DO_PERM (regs[4], 1);
+	    regs[5] = 0; /* Not used if reg_count = 5.  */
+	    break;
+	  case 4:
+	    DO_PERM (regs[0], 60);
+	    DO_PERM (regs[1], 12);
+	    DO_PERM (regs[2], 3);
+	    DO_PERM (regs[3], 1);
+	    break;
+	  case 3:
+	    DO_PERM (regs[0], 20);
+	    DO_PERM (regs[1], 4);
+	    DO_PERM (regs[2], 1);
+	    break;
+	  case 2:
+	    DO_PERM (regs[0], 5);
+	    DO_PERM (regs[1], 1);
+	    break;
+	  case 1:
+	    DO_PERM (regs[0], 1);
+	    break;
+	  case 0:
+	    break;
+	  default:
+	    printf (" [bad reg count]");
+	    return;
+	  }
+#undef DO_PERM
+	/* Renumber.  */
+	for (i = reg_count - 1; i >= 0; i--)
+	  {
+	    unsigned int inc = 1;
+	    for (j = 0; j < i; j++)
+	      if (regs[i] >= regs[j])
+		inc++;
+	    regs[i] += inc;
+	  }
+	/* Display.  */
+	for (i = 0; i < (int) reg_count; i++)
+	  printf (" %s", regs_name[regs[i]]);
+      }
+      break;
+    case MACH_O_UNWIND_X86_64_MODE_DWARF:
+      printf (" Dwarf offset: 0x%06x",
+	      encoding & MACH_O_UNWIND_X86_64_DWARF_SECTION_OFFSET);
+      break;
+    default:
+      printf (" [unhandled mode]");
+      break;
+    }
+}
+
+static void
+dump_unwind_encoding (bfd_mach_o_data_struct *mdata, unsigned int encoding)
+{
+  printf ("0x%08x", encoding);
+  if (encoding == 0)
+    return;
+
+  switch (mdata->header.cputype)
+    {
+    case BFD_MACH_O_CPU_TYPE_X86_64:
+      dump_unwind_encoding_x86 (encoding, 8, unwind_x86_64_regs);
+      break;
+    case BFD_MACH_O_CPU_TYPE_I386:
+      dump_unwind_encoding_x86 (encoding, 4, unwind_x86_regs);
+      break;
+    default:
+      printf (" [unhandled cpu]");
+      break;
+    }
+  if (encoding & MACH_O_UNWIND_HAS_LSDA)
+    printf (" LSDA");
+  if (encoding & MACH_O_UNWIND_PERSONALITY_MASK)
+    printf (" PERS(%u)",
+	    ((encoding & MACH_O_UNWIND_PERSONALITY_MASK)
+	     >> MACH_O_UNWIND_PERSONALITY_SHIFT));
+}
+
+static void
+dump_obj_compact_unwind (bfd *abfd,
+			 const unsigned char *content, bfd_size_type size)
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  int is_64 = mdata->header.version == 2;
+  const unsigned char *p;
+
+  printf (" compact unwind info:\n");
+  printf (" start            length   personality      lsda\n");
+
+  if (is_64)
+    {
+      struct mach_o_compact_unwind_64 *e =
+	(struct mach_o_compact_unwind_64 *) content;
+
+      for (p = content; p < content + size; p += sizeof (*e))
+	{
+	  e = (struct mach_o_compact_unwind_64 *) p;
+
+	  putchar (' ');
+	  fprintf_vma (stdout, bfd_get_64 (abfd, e->start));
+	  printf (" %08lx", bfd_get_32 (abfd, e->length));
+	  putchar (' ');
+	  fprintf_vma (stdout, bfd_get_64 (abfd, e->personnality));
+	  putchar (' ');
+	  fprintf_vma (stdout, bfd_get_64 (abfd, e->lsda));
+	  putchar ('\n');
+
+	  printf ("  encoding: ");
+	  dump_unwind_encoding (mdata, bfd_get_32 (abfd, e->encoding));
+	  putchar ('\n');
+	}
+    }
+  else
+    {
+      printf ("unhandled\n");
+    }
+}
+
+static void
+dump_exe_compact_unwind (bfd *abfd,
+			 const unsigned char *content, bfd_size_type size)
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  struct mach_o_unwind_info_header *hdr;
+  unsigned int version;
+  unsigned int encodings_offset;
+  unsigned int encodings_count;
+  unsigned int personality_offset;
+  unsigned int personality_count;
+  unsigned int index_offset;
+  unsigned int index_count;
+  struct mach_o_unwind_index_entry *index_entry;
+  unsigned int i;
+
+  /* The header.  */
+  printf (" compact unwind info:\n");
+
+  hdr = (struct mach_o_unwind_info_header *) content;
+  if (size < sizeof (*hdr))
+    {
+      printf ("  truncated!\n");
+      return;
+    }
+
+  version = bfd_get_32 (abfd, hdr->version);
+  if (version != MACH_O_UNWIND_SECTION_VERSION)
+    {
+      printf ("  unknown version: %u\n", version);
+      return;
+    }
+  encodings_offset = bfd_get_32 (abfd, hdr->encodings_array_offset);
+  encodings_count = bfd_get_32 (abfd, hdr->encodings_array_count);
+  personality_offset = bfd_get_32 (abfd, hdr->personality_array_offset);
+  personality_count = bfd_get_32 (abfd, hdr->personality_array_count);
+  index_offset = bfd_get_32 (abfd, hdr->index_offset);
+  index_count = bfd_get_32 (abfd, hdr->index_count);
+  printf ("   %u encodings, %u personalities, %u level-1 indexes:\n",
+	  encodings_count, personality_count, index_count);
+
+  /* Level-1 index.  */
+  printf ("   idx function   level2 off lsda off\n");
+
+  index_entry = (struct mach_o_unwind_index_entry *) (content + index_offset);
+  for (i = 0; i < index_count; i++)
+    {
+      unsigned int func_offset;
+      unsigned int level2_offset;
+      unsigned int lsda_offset;
+
+      func_offset = bfd_get_32 (abfd, index_entry->function_offset);
+      level2_offset = bfd_get_32 (abfd, index_entry->second_level_offset);
+      lsda_offset = bfd_get_32 (abfd, index_entry->lsda_index_offset);
+      printf ("   %3u 0x%08x 0x%08x 0x%08x\n",
+	      i, func_offset, level2_offset, lsda_offset);
+      index_entry++;
+    }
+
+  /* Level-1 index.  */
+  index_entry = (struct mach_o_unwind_index_entry *) (content + index_offset);
+  for (i = 0; i < index_count; i++)
+    {
+      unsigned int func_offset;
+      unsigned int level2_offset;
+      const unsigned char *level2;
+      unsigned int kind;
+
+      if (i == index_count - 1)
+	break;
+
+      func_offset = bfd_get_32 (abfd, index_entry->function_offset);
+      level2_offset = bfd_get_32 (abfd, index_entry->second_level_offset);
+
+      level2 = content + level2_offset;
+      kind = bfd_get_32 (abfd, level2);
+      switch (kind)
+	{
+	case MACH_O_UNWIND_SECOND_LEVEL_COMPRESSED:
+	  {
+	    struct mach_o_unwind_compressed_second_level_page_header *l2;
+	    unsigned int entry_offset;
+	    unsigned int entry_count;
+	    unsigned int l2_encodings_offset;
+	    unsigned int l2_encodings_count;
+	    const unsigned char *en;
+	    unsigned int j;
+
+	    l2 = (struct mach_o_unwind_compressed_second_level_page_header *)
+	      level2;
+	    entry_offset = bfd_get_16 (abfd, l2->entry_page_offset);
+	    entry_count = bfd_get_16 (abfd, l2->entry_count);
+	    l2_encodings_offset = bfd_get_16 (abfd, l2->encodings_offset);
+	    l2_encodings_count = bfd_get_16 (abfd, l2->encodings_count);
+
+	    printf ("   index %2u: compressed second level: "
+		    "%u entries, %u encodings (at 0x%08x)\n",
+		    i, entry_count, l2_encodings_count, l2_encodings_offset);
+	    printf ("   #    function   eidx  encoding\n");
+
+	    en = level2 + entry_offset;
+	    for (j = 0; j < entry_count; j++)
+	      {
+		unsigned int entry;
+		unsigned int en_func;
+		unsigned int enc_idx;
+		unsigned int encoding;
+		const unsigned char *enc_addr;
+
+		entry = bfd_get_32 (abfd, en);
+		en_func =
+		  MACH_O_UNWIND_INFO_COMPRESSED_ENTRY_FUNC_OFFSET (entry);
+		enc_idx =
+		  MACH_O_UNWIND_INFO_COMPRESSED_ENTRY_ENCODING_INDEX (entry);
+		if (enc_idx < encodings_count)
+		  enc_addr = content + encodings_offset
+		    + 4 * enc_idx;
+		else
+		  enc_addr = level2 + l2_encodings_offset
+		    + 4 * (enc_idx - encodings_count);
+		encoding = bfd_get_32 (abfd, enc_addr);
+
+		printf ("   %-4u 0x%08x [%3u] ", j,
+			func_offset + en_func, enc_idx);
+		dump_unwind_encoding (mdata, encoding);
+		putchar ('\n');
+
+		en += 4;
+	      }
+	  }
+	  break;
+
+	case MACH_O_UNWIND_SECOND_LEVEL_REGULAR:
+	  {
+	    struct mach_o_unwind_regular_second_level_page_header *l2;
+	    struct mach_o_unwind_regular_second_level_entry *en;
+	    unsigned int entry_offset;
+	    unsigned int entry_count;
+	    unsigned int j;
+
+	    l2 = (struct mach_o_unwind_regular_second_level_page_header *)
+	      level2;
+
+	    entry_offset = bfd_get_16 (abfd, l2->entry_page_offset);
+	    entry_count = bfd_get_16 (abfd, l2->entry_count);
+	    printf ("   index %2u: regular level 2 at 0x%04x, %u entries\n",
+		    i, entry_offset, entry_count);
+	    printf ("   #    function   encoding\n");
+
+	    en = (struct mach_o_unwind_regular_second_level_entry *)
+	      (level2 + entry_offset);
+	    for (j = 0; j < entry_count; j++)
+	      {
+		unsigned int en_func;
+		unsigned int encoding;
+
+		en_func = bfd_get_32 (abfd, en->function_offset);
+		encoding = bfd_get_32 (abfd, en->encoding);
+		printf ("   %-4u 0x%08x ", j, en_func);
+		dump_unwind_encoding (mdata, encoding);
+		putchar ('\n');
+		en++;
+	      }
+	  }
+	  break;
+
+	default:
+	  printf ("   index %2u: unhandled second level format (%u)\n",
+		  i, kind);
+	  break;
+	}
+
+      {
+	struct mach_o_unwind_lsda_index_entry *lsda;
+	unsigned int lsda_offset;
+	unsigned int next_lsda_offset;
+	unsigned int nbr_lsda;
+	unsigned int j;
+
+	lsda_offset = bfd_get_32 (abfd, index_entry->lsda_index_offset);
+	next_lsda_offset = bfd_get_32 (abfd, index_entry[1].lsda_index_offset);
+	lsda = (struct mach_o_unwind_lsda_index_entry *)
+	  (content + lsda_offset);
+	nbr_lsda = (next_lsda_offset - lsda_offset) / sizeof (*lsda);
+	for (j = 0; j < nbr_lsda; j++)
+	  {
+	    printf ("   lsda %-3u: function 0x%08x lsda 0x%08x\n",
+		    j, (unsigned int) bfd_get_32 (abfd, lsda->function_offset),
+		    (unsigned int) bfd_get_32 (abfd, lsda->lsda_offset));
+	    lsda++;
+	  }
+      }
+      index_entry++;
+    }
+}
+
+static void
+dump_section_content (bfd *abfd,
+		      const char *segname, const char *sectname,
+		      void (*dump)(bfd*, const unsigned char*, bfd_size_type))
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  unsigned int i;
+
+  for (i = 0; i < mdata->header.ncmds; i++)
+    {
+      bfd_mach_o_load_command *cmd = &mdata->commands[i];
+      if (cmd->type == BFD_MACH_O_LC_SEGMENT
+	  || cmd->type == BFD_MACH_O_LC_SEGMENT_64)
+	{
+	  bfd_mach_o_segment_command *seg = &cmd->command.segment;
+	  bfd_mach_o_section *sec;
+	  for (sec = seg->sect_head; sec != NULL; sec = sec->next)
+	    if (strcmp (sec->segname, segname) == 0
+		&& strcmp (sec->sectname, sectname) == 0)
+	      {
+		bfd_size_type size;
+		asection *bfdsec = sec->bfdsection;
+		unsigned char *content;
+
+		size = bfd_get_section_size (bfdsec);
+		content = (unsigned char *) xmalloc (size);
+		bfd_get_section_contents (abfd, bfdsec, content, 0, size);
+
+		(*dump)(abfd, content, size);
+
+		free (content);
+	      }
+	}
+    }
+}
+
 /* Dump ABFD (according to the options[] array).  */
 
 static void
@@ -1107,6 +1542,13 @@ mach_o_dump (bfd *abfd)
     dump_load_commands (abfd, BFD_MACH_O_LC_CODE_SIGNATURE, 0);
   if (options[OPT_SEG_SPLIT_INFO].selected)
     dump_load_commands (abfd, BFD_MACH_O_LC_SEGMENT_SPLIT_INFO, 0);
+  if (options[OPT_COMPACT_UNWIND].selected)
+    {
+      dump_section_content (abfd, "__LD", "__compact_unwind",
+			    dump_obj_compact_unwind);
+      dump_section_content (abfd, "__TEXT", "__unwind_info",
+			    dump_exe_compact_unwind);
+    }
 }
 
 /* Vector for Mach-O.  */
