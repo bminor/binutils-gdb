@@ -1,3 +1,18 @@
+2014-03-17  Christopher Faylor  <me.cygwin2014@cgf.cx>
+
+	* Makefile.am: Use host version of windres.
+	* Makefile.in: Regenerate.
+
+2014-03-14  Christopher Faylor  <me.cygwin2013@cgf.cx>
+
+	* ld.texinfo: Document change in handling of --enable-auto-image-base.
+	* emultempl/pe.em (pe_auto_image_base): Set to default base.
+	(gld_${EMULATION_NAME}_list_options): Change usage message to reflect
+	optional --enable-auto-image-base argument.
+	(gld${EMULATION_NAME}_handle_option): Handle optional
+	--enable-auto-image-base argument.
+	(compute_dll_image_base): Eliminate constant.  Use pe_auto_image_base.
+
 2014-03-14  Romain Geissler  <romain.geissler@amadeus.com>
 	    Alan Modra  <amodra@gmail.com>
 
