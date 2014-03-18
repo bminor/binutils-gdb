@@ -1,3 +1,10 @@
+2014-03-18  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13860
+	* gdb.mi/mi-solib.exp: Remove gdb/13860 kfail.
+	* lib/mi-support.exp (mi_expect_stop): Add special handling for
+	solib-event.
+
 2014-03-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/pckd_arr_ren: New testcase.

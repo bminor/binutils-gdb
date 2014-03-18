@@ -195,6 +195,8 @@ extern void start_remote (int from_tty);
 
 extern void normal_stop (void);
 
+extern void print_stop_event (struct target_waitstatus *ws);
+
 extern int signal_stop_state (int);
 
 extern int signal_print_state (int);

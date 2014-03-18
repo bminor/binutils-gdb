@@ -5996,6 +5996,68 @@ print_no_history_reason (void)
   ui_out_text (current_uiout, "\nNo more reverse-execution history.\n");
 }
 
+/* Print current location without a level number, if we have changed
+   functions or hit a breakpoint.  Print source line if we have one.
+   bpstat_print contains the logic deciding in detail what to print,
+   based on the event(s) that just occurred.  */
+
+void
+print_stop_event (struct target_waitstatus *ws)
+{
+  int bpstat_ret;
+  int source_flag;
+  int do_frame_printing = 1;
+  struct thread_info *tp = inferior_thread ();
+
+  bpstat_ret = bpstat_print (tp->control.stop_bpstat, ws->kind);
+  switch (bpstat_ret)
+    {
+    case PRINT_UNKNOWN:
+      /* FIXME: cagney/2002-12-01: Given that a frame ID does (or
+	 should) carry around the function and does (or should) use
+	 that when doing a frame comparison.  */
+      if (tp->control.stop_step
+	  && frame_id_eq (tp->control.step_frame_id,
+			  get_frame_id (get_current_frame ()))
+	  && step_start_function == find_pc_function (stop_pc))
+	{
+	  /* Finished step, just print source line.  */
+	  source_flag = SRC_LINE;
+	}
+      else
+	{
+	  /* Print location and source line.  */
+	  source_flag = SRC_AND_LOC;
+	}
+      break;
+    case PRINT_SRC_AND_LOC:
+      /* Print location and source line.  */
+      source_flag = SRC_AND_LOC;
+      break;
+    case PRINT_SRC_ONLY:
+      source_flag = SRC_LINE;
+      break;
+    case PRINT_NOTHING:
+      /* Something bogus.  */
+      source_flag = SRC_LINE;
+      do_frame_printing = 0;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, _("Unknown value."));
+    }
+
+  /* The behavior of this routine with respect to the source
+     flag is:
+     SRC_LINE: Print only source line
+     LOCATION: Print only location
+     SRC_AND_LOC: Print location and source line.  */
+  if (do_frame_printing)
+    print_stack_frame (get_selected_frame (NULL), 0, source_flag, 1);
+
+  /* Display the auto-display expressions.  */
+  do_displays ();
+}
+
 /* Here to return control to GDB when the inferior stops for real.
    Print appropriate messages, remove breakpoints, give terminal our modes.
 
@@ -6118,65 +6180,11 @@ normal_stop (void)
     {
       select_frame (get_current_frame ());
 
-      /* Print current location without a level number, if
-         we have changed functions or hit a breakpoint.
-         Print source line if we have one.
-         bpstat_print() contains the logic deciding in detail
-         what to print, based on the event(s) that just occurred.  */
-
       /* If --batch-silent is enabled then there's no need to print the current
 	 source location, and to try risks causing an error message about
 	 missing source files.  */
       if (stop_print_frame && !batch_silent)
-	{
-	  int bpstat_ret;
-	  int source_flag;
-	  int do_frame_printing = 1;
-	  struct thread_info *tp = inferior_thread ();
-
-	  bpstat_ret = bpstat_print (tp->control.stop_bpstat, last.kind);
-	  switch (bpstat_ret)
-	    {
-	    case PRINT_UNKNOWN:
-	      /* FIXME: cagney/2002-12-01: Given that a frame ID does
-	         (or should) carry around the function and does (or
-	         should) use that when doing a frame comparison.  */
-	      if (tp->control.stop_step
-		  && frame_id_eq (tp->control.step_frame_id,
-				  get_frame_id (get_current_frame ()))
-		  && step_start_function == find_pc_function (stop_pc))
-		source_flag = SRC_LINE;		/* Finished step, just
-						   print source line.  */
-	      else
-		source_flag = SRC_AND_LOC;	/* Print location and
-						   source line.  */
-	      break;
-	    case PRINT_SRC_AND_LOC:
-	      source_flag = SRC_AND_LOC;	/* Print location and
-						   source line.  */
-	      break;
-	    case PRINT_SRC_ONLY:
-	      source_flag = SRC_LINE;
-	      break;
-	    case PRINT_NOTHING:
-	      source_flag = SRC_LINE;	/* something bogus */
-	      do_frame_printing = 0;
-	      break;
-	    default:
-	      internal_error (__FILE__, __LINE__, _("Unknown value."));
-	    }
-
-	  /* The behavior of this routine with respect to the source
-	     flag is:
-	     SRC_LINE: Print only source line
-	     LOCATION: Print only location
-	     SRC_AND_LOC: Print location and source line.  */
-	  if (do_frame_printing)
-	    print_stack_frame (get_selected_frame (NULL), 0, source_flag, 1);
-
-	  /* Display the auto-display expressions.  */
-	  do_displays ();
-	}
+	print_stop_event (&last);
     }
 
   /* Save the function value return registers, if we care.

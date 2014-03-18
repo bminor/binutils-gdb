@@ -1,3 +1,12 @@
+2014-03-18  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13860
+	* inferior.h (print_stop_event): Declare.
+	* infrun.c (print_stop_event): New, factored out from ...
+	(normal_stop): ... this.
+	* mi/mi-interp.c (mi_on_normal_stop): Use print_stop_event instead
+	of bpstat_print/print_stack_frame.
+
 2014-03-17  Tom Tromey  <tromey@redhat.com>
 
 	* ui-out.c (clear_table, ui_out_new): Clear uiout->table.id.

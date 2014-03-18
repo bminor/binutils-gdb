@@ -441,9 +441,8 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	  current_uiout = mi_uiout;
 
 	  get_last_target_status (&last_ptid, &last);
-	  bpstat_print (bs, last.kind);
+	  print_stop_event (&last);
 
-	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 	  current_uiout = saved_uiout;
 	}
 
