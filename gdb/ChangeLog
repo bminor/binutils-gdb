@@ -1,3 +1,8 @@
+2014-03-24  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (avr_scan_prologue): Accept push r1 instruction for
+	small stack allocation.
+
 2014-03-24  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c (exc_server): Remove unused prototype.
