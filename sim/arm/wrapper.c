@@ -141,7 +141,7 @@ union maverick_acc_regs  DSPacc[4];
 ARMword DSPsc;
 
 static void
-init ()
+init (void)
 {
   static int done;
 
@@ -163,8 +163,7 @@ init ()
 /* FIXME: common/run.c doesn't do this yet.  */
 
 void
-sim_set_verbose (v)
-     int v;
+sim_set_verbose (int v)
 {
   verbosity = v;
 }
@@ -174,8 +173,7 @@ sim_set_verbose (v)
 /* FIXME: Rename to sim_set_mem_size.  */
 
 void
-sim_size (size)
-     int size;
+sim_size (int size)
 {
   mem_size = size;
 }
@@ -196,20 +194,18 @@ ARMul_ConsolePrint (ARMul_State * state,
 }
 
 ARMword
-ARMul_Debug (state, pc, instr)
-     ARMul_State * state ATTRIBUTE_UNUSED;
-     ARMword       pc    ATTRIBUTE_UNUSED;
-     ARMword       instr ATTRIBUTE_UNUSED;
+ARMul_Debug (ARMul_State * state ATTRIBUTE_UNUSED,
+	     ARMword       pc    ATTRIBUTE_UNUSED,
+	     ARMword       instr ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 int
-sim_write (sd, addr, buffer, size)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     SIM_ADDR addr;
-     const unsigned char * buffer;
-     int size;
+sim_write (SIM_DESC sd ATTRIBUTE_UNUSED,
+	   SIM_ADDR addr,
+	   const unsigned char * buffer,
+	   int size)
 {
   int i;
 
@@ -222,11 +218,10 @@ sim_write (sd, addr, buffer, size)
 }
 
 int
-sim_read (sd, addr, buffer, size)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     SIM_ADDR addr;
-     unsigned char * buffer;
-     int size;
+sim_read (SIM_DESC sd ATTRIBUTE_UNUSED,
+	  SIM_ADDR addr,
+	  unsigned char * buffer,
+	  int size)
 {
   int i;
 
@@ -239,8 +234,7 @@ sim_read (sd, addr, buffer, size)
 }
 
 int
-sim_trace (sd)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
+sim_trace (SIM_DESC sd ATTRIBUTE_UNUSED)
 {
   trace = 1;
   sim_resume (sd, 0, 0);
@@ -248,8 +242,7 @@ sim_trace (sd)
 }
 
 int
-sim_stop (sd)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
+sim_stop (SIM_DESC sd ATTRIBUTE_UNUSED)
 {
   state->Emulate = STOP;
   stop_simulator = 1;
@@ -257,10 +250,9 @@ sim_stop (sd)
 }
 
 void
-sim_resume (sd, step, siggnal)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     int step;
-     int siggnal ATTRIBUTE_UNUSED;
+sim_resume (SIM_DESC sd ATTRIBUTE_UNUSED,
+	    int step,
+	    int siggnal ATTRIBUTE_UNUSED)
 {
   state->EndCondition = 0;
   stop_simulator = 0;
@@ -281,11 +273,10 @@ sim_resume (sd, step, siggnal)
 }
 
 SIM_RC
-sim_create_inferior (sd, abfd, argv, env)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     struct bfd * abfd;
-     char ** argv;
-     char ** env;
+sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
+		     struct bfd * abfd,
+		     char ** argv,
+		     char ** env)
 {
   int argvlen = 0;
   int mach;
@@ -461,16 +452,13 @@ sim_create_inferior (sd, abfd, argv, env)
 }
 
 void
-sim_info (sd, verbose)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     int verbose ATTRIBUTE_UNUSED;
+sim_info (SIM_DESC sd ATTRIBUTE_UNUSED,
+	  int verbose ATTRIBUTE_UNUSED)
 {
 }
 
 static int
-frommem (state, memory)
-     struct ARMul_State *state;
-     unsigned char *memory;
+frommem (struct ARMul_State *state, unsigned char *memory)
 {
   if (state->bigendSig == HIGH)
     return (memory[0] << 24) | (memory[1] << 16)
@@ -481,10 +469,9 @@ frommem (state, memory)
 }
 
 static void
-tomem (state, memory, val)
-     struct ARMul_State *state;
-     unsigned char *memory;
-     int val;
+tomem (struct ARMul_State *state,
+       unsigned char *memory,
+       int val)
 {
   if (state->bigendSig == HIGH)
     {
@@ -503,11 +490,10 @@ tomem (state, memory, val)
 }
 
 int
-sim_store_register (sd, rn, memory, length)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_store_register (SIM_DESC sd ATTRIBUTE_UNUSED,
+		    int rn,
+		    unsigned char *memory,
+		    int length)
 {
   init ();
 
@@ -612,11 +598,10 @@ sim_store_register (sd, rn, memory, length)
 }
 
 int
-sim_fetch_register (sd, rn, memory, length)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_fetch_register (SIM_DESC sd ATTRIBUTE_UNUSED,
+		    int rn,
+		    unsigned char *memory,
+		    int length)
 {
   ARMword regval;
   int len = length;
@@ -734,8 +719,6 @@ sim_fetch_register (sd, rn, memory, length)
   return length;
 }
 
-static void sim_target_parse_arg_array (char **);
-
 typedef struct
 {
   char * 	swi_option;
@@ -760,9 +743,7 @@ static swi_options options[] =
 
 
 int
-sim_target_parse_command_line (argc, argv)
-     int argc;
-     char ** argv;
+sim_target_parse_command_line (int argc, char ** argv)
 {
   int i;
 
@@ -853,8 +834,7 @@ sim_target_parse_command_line (argc, argv)
 }
 
 static void
-sim_target_parse_arg_array (argv)
-     char ** argv;
+sim_target_parse_arg_array (char ** argv)
 {
   int i;
 
@@ -865,8 +845,7 @@ sim_target_parse_arg_array (argv)
 }
 
 void
-sim_target_display_usage (help)
-     int help;
+sim_target_display_usage (int help)
 {
   FILE *stream = help ? stdout : stderr;
 
@@ -878,15 +857,17 @@ sim_target_display_usage (help)
 }
 
 SIM_DESC
-sim_open (kind, ptr, abfd, argv)
-     SIM_OPEN_KIND kind;
-     host_callback *ptr;
-     struct bfd *abfd;
-     char **argv;
+sim_open (SIM_OPEN_KIND   kind,
+	  host_callback * ptr,
+	  struct bfd *    abfd,
+	  char **         argv)
 {
   sim_kind = kind;
-  if (myname) free (myname);
+
+  if (myname)
+    free (myname);
   myname = (char *) xstrdup (argv[0]);
+
   sim_callback = ptr;
 
 #ifdef SIM_TARGET_SWITCHES
@@ -938,21 +919,6 @@ sim_open (kind, ptr, abfd, argv)
 		break;
 	      }
 	  }
-	else if (argv[i][0] == '-' && argv[i][1] == 't')
-	  {
-	    trace = 1;
-	    break;
-	  }
-	else if (argv[i][0] == '-' && argv[i][1] == 'z')
-	  {
-	    trace_funcs = 1;
-	    break;
-	  }
-	else if (argv[i][0] == '-' && argv[i][1] == 'd')
-	  {
-	    disas = 1;
-	    break;
-	  }
 	else if (argv[i][0] == '-' && argv[i][1] == 'm')
 	  {
 	    if (argv[i][2] != '\0')
@@ -976,9 +942,8 @@ sim_open (kind, ptr, abfd, argv)
 }
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     int quitting ATTRIBUTE_UNUSED;
+sim_close (SIM_DESC sd ATTRIBUTE_UNUSED,
+	   int quitting ATTRIBUTE_UNUSED)
 {
   if (myname)
     free (myname);
@@ -986,11 +951,10 @@ sim_close (sd, quitting)
 }
 
 SIM_RC
-sim_load (sd, prog, abfd, from_tty)
-     SIM_DESC sd;
-     const char *prog;
-     bfd *abfd;
-     int from_tty ATTRIBUTE_UNUSED;
+sim_load (SIM_DESC sd,
+	  const char *prog,
+	  bfd *abfd,
+	  int from_tty ATTRIBUTE_UNUSED)
 {
   bfd *prog_bfd;
 
@@ -1005,10 +969,9 @@ sim_load (sd, prog, abfd, from_tty)
 }
 
 void
-sim_stop_reason (sd, reason, sigrc)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     enum sim_stop *reason;
-     int *sigrc;
+sim_stop_reason (SIM_DESC sd ATTRIBUTE_UNUSED,
+		 enum sim_stop *reason,
+		 int *sigrc)
 {
   if (stop_simulator)
     {
@@ -1034,9 +997,8 @@ sim_stop_reason (sd, reason, sigrc)
 }
 
 void
-sim_do_command (sd, cmd)
-     SIM_DESC sd ATTRIBUTE_UNUSED;
-     const char *cmd ATTRIBUTE_UNUSED;
+sim_do_command (SIM_DESC sd ATTRIBUTE_UNUSED,
+		const char *cmd ATTRIBUTE_UNUSED)
 {  
   (*sim_callback->printf_filtered)
     (sim_callback,
@@ -1044,8 +1006,7 @@ sim_do_command (sd, cmd)
 }
 
 void
-sim_set_callbacks (ptr)
-     host_callback *ptr;
+sim_set_callbacks (host_callback *ptr)
 {
   sim_callback = ptr;
 }
