@@ -88,6 +88,15 @@ extension options as the @option{-mcpu} option.  Unlike
 @option{-mcpu}, extensions are not always enabled by default,
 @xref{AArch64 Extensions}.
 
+@cindex @code{-mverbose-error} command line option, AArch64
+@item -mverbose-error
+This option enables verbose error messages for AArch64 gas.  This option
+is enabled by default.
+
+@cindex @code{-mno-verbose-error} command line option, AArch64
+@item -mno-verbose-error
+This option disables verbose error messages in AArch64 gas.
+
 @end table
 @c man end
 

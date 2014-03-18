@@ -1,3 +1,9 @@
+2014-03-18  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/illegal.d: Pass -mno-verbose-error.
+	* gas/aarch64/verbose-error.s: Add more verbose message testcases.
+	* gas/aarch64/verbose-error.l: Ditto.
+
 2014-03-17  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/16694

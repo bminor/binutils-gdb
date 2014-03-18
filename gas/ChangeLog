@@ -1,3 +1,11 @@
+2014-03-18  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (aarch64_opts): Add new option
+	"mno-verbose-error".
+	(verbose_error_p): Initialize to 1.
+	* doc/c-aarch64.texi (AArch64 Options): Document -mverbose-error
+	and -mno-verbose-error.
+
 2014-03-17  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/16694
