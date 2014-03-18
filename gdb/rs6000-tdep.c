@@ -3257,12 +3257,14 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
 	{
 	  int i;
 	  CORE_ADDR ev_addr = cache->base + fdata.ev_offset;
+	  CORE_ADDR off = (byte_order == BFD_ENDIAN_BIG ? 4 : 0);
+
 	  for (i = fdata.saved_ev; i < ppc_num_gprs; i++)
 	    {
 	      cache->saved_regs[tdep->ppc_ev0_regnum + i].addr = ev_addr;
-              cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = ev_addr + 4;
+	      cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = ev_addr + off;
 	      ev_addr += register_size (gdbarch, tdep->ppc_ev0_regnum);
-            }
+	    }
 	}
     }
 
