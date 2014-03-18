@@ -1,3 +1,8 @@
+2014-03-18  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/async.exp: Whitespace fixes.  Turn on target-async.
+	Fix spelling of exec-done-display.
+
 2014-03-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/15358
