@@ -10205,10 +10205,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           }
 
           *pos += 4;
-          return value_zero
-            (to_static_fixed_type
-             (static_unwrap_type (SYMBOL_TYPE (exp->elts[pc + 2].symbol))),
-             not_lval);
+          return value_zero (to_static_fixed_type (type), not_lval);
         }
       else
         {

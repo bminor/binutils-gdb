@@ -1,3 +1,8 @@
+2014-04-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <OP_VAR_VALUE>: Remove
+	unnecessary second call to static_unwrap_type.
+
 2014-04-27  Hui Zhu  <hui@codesourcery.com>
 
 	* stack.c (print_frame_info): Call do_gdb_disassembly with
