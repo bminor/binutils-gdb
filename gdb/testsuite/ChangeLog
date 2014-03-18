@@ -1,3 +1,9 @@
+2014-03-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/15358
+	* gdb.base/gdb-sigterm.c: New file.
+	* gdb.base/gdb-sigterm.exp: New file.
+
 2014-03-18  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13860

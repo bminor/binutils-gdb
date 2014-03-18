@@ -1,3 +1,16 @@
+2014-03-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/15358
+	* defs.h (sync_quit_force_run): New declaration.
+	(QUIT): Check also SYNC_QUIT_FORCE_RUN.
+	* event-top.c (async_sigterm_handler): New declaration.
+	(async_sigterm_token): New variable.
+	(async_init_signals): Create also async_sigterm_token.
+	(async_sigterm_handler): New function.
+	(sync_quit_force_run): New variable.
+	(handle_sigterm): Replace quit_force call by other calls.
+	* utils.c (quit): Call quit_force if SYNC_QUIT_FORCE_RUN.
+
 2014-03-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* rs6000-tdep.c (rs6000_frame_cache): Correct little-endian GPR
