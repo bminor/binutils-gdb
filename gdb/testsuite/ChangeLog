@@ -1,5 +1,9 @@
 2014-03-19  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/async.exp: Remove early return.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/async.exp (step& tests): Pass explicit test messages.
 
 2014-03-19  Pedro Alves  <palves@redhat.com>

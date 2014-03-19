@@ -20,13 +20,6 @@
 
 standard_testfile
 
-########################################
-##
-## Don't do any of these tests until we reach consensus on this file.
-##
-return 0
-########################################
-
 if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
     untested $testfile.exp
     return -1
