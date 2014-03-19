@@ -2,7 +2,7 @@
 
 	* rx-decode.opc (bwl): Allow for bogus instructions with a size
 	field of 3.
-	(sbwl, ubwl): Likewise.
+	(sbwl, ubwl, SCALE): Likewise.
 	* rx-decode.c: Regenerate.
 
 2014-03-12  Alan Modra  <amodra@gmail.com>
