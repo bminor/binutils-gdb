@@ -1,4 +1,9 @@
-2014-03-19  Daniel Gutson <daniel.gutson@tallertechnologies.com>`
+2014-03-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gas/sparc/ldd_std.d: Fix objdump invocation in order to get
+	the old opcodes for the ldtw, ldtwa, stw and stwa instructions.
+
+2014-03-19  Daniel Gutson <daniel.gutson@tallertechnologies.com>
 	    Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/ccs.s: New test case.
