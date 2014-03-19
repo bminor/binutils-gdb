@@ -848,6 +848,8 @@ Select either big-endian (-EB) or little-endian (-EL) output.
 @item -mthumb-interwork
 Specify that the code has been generated with interworking between Thumb and
 ARM code in mind.
+@item -mccs
+Turns on CodeComposer Studio assembly syntax compatibility mode.
 @item -k
 Specify that PIC code has been generated.
 @end table

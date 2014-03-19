@@ -81,6 +81,10 @@ struct fix;
 /* We support double slash line-comments for compatibility with the ARM AArch64 Assembler.  */
 #define DOUBLESLASH_LINE_COMMENTS
 
+/* We conditionally support labels without a colon.  */
+#define LABELS_WITHOUT_COLONS codecomposer_syntax
+extern bfd_boolean codecomposer_syntax;
+
 #define tc_symbol_chars arm_symbol_chars
 extern const char arm_symbol_chars[];
 
@@ -99,6 +103,9 @@ extern int arm_optimize_expr (expressionS *, operatorT, expressionS *);
 #define md_cleanup() arm_cleanup ()
 
 #define md_start_line_hook() arm_start_line_hook ()
+
+#define TC_START_LABEL_WITHOUT_COLON(c, l)  tc_start_label_without_colon (c, l)
+extern bfd_boolean tc_start_label_without_colon (char, const char *);
 
 #define tc_frob_label(S) arm_frob_label (S)
 
@@ -363,3 +370,9 @@ void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 extern int arm_convert_symbolic_attribute (const char *);
 extern int arm_apply_sym_value (struct fix *);
 #endif
+
+#define tc_comment_chars arm_comment_chars
+extern char arm_comment_chars[];
+
+#define tc_line_separator_chars arm_line_separator_chars
+extern char arm_line_separator_chars[];

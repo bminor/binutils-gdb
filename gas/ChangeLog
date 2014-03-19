@@ -1,3 +1,34 @@
+2014-03-19  Daniel Gutson <daniel.gutson@tallertechnologies.com>`
+	    Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (codecomposer_syntax): New flag that states whether the
+	CCS syntax compatibility mode is on or off.
+	(asmfunc_states): New enum to represent the asmfunc directive state.
+	(asmfunc_state): New variable holding the asmfunc directive state.
+	(comment_chars): Rename to arm_comment_chars.
+	(line_separator_chars): Rename to arm_line_separator_chars.
+	(s_ccs_ref): New function that handles the .ref directive.
+	(asmfunc_debug): New function.
+	(s_ccs_asmfunc): New function that handles the .asmfunc directive.
+	(s_ccs_endasmfunc): New function that handles the .endasmfunc directive.
+	(s_ccs_def): New function that handles the .def directive.
+	(tc_start_label_without_colon): New function.
+	(md_pseudo_table): Added new CCS directives.
+	(arm_ccs_mode): New function that handles the -mccs command line option.
+	(arm_long_opts): Added new -mccs command line option.
+	* config/tc-arm.h (LABELS_WITHOUT_COLONS): New macro.
+	(TC_START_LABEL_WITHOUT_COLON): New macro.
+	(tc_start_label_without_colon): Added extern function declaration.
+	(tc_comment_chars): Define.
+	(tc_line_separator_chars): Define.
+	* app.c (do_scrub_begin): Use tc_line_separator_chars, if defined.
+	* read.c (read_begin): Likewise.
+	* doc/as.texinfo: Add documentation for the -mccs command line
+	option.
+	* doc/c-arm.texi: Likewise.
+	* doc/internals.texi: Document tc_line_separator_chars.
+	* NEWS: Mention the new feature.
+
 2014-03-18  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (aarch64_opts): Add new option

@@ -369,6 +369,10 @@ the linker option of the same name.
 Enable or disable warnings about using deprecated options or
 features.  The default is to warn.
 
+@cindex @code{-mccs} command line option, ARM
+@item -mccs
+Turns on CodeComposer Studio assembly syntax compatibility mode.
+
 @end table
 
 

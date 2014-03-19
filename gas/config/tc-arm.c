@@ -137,6 +137,8 @@ static int fix_v4bx	     = FALSE;
 /* Warn on using deprecated features.  */
 static int warn_on_deprecated = TRUE;
 
+/* Understand CodeComposer Studio assembly syntax.  */
+bfd_boolean codecomposer_syntax = FALSE;
 
 /* Variables that we set while parsing command-line options.  Once all
    options have been read we re-process these values to set the real
@@ -795,6 +797,15 @@ typedef struct literal_pool
 /* Pointer to a linked list of literal pools.  */
 literal_pool * list_of_pools = NULL;
 
+typedef enum asmfunc_states
+{
+  OUTSIDE_ASMFUNC,
+  WAITING_ASMFUNC_NAME,
+  WAITING_ENDASMFUNC
+} asmfunc_states;
+
+static asmfunc_states asmfunc_state = OUTSIDE_ASMFUNC;
+
 #ifdef OBJ_ELF
 #  define now_it seg_info (now_seg)->tc_segment_info_data.current_it
 #else
@@ -853,7 +864,7 @@ static void it_fsm_post_encode (void);
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.	 */
-const char comment_chars[] = "@";
+char arm_comment_chars[] = "@";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
@@ -864,7 +875,7 @@ const char comment_chars[] = "@";
 /* Also note that comments like this one will always work.  */
 const char line_comment_chars[] = "#";
 
-const char line_separator_chars[] = ";";
+char arm_line_separator_chars[] = ";";
 
 /* Chars that can be used to separate mant
    from exp in floating point numbers.	*/
@@ -3012,6 +3023,104 @@ s_even (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Directives: CodeComposer Studio.  */
+
+/*  .ref  (for CodeComposer Studio syntax only).  */
+static void
+s_ccs_ref (int unused ATTRIBUTE_UNUSED)
+{
+  if (codecomposer_syntax)
+    ignore_rest_of_line ();
+  else
+    as_bad (_(".ref pseudo-op only available with -mccs flag."));
+}
+
+/*  If name is not NULL, then it is used for marking the beginning of a
+    function, wherease if it is NULL then it means the function end.  */
+static void
+asmfunc_debug (const char * name)
+{
+  static const char * last_name = NULL;
+
+  if (name != NULL)
+    {
+      gas_assert (last_name == NULL);
+      last_name = name;
+
+      if (debug_type == DEBUG_STABS)
+         stabs_generate_asm_func (name, name);
+    }
+  else
+    {
+      gas_assert (last_name != NULL);
+
+      if (debug_type == DEBUG_STABS)
+        stabs_generate_asm_endfunc (last_name, last_name);
+
+      last_name = NULL;
+    }
+}
+
+static void
+s_ccs_asmfunc (int unused ATTRIBUTE_UNUSED)
+{
+  if (codecomposer_syntax)
+    {
+      switch (asmfunc_state)
+	{
+	case OUTSIDE_ASMFUNC:
+	  asmfunc_state = WAITING_ASMFUNC_NAME;
+	  break;
+
+	case WAITING_ASMFUNC_NAME:
+	  as_bad (_(".asmfunc repeated."));
+	  break;
+
+	case WAITING_ENDASMFUNC:
+	  as_bad (_(".asmfunc without function."));
+	  break;
+	}
+      demand_empty_rest_of_line ();
+    }
+  else
+    as_bad (_(".asmfunc pseudo-op only available with -mccs flag."));
+}
+
+static void
+s_ccs_endasmfunc (int unused ATTRIBUTE_UNUSED)
+{
+  if (codecomposer_syntax)
+    {
+      switch (asmfunc_state)
+	{
+	case OUTSIDE_ASMFUNC:
+	  as_bad (_(".endasmfunc without a .asmfunc."));
+	  break;
+
+	case WAITING_ASMFUNC_NAME:
+	  as_bad (_(".endasmfunc without function."));
+	  break;
+
+	case WAITING_ENDASMFUNC:
+	  asmfunc_state = OUTSIDE_ASMFUNC;
+	  asmfunc_debug (NULL);
+	  break;
+	}
+      demand_empty_rest_of_line ();
+    }
+  else
+    as_bad (_(".endasmfunc pseudo-op only available with -mccs flag."));
+}
+
+static void
+s_ccs_def (int name)
+{
+  if (codecomposer_syntax)
+    s_globl (name);
+  else
+    as_bad (_(".def pseudo-op only available with -mccs flag."));
+}
+
 /* Directives: Literal pools.  */
 
 static literal_pool *
@@ -3126,6 +3235,32 @@ add_to_lit_pool (void)
   inst.reloc.exp.X_add_symbol = pool->symbol;
 
   return SUCCESS;
+}
+
+bfd_boolean
+tc_start_label_without_colon (char unused1 ATTRIBUTE_UNUSED, const char * rest)
+{
+  bfd_boolean ret = TRUE;
+
+  if (codecomposer_syntax && asmfunc_state == WAITING_ASMFUNC_NAME)
+    {
+      const char *label = rest;
+
+      while (!is_end_of_line[(int) label[-1]])
+	--label;
+
+      if (*label == '.')
+	{
+	  as_bad (_("Invalid label '%s'"), label);
+	  ret = FALSE;
+	}
+
+      asmfunc_debug (label);
+
+      asmfunc_state = WAITING_ENDASMFUNC;
+    }
+
+  return ret;
 }
 
 /* Can't use symbol_new here, so have to create a symbol and then at
@@ -4486,6 +4621,13 @@ const pseudo_typeS md_pseudo_table[] =
 #ifdef TE_PE
   {"secrel32", pe_directive_secrel, 0},
 #endif
+
+  /* These are for compatibility with CodeComposer Studio.  */
+  {"ref",          s_ccs_ref,        0},
+  {"def",          s_ccs_def,        0},
+  {"asmfunc",      s_ccs_asmfunc,    0},
+  {"endasmfunc",   s_ccs_endasmfunc, 0},
+
   { 0, 0, 0 }
 };
 
@@ -24523,6 +24665,15 @@ arm_parse_it_mode (char * str)
   return ret;
 }
 
+static bfd_boolean
+arm_ccs_mode (char * unused ATTRIBUTE_UNUSED)
+{
+  codecomposer_syntax = TRUE;
+  arm_comment_chars[0] = ';';
+  arm_line_separator_chars[0] = 0;
+  return TRUE;
+}
+
 struct arm_long_option_table arm_long_opts[] =
 {
   {"mcpu=", N_("<cpu name>\t  assemble for CPU <cpu name>"),
@@ -24539,6 +24690,8 @@ struct arm_long_option_table arm_long_opts[] =
 #endif
   {"mimplicit-it=", N_("<mode>\t  controls implicit insertion of IT instructions"),
    arm_parse_it_mode, NULL},
+  {"mccs", N_("\t\t\t  TI CodeComposer Studio syntax compatibility mode"),
+   arm_ccs_mode, NULL},
   {NULL, NULL, 0, NULL}
 };
 

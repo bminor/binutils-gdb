@@ -1,3 +1,9 @@
+2014-03-19  Daniel Gutson <daniel.gutson@tallertechnologies.com>`
+	    Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/ccs.s: New test case.
+	* gas/arm/ccs.d: New expected disassembly.
+
 2014-03-19  Nick Clifton  <nickc@redhat.com>
 
 	* gas/rx/mov.d: Update expected disassembly.

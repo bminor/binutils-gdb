@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Enhanced the ARM port to accept the assembler output from the CodeComposer
+  Studio tool.  Support is enabled via the new command line option -mccs.
+
 * Add support for the Andes NDS32.
 
 Changes in 2.24:

@@ -884,6 +884,8 @@ comment.
 @item tc_comment_chars
 @cindex tc_comment_chars
 If this macro is defined, GAS will use it instead of @code{comment_chars}.
+This has the advantage that this macro does not have to refer to a constant
+array.
 
 @item tc_symbol_chars
 @cindex tc_symbol_chars
@@ -907,6 +909,13 @@ lines (null and newline are such characters by default, and need not be
 listed in this array).  Note that line_separator_chars do not separate lines
 if found in a comment, such as after a character in line_comment_chars or
 comment_chars.
+
+@item tc_line_separator_chars
+@cindex tc_line_separator_chars
+If this macro is defined, GAS will use it instead of
+@code{line_separator_chars}.  This has the advantage that this macro does not
+have to refer to a constant array.
+
 
 @item EXP_CHARS
 @cindex EXP_CHARS
