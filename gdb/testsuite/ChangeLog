@@ -1,5 +1,9 @@
 2014-03-19  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/async.exp: Use prepare_for_testing.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/async.c (foo): Make 'x' volatile.  Write to it twice in
 	the same line.
 
