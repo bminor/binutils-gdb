@@ -1,4 +1,4 @@
-2014-03-19  Daniel Gutson <daniel.gutson@tallertechnologies.com>`
+2014-03-19  Daniel Gutson <daniel.gutson@tallertechnologies.com>
 	    Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (codecomposer_syntax): New flag that states whether the
