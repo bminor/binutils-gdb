@@ -1,5 +1,10 @@
 2014-03-19  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/async.c (foo): Make 'x' volatile.  Write to it twice in
+	the same line.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/async.c (main): Add "jump here" and "until here" line
 	marker comments.
 	* gdb.base/async.exp (jump_here): New global.
