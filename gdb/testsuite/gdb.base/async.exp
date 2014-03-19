@@ -78,9 +78,9 @@ proc test_background {command before_prompt after_prompt {message ""}} {
 
 test_background "next&" "" ".*z = 9.*"
 
-test_background "step&" "" ".*y = foo \\(\\).*"
+test_background "step&" "" ".*y = foo \\(\\).*" "step& #1"
 
-test_background "step&" "" " foo \\(\\) at .*async.c.*x = 5.*"
+test_background "step&" "" " foo \\(\\) at .*async.c.*x = 5.*" "step& #2"
 
 test_background "stepi&" "" ".*$hex.*x = 5.*"
 
