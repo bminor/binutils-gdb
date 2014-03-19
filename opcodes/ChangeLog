@@ -1,3 +1,10 @@
+2014-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* rx-decode.opc (bwl): Allow for bogus instructions with a size
+	field of 3.
+	(sbwl, ubwl): Likewise.
+	* rx-decode.c: Regenerate.
+
 2014-03-12  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
