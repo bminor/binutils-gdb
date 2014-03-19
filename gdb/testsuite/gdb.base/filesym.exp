@@ -22,6 +22,12 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
     return -1
 }
 
+if { ![readline_is_used] } {
+    unsupported "completion doesn't work when readline isn't used."
+    return -1
+}
+
+
 # Test completion list for "filesy".  We expect the immediate result to
 # complete to "filesym"; completing again, we expect the symbol name and the
 # filename (in that order).

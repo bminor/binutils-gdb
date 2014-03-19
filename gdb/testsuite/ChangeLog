@@ -1,5 +1,19 @@
 2014-03-26  Yao Qi  <yao@codesourcery.com>
 
+	* lib/gdb.exp (readline_is_used): New proc.
+	* gdb.base/completion.exp: Move tests on command complete up.
+	Skip the rest of tests if readline is not used.
+	* gdb.ada/complete.exp: Skp the test if readline is not
+	used.
+	* gdb.base/filesym.exp: Likewise.
+	* gdb.base/macscp.exp: Likewise.
+	* gdb.base/readline-ask.exp: Likewise.
+	* gdb.base/readline.exp: Likewise.
+	* gdb.python/py-cmd.exp: Likewise.
+	* gdb.trace/tfile.exp: Likewise.
+
+2014-03-26  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/macscp.exp: Fix code format issues.
 
 2014-03-25  Ulrich Weigand  <uweigand@de.ibm.com>

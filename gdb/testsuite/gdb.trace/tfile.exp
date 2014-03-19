@@ -148,6 +148,8 @@ gdb_test "interpreter-exec mi \"-trace-status\"" \
 
 # Test completion works well.
 
-gdb_test "target tfile [file rootname $tfile_basic]\t" \
-    "Assuming tracepoint.*" \
-    "complete-command 'target tfile'"
+if { [readline_is_used] } {
+    gdb_test "target tfile [file rootname $tfile_basic]\t" \
+	"Assuming tracepoint.*" \
+	"complete-command 'target tfile'"
+}

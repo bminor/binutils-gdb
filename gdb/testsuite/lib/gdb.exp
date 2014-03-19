@@ -1831,6 +1831,21 @@ proc supports_reverse {} {
     return 0
 }
 
+# Return 1 if readline library is used.
+
+proc readline_is_used { } {
+    global gdb_prompt
+
+    gdb_test_multiple "show editing" "" {
+	-re ".*Editing of command lines as they are typed is on\..*$gdb_prompt $" {
+	    return 1
+	}
+	-re ".*$gdb_prompt $" {
+	    return 0
+	}
+    }
+}
+
 # Return 1 if target is ELF.
 gdb_caching_proc is_elf_target {
     set me "is_elf_target"

@@ -176,15 +176,18 @@ test_gdb_complete "<pck__my" \
 # The verification we are trying to make involves the event loop,
 # and using the "complete" command is not sufficient to reproduce
 # the original problem.
-set test "interactive complete 'print some'"
-send_gdb "print some\t"
-gdb_test_multiple "" "$test" {
-    -re "^print some_local_variable $" {
-        send_gdb "\n"
-        gdb_test_multiple "" "$test" {
-            -re " = 1$eol$gdb_prompt $" {
-                pass "$test"
-            }
-        }
+
+if { [readline_is_used] } {
+    set test "interactive complete 'print some'"
+    send_gdb "print some\t"
+    gdb_test_multiple "" "$test" {
+	-re "^print some_local_variable $" {
+	    send_gdb "\n"
+	    gdb_test_multiple "" "$test" {
+		-re " = 1$eol$gdb_prompt $" {
+		    pass "$test"
+		}
+	    }
+	}
     }
 }
