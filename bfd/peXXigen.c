@@ -3477,6 +3477,63 @@ rsrc_merge (struct rsrc_entry * a, struct rsrc_entry * b)
   rsrc_sort_entries (& adir->ids, FALSE, adir);
 }
 
+static bfd_byte *
+rsrc_align (bfd * abfd, bfd_byte * data, bfd_byte * dataend)
+{
+  ptrdiff_t d;
+
+  /* Align the data pointer - we no longer have access to the original sections
+     so we do not know the alignment value they used.  We default to 1^2 alignment
+     but check to see if 1^3 is better.  */
+  d = (ptrdiff_t) data;
+  d = (d + 3) & ~3;
+
+  if ((bfd_byte *) d == (dataend - 4))
+    return dataend;
+      
+  if ((d & 0x4) == 0)
+    return (bfd_byte *) d;
+
+  /* Aligning to 1^3 would change the value of the pointer.  See if the
+     next 16 bytes (without aligning to 1^3) would form a valid Resource
+     Directory Table.  If not then increase the alignment.  */
+  data = (bfd_byte *) d;
+
+  if (data + 16 >= dataend)
+    /* Not enough room left for a resource table anyway.  Just stop.  */
+    return dataend;
+
+  if (bfd_get_32 (abfd, data) != 0)
+    /* A non-zero characteristics field.  This should not happen.
+       Possibly the padding between merged .rsrc sections was not zero.
+       Choose to advance the pointer.  */
+    return (bfd_byte *) (d + 4);
+
+  if (bfd_get_32 (abfd, data + 4) != 0)
+    /* A non-zero time field.  It cannot be the characteristics field
+       of a 1^3 aligned .rsrc section because the characteristics are
+       always zero.   Hence we should not increase the alignment.  */
+    return (bfd_byte *) d;
+
+  /* Looking at bytes 8..11 does not help.  These are either the time stamp
+     or the version fields.  They can both have arbitary values, and zero
+     is quite commmon, so we have no way to distinguish them.  */
+
+  /* Bytes 12..15 are either the version values or the number of entries
+     to follow.  If the value is zero then this must be the version fields,
+     since we must always have at least one entry.  A non-zero value on the
+     other hand is ambiguous.  */
+  if (bfd_get_32 (abfd, data + 12) == 0)
+    return (bfd_byte *) (d + 4);
+
+  /* Ho Hum, we have no easy way to resolve this problem, so punt for now.
+     FIXME: try parsing the entire remaining .rsrc section.  If it fails,
+     try re-aligning data and reparsing.  If that works go with the new
+     alignment.  Note - this has the potential to be dangerously recursive.  */
+
+  return (bfd_byte *) d;
+}
+
 /* Check the .rsrc section.  If it contains multiple concatenated
    resources then we must merge them properly.  Otherwise Windows
    will ignore all but the first set.  */
@@ -3522,7 +3579,7 @@ rsrc_process_section (bfd * abfd,
 
   /* Step one: Walk the section, computing the size of the tables,
      leaves and data and decide if we need to do anything.  */
-  dataend   = data + size;
+  dataend = data + size;
   num_resource_sets = 0;
   sizeof_leaves = sizeof_strings = sizeof_tables_and_entries = 0;
 
@@ -3531,6 +3588,7 @@ rsrc_process_section (bfd * abfd,
       bfd_byte * p = data;
 
       data = rsrc_count_directory (abfd, data, data, dataend, rva_bias);
+
       if (data > dataend)
 	{
 	  /* Corrupted .rsrc section - cannot merge.  */
@@ -3540,13 +3598,8 @@ rsrc_process_section (bfd * abfd,
 	  goto end;
 	}
 
-      /* Align the data pointer - we assume 1^2 alignment.  */
-      data = (bfd_byte *) (((ptrdiff_t) (data + 3)) & ~ 3);
+      data = rsrc_align (abfd, data, dataend);
       rva_bias += data - p;
-
-      if (data == (dataend - 4))
-	data = dataend;
-
       ++ num_resource_sets;
     }
 
@@ -3569,10 +3622,8 @@ rsrc_process_section (bfd * abfd,
 
       data = rsrc_parse_directory (abfd, type_tables + indx, data, data,
 				   dataend, rva_bias, NULL);
-      data = (bfd_byte *) (((ptrdiff_t) (data + 3)) & ~ 3);
+      data = rsrc_align (abfd, data, dataend);
       rva_bias += data - p;
-      if (data == (dataend - 4))
-	data = dataend;
       indx ++;
     }
   BFD_ASSERT (indx == num_resource_sets);

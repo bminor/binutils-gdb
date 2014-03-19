@@ -1,3 +1,12 @@
+2014-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (default-manifest.o): Use WINDRES_FOR_TARGET.
+	* Makefile.in: Regenerate.
+	* emultempl/default-manifest.rc: Fix typo.
+	* scripttempl/pe.sc (R_RSRC): Fix default-manifest exclusion.
+	(.rsrc): Add SUBALIGN(4).
+	* scripttempl/pep.sc: Likewise.
+
 2014-03-17  Christopher Faylor  <me.cygwin2014@cgf.cx>
 
 	* Makefile.am: Use host version of windres.

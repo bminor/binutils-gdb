@@ -54,7 +54,7 @@ if test "${RELOCATING}"; then
          binaries to run under Windows 8 (or later).  It is included as
          the last resource file so that if the application has provided
          its own manifest then that one will take precedence.  */
-      *(EXCLUDE_FILE ($DEFAULT_MANIFEST) .rsrc)
+      *(EXCLUDE_FILE (*$DEFAULT_MANIFEST) .rsrc)
       *(SORT(.rsrc*))
       KEEP ($DEFAULT_MANIFEST(.rsrc))"
   fi
@@ -214,7 +214,7 @@ SECTIONS
     ${RELOCATING+ __end__ = .;}
   }
 
-  .rsrc ${RELOCATING+BLOCK(__section_alignment__)} :
+  .rsrc ${RELOCATING+BLOCK(__section_alignment__)} : SUBALIGN(4)
   {
     ${R_RSRC}
   }

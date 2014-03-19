@@ -1927,7 +1927,7 @@ eshlelf64_nbsd.c: $(srcdir)/emulparams/shlelf64_nbsd.sh \
 
 # Rule to create a manifest file for Cygwin and Mingw.
 default-manifest.o: $(srcdir)/emultempl/default-manifest.rc
-	${WINDRES} -o $@ $<
+	${WINDRES_FOR_TARGET} -o $@ $<
 
 # We need this for automake to use YLWRAP.
 EXTRA_ld_new_SOURCES = deffilep.y ldlex.l

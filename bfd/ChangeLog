@@ -1,3 +1,9 @@
+2014-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (rsrc_align): New function.  Attempts to cope with
+	alignment variances when .rsrc sections are merged.
+	(rsrc_process_section): Use rsrc_align.
+
 2014-03-17  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_read_dylib): Handle lazy load dylib.
