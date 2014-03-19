@@ -1,5 +1,14 @@
 2014-03-19  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/async.c (main): Add "jump here" and "until here" line
+	marker comments.
+	* gdb.base/async.exp (jump_here): New global.
+	(jump& test): Use it.
+	(until_here): New global.
+	(until& test): Use it.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/async.exp: Don't frob gdb_protocol.
 
 2014-03-18  Doug Evans  <xdje42@gmail.com>

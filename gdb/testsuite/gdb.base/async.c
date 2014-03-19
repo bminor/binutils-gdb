@@ -30,9 +30,9 @@ main ()
  z = 9;
  y = foo ();
  z = y;
- y = y + 2;
+ y = y + 2; /* jump here */
  y = baz ();
- return 0;
+ return 0; /* until here */
 }
 
 

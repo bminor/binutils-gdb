@@ -103,17 +103,21 @@ gdb_expect {
     timeout  { fail "(timeout) finish &" }
 }
 
-send_gdb "jump 33&\n" 
+set jump_here [gdb_get_line_number "jump here"]
+
+send_gdb "jump $jump_here&\n"
 gdb_expect {
-    -re "^jump 33&.*Continuing at $hex.*$gdb_prompt.*Breakpoint 2, baz \\(\\) at.*async.c.*return 5.*completed\.\r\n" \
+    -re "^jump $jump_here&.*Continuing at $hex.*$gdb_prompt.*Breakpoint 2, baz \\(\\) at.*async.c.*return 5.*completed\.\r\n" \
 	    { pass "jump &" }
     -re ".*$gdb_prompt.*completed\.$" { fail "jump &" }
     timeout  { fail "(timeout) jump &" }
 }
 
-send_gdb "until 35&\n" 
+set until_here [gdb_get_line_number "until here"]
+
+send_gdb "until $until_here&\n" 
 gdb_expect {
-    -re "^until 35&.*$gdb_prompt.*$hex in main \\(\\) at.*async.c.*y = baz \\(\\).*completed\.\r\n" \
+    -re "^until $until_here&.*$gdb_prompt.*$hex in main \\(\\) at.*async.c.*y = baz \\(\\).*completed\.\r\n" \
 	    { pass "until &" }
     -re "$gdb_prompt.*completed\.$" { fail "until &" }
     timeout  { fail "(timeout) until &" }
