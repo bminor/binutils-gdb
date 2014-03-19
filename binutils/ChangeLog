@@ -1,3 +1,10 @@
+2014-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16723
+	* readelf.c (process_version_sections): Prevent an infinite loop
+	when the vn_next field is zero but there are still entries to be
+	processed.
+
 2014-03-17  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c (dump_section_header): Renames of dump_section.
