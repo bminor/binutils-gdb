@@ -3,6 +3,12 @@
 	* gas/sparc/ldd_std.d: Fix objdump invocation in order to get
 	the old opcodes for the ldtw, ldtwa, stw and stwa instructions.
 
+	* gas/sparc/rdhpr.s: Test rd %hstick_offset and %hstick_enable.
+	* gas/sparc/rdhpr.d: Likewise.
+
+	* gas/sparc/wrhpr.s: Test wr %hstick_offset and %hstick_enable.
+	* gas/sparc/wrhpr.d: Likewise.
+
 2014-03-19  Daniel Gutson <daniel.gutson@tallertechnologies.com>
 	    Nick Clifton  <nickc@redhat.com>
 

@@ -97,7 +97,7 @@ static char *v9_hpriv_reg_names[] =
   "resv7", "resv8", "resv9", "resv10", "resv11", "resv12", "resv13", 
   "resv14", "resv15", "resv16", "resv17", "resv18", "resv19", "resv20",
   "resv21", "resv22", "resv23", "resv24", "resv25", "resv26", "resv27",
-  "resv28", "resv29", "resv30", "hstick_cmpr"
+  "hstick_offset", "hstick_enable", "resv30", "hstick_cmpr"
 };
 
 /* These are ordered according to there register number in

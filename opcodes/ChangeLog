@@ -1,3 +1,8 @@
+2014-03-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-dis.c (v9_hpriv_reg_names): Names for %hstick_offset and
+	%hstick_enable added.
+
 2014-03-19  Nick Clifton  <nickc@redhat.com>
 
 	* rx-decode.opc (bwl): Allow for bogus instructions with a size
