@@ -49,69 +49,57 @@ gdb_test "break baz" ".*" ""
 #
 gdb_test_no_output "set exec-done-display on"
 
+# Test a background execution command.  COMMAND is the command to
+# send.  BEFORE_PROMPT is the pattern expected before the GDB prompt
+# is output.  AFTER_PROMPT is the pattern expected after the prompt
+# and before "completed".  MESSAGE is optional, and is the pass/fail
+# message to br printed.  If omitted, then the command string is used
+# as message.
+proc test_background {command before_prompt after_prompt {message ""}} {
+    global gdb_prompt
 
-send_gdb "next&\n" 
-gdb_expect {
-    -re "^next&\r\n$gdb_prompt.*z = 9.*completed\.\r\n" { pass "next &" }
-    -re "$gdb_prompt.*completed\.$" { fail "next &" }
-    timeout  { fail "(timeout) next &" }
+    if {$message eq ""} {
+        set message $command
+    }
+
+    send_gdb "$command\n"
+    gdb_expect {
+	-re "^$command\r\n${before_prompt}${gdb_prompt}${after_prompt}completed\.\r\n" {
+	    pass "$message"
+	}
+	-re "$gdb_prompt.*completed\.$" {
+	    fail "$message"
+	}
+	timeout  {
+	    fail "$message (timeout)"
+	}
+    }
 }
 
-send_gdb "step&\n" 
-gdb_expect {
-    -re "^step&\r\n$gdb_prompt.*y = foo \\(\\).*completed\.\r\n" { pass "step &" }
-    -re "$gdb_prompt.*completed\.$" { fail "step &" }
-    timeout  { fail "(timeout) step &" }
-}
+test_background "next&" "" ".*z = 9.*"
 
-send_gdb "step&\n" 
-gdb_expect {
-    -re "^step&\r\n$gdb_prompt foo \\(\\) at .*async.c.*x = 5.*completed\.\r\n" \
-	    { pass "step &" }
-    -re "$gdb_prompt.*completed\.$" { fail "step &" }
-    timeout  { fail "(timeout) step &" }
-}
+test_background "step&" "" ".*y = foo \\(\\).*"
 
-send_gdb "stepi&\n" 
-gdb_expect {
-    -re "^stepi&\r\n$gdb_prompt.*$hex.*x = 5.*completed\.\r\n" { pass "stepi &" }
-    -re "$gdb_prompt.*completed\.$" { fail "stepi &" }
-    timeout  { fail "(timeout) stepi &" }
-}
+test_background "step&" "" " foo \\(\\) at .*async.c.*x = 5.*"
 
-send_gdb "nexti&\n" 
-gdb_expect {
-    -re "^nexti&\r\n$gdb_prompt.*y = 3.*completed\.\r\n" { pass "nexti &" }
-    -re "$gdb_prompt.*completed\.$" { fail "nexti &" }
-    timeout  { fail "(timeout) nexti &" }
-}
+test_background "stepi&" "" ".*$hex.*x = 5.*"
 
-send_gdb "finish&\n" 
-gdb_expect {
-    -re "^finish&\r\nRun till exit from #0  foo \\(\\) at.*async.c.*\r\n$gdb_prompt.*$hex in main \\(\\) at.*async.c.*y = foo \\(\\).*Value returned is.*= 8.*completed\.\r\n" \
-	    { pass "finish &" }
-    -re "$gdb_prompt.*completed\.$" { fail "finish &" }
-    timeout  { fail "(timeout) finish &" }
-}
+test_background "nexti&" "" ".*y = 3.*"
+
+test_background "finish&" \
+    "Run till exit from #0  foo \\(\\) at.*async.c.*\r\n" \
+    ".*$hex in main \\(\\) at.*async.c.*y = foo \\(\\).*Value returned is.*= 8.*"
 
 set jump_here [gdb_get_line_number "jump here"]
-
-send_gdb "jump $jump_here&\n"
-gdb_expect {
-    -re "^jump $jump_here&.*Continuing at $hex.*$gdb_prompt.*Breakpoint 2, baz \\(\\) at.*async.c.*return 5.*completed\.\r\n" \
-	    { pass "jump &" }
-    -re ".*$gdb_prompt.*completed\.$" { fail "jump &" }
-    timeout  { fail "(timeout) jump &" }
-}
+test_background "jump $jump_here&" \
+    ".*Continuing at $hex.*" \
+    ".*Breakpoint 2, baz \\(\\) at.*async.c.*return 5.*" \
+    "jump&"
 
 set until_here [gdb_get_line_number "until here"]
-
-send_gdb "until $until_here&\n" 
-gdb_expect {
-    -re "^until $until_here&.*$gdb_prompt.*$hex in main \\(\\) at.*async.c.*y = baz \\(\\).*completed\.\r\n" \
-	    { pass "until &" }
-    -re "$gdb_prompt.*completed\.$" { fail "until &" }
-    timeout  { fail "(timeout) until &" }
-}
+test_background "until $until_here&" \
+    ".*" \
+    ".*$hex in main \\(\\) at.*async.c.*y = baz \\(\\).*" \
+    "until&"
 
 gdb_test_no_output "set exec-done-display off"
