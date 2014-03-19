@@ -67,7 +67,7 @@ proc test_background {command before_prompt after_prompt {message ""}} {
 	-re "^$command\r\n${before_prompt}${gdb_prompt}${after_prompt}completed\.\r\n" {
 	    pass "$message"
 	}
-	-re "$gdb_prompt.*completed\.$" {
+	-re "$gdb_prompt.*completed\.\r\n" {
 	    fail "$message"
 	}
 	timeout  {

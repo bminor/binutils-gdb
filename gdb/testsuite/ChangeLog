@@ -1,5 +1,10 @@
 2014-03-19  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/async.exp (test_background): Expect \r\n after
+	"completed." in the fail pattern.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/async.exp (test_background): New procedure.
 	Use it for all background execution command tests.
 
