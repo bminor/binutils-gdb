@@ -1,3 +1,10 @@
+2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* lib/gdb.exp (skip_tsx_tests, skip_btrace_pt_tests): New.
+	* gdb.btrace/instruction_history.exp: Update.
+	* gdb.btrace/tsx.exp: New.
+	* gdb.btrace/tsx.c: New.
+
 2015-08-06  Pedro Alves <palves@redhat.com>
 
 	* gdb.reverse/step-precsave.exp: Use with_timeout_factor to

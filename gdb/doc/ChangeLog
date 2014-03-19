@@ -1,3 +1,9 @@
+2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Document prefixing of
+	speculatively executed instructions in the "record instruction-history"
+	command.
+
 2015-07-20  Doug Evans  <dje@google.com>
 
 	* Makefile.in (STABS_DOC_BUILD_INCLUDES): Add gdb-cfg.texi, GDBvn.texi.

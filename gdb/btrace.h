@@ -52,6 +52,13 @@ enum btrace_insn_class
   BTRACE_INSN_JUMP
 };
 
+/* Instruction flags.  */
+enum btrace_insn_flag
+{
+  /* The instruction has been executed speculatively.  */
+  BTRACE_INSN_FLAG_SPECULATIVE = (1 << 0)
+};
+
 /* A branch trace instruction.
 
    This represents a single instruction in a branch trace.  */
@@ -65,6 +72,9 @@ struct btrace_insn
 
   /* The instruction class of this instruction.  */
   enum btrace_insn_class iclass;
+
+  /* A bit vector of BTRACE_INSN_FLAGS.  */
+  enum btrace_insn_flag flags;
 };
 
 /* A vector of branch trace instructions.  */

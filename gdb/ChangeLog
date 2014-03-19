@@ -1,5 +1,15 @@
 2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (btrace_compute_ftrace_bts): Clear insn flags.
+	(pt_btrace_insn_flags): New.
+	(ftrace_add_pt): Call pt_btrace_insn_flags.
+	* btrace.h (btrace_insn_flag): New.
+	(btrace_insn) <flags>: New.
+	* record-btrace.c (btrace_insn_history): Print insn prefix.
+	* NEWS: Announce it.
+
+2015-08-07  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* configure.ac: Check for PERF_ATTR_SIZE_VER5 in linux/perf_event.h
 	* configure: Regenerate.
 

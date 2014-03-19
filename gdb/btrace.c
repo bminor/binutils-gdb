@@ -660,6 +660,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  insn.pc = pc;
 	  insn.size = size;
 	  insn.iclass = ftrace_classify_insn (gdbarch, pc);
+	  insn.flags = 0;
 
 	  ftrace_update_insns (end, &insn);
 
@@ -723,6 +724,19 @@ pt_reclassify_insn (enum pt_insn_class iclass)
     default:
       return BTRACE_INSN_OTHER;
     }
+}
+
+/* Return the btrace instruction flags for INSN.  */
+
+static enum btrace_insn_flag
+pt_btrace_insn_flags (const struct pt_insn *insn)
+{
+  enum btrace_insn_flag flags = 0;
+
+  if (insn->speculative)
+    flags |= BTRACE_INSN_FLAG_SPECULATIVE;
+
+  return flags;
 }
 
 /* Add function branch trace using DECODER.  */
@@ -792,6 +806,7 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 	  btinsn.pc = (CORE_ADDR) insn.ip;
 	  btinsn.size = (gdb_byte) insn.size;
 	  btinsn.iclass = pt_reclassify_insn (insn.iclass);
+	  btinsn.flags = pt_btrace_insn_flags (&insn);
 
 	  ftrace_update_insns (end, &btinsn);
 	}
