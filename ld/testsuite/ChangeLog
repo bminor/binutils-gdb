@@ -1,3 +1,8 @@
+2014-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* config/default.exp (ASFLAGS): For the RX target add:
+	-muse-conventional-section-names.
+
 2014-03-15  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/vle-reloc-3.d: Remove addresses.
