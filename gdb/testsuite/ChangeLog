@@ -1,3 +1,7 @@
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.exp: Don't frob gdb_protocol.
+
 2014-03-18  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.base/async.exp: Whitespace fixes.  Turn on target-async.
