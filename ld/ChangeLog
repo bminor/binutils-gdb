@@ -4,7 +4,7 @@
 	* Makefile.in: Regenerate.
 	* emultempl/default-manifest.rc: Fix typo.
 	* scripttempl/pe.sc (R_RSRC): Fix default-manifest exclusion.
-	(.rsrc): Add SUBALIGN(4).
+	(.rsrc): Add SUBALIGN(4).  Remove SORT.
 	* scripttempl/pep.sc: Likewise.
 
 2014-03-17  Christopher Faylor  <me.cygwin2014@cgf.cx>

@@ -3477,63 +3477,6 @@ rsrc_merge (struct rsrc_entry * a, struct rsrc_entry * b)
   rsrc_sort_entries (& adir->ids, FALSE, adir);
 }
 
-static bfd_byte *
-rsrc_align (bfd * abfd, bfd_byte * data, bfd_byte * dataend)
-{
-  ptrdiff_t d;
-
-  /* Align the data pointer - we no longer have access to the original sections
-     so we do not know the alignment value they used.  We default to 1^2 alignment
-     but check to see if 1^3 is better.  */
-  d = (ptrdiff_t) data;
-  d = (d + 3) & ~3;
-
-  if ((bfd_byte *) d == (dataend - 4))
-    return dataend;
-      
-  if ((d & 0x4) == 0)
-    return (bfd_byte *) d;
-
-  /* Aligning to 1^3 would change the value of the pointer.  See if the
-     next 16 bytes (without aligning to 1^3) would form a valid Resource
-     Directory Table.  If not then increase the alignment.  */
-  data = (bfd_byte *) d;
-
-  if (data + 16 >= dataend)
-    /* Not enough room left for a resource table anyway.  Just stop.  */
-    return dataend;
-
-  if (bfd_get_32 (abfd, data) != 0)
-    /* A non-zero characteristics field.  This should not happen.
-       Possibly the padding between merged .rsrc sections was not zero.
-       Choose to advance the pointer.  */
-    return (bfd_byte *) (d + 4);
-
-  if (bfd_get_32 (abfd, data + 4) != 0)
-    /* A non-zero time field.  It cannot be the characteristics field
-       of a 1^3 aligned .rsrc section because the characteristics are
-       always zero.   Hence we should not increase the alignment.  */
-    return (bfd_byte *) d;
-
-  /* Looking at bytes 8..11 does not help.  These are either the time stamp
-     or the version fields.  They can both have arbitary values, and zero
-     is quite commmon, so we have no way to distinguish them.  */
-
-  /* Bytes 12..15 are either the version values or the number of entries
-     to follow.  If the value is zero then this must be the version fields,
-     since we must always have at least one entry.  A non-zero value on the
-     other hand is ambiguous.  */
-  if (bfd_get_32 (abfd, data + 12) == 0)
-    return (bfd_byte *) (d + 4);
-
-  /* Ho Hum, we have no easy way to resolve this problem, so punt for now.
-     FIXME: try parsing the entire remaining .rsrc section.  If it fails,
-     try re-aligning data and reparsing.  If that works go with the new
-     alignment.  Note - this has the potential to be dangerously recursive.  */
-
-  return (bfd_byte *) d;
-}
-
 /* Check the .rsrc section.  If it contains multiple concatenated
    resources then we must merge them properly.  Otherwise Windows
    will ignore all but the first set.  */
@@ -3555,6 +3498,10 @@ rsrc_process_section (bfd * abfd,
   rsrc_directory *  type_tables;
   rsrc_write_data   write_data;
   unsigned int      indx;
+  bfd *             input;
+  unsigned int      num_input_rsrc = 0;
+  unsigned int      max_num_input_rsrc = 4;
+  ptrdiff_t *       rsrc_sizes = NULL;
 
   new_table.names.num_entries = 0;
   new_table.ids.num_entries = 0;
@@ -3577,6 +3524,44 @@ rsrc_process_section (bfd * abfd,
   if (! bfd_get_section_contents (abfd, sec, data, 0, size))
     goto end;
 
+  /* Step zero: Scan the input bfds looking for .rsrc sections and record
+     their lengths.  Note - we rely upon the fact that the linker script
+     does *not* sort the input .rsrc sections, so that the order in the
+     linkinfo list matches the order in the output .rsrc section.
+
+     We need to know the lengths because each input .rsrc section has padding
+     at the end of a variable amount.  (It does not appear to be based upon
+     the section alignment or the file alignment).  We need to skip any
+     padding bytes when parsing the input .rsrc sections.  */
+  rsrc_sizes = bfd_malloc (max_num_input_rsrc * sizeof * rsrc_sizes);
+  if (rsrc_sizes == NULL)
+    goto end;
+
+  for (input = pfinfo->info->input_bfds;
+       input != NULL;
+       input = input->link_next)
+    {
+      asection * rsrc_sec = bfd_get_section_by_name (input, ".rsrc");
+
+      if (rsrc_sec != NULL)
+	{
+	  if (num_input_rsrc == max_num_input_rsrc)
+	    {
+	      max_num_input_rsrc += 10;
+	      rsrc_sizes = bfd_realloc (rsrc_sizes, max_num_input_rsrc
+					* sizeof * rsrc_sizes);
+	      if (rsrc_sizes == NULL)
+		goto end;
+	    }
+
+	  BFD_ASSERT (rsrc_sec->size > 0);
+	  rsrc_sizes [num_input_rsrc ++] = rsrc_sec->size;
+	}
+    }
+
+  if (num_input_rsrc < 2)
+    goto end;
+  
   /* Step one: Walk the section, computing the size of the tables,
      leaves and data and decide if we need to do anything.  */
   dataend = data + size;
@@ -3598,14 +3583,21 @@ rsrc_process_section (bfd * abfd,
 	  goto end;
 	}
 
-      data = rsrc_align (abfd, data, dataend);
+      if ((data - p) > rsrc_sizes [num_resource_sets])
+	{
+	  _bfd_error_handler (_("%s: .rsrc merge failure: unexpected .rsrc size"),
+			      bfd_get_filename (abfd));
+	  bfd_set_error (bfd_error_file_truncated);
+	  goto end;
+	}
+      /* FIXME: Should we add a check for "data - p" being much smaller
+	 than rsrc_sizes[num_resource_sets] ?  */
+
+      data = p + rsrc_sizes[num_resource_sets];
       rva_bias += data - p;
       ++ num_resource_sets;
     }
-
-  if (num_resource_sets < 2)
-    /* No merging necessary.  */
-    goto end;
+  BFD_ASSERT (num_resource_sets == num_input_rsrc);
 
   /* Step two: Walk the data again, building trees of the resources.  */
   data = datastart;
@@ -3620,11 +3612,11 @@ rsrc_process_section (bfd * abfd,
     {
       bfd_byte * p = data;
 
-      data = rsrc_parse_directory (abfd, type_tables + indx, data, data,
+      (void) rsrc_parse_directory (abfd, type_tables + indx, data, data,
 				   dataend, rva_bias, NULL);
-      data = rsrc_align (abfd, data, dataend);
+      data = p + rsrc_sizes[indx];
       rva_bias += data - p;
-      indx ++;
+      ++ indx;
     }
   BFD_ASSERT (indx == num_resource_sets);
 
@@ -3681,8 +3673,10 @@ rsrc_process_section (bfd * abfd,
   sec->size = sec->rawsize = size;
 
  end:
+  /* Step size: Free all the memory that we have used.  */
   /* FIXME: Free the resource tree, if we have one.  */
   free (datastart);
+  free (rsrc_sizes);
 }
 
 /* Handle the .idata section and other things that need symbol table

@@ -1,8 +1,8 @@
 2014-03-19  Nick Clifton  <nickc@redhat.com>
 
-	* peXXigen.c (rsrc_align): New function.  Attempts to cope with
-	alignment variances when .rsrc sections are merged.
-	(rsrc_process_section): Use rsrc_align.
+	* peXXigen.c (rsrc_process_section): Add code to scan input
+	sections and record their lengths.  Use these lengths to find the
+	start of each merged .rsrc section.
 
 2014-03-17  Tristan Gingold  <gingold@adacore.com>
 

@@ -47,15 +47,18 @@ if test "${RELOCATING}"; then
   if test -z "$DEFAULT_MANIFEST"; then
     R_RSRC='
       *(.rsrc)
-      *(SORT(.rsrc$*))'
+      *(.rsrc$*)'
   else
     R_RSRC="
       /* The default manifest contains information necessary for
          binaries to run under Windows 8 (or later).  It is included as
          the last resource file so that if the application has provided
-         its own manifest then that one will take precedence.  */
+         its own manifest then that one will take precedence.
+
+	 Note - the .rsrc section merging code relies upon the fact
+	 that the input .rsrc sections are *not* sorted.  */
       *(EXCLUDE_FILE (*$DEFAULT_MANIFEST) .rsrc)
-      *(SORT(.rsrc*))
+      *(.rsrc*)
       KEEP ($DEFAULT_MANIFEST(.rsrc))"
   fi
 else
