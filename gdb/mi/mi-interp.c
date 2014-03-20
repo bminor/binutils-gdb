@@ -853,7 +853,7 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
 
   ui_out_field_fmt (mi_uiout, "thread-group", "i%d", inferior->num);
   ui_out_field_core_addr (mi_uiout, "addr", target_gdbarch (), memaddr);
-  ui_out_field_fmt (mi_uiout, "len", "0x%zx", len);
+  ui_out_field_fmt (mi_uiout, "len", "%s", hex_string (len));
 
   /* Append 'type=code' into notification if MEMADDR falls in the range of
      sections contain code.  */

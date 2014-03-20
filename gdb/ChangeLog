@@ -1,3 +1,8 @@
+2014-03-20  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mi/mi-interp.c (mi_memory_changed): Avoid using the ISO C99
+	`z' formatted output modifier.
+
 2014-03-20  Tom Tromey  <tromey@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 
