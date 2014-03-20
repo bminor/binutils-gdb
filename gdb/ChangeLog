@@ -1,3 +1,9 @@
+2014-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* varobj.c (varobj_value_has_mutated): If NEW_VALUE is
+	a reference, strip the reference layer before calling
+	the lang_ops value_has_mutated callback.
+
 2014-03-27  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	Remove some globals from our parser.

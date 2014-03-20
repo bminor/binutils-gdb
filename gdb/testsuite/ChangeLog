@@ -1,3 +1,7 @@
+2014-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_dyn_arr: New testcase.
+
 2014-03-27  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/dw2-abs-hi-pc.exp: Build tests with "nodebug".
