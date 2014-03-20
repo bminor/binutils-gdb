@@ -1,5 +1,20 @@
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (prepare_to_proceed): Delete.
+	(thread_still_needs_step_over): New function.
+	(find_thread_needs_step_over): New function.
+	(proceed): If the current thread needs a step-over, set its
+	steping_over_breakpoint flag.  Adjust to use
+	find_thread_needs_step_over instead of prepare_to_proceed.
+	(process_event_stop_test): For BPSTAT_WHAT_STOP_NOISY and
+	BPSTAT_WHAT_STOP_SILENT, assume the thread stopped for a
+	breakpoint.
+	(switch_back_to_stepped_thread): Step over breakpoints of all
+	threads not the stepping thread, before switching back to the
+	stepping thread.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (single_step_breakpoint_inserted_here_p): Make
 	extern.
 	* breakpoint.h (single_step_breakpoint_inserted_here_p): Declare.

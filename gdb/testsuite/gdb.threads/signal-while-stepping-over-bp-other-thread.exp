@@ -107,7 +107,7 @@ gdb_test "set debug infrun 1"
 
 gdb_test \
     "step" \
-    ".*prepare_to_proceed \\(step=1\\), switched to.*signal arrived while stepping over breakpoint.*switching back to stepped thread.*stepped to a different line.*callme.*" \
+    ".*need to step-over.*resume \\(step=1.*signal arrived while stepping over breakpoint.*switching back to stepped thread.*stepped to a different line.*callme.*" \
     "step"
 
 set cnt_after [get_value "args\[$my_number\]" "get count after step"]

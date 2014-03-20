@@ -1,5 +1,12 @@
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/multiple-step-overs.c: New file.
+	* gdb.threads/multiple-step-overs.exp: New file.
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	Adjust expected infrun debug output.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/step-over-trips-on-watchpoint.c: New file.
 	* gdb.threads/step-over-trips-on-watchpoint.exp: New file.
 
