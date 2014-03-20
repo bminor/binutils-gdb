@@ -127,9 +127,9 @@ show_step_stop_if_no_debug (struct ui_file *file, int from_tty,
 
 int sync_execution = 0;
 
-/* wait_for_inferior and normal_stop use this to notify the user
-   when the inferior stopped in a different thread than it had been
-   running in.  */
+/* proceed and normal_stop use this to notify the user when the
+   inferior stopped in a different thread than it had been running
+   in.  */
 
 static ptid_t previous_inferior_ptid;
 
@@ -977,14 +977,6 @@ static CORE_ADDR singlestep_pc;
 static ptid_t saved_singlestep_ptid;
 static int stepping_past_singlestep_breakpoint;
 
-/* If not equal to null_ptid, this means that after stepping over breakpoint
-   is finished, we need to switch to deferred_step_ptid, and step it.
-
-   The use case is when one thread has hit a breakpoint, and then the user 
-   has switched to another thread and issued 'step'.  We need to step over
-   breakpoint in the thread which hit the breakpoint, but then continue
-   stepping the thread user has selected.  */
-static ptid_t deferred_step_ptid;
 
 /* Displaced stepping.  */
 
@@ -1583,9 +1575,6 @@ infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
   if (ptid_equal (singlestep_ptid, old_ptid))
     singlestep_ptid = new_ptid;
 
-  if (ptid_equal (deferred_step_ptid, old_ptid))
-    deferred_step_ptid = new_ptid;
-
   for (displaced = displaced_step_inferior_states;
        displaced;
        displaced = displaced->next)
@@ -2103,10 +2092,6 @@ prepare_to_proceed (int step)
       if (breakpoint_here_p (get_regcache_aspace (regcache),
 			     regcache_read_pc (regcache)))
 	{
-	  /* If stepping, remember current thread to switch back to.  */
-	  if (step)
-	    deferred_step_ptid = inferior_ptid;
-
 	  /* Switch back to WAIT_PID thread.  */
 	  switch_to_thread (wait_ptid);
 
@@ -2380,7 +2365,6 @@ init_wait_for_inferior (void)
   clear_proceed_status ();
 
   stepping_past_singlestep_breakpoint = 0;
-  deferred_step_ptid = null_ptid;
 
   target_last_wait_ptid = minus_one_ptid;
 
@@ -3916,43 +3900,6 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  prepare_to_wait (ecs);
 	  return;
 	}
-    }
-
-  if (!ptid_equal (deferred_step_ptid, null_ptid))
-    {
-      /* In non-stop mode, there's never a deferred_step_ptid set.  */
-      gdb_assert (!non_stop);
-
-      /* If we stopped for some other reason than single-stepping, ignore
-	 the fact that we were supposed to switch back.  */
-      if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
-	{
-	  if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog,
-				"infrun: handling deferred step\n");
-
-	  /* Pull the single step breakpoints out of the target.  */
-	  if (singlestep_breakpoints_inserted_p)
-	    {
-	      if (!ptid_equal (ecs->ptid, inferior_ptid))
-		context_switch (ecs->ptid);
-	      remove_single_step_breakpoints ();
-	      singlestep_breakpoints_inserted_p = 0;
-	    }
-
-	  ecs->event_thread->control.trap_expected = 0;
-
-	  context_switch (deferred_step_ptid);
-	  deferred_step_ptid = null_ptid;
-	  /* Suppress spurious "Switching to ..." message.  */
-	  previous_inferior_ptid = inferior_ptid;
-
-	  resume (1, GDB_SIGNAL_0);
-	  prepare_to_wait (ecs);
-	  return;
-	}
-
-      deferred_step_ptid = null_ptid;
     }
 
   /* See if a thread hit a thread-specific breakpoint that was meant for

@@ -1,3 +1,11 @@
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (previous_inferior_ptid): Adjust comment.
+	(deferred_step_ptid): Delete.
+	(infrun_thread_ptid_changed, prepare_to_proceed)
+	(init_wait_for_inferior): Adjust.
+	(handle_signal_stop): Delete deferred_step_ptid handling.
+
 2014-03-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/15358
