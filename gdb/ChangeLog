@@ -1,4 +1,11 @@
 2014-03-20  Tom Tromey  <tromey@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* probe.c (parse_probes): Turn assert into an ordinary error.
+	* break-catch-throw.c (re_set_exception_catchpoint): Ignore
+	exceptions when parsing probes.  Rearrange the code for clarity.
+
+2014-03-20  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/14135
 	* top.c (execute_command): Only dispatch events if the command

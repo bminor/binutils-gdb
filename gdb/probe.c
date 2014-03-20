@@ -59,7 +59,8 @@ parse_probes (char **argptr, struct linespec_result *canonical)
 
   cs = *argptr;
   probe_ops = probe_linespec_to_ops (&cs);
-  gdb_assert (probe_ops != NULL);
+  if (probe_ops == NULL)
+    error (_("'%s' is not a probe linespec"), arg_start);
 
   arg = (char *) cs;
   arg = skip_spaces (arg);

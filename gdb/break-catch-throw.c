@@ -207,29 +207,32 @@ re_set_exception_catchpoint (struct breakpoint *self)
   volatile struct gdb_exception e;
   struct cleanup *cleanup;
   enum exception_event_kind kind = classify_exception_breakpoint (self);
-  int pass;
 
-  for (pass = 0; sals.sals == NULL && pass < 2; ++pass)
+  /* We first try to use the probe interface.  */
+  TRY_CATCH (e, RETURN_MASK_ERROR)
     {
-      TRY_CATCH (e, RETURN_MASK_ERROR)
-	{
-	  char *spec;
+      char *spec = ASTRDUP (exception_functions[kind].probe);
 
-	  if (pass == 0)
-	    {
-	      spec = ASTRDUP (exception_functions[kind].probe);
-	      sals = parse_probes (&spec, NULL);
-	    }
-	  else
-	    {
-	      spec = ASTRDUP (exception_functions[kind].function);
-	      self->ops->decode_linespec (self, &spec, &sals);
-	    }
+      sals = parse_probes (&spec, NULL);
+    }
+
+  if (e.reason < 0)
+    {
+      volatile struct gdb_exception ex;
+
+      /* Using the probe interface failed.  Let's fallback to the normal
+	 catchpoint mode.  */
+      TRY_CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  char *spec = ASTRDUP (exception_functions[kind].function);
+
+	  self->ops->decode_linespec (self, &spec, &sals);
 	}
+
       /* NOT_FOUND_ERROR just means the breakpoint will be pending, so
 	 let it through.  */
-      if (e.reason < 0 && e.error != NOT_FOUND_ERROR)
-	throw_exception (e);
+      if (ex.reason < 0 && ex.error != NOT_FOUND_ERROR)
+	throw_exception (ex);
     }
 
   cleanup = make_cleanup (xfree, sals.sals);
