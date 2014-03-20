@@ -1,3 +1,9 @@
+2014-03-20  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/15718
+	* infcall.c: Include event-top.h.
+	(run_inferior_call): Call async_disable_stdin if needed.
+
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (prepare_to_proceed): Delete.

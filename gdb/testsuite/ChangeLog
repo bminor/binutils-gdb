@@ -1,3 +1,10 @@
+2014-03-20  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR cli/15718
+	* gdb.base/condbreak-call-false.c: New file.
+	* gdb.base/condbreak-call-false.exp: New file.
+
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/signal-while-stepping-over-bp-other-thread.c (pid):
