@@ -1,5 +1,13 @@
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.c (pid):
+	Delete.
+	(block_signals, unblock_signals): Delete.
+	(child_function_2, main): Remove references to deleted variable
+	and functions.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/signal-while-stepping-over-bp-other-thread.c (main):
 	Use pthread_kill to signal thread 2.
 	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
