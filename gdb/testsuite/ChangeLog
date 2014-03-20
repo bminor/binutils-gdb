@@ -1,5 +1,13 @@
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.c (main):
+	Use pthread_kill to signal thread 2.
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	Adjust to make the test send itself a signal rather than using the
+	host's "kill" command.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/multiple-step-overs.c: New file.
 	* gdb.threads/multiple-step-overs.exp: New file.
 	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:

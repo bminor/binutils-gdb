@@ -138,6 +138,8 @@ main ()
   pthread_barrier_wait (&barrier);
   callme (); /* set wait-thread-3 breakpoint here */
 
+  pthread_kill (child_thread_2, SIGUSR1);
+
   pthread_join (child_thread_2, NULL);
   pthread_join (child_thread_3, NULL);
 
