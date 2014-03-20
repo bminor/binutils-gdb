@@ -1,3 +1,19 @@
+2014-03-20  DJ Delorie  <dj@redhat.com>
+
+	* config/rl78-defs.h (RL78_RELAX_NONE, RL78_RELAX_BRANCH): Add.
+	* config/rl78-parse.y (BC, BNC, BZ, BNZ, BH, BHZ, bt_bf): Call
+	rl78_relax().
+	* config/tc-rl78.h (md_relax_frag): Define.
+	(rl78_relax_frag): Declare.
+	* config/tc-rl78.c (rl78_relax): Add.
+	(md_assemble): Set up the variable frags also when relaxing.
+	(op_type_T): New.
+	(rl78_opcode_type): New.
+	(rl78_frag_fix_value): New.
+	(md_estimate_size_before_relax): New-ish.
+	(rl78_relax_frag): New.
+	(md_convert_frag): New-ish.
+
 2014-03-20  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.h (DIFF_EXPR_OK, CFI_DIFF_EXPR_OK): Define.

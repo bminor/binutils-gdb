@@ -49,6 +49,9 @@ extern int target_little_endian;
 #define md_end rl78_md_end
 extern void rl78_md_end (void);
 
+#define md_relax_frag rl78_relax_frag
+extern int rl78_relax_frag (segT, fragS *, long);
+
 #define TC_FRAG_TYPE struct rl78_bytesT *
 #define TC_FRAG_INIT rl78_frag_init
 extern void rl78_frag_init (fragS *);

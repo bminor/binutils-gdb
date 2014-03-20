@@ -86,6 +86,15 @@ typedef struct rl78_bytesT
 static rl78_bytesT rl78_bytes;
 
 void
+rl78_relax (int type, int pos)
+{
+  rl78_bytes.relax[rl78_bytes.n_relax].type = type;
+  rl78_bytes.relax[rl78_bytes.n_relax].field_pos = pos;
+  rl78_bytes.relax[rl78_bytes.n_relax].val_ofs = rl78_bytes.n_base + rl78_bytes.n_ops;
+  rl78_bytes.n_relax ++;
+}
+
+void
 rl78_linkrelax_addr16 (void)
 {
   rl78_bytes.link_relax |= RL78_RELAXA_ADDR16;
@@ -486,12 +495,13 @@ md_assemble (char * str)
   rl78_parse ();
 
   /* This simplifies the relaxation code.  */
-  if (rl78_bytes.link_relax)
+  if (rl78_bytes.n_relax || rl78_bytes.link_relax)
     {
       int olen = rl78_bytes.n_prefix + rl78_bytes.n_base + rl78_bytes.n_ops;
       /* We do it this way because we want the frag to have the
-	 rl78_bytes in it, which we initialize above.  */
-      bytes = frag_more (olen);
+	 rl78_bytes in it, which we initialize above.  The extra bytes
+	 are for relaxing.  */
+      bytes = frag_more (olen + 3);
       frag_then = frag_now;
       frag_variant (rs_machine_dependent,
 		    olen /* max_chars */,
@@ -638,12 +648,477 @@ rl78_cons_fix_new (fragS *	frag,
     }
 }
 
-/* No relaxation just yet */
+
+/*----------------------------------------------------------------------*/
+/* To recap: we estimate everything based on md_estimate_size, then
+   adjust based on rl78_relax_frag.  When it all settles, we call
+   md_convert frag to update the bytes.  The relaxation types and
+   relocations are in fragP->tc_frag_data, which is a copy of that
+   rl78_bytes.
+
+   Our scheme is as follows: fr_fix has the size of the smallest
+   opcode (like BRA.S).  We store the number of total bytes we need in
+   fr_subtype.  When we're done relaxing, we use fr_subtype and the
+   existing opcode bytes to figure out what actual opcode we need to
+   put in there.  If the fixup isn't resolvable now, we use the
+   maximal size.  */
+
+#define TRACE_RELAX 0
+#define tprintf if (TRACE_RELAX) printf
+
+
+typedef enum
+{
+  OT_other,
+  OT_bt,
+  OT_bt_sfr,
+  OT_bt_es,
+  OT_bc,
+  OT_bh
+} op_type_T;
+
+/* We're looking for these types of relaxations:
+
+   BT		00110001 sbit0cc1 addr----	(cc is 10 (BF) or 01 (BT))
+   B~T		00110001 sbit0cc1 00000011 11101110 pcrel16- -------- (BR $!pcrel20)
+
+   BT sfr	00110001 sbit0cc0 sfr----- addr----
+   BT ES:	00010001 00101110 sbit0cc1 addr----
+
+   BC		110111cc addr----
+   B~C		110111cc 00000011 11101110 pcrel16- -------- (BR $!pcrel20)
+
+   BH		01100001 110c0011 00000011 11101110 pcrel16- -------- (BR $!pcrel20)
+   B~H		01100001 110c0011 00000011 11101110 pcrel16- -------- (BR $!pcrel20)
+*/
+
+/* Given the opcode bytes at OP, figure out which opcode it is and
+   return the type of opcode.  We use this to re-encode the opcode as
+   a different size later.  */
+
+static op_type_T
+rl78_opcode_type (char * op)
+{
+  if (op[0] == 0x31
+      && ((op[1] & 0x0f) == 0x05
+	  || (op[1] & 0x0f) == 0x03))
+    return OT_bt;
+
+  if (op[0] == 0x31
+      && ((op[1] & 0x0f) == 0x04
+	  || (op[1] & 0x0f) == 0x02))
+    return OT_bt_sfr;
+
+  if (op[0] == 0x11
+      && op[1] == 0x31
+      && ((op[2] & 0x0f) == 0x05
+	  || (op[2] & 0x0f) == 0x03))
+    return OT_bt_es;
+
+  if ((op[0] & 0xfc) == 0xdc)
+    return OT_bc;
+
+  if (op[0] == 0x61
+      && (op[1] & 0xef) == 0xc3)
+    return OT_bh;
+
+  return OT_other;
+}
+
+/* Returns zero if *addrP has the target address.  Else returns nonzero
+   if we cannot compute the target address yet.  */
+
+static int
+rl78_frag_fix_value (fragS *    fragP,
+		     segT       segment,
+		     int        which,
+		     addressT * addrP,
+		     int        need_diff,
+		     addressT * sym_addr)
+{
+  addressT addr = 0;
+  rl78_bytesT * b = fragP->tc_frag_data;
+  expressionS * exp = & b->fixups[which].exp;
+
+  if (need_diff && exp->X_op != O_subtract)
+    return 1;
+
+  if (exp->X_add_symbol)
+    {
+      if (S_FORCE_RELOC (exp->X_add_symbol, 1))
+	return 1;
+      if (S_GET_SEGMENT (exp->X_add_symbol) != segment)
+	return 1;
+      addr += S_GET_VALUE (exp->X_add_symbol);
+    }
+
+  if (exp->X_op_symbol)
+    {
+      if (exp->X_op != O_subtract)
+	return 1;
+      if (S_FORCE_RELOC (exp->X_op_symbol, 1))
+	return 1;
+      if (S_GET_SEGMENT (exp->X_op_symbol) != segment)
+	return 1;
+      addr -= S_GET_VALUE (exp->X_op_symbol);
+    }
+  if (sym_addr)
+    * sym_addr = addr;
+  addr += exp->X_add_number;
+  * addrP = addr;
+  return 0;
+}
+
+/* Estimate how big the opcode is after this relax pass.  The return
+   value is the difference between fr_fix and the actual size.  We
+   compute the total size in rl78_relax_frag and store it in fr_subtype,
+   sowe only need to subtract fx_fix and return it.  */
+
 int
 md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED, segT segment ATTRIBUTE_UNUSED)
 {
-  return 0;
+  int opfixsize;
+  int delta;
+
+  /* This is the size of the opcode that's accounted for in fr_fix.  */
+  opfixsize = fragP->fr_fix - (fragP->fr_opcode - fragP->fr_literal);
+  /* This is the size of the opcode that isn't.  */
+  delta = (fragP->fr_subtype - opfixsize);
+
+  tprintf (" -> opfixsize %d delta %d\n", opfixsize, delta);
+  return delta;
 }
+
+/* Given the new addresses for this relax pass, figure out how big
+   each opcode must be.  We store the total number of bytes needed in
+   fr_subtype.  The return value is the difference between the size
+   after the last pass and the size after this pass, so we use the old
+   fr_subtype to calculate the difference.  */
+
+int
+rl78_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
+{
+  addressT addr0, sym_addr;
+  addressT mypc;
+  int disp;
+  int oldsize = fragP->fr_subtype;
+  int newsize = oldsize;
+  op_type_T optype;
+  int ri;
+
+  mypc = fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal);
+
+  /* If we ever get more than one reloc per opcode, this is the one
+     we're relaxing.  */
+  ri = 0;
+
+  optype = rl78_opcode_type (fragP->fr_opcode);
+  /* Try to get the target address.  */
+  if (rl78_frag_fix_value (fragP, segment, ri, & addr0,
+			   fragP->tc_frag_data->relax[ri].type != RL78_RELAX_BRANCH,
+			   & sym_addr))
+    {
+      /* If we don't, we must use the maximum size for the linker.  */
+      switch (fragP->tc_frag_data->relax[ri].type)
+	{
+	case RL78_RELAX_BRANCH:
+	  switch (optype)
+	    {
+	    case OT_bt:
+	      newsize = 6;
+	      break;
+	    case OT_bt_sfr:
+	    case OT_bt_es:
+	      newsize = 7;
+	      break;
+	    case OT_bc:
+	      newsize = 5;
+	      break;
+	    case OT_bh:
+	      newsize = 6;
+	      break;
+	    case OT_other:
+	      newsize = oldsize;
+	      break;
+	    }
+	  break;
+
+	}
+      fragP->fr_subtype = newsize;
+      tprintf (" -> new %d old %d delta %d (external)\n", newsize, oldsize, newsize-oldsize);
+      return newsize - oldsize;
+    }
+
+  if (sym_addr > mypc)
+    addr0 += stretch;
+
+  switch (fragP->tc_frag_data->relax[ri].type)
+    {
+    case  RL78_RELAX_BRANCH:
+      disp = (int) addr0 - (int) mypc;
+
+      switch (optype)
+	{
+	case OT_bt:
+	  if (disp >= -128 && (disp - (oldsize-2)) <= 127)
+	    newsize = 3;
+	  else
+	    newsize = 6;
+	  break;
+	case OT_bt_sfr:
+	case OT_bt_es:
+	  if (disp >= -128 && (disp - (oldsize-3)) <= 127)
+	    newsize = 4;
+	  else
+	    newsize = 7;
+	  break;
+	case OT_bc:
+	  if (disp >= -128 && (disp - (oldsize-1)) <= 127)
+	    newsize = 2;
+	  else
+	    newsize = 5;
+	  break;
+	case OT_bh:
+	  if (disp >= -128 && (disp - (oldsize-2)) <= 127)
+	    newsize = 3;
+	  else
+	    newsize = 6;
+	  break;
+	case OT_other:
+	  newsize = oldsize;
+	  break;
+	}
+      break;
+    }
+
+  /* This prevents infinite loops in align-heavy sources.  */
+  if (newsize < oldsize)
+    {
+      if (fragP->tc_frag_data->times_shrank > 10
+         && fragP->tc_frag_data->times_grown > 10)
+       newsize = oldsize;
+      if (fragP->tc_frag_data->times_shrank < 20)
+       fragP->tc_frag_data->times_shrank ++;
+    }
+  else if (newsize > oldsize)
+    {
+      if (fragP->tc_frag_data->times_grown < 20)
+       fragP->tc_frag_data->times_grown ++;
+    }
+
+  fragP->fr_subtype = newsize;
+  tprintf (" -> new %d old %d delta %d\n", newsize, oldsize, newsize-oldsize);
+  return newsize - oldsize;
+ }
+ 
+/* This lets us test for the opcode type and the desired size in a
+   switch statement.  */
+#define OPCODE(type,size) ((type) * 16 + (size))
+
+/* Given the opcode stored in fr_opcode and the number of bytes we
+   think we need, encode a new opcode.  We stored a pointer to the
+   fixup for this opcode in the tc_frag_data structure.  If we can do
+   the fixup here, we change the relocation type to "none" (we test
+   for that in tc_gen_reloc) else we change it to the right type for
+   the new (biggest) opcode.  */
+
+void
+md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
+		 segT    segment ATTRIBUTE_UNUSED,
+		 fragS * fragP ATTRIBUTE_UNUSED)
+{
+  rl78_bytesT * rl78b = fragP->tc_frag_data;
+  addressT addr0, mypc;
+  int disp;
+  int reloc_type, reloc_adjust;
+  char * op = fragP->fr_opcode;
+  int keep_reloc = 0;
+  int ri;
+  int fi = (rl78b->n_fixups > 1) ? 1 : 0;
+  fixS * fix = rl78b->fixups[fi].fixP;
+
+  /* If we ever get more than one reloc per opcode, this is the one
+     we're relaxing.  */
+  ri = 0;
+
+  /* We used a new frag for this opcode, so the opcode address should
+     be the frag address.  */
+  mypc = fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal);
+  tprintf("\033[32mmypc: 0x%x\033[0m\n", (int)mypc);
+
+  /* Try to get the target address.  If we fail here, we just use the
+     largest format.  */
+  if (rl78_frag_fix_value (fragP, segment, 0, & addr0,
+			 fragP->tc_frag_data->relax[ri].type != RL78_RELAX_BRANCH, 0))
+    {
+      /* We don't know the target address.  */
+      keep_reloc = 1;
+      addr0 = 0;
+      disp = 0;
+      tprintf ("unknown addr ? - %x = ?\n", (int)mypc);
+    }
+  else
+    {
+      /* We know the target address, and it's in addr0.  */
+      disp = (int) addr0 - (int) mypc;
+      tprintf ("known addr %x - %x = %d\n", (int)addr0, (int)mypc, disp);
+    }
+
+  if (linkrelax)
+    keep_reloc = 1;
+
+  reloc_type = BFD_RELOC_NONE;
+  reloc_adjust = 0;
+
+  switch (fragP->tc_frag_data->relax[ri].type)
+    {
+    case RL78_RELAX_BRANCH:
+      switch (OPCODE (rl78_opcode_type (fragP->fr_opcode), fragP->fr_subtype))
+	{
+
+	case OPCODE (OT_bt, 3): /* BT A,$ - no change.  */
+	  disp -= 3;
+	  op[2] = disp;
+	  break;
+
+	case OPCODE (OT_bt, 6): /* BT A,$ - long version.  */
+	  disp -= 3;
+	  op[1] ^= 0x06; /* toggle conditional.  */
+	  op[2] = 3; /* displacement over long branch.  */
+	  disp -= 3;
+	  op[3] = 0xEE; /* BR $!addr20 */
+	  op[4] = disp & 0xff;
+	  op[5] = disp >> 8;
+	  reloc_type = keep_reloc ? BFD_RELOC_16_PCREL : BFD_RELOC_NONE;
+	  reloc_adjust = 2;
+	  break;
+
+	case OPCODE (OT_bt_sfr, 4): /* BT PSW,$ - no change.  */
+	  disp -= 4;
+	  op[3] = disp;
+	  break;
+
+	case OPCODE (OT_bt_sfr, 7): /* BT PSW,$ - long version.  */
+	  disp -= 4;
+	  op[1] ^= 0x06; /* toggle conditional.  */
+	  op[3] = 3; /* displacement over long branch.  */
+	  disp -= 3;
+	  op[4] = 0xEE; /* BR $!addr20 */
+	  op[5] = disp & 0xff;
+	  op[6] = disp >> 8;
+	  reloc_type = keep_reloc ? BFD_RELOC_16_PCREL : BFD_RELOC_NONE;
+	  reloc_adjust = 2;
+	  break;
+
+	case OPCODE (OT_bt_es, 4): /* BT ES:[HL],$ - no change.  */
+	  disp -= 4;
+	  op[3] = disp;
+	  break;
+
+	case OPCODE (OT_bt_es, 7): /* BT PSW,$ - long version.  */
+	  disp -= 4;
+	  op[2] ^= 0x06; /* toggle conditional.  */
+	  op[3] = 3; /* displacement over long branch.  */
+	  disp -= 3;
+	  op[4] = 0xEE; /* BR $!addr20 */
+	  op[5] = disp & 0xff;
+	  op[6] = disp >> 8;
+	  reloc_type = keep_reloc ? BFD_RELOC_16_PCREL : BFD_RELOC_NONE;
+	  reloc_adjust = 2;
+	  break;
+
+	case OPCODE (OT_bc, 2): /* BC $ - no change.  */
+	  disp -= 2;
+	  op[1] = disp;
+	  break;
+
+	case OPCODE (OT_bc, 5): /* BC $ - long version.  */
+	  disp -= 2;
+	  op[0] ^= 0x02; /* toggle conditional.  */
+	  op[1] = 3;
+	  disp -= 3;
+	  op[2] = 0xEE; /* BR $!addr20 */
+	  op[3] = disp & 0xff;
+	  op[4] = disp >> 8;
+	  reloc_type = keep_reloc ? BFD_RELOC_16_PCREL : BFD_RELOC_NONE;
+	  reloc_adjust = 2;
+	  break;
+
+	case OPCODE (OT_bh, 3): /* BH $ - no change.  */
+	  disp -= 3;
+	  op[2] = disp;
+	  break;
+
+	case OPCODE (OT_bh, 6): /* BC $ - long version.  */
+	  disp -= 3;
+	  op[1] ^= 0x10; /* toggle conditional.  */
+	  op[2] = 3;
+	  disp -= 3;
+	  op[3] = 0xEE; /* BR $!addr20 */
+	  op[4] = disp & 0xff;
+	  op[5] = disp >> 8;
+	  reloc_type = keep_reloc ? BFD_RELOC_16_PCREL : BFD_RELOC_NONE;
+	  reloc_adjust = 2;
+	  break;
+
+	default:
+	  fprintf(stderr, "Missed case %d %d at 0x%lx\n",
+		  rl78_opcode_type (fragP->fr_opcode), fragP->fr_subtype, mypc);
+	  abort ();
+	  
+	}
+      break;
+
+    default:
+      if (rl78b->n_fixups)
+	{
+	  reloc_type = fix->fx_r_type;
+	  reloc_adjust = 0;
+	}
+      break;
+    }
+
+  if (rl78b->n_fixups)
+    {
+
+      fix->fx_r_type = reloc_type;
+      fix->fx_where += reloc_adjust;
+      switch (reloc_type)
+	{
+	case BFD_RELOC_NONE:
+	  fix->fx_size = 0;
+	  break;
+	case BFD_RELOC_8:
+	  fix->fx_size = 1;
+	  break;
+	case BFD_RELOC_16_PCREL:
+	  fix->fx_size = 2;
+	  break;
+	}
+    }
+
+  fragP->fr_fix = fragP->fr_subtype + (fragP->fr_opcode - fragP->fr_literal);
+  tprintf ("fragP->fr_fix now %ld (%d + (%p - %p)\n", (long) fragP->fr_fix,
+	  fragP->fr_subtype, fragP->fr_opcode, fragP->fr_literal);
+  fragP->fr_var = 0;
+
+  tprintf ("compare 0x%lx vs 0x%lx - 0x%lx = 0x%lx (%p)\n",
+	   (long)fragP->fr_fix,
+	   (long)fragP->fr_next->fr_address, (long)fragP->fr_address,
+	   (long)(fragP->fr_next->fr_address - fragP->fr_address),
+	   fragP->fr_next);
+
+  if (fragP->fr_next != NULL
+	  && ((offsetT) (fragP->fr_next->fr_address - fragP->fr_address)
+	      != fragP->fr_fix))
+    as_bad (_("bad frag at %p : fix %ld addr %ld %ld \n"), fragP,
+	    (long) fragP->fr_fix,
+	    (long) fragP->fr_address, (long) fragP->fr_next->fr_address);
+}
+
+/* End of relaxation code.
+  ----------------------------------------------------------------------*/
+
 
 arelent **
 tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
@@ -866,13 +1341,4 @@ md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
   return ((size + (1 << align) - 1) & (-1 << align));
-}
-
-void
-md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
-		 segT    segment ATTRIBUTE_UNUSED,
-		 fragS * fragP ATTRIBUTE_UNUSED)
-{
-  /* No relaxation yet */
-  fragP->fr_var = 0;
 }
