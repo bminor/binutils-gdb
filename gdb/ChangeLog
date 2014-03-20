@@ -1,5 +1,31 @@
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (single_step_breakpoint_inserted_here_p): Make
+	extern.
+	* breakpoint.h (single_step_breakpoint_inserted_here_p): Declare.
+	* infrun.c (saved_singlestep_ptid)
+	(stepping_past_singlestep_breakpoint): Delete.
+	(resume): Remove stepping_past_singlestep_breakpoint handling.
+	(proceed): Store the prev_pc of the stepping thread too.
+	(init_wait_for_inferior): Adjust.  Clear singlestep_ptid and
+	singlestep_pc.
+	(enum infwait_states): Delete infwait_thread_hop_state.
+	(struct execution_control_state) <hit_singlestep_breakpoint>: New
+	field.
+	(handle_inferior_event): Adjust.
+	(handle_signal_stop): Delete stepping_past_singlestep_breakpoint
+	handling and the thread-hop code.  Before removing single-step
+	breakpoints, check whether the thread hit a single-step breakpoint
+	of another thread.  If it did, the trap is not a random signal.
+	(switch_back_to_stepped_thread): If the event thread hit a
+	single-step breakpoint, unblock it before switching to the
+	stepping thread.  Handle the case of the stepped thread having
+	advanced already.
+	(keep_going): Handle the case of the current thread moving past a
+	single-step breakpoint.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
 	PR breakpoints/7143
 	* breakpoint.c (should_be_inserted): Don't insert breakpoints that
 	are being stepped over.

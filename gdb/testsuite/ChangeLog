@@ -1,5 +1,10 @@
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/step-over-trips-on-watchpoint.c: New file.
+	* gdb.threads/step-over-trips-on-watchpoint.exp: New file.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
 	PR breakpoints/7143
 	* gdb.base/watchpoint.exp: Mention bugzilla bug number instead of
 	old gnats gdb/38.  Remove kfail.  Adjust to use gdb_test instead
