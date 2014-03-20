@@ -1,3 +1,11 @@
+2014-03-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.h (DIFF_EXPR_OK, CFI_DIFF_EXPR_OK): Define.
+	* config/tc-mips.c (md_pcrel_from): Remove error message.
+	(md_apply_fix): Convert PC-relative BFD_RELOC_32s to
+	BFD_RELOC_32_PCREL.  Report a specific error message for unhandled
+	PC-relative expressions.  Handle BFD_RELOC_8.
+
 2014-03-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-sparc.c (hpriv_reg_table): Added entries for
