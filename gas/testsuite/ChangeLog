@@ -1,3 +1,16 @@
+2014-03-20  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/avx512pf-intel.d: Change memory size for vgatherpf0qps,
+	vgatherpf1qps, vscatterpf0qps, vscatterpf1qps.
+	* gas/i386/avx512pf.s: Ditto.
+	* gas/i386/x86-64-avx512pf-intel.d: Ditto.
+	* gas/i386/x86-64-avx512pf.s: Ditto.
+	* gas/i386/avx512f-intel.d: Change memory size for vgatherqps,
+	vpgatherqd, vpscatterqd, vscatterqps.
+	* gas/i386/avx512f.s: Ditto.
+	* gas/i386/x86-64-avx512f-intel.d: Ditto.
+	* gas/i386/x86-64-avx512f.s: Ditto.
+
 2014-03-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gas/sparc/ldd_std.d: Fix objdump invocation in order to get
