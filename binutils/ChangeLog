@@ -1,3 +1,8 @@
+2014-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_version_sections): Fix off-by-one error in
+	previous delta.
+
 2014-03-19  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16723

@@ -8971,7 +8971,7 @@ process_version_sections (FILE * file)
 		if (j < ent.vn_cnt)
 		  warn (_("Missing Version Needs auxillary information\n"));
 
-		if (ent.vn_next == 0 && cnt < section->sh_info)
+		if (ent.vn_next == 0 && cnt < section->sh_info - 1)
 		  {
 		    warn (_("Corrupt Version Needs structure - offset to next structure is zero with entries still left to be processed\n"));
 		    cnt = section->sh_info;
