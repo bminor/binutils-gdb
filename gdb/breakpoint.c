@@ -165,11 +165,6 @@ static void describe_other_breakpoints (struct gdbarch *,
 					struct program_space *, CORE_ADDR,
 					struct obj_section *, int);
 
-static int breakpoint_address_match (struct address_space *aspace1,
-				     CORE_ADDR addr1,
-				     struct address_space *aspace2,
-				     CORE_ADDR addr2);
-
 static int watchpoint_locations_match (struct bp_location *loc1,
 				       struct bp_location *loc2);
 
@@ -2032,6 +2027,14 @@ should_be_inserted (struct bp_location *bl)
      the child could still trip on the parent's breakpoints.  Since
      the parent is blocked anyway, it won't miss any breakpoint.  */
   if (bl->pspace->breakpoints_not_allowed)
+    return 0;
+
+  /* Don't insert a breakpoint if we're trying to step past its
+     location.  */
+  if ((bl->loc_type == bp_loc_software_breakpoint
+       || bl->loc_type == bp_loc_hardware_breakpoint)
+      && stepping_past_instruction_at (bl->pspace->aspace,
+				       bl->address))
     return 0;
 
   return 1;
@@ -6792,12 +6795,9 @@ watchpoint_locations_match (struct bp_location *loc1,
 	  && loc1->length == loc2->length);
 }
 
-/* Returns true if {ASPACE1,ADDR1} and {ASPACE2,ADDR2} represent the
-   same breakpoint location.  In most targets, this can only be true
-   if ASPACE1 matches ASPACE2.  On targets that have global
-   breakpoints, the address space doesn't really matter.  */
+/* See breakpoint.h.  */
 
-static int
+int
 breakpoint_address_match (struct address_space *aspace1, CORE_ADDR addr1,
 			  struct address_space *aspace2, CORE_ADDR addr2)
 {

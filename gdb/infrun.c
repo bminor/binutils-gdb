@@ -977,6 +977,76 @@ static CORE_ADDR singlestep_pc;
 static ptid_t saved_singlestep_ptid;
 static int stepping_past_singlestep_breakpoint;
 
+/* Info about an instruction that is being stepped over.  Invalid if
+   ASPACE is NULL.  */
+
+struct step_over_info
+{
+  /* The instruction's address space.  */
+  struct address_space *aspace;
+
+  /* The instruction's address.  */
+  CORE_ADDR address;
+};
+
+/* The step-over info of the location that is being stepped over.
+
+   Note that with async/breakpoint always-inserted mode, a user might
+   set a new breakpoint/watchpoint/etc. exactly while a breakpoint is
+   being stepped over.  As setting a new breakpoint inserts all
+   breakpoints, we need to make sure the breakpoint being stepped over
+   isn't inserted then.  We do that by only clearing the step-over
+   info when the step-over is actually finished (or aborted).
+
+   Presently GDB can only step over one breakpoint at any given time.
+   Given threads that can't run code in the same address space as the
+   breakpoint's can't really miss the breakpoint, GDB could be taught
+   to step-over at most one breakpoint per address space (so this info
+   could move to the address space object if/when GDB is extended).
+   The set of breakpoints being stepped over will normally be much
+   smaller than the set of all breakpoints, so a flag in the
+   breakpoint location structure would be wasteful.  A separate list
+   also saves complexity and run-time, as otherwise we'd have to go
+   through all breakpoint locations clearing their flag whenever we
+   start a new sequence.  Similar considerations weigh against storing
+   this info in the thread object.  Plus, not all step overs actually
+   have breakpoint locations -- e.g., stepping past a single-step
+   breakpoint, or stepping to complete a non-continuable
+   watchpoint.  */
+static struct step_over_info step_over_info;
+
+/* Record the address of the breakpoint/instruction we're currently
+   stepping over.  */
+
+static void
+set_step_over_info (struct address_space *aspace, CORE_ADDR address)
+{
+  step_over_info.aspace = aspace;
+  step_over_info.address = address;
+}
+
+/* Called when we're not longer stepping over a breakpoint / an
+   instruction, so all breakpoints are free to be (re)inserted.  */
+
+static void
+clear_step_over_info (void)
+{
+  step_over_info.aspace = NULL;
+  step_over_info.address = 0;
+}
+
+/* See inferior.h.  */
+
+int
+stepping_past_instruction_at (struct address_space *aspace,
+			      CORE_ADDR address)
+{
+  return (step_over_info.aspace != NULL
+	  && breakpoint_address_match (aspace, address,
+				       step_over_info.aspace,
+				       step_over_info.address));
+}
+
 
 /* Displaced stepping.  */
 
@@ -1852,8 +1922,10 @@ a command like `return' or `jump' to continue execution."));
       remove_single_step_breakpoints ();
       singlestep_breakpoints_inserted_p = 0;
 
-      insert_breakpoints ();
+      clear_step_over_info ();
       tp->control.trap_expected = 0;
+
+      insert_breakpoints ();
     }
 
   if (should_resume)
@@ -1894,12 +1966,7 @@ a command like `return' or `jump' to continue execution."));
 	     hit, by single-stepping the thread with the breakpoint
 	     removed.  In which case, we need to single-step only this
 	     thread, and keep others stopped, as they can miss this
-	     breakpoint if allowed to run.
-
-	     The current code actually removes all breakpoints when
-	     doing this, not just the one being stepped over, so if we
-	     let other threads run, we can actually miss any
-	     breakpoint, not just the one at PC.  */
+	     breakpoint if allowed to run.  */
 	  resume_ptid = inferior_ptid;
 	}
 
@@ -2030,6 +2097,8 @@ clear_proceed_status (void)
     }
 
   stop_after_trap = 0;
+
+  clear_step_over_info ();
 
   observer_notify_about_to_proceed ();
 
@@ -2217,22 +2286,23 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
   tp = inferior_thread ();
 
   if (force_step)
-    {
-      tp->control.trap_expected = 1;
-      /* If displaced stepping is enabled, we can step over the
-	 breakpoint without hitting it, so leave all breakpoints
-	 inserted.  Otherwise we need to disable all breakpoints, step
-	 one instruction, and then re-add them when that step is
-	 finished.  */
-      if (!use_displaced_stepping (gdbarch))
-	remove_breakpoints ();
-    }
+    tp->control.trap_expected = 1;
 
-  /* We can insert breakpoints if we're not trying to step over one,
-     or if we are stepping over one but we're using displaced stepping
-     to do so.  */
-  if (! tp->control.trap_expected || use_displaced_stepping (gdbarch))
-    insert_breakpoints ();
+  /* If we need to step over a breakpoint, and we're not using
+     displaced stepping to do so, insert all breakpoints (watchpoints,
+     etc.) but the one we're stepping over, step one instruction, and
+     then re-insert the breakpoint when that step is finished.  */
+  if (tp->control.trap_expected && !use_displaced_stepping (gdbarch))
+    {
+      struct regcache *regcache = get_current_regcache ();
+
+      set_step_over_info (get_regcache_aspace (regcache),
+			  regcache_read_pc (regcache));
+    }
+  else
+    clear_step_over_info ();
+
+  insert_breakpoints ();
 
   if (!non_stop)
     {
@@ -3992,9 +4062,6 @@ handle_signal_stop (struct execution_control_state *ecs)
 
       if (thread_hop_needed)
 	{
-	  struct regcache *thread_regcache;
-	  int remove_status = 0;
-
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: thread_hop_needed\n");
 
@@ -4013,35 +4080,17 @@ handle_signal_stop (struct execution_control_state *ecs)
 	      singlestep_breakpoints_inserted_p = 0;
 	    }
 
-	  /* If the arch can displace step, don't remove the
-	     breakpoints.  */
-	  thread_regcache = get_thread_regcache (ecs->ptid);
-	  if (!use_displaced_stepping (get_regcache_arch (thread_regcache)))
-	    remove_status = remove_breakpoints ();
-
-	  /* Did we fail to remove breakpoints?  If so, try
-	     to set the PC past the bp.  (There's at least
-	     one situation in which we can fail to remove
-	     the bp's: On HP-UX's that use ttrace, we can't
-	     change the address space of a vforking child
-	     process until the child exits (well, okay, not
-	     then either :-) or execs.  */
-	  if (remove_status != 0)
-	    error (_("Cannot step over breakpoint hit in wrong thread"));
-	  else
-	    {			/* Single step */
-	      if (!non_stop)
-		{
-		  /* Only need to require the next event from this
-		     thread in all-stop mode.  */
-		  waiton_ptid = ecs->ptid;
-		  infwait_state = infwait_thread_hop_state;
-		}
-
-	      ecs->event_thread->stepping_over_breakpoint = 1;
-	      keep_going (ecs);
-	      return;
+	  if (!non_stop)
+	    {
+	      /* Only need to require the next event from this thread
+		 in all-stop mode.  */
+	      waiton_ptid = ecs->ptid;
+	      infwait_state = infwait_thread_hop_state;
 	    }
+
+	  ecs->event_thread->stepping_over_breakpoint = 1;
+	  keep_going (ecs);
+	  return;
 	}
     }
 
@@ -5695,6 +5744,8 @@ stop_stepping (struct execution_control_state *ecs)
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog, "infrun: stop_stepping\n");
 
+  clear_step_over_info ();
+
   /* Let callers know we don't want to wait for the inferior anymore.  */
   ecs->wait_some_more = 0;
 }
@@ -5727,6 +5778,9 @@ keep_going (struct execution_control_state *ecs)
     }
   else
     {
+      volatile struct gdb_exception e;
+      struct regcache *regcache = get_current_regcache ();
+
       /* Either the trap was not expected, but we are continuing
 	 anyway (if we got a signal, the user asked it be passed to
 	 the child)
@@ -5740,33 +5794,30 @@ keep_going (struct execution_control_state *ecs)
 	 already inserted breakpoints.  Therefore, we don't
 	 care if breakpoints were already inserted, or not.  */
 
-      if (ecs->event_thread->stepping_over_breakpoint)
+      /* If we need to step over a breakpoint, and we're not using
+	 displaced stepping to do so, insert all breakpoints
+	 (watchpoints, etc.) but the one we're stepping over, step one
+	 instruction, and then re-insert the breakpoint when that step
+	 is finished.  */
+      if (ecs->event_thread->stepping_over_breakpoint
+	  && !use_displaced_stepping (get_regcache_arch (regcache)))
 	{
-	  struct regcache *thread_regcache = get_thread_regcache (ecs->ptid);
-
-	  if (!use_displaced_stepping (get_regcache_arch (thread_regcache)))
-	    {
-	      /* Since we can't do a displaced step, we have to remove
-		 the breakpoint while we step it.  To keep things
-		 simple, we remove them all.  */
-	      remove_breakpoints ();
-	    }
+	  set_step_over_info (get_regcache_aspace (regcache),
+			      regcache_read_pc (regcache));
 	}
       else
-	{
-	  volatile struct gdb_exception e;
+	clear_step_over_info ();
 
-	  /* Stop stepping if inserting breakpoints fails.  */
-	  TRY_CATCH (e, RETURN_MASK_ERROR)
-	    {
-	      insert_breakpoints ();
-	    }
-	  if (e.reason < 0)
-	    {
-	      exception_print (gdb_stderr, e);
-	      stop_stepping (ecs);
-	      return;
-	    }
+      /* Stop stepping if inserting breakpoints fails.  */
+      TRY_CATCH (e, RETURN_MASK_ERROR)
+	{
+	  insert_breakpoints ();
+	}
+      if (e.reason < 0)
+	{
+	  exception_print (gdb_stderr, e);
+	  stop_stepping (ecs);
+	  return;
 	}
 
       ecs->event_thread->control.trap_expected

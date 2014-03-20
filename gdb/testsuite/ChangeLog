@@ -1,5 +1,14 @@
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
+	PR breakpoints/7143
+	* gdb.base/watchpoint.exp: Mention bugzilla bug number instead of
+	old gnats gdb/38.  Remove kfail.  Adjust to use gdb_test instead
+	of gdb_test_multiple.
+	* gdb.cp/annota2.exp: Remove kfail for gdb/38.
+	* gdb.cp/annota3.exp: Remove kfail for gdb/38.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/step-over-lands-on-breakpoint.c: New file.
 	* gdb.threads/step-over-lands-on-breakpoint.exp: New file.
 

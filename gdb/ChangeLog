@@ -1,5 +1,30 @@
 2014-03-20  Pedro Alves  <palves@redhat.com>
 
+	PR breakpoints/7143
+	* breakpoint.c (should_be_inserted): Don't insert breakpoints that
+	are being stepped over.
+	(breakpoint_address_match): Make extern.
+	* breakpoint.h (breakpoint_address_match): New declaration.
+	* inferior.h (stepping_past_instruction_at): New declaration.
+	* infrun.c (struct step_over_info): New type.
+	(step_over_info): New global.
+	(set_step_over_info, clear_step_over_info)
+	(stepping_past_instruction_at): New functions.
+	(handle_inferior_event): Clear the step-over info when
+	trap_expected is cleared.
+	(resume): Remove now stale comment.
+	(clear_proceed_status): Clear step-over info.
+	(proceed): Adjust step-over handling to set or clear the step-over
+	info instead of removing all breakpoints.
+	(handle_signal_stop): When setting up a thread-hop, don't remove
+	breakpoints here.
+	(stop_stepping): Clear step-over info.
+	(keep_going): Adjust step-over handling to set or clear step-over
+	info and then always inserting breakpoints, instead of removing
+	all breakpoints when stepping over one.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (previous_inferior_ptid): Adjust comment.
 	(deferred_step_ptid): Delete.
 	(infrun_thread_ptid_changed, prepare_to_proceed)
