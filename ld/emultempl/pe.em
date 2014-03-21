@@ -137,6 +137,7 @@ static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable.  */
 static char *pe_out_def_filename = NULL;
 static char *pe_implib_filename = NULL;
 static int pe_enable_auto_image_base = 0;
+static unsigned long pe_auto_image_base = 0x61500000;
 static char *pe_dll_search_prefix = NULL;
 #endif
 
@@ -322,7 +323,7 @@ gld${EMULATION_NAME}_add_options
        treating -c as an abbreviation for these --compat-implib.  */
     {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
     {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
-    {"enable-auto-image-base", no_argument, NULL, OPTION_ENABLE_AUTO_IMAGE_BASE},
+    {"enable-auto-image-base", optional_argument, NULL, OPTION_ENABLE_AUTO_IMAGE_BASE},
     {"disable-auto-image-base", no_argument, NULL, OPTION_DISABLE_AUTO_IMAGE_BASE},
     {"dll-search-prefix", required_argument, NULL, OPTION_DLL_SEARCH_PREFIX},
     {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
@@ -455,11 +456,12 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
   fprintf (file, _("  --out-implib <file>                Generate import library\n"));
   fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
-  fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports.\n"));
+  fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports\n"));
   fprintf (file, _("  --compat-implib                    Create backward compatible import libs;\n\
                                        create __imp_<SYMBOL> as well.\n"));
-  fprintf (file, _("  --enable-auto-image-base           Automatically choose image base for DLLs\n\
-                                       unless user specifies one\n"));
+  fprintf (file, _("  --enable-auto-image-base[=<address>] Automatically choose image base for DLLs\n\
+                                       (optionally starting with address) unless\n\
+                                       specifically set with --image-base\n"));
   fprintf (file, _("  --disable-auto-image-base          Do not auto-choose image base. (default)\n"));
   fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll without\n\
                                        an importlib, use <string><basename>.dll\n\
@@ -802,6 +804,12 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_ENABLE_AUTO_IMAGE_BASE:
       pe_enable_auto_image_base = 1;
+      if (optarg && *optarg)
+	{
+	  char *end;
+	  pe_auto_image_base = strtoul(optarg, &end, 0);
+	  /* XXX should check that we actually parsed something */
+	}
       break;
     case OPTION_DISABLE_AUTO_IMAGE_BASE:
       pe_enable_auto_image_base = 0;
@@ -911,7 +919,7 @@ static unsigned long
 compute_dll_image_base (const char *ofile)
 {
   unsigned long hash = strhash (ofile);
-  return 0x61300000 + ((hash << 16) & 0x0FFC0000);
+  return pe_auto_image_base + ((hash << 16) & 0x0FFC0000);
 }
 #endif
 
