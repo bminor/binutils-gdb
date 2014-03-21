@@ -1,3 +1,11 @@
+2014-04-22  Yao Qi  <yao@codesourcery.com>
+
+	* lib/trace-support.exp (generate_tracefile): New procedure.
+	* gdb.trace/tfile.exp: Skip the test if generate_tracefile
+	return 0.
+	* gdb.trace/mi-traceframe-changed.exp: Invoke test_tfind_tfile
+	if generate_tracefile returns 1.
+
 2014-04-18  Tom Tromey  <palves@redhat.com>
 	    Pedro alves  <tromey@redhat.com>
 
