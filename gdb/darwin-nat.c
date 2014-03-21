@@ -1991,11 +1991,8 @@ set_enable_mach_exceptions (char *args, int from_tty,
 static char *
 darwin_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  char *path;
+  static char path[PATH_MAX];
   int res;
-
-  path = xmalloc (PATH_MAX);
-  make_cleanup (xfree, path);
 
   res = proc_pidinfo (pid, PROC_PIDPATHINFO, 0, path, PATH_MAX);
   if (res >= 0)

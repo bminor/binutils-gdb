@@ -4011,19 +4011,15 @@ linux_nat_thread_name (struct target_ops *self, struct thread_info *thr)
 static char *
 linux_child_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  char *name1, *name2;
+  static char buf[PATH_MAX];
+  char name[PATH_MAX];
 
-  name1 = xmalloc (PATH_MAX);
-  name2 = xmalloc (PATH_MAX);
-  make_cleanup (xfree, name1);
-  make_cleanup (xfree, name2);
-  memset (name2, 0, PATH_MAX);
+  xsnprintf (name, PATH_MAX, "/proc/%d/exe", pid);
+  memset (buf, 0, PATH_MAX);
+  if (readlink (name, buf, PATH_MAX - 1) <= 0)
+    strcpy (buf, name);
 
-  xsnprintf (name1, PATH_MAX, "/proc/%d/exe", pid);
-  if (readlink (name1, name2, PATH_MAX - 1) > 0)
-    return name2;
-  else
-    return name1;
+  return buf;
 }
 
 /* Records the thread's register state for the corefile note

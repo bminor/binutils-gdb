@@ -1,3 +1,12 @@
+2014-03-21  Hui Zhu  <hui@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_pid_to_exec_file): Change xmalloc to
+	static buffer.
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Ditto.
+	* linux-nat.c (linux_child_pid_to_exec_file): Ditto.
+	* nbsd-nat.c (nbsd_pid_to_exec_file): Ditto.
+
 2014-03-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mi/mi-interp.c (mi_memory_changed): Avoid using the ISO C99
