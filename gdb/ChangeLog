@@ -1,3 +1,10 @@
+2014-03-24  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (exc_server): Remove unused prototype.
+	(darwin_dump_message): Correctly display data on x86_64.
+	(darwin_encode_reply): Fix style.
+	Add comments and fix indentation.
+
 2014-03-24  Pierre Langlois  <pierre.langlois@embecosm.com>
 
 	* MAINTAINERS (Write After Approval): Add "Pierre Langlois".

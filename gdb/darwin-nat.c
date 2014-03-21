@@ -85,8 +85,6 @@
 #define PTRACE(CMD, PID, ADDR, SIG) \
  darwin_ptrace(#CMD, CMD, (PID), (ADDR), (SIG))
 
-extern boolean_t exc_server (mach_msg_header_t *in, mach_msg_header_t *out);
-
 static void darwin_stop (struct target_ops *self, ptid_t);
 
 static void darwin_resume_to (struct target_ops *ops, ptid_t ptid, int step,
@@ -127,7 +125,7 @@ mach_port_t darwin_host_self;
 /* Exception port.  */
 mach_port_t darwin_ex_port;
 
-/* Port set.  */
+/* Port set, to wait for answer on all ports.  */
 mach_port_t darwin_port_set;
 
 /* Page size.  */
@@ -149,10 +147,8 @@ static unsigned int darwin_debug_flag = 0;
 /* Create a __TEXT __info_plist section in the executable so that gdb could
    be signed.  This is required to get an authorization for task_for_pid.
 
-   Once gdb is built, you can either:
-   * make it setgid procmod
-   * or codesign it with any system-trusted signing authority.
-   See taskgated(8) for details.  */
+   Once gdb is built, you must codesign it with any system-trusted signing
+   authority.  See taskgated(8) for details.  */
 static const unsigned char info_plist[]
 __attribute__ ((section ("__TEXT,__info_plist"),used)) =
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -492,7 +488,7 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
   if (disp_body)
     {
       const unsigned char *data;
-      const unsigned long *ldata;
+      const unsigned int *ldata;
       int size;
       int i;
 
@@ -538,9 +534,9 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	}
 
       printf_unfiltered (_("  data:"));
-      ldata = (const unsigned long *)data;
-      for (i = 0; i < size / sizeof (unsigned long); i++)
-	printf_unfiltered (" %08lx", ldata[i]);
+      ldata = (const unsigned int *)data;
+      for (i = 0; i < size / sizeof (unsigned int); i++)
+	printf_unfiltered (" %08x", ldata[i]);
       printf_unfiltered (_("\n"));
     }
 }
@@ -561,7 +557,7 @@ darwin_decode_exception_message (mach_msg_header_t *hdr,
   kern_return_t kret;
   int i;
 
-  /* Check message identifier.  2401 is exc.  */
+  /* Check message identifier.  2401 == 0x961 is exc.  */
   if (hdr->msgh_id != 2401)
     return -1;
 
@@ -616,8 +612,8 @@ darwin_decode_exception_message (mach_msg_header_t *hdr,
     return -1;
   *pthread = thread;
 
-  /* The thread should be running.  However we have observed cases where a thread
-     got a SIGTTIN message after being stopped.  */
+  /* The thread should be running.  However we have observed cases where a
+     thread got a SIGTTIN message after being stopped.  */
   gdb_assert (thread->msg_state != DARWIN_MESSAGE);
 
   /* Finish decoding.  */
@@ -644,9 +640,10 @@ darwin_encode_reply (mig_reply_error_t *reply, mach_msg_header_t *hdr,
 		     integer_t code)
 {
   mach_msg_header_t *rh = &reply->Head;
-  rh->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REMOTE(hdr->msgh_bits), 0);
+
+  rh->msgh_bits = MACH_MSGH_BITS (MACH_MSGH_BITS_REMOTE (hdr->msgh_bits), 0);
   rh->msgh_remote_port = hdr->msgh_remote_port;
-  rh->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
+  rh->msgh_size = (mach_msg_size_t) sizeof (mig_reply_error_t);
   rh->msgh_local_port = MACH_PORT_NULL;
   rh->msgh_id = hdr->msgh_id + 100;
 
@@ -1137,7 +1134,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 }
 
 static ptid_t
-darwin_wait_to (struct target_ops *ops, 
+darwin_wait_to (struct target_ops *ops,
                 ptid_t ptid, struct target_waitstatus *status, int options)
 {
   return darwin_wait (ptid, status);
@@ -1325,7 +1322,7 @@ darwin_kill_inferior (struct target_ops *ops)
   if (res == 0)
     {
       darwin_resume_inferior (inf);
-	  
+
       ptid = darwin_wait (inferior_ptid, &wstatus);
     }
   else if (errno != ESRCH)
