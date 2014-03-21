@@ -1,3 +1,8 @@
+2014-03-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.threads/thread-specific.exp: Handle the lack of usable
+	$this_breakpoint and $this_thread.
+
 2014-03-21  Hui Zhu  <hui@codesourcery.com>
 
 	* gdb.base/attach.exp (do_command_attach_tests): New.
