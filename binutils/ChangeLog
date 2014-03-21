@@ -1,3 +1,9 @@
+2014-03-24  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_unwind_encoding_x86): Set the factor.
+	(dump_exe_compact_unwind): Change the condition.  Improve
+	indentation.
+
 2014-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (process_version_sections): Fix off-by-one error in

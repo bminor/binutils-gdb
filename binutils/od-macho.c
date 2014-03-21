@@ -1157,7 +1157,7 @@ dump_unwind_encoding_x86 (unsigned int encoding, unsigned int sz,
 
 	    stack_adj =
 	      (encoding & MACH_O_UNWIND_X86_64_FRAMELESS_STACK_ADJUST) >> 13;
-	    printf (" size at 0x%03x + 0x%02x", stack_size, stack_adj);
+	    printf (" size at 0x%03x + 0x%02x", stack_size, stack_adj * sz);
 	  }
 	/* Registers are coded using arithmetic compression: the register
 	   is indexed in range 0-6, the second in range 0-5, the third in
@@ -1359,11 +1359,12 @@ dump_exe_compact_unwind (bfd *abfd,
       const unsigned char *level2;
       unsigned int kind;
 
-      if (i == index_count - 1)
-	break;
-
       func_offset = bfd_get_32 (abfd, index_entry->function_offset);
       level2_offset = bfd_get_32 (abfd, index_entry->second_level_offset);
+
+      /* No level-2 for this index (should be the last index).  */
+      if (level2_offset == 0)
+	continue;
 
       level2 = content + level2_offset;
       kind = bfd_get_32 (abfd, level2);
@@ -1477,7 +1478,7 @@ dump_exe_compact_unwind (bfd *abfd,
 	nbr_lsda = (next_lsda_offset - lsda_offset) / sizeof (*lsda);
 	for (j = 0; j < nbr_lsda; j++)
 	  {
-	    printf ("   lsda %-3u: function 0x%08x lsda 0x%08x\n",
+	    printf ("   lsda %3u: function 0x%08x lsda 0x%08x\n",
 		    j, (unsigned int) bfd_get_32 (abfd, lsda->function_offset),
 		    (unsigned int) bfd_get_32 (abfd, lsda->lsda_offset));
 	    lsda++;
