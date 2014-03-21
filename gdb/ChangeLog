@@ -1,3 +1,7 @@
+2014-03-21  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* MAINTAINERS (Write After Approval): Add "Pierre Langlois".
+
 2014-03-22  Doug Evans  <xdje42@gmail.com>
 
 	* infcmd.c: Whitespace fixes.
