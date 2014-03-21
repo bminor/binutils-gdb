@@ -179,7 +179,7 @@ struct avr_unwind_cache
 struct gdbarch_tdep
 {
   /* Number of bytes stored to the stack by call instructions.
-     2 bytes for avr1-5, 3 bytes for avr6.  */
+     2 bytes for avr1-5 and avrxmega1-5, 3 bytes for avr6 and avrxmega6-7.  */
   int call_length;
 
   /* Type for void.  */
@@ -719,7 +719,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
           info->size += gdbarch_tdep (gdbarch)->call_length;
           vpc += 2;
         }
-      else if (insn == 0x920f)  /* push r0 */
+      else if (insn == 0x920f || insn == 0x921f)  /* push r0 or push r1 */
         {
           info->size += 1;
           vpc += 2;
@@ -1355,14 +1355,21 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_avr1:
+    case bfd_mach_avrxmega1:
     case bfd_mach_avr2:
+    case bfd_mach_avrxmega2:
     case bfd_mach_avr3:
+    case bfd_mach_avrxmega3:
     case bfd_mach_avr4:
+    case bfd_mach_avrxmega4:
     case bfd_mach_avr5:
+    case bfd_mach_avrxmega5:
     default:
       call_length = 2;
       break;
     case bfd_mach_avr6:
+    case bfd_mach_avrxmega6:
+    case bfd_mach_avrxmega7:
       call_length = 3;
       break;
     }

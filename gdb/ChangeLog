@@ -1,3 +1,14 @@
+2014-04-11  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	PR backtrace/16721
+	PR backtrace/16832
+	* avr-tdep.c (struct gdbarch_tdep): Mention avrxmega in the comment.
+	(avr_gdbarch_init): Add xmega architectures given by bfd_architecture
+	when setting the size of call_length.
+	(avr_scan_prologue): Accept push r1 instruction for small stack
+	allocation.
+	* MAINTAINERS (Write After Approval): Add "Pierre Langlois".
+
 2014-03-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/16575
