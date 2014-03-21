@@ -180,6 +180,11 @@ enum xtensa_relax_statesE
      prevent the linker from changing the size of any frag between the
      section start and the org frag.  */
 
+  RELAX_TRAMPOLINE,
+  /* Every few thousand frags, we insert one of these, just in case we may
+     need some space for a trampoline (jump to a jump) because the function
+     has gotten too big. If not needed, it disappears. */
+
   RELAX_NONE
 };
 

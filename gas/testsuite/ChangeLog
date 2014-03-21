@@ -1,3 +1,10 @@
+2014-03-21  David Weatherford <weath@cadence.com>
+            Max Filippov <jcmvbkbc@gmail.com>
+
+	* gas/xtensa/all.exp: Add test for trampoline relaxation.
+	* gas/xtensa/trampoline.d: Trampoline relaxation expected dump.
+	* gas/xtensa/trampoline.s: Trampoline relaxation test source.
+
 2014-03-20  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/all/gas.exp: Remove XFAIL of forward.d for MIPS.

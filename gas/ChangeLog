@@ -1,3 +1,29 @@
+2014-03-21  David Weatherford <weath@cadence.com>
+            Max Filippov <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_check_frag_count)
+	xtensa_create_trampoline_frag,
+	xtensa_maybe_create_trampoline_frag, init_trampoline_frag,
+	find_trampoline_seg, search_trampolines, get_best_trampoline,
+	check_and_update_trampolines, add_jump_to_trampoline,
+	dump_trampolines): New functions.
+	(md_parse_option): Add cases for --[no-]trampolines options.
+	(md_assemble, finish_vinsn, xtensa_end): Add call to
+	xtensa_check_frag_count.
+	(xg_assemble_vliw_tokens): Add call to
+	xtensa_maybe_create_trampoline_frag.
+	(xtensa_relax_frag): Relax fragments with RELAX_TRAMPOLINE state.
+	(relax_frag_immed): Relax jump instructions that cannot reach its
+	target.
+	* config/tc-xtensa.h (xtensa_relax_statesE::RELAX_TRAMPOLINE): New
+	relax state.
+	* doc/as.texinfo: Document --[no-]trampolines command-line options.
+	* doc/c-xtensa.texi: Document trampolines relaxation and command
+	line options.
+	* frags.c (get_frag_count, clear_frag_count): New function.
+	(frag_alloc): Increment totalfrags counter.
+	* frags.h (get_frag_count, clear_frag_count): New function.
+
 2014-03-20  DJ Delorie  <dj@redhat.com>
 
 	* config/rl78-defs.h (RL78_RELAX_NONE, RL78_RELAX_BRANCH): Add.
