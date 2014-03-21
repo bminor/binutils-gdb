@@ -1,3 +1,11 @@
+2014-04-01  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_encode_reply): Add prototype.
+	(darwin_decode_exception_message): Reply to unknown inferiors.
+	(darwin_decode_message): Handle message by id.  Ignore message
+	to unknown inferior.
+	(darwin_wait): Discard unknown messages, add debug trace.
+
 2014-03-31  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_cutu_die_from_dwo): Delete unused local
