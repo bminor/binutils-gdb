@@ -6059,18 +6059,22 @@ normal_stop (void)
 	   && last.kind != TARGET_WAITKIND_NO_RESUMED)
     make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
 
-  /* In non-stop mode, we don't want GDB to switch threads behind the
-     user's back, to avoid races where the user is typing a command to
-     apply to thread x, but GDB switches to thread y before the user
-     finishes entering the command.  */
-
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until
      the inferior actually stops.
 
      There's no point in saying anything if the inferior has exited.
      Note that SIGNALLED here means "exited with a signal", not
-     "received a signal".  */
+     "received a signal".
+
+     Also skip saying anything in non-stop mode.  In that mode, as we
+     don't want GDB to switch threads behind the user's back, to avoid
+     races where the user is typing a command to apply to thread x,
+     but GDB switches to thread y before the user finishes entering
+     the command, fetch_inferior_event installs a cleanup to restore
+     the current thread back to the thread the user had selected right
+     after this event is handled, so we're not really switching, only
+     informing of a stop.  */
   if (!non_stop
       && !ptid_equal (previous_inferior_ptid, inferior_ptid)
       && target_has_execution

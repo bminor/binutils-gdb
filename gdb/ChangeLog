@@ -1,3 +1,7 @@
+2014-03-21  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (normal_stop): Extend comment.
+
 2014-03-21  Hui Zhu  <hui@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
