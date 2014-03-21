@@ -309,7 +309,10 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
 	  struct value *target;
 	  int was_pointer = TYPE_CODE (type) == TYPE_CODE_PTR;
 
-	  target = value_ind (val);
+	  if (was_pointer)
+	    target = value_ind (val);
+	  else
+	    target = coerce_ref (val);
 	  type = value_rtti_type (target, NULL, NULL, NULL);
 
 	  if (type)
