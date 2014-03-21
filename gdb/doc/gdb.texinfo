@@ -33742,6 +33742,7 @@ The remote target both supports and has enabled extended mode.
 
 @item ?
 @cindex @samp{?} packet
+@anchor{? packet}
 Indicate the reason the target halted.  The reply is the same as for
 step and continue.  This packet has a special interpretation when the
 target is in non-stop mode; see @ref{Remote Non-Stop}.
@@ -33954,9 +33955,25 @@ step packet}.
 @cindex @samp{k} packet
 Kill request.
 
-FIXME: @emph{There is no description of how to operate when a specific
-thread context has been selected (i.e.@: does 'k' kill only that
-thread?)}.
+The exact effect of this packet is not specified.
+
+For a bare-metal target, it may power cycle or reset the target
+system.  For that reason, the @samp{k} packet has no reply.
+
+For a single-process target, it may kill that process if possible.
+
+A multiple-process target may choose to kill just one process, or all
+that are under @value{GDBN}'s control.  For more precise control, use
+the vKill packet (@pxref{vKill packet}).
+
+If the target system immediately closes the connection in response to
+@samp{k}, @value{GDBN} does not consider the lack of packet
+acknowledgment to be an error, and assumes the kill was successful.
+
+If connected using @kbd{target extended-remote}, and the target does
+not close the connection in response to a kill request, @value{GDBN}
+probes the target state as if a new connection was opened
+(@pxref{? packet}).
 
 @item m @var{addr},@var{length}
 @cindex @samp{m} packet
@@ -34258,6 +34275,7 @@ request is completed.
 
 @item vKill;@var{pid}
 @cindex @samp{vKill} packet
+@anchor{vKill packet}
 Kill the process with the specified process ID.  @var{pid} is a
 hexadecimal integer identifying the process.  This packet is used in
 preference to @samp{k} when multiprocess protocol extensions are
