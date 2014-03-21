@@ -407,9 +407,17 @@ The hyperprivileged implementation version register is referred
 to as @samp{%hver}.
 
 @item
+The hyperprivileged system tick offset register is referred to as
+@samp{%hstick_offset}.  Note that there is no @samp{%hstick} register,
+the normal @samp{%stick} is used.
+
+@item
+The hyperprivileged system tick enable register is referred to as
+@samp{%hstick_enable}.
+
+@item
 The hyperprivileged system tick compare register is referred
-to as @samp{%hstick_cmpr}.  Note that there is no @samp{%hstick}
-register, the normal @samp{%stick} is used.
+to as @samp{%hstick_cmpr}.
 @end itemize
 
 @node Sparc-Constants

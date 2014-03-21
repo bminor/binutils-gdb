@@ -39,9 +39,9 @@
 char *
 fbsd_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  size_t len = PATH_MAX;
-  char *buf = xcalloc (len, sizeof (char));
-  char *path;
+  ssize_t len = PATH_MAX;
+  static char buf[PATH_MAX];
+  char name[PATH_MAX];
 
 #ifdef KERN_PROC_PATHNAME
   int mib[4];
@@ -54,15 +54,15 @@ fbsd_pid_to_exec_file (struct target_ops *self, int pid)
     return buf;
 #endif
 
-  path = xstrprintf ("/proc/%d/file", pid);
-  if (readlink (path, buf, PATH_MAX - 1) == -1)
+  xsnprintf (name, PATH_MAX, "/proc/%d/exe", pid);
+  len = readlink (name, buf, PATH_MAX - 1);
+  if (len != -1)
     {
-      xfree (buf);
-      buf = NULL;
+      buf[len] = '\0';
+      return buf;
     }
 
-  xfree (path);
-  return buf;
+  return NULL;
 }
 
 static int

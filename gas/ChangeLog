@@ -1,3 +1,112 @@
+2014-03-21  David Weatherford <weath@cadence.com>
+            Max Filippov <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_check_frag_count)
+	xtensa_create_trampoline_frag,
+	xtensa_maybe_create_trampoline_frag, init_trampoline_frag,
+	find_trampoline_seg, search_trampolines, get_best_trampoline,
+	check_and_update_trampolines, add_jump_to_trampoline,
+	dump_trampolines): New functions.
+	(md_parse_option): Add cases for --[no-]trampolines options.
+	(md_assemble, finish_vinsn, xtensa_end): Add call to
+	xtensa_check_frag_count.
+	(xg_assemble_vliw_tokens): Add call to
+	xtensa_maybe_create_trampoline_frag.
+	(xtensa_relax_frag): Relax fragments with RELAX_TRAMPOLINE state.
+	(relax_frag_immed): Relax jump instructions that cannot reach its
+	target.
+	* config/tc-xtensa.h (xtensa_relax_statesE::RELAX_TRAMPOLINE): New
+	relax state.
+	* doc/as.texinfo: Document --[no-]trampolines command-line options.
+	* doc/c-xtensa.texi: Document trampolines relaxation and command
+	line options.
+	* frags.c (get_frag_count, clear_frag_count): New function.
+	(frag_alloc): Increment totalfrags counter.
+	* frags.h (get_frag_count, clear_frag_count): New function.
+
+2014-03-20  DJ Delorie  <dj@redhat.com>
+
+	* config/rl78-defs.h (RL78_RELAX_NONE, RL78_RELAX_BRANCH): Add.
+	* config/rl78-parse.y (BC, BNC, BZ, BNZ, BH, BHZ, bt_bf): Call
+	rl78_relax().
+	* config/tc-rl78.h (md_relax_frag): Define.
+	(rl78_relax_frag): Declare.
+	* config/tc-rl78.c (rl78_relax): Add.
+	(md_assemble): Set up the variable frags also when relaxing.
+	(op_type_T): New.
+	(rl78_opcode_type): New.
+	(rl78_frag_fix_value): New.
+	(md_estimate_size_before_relax): New-ish.
+	(rl78_relax_frag): New.
+	(md_convert_frag): New-ish.
+
+2014-03-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.h (DIFF_EXPR_OK, CFI_DIFF_EXPR_OK): Define.
+	* config/tc-mips.c (md_pcrel_from): Remove error message.
+	(md_apply_fix): Convert PC-relative BFD_RELOC_32s to
+	BFD_RELOC_32_PCREL.  Report a specific error message for unhandled
+	PC-relative expressions.  Handle BFD_RELOC_8.
+
+2014-03-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (hpriv_reg_table): Added entries for
+	%hstick_offset and %hstick_enable.
+	* doc/c-sparc.texi (Sparc-Regs): Document the %hstick_offset and
+	%hstick_enable hyperprivileged registers.
+
+2014-03-19  Daniel Gutson <daniel.gutson@tallertechnologies.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (codecomposer_syntax): New flag that states whether the
+	CCS syntax compatibility mode is on or off.
+	(asmfunc_states): New enum to represent the asmfunc directive state.
+	(asmfunc_state): New variable holding the asmfunc directive state.
+	(comment_chars): Rename to arm_comment_chars.
+	(line_separator_chars): Rename to arm_line_separator_chars.
+	(s_ccs_ref): New function that handles the .ref directive.
+	(asmfunc_debug): New function.
+	(s_ccs_asmfunc): New function that handles the .asmfunc directive.
+	(s_ccs_endasmfunc): New function that handles the .endasmfunc directive.
+	(s_ccs_def): New function that handles the .def directive.
+	(tc_start_label_without_colon): New function.
+	(md_pseudo_table): Added new CCS directives.
+	(arm_ccs_mode): New function that handles the -mccs command line option.
+	(arm_long_opts): Added new -mccs command line option.
+	* config/tc-arm.h (LABELS_WITHOUT_COLONS): New macro.
+	(TC_START_LABEL_WITHOUT_COLON): New macro.
+	(tc_start_label_without_colon): Added extern function declaration.
+	(tc_comment_chars): Define.
+	(tc_line_separator_chars): Define.
+	* app.c (do_scrub_begin): Use tc_line_separator_chars, if defined.
+	* read.c (read_begin): Likewise.
+	* doc/as.texinfo: Add documentation for the -mccs command line
+	option.
+	* doc/c-arm.texi: Likewise.
+	* doc/internals.texi: Document tc_line_separator_chars.
+	* NEWS: Mention the new feature.
+
+2014-03-18  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (aarch64_opts): Add new option
+	"mno-verbose-error".
+	(verbose_error_p): Initialize to 1.
+	* doc/c-aarch64.texi (AArch64 Options): Document -mverbose-error
+	and -mno-verbose-error.
+
+2014-03-17  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16694
+	* config/tc-arm.c (tc_arm_regname_to_dw2regnum): Parse VFP
+	registers as well.
+
+2014-03-13  Richard Earnshaw  <rearnsha@arm.com>
+	    Jiong Wang  <Jiong.Wang@arm.com>
+
+	* doc/c-aarch64.texi: Clean up some formatting issues.
+	(AArch64 Options): Document -mcpu and -march.
+	(AArch64 Extensions): New node.
+
 2014-03-13  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-i386.c (use_big_obj): Declare.

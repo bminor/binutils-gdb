@@ -115,10 +115,6 @@ extern int disable_randomization;
 
 extern void generic_mourn_inferior (void);
 
-extern void terminal_save_ours (struct target_ops *self);
-
-extern void terminal_ours (struct target_ops *self);
-
 extern CORE_ADDR unsigned_pointer_to_address (struct gdbarch *gdbarch,
 					      struct type *type,
 					      const gdb_byte *buf);
@@ -164,13 +160,17 @@ extern void child_terminal_info (struct target_ops *self, const char *, int);
 
 extern void term_info (char *, int);
 
-extern void terminal_ours_for_output (struct target_ops *self);
+extern void child_terminal_save_ours (struct target_ops *self);
 
-extern void terminal_inferior (struct target_ops *self);
+extern void child_terminal_ours (struct target_ops *self);
 
-extern void terminal_init_inferior (struct target_ops *self);
+extern void child_terminal_ours_for_output (struct target_ops *self);
 
-extern void terminal_init_inferior_with_pgrp (int pgrp);
+extern void child_terminal_inferior (struct target_ops *self);
+
+extern void child_terminal_init (struct target_ops *self);
+
+extern void child_terminal_init_with_pgrp (int pgrp);
 
 /* From fork-child.c */
 
@@ -194,6 +194,8 @@ extern int stop_on_solib_events;
 extern void start_remote (int from_tty);
 
 extern void normal_stop (void);
+
+extern void print_stop_event (struct target_waitstatus *ws);
 
 extern int signal_stop_state (int);
 
@@ -219,6 +221,12 @@ void set_step_info (struct frame_info *frame, struct symtab_and_line sal);
    $_exitsignal.  */
 
 extern void clear_exit_convenience_vars (void);
+
+/* Returns true if we're trying to step past the instruction at
+   ADDRESS in ASPACE.  */
+
+extern int stepping_past_instruction_at (struct address_space *aspace,
+					 CORE_ADDR address);
 
 /* From infcmd.c */
 

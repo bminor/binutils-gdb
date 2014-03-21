@@ -1,3 +1,130 @@
+2014-03-21  Hui Zhu  <hui@codesourcery.com>
+
+	* gdb.base/attach.exp (do_command_attach_tests): New.
+
+2014-03-20  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR cli/15718
+	* gdb.base/condbreak-call-false.c: New file.
+	* gdb.base/condbreak-call-false.exp: New file.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.c (pid):
+	Delete.
+	(block_signals, unblock_signals): Delete.
+	(child_function_2, main): Remove references to deleted variable
+	and functions.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.c (main):
+	Use pthread_kill to signal thread 2.
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	Adjust to make the test send itself a signal rather than using the
+	host's "kill" command.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/multiple-step-overs.c: New file.
+	* gdb.threads/multiple-step-overs.exp: New file.
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	Adjust expected infrun debug output.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-over-trips-on-watchpoint.c: New file.
+	* gdb.threads/step-over-trips-on-watchpoint.exp: New file.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/7143
+	* gdb.base/watchpoint.exp: Mention bugzilla bug number instead of
+	old gnats gdb/38.  Remove kfail.  Adjust to use gdb_test instead
+	of gdb_test_multiple.
+	* gdb.cp/annota2.exp: Remove kfail for gdb/38.
+	* gdb.cp/annota3.exp: Remove kfail for gdb/38.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/step-over-lands-on-breakpoint.c: New file.
+	* gdb.threads/step-over-lands-on-breakpoint.exp: New file.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.exp: Remove early return.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.exp (step& tests): Pass explicit test messages.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.exp (test_background): Expect \r\n after
+	"completed." in the fail pattern.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.exp (test_background): New procedure.
+	Use it for all background execution command tests.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.exp: Use prepare_for_testing.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.c (foo): Make 'x' volatile.  Write to it twice in
+	the same line.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.c (main): Add "jump here" and "until here" line
+	marker comments.
+	* gdb.base/async.exp (jump_here): New global.
+	(jump& test): Use it.
+	(until_here): New global.
+	(until& test): Use it.
+
+2014-03-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async.exp: Don't frob gdb_protocol.
+
+2014-03-18  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/async.exp: Whitespace fixes.  Turn on target-async.
+	Fix spelling of exec-done-display.
+
+2014-03-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/15358
+	* gdb.base/gdb-sigterm.c: New file.
+	* gdb.base/gdb-sigterm.exp: New file.
+
+2014-03-18  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13860
+	* gdb.mi/mi-solib.exp: Remove gdb/13860 kfail.
+	* lib/mi-support.exp (mi_expect_stop): Add special handling for
+	solib-event.
+
+2014-03-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/pckd_arr_ren: New testcase.
+
+2014-03-13  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/16612
+	* gdb.guile/scm-value.ep (test_value_after_death): Do a garbage
+	collect after discarding symbols.
+
+2014-03-13  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Verify value added
+	to history survives a gc.
+
 2014-03-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/default.exp: Don't test "target procfs".

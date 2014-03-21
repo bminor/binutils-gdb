@@ -169,9 +169,6 @@ gdb_test_multiple "next" "watch triggered on a.x" {
     -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n\r\n\032\032watchpoint 3\r\n.*atchpoint 3: a.x\r\n\r\nOld value = 0\r\nNew value = 1\r\n\r\n(\032\032frame-begin 0 0x\[0-9a-z\]+\r\n|)main \\(\\) at .*$srcfile:$decimal\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032stopped\r\n.*$gdb_prompt$" { 
 	pass "watch triggered on a.x"
     }
-    -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
-	kfail "gdb/38" "watch triggered on a.x"
-    }
 }
 
 #

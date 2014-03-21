@@ -1,3 +1,46 @@
+2014-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (default-manifest.o): Use WINDRES_FOR_TARGET.
+	* Makefile.in: Regenerate.
+	* emultempl/default-manifest.rc: Fix typo.
+	* scripttempl/pe.sc (R_RSRC): Fix default-manifest exclusion.
+	(.rsrc): Add SUBALIGN(4).  Remove SORT.
+	* scripttempl/pep.sc: Likewise.
+
+2014-03-17  Christopher Faylor  <me.cygwin2014@cgf.cx>
+
+	* Makefile.am: Use host version of windres.
+	* Makefile.in: Regenerate.
+
+2014-03-14  Christopher Faylor  <me.cygwin2013@cgf.cx>
+
+	* ld.texinfo: Document change in handling of --enable-auto-image-base.
+	* emultempl/pe.em (pe_auto_image_base): Set to default base.
+	(gld_${EMULATION_NAME}_list_options): Change usage message to reflect
+	optional --enable-auto-image-base argument.
+	(gld${EMULATION_NAME}_handle_option): Handle optional
+	--enable-auto-image-base argument.
+	(compute_dll_image_base): Eliminate constant.  Use pe_auto_image_base.
+
+2014-03-14  Romain Geissler  <romain.geissler@amadeus.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (full_name_provided): New input flag.
+	* ldlang.c (new_afile): Don't use lang_input_file_is_search_file_enum
+	for -l:namespec.  Instead use lang_input_file_is_l_enum with
+	full_name_provided flag.
+	* ldlfile.c (ldfile_open_file_search): Don't complete lib name if
+	full_name_provided flag is set.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	Handle full_name_provided libraries.  Tidy EXTRA_SHLIB_EXTENSION
+	support.  Set DT_NEEDED for -l:namespec as namespec.
+	* emultempl/aix.em (ppc_after_open_output): Handle full_name_provided.
+	* emultempl/linux.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	Don't handle full_name_provided libraries.
+	* emultempl/pe.em (gld${EMULATION_NAME}_open_dynamic_archive): Ditto.
+	* emultempl/pep.em (gld${EMULATION_NAME}_open_dynamic_archive): Ditto.
+	* emultempl/vms.em (gld${EMULATION_NAME}_open_dynamic_archive): Ditto.
+
 2014-03-12  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.

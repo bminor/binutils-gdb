@@ -1656,42 +1656,46 @@ gld${EMULATION_NAME}_open_dynamic_archive
 {
   const char *filename;
   char *string;
+  size_t len;
+  bfd_boolean opened = FALSE;
 
   if (! entry->flags.maybe_archive)
     return FALSE;
 
   filename = entry->filename;
-
-  /* This allocates a few bytes too many when EXTRA_SHLIB_EXTENSION
-     is defined, but it does not seem worth the headache to optimize
-     away those two bytes of space.  */
-  string = (char *) xmalloc (strlen (search->name)
-			     + strlen (filename)
-			     + strlen (arch)
-#ifdef EXTRA_SHLIB_EXTENSION
-			     + strlen (EXTRA_SHLIB_EXTENSION)
-#endif
-			     + sizeof "/lib.so");
-
-  sprintf (string, "%s/lib%s%s.so", search->name, filename, arch);
-
-#ifdef EXTRA_SHLIB_EXTENSION
-  /* Try the .so extension first.  If that fails build a new filename
-     using EXTRA_SHLIB_EXTENSION.  */
-  if (! ldfile_try_open_bfd (string, entry))
+  len = strlen (search->name) + strlen (filename);
+  if (entry->flags.full_name_provided)
     {
-      sprintf (string, "%s/lib%s%s%s", search->name,
-	       filename, arch, EXTRA_SHLIB_EXTENSION);
-#endif
+      len += sizeof "/";
+      string = (char *) xmalloc (len);
+      sprintf (string, "%s/%s", search->name, filename);
+    }
+  else
+    {
+      size_t xlen = 0;
 
-  if (! ldfile_try_open_bfd (string, entry))
+      len += strlen (arch) + sizeof "/lib.so";
+#ifdef EXTRA_SHLIB_EXTENSION
+      xlen = (strlen (EXTRA_SHLIB_EXTENSION) > 3
+	      ? strlen (EXTRA_SHLIB_EXTENSION) - 3
+	      : 0);
+#endif
+      string = (char *) xmalloc (len + xlen);
+      sprintf (string, "%s/lib%s%s.so", search->name, filename, arch);
+#ifdef EXTRA_SHLIB_EXTENSION
+      /* Try the .so extension first.  If that fails build a new filename
+	 using EXTRA_SHLIB_EXTENSION.  */
+      opened = ldfile_try_open_bfd (string, entry);
+      if (!opened)
+	strcpy (string + len - 4, EXTRA_SHLIB_EXTENSION);
+#endif
+    }
+
+  if (!opened && !ldfile_try_open_bfd (string, entry))
     {
       free (string);
       return FALSE;
     }
-#ifdef EXTRA_SHLIB_EXTENSION
-    }
-#endif
 
   entry->filename = string;
 
@@ -1716,7 +1720,8 @@ gld${EMULATION_NAME}_open_dynamic_archive
       /* Rather than duplicating the logic above.  Just use the
 	 filename we recorded earlier.  */
 
-      filename = lbasename (entry->filename);
+      if (!entry->flags.full_name_provided)
+        filename = lbasename (entry->filename);
       bfd_elf_set_dt_needed_name (entry->the_bfd, filename);
     }
 

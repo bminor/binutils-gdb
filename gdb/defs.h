@@ -171,6 +171,9 @@ extern int check_quit_flag (void);
 /* * Set the quit flag.  */
 extern void set_quit_flag (void);
 
+/* Flag that function quit should call quit_force.  */
+extern volatile int sync_quit_force_run;
+
 extern int immediate_quit;
 
 extern void quit (void);
@@ -183,7 +186,7 @@ extern void quit (void);
    needed.  */
 
 #define QUIT { \
-  if (check_quit_flag ()) quit (); \
+  if (check_quit_flag () || sync_quit_force_run) quit (); \
   if (deprecated_interactive_hook) deprecated_interactive_hook (); \
 }
 

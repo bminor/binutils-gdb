@@ -3498,6 +3498,10 @@ rsrc_process_section (bfd * abfd,
   rsrc_directory *  type_tables;
   rsrc_write_data   write_data;
   unsigned int      indx;
+  bfd *             input;
+  unsigned int      num_input_rsrc = 0;
+  unsigned int      max_num_input_rsrc = 4;
+  ptrdiff_t *       rsrc_sizes = NULL;
 
   new_table.names.num_entries = 0;
   new_table.ids.num_entries = 0;
@@ -3520,9 +3524,47 @@ rsrc_process_section (bfd * abfd,
   if (! bfd_get_section_contents (abfd, sec, data, 0, size))
     goto end;
 
+  /* Step zero: Scan the input bfds looking for .rsrc sections and record
+     their lengths.  Note - we rely upon the fact that the linker script
+     does *not* sort the input .rsrc sections, so that the order in the
+     linkinfo list matches the order in the output .rsrc section.
+
+     We need to know the lengths because each input .rsrc section has padding
+     at the end of a variable amount.  (It does not appear to be based upon
+     the section alignment or the file alignment).  We need to skip any
+     padding bytes when parsing the input .rsrc sections.  */
+  rsrc_sizes = bfd_malloc (max_num_input_rsrc * sizeof * rsrc_sizes);
+  if (rsrc_sizes == NULL)
+    goto end;
+
+  for (input = pfinfo->info->input_bfds;
+       input != NULL;
+       input = input->link_next)
+    {
+      asection * rsrc_sec = bfd_get_section_by_name (input, ".rsrc");
+
+      if (rsrc_sec != NULL)
+	{
+	  if (num_input_rsrc == max_num_input_rsrc)
+	    {
+	      max_num_input_rsrc += 10;
+	      rsrc_sizes = bfd_realloc (rsrc_sizes, max_num_input_rsrc
+					* sizeof * rsrc_sizes);
+	      if (rsrc_sizes == NULL)
+		goto end;
+	    }
+
+	  BFD_ASSERT (rsrc_sec->size > 0);
+	  rsrc_sizes [num_input_rsrc ++] = rsrc_sec->size;
+	}
+    }
+
+  if (num_input_rsrc < 2)
+    goto end;
+  
   /* Step one: Walk the section, computing the size of the tables,
      leaves and data and decide if we need to do anything.  */
-  dataend   = data + size;
+  dataend = data + size;
   num_resource_sets = 0;
   sizeof_leaves = sizeof_strings = sizeof_tables_and_entries = 0;
 
@@ -3531,6 +3573,7 @@ rsrc_process_section (bfd * abfd,
       bfd_byte * p = data;
 
       data = rsrc_count_directory (abfd, data, data, dataend, rva_bias);
+
       if (data > dataend)
 	{
 	  /* Corrupted .rsrc section - cannot merge.  */
@@ -3540,19 +3583,21 @@ rsrc_process_section (bfd * abfd,
 	  goto end;
 	}
 
-      /* Align the data pointer - we assume 1^2 alignment.  */
-      data = (bfd_byte *) (((ptrdiff_t) (data + 3)) & ~ 3);
+      if ((data - p) > rsrc_sizes [num_resource_sets])
+	{
+	  _bfd_error_handler (_("%s: .rsrc merge failure: unexpected .rsrc size"),
+			      bfd_get_filename (abfd));
+	  bfd_set_error (bfd_error_file_truncated);
+	  goto end;
+	}
+      /* FIXME: Should we add a check for "data - p" being much smaller
+	 than rsrc_sizes[num_resource_sets] ?  */
+
+      data = p + rsrc_sizes[num_resource_sets];
       rva_bias += data - p;
-
-      if (data == (dataend - 4))
-	data = dataend;
-
       ++ num_resource_sets;
     }
-
-  if (num_resource_sets < 2)
-    /* No merging necessary.  */
-    goto end;
+  BFD_ASSERT (num_resource_sets == num_input_rsrc);
 
   /* Step two: Walk the data again, building trees of the resources.  */
   data = datastart;
@@ -3567,13 +3612,11 @@ rsrc_process_section (bfd * abfd,
     {
       bfd_byte * p = data;
 
-      data = rsrc_parse_directory (abfd, type_tables + indx, data, data,
+      (void) rsrc_parse_directory (abfd, type_tables + indx, data, data,
 				   dataend, rva_bias, NULL);
-      data = (bfd_byte *) (((ptrdiff_t) (data + 3)) & ~ 3);
+      data = p + rsrc_sizes[indx];
       rva_bias += data - p;
-      if (data == (dataend - 4))
-	data = dataend;
-      indx ++;
+      ++ indx;
     }
   BFD_ASSERT (indx == num_resource_sets);
 
@@ -3630,8 +3673,10 @@ rsrc_process_section (bfd * abfd,
   sec->size = sec->rawsize = size;
 
  end:
+  /* Step size: Free all the memory that we have used.  */
   /* FIXME: Free the resource tree, if we have one.  */
   free (datastart);
+  free (rsrc_sizes);
 }
 
 /* Handle the .idata section and other things that need symbol table

@@ -427,7 +427,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define MaskVex { OP_VEX, mask_mode }
 
 #define MVexVSIBDWpX { OP_M, vex_vsib_d_w_dq_mode }
+#define MVexVSIBDQWpX { OP_M, vex_vsib_d_w_d_mode }
 #define MVexVSIBQWpX { OP_M, vex_vsib_q_w_dq_mode }
+#define MVexVSIBQDWpX { OP_M, vex_vsib_q_w_d_mode }
 
 /* Used handle "rep" prefix for string instructions.  */
 #define Xbr { REP_Fixup, eSI_reg }
@@ -556,8 +558,12 @@ enum
 
   /* Similar to vex_w_dq_mode, with VSIB dword indices.  */
   vex_vsib_d_w_dq_mode,
+  /* Similar to vex_vsib_d_w_dq_mode, with smaller memory.  */
+  vex_vsib_d_w_d_mode,
   /* Similar to vex_w_dq_mode, with VSIB qword indices.  */
   vex_vsib_q_w_dq_mode,
+  /* Similar to vex_vsib_q_w_dq_mode, with smaller memory.  */
+  vex_vsib_q_w_d_mode,
 
   /* scalar, ignore vector length.  */
   scalar_mode,
@@ -14110,6 +14116,14 @@ intel_operand_size (int bytemode, int sizeflag)
 	  oappend ("ZMMWORD PTR ");
 	}
       break;
+    case vex_vsib_q_w_d_mode:
+    case vex_vsib_d_w_d_mode:
+      if (!need_vex || !vex.evex || vex.length != 512)
+	abort ();
+
+      oappend ("YMMWORD PTR ");
+
+      break;
     case mask_mode:
       if (!need_vex)
 	abort ();
@@ -14227,7 +14241,9 @@ OP_E_memory (int bytemode, int sizeflag)
       switch (bytemode)
 	{
 	case vex_vsib_d_w_dq_mode:
+	case vex_vsib_d_w_d_mode:
 	case vex_vsib_q_w_dq_mode:
+	case vex_vsib_q_w_d_mode:
 	case evex_x_gscat_mode:
 	case xmm_mdq_mode:
 	  shift = vex.w ? 3 : 2;
@@ -14346,7 +14362,9 @@ OP_E_memory (int bytemode, int sizeflag)
 	  switch (bytemode)
 	    {
 	    case vex_vsib_d_w_dq_mode:
+	    case vex_vsib_d_w_d_mode:
 	    case vex_vsib_q_w_dq_mode:
+	    case vex_vsib_q_w_d_mode:
 	      if (!need_vex)
 		abort ();
 	      if (vex.evex)
@@ -14362,13 +14380,17 @@ OP_E_memory (int bytemode, int sizeflag)
 		  indexes64 = indexes32 = names_xmm;
 		  break;
 		case 256:
-		  if (!vex.w || bytemode == vex_vsib_q_w_dq_mode)
+		  if (!vex.w
+		      || bytemode == vex_vsib_q_w_dq_mode
+		      || bytemode == vex_vsib_q_w_d_mode)
 		    indexes64 = indexes32 = names_ymm;
 		  else
 		    indexes64 = indexes32 = names_xmm;
 		  break;
 		case 512:
-		  if (!vex.w || bytemode == vex_vsib_q_w_dq_mode)
+		  if (!vex.w
+		      || bytemode == vex_vsib_q_w_dq_mode
+		      || bytemode == vex_vsib_q_w_d_mode)
 		    indexes64 = indexes32 = names_zmm;
 		  else
 		    indexes64 = indexes32 = names_ymm;
@@ -15366,7 +15388,9 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  names = names_xmm;
 	  break;
 	case 256:
-	  if (vex.w || bytemode != vex_vsib_q_w_dq_mode)
+	  if (vex.w
+	      || (bytemode != vex_vsib_q_w_dq_mode
+		  && bytemode != vex_vsib_q_w_d_mode))
 	    names = names_ymm;
 	  else
 	    names = names_xmm;
@@ -16072,6 +16096,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	case vex_mode:
 	case vex128_mode:
 	case vex_vsib_q_w_dq_mode:
+	case vex_vsib_q_w_d_mode:
 	  names = names_xmm;
 	  break;
 	case dq_mode:
@@ -16096,6 +16121,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  names = names_ymm;
 	  break;
 	case vex_vsib_q_w_dq_mode:
+	case vex_vsib_q_w_d_mode:
 	  names = vex.w ? names_ymm : names_xmm;
 	  break;
 	case mask_mode:

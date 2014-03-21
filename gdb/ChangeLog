@@ -1,3 +1,213 @@
+2014-03-21  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (normal_stop): Extend comment.
+
+2014-03-21  Hui Zhu  <hui@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_pid_to_exec_file): Change xmalloc to
+	static buffer.
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Ditto.
+	* linux-nat.c (linux_child_pid_to_exec_file): Ditto.
+	* nbsd-nat.c (nbsd_pid_to_exec_file): Ditto.
+
+2014-03-20  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mi/mi-interp.c (mi_memory_changed): Avoid using the ISO C99
+	`z' formatted output modifier.
+
+2014-03-20  Tom Tromey  <tromey@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* probe.c (parse_probes): Turn assert into an ordinary error.
+	* break-catch-throw.c (re_set_exception_catchpoint): Ignore
+	exceptions when parsing probes.  Rearrange the code for clarity.
+
+2014-03-20  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/14135
+	* top.c (execute_command): Only dispatch events if the command
+	started the target.
+
+2014-03-20  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/15718
+	* infcall.c: Include event-top.h.
+	(run_inferior_call): Call async_disable_stdin if needed.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (prepare_to_proceed): Delete.
+	(thread_still_needs_step_over): New function.
+	(find_thread_needs_step_over): New function.
+	(proceed): If the current thread needs a step-over, set its
+	steping_over_breakpoint flag.  Adjust to use
+	find_thread_needs_step_over instead of prepare_to_proceed.
+	(process_event_stop_test): For BPSTAT_WHAT_STOP_NOISY and
+	BPSTAT_WHAT_STOP_SILENT, assume the thread stopped for a
+	breakpoint.
+	(switch_back_to_stepped_thread): Step over breakpoints of all
+	threads not the stepping thread, before switching back to the
+	stepping thread.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (single_step_breakpoint_inserted_here_p): Make
+	extern.
+	* breakpoint.h (single_step_breakpoint_inserted_here_p): Declare.
+	* infrun.c (saved_singlestep_ptid)
+	(stepping_past_singlestep_breakpoint): Delete.
+	(resume): Remove stepping_past_singlestep_breakpoint handling.
+	(proceed): Store the prev_pc of the stepping thread too.
+	(init_wait_for_inferior): Adjust.  Clear singlestep_ptid and
+	singlestep_pc.
+	(enum infwait_states): Delete infwait_thread_hop_state.
+	(struct execution_control_state) <hit_singlestep_breakpoint>: New
+	field.
+	(handle_inferior_event): Adjust.
+	(handle_signal_stop): Delete stepping_past_singlestep_breakpoint
+	handling and the thread-hop code.  Before removing single-step
+	breakpoints, check whether the thread hit a single-step breakpoint
+	of another thread.  If it did, the trap is not a random signal.
+	(switch_back_to_stepped_thread): If the event thread hit a
+	single-step breakpoint, unblock it before switching to the
+	stepping thread.  Handle the case of the stepped thread having
+	advanced already.
+	(keep_going): Handle the case of the current thread moving past a
+	single-step breakpoint.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/7143
+	* breakpoint.c (should_be_inserted): Don't insert breakpoints that
+	are being stepped over.
+	(breakpoint_address_match): Make extern.
+	* breakpoint.h (breakpoint_address_match): New declaration.
+	* inferior.h (stepping_past_instruction_at): New declaration.
+	* infrun.c (struct step_over_info): New type.
+	(step_over_info): New global.
+	(set_step_over_info, clear_step_over_info)
+	(stepping_past_instruction_at): New functions.
+	(handle_inferior_event): Clear the step-over info when
+	trap_expected is cleared.
+	(resume): Remove now stale comment.
+	(clear_proceed_status): Clear step-over info.
+	(proceed): Adjust step-over handling to set or clear the step-over
+	info instead of removing all breakpoints.
+	(handle_signal_stop): When setting up a thread-hop, don't remove
+	breakpoints here.
+	(stop_stepping): Clear step-over info.
+	(keep_going): Adjust step-over handling to set or clear step-over
+	info and then always inserting breakpoints, instead of removing
+	all breakpoints when stepping over one.
+
+2014-03-20  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (previous_inferior_ptid): Adjust comment.
+	(deferred_step_ptid): Delete.
+	(infrun_thread_ptid_changed, prepare_to_proceed)
+	(init_wait_for_inferior): Adjust.
+	(handle_signal_stop): Delete deferred_step_ptid handling.
+
+2014-03-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/15358
+	* defs.h (sync_quit_force_run): New declaration.
+	(QUIT): Check also SYNC_QUIT_FORCE_RUN.
+	* event-top.c (async_sigterm_handler): New declaration.
+	(async_sigterm_token): New variable.
+	(async_init_signals): Create also async_sigterm_token.
+	(async_sigterm_handler): New function.
+	(sync_quit_force_run): New variable.
+	(handle_sigterm): Replace quit_force call by other calls.
+	* utils.c (quit): Call quit_force if SYNC_QUIT_FORCE_RUN.
+
+2014-03-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* rs6000-tdep.c (rs6000_frame_cache): Correct little-endian GPR
+	offset into SPE pseudo registers.
+
+2014-03-18  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13860
+	* inferior.h (print_stop_event): Declare.
+	* infrun.c (print_stop_event): New, factored out from ...
+	(normal_stop): ... this.
+	* mi/mi-interp.c (mi_on_normal_stop): Use print_stop_event instead
+	of bpstat_print/print_stack_frame.
+
+2014-03-17  Tom Tromey  <tromey@redhat.com>
+
+	* ui-out.c (clear_table, ui_out_new): Clear uiout->table.id.
+
+2014-03-17  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (decode_constrained_packed_array): Perform a
+	minimal coercion for reference with coerce_ref instead of
+	ada_coerce_ref.
+
+2014-03-17  Tristan Gingold  <gingold@adacore.com>
+
+	* solib-darwin.c (DYLD_VERSION_MAX): Increase value.
+	(darwin_solib_create_inferior_hook): Emit a warning if version
+	is unhandled.
+
+2014-03-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* python/py-value.c (get_field_flag): Cast flag_name argument to
+	PyObject_GetAttrString to support Python 2.4.
+
+2014-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* MAINTAINERS (The Official FSF-appointed GDB Maintainers)
+	(Global Maintainers): Remove Jan Kratochvil.
+
+2014-03-14  Pedro Alves  <palves@redhat.com>
+
+	* inferior.h (terminal_ours_for_output): Rename to ...
+	(child_terminal_ours_for_output): ... this.
+	(terminal_save_ours): Rename to ...
+	(child_terminal_save_ours): ... this.
+	(terminal_ours): Rename to ...
+	(child_terminal_ours): ... this.
+	(terminal_inferior): Rename to ...
+	(child_terminal_inferior): ... this.
+	(terminal_init_inferior): Rename to ...
+	(child_terminal_init_inferior): ... this.
+	(terminal_init_inferior_with_pgrp): Rename to ...
+	(child_terminal_init_inferior_with_pgrp): ... this.
+	* inflow.c (terminal_init_inferior_with_pgrp): Rename to ...
+	(child_terminal_init_with_pgrp): ... this.
+	(terminal_save_ours): Rename to ...
+	(child_terminal_save_ours): ... this.
+	(terminal_init_inferior): Rename to ...
+	(child_terminal_init): ... this.  Adjust.
+	(terminal_inferior): Rename to ...
+	(child_terminal_inferior): ... this.
+	(terminal_ours_for_output): Rename to ...
+	(child_terminal_ours_for_output): ... this.  Adjust.
+	(terminal_ours): Rename to ...
+	(child_terminal_ours): ... this.
+	(terminal_ours_1): Rename to ...
+	(child_terminal_ours_1): ... this.  Adjust.
+	* linux-nat.c (linux_nat_terminal_inferior): Adjust.
+	* windows-nat.c (do_initial_windows_stuff): Adjust.
+	* gnu-nat.c (gnu_terminal_init_inferior): Rename to ...
+	(gnu_terminal_init): ... this.  Adjust.
+	(gnu_target): Adjust.
+	* inf-child.c (inf_child_target): Adjust.
+
+2014-03-13  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/16612
+	* guile/scm-type.c (tyscm_copy_type_recursive): Move type to its
+	new eq?-hashtab.
+
+2014-03-13  Doug Evans  <xdje42@gmail.com>
+
+	* value.c (record_latest_value): Call release_value_or_incref
+	instead of release_value.
+
 2014-03-13  Pedro Alves  <palves@redhat.com>
 
 	* procfs.c (procfs_target): Don't override to_shortname,

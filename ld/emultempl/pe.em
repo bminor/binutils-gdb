@@ -2108,7 +2108,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive
   unsigned int i;
 
 
-  if (! entry->flags.maybe_archive)
+  if (! entry->flags.maybe_archive || entry->flags.full_name_provided)
     return FALSE;
 
   filename = entry->filename;

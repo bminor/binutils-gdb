@@ -807,8 +807,8 @@ uo_table_header (struct ui_out *uiout, int width, enum ui_align align,
 static void
 clear_table (struct ui_out *uiout)
 {
-  if (uiout->table.id)
-    xfree (uiout->table.id);
+  xfree (uiout->table.id);
+  uiout->table.id = NULL;
   clear_header_list (uiout);
 }
 
@@ -1114,6 +1114,7 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   current->field_count = 0;
   VEC_safe_push (ui_out_level_p, uiout->levels, current);
 
+  uiout->table.id = NULL;
   uiout->table.header_first = NULL;
   uiout->table.header_last = NULL;
   uiout->table.header_next = NULL;

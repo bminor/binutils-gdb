@@ -406,6 +406,8 @@ execute_command (char *p, int from_tty)
     {
       const char *cmd = p;
       char *arg;
+      int was_sync = sync_execution;
+
       line = p;
 
       /* If trace-commands is set then this will print this command.  */
@@ -461,7 +463,7 @@ execute_command (char *p, int from_tty)
 	 command's list, running command hooks or similars), and we
 	 just ran a synchronous command that started the target, wait
 	 for that command to end.  */
-      if (!interpreter_async && sync_execution)
+      if (!interpreter_async && !was_sync && sync_execution)
 	{
 	  while (gdb_do_one_event () >= 0)
 	    if (!sync_execution)

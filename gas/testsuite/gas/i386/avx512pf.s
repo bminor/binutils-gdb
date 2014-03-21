@@ -100,10 +100,10 @@ _start:
 	vgatherpf0qpd	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
 	vgatherpf0qpd	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
 
-	vgatherpf0qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
-	vgatherpf0qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
-	vgatherpf0qps	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
-	vgatherpf0qps	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
+	vgatherpf0qps	YMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
+	vgatherpf0qps	YMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
+	vgatherpf0qps	YMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
+	vgatherpf0qps	YMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
 
 	vgatherpf1dpd	ZMMWORD PTR [ebp+ymm7*8-123]{k1}	 # AVX512PF
 	vgatherpf1dpd	ZMMWORD PTR [ebp+ymm7*8-123]{k1}	 # AVX512PF
@@ -120,10 +120,10 @@ _start:
 	vgatherpf1qpd	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
 	vgatherpf1qpd	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
 
-	vgatherpf1qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
-	vgatherpf1qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
-	vgatherpf1qps	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
-	vgatherpf1qps	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
+	vgatherpf1qps	YMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
+	vgatherpf1qps	YMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
+	vgatherpf1qps	YMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
+	vgatherpf1qps	YMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
 
 	vscatterpf0dpd	ZMMWORD PTR [ebp+ymm7*8-123]{k1}	 # AVX512PF
 	vscatterpf0dpd	ZMMWORD PTR [ebp+ymm7*8-123]{k1}	 # AVX512PF
@@ -140,10 +140,10 @@ _start:
 	vscatterpf0qpd	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
 	vscatterpf0qpd	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
 
-	vscatterpf0qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
-	vscatterpf0qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
-	vscatterpf0qps	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
-	vscatterpf0qps	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
+	vscatterpf0qps	YMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
+	vscatterpf0qps	YMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
+	vscatterpf0qps	YMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
+	vscatterpf0qps	YMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
 
 	vscatterpf1dpd	ZMMWORD PTR [ebp+ymm7*8-123]{k1}	 # AVX512PF
 	vscatterpf1dpd	ZMMWORD PTR [ebp+ymm7*8-123]{k1}	 # AVX512PF
@@ -160,8 +160,8 @@ _start:
 	vscatterpf1qpd	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
 	vscatterpf1qpd	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
 
-	vscatterpf1qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
-	vscatterpf1qps	ZMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
-	vscatterpf1qps	ZMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
-	vscatterpf1qps	ZMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
+	vscatterpf1qps	YMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
+	vscatterpf1qps	YMMWORD PTR [ebp+zmm7*8-123]{k1}	 # AVX512PF
+	vscatterpf1qps	YMMWORD PTR [eax+zmm7+256]{k1}	 # AVX512PF
+	vscatterpf1qps	YMMWORD PTR [ecx+zmm7*4+1024]{k1}	 # AVX512PF
 

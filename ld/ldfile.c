@@ -367,7 +367,7 @@ ldfile_open_file_search (const char *arch,
 	    return TRUE;
 	}
 
-      if (entry->flags.maybe_archive)
+      if (entry->flags.maybe_archive && !entry->flags.full_name_provided)
 	string = concat (search->name, slash, lib, entry->filename,
 			 arch, suffix, (const char *) NULL);
       else

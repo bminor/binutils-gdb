@@ -543,6 +543,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--[no-]target-align}] [@b{--[no-]longcalls}]
  [@b{--[no-]transform}]
  [@b{--rename-section} @var{oldname}=@var{newname}]
+ [@b{--[no-]trampolines}]
 @end ifset
 
 @ifset Z80
@@ -848,6 +849,8 @@ Select either big-endian (-EB) or little-endian (-EL) output.
 @item -mthumb-interwork
 Specify that the code has been generated with interworking between Thumb and
 ARM code in mind.
+@item -mccs
+Turns on CodeComposer Studio assembly syntax compatibility mode.
 @item -k
 Specify that PIC code has been generated.
 @end table

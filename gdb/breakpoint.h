@@ -1126,6 +1126,9 @@ extern int regular_breakpoint_inserted_here_p (struct address_space *,
 extern int software_breakpoint_inserted_here_p (struct address_space *, 
 						CORE_ADDR);
 
+extern int single_step_breakpoint_inserted_here_p (struct address_space *,
+						   CORE_ADDR);
+
 /* Returns true if there's a hardware watchpoint or access watchpoint
    inserted in the range defined by ADDR and LEN.  */
 extern int hardware_watchpoint_inserted_in_range (struct address_space *,
@@ -1134,6 +1137,16 @@ extern int hardware_watchpoint_inserted_in_range (struct address_space *,
 
 extern int breakpoint_thread_match (struct address_space *, 
 				    CORE_ADDR, ptid_t);
+
+/* Returns true if {ASPACE1,ADDR1} and {ASPACE2,ADDR2} represent the
+   same breakpoint location.  In most targets, this can only be true
+   if ASPACE1 matches ASPACE2.  On targets that have global
+   breakpoints, the address space doesn't really matter.  */
+
+extern int breakpoint_address_match (struct address_space *aspace1,
+				     CORE_ADDR addr1,
+				     struct address_space *aspace2,
+				     CORE_ADDR addr2);
 
 extern void until_break_command (char *, int, int);
 

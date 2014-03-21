@@ -158,7 +158,10 @@ do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
   for (p = line_comment_chars; *p; p++)
     lex[(unsigned char) *p] = LEX_IS_LINE_COMMENT_START;
 
-  for (p = line_separator_chars; *p; p++)
+#ifndef tc_line_separator_chars
+#define tc_line_separator_chars line_separator_chars
+#endif
+  for (p = tc_line_separator_chars; *p; p++)
     lex[(unsigned char) *p] = LEX_IS_LINE_SEPARATOR;
 
 #ifdef tc_parallel_separator_chars

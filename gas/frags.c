@@ -24,6 +24,20 @@
 
 extern fragS zero_address_frag;
 extern fragS predefined_address_frag;
+
+static int totalfrags;
+
+int
+get_frag_count (void)
+{
+  return totalfrags;
+}
+
+void
+clear_frag_count (void)
+{
+  totalfrags = 0;
+}
 
 /* Initialization for frag routines.  */
 
@@ -70,6 +84,7 @@ frag_alloc (struct obstack *ob)
   ptr = (fragS *) obstack_alloc (ob, SIZEOF_STRUCT_FRAG);
   obstack_alignment_mask (ob) = oalign;
   memset (ptr, 0, SIZEOF_STRUCT_FRAG);
+  totalfrags++;
   return ptr;
 }
 

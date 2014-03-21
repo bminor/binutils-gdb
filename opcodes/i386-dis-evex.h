@@ -2906,42 +2906,42 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F3891_P_2 */
   {
-    { "vpgatherqd",	{ XMxmmq, MVexVSIBQWpX } },
+    { "vpgatherqd",	{ XMxmmq, MVexVSIBQDWpX } },
     { "vpgatherqq",	{ XM, MVexVSIBQWpX } },
   },
   /* EVEX_W_0F3893_P_2 */
   {
-    { "vgatherqps",	{ XMxmmq, MVexVSIBQWpX } },
+    { "vgatherqps",	{ XMxmmq, MVexVSIBQDWpX } },
     { "vgatherqpd",	{ XM, MVexVSIBQWpX } },
   },
   /* EVEX_W_0F38A1_P_2 */
   {
-    { "vpscatterqd",	{ MVexVSIBQWpX, XMxmmq } },
+    { "vpscatterqd",	{ MVexVSIBQDWpX, XMxmmq } },
     { "vpscatterqq",	{ MVexVSIBQWpX, XM } },
   },
   /* EVEX_W_0F38A3_P_2 */
   {
-    { "vscatterqps",	{ MVexVSIBQWpX, XMxmmq } },
+    { "vscatterqps",	{ MVexVSIBQDWpX, XMxmmq } },
     { "vscatterqpd",	{ MVexVSIBQWpX, XM } },
   },
   /* EVEX_W_0F38C7_R_1_P_2 */
   {
-    { "vgatherpf0qps",  { MVexVSIBDWpX } },
+    { "vgatherpf0qps",  { MVexVSIBDQWpX } },
     { "vgatherpf0qpd",  { MVexVSIBQWpX } },
   },
   /* EVEX_W_0F38C7_R_2_P_2 */
   {
-    { "vgatherpf1qps",  { MVexVSIBDWpX } },
+    { "vgatherpf1qps",  { MVexVSIBDQWpX } },
     { "vgatherpf1qpd",  { MVexVSIBQWpX } },
   },
   /* EVEX_W_0F38C7_R_5_P_2 */
   {
-    { "vscatterpf0qps",  { MVexVSIBDWpX } },
+    { "vscatterpf0qps",  { MVexVSIBDQWpX } },
     { "vscatterpf0qpd",  { MVexVSIBQWpX } },
   },
   /* EVEX_W_0F38C7_R_6_P_2 */
   {
-    { "vscatterpf1qps",  { MVexVSIBDWpX } },
+    { "vscatterpf1qps",  { MVexVSIBDQWpX } },
     { "vscatterpf1qpd",  { MVexVSIBQWpX } },
   },
 

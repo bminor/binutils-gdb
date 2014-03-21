@@ -36,6 +36,7 @@
 #include "ada-lang.h"
 #include "gdbthread.h"
 #include "exceptions.h"
+#include "event-top.h"
 
 /* If we can't find a function's name from its address,
    we print this instead.  */
@@ -398,6 +399,8 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 
   TRY_CATCH (e, RETURN_MASK_ALL)
     {
+      int was_sync = sync_execution;
+
       proceed (real_pc, GDB_SIGNAL_0, 0);
 
       /* Inferior function calls are always synchronous, even if the
@@ -407,6 +410,13 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 	{
 	  wait_for_inferior ();
 	  normal_stop ();
+	  /* If GDB was previously in sync execution mode, then ensure
+	     that it remains so.  normal_stop calls
+	     async_enable_stdin, so reset it again here.  In other
+	     cases, stdin will be re-enabled by
+	     inferior_event_handler, when an exception is thrown.  */
+	  if (was_sync)
+	    async_disable_stdin ();
 	}
     }
 

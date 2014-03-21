@@ -363,11 +363,30 @@ tyscm_copy_type_recursive (void **slot, void *info)
   type_smob *t_smob = (type_smob *) *slot;
   htab_t copied_types = info;
   struct objfile *objfile = TYPE_OBJFILE (t_smob->type);
+  htab_t htab;
+  eqable_gdb_smob **new_slot;
+  type_smob t_smob_for_lookup;
 
   gdb_assert (objfile != NULL);
 
   htab_empty (copied_types);
   t_smob->type = copy_type_recursive (objfile, t_smob->type, copied_types);
+
+  /* The eq?-hashtab that the type lived in is going away.
+     Add the type to its new eq?-hashtab: Otherwise if/when the type is later
+     garbage collected we'll assert-fail if the type isn't in the hashtab.
+     PR 16612.
+
+     Types now live in "arch space", and things like "char" that came from
+     the objfile *could* be considered eq? with the arch "char" type.
+     However, they weren't before the objfile got deleted, so making them
+     eq? now is debatable.  */
+  htab = tyscm_type_map (t_smob->type);
+  t_smob_for_lookup.type = t_smob->type;
+  new_slot = gdbscm_find_eqable_gsmob_ptr_slot (htab, &t_smob_for_lookup.base);
+  gdb_assert (*new_slot == NULL);
+  gdbscm_fill_eqable_gsmob_ptr_slot (new_slot, &t_smob->base);
+
   return 1;
 }
 

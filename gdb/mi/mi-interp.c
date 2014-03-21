@@ -441,9 +441,8 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	  current_uiout = mi_uiout;
 
 	  get_last_target_status (&last_ptid, &last);
-	  bpstat_print (bs, last.kind);
+	  print_stop_event (&last);
 
-	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 	  current_uiout = saved_uiout;
 	}
 
@@ -854,7 +853,7 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
 
   ui_out_field_fmt (mi_uiout, "thread-group", "i%d", inferior->num);
   ui_out_field_core_addr (mi_uiout, "addr", target_gdbarch (), memaddr);
-  ui_out_field_fmt (mi_uiout, "len", "0x%zx", len);
+  ui_out_field_fmt (mi_uiout, "len", "%s", hex_string (len));
 
   /* Append 'type=code' into notification if MEMADDR falls in the range of
      sections contain code.  */

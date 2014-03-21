@@ -57,7 +57,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (const char *arch ATTRIBUTE_UNUSED,
 {
   char *string;
 
-  if (! entry->flags.maybe_archive)
+  if (! entry->flags.maybe_archive || entry->flags.full_name_provided)
     return FALSE;
 
   string = (char *) xmalloc (strlen (search->name)

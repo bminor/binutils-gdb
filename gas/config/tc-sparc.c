@@ -787,6 +787,8 @@ struct priv_reg_entry hpriv_reg_table[] =
   {"hintp", 3},
   {"htba", 5},
   {"hver", 6},
+  {"hstick_offset", 28},
+  {"hstick_enable", 29},
   {"hstick_cmpr", 31},
   {"", -1},			/* End marker.  */
 };

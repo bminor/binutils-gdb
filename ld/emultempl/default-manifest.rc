@@ -1,7 +1,7 @@
 LANGUAGE 0, 0
 
 /* CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST MOVEABLE PURE DISCARDABLE */
-1 9 MOVEABLE PURE DISCARDABLE
+1 24 MOVEABLE PURE DISCARDABLE
 BEGIN
   "<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>\n"
   "<assembly xmlns=""urn:schemas-microsoft-com:asm.v1"" manifestVersion=""1.0"">\n"

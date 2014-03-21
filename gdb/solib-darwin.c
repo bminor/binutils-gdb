@@ -70,7 +70,7 @@ struct gdb_dyld_all_image_infos
 
 /* Current all_image_infos version.  */
 #define DYLD_VERSION_MIN 1
-#define DYLD_VERSION_MAX 12
+#define DYLD_VERSION_MAX 14
 
 /* Per PSPACE specific data.  */
 struct darwin_info
@@ -513,7 +513,10 @@ darwin_solib_create_inferior_hook (int from_tty)
   darwin_load_image_infos (info);
 
   if (!darwin_dyld_version_ok (info))
-    return;
+    {
+      warning (_("unhandled dyld version (%d)"), info->all_image.version);
+      return;
+    }
 
   create_solib_event_breakpoint (target_gdbarch (), info->all_image.notifier);
 

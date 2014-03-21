@@ -98,6 +98,7 @@ if [istarget xtensa*-*-*] then {
     run_dump_test "pcrel"
     run_dump_test "weak-call"
     run_dump_test "jlong"
+    run_dump_test "trampoline"
 }
 
 if [info exists errorInfo] then {
