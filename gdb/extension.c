@@ -342,7 +342,8 @@ eval_ext_lang_from_control_command (struct command_line *cmd)
     {
       if (extlang->cli_control_type == cmd->control_type)
 	{
-	  if (extlang->ops->eval_from_control_command != NULL)
+	  if (extlang->ops != NULL
+	      && extlang->ops->eval_from_control_command != NULL)
 	    {
 	      extlang->ops->eval_from_control_command (extlang, cmd);
 	      return;

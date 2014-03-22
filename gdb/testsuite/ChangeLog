@@ -1,3 +1,8 @@
+2014-03-22  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/python.exp (python not supported): Verify multi-line
+	python command issues an error.
+
 2014-03-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.threads/thread-specific.exp: Handle the lack of usable

@@ -1,3 +1,8 @@
+2014-03-21  Daniel Gutson  <daniel.gutson@tallertechnologies.com>
+
+	* extension.c (eval_ext_lang_from_control_command): Avoid dereferencing
+	NULL pointer.
+
 2014-03-21  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (normal_stop): Extend comment.
