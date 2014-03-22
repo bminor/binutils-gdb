@@ -1,3 +1,8 @@
+2014-03-22  Doug Evans  <xdje42@gmail.com>
+
+	* infcmd.c (interrupt_command): Renamed from interrupt_target_command.
+	All uses updated.
+
 2014-03-22  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (target_read_live_memory): Remove.

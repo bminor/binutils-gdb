@@ -2700,7 +2700,7 @@ interrupt_target_1 (int all_threads)
 
 /* interrupt [-a]  */
 static void
-interrupt_target_command (char *args, int from_tty)
+interrupt_command (char *args, int from_tty)
 {
   if (target_can_async_p ())
     {
@@ -3067,7 +3067,7 @@ You may specify arguments to give to your program, just as with the\n\
 \"run\" command."));
   set_cmd_completer (c, filename_completer);
 
-  add_com ("interrupt", class_run, interrupt_target_command,
+  add_com ("interrupt", class_run, interrupt_command,
 	   _("Interrupt the execution of the debugged program.\n\
 If non-stop mode is enabled, interrupt only the current thread,\n\
 otherwise all the threads in the program are stopped.  To \n\
