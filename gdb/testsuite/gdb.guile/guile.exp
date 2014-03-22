@@ -38,6 +38,13 @@ gdb_test_multiple "guile (display 23) (newline)" "verify guile support" {
       gdb_test "source $srcdir/$subdir/source2.scm" \
 	  "Error in sourced command file:.*" \
 	  "source source2.scm when guile disabled"
+
+      # Verify multi-line guile commands cause an error.
+      gdb_test_multiline "multi-line guile command" \
+	  "guile" "" \
+	  "(print 23)" "" \
+	  "end" "not supported.*"
+
       return
     }
     -re "$gdb_prompt $"	{}

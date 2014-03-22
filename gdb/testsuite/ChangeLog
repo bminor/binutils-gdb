@@ -2,6 +2,8 @@
 
 	* gdb.python/python.exp (python not supported): Verify multi-line
 	python command issues an error.
+	* gdb.python/guile.exp (guile not supported): Verify multi-line
+	guile command issues an error.
 
 2014-03-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
