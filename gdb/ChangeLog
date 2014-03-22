@@ -1,5 +1,10 @@
 2014-03-22  Doug Evans  <xdje42@gmail.com>
 
+	* infcmd.c: Whitespace fixes.
+	(interrupt_command): Merge two function comments into one.
+
+2014-03-22  Doug Evans  <xdje42@gmail.com>
+
 	* infcmd.c (interrupt_command): Renamed from interrupt_target_command.
 	All uses updated.
 
