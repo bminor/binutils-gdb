@@ -36,7 +36,6 @@ proc do_test { pass } {
 
     gdb_test_no_output "set range-stepping off" ""
     gdb_test_no_output "set debug infrun 1" ""
-    gdb_test_no_output "set debug lin-lwp 1" ""
 
     set test "run a bit #$pass"
     set abort 1
