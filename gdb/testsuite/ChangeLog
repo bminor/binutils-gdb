@@ -1,3 +1,8 @@
+2014-03-24  Doug Evans  <dje@google.com>
+
+	* gdb.linespec/macro-relative.exp: Mark the test as unsupported if
+	using fission.
+
 2014-03-24  Hui Zhu  <hui@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 

@@ -15,6 +15,12 @@
 
 standard_testfile
 
+# Fission doesn't support macros yet.  Bug 15954.
+if [using_fission] {
+    unsupported "fission"
+    return -1
+}
+
 set opts {debug additional_flags=-I.}
 
 get_compiler_info
