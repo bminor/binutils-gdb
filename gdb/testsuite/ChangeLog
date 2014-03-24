@@ -1,3 +1,15 @@
+2014-03-24  Hui Zhu  <hui@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/16101
+	* gdb.base/dprintf.exp: Use unsupported rather than changing the
+	test pass/fail messages.  Detect missing support for dprintf when
+	breakpoints are actually inserted.
+	* gdb.base/mi-dprintf.exp: Detect missing support for dprintf when
+	breakpoints are actually inserted.
+	* lib/mi-support.exp (mi_run_cmd_full): Return -1 if continue
+	fails.
+
 2014-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/gdb-sigterm.exp (do_test): Remove "set debug lin-lwp 1".
