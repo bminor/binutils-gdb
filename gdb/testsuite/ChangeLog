@@ -1,3 +1,13 @@
+2014-04-17  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (with_target_charset): New proc.
+	* gdb.base/printcmds.exp (test_print_all_chars): Wrap tests with
+	with_target_charset.
+	(test_print_strings): Likewise.
+	(test_repeat_bytes): Likewise.
+	* gdb.base/setvar.exp: Set target-charset to ASCII temporarily
+	for some tests.
+
 2014-04-16  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/15827

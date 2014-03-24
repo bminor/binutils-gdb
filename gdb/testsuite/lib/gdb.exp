@@ -1748,6 +1748,39 @@ proc with_gdb_prompt { prompt body } {
     }
 }
 
+# Run tests in BODY with target-charset setting to TARGET_CHARSET.  When
+# BODY is finished, restore target-charset.
+
+proc with_target_charset { target_charset body } {
+    global gdb_prompt
+
+    set saved ""
+    gdb_test_multiple "show target-charset" "" {
+	-re "The target character set is \".*; currently (.*)\"\..*$gdb_prompt " {
+	    set saved $expect_out(1,string)
+	}
+	-re "The target character set is \"(.*)\".*$gdb_prompt " {
+	    set saved $expect_out(1,string)
+	}
+	-re ".*$gdb_prompt " {
+	    fail "get target-charset"
+	}
+    }
+
+    gdb_test_no_output "set target-charset $target_charset" ""
+
+    set code [catch {uplevel 1 $body} result]
+
+    gdb_test_no_output "set target-charset $saved" ""
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
 # Return 1 if _Complex types are supported, otherwise, return 0.
 
 gdb_caching_proc support_complex_tests {
