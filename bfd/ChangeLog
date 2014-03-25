@@ -1,3 +1,12 @@
+2014-03-27  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (bfd_mach_o_get_base_address): New prototype.
+	* mach-o.c (bfd_mach_o_write_symtab)
+	(bfd_mach_o_write_contents)
+	(bfd_mach_o_set_section_flags_from_bfd)
+	(bfd_mach_o_build_seg_command): Fix indentation.
+	(bfd_mach_o_get_base_address): New function.
+
 2014-03-26  Nick Clifton  <nickc@redhat.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Skip
