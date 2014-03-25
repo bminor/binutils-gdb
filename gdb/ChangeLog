@@ -1,3 +1,8 @@
+2014-03-25  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-script.c (script_from_file): Force the interpreter to
+	sync mode.
+
 2014-03-24  Pierre Langlois  <pierre.langlois@embecosm.com>
 
 	* avr-tdep.c (avr_scan_prologue): Accept push r1 instruction for
