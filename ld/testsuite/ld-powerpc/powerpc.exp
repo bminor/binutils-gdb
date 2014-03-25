@@ -213,6 +213,8 @@ set ppc64elftests {
         {tocopt4a.s tocopt4b.s} {{objdump -s tocopt4.d}} "tocopt4"}
     {"TOC opt5" "-melf64ppc" "" "-a64"  {tocopt5.s}
 	{{objdump -s tocopt5.d}} "tocopt5"}
+    {"ambig shared v1" "-shared -melf64ppc" "" "-a64" {funv1.s} {} "funv1.so"}
+    {"ambig shared v2" "-shared -melf64ppc" "" "-a64" {funv2.s} {} "funv2.so"}
 }
 
 set ppceabitests {
@@ -271,6 +273,8 @@ if [ supports_ppc64 ] then {
     run_dump_test "relbrlt"
     run_dump_test "elfv2so"
     run_dump_test "elfv2exe"
+    run_dump_test "ambiguousv1"
+    run_dump_test "ambiguousv2"
 }
 
 if { [istarget "powerpc*-eabi*"] } {

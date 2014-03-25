@@ -1,6 +1,12 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2014-03-26  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/startv1.s, * ld-powerpc/startv2.s, * ld-powerpc/funref.s,
+	* ld-powerpc/funv1.s, * ld-powerpc/funv2.s,
+	* ld-powerpc/ambiguousv1.d, * ld-powerpc/ambiguousv2.d: New test files.
+	* ld-powerpc/powerpc.exp: Run new tests.
+
 	2014-03-14  Alan Modra  <amodra@gmail.com>
 	* ld-powerpc/vle.ld: Place .PPC.EMB.sdata0 within 32k of 0.
 	* ld-powerpc/vle-reloc-3.d: Update.
