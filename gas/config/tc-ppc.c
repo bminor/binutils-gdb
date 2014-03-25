@@ -2530,16 +2530,25 @@ parse_toc_entry (enum toc_size_qualifier *toc_kind)
 }
 #endif
 
-#ifdef OBJ_XCOFF
+#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
 /* See whether a symbol is in the TOC section.  */
 
 static int
 ppc_is_toc_sym (symbolS *sym)
 {
+#ifdef OBJ_XCOFF
   return (symbol_get_tc (sym)->symbol_class == XMC_TC
 	  || symbol_get_tc (sym)->symbol_class == XMC_TC0);
-}
 #endif
+#ifdef OBJ_ELF
+  const char *sname = segment_name (S_GET_SEGMENT (sym));
+  if (ppc_obj64)
+    return strcmp (sname, ".toc") == 0;
+  else
+    return strcmp (sname, ".got") == 0;
+#endif
+}
+#endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
 
 
 #ifdef OBJ_ELF
@@ -3167,11 +3176,17 @@ md_assemble (char *str)
 		   && operand->shift == 0)
 	    {
 	      reloc = BFD_RELOC_16;
-#ifdef OBJ_XCOFF
+#if defined OBJ_XCOFF || defined OBJ_ELF
 	      /* Note: the symbol may be not yet defined.  */
 	      if ((operand->flags & PPC_OPERAND_PARENS) != 0
 		  && ppc_is_toc_sym (ex.X_add_symbol))
-		reloc = BFD_RELOC_PPC_TOC16;
+		{
+		  reloc = BFD_RELOC_PPC_TOC16;
+#ifdef OBJ_ELF
+		  as_warn (_("assuming %s on symbol"),
+			   ppc_obj64 ? "@toc" : "@xgot");
+#endif
+		}
 #endif
 	    }
 

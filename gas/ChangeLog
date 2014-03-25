@@ -1,3 +1,8 @@
+2014-03-25  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_is_toc_sym): Revert 2014-03-05.
+	(md_assemble): Likewise.  Warn.
+
 2014-03-21  David Weatherford <weath@cadence.com>
             Max Filippov <jcmvbkbc@gmail.com>
 
