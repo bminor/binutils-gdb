@@ -1,3 +1,8 @@
+2014-03-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.asm/asm-source.exp: Handle powerpc64le-* targets.
+	* gdb.asm/powerpc64le.inc: New file.
+
 2014-03-25  Pedro Alves  <palves@redhat.com>
 	    Doug Evans  <dje@google.com>
 
