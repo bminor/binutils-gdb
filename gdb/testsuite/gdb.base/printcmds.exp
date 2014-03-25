@@ -622,8 +622,16 @@ proc test_print_typedef_arrays {} {
 
 proc test_artificial_arrays {} {
     # Send \026@ instead of just @ in case the kill character is @.
-    gdb_test_escape_braces "p int1dim\[0\]\026@2" " = {0, 1}" {p int1dim[0]@2}
-    gdb_test_escape_braces "p int1dim\[0\]\026@2\026@3" \
+    # \026 (ctrl-v) is to escape the next character (@), but it is
+    # not only unnecessary to do so on MingW hosts, but also harmful
+    # for the test because that character isn't recognized as an
+    # escape character.
+    set ctrlv "\026"
+    if [ishost *-*-mingw*] {
+	set ctrlv ""
+    }
+    gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@2" " = {0, 1}" {p int1dim[0]@2}
+    gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@2${ctrlv}@3" \
 	"({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)" \
 	{p int1dim[0]@2@3}
     gdb_test_escape_braces {p/x (short [])0x12345678} \

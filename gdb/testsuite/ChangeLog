@@ -1,3 +1,8 @@
+2014-04-08  Pierre Muller  <muller@sourceware.org>
+
+	* gdb.base/printcmds.exp (test_artificial_arrays): Disable
+	Ctrl-V use for mingw hosts.
+
 2014-04-07  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/py-value.c: Improve test case.
