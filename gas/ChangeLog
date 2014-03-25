@@ -1,3 +1,10 @@
+2014-03-25  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-coff-seh.c (obj_coff_seh_code): New function -
+	switches the current segment back to the code segment recorded
+	when seh_proc was last invoked.
+	* config/obj-coff-seh.h (SEH_CMDS): Add seh_code.
+
 2014-03-25  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_is_toc_sym): Revert 2014-03-05.
