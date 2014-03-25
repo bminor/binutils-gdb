@@ -1,3 +1,15 @@
+2014-03-26  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_check_relocs): Account for possibly
+	needed plt entries when taking the address of functions for
+	abiversion == 0 (ie. unknown) as well as abiversion == 2.
+	Move opd setup and abiversion checks to..
+	(ppc64_elf_before_check_relocs): ..here.  Renamed from
+	ppc64_elf_process_dot_syms.  Set output abiversion from input and
+	input abiversion from output, if either is not set.
+	(ppc64_elf_merge_private_bfd_data): Don't merge flags here.
+	(elf_backend_check_directives): Update.
+
 2014-03-25  Will Newton  <will.newton@linaro.org>
 
 	 * elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_sections):

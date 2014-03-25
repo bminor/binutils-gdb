@@ -1,3 +1,10 @@
+2014-03-26  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/startv1.s, * ld-powerpc/startv2.s, * ld-powerpc/funref.s,
+	* ld-powerpc/funv1.s, * ld-powerpc/funv2.s,
+	* ld-powerpc/ambiguousv1.d, * ld-powerpc/ambiguousv2.d: New test files.
+	* ld-powerpc/powerpc.exp: Run new tests.
+
 2014-03-25  Will Newton  <will.newton@linaro.org>
 
 	 * ld-aarch64/aarch64-elf.exp: Add relasz dump test.
