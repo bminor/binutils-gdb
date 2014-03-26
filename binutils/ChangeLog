@@ -1,3 +1,14 @@
+2014-04-01  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (OPT_DATA_IN_CODE): New macro.
+	(options): Add entry for data in code.
+	(mach_o_help): Ditto.
+	(data_in_code_kind_name): New array.
+	(dump_data_in_code): New function.
+	(dump_load_command): Handle data in code.
+	(mach_o_dump): Ditto.
+	(dump_header): Display a terminal newline.
+
 2014-03-27  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c (dump_load_command): Display value for

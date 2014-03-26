@@ -43,6 +43,7 @@
 #define OPT_SEG_SPLIT_INFO 6
 #define OPT_COMPACT_UNWIND 7
 #define OPT_FUNCTION_STARTS 8
+#define OPT_DATA_IN_CODE 9
 
 /* List of actions.  */
 static struct objdump_private_option options[] =
@@ -56,6 +57,7 @@ static struct objdump_private_option options[] =
     { "seg_split_info", 0 },
     { "compact_unwind", 0 },
     { "function_starts", 0 },
+    { "data_in_code", 0 },
     { NULL, 0 }
   };
 
@@ -75,6 +77,7 @@ For Mach-O files:\n\
   seg_split_info   Display segment split info\n\
   compact_unwind   Display compact unwinding info\n\
   function_starts  Display start address of functions\n\
+  data_in_code     Display data in code entries\n\
 "));
 }
 
@@ -284,6 +287,7 @@ dump_header (bfd *abfd)
   bfd_mach_o_print_flags (bfd_mach_o_header_flags_name, h->flags);
   fputs (_(")\n"), stdout);
   printf (_(" reserved  : %08x\n"), h->reserved);
+  putchar ('\n');
 }
 
 static void
@@ -974,6 +978,59 @@ dump_function_starts (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
   free (buf);
 }
 
+static const bfd_mach_o_xlat_name data_in_code_kind_name[] =
+{
+  { "data", BFD_MACH_O_DICE_KIND_DATA },
+  { "1 byte jump table", BFD_MACH_O_DICE_JUMP_TABLES8 },
+  { "2 bytes jump table", BFD_MACH_O_DICE_JUMP_TABLES16 },
+  { "4 bytes jump table", BFD_MACH_O_DICE_JUMP_TABLES32 },
+  { "4 bytes abs jump table", BFD_MACH_O_DICE_ABS_JUMP_TABLES32 },
+  { NULL, 0 }
+};
+
+static void
+dump_data_in_code (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
+{
+  unsigned char *buf;
+  unsigned char *p;
+
+  if (cmd->datasize == 0)
+    {
+      printf ("   no data_in_code entries\n");
+      return;
+    }
+
+  buf = xmalloc (cmd->datasize);
+  if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
+      || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
+    {
+      non_fatal (_("cannot read function starts"));
+      free (buf);
+      return;
+    }
+
+  printf ("   offset     length kind\n");
+  for (p = buf; p < buf + cmd->datasize; )
+    {
+      struct mach_o_data_in_code_entry_external *dice;
+      unsigned int offset;
+      unsigned int length;
+      unsigned int kind;
+
+      dice = (struct mach_o_data_in_code_entry_external *) p;
+
+      offset = bfd_get_32 (abfd, dice->offset);
+      length = bfd_get_16 (abfd, dice->length);
+      kind = bfd_get_16 (abfd, dice->kind);
+
+      printf ("   0x%08x 0x%04x 0x%04x %s\n", offset, length, kind,
+	      bfd_mach_o_get_name (data_in_code_kind_name, kind));
+
+      p += sizeof (*dice);
+    }
+  free (buf);
+}
+
 static void
 dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
                    bfd_boolean verbose)
@@ -1070,14 +1127,26 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
            linkedit->dataoff, linkedit->datasize,
            linkedit->dataoff + linkedit->datasize);
 
-        if (verbose && cmd->type == BFD_MACH_O_LC_CODE_SIGNATURE)
-          dump_code_signature (abfd, linkedit);
-        else if (verbose && cmd->type == BFD_MACH_O_LC_SEGMENT_SPLIT_INFO)
-          dump_segment_split_info (abfd, linkedit);
-        else if (verbose && cmd->type == BFD_MACH_O_LC_FUNCTION_STARTS)
-          dump_function_starts (abfd, linkedit);
-        break;
+	if (verbose)
+	  switch (cmd->type)
+	    {
+	    case BFD_MACH_O_LC_CODE_SIGNATURE:
+	      dump_code_signature (abfd, linkedit);
+	      break;
+	    case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
+	      dump_segment_split_info (abfd, linkedit);
+	      break;
+	    case BFD_MACH_O_LC_FUNCTION_STARTS:
+	      dump_function_starts (abfd, linkedit);
+	      break;
+	    case BFD_MACH_O_LC_DATA_IN_CODE:
+	      dump_data_in_code (abfd, linkedit);
+	      break;
+	    default:
+	      break;
+	    }
       }
+      break;
     case BFD_MACH_O_LC_SUB_FRAMEWORK:
     case BFD_MACH_O_LC_SUB_UMBRELLA:
     case BFD_MACH_O_LC_SUB_LIBRARY:
@@ -1617,6 +1686,8 @@ mach_o_dump (bfd *abfd)
     dump_load_commands (abfd, BFD_MACH_O_LC_SEGMENT_SPLIT_INFO, 0);
   if (options[OPT_FUNCTION_STARTS].selected)
     dump_load_commands (abfd, BFD_MACH_O_LC_FUNCTION_STARTS, 0);
+  if (options[OPT_DATA_IN_CODE].selected)
+    dump_load_commands (abfd, BFD_MACH_O_LC_DATA_IN_CODE, 0);
   if (options[OPT_COMPACT_UNWIND].selected)
     {
       dump_section_content (abfd, "__LD", "__compact_unwind",
