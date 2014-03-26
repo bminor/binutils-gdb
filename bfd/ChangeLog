@@ -1,3 +1,8 @@
+2014-03-26  Nick Clifton  <nickc@redhat.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Skip
+	relocations in discarded sections.
+
 2014-03-26  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_convert_architecture): Add
