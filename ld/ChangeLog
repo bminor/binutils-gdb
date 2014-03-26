@@ -1,3 +1,10 @@
+2014-03-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16756
+	* ldmain.c (symbol_warning): New function.
+	(warning_callback): Use it.  Scan all input files for a reference
+	to SYMBOL.
+
 2014-03-17  Christopher Faylor  <me.cygwin2013@cgf.cx>
 
 	* ld.texinfo: Document change in handling of --enable-auto-image-base.

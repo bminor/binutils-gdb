@@ -1150,6 +1150,25 @@ struct warning_callback_info
   asymbol **asymbols;
 };
 
+/* Look through the relocs to see if we can find a plausible address
+   for SYMBOL in ABFD.  Return TRUE if found.  Otherwise return FALSE.  */
+
+static bfd_boolean
+symbol_warning (const char *warning, const char *symbol, bfd *abfd)
+{
+  struct warning_callback_info cinfo;
+
+  if (!bfd_generic_link_read_symbols (abfd))
+    einfo (_("%B%F: could not read symbols: %E\n"), abfd);
+
+  cinfo.found = FALSE;
+  cinfo.warning = warning;
+  cinfo.symbol = symbol;
+  cinfo.asymbols = bfd_get_outsymbols (abfd);
+  bfd_map_over_sections (abfd, warning_find_reloc, &cinfo);
+  return cinfo.found;
+}
+
 /* This is called when there is a reference to a warning symbol.  */
 
 static bfd_boolean
@@ -1172,24 +1191,14 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
     einfo ("%P: %s%s\n", _("warning: "), warning);
   else if (symbol == NULL)
     einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
-  else
+  else if (! symbol_warning (warning, symbol, abfd))
     {
-      struct warning_callback_info cinfo;
-
-      /* Look through the relocs to see if we can find a plausible
-	 address.  */
-
-      if (!bfd_generic_link_read_symbols (abfd))
-	einfo (_("%B%F: could not read symbols: %E\n"), abfd);
-
-      cinfo.found = FALSE;
-      cinfo.warning = warning;
-      cinfo.symbol = symbol;
-      cinfo.asymbols = bfd_get_outsymbols (abfd);
-      bfd_map_over_sections (abfd, warning_find_reloc, &cinfo);
-
-      if (! cinfo.found)
-	einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
+      bfd *b;
+      /* Search all input files for a reference to SYMBOL.  */
+      for (b = info->input_bfds; b; b = b->link_next)
+	if (b != abfd && symbol_warning (warning, symbol, b))
+	  return TRUE;
+      einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
     }
 
   return TRUE;

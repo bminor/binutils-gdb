@@ -116,14 +116,14 @@ set lto_link_tests {
    "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12758a.o -Wl,--start-group tmpdir/libpr12758.a -Wl,--end-group" ""
    {dummy.c} {} "pr12758.exe"}
   {"Build libdummy.a PR ld/12760"
-   "" ""
+   "" "-g -O0"
    {pr12760a.c} {} "libdummy.a"}
   {"Build libpr12760.a"
    "" "-flto -O2 -ffat-lto-objects"
    {pr12760b.c} {} "libpr12760.a"}
   {"PR ld/12760"
    "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12760a.o -Wl,--start-group tmpdir/libpr12760.a -Wl,--end-group" ""
-   {dummy.c} {} "pr12760.exe" "c" "warning: Bad bar"}
+   {dummy.c} {} "pr12760.exe" "c" "pr12760a.c:6: warning: Bad bar"}
   {"Build libpr13183.a"
    "-T" "-flto -O2 -ffat-lto-objects"
    {pr13183a.c} {} "libpr13183.a"}
