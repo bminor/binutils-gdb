@@ -3207,12 +3207,69 @@ bfd_mach_o_read_dylib (bfd *abfd, bfd_mach_o_load_command *command)
 }
 
 static int
-bfd_mach_o_read_prebound_dylib (bfd *abfd ATTRIBUTE_UNUSED,
-                                bfd_mach_o_load_command *command ATTRIBUTE_UNUSED)
+bfd_mach_o_read_prebound_dylib (bfd *abfd,
+                                bfd_mach_o_load_command *command)
 {
-  /* bfd_mach_o_prebound_dylib_command *cmd = &command->command.prebound_dylib; */
+  bfd_mach_o_prebound_dylib_command *cmd = &command->command.prebound_dylib;
+  struct mach_o_prebound_dylib_command_external raw;
+  unsigned int nameoff;
+  unsigned int modoff;
+  unsigned int str_len;
+  unsigned char *str;
 
-  BFD_ASSERT (command->type == BFD_MACH_O_LC_PREBOUND_DYLIB);
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
+      || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return -1;
+
+  nameoff = bfd_h_get_32 (abfd, raw.name);
+  modoff = bfd_h_get_32 (abfd, raw.linked_modules);
+  if (nameoff > command->len || modoff > command->len)
+    return -1;
+
+  str_len = command->len - sizeof (raw);
+  str = bfd_alloc (abfd, str_len);
+  if (str == NULL)
+    return -1;
+  if (bfd_bread (str, str_len, abfd) != str_len)
+    return -1;
+
+  cmd->name_offset = command->offset + nameoff;
+  cmd->nmodules = bfd_h_get_32 (abfd, raw.nmodules);
+  cmd->linked_modules_offset = command->offset + modoff;
+
+  cmd->name_str = (char *)str + nameoff - (sizeof (raw) + BFD_MACH_O_LC_SIZE);
+  cmd->linked_modules = str + modoff - (sizeof (raw) + BFD_MACH_O_LC_SIZE);
+  return 0;
+}
+
+static int
+bfd_mach_o_read_prebind_cksum (bfd *abfd,
+			       bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_prebind_cksum_command *cmd = &command->command.prebind_cksum;
+  struct mach_o_prebind_cksum_command_external raw;
+
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
+      || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return -1;
+
+  cmd->cksum = bfd_get_32 (abfd, raw.cksum);
+  return 0;
+}
+
+static int
+bfd_mach_o_read_twolevel_hints (bfd *abfd,
+				bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_twolevel_hints_command *cmd = &command->command.twolevel_hints;
+  struct mach_o_twolevel_hints_command_external raw;
+
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
+      || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return -1;
+
+  cmd->offset = bfd_get_32 (abfd, raw.offset);
+  cmd->nhints = bfd_get_32 (abfd, raw.nhints);
   return 0;
 }
 
@@ -3881,8 +3938,13 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       if (bfd_mach_o_read_dysymtab (abfd, command) != 0)
 	return -1;
       break;
-    case BFD_MACH_O_LC_TWOLEVEL_HINTS:
     case BFD_MACH_O_LC_PREBIND_CKSUM:
+      if (bfd_mach_o_read_prebind_cksum (abfd, command) != 0)
+	return -1;
+      break;
+    case BFD_MACH_O_LC_TWOLEVEL_HINTS:
+      if (bfd_mach_o_read_twolevel_hints (abfd, command) != 0)
+	return -1;
       break;
     case BFD_MACH_O_LC_UUID:
       if (bfd_mach_o_read_uuid (abfd, command) != 0)

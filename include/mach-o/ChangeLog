@@ -1,3 +1,9 @@
+2014-04-02  Tristan Gingold  <gingold@adacore.com>
+
+	* external.h (mach_o_prebound_dylib_command_external)
+	(mach_o_prebind_cksum_command_external)
+	(mach_o_twolevel_hints_command_external): New types.
+
 2014-03-26  Tristan Gingold  <gingold@adacore.com>
 
 	* loader.h (bfd_mach_o_cpu_type): Add BFD_MACH_O_CPU_TYPE_ARM64.

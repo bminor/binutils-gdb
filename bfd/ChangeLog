@@ -1,3 +1,17 @@
+2014-04-02  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (bfd_mach_o_twolevel_hints_command)
+	(bfd_mach_o_prebind_cksum_command): New types.
+	(bfd_mach_o_prebound_dylib_command): Rewrite.
+	(bfd_mach_o_load_command): Add prebind_cksum and twolevel_hints
+	fields.
+	* mach-o.c (bfd_mach_o_read_prebound_dylib): Read and decode the
+	command.
+	(bfd_mach_o_read_prebind_cksum): New function.
+	(bfd_mach_o_read_twolevel_hints): Ditto.
+	(bfd_mach_o_read_command): Handle prebind cksum and twolevel hints
+	commands.
+
 2014-04-02  Alan Modra  <amodra@gmail.com>
 
 	* elfcode.h (bfd_from_remote_memory): Add "size" parameter.

@@ -44,6 +44,7 @@
 #define OPT_COMPACT_UNWIND 7
 #define OPT_FUNCTION_STARTS 8
 #define OPT_DATA_IN_CODE 9
+#define OPT_TWOLEVEL_HINTS 10
 
 /* List of actions.  */
 static struct objdump_private_option options[] =
@@ -58,6 +59,7 @@ static struct objdump_private_option options[] =
     { "compact_unwind", 0 },
     { "function_starts", 0 },
     { "data_in_code", 0 },
+    { "twolevel_hints", 0 },
     { NULL, 0 }
   };
 
@@ -78,6 +80,7 @@ For Mach-O files:\n\
   compact_unwind   Display compact unwinding info\n\
   function_starts  Display start address of functions\n\
   data_in_code     Display data in code entries\n\
+  twolevel_hints   Display the two-level namespace lookup hints table\n\
 "));
 }
 
@@ -1004,7 +1007,7 @@ dump_data_in_code (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
   if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
       || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
     {
-      non_fatal (_("cannot read function starts"));
+      non_fatal (_("cannot read data_in_code"));
       free (buf);
       return;
     }
@@ -1027,6 +1030,45 @@ dump_data_in_code (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
 	      bfd_mach_o_get_name (data_in_code_kind_name, kind));
 
       p += sizeof (*dice);
+    }
+  free (buf);
+}
+
+static void
+dump_twolevel_hints (bfd *abfd, bfd_mach_o_twolevel_hints_command *cmd)
+{
+  size_t sz = 4 * cmd->nhints;
+  unsigned char *buf;
+  unsigned char *p;
+
+  buf = xmalloc (sz);
+  if (bfd_seek (abfd, cmd->offset, SEEK_SET) != 0
+      || bfd_bread (buf, sz, abfd) != sz)
+    {
+      non_fatal (_("cannot read twolevel hints"));
+      free (buf);
+      return;
+    }
+
+  for (p = buf; p < buf + sz; p += 4)
+    {
+      unsigned int v;
+      unsigned int isub_image;
+      unsigned int itoc;
+
+      v = bfd_get_32 (abfd, p);
+      if (bfd_big_endian (abfd))
+	{
+	  isub_image = (v >> 24) & 0xff;
+	  itoc = v & 0xffffff;
+	}
+      else
+	{
+	  isub_image = v & 0xff;
+	  itoc = (v >> 8) & 0xffffff;
+	}
+
+      printf ("  %3u %8u\n", isub_image, itoc);
     }
   free (buf);
 }
@@ -1193,6 +1235,43 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
         printf ("\n"
                 "   version a.b.c.d.e: %u.%u.%u.%u.%u\n",
 		version->a, version->b, version->c, version->d, version->e);
+        break;
+      }
+    case BFD_MACH_O_LC_PREBOUND_DYLIB:
+      {
+        bfd_mach_o_prebound_dylib_command *pbdy = &cmd->command.prebound_dylib;
+	unsigned char *lm = pbdy->linked_modules;
+	unsigned int j;
+	unsigned int last;
+
+        printf (" %s\n", pbdy->name_str);
+        printf ("   nmodules: %u\n", pbdy->nmodules);
+	printf ("   linked modules (at %u): ",
+		pbdy->linked_modules_offset - cmd->offset);
+	last = pbdy->nmodules > 32 ? 32 : pbdy->nmodules;
+	for (j = 0; j < last; j++)
+	  printf ("%u", (lm[j >> 3] >> (j & 7)) & 1);
+	if (last < pbdy->nmodules)
+	  printf ("...");
+	putchar ('\n');
+        break;
+      }
+    case BFD_MACH_O_LC_PREBIND_CKSUM:
+      {
+        bfd_mach_o_prebind_cksum_command *cksum = &cmd->command.prebind_cksum;
+        printf (" 0x%08x\n", cksum->cksum);
+        break;
+      }
+    case BFD_MACH_O_LC_TWOLEVEL_HINTS:
+      {
+        bfd_mach_o_twolevel_hints_command *hints =
+	  &cmd->command.twolevel_hints;
+
+        printf ("\n"
+                "   table offset: 0x%08x  nbr hints: %u\n",
+		hints->offset, hints->nhints);
+	if (verbose)
+	  dump_twolevel_hints (abfd, hints);
         break;
       }
     case BFD_MACH_O_LC_MAIN:
@@ -1688,6 +1767,8 @@ mach_o_dump (bfd *abfd)
     dump_load_commands (abfd, BFD_MACH_O_LC_FUNCTION_STARTS, 0);
   if (options[OPT_DATA_IN_CODE].selected)
     dump_load_commands (abfd, BFD_MACH_O_LC_DATA_IN_CODE, 0);
+  if (options[OPT_TWOLEVEL_HINTS].selected)
+    dump_load_commands (abfd, BFD_MACH_O_LC_TWOLEVEL_HINTS, 0);
   if (options[OPT_COMPACT_UNWIND].selected)
     {
       dump_section_content (abfd, "__LD", "__compact_unwind",
