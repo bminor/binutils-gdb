@@ -1,3 +1,10 @@
+2014-03-26  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.c (rl78_op): Issue an error message if a 16-bit
+	relocation is used on an 8-bit operand or vice versa.
+	(tc_gen_reloc): Use the RL78_16U relocation for RL78_CODE.
+	(md_apply_fix): Add support for RL78_HI8, RL78_HI16 and RL78_LO16.
+
 2014-03-25  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-coff-seh.c (obj_coff_seh_code): New function -
