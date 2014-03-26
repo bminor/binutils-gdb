@@ -1,3 +1,7 @@
+2014-03-26  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (bfd_mach_o_cpu_name): Add BFD_MACH_O_CPU_TYPE_ARM64.
+
 2014-03-24  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c (dump_unwind_encoding_x86): Set the factor.

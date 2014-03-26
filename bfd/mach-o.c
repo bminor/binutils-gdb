@@ -905,6 +905,10 @@ bfd_mach_o_convert_architecture (bfd_mach_o_cpu_type mtype,
       *type = bfd_arch_powerpc;
       *subtype = bfd_mach_ppc64;
       break;
+    case BFD_MACH_O_CPU_TYPE_ARM64:
+      *type = bfd_arch_aarch64;
+      *subtype = bfd_mach_aarch64;
+      break;
     default:
       *type = bfd_arch_unknown;
       break;

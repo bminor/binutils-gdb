@@ -1,3 +1,7 @@
+2014-03-26  Tristan Gingold  <gingold@adacore.com>
+
+	* loader.h (bfd_mach_o_cpu_type): Add BFD_MACH_O_CPU_TYPE_ARM64.
+
 2014-03-17  Tristan Gingold  <gingold@adacore.com>
 
 	* unwind.h: New file.
@@ -14,7 +18,7 @@
 
 	* loader.h (bfd_mach_o_load_command_type): Add
 	BFD_MACH_O_LC_MAIN, BFD_MACH_O_LC_DATA_IN_CODE,
-	BFD_MACH_O_LC_SOURCE_VERSION and	BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS.
+	BFD_MACH_O_LC_SOURCE_VERSION and BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS.
 	(BFD_MACH_O_REFERENCE_MASK): Adjust value.
 	(BFD_MACH_O_N_REF_TO_WEAK): New definition.
 	(BFD_MACH_O_N_ARM_THUMB_DEF, BFD_MACH_O_N_SYMBOL_RESOLVER): Likewise.

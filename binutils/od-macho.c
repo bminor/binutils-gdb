@@ -99,6 +99,7 @@ static const bfd_mach_o_xlat_name bfd_mach_o_cpu_name[] =
   { "powerpc", BFD_MACH_O_CPU_TYPE_POWERPC },
   { "powerpc_64", BFD_MACH_O_CPU_TYPE_POWERPC_64 },
   { "x86_64", BFD_MACH_O_CPU_TYPE_X86_64 },
+  { "arm64", BFD_MACH_O_CPU_TYPE_ARM64 },
   { NULL, 0}
 };
 
