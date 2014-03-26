@@ -1,5 +1,11 @@
 2014-03-27  Tristan Gingold  <gingold@adacore.com>
 
+	* od-macho.c (dump_load_command): Display value for
+	BFD_MACH_O_LC_DYLD_ENVIRONMENT.  Handle BFD_MACH_O_LC_DATA_IN_CODE
+	and BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS.
+
+2014-03-27  Tristan Gingold  <gingold@adacore.com>
+
 	* od-macho.c (OPT_FUNCTION_STARTS): New macro.
 	(options): Add entry for function_starts.
 	(mach_o_help): Ditto.

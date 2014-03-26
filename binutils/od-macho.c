@@ -1026,6 +1026,10 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
     case BFD_MACH_O_LC_ID_DYLINKER:
       printf (" %s\n", cmd->command.dylinker.name_str);
       break;
+    case BFD_MACH_O_LC_DYLD_ENVIRONMENT:
+      putchar ('\n');
+      printf ("  %s\n", cmd->command.dylinker.name_str);
+      break;
     case BFD_MACH_O_LC_SYMTAB:
       {
         bfd_mach_o_symtab_command *symtab = &cmd->command.symtab;
@@ -1056,6 +1060,8 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
     case BFD_MACH_O_LC_CODE_SIGNATURE:
     case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
     case BFD_MACH_O_LC_FUNCTION_STARTS:
+    case BFD_MACH_O_LC_DATA_IN_CODE:
+    case BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS:
       {
         bfd_mach_o_linkedit_command *linkedit = &cmd->command.linkedit;
         printf

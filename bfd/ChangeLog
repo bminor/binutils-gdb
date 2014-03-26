@@ -1,5 +1,10 @@
 2014-03-27  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_read_dylinker): Remove assert.
+	(bfd_mach_o_read_command): Handle BFD_MACH_O_LC_DYLD_ENVIRONMENT.
+
+2014-03-27  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h (bfd_mach_o_get_base_address): New prototype.
 	* mach-o.c (bfd_mach_o_write_symtab)
 	(bfd_mach_o_write_contents)

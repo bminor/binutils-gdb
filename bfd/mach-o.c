@@ -3149,9 +3149,6 @@ bfd_mach_o_read_dylinker (bfd *abfd, bfd_mach_o_load_command *command)
   struct mach_o_str_command_external raw;
   unsigned int nameoff;
 
-  BFD_ASSERT ((command->type == BFD_MACH_O_LC_ID_DYLINKER)
-	      || (command->type == BFD_MACH_O_LC_LOAD_DYLINKER));
-
   if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
       || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
     return -1;
@@ -3845,6 +3842,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       break;
     case BFD_MACH_O_LC_LOAD_DYLINKER:
     case BFD_MACH_O_LC_ID_DYLINKER:
+    case BFD_MACH_O_LC_DYLD_ENVIRONMENT:
       if (bfd_mach_o_read_dylinker (abfd, command) != 0)
 	return -1;
       break;
