@@ -1,3 +1,8 @@
+2014-03-27  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (can_single_step_to_signal_handler): Return zero
+	if target is nios2-*-*.
+
 2014-03-26  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (readline_is_used): New proc.
