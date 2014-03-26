@@ -1,3 +1,7 @@
+2014-04-14  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (read_enumeration_type): Handle DW_AT_type.
+
 2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* eval.c (evaluate_subexp_for_sizeof): Add enum noside argument.

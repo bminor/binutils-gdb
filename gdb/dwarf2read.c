@@ -13225,6 +13225,14 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   if (name != NULL)
     TYPE_TAG_NAME (type) = name;
 
+  attr = dwarf2_attr (die, DW_AT_type, cu);
+  if (attr != NULL)
+    {
+      struct type *underlying_type = die_type (die, cu);
+
+      TYPE_TARGET_TYPE (type) = underlying_type;
+    }
+
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     {
@@ -13243,8 +13251,24 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   if (die_is_declaration (die, cu))
     TYPE_STUB (type) = 1;
 
-  /* Finish the creation of this type by using the enum's children.  */
+  /* Finish the creation of this type by using the enum's children.
+     We must call this even when the underlying type has been provided
+     so that we can determine if we're looking at a "flag" enum.  */
   update_enumeration_type_from_children (die, type, cu);
+
+  /* If this type has an underlying type that is not a stub, then we
+     may use its attributes.  We always use the "unsigned" attribute
+     in this situation, because ordinarily we guess whether the type
+     is unsigned -- but the guess can be wrong and the underlying type
+     can tell us the reality.  However, we defer to a local size
+     attribute if one exists, because this lets the compiler override
+     the underlying type if needed.  */
+  if (TYPE_TARGET_TYPE (type) != NULL && !TYPE_STUB (TYPE_TARGET_TYPE (type)))
+    {
+      TYPE_UNSIGNED (type) = TYPE_UNSIGNED (TYPE_TARGET_TYPE (type));
+      if (TYPE_LENGTH (type) == 0)
+	TYPE_LENGTH (type) = TYPE_LENGTH (TYPE_TARGET_TYPE (type));
+    }
 
   return set_die_type (die, type, cu);
 }

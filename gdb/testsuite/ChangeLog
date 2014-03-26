@@ -1,3 +1,7 @@
+2014-04-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/enum-type.exp: New file.
+
 2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* gdb.mi/mi-vla-c99.exp: New file.
