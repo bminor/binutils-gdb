@@ -422,11 +422,17 @@ aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
       info->reglist.index = QSsize;
       break;
     case 0x1:
+      if (QSsize & 0x1)
+	/* UND.  */
+	return 0;
       info->qualifier = AARCH64_OPND_QLF_S_H;
       /* Index encoded in "Q:S:size<1>".  */
       info->reglist.index = QSsize >> 1;
       break;
     case 0x2:
+      if ((QSsize >> 1) & 0x1)
+	/* UND.  */
+	return 0;
       if ((QSsize & 0x1) == 0)
 	{
 	  info->qualifier = AARCH64_OPND_QLF_S_S;
@@ -435,12 +441,12 @@ aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	}
       else
 	{
-	  info->qualifier = AARCH64_OPND_QLF_S_D;
-	  /* Index encoded in "Q".  */
-	  info->reglist.index = QSsize >> 3;
 	  if (extract_field (FLD_S, code, 0))
 	    /* UND */
 	    return 0;
+	  info->qualifier = AARCH64_OPND_QLF_S_D;
+	  /* Index encoded in "Q".  */
+	  info->reglist.index = QSsize >> 3;
 	}
       break;
     default:
