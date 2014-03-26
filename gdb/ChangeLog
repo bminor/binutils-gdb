@@ -1,3 +1,10 @@
+2014-03-25  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* features/nios2-cpu.xml: Correct types of "gp", "fp", "ea", and
+	"ra" registers.
+	* features/nios2-linux.c: Regenerated.
+	* features/nios2.c: Regenerated.
+
 2014-03-25  Pedro Alves  <palves@redhat.com>
 
 	* cli/cli-script.c (script_from_file): Force the interpreter to
