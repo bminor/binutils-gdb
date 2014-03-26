@@ -1,3 +1,9 @@
+2014-03-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* binutils-all/aarch64/aarch64.exp: New test driver for AArch64.
+	* binutils-all/aarch64/unallocated-encoding.s: New testcase.
+	* binutils-all/aarch64/unallocated-encoding.d: Ditto.
+
 2014-03-17  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/readelf.ss: Add skip of MSP430 defined symbols.

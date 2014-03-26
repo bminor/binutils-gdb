@@ -1,3 +1,8 @@
+2014-03-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-dis.c (aarch64_ext_ldst_elemlist): Check H/S undefined
+	instructions.
+
 2014-03-20  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* i386-opc.tbl: Change memory size for vgatherpf0qps, vgatherpf1qps,
