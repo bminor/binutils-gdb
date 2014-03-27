@@ -50,7 +50,7 @@ extern void _initialize_language (void);
 
 static void unk_lang_error (char *);
 
-static int unk_lang_parser (void);
+static int unk_lang_parser (struct parser_state *);
 
 static void show_check (char *, int);
 
@@ -694,7 +694,7 @@ default_get_string (struct value *value, gdb_byte **buffer, int *length,
 /* Define the language that is no language.  */
 
 static int
-unk_lang_parser (void)
+unk_lang_parser (struct parser_state *ps)
 {
   return 1;
 }

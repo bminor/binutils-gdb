@@ -28,15 +28,29 @@
 #include "expression.h"
 
 struct block;
+struct language_defn;
+struct internalvar;
 
 extern int parser_debug;
 
-extern struct expression *expout;
-extern int expout_size;
-extern int expout_ptr;
+#define parse_gdbarch(ps) ((ps)->expout->gdbarch)
+#define parse_language(ps) ((ps)->expout->language_defn)
 
-#define parse_gdbarch (expout->gdbarch)
-#define parse_language (expout->language_defn)
+struct parser_state
+{
+  /* The expression related to this parser state.  */
+
+  struct expression *expout;
+
+  /* The size of the expression above.  */
+
+  size_t expout_size;
+
+  /* The number of elements already in the expression.  This is used
+     to know where to put new elements.  */
+
+  size_t expout_ptr;
+};
 
 /* If this is nonzero, this block is used as the lexical context
    for symbol names.  */
@@ -148,19 +162,21 @@ struct type_stack
 };
 
 /* Helper function to initialize the expout, expout_size, expout_ptr
-   trio before it is used to store expression elements created during
-   the parsing of an expression.  INITIAL_SIZE is the initial size of
+   trio inside PS before it is used to store expression elements created
+   during the parsing of an expression.  INITIAL_SIZE is the initial size of
    the expout array.  LANG is the language used to parse the expression.
    And GDBARCH is the gdbarch to use during parsing.  */
 
-extern void initialize_expout (int, const struct language_defn *,
-			       struct gdbarch *);
+extern void initialize_expout (struct parser_state *ps,
+			       size_t initial_size,
+			       const struct language_defn *lang,
+			       struct gdbarch *gdbarch);
 
-/* Helper function that frees any unsed space in the expout array.
-   It is generally used when the parser has just been parsed and
-   created.  */
+/* Helper function that reallocates the EXPOUT inside PS in order to
+   eliminate any unused space.  It is generally used when the expression
+   has just been parsed and created.  */
 
-extern void reallocate_expout (void);
+extern void reallocate_expout (struct parser_state *ps);
 
 /* Reverse an expression from suffix form (in which it is constructed)
    to prefix form (in which we can conveniently print or execute it).
@@ -171,35 +187,38 @@ extern void reallocate_expout (void);
 
 extern int prefixify_expression (struct expression *expr);
 
-extern void write_exp_elt_opcode (enum exp_opcode);
+extern void write_exp_elt_opcode (struct parser_state *, enum exp_opcode);
 
-extern void write_exp_elt_sym (struct symbol *);
+extern void write_exp_elt_sym (struct parser_state *, struct symbol *);
 
-extern void write_exp_elt_longcst (LONGEST);
+extern void write_exp_elt_longcst (struct parser_state *, LONGEST);
 
-extern void write_exp_elt_dblcst (DOUBLEST);
+extern void write_exp_elt_dblcst (struct parser_state *, DOUBLEST);
 
-extern void write_exp_elt_decfloatcst (gdb_byte *);
+extern void write_exp_elt_decfloatcst (struct parser_state *, gdb_byte *);
 
-extern void write_exp_elt_type (struct type *);
+extern void write_exp_elt_type (struct parser_state *, struct type *);
 
-extern void write_exp_elt_intern (struct internalvar *);
+extern void write_exp_elt_intern (struct parser_state *, struct internalvar *);
 
-extern void write_exp_string (struct stoken);
+extern void write_exp_string (struct parser_state *, struct stoken);
 
-void write_exp_string_vector (int type, struct stoken_vector *vec);
+void write_exp_string_vector (struct parser_state *, int type,
+			      struct stoken_vector *vec);
 
-extern void write_exp_bitstring (struct stoken);
+extern void write_exp_bitstring (struct parser_state *, struct stoken);
 
-extern void write_exp_elt_block (const struct block *);
+extern void write_exp_elt_block (struct parser_state *, const struct block *);
 
-extern void write_exp_elt_objfile (struct objfile *objfile);
+extern void write_exp_elt_objfile (struct parser_state *,
+				   struct objfile *objfile);
 
-extern void write_exp_msymbol (struct bound_minimal_symbol);
+extern void write_exp_msymbol (struct parser_state *,
+			       struct bound_minimal_symbol);
 
-extern void write_dollar_variable (struct stoken str);
+extern void write_dollar_variable (struct parser_state *, struct stoken str);
 
-extern void mark_struct_expression (void);
+extern void mark_struct_expression (struct parser_state *);
 
 extern const char *find_template_name_end (const char *);
 
@@ -215,7 +234,7 @@ extern void push_type (enum type_pieces);
 
 extern void push_type_int (int);
 
-extern void insert_type_address_space (char *);
+extern void insert_type_address_space (struct parser_state *, char *);
 
 extern enum type_pieces pop_type (void);
 
@@ -374,6 +393,12 @@ extern int exp_uses_objfile (struct expression *exp, struct objfile *objfile);
 
 extern void mark_completion_tag (enum type_code, const char *ptr,
 				 int length);
+
+/* Reallocate the `expout' pointer inside PS so that it can accommodate
+   at least LENELT expression elements.  This function does nothing if
+   there is enough room for the elements.  */
+
+extern void increase_expout_size (struct parser_state *ps, size_t lenelt);
 
 #endif /* PARSER_DEFS_H */
 

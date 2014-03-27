@@ -1,3 +1,168 @@
+2014-03-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	Remove some globals from our parser.
+	* language.c (unk_lang_parser): Add "struct parser_state"
+	argument.
+	* language.h (struct language_defn) <la_parser>: Likewise.
+	* parse.c (expout, expout_size, expout_ptr): Remove variables.
+	(initialize_expout): Add "struct parser_state" argument.
+	Rewrite function to use the parser state.
+	(reallocate_expout, write_exp_elt, write_exp_elt_opcode,
+	write_exp_elt_sym, write_exp_elt_block, write_exp_elt_objfile,
+	write_exp_elt_longcst, write_exp_elt_dblcst,
+	write_exp_elt_decfloatcst, write_exp_elt_type,
+	write_exp_elt_intern, write_exp_string, write_exp_string_vector,
+	write_exp_bitstring, write_exp_msymbol, mark_struct_expression,
+	write_dollar_variable): Likewise.
+	(parse_exp_in_context_1): Use parser state.
+	(insert_type_address_space): Add "struct parser_state" argument.
+	Use parser state.
+	(increase_expout_size): New function.
+	* parser-defs.h: Forward declare "struct language_defn" and
+	"struct parser_state".
+	(expout, expout_size, expout_ptr): Remove extern declarations.
+	(parse_gdbarch, parse_language): Rewrite macro declarations to
+	accept the parser state.
+	(struct parser_state): New struct.
+	(initialize_expout, reallocate_expout, write_exp_elt_opcode,
+	write_exp_elt_sym, write_exp_elt_longcst, write_exp_elt_dblcst,
+	write_exp_elt_decfloatcst, write_exp_elt_type,
+	write_exp_elt_intern, write_exp_string, write_exp_string_vector,
+	write_exp_bitstring, write_exp_elt_block, write_exp_elt_objfile,
+	write_exp_msymbol, write_dollar_variable,
+	mark_struct_expression, insert_type_address_space): Add "struct
+	parser_state" argument.
+	(increase_expout_size): New function.
+	* utils.c (do_clear_parser_state): New function.
+	(make_cleanup_clear_parser_state): Likewise.
+	* utils.h (make_cleanup_clear_parser_state): New function
+	prototype.
+	* aarch64-linux-tdep.c (aarch64_stap_parse_special_token):
+	Update calls to write_exp* in order to pass the parser state.
+	* arm-linux-tdep.c (arm_stap_parse_special_token): Likewise.
+	* i386-tdep.c (i386_stap_parse_special_token_triplet): Likewise.
+	(i386_stap_parse_special_token_three_arg_disp): Likewise.
+	* ppc-linux-tdep.c (ppc_stap_parse_special_token): Likewise.
+	* stap-probe.c (stap_parse_register_operand): Likewise.
+	(stap_parse_single_operand): Likewise.
+	(stap_parse_argument_1): Likewise.
+	(stap_parse_argument): Use parser state.
+	* stap-probe.h: Include "parser-defs.h".
+	(struct stap_parse_info) <pstate>: New field.
+	* c-exp.y (parse_type): Rewrite to use parser state.
+	(yyparse): Redefine to c_parse_internal.
+	(pstate): New global variable.
+	(parse_number): Add "struct parser_state" argument.
+	(write_destructor_name): Likewise.
+	(type_exp): Update calls to write_exp* and similars in order to
+	use parser state.
+	(exp1, exp, variable, qualified_name, space_identifier,
+	typename, typebase): Likewise.
+	(write_destructor_name, parse_number, lex_one_token,
+	classify_name, classify_inner_name, c_parse): Add "struct
+	parser_state" argument.  Update function to use parser state.
+	* c-lang.h: Forward declare "struct parser_state".
+	(c_parse): Add "struct parser_state" argument.
+	* ada-exp.y (parse_type): Rewrite macro to use parser state.
+	(yyparse): Redefine macro to ada_parse_internal.
+	(pstate): New variable.
+	(write_int, write_object_renaming, write_var_or_type,
+	write_name_assoc, write_exp_op_with_string, write_ambiguous_var,
+	type_int, type_long, type_long_long, type_float, type_double,
+	type_long_double, type_char, type_boolean, type_system_address):
+	Add "struct parser_state" argument.
+	(exp1, primary, simple_exp, relation, and_exp, and_then_exp,
+	or_exp, or_else_exp, xor_exp, type_prefix, opt_type_prefix,
+	var_or_type, aggregate, aggregate_component_list,
+	positional_list, others, component_group,
+	component_associations): Update calls to write_exp* and similar
+	functions in order to use parser state.
+	(ada_parse, write_var_from_sym, write_int,
+	write_exp_op_with_string, write_object_renaming,
+	find_primitive_type, write_selectors, write_ambiguous_var,
+	write_var_or_type, write_name_assoc, type_int, type_long,
+	type_long_long, type_float, type_double, type_long_double,
+	type_char, type_boolean, type_system_address): Add "struct
+	parser_state" argument.  Adjust function to use parser state.
+	* ada-lang.c (parse): Likewise.
+	* ada-lang.h: Forward declare "struct parser_state".
+	(ada_parse): Add "struct parser_state" argument.
+	* ada-lex.l (processInt, processReal): Likewise.  Adjust all
+	calls to both functions.
+	* f-exp.y (parse_type, parse_f_type): Rewrite macros to use
+	parser state.
+	(yyparse): Redefine macro to f_parse_internal.
+	(pstate): New variable.
+	(parse_number): Add "struct parser_state" argument.
+	(type_exp, exp, subrange, typebase): Update calls to write_exp*
+	and similars in order to use parser state.
+	(parse_number): Adjust code to use parser state.
+	(yylex): Likewise.
+	(f_parse): New function.
+	* f-lang.h: Forward declare "struct parser_state".
+	(f_parse): Add "struct parser_state" argument.
+	* jv-exp.y (parse_type, parse_java_type): Rewrite macros to use
+	parser state.
+	(yyparse): Redefine macro for java_parse_internal.
+	(pstate): New variable.
+	(push_expression_name, push_expression_name, insert_exp): Add
+	"struct parser_state" argument.
+	(type_exp, StringLiteral, Literal, PrimitiveType, IntegralType,
+	FloatingPointType, exp1, PrimaryNoNewArray, FieldAccess,
+	FuncStart, MethodInvocation, ArrayAccess, PostfixExpression,
+	PostIncrementExpression, PostDecrementExpression,
+	UnaryExpression, PreIncrementExpression, PreDecrementExpression,
+	UnaryExpressionNotPlusMinus, CastExpression,
+	MultiplicativeExpression, AdditiveExpression, ShiftExpression,
+	RelationalExpression, EqualityExpression, AndExpression,
+	ExclusiveOrExpression, InclusiveOrExpression,
+	ConditionalAndExpression, ConditionalOrExpression,
+	ConditionalExpression, Assignment, LeftHandSide): Update
+	calls to write_exp* and similars in order to use parser state.
+	(parse_number): Ajust code to use parser state.
+	(yylex): Likewise.
+	(java_parse): New function.
+	(push_variable): Add "struct parser_state" argument.  Adjust
+	code to user parser state.
+	(push_fieldnames, push_qualified_expression_name,
+	push_expression_name, insert_exp): Likewise.
+	* jv-lang.h: Forward declare "struct parser_state".
+	(java_parse): Add "struct parser_state" argument.
+	* m2-exp.y (parse_type, parse_m2_type): Rewrite macros to use
+	parser state.
+	(yyparse): Redefine macro to m2_parse_internal.
+	(pstate): New variable.
+	(type_exp, exp, fblock, variable, type): Update calls to
+	write_exp* and similars to use parser state.
+	(yylex): Likewise.
+	(m2_parse): New function.
+	* m2-lang.h: Forward declare "struct parser_state".
+	(m2_parse): Add "struct parser_state" argument.
+	* objc-lang.c (end_msglist): Add "struct parser_state" argument.
+	* objc-lang.h: Forward declare "struct parser_state".
+	(end_msglist): Add "struct parser_state" argument.
+	* p-exp.y (parse_type): Rewrite macro to use parser state.
+	(yyparse): Redefine macro to pascal_parse_internal.
+	(pstate): New variable.
+	(parse_number): Add "struct parser_state" argument.
+	(type_exp, exp1, exp, qualified_name, variable): Update calls to
+	write_exp* and similars in order to use parser state.
+	(parse_number, yylex): Adjust code to use parser state.
+	(pascal_parse): New function.
+	* p-lang.h: Forward declare "struct parser_state".
+	(pascal_parse): Add "struct parser_state" argument.
+	* go-exp.y (parse_type): Rewrite macro to use parser state.
+	(yyparse): Redefine macro to go_parse_internal.
+	(pstate): New variable.
+	(parse_number): Add "struct parser_state" argument.
+	(type_exp, exp1, exp, variable, type): Update calls to
+	write_exp* and similars in order to use parser state.
+	(parse_number, lex_one_token, classify_name, yylex): Adjust code
+	to use parser state.
+	(go_parse): Likewise.
+	* go-lang.h: Forward declare "struct parser_state".
+	(go_parse): Add "struct parser_state" argument.
+
 2014-03-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_str_index): Delete arg cu.  All callers updated.

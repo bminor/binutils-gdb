@@ -1206,28 +1206,28 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 	return 0;
 
       /* The displacement.  */
-      write_exp_elt_opcode (OP_LONG);
-      write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
-      write_exp_elt_longcst (displacement);
-      write_exp_elt_opcode (OP_LONG);
+      write_exp_elt_opcode (&p->pstate, OP_LONG);
+      write_exp_elt_type (&p->pstate, builtin_type (gdbarch)->builtin_long);
+      write_exp_elt_longcst (&p->pstate, displacement);
+      write_exp_elt_opcode (&p->pstate, OP_LONG);
       if (got_minus)
-	write_exp_elt_opcode (UNOP_NEG);
+	write_exp_elt_opcode (&p->pstate, UNOP_NEG);
 
       /* The register name.  */
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
       str.ptr = regname;
       str.length = len;
-      write_exp_string (str);
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_string (&p->pstate, str);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
 
-      write_exp_elt_opcode (BINOP_ADD);
+      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
 
       /* Casting to the expected type.  */
-      write_exp_elt_opcode (UNOP_CAST);
-      write_exp_elt_type (lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (UNOP_CAST);
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
+      write_exp_elt_type (&p->pstate, lookup_pointer_type (p->arg_type));
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
 
-      write_exp_elt_opcode (UNOP_IND);
+      write_exp_elt_opcode (&p->pstate, UNOP_IND);
 
       p->arg = tmp;
     }

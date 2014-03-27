@@ -56,7 +56,7 @@
 #include "typeprint.h"
 #include "cp-abi.h"
 
-#define parse_type builtin_type (parse_gdbarch)
+#define parse_type(ps) builtin_type (parse_gdbarch (ps))
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
@@ -118,6 +118,11 @@
 
 #define YYFPRINTF parser_fprintf
 
+/* The state of the parser, used internally when we are parsing the
+   expression.  */
+
+static struct parser_state *pstate = NULL;
+
 int yyparse (void);
 
 static int yylex (void);
@@ -164,10 +169,12 @@ void yyerror (char *);
 
 %{
 /* YYSTYPE gets defined by %union */
-static int parse_number (const char *, int, int, YYSTYPE *);
+static int parse_number (struct parser_state *par_state,
+			 const char *, int, int, YYSTYPE *);
 static struct stoken operator_stoken (const char *);
 static void check_parameter_typelist (VEC (type_ptr) *);
-static void write_destructor_name (struct stoken);
+static void write_destructor_name (struct parser_state *par_state,
+				   struct stoken);
 
 #ifdef YYBISON
 static void c_print_token (FILE *file, int type, YYSTYPE value);
@@ -283,186 +290,186 @@ start   :	exp1
 	;
 
 type_exp:	type
-			{ write_exp_elt_opcode(OP_TYPE);
-			  write_exp_elt_type($1);
-			  write_exp_elt_opcode(OP_TYPE);}
+			{ write_exp_elt_opcode(pstate, OP_TYPE);
+			  write_exp_elt_type(pstate, $1);
+			  write_exp_elt_opcode(pstate, OP_TYPE);}
 	|	TYPEOF '(' exp ')'
 			{
-			  write_exp_elt_opcode (OP_TYPEOF);
+			  write_exp_elt_opcode (pstate, OP_TYPEOF);
 			}
 	|	TYPEOF '(' type ')'
 			{
-			  write_exp_elt_opcode (OP_TYPE);
-			  write_exp_elt_type ($3);
-			  write_exp_elt_opcode (OP_TYPE);
+			  write_exp_elt_opcode (pstate, OP_TYPE);
+			  write_exp_elt_type (pstate, $3);
+			  write_exp_elt_opcode (pstate, OP_TYPE);
 			}
 	|	DECLTYPE '(' exp ')'
 			{
-			  write_exp_elt_opcode (OP_DECLTYPE);
+			  write_exp_elt_opcode (pstate, OP_DECLTYPE);
 			}
 	;
 
 /* Expressions, including the comma operator.  */
 exp1	:	exp
 	|	exp1 ',' exp
-			{ write_exp_elt_opcode (BINOP_COMMA); }
+			{ write_exp_elt_opcode (pstate, BINOP_COMMA); }
 	;
 
 /* Expressions, not including the comma operator.  */
 exp	:	'*' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_IND); }
+			{ write_exp_elt_opcode (pstate, UNOP_IND); }
 	;
 
 exp	:	'&' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_ADDR); }
+			{ write_exp_elt_opcode (pstate, UNOP_ADDR); }
 	;
 
 exp	:	'-' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_NEG); }
+			{ write_exp_elt_opcode (pstate, UNOP_NEG); }
 	;
 
 exp	:	'+' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_PLUS); }
+			{ write_exp_elt_opcode (pstate, UNOP_PLUS); }
 	;
 
 exp	:	'!' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_LOGICAL_NOT); }
+			{ write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT); }
 	;
 
 exp	:	'~' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_COMPLEMENT); }
+			{ write_exp_elt_opcode (pstate, UNOP_COMPLEMENT); }
 	;
 
 exp	:	INCREMENT exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_PREINCREMENT); }
+			{ write_exp_elt_opcode (pstate, UNOP_PREINCREMENT); }
 	;
 
 exp	:	DECREMENT exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_PREDECREMENT); }
+			{ write_exp_elt_opcode (pstate, UNOP_PREDECREMENT); }
 	;
 
 exp	:	exp INCREMENT    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_POSTINCREMENT); }
+			{ write_exp_elt_opcode (pstate, UNOP_POSTINCREMENT); }
 	;
 
 exp	:	exp DECREMENT    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_POSTDECREMENT); }
+			{ write_exp_elt_opcode (pstate, UNOP_POSTDECREMENT); }
 	;
 
 exp	:	TYPEID '(' exp ')' %prec UNARY
-			{ write_exp_elt_opcode (OP_TYPEID); }
+			{ write_exp_elt_opcode (pstate, OP_TYPEID); }
 	;
 
 exp	:	TYPEID '(' type_exp ')' %prec UNARY
-			{ write_exp_elt_opcode (OP_TYPEID); }
+			{ write_exp_elt_opcode (pstate, OP_TYPEID); }
 	;
 
 exp	:	SIZEOF exp       %prec UNARY
-			{ write_exp_elt_opcode (UNOP_SIZEOF); }
+			{ write_exp_elt_opcode (pstate, UNOP_SIZEOF); }
 	;
 
 exp	:	exp ARROW name
-			{ write_exp_elt_opcode (STRUCTOP_PTR);
-			  write_exp_string ($3);
-			  write_exp_elt_opcode (STRUCTOP_PTR); }
+			{ write_exp_elt_opcode (pstate, STRUCTOP_PTR);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
 	;
 
 exp	:	exp ARROW name COMPLETE
-			{ mark_struct_expression ();
-			  write_exp_elt_opcode (STRUCTOP_PTR);
-			  write_exp_string ($3);
-			  write_exp_elt_opcode (STRUCTOP_PTR); }
+			{ mark_struct_expression (pstate);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
 	;
 
 exp	:	exp ARROW COMPLETE
 			{ struct stoken s;
-			  mark_struct_expression ();
-			  write_exp_elt_opcode (STRUCTOP_PTR);
+			  mark_struct_expression (pstate);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
 			  s.ptr = "";
 			  s.length = 0;
-			  write_exp_string (s);
-			  write_exp_elt_opcode (STRUCTOP_PTR); }
+			  write_exp_string (pstate, s);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
 	;
 
 exp	:	exp ARROW '~' name
-			{ write_exp_elt_opcode (STRUCTOP_PTR);
-			  write_destructor_name ($4);
-			  write_exp_elt_opcode (STRUCTOP_PTR); }
+			{ write_exp_elt_opcode (pstate, STRUCTOP_PTR);
+			  write_destructor_name (pstate, $4);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
 	;
 
 exp	:	exp ARROW '~' name COMPLETE
-			{ mark_struct_expression ();
-			  write_exp_elt_opcode (STRUCTOP_PTR);
-			  write_destructor_name ($4);
-			  write_exp_elt_opcode (STRUCTOP_PTR); }
+			{ mark_struct_expression (pstate);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
+			  write_destructor_name (pstate, $4);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
 	;
 
 exp	:	exp ARROW qualified_name
 			{ /* exp->type::name becomes exp->*(&type::name) */
 			  /* Note: this doesn't work if name is a
 			     static member!  FIXME */
-			  write_exp_elt_opcode (UNOP_ADDR);
-			  write_exp_elt_opcode (STRUCTOP_MPTR); }
+			  write_exp_elt_opcode (pstate, UNOP_ADDR);
+			  write_exp_elt_opcode (pstate, STRUCTOP_MPTR); }
 	;
 
 exp	:	exp ARROW_STAR exp
-			{ write_exp_elt_opcode (STRUCTOP_MPTR); }
+			{ write_exp_elt_opcode (pstate, STRUCTOP_MPTR); }
 	;
 
 exp	:	exp '.' name
-			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_exp_string ($3);
-			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+			{ write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 	;
 
 exp	:	exp '.' name COMPLETE
-			{ mark_struct_expression ();
-			  write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_exp_string ($3);
-			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+			{ mark_struct_expression (pstate);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 	;
 
 exp	:	exp '.' COMPLETE
 			{ struct stoken s;
-			  mark_struct_expression ();
-			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  mark_struct_expression (pstate);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  s.ptr = "";
 			  s.length = 0;
-			  write_exp_string (s);
-			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+			  write_exp_string (pstate, s);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 	;
 
 exp	:	exp '.' '~' name
-			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_destructor_name ($4);
-			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+			{ write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
+			  write_destructor_name (pstate, $4);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 	;
 
 exp	:	exp '.' '~' name COMPLETE
-			{ mark_struct_expression ();
-			  write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_destructor_name ($4);
-			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+			{ mark_struct_expression (pstate);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
+			  write_destructor_name (pstate, $4);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 	;
 
 exp	:	exp '.' qualified_name
 			{ /* exp.type::name becomes exp.*(&type::name) */
 			  /* Note: this doesn't work if name is a
 			     static member!  FIXME */
-			  write_exp_elt_opcode (UNOP_ADDR);
-			  write_exp_elt_opcode (STRUCTOP_MEMBER); }
+			  write_exp_elt_opcode (pstate, UNOP_ADDR);
+			  write_exp_elt_opcode (pstate, STRUCTOP_MEMBER); }
 	;
 
 exp	:	exp DOT_STAR exp
-			{ write_exp_elt_opcode (STRUCTOP_MEMBER); }
+			{ write_exp_elt_opcode (pstate, STRUCTOP_MEMBER); }
 	;
 
 exp	:	exp '[' exp1 ']'
-			{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
+			{ write_exp_elt_opcode (pstate, BINOP_SUBSCRIPT); }
 	;
 
 exp	:	exp OBJC_LBRAC exp1 ']'
-			{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
+			{ write_exp_elt_opcode (pstate, BINOP_SUBSCRIPT); }
 	;
 
 /*
@@ -474,45 +481,47 @@ exp	: 	OBJC_LBRAC TYPENAME
 			{
 			  CORE_ADDR class;
 
-			  class = lookup_objc_class (parse_gdbarch,
+			  class = lookup_objc_class (parse_gdbarch (pstate),
 						     copy_name ($2.stoken));
 			  if (class == 0)
 			    error (_("%s is not an ObjC Class"),
 				   copy_name ($2.stoken));
-			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (parse_type->builtin_int);
-			  write_exp_elt_longcst ((LONGEST) class);
-			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate,
+					    parse_type (pstate)->builtin_int);
+			  write_exp_elt_longcst (pstate, (LONGEST) class);
+			  write_exp_elt_opcode (pstate, OP_LONG);
 			  start_msglist();
 			}
 		msglist ']'
-			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
-			  end_msglist();
-			  write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			{ write_exp_elt_opcode (pstate, OP_OBJC_MSGCALL);
+			  end_msglist (pstate);
+			  write_exp_elt_opcode (pstate, OP_OBJC_MSGCALL);
 			}
 	;
 
 exp	:	OBJC_LBRAC CLASSNAME
 			{
-			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (parse_type->builtin_int);
-			  write_exp_elt_longcst ((LONGEST) $2.class);
-			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate,
+					    parse_type (pstate)->builtin_int);
+			  write_exp_elt_longcst (pstate, (LONGEST) $2.class);
+			  write_exp_elt_opcode (pstate, OP_LONG);
 			  start_msglist();
 			}
 		msglist ']'
-			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
-			  end_msglist();
-			  write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			{ write_exp_elt_opcode (pstate, OP_OBJC_MSGCALL);
+			  end_msglist (pstate);
+			  write_exp_elt_opcode (pstate, OP_OBJC_MSGCALL);
 			}
 	;
 
 exp	:	OBJC_LBRAC exp
 			{ start_msglist(); }
 		msglist ']'
-			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
-			  end_msglist();
-			  write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			{ write_exp_elt_opcode (pstate, OP_OBJC_MSGCALL);
+			  end_msglist (pstate);
+			  write_exp_elt_opcode (pstate, OP_OBJC_MSGCALL);
 			}
 	;
 
@@ -538,20 +547,23 @@ exp	:	exp '('
 			   being accumulated by an outer function call.  */
 			{ start_arglist (); }
 		arglist ')'	%prec ARROW
-			{ write_exp_elt_opcode (OP_FUNCALL);
-			  write_exp_elt_longcst ((LONGEST) end_arglist ());
-			  write_exp_elt_opcode (OP_FUNCALL); }
+			{ write_exp_elt_opcode (pstate, OP_FUNCALL);
+			  write_exp_elt_longcst (pstate,
+						 (LONGEST) end_arglist ());
+			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 	;
 
 exp	:	UNKNOWN_CPP_NAME '('
 			{
 			  /* This could potentially be a an argument defined
 			     lookup function (Koenig).  */
-			  write_exp_elt_opcode (OP_ADL_FUNC);
-			  write_exp_elt_block (expression_context_block);
-			  write_exp_elt_sym (NULL); /* Placeholder.  */
-			  write_exp_string ($1.stoken);
-			  write_exp_elt_opcode (OP_ADL_FUNC);
+			  write_exp_elt_opcode (pstate, OP_ADL_FUNC);
+			  write_exp_elt_block (pstate,
+					       expression_context_block);
+			  write_exp_elt_sym (pstate,
+					     NULL); /* Placeholder.  */
+			  write_exp_string (pstate, $1.stoken);
+			  write_exp_elt_opcode (pstate, OP_ADL_FUNC);
 
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
@@ -560,9 +572,10 @@ exp	:	UNKNOWN_CPP_NAME '('
 			}
 		arglist ')'	%prec ARROW
 			{
-			  write_exp_elt_opcode (OP_FUNCALL);
-			  write_exp_elt_longcst ((LONGEST) end_arglist ());
-			  write_exp_elt_opcode (OP_FUNCALL);
+			  write_exp_elt_opcode (pstate, OP_FUNCALL);
+			  write_exp_elt_longcst (pstate,
+						 (LONGEST) end_arglist ());
+			  write_exp_elt_opcode (pstate, OP_FUNCALL);
 			}
 	;
 
@@ -587,14 +600,14 @@ exp     :       exp '(' parameter_typelist ')' const_or_volatile
 			  struct type *type_elt;
 			  LONGEST len = VEC_length (type_ptr, type_list);
 
-			  write_exp_elt_opcode (TYPE_INSTANCE);
-			  write_exp_elt_longcst (len);
+			  write_exp_elt_opcode (pstate, TYPE_INSTANCE);
+			  write_exp_elt_longcst (pstate, len);
 			  for (i = 0;
 			       VEC_iterate (type_ptr, type_list, i, type_elt);
 			       ++i)
-			    write_exp_elt_type (type_elt);
-			  write_exp_elt_longcst(len);
-			  write_exp_elt_opcode (TYPE_INSTANCE);
+			    write_exp_elt_type (pstate, type_elt);
+			  write_exp_elt_longcst(pstate, len);
+			  write_exp_elt_opcode (pstate, TYPE_INSTANCE);
 			  VEC_free (type_ptr, type_list);
 			}
 	;
@@ -603,18 +616,18 @@ rcurly	:	'}'
 			{ $$ = end_arglist () - 1; }
 	;
 exp	:	lcurly arglist rcurly	%prec ARROW
-			{ write_exp_elt_opcode (OP_ARRAY);
-			  write_exp_elt_longcst ((LONGEST) 0);
-			  write_exp_elt_longcst ((LONGEST) $3);
-			  write_exp_elt_opcode (OP_ARRAY); }
+			{ write_exp_elt_opcode (pstate, OP_ARRAY);
+			  write_exp_elt_longcst (pstate, (LONGEST) 0);
+			  write_exp_elt_longcst (pstate, (LONGEST) $3);
+			  write_exp_elt_opcode (pstate, OP_ARRAY); }
 	;
 
 exp	:	lcurly type_exp rcurly exp  %prec UNARY
-			{ write_exp_elt_opcode (UNOP_MEMVAL_TYPE); }
+			{ write_exp_elt_opcode (pstate, UNOP_MEMVAL_TYPE); }
 	;
 
 exp	:	'(' type_exp ')' exp  %prec UNARY
-			{ write_exp_elt_opcode (UNOP_CAST_TYPE); }
+			{ write_exp_elt_opcode (pstate, UNOP_CAST_TYPE); }
 	;
 
 exp	:	'(' exp1 ')'
@@ -624,100 +637,101 @@ exp	:	'(' exp1 ')'
 /* Binary operators in order of decreasing precedence.  */
 
 exp	:	exp '@' exp
-			{ write_exp_elt_opcode (BINOP_REPEAT); }
+			{ write_exp_elt_opcode (pstate, BINOP_REPEAT); }
 	;
 
 exp	:	exp '*' exp
-			{ write_exp_elt_opcode (BINOP_MUL); }
+			{ write_exp_elt_opcode (pstate, BINOP_MUL); }
 	;
 
 exp	:	exp '/' exp
-			{ write_exp_elt_opcode (BINOP_DIV); }
+			{ write_exp_elt_opcode (pstate, BINOP_DIV); }
 	;
 
 exp	:	exp '%' exp
-			{ write_exp_elt_opcode (BINOP_REM); }
+			{ write_exp_elt_opcode (pstate, BINOP_REM); }
 	;
 
 exp	:	exp '+' exp
-			{ write_exp_elt_opcode (BINOP_ADD); }
+			{ write_exp_elt_opcode (pstate, BINOP_ADD); }
 	;
 
 exp	:	exp '-' exp
-			{ write_exp_elt_opcode (BINOP_SUB); }
+			{ write_exp_elt_opcode (pstate, BINOP_SUB); }
 	;
 
 exp	:	exp LSH exp
-			{ write_exp_elt_opcode (BINOP_LSH); }
+			{ write_exp_elt_opcode (pstate, BINOP_LSH); }
 	;
 
 exp	:	exp RSH exp
-			{ write_exp_elt_opcode (BINOP_RSH); }
+			{ write_exp_elt_opcode (pstate, BINOP_RSH); }
 	;
 
 exp	:	exp EQUAL exp
-			{ write_exp_elt_opcode (BINOP_EQUAL); }
+			{ write_exp_elt_opcode (pstate, BINOP_EQUAL); }
 	;
 
 exp	:	exp NOTEQUAL exp
-			{ write_exp_elt_opcode (BINOP_NOTEQUAL); }
+			{ write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
 	;
 
 exp	:	exp LEQ exp
-			{ write_exp_elt_opcode (BINOP_LEQ); }
+			{ write_exp_elt_opcode (pstate, BINOP_LEQ); }
 	;
 
 exp	:	exp GEQ exp
-			{ write_exp_elt_opcode (BINOP_GEQ); }
+			{ write_exp_elt_opcode (pstate, BINOP_GEQ); }
 	;
 
 exp	:	exp '<' exp
-			{ write_exp_elt_opcode (BINOP_LESS); }
+			{ write_exp_elt_opcode (pstate, BINOP_LESS); }
 	;
 
 exp	:	exp '>' exp
-			{ write_exp_elt_opcode (BINOP_GTR); }
+			{ write_exp_elt_opcode (pstate, BINOP_GTR); }
 	;
 
 exp	:	exp '&' exp
-			{ write_exp_elt_opcode (BINOP_BITWISE_AND); }
+			{ write_exp_elt_opcode (pstate, BINOP_BITWISE_AND); }
 	;
 
 exp	:	exp '^' exp
-			{ write_exp_elt_opcode (BINOP_BITWISE_XOR); }
+			{ write_exp_elt_opcode (pstate, BINOP_BITWISE_XOR); }
 	;
 
 exp	:	exp '|' exp
-			{ write_exp_elt_opcode (BINOP_BITWISE_IOR); }
+			{ write_exp_elt_opcode (pstate, BINOP_BITWISE_IOR); }
 	;
 
 exp	:	exp ANDAND exp
-			{ write_exp_elt_opcode (BINOP_LOGICAL_AND); }
+			{ write_exp_elt_opcode (pstate, BINOP_LOGICAL_AND); }
 	;
 
 exp	:	exp OROR exp
-			{ write_exp_elt_opcode (BINOP_LOGICAL_OR); }
+			{ write_exp_elt_opcode (pstate, BINOP_LOGICAL_OR); }
 	;
 
 exp	:	exp '?' exp ':' exp	%prec '?'
-			{ write_exp_elt_opcode (TERNOP_COND); }
+			{ write_exp_elt_opcode (pstate, TERNOP_COND); }
 	;
 			  
 exp	:	exp '=' exp
-			{ write_exp_elt_opcode (BINOP_ASSIGN); }
+			{ write_exp_elt_opcode (pstate, BINOP_ASSIGN); }
 	;
 
 exp	:	exp ASSIGN_MODIFY exp
-			{ write_exp_elt_opcode (BINOP_ASSIGN_MODIFY);
-			  write_exp_elt_opcode ($2);
-			  write_exp_elt_opcode (BINOP_ASSIGN_MODIFY); }
+			{ write_exp_elt_opcode (pstate, BINOP_ASSIGN_MODIFY);
+			  write_exp_elt_opcode (pstate, $2);
+			  write_exp_elt_opcode (pstate,
+						BINOP_ASSIGN_MODIFY); }
 	;
 
 exp	:	INT
-			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type ($1.type);
-			  write_exp_elt_longcst ((LONGEST)($1.val));
-			  write_exp_elt_opcode (OP_LONG); }
+			{ write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate, $1.type);
+			  write_exp_elt_longcst (pstate, (LONGEST) ($1.val));
+			  write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
 exp	:	CHAR
@@ -725,33 +739,35 @@ exp	:	CHAR
 			  struct stoken_vector vec;
 			  vec.len = 1;
 			  vec.tokens = &$1;
-			  write_exp_string_vector ($1.type, &vec);
+			  write_exp_string_vector (pstate, $1.type, &vec);
 			}
 	;
 
 exp	:	NAME_OR_INT
 			{ YYSTYPE val;
-			  parse_number ($1.stoken.ptr, $1.stoken.length, 0, &val);
-			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (val.typed_val_int.type);
-			  write_exp_elt_longcst ((LONGEST)val.typed_val_int.val);
-			  write_exp_elt_opcode (OP_LONG);
+			  parse_number (pstate, $1.stoken.ptr,
+					$1.stoken.length, 0, &val);
+			  write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate, val.typed_val_int.type);
+			  write_exp_elt_longcst (pstate,
+					    (LONGEST) val.typed_val_int.val);
+			  write_exp_elt_opcode (pstate, OP_LONG);
 			}
 	;
 
 
 exp	:	FLOAT
-			{ write_exp_elt_opcode (OP_DOUBLE);
-			  write_exp_elt_type ($1.type);
-			  write_exp_elt_dblcst ($1.dval);
-			  write_exp_elt_opcode (OP_DOUBLE); }
+			{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+			  write_exp_elt_type (pstate, $1.type);
+			  write_exp_elt_dblcst (pstate, $1.dval);
+			  write_exp_elt_opcode (pstate, OP_DOUBLE); }
 	;
 
 exp	:	DECFLOAT
-			{ write_exp_elt_opcode (OP_DECFLOAT);
-			  write_exp_elt_type ($1.type);
-			  write_exp_elt_decfloatcst ($1.val);
-			  write_exp_elt_opcode (OP_DECFLOAT); }
+			{ write_exp_elt_opcode (pstate, OP_DECFLOAT);
+			  write_exp_elt_type (pstate, $1.type);
+			  write_exp_elt_decfloatcst (pstate, $1.val);
+			  write_exp_elt_opcode (pstate, OP_DECFLOAT); }
 	;
 
 exp	:	variable
@@ -759,43 +775,46 @@ exp	:	variable
 
 exp	:	VARIABLE
 			{
-			  write_dollar_variable ($1);
+			  write_dollar_variable (pstate, $1);
 			}
 	;
 
 exp	:	SELECTOR '(' name ')'
 			{
-			  write_exp_elt_opcode (OP_OBJC_SELECTOR);
-			  write_exp_string ($3);
-			  write_exp_elt_opcode (OP_OBJC_SELECTOR); }
+			  write_exp_elt_opcode (pstate, OP_OBJC_SELECTOR);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, OP_OBJC_SELECTOR); }
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
-			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (lookup_signed_typename
-					      (parse_language, parse_gdbarch,
+			{ write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate, lookup_signed_typename
+					      (parse_language (pstate),
+					       parse_gdbarch (pstate),
 					       "int"));
 			  CHECK_TYPEDEF ($3);
-			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
-			  write_exp_elt_opcode (OP_LONG); }
+			  write_exp_elt_longcst (pstate,
+						 (LONGEST) TYPE_LENGTH ($3));
+			  write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
 exp	:	REINTERPRET_CAST '<' type_exp '>' '(' exp ')' %prec UNARY
-			{ write_exp_elt_opcode (UNOP_REINTERPRET_CAST); }
+			{ write_exp_elt_opcode (pstate,
+						UNOP_REINTERPRET_CAST); }
 	;
 
 exp	:	STATIC_CAST '<' type_exp '>' '(' exp ')' %prec UNARY
-			{ write_exp_elt_opcode (UNOP_CAST_TYPE); }
+			{ write_exp_elt_opcode (pstate, UNOP_CAST_TYPE); }
 	;
 
 exp	:	DYNAMIC_CAST '<' type_exp '>' '(' exp ')' %prec UNARY
-			{ write_exp_elt_opcode (UNOP_DYNAMIC_CAST); }
+			{ write_exp_elt_opcode (pstate, UNOP_DYNAMIC_CAST); }
 	;
 
 exp	:	CONST_CAST '<' type_exp '>' '(' exp ')' %prec UNARY
 			{ /* We could do more error checking here, but
 			     it doesn't seem worthwhile.  */
-			  write_exp_elt_opcode (UNOP_CAST_TYPE); }
+			  write_exp_elt_opcode (pstate, UNOP_CAST_TYPE); }
 	;
 
 string_exp:
@@ -860,7 +879,7 @@ exp	:	string_exp
 				}
 			    }
 
-			  write_exp_string_vector (type, &$1);
+			  write_exp_string_vector (pstate, type, &$1);
 			  for (i = 0; i < $1.len; ++i)
 			    free ($1.tokens[i].ptr);
 			  free ($1.tokens);
@@ -870,24 +889,26 @@ exp	:	string_exp
 exp     :	NSSTRING	/* ObjC NextStep NSString constant
 				 * of the form '@' '"' string '"'.
 				 */
-			{ write_exp_elt_opcode (OP_OBJC_NSSTRING);
-			  write_exp_string ($1);
-			  write_exp_elt_opcode (OP_OBJC_NSSTRING); }
+			{ write_exp_elt_opcode (pstate, OP_OBJC_NSSTRING);
+			  write_exp_string (pstate, $1);
+			  write_exp_elt_opcode (pstate, OP_OBJC_NSSTRING); }
 	;
 
 /* C++.  */
 exp     :       TRUEKEYWORD    
-                        { write_exp_elt_opcode (OP_LONG);
-                          write_exp_elt_type (parse_type->builtin_bool);
-                          write_exp_elt_longcst ((LONGEST) 1);
-                          write_exp_elt_opcode (OP_LONG); }
+                        { write_exp_elt_opcode (pstate, OP_LONG);
+                          write_exp_elt_type (pstate,
+					  parse_type (pstate)->builtin_bool);
+                          write_exp_elt_longcst (pstate, (LONGEST) 1);
+                          write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
 exp     :       FALSEKEYWORD   
-                        { write_exp_elt_opcode (OP_LONG);
-                          write_exp_elt_type (parse_type->builtin_bool);
-                          write_exp_elt_longcst ((LONGEST) 0);
-                          write_exp_elt_opcode (OP_LONG); }
+                        { write_exp_elt_opcode (pstate, OP_LONG);
+                          write_exp_elt_type (pstate,
+					  parse_type (pstate)->builtin_bool);
+                          write_exp_elt_longcst (pstate, (LONGEST) 0);
+                          write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
 /* end of C++.  */
@@ -925,9 +946,9 @@ variable:	name_not_typename ENTRY
 				     "parameters, not for \"%s\""),
 				   copy_name ($1.stoken));
 
-			  write_exp_elt_opcode (OP_VAR_ENTRY_VALUE);
-			  write_exp_elt_sym (sym);
-			  write_exp_elt_opcode (OP_VAR_ENTRY_VALUE);
+			  write_exp_elt_opcode (pstate, OP_VAR_ENTRY_VALUE);
+			  write_exp_elt_sym (pstate, sym);
+			  write_exp_elt_opcode (pstate, OP_VAR_ENTRY_VALUE);
 			}
 	;
 
@@ -946,11 +967,11 @@ variable:	block COLONCOLON name
 				innermost_block = block_found;
 			    }
 
-			  write_exp_elt_opcode (OP_VAR_VALUE);
+			  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			  /* block_found is set by lookup_symbol.  */
-			  write_exp_elt_block (block_found);
-			  write_exp_elt_sym (sym);
-			  write_exp_elt_opcode (OP_VAR_VALUE); }
+			  write_exp_elt_block (pstate, block_found);
+			  write_exp_elt_sym (pstate, sym);
+			  write_exp_elt_opcode (pstate, OP_VAR_VALUE); }
 	;
 
 qualified_name:	TYPENAME COLONCOLON name
@@ -963,10 +984,10 @@ qualified_name:	TYPENAME COLONCOLON name
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));
 
-			  write_exp_elt_opcode (OP_SCOPE);
-			  write_exp_elt_type (type);
-			  write_exp_string ($3);
-			  write_exp_elt_opcode (OP_SCOPE);
+			  write_exp_elt_opcode (pstate, OP_SCOPE);
+			  write_exp_elt_type (pstate, type);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, OP_SCOPE);
 			}
 	|	TYPENAME COLONCOLON '~' name
 			{
@@ -989,10 +1010,10 @@ qualified_name:	TYPENAME COLONCOLON name
 
 			  /* Check for valid destructor name.  */
 			  destructor_name_p (tmp_token.ptr, $1.type);
-			  write_exp_elt_opcode (OP_SCOPE);
-			  write_exp_elt_type (type);
-			  write_exp_string (tmp_token);
-			  write_exp_elt_opcode (OP_SCOPE);
+			  write_exp_elt_opcode (pstate, OP_SCOPE);
+			  write_exp_elt_type (pstate, type);
+			  write_exp_string (pstate, tmp_token);
+			  write_exp_elt_opcode (pstate, OP_SCOPE);
 			}
 	|	TYPENAME COLONCOLON name COLONCOLON name
 			{
@@ -1015,16 +1036,16 @@ variable:	qualified_name
 					   VAR_DOMAIN, NULL);
 			  if (sym)
 			    {
-			      write_exp_elt_opcode (OP_VAR_VALUE);
-			      write_exp_elt_block (NULL);
-			      write_exp_elt_sym (sym);
-			      write_exp_elt_opcode (OP_VAR_VALUE);
+			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+			      write_exp_elt_block (pstate, NULL);
+			      write_exp_elt_sym (pstate, sym);
+			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			      break;
 			    }
 
 			  msymbol = lookup_bound_minimal_symbol (name);
 			  if (msymbol.minsym != NULL)
-			    write_exp_msymbol (msymbol);
+			    write_exp_msymbol (pstate, msymbol);
 			  else if (!have_full_symbols () && !have_partial_symbols ())
 			    error (_("No symbol table is loaded.  Use the \"file\" command."));
 			  else
@@ -1045,13 +1066,13 @@ variable:	name_not_typename
 				    innermost_block = block_found;
 				}
 
-			      write_exp_elt_opcode (OP_VAR_VALUE);
+			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			      /* We want to use the selected frame, not
 				 another more inner frame which happens to
 				 be in the same block.  */
-			      write_exp_elt_block (NULL);
-			      write_exp_elt_sym (sym);
-			      write_exp_elt_opcode (OP_VAR_VALUE);
+			      write_exp_elt_block (pstate, NULL);
+			      write_exp_elt_sym (pstate, sym);
+			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			    }
 			  else if ($1.is_a_field_of_this)
 			    {
@@ -1062,11 +1083,11 @@ variable:	name_not_typename
 				  || contained_in (block_found,
 						   innermost_block))
 				innermost_block = block_found;
-			      write_exp_elt_opcode (OP_THIS);
-			      write_exp_elt_opcode (OP_THIS);
-			      write_exp_elt_opcode (STRUCTOP_PTR);
-			      write_exp_string ($1.stoken);
-			      write_exp_elt_opcode (STRUCTOP_PTR);
+			      write_exp_elt_opcode (pstate, OP_THIS);
+			      write_exp_elt_opcode (pstate, OP_THIS);
+			      write_exp_elt_opcode (pstate, STRUCTOP_PTR);
+			      write_exp_string (pstate, $1.stoken);
+			      write_exp_elt_opcode (pstate, STRUCTOP_PTR);
 			    }
 			  else
 			    {
@@ -1076,7 +1097,7 @@ variable:	name_not_typename
 			      msymbol =
 				lookup_bound_minimal_symbol (arg);
 			      if (msymbol.minsym != NULL)
-				write_exp_msymbol (msymbol);
+				write_exp_msymbol (pstate, msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
 				error (_("No symbol table is loaded.  Use the \"file\" command."));
 			      else
@@ -1087,7 +1108,7 @@ variable:	name_not_typename
 	;
 
 space_identifier : '@' NAME
-		{ insert_type_address_space (copy_name ($2.stoken)); }
+		{ insert_type_address_space (pstate, copy_name ($2.stoken)); }
 	;
 
 const_or_volatile: const_or_volatile_noopt
@@ -1194,117 +1215,121 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	:	TYPENAME
 			{ $$ = $1.type; }
 	|	INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "int"); }
 	|	LONG
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long"); }
 	|	SHORT
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "short"); }
 	|	LONG INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long"); }
 	|	LONG SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long"); }
 	|	LONG SIGNED_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long"); }
 	|	SIGNED_KEYWORD LONG INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long"); }
 	|	UNSIGNED LONG INT_KEYWORD
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "long"); }
 	|	LONG UNSIGNED INT_KEYWORD
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "long"); }
 	|	LONG UNSIGNED
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "long"); }
 	|	LONG LONG
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long long"); }
 	|	LONG LONG INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long long"); }
 	|	LONG LONG SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long long"); }
 	|	LONG LONG SIGNED_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long long"); }
 	|	SIGNED_KEYWORD LONG LONG
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long long"); }
 	|	SIGNED_KEYWORD LONG LONG INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "long long"); }
 	|	UNSIGNED LONG LONG
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "long long"); }
 	|	UNSIGNED LONG LONG INT_KEYWORD
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "long long"); }
 	|	LONG LONG UNSIGNED
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "long long"); }
 	|	LONG LONG UNSIGNED INT_KEYWORD
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "long long"); }
 	|	SHORT INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "short"); }
 	|	SHORT SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "short"); }
 	|	SHORT SIGNED_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "short"); }
 	|	UNSIGNED SHORT INT_KEYWORD
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "short"); }
 	|	SHORT UNSIGNED 
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "short"); }
 	|	SHORT UNSIGNED INT_KEYWORD
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "short"); }
 	|	DOUBLE_KEYWORD
-			{ $$ = lookup_typename (parse_language, parse_gdbarch,
-						"double", (struct block *) NULL,
+			{ $$ = lookup_typename (parse_language (pstate),
+						parse_gdbarch (pstate),
+						"double",
+						(struct block *) NULL,
 						0); }
 	|	LONG DOUBLE_KEYWORD
-			{ $$ = lookup_typename (parse_language, parse_gdbarch,
+			{ $$ = lookup_typename (parse_language (pstate),
+						parse_gdbarch (pstate),
 						"long double",
-						(struct block *) NULL, 0); }
+						(struct block *) NULL,
+						0); }
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),
 					      expression_context_block); }
@@ -1362,20 +1387,20 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			  $$ = NULL;
 			}
 	|	UNSIGNED typename
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 TYPE_NAME($2.type)); }
 	|	UNSIGNED
-			{ $$ = lookup_unsigned_typename (parse_language,
-							 parse_gdbarch,
+			{ $$ = lookup_unsigned_typename (parse_language (pstate),
+							 parse_gdbarch (pstate),
 							 "int"); }
 	|	SIGNED_KEYWORD typename
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       TYPE_NAME($2.type)); }
 	|	SIGNED_KEYWORD
-			{ $$ = lookup_signed_typename (parse_language,
-						       parse_gdbarch,
+			{ $$ = lookup_signed_typename (parse_language (pstate),
+						       parse_gdbarch (pstate),
 						       "int"); }
                 /* It appears that this rule for templates is never
                    reduced; template recognition happens by lookahead
@@ -1395,24 +1420,24 @@ typename:	TYPENAME
 		{
 		  $$.stoken.ptr = "int";
 		  $$.stoken.length = 3;
-		  $$.type = lookup_signed_typename (parse_language,
-						    parse_gdbarch,
+		  $$.type = lookup_signed_typename (parse_language (pstate),
+						    parse_gdbarch (pstate),
 						    "int");
 		}
 	|	LONG
 		{
 		  $$.stoken.ptr = "long";
 		  $$.stoken.length = 4;
-		  $$.type = lookup_signed_typename (parse_language,
-						    parse_gdbarch,
+		  $$.type = lookup_signed_typename (parse_language (pstate),
+						    parse_gdbarch (pstate),
 						    "long");
 		}
 	|	SHORT
 		{
 		  $$.stoken.ptr = "short";
 		  $$.stoken.length = 5;
-		  $$.type = lookup_signed_typename (parse_language,
-						    parse_gdbarch,
+		  $$.type = lookup_signed_typename (parse_language (pstate),
+						    parse_gdbarch (pstate),
 						    "short");
 		}
 	;
@@ -1635,7 +1660,7 @@ name_not_typename :	NAME
 /* Like write_exp_string, but prepends a '~'.  */
 
 static void
-write_destructor_name (struct stoken token)
+write_destructor_name (struct parser_state *par_state, struct stoken token)
 {
   char *copy = alloca (token.length + 1);
 
@@ -1645,7 +1670,7 @@ write_destructor_name (struct stoken token)
   token.ptr = copy;
   ++token.length;
 
-  write_exp_string (token);
+  write_exp_string (par_state, token);
 }
 
 /* Returns a stoken of the operator name given by OP (which does not
@@ -1706,7 +1731,8 @@ check_parameter_typelist (VEC (type_ptr) *params)
 /*** Needs some error checking for the float case ***/
 
 static int
-parse_number (const char *buf, int len, int parsed_float, YYSTYPE *putithere)
+parse_number (struct parser_state *par_state,
+	      const char *buf, int len, int parsed_float, YYSTYPE *putithere)
 {
   /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
      here, and we do kind of silly things like cast to unsigned.  */
@@ -1742,9 +1768,10 @@ parse_number (const char *buf, int len, int parsed_float, YYSTYPE *putithere)
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
-	    = parse_type->builtin_decfloat;
+	    = parse_type (par_state)->builtin_decfloat;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 4,
-			       gdbarch_byte_order (parse_gdbarch), p);
+			       gdbarch_byte_order (parse_gdbarch (par_state)),
+			       p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
 	}
@@ -1753,9 +1780,10 @@ parse_number (const char *buf, int len, int parsed_float, YYSTYPE *putithere)
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
-	    = parse_type->builtin_decdouble;
+	    = parse_type (par_state)->builtin_decdouble;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 8,
-			       gdbarch_byte_order (parse_gdbarch), p);
+			       gdbarch_byte_order (parse_gdbarch (par_state)),
+			       p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
 	}
@@ -1764,14 +1792,15 @@ parse_number (const char *buf, int len, int parsed_float, YYSTYPE *putithere)
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
-	    = parse_type->builtin_declong;
+	    = parse_type (par_state)->builtin_declong;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 16,
-			       gdbarch_byte_order (parse_gdbarch), p);
+			       gdbarch_byte_order (parse_gdbarch (par_state)),
+			       p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
 	}
 
-      if (! parse_c_float (parse_gdbarch, p, len,
+      if (! parse_c_float (parse_gdbarch (par_state), p, len,
 			   &putithere->typed_val_float.dval,
 			   &putithere->typed_val_float.type))
 	return ERROR;
@@ -1887,9 +1916,10 @@ parse_number (const char *buf, int len, int parsed_float, YYSTYPE *putithere)
 
   un = (ULONGEST)n >> 2;
   if (long_p == 0
-      && (un >> (gdbarch_int_bit (parse_gdbarch) - 2)) == 0)
+      && (un >> (gdbarch_int_bit (parse_gdbarch (par_state)) - 2)) == 0)
     {
-      high_bit = ((ULONGEST)1) << (gdbarch_int_bit (parse_gdbarch) - 1);
+      high_bit
+	= ((ULONGEST)1) << (gdbarch_int_bit (parse_gdbarch (par_state)) - 1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -1897,28 +1927,29 @@ parse_number (const char *buf, int len, int parsed_float, YYSTYPE *putithere)
 	 int.  This probably should be fixed.  GCC gives a warning on
 	 such constants.  */
 
-      unsigned_type = parse_type->builtin_unsigned_int;
-      signed_type = parse_type->builtin_int;
+      unsigned_type = parse_type (par_state)->builtin_unsigned_int;
+      signed_type = parse_type (par_state)->builtin_int;
     }
   else if (long_p <= 1
-	   && (un >> (gdbarch_long_bit (parse_gdbarch) - 2)) == 0)
+	   && (un >> (gdbarch_long_bit (parse_gdbarch (par_state)) - 2)) == 0)
     {
-      high_bit = ((ULONGEST)1) << (gdbarch_long_bit (parse_gdbarch) - 1);
-      unsigned_type = parse_type->builtin_unsigned_long;
-      signed_type = parse_type->builtin_long;
+      high_bit
+	= ((ULONGEST)1) << (gdbarch_long_bit (parse_gdbarch (par_state)) - 1);
+      unsigned_type = parse_type (par_state)->builtin_unsigned_long;
+      signed_type = parse_type (par_state)->builtin_long;
     }
   else
     {
       int shift;
       if (sizeof (ULONGEST) * HOST_CHAR_BIT 
-	  < gdbarch_long_long_bit (parse_gdbarch))
+	  < gdbarch_long_long_bit (parse_gdbarch (par_state)))
 	/* A long long does not fit in a LONGEST.  */
 	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
       else
-	shift = (gdbarch_long_long_bit (parse_gdbarch) - 1);
+	shift = (gdbarch_long_long_bit (parse_gdbarch (par_state)) - 1);
       high_bit = (ULONGEST) 1 << shift;
-      unsigned_type = parse_type->builtin_unsigned_long_long;
-      signed_type = parse_type->builtin_long_long;
+      unsigned_type = parse_type (par_state)->builtin_unsigned_long_long;
+      signed_type = parse_type (par_state)->builtin_long_long;
     }
 
    putithere->typed_val_int.val = n;
@@ -2417,7 +2448,7 @@ static int last_was_structop;
 /* Read one token, getting characters through lexptr.  */
 
 static int
-lex_one_token (int *is_quoted_name)
+lex_one_token (struct parser_state *par_state, int *is_quoted_name)
 {
   int c;
   int namelen;
@@ -2450,7 +2481,7 @@ lex_one_token (int *is_quoted_name)
     if (strncmp (tokstart, tokentab3[i].operator, 3) == 0)
       {
 	if ((tokentab3[i].flags & FLAG_CXX) != 0
-	    && parse_language->la_language != language_cplus)
+	    && parse_language (par_state)->la_language != language_cplus)
 	  break;
 
 	lexptr += 3;
@@ -2463,7 +2494,7 @@ lex_one_token (int *is_quoted_name)
     if (strncmp (tokstart, tokentab2[i].operator, 2) == 0)
       {
 	if ((tokentab2[i].flags & FLAG_CXX) != 0
-	    && parse_language->la_language != language_cplus)
+	    && parse_language (par_state)->la_language != language_cplus)
 	  break;
 
 	lexptr += 2;
@@ -2507,7 +2538,8 @@ lex_one_token (int *is_quoted_name)
     case '(':
       paren_depth++;
       lexptr++;
-      if (parse_language->la_language == language_objc && c == '[')
+      if (parse_language (par_state)->la_language == language_objc
+	  && c == '[')
 	return OBJC_LBRAC;
       return c;
 
@@ -2587,7 +2619,8 @@ lex_one_token (int *is_quoted_name)
 				  && (*p < 'A' || *p > 'Z')))
 	      break;
 	  }
-	toktype = parse_number (tokstart, p - tokstart, got_dot|got_e, &yylval);
+	toktype = parse_number (par_state, tokstart, p - tokstart,
+				got_dot|got_e, &yylval);
         if (toktype == ERROR)
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
@@ -2605,7 +2638,7 @@ lex_one_token (int *is_quoted_name)
 	const char *p = &tokstart[1];
 	size_t len = strlen ("entry");
 
-	if (parse_language->la_language == language_objc)
+	if (parse_language (par_state)->la_language == language_objc)
 	  {
 	    size_t len = strlen ("selector");
 
@@ -2759,7 +2792,7 @@ lex_one_token (int *is_quoted_name)
     if (strcmp (copy, ident_tokens[i].operator) == 0)
       {
 	if ((ident_tokens[i].flags & FLAG_CXX) != 0
-	    && parse_language->la_language != language_cplus)
+	    && parse_language (par_state)->la_language != language_cplus)
 	  break;
 
 	if ((ident_tokens[i].flags & FLAG_SHADOW) != 0)
@@ -2768,8 +2801,8 @@ lex_one_token (int *is_quoted_name)
 
 	    if (lookup_symbol (copy, expression_context_block,
 			       VAR_DOMAIN,
-			       (parse_language->la_language == language_cplus
-				? &is_a_field_of_this
+			       (parse_language (par_state)->la_language
+			        == language_cplus ? &is_a_field_of_this
 				: NULL))
 		!= NULL)
 	      {
@@ -2822,7 +2855,8 @@ static struct obstack name_obstack;
    IS_QUOTED_NAME is non-zero if the name token was originally quoted
    in single quotes.  */
 static int
-classify_name (const struct block *block, int is_quoted_name)
+classify_name (struct parser_state *par_state, const struct block *block,
+	       int is_quoted_name)
 {
   struct symbol *sym;
   char *copy;
@@ -2835,7 +2869,7 @@ classify_name (const struct block *block, int is_quoted_name)
   memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
   sym = lookup_symbol (copy, block, VAR_DOMAIN, 
-		       parse_language->la_name_of_this
+		       parse_language (par_state)->la_name_of_this
 		       ? &is_a_field_of_this : NULL);
 
   if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
@@ -2892,15 +2926,16 @@ classify_name (const struct block *block, int is_quoted_name)
     }
 
   yylval.tsym.type
-    = language_lookup_primitive_type_by_name (parse_language,
-					      parse_gdbarch, copy);
+    = language_lookup_primitive_type_by_name (parse_language (par_state),
+					      parse_gdbarch (par_state),
+					      copy);
   if (yylval.tsym.type != NULL)
     return TYPENAME;
 
   /* See if it's an ObjC classname.  */
-  if (parse_language->la_language == language_objc && !sym)
+  if (parse_language (par_state)->la_language == language_objc && !sym)
     {
-      CORE_ADDR Class = lookup_objc_class (parse_gdbarch, copy);
+      CORE_ADDR Class = lookup_objc_class (parse_gdbarch (par_state), copy);
       if (Class)
 	{
 	  yylval.class.class = Class;
@@ -2919,7 +2954,8 @@ classify_name (const struct block *block, int is_quoted_name)
 	  || (copy[0] >= 'A' && copy[0] < 'A' + input_radix - 10)))
     {
       YYSTYPE newlval;	/* Its value is ignored.  */
-      int hextype = parse_number (copy, yylval.sval.length, 0, &newlval);
+      int hextype = parse_number (par_state, copy, yylval.sval.length,
+				  0, &newlval);
       if (hextype == INT)
 	{
 	  yylval.ssym.sym = sym;
@@ -2933,7 +2969,7 @@ classify_name (const struct block *block, int is_quoted_name)
   yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 
   if (sym == NULL
-      && parse_language->la_language == language_cplus
+      && parse_language (par_state)->la_language == language_cplus
       && is_a_field_of_this.type == NULL
       && lookup_minimal_symbol (copy, NULL, NULL).minsym == NULL)
     return UNKNOWN_CPP_NAME;
@@ -2946,13 +2982,14 @@ classify_name (const struct block *block, int is_quoted_name)
    NULL if this is the first component of a name.  */
 
 static int
-classify_inner_name (const struct block *block, struct type *context)
+classify_inner_name (struct parser_state *par_state,
+		     const struct block *block, struct type *context)
 {
   struct type *type;
   char *copy;
 
   if (context == NULL)
-    return classify_name (block, 0);
+    return classify_name (par_state, block, 0);
 
   type = check_typedef (context);
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -3035,10 +3072,11 @@ yylex (void)
   /* Read the first token and decide what to do.  Most of the
      subsequent code is C++-only; but also depends on seeing a "::" or
      name-like token.  */
-  current.token = lex_one_token (&is_quoted_name);
+  current.token = lex_one_token (pstate, &is_quoted_name);
   if (current.token == NAME)
-    current.token = classify_name (expression_context_block, is_quoted_name);
-  if (parse_language->la_language != language_cplus
+    current.token = classify_name (pstate, expression_context_block,
+				   is_quoted_name);
+  if (parse_language (pstate)->la_language != language_cplus
       || (current.token != TYPENAME && current.token != COLONCOLON
 	  && current.token != FILENAME))
     return current.token;
@@ -3054,7 +3092,7 @@ yylex (void)
 
       /* We ignore quoted names other than the very first one.
 	 Subsequent ones do not have any special meaning.  */
-      current.token = lex_one_token (&ignore);
+      current.token = lex_one_token (pstate, &ignore);
       current.value = yylval;
       VEC_safe_push (token_and_value, token_fifo, &current);
 
@@ -3104,7 +3142,8 @@ yylex (void)
 	  int classification;
 
 	  yylval = next->value;
-	  classification = classify_inner_name (search_block, context_type);
+	  classification = classify_inner_name (pstate, search_block,
+						context_type);
 	  /* We keep going until we either run out of names, or until
 	     we have a qualified name which is not a type.  */
 	  if (classification != TYPENAME && classification != NAME)
@@ -3164,11 +3203,17 @@ yylex (void)
 }
 
 int
-c_parse (void)
+c_parse (struct parser_state *par_state)
 {
   int result;
-  struct cleanup *back_to = make_cleanup (free_current_contents,
-					  &expression_macro_scope);
+  struct cleanup *back_to;
+
+  /* Setting up the parser state.  */
+  gdb_assert (par_state != NULL);
+  pstate = par_state;
+
+  back_to = make_cleanup (free_current_contents, &expression_macro_scope);
+  make_cleanup_clear_parser_state (&pstate);
 
   /* Set up the scope for macro expansion.  */
   expression_macro_scope = NULL;
@@ -3200,6 +3245,7 @@ c_parse (void)
 
   result = yyparse ();
   do_cleanups (back_to);
+
   return result;
 }
 

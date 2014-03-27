@@ -115,6 +115,10 @@ extern struct cleanup *make_cleanup_restore_current_language (void);
 
 extern struct cleanup *make_cleanup_htab_delete (htab_t htab);
 
+struct parser_state;
+extern struct cleanup *make_cleanup_clear_parser_state
+  (struct parser_state **p);
+
 extern void free_current_contents (void *);
 
 extern void init_page_info (void);

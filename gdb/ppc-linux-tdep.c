@@ -978,11 +978,11 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 	error (_("Invalid register name `%s' on expression `%s'."),
 	       regname, p->saved_arg);
 
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
       str.ptr = regname;
       str.length = len;
-      write_exp_string (str);
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_string (&p->pstate, str);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
 
       p->arg = s;
     }
