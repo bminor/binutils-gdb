@@ -1,3 +1,8 @@
+2014-03-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (struct dwarf2_cu): Improve comments for members
+	addr_base, ranges_base.
+
 2014-03-26  Keith Seitz  <keiths@redhat.com>
 
 	* ada-tasks.c (get_tcb_types_info): Search STRUCT_DOMAIN for
