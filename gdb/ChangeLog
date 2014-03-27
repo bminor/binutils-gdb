@@ -1,5 +1,24 @@
 2014-04-14  Tom Tromey  <tromey@redhat.com>
 
+	PR c++/15246:
+	* c-exp.y (type_aggregate_p): New function.
+	(qualified_name, classify_inner_name): Use it.
+	* c-typeprint.c (c_type_print_base): Handle TYPE_DECLARED_CLASS
+	and TYPE_TARGET_TYPE of an enum type.
+	* dwarf2read.c (read_enumeration_type): Set TYPE_DECLARED_CLASS on
+	an enum type.
+	(determine_prefix) <case DW_TAG_enumeration_type>: New case;
+	handle TYPE_DECLARED_CLASS.
+	* gdbtypes.c (rank_one_type): Handle TYPE_DECLARED_CLASS on enum
+	types.
+	* gdbtypes.h (TYPE_DECLARED_CLASS): Update comment.
+	* valops.c (enum_constant_from_type): New function.
+	(value_aggregate_elt): Use it.
+	* cp-namespace.c (cp_lookup_nested_symbol): Handle
+	TYPE_CODE_ENUM.
+
+2014-04-14  Tom Tromey  <tromey@redhat.com>
+
 	* valops.c (value_aggregate_elt, value_struct_elt_for_reference)
 	(value_namespace_elt, value_maybe_namespace_elt): Make "name"
 	const.

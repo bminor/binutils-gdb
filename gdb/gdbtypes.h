@@ -331,8 +331,10 @@ enum type_instance_flag_value
 #define TYPE_OBJFILE(t) (TYPE_OBJFILE_OWNED(t)? TYPE_OWNER(t).objfile : NULL)
 
 /* * True if this type was declared using the "class" keyword.  This is
-   only valid for C++ structure types, and only used for displaying
-   the type.  If false, the structure was declared as a "struct".  */
+   only valid for C++ structure and enum types.  If false, a structure
+   was declared as a "struct"; if true it was declared "class".  For
+   enum types, this is true when "enum class" or "enum struct" was
+   used to declare the type..  */
 
 #define TYPE_DECLARED_CLASS(t) (TYPE_MAIN_TYPE (t)->flag_declared_class)
 

@@ -129,6 +129,8 @@ static int yylex (void);
 
 void yyerror (char *);
 
+static int type_aggregate_p (struct type *);
+
 %}
 
 /* Although the yacc "value" of an expression is not used,
@@ -986,9 +988,7 @@ qualified_name:	TYPENAME COLONCOLON name
 			{
 			  struct type *type = $1.type;
 			  CHECK_TYPEDEF (type);
-			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-			      && TYPE_CODE (type) != TYPE_CODE_UNION
-			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
+			  if (!type_aggregate_p (type))
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));
 
@@ -1004,9 +1004,7 @@ qualified_name:	TYPENAME COLONCOLON name
 			  char *buf;
 
 			  CHECK_TYPEDEF (type);
-			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-			      && TYPE_CODE (type) != TYPE_CODE_UNION
-			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
+			  if (!type_aggregate_p (type))
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));
 			  buf = alloca ($4.length + 2);
@@ -1700,6 +1698,18 @@ operator_stoken (const char *op)
   make_cleanup (free, buf);
   return st;
 };
+
+/* Return true if the type is aggregate-like.  */
+
+static int
+type_aggregate_p (struct type *type)
+{
+  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (type) == TYPE_CODE_UNION
+	  || TYPE_CODE (type) == TYPE_CODE_NAMESPACE
+	  || (TYPE_CODE (type) == TYPE_CODE_ENUM
+	      && TYPE_DECLARED_CLASS (type)));
+}
 
 /* Validate a parameter typelist.  */
 
@@ -3000,9 +3010,7 @@ classify_inner_name (struct parser_state *par_state,
     return classify_name (par_state, block, 0);
 
   type = check_typedef (context);
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_UNION
-      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
+  if (!type_aggregate_p (type))
     return ERROR;
 
   copy = copy_name (yylval.ssym.stoken);

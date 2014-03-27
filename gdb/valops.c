@@ -3020,6 +3020,42 @@ destructor_name_p (const char *name, struct type *type)
   return 0;
 }
 
+/* Find an enum constant named NAME in TYPE.  TYPE must be an "enum
+   class".  If the name is found, return a value representing it;
+   otherwise throw an exception.  */
+
+static struct value *
+enum_constant_from_type (struct type *type, const char *name)
+{
+  int i;
+  int name_len = strlen (name);
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ENUM
+	      && TYPE_DECLARED_CLASS (type));
+
+  for (i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); ++i)
+    {
+      const char *fname = TYPE_FIELD_NAME (type, i);
+      int len;
+
+      if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_ENUMVAL
+	  || fname == NULL)
+	continue;
+
+      /* Look for the trailing "::NAME", since enum class constant
+	 names are qualified here.  */
+      len = strlen (fname);
+      if (len + 2 >= name_len
+	  && fname[len - name_len - 2] == ':'
+	  && fname[len - name_len - 1] == ':'
+	  && strcmp (&fname[len - name_len], name) == 0)
+	return value_from_longest (type, TYPE_FIELD_ENUMVAL (type, i));
+    }
+
+  error (_("no constant named \"%s\" in enum \"%s\""),
+	 name, TYPE_TAG_NAME (type));
+}
+
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
    return the appropriate member (or the address of the member, if
    WANT_ADDRESS).  This function is used to resolve user expressions
@@ -3041,6 +3077,10 @@ value_aggregate_elt (struct type *curtype, const char *name,
     case TYPE_CODE_NAMESPACE:
       return value_namespace_elt (curtype, name, 
 				  want_address, noside);
+
+    case TYPE_CODE_ENUM:
+      return enum_constant_from_type (curtype, name);
+
     default:
       internal_error (__FILE__, __LINE__,
 		      _("non-aggregate type in value_aggregate_elt"));

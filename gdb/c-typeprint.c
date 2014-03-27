@@ -1328,6 +1328,8 @@ c_type_print_base (struct type *type, struct ui_file *stream,
     case TYPE_CODE_ENUM:
       c_type_print_modifier (type, stream, 0, 1);
       fprintf_filtered (stream, "enum ");
+      if (TYPE_DECLARED_CLASS (type))
+	fprintf_filtered (stream, "class ");
       /* Print the tag name if it exists.
          The aCC compiler emits a spurious 
          "{unnamed struct}"/"{unnamed union}"/"{unnamed enum}"
@@ -1352,6 +1354,23 @@ c_type_print_base (struct type *type, struct ui_file *stream,
       else if (show > 0 || TYPE_TAG_NAME (type) == NULL)
 	{
 	  LONGEST lastval = 0;
+
+	  /* We can't handle this case perfectly, as DWARF does not
+	     tell us whether or not the underlying type was specified
+	     in the source (and other debug formats don't provide this
+	     at all).  We choose to print the underlying type, if it
+	     has a name, when in C++ on the theory that it's better to
+	     print too much than too little; but conversely not to
+	     print something egregiously outside the current
+	     language's syntax.  */
+	  if (current_language->la_language == language_cplus
+	      && TYPE_TARGET_TYPE (type) != NULL)
+	    {
+	      struct type *underlying = check_typedef (TYPE_TARGET_TYPE (type));
+
+	      if (TYPE_NAME (underlying) != NULL)
+		fprintf_filtered (stream, ": %s ", TYPE_NAME (underlying));
+	    }
 
 	  fprintf_filtered (stream, "{");
 	  len = TYPE_NFIELDS (type);

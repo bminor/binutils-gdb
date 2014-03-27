@@ -13270,6 +13270,8 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 	TYPE_LENGTH (type) = TYPE_LENGTH (TYPE_TARGET_TYPE (type));
     }
 
+  TYPE_DECLARED_CLASS (type) = dwarf2_flag_true_p (die, DW_AT_enum_class, cu);
+
   return set_die_type (die, type, cu);
 }
 
@@ -18673,6 +18675,15 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	      return name;
 	  }
 	return "";
+      case DW_TAG_enumeration_type:
+	parent_type = read_type_die (parent, cu);
+	if (TYPE_DECLARED_CLASS (parent_type))
+	  {
+	    if (TYPE_TAG_NAME (parent_type) != NULL)
+	      return TYPE_TAG_NAME (parent_type);
+	    return "";
+	  }
+	/* Fall through.  */
       default:
 	return determine_prefix (parent, cu);
       }

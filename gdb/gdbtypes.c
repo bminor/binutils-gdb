@@ -3086,6 +3086,8 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
+	  if (TYPE_DECLARED_CLASS (arg))
+	    return INCOMPATIBLE_TYPE_BADNESS;
 	  return INTEGER_PROMOTION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;
@@ -3103,6 +3105,8 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_ENUM:
+	  if (TYPE_DECLARED_CLASS (parm) || TYPE_DECLARED_CLASS (arg))
+	    return INCOMPATIBLE_TYPE_BADNESS;
 	  return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;
@@ -3116,6 +3120,8 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_ENUM:
+	  if (TYPE_DECLARED_CLASS (arg))
+	    return INCOMPATIBLE_TYPE_BADNESS;
 	  return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;

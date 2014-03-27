@@ -1,5 +1,13 @@
 2014-04-14  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/classes.exp (test_enums): Handle underlying type.
+	* gdb.dwarf2/enum-type.exp: Add test for enum with underlying
+	type.
+	* gdb.cp/enum-class.exp: New file.
+	* gdb.cp/enum-class.cc: New file.
+
+2014-04-14  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/enum-type.exp: New file.
 
 2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
