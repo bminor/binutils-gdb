@@ -1,5 +1,14 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (stop_stepping): Rename to ...
+	(stop_waiting): ... this.
+	(proceed): Update comment.
+	(process_event_stop_test, handle_inferior_event)
+	(handle_signal_stop, handle_step_into_function)
+	(handle_step_into_function_backward): Update.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
 	* infcall.c (run_inferior_call): Don't check whether the current
 	thread is running after the proceed call.
 

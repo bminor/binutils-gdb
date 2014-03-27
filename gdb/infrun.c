@@ -2344,7 +2344,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
   gdb_flush (gdb_stdout);
 
   /* Refresh prev_pc value just prior to resuming.  This used to be
-     done in stop_stepping, however, setting prev_pc there did not handle
+     done in stop_waiting, however, setting prev_pc there did not handle
      scenarios such as inferior function calls or returning from
      a function via the return command.  In those cases, the prev_pc
      value was not set properly for subsequent commands.  The prev_pc value 
@@ -2500,7 +2500,7 @@ static void handle_signal_stop (struct execution_control_state *ecs);
 static void check_exception_resume (struct execution_control_state *,
 				    struct frame_info *);
 
-static void stop_stepping (struct execution_control_state *ecs);
+static void stop_waiting (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
 static void process_event_stop_test (struct execution_control_state *ecs);
@@ -3252,7 +3252,7 @@ get_inferior_stop_soon (ptid_t ptid)
 
    The alternatives are:
 
-   1) stop_stepping and return; to really stop and return to the
+   1) stop_waiting and return; to really stop and return to the
    debugger.
 
    2) keep_going and return; to wait for the next event (set
@@ -3310,7 +3310,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_NO_RESUMED\n");
 
       stop_print_frame = 0;
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
     }
 
@@ -3453,7 +3453,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 		 normal_stop.  */
 	      stop_print_frame = 1;
 
-	      stop_stepping (ecs);
+	      stop_waiting (ecs);
 	      return;
 	    }
 	}
@@ -3480,7 +3480,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	{
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	  return;
 	}
 
@@ -3568,7 +3568,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       singlestep_breakpoints_inserted_p = 0;
       cancel_single_step_breakpoints ();
       stop_print_frame = 0;
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
 
       /* The following are the only cases in which we keep going;
@@ -3720,7 +3720,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  if (should_resume)
 	    keep_going (ecs);
 	  else
-	    stop_stepping (ecs);
+	    stop_waiting (ecs);
 	  return;
 	}
       process_event_stop_test (ecs);
@@ -3829,7 +3829,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	}
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
       observer_notify_no_history ();
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
     }
 }
@@ -3900,7 +3900,7 @@ handle_signal_stop (struct execution_control_state *ecs)
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
       stop_print_frame = 1;
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
     }
 
@@ -3912,7 +3912,7 @@ handle_signal_stop (struct execution_control_state *ecs)
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
       stop_print_frame = 0;
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
     }
 
@@ -3942,7 +3942,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_0))
     {
       stop_print_frame = 1;
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
       return;
     }
@@ -4229,7 +4229,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  || (!inf->detaching
 	      && signal_stop_state (ecs->event_thread->suspend.stop_signal)))
 	{
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	  return;
 	}
       /* If not going to stop, give terminal back
@@ -4464,7 +4464,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	ecs->event_thread->control.stop_step = 1;
 	end_stepping_range ();
-	stop_stepping (ecs);
+	stop_waiting (ecs);
       }
       return;
 
@@ -4519,7 +4519,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	 resumed.  */
       ecs->event_thread->stepping_over_breakpoint = 1;
 
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
 
     case BPSTAT_WHAT_STOP_SILENT:
@@ -4531,7 +4531,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	 whether a/the breakpoint is there when the thread is next
 	 resumed.  */
       ecs->event_thread->stepping_over_breakpoint = 1;
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
 
     case BPSTAT_WHAT_HP_STEP_RESUME:
@@ -4629,7 +4629,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	{
 	  ecs->event_thread->control.stop_step = 1;
 	  end_stepping_range ();
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	}
       else
 	keep_going (ecs);
@@ -4783,7 +4783,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  /* And this works the same backward as frontward.  MVS */
 	  ecs->event_thread->control.stop_step = 1;
 	  end_stepping_range ();
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	  return;
 	}
 
@@ -4899,7 +4899,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	{
 	  ecs->event_thread->control.stop_step = 1;
 	  end_stepping_range ();
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	  return;
 	}
 
@@ -4995,7 +4995,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	     switch in assembly mode.  */
 	  ecs->event_thread->control.stop_step = 1;
 	  end_stepping_range ();
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	  return;
 	}
       else
@@ -5016,7 +5016,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepi/nexti\n");
       ecs->event_thread->control.stop_step = 1;
       end_stepping_range ();
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
     }
 
@@ -5030,7 +5030,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: no line number info\n");
       ecs->event_thread->control.stop_step = 1;
       end_stepping_range ();
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
     }
 
@@ -5063,7 +5063,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	  ecs->event_thread->control.stop_step = 1;
 	  end_stepping_range ();
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	  return;
 	}
       else
@@ -5078,7 +5078,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	    {
 	      ecs->event_thread->control.stop_step = 1;
 	      end_stepping_range ();
-	      stop_stepping (ecs);
+	      stop_waiting (ecs);
 	    }
 	  return;
 	}
@@ -5105,7 +5105,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	{
 	  ecs->event_thread->control.stop_step = 1;
 	  end_stepping_range ();
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	}
       return;
     }
@@ -5123,7 +5123,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 			     "infrun: stepped to a different line\n");
       ecs->event_thread->control.stop_step = 1;
       end_stepping_range ();
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
     }
 
@@ -5449,7 +5449,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
       /* We are already there: stop now.  */
       ecs->event_thread->control.stop_step = 1;
       end_stepping_range ();
-      stop_stepping (ecs);
+      stop_waiting (ecs);
       return;
     }
   else
@@ -5498,7 +5498,7 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
       /* We're there already.  Just stop stepping now.  */
       ecs->event_thread->control.stop_step = 1;
       end_stepping_range ();
-      stop_stepping (ecs);
+      stop_waiting (ecs);
     }
   else
     {
@@ -5773,10 +5773,10 @@ check_exception_resume (struct execution_control_state *ecs,
 }
 
 static void
-stop_stepping (struct execution_control_state *ecs)
+stop_waiting (struct execution_control_state *ecs)
 {
   if (debug_infrun)
-    fprintf_unfiltered (gdb_stdlog, "infrun: stop_stepping\n");
+    fprintf_unfiltered (gdb_stdlog, "infrun: stop_waiting\n");
 
   clear_step_over_info ();
 
@@ -5851,7 +5851,7 @@ keep_going (struct execution_control_state *ecs)
       if (e.reason < 0)
 	{
 	  exception_print (gdb_stderr, e);
-	  stop_stepping (ecs);
+	  stop_waiting (ecs);
 	  return;
 	}
 
@@ -5916,7 +5916,7 @@ end_stepping_range (void)
    The rest of the cases are dealt with later on in normal_stop and
    print_it_typical.  Ideally there should be a call to one of these
    print_*_reason functions functions from handle_inferior_event each time
-   stop_stepping is called.
+   stop_waiting is called.
 
    Note that we don't call these directly, instead we delegate that to
    the interpreters, through observers.  Interpreters then call these
