@@ -1,5 +1,9 @@
 2014-03-27  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (read_str_index): Delete arg cu.  All callers updated.
+
+2014-03-27  Doug Evans  <dje@google.com>
+
 	* dwarf2read.c (init_cutu_and_read_dies_no_follow): Fix comments.
 	Remove argument abbrev_section.  All callers updated.
 

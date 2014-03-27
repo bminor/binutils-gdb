@@ -1492,7 +1492,7 @@ static CORE_ADDR read_addr_index_from_leb128 (struct dwarf2_cu *,
 					      unsigned int *);
 
 static const char *read_str_index (const struct die_reader_specs *reader,
-				   struct dwarf2_cu *cu, ULONGEST str_index);
+				   ULONGEST str_index);
 
 static void set_cu_language (unsigned int, struct dwarf2_cu *);
 
@@ -15907,7 +15907,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 	ULONGEST str_index =
 	  read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
 
-	DW_STRING (attr) = read_str_index (reader, cu, str_index);
+	DW_STRING (attr) = read_str_index (reader, str_index);
 	DW_STRING_IS_CANONICAL (attr) = 0;
 	info_ptr += bytes_read;
       }
@@ -16443,12 +16443,12 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
    This is only used by the Fission support.  */
 
 static const char *
-read_str_index (const struct die_reader_specs *reader,
-		struct dwarf2_cu *cu, ULONGEST str_index)
+read_str_index (const struct die_reader_specs *reader, ULONGEST str_index)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   const char *objf_name = objfile_name (objfile);
   bfd *abfd = objfile->obfd;
+  struct dwarf2_cu *cu = reader->cu;
   struct dwarf2_section_info *str_section = &reader->dwo_file->sections.str;
   struct dwarf2_section_info *str_offsets_section =
     &reader->dwo_file->sections.str_offsets;
