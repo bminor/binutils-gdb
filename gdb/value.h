@@ -676,7 +676,7 @@ extern struct value *value_struct_elt_bitpos (struct value **argp,
 					      const char *err);
 
 extern struct value *value_aggregate_elt (struct type *curtype,
-					  char *name,
+					  const char *name,
 					  struct type *expect_type,
 					  int want_address,
 					  enum noside noside);

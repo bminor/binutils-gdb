@@ -83,15 +83,15 @@ oload_classification classify_oload_match (struct badness_vector *,
 
 static struct value *value_struct_elt_for_reference (struct type *,
 						     int, struct type *,
-						     char *,
+						     const char *,
 						     struct type *,
 						     int, enum noside);
 
 static struct value *value_namespace_elt (const struct type *,
-					  char *, int , enum noside);
+					  const char *, int , enum noside);
 
 static struct value *value_maybe_namespace_elt (const struct type *,
-						char *, int,
+						const char *, int,
 						enum noside);
 
 static CORE_ADDR allocate_space_in_inferior (int);
@@ -3027,7 +3027,7 @@ destructor_name_p (const char *name, struct type *type)
    the comment before value_struct_elt_for_reference.  */
 
 struct value *
-value_aggregate_elt (struct type *curtype, char *name,
+value_aggregate_elt (struct type *curtype, const char *name,
 		     struct type *expect_type, int want_address,
 		     enum noside noside)
 {
@@ -3108,7 +3108,7 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
 
 static struct value *
 value_struct_elt_for_reference (struct type *domain, int offset,
-				struct type *curtype, char *name,
+				struct type *curtype, const char *name,
 				struct type *intype, 
 				int want_address,
 				enum noside noside)
@@ -3337,7 +3337,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
 static struct value *
 value_namespace_elt (const struct type *curtype,
-		     char *name, int want_address,
+		     const char *name, int want_address,
 		     enum noside noside)
 {
   struct value *retval = value_maybe_namespace_elt (curtype, name,
@@ -3359,7 +3359,7 @@ value_namespace_elt (const struct type *curtype,
 
 static struct value *
 value_maybe_namespace_elt (const struct type *curtype,
-			   char *name, int want_address,
+			   const char *name, int want_address,
 			   enum noside noside)
 {
   const char *namespace_name = TYPE_TAG_NAME (curtype);

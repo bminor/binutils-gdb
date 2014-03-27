@@ -1,5 +1,12 @@
 2014-04-14  Tom Tromey  <tromey@redhat.com>
 
+	* valops.c (value_aggregate_elt, value_struct_elt_for_reference)
+	(value_namespace_elt, value_maybe_namespace_elt): Make "name"
+	const.
+	* value.h (value_aggregate_elt): Update.
+
+2014-04-14  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (read_enumeration_type): Handle DW_AT_type.
 
 2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
