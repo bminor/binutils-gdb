@@ -3524,6 +3524,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  current_inferior ()->has_exit_code = 1;
 	  current_inferior ()->exit_code = (LONGEST) ecs->ws.value.integer;
 
+	  /* Support the --return-child-result option.  */
+	  return_child_result_value = ecs->ws.value.integer;
+
 	  print_exited_reason (ecs->ws.value.integer);
 	}
       else
@@ -5971,8 +5974,6 @@ print_exited_reason (int exitstatus)
       ui_out_text (uiout, pidstr);
       ui_out_text (uiout, ") exited normally]\n");
     }
-  /* Support the --return-child-result option.  */
-  return_child_result_value = exitstatus;
 }
 
 /* Signal received, print why the inferior has stopped.  The signal table

@@ -1,3 +1,9 @@
+2014-05-22  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_inferior_event): Store the exit code for
+	--return-child-result here, instead of ...
+	(print_exited_reason): ... here.
+
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13860
