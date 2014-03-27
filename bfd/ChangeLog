@@ -1,3 +1,13 @@
+2014-03-27  Yury Gribov  <y.gribov@samsung.com>
+    	    Pavel Fedin  <p.fedin@samsung.com>
+
+    	* elf32-arm.c: Add support for limited pretty-printing of PLT
+	entries on eabi and nacl targets.
+	(elf32_arm_get_synthetic_symtab): Add new callback.
+    	(elf32_arm_nacl_plt_sym_val): Likewise.
+    	(elf32_arm_plt0_size): Add helper function.
+    	(elf32_arm_plt_size): Likewise.
+
 2014-03-27  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_read_dylinker): Remove assert.

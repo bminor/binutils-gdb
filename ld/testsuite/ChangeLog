@@ -1,3 +1,36 @@
+2014-03-27  Yury Gribov  <y.gribov@samsung.com>
+    	    Pavel Fedin  <p.fedin@samsung.com>
+
+    	* ld-arm/arm-app-abs32.d: Update expected disassembly, taking into
+	account the pretty printing of PLT entries.
+    	* ld-arm/arm-app.d: Likewise.
+    	* ld-arm/arm-lib-plt32.d: Likewise.
+    	* ld-arm/arm-lib.d: Likewise.
+    	* ld-arm/armthumb-lib.d: Likewise.
+    	* ld-arm/cortex-a8-fix-b-plt.d: Likewise.
+    	* ld-arm/cortex-a8-fix-bcc-plt.d: Likewise.
+    	* ld-arm/cortex-a8-fix-bl-plt.d: Likewise.
+    	* ld-arm/cortex-a8-fix-bl-rel-plt.d: Likewise.
+    	* ld-arm/cortex-a8-fix-blx-plt.d: Likewise.
+    	* ld-arm/farcall-mixed-app-v5.d: Likewise.
+    	* ld-arm/farcall-mixed-app.d: Likewise.
+    	* ld-arm/farcall-mixed-lib-v4t.d: Likewise.
+    	* ld-arm/farcall-mixed-lib.d: Likewise.
+    	* ld-arm/ifunc-10.dd: Likewise.
+    	* ld-arm/ifunc-14.dd: Likewise.
+    	* ld-arm/ifunc-15.dd: Likewise.
+    	* ld-arm/ifunc-3.dd: Likewise.
+    	* ld-arm/ifunc-4.dd: Likewise.
+    	* ld-arm/ifunc-7.dd: Likewise.
+    	* ld-arm/ifunc-8.dd: Likewise.
+    	* ld-arm/ifunc-9.dd: Likewise.
+    	* ld-arm/long-plt-format.d: Likewise.
+    	* ld-arm/mixed-app-v5.d: Likewise.
+    	* ld-arm/mixed-app.d: Likewise.
+    	* ld-arm/mixed-lib.d: Likewise.
+    	* ld-arm/thumb2-bl-undefweak.d: Likewise.
+    	* ld-arm/thumb2-bl-undefweak1.d: Likewise.
+
 2014-03-26  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/startv1.s, * ld-powerpc/startv2.s, * ld-powerpc/funref.s,
