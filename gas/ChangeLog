@@ -1,3 +1,8 @@
+2014-03-27  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-score.c (s3_parse_pce_inst): Add "%s" parameter to
+	sprintf in order to avoid a compile time warning.
+
 2014-03-26  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rl78.c (rl78_op): Issue an error message if a 16-bit
