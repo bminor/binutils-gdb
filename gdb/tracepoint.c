@@ -3216,15 +3216,6 @@ set_current_traceframe (int num)
   clear_traceframe_info ();
 }
 
-/* Make the traceframe NUM be the current trace frame, and do nothing
-   more.  */
-
-void
-set_traceframe_number (int num)
-{
-  traceframe_number = num;
-}
-
 /* A cleanup used when switching away and back from tfind mode.  */
 
 struct current_traceframe_cleanup
@@ -3259,12 +3250,6 @@ make_cleanup_restore_current_traceframe (void)
 
   return make_cleanup_dtor (do_restore_current_traceframe_cleanup, old,
 			    restore_current_traceframe_cleanup_dtor);
-}
-
-struct cleanup *
-make_cleanup_restore_traceframe_number (void)
-{
-  return make_cleanup_restore_integer (&traceframe_number);
 }
 
 /* Given a number and address, return an uploaded tracepoint with that

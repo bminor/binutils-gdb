@@ -1,3 +1,83 @@
+2014-03-26  Keith Seitz  <keiths@redhat.com>
+
+	* ada-tasks.c (get_tcb_types_info): Search STRUCT_DOMAIN for
+	types, not VAR_DOMAIN.
+
+2014-03-25  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* features/nios2-cpu.xml: Correct types of "gp", "fp", "ea", and
+	"ra" registers.
+	* features/nios2-linux.c: Regenerated.
+	* features/nios2.c: Regenerated.
+
+2014-03-25  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-script.c (script_from_file): Force the interpreter to
+	sync mode.
+
+2014-03-24  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (avr_scan_prologue): Accept push r1 instruction for
+	small stack allocation.
+
+2014-03-24  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (exc_server): Remove unused prototype.
+	(darwin_dump_message): Correctly display data on x86_64.
+	(darwin_encode_reply): Fix style.
+	Add comments and fix indentation.
+
+2014-03-24  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* MAINTAINERS (Write After Approval): Add "Pierre Langlois".
+
+2014-03-22  Doug Evans  <xdje42@gmail.com>
+
+	* infcmd.c: Whitespace fixes.
+	(interrupt_command): Merge two function comments into one.
+
+2014-03-22  Doug Evans  <xdje42@gmail.com>
+
+	* infcmd.c (interrupt_command): Renamed from interrupt_target_command.
+	All uses updated.
+
+2014-03-22  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (target_read_live_memory): Remove.
+	(memory_xfer_live_readonly_partial): Rename it to
+	remote_xfer_live_readonly_partial.  Remove argument 'object'.
+	All callers updated.  Call remote_read_bytes_1
+	instead of target_read_live_memory.
+	* tracepoint.c (set_traceframe_number): Remove.
+	(make_cleanup_restore_traceframe_number): Likewise .
+	* tracepoint.h (set_traceframe_number): Remove declaration.
+	(make_cleanup_restore_traceframe_number): Likewise.
+
+2014-03-22  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (remote_read_bytes): Move code on reading from the
+	remote stub to ...
+	(remote_read_bytes_1): ... here.  New function.
+
+2014-03-22  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_xfer_partial): Check the return value of
+	exec_read_partial_read_only, if it is not TARGET_XFER_OK,
+	return TARGET_XFER_UNAVAILABLE.
+	* tracefile-tfile.c (tfile_xfer_partial): Likewise.
+	* target.c (target_read_live_memory): Move it to remote.c.
+	(memory_xfer_live_readonly_partial): Likewise.
+	(memory_xfer_partial_1): Move some code to remote_read_bytes.
+	* remote.c (target_read_live_memory): Moved from target.c.
+	(memory_xfer_live_readonly_partial): Likewise.
+	(remote_read_bytes): Factored out from
+	memory_xfer_partial_1.
+
+2014-03-21  Daniel Gutson  <daniel.gutson@tallertechnologies.com>
+
+	* extension.c (eval_ext_lang_from_control_command): Avoid dereferencing
+	NULL pointer.
+
 2014-03-21  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (normal_stop): Extend comment.

@@ -140,30 +140,39 @@ gdb_expect {
 }
 
 if $target_can_dprintf {
-    mi_run_cmd
-
-    mi_expect_stop ".*" ".*" ".*" ".*" ".*" "" "mi expect stop"
-
-    mi_send_resuming_command "exec-continue" "mi 1st dprintf continue, agent"
-    mi_expect_stop ".*" "foo" ".*" ".*" ".*" "" "mi 1st dprintf, agent"
-
-    mi_send_resuming_command "exec-continue" "mi 2nd dprintf continue, agent"
-
-    # The =breakpoint-modified text is a part of the "-exec-continue" output.
-    set msg "mi info dprintf second time"
-    gdb_expect {
-	-re "=breakpoint-modified," {
-	    pass $msg
-	}
-	-re ".*$mi_gdb_prompt$" {
-	    fail "$msg"
-	}
-	timeout {
-	    fail "$msg"
-	}
+    if {[mi_run_cmd] < 0} {
+	# This likely means we failed to use target side commands in
+	# combination with software breakpoints.  IOW, the target
+	# likely doesn't support target-side software breakpoints.
+	set target_can_dprintf 0
+	unsupported "send dprintf to target"
     }
 
-    mi_expect_stop ".*" "foo" ".*" ".*" ".*" "" "mi 2nd dprintf, agent"
+    if $target_can_dprintf {
+	mi_expect_stop ".*" ".*" ".*" ".*" ".*" "" "mi expect stop"
+
+	mi_send_resuming_command "exec-continue" "mi 1st dprintf continue, agent"
+	mi_expect_stop ".*" "foo" ".*" ".*" ".*" "" "mi 1st dprintf, agent"
+
+	mi_send_resuming_command "exec-continue" "mi 2nd dprintf continue, agent"
+
+	# The =breakpoint-modified text is a part of the
+	# "-exec-continue" output.
+	set msg "mi info dprintf second time"
+	gdb_expect {
+	    -re "=breakpoint-modified," {
+		pass $msg
+	    }
+	    -re ".*$mi_gdb_prompt$" {
+		fail "$msg"
+	    }
+	    timeout {
+		fail "$msg"
+	    }
+	}
+
+	mi_expect_stop ".*" "foo" ".*" ".*" ".*" "" "mi 2nd dprintf, agent"
+    }
 }
 
 mi_gdb_test "set dprintf-style foobar" ".*error.*" "mi set dprintf style to an unrecognized type"

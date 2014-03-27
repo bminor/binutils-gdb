@@ -656,6 +656,8 @@ unsigned int bfd_mach_o_section_get_entry_size (bfd *, bfd_mach_o_section *);
 bfd_boolean bfd_mach_o_read_symtab_symbols (bfd *);
 bfd_boolean bfd_mach_o_read_symtab_strtab (bfd *abfd);
 
+bfd_vma bfd_mach_o_get_base_address (bfd *);
+
 /* A placeholder in case we need to suppress emitting the dysymtab for some
    reason (e.g. compatibility with older system versions).  */
 #define bfd_mach_o_should_emit_dysymtab(x) TRUE

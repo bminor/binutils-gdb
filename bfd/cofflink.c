@@ -3059,6 +3059,11 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      sec = sections[symndx];
+
+	      /* If the output section has been discarded then ignore this reloc.  */
+	      if (sec->output_section->vma == 0)
+		continue;
+
               val = (sec->output_section->vma
 		     + sec->output_offset
 		     + sym->n_value);

@@ -720,7 +720,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
           info->size += gdbarch_tdep (gdbarch)->call_length;
           vpc += 2;
         }
-      else if (insn == 0x920f)  /* push r0 */
+      else if (insn == 0x920f || insn == 0x921f)  /* push r0 or push r1 */
         {
           info->size += 1;
           vpc += 2;

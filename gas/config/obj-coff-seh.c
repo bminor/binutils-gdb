@@ -169,6 +169,13 @@ seh_validate_seg (const char *directive)
   return 0;
 }
 
+/* Switch back to the code section, whatever that may be.  */
+static void
+obj_coff_seh_code (int ignored ATTRIBUTE_UNUSED)
+{
+  subseg_set (seh_ctx_cur->code_seg, 0);
+}
+
 static void
 switch_xdata (int subseg, segT code_seg)
 {

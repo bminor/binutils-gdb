@@ -232,6 +232,7 @@ set_inferior_args_vector (int argc, char **argv)
 }
 
 /* Notice when `set args' is run.  */
+
 static void
 set_args_command (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -241,6 +242,7 @@ set_args_command (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 /* Notice when `show args' is run.  */
+
 static void
 show_args_command (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
@@ -253,6 +255,7 @@ show_args_command (struct ui_file *file, int from_tty,
 
 /* Compute command-line string given argument vector.  This does the
    same shell processing as fork_inferior.  */
+
 char *
 construct_inferior_arguments (int argc, char **argv)
 {
@@ -373,6 +376,7 @@ construct_inferior_arguments (int argc, char **argv)
    background execution) has been added as *the last* of the arguments ARGS
    of a command.  If it has, it removes it and returns 1.  Otherwise it
    does nothing and returns 0.  */
+
 static int
 strip_bg_char (char **args)
 {
@@ -748,6 +752,7 @@ continue_1 (int all_threads)
 }
 
 /* continue [-a] [proceed-count] [&]  */
+
 static void
 continue_command (char *args, int from_tty)
 {
@@ -960,6 +965,7 @@ struct step_1_continuation_args
    to the user.  If count is > 1, we will need to do one more call to
    proceed(), via step_once().  Basically it is like step_once and
    step_1_continuation are co-recursive.  */
+
 static void
 step_1_continuation (void *args, int err)
 {
@@ -1187,6 +1193,7 @@ jump_command (char *arg, int from_tty)
 
 
 /* Go to line or address in current procedure.  */
+
 static void
 go_command (char *line_no, int from_tty)
 {
@@ -2693,14 +2700,14 @@ interrupt_target_1 (int all_threads)
     set_stop_requested (ptid, 1);
 }
 
-/* Stop the execution of the target while running in async mode, in
+/* interrupt [-a]
+   Stop the execution of the target while running in async mode, in
    the backgound.  In all-stop, stop the whole process.  In non-stop
    mode, stop the current thread only by default, or stop all threads
    if the `-a' switch is used.  */
 
-/* interrupt [-a]  */
 static void
-interrupt_target_command (char *args, int from_tty)
+interrupt_command (char *args, int from_tty)
 {
   if (target_can_async_p ())
     {
@@ -3067,7 +3074,7 @@ You may specify arguments to give to your program, just as with the\n\
 \"run\" command."));
   set_cmd_completer (c, filename_completer);
 
-  add_com ("interrupt", class_run, interrupt_target_command,
+  add_com ("interrupt", class_run, interrupt_command,
 	   _("Interrupt the execution of the debugged program.\n\
 If non-stop mode is enabled, interrupt only the current thread,\n\
 otherwise all the threads in the program are stopped.  To \n\

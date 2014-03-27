@@ -1,3 +1,20 @@
+2014-03-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16756
+	* ldmain.c (symbol_warning): New function.
+	(warning_callback): Use it.  Scan all input files for a reference
+	to SYMBOL.
+
+2014-03-17  Christopher Faylor  <me.cygwin2013@cgf.cx>
+
+	* ld.texinfo: Document change in handling of --enable-auto-image-base.
+	* emultempl/pe.em (pe_auto_image_base): Set to default base.
+	(gld_${EMULATION_NAME}_list_options): Change usage message to reflect
+	optional --enable-auto-image-base argument.
+	(gld${EMULATION_NAME}_handle_option): Handle optional
+	--enable-auto-image-base argument.
+	(compute_dll_image_base): Eliminate constant.  Use pe_auto_image_base.
+
 2014-03-19  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (default-manifest.o): Use WINDRES_FOR_TARGET.

@@ -157,3 +157,5 @@ run_dump_test "ifunc-19b"
 run_dump_test "ifunc-20"
 run_dump_test "ifunc-21"
 run_dump_test "ifunc-22"
+
+run_dump_test "relasz"

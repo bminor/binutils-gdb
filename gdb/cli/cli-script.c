@@ -1667,6 +1667,9 @@ script_from_file (FILE *stream, const char *file)
   source_line_number = 0;
   source_file_name = file;
 
+  make_cleanup_restore_integer (&interpreter_async);
+  interpreter_async = 0;
+
   {
     volatile struct gdb_exception e;
 

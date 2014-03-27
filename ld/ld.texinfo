@@ -2415,11 +2415,12 @@ creation step.
 
 @kindex --enable-auto-image-base
 @item --enable-auto-image-base
-Automatically choose the image base for DLLs, unless one is specified
-using the @code{--image-base} argument.  By using a hash generated
-from the dllname to create unique image bases for each DLL, in-memory
-collisions and relocations which can delay program execution are
-avoided.
+@itemx --enable-auto-image-base=@var{value}
+Automatically choose the image base for DLLs, optionally starting with base
+@var{value}, unless one is specified using the @code{--image-base} argument.
+By using a hash generated from the dllname to create unique image bases
+for each DLL, in-memory collisions and relocations which can delay program
+execution are avoided.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --disable-auto-image-base

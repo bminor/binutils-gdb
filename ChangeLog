@@ -1,3 +1,9 @@
+2014-03-28  Yaakov Selkowitz  <yselkowitz@users.sourceforge.net>
+
+	* Makefile.def (dependencies): Make all-ld depend on all-binutils
+	for WINDRES_FOR_TARGET in default-manifest.o rule.
+	* Makefile.in: Regenerate.
+
 2014-02-04  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR target/59788

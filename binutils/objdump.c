@@ -2259,7 +2259,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   if (section->start != NULL)
     return 1;
 
-  section->address = 0;
+  section->address = bfd_get_section_vma (abfd, sec);
   section->size = bfd_get_section_size (sec);
   section->start = NULL;
   ret = bfd_get_full_section_contents (abfd, sec, &section->start);

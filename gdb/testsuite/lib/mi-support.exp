@@ -843,6 +843,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	    send_gdb "${run_prefix}continue\n"
 	    gdb_expect 60 {
 		-re "${run_match}\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt" {}
+		-re "${run_match}\\^error.*$mi_gdb_prompt" {return -1}
 		default {}
 	    }
 	    return 0

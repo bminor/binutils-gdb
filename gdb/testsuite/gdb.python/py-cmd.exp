@@ -177,14 +177,16 @@ gdb_test "complete expr_test bar\." \
     "expr_test bar\.bc.*expr_test bar\.ij.*" \
     "Test completion through complete command"
 
-set test "complete 'expr_test bar.i'"
-send_gdb "expr_test bar\.i\t\t"
-gdb_test_multiple "" "$test" {
-    -re "expr_test bar\.ij \\\x07$" {
-	send_gdb "\n"
-	gdb_test_multiple "" $test {
-	    -re "invoked on = bar.ij.*$gdb_prompt $" {
-		pass "$test"
+if { [readline_is_used] } {
+    set test "complete 'expr_test bar.i'"
+    send_gdb "expr_test bar\.i\t\t"
+    gdb_test_multiple "" "$test" {
+	-re "expr_test bar\.ij \\\x07$" {
+	    send_gdb "\n"
+	    gdb_test_multiple "" $test {
+		-re "invoked on = bar.ij.*$gdb_prompt $" {
+		    pass "$test"
+		}
 	    }
 	}
     }

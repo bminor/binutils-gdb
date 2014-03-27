@@ -1792,7 +1792,8 @@ proc can_single_step_to_signal_handler {} {
     # to determine the next instruction addresses, because start of signal
     # handler is one of them.
     if { [istarget "arm*-*-*"] || [istarget "mips*-*-*"]
-	 || [istarget "tic6x-*-*"] || [istarget "sparc*-*-linux*"] } {
+	 || [istarget "tic6x-*-*"] || [istarget "sparc*-*-linux*"]
+	 || [istarget "nios2-*-*"] } {
 	return 0
     }
 
@@ -1829,6 +1830,21 @@ proc supports_reverse {} {
     }
 
     return 0
+}
+
+# Return 1 if readline library is used.
+
+proc readline_is_used { } {
+    global gdb_prompt
+
+    gdb_test_multiple "show editing" "" {
+	-re ".*Editing of command lines as they are typed is on\..*$gdb_prompt $" {
+	    return 1
+	}
+	-re ".*$gdb_prompt $" {
+	    return 0
+	}
+    }
 }
 
 # Return 1 if target is ELF.

@@ -42,6 +42,7 @@
 #define OPT_CODESIGN 5
 #define OPT_SEG_SPLIT_INFO 6
 #define OPT_COMPACT_UNWIND 7
+#define OPT_FUNCTION_STARTS 8
 
 /* List of actions.  */
 static struct objdump_private_option options[] =
@@ -54,6 +55,7 @@ static struct objdump_private_option options[] =
     { "codesign", 0 },
     { "seg_split_info", 0 },
     { "compact_unwind", 0 },
+    { "function_starts", 0 },
     { NULL, 0 }
   };
 
@@ -64,14 +66,15 @@ mach_o_help (FILE *stream)
 {
   fprintf (stream, _("\
 For Mach-O files:\n\
-  header         Display the file header\n\
-  section        Display the segments and sections commands\n\
-  map            Display the section map\n\
-  load           Display the load commands\n\
-  dysymtab       Display the dynamic symbol table\n\
-  codesign       Display code signature\n\
-  seg_split_info Display segment split info\n\
-  compact_unwind Display compact unwinding info\n\
+  header           Display the file header\n\
+  section          Display the segments and sections commands\n\
+  map              Display the section map\n\
+  load             Display the load commands\n\
+  dysymtab         Display the dynamic symbol table\n\
+  codesign         Display code signature\n\
+  seg_split_info   Display segment split info\n\
+  compact_unwind   Display compact unwinding info\n\
+  function_starts  Display start address of functions\n\
 "));
 }
 
@@ -99,6 +102,7 @@ static const bfd_mach_o_xlat_name bfd_mach_o_cpu_name[] =
   { "powerpc", BFD_MACH_O_CPU_TYPE_POWERPC },
   { "powerpc_64", BFD_MACH_O_CPU_TYPE_POWERPC_64 },
   { "x86_64", BFD_MACH_O_CPU_TYPE_X86_64 },
+  { "arm64", BFD_MACH_O_CPU_TYPE_ARM64 },
   { NULL, 0}
 };
 
@@ -283,6 +287,14 @@ dump_header (bfd *abfd)
 }
 
 static void
+disp_segment_prot (unsigned int prot)
+{
+  putchar (prot & BFD_MACH_O_PROT_READ ? 'r' : '-');
+  putchar (prot & BFD_MACH_O_PROT_WRITE ? 'w' : '-');
+  putchar (prot & BFD_MACH_O_PROT_EXECUTE ? 'x' : '-');
+}
+
+static void
 dump_section_map (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
@@ -308,9 +320,7 @@ dump_section_map (bfd *abfd)
       putchar ('-');
       printf_vma  (seg->vmaddr + seg->vmsize - 1);
       putchar (' ');
-      putchar (seg->initprot & BFD_MACH_O_PROT_READ ? 'r' : '-');
-      putchar (seg->initprot & BFD_MACH_O_PROT_WRITE ? 'w' : '-');
-      putchar (seg->initprot & BFD_MACH_O_PROT_EXECUTE ? 'x' : '-');
+      disp_segment_prot (seg->initprot);
       printf ("]\n");
 
       for (sec = seg->sect_head; sec != NULL; sec = sec->next)
@@ -392,8 +402,13 @@ dump_segment (bfd *abfd ATTRIBUTE_UNUSED, bfd_mach_o_load_command *cmd)
   printf (" endoff: ");
   printf_vma ((bfd_vma)(seg->fileoff + seg->filesize));
   printf ("\n");
-  printf ("   nsects: %lu  ", seg->nsects);
-  printf (" flags: %lx\n", seg->flags);
+  printf ("   nsects: %lu", seg->nsects);
+  printf ("   flags: %lx", seg->flags);
+  printf ("   initprot: ");
+  disp_segment_prot (seg->initprot);
+  printf ("   maxprot: ");
+  disp_segment_prot (seg->maxprot);
+  printf ("\n");
   for (sec = seg->sect_head; sec != NULL; sec = sec->next)
     dump_section_header (abfd, sec);
 }
@@ -911,6 +926,55 @@ dump_segment_split_info (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
 }
 
 static void
+dump_function_starts (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
+{
+  unsigned char *buf = xmalloc (cmd->datasize);
+  unsigned char *end_buf = buf + cmd->datasize;
+  unsigned char *p;
+  bfd_vma addr;
+
+  if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
+      || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
+    {
+      non_fatal (_("cannot read function starts"));
+      free (buf);
+      return;
+    }
+
+  /* Function starts are delta encoded, starting from the base address.  */
+  addr = bfd_mach_o_get_base_address (abfd);
+
+  for (p = buf; ;)
+    {
+      bfd_vma delta = 0;
+      unsigned int shift = 0;
+
+      if (*p == 0 || p == end_buf)
+	break;
+      while (1)
+	{
+	  unsigned char b = *p++;
+
+	  delta |= (b & 0x7f) << shift;
+	  if ((b & 0x80) == 0)
+	    break;
+	  if (p == end_buf)
+	    {
+	      fputs ("   [truncated]\n", stdout);
+	      break;
+	    }
+	  shift += 7;
+	}
+
+      addr += delta;
+      fputs ("    ", stdout);
+      bfd_printf_vma (abfd, addr);
+      putchar ('\n');
+    }
+  free (buf);
+}
+
+static void
 dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
                    bfd_boolean verbose)
 {
@@ -962,6 +1026,10 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
     case BFD_MACH_O_LC_ID_DYLINKER:
       printf (" %s\n", cmd->command.dylinker.name_str);
       break;
+    case BFD_MACH_O_LC_DYLD_ENVIRONMENT:
+      putchar ('\n');
+      printf ("  %s\n", cmd->command.dylinker.name_str);
+      break;
     case BFD_MACH_O_LC_SYMTAB:
       {
         bfd_mach_o_symtab_command *symtab = &cmd->command.symtab;
@@ -992,6 +1060,8 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
     case BFD_MACH_O_LC_CODE_SIGNATURE:
     case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
     case BFD_MACH_O_LC_FUNCTION_STARTS:
+    case BFD_MACH_O_LC_DATA_IN_CODE:
+    case BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS:
       {
         bfd_mach_o_linkedit_command *linkedit = &cmd->command.linkedit;
         printf
@@ -1004,6 +1074,8 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
           dump_code_signature (abfd, linkedit);
         else if (verbose && cmd->type == BFD_MACH_O_LC_SEGMENT_SPLIT_INFO)
           dump_segment_split_info (abfd, linkedit);
+        else if (verbose && cmd->type == BFD_MACH_O_LC_FUNCTION_STARTS)
+          dump_function_starts (abfd, linkedit);
         break;
       }
     case BFD_MACH_O_LC_SUB_FRAMEWORK:
@@ -1157,7 +1229,7 @@ dump_unwind_encoding_x86 (unsigned int encoding, unsigned int sz,
 
 	    stack_adj =
 	      (encoding & MACH_O_UNWIND_X86_64_FRAMELESS_STACK_ADJUST) >> 13;
-	    printf (" size at 0x%03x + 0x%02x", stack_size, stack_adj);
+	    printf (" size at 0x%03x + 0x%02x", stack_size, stack_adj * sz);
 	  }
 	/* Registers are coded using arithmetic compression: the register
 	   is indexed in range 0-6, the second in range 0-5, the third in
@@ -1259,7 +1331,7 @@ dump_obj_compact_unwind (bfd *abfd,
   int is_64 = mdata->header.version == 2;
   const unsigned char *p;
 
-  printf (" compact unwind info:\n");
+  printf ("Compact unwind info:\n");
   printf (" start            length   personality      lsda\n");
 
   if (is_64)
@@ -1308,7 +1380,7 @@ dump_exe_compact_unwind (bfd *abfd,
   unsigned int i;
 
   /* The header.  */
-  printf (" compact unwind info:\n");
+  printf ("Compact unwind info:\n");
 
   hdr = (struct mach_o_unwind_info_header *) content;
   if (size < sizeof (*hdr))
@@ -1359,11 +1431,12 @@ dump_exe_compact_unwind (bfd *abfd,
       const unsigned char *level2;
       unsigned int kind;
 
-      if (i == index_count - 1)
-	break;
-
       func_offset = bfd_get_32 (abfd, index_entry->function_offset);
       level2_offset = bfd_get_32 (abfd, index_entry->second_level_offset);
+
+      /* No level-2 for this index (should be the last index).  */
+      if (level2_offset == 0)
+	continue;
 
       level2 = content + level2_offset;
       kind = bfd_get_32 (abfd, level2);
@@ -1477,7 +1550,7 @@ dump_exe_compact_unwind (bfd *abfd,
 	nbr_lsda = (next_lsda_offset - lsda_offset) / sizeof (*lsda);
 	for (j = 0; j < nbr_lsda; j++)
 	  {
-	    printf ("   lsda %-3u: function 0x%08x lsda 0x%08x\n",
+	    printf ("   lsda %3u: function 0x%08x lsda 0x%08x\n",
 		    j, (unsigned int) bfd_get_32 (abfd, lsda->function_offset),
 		    (unsigned int) bfd_get_32 (abfd, lsda->lsda_offset));
 	    lsda++;
@@ -1542,6 +1615,8 @@ mach_o_dump (bfd *abfd)
     dump_load_commands (abfd, BFD_MACH_O_LC_CODE_SIGNATURE, 0);
   if (options[OPT_SEG_SPLIT_INFO].selected)
     dump_load_commands (abfd, BFD_MACH_O_LC_SEGMENT_SPLIT_INFO, 0);
+  if (options[OPT_FUNCTION_STARTS].selected)
+    dump_load_commands (abfd, BFD_MACH_O_LC_FUNCTION_STARTS, 0);
   if (options[OPT_COMPACT_UNWIND].selected)
     {
       dump_section_content (abfd, "__LD", "__compact_unwind",

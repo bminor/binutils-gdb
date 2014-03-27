@@ -208,6 +208,16 @@ rl78_op (expressionS exp, int nbytes, int type)
       if (nbytes > 2
 	  && exp.X_md == BFD_RELOC_RL78_CODE)
 	exp.X_md = 0;
+
+      if (nbytes == 1
+	  && (exp.X_md == BFD_RELOC_RL78_LO16
+	      || exp.X_md == BFD_RELOC_RL78_HI16))
+	as_bad (_("16-bit relocation used in 8-bit operand"));
+
+      if (nbytes == 2
+	  && exp.X_md == BFD_RELOC_RL78_HI8)
+	as_bad (_("8-bit relocation used in 16-bit operand"));
+
       rl78_op_fixup (exp, rl78_bytes.n_ops * 8, nbytes * 8, type);
       memset (rl78_bytes.ops + rl78_bytes.n_ops, 0, nbytes);
       rl78_bytes.n_ops += nbytes;
@@ -1197,8 +1207,8 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       break;
 
     case BFD_RELOC_RL78_CODE:
-      SYM0 ();
-      OP (ABS16);
+      reloc[0]->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RL78_16U);
+      reloc[1] = NULL;
       break;
 
     case BFD_RELOC_RL78_LO16:
@@ -1324,6 +1334,22 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
       op[1] = val >> 8;
       op[2] = val >> 16;
       op[3] = val >> 24;
+      break;
+
+    case BFD_RELOC_RL78_HI8:
+      val = val >> 16;
+      op[0] = val;
+      break;
+
+    case BFD_RELOC_RL78_HI16:
+      val = val >> 16;
+      op[0] = val;
+      op[1] = val >> 8;
+      break;
+
+    case BFD_RELOC_RL78_LO16:
+      op[0] = val;
+      op[1] = val >> 8;
       break;
 
     default:

@@ -5363,7 +5363,7 @@ s3_parse_pce_inst (char *insnstr)
 	 || ((pec_part_1.size == s3_INSN16_SIZE) && (s3_inst.size == s3_INSN_SIZE)))
     {
       s3_inst.error = _("pce instruction error (16 bit || 16 bit)'");
-      sprintf (s3_inst.str, insnstr);
+      sprintf (s3_inst.str, "%s", insnstr);
       return;
     }
 

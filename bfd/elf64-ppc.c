@@ -95,7 +95,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_add_symbol_hook	      ppc64_elf_add_symbol_hook
-#define elf_backend_check_directives	      ppc64_elf_process_dot_syms
+#define elf_backend_check_directives	      ppc64_elf_before_check_relocs
 #define elf_backend_notice_as_needed	      ppc64_elf_notice_as_needed
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
@@ -3953,7 +3953,7 @@ struct ppc_link_hash_table
   /* Set on error.  */
   unsigned int stub_error:1;
 
-  /* Temp used by ppc64_elf_process_dot_syms.  */
+  /* Temp used by ppc64_elf_before_check_relocs.  */
   unsigned int twiddled_syms:1;
 
   /* Incremented every time we size stubs.  */
@@ -4930,10 +4930,11 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Process list of dot-symbols we made in link_hash_newfunc.  */
+/* Set up opd section info and abiversion for IBFD, and process list
+   of dot-symbols we made in link_hash_newfunc.  */
 
 static bfd_boolean
-ppc64_elf_process_dot_syms (bfd *ibfd, struct bfd_link_info *info)
+ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
   struct ppc_link_hash_entry **p, *eh;
@@ -4946,6 +4947,57 @@ ppc64_elf_process_dot_syms (bfd *ibfd, struct bfd_link_info *info)
 
   if (is_ppc64_elf (ibfd))
     {
+      asection *opd = bfd_get_section_by_name (ibfd, ".opd");
+
+      if (opd != NULL && opd->size != 0)
+	{
+	  if (abiversion (ibfd) == 0)
+	    set_abiversion (ibfd, 1);
+	  else if (abiversion (ibfd) == 2)
+	    {
+	      info->callbacks->einfo (_("%P: %B .opd not allowed in ABI"
+					" version %d\n"),
+				      ibfd, abiversion (ibfd));
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+
+	  if ((ibfd->flags & DYNAMIC) == 0
+	      && (opd->flags & SEC_RELOC) != 0
+	      && opd->reloc_count != 0
+	      && !bfd_is_abs_section (opd->output_section))
+	    {
+	      /* Garbage collection needs some extra help with .opd sections.
+		 We don't want to necessarily keep everything referenced by
+		 relocs in .opd, as that would keep all functions.  Instead,
+		 if we reference an .opd symbol (a function descriptor), we
+		 want to keep the function code symbol's section.  This is
+		 easy for global symbols, but for local syms we need to keep
+		 information about the associated function section.  */
+	      bfd_size_type amt;
+	      asection **opd_sym_map;
+
+	      amt = opd->size * sizeof (*opd_sym_map) / 8;
+	      opd_sym_map = bfd_zalloc (ibfd, amt);
+	      if (opd_sym_map == NULL)
+		return FALSE;
+	      ppc64_elf_section_data (opd)->u.opd.func_sec = opd_sym_map;
+	      BFD_ASSERT (ppc64_elf_section_data (opd)->sec_type == sec_normal);
+	      ppc64_elf_section_data (opd)->sec_type = sec_opd;
+	    }
+	}
+
+      /* For input files without an explicit abiversion in e_flags
+	 we should have flagged any with symbol st_other bits set
+	 as ELFv1 and above flagged those with .opd as ELFv2.
+	 Set the output abiversion if not yet set, and for any input
+	 still ambiguous, take its abiversion from the output.
+	 Differences in ABI are reported later.  */
+      if (abiversion (info->output_bfd) == 0)
+	set_abiversion (info->output_bfd, abiversion (ibfd));
+      else if (abiversion (ibfd) == 0)
+	set_abiversion (ibfd, abiversion (info->output_bfd));
+
       p = &htab->dot_syms;
       while ((eh = *p) != NULL)
 	{
@@ -5149,34 +5201,9 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   sym_hashes = elf_sym_hashes (abfd);
   sreloc = NULL;
   opd_sym_map = NULL;
-  if (strcmp (sec->name, ".opd") == 0)
-    {
-      /* Garbage collection needs some extra help with .opd sections.
-	 We don't want to necessarily keep everything referenced by
-	 relocs in .opd, as that would keep all functions.  Instead,
-	 if we reference an .opd symbol (a function descriptor), we
-	 want to keep the function code symbol's section.  This is
-	 easy for global symbols, but for local syms we need to keep
-	 information about the associated function section.  */
-      bfd_size_type amt;
-
-      if (abiversion (abfd) == 0)
-	set_abiversion (abfd, 1);
-      else if (abiversion (abfd) == 2)
-	{
-	  info->callbacks->einfo (_("%P: .opd not allowed in ABI version %d\n"),
-				  abiversion (abfd));
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-      amt = sec->size * sizeof (*opd_sym_map) / 8;
-      opd_sym_map = bfd_zalloc (abfd, amt);
-      if (opd_sym_map == NULL)
-	return FALSE;
-      ppc64_elf_section_data (sec)->u.opd.func_sec = opd_sym_map;
-      BFD_ASSERT (ppc64_elf_section_data (sec)->sec_type == sec_normal);
-      ppc64_elf_section_data (sec)->sec_type = sec_opd;
-    }
+  if (ppc64_elf_section_data (sec) != NULL
+      && ppc64_elf_section_data (sec)->sec_type == sec_opd)
+    opd_sym_map = ppc64_elf_section_data (sec)->u.opd.func_sec;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -5350,7 +5377,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* We may also need a plt entry if the symbol turns out to be
 	     an ifunc.  */
-	  if (h != NULL && !info->shared && abiversion (abfd) == 2)
+	  if (h != NULL && !info->shared && abiversion (abfd) != 1)
 	    {
 	      if (!update_plt_info (abfd, &h->plt.plist, rel->r_addend))
 		return FALSE;
@@ -5634,7 +5661,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_ADDR16_HIGHESTA:
 	case R_PPC64_ADDR16_LO:
 	case R_PPC64_ADDR16_LO_DS:
-	  if (h != NULL && !info->shared && abiversion (abfd) == 2
+	  if (h != NULL && !info->shared && abiversion (abfd) != 1
 	      && rel->r_addend == 0)
 	    {
 	      /* We may need a .plt entry if this reloc refers to a
@@ -5808,21 +5835,14 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   iflags = elf_elfheader (ibfd)->e_flags;
   oflags = elf_elfheader (obfd)->e_flags;
 
-  if (!elf_flags_init (obfd) || oflags == 0)
-    {
-      elf_flags_init (obfd) = TRUE;
-      elf_elfheader (obfd)->e_flags = iflags;
-    }
-  else if (iflags == oflags || iflags == 0)
-    ;
-  else if (iflags & ~EF_PPC64_ABI)
+  if (iflags & ~EF_PPC64_ABI)
     {
       (*_bfd_error_handler)
 	(_("%B uses unknown e_flags 0x%lx"), ibfd, iflags);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
-  else
+  else if (iflags != oflags && iflags != 0)
     {
       (*_bfd_error_handler)
 	(_("%B: ABI version %ld is not compatible with ABI version %ld output"),

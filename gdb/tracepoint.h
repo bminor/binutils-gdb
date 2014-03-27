@@ -269,21 +269,12 @@ extern int get_traceframe_number (void);
 /* Returns the tracepoint number for current traceframe.  */
 extern int get_tracepoint_number (void);
 
-/* Make the traceframe NUM be the current GDB trace frame number, and
-   do nothing more.  In particular, this does not flush the
-   register/frame caches or notify the target about the trace frame
-   change, so that is can be used when we need to momentarily access
-   live memory.  Targets lazily switch their current traceframe to
-   match GDB's traceframe number, at the appropriate times.  */
-extern void set_traceframe_number (int);
-
 /* Make the traceframe NUM be the current trace frame, all the way to
    the target, and flushes all global state (register/frame caches,
    etc.).  */
 extern void set_current_traceframe (int num);
 
 struct cleanup *make_cleanup_restore_current_traceframe (void);
-struct cleanup *make_cleanup_restore_traceframe_number (void);
 
 void free_actions (struct breakpoint *);
 

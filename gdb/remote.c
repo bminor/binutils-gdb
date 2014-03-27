@@ -6835,17 +6835,14 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len,
    transferred in *XFERED_LEN.  */
 
 static enum target_xfer_status
-remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
-		   ULONGEST *xfered_len)
+remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
+		     ULONGEST *xfered_len)
 {
   struct remote_state *rs = get_remote_state ();
   int max_buf_size;		/* Max size of packet output buffer.  */
   char *p;
   int todo;
   int i;
-
-  if (len == 0)
-    return 0;
 
   max_buf_size = get_memory_read_packet_size ();
   /* The packet buffer will be large enough for the payload;
@@ -6875,6 +6872,129 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
   /* Return what we have.  Let higher layers handle partial reads.  */
   *xfered_len = (ULONGEST) i;
   return TARGET_XFER_OK;
+}
+
+/* Using the set of read-only target sections of remote, read live
+   read-only memory.
+
+   For interface/parameters/return description see target.h,
+   to_xfer_partial.  */
+
+static enum target_xfer_status
+remote_xfer_live_readonly_partial (struct target_ops *ops, gdb_byte *readbuf,
+				   ULONGEST memaddr, ULONGEST len,
+				   ULONGEST *xfered_len)
+{
+  struct target_section *secp;
+  struct target_section_table *table;
+
+  secp = target_section_by_addr (ops, memaddr);
+  if (secp != NULL
+      && (bfd_get_section_flags (secp->the_bfd_section->owner,
+				 secp->the_bfd_section)
+	  & SEC_READONLY))
+    {
+      struct target_section *p;
+      ULONGEST memend = memaddr + len;
+
+      table = target_get_section_table (ops);
+
+      for (p = table->sections; p < table->sections_end; p++)
+	{
+	  if (memaddr >= p->addr)
+	    {
+	      if (memend <= p->endaddr)
+		{
+		  /* Entire transfer is within this section.  */
+		  return remote_read_bytes_1 (memaddr, readbuf, len,
+					      xfered_len);
+		}
+	      else if (memaddr >= p->endaddr)
+		{
+		  /* This section ends before the transfer starts.  */
+		  continue;
+		}
+	      else
+		{
+		  /* This section overlaps the transfer.  Just do half.  */
+		  len = p->endaddr - memaddr;
+		  return remote_read_bytes_1 (memaddr, readbuf, len,
+					      xfered_len);
+		}
+	    }
+	}
+    }
+
+  return TARGET_XFER_EOF;
+}
+
+/* Similar to remote_read_bytes_1, but it reads from the remote stub
+   first if the requested memory is unavailable in traceframe.
+   Otherwise, fall back to remote_read_bytes_1.  */
+
+static enum target_xfer_status
+remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
+		   gdb_byte *myaddr, ULONGEST len, ULONGEST *xfered_len)
+{
+  if (len == 0)
+    return 0;
+
+  if (get_traceframe_number () != -1)
+    {
+      VEC(mem_range_s) *available;
+
+      /* If we fail to get the set of available memory, then the
+	 target does not support querying traceframe info, and so we
+	 attempt reading from the traceframe anyway (assuming the
+	 target implements the old QTro packet then).  */
+      if (traceframe_available_memory (&available, memaddr, len))
+	{
+	  struct cleanup *old_chain;
+
+	  old_chain = make_cleanup (VEC_cleanup(mem_range_s), &available);
+
+	  if (VEC_empty (mem_range_s, available)
+	      || VEC_index (mem_range_s, available, 0)->start != memaddr)
+	    {
+	      enum target_xfer_status res;
+
+	      /* Don't read into the traceframe's available
+		 memory.  */
+	      if (!VEC_empty (mem_range_s, available))
+		{
+		  LONGEST oldlen = len;
+
+		  len = VEC_index (mem_range_s, available, 0)->start - memaddr;
+		  gdb_assert (len <= oldlen);
+		}
+
+	      do_cleanups (old_chain);
+
+	      /* This goes through the topmost target again.  */
+	      res = remote_xfer_live_readonly_partial (ops, myaddr, memaddr,
+						       len, xfered_len);
+	      if (res == TARGET_XFER_OK)
+		return TARGET_XFER_OK;
+	      else
+		{
+		  /* No use trying further, we know some memory starting
+		     at MEMADDR isn't available.  */
+		  *xfered_len = len;
+		  return TARGET_XFER_UNAVAILABLE;
+		}
+	    }
+
+	  /* Don't try to read more than how much is available, in
+	     case the target implements the deprecated QTro packet to
+	     cater for older GDBs (the target's knowledge of read-only
+	     sections may be outdated by now).  */
+	  len = VEC_index (mem_range_s, available, 0)->length;
+
+	  do_cleanups (old_chain);
+	}
+    }
+
+  return remote_read_bytes_1 (memaddr, myaddr, len, xfered_len);
 }
 
 
@@ -8698,7 +8818,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       if (writebuf != NULL)
 	return remote_write_bytes (offset, writebuf, len, xfered_len);
       else
-	return remote_read_bytes (offset, readbuf, len, xfered_len);
+	return remote_read_bytes (ops, offset, readbuf, len, xfered_len);
     }
 
   /* Handle SPU memory using qxfer packets.  */

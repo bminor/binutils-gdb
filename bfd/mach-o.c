@@ -905,6 +905,10 @@ bfd_mach_o_convert_architecture (bfd_mach_o_cpu_type mtype,
       *type = bfd_arch_powerpc;
       *subtype = bfd_mach_ppc64;
       break;
+    case BFD_MACH_O_CPU_TYPE_ARM64:
+      *type = bfd_arch_aarch64;
+      *subtype = bfd_mach_aarch64;
+      break;
     default:
       *type = bfd_arch_unknown;
       break;
@@ -1474,7 +1478,7 @@ bfd_mach_o_write_symtab (bfd *abfd, bfd_mach_o_load_command *command)
   BFD_ASSERT (command->type == BFD_MACH_O_LC_SYMTAB);
 
   /* Write the symbols first.  */
-  mdata->filelen = FILE_ALIGN(mdata->filelen, wide ? 3 : 2);
+  mdata->filelen = FILE_ALIGN (mdata->filelen, wide ? 3 : 2);
   sym->symoff = mdata->filelen;
   if (bfd_seek (abfd, sym->symoff, SEEK_SET) != 0)
     return FALSE;
@@ -2014,8 +2018,9 @@ bfd_mach_o_write_contents (bfd *abfd)
 	case BFD_MACH_O_LC_SUB_FRAMEWORK:
 	  break;
 	default:
-	  (*_bfd_error_handler) (_("unable to write unknown load command 0x%lx"),
-				 (unsigned long) cur->type);
+	  (*_bfd_error_handler)
+	    (_("unable to write unknown load command 0x%lx"),
+	     (unsigned long) cur->type);
 	  return FALSE;
 	}
     }
@@ -2038,7 +2043,8 @@ bfd_mach_o_append_section_to_segment (bfd_mach_o_segment_command *seg,
 /* Create section Mach-O flags from BFD flags.  */
 
 static void
-bfd_mach_o_set_section_flags_from_bfd (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+bfd_mach_o_set_section_flags_from_bfd (bfd *abfd ATTRIBUTE_UNUSED,
+				       asection *sec)
 {
   flagword bfd_flags;
   bfd_mach_o_section *s = bfd_mach_o_get_mach_o_section (sec);
@@ -2169,7 +2175,8 @@ bfd_mach_o_build_seg_command (const char *segment,
       mdata->filelen += s->size;
     }
 
-  /* Now pass through again, for zerofill, only now we just update the vmsize.  */
+  /* Now pass through again, for zerofill, only now we just update the
+     vmsize.  */
   for (i = 0; i < mdata->nsects; ++i)
     {
       bfd_mach_o_section *s = mdata->sections[i];
@@ -3142,9 +3149,6 @@ bfd_mach_o_read_dylinker (bfd *abfd, bfd_mach_o_load_command *command)
   struct mach_o_str_command_external raw;
   unsigned int nameoff;
 
-  BFD_ASSERT ((command->type == BFD_MACH_O_LC_ID_DYLINKER)
-	      || (command->type == BFD_MACH_O_LC_LOAD_DYLINKER));
-
   if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
       || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
     return -1;
@@ -3838,6 +3842,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       break;
     case BFD_MACH_O_LC_LOAD_DYLINKER:
     case BFD_MACH_O_LC_ID_DYLINKER:
+    case BFD_MACH_O_LC_DYLD_ENVIRONMENT:
       if (bfd_mach_o_read_dylinker (abfd, command) != 0)
 	return -1;
       break;
@@ -4268,6 +4273,35 @@ static const bfd_target *
 bfd_mach_o_gen_core_p (bfd *abfd)
 {
   return bfd_mach_o_header_p (abfd, BFD_MACH_O_MH_CORE, 0);
+}
+
+/* Return the base address of ABFD, ie the address at which the image is
+   mapped.  The possible initial pagezero is ignored.  */
+
+bfd_vma
+bfd_mach_o_get_base_address (bfd *abfd)
+{
+  bfd_mach_o_data_struct *mdata;
+  unsigned int i;
+
+  /* Check for Mach-O.  */
+  if (!bfd_mach_o_valid (abfd))
+    return 0;
+  mdata = bfd_mach_o_get_data (abfd);
+
+  for (i = 0; i < mdata->header.ncmds; i++)
+    {
+      bfd_mach_o_load_command *cmd = &mdata->commands[i];
+      if ((cmd->type == BFD_MACH_O_LC_SEGMENT
+	   || cmd->type == BFD_MACH_O_LC_SEGMENT_64))
+	{
+	  struct bfd_mach_o_segment_command *segcmd = &cmd->command.segment;
+
+	  if (segcmd->initprot != 0)
+	    return segcmd->vmaddr;
+	}
+    }
+  return 0;
 }
 
 typedef struct mach_o_fat_archentry

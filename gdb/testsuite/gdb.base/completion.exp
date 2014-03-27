@@ -69,6 +69,70 @@ if ![runto_main] then {
 set oldtimeout1 $timeout
 set timeout 30
 
+gdb_test_no_output "complete print values\[0\].x." \
+    "field completion with invalid field"
+
+# If there is a non-deprecated completion, it should be returned.
+gdb_test "complete sav" "save" "test non-deprecated completion"
+# If there is only a deprecated completion, then it should be returned.
+gdb_test "complete save-t" "save-tracepoints" "test deprecated completion"
+
+
+#
+# Tag name completion.
+#
+
+gdb_test "complete ptype struct some_" "ptype struct some_struct"
+gdb_test "complete ptype enum some_" "ptype enum some_enum"
+gdb_test "complete ptype union some_" "ptype union some_union"
+
+
+gdb_test "complete set gnutarget aut" "set gnutarget auto"
+
+
+gdb_test "complete set cp-abi aut" "set cp-abi auto"
+
+# Test that completion of commands 'target FOO' works well.
+set targets [list "core" "tfile" "exec"]
+
+# Test that completion of command 'target ctf' if GDB supports ctf
+# target.
+gdb_test_multiple "target ctf" "" {
+    -re "Undefined target command: \"ctf\"\.  Try \"help target\"\.\r\n$gdb_prompt $" {
+    }
+    -re "No CTF directory specified.*\r\n$gdb_prompt $" {
+	lappend targets "ctf"
+    }
+}
+
+foreach target_name ${targets} {
+    gdb_test "complete target ${target_name} ./gdb.base/completion" \
+	"target ${target_name} \\./gdb.base/completion.*\\./gdb.base/completion0\\.o.*\\./gdb.base/completion1\\.o.*"
+}
+
+#
+# "set foo unlimited" completion.
+#
+
+# A var_uinteger command.
+gdb_test "complete set height " "set height unlimited"
+gdb_test "complete set height u" "set height unlimited"
+
+# A var_integer command.
+gdb_test "complete set listsize " "set listsize unlimited"
+gdb_test "complete set listsize unl" "set listsize unlimited"
+
+# A var_zuinteger_unlimited command.
+gdb_test "complete set trace-buffer-size " "set trace-buffer-size unlimited"
+gdb_test "complete set trace-buffer-size unl" "set trace-buffer-size unlimited"
+
+# Tests below are about tab-completion, which doesn't work if readline
+# library isn't used.  Check it first.
+
+if { ![readline_is_used] } {
+    return -1
+}
+
 set test "complete 'hfgfh'"
 send_gdb "hfgfh\t"
 gdb_test_multiple "" "$test" {
@@ -671,63 +735,6 @@ gdb_test_multiple "" "$test" {
 	}
     }
 }
-
-gdb_test_no_output "complete print values\[0\].x." \
-    "field completion with invalid field"
-
-# If there is a non-deprecated completion, it should be returned.
-gdb_test "complete sav" "save" "test non-deprecated completion"
-# If there is only a deprecated completion, then it should be returned.
-gdb_test "complete save-t" "save-tracepoints" "test deprecated completion"
-
-
-#
-# Tag name completion.
-#
-
-gdb_test "complete ptype struct some_" "ptype struct some_struct"
-gdb_test "complete ptype enum some_" "ptype enum some_enum"
-gdb_test "complete ptype union some_" "ptype union some_union"
-
-
-gdb_test "complete set gnutarget aut" "set gnutarget auto"
-
-
-gdb_test "complete set cp-abi aut" "set cp-abi auto"
-
-# Test that completion of commands 'target FOO' works well.
-set targets [list "core" "tfile" "exec"]
-
-# Test that completion of command 'target ctf' if GDB supports ctf
-# target.
-gdb_test_multiple "target ctf" "" {
-    -re "Undefined target command: \"ctf\"\.  Try \"help target\"\.\r\n$gdb_prompt $" {
-    }
-    -re "No CTF directory specified.*\r\n$gdb_prompt $" {
-	lappend targets "ctf"
-    }
-}
-
-foreach target_name ${targets} {
-    gdb_test "complete target ${target_name} ./gdb.base/completion" \
-	"target ${target_name} ./gdb.base/completion\\.exp.*"
-}
-
-#
-# "set foo unlimited" completion.
-#
-
-# A var_uinteger command.
-gdb_test "complete set height " "set height unlimited"
-gdb_test "complete set height u" "set height unlimited"
-
-# A var_integer command.
-gdb_test "complete set listsize " "set listsize unlimited"
-gdb_test "complete set listsize unl" "set listsize unlimited"
-
-# A var_zuinteger_unlimited command.
-gdb_test "complete set trace-buffer-size " "set trace-buffer-size unlimited"
-gdb_test "complete set trace-buffer-size unl" "set trace-buffer-size unlimited"
 
 # Restore globals modified in this test...
 set timeout $oldtimeout1

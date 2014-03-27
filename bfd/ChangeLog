@@ -1,3 +1,55 @@
+2014-03-27  Yury Gribov  <y.gribov@samsung.com>
+    	    Pavel Fedin  <p.fedin@samsung.com>
+
+    	* elf32-arm.c: Add support for limited pretty-printing of PLT
+	entries on eabi and nacl targets.
+	(elf32_arm_get_synthetic_symtab): Add new callback.
+    	(elf32_arm_nacl_plt_sym_val): Likewise.
+    	(elf32_arm_plt0_size): Add helper function.
+    	(elf32_arm_plt_size): Likewise.
+
+2014-03-27  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_read_dylinker): Remove assert.
+	(bfd_mach_o_read_command): Handle BFD_MACH_O_LC_DYLD_ENVIRONMENT.
+
+2014-03-27  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (bfd_mach_o_get_base_address): New prototype.
+	* mach-o.c (bfd_mach_o_write_symtab)
+	(bfd_mach_o_write_contents)
+	(bfd_mach_o_set_section_flags_from_bfd)
+	(bfd_mach_o_build_seg_command): Fix indentation.
+	(bfd_mach_o_get_base_address): New function.
+
+2014-03-26  Nick Clifton  <nickc@redhat.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Skip
+	relocations in discarded sections.
+
+2014-03-26  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_convert_architecture): Add
+	BFD_MACH_O_CPU_TYPE_ARM64.
+
+2014-03-26  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_check_relocs): Account for possibly
+	needed plt entries when taking the address of functions for
+	abiversion == 0 (ie. unknown) as well as abiversion == 2.
+	Move opd setup and abiversion checks to..
+	(ppc64_elf_before_check_relocs): ..here.  Renamed from
+	ppc64_elf_process_dot_syms.  Set output abiversion from input and
+	input abiversion from output, if either is not set.
+	(ppc64_elf_merge_private_bfd_data): Don't merge flags here.
+	(elf_backend_check_directives): Update.
+
+2014-03-25  Will Newton  <will.newton@linaro.org>
+
+	 * elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_sections):
+	 Set value of DT_PLTRELSZ and DT_RELASZ based on the size
+	 of input sections rather than output sections.
+
 2014-03-20  Will Newton  <will.newton@linaro.org>
 
 	PR ld/16715
