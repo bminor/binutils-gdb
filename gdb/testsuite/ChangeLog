@@ -1,3 +1,7 @@
+2014-03-27  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-abs-hi-pc.exp: Build tests with "nodebug".
+
 2014-03-27  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (can_single_step_to_signal_handler): Return zero
