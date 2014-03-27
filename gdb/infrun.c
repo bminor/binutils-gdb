@@ -88,8 +88,6 @@ static int currently_stepping (struct thread_info *tp);
 
 static void xdb_handle_command (char *args, int from_tty);
 
-static void end_stepping_range (void);
-
 void _initialize_infrun (void);
 
 void nullify_last_target_wait_ptid (void);
@@ -2500,6 +2498,7 @@ static void handle_signal_stop (struct execution_control_state *ecs);
 static void check_exception_resume (struct execution_control_state *,
 				    struct frame_info *);
 
+static void end_stepping_range (struct execution_control_state *ecs);
 static void stop_waiting (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
@@ -4462,9 +4461,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	   exists.  */
 	delete_step_resume_breakpoint (ecs->event_thread);
 
-	ecs->event_thread->control.stop_step = 1;
-	end_stepping_range ();
-	stop_waiting (ecs);
+	end_stepping_range (ecs);
       }
       return;
 
@@ -4626,11 +4623,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (stop_pc == ecs->event_thread->control.step_range_start
 	  && stop_pc != ecs->stop_func_start
 	  && execution_direction == EXEC_REVERSE)
-	{
-	  ecs->event_thread->control.stop_step = 1;
-	  end_stepping_range ();
-	  stop_waiting (ecs);
-	}
+	end_stepping_range (ecs);
       else
 	keep_going (ecs);
 
@@ -4781,9 +4774,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	     thought it was a subroutine call but it was not.  Stop as
 	     well.  FENN */
 	  /* And this works the same backward as frontward.  MVS */
-	  ecs->event_thread->control.stop_step = 1;
-	  end_stepping_range ();
-	  stop_waiting (ecs);
+	  end_stepping_range (ecs);
 	  return;
 	}
 
@@ -4897,9 +4888,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (ecs->event_thread->control.step_over_calls == STEP_OVER_UNDEBUGGABLE
 	  && step_stop_if_no_debug)
 	{
-	  ecs->event_thread->control.stop_step = 1;
-	  end_stepping_range ();
-	  stop_waiting (ecs);
+	  end_stepping_range (ecs);
 	  return;
 	}
 
@@ -4993,9 +4982,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  /* If we have no line number and the step-stop-if-no-debug
 	     is set, we stop the step so that the user has a chance to
 	     switch in assembly mode.  */
-	  ecs->event_thread->control.stop_step = 1;
-	  end_stepping_range ();
-	  stop_waiting (ecs);
+	  end_stepping_range (ecs);
 	  return;
 	}
       else
@@ -5014,9 +5001,7 @@ process_event_stop_test (struct execution_control_state *ecs)
          one instruction.  */
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepi/nexti\n");
-      ecs->event_thread->control.stop_step = 1;
-      end_stepping_range ();
-      stop_waiting (ecs);
+      end_stepping_range (ecs);
       return;
     }
 
@@ -5028,9 +5013,7 @@ process_event_stop_test (struct execution_control_state *ecs)
          or can this happen as a result of a return or longjmp?).  */
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: no line number info\n");
-      ecs->event_thread->control.stop_step = 1;
-      end_stepping_range ();
-      stop_waiting (ecs);
+      end_stepping_range (ecs);
       return;
     }
 
@@ -5061,9 +5044,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	      && call_sal.symtab == ecs->event_thread->current_symtab)
 	    step_into_inline_frame (ecs->ptid);
 
-	  ecs->event_thread->control.stop_step = 1;
-	  end_stepping_range ();
-	  stop_waiting (ecs);
+	  end_stepping_range (ecs);
 	  return;
 	}
       else
@@ -5075,11 +5056,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	      && call_sal.symtab == ecs->event_thread->current_symtab)
 	    keep_going (ecs);
 	  else
-	    {
-	      ecs->event_thread->control.stop_step = 1;
-	      end_stepping_range ();
-	      stop_waiting (ecs);
-	    }
+	    end_stepping_range (ecs);
 	  return;
 	}
     }
@@ -5102,11 +5079,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (ecs->event_thread->control.step_over_calls == STEP_OVER_ALL)
 	keep_going (ecs);
       else
-	{
-	  ecs->event_thread->control.stop_step = 1;
-	  end_stepping_range ();
-	  stop_waiting (ecs);
-	}
+	end_stepping_range (ecs);
       return;
     }
 
@@ -5121,9 +5094,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog,
 			     "infrun: stepped to a different line\n");
-      ecs->event_thread->control.stop_step = 1;
-      end_stepping_range ();
-      stop_waiting (ecs);
+      end_stepping_range (ecs);
       return;
     }
 
@@ -5447,9 +5418,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
   if (ecs->stop_func_start == stop_pc)
     {
       /* We are already there: stop now.  */
-      ecs->event_thread->control.stop_step = 1;
-      end_stepping_range ();
-      stop_waiting (ecs);
+      end_stepping_range (ecs);
       return;
     }
   else
@@ -5496,9 +5465,7 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
   if (stop_func_sal.pc == stop_pc)
     {
       /* We're there already.  Just stop stepping now.  */
-      ecs->event_thread->control.stop_step = 1;
-      end_stepping_range ();
-      stop_waiting (ecs);
+      end_stepping_range (ecs);
     }
   else
     {
@@ -5902,13 +5869,12 @@ prepare_to_wait (struct execution_control_state *ecs)
    if not in the middle of doing a "step N" operation for N > 1.  */
 
 static void
-end_stepping_range (void)
+end_stepping_range (struct execution_control_state *ecs)
 {
-  if (inferior_thread ()->step_multi
-      && inferior_thread ()->control.stop_step)
-    return;
-
-  observer_notify_end_stepping_range ();
+  ecs->event_thread->control.stop_step = 1;
+  if (!ecs->event_thread->step_multi)
+    observer_notify_end_stepping_range ();
+  stop_waiting (ecs);
 }
 
 /* Several print_*_reason functions to print why the inferior has stopped.

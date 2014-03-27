@@ -1,5 +1,13 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (process_event_stop_test, handle_step_into_function)
+	(handle_step_into_function_backward): Adjust.
+	Don't set the even thread's stop_step and call stop_waiting before
+	calling end_stepping_range.  Instead do that ...
+	(end_stepping_range): ... here.  Take an ecs pointer parameter.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (stop_stepping): Rename to ...
 	(stop_waiting): ... this.
 	(proceed): Update comment.
