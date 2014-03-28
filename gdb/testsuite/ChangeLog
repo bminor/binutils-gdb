@@ -1,3 +1,9 @@
+2014-04-01  Anton Blanchard  <anton@samba.org>
+
+	* gdb.arch/ppc64-atomic-inst.c: Remove.
+	* gdb.arch/ppc64-atomic-inst.S: New file.
+	* gdb.arch/ppc64-atomic-inst.exp: Adapt for asm based testcase.
+
 2014-03-31  Doug Evans  <dje@google.com>
 
 	* gdb.base/print-symbol-loading-lib.c: New file.

@@ -27,7 +27,7 @@ if {![istarget "powerpc*"] || ![is_lp64_target]} {
 }
 
 set testfile "ppc64-atomic-inst"
-set srcfile ${testfile}.c
+set srcfile ${testfile}.S
 set binfile ${objdir}/${subdir}/${testfile}
 set compile_flags {debug quiet}
 
@@ -50,11 +50,18 @@ set bp1 [gdb_get_line_number "lwarx"]
 gdb_breakpoint "$bp1" "Breakpoint $decimal at $hex" \
   "Set the breakpoint at the start of the sequence"
 
+set bp2 [gdb_get_line_number "ldarx"]
+gdb_breakpoint "$bp2" "Breakpoint $decimal at $hex" \
+  "Set the breakpoint at the start of the sequence"
+
 gdb_test continue "Continuing.*Breakpoint $decimal.*" \
   "Continue until breakpoint"
 
-gdb_test next ".*__asm __volatile.*" \
+gdb_test nexti "bne.*1b" \
   "Step through the lwarx/stwcx sequence"
 
-gdb_test next ".*return 0.*" \
-  "Step through the ldarx/stdcx sequence"
+gdb_test continue "Continuing.*Breakpoint $decimal.*" \
+  "Continue until breakpoint"
+
+gdb_test nexti "bne.*1b" \
+  "Step through the lwarx/stwcx sequence"
