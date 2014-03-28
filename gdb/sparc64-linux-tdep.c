@@ -139,7 +139,7 @@ sparc64_linux_step_trap (struct frame_info *frame, unsigned long insn)
 }
 
 
-const struct sparc_gregset sparc64_linux_core_gregset =
+const struct sparc_gregmap sparc64_linux_core_gregmap =
 {
   32 * 8,			/* %tstate */
   33 * 8,			/* %tpc */
@@ -158,7 +158,7 @@ sparc64_linux_supply_core_gregset (const struct regset *regset,
 				   struct regcache *regcache,
 				   int regnum, const void *gregs, size_t len)
 {
-  sparc64_supply_gregset (&sparc64_linux_core_gregset,
+  sparc64_supply_gregset (&sparc64_linux_core_gregmap,
 			  regcache, regnum, gregs);
 }
 
@@ -167,7 +167,7 @@ sparc64_linux_collect_core_gregset (const struct regset *regset,
 				    const struct regcache *regcache,
 				    int regnum, void *gregs, size_t len)
 {
-  sparc64_collect_gregset (&sparc64_linux_core_gregset,
+  sparc64_collect_gregset (&sparc64_linux_core_gregmap,
 			   regcache, regnum, gregs);
 }
 
@@ -176,7 +176,7 @@ sparc64_linux_supply_core_fpregset (const struct regset *regset,
 				    struct regcache *regcache,
 				    int regnum, const void *fpregs, size_t len)
 {
-  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 static void
@@ -184,7 +184,7 @@ sparc64_linux_collect_core_fpregset (const struct regset *regset,
 				     const struct regcache *regcache,
 				     int regnum, void *fpregs, size_t len)
 {
-  sparc64_collect_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
+  sparc64_collect_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 /* Set the program counter for process PTID to PC.  */

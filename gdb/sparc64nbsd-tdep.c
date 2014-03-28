@@ -37,7 +37,7 @@
 #include "nbsd-tdep.h"
 
 /* From <machine/reg.h>.  */
-const struct sparc_gregset sparc64nbsd_gregset =
+const struct sparc_gregmap sparc64nbsd_gregmap =
 {
   0 * 8,			/* "tstate" */
   1 * 8,			/* %pc */
@@ -56,7 +56,7 @@ sparc64nbsd_supply_gregset (const struct regset *regset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
-  sparc64_supply_gregset (&sparc64nbsd_gregset, regcache, regnum, gregs);
+  sparc64_supply_gregset (&sparc64nbsd_gregmap, regcache, regnum, gregs);
 }
 
 static void
@@ -64,7 +64,7 @@ sparc64nbsd_supply_fpregset (const struct regset *regset,
 			     struct regcache *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
-  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 

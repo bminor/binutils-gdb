@@ -36,7 +36,7 @@
 #include "solib-svr4.h"
 
 /* From <sys/regset.h>.  */
-const struct sparc_gregset sparc32_sol2_gregset =
+const struct sparc_gregmap sparc32_sol2_gregmap =
 {
   32 * 4,			/* %psr */
   33 * 4,			/* %pc */
@@ -48,7 +48,7 @@ const struct sparc_gregset sparc32_sol2_gregset =
   16 * 4,			/* %l0 */
 };
 
-const struct sparc_fpregset sparc32_sol2_fpregset =
+const struct sparc_fpregmap sparc32_sol2_fpregmap =
 {
   0 * 4,			/* %f0 */
   33 * 4,			/* %fsr */

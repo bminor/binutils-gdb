@@ -120,8 +120,8 @@ _initialize_sparc64obsd_nat (void)
   sparc_gregset_supplies_p = sparc64obsd_gregset_supplies_p;
   sparc_fpregset_supplies_p = sparc64obsd_fpregset_supplies_p;
 
-  sparc_gregset = &sparc64nbsd_gregset;
-  sparc_fpregset = &sparc64_bsd_fpregset;
+  sparc_gregmap = &sparc64nbsd_gregmap;
+  sparc_fpregmap = &sparc64_bsd_fpregmap;
 
   /* Add some extra features to the generic SPARC target.  */
   obsd_add_target (sparc_target ());

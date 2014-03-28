@@ -46,7 +46,7 @@
    match the ptrace(2) layout.  */
 
 /* From <machine/reg.h>.  */
-const struct sparc_gregset sparc64obsd_gregset =
+const struct sparc_gregmap sparc64obsd_gregmap =
 {
   0 * 8,			/* "tstate" */
   1 * 8,			/* %pc */
@@ -59,7 +59,7 @@ const struct sparc_gregset sparc64obsd_gregset =
   4				/* sizeof (%y) */
 };
 
-const struct sparc_gregset sparc64obsd_core_gregset =
+const struct sparc_gregmap sparc64obsd_core_gregmap =
 {
   0 * 8,			/* "tstate" */
   1 * 8,			/* %pc */
@@ -81,12 +81,12 @@ sparc64obsd_supply_gregset (const struct regset *regset,
 
   if (len < 832)
     {
-      sparc64_supply_gregset (&sparc64obsd_gregset, regcache, regnum, gregs);
+      sparc64_supply_gregset (&sparc64obsd_gregmap, regcache, regnum, gregs);
       return;
     }
 
-  sparc64_supply_gregset (&sparc64obsd_core_gregset, regcache, regnum, gregs);
-  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
+  sparc64_supply_gregset (&sparc64obsd_core_gregmap, regcache, regnum, gregs);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 static void
@@ -94,7 +94,7 @@ sparc64obsd_supply_fpregset (const struct regset *regset,
 			     struct regcache *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
-  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 

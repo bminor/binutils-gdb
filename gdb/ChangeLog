@@ -1,5 +1,101 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* sparc-linux-nat.c (supply_gregset, supply_fpregset)
+	(fill_gregset, fill_fpregset, _initialize_sparc_linux_nat): Rename
+	register maps ("regmaps") from "*regset" to "*regmap".  Do this
+	for all regmap types and variables.
+	* sparc-linux-tdep.c (sparc32_linux_step_trap)
+	(sparc32_linux_supply_core_gregset)
+	(sparc32_linux_collect_core_gregset)
+	(sparc32_linux_supply_core_fpregset)
+	(sparc32_linux_collect_core_fpregset): Likewise.
+	* sparc-nat.c (sparc_gregset, sparc_fpregset): Rename to...
+	(sparc_gregmap, sparc_fpregmap): ... these.
+	(sparc_supply_gregset, sparc_collect_gregset)
+	(sparc_supply_fpregset, sparc_collect_fpregset): Likewise.
+	(sparc_fetch_inferior_registers, sparc_store_inferior_registers)
+	(_initialize_sparc_nat): Rename regmaps.
+	* sparc-nat.h (sparc_gregset, sparc_fpregset): Rename to...
+	(sparc_gregmap, sparc_fpregmap): ... these.
+	(sparc_supply_gregset, sparc_collect_gregset)
+	(sparc_supply_fpregset, sparc_collect_fpregset): Likewise.
+	* sparc-sol2-nat.c (sparc_sol2_gregset, sparc_sol2_fpregset):
+	Rename macros to...
+	(sparc_sol2_gregmap, sparc_sol2_fpregmap): ... these.
+	(supply_gregset, supply_fpregset, fill_gregset, fill_fpregset):
+	Likewise.
+	* sparc-sol2-tdep.c (sparc32_sol2_gregset, sparc32_sol2_fpregset):
+	Rename to...
+	(sparc32_sol2_gregmap, sparc32_sol2_fpregmap): ... these.
+	* sparc-tdep.c (sparc32_supply_gregset, sparc32_collect_gregset)
+	(sparc32_supply_fpregset, sparc32_collect_fpregset): Rename
+	regmaps.
+	(sparc32_sunos4_gregset, sparc32_sunos4_fpregset)
+	(sparc32_bsd_fpregset): Rename to...
+	(sparc32_sunos4_gregmap, sparc32_sunos4_fpregmap)
+	(sparc32_bsd_fpregmap): ... these.
+	* sparc-tdep.h (struct sparc_gregset, struct sparc_fpregset)
+	(sparc32_sunos4_gregset, sparc32_sunos4_fpregset)
+	(sparc32_bsd_fpregset, sparc32_sol2_gregset)
+	(sparc32_sol2_fpregset, sparc32nbsd_gregset): Rename to...
+	(struct sparc_gregmap, struct sparc_fpregmap)
+	(sparc32_sunos4_gregmap, sparc32_sunos4_fpregmap)
+	(sparc32_bsd_fpregmap, sparc32_sol2_gregmap)
+	(sparc32_sol2_fpregmap, sparc32nbsd_gregmap): ... these.
+	(sparc32_supply_regset, sparc32_collect_gregset)
+	(sparc32_supply_fpregset, sparc32_collect_fpregset): Adjust
+	prototypes.
+	* sparc64-linux-nat.c (sparc64_linux_ptrace_gregset): Rename to...
+	(sparc64_linux_ptrace_gregmap): ... this.
+	(supply_gregset, supply_fpregset, fill_gregset, fill_fpregset)
+	(_initialize_sparc64_linux_nat): Rename regmaps.
+	* sparc64-linux-tdep.c (sparc64_linux_core_gregset): Rename to...
+	(sparc64_linux_core_gregmap): ... this.
+	(sparc64_linux_supply_core_gregset)
+	(sparc64_linux_collect_core_gregset)
+	(sparc64_linux_supply_core_fpregset)
+	(sparc64_linux_collect_core_fpregset): Rename regmaps.
+	* sparc64-sol2-tdep.c (sparc64_sol2_gregset)
+	(sparc64_sol2_fpregset): Rename to...
+	(sparc64_sol2_gregmap, sparc64_sol2_fpregmap): ... these.
+	* sparc64-tdep.c (sparc64_supply_gregset, sparc64_collect_gregset)
+	(sparc64_supply_fpregset, sparc64_collect_fpregset): Rename
+	regmaps.
+	* sparc64-tdep.h (struct sparc_gregset, sparc64_sol2_gregset)
+	(sparc64_sol2_fpregset, sparc64fbsd_gregset, sparc64nbsd_gregset)
+	(sparc64_bsd_fpregset): Rename to...
+	(struct sparc_gregmap, sparc64_sol2_gregmap)
+	(sparc64_sol2_fpregmap, sparc64fbsd_gregmap, sparc64nbsd_gregmap)
+	(sparc64_bsd_fpregmap): ... these.
+	(sparc64_supply_gregset, sparc64_collect_gregset)
+	(sparc64_supply_fpregset, sparc64_collect_fpregset): Adjust
+	prototypes.
+	* sparc64fbsd-nat.c (_initialize_sparc64fbsd_nat): Rename regmaps.
+	* sparc64fbsd-tdep.c (sparc64fbsd_gregset): Rename to...
+	(sparc64fbsd_gregmap): ... this.
+	(sparc64fbsd_supply_gregset, sparc64fbsd_collect_gregset)
+	(sparc64fbsd_supply_fpregset, sparc64fbsd_collect_fpregset):
+	Rename regmaps.
+	* sparc64nbsd-nat.c (sparc64nbsd_supply_gregset)
+	(sparc64nbsd_collect_gregset, sparc64nbsd_supply_fpregset)
+	(sparc64nbsd_collect_fpregset): Likewise.
+	* sparc64nbsd-tdep.c (sparc64nbsd_gregset): Rename to...
+	(sparc64nbsd_gregmap): ... this.
+	(sparc64nbsd_supply_gregset, sparc64nbsd_supply_fpregset): Rename
+	regmaps.
+	* sparc64obsd-nat.c (_initialize_sparc64obsd_nat): Likewise.
+	* sparc64obsd-tdep.c (sparc64obsd_gregset): Rename to...
+	(sparc64obsd_gregmap): ... this.
+	(sparc64obsd_supply_gregset, sparc64obsd_supply_fpregset): Rename
+	regmaps.
+	* sparcnbsd-nat.c (_initialize_sparcnbsd_nat): Likewise.
+	* sparcnbsd-tdep.c (sparc32nbsd_gregset): Rename to...
+	(sparc32nbsd_gregmap): ... this.
+	(sparc32nbsd_supply_gregset, sparc32nbsd_supply_fpregset): Rename
+	regmaps.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* score-tdep.c (score7_linux_gregset): New static regset
 	structure.
 	(score7_linux_regset_from_core_section): Remove dynamic regset
