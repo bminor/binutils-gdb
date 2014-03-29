@@ -1371,15 +1371,14 @@ static const struct regset hppa_hpux_regset =
   hppa_hpux_supply_save_state
 };
 
-static const struct regset *
-hppa_hpux_regset_from_core_section (struct gdbarch *gdbarch,
-				    const char *sect_name, size_t sect_size)
+static void
+hppa_hpux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					iterate_over_regset_sections_cb *cb,
+					void *cb_data,
+					const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size >= HPPA_HPUX_PA89_SAVE_STATE_SIZE + 8)
-    return &hppa_hpux_regset;
-
-  return NULL;
+  cb (".reg", HPPA_HPUX_PA89_SAVE_STATE_SIZE + 8, &hppa_hpux_regset,
+      NULL, cb_data);
 }
 
 
@@ -1495,8 +1494,8 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_permanent_breakpoint
     (gdbarch, hppa_skip_permanent_breakpoint);
 
-  set_gdbarch_regset_from_core_section
-    (gdbarch, hppa_hpux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, hppa_hpux_iterate_over_regset_sections);
 
   frame_unwind_append_unwinder (gdbarch, &hppa_hpux_sigtramp_frame_unwind);
 }

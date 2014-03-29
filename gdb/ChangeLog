@@ -1,5 +1,20 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* hppa-hpux-tdep.c (hppa_hpux_regset_from_core_section): Remove.
+	(hppa_hpux_iterate_over_regset_sections): New.
+	(hppa_hpux_init_abi): Adjust gdbarch initialization.
+	* hppa-linux-tdep.c (hppa_linux_regset_from_core_section): Remove.
+	(hppa_linux_iterate_over_regset_sections): New.
+	(hppa_linux_init_abi): Adjust.
+	* hppanbsd-tdep.c (hppaobsd_regset_from_core_section): Remove.
+	(hppanbsd_iterate_over_regset_sections): New.
+	(hppanbsd_init_abi): Adjust.
+	* hppaobsd-tdep.c (hppaobsd_regset_from_core_section): Remove.
+	(hppaobsd_iterate_over_regset_sections): New.
+	(hppaobsd_init_abi): Adjust.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* frv-linux-tdep.c (frv_linux_regset_from_core_section): Remove.
 	(frv_linux_iterate_over_regset_sections): New.
 	(frv_linux_init_abi): Adjust gdbarch initialization.
