@@ -201,20 +201,14 @@ static const struct regset ia64_linux_fpregset =
     ia64_linux_supply_fpregset, regcache_collect_regset
   };
 
-static const struct regset *
-ia64_linux_regset_from_core_section (struct gdbarch *gdbarch,
-				     const char *sect_name,
-				     size_t sect_size)
+static void
+ia64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					 iterate_over_regset_sections_cb *cb,
+					 void *cb_data,
+					 const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size >= IA64_LINUX_GREGS_SIZE)
-    return &ia64_linux_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0
-      && sect_size >= IA64_LINUX_FPREGS_SIZE)
-    return &ia64_linux_fpregset;
-
-  return NULL;
+  cb (".reg", IA64_LINUX_GREGS_SIZE, &ia64_linux_gregset, NULL, cb_data);
+  cb (".reg2", IA64_LINUX_FPREGS_SIZE, &ia64_linux_fpregset, NULL, cb_data);
 }
 
 static void
@@ -248,8 +242,8 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 
   /* Core file support. */
-  set_gdbarch_regset_from_core_section (gdbarch,
-					ia64_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, ia64_linux_iterate_over_regset_sections);
 
   /* SystemTap related.  */
   set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);

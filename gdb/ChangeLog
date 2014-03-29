@@ -1,5 +1,11 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* ia64-linux-tdep.c (ia64_linux_regset_from_core_section): Remove.
+	(ia64_linux_iterate_over_regset_sections): New.
+	(ia64_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* m68kbsd-tdep.c (m68kbsd_regset_from_core_section): Remove.
 	(m68kbsd_iterate_over_regset_sections): New.
 	(m68kbsd_init_abi): Adjust gdbarch initialization.
