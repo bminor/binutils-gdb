@@ -1,5 +1,33 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* amd64obsd-tdep.c (amd64obsd_regset_from_core_section): Remove.
+	(amd64obsd_iterate_over_regset_sections): New.
+	(amd64obsd_core_init_abi): Adjust gdbarch initialization.
+	* i386-cygwin-tdep.c (i386_windows_regset_from_core_section):
+	Remove.
+	(i386_cygwin_init_abi): Clear tdep->sizeof_fpregset.  Drop
+	regset_from_core_section initialization.
+	* i386-tdep.c (i386_regset_from_core_section): Remove.
+	(i386_iterate_over_regset_sections): New.
+	(i386_gdbarch_init): Adjust gdbarch initialization.
+	* i386-tdep.h (i386_regset_from_core_section): Remove prototype.
+	(i386_iterate_over_regset_sections): New prototype.
+	* i386obsd-tdep.c (i386obsd_aout_regset_from_core_section):
+	Remove.
+	(i386obsd_aout_iterate_over_regset_sections): New.
+	(i386obsd_aout_init_abi): Adjust gdbarch initialization.
+	* configure.tgt (gdb_target_obs): Add fbsd-tdep.o for all x86 FreeBSD
+	targets.
+	* amd64fbsd-tdep.c (fbsd-tdep.h): Include.
+	(amd64fbsd_init_abi): Call fbsd_init_abi.
+	* i386fbsd-tdep.c (fbsd-tdep.h): Include.
+	(i386fbsd4_init_abi): Call fbsd_init_abi.
+	* amd64fbsd-nat.c (_initialize_amd64fbsd_nat): No longer set
+	target method 'make_corefile_notes'.
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Likewise.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* hppa-hpux-tdep.c (hppa_hpux_regset_from_core_section): Remove.
 	(hppa_hpux_iterate_over_regset_sections): New.
 	(hppa_hpux_init_abi): Adjust gdbarch initialization.

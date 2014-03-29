@@ -393,12 +393,12 @@ extern const struct regset i386_gregset;
 /* Floating-point register set. */
 extern const struct regset i386_fpregset;
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
-extern const struct regset *
-  i386_regset_from_core_section (struct gdbarch *gdbarch,
-				 const char *sect_name, size_t sect_size);
-
+/* Default iterator over core file register note sections.  */
+extern void
+  i386_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				     iterate_over_regset_sections_cb *cb,
+				     void *cb_data,
+				     const struct regcache *regcache);
 
 extern struct displaced_step_closure *i386_displaced_step_copy_insn
   (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,

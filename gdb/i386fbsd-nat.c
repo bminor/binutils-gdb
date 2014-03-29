@@ -143,7 +143,6 @@ _initialize_i386fbsd_nat (void)
   t->to_resume = i386fbsd_resume;
   t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
   t->to_find_memory_regions = fbsd_find_memory_regions;
-  t->to_make_corefile_notes = fbsd_make_corefile_notes;
   add_target (t);
 
   /* Support debugging kernel virtual memory images.  */

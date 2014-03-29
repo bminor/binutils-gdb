@@ -3818,22 +3818,19 @@ const struct regset i386_fpregset =
     NULL, i386_supply_fpregset, i386_collect_fpregset
   };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Default iterator over core file register note sections.  */
 
-const struct regset *
-i386_regset_from_core_section (struct gdbarch *gdbarch,
-			       const char *sect_name, size_t sect_size)
+void
+i386_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				   iterate_over_regset_sections_cb *cb,
+				   void *cb_data,
+				   const struct regcache *regcache)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
-    return &i386_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
-    return tdep->fpregset;
-
-  return NULL;
+  cb (".reg", tdep->sizeof_gregset, &i386_gregset, NULL, cb_data);
+  if (tdep->sizeof_fpregset)
+    cb (".reg2", tdep->sizeof_fpregset, tdep->fpregset, NULL, cb_data);
 }
 
 
@@ -8566,10 +8563,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* If we have a register mapping, enable the generic core file
      support, unless it has already been enabled.  */
   if (tdep->gregset_reg_offset
-      && !gdbarch_regset_from_core_section_p (gdbarch)
       && !gdbarch_iterate_over_regset_sections_p (gdbarch))
-    set_gdbarch_regset_from_core_section (gdbarch,
-					  i386_regset_from_core_section);
+    set_gdbarch_iterate_over_regset_sections
+      (gdbarch, i386_iterate_over_regset_sections);
 
   set_gdbarch_skip_permanent_breakpoint (gdbarch,
 					 i386_skip_permanent_breakpoint);
