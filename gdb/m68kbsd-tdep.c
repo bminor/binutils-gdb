@@ -114,20 +114,16 @@ static const struct regset m68kbsd_fpregset =
   m68kbsd_supply_fpregset
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-m68kbsd_regset_from_core_section (struct gdbarch *gdbarch,
-				  const char *sect_name, size_t sect_size)
+static void
+m68kbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				      iterate_over_regset_sections_cb *cb,
+				      void *cb_data,
+				      const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= M68KBSD_SIZEOF_GREGS)
-    return &m68kbsd_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= M68KBSD_SIZEOF_FPREGS)
-    return &m68kbsd_fpregset;
-
-  return NULL;
+  cb (".reg", M68KBSD_SIZEOF_GREGS, &m68kbsd_gregset, NULL, cb_data);
+  cb (".reg2", M68KBSD_SIZEOF_FPREGS, &m68kbsd_fpregset, NULL, cb_data);
 }
 
 
@@ -195,8 +191,8 @@ m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
-  set_gdbarch_regset_from_core_section
-    (gdbarch, m68kbsd_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, m68kbsd_iterate_over_regset_sections);
 }
 
 /* OpenBSD and NetBSD a.out.  */
