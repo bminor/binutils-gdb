@@ -107,18 +107,14 @@ static const struct regset armbsd_fpregset =
   armbsd_supply_fpregset
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over supported core file register note sections. */
 
-const struct regset *
-armbsd_regset_from_core_section (struct gdbarch *gdbarch,
-				 const char *sect_name, size_t sect_size)
+void
+armbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				     iterate_over_regset_sections_cb *cb,
+				     void *cb_data,
+				     const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= ARMBSD_SIZEOF_GREGS)
-    return &armbsd_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= ARMBSD_SIZEOF_FPREGS)
-    return &armbsd_fpregset;
-
-  return NULL;
+  cb (".reg", ARMBSD_SIZEOF_GREGS, &armbsd_gregset, NULL, cb_data);
+  cb (".reg2", ARMBSD_SIZEOF_FPREGS, &armbsd_fpregset, NULL, cb_data);
 }

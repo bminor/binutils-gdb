@@ -1,5 +1,14 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* arm-tdep.h (armbsd_regset_from_core_section): Remove prototype.
+	(armbsd_iterate_over_regset_sections): New prototype.
+	* armbsd-tdep.c (armbsd_regset_from_core_section): Remove.
+	(armbsd_iterate_over_regset_sections): New.
+	* armobsd-tdep.c (armobsd_init_abi): Adjust gdbarch
+	initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* alpha-linux-tdep.c (alpha_linux_regset_from_core_section): Remove.
 	(alpha_linux_iterate_over_regset_sections): New.
 	(alpha_linux_init_abi): Adjust gdbarch initialization.

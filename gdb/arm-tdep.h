@@ -341,9 +341,11 @@ extern int arm_process_record (struct gdbarch *gdbarch,
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
-extern const struct regset *
-  armbsd_regset_from_core_section (struct gdbarch *gdbarch,
-				   const char *sect_name, size_t sect_size);
+extern void
+  armbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				       iterate_over_regset_sections_cb *cb,
+				       void *cb_data,
+				       const struct regcache *regcache);
 
 /* Target descriptions.  */
 extern struct target_desc *tdesc_arm_with_m;
