@@ -1,12 +1,3 @@
-2014-03-29  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
-
-	* config/tc-avr.c: Add specified_mcu variable for selected mcu.
-	(enum options): add OPTION_RMW_ISA for -mrmw option.
-	(struct option md_longopts): Add mrmw option.
-	(md_show_usage): add -mrmw option description.
-	(md_parse_option): Update isa details if -mrmw option specified.
-	* doc/c-avr.texi: Add doc for new option -mrmw.
-
 2014-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-score.c (s3_parse_pce_inst): Add "%s" parameter to

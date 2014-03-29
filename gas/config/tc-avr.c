@@ -326,10 +326,8 @@ static struct mcu_type_s mcu_types[] =
   {NULL, 0, 0}
 };
 
-
 /* Current MCU type.  */
 static struct mcu_type_s   default_mcu = {"avr2", AVR_ISA_AVR2, bfd_mach_avr2};
-static struct mcu_type_s   specified_mcu;
 static struct mcu_type_s * avr_mcu = & default_mcu;
 
 /* AVR target-specific switches.  */
@@ -400,8 +398,7 @@ enum options
 {
   OPTION_ALL_OPCODES = OPTION_MD_BASE + 1,
   OPTION_NO_SKIP_BUG,
-  OPTION_NO_WRAP,
-  OPTION_RMW_ISA
+  OPTION_NO_WRAP
 };
 
 struct option md_longopts[] =
@@ -410,7 +407,6 @@ struct option md_longopts[] =
   { "mall-opcodes", no_argument, NULL, OPTION_ALL_OPCODES },
   { "mno-skip-bug", no_argument, NULL, OPTION_NO_SKIP_BUG },
   { "mno-wrap",     no_argument, NULL, OPTION_NO_WRAP     },
-  { "mrmw",         no_argument, NULL, OPTION_RMW_ISA     },
   { NULL, no_argument, NULL, 0 }
 };
 
@@ -515,9 +511,7 @@ md_show_usage (FILE *stream)
 	"  -mno-skip-bug    disable warnings for skipping two-word instructions\n"
 	"                   (default for avr4, avr5)\n"
 	"  -mno-wrap        reject rjmp/rcall instructions with 8K wrap-around\n"
-	"                   (default for avr3, avr5)\n"
-    "  -mrmw            accept RMW instructions\n"
-    ));
+	"                   (default for avr3, avr5)\n"));
   show_mcu_list (stream);
 }
 
@@ -564,12 +558,7 @@ md_parse_option (int c, char *arg)
 	   type - this for allows passing -mmcu=... via gcc ASM_SPEC as well
 	   as .arch ... in the asm output at the same time.  */
 	if (avr_mcu == &default_mcu || avr_mcu->mach == mcu_types[i].mach)
-      {
-        specified_mcu.name = mcu_types[i].name;
-        specified_mcu.isa  |= mcu_types[i].isa;
-        specified_mcu.mach = mcu_types[i].mach;
-        avr_mcu = &specified_mcu;
-      }
+	  avr_mcu = &mcu_types[i];
 	else
 	  as_fatal (_("redefinition of mcu type `%s' to `%s'"),
 		    avr_mcu->name, mcu_types[i].name);
@@ -583,9 +572,6 @@ md_parse_option (int c, char *arg)
       return 1;
     case OPTION_NO_WRAP:
       avr_opt.no_wrap = 1;
-      return 1;
-    case OPTION_RMW_ISA:
-      specified_mcu.isa |= AVR_ISA_RMW;
       return 1;
     }
 

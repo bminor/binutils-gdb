@@ -1,9 +1,3 @@
-2014-03-29  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
-
-	* gas/avr/avr.exp: Run new tests.
-	* gas/avr/rmw.d: Add test for additional ISA support.
-	* gas/avr/rmw.s: Ditto.
-
 2014-03-21  David Weatherford <weath@cadence.com>
             Max Filippov <jcmvbkbc@gmail.com>
 
