@@ -1,5 +1,10 @@
 2014-03-30  Doug Evans  <xdje42@gmail.com>
 
+	* infrun.c (set_last_target_status): New function.
+	(handle_inferior_event): Call it.
+
+2014-03-30  Doug Evans  <xdje42@gmail.com>
+
 	* inferior.h (enum stop_kind): Improve comment.
 
 2014-03-28  Joel Brobecker  <brobecker@adacore.com>
