@@ -1,3 +1,7 @@
+2014-03-30  Doug Evans  <xdje42@gmail.com>
+
+	* inferior.h (enum stop_kind): Improve comment.
+
 2014-03-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* varobj.c (varobj_value_has_mutated): If NEW_VALUE is
