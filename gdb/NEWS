@@ -153,6 +153,11 @@ qXfer:btrace:read's annex
   ** Valid Python operations on gdb.Value objects representing
      structs/classes invoke the corresponding overloaded operators if
      available.
+  ** New `Xmethods' feature in the Python API.  Xmethods are
+     additional methods or replacements for existing methods of a C++
+     class.  This feature is useful for those cases where a method
+     defined in C++ source code could be inlined or optimized out by
+     the compiler, making it unavailable to GDB.
 
 * New targets
 PowerPC64 GNU/Linux little-endian	powerpc64le-*-linux*

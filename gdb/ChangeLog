@@ -1,5 +1,10 @@
 2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
 
+	* NEWS (Python Scripting): Add entry about the new xmethods
+	feature.
+
+2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
+
 	* python/py-xmethods.c: New file.
 	* python/py-objfile.c (objfile_object): New field 'xmethods'.
 	(objfpy_dealloc): XDECREF on the new xmethods field.

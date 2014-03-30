@@ -144,6 +144,9 @@ optional arguments while skipping others.  Example:
 * Frame Filter API::            Filtering Frames.
 * Frame Decorator API::         Decorating Frames.
 * Writing a Frame Filter::      Writing a Frame Filter.
+* Xmethods In Python::          Adding and replacing methods of C++ classes.
+* Xmethod API::                 Xmethod types.
+* Writing an Xmethod::          Writing an xmethod.
 * Inferiors In Python::         Python representation of inferiors (processes)
 * Events In Python::            Listening for events from @value{GDBN}.
 * Threads In Python::           Accessing inferior threads from Python.
@@ -2173,6 +2176,348 @@ printed hierarchically.  Another approach would be to combine the
 @code{function} method, and the @code{elided} method to both print a
 marker in the inlined frame, and also show the hierarchical
 relationship.
+
+@node Xmethods In Python
+@subsubsection Xmethods In Python
+@cindex xmethods in Python
+
+@dfn{Xmethods} are additional methods or replacements for existing
+methods of a C@t{++} class.  This feature is useful for those cases
+where a method defined in C@t{++} source code could be inlined or
+optimized out by the compiler, making it unavailable to @value{GDBN}.
+For such cases, one can define an xmethod to serve as a replacement
+for the method defined in the C@t{++} source code.  @value{GDBN} will
+then invoke the xmethod, instead of the C@t{++} method, to
+evaluate expressions.  One can also use xmethods when debugging
+with core files.  Moreover, when debugging live programs, invoking an
+xmethod need not involve running the inferior (which can potentially
+perturb its state).  Hence, even if the C@t{++} method is available, it
+is better to use its replacement xmethod if one is defined.
+
+The xmethods feature in Python is available via the concepts of an
+@dfn{xmethod matcher} and an @dfn{xmethod worker}.  To
+implement an xmethod, one has to implement a matcher and a
+corresponding worker for it (more than one worker can be
+implemented, each catering to a different overloaded instance of the
+method).  Internally, @value{GDBN} invokes the @code{match} method of a
+matcher to match the class type and method name.  On a match, the
+@code{match} method returns a list of matching @emph{worker} objects.
+Each worker object typically corresponds to an overloaded instance of
+the xmethod.  They implement a @code{get_arg_types} method which
+returns a sequence of types corresponding to the arguments the xmethod
+requires.  @value{GDBN} uses this sequence of types to perform
+overload resolution and picks a winning xmethod worker.  A winner
+is also selected from among the methods @value{GDBN} finds in the
+C@t{++} source code.  Next, the winning xmethod worker and the
+winning C@t{++} method are compared to select an overall winner.  In
+case of a tie between a xmethod worker and a C@t{++} method, the
+xmethod worker is selected as the winner.  That is, if a winning
+xmethod worker is found to be equivalent to the winning C@t{++}
+method, then the xmethod worker is treated as a replacement for
+the C@t{++} method.  @value{GDBN} uses the overall winner to invoke the
+method.  If the winning xmethod worker is the overall winner, then
+the corresponding xmethod is invoked via the @code{invoke} method
+of the worker object.
+
+If one wants to implement an xmethod as a replacement for an
+existing C@t{++} method, then they have to implement an equivalent
+xmethod which has exactly the same name and takes arguments of
+exactly the same type as the C@t{++} method.  If the user wants to
+invoke the C@t{++} method even though a replacement xmethod is
+available for that method, then they can disable the xmethod.
+
+@xref{Xmethod API}, for API to implement xmethods in Python.
+@xref{Writing an Xmethod}, for implementing xmethods in Python.
+
+@node Xmethod API
+@subsubsection Xmethod API
+@cindex xmethod API
+
+The @value{GDBN} Python API provides classes, interfaces and functions
+to implement, register and manipulate xmethods.
+@xref{Xmethods In Python}.
+
+An xmethod matcher should be an instance of a class derived from
+@code{XMethodMatcher} defined in the module @code{gdb.xmethod}, or an
+object with similar interface and attributes.  An instance of
+@code{XMethodMatcher} has the following attributes:
+
+@defvar name
+The name of the matcher.
+@end defvar
+
+@defvar enabled
+A boolean value indicating whether the matcher is enabled or disabled.
+@end defvar
+
+@defvar methods
+A list of named methods managed by the matcher.  Each object in the list
+is an instance of the class @code{XMethod} defined in the module
+@code{gdb.xmethod}, or any object with the following attributes:
+
+@table @code
+
+@item name
+Name of the xmethod which should be unique for each xmethod
+managed by the matcher.
+
+@item enabled
+A boolean value indicating whether the xmethod is enabled or
+disabled.
+
+@end table
+
+The class @code{XMethod} is a convenience class with same
+attributes as above along with the following constructor:
+
+@defun XMethod.__init__(self, name)
+Constructs an enabled xmethod with name @var{name}.
+@end defun
+@end defvar
+
+@noindent
+The @code{XMethodMatcher} class has the following methods:
+
+@defun XMethodMatcher.__init__(self, name)
+Constructs an enabled xmethod matcher with name @var{name}.  The
+@code{methods} attribute is initialized to @code{None}.
+@end defun
+
+@defun XMethodMatcher.match(self, class_type, method_name)
+Derived classes should override this method.  It should return a
+xmethod worker object (or a sequence of xmethod worker
+objects) matching the @var{class_type} and @var{method_name}.
+@var{class_type} is a @code{gdb.Type} object, and @var{method_name}
+is a string value.  If the matcher manages named methods as listed in
+its @code{methods} attribute, then only those worker objects whose
+corresponding entries in the @code{methods} list are enabled should be
+returned.
+@end defun
+
+An xmethod worker should be an instance of a class derived from
+@code{XMethodWorker} defined in the module @code{gdb.xmethod},
+or support the following interface:
+
+@defun XMethodWorker.get_arg_types(self)
+This method returns a sequence of @code{gdb.Type} objects corresponding
+to the arguments that the xmethod takes.  It can return an empty
+sequence or @code{None} if the xmethod does not take any arguments.
+If the xmethod takes a single argument, then a single
+@code{gdb.Type} object corresponding to it can be returned.
+@end defun
+
+@defun XMethodWorker.__call__(self, *args)
+This is the method which does the @emph{work} of the xmethod.  The
+@var{args} arguments is the tuple of arguments to the xmethod.  Each
+element in this tuple is a gdb.Value object.  The first element is
+always the @code{this} pointer value.
+@end defun
+
+For @value{GDBN} to lookup xmethods, the xmethod matchers
+should be registered using the following function defined in the module
+@code{gdb.xmethod}:
+
+@defun register_xmethod_matcher(locus, matcher, replace=False)
+The @code{matcher} is registered with @code{locus}, replacing an
+existing matcher with the same name as @code{matcher} if
+@code{replace} is @code{True}.  @code{locus} can be a
+@code{gdb.Objfile} object (@pxref{Objfiles In Python}), or a
+@code{gdb.Progspace} object (@pxref{Program Spaces In Python}), or
+@code{None}.  If it is @code{None}, then @code{matcher} is registered
+globally.
+@end defun
+
+@node Writing an Xmethod
+@subsubsection Writing an Xmethod
+@cindex writing xmethods in Python
+
+Implementing xmethods in Python will require implementing xmethod
+matchers and xmethod workers (@pxref{Xmethods In Python}).  Consider
+the following C@t{++} class:
+
+@smallexample
+class MyClass
+@{
+public:
+  MyClass (int a) : a_(a) @{ @}
+
+  int geta (void) @{ return a_; @}
+  int operator+ (int b);
+
+private:
+  int a_;
+@};
+
+int
+MyClass::operator+ (int b)
+@{
+  return a_ + b;
+@}
+@end smallexample
+
+@noindent
+Let us define two xmethods for the class @code{MyClass}, one
+replacing the method @code{geta}, and another adding an overloaded
+flavor of @code{operator+} which takes a @code{MyClass} argument (the
+C@t{++} code above already has an overloaded @code{operator+}
+which takes an @code{int} argument).  The xmethod matcher can be
+defined as follows:
+
+@smallexample
+class MyClass_geta(gdb.xmethod.XMethod):
+    def __init__(self):
+        gdb.xmethod.XMethod.__init__(self, 'geta')
+ 
+    def get_worker(self, method_name):
+        if method_name == 'geta':
+            return MyClassWorker_geta()
+ 
+ 
+class MyClass_sum(gdb.xmethod.XMethod):
+    def __init__(self):
+        gdb.xmethod.XMethod.__init__(self, 'sum')
+ 
+    def get_worker(self, method_name):
+        if method_name == 'operator+':
+            return MyClassWorker_plus()
+ 
+ 
+class MyClassMatcher(gdb.xmethod.XMethodMatcher):
+    def __init__(self):
+        gdb.xmethod.XMethodMatcher.__init__(self, 'MyClassMatcher')
+        # List of methods 'managed' by this matcher
+        self.methods = [MyClass_geta(), MyClass_sum()]
+ 
+    def match(self, class_type, method_name):
+        if class_type.tag != 'MyClass':
+            return None
+        workers = []
+        for method in self.methods:
+            if method.enabled:
+                worker = method.get_worker(method_name)
+                if worker:
+                    workers.append(worker)
+ 
+        return workers
+@end smallexample
+
+@noindent
+Notice that the @code{match} method of @code{MyClassMatcher} returns
+a worker object of type @code{MyClassWorker_geta} for the @code{geta}
+method, and a worker object of type @code{MyClassWorker_plus} for the
+@code{operator+} method.  This is done indirectly via helper classes
+derived from @code{gdb.xmethod.XMethod}.  One does not need to use the
+@code{methods} attribute in a matcher as it is optional.  However, if a
+matcher manages more than one xmethod, it is a good practice to list the
+xmethods in the @code{methods} attribute of the matcher.  This will then
+facilitate enabling and disabling individual xmethods via the
+@code{enable/disable} commands.  Notice also that a worker object is
+returned only if the corresponding entry in the @code{methods} attribute
+of the matcher is enabled.
+
+The implementation of the worker classes returned by the matcher setup
+above is as follows:
+
+@smallexample
+class MyClassWorker_geta(gdb.xmethod.XMethodWorker):
+    def get_arg_types(self):
+        return None
+ 
+    def __call__(self, obj):
+        return obj['a_']
+ 
+ 
+class MyClassWorker_plus(gdb.xmethod.XMethodWorker):
+    def get_arg_types(self):
+        return gdb.lookup_type('MyClass')
+ 
+    def __call__(self, obj, other):
+        return obj['a_'] + other['a_']
+@end smallexample
+
+For @value{GDBN} to actually lookup a xmethod, it has to be
+registered with it.  The matcher defined above is registered with
+@value{GDBN} globally as follows:
+
+@smallexample
+gdb.xmethod.register_xmethod_matcher(None, MyClassMatcher())
+@end smallexample
+
+If an object @code{obj} of type @code{MyClass} is initialized in C@t{++}
+code as follows:
+
+@smallexample
+MyClass obj(5);
+@end smallexample
+
+@noindent
+then, after loading the Python script defining the xmethod matchers
+and workers into @code{GDBN}, invoking the method @code{geta} or using
+the operator @code{+} on @code{obj} will invoke the xmethods
+defined above:
+
+@smallexample
+(gdb) p obj.geta()
+$1 = 5
+
+(gdb) p obj + obj
+$2 = 10
+@end smallexample
+
+Consider another example with a C++ template class:
+
+@smallexample
+template <class T>
+class MyTemplate
+@{
+public:
+  MyTemplate () : dsize_(10), data_ (new T [10]) @{ @}
+  ~MyTemplate () @{ delete [] data_; @}
+ 
+  int footprint (void)
+  @{
+    return sizeof (T) * dsize_ + sizeof (MyTemplate<T>);
+  @}
+ 
+private:
+  int dsize_;
+  T *data_;
+@};
+@end smallexample
+
+Let us implement an xmethod for the above class which serves as a
+replacement for the @code{footprint} method.  The full code listing
+of the xmethod workers and xmethod matchers is as follows:
+
+@smallexample
+class MyTemplateWorker_footprint(gdb.xmethod.XMethodWorker):
+    def __init__(self, class_type):
+        self.class_type = class_type
+ 
+    def get_arg_types(self):
+        return None
+ 
+    def __call__(self, obj):
+        return (self.class_type.sizeof +
+                obj['dsize_'] *
+                self.class_type.template_argument(0).sizeof)
+ 
+ 
+class MyTemplateMatcher_footprint(gdb.xmethod.XMethodMatcher):
+    def __init__(self):
+        gdb.xmethod.XMethodMatcher.__init__(self, 'MyTemplateMatcher')
+ 
+    def match(self, class_type, method_name):
+        if (re.match('MyTemplate<[ \t\n]*[_a-zA-Z][ _a-zA-Z0-9]*>',
+                     class_type.tag) and
+            method_name == 'footprint'):
+            return MyTemplateWorker_footprint(class_type)
+@end smallexample
+
+Notice that, in this example, we have not used the @code{methods}
+attribute of the matcher as the matcher manages only one xmethod.  The
+user can enable/disable this xmethod by enabling/disabling the matcher
+itself.
 
 @node Inferiors In Python
 @subsubsection Inferiors In Python

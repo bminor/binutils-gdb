@@ -1,3 +1,10 @@
+2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
+
+	*  python.texi (Xmethods In Python, XMethod API)
+	(Writing an Xmethod): New nodes.
+	(Python API): New menu entries "Xmethods In Python",
+	"Xmethod API", "Writing an Xmethod".
+
 2014-06-02  Doug Evans  <xdje42@gmail.com>
 
 	* guile.texi (Guile API): Add entry for Parameters In Guile.
