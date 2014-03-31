@@ -1,3 +1,9 @@
+2014-03-31  Doug Evans  <dje@google.com>
+
+	* gdb.base/print-symbol-loading-lib.c: New file.
+	* gdb.base/print-symbol-loading-main.c: New file.
+	* gdb.base/print-symbol-loading.exp: New file.
+
 2014-03-31  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/source-dir.exp: Allow ';' as a directory separator.

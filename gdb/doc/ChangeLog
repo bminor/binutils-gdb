@@ -1,3 +1,7 @@
+2014-03-31  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Symbols): Document set/show print symbol-loading.
+
 2014-03-30  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Non-Stop Mode): Remove trailing whitespace.

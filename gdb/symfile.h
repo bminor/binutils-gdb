@@ -503,6 +503,8 @@ extern bfd *gdb_bfd_open_maybe_remote (const char *);
 
 extern int get_section_index (struct objfile *, char *);
 
+extern int print_symbol_loading_p (int from_tty, int mainline, int full);
+
 /* Utility functions for overlay sections: */
 extern enum overlay_debugging_state
 {

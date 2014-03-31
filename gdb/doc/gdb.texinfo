@@ -16184,6 +16184,28 @@ is printed as follows:
 @item show opaque-type-resolution
 Show whether opaque types are resolved or not.
 
+@kindex set print symbol-loading
+@cindex print messages when symbols are loaded
+@item set print symbol-loading
+@itemx set print symbol-loading full
+@itemx set print symbol-loading brief
+@itemx set print symbol-loading off
+The @code{set print symbol-loading} command allows you to control the
+printing of messages when @value{GDBN} loads symbol information.
+By default a message is printed for the executable and one for each
+shared library, and normally this is what you want.  However, when
+debugging apps with large numbers of shared libraries these messages
+can be annoying.
+When set to @code{brief} a message is printed for each executable,
+and when @value{GDBN} loads a collection of shared libraries at once
+it will only print one message regardless of the number of shared
+libraries.  When set to @code{off} no messages are printed.
+
+@kindex show print symbol-loading
+@item show print symbol-loading
+Show whether messages will be printed when a @value{GDBN} command
+entered from the keyboard causes symbol information to be loaded.
+
 @kindex maint print symbols
 @cindex symbol dump
 @kindex maint print psymbols

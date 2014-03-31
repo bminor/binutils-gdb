@@ -650,7 +650,7 @@ solib_read_symbols (struct so_list *so, int flags)
 			   so->so_name);
       else
 	{
-	  if (from_tty || info_verbose)
+	  if (print_symbol_loading_p (from_tty, 0, 1))
 	    printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
 	  so->symbols_loaded = 1;
 	}
@@ -904,6 +904,17 @@ solib_add (char *pattern, int from_tty,
 	   struct target_ops *target, int readsyms)
 {
   struct so_list *gdb;
+
+  if (print_symbol_loading_p (from_tty, 0, 0))
+    {
+      if (pattern != NULL)
+	{
+	  printf_unfiltered (_("Loading symbols for shared libraries: %s\n"),
+			     pattern);
+	}
+      else
+	printf_unfiltered (_("Loading symbols for shared libraries.\n"));
+    }
 
   current_program_space->solib_add_generation++;
 
@@ -1276,6 +1287,9 @@ reload_shared_libraries_1 (int from_tty)
 {
   struct so_list *so;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+
+  if (print_symbol_loading_p (from_tty, 0, 0))
+    printf_unfiltered (_("Loading symbols for shared libraries.\n"));
 
   for (so = so_list_head; so != NULL; so = so->next)
     {

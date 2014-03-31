@@ -1,3 +1,24 @@
+2014-03-31  Doug Evans  <dje@google.com>
+
+	New option "set print symbol-loading".
+	* NEWS: Mention it.
+	* solib.c (solib_read_symbols): Only print symbol loading messages
+	if requested.
+	(solib_add): If symbol loading is in "brief" mode, notify user
+	symbols are being loaded.
+	(reload_shared_libraries_1): Ditto.
+	* symfile.c (print_symbol_loading_off): New static global.
+	(print_symbol_loading_brief): New static global.
+	(print_symbol_loading_full): New static global.
+	(print_symbol_loading_enums): New static global.
+	(print_symbol_loading): New static global.
+	(print_symbol_loading_p): New function.
+	(symbol_file_add_with_addrs): Only print symbol loading messages
+	if requested.
+	(_initialize_symfile): Register "print symbol-loading" set/show
+	command.
+	* symfile.h (print_symbol_loading_p): Declare.
+
 2014-03-30  Doug Evans  <xdje42@gmail.com>
 
 	* infrun.c (set_last_target_status): New function.
