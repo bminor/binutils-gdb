@@ -1,5 +1,10 @@
 2014-04-01  Anton Blanchard  <anton@samba.org>
 
+	* gdb.arch/ppc64-atomic-inst.exp: Use standard_testfile,
+	prepare_for_testing.
+
+2014-04-01  Anton Blanchard  <anton@samba.org>
+
 	* gdb.arch/ppc64-atomic-inst.c: Remove.
 	* gdb.arch/ppc64-atomic-inst.S: New file.
 	* gdb.arch/ppc64-atomic-inst.exp: Adapt for asm based testcase.
