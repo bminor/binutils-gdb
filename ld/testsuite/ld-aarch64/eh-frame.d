@@ -34,7 +34,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
-0+0048 0+0014 0+004c FDE cie=0+0000 pc=f+fffff80..f+fffffc0
+0+0048 0+0014 0+004c FDE cie=0+0000 pc=0+8000..0+8040
   DW_CFA_nop
   DW_CFA_nop
   DW_CFA_nop
@@ -75,7 +75,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
-0+00a8 0+0014 0+004c FDE cie=0+0060 pc=f+fffffc0..0+0000
+0+00a8 0+0014 0+004c FDE cie=0+0060 pc=0+8040..0+8080
   DW_CFA_nop
   DW_CFA_nop
   DW_CFA_nop

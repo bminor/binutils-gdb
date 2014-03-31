@@ -1,3 +1,7 @@
+2014-03-31  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/eh-frame.d: Adjust FDE pc address.
+
 2014-03-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16756
