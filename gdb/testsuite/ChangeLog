@@ -1,3 +1,7 @@
+2014-03-31  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/source-dir.exp: Allow ';' as a directory separator.
+
 2014-03-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_dyn_arr: New testcase.
