@@ -1,5 +1,14 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* score-tdep.c (score7_linux_gregset): New static regset
+	structure.
+	(score7_linux_regset_from_core_section): Remove dynamic regset
+	allocation.
+	(score_gdbarch_init): Drop allocation of tdep structure.
+	* score-tdep.h (struct gdbarch_tdep): Remove declaration.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* mn10300-linux-tdep.c (am33_gregset, am33_fpregset): New static
 	regset structures.
 	(am33_regset_from_core_section): Remove dynamic regset

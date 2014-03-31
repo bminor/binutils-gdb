@@ -49,13 +49,6 @@ enum gdb_regnum
 /* Forward declarations.  */
 struct regset;
 
-/* Target-dependent structure in gdbarch */
-struct gdbarch_tdep
-{
-    /* Cached core file helpers.  */
-    struct regset *gregset;
-};
-
 /* Linux Core file support (dirty hack)
   
    S+core Linux register set definition, copy from S+core Linux.  */
