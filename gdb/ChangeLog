@@ -1,5 +1,10 @@
 2014-03-31  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (read_cutu_die_from_dwo): Delete unused local
+	comp_dir_string.
+
+2014-03-31  Doug Evans  <dje@google.com>
+
 	New option "set print symbol-loading".
 	* NEWS: Mention it.
 	* solib.c (solib_read_symbols): Only print symbol loading messages
