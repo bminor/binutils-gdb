@@ -1,5 +1,30 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* aarch64-linux-nat.c (fill_gregset, fill_fpregset): Replace logic
+	by call to regcache_collect_regset.
+	(supply_gregset, supply_fpregset): Call regcache_supply_regset
+	instead of aarch64_linux_supply_gregset/_fpregset.
+	* aarch64-linux-tdep.c (AARCH64_LINUX_SIZEOF_GREGSET)
+	(AARCH64_LINUX_SIZEOF_FPREGSET): Delete macros here, move to
+	header file instead.
+	(aarch64_linux_supply_gregset, supply_gregset_from_core)
+	(aarch64_linux_suply_fpregset, supply_fpregset_from_core): Delete
+	functions.  Move logic to ...
+	(aarch64_linux_gregmap, aarch64_linux_fpregmap): ... these new
+	register maps.
+	(aarch64_linux_gregset, aarch64_linux_fpregset): Make global,
+	refer to new register maps, replace *_regset_from_core by
+	regcache_supply_regset, and also use regcache_collect_regset.
+	* aarch64-linux-tdep.h: Include "regset.h".
+	(aarch64_linux_supply_gregset, aarch64_linux_supply_fpregset):
+	Delete prototypes.
+	(AARCH64_LINUX_SIZEOF_GREGSET, AARCH64_LINUX_SIZEOF_FPREGSET): New
+	macros, moved from C source file.
+	(aarch64_linux_gregset, aarch64_linux_fpregset): New global
+	variable declarations.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-nat.c: Include "regset.h".
 	(regmap_gregset): Delete macro.
 	(s390_64_regmap_gregset): New register map for

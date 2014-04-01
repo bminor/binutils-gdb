@@ -18,9 +18,17 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct regcache;
+#include "regset.h"
 
-extern void aarch64_linux_supply_gregset (struct regcache *regcache,
-					  const gdb_byte *gregs_buf);
-extern void aarch64_linux_supply_fpregset (struct regcache *regcache,
-					   const gdb_byte *fpregs_buf);
+/* The general-purpose regset consists of 31 X registers, plus SP, PC,
+   and PSTATE registers, as defined in the AArch64 port of the Linux
+   kernel.  */
+#define AARCH64_LINUX_SIZEOF_GREGSET  (34 * X_REGISTER_SIZE)
+
+/* The fp regset consists of 32 V registers, plus FPCR and FPSR which
+   are 4 bytes wide each, and the whole structure is padded to 128 bit
+   alignment.  */
+#define AARCH64_LINUX_SIZEOF_FPREGSET (33 * V_REGISTER_SIZE)
+
+extern const struct regset aarch64_linux_gregset;
+extern const struct regset aarch64_linux_fpregset;

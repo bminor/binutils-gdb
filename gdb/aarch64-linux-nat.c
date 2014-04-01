@@ -616,14 +616,9 @@ void
 fill_gregset (const struct regcache *regcache,
 	      gdb_gregset_t *gregsetp, int regno)
 {
-  gdb_byte *gregs_buf = (gdb_byte *) gregsetp;
-  int i;
-
-  for (i = AARCH64_X0_REGNUM; i <= AARCH64_CPSR_REGNUM; i++)
-    if (regno == -1 || regno == i)
-      regcache_raw_collect (regcache, i,
-			    gregs_buf + X_REGISTER_SIZE
-			    * (i - AARCH64_X0_REGNUM));
+  regcache_collect_regset (&aarch64_linux_gregset, regcache,
+			   regno, (gdb_byte *) gregsetp,
+			   AARCH64_LINUX_SIZEOF_GREGSET);
 }
 
 /* Fill GDB's register array with the general-purpose register values
@@ -632,7 +627,9 @@ fill_gregset (const struct regcache *regcache,
 void
 supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
-  aarch64_linux_supply_gregset (regcache, (const gdb_byte *) gregsetp);
+  regcache_supply_regset (&aarch64_linux_gregset, regcache, -1,
+			  (const gdb_byte *) gregsetp,
+			  AARCH64_LINUX_SIZEOF_GREGSET);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -643,22 +640,9 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       gdb_fpregset_t *fpregsetp, int regno)
 {
-  gdb_byte *fpregs_buf = (gdb_byte *) fpregsetp;
-  int i;
-
-  for (i = AARCH64_V0_REGNUM; i <= AARCH64_V31_REGNUM; i++)
-    if (regno == -1 || regno == i)
-      regcache_raw_collect (regcache, i,
-			    fpregs_buf + V_REGISTER_SIZE
-			    * (i - AARCH64_V0_REGNUM));
-
-  if (regno == -1 || regno == AARCH64_FPSR_REGNUM)
-    regcache_raw_collect (regcache, AARCH64_FPSR_REGNUM,
-			  fpregs_buf + V_REGISTER_SIZE * 32);
-
-  if (regno == -1 || regno == AARCH64_FPCR_REGNUM)
-    regcache_raw_collect (regcache, AARCH64_FPCR_REGNUM,
-			  fpregs_buf + V_REGISTER_SIZE * 32 + 4);
+  regcache_collect_regset (&aarch64_linux_fpregset, regcache,
+			   regno, (gdb_byte *) fpregsetp,
+			   AARCH64_LINUX_SIZEOF_FPREGSET);
 }
 
 /* Fill GDB's register array with the floating-point register values
@@ -667,7 +651,9 @@ fill_fpregset (const struct regcache *regcache,
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  aarch64_linux_supply_fpregset (regcache, (const gdb_byte *) fpregsetp);
+  regcache_supply_regset (&aarch64_linux_fpregset, regcache, -1,
+			  (const gdb_byte *) fpregsetp,
+			  AARCH64_LINUX_SIZEOF_FPREGSET);
 }
 
 /* Called when resuming a thread.
