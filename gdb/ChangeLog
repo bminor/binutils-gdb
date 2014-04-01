@@ -1,5 +1,17 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* hppa-linux-tdep.c (greg_map): Rename to...
+	(hppa_linux_gregmap): ... this.  Also convert to
+	regcache_map_entry format.
+	(hppa_linux_supply_regset): Delete function.
+	(hppa_linux_supply_fpregset): Delete function.  Move logic to...
+	(hppa_linux_fpregmap): ... this new register map.
+	(hppa_linux_regset, hppa_linux_fpregset): Refer to appropriate
+	register map, replace supply method by regcache_supply_regset, and
+	add collect method regcache_collect_regset.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* frv-linux-tdep.c (FRV_PT_PSR, FRV_PT_ISR, FRV_PT_CCR)
 	(FRV_PT_CCCR, FRV_PT_LR, FRV_PT_LCR, FRV_PT_PC, FRV_PT_GNER0)
 	(FRV_PT_GNER1, FRV_PT_IACC0H, FRV_PT_IACC0L, FRV_PT_GR)
