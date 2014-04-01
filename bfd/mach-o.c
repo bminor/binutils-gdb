@@ -1075,7 +1075,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 	  /* An external symbol number.  */
 	  sym = syms + num;
 	}
-      else if (num == 0x00ffffff)
+      else if (num == 0x00ffffff || num == 0)
 	{
 	  /* The 'symnum' in a non-scattered PAIR is 0x00ffffff.  But as this
 	     is generic code, we don't know wether this is really a PAIR.
@@ -1087,7 +1087,6 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
       else
         {
 	  /* A section number.  */
-          BFD_ASSERT (num != 0);
           BFD_ASSERT (num <= mdata->nsects);
 
           sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
