@@ -4982,9 +4982,11 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 
   /* These attributes aren't processed until later:
      DW_AT_stmt_list, DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges.
-     However, the attribute is found in the stub which we won't have later.
-     In order to not impose this complication on the rest of the code,
-     we read them here and copy them to the DWO CU/TU die.  */
+     DW_AT_comp_dir is used now, to find the DWO file, but it is also
+     referenced later.  However, these attributes are found in the stub
+     which we won't have later.  In order to not impose this complication
+     on the rest of the code, we read them here and copy them to the
+     DWO CU/TU die.  */
 
   stmt_list = NULL;
   low_pc = NULL;

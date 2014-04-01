@@ -1,3 +1,7 @@
+2014-04-01  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (read_cutu_die_from_dwo): Improve comment.
+
 2014-04-01  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c (darwin_encode_reply): Add prototype.
