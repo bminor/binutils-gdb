@@ -1,5 +1,21 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* frv-linux-tdep.c (FRV_PT_PSR, FRV_PT_ISR, FRV_PT_CCR)
+	(FRV_PT_CCCR, FRV_PT_LR, FRV_PT_LCR, FRV_PT_PC, FRV_PT_GNER0)
+	(FRV_PT_GNER1, FRV_PT_IACC0H, FRV_PT_IACC0L, FRV_PT_GR)
+	(FRV_PT_TBR, FRV_PT_GR, FRV_PT_EXEC_FDPIC_LOADMAP)
+	(FRV_PT_INTERP_FDPIC_LOADMAP): Delete macros.
+	(frv_linux_gregmap, frv_linux_fpregmap): New register maps.
+	(frv_linux_supply_gregset): Replace main logic by call to
+	regcache_supply_regset, but keep clearing gr32-gr63.
+	(frv_linux_supply_fpregset): Delete function.
+	(frv_linux_gregset): Refer to appropriate register map and add
+	regcache_collect_regset as the collect method.
+	(frv_linux_fpregset): Likewise.  Also exchange the supply method
+	by regcache_supply_regset.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* alpha-linux-tdep.c (alpha_linux_supply_gregset): Replace logic
 	by call to alpha_supply_int_regs.
 	(alpha_linux_collect_gregset): New function.
