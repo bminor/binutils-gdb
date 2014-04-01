@@ -1,5 +1,15 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* alpha-linux-tdep.c (alpha_linux_supply_gregset): Replace logic
+	by call to alpha_supply_int_regs.
+	(alpha_linux_collect_gregset): New function.
+	(alpha_linux_supply_fpregset): Replace logic by call to
+	alpha_supply_fp_regs.
+	(alpha_linux_collect_fpregset): New function.
+	(alpha_linux_gregset, alpha_linux_fpregset): Add collect method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* aarch64-linux-nat.c (fill_gregset, fill_fpregset): Replace logic
 	by call to regcache_collect_regset.
 	(supply_gregset, supply_fpregset): Call regcache_supply_regset
