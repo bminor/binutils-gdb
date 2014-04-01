@@ -1,5 +1,10 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* nios2-linux-tdep.c (nios2_collect_gregset): New function.
+	(nios2_core_regset): Add collect method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* m32r-linux-tdep.c (m32r_linux_supply_gregset): Make
 	platform-independent and don't write to read-only input buffer.
 	(m32r_linux_collect_gregset): New function.
