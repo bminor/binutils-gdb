@@ -527,6 +527,31 @@ Symbol::set_output_section(Output_section* os)
     }
 }
 
+// Set the symbol's output segment.  This is used for pre-defined
+// symbols whose segments aren't known until after layout is done
+// (e.g., __ehdr_start).
+
+void
+Symbol::set_output_segment(Output_segment* os, Segment_offset_base base)
+{
+  gold_assert(this->is_predefined_);
+  this->source_ = IN_OUTPUT_SEGMENT;
+  this->u_.in_output_segment.output_segment = os;
+  this->u_.in_output_segment.offset_base = base;
+}
+
+// Set the symbol to undefined.  This is used for pre-defined
+// symbols whose segments aren't known until after layout is done
+// (e.g., __ehdr_start).
+
+void
+Symbol::set_undefined()
+{
+  gold_assert(this->is_predefined_);
+  this->source_ = IS_UNDEFINED;
+  this->is_predefined_ = false;
+}
+
 // Class Symbol_table.
 
 Symbol_table::Symbol_table(unsigned int count,

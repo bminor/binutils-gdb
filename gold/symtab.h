@@ -238,7 +238,7 @@ class Symbol
   override_visibility(elfcpp::STV);
 
   // Set whether the symbol was originally a weak undef or a regular undef
-  // when resolved by a dynamic def.
+  // when resolved by a dynamic def or by a special symbol.
   inline void
   set_undef_binding(elfcpp::STB bind)
   {
@@ -249,7 +249,8 @@ class Symbol
       }
   }
 
-  // Return TRUE if a weak undef was resolved by a dynamic def.
+  // Return TRUE if a weak undef was resolved by a dynamic def or
+  // by a special symbol.
   inline bool
   is_undef_binding_weak() const
   { return this->undef_binding_weak_; }
@@ -512,7 +513,20 @@ class Symbol
   // Return whether this is a weak undefined symbol.
   bool
   is_weak_undefined() const
-  { return this->is_undefined() && this->binding() == elfcpp::STB_WEAK; }
+  {
+    return (this->is_undefined()
+	    && (this->binding() == elfcpp::STB_WEAK
+		|| this->is_undef_binding_weak()));
+  }
+
+  // Return whether this is a strong undefined symbol.
+  bool
+  is_strong_undefined() const
+  {
+    return (this->is_undefined()
+	    && this->binding() != elfcpp::STB_WEAK
+	    && !this->is_undef_binding_weak());
+  }
 
   // Return whether this is an absolute symbol.
   bool
@@ -771,6 +785,18 @@ class Symbol
   void
   set_output_section(Output_section*);
 
+  // Set the symbol's output segment.  This is used for pre-defined
+  // symbols whose segments aren't known until after layout is done
+  // (e.g., __ehdr_start).
+  void
+  set_output_segment(Output_segment*, Segment_offset_base);
+
+  // Set the symbol to undefined.  This is used for pre-defined
+  // symbols whose segments aren't known until after layout is done
+  // (e.g., __ehdr_start).
+  void
+  set_undefined();
+
   // Return whether there should be a warning for references to this
   // symbol.
   bool
@@ -1019,7 +1045,7 @@ class Symbol
   // True if UNDEF_BINDING_WEAK_ has been set (bit 32).
   bool undef_binding_set_ : 1;
   // True if this symbol was a weak undef resolved by a dynamic def
-  // (bit 33).
+  // or by a special symbol (bit 33).
   bool undef_binding_weak_ : 1;
   // True if this symbol is a predefined linker symbol (bit 34).
   bool is_predefined_ : 1;

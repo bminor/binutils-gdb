@@ -185,7 +185,7 @@ issue_undefined_symbol_error(const Symbol* sym)
     return false;
 
   // We don't report weak symbols.
-  if (sym->binding() == elfcpp::STB_WEAK)
+  if (sym->is_weak_undefined())
     return false;
 
   // We don't report symbols defined in discarded sections.
@@ -210,6 +210,10 @@ issue_undefined_symbol_error(const Symbol* sym)
       if (strcmp(u, "ignore-in-shared-libs") == 0 && !sym->in_reg())
 	return false;
     }
+
+  // If the symbol is hidden, report it.
+  if (sym->visibility() == elfcpp::STV_HIDDEN)
+    return true;
 
   // When creating a shared library, only report unresolved symbols if
   // -z defs was used.
@@ -420,7 +424,7 @@ relocate_section(
 	}
       else if (sym != NULL
 	       && sym->visibility() != elfcpp::STV_DEFAULT
-	       && (sym->is_undefined() || sym->is_from_dynobj()))
+	       && (sym->is_strong_undefined() || sym->is_from_dynobj()))
 	visibility_error(sym);
 
       if (sym != NULL && sym->has_warning())
