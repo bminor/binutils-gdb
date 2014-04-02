@@ -1,3 +1,9 @@
+2014-04-02  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16765
+	* config/tc-arm.c (create_unwind_entry): Report an error if an
+	attempt to recreate an unwind directive is encountered.
+
 2014-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-score.c (s3_parse_pce_inst): Add "%s" parameter to

@@ -20992,7 +20992,7 @@ start_unwind_section (const segT text_seg, int idx)
 
 /* Start an unwind table entry.	 HAVE_DATA is nonzero if we have additional
    personality routine data.  Returns zero, or the index table value for
-   and inline entry.  */
+   an inline entry.  */
 
 static valueT
 create_unwind_entry (int have_data)
@@ -21063,7 +21063,12 @@ create_unwind_entry (int have_data)
     }
   else
     {
-      gas_assert (unwind.personality_index == -1);
+      /* PR 16765: Missing or misplaced unwind directives can trigger this.  */
+      if (unwind.personality_index != -1)
+	{
+	  as_bad (_("attempt to recreate an unwind entry"));
+	  return 1;
+	}
 
       /* An extra byte is required for the opcode count.	*/
       size = unwind.opcode_count + 1;
