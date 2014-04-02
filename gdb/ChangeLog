@@ -1,3 +1,9 @@
+2014-05-30  Andrew Burgess  <aburgess@broadcom.com>
+
+	* frame.c (remove_prev_frame): New function.
+	(get_prev_frame_if_no_cycle): Create / discard cleanup using
+	remove_prev_frame.
+
 2014-05-29  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (resume): Rename local 'hw_step' to 'entry_step'

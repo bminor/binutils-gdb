@@ -1,3 +1,11 @@
+2014-05-30  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.arch/amd64-invalid-stack-middle.S: New file.
+	* gdb.arch/amd64-invalid-stack-middle.c: New file.
+	* gdb.arch/amd64-invalid-stack-middle.exp: New file.
+	* gdb.arch/amd64-invalid-stack-top.c: New file.
+	* gdb.arch/amd64-invalid-stack-top.exp: New file.
+
 2014-05-30  Pedro Alves  <palves@redhat.com>
 
 	PR breakpoints/17000

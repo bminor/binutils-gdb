@@ -1738,6 +1738,22 @@ frame_register_unwind_location (struct frame_info *this_frame, int regnum,
     }
 }
 
+/* Called during frame unwinding to remove a previous frame pointer from a
+   frame passed in ARG.  */
+
+static void
+remove_prev_frame (void *arg)
+{
+  struct frame_info *this_frame, *prev_frame;
+
+  this_frame = (struct frame_info *) arg;
+  prev_frame = this_frame->prev;
+  gdb_assert (prev_frame != NULL);
+
+  prev_frame->next = NULL;
+  this_frame->prev = NULL;
+}
+
 /* Get the previous raw frame, and check that it is not identical to
    same other frame frame already in the chain.  If it is, there is
    most likely a stack cycle, so we discard it, and mark THIS_FRAME as
@@ -1750,28 +1766,36 @@ static struct frame_info *
 get_prev_frame_if_no_cycle (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame;
+  struct cleanup *prev_frame_cleanup;
 
   prev_frame = get_prev_frame_raw (this_frame);
   if (prev_frame == NULL)
     return NULL;
 
-  compute_frame_id (prev_frame);
-  if (frame_stash_add (prev_frame))
-    return prev_frame;
+  /* The cleanup will remove the previous frame that get_prev_frame_raw
+     linked onto THIS_FRAME.  */
+  prev_frame_cleanup = make_cleanup (remove_prev_frame, this_frame);
 
-  /* Another frame with the same id was already in the stash.  We just
-     detected a cycle.  */
-  if (frame_debug)
+  compute_frame_id (prev_frame);
+  if (!frame_stash_add (prev_frame))
     {
-      fprintf_unfiltered (gdb_stdlog, "-> ");
-      fprint_frame (gdb_stdlog, NULL);
-      fprintf_unfiltered (gdb_stdlog, " // this frame has same ID }\n");
+      /* Another frame with the same id was already in the stash.  We just
+	 detected a cycle.  */
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // this frame has same ID }\n");
+	}
+      this_frame->stop_reason = UNWIND_SAME_ID;
+      /* Unlink.  */
+      prev_frame->next = NULL;
+      this_frame->prev = NULL;
+      prev_frame = NULL;
     }
-  this_frame->stop_reason = UNWIND_SAME_ID;
-  /* Unlink.  */
-  prev_frame->next = NULL;
-  this_frame->prev = NULL;
-  return NULL;
+
+  discard_cleanups (prev_frame_cleanup);
+  return prev_frame;
 }
 
 /* Return a "struct frame_info" corresponding to the frame that called
