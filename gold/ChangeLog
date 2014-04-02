@@ -1,3 +1,31 @@
+2014-05-02  Cary Coutant  <ccoutant@google.com>
+
+    	* defstd.cc (in_segment): Define __ehdr_start here...
+    	* layout.cc (Layout::finalize): ...Instead of here.  Set the
+    	output segment when known.
+    	* resolve.cc (Symbol::override_base_with_special): Remember
+    	the original binding.
+    	* symtab.cc (Symbol::set_output_segment): New function.
+    	(Symbol::set_undefined): New function.
+    	* symtab.h (Symbol::is_weak_undefined): Check original undef
+    	binding.
+    	(Symbol::is_strong_undefined): New function.
+    	(Symbol::set_output_segment): New function.
+    	(Symbol::set_undefined): New function.
+    	* target-reloc.h (is_strong_undefined): Remove.
+    	(issue_undefined_symbol_error): Call Symbol::is_weak_undefined.
+    	Check for hidden undefs.
+    	(relocate_section): Call Symbol::is_strong_undefined.
+    
+    	* testsuite/Makefile.am (ehdr_start_test_1)
+    	(ehdr_start_test_2, ehdr_start_test_3)
+    	(ehdr_start_test_4, ehdr_start_test_5): New test cases.
+    	* testsuite/Makefile.in: Regenerate.
+    	* testsuite/ehdr_start_def.cc: New source file.
+    	* testsuite/ehdr_start_test.cc: New source file.
+    	* testsuite/ehdr_start_test.t: New linker script.
+    	* testsuite/ehdr_start_test_4.sh: New shell script.
+
 2014-04-23  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/16870

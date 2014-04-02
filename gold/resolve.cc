@@ -915,6 +915,10 @@ Symbol::override_base_with_special(const Symbol* from)
   bool same_name = this->name_ == from->name_;
   gold_assert(same_name || this->has_alias());
 
+  // If we are overriding an undef, remember the original binding.
+  if (this->is_undefined())
+    this->set_undef_binding(this->binding_);
+
   this->source_ = from->source_;
   switch (from->source_)
     {
