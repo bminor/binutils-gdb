@@ -1,3 +1,8 @@
+2014-04-11  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/completion.exp: Check file exists before running tests
+	on file completion.
+
 2014-04-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/cond-eval-mode.c: New file.
