@@ -1,5 +1,10 @@
 2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/vdso.c: New.
+	* gdb.btrace/vdso.exp: New.
+
+2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.base/gcore.exp (capture_command_output): Move ...
 	* lib/gdb.exp (capture_command_output): ... here.
 

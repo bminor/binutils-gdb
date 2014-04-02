@@ -1,5 +1,9 @@
 2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* symfile-mem.c (symbol_file_add_from_memory): Add BFD sections.
+
+2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_allow_memory_access): Remove.
 	(replay_memory_access_read_only, replay_memory_access_read_write)
 	(replay_memory_access_types, replay_memory_access)

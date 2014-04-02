@@ -92,6 +92,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   struct section_addr_info *sai;
   unsigned int i;
   struct cleanup *cleanup;
+  struct target_section *sections, *sections_end, *tsec;
 
   if (bfd_get_flavour (templ) != bfd_target_elf_flavour)
     error (_("add-symbol-file-from-memory not supported for this target"));
@@ -130,6 +131,23 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   objf = symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd),
 				   from_tty ? SYMFILE_VERBOSE : 0,
                                    sai, OBJF_SHARED, NULL);
+
+  sections = NULL;
+  sections_end = NULL;
+
+  if (build_section_table (nbfd, &sections, &sections_end) == 0)
+    {
+      make_cleanup (xfree, sections);
+
+      /* Adjust the target section addresses by the load address.  */
+      for (tsec = sections; tsec != sections_end; ++tsec)
+	{
+	  tsec->addr += loadbase;
+	  tsec->endaddr += loadbase;
+	}
+
+      add_target_sections (&nbfd, sections, sections_end);
+    }
 
   /* This might change our ideas about frames already looked at.  */
   reinit_frame_cache ();
