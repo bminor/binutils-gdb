@@ -1310,13 +1310,23 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
       f->fx_done = 1;
       break;
 
-    case BFD_RELOC_8:
     case BFD_RELOC_8_PCREL:
+      if ((long)val < -128 || (long)val > 127)
+	as_bad_where (f->fx_file, f->fx_line,
+		      _("value of %ld too large for 8-bit branch"),
+		      val);
+      /* Fall through.  */
+    case BFD_RELOC_8:
       op[0] = val;
       break;
 
-    case BFD_RELOC_16:
     case BFD_RELOC_16_PCREL:
+      if ((long)val < -32768 || (long)val > 32767)
+	as_bad_where (f->fx_file, f->fx_line,
+		      _("value of %ld too large for 16-bit branch"),
+		      val);
+      /* Fall through.  */
+    case BFD_RELOC_16:
     case BFD_RELOC_RL78_CODE:
       op[0] = val;
       op[1] = val >> 8;

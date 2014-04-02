@@ -1,3 +1,8 @@
+2014-04-02  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rl78.c (md_apply_fix): Add overflow warnings for
+	pc-relative branches.
+
 2014-04-02  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/16765
