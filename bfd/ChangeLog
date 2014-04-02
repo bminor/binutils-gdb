@@ -1,3 +1,21 @@
+2014-04-02  Alan Modra  <amodra@gmail.com>
+
+	* elfcode.h (bfd_from_remote_memory): Add "size" parameter.
+	Consolidate code handling possible section headers past end of
+	segment.  Don't use p_align for page size guess, instead use
+	minpagesize.  Take note of ld.so clearing section headers when
+	p_memsz > p_filesz.  Handle file header specifying no section
+	headers.  Handle zero p_align throughout.  Default loadbase to
+	zero.  Add comments.  Rename contents_size to high_offset, and
+	make it a bfd_vma.  Delete unnecessary bfd_set_error calls.
+	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Update prototpe.
+	* elf-bfd.h (struct elf_backend_data <elf_backend_from_remote_memory>):
+	Likewise.
+	(_bfd_elf32_bfd_from_remote_memory): Likewise.
+	(_bfd_elf64_bfd_from_remote_memory): Likewise.
+	* elf.c (bfd_elf_bfd_from_remote_memory): Adjust.
+	* bfd-in2.h: Regnerate.
+
 2014-04-01  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Avoid to crash

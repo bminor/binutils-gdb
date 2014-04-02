@@ -1,3 +1,11 @@
+2014-04-02  Alan Modra  <amodra@gmail.com>
+
+	* symfile-mem.c (symbol_file_add_from_memory): Add size parameter.
+	Pass to bfd_elf_bfd_from_remote_memory.  Adjust all callers.
+	(struct symbol_file_add_from_memory_args): Add size field.
+	(find_vdso_size): New function.
+	(add_vsyscall_page): Attempt to find vdso size.
+
 2014-04-01  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_cutu_die_from_dwo): Improve comment.
