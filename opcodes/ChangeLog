@@ -1,3 +1,8 @@
+2014-04-02  Anthony Green  <green@moxielogic.com>
+
+	* moxie-opc.c (moxie_form1_opc_info): Add sign-extension
+	instructions, sex.b and sex.s.
+
 2014-03-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64-dis.c (aarch64_ext_ldst_elemlist): Check H/S undefined
