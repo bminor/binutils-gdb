@@ -4977,8 +4977,8 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
   struct attribute *attr;
   struct die_info *comp_unit_die;
 
-  /* Exactly one of these must be provided.  */
-  gdb_assert ((stub_comp_unit_die != NULL) + (stub_comp_dir != NULL) == 1);
+  /* At most one of these may be provided.  */
+  gdb_assert ((stub_comp_unit_die != NULL) + (stub_comp_dir != NULL) <= 1);
 
   /* These attributes aren't processed until later:
      DW_AT_stmt_list, DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges.

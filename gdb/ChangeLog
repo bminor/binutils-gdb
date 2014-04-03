@@ -1,3 +1,8 @@
+2014-04-03  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (read_cutu_die_from_dwo): Fix assertion, at most one
+	of stub_comp_unit_die, stub_comp_dir is non-NULL.
+
 2014-04-02  Alan Modra  <amodra@gmail.com>
 
 	* symfile-mem.c (symbol_file_add_from_memory): Add size parameter.
