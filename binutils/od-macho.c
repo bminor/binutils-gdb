@@ -317,22 +317,22 @@ static void
 dump_section_map (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
-  unsigned int i;
+  bfd_mach_o_load_command *cmd;
   unsigned int sec_nbr = 0;
 
   fputs (_("Segments and Sections:\n"), stdout);
   fputs (_(" #: Segment name     Section name     Address\n"), stdout);
 
-  for (i = 0; i < mdata->header.ncmds; i++)
+  for (cmd = mdata->first_command; cmd != NULL; cmd = cmd->next)
     {
       bfd_mach_o_segment_command *seg;
       bfd_mach_o_section *sec;
 
-      if (mdata->commands[i].type != BFD_MACH_O_LC_SEGMENT
-	  && mdata->commands[i].type != BFD_MACH_O_LC_SEGMENT_64)
+      if (cmd->type != BFD_MACH_O_LC_SEGMENT
+	  && cmd->type != BFD_MACH_O_LC_SEGMENT_64)
 	continue;
 
-      seg = &mdata->commands[i].command.segment;
+      seg = &cmd->command.segment;
 
       printf ("[Segment %-16s ", seg->segname);
       printf_vma (seg->vmaddr);
@@ -1644,12 +1644,11 @@ static void
 dump_load_commands (bfd *abfd, unsigned int cmd32, unsigned int cmd64)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  bfd_mach_o_load_command *cmd;
   unsigned int i;
 
-  for (i = 0; i < mdata->header.ncmds; i++)
+  for (cmd = mdata->first_command, i = 0; cmd != NULL; cmd = cmd->next, i++)
     {
-      bfd_mach_o_load_command *cmd = &mdata->commands[i];
-
       if (cmd32 == 0)
         dump_load_command (abfd, cmd, i, FALSE);
       else if (cmd->type == cmd32 || cmd->type == cmd64)
@@ -2070,11 +2069,10 @@ dump_section_content (bfd *abfd,
 		      void (*dump)(bfd*, const unsigned char*, bfd_size_type))
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
-  unsigned int i;
+  bfd_mach_o_load_command *cmd;
 
-  for (i = 0; i < mdata->header.ncmds; i++)
+  for (cmd = mdata->first_command; cmd != NULL; cmd = cmd->next)
     {
-      bfd_mach_o_load_command *cmd = &mdata->commands[i];
       if (cmd->type == BFD_MACH_O_LC_SEGMENT
 	  || cmd->type == BFD_MACH_O_LC_SEGMENT_64)
 	{

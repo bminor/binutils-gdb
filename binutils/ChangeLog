@@ -1,3 +1,9 @@
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_section_map): Adjust as load commands
+	are now chained.
+	(dump_load_command, dump_section_content): Likewise.
+
 2014-04-16  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c (OPT_DYLD_INFO): New macro.

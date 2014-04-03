@@ -1,5 +1,49 @@
 2014-04-18  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h (bfd_mach_o_dyld_info_command): Add rebase_content,
+	bind_content, weak_bind_content, lazy_bind_content,
+	export_content.
+	(bfd_mach_o_load_command): Add comments, add next field.
+	(mach_o_data_struct): Replace commands field by first_command
+	and last_command.
+	* mach-o.c (bfd_mach_o_append_command): New function.
+	(bfd_mach_o_bfd_copy_private_symbol_data): Add blank lines.
+	(bfd_mach_o_bfd_copy_private_section_data): Check flavour,
+	copy fields.
+	(bfd_mach_o_bfd_copy_private_header_data): Copy load commands.
+	(bfd_mach_o_pad4, bfd_mach_o_pad_command): New functions.
+	(bfd_mach_o_write_thread): Use macro instead of literal.
+	(bfd_mach_o_write_dylinker, bfd_mach_o_write_dylib)
+	(bfd_mach_o_write_main, bfd_mach_o_write_dyld_info): New
+	functions.
+	(bfd_mach_o_write_symtab_content): New function (extracted
+	from bfd_mach_o_write_symtab).
+	(bfd_mach_o_write_symtab): Split.
+	(bfd_mach_o_count_indirect_symbols): Move
+	(bfd_mach_o_build_dysymtab): Remove layout code.
+	(bfd_mach_o_write_contents): Rewritten to build commands in order.
+	(bfd_mach_o_count_sections_for_seg): Remove.
+	(bfd_mach_o_build_obj_seg_command): New function (extracted from
+	bfd_mach_o_build_seg_command).
+	(bfd_mach_o_build_exec_seg_command): New function.
+	(bfd_mach_o_build_dysymtab_command): Remove.
+	(bfd_mach_o_layout_commands): New function.
+	(bfd_mach_o_init_segment): New function.
+	(bfd_mach_o_build_commands): Major rework to handle non-object
+	files.
+	(bfd_mach_o_alloc_and_read, bfd_mach_o_read_dyld_content): New
+	function.
+	(bfd_mach_o_read_dyld_info): Clear content fields.
+	(bfd_mach_o_read_segment): Adjust call.
+	(bfd_mach_o_flatten_sections): Adjust as now load commands are
+	chained.
+	(bfd_mach_o_scan_start_address, bfd_mach_o_scan)
+	(bfd_mach_o_mkobject_init, bfd_mach_o_get_base_address)
+	(bfd_mach_o_lookup_command, bfd_mach_o_core_fetch_environment):
+	Likewise.
+
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o-target.c (bfd_mach_o_bfd_copy_private_header_data):
 	Define instead of bfd_mach_o_bfd_copy_private_bfd_data.
 	* mach-o.c (bfd_mach_o_bfd_copy_private_bfd_data): Rename.
