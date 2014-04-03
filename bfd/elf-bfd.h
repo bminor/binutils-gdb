@@ -1191,7 +1191,7 @@ struct elf_backend_data
   /* This function implements `bfd_elf_bfd_from_remote_memory';
      see elf.c, elfcode.h.  */
   bfd *(*elf_backend_bfd_from_remote_memory)
-    (bfd *templ, bfd_vma ehdr_vma, size_t size, bfd_vma *loadbasep,
+    (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
      int (*target_read_memory) (bfd_vma vma, bfd_byte *myaddr,
 				bfd_size_type len));
 
@@ -2334,10 +2334,10 @@ extern char *elfcore_write_ppc_linux_prpsinfo32
   (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
 
 extern bfd *_bfd_elf32_bfd_from_remote_memory
-  (bfd *templ, bfd_vma ehdr_vma, size_t size, bfd_vma *loadbasep,
+  (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type));
 extern bfd *_bfd_elf64_bfd_from_remote_memory
-  (bfd *templ, bfd_vma ehdr_vma, size_t size, bfd_vma *loadbasep,
+  (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type));
 
 extern bfd_vma bfd_elf_obj_attr_size (bfd *);

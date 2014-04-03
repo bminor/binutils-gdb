@@ -9908,7 +9908,7 @@ bfd *
 bfd_elf_bfd_from_remote_memory
   (bfd *templ,
    bfd_vma ehdr_vma,
-   size_t size,
+   bfd_size_type size,
    bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type))
 {
