@@ -1111,6 +1111,13 @@ pe_print_idata (bfd * abfd, void * vfile)
 		   _("\nThere is an import table, but the section containing it could not be found\n"));
 	  return TRUE;
 	}
+      else if (!(section->flags & SEC_HAS_CONTENTS))
+        {
+	  fprintf (file,
+		   _("\nThere is an import table in %s, but that section has no contents\n"),
+		   section->name);
+	  return TRUE;
+        }
     }
 
   fprintf (file, _("\nThere is an import table in %s at 0x%lx\n"),
@@ -1373,7 +1380,7 @@ pe_print_edata (bfd * abfd, void * vfile)
   bfd_size_type datasize = 0;
   bfd_size_type dataoff;
   bfd_size_type i;
-  bfd_signed_vma adj;
+  bfd_vma       adj;
   struct EDT_type
   {
     long export_flags;          /* Reserved - should be zero.  */
@@ -1423,6 +1430,13 @@ pe_print_edata (bfd * abfd, void * vfile)
 		   _("\nThere is an export table, but the section containing it could not be found\n"));
 	  return TRUE;
 	}
+      else if (!(section->flags & SEC_HAS_CONTENTS))
+        {
+	  fprintf (file,
+		   _("\nThere is an export table in %s, but that section has no contents\n"),
+		   section->name);
+	  return TRUE;
+        }
 
       dataoff = addr - section->vma;
       datasize = extra->DataDirectory[PE_EXPORT_TABLE].Size;
@@ -1478,8 +1492,11 @@ pe_print_edata (bfd * abfd, void * vfile)
   fprintf (file,
 	   _("Name \t\t\t\t"));
   bfd_fprintf_vma (abfd, file, edt.name);
-  fprintf (file,
-	   " %s\n", data + edt.name - adj);
+
+  if ((edt.name >= adj) && (edt.name < adj + datasize))
+    fprintf (file, " %s\n", data + edt.name - adj);
+  else
+    fprintf (file, "(outside .edata section)\n");
 
   fprintf (file,
 	   _("Ordinal Base \t\t\t%ld\n"), edt.base);
@@ -1927,10 +1944,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
   bfd_size_type i;
   bfd_size_type start, stop;
 
-  if (section == NULL)
-    return TRUE;
-
-  if (section->size == 0)
+  if (section == NULL || section->size == 0 || !(section->flags & SEC_HAS_CONTENTS))
     return TRUE;
 
   fprintf (file,
@@ -2166,7 +2180,6 @@ rsrc_print_section (bfd * abfd, void * vfile)
   bfd_byte * dataend;
   bfd_byte * datastart;
 
-
   pe = pe_data (abfd);
   if (pe == NULL)
     return TRUE;
@@ -2174,12 +2187,14 @@ rsrc_print_section (bfd * abfd, void * vfile)
   section = bfd_get_section_by_name (abfd, ".rsrc");
   if (section == NULL)
     return TRUE;
-
-  rva_bias = section->vma - pe->pe_opthdr.ImageBase;
+  if (!(section->flags & SEC_HAS_CONTENTS))
+    return TRUE;
 
   datasize = section->size;
   if (datasize == 0)
     return TRUE;
+
+  rva_bias = section->vma - pe->pe_opthdr.ImageBase;
 
   if (! bfd_malloc_and_get_section (abfd, section, & data))
     {

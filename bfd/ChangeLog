@@ -1,3 +1,11 @@
+2014-04-03  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* peXXigen.c (pe_print_edata): Verify edt.name lies inside
+	section before dereferencing.
+	(pe_print_idata, pe_print_edata, pe_print_reloc)
+	(rsrc_print_section): Don't bother interpreting the contents
+	of sections which have no contents.
+
 2014-04-03  Maria Guseva  <m.guseva@samsung.com>
 
 	PR ld/16803
