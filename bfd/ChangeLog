@@ -1,3 +1,13 @@
+2014-04-03  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data
+	<elf_backend_bfd_from_remote_memory>): Replace "size_t size"
+	with "bfd_size_type size".
+	(_bfd_elf32_bfd_from_remote_memory): Likewise.
+	(_bfd_elf64_bfd_from_remote_memory): Likewise.
+	* elf.c (bfd_elf_bfd_from_remote_memory): Likewise.
+	* elfcode.h (bfd_from_remote_memory): Likewise.
+
 2014-04-02  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.h (bfd_mach_o_twolevel_hints_command)
