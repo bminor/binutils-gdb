@@ -7800,7 +7800,7 @@ _bfd_elf_set_section_contents (bfd *abfd,
 			       bfd_size_type count)
 {
   Elf_Internal_Shdr *hdr;
-  bfd_signed_vma pos;
+  file_ptr pos;
 
   if (! abfd->output_has_begun
       && ! _bfd_elf_compute_section_file_positions (abfd, NULL))

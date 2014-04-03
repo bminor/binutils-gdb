@@ -1,3 +1,9 @@
+2014-04-03  Maria Guseva  <m.guseva@samsung.com>
+
+	PR ld/16803
+	* elf.c (_bfd_elf_set_section_contents): Use correct type to hold
+	file position.
+
 2014-04-03  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_mangle_symbols): Use index from
