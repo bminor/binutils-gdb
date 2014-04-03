@@ -1,3 +1,7 @@
+2014-04-04  Tristan Gingold  <gingold@adacore.com>
+
+	* bfd.c (bfd_get_arch_size): Default is taken from arch.
+
 2014-04-03  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* peXXigen.c (pe_print_edata): Verify edt.name lies inside

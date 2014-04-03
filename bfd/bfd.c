@@ -1073,9 +1073,11 @@ SYNOPSIS
  	int bfd_get_arch_size (bfd *abfd);
 
 DESCRIPTION
-	Returns the architecture address size, in bits, as determined
-	by the object file's format.  For ELF, this information is
-	included in the header.
+	Returns the normalized architecture address size, in bits, as
+	determined by the object file's format.  By normalized, we mean
+	either 32 or 64.  For ELF, this information is included in the
+	header.  Use bfd_arch_bits_per_address for number of bits in
+	the architecture address.
 
 RETURNS
 	Returns the arch size in bits if known, <<-1>> otherwise.
@@ -1087,7 +1089,7 @@ bfd_get_arch_size (bfd *abfd)
   if (abfd->xvec->flavour == bfd_target_elf_flavour)
     return get_elf_backend_data (abfd)->s->arch_size;
 
-  return -1;
+  return bfd_arch_bits_per_address (abfd) > 32 ? 64 : 32;
 }
 
 /*
