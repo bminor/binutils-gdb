@@ -7,6 +7,8 @@
 	(_bfd_elf64_bfd_from_remote_memory): Likewise.
 	* elf.c (bfd_elf_bfd_from_remote_memory): Likewise.
 	* elfcode.h (bfd_from_remote_memory): Likewise.
+	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Likewise.
+	* bfd-in2.h: Regenerate.
 
 2014-04-02  Tristan Gingold  <gingold@adacore.com>
 

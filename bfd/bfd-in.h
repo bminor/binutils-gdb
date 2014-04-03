@@ -694,7 +694,7 @@ extern int bfd_get_elf_phdrs
    failure.  TEMPL must be a BFD for a target with the word size and
    byte order found in the remote memory.  */
 extern bfd *bfd_elf_bfd_from_remote_memory
-  (bfd *templ, bfd_vma ehdr_vma, size_t size, bfd_vma *loadbasep,
+  (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma vma, bfd_byte *myaddr,
 			      bfd_size_type len));
 
