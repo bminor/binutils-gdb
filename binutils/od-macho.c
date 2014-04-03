@@ -249,6 +249,15 @@ bfd_mach_o_print_flags (const bfd_mach_o_xlat_name *table,
     printf ("-");
 }
 
+/* Print a bfd_uint64_t, using a platform independant style.  */
+
+static void
+printf_uint64 (bfd_uint64_t v)
+{
+  printf ("0x%08lx%08lx",
+	  (unsigned long)((v >> 16) >> 16), (unsigned long)(v & 0xffffffffUL));
+}
+
 static const char *
 bfd_mach_o_get_name_or_null (const bfd_mach_o_xlat_name *table,
                              unsigned long val)
@@ -1279,10 +1288,10 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
         bfd_mach_o_main_command *entry = &cmd->command.main;
         printf ("\n"
                 "   entry offset: ");
-	printf_vma (entry->entryoff);
+	printf_uint64 (entry->entryoff);
         printf ("\n"
                 "   stack size:   ");
-	printf_vma (entry->stacksize);
+	printf_uint64 (entry->stacksize);
 	printf ("\n");
         break;
       }
@@ -1492,12 +1501,12 @@ dump_obj_compact_unwind (bfd *abfd,
 	  e = (struct mach_o_compact_unwind_64 *) p;
 
 	  putchar (' ');
-	  fprintf_vma (stdout, bfd_get_64 (abfd, e->start));
+	  printf_uint64 (bfd_get_64 (abfd, e->start));
 	  printf (" %08lx", bfd_get_32 (abfd, e->length));
 	  putchar (' ');
-	  fprintf_vma (stdout, bfd_get_64 (abfd, e->personnality));
+	  printf_uint64 (bfd_get_64 (abfd, e->personality));
 	  putchar (' ');
-	  fprintf_vma (stdout, bfd_get_64 (abfd, e->lsda));
+	  printf_uint64 (bfd_get_64 (abfd, e->lsda));
 	  putchar ('\n');
 
 	  printf ("  encoding: ");
@@ -1551,6 +1560,17 @@ dump_exe_compact_unwind (bfd *abfd,
   index_count = bfd_get_32 (abfd, hdr->index_count);
   printf ("   %u encodings, %u personalities, %u level-1 indexes:\n",
 	  encodings_count, personality_count, index_count);
+
+  /* Personality.  */
+  if (personality_count > 0)
+    {
+      const unsigned char *pers = content + personality_offset;
+
+      printf ("   personalities\n");
+      for (i = 0; i < personality_count; i++)
+	printf ("     %u: 0x%08x\n", i,
+		(unsigned) bfd_get_32 (abfd, pers + 4 * i));
+    }
 
   /* Level-1 index.  */
   printf ("   idx function   level2 off lsda off\n");
@@ -1634,7 +1654,7 @@ dump_exe_compact_unwind (bfd *abfd,
 		    + 4 * (enc_idx - encodings_count);
 		encoding = bfd_get_32 (abfd, enc_addr);
 
-		printf ("   %-4u 0x%08x [%3u] ", j,
+		printf ("   %4u 0x%08x [%3u] ", j,
 			func_offset + en_func, enc_idx);
 		dump_unwind_encoding (mdata, encoding);
 		putchar ('\n');

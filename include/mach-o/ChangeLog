@@ -1,3 +1,7 @@
+2014-04-03  Tristan Gingold  <gingold@adacore.com>
+
+	* unwind.h (mach_o_compact_unwind_64): Fix typo in personality.
+
 2014-04-02  Tristan Gingold  <gingold@adacore.com>
 
 	* external.h (mach_o_prebound_dylib_command_external)

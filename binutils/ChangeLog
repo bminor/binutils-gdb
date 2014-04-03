@@ -1,3 +1,9 @@
+2014-04-03  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (printf_uint64): New function.
+	(dump_load_command, dump_obj_compact_unwind): Use it.
+	(dump_exe_compact_unwind): Display personality functions.
+
 2014-04-02  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c (OPT_TWOLEVEL_HINTS): New macro.
