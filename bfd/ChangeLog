@@ -1,5 +1,10 @@
 2014-04-04  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_header_p): Reject 64 bit target when not
+	configured for.
+
+2014-04-04  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_convert_section_name_to_mach_o): Fix
 	thinko on names length.
 

@@ -4300,6 +4300,15 @@ bfd_mach_o_header_p (bfd *abfd,
       if (header.cputype != cputype)
         goto wrong;
     }
+  else
+    {
+#ifndef BFD64
+      /* Do not recognize 64 architectures if not configured for 64bit targets.
+	 This could happen only for generic targets.  */
+      if (mach_o_wide_p (&header))
+	 goto wrong;
+#endif
+    }
 
   if (filetype)
     {
