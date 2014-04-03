@@ -586,8 +586,24 @@ sim_resume (sd, step, siggnal)
 	      break;
 	    case 0x0f: /* nop */
 	      break;
-	    case 0x10: /* bad */
-	    case 0x11: /* bad */
+	    case 0x10: /* sex.b */
+	      {
+		int a = (inst >> 4) & 0xf;
+		int b = inst & 0xf;
+		signed char bv = cpu.asregs.regs[b];
+		TRACE("sex.b");
+		cpu.asregs.regs[a] = (int) bv;
+	      }
+	      break;
+	    case 0x11: /* sex.s */
+	      {
+		int a = (inst >> 4) & 0xf;
+		int b = inst & 0xf;
+		signed short bv = cpu.asregs.regs[b];
+		TRACE("sex.s");
+		cpu.asregs.regs[a] = (int) bv;
+	      }
+	      break;
 	    case 0x12: /* bad */
 	    case 0x13: /* bad */
 	    case 0x14: /* bad */
