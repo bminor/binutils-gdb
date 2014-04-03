@@ -1,3 +1,9 @@
+2014-04-03  Markus Trippelsdorf  <markus@trippelsdorf.de>
+
+	PR binutils/14698
+	ar.c: Set plugin_target early if plugins are supported.
+	nm.c: Likewise.
+
 2014-04-03  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c (printf_uint64): New function.
