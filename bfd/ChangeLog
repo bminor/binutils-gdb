@@ -1,3 +1,11 @@
+2014-04-03  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_mangle_symbols): Use index from
+	output_section.
+	(bfd_mach_o_build_seg_command): Add comment.  Realign segment.
+	Fix style.
+	(bfd_mach_o_build_commands, bfd_mach_o_read_thread): Fix style.
+
 2014-04-03  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_backend_data

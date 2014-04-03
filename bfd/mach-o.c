@@ -1873,7 +1873,7 @@ bfd_mach_o_mangle_symbols (bfd *abfd)
           && s->symbol.section != bfd_com_section_ptr)
           || ((s->n_type & BFD_MACH_O_N_STAB) != 0
                && s->symbol.name == NULL))
-	s->n_sect = s->symbol.section->target_index;
+	s->n_sect = s->symbol.section->output_section->target_index;
 
       /* Number to preserve order for local and debug syms.  */
       s->symbol.udata.i = i;
@@ -2166,6 +2166,7 @@ bfd_mach_o_build_seg_command (const char *segment,
 	  seg->filesize = FILE_ALIGN (seg->filesize, s->align);
 	  seg->filesize += s->size;
 
+	  /* Note: follow alignment even for object file.  */
           mdata->filelen = FILE_ALIGN (mdata->filelen, s->align);
           s->offset = mdata->filelen;
         }
@@ -2173,6 +2174,11 @@ bfd_mach_o_build_seg_command (const char *segment,
       sec->filepos = s->offset;
       mdata->filelen += s->size;
     }
+
+  /* Be sure the file offset of the segment is the file offset of its first
+     section (may have changed due to alignment).  */
+  if (seg->sect_head != NULL)
+    seg->fileoff = seg->sect_head->offset;
 
   /* Now pass through again, for zerofill, only now we just update the
      vmsize.  */
@@ -2184,8 +2190,8 @@ bfd_mach_o_build_seg_command (const char *segment,
         continue;
 
       if (! is_mho
-	  && strncmp (segment, s->segname, BFD_MACH_O_SEGNAME_SIZE) != 0)
-	continue;
+         && strncmp (segment, s->segname, BFD_MACH_O_SEGNAME_SIZE) != 0)
+       continue;
 
       if (s->size > 0)
 	{
@@ -2214,7 +2220,7 @@ bfd_mach_o_build_seg_command (const char *segment,
     }
 
   /* Allocate space for the relocations.  */
-  mdata->filelen = FILE_ALIGN(mdata->filelen, 2);
+  mdata->filelen = FILE_ALIGN (mdata->filelen, 2);
 
   for (i = 0; i < mdata->nsects; ++i)
     {
@@ -2470,7 +2476,8 @@ bfd_mach_o_build_commands (bfd *abfd)
       bfd_mach_o_load_command *cmd = &mdata->commands[segcmd_idx];
       bfd_mach_o_segment_command *seg = &cmd->command.segment;
 
-      /* Count the segctions in the special blank segment used for MH_OBJECT.  */
+      /* Count the segctions in the special blank segment used
+	 for MH_OBJECT.  */
       seg->nsects = bfd_mach_o_count_sections_for_seg (NULL, mdata);
       if (seg->nsects == (unsigned long) -1)
 	return FALSE;
@@ -3372,11 +3379,13 @@ bfd_mach_o_read_thread (bfd *abfd, bfd_mach_o_load_command *command)
 	{
 	case BFD_MACH_O_CPU_TYPE_POWERPC:
 	case BFD_MACH_O_CPU_TYPE_POWERPC_64:
-	  flavourstr = bfd_mach_o_ppc_flavour_string (cmd->flavours[i].flavour);
+	  flavourstr =
+	    bfd_mach_o_ppc_flavour_string (cmd->flavours[i].flavour);
 	  break;
 	case BFD_MACH_O_CPU_TYPE_I386:
 	case BFD_MACH_O_CPU_TYPE_X86_64:
-	  flavourstr = bfd_mach_o_i386_flavour_string (cmd->flavours[i].flavour);
+	  flavourstr =
+	    bfd_mach_o_i386_flavour_string (cmd->flavours[i].flavour);
 	  break;
 	default:
 	  flavourstr = "UNKNOWN_ARCHITECTURE";
