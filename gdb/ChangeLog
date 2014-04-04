@@ -1,3 +1,9 @@
+2014-04-08  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (struct gdbarch_tdep): Mention avrxmega in the comment.
+	(avr_gdbarch_init): Add xmega architectures given by bfd_architecture
+	when setting the size of call_length.
+
 2014-04-07  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python/py-value.c (valpy_get_dynamic_type): Use coerce_ref to
