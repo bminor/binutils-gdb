@@ -467,7 +467,8 @@ bfd_mach_o_convert_section_name_to_mach_o (bfd *abfd ATTRIBUTE_UNUSED,
       seglen = dot - name;
       seclen = len - (dot + 1 - name);
 
-      if (seglen < 16 && seclen < 16)
+      if (seglen <= BFD_MACH_O_SEGNAME_SIZE
+	  && seclen <= BFD_MACH_O_SECTNAME_SIZE)
         {
           memcpy (section->segname, name, seglen);
           section->segname[seglen] = 0;
@@ -1325,9 +1326,9 @@ bfd_mach_o_write_relocs (bfd *abfd, bfd_mach_o_section *section)
 
           v = BFD_MACH_O_SR_SCATTERED
             | (pinfo->r_pcrel ? BFD_MACH_O_SR_PCREL : 0)
-            | BFD_MACH_O_SET_SR_LENGTH(pinfo->r_length)
-            | BFD_MACH_O_SET_SR_TYPE(pinfo->r_type)
-            | BFD_MACH_O_SET_SR_ADDRESS(pinfo->r_address);
+            | BFD_MACH_O_SET_SR_LENGTH (pinfo->r_length)
+            | BFD_MACH_O_SET_SR_TYPE (pinfo->r_type)
+            | BFD_MACH_O_SET_SR_ADDRESS (pinfo->r_address);
           /* Note: scattered relocs have field in reverse order...  */
           bfd_put_32 (abfd, v, raw.r_address);
           bfd_put_32 (abfd, pinfo->r_value, raw.r_symbolnum);

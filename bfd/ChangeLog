@@ -1,5 +1,10 @@
 2014-04-04  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_convert_section_name_to_mach_o): Fix
+	thinko on names length.
+
+2014-04-04  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o-i386.c (bfd_mach_o_i386_swap_reloc_out): Use target index
 	of output_section.
 	* mach-o-x86-64.c (bfd_mach_o_x86_64_swap_reloc_out): Ditto.
