@@ -1,5 +1,11 @@
 2014-04-04  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o-i386.c (bfd_mach_o_i386_swap_reloc_out): Use target index
+	of output_section.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_swap_reloc_out): Ditto.
+
+2014-04-04  Tristan Gingold  <gingold@adacore.com>
+
 	* bfd.c (bfd_get_arch_size): Default is taken from arch.
 
 2014-04-03  Jon Turney  <jon.turney@dronecode.org.uk>
