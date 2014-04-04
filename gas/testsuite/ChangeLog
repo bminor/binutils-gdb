@@ -1,5 +1,11 @@
 2014-04-23  Will Newton  <will.newton@linaro.org>
 
+	* gas/arm/backslash-at.d: Fix dump output regexps for
+	armeb-linux-eabi configuration.
+	* gas/arm/got_prel.d: Likewise.
+	* gas/arm/inst-po.d: Likewise.
+	* gas/arm/unwind.d: Likewise.
+
 	* gas/arm/mapmisc.d: Check literal pool mapping with
 	a trailing .align statement.
 	* gas/arm/mapmisc.s: Likewise.
