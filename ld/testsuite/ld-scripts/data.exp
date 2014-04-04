@@ -23,7 +23,9 @@
 # text segment, confusing run_dump_test.
 if {[is_aout_format]} {
 	unsupported data
+	unsupported fill
 	return
 }
 
 run_dump_test data
+run_dump_test fill

@@ -1,3 +1,8 @@
+2014-04-04  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_size_sections_1 <lang_input_section_enum>): Use
+	current "fill", not "output_section_statement->fill".
+
 2014-03-31  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16744

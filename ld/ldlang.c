@@ -5213,7 +5213,7 @@ lang_size_sections_1
 		  *relax = TRUE;
 	      }
 	    dot = size_input_section (prev, output_section_statement,
-				      output_section_statement->fill, dot);
+				      fill, dot);
 	  }
 	  break;
 
