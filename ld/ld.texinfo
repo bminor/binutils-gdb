@@ -3788,7 +3788,7 @@ The full description of an output section looks like this:
     @var{output-section-command}
     @var{output-section-command}
     @dots{}
-  @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
+  @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}] [,]
 @end group
 @end smallexample
 
@@ -3796,6 +3796,8 @@ Most output sections do not use most of the optional section attributes.
 
 The whitespace around @var{section} is required, so that the section
 name is unambiguous.  The colon and the curly braces are also required.
+The comma at the end may be required if a @var{fillexp} is used and
+the next @var{sections-command} looks like a continuation of the expression.
 The line breaks and other white space are optional.
 
 Each @var{output-section-command} may be one of the following:
@@ -4729,7 +4731,7 @@ OVERLAY [@var{start}] : [NOCROSSREFS] [AT ( @var{ldaddr} )]
         @dots{}
       @} [:@var{phdr}@dots{}] [=@var{fill}]
     @dots{}
-  @} [>@var{region}] [:@var{phdr}@dots{}] [=@var{fill}]
+  @} [>@var{region}] [:@var{phdr}@dots{}] [=@var{fill}] [,]
 @end group
 @end smallexample
 
@@ -4739,6 +4741,9 @@ section definitions within the @code{OVERLAY} construct are identical to
 those within the general @code{SECTIONS} construct (@pxref{SECTIONS}),
 except that no addresses and no memory regions may be defined for
 sections within an @code{OVERLAY}.
+
+The comma at the end may be required if a @var{fill} is used and
+the next @var{sections-command} looks like a continuation of the expression.
 
 The sections are all defined with the same starting address.  The load
 addresses of the sections are arranged such that they are consecutive in

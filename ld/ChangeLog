@@ -1,3 +1,9 @@
+2014-04-04  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/16804
+	* ld.texinfo: Document optional comma following output section
+	command and overlay command.
+
 2014-04-04  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_size_sections_1 <lang_input_section_enum>): Use
