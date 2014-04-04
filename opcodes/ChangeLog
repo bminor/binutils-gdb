@@ -1,3 +1,19 @@
+2014-04-04  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis.c (rm_table): Add encls, enclu.
+	* i386-gen.c (cpu_flag_init): Add CPU_SE1_FLAGS,
+	(cpu_flags): Add CpuSE1.
+	* i386-opc.h (enum): Add CpuSE1.
+	(i386_cpu_flags): Add cpuse1.
+	* i386-opc.tbl: Add encls, enclu.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2014-04-02  Anthony Green  <green@moxielogic.com>
+
+	* moxie-opc.c (moxie_form1_opc_info): Add sign-extension
+	instructions, sex.b and sex.s.
+
 2014-03-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64-dis.c (aarch64_ext_ldst_elemlist): Check H/S undefined

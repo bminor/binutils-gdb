@@ -1,3 +1,15 @@
+2014-04-04  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_size_sections_1 <lang_input_section_enum>): Use
+	current "fill", not "output_section_statement->fill".
+
+2014-03-31  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16744
+	* emultempl/elf32.em (_after_open): Create a .note.GNU-stack
+	section when performing a relocatable link with -z [no]execstack
+	specified.
+
 2014-03-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16756
@@ -5,7 +17,7 @@
 	(warning_callback): Use it.  Scan all input files for a reference
 	to SYMBOL.
 
-2014-03-17  Christopher Faylor  <me.cygwin2013@cgf.cx>
+2014-03-21  Christopher Faylor  <me.cygwin2013@cgf.cx>
 
 	* ld.texinfo: Document change in handling of --enable-auto-image-base.
 	* emultempl/pe.em (pe_auto_image_base): Set to default base.
@@ -28,16 +40,6 @@
 
 	* Makefile.am: Use host version of windres.
 	* Makefile.in: Regenerate.
-
-2014-03-14  Christopher Faylor  <me.cygwin2013@cgf.cx>
-
-	* ld.texinfo: Document change in handling of --enable-auto-image-base.
-	* emultempl/pe.em (pe_auto_image_base): Set to default base.
-	(gld_${EMULATION_NAME}_list_options): Change usage message to reflect
-	optional --enable-auto-image-base argument.
-	(gld${EMULATION_NAME}_handle_option): Handle optional
-	--enable-auto-image-base argument.
-	(compute_dll_image_base): Eliminate constant.  Use pe_auto_image_base.
 
 2014-03-14  Romain Geissler  <romain.geissler@amadeus.com>
 	    Alan Modra  <amodra@gmail.com>

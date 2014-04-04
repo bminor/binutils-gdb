@@ -1,3 +1,41 @@
+2014-04-03  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/setshow.exp: Invoke string_to_regexp to HOME and PWD.
+
+2014-04-01  Anton Blanchard  <anton@samba.org>
+
+	* gdb.arch/ppc64-atomic-inst.exp: Use untested.  Make test
+	messages unique.
+
+2014-04-01  Anton Blanchard  <anton@samba.org>
+
+	* gdb.arch/ppc64-atomic-inst.exp: Use standard_testfile,
+	prepare_for_testing.
+
+2014-04-01  Anton Blanchard  <anton@samba.org>
+
+	* gdb.arch/ppc64-atomic-inst.c: Remove.
+	* gdb.arch/ppc64-atomic-inst.S: New file.
+	* gdb.arch/ppc64-atomic-inst.exp: Adapt for asm based testcase.
+
+2014-03-31  Doug Evans  <dje@google.com>
+
+	* gdb.base/print-symbol-loading-lib.c: New file.
+	* gdb.base/print-symbol-loading-main.c: New file.
+	* gdb.base/print-symbol-loading.exp: New file.
+
+2014-03-31  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/source-dir.exp: Allow ';' as a directory separator.
+
+2014-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_dyn_arr: New testcase.
+
+2014-03-27  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-abs-hi-pc.exp: Build tests with "nodebug".
+
 2014-03-27  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (can_single_step_to_signal_handler): Return zero

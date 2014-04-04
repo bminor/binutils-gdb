@@ -28,6 +28,13 @@ info auto-load guile-scripts [regexp]
 
 * New options
 
+set print symbol-loading (off|brief|full)
+show print symbol-loading
+  Control whether to print informational messages when loading symbol
+  information for a file.  The default is "full", but when debugging
+  programs with large numbers of shared libraries the amount of output
+  becomes less useful.
+
 set guile print-stack (none|message|full)
 show guile print-stack
   Show a stack trace when an error is encountered in a Guile script.

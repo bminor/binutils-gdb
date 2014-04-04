@@ -1,3 +1,18 @@
+2014-04-02  Sriraman Tallam  <tmsriram@google.com>
+
+	* icf.cc (get_section_contents): Replace copies of reloc
+	vectors with const references.
+
+2014-04-02  Cary Coutant  <ccoutant@google.com>
+
+	* configure.ac (HAVE_PUBNAMES): Use C instead of C++.
+	(HAVE_NO_USE_LINKER_PLUGIN): Check for -fno-use-linker-plugin.
+	* configure: Regenerate.
+	* testsuite/Makefile.am (OPT_NO_PLUGINS): New macro for
+	-fno-use-linker-plugin.
+	(LINK1, CXXLINK1): Add it to the link command.
+	* testsuite/Makefile.in: Regenerate.
+
 2014-03-12  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.

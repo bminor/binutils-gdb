@@ -1,3 +1,13 @@
+2014-04-04  Alan Modra  <amodra@gmail.com>
+
+	* ld-scripts/fill.d, * ld-scripts/fill.t, * ld-scripts/fill_0.s,
+	* ld-scripts/fill_1.s, * ld-scripts/fill_2.s: New test.
+	* ld-scripts/data.exp: Run it.
+
+2014-03-31  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/eh-frame.d: Adjust FDE pc address.
+
 2014-03-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16756

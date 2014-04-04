@@ -113,6 +113,9 @@ static char *darwin_pid_to_str (struct target_ops *ops, ptid_t tpid);
 
 static int darwin_thread_alive (struct target_ops *ops, ptid_t tpid);
 
+static void darwin_encode_reply (mig_reply_error_t *reply,
+				 mach_msg_header_t *hdr, integer_t code);
+
 /* Target operations for Darwin.  */
 static struct target_ops *darwin_ops;
 
@@ -557,8 +560,8 @@ darwin_decode_exception_message (mach_msg_header_t *hdr,
   kern_return_t kret;
   int i;
 
-  /* Check message identifier.  2401 == 0x961 is exc.  */
-  if (hdr->msgh_id != 2401)
+  /* Check message destination.  */
+  if (hdr->msgh_local_port != darwin_ex_port)
     return -1;
 
   /* Check message header.  */
@@ -588,24 +591,41 @@ darwin_decode_exception_message (mach_msg_header_t *hdr,
   /* Ok, the hard work.  */
   data = (integer_t *)(ndr + 1);
 
-  /* Find process by port.  */
   task_port = desc[1].name;
   thread_port = desc[0].name;
-  inf = darwin_find_inferior_by_task (task_port);
-  if (inf == NULL)
-    return -1;
-  *pinf = inf;
-
-  /* Find thread by port.  */
-  /* Check for new threads.  Do it early so that the port in the exception
-     message can be deallocated.  */
-  darwin_check_new_threads (inf);
 
   /* We got new rights to the task and the thread.  Get rid of them.  */
   kret = mach_port_deallocate (mach_task_self (), task_port);
   MACH_CHECK_ERROR (kret);
   kret = mach_port_deallocate (mach_task_self (), thread_port);
   MACH_CHECK_ERROR (kret);
+
+  /* Find process by port.  */
+  inf = darwin_find_inferior_by_task (task_port);
+  *pinf = inf;
+  if (inf == NULL)
+    {
+      /* Not a known inferior.  This could happen if the child fork, as
+	 the created process will inherit its exception port.
+	 FIXME: should the exception port be restored ?  */
+      kern_return_t kret;
+      mig_reply_error_t reply;
+
+      darwin_encode_reply (&reply, hdr, KERN_SUCCESS);
+
+      kret = mach_msg (&reply.Head, MACH_SEND_MSG | MACH_SEND_INTERRUPT,
+		       reply.Head.msgh_size, 0,
+		       MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE,
+		       MACH_PORT_NULL);
+      MACH_CHECK_ERROR (kret);
+
+      return 0;
+    }
+
+  /* Find thread by port.  */
+  /* Check for new threads.  Do it early so that the port in the exception
+     message can be deallocated.  */
+  darwin_check_new_threads (inf);
 
   thread = darwin_find_thread (inf, thread_port);
   if (thread == NULL)
@@ -863,8 +883,8 @@ darwin_decode_message (mach_msg_header_t *hdr,
   darwin_thread_t *thread;
   struct inferior *inf;
 
-  /* Exception message.  */
-  if (hdr->msgh_local_port == darwin_ex_port)
+  /* Exception message.  2401 == 0x961 is exc.  */
+  if (hdr->msgh_id == 2401)
     {
       int res;
 
@@ -877,7 +897,12 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	  printf_unfiltered
 	    (_("darwin_wait: ill-formatted message (id=0x%x)\n"), hdr->msgh_id);
 	  /* FIXME: send a failure reply?  */
-	  status->kind = TARGET_WAITKIND_SPURIOUS;
+	  status->kind = TARGET_WAITKIND_IGNORE;
+	  return minus_one_ptid;
+	}
+      if (inf == NULL)
+	{
+	  status->kind = TARGET_WAITKIND_IGNORE;
 	  return minus_one_ptid;
 	}
       *pinf = inf;
@@ -940,56 +965,60 @@ darwin_decode_message (mach_msg_header_t *hdr,
 
       return ptid_build (inf->pid, 0, thread->gdb_port);
     }
-
-  *pinf = NULL;
-  *pthread = NULL;
-
-  inf = darwin_find_inferior_by_notify (hdr->msgh_local_port);
-  if (inf != NULL)
+  else if (hdr->msgh_id == 0x48)
     {
-      if (!inf->private->no_ptrace)
-	{
-	  pid_t res;
-	  int wstatus;
+      /* MACH_NOTIFY_DEAD_NAME: notification for exit.  */
+      *pinf = NULL;
+      *pthread = NULL;
 
-	  res = wait4 (inf->pid, &wstatus, 0, NULL);
-	  if (res < 0 || res != inf->pid)
+      inf = darwin_find_inferior_by_notify (hdr->msgh_local_port);
+      if (inf != NULL)
+	{
+	  if (!inf->private->no_ptrace)
 	    {
-	      printf_unfiltered (_("wait4: res=%d: %s\n"),
-				 res, safe_strerror (errno));
-	      status->kind = TARGET_WAITKIND_SPURIOUS;
-	      return minus_one_ptid;
-	    }
-	  if (WIFEXITED (wstatus))
-	    {
-	      status->kind = TARGET_WAITKIND_EXITED;
-	      status->value.integer = WEXITSTATUS (wstatus);
+	      pid_t res;
+	      int wstatus;
+
+	      res = wait4 (inf->pid, &wstatus, 0, NULL);
+	      if (res < 0 || res != inf->pid)
+		{
+		  printf_unfiltered (_("wait4: res=%d: %s\n"),
+				     res, safe_strerror (errno));
+		  status->kind = TARGET_WAITKIND_IGNORE;
+		  return minus_one_ptid;
+		}
+	      if (WIFEXITED (wstatus))
+		{
+		  status->kind = TARGET_WAITKIND_EXITED;
+		  status->value.integer = WEXITSTATUS (wstatus);
+		}
+	      else
+		{
+		  status->kind = TARGET_WAITKIND_SIGNALLED;
+		  status->value.sig = WTERMSIG (wstatus);
+		}
+
+	      inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
+			      res, wstatus);
+
+	      /* Looks necessary on Leopard and harmless...  */
+	      wait4 (inf->pid, &wstatus, 0, NULL);
+
+	      return ptid_build (inf->pid, 0, 0);
 	    }
 	  else
 	    {
-	      status->kind = TARGET_WAITKIND_SIGNALLED;
-	      status->value.sig = WTERMSIG (wstatus);
+	      inferior_debug (4, _("darwin_wait: pid=%d\n"), inf->pid);
+	      status->kind = TARGET_WAITKIND_EXITED;
+	      status->value.integer = 0; /* Don't know.  */
+	      return ptid_build (inf->pid, 0, 0);
 	    }
-
-	  inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
-			  res, wstatus);
-
-	  /* Looks necessary on Leopard and harmless...  */
-	  wait4 (inf->pid, &wstatus, 0, NULL);
-
-	  return ptid_build (inf->pid, 0, 0);
-	}
-      else
-	{
-	  inferior_debug (4, _("darwin_wait: pid=%d\n"), inf->pid);
-	  status->kind = TARGET_WAITKIND_EXITED;
-	  status->value.integer = 0; /* Don't know.  */
-	  return ptid_build (inf->pid, 0, 0);
 	}
     }
 
-  printf_unfiltered (_("Bad local-port: 0x%x\n"), hdr->msgh_local_port);
-  status->kind = TARGET_WAITKIND_SPURIOUS;
+  /* Unknown message.  */
+  warning (_("darwin: got unknown message, id: 0x%x\n"), hdr->msgh_id);
+  status->kind = TARGET_WAITKIND_IGNORE;
   return minus_one_ptid;
 }
 
@@ -1082,7 +1111,10 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 	darwin_dump_message (hdr, darwin_debug_flag > 11);
 
       res = darwin_decode_message (hdr, &thread, &inf, status);
+      if (ptid_equal (res, minus_one_ptid))
+	continue;
 
+      /* Early return in case an inferior has exited.  */
       if (inf == NULL)
 	return res;
     }
@@ -1109,6 +1141,10 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 	    (5, _("darwin_wait: mach_msg(pending) ret=0x%x\n"), kret);
 	  break;
 	}
+
+      /* Debug: display message.  */
+      if (darwin_debug_flag > 10)
+	darwin_dump_message (hdr, darwin_debug_flag > 11);
 
       ptid2 = darwin_decode_message (hdr, &thread, &inf, &status2);
 

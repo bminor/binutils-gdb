@@ -3766,33 +3766,36 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 
       for (i = 0; i < 3; i++)
 	{
-	  write_exp_elt_opcode (OP_LONG);
-	  write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
-	  write_exp_elt_longcst (displacements[i]);
-	  write_exp_elt_opcode (OP_LONG);
+	  write_exp_elt_opcode (&p->pstate, OP_LONG);
+	  write_exp_elt_type
+	    (&p->pstate, builtin_type (gdbarch)->builtin_long);
+	  write_exp_elt_longcst (&p->pstate, displacements[i]);
+	  write_exp_elt_opcode (&p->pstate, OP_LONG);
 	  if (got_minus[i])
-	    write_exp_elt_opcode (UNOP_NEG);
+	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
 	}
 
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
       str.ptr = regname;
       str.length = len;
-      write_exp_string (str);
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_string (&p->pstate, str);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
 
-      write_exp_elt_opcode (UNOP_CAST);
-      write_exp_elt_type (builtin_type (gdbarch)->builtin_data_ptr);
-      write_exp_elt_opcode (UNOP_CAST);
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
+      write_exp_elt_type (&p->pstate,
+			  builtin_type (gdbarch)->builtin_data_ptr);
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
 
-      write_exp_elt_opcode (BINOP_ADD);
-      write_exp_elt_opcode (BINOP_ADD);
-      write_exp_elt_opcode (BINOP_ADD);
+      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
+      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
+      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
 
-      write_exp_elt_opcode (UNOP_CAST);
-      write_exp_elt_type (lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (UNOP_CAST);
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
+      write_exp_elt_type (&p->pstate,
+			  lookup_pointer_type (p->arg_type));
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
 
-      write_exp_elt_opcode (UNOP_IND);
+      write_exp_elt_opcode (&p->pstate, UNOP_IND);
 
       p->arg = s;
 
@@ -3912,47 +3915,50 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 
       if (offset)
 	{
-	  write_exp_elt_opcode (OP_LONG);
-	  write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
-	  write_exp_elt_longcst (offset);
-	  write_exp_elt_opcode (OP_LONG);
+	  write_exp_elt_opcode (&p->pstate, OP_LONG);
+	  write_exp_elt_type (&p->pstate,
+			      builtin_type (gdbarch)->builtin_long);
+	  write_exp_elt_longcst (&p->pstate, offset);
+	  write_exp_elt_opcode (&p->pstate, OP_LONG);
 	  if (offset_minus)
-	    write_exp_elt_opcode (UNOP_NEG);
+	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
 	}
 
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
       base_token.ptr = base;
       base_token.length = len_base;
-      write_exp_string (base_token);
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_string (&p->pstate, base_token);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
 
       if (offset)
-	write_exp_elt_opcode (BINOP_ADD);
+	write_exp_elt_opcode (&p->pstate, BINOP_ADD);
 
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
       index_token.ptr = index;
       index_token.length = len_index;
-      write_exp_string (index_token);
-      write_exp_elt_opcode (OP_REGISTER);
+      write_exp_string (&p->pstate, index_token);
+      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
 
       if (size)
 	{
-	  write_exp_elt_opcode (OP_LONG);
-	  write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
-	  write_exp_elt_longcst (size);
-	  write_exp_elt_opcode (OP_LONG);
+	  write_exp_elt_opcode (&p->pstate, OP_LONG);
+	  write_exp_elt_type (&p->pstate,
+			      builtin_type (gdbarch)->builtin_long);
+	  write_exp_elt_longcst (&p->pstate, size);
+	  write_exp_elt_opcode (&p->pstate, OP_LONG);
 	  if (size_minus)
-	    write_exp_elt_opcode (UNOP_NEG);
-	  write_exp_elt_opcode (BINOP_MUL);
+	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
+	  write_exp_elt_opcode (&p->pstate, BINOP_MUL);
 	}
 
-      write_exp_elt_opcode (BINOP_ADD);
+      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
 
-      write_exp_elt_opcode (UNOP_CAST);
-      write_exp_elt_type (lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (UNOP_CAST);
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
+      write_exp_elt_type (&p->pstate,
+			  lookup_pointer_type (p->arg_type));
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
 
-      write_exp_elt_opcode (UNOP_IND);
+      write_exp_elt_opcode (&p->pstate, UNOP_IND);
 
       p->arg = s;
 

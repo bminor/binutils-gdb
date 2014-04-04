@@ -1,3 +1,11 @@
+2014-04-04  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/i386.exp: Run SE1 tests.
+	* gas/i386/se1.d: New file.
+	* gas/i386/se1.s: Ditto.
+	* gas/i386/x86-64-se1.d: Ditto.
+	* gas/i386/x86-64-se1.s: Ditto.
+
 2014-03-21  David Weatherford <weath@cadence.com>
             Max Filippov <jcmvbkbc@gmail.com>
 

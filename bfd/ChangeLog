@@ -1,3 +1,94 @@
+2014-04-04  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_header_p): Reject 64 bit target when not
+	configured for.
+
+2014-04-04  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_convert_section_name_to_mach_o): Fix
+	thinko on names length.
+
+2014-04-04  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o-i386.c (bfd_mach_o_i386_swap_reloc_out): Use target index
+	of output_section.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_swap_reloc_out): Ditto.
+
+2014-04-04  Tristan Gingold  <gingold@adacore.com>
+
+	* bfd.c (bfd_get_arch_size): Default is taken from arch.
+
+2014-04-03  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* peXXigen.c (pe_print_edata): Verify edt.name lies inside
+	section before dereferencing.
+	(pe_print_idata, pe_print_edata, pe_print_reloc)
+	(rsrc_print_section): Don't bother interpreting the contents
+	of sections which have no contents.
+
+2014-04-03  Maria Guseva  <m.guseva@samsung.com>
+
+	PR ld/16803
+	* elf.c (_bfd_elf_set_section_contents): Use correct type to hold
+	file position.
+
+2014-04-03  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_mangle_symbols): Use index from
+	output_section.
+	(bfd_mach_o_build_seg_command): Add comment.  Realign segment.
+	Fix style.
+	(bfd_mach_o_build_commands, bfd_mach_o_read_thread): Fix style.
+
+2014-04-03  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data
+	<elf_backend_bfd_from_remote_memory>): Replace "size_t size"
+	with "bfd_size_type size".
+	(_bfd_elf32_bfd_from_remote_memory): Likewise.
+	(_bfd_elf64_bfd_from_remote_memory): Likewise.
+	* elf.c (bfd_elf_bfd_from_remote_memory): Likewise.
+	* elfcode.h (bfd_from_remote_memory): Likewise.
+	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Likewise.
+	* bfd-in2.h: Regenerate.
+
+2014-04-02  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (bfd_mach_o_twolevel_hints_command)
+	(bfd_mach_o_prebind_cksum_command): New types.
+	(bfd_mach_o_prebound_dylib_command): Rewrite.
+	(bfd_mach_o_load_command): Add prebind_cksum and twolevel_hints
+	fields.
+	* mach-o.c (bfd_mach_o_read_prebound_dylib): Read and decode the
+	command.
+	(bfd_mach_o_read_prebind_cksum): New function.
+	(bfd_mach_o_read_twolevel_hints): Ditto.
+	(bfd_mach_o_read_command): Handle prebind cksum and twolevel hints
+	commands.
+
+2014-04-02  Alan Modra  <amodra@gmail.com>
+
+	* elfcode.h (bfd_from_remote_memory): Add "size" parameter.
+	Consolidate code handling possible section headers past end of
+	segment.  Don't use p_align for page size guess, instead use
+	minpagesize.  Take note of ld.so clearing section headers when
+	p_memsz > p_filesz.  Handle file header specifying no section
+	headers.  Handle zero p_align throughout.  Default loadbase to
+	zero.  Add comments.  Rename contents_size to high_offset, and
+	make it a bfd_vma.  Delete unnecessary bfd_set_error calls.
+	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Update prototpe.
+	* elf-bfd.h (struct elf_backend_data <elf_backend_from_remote_memory>):
+	Likewise.
+	(_bfd_elf32_bfd_from_remote_memory): Likewise.
+	(_bfd_elf64_bfd_from_remote_memory): Likewise.
+	* elf.c (bfd_elf_bfd_from_remote_memory): Adjust.
+	* bfd-in2.h: Regnerate.
+
+2014-04-01  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Avoid to crash
+	when num == 0.
+
 2014-03-27  Yury Gribov  <y.gribov@samsung.com>
     	    Pavel Fedin  <p.fedin@samsung.com>
 

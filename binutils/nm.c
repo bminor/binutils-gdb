@@ -175,7 +175,11 @@ static char other_format[] = "%02x";
 static char desc_format[] = "%04x";
 
 static char *target = NULL;
-static char *plugin_target = NULL;
+#if BFD_SUPPORTS_PLUGINS
+static const char *plugin_target = "plugin";
+#else
+static const char *plugin_target = NULL;
+#endif
 
 /* Used to cache the line numbers for a BFD.  */
 static bfd *lineno_cache_bfd;
@@ -1646,7 +1650,6 @@ main (int argc, char **argv)
 
 	case OPTION_PLUGIN:	/* --plugin */
 #if BFD_SUPPORTS_PLUGINS
-	  plugin_target = "plugin";
 	  bfd_plugin_set_plugin (optarg);
 #else
 	  fatal (_("sorry - this program has been built without plugin support\n"));

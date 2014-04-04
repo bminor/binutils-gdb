@@ -465,7 +465,7 @@ add_msglist(struct stoken *str, int addcolon)
 }
 
 int
-end_msglist(void)
+end_msglist (struct parser_state *ps)
 {
   int val = msglist_len;
   struct selname *sel = selname_chain;
@@ -475,12 +475,12 @@ end_msglist(void)
   selname_chain = sel->next;
   msglist_len = sel->msglist_len;
   msglist_sel = sel->msglist_sel;
-  selid = lookup_child_selector (parse_gdbarch, p);
+  selid = lookup_child_selector (parse_gdbarch (ps), p);
   if (!selid)
     error (_("Can't find selector \"%s\""), p);
-  write_exp_elt_longcst (selid);
+  write_exp_elt_longcst (ps, selid);
   xfree(p);
-  write_exp_elt_longcst (val);	/* Number of args */
+  write_exp_elt_longcst (ps, val);	/* Number of args */
   xfree(sel);
 
   return val;

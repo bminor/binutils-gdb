@@ -143,6 +143,20 @@ DEF_VEC_O (registered_sym_fns);
 
 static VEC (registered_sym_fns) *symtab_fns = NULL;
 
+/* Values for "set print symbol-loading".  */
+
+const char print_symbol_loading_off[] = "off";
+const char print_symbol_loading_brief[] = "brief";
+const char print_symbol_loading_full[] = "full";
+static const char *print_symbol_loading_enums[] =
+{
+  print_symbol_loading_off,
+  print_symbol_loading_brief,
+  print_symbol_loading_full,
+  NULL
+};
+static const char *print_symbol_loading = print_symbol_loading_full;
+
 /* If non-zero, shared library symbols will be added automatically
    when the inferior is created, new libraries are loaded, or when
    attaching to the inferior.  This is almost always what users will
@@ -155,6 +169,31 @@ static VEC (registered_sym_fns) *symtab_fns = NULL;
 
 int auto_solib_add = 1;
 
+
+/* Return non-zero if symbol-loading messages should be printed.
+   FROM_TTY is the standard from_tty argument to gdb commands.
+   If EXEC is non-zero the messages are for the executable.
+   Otherwise, messages are for shared libraries.
+   If FULL is non-zero then the caller is printing a detailed message.
+   E.g., the message includes the shared library name.
+   Otherwise, the caller is printing a brief "summary" message.  */
+
+int
+print_symbol_loading_p (int from_tty, int exec, int full)
+{
+  if (!from_tty && !info_verbose)
+    return 0;
+
+  if (exec)
+    {
+      /* We don't check FULL for executables, there are few such
+	 messages, therefore brief == full.  */
+      return print_symbol_loading != print_symbol_loading_off;
+    }
+  if (full)
+    return print_symbol_loading == print_symbol_loading_full;
+  return print_symbol_loading == print_symbol_loading_brief;
+}
 
 /* True if we are reading a symbol table.  */
 
@@ -1112,7 +1151,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
   struct objfile *objfile;
   const int from_tty = add_flags & SYMFILE_VERBOSE;
   const int mainline = add_flags & SYMFILE_MAINLINE;
-  const int should_print = ((from_tty || info_verbose)
+  const int should_print = (print_symbol_loading_p (from_tty, mainline, 1)
 			    && (readnow_symbol_files
 				|| (add_flags & SYMFILE_NO_READ) == 0));
 
@@ -3985,4 +4024,18 @@ each global debug-file-directory component prepended."),
 				     NULL,
 				     show_debug_file_directory,
 				     &setlist, &showlist);
+
+  add_setshow_enum_cmd ("symbol-loading", no_class,
+			print_symbol_loading_enums, &print_symbol_loading,
+			_("\
+Set printing of symbol loading messages."), _("\
+Show printing of symbol loading messages."), _("\
+off   == turn all messages off\n\
+brief == print messages for the executable,\n\
+         and brief messages for shared libraries\n\
+full  == print messages for the executable,\n\
+         and messages for each shared library."),
+			NULL,
+			NULL,
+			&setprintlist, &showprintlist);
 }

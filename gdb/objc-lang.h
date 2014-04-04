@@ -26,6 +26,7 @@ struct stoken;
 
 struct value;
 struct block;
+struct parser_state;
 
 extern CORE_ADDR lookup_objc_class     (struct gdbarch *gdbarch,
 					char *classname);
@@ -45,7 +46,7 @@ extern struct value *value_nsstring (struct gdbarch *gdbarch,
 /* for parsing Objective C */
 extern void start_msglist (void);
 extern void add_msglist (struct stoken *str, int addcolon);
-extern int end_msglist (void);
+extern int end_msglist (struct parser_state *);
 
 struct symbol *lookup_struct_typedef (char *name, const struct block *block,
 				      int noerr);

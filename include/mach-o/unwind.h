@@ -119,7 +119,7 @@ struct mach_o_compact_unwind_64
   unsigned char start[8];
   unsigned char length[4];
   unsigned char encoding[4];
-  unsigned char personnality[8];
+  unsigned char personality[8];
   unsigned char lsda[8];
 };
 

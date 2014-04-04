@@ -1112,7 +1112,20 @@ gld${EMULATION_NAME}_after_open (void)
     }
 
   if (link_info.relocatable)
-    return;
+    {
+      if (link_info.execstack == ! link_info.noexecstack)
+	/* PR ld/16744: If "-z [no]execstack" has been specified on the
+	   command line and we are perfoming a relocatable link then no
+	   PT_GNU_STACK segment will be created and so the
+	   linkinfo.[no]execstack values set in _handle_option() will have no
+	   effect.  Instead we create a .note.GNU-stack section in much the
+	   same way as the assembler does with its --[no]execstack option.  */
+	(void) bfd_make_section_with_flags (link_info.input_bfds,
+					    ".note.GNU-stack",
+					    SEC_READONLY | (link_info.execstack ? SEC_CODE : 0));
+
+      return;
+    }
 
   if (link_info.eh_frame_hdr
       && !link_info.traditional_format)

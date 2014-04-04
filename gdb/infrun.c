@@ -2965,6 +2965,15 @@ init_thread_stepping_state (struct thread_info *tss)
   tss->step_after_step_resume_breakpoint = 0;
 }
 
+/* Set the cached copy of the last ptid/waitstatus.  */
+
+static void
+set_last_target_status (ptid_t ptid, struct target_waitstatus status)
+{
+  target_last_wait_ptid = ptid;
+  target_last_waitstatus = status;
+}
+
 /* Return the cached copy of the last pid/waitstatus returned by
    target_wait()/deprecated_target_wait_hook().  The data is actually
    cached by handle_inferior_event(), which gets called immediately
@@ -3272,8 +3281,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     }
 
   /* Cache the last pid/waitstatus.  */
-  target_last_wait_ptid = ecs->ptid;
-  target_last_waitstatus = ecs->ws;
+  set_last_target_status (ecs->ptid, ecs->ws);
 
   /* Always clear state belonging to the previous time we stopped.  */
   stop_stack_dummy = STOP_NONE;

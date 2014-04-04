@@ -22,7 +22,7 @@ if {![dwarf2_support]} {
 standard_testfile
 set executable ${testfile}
 
-if {[build_executable ${testfile}.exp ${executable} "${testfile}.c ${testfile}-hello-dbg.S ${testfile}-hello.c ${testfile}-world-dbg.S ${testfile}-world.c"] == -1} {
+if {[build_executable ${testfile}.exp ${executable} "${testfile}.c ${testfile}-hello-dbg.S ${testfile}-hello.c ${testfile}-world-dbg.S ${testfile}-world.c" "nodebug"] == -1} {
     return -1
 }
 

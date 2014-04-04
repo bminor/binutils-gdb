@@ -11532,6 +11532,10 @@ static const struct dis386 rm_table[][8] = {
     { "mwait",		{ { OP_Mwait, 0 } } },
     { "clac",		{ Skip_MODRM } },
     { "stac",		{ Skip_MODRM } },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "encls",		{ Skip_MODRM } },
   },
   {
     /* RM_0F01_REG_2 */
@@ -11542,7 +11546,7 @@ static const struct dis386 rm_table[][8] = {
     { "vmfunc",		{ Skip_MODRM } },
     { "xend",		{ Skip_MODRM } },
     { "xtest",		{ Skip_MODRM } },
-    { Bad_Opcode },
+    { "enclu",		{ Skip_MODRM } },
   },
   {
     /* RM_0F01_REG_3 */

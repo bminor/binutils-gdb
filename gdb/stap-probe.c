@@ -601,12 +601,12 @@ stap_parse_register_operand (struct stap_parse_info *p)
       p->arg = endp;
 
       /* Generating the expression for the displacement.  */
-      write_exp_elt_opcode (OP_LONG);
-      write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
-      write_exp_elt_longcst (displacement);
-      write_exp_elt_opcode (OP_LONG);
+      write_exp_elt_opcode (&p->pstate, OP_LONG);
+      write_exp_elt_type (&p->pstate, builtin_type (gdbarch)->builtin_long);
+      write_exp_elt_longcst (&p->pstate, displacement);
+      write_exp_elt_opcode (&p->pstate, OP_LONG);
       if (got_minus)
-	write_exp_elt_opcode (UNOP_NEG);
+	write_exp_elt_opcode (&p->pstate, UNOP_NEG);
     }
 
   /* Getting rid of register indirection prefix.  */
@@ -660,23 +660,23 @@ stap_parse_register_operand (struct stap_parse_info *p)
     error (_("Invalid register name `%s' on expression `%s'."),
 	   regname, p->saved_arg);
 
-  write_exp_elt_opcode (OP_REGISTER);
+  write_exp_elt_opcode (&p->pstate, OP_REGISTER);
   str.ptr = regname;
   str.length = len;
-  write_exp_string (str);
-  write_exp_elt_opcode (OP_REGISTER);
+  write_exp_string (&p->pstate, str);
+  write_exp_elt_opcode (&p->pstate, OP_REGISTER);
 
   if (indirect_p)
     {
       if (disp_p)
-	write_exp_elt_opcode (BINOP_ADD);
+	write_exp_elt_opcode (&p->pstate, BINOP_ADD);
 
       /* Casting to the expected type.  */
-      write_exp_elt_opcode (UNOP_CAST);
-      write_exp_elt_type (lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (UNOP_CAST);
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
+      write_exp_elt_type (&p->pstate, lookup_pointer_type (p->arg_type));
+      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
 
-      write_exp_elt_opcode (UNOP_IND);
+      write_exp_elt_opcode (&p->pstate, UNOP_IND);
     }
 
   /* Getting rid of the register name suffix.  */
@@ -767,9 +767,9 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	  ++p->arg;
 	  stap_parse_argument_conditionally (p);
 	  if (c == '-')
-	    write_exp_elt_opcode (UNOP_NEG);
+	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
 	  else if (c == '~')
-	    write_exp_elt_opcode (UNOP_COMPLEMENT);
+	    write_exp_elt_opcode (&p->pstate, UNOP_COMPLEMENT);
 	}
       else
 	{
@@ -807,10 +807,11 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	  const char *int_suffix;
 
 	  /* We are dealing with a numeric constant.  */
-	  write_exp_elt_opcode (OP_LONG);
-	  write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
-	  write_exp_elt_longcst (number);
-	  write_exp_elt_opcode (OP_LONG);
+	  write_exp_elt_opcode (&p->pstate, OP_LONG);
+	  write_exp_elt_type (&p->pstate,
+			      builtin_type (gdbarch)->builtin_long);
+	  write_exp_elt_longcst (&p->pstate, number);
+	  write_exp_elt_opcode (&p->pstate, OP_LONG);
 
 	  p->arg = tmp;
 
@@ -837,10 +838,10 @@ stap_parse_single_operand (struct stap_parse_info *p)
       number = strtol (p->arg, &endp, 10);
       p->arg = endp;
 
-      write_exp_elt_opcode (OP_LONG);
-      write_exp_elt_type (builtin_type (gdbarch)->builtin_long);
-      write_exp_elt_longcst (number);
-      write_exp_elt_opcode (OP_LONG);
+      write_exp_elt_opcode (&p->pstate, OP_LONG);
+      write_exp_elt_type (&p->pstate, builtin_type (gdbarch)->builtin_long);
+      write_exp_elt_longcst (&p->pstate, number);
+      write_exp_elt_opcode (&p->pstate, OP_LONG);
 
       if (stap_check_integer_suffix (gdbarch, p->arg, &int_suffix))
 	p->arg += strlen (int_suffix);
@@ -987,7 +988,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
 	  stap_parse_argument_1 (p, 1, lookahead_prec);
 	}
 
-      write_exp_elt_opcode (opcode);
+      write_exp_elt_opcode (&p->pstate, opcode);
     }
 }
 
@@ -1028,8 +1029,8 @@ stap_parse_argument (const char **arg, struct type *atype,
   /* We need to initialize the expression buffer, in order to begin
      our parsing efforts.  The language here does not matter, since we
      are using our own parser.  */
-  initialize_expout (10, current_language, gdbarch);
-  back_to = make_cleanup (free_current_contents, &expout);
+  initialize_expout (&p.pstate, 10, current_language, gdbarch);
+  back_to = make_cleanup (free_current_contents, &p.pstate.expout);
 
   p.saved_arg = *arg;
   p.arg = *arg;
@@ -1044,16 +1045,17 @@ stap_parse_argument (const char **arg, struct type *atype,
   gdb_assert (p.inside_paren_p == 0);
 
   /* Casting the final expression to the appropriate type.  */
-  write_exp_elt_opcode (UNOP_CAST);
-  write_exp_elt_type (atype);
-  write_exp_elt_opcode (UNOP_CAST);
+  write_exp_elt_opcode (&p.pstate, UNOP_CAST);
+  write_exp_elt_type (&p.pstate, atype);
+  write_exp_elt_opcode (&p.pstate, UNOP_CAST);
 
-  reallocate_expout ();
+  reallocate_expout (&p.pstate);
 
   p.arg = skip_spaces_const (p.arg);
   *arg = p.arg;
 
-  return expout;
+  /* We can safely return EXPOUT here.  */
+  return p.pstate.expout;
 }
 
 /* Function which parses an argument string from PROBE, correctly splitting

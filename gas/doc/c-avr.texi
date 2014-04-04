@@ -129,6 +129,10 @@ This option disable warnings for skipping two-word instructions.
 @item -mno-wrap
 This option reject @code{rjmp/rcall} instructions with 8K wrap-around.
 
+@cindex @code{-mrmw} command line option, AVR
+@item -mrmw
+Accept Read-Modify-Write (@code{XCH,LAC,LAS,LAT}) instructions.
+
 @end table
 
 

@@ -13376,10 +13376,10 @@ emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 }
 
 static int
-parse (void)
+parse (struct parser_state *ps)
 {
   warnings_issued = 0;
-  return ada_parse ();
+  return ada_parse (ps);
 }
 
 static const struct exp_descriptor ada_exp_descriptor = {
