@@ -1,6 +1,10 @@
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches for ppc476 workaround
+	2014-04-09  Alan Modra  <amodra@gmail.com>
+	* emultempl/ppc32elf.em (no_zero_padding, ppc_finish): New functions.
+	(LDEMUL_FINISH): Define.
+
 	2014-02-27  Alan Modra  <amodra@gmail.com>
 	* emulparams/elf32ppcvxworks.sh: Source plt_unwind.sh and
 	use ppc32elf.em.

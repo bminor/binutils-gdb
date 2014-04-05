@@ -1,6 +1,11 @@
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches for ppc476 workaround
+	2014-04-09  Alan Modra  <amodra@gmail.com>
+	* elf32-ppc.c (ppc_elf_relocate_section): Remove bctr from list
+	of safe ppc476 insns at end of page.  Also remove non-branch insns.
+	Expand comments.
+
 	2014-02-27  Alan Modra  <amodra@gmail.com>
 	* elf32-ppc.c (ppc_elf_link_hash_table_create): Provide default
 	params for targets that don't use ppc32elf.em.
