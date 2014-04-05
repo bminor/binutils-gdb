@@ -9279,27 +9279,56 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  if (is_data)
 	    continue;
 
-	  /* Some instructions can be left alone too.  In this
-	     category are most insns that unconditionally change
-	     control flow, and isync.  Of these, some *must* be left
-	     alone, for example, the "bcl 20, 31, label" used in pic
-	     sequences to give the address of the next insn.  twui
-	     and twu apparently are not safe.  */
+	  /* Some instructions can be left alone too.  Unconditional
+	     branches, except for bcctr with BO=0x14 (bctr, bctrl),
+	     avoid the icache failure.
+
+	     The problem occurs due to prefetch across a page boundary
+	     where stale instructions can be fetched from the next
+	     page, and the mechanism for flushing these bad
+	     instructions fails under certain circumstances.  The
+	     unconditional branches:
+	     1) Branch: b, bl, ba, bla,
+	     2) Branch Conditional: bc, bca, bcl, bcla,
+	     3) Branch Conditional to Link Register: bclr, bclrl,
+	     where (2) and (3) have BO=0x14 making them unconditional,
+	     prevent the bad prefetch because the prefetch itself is
+	     affected by these instructions.  This happens even if the
+	     instruction is not executed.
+
+	     A bctr example:
+	     .
+	     .	lis 9,new_page@ha
+	     .	addi 9,9,new_page@l
+	     .	mtctr 9
+	     .	bctr
+	     .	nop
+	     .	nop
+	     . new_page:
+	     .
+	     The bctr is not predicted taken due to ctr not being
+	     ready, so prefetch continues on past the bctr into the
+	     new page which might have stale instructions.  If they
+	     fail to be flushed, then they will be executed after the
+	     bctr executes.  Either of the following modifications
+	     prevent the bad prefetch from happening in the first
+	     place:
+	     .
+	     .	lis 9,new_page@ha	 lis 9,new_page@ha	
+	     .	addi 9,9,new_page@l	 addi 9,9,new_page@l	
+	     .	mtctr 9			 mtctr 9			
+	     .	bctr			 bctr			
+	     .	nop			 b somewhere_else
+	     .	b somewhere_else	 nop			
+	     . new_page:		new_page:		
+	     .  */
 	  insn = bfd_get_32 (input_bfd, contents + offset);
-	  if (insn == 0
-	      || (insn & (0x3f << 26)) == (18u << 26)        /* b */
-	      || ((insn & (0x3f << 26)) == (16u << 26)       /* bc always */
-		  && (insn & (0x14 << 21)) == (0x14 << 21))
-	      || ((insn & (0x3f << 26)) == (19u << 26)       /* blr, bctr */
-		  && (insn & (0x14 << 21)) == (0x14 << 21)
-		  && (insn & (0x1ff << 1)) == (16u << 1))
-	      || (insn & (0x3f << 26)) == (17u << 26)        /* sc */
+	  if ((insn & (0x3f << 26)) == (18u << 26)          /* b,bl,ba,bla */
+	      || ((insn & (0x3f << 26)) == (16u << 26)      /* bc,bcl,bca,bcla*/
+		  && (insn & (0x14 << 21)) == (0x14 << 21)) /*   with BO=0x14 */
 	      || ((insn & (0x3f << 26)) == (19u << 26)
-		  && ((insn & (0x3ff << 1)) == (38u << 1)    /* rfmci */
-		      || (insn & (0x3ff << 1)) == (50u << 1) /* rfi */
-		      || (insn & (0x3ff << 1)) == (51u << 1) /* rfci */
-		      || (insn & (0x3ff << 1)) == (82u << 1) /* rfsvc */
-		      || (insn & (0x3ff << 1)) == (150u << 1))) /* isync */)
+		  && (insn & (0x3ff << 1)) == (16u << 1)    /* bclr,bclrl */
+		  && (insn & (0x14 << 21)) == (0x14 << 21)))/*   with BO=0x14 */
 	    continue;
 
 	  patch_addr = (start_addr + input_section->size
