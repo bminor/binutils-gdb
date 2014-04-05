@@ -28,8 +28,8 @@ global CFLAGS
 global CXXFLAGS
 set saved_CFLAGS "$CFLAGS"
 set saved_CXXFLAGS "$CXXFLAGS"
-regsub -all "\\-Wp,-D_FORTIFY_SOURCE=\[0-9\]+" $CFLAGS "" CFLAGS
-regsub -all "\\-Wp,-D_FORTIFY_SOURCE=\[0-9\]+" $CXXFLAGS "" CXXFLAGS
+regsub -all "(\\-Wp,)?-D_FORTIFY_SOURCE=\[0-9\]+" $CFLAGS "" CFLAGS
+regsub -all "(\\-Wp,)?-D_FORTIFY_SOURCE=\[0-9\]+" $CXXFLAGS "" CXXFLAGS
 
 proc restore_notify { } {
   global saved_CFLAGS
@@ -69,7 +69,7 @@ set lto_link_tests {
    {lto-6.c} {} "lto-6.exe" "c"}
   {"Build libdummy.a 9"
    "" "-O2 -finline -flto"
-   {lto-9.cc} {} "libdummy.a"}
+   {lto-9.cc} {} "libdummy.a" "c++"}
   {"Build libdummy.a 11a"
    "" "-O -flto"
    {lto-11a.c} {} "libdummy.a"}
@@ -105,7 +105,7 @@ set lto_link_tests {
    {lto-15b.c} {} "liblto-15.a"}
   {"PR ld/12696"
    "-O2 -flto -fuse-linker-plugin -r -nostdlib" "-O2 -flto"
-   {pr12696-1.cc} {} "pr12696-1r.o" "c"}
+   {pr12696-1.cc} {} "pr12696-1r.o" "c++"}
   {"Build libdummy.a PR ld/12758"
    "" ""
    {pr12758a.s} {} "libdummy.a"}
