@@ -1,3 +1,8 @@
+2014-04-07  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/16811
+	* objcopy.c (copy_object): Error if no sections.
+
 2014-04-03  Markus Trippelsdorf  <markus@trippelsdorf.de>
 
 	PR binutils/14698
