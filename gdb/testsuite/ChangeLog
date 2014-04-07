@@ -1,3 +1,8 @@
+2014-04-07  David Blaikie  <dblaikie@gmail.com>
+
+	* lib/compiler.c: Identify the clang compiler.
+	* lib/compiler.cc: Ditto.
+
 2014-04-03  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/setshow.exp: Invoke string_to_regexp to HOME and PWD.
