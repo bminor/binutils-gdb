@@ -1,3 +1,8 @@
+2014-04-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* darwin-nat.c (darwin_decode_message): Remove trailing '\n' at
+	end of warning message.
+
 2014-04-03  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_cutu_die_from_dwo): Fix assertion, at most one

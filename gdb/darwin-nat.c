@@ -1017,7 +1017,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
     }
 
   /* Unknown message.  */
-  warning (_("darwin: got unknown message, id: 0x%x\n"), hdr->msgh_id);
+  warning (_("darwin: got unknown message, id: 0x%x"), hdr->msgh_id);
   status->kind = TARGET_WAITKIND_IGNORE;
   return minus_one_ptid;
 }
