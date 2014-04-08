@@ -129,7 +129,6 @@ static void ppc_vbyte (int);
 #endif
 
 #ifdef OBJ_ELF
-static void ppc_elf_cons (int);
 static void ppc_elf_rdata (int);
 static void ppc_elf_lcomm (int);
 static void ppc_elf_localentry (int);
@@ -257,11 +256,7 @@ const pseudo_typeS md_pseudo_table[] =
 #endif
 
 #ifdef OBJ_ELF
-  { "llong",	ppc_elf_cons,	8 },
-  { "quad",	ppc_elf_cons,	8 },
-  { "long",	ppc_elf_cons,	4 },
-  { "word",	ppc_elf_cons,	2 },
-  { "short",	ppc_elf_cons,	2 },
+  { "llong",	cons,		8 },
   { "rdata",	ppc_elf_rdata,	0 },
   { "rodata",	ppc_elf_rdata,	0 },
   { "lcomm",	ppc_elf_lcomm,	0 },
@@ -1957,11 +1952,11 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP64 ("tprel@highera",	BFD_RELOC_PPC64_TPREL16_HIGHERA),
     MAP64 ("tprel@highest",	BFD_RELOC_PPC64_TPREL16_HIGHEST),
     MAP64 ("tprel@highesta",	BFD_RELOC_PPC64_TPREL16_HIGHESTA),
-    { (char *) 0, 0, 0, 0,	BFD_RELOC_UNUSED }
+    { (char *) 0, 0, 0, 0,	BFD_RELOC_NONE }
   };
 
   if (*str++ != '@')
-    return BFD_RELOC_UNUSED;
+    return BFD_RELOC_NONE;
 
   for (ch = *str, str2 = ident;
        (str2 < ident + sizeof (ident) - 1
@@ -2047,63 +2042,18 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
 	return (bfd_reloc_code_real_type) reloc;
       }
 
-  return BFD_RELOC_UNUSED;
+  return BFD_RELOC_NONE;
 }
 
-/* Like normal .long/.short/.word, except support @got, etc.
-   Clobbers input_line_pointer, checks end-of-line.  */
-static void
-ppc_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long, 8=.llong */)
+/* Support @got, etc. on constants emitted via .short, .int etc.  */
+
+bfd_reloc_code_real_type
+ppc_elf_parse_cons (expressionS *exp, unsigned int nbytes)
 {
-  expressionS exp;
-  bfd_reloc_code_real_type reloc;
-
-  if (is_it_end_of_statement ())
-    {
-      demand_empty_rest_of_line ();
-      return;
-    }
-
-  do
-    {
-      expression (&exp);
-      if (*input_line_pointer == '@'
-	  && (reloc = ppc_elf_suffix (&input_line_pointer,
-				      &exp)) != BFD_RELOC_UNUSED)
-	{
-	  reloc_howto_type *reloc_howto;
-	  int size;
-
-	  reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
-	  size = bfd_get_reloc_size (reloc_howto);
-
-	  if (size > nbytes)
-	    {
-	      as_bad (_("%s relocations do not fit in %d bytes\n"),
-		      reloc_howto->name, nbytes);
-	    }
-	  else
-	    {
-	      char *p;
-	      int offset;
-
-	      p = frag_more (nbytes);
-	      memset (p, 0, nbytes);
-	      offset = 0;
-	      if (target_big_endian)
-		offset = nbytes - size;
-	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
-			   &exp, 0, reloc);
-	    }
-	}
-      else
-	emit_expr (&exp, (unsigned int) nbytes);
-    }
-  while (*input_line_pointer++ == ',');
-
-  /* Put terminator back into stream.  */
-  input_line_pointer--;
-  demand_empty_rest_of_line ();
+  expression (exp);
+  if (nbytes >= 2 && *input_line_pointer == '@')
+    return ppc_elf_suffix (&input_line_pointer, exp);
+  return BFD_RELOC_NONE;
 }
 
 /* Solaris pseduo op to change to the .rodata section.  */
@@ -2338,8 +2288,7 @@ ppc_elf_validate_fix (fixS *fixp, segT seg)
       return;
 
     case SHLIB_MRELOCATABLE:
-      if (fixp->fx_r_type <= BFD_RELOC_UNUSED
-	  && fixp->fx_r_type != BFD_RELOC_16_GOTOFF
+      if (fixp->fx_r_type != BFD_RELOC_16_GOTOFF
 	  && fixp->fx_r_type != BFD_RELOC_HI16_GOTOFF
 	  && fixp->fx_r_type != BFD_RELOC_LO16_GOTOFF
 	  && fixp->fx_r_type != BFD_RELOC_HI16_S_GOTOFF
@@ -2839,12 +2788,12 @@ md_assemble (char *str)
 	      /* FIXME: these next two specifically specify 32/64 bit
 		 toc entries.  We don't support them today.  Is this
 		 the right way to say that?  */
-	      toc_reloc = BFD_RELOC_UNUSED;
+	      toc_reloc = BFD_RELOC_NONE;
 	      as_bad (_("unimplemented toc32 expression modifier"));
 	      break;
 	    case must_be_64:
 	      /* FIXME: see above.  */
-	      toc_reloc = BFD_RELOC_UNUSED;
+	      toc_reloc = BFD_RELOC_NONE;
 	      as_bad (_("unimplemented toc64 expression modifier"));
 	      break;
 	    default:
@@ -2914,7 +2863,7 @@ md_assemble (char *str)
 	  bfd_reloc_code_real_type reloc;
 	  char *orig_str = str;
 
-	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
+	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_NONE)
 	    switch (reloc)
 	      {
 	      default:
@@ -3000,7 +2949,7 @@ md_assemble (char *str)
 	}
       else
 	{
-	  bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
+	  bfd_reloc_code_real_type reloc = BFD_RELOC_NONE;
 #ifdef OBJ_ELF
 	  if (ex.X_op == O_symbol && str[0] == '(')
 	    {
@@ -3017,7 +2966,7 @@ md_assemble (char *str)
 		  expression (&tls_exp);
 		  if (tls_exp.X_op == O_symbol)
 		    {
-		      reloc = BFD_RELOC_UNUSED;
+		      reloc = BFD_RELOC_NONE;
 		      if (strncasecmp (input_line_pointer, "@tlsgd)", 7) == 0)
 			{
 			  reloc = BFD_RELOC_PPC_TLSGD;
@@ -3028,7 +2977,7 @@ md_assemble (char *str)
 			  reloc = BFD_RELOC_PPC_TLSLD;
 			  input_line_pointer += 7;
 			}
-		      if (reloc != BFD_RELOC_UNUSED)
+		      if (reloc != BFD_RELOC_NONE)
 			{
 			  SKIP_WHITESPACE ();
 			  str = input_line_pointer;
@@ -3045,7 +2994,7 @@ md_assemble (char *str)
 		}
 	    }
 
-	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
+	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_NONE)
 	    {
 	      /* Some TLS tweaks.  */
 	      switch (reloc)
@@ -3144,7 +3093,7 @@ md_assemble (char *str)
 	    }
 #endif /* OBJ_ELF */
 
-	  if (reloc != BFD_RELOC_UNUSED)
+	  if (reloc != BFD_RELOC_NONE)
 	    ;
 	  /* Determine a BFD reloc value based on the operand information.
 	     We are only prepared to turn a few of the operands into
@@ -3405,7 +3354,7 @@ md_assemble (char *str)
   for (i = 0; i < fc; i++)
     {
       fixS *fixP;
-      if (fixups[i].reloc != BFD_RELOC_UNUSED)
+      if (fixups[i].reloc != BFD_RELOC_NONE)
 	{
 	  reloc_howto_type *reloc_howto;
 	  int size;
@@ -3438,7 +3387,7 @@ md_assemble (char *str)
 			      insn_length,
 			      &fixups[i].exp,
 			      (operand->flags & PPC_OPERAND_RELATIVE) != 0,
-			      BFD_RELOC_UNUSED);
+			      BFD_RELOC_NONE);
 	}
       fixP->fx_pcrel_adjust = fixups[i].opindex;
     }
@@ -6462,7 +6411,7 @@ ppc_handle_align (struct frag *fragP)
    fixups we generated by the calls to fix_new_exp, above.  */
 
 void
-md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   valueT value = * valP;
   offsetT fieldval;
@@ -6810,7 +6759,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	return;
 
       gas_assert (fixP->fx_addsy != NULL);
-      if (fixP->fx_r_type == BFD_RELOC_UNUSED)
+      if (fixP->fx_r_type == BFD_RELOC_NONE)
 	{
 	  char *sfile;
 	  unsigned int sline;

@@ -2181,7 +2181,8 @@ void
 cons_fix_new_ns32k (fragS *frag,	/* Which frag? */
 		    int where,		/* Where in that frag? */
 		    int size,		/* 1, 2  or 4 usually.  */
-		    expressionS *exp)	/* Expression.  */
+		    expressionS *exp,	/* Expression.  */
+		    bfd_reloc_code_real_type r ATTRIBUTE_UNUSED)
 {
   fix_new_ns32k_exp (frag, where, size, exp,
 		     0, 2, 0, 0, 0, 0);

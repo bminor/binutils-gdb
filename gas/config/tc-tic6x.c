@@ -2012,10 +2012,9 @@ tic6x_fix_new_exp (fragS *frag, int where, int size, expressionS *exp,
    go through the error checking in tic6x_fix_new_exp.  */
 
 void
-tic6x_cons_fix_new (fragS *frag, int where, int size, expressionS *exp)
+tic6x_cons_fix_new (fragS *frag, int where, int size, expressionS *exp,
+		    bfd_reloc_code_real_type r_type)
 {
-  bfd_reloc_code_real_type r_type;
-
   switch (size)
     {
     case 1:

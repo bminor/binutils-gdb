@@ -606,9 +606,6 @@ static int within_procedure;
    seen in each subspace.  */
 static label_symbol_struct *label_symbols_rootp = NULL;
 
-/* Holds the last field selector.  */
-static int hppa_field_selector;
-
 /* Nonzero when strict matching is enabled.  Zero otherwise.
 
    Each opcode in the table has a flag which indicates whether or
@@ -1263,7 +1260,8 @@ fix_new_hppa (fragS *frag,
    hppa_field_selector is set by the parse_cons_expression_hppa.  */
 
 void
-cons_fix_new_hppa (fragS *frag, int where, int size, expressionS *exp)
+cons_fix_new_hppa (fragS *frag, int where, int size, expressionS *exp,
+		   int hppa_field_selector)
 {
   unsigned int rel_type;
 
@@ -1300,9 +1298,6 @@ cons_fix_new_hppa (fragS *frag, int where, int size, expressionS *exp)
   fix_new_hppa (frag, where, size,
 		(symbolS *) NULL, (offsetT) 0, exp, 0, rel_type,
 		hppa_field_selector, size * 8, 0, 0);
-
-  /* Reset field selector to its default state.  */
-  hppa_field_selector = 0;
 }
 
 /* Mark (via expr_end) the end of an expression (I think).  FIXME.  */
@@ -2517,11 +2512,12 @@ pa_chk_field_selector (char **str)
 /* Parse a .byte, .word, .long expression for the HPPA.  Called by
    cons via the TC_PARSE_CONS_EXPRESSION macro.  */
 
-void
+int
 parse_cons_expression_hppa (expressionS *exp)
 {
-  hppa_field_selector = pa_chk_field_selector (&input_line_pointer);
+  int hppa_field_selector = pa_chk_field_selector (&input_line_pointer);
   expression (exp);
+  return hppa_field_selector;
 }
 
 /* Evaluate an absolute expression EXP which may be modified by

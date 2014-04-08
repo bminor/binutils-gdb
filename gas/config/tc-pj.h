@@ -31,7 +31,8 @@
    ? "Pico Java GAS Big Endian"           				\
    : "Pico Java GAS Little Endian")
 
-void pj_cons_fix_new_pj (struct frag *, int, int, expressionS *);
+void pj_cons_fix_new_pj (struct frag *, int, int, expressionS *,
+			 bfd_reloc_code_real_type);
 arelent *tc_gen_reloc (asection *, struct fix *);
 
 #define md_section_align(SEGMENT, SIZE)     (SIZE)
@@ -45,8 +46,8 @@ arelent *tc_gen_reloc (asection *, struct fix *);
 #define md_pcrel_from(FIX) 						\
 	((FIX)->fx_where + (FIX)->fx_frag->fr_address - 1)
 
-#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP) \
-	pj_cons_fix_new_pj (FRAG, WHERE, NBYTES, EXP)
+#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP, RELOC)	\
+	pj_cons_fix_new_pj (FRAG, WHERE, NBYTES, EXP, RELOC)
 
 /* No shared lib support, so we don't need to ensure externally
    visible symbols can be overridden.  */

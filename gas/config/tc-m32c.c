@@ -1019,10 +1019,9 @@ void
 m32c_cons_fix_new (fragS *	frag,
 		   int		where,
 		   int		size,
-		   expressionS *exp)
+		   expressionS *exp,
+		   bfd_reloc_code_real_type type)
 {
-  bfd_reloc_code_real_type type;
-
   switch (size)
     {
     case 1:

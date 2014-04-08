@@ -3264,12 +3264,11 @@ md_begin (void)
     }
 }
 
-static char *vax_cons_special_reloc;
-
-void
+bfd_reloc_code_real_type
 vax_cons (expressionS *exp, int size)
 {
   char *save;
+  char *vax_cons_special_reloc;
 
   SKIP_WHITESPACE ();
   vax_cons_special_reloc = NULL;
@@ -3373,35 +3372,29 @@ vax_cons (expressionS *exp, int size)
     }
   if (vax_cons_special_reloc == NULL)
     expression (exp);
+  else
+    switch (size)
+      {
+      case 1: return BFD_RELOC_8_PCREL;
+      case 2: return BFD_RELOC_16_PCREL;
+      case 4: return BFD_RELOC_32_PCREL;
+      }
+  return BFD_RELOC_NONE;
 }
 
 /* This is called by emit_expr via TC_CONS_FIX_NEW when creating a
    reloc for a cons.  */
 
 void
-vax_cons_fix_new (fragS *frag, int where, unsigned int nbytes, expressionS *exp)
+vax_cons_fix_new (fragS *frag, int where, unsigned int nbytes, expressionS *exp,
+		  bfd_reloc_code_real_type r)
 {
-  bfd_reloc_code_real_type r;
-
-  r = (nbytes == 1 ? BFD_RELOC_8 :
-       (nbytes == 2 ? BFD_RELOC_16 : BFD_RELOC_32));
-
-  if (vax_cons_special_reloc)
-    {
-      if (*vax_cons_special_reloc == 'p')
-	{
-	  switch (nbytes)
-	    {
-	    case 1: r = BFD_RELOC_8_PCREL; break;
-	    case 2: r = BFD_RELOC_16_PCREL; break;
-	    case 4: r = BFD_RELOC_32_PCREL; break;
-	    default: abort ();
-	    }
-	}
-    }
+  if (r == BFD_RELOC_NONE)
+    r = (nbytes == 1 ? BFD_RELOC_8
+	 : nbytes == 2 ? BFD_RELOC_16
+	 : BFD_RELOC_32);
 
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
-  vax_cons_special_reloc = NULL;
 }
 
 char *

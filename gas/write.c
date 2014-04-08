@@ -1883,7 +1883,7 @@ write_object_file (void)
 #ifdef TC_CONS_FIX_NEW
 	  TC_CONS_FIX_NEW (lie->frag,
 			   lie->word_goes_here - lie->frag->fr_literal,
-			   2, &exp);
+			   2, &exp, TC_PARSE_CONS_RETURN_NONE);
 #else
 	  fix_new_exp (lie->frag,
 		       lie->word_goes_here - lie->frag->fr_literal,

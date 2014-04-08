@@ -23159,9 +23159,9 @@ void
 cons_fix_new_arm (fragS *	frag,
 		  int		where,
 		  int		size,
-		  expressionS * exp)
+		  expressionS * exp,
+		  bfd_reloc_code_real_type reloc)
 {
-  bfd_reloc_code_real_type type;
   int pcrel = 0;
 
   /* Pick a reloc.
@@ -23169,17 +23169,17 @@ cons_fix_new_arm (fragS *	frag,
   switch (size)
     {
     case 1:
-      type = BFD_RELOC_8;
+      reloc = BFD_RELOC_8;
       break;
     case 2:
-      type = BFD_RELOC_16;
+      reloc = BFD_RELOC_16;
       break;
     case 4:
     default:
-      type = BFD_RELOC_32;
+      reloc = BFD_RELOC_32;
       break;
     case 8:
-      type = BFD_RELOC_64;
+      reloc = BFD_RELOC_64;
       break;
     }
 
@@ -23187,11 +23187,11 @@ cons_fix_new_arm (fragS *	frag,
   if (exp->X_op == O_secrel)
   {
     exp->X_op = O_symbol;
-    type = BFD_RELOC_32_SECREL;
+    reloc = BFD_RELOC_32_SECREL;
   }
 #endif
 
-  fix_new_exp (frag, where, (int) size, exp, pcrel, type);
+  fix_new_exp (frag, where, size, exp, pcrel, reloc);
 }
 
 #if defined (OBJ_COFF)

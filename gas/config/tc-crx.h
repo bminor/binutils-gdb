@@ -60,7 +60,8 @@ extern int crx_force_relocation (struct fix *);
 /* This is called by emit_expr when creating a reloc for a cons.
    We could use the definition there, except that we want to handle 
    the CRX reloc type specially, rather than the BFD_RELOC type.  */
-#define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP) \
+#define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP, RELOC) \
+      (void) RELOC, \
       fix_new_exp (FRAG, OFF, (int) LEN, EXP, 0, \
 	LEN == 1 ? BFD_RELOC_CRX_NUM8 \
 	: LEN == 2 ? BFD_RELOC_CRX_NUM16 \

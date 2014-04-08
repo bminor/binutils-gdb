@@ -49,8 +49,9 @@
 #ifdef OBJ_ELF
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) vax_cons (EXP, NBYTES)
 #define TC_CONS_FIX_NEW vax_cons_fix_new
-void vax_cons (expressionS *, int);
-void vax_cons_fix_new (struct frag *, int, unsigned int, struct expressionS *);
+bfd_reloc_code_real_type vax_cons (expressionS *, int);
+void vax_cons_fix_new (struct frag *, int, unsigned int, struct expressionS *,
+		       bfd_reloc_code_real_type);
 #endif
 
 extern const struct relax_type md_relax_table[];

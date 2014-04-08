@@ -71,7 +71,8 @@ extern valueT alpha_gp_value;
 
 #define tc_canonicalize_symbol_name evax_shorten_name
 
-#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) \
+#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP,RELOC)	\
+      (void) RELOC,				\
       fix_new_exp (FRAG, OFF, (int)LEN, EXP, 0, \
 	LEN == 2 ? BFD_RELOC_16 \
 	: LEN == 4 ? BFD_RELOC_32 \

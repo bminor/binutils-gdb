@@ -158,6 +158,10 @@
 /* The maximum address skip amount that can be encoded with a special op.  */
 #define MAX_SPECIAL_ADDR_DELTA		SPECIAL_ADDR(255)
 
+#ifndef TC_PARSE_CONS_RETURN_NONE
+#define TC_PARSE_CONS_RETURN_NONE BFD_RELOC_NONE
+#endif
+
 struct line_entry {
   struct line_entry *next;
   symbolS *label;
@@ -1144,13 +1148,13 @@ emit_fixed_inc_line_addr (int line_delta, addressT addr_delta, fragS *frag,
       exp.X_op = O_symbol;
       exp.X_add_symbol = to_sym;
       exp.X_add_number = 0;
-      emit_expr_fix (&exp, sizeof_address, frag, p);
+      emit_expr_fix (&exp, sizeof_address, frag, p, TC_PARSE_CONS_RETURN_NONE);
       p += sizeof_address;
     }
   else
     {
       *p++ = DW_LNS_fixed_advance_pc;
-      emit_expr_fix (pexp, 2, frag, p);
+      emit_expr_fix (pexp, 2, frag, p, TC_PARSE_CONS_RETURN_NONE);
       p += 2;
     }
 

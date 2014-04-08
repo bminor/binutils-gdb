@@ -231,6 +231,10 @@ extern int ppc_fix_adjustable (struct fix *);
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) \
+  ppc_elf_parse_cons (EXP, NBYTES)
+extern bfd_reloc_code_real_type ppc_elf_parse_cons (expressionS *,
+						    unsigned int);
 #define tc_frob_file_before_adjust ppc_frob_file_before_adjust
 extern void ppc_frob_file_before_adjust (void);
 

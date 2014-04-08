@@ -1521,22 +1521,7 @@ md_assemble (char *str)
   }
 }
 
-typedef struct
-{
-  /* Name of the expression modifier allowed with .byte, .word, etc.  */
-  const char *name;
-
-  /* Only allowed with n bytes of data.  */
-  int nbytes;
-
-  /* Associated RELOC.  */
-  bfd_reloc_code_real_type reloc;
-
-  /* Part of the error message.  */
-  const char *error;
-} exp_mod_data_t;
-
-static const exp_mod_data_t exp_mod_data[] =
+const exp_mod_data_t exp_mod_data[] =
 {
   /* Default, must be first.  */
   { "", 0, BFD_RELOC_16, "" },
@@ -1557,20 +1542,15 @@ static const exp_mod_data_t exp_mod_data[] =
   { NULL, 0, 0, NULL }
 };
 
-/* Data to pass between `avr_parse_cons_expression' and `avr_cons_fix_new'.  */
-static const exp_mod_data_t *pexp_mod_data = &exp_mod_data[0];
-
 /* Parse special CONS expression: pm (expression) or alternatively
    gs (expression).  These are used for addressing program memory.  Moreover,
    define lo8 (expression), hi8 (expression) and hlo8 (expression).  */
 
-void
+const exp_mod_data_t *
 avr_parse_cons_expression (expressionS *exp, int nbytes)
 {
   const exp_mod_data_t *pexp = &exp_mod_data[0];
   char *tmp;
-
-  pexp_mod_data = pexp;
 
   tmp = input_line_pointer = skip_space (input_line_pointer);
 
@@ -1589,18 +1569,18 @@ avr_parse_cons_expression (expressionS *exp, int nbytes)
 	  if (*input_line_pointer == '(')
 	    {
 	      input_line_pointer = skip_space (input_line_pointer + 1);
-	      pexp_mod_data = pexp;
 	      expression (exp);
 
 	      if (*input_line_pointer == ')')
-		++input_line_pointer;
+		{
+		  ++input_line_pointer;
+		  return pexp;
+		}
 	      else
 		{
 		  as_bad (_("`)' required"));
-		  pexp_mod_data = &exp_mod_data[0];
+		  return &exp_mod_data[0];
 		}
-
-	      return;
 	    }
 
 	  input_line_pointer = tmp;
@@ -1610,13 +1590,15 @@ avr_parse_cons_expression (expressionS *exp, int nbytes)
     }
 
   expression (exp);
+  return &exp_mod_data[0];
 }
 
 void
 avr_cons_fix_new (fragS *frag,
 		  int where,
 		  int nbytes,
-		  expressionS *exp)
+		  expressionS *exp,
+		  const exp_mod_data_t *pexp_mod_data)
 {
   int bad = 0;
 
@@ -1646,8 +1628,6 @@ avr_cons_fix_new (fragS *frag,
 
   if (bad)
     as_bad (_("illegal %srelocation size: %d"), pexp_mod_data->error, nbytes);
-
-  pexp_mod_data = &exp_mod_data[0];
 }
 
 static bfd_boolean

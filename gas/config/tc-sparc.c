@@ -4268,11 +4268,6 @@ s_proc (int ignore ATTRIBUTE_UNUSED)
 
 static int sparc_no_align_cons = 0;
 
-/* This static variable is set by sparc_cons to emit requested types
-   of relocations in cons_fix_new_sparc.  */
-
-static const char *sparc_cons_special_reloc;
-
 /* This handles the unaligned space allocation pseudo-ops, such as
    .uaword.  .uaword is just like .word, but the value does not need
    to be aligned.  */
@@ -4540,13 +4535,13 @@ sparc_elf_final_processing (void)
     elf_elfheader (stdoutput)->e_flags |= EF_SPARC_SUN_US1|EF_SPARC_SUN_US3;
 }
 
-void
+const char *
 sparc_cons (expressionS *exp, int size)
 {
   char *save;
+  const char *sparc_cons_special_reloc = NULL;
 
   SKIP_WHITESPACE ();
-  sparc_cons_special_reloc = NULL;
   save = input_line_pointer;
   if (input_line_pointer[0] == '%'
       && input_line_pointer[1] == 'r'
@@ -4673,6 +4668,7 @@ sparc_cons (expressionS *exp, int size)
     }
   if (sparc_cons_special_reloc == NULL)
     expression (exp);
+  return sparc_cons_special_reloc;
 }
 
 #endif
@@ -4685,7 +4681,8 @@ void
 cons_fix_new_sparc (fragS *frag,
 		    int where,
 		    unsigned int nbytes,
-		    expressionS *exp)
+		    expressionS *exp,
+		    const char *sparc_cons_special_reloc)
 {
   bfd_reloc_code_real_type r;
 
@@ -4734,7 +4731,6 @@ cons_fix_new_sparc (fragS *frag,
    }
 
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
-  sparc_cons_special_reloc = NULL;
 }
 
 void
@@ -4788,9 +4784,7 @@ sparc_regname_to_dw2regnum (char *regname)
 void
 sparc_cfi_emit_pcrel_expr (expressionS *exp, unsigned int nbytes)
 {
-  sparc_cons_special_reloc = "disp";
   sparc_no_align_cons = 1;
-  emit_expr (exp, nbytes);
+  emit_expr_with_reloc (exp, nbytes, "disp");
   sparc_no_align_cons = 0;
-  sparc_cons_special_reloc = NULL;
 }

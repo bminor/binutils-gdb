@@ -348,7 +348,8 @@ extern int arm_data_in_code (void);
 extern char * arm_canonicalize_symbol_name (char *);
 extern void arm_adjust_symtab (void);
 extern void armelf_frob_symbol (symbolS *, int *);
-extern void cons_fix_new_arm (fragS *, int, int, expressionS *);
+extern void cons_fix_new_arm (fragS *, int, int, expressionS *,
+			      bfd_reloc_code_real_type);
 extern void arm_init_frag (struct frag *, int);
 extern void arm_handle_align (struct frag *);
 extern bfd_boolean arm_fix_adjustable (struct fix *);

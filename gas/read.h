@@ -93,6 +93,11 @@ enum linkonce_type {
 extern char original_case_string[];
 #endif
 
+#ifndef TC_PARSE_CONS_RETURN_TYPE
+#define TC_PARSE_CONS_RETURN_TYPE bfd_reloc_code_real_type
+#define TC_PARSE_CONS_RETURN_NONE BFD_RELOC_NONE
+#endif
+
 extern void pop_insert (const pseudo_typeS *);
 extern unsigned int get_stab_string_offset
   (const char *string, const char *stabstr_secname);
@@ -109,7 +114,10 @@ extern void add_include_dir (char *path);
 extern void cons (int nbytes);
 extern void demand_empty_rest_of_line (void);
 extern void emit_expr (expressionS *exp, unsigned int nbytes);
-extern void emit_expr_fix (expressionS *, unsigned int, fragS *, char *);
+extern void emit_expr_with_reloc (expressionS *exp, unsigned int nbytes,
+				  TC_PARSE_CONS_RETURN_TYPE);
+extern void emit_expr_fix (expressionS *, unsigned int, fragS *, char *,
+			   TC_PARSE_CONS_RETURN_TYPE);
 extern void equals (char *sym_name, int reassign);
 extern void float_cons (int float_type);
 extern void ignore_rest_of_line (void);

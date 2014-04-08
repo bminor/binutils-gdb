@@ -1160,7 +1160,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
    Values for the status register are specified with %st(label).
    `label' will be right shifted by 2.  */
 
-void
+bfd_reloc_code_real_type
 arc_parse_cons_expression (expressionS *exp,
 			   unsigned int nbytes ATTRIBUTE_UNUSED)
 {
@@ -1179,6 +1179,7 @@ arc_parse_cons_expression (expressionS *exp,
       arc_code_symbol (exp);
       input_line_pointer = p;
     }
+  return BFD_RELOC_NONE;
 }
 
 /* Record a fixup for a cons expression.  */
@@ -1187,7 +1188,8 @@ void
 arc_cons_fix_new (fragS *frag,
 		  int where,
 		  int nbytes,
-		  expressionS *exp)
+		  expressionS *exp,
+		  bfd_reloc_code_real_type r ATTRIBUTE_UNUSED)
 {
   if (nbytes == 4)
     {

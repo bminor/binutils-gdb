@@ -58,10 +58,11 @@ extern int v850_force_relocation (struct fix *);
 /* We need to handle lo(), hi(), etc etc in .hword, .word, etc
    directives, so we have to parse "cons" expressions ourselves.  */
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) parse_cons_expression_v850 (EXP)
-extern void parse_cons_expression_v850 (expressionS *);
+extern bfd_reloc_code_real_type parse_cons_expression_v850 (expressionS *);
 
 #define TC_CONS_FIX_NEW cons_fix_new_v850
-extern void cons_fix_new_v850 (fragS *, int, int, expressionS *);
+extern void cons_fix_new_v850 (fragS *, int, int, expressionS *,
+			       bfd_reloc_code_real_type);
 
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 extern const struct relax_type md_relax_table[];
