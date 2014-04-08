@@ -3918,6 +3918,12 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
   do
     {
       TC_PARSE_CONS_RETURN_TYPE ret = TC_PARSE_CONS_RETURN_NONE;
+#ifdef TC_CONS_FIX_CHECK
+      fixS **cur_fix = &frchain_now->fix_tail;
+
+      if (*cur_fix != NULL)
+	cur_fix = &(*cur_fix)->fx_next;
+#endif
 
 #ifdef TC_M68K
       if (flag_m68k_mri)
@@ -3942,6 +3948,9 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 	    as_fatal (_("rva without symbol"));
 	}
       emit_expr_with_reloc (&exp, (unsigned int) nbytes, ret);
+#ifdef TC_CONS_FIX_CHECK
+      TC_CONS_FIX_CHECK (&exp, nbytes, *cur_fix);
+#endif
       ++c;
     }
   while (*input_line_pointer++ == ',');

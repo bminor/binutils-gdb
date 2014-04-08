@@ -211,6 +211,12 @@ enum {
   has_large_toc_reloc = 1,
   has_small_toc_reloc = 2
 } toc_reloc_types;
+
+/* Warn on emitting data to code sections.  */
+int warn_476;
+unsigned long last_insn;
+segT last_seg;
+subsegT last_subseg;
 
 /* The target specific pseudo-ops which we support.  */
 
@@ -1065,6 +1071,8 @@ const char *const md_shortopts = "um:";
 #define OPTION_NOPS (OPTION_MD_BASE + 0)
 const struct option md_longopts[] = {
   {"nops", required_argument, NULL, OPTION_NOPS},
+  {"ppc476-workaround", no_argument, &warn_476, 1},
+  {"no-ppc476-workaround", no_argument, &warn_476, 0},
   {NULL, no_argument, NULL, 0}
 };
 const size_t md_longopts_size = sizeof (md_longopts);
@@ -1243,6 +1251,9 @@ md_parse_option (int c, char *arg)
       }
       break;
 
+    case 0:
+      break;
+
     default:
       return 0;
     }
@@ -1316,7 +1327,8 @@ PowerPC options:\n\
 -Qy, -Qn                ignored\n"));
 #endif
   fprintf (stream, _("\
--nops=count             when aligning, more than COUNT nops uses a branch\n"));
+-nops=count             when aligning, more than COUNT nops uses a branch\n\
+-ppc476-workaround      warn if emitting data to code sections\n"));
 }
 
 /* Set ppc_cpu if it is not already set.  */
@@ -2054,6 +2066,37 @@ ppc_elf_parse_cons (expressionS *exp, unsigned int nbytes)
   if (nbytes >= 2 && *input_line_pointer == '@')
     return ppc_elf_suffix (&input_line_pointer, exp);
   return BFD_RELOC_NONE;
+}
+
+/* Warn when emitting data to code sections, unless we are emitting
+   a relocation that ld --ppc476-workaround uses to recognise data
+   *and* there was an unconditional branch prior to the data.  */
+
+void
+ppc_elf_cons_fix_check (expressionS *exp ATTRIBUTE_UNUSED,
+			unsigned int nbytes, fixS *fix)
+{
+  if (warn_476
+      && (now_seg->flags & SEC_CODE) != 0
+      && (nbytes != 4
+	  || fix == NULL
+	  || !(fix->fx_r_type == BFD_RELOC_32
+	       || fix->fx_r_type == BFD_RELOC_CTOR
+	       || fix->fx_r_type == BFD_RELOC_32_PCREL)
+	  || !(last_seg == now_seg && last_subseg == now_subseg)
+	  || !((last_insn & (0x3f << 26)) == (18u << 26)
+	       || ((last_insn & (0x3f << 26)) == (16u << 26)
+		   && (last_insn & (0x14 << 21)) == (0x14 << 21))
+	       || ((last_insn & (0x3f << 26)) == (19u << 26)
+		   && (last_insn & (0x3ff << 1)) == (16u << 1)
+		   && (last_insn & (0x14 << 21)) == (0x14 << 21)))))
+    {
+      /* Flag that we've warned.  */
+      if (fix != NULL)
+	fix->fx_tcbit = 1;
+
+      as_warn (_("data in executable section"));
+    }
 }
 
 /* Solaris pseduo op to change to the .rodata section.  */
@@ -3345,6 +3388,9 @@ md_assemble (char *str)
   frag_now->insn_addr = addr_mod;
   frag_now->has_code = 1;
   md_number_to_chars (f, insn, insn_length);
+  last_insn = insn;
+  last_seg = now_seg;
+  last_subseg = now_subseg;
 
 #ifdef OBJ_ELF
   dwarf2_emit_insn (insn_length);
@@ -3502,6 +3548,8 @@ ppc_section_flags (flagword flags, bfd_vma attr ATTRIBUTE_UNUSED, int type)
 static void
 ppc_byte (int ignore ATTRIBUTE_UNUSED)
 {
+  int count = 0;
+
   if (*input_line_pointer != '\"')
     {
       cons (1);
@@ -3525,8 +3573,11 @@ ppc_byte (int ignore ATTRIBUTE_UNUSED)
 	}
 
       FRAG_APPEND_1_CHAR (c);
+      ++count;
     }
 
+  if (warn_476 && count != 0 && (now_seg->flags & SEC_CODE) != 0)
+    as_warn (_("data in executable section"));
   demand_empty_rest_of_line ();
 }
 
@@ -6924,6 +6975,16 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       if (fixP->fx_size && APPLY_RELOC)
 	md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			    fieldval, fixP->fx_size);
+      if (warn_476
+	  && (seg->flags & SEC_CODE) != 0
+	  && fixP->fx_size == 4
+	  && fixP->fx_done
+	  && !fixP->fx_tcbit
+	  && (fixP->fx_r_type == BFD_RELOC_32
+	      || fixP->fx_r_type == BFD_RELOC_CTOR
+	      || fixP->fx_r_type == BFD_RELOC_32_PCREL))
+	as_warn_where (fixP->fx_file, fixP->fx_line,
+		       _("data in executable section"));
     }
 
   /* We are only able to convert some relocs to pc-relative.  */
