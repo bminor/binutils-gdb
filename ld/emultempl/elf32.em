@@ -39,10 +39,7 @@ fragment <<EOF
 #include "bfd.h"
 #include "libiberty.h"
 #include "filenames.h"
-#include "safe-ctype.h"
 #include "getopt.h"
-#include "md5.h"
-#include "sha1.h"
 #include <fcntl.h>
 
 #include "bfdlink.h"
@@ -54,6 +51,7 @@ fragment <<EOF
 #include "ldlang.h"
 #include "ldfile.h"
 #include "ldemul.h"
+#include "ldbuildid.h"
 #include <ldgram.h>
 #include "elf/common.h"
 #include "elf-bfd.h"
@@ -895,51 +893,18 @@ id_note_section_size (bfd *abfd ATTRIBUTE_UNUSED)
 {
   const char *style = emit_note_gnu_build_id;
   bfd_size_type size;
+  bfd_size_type build_id_size;
 
   size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
   size = (size + 3) & -(bfd_size_type) 4;
 
-  if (!strcmp (style, "md5") || !strcmp (style, "uuid"))
-    size += 128 / 8;
-  else if (!strcmp (style, "sha1"))
-    size += 160 / 8;
-  else if (!strncmp (style, "0x", 2))
-    {
-      /* ID is in string form (hex).  Convert to bits.  */
-      const char *id = style + 2;
-      do
-	{
-	  if (ISXDIGIT (id[0]) && ISXDIGIT (id[1]))
-	    {
-	      ++size;
-	      id += 2;
-	    }
-	  else if (*id == '-' || *id == ':')
-	    ++id;
-	  else
-	    {
-	      size = 0;
-	      break;
-	    }
-	} while (*id != '\0');
-    }
+  build_id_size = compute_build_id_size (style);
+  if (build_id_size)
+    size += build_id_size;
   else
     size = 0;
 
   return size;
-}
-
-static unsigned char
-read_hex (const char xdigit)
-{
-  if (ISDIGIT (xdigit))
-    return xdigit - '0';
-  if (ISUPPER (xdigit))
-    return xdigit - 'A' + 0xa;
-  if (ISLOWER (xdigit))
-    return xdigit - 'a' + 0xa;
-  abort ();
-  return 0;
 }
 
 static bfd_boolean
@@ -954,7 +919,6 @@ write_build_id (bfd *abfd)
   bfd_size_type size;
   file_ptr position;
   Elf_External_Note *e_note;
-  typedef void (*sum_fn) (const void *, size_t, void *);
 
   style = t->o->build_id.style;
   asec = t->o->build_id.sec;
@@ -986,55 +950,7 @@ write_build_id (bfd *abfd)
   bfd_h_put_32 (abfd, NT_GNU_BUILD_ID, &e_note->type);
   memcpy (e_note->name, "GNU", sizeof "GNU");
 
-  if (strcmp (style, "md5") == 0)
-    {
-      struct md5_ctx ctx;
-
-      md5_init_ctx (&ctx);
-      if (!bed->s->checksum_contents (abfd, (sum_fn) &md5_process_bytes, &ctx))
-	return FALSE;
-      md5_finish_ctx (&ctx, id_bits);
-    }
-  else if (strcmp (style, "sha1") == 0)
-    {
-      struct sha1_ctx ctx;
-
-      sha1_init_ctx (&ctx);
-      if (!bed->s->checksum_contents (abfd, (sum_fn) &sha1_process_bytes, &ctx))
-	return FALSE;
-      sha1_finish_ctx (&ctx, id_bits);
-    }
-  else if (strcmp (style, "uuid") == 0)
-    {
-      int n;
-      int fd = open ("/dev/urandom", O_RDONLY);
-      if (fd < 0)
-	return FALSE;
-      n = read (fd, id_bits, size);
-      close (fd);
-      if (n < (int) size)
-	return FALSE;
-    }
-  else if (strncmp (style, "0x", 2) == 0)
-    {
-      /* ID is in string form (hex).  Convert to bits.  */
-      const char *id = style + 2;
-      size_t n = 0;
-      do
-	{
-	  if (ISXDIGIT (id[0]) && ISXDIGIT (id[1]))
-	    {
-	      id_bits[n] = read_hex (*id++) << 4;
-	      id_bits[n++] |= read_hex (*id++);
-	    }
-	  else if (*id == '-' || *id == ':')
-	    ++id;
-	  else
-	    abort ();		/* Should have been validated earlier.  */
-	} while (*id != '\0');
-    }
-  else
-    abort ();			/* Should have been validated earlier.  */
+  generate_build_id (abfd, style, bed->s->checksum_contents, id_bits, size);
 
   position = i_shdr->sh_offset + asec->output_offset;
   size = asec->size;

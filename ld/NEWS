@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add support for the --build-id command line option to COFF based targets.
+
+* x86/x86_64 pe-coff now supports the --build-id option.
+
 * Add support for the Andes NDS32.
 
 Changes in 2.24:

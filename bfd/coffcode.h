@@ -4329,7 +4329,18 @@ coff_write_object_contents (bfd * abfd)
     }
 #endif
 
-  /* Now write them.  */
+#ifdef COFF_WITH_PE
+  {
+    /* After object contents are finalized so we can compute a reasonable hash,
+       but before header is written so we can update it to point to debug directory.  */
+    struct pe_tdata *pe = pe_data (abfd);
+
+    if (pe->build_id.after_write_object_contents != NULL)
+      (*pe->build_id.after_write_object_contents) (abfd);
+  }
+#endif
+
+  /* Now write header.  */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return FALSE;
 

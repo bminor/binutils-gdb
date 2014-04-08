@@ -378,6 +378,13 @@ main (int argc, char **argv)
 
   lang_final ();
 
+  /* If the only command line argument has been -v or --version or --verbose
+     then ignore any input files provided by linker scripts and exit now.
+     We do not want to create an output file when the linker is just invoked
+     to provide version information.  */
+  if (argc == 2 && version_printed)
+    xexit (0);
+
   if (!lang_has_input_file)
     {
       if (version_printed || command_line.print_output_format)

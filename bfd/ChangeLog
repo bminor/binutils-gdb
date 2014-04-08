@@ -1,3 +1,18 @@
+2014-04-08  Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* peXXigen.c (pe_print_debugdata): New function: Displays the
+	contents of the debug directory and decodes codeview entries.
+	(_bfd_XXi_swap_debugdir_in, _bfd_XXi_swap_debugdir_out)
+	(_bfd_XXi_slurp_codeview_record, _bfd_XXi_write_codeview_record):
+	Add functions for reading and writing debugdir and codeview
+	records.
+	* libpei.h (_bfd_XXi_swap_debugdir_in, _bfd_XXi_swap_debugdir_out)
+	(_bfd_XXi_write_codeview_record): Add prototypes and macros.
+	* libcoff-in.h (pe_tdata): Add build-id data.
+	* libcoff.h: Regenerate.
+	* coffcode.h (coff_write_object_contents): Run build_id
+	after_write_object_contents hook.
+
 2014-04-05  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_add_default_symbol): Pass poldbfd when

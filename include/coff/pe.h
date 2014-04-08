@@ -1,4 +1,4 @@
-/* pe.h  -  PE COFF header information 
+/* pe.h  -  PE COFF header information
 
    Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
@@ -163,9 +163,9 @@
 #define IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER	12
 #define IMAGE_SUBSYSTEM_SAL_RUNTIME_DRIVER	13
 #define IMAGE_SUBSYSTEM_XBOX			14
-  
+
 /* Magic values that are true for all dos/nt implementations.  */
-#define DOSMAGIC       0x5a4d  
+#define DOSMAGIC       0x5a4d
 #define NT_SIGNATURE   0x00004550
 
 /* NT allows long filenames, we want to accommodate this.
@@ -264,7 +264,7 @@ struct external_PEI_filehdr
 
 /* 32-bit PE a.out header: */
 
-typedef struct 
+typedef struct
 {
   AOUTHDR standard;
 
@@ -300,7 +300,7 @@ typedef struct
 /* Like PEAOUTHDR, except that the "standard" member has no BaseOfData
    (aka data_start) member and that some of the members are 8 instead
    of just 4 bytes long.  */
-typedef struct 
+typedef struct
 {
 #ifdef AOUTHDRSZ64
   AOUTHDR64 standard;
@@ -338,7 +338,7 @@ typedef struct
 #else
 #define PEPAOUTSZ	240
 #endif
-  
+
 #undef  E_FILNMLEN
 #define E_FILNMLEN	18	/* # characters in a file name.  */
 
@@ -583,5 +583,42 @@ struct external_pex64_scope_entry
 #define PEX64_SCOPE_ENTRY(COUNTOFUNWINDCODES, IDX) \
   (PEX64_OFFSET_TO_SCOPE_COUNT(COUNTOFUNWINDCODES) + \
    PEX64_SCOPE_ENTRY_SIZE * (IDX))
+
+/* Extra structure used in debug directory */
+struct external_IMAGE_DEBUG_DIRECTORY {
+  char Characteristics[4];
+  char TimeDateStamp[4];
+  char MajorVersion[2];
+  char MinorVersion[2];
+  char Type[4];
+  char SizeOfData[4];
+  char AddressOfRawData[4];
+  char PointerToRawData[4];
+};
+
+/* Extra structures used in codeview debug record */
+/* This is not part of the PE specification */
+
+#define CVINFO_PDB70_CVSIGNATURE 0x53445352 // "RSDS"
+#define CVINFO_PDB20_CVSIGNATURE 0x3031424e // "NB10"
+#define CVINFO_CV50_CVSIGNATURE  0x3131424e // "NB11"
+#define CVINFO_CV41_CVSIGNATURE  0x3930424e // âNB09"
+
+typedef struct _CV_INFO_PDB70
+{
+  char CvSignature[4];
+  char Signature[16];
+  char Age[4];
+  char PdbFileName[];
+} CV_INFO_PDB70;
+
+typedef struct _CV_INFO_PDB20
+{
+  char CvHeader[4];
+  char Offset[4];
+  char Signature[4];
+  char Age[4];
+  char PdbFileName[];
+} CV_INFO_PDB20;
 
 #endif /* _PE_H */
