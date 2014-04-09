@@ -1,3 +1,20 @@
+2014-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (default-manifest.o): Remove rule.
+	(EMUL_EXTRA_BINARIES): Delete.
+	(ALL_EMUL_EXTRA_BINARIES): Delete.
+	(ld_new_DEPENDENCIES): Remove EMUL_EXTRA_BINARIES.
+	(install-data-local): Remove EMUL_EXTRA_BINARIES.
+	* Makefile.in: Regenerate.
+	* configure.in (all_emul_extra_binaries): Delete.
+	(EMUL_EXTRA_BINARIES): Remove.
+	* configure: Regenerate.
+	* configure.tgt (target_extra_binaries): Delete.
+	* emultempl/default-manifest.rc: Delete.
+	* ld.texinfo: Remove discussion of default manifest.
+	* emulparams/i386pe.sh (DEFAULT_MANIFEST): Delete.
+	* emulparams/i386pep.sh (DEFAULT_MANIFEST): Delete.
+
 2014-04-09  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/spuelf.em: Include safe-ctype.h, remove duplicate errno.h.

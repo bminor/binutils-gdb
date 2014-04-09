@@ -7599,14 +7599,6 @@ tools will be able to process object files employing this GNU extension,
 but will fail to respect the alignment instructions, and may issue noisy
 warnings about unknown linker directives.
 
-@cindex default manifest
-@item default manifest
-The linker will automatically add a default manifest to the .rsrc
-section of any fully linked cygwin or MingGW binary.  This manifest is
-necessary in order to be able to execute the binary under Windows 8
-(or later).  An application can supply its own manifest, and if it
-does so then this manifest will be used in preference to the default
-one.
 @end table
 
 @ifclear GENERIC

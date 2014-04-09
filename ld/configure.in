@@ -275,7 +275,6 @@ all_targets=
 EMUL=
 all_emuls=
 all_emul_extras=
-all_emul_extra_binaries=
 all_libpath=
 
 dnl We need to get an arbitrary number of tdir definitions into
@@ -355,14 +354,6 @@ do
 	esac
     done
 
-    for i in $targ_extra_binaries; do
-	case " $all_emul_extra_binaries " in
-	*" ${i} "*) ;;
-	*)
-	  all_emul_extra_binaries="$all_emul_extra_binaries ${i}"
-	  ;;
-	esac
-    done
   fi
 done
 
@@ -378,15 +369,12 @@ if test x${all_targets} = xtrue; then
     EMULATION_OFILES='$(ALL_EMULATIONS)'
   fi
   EMUL_EXTRA_OFILES='$(ALL_EMUL_EXTRA_OFILES)'
-  EMUL_EXTRA_BINARIES='$(ALL_EMUL_EXTRA_BINARIES)'
 else
   EMULATION_OFILES=$all_emuls
   EMUL_EXTRA_OFILES=$all_emul_extras
-  EMUL_EXTRA_BINARIES=$all_emul_extra_binaries
 fi
 AC_SUBST(EMULATION_OFILES)
 AC_SUBST(EMUL_EXTRA_OFILES)
-AC_SUBST(EMUL_EXTRA_BINARIES)
 AC_SUBST(LIB_PATH)
 
 EMULATION_LIBPATH=$all_libpath
