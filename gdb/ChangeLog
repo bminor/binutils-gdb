@@ -1,3 +1,9 @@
+2014-04-09  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_check_new_threads): Fix port leak, add
+	comments.
+	(darwin_decode_exception_message): Free port only after use.
+
 2014-04-08  Pierre Langlois  <pierre.langlois@embecosm.com>
 
 	* avr-tdep.c (struct gdbarch_tdep): Mention avrxmega in the comment.
