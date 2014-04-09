@@ -67,7 +67,7 @@ extern long md_pcrel_from_section (struct fix *, segT);
   rl78_validate_fix_sub (FIX)
 extern int rl78_validate_fix_sub (struct fix *);
 
-#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP) \
+#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP, RET)	\
   rl78_cons_fix_new (FRAG, WHERE, NBYTES, EXP)
 extern void rl78_cons_fix_new (fragS *, int, int, expressionS *);
 

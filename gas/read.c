@@ -4412,7 +4412,7 @@ emit_expr_with_reloc (expressionS *exp,
 
 void
 emit_expr_fix (expressionS *exp, unsigned int nbytes, fragS *frag, char *p,
-	       TC_PARSE_CONS_RETURN_TYPE r)
+	       TC_PARSE_CONS_RETURN_TYPE r ATTRIBUTE_UNUSED)
 {
   int offset = 0;
   unsigned int size = nbytes;
