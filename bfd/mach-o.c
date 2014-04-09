@@ -5084,6 +5084,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #define TARGET_NAME 		mach_o_be_vec
 #define TARGET_STRING     	"mach-o-be"
 #define TARGET_ARCHITECTURE	bfd_arch_unknown
+#define TARGET_PAGESIZE		1
 #define TARGET_BIG_ENDIAN 	1
 #define TARGET_ARCHIVE 		0
 #define TARGET_PRIORITY		1
@@ -5092,6 +5093,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #undef TARGET_NAME
 #undef TARGET_STRING
 #undef TARGET_ARCHITECTURE
+#undef TARGET_PAGESIZE
 #undef TARGET_BIG_ENDIAN
 #undef TARGET_ARCHIVE
 #undef TARGET_PRIORITY
@@ -5099,6 +5101,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #define TARGET_NAME 		mach_o_le_vec
 #define TARGET_STRING 		"mach-o-le"
 #define TARGET_ARCHITECTURE	bfd_arch_unknown
+#define TARGET_PAGESIZE		1
 #define TARGET_BIG_ENDIAN 	0
 #define TARGET_ARCHIVE 		0
 #define TARGET_PRIORITY		1
@@ -5108,6 +5111,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #undef TARGET_NAME
 #undef TARGET_STRING
 #undef TARGET_ARCHITECTURE
+#undef TARGET_PAGESIZE
 #undef TARGET_BIG_ENDIAN
 #undef TARGET_ARCHIVE
 #undef TARGET_PRIORITY
@@ -5130,6 +5134,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #define TARGET_NAME 		mach_o_fat_vec
 #define TARGET_STRING 		"mach-o-fat"
 #define TARGET_ARCHITECTURE	bfd_arch_unknown
+#define TARGET_PAGESIZE		1
 #define TARGET_BIG_ENDIAN 	1
 #define TARGET_ARCHIVE 		1
 #define TARGET_PRIORITY		0
@@ -5139,6 +5144,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #undef TARGET_NAME
 #undef TARGET_STRING
 #undef TARGET_ARCHITECTURE
+#undef TARGET_PAGESIZE
 #undef TARGET_BIG_ENDIAN
 #undef TARGET_ARCHIVE
 #undef TARGET_PRIORITY

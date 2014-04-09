@@ -1,5 +1,15 @@
 2014-04-18  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h (bfd_mach_o_backend_data): Add page_size field.
+	* mach-o-target.c: Check TARGET_PAGESIZE is defined.
+	(TARGET_NAME_BACKEND): Add TARGET_PAGESIZE.
+	* mach-o.c (TARGET_PAGESIZE): Define and undefined for
+	each targets declared.
+	* mach-o-x86-64.c (TARGET_PAGESIZE): Define.
+	* mach-o-i386.c (TARGET_PAGESIZE): Define.
+
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_write_thread)
 	(bfd_mach_o_write_section_32, bfd_mach_o_write_section_64)
 	(bfd_mach_o_write_segment_32, bfd_mach_o_write_segment_64)

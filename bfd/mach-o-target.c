@@ -85,6 +85,10 @@
 #error TARGET_ARCHIVE must be defined
 #endif /* TARGET_ARCHIVE */
 
+#ifndef TARGET_PAGESIZE
+#error TARGET_PAGESIZE must be defined
+#endif
+
 #if ((TARGET_ARCHIVE) && (! TARGET_BIG_ENDIAN))
 #error Mach-O fat files must always be big-endian.
 #endif /* ((TARGET_ARCHIVE) && (! TARGET_BIG_ENDIAN)) */
@@ -92,6 +96,7 @@
 static const bfd_mach_o_backend_data TARGET_NAME_BACKEND =
 {
   TARGET_ARCHITECTURE,
+  TARGET_PAGESIZE,
   bfd_mach_o_swap_reloc_in,
   bfd_mach_o_swap_reloc_out,
   bfd_mach_o_print_thread,
