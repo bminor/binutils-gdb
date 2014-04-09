@@ -32,7 +32,10 @@ typedef enum bfd_mach_o_mach_header_magic
 }
 bfd_mach_o_mach_header_magic;
 
-#define BFD_MACH_O_CPU_IS64BIT 0x1000000
+/* Capability bits in cpu type.  */
+#define BFD_MACH_O_CPU_ARCH_MASK  0xff000000
+#define BFD_MACH_O_CPU_ARCH_ABI64 0x01000000
+#define BFD_MACH_O_CPU_IS64BIT    0x01000000
 
 typedef enum bfd_mach_o_cpu_type
 {
@@ -56,6 +59,10 @@ typedef enum bfd_mach_o_cpu_type
     (BFD_MACH_O_CPU_TYPE_ARM | BFD_MACH_O_CPU_IS64BIT)
 }
 bfd_mach_o_cpu_type;
+
+/* Capability bits in cpu subtype.  */
+#define BFD_MACH_O_CPU_SUBTYPE_MASK  0xff000000
+#define BFD_MACH_O_CPU_SUBTYPE_LIB64 0x80000000
 
 typedef enum bfd_mach_o_cpu_subtype
 {

@@ -1,3 +1,8 @@
+2014-04-16  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_mkobject): Adjust cpusubtype
+	flag.
+
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Fill 476 fixup area

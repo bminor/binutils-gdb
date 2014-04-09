@@ -53,7 +53,8 @@ bfd_mach_o_x86_64_mkobject (bfd *abfd)
   mdata = bfd_mach_o_get_data (abfd);
   mdata->header.magic = BFD_MACH_O_MH_MAGIC_64;
   mdata->header.cputype = BFD_MACH_O_CPU_TYPE_X86_64;
-  mdata->header.cpusubtype = BFD_MACH_O_CPU_SUBTYPE_X86_ALL;
+  mdata->header.cpusubtype =
+    BFD_MACH_O_CPU_SUBTYPE_X86_ALL | BFD_MACH_O_CPU_SUBTYPE_LIB64;
   mdata->header.byteorder = BFD_ENDIAN_LITTLE;
   mdata->header.version = 2;
 
