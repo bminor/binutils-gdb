@@ -418,8 +418,7 @@ bfd_mach_o_thread_command;
 
 typedef struct bfd_mach_o_dylinker_command
 {
-  unsigned long name_offset;         /* Offset to library's path name.  */
-  unsigned long name_len;            /* Offset to library's path name.  */
+  unsigned int name_offset;         /* Offset to library's path name.  */
   char *name_str;
 }
 bfd_mach_o_dylinker_command;
@@ -429,8 +428,7 @@ bfd_mach_o_dylinker_command;
 
 typedef struct bfd_mach_o_dylib_command
 {
-  unsigned long name_offset;           /* Offset to library's path name.  */
-  unsigned long name_len;              /* Offset to library's path name.  */
+  unsigned int name_offset;            /* Offset to library's path name.  */
   unsigned long timestamp;	       /* Library's build time stamp.  */
   unsigned long current_version;       /* Library's current version number.  */
   unsigned long compatibility_version; /* Library's compatibility vers number.  */
@@ -479,7 +477,6 @@ bfd_mach_o_str_command;
 typedef struct bfd_mach_o_fvmlib_command
 {
   unsigned int name_offset;
-  unsigned int name_len;
   char *name_str;
   unsigned int minor_version;
   unsigned int header_addr;

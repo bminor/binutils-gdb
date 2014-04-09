@@ -1,5 +1,13 @@
 2014-04-18  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h (bfd_mach_o_dylinker_command)
+	(bfd_mach_o_dylib_command, bfd_mach_o_fvmlib_command): Remove
+	name_len field.
+	* mach-o.c (bfd_mach_o_read_dylinker, bfd_mach_o_read_dylib)
+	(bfd_mach_o_read_fvmlib): Adjust after name_len removal.
+
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h (bfd_mach_o_backend_data): Add page_size field.
 	* mach-o-target.c: Check TARGET_PAGESIZE is defined.
 	(TARGET_NAME_BACKEND): Add TARGET_PAGESIZE.

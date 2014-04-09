@@ -3155,6 +3155,7 @@ bfd_mach_o_read_dylinker (bfd *abfd, bfd_mach_o_load_command *command)
   bfd_mach_o_dylinker_command *cmd = &command->command.dylinker;
   struct mach_o_str_command_external raw;
   unsigned int nameoff;
+  unsigned int namelen;
 
   if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
       || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
@@ -3162,13 +3163,14 @@ bfd_mach_o_read_dylinker (bfd *abfd, bfd_mach_o_load_command *command)
 
   nameoff = bfd_h_get_32 (abfd, raw.str);
 
-  cmd->name_offset = command->offset + nameoff;
-  cmd->name_len = command->len - nameoff;
-  cmd->name_str = bfd_alloc (abfd, cmd->name_len);
+  cmd->name_offset = nameoff;
+  namelen = command->len - nameoff;
+  nameoff += command->offset;
+  cmd->name_str = bfd_alloc (abfd, namelen);
   if (cmd->name_str == NULL)
     return FALSE;
-  if (bfd_seek (abfd, cmd->name_offset, SEEK_SET) != 0
-      || bfd_bread (cmd->name_str, cmd->name_len, abfd) != cmd->name_len)
+  if (bfd_seek (abfd, nameoff, SEEK_SET) != 0
+      || bfd_bread (cmd->name_str, namelen, abfd) != namelen)
     return FALSE;
   return TRUE;
 }
@@ -3179,6 +3181,7 @@ bfd_mach_o_read_dylib (bfd *abfd, bfd_mach_o_load_command *command)
   bfd_mach_o_dylib_command *cmd = &command->command.dylib;
   struct mach_o_dylib_command_external raw;
   unsigned int nameoff;
+  unsigned int namelen;
 
   switch (command->type)
     {
@@ -3204,12 +3207,12 @@ bfd_mach_o_read_dylib (bfd *abfd, bfd_mach_o_load_command *command)
   cmd->compatibility_version = bfd_h_get_32 (abfd, raw.compatibility_version);
 
   cmd->name_offset = command->offset + nameoff;
-  cmd->name_len = command->len - nameoff;
-  cmd->name_str = bfd_alloc (abfd, cmd->name_len);
+  namelen = command->len - nameoff;
+  cmd->name_str = bfd_alloc (abfd, namelen);
   if (cmd->name_str == NULL)
     return FALSE;
   if (bfd_seek (abfd, cmd->name_offset, SEEK_SET) != 0
-      || bfd_bread (cmd->name_str, cmd->name_len, abfd) != cmd->name_len)
+      || bfd_bread (cmd->name_str, namelen, abfd) != namelen)
     return FALSE;
   return TRUE;
 }
@@ -3287,6 +3290,7 @@ bfd_mach_o_read_fvmlib (bfd *abfd, bfd_mach_o_load_command *command)
   bfd_mach_o_fvmlib_command *fvm = &command->command.fvmlib;
   struct mach_o_fvmlib_command_external raw;
   unsigned int nameoff;
+  unsigned int namelen;
 
   if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
       || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
@@ -3297,12 +3301,12 @@ bfd_mach_o_read_fvmlib (bfd *abfd, bfd_mach_o_load_command *command)
   fvm->header_addr = bfd_h_get_32 (abfd, raw.header_addr);
 
   fvm->name_offset = command->offset + nameoff;
-  fvm->name_len = command->len - nameoff;
-  fvm->name_str = bfd_alloc (abfd, fvm->name_len);
+  namelen = command->len - nameoff;
+  fvm->name_str = bfd_alloc (abfd, namelen);
   if (fvm->name_str == NULL)
     return FALSE;
   if (bfd_seek (abfd, fvm->name_offset, SEEK_SET) != 0
-      || bfd_bread (fvm->name_str, fvm->name_len, abfd) != fvm->name_len)
+      || bfd_bread (fvm->name_str, namelen, abfd) != namelen)
     return FALSE;
   return TRUE;
 }
