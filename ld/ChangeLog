@@ -1,5 +1,11 @@
 2014-04-09  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/spuelf.em: Include safe-ctype.h, remove duplicate errno.h.
+	* emultempl/nds32elf.em: Include bfd_stdint.h.
+	* po/POTFILES.in: Regenerate.
+
+2014-04-09  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/ppc32elf.em (no_zero_padding, ppc_finish): New functions.
 	(LDEMUL_FINISH): Define.
 

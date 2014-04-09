@@ -1,5 +1,9 @@
 2014-04-09  Alan Modra  <amodra@gmail.com>
 
+	* libcoff.h: Regenerate.
+
+2014-04-09  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc_elf_relocate_section): Remove bctr from list
 	of safe ppc476 insns at end of page.  Also remove non-branch insns.
 	Expand comments.

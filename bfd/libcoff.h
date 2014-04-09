@@ -124,7 +124,7 @@ typedef struct pe_tdata
   bfd_boolean (*in_reloc_p) (bfd *, reloc_howto_type *);
   flagword real_flags;
 
-  /* build-id info. */
+  /* Build-id info.  */
   struct
   {
     bfd_boolean (*after_write_object_contents) (bfd *);
