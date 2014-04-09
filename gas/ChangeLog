@@ -1,3 +1,17 @@
+2014-04-16  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline patches for ppc476 workaround
+	2014-04-09  Alan Modra  <amodra@gmail.com>
+    	* config/tc-ppc.c (warn_476, last_insn, last_seg, last_subseg):
+    	New static vars.
+    	(md_longopts, md_parse_option, md_show_usage): Add --ppc476-workaround.
+    	(ppc_elf_cons_fix_check): New function.
+    	(md_assemble): Set last_insn, last_seg, last_subseg.
+    	(ppc_elf_cons, ppc_byte, md_apply_fix): Handle warn_476.
+    	* config/tc-ppc.h (TC_CONS_FIX_CHECK): Define.
+    	(ppc_elf_cons_fix_check): Declare.
+    	* read.c (cons_worker): Invoke TC_CONS_FIX_CHECK.
+
 2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
