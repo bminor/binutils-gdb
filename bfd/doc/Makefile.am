@@ -76,10 +76,13 @@ MKDOC = chew$(EXEEXT_FOR_BUILD)
 AM_CPPFLAGS = -I.. -I$(srcdir)/.. -I$(srcdir)/../../include \
 	-I$(srcdir)/../../intl -I../../intl
 
-$(MKDOC): $(srcdir)/chew.c
+$(MKDOC): chew.stamp ; @true
+chew.stamp: $(srcdir)/chew.c
 	$(CC_FOR_BUILD) -o chw$$$$$(EXEEXT_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
 	  $(LDFLAGS_FOR_BUILD) $(H_CFLAGS) $(AM_CPPFLAGS) $(srcdir)/chew.c; \
-	$(SHELL) $(srcdir)/../../move-if-change chw$$$$$(EXEEXT_FOR_BUILD) $@
+	$(SHELL) $(srcdir)/../../move-if-change \
+	  chw$$$$$(EXEEXT_FOR_BUILD) $(MKDOC); \
+	touch $@
 
 protos: libbfd.h libcoff.h bfd.h
 
@@ -323,11 +326,11 @@ bfdver.texi: $(srcdir)/Makefile.in
 
 noinst_TEXINFOS = bfdint.texi
 
-MOSTLYCLEANFILES = $(MKDOC) *.o
+MOSTLYCLEANFILES = $(MKDOC) *.o *.stamp
 
 CLEANFILES = *.p *.ip
 
-DISTCLEANFILES = bfd.?? bfd.??? bfd.h libbfd.h libcoff.h texput.log *.stamp
+DISTCLEANFILES = bfd.?? bfd.??? bfd.h libbfd.h libcoff.h texput.log
 
 MAINTAINERCLEANFILES = $(DOCFILES)
 
