@@ -1,5 +1,12 @@
 2014-04-18  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o-target.c (bfd_mach_o_bfd_copy_private_header_data):
+	Define instead of bfd_mach_o_bfd_copy_private_bfd_data.
+	* mach-o.c (bfd_mach_o_bfd_copy_private_bfd_data): Rename.
+	* mach-o.h (bfd_mach_o_bfd_copy_private_bfd_data): Likewise.
+
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h (bfd_mach_o_dylinker_command)
 	(bfd_mach_o_dylib_command, bfd_mach_o_fvmlib_command): Remove
 	name_len field.

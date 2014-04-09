@@ -575,7 +575,7 @@ bfd_mach_o_bfd_copy_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
    to the output bfd.  */
 
 bfd_boolean
-bfd_mach_o_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
+bfd_mach_o_bfd_copy_private_header_data (bfd *ibfd, bfd *obfd)
 {
   if (bfd_get_flavour (ibfd) != bfd_target_mach_o_flavour
       || bfd_get_flavour (obfd) != bfd_target_mach_o_flavour)
