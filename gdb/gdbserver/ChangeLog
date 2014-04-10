@@ -1,3 +1,13 @@
+2014-04-10  Pedro Alves  <palves@redhat.com>
+
+	* mem-break.c (add_breakpoint_condition, add_breakpoint_commands):
+	Check if the condition or command is NULL before checking if the
+	breakpoint is known.  On success, return true.
+	* mem-break.h (add_breakpoint_condition): Document return.
+	(add_breakpoint_commands): Add describing comment.
+	* server.c (skip_to_semicolon): New function.
+	(process_point_options): Use it.
+
 2014-04-09  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_read_loadmap): Pass current_inferior directly

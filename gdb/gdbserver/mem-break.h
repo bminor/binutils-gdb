@@ -48,9 +48,16 @@ int breakpoint_inserted_here (CORE_ADDR addr);
 
 void clear_gdb_breakpoint_conditions (CORE_ADDR addr);
 
-/* Set target-side condition CONDITION to the breakpoint at ADDR.  */
+/* Set target-side condition CONDITION to the breakpoint at ADDR.
+   Returns false on failure.  On success, advances CONDITION pointer
+   past the condition and returns true.  */
 
 int add_breakpoint_condition (CORE_ADDR addr, char **condition);
+
+/* Set target-side commands COMMANDS to the breakpoint at ADDR.
+   Returns false on failure.  On success, advances COMMANDS past the
+   commands and returns true.  If PERSIST, the commands should run
+   even while GDB is disconnected.  */
 
 int add_breakpoint_commands (CORE_ADDR addr, char **commands, int persist);
 

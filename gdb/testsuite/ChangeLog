@@ -1,3 +1,12 @@
+2014-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/cond-eval-mode.c: New file.
+	* gdb.base/cond-eval-mode.exp: Use standard_testfile.  Adjust
+	prepare_for_testing to build the new file.  Check result of
+	runto_main.
+	(test_break, test_watch): New procedures.
+	(top level): Use them.
+
 2014-04-08  Pierre Muller  <muller@sourceware.org>
 
 	* gdb.base/printcmds.exp (test_artificial_arrays): Disable

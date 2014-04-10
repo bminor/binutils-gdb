@@ -799,11 +799,11 @@ add_breakpoint_condition (CORE_ADDR addr, char **condition)
   char *actparm = *condition;
   struct agent_expr *cond;
 
-  if (bp == NULL)
-    return 1;
-
   if (condition == NULL)
     return 1;
+
+  if (bp == NULL)
+    return 0;
 
   cond = gdb_parse_agent_expr (&actparm);
 
@@ -818,7 +818,7 @@ add_breakpoint_condition (CORE_ADDR addr, char **condition)
 
   *condition = actparm;
 
-  return 0;
+  return 1;
 }
 
 /* Evaluate condition (if any) at breakpoint BP.  Return 1 if
@@ -891,11 +891,11 @@ add_breakpoint_commands (CORE_ADDR addr, char **command, int persist)
   char *actparm = *command;
   struct agent_expr *cmd;
 
-  if (bp == NULL)
-    return 1;
-
   if (command == NULL)
     return 1;
+
+  if (bp == NULL)
+    return 0;
 
   cmd = gdb_parse_agent_expr (&actparm);
 
@@ -910,7 +910,7 @@ add_breakpoint_commands (CORE_ADDR addr, char **command, int persist)
 
   *command = actparm;
 
-  return 0;
+  return 1;
 }
 
 /* Return true if there are no commands to run at this location,
