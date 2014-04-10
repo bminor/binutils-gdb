@@ -293,6 +293,12 @@ static struct breakpoint_ops bkpt_probe_breakpoint_ops;
 /* Dynamic printf class type.  */
 struct breakpoint_ops dprintf_breakpoint_ops;
 
+/* One (or perhaps two) breakpoints used for software single
+   stepping.  */
+
+static void *single_step_breakpoints[2];
+static struct gdbarch *single_step_gdbarch[2];
+
 /* The style in which to perform a dynamic printf.  This is a user
    option because different output options have different tradeoffs;
    if GDB does the printing, there is better error handling if there
@@ -1409,6 +1415,100 @@ bp_location_has_shadow (struct bp_location *bl)
   return 1;
 }
 
+/* Update BUF, which is LEN bytes read from the target address
+   MEMADDR, by replacing a memory breakpoint with its shadowed
+   contents.
+
+   If READBUF is not NULL, this buffer must not overlap with the of
+   the breakpoint location's shadow_contents buffer.  Otherwise, a
+   failed assertion internal error will be raised.  */
+
+static void
+one_breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
+			    const gdb_byte *writebuf_org,
+			    ULONGEST memaddr, LONGEST len,
+			    struct bp_target_info *target_info,
+			    struct gdbarch *gdbarch)
+{
+  /* Now do full processing of the found relevant range of elements.  */
+  CORE_ADDR bp_addr = 0;
+  int bp_size = 0;
+  int bptoffset = 0;
+
+  if (!breakpoint_address_match (target_info->placed_address_space, 0,
+				 current_program_space->aspace, 0))
+    {
+      /* The breakpoint is inserted in a different address space.  */
+      return;
+    }
+
+  /* Addresses and length of the part of the breakpoint that
+     we need to copy.  */
+  bp_addr = target_info->placed_address;
+  bp_size = target_info->shadow_len;
+
+  if (bp_addr + bp_size <= memaddr)
+    {
+      /* The breakpoint is entirely before the chunk of memory we are
+	 reading.  */
+      return;
+    }
+
+  if (bp_addr >= memaddr + len)
+    {
+      /* The breakpoint is entirely after the chunk of memory we are
+	 reading.  */
+      return;
+    }
+
+  /* Offset within shadow_contents.  */
+  if (bp_addr < memaddr)
+    {
+      /* Only copy the second part of the breakpoint.  */
+      bp_size -= memaddr - bp_addr;
+      bptoffset = memaddr - bp_addr;
+      bp_addr = memaddr;
+    }
+
+  if (bp_addr + bp_size > memaddr + len)
+    {
+      /* Only copy the first part of the breakpoint.  */
+      bp_size -= (bp_addr + bp_size) - (memaddr + len);
+    }
+
+  if (readbuf != NULL)
+    {
+      /* Verify that the readbuf buffer does not overlap with the
+	 shadow_contents buffer.  */
+      gdb_assert (target_info->shadow_contents >= readbuf + len
+		  || readbuf >= (target_info->shadow_contents
+				 + target_info->shadow_len));
+
+      /* Update the read buffer with this inserted breakpoint's
+	 shadow.  */
+      memcpy (readbuf + bp_addr - memaddr,
+	      target_info->shadow_contents + bptoffset, bp_size);
+    }
+  else
+    {
+      const unsigned char *bp;
+      CORE_ADDR placed_address = target_info->placed_address;
+      int placed_size = target_info->placed_size;
+
+      /* Update the shadow with what we want to write to memory.  */
+      memcpy (target_info->shadow_contents + bptoffset,
+	      writebuf_org + bp_addr - memaddr, bp_size);
+
+      /* Determine appropriate breakpoint contents and size for this
+	 address.  */
+      bp = gdbarch_breakpoint_from_pc (gdbarch, &placed_address, &placed_size);
+
+      /* Update the final write buffer with this inserted
+	 breakpoint's INSN.  */
+      memcpy (writebuf + bp_addr - memaddr, bp + bptoffset, bp_size);
+    }
+}
+
 /* Update BUF, which is LEN bytes read from the target address MEMADDR,
    by replacing any memory breakpoints with their shadowed contents.
 
@@ -1435,6 +1535,7 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
   /* Left boundary, right boundary and median element of our binary
      search.  */
   unsigned bc_l, bc_r, bc;
+  size_t i;
 
   /* Find BC_L which is a leftmost element which may affect BUF
      content.  It is safe to report lower value but a failure to
@@ -1508,74 +1609,27 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 
     if (!bp_location_has_shadow (bl))
       continue;
-    if (!breakpoint_address_match (bl->target_info.placed_address_space, 0,
-				   current_program_space->aspace, 0))
-      continue;
 
-    /* Addresses and length of the part of the breakpoint that
-       we need to copy.  */
-    bp_addr = bl->target_info.placed_address;
-    bp_size = bl->target_info.shadow_len;
-
-    if (bp_addr + bp_size <= memaddr)
-      /* The breakpoint is entirely before the chunk of memory we
-         are reading.  */
-      continue;
-
-    if (bp_addr >= memaddr + len)
-      /* The breakpoint is entirely after the chunk of memory we are
-         reading.  */
-      continue;
-
-    /* Offset within shadow_contents.  */
-    if (bp_addr < memaddr)
-      {
-	/* Only copy the second part of the breakpoint.  */
-	bp_size -= memaddr - bp_addr;
-	bptoffset = memaddr - bp_addr;
-	bp_addr = memaddr;
-      }
-
-    if (bp_addr + bp_size > memaddr + len)
-      {
-	/* Only copy the first part of the breakpoint.  */
-	bp_size -= (bp_addr + bp_size) - (memaddr + len);
-      }
-
-    if (readbuf != NULL)
-      {
-	/* Verify that the readbuf buffer does not overlap with
-	   the shadow_contents buffer.  */
-	gdb_assert (bl->target_info.shadow_contents >= readbuf + len
-		    || readbuf >= (bl->target_info.shadow_contents
-				   + bl->target_info.shadow_len));
-
-	/* Update the read buffer with this inserted breakpoint's
-	   shadow.  */
-	memcpy (readbuf + bp_addr - memaddr,
-		bl->target_info.shadow_contents + bptoffset, bp_size);
-      }
-    else
-      {
-	struct gdbarch *gdbarch = bl->gdbarch;
-	const unsigned char *bp;
-	CORE_ADDR placed_address = bl->target_info.placed_address;
-	int placed_size = bl->target_info.placed_size;
-
-	/* Update the shadow with what we want to write to memory.  */
-	memcpy (bl->target_info.shadow_contents + bptoffset,
-		writebuf_org + bp_addr - memaddr, bp_size);
-
-	/* Determine appropriate breakpoint contents and size for this
-	   address.  */
-	bp = gdbarch_breakpoint_from_pc (gdbarch, &placed_address, &placed_size);
-
-	/* Update the final write buffer with this inserted
-	   breakpoint's INSN.  */
-	memcpy (writebuf + bp_addr - memaddr, bp + bptoffset, bp_size);
-      }
+    one_breakpoint_xfer_memory (readbuf, writebuf, writebuf_org,
+				memaddr, len, &bl->target_info, bl->gdbarch);
   }
+
+  /* Now process single-step breakpoints.  These are not found in the
+     bp_location array.  */
+  for (i = 0; i < 2; i++)
+    {
+      struct bp_target_info *bp_tgt = single_step_breakpoints[i];
+
+      if (bp_tgt != NULL)
+	{
+	  struct gdbarch *gdbarch = single_step_gdbarch[i];
+
+	  one_breakpoint_xfer_memory (readbuf, writebuf, writebuf_org,
+				      memaddr, len, bp_tgt, gdbarch);
+	}
+    }
 }
+
 
 
 /* Return true if BPT is either a software breakpoint or a hardware
@@ -15035,12 +15089,6 @@ deprecated_remove_raw_breakpoint (struct gdbarch *gdbarch, void *bp)
 
   return ret;
 }
-
-/* One (or perhaps two) breakpoints used for software single
-   stepping.  */
-
-static void *single_step_breakpoints[2];
-static struct gdbarch *single_step_gdbarch[2];
 
 /* Create and insert a breakpoint for software single step.  */
 

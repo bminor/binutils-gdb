@@ -1,3 +1,11 @@
+2014-04-10  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (single_step_breakpoints)
+	(single_step_gdbarch): Move up in the file.
+	(one_breakpoint_xfer_memory): New function, factored out from ...
+	(breakpoint_xfer_memory): ... here.  Also process single-step
+	breakpoints.
+
 2014-04-09  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c (darwin_check_new_threads): Fix port leak, add
