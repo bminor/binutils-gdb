@@ -1,3 +1,15 @@
+2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* elf32-avr.c: Add DIFF relocations for AVR.
+	(avr_final_link_relocate): Handle the DIFF relocs.
+	(bfd_elf_avr_diff_reloc): New.
+	(elf32_avr_is_diff_reloc): New.
+	(elf32_avr_adjust_diff_reloc_value): Reduce difference value.
+	(elf32_avr_relax_delete_bytes): Recompute difference after deleting
+	bytes.
+
+	* reloc.c: Add BFD_RELOC_AVR_DIFF8/16/32 relocations
+
 2014-04-09  Alan Modra  <amodra@gmail.com>
 
 	* libcoff.h: Regenerate.

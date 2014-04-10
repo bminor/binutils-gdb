@@ -1,3 +1,9 @@
+2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* gas/avr/diffreloc_withrelax.d: New testcase.
+	* gas/avr/noreloc_withoutrelax.d: Likewise.
+	* gas/avr/relax.s: Likewise.
+
 2014-04-04  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/i386.exp: Run SE1 tests.

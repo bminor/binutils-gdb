@@ -1,3 +1,9 @@
+2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* ld-avr/norelax_diff.d: New testcase.
+	* ld-avr/relax_diff.d: Likewise.
+	* ld-avr/relax.s: Likewise.
+
 2014-04-05  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ld-plugin/lto.exp: Make "-Wp," prefix optional when filtering

@@ -1,3 +1,23 @@
+2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* config/tc-avr.c: Add new flag mlink-relax.
+	(md_show_usage): Add flag and help text.
+	(md_parse_option): Record whether link relax is turned on.
+	(relaxable_section): New.
+	(avr_validate_fix_sub): New.
+	(avr_force_relocation): New.
+	(md_apply_fix): Generate DIFF reloc.
+	(avr_allow_local_subtract): New.
+
+	* config/tc-avr.h (TC_LINKRELAX_FIXUP): Define to 0.
+	(TC_FORCE_RELOCATION): Define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define.
+	(TC_VALIDATE_FIX_SUB): Define.
+	(avr_force_relocation): Declare.
+	(avr_validate_fix_sub): Declare.
+	(md_allow_local_subtract): Define.
+	(avr_allow_local_subtract): Declare.
+
 2014-04-10  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Add P5600

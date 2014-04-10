@@ -4780,7 +4780,19 @@ ENUM
 ENUMDOC
   This is a 8 bit reloc for the AVR that stores bits 16..23 of a symbol
   in .byte hlo8(symbol)
-
+ENUM
+  BFD_RELOC_AVR_DIFF8
+ENUMX
+  BFD_RELOC_AVR_DIFF16
+ENUMX
+  BFD_RELOC_AVR_DIFF32
+ENUMDOC
+  AVR relocations to mark the difference of two local symbols.
+  These are only needed to support linker relaxation and can be ignored
+  when not relaxing.  The field is set to the value of the difference
+  assuming no relaxation.  The relocation encodes the position of the
+  second symbol so the linker can determine whether to adjust the field
+  value.
 ENUM
   BFD_RELOC_RL78_NEG8
 ENUMX
