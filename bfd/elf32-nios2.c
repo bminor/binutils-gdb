@@ -2013,16 +2013,21 @@ nios2_elf32_build_stubs (struct bfd_link_info *info)
   for (stub_sec = htab->stub_bfd->sections;
        stub_sec != NULL;
        stub_sec = stub_sec->next)
-    {
-      bfd_size_type size;
+    /* The stub_bfd may contain non-stub sections if it is also the
+       dynobj.  Any such non-stub sections are created with the
+       SEC_LINKER_CREATED flag set, while stub sections do not
+       have that flag.  Ignore any non-stub sections here.  */
+    if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
+      {  
+	bfd_size_type size;
 
-      /* Allocate memory to hold the linker stubs.  */
-      size = stub_sec->size;
-      stub_sec->contents = bfd_zalloc (htab->stub_bfd, size);
-      if (stub_sec->contents == NULL && size != 0)
-	return FALSE;
-      stub_sec->size = 0;
-    }
+	/* Allocate memory to hold the linker stubs.  */
+	size = stub_sec->size;
+	stub_sec->contents = bfd_zalloc (htab->stub_bfd, size);
+	if (stub_sec->contents == NULL && size != 0)
+	  return FALSE;
+	stub_sec->size = 0;
+      }
 
   /* Build the stubs as directed by the stub hash table.  */
   table = &htab->bstab;
