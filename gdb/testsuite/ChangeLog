@@ -1,3 +1,9 @@
+2014-04-11  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16675
+	* gdb.cp/cpsizeof.exp: New file.
+	* gdb.cp/cpsizeof.cc: New file.
+
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* mi-vla-c99.exp: New file.

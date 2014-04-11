@@ -1,3 +1,10 @@
+2014-04-11  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16675
+	* c-exp.y (exp : SIZEOF '(' type ')'): Handle reference types.
+	* eval.c (evaluate_subexp_for_sizeof): Refactor and handle
+	reference types.
+
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* eval.c (evaluate_subexp_for_sizeof): Add enum noside argument.

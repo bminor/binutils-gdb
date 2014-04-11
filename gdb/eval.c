@@ -3030,21 +3030,22 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	  && TYPE_CODE (type) != TYPE_CODE_REF
 	  && TYPE_CODE (type) != TYPE_CODE_ARRAY)
 	error (_("Attempt to take contents of a non-pointer value."));
-      type = check_typedef (TYPE_TARGET_TYPE (type));
       if (is_dynamic_type (type))
 	type = value_type (value_ind (val));
-      return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+      else
+	type = TYPE_TARGET_TYPE (type);
+      break;
 
     case UNOP_MEMVAL:
       (*pos) += 3;
-      type = check_typedef (exp->elts[pc + 1].type);
-      return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+      type = exp->elts[pc + 1].type;
+      break;
 
     case UNOP_MEMVAL_TYPE:
       (*pos) += 1;
       val = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-      type = check_typedef (value_type (val));
-      return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+      type = value_type (val);
+      break;
 
     case OP_VAR_VALUE:
       type = check_typedef (SYMBOL_TYPE (exp->elts[pc + 2].symbol));
@@ -3055,8 +3056,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	}
       else
 	(*pos) += 4;
-      return
-	value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+      break;
 
       /* Deal with the special case if NOSIDE is EVAL_NORMAL and the resulting
 	 type of the subscript is a variable length array type. In this case we
@@ -3080,8 +3080,8 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 		  if (TYPE_RANGE_DATA (type)->flag_bound_evaluated)
 		    {
 		      val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
-		      return value_from_longest
-			(size_type, (LONGEST) TYPE_LENGTH (value_type (val)));
+		      type = value_type (val);
+		      break;
 		    }
 		}
 	    }
@@ -3091,9 +3091,18 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 
     default:
       val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-      return value_from_longest (size_type,
-				 (LONGEST) TYPE_LENGTH (value_type (val)));
+      type = value_type (val);
+      break;
     }
+
+  /* $5.3.3/2 of the C++ Standard (n3290 draft) says of sizeof:
+     "When applied to a reference or a reference type, the result is
+     the size of the referenced type."  */
+  CHECK_TYPEDEF (type);
+  if (exp->language_defn->la_language == language_cplus
+      && TYPE_CODE (type) == TYPE_CODE_REF)
+    type = check_typedef (TYPE_TARGET_TYPE (type));
+  return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 }
 
 /* Parse a type expression in the string [P..P+LENGTH).  */

@@ -787,14 +787,22 @@ exp	:	SELECTOR '(' name ')'
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
-			{ write_exp_elt_opcode (pstate, OP_LONG);
+			{ struct type *type = $3;
+			  write_exp_elt_opcode (pstate, OP_LONG);
 			  write_exp_elt_type (pstate, lookup_signed_typename
 					      (parse_language (pstate),
 					       parse_gdbarch (pstate),
 					       "int"));
-			  CHECK_TYPEDEF ($3);
+			  CHECK_TYPEDEF (type);
+
+			    /* $5.3.3/2 of the C++ Standard (n3290 draft)
+			       says of sizeof:  "When applied to a reference
+			       or a reference type, the result is the size of
+			       the referenced type."  */
+			  if (TYPE_CODE (type) == TYPE_CODE_REF)
+			    type = check_typedef (TYPE_TARGET_TYPE (type));
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) TYPE_LENGTH ($3));
+						 (LONGEST) TYPE_LENGTH (type));
 			  write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
