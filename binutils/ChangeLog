@@ -1,5 +1,19 @@
 2014-04-16  Tristan Gingold  <gingold@adacore.com>
 
+	* od-macho.c (OPT_DYLD_INFO): New macro.
+	(options): Add entry for dyld_info.
+	(mach_o_help): Likewise.
+	(load_and_dump, dump_dyld_info_rebase, dump_dyld_info_bind)
+	(dump_dyld_info_export_1, dump_dyld_info_export): New functions.
+	(bfd_mach_o_dyld_rebase_type_name): New array.
+	(export_info_data): New struct.
+	(dump_dyld_info): Add verbose argument.  Dump rebase, bind and
+	exports data.
+	(dump_load_command): Adjust dump_dyld_info call.
+	(mach_o_dump): Handle dyld_info.
+
+2014-04-16  Tristan Gingold  <gingold@adacore.com>
+
 	* od-macho.c (dump_header): Display sizeofcmds in decimal too.
 	(dump_segment): Reformat output.
 	(dump_dyld_info): Also display end offsets.
