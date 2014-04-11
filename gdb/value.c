@@ -3319,39 +3319,32 @@ value_from_ulongest (struct type *type, ULONGEST num)
 
 
 /* Create a value representing a pointer of type TYPE to the address
-   ADDR.  The type of the created value may differ from the passed
-   type TYPE. Make sure to retrieve the returned values's new type
-   after this call e.g. in case of an variable length array.  */
-
+   ADDR.  */
 struct value *
 value_from_pointer (struct type *type, CORE_ADDR addr)
 {
-  struct type *resolved_type = resolve_dynamic_type (type, addr);
-  struct value *val = allocate_value (resolved_type);
+  struct value *val = allocate_value (type);
 
-  store_typed_address (value_contents_raw (val),
-		       check_typedef (resolved_type), addr);
+  store_typed_address (value_contents_raw (val), check_typedef (type), addr);
   return val;
 }
 
 
 /* Create a value of type TYPE whose contents come from VALADDR, if it
    is non-null, and whose memory address (in the inferior) is
-   ADDRESS.  The type of the created value may differ from the passed
-   type TYPE.  Make sure to retrieve values new type after this call.  */
+   ADDRESS.  */
 
 struct value *
 value_from_contents_and_address (struct type *type,
 				 const gdb_byte *valaddr,
 				 CORE_ADDR address)
 {
-  struct type *resolved_type = resolve_dynamic_type (type, address);
   struct value *v;
 
   if (valaddr == NULL)
-    v = allocate_value_lazy (resolved_type);
+    v = allocate_value_lazy (type);
   else
-    v = value_from_contents (resolved_type, valaddr);
+    v = value_from_contents (type, valaddr);
   set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
   return v;
@@ -3505,7 +3498,6 @@ coerce_ref (struct value *arg)
   retval = value_at_lazy (enc_type,
                           unpack_pointer (value_type (arg),
                                           value_contents (arg)));
-  enc_type = value_type (retval);
   return readjust_indirect_value_type (retval, enc_type,
                                        value_type_arg_tmp, arg);
 }

@@ -50,8 +50,7 @@ extern int overload_resolution;
 
 /* Prototypes for local functions.  */
 
-static struct value *evaluate_subexp_for_sizeof (struct expression *, int *,
-						 enum noside);
+static struct value *evaluate_subexp_for_sizeof (struct expression *, int *);
 
 static struct value *evaluate_subexp_for_address (struct expression *,
 						  int *, enum noside);
@@ -2563,7 +2562,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
 	  goto nosideret;
 	}
-      return evaluate_subexp_for_sizeof (exp, pos, noside);
+      return evaluate_subexp_for_sizeof (exp, pos);
 
     case UNOP_CAST:
       (*pos) += 2;
@@ -2985,7 +2984,6 @@ evaluate_subexp_with_coercion (struct expression *exp,
 	{
 	  (*pos) += 4;
 	  val = address_of_variable (var, exp->elts[pc + 1].block);
-	  type = value_type (val);
 	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 			     val);
 	}
@@ -2998,13 +2996,10 @@ evaluate_subexp_with_coercion (struct expression *exp,
 
 /* Evaluate a subexpression of EXP, at index *POS,
    and return a value for the size of that subexpression.
-   Advance *POS over the subexpression.  If NOSIDE is EVAL_NORMAL
-   we allow side-effects on the operand if its type is a variable
-   length array.   */
+   Advance *POS over the subexpression.  */
 
 static struct value *
-evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
-			    enum noside noside)
+evaluate_subexp_for_sizeof (struct expression *exp, int *pos)
 {
   /* FIXME: This should be size_t.  */
   struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
@@ -3030,10 +3025,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	  && TYPE_CODE (type) != TYPE_CODE_REF
 	  && TYPE_CODE (type) != TYPE_CODE_ARRAY)
 	error (_("Attempt to take contents of a non-pointer value."));
-      if (is_dynamic_type (type))
-	type = value_type (value_ind (val));
-      else
-	type = TYPE_TARGET_TYPE (type);
+      type = TYPE_TARGET_TYPE (type);
       break;
 
     case UNOP_MEMVAL:
@@ -3048,46 +3040,9 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
       break;
 
     case OP_VAR_VALUE:
-      type = check_typedef (SYMBOL_TYPE (exp->elts[pc + 2].symbol));
-      if (is_dynamic_type (type))
-	{
-	  val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
-	  type = value_type (val);
-	}
-      else
-	(*pos) += 4;
+      (*pos) += 4;
+      type = SYMBOL_TYPE (exp->elts[pc + 2].symbol);
       break;
-
-      /* Deal with the special case if NOSIDE is EVAL_NORMAL and the resulting
-	 type of the subscript is a variable length array type. In this case we
-	 must re-evaluate the right hand side of the subcription to allow
-	 side-effects. */
-    case BINOP_SUBSCRIPT:
-      if (noside == EVAL_NORMAL)
-	{
-	  int pc = (*pos) + 1;
-
-	  val = evaluate_subexp (NULL_TYPE, exp, &pc, EVAL_AVOID_SIDE_EFFECTS);
-	  type = check_typedef (value_type (val));
-	  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
-	    {
-	      type = check_typedef (TYPE_TARGET_TYPE (type));
-	      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
-		{
-		  type = TYPE_INDEX_TYPE (type);
-		  /* Only re-evaluate the right hand side if the resulting type
-		     is a variable length type.  */
-		  if (TYPE_RANGE_DATA (type)->flag_bound_evaluated)
-		    {
-		      val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
-		      type = value_type (val);
-		      break;
-		    }
-		}
-	    }
-	}
-
-      /* Fall through.  */
 
     default:
       val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);

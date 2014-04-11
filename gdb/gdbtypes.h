@@ -1,4 +1,3 @@
-
 /* Internal type definitions for GDB.
 
    Copyright (C) 1992-2014 Free Software Foundation, Inc.
@@ -663,16 +662,6 @@ struct main_type
       /* * High bound of range.  */
 
       struct dynamic_prop high;
-
-      /* True if HIGH range bound contains the number of elements in the
-	 subrange. This affects how the final hight bound is computed.  */
-
-      int flag_upper_bound_is_count : 1;
-
-      /* True if LOW or/and HIGH are resolved into a static bound from
-	 a dynamic one.  */
-
-      int flag_bound_evaluated : 1;
     } *bounds;
 
   } flds_bnds;
@@ -1692,15 +1681,6 @@ extern struct type *lookup_signed_typename (const struct language_defn *,
 extern void get_unsigned_type_max (struct type *, ULONGEST *);
 
 extern void get_signed_type_minmax (struct type *, LONGEST *, LONGEST *);
-
-/* * Resolve all dynamic values of a type e.g. array bounds to static values.
-   ADDR specifies the location of the variable the type is bound to.
-   If TYPE has no dynamic properties return TYPE; otherwise a new type with
-   static properties is returned.  */
-extern struct type *resolve_dynamic_type (struct type *type, CORE_ADDR addr);
-
-/* * Predicate if the type has dynamic values, which are not resolved yet.  */
-extern int is_dynamic_type (struct type *type);
 
 extern struct type *check_typedef (struct type *);
 

@@ -1,3 +1,24 @@
+2014-04-11  Joel Brobecker  <brobecker@adacore.com>
+
+	Revert the following changes (regressions):
+
+	* gdb.base/vla-sideeffect.c: New file.
+	* gdb.base/vla-sideeffect.exp: New file.
+
+	* gdb.dwarf2/count.exp: New file.
+
+	* gdb.base/vla-multi.c: New file.
+	* gdb.base/vla-multi.exp: New file.
+
+	* gdb.base/vla-ptr.c: New file.
+	* gdb.base/vla-ptr.exp: New file.
+
+	* gdb.base/vla-datatypes.c: New file.
+	* gdb.base/vla-datatypes.exp: New file.
+
+	* gdb.mi/mi-vla-c99.exp: New file.
+	* gdb.mi/vla.c: New file.
+
 2014-04-11  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/16675

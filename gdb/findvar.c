@@ -437,12 +437,7 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
   switch (SYMBOL_CLASS (var))
     {
     case LOC_CONST:
-      if (is_dynamic_type (type))
-	{
-	  /* Value is a constant byte-sequence and needs no memory access.  */
-	  type = resolve_dynamic_type (type, /* Unused address.  */ 0);
-	}
-      /* Put the constant back in target format. */
+      /* Put the constant back in target format.  */
       v = allocate_value (type);
       store_signed_integer (value_contents_raw (v), TYPE_LENGTH (type),
 			    gdbarch_byte_order (get_type_arch (type)),
@@ -469,11 +464,6 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
       return v;
 
     case LOC_CONST_BYTES:
-      if (is_dynamic_type (type))
-	{
-	  /* Value is a constant byte-sequence and needs no memory access.  */
-	  type = resolve_dynamic_type (type, /* Unused address.  */ 0);
-	}
       v = allocate_value (type);
       memcpy (value_contents_raw (v), SYMBOL_VALUE_BYTES (var),
 	      TYPE_LENGTH (type));

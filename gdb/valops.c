@@ -266,7 +266,6 @@ value_cast_structs (struct type *type, struct value *v2)
 	{
 	  v = value_full_object (v2, real_type, full, top, using_enc);
 	  v = value_at_lazy (real_type, value_address (v));
-	  real_type = value_type (v);
 
 	  /* We might be trying to cast to the outermost enclosing
 	     type, in which case search_struct_field won't work.  */
@@ -802,7 +801,6 @@ value_dynamic_cast (struct type *type, struct value *arg)
     return value_at_lazy (type, addr);
 
   tem = value_at (type, addr);
-  type = value_type (tem);
 
   /* The first dynamic check specified in 5.2.7.  */
   if (is_public_ancestor (arg_type, TYPE_TARGET_TYPE (resolved_type)))
@@ -902,10 +900,7 @@ value_one (struct type *type)
   return val;
 }
 
-/* Helper function for value_at, value_at_lazy, and value_at_lazy_stack.
-   The type of the created value may differ from the passed type TYPE.
-   Make sure to retrieve the returned values's new type after this call
-   e.g. in case the type is a variable length array.  */
+/* Helper function for value_at, value_at_lazy, and value_at_lazy_stack.  */
 
 static struct value *
 get_value_at (struct type *type, CORE_ADDR addr, int lazy)
@@ -930,10 +925,7 @@ get_value_at (struct type *type, CORE_ADDR addr, int lazy)
    value_at_lazy instead.  value_at_lazy simply records the address of
    the data and sets the lazy-evaluation-required flag.  The lazy flag
    is tested in the value_contents macro, which is used if and when
-   the contents are actually required.  The type of the created value
-   may differ from the passed type TYPE.  Make sure to retrieve the
-   returned values's new type after this call e.g. in case the type
-   is a variable length array.
+   the contents are actually required.
 
    Note: value_at does *NOT* handle embedded offsets; perform such
    adjustments before or after calling it.  */
@@ -944,10 +936,7 @@ value_at (struct type *type, CORE_ADDR addr)
   return get_value_at (type, addr, 0);
 }
 
-/* Return a lazy value with type TYPE located at ADDR (cf. value_at).
-   The type of the created value may differ from the passed type TYPE.
-   Make sure to retrieve the returned values's new type after this call
-   e.g. in case the type is a variable length array.  */
+/* Return a lazy value with type TYPE located at ADDR (cf. value_at).  */
 
 struct value *
 value_at_lazy (struct type *type, CORE_ADDR addr)
@@ -1322,7 +1311,6 @@ address_of_variable (struct symbol *var, const struct block *b)
      Lazy evaluation pays off here.  */
 
   val = value_of_variable (var, b);
-  type = value_type (val);
 
   if ((VALUE_LVAL (val) == lval_memory && value_lazy (val))
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -1571,7 +1559,6 @@ value_ind (struct value *arg1)
 			      (value_as_address (arg1)
 			       - value_pointed_to_offset (arg1)));
 
-      enc_type = value_type (arg2);
       return readjust_indirect_value_type (arg2, enc_type, base_type, arg1);
     }
 
