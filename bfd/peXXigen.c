@@ -207,6 +207,14 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 #endif
 }
 
+static bfd_boolean
+abs_finder (bfd * abfd ATTRIBUTE_UNUSED, asection * sec, void * data)
+{
+  bfd_vma abs_val = * (bfd_vma *) data;
+
+  return (sec->vma <= abs_val) && ((sec->vma + (1L << 32)) > abs_val);
+}
+
 unsigned int
 _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
 {
@@ -220,6 +228,29 @@ _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
     }
   else
     memcpy (ext->e.e_name, in->_n._n_name, SYMNMLEN);
+
+  /* The PE32 and PE32+ formats only use 4 bytes to hold the value of a
+     symbol.  This is a problem on 64-bit targets where we can generate
+     absolute symbols with values >= 1^32.  We try to work around this
+     problem by finding a section whose base address is sufficient to
+     reduce the absolute value to < 1^32, and then transforming the
+     symbol into a section relative symbol.  This of course is a hack.  */
+  if (sizeof (in->n_value) > 4
+      && in->n_value > ((1L << 32) - 1)
+      && in->n_scnum == -1)
+    {
+      asection * sec;
+
+      sec = bfd_sections_find_if (abfd, abs_finder, & in->n_value);
+      if (sec)
+	{
+	  in->n_value -= sec->vma;
+	  in->n_scnum = sec->target_index;
+	}
+      /* else: FIXME: The value is outside the range of any section.  This
+	 happens for __image_base__ and __ImageBase__ and maybe some other
+	 symbols as well.  We should find a way to handle these values.  */
+    }
 
   H_PUT_32 (abfd, in->n_value, ext->e_value);
   H_PUT_16 (abfd, in->n_scnum, ext->e_scnum);

@@ -1,5 +1,13 @@
 2014-04-11  Nick Clifton  <nickc@redhat.com>
 
+	PR ld/16821
+	* peXXigen.c (abs_finder): New function.
+	(_bfd_XXi_swap_sym_out): For absolute symbols with values larger
+	than 1^32 try to convert them into section relative values
+	instead.
+
+2014-04-11  Nick Clifton  <nickc@redhat.com>
+
 	* bfd-in2.h: Regenerate.
 	* libbfd.h: Regenerate.
 
