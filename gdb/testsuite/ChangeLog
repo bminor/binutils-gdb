@@ -27,8 +27,8 @@
 
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
-	* mi-vla-c99.exp: New file.
-	* vla.c: New file.
+	* gdb.mi/mi-vla-c99.exp: New file.
+	* gdb.mi/vla.c: New file.
 
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
@@ -51,8 +51,8 @@
 
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
-	* vla-sideeffect.c: New file.
-	* vla-sideeffect.exp: New file.
+	* gdb.base/vla-sideeffect.c: New file.
+	* gdb.base/vla-sideeffect.exp: New file.
 
 2014-04-11  Yao Qi  <yao@codesourcery.com>
 
