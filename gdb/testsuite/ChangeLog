@@ -1,5 +1,17 @@
 2014-04-24  David Blaikie  <dblaikie@gmail.com>
 
+	* gdb.base/catch-syscall.c: Make unreferenced statics non-static to
+	ensure clang would not discard them.
+	* gdb.base/gdbvars.c: Ditto.
+	* gdb.base/memattr.c: Ditto.
+	* gdb.base/whatis.c: Ditto.
+	* gdb.python/py-prettyprint.c: Ditto.
+	* gdb.trace/actions.c: Ditto.
+	* gdb.cp/ptype-cv-cp.cc: Mark unused global const int as used to
+	ensure clang would not discard it.
+
+2014-04-24  David Blaikie  <dblaikie@gmail.com>
+
 	* gdb.stabs/gdb11479.c (tag_dummy_enum): introduce a variable to cause
 	clang to emit the full definition of type required by the test
 	* gdb.stabs/gdb11479.exp (do_test): correct a typo in a test message
