@@ -1,3 +1,9 @@
+2014-04-14  David Blaikie <dblaikie@gmail.com>
+
+	* gdb.mi/non-stop.c: Add return value for non-void function return
+	statement.
+	* gdb.threads/staticthreads.c: Ditto.
+
 2014-04-12  Siva Chandra Reddy  <sivachandra@google.com>
 	    Doug Evans  <xdje42@gmail.com>
 
