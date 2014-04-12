@@ -585,7 +585,10 @@ gdbscm_value_dynamic_type (SCM self)
 	  struct value *target;
 	  int was_pointer = TYPE_CODE (type) == TYPE_CODE_PTR;
 
-	  target = value_ind (value);
+	  if (was_pointer)
+	    target = value_ind (value);
+	  else
+	    target = coerce_ref (value);
 	  type = value_rtti_type (target, NULL, NULL, NULL);
 
 	  if (type)

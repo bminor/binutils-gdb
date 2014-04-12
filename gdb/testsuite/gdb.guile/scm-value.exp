@@ -335,6 +335,8 @@ proc test_subscript_regression {exefile lang} {
 	# Likewise.
 	gdb_test "gu (print (value-dynamic-type (parse-and-eval \"base\")))" \
 	    "= Derived \[*\]"
+	gdb_test "gu (print (value-dynamic-type (parse-and-eval \"base_ref\")))" \
+	    "= Derived \[&\]"
 	# A static type case.
 	gdb_test "gu (print (value-dynamic-type (parse-and-eval \"5\")))" \
 	    "= int"
