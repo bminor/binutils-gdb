@@ -1,5 +1,12 @@
 2014-04-24  David Blaikie  <dblaikie@gmail.com>
 
+	* gdb.cp/pr10728-x.cc (main::x): Return by value instead of pointer to
+	coax Clang into emitting the definition of the type.
+	* gdb.cp/pr10728-x.h (y): Ditto.
+	* gdb.cp/pr10728-y.cc (y): Ditto.
+
+2014-04-24  David Blaikie  <dblaikie@gmail.com>
+
 	* gdb.base/label.exp: XFAIL label related tests under Clang.
 	* gdb.cp/cplabel.exp: Ditto.
 	* gdb.linespec/ls-errs.exp: Refactor tests to execute directly and XFAIL
