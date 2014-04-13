@@ -1,5 +1,9 @@
 2014-04-24  David Blaikie  <dblaikie@gmail.com>
 
+	* gdb.python/lib-types.exp: Fix test and xfail under gcc due to gcc/55641.
+
+2014-04-24  David Blaikie  <dblaikie@gmail.com>
+
 	* gdb.cp/cpexprs.cc: Move braces to the same line as the start
 	of the function to work across GCC and Clang.
 	* gdb.cp/cpexprs.exp: Account for GCC/Clang difference in vtable
