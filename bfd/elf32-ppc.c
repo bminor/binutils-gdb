@@ -147,6 +147,7 @@ static const bfd_vma ppc_elf_vxworks_pic_plt0_entry
 #define ADD_3_12_2	0x7c6c1214
 #define ADD_11_0_11	0x7d605a14
 #define B		0x48000000
+#define BA		0x48000002
 #define BCL_20_31	0x429f0005
 #define BCTR		0x4e800420
 #define BEQLR		0x4d820020
@@ -3249,7 +3250,7 @@ static struct bfd_link_hash_table *
 ppc_elf_link_hash_table_create (bfd *abfd)
 {
   struct ppc_elf_link_hash_table *ret;
-  static struct ppc_elf_params default_params = { PLT_OLD, 0, 1, 0, 0, 4096 };
+  static struct ppc_elf_params default_params = { PLT_OLD, 0, 1, 0, 0, 12 };
 
   ret = bfd_zmalloc (sizeof (struct ppc_elf_link_hash_table));
   if (ret == NULL)
@@ -7336,7 +7337,7 @@ write_glink_stub (struct plt_entry *ent, asection *plt_sec, unsigned char *p,
 	  p += 4;
 	  bfd_put_32 (output_bfd, BCTR, p);
 	  p += 4;
-	  bfd_put_32 (output_bfd, NOP, p);
+	  bfd_put_32 (output_bfd, htab->params->ppc476_workaround ? BA : NOP, p);
 	  p += 4;
 	}
       else
@@ -10115,7 +10116,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       p += htab->glink_pltresolve;
       endp = htab->glink->contents;
       endp += htab->glink->size - GLINK_PLTRESOLVE;
-      while (p < endp - 8 * 4)
+      while (p < endp - (htab->params->ppc476_workaround ? 0 : 8 * 4))
 	{
 	  bfd_put_32 (output_bfd, B + endp - p, p);
 	  p += 4;
@@ -10130,6 +10131,39 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      + htab->glink->output_section->vma
 	      + htab->glink->output_offset);
 
+      if (htab->params->ppc476_workaround)
+	{
+	  /* Ensure that a call stub at the end of a page doesn't
+	     result in prefetch over the end of the page into the
+	     glink branch table.  */
+	  bfd_vma pagesize = (bfd_vma) 1 << htab->params->pagesize_p2;
+	  bfd_vma page_addr;
+	  bfd_vma glink_start = (htab->glink->output_section->vma
+				 + htab->glink->output_offset);
+
+	  for (page_addr = res0 & -pagesize;
+	       page_addr > glink_start;
+	       page_addr -= pagesize)
+	    {
+	      /* We have a plt call stub that may need fixing.  */
+	      bfd_byte *loc;
+	      unsigned int insn;
+
+	      loc = htab->glink->contents + page_addr - 4 - glink_start;
+	      insn = bfd_get_32 (output_bfd, loc);
+	      if (insn == BCTR)
+		{
+		  /* By alignment, we know that there must be at least
+		     one other call stub before this one.  */
+		  insn = bfd_get_32 (output_bfd, loc - 16);
+		  if (insn == BCTR)
+		    bfd_put_32 (output_bfd, B | (-16 & 0x3fffffc), loc);
+		  else
+		    bfd_put_32 (output_bfd, B | (-20 & 0x3fffffc), loc);
+		}
+	    }
+	}
+
       /* Last comes the PLTresolve stub.  */
       if (info->shared)
 	{
@@ -10137,7 +10171,11 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	  for (i = 0; i < ARRAY_SIZE (pic_plt_resolve); i++)
 	    {
-	      bfd_put_32 (output_bfd, pic_plt_resolve[i], p);
+	      unsigned int insn = pic_plt_resolve[i];
+
+	      if (htab->params->ppc476_workaround && insn == NOP)
+		insn = BA + 0;
+	      bfd_put_32 (output_bfd, insn, p);
 	      p += 4;
 	    }
 	  p -= 4 * ARRAY_SIZE (pic_plt_resolve);
@@ -10171,7 +10209,11 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	{
 	  for (i = 0; i < ARRAY_SIZE (plt_resolve); i++)
 	    {
-	      bfd_put_32 (output_bfd, plt_resolve[i], p);
+	      unsigned int insn = plt_resolve[i];
+
+	      if (htab->params->ppc476_workaround && insn == NOP)
+		insn = BA + 0;
+	      bfd_put_32 (output_bfd, insn, p);
 	      p += 4;
 	    }
 	  p -= 4 * ARRAY_SIZE (plt_resolve);

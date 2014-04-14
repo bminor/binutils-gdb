@@ -1,3 +1,13 @@
+2014-04-14  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (BA): Define
+	(ppc_elf_link_hash_table_create): Correct default_params.
+	(write_glink_stub): Pad small plt call stub with "ba 0" rather
+	than "nop" for ppc476_workaround.
+	(ppc_elf_finish_dynamic_sections): Likewise for branch table
+	and __glink_PLTresolve.  Ensure plt call stub at end of page
+	doesn't allow fall-thru prefetch.
+
 2014-04-11  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16821
