@@ -5499,17 +5499,6 @@ elfNN_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
     }
 }
 
-/* Set the right machine number for an AArch64 ELF file.  */
-
-static bfd_boolean
-elfNN_aarch64_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
-{
-  if (hdr->sh_type == SHT_NOTE)
-    *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;
-
-  return TRUE;
-}
-
 /* Handle an AArch64 specific section when reading an object file.  This is
    called when bfd_section_from_shdr finds a section with an unknown
    type.  */
@@ -7285,9 +7274,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define elf_backend_reloc_type_class		\
   elfNN_aarch64_reloc_type_class
-
-#define elf_backend_section_flags		\
-  elfNN_aarch64_section_flags
 
 #define elf_backend_section_from_shdr		\
   elfNN_aarch64_section_from_shdr
