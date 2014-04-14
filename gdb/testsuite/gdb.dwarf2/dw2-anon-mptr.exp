@@ -40,5 +40,7 @@ gdb_test "show cp-abi" {The currently selected C\+\+ ABI is "gnu-v3".*}
 
 gdb_load $binfile
 
+gdb_test_no_output "set language c++"
+
 gdb_test "ptype crash" \
     "type = class crash {\[\r\n \t\]*public:\[\r\n \t\]*crash\\(int \\(class {\\.\\.\\.}::\\*\\)\\(class {\\.\\.\\.} \\* const\\)\\);\[\r\n \t\]*}"

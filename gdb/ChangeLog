@@ -1,3 +1,39 @@
+2014-04-14  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16253
+	* ada-lang.c (ada_symbol_matches_domain): Moved here and renamed
+	from symbol_matches_domain in symtab.c. All local callers
+	of symbol_matches_domain updated.
+	(standard_lookup): If DOMAIN is VAR_DOMAIN and no symbol is found,
+	search STRUCT_DOMAIN.
+	(ada_find_any_type_symbol): Do not search STRUCT_DOMAIN
+	independently.  standard_lookup will do that automatically.
+	* cp-namespace.c (cp_lookup_symbol_nonlocal): Explain when/why
+	VAR_DOMAIN searches may return a STRUCT_DOMAIN match.
+	(cp_lookup_symbol_in_namespace): Likewise.
+	If no VAR_DOMAIN symbol is found, search STRUCT_DOMAIN.
+	(cp_lookup_symbol_exports): Explain when/why VAR_DOMAIN searches
+	may return a STRUCT_DOMAIN match.
+	(lookup_symbol_file): Search for the class name in STRUCT_DOMAIN.
+	* cp-support.c: Include language.h.
+	(inspect_type): Explicitly search STRUCT_DOMAIN before searching
+	VAR_DOMAIN.
+	* psymtab.c (match_partial_symbol): Compare the requested
+	domain with the symbol's domain directly.
+	(lookup_partial_symbol): Likewise.
+	* symtab.c (lookup_symbol_in_language): Explain when/why
+	VAR_DOMAIN searches may return a STRUCT_DOMAIN match.
+	If no VAR_DOMAIN symbol is found, search STRUCT_DOMAIN for
+	appropriate languages.
+	(symbol_matches_domain): Renamed `ada_symbol_matches_domain'
+	and moved to ada-lang.c
+	(lookup_block_symbol): Explain that this function only returns
+	symbol matching the requested DOMAIN.
+	Compare the requested domain with the symbol's domain directly.
+	(iterate_over_symbols): Compare the requested domain with the
+	symbol's domain directly.
+	* symtab.h (symbol_matches_domain): Remove.
+
 2014-04-14  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/15246:

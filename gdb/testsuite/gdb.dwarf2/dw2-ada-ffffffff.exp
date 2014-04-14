@@ -28,6 +28,10 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {}] != ""
 
 clean_restart $executable
 
+# Force the language to C++, since we want to treat the type
+# defined in the object file like a C++ type, using sizeof.
+gdb_test_no_output "set language c++"
+
 # -1 was produced, it is now caught with the complaint:
 # Suspicious DW_AT_byte_size value treated as zero instead of ...
 gdb_test "p sizeof (t)" " = 0"

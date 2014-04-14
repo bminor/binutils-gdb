@@ -35,6 +35,7 @@
 #include "expression.h"
 #include "value.h"
 #include "cp-abi.h"
+#include "language.h"
 
 #include "safe-ctype.h"
 
@@ -177,7 +178,29 @@ inspect_type (struct demangle_parse_info *info,
   sym = NULL;
   TRY_CATCH (except, RETURN_MASK_ALL)
   {
-    sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
+    /* It is not legal to have a typedef and tag name of the same
+       name in C++.  However, anonymous composite types that are defined
+       with a typedef ["typedef struct {...} anonymous_struct;"] WILL
+       have symbols for a TYPE_CODE_TYPEDEF (in VAR_DOMAIN) and a
+       TYPE_CODE_STRUCT (in STRUCT_DOMAIN).
+
+       If VAR_DOMAIN is searched first, it will return the TYPEDEF symbol,
+       and this function will never output the definition of the typedef,
+       since type_print is called below with SHOW = -1. [The typedef hash
+       is never initialized/used when SHOW <= 0 -- and the finder
+       (find_typedef_for_canonicalize) will always return NULL as a result.]
+
+       Consequently, type_print will eventually keep calling this function
+       to replace the typedef (via
+       print_name_maybe_canonical/cp_canonicalize_full).  This leads to
+       infinite recursion.
+
+       This can all be safely avoid by explicitly searching STRUCT_DOMAIN
+       first to find the structure definition.  */
+    if (current_language->la_language == language_cplus)
+      sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0);
+    if (sym == NULL)
+      sym = lookup_symbol (name, 0, VAR_DOMAIN, NULL);
   }
 
   if (except.reason >= 0 && sym != NULL)

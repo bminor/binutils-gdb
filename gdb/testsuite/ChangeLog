@@ -1,3 +1,13 @@
+2014-04-14  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16253
+	* gdb.cp/var-tag.cc: New file.
+	* gdb.cp/var-tag.exp: New file.
+	* gdb.dwarf2/dw2-ada-ffffffff.exp: Set the language to C++.
+	* gdb.dwarf2/dw2-anon-mptr.exp: Likewise.
+	* gdb.dwarf2/dw2-double-set-die-type.exp: Likewise.
+	* gdb.dwarf2/dw2-inheritance.exp: Likewise.
+
 2014-04-14  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/classes.exp (test_enums): Handle underlying type.
