@@ -1,3 +1,15 @@
+2014-04-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/sym-file-loader.c: Include <limits.h>.
+	(SELF_LINK): New define.
+	(get_origin): New function.
+	(load_shlib): Use it.
+	* gdb.base/sym-file.exp: Don't early return if the target is
+	remote.  Use runto_main, and issue fail is that fails.  Use
+	gdb_load_shlibs.
+	(shlib_name): Delete.
+	(lib_so, lib_syms, lib_dlopen): New globals.  Use them throughout.
+
 2014-04-15  Pedro Alves <palves@redhat.com>
 
 	* gdb.base/sym-file.exp: Remove regex characters from test

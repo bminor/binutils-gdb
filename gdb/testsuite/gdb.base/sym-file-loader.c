@@ -15,6 +15,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -77,6 +78,48 @@ load (uint8_t *addr, Elf_External_Phdr *phdr, struct segment *tail_seg)
   return seg;
 }
 
+#ifdef __linux__
+# define SELF_LINK "/proc/self/exe"
+#elif defined NETBSD
+# define SELK_LINK "/proc/curproc/exe"
+#elif defined __OpenBSD__ || defined __FreeBSD__ || defined __DragonFly__
+# define SELK_LINK "/proc/curproc/file"
+#elif defined SunOS
+# define SELK_LINK "/proc/self/path/a.out"
+#endif
+
+/* Like RPATH=$ORIGIN, return the dirname of the current
+   executable.  */
+
+static const char *
+get_origin (void)
+{
+  static char self_path[PATH_MAX];
+  static ssize_t self_path_len;
+
+  if (self_path_len == 0)
+    {
+#ifdef SELF_LINK
+      self_path_len = readlink (SELF_LINK, self_path, PATH_MAX - 1);
+      if (self_path_len != -1)
+	{
+	  char *dirsep;
+
+	  self_path[self_path_len] = '\0';
+	  dirsep = strrchr (self_path, '/');
+	  *dirsep = '\0';
+	}
+#else
+      self_path_len = -1;
+#endif
+    }
+
+  if (self_path_len == -1)
+    return NULL;
+  else
+    return self_path;
+}
+
 /* Mini shared library loader.  No reallocation
    is performed for the sake of simplicity.  */
 
@@ -85,16 +128,37 @@ load_shlib (const char *file, Elf_External_Ehdr **ehdr_out,
 	    struct segment **seg_out)
 {
   uint64_t i;
-  int fd;
+  int fd = -1;
   off_t fsize;
   uint8_t *addr;
   Elf_External_Ehdr *ehdr;
   Elf_External_Phdr *phdr;
   struct segment *head_seg = NULL;
   struct segment *tail_seg = NULL;
+  const char *origin;
+  char *path;
 
-  /* Map the lib in memory for reading.  */
-  fd = open (file, O_RDONLY);
+  /* Map the lib in memory for reading.
+
+     If the file name is relative, try looking it up relative to the
+     main executable's path.  I.e., emulate RPATH=$ORIGIN.  */
+  if (file[0] != '/')
+    {
+      origin = get_origin ();
+      if (origin == NULL)
+	{
+	  fprintf (stderr, "get_origin not implemented.");
+	  return -1;
+	}
+
+      path = alloca (strlen (origin) + 1 + strlen (file) + 1);
+      sprintf (path, "%s/%s", origin, file);
+      fd = open (path, O_RDONLY);
+    }
+
+  if (fd < 0)
+    fd = open (file, O_RDONLY);
+
   if (fd < 0)
     {
       perror ("fopen failed.");
