@@ -1,3 +1,10 @@
+2014-04-24  David Blaikie  <dblaikie@gmail.com>
+
+	* gdb.cp/cpexprs.cc: Move braces to the same line as the start
+	of the function to work across GCC and Clang.
+	* gdb.cp/cpexprs.exp: Account for GCC/Clang difference in vtable
+	pointer types (const void ** const V void **).
+
 2014-04-24  Michael Sturm  <michael.sturm@mintel.com>
 	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
