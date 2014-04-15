@@ -1,3 +1,8 @@
+2014-04-15  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/tls-relax-gdesc-ie.s (var): Adjust test case
+	to include all 5 bits of LDR destination register.
+
 2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* ld-avr/norelax_diff.d: New testcase.

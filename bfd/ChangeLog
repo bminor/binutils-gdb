@@ -1,3 +1,7 @@
+2014-04-15  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* (elfNN_aarch64_tls_relax): Fix instruction mask.
+
 2014-04-14  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (BA): Define
