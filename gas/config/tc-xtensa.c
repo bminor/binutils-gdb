@@ -5609,7 +5609,6 @@ xtensa_handle_align (fragS *fragP)
       && ! fragP->tc_frag_data.is_literal
       && (fragP->fr_type == rs_align
 	  || fragP->fr_type == rs_align_code)
-      && fragP->fr_address + fragP->fr_fix > 0
       && fragP->fr_offset > 0
       && now_seg != bss_section)
     {

@@ -1,3 +1,11 @@
+2014-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* gas/xtensa/all.exp: Add test for the first section frag alignment.
+	* gas/xtensa/first_frag_align.d: First section frag alignment expected
+	dump.
+	* gas/xtensa/first_frag_align.s: First section frag alignment test
+	source.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.

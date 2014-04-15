@@ -1,3 +1,8 @@
+2014-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_handle_align): record alignment for the
+	first section frag.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.
