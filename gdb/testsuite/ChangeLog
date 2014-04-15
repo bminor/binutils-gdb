@@ -1,5 +1,14 @@
 2014-04-15  Keith Seitz  <keiths@redhat.com>
 
+	* gdb.mi/mi-simplerun.exp (test_breakpoints_creation_and_listing):
+	Remove unused globals.
+	(test_running_the_program): Likewise.
+	(test_controlled_execution): Likewise.
+	(test_controlling_breakpoints): Likewise.
+	(test_program_termination): Likewise.
+
+2014-04-15  Keith Seitz  <keiths@redhat.com>
+
 	* gdb.mi/mi-break.exp (test_tbreak_creation_and_listing): Remove
 	unused globals.
 	(test_rbreak_creation_and_listing): Likewise.
