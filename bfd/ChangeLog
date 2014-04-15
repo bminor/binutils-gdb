@@ -1,3 +1,7 @@
+2014-04-15  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* (elfNN_aarch64_tls_relax): Fix instruction mask.
+
 2014-03-07  Michael Hudson-Doyle  <michael.hudson@linaro.org>
 	    Kugan Vivekanandarajah  <kugan.vivekanandarajah@linaro.org>
 

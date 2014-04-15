@@ -1,3 +1,8 @@
+2014-04-15  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/tls-relax-gdesc-ie.s (var): Adjust test case
+	to include all 5 bits of LDR destination register.
+
 2014-03-06  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-arm/gc-hidden-1.d: Remove target, add not-target to match

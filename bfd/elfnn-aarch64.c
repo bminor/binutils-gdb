@@ -3957,7 +3957,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	     ldr xd, [x0, #:tlsdesc_lo12:var] => ldr x0, [x0, #:gottprel_lo12:var]
 	   */
 	  insn = bfd_getl32 (contents + rel->r_offset);
-	  insn &= 0xfffffff0;
+	  insn &= 0xffffffe0;
 	  bfd_putl32 (insn, contents + rel->r_offset);
 	  return bfd_reloc_continue;
 	}
