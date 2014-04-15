@@ -1,3 +1,8 @@
+2014-04-15  Doug Evans  <dje@google.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Don't reference
+	uninitialized value of "description".
+
 2014-04-15  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.mi/mi-simplerun.exp (test_breakpoints_creation_and_listing):
