@@ -1,3 +1,8 @@
+2014-04-15  Pedro Alves <palves@redhat.com>
+
+	* gdb.base/sym-file.exp: Remove regex characters from test
+	message.  Don't refer to breakpoint numbers in test messages.
+
 2014-04-14  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/16253

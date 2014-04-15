@@ -89,7 +89,7 @@ if {!$result} then {
 # 3) Add $shlib_name using 'add-symbol-file'.
 set result [gdb_test "add-symbol-file ${shlib_name} addr" \
 		     "Reading symbols from .*${lib_basename}\\.so\\.\\.\\.done\\." \
-		     "add-symbol-file .*${lib_basename}\\.so addr" \
+		     "add-symbol-file ${lib_basename}.so addr" \
 		     "add symbol table from file \".*${lib_basename}\\.so\"\
  at.*\\(y or n\\) " \
 		     "y"]
@@ -148,11 +148,11 @@ gdb_test "info files" \
 #     $shlib_name.
 gdb_test "info breakpoints 2" \
 	 ".*PENDING.*" \
-	 "check if Breakpoint 2 is pending."
+	 "breakpoint at foo is pending"
 
 gdb_test "info breakpoints 3" \
 	 ".*PENDING.*" \
-	 "check if Breakpoint 3 is pending."
+	 "breakpoint at bar is pending"
 
 # 13) Check that the execution can continue without error.
 gdb_continue_to_end
