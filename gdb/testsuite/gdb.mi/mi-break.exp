@@ -56,14 +56,12 @@ set line_callme_body   [expr $line_callme_head + 2]
 set fullname "fullname=\"${fullname_syntax}${srcfile}\""
 
 proc test_tbreak_creation_and_listing {} {
-    global mi_gdb_prompt
     global srcfile
     global hex
-    global line_callee4_head line_callee4_body
-    global line_callee3_head line_callee3_body
-    global line_callee2_head line_callee2_body
-    global line_callee1_head line_callee1_body
-    global line_main_head    line_main_body
+    global line_callee4_head
+    global line_callee3_head
+    global line_callee2_body
+    global line_main_body
     global fullname
 
     # Insert some breakpoints and list them
@@ -98,14 +96,12 @@ proc test_tbreak_creation_and_listing {} {
 }
 
 proc test_rbreak_creation_and_listing {} {
-    global mi_gdb_prompt
-    global srcfile
     global hex
-    global line_callee4_head line_callee4_body
-    global line_callee3_head line_callee3_body
-    global line_callee2_head line_callee2_body
-    global line_callee1_head line_callee1_body
-    global line_main_head    line_main_body
+    global line_callee4_body
+    global line_callee3_body
+    global line_callee2_body
+    global line_callee1_body
+    global line_main_body
 
     # Insert some breakpoints and list them
     # Also, disable some so they do not interfere with other tests
@@ -165,7 +161,6 @@ proc test_abreak_creation {} {
 }
 
 proc test_ignore_count {} {
-    global mi_gdb_prompt
     global line_callme_body
 
     mi_gdb_test "-break-insert -i 1 callme" \
@@ -179,8 +174,6 @@ proc test_ignore_count {} {
 }
 
 proc test_error {} {
-    global mi_gdb_prompt
-
     mi_gdb_test "-break-insert function_that_does_not_exist" \
         ".*\\^error,msg=\"Function \\\\\"function_that_does_not_exist\\\\\" not defined.\"" \
         "breakpoint at nonexistent function"
@@ -211,7 +204,6 @@ proc test_error {} {
 }
 
 proc test_disabled_creation {} {
-    global mi_gdb_prompt
     global hex
     global line_callee2_body
 
