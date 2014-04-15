@@ -38,37 +38,29 @@ int
 main (int argc, const char *argv[])
 {
   const char *file = SHLIB_NAME;
-  Elf_External_Ehdr *ehdr = NULL;
-  struct segment *head_seg = NULL;
-  Elf_External_Shdr *text;
+  struct library *lib;
   char *text_addr = NULL;
   int (*pbar) () = NULL;
   int (*pfoo) (int) = NULL;
 
-  if (load_shlib (file, &ehdr, &head_seg) != 0)
-    return -1;
+  lib = load_shlib (file);
+  if (lib == NULL)
+    return 1;
 
-  /* Get the text section.  */
-  text = find_shdr (ehdr, ".text");
-  if (text == NULL)
-    return -1;
-
-  /* Notify GDB to add the symbol file.  */
-  if (translate_offset (GET (text, sh_offset), head_seg, (void **) &text_addr)
-      != 0)
-    return -1;
+  if (get_text_addr (lib,  (void **) &text_addr) != 0)
+    return 1;
 
   gdb_add_symbol_file (text_addr, file);
 
   /* Call bar from SHLIB_NAME.  */
-  if (lookup_function ("bar", ehdr, head_seg, (void *) &pbar) != 0)
-    return -1;
+  if (lookup_function (lib, "bar", (void *) &pbar) != 0)
+    return 1;
 
   (*pbar) ();
 
   /* Call foo from SHLIB_NAME.  */
-  if (lookup_function ("foo", ehdr, head_seg, (void *) &pfoo) != 0)
-    return -1;
+  if (lookup_function (lib, "foo", (void *) &pfoo) != 0)
+    return 1;
 
   (*pfoo) (2);
 

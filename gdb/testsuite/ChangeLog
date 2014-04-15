@@ -1,5 +1,32 @@
 2014-04-15  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/sym-file-loader.h: Move inclusion of <inttypes.h>,
+	<ansidecl.h>, <elf/common.h> and <elf/external.h> to
+	sym-file-loader.c.
+	(Elf_External_Phdr, Elf_External_Ehdr, Elf_External_Shdr)
+	(Elf_External_Sym, Elf_Addr, GET, GETADDR, struct segment): Move
+	to sym-file-loader.c.
+	(struct library): Forward declare.
+	(load_shlib, lookup_function): Change prototypes.
+	(find_shstrtab, find_strtab, find_shdr, find_symtab)
+	(translate_offset): Remove declarations.
+	(get_text_addr): New declaration.
+	* gdb.base/sym-file-loader.c: Move inclusion of <inttypes.h>,
+	<ansidecl.h>, <elf/common.h> and <elf/external.h> here from
+	sym-file-loader.h.
+	(Elf_External_Phdr, Elf_External_Ehdr, Elf_External_Shdr)
+	(Elf_External_Sym, Elf_Addr, GET, GETADDR, struct segment): Move
+	here from sym-file-loader.h.
+	(struct library): New structure.
+	(load_shlib, lookup_function): Change prototypes and adjust to
+	work with a struct library.
+	(find_shstrtab, find_strtab, find_shdr, find_symtab)
+	(translate_offset): Make static.
+	(get_text_addr): New function.
+	* gdb.base/sym-file-main.c (main): Adjust to new loader interface.
+
+2014-04-15  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/sym-file-loader.c: Fix typo.  SELF_LINK, not SELK_LINK.
 
 2014-04-15  Pedro Alves  <palves@redhat.com>
