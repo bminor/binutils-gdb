@@ -87,10 +87,6 @@ OP (BINOP_VAL)
    the second operand with itself that many times.  */
 OP (BINOP_CONCAT)
 
-/* This is the "colon operator" used various places in (the
-   deleted) Chill.  */
-OP (BINOP_RANGE)
-
 /* This must be the highest BINOP_ value, for expprint.c.  */
 OP (BINOP_END)
 

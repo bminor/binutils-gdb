@@ -1,5 +1,13 @@
 2014-07-20  Yao Qi  <yao@codesourcery.com>
 
+	* std-operator.def: Remove BINOP_RANGE.
+	* breakpoint.c (watchpoint_exp_is_const): Update.
+	* expprint.c (dump_subexp_body_standard): Likewise.
+	* eval.c (init_array_element): Remove dead code.
+	(evaluate_subexp_standard): Likewise.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
 	* std-operator.def: Remove BINOP_IN.
 	* breakpoint.c (watchpoint_exp_is_const): Update.
 	* eval.c (evaluate_subexp_standard): Likewise.

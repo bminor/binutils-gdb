@@ -10602,7 +10602,6 @@ watchpoint_exp_is_const (const struct expression *exp)
 	case BINOP_MAX:
 	case BINOP_INTDIV:
 	case BINOP_CONCAT:
-	case BINOP_RANGE:
 	case TERNOP_COND:
 	case TERNOP_SLICE:
 
