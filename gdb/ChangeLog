@@ -1,5 +1,9 @@
 2014-07-20  Yao Qi  <yao@codesourcery.com>
 
+	* std-operator.def: Update comments to TERNOP_SLICE.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
 	* std-operator.def: Remove BINOP_RANGE.
 	* breakpoint.c (watchpoint_exp_is_const): Update.
 	* expprint.c (dump_subexp_body_standard): Likewise.
