@@ -400,9 +400,11 @@ enum SHT
   // x86_64 unwind information.
   SHT_X86_64_UNWIND = 0x70000001,
 
-  //MIPS-specific section types.
-  // Register info section
+  // MIPS-specific section types.
+  // Section contains register usage information.
   SHT_MIPS_REGINFO = 0x70000006,
+  // Section contains miscellaneous options.
+  SHT_MIPS_OPTIONS = 0x7000000d,
 
   // Link editor is to sort the entries in this section based on the
   // address specified in the associated symbol table entry.
