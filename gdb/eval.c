@@ -2164,15 +2164,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    return value_subscript (arg1, value_as_long (arg2));
 	}
-
-    case BINOP_IN:
-      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      type = language_bool_type (exp->language_defn, exp->gdbarch);
-      return value_from_longest (type, (LONGEST) value_in (arg1, arg2));
-
     case MULTI_SUBSCRIPT:
       (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);

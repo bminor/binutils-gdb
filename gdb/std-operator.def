@@ -87,9 +87,6 @@ OP (BINOP_VAL)
    the second operand with itself that many times.  */
 OP (BINOP_CONCAT)
 
-/* For (the deleted) Chill and Pascal.  */
-OP (BINOP_IN)			/* Returns 1 iff ARG1 IN ARG2.  */
-
 /* This is the "colon operator" used various places in (the
    deleted) Chill.  */
 OP (BINOP_RANGE)

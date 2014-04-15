@@ -1,3 +1,10 @@
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Remove BINOP_IN.
+	* breakpoint.c (watchpoint_exp_is_const): Update.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* expprint.c (dump_subexp_body_standard): Likewise.
+
 2014-07-19  Ajit Agarwal  <ajitkum@xilinx.com>
 
 	* microblaze-tdep.c (microblaze_register_names): Add
