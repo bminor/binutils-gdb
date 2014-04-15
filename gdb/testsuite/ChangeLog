@@ -1,5 +1,9 @@
 2014-04-15  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/sym-file-loader.c: Fix typo.  SELF_LINK, not SELK_LINK.
+
+2014-04-15  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/sym-file-loader.c: Include <limits.h>.
 	(SELF_LINK): New define.
 	(get_origin): New function.

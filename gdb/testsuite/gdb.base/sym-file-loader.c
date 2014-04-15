@@ -81,11 +81,11 @@ load (uint8_t *addr, Elf_External_Phdr *phdr, struct segment *tail_seg)
 #ifdef __linux__
 # define SELF_LINK "/proc/self/exe"
 #elif defined NETBSD
-# define SELK_LINK "/proc/curproc/exe"
+# define SELF_LINK "/proc/curproc/exe"
 #elif defined __OpenBSD__ || defined __FreeBSD__ || defined __DragonFly__
-# define SELK_LINK "/proc/curproc/file"
+# define SELF_LINK "/proc/curproc/file"
 #elif defined SunOS
-# define SELK_LINK "/proc/self/path/a.out"
+# define SELF_LINK "/proc/self/path/a.out"
 #endif
 
 /* Like RPATH=$ORIGIN, return the dirname of the current
