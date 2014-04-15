@@ -480,6 +480,11 @@ class Target
   adjust_dyn_symbol(const Symbol* sym, unsigned char* view) const
   { this->do_adjust_dyn_symbol(sym, view); }
 
+  // Return whether to include the section in the link.
+  bool
+  should_include_section(elfcpp::Elf_Word sh_type) const
+  { return this->do_should_include_section(sh_type); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -772,6 +777,11 @@ class Target
   virtual void
   do_adjust_dyn_symbol(const Symbol*, unsigned char*) const
   { }
+
+  // This may be overridden by the child class.
+  virtual bool
+  do_should_include_section(elfcpp::Elf_Word) const
+  { return true; }
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are

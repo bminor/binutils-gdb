@@ -1,5 +1,12 @@
 2014-04-15  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
+	* layout.cc (Layout::include_section): Allow a target to decide
+	whether to include a section.
+	* target.h (Target::should_include_section): New function.
+	(Target::do_should_include_section): New function.
+
+2014-04-15  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
 	* copy-relocs.cc (Copy_relocs::Copy_reloc_entry::emit): Remove and
 	inline into ...
 	(Copy_relocs::emit): ... here.
