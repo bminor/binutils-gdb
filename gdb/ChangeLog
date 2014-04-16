@@ -1,3 +1,9 @@
+2014-04-16  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16597
+	* cp-namespace.c (lookup_symbol_file): If the type name of
+	`this' is NULL, return immediately.
+
 2014-04-14  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/16253

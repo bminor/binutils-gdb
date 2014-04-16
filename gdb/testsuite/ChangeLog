@@ -1,3 +1,10 @@
+2014-04-16  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16597
+	* gdb.cp/namelessclass.cc: New file.
+	* gdb.cp/namelessclass.exp: New file.
+	* gdb.cp/namelessclass.S: New file.
+
 2014-04-16  Doug Evans  <dje@google.com>
 
 	* lib/gdbserver-support.exp (gdbserver_default_get_remote_address):

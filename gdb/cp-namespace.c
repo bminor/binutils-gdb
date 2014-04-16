@@ -694,6 +694,11 @@ lookup_symbol_file (const char *name,
 	    }
 
 	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (this)));
+	  /* If TYPE_NAME is NULL, abandon trying to find this symbol.
+	     This can happen for lambda functions compiled with clang++,
+	     which outputs no name for the container class.  */
+	  if (TYPE_NAME (type) == NULL)
+	    return NULL;
 	  klass = xstrdup (TYPE_NAME (type));
 	  nested = xstrdup (name);
 	}
