@@ -1,3 +1,23 @@
+2014-04-16  Doug Evans  <dje@google.com>
+
+	* lib/gdbserver-support.exp (gdbserver_default_get_remote_address):
+	Add comment.
+	(gdbserver_default_get_comm_port): New function.
+	(gdbserver_start): Check if board file provided
+	"gdbserver,get_comm_port" and use it if so.
+	* boards/native-stdio-gdbserver.exp (sockethost): Set to "".
+	(gdb,socketport): Set to "stdio".
+	(gdbserver,get_comm_port): Set to ${board}_get_comm_port.
+	(stdio_gdbserver_template): Delete.
+	(${board}_get_remote_address): Update.
+	(${board}_build_remote_cmd): Delete.
+	(${board}_get_comm_port): New function.
+	(${board}_spawn): Update.
+	* boards/remote-stdio-gdbserver.exp (${board}_build_remote_cmd):
+	Delete.
+	(${board}_get_remote_address): Update.
+	(${board}_get_comm_port): New function.
+
 2014-04-16  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/memattr.exp: Improve regexps to handle memory regions

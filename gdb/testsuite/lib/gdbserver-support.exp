@@ -189,7 +189,15 @@ proc gdbserver_download_current_prog { } {
 # Default routine to compute the argument to "target remote".
 
 proc gdbserver_default_get_remote_address { host port } {
+    # Historically HOST included the trailing ":".
+    # To avoid breaking any board files out there we leave things alone.
     return "$host$port"
+}
+
+# Default routine to compute the "comm" argument for gdbserver.
+
+proc gdbserver_default_get_comm_port { port } {
+    return ":$port"
 }
 
 # Start a gdbserver process with initial OPTIONS and trailing ARGUMENTS.
@@ -223,6 +231,11 @@ proc gdbserver_start { options arguments } {
     } else {
 	set get_remote_address gdbserver_default_get_remote_address
     }
+    if [target_info exists gdbserver,get_comm_port] {
+	set get_comm_port [target_info gdbserver,get_comm_port]
+    } else {
+	set get_comm_port gdbserver_default_get_comm_port
+    }
 
     # Extract the protocol
     if [target_info exists gdb_protocol] {
@@ -251,7 +264,7 @@ proc gdbserver_start { options arguments } {
 	    append gdbserver_command " $options"
 	}
 	if { $portnum != "" } {
-	    append gdbserver_command " :$portnum"
+	    append gdbserver_command " [$get_comm_port $portnum]"
 	}
 	if { $arguments != "" } {
 	    append gdbserver_command " $arguments"
