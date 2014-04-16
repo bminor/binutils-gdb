@@ -98,7 +98,7 @@ generate_build_id (bfd *abfd,
 		   const char *style,
 		   checksum_fn checksum_contents,
 		   unsigned char *id_bits,
-		   int size)
+		   int size ATTRIBUTE_UNUSED)
 {
   if (streq (style, "md5"))
     {
