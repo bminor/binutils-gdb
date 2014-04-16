@@ -9173,8 +9173,20 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
       relax_info = elf_section_data (input_section)->sec_info;
       if (relax_info->workaround_size != 0)
-	memset (contents + input_section->size - relax_info->workaround_size,
-		0, relax_info->workaround_size);
+	{
+	  bfd_byte *p;
+	  unsigned int n;
+	  bfd_byte fill[4];
+
+	  bfd_put_32 (input_bfd, BA, fill);
+	  p = contents + input_section->size - relax_info->workaround_size;
+	  n = relax_info->workaround_size >> 2;
+	  while (n--)
+	    {
+	      memcpy (p, fill, 4);
+	      p += 4;
+	    }
+	}
 
       /* The idea is: Replace the last instruction on a page with a
 	 branch to a patch area.  Put the insn there followed by a
