@@ -1,5 +1,11 @@
 2014-04-16  Keith Seitz  <keiths@redhat.com>
 
+	PR gdb/15827
+	* gdb.dwarf2/corrupt.c: New file.
+	* gdb.dwarf2/corrupt.exp: New file.
+
+2014-04-16  Keith Seitz  <keiths@redhat.com>
+
 	PR c++/16597
 	* gdb.cp/namelessclass.cc: New file.
 	* gdb.cp/namelessclass.exp: New file.

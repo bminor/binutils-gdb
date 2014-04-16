@@ -1,5 +1,12 @@
 2014-04-16  Keith Seitz  <keiths@redhat.com>
 
+	PR gdb/15827
+	* dwarf2read.c (skip_one_die): Check that all relative-offset
+	sibling DIEs fall within range of the current reader's buffer.
+	(read_partial_die): Likewise.
+
+2014-04-16  Keith Seitz  <keiths@redhat.com>
+
 	PR c++/16597
 	* cp-namespace.c (lookup_symbol_file): If the type name of
 	`this' is NULL, return immediately.

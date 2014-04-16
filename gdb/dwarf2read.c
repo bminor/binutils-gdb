@@ -7104,6 +7104,8 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	      if (sibling_ptr < info_ptr)
 		complaint (&symfile_complaints,
 			   _("DW_AT_sibling points backwards"));
+	      else if (sibling_ptr > reader->buffer_end)
+		dwarf2_section_buffer_overflow_complaint (reader->die_section);
 	      else
 		return sibling_ptr;
 	    }
@@ -15502,6 +15504,8 @@ read_partial_die (const struct die_reader_specs *reader,
 	      if (sibling_ptr < info_ptr)
 		complaint (&symfile_complaints,
 			   _("DW_AT_sibling points backwards"));
+	      else if (sibling_ptr > reader->buffer_end)
+		dwarf2_section_buffer_overflow_complaint (reader->die_section);
 	      else
 		part_die->sibling = sibling_ptr;
 	    }
