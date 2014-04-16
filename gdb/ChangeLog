@@ -1,3 +1,7 @@
+2014-04-16  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdbtypes.h: Remove definition of the macro TYPE_FN_FIELDS.
+
 2014-04-16  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/15827
