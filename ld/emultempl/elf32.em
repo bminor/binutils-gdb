@@ -38,6 +38,7 @@ fragment <<EOF
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "filenames.h"
 #include "getopt.h"
 #include <fcntl.h>
