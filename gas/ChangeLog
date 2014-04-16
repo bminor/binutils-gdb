@@ -1,3 +1,8 @@
+2014-04-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-tilegx.h (TC_CONS_FIX_NEW): Add RELOC arg.
+	* config/tc-tilepro.h (TC_CONS_FIX_NEW): Likewise.
+
 2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* config/tc-avr.c: Add new flag mlink-relax.
