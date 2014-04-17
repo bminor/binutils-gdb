@@ -168,8 +168,10 @@ struct mips_got_info
   unsigned int page_gotno;
   /* The number of relocations needed for the GOT entries.  */
   unsigned int relocs;
-  /* The number of local .got entries we have used.  */
-  unsigned int assigned_gotno;
+  /* The first unused local .got entry.  */
+  unsigned int assigned_low_gotno;
+  /* The last unused local .got entry.  */
+  unsigned int assigned_high_gotno;
   /* A hash table holding members of the got.  */
   struct htab *got_entries;
   /* A hash table holding mips_got_page_ref structures.  */
@@ -3635,7 +3637,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   if (entry)
     return entry;
 
-  if (g->assigned_gotno >= g->local_gotno)
+  if (g->assigned_low_gotno > g->assigned_high_gotno)
     {
       /* We didn't allocate enough space in the GOT.  */
       (*_bfd_error_handler)
@@ -3648,7 +3650,14 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   if (!entry)
     return NULL;
 
-  lookup.gotidx = MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno++;
+  if (got16_reloc_p (r_type)
+      || call16_reloc_p (r_type)
+      || got_page_reloc_p (r_type)
+      || got_disp_reloc_p (r_type))
+    lookup.gotidx = MIPS_ELF_GOT_SIZE (abfd) * g->assigned_low_gotno++;
+  else
+    lookup.gotidx = MIPS_ELF_GOT_SIZE (abfd) * g->assigned_high_gotno--;
+
   *entry = lookup;
   *loc = entry;
 
@@ -4628,12 +4637,12 @@ mips_elf_set_global_gotidx (void **entryp, void *data)
       && entry->symndx == -1
       && entry->d.h->global_got_area != GGA_NONE)
     {
-      if (!mips_elf_set_gotidx (entryp, arg->value * arg->g->assigned_gotno))
+      if (!mips_elf_set_gotidx (entryp, arg->value * arg->g->assigned_low_gotno))
 	{
 	  arg->g = NULL;
 	  return 0;
 	}
-      arg->g->assigned_gotno += 1;
+      arg->g->assigned_low_gotno += 1;
 
       if (arg->info->shared
 	  || (elf_hash_table (arg->info)->dynamic_sections_created
@@ -4766,7 +4775,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
   htab_traverse (g->got_entries, mips_elf_set_global_got_area, &tga);
 
   /* Now go through the GOTs assigning them offset ranges.
-     [assigned_gotno, local_gotno[ will be set to the range of local
+     [assigned_low_gotno, local_gotno[ will be set to the range of local
      entries in each GOT.  We can then compute the end of a GOT by
      adding local_gotno to global_gotno.  We reverse the list and make
      it circular since then we'll be able to quickly compute the
@@ -4789,9 +4798,10 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
       struct mips_got_info *gn;
 
       assign += htab->reserved_gotno;
-      g->assigned_gotno = assign;
+      g->assigned_low_gotno = assign;
       g->local_gotno += assign;
       g->local_gotno += (pages < g->page_gotno ? pages : g->page_gotno);
+      g->assigned_high_gotno = g->local_gotno - 1;
       assign = g->local_gotno + g->global_gotno + g->tls_gotno;
 
       /* Take g out of the direct list, and push it onto the reversed
@@ -4830,21 +4840,21 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
 
       /* Assign offsets to global GOT entries and count how many
 	 relocations they need.  */
-      save_assign = g->assigned_gotno;
-      g->assigned_gotno = g->local_gotno;
+      save_assign = g->assigned_low_gotno;
+      g->assigned_low_gotno = g->local_gotno;
       tga.info = info;
       tga.value = MIPS_ELF_GOT_SIZE (abfd);
       tga.g = g;
       htab_traverse (g->got_entries, mips_elf_set_global_gotidx, &tga);
       if (!tga.g)
 	return FALSE;
-      BFD_ASSERT (g->assigned_gotno == g->local_gotno + g->global_gotno);
-      g->assigned_gotno = save_assign;
+      BFD_ASSERT (g->assigned_low_gotno == g->local_gotno + g->global_gotno);
+      g->assigned_low_gotno = save_assign;
 
       if (info->shared)
 	{
-	  g->relocs += g->local_gotno - g->assigned_gotno;
-	  BFD_ASSERT (g->assigned_gotno == g->next->local_gotno
+	  g->relocs += g->local_gotno - g->assigned_low_gotno;
+	  BFD_ASSERT (g->assigned_low_gotno == g->next->local_gotno
 		      + g->next->global_gotno
 		      + g->next->tls_gotno
 		      + htab->reserved_gotno);
@@ -9064,13 +9074,13 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
 
   /* Allocate room for the reserved entries.  VxWorks always reserves
      3 entries; other objects only reserve 2 entries.  */
-  BFD_ASSERT (g->assigned_gotno == 0);
+  BFD_ASSERT (g->assigned_low_gotno == 0);
   if (htab->is_vxworks)
     htab->reserved_gotno = 3;
   else
     htab->reserved_gotno = 2;
   g->local_gotno += htab->reserved_gotno;
-  g->assigned_gotno = htab->reserved_gotno;
+  g->assigned_low_gotno = htab->reserved_gotno;
 
   /* Decide which symbols need to go in the global part of the GOT and
      count the number of reloc-only GOT symbols.  */
@@ -9113,6 +9123,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
     page_gotno = g->page_gotno;
 
   g->local_gotno += page_gotno;
+  g->assigned_high_gotno = g->local_gotno - 1;
 
   s->size += g->local_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
   s->size += g->global_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
@@ -11387,10 +11398,14 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	  if (! info->shared)
 	    continue;
 
-	  while (got_index < g->assigned_gotno)
+	  for (; got_index < g->local_gotno; got_index++)
 	    {
+	      if (got_index >= g->assigned_low_gotno
+		  && got_index <= g->assigned_high_gotno)
+		continue;
+
 	      rel[0].r_offset = rel[1].r_offset = rel[2].r_offset
-		= got_index++ * MIPS_ELF_GOT_SIZE (output_bfd);
+		= got_index * MIPS_ELF_GOT_SIZE (output_bfd);
 	      if (!(mips_elf_create_dynamic_relocation
 		    (output_bfd, info, rel, NULL,
 		     bfd_abs_section_ptr,

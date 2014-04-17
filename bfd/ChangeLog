@@ -1,3 +1,20 @@
+2014-04-17  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* elfxx-mips.c (struct mips_got_info): Delete assigned_gotno
+	field.  Add assigned_low_gotno and assigned_high_gotno fields.
+	(mips_elf_create_local_got_entry): Update out-of-space condition.
+	Set index of new GOT entry to assigned_low_gotno if required by
+	the current relocation, else set it to assigned_high_gotno.
+	(mips_elf_set_global_gotidx): Replace uses of assigned_gotno
+	with assigned_low_gotno.
+	(mips_elf_multi_got): Initialize assigned_low_gotno and
+	assigned_high_gotno in secondary GOTs.  Use assigned_low_gotno
+	in place of assigned_gotno when handling global GOT entries.
+	(mips_elf_lay_out_got): Initialize assigned_low_gotno and
+	assigned_high_gotno.
+	(_bfd_mips_elf_finish_dynamic_sections): Account for a possible
+	gap in the middle of local GOT space.
+
 2014-04-17  Alan Modra  <amodra@gmail.com>
 
 	PR 16846
