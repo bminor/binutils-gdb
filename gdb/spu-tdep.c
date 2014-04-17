@@ -314,10 +314,11 @@ spu_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 /* Value conversion -- access scalar values at the preferred slot.  */
 
 static struct value *
-spu_value_from_register (struct type *type, int regnum,
-			 struct frame_info *frame)
+spu_value_from_register (struct gdbarch *gdbarch, struct type *type,
+			 int regnum, struct frame_id frame_id)
 {
-  struct value *value = default_value_from_register (type, regnum, frame);
+  struct value *value = default_value_from_register (gdbarch, type,
+						     regnum, frame_id);
   int len = TYPE_LENGTH (type);
 
   if (regnum < SPU_NUM_GPRS && len < 16)

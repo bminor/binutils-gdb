@@ -422,12 +422,12 @@ extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_inf
 extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_value_to_register_ftype *value_to_register);
 
 /* Construct a value representing the contents of register REGNUM in
-   frame FRAME, interpreted as type TYPE.  The routine needs to
+   frame FRAME_ID, interpreted as type TYPE.  The routine needs to
    allocate and return a struct value with all value attributes
    (but not the value contents) filled in. */
 
-typedef struct value * (gdbarch_value_from_register_ftype) (struct type *type, int regnum, struct frame_info *frame);
-extern struct value * gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_info *frame);
+typedef struct value * (gdbarch_value_from_register_ftype) (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_id frame_id);
+extern struct value * gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_id frame_id);
 extern void set_gdbarch_value_from_register (struct gdbarch *gdbarch, gdbarch_value_from_register_ftype *value_from_register);
 
 typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);

@@ -317,13 +317,9 @@ dwarf_expr_read_addr_from_reg (void *baton, int dwarf_regnum)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
   struct gdbarch *gdbarch = get_frame_arch (debaton->frame);
-  CORE_ADDR result;
-  int regnum;
+  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_regnum);
 
-  regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_regnum);
-  result = address_from_register (builtin_type (gdbarch)->builtin_data_ptr,
-				  regnum, debaton->frame);
-  return result;
+  return address_from_register (regnum, debaton->frame);
 }
 
 /* Implement struct dwarf_expr_context_funcs' "get_reg_value" callback.  */

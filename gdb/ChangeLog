@@ -1,3 +1,24 @@
+2014-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (value_from_register): Make class "m" instead of "f".
+	Replace FRAME argument with FRAME_ID.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* findvar.c (default_value_from_register): Add GDBARCH argument;
+	replace FRAME by FRAME_ID.  No longer call get_frame_id.
+	(value_from_register): Update call to gdbarch_value_from_register.
+	* value.h (default_value_from_register): Update prototype.
+	* s390-linux-tdep.c (s390_value_from_register): Update interface
+	and call to default_value_from_register.
+	* spu-tdep.c (spu_value_from_register): Likewise.
+
+	* findvar.c (address_from_register): Remove TYPE argument.
+	Do not call value_from_register; use gdbarch_value_from_register
+	with null_frame_id instead.
+	* value.h (address_from_register): Update prototype.
+	* dwarf2-frame.c (read_addr_from_reg): Use address_from_register.
+	* dwarf2loc.c (dwarf_expr_read_addr_from_reg): Update for
+	address_from_register interface change.
+
 2014-04-17  Yao Qi  <yao@codesourcery.com>
 
 	* gdbtypes.h: Update comments to link to types and macros'
