@@ -1,5 +1,13 @@
 2014-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c: Include "dwarf2-frame.h" and "ax.h".
+	(spu_ax_pseudo_register_collect): New function.
+	(spu_ax_pseudo_register_push_stack): Likewise.
+	(spu_dwarf_reg_to_regnum): Likewise.
+	(spu_gdbarch_init): Install them.  Append DWARF unwinders.
+
+2014-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (value_from_register): Make class "m" instead of "f".
 	Replace FRAME argument with FRAME_ID.
 	* gdbarch.c, gdbarch.h: Regenerate.
