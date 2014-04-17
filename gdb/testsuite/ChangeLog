@@ -1,5 +1,9 @@
 2014-04-17  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* gdb.java/jnpe.exp: Drop srcdir from untested path.
+
+2014-04-17  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* lib/gdb.exp (gdb_compile_pthreads, gdb_compile_objc):
 	Drop prefix from unsupported source file path.
 
