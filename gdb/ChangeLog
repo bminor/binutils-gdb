@@ -1,5 +1,11 @@
 2014-07-20  Yao Qi  <yao@codesourcery.com>
 
+	* eval.c: Remove "Chill" from comments.
+	* gdbtypes.h: Likewise.
+	* symtab.h: Likewise.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
 	* std-operator.def: Update comments to TERNOP_SLICE.
 
 2014-07-20  Yao Qi  <yao@codesourcery.com>

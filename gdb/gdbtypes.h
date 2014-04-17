@@ -132,10 +132,9 @@ enum type_code
     TYPE_CODE_RANGE,		/**< Range (integers within spec'd bounds).  */
 
     /* * A string type which is like an array of character but prints
-       differently (at least for (the deleted) CHILL).  It does not
-       contain a length field as Pascal strings (for many Pascals,
-       anyway) do; if we want to deal with such strings, we should use
-       a new type code.  */
+       differently.  It does not contain a length field as Pascal
+       strings (for many Pascals, anyway) do; if we want to deal with
+       such strings, we should use a new type code.  */
     TYPE_CODE_STRING,
 
     /* * Unknown type.  The length field is valid if we were able to

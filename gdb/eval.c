@@ -346,12 +346,11 @@ evaluate_struct_tuple (struct value *struct_val,
   return struct_val;
 }
 
-/* Recursive helper function for setting elements of array tuples for
-   (the deleted) Chill.  The target is ARRAY (which has bounds
-   LOW_BOUND to HIGH_BOUND); the element value is ELEMENT; EXP, POS
-   and NOSIDE are as usual.  Evaluates index expresions and sets the
-   specified element(s) of ARRAY to ELEMENT.  Returns last index
-   value.  */
+/* Recursive helper function for setting elements of array tuples.
+   The target is ARRAY (which has bounds LOW_BOUND to HIGH_BOUND); the
+   element value is ELEMENT; EXP, POS and NOSIDE are as usual.
+   Evaluates index expresions and sets the specified element(s) of
+   ARRAY to ELEMENT.  Returns last index value.  */
 
 static LONGEST
 init_array_element (struct value *array, struct value *element,
