@@ -1,3 +1,8 @@
+2014-04-17  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* lib/gdb.exp (gdb_compile_pthreads, gdb_compile_objc):
+	Drop prefix from unsupported source file path.
+
 2014-04-17  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (with_target_charset): New proc.

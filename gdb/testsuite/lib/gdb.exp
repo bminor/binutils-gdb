@@ -2861,7 +2861,7 @@ proc gdb_compile_pthreads {source dest type options} {
         }
     }
     if {!$built_binfile} {
-        unsupported "Couldn't compile $source: ${why_msg}"
+	unsupported "Couldn't compile [file tail $source]: ${why_msg}"
         return -1
     }
 }
@@ -3033,7 +3033,7 @@ proc gdb_compile_objc {source dest type options} {
         }
     }
     if {!$built_binfile} {
-        unsupported "Couldn't compile $source: ${why_msg}"
+        unsupported "Couldn't compile [file tail $source]: ${why_msg}"
         return -1
     }
 }
