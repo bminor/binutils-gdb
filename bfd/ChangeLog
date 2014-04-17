@@ -1,3 +1,10 @@
+2014-04-17  Alan Modra  <amodra@gmail.com>
+
+	PR 16846
+	* elflink.c (_bfd_elf_merge_symbol): Ignore TLS mismatch when
+	current bfd is a plugin.  Don't always set type_change_ok
+	when old bfd is a plugin.
+
 2014-04-16  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o-x86-64.c (bfd_mach_o_x86_64_mkobject): Adjust cpusubtype
