@@ -46,7 +46,6 @@
 #include "hashtab.h"
 #include "valprint.h"
 
-static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
 static const char *frame_stop_reason_symbol_string (enum unwind_stop_reason reason);
 
@@ -425,9 +424,15 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
 static struct frame_info *
 skip_artificial_frames (struct frame_info *frame)
 {
+  /* Note we use get_prev_frame_always, and not get_prev_frame.  The
+     latter will truncate the frame chain, leading to this function
+     unintentionally returning a null_frame_id (e.g., when the user
+     sets a backtrace limit).  This is safe, because as these frames
+     are made up by GDB, there must be a real frame in the chain
+     below.  */
   while (get_frame_type (frame) == INLINE_FRAME
 	 || get_frame_type (frame) == TAILCALL_FRAME)
-    frame = get_prev_frame (frame);
+    frame = get_prev_frame_always (frame);
 
   return frame;
 }
@@ -484,13 +489,13 @@ frame_unwind_caller_id (struct frame_info *next_frame)
 {
   struct frame_info *this_frame;
 
-  /* Use get_prev_frame_1, and not get_prev_frame.  The latter will truncate
-     the frame chain, leading to this function unintentionally
-     returning a null_frame_id (e.g., when a caller requests the frame
-     ID of "main()"s caller.  */
+  /* Use get_prev_frame_always, and not get_prev_frame.  The latter
+     will truncate the frame chain, leading to this function
+     unintentionally returning a null_frame_id (e.g., when a caller
+     requests the frame ID of "main()"s caller.  */
 
   next_frame = skip_artificial_frames (next_frame);
-  this_frame = get_prev_frame_1 (next_frame);
+  this_frame = get_prev_frame_always (next_frame);
   if (this_frame)
     return get_frame_id (skip_artificial_frames (this_frame));
   else
@@ -956,7 +961,7 @@ frame_pop (struct frame_info *this_frame)
     }
 
   /* Ensure that we have a frame to pop to.  */
-  prev_frame = get_prev_frame_1 (this_frame);
+  prev_frame = get_prev_frame_always (this_frame);
 
   if (!prev_frame)
     error (_("Cannot pop the initial frame."));
@@ -1775,8 +1780,8 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
    Unlike get_prev_frame, this function always tries to unwind the
    frame.  */
 
-static struct frame_info *
-get_prev_frame_1 (struct frame_info *this_frame)
+struct frame_info *
+get_prev_frame_always (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch;
 
@@ -1785,7 +1790,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
 
   if (frame_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame_1 (this_frame=");
+      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame_always (this_frame=");
       if (this_frame != NULL)
 	fprintf_unfiltered (gdb_stdlog, "%d", this_frame->level);
       else
@@ -2137,7 +2142,7 @@ get_prev_frame (struct frame_info *this_frame)
       return NULL;
     }
 
-  return get_prev_frame_1 (this_frame);
+  return get_prev_frame_always (this_frame);
 }
 
 CORE_ADDR
@@ -2523,7 +2528,7 @@ enum unwind_stop_reason
 get_frame_unwind_stop_reason (struct frame_info *frame)
 {
   /* Fill-in STOP_REASON.  */
-  get_prev_frame_1 (frame);
+  get_prev_frame_always (frame);
   gdb_assert (frame->prev_p);
 
   return frame->stop_reason;

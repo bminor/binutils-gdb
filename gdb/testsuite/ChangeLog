@@ -1,3 +1,13 @@
+2014-04-18  Tom Tromey  <palves@redhat.com>
+	    Pedro alves  <tromey@redhat.com>
+
+	PR backtrace/15558
+	* gdb.opt/inline-bt.exp: Test backtracing from an inline function
+	with a backtrace limit.
+	* gdb.python/py-frame-inline.exp: Test running to an inline
+	function with a backtrace limit, and printing the newest frame.
+	* gdb.python/py-frame-inline.c (main): Call f.
+
 2014-04-17  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* gdb.java/jnpe.exp: Drop srcdir from untested path.
