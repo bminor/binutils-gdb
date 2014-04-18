@@ -1399,7 +1399,7 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 	    = bt_ctf_iter_read_event (ctf_iter);
 	  const char *name = bt_ctf_event_name (event);
 
-	  if (strcmp (name, "frame") == 0)
+	  if (name == NULL || strcmp (name, "frame") == 0)
 	    break;
 	  else if (strcmp (name, "memory") != 0)
 	    {

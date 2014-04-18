@@ -1,3 +1,7 @@
+2014-04-19  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_xfer_partial): Check 'name' is NULL before strcmp.
+
 2014-04-18  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* valops.c (oload_method_static): Remove unnecessary argument
