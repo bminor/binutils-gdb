@@ -1,3 +1,13 @@
+2014-04-22  Yao Qi  <yao@codesourcery.com>
+
+	* tracefile-tfile.c (tfile_fetch_registers): Move the bottom
+	to ...
+	* tracefile.c (tracefile_fetch_registers): ... it.  New
+	function.
+	* tracefile.h (tracefile_fetch_registers): Declare.
+	* ctf.c (ctf_fetch_registers): Remove the bottom.  Call
+	tracefile_fetch_registers.
+
 2014-04-19  Eli Zaretskii  <eliz@gnu.org>
 
 	PR gdb/14018

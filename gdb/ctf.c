@@ -1229,8 +1229,6 @@ ctf_fetch_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int offset, regn, regsize, pc_regno;
-  gdb_byte *regs = NULL;
   struct bt_ctf_event *event = NULL;
   struct bt_iter_pos *pos;
 
@@ -1270,13 +1268,14 @@ ctf_fetch_registers (struct target_ops *ops,
 
   if (event != NULL)
     {
+      int offset, regsize, regn;
       const struct bt_definition *scope
 	= bt_ctf_get_top_level_scope (event,
 				      BT_EVENT_FIELDS);
       const struct bt_definition *array
 	= bt_ctf_get_field (event, scope, "contents");
+      gdb_byte *regs = (gdb_byte *) bt_ctf_get_char_array (array);
 
-      regs = (gdb_byte *) bt_ctf_get_char_array (array);
       /* Assume the block is laid out in GDB register number order,
 	 each register with the size that it has in GDB.  */
       offset = 0;
@@ -1300,48 +1299,9 @@ ctf_fetch_registers (struct target_ops *ops,
 	    }
 	  offset += regsize;
 	}
-      return;
     }
-
-  regs = alloca (trace_regblock_size);
-
-  /* We get here if no register data has been found.  Mark registers
-     as unavailable.  */
-  for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
-    regcache_raw_supply (regcache, regn, NULL);
-
-  /* We can often usefully guess that the PC is going to be the same
-     as the address of the tracepoint.  */
-  pc_regno = gdbarch_pc_regnum (gdbarch);
-  if (pc_regno >= 0 && (regno == -1 || regno == pc_regno))
-    {
-      struct tracepoint *tp = get_tracepoint (get_tracepoint_number ());
-
-      if (tp != NULL && tp->base.loc)
-	{
-	  /* But don't try to guess if tracepoint is multi-location...  */
-	  if (tp->base.loc->next != NULL)
-	    {
-	      warning (_("Tracepoint %d has multiple "
-			 "locations, cannot infer $pc"),
-		       tp->base.number);
-	      return;
-	    }
-	  /* ... or does while-stepping.  */
-	  if (tp->step_count > 0)
-	    {
-	      warning (_("Tracepoint %d does while-stepping, "
-			 "cannot infer $pc"),
-		       tp->base.number);
-	      return;
-	    }
-
-	  store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
-				  gdbarch_byte_order (gdbarch),
-				  tp->base.loc->address);
-	  regcache_raw_supply (regcache, pc_regno, regs);
-	}
-    }
+  else
+    tracefile_fetch_registers (regcache, regno);
 }
 
 /* This is the implementation of target_ops method to_xfer_partial.
