@@ -1,5 +1,9 @@
 2014-04-19  Yao Qi  <yao@codesourcery.com>
 
+	* ctf.c (ctf_open): Call post_create_inferior.
+
+2014-04-19  Yao Qi  <yao@codesourcery.com>
+
 	* ctf.c (handle_id): New static variable.
 	(ctf_open_dir): Get handle_id from bt_context_add_trace return
 	value.  Get the declaration of event "register" and get length
