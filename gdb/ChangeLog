@@ -1,3 +1,8 @@
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
+	* solib-darwin.c (darwin_solib_create_inferior_hook): Simplify
+	code by using bfd_mach_o_get_base_address.
+
 2014-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c: Include "dwarf2-frame.h" and "ax.h".
