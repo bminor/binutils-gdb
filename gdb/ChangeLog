@@ -1,5 +1,11 @@
 2014-04-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_discrete_type_high_bound): Resolve the type's
+	dynamic bounds before computing its upper bound.
+	(ada_discrete_type_low_bound): Same as above with the lower bound.
+
+2014-04-28  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (is_dynamic_type): Return true for dynamic
 	range types.  Adjust the array handling implementation to
 	take advantage of this change.

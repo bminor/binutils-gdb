@@ -793,6 +793,7 @@ min_of_type (struct type *t)
 LONGEST
 ada_discrete_type_high_bound (struct type *type)
 {
+  type = resolve_dynamic_type (type, 0);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -813,6 +814,7 @@ ada_discrete_type_high_bound (struct type *type)
 LONGEST
 ada_discrete_type_low_bound (struct type *type)
 {
+  type = resolve_dynamic_type (type, 0);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
