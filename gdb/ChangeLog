@@ -1,5 +1,12 @@
 2014-04-19  Yao Qi  <yao@codesourcery.com>
 
+	* ctf.c (handle_id): New static variable.
+	(ctf_open_dir): Get handle_id from bt_context_add_trace return
+	value.  Get the declaration of event "register" and get length
+	of field "contents".
+
+2014-04-19  Yao Qi  <yao@codesourcery.com>
+
 	* ctf.c (ctf_xfer_partial): Check 'name' is NULL before strcmp.
 
 2014-04-18  Siva Chandra Reddy  <sivachandra@google.com>

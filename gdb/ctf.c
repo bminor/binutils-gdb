@@ -873,6 +873,7 @@ ctf_trace_file_writer_new (void)
 #include <babeltrace/ctf/iterator.h>
 
 /* The struct pointer for current CTF directory.  */
+static int handle_id = -1;
 static struct bt_context *ctx = NULL;
 static struct bt_ctf_iter *ctf_iter = NULL;
 /* The position of the first packet containing trace frame.  */
@@ -905,15 +906,16 @@ ctf_destroy (void)
 static void
 ctf_open_dir (char *dirname)
 {
-  int ret;
   struct bt_iter_pos begin_pos;
   struct bt_iter_pos *pos;
+  unsigned int count, i;
+  struct bt_ctf_event_decl * const *list;
 
   ctx = bt_context_create ();
   if (ctx == NULL)
     error (_("Unable to create bt_context"));
-  ret = bt_context_add_trace (ctx, dirname, "ctf", NULL, NULL, NULL);
-  if (ret < 0)
+  handle_id = bt_context_add_trace (ctx, dirname, "ctf", NULL, NULL, NULL);
+  if (handle_id < 0)
     {
       ctf_destroy ();
       error (_("Unable to use libbabeltrace on directory \"%s\""),
@@ -928,42 +930,28 @@ ctf_open_dir (char *dirname)
       error (_("Unable to create bt_iterator"));
     }
 
-  /* Iterate over events, and look for an event for register block
-     to set trace_regblock_size.  */
+  /* Look for the declaration of register block.  Get the length of
+     array "contents" to set trace_regblock_size.  */
 
-  /* Save the current position.  */
-  pos = bt_iter_get_pos (bt_ctf_get_iter (ctf_iter));
-  gdb_assert (pos->type == BT_SEEK_RESTORE);
+  bt_ctf_get_event_decl_list (handle_id, ctx, &list, &count);
+  for (i = 0; i < count; i++)
+    if (strcmp ("register", bt_ctf_get_decl_event_name (list[i])) == 0)
+      {
+	unsigned int j;
+	const struct bt_ctf_field_decl * const *field_list;
+	const struct bt_declaration *decl;
 
-  while (1)
-    {
-      const char *name;
-      struct bt_ctf_event *event;
+	bt_ctf_get_decl_fields (list[i], BT_EVENT_FIELDS, &field_list,
+				&count);
 
-      event = bt_ctf_iter_read_event (ctf_iter);
+	gdb_assert (count == 1);
+	gdb_assert (0 == strcmp ("contents",
+				 bt_ctf_get_decl_field_name (field_list[0])));
+	decl = bt_ctf_get_decl_from_field_decl (field_list[0]);
+	trace_regblock_size = bt_ctf_get_array_len (decl);
 
-      name = bt_ctf_event_name (event);
-
-      if (name == NULL)
 	break;
-      else if (strcmp (name, "register") == 0)
-	{
-	  const struct bt_definition *scope
-	    = bt_ctf_get_top_level_scope (event,
-					  BT_EVENT_FIELDS);
-	  const struct bt_definition *array
-	    = bt_ctf_get_field (event, scope, "contents");
-
-	  trace_regblock_size
-	    = bt_ctf_get_array_len (bt_ctf_get_decl_from_def (array));
-	}
-
-      if (bt_iter_next (bt_ctf_get_iter (ctf_iter)) < 0)
-	break;
-    }
-
-  /* Restore the position.  */
-  bt_iter_set_pos (bt_ctf_get_iter (ctf_iter), pos);
+      }
 }
 
 #define SET_INT32_FIELD(EVENT, SCOPE, VAR, FIELD)			\
