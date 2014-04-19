@@ -1,5 +1,18 @@
 2014-04-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* dwarf2read.c (is_dynamic_type): Return true for dynamic
+	range types.  Adjust the array handling implementation to
+	take advantage of this change.
+	(resolve_dynamic_range): New function, mostly extracted from
+	resolve_dynamic_bounds.
+	(resolve_dynamic_array): New function, mostly extracted from
+	resolve_dynamic_bounds.
+	(resolve_dynamic_bounds): Delete.
+	(resolve_dynamic_type): Reimplement.  Add handling of
+	TYPE_CODE_RANGE types.
+
+2014-04-28  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-varobj.c (ada_varobj_describe_simple_array_child): Remove
 	handling of parallel ___XA types.
 
