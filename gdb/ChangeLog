@@ -1,3 +1,22 @@
+2014-04-19  Eli Zaretskii  <eliz@gnu.org>
+
+	PR gdb/14018
+	* windows-nat.c (thread_rec): Don't display a warning when
+	SuspendThread fails with ERROR_ACCESS_DENIED.  If SuspendThread
+	fails for any reason, set th->suspended to -1, so that we don't
+	try to resume such a thread.  Also, don't return NULL in these
+	cases, to avoid completely ruin the session due to "PC register is
+	not available" error.
+	(do_windows_fetch_inferior_registers): Check errors in
+	GetThreadContext call.
+	(windows_continue): Accept an additional argument KILLED; if not
+	zero, ignore errors in the SetThreadContext call, since the
+	inferior was killed and is shutting down.
+	(windows_resume, get_windows_debug_event)
+	(windows_create_inferior, windows_mourn_inferior)
+	(windows_kill_inferior): All callers of windows_continue changed
+	to adjust to its new calling sequence.
+
 2014-04-11  Pierre Langlois  <pierre.langlois@embecosm.com>
 
 	PR backtrace/16721

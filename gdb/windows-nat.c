@@ -310,12 +310,18 @@ thread_rec (DWORD id, int get_context)
 		  {
 		    DWORD err = GetLastError ();
 
-		    warning (_("SuspendThread (tid=0x%x) failed."
-			       " (winerr %u)"),
-			     (unsigned) id, (unsigned) err);
-		    return NULL;
+		    /* We get Access Denied (5) when trying to suspend
+		       threads that Windows started on behalf of the
+		       debuggee, usually when those threads are just
+		       about to exit.  */
+		    if (err != ERROR_ACCESS_DENIED)
+		      warning (_("SuspendThread (tid=0x%x) failed."
+				 " (winerr %u)"),
+			       (unsigned) id, (unsigned) err);
+		    th->suspended = -1;
 		  }
-		th->suspended = 1;
+		else
+		  th->suspended = 1;
 	      }
 	    else if (get_context < 0)
 	      th->suspended = -1;
@@ -445,7 +451,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
 	{
 	  thread_info *th = current_thread;
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
-	  GetThreadContext (th->h, &th->context);
+	  CHECK (GetThreadContext (th->h, &th->context));
 	  /* Copy dr values from that thread.
 	     But only if there were not modified since last stop.
 	     PR gdb/2388 */
@@ -1266,10 +1272,12 @@ handle_exception (struct target_waitstatus *ourstatus)
   return 1;
 }
 
-/* Resume all artificially suspended threads if we are continuing
-   execution.  */
+/* Resume thread specified by ID, or all artificially suspended
+   threads, if we are continuing execution.  KILLED non-zero means we
+   have killed the inferior, so we should ignore weird errors due to
+   threads shutting down.  */
 static BOOL
-windows_continue (DWORD continue_status, int id)
+windows_continue (DWORD continue_status, int id, int killed)
 {
   int i;
   thread_info *th;
@@ -1297,7 +1305,16 @@ windows_continue (DWORD continue_status, int id)
 	  }
 	if (th->context.ContextFlags)
 	  {
-	    CHECK (SetThreadContext (th->h, &th->context));
+	    DWORD ec = 0;
+
+	    if (GetExitCodeThread (th->h, &ec)
+		&& ec == STILL_ACTIVE)
+	      {
+		BOOL status = SetThreadContext (th->h, &th->context);
+
+		if (!killed)
+		  CHECK (status);
+	      }
 	    th->context.ContextFlags = 0;
 	  }
 	if (th->suspended > 0)
@@ -1425,9 +1442,9 @@ windows_resume (struct target_ops *ops,
      Otherwise complain.  */
 
   if (resume_all)
-    windows_continue (continue_status, -1);
+    windows_continue (continue_status, -1, 0);
   else
-    windows_continue (continue_status, ptid_get_tid (ptid));
+    windows_continue (continue_status, ptid_get_tid (ptid), 0);
 }
 
 /* Ctrl-C handler used when the inferior is not run in the same console.  The
@@ -1645,7 +1662,7 @@ get_windows_debug_event (struct target_ops *ops,
       if (continue_status == -1)
 	windows_resume (ops, minus_one_ptid, 0, 1);
       else
-	CHECK (windows_continue (continue_status, -1));
+	CHECK (windows_continue (continue_status, -1, 0));
     }
   else
     {
@@ -2382,13 +2399,13 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
 
   do_initial_windows_stuff (ops, pi.dwProcessId, 0);
 
-  /* windows_continue (DBG_CONTINUE, -1); */
+  /* windows_continue (DBG_CONTINUE, -1, 0); */
 }
 
 static void
 windows_mourn_inferior (struct target_ops *ops)
 {
-  (void) windows_continue (DBG_CONTINUE, -1);
+  (void) windows_continue (DBG_CONTINUE, -1, 0);
   i386_cleanup_dregs();
   if (open_process_used)
     {
@@ -2456,7 +2473,7 @@ windows_kill_inferior (struct target_ops *ops)
 
   for (;;)
     {
-      if (!windows_continue (DBG_CONTINUE, -1))
+      if (!windows_continue (DBG_CONTINUE, -1, 1))
 	break;
       if (!WaitForDebugEvent (&current_event, INFINITE))
 	break;
