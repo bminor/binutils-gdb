@@ -14572,13 +14572,9 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       break;
     }
 
-  /* FIXME: For variable sized arrays either of these could be
-     a variable rather than a constant value.  We'll allow it,
-     but we don't know how to handle it.  */
   attr = dwarf2_attr (die, DW_AT_lower_bound, cu);
   if (attr)
-    low.data.const_val
-      = dwarf2_get_attr_constant_value (attr, low.data.const_val);
+    attr_to_dynamic_prop (attr, die, cu, &low);
   else if (!low_default_is_valid)
     complaint (&symfile_complaints, _("Missing DW_AT_lower_bound "
 				      "- DIE at 0x%x [in module %s]"),
