@@ -1768,13 +1768,13 @@ user_visible_resume_ptid (int step)
 void
 resume (int step, enum gdb_signal sig)
 {
-  int should_resume = 1;
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct thread_info *tp = inferior_thread ();
   CORE_ADDR pc = regcache_read_pc (regcache);
   struct address_space *aspace = get_regcache_aspace (regcache);
+  ptid_t resume_ptid;
 
   QUIT;
 
@@ -1918,87 +1918,82 @@ a command like `return' or `jump' to continue execution."));
       insert_breakpoints ();
     }
 
-  if (should_resume)
+  /* If STEP is set, it's a request to use hardware stepping
+     facilities.  But in that case, we should never
+     use singlestep breakpoint.  */
+  gdb_assert (!(singlestep_breakpoints_inserted_p && step));
+
+  /* Decide the set of threads to ask the target to resume.  Start
+     by assuming everything will be resumed, than narrow the set
+     by applying increasingly restricting conditions.  */
+  resume_ptid = user_visible_resume_ptid (step);
+
+  /* Maybe resume a single thread after all.  */
+  if ((step || singlestep_breakpoints_inserted_p)
+      && tp->control.trap_expected)
     {
-      ptid_t resume_ptid;
-
-      /* If STEP is set, it's a request to use hardware stepping
-	 facilities.  But in that case, we should never
-	 use singlestep breakpoint.  */
-      gdb_assert (!(singlestep_breakpoints_inserted_p && step));
-
-      /* Decide the set of threads to ask the target to resume.  Start
-	 by assuming everything will be resumed, than narrow the set
-	 by applying increasingly restricting conditions.  */
-      resume_ptid = user_visible_resume_ptid (step);
-
-      /* Maybe resume a single thread after all.  */
-      if ((step || singlestep_breakpoints_inserted_p)
-	  && tp->control.trap_expected)
-	{
-	  /* We're allowing a thread to run past a breakpoint it has
-	     hit, by single-stepping the thread with the breakpoint
-	     removed.  In which case, we need to single-step only this
-	     thread, and keep others stopped, as they can miss this
-	     breakpoint if allowed to run.  */
-	  resume_ptid = inferior_ptid;
-	}
-
-      if (gdbarch_cannot_step_breakpoint (gdbarch))
-	{
-	  /* Most targets can step a breakpoint instruction, thus
-	     executing it normally.  But if this one cannot, just
-	     continue and we will hit it anyway.  */
-	  if (step && breakpoint_inserted_here_p (aspace, pc))
-	    step = 0;
-	}
-
-      if (debug_displaced
-          && use_displaced_stepping (gdbarch)
-          && tp->control.trap_expected)
-        {
-	  struct regcache *resume_regcache = get_thread_regcache (resume_ptid);
-	  struct gdbarch *resume_gdbarch = get_regcache_arch (resume_regcache);
-          CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
-          gdb_byte buf[4];
-
-          fprintf_unfiltered (gdb_stdlog, "displaced: run %s: ",
-                              paddress (resume_gdbarch, actual_pc));
-          read_memory (actual_pc, buf, sizeof (buf));
-          displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
-        }
-
-      if (tp->control.may_range_step)
-	{
-	  /* If we're resuming a thread with the PC out of the step
-	     range, then we're doing some nested/finer run control
-	     operation, like stepping the thread out of the dynamic
-	     linker or the displaced stepping scratch pad.  We
-	     shouldn't have allowed a range step then.  */
-	  gdb_assert (pc_in_thread_step_range (pc, tp));
-	}
-
-      /* Install inferior's terminal modes.  */
-      target_terminal_inferior ();
-
-      /* Avoid confusing the next resume, if the next stop/resume
-	 happens to apply to another thread.  */
-      tp->suspend.stop_signal = GDB_SIGNAL_0;
-
-      /* Advise target which signals may be handled silently.  If we have
-	 removed breakpoints because we are stepping over one (which can
-	 happen only if we are not using displaced stepping), we need to
-	 receive all signals to avoid accidentally skipping a breakpoint
-	 during execution of a signal handler.  */
-      if ((step || singlestep_breakpoints_inserted_p)
-	  && tp->control.trap_expected
-	  && !use_displaced_stepping (gdbarch))
-	target_pass_signals (0, NULL);
-      else
-	target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
-
-      target_resume (resume_ptid, step, sig);
+      /* We're allowing a thread to run past a breakpoint it has
+	 hit, by single-stepping the thread with the breakpoint
+	 removed.  In which case, we need to single-step only this
+	 thread, and keep others stopped, as they can miss this
+	 breakpoint if allowed to run.  */
+      resume_ptid = inferior_ptid;
     }
+
+  if (gdbarch_cannot_step_breakpoint (gdbarch))
+    {
+      /* Most targets can step a breakpoint instruction, thus
+	 executing it normally.  But if this one cannot, just
+	 continue and we will hit it anyway.  */
+      if (step && breakpoint_inserted_here_p (aspace, pc))
+	step = 0;
+    }
+
+  if (debug_displaced
+      && use_displaced_stepping (gdbarch)
+      && tp->control.trap_expected)
+    {
+      struct regcache *resume_regcache = get_thread_regcache (resume_ptid);
+      struct gdbarch *resume_gdbarch = get_regcache_arch (resume_regcache);
+      CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
+      gdb_byte buf[4];
+
+      fprintf_unfiltered (gdb_stdlog, "displaced: run %s: ",
+			  paddress (resume_gdbarch, actual_pc));
+      read_memory (actual_pc, buf, sizeof (buf));
+      displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
+    }
+
+  if (tp->control.may_range_step)
+    {
+      /* If we're resuming a thread with the PC out of the step
+	 range, then we're doing some nested/finer run control
+	 operation, like stepping the thread out of the dynamic
+	 linker or the displaced stepping scratch pad.  We
+	 shouldn't have allowed a range step then.  */
+      gdb_assert (pc_in_thread_step_range (pc, tp));
+    }
+
+  /* Install inferior's terminal modes.  */
+  target_terminal_inferior ();
+
+  /* Avoid confusing the next resume, if the next stop/resume
+     happens to apply to another thread.  */
+  tp->suspend.stop_signal = GDB_SIGNAL_0;
+
+  /* Advise target which signals may be handled silently.  If we have
+     removed breakpoints because we are stepping over one (which can
+     happen only if we are not using displaced stepping), we need to
+     receive all signals to avoid accidentally skipping a breakpoint
+     during execution of a signal handler.  */
+  if ((step || singlestep_breakpoints_inserted_p)
+      && tp->control.trap_expected
+      && !use_displaced_stepping (gdbarch))
+    target_pass_signals (0, NULL);
+  else
+    target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
+
+  target_resume (resume_ptid, step, sig);
 
   discard_cleanups (old_cleanups);
 }

@@ -1,3 +1,8 @@
+2014-05-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* infrun.c (resume): Remove should_resume (unused).  Move up
+	declaration of resume_ptid.
+
 2014-05-13  Tom Tromey  <tromey@redhat.com>
 
 	* language.h (unop_type_check): Remove.
