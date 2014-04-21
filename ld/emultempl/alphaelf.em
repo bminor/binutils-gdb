@@ -72,6 +72,7 @@ alpha_after_open (void)
 static void
 alpha_after_parse (void)
 {
+  link_info.relax_pass = 2;
   if (limit_32bit && !link_info.shared && !link_info.relocatable)
     lang_section_start (".interp",
 			exp_binop ('+',

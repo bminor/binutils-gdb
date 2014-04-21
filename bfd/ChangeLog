@@ -1,5 +1,14 @@
 2014-04-21  Richard Henderson  <rth@redhat.com>
 
+	* elf64-alpha.c (elf64_alpha_size_got_sections): New may_merge
+	parameter; honor it and disable got merging when false.
+	(elf64_alpha_relax_got_load): Do not relax to GPREL relocs during
+	the first pass of relaxation.
+	(elf64_alpha_relax_with_lituse): Likewise.  Move relaxed relocs to
+	the end of the LITERAL+LITUSE chain.
+	(elf64_alpha_relax_section): Only process LITERAL relocs during the
+	second pass of relaxation.
+
 	* configure.ac (use_secureplt): Enable by default.
 	* configure: Rebuild.
 
