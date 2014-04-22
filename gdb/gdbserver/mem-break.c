@@ -676,7 +676,10 @@ delete_breakpoint (struct breakpoint *todel)
   return delete_breakpoint_1 (proc, todel);
 }
 
-struct breakpoint *
+/* Locate a breakpoint placed at address WHERE and return a pointer
+   to its structure.  */
+
+static struct breakpoint *
 find_gdb_breakpoint_at (CORE_ADDR where)
 {
   struct process_info *proc = current_process ();

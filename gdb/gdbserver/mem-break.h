@@ -25,11 +25,6 @@
 struct breakpoint;
 struct fast_tracepoint_jump;
 
-/* Locate a breakpoint placed at address WHERE and return a pointer
-   to its structure.  */
-
-struct breakpoint *find_gdb_breakpoint_at (CORE_ADDR where);
-
 /* Create a new GDB breakpoint at WHERE.  Returns -1 if breakpoints
    are not supported on this target, 0 otherwise.  */
 

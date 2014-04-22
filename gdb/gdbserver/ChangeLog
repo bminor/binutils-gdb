@@ -1,5 +1,10 @@
 2014-04-23  Pedro Alves  <palves@redhat.com>
 
+	* mem-break.c (find_gdb_breakpoint_at): Make static.
+	* mem-break.h (find_gdb_breakpoint_at): Delete declaration.
+
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
 	* i386-low.c: Don't include break-common.h here.
 	(i386_low_insert_watchpoint, i386_low_remove_watchpoint): Change
 	prototype to take target_hw_bp_type as argument instead of a Z
