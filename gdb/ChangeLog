@@ -1,3 +1,7 @@
+2014-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention that ARM sim now supports tracing.
+
 2014-04-22  Yao Qi  <yao@codesourcery.com>
 
 	* tracefile-tfile.c (tfile_fetch_registers): Move the bottom
