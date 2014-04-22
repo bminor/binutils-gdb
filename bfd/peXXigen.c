@@ -212,7 +212,7 @@ abs_finder (bfd * abfd ATTRIBUTE_UNUSED, asection * sec, void * data)
 {
   bfd_vma abs_val = * (bfd_vma *) data;
 
-  return (sec->vma <= abs_val) && ((sec->vma + (1L << 32)) > abs_val);
+  return (sec->vma <= abs_val) && ((sec->vma + (1LL << 32)) > abs_val);
 }
 
 unsigned int
@@ -3591,6 +3591,7 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 
 		      /* Unhook NEXT from the chain.  */
 		      /* FIXME: memory loss here.  */
+		      /* FIXME: do we need to decrement sizeof_tables_and_entries ?  */
 		      entry->next_entry = next->next_entry;
 		      chain->num_entries --;
 		      if (chain->num_entries < 2)
@@ -3654,6 +3655,7 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 		}
 
 	      /* Unhook NEXT from the chain.  */
+	      /* FIXME: do we need to decrement sizeof_tables_and_entries ?  */
 	      entry->next_entry = next->next_entry;
 	      chain->num_entries --;
 	      if (chain->num_entries < 2)
@@ -3913,6 +3915,12 @@ rsrc_process_section (bfd * abfd,
   new_data = bfd_malloc (size);
   if (new_data == NULL)
     goto end;
+
+  /* We have merged the top level Type Tables of all of the input
+     .rsrc sections into one Type Table.  So we can (and must)
+     reduce the count of the number of tables that we will be
+     emitting appropriately.  */
+  sizeof_tables_and_entries -= 16 * (num_resource_sets - 1);
 
   write_data.abfd        = abfd;
   write_data.datastart   = new_data;
