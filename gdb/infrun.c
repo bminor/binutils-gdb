@@ -85,9 +85,6 @@ static void set_schedlock_func (char *args, int from_tty,
 
 static int currently_stepping (struct thread_info *tp);
 
-static int currently_stepping_or_nexting_callback (struct thread_info *tp,
-						   void *data);
-
 static void xdb_handle_command (char *args, int from_tty);
 
 static void print_exited_reason (int exitstatus);
@@ -2107,6 +2104,17 @@ thread_still_needs_step_over (struct thread_info *tp)
   return 0;
 }
 
+/* Returns true if scheduler locking applies.  STEP indicates whether
+   we're about to do a step/next-like command to a thread.  */
+
+static int
+schedlock_applies (int step)
+{
+  return (scheduler_mode == schedlock_on
+	  || (scheduler_mode == schedlock_step
+	      && step));
+}
+
 /* Look a thread other than EXCEPT that has previously reported a
    breakpoint event, and thus needs a step-over in order to make
    progress.  Returns NULL is none is found.  STEP indicates whether
@@ -2116,21 +2124,16 @@ thread_still_needs_step_over (struct thread_info *tp)
 static struct thread_info *
 find_thread_needs_step_over (int step, struct thread_info *except)
 {
-  int schedlock_enabled;
   struct thread_info *tp, *current;
 
   /* With non-stop mode on, threads are always handled individually.  */
   gdb_assert (! non_stop);
 
-  schedlock_enabled = (scheduler_mode == schedlock_on
-		       || (scheduler_mode == schedlock_step
-			   && step));
-
   current = inferior_thread ();
 
   /* If scheduler locking applies, we can avoid iterating over all
      threads.  */
-  if (schedlock_enabled)
+  if (schedlock_applies (step))
     {
       if (except != current
 	  && thread_still_needs_step_over (current))
@@ -5137,6 +5140,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
     {
       struct thread_info *tp;
       struct thread_info *stepping_thread;
+      struct thread_info *step_over;
 
       /* If any thread is blocked on some internal breakpoint, and we
 	 simply need to step over that breakpoint to get it going
@@ -5179,17 +5183,72 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	 return 1;
        }
 
-      stepping_thread
-	= iterate_over_threads (currently_stepping_or_nexting_callback,
-				ecs->event_thread);
+      /* Otherwise, we no longer expect a trap in the current thread.
+	 Clear the trap_expected flag before switching back -- this is
+	 what keep_going does as well, if we call it.  */
+      ecs->event_thread->control.trap_expected = 0;
 
-      /* Check if any other thread except the stepping thread that
-	 needs to start a step-over.  Do that before actually
-	 proceeding with step/next/etc.  */
-      tp = find_thread_needs_step_over (stepping_thread != NULL,
-					stepping_thread);
-      if (tp != NULL)
+      /* If scheduler locking applies even if not stepping, there's no
+	 need to walk over threads.  Above we've checked whether the
+	 current thread is stepping.  If some other thread not the
+	 event thread is stepping, then it must be that scheduler
+	 locking is not in effect.  */
+      if (schedlock_applies (0))
+	return 0;
+
+      /* Look for the stepping/nexting thread, and check if any other
+	 thread other than the stepping thread needs to start a
+	 step-over.  Do all step-overs before actually proceeding with
+	 step/next/etc.  */
+      stepping_thread = NULL;
+      step_over = NULL;
+      ALL_THREADS (tp)
+        {
+	  /* Ignore threads of processes we're not resuming.  */
+	  if (!sched_multi
+	      && ptid_get_pid (tp->ptid) != ptid_get_pid (inferior_ptid))
+	    continue;
+
+	  /* When stepping over a breakpoint, we lock all threads
+	     except the one that needs to move past the breakpoint.
+	     If a non-event thread has this set, the "incomplete
+	     step-over" check above should have caught it earlier.  */
+	  gdb_assert (!tp->control.trap_expected);
+
+	  /* Did we find the stepping thread?  */
+	  if (tp->control.step_range_end)
+	    {
+	      /* Yep.  There should only one though.  */
+	      gdb_assert (stepping_thread == NULL);
+
+	      /* The event thread is handled at the top, before we
+		 enter this loop.  */
+	      gdb_assert (tp != ecs->event_thread);
+
+	      /* If some thread other than the event thread is
+		 stepping, then scheduler locking can't be in effect,
+		 otherwise we wouldn't have resumed the current event
+		 thread in the first place.  */
+	      gdb_assert (!schedlock_applies (1));
+
+	      stepping_thread = tp;
+	    }
+	  else if (thread_still_needs_step_over (tp))
+	    {
+	      step_over = tp;
+
+	      /* At the top we've returned early if the event thread
+		 is stepping.  If some other thread not the event
+		 thread is stepping, then scheduler locking can't be
+		 in effect, and we can resume this thread.  No need to
+		 keep looking for the stepping thread then.  */
+	      break;
+	    }
+	}
+
+      if (step_over != NULL)
 	{
+	  tp = step_over;
 	  if (debug_infrun)
 	    {
 	      fprintf_unfiltered (gdb_stdlog,
@@ -5197,13 +5256,8 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 				  target_pid_to_str (tp->ptid));
 	    }
 
-	  gdb_assert (!tp->control.trap_expected);
+	  /* Only the stepping thread should have this set.  */
 	  gdb_assert (tp->control.step_range_end == 0);
-
-	  /* We no longer expect a trap in the current thread.  Clear
-	     the trap_expected flag before switching.  This is what
-	     keep_going would do as well, if we called it.  */
-	  ecs->event_thread->control.trap_expected = 0;
 
 	  ecs->ptid = tp->ptid;
 	  ecs->event_thread = tp;
@@ -5212,11 +5266,12 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	  return 1;
 	}
 
-      tp = stepping_thread;
-      if (tp != NULL)
+      if (stepping_thread != NULL)
 	{
 	  struct frame_info *frame;
 	  struct gdbarch *gdbarch;
+
+	  tp = stepping_thread;
 
 	  /* If the stepping thread exited, then don't try to switch
 	     back and resume it, which could fail in several different
@@ -5249,11 +5304,6 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	      keep_going (ecs);
 	      return 1;
 	    }
-
-	  /* Otherwise, we no longer expect a trap in the current thread.
-	     Clear the trap_expected flag before switching back -- this is
-	     what keep_going would do as well, if we called it.  */
-	  ecs->event_thread->control.trap_expected = 0;
 
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -5323,19 +5373,6 @@ currently_stepping (struct thread_info *tp)
 	   && tp->control.step_resume_breakpoint == NULL)
 	  || tp->control.trap_expected
 	  || bpstat_should_step ());
-}
-
-/* Returns true if any thread *but* the one passed in "data" is in the
-   middle of stepping or of handling a "next".  */
-
-static int
-currently_stepping_or_nexting_callback (struct thread_info *tp, void *data)
-{
-  if (tp == data)
-    return 0;
-
-  return (tp->control.step_range_end
- 	  || tp->control.trap_expected);
 }
 
 /* Inferior has stepped into a subroutine call with source code that

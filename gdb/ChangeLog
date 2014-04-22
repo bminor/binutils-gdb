@@ -1,3 +1,14 @@
+2014-04-22  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (schedlock_applies): New function, factored out from
+	find_thread_needs_step_over.
+	(find_thread_needs_step_over): Use it.
+	(switch_back_to_stepped_thread): Always clear trap_expected if the
+	step over is finished.  Return early if scheduler locking applies.
+	Look for the stepping thread and a potential step-over thread with
+	a single loop.
+	(currently_stepping_or_nexting_callback): Delete.
+
 2014-04-22  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention that ARM sim now supports tracing.
