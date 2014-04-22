@@ -1,5 +1,21 @@
 2014-04-23  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (insert_bp_location): Tolerate errors if the
+	breakpoint is set in a user-loaded objfile.
+	(remove_breakpoint_1): Likewise.  Also tolerate errors if the
+	location is marked shlib_disabled.  If the breakpoint is set in a
+	user-loaded objfile is a GDB-side memory breakpoint, validate it
+	before uninsertion.  (disable_breakpoints_in_freed_objfile): Skip
+	non-OBJF_USERLOADED objfiles.  Don't clear the location's inserted
+	flag.
+	* mem-break.c (memory_validate_breakpoint): New function.
+	* objfiles.c (userloaded_objfile_contains_address_p): New
+	function.
+	* objfiles.h (userloaded_objfile_contains_address_p): Declare.
+	* target.h (memory_validate_breakpoint): New declaration.
+
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (insert_bp_location, remove_breakpoint_1): If
 	the breakpoint is set in a shared library, only suppress
 	errors for software breakpoints, not hardware breakpoints.

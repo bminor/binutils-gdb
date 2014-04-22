@@ -2648,7 +2648,9 @@ insert_bp_location (struct bp_location *bl,
 	     errors as memory errors.  */
 	  if ((bp_err == GENERIC_ERROR || bp_err == MEMORY_ERROR)
 	      && bl->loc_type == bp_loc_software_breakpoint
-	      && solib_name_from_address (bl->pspace, bl->address))
+	      && (solib_name_from_address (bl->pspace, bl->address)
+		  || userloaded_objfile_contains_address_p (bl->pspace,
+							    bl->address)))
 	    {
 	      /* See also: disable_breakpoints_in_shlibs.  */
 	      bl->shlib_disabled = 1;
@@ -3778,7 +3780,31 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
 	  || !(section_is_overlay (bl->section)))
 	{
 	  /* No overlay handling: just remove the breakpoint.  */
-	  val = bl->owner->ops->remove_location (bl);
+
+	  /* If we're trying to uninsert a memory breakpoint that we
+	     know is set in a dynamic object that is marked
+	     shlib_disabled, then either the dynamic object was
+	     removed with "remove-symbol-file" or with
+	     "nosharedlibrary".  In the former case, we don't know
+	     whether another dynamic object might have loaded over the
+	     breakpoint's address -- the user might well let us know
+	     about it next with add-symbol-file (the whole point of
+	     OBJF_USERLOADED is letting the user manually maintain a
+	     list of dynamically loaded objects).  If we have the
+	     breakpoint's shadow memory, that is, this is a software
+	     breakpoint managed by GDB, check whether the breakpoint
+	     is still inserted in memory, to avoid overwriting wrong
+	     code with stale saved shadow contents.  Note that HW
+	     breakpoints don't have shadow memory, as they're
+	     implemented using a mechanism that is not dependent on
+	     being able to modify the target's memory, and as such
+	     they should always be removed.  */
+	  if (bl->shlib_disabled
+	      && bl->target_info.shadow_len != 0
+	      && !memory_validate_breakpoint (bl->gdbarch, &bl->target_info))
+	    val = 0;
+	  else
+	    val = bl->owner->ops->remove_location (bl);
 	}
       else
 	{
@@ -3823,12 +3849,21 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
 	    }
 	}
 
-      /* In some cases, we might not be able to remove a breakpoint
-	 in a shared library that has already been removed, but we
-	 have not yet processed the shlib unload event.  */
+      /* In some cases, we might not be able to remove a breakpoint in
+	 a shared library that has already been removed, but we have
+	 not yet processed the shlib unload event.  Similarly for an
+	 unloaded add-symbol-file object - the user might not yet have
+	 had the chance to remove-symbol-file it.  shlib_disabled will
+	 be set if the library/object has already been removed, but
+	 the breakpoint hasn't been uninserted yet, e.g., after
+	 "nosharedlibrary" or "remove-symbol-file" with breakpoints
+	 always-inserted mode.  */
       if (val
-	  && bl->loc_type == bp_loc_software_breakpoint
-	  && solib_name_from_address (bl->pspace, bl->address))
+	  && (bl->loc_type == bp_loc_software_breakpoint
+	      && (bl->shlib_disabled
+		  || solib_name_from_address (bl->pspace, bl->address)
+		  || userloaded_objfile_contains_address_p (bl->pspace,
+							    bl->address))))
 	val = 0;
 
       if (val)
@@ -7665,10 +7700,18 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
   if (objfile == NULL)
     return;
 
-  /* If the file is a shared library not loaded by the user then
-     solib_unloaded was notified and disable_breakpoints_in_unloaded_shlib
-     was called.  In that case there is no need to take action again.  */
-  if ((objfile->flags & OBJF_SHARED) && !(objfile->flags & OBJF_USERLOADED))
+  /* OBJF_USERLOADED are dynamic modules manually managed by the user
+     with add-symbol-file/remove-symbol-file.  Similarly to how
+     breakpoints in shared libraries are handled in response to
+     "nosharedlibrary", mark breakpoints in OBJF_USERLOADED modules
+     shlib_disabled so they end up uninserted on the next global
+     location list update.  Shared libraries not loaded by the user
+     aren't handled here -- they're already handled in
+     disable_breakpoints_in_unloaded_shlib, called by solib.c's
+     solib_unloaded observer.  We skip objfiles that are not
+     OBJF_USERLOADED (nor OBJF_SHARED) as those aren't considered
+     dynamic objects (e.g. the main objfile).  */
+  if ((objfile->flags & OBJF_USERLOADED) == 0)
     return;
 
   ALL_BREAKPOINTS (b)
@@ -7700,7 +7743,11 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 	  if (is_addr_in_objfile (loc_addr, objfile))
 	    {
 	      loc->shlib_disabled = 1;
-	      loc->inserted = 0;
+	      /* At this point, we don't know whether the object was
+		 unmapped from the inferior or not, so leave the
+		 inserted flag alone.  We'll handle failure to
+		 uninsert quietly, in case the object was indeed
+		 unmapped.  */
 
 	      mark_breakpoint_location_modified (loc);
 

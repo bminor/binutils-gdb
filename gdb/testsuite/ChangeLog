@@ -1,5 +1,21 @@
 2014-04-23  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/break-unload-file.c: New file.
+	* gdb.base/break-unload-file.exp: New file.
+	* gdb.base/sym-file-lib.c (baz): New function.
+	* gdb.base/sym-file-loader.c (struct segment) <mapped_size>: New
+	field.
+	(load): Store the segment's mapped size.
+	(unload): New function.
+	(unload_shlib): New function.
+	* gdb.base/sym-file-loader.h (unload_shlib): New declaration.
+	* gdb.base/sym-file-main.c (main): Unload, and reload the library,
+	set a breakpoint at baz, and call it.
+	* gdb.base/sym-file.exp: New tests for stale breakpoint
+	instructions.
+
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/hbreak-in-shr-unsupported-shr.c: New file.
 	* gdb.base/hbreak-in-shr-unsupported.c: New file.
 	* gdb.base/hbreak-in-shr-unsupported.exp: New file.

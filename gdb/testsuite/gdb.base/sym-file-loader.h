@@ -25,6 +25,10 @@ struct library;
 
 struct library *load_shlib (const char *file);
 
+/* Unload a library.  */
+
+void unload_shlib (struct library *lib);
+
 /* Lookup the address of FUNC.  */
 
 int lookup_function (struct library *lib, const char *func, void **addr);

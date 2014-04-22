@@ -60,6 +60,7 @@ sizeof ((hdr)->field) == sizeof (Elf_Addr) ? *(Elf_Addr *) (hdr)->field : \
 struct segment
 {
   uint8_t *mapped_addr;
+  size_t mapped_size;
   Elf_External_Phdr *phdr;
   struct segment *next;
 };
@@ -101,6 +102,7 @@ load (uint8_t *addr, Elf_External_Phdr *phdr, struct segment *tail_seg)
 {
   struct segment *seg = NULL;
   uint8_t *mapped_addr = NULL;
+  size_t mapped_size = 0;
   void *from = NULL;
   void *to = NULL;
 
@@ -110,6 +112,7 @@ load (uint8_t *addr, Elf_External_Phdr *phdr, struct segment *tail_seg)
   mapped_addr = (uint8_t *) mmap ((void *) GETADDR (phdr, p_vaddr),
 				  GET (phdr, p_memsz), perm,
 				  MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+  mapped_size = GET (phdr, p_memsz);
 
   from = (void *) (addr + GET (phdr, p_offset));
   to = (void *) mapped_addr;
@@ -122,6 +125,7 @@ load (uint8_t *addr, Elf_External_Phdr *phdr, struct segment *tail_seg)
     return 0;
 
   seg->mapped_addr = mapped_addr;
+  seg->mapped_size = mapped_size;
   seg->phdr = phdr;
   seg->next = 0;
 
@@ -171,6 +175,30 @@ get_origin (void)
     return NULL;
   else
     return self_path;
+}
+
+/* Unload/unmap a segment.  */
+
+static void
+unload (struct segment *seg)
+{
+  munmap (seg->mapped_addr, seg->mapped_size);
+  free (seg);
+}
+
+void
+unload_shlib (struct library *lib)
+{
+  struct segment *seg, *next_seg;
+
+  for (seg = lib->segments; seg != NULL; seg = next_seg)
+    {
+      next_seg = seg->next;
+      unload (seg);
+    }
+
+  close (lib->fd);
+  free (lib);
 }
 
 /* Mini shared library loader.  No reallocation

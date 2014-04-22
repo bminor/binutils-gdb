@@ -89,3 +89,35 @@ memory_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 {
   return gdbarch_memory_remove_breakpoint (gdbarch, bp_tgt);
 }
+
+int
+memory_validate_breakpoint (struct gdbarch *gdbarch,
+			    struct bp_target_info *bp_tgt)
+{
+  CORE_ADDR addr = bp_tgt->placed_address;
+  const gdb_byte *bp;
+  int val;
+  int bplen;
+  gdb_byte cur_contents[BREAKPOINT_MAX];
+  struct cleanup *cleanup;
+  int ret;
+
+  /* Determine appropriate breakpoint contents and size for this
+     address.  */
+  bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
+
+  if (bp == NULL || bp_tgt->placed_size != bplen)
+    return 0;
+
+  /* Make sure we see the memory breakpoints.  */
+  cleanup = make_show_memory_breakpoints_cleanup (1);
+  val = target_read_memory (addr, cur_contents, bplen);
+
+  /* If our breakpoint is no longer at the address, this means that
+     the program modified the code on us, so it is wrong to put back
+     the old value.  */
+  ret = (val == 0 && memcmp (bp, cur_contents, bplen) == 0);
+
+  do_cleanups (cleanup);
+  return ret;
+}

@@ -1,4 +1,7 @@
-/* Copyright 2013-2014 Free Software Foundation, Inc.
+/* This testcase is part of GDB, the GNU debugger.
+
+   Copyright 2014 Free Software Foundation, Inc.
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
@@ -10,23 +13,23 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern int
-bar ()
+void
+foo (void)
 {
-  return 1; /* gdb break at bar */
 }
 
-extern int
-foo (int a)
+void
+bar (void)
 {
-  return a; /* gdb break at foo */
 }
 
-extern int
-baz (int a)
+int
+main (void)
 {
-  return a; /* gdb break at baz */
+  foo ();
+  bar ();
+
+  return 0;
 }

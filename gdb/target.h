@@ -2110,6 +2110,12 @@ extern int memory_remove_breakpoint (struct target_ops *, struct gdbarch *,
 extern int memory_insert_breakpoint (struct target_ops *, struct gdbarch *,
 				     struct bp_target_info *);
 
+/* Check whether the memory at the breakpoint's placed address still
+   contains the expected breakpoint instruction.  */
+
+extern int memory_validate_breakpoint (struct gdbarch *gdbarch,
+				       struct bp_target_info *bp_tgt);
+
 extern int default_memory_remove_breakpoint (struct gdbarch *,
 					     struct bp_target_info *);
 
