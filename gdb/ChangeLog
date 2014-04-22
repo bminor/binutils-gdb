@@ -1,3 +1,10 @@
+2014-05-16  Pierre Muller  <muller@sourceware.org>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* valprint.c (print_wchar): Move the code on checking whether
+	W is a printable wide char to the default branch of switch
+	statement below.  Call wchar_printable instead of gdb_iswprint.
+
 2014-05-16  Taimoor Mirza  <tmirza@codesourcery.com>
 
 	* arm-tdep.c (thumb_analyze_prologue): Fix offset calculation for
