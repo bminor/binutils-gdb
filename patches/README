@@ -30,7 +30,7 @@ do
     suffix=$(echo $p | sed -e "s/.*-\([^-]\+\).patch/\1/")
     backup="-b --suffix .$suffix"
   fi
-  patch -E -p1 $backup < $dir/$p || exit 1
+  patch --follow-symlinks -E -p1 $backup < $dir/$p || exit 1
 done
 find -name "*.orig" | xargs rm -fv
 find -name "*.gmo" | xargs rm -fv
