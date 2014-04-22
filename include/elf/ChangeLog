@@ -1,3 +1,10 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* common.h: Remove openrisc and or32 support.  Add support for or1k.
+	* or1k.h: New file.
+	* openrisc.h: Delete.
+	* or32.h: Delete.
+
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
 	Update copyright years.

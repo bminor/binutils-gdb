@@ -246,7 +246,7 @@ enum EM
   EM_MN10300 = 89,
   EM_MN10200 = 90,
   EM_PJ = 91,
-  EM_OPENRISC = 92,
+  EM_OR1K = 92,
   EM_ARC_A5 = 93,
   EM_XTENSA = 94,
   EM_VIDEOCORE = 95,
@@ -288,7 +288,7 @@ enum EM
   // Old AVR objects used 0x1057 (EM_AVR is correct).
   // Old MSP430 objects used 0x1059 (EM_MSP430 is correct).
   // Old FR30 objects used 0x3330 (EM_FR30 is correct).
-  // Old OpenRISC objects used 0x3426 and 0x8472 (EM_OPENRISC is correct).
+  // Old OpenRISC objects used 0x3426 and 0x8472 (EM_OR1K is correct).
   // Old D10V objects used 0x7650 (EM_D10V is correct).
   // Old D30V objects used 0x7676 (EM_D30V is correct).
   // Old IP2X objects used 0x8217 (EM_IP2K is correct).

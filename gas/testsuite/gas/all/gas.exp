@@ -163,7 +163,7 @@ case $target_triplet in {
 	# These targets fail redef3 because section contents for the
 	# word referencing the .comm sym is not zero and/or its reloc
 	# has a non-zero addend.  Relaxing the test would hide real
-	# failures such as or32-elf.
+	# failures.
 	setup_xfail "bfin-*-*" "i\[3-7\]86-*-*coff" \
 	    "i\[3-7\]86-*-*pe" "i\[3-7\]86-*-go32*" \
 	    "i\[3-7\]86-*-cygwin*" "i\[3-7\]86-*-mingw*" "x86_64-*-mingw*"

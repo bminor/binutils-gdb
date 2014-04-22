@@ -121,7 +121,9 @@ DESCRIPTION
 .#define bfd_mach_i960_jx	 7
 .#define bfd_mach_i960_hx        8
 .
-.  bfd_arch_or32,      {* OpenRISC 32 *}
+.  bfd_arch_or1k,      {* OpenRISC 1000 *}
+.#define bfd_mach_or1k           1
+.#define bfd_mach_or1knd         2
 .
 .  bfd_arch_sparc,     {* SPARC *}
 .#define bfd_mach_sparc			1
@@ -433,7 +435,6 @@ DESCRIPTION
 .  bfd_arch_score,     {* Sunplus score *}
 .#define bfd_mach_score3         3
 .#define bfd_mach_score7         7
-.  bfd_arch_openrisc,  {* OpenRISC *}
 .  bfd_arch_mmix,      {* Donald Knuth's educational processor.  *}
 .  bfd_arch_xstormy16,
 .#define bfd_mach_xstormy16	1
@@ -583,8 +584,7 @@ extern const bfd_arch_info_type bfd_mt_arch;
 extern const bfd_arch_info_type bfd_nds32_arch;
 extern const bfd_arch_info_type bfd_nios2_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
-extern const bfd_arch_info_type bfd_openrisc_arch;
-extern const bfd_arch_info_type bfd_or32_arch;
+extern const bfd_arch_info_type bfd_or1k_arch;
 extern const bfd_arch_info_type bfd_pdp11_arch;
 extern const bfd_arch_info_type bfd_pj_arch;
 extern const bfd_arch_info_type bfd_plugin_arch;
@@ -673,8 +673,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_nds32_arch,
     &bfd_nios2_arch,
     &bfd_ns32k_arch,
-    &bfd_openrisc_arch,
-    &bfd_or32_arch,
+    &bfd_or1k_arch,
     &bfd_pdp11_arch,
     &bfd_powerpc_arch,
     &bfd_rs6000_arch,

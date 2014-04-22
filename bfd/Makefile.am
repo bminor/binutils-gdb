@@ -139,8 +139,7 @@ ALL_MACHINES = \
 	cpu-nds32.lo \
 	cpu-nios2.lo \
 	cpu-ns32k.lo \
-	cpu-openrisc.lo \
-	cpu-or32.lo \
+	cpu-or1k.lo \
 	cpu-pdp11.lo \
 	cpu-pj.lo \
 	cpu-plugin.lo \
@@ -224,8 +223,7 @@ ALL_MACHINES_CFILES = \
 	cpu-nds32.c \
 	cpu-ns32k.c \
 	cpu-nios2.c \
-	cpu-openrisc.c \
-	cpu-or32.c \
+	cpu-or1k.c \
 	cpu-pdp11.c \
 	cpu-pj.c \
 	cpu-plugin.c \
@@ -284,7 +282,6 @@ BFD32_BACKENDS = \
 	coff-m68k.lo \
 	coff-m88k.lo \
 	coff-mips.lo \
-	coff-or32.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
 	coff-sparc.lo \
@@ -353,8 +350,7 @@ BFD32_BACKENDS = \
 	elf32-mt.lo \
 	elf32-nds32.lo \
 	elf32-nios2.lo \
-	elf32-openrisc.lo \
-	elf32-or32.lo \
+	elf32-or1k.lo \
 	elf32-pj.lo \
 	elf32-ppc.lo \
 	elf32-rl78.lo \
@@ -473,7 +469,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-m68k.c \
 	coff-m88k.c \
 	coff-mips.c \
-	coff-or32.c \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-sparc.c \
@@ -542,8 +537,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-mt.c \
 	elf32-nds32.c \
 	elf32-nios2.c \
-	elf32-openrisc.c \
-	elf32-or32.c \
+	elf32-or1k.c \
 	elf32-pj.c \
 	elf32-ppc.c \
 	elf32-rl78.c \

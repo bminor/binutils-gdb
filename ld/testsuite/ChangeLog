@@ -1,3 +1,33 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* ld-discard/extern.d: Remove openrisc and or32 support.  Add
+	support for or1k.
+	* ld-discard/start.d: Likewise.
+	* ld-discard/static.d: Likewise.
+	* ld-elf/group1.d: Likewise.
+	* ld-elf/group3b.d: Likewise.
+	* ld-elf/group8a.d: Likewise.
+	* ld-elf/group8b.d: Likewise.
+	* ld-elf/group9a.d: Likewise.
+	* ld-elf/group9b.d: Likewise.
+	* ld-elf/linkonce2.d: Likewise.
+	* ld-elf/merge.d: Likewise.
+	* ld-elf/merge2.d: Likewise.
+	* ld-elf/orphan-region.d: Likewise.
+	* ld-elf/orphan.d: Likewise.
+	* ld-elf/orphan3.d: Likewise.
+	* ld-elf/pr12851.d: Likewise.
+	* ld-elf/pr12975.d: Likewise.
+	* ld-elf/pr13177.d: Likewise.
+	* ld-elf/pr13195.d: Likewise.
+	* ld-elf/pr349.d: Likewise.
+	* ld-elf/sec64k.exp: Likewise.
+	* ld-elf/warn1.d: Likewise.
+	* ld-elf/warn2.d: Likewise.
+	* ld-elf/warn3.d: Likewise.
+	* ld-scripts/weak.exp: Likewise.
+	* lib/ld-lib.exp: Likewise.
+
 2014-04-17  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* ld-mips-elf/elf-rel-xgot-n32.d: Update for new GOT layout.

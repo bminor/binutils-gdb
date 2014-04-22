@@ -1,3 +1,7 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* elfcpp.h: Remove openrisc and or32 support.
+
 2014-04-15  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
 	* mips.h (R _MIPS16_TLS_GD, R_MIPS16_TLS_LDM, R_MIPS16_TLS_DTPREL_HI16,

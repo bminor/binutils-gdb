@@ -1,3 +1,19 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.
+	* configure.in: Likewise.
+	* configure.tgt: Likewise.
+	* doc/as.texinfo: Likewise.
+	* config/obj-coff.h: Likewise.
+	* config/tc-or1k.c: New file.
+	* config/tc-or1k.h: New file.
+	* config/tc-openrisc.c: Delete.
+	* config/tc-openrisc.h: Delete.
+	* config/tc-or32.c: Delete.
+	* config/tc-or32.h: Delete.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-tilegx.h (TC_CONS_FIX_NEW): Add RELOC arg.

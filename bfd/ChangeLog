@@ -1,3 +1,24 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.
+	* archures.c: Likewise.
+	* coffcode.h: Likewise.
+	* config.bfd: Likewise.
+	* configure.in: Likewise.
+	* reloc.c: Likewise.
+	* targets.c: Likewise.
+	* cpu-or1k.c: New file.
+	* elf32-or1k.c: New file.
+	* coff-or32.c: Delete.
+	* cpu-openrisc.c: Delete.
+	* cpu-or32.c: Delete.
+	* elf32-openrisc.c: Delete.
+	* elf32-or32.c: Delete.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+
 2014-04-22  Yuanhui Zhang  <asmwarrior@gmail.com>
 
 	PR ld/16821
