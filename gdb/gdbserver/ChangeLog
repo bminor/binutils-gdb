@@ -1,3 +1,7 @@
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
+	* utils.h (perror_with_name): Add ATTRIBUTE_NORETURN.
+
 2014-04-10  Pedro Alves  <palves@redhat.com>
 
 	* mem-break.c (add_breakpoint_condition, add_breakpoint_commands):
