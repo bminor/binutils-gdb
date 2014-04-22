@@ -1,5 +1,24 @@
 2014-04-23  Pedro Alves  <palves@redhat.com>
 
+	* i386-low.c: Don't include break-common.h here.
+	(i386_low_insert_watchpoint, i386_low_remove_watchpoint): Change
+	prototype to take target_hw_bp_type as argument instead of a Z
+	packet char.
+	* i386-low.h: Include break-common.h here.
+	(Z_packet_to_hw_type): Declare.
+	(i386_low_insert_watchpoint, i386_low_remove_watchpoint): Change
+	prototypes.
+	* linux-x86-low.c (x86_insert_point): Convert the packet number to
+	a target_hw_bp_type before calling i386_low_insert_watchpoint.
+	(x86_remove_point): Convert the packet number to a
+	target_hw_bp_type before calling i386_low_remove_watchpoint.
+	* win32-i386-low.c (i386_insert_point): Convert the packet number
+	to a target_hw_bp_type before calling i386_low_insert_watchpoint.
+	(i386_remove_point): Convert the packet number to a
+	target_hw_bp_type before calling i386_low_remove_watchpoint.
+
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
 	* utils.h (perror_with_name): Add ATTRIBUTE_NORETURN.
 
 2014-04-10  Pedro Alves  <palves@redhat.com>

@@ -105,8 +105,12 @@ i386_insert_point (char type, CORE_ADDR addr, int len)
     case '2':
     case '3':
     case '4':
-      return i386_low_insert_watchpoint (&debug_reg_state,
-					 type, addr, len);
+      {
+	enum target_hw_bp_type hw_type = Z_packet_to_hw_type (type);
+
+	return i386_low_insert_watchpoint (&debug_reg_state,
+					   hw_type, addr, len);
+      }
     default:
       /* Unsupported.  */
       return 1;
@@ -121,8 +125,12 @@ i386_remove_point (char type, CORE_ADDR addr, int len)
     case '2':
     case '3':
     case '4':
-      return i386_low_remove_watchpoint (&debug_reg_state,
-					 type, addr, len);
+      {
+	enum target_hw_bp_type hw_type = Z_packet_to_hw_type (type);
+
+	return i386_low_remove_watchpoint (&debug_reg_state,
+					   hw_type, addr, len);
+      }
     default:
       /* Unsupported.  */
       return 1;

@@ -20,7 +20,6 @@
 #include "server.h"
 #include "target.h"
 #include "i386-low.h"
-#include "break-common.h"
 
 /* Support for 8-byte wide hw watchpoints.  */
 #ifndef TARGET_HAS_DR_LEN_8
@@ -408,9 +407,7 @@ Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n",
 #define Z_PACKET_READ_WP '3'
 #define Z_PACKET_ACCESS_WP '4'
 
-/* Map the protocol watchpoint type TYPE to enum target_hw_bp_type.  */
-
-static enum target_hw_bp_type
+enum target_hw_bp_type
 Z_packet_to_hw_type (char type)
 {
   switch (type)
@@ -457,10 +454,10 @@ i386_update_inferior_debug_regs (struct i386_debug_reg_state *inf_state,
 
 int
 i386_low_insert_watchpoint (struct i386_debug_reg_state *state,
-			    char type_from_packet, CORE_ADDR addr, int len)
+			    enum target_hw_bp_type type,
+			    CORE_ADDR addr, int len)
 {
   int retval;
-  enum target_hw_bp_type type = Z_packet_to_hw_type (type_from_packet);
   /* Work on a local copy of the debug registers, and on success,
      commit the change back to the inferior.  */
   struct i386_debug_reg_state local_state = *state;
@@ -493,14 +490,14 @@ i386_low_insert_watchpoint (struct i386_debug_reg_state *state,
 
 /* Remove a watchpoint that watched the memory region which starts at
    address ADDR, whose length is LEN bytes, and for accesses of the
-   type TYPE_FROM_PACKET.  Return 0 on success, -1 on failure.  */
+   type TYPE.  Return 0 on success, -1 on failure.  */
 
 int
 i386_low_remove_watchpoint (struct i386_debug_reg_state *state,
-			    char type_from_packet, CORE_ADDR addr, int len)
+			    enum target_hw_bp_type type,
+			    CORE_ADDR addr, int len)
 {
   int retval;
-  enum target_hw_bp_type type = Z_packet_to_hw_type (type_from_packet);
   /* Work on a local copy of the debug registers, and on success,
      commit the change back to the inferior.  */
   struct i386_debug_reg_state local_state = *state;

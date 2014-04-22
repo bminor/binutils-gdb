@@ -641,8 +641,13 @@ x86_insert_point (char type, CORE_ADDR addr, int len)
     case '2': /* write watchpoint */
     case '3': /* read watchpoint */
     case '4': /* access watchpoint */
-      return i386_low_insert_watchpoint (&proc->private->arch_private->debug_reg_state,
-					 type, addr, len);
+      {
+	enum target_hw_bp_type hw_type = Z_packet_to_hw_type (type);
+	struct i386_debug_reg_state *state
+	  = &proc->private->arch_private->debug_reg_state;
+
+	return i386_low_insert_watchpoint (state, hw_type, addr, len);
+      }
 
     default:
       /* Unsupported.  */
@@ -671,8 +676,13 @@ x86_remove_point (char type, CORE_ADDR addr, int len)
     case '2': /* write watchpoint */
     case '3': /* read watchpoint */
     case '4': /* access watchpoint */
-      return i386_low_remove_watchpoint (&proc->private->arch_private->debug_reg_state,
-					 type, addr, len);
+      {
+	enum target_hw_bp_type hw_type = Z_packet_to_hw_type (type);
+	struct i386_debug_reg_state *state
+	  = &proc->private->arch_private->debug_reg_state;
+
+	return i386_low_remove_watchpoint (state, hw_type, addr, len);
+      }
     default:
       /* Unsupported.  */
       return 1;
