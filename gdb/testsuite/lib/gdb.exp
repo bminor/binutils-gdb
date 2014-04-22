@@ -549,16 +549,9 @@ proc gdb_continue_to_breakpoint {name {location_pattern .*}} {
     global gdb_prompt
     set full_name "continue to breakpoint: $name"
 
-    send_gdb "continue\n"
-    gdb_expect {
+    gdb_test_multiple "continue" $full_name {
 	-re "(?:Breakpoint|Temporary breakpoint) .* (at|in) $location_pattern\r\n$gdb_prompt $" {
 	    pass $full_name
-	}
-	-re ".*$gdb_prompt $" {
-	    fail $full_name
-	}
-	timeout { 
-	    fail "$full_name (timeout)"
 	}
     }
 }
