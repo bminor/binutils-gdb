@@ -1,3 +1,8 @@
+2014-04-22  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16821
+	* peXXigen.c (_bfd_XXi_swap_sym_out): Fix for 32-bit hosts.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.

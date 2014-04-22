@@ -236,7 +236,7 @@ _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
      reduce the absolute value to < 1^32, and then transforming the
      symbol into a section relative symbol.  This of course is a hack.  */
   if (sizeof (in->n_value) > 4
-      && in->n_value > ((1L << 32) - 1)
+      && in->n_value > ((1ULL << 32) - 1)
       && in->n_scnum == -1)
     {
       asection * sec;
