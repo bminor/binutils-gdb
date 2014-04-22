@@ -59,7 +59,6 @@ scriptdir = $(tooldir)/lib
 EMUL = @EMUL@
 EMULATION_OFILES = @EMULATION_OFILES@
 EMUL_EXTRA_OFILES = @EMUL_EXTRA_OFILES@
-EMUL_EXTRA_BINARIES = @EMUL_EXTRA_BINARIES@
 
 
 # Search path to override the default search path for -lfoo libraries.
@@ -246,7 +245,8 @@ ALL_EMULATION_SOURCES = \
 	eelf32microblaze.c \
 	eelf32moxie.c \
 	eelf32mt.c \
-	eelf32openrisc.c \
+	eelf32or1k.c \
+	eelf32or1k_linux.c \
 	eelf32ppc.c \
 	eelf32ppc_fbsd.c \
 	eelf32ppclinux.c \
@@ -349,8 +349,6 @@ ALL_EMULATION_SOURCES = \
 	ends32belf_linux.c \
 	enews.c \
 	ens32knbsd.c \
-	eor32.c \
-	eor32elf.c \
 	epc532macha.c \
 	epdp11.c \
 	epjelf.c \
@@ -491,17 +489,15 @@ ALL_EMUL_EXTRA_OFILES = \
 	pe-dll.@OBJEXT@ \
 	pep-dll.@OBJEXT@
 
-ALL_EMUL_EXTRA_BINARIES = 
-
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c ldcref.c pe-dll.c pep-dll.c ldlex-wrapper.c \
-	$(PLUGIN_C)
+	$(PLUGIN_C) ldbuildid.c
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
 	ldwrite.h mri.h deffile.h pe-dll.h pep-dll.h \
-	elf-hints-local.h $(PLUGIN_H)
+	elf-hints-local.h $(PLUGIN_H) ldbuildid.h
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -513,7 +509,8 @@ BUILT_SOURCES = $(GENERATED_HFILES)
 OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ \
 	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ $(PLUGIN_OBJECT) \
 	ldwrite.@OBJEXT@ ldexp.@OBJEXT@  ldemul.@OBJEXT@ ldver.@OBJEXT@ ldmisc.@OBJEXT@ \
-	ldfile.@OBJEXT@ ldcref.@OBJEXT@ ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES}
+	ldfile.@OBJEXT@ ldcref.@OBJEXT@ ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES} \
+	ldbuildid.@OBJEXT@
 
 STAGESTUFF = *.@OBJEXT@ ldscripts/* e*.c
 
@@ -1136,9 +1133,12 @@ eelf32moxie.c: $(srcdir)/emulparams/elf32moxie.sh \
 eelf32mt.c: $(srcdir)/emulparams/elf32mt.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mt "$(tdir_mt)"
-eelf32openrisc.c: $(srcdir)/emulparams/elf32openrisc.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} elf32openrisc "$(tdir_openrisc)"
+eelf32or1k.c: $(srcdir)/emulparams/elf32or1k.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32or1k "$(tdir_elf32or1k)"
+eelf32or1k_linux.c: $(srcdir)/emulparams/elf32or1k_linux.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32or1k_linux "$(tdir_elf32or1k_linux)"
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emulparams/elf32ppccommon.sh $(srcdir)/emultempl/ppc32elf.em \
   ldemul-list.h \
@@ -1544,12 +1544,6 @@ eaarch64linux32b.c: $(srcdir)/emulparams/aarch64linux32b.sh $(srcdir)/emulparams
   $(ELF_DEPS) $(srcdir)/emultempl/aarch64elf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} aarch64linux32b "$(tdir_aarch64linux32b)"
-eor32.c: $(srcdir)/emulparams/or32.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/or32.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} or32 "$(tdir_or32)"
-eor32elf.c: $(srcdir)/emulparams/or32elf.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} or32elf "$(tdir_or32elf)"
 epc532macha.c: $(srcdir)/emulparams/pc532macha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} pc532macha "$(tdir_pc532macha)"
@@ -1925,18 +1919,15 @@ eshlelf64_nbsd.c: $(srcdir)/emulparams/shlelf64_nbsd.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf64_nbsd "$(tdir_shlelf64_nbsd)"
 
-# Rule to create a manifest file for Cygwin and Mingw.
-default-manifest.o: $(srcdir)/emultempl/default-manifest.rc
-	${WINDRES_FOR_TARGET} -o $@ $<
-
 # We need this for automake to use YLWRAP.
 EXTRA_ld_new_SOURCES = deffilep.y ldlex.l
 # Allow dependency tracking to work for these files, too.
 EXTRA_ld_new_SOURCES += pep-dll.c pe-dll.c
 
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
-	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c $(PLUGIN_C)
-ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(EMUL_EXTRA_BINARIES) \
+	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c $(PLUGIN_C) \
+	ldbuildid.c
+ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
 		      $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
@@ -2083,9 +2074,9 @@ install-exec-local: ld-new$(EXEEXT) install-binPROGRAMS
 	  fi; \
 	fi
 
-install-data-local: $(EMUL_EXTRA_BINARIES)
+install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(scriptdir)/ldscripts
-	for f in ldscripts/* $(EMUL_EXTRA_BINARIES); do \
+	for f in ldscripts/* ; do \
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
 

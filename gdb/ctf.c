@@ -873,6 +873,7 @@ ctf_trace_file_writer_new (void)
 #include <babeltrace/ctf/iterator.h>
 
 /* The struct pointer for current CTF directory.  */
+static int handle_id = -1;
 static struct bt_context *ctx = NULL;
 static struct bt_ctf_iter *ctf_iter = NULL;
 /* The position of the first packet containing trace frame.  */
@@ -905,15 +906,16 @@ ctf_destroy (void)
 static void
 ctf_open_dir (char *dirname)
 {
-  int ret;
   struct bt_iter_pos begin_pos;
   struct bt_iter_pos *pos;
+  unsigned int count, i;
+  struct bt_ctf_event_decl * const *list;
 
   ctx = bt_context_create ();
   if (ctx == NULL)
     error (_("Unable to create bt_context"));
-  ret = bt_context_add_trace (ctx, dirname, "ctf", NULL, NULL, NULL);
-  if (ret < 0)
+  handle_id = bt_context_add_trace (ctx, dirname, "ctf", NULL, NULL, NULL);
+  if (handle_id < 0)
     {
       ctf_destroy ();
       error (_("Unable to use libbabeltrace on directory \"%s\""),
@@ -928,42 +930,28 @@ ctf_open_dir (char *dirname)
       error (_("Unable to create bt_iterator"));
     }
 
-  /* Iterate over events, and look for an event for register block
-     to set trace_regblock_size.  */
+  /* Look for the declaration of register block.  Get the length of
+     array "contents" to set trace_regblock_size.  */
 
-  /* Save the current position.  */
-  pos = bt_iter_get_pos (bt_ctf_get_iter (ctf_iter));
-  gdb_assert (pos->type == BT_SEEK_RESTORE);
+  bt_ctf_get_event_decl_list (handle_id, ctx, &list, &count);
+  for (i = 0; i < count; i++)
+    if (strcmp ("register", bt_ctf_get_decl_event_name (list[i])) == 0)
+      {
+	unsigned int j;
+	const struct bt_ctf_field_decl * const *field_list;
+	const struct bt_declaration *decl;
 
-  while (1)
-    {
-      const char *name;
-      struct bt_ctf_event *event;
+	bt_ctf_get_decl_fields (list[i], BT_EVENT_FIELDS, &field_list,
+				&count);
 
-      event = bt_ctf_iter_read_event (ctf_iter);
+	gdb_assert (count == 1);
+	gdb_assert (0 == strcmp ("contents",
+				 bt_ctf_get_decl_field_name (field_list[0])));
+	decl = bt_ctf_get_decl_from_field_decl (field_list[0]);
+	trace_regblock_size = bt_ctf_get_array_len (decl);
 
-      name = bt_ctf_event_name (event);
-
-      if (name == NULL)
 	break;
-      else if (strcmp (name, "register") == 0)
-	{
-	  const struct bt_definition *scope
-	    = bt_ctf_get_top_level_scope (event,
-					  BT_EVENT_FIELDS);
-	  const struct bt_definition *array
-	    = bt_ctf_get_field (event, scope, "contents");
-
-	  trace_regblock_size
-	    = bt_ctf_get_array_len (bt_ctf_get_decl_from_def (array));
-	}
-
-      if (bt_iter_next (bt_ctf_get_iter (ctf_iter)) < 0)
-	break;
-    }
-
-  /* Restore the position.  */
-  bt_iter_set_pos (bt_ctf_get_iter (ctf_iter), pos);
+      }
 }
 
 #define SET_INT32_FIELD(EVENT, SCOPE, VAR, FIELD)			\
@@ -1199,6 +1187,8 @@ ctf_open (char *dirname, int from_tty)
 
   merge_uploaded_trace_state_variables (&uploaded_tsvs);
   merge_uploaded_tracepoints (&uploaded_tps);
+
+  post_create_inferior (&ctf_ops, from_tty);
 }
 
 /* This is the implementation of target_ops method to_close.  Destroy
@@ -1239,8 +1229,6 @@ ctf_fetch_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int offset, regn, regsize, pc_regno;
-  gdb_byte *regs = NULL;
   struct bt_ctf_event *event = NULL;
   struct bt_iter_pos *pos;
 
@@ -1280,13 +1268,14 @@ ctf_fetch_registers (struct target_ops *ops,
 
   if (event != NULL)
     {
+      int offset, regsize, regn;
       const struct bt_definition *scope
 	= bt_ctf_get_top_level_scope (event,
 				      BT_EVENT_FIELDS);
       const struct bt_definition *array
 	= bt_ctf_get_field (event, scope, "contents");
+      gdb_byte *regs = (gdb_byte *) bt_ctf_get_char_array (array);
 
-      regs = (gdb_byte *) bt_ctf_get_char_array (array);
       /* Assume the block is laid out in GDB register number order,
 	 each register with the size that it has in GDB.  */
       offset = 0;
@@ -1310,48 +1299,9 @@ ctf_fetch_registers (struct target_ops *ops,
 	    }
 	  offset += regsize;
 	}
-      return;
     }
-
-  regs = alloca (trace_regblock_size);
-
-  /* We get here if no register data has been found.  Mark registers
-     as unavailable.  */
-  for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
-    regcache_raw_supply (regcache, regn, NULL);
-
-  /* We can often usefully guess that the PC is going to be the same
-     as the address of the tracepoint.  */
-  pc_regno = gdbarch_pc_regnum (gdbarch);
-  if (pc_regno >= 0 && (regno == -1 || regno == pc_regno))
-    {
-      struct tracepoint *tp = get_tracepoint (get_tracepoint_number ());
-
-      if (tp != NULL && tp->base.loc)
-	{
-	  /* But don't try to guess if tracepoint is multi-location...  */
-	  if (tp->base.loc->next != NULL)
-	    {
-	      warning (_("Tracepoint %d has multiple "
-			 "locations, cannot infer $pc"),
-		       tp->base.number);
-	      return;
-	    }
-	  /* ... or does while-stepping.  */
-	  if (tp->step_count > 0)
-	    {
-	      warning (_("Tracepoint %d does while-stepping, "
-			 "cannot infer $pc"),
-		       tp->base.number);
-	      return;
-	    }
-
-	  store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
-				  gdbarch_byte_order (gdbarch),
-				  tp->base.loc->address);
-	  regcache_raw_supply (regcache, pc_regno, regs);
-	}
-    }
+  else
+    tracefile_fetch_registers (regcache, regno);
 }
 
 /* This is the implementation of target_ops method to_xfer_partial.
@@ -1399,7 +1349,7 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 	    = bt_ctf_iter_read_event (ctf_iter);
 	  const char *name = bt_ctf_event_name (event);
 
-	  if (strcmp (name, "frame") == 0)
+	  if (name == NULL || strcmp (name, "frame") == 0)
 	    break;
 	  else if (strcmp (name, "memory") != 0)
 	    {

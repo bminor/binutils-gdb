@@ -437,7 +437,12 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
   switch (SYMBOL_CLASS (var))
     {
     case LOC_CONST:
-      /* Put the constant back in target format.  */
+      if (is_dynamic_type (type))
+	{
+	  /* Value is a constant byte-sequence and needs no memory access.  */
+	  type = resolve_dynamic_type (type, /* Unused address.  */ 0);
+	}
+      /* Put the constant back in target format. */
       v = allocate_value (type);
       store_signed_integer (value_contents_raw (v), TYPE_LENGTH (type),
 			    gdbarch_byte_order (get_type_arch (type)),
@@ -464,6 +469,11 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
       return v;
 
     case LOC_CONST_BYTES:
+      if (is_dynamic_type (type))
+	{
+	  /* Value is a constant byte-sequence and needs no memory access.  */
+	  type = resolve_dynamic_type (type, /* Unused address.  */ 0);
+	}
       v = allocate_value (type);
       memcpy (value_contents_raw (v), SYMBOL_VALUE_BYTES (var),
 	      TYPE_LENGTH (type));
@@ -615,15 +625,14 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 /* Install default attributes for register values.  */
 
 struct value *
-default_value_from_register (struct type *type, int regnum,
-			     struct frame_info *frame)
+default_value_from_register (struct gdbarch *gdbarch, struct type *type,
+                             int regnum, struct frame_id frame_id)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
   int len = TYPE_LENGTH (type);
   struct value *value = allocate_value (type);
 
   VALUE_LVAL (value) = lval_register;
-  VALUE_FRAME_ID (value) = get_frame_id (frame);
+  VALUE_FRAME_ID (value) = frame_id;
   VALUE_REGNUM (value) = regnum;
 
   /* Any structure stored in more than one register will always be
@@ -731,7 +740,8 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   else
     {
       /* Construct the value.  */
-      v = gdbarch_value_from_register (gdbarch, type, regnum, frame);
+      v = gdbarch_value_from_register (gdbarch, type,
+				       regnum, get_frame_id (frame));
 
       /* Get the data.  */
       read_frame_register_value (v, frame);
@@ -740,18 +750,30 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   return v;
 }
 
-/* Return contents of register REGNUM in frame FRAME as address,
-   interpreted as value of type TYPE.   Will abort if register
-   value is not available.  */
+/* Return contents of register REGNUM in frame FRAME as address.
+   Will abort if register value is not available.  */
 
 CORE_ADDR
-address_from_register (struct type *type, int regnum, struct frame_info *frame)
+address_from_register (int regnum, struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct type *type = builtin_type (gdbarch)->builtin_data_ptr;
   struct value *value;
   CORE_ADDR result;
 
-  value = value_from_register (type, regnum, frame);
-  gdb_assert (value);
+  /* This routine may be called during early unwinding, at a time
+     where the ID of FRAME is not yet known.  Calling value_from_register
+     would therefore abort in get_frame_id.  However, since we only need
+     a temporary value that is never used as lvalue, we actually do not
+     really need to set its VALUE_FRAME_ID.  Therefore, we re-implement
+     the core of value_from_register, but use the null_frame_id.
+
+     This works only if we do not require a special conversion routine,
+     which is true for plain pointer types for all current targets.  */
+  gdb_assert (!gdbarch_convert_register_p (gdbarch, regnum, type));
+
+  value = gdbarch_value_from_register (gdbarch, type, regnum, null_frame_id);
+  read_frame_register_value (value, frame);
 
   if (value_optimized_out (value))
     {

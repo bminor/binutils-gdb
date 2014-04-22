@@ -53,7 +53,7 @@ struct tilegx_operand;
 
 extern void tilegx_cons_fix_new (struct frag *, int,
 				 int, struct expressionS *);
-#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP) \
+#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP, RELOC)	\
   tilegx_cons_fix_new (FRAG, WHERE, NBYTES, EXP)
 
 extern int tilegx_parse_name (char *, expressionS *, char *);

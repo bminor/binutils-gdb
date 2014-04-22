@@ -765,9 +765,10 @@ sh_check_fixup (expressionS *main_exp, bfd_reloc_code_real_type *r_type_p)
 /* Add expression EXP of SIZE bytes to offset OFF of fragment FRAG.  */
 
 void
-sh_cons_fix_new (fragS *frag, int off, int size, expressionS *exp)
+sh_cons_fix_new (fragS *frag, int off, int size, expressionS *exp,
+		 bfd_reloc_code_real_type r_type)
 {
-  bfd_reloc_code_real_type r_type = BFD_RELOC_UNUSED;
+  r_type = BFD_RELOC_UNUSED;
 
   if (sh_check_fixup (exp, &r_type))
     as_bad (_("Invalid PIC expression."));

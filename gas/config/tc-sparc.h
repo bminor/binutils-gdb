@@ -155,14 +155,17 @@ extern void sparc_md_end (void);
 
 #endif
 
+#define TC_PARSE_CONS_RETURN_TYPE const char *
+#define TC_PARSE_CONS_RETURN_NONE NULL
+
 #ifdef OBJ_ELF
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) sparc_cons (EXP, NBYTES)
-extern void sparc_cons (expressionS *, int);
+extern const char *sparc_cons (expressionS *, int);
 #endif
 
 #define TC_CONS_FIX_NEW cons_fix_new_sparc
 extern void cons_fix_new_sparc
-  (struct frag *, int, unsigned int, struct expressionS *);
+(struct frag *, int, unsigned int, struct expressionS *, const char *);
 
 #define TC_FIX_TYPE	valueT
 

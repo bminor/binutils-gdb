@@ -73,7 +73,7 @@ static int find_oload_champ (struct value **, int, int,
 			     struct fn_field *, struct symbol **,
 			     struct badness_vector **);
 
-static int oload_method_static (int, struct fn_field *, int);
+static int oload_method_static_p (struct fn_field *, int);
 
 enum oload_classification { STANDARD, NON_STANDARD, INCOMPATIBLE };
 
@@ -83,15 +83,15 @@ oload_classification classify_oload_match (struct badness_vector *,
 
 static struct value *value_struct_elt_for_reference (struct type *,
 						     int, struct type *,
-						     char *,
+						     const char *,
 						     struct type *,
 						     int, enum noside);
 
 static struct value *value_namespace_elt (const struct type *,
-					  char *, int , enum noside);
+					  const char *, int , enum noside);
 
 static struct value *value_maybe_namespace_elt (const struct type *,
-						char *, int,
+						const char *, int,
 						enum noside);
 
 static CORE_ADDR allocate_space_in_inferior (int);
@@ -266,6 +266,7 @@ value_cast_structs (struct type *type, struct value *v2)
 	{
 	  v = value_full_object (v2, real_type, full, top, using_enc);
 	  v = value_at_lazy (real_type, value_address (v));
+	  real_type = value_type (v);
 
 	  /* We might be trying to cast to the outermost enclosing
 	     type, in which case search_struct_field won't work.  */
@@ -413,10 +414,10 @@ value_cast (struct type *type, struct value *arg2)
 		       "divide object size in cast"));
 	  /* FIXME-type-allocation: need a way to free this type when
 	     we are done with it.  */
-	  range_type = create_range_type ((struct type *) NULL,
-					  TYPE_TARGET_TYPE (range_type),
-					  low_bound,
-					  new_length + low_bound - 1);
+	  range_type = create_static_range_type ((struct type *) NULL,
+						 TYPE_TARGET_TYPE (range_type),
+						 low_bound,
+						 new_length + low_bound - 1);
 	  deprecated_set_value_type (arg2, 
 				     create_array_type ((struct type *) NULL,
 							element_type, 
@@ -801,6 +802,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
     return value_at_lazy (type, addr);
 
   tem = value_at (type, addr);
+  type = value_type (tem);
 
   /* The first dynamic check specified in 5.2.7.  */
   if (is_public_ancestor (arg_type, TYPE_TARGET_TYPE (resolved_type)))
@@ -900,7 +902,10 @@ value_one (struct type *type)
   return val;
 }
 
-/* Helper function for value_at, value_at_lazy, and value_at_lazy_stack.  */
+/* Helper function for value_at, value_at_lazy, and value_at_lazy_stack.
+   The type of the created value may differ from the passed type TYPE.
+   Make sure to retrieve the returned values's new type after this call
+   e.g. in case the type is a variable length array.  */
 
 static struct value *
 get_value_at (struct type *type, CORE_ADDR addr, int lazy)
@@ -925,7 +930,10 @@ get_value_at (struct type *type, CORE_ADDR addr, int lazy)
    value_at_lazy instead.  value_at_lazy simply records the address of
    the data and sets the lazy-evaluation-required flag.  The lazy flag
    is tested in the value_contents macro, which is used if and when
-   the contents are actually required.
+   the contents are actually required.  The type of the created value
+   may differ from the passed type TYPE.  Make sure to retrieve the
+   returned values's new type after this call e.g. in case the type
+   is a variable length array.
 
    Note: value_at does *NOT* handle embedded offsets; perform such
    adjustments before or after calling it.  */
@@ -936,7 +944,10 @@ value_at (struct type *type, CORE_ADDR addr)
   return get_value_at (type, addr, 0);
 }
 
-/* Return a lazy value with type TYPE located at ADDR (cf. value_at).  */
+/* Return a lazy value with type TYPE located at ADDR (cf. value_at).
+   The type of the created value may differ from the passed type TYPE.
+   Make sure to retrieve the returned values's new type after this call
+   e.g. in case the type is a variable length array.  */
 
 struct value *
 value_at_lazy (struct type *type, CORE_ADDR addr)
@@ -1311,6 +1322,7 @@ address_of_variable (struct symbol *var, const struct block *b)
      Lazy evaluation pays off here.  */
 
   val = value_of_variable (var, b);
+  type = value_type (val);
 
   if ((VALUE_LVAL (val) == lval_memory && value_lazy (val))
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -1559,6 +1571,7 @@ value_ind (struct value *arg1)
 			      (value_as_address (arg1)
 			       - value_pointed_to_offset (arg1)));
 
+      enc_type = value_type (arg2);
       return readjust_indirect_value_type (arg2, enc_type, base_type, arg1);
     }
 
@@ -2475,8 +2488,8 @@ find_overload_match (struct value **args, int nargs,
 
 	  method_match_quality =
 	      classify_oload_match (method_badness, nargs,
-	                            oload_method_static (method, fns_ptr,
-	                                                 method_oload_champ));
+	                            oload_method_static_p (fns_ptr,
+							   method_oload_champ));
 
 	  make_cleanup (xfree, method_badness);
 	}
@@ -2624,7 +2637,7 @@ find_overload_match (struct value **args, int nargs,
     }
 
   if (staticp != NULL)
-    *staticp = oload_method_static (method, fns_ptr, method_oload_champ);
+    *staticp = oload_method_static_p (fns_ptr, method_oload_champ);
 
   if (method_oload_champ >= 0)
     {
@@ -2863,7 +2876,7 @@ find_oload_champ (struct value **args, int nargs,
       if (fns_ptr != NULL)
 	{
 	  nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (fns_ptr, ix));
-	  static_offset = oload_method_static (1, fns_ptr, ix);
+	  static_offset = oload_method_static_p (fns_ptr, ix);
 	}
       else
 	{
@@ -2941,10 +2954,9 @@ find_oload_champ (struct value **args, int nargs,
    a non-static method or a function that isn't a method.  */
 
 static int
-oload_method_static (int method, struct fn_field *fns_ptr, int index)
+oload_method_static_p (struct fn_field *fns_ptr, int index)
 {
-  if (method && fns_ptr && index >= 0
-      && TYPE_FN_FIELD_STATIC_P (fns_ptr, index))
+  if (fns_ptr && index >= 0 && TYPE_FN_FIELD_STATIC_P (fns_ptr, index))
     return 1;
   else
     return 0;
@@ -3007,6 +3019,42 @@ destructor_name_p (const char *name, struct type *type)
   return 0;
 }
 
+/* Find an enum constant named NAME in TYPE.  TYPE must be an "enum
+   class".  If the name is found, return a value representing it;
+   otherwise throw an exception.  */
+
+static struct value *
+enum_constant_from_type (struct type *type, const char *name)
+{
+  int i;
+  int name_len = strlen (name);
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ENUM
+	      && TYPE_DECLARED_CLASS (type));
+
+  for (i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); ++i)
+    {
+      const char *fname = TYPE_FIELD_NAME (type, i);
+      int len;
+
+      if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_ENUMVAL
+	  || fname == NULL)
+	continue;
+
+      /* Look for the trailing "::NAME", since enum class constant
+	 names are qualified here.  */
+      len = strlen (fname);
+      if (len + 2 >= name_len
+	  && fname[len - name_len - 2] == ':'
+	  && fname[len - name_len - 1] == ':'
+	  && strcmp (&fname[len - name_len], name) == 0)
+	return value_from_longest (type, TYPE_FIELD_ENUMVAL (type, i));
+    }
+
+  error (_("no constant named \"%s\" in enum \"%s\""),
+	 name, TYPE_TAG_NAME (type));
+}
+
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
    return the appropriate member (or the address of the member, if
    WANT_ADDRESS).  This function is used to resolve user expressions
@@ -3014,7 +3062,7 @@ destructor_name_p (const char *name, struct type *type)
    the comment before value_struct_elt_for_reference.  */
 
 struct value *
-value_aggregate_elt (struct type *curtype, char *name,
+value_aggregate_elt (struct type *curtype, const char *name,
 		     struct type *expect_type, int want_address,
 		     enum noside noside)
 {
@@ -3028,6 +3076,10 @@ value_aggregate_elt (struct type *curtype, char *name,
     case TYPE_CODE_NAMESPACE:
       return value_namespace_elt (curtype, name, 
 				  want_address, noside);
+
+    case TYPE_CODE_ENUM:
+      return enum_constant_from_type (curtype, name);
+
     default:
       internal_error (__FILE__, __LINE__,
 		      _("non-aggregate type in value_aggregate_elt"));
@@ -3095,7 +3147,7 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
 
 static struct value *
 value_struct_elt_for_reference (struct type *domain, int offset,
-				struct type *curtype, char *name,
+				struct type *curtype, const char *name,
 				struct type *intype, 
 				int want_address,
 				enum noside noside)
@@ -3324,7 +3376,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
 static struct value *
 value_namespace_elt (const struct type *curtype,
-		     char *name, int want_address,
+		     const char *name, int want_address,
 		     enum noside noside)
 {
   struct value *retval = value_maybe_namespace_elt (curtype, name,
@@ -3346,7 +3398,7 @@ value_namespace_elt (const struct type *curtype,
 
 static struct value *
 value_maybe_namespace_elt (const struct type *curtype,
-			   char *name, int want_address,
+			   const char *name, int want_address,
 			   enum noside noside)
 {
   const char *namespace_name = TYPE_TAG_NAME (curtype);
@@ -3569,10 +3621,10 @@ value_slice (struct value *array, int lowbound, int length)
 
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
-  slice_range_type = create_range_type ((struct type *) NULL,
-					TYPE_TARGET_TYPE (range_type),
-					lowbound,
-					lowbound + length - 1);
+  slice_range_type = create_static_range_type ((struct type *) NULL,
+					       TYPE_TARGET_TYPE (range_type),
+					       lowbound,
+					       lowbound + length - 1);
 
   {
     struct type *element_type = TYPE_TARGET_TYPE (array_type);

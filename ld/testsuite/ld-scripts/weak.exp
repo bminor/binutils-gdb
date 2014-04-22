@@ -33,8 +33,8 @@ if {! [istarget i?86-*-*] && ! [istarget sh-*-*]} {
     setup_xfail *-*-pe*
 }
 
-# hppa64 and or32 are incredibly broken
-setup_xfail hppa64-*-* or32-*-*
+# hppa64 is incredibly broken
+setup_xfail hppa64-*-*
 
 if {! [ld_assemble $as $srcdir/$subdir/weak1.s tmpdir/weak1.o]
     || ! [ld_assemble $as $srcdir/$subdir/weak2.s tmpdir/weak2.o]} then {

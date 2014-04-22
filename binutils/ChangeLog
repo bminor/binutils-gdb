@@ -1,3 +1,41 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* readelf.c: Remove openrisc and or32 support.  Add support for or1k.
+
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_section_map): Adjust as load commands
+	are now chained.
+	(dump_load_command, dump_section_content): Likewise.
+
+2014-04-16  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (OPT_DYLD_INFO): New macro.
+	(options): Add entry for dyld_info.
+	(mach_o_help): Likewise.
+	(load_and_dump, dump_dyld_info_rebase, dump_dyld_info_bind)
+	(dump_dyld_info_export_1, dump_dyld_info_export): New functions.
+	(bfd_mach_o_dyld_rebase_type_name): New array.
+	(export_info_data): New struct.
+	(dump_dyld_info): Add verbose argument.  Dump rebase, bind and
+	exports data.
+	(dump_load_command): Adjust dump_dyld_info call.
+	(mach_o_dump): Handle dyld_info.
+
+2014-04-16  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_header): Display sizeofcmds in decimal too.
+	(dump_segment): Reformat output.
+	(dump_dyld_info): Also display end offsets.
+	(dump_load_command): Add IDX argument, display commands size
+	and offset, reformat display.
+	(dump_load_commands): Adjust for added argument.
+
+2014-04-07  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/16811
+	* objcopy.c (copy_object): Error if no sections.
+
 2014-04-03  Markus Trippelsdorf  <markus@trippelsdorf.de>
 
 	PR binutils/14698

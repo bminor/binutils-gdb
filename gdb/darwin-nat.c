@@ -303,9 +303,18 @@ darwin_check_new_threads (struct inferior *inf)
 	  break;
       if (i == new_nbr)
 	{
+	  /* Deallocate ports.  */
+	  for (i = 0; i < new_nbr; i++)
+	    {
+	      kret = mach_port_deallocate (mach_task_self (), thread_list[i]);
+	      MACH_CHECK_ERROR (kret);
+	    }
+
+	  /* Deallocate the buffer.  */
 	  kret = vm_deallocate (gdb_task, (vm_address_t) thread_list,
 				new_nbr * sizeof (int));
 	  MACH_CHECK_ERROR (kret);
+
 	  return;
 	}
     }
@@ -331,8 +340,10 @@ darwin_check_new_threads (struct inferior *inf)
 	  new_ix++;
 	  old_ix++;
 
-	  kret = mach_port_deallocate (gdb_task, old_id);
+	  /* Deallocate the port.  */
+	  kret = mach_port_deallocate (gdb_task, new_id);
 	  MACH_CHECK_ERROR (kret);
+
 	  continue;
 	}
       if (new_ix < new_nbr && new_id == MACH_PORT_DEAD)
@@ -382,6 +393,7 @@ darwin_check_new_threads (struct inferior *inf)
     VEC_free (darwin_thread_t, darwin_inf->threads);
   darwin_inf->threads = thread_vec;
 
+  /* Deallocate the buffer.  */
   kret = vm_deallocate (gdb_task, (vm_address_t) thread_list,
 			new_nbr * sizeof (int));
   MACH_CHECK_ERROR (kret);
@@ -594,10 +606,9 @@ darwin_decode_exception_message (mach_msg_header_t *hdr,
   task_port = desc[1].name;
   thread_port = desc[0].name;
 
-  /* We got new rights to the task and the thread.  Get rid of them.  */
+  /* We got new rights to the task, get rid of it.  Do not get rid of thread
+     right, as we will need it to find the thread.  */
   kret = mach_port_deallocate (mach_task_self (), task_port);
-  MACH_CHECK_ERROR (kret);
-  kret = mach_port_deallocate (mach_task_self (), thread_port);
   MACH_CHECK_ERROR (kret);
 
   /* Find process by port.  */
@@ -610,6 +621,10 @@ darwin_decode_exception_message (mach_msg_header_t *hdr,
 	 FIXME: should the exception port be restored ?  */
       kern_return_t kret;
       mig_reply_error_t reply;
+
+      /* Free thread port (we don't know it).  */
+      kret = mach_port_deallocate (mach_task_self (), thread_port);
+      MACH_CHECK_ERROR (kret);
 
       darwin_encode_reply (&reply, hdr, KERN_SUCCESS);
 
@@ -626,6 +641,11 @@ darwin_decode_exception_message (mach_msg_header_t *hdr,
   /* Check for new threads.  Do it early so that the port in the exception
      message can be deallocated.  */
   darwin_check_new_threads (inf);
+
+  /* Free the thread port (as gdb knows the thread, it has already has a right
+     for it, so this just decrement a reference counter).  */
+  kret = mach_port_deallocate (mach_task_self (), thread_port);
+  MACH_CHECK_ERROR (kret);
 
   thread = darwin_find_thread (inf, thread_port);
   if (thread == NULL)
@@ -1017,7 +1037,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
     }
 
   /* Unknown message.  */
-  warning (_("darwin: got unknown message, id: 0x%x\n"), hdr->msgh_id);
+  warning (_("darwin: got unknown message, id: 0x%x"), hdr->msgh_id);
   status->kind = TARGET_WAITKIND_IGNORE;
   return minus_one_ptid;
 }

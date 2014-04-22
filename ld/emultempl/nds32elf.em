@@ -25,6 +25,7 @@ fragment <<EOF
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/nds32.h"
+#include "bfd_stdint.h"
 #include "elf32-nds32.h"
 
 static int relax_fp_as_gp = 1;		/* --mrelax-omit-fp  */

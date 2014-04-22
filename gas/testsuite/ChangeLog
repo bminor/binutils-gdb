@@ -1,3 +1,29 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.
+	* gas/all/gas.exp: Likewise.
+	* gas/elf/warn-2.s: Likewise.
+	* gas/lns/lns.exp: Likewise.
+	* gas/lns/lns-common-1-or1k.s: New file.
+	* gas/or1k/allinsn.d: New file.
+	* gas/or1k/allinsn.exp: New file.
+	* gas/or1k/allinsn.s: New file.
+	* gas/openrisc/addi.d: Delete.
+	* gas/openrisc/addi.s: Delete.
+	* gas/openrisc/allinsn.d: Delete.
+	* gas/openrisc/allinsn.exp: Delete.
+	* gas/openrisc/allinsn.s: Delete.
+	* gas/openrisc/lohi.d: Delete.
+	* gas/openrisc/lohi.s: Delete.
+	* gas/openrisc/store.d: Delete.
+	* gas/openrisc/store.s: Delete.
+
+2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* gas/avr/diffreloc_withrelax.d: New testcase.
+	* gas/avr/noreloc_withoutrelax.d: Likewise.
+	* gas/avr/relax.s: Likewise.
+
 2014-04-04  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/i386.exp: Run SE1 tests.

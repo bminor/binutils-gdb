@@ -500,10 +500,10 @@ m:int:convert_register_p:int regnum, struct type *type:regnum, type:0:generic_co
 f:int:register_to_value:struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf, int *optimizedp, int *unavailablep:frame, regnum, type, buf, optimizedp, unavailablep:0
 f:void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf:frame, regnum, type, buf:0
 # Construct a value representing the contents of register REGNUM in
-# frame FRAME, interpreted as type TYPE.  The routine needs to
+# frame FRAME_ID, interpreted as type TYPE.  The routine needs to
 # allocate and return a struct value with all value attributes
 # (but not the value contents) filled in.
-f:struct value *:value_from_register:struct type *type, int regnum, struct frame_info *frame:type, regnum, frame::default_value_from_register::0
+m:struct value *:value_from_register:struct type *type, int regnum, struct frame_id frame_id:type, regnum, frame_id::default_value_from_register::0
 #
 m:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
 m:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0

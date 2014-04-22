@@ -57,7 +57,8 @@ extern int xstormy16_force_relocation (struct fix *);
 extern long md_pcrel_from_section (struct fix *, segT);
 
 #define TC_CONS_FIX_NEW xstormy16_cons_fix_new
-extern void xstormy16_cons_fix_new (fragS *f, int, int, expressionS *);
+extern void xstormy16_cons_fix_new (fragS *f, int, int, expressionS *,
+				    bfd_reloc_code_real_type);
 
 #define md_cgen_record_fixup_exp  xstormy16_cgen_record_fixup_exp
 

@@ -96,7 +96,8 @@ parse_exp_save_ilp (char *s, expressionS *op)
    we want to handle magic pending reloc expressions specially.  */
 
 void
-pj_cons_fix_new_pj (fragS *frag, int where, int nbytes, expressionS *exp)
+pj_cons_fix_new_pj (fragS *frag, int where, int nbytes, expressionS *exp,
+		    bfd_reloc_code_real_type r ATTRIBUTE_UNUSED)
 {
   static int rv[5][2] =
   { { 0, 0 },

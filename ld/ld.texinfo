@@ -2160,16 +2160,16 @@ enable other tradeoffs in future versions of the linker.
 @kindex --build-id=@var{style}
 @item --build-id
 @itemx --build-id=@var{style}
-Request creation of @code{.note.gnu.build-id} ELF note section.
-The contents of the note are unique bits identifying this linked
-file.  @var{style} can be @code{uuid} to use 128 random bits,
-@code{sha1} to use a 160-bit @sc{SHA1} hash on the normative
-parts of the output contents, @code{md5} to use a 128-bit
-@sc{MD5} hash on the normative parts of the output contents, or
-@code{0x@var{hexstring}} to use a chosen bit string specified as
-an even number of hexadecimal digits (@code{-} and @code{:}
-characters between digit pairs are ignored).  If @var{style} is
-omitted, @code{sha1} is used.
+Request the creation of a @code{.note.gnu.build-id} ELF note section
+or a @code{.build-id} COFF section.  The contents of the note are
+unique bits identifying this linked file.  @var{style} can be
+@code{uuid} to use 128 random bits, @code{sha1} to use a 160-bit
+@sc{SHA1} hash on the normative parts of the output contents,
+@code{md5} to use a 128-bit @sc{MD5} hash on the normative parts of
+the output contents, or @code{0x@var{hexstring}} to use a chosen bit
+string specified as an even number of hexadecimal digits (@code{-} and
+@code{:} characters between digit pairs are ignored).  If @var{style}
+is omitted, @code{sha1} is used.
 
 The @code{md5} and @code{sha1} styles produces an identifier
 that is always the same in an identical output file, but will be
@@ -3788,7 +3788,7 @@ The full description of an output section looks like this:
     @var{output-section-command}
     @var{output-section-command}
     @dots{}
-  @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
+  @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}] [,]
 @end group
 @end smallexample
 
@@ -3796,6 +3796,8 @@ Most output sections do not use most of the optional section attributes.
 
 The whitespace around @var{section} is required, so that the section
 name is unambiguous.  The colon and the curly braces are also required.
+The comma at the end may be required if a @var{fillexp} is used and
+the next @var{sections-command} looks like a continuation of the expression.
 The line breaks and other white space are optional.
 
 Each @var{output-section-command} may be one of the following:
@@ -4729,7 +4731,7 @@ OVERLAY [@var{start}] : [NOCROSSREFS] [AT ( @var{ldaddr} )]
         @dots{}
       @} [:@var{phdr}@dots{}] [=@var{fill}]
     @dots{}
-  @} [>@var{region}] [:@var{phdr}@dots{}] [=@var{fill}]
+  @} [>@var{region}] [:@var{phdr}@dots{}] [=@var{fill}] [,]
 @end group
 @end smallexample
 
@@ -4739,6 +4741,9 @@ section definitions within the @code{OVERLAY} construct are identical to
 those within the general @code{SECTIONS} construct (@pxref{SECTIONS}),
 except that no addresses and no memory regions may be defined for
 sections within an @code{OVERLAY}.
+
+The comma at the end may be required if a @var{fill} is used and
+the next @var{sections-command} looks like a continuation of the expression.
 
 The sections are all defined with the same starting address.  The load
 addresses of the sections are arranged such that they are consecutive in
@@ -7594,14 +7599,6 @@ tools will be able to process object files employing this GNU extension,
 but will fail to respect the alignment instructions, and may issue noisy
 warnings about unknown linker directives.
 
-@cindex default manifest
-@item default manifest
-The linker will automatically add a default manifest to the .rsrc
-section of any fully linked cygwin or MingGW binary.  This manifest is
-necessary in order to be able to execute the binary under Windows 8
-(or later).  An application can supply its own manifest, and if it
-does so then this manifest will be used in preference to the default
-one.
 @end table
 
 @ifclear GENERIC

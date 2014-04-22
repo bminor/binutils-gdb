@@ -5272,7 +5272,7 @@ static int
 linux_read_loadmap (const char *annex, CORE_ADDR offset,
 		    unsigned char *myaddr, unsigned int len)
 {
-  int pid = lwpid_of (get_thread_lwp (current_inferior));
+  int pid = lwpid_of (current_inferior);
   int addr = -1;
   struct target_loadmap *data = NULL;
   unsigned int actual_length, copy_length;

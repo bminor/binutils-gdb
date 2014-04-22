@@ -4780,7 +4780,19 @@ ENUM
 ENUMDOC
   This is a 8 bit reloc for the AVR that stores bits 16..23 of a symbol
   in .byte hlo8(symbol)
-
+ENUM
+  BFD_RELOC_AVR_DIFF8
+ENUMX
+  BFD_RELOC_AVR_DIFF16
+ENUMX
+  BFD_RELOC_AVR_DIFF32
+ENUMDOC
+  AVR relocations to mark the difference of two local symbols.
+  These are only needed to support linker relaxation and can be ignored
+  when not relaxing.  The field is set to the value of the difference
+  assuming no relaxation.  The relocation encodes the position of the
+  second symbol so the linker can determine whether to adjust the field
+  value.
 ENUM
   BFD_RELOC_RL78_NEG8
 ENUMX
@@ -5869,11 +5881,55 @@ ENUMDOC
   Intel i860 Relocations.
 
 ENUM
-  BFD_RELOC_OPENRISC_ABS_26
+  BFD_RELOC_OR1K_REL_26
 ENUMX
-  BFD_RELOC_OPENRISC_REL_26
+  BFD_RELOC_OR1K_GOTPC_HI16
+ENUMX
+  BFD_RELOC_OR1K_GOTPC_LO16
+ENUMX
+  BFD_RELOC_OR1K_GOT16
+ENUMX
+  BFD_RELOC_OR1K_PLT26
+ENUMX
+  BFD_RELOC_OR1K_GOTOFF_HI16
+ENUMX
+  BFD_RELOC_OR1K_GOTOFF_LO16
+ENUMX
+  BFD_RELOC_OR1K_COPY
+ENUMX
+  BFD_RELOC_OR1K_GLOB_DAT
+ENUMX
+  BFD_RELOC_OR1K_JMP_SLOT
+ENUMX
+  BFD_RELOC_OR1K_RELATIVE
+ENUMX
+  BFD_RELOC_OR1K_TLS_GD_HI16
+ENUMX
+  BFD_RELOC_OR1K_TLS_GD_LO16
+ENUMX
+  BFD_RELOC_OR1K_TLS_LDM_HI16
+ENUMX
+  BFD_RELOC_OR1K_TLS_LDM_LO16
+ENUMX
+  BFD_RELOC_OR1K_TLS_LDO_HI16
+ENUMX
+  BFD_RELOC_OR1K_TLS_LDO_LO16
+ENUMX
+  BFD_RELOC_OR1K_TLS_IE_HI16
+ENUMX
+  BFD_RELOC_OR1K_TLS_IE_LO16
+ENUMX
+  BFD_RELOC_OR1K_TLS_LE_HI16
+ENUMX
+  BFD_RELOC_OR1K_TLS_LE_LO16
+ENUMX
+  BFD_RELOC_OR1K_TLS_TPOFF
+ENUMX
+  BFD_RELOC_OR1K_TLS_DTPOFF
+ENUMX
+  BFD_RELOC_OR1K_TLS_DTPMOD
 ENUMDOC
-  OpenRISC Relocations.
+  OpenRISC 1000 Relocations.
 
 ENUM
   BFD_RELOC_H8_DIR16A8

@@ -69,8 +69,10 @@ struct bit_info
 extern int tic54x_start_label (int, char *);
 
 /* custom handling for relocations in cons expressions */
-#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) tic54x_cons_fix_new(FRAG,OFF,LEN,EXP)
-extern void tic54x_cons_fix_new (fragS *,int,int,expressionS *);
+#define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP, RELOC)	\
+  tic54x_cons_fix_new (FRAG, OFF, LEN, EXP, RELOC)
+extern void tic54x_cons_fix_new (fragS *, int, int, expressionS *,
+				 bfd_reloc_code_real_type);
 
 /* Define md_number_to_chars as the appropriate standard big endian or
    little endian function.  Mostly littleendian, but longwords and floats are

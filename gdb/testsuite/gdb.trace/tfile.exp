@@ -34,8 +34,6 @@ if {![is_remote host] && ![is_remote target]} {
     set purely_local 0
 }
 
-gdb_exit
-gdb_start
 standard_testfile
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable \
@@ -45,7 +43,6 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
     untested ${testfile}.exp
     return -1
 }
-gdb_reinitialize_dir $srcdir/$subdir
 
 # Make sure we are starting fresh.
 remote_file host delete $tfile_basic
@@ -53,14 +50,17 @@ remote_file host delete $tfile_error
 remote_file target delete $tfile_basic
 remote_file target delete $tfile_error
 
-remote_exec target "$binfile"
+if { ![generate_tracefile $binfile] } {
+    unsupported "Unable to generate trace file"
+}
+
 if {!$purely_local} {
     # Copy tracefile from target to host through build.
     remote_download host [remote_upload target tfile-basic.tf] tfile-basic.tf
     remote_download host [remote_upload target tfile-error.tf] tfile-error.tf
 }
 
-gdb_load $binfile
+clean_restart $binfile
 
 # Program has presumably exited, now target a trace file it created.
 

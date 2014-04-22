@@ -1,3 +1,485 @@
+2014-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention that ARM sim now supports tracing.
+
+2014-04-22  Yao Qi  <yao@codesourcery.com>
+
+	* tracefile-tfile.c (tfile_fetch_registers): Move the bottom
+	to ...
+	* tracefile.c (tracefile_fetch_registers): ... it.  New
+	function.
+	* tracefile.h (tracefile_fetch_registers): Declare.
+	* ctf.c (ctf_fetch_registers): Remove the bottom.  Call
+	tracefile_fetch_registers.
+
+2014-04-19  Eli Zaretskii  <eliz@gnu.org>
+
+	PR gdb/14018
+	* windows-nat.c (thread_rec): Don't display a warning when
+	SuspendThread fails with ERROR_ACCESS_DENIED.  If SuspendThread
+	fails for any reason, set th->suspended to -1, so that we don't
+	try to resume such a thread.  Also, don't return NULL in these
+	cases, to avoid completely ruin the session due to "PC register is
+	not available" error.
+	(do_windows_fetch_inferior_registers): Check errors in
+	GetThreadContext call.
+	(windows_continue): Accept an additional argument KILLED; if not
+	zero, ignore errors in the SetThreadContext call, since the
+	inferior was killed and is shutting down.
+	(windows_resume, get_windows_debug_event)
+	(windows_create_inferior, windows_mourn_inferior)
+	(windows_kill_inferior): All callers of windows_continue changed
+	to adjust to its new calling sequence.
+
+2014-04-19  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_open): Call post_create_inferior.
+
+2014-04-19  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (handle_id): New static variable.
+	(ctf_open_dir): Get handle_id from bt_context_add_trace return
+	value.  Get the declaration of event "register" and get length
+	of field "contents".
+
+2014-04-19  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_xfer_partial): Check 'name' is NULL before strcmp.
+
+2014-04-18  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* valops.c (oload_method_static): Remove unnecessary argument
+	METHOD.  Update all callers.
+
+2014-04-18  Pedro alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	PR backtrace/15558
+	* frame.c (get_prev_frame_1): Rename to ...
+	(get_prev_frame_always): ... this, and make extern.  Adjust.
+	(skip_artificial_frames): Use get_prev_frame_always.
+	(frame_unwind_caller_id, frame_pop, get_prev_frame)
+	(get_frame_unwind_stop_reason): Adjust to rename.
+	* frame.h (get_prev_frame_always): Declare.
+	* inline-frame.c: Include frame.h.
+	(inline_frame_this_id): Use get_prev_frame_always.
+
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
+	* solib-darwin.c (darwin_solib_create_inferior_hook): Simplify
+	code by using bfd_mach_o_get_base_address.
+
+2014-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c: Include "dwarf2-frame.h" and "ax.h".
+	(spu_ax_pseudo_register_collect): New function.
+	(spu_ax_pseudo_register_push_stack): Likewise.
+	(spu_dwarf_reg_to_regnum): Likewise.
+	(spu_gdbarch_init): Install them.  Append DWARF unwinders.
+
+2014-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (value_from_register): Make class "m" instead of "f".
+	Replace FRAME argument with FRAME_ID.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* findvar.c (default_value_from_register): Add GDBARCH argument;
+	replace FRAME by FRAME_ID.  No longer call get_frame_id.
+	(value_from_register): Update call to gdbarch_value_from_register.
+	* value.h (default_value_from_register): Update prototype.
+	* s390-linux-tdep.c (s390_value_from_register): Update interface
+	and call to default_value_from_register.
+	* spu-tdep.c (spu_value_from_register): Likewise.
+
+	* findvar.c (address_from_register): Remove TYPE argument.
+	Do not call value_from_register; use gdbarch_value_from_register
+	with null_frame_id instead.
+	* value.h (address_from_register): Update prototype.
+	* dwarf2-frame.c (read_addr_from_reg): Use address_from_register.
+	* dwarf2loc.c (dwarf_expr_read_addr_from_reg): Update for
+	address_from_register interface change.
+
+2014-04-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdbtypes.h: Update comments to link to types and macros'
+	definitions.
+
+2014-04-16  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdbtypes.h: Remove definition of the macro TYPE_FN_FIELDS.
+
+2014-04-16  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/15827
+	* dwarf2read.c (skip_one_die): Check that all relative-offset
+	sibling DIEs fall within range of the current reader's buffer.
+	(read_partial_die): Likewise.
+
+2014-04-16  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16597
+	* cp-namespace.c (lookup_symbol_file): If the type name of
+	`this' is NULL, return immediately.
+
+2014-04-14  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16253
+	* ada-lang.c (ada_symbol_matches_domain): Moved here and renamed
+	from symbol_matches_domain in symtab.c. All local callers
+	of symbol_matches_domain updated.
+	(standard_lookup): If DOMAIN is VAR_DOMAIN and no symbol is found,
+	search STRUCT_DOMAIN.
+	(ada_find_any_type_symbol): Do not search STRUCT_DOMAIN
+	independently.  standard_lookup will do that automatically.
+	* cp-namespace.c (cp_lookup_symbol_nonlocal): Explain when/why
+	VAR_DOMAIN searches may return a STRUCT_DOMAIN match.
+	(cp_lookup_symbol_in_namespace): Likewise.
+	If no VAR_DOMAIN symbol is found, search STRUCT_DOMAIN.
+	(cp_lookup_symbol_exports): Explain when/why VAR_DOMAIN searches
+	may return a STRUCT_DOMAIN match.
+	(lookup_symbol_file): Search for the class name in STRUCT_DOMAIN.
+	* cp-support.c: Include language.h.
+	(inspect_type): Explicitly search STRUCT_DOMAIN before searching
+	VAR_DOMAIN.
+	* psymtab.c (match_partial_symbol): Compare the requested
+	domain with the symbol's domain directly.
+	(lookup_partial_symbol): Likewise.
+	* symtab.c (lookup_symbol_in_language): Explain when/why
+	VAR_DOMAIN searches may return a STRUCT_DOMAIN match.
+	If no VAR_DOMAIN symbol is found, search STRUCT_DOMAIN for
+	appropriate languages.
+	(symbol_matches_domain): Renamed `ada_symbol_matches_domain'
+	and moved to ada-lang.c
+	(lookup_block_symbol): Explain that this function only returns
+	symbol matching the requested DOMAIN.
+	Compare the requested domain with the symbol's domain directly.
+	(iterate_over_symbols): Compare the requested domain with the
+	symbol's domain directly.
+	* symtab.h (symbol_matches_domain): Remove.
+
+2014-04-14  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/15246:
+	* c-exp.y (type_aggregate_p): New function.
+	(qualified_name, classify_inner_name): Use it.
+	* c-typeprint.c (c_type_print_base): Handle TYPE_DECLARED_CLASS
+	and TYPE_TARGET_TYPE of an enum type.
+	* dwarf2read.c (read_enumeration_type): Set TYPE_DECLARED_CLASS on
+	an enum type.
+	(determine_prefix) <case DW_TAG_enumeration_type>: New case;
+	handle TYPE_DECLARED_CLASS.
+	* gdbtypes.c (rank_one_type): Handle TYPE_DECLARED_CLASS on enum
+	types.
+	* gdbtypes.h (TYPE_DECLARED_CLASS): Update comment.
+	* valops.c (enum_constant_from_type): New function.
+	(value_aggregate_elt): Use it.
+	* cp-namespace.c (cp_lookup_nested_symbol): Handle
+	TYPE_CODE_ENUM.
+
+2014-04-14  Tom Tromey  <tromey@redhat.com>
+
+	* valops.c (value_aggregate_elt, value_struct_elt_for_reference)
+	(value_namespace_elt, value_maybe_namespace_elt): Make "name"
+	const.
+	* value.h (value_aggregate_elt): Update.
+
+2014-04-14  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (read_enumeration_type): Handle DW_AT_type.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* eval.c (evaluate_subexp_for_sizeof): Add enum noside argument.
+	(evaluate_subexp_standard): Pass noside argument.
+	(evaluate_subexp_for_sizeof) <BINOP_SUBSCRIPT>: Handle subscript case
+	if noside equals EVAL_NORMAL. If the subscript yields a vla type
+	re-evaluate subscript operation with EVAL_NORMAL to enable sideffects.
+	* gdbtypes.c (resolve_dynamic_bounds): Mark bound as evaluated.
+	* gdbtypes.h (enum range_flags): Add RANGE_EVALUATED case.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* findvar.c (default_read_var_value): Resolve dynamic bounds if location
+	points to a constant blob.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* dwarf2read.c (read_subrange_type): Convert DW_AT_count to a dynamic
+	property and store it as the high bound and flag the range accordingly.
+	* gdbtypes.c (resolve_dynamic_bounds): If range is flagged as
+	RANGE_UPPER_BOUND_IS_COUNT assign low + high - 1 as the new high bound.
+	* gdbtypes.h (enum range_flags): New enum.
+	(struct range_bounds): Add flags member.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* c-typeprint.c (c_type_print_varspec_suffix): Added
+	check for not yet resolved high bound. If unresolved, print
+	"variable length" string to the console instead of random
+	length.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Re-fetch type from
+	value.
+	(ada_template_to_fixed_record_type_1): Likewise.
+	(ada_to_fixed_type_1): Likewise.
+	* cp-valprint.c (cp_print_value_fields_rtti): Likewise.
+	(cp_print_value): Likewise.
+	* d-valprint.c (dynamic_array_type): Likewise.
+	* findvar.c (address_of_variable): Likewise.
+	* jv-valprint.c (java_value_print): Likewise.
+	* valops.c (value_ind): Likewise.
+	* value.c (coerce_ref): Likewise.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* eval.c (evaluate_subexp_for_sizeof) <UNOP_IND>: Create an indirect
+	value and retrieve the dynamic type size.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* eval.c (evaluate_subexp_for_sizeof) <OP_VAR_VALUE>: If the type
+	passed to sizeof is dynamic evaluate the argument to compute the length.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2loc.c (dwarf2_locexpr_baton_eval): New function.
+	(dwarf2_evaluate_property): New function.
+	* dwarf2loc.h (dwarf2_evaluate_property): New function prototype.
+	* dwarf2read.c (attr_to_dynamic_prop): New function.
+	(read_subrange_type): Use attr_to_dynamic_prop to read high bound
+	attribute.
+	* gdbtypes.c: Include dwarf2loc.h.
+	(is_dynamic_type): New function.
+	(resolve_dynamic_type): New function.
+	(resolve_dynamic_bounds): New function.
+	(get_type_length): New function.
+	(check_typedef): Use get_type_length to compute type length.
+	* gdbtypes.h (TYPE_HIGH_BOUND_KIND): New macro.
+	(TYPE_LOW_BOUND_KIND): New macro.
+	(is_dynamic_type): New function prototype.
+	* value.c (value_from_contents_and_address): Call resolve_dynamic_type
+	to resolve dynamic properties of the type. Update comment.
+	* valops.c (get_value_at, value_at, value_at_lazy): Update comment.
+
+2014-04-14  Richard Henderson  <rth@redhat.com>
+
+	* alpha-linux-nat.c (_initialize_alpha_linux_nat): Fix prototype.
+
+2014-04-12  Siva Chandra Reddy  <sivachandra@google.com>
+	    Doug Evans  <xdje42@gmail.com>
+
+	* guile/scm-value.c (gdbscm_value_dynamic_type): Use coerce_ref to
+	dereference TYPE_CODE_REF values.
+
+2014-04-11  Joel Brobecker  <brobecker@adacore.com>
+
+	Revert the following changes due to regressions:
+
+	* dwarf2loc.c (dwarf2_locexpr_baton_eval): New function.
+	(dwarf2_evaluate_property): New function.
+	* dwarf2loc.h (dwarf2_evaluate_property): New function prototype.
+	* dwarf2read.c (attr_to_dynamic_prop): New function.
+	(read_subrange_type): Use attr_to_dynamic_prop to read high bound
+	attribute.
+	* gdbtypes.c: Include dwarf2loc.h.
+	(is_dynamic_type): New function.
+	(resolve_dynamic_type): New function.
+	(resolve_dynamic_bounds): New function.
+	(get_type_length): New function.
+	(check_typedef): Use get_type_length to compute type length.
+	* gdbtypes.h (TYPE_HIGH_BOUND_KIND): New macro.
+	(TYPE_LOW_BOUND_KIND): New macro.
+	(is_dynamic_type): New function prototype.
+	* value.c (value_from_contents_and_address): Call resolve_dynamic_type
+	to resolve dynamic properties of the type. Update comment.
+	* valops.c (get_value_at, value_at, value_at_lazy): Update comment.
+
+	* eval.c (evaluate_subexp_for_sizeof) <OP_VAR_VALUE>: If the type
+	passed to sizeof is dynamic evaluate the argument to compute the length.
+
+	* eval.c (evaluate_subexp_for_sizeof) <UNOP_IND>: Create an indirect
+	value and retrieve the dynamic type size.
+
+	* ada-lang.c (ada_value_primitive_packed_val): Re-fetch type from value.
+	(ada_template_to_fixed_record_type_1): Likewise.
+	(ada_to_fixed_type_1): Likewise.
+	* cp-valprint.c (cp_print_value_fields_rtti): Likewise.
+	(cp_print_value): Likewise.
+	* d-valprint.c (dynamic_array_type): Likewise.
+	* eval.c (evaluate_subexp_with_coercion): Likewise.
+	* findvar.c (address_of_variable): Likewise.
+	* jv-valprint.c (java_value_print): Likewise.
+	* valops.c (value_ind): Likewise.
+	* value.c (coerce_ref): Likewise.
+
+	* c-typeprint.c (c_type_print_varspec_suffix): Added
+	check for not yet resolved high bound. If unresolved, print
+	"variable length" string to the console instead of random
+	length.
+
+	* dwarf2read.c (read_subrange_type): Convert DW_AT_count to a dynamic
+	property and store it as the high bound and flag the range accordingly.
+	* gdbtypes.c (resolve_dynamic_bounds): If range is flagged as
+	RANGE_UPPER_BOUND_IS_COUNT assign low + high - 1 as the new high bound.
+	* gdbtypes.h (enum range_flags): New enum.
+	(struct range_bounds): Add flags member.
+
+	* findvar.c (default_read_var_value): Resolve dynamic bounds if location
+	points to a constant blob.
+
+	* eval.c (evaluate_subexp_for_sizeof): Add enum noside argument.
+	(evaluate_subexp_standard): Pass noside argument.
+	(evaluate_subexp_for_sizeof) <BINOP_SUBSCRIPT>: Handle subscript case
+	if noside equals EVAL_NORMAL. If the subscript yields a vla type
+	re-evaluate subscript operation with EVAL_NORMAL to enable sideffects.
+	* gdbtypes.c (resolve_dynamic_bounds): Mark bound as evaluated.
+	* gdbtypes.h (enum range_flags): Add RANGE_EVALUATED case.
+
+2014-04-11  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/16675
+	* c-exp.y (exp : SIZEOF '(' type ')'): Handle reference types.
+	* eval.c (evaluate_subexp_for_sizeof): Refactor and handle
+	reference types.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* eval.c (evaluate_subexp_for_sizeof): Add enum noside argument.
+	(evaluate_subexp_standard): Pass noside argument.
+	(evaluate_subexp_for_sizeof) <BINOP_SUBSCRIPT>: Handle subscript case
+	if noside equals EVAL_NORMAL. If the subscript yields a vla type
+	re-evaluate subscript operation with EVAL_NORMAL to enable sideffects.
+	* gdbtypes.c (resolve_dynamic_bounds): Mark bound as evaluated.
+	* gdbtypes.h (enum range_flags): Add RANGE_EVALUATED case.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* findvar.c (default_read_var_value): Resolve dynamic bounds if location
+	points to a constant blob.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* dwarf2read.c (read_subrange_type): Convert DW_AT_count to a dynamic
+	property and store it as the high bound and flag the range accordingly.
+	* gdbtypes.c (resolve_dynamic_bounds): If range is flagged as
+	RANGE_UPPER_BOUND_IS_COUNT assign low + high - 1 as the new high bound.
+	* gdbtypes.h (enum range_flags): New enum.
+	(struct range_bounds): Add flags member.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* c-typeprint.c (c_type_print_varspec_suffix): Added
+	check for not yet resolved high bound. If unresolved, print
+	"variable length" string to the console instead of random
+	length.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Re-fetch type from value.
+	(ada_template_to_fixed_record_type_1): Likewise.
+	(ada_to_fixed_type_1): Likewise.
+	* cp-valprint.c (cp_print_value_fields_rtti): Likewise.
+	(cp_print_value): Likewise.
+	* d-valprint.c (dynamic_array_type): Likewise.
+	* eval.c (evaluate_subexp_with_coercion): Likewise.
+	* findvar.c (address_of_variable): Likewise.
+	* jv-valprint.c (java_value_print): Likewise.
+	* valops.c (value_ind): Likewise.
+	* value.c (coerce_ref): Likewise.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* eval.c (evaluate_subexp_for_sizeof) <UNOP_IND>: Create an indirect
+	value and retrieve the dynamic type size.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* eval.c (evaluate_subexp_for_sizeof) <OP_VAR_VALUE>: If the type
+	passed to sizeof is dynamic evaluate the argument to compute the length.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* dwarf2loc.c (dwarf2_locexpr_baton_eval): New function.
+	(dwarf2_evaluate_property): New function.
+	* dwarf2loc.h (dwarf2_evaluate_property): New function prototype.
+	* dwarf2read.c (attr_to_dynamic_prop): New function.
+	(read_subrange_type): Use attr_to_dynamic_prop to read high bound
+	attribute.
+	* gdbtypes.c: Include dwarf2loc.h.
+	(is_dynamic_type): New function.
+	(resolve_dynamic_type): New function.
+	(resolve_dynamic_bounds): New function.
+	(get_type_length): New function.
+	(check_typedef): Use get_type_length to compute type length.
+	* gdbtypes.h (TYPE_HIGH_BOUND_KIND): New macro.
+	(TYPE_LOW_BOUND_KIND): New macro.
+	(is_dynamic_type): New function prototype.
+	* value.c (value_from_contents_and_address): Call resolve_dynamic_type
+	to resolve dynamic properties of the type. Update comment.
+	* valops.c (get_value_at, value_at, value_at_lazy): Update comment.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* dwarf2read.c (read_subrange_type): Use struct bound_prop for
+	declaring high/low bounds and change uses accordingly. Call
+	create_range_type instead of create_static_range_type.
+	* gdbtypes.c (create_range_type): New function.
+	(create_range_type): Convert bounds into struct bound_prop and pass
+	them to create_range_type.
+	* gdbtypes.h (struct bound_prop): New struct.
+	(create_range_type): New function prototype.
+	(struct range_bounds): Use struct bound_prop instead of LONGEST for
+	high/low bounds. Remove low_undefined/high_undefined and adapt all uses.
+	(TYPE_LOW_BOUND,TYPE_HIGH_BOUND): Adapt macros to refer to the static
+	part of the bound.
+	* parse.c (follow_types): Set high bound kind to BOUND_UNDEFINED.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* gdbtypes.c (create_static_range_type): Renamed from create_range_type.
+	* gdbtypes.h (create_static_range_type): Renamed from create_range_type.
+	* ada-lang.c: All uses of create_range_type updated.
+	* coffread.c: All uses of create_range_type updated.
+	* dwarf2read.c: All uses of create_range_type updated.
+	* f-exp.y: All uses of create_range_type updated.
+	* m2-valprint.c: All uses of create_range_type updated.
+	* mdebugread.c: All uses of create_range_type updated.
+	* stabsread.c: All uses of create_range_type updated.
+	* valops.c: All uses of create_range_type updated.
+	* valprint.c: All uses of create_range_type updated.
+
+2014-04-10  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (single_step_breakpoints)
+	(single_step_gdbarch): Move up in the file.
+	(one_breakpoint_xfer_memory): New function, factored out from ...
+	(breakpoint_xfer_memory): ... here.  Also process single-step
+	breakpoints.
+
+2014-04-09  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_check_new_threads): Fix port leak, add
+	comments.
+	(darwin_decode_exception_message): Free port only after use.
+
+2014-04-08  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (struct gdbarch_tdep): Mention avrxmega in the comment.
+	(avr_gdbarch_init): Add xmega architectures given by bfd_architecture
+	when setting the size of call_length.
+
+2014-04-07  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/py-value.c (valpy_get_dynamic_type): Use coerce_ref to
+	dereference TYPE_CODE_REF values.
+
+2014-04-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* darwin-nat.c (darwin_decode_message): Remove trailing '\n' at
+	end of warning message.
+
 2014-04-03  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_cutu_die_from_dwo): Fix assertion, at most one

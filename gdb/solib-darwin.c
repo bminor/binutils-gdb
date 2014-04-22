@@ -524,26 +524,10 @@ darwin_solib_create_inferior_hook (int from_tty)
   load_addr = darwin_read_exec_load_addr (info);
   if (load_addr != 0 && symfile_objfile != NULL)
     {
-      CORE_ADDR vmaddr = 0;
-      struct mach_o_data_struct *md = bfd_mach_o_get_data (exec_bfd);
-      unsigned int i, num;
+      CORE_ADDR vmaddr;
 
       /* Find the base address of the executable.  */
-      for (i = 0; i < md->header.ncmds; i++)
-	{
-	  struct bfd_mach_o_load_command *cmd = &md->commands[i];
-
-	  if (cmd->type != BFD_MACH_O_LC_SEGMENT
-	      && cmd->type != BFD_MACH_O_LC_SEGMENT_64)
-	    continue;
-	  if (cmd->command.segment.fileoff == 0
-	      && cmd->command.segment.vmaddr != 0
-	      && cmd->command.segment.filesize != 0)
-	    {
-	      vmaddr = cmd->command.segment.vmaddr;
-	      break;
-	    }
-	}
+      vmaddr = bfd_mach_o_get_base_address (exec_bfd);
 
       /* Relocate.  */
       if (vmaddr != load_addr)

@@ -1,3 +1,11 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* dis-asm.h: Remove openrisc and or32 support.  Add support for or1k.
+
+2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* elf/avr.h: Add new DIFF relocs.
+
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
 	Update copyright years.

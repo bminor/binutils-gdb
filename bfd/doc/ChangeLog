@@ -1,3 +1,25 @@
+2014-04-09  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am ($(MKDOC)): New rule, depend on chew.stamp.  Move
+	old rule to..
+	(chew.stamp): ..here.
+	(DISTCLEANFILES): Move *.stamp..
+	(MOSTLYCLEANFILES): ..to here.
+	* Makefile.in: Regenerate.
+
+2014-04-09  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (MKDOC): Use $@ in command.
+	(aoutx.texi): New rule, depend on aoutx.stamp.  Move old rule..
+	(aoutx.stamp): .. to here.  Don't depend on chew.c, depend on MKDOC
+	and omit recursive MAKE.  Use $< in command.
+	(archive.texi, archures.texi, bfdt.texi, cache.texi, coffcode.texi,
+	core.texi, elf.texi, elfcode.texi, mmo.texi, format.texi, libbfd.texi,
+	bfdio.texi, bfdwin.texi, opncls.texi, reloc.texi, section.texi,
+	syms.texi, targets.texi, init.texi, hash.texi, linker.texi): Similarly.
+	(DISTCLEANFILES): Remove *.stamp.
+	* Makefile.in: Regenerate.
+
 2014-03-12  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.

@@ -44,6 +44,8 @@
 #include "observer.h"
 #include "infcall.h"
 #include "dwarf2.h"
+#include "dwarf2-frame.h"
+#include "ax.h"
 #include "exceptions.h"
 #include "spu-tdep.h"
 
@@ -311,13 +313,59 @@ spu_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 }
 
+static int
+spu_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+				struct agent_expr *ax, int regnum)
+{
+  switch (regnum)
+    {
+    case SPU_SP_REGNUM:
+      ax_reg_mask (ax, SPU_RAW_SP_REGNUM);
+      return 0;
+
+    case SPU_FPSCR_REGNUM:
+    case SPU_SRR0_REGNUM:
+    case SPU_LSLR_REGNUM:
+    case SPU_DECR_REGNUM:
+    case SPU_DECR_STATUS_REGNUM:
+      return -1;
+
+    default:
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    }
+}
+
+static int
+spu_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
+				   struct agent_expr *ax, int regnum)
+{
+  switch (regnum)
+    {
+    case SPU_SP_REGNUM:
+      ax_reg (ax, SPU_RAW_SP_REGNUM);
+      return 0;
+
+    case SPU_FPSCR_REGNUM:
+    case SPU_SRR0_REGNUM:
+    case SPU_LSLR_REGNUM:
+    case SPU_DECR_REGNUM:
+    case SPU_DECR_STATUS_REGNUM:
+      return -1;
+
+    default:
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    }
+}
+
+
 /* Value conversion -- access scalar values at the preferred slot.  */
 
 static struct value *
-spu_value_from_register (struct type *type, int regnum,
-			 struct frame_info *frame)
+spu_value_from_register (struct gdbarch *gdbarch, struct type *type,
+			 int regnum, struct frame_id frame_id)
 {
-  struct value *value = default_value_from_register (type, regnum, frame);
+  struct value *value = default_value_from_register (gdbarch, type,
+						     regnum, frame_id);
   int len = TYPE_LENGTH (type);
 
   if (regnum < SPU_NUM_GPRS && len < 16)
@@ -349,6 +397,15 @@ spu_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return 1;
 
   return default_register_reggroup_p (gdbarch, regnum, group);
+}
+
+/* DWARF-2 register numbers.  */
+
+static int
+spu_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+{
+  /* Use cooked instead of raw SP.  */
+  return (reg == SPU_RAW_SP_REGNUM)? SPU_SP_REGNUM : reg;
 }
 
 
@@ -2679,6 +2736,11 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_write (gdbarch, spu_pseudo_register_write);
   set_gdbarch_value_from_register (gdbarch, spu_value_from_register);
   set_gdbarch_register_reggroup_p (gdbarch, spu_register_reggroup_p);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, spu_dwarf_reg_to_regnum);
+  set_gdbarch_ax_pseudo_register_collect
+    (gdbarch, spu_ax_pseudo_register_collect);
+  set_gdbarch_ax_pseudo_register_push_stack
+    (gdbarch, spu_ax_pseudo_register_push_stack);
 
   /* Data types.  */
   set_gdbarch_char_signed (gdbarch, 0);
@@ -2717,6 +2779,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Frame handling.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &spu_frame_unwind);
   frame_base_set_default (gdbarch, &spu_frame_base);
   set_gdbarch_unwind_pc (gdbarch, spu_unwind_pc);

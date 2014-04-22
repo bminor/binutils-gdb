@@ -19,8 +19,10 @@
 
 standard_testfile
 
+# Explicitly specify gnu89 for gnu inline semantics to override Clang's default
+# of c99.
 if { [prepare_for_testing $testfile.exp $testfile $srcfile \
-          {debug optimize=-O2 additional_flags=-Winline}] } {
+          {debug optimize=-O2 additional_flags=-Winline additional_flags=-std=gnu89}] } {
     return -1
 }
 

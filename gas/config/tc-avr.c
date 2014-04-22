@@ -338,9 +338,11 @@ struct avr_opt_s
   int all_opcodes;  /* -mall-opcodes: accept all known AVR opcodes.  */
   int no_skip_bug;  /* -mno-skip-bug: no warnings for skipping 2-word insns.  */
   int no_wrap;      /* -mno-wrap: reject rjmp/rcall with 8K wrap-around.  */
+  int link_relax;   /* -mlink-relax: generate relocations for linker 
+                       relaxation. */
 };
 
-static struct avr_opt_s avr_opt = { 0, 0, 0 };
+static struct avr_opt_s avr_opt = { 0, 0, 0, 0 };
 
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
@@ -401,7 +403,8 @@ enum options
   OPTION_ALL_OPCODES = OPTION_MD_BASE + 1,
   OPTION_NO_SKIP_BUG,
   OPTION_NO_WRAP,
-  OPTION_ISA_RMW
+  OPTION_ISA_RMW,
+  OPTION_LINK_RELAX
 };
 
 struct option md_longopts[] =
@@ -411,6 +414,7 @@ struct option md_longopts[] =
   { "mno-skip-bug", no_argument, NULL, OPTION_NO_SKIP_BUG },
   { "mno-wrap",     no_argument, NULL, OPTION_NO_WRAP     },
   { "mrmw",         no_argument, NULL, OPTION_ISA_RMW     },
+  { "mlink-relax",  no_argument, NULL, OPTION_LINK_RELAX  },
   { NULL, no_argument, NULL, 0 }
 };
 
@@ -517,6 +521,7 @@ md_show_usage (FILE *stream)
 	"  -mno-wrap        reject rjmp/rcall instructions with 8K wrap-around\n"
 	"                   (default for avr3, avr5)\n"
 	"  -mrmw            accept Read-Modify-Write instructions\n"
+    "  -mlink-relax     generate relocations for linker relaxation\n"
     ));
   show_mcu_list (stream);
 }
@@ -587,6 +592,9 @@ md_parse_option (int c, char *arg)
     case OPTION_ISA_RMW:
       specified_mcu.isa |= AVR_ISA_RMW;
       return 1;
+    case OPTION_LINK_RELAX:
+      avr_opt.link_relax = 1;
+      return 1;
     }
 
   return 0;
@@ -637,6 +645,7 @@ md_begin (void)
     }
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
+  linkrelax = avr_opt.link_relax;
 }
 
 /* Resolve STR as a constant expression and return the result.
@@ -1200,6 +1209,53 @@ md_pcrel_from_section (fixS *fixp, segT sec)
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
+static bfd_boolean
+relaxable_section (asection *sec)
+{
+  return (sec->flags & SEC_DEBUGGING) == 0;
+}
+
+/* Does whatever the xtensa port does. */
+int
+avr_validate_fix_sub (fixS *fix)
+{
+  segT add_symbol_segment, sub_symbol_segment;
+
+  /* The difference of two symbols should be resolved by the assembler when
+     linkrelax is not set.  If the linker may relax the section containing
+     the symbols, then an Xtensa DIFF relocation must be generated so that
+     the linker knows to adjust the difference value.  */
+  if (!linkrelax || fix->fx_addsy == NULL)
+    return 0;
+
+  /* Make sure both symbols are in the same segment, and that segment is
+     "normal" and relaxable.  If the segment is not "normal", then the
+     fix is not valid.  If the segment is not "relaxable", then the fix
+     should have been handled earlier.  */
+  add_symbol_segment = S_GET_SEGMENT (fix->fx_addsy);
+  if (! SEG_NORMAL (add_symbol_segment) ||
+      ! relaxable_section (add_symbol_segment))
+    return 0;
+
+  sub_symbol_segment = S_GET_SEGMENT (fix->fx_subsy);
+  return (sub_symbol_segment == add_symbol_segment);
+}
+
+/* TC_FORCE_RELOCATION hook */
+
+/* If linkrelax is turned on, and the symbol to relocate
+   against is in a relaxable segment, don't compute the value -
+   generate a relocation instead. */
+int
+avr_force_relocation (fixS *fix)
+{
+  if (linkrelax && fix->fx_addsy
+      && relaxable_section (S_GET_SEGMENT (fix->fx_addsy)))
+    return 1;
+
+  return generic_force_reloc (fix);
+}
+
 /* GAS will call this for each fixup.  It should store the correct
    value in the object file.  */
 
@@ -1223,11 +1279,47 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  fixP->fx_done = 1;
 	}
     }
+  else if (linkrelax && fixP->fx_subsy)
+    {
+      /* For a subtraction relocation expression, generate one
+         of the DIFF relocs, with the value being the difference.
+         Note that a sym1 - sym2 expression is adjusted into a
+         section_start_sym + sym4_offset_from_section_start - sym1
+         expression. fixP->fx_addsy holds the section start symbol,
+         fixP->fx_offset holds sym2's offset, and fixP->fx_subsy
+         holds sym1. Calculate the current difference and write value,
+         but leave fx_offset as is - during relaxation, 
+         fx_offset - value gives sym1's value */
 
+       switch (fixP->fx_r_type)
+         {
+           case BFD_RELOC_8:
+             fixP->fx_r_type = BFD_RELOC_AVR_DIFF8;
+             break;
+           case BFD_RELOC_16:
+             fixP->fx_r_type = BFD_RELOC_AVR_DIFF16;
+             break;
+           case BFD_RELOC_32:
+             fixP->fx_r_type = BFD_RELOC_AVR_DIFF32;
+             break;
+           default:
+             as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+             break;
+         }
+
+      value = S_GET_VALUE (fixP->fx_addsy) +
+          fixP->fx_offset - S_GET_VALUE (fixP->fx_subsy);
+
+      fixP->fx_subsy = NULL;
+  }
   /* We don't actually support subtracting a symbol.  */
   if (fixP->fx_subsy != (symbolS *) NULL)
     as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
 
+  /* For the DIFF relocs, write the value into the object file while still
+     keeping fx_done FALSE, as both the difference (recorded in the object file)
+     and the sym offset (part of fixP) are needed at link relax time */
+  where = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
   switch (fixP->fx_r_type)
     {
     default:
@@ -1237,6 +1329,16 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
     case BFD_RELOC_AVR_13_PCREL:
     case BFD_RELOC_32:
     case BFD_RELOC_16:
+      break;
+    case BFD_RELOC_AVR_DIFF8:
+      *where = value;
+	  break;
+    case BFD_RELOC_AVR_DIFF16:
+      bfd_putl16 ((bfd_vma) value, where);
+      break;
+    case BFD_RELOC_AVR_DIFF32:
+      bfd_putl32 ((bfd_vma) value, where);
+      break;
     case BFD_RELOC_AVR_CALL:
       break;
     }
@@ -1521,22 +1623,7 @@ md_assemble (char *str)
   }
 }
 
-typedef struct
-{
-  /* Name of the expression modifier allowed with .byte, .word, etc.  */
-  const char *name;
-
-  /* Only allowed with n bytes of data.  */
-  int nbytes;
-
-  /* Associated RELOC.  */
-  bfd_reloc_code_real_type reloc;
-
-  /* Part of the error message.  */
-  const char *error;
-} exp_mod_data_t;
-
-static const exp_mod_data_t exp_mod_data[] =
+const exp_mod_data_t exp_mod_data[] =
 {
   /* Default, must be first.  */
   { "", 0, BFD_RELOC_16, "" },
@@ -1557,20 +1644,15 @@ static const exp_mod_data_t exp_mod_data[] =
   { NULL, 0, 0, NULL }
 };
 
-/* Data to pass between `avr_parse_cons_expression' and `avr_cons_fix_new'.  */
-static const exp_mod_data_t *pexp_mod_data = &exp_mod_data[0];
-
 /* Parse special CONS expression: pm (expression) or alternatively
    gs (expression).  These are used for addressing program memory.  Moreover,
    define lo8 (expression), hi8 (expression) and hlo8 (expression).  */
 
-void
+const exp_mod_data_t *
 avr_parse_cons_expression (expressionS *exp, int nbytes)
 {
   const exp_mod_data_t *pexp = &exp_mod_data[0];
   char *tmp;
-
-  pexp_mod_data = pexp;
 
   tmp = input_line_pointer = skip_space (input_line_pointer);
 
@@ -1589,18 +1671,18 @@ avr_parse_cons_expression (expressionS *exp, int nbytes)
 	  if (*input_line_pointer == '(')
 	    {
 	      input_line_pointer = skip_space (input_line_pointer + 1);
-	      pexp_mod_data = pexp;
 	      expression (exp);
 
 	      if (*input_line_pointer == ')')
-		++input_line_pointer;
+		{
+		  ++input_line_pointer;
+		  return pexp;
+		}
 	      else
 		{
 		  as_bad (_("`)' required"));
-		  pexp_mod_data = &exp_mod_data[0];
+		  return &exp_mod_data[0];
 		}
-
-	      return;
 	    }
 
 	  input_line_pointer = tmp;
@@ -1610,13 +1692,15 @@ avr_parse_cons_expression (expressionS *exp, int nbytes)
     }
 
   expression (exp);
+  return &exp_mod_data[0];
 }
 
 void
 avr_cons_fix_new (fragS *frag,
 		  int where,
 		  int nbytes,
-		  expressionS *exp)
+		  expressionS *exp,
+		  const exp_mod_data_t *pexp_mod_data)
 {
   int bad = 0;
 
@@ -1646,8 +1730,6 @@ avr_cons_fix_new (fragS *frag,
 
   if (bad)
     as_bad (_("illegal %srelocation size: %d"), pexp_mod_data->error, nbytes);
-
-  pexp_mod_data = &exp_mod_data[0];
 }
 
 static bfd_boolean
@@ -1673,4 +1755,26 @@ tc_cfi_frame_initial_instructions (void)
   /* Note that AVR consistently uses post-decrement, which means that things
      do not line up the same way as for targers that use pre-decrement.  */
   cfi_add_CFA_offset (DWARF2_DEFAULT_RETURN_COLUMN, 1-return_size);
+}
+
+bfd_boolean
+avr_allow_local_subtract (expressionS * left,
+			     expressionS * right,
+			     segT section)
+{
+  /* If we are not in relaxation mode, subtraction is OK. */
+  if (!linkrelax)
+    return TRUE;
+
+  /* If the symbols are not in a code section then they are OK.  */
+  if ((section->flags & SEC_CODE) == 0)
+    return TRUE;
+
+  if (left->X_add_symbol == right->X_add_symbol)
+    return TRUE;
+
+  /* We have to assume that there may be instructions between the
+     two symbols and that relaxation may increase the distance between
+     them.  */
+  return FALSE;
 }

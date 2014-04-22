@@ -27,6 +27,7 @@ fragment <<EOF
 #include "libbfd.h"
 #include "elf32-ppc.h"
 #include "ldlex.h"
+#include "ldlang.h"
 
 #define is_ppc_elf(bfd) \
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
@@ -173,6 +174,45 @@ ppc_before_allocation (void)
     ENABLE_RELAXATION;
 }
 
+/* Replaces default zero fill padding in executable sections with
+   "ba 0" instructions.  This works around the ppc476 icache bug if we
+   have a function pointer tail call near the end of a page, some
+   small amount of padding, then the function called at the beginning
+   of the next page.  If the "ba 0" is ever executed we should hit a
+   segv, so it's almost as good as an illegal instruction (zero).  */
+
+static void
+no_zero_padding (lang_statement_union_type *l)
+{
+  if (l->header.type == lang_padding_statement_enum
+      && l->padding_statement.size != 0
+      && l->padding_statement.output_section != NULL
+      && (l->padding_statement.output_section->flags & SEC_CODE) != 0
+      && l->padding_statement.fill->size == 0)
+    {
+      struct _ppc_fill_type
+      {
+	size_t size;
+	unsigned char data[4];
+      };
+      static struct _ppc_fill_type fill_be = { 4, {0x48, 0, 0, 2} };
+      static struct _ppc_fill_type fill_le = { 4, {2, 0, 0, 0x48} };
+
+      if (bfd_big_endian (link_info.output_bfd))
+	l->padding_statement.fill = (struct _fill_type *) &fill_be;
+      else
+	l->padding_statement.fill = (struct _fill_type *) &fill_le;
+    }
+}
+
+static void
+ppc_finish (void)
+{
+  if (params.ppc476_workaround)
+    lang_for_each_statement (no_zero_padding);
+  finish_default ();
+}
+
 EOF
 
 if grep -q 'ld_elf32_spu_emulation' ldemul-list.h; then
@@ -303,3 +343,4 @@ if test -z "$VXWORKS_BASE_EM_FILE" ; then
   LDEMUL_AFTER_OPEN=ppc_after_open
 fi
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
+LDEMUL_FINISH=ppc_finish

@@ -193,10 +193,9 @@ void
 xstormy16_cons_fix_new (fragS *f,
 			int where,
 			int nbytes,
-			expressionS *exp)
+			expressionS *exp,
+			bfd_reloc_code_real_type code)
 {
-  bfd_reloc_code_real_type code;
-
   if (exp->X_op == O_fptr_symbol)
     {
       switch (nbytes)

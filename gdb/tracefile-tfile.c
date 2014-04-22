@@ -795,18 +795,17 @@ tfile_fetch_registers (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int offset, regn, regsize, pc_regno;
-  gdb_byte *regs;
+  int offset, regn, regsize;
 
   /* An uninitialized reg size says we're not going to be
      successful at getting register blocks.  */
   if (!trace_regblock_size)
     return;
 
-  regs = alloca (trace_regblock_size);
-
   if (traceframe_find_block_type ('R', 0) >= 0)
     {
+      gdb_byte *regs = alloca (trace_regblock_size);
+
       tfile_read (regs, trace_regblock_size);
 
       /* Assume the block is laid out in GDB register number order,
@@ -832,56 +831,9 @@ tfile_fetch_registers (struct target_ops *ops,
 	    }
 	  offset += regsize;
 	}
-      return;
     }
-
-  /* We get here if no register data has been found.  Mark registers
-     as unavailable.  */
-  for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
-    regcache_raw_supply (regcache, regn, NULL);
-
-  /* We can often usefully guess that the PC is going to be the same
-     as the address of the tracepoint.  */
-  pc_regno = gdbarch_pc_regnum (gdbarch);
-
-  /* XXX This guessing code below only works if the PC register isn't
-     a pseudo-register.  The value of a pseudo-register isn't stored
-     in the (non-readonly) regcache -- instead it's recomputed
-     (probably from some other cached raw register) whenever the
-     register is read.  This guesswork should probably move to some
-     higher layer.  */
-  if (pc_regno < 0 || pc_regno >= gdbarch_num_regs (gdbarch))
-    return;
-
-  if (regno == -1 || regno == pc_regno)
-    {
-      struct tracepoint *tp = get_tracepoint (get_tracepoint_number ());
-
-      if (tp && tp->base.loc)
-	{
-	  /* But don't try to guess if tracepoint is multi-location...  */
-	  if (tp->base.loc->next)
-	    {
-	      warning (_("Tracepoint %d has multiple "
-			 "locations, cannot infer $pc"),
-		       tp->base.number);
-	      return;
-	    }
-	  /* ... or does while-stepping.  */
-	  if (tp->step_count > 0)
-	    {
-	      warning (_("Tracepoint %d does while-stepping, "
-			 "cannot infer $pc"),
-		       tp->base.number);
-	      return;
-	    }
-
-	  store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
-				  gdbarch_byte_order (gdbarch),
-				  tp->base.loc->address);
-	  regcache_raw_supply (regcache, pc_regno, regs);
-	}
-    }
+  else
+    tracefile_fetch_registers (regcache, regno);
 }
 
 static enum target_xfer_status

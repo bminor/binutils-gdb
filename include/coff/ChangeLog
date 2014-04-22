@@ -1,3 +1,16 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* or32.h: Delete.
+
+2014-04-08  Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* pe.h (external_IMAGE_DEBUG_DIRECTORY, _CV_INFO_PDB70)
+	(_CV_INFO_PDB20): Add structures and constants for debug directory
+	and codeview records.
+	* internal.h (internal_IMAGE_DEBUG_DIRECTORY, CODEVIEW_INFO):
+	Add structures and constants for internal representation of debug
+	directory and codeview records.
+
 2014-03-13  Tristan Gingold  <gingold@adacore.com>
 
 	* pe.h (struct external_ANON_OBJECT_HEADER_BIGOBJ): Declare.

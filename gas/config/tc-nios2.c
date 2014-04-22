@@ -3003,12 +3003,10 @@ nios2_elf_section_flags (flagword flags, int attr, int type ATTRIBUTE_UNUSED)
 }
 
 /* Implement TC_PARSE_CONS_EXPRESSION to handle %tls_ldo(...) */
-static int nios2_tls_ldo_reloc;
-
-void
+bfd_reloc_code_real_type
 nios2_cons (expressionS *exp, int size)
 {
-  nios2_tls_ldo_reloc = 0;
+  bfd_reloc_code_real_type nios2_tls_ldo_reloc = BFD_RELOC_NONE;
 
   SKIP_WHITESPACE ();
   if (input_line_pointer[0] == '%')
@@ -3021,10 +3019,10 @@ nios2_cons (expressionS *exp, int size)
 	  else
 	    {
 	      input_line_pointer += 8;
-	      nios2_tls_ldo_reloc = 1;
+	      nios2_tls_ldo_reloc = BFD_RELOC_NIOS2_TLS_DTPREL;
 	    }
 	}
-      if (nios2_tls_ldo_reloc)
+      if (nios2_tls_ldo_reloc != BFD_RELOC_NONE)
 	{
 	  SKIP_WHITESPACE ();
 	  if (input_line_pointer[0] != '(')
@@ -3066,26 +3064,9 @@ nios2_cons (expressionS *exp, int size)
 	    }
 	}
     }
-  if (!nios2_tls_ldo_reloc)
+  if (nios2_tls_ldo_reloc == BFD_RELOC_NONE)
     expression (exp);
-}
-
-/* Implement TC_CONS_FIX_NEW.  */
-void
-nios2_cons_fix_new (fragS *frag, int where, unsigned int nbytes,
-		    expressionS *exp)
-{
-  bfd_reloc_code_real_type r;
-
-  r = (nbytes == 1 ? BFD_RELOC_8
-       : (nbytes == 2 ? BFD_RELOC_16
-	  : (nbytes == 4 ? BFD_RELOC_32 : BFD_RELOC_64)));
-
-  if (nios2_tls_ldo_reloc)
-    r = BFD_RELOC_NIOS2_TLS_DTPREL;
-
-  fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
-  nios2_tls_ldo_reloc = 0;
+  return nios2_tls_ldo_reloc;
 }
 
 /* Implement HANDLE_ALIGN.  */

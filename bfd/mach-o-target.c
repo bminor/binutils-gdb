@@ -54,7 +54,7 @@
 #define bfd_mach_o_bfd_discard_group                  bfd_generic_discard_group
 #define bfd_mach_o_section_already_linked             _bfd_generic_section_already_linked
 #define bfd_mach_o_bfd_define_common_symbol           bfd_generic_define_common_symbol
-#define bfd_mach_o_bfd_copy_private_header_data       _bfd_generic_bfd_copy_private_header_data
+#define bfd_mach_o_bfd_copy_private_bfd_data          _bfd_generic_bfd_copy_private_bfd_data
 #define bfd_mach_o_core_file_matches_executable_p     generic_core_file_matches_executable_p
 #define bfd_mach_o_core_file_pid                      _bfd_nocore_core_file_pid
 
@@ -85,6 +85,10 @@
 #error TARGET_ARCHIVE must be defined
 #endif /* TARGET_ARCHIVE */
 
+#ifndef TARGET_PAGESIZE
+#error TARGET_PAGESIZE must be defined
+#endif
+
 #if ((TARGET_ARCHIVE) && (! TARGET_BIG_ENDIAN))
 #error Mach-O fat files must always be big-endian.
 #endif /* ((TARGET_ARCHIVE) && (! TARGET_BIG_ENDIAN)) */
@@ -92,6 +96,7 @@
 static const bfd_mach_o_backend_data TARGET_NAME_BACKEND =
 {
   TARGET_ARCHITECTURE,
+  TARGET_PAGESIZE,
   bfd_mach_o_swap_reloc_in,
   bfd_mach_o_swap_reloc_out,
   bfd_mach_o_print_thread,

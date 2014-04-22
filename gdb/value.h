@@ -579,9 +579,10 @@ extern struct value *value_from_contents_and_address (struct type *,
 						      CORE_ADDR);
 extern struct value *value_from_contents (struct type *, const gdb_byte *);
 
-extern struct value *default_value_from_register (struct type *type,
+extern struct value *default_value_from_register (struct gdbarch *gdbarch,
+						  struct type *type,
 						  int regnum,
-						  struct frame_info *frame);
+						  struct frame_id frame_id);
 
 extern void read_frame_register_value (struct value *value,
 				       struct frame_info *frame);
@@ -589,7 +590,7 @@ extern void read_frame_register_value (struct value *value,
 extern struct value *value_from_register (struct type *type, int regnum,
 					  struct frame_info *frame);
 
-extern CORE_ADDR address_from_register (struct type *type, int regnum,
+extern CORE_ADDR address_from_register (int regnum,
 					struct frame_info *frame);
 
 extern struct value *value_of_variable (struct symbol *var,
@@ -676,7 +677,7 @@ extern struct value *value_struct_elt_bitpos (struct value **argp,
 					      const char *err);
 
 extern struct value *value_aggregate_elt (struct type *curtype,
-					  char *name,
+					  const char *name,
 					  struct type *expect_type,
 					  int want_address,
 					  enum noside noside);

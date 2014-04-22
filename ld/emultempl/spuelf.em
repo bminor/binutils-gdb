@@ -447,7 +447,7 @@ EOF
 
 if grep -q 'ld_elf.*ppc.*_emulation' ldemul-list.h; then
   fragment <<EOF
-#include <errno.h>
+#include "safe-ctype.h"
 #include "filenames.h"
 #include "libiberty.h"
 

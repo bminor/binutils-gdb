@@ -1,3 +1,4 @@
+
 /* Internal type definitions for GDB.
 
    Copyright (C) 1992-2014 Free Software Foundation, Inc.
@@ -28,18 +29,19 @@
    languages using a common representation defined in gdbtypes.h.
 
    The main data structure is main_type; it consists of a code (such
-   as TYPE_CODE_ENUM for enumeration types), a number of
+   as #TYPE_CODE_ENUM for enumeration types), a number of
    generally-useful fields such as the printable name, and finally a
-   field type_specific that is a union of info specific to particular
-   languages or other special cases (such as calling convention).
+   field main_type::type_specific that is a union of info specific to
+   particular languages or other special cases (such as calling
+   convention).
 
-   The available type codes are defined in enum type_code.  The enum
+   The available type codes are defined in enum #type_code.  The enum
    includes codes both for types that are common across a variety
    of languages, and for types that are language-specific.
 
-   Most accesses to type fields go through macros such as TYPE_CODE
-   and TYPE_FN_FIELD_CONST.  These are written such that they can be
-   used as both rvalues and lvalues.
+   Most accesses to type fields go through macros such as
+   #TYPE_CODE(thistype) and #TYPE_FN_FIELD_CONST(thisfn, n).  These are
+   written such that they can be used as both rvalues and lvalues.
  */
 
 #include "hashtab.h"
@@ -330,8 +332,10 @@ enum type_instance_flag_value
 #define TYPE_OBJFILE(t) (TYPE_OBJFILE_OWNED(t)? TYPE_OWNER(t).objfile : NULL)
 
 /* * True if this type was declared using the "class" keyword.  This is
-   only valid for C++ structure types, and only used for displaying
-   the type.  If false, the structure was declared as a "struct".  */
+   only valid for C++ structure and enum types.  If false, a structure
+   was declared as a "struct"; if true it was declared "class".  For
+   enum types, this is true when "enum class" or "enum struct" was
+   used to declare the type..  */
 
 #define TYPE_DECLARED_CLASS(t) (TYPE_MAIN_TYPE (t)->flag_declared_class)
 
@@ -398,6 +402,33 @@ enum type_instance_flag_value
   (TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1 | TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2)
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
+
+/* * Used to store a dynamic property.  */
+
+struct dynamic_prop
+{
+  /* Determine which field of the union dynamic_prop.data is used.  */
+  enum
+  {
+    PROP_UNDEFINED, /* Not defined.  */
+    PROP_CONST,     /* Constant.  */
+    PROP_LOCEXPR,   /* Location expression.  */
+    PROP_LOCLIST    /* Location list.  */
+  } kind;
+
+  /* Storage for dynamic or static value.  */
+  union data
+  {
+    /* Storage for constant property.  */
+
+    LONGEST const_val;
+
+    /* Storage for dynamic property.  */
+
+    void *baton;
+  } data;
+};
+
 
 /* * Determine which field of the union main_type.fields[x].loc is
    used.  */
@@ -630,19 +661,21 @@ struct main_type
     {
       /* * Low bound of range.  */
 
-      LONGEST low;
+      struct dynamic_prop low;
 
       /* * High bound of range.  */
 
-      LONGEST high;
+      struct dynamic_prop high;
 
-      /* * Flags indicating whether the values of low and high are
-         valid.  When true, the respective range value is
-         undefined.  Currently used only for FORTRAN arrays.  */
-           
-      char low_undefined;
-      char high_undefined;
+      /* True if HIGH range bound contains the number of elements in the
+	 subrange. This affects how the final hight bound is computed.  */
 
+      int flag_upper_bound_is_count : 1;
+
+      /* True if LOW or/and HIGH are resolved into a static bound from
+	 a dynamic one.  */
+
+      int flag_bound_evaluated : 1;
     } *bounds;
 
   } flds_bnds;
@@ -1155,12 +1188,18 @@ extern void allocate_gnat_aux_type (struct type *);
 
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
 #define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
-#define TYPE_LOW_BOUND(range_type) TYPE_RANGE_DATA(range_type)->low
-#define TYPE_HIGH_BOUND(range_type) TYPE_RANGE_DATA(range_type)->high
+#define TYPE_LOW_BOUND(range_type) \
+  TYPE_RANGE_DATA(range_type)->low.data.const_val
+#define TYPE_HIGH_BOUND(range_type) \
+  TYPE_RANGE_DATA(range_type)->high.data.const_val
 #define TYPE_LOW_BOUND_UNDEFINED(range_type) \
-   TYPE_RANGE_DATA(range_type)->low_undefined
+  (TYPE_RANGE_DATA(range_type)->low.kind == PROP_UNDEFINED)
 #define TYPE_HIGH_BOUND_UNDEFINED(range_type) \
-   TYPE_RANGE_DATA(range_type)->high_undefined
+  (TYPE_RANGE_DATA(range_type)->high.kind == PROP_UNDEFINED)
+#define TYPE_HIGH_BOUND_KIND(range_type) \
+  TYPE_RANGE_DATA(range_type)->high.kind
+#define TYPE_LOW_BOUND_KIND(range_type) \
+  TYPE_RANGE_DATA(range_type)->low.kind
 
 /* Moto-specific stuff for FORTRAN arrays.  */
 
@@ -1180,7 +1219,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_VPTR_BASETYPE(thistype) TYPE_MAIN_TYPE(thistype)->vptr_basetype
 #define TYPE_DOMAIN_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->vptr_basetype
 #define TYPE_VPTR_FIELDNO(thistype) TYPE_MAIN_TYPE(thistype)->vptr_fieldno
-#define TYPE_FN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fields
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_SPECIFIC_FIELD(thistype) \
   TYPE_MAIN_TYPE(thistype)->type_specific_field
@@ -1625,11 +1663,16 @@ extern struct type *lookup_function_type_with_arguments (struct type *,
 							 int,
 							 struct type **);
 
-extern struct type *create_range_type (struct type *, struct type *, LONGEST,
-				       LONGEST);
+extern struct type *create_static_range_type (struct type *, struct type *,
+					      LONGEST, LONGEST);
+
 
 extern struct type *create_array_type_with_stride
   (struct type *, struct type *, struct type *, unsigned int);
+
+extern struct type *create_range_type (struct type *, struct type *,
+				       const struct dynamic_prop *,
+				       const struct dynamic_prop *);
 
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);
@@ -1651,6 +1694,15 @@ extern struct type *lookup_signed_typename (const struct language_defn *,
 extern void get_unsigned_type_max (struct type *, ULONGEST *);
 
 extern void get_signed_type_minmax (struct type *, LONGEST *, LONGEST *);
+
+/* * Resolve all dynamic values of a type e.g. array bounds to static values.
+   ADDR specifies the location of the variable the type is bound to.
+   If TYPE has no dynamic properties return TYPE; otherwise a new type with
+   static properties is returned.  */
+extern struct type *resolve_dynamic_type (struct type *type, CORE_ADDR addr);
+
+/* * Predicate if the type has dynamic values, which are not resolved yet.  */
+extern int is_dynamic_type (struct type *type);
 
 extern struct type *check_typedef (struct type *);
 

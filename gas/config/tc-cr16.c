@@ -492,10 +492,9 @@ cr16_force_relocation (fixS *fix)
 /* Record a fixup for a cons expression.  */
 
 void
-cr16_cons_fix_new (fragS *frag, int offset, int len, expressionS *exp)
+cr16_cons_fix_new (fragS *frag, int offset, int len, expressionS *exp,
+		   bfd_reloc_code_real_type rtype)
 {
-  int rtype = BFD_RELOC_UNUSED;
-
   switch (len)
     {
     default: rtype = BFD_RELOC_NONE; break;

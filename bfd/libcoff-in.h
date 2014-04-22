@@ -119,6 +119,14 @@ typedef struct pe_tdata
   bfd_boolean insert_timestamp;
   bfd_boolean (*in_reloc_p) (bfd *, reloc_howto_type *);
   flagword real_flags;
+
+  /* Build-id info.  */
+  struct
+  {
+    bfd_boolean (*after_write_object_contents) (bfd *);
+    const char *style;
+    asection *sec;
+  } build_id;
 } pe_data_type;
 
 #define pe_data(bfd)		((bfd)->tdata.pe_obj_data)

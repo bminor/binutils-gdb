@@ -132,11 +132,12 @@ extern const char *i386_comment_chars;
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
 #endif
-extern void x86_cons (expressionS *, int);
+extern bfd_reloc_code_real_type x86_cons (expressionS *, int);
 
-#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_cons_fix_new(FRAG, OFF, LEN, EXP)
+#define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP, RELOC)	\
+  x86_cons_fix_new(FRAG, OFF, LEN, EXP, RELOC)
 extern void x86_cons_fix_new
-  (fragS *, unsigned int, unsigned int, expressionS *);
+(fragS *, unsigned int, unsigned int, expressionS *, bfd_reloc_code_real_type);
 
 #define TC_ADDRESS_BYTES x86_address_bytes
 extern int x86_address_bytes (void);

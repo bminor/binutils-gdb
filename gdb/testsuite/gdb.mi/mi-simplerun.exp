@@ -45,7 +45,6 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
 proc test_breakpoints_creation_and_listing {} {
-    global mi_gdb_prompt
     global srcfile
     global hex
 
@@ -92,9 +91,6 @@ proc test_breakpoints_creation_and_listing {} {
 }
 
 proc test_running_the_program {} {
-    global mi_gdb_prompt
-    global hex
-
     set line_main_head     [gdb_get_line_number "main ("]
     set line_main_body     [expr $line_main_head + 2]
 
@@ -112,7 +108,6 @@ proc test_running_the_program {} {
 }
 
 proc test_controlled_execution {} {
-    global mi_gdb_prompt
     global hex
 
     set line_callee4_head         [gdb_get_line_number "callee4 ("]
@@ -156,8 +151,6 @@ proc test_controlled_execution {} {
 }
 
 proc test_controlling_breakpoints {} {
-    global mi_gdb_prompt
-
     # Enable, delete, set ignore counts in breakpoints
     # (disable was already tested above)
     # Tests:
@@ -169,8 +162,6 @@ proc test_controlling_breakpoints {} {
 }
 
 proc test_program_termination {} {
-    global mi_gdb_prompt
-
     # Run to completion: normal and forced
     # Tests:
     # -exec-abort

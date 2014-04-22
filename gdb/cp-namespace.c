@@ -221,7 +221,12 @@ cp_is_anonymous (const char *namespace)
    we're looking for, BLOCK is the block that we're searching within,
    DOMAIN says what kind of symbols we're looking for, and if SYMTAB
    is non-NULL, we should store the symtab where we found the symbol
-   in it.  */
+   in it.
+
+   Class, union, and enum tag names may be used in C++ without specifying
+   class-key or enum.  If searching for a VAR_DOMAIN symbol fails,
+   this function will search STRUCT_DOMAIN.  [This is actually done in
+   cp_lookup_symbol_in_namespace.]  */
 
 struct symbol *
 cp_lookup_symbol_nonlocal (const char *name,
@@ -242,7 +247,10 @@ cp_lookup_symbol_nonlocal (const char *name,
 
 /* Look up NAME in the C++ namespace NAMESPACE.  Other arguments are
    as in cp_lookup_symbol_nonlocal.  If SEARCH is non-zero, search
-   through base classes for a matching symbol.  */
+   through base classes for a matching symbol.
+
+   If DOMAIN is VAR_DOMAIN and no matching symbol exists in that domain,
+   this function will search STRUCT_DOMAIN for a match.  */
 
 static struct symbol *
 cp_lookup_symbol_in_namespace (const char *namespace,
@@ -252,18 +260,30 @@ cp_lookup_symbol_in_namespace (const char *namespace,
 {
   if (namespace[0] == '\0')
     {
-      return lookup_symbol_file (name, block, domain, 0, search);
+      struct symbol *sym = lookup_symbol_file (name, block, domain, 0, search);
+
+      if (sym == NULL && domain == VAR_DOMAIN)
+	sym = lookup_symbol_file (name, block, STRUCT_DOMAIN, 0, search);
+
+      return sym;
     }
   else
     {
+      struct symbol *sym;
       char *concatenated_name = alloca (strlen (namespace) + 2
 					+ strlen (name) + 1);
 
       strcpy (concatenated_name, namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, name);
-      return lookup_symbol_file (concatenated_name, block, domain,
-				 cp_is_anonymous (namespace), search);
+      sym = lookup_symbol_file (concatenated_name, block, domain,
+				cp_is_anonymous (namespace), search);
+
+      if (sym == NULL && domain == VAR_DOMAIN)
+	sym = lookup_symbol_file (concatenated_name, block, STRUCT_DOMAIN,
+				  cp_is_anonymous (namespace), search);
+
+      return sym;
     }
 }
 
@@ -516,7 +536,12 @@ cp_lookup_symbol_imports_or_template (const char *scope,
  /* Searches for NAME in the current namespace, and by applying
     relevant import statements belonging to BLOCK and its parents.
     SCOPE is the namespace scope of the context in which the search is
-    being evaluated.  */
+    being evaluated.
+
+    Class, union, and enum tag names may be used in C++ without specifying
+    class-key or enum.  If searching for a VAR_DOMAIN symbol fails,
+    this function will search STRUCT_DOMAIN.  [This is done in
+    cp_lookup_symbol_in_namespace.]  */
 
 struct symbol*
 cp_lookup_symbol_namespace (const char *scope,
@@ -669,6 +694,11 @@ lookup_symbol_file (const char *name,
 	    }
 
 	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (this)));
+	  /* If TYPE_NAME is NULL, abandon trying to find this symbol.
+	     This can happen for lambda functions compiled with clang++,
+	     which outputs no name for the container class.  */
+	  if (TYPE_NAME (type) == NULL)
+	    return NULL;
 	  klass = xstrdup (TYPE_NAME (type));
 	  nested = xstrdup (name);
 	}
@@ -688,7 +718,7 @@ lookup_symbol_file (const char *name,
 
       /* Lookup a class named KLASS.  If none is found, there is nothing
 	 more that can be done.  */
-      klass_sym = lookup_symbol_global (klass, block, domain);
+      klass_sym = lookup_symbol_global (klass, block, STRUCT_DOMAIN);
       if (klass_sym == NULL)
 	{
 	  do_cleanups (cleanup);
@@ -812,6 +842,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_UNION:
+    case TYPE_CODE_ENUM:
     /* NOTE: Handle modules here as well, because Fortran is re-using the C++
        specific code to lookup nested symbols in modules, by calling the
        function pointer la_lookup_symbol_nonlocal, which ends up here.  */

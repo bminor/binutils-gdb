@@ -644,7 +644,13 @@ Layout::include_section(Sized_relobj_file<size, big_endian>*, const char* name,
       && (shdr.get_sh_flags() & elfcpp::SHF_EXCLUDE))
     return false;
 
-  switch (shdr.get_sh_type())
+  elfcpp::Elf_Word sh_type = shdr.get_sh_type();
+
+  if ((sh_type >= elfcpp::SHT_LOOS && sh_type <= elfcpp::SHT_HIOS)
+      || (sh_type >= elfcpp::SHT_LOPROC && sh_type <= elfcpp::SHT_HIPROC))
+    return parameters->target().should_include_section(sh_type);
+
+  switch (sh_type)
     {
     case elfcpp::SHT_NULL:
     case elfcpp::SHT_SYMTAB:

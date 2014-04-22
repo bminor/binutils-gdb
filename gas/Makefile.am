@@ -167,8 +167,7 @@ TARGET_CPU_CFILES = \
 	config/tc-nds32.c \
 	config/tc-nios2.c \
 	config/tc-ns32k.c \
-	config/tc-openrisc.c \
-	config/tc-or32.c \
+	config/tc-or1k.c \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
@@ -239,8 +238,7 @@ TARGET_CPU_HFILES = \
 	config/tc-nds32.h \
 	config/tc-nios2.h \
 	config/tc-ns32k.h \
-	config/tc-openrisc.h \
-	config/tc-or32.h \
+	config/tc-or1k.h \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \

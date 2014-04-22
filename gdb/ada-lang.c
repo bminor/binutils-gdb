@@ -1981,9 +1981,9 @@ ada_type_of_array (struct value *arr, int bounds)
           struct value *high = desc_one_bound (descriptor, arity, 1);
 
           arity -= 1;
-          create_range_type (range_type, value_type (low),
-                             longest_to_int (value_as_long (low)),
-                             longest_to_int (value_as_long (high)));
+          create_static_range_type (range_type, value_type (low),
+				    longest_to_int (value_as_long (low)),
+				    longest_to_int (value_as_long (high)));
           elt_type = create_array_type (array_type, elt_type, range_type);
 
 	  if (ada_is_unconstrained_packed_array_type (value_type (arr)))
@@ -2406,6 +2406,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
       v = value_at (type, value_address (obj));
+      type = value_type (v);
       bytes = (unsigned char *) alloca (len);
       read_memory (value_address (v) + offset, bytes, len);
     }
@@ -2754,9 +2755,10 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
   CORE_ADDR base = value_as_address (array_ptr)
     + ((low - ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type0)))
        * TYPE_LENGTH (TYPE_TARGET_TYPE (type0)));
-  struct type *index_type =
-    create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type0)),
-                       low, high);
+  struct type *index_type
+    = create_static_range_type (NULL,
+				TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type0)),
+				low, high);
   struct type *slice_type =
     create_array_type (NULL, TYPE_TARGET_TYPE (type0), index_type);
 
@@ -2768,8 +2770,8 @@ static struct value *
 ada_value_slice (struct value *array, int low, int high)
 {
   struct type *type = ada_check_typedef (value_type (array));
-  struct type *index_type =
-    create_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
+  struct type *index_type
+    = create_static_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
   struct type *slice_type =
     create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
 
@@ -2980,9 +2982,9 @@ static struct value *
 empty_array (struct type *arr_type, int low)
 {
   struct type *arr_type0 = ada_check_typedef (arr_type);
-  struct type *index_type =
-    create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type0)),
-                       low, low - 1);
+  struct type *index_type
+    = create_static_range_type
+        (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type0)),  low, low - 1);
   struct type *elt_type = ada_array_element_type (arr_type0, 1);
 
   return allocate_value (create_array_type (NULL, elt_type, index_type));
@@ -4389,6 +4391,20 @@ ada_clear_symbol_cache (void)
   ada_init_symbol_cache (sym_cache);
 }
 
+/* STRUCT_DOMAIN symbols are also typedefs for the type.  This function tests
+   the equivalency of two Ada symbol domain types.  */
+
+static int
+ada_symbol_matches_domain (domain_enum symbol_domain, domain_enum domain)
+{
+  if (symbol_domain == domain
+      || ((domain == VAR_DOMAIN || domain == STRUCT_DOMAIN)
+	  && symbol_domain == STRUCT_DOMAIN))
+    return 1;
+
+  return 0;
+}
+
 /* Search our cache for an entry matching NAME and NAMESPACE.
    Return it if found, or NULL otherwise.  */
 
@@ -4490,6 +4506,13 @@ standard_lookup (const char *name, const struct block *block,
   if (lookup_cached_symbol (name, domain, &sym, NULL))
     return sym;
   sym = lookup_symbol_in_language (name, block, domain, language_c, 0);
+
+  /* STRUCT_DOMAIN symbols also define a typedef for the type.  Lookup
+     a STRUCT_DOMAIN symbol if one is requested for VAR_DOMAIN and not
+     found.  */
+  if (sym == NULL && domain == VAR_DOMAIN)
+    sym = lookup_symbol_in_language (name, block, STRUCT_DOMAIN, language_c, 0);
+
   cache_symbol (name, domain, sym, block_found);
   return sym;
 }
@@ -5315,13 +5338,29 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
       data.objfile = objfile;
 
       if (is_wild_match)
-	objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
-					       aux_add_nonlocal_symbols, &data,
-					       wild_match, NULL);
+	{
+	  objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
+						 aux_add_nonlocal_symbols,
+						 &data, wild_match, NULL);
+	  if (domain == VAR_DOMAIN)
+	    objfile->sf->qf->map_matching_symbols (objfile, name,
+						   STRUCT_DOMAIN, global,
+						   aux_add_nonlocal_symbols,
+						   &data, wild_match, NULL);
+	}
       else
-	objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
-					       aux_add_nonlocal_symbols, &data,
-					       full_match, compare_names);
+	{
+	  objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
+						 aux_add_nonlocal_symbols,
+						 &data, full_match,
+						 compare_names);
+	  if (domain == VAR_DOMAIN)
+	    objfile->sf->qf->map_matching_symbols (objfile, name,
+						   STRUCT_DOMAIN, global,
+						   aux_add_nonlocal_symbols,
+						   &data, full_match,
+						   compare_names);
+	}
     }
 
   if (num_defns_collected (obstackp) == 0 && global && !is_wild_match)
@@ -5845,8 +5884,7 @@ ada_add_block_symbols (struct obstack *obstackp,
       for (sym = block_iter_match_first (block, name, wild_match, &iter);
 	   sym != NULL; sym = block_iter_match_next (name, wild_match, &iter))
       {
-        if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-                                   SYMBOL_DOMAIN (sym), domain)
+        if (ada_symbol_matches_domain (SYMBOL_DOMAIN (sym), domain)
             && wild_match (SYMBOL_LINKAGE_NAME (sym), name) == 0)
           {
 	    if (SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
@@ -5868,8 +5906,7 @@ ada_add_block_symbols (struct obstack *obstackp,
      for (sym = block_iter_match_first (block, name, full_match, &iter);
 	  sym != NULL; sym = block_iter_match_next (name, full_match, &iter))
       {
-        if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-                                   SYMBOL_DOMAIN (sym), domain))
+        if (ada_symbol_matches_domain (SYMBOL_DOMAIN (sym), domain))
           {
 	    if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
 	      {
@@ -5901,8 +5938,7 @@ ada_add_block_symbols (struct obstack *obstackp,
 
       ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
-        if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-                                   SYMBOL_DOMAIN (sym), domain))
+        if (ada_symbol_matches_domain (SYMBOL_DOMAIN (sym), domain))
           {
             int cmp;
 
@@ -7486,11 +7522,12 @@ ada_find_any_type_symbol (const char *name)
   struct symbol *sym;
 
   sym = standard_lookup (name, get_selected_block (NULL), VAR_DOMAIN);
-  if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+  if (sym != NULL
+      && (SYMBOL_DOMAIN (sym) != VAR_DOMAIN
+	  || SYMBOL_CLASS (sym) == LOC_TYPEDEF))
     return sym;
 
-  sym = standard_lookup (name, NULL, STRUCT_DOMAIN);
-  return sym;
+  return NULL;
 }
 
 /* Find a type named NAME.  Ignores ambiguity.  This routine will look
@@ -7887,6 +7924,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 		 size first before creating the value.  */
 	      check_size (rtype);
 	      dval = value_from_contents_and_address (rtype, valaddr, address);
+	      rtype = value_type (dval);
 	    }
           else
             dval = dval0;
@@ -7989,7 +8027,10 @@ ada_template_to_fixed_record_type_1 (struct type *type,
       off = TYPE_FIELD_BITPOS (rtype, variant_field);
 
       if (dval0 == NULL)
-        dval = value_from_contents_and_address (rtype, valaddr, address);
+	{
+	  dval = value_from_contents_and_address (rtype, valaddr, address);
+	  rtype = value_type (dval);
+	}
       else
         dval = dval0;
 
@@ -8130,7 +8171,10 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
     return type;
 
   if (dval0 == NULL)
-    dval = value_from_contents_and_address (type, valaddr, address);
+    {
+      dval = value_from_contents_and_address (type, valaddr, address);
+      type = value_type (dval);
+    }
   else
     dval = dval0;
 
@@ -8428,6 +8472,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
 	      value_from_contents_and_address (fixed_record_type,
 					       valaddr,
 					       address);
+            fixed_record_type = value_type (obj);
             if (real_type != NULL)
               return to_fixed_record_type
 		(real_type, NULL,
@@ -11120,9 +11165,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       if (L < INT_MIN || U > INT_MAX)
 	return raw_type;
       else
-	return create_range_type (alloc_type_copy (raw_type), raw_type,
-				  ada_discrete_type_low_bound (raw_type),
-				  ada_discrete_type_high_bound (raw_type));
+	return create_static_range_type (alloc_type_copy (raw_type), raw_type,
+					 L, U);
     }
   else
     {
@@ -11185,7 +11229,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
             }
         }
 
-      type = create_range_type (alloc_type_copy (raw_type), base_type, L, U);
+      type = create_static_range_type (alloc_type_copy (raw_type),
+				       base_type, L, U);
       TYPE_NAME (type) = name;
       return type;
     }

@@ -3957,7 +3957,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	     ldr xd, [x0, #:tlsdesc_lo12:var] => ldr x0, [x0, #:gottprel_lo12:var]
 	   */
 	  insn = bfd_getl32 (contents + rel->r_offset);
-	  insn &= 0xfffffff0;
+	  insn &= 0xffffffe0;
 	  bfd_putl32 (insn, contents + rel->r_offset);
 	  return bfd_reloc_continue;
 	}
@@ -5497,17 +5497,6 @@ elfNN_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
     default:
       return reloc_class_normal;
     }
-}
-
-/* Set the right machine number for an AArch64 ELF file.  */
-
-static bfd_boolean
-elfNN_aarch64_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
-{
-  if (hdr->sh_type == SHT_NOTE)
-    *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;
-
-  return TRUE;
 }
 
 /* Handle an AArch64 specific section when reading an object file.  This is
@@ -7285,9 +7274,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define elf_backend_reloc_type_class		\
   elfNN_aarch64_reloc_type_class
-
-#define elf_backend_section_flags		\
-  elfNN_aarch64_section_flags
 
 #define elf_backend_section_from_shdr		\
   elfNN_aarch64_section_from_shdr

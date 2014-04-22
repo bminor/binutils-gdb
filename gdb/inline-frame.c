@@ -26,6 +26,7 @@
 #include "regcache.h"
 #include "symtab.h"
 #include "vec.h"
+#include "frame.h"
 
 #include "gdb_assert.h"
 
@@ -154,11 +155,11 @@ inline_frame_this_id (struct frame_info *this_frame,
 
   /* In order to have a stable frame ID for a given inline function,
      we must get the stack / special addresses from the underlying
-     real frame's this_id method.  So we must call get_prev_frame.
-     Because we are inlined into some function, there must be previous
-     frames, so this is safe - as long as we're careful not to
-     create any cycles.  */
-  *this_id = get_frame_id (get_prev_frame (this_frame));
+     real frame's this_id method.  So we must call
+     get_prev_frame_always.  Because we are inlined into some
+     function, there must be previous frames, so this is safe - as
+     long as we're careful not to create any cycles.  */
+  *this_id = get_frame_id (get_prev_frame_always (this_frame));
 
   /* We need a valid frame ID, so we need to be based on a valid
      frame.  FSF submission NOTE: this would be a good assertion to

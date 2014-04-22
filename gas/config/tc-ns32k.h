@@ -54,7 +54,8 @@ extern int md_pcrel_adjust (fragS *);
 #define ARG_LEN 50
 
 #define TC_CONS_FIX_NEW cons_fix_new_ns32k
-extern void cons_fix_new_ns32k (fragS *, int, int, expressionS *);
+extern void cons_fix_new_ns32k (fragS *, int, int, expressionS *,
+				bfd_reloc_code_real_type);
 
 /* The NS32x32 has a non 0 nop instruction which should be used in aligns.  */
 #define NOP_OPCODE 0xa2

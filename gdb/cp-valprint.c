@@ -443,6 +443,7 @@ cp_print_value_fields_rtti (struct type *type,
       /* Ugh, we have to convert back to a value here.  */
       value = value_from_contents_and_address (type, valaddr + offset,
 					       address + offset);
+      type = value_type (value);
       /* We don't actually care about most of the result here -- just
 	 the type.  We already have the correct offset, due to how
 	 val_print was initially called.  */
@@ -545,6 +546,7 @@ cp_print_value (struct type *type, struct type *real_type,
 		  base_val = value_from_contents_and_address (baseclass,
 							      buf,
 							      address + boffset);
+		  baseclass = value_type (base_val);
 		  thisoffset = 0;
 		  boffset = 0;
 		  thistype = baseclass;

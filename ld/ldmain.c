@@ -378,6 +378,13 @@ main (int argc, char **argv)
 
   lang_final ();
 
+  /* If the only command line argument has been -v or --version or --verbose
+     then ignore any input files provided by linker scripts and exit now.
+     We do not want to create an output file when the linker is just invoked
+     to provide version information.  */
+  if (argc == 2 && version_printed)
+    xexit (0);
+
   if (!lang_has_input_file)
     {
       if (version_printed || command_line.print_output_format)
@@ -425,7 +432,14 @@ main (int argc, char **argv)
     output_cref (config.map_file != NULL ? config.map_file : stdout);
   if (nocrossref_list != NULL)
     check_nocrossrefs ();
+#if 0
+  {
+    struct bfd_link_hash_entry * h;
 
+    h = bfd_link_hash_lookup (link_info.hash, "__image_base__", 0,0,1);
+    fprintf (stderr, "lookup = %p val %lx\n", h, h ? h->u.def.value : 1);
+  }
+#endif
   lang_finish ();
 
   /* Even if we're producing relocatable output, some non-fatal errors should

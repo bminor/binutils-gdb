@@ -5121,10 +5121,9 @@ tc_gen_reloc (asection *section, fixS *fixP)
 /* Handle cons expressions.  */
 
 void
-tic54x_cons_fix_new (fragS *frag, int where, int octets, expressionS *expn)
+tic54x_cons_fix_new (fragS *frag, int where, int octets, expressionS *expn,
+		     bfd_reloc_code_real_type r)
 {
-  bfd_reloc_code_real_type r;
-
   switch (octets)
     {
     default:

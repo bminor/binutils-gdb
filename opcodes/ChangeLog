@@ -1,3 +1,28 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.
+	* configure.in: Likewise.
+	* disassemble.c: Likewise.
+	* or1k-asm.c: New file.
+	* or1k-desc.c: New file.
+	* or1k-desc.h: New file.
+	* or1k-dis.c: New file.
+	* or1k-ibld.c: New file.
+	* or1k-opc.c: New file.
+	* or1k-opc.h: New file.
+	* or1k-opinst.c: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* openrisc-asm.c: Delete.
+	* openrisc-desc.c: Delete.
+	* openrisc-desc.h: Delete.
+	* openrisc-dis.c: Delete.
+	* openrisc-ibld.c: Delete.
+	* openrisc-opc.c: Delete.
+	* openrisc-opc.h: Delete.
+	* or32-dis.c: Delete.
+	* or32-opc.c: Delete.
+
 2014-04-04  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* i386-dis.c (rm_table): Add encls, enclu.

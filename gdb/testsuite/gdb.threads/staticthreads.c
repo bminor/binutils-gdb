@@ -37,7 +37,7 @@ thread_function (void *arg)
       if (errno != EINTR)
 	{
 	  perror ("thread_function");
-	  return;
+	  return NULL;
 	}
     }
   return NULL;

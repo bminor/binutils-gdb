@@ -1013,7 +1013,8 @@ mn10300_check_fixup (struct mn10300_fixup *fixup)
 }
 
 void
-mn10300_cons_fix_new (fragS *frag, int off, int size, expressionS *exp)
+mn10300_cons_fix_new (fragS *frag, int off, int size, expressionS *exp,
+		      bfd_reloc_code_real_type r ATTRIBUTE_UNUSED)
 {
   struct mn10300_fixup fixup;
 

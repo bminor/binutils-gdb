@@ -28,7 +28,6 @@ if {
         ![istarget i370-*-*]
      && ![istarget i960-*-*]
      && ![istarget mcore-*-*]
-     && ![istarget or32-*-*]
      && ![istarget rx-*-*]
      && ![istarget s390*-*-*]
 } {
@@ -44,6 +43,8 @@ if {
       run_dump_test "lns-big-delta"
     } elseif { [istarget ia64*-*-*] } {
       run_dump_test "lns-common-1" { { source "lns-common-1-ia64.s" } }
+    } elseif { [istarget or1k*-*-*] } {
+      run_dump_test "lns-common-1" { { source "lns-common-1-or1k.s" } }
     } else {
       run_dump_test "lns-common-1"
     }

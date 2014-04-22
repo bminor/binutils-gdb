@@ -3350,6 +3350,15 @@ main (int argc, char *argv[])
     }
 }
 
+/* Skip PACKET until the next semi-colon (or end of string).  */
+
+static void
+skip_to_semicolon (char **packet)
+{
+  while (**packet != '\0' && **packet != ';')
+    (*packet)++;
+}
+
 /* Process options coming from Z packets for *point at address
    POINT_ADDR.  PACKET is the packet buffer.  *PACKET is updated
    to point to the first char after the last processed option.  */
@@ -3376,7 +3385,8 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 	  /* Conditional expression.  */
 	  if (debug_threads)
 	    debug_printf ("Found breakpoint condition.\n");
-	  add_breakpoint_condition (point_addr, &dataptr);
+	  if (!add_breakpoint_condition (point_addr, &dataptr))
+	    skip_to_semicolon (&dataptr);
 	}
       else if (strncmp (dataptr, "cmds:", strlen ("cmds:")) == 0)
 	{
@@ -3385,15 +3395,15 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 	    debug_printf ("Found breakpoint commands %s.\n", dataptr);
 	  persist = (*dataptr == '1');
 	  dataptr += 2;
-	  add_breakpoint_commands (point_addr, &dataptr, persist);
+	  if (add_breakpoint_commands (point_addr, &dataptr, persist))
+	    skip_to_semicolon (&dataptr);
 	}
       else
 	{
 	  fprintf (stderr, "Unknown token %c, ignoring.\n",
 		   *dataptr);
 	  /* Skip tokens until we find one that we recognize.  */
-	  while (*dataptr && *dataptr != ';')
-	    dataptr++;
+	  skip_to_semicolon (&dataptr);
 	}
     }
   *packet = dataptr;

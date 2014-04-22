@@ -307,6 +307,13 @@ extern void select_frame (struct frame_info *);
 extern struct frame_info *get_prev_frame (struct frame_info *);
 extern struct frame_info *get_next_frame (struct frame_info *);
 
+/* Return a "struct frame_info" corresponding to the frame that called
+   THIS_FRAME.  Returns NULL if there is no such frame.
+
+   Unlike get_prev_frame, this function always tries to unwind the
+   frame.  */
+extern struct frame_info *get_prev_frame_always (struct frame_info *);
+
 /* Given a frame's ID, relocate the frame.  Returns NULL if the frame
    is not found.  */
 extern struct frame_info *frame_find_by_id (struct frame_id id);

@@ -1598,6 +1598,13 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       return FALSE;
     }
 
+  if (ibfd->sections == NULL)
+    {
+      non_fatal (_("error: the input file '%s' has no sections"),
+		 bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
   if (verbose)
     printf (_("copy from `%s' [%s] to `%s' [%s]\n"),
 	    bfd_get_archive_filename (ibfd), bfd_get_target (ibfd),

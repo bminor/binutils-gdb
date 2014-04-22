@@ -17,7 +17,7 @@ load_lib "java.exp"
 
 standard_testfile .java
 if  { [compile_java_from_source $srcdir/$subdir/$srcfile $binfile "-g"] != "" } {
-    untested "Couldn't compile ${srcdir}/$subdir/${srcfile}"
+    untested "Couldn't compile $subdir/${srcfile}"
     return -1
 }
 

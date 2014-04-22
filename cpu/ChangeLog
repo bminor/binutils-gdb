@@ -1,3 +1,13 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* openrisc.cpu: Delete.
+	* openrisc.opc: Delete.
+	* or1k.cpu: New file.
+	* or1k.opc: New file.
+	* or1kcommon.cpu: New file.
+	* or1korbis.cpu: New file.
+	* or1korfpx.cpu: New file.
+
 2013-12-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* epiphany.opc: Remove +x file mode.

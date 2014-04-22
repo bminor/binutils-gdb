@@ -54,7 +54,7 @@ struct tilepro_operand;
 extern void tilepro_cons_fix_new (struct frag *, int,
 				  int, struct expressionS *);
 
-#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP)	\
+#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP, RELOC)	\
   tilepro_cons_fix_new (FRAG, WHERE, NBYTES, EXP)
 
 extern int tilepro_parse_name (char *, expressionS *, char *);

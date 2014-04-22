@@ -59,6 +59,7 @@ dynamic_array_type (struct type *type, const gdb_byte *valaddr,
 
       true_type = lookup_array_range_type (true_type, 0, length - 1);
       ival = value_at (true_type, addr);
+      true_type = value_type (ival);
 
       d_val_print (true_type,
 		   value_contents_for_printing (ival),

@@ -418,8 +418,7 @@ bfd_mach_o_thread_command;
 
 typedef struct bfd_mach_o_dylinker_command
 {
-  unsigned long name_offset;         /* Offset to library's path name.  */
-  unsigned long name_len;            /* Offset to library's path name.  */
+  unsigned int name_offset;         /* Offset to library's path name.  */
   char *name_str;
 }
 bfd_mach_o_dylinker_command;
@@ -429,8 +428,7 @@ bfd_mach_o_dylinker_command;
 
 typedef struct bfd_mach_o_dylib_command
 {
-  unsigned long name_offset;           /* Offset to library's path name.  */
-  unsigned long name_len;              /* Offset to library's path name.  */
+  unsigned int name_offset;            /* Offset to library's path name.  */
   unsigned long timestamp;	       /* Library's build time stamp.  */
   unsigned long current_version;       /* Library's current version number.  */
   unsigned long compatibility_version; /* Library's compatibility vers number.  */
@@ -479,7 +477,6 @@ bfd_mach_o_str_command;
 typedef struct bfd_mach_o_fvmlib_command
 {
   unsigned int name_offset;
-  unsigned int name_len;
   char *name_str;
   unsigned int minor_version;
   unsigned int header_addr;
@@ -491,22 +488,27 @@ typedef struct bfd_mach_o_dyld_info_command
   /* File offset and size to rebase info.  */
   unsigned int rebase_off;
   unsigned int rebase_size;
+  unsigned char *rebase_content;
 
   /* File offset and size of binding info.  */
   unsigned int bind_off;
   unsigned int bind_size;
+  unsigned char *bind_content;
 
   /* File offset and size of weak binding info.  */
   unsigned int weak_bind_off;
   unsigned int weak_bind_size;
+  unsigned char *weak_bind_content;
 
   /* File offset and size of lazy binding info.  */
   unsigned int lazy_bind_off;
   unsigned int lazy_bind_size;
+  unsigned char *lazy_bind_content;
 
   /* File offset and size of export info.  */
   unsigned int export_off;
   unsigned int export_size;
+  unsigned char *export_content;
 }
 bfd_mach_o_dyld_info_command;
 
@@ -546,10 +548,17 @@ bfd_mach_o_source_version_command;
 
 typedef struct bfd_mach_o_load_command
 {
+  /* Next command in the single linked list.  */
+  struct bfd_mach_o_load_command *next;
+
+  /* Type and required flag.  */
   bfd_mach_o_load_command_type type;
   bfd_boolean type_required;
+
+  /* Offset and length in the file.  */
   unsigned int offset;
   unsigned int len;
+
   union
   {
     bfd_mach_o_segment_command segment;
@@ -570,8 +579,7 @@ typedef struct bfd_mach_o_load_command
     bfd_mach_o_fvmlib_command fvmlib;
     bfd_mach_o_main_command main;
     bfd_mach_o_source_version_command source_version;
-  }
-  command;
+  } command;
 }
 bfd_mach_o_load_command;
 
@@ -580,7 +588,8 @@ typedef struct mach_o_data_struct
   /* Mach-O header.  */
   bfd_mach_o_header header;
   /* Array of load commands (length is given by header.ncmds).  */
-  bfd_mach_o_load_command *commands;
+  bfd_mach_o_load_command *first_command;
+  bfd_mach_o_load_command *last_command;
 
   /* Flatten array of sections.  The array is 0-based.  */
   unsigned long nsects;
@@ -639,7 +648,7 @@ bfd_boolean bfd_mach_o_bfd_copy_private_symbol_data (bfd *, asymbol *,
                                                      bfd *, asymbol *);
 bfd_boolean bfd_mach_o_bfd_copy_private_section_data (bfd *, asection *,
                                                       bfd *, asection *);
-bfd_boolean bfd_mach_o_bfd_copy_private_bfd_data (bfd *, bfd *);
+bfd_boolean bfd_mach_o_bfd_copy_private_header_data (bfd *, bfd *);
 bfd_boolean bfd_mach_o_bfd_set_private_flags (bfd *, flagword);
 long bfd_mach_o_get_symtab_upper_bound (bfd *);
 long bfd_mach_o_canonicalize_symtab (bfd *, asymbol **);
@@ -719,6 +728,7 @@ bfd_mach_o_section_data_for_bfd_name (bfd *, const char *, const char **);
 typedef struct bfd_mach_o_backend_data
 {
   enum bfd_architecture arch;
+  bfd_vma page_size;
   bfd_boolean (*_bfd_mach_o_swap_reloc_in)(arelent *, bfd_mach_o_reloc_info *);
   bfd_boolean (*_bfd_mach_o_swap_reloc_out)(arelent *, bfd_mach_o_reloc_info *);
   bfd_boolean (*_bfd_mach_o_print_thread)(bfd *, bfd_mach_o_thread_flavour *,

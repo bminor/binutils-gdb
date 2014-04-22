@@ -27,7 +27,6 @@
 #  targ_extra_emuls	additional linker emulations to provide
 #  targ_extra_libpath	additional linker emulations using LIB_PATH
 #  targ_extra_ofiles	additional host-compiled objects needed by the emulation
-#  targ_extra_binaries  additional target-built binaries needed by the emulation
 #  targ64_extra_emuls	additional linker emulations to provide if
 #  			--enable-64-bit-bfd is given or if host is 64 bit.
 #  targ64_extra_libpath	additional linker emulations using LIB_PATH if
@@ -310,30 +309,23 @@ i[3-7]86-*-gnu*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-msdos*)	targ_emul=i386msdos; targ_extra_emuls=i386aout ;;
 i[3-7]86-*-moss*)	targ_emul=i386moss; targ_extra_emuls=i386msdos ;;
 i[3-7]86-*-winnt*)	targ_emul=i386pe ;
-			targ_extra_binaries="default-manifest.o" ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 i[3-7]86-*-pe)		targ_emul=i386pe ;
-			targ_extra_binaries="default-manifest.o" ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 i[3-7]86-*-cygwin*)	targ_emul=i386pe ;
-			targ_extra_binaries="default-manifest.o" ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;
 			test "$targ" != "$host" && LIB_PATH='${tooldir}/lib/w32api' ;;
 i[3-7]86-*-mingw32*)	targ_emul=i386pe ;
-			targ_extra_binaries="default-manifest.o" ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 x86_64-*-pe | x86_64-*-pep) targ_emul=i386pep ;
 			targ_extra_emuls=i386pe ;
-			targ_extra_binaries="default-manifest.o" ;
 			targ_extra_ofiles="deffilep.o pep-dll.o pe-dll.o" ;;
 x86_64-*-cygwin)	targ_emul=i386pep ;
 			targ_extra_emuls=i386pe
-			targ_extra_binaries="default-manifest.o" ;
 			targ_extra_ofiles="deffilep.o pep-dll.o pe-dll.o"
 			test "$targ" != "$host" && LIB_PATH='${tooldir}/lib/w32api' ;;
 x86_64-*-mingw*)	targ_emul=i386pep ;
 			targ_extra_emuls=i386pe
-			targ_extra_binaries="default-manifest.o" ;
 			targ_extra_ofiles="deffilep.o pep-dll.o pe-dll.o" ;;
 i[3-7]86-*-interix*)	targ_emul=i386pe_posix;
  			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
@@ -535,10 +527,9 @@ nios2*-*-*)		targ_emul=nios2elf ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)  targ_emul=pc532macha ;;
 ns32k-*-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd
 			;;
-openrisc-*-*)		targ_emul=elf32openrisc ;;
-or32-*-coff)		targ_emul=or32 ;;
-or32-*-elf)		targ_emul=or32elf ;;
-or32-*-rtems*)          targ_emul=or32elf
+or1k-*-elf | or1knd-*-elf)		targ_emul=elf32or1k ;;
+or1k-*-linux* | or1knd-*-linux*)	targ_emul=elf32or1k_linux ;;
+or1k-*-rtems* | or1knd-*-rtems*)	targ_emul=elf32or1k
 			;;
 pdp11-*-*)		targ_emul=pdp11
 			;;

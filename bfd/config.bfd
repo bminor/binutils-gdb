@@ -48,6 +48,11 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
+ openrisc-*-* | or32-*-*)
+    echo "*** Configuration $targ is obsolete." >&2
+    echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
+    exit 1
+    ;;
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -59,24 +64,24 @@ case $targ in
 esac
 
 case $targ in
- m68*-apple-aux* | \
- m68*-apollo-* | \
- m68*-bull-sysv* | \
- m68*-*-rtemscoff* | \
- maxq-*-coff | \
- i960-*-rtems* | \
- or32-*-rtems* | \
- m68*-*-lynxos* | \
- sparc-*-lynxos* | \
- vax-*-vms* | \
- arm-*-oabi | \
- a29k-* | \
- hppa*-*-rtems* | \
  *-go32-rtems* | \
+ a29k-* | \
+ arm-*-oabi | \
+ hppa*-*-rtems* | \
+ i960-*-rtems* | \
  i[3-7]86*-*-rtemscoff* | \
+ m68*-*-lynxos* | \
+ m68*-*-rtemscoff* | \
+ m68*-apollo-* | \
+ m68*-apple-aux* | \
+ m68*-bull-sysv* | \
+ maxq-*-coff | \
  mips*el-*-rtems* | \
+ or1k-*-rtems* | \
  powerpcle-*-rtems* | \
  sparc*-*-rtemsaout* | \
+ sparc-*-lynxos* | \
+ vax-*-vms* | \
  null)
     echo "*** Configuration $targ is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
@@ -111,7 +116,7 @@ microblaze*)	 targ_archs=bfd_microblaze_arch ;;
 mips*)		 targ_archs=bfd_mips_arch ;;
 nds32*)		 targ_archs=bfd_nds32_arch ;;
 nios2*)          targ_archs=bfd_nios2_arch ;;
-or32*)		 targ_archs=bfd_or32_arch ;;
+or1k*|or1knd*)	 targ_archs=bfd_or1k_arch ;;
 pdp11*)		 targ_archs=bfd_pdp11_arch ;;
 pj*)		 targ_archs="bfd_pj_arch bfd_i386_arch";;
 powerpc*)	 targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
@@ -1165,17 +1170,12 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_bignios2_vec
     ;;
 
-  openrisc-*-elf)
-    targ_defvec=bfd_elf32_openrisc_vec
+  or1k-*-elf | or1k-*-linux*)
+    targ_defvec=bfd_elf32_or1k_vec
     ;;
 
-  or32-*-coff)
-    targ_defvec=or32coff_big_vec
-    targ_underscore=yes
-    ;;
-
-  or32-*-elf)
-    targ_defvec=bfd_elf32_or32_big_vec
+  or1knd-*-elf | or1knd-*-linux*)
+    targ_defvec=bfd_elf32_or1k_vec
     ;;
 
   pdp11-*-*)

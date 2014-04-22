@@ -2096,12 +2096,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
   machine = 0;
   switch (internal_f->f_magic)
     {
-#ifdef OR32_MAGIC_BIG
-    case OR32_MAGIC_BIG:
-    case OR32_MAGIC_LITTLE:
-      arch = bfd_arch_or32;
-      break;
-#endif
 #ifdef PPCMAGIC
     case PPCMAGIC:
       arch = bfd_arch_powerpc;
@@ -3065,15 +3059,6 @@ coff_set_flags (bfd * abfd,
 #ifdef W65MAGIC
     case bfd_arch_w65:
       *magicp = W65MAGIC;
-      return TRUE;
-#endif
-
-#ifdef OR32_MAGIC_BIG
-    case bfd_arch_or32:
-      if (bfd_big_endian (abfd))
-	* magicp = OR32_MAGIC_BIG;
-      else
-	* magicp = OR32_MAGIC_LITTLE;
       return TRUE;
 #endif
 
@@ -4158,11 +4143,6 @@ coff_write_object_contents (bfd * abfd)
     internal_a.magic = MIPS_PE_MAGIC;
 #endif
 
-#ifdef OR32
-#define __A_MAGIC_SET__
-    internal_a.magic = NMAGIC; /* Assume separate i/d.  */
-#endif
-
 #ifndef __A_MAGIC_SET__
 #include "Your aouthdr magic number is not being set!"
 #else
@@ -4329,7 +4309,18 @@ coff_write_object_contents (bfd * abfd)
     }
 #endif
 
-  /* Now write them.  */
+#ifdef COFF_WITH_PE
+  {
+    /* After object contents are finalized so we can compute a reasonable hash,
+       but before header is written so we can update it to point to debug directory.  */
+    struct pe_tdata *pe = pe_data (abfd);
+
+    if (pe->build_id.after_write_object_contents != NULL)
+      (*pe->build_id.after_write_object_contents) (abfd);
+  }
+#endif
+
+  /* Now write header.  */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return FALSE;
 

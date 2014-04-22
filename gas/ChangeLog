@@ -1,3 +1,186 @@
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.
+	* configure.in: Likewise.
+	* configure.tgt: Likewise.
+	* doc/as.texinfo: Likewise.
+	* config/obj-coff.h: Likewise.
+	* config/tc-or1k.c: New file.
+	* config/tc-or1k.h: New file.
+	* config/tc-openrisc.c: Delete.
+	* config/tc-openrisc.h: Delete.
+	* config/tc-or32.c: Delete.
+	* config/tc-or32.h: Delete.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2014-04-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-tilegx.h (TC_CONS_FIX_NEW): Add RELOC arg.
+	* config/tc-tilepro.h (TC_CONS_FIX_NEW): Likewise.
+
+2014-04-10  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* config/tc-avr.c: Add new flag mlink-relax.
+	(md_show_usage): Add flag and help text.
+	(md_parse_option): Record whether link relax is turned on.
+	(relaxable_section): New.
+	(avr_validate_fix_sub): New.
+	(avr_force_relocation): New.
+	(md_apply_fix): Generate DIFF reloc.
+	(avr_allow_local_subtract): New.
+
+	* config/tc-avr.h (TC_LINKRELAX_FIXUP): Define to 0.
+	(TC_FORCE_RELOCATION): Define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define.
+	(TC_VALIDATE_FIX_SUB): Define.
+	(avr_force_relocation): Declare.
+	(avr_validate_fix_sub): Declare.
+	(md_allow_local_subtract): Define.
+	(avr_allow_local_subtract): Declare.
+
+2014-04-10  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add P5600
+	configuation.
+	* doc/c-mips.texi: Document p5600.
+
+2014-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.h (TC_CONS_FIX_NEW): Add RELOC parameter.
+	* config/tc-z80.h (TC_CONS_FIX_NEW): Discard RELOC parameter.
+	* config/tc-aarch64.h (TC_CONS_FIX_NEW): Discard RELOC parameter.
+	* read.c (emit_expr_fix): Mark the r parameter as potentially
+	unused.
+
+2014-04-09  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (warn_476, last_insn, last_seg, last_subseg):
+	New static vars.
+	(md_longopts, md_parse_option, md_show_usage): Add --ppc476-workaround.
+	(ppc_elf_cons_fix_check): New function.
+	(md_assemble): Set last_insn, last_seg, last_subseg.
+	(ppc_byte, md_apply_fix): Handle warn_476.
+	* config/tc-ppc.h (TC_CONS_FIX_CHECK): Define.
+	(ppc_elf_cons_fix_check): Declare.
+	* read.c (cons_worker): Invoke TC_CONS_FIX_CHECK.
+
+2014-04-09  Alan Modra  <amodra@gmail.com>
+
+	* gas/config/tc-alpha.h (TC_CONS_FIX_NEW): Add RELOC parameter.
+	* gas/config/tc-arc.c (arc_cons_fix_new): Add reloc parameter.
+	* gas/config/tc-arc.h (arc_cons_fix_new): Update prototype.
+	(TC_CONS_FIX_NEW): Add RELOC parameter.
+	* gas/config/tc-arm.c (cons_fix_new_arm): Similarly
+	* gas/config/tc-arm.h (cons_fix_new_arm, TC_CONS_FIX_NEW): Similarly.
+	* gas/config/tc-cr16.c (cr16_cons_fix_new): Similarly.
+	* gas/config/tc-cr16.h (cr16_cons_fix_new, TC_CONS_FIX_NEW): Similarly.
+	* gas/config/tc-crx.h (TC_CONS_FIX_NEW): Similarly.
+	* gas/config/tc-m32c.c (m32c_cons_fix_new): Similarly.
+	* gas/config/tc-m32c.h (m32c_cons_fix_new, TC_CONS_FIX_NEW): Similarly.
+	* gas/config/tc-mn10300.c (mn10300_cons_fix_new): Similarly.
+	* gas/config/tc-mn10300.h (mn10300_cons_fix_new, TC_CONS_FIX_NEW):
+	Similarly.
+	* gas/config/tc-ns32k.c (cons_fix_new_ns32k): Similarly.
+	* gas/config/tc-ns32k.h (cons_fix_new_ns32k): Similarly.
+	* gas/config/tc-pj.c (pj_cons_fix_new_pj): Similarly.
+	* gas/config/tc-pj.h (pj_cons_fix_new_pj, TC_CONS_FIX_NEW): Similarly.
+	* gas/config/tc-rx.c (rx_cons_fix_new): Similarly.
+	* gas/config/tc-rx.h (rx_cons_fix_new, TC_CONS_FIX_NEW): Similarly.
+	* gas/config/tc-sh.c (sh_cons_fix_new): Similarly.
+	* gas/config/tc-sh.h (sh_cons_fix_new, TC_CONS_FIX_NEW): Similarly.
+	* gas/config/tc-tic54x.c (tic54x_cons_fix_new): Similarly.
+	* gas/config/tc-tic54x.h (tic54x_cons_fix_new, TC_CONS_FIX_NEW):
+	Similarly.
+	* gas/config/tc-tic6x.c (tic6x_cons_fix_new): Similarly.
+	* gas/config/tc-tic6x.h (tic6x_cons_fix_new, TC_CONS_FIX_NEW):
+	Similarly.
+	* gas/config/tc-arc.c (arc_parse_cons_expression): Return reloc.
+	* gas/config/tc-arc.h (arc_parse_cons_expression): Update proto.
+	* gas/config/tc-avr.c (exp_mod_data): Make global.
+	(pexp_mod_data): Delete.
+	(avr_parse_cons_expression): Return exp_mod_data pointer.
+	(avr_cons_fix_new): Add exp_mod_data_t pointer param.
+	(exp_mod_data_t): Move typedef..
+	* gas/config/tc-avr.h: ..to here.
+	(exp_mod_data): Declare.
+	(TC_PARSE_CONS_RETURN_TYPE, TC_PARSE_CONS_RETURN_NONE): Define.
+	(avr_parse_cons_expression, avr_cons_fix_new): Update prototype.
+	(TC_CONS_FIX_NEW): Update.
+	* gas/config/tc-hppa.c (hppa_field_selector): Delete static var.
+	(cons_fix_new_hppa): Add hppa_field_selector param.
+	(fix_new_hppa): Adjust.
+	(parse_cons_expression_hppa): Return field selector.
+	* gas/config/tc-hppa.h (parse_cons_expression_hppa): Update proto.
+	(cons_fix_new_hppa): Likewise.
+	(TC_PARSE_CONS_RETURN_TYPE, TC_PARSE_CONS_RETURN_NONE): Define.
+	* gas/config/tc-i386.c (got_reloc): Delete static var.
+	(x86_cons_fix_new): Add reloc param.
+	(x86_cons): Return got reloc.
+	* gas/config/tc-i386.h (x86_cons, x86_cons_fix_new): Update proto.
+	(TC_CONS_FIX_NEW): Add RELOC param.
+	* gas/config/tc-ia64.c (ia64_cons_fix_new): Add reloc param.  Adjust
+	calls.
+	* gas/config/tc-ia64.h (ia64_cons_fix_new): Update prototype.
+	(TC_CONS_FIX_NEW): Add reloc param.
+	* gas/config/tc-microblaze.c (parse_cons_expression_microblaze):
+	Return reloc.
+	(cons_fix_new_microblaze): Add reloc param.
+	* gas/config/tc-microblaze.h: Formatting.
+	(parse_cons_expression_microblaze): Update proto.
+	(cons_fix_new_microblaze): Likewise.
+	* gas/config/tc-nios2.c (nios2_tls_ldo_reloc): Delete static var.
+	(nios2_cons): Return ldo reloc.
+	(nios2_cons_fix_new): Delete.
+	* gas/config/tc-nios2.h (nios2_cons): Update prototype.
+	(nios2_cons_fix_new, TC_CONS_FIX_NEW): Delete.
+	* gas/config/tc-ppc.c (md_pseudo_table): Remove quad, long, word,
+	short.  Make llong use cons.
+	(ppc_elf_suffix): Return BFD_RELOC_NONE rather than BFD_RELOC_UNUSED.
+	(ppc_elf_cons): Delete.
+	(ppc_elf_parse_cons): New function.
+	(ppc_elf_validate_fix): Don't check for BFD_RELOC_UNUSED.
+	(md_assemble): Use BFD_RELOC_NONE rather than BFD_RELOC_UNUSED.
+	* gas/config/tc-ppc.h (TC_PARSE_CONS_EXPRESSION): Define
+	(ppc_elf_parse_cons): Declare.
+	* gas/config/tc-sparc.c (sparc_cons_special_reloc): Delete static var.
+	(sparc_cons): Return reloc specifier.
+	(cons_fix_new_sparc): Add reloc specifier param.
+	(sparc_cfi_emit_pcrel_expr): Use emit_expr_with_reloc.
+	* gas/config/tc-sparc.h (TC_PARSE_CONS_RETURN_TYPE): Define.
+	(TC_PARSE_CONS_RETURN_NONE): Define.
+	(sparc_cons, cons_fix_new_sparc): Update prototype.
+	* gas/config/tc-v850.c (hold_cons_reloc): Delete static var.
+	(v850_reloc_prefix): Use BFD_RELOC_NONE rather than BFD_RELOC_UNUSED.
+	(md_assemble): Likewise.
+	(parse_cons_expression_v850): Return reloc.
+	(cons_fix_new_v850): Add reloc parameter.
+	* gas/config/tc-v850.h (parse_cons_expression_v850): Update proto.
+	(cons_fix_new_v850): Likewise.
+	* gas/config/tc-vax.c (vax_cons_special_reloc): Delete static var.
+	(vax_cons): Return reloc.
+	(vax_cons_fix_new): Add reloc parameter.
+	* gas/config/tc-vax.h (vax_cons, vax_cons_fix_new): Update proto.
+	* gas/config/tc-xstormy16.c (xstormy16_cons_fix_new): Add reloc param.
+	* gas/config/tc-xstormy16.h (xstormy16_cons_fix_new): Update proto.
+	* gas/dwarf2dbg.c (TC_PARSE_CONS_RETURN_NONE): Provide default.
+	(emit_fixed_inc_line_addr): Adjust exmit_expr_fix calls.
+	* gas/read.c (TC_PARSE_CONS_EXPRESSION): Return value.
+	(do_parse_cons_expression): Adjust.
+	(cons_worker): Pass return value from TC_PARSE_CONS_EXPRESSION
+	to emit_expr_with_reloc.
+	(emit_expr_with_reloc): New function handling reloc, mostly
+	extracted from..
+	(emit_expr): ..here.
+	(emit_expr_fix): Add reloc param.  Adjust TC_CONS_FIX_NEW invocation.
+	Handle reloc.
+	(parse_mri_cons): Convert to ISO.
+	* gas/read.h (TC_PARSE_CONS_RETURN_TYPE): Define.
+	(TC_PARSE_CONS_RETURN_NONE): Define.
+	(emit_expr_with_reloc): Declare.
+	(emit_expr_fix): Update prototype.
+	* gas/write.c (write_object_file): Update TC_CONS_FIX_NEW invocation.
+
 2014-04-03  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .se1.

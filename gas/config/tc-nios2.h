@@ -107,11 +107,7 @@ extern flagword nios2_elf_section_flags (flagword, int, int);
 #define CFI_DIFF_EXPR_OK 0
 
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) nios2_cons (EXP, NBYTES)
-extern void nios2_cons (expressionS *exp, int size);
-
-#define TC_CONS_FIX_NEW nios2_cons_fix_new
-extern void nios2_cons_fix_new (struct frag *frag, int where,
-				unsigned int nbytes, struct expressionS *exp);
+extern bfd_reloc_code_real_type nios2_cons (expressionS *exp, int size);
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP 1

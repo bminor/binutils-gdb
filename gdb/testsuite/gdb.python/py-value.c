@@ -58,6 +58,8 @@ struct Derived : public Base {
 };
 
 Base *base = new Derived ();
+Derived derived;
+Base &base_ref = derived;
 
 void ptr_ref(int*& rptr_int)
 {

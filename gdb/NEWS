@@ -2,6 +2,9 @@
 	     (Organized release by release)
 
 *** Changes since GDB 7.7
+ 
+* The ARM simulator now supports instruction level tracing
+  with or without disassembly.
 
 * Guile scripting
 

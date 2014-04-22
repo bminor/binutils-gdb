@@ -1,3 +1,19 @@
+2014-04-15  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* layout.cc (Layout::include_section): Allow a target to decide
+	whether to include a section.
+	* target.h (Target::should_include_section): New function.
+	(Target::do_should_include_section): New function.
+
+2014-04-15  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* copy-relocs.cc (Copy_relocs::Copy_reloc_entry::emit): Remove and
+	inline into ...
+	(Copy_relocs::emit): ... here.
+	* copy-relocs.h (Copy_reloc_entry): Change from class to struct.
+	(Copy_reloc_entry::make_copy_reloc): Change from private to protected.
+	(Copy_reloc_entry::entries_): Change from private to protected.
+
 2014-04-02  Sriraman Tallam  <tmsriram@google.com>
 
 	* icf.cc (get_section_contents): Replace copies of reloc

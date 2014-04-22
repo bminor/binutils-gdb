@@ -147,6 +147,7 @@ static const bfd_vma ppc_elf_vxworks_pic_plt0_entry
 #define ADD_3_12_2	0x7c6c1214
 #define ADD_11_0_11	0x7d605a14
 #define B		0x48000000
+#define BA		0x48000002
 #define BCL_20_31	0x429f0005
 #define BCTR		0x4e800420
 #define BEQLR		0x4d820020
@@ -3249,7 +3250,7 @@ static struct bfd_link_hash_table *
 ppc_elf_link_hash_table_create (bfd *abfd)
 {
   struct ppc_elf_link_hash_table *ret;
-  static struct ppc_elf_params default_params = { PLT_OLD, 0, 1, 0, 0, 4096 };
+  static struct ppc_elf_params default_params = { PLT_OLD, 0, 1, 0, 0, 12 };
 
   ret = bfd_zmalloc (sizeof (struct ppc_elf_link_hash_table));
   if (ret == NULL)
@@ -7336,7 +7337,7 @@ write_glink_stub (struct plt_entry *ent, asection *plt_sec, unsigned char *p,
 	  p += 4;
 	  bfd_put_32 (output_bfd, BCTR, p);
 	  p += 4;
-	  bfd_put_32 (output_bfd, NOP, p);
+	  bfd_put_32 (output_bfd, htab->params->ppc476_workaround ? BA : NOP, p);
 	  p += 4;
 	}
       else
@@ -9224,8 +9225,20 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
       relax_info = elf_section_data (input_section)->sec_info;
       if (relax_info->workaround_size != 0)
-	memset (contents + input_section->size - relax_info->workaround_size,
-		0, relax_info->workaround_size);
+	{
+	  bfd_byte *p;
+	  unsigned int n;
+	  bfd_byte fill[4];
+
+	  bfd_put_32 (input_bfd, BA, fill);
+	  p = contents + input_section->size - relax_info->workaround_size;
+	  n = relax_info->workaround_size >> 2;
+	  while (n--)
+	    {
+	      memcpy (p, fill, 4);
+	      p += 4;
+	    }
+	}
 
       /* The idea is: Replace the last instruction on a page with a
 	 branch to a patch area.  Put the insn there followed by a
@@ -9279,27 +9292,56 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  if (is_data)
 	    continue;
 
-	  /* Some instructions can be left alone too.  In this
-	     category are most insns that unconditionally change
-	     control flow, and isync.  Of these, some *must* be left
-	     alone, for example, the "bcl 20, 31, label" used in pic
-	     sequences to give the address of the next insn.  twui
-	     and twu apparently are not safe.  */
+	  /* Some instructions can be left alone too.  Unconditional
+	     branches, except for bcctr with BO=0x14 (bctr, bctrl),
+	     avoid the icache failure.
+
+	     The problem occurs due to prefetch across a page boundary
+	     where stale instructions can be fetched from the next
+	     page, and the mechanism for flushing these bad
+	     instructions fails under certain circumstances.  The
+	     unconditional branches:
+	     1) Branch: b, bl, ba, bla,
+	     2) Branch Conditional: bc, bca, bcl, bcla,
+	     3) Branch Conditional to Link Register: bclr, bclrl,
+	     where (2) and (3) have BO=0x14 making them unconditional,
+	     prevent the bad prefetch because the prefetch itself is
+	     affected by these instructions.  This happens even if the
+	     instruction is not executed.
+
+	     A bctr example:
+	     .
+	     .	lis 9,new_page@ha
+	     .	addi 9,9,new_page@l
+	     .	mtctr 9
+	     .	bctr
+	     .	nop
+	     .	nop
+	     . new_page:
+	     .
+	     The bctr is not predicted taken due to ctr not being
+	     ready, so prefetch continues on past the bctr into the
+	     new page which might have stale instructions.  If they
+	     fail to be flushed, then they will be executed after the
+	     bctr executes.  Either of the following modifications
+	     prevent the bad prefetch from happening in the first
+	     place:
+	     .
+	     .	lis 9,new_page@ha	 lis 9,new_page@ha	
+	     .	addi 9,9,new_page@l	 addi 9,9,new_page@l	
+	     .	mtctr 9			 mtctr 9			
+	     .	bctr			 bctr			
+	     .	nop			 b somewhere_else
+	     .	b somewhere_else	 nop			
+	     . new_page:		new_page:		
+	     .  */
 	  insn = bfd_get_32 (input_bfd, contents + offset);
-	  if (insn == 0
-	      || (insn & (0x3f << 26)) == (18u << 26)        /* b */
-	      || ((insn & (0x3f << 26)) == (16u << 26)       /* bc always */
-		  && (insn & (0x14 << 21)) == (0x14 << 21))
-	      || ((insn & (0x3f << 26)) == (19u << 26)       /* blr, bctr */
-		  && (insn & (0x14 << 21)) == (0x14 << 21)
-		  && (insn & (0x1ff << 1)) == (16u << 1))
-	      || (insn & (0x3f << 26)) == (17u << 26)        /* sc */
+	  if ((insn & (0x3f << 26)) == (18u << 26)          /* b,bl,ba,bla */
+	      || ((insn & (0x3f << 26)) == (16u << 26)      /* bc,bcl,bca,bcla*/
+		  && (insn & (0x14 << 21)) == (0x14 << 21)) /*   with BO=0x14 */
 	      || ((insn & (0x3f << 26)) == (19u << 26)
-		  && ((insn & (0x3ff << 1)) == (38u << 1)    /* rfmci */
-		      || (insn & (0x3ff << 1)) == (50u << 1) /* rfi */
-		      || (insn & (0x3ff << 1)) == (51u << 1) /* rfci */
-		      || (insn & (0x3ff << 1)) == (82u << 1) /* rfsvc */
-		      || (insn & (0x3ff << 1)) == (150u << 1))) /* isync */)
+		  && (insn & (0x3ff << 1)) == (16u << 1)    /* bclr,bclrl */
+		  && (insn & (0x14 << 21)) == (0x14 << 21)))/*   with BO=0x14 */
 	    continue;
 
 	  patch_addr = (start_addr + input_section->size
@@ -10086,7 +10128,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       p += htab->glink_pltresolve;
       endp = htab->glink->contents;
       endp += htab->glink->size - GLINK_PLTRESOLVE;
-      while (p < endp - 8 * 4)
+      while (p < endp - (htab->params->ppc476_workaround ? 0 : 8 * 4))
 	{
 	  bfd_put_32 (output_bfd, B + endp - p, p);
 	  p += 4;
@@ -10101,6 +10143,39 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      + htab->glink->output_section->vma
 	      + htab->glink->output_offset);
 
+      if (htab->params->ppc476_workaround)
+	{
+	  /* Ensure that a call stub at the end of a page doesn't
+	     result in prefetch over the end of the page into the
+	     glink branch table.  */
+	  bfd_vma pagesize = (bfd_vma) 1 << htab->params->pagesize_p2;
+	  bfd_vma page_addr;
+	  bfd_vma glink_start = (htab->glink->output_section->vma
+				 + htab->glink->output_offset);
+
+	  for (page_addr = res0 & -pagesize;
+	       page_addr > glink_start;
+	       page_addr -= pagesize)
+	    {
+	      /* We have a plt call stub that may need fixing.  */
+	      bfd_byte *loc;
+	      unsigned int insn;
+
+	      loc = htab->glink->contents + page_addr - 4 - glink_start;
+	      insn = bfd_get_32 (output_bfd, loc);
+	      if (insn == BCTR)
+		{
+		  /* By alignment, we know that there must be at least
+		     one other call stub before this one.  */
+		  insn = bfd_get_32 (output_bfd, loc - 16);
+		  if (insn == BCTR)
+		    bfd_put_32 (output_bfd, B | (-16 & 0x3fffffc), loc);
+		  else
+		    bfd_put_32 (output_bfd, B | (-20 & 0x3fffffc), loc);
+		}
+	    }
+	}
+
       /* Last comes the PLTresolve stub.  */
       if (info->shared)
 	{
@@ -10108,7 +10183,11 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	  for (i = 0; i < ARRAY_SIZE (pic_plt_resolve); i++)
 	    {
-	      bfd_put_32 (output_bfd, pic_plt_resolve[i], p);
+	      unsigned int insn = pic_plt_resolve[i];
+
+	      if (htab->params->ppc476_workaround && insn == NOP)
+		insn = BA + 0;
+	      bfd_put_32 (output_bfd, insn, p);
 	      p += 4;
 	    }
 	  p -= 4 * ARRAY_SIZE (pic_plt_resolve);
@@ -10142,7 +10221,11 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	{
 	  for (i = 0; i < ARRAY_SIZE (plt_resolve); i++)
 	    {
-	      bfd_put_32 (output_bfd, plt_resolve[i], p);
+	      unsigned int insn = plt_resolve[i];
+
+	      if (htab->params->ppc476_workaround && insn == NOP)
+		insn = BA + 0;
+	      bfd_put_32 (output_bfd, insn, p);
 	      p += 4;
 	    }
 	  p -= 4 * ARRAY_SIZE (plt_resolve);
