@@ -1,3 +1,11 @@
+2014-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16846
+	* ld-plugin/lto.exp (lto_link_tests): Add tests for PR ld/16846.
+	* ld-plugin/pr16846a.c: New file.
+	* ld-plugin/pr16846b.c: Likewise.
+	* ld-plugin/pr16846c.c: Likewise.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* ld-discard/extern.d: Remove openrisc and or32 support.  Add
