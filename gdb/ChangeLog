@@ -1,3 +1,7 @@
+2014-04-24  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* NEWS: Mention support for C99 variable length arrays.
+
 2014-04-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (standard_exc): Expand introductory comment.
