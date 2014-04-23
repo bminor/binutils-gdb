@@ -3393,6 +3393,7 @@ Target_x86_64<size>::Relocate::relocate(
 	Relocate_functions<size, false>::rela64(view, object, psymval,
 						addend - got_address);
       }
+      break;
 
     case elfcpp::R_X86_64_GOT32:
       gold_assert(have_got_offset);

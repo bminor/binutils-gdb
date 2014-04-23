@@ -1,3 +1,8 @@
+2014-04-23  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/16870
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Add missing break.
+
 2013-12-10  Roland McGrath  <mcgrathr@google.com>
 
 	* Makefile.am (install-exec-local): Prefix $(INSTALL_PROGRAM) uses
