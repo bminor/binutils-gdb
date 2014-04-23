@@ -1,3 +1,8 @@
+2014-04-22  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gas/nios2/selftest.s: New.
+	* gas/nios2/selftest.d: New.
+
 2014-04-22  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* gas/xtensa/all.exp: Add test for the first section frag alignment.
