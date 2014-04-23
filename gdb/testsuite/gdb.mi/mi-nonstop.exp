@@ -57,7 +57,8 @@ if { [mi_run_to_main] < 0 } {
     continue
 }
 
-mi_create_breakpoint break_at_me 2 keep break_at_me .* .* .* "breakpoint at marker"
+mi_create_breakpoint break_at_me "breakpoint at marker" \
+    -number 2 -func break_at_me
 
 mi_nonstop_resume "exec-continue" "resume 1"
 mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w0,i0 stop"

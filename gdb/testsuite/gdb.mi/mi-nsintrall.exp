@@ -47,8 +47,9 @@ if { [mi_run_to_main] < 0 } {
     continue
 }
 
-mi_create_breakpoint thread_function 2 keep thread_function .* .* .* \
-    "breakpoint at thread_function"
+mi_create_breakpoint thread_function \
+    "breakpoint at thread_function" \
+    -number 2 -func thread_function
 
 mi_send_resuming_command "exec-continue --all" "resume all"
 for {set i 0} {$i < 6} {incr i} {

@@ -937,14 +937,10 @@ proc mi_runto_helper {func run_or_continue} {
   global hex decimal fullname_syntax
 
   set test "mi runto $func"
-  mi_gdb_test "200-break-insert -t $func" \
-    "200\\^done,bkpt=\{number=\"\[0-9\]+\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"$func\(\\\(.*\\\)\)?\",file=\".*\",line=\"\[0-9\]*\",thread-groups=\\\[\"i1\"\\\],times=\"0\",original-location=\".*\"\}" \
-    "breakpoint at $func"
-
-  if {![regexp {number="[0-9]+"} $expect_out(buffer) str]
-      || ![scan $str {number="%d"} bkptno]} {
-    set bkptno {[0-9]+}
-  }
+  set bp [mi_make_breakpoint -type breakpoint -disp del \
+	      -func $func\(\\\(.*\\\)\)?]
+  mi_gdb_test "200-break-insert -t $func" "200\\^done,$bp" \
+      "breakpoint at $func"
 
   if {$run_or_continue == "run"} {
       if { [mi_run_cmd] < 0 } {
@@ -1232,39 +1228,14 @@ proc mi0_continue_to { bkptno func args file line test } {
 	"$func" "$args" "$file" "$line" "" "$test"
 }
 
-# Creates a breakpoint and checks the reported fields are as expected
-proc mi_create_breakpoint { location number disp func file line address test } {
-    verbose -log "Expecting: 222\\^done,bkpt=\{number=\"$number\",type=\"breakpoint\",disp=\"$disp\",enabled=\"y\",addr=\"$address\",func=\"$func\",file=\"$file\",fullname=\".*\",line=\"$line\",thread-groups=\\\[\".*\"\\\],times=\"0\",original-location=\".*\"\}"
-    mi_gdb_test "222-break-insert $location" \
-	"222\\^done,bkpt=\{number=\"$number\",type=\"breakpoint\",disp=\"$disp\",enabled=\"y\",addr=\"$address\",func=\"$func\",file=\"$file\",fullname=\".*\",line=\"$line\",thread-groups=\\\[\".*\"\\\],times=\"0\",original-location=\".*\"\}" \
-	$test
-}
+# Creates a breakpoint and checks the reported fields are as expected.
+# This procedure takes the same options as mi_make_breakpoint and
+# returns the breakpoint regexp from that procedure.
 
-proc mi_list_breakpoints { expected test } {
-    set fullname ".*"
-
-    set body ""
-    set first 1
-
-    foreach item $expected {
-	if {$first == 0} {
-	    set body "$body,"
-	    set first 0
-	}
-	set number [lindex $item 0]
-	set disp [lindex $item 1]
-	set func [lindex $item 2]
-	set file [lindex $item 3]
-	set line [lindex $item 4]
-	set address [lindex $item 5]
-	set body "${body}bkpt=\{number=\"$number\",type=\"breakpoint\",disp=\"$disp\",enabled=\"y\",addr=\"$address\",func=\"$func\",file=\".*$file\",${fullname},line=\"$line\",thread-groups=\\\[\"i1\"\\\],times=\"0\",original-location=\".*\"\}"
-	set first 0
-    }
-
-    verbose -log "Expecting: 666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[$body\\\]\}"
-    mi_gdb_test "666-break-list" \
-	"666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[$body\\\]\}" \
-	$test
+proc mi_create_breakpoint {location test args} {
+    set bp [eval mi_make_breakpoint $args]
+    mi_gdb_test "222-break-insert $location" "222\\^done,$bp" $test
+    return $bp
 }
 
 # Creates varobj named NAME for EXPRESSION.
@@ -2353,4 +2324,118 @@ proc mi_walk_varobj_tree {language tree \
 			      {callback \
 				   mi_varobj_tree_test_children_callback}} {
   ::varobj_tree::walk_tree $language $tree $callback
+}
+
+# Build a list of key-value pairs given by the list ATTR_LIST.  Flatten
+# this list using the optional JOINER, a comma by default.
+#
+# The list must contain an even number of elements, which are the key-value
+# pairs.  Each value will be surrounded by quotes, according to the grammar,
+# except if the value starts with \[ or \{, when the quotes will be omitted.
+#
+# Example: mi_build_kv_pairs {a b c d e f g \[.*\]}
+# returns a=\"b\",c=\"d\",e=\"f\",g=\[.*\]
+proc mi_build_kv_pairs {attr_list {joiner ,}} {
+    set l {}
+    foreach {var value} $attr_list {
+	if {[string range $value 0 1] == "\\\["
+	    || [string range $value 0 1] == "\\\{"} {
+	    lappend l "$var=$value"
+	} else {
+	    lappend l "$var=\"$value\""
+	}
+    }
+    return "[join $l $joiner]"
+}
+
+# Construct a breakpoint regexp.  This may be used to test the output of
+# -break-insert, -dprintf-insert, or -break-info.
+#
+# All arguments for the breakpoint may be specified using the options
+# number, type, disp, enabled, addr, func, file, fullanme, line,
+# thread-groups, times, ignore, script, and original-location.
+#
+# Only if -script and -ignore are given will they appear in the output.
+# Otherwise, this procedure will skip them using ".*".
+#
+# Example: mi_make_breakpoint -number 2 -file ".*/myfile.c" -line 3
+# will return the breakpoint:
+# bkpt={number="2",type=".*",disp=".*",enabled=".*",addr=".*",func=".*",
+#       file=".*/myfile.c",fullname=".*",line="3",thread-groups=\[.*\],
+#       times="0".*original-location=".*"}
+
+proc mi_make_breakpoint {args} {
+    parse_args {{number .*} {type .*} {disp .*} {enabled .*} {addr .*}
+	{func .*} {file .*} {fullname .*} {line .*}
+	{thread-groups \\\[.*\\\]} {times .*} {ignore 0}
+	{script ""} {original-location .*}}
+
+    set attr_list {}
+    foreach attr [list number type disp enabled addr func file \
+		      fullname line thread-groups times] {
+	lappend attr_list $attr [set $attr]
+    }
+
+    set result "bkpt={[mi_build_kv_pairs $attr_list]"
+
+    # There are always exceptions.
+    # If SCRIPT and IGNORE are not present, do not output them.
+    if {$ignore != 0} {
+	append result ","
+	append result [mi_build_kv_pairs [list "ignore" $ignore]]
+	append result ","
+    }
+    if {[string length $script] > 0} {
+	append result ","
+	append result [mi_build_kv_pairs [list "script" $script]]
+	append result ","
+    } else {
+	# Allow anything up until the next "official"/required attribute.
+	# This pattern skips over script/ignore if matches on those
+	# were not specifically required by the caller.
+	append result ".*"
+    }
+    append result [mi_build_kv_pairs \
+		       [list "original-location" ${original-location}]]
+    append result "}"
+    return $result
+}
+
+# Build a breakpoint table regexp given the list of breakpoints in `bp_list',
+# constructed by mi_make_breakpoint.
+#
+# Example:  Construct a breakpoint table where the only attributes we
+# test for are the existence of three breakpoints numbered 1, 2, and 3.
+#
+# set bps {}
+# lappend bps [mi_make_breakpoint -number 1]
+# lappend bps [mi_make_breakpoint -number 2]
+# lappned bps [mi_make_breakpoint -number 3]
+# mi_make_breakpoint_table $bps
+# will return (abbreviated for clarity):
+# BreakpointTable={nr_rows="3",nr_cols="6",hdr=[{width=".*",...} ...],
+#   body=[bkpt={number="1",...},bkpt={number="2",...},bkpt={number="3",...}]}
+
+proc mi_make_breakpoint_table {bp_list} {
+    # Build header -- assume a standard header for all breakpoint tables.
+    set hl {}
+    foreach {nm hdr} [list number Num type Type disp Disp enabled Enb \
+			  addr Address what What] {
+	# The elements here are the MI table headers, which have the
+	# format:
+	# {width="7",alignment="-1",col_name="number",colhdr="Num"}
+	lappend hl "{[mi_build_kv_pairs [list width .* alignment .* \
+				       col_name $nm colhdr $hdr]]}"
+    }
+    set header "hdr=\\\[[join $hl ,]\\\]"
+
+    # The caller has implicitly supplied the number of columns and rows.
+    set nc [llength $hl]
+    set nr [llength $bp_list]
+
+    # Build body -- mi_make_breakpoint has done most of the work.
+    set body "body=\\\[[join $bp_list ,]\\\]"
+
+    # Assemble the final regexp.
+    return "BreakpointTable={nr_rows=\"$nr\",nr_cols=\"$nc\",$header,$body}"
 }
