@@ -156,6 +156,9 @@ struct dwarf2_debug
      use. */
   struct funcinfo *inliner_chain;
 
+  /* Section VMAs at the time the stash was built.  */
+  bfd_vma *sec_vma;
+
   /* Number of sections whose VMA we must adjust.  */
   unsigned int adjusted_section_count;
 
@@ -3031,7 +3034,9 @@ place_sections (bfd *abfd, struct dwarf2_debug *stash)
 	  bfd_size_type sz;
 	  int is_debug_info;
 
-	  if (sect->vma != 0)
+	  if ((sect->output_section != NULL
+	       && sect->output_section != sect)
+	      || sect->vma != 0)
 	    continue;
 
 	  /* We need to adjust the VMAs of any .debug_info sections.
@@ -3053,6 +3058,8 @@ place_sections (bfd *abfd, struct dwarf2_debug *stash)
 
 	  i++;
 	}
+      if (i <= 1)
+	return TRUE;
 
       amt = i * sizeof (struct adjusted_section);
       p = (struct adjusted_section *) bfd_alloc (abfd, amt);
@@ -3067,7 +3074,9 @@ place_sections (bfd *abfd, struct dwarf2_debug *stash)
 	  bfd_size_type sz;
 	  int is_debug_info;
 
-	  if (sect->vma != 0)
+	  if ((sect->output_section != NULL
+	       && sect->output_section != sect)
+	      || sect->vma != 0)
 	    continue;
 
 	  /* We need to adjust the VMAs of any .debug_info sections.
@@ -3341,6 +3350,56 @@ stash_find_line_fast (struct dwarf2_debug *stash,
 				   filename_ptr, linenumber_ptr);
 }
 
+/* Save current section VMAs.  */
+
+static bfd_boolean
+save_section_vma (const bfd *abfd, struct dwarf2_debug *stash)
+{
+  asection *s;
+  unsigned int i;
+
+  if (abfd->section_count == 0)
+    return TRUE;
+  stash->sec_vma = bfd_malloc (sizeof (*stash->sec_vma) * abfd->section_count);
+  if (stash->sec_vma == NULL)
+    return FALSE;
+  for (i = 0, s = abfd->sections; i < abfd->section_count; i++, s = s->next)
+    {
+      if (s->output_section != NULL)
+	stash->sec_vma[i] = s->output_section->vma + s->output_offset;
+      else
+	stash->sec_vma[i] = s->vma;
+    }
+  return TRUE;
+}
+
+/* Compare current section VMAs against those at the time the stash
+   was created.  If find_nearest_line is used in linker warnings or
+   errors early in the link process, the debug info stash will be
+   invalid for later calls.  This is because we relocate debug info
+   sections, so the stashed section contents depend on symbol values,
+   which in turn depend on section VMAs.  */
+
+static bfd_boolean
+section_vma_same (const bfd *abfd, const struct dwarf2_debug *stash)
+{
+  asection *s;
+  unsigned int i;
+
+  for (i = 0, s = abfd->sections; i < abfd->section_count; i++, s = s->next)
+    {
+      bfd_vma vma;
+
+      if (s->output_section != NULL)
+	vma = s->output_section->vma + s->output_offset;
+      else
+	vma = s->vma;
+      if (vma != stash->sec_vma[i])
+	return FALSE;
+    }
+  return TRUE;
+}
+
 /* Read debug information from DEBUG_BFD when DEBUG_BFD is specified.
    If DEBUG_BFD is not specified, we read debug information from ABFD
    or its gnu_debuglink. The results will be stored in PINFO.
@@ -3358,13 +3417,23 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   struct dwarf2_debug *stash = (struct dwarf2_debug *) *pinfo;
 
   if (stash != NULL)
-    return TRUE;
-
-  stash = (struct dwarf2_debug *) bfd_zalloc (abfd, amt);
-  if (! stash)
-    return FALSE;
+    {
+      if (stash->syms == symbols
+	  && section_vma_same (abfd, stash))
+	return TRUE;
+      _bfd_dwarf2_cleanup_debug_info (abfd, pinfo);
+      memset (stash, 0, amt);
+    }
+  else
+    {
+      stash = (struct dwarf2_debug *) bfd_zalloc (abfd, amt);
+      if (! stash)
+	return FALSE;
+    }
   stash->debug_sections = debug_sections;
   stash->syms = symbols;
+  if (!save_section_vma (abfd, stash))
+    return FALSE;
 
   *pinfo = stash;
 
@@ -3891,6 +3960,8 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
     free (stash->alt_dwarf_str_buffer);
   if (stash->alt_dwarf_info_buffer)
     free (stash->alt_dwarf_info_buffer);
+  if (stash->sec_vma)
+    free (stash->sec_vma);
   if (stash->alt_bfd_ptr)
     bfd_close (stash->alt_bfd_ptr);
 }

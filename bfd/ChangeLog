@@ -1,3 +1,16 @@
+2014-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR ld/16787
+	* dwarf2.c (struct dwarf2_debug): Add sec_vma field.
+	(place_sections): Do not modify VMA of sections when called from
+	linker after sections have been placed in output sections.  Short
+	circuit single section case.
+	(save_section_vma, section_vma_same): New functions.
+	(_bfd_dwarf2_slurp_debug_info): Throw away stash if section VMAs
+	change.
+	* reloc.c (bfd_perform_relocation): Do not modify reloc addend
+	when non-relocatable.
+
 2014-04-22  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16821
