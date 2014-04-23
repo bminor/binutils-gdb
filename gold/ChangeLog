@@ -1,5 +1,6 @@
 2014-04-23  Cary Coutant  <ccoutant@google.com>
 
+	PR gold/16870
 	* x86_64.cc (Target_x86_64::Relocate::relocate): Add missing break.
 
 2014-04-15  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
