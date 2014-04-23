@@ -1,3 +1,13 @@
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/hbreak-in-shr-unsupported-shr.c: New file.
+	* gdb.base/hbreak-in-shr-unsupported.c: New file.
+	* gdb.base/hbreak-in-shr-unsupported.exp: New file.
+	* gdb.base/hbreak-unmapped.c: New file.
+	* gdb.base/hbreak-unmapped.exp: New file.
+	* gdb.trace/qtro.exp (gdb_is_target_remote): Move ...
+	* lib/gdb.exp (gdb_is_target_remote): ... here.
+
 2014-04-22  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/consecutive-step-over.c: New file.

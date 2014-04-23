@@ -2642,12 +2642,12 @@ insert_bp_location (struct bp_location *bl,
 	     breakpoint in a shared library that has already been
 	     removed, but we have not yet processed the shlib unload
 	     event.  Unfortunately, some targets that implement
-	     breakpoint insertion themselves (necessary if this is a
-	     HW breakpoint, but SW breakpoints likewise) can't tell
-	     why the breakpoint insertion failed (e.g., the remote
-	     target doesn't define error codes), so we must treat
-	     generic errors as memory errors.  */
+	     breakpoint insertion themselves can't tell why the
+	     breakpoint insertion failed (e.g., the remote target
+	     doesn't define error codes), so we must treat generic
+	     errors as memory errors.  */
 	  if ((bp_err == GENERIC_ERROR || bp_err == MEMORY_ERROR)
+	      && bl->loc_type == bp_loc_software_breakpoint
 	      && solib_name_from_address (bl->pspace, bl->address))
 	    {
 	      /* See also: disable_breakpoints_in_shlibs.  */
@@ -3826,7 +3826,9 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
       /* In some cases, we might not be able to remove a breakpoint
 	 in a shared library that has already been removed, but we
 	 have not yet processed the shlib unload event.  */
-      if (val && solib_name_from_address (bl->pspace, bl->address))
+      if (val
+	  && bl->loc_type == bp_loc_software_breakpoint
+	  && solib_name_from_address (bl->pspace, bl->address))
 	val = 0;
 
       if (val)

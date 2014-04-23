@@ -1,3 +1,9 @@
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (insert_bp_location, remove_breakpoint_1): If
+	the breakpoint is set in a shared library, only suppress
+	errors for software breakpoints, not hardware breakpoints.
+
 2014-04-22  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (schedlock_applies): New function, factored out from

@@ -35,22 +35,6 @@ if ![runto_main] {
 # Check whether we're testing with the remote or extended-remote
 # targets, and whether the target supports tracepoints.
 
-proc gdb_is_target_remote { } {
-    global gdb_prompt
-
-    set test "probe for target remote"
-    gdb_test_multiple "maint print target-stack" $test {
-	-re ".*emote serial target in gdb-specific protocol.*$gdb_prompt $" {
-	    pass $test
-	    return 1
-	}
-	-re "$gdb_prompt $" {
-	    pass $test
-	}
-    }
-    return 0
-}
-
 if ![gdb_is_target_remote] {
     return -1
 }
