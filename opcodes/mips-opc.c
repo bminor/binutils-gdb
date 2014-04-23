@@ -359,6 +359,9 @@ decode_mips_operand (const char *p)
 #define MSA	ASE_MSA
 #define MSA64	ASE_MSA64
 
+/* eXtended Physical Address (XPA) support.  */
+#define XPA     ASE_XPA
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -895,7 +898,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ceil.l.s",		"D,S",		0x4600000a, 0xffff003f, WR_1|RD_2|FP_S|FP_D,	0,		I3_33,		0,	0 },
 {"ceil.w.d",		"D,S",		0x4620000e, 0xffff003f, WR_1|RD_2|FP_S|FP_D,	0,		I2,		0,	SF },
 {"ceil.w.s",		"D,S",		0x4600000e, 0xffff003f, WR_1|RD_2|FP_S,		0,		I2,		0,	EE },
-{"cfc0",		"t,G",		0x40400000, 0xffe007ff,	WR_1|RD_C0|LCD,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
+/* cfc0 is at the bottom of the table.  */
 {"cfc1",		"t,G",		0x44400000, 0xffe007ff,	WR_1|RD_C1|LCD|FP_S,	0,		I1,		0,	0 },
 {"cfc1",		"t,S",		0x44400000, 0xffe007ff,	WR_1|RD_C1|LCD|FP_S,	0,		I1,		0,	0 },
 /* cfc2 is at the bottom of the table.  */
@@ -908,7 +911,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"cins",		"t,r,+p,+S",	0x70000032, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 },
 {"clo",			"U,s",		0x70000021, 0xfc0007ff, WR_1|RD_2, 	0,		I32|N55,	0,	0 },
 {"clz",			"U,s",		0x70000020, 0xfc0007ff, WR_1|RD_2, 	0,		I32|N55,	0,	0 },
-{"ctc0",		"t,G",		0x40c00000, 0xffe007ff,	RD_1|WR_CC|COD,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
+/* ctc0 is at the bottom of the table.  */
 {"ctc1",		"t,G",		0x44c00000, 0xffe007ff,	RD_1|WR_CC|COD|FP_S,	0,		I1,		0,	0 },
 {"ctc1",		"t,S",		0x44c00000, 0xffe007ff,	RD_1|WR_CC|COD|FP_S,	0,		I1,		0,	0 },
 /* ctc2 is at the bottom of the table.  */
@@ -1300,6 +1303,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mfc0",		"t,G,H",	0x40000000, 0xffe007f8,	WR_1|RD_C0|LCD,		0,		I32,		0,	0 },
 {"mfgc0",		"t,G",		0x40600000, 0xffe007ff,	WR_1|RD_C0|LCD,		0,		0,		IVIRT,	0 },
 {"mfgc0",		"t,G,H",	0x40600000, 0xffe007f8, WR_1|RD_C0|LCD, 	0,		0,		IVIRT,	0 },
+{"mfhc0",		"t,G",		0x40400000, 0xffe007ff,	WR_1|RD_C0|LCD,		0,		I33,		XPA,	0 },
+{"mfhc0",		"t,G,H",	0x40400000, 0xffe007f8,	WR_1|RD_C0|LCD,		0,		I33,		XPA,	0 },
+{"mfhgc0",		"t,G",		0x40600400, 0xffe007ff,	WR_1|RD_C0|LCD,		0,		I33,		IVIRT|XPA,	0 },
+{"mfhgc0",		"t,G,H",	0x40600400, 0xffe007f8,	WR_1|RD_C0|LCD,		0,		I33,		IVIRT|XPA,	0 },
 {"mfc1",		"t,S",		0x44000000, 0xffe007ff,	WR_1|RD_2|LCD|FP_S,	0,		I1,		0,	0 },
 {"mfc1",		"t,G",		0x44000000, 0xffe007ff,	WR_1|RD_2|LCD|FP_S,	0,		I1,		0,	0 },
 {"mfhc1",		"t,S",		0x44600000, 0xffe007ff,	WR_1|RD_2|LCD|FP_D,	0,		I33,		0,	0 },
@@ -1393,6 +1400,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mtc0",		"t,G,H",	0x40800000, 0xffe007f8,	RD_1|WR_C0|WR_CC|COD,	0,		I32,		0,	0 },
 {"mtgc0",		"t,G",		0x40600200, 0xffe007ff,	RD_1|WR_C0|WR_CC|COD,	0,		0,		IVIRT,	0 },
 {"mtgc0",		"t,G,H",	0x40600200, 0xffe007f8, RD_1|WR_C0|WR_CC|COD,   0,		0,		IVIRT,	0 },
+{"mthc0",		"t,G",		0x40c00000, 0xffe007ff,	RD_1|WR_C0|WR_CC|COD,	0,		I33,		XPA,	0 },
+{"mthc0",		"t,G,H",	0x40c00000, 0xffe007f8,	RD_1|WR_C0|WR_CC|COD,	0,		I33,		XPA,	0 },
+{"mthgc0",		"t,G",		0x40600600, 0xffe007ff,	RD_1|WR_C0|WR_CC|COD,	0,		I33,		IVIRT|XPA,	0 },
+{"mthgc0",		"t,G,H",	0x40600600, 0xffe007f8,	RD_1|WR_C0|WR_CC|COD,	0,		I33,		IVIRT|XPA,	0 },
 {"mtc1",		"t,S",		0x44800000, 0xffe007ff,	RD_1|WR_2|COD|FP_S,	0,		I1,		0,	0 },
 {"mtc1",		"t,G",		0x44800000, 0xffe007ff,	RD_1|WR_2|COD|FP_S,	0,		I1,		0,	0 },
 {"mthc1",		"t,S",		0x44e00000, 0xffe007ff,	RD_1|WR_2|COD|FP_D,	0,		I33,		0,	0 },
@@ -1953,6 +1964,12 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"yield",		"d,s",		0x7c000009, 0xfc1f07ff, WR_1|RD_2|NODS,		0,		0,		MT32,	0 },
 {"zcb",			"(b)",		0x7000071f, 0xfc1fffff, RD_1|SM,		0,		IOCT2,		0,	0 },
 {"zcbt",		"(b)",		0x7000075f, 0xfc1fffff, RD_1|SM,		0,		IOCT2,		0,	0 },
+
+/* Coprocessor 0 move instructions cfc0 and ctc0 conflict with the 
+   mfhc0 and mthc0 XPA instructions, so they have been placed here 
+   to allow the XPA instructions to take precedence.  */
+{"ctc0",		"t,G",		0x40c00000, 0xffe007ff,	RD_1|WR_CC|COD,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
+{"cfc0",		"t,G",		0x40400000, 0xffe007ff,	WR_1|RD_C0|LCD,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
 
 /* Coprocessor 2 move/branch operations overlap with VR5400 .ob format
    instructions so they are here for the latters to take precedence.  */

@@ -1,3 +1,12 @@
+2014-04-23  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-dis.c (mips_arch_choices): Update mips32r2 and mips64r2
+	to allow the MIPS XPA ASE.
+	(parse_mips_dis_option): Process the -Mxpa option.
+	* mips-opc.c (XPA): New define.
+	(mips_builtin_opcodes): Add MIPS XPA instructions and move the
+	locations of the ctc0 and cfc0 instructions.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.

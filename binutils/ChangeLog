@@ -1,3 +1,8 @@
+2014-04-23  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* doc/binutils.texi: Document the disassemble MIPS XPA instructions
+	command line option.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* readelf.c: Remove openrisc and or32 support.  Add support for or1k.

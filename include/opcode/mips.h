@@ -1155,6 +1155,8 @@ static const unsigned int mips_isa_table[] =
 /* MSA Extension  */
 #define ASE_MSA			0x00000800
 #define ASE_MSA64		0x00001000
+/* eXtended Physical Address (XPA) Extension.  */
+#define ASE_XPA			0x00002000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 

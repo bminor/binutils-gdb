@@ -1338,6 +1338,8 @@ enum options
     OPTION_NO_DSPR2,
     OPTION_EVA,
     OPTION_NO_EVA,
+    OPTION_XPA,
+    OPTION_NO_XPA,
     OPTION_MICROMIPS,
     OPTION_NO_MICROMIPS,
     OPTION_MCU,
@@ -1447,6 +1449,8 @@ struct option md_longopts[] =
   {"mno-virt", no_argument, NULL, OPTION_NO_VIRT},
   {"mmsa", no_argument, NULL, OPTION_MSA},
   {"mno-msa", no_argument, NULL, OPTION_NO_MSA},
+  {"mxpa", no_argument, NULL, OPTION_XPA},
+  {"mno-xpa", no_argument, NULL, OPTION_NO_XPA},
 
   /* Old-style architecture options.  Don't add more of these.  */
   {"m4650", no_argument, NULL, OPTION_M4650},
@@ -1599,7 +1603,11 @@ static const struct mips_ase mips_ases[] = {
 
   { "msa", ASE_MSA, ASE_MSA64,
     OPTION_MSA, OPTION_NO_MSA,
-    2, 2, 2, 2 }
+    2, 2, 2, 2 },
+
+  { "xpa", ASE_XPA, 0,
+    OPTION_XPA, OPTION_NO_XPA,
+    2, 2, -1, -1 }
 };
 
 /* The set of ASEs that require -mfp64.  */
@@ -17903,7 +17911,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "1004kf",         0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   { "1004kf1_1",      0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   /* P5600 with EVA and Virtualization ASEs, other ASEs are optional.  */
-  { "p5600",          0, ASE_VIRT | ASE_EVA, 	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "p5600",          0, ASE_VIRT | ASE_EVA | ASE_XPA, 	ISA_MIPS32R2, CPU_MIPS32R2 },
 
   /* MIPS 64 */
   { "5kc",            0, 0,			ISA_MIPS64,   CPU_MIPS64 },
@@ -18160,6 +18168,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mmsa			generate MSA instructions\n\
 -mno-msa		do not generate MSA instructions\n"));
+  fprintf (stream, _("\
+-mxpa			generate eXtended Physical Address (XPA) instructions\n\
+-mno-xpa		do not generate eXtended Physical Address (XPA) instructions\n"));
   fprintf (stream, _("\
 -mvirt			generate Virtualization instructions\n\
 -mno-virt		do not generate Virtualization instructions\n"));

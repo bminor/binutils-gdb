@@ -413,6 +413,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mdsp}] [@b{-mno-dsp}]
    [@b{-mdspr2}] [@b{-mno-dspr2}]
    [@b{-mmsa}] [@b{-mno-msa}]
+   [@b{-mxpa}] [@b{-mno-xpa}]
    [@b{-mmt}] [@b{-mno-mt}]
    [@b{-mmcu}] [@b{-mno-mcu}]
    [@b{-minsn32}] [@b{-mno-insn32}]
@@ -1356,6 +1357,12 @@ This tells the assembler to accept DSP Release 2 instructions.
 Generate code for the MIPS SIMD Architecture Extension.
 This tells the assembler to accept MSA instructions.
 @samp{-mno-msa} turns off this option.
+
+@item -mxpa
+@itemx -mno-xpa
+Generate code for the MIPS eXtended Physical Address (XPA) Extension.
+This tells the assembler to accept XPA instructions.
+@samp{-mno-xpa} turns off this option.
 
 @item -mmt
 @itemx -mno-mt

@@ -183,6 +183,12 @@ Generate code for the MIPS SIMD Architecture Extension.
 This tells the assembler to accept MSA instructions.
 @samp{-mno-msa} turns off this option.
 
+@item -mxpa
+@itemx -mno-xpa
+Generate code for the MIPS eXtended Physical Address (XPA) Extension.
+This tells the assembler to accept XPA instructions.
+@samp{-mno-xpa} turns off this option.
+
 @item -mvirt
 @itemx -mno-virt
 Generate code for the Virtualization Application Specific Extension.
@@ -878,6 +884,13 @@ The directive @code{.set virt} makes the assembler accept instructions
 from the Virtualization Application Specific Extension from that point
 on in the assembly.  The @code{.set novirt} directive prevents Virtualization
 instructions from being accepted.
+
+@cindex MIPS eXtended Physical Address (XPA) instruction generation override
+@kindex @code{.set xpa}
+@kindex @code{.set noxpa}
+The directive @code{.set xpa} makes the assembler accept instructions
+from the XPA Extension from that point on in the assembly.  The 
+@code{.set noxpa} directive prevents XPA instructions from being accepted.
 
 Traditional MIPS assemblers do not support these directives.
 
