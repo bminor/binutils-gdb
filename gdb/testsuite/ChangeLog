@@ -1,3 +1,13 @@
+2014-04-26  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dwz.exp: Compile main.c to object.  Restart GDB
+	and compute the length of function main.  Save it in
+	$main_length.
+	(Dwarf::assemble): Use $main_length instead of hard-coded 10.
+	(top-level): Use gdb_compile to compile objects into
+	executable and restart GDB.  Remove invocation to
+	prepare_for_testing.
+
 2014-04-25  Simon Marchi  <simon.marchi@ericsson.com>
 	    Pedro Alves  <palves@redhat.com>
 
