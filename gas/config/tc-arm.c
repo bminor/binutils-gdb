@@ -3335,9 +3335,10 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
 
   record_alignment (now_seg, 2);
 
+#ifdef OBJ_ELF
   seg_info (now_seg)->tc_segment_info_data.mapstate = MAP_DATA;
   make_mapping_symbol (MAP_DATA, (valueT) frag_now_fix (), frag_now);
-
+#endif
   sprintf (sym_name, "$$lit_\002%x", pool->id);
 
   symbol_locate (pool->symbol, sym_name, now_seg,

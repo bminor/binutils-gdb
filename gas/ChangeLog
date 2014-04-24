@@ -1,3 +1,8 @@
+2014-04-24  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (s_ltorg): Only create a mapping symbol for ELF
+	based targets.
+
 2014-04-23  Will Newton  <will.newton@linaro.org>
 
 	* config/tc-arm.c (s_ltorg): Call make_mapping_symbol
