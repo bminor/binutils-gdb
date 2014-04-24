@@ -1,3 +1,19 @@
+2014-04-24  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16807
+	* peXXigen.c (struct rsrc_regions): New structure.
+	(rsrc_print_resource_directory): Use new structure.  Include
+	offset of directory in listing.
+	(rsrc_print_resource_entry): Likewise.
+	(rsrc_print_section): Likewise.
+	(rsrc_count_entries): Do not increment sizeof_strings or
+	sizeof_leaves.
+	(rsrc_count_directory): Do not increment sizeof_tables.
+	(rsrc_compute_region_sizes): New function.
+	(rsrc_write_leaf): Maintain 8-byte alignment for resource data.
+	(rsrc_process_section): Compute size of regions after merging
+	entries.
+
 2014-04-23  Alan Modra  <amodra@gmail.com>
 
 	PR ld/16787

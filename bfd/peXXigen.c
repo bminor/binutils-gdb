@@ -212,7 +212,7 @@ abs_finder (bfd * abfd ATTRIBUTE_UNUSED, asection * sec, void * data)
 {
   bfd_vma abs_val = * (bfd_vma *) data;
 
-  return (sec->vma <= abs_val) && ((sec->vma + (1LL << 32)) > abs_val);
+  return (sec->vma <= abs_val) && ((sec->vma + (1ULL << 32)) > abs_val);
 }
 
 unsigned int
@@ -2145,48 +2145,61 @@ pe_print_reloc (bfd * abfd, void * vfile)
   return TRUE;
 }
 
+/* A data structure describing the regions of a .rsrc section.
+   Some fields are filled in as the section is parsed.  */
+
+typedef struct rsrc_regions
+{
+  bfd_byte * section_start;
+  bfd_byte * section_end;
+  bfd_byte * strings_start;
+  bfd_byte * resource_start;
+} rsrc_regions;
 
 static bfd_byte *
-rsrc_print_resource_directory (FILE * , bfd *, unsigned int,
-			       bfd_byte *, bfd_byte *, bfd_byte *, bfd_vma);
+rsrc_print_resource_directory (FILE * , bfd *, unsigned int, bfd_byte *,
+			       rsrc_regions *, bfd_vma);
 
 static bfd_byte *
-rsrc_print_resource_entries (FILE *        file,
-			     bfd *         abfd,
-			     unsigned int  indent,
-			     bfd_boolean   is_name,
-			     bfd_byte *    datastart,
-			     bfd_byte *    data,
-			     bfd_byte *    dataend,
-			     bfd_vma       rva_bias)
+rsrc_print_resource_entries (FILE *         file,
+			     bfd *          abfd,
+			     unsigned int   indent,
+			     bfd_boolean    is_name,
+			     bfd_byte *     data,
+			     rsrc_regions * regions,
+			     bfd_vma        rva_bias)
 {
   unsigned long entry, addr, size;
 
-  if (data + 8 >= dataend)
-    return dataend + 1;
+  if (data + 8 >= regions->section_end)
+    return regions->section_end + 1;
 
-  fprintf (file, _("%*.s Entry: "), indent, " ");
+  fprintf (file, _("%03x %*.s Entry: "), (int)(data - regions->section_start), indent, " ");
 
   entry = (long) bfd_get_32 (abfd, data);
   if (is_name)
     {
       bfd_byte * name;
 
-      /* Note - the documenation says that this field is an RVA value
+      /* Note - the documentation says that this field is an RVA value
 	 but windres appears to produce a section relative offset with
 	 the top bit set.  Support both styles for now.  */
       if (HighBitSet (entry))
-	name = datastart + WithoutHighBit (entry);
+	name = regions->section_start + WithoutHighBit (entry);
       else
-	name = datastart + entry - rva_bias;
+	name = regions->section_start + entry - rva_bias;
 
-      if (name + 2 < dataend)
+      if (name + 2 < regions->section_end)
 	{
 	  unsigned int len;
+
+	  if (regions->strings_start == NULL)
+	    regions->strings_start = name;
+
 	  len = bfd_get_16 (abfd, name);
 
 	  fprintf (file, _("name: [val: %08lx len %d]: "), entry, len);
-	  if (name + 2 + len * 2 < dataend)
+	  if (name + 2 + len * 2 < regions->section_end)
 	    {
 	      /* This strange loop is to cope with multibyte characters.  */
 	      while (len --)
@@ -2209,47 +2222,49 @@ rsrc_print_resource_entries (FILE *        file,
 
   if (HighBitSet  (entry))
     return rsrc_print_resource_directory (file, abfd, indent + 1,
-					  datastart,
-					  datastart + WithoutHighBit (entry),
-					  dataend, rva_bias);
+					  regions->section_start + WithoutHighBit (entry),
+					  regions, rva_bias);
 
-  if (datastart + entry + 16 >= dataend)
-    return dataend + 1;
+  if (regions->section_start + entry + 16 >= regions->section_end)
+    return regions->section_end + 1;
 
-  fprintf (file, _("%*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"),
+  fprintf (file, _("%03x %*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"),
+	   (int) (entry),
 	   indent, " ",
-	   addr = (long) bfd_get_32 (abfd, datastart + entry),
-	   size = (long) bfd_get_32 (abfd, datastart + entry + 4),
-	   (int) bfd_get_32 (abfd, datastart + entry + 8));
+	   addr = (long) bfd_get_32 (abfd, regions->section_start + entry),
+	   size = (long) bfd_get_32 (abfd, regions->section_start + entry + 4),
+	   (int) bfd_get_32 (abfd, regions->section_start + entry + 8));
 
   /* Check that the reserved entry is 0.  */
-  if (bfd_get_32 (abfd, datastart + entry + 12) != 0
+  if (bfd_get_32 (abfd, regions->section_start + entry + 12) != 0
       /* And that the data address/size is valid too.  */
-      || (datastart + (addr - rva_bias) + size > dataend))
-    return dataend + 1;
+      || (regions->section_start + (addr - rva_bias) + size > regions->section_end))
+    return regions->section_end + 1;
 
-  return datastart + (addr - rva_bias) + size;
+  if (regions->resource_start == NULL)
+    regions->resource_start = regions->section_start + (addr - rva_bias);
+
+  return regions->section_start + (addr - rva_bias) + size;
 }
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 static bfd_byte *
-rsrc_print_resource_directory (FILE *        file,
-			       bfd *         abfd,
-			       unsigned int  indent,
-			       bfd_byte *    datastart,
-			       bfd_byte *    data,
-			       bfd_byte *    dataend,
-			       bfd_vma       rva_bias)
+rsrc_print_resource_directory (FILE *         file,
+			       bfd *          abfd,
+			       unsigned int   indent,
+			       bfd_byte *     data,
+			       rsrc_regions * regions,
+			       bfd_vma        rva_bias)
 {
   unsigned int num_names, num_ids;
   bfd_byte * highest_data = data;
 
-  if (data + 16 >= dataend)
-    return dataend + 1;
+  if (data + 16 >= regions->section_end)
+    return regions->section_end + 1;
 
-  fprintf (file, "%*.s ", indent, " ");
+  fprintf (file, "%03x %*.s ", (int)(data - regions->section_start), indent, " ");
   switch (indent)
     {
     case 0: fprintf (file, "Type"); break;
@@ -2272,10 +2287,10 @@ rsrc_print_resource_directory (FILE *        file,
       bfd_byte * entry_end;
 
       entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, TRUE,
-					       datastart, data, dataend, rva_bias);
+					       data, regions, rva_bias);
       data += 8;
       highest_data = max (highest_data, entry_end);
-      if (entry_end >= dataend)
+      if (entry_end >= regions->section_end)
 	return entry_end;
     }
 
@@ -2284,11 +2299,10 @@ rsrc_print_resource_directory (FILE *        file,
       bfd_byte * entry_end;
 
       entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, FALSE,
-					       datastart, data, dataend,
-					       rva_bias);
+					       data, regions, rva_bias);
       data += 8;
       highest_data = max (highest_data, entry_end);
-      if (entry_end >= dataend)
+      if (entry_end >= regions->section_end)
 	return entry_end;
     }
 
@@ -2308,8 +2322,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
   bfd_size_type datasize;
   asection * section;
   bfd_byte * data;
-  bfd_byte * dataend;
-  bfd_byte * datastart;
+  rsrc_regions regions;
 
   pe = pe_data (abfd);
   if (pe == NULL)
@@ -2333,20 +2346,22 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	free (data);
       return FALSE;
     }
-  datastart = data;
-  dataend = data + datasize;
+
+  regions.section_start = data;
+  regions.section_end = data + datasize;
+  regions.strings_start = NULL;
+  regions.resource_start = NULL;
 
   fflush (file);
   fprintf (file, "\nThe .rsrc Resource Directory section:\n");
 
-  while (data < dataend)
+  while (data < regions.section_end)
     {
       bfd_byte * p = data;
 
-      data = rsrc_print_resource_directory (file, abfd, 0, data, data,
-					    dataend, rva_bias);
+      data = rsrc_print_resource_directory (file, abfd, 0, data, & regions, rva_bias);
 
-      if (data == dataend + 1)
+      if (data == regions.section_end + 1)
 	fprintf (file, _("Corrupt .rsrc section detected!\n"));
       else
 	{
@@ -2360,14 +2375,19 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	     aligned to a 1^3 boundary even when their alignment is set at
 	     1^2.  Catch that case here before we issue a spurious warning
 	     message.  */
-	  if (data == (dataend - 4))
-	    data = dataend;
-	  else if (data < dataend)
+	  if (data == (regions.section_end - 4))
+	    data = regions.section_end;
+	  else if (data < regions.section_end)
 	    fprintf (file, _("\nWARNING: Extra data in .rsrc section - it will be ignored by Windows:\n"));
 	}
     }
 
-  free (datastart);
+  if (regions.strings_start != NULL)
+    fprintf (file, " String table starts at %lx\n", regions.strings_start - regions.section_start);
+  if (regions.resource_start != NULL)
+    fprintf (file, " Resources start at %lx\n", regions.resource_start - regions.section_start);
+  
+  free (regions.section_start);
   return TRUE;
 }
 
@@ -2803,8 +2823,6 @@ rsrc_count_entries (bfd *          abfd,
       unsigned int len = bfd_get_16 (abfd, name);
       if (len == 0 || len > 256)
 	return dataend + 1;
-
-      sizeof_strings += (len + 1) * 2;
     }
 
   entry = (long) bfd_get_32 (abfd, data + 4);
@@ -2820,8 +2838,6 @@ rsrc_count_entries (bfd *          abfd,
 
   addr = (long) bfd_get_32 (abfd, datastart + entry);
   size = (long) bfd_get_32 (abfd, datastart + entry + 4);
-
-  sizeof_leaves += 16;
 
   return datastart + addr - rva_bias + size;
 }
@@ -2845,7 +2861,6 @@ rsrc_count_directory (bfd *          abfd,
   num_entries += num_ids;
 
   data += 16;
-  sizeof_tables_and_entries += 16;
 
   while (num_entries --)
     {
@@ -2854,7 +2869,6 @@ rsrc_count_directory (bfd *          abfd,
       entry_end = rsrc_count_entries (abfd, num_entries >= num_ids,
 				      datastart, data, dataend, rva_bias);
       data += 8;
-      sizeof_tables_and_entries += 8;
       highest_data = max (highest_data, entry_end);
       if (entry_end >= dataend)
 	break;
@@ -3116,7 +3130,9 @@ rsrc_write_leaf (rsrc_write_data * data,
   data->next_leaf += 16;
 
   memcpy (data->next_data, leaf->data, leaf->size);
-  data->next_data += leaf->size;
+  /* An undocumented feature of Windows resources is that each unit
+     of raw data is 8-byte aligned...  */
+  data->next_data += ((leaf->size + 7) & ~7);
 }
 
 static void rsrc_write_directory (rsrc_write_data *, rsrc_directory *);
@@ -3151,6 +3167,39 @@ rsrc_write_entry (rsrc_write_data *  data,
 }
 
 static void
+rsrc_compute_region_sizes (rsrc_directory * dir)
+{
+  struct rsrc_entry * entry;
+
+  if (dir == NULL)
+    return;
+
+  sizeof_tables_and_entries += 16;
+
+  for (entry = dir->names.first_entry; entry != NULL; entry = entry->next_entry)
+    {
+      sizeof_tables_and_entries += 8;
+
+      sizeof_strings += (entry->name_id.name.len + 1) * 2;
+	  
+      if (entry->is_dir)
+	rsrc_compute_region_sizes (entry->value.directory);
+      else
+	sizeof_leaves += 16;
+    }
+
+  for (entry = dir->ids.first_entry; entry != NULL; entry = entry->next_entry)
+    {
+      sizeof_tables_and_entries += 8;
+
+      if (entry->is_dir)
+	rsrc_compute_region_sizes (entry->value.directory);
+      else
+	sizeof_leaves += 16;
+    }
+}
+
+static void
 rsrc_write_directory (rsrc_write_data * data,
 		      rsrc_directory *  dir)
 {
@@ -3177,6 +3226,7 @@ rsrc_write_directory (rsrc_write_data * data,
        i > 0 && entry != NULL;
        i--, entry = entry->next_entry)
     {
+      BFD_ASSERT (entry->is_name);
       rsrc_write_entry (data, next_entry, entry);
       next_entry += 8;
     }
@@ -3187,6 +3237,7 @@ rsrc_write_directory (rsrc_write_data * data,
        i > 0 && entry != NULL;
        i--, entry = entry->next_entry)
     {
+      BFD_ASSERT (! entry->is_name);
       rsrc_write_entry (data, next_entry, entry);
       next_entry += 8;
     }
@@ -3551,7 +3602,7 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 		     resource manifests - there can only be one of these,
 		     even if they differ in language.  Zero-language manifests
 		     are assumed to be default manifests (provided by the
-		     cygwin build system) and these can be silently dropped,
+		     Cygwin/MinGW build system) and these can be silently dropped,
 		     unless that would reduce the number of manifests to zero.
 		     There should only ever be one non-zero lang manifest -
 		     if there are more it is an error.  A non-zero lang
@@ -3591,7 +3642,6 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 
 		      /* Unhook NEXT from the chain.  */
 		      /* FIXME: memory loss here.  */
-		      /* FIXME: do we need to decrement sizeof_tables_and_entries ?  */
 		      entry->next_entry = next->next_entry;
 		      chain->num_entries --;
 		      if (chain->num_entries < 2)
@@ -3655,7 +3705,6 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 		}
 
 	      /* Unhook NEXT from the chain.  */
-	      /* FIXME: do we need to decrement sizeof_tables_and_entries ?  */
 	      entry->next_entry = next->next_entry;
 	      chain->num_entries --;
 	      if (chain->num_entries < 2)
@@ -3826,7 +3875,6 @@ rsrc_process_section (bfd * abfd,
      leaves and data and decide if we need to do anything.  */
   dataend = data + size;
   num_resource_sets = 0;
-  sizeof_leaves = sizeof_strings = sizeof_tables_and_entries = 0;
 
   while (data < dataend)
     {
@@ -3912,15 +3960,18 @@ rsrc_process_section (bfd * abfd,
   rsrc_sort_entries (& new_table.ids, FALSE, & new_table);
 
   /* Step four: Create new contents for the .rsrc section.  */
+  /* Step four point one: Compute the size of each region of the .rsrc section.
+     We do this now, rather than earlier, as the merging above may have dropped
+     some entries.  */
+  sizeof_leaves = sizeof_strings = sizeof_tables_and_entries = 0;
+  rsrc_compute_region_sizes (& new_table);
+  /* We increment sizeof_strings to make sure that resource data
+     starts on an 8-byte boundary.  FIXME: Is this correct ?  */
+  sizeof_strings = (sizeof_strings + 7) & ~ 7;
+
   new_data = bfd_malloc (size);
   if (new_data == NULL)
     goto end;
-
-  /* We have merged the top level Type Tables of all of the input
-     .rsrc sections into one Type Table.  So we can (and must)
-     reduce the count of the number of tables that we will be
-     emitting appropriately.  */
-  sizeof_tables_and_entries -= 16 * (num_resource_sets - 1);
 
   write_data.abfd        = abfd;
   write_data.datastart   = new_data;
@@ -3939,7 +3990,7 @@ rsrc_process_section (bfd * abfd,
   sec->size = sec->rawsize = size;
 
  end:
-  /* Step size: Free all the memory that we have used.  */
+  /* Step six: Free all the memory that we have used.  */
   /* FIXME: Free the resource tree, if we have one.  */
   free (datastart);
   free (rsrc_sizes);
