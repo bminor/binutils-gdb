@@ -1,3 +1,10 @@
+2014-04-25  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dwz.exp (Dwarf::assemble): Remove unused
+	double_label.
+	* gdb.dwarf2/dwzbuildid.exp (Dwarf::assemble): Remove
+	partial_label and double_label.
+
 2014-04-24  David Blaikie  <dblaikie@gmail.com>
 
 	* gdb.python/lib-types.exp: Fix test and xfail under gcc due to gcc/55641.

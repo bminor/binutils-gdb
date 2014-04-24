@@ -62,7 +62,7 @@ proc write_dwarf_file {filename buildid {value 99}} {
     set asm_file [standard_output_file $filename]
 
     Dwarf::assemble $asm_file {
-	declare_labels partial_label double_label int_label int_label2
+	declare_labels int_label int_label2
 
 	upvar buildid buildid
 	upvar value value

@@ -25,7 +25,7 @@ standard_testfile main.c dwz.S
 # Create the DWARF.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
-    declare_labels partial_label double_label int_label int_label2
+    declare_labels partial_label int_label int_label2
 
     extern main
 
