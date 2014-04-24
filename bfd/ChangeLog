@@ -1,3 +1,27 @@
+2014-04-24  Alan Modra  <amodra@gmail.com>
+
+	PR 16867
+	* dwarf2.c: Formatting.
+	(struct dwarf2_debug): Make adjusted_section_count signed.
+	(unset_sections): Make i signed.
+	(set_debug_vma): New function.
+	(place_sections): Handle separate debug object file.  Set VMA
+	on debug sections, even if they have an output section.  Also
+	set VMA on zero size sections, and non-load but alloc sections.
+	Set adjusted_section_count to -1 when no section adjustment.
+	Malloc adjusted_sections.  Don't double last_vma.  Transfer
+	alloc section VMAs to separate debug file.
+	(_bfd_dwarf2_cleanup_debug_info): Free adjusted_sections.
+	(_bfd_dwarf2_slurp_debug_info): Add do_place parameter.  Drop
+	test on symbols being the same before using old stash.  Read
+	and use separate debug file symbols.  Call place_sections.
+	(find_line): Don't call place_sections here.
+	* libbfd-in.h (_bfd_dwarf2_slurp_debug_info): Update proto.
+	* libbfd.h: Regenerate.
+	* mach-o.c (bfd_mach_o_find_nearest_line): Adjust
+	_bfd_dwarf2_slurp_debug_info call.
+	* simple.c (simple_save_output_info): Clarify comment.
+
 2014-04-24  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16807

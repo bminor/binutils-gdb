@@ -5660,7 +5660,8 @@ bfd_mach_o_find_nearest_line (bfd *abfd,
             break;
           if (! _bfd_dwarf2_slurp_debug_info (abfd, mdata->dsym_bfd,
                                               dwarf_debug_sections, symbols,
-                                              &mdata->dwarf2_find_line_info))
+                                              &mdata->dwarf2_find_line_info,
+					      FALSE))
             return FALSE;
         }
       break;
