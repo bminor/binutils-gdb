@@ -1,5 +1,10 @@
 2014-04-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-varobj.c (ada_varobj_describe_simple_array_child): Remove
+	handling of parallel ___XA types.
+
+2014-04-28  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp) <OP_VAR_VALUE>: Remove
 	unnecessary second call to static_unwrap_type.
 
