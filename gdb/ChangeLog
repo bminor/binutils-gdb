@@ -1,3 +1,7 @@
+2014-04-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (standard_exc): Expand introductory comment.
+
 2014-04-24  Michael Sturm  <michael.sturm@mintel.com>
 	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
 

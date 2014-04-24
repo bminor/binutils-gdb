@@ -11294,7 +11294,19 @@ ada_modulus (struct type *type)
    variants of the runtime, we use a sniffer that will determine
    the runtime variant used by the program being debugged.  */
 
-/* Ada's standard exceptions.  */
+/* Ada's standard exceptions.
+
+   The Ada 83 standard also defined Numeric_Error.  But there so many
+   situations where it was unclear from the Ada 83 Reference Manual
+   (RM) whether Constraint_Error or Numeric_Error should be raised,
+   that the ARG (Ada Rapporteur Group) eventually issued a Binding
+   Interpretation saying that anytime the RM says that Numeric_Error
+   should be raised, the implementation may raise Constraint_Error.
+   Ada 95 went one step further and pretty much removed Numeric_Error
+   from the list of standard exceptions (it made it a renaming of
+   Constraint_Error, to help preserve compatibility when compiling
+   an Ada83 compiler). As such, we do not include Numeric_Error from
+   this list of standard exceptions.  */
 
 static char *standard_exc[] = {
   "constraint_error",
