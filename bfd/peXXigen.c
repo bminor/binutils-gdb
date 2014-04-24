@@ -2383,9 +2383,11 @@ rsrc_print_section (bfd * abfd, void * vfile)
     }
 
   if (regions.strings_start != NULL)
-    fprintf (file, " String table starts at %lx\n", regions.strings_start - regions.section_start);
+    fprintf (file, " String table starts at %03x\n",
+	     (int) (regions.strings_start - regions.section_start));
   if (regions.resource_start != NULL)
-    fprintf (file, " Resources start at %lx\n", regions.resource_start - regions.section_start);
+    fprintf (file, " Resources start at %03xx\n",
+	     (int) (regions.resource_start - regions.section_start));
   
   free (regions.section_start);
   return TRUE;
