@@ -1,3 +1,22 @@
+2014-04-25  Pedro Alves  <palves@redhat.com>
+
+	PR server/16255
+	* linux-low.c (linux_attach_fail_reason_string): New function.
+	(linux_attach_lwp): Delete.
+	(linux_attach_lwp_1): Rename to ...
+	(linux_attach_lwp): ... this.  Take a ptid instead of a pid as
+	argument.  Remove "initial" parameter.  Return int instead of
+	void.  Don't error or warn here.
+	(linux_attach): Adjust to call linux_attach_lwp.  Call error on
+	failure to attach to the tgid.  Call warning when failing to
+	attach to an lwp.
+	* linux-low.h (linux_attach_lwp): Take a ptid instead of a pid as
+	argument.  Remove "initial" parameter.  Return int instead of
+	void.  Don't error or warn here.
+	(linux_attach_fail_reason_string): New declaration.
+	* thread-db.c (attach_thread): Adjust to linux_attach_lwp's
+	interface change.  Use linux_attach_fail_reason_string.
+
 2014-04-24  Michael Sturm  <michael.sturm@mintel.com>
 	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
