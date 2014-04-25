@@ -1,3 +1,101 @@
+2014-04-25  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (struct remote_state): Remove multi_process_aware,
+	non_stop_aware, cond_tracepoints, cond_breakpoints,
+	breakpoint_commands, fast_tracepoints, static_tracepoints,
+	install_in_trace, disconnected_tracing,
+	enable_disable_tracepoints, string_tracing, and
+	augmented_libraries_svr4_read fields.
+	(remote_multi_process_p): Move further below in the file.
+	(struct packet_config): Add comments.
+	(update_packet_config): Delete function.
+	(show_packet_config_cmd): Use packet_config_support.
+	(add_packet_config_cmd): Use NULL as set callback.
+	(packet_ok): "set remote foo-packet"-style commands no longer
+	change config->supported -- adjust.
+	(PACKET_ConditionalTracepoints, PACKET_ConditionalBreakpoints)
+	(PACKET_BreakpointCommands, PACKET_FastTracepoints)
+	(PACKET_StaticTracepoints, PACKET_InstallInTrace): Add comments.
+	(PACKET_QNonStop, PACKET_multiprocess_feature)
+	(PACKET_EnableDisableTracepoints_feature, PACKET_tracenz_feature)
+	(PACKET_DisconnectedTracing_feature)
+	(PACKET_augmented_libraries_svr4_read_feature): New enum values.
+	(set_remote_protocol_packet_cmd): Delete function.
+	(packet_config_support, packet_support): New functions.
+	(set_remote_protocol_Z_packet_cmd): Don't call
+	update_packet_config.
+	(remote_query_attached, remote_pass_signals)
+	(remote_program_signals, remote_threads_info)
+	(remote_threads_extra_info, remote_start_remote): Use
+	packet_support.
+	(remote_start_remote): Use packet_config_support and
+	packet_support.
+	(init_all_packet_configs): Set all packets to unknown support,
+	instead of calling update_packet_config.
+	(remote_check_symbols): Use packet_support.
+	(remote_supported_packet): Unconditionally set the packet config's
+	support status.
+	(remote_multi_process_feature, remote_non_stop_feature)
+	(remote_cond_tracepoint_feature, remote_cond_breakpoint_feature)
+	(remote_breakpoint_commands_feature)
+	(remote_fast_tracepoint_feature, remote_static_tracepoint_feature)
+	(remote_install_in_trace_feature)
+	(remote_disconnected_tracing_feature)
+	(remote_enable_disable_tracepoint_feature)
+	(remote_string_tracing_feature)
+	(remote_augmented_libraries_svr4_read_feature): Delete functions.
+	(remote_protocol_features): Adjust to use remote_supported_packet
+	for "augmented-libraries-svr4-read", "multiprocess", "QNonStop",
+	"ConditionalTracepoints", "ConditionalBreakpoints",
+	"BreakpointCommands", "FastTracepoints", "StaticTracepoints",
+	"InstallInTrace", "DisconnectedTracing", "DisconnectedTracing",
+	"EnableDisableTracepoints", and "tracenz".
+	(remote_query_supported): Use packet_support.
+	(remote_open_1): Adjust.
+	(extended_remote_attach_1): Use packet_support.  Switch on the
+	result of packet_ok instead of checking whether the packet ended
+	up disabled.
+	(remote_vcont_resume): Use packet_support.
+	(remote_resume, remote_stop_ns, fetch_register_using_p)
+	(remote_prepare_to_store, store_register_using_P)
+	(check_binary_download, remote_write_bytes): Use packet_support.
+	(remote_vkill): Use packet_support.  Switch on the result of
+	packet_ok instead of checking whether the packet ended up
+	disabled.
+	(extended_remote_supports_disable_randomization): Use
+	packet_support.
+	(extended_remote_run): Switch on the result of packet_ok instead
+	of checking whether the packet ended up disabled.
+	(remote_insert_breakpoint, remote_remove_breakpoint)
+	(remote_insert_watchpoint, remote_remove_watchpoint)
+	(remote_insert_hw_breakpoint, remote_remove_hw_breakpoint): Use
+	packet_support.
+	(remote_search_memory): Use packet_config_support.
+	(remote_get_thread_local_address, remote_get_tib_address)
+	(remote_hostio_send_command, remote_can_execute_reverse): Use
+	packet_support.
+	(remote_supports_cond_tracepoints)
+	(remote_supports_cond_breakpoints)
+	(remote_supports_fast_tracepoints)
+	(remote_supports_static_tracepoints)
+	(remote_supports_install_in_trace)
+	(remote_supports_enable_disable_tracepoint)
+	(remote_supports_string_tracing)
+	(remote_can_run_breakpoint_commands): Rewrite, checking whether
+	the packet config says the feature is enabled or disabled.
+	(remote_download_tracepoint, remote_trace_set_readonly_regions)
+	(remote_get_trace_status): Use packet_support.
+	(remote_set_disconnected_tracing): Adjust to check whether the
+	feature is enabled with packet_support.
+	(remote_set_trace_buffer_size, remote_use_agent)
+	(remote_can_use_agent, remote_supports_btrace): Use
+	packet_support.
+	(remote_enable_btrace, remote_disable_btrace, remote_read_btrace):
+	Use packet_config_support.
+	(remote_augmented_libraries_svr4_read): Rewrite, checking whether
+	the packet config says the feature is enabled or disabled.
+	(set_range_stepping): Use packet_support.
+
 2014-04-25  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-cmds.c (_initialize_cli_cmds): Document "quit" command's

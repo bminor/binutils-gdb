@@ -35,10 +35,10 @@ gdb_test_no_output $test_auto
 
 # If target-side condition evaluation is not supported, this warning will be
 # displayed.
-set warning "warning: Target does not support breakpoint condition evaluation.\r\nUsing host evaluation mode instead.\r\n"
+set warning "warning: Target does not support breakpoint condition evaluation.\r\nUsing host evaluation mode instead."
 
 gdb_test_multiple $test_target $test_target {
-    -re "$warning$gdb_prompt $" {
+    -re "$warning\r\n$gdb_prompt $" {
 	unsupported $test_target
 	return -1
     }
@@ -46,6 +46,20 @@ gdb_test_multiple $test_target $test_target {
     -re "^$test_target\r\n$gdb_prompt $" {
 	pass $test_target
     }
+}
+
+# We now know that the target supports target-side conditional
+# evaluation.  Now make sure we can force-disable the
+# ConditionalBreakpoints RSP feature.
+if [gdb_is_target_remote] {
+    gdb_test_no_output "set remote conditional-breakpoints-packet off"
+
+    gdb_test $test_target "$warning" \
+	"set breakpoint condition-evaluation target, with support disabled"
+
+    # Confirm we can re-enable it.
+    gdb_test_no_output "set remote conditional-breakpoints-packet on"
+    gdb_test_no_output $test_target "restore $test_target"
 }
 
 # Test setting a condition in a breakpoint.  BREAK_COMMAND is the

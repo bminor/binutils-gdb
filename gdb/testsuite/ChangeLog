@@ -1,3 +1,19 @@
+2014-04-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/cond-eval-mode.exp (warning): Move trailing \r\n to
+	user.
+	(top level): Test that "set remote conditional-breakpoints-packet
+	off" works as intended.
+	* gdb.base/dprintf.exp: Test that "set remote
+	breakpoint-commands-packet off" works as intended.
+	* gdb.trace/change-loc.exp (tracepoint_install_in_trace_disabled):
+	New function.
+	(top level): Call it.
+	* gdb.trace/ftrace.exp (test_fast_tracepoints): Test that "set
+	remote fast-tracepoints-packet off" works as intended.
+	* gdb.trace/qtro.exp (gdb_is_target_remote): Moved ...
+	* lib/gdb.exp (gdb_is_target_remote): ... here.
+
 2014-04-24  David Blaikie  <dblaikie@gmail.com>
 
 	* gdb.base/catch-syscall.c: Make unreferenced statics non-static to
