@@ -236,7 +236,15 @@ _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
      reduce the absolute value to < 1^32, and then transforming the
      symbol into a section relative symbol.  This of course is a hack.  */
   if (sizeof (in->n_value) > 4
+      /* GCC 4.6.x erroneously complains about the next test always being
+	 false when compiled on a 32-bit host.  (The sizeof test above
+	 should have made the warning unnecessary).  Hence we have to
+	 predicate the test.  It should not matter if the test is omitted
+	 since the worst that can happen is that some absolute symbols
+	 are needlessly converted to equivalent section relative symbols.  */
+#if defined BFD64 || ! defined __GNUC__ || __GNUC__ > 4 || __GNUC_MINOR__ > 6
       && in->n_value > ((1ULL << 32) - 1)
+#endif
       && in->n_scnum == -1)
     {
       asection * sec;
@@ -248,7 +256,7 @@ _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
 	  in->n_scnum = sec->target_index;
 	}
       /* else: FIXME: The value is outside the range of any section.  This
-	 happens for __image_base__ and __ImageBase__ and maybe some other
+	 happens for __image_base__ and __ImageBase and maybe some other
 	 symbols as well.  We should find a way to handle these values.  */
     }
 

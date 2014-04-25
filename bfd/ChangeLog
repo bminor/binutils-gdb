@@ -1,3 +1,9 @@
+2014-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16821
+	* peXXigen.c (_bfd_XXi_swap_sym_out): Another fix for building on
+	a 342-bit host.  This time for older versions of gcc.
+
 2014-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* peXXigen.c (rsrc_print_section): Fix compile time warning for
