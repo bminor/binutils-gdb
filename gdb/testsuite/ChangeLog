@@ -1,5 +1,11 @@
 2014-04-24  David Blaikie  <dblaikie@gmail.com>
 
+	* gdb.stabs/gdb11479.c (tag_dummy_enum): introduce a variable to cause
+	clang to emit the full definition of type required by the test
+	* gdb.stabs/gdb11479.exp (do_test): correct a typo in a test message
+
+2014-04-24  David Blaikie  <dblaikie@gmail.com>
+
 	* gdb.cp/pr10728-x.cc (main::x): Return by value instead of pointer to
 	coax Clang into emitting the definition of the type.
 	* gdb.cp/pr10728-x.h (y): Ditto.
