@@ -1685,7 +1685,11 @@ strict == evaluate script according to filename extension, error if not supporte
 			show_script_ext_mode,
 			&setlist, &showlist);
 
-  add_com ("quit", class_support, quit_command, _("Exit gdb."));
+  add_com ("quit", class_support, quit_command, _("\
+Exit gdb.\n\
+Usage: quit [EXPR]\n\
+The optional expression EXPR, if present, is evaluated and the result\n\
+used as GDB's exit code.  The default is zero."));
   c = add_com ("help", class_support, help_command,
 	       _("Print list of commands."));
   set_cmd_completer (c, command_completer);
