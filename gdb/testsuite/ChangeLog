@@ -1,3 +1,15 @@
+2014-05-05  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/unavailable.exp (gdb_collect_args_test): Move some
+	code to ...
+	(gdb_collect_args_test_1): ... it.  New proc.
+	(gdb_collect_locals_test): Move some code to ...
+	(gdb_collect_locals_test_1): ... it.  New proc.
+	(gdb_unavailable_registers_test): Move some code to ...
+	(gdb_unavailable_registers_test_1): ... it.  New proc.
+	(gdb_unavailable_floats): Move some code to ...
+	(gdb_unavailable_floats_1): ... it.  New proc.
+
 2014-05-02  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.arch/amd64-stap-optional-prefix.S (main): Add several
