@@ -1,5 +1,16 @@
 2014-04-25  Pedro Alves  <palves@redhat.com>
 
+	PR server/16255
+	* common/linux-ptrace.c (linux_ptrace_attach_warnings): Rename to ...
+	(linux_ptrace_attach_fail_reason): ... this.  Remove "warning: "
+	and newline from built string.
+	* common/linux-ptrace.h (linux_ptrace_attach_warnings): Rename to ...
+	(linux_ptrace_attach_fail_reason): ... this.
+	* linux-nat.c (linux_nat_attach): Adjust to use
+	linux_ptrace_attach_fail_reason.
+
+2014-04-25  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (struct remote_state): Remove multi_process_aware,
 	non_stop_aware, cond_tracepoints, cond_breakpoints,
 	breakpoint_commands, fast_tracepoints, static_tracepoints,

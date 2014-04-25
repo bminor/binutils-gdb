@@ -1,3 +1,10 @@
+2014-04-25  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR server/16255
+	* gdb.multi/multi-attach.c: New file.
+	* gdb.multi/multi-attach.exp: New file.
+
 2014-04-25  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/cond-eval-mode.exp (warning): Move trailing \r\n to

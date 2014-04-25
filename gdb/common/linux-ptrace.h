@@ -83,7 +83,7 @@ struct buffer;
 #define __WALL          0x40000000 /* Wait for any child.  */
 #endif
 
-extern void linux_ptrace_attach_warnings (pid_t pid, struct buffer *buffer);
+extern void linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer);
 extern void linux_ptrace_init_warnings (void);
 extern void linux_enable_event_reporting (pid_t pid);
 extern int linux_supports_tracefork (void);
