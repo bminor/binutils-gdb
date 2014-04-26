@@ -1547,7 +1547,7 @@ display_command (char *arg, int from_tty)
       new->enabled_p = 1;
       display_chain = new;
 
-      if (from_tty && target_has_execution)
+      if (from_tty)
 	do_one_display (new);
 
       dont_repeat ();

@@ -1,3 +1,8 @@
+2014-05-05  Yao Qi  <yao@codesourcery.com>
+
+	* printcmd.c (display_command): Remove the check to
+	target_has_execution.
+
 2014-05-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* ppcobsd-nat.c: Include "obsd-nat.h".
