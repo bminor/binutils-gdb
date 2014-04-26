@@ -1,3 +1,7 @@
+2014-04-26  Doug Evans  <xdje42@gmail.com>
+
+	* guile/scm-safe-call.c (scscm_eval_scheme_string): Fix comment.
+
 2014-04-25  Pedro Alves  <palves@redhat.com>
 
 	PR server/16255

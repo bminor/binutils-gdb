@@ -364,7 +364,7 @@ struct eval_scheme_string_data
 };
 
 /* Wrapper to eval a C string in the Guile interpreter.
-   This is passed to scm_with_guile.  */
+   This is passed to gdbscm_with_guile.  */
 
 static void *
 scscm_eval_scheme_string (void *datap)
