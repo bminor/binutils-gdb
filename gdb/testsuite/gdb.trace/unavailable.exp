@@ -188,6 +188,8 @@ proc gdb_collect_args_test_1 {} {
 proc gdb_collect_args_test {} {
     with_test_prefix "unavailable arguments" {
 	global gdb_prompt
+	global testfile srcdir subdir binfile
+	global trace_file_targets
 
 	prepare_for_trace_test
 
@@ -203,6 +205,30 @@ proc gdb_collect_args_test {} {
 	gdb_test "tfind none" \
 	    "#0  end .*" \
 	    "cease trace debugging"
+
+	set tracefile [standard_output_file ${testfile}]
+	gdb_test "tsave ${tracefile}.args.tfile" \
+	    "Trace data saved to file '${tracefile}.args.tfile'\.\\r" \
+	    "tsave ${testfile}.args.tfile"
+	gdb_test "tsave -ctf ${tracefile}.args.ctf" \
+	    "Trace data saved to directory '${tracefile}.args.ctf'\.\\r" \
+	    "save ctf trace file"
+
+	foreach target_name ${trace_file_targets} {
+	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
+	    gdb_exit
+	    gdb_start
+	    gdb_reinitialize_dir $srcdir/$subdir
+	    gdb_file_cmd $binfile
+	    gdb_test "target ${target_name} ${tracefile}.args.${target_name}" ".*" \
+		"change to ${target_name} target"
+
+	    with_test_prefix "${target_name}" {
+		gdb_test "tfind start" "#0  args_test_func .*" \
+		    "tfind test frame"
+		gdb_collect_args_test_1
+	    }
+	}
     }
 }
 
@@ -244,6 +270,8 @@ proc gdb_collect_locals_test_1 { func } {
 proc gdb_collect_locals_test { func msg } {
     with_test_prefix "unavailable locals: $msg" {
 	global gdb_prompt
+	global testfile srcdir subdir binfile
+	global trace_file_targets
 
 	prepare_for_trace_test
 
@@ -261,6 +289,30 @@ proc gdb_collect_locals_test { func msg } {
 	gdb_test "tfind none" \
 	    "#0  end .*" \
 	    "cease trace debugging"
+
+	set tracefile [standard_output_file ${testfile}]
+	gdb_test "tsave ${tracefile}.locals.tfile" \
+	    "Trace data saved to file '${tracefile}.locals.tfile'\.\\r" \
+	    "tsave ${testfile}.locals.tfile"
+	gdb_test "tsave -ctf ${tracefile}.locals.ctf" \
+	    "Trace data saved to directory '${tracefile}.locals.ctf'\.\\r" \
+	    "save ctf trace file"
+
+	foreach target_name ${trace_file_targets} {
+	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
+	    gdb_exit
+	    gdb_start
+	    gdb_reinitialize_dir $srcdir/$subdir
+	    gdb_file_cmd $binfile
+	    gdb_test "target ${target_name} ${tracefile}.locals.${target_name}" ".*" \
+		"change to ${target_name} target"
+
+	    with_test_prefix "${target_name}" {
+		gdb_test "tfind start" "#0  $func .*" \
+		    "tfind test frame"
+		gdb_collect_locals_test_1 $func
+	    }
+	}
     }
 }
 
@@ -302,6 +354,8 @@ proc gdb_unavailable_registers_test_1 { } {
 
 proc gdb_unavailable_registers_test { } {
     with_test_prefix "unavailable registers" {
+	global testfile srcdir subdir binfile
+	global trace_file_targets
 
 	prepare_for_trace_test
 
@@ -318,6 +372,30 @@ proc gdb_unavailable_registers_test { } {
 	gdb_unavailable_registers_test_1
 
 	gdb_test "tfind none" "#0  end .*" "cease trace debugging"
+
+	set tracefile [standard_output_file ${testfile}]
+	gdb_test "tsave ${tracefile}.registers.tfile" \
+	    "Trace data saved to file '${tracefile}.registers.tfile'\.\\r" \
+	    "tsave ${testfile}.registers.tfile"
+	gdb_test "tsave -ctf ${tracefile}.registers.ctf" \
+	    "Trace data saved to directory '${tracefile}.registers.ctf'\.\\r" \
+	    "save ctf trace file"
+
+	foreach target_name ${trace_file_targets} {
+	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
+	    gdb_exit
+	    gdb_start
+	    gdb_reinitialize_dir $srcdir/$subdir
+	    gdb_file_cmd $binfile
+	    gdb_test "target ${target_name} ${tracefile}.registers.${target_name}" ".*" \
+		"change to ${target_name} target"
+
+	    with_test_prefix "${target_name}" {
+		gdb_test "tfind start" "#0  globals_test_func .*" \
+		    "tfind test frame"
+		gdb_unavailable_registers_test_1
+	    }
+	}
     }
 }
 
@@ -340,6 +418,9 @@ proc gdb_unavailable_floats_1 { } {
 
 proc gdb_unavailable_floats { } {
     with_test_prefix "unavailable floats" {
+	global testfile srcdir subdir binfile
+	global trace_file_targets
+
 	prepare_for_trace_test
 
 	# We'll simply re-use the globals_test_function for this test
@@ -355,6 +436,30 @@ proc gdb_unavailable_floats { } {
 	gdb_unavailable_floats_1
 
 	gdb_test "tfind none" "#0  end .*" "cease trace debugging"
+
+	set tracefile [standard_output_file ${testfile}]
+	gdb_test "tsave ${tracefile}.floats.tfile" \
+	    "Trace data saved to file '${tracefile}.floats.tfile'\.\\r" \
+	    "tsave ${testfile}.floats.tfile"
+	gdb_test "tsave -ctf ${tracefile}.floats.ctf" \
+	    "Trace data saved to directory '${tracefile}.floats.ctf'\.\\r" \
+	    "save ctf trace file"
+
+	foreach target_name ${trace_file_targets} {
+	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
+	    gdb_exit
+	    gdb_start
+	    gdb_reinitialize_dir $srcdir/$subdir
+	    gdb_file_cmd $binfile
+	    gdb_test "target ${target_name} ${tracefile}.floats.${target_name}" ".*" \
+		"change to ${target_name} target"
+
+	    with_test_prefix "${target_name}" {
+		gdb_test "tfind start" "#0  globals_test_func .*" \
+		    "tfind test frame"
+		gdb_unavailable_floats_1
+	    }
+	}
     }
 }
 
@@ -551,6 +656,9 @@ proc gdb_collect_globals_test_1 { } {
 
 proc gdb_collect_globals_test { } {
     with_test_prefix "collect globals" {
+	global testfile binfile srcdir subdir
+	global trace_file_targets
+
 	prepare_for_trace_test
 
 	set testline [gdb_get_line_number "set globals_test_func tracepoint here"]
@@ -596,6 +704,31 @@ proc gdb_collect_globals_test { } {
 	gdb_test "tfind none" \
 	    "#0  end .*" \
 	    "cease trace debugging"
+
+	set tracefile [standard_output_file ${testfile}]
+	gdb_test "tsave ${tracefile}.globals.tfile" \
+	    "Trace data saved to file '${tracefile}.globals.tfile'\.\\r" \
+	    "tsave ${testfile}.globals.tfile"
+	gdb_test "tsave -ctf ${tracefile}.globals.ctf" \
+	    "Trace data saved to directory '${tracefile}.globals.ctf'\.\\r" \
+	    "save ctf trace file"
+
+	foreach target_name ${trace_file_targets} {
+	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
+	    gdb_exit
+	    gdb_start
+	    gdb_reinitialize_dir $srcdir/$subdir
+	    gdb_file_cmd $binfile
+	    gdb_test "target ${target_name} ${tracefile}.globals.${target_name}" ".*" \
+		"change to ${target_name} target"
+
+	    with_test_prefix "${target_name}" {
+		gdb_test "tfind start" "#0  globals_test_func .*" \
+		    "tfind test frame"
+		gdb_collect_globals_test_1
+	    }
+	}
+
     }
 }
 
@@ -615,6 +748,15 @@ runto_main
 if { ![gdb_target_supports_trace] } then {
     unsupported "Current target does not support trace"
     return 1
+}
+
+set trace_file_targets [list "tfile"]
+gdb_test_multiple "target ctf" "" {
+    -re "Undefined target command: \"ctf\"\.  Try \"help target\"\.\r\n$gdb_prompt $" {
+    }
+    -re "No CTF directory specified.*\r\n$gdb_prompt $" {
+	lappend trace_file_targets "ctf"
+    }
 }
 
 # Body of test encased in a proc so we can return prematurely.

@@ -1,5 +1,17 @@
 2014-05-05  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/unavailable.exp (gdb_collect_args_test): Save
+	traceframes into tfile and ctf trace files.  Read data from
+	trace file and test collected data.
+	(gdb_collect_locals_test): Likewise.
+	(gdb_unavailable_registers_test): Likewise.
+	(gdb_unavailable_floats): Likewise.
+	(gdb_collect_globals_test): Likewise.
+	(top-level): Append "ctf" to trace_file_targets if GDB
+	supports.
+
+2014-05-05  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.trace/unavailable.exp (gdb_collect_args_test): Move some
 	code to ...
 	(gdb_collect_args_test_1): ... it.  New proc.

@@ -1,4 +1,13 @@
 2014-05-05  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* tracefile-tfile.c (tfile_xfer_partial): Record the lowest
+	address of blocks that intersects the requested range.  Trim
+	LEN up to LOW_ADDR_AVAILABLE if read from executable read-only
+	sections.
+	* ctf.c (ctf_xfer_partial): Likewise.
+
+2014-05-05  Yao Qi  <yao@codesourcery.com>
 
 	* printcmd.c (display_command): Remove the check to
 	target_has_execution.

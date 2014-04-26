@@ -1328,6 +1328,9 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
       struct bt_iter_pos *pos;
       int i = 0;
       enum target_xfer_status res;
+      /* Records the lowest available address of all blocks that
+	 intersects the requested range.  */
+      ULONGEST low_addr_available = 0;
 
       gdb_assert (ctf_iter != NULL);
       /* Save the current position.  */
@@ -1410,6 +1413,10 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 		}
 	    }
 
+	  if (offset < maddr && maddr < (offset + len))
+	    if (low_addr_available == 0 || low_addr_available > maddr)
+	      low_addr_available = maddr;
+
 	  if (bt_iter_next (bt_ctf_get_iter (ctf_iter)) < 0)
 	    break;
 	}
@@ -1419,7 +1426,9 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 
       /* Requested memory is unavailable in the context of traceframes,
 	 and this address falls within a read-only section, fallback
-	 to reading from executable.  */
+	 to reading from executable, up to LOW_ADDR_AVAILABLE  */
+      if (offset < low_addr_available)
+	len = min (len, low_addr_available - offset);
       res = exec_read_partial_read_only (readbuf, offset, len, xfered_len);
 
       if (res == TARGET_XFER_OK)
