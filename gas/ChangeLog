@@ -1,3 +1,7 @@
+2014-04-26  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2014-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (s_ltorg): Only create a mapping symbol for ELF

@@ -38,7 +38,6 @@ coff-i960.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
-coff-or32.c
 coff-rs6000.c
 coff-sh.c
 coff-sparc.c
@@ -112,8 +111,7 @@ cpu-mt.c
 cpu-nds32.c
 cpu-nios2.c
 cpu-ns32k.c
-cpu-openrisc.c
-cpu-or32.c
+cpu-or1k.c
 cpu-pdp11.c
 cpu-pj.c
 cpu-plugin.c
@@ -205,8 +203,7 @@ elf32-msp430.c
 elf32-mt.c
 elf32-nds32.c
 elf32-nios2.c
-elf32-openrisc.c
-elf32-or32.c
+elf32-or1k.c
 elf32-pj.c
 elf32-ppc.c
 elf32-rl78.c

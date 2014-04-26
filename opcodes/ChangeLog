@@ -1,3 +1,7 @@
+2014-04-26  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2014-04-23  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* mips-dis.c (mips_arch_choices): Update mips32r2 and mips64r2

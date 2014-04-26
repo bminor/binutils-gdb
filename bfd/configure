@@ -15099,6 +15099,11 @@ if test "$enable_shared" = "yes"; then
     SHARED_LDFLAGS="-no-undefined"
     SHARED_LIBADD="-L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin -lkernel32"
   ;;
+
+  # Hack to build or1k-src on OSX
+  or1k*-*-darwin*)
+    SHARED_LIBADD="-L`pwd`/../libiberty/pic -L`pwd`/../intl -liberty -lintl"
+  ;;
   esac
 
   if test -n "$SHARED_LIBADD"; then
@@ -15322,7 +15327,7 @@ do
     bfd_elf32_nds32le_vec)      tb="$tb elf32-nds32.lo elf32.lo $elf" ;;
     bfd_elf32_nds32belin_vec)   tb="$tb elf32-nds32.lo elf32.lo $elf" ;;
     bfd_elf32_nds32lelin_vec)   tb="$tb elf32-nds32.lo elf32.lo $elf" ;;
-    bfd_elf32_or1k_vec)         tb="$tb elf32-or1k.lo elf32.lo $elf" ;;
+    bfd_elf32_or1k_vec)		tb="$tb elf32-or1k.lo elf32.lo $elf" ;;
     bfd_elf32_pj_vec)           tb="$tb elf32-pj.lo elf32.lo $elf";;
     bfd_elf32_pjl_vec)          tb="$tb elf32-pj.lo elf32.lo $elf";;
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.lo elf-vxworks.lo elf32.lo $elf" ;;
