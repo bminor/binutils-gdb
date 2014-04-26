@@ -1,5 +1,10 @@
 2014-05-12  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* mi/mi-console.c (mi_console_raw_packet): Use the value from
+	mi_console->quote as the quoting character.
+
+2014-05-12  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* MAINTAINERS (Write After Approval): Add "Simon Marchi".
 
 2014-04-29  Tom Tromey  <tromey@redhat.com>
