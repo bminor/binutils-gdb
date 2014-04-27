@@ -836,6 +836,13 @@ print_frame_info (struct frame_info *frame, int print_level,
       ui_out_text (uiout, "\n");
       annotate_frame_end ();
 
+      /* If disassemble-next-line is set to auto or on output the next
+	 instruction.  */
+      if (disassemble_next_line == AUTO_BOOLEAN_AUTO
+	  || disassemble_next_line == AUTO_BOOLEAN_TRUE)
+	do_gdb_disassembly (get_frame_arch (frame), 1,
+			    get_frame_pc (frame), get_frame_pc (frame) + 1);
+
       do_cleanups (uiout_cleanup);
       return;
     }
