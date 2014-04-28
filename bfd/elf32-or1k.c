@@ -1112,6 +1112,8 @@ or1k_elf_relocate_section (bfd *output_bfd,
             bfd_byte *loc;
             int dynamic;
 
+            sreloc = bfd_get_section_by_name (dynobj, ".rela.got");
+
             /* Mark as TLS related GOT entry by setting
                bit 2 as well as bit 1.  */
             if (h != NULL)
@@ -1539,15 +1541,6 @@ or1k_elf_check_relocs (bfd *abfd,
                 htab->root.dynobj = dynobj = abfd;
               if (! create_got_section (dynobj, info))
                 return FALSE;
-            }
-
-          /* TLS specific.  */
-          if (ELF32_R_TYPE (rel->r_info) >= R_OR1K_TLS_GD_HI16 &&
-              ELF32_R_TYPE (rel->r_info) <= R_OR1K_TLS_IE_LO16)
-            {
-              /* Set which rela section to use.  */
-              elf_section_data (sec)->sreloc =
-                bfd_get_section_by_name (dynobj, ".rela.got");;
             }
 
           if (ELF32_R_TYPE (rel->r_info) != R_OR1K_GOTOFF_HI16 &&

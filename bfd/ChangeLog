@@ -1,3 +1,8 @@
+2014-04-29  Christian Svensson  <blue@cmd.nu>
+
+	* elf32-or1k.c: Fix a bug where non-TLS relocations would be forced
+	into .rela.got if it contained TLS relocations as well.
+
 2014-04-28  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16821
