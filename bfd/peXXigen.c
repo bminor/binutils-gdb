@@ -236,15 +236,12 @@ _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
      reduce the absolute value to < 1^32, and then transforming the
      symbol into a section relative symbol.  This of course is a hack.  */
   if (sizeof (in->n_value) > 4
-      /* GCC 4.6.x erroneously complains about the next test always being
-	 false when compiled on a 32-bit host.  (The sizeof test above
-	 should have made the warning unnecessary).  Hence we have to
-	 predicate the test.  It should not matter if the test is omitted
-	 since the worst that can happen is that some absolute symbols
-	 are needlessly converted to equivalent section relative symbols.  */
-#if defined BFD64 || ! defined __GNUC__ || __GNUC__ > 4 || __GNUC_MINOR__ > 6
-      && in->n_value > ((1ULL << 32) - 1)
-#endif
+      /* The strange computation of the shift amount is here in order to
+	 avoid a compile time warning about the comparison always being
+	 false.  It does not matter if this test fails to work as expected
+	 as the worst that can happen is that some absolute symbols are
+	 needlessly converted into section relative symbols.  */
+      && in->n_value > ((1ULL << (sizeof (in->n_value) > 4 ? 32 : 31)) - 1)
       && in->n_scnum == -1)
     {
       asection * sec;
