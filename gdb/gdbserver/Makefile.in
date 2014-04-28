@@ -593,7 +593,7 @@ i386-avx.c : $(srcdir)/../regformats/i386/i386-avx.dat $(regdat_sh)
 i386-avx-linux.c : $(srcdir)/../regformats/i386/i386-avx-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-linux.dat i386-avx-linux.c
 i386-avx512.c : $(srcdir)/../regformats/i386/i386-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx512.dat i386-avx.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx512.dat i386-avx512.c
 i386-avx512-linux.c : $(srcdir)/../regformats/i386/i386-avx512-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx512-linux.dat i386-avx512-linux.c
 i386-mpx.c : $(srcdir)/../regformats/i386/i386-mpx.dat $(regdat_sh)

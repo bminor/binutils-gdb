@@ -1,3 +1,8 @@
+2014-04-28  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (i386-avx512.c): Fix the typo of generated file
+	name.
+
 2014-04-25  Pedro Alves  <palves@redhat.com>
 
 	PR server/16255
