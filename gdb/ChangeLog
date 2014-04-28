@@ -1,5 +1,12 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* aarch64-linux-tdep.c (aarch64_linux_regset_from_core_section):
+	Remove.
+	(aarch64_linux_iterate_over_regset_sections): New.
+	(aarch64_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* fbsd-tdep.c: New file.
 	* fbsd-tdep.h: New file.
 	* Makefile.in (ALL_TARGET_OBS): Add fbsd-tdep.o.
