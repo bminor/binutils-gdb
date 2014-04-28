@@ -1,3 +1,9 @@
+2014-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16858
+	* config/tc-i386.c (md_apply_fix): Do not adjust value of
+	pc-relative fixes against weak symbols.
+
 2014-04-26  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.

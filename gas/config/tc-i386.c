@@ -9146,7 +9146,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 #endif
     }
 #if defined (OBJ_COFF) && defined (TE_PE)
-  if (fixP->fx_addsy != NULL && S_IS_WEAK (fixP->fx_addsy))
+  if (fixP->fx_addsy != NULL
+      && S_IS_WEAK (fixP->fx_addsy)
+      /* PR 16858: Do not modify weak function references.  */
+      && ! fixP->fx_pcrel)
     {
       value -= S_GET_VALUE (fixP->fx_addsy);
     }
