@@ -96,7 +96,7 @@ struct value *dwarf2_evaluate_loc_desc (struct type *type,
    into VALUE, otherwise returns 0.  */
 
 int dwarf2_evaluate_property (const struct dynamic_prop *prop,
-			      CORE_ADDR addr, CORE_ADDR *value);
+			      CORE_ADDR *value);
 
 CORE_ADDR dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
 				  unsigned int addr_index);

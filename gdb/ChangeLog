@@ -1,3 +1,12 @@
+2014-04-30  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* dwarf2loc.c (dwarf2_locexpr_baton_eval,
+	dwarf2_evaluate_property): Remove unused CORE_ADDR argument.
+	Update all callers.
+	* dwarf2loc.h (dwarf2_evaluate_property): Update signature.
+	* gdbtypes.c (resolve_dynamic_range, resolve_dynamic_array):
+	Remove unused CORE_ADDR argument.  Update all callers.
+
 2014-04-29  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (struct packet_config) <detect>: Extend comment.

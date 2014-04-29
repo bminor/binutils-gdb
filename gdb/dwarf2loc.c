@@ -2436,7 +2436,7 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 
 static int
 dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
-			   CORE_ADDR addr, CORE_ADDR *valp)
+			   CORE_ADDR *valp)
 {
   struct dwarf_expr_context *ctx;
   struct dwarf_expr_baton baton;
@@ -2491,8 +2491,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 /* See dwarf2loc.h.  */
 
 int
-dwarf2_evaluate_property (const struct dynamic_prop *prop, CORE_ADDR address,
-			  CORE_ADDR *value)
+dwarf2_evaluate_property (const struct dynamic_prop *prop, CORE_ADDR *value)
 {
   if (prop == NULL)
     return 0;
@@ -2503,7 +2502,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop, CORE_ADDR address,
       {
 	const struct dwarf2_property_baton *baton = prop->data.baton;
 
-	if (dwarf2_locexpr_baton_eval (&baton->locexpr, address, value))
+	if (dwarf2_locexpr_baton_eval (&baton->locexpr, value))
 	  {
 	    if (baton->referenced_type)
 	      {

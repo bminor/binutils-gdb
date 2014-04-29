@@ -1646,7 +1646,7 @@ is_dynamic_type (struct type *type)
 }
 
 static struct type *
-resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
+resolve_dynamic_range (struct type *dyn_range_type)
 {
   CORE_ADDR value;
   struct type *static_range_type;
@@ -1657,7 +1657,7 @@ resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
   gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->low;
-  if (dwarf2_evaluate_property (prop, addr, &value))
+  if (dwarf2_evaluate_property (prop, &value))
     {
       low_bound.kind = PROP_CONST;
       low_bound.data.const_val = value;
@@ -1669,7 +1669,7 @@ resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
     }
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->high;
-  if (dwarf2_evaluate_property (prop, addr, &value))
+  if (dwarf2_evaluate_property (prop, &value))
     {
       high_bound.kind = PROP_CONST;
       high_bound.data.const_val = value;
@@ -1696,7 +1696,7 @@ resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
    of the associated array.  */
 
 static struct type *
-resolve_dynamic_array (struct type *type, CORE_ADDR addr)
+resolve_dynamic_array (struct type *type)
 {
   CORE_ADDR value;
   struct type *elt_type;
@@ -1707,12 +1707,12 @@ resolve_dynamic_array (struct type *type, CORE_ADDR addr)
 
   elt_type = type;
   range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
-  range_type = resolve_dynamic_range (range_type, addr);
+  range_type = resolve_dynamic_range (range_type);
 
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
   if (ary_dim != NULL && TYPE_CODE (ary_dim) == TYPE_CODE_ARRAY)
-    elt_type = resolve_dynamic_array (TYPE_TARGET_TYPE (type), addr);
+    elt_type = resolve_dynamic_array (TYPE_TARGET_TYPE (type));
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
@@ -1751,11 +1751,11 @@ resolve_dynamic_type (struct type *type, CORE_ADDR addr)
 	}
 
       case TYPE_CODE_ARRAY:
-	resolved_type = resolve_dynamic_array (type, addr);
+	resolved_type = resolve_dynamic_array (type);
 	break;
 
       case TYPE_CODE_RANGE:
-	resolved_type = resolve_dynamic_range (type, addr);
+	resolved_type = resolve_dynamic_range (type);
 	break;
     }
 
