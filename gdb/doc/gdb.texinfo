@@ -22926,11 +22926,11 @@ message.
 @item show debug timestamp
 Displays the current state of displaying timestamps with @value{GDBN}
 debugging info.
-@item set debugvarobj
+@item set debug varobj
 @cindex variable object debugging info
 Turns on or off display of @value{GDBN} variable object debugging
 info. The default is off.
-@item show debugvarobj
+@item show debug varobj
 Displays the current state of displaying @value{GDBN} variable object
 debugging info.
 @item set debug xml

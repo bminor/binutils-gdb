@@ -2799,13 +2799,13 @@ _initialize_varobj (void)
   varobj_table = xmalloc (sizeof_table);
   memset (varobj_table, 0, sizeof_table);
 
-  add_setshow_zuinteger_cmd ("debugvarobj", class_maintenance,
+  add_setshow_zuinteger_cmd ("varobj", class_maintenance,
 			     &varobjdebug,
 			     _("Set varobj debugging."),
 			     _("Show varobj debugging."),
 			     _("When non-zero, varobj debugging is enabled."),
 			     NULL, show_varobjdebug,
-			     &setlist, &showlist);
+			     &setdebuglist, &showdebuglist);
 }
 
 /* Invalidate varobj VAR if it is tied to locals and re-create it if it is

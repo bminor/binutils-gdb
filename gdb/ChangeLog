@@ -1,3 +1,8 @@
+2014-04-29  Tom Tromey  <tromey@redhat.com>
+
+	* varobj.c (_initialize_varobj): Rename to "set debug varobj" and
+	"show debug varobj".
+
 2014-05-07  Kyle McMartin  <kyle@redhat.com>
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>.

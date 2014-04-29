@@ -1,3 +1,8 @@
+2014-04-29  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Debugging Output): Rename to "set debug varobj" and
+	"show debug varobj".
+
 2014-05-01  David Taylor  <dtaylor@emc.com>
 
 	* gdb.texinfo (compare-sections): Document the new -r (read-only)
