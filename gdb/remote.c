@@ -1067,7 +1067,8 @@ struct packet_config
     /* If auto, GDB auto-detects support for this packet or feature,
        either through qSupported, or by trying the packet and looking
        at the response.  If true, GDB assumes the target supports this
-       packet.  If false, the packet is disabled.  */
+       packet.  If false, the packet is disabled.  Configs that don't
+       have an associated command always have this set to auto.  */
     enum auto_boolean detect;
 
     /* Does the target support this packet?  */
@@ -1129,8 +1130,6 @@ add_packet_config_cmd (struct packet_config *config, const char *name,
 
   config->name = name;
   config->title = title;
-  config->detect = AUTO_BOOLEAN_AUTO;
-  config->support = PACKET_SUPPORT_UNKNOWN;
   set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet",
 			name, title);
   show_doc = xstrprintf ("Show current use of remote "
@@ -3632,7 +3631,19 @@ extended_remote_open (char *name, int from_tty)
   remote_open_1 (name, from_tty, &extended_remote_ops, 1 /*extended_p */);
 }
 
-/* Generic code for opening a connection to a remote target.  */
+/* Reset all packets back to "unknown support".  Called when opening a
+   new connection to a remote target.  */
+
+static void
+reset_all_packet_configs_support (void)
+{
+  int i;
+
+  for (i = 0; i < PACKET_MAX; i++)
+    remote_protocol_packets[i].support = PACKET_SUPPORT_UNKNOWN;
+}
+
+/* Initialize all packet configs.  */
 
 static void
 init_all_packet_configs (void)
@@ -3640,7 +3651,10 @@ init_all_packet_configs (void)
   int i;
 
   for (i = 0; i < PACKET_MAX; i++)
-    remote_protocol_packets[i].support = PACKET_SUPPORT_UNKNOWN;
+    {
+      remote_protocol_packets[i].detect = AUTO_BOOLEAN_AUTO;
+      remote_protocol_packets[i].support = PACKET_SUPPORT_UNKNOWN;
+    }
 }
 
 /* Symbol look-up.  */
@@ -4192,7 +4206,7 @@ remote_open_1 (char *name, int from_tty,
 
   /* Reset the target state; these things will be queried either by
      remote_query_supported or as they are needed.  */
-  init_all_packet_configs ();
+  reset_all_packet_configs_support ();
   rs->cached_wait_status = 0;
   rs->explicit_packet_size = 0;
   rs->noack_mode = 0;
@@ -11869,6 +11883,8 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			     NULL, /* FIXME: i18n: */
 			     &setlist, &showlist);
 
+  init_all_packet_configs ();
+
   add_packet_config_cmd (&remote_protocol_packets[PACKET_X],
 			 "X", "binary-download", 1);
 
@@ -12051,6 +12067,38 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_btrace],
        "qXfer:btrace", "read-btrace", 0);
+
+  /* Assert that we've registered commands for all packet configs.  */
+  {
+    int i;
+
+    for (i = 0; i < PACKET_MAX; i++)
+      {
+	/* Ideally all configs would have a command associated.  Some
+	   still don't though.  */
+	int excepted;
+
+	switch (i)
+	  {
+	  case PACKET_QNonStop:
+	  case PACKET_multiprocess_feature:
+	  case PACKET_EnableDisableTracepoints_feature:
+	  case PACKET_tracenz_feature:
+	  case PACKET_DisconnectedTracing_feature:
+	  case PACKET_augmented_libraries_svr4_read_feature:
+	    /* Additions to this list need to be well justified.  */
+	    excepted = 1;
+	    break;
+	  default:
+	    excepted = 0;
+	    break;
+	  }
+
+	/* This catches both forgetting to add a config command, and
+	   forgetting to remove a packet from the exception list.  */
+	gdb_assert (excepted == (remote_protocol_packets[i].name == NULL));
+      }
+  }
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

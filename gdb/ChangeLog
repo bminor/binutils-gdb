@@ -1,3 +1,17 @@
+2014-04-29  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (struct packet_config) <detect>: Extend comment.
+	(add_packet_config_cmd): Don't set the config's detect or support
+	fields here.
+	(init_all_packet_configs): Also initialize the config's 'detect'
+	field.
+	(reset_all_packet_configs_support): New function.
+	(remote_open_1): Call reset_all_packet_configs_support instead of
+	init_all_packet_configs.
+	(_initialize_remote): Initialize all packet configs.  Assert that
+	all packets have an associated command, except a few known
+	outliers.
+
 2014-04-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (read_subrange_type): Handle dynamic
