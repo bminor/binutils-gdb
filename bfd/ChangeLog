@@ -1,3 +1,9 @@
+2014-04-30  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (struct cie.personality): Replace val with sym.
+	(find_merged_cie): Identify personality functions by (bfd_id,index)
+	pair when a local sym is used.
+
 2014-04-29  Christian Svensson  <blue@cmd.nu>
 
 	* elf32-or1k.c: Fix a bug where non-TLS relocations would be forced

@@ -40,7 +40,10 @@ struct cie
   bfd_vma augmentation_size;
   union {
     struct elf_link_hash_entry *h;
-    bfd_vma val;
+    struct {
+      unsigned int bfd_id;
+      unsigned int index;
+    } sym;
     unsigned int reloc_index;
   } personality;
   asection *output_sec;
@@ -1030,8 +1033,12 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
     {
       bfd_boolean per_binds_local;
 
-      /* Work out the address of personality routine, either as an absolute
-	 value or as a symbol.  */
+      /* Work out the address of personality routine, or at least
+	 enough info that we could calculate the address had we made a
+	 final section layout.  The symbol on the reloc is enough,
+	 either the hash for a global, or (bfd id, index) pair for a
+	 local.  The assumption here is that no one uses addends on
+	 the reloc.  */
       rel = cookie->rels + cie->personality.reloc_index;
       memset (&cie->personality, 0, sizeof (cie->personality));
 #ifdef BFD64
@@ -1071,9 +1078,8 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	    return cie_inf;
 
 	  cie->local_personality = 1;
-	  cie->personality.val = (sym->st_value
-				  + sym_sec->output_offset
-				  + sym_sec->output_section->vma);
+	  cie->personality.sym.bfd_id = abfd->id;
+	  cie->personality.sym.index = r_symndx;
 	  per_binds_local = TRUE;
 	}
 
