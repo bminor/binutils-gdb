@@ -1,3 +1,9 @@
+2014-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* compress.c (bfd_is_section_compressed): When checking the
+	.debug_str section, also check the fifth byte in the section is
+	not part of a string.
+
 2014-04-30  Alan Modra  <amodra@gmail.com>
 
 	* elf-eh-frame.c (struct cie.personality): Replace val with sym.
