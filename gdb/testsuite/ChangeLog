@@ -1,3 +1,9 @@
+2014-05-07  Kyle McMartin  <kyle@redhat.com>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	* gdb.arch/aarch64-atomic-inst.c: New file.
+	* gdb.arch/aarch64-atomic-inst.exp: New file.
+
 2014-05-07  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.dwarf2/dwzbuildid.exp: Match output "No symbol "the_int"

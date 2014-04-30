@@ -1,3 +1,10 @@
+2014-05-07  Kyle McMartin  <kyle@redhat.com>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	* aarch64-tdep.c (aarch64_software_single_step): New function.
+	(aarch64_gdbarch_init): Handle single stepping of atomic sequences
+	with aarch64_software_single_step.
+
 2014-05-05  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.7.1 released.
