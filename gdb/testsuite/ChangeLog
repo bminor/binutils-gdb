@@ -1,5 +1,12 @@
 2014-05-01  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (gdb_load): Extend comment.  Skip calling
+	gdb_file_cmd if no file is specified.
+	* boards/native-extended-gdbserver.exp (gdb_load): Use the
+	last_loaded_file to set the remote exec-file.
+
+2014-05-01  Pedro Alves  <palves@redhat.com>
+
 	* boards/local-remote-host.exp: New file.
 
 2014-05-01  Pedro Alves  <palves@redhat.com>

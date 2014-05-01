@@ -3491,11 +3491,14 @@ proc gdb_load_shlibs { args } {
 }
 
 #
-# gdb_load -- load a file into the debugger.
+# gdb_load -- load a file into the debugger.  Specifying no file
+# defaults to the executable currently being debugged.
 # Many files in config/*.exp override this procedure.
 #
 proc gdb_load { arg } {
-    return [gdb_file_cmd $arg]
+    if { $arg != "" } {
+	return [gdb_file_cmd $arg]
+    }
 }
 
 # gdb_reload -- load a file into the target.  Called before "running",

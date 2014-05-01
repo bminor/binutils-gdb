@@ -78,12 +78,13 @@ proc mi_gdb_start { args } {
 #
 proc gdb_load { arg } {
     global gdb_prompt
+    global last_loaded_file
 
     if { $arg != "" } {
 	if [gdb_file_cmd $arg] then { return -1 }
     }
 
-    send_gdb "set remote exec-file $arg\n"
+    send_gdb "set remote exec-file $last_loaded_file\n"
     gdb_expect {
 	-re "$gdb_prompt $" {}
 	timeout {
