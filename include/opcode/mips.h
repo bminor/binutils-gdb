@@ -1080,16 +1080,33 @@ struct mips_opcode
 #define INSN_ISA4_32R2            13
 #define INSN_ISA5_32R2            14
 
-/* Given INSN_ISA* values X and Y, where X ranges over INSN_ISA1 through
-   INSN_ISA5_32R2 and Y ranges over INSN_ISA1 through INSN_ISA64R2,
-   this table describes whether at least one of the ISAs described by X
-   is/are implemented by ISA Y.  (Think of Y as the ISA level supported by
-   a particular core and X as the ISA level(s) at which a certain instruction
-   is defined.)  The ISA(s) described by X is/are implemented by Y iff
-   (mips_isa_table[(Y & INSN_ISA_MASK) - 1] >> ((X & INSN_ISA_MASK) - 1)) & 1
-   is non-zero.  */
-static const unsigned int mips_isa_table[] =
-  { 0x0001, 0x0003, 0x0607, 0x1e0f, 0x3e1f, 0x0a23, 0x3e63, 0x3ebf, 0x3fff };
+/* Bit INSN_ISA<X> - 1 of INSN_UPTO<Y> is set if ISA Y includes ISA X.  */
+#define ISAF(X) (1 << (INSN_ISA##X - 1))
+#define INSN_UPTO1    ISAF(1)
+#define INSN_UPTO2    INSN_UPTO1 | ISAF(2)
+#define INSN_UPTO3    INSN_UPTO2 | ISAF(3) | ISAF(3_32) | ISAF(3_32R2)
+#define INSN_UPTO4    INSN_UPTO3 | ISAF(4) | ISAF(4_32) | ISAF(4_32R2)
+#define INSN_UPTO5    INSN_UPTO4 | ISAF(5) | ISAF(5_32R2)
+#define INSN_UPTO32   INSN_UPTO2 | ISAF(32) | ISAF(3_32) | ISAF(4_32)
+#define INSN_UPTO32R2 INSN_UPTO32 | ISAF(32R2) \
+			| ISAF(3_32R2) | ISAF(4_32R2) | ISAF(5_32R2)
+#define INSN_UPTO64   INSN_UPTO5 | ISAF(64) | ISAF(32)
+#define INSN_UPTO64R2 INSN_UPTO64 | ISAF(64R2) | ISAF(32R2)
+
+/* The same information in table form: bit INSN_ISA<X> - 1 of index
+   INSN_UPTO<Y> - 1 is set if ISA Y includes ISA X.  */
+static const unsigned int mips_isa_table[] = {
+  INSN_UPTO1,
+  INSN_UPTO2,
+  INSN_UPTO3,
+  INSN_UPTO4,
+  INSN_UPTO5,
+  INSN_UPTO32,
+  INSN_UPTO32R2,
+  INSN_UPTO64,
+  INSN_UPTO64R2
+};
+#undef ISAF
 
 /* Masks used for Chip specific instructions.  */
 #define INSN_CHIP_MASK		  0xc3ff0f20
