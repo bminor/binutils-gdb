@@ -8484,6 +8484,7 @@ compare_sections_command (char *args, int from_tty)
   int matched = 0;
   int mismatched = 0;
   int res;
+  int read_only = 0;
 
   if (!exec_bfd)
     error (_("command cannot be used without an exec file"));
@@ -8491,10 +8492,19 @@ compare_sections_command (char *args, int from_tty)
   /* Make sure the remote is pointing at the right process.  */
   set_general_process ();
 
+  if (args != NULL && strcmp (args, "-r") == 0)
+    {
+      read_only = 1;
+      args = NULL;
+    }
+
   for (s = exec_bfd->sections; s; s = s->next)
     {
       if (!(s->flags & SEC_LOAD))
 	continue;		/* Skip non-loadable section.  */
+
+      if (read_only && (s->flags & SEC_READONLY) == 0)
+	continue;		/* Skip writeable sections */
 
       size = bfd_get_section_size (s);
       if (size == 0)
@@ -11771,7 +11781,8 @@ the packets being used"),
 
   add_cmd ("compare-sections", class_obscure, compare_sections_command, _("\
 Compare section data on target to the exec file.\n\
-Argument is a single section name (default: all loaded sections)."),
+Argument is a single section name (default: all loaded sections).\n\
+To compare only read-only loaded sections, specify the -r option."),
 	   &cmdlist);
 
   add_cmd ("packet", class_maintenance, packet_command, _("\
