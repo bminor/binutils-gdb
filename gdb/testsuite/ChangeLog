@@ -1,5 +1,9 @@
 2014-05-01  Pedro Alves  <palves@redhat.com>
 
+	* boards/local-remote-host.exp: New file.
+
+2014-05-01  Pedro Alves  <palves@redhat.com>
+
 	* boards/local-remote-host.exp: Rename to ...
 	* boards/local-remote-host-notty.exp: ... this.
 
