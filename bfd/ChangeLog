@@ -1,3 +1,17 @@
+2014-05-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo File layout documentation): Add note about low bits
+	of address.
+	(mmo_write_chunk): When handling data remainder, assert that
+	previous remaining data is flushed.
+	(mmo_write_loc_chunk): Only look for trailing and leading zeros
+	when dealing with an aligned VMA and for aligned lengths.  Don't skip
+	the last 32-bit-word of zeros.
+	(mmo_write_loc_chunk): Emit an error if the VMA is not aligned.
+	(mmo_scan) <case LOP_QUOTE>: Move re-alignment of vma before
+	emitting data, not after updating it.
+	<case LOP_LOC>: Call mmo_decide_section with aligned vma.
+
 2014-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* compress.c (bfd_is_section_compressed): When checking the
