@@ -12548,8 +12548,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
   if (((prefixes & PREFIX_FWAIT)
        && ((*codep < 0xd8) || (*codep > 0xdf))))
     {
+      /* Handle prefixes before fwait.  */
+      for (i = 0;
+	   i < (int) ARRAY_SIZE (all_prefixes) && all_prefixes[i];
+	   i++)
+	(*info->fprintf_func) (info->stream, "%s ",
+			       prefix_name (all_prefixes[i], sizeflag));
       (*info->fprintf_func) (info->stream, "fwait");
-      return 1;
+      return i + 1;
     }
 
   if (*codep == 0x0f)

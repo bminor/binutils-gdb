@@ -589,3 +589,6 @@ foo:
  cmovpo 0x90909090(%eax),%edx
  cmovpe  0x90909090(%eax),%dx
  cmovpo 0x90909090(%eax),%dx
+
+ es fwait
+ fwait
