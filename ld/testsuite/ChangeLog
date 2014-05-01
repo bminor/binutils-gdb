@@ -1,3 +1,10 @@
+2014-05-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/sec-11.d, ld-mmix/sec-11.ld, ld-mmix/sec-10.s,
+	ld-mmix/sec-10.d, ld-mmix/b-offlocmis.s, ld-mmix/sec-12.d: New
+	tests.
+	* ld-mmix/b-offloc.s: Correct address in comment.
+
 2014-04-23  Will Newton  <will.newton@linaro.org>
 
 	* ld-arm/arm-no-rel-plt.ld: Remove OUTPUT_FORMAT and
