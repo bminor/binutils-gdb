@@ -2845,6 +2845,29 @@ static const unsigned char twobyte_has_modrm[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
+static const unsigned char twobyte_has_mandatory_prefix[256] = {
+  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
+  /*       -------------------------------        */
+  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
+  /* 10 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* 1f */
+  /* 20 */ 0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0, /* 2f */
+  /* 30 */ 0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0, /* 3f */
+  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
+  /* 50 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 5f */
+  /* 60 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 6f */
+  /* 70 */ 1,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1, /* 7f */
+  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
+  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
+  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
+  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
+  /* c0 */ 0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0, /* cf */
+  /* d0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
+  /* e0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ef */
+  /* f0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0  /* ff */
+  /*       -------------------------------        */
+  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
+};
+
 static char obuf[100];
 static char *obufp;
 static char *mnemonicendp;
@@ -2852,6 +2875,7 @@ static char scratchbuf[100];
 static unsigned char *start_codep;
 static unsigned char *insn_codep;
 static unsigned char *codep;
+static unsigned char *end_codep;
 static int last_lock_prefix;
 static int last_repz_prefix;
 static int last_repnz_prefix;
@@ -2859,6 +2883,10 @@ static int last_data_prefix;
 static int last_addr_prefix;
 static int last_rex_prefix;
 static int last_seg_prefix;
+/* The PREFIX_REPZ/PREFIX_REPNZ/PREFIX_DATA prefix is mandatory.  */
+static int mandatory_prefix;
+/* The active segment register prefix.  */
+static int active_seg_prefix;
 #define MAX_CODE_LENGTH 15
 /* We can up to 14 prefixes since the maximum instruction length is
    15bytes.  */
@@ -11607,6 +11635,7 @@ ckprefix (void)
   last_addr_prefix = -1;
   last_rex_prefix = -1;
   last_seg_prefix = -1;
+  active_seg_prefix = 0;
   for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
     all_prefixes[i] = 0;
   i = 0;
@@ -11656,26 +11685,32 @@ ckprefix (void)
 	case 0x2e:
 	  prefixes |= PREFIX_CS;
 	  last_seg_prefix = i;
+	  active_seg_prefix = PREFIX_CS;
 	  break;
 	case 0x36:
 	  prefixes |= PREFIX_SS;
 	  last_seg_prefix = i;
+	  active_seg_prefix = PREFIX_SS;
 	  break;
 	case 0x3e:
 	  prefixes |= PREFIX_DS;
 	  last_seg_prefix = i;
+	  active_seg_prefix = PREFIX_DS;
 	  break;
 	case 0x26:
 	  prefixes |= PREFIX_ES;
 	  last_seg_prefix = i;
+	  active_seg_prefix = PREFIX_ES;
 	  break;
 	case 0x64:
 	  prefixes |= PREFIX_FS;
 	  last_seg_prefix = i;
+	  active_seg_prefix = PREFIX_FS;
 	  break;
 	case 0x65:
 	  prefixes |= PREFIX_GS;
 	  last_seg_prefix = i;
+	  active_seg_prefix = PREFIX_GS;
 	  break;
 	case 0x66:
 	  prefixes |= PREFIX_DATA;
@@ -11716,28 +11751,6 @@ ckprefix (void)
       length++;
     }
   return 0;
-}
-
-static int
-seg_prefix (int pref)
-{
-  switch (pref)
-    {
-    case 0x2e:
-      return PREFIX_CS;
-    case 0x36:
-      return PREFIX_SS;
-    case 0x3e:
-      return PREFIX_DS;
-    case 0x26:
-      return PREFIX_ES;
-    case 0x64:
-      return PREFIX_FS;
-    case 0x65:
-      return PREFIX_GS;
-    default:
-      return 0;
-    }
 }
 
 /* Return the name of the prefix byte PREF, or NULL if PREF is not a
@@ -11961,32 +11974,47 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	}
       else
 	{
+	  int last_prefix = -1;
+	  int prefix = 0;
 	  vindex = 0;
-	  used_prefixes |= (prefixes & PREFIX_REPZ);
-	  if (prefixes & PREFIX_REPZ)
+	  /* We check PREFIX_REPNZ and PREFIX_REPZ before PREFIX_DATA.
+	     When there are multiple PREFIX_REPNZ and PREFIX_REPZ, the
+	     last one wins.  */
+	  if ((prefixes & (PREFIX_REPZ | PREFIX_REPNZ)) != 0)
 	    {
-	      vindex = 1;
-	      all_prefixes[last_repz_prefix] = 0;
-	    }
-	  else
-	    {
-	      /* We should check PREFIX_REPNZ and PREFIX_REPZ before
-		 PREFIX_DATA.  */
-	      used_prefixes |= (prefixes & PREFIX_REPNZ);
-	      if (prefixes & PREFIX_REPNZ)
+	      if (last_repz_prefix > last_repnz_prefix)
 		{
-		  vindex = 3;
-		  all_prefixes[last_repnz_prefix] = 0;
+		  vindex = 1;
+		  prefix = PREFIX_REPZ;
+		  last_prefix = last_repz_prefix;
 		}
 	      else
 		{
-		  used_prefixes |= (prefixes & PREFIX_DATA);
-		  if (prefixes & PREFIX_DATA)
-		    {
-		      vindex = 2;
-		      all_prefixes[last_data_prefix] = 0;
-		    }
+		  vindex = 3;
+		  prefix = PREFIX_REPNZ;
+		  last_prefix = last_repnz_prefix;
 		}
+
+	      /* Ignore the invalid index if it isn't mandatory.  */
+	      if (!mandatory_prefix
+		  && (prefix_table[dp->op[1].bytemode][vindex].name
+		      == NULL)
+		  && (prefix_table[dp->op[1].bytemode][vindex].op[0].bytemode
+		      == 0))
+		vindex = 0;
+	    }
+
+	  if (vindex == 0 && (prefixes & PREFIX_DATA) != 0)
+	    {
+	      vindex = 2;
+	      prefix = PREFIX_DATA;
+	      last_prefix = last_data_prefix;
+	    }
+
+	  if (vindex != 0)
+	    {
+	      used_prefixes |= prefix;
+	      all_prefixes[last_prefix] = 0;
 	    }
 	}
       dp = &prefix_table[dp->op[1].bytemode][vindex];
@@ -12001,6 +12029,7 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       FETCH_DATA (info, codep + 2);
       vindex = *codep++;
       dp = &three_byte_table[dp->op[1].bytemode][vindex];
+      end_codep = codep;
       modrm.mod = (*codep >> 6) & 3;
       modrm.reg = (*codep >> 3) & 7;
       modrm.rm = *codep & 7;
@@ -12083,6 +12112,7 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vindex = *codep++;
       dp = &xop_table[vex_table_index][vindex];
 
+      end_codep = codep;
       FETCH_DATA (info, codep + 1);
       modrm.mod = (*codep >> 6) & 3;
       modrm.reg = (*codep >> 3) & 7;
@@ -12144,6 +12174,7 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       codep++;
       vindex = *codep++;
       dp = &vex_table[vex_table_index][vindex];
+      end_codep = codep;
       /* There is no MODRM byte for VEX [82|77].  */
       if (vindex != 0x77 && vindex != 0x82)
 	{
@@ -12192,6 +12223,7 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       codep++;
       vindex = *codep++;
       dp = &vex_table[dp->op[1].bytemode][vindex];
+      end_codep = codep;
       /* There is no MODRM byte for VEX [82|77].  */
       if (vindex != 0x77 && vindex != 0x82)
 	{
@@ -12286,6 +12318,7 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       codep++;
       vindex = *codep++;
       dp = &evex_table[vex_table_index][vindex];
+      end_codep = codep;
       FETCH_DATA (info, codep + 1);
       modrm.mod = (*codep >> 6) & 3;
       modrm.reg = (*codep >> 3) & 7;
@@ -12565,21 +12598,16 @@ print_insn (bfd_vma pc, disassemble_info *info)
       threebyte = *++codep;
       dp = &dis386_twobyte[threebyte];
       need_modrm = twobyte_has_modrm[*codep];
+      mandatory_prefix = twobyte_has_mandatory_prefix[*codep];
       codep++;
     }
   else
     {
       dp = &dis386[*codep];
       need_modrm = onebyte_has_modrm[*codep];
+      mandatory_prefix = 0;
       codep++;
     }
-
-  if ((prefixes & PREFIX_REPZ))
-    used_prefixes |= PREFIX_REPZ;
-  if ((prefixes & PREFIX_REPNZ))
-    used_prefixes |= PREFIX_REPNZ;
-  if ((prefixes & PREFIX_LOCK))
-    used_prefixes |= PREFIX_LOCK;
 
   default_prefixes = 0;
   if (prefixes & PREFIX_ADDR)
@@ -12615,6 +12643,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	}
     }
 
+  end_codep = codep;
   if (need_modrm)
     {
       FETCH_DATA (info, codep + 1);
@@ -12663,24 +12692,6 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	}
     }
 
-  /* See if any prefixes were not used.  If so, print the first one
-     separately.  If we don't do this, we'll wind up printing an
-     instruction stream which does not precisely correspond to the
-     bytes we are disassembling.  */
-  if ((prefixes & ~(used_prefixes | default_prefixes)) != 0)
-    {
-      for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
-	if (all_prefixes[i])
-	  {
-	    const char *name;
-	    name = prefix_name (all_prefixes[i], priv.orig_sizeflag);
-	    if (name == NULL)
-	      name = INTERNAL_DISASSEMBLER_ERROR;
-	    (*info->fprintf_func) (info->stream, "%s", name);
-	    return 1;
-	  }
-    }
-
   /* Check if the REX prefix is used.  */
   if (rex_ignored == 0 && (rex ^ rex_used) == 0 && last_rex_prefix >= 0)
     all_prefixes[last_rex_prefix] = 0;
@@ -12688,8 +12699,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
   /* Check if the SEG prefix is used.  */
   if ((prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS | PREFIX_ES
 		   | PREFIX_FS | PREFIX_GS)) != 0
-      && (used_prefixes
-	  & seg_prefix (all_prefixes[last_seg_prefix])) != 0)
+      && (used_prefixes & active_seg_prefix) != 0)
     all_prefixes[last_seg_prefix] = 0;
 
   /* Check if the ADDR prefix is used.  */
@@ -12697,10 +12707,15 @@ print_insn (bfd_vma pc, disassemble_info *info)
       && (used_prefixes & PREFIX_ADDR) != 0)
     all_prefixes[last_addr_prefix] = 0;
 
-  /* Check if the DATA prefix is used.  */
-  if ((prefixes & PREFIX_DATA) != 0
-      && (used_prefixes & PREFIX_DATA) != 0)
-    all_prefixes[last_data_prefix] = 0;
+  /* Check if the DATA prefix is used.  Restore the DFLAG bit in
+     sizeflag if the DATA prefix is unused.  */
+  if ((prefixes & PREFIX_DATA) != 0)
+    {
+      if ((used_prefixes & PREFIX_DATA) != 0)
+	all_prefixes[last_data_prefix] = 0;
+      else if ((default_prefixes & PREFIX_DATA) == 0)
+	sizeflag ^= DFLAG;
+    }
 
   prefix_length = 0;
   for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
@@ -12713,6 +12728,26 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	prefix_length += strlen (name) + 1;
 	(*info->fprintf_func) (info->stream, "%s ", name);
       }
+
+  /* If the mandatory PREFIX_REPZ/PREFIX_REPNZ/PREFIX_DATA prefix is
+     unused, opcode is invalid.  Since the PREFIX_DATA prefix may be
+     used by putop and MMX/SSE operand and may be overriden by the
+     PREFIX_REPZ/PREFIX_REPNZ fix, we check the PREFIX_DATA prefix
+     separately.  */
+  if (mandatory_prefix
+      && dp != &bad_opcode
+      && (((prefixes
+	    & (PREFIX_REPZ | PREFIX_REPNZ)) != 0
+	   && (used_prefixes
+	       & (PREFIX_REPZ | PREFIX_REPNZ)) == 0)
+	  || ((((prefixes
+		 & (PREFIX_REPZ | PREFIX_REPNZ | PREFIX_DATA))
+		== PREFIX_DATA)
+	       && (used_prefixes & PREFIX_DATA) == 0))))
+    {
+      (*info->fprintf_func) (info->stream, "(bad)");
+      return end_codep - priv.the_buffer;
+    }
 
   /* Check maximum code length.  */
   if ((codep - start_codep) > MAX_CODE_LENGTH)
@@ -13681,35 +13716,33 @@ oappend (const char *s)
 static void
 append_seg (void)
 {
-  if (prefixes & PREFIX_CS)
+  /* Only print the active segment register.  */
+  if (!active_seg_prefix)
+    return;
+
+  used_prefixes |= active_seg_prefix;
+  switch (active_seg_prefix)
     {
-      used_prefixes |= PREFIX_CS;
+    case PREFIX_CS:
       oappend_maybe_intel ("%cs:");
-    }
-  if (prefixes & PREFIX_DS)
-    {
-      used_prefixes |= PREFIX_DS;
+      break;
+    case PREFIX_DS:
       oappend_maybe_intel ("%ds:");
-    }
-  if (prefixes & PREFIX_SS)
-    {
-      used_prefixes |= PREFIX_SS;
+      break;
+    case PREFIX_SS:
       oappend_maybe_intel ("%ss:");
-    }
-  if (prefixes & PREFIX_ES)
-    {
-      used_prefixes |= PREFIX_ES;
+      break;
+    case PREFIX_ES:
       oappend_maybe_intel ("%es:");
-    }
-  if (prefixes & PREFIX_FS)
-    {
-      used_prefixes |= PREFIX_FS;
+      break;
+    case PREFIX_FS:
       oappend_maybe_intel ("%fs:");
-    }
-  if (prefixes & PREFIX_GS)
-    {
-      used_prefixes |= PREFIX_GS;
+      break;
+    case PREFIX_GS:
       oappend_maybe_intel ("%gs:");
+      break;
+    default:
+      break;
     }
 }
 
@@ -14541,10 +14574,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	{
 	  if (modrm.mod != 0 || base == 5)
 	    {
-	      if (prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
-			      | PREFIX_ES | PREFIX_FS | PREFIX_GS))
-		;
-	      else
+	      if (!active_seg_prefix)
 		{
 		  oappend (names_seg[ds_reg - es_reg]);
 		  oappend (":");
@@ -14617,10 +14647,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	}
       else if (intel_syntax)
 	{
-	  if (prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
-			  | PREFIX_ES | PREFIX_FS | PREFIX_GS))
-	    ;
-	  else
+	  if (!active_seg_prefix)
 	    {
 	      oappend (names_seg[ds_reg - es_reg]);
 	      oappend (":");
@@ -15178,8 +15205,7 @@ OP_OFF (int bytemode, int sizeflag)
 
   if (intel_syntax)
     {
-      if (!(prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
-			| PREFIX_ES | PREFIX_FS | PREFIX_GS)))
+      if (!active_seg_prefix)
 	{
 	  oappend (names_seg[ds_reg - es_reg]);
 	  oappend (":");
@@ -15209,8 +15235,7 @@ OP_OFF64 (int bytemode, int sizeflag)
 
   if (intel_syntax)
     {
-      if (!(prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
-			| PREFIX_ES | PREFIX_FS | PREFIX_GS)))
+      if (!active_seg_prefix)
 	{
 	  oappend (names_seg[ds_reg - es_reg]);
 	  oappend (":");
@@ -15286,14 +15311,10 @@ OP_DSreg (int code, int sizeflag)
 	  intel_operand_size (b_mode, sizeflag);
 	}
     }
-  if ((prefixes
-       & (PREFIX_CS
-	  | PREFIX_DS
-	  | PREFIX_SS
-	  | PREFIX_ES
-	  | PREFIX_FS
-	  | PREFIX_GS)) == 0)
-    prefixes |= PREFIX_DS;
+  /* Set active_seg_prefix to PREFIX_DS if it is unset so that the
+     default segment register DS is printed.  */
+  if (!active_seg_prefix)
+    active_seg_prefix = PREFIX_DS;
   append_seg ();
   ptr_reg (code, sizeflag);
 }

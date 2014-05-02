@@ -1,3 +1,29 @@
+2014-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16893
+	* i386-dis.c (twobyte_has_mandatory_prefix): New variable.
+	(end_codep): Likewise.
+	(mandatory_prefix): Likewise.
+	(active_seg_prefix): Likewise.
+	(ckprefix): Set active_seg_prefix to the active segment register
+	prefix.
+	(seg_prefix): Removed.
+	(get_valid_dis386): Use the last of PREFIX_REPNZ and PREFIX_REPZ
+	for prefix index.  Ignore the index if it is invalid and the
+	mandatory prefix isn't required.
+	(print_insn): Set mandatory_prefix if the PREFIX_XXX prefix is
+	mandatory.  Don't set PREFIX_REPZ/PREFIX_REPNZ/PREFIX_LOCK bits
+	in used_prefixes here.  Don't print unused prefixes.  Check
+	active_seg_prefix for the active segment register prefix.
+	Restore the DFLAG bit in sizeflag if the data size prefix is
+	unused.  Check the unused mandatory PREFIX_XXX prefixes
+	(append_seg): Only print the segment register which gets used.
+	(OP_E_memory): Check active_seg_prefix for the segment register
+	prefix.
+	(OP_OFF): Likewise.
+	(OP_OFF64): Likewise.
+	(OP_DSreg): Set active_seg_prefix to PREFIX_DS if it is unset.
+
 2014-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/16886

@@ -1,3 +1,19 @@
+2014-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16893
+	* gas/i386/katmai.d: Expect "gs" as prefix.
+
+	* gas/i386/long-1.s: Replace movapd with movss.
+	* gas/i386/x86-64-long-1.s: Likewise.
+	* gas/i386/long-1-intel.d: Updated.
+	* gas/i386/long-1.d: Likewise.
+	* gas/i386/x86-64-long-1-intel.d: Likewise.
+	* gas/i386/x86-64-long-1.d: Likewise.
+
+	* gas/i386/prefix.s: Add tests for multiple 0x66, 0x67, 0xf0,
+	0xf2 and 0xf3 prefixes.
+	* gas/i386/prefix.d: Updated.
+
 2014-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/opcode-intel.d: Undo the last change.
