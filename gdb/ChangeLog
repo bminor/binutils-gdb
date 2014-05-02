@@ -1,3 +1,11 @@
+2014-05-02  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/16889
+	* stap-probe.c (stap_parse_probe_arguments): Simplify
+	check for non-prefixed probes (i.e., probes whose
+	arguments do not start with "N@").  Always set the
+	argument type to a sane value.
+
 2014-05-01  David Taylor  <dtaylor@emc.com>
 
 	* remote.c (compare_sections_command): Add -r option to compare

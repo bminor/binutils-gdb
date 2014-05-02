@@ -1098,10 +1098,8 @@ stap_parse_probe_arguments (struct stap_probe *probe, struct gdbarch *gdbarch)
 	 Where `N' can be [+,-][4,8].  This is not mandatory, so
 	 we check it here.  If we don't find it, go to the next
 	 state.  */
-      if ((*cur == '-' && cur[1] != '\0' && cur[2] != '@')
-	  && cur[1] != '@')
-	arg.bitness = STAP_ARG_BITNESS_UNDEFINED;
-      else
+      if ((cur[0] == '-' && isdigit (cur[1]) && cur[2] == '@')
+	  || (isdigit (cur[0]) && cur[1] == '@'))
 	{
 	  if (*cur == '-')
 	    {
@@ -1127,11 +1125,14 @@ stap_parse_probe_arguments (struct stap_probe *probe, struct gdbarch *gdbarch)
 	    }
 
 	  arg.bitness = b;
-	  arg.atype = stap_get_expected_argument_type (gdbarch, b);
 
 	  /* Discard the number and the `@' sign.  */
 	  cur += 2;
 	}
+      else
+	arg.bitness = STAP_ARG_BITNESS_UNDEFINED;
+
+      arg.atype = stap_get_expected_argument_type (gdbarch, arg.bitness);
 
       expr = stap_parse_argument (&cur, arg.atype, gdbarch);
 

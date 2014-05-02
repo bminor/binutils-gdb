@@ -1,3 +1,9 @@
+2014-05-02  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/16889
+	* gdb.arch/amd64-stap-optional-prefix.S: New file.
+	* gdb.arch/amd64-stap-optional-prefix.exp: Likewise.
+
 2014-05-01  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (gdb_load): Extend comment.  Skip calling
