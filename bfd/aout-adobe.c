@@ -26,7 +26,7 @@
 #include "libaout.h"		/* BFD a.out internal data structures.  */
 
 /* Forward decl.  */
-extern const bfd_target a_out_adobe_vec;
+extern const bfd_target aout_adobe_vec;
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
@@ -216,7 +216,7 @@ aout_adobe_object_p (bfd *abfd)
   if (N_BADMAG (anexec))
     {
       targ = getenv ("GNUTARGET");
-      if (targ && !strcmp (targ, a_out_adobe_vec.name))
+      if (targ && !strcmp (targ, aout_adobe_vec.name))
 	/* Just continue anyway, if specifically set to this format.  */
 	;
       else
@@ -472,7 +472,7 @@ aout_adobe_sizeof_headers (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 #define aout_32_bfd_final_link		            _bfd_generic_final_link
 #define aout_32_bfd_link_split_section	            _bfd_generic_link_split_section
 
-const bfd_target a_out_adobe_vec =
+const bfd_target aout_adobe_vec =
 {
   "a.out.adobe",		/* Name.  */
   bfd_target_aout_flavour,

@@ -2826,7 +2826,7 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define ELF_TARGET_ID                   OR1K_ELF_DATA
 #define ELF_MAXPAGESIZE                 0x2000
 
-#define TARGET_BIG_SYM                  bfd_elf32_or1k_vec
+#define TARGET_BIG_SYM                  or1k_elf32_vec
 #define TARGET_BIG_NAME                 "elf32-or1k"
 
 #define elf_info_to_howto_rel           NULL

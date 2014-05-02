@@ -4656,7 +4656,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_got_header_size	     8
 #define elf_backend_rela_normal		     1
 
-#define TARGET_BIG_SYM		bfd_elf32_hppa_vec
+#define TARGET_BIG_SYM		hppa_elf32_vec
 #define TARGET_BIG_NAME		"elf32-hppa"
 #define ELF_ARCH		bfd_arch_hppa
 #define ELF_TARGET_ID		HPPA32_ELF_DATA
@@ -4668,7 +4668,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #include "elf32-target.h"
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM		bfd_elf32_hppa_linux_vec
+#define TARGET_BIG_SYM		hppa_elf32_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME		"elf32-hppa-linux"
 #undef ELF_OSABI
@@ -4679,7 +4679,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #include "elf32-target.h"
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM		bfd_elf32_hppa_nbsd_vec
+#define TARGET_BIG_SYM		hppa_elf32_nbsd_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME		"elf32-hppa-netbsd"
 #undef ELF_OSABI

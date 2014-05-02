@@ -1,3 +1,10 @@
+2014-05-02  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/metagelf.em: Update bfd target vector naming.
+	* emultempl/nios2elf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.

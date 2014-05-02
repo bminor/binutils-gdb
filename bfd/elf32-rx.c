@@ -30,8 +30,8 @@
 /* This is a meta-target that's used only with objcopy, to avoid the
    endian-swap we would otherwise get.  We check for this in
    rx_elf_object_p().  */
-const bfd_target bfd_elf32_rx_be_ns_vec;
-const bfd_target bfd_elf32_rx_be_vec;
+const bfd_target rx_elf32_be_ns_vec;
+const bfd_target rx_elf32_be_vec;
 
 #ifdef DEBUG
 char * rx_get_reloc (long);
@@ -3071,17 +3071,17 @@ rx_elf_object_p (bfd * abfd)
   /* We never want to automatically choose the non-swapping big-endian
      target.  The user can only get that explicitly, such as with -I
      and objcopy.  */
-  if (abfd->xvec == &bfd_elf32_rx_be_ns_vec
+  if (abfd->xvec == &rx_elf32_be_ns_vec
       && abfd->target_defaulted)
     return FALSE;
 
   /* BFD->target_defaulted is not set to TRUE when a target is chosen
      as a fallback, so we check for "scanning" to know when to stop
      using the non-swapping target.  */
-  if (abfd->xvec == &bfd_elf32_rx_be_ns_vec
+  if (abfd->xvec == &rx_elf32_be_ns_vec
       && saw_be)
     return FALSE;
-  if (abfd->xvec == &bfd_elf32_rx_be_vec)
+  if (abfd->xvec == &rx_elf32_be_vec)
     saw_be = TRUE;
 
   bfd_default_set_arch_mach (abfd, bfd_arch_rx,
@@ -3548,10 +3548,10 @@ static const struct bfd_elf_special_section elf32_rx_special_sections[] =
 #define ELF_MACHINE_CODE	EM_RX
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_BIG_SYM		bfd_elf32_rx_be_vec
+#define TARGET_BIG_SYM		rx_elf32_be_vec
 #define TARGET_BIG_NAME		"elf32-rx-be"
 
-#define TARGET_LITTLE_SYM	bfd_elf32_rx_le_vec
+#define TARGET_LITTLE_SYM	rx_elf32_le_vec
 #define TARGET_LITTLE_NAME	"elf32-rx-le"
 
 #define elf_info_to_howto_rel			NULL
@@ -3580,7 +3580,7 @@ static const struct bfd_elf_special_section elf32_rx_special_sections[] =
    pre-swapped .text sections (like objcopy).  */
 
 #undef  TARGET_BIG_SYM
-#define TARGET_BIG_SYM		bfd_elf32_rx_be_ns_vec
+#define TARGET_BIG_SYM		rx_elf32_be_ns_vec
 #undef  TARGET_BIG_NAME
 #define TARGET_BIG_NAME		"elf32-rx-be-ns"
 #undef  TARGET_LITTLE_SYM

@@ -980,7 +980,7 @@ static const struct nlm_backend_data nlm32_powerpc_backend =
 };
 
 #define TARGET_BIG_NAME			"nlm32-powerpc"
-#define TARGET_BIG_SYM			nlmNAME (powerpc_vec)
+#define TARGET_BIG_SYM			powerpc_nlm32_vec
 #define TARGET_BACKEND_DATA		& nlm32_powerpc_backend
 
 #include "nlm-target.h"

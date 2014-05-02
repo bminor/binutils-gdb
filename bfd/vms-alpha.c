@@ -9255,7 +9255,7 @@ bfd_vms_get_data (bfd *abfd)
 #define alpha_vms_canonicalize_dynamic_reloc \
   _bfd_nodynamic_canonicalize_dynamic_reloc
 
-const bfd_target vms_alpha_vec =
+const bfd_target alpha_vms_vec =
 {
   "vms-alpha",			/* Name.  */
   bfd_target_evax_flavour,

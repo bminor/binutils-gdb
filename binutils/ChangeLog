@@ -1,3 +1,8 @@
+2014-05-02  Alan Modra  <amodra@gmail.com>
+
+	* emul_aix.c: Update bfd target vector naming.
+	* testsuite/binutils-all/objcopy.exp: Likewise.
+
 2014-04-24  Christian Svensson  <blue@cmd.nu>
 
 	* MAINTAINERS: Add myself and Stefan as OR1K maintainers.

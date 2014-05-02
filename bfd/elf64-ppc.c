@@ -56,9 +56,9 @@ static bfd_reloc_status_type ppc64_elf_unhandled_reloc
 static bfd_vma opd_entry_value
   (asection *, bfd_vma, asection **, bfd_vma *, bfd_boolean);
 
-#define TARGET_LITTLE_SYM	bfd_elf64_powerpcle_vec
+#define TARGET_LITTLE_SYM	powerpc_elf64_le_vec
 #define TARGET_LITTLE_NAME	"elf64-powerpcle"
-#define TARGET_BIG_SYM		bfd_elf64_powerpc_vec
+#define TARGET_BIG_SYM		powerpc_elf64_vec
 #define TARGET_BIG_NAME		"elf64-powerpc"
 #define ELF_ARCH		bfd_arch_powerpc
 #define ELF_TARGET_ID		PPC64_ELF_DATA
@@ -15090,7 +15090,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 #undef  TARGET_LITTLE_NAME
 
 #undef  TARGET_BIG_SYM
-#define TARGET_BIG_SYM	bfd_elf64_powerpc_freebsd_vec
+#define TARGET_BIG_SYM	powerpc_elf64_fbsd_vec
 #undef  TARGET_BIG_NAME
 #define TARGET_BIG_NAME "elf64-powerpc-freebsd"
 

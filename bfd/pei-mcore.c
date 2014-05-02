@@ -22,9 +22,9 @@
 #include "bfd.h"
 
 #ifndef TARGET_BIG_SYM
-#define TARGET_BIG_SYM       mcore_pei_big_vec
+#define TARGET_BIG_SYM       mcore_pei_be_vec
 #define TARGET_BIG_NAME      "pei-mcore-big"
-#define TARGET_LITTLE_SYM    mcore_pei_little_vec
+#define TARGET_LITTLE_SYM    mcore_pei_le_vec
 #define TARGET_LITTLE_NAME   "pei-mcore-little"
 #endif
 

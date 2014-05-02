@@ -1014,7 +1014,7 @@ xstormy16_elf_gc_mark_hook (asection *sec,
 #define ELF_MACHINE_CODE	EM_XSTORMY16
 #define ELF_MAXPAGESIZE		0x100
 
-#define TARGET_LITTLE_SYM       bfd_elf32_xstormy16_vec
+#define TARGET_LITTLE_SYM       xstormy16_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-xstormy16"
 
 #define elf_info_to_howto_rel			NULL

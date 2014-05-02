@@ -26,7 +26,7 @@
 /* This does not include any relocations, but should be good enough
    for GDB.  */
 
-#define TARGET_BIG_SYM		bfd_elf32_m88k_vec
+#define TARGET_BIG_SYM		m88k_elf32_vec
 #define TARGET_BIG_NAME		"elf32-m88k"
 #define ELF_ARCH		bfd_arch_m88k
 #define ELF_MACHINE_CODE	EM_88K

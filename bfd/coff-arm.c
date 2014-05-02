@@ -2528,13 +2528,13 @@ coff_arm_final_link_postscript (bfd * abfd ATTRIBUTE_UNUSED,
 #include "coffcode.h"
 
 #ifndef TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM armcoff_little_vec
+#define TARGET_LITTLE_SYM arm_coff_le_vec
 #endif
 #ifndef TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME "coff-arm-little"
 #endif
 #ifndef TARGET_BIG_SYM
-#define TARGET_BIG_SYM armcoff_big_vec
+#define TARGET_BIG_SYM arm_coff_be_vec
 #endif
 #ifndef TARGET_BIG_NAME
 #define TARGET_BIG_NAME "coff-arm-big"

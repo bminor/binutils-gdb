@@ -1356,7 +1356,7 @@ i370_elf_relocate_section (bfd *output_bfd,
   return ret;
 }
 
-#define TARGET_BIG_SYM		bfd_elf32_i370_vec
+#define TARGET_BIG_SYM		i370_elf32_vec
 #define TARGET_BIG_NAME		"elf32-i370"
 #define ELF_ARCH		bfd_arch_i370
 #define ELF_MACHINE_CODE	EM_S370

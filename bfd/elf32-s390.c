@@ -3982,7 +3982,7 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 }
 
 
-#define TARGET_BIG_SYM	bfd_elf32_s390_vec
+#define TARGET_BIG_SYM	s390_elf32_vec
 #define TARGET_BIG_NAME	"elf32-s390"
 #define ELF_ARCH	bfd_arch_s390
 #define ELF_TARGET_ID	S390_ELF_DATA

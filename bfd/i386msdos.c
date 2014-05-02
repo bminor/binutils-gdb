@@ -176,7 +176,7 @@ msdos_set_section_contents (bfd *abfd,
 #define msdos_get_reloc_upper_bound _bfd_norelocs_get_reloc_upper_bound
 #define msdos_32_bfd_link_split_section  _bfd_generic_link_split_section
 
-const bfd_target i386msdos_vec =
+const bfd_target i386_msdos_vec =
   {
     "msdos",			/* name */
     bfd_target_msdos_flavour,

@@ -2040,9 +2040,9 @@ elf32_arm_nabi_write_core_note (bfd *abfd, char *buf, int *bufsiz,
     }
 }
 
-#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_vec
+#define TARGET_LITTLE_SYM               arm_elf32_le_vec
 #define TARGET_LITTLE_NAME              "elf32-littlearm"
-#define TARGET_BIG_SYM                  bfd_elf32_bigarm_vec
+#define TARGET_BIG_SYM                  arm_elf32_be_vec
 #define TARGET_BIG_NAME                 "elf32-bigarm"
 
 #define elf_backend_grok_prstatus	elf32_arm_nabi_grok_prstatus
@@ -16170,11 +16170,11 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 /* Native Client targets.  */
 
 #undef	TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		bfd_elf32_littlearm_nacl_vec
+#define TARGET_LITTLE_SYM		arm_elf32_nacl_le_vec
 #undef	TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-littlearm-nacl"
 #undef	TARGET_BIG_SYM
-#define TARGET_BIG_SYM			bfd_elf32_bigarm_nacl_vec
+#define TARGET_BIG_SYM			arm_elf32_nacl_be_vec
 #undef	TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf32-bigarm-nacl"
 
@@ -16268,11 +16268,11 @@ elf32_arm_nacl_plt_sym_val (bfd_vma i, const asection *plt,
 /* VxWorks Targets.  */
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_vxworks_vec
+#define TARGET_LITTLE_SYM               arm_elf32_vxworks_le_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME              "elf32-littlearm-vxworks"
 #undef  TARGET_BIG_SYM
-#define TARGET_BIG_SYM                  bfd_elf32_bigarm_vxworks_vec
+#define TARGET_BIG_SYM                  arm_elf32_vxworks_be_vec
 #undef  TARGET_BIG_NAME
 #define TARGET_BIG_NAME                 "elf32-bigarm-vxworks"
 
@@ -16554,11 +16554,11 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 /* Symbian OS Targets.  */
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_symbian_vec
+#define TARGET_LITTLE_SYM               arm_elf32_symbian_le_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME              "elf32-littlearm-symbian"
 #undef  TARGET_BIG_SYM
-#define TARGET_BIG_SYM                  bfd_elf32_bigarm_symbian_vec
+#define TARGET_BIG_SYM                  arm_elf32_symbian_be_vec
 #undef  TARGET_BIG_NAME
 #define TARGET_BIG_NAME                 "elf32-bigarm-symbian"
 

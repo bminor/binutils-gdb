@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SYM mipslpei_vec
+#define TARGET_SYM mips_pei_le_vec
 #define TARGET_NAME "pei-mips"
 #define COFF_IMAGE_WITH_PE
 #define PCRELOFFSET TRUE

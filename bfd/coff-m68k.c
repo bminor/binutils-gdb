@@ -30,7 +30,7 @@
    variants.  The following macros control its behaviour:
 
    TARGET_SYM
-     The C name of the BFD target vector.  The default is m68kcoff_vec.
+     The C name of the BFD target vector.  The default is m68k_coff_vec.
    TARGET_NAME
      The user visible target name.  The default is "coff-m68k".
    NAMES_HAVE_UNDERSCORE
@@ -528,7 +528,7 @@ bfd_m68k_coff_create_embedded_relocs (bfd *abfd,
 #include "coffcode.h"
 
 #ifndef TARGET_SYM
-#define TARGET_SYM m68kcoff_vec
+#define TARGET_SYM m68k_coff_vec
 #endif
 
 #ifndef TARGET_NAME

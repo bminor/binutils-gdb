@@ -4014,7 +4014,7 @@ const struct elf_size_info hppa64_elf_size_info =
   bfd_elf64_swap_reloca_out
 };
 
-#define TARGET_BIG_SYM			bfd_elf64_hppa_vec
+#define TARGET_BIG_SYM			hppa_elf64_vec
 #define TARGET_BIG_NAME			"elf64-hppa"
 #define ELF_ARCH			bfd_arch_hppa
 #define ELF_TARGET_ID			HPPA64_ELF_DATA
@@ -4096,7 +4096,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #include "elf64-target.h"
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM			bfd_elf64_hppa_linux_vec
+#define TARGET_BIG_SYM			hppa_elf64_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
 #undef ELF_OSABI

@@ -3466,10 +3466,10 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
   return TRUE;
 }
 
-#define TARGET_LITTLE_SYM      bfd_elf32_microblazeel_vec
+#define TARGET_LITTLE_SYM      microblaze_elf32_le_vec
 #define TARGET_LITTLE_NAME     "elf32-microblazeel"
 
-#define TARGET_BIG_SYM          bfd_elf32_microblaze_vec
+#define TARGET_BIG_SYM          microblaze_elf32_vec
 #define TARGET_BIG_NAME		"elf32-microblaze"
 
 #define ELF_ARCH		bfd_arch_microblaze

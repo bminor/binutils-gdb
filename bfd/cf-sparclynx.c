@@ -19,7 +19,7 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#define TARGET_SYM	sparclynx_coff_vec
+#define TARGET_SYM	sparc_coff_lynx_vec
 #define TARGET_NAME	"coff-sparc-lynx"
 
 #define LYNXOS

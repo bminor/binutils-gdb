@@ -5018,7 +5018,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
   return TRUE;
 }
 
-#define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
+#define TARGET_LITTLE_SYM		i386_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
 #define ELF_TARGET_ID			I386_ELF_DATA
@@ -5072,7 +5072,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
 /* FreeBSD support.  */
 
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_i386_freebsd_vec
+#define	TARGET_LITTLE_SYM		i386_elf32_fbsd_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-freebsd"
 #undef	ELF_OSABI
@@ -5105,7 +5105,7 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 /* Solaris 2.  */
 
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_i386_sol2_vec
+#define	TARGET_LITTLE_SYM		i386_elf32_sol2_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-sol2"
 
@@ -5133,7 +5133,7 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 /* Native Client support.  */
 
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_i386_nacl_vec
+#define	TARGET_LITTLE_SYM		i386_elf32_nacl_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-nacl"
 #undef	elf32_bed
@@ -5322,7 +5322,7 @@ elf32_i386_nacl_elf_object_p (bfd *abfd)
 /* VxWorks support.  */
 
 #undef	TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		bfd_elf32_i386_vxworks_vec
+#define TARGET_LITTLE_SYM		i386_elf32_vxworks_vec
 #undef	TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-i386-vxworks"
 #undef	ELF_OSABI

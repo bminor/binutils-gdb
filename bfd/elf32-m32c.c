@@ -2043,10 +2043,10 @@ _bfd_m32c_elf_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
 #define ELF_MAXPAGESIZE		0x100
 
 #if 0
-#define TARGET_BIG_SYM		bfd_elf32_m32c_vec
+#define TARGET_BIG_SYM		m32c_elf32_vec
 #define TARGET_BIG_NAME		"elf32-m32c"
 #else
-#define TARGET_LITTLE_SYM		bfd_elf32_m32c_vec
+#define TARGET_LITTLE_SYM		m32c_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-m32c"
 #endif
 

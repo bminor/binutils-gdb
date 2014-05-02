@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SHL_SYM shlpei_vec
+#define TARGET_SHL_SYM sh_pei_le_vec
 #define TARGET_SHL_NAME "pei-shl"
 #define IMAGE_BASE NT_IMAGE_BASE
 #define COFF_IMAGE_WITH_PE

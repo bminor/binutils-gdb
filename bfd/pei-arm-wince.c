@@ -21,9 +21,9 @@
 #define TARGET_UNDERSCORE    0
 #define USER_LABEL_PREFIX    ""
 
-#define TARGET_LITTLE_SYM    arm_wince_pei_little_vec
+#define TARGET_LITTLE_SYM    arm_pei_wince_le_vec
 #define TARGET_LITTLE_NAME   "pei-arm-wince-little"
-#define TARGET_BIG_SYM       arm_wince_pei_big_vec
+#define TARGET_BIG_SYM       arm_pei_wince_be_vec
 #define TARGET_BIG_NAME      "pei-arm-wince-big"
 
 #define LOCAL_LABEL_PREFIX "."

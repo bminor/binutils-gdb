@@ -236,9 +236,9 @@ arc_elf_final_write_processing (bfd *abfd,
   elf_elfheader (abfd)->e_flags |= val;
 }
 
-#define TARGET_LITTLE_SYM   bfd_elf32_littlearc_vec
+#define TARGET_LITTLE_SYM   arc_elf32_le_vec
 #define TARGET_LITTLE_NAME  "elf32-littlearc"
-#define TARGET_BIG_SYM      bfd_elf32_bigarc_vec
+#define TARGET_BIG_SYM      arc_elf32_be_vec
 #define TARGET_BIG_NAME	    "elf32-bigarc"
 #define ELF_ARCH            bfd_arch_arc
 #define ELF_MACHINE_CODE    EM_ARC

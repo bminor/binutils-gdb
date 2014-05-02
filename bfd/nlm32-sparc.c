@@ -372,7 +372,7 @@ static const struct nlm_backend_data nlm32_sparc_backend =
 };
 
 #define TARGET_BIG_NAME		"nlm32-sparc"
-#define TARGET_BIG_SYM		nlmNAME (sparc_vec)
+#define TARGET_BIG_SYM		sparc_nlm32_vec
 #define TARGET_BACKEND_DATA	& nlm32_sparc_backend
 
 #include "nlm-target.h"

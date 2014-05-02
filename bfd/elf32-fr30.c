@@ -703,7 +703,7 @@ fr30_elf_check_relocs (bfd *abfd,
 #define ELF_MACHINE_ALT1	EM_CYGNUS_FR30
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_BIG_SYM          bfd_elf32_fr30_vec
+#define TARGET_BIG_SYM          fr30_elf32_vec
 #define TARGET_BIG_NAME		"elf32-fr30"
 
 #define elf_info_to_howto_rel			NULL

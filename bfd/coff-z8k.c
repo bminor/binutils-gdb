@@ -384,4 +384,4 @@ extra_case (bfd *in_abfd,
 #undef  coff_bfd_relax_section
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
-CREATE_BIG_COFF_TARGET_VEC (z8kcoff_vec, "coff-z8k", 0, 0, '_', NULL, COFF_SWAP_TABLE)
+CREATE_BIG_COFF_TARGET_VEC (z8k_coff_vec, "coff-z8k", 0, 0, '_', NULL, COFF_SWAP_TABLE)

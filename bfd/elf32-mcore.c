@@ -648,9 +648,9 @@ static const struct bfd_elf_special_section mcore_elf_special_sections[]=
   { NULL,                     0,  0, 0,            0 }
 };
 
-#define TARGET_BIG_SYM		bfd_elf32_mcore_big_vec
+#define TARGET_BIG_SYM		mcore_elf32_be_vec
 #define TARGET_BIG_NAME		"elf32-mcore-big"
-#define TARGET_LITTLE_SYM       bfd_elf32_mcore_little_vec
+#define TARGET_LITTLE_SYM       mcore_elf32_le_vec
 #define TARGET_LITTLE_NAME      "elf32-mcore-little"
 
 #define ELF_ARCH		bfd_arch_mcore

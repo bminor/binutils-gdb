@@ -573,7 +573,7 @@ mt_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 }
 
 
-#define TARGET_BIG_SYM	 bfd_elf32_mt_vec
+#define TARGET_BIG_SYM	 mt_elf32_vec
 #define TARGET_BIG_NAME  "elf32-mt"
 
 #define ELF_ARCH	 bfd_arch_mt

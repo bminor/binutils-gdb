@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SYM 		i386pe_vec
+#define TARGET_SYM 		i386_pe_vec
 #define TARGET_NAME 		"pe-i386"
 #define COFF_WITH_PE
 #define PCRELOFFSET 		TRUE

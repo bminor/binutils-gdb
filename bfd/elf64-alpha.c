@@ -5468,7 +5468,7 @@ static const struct elf_size_info alpha_elf_size_info =
   bfd_elf64_swap_reloca_out
 };
 
-#define TARGET_LITTLE_SYM	bfd_elf64_alpha_vec
+#define TARGET_LITTLE_SYM	alpha_elf64_vec
 #define TARGET_LITTLE_NAME	"elf64-alpha"
 #define ELF_ARCH		bfd_arch_alpha
 #define ELF_TARGET_ID		ALPHA_ELF_DATA
@@ -5560,7 +5560,7 @@ static const struct elf_size_info alpha_elf_size_info =
 /* FreeBSD support.  */
 
 #undef TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM	bfd_elf64_alpha_freebsd_vec
+#define TARGET_LITTLE_SYM	alpha_elf64_fbsd_vec
 #undef TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME	"elf64-alpha-freebsd"
 #undef	ELF_OSABI

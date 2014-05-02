@@ -5618,7 +5618,7 @@ static const struct bfd_elf_special_section
   { NULL,	                0,          0, 0,            0 }
 };
 
-#define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
+#define TARGET_LITTLE_SYM		    x86_64_elf64_vec
 #define TARGET_LITTLE_NAME		    "elf64-x86-64"
 #define ELF_ARCH			    bfd_arch_i386
 #define ELF_TARGET_ID			    X86_64_ELF_DATA
@@ -5699,7 +5699,7 @@ static const struct bfd_elf_special_section
 /* FreeBSD support.  */
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_freebsd_vec
+#define TARGET_LITTLE_SYM		    x86_64_elf64_fbsd_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-x86-64-freebsd"
 
@@ -5714,7 +5714,7 @@ static const struct bfd_elf_special_section
 /* Solaris 2 support.  */
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_sol2_vec
+#define TARGET_LITTLE_SYM		    x86_64_elf64_sol2_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-x86-64-sol2"
 
@@ -5752,7 +5752,7 @@ elf64_x86_64_nacl_elf_object_p (bfd *abfd)
 }
 
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf64_x86_64_nacl_vec
+#define	TARGET_LITTLE_SYM		x86_64_elf64_nacl_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf64-x86-64-nacl"
 #undef	elf64_bed
@@ -5905,7 +5905,7 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
 }
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		bfd_elf32_x86_64_nacl_vec
+#define TARGET_LITTLE_SYM		x86_64_elf32_nacl_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-x86-64-nacl"
 #undef	elf32_bed
@@ -5956,7 +5956,7 @@ elf64_l1om_elf_object_p (bfd *abfd)
 }
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf64_l1om_vec
+#define TARGET_LITTLE_SYM		    l1om_elf64_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-l1om"
 #undef ELF_ARCH
@@ -5990,7 +5990,7 @@ elf64_l1om_elf_object_p (bfd *abfd)
 /* FreeBSD L1OM support.  */
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf64_l1om_freebsd_vec
+#define TARGET_LITTLE_SYM		    l1om_elf64_fbsd_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-l1om-freebsd"
 
@@ -6013,7 +6013,7 @@ elf64_k1om_elf_object_p (bfd *abfd)
 }
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf64_k1om_vec
+#define TARGET_LITTLE_SYM		    k1om_elf64_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-k1om"
 #undef ELF_ARCH
@@ -6040,7 +6040,7 @@ elf64_k1om_elf_object_p (bfd *abfd)
 /* FreeBSD K1OM support.  */
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf64_k1om_freebsd_vec
+#define TARGET_LITTLE_SYM		    k1om_elf64_fbsd_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-k1om-freebsd"
 
@@ -6055,7 +6055,7 @@ elf64_k1om_elf_object_p (bfd *abfd)
 /* 32bit x86-64 support.  */
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf32_x86_64_vec
+#define TARGET_LITTLE_SYM		    x86_64_elf32_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf32-x86-64"
 #undef	elf32_bed

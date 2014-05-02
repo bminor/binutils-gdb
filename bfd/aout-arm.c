@@ -42,14 +42,14 @@
 #define SEGMENT_SIZE TARGET_PAGE_SIZE
 #define DEFAULT_ARCH bfd_arch_arm
 
-#define MY(OP) CONCAT2 (aoutarm_,OP)
+#define MY(OP) CONCAT2 (arm_aout_,OP)
 #define N_BADMAG(x) ((((x).a_info & ~007200) != ZMAGIC) && \
                      (((x).a_info & ~006000) != OMAGIC) && \
                      ((x).a_info != NMAGIC))
 #define N_MAGIC(x) ((x).a_info & ~07200)
 
-#define MY_bfd_reloc_type_lookup aoutarm_bfd_reloc_type_lookup
-#define MY_bfd_reloc_name_lookup aoutarm_bfd_reloc_name_lookup
+#define MY_bfd_reloc_type_lookup arm_aout_bfd_reloc_type_lookup
+#define MY_bfd_reloc_name_lookup arm_aout_bfd_reloc_name_lookup
 
 #include "libaout.h"
 #include "aout/aout64.h"
@@ -461,9 +461,9 @@ MY_swap_std_reloc_out (bfd *abfd,
 
 #include "aout-target.h"
 
-extern const bfd_target aout_arm_big_vec;
+extern const bfd_target arm_aout_be_vec;
 
-const bfd_target aout_arm_little_vec =
+const bfd_target arm_aout_le_vec =
 {
   "a.out-arm-little",           /* Name.  */
   bfd_target_aout_flavour,
@@ -500,12 +500,12 @@ const bfd_target aout_arm_little_vec =
   BFD_JUMP_TABLE_LINK (MY),
   BFD_JUMP_TABLE_DYNAMIC (MY),
 
-  & aout_arm_big_vec,
+  & arm_aout_be_vec,
 
   (void *) MY_backend_data,
 };
 
-const bfd_target aout_arm_big_vec =
+const bfd_target arm_aout_be_vec =
 {
   "a.out-arm-big",              /* Name.  */
   bfd_target_aout_flavour,
@@ -542,7 +542,7 @@ const bfd_target aout_arm_big_vec =
   BFD_JUMP_TABLE_LINK (MY),
   BFD_JUMP_TABLE_DYNAMIC (MY),
 
-  & aout_arm_little_vec,
+  & arm_aout_le_vec,
 
   (void *) MY_backend_data,
 };

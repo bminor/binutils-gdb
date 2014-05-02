@@ -1732,8 +1732,8 @@ bfin_gc_sweep_hook (bfd * abfd,
   return TRUE;
 }
 
-extern const bfd_target bfd_elf32_bfinfdpic_vec;
-#define IS_FDPIC(bfd) ((bfd)->xvec == &bfd_elf32_bfinfdpic_vec)
+extern const bfd_target bfin_elf32_fdpic_vec;
+#define IS_FDPIC(bfd) ((bfd)->xvec == &bfin_elf32_fdpic_vec)
 
 /* An extension of the elf hash table data structure,
    containing some additional Blackfin-specific data.  */
@@ -5624,7 +5624,7 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 };
 
 
-#define TARGET_LITTLE_SYM		bfd_elf32_bfin_vec
+#define TARGET_LITTLE_SYM		bfin_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-bfin"
 #define ELF_ARCH			bfd_arch_bfin
 #define ELF_TARGET_ID			BFIN_ELF_DATA
@@ -5686,7 +5686,7 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #include "elf32-target.h"
 
 #undef TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM          bfd_elf32_bfinfdpic_vec
+#define TARGET_LITTLE_SYM          bfin_elf32_fdpic_vec
 #undef TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-bfinfdpic"
 #undef	elf32_bed

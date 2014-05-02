@@ -330,7 +330,7 @@ $ if ARCH.eqs."alpha"
 $ then
 $   create build.com
 $DECK
-$ DEFS="""SELECT_VECS=&vms_alpha_vec"","+-
+$ DEFS="""SELECT_VECS=&alpha_vms_vec"","+-
   """SELECT_ARCHITECTURES=&bfd_alpha_arch"""
 $ FILES="cpu-alpha,vms,vms-hdr,vms-gsd,vms-tir,vms-misc,"
 $EOD
@@ -339,7 +339,7 @@ $ if ARCH.eqs."ia64"
 $ then
 $   create build.com
 $DECK
-$ DEFS="""SELECT_VECS=&bfd_elf64_ia64_vms_vec"","+-
+$ DEFS="""SELECT_VECS=&ia64_elf64_vms_vec"","+-
   """SELECT_ARCHITECTURES=&bfd_ia64_arch"""
 $ FILES="cpu-ia64,elf64-ia64,elf-strtab,corefile,stabs,merge,elf-eh-frame,"+-
   "elflink,elf-attrs,dwarf1,elf64,"

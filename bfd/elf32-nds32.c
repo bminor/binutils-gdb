@@ -14207,9 +14207,9 @@ nds32_elf_ex9_itb_base (struct bfd_link_info *link_info)
 #define ELF_MACHINE_CODE			EM_NDS32
 #define ELF_MAXPAGESIZE				0x1000
 
-#define TARGET_BIG_SYM				bfd_elf32_nds32be_vec
+#define TARGET_BIG_SYM				nds32_elf32_be_vec
 #define TARGET_BIG_NAME				"elf32-nds32be"
-#define TARGET_LITTLE_SYM			bfd_elf32_nds32le_vec
+#define TARGET_LITTLE_SYM			nds32_elf32_le_vec
 #define TARGET_LITTLE_NAME			"elf32-nds32le"
 
 #define elf_info_to_howto			nds32_info_to_howto
@@ -14258,11 +14258,11 @@ nds32_elf_ex9_itb_base (struct bfd_link_info *link_info)
 #define ELF_MAXPAGESIZE				0x2000
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM				bfd_elf32_nds32belin_vec
+#define TARGET_BIG_SYM				nds32_elf32_linux_be_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME				"elf32-nds32be-linux"
 #undef TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM			bfd_elf32_nds32lelin_vec
+#define TARGET_LITTLE_SYM			nds32_elf32_linux_le_vec
 #undef TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME			"elf32-nds32le-linux"
 #undef elf32_bed

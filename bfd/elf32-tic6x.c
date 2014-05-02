@@ -4345,9 +4345,9 @@ elf32_tic6x_write_section (bfd *output_bfd,
   return TRUE;
 }
 
-#define TARGET_LITTLE_SYM	bfd_elf32_tic6x_le_vec
+#define TARGET_LITTLE_SYM	tic6x_elf32_le_vec
 #define TARGET_LITTLE_NAME	"elf32-tic6x-le"
-#define TARGET_BIG_SYM		bfd_elf32_tic6x_be_vec
+#define TARGET_BIG_SYM		tic6x_elf32_be_vec
 #define TARGET_BIG_NAME		"elf32-tic6x-be"
 #define ELF_ARCH		bfd_arch_tic6x
 #define ELF_TARGET_ID		TIC6X_ELF_DATA
@@ -4416,11 +4416,11 @@ elf32_tic6x_write_section (bfd *output_bfd,
 #define	elf32_bed		elf32_tic6x_linux_bed
 
 #undef TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_tic6x_linux_le_vec
+#define	TARGET_LITTLE_SYM		tic6x_elf32_linux_le_vec
 #undef TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-tic6x-linux-le"
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM			bfd_elf32_tic6x_linux_be_vec
+#define TARGET_BIG_SYM			tic6x_elf32_linux_be_vec
 #undef TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf32-tic6x-linux-be"
 #undef ELF_OSABI
@@ -4432,11 +4432,11 @@ elf32_tic6x_write_section (bfd *output_bfd,
 #define	elf32_bed		elf32_tic6x_elf_bed
 
 #undef TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_tic6x_elf_le_vec
+#define	TARGET_LITTLE_SYM		tic6x_elf32_c6000_le_vec
 #undef TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-tic6x-elf-le"
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM			bfd_elf32_tic6x_elf_be_vec
+#define TARGET_BIG_SYM			tic6x_elf32_c6000_be_vec
 #undef TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf32-tic6x-elf-be"
 #undef ELF_OSABI

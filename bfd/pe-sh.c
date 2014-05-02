@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SHL_SYM shlpe_vec
+#define TARGET_SHL_SYM sh_pe_le_vec
 #define TARGET_SHL_NAME "pe-shl"
 #define COFF_WITH_PE
 #define PCRELOFFSET TRUE

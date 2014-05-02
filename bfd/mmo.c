@@ -3251,7 +3251,7 @@ mmo_write_object_contents (bfd *abfd)
 #define mmo_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 #define mmo_bfd_print_private_bfd_data _bfd_generic_bfd_print_private_bfd_data
 
-const bfd_target bfd_mmo_vec =
+const bfd_target mmix_mmo_vec =
 {
   "mmo",			/* name */
   bfd_target_mmo_flavour,

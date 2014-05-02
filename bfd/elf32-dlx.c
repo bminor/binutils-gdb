@@ -571,7 +571,7 @@ elf32_dlx_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   return;
 }
 
-#define TARGET_BIG_SYM          bfd_elf32_dlx_big_vec
+#define TARGET_BIG_SYM          dlx_elf32_be_vec
 #define TARGET_BIG_NAME         "elf32-dlx"
 #define ELF_ARCH                bfd_arch_dlx
 #define ELF_MACHINE_CODE        EM_DLX

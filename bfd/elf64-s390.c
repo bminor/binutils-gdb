@@ -3795,7 +3795,7 @@ const struct elf_size_info s390_elf64_size_info =
   bfd_elf64_swap_reloca_out
 };
 
-#define TARGET_BIG_SYM	bfd_elf64_s390_vec
+#define TARGET_BIG_SYM	s390_elf64_vec
 #define TARGET_BIG_NAME	"elf64-s390"
 #define ELF_ARCH	bfd_arch_s390
 #define ELF_TARGET_ID	S390_ELF_DATA

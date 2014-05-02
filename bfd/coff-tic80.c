@@ -709,4 +709,4 @@ coff_tic80_relocate_section (bfd *output_bfd,
 
 #include "coffcode.h"
 
-CREATE_LITTLE_COFF_TARGET_VEC (tic80coff_vec, "coff-tic80", D_PAGED, 0, '_', NULL, COFF_SWAP_TABLE)
+CREATE_LITTLE_COFF_TARGET_VEC (tic80_coff_vec, "coff-tic80", D_PAGED, 0, '_', NULL, COFF_SWAP_TABLE)

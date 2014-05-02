@@ -549,10 +549,10 @@ static const struct msp430_reloc_map msp430x_reloc_map[] =
 static inline bfd_boolean
 uses_msp430x_relocs (bfd * abfd)
 {
-  extern const bfd_target bfd_elf32_msp430_ti_vec;
+  extern const bfd_target msp430_elf32_ti_vec;
 
   return bfd_get_mach (abfd) == bfd_mach_msp430x
-    || abfd->xvec == & bfd_elf32_msp430_ti_vec;
+    || abfd->xvec == & msp430_elf32_ti_vec;
 }
 
 static reloc_howto_type *
@@ -2436,7 +2436,7 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 #define ELF_MAXPAGESIZE		4
 #define	ELF_OSABI		ELFOSABI_STANDALONE
 
-#define TARGET_LITTLE_SYM       bfd_elf32_msp430_vec
+#define TARGET_LITTLE_SYM       msp430_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-msp430"
 
 #define elf_info_to_howto	             msp430_info_to_howto_rela
@@ -2456,7 +2456,7 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 
 /* The TI compiler sets the OSABI field to ELFOSABI_NONE.  */
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM       bfd_elf32_msp430_ti_vec
+#define TARGET_LITTLE_SYM       msp430_elf32_ti_vec
 
 #undef  elf32_bed
 #define elf32_bed		elf32_msp430_ti_bed

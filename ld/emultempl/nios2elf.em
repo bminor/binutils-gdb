@@ -41,10 +41,10 @@ static int need_laying_out = 0;
 static void
 nios2elf_create_output_section_statements (void)
 {
-  extern const bfd_target bfd_elf32_littlenios2_vec, bfd_elf32_bignios2_vec;
+  extern const bfd_target nios2_elf32_le_vec, nios2_elf32_be_vec;
 
-  if (link_info.output_bfd->xvec != &bfd_elf32_littlenios2_vec
-      && link_info.output_bfd->xvec != &bfd_elf32_bignios2_vec)
+  if (link_info.output_bfd->xvec != &nios2_elf32_le_vec
+      && link_info.output_bfd->xvec != &nios2_elf32_be_vec)
     return;
 
   /* If --no-relax was not explicitly specified by the user, enable

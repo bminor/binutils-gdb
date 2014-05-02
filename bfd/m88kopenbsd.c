@@ -28,7 +28,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) CONCAT2 (m88kopenbsd_,OP)
+#define MY(OP) CONCAT2 (m88k_aout_obsd_,OP)
 #define TARGETNAME "a.out-m88k-openbsd"
 
 #include "netbsd.h"

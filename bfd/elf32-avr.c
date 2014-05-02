@@ -3245,7 +3245,7 @@ elf32_avr_build_stubs (struct bfd_link_info *info)
 #define ELF_MACHINE_ALT1	EM_AVR_OLD
 #define ELF_MAXPAGESIZE		1
 
-#define TARGET_LITTLE_SYM       bfd_elf32_avr_vec
+#define TARGET_LITTLE_SYM       avr_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-avr"
 
 #define bfd_elf32_bfd_link_hash_table_create elf32_avr_link_hash_table_create

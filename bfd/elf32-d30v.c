@@ -539,7 +539,7 @@ d30v_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
 #define ELF_MACHINE_ALT1	EM_CYGNUS_D30V
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_BIG_SYM          bfd_elf32_d30v_vec
+#define TARGET_BIG_SYM          d30v_elf32_vec
 #define TARGET_BIG_NAME		"elf32-d30v"
 
 #define elf_info_to_howto	d30v_info_to_howto_rela

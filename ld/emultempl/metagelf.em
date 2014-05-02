@@ -45,9 +45,9 @@ static bfd_signed_vma group_size = 1;
 static void
 metagelf_create_output_section_statements (void)
 {
-  extern const bfd_target bfd_elf32_metag_vec;
+  extern const bfd_target metag_elf32_vec;
 
-  if (link_info.output_bfd->xvec != &bfd_elf32_metag_vec)
+  if (link_info.output_bfd->xvec != &metag_elf32_vec)
     return;
 
   stub_file = lang_add_input_file ("linker stubs",

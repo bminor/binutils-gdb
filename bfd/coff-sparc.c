@@ -198,7 +198,7 @@ rtype2howto (arelent *cache_ptr, struct internal_reloc *dst)
 #include "coffcode.h"
 
 #ifndef TARGET_SYM
-#define TARGET_SYM sparccoff_vec
+#define TARGET_SYM sparc_coff_vec
 #endif
 
 #ifndef TARGET_NAME

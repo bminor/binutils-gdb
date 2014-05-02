@@ -1308,7 +1308,7 @@ elf32_crx_relax_section (bfd *abfd, asection *sec,
 }
 
 /* Definitions for setting CRX target vector.  */
-#define TARGET_LITTLE_SYM		bfd_elf32_crx_vec
+#define TARGET_LITTLE_SYM		crx_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-crx"
 #define ELF_ARCH			bfd_arch_crx
 #define ELF_MACHINE_CODE		EM_CRX

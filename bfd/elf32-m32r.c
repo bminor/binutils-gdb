@@ -4004,9 +4004,9 @@ m32r_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 #define ELF_MACHINE_ALT1	EM_CYGNUS_M32R
 #define ELF_MAXPAGESIZE		0x1 /* Explicitly requested by Mitsubishi.  */
 
-#define TARGET_BIG_SYM          bfd_elf32_m32r_vec
+#define TARGET_BIG_SYM          m32r_elf32_vec
 #define TARGET_BIG_NAME		"elf32-m32r"
-#define TARGET_LITTLE_SYM       bfd_elf32_m32rle_vec
+#define TARGET_LITTLE_SYM       m32r_elf32_le_vec
 #define TARGET_LITTLE_NAME      "elf32-m32rle"
 
 #define elf_info_to_howto			m32r_info_to_howto
@@ -4062,11 +4062,11 @@ m32r_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 #define ELF_MAXPAGESIZE         0x1000
 
 #undef  TARGET_BIG_SYM
-#define TARGET_BIG_SYM          bfd_elf32_m32rlin_vec
+#define TARGET_BIG_SYM          m32r_elf32_linux_vec
 #undef  TARGET_BIG_NAME
 #define TARGET_BIG_NAME         "elf32-m32r-linux"
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM       bfd_elf32_m32rlelin_vec
+#define TARGET_LITTLE_SYM       m32r_elf32_linux_le_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME      "elf32-m32rle-linux"
 #undef  elf32_bed

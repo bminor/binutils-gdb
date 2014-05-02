@@ -2417,7 +2417,7 @@ rl78_elf_relax_section
 #define ELF_MACHINE_CODE	EM_RL78
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_LITTLE_SYM	bfd_elf32_rl78_vec
+#define TARGET_LITTLE_SYM	rl78_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-rl78"
 
 #define elf_info_to_howto_rel			NULL

@@ -1548,9 +1548,9 @@ elfNN_aarch64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
-#define TARGET_LITTLE_SYM               bfd_elfNN_littleaarch64_vec
+#define TARGET_LITTLE_SYM               aarch64_elfNN_le_vec
 #define TARGET_LITTLE_NAME              "elfNN-littleaarch64"
-#define TARGET_BIG_SYM                  bfd_elfNN_bigaarch64_vec
+#define TARGET_BIG_SYM                  aarch64_elfNN_be_vec
 #define TARGET_BIG_NAME                 "elfNN-bigaarch64"
 
 /* The linker script knows the section names for placement.

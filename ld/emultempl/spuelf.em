@@ -89,9 +89,9 @@ static const struct _ovl_stream icache_mgr_stream = {
 static int
 is_spu_target (void)
 {
-  extern const bfd_target bfd_elf32_spu_vec;
+  extern const bfd_target spu_elf32_vec;
 
-  return link_info.output_bfd->xvec == &bfd_elf32_spu_vec;
+  return link_info.output_bfd->xvec == &spu_elf32_vec;
 }
 
 /* Create our note section.  */

@@ -1288,7 +1288,7 @@ static const struct bfd_elf_special_section elf32_m68hc11_special_sections[] =
 #define ELF_MACHINE_CODE	EM_68HC11
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_BIG_SYM          bfd_elf32_m68hc11_vec
+#define TARGET_BIG_SYM          m68hc11_elf32_vec
 #define TARGET_BIG_NAME		"elf32-m68hc11"
 
 #define elf_info_to_howto	0

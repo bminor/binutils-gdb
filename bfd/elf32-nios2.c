@@ -68,8 +68,8 @@ static bfd_reloc_status_type nios2_elf32_callr_relocate
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 
 /* Target vector.  */
-extern const bfd_target bfd_elf32_littlenios2_vec;
-extern const bfd_target bfd_elf32_bignios2_vec;
+extern const bfd_target nios2_elf32_le_vec;
+extern const bfd_target nios2_elf32_be_vec;
 
 /* Offset of tp and dtp pointers from start of TLS block.  */
 #define TP_OFFSET	0x7000
@@ -5167,8 +5167,8 @@ nios2_elf32_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 static bfd_boolean
 is_nios2_elf_target (const struct bfd_target *targ)
 {
-  return (targ == &bfd_elf32_littlenios2_vec
-	  || targ == &bfd_elf32_bignios2_vec);
+  return (targ == &nios2_elf32_le_vec
+	  || targ == &nios2_elf32_be_vec);
 }
 
 /* Implement elf_backend_add_symbol_hook.
@@ -5299,9 +5299,9 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 
 #define elf_backend_special_sections	  elf32_nios2_special_sections
 
-#define TARGET_LITTLE_SYM		bfd_elf32_littlenios2_vec
+#define TARGET_LITTLE_SYM		nios2_elf32_le_vec
 #define TARGET_LITTLE_NAME		"elf32-littlenios2"
-#define TARGET_BIG_SYM			bfd_elf32_bignios2_vec
+#define TARGET_BIG_SYM			nios2_elf32_be_vec
 #define TARGET_BIG_NAME			"elf32-bignios2"
 
 #define elf_backend_got_header_size	12

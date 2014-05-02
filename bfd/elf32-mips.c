@@ -82,8 +82,8 @@ static bfd_boolean elf32_mips_grok_psinfo
 static irix_compat_t elf32_mips_irix_compat
   (bfd *);
 
-extern const bfd_target bfd_elf32_bigmips_vec;
-extern const bfd_target bfd_elf32_littlemips_vec;
+extern const bfd_target mips_elf32_be_vec;
+extern const bfd_target mips_elf32_le_vec;
 
 /* Nonzero if ABFD is using the N32 ABI.  */
 #define ABI_N32_P(abfd) \
@@ -2259,8 +2259,8 @@ elf32_mips_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 static irix_compat_t
 elf32_mips_irix_compat (bfd *abfd)
 {
-  if ((abfd->xvec == &bfd_elf32_bigmips_vec)
-      || (abfd->xvec == &bfd_elf32_littlemips_vec))
+  if ((abfd->xvec == &mips_elf32_be_vec)
+      || (abfd->xvec == &mips_elf32_le_vec))
     return ict_irix5;
   else
     return ict_none;
@@ -2395,9 +2395,9 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define bfd_elf32_mkobject		_bfd_mips_elf_mkobject
 
 /* Support for SGI-ish mips targets.  */
-#define TARGET_LITTLE_SYM		bfd_elf32_littlemips_vec
+#define TARGET_LITTLE_SYM		mips_elf32_le_vec
 #define TARGET_LITTLE_NAME		"elf32-littlemips"
-#define TARGET_BIG_SYM			bfd_elf32_bigmips_vec
+#define TARGET_BIG_SYM			mips_elf32_be_vec
 #define TARGET_BIG_NAME			"elf32-bigmips"
 
 /* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
@@ -2416,9 +2416,9 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #undef ELF_MAXPAGESIZE
 #undef ELF_COMMONPAGESIZE
 
-#define TARGET_LITTLE_SYM               bfd_elf32_tradlittlemips_vec
+#define TARGET_LITTLE_SYM               mips_elf32_trad_le_vec
 #define TARGET_LITTLE_NAME              "elf32-tradlittlemips"
-#define TARGET_BIG_SYM                  bfd_elf32_tradbigmips_vec
+#define TARGET_BIG_SYM                  mips_elf32_trad_be_vec
 #define TARGET_BIG_NAME                 "elf32-tradbigmips"
 
 /* The MIPS ABI says at Page 5-1:
@@ -2440,9 +2440,9 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #undef TARGET_BIG_SYM
 #undef TARGET_BIG_NAME
 
-#define	TARGET_LITTLE_SYM		bfd_elf32_tradlittlemips_freebsd_vec
+#define	TARGET_LITTLE_SYM		mips_elf32_tradfbsd_le_vec
 #define	TARGET_LITTLE_NAME		"elf32-tradlittlemips-freebsd"
-#define	TARGET_BIG_SYM			bfd_elf32_tradbigmips_freebsd_vec
+#define	TARGET_BIG_SYM			mips_elf32_tradfbsd_be_vec
 #define	TARGET_BIG_NAME			"elf32-tradbigmips-freebsd"
 
 #undef	ELF_OSABI
@@ -2469,9 +2469,9 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #undef ELF_MAXPAGESIZE
 #undef ELF_COMMONPAGESIZE
 
-#define TARGET_LITTLE_SYM               bfd_elf32_littlemips_vxworks_vec
+#define TARGET_LITTLE_SYM               mips_elf32_vxworks_le_vec
 #define TARGET_LITTLE_NAME              "elf32-littlemips-vxworks"
-#define TARGET_BIG_SYM                  bfd_elf32_bigmips_vxworks_vec
+#define TARGET_BIG_SYM                  mips_elf32_vxworks_be_vec
 #define TARGET_BIG_NAME                 "elf32-bigmips-vxworks"
 #undef	ELF_OSABI
 

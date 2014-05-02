@@ -187,7 +187,7 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
   return TRUE;
 }
 
-#define TARGET_BIG_SYM	bfd_elf32_sparc_vec
+#define TARGET_BIG_SYM	sparc_elf32_vec
 #define TARGET_BIG_NAME	"elf32-sparc"
 #define ELF_ARCH	bfd_arch_sparc
 #define ELF_TARGET_ID	SPARC_ELF_DATA
@@ -250,7 +250,7 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 /* Solaris 2.  */
 
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM				bfd_elf32_sparc_sol2_vec
+#define	TARGET_BIG_SYM				sparc_elf32_sol2_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME				"elf32-sparc-sol2"
 
@@ -294,7 +294,7 @@ elf32_sparc_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 }
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM	bfd_elf32_sparc_vxworks_vec
+#define TARGET_BIG_SYM	sparc_elf32_vxworks_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME	"elf32-sparc-vxworks"
 

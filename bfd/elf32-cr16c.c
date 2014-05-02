@@ -939,7 +939,7 @@ elf32_cr16c_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED
 }
 
 /* Definitions for setting CR16C target vector.  */
-#define TARGET_LITTLE_SYM		bfd_elf32_cr16c_vec
+#define TARGET_LITTLE_SYM		cr16c_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-cr16c"
 #define ELF_ARCH			bfd_arch_cr16c
 #define ELF_MACHINE_CODE		EM_CR

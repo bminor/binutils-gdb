@@ -1522,12 +1522,12 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      extern const bfd_target bfd_elf32_spu_vec;
+      extern const bfd_target spu_elf32_vec;
       Elf_Internal_Shdr *symtab_hdr;
       asection *isec;
       Elf_Internal_Sym *local_syms = NULL;
 
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
+      if (ibfd->xvec != &spu_elf32_vec)
 	continue;
 
       /* We'll need the symbol table in a second.  */
@@ -2950,14 +2950,14 @@ discover_functions (struct bfd_link_info *info)
        ibfd != NULL;
        ibfd = ibfd->link_next, bfd_idx++)
     {
-      extern const bfd_target bfd_elf32_spu_vec;
+      extern const bfd_target spu_elf32_vec;
       Elf_Internal_Shdr *symtab_hdr;
       asection *sec;
       size_t symcount;
       Elf_Internal_Sym *syms, *sy, **psyms, **psy;
       asection **psecs, **p;
 
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
+      if (ibfd->xvec != &spu_elf32_vec)
 	continue;
 
       /* Read all the symbols.  */
@@ -3111,10 +3111,10 @@ discover_functions (struct bfd_link_info *info)
 
       for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
 	{
-	  extern const bfd_target bfd_elf32_spu_vec;
+	  extern const bfd_target spu_elf32_vec;
 	  asection *sec;
 
-	  if (ibfd->xvec != &bfd_elf32_spu_vec)
+	  if (ibfd->xvec != &spu_elf32_vec)
 	    continue;
 
 	  /* Some of the symbols we've installed as marking the
@@ -3183,10 +3183,10 @@ for_each_node (bfd_boolean (*doit) (struct function_info *,
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      extern const bfd_target bfd_elf32_spu_vec;
+      extern const bfd_target spu_elf32_vec;
       asection *sec;
 
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
+      if (ibfd->xvec != &spu_elf32_vec)
 	continue;
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
@@ -3332,10 +3332,10 @@ build_call_tree (struct bfd_link_info *info)
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      extern const bfd_target bfd_elf32_spu_vec;
+      extern const bfd_target spu_elf32_vec;
       asection *sec;
 
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
+      if (ibfd->xvec != &spu_elf32_vec)
 	continue;
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
@@ -3709,10 +3709,10 @@ auto_ovl_lib_functions (struct bfd_link_info *info, unsigned int lib_size)
   lib_count = 0;
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      extern const bfd_target bfd_elf32_spu_vec;
+      extern const bfd_target spu_elf32_vec;
       asection *sec;
 
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
+      if (ibfd->xvec != &spu_elf32_vec)
 	continue;
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
@@ -4264,11 +4264,11 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
   total_overlay_size = 0;
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      extern const bfd_target bfd_elf32_spu_vec;
+      extern const bfd_target spu_elf32_vec;
       asection *sec;
       unsigned int old_count;
 
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
+      if (ibfd->xvec != &spu_elf32_vec)
 	continue;
 
       old_count = count;
@@ -5446,7 +5446,7 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-#define TARGET_BIG_SYM		bfd_elf32_spu_vec
+#define TARGET_BIG_SYM		spu_elf32_vec
 #define TARGET_BIG_NAME		"elf32-spu"
 #define ELF_ARCH		bfd_arch_spu
 #define ELF_TARGET_ID		SPU_ELF_DATA

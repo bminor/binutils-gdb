@@ -853,7 +853,7 @@ static const struct nlm_backend_data nlm32_alpha_backend =
 };
 
 #define TARGET_LITTLE_NAME		"nlm32-alpha"
-#define TARGET_LITTLE_SYM		nlmNAME (alpha_vec)
+#define TARGET_LITTLE_SYM		alpha_nlm32_vec
 #define TARGET_BACKEND_DATA		& nlm32_alpha_backend
 
 #include "nlm-target.h"

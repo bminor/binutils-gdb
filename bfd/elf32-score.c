@@ -4446,9 +4446,9 @@ _bfd_score_elf_common_definition (Elf_Internal_Sym *sym)
 
 
 #define USE_REL                         1
-#define TARGET_LITTLE_SYM               bfd_elf32_littlescore_vec
+#define TARGET_LITTLE_SYM               score_elf32_le_vec
 #define TARGET_LITTLE_NAME              "elf32-littlescore"
-#define TARGET_BIG_SYM                  bfd_elf32_bigscore_vec
+#define TARGET_BIG_SYM                  score_elf32_be_vec
 #define TARGET_BIG_NAME                 "elf32-bigscore"
 #define ELF_ARCH                        bfd_arch_score
 #define ELF_MACHINE_CODE                EM_SCORE

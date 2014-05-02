@@ -66,12 +66,12 @@ DESCRIPTION
 	from @file{sunos.c}:
 
 |	#define TARGET_NAME "a.out-sunos-big"
-|	#define VECNAME    sunos_big_vec
+|	#define VECNAME    sparc_aout_sunos_be_vec
 |	#include "aoutf1.h"
 
 	requires all the names from @file{aout32.c}, and produces the jump vector
 
-|	sunos_big_vec
+|	sparc_aout_sunos_be_vec
 
 	The file @file{host-aout.c} is a special case.  It is for a large set
 	of hosts that use ``more or less standard'' a.out files, and

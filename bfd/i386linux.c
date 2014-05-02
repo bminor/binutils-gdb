@@ -38,7 +38,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) CONCAT2 (i386linux_,OP)
+#define MY(OP) CONCAT2 (i386_aout_linux_,OP)
 #define TARGETNAME "a.out-i386-linux"
 
 extern const bfd_target MY(vec);

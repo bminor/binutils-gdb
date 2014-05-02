@@ -820,7 +820,7 @@ versados_canonicalize_reloc (bfd *abfd,
 #define versados_bfd_final_link                       _bfd_generic_final_link
 #define versados_bfd_link_split_section               _bfd_generic_link_split_section
 
-const bfd_target versados_vec =
+const bfd_target m68k_versados_vec =
 {
   "versados",			/* Name.  */
   bfd_target_versados_flavour,

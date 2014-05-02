@@ -106,7 +106,7 @@ apollo_howto2rtype (reloc_howto_type *internal)
 #include "coffcode.h"
 
 #ifndef TARGET_SYM
-#define TARGET_SYM apollocoff_vec
+#define TARGET_SYM m68k_coff_apollo_vec
 #endif
 
 #ifndef TARGET_NAME

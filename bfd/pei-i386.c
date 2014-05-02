@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SYM 		i386pei_vec
+#define TARGET_SYM 		i386_pei_vec
 #define TARGET_NAME 		"pei-i386"
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE
