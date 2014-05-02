@@ -1,3 +1,8 @@
+2014-05-05  Cary Coutant  <ccoutant@google.com>
+        
+	* gdb-index.cc (Gdb_index_info_reader): Don't complain about language
+	if we have pubnames/pubtypes.
+
 2014-05-02  Cary Coutant  <ccoutant@google.com>
 
     	* defstd.cc (in_segment): Define __ehdr_start here...
