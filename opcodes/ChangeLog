@@ -1,3 +1,32 @@
+2014-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16886
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* configure.in: Check if sigsetjmp is available.
+	* h8500-dis.c (private): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_h8500): Replace setjmp with OPCODES_SIGSETJMP.
+	* i386-dis.c (dis_private): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn): Replace setjmp with OPCODES_SIGSETJMP.
+	* ns32k-dis.c (private): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_ns32k): Replace setjmp with OPCODES_SIGSETJMP.
+	* sysdep.h (OPCODES_SIGJMP_BUF): New macro.
+	(OPCODES_SIGSETJMP): Likewise.
+	(OPCODES_SIGLONGJMP): Likewise.
+	* vax-dis.c (private): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_vax): Replace setjmp with OPCODES_SIGSETJMP.
+	* xtensa-dis.c (dis_private): Replace jmp_buf with
+	OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_xtensa): Replace setjmp with OPCODES_SIGSETJMP.
+	* z8k-dis.c(instr_data_s): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_z8k): Replace setjmp with OPCODES_SIGSETJMP.
+
 2014-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/16891
