@@ -43,6 +43,11 @@ proc test_probe_value { value reg_val } {
     gdb_test "print \$_probe_arg0 == *((unsigned int *) (${reg_val}))" "= 1"
 }
 
+proc test_probe_value_without_reg { value } {
+    gdb_test "print \$_probe_argc" "= 1"
+    gdb_test "print \$_probe_arg0" "= $value"
+}
+
 if { ![runto_main] } {
     return -1
 }
@@ -54,4 +59,33 @@ foreach probe_name [list "foo" "bar" "foo_prefix" "bar_prefix"] \
 	goto_probe $probe_name
 	test_probe_value $probe_val $probe_reg_val
     }
+}
+
+# Testing normal probes, with several prefixes.
+
+set normal_probes_names { }
+
+foreach bit [list 8 16 32 64] {
+    lappend normal_probes_names "uint${bit}_probe"
+    lappend normal_probes_names "int${bit}_probe"
+}
+
+foreach probe_name $normal_probes_names \
+    probe_val [list 8 -8 16 -16 32 -32 64 -64] {
+    with_test_prefix $probe_name {
+	goto_probe $probe_name
+	test_probe_value_without_reg $probe_val
+    }
+}
+
+# Testing the fail probes.
+
+with_test_prefix "fail_probe" {
+    goto_probe "fail_probe"
+    gdb_test "print \$_probe_arg0" "warning: unrecognized bitness `-7' for probe `fail_probe'\r\nInvalid probe argument 0 -- probe has 0 arguments available"
+}
+
+with_test_prefix "fail2_probe" {
+    goto_probe "fail2_probe"
+    gdb_test "print \$_probe_arg0" "Unknown numeric token on expression `23-@\\\$16'."
 }

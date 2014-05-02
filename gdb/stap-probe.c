@@ -60,6 +60,10 @@ static unsigned int stap_expression_debug = 0;
    The relationship is:
 
    - STAP_ARG_BITNESS_UNDEFINED:  The user hasn't specified the bitness.
+   - STAP_ARG_BITNESS_8BIT_UNSIGNED:  argument string starts with `1@'.
+   - STAP_ARG_BITNESS_8BIT_SIGNED:  argument string starts with `-1@'.
+   - STAP_ARG_BITNESS_16BIT_UNSIGNED:  argument string starts with `2@'.
+   - STAP_ARG_BITNESS_16BIT_SIGNED:  argument string starts with `-2@'.
    - STAP_ARG_BITNESS_32BIT_UNSIGNED:  argument string starts with `4@'.
    - STAP_ARG_BITNESS_32BIT_SIGNED:  argument string starts with `-4@'.
    - STAP_ARG_BITNESS_64BIT_UNSIGNED:  argument string starts with `8@'.
@@ -68,6 +72,10 @@ static unsigned int stap_expression_debug = 0;
 enum stap_arg_bitness
 {
   STAP_ARG_BITNESS_UNDEFINED,
+  STAP_ARG_BITNESS_8BIT_UNSIGNED,
+  STAP_ARG_BITNESS_8BIT_SIGNED,
+  STAP_ARG_BITNESS_16BIT_UNSIGNED,
+  STAP_ARG_BITNESS_16BIT_SIGNED,
   STAP_ARG_BITNESS_32BIT_UNSIGNED,
   STAP_ARG_BITNESS_32BIT_SIGNED,
   STAP_ARG_BITNESS_64BIT_UNSIGNED,
@@ -328,6 +336,18 @@ stap_get_expected_argument_type (struct gdbarch *gdbarch,
 	return builtin_type (gdbarch)->builtin_uint32;
       else
 	return builtin_type (gdbarch)->builtin_uint64;
+
+    case STAP_ARG_BITNESS_8BIT_UNSIGNED:
+      return builtin_type (gdbarch)->builtin_uint8;
+
+    case STAP_ARG_BITNESS_8BIT_SIGNED:
+      return builtin_type (gdbarch)->builtin_int8;
+
+    case STAP_ARG_BITNESS_16BIT_UNSIGNED:
+      return builtin_type (gdbarch)->builtin_uint16;
+
+    case STAP_ARG_BITNESS_16BIT_SIGNED:
+      return builtin_type (gdbarch)->builtin_int16;
 
     case STAP_ARG_BITNESS_32BIT_SIGNED:
       return builtin_type (gdbarch)->builtin_int32;
@@ -1095,7 +1115,7 @@ stap_parse_probe_arguments (struct stap_probe *probe, struct gdbarch *gdbarch)
 
 	 N@OP
 
-	 Where `N' can be [+,-][4,8].  This is not mandatory, so
+	 Where `N' can be [+,-][1,2,4,8].  This is not mandatory, so
 	 we check it here.  If we don't find it, go to the next
 	 state.  */
       if ((cur[0] == '-' && isdigit (cur[1]) && cur[2] == '@')
@@ -1108,20 +1128,37 @@ stap_parse_probe_arguments (struct stap_probe *probe, struct gdbarch *gdbarch)
 	      got_minus = 1;
 	    }
 
-	  if (*cur == '4')
-	    b = (got_minus ? STAP_ARG_BITNESS_32BIT_SIGNED
-		 : STAP_ARG_BITNESS_32BIT_UNSIGNED);
-	  else if (*cur == '8')
-	    b = (got_minus ? STAP_ARG_BITNESS_64BIT_SIGNED
-		 : STAP_ARG_BITNESS_64BIT_UNSIGNED);
-	  else
+	  /* Defining the bitness.  */
+	  switch (*cur)
 	    {
-	      /* We have an error, because we don't expect anything
-		 except 4 and 8.  */
-	      complaint (&symfile_complaints,
-			 _("unrecognized bitness `%c' for probe `%s'"),
-			 *cur, probe->p.name);
-	      return;
+	    case '1':
+	      b = (got_minus ? STAP_ARG_BITNESS_8BIT_SIGNED
+		   : STAP_ARG_BITNESS_8BIT_UNSIGNED);
+	      break;
+
+	    case '2':
+	      b = (got_minus ? STAP_ARG_BITNESS_16BIT_SIGNED
+		   : STAP_ARG_BITNESS_16BIT_UNSIGNED);
+	      break;
+
+	    case '4':
+	      b = (got_minus ? STAP_ARG_BITNESS_32BIT_SIGNED
+		   : STAP_ARG_BITNESS_32BIT_UNSIGNED);
+	      break;
+
+	    case '8':
+	      b = (got_minus ? STAP_ARG_BITNESS_64BIT_SIGNED
+		   : STAP_ARG_BITNESS_64BIT_UNSIGNED);
+	      break;
+
+	    default:
+	      {
+		/* We have an error, because we don't expect anything
+		   except 1, 2, 4 and 8.  */
+		warning (_("unrecognized bitness %s%c' for probe `%s'"),
+			 got_minus ? "`-" : "`", *cur, probe->p.name);
+		return;
+	      }
 	    }
 
 	  arg.bitness = b;

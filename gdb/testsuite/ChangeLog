@@ -1,5 +1,13 @@
 2014-05-02  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* gdb.arch/amd64-stap-optional-prefix.S (main): Add several
+	probes to test for bitness recognition.
+	* gdb.arch/amd64-stap-optional-prefix.exp
+	(test_probe_value_without_reg): New procedure.
+	Add code to test for different kinds of bitness.
+
+2014-05-02  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	PR breakpoints/16889
 	* gdb.arch/amd64-stap-optional-prefix.S: New file.
 	* gdb.arch/amd64-stap-optional-prefix.exp: Likewise.

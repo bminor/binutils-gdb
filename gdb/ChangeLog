@@ -1,5 +1,13 @@
 2014-05-02  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* stap-probe.c (enum stap_arg_bitness): New enums to represent 8
+	and 16-bit signed and unsigned arguments.  Update comment.
+	(stap_parse_probe_arguments): Extend code to handle such
+	arguments.  Use warning instead of complaint to notify about
+	unrecognized bitness.
+
+2014-05-02  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	PR breakpoints/16889
 	* stap-probe.c (stap_parse_probe_arguments): Simplify
 	check for non-prefixed probes (i.e., probes whose

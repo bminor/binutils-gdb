@@ -28,5 +28,15 @@ main:
 	STAP_PROBE1(probe, foo_prefix, 8@(%rsp))
 	STAP_PROBE1(probe, bar_prefix, 8@-8(%rbp))
 	mov	%rbp,%rsp
+	STAP_PROBE1(probe, uint8_probe, 1@$8)
+	STAP_PROBE1(probe, int8_probe, -1@$-8)
+	STAP_PROBE1(probe, uint16_probe, 2@$16)
+	STAP_PROBE1(probe, int16_probe, -2@$-16)
+	STAP_PROBE1(probe, uint32_probe, 4@$32)
+	STAP_PROBE1(probe, int32_probe, -4@$-32)
+	STAP_PROBE1(probe, uint64_probe, 8@$64)
+	STAP_PROBE1(probe, int64_probe, -8@$-64)
+	STAP_PROBE1(probe, fail_probe, -7@$16)
+	STAP_PROBE1(probe, fail2_probe, 23-@$16)
 	xor	%rax,%rax
 	ret
