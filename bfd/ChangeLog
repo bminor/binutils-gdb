@@ -1,5 +1,11 @@
 2014-05-02  Alan Modra  <amodra@gmail.com>
 
+	* targets.c: Sort bfd_target vectors somewhat alphabetically.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+
+2014-05-02  Alan Modra  <amodra@gmail.com>
+
 	* aix386-core.c, * aout-adobe.c, * aout-arm.c, * aout-ns32k.c,
 	* aout-sparcle.c, * aout0.c, * aoutx.h, * armnetbsd.c, * bout.c,
 	* cf-i386lynx.c, * cf-sparclynx.c, * cisco-core.c, * coff-alpha.c,
