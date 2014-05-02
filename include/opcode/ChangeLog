@@ -1,3 +1,27 @@
+2014-05-07  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips.h (INSN_ISA_MASK): Updated.
+	(INSN_ISA32R3): New define.
+	(INSN_ISA32R5): New define.
+	(INSN_ISA64R3): New define.
+	(INSN_ISA64R5): New define.
+	(INSN_ISA64, INSN_ISA64R2, INSN_ISA3_32, INSN_ISA3_32R2, INSN_ISA4_32
+	INSN_ISA4_32R2, INSN_ISA5_32R2): Renumbered.
+	(mips_isa_table): Add entries for mips32r3, mips32r5, mips64r3 and
+	mips64r5.
+	(INSN_UPTO32R3): New define.
+	(INSN_UPTO32R5): New define.
+	(INSN_UPTO64R3): New define.
+	(INSN_UPTO64R5): New define.
+	(ISA_MIPS32R3): New define.
+	(ISA_MIPS32R5): New define.
+	(ISA_MIPS64R3): New define.
+	(ISA_MIPS64R5): New define.
+	(CPU_MIPS32R3): New define.
+	(CPU_MIPS32R5): New define.
+	(CPU_MIPS64R3): New define.
+	(CPU_MIPS64R5): New define.
+
 2014-05-01  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* mips.h (mips_isa_table): Avoid hard-coding INSN_ISA* values.

@@ -416,6 +416,14 @@ mips_arch_create mips32r2 32	mips32	{ fpisa3 fpisa4 fpisa5 ror } \
 			{ -march=mips32r2 -mtune=mips32r2 } \
 			{ -mmips:isa32r2 } \
 			{ mipsisa32r2-*-* mipsisa32r2el-*-* }
+mips_arch_create mips32r3 32	mips32r2 { fpisa3 fpisa4 fpisa5 ror } \
+			{ -march=mips32r3 -mtune=mips32r3 } \
+			{ -mmips:isa32r3 } \
+			{ mipsisa32r3-*-* mipsisa32r3el-*-* }
+mips_arch_create mips32r5 32	mips32r3 { fpisa3 fpisa4 fpisa5 ror } \
+			{ -march=mips32r5 -mtune=mips32r5 } \
+			{ -mmips:isa32r5 } \
+			{ mipsisa32r5-*-* mipsisa32r5el-*-* }
 mips_arch_create mips64	64	mips5	{ mips32 } \
 			{ -march=mips64 -mtune=mips64 } { -mmips:isa64 } \
 			{ mipsisa64-*-* mipsisa64el-*-* }
@@ -423,6 +431,14 @@ mips_arch_create mips64r2 64	mips64	{ mips32r2 ror } \
 			{ -march=mips64r2 -mtune=mips64r2 } \
 			{ -mmips:isa64r2 } \
 			{ mipsisa64r2-*-* mipsisa64r2el-*-* }
+mips_arch_create mips64r3 64	mips64r2 { mips32r3 ror } \
+			{ -march=mips64r3 -mtune=mips64r3 } \
+			{ -mmips:isa64r3 } \
+			{ mipsisa64r3-*-* mipsisa64r3el-*-* }
+mips_arch_create mips64r5 64	mips64r3 { mips32r5 ror } \
+			{ -march=mips64r5 -mtune=mips64r5 } \
+			{ -mmips:isa64r5 } \
+			{ mipsisa64r5-*-* mipsisa64r5el-*-* }
 mips_arch_create mips16	32	{}	{} \
 			{ -march=mips1 -mips16 } { -mmips:16 }
 mips_arch_create micromips 64	mips64r2 {} \
@@ -1171,6 +1187,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "msa-branch"	[mips_arch_list_matching mips32r2]
 
     run_dump_test_arches "xpa"		[mips_arch_list_matching mips32r2 !micromips]
+    run_dump_test_arches "r5"		[mips_arch_list_matching mips32r5 !micromips]
 
     run_dump_test "pcrel-1"
     run_dump_test "pcrel-2"

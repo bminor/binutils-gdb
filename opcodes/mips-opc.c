@@ -249,7 +249,11 @@ decode_mips_operand (const char *p)
 #define I32	INSN_ISA32
 #define I64     INSN_ISA64
 #define I33	INSN_ISA32R2
+#define I34	INSN_ISA32R3
+#define I36	INSN_ISA32R5
 #define I65	INSN_ISA64R2
+#define I66	INSN_ISA64R3
+#define I68	INSN_ISA64R5
 #define I3_32   INSN_ISA3_32
 #define I3_33   INSN_ISA3_32R2
 #define I4_32   INSN_ISA4_32
@@ -1091,6 +1095,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"emt",			"",		0x41600be1, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
 {"emt",			"t",		0x41600be1, 0xffe0ffff, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"eret",		"",		0x42000018, 0xffffffff, NODS,      		0,		I3_32,		0,	0 },
+{"eretnc",		"",		0x42000058, 0xffffffff, NODS,      		0,		I36,		0,	0 },
 {"evpe",		"",		0x41600021, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
 {"evpe",		"t",		0x41600021, 0xffe0ffff, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"ext",			"t,r,+A,+C",	0x7c000000, 0xfc00003f, WR_1|RD_2,    		0,		I33,		0,	0 },

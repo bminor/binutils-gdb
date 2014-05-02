@@ -1,5 +1,17 @@
 2014-05-07  Andrew Bennett  <andrew.bennett@imgtec.com>
 
+	* mips-opc.c (mips_builtin_opcodes): Add MIPS32r5 eretnc instruction.
+	(I34): New define.
+	(I36): New define.
+	(I66): New define.
+	(I68): New define.
+	* mips-dis.c (mips_arch_choices): Add mips32r3, mips32r5, mips64r3 and
+	mips64r5.
+	(parse_mips_dis_option): Update MSA and virtualization support to
+	allow mips64r3 and mips64r5. 
+
+2014-05-07  Andrew Bennett  <andrew.bennett@imgtec.com>
+
 	* mips-opc.c (G3): Remove I4.
 
 2014-05-05  H.J. Lu  <hongjiu.lu@intel.com>

@@ -81,16 +81,22 @@ VxWorks-style position-independent macro expansions.
 @itemx -mips5
 @itemx -mips32
 @itemx -mips32r2
+@itemx -mips32r3
+@itemx -mips32r5
 @itemx -mips64
 @itemx -mips64r2
+@itemx -mips64r3
+@itemx -mips64r5
 Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the R2000 and R3000 processors,
 @samp{-mips2} to the R6000 processor, @samp{-mips3} to the
 R4000 processor, and @samp{-mips4} to the R8000 and R10000 processors.
-@samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, @samp{-mips64}, and
-@samp{-mips64r2} correspond to generic MIPS V, MIPS32, MIPS32 Release 2,
-MIPS64, and MIPS64 Release 2 ISA processors, respectively.  You can also
-switch instruction sets during the assembly; see @ref{MIPS ISA,
+@samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, @samp{-mips32r3}, 
+@samp{-mips32r5}, @samp{-mips64}, @samp{-mips64r2}, @samp{-mips64r3}, and
+@samp{-mips64r5} correspond to generic MIPS V, MIPS32, MIPS32 Release 2,
+MIPS32 Release 3, MIPS32 Release 5, MIPS64, and MIPS64 Release 2,
+MIPS64 Release 3, and MIPS64 Release 5 ISA processors, respectively.  You 
+can also switch instruction sets during the assembly; see @ref{MIPS ISA,
 Directives to override the ISA level}.
 
 @item -mgp32
@@ -652,8 +658,8 @@ Small data is not supported for SVR4-style PIC.
 @kindex @code{.set mips@var{n}}
 @sc{gnu} @code{@value{AS}} supports an additional directive to change
 the MIPS Instruction Set Architecture level on the fly: @code{.set
-mips@var{n}}.  @var{n} should be a number from 0 to 5, or 32, 32r2, 64
-or 64r2.
+mips@var{n}}.  @var{n} should be a number from 0 to 5, or 32, 32r2, 32r3,
+32r5, 64, 64r2, 64r3 or 64r5.
 The values other than 0 make the assembler accept instructions
 for the corresponding ISA level, from that point on in the
 assembly.  @code{.set mips@var{n}} affects not only which instructions

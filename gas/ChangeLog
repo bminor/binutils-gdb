@@ -1,3 +1,30 @@
+2014-05-07  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* tc-mips.c (ISA_SUPPORTS_MIPS16E): Add mips32r3, mips32r5, mips64r3
+	and mips64r5.
+	(ISA_HAS_64BIT_FPRS): Likewise.
+	(ISA_HAS_ROR): Likewise.
+	(ISA_HAS_ODD_SINGLE_FPR): Likewise.
+	(ISA_HAS_MXHC1): Likewise.
+	(hilo_interlocks): Likewise.
+	(md_longopts): Likewise.
+	(ISA_HAS_64BIT_REGS): Add mips64r3 and mips64r5.
+	(ISA_HAS_DROR): Likewise.
+	(options): Add OPTION_MIPS32R3, OPTION_MIPS32R5, OPTION_MIPS64R3, and
+	OPTION_MIPS64R5.
+	(mips_isa_rev): Add support for mips32r3, mips32r5, mips64r3 and
+	mips64r5.
+	(md_parse_option): Likewise.
+	(s_mipsset): Likewise.
+	(mips_cpu_info_table): Add entries for mips32r3, mips32r5, mips64r3
+	and mips64r5.  Also change p5600 entry to be mips32r5.
+	* configure.in: Add support for mips32r3, mips32r5, mips64r3 and
+	mips64r5.
+	* configure: Regenerate.
+	* doc/c-mips.texi: Document the -mips32r3, -mips32r5, -mips64r3 and
+	-mips64r5 command line options.
+	* doc/as.texinfo: Likewise.
+
 2014-04-28  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/16858

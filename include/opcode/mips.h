@@ -1058,7 +1058,7 @@ struct mips_opcode
    word constructed using these macros is a bitmask of the remaining
    INSN_* values below.  */
 
-#define INSN_ISA_MASK		  0x0000000ful
+#define INSN_ISA_MASK		  0x0000001ful
 
 /* We cannot start at zero due to ISA_UNKNOWN below.  */
 #define INSN_ISA1                 1
@@ -1068,17 +1068,21 @@ struct mips_opcode
 #define INSN_ISA5                 5
 #define INSN_ISA32                6
 #define INSN_ISA32R2              7
-#define INSN_ISA64                8
-#define INSN_ISA64R2              9
+#define INSN_ISA32R3              8
+#define INSN_ISA32R5              9
+#define INSN_ISA64                11 
+#define INSN_ISA64R2              12
+#define INSN_ISA64R3              13
+#define INSN_ISA64R5              14
 /* Below this point the INSN_* values correspond to combinations of ISAs.
    They are only for use in the opcodes table to indicate membership of
    a combination of ISAs that cannot be expressed using the usual inclusion
    ordering on the above INSN_* values.  */
-#define INSN_ISA3_32              10
-#define INSN_ISA3_32R2            11
-#define INSN_ISA4_32              12
-#define INSN_ISA4_32R2            13
-#define INSN_ISA5_32R2            14
+#define INSN_ISA3_32              16
+#define INSN_ISA3_32R2            17
+#define INSN_ISA4_32              18
+#define INSN_ISA4_32R2            19
+#define INSN_ISA5_32R2            20
 
 /* Bit INSN_ISA<X> - 1 of INSN_UPTO<Y> is set if ISA Y includes ISA X.  */
 #define ISAF(X) (1 << (INSN_ISA##X - 1))
@@ -1090,8 +1094,12 @@ struct mips_opcode
 #define INSN_UPTO32   INSN_UPTO2 | ISAF(32) | ISAF(3_32) | ISAF(4_32)
 #define INSN_UPTO32R2 INSN_UPTO32 | ISAF(32R2) \
 			| ISAF(3_32R2) | ISAF(4_32R2) | ISAF(5_32R2)
+#define INSN_UPTO32R3 INSN_UPTO32R2 | ISAF(32R3)
+#define INSN_UPTO32R5 INSN_UPTO32R3 | ISAF(32R5)
 #define INSN_UPTO64   INSN_UPTO5 | ISAF(64) | ISAF(32)
 #define INSN_UPTO64R2 INSN_UPTO64 | ISAF(64R2) | ISAF(32R2)
+#define INSN_UPTO64R3 INSN_UPTO64R2 | ISAF(64R3) | ISAF(32R3)
+#define INSN_UPTO64R5 INSN_UPTO64R3 | ISAF(64R5) | ISAF(32R5)
 
 /* The same information in table form: bit INSN_ISA<X> - 1 of index
    INSN_UPTO<Y> - 1 is set if ISA Y includes ISA X.  */
@@ -1103,8 +1111,13 @@ static const unsigned int mips_isa_table[] = {
   INSN_UPTO5,
   INSN_UPTO32,
   INSN_UPTO32R2,
+  INSN_UPTO32R3,
+  INSN_UPTO32R5,
+  0,
   INSN_UPTO64,
-  INSN_UPTO64R2
+  INSN_UPTO64R2,
+  INSN_UPTO64R3,
+  INSN_UPTO64R5
 };
 #undef ISAF
 
@@ -1188,7 +1201,11 @@ static const unsigned int mips_isa_table[] = {
 #define       ISA_MIPS64      INSN_ISA64
 
 #define       ISA_MIPS32R2    INSN_ISA32R2
+#define       ISA_MIPS32R3    INSN_ISA32R3
+#define       ISA_MIPS32R5    INSN_ISA32R5
 #define       ISA_MIPS64R2    INSN_ISA64R2
+#define       ISA_MIPS64R3    INSN_ISA64R3
+#define       ISA_MIPS64R5    INSN_ISA64R5
 
 
 /* CPU defines, use instead of hardcoding processor number. Keep this
@@ -1220,9 +1237,13 @@ static const unsigned int mips_isa_table[] = {
 #define CPU_MIPS16	16
 #define CPU_MIPS32	32
 #define CPU_MIPS32R2	33
+#define CPU_MIPS32R3	34
+#define CPU_MIPS32R5	36
 #define CPU_MIPS5       5
 #define CPU_MIPS64      64
 #define CPU_MIPS64R2	65
+#define CPU_MIPS64R3	66
+#define CPU_MIPS64R5	68
 #define CPU_SB1         12310201        /* octal 'SB', 01.  */
 #define CPU_LOONGSON_2E 3001
 #define CPU_LOONGSON_2F 3002
