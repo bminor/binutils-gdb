@@ -1,3 +1,10 @@
+2014-05-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* ppcobsd-nat.c: Include "obsd-nat.h".
+	(_initialize_ppcobsd_nat): Call obsd_add_target instead of
+	add_target.
+	* config/powerpc/obsd.mh (NATDEPFILES): Add obsd-nat.o.
+
 2014-05-02  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* stap-probe.c (enum stap_arg_bitness): New enums to represent 8
