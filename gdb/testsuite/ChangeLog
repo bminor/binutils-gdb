@@ -1,3 +1,8 @@
+2014-05-05  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.linespec/ls-dollar.exp: Add test for linespec
+	file:convenience_variable.
+
 2014-05-05  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/unavailable.exp (gdb_collect_args_test): Save
