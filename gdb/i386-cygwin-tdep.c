@@ -96,16 +96,9 @@ static const struct regset *
 i386_windows_regset_from_core_section (struct gdbarch *gdbarch,
 				     const char *sect_name, size_t sect_size)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   if (strcmp (sect_name, ".reg") == 0
       && sect_size == I386_WINDOWS_SIZEOF_GREGSET)
-    {
-      if (tdep->gregset == NULL)
-        tdep->gregset = regset_alloc (gdbarch, i386_supply_gregset,
-                                      i386_collect_gregset);
-      return tdep->gregset;
-    }
+    return &i386_gregset;
 
   return NULL;
 }

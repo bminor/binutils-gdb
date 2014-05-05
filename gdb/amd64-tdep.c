@@ -2886,6 +2886,16 @@ amd64_collect_xstateregset (const struct regset *regset,
   amd64_collect_xsave (regcache, regnum, xstateregs, 1);
 }
 
+static const struct regset amd64_fpregset =
+  {
+    NULL, amd64_supply_fpregset, amd64_collect_fpregset
+  };
+
+static const struct regset amd64_xstateregset =
+  {
+    NULL, amd64_supply_xstateregset, amd64_collect_xstateregset
+  };
+
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
@@ -2896,23 +2906,10 @@ amd64_regset_from_core_section (struct gdbarch *gdbarch,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
-    {
-      if (tdep->fpregset == NULL)
-	tdep->fpregset = regset_alloc (gdbarch, amd64_supply_fpregset,
-				       amd64_collect_fpregset);
-
-      return tdep->fpregset;
-    }
+    return &amd64_fpregset;
 
   if (strcmp (sect_name, ".reg-xstate") == 0)
-    {
-      if (tdep->xstateregset == NULL)
-	tdep->xstateregset = regset_alloc (gdbarch,
-					   amd64_supply_xstateregset,
-					   amd64_collect_xstateregset);
-
-      return tdep->xstateregset;
-    }
+    return &amd64_xstateregset;
 
   return i386_regset_from_core_section (gdbarch, sect_name, sect_size);
 }

@@ -152,6 +152,11 @@ i386obsd_aout_supply_regset (const struct regset *regset,
   i387_supply_fsave (regcache, regnum, gregs + tdep->sizeof_gregset);
 }
 
+static const struct regset i386obsd_aout_gregset =
+  {
+    NULL, i386obsd_aout_supply_regset, NULL
+  };
+
 static const struct regset *
 i386obsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
 					const char *sect_name,
@@ -164,12 +169,7 @@ i386obsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
 
   if (strcmp (sect_name, ".reg") == 0
       && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE)
-    {
-      if (tdep->gregset == NULL)
-        tdep->gregset =
-	  regset_alloc (gdbarch, i386obsd_aout_supply_regset, NULL);
-      return tdep->gregset;
-    }
+    return &i386obsd_aout_gregset;
 
   return NULL;
 }

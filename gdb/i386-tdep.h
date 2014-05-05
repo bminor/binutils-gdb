@@ -56,17 +56,12 @@ enum struct_return
 struct gdbarch_tdep
 {
   /* General-purpose registers.  */
-  struct regset *gregset;
   int *gregset_reg_offset;
   int gregset_num_regs;
   size_t sizeof_gregset;
 
   /* Floating-point registers.  */
-  struct regset *fpregset;
   size_t sizeof_fpregset;
-
-  /* XSAVE extended state.  */
-  struct regset *xstateregset;
 
   /* Register number for %st(0).  The register numbers for the other
      registers follow from this one.  Set this to -1 to indicate the
@@ -389,13 +384,8 @@ extern void i386_supply_gregset (const struct regset *regset,
 				 struct regcache *regcache, int regnum,
 				 const void *gregs, size_t len);
 
-/* Collect register REGNUM from the register cache REGCACHE and store
-   it in the buffer specified by GREGS and LEN as described by the
-   general-purpose register set REGSET.  If REGNUM is -1, do this for
-   all registers in REGSET.  */
-extern void i386_collect_gregset (const struct regset *regset,
-				  const struct regcache *regcache,
-				  int regnum, void *gregs, size_t len);
+/* General-purpose register set. */
+extern const struct regset i386_gregset;
 
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */

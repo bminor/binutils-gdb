@@ -55,6 +55,11 @@ amd64obsd_supply_regset (const struct regset *regset,
 		       ((const gdb_byte *)regs) + tdep->sizeof_gregset);
 }
 
+static const struct regset amd64obsd_combined_regset =
+  {
+    NULL, amd64obsd_supply_regset, NULL
+  };
+
 static const struct regset *
 amd64obsd_regset_from_core_section (struct gdbarch *gdbarch,
 				    const char *sect_name, size_t sect_size)
@@ -66,11 +71,7 @@ amd64obsd_regset_from_core_section (struct gdbarch *gdbarch,
 
   if (strcmp (sect_name, ".reg") == 0
       && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FXSAVE)
-    {
-      if (tdep->gregset == NULL)
-        tdep->gregset = regset_alloc (gdbarch, amd64obsd_supply_regset, NULL);
-      return tdep->gregset;
-    }
+    return &amd64obsd_combined_regset;
 
   return NULL;
 }

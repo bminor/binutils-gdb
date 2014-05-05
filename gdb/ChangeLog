@@ -1,5 +1,35 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* amd64-tdep.c (amd64_fpregset, amd64_xstateregset): New static
+	regset structures.
+	(amd64_regset_from_core_section): Remove dynamic regset
+	allocations.
+	* amd64obsd-tdep.c (amd64obsd_combined_regset): New static regset
+	structure.
+	(amd64obsd_regset_from_core_section): Remove dynamic regset
+	allocation.
+	* i386-cygwin-tdep.c (i386_windows_regset_from_core_section):
+	Likewise.
+	* i386-nto-tdep.c (i386nto_supply_gregset): Adjust call to
+	x86-common regset supply function.
+	* i386-tdep.c (i386_collect_gregset): Make static.
+	(i386_gregset): New global regset structure.
+	(i386_fpregset, i386_xstateregset): New static regset structures.
+	(i386_regset_from_core_section): Remove dynamic regset
+	allocations.
+	(i386_gdbarch_init): Remove initialization of tdep fields
+	'gregset', 'fpregset', and 'xstateregset'.
+	* i386-tdep.h (struct gdbarch_tdep): Remove fields 'gregset',
+	'fpregset', and 'xstateregset'.
+	(i386_collect_gregset): Remove prototype.
+	(i386_gregset): New declaration.
+	* i386obsd-tdep.c (i386obsd_aout_gregset): New static regset
+	structure.
+	(i386obsd_aout_regset_from_core_section): Remove dynamic regset
+	allocation.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* arm-linux-tdep.c (arm_linux_gregset, arm_linux_fpregset)
 	(arm_linux_vfpregset): New static regset structures.
 	(arm_linux_regset_from_core_section): Remove dynamic allocation of
