@@ -1,3 +1,26 @@
+2014-05-06  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/16900
+	* i386.cc (Output_data_got_plt_i386): New class.
+	(Output_data_plt_i386::Output_data_plt_i386): Change type of got_plt
+	parameter. Change all callers.
+	(Output_data_plt_i386::layout_): Remove.
+	(Output_data_plt_i386::got_plt_): Change type.
+	(Target_i386::got_plt_): Change type. Change all references.
+	(Target_i386::got_section): Create instance of new class.
+	(Output_data_got_plt_i386::do_write): New function.
+	* x86_64.cc (Output_data_got_plt_x86_64): New class.
+	(Output_data_plt_x86_64::Output_data_plt_x86_64): Change type of got_plt
+	parameter. Change all callers.
+	(Output_data_plt_x86_64::layout_): Remove.
+	(Output_data_plt_x86_64::got_plt_): Change type.
+	(Target_x86_64::got_plt_): Change type. Change all references.
+	(Target_x86_64::got_section): Create instance of new class.
+	(Output_data_got_plt_x86_64::do_write): New function.
+	(Output_data_plt_x86_64::do_write): Don't write reserved words in GOT.
+	(Target_x86_64<size>::init_got_plt_for_update): Create instance of new
+	class.
+
 2014-05-05  Cary Coutant  <ccoutant@google.com>
         
 	* gdb-index.cc (Gdb_index_info_reader): Don't complain about language
