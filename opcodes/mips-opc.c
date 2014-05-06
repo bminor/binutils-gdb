@@ -296,9 +296,7 @@ decode_mips_operand (const char *p)
 #define G2      (T3             \
                  )
 
-#define G3      (I4             \
-                 |EE            \
-                 )
+#define G3      EE
 
 /* 64 bit CPU with 32 bit FPU (single float). */
 #define SF	EE
