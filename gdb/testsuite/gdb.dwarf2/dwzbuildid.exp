@@ -162,7 +162,7 @@ foreach testname {ok mismatch fallback} {
 	if {[runto_main]} {
 	    if {$testname == "mismatch"} {
 		gdb_test "print the_int" \
-		    "No symbol table is loaded.*"
+		    "(No symbol table is loaded|No symbol \"the_int\" in current context).*"
 	    } else {
 		gdb_test "print the_int" " = 99"
 	    }

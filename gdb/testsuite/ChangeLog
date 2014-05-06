@@ -1,3 +1,8 @@
+2014-05-07  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dwzbuildid.exp: Match output "No symbol "the_int"
+	in current context" too.
+
 2014-05-05  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.linespec/ls-dollar.exp: Add test for linespec
