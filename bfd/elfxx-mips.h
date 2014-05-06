@@ -108,6 +108,8 @@ extern bfd_boolean _bfd_mips_elf_merge_private_bfd_data
   (bfd *, bfd *);
 extern bfd_boolean _bfd_mips_elf_set_private_flags
   (bfd *, flagword);
+extern const char * _bfd_mips_fp_abi_string
+  (int);
 extern bfd_boolean _bfd_mips_elf_print_private_bfd_data
   (bfd *, void *);
 extern bfd_boolean _bfd_mips_elf_discard_info

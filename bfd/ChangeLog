@@ -1,3 +1,10 @@
+2014-05-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.h (elfxx-mips.h): Declare.
+	* elfxx-mips.c (mips_elf_merge_obj_attributes): Use it to report
+	Tag_GNU_MIPS_ABI_FP mismatches.
+	(_bfd_mips_fp_abi_string): New function.
+
 2014-05-02  Alan Modra  <amodra@gmail.com>
 
 	* targets.c: Sort bfd_target vectors somewhat alphabetically.
