@@ -329,7 +329,7 @@ case "${targ}" in
     targ_defvec=arm_elf32_le_vec
     targ_selvecs=arm_elf32_be_vec
     ;;
-  armeb-*-elf | arm*b-*-linux-*)
+  armeb-*-elf | arm*b-*-freebsd* | arm*b-*-linux-*)
     targ_defvec=arm_elf32_be_vec
     targ_selvecs=arm_elf32_le_vec
     ;;
@@ -337,7 +337,7 @@ case "${targ}" in
     targ_defvec=arm_elf32_le_vec
     targ_selvecs=arm_elf32_be_vec
     ;;
-  arm-*-elf | arm-*-freebsd* | arm*-*-linux-* | arm*-*-conix* | \
+  arm-*-elf | arm*-*-freebsd* | arm*-*-linux-* | arm*-*-conix* | \
   arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
   arm*-*-eabi* )
     targ_defvec=arm_elf32_le_vec
