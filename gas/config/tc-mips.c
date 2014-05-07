@@ -42,6 +42,8 @@ typedef char static_assert2[sizeof (valueT) < 8 ? -1 : 1];
 #define DBG(x)
 #endif
 
+#define streq(a, b)           (strcmp (a, b) == 0)
+
 #define SKIP_SPACE_TABS(S) \
   do { while (*(S) == ' ' || *(S) == '\t') ++(S); } while (0)
 
@@ -18341,4 +18343,35 @@ tc_mips_regname_to_dw2regnum (char *regname)
     regnum = reg;
 
   return regnum;
+}
+
+/* Implement CONVERT_SYMBOLIC_ATTRIBUTE.
+   Given a symbolic attribute NAME, return the proper integer value.
+   Returns -1 if the attribute is not known.  */
+
+int
+mips_convert_symbolic_attribute (const char *name)
+{
+  static const struct
+  {
+    const char * name;
+    const int    tag;
+  }
+  attribute_table[] =
+    {
+#define T(tag) {#tag, tag}
+      T (Tag_GNU_MIPS_ABI_FP),
+      T (Tag_GNU_MIPS_ABI_MSA),
+#undef T
+    };
+  unsigned int i;
+
+  if (name == NULL)
+    return -1;
+
+  for (i = 0; i < ARRAY_SIZE (attribute_table); i++)
+    if (streq (name, attribute_table[i].name))
+      return attribute_table[i].tag;
+
+  return -1;
 }

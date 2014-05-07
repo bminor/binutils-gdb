@@ -1197,4 +1197,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "pcrel-4-n32"
 	run_dump_test "pcrel-4-64"
     }
+
+    run_dump_test "attr-gnu-abi-fp-1"
+    run_dump_test "attr-gnu-abi-msa-1"
 }
