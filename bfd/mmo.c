@@ -29,14 +29,14 @@ SECTION
 	The mmo object format is used exclusively together with Professor
 	Donald E.@: Knuth's educational 64-bit processor MMIX.  The simulator
 	@command{mmix} which is available at
-	@url{http://www-cs-faculty.stanford.edu/~knuth/programs/mmix.tar.gz}
+	@url{http://mmix.cs.hm.edu/src/index.html}
 	understands this format.  That package also includes a combined
 	assembler and linker called @command{mmixal}.  The mmo format has
 	no advantages feature-wise compared to e.g. ELF.  It is a simple
 	non-relocatable object format with no support for archives or
 	debugging information, except for symbol value information and
 	line numbers (which is not yet implemented in BFD).  See
-	@url{http://www-cs-faculty.stanford.edu/~knuth/mmix.html} for more
+	@url{http://mmix.cs.hm.edu/} for more
 	information about MMIX.  The ELF format is used for intermediate
 	object files in the BFD implementation.
 
@@ -75,7 +75,7 @@ SUBSECTION
 	two remaining bytes, called the @samp{Y} and @samp{Z} fields, or
 	the @samp{YZ} field (a 16-bit big-endian number), are used for
 	various purposes different for each lopcode.  As documented in
-	@url{http://www-cs-faculty.stanford.edu/~knuth/mmixal-intro.ps.gz},
+	@url{http://mmix.cs.hm.edu/doc/mmixal.pdf},
 	the lopcodes are:
 
 	@table @code
@@ -1231,8 +1231,8 @@ Symbol-table, mmo section mapping, File layout, mmo
 SUBSECTION
 	Symbol table format
 
-	From mmixal.w (or really, the generated mmixal.tex) in
-	@url{http://www-cs-faculty.stanford.edu/~knuth/programs/mmix.tar.gz}):
+	From mmixal.w (or really, the generated mmixal.tex) in the
+	MMIXware package which also contains the @command{mmix} simulator:
 	``Symbols are stored and retrieved by means of a @samp{ternary
 	search trie}, following ideas of Bentley and Sedgewick. (See
 	ACM--SIAM Symp.@: on Discrete Algorithms @samp{8} (1997), 360--369;
