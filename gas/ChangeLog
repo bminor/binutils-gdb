@@ -1,5 +1,15 @@
 2014-05-08  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* config/tc-mips.c (mips_set_options): Rename fp32 field to fp.
+	Update fp32 == 0 to fp == 64 and fp32 == 1 to fp != 64 throughout.
+	(file_mips_gp32, file_mips_fp32, file_mips_soft_float,
+	file_mips_single_float, file_mips_isa, file_mips_arch): Merge into
+	one struct...
+	(file_mips_opts): Here. New static global. Update throughout.
+	(mips_opts): Update defaults for gp32 and fp.
+
+2014-05-08  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* config/tc-mips.c (streq): Define.
 	(mips_convert_symbolic_attribute): New function.
 	* config/tc-mips.h (CONVERT_SYMBOLIC_ATTRIBUTE): Define.
