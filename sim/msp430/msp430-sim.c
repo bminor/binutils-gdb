@@ -175,8 +175,10 @@ sim_open (SIM_OPEN_KIND kind,
   CPU_REG_STORE (MSP430_CPU (sd)) = msp430_reg_store;
 
   /* Allocate memory if none specified by user.  */
+  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x130, 1) == 0)
+    sim_do_commandf (sd, "memory-region 0,0x20");
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x200, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0,0x10000");
+    sim_do_commandf (sd, "memory-region 0x200,0xffe00");
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0xfffe, 1) == 0)
     sim_do_commandf (sd, "memory-region 0xfffe,2");
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x10000, 1) == 0)
@@ -314,6 +316,40 @@ trace_reg_get (SIM_DESC sd, int n)
 #define REG_PUT(N,V) trace_reg_put (sd, N, V)
 #define REG_GET(N)   trace_reg_get (sd, N)
 
+/* Hardware multiply (and accumulate) support.  */
+static enum { UNSIGN_32, SIGN_32, UNSIGN_MAC_32, SIGN_MAC_32 } hwmult_type;
+static unsigned32 hwmult_op1;
+static unsigned32 hwmult_op2;
+static unsigned32 hwmult_result;
+static   signed32 hwmult_signed_result;
+static unsigned32 hwmult_accumulator;
+static   signed32 hwmult_signed_accumulator;
+
+static enum { UNSIGN_64, SIGN_64 } hw32mult_type;
+static unsigned64 hw32mult_op1;
+static unsigned64 hw32mult_op2;
+static unsigned64 hw32mult_result;
+
+static unsigned int
+zero_ext (unsigned int v, unsigned int bits)
+{
+  v &= ((1 << bits) - 1);
+  return v;
+}
+
+static signed int
+sign_ext (signed int v, unsigned int bits)
+{
+  int sb = 1 << (bits-1);	/* Sign bit.  */
+  int mb = (1 << (bits-1)) - 1; /* Mantissa bits.  */
+
+  if (v & sb)
+    v = v | ~mb;
+  else
+    v = v & mb;
+  return v;
+}
+
 static int
 get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 {
@@ -372,6 +408,71 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
       if (addr == 0x5dd)
 	rv = 2;
 #endif
+      if (addr >= 0x130 && addr <= 0x15B)
+	{
+	  switch (addr)
+	    {
+	    case 0x13A:
+	      rv = zero_ext (hwmult_result, 16);
+	      break;
+
+	    case 0x13C:
+	      switch (hwmult_type)
+		{
+		case UNSIGN_32:
+		  rv = zero_ext (hwmult_result >> 16, 16);
+		  break;
+
+		case SIGN_32:
+		  rv = sign_ext (hwmult_signed_result >> 16, 16);
+		  break;
+		}
+	      break;
+
+	    case 0x13E:
+	      switch (hwmult_type)
+		{
+		case UNSIGN_32:
+		  rv = 0;
+		  break;
+		case SIGN_32:
+		  rv = hwmult_signed_result < 0 ? -1 : 0;
+		  break;
+		case UNSIGN_MAC_32:
+		  rv = 0; /* FIXME: Should be carry of last accumulate.  */
+		  break;
+		case SIGN_MAC_32:
+		  rv = hwmult_signed_accumulator < 0 ? -1 : 0;
+		  break;
+		}
+	      break;
+
+	    case 0x154:
+	      rv = zero_ext (hw32mult_result, 16);
+	      break;
+
+	    case 0x156:
+	      rv = zero_ext (hw32mult_result >> 16, 16);
+	      break;
+
+	    case 0x158:
+	      rv = zero_ext (hw32mult_result >> 32, 16);
+	      break;
+
+	    case 0x15A:
+	      switch (hw32mult_type)
+		{
+		case UNSIGN_64: rv = zero_ext (hw32mult_result >> 48, 16); break;
+		case   SIGN_64: rv = sign_ext (hw32mult_result >> 48, 16); break;
+		}
+	      break;
+
+	    default:
+	      fprintf (stderr, "unimplemented HW MULT read!\n");
+	      break;
+	    }
+	}
+
       if (TRACE_MEMORY_P (MSP430_CPU (sd)))
 	trace_generic (sd, MSP430_CPU (sd), TRACE_MEMORY_IDX,
 		       "GET: [%#x].%d -> %#x", addr, opc->size, rv);
@@ -464,6 +565,77 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
       if (addr == 0x5ce)
 	putchar (val);
 #endif
+      if (addr >= 0x130 && addr <= 0x15B)
+	{
+	  signed int a,b;
+
+	  /* Hardware Multiply emulation.  */
+	  assert (opc->size == 16);
+
+	  switch (addr)
+	    {
+	    case 0x130: hwmult_op1 = val; hwmult_type = UNSIGN_32; break;
+	    case 0x132: hwmult_op1 = val; hwmult_type = SIGN_32; break;
+	    case 0x134: hwmult_op1 = val; hwmult_type = UNSIGN_MAC_32; break;
+	    case 0x136: hwmult_op1 = val; hwmult_type = SIGN_MAC_32; break;
+
+	    case 0x138: hwmult_op2 = val;
+	      switch (hwmult_type)
+		{
+		case UNSIGN_32:
+		  hwmult_result = hwmult_op1 * hwmult_op2;
+		  hwmult_signed_result = (signed) hwmult_result;
+		  hwmult_accumulator = hwmult_signed_accumulator = 0;
+		  break;
+
+		case SIGN_32:
+		  a = sign_ext (hwmult_op1, 16);
+		  b = sign_ext (hwmult_op2, 16);
+		  hwmult_signed_result = a * b;
+		  hwmult_result = (unsigned) hwmult_signed_result;
+		  hwmult_accumulator = hwmult_signed_accumulator = 0;
+		  break;
+
+		case UNSIGN_MAC_32:
+		  hwmult_accumulator += hwmult_op1 * hwmult_op2;
+		  hwmult_signed_accumulator += hwmult_op1 * hwmult_op2;
+		  hwmult_result = hwmult_signed_result = 0;
+		  break;
+
+		case SIGN_MAC_32:
+		  a = sign_ext (hwmult_op1, 16);
+		  b = sign_ext (hwmult_op2, 16);
+		  hwmult_accumulator += a * b;
+		  hwmult_signed_accumulator += a * b;
+		  hwmult_result = hwmult_signed_result = 0;
+		  break;
+		}
+	      break;
+
+	    case 0x140: hw32mult_op1 = val; hw32mult_type = UNSIGN_64; break;
+	    case 0x142: hw32mult_op1 = (hw32mult_op1 & 0xFFFF) | (val << 16); break;
+	    case 0x144: hw32mult_op1 = val; hw32mult_type = SIGN_64; break;
+	    case 0x146: hw32mult_op1 = (hw32mult_op1 & 0xFFFF) | (val << 16); break;
+	    case 0x150: hw32mult_op2 = val; break;
+
+	    case 0x152: hw32mult_op2 = (hw32mult_op2 & 0xFFFF) | (val << 16);
+	      switch (hw32mult_type)
+		{
+		case UNSIGN_64:
+		  hw32mult_result = hw32mult_op1 * hw32mult_op2;
+		  break;
+		case SIGN_64:
+		  hw32mult_result = sign_ext (hw32mult_op1, 32) * sign_ext (hw32mult_op2, 32);
+		  break;
+		}
+	      break;
+
+	    default:
+	      fprintf (stderr, "unimplemented HW MULT write to %x!\n", addr);
+	      break;
+	    }
+	}
+
       switch (opc->size)
 	{
 	case 8:
@@ -639,26 +811,6 @@ msp430_dis_read (bfd_vma memaddr,
 #define SIGN   (1 << (opcode->size - 1))
 #define POS(x) (((x) & SIGN) ? 0 : 1)
 #define NEG(x) (((x) & SIGN) ? 1 : 0)
-
-static int
-zero_ext (int v, int bits)
-{
-  v &= ((1 << bits) - 1);
-  return v;
-}
-
-static int
-sign_ext (int v, int bits)
-{
-  int sb = 1 << (bits-1);	/* Sign bit.  */
-  int mb = (1 << (bits-1)) - 1; /* Mantissa bits.  */
-
-  if (v & sb)
-    v = v | ~mb;
-  else
-    v = v & mb;
-  return v;
-}
 
 #define SX(v) sign_ext (v, opcode->size)
 #define ZX(v) zero_ext (v, opcode->size)
@@ -1350,10 +1502,16 @@ msp430_step_once (SIM_DESC sd)
       break;
 
     case MSO_reti:
-      SR = mem_get_val (sd, SP, op_bits);
+      u1 = mem_get_val (sd, SP, 16);
+      SR = u1 & 0xFF;
       SP += 2;
-      PC = mem_get_val (sd, SP, op_bits);
+      PC = mem_get_val (sd, SP, 16);
       SP += 2;
+      /* Emulate the RETI action of the 20-bit CPUX architecure.
+	 This is safe for 16-bit CPU architectures as well, since the top
+	 8-bits of SR will have been written to the stack here, and will
+	 have been read as 0.  */
+      PC |= (u1 & 0xF000) << 4;
       if (TRACE_ALU_P (MSP430_CPU (sd)))
 	trace_generic (sd, MSP430_CPU (sd), TRACE_ALU_IDX,
 		       "RETI: pc %#x sr %#x",

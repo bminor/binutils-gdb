@@ -1,3 +1,14 @@
+2014-05-08  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-sim.c (sim_open): Do not allocate memory over the
+	hardware multiply registers.
+	(get_op): Add support for reads from the hardware multiply
+	registers.
+	(put_op): Add support for writes to the hardware multiply
+	registers.
+	(msp430_step_once): Add support for the RETI instruction used by
+	the CPUX architecture.
+
 2014-03-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* msp430-sim.c (sim_create_inferior): Set new_pc to the result of
