@@ -1,3 +1,7 @@
+2014-05-08  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c: Update URLs in documentation comments.
+
 2014-05-02  Volodymyr Arbatov  <arbatov@cadence.com>
 	    David Weatherford  <weath@cadence.com>
 	    Max Filippov  <jcmvbkbc@gmail.com>
