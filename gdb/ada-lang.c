@@ -7385,7 +7385,11 @@ ada_which_variant_applies (struct type *var_type, struct type *outer_type,
   struct value *discrim;
   LONGEST discrim_val;
 
-  outer = value_from_contents_and_address (outer_type, outer_valaddr, 0);
+  /* Using plain value_from_contents_and_address here causes problems
+     because we will end up trying to resolve a type that is currently
+     being constructed.  */
+  outer = value_from_contents_and_address_unresolved (outer_type,
+						      outer_valaddr, 0);
   discrim = ada_value_struct_elt (outer, discrim_name, 1);
   if (discrim == NULL)
     return -1;
@@ -7925,7 +7929,13 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 		 GDB may fail to allocate a value for it.  So check the
 		 size first before creating the value.  */
 	      check_size (rtype);
-	      dval = value_from_contents_and_address (rtype, valaddr, address);
+	      /* Using plain value_from_contents_and_address here
+		 causes problems because we will end up trying to
+		 resolve a type that is currently being
+		 constructed.  */
+	      dval = value_from_contents_and_address_unresolved (rtype,
+								 valaddr,
+								 address);
 	      rtype = value_type (dval);
 	    }
           else
@@ -8030,7 +8040,11 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 
       if (dval0 == NULL)
 	{
-	  dval = value_from_contents_and_address (rtype, valaddr, address);
+	  /* Using plain value_from_contents_and_address here causes
+	     problems because we will end up trying to resolve a type
+	     that is currently being constructed.  */
+	  dval = value_from_contents_and_address_unresolved (rtype, valaddr,
+							     address);
 	  rtype = value_type (dval);
 	}
       else

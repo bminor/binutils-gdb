@@ -1636,6 +1636,18 @@ is_dynamic_type (struct type *type)
 	  return 1;
 	return is_dynamic_type (TYPE_TARGET_TYPE (type));
       }
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      {
+	int i;
+
+	for (i = 0; i < TYPE_NFIELDS (type); ++i)
+	  if (!field_is_static (&TYPE_FIELD (type, i))
+	      && is_dynamic_type (TYPE_FIELD_TYPE (type, i)))
+	    return 1;
+      }
+      break;
     }
 
   return 0;
@@ -1717,6 +1729,97 @@ resolve_dynamic_array (struct type *type)
 			    range_type);
 }
 
+/* Resolve dynamic bounds of members of the union TYPE to static
+   bounds.  */
+
+static struct type *
+resolve_dynamic_union (struct type *type, CORE_ADDR addr)
+{
+  struct type *resolved_type;
+  int i;
+  unsigned int max_len = 0;
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+
+  resolved_type = copy_type (type);
+  TYPE_FIELDS (resolved_type)
+    = TYPE_ALLOC (resolved_type,
+		  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+  memcpy (TYPE_FIELDS (resolved_type),
+	  TYPE_FIELDS (type),
+	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+  for (i = 0; i < TYPE_NFIELDS (resolved_type); ++i)
+    {
+      struct type *t;
+
+      if (field_is_static (&TYPE_FIELD (type, i)))
+	continue;
+
+      t = resolve_dynamic_type (TYPE_FIELD_TYPE (resolved_type, i), addr);
+      TYPE_FIELD_TYPE (resolved_type, i) = t;
+      if (TYPE_LENGTH (t) > max_len)
+	max_len = TYPE_LENGTH (t);
+    }
+
+  TYPE_LENGTH (resolved_type) = max_len;
+  return resolved_type;
+}
+
+/* Resolve dynamic bounds of members of the struct TYPE to static
+   bounds.  */
+
+static struct type *
+resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
+{
+  struct type *resolved_type;
+  int i;
+  int vla_field = TYPE_NFIELDS (type) - 1;
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
+  gdb_assert (TYPE_NFIELDS (type) > 0);
+
+  resolved_type = copy_type (type);
+  TYPE_FIELDS (resolved_type)
+    = TYPE_ALLOC (resolved_type,
+		  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+  memcpy (TYPE_FIELDS (resolved_type),
+	  TYPE_FIELDS (type),
+	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+  for (i = 0; i < TYPE_NFIELDS (resolved_type); ++i)
+    {
+      struct type *t;
+
+      if (field_is_static (&TYPE_FIELD (type, i)))
+	continue;
+
+      t = resolve_dynamic_type (TYPE_FIELD_TYPE (resolved_type, i), addr);
+
+      /* This is a bit odd.  We do not support a VLA in any position
+	 of a struct except for the last.  GCC does have an extension
+	 that allows a VLA in the middle of a structure, but the DWARF
+	 it emits is relatively useless to us, so we can't represent
+	 such a type properly -- and even if we could, we do not have
+	 enough information to redo structure layout anyway.
+	 Nevertheless, we check all the fields in case something odd
+	 slips through, since it's better to see an error than
+	 incorrect results.  */
+      if (t != TYPE_FIELD_TYPE (resolved_type, i)
+	  && i != vla_field)
+	error (_("Attempt to resolve a variably-sized type which appears "
+		 "in the interior of a structure type"));
+
+      TYPE_FIELD_TYPE (resolved_type, i) = t;
+    }
+
+  /* Due to the above restrictions we can successfully compute
+     the size of the resulting structure here, as the offset of
+     the final field plus its size.  */
+  TYPE_LENGTH (resolved_type)
+    = (TYPE_FIELD_BITPOS (resolved_type, vla_field) / TARGET_CHAR_BIT
+       + TYPE_LENGTH (TYPE_FIELD_TYPE (resolved_type, vla_field)));
+  return resolved_type;
+}
+
 /* See gdbtypes.h  */
 
 struct type *
@@ -1753,6 +1856,14 @@ resolve_dynamic_type (struct type *type, CORE_ADDR addr)
       case TYPE_CODE_RANGE:
 	resolved_type = resolve_dynamic_range (type);
 	break;
+
+    case TYPE_CODE_UNION:
+      resolved_type = resolve_dynamic_union (type, addr);
+      break;
+
+    case TYPE_CODE_STRUCT:
+      resolved_type = resolve_dynamic_struct (type, addr);
+      break;
     }
 
   return resolved_type;

@@ -3379,6 +3379,29 @@ value_from_pointer (struct type *type, CORE_ADDR addr)
 /* Create a value of type TYPE whose contents come from VALADDR, if it
    is non-null, and whose memory address (in the inferior) is
    ADDRESS.  The type of the created value may differ from the passed
+   type TYPE.  Make sure to retrieve values new type after this call.
+   Note that TYPE is not passed through resolve_dynamic_type; this is
+   a special API intended for use only by Ada.  */
+
+struct value *
+value_from_contents_and_address_unresolved (struct type *type,
+					    const gdb_byte *valaddr,
+					    CORE_ADDR address)
+{
+  struct value *v;
+
+  if (valaddr == NULL)
+    v = allocate_value_lazy (type);
+  else
+    v = value_from_contents (type, valaddr);
+  set_value_address (v, address);
+  VALUE_LVAL (v) = lval_memory;
+  return v;
+}
+
+/* Create a value of type TYPE whose contents come from VALADDR, if it
+   is non-null, and whose memory address (in the inferior) is
+   ADDRESS.  The type of the created value may differ from the passed
    type TYPE.  Make sure to retrieve values new type after this call.  */
 
 struct value *

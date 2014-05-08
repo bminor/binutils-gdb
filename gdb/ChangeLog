@@ -1,5 +1,18 @@
 2014-06-04  Tom Tromey  <tromey@redhat.com>
 
+	* ada-lang.c (ada_template_to_fixed_record_type_1): Use
+	value_from_contents_and_address_unresolved.
+	(ada_template_to_fixed_record_type_1): Likewise.
+	(ada_which_variant_applies): Likewise.
+	* value.h (value_from_contents_and_address_unresolved): Declare.
+	* value.c (value_from_contents_and_address_unresolved): New
+	function.
+	* gdbtypes.c (is_dynamic_type, resolve_dynamic_type)
+	<TYPE_CODE_STRUCT, TYPE_CODE_UNION>: New cases.
+	(resolve_dynamic_struct, resolve_dynamic_union): New functions.
+
+2014-06-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdbtypes.c (is_dynamic_type): Remove unneeded "break"s.
 
 2014-06-04  Tom Tromey  <tromey@redhat.com>

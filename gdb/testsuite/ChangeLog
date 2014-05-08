@@ -1,3 +1,11 @@
+2014-06-04  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/vla-datatypes.exp: Add tests for VLA-in-structure and
+	VLA-in-union.
+	* gdb.base/vla-datatypes.c (vla_factory): Add vla_struct,
+	inner_vla_struct, vla_union types.  Initialize objects of those
+	types and compute their sizes.
+
 2014-06-04  Nathan Sidwell  <nathan@codesourcery.com>
 	    Hui Zhu  <hui@codesourcery.com>
 

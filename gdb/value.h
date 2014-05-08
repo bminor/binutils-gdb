@@ -575,6 +575,8 @@ extern struct value *value_from_history_ref (char *, char **);
 extern struct value *value_at (struct type *type, CORE_ADDR addr);
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
 
+extern struct value *value_from_contents_and_address_unresolved
+     (struct type *, const gdb_byte *, CORE_ADDR);
 extern struct value *value_from_contents_and_address (struct type *,
 						      const gdb_byte *,
 						      CORE_ADDR);
