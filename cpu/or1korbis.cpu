@@ -24,6 +24,10 @@
 (dnh h-uimm16      "16-bit unsigned immediate" ()                   (immediate (UINT 16)) () () ())
 (dnh h-uimm6       "6-bit unsigned immediate"  ()                   (immediate (UINT 6)) () () ())
 
+; Hardware for the (internal) atomic registers
+(dsh h-atomic-reserve "atomic reserve flag" () (register BI))
+(dsh h-atomic-address "atomic reserve address" () (register SI))
+
 ; Instruction classes.
 (dnf f-opcode      "insn opcode"               ((MACH ORBIS-MACHS)) 31 6)
 
@@ -139,6 +143,7 @@
    ("JR"           #x11)
    ("JALR"         #x12)
    ("MACI"         #x13)
+   ("LWA"          #x1b)
    ("CUST1"        #x1c)
    ("CUST2"        #x1d)
    ("CUST3"        #x1e)
@@ -162,6 +167,7 @@
    ("MTSPR"        #x30)
    ("MAC"          #x31)
    ("FLOAT"        #x32)
+   ("SWA"          #x33)
    ("SD"           #x34)
    ("SW"           #x35)
    ("SB"           #x36)
@@ -285,6 +291,9 @@
 
 (dnop mac-machi         "MAC HI result register"           ((MACH ORBIS-MACHS) SEM-ONLY) h-mac-machi         f-nil)
 (dnop mac-maclo         "MAC LO result register"           ((MACH ORBIS-MACHS) SEM-ONLY) h-mac-maclo         f-nil)
+
+(dnop atomic-reserve    "atomic reserve flag"              ((MACH ORBIS-MACHS) SEM-ONLY) h-atomic-reserve    f-nil)
+(dnop atomic-address    "atomic address"                   ((MACH ORBIS-MACHS) SEM-ONLY) h-atomic-address    f-nil)
 
 (dnop uimm6             "uimm6"                            ((MACH ORBIS-MACHS))          h-uimm6             f-uimm6)
 
@@ -572,6 +581,18 @@
      ()
 )
 
+(dni l-lwa "l.lwa reg/simm16(reg)"
+     ((MACH ORBIS-MACHS))
+     "l.lwa $rD,${simm16}($rA)"
+     (+ OPC_LWA rD rA simm16)
+     (sequence ()
+               (set UWI rD (zext UWI (mem USI (load-store-addr rA simm16 4))))
+               (set atomic-reserve (const 1))
+               (set atomic-address (load-store-addr rA simm16 4))
+               )
+     ()
+)
+
 (dni l-lbz "l.lbz reg/simm16(reg)"
      ((MACH ORBIS-MACHS))
      "l.lbz $rD,${simm16}($rA)"
@@ -580,7 +601,7 @@
      ()
 )
 
-(dni l-lbs "l.lbz reg/simm16(reg)"
+(dni l-lbs "l.lbs reg/simm16(reg)"
      ((MACH ORBIS-MACHS))
      "l.lbs $rD,${simm16}($rA)"
      (+ OPC_LBS rD rA simm16)
@@ -613,8 +634,14 @@
           (.str "l." mnemonic " simm16(reg)/reg")
           ((MACH ORBIS-MACHS))
           (.str "l." mnemonic " ${simm16-split}($rA),$rB")
-          (+ opc-op rB rD simm16-split)
-          (set mode (mem mode (load-store-addr rA simm16-split size)) (trunc mode rB))
+          (+ opc-op rA rB simm16-split)
+          (sequence ((SI addr))
+		    (set addr (load-store-addr rA simm16-split size))
+		    (set mode (mem mode addr) (trunc mode rB))
+		    (if (eq (and addr #xffffffc) atomic-address)
+			(set atomic-reserve (const 0))
+			)
+                    )
           ()
      )
    )
@@ -624,6 +651,20 @@
 (store-insn sb OPC_SB UQI 1)
 (store-insn sh OPC_SH UHI 2)
 
+(dni l-swa "l.swa simm16(reg)/reg"
+     ((MACH ORBIS-MACHS))
+     "l.swa ${simm16-split}($rA),$rB"
+     (+ OPC_SWA rA rB simm16)
+     (sequence ((SI addr) (BI flag))
+	       (set addr (load-store-addr rA simm16-split 4))
+	       (set sys-sr-f (and atomic-reserve (eq addr atomic-address)))
+	       (if sys-sr-f
+		   (set USI (mem USI addr) (trunc USI rB))
+		   )
+	       (set atomic-reserve (const 0))
+	       )
+     ()
+)
 
 
 ; Shift and rotate instructions

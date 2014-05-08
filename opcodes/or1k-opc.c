@@ -88,7 +88,11 @@ static const CGEN_IFMT ifmt_l_lwz ATTRIBUTE_UNUSED = {
 };
 
 static const CGEN_IFMT ifmt_l_sw ATTRIBUTE_UNUSED = {
-  32, 32, 0xfc000000, { { F (F_OPCODE) }, { F (F_R1) }, { F (F_R3) }, { F (F_SIMM16_SPLIT) }, { 0 } }
+  32, 32, 0xfc000000, { { F (F_OPCODE) }, { F (F_R2) }, { F (F_R3) }, { F (F_SIMM16_SPLIT) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_l_swa ATTRIBUTE_UNUSED = {
+  32, 32, 0xfc000000, { { F (F_OPCODE) }, { F (F_R2) }, { F (F_R3) }, { F (F_SIMM16) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_l_sll ATTRIBUTE_UNUSED = {
@@ -276,6 +280,12 @@ static const CGEN_OPCODE or1k_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, ' ', OP (RD), ',', OP (SIMM16), '(', OP (RA), ')', 0 } },
     & ifmt_l_lwz, { 0x88000000 }
   },
+/* l.lwa $rD,${simm16}($rA) */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (RD), ',', OP (SIMM16), '(', OP (RA), ')', 0 } },
+    & ifmt_l_lwz, { 0x6c000000 }
+  },
 /* l.lbz $rD,${simm16}($rA) */
   {
     { 0, 0, 0, 0 },
@@ -317,6 +327,12 @@ static const CGEN_OPCODE or1k_cgen_insn_opcode_table[MAX_INSNS] =
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SIMM16_SPLIT), '(', OP (RA), ')', ',', OP (RB), 0 } },
     & ifmt_l_sw, { 0xdc000000 }
+  },
+/* l.swa ${simm16-split}($rA),$rB */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (SIMM16_SPLIT), '(', OP (RA), ')', ',', OP (RB), 0 } },
+    & ifmt_l_swa, { 0xcc000000 }
   },
 /* l.sll $rD,$rA,$rB */
   {
