@@ -1,3 +1,7 @@
+2014-05-08  Martin Liška  <mliska@suse.cz>
+
+	* output.cc (Sized_relobj_file::do_layout): Fix typo in info message.
+
 2014-05-06  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/16900
