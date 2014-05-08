@@ -1,5 +1,9 @@
 2014-06-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdbtypes.c (is_dynamic_type): Remove unneeded "break"s.
+
+2014-06-04  Tom Tromey  <tromey@redhat.com>
+
 	* procfs.c (procfs_attach): Make "args" const.
 	* windows-nat.c (windows_attach): Make "args" const.
 	* nto-procfs.c (procfs_attach): Make "args" const.

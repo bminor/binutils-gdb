@@ -1625,7 +1625,6 @@ is_dynamic_type (struct type *type)
     {
     case TYPE_CODE_RANGE:
       return !has_static_range (TYPE_RANGE_DATA (type));
-      break;
 
     case TYPE_CODE_ARRAY:
       {
@@ -1635,14 +1634,11 @@ is_dynamic_type (struct type *type)
 	   or the elements it contains have a dynamic contents.  */
 	if (is_dynamic_type (TYPE_INDEX_TYPE (type)))
 	  return 1;
-	else
-	  return is_dynamic_type (TYPE_TARGET_TYPE (type));
-	break;
+	return is_dynamic_type (TYPE_TARGET_TYPE (type));
       }
-    default:
-      return 0;
-      break;
     }
+
+  return 0;
 }
 
 static struct type *
