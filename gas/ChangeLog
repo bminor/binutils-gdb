@@ -1,5 +1,10 @@
 2014-05-08  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* config/tc-mips.c (md_parse_option): Update missed file_mips_isa
+	references.
+
+2014-05-08  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* config/tc-mips.c (mips_set_options): Rename fp32 field to fp.
 	Update fp32 == 0 to fp == 64 and fp32 == 1 to fp != 64 throughout.
 	(file_mips_gp32, file_mips_fp32, file_mips_soft_float,
