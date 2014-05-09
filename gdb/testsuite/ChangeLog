@@ -1,5 +1,12 @@
 2014-05-20  Yao Qi  <yao@codesourcery.com>
 
+	* lib/gdb.exp (gdb_init): Set timeout if test file is under
+	gdb.reverse directory and gdb_reverse_timeout exists in board
+	setting.
+	* README: Document gdb_reverse_timeout.
+
+2014-05-20  Yao Qi  <yao@codesourcery.com>
+
 	* lib/gdb.exp (default_gdb_init): Rename argument 'args' by
 	'test_file_name'.  Treat args as a string instead of a list.
 	(gdb_init): Rename argument 'args' by 'test_file_name'.

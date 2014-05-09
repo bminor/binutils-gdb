@@ -203,6 +203,15 @@ The default value of the timeout is defined in the file
 `testsuite/config/unix.exp' (at least for Unix hosts; board files may
 have their own values).
 
+gdb_reverse_timeout
+
+Defining this variable changes the default timeout duration when tests
+under gdb.reverse directory are running.  Process record and reverse
+debugging is so slow that its tests have unexpected `TIMEOUT' test
+failures.  This global variable is useful to bump up the value of
+`timeout' for gdb.reverse tests and doesn't cause any delay where
+actual failures happen in the rest of the testsuite.
+
 
 Board Settings
 **************

@@ -3691,6 +3691,11 @@ proc gdb_init { test_file_name } {
     global timeout
     set timeout $gdb_test_timeout
 
+    if { [regexp ".*gdb\.reverse\/.*" $test_file_name]
+	 && [target_info exists gdb_reverse_timeout] } {
+	set timeout [target_info gdb_reverse_timeout]
+    }
+
     # If GDB_INOTIFY is given, check for writes to '.'.  This is a
     # debugging tool to help confirm that the test suite is
     # parallel-safe.  You need "inotifywait" from the
