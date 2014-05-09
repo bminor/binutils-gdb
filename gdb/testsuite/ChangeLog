@@ -1,3 +1,9 @@
+2014-05-20  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (default_gdb_init): Rename argument 'args' by
+	'test_file_name'.  Treat args as a string instead of a list.
+	(gdb_init): Rename argument 'args' by 'test_file_name'.
+
 2014-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/powerpc-power.exp: New file.
