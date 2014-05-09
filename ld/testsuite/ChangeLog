@@ -1,3 +1,12 @@
+2014-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/tlsbin.dd: Replace data32 with data16.
+	* ld-x86-64/tlsdesc-nacl.pd: Likewise.
+	* ld-x86-64/tlsgdesc.dd: Likewise.
+	* ld-x86-64/tlsld1.dd: Likewise.
+	* ld-x86-64/tlsld3.dd: Likewise.
+	* ld-x86-64/tlspic.dd: Likewise.
+
 2014-05-02  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* ld-xtensa/diff_overflow.exp, * ld-xtensa/diff_overflow1.s,

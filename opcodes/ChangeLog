@@ -1,3 +1,12 @@
+2014-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (ADDR16_PREFIX): Removed.
+	(ADDR32_PREFIX): Likewise.
+	(DATA16_PREFIX): Likewise.
+	(DATA32_PREFIX): Likewise.
+	(prefix_name): Updated.
+	(print_insn): Simplify data and address size prefixes processing.
+
 2014-05-08  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
 
 	* or1k-desc.c: Regenerated.

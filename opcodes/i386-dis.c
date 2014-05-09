@@ -11610,10 +11610,6 @@ static const struct dis386 rm_table[][8] = {
 
 /* We use the high bit to indicate different name for the same
    prefix.  */
-#define ADDR16_PREFIX	(0x67 | 0x100)
-#define ADDR32_PREFIX	(0x67 | 0x200)
-#define DATA16_PREFIX	(0x66 | 0x100)
-#define DATA32_PREFIX	(0x66 | 0x200)
 #define REP_PREFIX	(0xf3 | 0x100)
 #define XACQUIRE_PREFIX	(0xf2 | 0x200)
 #define XRELEASE_PREFIX	(0xf3 | 0x400)
@@ -11826,14 +11822,6 @@ prefix_name (int pref, int sizeflag)
 	return (sizeflag & AFLAG) ? "addr16" : "addr32";
     case FWAIT_OPCODE:
       return "fwait";
-    case ADDR16_PREFIX:
-      return "addr16";
-    case ADDR32_PREFIX:
-      return "addr32";
-    case DATA16_PREFIX:
-      return "data16";
-    case DATA32_PREFIX:
-      return "data32";
     case REP_PREFIX:
       return "rep";
     case XACQUIRE_PREFIX:
@@ -12383,11 +12371,10 @@ print_insn (bfd_vma pc, disassemble_info *info)
   int i;
   char *op_txt[MAX_OPERANDS];
   int needcomma;
-  int sizeflag;
+  int sizeflag, orig_sizeflag;
   const char *p;
   struct dis_private priv;
   int prefix_length;
-  int default_prefixes;
 
   priv.orig_sizeflag = AFLAG | DFLAG;
   if ((info->mach & bfd_mach_i386_i386) != 0)
@@ -12609,39 +12596,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
       codep++;
     }
 
-  default_prefixes = 0;
+  /* Save sizeflag for printing the extra prefixes later before updating
+     it for mnemonic and operand processing.  The prefix names depend
+     only on the address mode.  */
+  orig_sizeflag = sizeflag;
   if (prefixes & PREFIX_ADDR)
-    {
-      sizeflag ^= AFLAG;
-      if (dp->op[2].bytemode != loop_jcxz_mode || intel_syntax)
-	{
-	  if ((sizeflag & AFLAG) || address_mode == mode_64bit)
-	    all_prefixes[last_addr_prefix] = ADDR32_PREFIX;
-	  else
-	    all_prefixes[last_addr_prefix] = ADDR16_PREFIX;
-	  default_prefixes |= PREFIX_ADDR;
-	}
-    }
-
+    sizeflag ^= AFLAG;
   if ((prefixes & PREFIX_DATA))
-    {
-      sizeflag ^= DFLAG;
-      if (dp->op[2].bytemode == cond_jump_mode
-	  && dp->op[0].bytemode == v_mode
-	  && !intel_syntax)
-	{
-	  if (sizeflag & DFLAG)
-	    all_prefixes[last_data_prefix] = DATA32_PREFIX;
-	  else
-	    all_prefixes[last_data_prefix] = DATA16_PREFIX;
-	  default_prefixes |= PREFIX_DATA;
-	}
-      else if (rex & REX_W)
-	{
-	  /* REX_W will override PREFIX_DATA.  */
-	  default_prefixes |= PREFIX_DATA;
-	}
-    }
+    sizeflag ^= DFLAG;
 
   end_codep = codep;
   if (need_modrm)
@@ -12707,22 +12669,18 @@ print_insn (bfd_vma pc, disassemble_info *info)
       && (used_prefixes & PREFIX_ADDR) != 0)
     all_prefixes[last_addr_prefix] = 0;
 
-  /* Check if the DATA prefix is used.  Restore the DFLAG bit in
-     sizeflag if the DATA prefix is unused.  */
-  if ((prefixes & PREFIX_DATA) != 0)
-    {
-      if ((used_prefixes & PREFIX_DATA) != 0)
-	all_prefixes[last_data_prefix] = 0;
-      else if ((default_prefixes & PREFIX_DATA) == 0)
-	sizeflag ^= DFLAG;
-    }
+  /* Check if the DATA prefix is used.  */
+  if ((prefixes & PREFIX_DATA) != 0
+      && (used_prefixes & PREFIX_DATA) != 0)
+    all_prefixes[last_data_prefix] = 0;
 
+  /* Print the extra prefixes.  */
   prefix_length = 0;
   for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
     if (all_prefixes[i])
       {
 	const char *name;
-	name = prefix_name (all_prefixes[i], sizeflag);
+	name = prefix_name (all_prefixes[i], orig_sizeflag);
 	if (name == NULL)
 	  abort ();
 	prefix_length += strlen (name) + 1;
