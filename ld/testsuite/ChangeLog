@@ -1,3 +1,10 @@
+2014-05-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/wrap1.d, ld-mmix/wrap1a.s, ld-mmix/wrap1b.s,
+	ld-mmix/wrap1c.s, ld-mmix/wrap2.d, ld-mmix/wrap3.d,
+	ld-mmix/wrap3a.s, ld-mmix/wrap3b.s, ld-mmix/wrap4.d: New
+	tests.
+
 2014-05-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/tlsbin.dd: Replace data32 with data16.

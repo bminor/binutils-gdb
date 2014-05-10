@@ -1,3 +1,13 @@
+2014-05-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ldlang.c (lang_finish): Don't call bfd_link_hash_table_free here.
+	(output_bfd_hash_table_free_fn): New variable.
+	(open_output): Save the _bfd_link_hash_table_free function for the
+	output_bfd into output_bfd_hash_table_free_fn.
+	* ldmain.c (ld_cleanup): If set, call output_bfd_hash_table_free_fn
+	on link_info.hash.
+	* ldlang.h (output_bfd_hash_table_free_fn): Declare.
+
 2014-05-02  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/metagelf.em: Update bfd target vector naming.

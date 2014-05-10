@@ -518,6 +518,8 @@ extern lang_statement_list_type input_file_chain;
 extern int lang_statement_iteration;
 extern struct asneeded_minfo **asneeded_list_tail;
 
+extern void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
+
 extern void lang_init
   (void);
 extern void lang_finish
