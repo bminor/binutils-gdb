@@ -63,6 +63,9 @@ TEXI2ROFF=texi2roff
 # where to find texi2dvi, ditto
 TEXI2DVI=texi2dvi
 
+# Package to install the docs under
+PACKAGE = @PACKAGE@
+
 # Package version and bug-reporting URL.
 PKGVERSION = @PKGVERSION@
 BUGURL_TEXI = @REPORT_BUGS_TEXI@

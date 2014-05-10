@@ -1,3 +1,8 @@
+2014-05-09  Samuel Bronson  <naesten@gmail.com>
+
+	* Makefile.in (PACKAGE): Copy from ../Makefile.in in case of
+	"make -C".
+
 2014-04-29  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Debugging Output): Rename to "set debug varobj" and
