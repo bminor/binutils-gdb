@@ -1,3 +1,8 @@
+2014-05-11  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* emulparams/nios2linux.sh (OTHER_GOT_SYMBOLS): Wrap _gp in HIDDEN(),
+	and gp in PROVIDE_HIDDEN.
+
 2014-05-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ldlang.c (lang_finish): Don't call bfd_link_hash_table_free here.
