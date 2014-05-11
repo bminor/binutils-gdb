@@ -1,3 +1,11 @@
+2014-05-11  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	Backport from master
+
+	2014-05-11  Chung-Lin Tang  <cltang@codesourcery.com>
+	* emulparams/nios2linux.sh (OTHER_GOT_SYMBOLS): Wrap _gp in HIDDEN(),
+	and gp in PROVIDE_HIDDEN.
+
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches for ppc476 workaround
