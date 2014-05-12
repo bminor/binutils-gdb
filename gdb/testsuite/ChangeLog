@@ -1315,6 +1315,7 @@
 	* gdb.python/py-pp-integral.py: New file.
 	* gdb.python/py-pp-integral.exp: New file.
 
+For older changes see ChangeLog-1993-2013.
 
 ;; Local Variables:
 ;; mode: change-log
