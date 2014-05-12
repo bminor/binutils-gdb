@@ -337,11 +337,11 @@ zero_ext (unsigned int v, unsigned int bits)
   return v;
 }
 
-static signed int
-sign_ext (signed int v, unsigned int bits)
+static signed long long
+sign_ext (signed long long v, unsigned int bits)
 {
-  int sb = 1 << (bits-1);	/* Sign bit.  */
-  int mb = (1 << (bits-1)) - 1; /* Mantissa bits.  */
+  signed long long sb = 1LL << (bits-1);	/* Sign bit.  */
+  signed long long mb = (1LL << (bits-1)) - 1LL; /* Mantissa bits.  */
 
   if (v & sb)
     v = v | ~mb;

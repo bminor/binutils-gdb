@@ -1,3 +1,8 @@
+2014-05-12  DJ Delorie  <dj@redhat.com>
+
+	* msp43-sim.c (sign_ext): Change to "long long" to support
+	sign-extending 32-bit values.
+
 2014-05-08  Nick Clifton  <nickc@redhat.com>
 
 	* msp430-sim.c (sim_open): Do not allocate memory over the
