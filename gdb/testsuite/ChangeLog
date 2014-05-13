@@ -1,3 +1,9 @@
+2014-05-16  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dw2-filename.exp: Copy file1.txt to host.  Remove
+	file1.txt from host at the end.
+	* gdb.dwarf2/dw2-anonymous-func.exp: Likewise.
+
 2014-05-15  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/fission-reread.S: Remove directory from .dwo file path.
