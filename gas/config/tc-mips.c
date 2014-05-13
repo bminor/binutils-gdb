@@ -241,7 +241,7 @@ struct mips_set_options
   /* Restrict general purpose registers and floating point registers
      to 32 bit.  This is initially determined when -mgp32 or -mfp32
      is passed but can changed if the assembler code uses .set mipsN.  */
-  int gp32;
+  int gp;
   int fp;
   /* MIPS architecture (CPU) type.  Changed by .set arch=FOO, the -march
      command line option, and the default CPU.  */
@@ -263,7 +263,7 @@ struct mips_set_options
 static bfd_boolean mips_flag_nan2008 = FALSE;
 
 /* This is the struct we use to hold the module level set of options.
-   Note that we must set the isa field to ISA_UNKNOWN and the ASE, gp32 and
+   Note that we must set the isa field to ISA_UNKNOWN and the ASE, gp and
    fp fields to -1 to indicate that they have not been initialized.  */
 
 static struct mips_set_options file_mips_opts =
@@ -271,7 +271,7 @@ static struct mips_set_options file_mips_opts =
   /* isa */ ISA_UNKNOWN, /* ase */ 0, /* mips16 */ -1, /* micromips */ -1,
   /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
   /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* insn32 */ FALSE,
-  /* gp32 */ -1, /* fp */ -1, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
+  /* gp */ -1, /* fp */ -1, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
   /* soft_float */ FALSE, /* single_float */ FALSE
 };
 
@@ -282,7 +282,7 @@ static struct mips_set_options mips_opts =
   /* isa */ ISA_UNKNOWN, /* ase */ 0, /* mips16 */ -1, /* micromips */ -1,
   /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
   /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* insn32 */ FALSE,
-  /* gp32 */ -1, /* fp */ -1, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
+  /* gp */ -1, /* fp */ -1, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
   /* soft_float */ FALSE, /* single_float */ FALSE
 };
 
@@ -413,14 +413,15 @@ static int mips_32bitmode = 0;
    || (ISA) == ISA_MIPS64R3		\
    || (ISA) == ISA_MIPS64R5)
 
-#define HAVE_32BIT_GPRS		                   \
-    (mips_opts.gp32 || !ISA_HAS_64BIT_REGS (mips_opts.isa))
+#define GPR_SIZE \
+    (mips_opts.gp == 64 && !ISA_HAS_64BIT_REGS (mips_opts.isa) \
+     ? 32 \
+     : mips_opts.gp)
 
-#define HAVE_32BIT_FPRS                            \
-    (mips_opts.fp != 64 || !ISA_HAS_64BIT_FPRS (mips_opts.isa))
-
-#define HAVE_64BIT_GPRS (!HAVE_32BIT_GPRS)
-#define HAVE_64BIT_FPRS (!HAVE_32BIT_FPRS)
+#define FPR_SIZE \
+    (mips_opts.fp == 64 && !ISA_HAS_64BIT_FPRS (mips_opts.isa) \
+     ? 32 \
+     : mips_opts.fp)
 
 #define HAVE_NEWABI (mips_abi == N32_ABI || mips_abi == N64_ABI)
 
@@ -431,7 +432,7 @@ static int mips_32bitmode = 0;
 
 /* The ABI-derived address size.  */
 #define HAVE_64BIT_ADDRESSES \
-  (HAVE_64BIT_GPRS && (mips_abi == EABI_ABI || mips_abi == N64_ABI))
+  (GPR_SIZE == 64 && (mips_abi == EABI_ABI || mips_abi == N64_ABI))
 #define HAVE_32BIT_ADDRESSES (!HAVE_64BIT_ADDRESSES)
 
 /* The size of symbolic constants (i.e., expressions of the form
@@ -562,7 +563,7 @@ static int mips_32bitmode = 0;
   ((mips_opts.mips16 | mips_opts.micromips) != 0)
 
 /* The minimum and maximum signed values that can be stored in a GPR.  */
-#define GPR_SMAX ((offsetT) (((valueT) 1 << (HAVE_64BIT_GPRS ? 63 : 31)) - 1))
+#define GPR_SMAX ((offsetT) (((valueT) 1 << (GPR_SIZE - 1)) - 1))
 #define GPR_SMIN (-GPR_SMAX - 1)
 
 /* MIPS PIC level.  */
@@ -4219,7 +4220,7 @@ fpr_read_mask (const struct mips_cl_insn *ip)
   pinfo = ip->insn_mo->pinfo;
   /* Conservatively treat all operands to an FP_D instruction are doubles.
      (This is overly pessimistic for things like cvt.d.s.)  */
-  if (HAVE_32BIT_FPRS && (pinfo & FP_D))
+  if (FPR_SIZE != 64 && (pinfo & FP_D))
     mask |= mask << 1;
   return mask;
 }
@@ -4238,7 +4239,7 @@ fpr_write_mask (const struct mips_cl_insn *ip)
   pinfo = ip->insn_mo->pinfo;
   /* Conservatively treat all operands to an FP_D instruction are doubles.
      (This is overly pessimistic for things like cvt.s.d.)  */
-  if (HAVE_32BIT_FPRS && (pinfo & FP_D))
+  if (FPR_SIZE != 64 && (pinfo & FP_D))
     mask |= mask << 1;
   return mask;
 }
@@ -4505,7 +4506,7 @@ check_regno (struct mips_arg_info *arg,
 
   if (type == OP_REG_FP
       && (regno & 1) != 0
-      && HAVE_32BIT_FPRS
+      && FPR_SIZE != 64
       && !mips_oddfpreg_ok (arg->insn->insn_mo, arg->opnum))
     as_warn (_("float register should be even, was %d"), regno);
 
@@ -5367,7 +5368,7 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
 	 but the GPRs are only 32 bits wide.  */
       /* ??? No longer true with the addition of MTHC1, but this
 	 is legacy code...  */
-      && (using_gprs || !(HAVE_64BIT_FPRS && HAVE_32BIT_GPRS))
+      && (using_gprs || !(FPR_SIZE == 64 && GPR_SIZE == 32))
       && ((data[0] == 0 && data[1] == 0)
 	  || (data[2] == 0 && data[3] == 0))
       && ((data[4] == 0 && data[5] == 0)
@@ -5377,7 +5378,7 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
 	 If using 32-bit registers, set IMM to the high order 32 bits and
 	 OFFSET to the low order 32 bits.  Otherwise, set IMM to the entire
 	 64 bit constant.  */
-      if (using_gprs ? HAVE_32BIT_GPRS : HAVE_32BIT_FPRS)
+      if (using_gprs ? GPR_SIZE == 32 : FPR_SIZE != 64)
 	{
 	  imm->X_op = O_constant;
 	  offset->X_op = O_constant;
@@ -6873,7 +6874,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
       /* These relocations can have an addend that won't fit in
 	 4 octets for 64bit assembly.  */
-      if (HAVE_64BIT_GPRS
+      if (GPR_SIZE == 64
 	  && ! howto->partial_inplace
 	  && (reloc_type[0] == BFD_RELOC_16
 	      || reloc_type[0] == BFD_RELOC_32
@@ -7287,7 +7288,7 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	  if (!match_const_int (&arg, &imm_expr.X_add_number))
 	    return FALSE;
 	  imm_expr.X_op = O_constant;
-	  if (HAVE_32BIT_GPRS)
+	  if (GPR_SIZE == 32)
 	    normalize_constant_expr (&imm_expr);
 	  continue;
 
@@ -7497,7 +7498,7 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	  if (!match_const_int (&arg, &imm_expr.X_add_number))
 	    return FALSE;
 	  imm_expr.X_op = O_constant;
-	  if (HAVE_32BIT_GPRS)
+	  if (GPR_SIZE == 32)
 	    normalize_constant_expr (&imm_expr);
 	  continue;
 
@@ -8224,7 +8225,7 @@ set_at (int reg, int unsignedp)
 		 AT, reg, BFD_RELOC_LO16);
   else
     {
-      load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+      load_register (AT, &imm_expr, GPR_SIZE == 64);
       macro_build (NULL, unsignedp ? "sltu" : "slt", "d,v,t", AT, reg, AT);
     }
 }
@@ -8350,7 +8351,7 @@ load_register (int reg, expressionS *ep, int dbl)
 
   /* The value is larger than 32 bits.  */
 
-  if (!dbl || HAVE_32BIT_GPRS)
+  if (!dbl || GPR_SIZE == 32)
     {
       char value[32];
 
@@ -8806,7 +8807,7 @@ move_register (int dest, int source)
       && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
     macro_build (NULL, "move", "mp,mj", dest, source);
   else
-    macro_build (NULL, HAVE_32BIT_GPRS ? "addu" : "daddu", "d,v,t",
+    macro_build (NULL, GPR_SIZE == 32 ? "addu" : "daddu", "d,v,t",
 		 dest, source, 0);
 }
 
@@ -9289,7 +9290,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	}
 
       used_at = 1;
-      load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+      load_register (AT, &imm_expr, GPR_SIZE == 64);
       macro_build (NULL, s2, "d,v,t", op[0], op[1], AT);
       break;
 
@@ -9333,7 +9334,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	{
 	  op[1] = AT;
 	  used_at = 1;
-	  load_register (op[1], &imm_expr, HAVE_64BIT_GPRS);
+	  load_register (op[1], &imm_expr, GPR_SIZE == 64);
 	}
       /* Fall through.  */
     case M_BEQL:
@@ -9433,7 +9434,7 @@ macro (struct mips_cl_insn *ip, char *str)
       likely = 1;
     case M_BGTU_I:
       if (op[0] == 0
-	  || (HAVE_32BIT_GPRS
+	  || (GPR_SIZE == 32
 	      && imm_expr.X_add_number == -1))
 	goto do_false;
       ++imm_expr.X_add_number;
@@ -9550,7 +9551,7 @@ macro (struct mips_cl_insn *ip, char *str)
       likely = 1;
     case M_BLEU_I:
       if (op[0] == 0
-	  || (HAVE_32BIT_GPRS
+	  || (GPR_SIZE == 32
 	      && imm_expr.X_add_number == -1))
 	goto do_true;
       ++imm_expr.X_add_number;
@@ -9815,7 +9816,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	 zero, we then add a base register to it.  */
 
       breg = op[2];
-      if (dbl && HAVE_32BIT_GPRS)
+      if (dbl && GPR_SIZE == 32)
 	as_warn (_("dla used to load 32-bit register"));
 
       if (!dbl && HAVE_64BIT_OBJECTS)
@@ -11478,7 +11479,7 @@ macro (struct mips_cl_insn *ip, char *str)
          zero or in OFFSET_EXPR.  */
       if (imm_expr.X_op == O_constant)
 	{
-	  if (HAVE_64BIT_GPRS)
+	  if (GPR_SIZE == 64)
 	    load_register (op[0], &imm_expr, 1);
 	  else
 	    {
@@ -11527,7 +11528,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	}
 
       /* Now we load the register(s).  */
-      if (HAVE_64BIT_GPRS)
+      if (GPR_SIZE == 64)
 	{
 	  used_at = 1;
 	  macro_build (&offset_expr, "ld", "t,o(b)", op[0],
@@ -11558,10 +11559,10 @@ macro (struct mips_cl_insn *ip, char *str)
       if (imm_expr.X_op == O_constant)
 	{
 	  used_at = 1;
-	  load_register (AT, &imm_expr, HAVE_64BIT_FPRS);
-	  if (HAVE_64BIT_FPRS)
+	  load_register (AT, &imm_expr, FPR_SIZE == 64);
+	  if (FPR_SIZE == 64)
 	    {
-	      gas_assert (HAVE_64BIT_GPRS);
+	      gas_assert (GPR_SIZE == 64);
 	      macro_build (NULL, "dmtc1", "t,S", AT, op[0]);
 	    }
 	  else
@@ -11659,7 +11660,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_LD_AB:
       fmt = "t,o(b)";
-      if (HAVE_64BIT_GPRS)
+      if (GPR_SIZE == 64)
 	{
 	  s = "ld";
 	  goto ld;
@@ -11669,7 +11670,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_SD_AB:
       fmt = "t,o(b)";
-      if (HAVE_64BIT_GPRS)
+      if (GPR_SIZE == 64)
 	{
 	  s = "sd";
 	  goto ld_st;
@@ -12310,19 +12311,19 @@ macro (struct mips_cl_insn *ip, char *str)
 	       && imm_expr.X_add_number < 0)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
-	  macro_build (&imm_expr, HAVE_32BIT_GPRS ? "addiu" : "daddiu",
+	  macro_build (&imm_expr, GPR_SIZE == 32 ? "addiu" : "daddiu",
 		       "t,r,j", op[0], op[1], BFD_RELOC_LO16);
 	}
       else if (CPU_HAS_SEQ (mips_opts.arch))
 	{
 	  used_at = 1;
-	  load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+	  load_register (AT, &imm_expr, GPR_SIZE == 64);
 	  macro_build (NULL, "seq", "d,v,t", op[0], op[1], AT);
 	  break;
 	}
       else
 	{
-	  load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+	  load_register (AT, &imm_expr, GPR_SIZE == 64);
 	  macro_build (NULL, "xor", "d,v,t", op[0], op[1], AT);
 	  used_at = 1;
 	}
@@ -12347,7 +12348,7 @@ macro (struct mips_cl_insn *ip, char *str)
 		     op[0], op[1], BFD_RELOC_LO16);
       else
 	{
-	  load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+	  load_register (AT, &imm_expr, GPR_SIZE == 64);
 	  macro_build (NULL, mask == M_SGE_I ? "slt" : "sltu", "d,v,t",
 		       op[0], op[1], AT);
 	  used_at = 1;
@@ -12371,7 +12372,7 @@ macro (struct mips_cl_insn *ip, char *str)
       s = "sltu";
     sgti:
       used_at = 1;
-      load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+      load_register (AT, &imm_expr, GPR_SIZE == 64);
       macro_build (NULL, s, "d,v,t", op[0], AT, op[1]);
       break;
 
@@ -12392,7 +12393,7 @@ macro (struct mips_cl_insn *ip, char *str)
       s = "sltu";
     slei:
       used_at = 1;
-      load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+      load_register (AT, &imm_expr, GPR_SIZE == 64);
       macro_build (NULL, s, "d,v,t", op[0], AT, op[1]);
       macro_build (&expr1, "xori", "t,r,i", op[0], op[0], BFD_RELOC_LO16);
       break;
@@ -12406,7 +12407,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	  break;
 	}
       used_at = 1;
-      load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+      load_register (AT, &imm_expr, GPR_SIZE == 64);
       macro_build (NULL, "slt", "d,v,t", op[0], op[1], AT);
       break;
 
@@ -12419,7 +12420,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	  break;
 	}
       used_at = 1;
-      load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+      load_register (AT, &imm_expr, GPR_SIZE == 64);
       macro_build (NULL, "sltu", "d,v,t", op[0], op[1], AT);
       break;
 
@@ -12445,7 +12446,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	{
 	  as_warn (_("instruction %s: result is always true"),
 		   ip->insn_mo->name);
-	  macro_build (&expr1, HAVE_32BIT_GPRS ? "addiu" : "daddiu", "t,r,j",
+	  macro_build (&expr1, GPR_SIZE == 32 ? "addiu" : "daddiu", "t,r,j",
 		       op[0], 0, BFD_RELOC_LO16);
 	  break;
 	}
@@ -12467,19 +12468,19 @@ macro (struct mips_cl_insn *ip, char *str)
 	       && imm_expr.X_add_number < 0)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
-	  macro_build (&imm_expr, HAVE_32BIT_GPRS ? "addiu" : "daddiu",
+	  macro_build (&imm_expr, GPR_SIZE == 32 ? "addiu" : "daddiu",
 		       "t,r,j", op[0], op[1], BFD_RELOC_LO16);
 	}
       else if (CPU_HAS_SEQ (mips_opts.arch))
 	{
 	  used_at = 1;
-	  load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+	  load_register (AT, &imm_expr, GPR_SIZE == 64);
 	  macro_build (NULL, "sne", "d,v,t", op[0], op[1], AT);
 	  break;
 	}
       else
 	{
-	  load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+	  load_register (AT, &imm_expr, GPR_SIZE == 64);
 	  macro_build (NULL, "xor", "d,v,t", op[0], op[1], AT);
 	  used_at = 1;
 	}
@@ -12545,7 +12546,7 @@ macro (struct mips_cl_insn *ip, char *str)
       s = "tne";
     trap:
       used_at = 1;
-      load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+      load_register (AT, &imm_expr, GPR_SIZE == 64);
       macro_build (NULL, s, "s,t", op[0], AT);
       break;
 
@@ -13801,11 +13802,11 @@ md_parse_option (int c, char *arg)
       break;
 
     case OPTION_GP32:
-      file_mips_opts.gp32 = 1;
+      file_mips_opts.gp = 32;
       break;
 
     case OPTION_GP64:
-      file_mips_opts.gp32 = 0;
+      file_mips_opts.gp = 64;
       break;
 
     case OPTION_FP32:
@@ -13996,15 +13997,15 @@ mips_after_parse_args (void)
   else
     mips_set_tune (tune_info);
 
-  if (file_mips_opts.gp32 >= 0)
+  if (file_mips_opts.gp >= 0)
     {
       /* The user specified the size of the integer registers.  Make sure
 	 it agrees with the ABI and ISA.  */
-      if (file_mips_opts.gp32 == 0 && !ISA_HAS_64BIT_REGS (mips_opts.isa))
+      if (file_mips_opts.gp == 64 && !ISA_HAS_64BIT_REGS (mips_opts.isa))
 	as_bad (_("-mgp64 used with a 32-bit processor"));
-      else if (file_mips_opts.gp32 == 1 && ABI_NEEDS_64BIT_REGS (mips_abi))
+      else if (file_mips_opts.gp == 32 && ABI_NEEDS_64BIT_REGS (mips_abi))
 	as_bad (_("-mgp32 used with a 64-bit ABI"));
-      else if (file_mips_opts.gp32 == 0 && ABI_NEEDS_32BIT_REGS (mips_abi))
+      else if (file_mips_opts.gp == 64 && ABI_NEEDS_32BIT_REGS (mips_abi))
 	as_bad (_("-mgp64 used with a 32-bit ABI"));
     }
   else
@@ -14012,8 +14013,9 @@ mips_after_parse_args (void)
       /* Infer the integer register size from the ABI and processor.
 	 Restrict ourselves to 32-bit registers if that's all the
 	 processor has, or if the ABI cannot handle 64-bit registers.  */
-      file_mips_opts.gp32 = (ABI_NEEDS_32BIT_REGS (mips_abi)
-			     || !ISA_HAS_64BIT_REGS (mips_opts.isa));
+      file_mips_opts.gp = (ABI_NEEDS_32BIT_REGS (mips_abi)
+			   || !ISA_HAS_64BIT_REGS (mips_opts.isa))
+			  ? 32 : 64;
     }
 
   switch (file_mips_opts.fp)
@@ -14027,7 +14029,7 @@ mips_after_parse_args (void)
 	 registers would lead to spurious "register must be even" messages.
 	 So here we assume float registers are never smaller than the
 	 integer ones.  */
-      if (file_mips_opts.gp32 == 0)
+      if (file_mips_opts.gp == 64)
 	/* 64-bit integer registers implies 64-bit float registers.  */
 	file_mips_opts.fp = 64;
       else if ((mips_opts.ase & FP64_ASES)
@@ -14059,7 +14061,7 @@ mips_after_parse_args (void)
   /* This flag is set when we have a 64-bit capable CPU but use only
      32-bit wide registers.  Note that EABI does not use it.  */
   if (ISA_HAS_64BIT_REGS (mips_opts.isa)
-      && ((mips_abi == NO_ABI && file_mips_opts.gp32 == 1)
+      && ((mips_abi == NO_ABI && file_mips_opts.gp == 32)
 	  || mips_abi == O32_ABI))
     mips_32bitmode = 1;
 
@@ -14085,7 +14087,7 @@ mips_after_parse_args (void)
 
   file_mips_opts.isa = mips_opts.isa;
   file_mips_opts.ase = mips_opts.ase;
-  mips_opts.gp32 = file_mips_opts.gp32;
+  mips_opts.gp = file_mips_opts.gp;
   mips_opts.fp = file_mips_opts.fp;
   mips_opts.soft_float = file_mips_opts.soft_float;
   mips_opts.single_float = file_mips_opts.single_float;
@@ -15044,15 +15046,15 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
       mips_opts.nobopt = 1;
     }
   else if (strcmp (name, "gp=default") == 0)
-    mips_opts.gp32 = file_mips_opts.gp32;
+    mips_opts.gp = file_mips_opts.gp;
   else if (strcmp (name, "gp=32") == 0)
-    mips_opts.gp32 = 1;
+    mips_opts.gp = 32;
   else if (strcmp (name, "gp=64") == 0)
     {
       if (!ISA_HAS_64BIT_REGS (mips_opts.isa))
 	as_warn (_("%s isa does not support 64-bit registers"),
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
-      mips_opts.gp32 = 0;
+      mips_opts.gp = 64;
     }
   else if (strcmp (name, "fp=default") == 0)
     mips_opts.fp = file_mips_opts.fp;
@@ -15148,7 +15150,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	case ISA_MIPS32R2:
 	case ISA_MIPS32R3:
 	case ISA_MIPS32R5:
-	  mips_opts.gp32 = 1;
+	  mips_opts.gp = 32;
 	  mips_opts.fp = 32;
 	  break;
 	case ISA_MIPS3:
@@ -15158,7 +15160,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	case ISA_MIPS64R2:
 	case ISA_MIPS64R3:
 	case ISA_MIPS64R5:
-	  mips_opts.gp32 = 0;
+	  mips_opts.gp = 64;
 	  if (mips_opts.arch == CPU_R5900)
 	    {
 		mips_opts.fp = 32;
@@ -15174,7 +15176,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	}
       if (reset)
 	{
-	  mips_opts.gp32 = file_mips_opts.gp32;
+	  mips_opts.gp = file_mips_opts.gp;
 	  mips_opts.fp = file_mips_opts.fp;
 	}
     }
@@ -17399,7 +17401,7 @@ mips_elf_final_processing (void)
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O64;
   else if (mips_abi == EABI_ABI)
     {
-      if (!file_mips_opts.gp32)
+      if (file_mips_opts.gp == 64)
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI64;
       else
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
@@ -18090,8 +18092,8 @@ mips_parse_cpu (const char *option, const char *cpu_string)
       if (ABI_NEEDS_64BIT_REGS (mips_abi))
 	return mips_cpu_info_from_isa (ISA_MIPS3);
 
-      if (file_mips_opts.gp32 >= 0)
-	return mips_cpu_info_from_isa (file_mips_opts.gp32
+      if (file_mips_opts.gp >= 0)
+	return mips_cpu_info_from_isa (file_mips_opts.gp == 32
 				       ? ISA_MIPS1 : ISA_MIPS3);
 
       return mips_cpu_info_from_isa (MIPS_DEFAULT_64BIT

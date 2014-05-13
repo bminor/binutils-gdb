@@ -1,3 +1,10 @@
+2014-05-13  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_set_options): Rename gp32 to gp throughout.
+	(HAVE_32BIT_GPRS, HAVE_64BIT_GPRS): Remove. Re-implement via GPR_SIZE.
+	(HAVE_32BIT_FPRS, HAVE_64BIT_FPRS): Remove. Re-implement via FPR_SIZE.
+	(GPR_SIZE, FPR_SIZE): New macros. Use throughout.
+
 2014-05-08  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c (md_parse_option): Update missed file_mips_isa
