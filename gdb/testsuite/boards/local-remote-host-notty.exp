@@ -33,6 +33,13 @@ set_board_info rsh_prog /usr/bin/ssh
 set_board_info rcp_prog /usr/bin/scp
 set_board_info file_transfer "rsh"
 
+proc ${board}_file { dest op args } {
+    if { $op == "delete" } {
+	return 0
+    }
+    return [eval [list standard_file $dest $op] $args]
+}
+
 proc ${board}_download { board src dest } {
 
     # If file name is a relative, convert it to absolute, otherwise file can't

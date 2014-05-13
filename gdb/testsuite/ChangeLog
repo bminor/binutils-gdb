@@ -1,3 +1,8 @@
+2014-05-14  Yao Qi  <yao@codesourcery.com>
+
+	* boards/local-remote-host-notty.exp (${board}_file): New
+	proc.
+
 2014-05-07  Kyle McMartin  <kyle@redhat.com>
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>.
