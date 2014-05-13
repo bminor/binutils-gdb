@@ -1,3 +1,8 @@
+2014-05-13  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	* s390-linux-nat.c (fill_gregset): Remove erroneous offset 4 in
+	call to regcache_raw_collect.
+
 2014-05-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* mi/mi-console.c (mi_console_raw_packet): Use the value from
