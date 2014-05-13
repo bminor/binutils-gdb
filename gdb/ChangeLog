@@ -1,3 +1,9 @@
+2014-05-13  Andreas Arnez  <arnez@vnet.linux.ibm.com>
+
+	PR target/16940
+	* s390-linux-nat.c (fill_gregset): Remove erroneous offset 4 in
+	call to regcache_raw_collect.
+
 2014-05-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 7.7.1.DATE-cvs.
