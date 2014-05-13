@@ -1,3 +1,8 @@
+2014-05-13  Tom Tromey  <tromey@redhat.com>
+
+	* language.h (unop_type_check): Remove.
+	(binop_type_check): Don't declare.
+
 2014-05-13  Andreas Arnez  <arnez@vnet.linux.ibm.com>
 
 	* s390-linux-nat.c (fill_gregset): Remove erroneous offset 4 in
