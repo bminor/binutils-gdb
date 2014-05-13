@@ -847,8 +847,7 @@ class Symbol
   bool
   may_need_copy_reloc() const
   {
-    return (!parameters->options().output_is_position_independent()
-	    && parameters->options().copyreloc()
+    return (parameters->options().copyreloc()
 	    && this->is_from_dynobj()
 	    && !this->is_func());
   }

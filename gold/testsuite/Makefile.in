@@ -181,7 +181,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pie_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pie_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pie_copyrelocs_test
 
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
@@ -782,7 +783,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pie_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pie_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pie_copyrelocs_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_9 = two_file_shared_1_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_nonpic_test$(EXEEXT) \
@@ -1407,6 +1409,11 @@ permission_test_LDADD = $(LDADD)
 permission_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_pie_copyrelocs_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pie_copyrelocs_test.$(OBJEXT)
+pie_copyrelocs_test_OBJECTS = $(am_pie_copyrelocs_test_OBJECTS)
+pie_copyrelocs_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(pie_copyrelocs_test_LDFLAGS) $(LDFLAGS) -o $@
 plugin_test_1_SOURCES = plugin_test_1.c
 plugin_test_1_OBJECTS = plugin_test_1.$(OBJEXT)
 plugin_test_1_LDADD = $(LDADD)
@@ -1875,14 +1882,15 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(large_symbol_alignment_SOURCES) $(leb128_unittest_SOURCES) \
 	local_labels_test.c many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
-	permission_test.c plugin_test_1.c plugin_test_2.c \
-	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
-	plugin_test_6.c plugin_test_7.c plugin_test_8.c \
-	plugin_test_tls.c $(protected_1_SOURCES) \
-	$(protected_2_SOURCES) $(relro_now_test_SOURCES) \
-	$(relro_script_test_SOURCES) $(relro_strip_test_SOURCES) \
-	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
-	script_test_11.c $(script_test_2_SOURCES) script_test_3.c \
+	permission_test.c $(pie_copyrelocs_test_SOURCES) \
+	plugin_test_1.c plugin_test_2.c plugin_test_3.c \
+	plugin_test_4.c plugin_test_5.c plugin_test_6.c \
+	plugin_test_7.c plugin_test_8.c plugin_test_tls.c \
+	$(protected_1_SOURCES) $(protected_2_SOURCES) \
+	$(relro_now_test_SOURCES) $(relro_script_test_SOURCES) \
+	$(relro_strip_test_SOURCES) $(relro_test_SOURCES) \
+	$(script_test_1_SOURCES) script_test_11.c \
+	$(script_test_2_SOURCES) script_test_3.c \
 	$(searched_file_test_SOURCES) start_lib_test.c \
 	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
 	$(tls_phdrs_script_test_SOURCES) $(tls_pic_test_SOURCES) \
@@ -2312,6 +2320,10 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable_test_LDADD = two_file_relocatable.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_SOURCES = pie_copyrelocs_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_DEPENDENCIES = gcctestdir/ld pie_copyrelocs_shared_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -pie
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_test_LDADD = pie_copyrelocs_shared_test.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic_test_SOURCES = \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_2.cc two_file_test_main.cc
 
@@ -3245,6 +3257,9 @@ object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENC
 @NATIVE_LINKER_FALSE@permission_test$(EXEEXT): $(permission_test_OBJECTS) $(permission_test_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f permission_test$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(permission_test_OBJECTS) $(permission_test_LDADD) $(LIBS)
+pie_copyrelocs_test$(EXEEXT): $(pie_copyrelocs_test_OBJECTS) $(pie_copyrelocs_test_DEPENDENCIES) 
+	@rm -f pie_copyrelocs_test$(EXEEXT)
+	$(pie_copyrelocs_test_LINK) $(pie_copyrelocs_test_OBJECTS) $(pie_copyrelocs_test_LDADD) $(LIBS)
 @GCC_FALSE@plugin_test_1$(EXEEXT): $(plugin_test_1_OBJECTS) $(plugin_test_1_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f plugin_test_1$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(plugin_test_1_OBJECTS) $(plugin_test_1_LDADD) $(LIBS)
@@ -3635,6 +3650,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/permission_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pie_copyrelocs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_3.Po@am__quote@
@@ -4202,6 +4218,8 @@ two_file_relocatable_test.log: two_file_relocatable_test$(EXEEXT)
 	@p='two_file_relocatable_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_pie_test.log: two_file_pie_test$(EXEEXT)
 	@p='two_file_pie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+pie_copyrelocs_test.log: pie_copyrelocs_test$(EXEEXT)
+	@p='pie_copyrelocs_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_shared_1_nonpic_test.log: two_file_shared_1_nonpic_test$(EXEEXT)
 	@p='two_file_shared_1_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_shared_2_nonpic_test.log: two_file_shared_2_nonpic_test$(EXEEXT)
@@ -4805,6 +4823,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_pie_test: two_file_test_1_pie.o two_file_test_1b_pie.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@		two_file_test_2_pie.o two_file_test_main_pie.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -pie two_file_test_1_pie.o two_file_test_1b_pie.o two_file_test_2_pie.o two_file_test_main_pie.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_shared_test.o: pie_copyrelocs_shared_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O2 -fpic -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pie_copyrelocs_shared_test.so: pie_copyrelocs_shared_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared pie_copyrelocs_shared_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared.dbg: two_file_shared.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -w $< >$@ 2>/dev/null
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld

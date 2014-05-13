@@ -1,3 +1,22 @@
+2014-05-13  Sriraman Tallam  <tmsriram@google.com>
+
+	* symtab.h (may_need_copy_reloc): Remove check for position independent
+	code.
+	* x86_64.cc (Target_x86_64<size>::Scan::global): Add check for no
+	position independence before pc absolute may_need_copy_reloc call.
+	Add check for executable output befor pc relative may_need_copy_reloc
+	call.
+	* i386.cc: Ditto.
+	* arm.cc: Ditto.
+	* sparc.cc: Ditto.
+	* tilegx.cc: Ditto.
+	* powerpc.cc: Add check for no position independence before
+	may_need_copy_reloc calls.
+	* testsuite/pie_copyrelocs_test.cc: New file.
+	* testsuite/pie_copyrelocs_shared_test.cc: New file.
+	* Makefile.am (pie_copyrelocs_test): New test.
+	* Makefile.in: Regenerate.  
+
 2014-05-08  Martin Liška  <mliska@suse.cz>
 
 	* output.cc (Sized_relobj_file::do_layout): Fix typo in info message.

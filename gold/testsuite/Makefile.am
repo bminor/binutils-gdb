@@ -517,6 +517,16 @@ two_file_pie_test: two_file_test_1_pie.o two_file_test_1b_pie.o \
 		two_file_test_2_pie.o two_file_test_main_pie.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -pie two_file_test_1_pie.o two_file_test_1b_pie.o two_file_test_2_pie.o two_file_test_main_pie.o
 
+check_PROGRAMS += pie_copyrelocs_test
+pie_copyrelocs_test_SOURCES = pie_copyrelocs_test.cc
+pie_copyrelocs_test_DEPENDENCIES = gcctestdir/ld pie_copyrelocs_shared_test.so
+pie_copyrelocs_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -pie
+pie_copyrelocs_test_LDADD = pie_copyrelocs_shared_test.so
+pie_copyrelocs_shared_test.o: pie_copyrelocs_shared_test.cc
+	$(CXXCOMPILE) -O2 -fpic -c -o $@ $<
+pie_copyrelocs_shared_test.so: pie_copyrelocs_shared_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared pie_copyrelocs_shared_test.o
+
 check_SCRIPTS += two_file_shared.sh
 check_DATA += two_file_shared.dbg
 MOSTLYCLEANFILES += two_file_shared.dbg
