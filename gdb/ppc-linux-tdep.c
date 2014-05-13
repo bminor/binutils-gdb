@@ -498,36 +498,31 @@ static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
 static const struct regset ppc32_linux_gregset = {
   &ppc32_linux_reg_offsets,
   ppc_linux_supply_gregset,
-  ppc_linux_collect_gregset,
-  NULL
+  ppc_linux_collect_gregset
 };
 
 static const struct regset ppc64_linux_gregset = {
   &ppc64_linux_reg_offsets,
   ppc_linux_supply_gregset,
-  ppc_linux_collect_gregset,
-  NULL
+  ppc_linux_collect_gregset
 };
 
 static const struct regset ppc32_linux_fpregset = {
   &ppc32_linux_reg_offsets,
   ppc_supply_fpregset,
-  ppc_collect_fpregset,
-  NULL
+  ppc_collect_fpregset
 };
 
 static const struct regset ppc32_linux_vrregset = {
   &ppc32_linux_reg_offsets,
   ppc_supply_vrregset,
-  ppc_collect_vrregset,
-  NULL
+  ppc_collect_vrregset
 };
 
 static const struct regset ppc32_linux_vsxregset = {
   &ppc32_linux_reg_offsets,
   ppc_supply_vsxregset,
-  ppc_collect_vsxregset,
-  NULL
+  ppc_collect_vsxregset
 };
 
 const struct regset *

@@ -50,9 +50,6 @@ struct regset
 
   /* Function collecting values in a register set from a register cache.  */
   collect_regset_ftype *collect_regset;
-
-  /* Architecture associated with the register set.  */
-  struct gdbarch *arch;
 };
 
 /* Allocate a fresh 'struct regset' whose supply_regset function is

@@ -1,5 +1,23 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* regset.h (struct regset): Remove gdbarch field.
+	* regset.c (regset_alloc): Drop initialization of gdbarch field.
+	* nios2-linux-tdep.c (nios2_core_regset): Likewise.
+	* ppcfbsd-tdep.c (ppc32_fbsd_gregset, ppc64_fbsd_gregset):
+	Likewise.
+	* ppc-linux-tdep.c (ppc32_linux_gregset, ppc64_linux_gregset)
+	(ppc32_linux_fpregset, ppc32_linux_vrregset)
+	(ppc32_linux_vsxregset): Likewise.
+	* i386obsd-tdep.c (i386obsd_aout_supply_regset): Get the gdbarch
+	via the regcache instead of the regset.
+	* i386-tdep.c (i386_supply_gregset, i386_collect_gregset)
+	(i386_supply_fpregset, i386_collect_fpregset): Likewise.
+	* amd64obsd-tdep.c (amd64obsd_supply_regset): Likewise.
+	* amd64-tdep.c (amd64_supply_fpregset, amd64_collect_fpregset):
+	Likewise.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* alpha-linux-tdep.c (alpha_linux_gregset, alpha_linux_fpregset):
 	Constify structures.
 	* alphanbsd-tdep.c (alphanbsd_gregset, alphanbsd_fpregset)

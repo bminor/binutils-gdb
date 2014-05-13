@@ -36,7 +36,6 @@ regset_alloc (struct gdbarch *arch,
 {
   struct regset *regset = GDBARCH_OBSTACK_ZALLOC (arch, struct regset);
 
-  regset->arch = arch;
   regset->supply_regset = supply_regset;
   regset->collect_regset = collect_regset;
 
