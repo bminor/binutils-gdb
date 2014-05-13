@@ -1,5 +1,11 @@
 2014-05-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* lib/mi-support.exp (mi_run_cmd_full): Set arguments by
+	calling "-exec-arguments" or "set args" before running the
+	inferior.
+
+2014-05-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* lib/mi-support.exp (mi_expect_stop): Expect message for
 	inferiors that exit with non-zero exit code.
 
