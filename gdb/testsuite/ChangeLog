@@ -1,5 +1,12 @@
 2014-05-14  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.mi/mi-file.exp (test_file_list_exec_source_file): Don't
+	match absolute path on remote host.
+	(test_file_list_exec_source_files): Remove "/" from the
+	pattern.
+
+2014-05-14  Yao Qi  <yao@codesourcery.com>
+
 	* boards/local-remote-host-notty.exp (${board}_file): New
 	proc.
 
