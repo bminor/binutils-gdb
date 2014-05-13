@@ -1068,6 +1068,20 @@ proc mi_expect_stop { reason func args file line extra test } {
 	}
 	return
     }
+    if { $reason == "exited" } {
+	gdb_expect {
+	    -re "\\*stopped,reason=\"exited\",exit-code=\"\[0-7\]+\"\r\n$prompt_re" {
+		pass "$test"
+	    }
+	    -re ".*$mi_gdb_prompt$" {
+		fail "$test (inferior not stopped)"
+	    }
+	    timeout {
+		fail "$test (unknown output after running)"
+	    }
+	}
+	return
+    }
 
     if { $reason == "solib-event" } {
 	set pattern "\\*stopped,reason=\"solib-event\",thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re"
