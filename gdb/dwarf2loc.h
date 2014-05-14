@@ -222,4 +222,12 @@ extern struct call_site_chain *call_site_find_chain (struct gdbarch *gdbarch,
 						     CORE_ADDR caller_pc,
 						     CORE_ADDR callee_pc);
 
+/* A helper function to convert a DWARF register to an arch register.
+   ARCH is the architecture.
+   DWARF_REG is the register.
+   This will throw an exception if the DWARF register cannot be
+   translated to an architecture register.  */
+
+extern int dwarf2_reg_to_regnum_or_error (struct gdbarch *arch, int dwarf_reg);
+
 #endif /* dwarf2loc.h */

@@ -1,3 +1,10 @@
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.h (dwarf2_reg_to_regnum_or_error): Declare.
+	* dwarf2loc.c (dwarf2_reg_to_regnum_or_error): Rename from
+	translate_register.  Now public.
+	(dwarf2_compile_expr_to_ax): Update.
+
 2014-12-12  Tom Tromey  <tromey@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

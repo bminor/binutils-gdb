@@ -2707,14 +2707,10 @@ unimplemented (unsigned int op)
 	   op);
 }
 
-/* A helper function to convert a DWARF register to an arch register.
-   ARCH is the architecture.
-   DWARF_REG is the register.
-   This will throw an exception if the DWARF register cannot be
-   translated to an architecture register.  */
+/* See dwarf2loc.h.  */
 
-static int
-translate_register (struct gdbarch *arch, int dwarf_reg)
+int
+dwarf2_reg_to_regnum_or_error (struct gdbarch *arch, int dwarf_reg)
 {
   int reg = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_reg);
   if (reg == -1)
@@ -2965,14 +2961,14 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	case DW_OP_reg30:
 	case DW_OP_reg31:
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
-	  loc->u.reg = translate_register (arch, op - DW_OP_reg0);
+	  loc->u.reg = dwarf2_reg_to_regnum_or_error (arch, op - DW_OP_reg0);
 	  loc->kind = axs_lvalue_register;
 	  break;
 
 	case DW_OP_regx:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
-	  loc->u.reg = translate_register (arch, reg);
+	  loc->u.reg = dwarf2_reg_to_regnum_or_error (arch, reg);
 	  loc->kind = axs_lvalue_register;
 	  break;
 
@@ -3035,7 +3031,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	case DW_OP_breg30:
 	case DW_OP_breg31:
 	  op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	  i = translate_register (arch, op - DW_OP_breg0);
+	  i = dwarf2_reg_to_regnum_or_error (arch, op - DW_OP_breg0);
 	  ax_reg (expr, i);
 	  if (offset != 0)
 	    {
@@ -3047,7 +3043,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  {
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    i = translate_register (arch, reg);
+	    i = dwarf2_reg_to_regnum_or_error (arch, reg);
 	    ax_reg (expr, i);
 	    if (offset != 0)
 	      {
