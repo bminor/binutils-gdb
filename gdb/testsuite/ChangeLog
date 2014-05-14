@@ -1,3 +1,8 @@
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+
+	* lib/dwarf.exp (_location): Ignore blank lines.  Allow comments.
+	Handle DW_OP_pick, DW_OP_skip, DW_OP_bra.
+
 2014-12-12  Doug Evans  <dje@google.com>
 
 	* lib/gdb-python.exp (get_python_valueof): New function.
