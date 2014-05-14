@@ -1,5 +1,12 @@
 2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linux-tdep.c: Include objfiles.h and infcall.h.
+	(GDB_MMAP_MAP_PRIVATE, GDB_MMAP_MAP_ANONYMOUS, linux_infcall_mmap): New
+	function.
+	(linux_init_abi): Add linux_infcall_mmap to gdbarch.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2loc.h (dwarf2_reg_to_regnum_or_error): Declare.
 	* dwarf2loc.c (dwarf2_reg_to_regnum_or_error): Rename from
 	translate_register.  Now public.
