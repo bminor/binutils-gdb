@@ -159,32 +159,32 @@ print_macro_definition (const char *name,
 			struct macro_source_file *file,
 			int line)
 {
-      fprintf_filtered (gdb_stdout, "Defined at ");
-      show_pp_source_pos (gdb_stdout, file, line);
+  fprintf_filtered (gdb_stdout, "Defined at ");
+  show_pp_source_pos (gdb_stdout, file, line);
 
-      if (line != 0)
-	fprintf_filtered (gdb_stdout, "#define %s", name);
-      else
-	fprintf_filtered (gdb_stdout, "-D%s", name);
+  if (line != 0)
+    fprintf_filtered (gdb_stdout, "#define %s", name);
+  else
+    fprintf_filtered (gdb_stdout, "-D%s", name);
 
-      if (d->kind == macro_function_like)
-        {
-          int i;
+  if (d->kind == macro_function_like)
+    {
+      int i;
 
-          fputs_filtered ("(", gdb_stdout);
-          for (i = 0; i < d->argc; i++)
-            {
-              fputs_filtered (d->argv[i], gdb_stdout);
-              if (i + 1 < d->argc)
-                fputs_filtered (", ", gdb_stdout);
-            }
-          fputs_filtered (")", gdb_stdout);
-        }
+      fputs_filtered ("(", gdb_stdout);
+      for (i = 0; i < d->argc; i++)
+	{
+	  fputs_filtered (d->argv[i], gdb_stdout);
+	  if (i + 1 < d->argc)
+	    fputs_filtered (", ", gdb_stdout);
+	}
+      fputs_filtered (")", gdb_stdout);
+    }
 
-      if (line != 0)
-	fprintf_filtered (gdb_stdout, " %s\n", d->replacement);
-      else
-	fprintf_filtered (gdb_stdout, "=%s\n", d->replacement);
+  if (line != 0)
+    fprintf_filtered (gdb_stdout, " %s\n", d->replacement);
+  else
+    fprintf_filtered (gdb_stdout, "=%s\n", d->replacement);
 }
 
 /* A callback function for usage with macro_for_each and friends.

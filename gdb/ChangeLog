@@ -1,3 +1,7 @@
+2014-05-14  Tom Tromey  <tromey@redhat.com>
+
+	* macrocmd.c (print_macro_definition): Reindent.
+
 2014-05-13  Doug Evans  <xdje42@gmail.com>
 
 	* python/py-cmd.c (cmdpy_completer): Add comment.
