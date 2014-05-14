@@ -1,4 +1,15 @@
 2014-12-12  Tom Tromey  <tromey@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (dwarf_expr_frame_base_1): Remove declaration.
+	(dwarf_expr_frame_base): Update caller.
+	(dwarf_expr_frame_base_1): Rename to ...
+	(func_get_frame_base_dwarf_block): ... this and make it public.
+	(dwarf2_compile_expr_to_ax, locexpr_describe_location_piece): Update
+	callers.
+	* dwarf2loc.h (func_get_frame_base_dwarf_block): New declaration.
+
+2014-12-12  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (dwarf2_compile_expr_to_ax) <DW_OP_call_frame_cfa>:
 	Update.

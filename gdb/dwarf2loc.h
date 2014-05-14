@@ -80,6 +80,18 @@ extern const gdb_byte *dwarf2_fetch_constant_bytes (sect_offset,
 struct type *dwarf2_get_die_type (cu_offset die_offset,
 				  struct dwarf2_per_cu_data *per_cu);
 
+/* Find the frame base information for FRAMEFUNC at PC.  START is an
+   out parameter which is set to point to the DWARF expression to
+   compute.  LENGTH is an out parameter which is set to the length of
+   the DWARF expression.  This throws an exception on error or if an
+   expression is not found; the returned length will never be
+   zero.  */
+
+extern void func_get_frame_base_dwarf_block (struct symbol *framefunc,
+					     CORE_ADDR pc,
+					     const gdb_byte **start,
+					     size_t *length);
+
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable of TYPE in the context
    of FRAME.  */

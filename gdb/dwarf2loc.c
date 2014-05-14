@@ -40,9 +40,6 @@
 
 extern int dwarf2_always_disassemble;
 
-static void dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
-				     const gdb_byte **start, size_t *length);
-
 static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
 
 static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
@@ -365,9 +362,9 @@ dwarf_expr_frame_base (void *baton, const gdb_byte **start, size_t * length)
      something has gone wrong.  */
   gdb_assert (framefunc != NULL);
 
-  dwarf_expr_frame_base_1 (framefunc,
-			   get_frame_address_in_block (debaton->frame),
-			   start, length);
+  func_get_frame_base_dwarf_block (framefunc,
+				   get_frame_address_in_block (debaton->frame),
+				   start, length);
 }
 
 /* Implement find_frame_base_location method for LOC_BLOCK functions using
@@ -411,9 +408,11 @@ const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs =
   loclist_find_frame_base_location
 };
 
-static void
-dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
-			 const gdb_byte **start, size_t *length)
+/* See dwarf2loc.h.  */
+
+void
+func_get_frame_base_dwarf_block (struct symbol *framefunc, CORE_ADDR pc,
+				 const gdb_byte **start, size_t *length)
 {
   if (SYMBOL_BLOCK_OPS (framefunc) != NULL)
     {
@@ -3074,8 +3073,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    if (!framefunc)
 	      error (_("No function found for block"));
 
-	    dwarf_expr_frame_base_1 (framefunc, expr->scope,
-				     &datastart, &datalen);
+	    func_get_frame_base_dwarf_block (framefunc, expr->scope,
+					     &datastart, &datalen);
 
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    dwarf2_compile_expr_to_ax (expr, loc, arch, addr_size, datastart,
@@ -3571,7 +3570,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	error (_("No function found for block for symbol \"%s\"."),
 	       SYMBOL_PRINT_NAME (symbol));
 
-      dwarf_expr_frame_base_1 (framefunc, addr, &base_data, &base_size);
+      func_get_frame_base_dwarf_block (framefunc, addr, &base_data, &base_size);
 
       if (base_data[0] >= DW_OP_breg0 && base_data[0] <= DW_OP_breg31)
 	{
