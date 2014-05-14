@@ -1,5 +1,10 @@
 2014-12-12  Tom Tromey  <tromey@redhat.com>
 
+	* gdbtypes.h (make_unqualified_type): Declare.
+	* gdbtypes.c (make_unqualified_type): New function.
+
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+
 	* ui-file.h (ui_file_write_for_put): Declare.
 	* ui-file.c (ui_file_write_for_put): New function.
 	* mi/mi-out.c (do_write): Remove.
