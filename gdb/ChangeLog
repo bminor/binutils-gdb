@@ -1,3 +1,11 @@
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* infcall.h (call_function_by_hand_dummy): Declare.
+	* infcall.c (call_function_by_hand): Use
+	call_function_by_hand_dummy.
+	(call_function_by_hand_dummy): Rename from call_function_by_hand.
+	Add arguments.  Register a destructor.
+
 2014-12-12  Tom Tromey  <tromey@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

@@ -456,6 +456,14 @@ cleanup_delete_std_terminate_breakpoint (void *ignore)
   delete_std_terminate_breakpoint ();
 }
 
+/* See infcall.h.  */
+
+struct value *
+call_function_by_hand (struct value *function, int nargs, struct value **args)
+{
+  return call_function_by_hand_dummy (function, nargs, args, NULL, NULL);
+}
+
 /* All this stuff with a dummy frame may seem unnecessarily complicated
    (why not just save registers in GDB?).  The purpose of pushing a dummy
    frame which looks just like a real frame is so that if you call a
@@ -475,7 +483,10 @@ cleanup_delete_std_terminate_breakpoint (void *ignore)
    ARGS is modified to contain coerced values.  */
 
 struct value *
-call_function_by_hand (struct value *function, int nargs, struct value **args)
+call_function_by_hand_dummy (struct value *function,
+			     int nargs, struct value **args,
+			     call_function_by_hand_dummy_dtor_ftype *dummy_dtor,
+			     void *dummy_dtor_data)
 {
   CORE_ADDR sp;
   struct type *values_type, *target_values_type;
@@ -874,6 +885,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
      caller (and identify the dummy-frame) onto the dummy-frame
      stack.  */
   dummy_frame_push (caller_state, &dummy_id, inferior_ptid);
+  if (dummy_dtor != NULL)
+    register_dummy_frame_dtor (dummy_id, inferior_ptid,
+			       dummy_dtor, dummy_dtor_data);
 
   /* Discard both inf_status and caller_state cleanups.
      From this point on we explicitly restore the associated state
