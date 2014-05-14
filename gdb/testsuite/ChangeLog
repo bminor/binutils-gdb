@@ -1,3 +1,26 @@
+2014-12-12  Phil Muldoon  <pmuldoon@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* configure.ac: Add gdb.compile/.
+	* configure: Regenerate.
+	* gdb.compile/Makefile.in: New file.
+	* gdb.compile/compile-ops.exp: New file.
+	* gdb.compile/compile-ops.c: New file.
+	* gdb.compile/compile-tls.c: New file.
+	* gdb.compile/compile-tls.exp: New file.
+	* gdb.compile/compile-constvar.S: New file.
+	* gdb.compile/compile-constvar.c: New file.
+	* gdb.compile/compile-mod.c: New file.
+	* gdb.compile/compile-nodebug.c: New file.
+	* gdb.compile/compile-setjmp-mod.c: New file.
+	* gdb.compile/compile-setjmp.c: New file.
+	* gdb.compile/compile-setjmp.exp: New file.
+	* gdb.compile/compile-shlib.c: New file.
+	* gdb.compile/compile.c: New file.
+	* gdb.compile/compile.exp: New file.
+	* lib/gdb.exp (skip_compile_feature_tests): New proc.
+
 2014-12-12  Tom Tromey  <tromey@redhat.com>
 
 	* lib/dwarf.exp (_location): Ignore blank lines.  Allow comments.

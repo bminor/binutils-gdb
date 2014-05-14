@@ -111,6 +111,27 @@ int dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			      CORE_ADDR address,
 			      CORE_ADDR *value);
 
+/* A helper for the compiler interface that compiles a single dynamic
+   property to C code.
+
+   STREAM is where the C code is to be written.
+   RESULT_NAME is the name of the generated variable.
+   GDBARCH is the architecture to use.
+   REGISTERS_USED is a bit-vector that is filled to note which
+   registers are required by the generated expression.
+   PROP is the property for which code is generated.
+   ADDRESS is the address at which the property is considered to be
+   evaluated.
+   SYM the originating symbol, used for error reporting.  */
+
+void dwarf2_compile_property_to_c (struct ui_file *stream,
+				   const char *result_name,
+				   struct gdbarch *gdbarch,
+				   unsigned char *registers_used,
+				   const struct dynamic_prop *prop,
+				   CORE_ADDR address,
+				   struct symbol *sym);
+
 CORE_ADDR dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
 				  unsigned int addr_index);
 

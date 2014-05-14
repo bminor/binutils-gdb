@@ -1,3 +1,58 @@
+2014-12-12  Phil Muldoon  <pmuldoon@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Update.
+	* symtab.h (struct symbol_computed_ops) <generate_c_location>: New
+	field.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn) <la_get_compile_instance,
+	la_compute_program>: New fields.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Update.
+	* jv-lang.c (java_language_defn): Update.
+	* go-lang.c (go_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* dwarf2loc.h (dwarf2_compile_property_to_c): Declare.
+	* dwarf2loc.c (dwarf2_compile_property_to_c)
+	(locexpr_generate_c_location, loclist_generate_c_location): New
+	functions.
+	(dwarf2_locexpr_funcs, dwarf2_loclist_funcs): Update.
+	* defs.h (enum compile_i_scope_types): New.
+	(enum command_control_type) <compile_control>: New constant.
+	(struct command_line) <control_u>: New field.
+	* d-lang.c (d_language_defn): Update.
+	* compile/compile.c: New file.
+	* compile/compile-c-support.c: New file.
+	* compile/compile-c-symbols.c: New file.
+	* compile/compile-c-types.c: New file.
+	* compile/compile.h: New file.
+	* compile/compile-internal.h: New file.
+	* compile/compile-loc2c.c: New file.
+	* compile/compile-object-load.c: New file.
+	* compile/compile-object-load.h: New file.
+	* compile/compile-object-run.c: New file.
+	* compile/compile-object-run.h: New file.
+	* cli/cli-script.c (multi_line_command_p, print_command_lines)
+	(execute_control_command, process_next_line)
+	(recurse_read_control_structure): Handle compile_control.
+	* c-lang.h (c_get_compile_context, c_compute_program): Declare.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* ada-lang.c (ada_language_defn): Update.
+	* Makefile.in (SUBDIR_GCC_COMPILE_OBS, SUBDIR_GCC_COMPILE_SRCS):
+	New variables.
+	(SFILES): Add SUBDIR_GCC_COMPILE_SRCS.
+	(HFILES_NO_SRCDIR): Add compile.h.
+	(COMMON_OBS): Add SUBDIR_GCC_COMPILE_OBS.
+	(INIT_FILES): Add SUBDIR_GCC_COMPILE_SRCS.
+	(compile.o, compile-c-types.o, compile-c-symbols.o)
+	(compile-object-load.o, compile-object-run.o, compile-loc2c.o)
+	(compile-c-support.o): New targets.
+
 2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* s390-linux-tdep.c (s390_gcc_target_options): New function.

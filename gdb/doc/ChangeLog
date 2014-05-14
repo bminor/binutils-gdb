@@ -1,3 +1,9 @@
+2014-12-12  Phil Muldoon  <pmuldoon@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Altering): Update.
+	(Compiling and Injecting Code): New node.
+
 2014-12-12  Doug Evans  <dje@google.com>
 
 	* python.texi (Objfiles In Python): Document gdb.lookup_objfile.

@@ -31,6 +31,7 @@
 
 #include "extension.h"
 #include "interps.h"
+#include "compile/compile.h"
 
 /* Prototypes for local functions.  */
 
@@ -87,6 +88,7 @@ multi_line_command_p (enum command_control_type type)
     case while_control:
     case while_stepping_control:
     case commands_control:
+    case compile_control:
     case python_control:
     case guile_control:
       return 1;
@@ -263,6 +265,19 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	  ui_out_field_string (uiout, NULL, "python");
 	  ui_out_text (uiout, "\n");
 	  /* Don't indent python code at all.  */
+	  print_command_lines (uiout, *list->body_list, 0);
+	  if (depth)
+	    ui_out_spaces (uiout, 2 * depth);
+	  ui_out_field_string (uiout, NULL, "end");
+	  ui_out_text (uiout, "\n");
+	  list = list->next;
+	  continue;
+	}
+
+      if (list->control_type == compile_control)
+	{
+	  ui_out_field_string (uiout, NULL, "compile expression");
+	  ui_out_text (uiout, "\n");
 	  print_command_lines (uiout, *list->body_list, 0);
 	  if (depth)
 	    ui_out_spaces (uiout, 2 * depth);
@@ -598,6 +613,11 @@ execute_control_command (struct command_line *cmd)
 	ret = commands_from_control_command (new_line, cmd);
 	break;
       }
+
+    case compile_control:
+      eval_compile_command (cmd, NULL, cmd->control_u.compile.scope);
+      ret = simple_control;
+      break;
 
     case python_control:
     case guile_control:
@@ -1040,6 +1060,14 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	     here.  */
 	  *command = build_command_line (python_control, "");
 	}
+      else if (p_end - p == 6 && !strncmp (p, "compile", 7))
+	{
+	  /* Note that we ignore the inline "compile command" form
+	     here.  */
+	  *command = build_command_line (compile_control, "");
+	  (*command)->control_u.compile.scope = COMPILE_I_INVALID_SCOPE;
+	}
+
       else if (p_end - p == 5 && !strncmp (p, "guile", 5))
 	{
 	  /* Note that we ignore the inline "guile command" form here.  */
@@ -1133,7 +1161,8 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
       next = NULL;
       val = process_next_line (read_next_line_func (), &next, 
 			       current_cmd->control_type != python_control
-			       && current_cmd->control_type != guile_control,
+			       && current_cmd->control_type != guile_control
+			       && current_cmd->control_type != compile_control,
 			       validator, closure);
 
       /* Just skip blanks and comments.  */
