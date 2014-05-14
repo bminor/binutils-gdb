@@ -1,3 +1,13 @@
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dummy-frame.c (struct dummy_frame) <dtor, dtor_data>: New
+	fields.
+	(pop_dummy_frame): Call the destructor if it exists.
+	(register_dummy_frame_dtor, find_dummy_frame_dtor): New
+	functions.
+	* dummy-frame.h (dummy_frame_dtor_ftype): New typedef.
+	(register_dummy_frame_dtor, find_dummy_frame_dtor): Declare.
+
 2014-12-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdbtypes.h (make_unqualified_type): Declare.
