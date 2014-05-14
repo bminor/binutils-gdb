@@ -882,11 +882,15 @@ dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
 }
 
 
-void
-dwarf2_compile_cfa_to_ax (struct agent_expr *expr, struct axs_value *loc,
-			  struct gdbarch *gdbarch,
-			  CORE_ADDR pc,
-			  struct dwarf2_per_cu_data *data)
+/* See dwarf2-frame.h.  */
+
+int
+dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
+		       struct dwarf2_per_cu_data *data,
+		       int *regnum_out, LONGEST *offset_out,
+		       CORE_ADDR *text_offset_out,
+		       const gdb_byte **cfa_start_out,
+		       const gdb_byte **cfa_end_out)
 {
   struct dwarf2_fde *fde;
   CORE_ADDR text_offset;
@@ -932,26 +936,20 @@ dwarf2_compile_cfa_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	if (regnum == -1)
 	  error (_("Unable to access DWARF register number %d"),
 		 (int) fs.regs.cfa_reg); /* FIXME */
-	ax_reg (expr, regnum);
 
-	if (fs.regs.cfa_offset != 0)
-	  {
-	    if (fs.armcc_cfa_offsets_reversed)
-	      ax_const_l (expr, -fs.regs.cfa_offset);
-	    else
-	      ax_const_l (expr, fs.regs.cfa_offset);
-	    ax_simple (expr, aop_add);
-	  }
+	*regnum_out = regnum;
+	if (fs.armcc_cfa_offsets_reversed)
+	  *offset_out = -fs.regs.cfa_offset;
+	else
+	  *offset_out = fs.regs.cfa_offset;
+	return 1;
       }
-      break;
 
     case CFA_EXP:
-      ax_const_l (expr, text_offset);
-      dwarf2_compile_expr_to_ax (expr, loc, gdbarch, addr_size,
-				 fs.regs.cfa_exp,
-				 fs.regs.cfa_exp + fs.regs.cfa_exp_len,
-				 data);
-      break;
+      *text_offset_out = text_offset;
+      *cfa_start_out = fs.regs.cfa_exp;
+      *cfa_end_out = fs.regs.cfa_exp + fs.regs.cfa_exp_len;
+      return 0;
 
     default:
       internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));

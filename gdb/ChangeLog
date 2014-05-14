@@ -1,3 +1,13 @@
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax) <DW_OP_call_frame_cfa>:
+	Update.
+	* dwarf2-frame.c (dwarf2_fetch_cfa_info): New function, based on
+	dwarf2_compile_cfa_to_ax.
+	(dwarf2_compile_cfa_to_ax): Remove.
+	* dwarf2-frame.h (dwarf2_fetch_cfa_info): Declare.
+	(dwarf2_compile_cfa_to_ax): Remove.
+
 2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* infcall.h (call_function_by_hand_dummy): Declare.

@@ -3282,8 +3282,34 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  break;
 
 	case DW_OP_call_frame_cfa:
-	  dwarf2_compile_cfa_to_ax (expr, loc, arch, expr->scope, per_cu);
-	  loc->kind = axs_lvalue_memory;
+	  {
+	    int regnum;
+	    CORE_ADDR text_offset;
+	    LONGEST off;
+	    const gdb_byte *cfa_start, *cfa_end;
+
+	    if (dwarf2_fetch_cfa_info (arch, expr->scope, per_cu,
+				       &regnum, &off,
+				       &text_offset, &cfa_start, &cfa_end))
+	      {
+		/* Register.  */
+		ax_reg (expr, regnum);
+		if (off != 0)
+		  {
+		    ax_const_l (expr, off);
+		    ax_simple (expr, aop_add);
+		  }
+	      }
+	    else
+	      {
+		/* Another expression.  */
+		ax_const_l (expr, text_offset);
+		dwarf2_compile_expr_to_ax (expr, loc, arch, addr_size,
+					   cfa_start, cfa_end, per_cu);
+	      }
+
+	    loc->kind = axs_lvalue_memory;
+	  }
 	  break;
 
 	case DW_OP_GNU_push_tls_address:
