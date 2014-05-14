@@ -193,4 +193,13 @@ extern int default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *ra
    module determines whether a breakpoint is permanent.  */
 extern void default_skip_permanent_breakpoint (struct regcache *regcache);
 
+/* Symbols for gdbarch_infcall_mmap; their Linux PROT_* system
+   definitions would be dependent on compilation host.  */
+#define GDB_MMAP_PROT_READ	0x1	/* Page can be read.  */
+#define GDB_MMAP_PROT_WRITE	0x2	/* Page can be written.  */
+#define GDB_MMAP_PROT_EXEC	0x4	/* Page can be executed.  */
+
+extern CORE_ADDR default_infcall_mmap (CORE_ADDR size, unsigned prot);
+extern char *default_gcc_target_options (struct gdbarch *gdbarch);
+
 #endif

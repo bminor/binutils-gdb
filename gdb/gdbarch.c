@@ -321,6 +321,8 @@ struct gdbarch
   gdbarch_insn_is_jump_ftype *insn_is_jump;
   gdbarch_auxv_parse_ftype *auxv_parse;
   gdbarch_vsyscall_range_ftype *vsyscall_range;
+  gdbarch_infcall_mmap_ftype *infcall_mmap;
+  gdbarch_gcc_target_options_ftype *gcc_target_options;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -417,6 +419,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->insn_is_ret = default_insn_is_ret;
   gdbarch->insn_is_jump = default_insn_is_jump;
   gdbarch->vsyscall_range = default_vsyscall_range;
+  gdbarch->infcall_mmap = default_infcall_mmap;
+  gdbarch->gcc_target_options = default_gcc_target_options;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -642,6 +646,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of insn_is_jump, invalid_p == 0 */
   /* Skip verify of auxv_parse, has predicate.  */
   /* Skip verify of vsyscall_range, invalid_p == 0 */
+  /* Skip verify of infcall_mmap, invalid_p == 0 */
+  /* Skip verify of gcc_target_options, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -912,6 +918,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: frame_red_zone_size = %s\n",
                       plongest (gdbarch->frame_red_zone_size));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: gcc_target_options = <%s>\n",
+                      host_address_to_string (gdbarch->gcc_target_options));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_gcore_bfd_target_p() = %d\n",
                       gdbarch_gcore_bfd_target_p (gdbarch));
   fprintf_unfiltered (file,
@@ -977,6 +986,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
                       host_address_to_string (gdbarch->in_solib_return_trampoline));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: infcall_mmap = <%s>\n",
+                      host_address_to_string (gdbarch->infcall_mmap));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_info_proc_p() = %d\n",
                       gdbarch_info_proc_p (gdbarch));
@@ -4517,6 +4529,40 @@ set_gdbarch_vsyscall_range (struct gdbarch *gdbarch,
                             gdbarch_vsyscall_range_ftype vsyscall_range)
 {
   gdbarch->vsyscall_range = vsyscall_range;
+}
+
+CORE_ADDR
+gdbarch_infcall_mmap (struct gdbarch *gdbarch, CORE_ADDR size, unsigned prot)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->infcall_mmap != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_infcall_mmap called\n");
+  return gdbarch->infcall_mmap (size, prot);
+}
+
+void
+set_gdbarch_infcall_mmap (struct gdbarch *gdbarch,
+                          gdbarch_infcall_mmap_ftype infcall_mmap)
+{
+  gdbarch->infcall_mmap = infcall_mmap;
+}
+
+char *
+gdbarch_gcc_target_options (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->gcc_target_options != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_gcc_target_options called\n");
+  return gdbarch->gcc_target_options (gdbarch);
+}
+
+void
+set_gdbarch_gcc_target_options (struct gdbarch *gdbarch,
+                                gdbarch_gcc_target_options_ftype gcc_target_options)
+{
+  gdbarch->gcc_target_options = gcc_target_options;
 }
 
 

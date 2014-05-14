@@ -1,5 +1,16 @@
 2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* arch-utils.c (default_infcall_mmap)
+	(default_gcc_target_options): New functions.
+	* arch-utils.h (GDB_MMAP_PROT_READ, GDB_MMAP_PROT_WRITE)
+	(GDB_MMAP_PROT_EXEC): Define.
+	(default_infcall_mmap, default_gcc_target_options): Declare.
+	* gdbarch.h: Rebuild.
+	* gdbarch.c: Rebuild.
+	* gdbarch.sh (infcall_mmap, gcc_target_options): New methods.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dummy-frame.c (struct dummy_frame) <dtor, dtor_data>: New
 	fields.
 	(pop_dummy_frame): Call the destructor if it exists.

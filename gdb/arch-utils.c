@@ -858,6 +858,22 @@ default_skip_permanent_breakpoint (struct regcache *regcache)
   regcache_write_pc (regcache, current_pc);
 }
 
+CORE_ADDR
+default_infcall_mmap (CORE_ADDR size, unsigned prot)
+{
+  error (_("This target does not support inferior memory allocation by mmap."));
+}
+
+/* -mcmodel=large is used so that no GOT (Global Offset Table) is needed to be
+   created in inferior memory by GDB (normally it is set by ld.so).  */
+
+char *
+default_gcc_target_options (struct gdbarch *gdbarch)
+{
+  return xstrprintf ("-m%d%s", gdbarch_ptr_bit (gdbarch),
+		     gdbarch_ptr_bit (gdbarch) == 64 ? " -mcmodel=large" : "");
+}
+
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_gdbarch_utils;
 

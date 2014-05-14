@@ -1390,6 +1390,23 @@ typedef int (gdbarch_vsyscall_range_ftype) (struct gdbarch *gdbarch, struct mem_
 extern int gdbarch_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range);
 extern void set_gdbarch_vsyscall_range (struct gdbarch *gdbarch, gdbarch_vsyscall_range_ftype *vsyscall_range);
 
+/* Allocate SIZE bytes of PROT protected page aligned memory in inferior.
+   PROT has GDB_MMAP_PROT_* bitmask format.
+   Throw an error if it is not possible.  Returned address is always valid. */
+
+typedef CORE_ADDR (gdbarch_infcall_mmap_ftype) (CORE_ADDR size, unsigned prot);
+extern CORE_ADDR gdbarch_infcall_mmap (struct gdbarch *gdbarch, CORE_ADDR size, unsigned prot);
+extern void set_gdbarch_infcall_mmap (struct gdbarch *gdbarch, gdbarch_infcall_mmap_ftype *infcall_mmap);
+
+/* Return string (caller has to use xfree for it) with options for GCC
+   to produce code for this target, typically "-m64", "-m32" or "-m31".
+   These options are put before CU's DW_AT_producer compilation options so that
+   they can override it.  Method may also return NULL. */
+
+typedef char * (gdbarch_gcc_target_options_ftype) (struct gdbarch *gdbarch);
+extern char * gdbarch_gcc_target_options (struct gdbarch *gdbarch);
+extern void set_gdbarch_gcc_target_options (struct gdbarch *gdbarch, gdbarch_gcc_target_options_ftype *gcc_target_options);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 
