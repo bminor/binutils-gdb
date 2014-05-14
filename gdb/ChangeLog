@@ -1,5 +1,10 @@
 2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* s390-linux-tdep.c (s390_gcc_target_options): New function.
+	(s390_gdbarch_init): Add it to gdbarch.
+
+2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linux-tdep.c: Include objfiles.h and infcall.h.
 	(GDB_MMAP_MAP_PRIVATE, GDB_MMAP_MAP_ANONYMOUS, linux_infcall_mmap): New
 	function.

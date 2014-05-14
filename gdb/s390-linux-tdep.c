@@ -2808,6 +2808,14 @@ s390_address_class_name_to_type_flags (struct gdbarch *gdbarch,
     return 0;
 }
 
+/* Implement gdbarch_gcc_target_options.  GCC does not know "-m32".  */
+
+static char *
+s390_gcc_target_options (struct gdbarch *gdbarch)
+{
+  return xstrdup ("-m31");
+}
+
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
    gdbarch.h.  */
 
@@ -3104,6 +3112,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case ABI_LINUX_S390:
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
+      set_gdbarch_gcc_target_options (gdbarch, s390_gcc_target_options);
       set_solib_svr4_fetch_link_map_offsets
 	(gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
