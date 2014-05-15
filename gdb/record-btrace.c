@@ -1577,6 +1577,10 @@ record_btrace_step_thread (struct thread_info *tp)
   enum btrace_thread_flag flags;
   unsigned int steps;
 
+  /* We can't step without an execution history.  */
+  if (btrace_is_empty (tp))
+    return btrace_step_no_history ();
+
   btinfo = &tp->btrace;
   replay = btinfo->replay;
 
