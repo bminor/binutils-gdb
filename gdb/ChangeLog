@@ -1,3 +1,7 @@
+2014-05-15  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (read_structure_type): Delete outdated comments.
+
 2014-05-14  Tom Tromey  <tromey@redhat.com>
 
 	* macrocmd.c (print_macro_definition): Reindent.

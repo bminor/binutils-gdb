@@ -12802,19 +12802,14 @@ producer_is_icc (struct dwarf2_cu *cu)
 /* Called when we find the DIE that starts a structure or union scope
    (definition) to create a type for the structure or union.  Fill in
    the type's name and general properties; the members will not be
-   processed until process_structure_scope.
+   processed until process_structure_scope.  A symbol table entry for
+   the type will also not be done until process_structure_scope (assuming
+   the type has a name).
 
    NOTE: we need to call these functions regardless of whether or not the
    DIE has a DW_AT_name attribute, since it might be an anonymous
    structure or union.  This gets the type entered into our set of
-   user defined types.
-
-   However, if the structure is incomplete (an opaque struct/union)
-   then suppress creating a symbol table entry for it since gdb only
-   wants to find the one with the complete definition.  Note that if
-   it is complete, we just call new_symbol, which does it's own
-   checking about whether the struct/union is anonymous or not (and
-   suppresses creating a symbol table entry itself).  */
+   user defined types.  */
 
 static struct type *
 read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
