@@ -1,3 +1,9 @@
+2014-05-15  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/fission-reread.S: Remove directory from .dwo file path.
+	* gdb.dwarf2/fission-reread.exp: Set debug-file-directory before
+	loading file.  Add test for TU lookup.
+
 2014-05-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* lib/mi-support.exp (mi_run_cmd_full): Set arguments by
