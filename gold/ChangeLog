@@ -1,6 +1,10 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
+	2014-05-15  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (do_plt_fde_location): Handle zero length .glink.
+	Compare FDE contents with DW_CFA_nop rather than 0.
+
 	2014-03-07  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (Powerpc_relocate_functions::Overflow_check): Add
 	CHECK_UNSIGNED, CHECK_LOW_INSN, CHECK_HIGH_INSN.
