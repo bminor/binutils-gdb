@@ -1,3 +1,7 @@
+2014-05-16  John Marino  <binutils@marino.st>
+
+	* configure.tgt: Add /lib to dragonfly NATIVE_LIB_DIRS.
+
 2014-05-11  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* emulparams/nios2linux.sh (OTHER_GOT_SYMBOLS): Wrap _gp in HIDDEN(),

@@ -780,7 +780,7 @@ NATIVE_LIB_DIRS='/usr/local/lib /lib /usr/lib'
 case "${target}" in
 
 *-*-dragonfly*)
-  NATIVE_LIB_DIRS='/usr/lib /usr/pkg/lib /usr/local/lib'
+  NATIVE_LIB_DIRS='/lib /usr/lib /usr/pkg/lib /usr/local/lib'
   ;;
 
 *-*-freebsd*)
