@@ -1,3 +1,17 @@
+2014-05-16  Gregory Fong  <gregory.0xf0@gmail.com>
+
+	Import the "dirfd" gnulib module.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add dirfd.
+	* gnulib/aclocal.m4: Update.
+	* gnulib/config.in: Update.
+	* gnulib/configure: Update.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Update.
+	* gnulib/import/dirfd.c: New.
+	* gnulib/import/m4/dirfd.m4: New.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+
 2014-05-16  Pierre Muller  <muller@sourceware.org>
 	    Yao Qi  <yao@codesourcery.com>
 
