@@ -1,5 +1,9 @@
 2014-05-16  Doug Evans  <dje@google.com>
 
+	* gdb.base/Makefile.in (EXECUTABLES): Add completion.
+
+2014-05-16  Doug Evans  <dje@google.com>
+
 	* gdb.base/catch-syscall.exp (test_catch_syscall_fail_nodatadir):
 	Update.
 	(do_syscall_tests_without_xml): Update.
