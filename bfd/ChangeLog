@@ -1,3 +1,14 @@
+2014-05-16  Jon Turney <jon.turney@dronecode.org.uk>
+
+	* peXXigen.c (pe_print_debugdata): Don't interpret debug directory
+	in a section with no contents.
+	(is_vma_in_section, find_section_by_vma): New functions.
+	(_bfd_XX_bfd_copy_private_bfd_data_common): Recalculate file
+	offsets in the debug directory.
+	(_bfd_XXi_slurp_codeview_record, _bfd_XXi_write_codeview_record):
+	Byte-swap GUID from little-endian to big-endian order for
+	consistent and conventional display.
+
 2014-05-16  Kaushik Phata  <Kaushik.Phatak@kpit.com>
 
 	* elf32-rl78.c (rl78_elf_merge_private_bfd_data): Complain if
@@ -425,7 +436,7 @@
 	of safe ppc476 insns at end of page.  Also remove non-branch insns.
 	Expand comments.
 
-2014-04-08  Jon TURNEY  <jon.turney@dronecode.org.uk>
+2014-04-08  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* peXXigen.c (pe_print_debugdata): New function: Displays the
 	contents of the debug directory and decodes codeview entries.

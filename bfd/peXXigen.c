@@ -1112,7 +1112,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
   if (bfd_bread (buffer, 256, abfd) < 4)
     return NULL;
 
-  /* ensure null termination of filename */
+  /* Ensure null termination of filename.  */
   buffer[256] = '\0';
 
   cvinfo->CVSignature = H_GET_32(abfd, buffer);
@@ -1124,7 +1124,15 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       CV_INFO_PDB70 *cvinfo70 = (CV_INFO_PDB70 *)(buffer);
 
       cvinfo->Age = H_GET_32(abfd, cvinfo70->Age);
-      memcpy (cvinfo->Signature, cvinfo70->Signature, CV_INFO_SIGNATURE_LENGTH);
+
+      /* A GUID consists of 4,2,2 byte values in little-endian order, followed
+         by 8 single bytes.  Byte swap them so we can conveniently treat the GUID
+         as 16 bytes in big-endian order.  */
+      bfd_putb32 (bfd_getl32 (cvinfo70->Signature), cvinfo->Signature);
+      bfd_putb16 (bfd_getl16 (&(cvinfo70->Signature[4])), &(cvinfo->Signature[4]));
+      bfd_putb16 (bfd_getl16 (&(cvinfo70->Signature[6])), &(cvinfo->Signature[6]));
+      memcpy (&(cvinfo->Signature[8]), &(cvinfo70->Signature[8]), 8);
+
       cvinfo->SignatureLength = CV_INFO_SIGNATURE_LENGTH;
       // cvinfo->PdbFileName = cvinfo70->PdbFileName;
 
@@ -1157,7 +1165,14 @@ _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinf
 
   cvinfo70 = (CV_INFO_PDB70 *) buffer;
   H_PUT_32 (abfd, CVINFO_PDB70_CVSIGNATURE, cvinfo70->CvSignature);
-  memcpy (&(cvinfo70->Signature), cvinfo->Signature, CV_INFO_SIGNATURE_LENGTH);
+
+  /* Byte swap the GUID from 16 bytes in big-endian order to 4,2,2 byte values
+     in little-endian order, followed by 8 single bytes.  */
+  bfd_putl32 (bfd_getb32 (cvinfo->Signature), cvinfo70->Signature);
+  bfd_putl16 (bfd_getb16 (&(cvinfo->Signature[4])), &(cvinfo70->Signature[4]));
+  bfd_putl16 (bfd_getb16 (&(cvinfo->Signature[6])), &(cvinfo70->Signature[6]));
+  memcpy (&(cvinfo70->Signature[8]), &(cvinfo->Signature[8]), 8);
+
   H_PUT_32 (abfd, cvinfo->Age, cvinfo70->Age);
   cvinfo70->PdbFileName[0] = '\0';
 
@@ -2446,6 +2461,13 @@ pe_print_debugdata (bfd * abfd, void * vfile)
                _("\nThere is a debug directory, but the section containing it could not be found\n"));
       return TRUE;
     }
+  else if (!(section->flags & SEC_HAS_CONTENTS))
+    {
+      fprintf (file,
+               _("\nThere is a debug directory in %s, but that section has no contents\n"),
+               section->name);
+      return TRUE;
+    }
 
   fprintf (file, _("\nThere is a debug directory in %s at 0x%lx\n\n"),
 	   section->name, (unsigned long) addr);
@@ -2689,6 +2711,19 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   return TRUE;
 }
 
+static bfd_boolean
+is_vma_in_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
+{
+  bfd_vma addr = * (bfd_vma *) obj;
+  return (addr >= sect->vma) && (addr < (sect->vma + sect->size));
+}
+
+static asection *
+find_section_by_vma (bfd *abfd, bfd_vma addr)
+{
+  return bfd_sections_find_if (abfd, is_vma_in_section, (void *) & addr);
+}
+
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
@@ -2726,6 +2761,47 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
   if (! pe_data (ibfd)->has_reloc_section
       && ! (pe_data (ibfd)->real_flags & IMAGE_FILE_RELOCS_STRIPPED))
     pe_data (obfd)->dont_strip_reloc = 1;
+
+  /* The file offsets contained in the debug directory need rewriting.  */
+  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size != 0)
+    {
+      bfd_vma addr = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].VirtualAddress
+	+ ope->pe_opthdr.ImageBase;
+      asection *section = find_section_by_vma (obfd, addr);
+      bfd_byte *data;
+
+      if (section && bfd_malloc_and_get_section (obfd, section, &data))
+        {
+          unsigned int i;
+          struct external_IMAGE_DEBUG_DIRECTORY *dd =
+	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
+
+          for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
+		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
+            {
+              asection *ddsection;
+              struct external_IMAGE_DEBUG_DIRECTORY *edd = &(dd[i]);
+              struct internal_IMAGE_DEBUG_DIRECTORY idd;
+
+              _bfd_XXi_swap_debugdir_in (obfd, edd, &idd);
+
+              if (idd.AddressOfRawData == 0)
+                continue; /* RVA 0 means only offset is valid, not handled yet.  */
+
+              ddsection = find_section_by_vma (obfd, idd.AddressOfRawData + ope->pe_opthdr.ImageBase);
+              if (!ddsection)
+                continue; /* Not in a section! */
+
+              idd.PointerToRawData = ddsection->filepos + (idd.AddressOfRawData
+							   + ope->pe_opthdr.ImageBase) - ddsection->vma;
+
+              _bfd_XXi_swap_debugdir_out (obfd, &idd, edd);
+            }
+
+          if (!bfd_set_section_contents (obfd, section, data, 0, section->size))
+            _bfd_error_handler (_("Failed to update file offsets in debug directory"));
+        }
+    }
 
   return TRUE;
 }
