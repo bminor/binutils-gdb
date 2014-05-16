@@ -1,4 +1,8 @@
-2014-05-16  Jon Turney <jon.turney@dronecode.org.uk>
+2014-05-16  Ryan Mansfield  <rmansfield@qnx.com>
+
+        * config.bfd: Move QNX target_cflags from arm-*-netbsd* to arm-*-nto*.
+
+2014-05-16  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* peXXigen.c (pe_print_debugdata): Don't interpret debug directory
 	in a section with no contents.

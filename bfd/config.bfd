@@ -286,11 +286,11 @@ case "${targ}" in
     targ_defvec=arm_aout_nbsd_vec
     targ_selvecs="arm_elf32_le_vec arm_elf32_be_vec"
     targ_underscore=yes
-    targ_cflags=-D__QNXTARGET__
     ;;
   arm-*-nto* | nto*arm*)
     targ_defvec=arm_elf32_le_vec
     targ_selvecs=arm_elf32_be_vec
+    targ_cflags=-D__QNXTARGET__
     ;;
   arm-*-riscix*)
     targ_defvec=arm_aout_riscix_vec
