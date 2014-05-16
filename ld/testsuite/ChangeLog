@@ -1,3 +1,8 @@
+2014-05-20  Will Newton  <will.newton@linaro.org>
+
+	* ld-shared/shared.exp: Mark non-PIC shared object tests
+	as xfail on aarch64.
+
 2014-05-19  Andreas Tobler  <andreast@fgznet.ch>
 
 	* ld-elf/shared.exp: Introduce the extralibs variable to control
