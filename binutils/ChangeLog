@@ -1,3 +1,7 @@
+2014-05-16  Kaushik Phata  <Kaushik.Phatak@kpit.com>
+
+	* readelf.c (get_machine_flags): Handle RL78 64-bit doubles flag.
+
 2014-05-02  Alan Modra  <amodra@gmail.com>
 
 	* emul_aix.c: Update bfd target vector naming.

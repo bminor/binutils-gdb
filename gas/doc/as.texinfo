@@ -479,6 +479,12 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-msolaris}|@b{-mno-solaris}]
    [@b{-nops=@var{count}}]
 @end ifset
+@ifset RL78
+
+@emph{Target RL78 options:}
+   [@b{-mg10}]
+   [@b{-m32bit-doubles}|@b{-m64bit-doubles}]
+@end ifset
 @ifset RX
 
 @emph{Target RX options:}

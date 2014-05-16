@@ -32,6 +32,14 @@ Enable support for link-time relaxation.
 Mark the generated binary as targeting the G10 variant of the RL78
 architecture.
 
+@item m32bit-doubles
+Mark the generated binary as one that uses 32-bits to hold the
+@code{double} floating point type.  This is the default.
+
+@item m64bit-doubles
+Mark the generated binary as one that uses 64-bits to hold the
+@code{double} floating point type.
+
 @end table
 
 @node RL78-Modifiers
@@ -85,8 +93,10 @@ In addition to the common directives, the RL78 adds these:
 @table @code
 
 @item .double
-Output a constant in ``double'' format, which is a 32-bit floating
-point value on RL78.
+Output a constant in ``double'' format, which is either a 32-bit
+or a 64-bit floating point value, depending upon the setting of the
+@option{-m32bit-doubles}|@option{-m64bit-doubles} command line
+option.
 
 @item .bss
 Select the BSS section.

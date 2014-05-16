@@ -1,3 +1,9 @@
+2014-05-16  Kaushik Phata  <Kaushik.Phatak@kpit.com>
+
+	* elf32-rl78.c (rl78_elf_merge_private_bfd_data): Complain if
+	64-bit doubles objects mix with 32-bit doubles objects.
+	(rl78_elf_print_private_bfd_data): Describe 64-bit doubles flag.
+
 2014-05-08  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c: Update URLs in documentation comments.

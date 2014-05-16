@@ -1,3 +1,15 @@
+2014-05-16  Kaushik Phata  <Kaushik.Phatak@kpit.com>
+
+	* config/tc-rl78.c (enum options): Add OPTION_32BIT_DOUBLES
+	and OPTION_64BIT_DOUBLES.
+	(md_longopts): Add -m32bit-doubles and -m64bit-doubles.
+	(md_parse_option): Parse -m32bit-doubles and -m64bit-doubles.
+	(md_show_usage): Show all of the RL78 options.
+	(rl78_float_cons): New static functions.
+	(md_pseudo_table): Update handler for "double".
+	* doc/c-rl78.texi: Document new options.
+	* doc/as.texinfo: Likewise.
+
 2014-05-13  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c (mips_set_options): Rename gp32 to gp throughout.
