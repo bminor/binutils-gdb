@@ -1,6 +1,8 @@
 2014-05-16  Doug Evans  <dje@google.com>
 
 	* gdb.base/Makefile.in (EXECUTABLES): Add completion.
+	* gdb.base/completion.exp: Check that all expected files exist
+	before doing file completion.
 
 2014-05-16  Doug Evans  <dje@google.com>
 
