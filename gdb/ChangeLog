@@ -1,3 +1,17 @@
+2014-05-16  Doug Evans  <dje@google.com>
+
+	New command line option -D.
+	* NEWS: Mention it.
+	* main.c (set_gdb_data_directory): New function.
+	(captured_main): Recognize -D.  Flag error for --data-directory "".
+	Call set_gdb_data_directory.
+	(print_gdb_help): Print --data-directory, -D.
+	* main.h (set_gdb_data_directory): Declare.
+	* top.c (staged_gdb_datadir): New static global.
+	(set_gdb_datadir): Call set_gdb_data_directory
+	(show_gdb_datadir): New function.
+	(init_main): Update init of data-directory parameter.
+
 2014-05-16  Gregory Fong  <gregory.0xf0@gmail.com>
 
 	Import the "dirfd" gnulib module.

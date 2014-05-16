@@ -106,6 +106,41 @@ get_gdb_program_name (void)
 
 static void print_gdb_help (struct ui_file *);
 
+/* Set the data-directory parameter to NEW_DATADIR.
+   If NEW_DATADIR is not a directory then a warning is printed.
+   We don't signal an error for backward compatibility.  */
+
+void
+set_gdb_data_directory (const char *new_datadir)
+{
+  struct stat st;
+
+  if (stat (new_datadir, &st) < 0)
+    {
+      int save_errno = errno;
+
+      fprintf_unfiltered (gdb_stderr, "Warning: ");
+      print_sys_errmsg (new_datadir, save_errno);
+    }
+  else if (!S_ISDIR (st.st_mode))
+    warning (_("%s is not a directory."), new_datadir);
+
+  xfree (gdb_datadir);
+  gdb_datadir = gdb_realpath (new_datadir);
+
+  /* gdb_realpath won't return an absolute path if the path doesn't exist,
+     but we still want to record an absolute path here.  If the user entered
+     "../foo" and "../foo" doesn't exist then we'll record $(pwd)/../foo which
+     isn't canonical, but that's ok.  */
+  if (!IS_ABSOLUTE_PATH (gdb_datadir))
+    {
+      char *abs_datadir = gdb_abspath (gdb_datadir);
+
+      xfree (gdb_datadir);
+      gdb_datadir = abs_datadir;
+    }
+}
+
 /* Relocate a file or directory.  PROGNAME is the name by which gdb
    was invoked (i.e., argv[0]).  INITIAL is the default value for the
    file or directory.  FLAG is true if the value is relocatable, false
@@ -517,6 +552,7 @@ captured_main (void *data)
       {"directory", required_argument, 0, 'd'},
       {"d", required_argument, 0, 'd'},
       {"data-directory", required_argument, 0, 'D'},
+      {"D", required_argument, 0, 'D'},
       {"cd", required_argument, 0, OPT_CD},
       {"tty", required_argument, 0, 't'},
       {"baud", required_argument, 0, 'b'},
@@ -641,8 +677,15 @@ captured_main (void *data)
 	    gdb_stdout = ui_file_new();
 	    break;
 	  case 'D':
-	    xfree (gdb_datadir);
-	    gdb_datadir = xstrdup (optarg);
+	    if (optarg[0] == '\0')
+	      {
+		fprintf_unfiltered (gdb_stderr,
+				    _("%s: empty path for"
+				      " `--data-directory'\n"),
+				    argv[0]);
+		exit (1);
+	      }
+	    set_gdb_data_directory (optarg);
 	    gdb_datadir_provided = 1;
 	    break;
 #ifdef GDBTK
@@ -1146,6 +1189,8 @@ Remote debugging options:\n\n\
   -l TIMEOUT         Set timeout in seconds for remote debugging.\n\n\
 Other options:\n\n\
   --cd=DIR           Change current directory to DIR.\n\
+  --data-directory=DIR, -D\n\
+                     Set GDB's data-directory to DIR.\n\
 "), stream);
   fputs_unfiltered (_("\n\
 At startup, GDB reads the following init files and executes their commands:\n\

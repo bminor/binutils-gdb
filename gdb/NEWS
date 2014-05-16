@@ -3,6 +3,11 @@
 
 *** Changes since GDB 7.7
 
+* New command line options
+
+-D data-directory
+  This is an alias for the --data-directory option.
+
 * GDB supports printing and modifying of variable length automatic arrays
   as specified in ISO C99.
 

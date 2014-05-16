@@ -1164,7 +1164,9 @@ Run @value{GDBN} using @var{directory} as its working directory,
 instead of the current directory.
 
 @item -data-directory @var{directory}
+@itemx -D @var{directory}
 @cindex @code{--data-directory}
+@cindex @code{-D}
 Run @value{GDBN} using @var{directory} as its data directory.
 The data directory is where @value{GDBN} searches for its
 auxiliary files.  @xref{Data Files}.

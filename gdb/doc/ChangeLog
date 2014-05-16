@@ -1,3 +1,7 @@
+2014-05-16  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Mode Options): Add -D.
+
 2014-05-09  Samuel Bronson  <naesten@gmail.com>
 
 	* Makefile.in (PACKAGE): Copy from ../Makefile.in in case of

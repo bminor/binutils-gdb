@@ -1668,12 +1668,26 @@ show_exec_done_display_p (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* New values of the "data-directory" parameter are staged here.  */
+static char *staged_gdb_datadir;
+
 /* "set" command for the gdb_datadir configuration variable.  */
 
 static void
 set_gdb_datadir (char *args, int from_tty, struct cmd_list_element *c)
 {
+  set_gdb_data_directory (staged_gdb_datadir);
   observer_notify_gdb_datadir_changed ();
+}
+
+/* "show" command for the gdb_datadir configuration variable.  */
+
+static void
+show_gdb_datadir (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("GDB's data directory is \"%s\".\n"),
+		    gdb_datadir);
 }
 
 static void
@@ -1793,11 +1807,11 @@ Use \"on\" to enable the notification, and \"off\" to disable it."),
 			   &setlist, &showlist);
 
   add_setshow_filename_cmd ("data-directory", class_maintenance,
-                           &gdb_datadir, _("Set GDB's data directory."),
+                           &staged_gdb_datadir, _("Set GDB's data directory."),
                            _("Show GDB's data directory."),
                            _("\
 When set, GDB uses the specified path to search for data files."),
-                           set_gdb_datadir, NULL,
+                           set_gdb_datadir, show_gdb_datadir,
                            &setlist,
                            &showlist);
 }
