@@ -1060,7 +1060,7 @@ proc mi_expect_stop { reason func args file line extra test } {
 		pass "$test"
 	    }
 	    timeout {
-		fail "$test (unknown output after running)"
+		fail "$test (timeout)"
 	    }
 	}
 	return
@@ -1074,7 +1074,7 @@ proc mi_expect_stop { reason func args file line extra test } {
 	    }
 	    -re ".*$mi_gdb_prompt$" {fail "continue to end (2)"}
 	    timeout {
-		fail "$test (unknown output after running)"
+		fail "$test (timeout)"
 	    }
 	}
 	return
@@ -1088,7 +1088,7 @@ proc mi_expect_stop { reason func args file line extra test } {
 		fail "$test (inferior not stopped)"
 	    }
 	    timeout {
-		fail "$test (unknown output after running)"
+		fail "$test (timeout)"
 	    }
 	}
 	return
@@ -1102,7 +1102,7 @@ proc mi_expect_stop { reason func args file line extra test } {
 		pass "$test"
 	    }
 	    timeout {
-		fail "$test (unknown output after running)"
+		fail "$test (timeout)"
 	    }
 	}
 	return

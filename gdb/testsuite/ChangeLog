@@ -1,3 +1,8 @@
+2014-05-16  Pedro Alves  <palves@redhat.com>
+
+	* lib/mi-support.exp (mi_expect_stop): On timeout, say "timeout"
+	instead of "unknown output after running".
+
 2014-05-16  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.dwarf2/dw2-filename.exp: Copy file1.txt to host.  Remove
