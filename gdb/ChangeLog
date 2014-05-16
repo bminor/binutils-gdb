@@ -1,3 +1,8 @@
+2014-05-16  Taimoor Mirza  <tmirza@codesourcery.com>
+
+        * arm-tdep.c (thumb_analyze_prologue): Fix offset calculation for
+	ldr.w and ldrd instructions.
+
 2014-05-15  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_structure_type): Delete outdated comments.
