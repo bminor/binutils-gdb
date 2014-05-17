@@ -2029,6 +2029,12 @@ handle_lo16 (const struct v850_operand *operand, const char **errmsg)
 static bfd_reloc_code_real_type
 handle_ctoff (const struct v850_operand *operand, const char **errmsg)
 {
+  if (v850_target_arch == bfd_arch_v850_rh850)
+    {
+      *errmsg = _("ctoff() is not supported by the rh850 ABI. Use -mgcc-abi instead");
+      return BFD_RELOC_64;  /* Used to indicate an error condition.  */
+    }
+
   if (operand == NULL)
     return BFD_RELOC_V850_CALLT_16_16_OFFSET;
 

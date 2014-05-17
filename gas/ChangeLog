@@ -1,3 +1,9 @@
+2014-05-17  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16946
+	* config/tc-v850.c (handle_ctoff): Generate an error if called
+	when using the RH850 ABI.
+
 2014-05-16  Kaushik Phata  <Kaushik.Phatak@kpit.com>
 
 	* config/tc-rl78.c (enum options): Add OPTION_32BIT_DOUBLES
