@@ -236,9 +236,6 @@ extern struct program_space *current_program_space;
    pointer to the new object.  */
 extern struct program_space *add_program_space (struct address_space *aspace);
 
-/* Release PSPACE and removes it from the pspace list.  */
-extern void remove_program_space (struct program_space *pspace);
-
 /* Returns the number of program spaces listed.  */
 extern int number_of_program_spaces (void);
 

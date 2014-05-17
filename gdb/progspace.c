@@ -170,30 +170,6 @@ release_program_space (struct program_space *pspace)
   do_cleanups (old_chain);
 }
 
-/* Unlinks PSPACE from the pspace list, and releases it.  */
-
-void
-remove_program_space (struct program_space *pspace)
-{
-  struct program_space *ss, **ss_link;
-
-  ss = program_spaces;
-  ss_link = &program_spaces;
-  while (ss)
-    {
-      if (ss != pspace)
-	{
-	  ss_link = &ss->next;
-	  ss = *ss_link;
-	  continue;
-	}
-
-      *ss_link = ss->next;
-      release_program_space (ss);
-      ss = *ss_link;
-    }
-}
-
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
 

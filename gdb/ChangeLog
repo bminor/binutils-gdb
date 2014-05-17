@@ -1,5 +1,10 @@
 2014-05-17  Doug Evans  <xdje42@gmail.com>
 
+	* progspace.c (remove_program_space): Delete, unused.
+	* progspace.h (remove_program_space): Ditto.
+
+2014-05-17  Doug Evans  <xdje42@gmail.com>
+
 	* inferior.c (prune_inferiors): Fix comment.
 	(remove_inferior_command): Call prune_program_spaces.
 
