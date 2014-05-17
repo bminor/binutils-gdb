@@ -1,3 +1,8 @@
+2014-05-17  Doug Evans  <xdje42@gmail.com>
+
+	* inferior.c (prune_inferiors): Fix comment.
+	(remove_inferior_command): Call prune_program_spaces.
+
 2014-05-16  Doug Evans  <dje@google.com>
 
 	New command line option -D.
