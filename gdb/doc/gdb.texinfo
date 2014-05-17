@@ -34806,6 +34806,12 @@ with @samp{l} (lower-case ell, for @dfn{last}).
 Refer to @ref{thread-id syntax}, for the format of the @var{thread-id}
 fields.
 
+@emph{Note: @value{GDBN} will send the @code{qfThreadInfo} query during the
+initial connection with the remote target, and the very first thread ID
+mentioned in the reply will be stopped by @value{GDBN} in a subsequent
+message.  Therefore, the stub should ensure that the first thread ID in
+the @code{qfThreadInfo} reply is suitable for being stopped by @value{GDBN}.}
+
 @item qGetTLSAddr:@var{thread-id},@var{offset},@var{lm}
 @cindex get thread-local storage address, remote request
 @cindex @samp{qGetTLSAddr} packet
