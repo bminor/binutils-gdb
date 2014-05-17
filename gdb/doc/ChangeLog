@@ -1,3 +1,19 @@
+2014-05-17  Doug Evans  <xdje42@gmail.com>
+
+	Copy over changes from guile.texi.
+	* python.texi (Basic Python) <gdb.execute>: Add text.
+	(Basic Python) <gdb.post_event>: Remove "main" from "main GDB thread".
+	(Values From Inferior) <Python string>: Add text.
+	(Values From Inferior) <Value.string>: Clarify string length handling.
+	(Pretty Printing API): Add cindex.
+	(Types In Python) <TYPE_CODE_*>: Use vtable instead of table.
+	Remove unnecessary index of gdb.TYPE_CODE_*.  Replace @findex with
+	@vindex.
+	(Commands In Python) <COMPLETE_*>: Similarly.
+	(Symbols In Python) <SYMBOL_*>: Similarly.
+	(Breakpoints In Python) <WP_*>: Similarly.
+	(Breakpoints In Python) <BP_*>: Similarly.
+
 2014-05-17  David Taylor <dtaylor@emc.com>
 
 	* gdb.texinfo (General Query Packets): Add a note about thread IDs

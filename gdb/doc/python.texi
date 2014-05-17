@@ -220,7 +220,8 @@ command as having originated from the user invoking it interactively.
 It must be a boolean value.  If omitted, it defaults to @code{False}.
 
 By default, any output produced by @var{command} is sent to
-@value{GDBN}'s standard output.  If the @var{to_string} parameter is
+@value{GDBN}'s standard output (and to the log output if logging is
+turned on).  If the @var{to_string} parameter is
 @code{True}, then output will be collected by @code{gdb.execute} and
 returned as a string.  The default is @code{False}, in which case the
 return value is @code{None}.  If @var{to_string} is @code{True}, the
@@ -295,7 +296,7 @@ processed relative to other events inside @value{GDBN}.
 
 @value{GDBN} is not thread-safe.  If your Python program uses multiple
 threads, you must be careful to only call @value{GDBN}-specific
-functions in the main @value{GDBN} thread.  @code{post_event} ensures
+functions in the @value{GDBN} thread.  @code{post_event} ensures
 this.  For example:
 
 @smallexample
@@ -660,8 +661,10 @@ A Python float is converted to the C @code{double} type for the
 current architecture.
 
 @item Python string
-A Python string is converted to a target string, using the current
-target encoding.
+A Python string is converted to a target string in the current target
+language using the current target encoding.
+If a character cannot be represented in the current target encoding,
+then an exception is thrown.
 
 @item @code{gdb.Value}
 If @code{val} is a @code{gdb.Value}, then a copy of the value is made.
@@ -789,15 +792,16 @@ If this @code{gdb.Value} represents a string, then this method
 converts the contents to a Python string.  Otherwise, this method will
 throw an exception.
 
-Strings are recognized in a language-specific way; whether a given
-@code{gdb.Value} represents a string is determined by the current
-language.
+Values are interpreted as strings according to the rules of the
+current language.  If the optional length argument is given, the
+string will be converted to that length, and will include any embedded
+zeroes that the string may contain.  Otherwise, for languages
+where the string is zero-terminated, the entire string will be
+converted.
 
-For C-like languages, a value is a string if it is a pointer to or an
-array of characters or ints.  The string is assumed to be terminated
-by a zero of the appropriate width.  However if the optional length
-argument is given, the string will be converted to that given length,
-ignoring any embedded zeros that the string may contain.
+For example, in C-like languages, a value is a string if it is a pointer
+to or an array of characters or ints of type @code{wchar_t}, @code{char16_t},
+or @code{char32_t}.
 
 If the optional @var{encoding} argument is given, it must be a string
 naming the encoding of the string in the @code{gdb.Value}, such as
@@ -1057,145 +1061,120 @@ Each type has a code, which indicates what category this type falls
 into.  The available type categories are represented by constants
 defined in the @code{gdb} module:
 
-@table @code
-@findex TYPE_CODE_PTR
-@findex gdb.TYPE_CODE_PTR
+@vtable @code
+@vindex TYPE_CODE_PTR
 @item gdb.TYPE_CODE_PTR
 The type is a pointer.
 
-@findex TYPE_CODE_ARRAY
-@findex gdb.TYPE_CODE_ARRAY
+@vindex TYPE_CODE_ARRAY
 @item gdb.TYPE_CODE_ARRAY
 The type is an array.
 
-@findex TYPE_CODE_STRUCT
-@findex gdb.TYPE_CODE_STRUCT
+@vindex TYPE_CODE_STRUCT
 @item gdb.TYPE_CODE_STRUCT
 The type is a structure.
 
-@findex TYPE_CODE_UNION
-@findex gdb.TYPE_CODE_UNION
+@vindex TYPE_CODE_UNION
 @item gdb.TYPE_CODE_UNION
 The type is a union.
 
-@findex TYPE_CODE_ENUM
-@findex gdb.TYPE_CODE_ENUM
+@vindex TYPE_CODE_ENUM
 @item gdb.TYPE_CODE_ENUM
 The type is an enum.
 
-@findex TYPE_CODE_FLAGS
-@findex gdb.TYPE_CODE_FLAGS
+@vindex TYPE_CODE_FLAGS
 @item gdb.TYPE_CODE_FLAGS
 A bit flags type, used for things such as status registers.
 
-@findex TYPE_CODE_FUNC
-@findex gdb.TYPE_CODE_FUNC
+@vindex TYPE_CODE_FUNC
 @item gdb.TYPE_CODE_FUNC
 The type is a function.
 
-@findex TYPE_CODE_INT
-@findex gdb.TYPE_CODE_INT
+@vindex TYPE_CODE_INT
 @item gdb.TYPE_CODE_INT
 The type is an integer type.
 
-@findex TYPE_CODE_FLT
-@findex gdb.TYPE_CODE_FLT
+@vindex TYPE_CODE_FLT
 @item gdb.TYPE_CODE_FLT
 A floating point type.
 
-@findex TYPE_CODE_VOID
-@findex gdb.TYPE_CODE_VOID
+@vindex TYPE_CODE_VOID
 @item gdb.TYPE_CODE_VOID
 The special type @code{void}.
 
-@findex TYPE_CODE_SET
-@findex gdb.TYPE_CODE_SET
+@vindex TYPE_CODE_SET
 @item gdb.TYPE_CODE_SET
 A Pascal set type.
 
-@findex TYPE_CODE_RANGE
-@findex gdb.TYPE_CODE_RANGE
+@vindex TYPE_CODE_RANGE
 @item gdb.TYPE_CODE_RANGE
 A range type, that is, an integer type with bounds.
 
-@findex TYPE_CODE_STRING
-@findex gdb.TYPE_CODE_STRING
+@vindex TYPE_CODE_STRING
 @item gdb.TYPE_CODE_STRING
 A string type.  Note that this is only used for certain languages with
 language-defined string types; C strings are not represented this way.
 
-@findex TYPE_CODE_BITSTRING
-@findex gdb.TYPE_CODE_BITSTRING
+@vindex TYPE_CODE_BITSTRING
 @item gdb.TYPE_CODE_BITSTRING
 A string of bits.  It is deprecated.
 
-@findex TYPE_CODE_ERROR
-@findex gdb.TYPE_CODE_ERROR
+@vindex TYPE_CODE_ERROR
 @item gdb.TYPE_CODE_ERROR
 An unknown or erroneous type.
 
-@findex TYPE_CODE_METHOD
-@findex gdb.TYPE_CODE_METHOD
+@vindex TYPE_CODE_METHOD
 @item gdb.TYPE_CODE_METHOD
 A method type, as found in C@t{++} or Java.
 
-@findex TYPE_CODE_METHODPTR
-@findex gdb.TYPE_CODE_METHODPTR
+@vindex TYPE_CODE_METHODPTR
 @item gdb.TYPE_CODE_METHODPTR
 A pointer-to-member-function.
 
-@findex TYPE_CODE_MEMBERPTR
-@findex gdb.TYPE_CODE_MEMBERPTR
+@vindex TYPE_CODE_MEMBERPTR
 @item gdb.TYPE_CODE_MEMBERPTR
 A pointer-to-member.
 
-@findex TYPE_CODE_REF
-@findex gdb.TYPE_CODE_REF
+@vindex TYPE_CODE_REF
 @item gdb.TYPE_CODE_REF
 A reference type.
 
-@findex TYPE_CODE_CHAR
-@findex gdb.TYPE_CODE_CHAR
+@vindex TYPE_CODE_CHAR
 @item gdb.TYPE_CODE_CHAR
 A character type.
 
-@findex TYPE_CODE_BOOL
-@findex gdb.TYPE_CODE_BOOL
+@vindex TYPE_CODE_BOOL
 @item gdb.TYPE_CODE_BOOL
 A boolean type.
 
-@findex TYPE_CODE_COMPLEX
-@findex gdb.TYPE_CODE_COMPLEX
+@vindex TYPE_CODE_COMPLEX
 @item gdb.TYPE_CODE_COMPLEX
 A complex float type.
 
-@findex TYPE_CODE_TYPEDEF
-@findex gdb.TYPE_CODE_TYPEDEF
+@vindex TYPE_CODE_TYPEDEF
 @item gdb.TYPE_CODE_TYPEDEF
 A typedef to some other type.
 
-@findex TYPE_CODE_NAMESPACE
-@findex gdb.TYPE_CODE_NAMESPACE
+@vindex TYPE_CODE_NAMESPACE
 @item gdb.TYPE_CODE_NAMESPACE
 A C@t{++} namespace.
 
-@findex TYPE_CODE_DECFLOAT
-@findex gdb.TYPE_CODE_DECFLOAT
+@vindex TYPE_CODE_DECFLOAT
 @item gdb.TYPE_CODE_DECFLOAT
 A decimal floating point type.
 
-@findex TYPE_CODE_INTERNAL_FUNCTION
-@findex gdb.TYPE_CODE_INTERNAL_FUNCTION
+@vindex TYPE_CODE_INTERNAL_FUNCTION
 @item gdb.TYPE_CODE_INTERNAL_FUNCTION
 A function internal to @value{GDBN}.  This is the type used to represent
 convenience functions.
-@end table
+@end vtable
 
 Further support for types is provided in the @code{gdb.types}
 Python module (@pxref{gdb.types}).
 
 @node Pretty Printing API
 @subsubsection Pretty Printing API
+@cindex python pretty printing api
 
 An example output is provided (@pxref{Pretty Printing}).
 
@@ -1290,6 +1269,7 @@ printer exists, then this returns @code{None}.
 
 @node Selecting Pretty-Printers
 @subsubsection Selecting Pretty-Printers
+@cindex selecting python pretty-printers
 
 The Python list @code{gdb.pretty_printers} contains an array of
 functions or callable objects that have been registered via addition
@@ -2698,42 +2678,36 @@ specifying it via an argument at initialization, or by returning it
 from the @code{complete} method.  These predefined completion
 constants are all defined in the @code{gdb} module:
 
-@table @code
-@findex COMPLETE_NONE
-@findex gdb.COMPLETE_NONE
+@vtable @code
+@vindex COMPLETE_NONE
 @item gdb.COMPLETE_NONE
 This constant means that no completion should be done.
 
-@findex COMPLETE_FILENAME
-@findex gdb.COMPLETE_FILENAME
+@vindex COMPLETE_FILENAME
 @item gdb.COMPLETE_FILENAME
 This constant means that filename completion should be performed.
 
-@findex COMPLETE_LOCATION
-@findex gdb.COMPLETE_LOCATION
+@vindex COMPLETE_LOCATION
 @item gdb.COMPLETE_LOCATION
 This constant means that location completion should be done.
 @xref{Specify Location}.
 
-@findex COMPLETE_COMMAND
-@findex gdb.COMPLETE_COMMAND
+@vindex COMPLETE_COMMAND
 @item gdb.COMPLETE_COMMAND
 This constant means that completion should examine @value{GDBN}
 command names.
 
-@findex COMPLETE_SYMBOL
-@findex gdb.COMPLETE_SYMBOL
+@vindex COMPLETE_SYMBOL
 @item gdb.COMPLETE_SYMBOL
 This constant means that completion should be done using symbol names
 as the source.
 
-@findex COMPLETE_EXPRESSION
-@findex gdb.COMPLETE_EXPRESSION
+@vindex COMPLETE_EXPRESSION
 @item gdb.COMPLETE_EXPRESSION
 This constant means that completion should be done on expressions.
 Often this means completing on symbol names, but some language
 parsers also have support for completing on field names.
-@end table
+@end vtable
 
 The following code snippet shows how a trivial CLI command can be
 implemented in Python:
@@ -3550,111 +3524,109 @@ exception.
 The available domain categories in @code{gdb.Symbol} are represented
 as constants in the @code{gdb} module:
 
-@table @code
-@findex SYMBOL_UNDEF_DOMAIN
-@findex gdb.SYMBOL_UNDEF_DOMAIN
+@vtable @code
+@vindex SYMBOL_UNDEF_DOMAIN
 @item gdb.SYMBOL_UNDEF_DOMAIN
 This is used when a domain has not been discovered or none of the
 following domains apply.  This usually indicates an error either
 in the symbol information or in @value{GDBN}'s handling of symbols.
-@findex SYMBOL_VAR_DOMAIN
-@findex gdb.SYMBOL_VAR_DOMAIN
+
+@vindex SYMBOL_VAR_DOMAIN
 @item gdb.SYMBOL_VAR_DOMAIN
 This domain contains variables, function names, typedef names and enum
 type values.
-@findex SYMBOL_STRUCT_DOMAIN
-@findex gdb.SYMBOL_STRUCT_DOMAIN
+
+@vindex SYMBOL_STRUCT_DOMAIN
 @item gdb.SYMBOL_STRUCT_DOMAIN
 This domain holds struct, union and enum type names.
-@findex SYMBOL_LABEL_DOMAIN
-@findex gdb.SYMBOL_LABEL_DOMAIN
+
+@vindex SYMBOL_LABEL_DOMAIN
 @item gdb.SYMBOL_LABEL_DOMAIN
 This domain contains names of labels (for gotos).
-@findex SYMBOL_VARIABLES_DOMAIN
-@findex gdb.SYMBOL_VARIABLES_DOMAIN
+
+@vindex SYMBOL_VARIABLES_DOMAIN
 @item gdb.SYMBOL_VARIABLES_DOMAIN
 This domain holds a subset of the @code{SYMBOLS_VAR_DOMAIN}; it
 contains everything minus functions and types.
-@findex SYMBOL_FUNCTIONS_DOMAIN
-@findex gdb.SYMBOL_FUNCTIONS_DOMAIN
+
+@vindex SYMBOL_FUNCTIONS_DOMAIN
 @item gdb.SYMBOL_FUNCTION_DOMAIN
 This domain contains all functions.
-@findex SYMBOL_TYPES_DOMAIN
-@findex gdb.SYMBOL_TYPES_DOMAIN
+
+@vindex SYMBOL_TYPES_DOMAIN
 @item gdb.SYMBOL_TYPES_DOMAIN
 This domain contains all types.
-@end table
+@end vtable
 
 The available address class categories in @code{gdb.Symbol} are represented
 as constants in the @code{gdb} module:
 
-@table @code
-@findex SYMBOL_LOC_UNDEF
-@findex gdb.SYMBOL_LOC_UNDEF
+@vtable @code
+@vindex SYMBOL_LOC_UNDEF
 @item gdb.SYMBOL_LOC_UNDEF
 If this is returned by address class, it indicates an error either in
 the symbol information or in @value{GDBN}'s handling of symbols.
-@findex SYMBOL_LOC_CONST
-@findex gdb.SYMBOL_LOC_CONST
+
+@vindex SYMBOL_LOC_CONST
 @item gdb.SYMBOL_LOC_CONST
 Value is constant int.
-@findex SYMBOL_LOC_STATIC
-@findex gdb.SYMBOL_LOC_STATIC
+
+@vindex SYMBOL_LOC_STATIC
 @item gdb.SYMBOL_LOC_STATIC
 Value is at a fixed address.
-@findex SYMBOL_LOC_REGISTER
-@findex gdb.SYMBOL_LOC_REGISTER
+
+@vindex SYMBOL_LOC_REGISTER
 @item gdb.SYMBOL_LOC_REGISTER
 Value is in a register.
-@findex SYMBOL_LOC_ARG
-@findex gdb.SYMBOL_LOC_ARG
+
+@vindex SYMBOL_LOC_ARG
 @item gdb.SYMBOL_LOC_ARG
 Value is an argument.  This value is at the offset stored within the
 symbol inside the frame's argument list.
-@findex SYMBOL_LOC_REF_ARG
-@findex gdb.SYMBOL_LOC_REF_ARG
+
+@vindex SYMBOL_LOC_REF_ARG
 @item gdb.SYMBOL_LOC_REF_ARG
 Value address is stored in the frame's argument list.  Just like
 @code{LOC_ARG} except that the value's address is stored at the
 offset, not the value itself.
-@findex SYMBOL_LOC_REGPARM_ADDR
-@findex gdb.SYMBOL_LOC_REGPARM_ADDR
+
+@vindex SYMBOL_LOC_REGPARM_ADDR
 @item gdb.SYMBOL_LOC_REGPARM_ADDR
 Value is a specified register.  Just like @code{LOC_REGISTER} except
 the register holds the address of the argument instead of the argument
 itself.
-@findex SYMBOL_LOC_LOCAL
-@findex gdb.SYMBOL_LOC_LOCAL
+
+@vindex SYMBOL_LOC_LOCAL
 @item gdb.SYMBOL_LOC_LOCAL
 Value is a local variable.
-@findex SYMBOL_LOC_TYPEDEF
-@findex gdb.SYMBOL_LOC_TYPEDEF
+
+@vindex SYMBOL_LOC_TYPEDEF
 @item gdb.SYMBOL_LOC_TYPEDEF
 Value not used.  Symbols in the domain @code{SYMBOL_STRUCT_DOMAIN} all
 have this class.
-@findex SYMBOL_LOC_BLOCK
-@findex gdb.SYMBOL_LOC_BLOCK
+
+@vindex SYMBOL_LOC_BLOCK
 @item gdb.SYMBOL_LOC_BLOCK
 Value is a block.
-@findex SYMBOL_LOC_CONST_BYTES
-@findex gdb.SYMBOL_LOC_CONST_BYTES
+
+@vindex SYMBOL_LOC_CONST_BYTES
 @item gdb.SYMBOL_LOC_CONST_BYTES
 Value is a byte-sequence.
-@findex SYMBOL_LOC_UNRESOLVED
-@findex gdb.SYMBOL_LOC_UNRESOLVED
+
+@vindex SYMBOL_LOC_UNRESOLVED
 @item gdb.SYMBOL_LOC_UNRESOLVED
 Value is at a fixed address, but the address of the variable has to be
 determined from the minimal symbol table whenever the variable is
 referenced.
-@findex SYMBOL_LOC_OPTIMIZED_OUT
-@findex gdb.SYMBOL_LOC_OPTIMIZED_OUT
+
+@vindex SYMBOL_LOC_OPTIMIZED_OUT
 @item gdb.SYMBOL_LOC_OPTIMIZED_OUT
 The value does not actually exist in the program.
-@findex SYMBOL_LOC_COMPUTED
-@findex gdb.SYMBOL_LOC_COMPUTED
+
+@vindex SYMBOL_LOC_COMPUTED
 @item gdb.SYMBOL_LOC_COMPUTED
 The value's address is a computed location.
-@end table
+@end vtable
 
 @node Symbol Tables In Python
 @subsubsection Symbol table representation in Python.
@@ -3892,22 +3864,19 @@ class MyBreakpoint (gdb.Breakpoint):
 The available watchpoint types represented by constants are defined in the
 @code{gdb} module:
 
-@table @code
-@findex WP_READ
-@findex gdb.WP_READ
+@vtable @code
+@vindex WP_READ
 @item gdb.WP_READ
 Read only watchpoint.
 
-@findex WP_WRITE
-@findex gdb.WP_WRITE
+@vindex WP_WRITE
 @item gdb.WP_WRITE
 Write only watchpoint.
 
-@findex WP_ACCESS
-@findex gdb.WP_ACCESS
+@vindex WP_ACCESS
 @item gdb.WP_ACCESS
 Read/Write watchpoint.
-@end table
+@end vtable
 
 @defun Breakpoint.is_valid ()
 Return @code{True} if this @code{Breakpoint} object is valid,
@@ -3986,32 +3955,27 @@ writable.
 The available types are represented by constants defined in the @code{gdb}
 module:
 
-@table @code
-@findex BP_BREAKPOINT
-@findex gdb.BP_BREAKPOINT
+@vtable @code
+@vindex BP_BREAKPOINT
 @item gdb.BP_BREAKPOINT
 Normal code breakpoint.
 
-@findex BP_WATCHPOINT
-@findex gdb.BP_WATCHPOINT
+@vindex BP_WATCHPOINT
 @item gdb.BP_WATCHPOINT
 Watchpoint breakpoint.
 
-@findex BP_HARDWARE_WATCHPOINT
-@findex gdb.BP_HARDWARE_WATCHPOINT
+@vindex BP_HARDWARE_WATCHPOINT
 @item gdb.BP_HARDWARE_WATCHPOINT
 Hardware assisted watchpoint.
 
-@findex BP_READ_WATCHPOINT
-@findex gdb.BP_READ_WATCHPOINT
+@vindex BP_READ_WATCHPOINT
 @item gdb.BP_READ_WATCHPOINT
 Hardware assisted read watchpoint.
 
-@findex BP_ACCESS_WATCHPOINT
-@findex gdb.BP_ACCESS_WATCHPOINT
+@vindex BP_ACCESS_WATCHPOINT
 @item gdb.BP_ACCESS_WATCHPOINT
 Hardware assisted access watchpoint.
-@end table
+@end vtable
 
 @defvar Breakpoint.hit_count
 This attribute holds the hit count for the breakpoint, an integer.
