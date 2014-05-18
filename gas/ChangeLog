@@ -1,3 +1,9 @@
+2014-05-18  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (md_obj_begin): Delete.
+	(md_obj_end): Fold into...
+	(md_mips_end): ...here.  Move to end of file.
+
 2014-05-17  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/16946

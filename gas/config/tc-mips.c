@@ -1295,8 +1295,6 @@ static void s_ehword (int);
 static void s_cpadd (int);
 static void s_insn (int);
 static void s_nan (int);
-static void md_obj_begin (void);
-static void md_obj_end (void);
 static void s_mips_ent (int);
 static void s_mips_end (int);
 static void s_mips_frame (int);
@@ -3629,19 +3627,8 @@ md_begin (void)
     subseg_set (seg, subseg);
   }
 
-  if (! ECOFF_DEBUGGING)
-    md_obj_begin ();
-
   if (mips_fix_vr4120)
     init_vr4120_conflicts ();
-}
-
-void
-md_mips_end (void)
-{
-  mips_emit_delays ();
-  if (! ECOFF_DEBUGGING)
-    md_obj_end ();
 }
 
 void
@@ -17522,19 +17509,6 @@ mips_handle_align (fragS *fragp)
   fragp->fr_var = size;
 }
 
-static void
-md_obj_begin (void)
-{
-}
-
-static void
-md_obj_end (void)
-{
-  /* Check for premature end, nesting errors, etc.  */
-  if (cur_proc_ptr)
-    as_warn (_("missing .end at end of assembly"));
-}
-
 static long
 get_number (void)
 {
@@ -18374,4 +18348,12 @@ mips_convert_symbolic_attribute (const char *name)
       return attribute_table[i].tag;
 
   return -1;
+}
+
+void
+md_mips_end (void)
+{
+  mips_emit_delays ();
+  if (cur_proc_ptr)
+    as_warn (_("missing .end at end of assembly"));
 }
