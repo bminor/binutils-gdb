@@ -1,3 +1,8 @@
+2014-05-19  Tom Tromey  <tromey@redhat.com>
+
+	* gdbtypes.c (rank_function): Use XNEWVEC.
+	* mi/mi-cmds.c (build_table): Use XCNEWVEC.
+
 2014-05-19  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct dwarf2_per_objfile): Delete unused members

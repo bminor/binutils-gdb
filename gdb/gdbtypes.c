@@ -2582,7 +2582,7 @@ rank_function (struct type **parms, int nparms,
 
   bv = xmalloc (sizeof (struct badness_vector));
   bv->length = nargs + 1;	/* add 1 for the length-match rank.  */
-  bv->rank = xmalloc ((nargs + 1) * sizeof (int));
+  bv->rank = XNEWVEC (struct rank, nargs + 1);
 
   /* First compare the lengths of the supplied lists.
      If there is a mismatch, set it to a high value.  */
