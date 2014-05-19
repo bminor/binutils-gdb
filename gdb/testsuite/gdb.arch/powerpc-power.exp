@@ -1,0 +1,183 @@
+# Copyright 2014 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Test PowerPC instructions disassembly.
+
+standard_testfile .s
+set objfile [standard_output_file ${testfile}.o]
+
+if {![istarget "powerpc*-*-*"]} then {
+    verbose "Skipping PowerPC instructions disassembly."
+    return
+}
+
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug}] != "" } {
+    untested "PowerPC instructions disassembly"
+    return -1
+}
+
+clean_restart ${objfile}
+
+# Disassemble the function.
+
+set test "disass func"
+gdb_test_multiple $test $test {
+    -re "\r\nDump of assembler code for function func:(\r\n.*\r\n)End of assembler dump.\r\n$gdb_prompt $" {
+	set func $expect_out(1,string)
+	pass $test
+    }
+}
+
+proc instr_to_patt {offset instr} {
+    # 0x0000000000000018 <+24>:	stxvd2x vs43,r4,r5
+    return ".*\r\n\[ \t\]*0x\[0-9a-f\]+ <\\$offset>:\[ \t\]*[string map [list { } "\[ \t\]+" . {\.}] $instr]\[ \t\]*\r\n.*"
+}
+
+proc func_check {offset instr} {
+    global func
+
+    set test "Found $offset: $instr"
+    if [regexp -nocase -line [instr_to_patt $offset $instr] $func] {
+	pass $test
+    } else {
+	fail $test
+    }
+}
+
+func_check +0    "lxvd2x  vs3,r4,r5"
+# Some instructions are no longer recognized, this is correct since:
+# [PATCH] Remove support for POWER7 VSX load/store with update instructions
+# http://sourceware.org/ml/binutils/2009-09/msg00680.html
+# http://sourceware.org/ml/binutils-cvs/2009-09/msg00331.html
+# lxvd2ux vs3,r4,r5
+func_check +4    ".long 0x7c642ed8"
+func_check +8    "lxvd2x  vs43,r4,r5"
+# lxvd2ux vs43,r4,r5
+func_check +12   ".long 0x7d642ed9"
+func_check +16   "stxvd2x vs3,r4,r5"
+# stxvd2ux vs3,r4,r5
+func_check +20   ".long 0x7c642fd8"
+func_check +24   "stxvd2x vs43,r4,r5"
+# stxvd2ux vs43,r4,r5
+func_check +28   ".long 0x7d642fd9"
+func_check +32   "xxmrghd vs3,vs4,vs5"
+func_check +36   "xxmrghd vs43,vs44,vs45"
+func_check +40   "xxmrgld vs3,vs4,vs5"
+func_check +44   "xxmrgld vs43,vs44,vs45"
+func_check +48   "xxmrghd vs3,vs4,vs5"
+func_check +52   "xxmrghd vs43,vs44,vs45"
+func_check +56   "xxmrgld vs3,vs4,vs5"
+func_check +60   "xxmrgld vs43,vs44,vs45"
+func_check +64   "xxpermdi vs3,vs4,vs5,1"
+func_check +68   "xxpermdi vs43,vs44,vs45,1"
+func_check +72   "xxpermdi vs3,vs4,vs5,2"
+func_check +76   "xxpermdi vs43,vs44,vs45,2"
+func_check +80   "xvmovdp vs3,vs4"
+func_check +84   "xvmovdp vs43,vs44"
+func_check +88   "xvmovdp vs3,vs4"
+func_check +92   "xvmovdp vs43,vs44"
+func_check +96   "xvcpsgndp vs3,vs4,vs5"
+func_check +100  "xvcpsgndp vs43,vs44,vs45"
+func_check +104  "wait"
+func_check +108  "wait"
+func_check +112  "waitrsv"
+func_check +116  "waitrsv"
+func_check +120  "waitimpl"
+func_check +124  "waitimpl"
+func_check +128  "doze"
+func_check +132  "nap"
+func_check +136  "sleep"
+func_check +140  "rvwinkle"
+func_check +144  "prtyw   r3,r4"
+func_check +148  "prtyd   r13,r14"
+func_check +152  "mfcfar  r10"
+func_check +156  "mtcfar  r11"
+func_check +160  "cmpb    r3,r4,r5"
+func_check +164  "lwzcix  r10,r11,r12"
+func_check +168  "dadd    f16,f17,f18"
+func_check +172  "daddq   f20,f22,f24"
+func_check +176  "dss     3"
+func_check +180  "dssall"
+func_check +184  "dst     r5,r4,1"
+func_check +188  "dstt    r8,r7,0"
+func_check +192  "dstst   r5,r6,3"
+func_check +196  "dststt  r4,r5,2"
+func_check +200  "divwe   r10,r11,r12"
+func_check +204  "divwe.  r11,r12,r13"
+func_check +208  "divweo  r12,r13,r14"
+func_check +212  "divweo. r13,r14,r15"
+func_check +216  "divweu  r10,r11,r12"
+func_check +220  "divweu. r11,r12,r13"
+func_check +224  "divweuo r12,r13,r14"
+func_check +228  "divweuo. r13,r14,r15"
+func_check +232  "bpermd  r7,r17,r27"
+func_check +236  "popcntw r10,r20"
+func_check +240  "popcntd r10,r20"
+func_check +244  "ldbrx   r20,r21,r22"
+func_check +248  "stdbrx  r20,r21,r22"
+func_check +252  "lfiwzx  f10,0,r10"
+func_check +256  "lfiwzx  f10,r9,r10"
+func_check +260  "fcfids  f4,f5"
+func_check +264  "fcfids. f4,f5"
+func_check +268  "fcfidus f4,f5"
+func_check +272  "fcfidus. f4,f5"
+func_check +276  "fctiwu  f4,f5"
+func_check +280  "fctiwu. f4,f5"
+func_check +284  "fctiwuz f4,f5"
+func_check +288  "fctiwuz. f4,f5"
+func_check +292  "fctidu  f4,f5"
+func_check +296  "fctidu. f4,f5"
+func_check +300  "fctiduz f4,f5"
+func_check +304  "fctiduz. f4,f5"
+func_check +308  "fcfidu  f4,f5"
+func_check +312  "fcfidu. f4,f5"
+func_check +316  "ftdiv   cr0,f10,f11"
+func_check +320  "ftdiv   cr7,f10,f11"
+func_check +324  "ftsqrt  cr0,f10"
+func_check +328  "ftsqrt  cr7,f10"
+func_check +332  "dcbtt   r8,r9"
+func_check +336  "dcbtstt r8,r9"
+func_check +340  "dcffix  f10,f12"
+func_check +344  "dcffix. f20,f22"
+func_check +348  "lbarx   r10,r11,r12"
+func_check +352  "lbarx   r10,r11,r12"
+func_check +356  "lbarx   r10,r11,r12,1"
+func_check +360  "lharx   r20,r21,r22"
+func_check +364  "lharx   r20,r21,r22"
+func_check +368  "lharx   r20,r21,r22,1"
+func_check +372  "stbcx.  r10,r11,r12"
+func_check +376  "sthcx.  r10,r11,r12"
+func_check +380  "fre     f14,f15"
+func_check +384  "fre.    f14,f15"
+func_check +388  "fres    f14,f15"
+func_check +392  "fres.   f14,f15"
+func_check +396  "frsqrte f14,f15"
+func_check +400  "frsqrte. f14,f15"
+func_check +404  "frsqrtes f14,f15"
+func_check +408  "frsqrtes. f14,f15"
+func_check +412  "isel    r2,r3,r4,28"
+func_check +416  "dcbzl   r8,r9"
+func_check +420  "frsqrtes f10,f11"
+func_check +424  "dadd    f1,f2,f1"
+func_check +428  "daddq   f0,f2,f0"
+func_check +432  "dsub    f1,f2,f1"
+func_check +436  "dsubq   f0,f2,f0"
+func_check +440  "dmul    f1,f2,f1"
+func_check +444  "dmulq   f0,f2,f0"
+func_check +448  "ddiv    f1,f2,f1"
+func_check +452  "ddivq   f0,f2,f0"
+func_check +456  "dcmpu   cr1,f2,f1"
+func_check +460  "dcmpuq  cr1,f2,f0"

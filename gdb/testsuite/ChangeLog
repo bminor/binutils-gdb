@@ -1,3 +1,8 @@
+2014-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/powerpc-power.exp: New file.
+	* gdb.arch/powerpc-power.s: New file.
+
 2014-05-16  Doug Evans  <dje@google.com>
 
 	* gdb.base/Makefile.in (EXECUTABLES): Add completion.
