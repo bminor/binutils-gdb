@@ -1,3 +1,8 @@
+2014-05-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* config/monitor.exp (gdb_target_monitor): Replace use of
+	"set remotebaud" by "set serial baud".
+
 2014-05-26  Andy Wingo  <wingo@igalia.com>
 
 	* gdb.guile/scm-breakpoint.exp:

@@ -1,3 +1,9 @@
+2014-05-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* serial.c (_initialize_serial): Remove support for
+	the "set remotebaud" and "show remotebaud" commands.
+	* NEWS: Add entry documenting the removal of that command.
+
 2014-05-28  Yao Qi  <yao@codesourcery.com>
 
 	* charset.c: Fix typo in comments.
