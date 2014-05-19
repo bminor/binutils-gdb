@@ -1363,7 +1363,7 @@ evaluate_subexp_standard (struct type *expect_type,
       op = exp->elts[*pos].opcode;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       /* Allocate arg vector, including space for the function to be
-         called in argvec[0] and a terminating NULL.  */
+         called in argvec[0], a potential `this', and a terminating NULL.  */
       argvec = (struct value **)
 	alloca (sizeof (struct value *) * (nargs + 3));
       if (op == STRUCTOP_MEMBER || op == STRUCTOP_MPTR)
@@ -1514,6 +1514,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		       name, TYPE_TAG_NAME (type));
 
 	      tem = 1;
+	      /* arg2 is left as NULL on purpose.  */
 	    }
 	  else
 	    {
@@ -1521,6 +1522,8 @@ evaluate_subexp_standard (struct type *expect_type,
 			  || TYPE_CODE (type) == TYPE_CODE_UNION);
 	      function_name = name;
 
+	      /* We need a properly typed value for method lookup.  For
+		 static methods arg2 is otherwise unused.  */
 	      arg2 = value_zero (type, lval_memory);
 	      ++nargs;
 	      tem = 2;
@@ -1570,7 +1573,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	}
 
-      /* Evaluate arguments.  */
+      /* Evaluate arguments (if not already done, e.g., namespace::func()
+	 and overload-resolution is off).  */
       for (; tem <= nargs; tem++)
 	{
 	  /* Ensure that array expressions are coerced into pointer
@@ -1580,6 +1584,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
       /* Signal end of arglist.  */
       argvec[tem] = 0;
+
       if (op == OP_ADL_FUNC)
         {
           struct symbol *symp;
@@ -1609,7 +1614,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	  int static_memfuncp;
 	  char *tstr;
 
-	  /* Method invocation : stuff "this" as first parameter.  */
+	  /* Method invocation: stuff "this" as first parameter.
+	     If the method turns out to be static we undo this below.  */
 	  argvec[1] = arg2;
 
 	  if (op != OP_SCOPE)
@@ -1663,6 +1669,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      argvec[1] = arg2;	/* the ``this'' pointer */
 	    }
 
+	  /* Take out `this' if needed.  */
 	  if (static_memfuncp)
 	    {
 	      argvec[1] = argvec[0];

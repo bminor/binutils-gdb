@@ -1,3 +1,7 @@
+2014-05-19  Doug Evans  <dje@google.com>
+
+	* eval.c (evaluate_subexp_standard): Add some comments.
+
 2014-05-17  Doug Evans  <xdje42@gmail.com>
 
 	* progspace.c (remove_program_space): Delete, unused.
