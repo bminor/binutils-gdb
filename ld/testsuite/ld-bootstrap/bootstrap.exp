@@ -122,7 +122,9 @@ foreach flags $test_flags {
 
     # Plugin support requires linking with libdl.
     if { $plugins == "yes" } {
-	set extralibs "$extralibs -ldl"
+	if { ![istarget "*-*-freebsd*"]} {
+	    set extralibs "$extralibs -ldl"
+	}
     }
 
     # On Irix 5, linking with --static only works if all the files are

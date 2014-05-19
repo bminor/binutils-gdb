@@ -1,3 +1,11 @@
+2014-05-19  Andreas Tobler  <andreast@fgznet.ch>
+
+	* ld-elf/shared.exp: Introduce the extralibs variable to control
+	the libraries to be linked. Don't link -ldl on *-*-freebsd*.
+
+	* ld-bootstrap/bootstrap.exp: Do not add -ldl to the extralibs on
+	*-*-freebsd*.
+
 2014-05-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/wrap1.d, ld-mmix/wrap1a.s, ld-mmix/wrap1b.s,
