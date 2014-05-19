@@ -1,5 +1,14 @@
 2014-05-19  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (struct dwarf2_per_objfile): Delete unused members
+	n_type_unit_groups, all_type_unit_groups.  All uses removed.
+	(get_type_unit_group, build_type_unit_groups): Delete forward decls.
+	(dw2_get_cutu): Renamed from dw2_get_cu.  All callers updated.
+	(dw2_get_cu): Renamed from dw2_get_primary_cu.  All callers updated.
+	(add_type_unit_group_to_table): Delete.
+
+2014-05-19  Doug Evans  <dje@google.com>
+
 	* eval.c (evaluate_subexp_standard): Add some comments.
 
 2014-05-17  Doug Evans  <xdje42@gmail.com>

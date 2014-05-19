@@ -239,13 +239,6 @@ struct dwarf2_per_objfile
      This is stored in malloc space because we may realloc it.  */
   struct signatured_type **all_type_units;
 
-  /* The number of entries in all_type_unit_groups.  */
-  int n_type_unit_groups;
-
-  /* Table of type unit groups.
-     This exists to make it easy to iterate over all CUs and TU groups.  */
-  struct type_unit_group **all_type_unit_groups;
-
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */
   htab_t type_unit_groups;
@@ -1715,11 +1708,6 @@ static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 
 static void read_signatured_type (struct signatured_type *);
 
-static struct type_unit_group *get_type_unit_group
-    (struct dwarf2_cu *, const struct attribute *);
-
-static void build_type_unit_groups (die_reader_func_ftype *, void *);
-
 /* memory allocation interface */
 
 static struct dwarf_block *dwarf_alloc_block (struct dwarf2_cu *);
@@ -2673,21 +2661,21 @@ dw2_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
   return per_cu->v.quick->symtab;
 }
 
-/* Return the CU given its index.
+/* Return the CU/TU given its index.
 
    This is intended for loops like:
 
    for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		    + dwarf2_per_objfile->n_type_units); ++i)
      {
-       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+       struct dwarf2_per_cu_data *per_cu = dw2_get_cutu (i);
 
        ...;
      }
 */
 
 static struct dwarf2_per_cu_data *
-dw2_get_cu (int index)
+dw2_get_cutu (int index)
 {
   if (index >= dwarf2_per_objfile->n_comp_units)
     {
@@ -2699,30 +2687,14 @@ dw2_get_cu (int index)
   return dwarf2_per_objfile->all_comp_units[index];
 }
 
-/* Return the primary CU given its index.
-   The difference between this function and dw2_get_cu is in the handling
-   of type units (TUs).  Here we return the type_unit_group object.
-
-   This is intended for loops like:
-
-   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		    + dwarf2_per_objfile->n_type_unit_groups); ++i)
-     {
-       struct dwarf2_per_cu_data *per_cu = dw2_get_primary_cu (i);
-
-       ...;
-     }
-*/
+/* Return the CU given its index.
+   This differs from dw2_get_cutu in that it's for when you know INDEX
+   refers to a CU.  */
 
 static struct dwarf2_per_cu_data *
-dw2_get_primary_cu (int index)
+dw2_get_cu (int index)
 {
-  if (index >= dwarf2_per_objfile->n_comp_units)
-    {
-      index -= dwarf2_per_objfile->n_comp_units;
-      gdb_assert (index < dwarf2_per_objfile->n_type_unit_groups);
-      return &dwarf2_per_objfile->all_type_unit_groups[index]->per_cu;
-    }
+  gdb_assert (index >= 0 && index < dwarf2_per_objfile->n_comp_units);
 
   return dwarf2_per_objfile->all_comp_units[index];
 }
@@ -2889,7 +2861,7 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
 	}
 
       addrmap_set_empty (mutable_map, lo + baseaddr, hi + baseaddr - 1,
-			 dw2_get_cu (cu_index));
+			 dw2_get_cutu (cu_index));
     }
 
   objfile->psymtabs_addrmap = addrmap_create_fixed (mutable_map,
@@ -3333,7 +3305,7 @@ dw2_find_last_source_symtab (struct objfile *objfile)
 
   dw2_setup (objfile);
   index = dwarf2_per_objfile->n_comp_units - 1;
-  return dw2_instantiate_symtab (dw2_get_cu (index));
+  return dw2_instantiate_symtab (dw2_get_cutu (index));
 }
 
 /* Traversal function for dw2_forget_cached_source_info.  */
@@ -3409,7 +3381,7 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
       int j;
-      struct dwarf2_per_cu_data *per_cu = dw2_get_primary_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
       struct quick_file_names *file_data;
 
       /* We only need to look at symtabs not already expanded.  */
@@ -3557,7 +3529,7 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
 	  continue;
 	}
 
-      per_cu = dw2_get_cu (cu_index);
+      per_cu = dw2_get_cutu (cu_index);
 
       /* Skip if already read in.  */
       if (per_cu->v.quick->symtab)
@@ -3668,7 +3640,7 @@ dw2_print_stats (struct objfile *objfile)
   count = 0;
   for (i = 0; i < total; ++i)
     {
-      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cutu (i);
 
       if (!per_cu->v.quick->symtab)
 	++count;
@@ -3741,7 +3713,7 @@ dw2_expand_all_symtabs (struct objfile *objfile)
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		   + dwarf2_per_objfile->n_type_units); ++i)
     {
-      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cutu (i);
 
       dw2_instantiate_symtab (per_cu);
     }
@@ -3763,7 +3735,7 @@ dw2_expand_symtabs_with_fullname (struct objfile *objfile,
   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
       int j;
-      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cutu (i);
       struct quick_file_names *file_data;
 
       /* We only need to look at symtabs not already expanded.  */
@@ -3840,7 +3812,7 @@ dw2_expand_symtabs_matching
       for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
 	{
 	  int j;
-	  struct dwarf2_per_cu_data *per_cu = dw2_get_primary_cu (i);
+	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 	  struct quick_file_names *file_data;
 	  void **slot;
 
@@ -3975,7 +3947,7 @@ dw2_expand_symtabs_matching
 	      continue;
 	    }
 
-	  per_cu = dw2_get_cu (cu_index);
+	  per_cu = dw2_get_cutu (cu_index);
 	  if (file_matcher == NULL || per_cu->v.quick->mark)
 	    dw2_instantiate_symtab (per_cu);
 	}
@@ -4055,7 +4027,7 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 
   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
-      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cutu (i);
 
       if (per_cu->v.quick->symtab)
 	{
@@ -4069,7 +4041,7 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
       int j;
-      struct dwarf2_per_cu_data *per_cu = dw2_get_primary_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
       struct quick_file_names *file_data;
       void **slot;
 
@@ -4152,7 +4124,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
       for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		       + dwarf2_per_objfile->n_type_units); ++i)
 	{
-	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+	  struct dwarf2_per_cu_data *per_cu = dw2_get_cutu (i);
 
 	  per_cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 					    struct dwarf2_per_cu_quick_data);
@@ -5781,20 +5753,6 @@ sort_tu_by_abbrev_offset (const void *ap, const void *bp)
   return (aoff > boff) - (aoff < boff);
 }
 
-/* A helper function to add a type_unit_group to a table.  */
-
-static int
-add_type_unit_group_to_table (void **slot, void *datum)
-{
-  struct type_unit_group *tu_group = *slot;
-  struct type_unit_group ***datap = datum;
-
-  **datap = tu_group;
-  ++*datap;
-
-  return 1;
-}
-
 /* Efficiently read all the type units, calling init_cutu_and_read_dies on
    each one passing FUNC,DATA.
 
@@ -5910,22 +5868,7 @@ build_type_unit_groups (die_reader_func_ftype *func, void *data)
     {
       dwarf2_per_objfile->type_unit_groups =
 	allocate_type_unit_groups_table ();
-      dwarf2_per_objfile->n_type_unit_groups = 0;
     }
-
-  /* Create a vector of pointers to primary type units to make it easy to
-     iterate over them and CUs.  See dw2_get_primary_cu.  */
-  dwarf2_per_objfile->n_type_unit_groups =
-    htab_elements (dwarf2_per_objfile->type_unit_groups);
-  dwarf2_per_objfile->all_type_unit_groups =
-    obstack_alloc (&objfile->objfile_obstack,
-		   dwarf2_per_objfile->n_type_unit_groups
-		   * sizeof (struct type_unit_group *));
-  iter = &dwarf2_per_objfile->all_type_unit_groups[0];
-  htab_traverse_noresize (dwarf2_per_objfile->type_unit_groups,
-			  add_type_unit_group_to_table, &iter);
-  gdb_assert (iter - &dwarf2_per_objfile->all_type_unit_groups[0]
-	      == dwarf2_per_objfile->n_type_unit_groups);
 
   do_cleanups (cleanups);
 
@@ -6269,7 +6212,7 @@ set_partial_user (struct objfile *objfile)
 
   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
-      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cutu (i);
       struct partial_symtab *pst = per_cu->v.psymtab;
       int j;
 
@@ -6322,7 +6265,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
 
   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
-      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cutu (i);
 
       process_psymtab_comp_unit (per_cu, 0, language_minimal);
     }
