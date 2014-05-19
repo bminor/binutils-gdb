@@ -206,6 +206,7 @@ static const int x86_64_regmap[] =
 };
 
 #define X86_64_NUM_REGS (sizeof (x86_64_regmap) / sizeof (x86_64_regmap[0]))
+#define X86_64_USER_REGS (GS + 1)
 
 #else /* ! __x86_64__ */
 
@@ -364,6 +365,10 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
 	  collect_register (regcache, i, ((char *) buf) + x86_64_regmap[i]);
       return;
     }
+
+  /* 32-bit inferior registers need to be zero-extended.
+     Callers would read uninitialized memory otherwise.  */
+  memset (buf, 0x00, X86_64_USER_REGS * 8);
 #endif
 
   for (i = 0; i < I386_NUM_REGS; i++)

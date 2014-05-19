@@ -1,3 +1,9 @@
+2014-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix gdbserver qGetTLSAddr for x86_64 -m32.
+	* linux-x86-low.c (X86_64_USER_REGS): New.
+	(x86_fill_gregset): Call memset for BUF first in x86_64 -m32 case.
+
 2014-04-28  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (i386-avx512.c): Fix the typo of generated file
