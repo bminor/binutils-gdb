@@ -9151,6 +9151,16 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       /* PR 16858: Do not modify weak function references.  */
       && ! fixP->fx_pcrel)
     {
+#if !defined (TE_PEP)
+      /* For x86 PE weak function symbols are neither PC-relative
+	 nor do they set S_IS_FUNCTION.  So the only reliable way
+	 to detect them is to check the flags of their containing
+	 section.  */
+      if (S_GET_SEGMENT (fixP->fx_addsy) != NULL
+	  && S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_CODE)
+	;
+      else
+#endif
       value -= S_GET_VALUE (fixP->fx_addsy);
     }
 #endif

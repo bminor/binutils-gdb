@@ -1,3 +1,9 @@
+2014-05-19  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/16858
+	* config/tc-i386.c (md_apply_fix): Improve the detection of code
+	symbols for 32-bit PE targets.
+
 2014-05-18  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (md_obj_begin): Delete.
