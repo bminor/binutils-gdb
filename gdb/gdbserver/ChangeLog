@@ -1,3 +1,9 @@
+2014-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Only use -Werror by default when DEVELOPMENT
+	is true.
+	* configure: Regenerate.
+
 2014-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix gdbserver qGetTLSAddr for x86_64 -m32.
