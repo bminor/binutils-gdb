@@ -2057,7 +2057,8 @@ MAINTAINERCLEANFILES = configdoc.texi ld.1
 # We want to reconfigure if configure.host or configure.tgt changes.  We
 # extract version from bfd/configure.in, so we must depend on that also.
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.host $(srcdir)/configure.tgt \
-	$(srcdir)/../bfd/configure.in
+	$(srcdir)/../bfd/configure.in \
+	$(srcdir)/../bfd/development.sh
 
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.@OBJEXT@ crtend.@OBJEXT@ ld.log ld.sum

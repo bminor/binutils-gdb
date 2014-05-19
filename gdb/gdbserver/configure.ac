@@ -41,7 +41,7 @@ AC_HEADER_STDC
 AC_FUNC_ALLOCA
 
 # Set the 'development' global.
-. $srcdir/../development.sh
+. $srcdir/../../bfd/development.sh
 
 # Enable -lmcheck by default (it provides cheap-enough memory
 # mangling), but turn it off for releases.

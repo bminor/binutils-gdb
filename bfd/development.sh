@@ -15,7 +15,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Set to 'true' for development snapshots, 'false' for releases and
-# pre-releases.  When true, provide more thorough testing with
-# -lmcheck.
+# Controls whether to enable development-mode features by default.
 development=true

@@ -60,7 +60,8 @@ diststuff: $(BUILT_SOURCES) info $(man_MANS)
 
 # We extract version from bfd/configure.in, make sure to rerun configure
 # when BFD's version changes.
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in \
+	$(BFDDIR)/development.sh
 
 # This empty rule is a hack against gmake patched by Apple.
 %.o:%.m

@@ -1,3 +1,9 @@
+2014-06-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Add dependency on
+	bfd's development.sh.
+	* Makefile.in, configure: Regenerate.
+
 2014-05-16  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* objcopy.c (is_nondebug_keep_contents_section): New function.

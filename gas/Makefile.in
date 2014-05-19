@@ -677,7 +677,10 @@ MOSTLYCLEANFILES = $(STAGESTUFF) core \
 	testsuite/site.exp site.bak site.exp stage stage1 stage2
 
 against = stage2
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in $(srcdir)/configure.tgt
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in \
+	$(srcdir)/configure.tgt \
+	$(BFDDIR)/development.sh
+
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

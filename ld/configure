@@ -4642,6 +4642,9 @@ $as_echo "$ac_cv_path_EGREP" >&6; }
 
 
 
+# Set the 'development' global.
+. $srcdir/../bfd/development.sh
+
 GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -4676,8 +4679,8 @@ case "${host}" in
   *) ;;
 esac
 
-# Enable -Werror by default when using gcc
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+# Enable -Werror by default when using gcc.  Turn it off for releases.
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" -a "$development" = true ; then
     ERROR_ON_WARNING=yes
 fi
 
@@ -12193,7 +12196,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12196 "configure"
+#line 12199 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12299,7 +12302,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12302 "configure"
+#line 12305 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

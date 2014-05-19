@@ -2714,7 +2714,7 @@ fi
 
 
 # Set the 'development' global.
-. $srcdir/development.sh
+. $srcdir/../bfd/development.sh
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'

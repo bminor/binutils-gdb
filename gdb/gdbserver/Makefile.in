@@ -390,7 +390,7 @@ $(GNULIB_BUILDDIR)/Makefile: $(srcdir)/../gnulib/Makefile.in config.status
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
-config.status: configure configure.srv $(srcdir)/../development.sh
+config.status: configure configure.srv $(srcdir)/../../bfd/development.sh
 	$(SHELL) ./config.status --recheck
 
 # automatic rebuilding in automake-generated Makefiles requires

@@ -24,7 +24,7 @@ AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
 
 # Set the 'development' global.
-. $srcdir/development.sh
+. $srcdir/../bfd/development.sh
 
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS

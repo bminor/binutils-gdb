@@ -1476,7 +1476,7 @@ stamp-h: $(srcdir)/config.in config.status
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
-config.status: $(srcdir)/configure configure.tgt configure.host development.sh
+config.status: $(srcdir)/configure configure.tgt configure.host ../bfd/development.sh
 	$(SHELL) config.status --recheck
 
 ACLOCAL = aclocal
