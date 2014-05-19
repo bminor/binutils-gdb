@@ -5,6 +5,15 @@
 
 2014-05-19  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (build_type_psymtabs_1): Renamed from
+	build_type_unit_groups and moved closer to only caller.  Remove
+	arguments.  All references updated.  Remove outdated .gdb_index
+	comment.
+	(struct tu_abbrev_offset, sort_tu_by_abbrev_offset): Move with
+	build_type_psymtabs_1.
+
+2014-05-19  Doug Evans  <dje@google.com>
+
 	* dwarf2read.c (struct dwarf2_per_objfile): Delete unused members
 	n_type_unit_groups, all_type_unit_groups.  All uses removed.
 	(get_type_unit_group, build_type_unit_groups): Delete forward decls.
