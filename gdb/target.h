@@ -1109,6 +1109,14 @@ struct target_ops
 					 struct gdbarch *gdbarch)
       TARGET_DEFAULT_FUNC (default_target_decr_pc_after_break);
 
+    /* Prepare to generate a core file.  */
+    void (*to_prepare_to_generate_core) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
+
+    /* Cleanup after generating a core file.  */
+    void (*to_done_generating_core) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -2260,5 +2268,11 @@ extern CORE_ADDR forward_target_decr_pc_after_break (struct target_ops *ops,
 
 /* See to_decr_pc_after_break.  */
 extern CORE_ADDR target_decr_pc_after_break (struct gdbarch *gdbarch);
+
+/* See to_prepare_to_generate_core.  */
+extern void target_prepare_to_generate_core (void);
+
+/* See to_done_generating_core.  */
+extern void target_done_generating_core (void);
 
 #endif /* !defined (TARGET_H) */

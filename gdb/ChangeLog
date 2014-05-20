@@ -1,5 +1,18 @@
 2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* target.h (target_ops) <to_prepare_to_generate_core>
+	<to_done_generating_core>: New.
+	(target_prepare_to_generate_core, target_done_generating_core): New.
+	* target.c (target_prepare_to_generate_core)
+	(target_done_generating_core): New.
+	* target-delegates.c: Regenerate.
+	* gcore.c: (write_gcore_file): Rename to ...
+	(write_gcore_file_1): ...this.
+	(write_gcore_file): Call target_prepare_to_generate_core
+	and target_done_generating_core.
+
+2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* fbsd-nat.c (fbsd_make_corefile_notes): Remove make_cleanup call.
 	* gcore.c (write_gcore_file): Free memory returned from
 	make_corefile_notes.

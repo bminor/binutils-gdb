@@ -61,12 +61,10 @@ create_gcore_bfd (const char *filename)
   return obfd;
 }
 
-/* write_gcore_file -- helper for gcore_command (exported).
-   Compose and write the corefile data to the core file.  */
+/* write_gcore_file_1 -- do the actual work of write_gcore_file.  */
 
-
-void
-write_gcore_file (bfd *obfd)
+static void
+write_gcore_file_1 (bfd *obfd)
 {
   struct cleanup *cleanup;
   void *note_data = NULL;
@@ -109,6 +107,25 @@ write_gcore_file (bfd *obfd)
     warning (_("writing note section (%s)"), bfd_errmsg (bfd_get_error ()));
 
   do_cleanups (cleanup);
+}
+
+/* write_gcore_file -- helper for gcore_command (exported).
+   Compose and write the corefile data to the core file.  */
+
+void
+write_gcore_file (bfd *obfd)
+{
+  volatile struct gdb_exception except;
+
+  target_prepare_to_generate_core ();
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    write_gcore_file_1 (obfd);
+
+  target_done_generating_core ();
+
+  if (except.reason < 0)
+    throw_exception (except);
 }
 
 static void

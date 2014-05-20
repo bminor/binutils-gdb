@@ -3606,6 +3606,22 @@ target_decr_pc_after_break (struct gdbarch *gdbarch)
   return current_target.to_decr_pc_after_break (&current_target, gdbarch);
 }
 
+/* See target.h.  */
+
+void
+target_prepare_to_generate_core (void)
+{
+  current_target.to_prepare_to_generate_core (&current_target);
+}
+
+/* See target.h.  */
+
+void
+target_done_generating_core (void)
+{
+  current_target.to_done_generating_core (&current_target);
+}
+
 static void
 debug_to_files_info (struct target_ops *target)
 {

@@ -1625,6 +1625,30 @@ delegate_decr_pc_after_break (struct target_ops *self, struct gdbarch *arg1)
 }
 
 static void
+delegate_prepare_to_generate_core (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_prepare_to_generate_core (self);
+}
+
+static void
+tdefault_prepare_to_generate_core (struct target_ops *self)
+{
+}
+
+static void
+delegate_done_generating_core (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_done_generating_core (self);
+}
+
+static void
+tdefault_done_generating_core (struct target_ops *self)
+{
+}
+
+static void
 install_delegators (struct target_ops *ops)
 {
   if (ops->to_post_attach == NULL)
@@ -1897,6 +1921,10 @@ install_delegators (struct target_ops *ops)
     ops->to_get_tailcall_unwinder = delegate_get_tailcall_unwinder;
   if (ops->to_decr_pc_after_break == NULL)
     ops->to_decr_pc_after_break = delegate_decr_pc_after_break;
+  if (ops->to_prepare_to_generate_core == NULL)
+    ops->to_prepare_to_generate_core = delegate_prepare_to_generate_core;
+  if (ops->to_done_generating_core == NULL)
+    ops->to_done_generating_core = delegate_done_generating_core;
 }
 
 static void
@@ -2037,4 +2065,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_get_unwinder = tdefault_get_unwinder;
   ops->to_get_tailcall_unwinder = tdefault_get_tailcall_unwinder;
   ops->to_decr_pc_after_break = default_target_decr_pc_after_break;
+  ops->to_prepare_to_generate_core = tdefault_prepare_to_generate_core;
+  ops->to_done_generating_core = tdefault_done_generating_core;
 }
