@@ -241,7 +241,16 @@ py_free_pspace (struct program_space *pspace, void *datum)
 {
   struct cleanup *cleanup;
   pspace_object *object = datum;
-  struct gdbarch *arch = get_current_arch ();
+  /* This is a fiction, but we're in a nasty spot: The pspace is in the
+     process of being deleted, we can't rely on anything in it.  Plus
+     this is one time when the current program space and current inferior
+     are not in sync: All inferiors that use PSPACE may no longer exist.
+     We don't need to do much here, and since "there is always an inferior"
+     using target_gdbarch suffices.
+     Note: We cannot call get_current_arch because it may try to access
+     the target, which may involve accessing data in the pspace currently
+     being deleted.  */
+  struct gdbarch *arch = target_gdbarch ();
 
   cleanup = ensure_python_env (arch, current_language);
   object->pspace = NULL;

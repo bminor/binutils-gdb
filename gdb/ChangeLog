@@ -1,3 +1,8 @@
+2014-05-20  Doug Evans  <dje@google.com>
+
+	* python/py-progspace.c (py_free_pspace): Call target_gdbarch
+	instead of get_current_arch.
+
 2014-05-20  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention that compare-sections now works with all targets.
