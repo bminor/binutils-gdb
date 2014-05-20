@@ -4608,12 +4608,15 @@ size_input_section
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
+  asection *o = output_section_statement->bfd_section;
 
-  if (i->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
-      && (i->flags & SEC_EXCLUDE) == 0)
+  if (i->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+    i->output_offset = i->vma - o->vma;
+  else if ((i->flags & SEC_EXCLUDE) != 0)
+    i->output_offset = dot - o->vma;
+  else
     {
       bfd_size_type alignment_needed;
-      asection *o;
 
       /* Align this section first to the input sections requirement,
 	 then to the output section's requirement.  If this alignment
@@ -4623,7 +4626,6 @@ size_input_section
       if (output_section_statement->subsection_alignment != -1)
 	i->alignment_power = output_section_statement->subsection_alignment;
 
-      o = output_section_statement->bfd_section;
       if (o->alignment_power < i->alignment_power)
 	o->alignment_power = i->alignment_power;
 
@@ -4636,16 +4638,11 @@ size_input_section
 	}
 
       /* Remember where in the output section this input section goes.  */
-
       i->output_offset = dot - o->vma;
 
       /* Mark how big the output section must be to contain this now.  */
       dot += TO_ADDR (i->size);
       o->size = TO_SIZE (dot - o->vma);
-    }
-  else
-    {
-      i->output_offset = i->vma - output_section_statement->bfd_section->vma;
     }
 
   return dot;

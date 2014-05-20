@@ -1,3 +1,12 @@
+2014-05-20  Alan Modra  <amodra@gmail.com>
+
+	PR 16952
+	* emulparams/elf32ppccommon.sh (_SDA_BASE_, _SDA2_BASE_): Delete.
+	* emultempl/ppc32elf.em (ppc_before_allocation): Call
+	ppc_elf_maybe_strip_sdata_syms.
+	* ldlang.c (size_input_section): Correct output_offset value
+	for excluded input sections.
+
 2014-05-16  John Marino  <binutils@marino.st>
 
 	* configure.tgt: Add /lib to dragonfly NATIVE_LIB_DIRS.
