@@ -1765,11 +1765,16 @@ evaluate_subexp_standard (struct type *expect_type,
 	    error (_("Expression of type other than "
 		     "\"Function returning ...\" used as function"));
 	}
-      if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_INTERNAL_FUNCTION)
-	return call_internal_function (exp->gdbarch, exp->language_defn,
-				       argvec[0], nargs, argvec + 1);
-
-      return call_function_by_hand (argvec[0], nargs, argvec + 1);
+      switch (TYPE_CODE (value_type (argvec[0])))
+	{
+	case TYPE_CODE_INTERNAL_FUNCTION:
+	  return call_internal_function (exp->gdbarch, exp->language_defn,
+					 argvec[0], nargs, argvec + 1);
+	case TYPE_CODE_XMETHOD:
+	  return call_xmethod (argvec[0], nargs, argvec + 1);
+	default:
+	  return call_function_by_hand (argvec[0], nargs, argvec + 1);
+	}
       /* pai: FIXME save value from call_function_by_hand, then adjust
 	 pc by adjust_fn_pc if +ve.  */
 
