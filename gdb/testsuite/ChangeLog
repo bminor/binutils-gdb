@@ -1,5 +1,10 @@
 2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.base/gcore.exp (capture_command_output): Move ...
+	* lib/gdb.exp (capture_command_output): ... here.
+
+2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/data.exp: Test memory access during btrace replay.
 
 2014-05-22  Simon Marchi  <simon.marchi@ericsson.com>
