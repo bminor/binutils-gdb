@@ -1,3 +1,10 @@
+2014-05-20  Hui Zhu  <hui@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	PR backtrace/16558
+	* aarch64-linux-tdep.c (aarch64_linux_sigframe_init): Update comments
+	and change address of sp and pc.
+
 2014-05-19  Tom Tromey  <tromey@redhat.com>
 
 	* gdbtypes.c (rank_function): Use XNEWVEC.

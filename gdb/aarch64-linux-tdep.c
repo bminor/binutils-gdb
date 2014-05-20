@@ -53,28 +53,30 @@
 
 /* Signal frame handling.
 
-      +----------+  ^
-      | saved lr |  |
-   +->| saved fp |--+
-   |  |          |
-   |  |          |
-   |  +----------+
-   |  | saved lr |
-   +--| saved fp |
-   ^  |          |
-   |  |          |
-   |  +----------+
-   ^  |          |
-   |  | signal   |
-   |  |          |
-   |  | saved lr |-->interrupted_function_pc
-   +--| saved fp |
-   |  +----------+
-   |  | saved lr |--> default_restorer (movz x8, NR_sys_rt_sigreturn; svc 0)
-   +--| saved fp |<- FP
-      |          |
-      |          |<- SP
-      +----------+
+      +------------+  ^
+      | saved lr   |  |
+   +->| saved fp   |--+
+   |  |            |
+   |  |            |
+   |  +------------+
+   |  | saved lr   |
+   +--| saved fp   |
+   ^  |            |
+   |  |            |
+   |  +------------+
+   ^  |            |
+   |  | signal     |
+   |  |            |        SIGTRAMP_FRAME (struct rt_sigframe)
+   |  | saved regs |
+   +--| saved sp   |--> interrupted_sp
+   |  | saved pc   |--> interrupted_pc
+   |  |            |
+   |  +------------+
+   |  | saved lr   |--> default_restorer (movz x8, NR_sys_rt_sigreturn; svc 0)
+   +--| saved fp   |<- FP
+      |            |         NORMAL_FRAME
+      |            |<- SP
+      +------------+
 
   On signal delivery, the kernel will create a signal handler stack
   frame and setup the return address in LR to point at restorer stub.
@@ -123,6 +125,8 @@
   d28015a8        movz    x8, #0xad
   d4000001        svc     #0x0
 
+  This is a system call sys_rt_sigreturn.
+
   We detect signal frames by snooping the return code for the restorer
   instruction sequence.
 
@@ -146,7 +150,6 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
-  CORE_ADDR fp = get_frame_register_unsigned (this_frame, AARCH64_FP_REGNUM);
   CORE_ADDR sigcontext_addr =
     sp
     + AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET
@@ -160,12 +163,14 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 			       sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
 			       + i * AARCH64_SIGCONTEXT_REG_SIZE);
     }
+  trad_frame_set_reg_addr (this_cache, AARCH64_SP_REGNUM,
+			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
+			     + 31 * AARCH64_SIGCONTEXT_REG_SIZE);
+  trad_frame_set_reg_addr (this_cache, AARCH64_PC_REGNUM,
+			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
+			     + 32 * AARCH64_SIGCONTEXT_REG_SIZE);
 
-  trad_frame_set_reg_addr (this_cache, AARCH64_FP_REGNUM, fp);
-  trad_frame_set_reg_addr (this_cache, AARCH64_LR_REGNUM, fp + 8);
-  trad_frame_set_reg_addr (this_cache, AARCH64_PC_REGNUM, fp + 8);
-
-  trad_frame_set_id (this_cache, frame_id_build (fp, func));
+  trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
 static const struct tramp_frame aarch64_linux_rt_sigframe =
