@@ -1,3 +1,24 @@
+2014-05-20  Pedro Alves  <palves@redhat.com>
+
+	* linux-aarch64-low.c: Include break-common.h.
+	(enum target_point_type): Delete.
+	(Z_packet_to_point_type): Rename to ...
+	(Z_packet_to_target_hw_bp_type): ... this, and return a
+	target_hw_bp_type instead.
+	(aarch64_show_debug_reg_state): Take an enum target_hw_bp_type
+	instead of an enum target_point_type.
+	(aarch64_point_encode_ctrl_reg): Likewise.  Compute type mask from
+	breakpoint type.
+	(aarch64_dr_state_insert_one_point)
+	(aarch64_dr_state_remove_one_point, aarch64_handle_breakpoint)
+	(aarch64_handle_aligned_watchpoint)
+	(aarch64_handle_unaligned_watchpoint, aarch64_handle_watchpoint):
+	Take an enum target_hw_bp_type instead of an enum
+	target_point_type.
+	(aarch64_supports_z_point_type): New function.
+	(aarch64_insert_point, aarch64_remove_point): Use it.  Adjust to
+	use Z_packet_to_target_hw_bp_type.
+
 2014-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Only use -Werror by default when DEVELOPMENT
