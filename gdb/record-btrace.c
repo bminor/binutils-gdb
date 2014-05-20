@@ -68,6 +68,9 @@ static enum exec_direction_kind record_btrace_resume_exec_dir = EXEC_FORWARD;
 /* The async event handler for reverse/replay execution.  */
 static struct async_event_handler *record_btrace_async_inferior_event_handler;
 
+/* A flag indicating that we are currently generating a core file.  */
+static int record_btrace_generating_corefile;
+
 /* Print a record-btrace debug message.  Use do ... while (0) to avoid
    ambiguities when used in if statements.  */
 
@@ -221,6 +224,7 @@ record_btrace_open (char *args, int from_tty)
   record_btrace_async_inferior_event_handler
     = create_async_event_handler (record_btrace_handle_async_inferior_event,
 				  NULL);
+  record_btrace_generating_corefile = 0;
 
   observer_notify_record_changed (current_inferior (),  1);
 
@@ -854,6 +858,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 
   /* Filter out requests that don't make sense during replay.  */
   if (replay_memory_access == replay_memory_access_read_only
+      && !record_btrace_generating_corefile
       && record_btrace_is_replaying (ops))
     {
       switch (object)
@@ -969,7 +974,7 @@ record_btrace_fetch_registers (struct target_ops *ops,
   gdb_assert (tp != NULL);
 
   replay = tp->btrace.replay;
-  if (replay != NULL)
+  if (replay != NULL && !record_btrace_generating_corefile)
     {
       const struct btrace_insn *insn;
       struct gdbarch *gdbarch;
@@ -1010,7 +1015,7 @@ record_btrace_store_registers (struct target_ops *ops,
 {
   struct target_ops *t;
 
-  if (record_btrace_is_replaying (ops))
+  if (!record_btrace_generating_corefile && record_btrace_is_replaying (ops))
     error (_("This record target does not allow writing registers."));
 
   gdb_assert (may_write_registers != 0);
@@ -1033,7 +1038,7 @@ record_btrace_prepare_to_store (struct target_ops *ops,
 {
   struct target_ops *t;
 
-  if (record_btrace_is_replaying (ops))
+  if (!record_btrace_generating_corefile && record_btrace_is_replaying (ops))
     return;
 
   for (t = ops->beneath; t != NULL; t = t->beneath)
@@ -1939,6 +1944,22 @@ record_btrace_execution_direction (struct target_ops *self)
   return record_btrace_resume_exec_dir;
 }
 
+/* The to_prepare_to_generate_core target method.  */
+
+static void
+record_btrace_prepare_to_generate_core (struct target_ops *self)
+{
+  record_btrace_generating_corefile = 1;
+}
+
+/* The to_done_generating_core target method.  */
+
+static void
+record_btrace_done_generating_core (struct target_ops *self)
+{
+  record_btrace_generating_corefile = 0;
+}
+
 /* Initialize the record-btrace target ops.  */
 
 static void
@@ -1983,6 +2004,8 @@ init_record_btrace_ops (void)
   ops->to_can_execute_reverse = record_btrace_can_execute_reverse;
   ops->to_decr_pc_after_break = record_btrace_decr_pc_after_break;
   ops->to_execution_direction = record_btrace_execution_direction;
+  ops->to_prepare_to_generate_core = record_btrace_prepare_to_generate_core;
+  ops->to_done_generating_core = record_btrace_done_generating_core;
   ops->to_stratum = record_stratum;
   ops->to_magic = OPS_MAGIC;
 }

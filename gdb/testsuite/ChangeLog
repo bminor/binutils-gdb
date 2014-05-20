@@ -1,3 +1,7 @@
+2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/gcore.exp: New.
+
 2014-06-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/watchpoint-reuse-slot.c: New file.

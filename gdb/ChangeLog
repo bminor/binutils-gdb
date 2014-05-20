@@ -1,5 +1,17 @@
 2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_generating_corefile)
+	(record_btrace_prepare_to_generate_core)
+	(record_btrace_done_generating_core): New.
+	(record_btrace_xfer_partial, record_btrace_fetch_registers)
+	(record_btrace_store_registers, record_btrace_prepare_to_store):
+	Forward request when generating a core file.
+	(record_btrace_open): Set record_btrace_generating_corefile to zero.
+	(init_record_btrace_ops): Set to_prepare_to_generate_core and
+	to_done_generating_core.
+
+2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* target.h (target_ops) <to_prepare_to_generate_core>
 	<to_done_generating_core>: New.
 	(target_prepare_to_generate_core, target_done_generating_core): New.
