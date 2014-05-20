@@ -1643,7 +1643,7 @@ static const struct mips_ase mips_ases[] = {
 };
 
 /* The set of ASEs that require -mfp64.  */
-#define FP64_ASES (ASE_MIPS3D | ASE_MDMX)
+#define FP64_ASES (ASE_MIPS3D | ASE_MDMX | ASE_MSA)
 
 /* Groups of ASE_* flags that represent different revisions of an ASE.  */
 static const unsigned int mips_ase_groups[] = {
@@ -14021,7 +14021,7 @@ mips_after_parse_args (void)
 	file_mips_opts.fp = 64;
       else if ((mips_opts.ase & FP64_ASES)
 	       && ISA_HAS_64BIT_FPRS (mips_opts.isa))
-	/* -mips3d and -mdmx imply 64-bit float registers, if possible.  */
+	/* Handle ASEs that require 64-bit float registers, if possible.  */
 	file_mips_opts.fp = 64;
       else
 	/* 32-bit float registers.  */
@@ -14063,10 +14063,10 @@ mips_after_parse_args (void)
     mips_opts.micromips = (CPU_HAS_MICROMIPS (file_mips_opts.arch))
 			   ? 1 : 0;
 
-  /* MIPS3D and MDMX require 64-bit FPRs, so -mfp32 should stop those
+  /* MIPS3D, MDMX and MSA require 64-bit FPRs, so -mfp32 should stop those
      ASEs from being selected implicitly.  */
   if (file_mips_opts.fp != 64)
-    file_ase_explicit |= ASE_MIPS3D | ASE_MDMX;
+    file_ase_explicit |= ASE_MIPS3D | ASE_MDMX | ASE_MSA;
 
   /* If the user didn't explicitly select or deselect a particular ASE,
      use the default setting for the CPU.  */

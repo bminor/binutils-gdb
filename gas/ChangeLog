@@ -1,3 +1,8 @@
+2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (FP64_ASES): Add ASE_MSA.
+	(mips_after_parse_args): Do not select ASE_MSA without -mfp64.
+
 2014-05-20  Mike Stump  <mikestump@comcast.net>
 
 	* messages.c (as_warn_internal): Ensure we don't interleave output
