@@ -388,6 +388,8 @@ enum lval_type
     lval_register,
     /* * In a gdb internal variable.  */
     lval_internalvar,
+    /* * Value encapsulates a callable defined in an extension language.  */
+    lval_xcallable,
     /* * Part of a gdb internal variable (structure field).  */
     lval_internalvar_component,
     /* * Value's bits are fetched and stored using functions provided

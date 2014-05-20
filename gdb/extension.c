@@ -834,6 +834,160 @@ check_quit_flag (void)
   return result;
 }
 
+/* xmethod support.  */
+
+/* The xmethod API routines do not have "ext_lang" in the name because
+   the name "xmethod" implies that this routine deals with extension
+   languages.  Plus some of the methods take a xmethod_foo * "self/this"
+   arg, not an extension_language_defn * arg.  */
+
+/* Returns a new xmethod_worker with EXTLANG and DATA.  Space for the
+   result must be freed with free_xmethod_worker.  */
+
+struct xmethod_worker *
+new_xmethod_worker (const struct extension_language_defn *extlang, void *data)
+{
+  struct xmethod_worker *worker = XCNEW (struct xmethod_worker);
+
+  worker->extlang = extlang;
+  worker->data = data;
+  worker->value = NULL;
+
+  return worker;
+}
+
+/* Clones WORKER and returns a new but identical worker.
+   The function get_matching_xmethod_workers (see below), returns a
+   vector of matching workers.  If a particular worker is selected by GDB
+   to invoke a method, then this function can help in cloning the
+   selected worker and freeing up the vector via a cleanup.
+
+   Space for the result must be freed with free_xmethod_worker.  */
+
+struct xmethod_worker *
+clone_xmethod_worker (struct xmethod_worker *worker)
+{
+  struct xmethod_worker *new_worker;
+  const struct extension_language_defn *extlang = worker->extlang;
+
+  gdb_assert (extlang->ops->clone_xmethod_worker_data != NULL);
+
+  new_worker = new_xmethod_worker
+    (extlang,
+     extlang->ops->clone_xmethod_worker_data (extlang, worker->data));
+
+  return new_worker;
+}
+
+/* If a method with name METHOD_NAME is to be invoked on an object of type
+   TYPE, then all entension languages are searched for implementations of
+   methods with name METHOD.  All matches found are returned as a vector
+   of 'xmethod_worker_ptr' objects.  If no matching methods are
+   found, NULL is returned.  */
+
+VEC (xmethod_worker_ptr) *
+get_matching_xmethod_workers (struct type *type, const char *method_name)
+{
+  VEC (xmethod_worker_ptr) *workers = NULL;
+  int i;
+  const struct extension_language_defn *extlang;
+
+  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+    {
+      VEC (xmethod_worker_ptr) *lang_workers, *new_vec;
+      enum ext_lang_rc rc;
+
+      /* If an extension language does not support xmethods, ignore
+	 it.  */
+      if (extlang->ops->get_matching_xmethod_workers == NULL)
+	continue;
+
+      rc = extlang->ops->get_matching_xmethod_workers (extlang,
+						       type, method_name,
+						       &lang_workers);
+      if (rc == EXT_LANG_RC_ERROR)
+	{
+	  free_xmethod_worker_vec (workers);
+	  error (_("Error while looking for matching xmethod workers "
+		   "defined in %s."), extlang->capitalized_name);
+	}
+
+      new_vec = VEC_merge (xmethod_worker_ptr, workers, lang_workers);
+      /* Free only the vectors and not the elements as NEW_VEC still
+	 contains them.  */
+      VEC_free (xmethod_worker_ptr, workers);
+      VEC_free (xmethod_worker_ptr, lang_workers);
+      workers = new_vec;
+    }
+
+  return workers;
+}
+
+/* Return the arg types of the xmethod encapsulated in WORKER.
+   An array of arg types is returned.  The length of the array is returned in
+   NARGS.  The type of the 'this' object is returned as the first element of
+   array.  */
+
+struct type **
+get_xmethod_arg_types (struct xmethod_worker *worker, int *nargs)
+{
+  enum ext_lang_rc rc;
+  struct type **type_array = NULL;
+  const struct extension_language_defn *extlang = worker->extlang;
+
+  gdb_assert (extlang->ops->get_xmethod_arg_types != NULL);
+
+  rc = extlang->ops->get_xmethod_arg_types (extlang, worker, nargs,
+					    &type_array);
+  if (rc == EXT_LANG_RC_ERROR)
+    {
+      error (_("Error while looking for arg types of a xmethod worker "
+	       "defined in %s."), extlang->capitalized_name);
+    }
+
+  return type_array;
+}
+
+/* Invokes the xmethod encapsulated in WORKER and returns the result.
+   The method is invoked on OBJ with arguments in the ARGS array.  NARGS is
+   the length of the this array.  */
+
+struct value *
+invoke_xmethod (struct xmethod_worker *worker, struct value *obj,
+		     struct value **args, int nargs)
+{
+  gdb_assert (worker->extlang->ops->invoke_xmethod != NULL);
+
+  return worker->extlang->ops->invoke_xmethod (worker->extlang, worker,
+					       obj, args, nargs);
+}
+
+/* Frees the xmethod worker WORKER.  */
+
+void
+free_xmethod_worker (struct xmethod_worker *worker)
+{
+  gdb_assert (worker->extlang->ops->free_xmethod_worker_data != NULL);
+  worker->extlang->ops->free_xmethod_worker_data (worker->extlang,
+						  worker->data);
+  xfree (worker);
+}
+
+/* Frees a vector of xmethod_workers VEC.  */
+
+void
+free_xmethod_worker_vec (void *vec)
+{
+  int i;
+  struct xmethod_worker *worker;
+  VEC (xmethod_worker_ptr) *v = (VEC (xmethod_worker_ptr) *) vec;
+
+  for (i = 0; VEC_iterate (xmethod_worker_ptr, v, i, worker); i++)
+    free_xmethod_worker (worker);
+
+  VEC_free (xmethod_worker_ptr, v);
+}
+
 /* Called via an observer before gdb prints its prompt.
    Iterate over the extension languages giving them a chance to
    change the prompt.  The first one to change the prompt wins,

@@ -4387,6 +4387,10 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     = arch_type (gdbarch, TYPE_CODE_INTERNAL_FUNCTION, 0,
 		 "<internal function>");
 
+  /* This type represents an xmethod.  */
+  builtin_type->xmethod
+    = arch_type (gdbarch, TYPE_CODE_XMETHOD, 0, "<xmethod>");
+
   return builtin_type;
 }
 

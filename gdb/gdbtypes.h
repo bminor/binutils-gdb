@@ -179,7 +179,10 @@ enum type_code
     TYPE_CODE_MODULE,		/**< Fortran module.  */
 
     /* * Internal function type.  */
-    TYPE_CODE_INTERNAL_FUNCTION
+    TYPE_CODE_INTERNAL_FUNCTION,
+
+    /* * Methods implemented in extension languages.  */
+    TYPE_CODE_XMETHOD
   };
 
 /* * For now allow source to use TYPE_CODE_CLASS for C++ classes, as
@@ -1468,6 +1471,9 @@ struct builtin_type
   /* * This type is used to represent a GDB internal function.  */
 
   struct type *internal_fn;
+
+  /* * This type is used to represent an xmethod.  */
+  struct type *xmethod;
 };
 
 /* * Return the type table for the specified architecture.  */

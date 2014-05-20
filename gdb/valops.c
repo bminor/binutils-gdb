@@ -1372,7 +1372,8 @@ value_must_coerce_to_target (struct value *val)
 
   /* The only lval kinds which do not live in target memory.  */
   if (VALUE_LVAL (val) != not_lval
-      && VALUE_LVAL (val) != lval_internalvar)
+      && VALUE_LVAL (val) != lval_internalvar
+      && VALUE_LVAL (val) != lval_xcallable)
     return 0;
 
   valtype = check_typedef (value_type (val));

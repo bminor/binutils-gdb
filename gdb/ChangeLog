@@ -1,3 +1,40 @@
+2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* defs.h (enum lval_type): New enumerator "lval_xcallable".
+	* extension-priv.h (struct extension_language_ops): Add the
+	xmethod interface.
+	* extension.c (new_xmethod_worker, clone_xmethod_worker,
+	get_matching_xmethod_workers, get_xmethod_argtypes,
+	invoke_xmethod, free_xmethod_worker,
+	free_xmethod_worker_vec): New functions.
+	* extension.h: #include "common/vec.h".
+	New function declarations.
+	(struct xmethod_worker): New struct.
+	(VEC (xmethod_worker_ptr)): New vector type.
+	(xmethod_worker_ptr): New typedef.
+	(xmethod_worker_vec): Likewise.
+	* gdbtypes.c (gdbtypes_post_init): Initialize "xmethod" field of
+	builtin_type.
+	* gdbtypes.h (enum type_code): New enumerator TYPE_CODE_XMETHOD.
+	(struct builtin_type): New field "xmethod".
+	* valarith.c (value_ptradd): Assert that the value argument is not
+	lval_xcallable.
+	* valops.c (value_must_coerce_to_target): Return 0 for
+	lval_xcallable values.
+	* value.c (struct value): New field XM_WORKER in the field
+	LOCATION.
+	(value_address, value_raw_address): Return 0 for lval_xcallable
+	values.
+	(set_value_address): Assert that the value is not an
+	lval_xcallable.
+	(value_free): Free the associated xmethod worker when freeing
+	lval_xcallable values.
+	(set_value_component_location): Assert that the WHOLE value is not
+	lval_xcallable.
+	(value_of_xmethod, call_xmethod): New functions.
+	* value.h: Declare "struct xmethod_worker".
+	Declare new functions value_of_xmethod, call_xmethod.
+
 2014-06-03  Joel Brobecker  <brobecker@adacore.com>
 	    Pedro Alves  <palves@redhat.com>
 
