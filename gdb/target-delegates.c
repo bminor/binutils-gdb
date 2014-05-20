@@ -1249,12 +1249,6 @@ delegate_verify_memory (struct target_ops *self, const gdb_byte *arg1, CORE_ADDR
 }
 
 static int
-tdefault_verify_memory (struct target_ops *self, const gdb_byte *arg1, CORE_ADDR arg2, ULONGEST arg3)
-{
-  tcomplain ();
-}
-
-static int
 delegate_get_tib_address (struct target_ops *self, ptid_t arg1, CORE_ADDR *arg2)
 {
   self = self->beneath;
@@ -2003,7 +1997,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_set_trace_buffer_size = tdefault_set_trace_buffer_size;
   ops->to_set_trace_notes = tdefault_set_trace_notes;
   ops->to_core_of_thread = tdefault_core_of_thread;
-  ops->to_verify_memory = tdefault_verify_memory;
+  ops->to_verify_memory = default_verify_memory;
   ops->to_get_tib_address = tdefault_get_tib_address;
   ops->to_set_permissions = tdefault_set_permissions;
   ops->to_static_tracepoint_marker_at = tdefault_static_tracepoint_marker_at;

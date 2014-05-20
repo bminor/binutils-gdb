@@ -1273,6 +1273,7 @@ enum {
   PACKET_qTStatus,
   PACKET_QPassSignals,
   PACKET_QProgramSignals,
+  PACKET_qCRC,
   PACKET_qSearch_memory,
   PACKET_vAttach,
   PACKET_vRun,
@@ -8441,29 +8442,40 @@ remote_verify_memory (struct target_ops *ops,
   unsigned long host_crc, target_crc;
   char *tmp;
 
-  /* Make sure the remote is pointing at the right process.  */
-  set_general_process ();
+  /* It doesn't make sense to use qCRC if the remote target is
+     connected but not running.  */
+  if (target_has_execution && packet_support (PACKET_qCRC) != PACKET_DISABLE)
+    {
+      enum packet_result result;
 
-  /* FIXME: assumes lma can fit into long.  */
-  xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%lx,%lx",
-	     (long) lma, (long) size);
-  putpkt (rs->buf);
+      /* Make sure the remote is pointing at the right process.  */
+      set_general_process ();
 
-  /* Be clever; compute the host_crc before waiting for target
-     reply.  */
-  host_crc = xcrc32 (data, size, 0xffffffff);
+      /* FIXME: assumes lma can fit into long.  */
+      xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%lx,%lx",
+		 (long) lma, (long) size);
+      putpkt (rs->buf);
 
-  getpkt (&rs->buf, &rs->buf_size, 0);
-  if (rs->buf[0] == 'E')
-    return -1;
+      /* Be clever; compute the host_crc before waiting for target
+	 reply.  */
+      host_crc = xcrc32 (data, size, 0xffffffff);
 
-  if (rs->buf[0] != 'C')
-    error (_("remote target does not support this operation"));
+      getpkt (&rs->buf, &rs->buf_size, 0);
 
-  for (target_crc = 0, tmp = &rs->buf[1]; *tmp; tmp++)
-    target_crc = target_crc * 16 + fromhex (*tmp);
+      result = packet_ok (rs->buf,
+			  &remote_protocol_packets[PACKET_qCRC]);
+      if (result == PACKET_ERROR)
+	return -1;
+      else if (result == PACKET_OK)
+	{
+	  for (target_crc = 0, tmp = &rs->buf[1]; *tmp; tmp++)
+	    target_crc = target_crc * 16 + fromhex (*tmp);
 
-  return (host_crc == target_crc);
+	  return (host_crc == target_crc);
+	}
+    }
+
+  return simple_verify_memory (ops, data, lma, size);
 }
 
 /* compare-sections command
@@ -8542,7 +8554,7 @@ compare_sections_command (char *args, int from_tty)
       do_cleanups (old_chain);
     }
   if (mismatched > 0)
-    warning (_("One or more sections of the remote executable does not match\n\
+    warning (_("One or more sections of the target image does not match\n\
 the loaded file\n"));
   if (args && !matched)
     printf_filtered (_("No loaded section named '%s'.\n"), args);
@@ -12097,7 +12109,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 	  case PACKET_tracenz_feature:
 	  case PACKET_DisconnectedTracing_feature:
 	  case PACKET_augmented_libraries_svr4_read_feature:
-	    /* Additions to this list need to be well justified.  */
+	  case PACKET_qCRC:
+	    /* Additions to this list need to be well justified:
+	       pre-existing packets are OK; new packets are not.  */
 	    excepted = 1;
 	    break;
 	  default:

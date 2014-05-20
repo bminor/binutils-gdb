@@ -73,6 +73,10 @@ static int default_search_memory (struct target_ops *ops,
 				  ULONGEST pattern_len,
 				  CORE_ADDR *found_addrp);
 
+static int default_verify_memory (struct target_ops *self,
+				  const gdb_byte *data,
+				  CORE_ADDR memaddr, ULONGEST size);
+
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int return_zero (struct target_ops *);
@@ -3258,6 +3262,45 @@ target_core_of_thread (ptid_t ptid)
 			"target_core_of_thread (%d) = %d\n",
 			ptid_get_pid (ptid), retval);
   return retval;
+}
+
+int
+simple_verify_memory (struct target_ops *ops,
+		      const gdb_byte *data, CORE_ADDR lma, ULONGEST size)
+{
+  LONGEST total_xfered = 0;
+
+  while (total_xfered < size)
+    {
+      ULONGEST xfered_len;
+      enum target_xfer_status status;
+      gdb_byte buf[1024];
+      ULONGEST howmuch = min (sizeof (buf), size - total_xfered);
+
+      status = target_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
+				    buf, NULL, lma + total_xfered, howmuch,
+				    &xfered_len);
+      if (status == TARGET_XFER_OK
+	  && memcmp (data + total_xfered, buf, xfered_len) == 0)
+	{
+	  total_xfered += xfered_len;
+	  QUIT;
+	}
+      else
+	return 0;
+    }
+  return 1;
+}
+
+/* Default implementation of memory verification.  */
+
+static int
+default_verify_memory (struct target_ops *self,
+		       const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
+{
+  /* Start over from the top of the target stack.  */
+  return simple_verify_memory (current_target.beneath,
+			       data, memaddr, size);
 }
 
 int

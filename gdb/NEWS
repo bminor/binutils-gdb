@@ -94,6 +94,9 @@ maint ada show ignore-descriptive-types
 
 * The "catch syscall" command now works on s390*-linux* targets.
 
+* The "compare-sections" command is no longer specific to target
+  remote.  It now works with all targets.
+
 * New remote packets
 
 qXfer:btrace:read's annex

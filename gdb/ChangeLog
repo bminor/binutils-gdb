@@ -1,3 +1,22 @@
+2014-05-20  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that compare-sections now works with all targets.
+
+	* remote.c (PACKET_qCRC): New enum value.
+	(remote_verify_memory): Don't send qCRC if the target has no
+	execution.  Use packet_support/packet_ok.  If the target doesn't
+	support the qCRC packet, fallback to a deep memory copy.
+	(compare_sections_command): Say "target image" instead of "remote
+	executable".
+	(_initialize_remote): Add PACKET_qCRC to the list of config
+	packets that have no associated command.  Extend comment.
+	* target.c (simple_verify_memory, default_verify_memory): New
+	function.
+	* target.h (struct target_ops) <to_verify_memory>: Default to
+	default_verify_memory.
+	(simple_verify_memory): New declaration.
+	* target-delegates.c: Regenerate.
+
 2014-05-20  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record-btrace.c (record_btrace_step_thread): Check for empty history.

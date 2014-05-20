@@ -8765,23 +8765,28 @@ are from the last memory unit printed; this is not the same as the last
 address printed if several units were printed on the last line of output.
 
 @cindex remote memory comparison
+@cindex target memory comparison
 @cindex verify remote memory image
+@cindex verify target memory image
 When you are debugging a program running on a remote target machine
-(@pxref{Remote Debugging}), you may wish to verify the program's image in the
-remote machine's memory against the executable file you downloaded to
-the target.  The @code{compare-sections} command is provided for such
-situations.
+(@pxref{Remote Debugging}), you may wish to verify the program's image
+in the remote machine's memory against the executable file you
+downloaded to the target.  Or, on any target, you may want to check
+whether the program has corrupted its own read-only sections.  The
+@code{compare-sections} command is provided for such situations.
 
 @table @code
 @kindex compare-sections
 @item compare-sections @r{[}@var{section-name}@r{|}@code{-r}@r{]}
 Compare the data of a loadable section @var{section-name} in the
 executable file of the program being debugged with the same section in
-the remote machine's memory, and report any mismatches.  With no
+the target machine's memory, and report any mismatches.  With no
 arguments, compares all loadable sections.  With an argument of
-@code{-r}, compares all loadable read-only sections.  This command's
-availability depends on the target's support for the @code{"qCRC"}
-remote request.
+@code{-r}, compares all loadable read-only sections.
+
+Note: for remote targets, this command can be accelerated if the
+target supports computing the CRC checksum of a block of memory
+(@pxref{qCRC packet}).
 @end table
 
 @node Auto Display
@@ -17579,11 +17584,10 @@ the final result is inverted to ensure trailing zeros also affect the
 CRC.
 
 @emph{Note:} This is the same CRC polynomial as used in handling the
-@dfn{Remote Serial Protocol} @code{qCRC} packet (@pxref{Remote Protocol,
-, @value{GDBN} Remote Serial Protocol}).  However in the
-case of the Remote Serial Protocol, the CRC is computed @emph{most}
-significant bit first, and the result is not inverted, so trailing
-zeros have no effect on the CRC value.
+@dfn{Remote Serial Protocol} @code{qCRC} packet (@pxref{qCRC packet}).
+However in the case of the Remote Serial Protocol, the CRC is computed
+@emph{most} significant bit first, and the result is not inverted, so
+trailing zeros have no effect on the CRC value.
 
 To complete the description, we show below the code of the function
 which produces the CRC used in @code{.gnu_debuglink}.  Inverting the
@@ -34722,6 +34726,7 @@ Any other reply implies the old thread ID.
 @item qCRC:@var{addr},@var{length}
 @cindex CRC of memory block, remote request
 @cindex @samp{qCRC} packet
+@anchor{qCRC packet}
 Compute the CRC checksum of a block of memory using CRC-32 defined in
 IEEE 802.3.  The CRC is computed byte at a time, taking the most
 significant bit of each byte first.  The initial pattern code

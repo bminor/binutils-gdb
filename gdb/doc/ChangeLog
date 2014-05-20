@@ -1,3 +1,10 @@
+2014-05-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Memory) <compare-sections>: Generalize comments to
+	not be remote specific.  Add cross reference to the qCRC packet.
+	(Separate Debug Files): Update cross reference to the qCRC packet.
+	(General Query Packets) <qCRC packet>: Add anchor.
+
 2014-05-17  Doug Evans  <xdje42@gmail.com>
 
 	Copy over changes from guile.texi.
