@@ -1,3 +1,9 @@
+2014-05-20  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (CHECK_RELOC_MSP430): Add OP parameter.
+	Generate BFD_RELOC_MSP430_ABS_HI16 if vshift is 1.
+	(msp430_srcoperand): Store vshift value in operand.
+
 2014-05-19  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/16858
