@@ -1,3 +1,7 @@
+2014-05-20  Alan Modra  <amodra@gmail.com>
+
+	* m68k-dis.c: Don't include setjmp.h.
+
 2014-05-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (ADDR16_PREFIX): Removed.
