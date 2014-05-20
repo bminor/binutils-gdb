@@ -3359,12 +3359,12 @@ skip_to_semicolon (char **packet)
     (*packet)++;
 }
 
-/* Process options coming from Z packets for *point at address
-   POINT_ADDR.  PACKET is the packet buffer.  *PACKET is updated
-   to point to the first char after the last processed option.  */
+/* Process options coming from Z packets for a breakpoint.  PACKET is
+   the packet buffer.  *PACKET is updated to point to the first char
+   after the last processed option.  */
 
 static void
-process_point_options (CORE_ADDR point_addr, char **packet)
+process_point_options (struct breakpoint *bp, char **packet)
 {
   char *dataptr = *packet;
   int persist;
@@ -3385,7 +3385,7 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 	  /* Conditional expression.  */
 	  if (debug_threads)
 	    debug_printf ("Found breakpoint condition.\n");
-	  if (!add_breakpoint_condition (point_addr, &dataptr))
+	  if (!add_breakpoint_condition (bp, &dataptr))
 	    skip_to_semicolon (&dataptr);
 	}
       else if (strncmp (dataptr, "cmds:", strlen ("cmds:")) == 0)
@@ -3395,7 +3395,7 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 	    debug_printf ("Found breakpoint commands %s.\n", dataptr);
 	  persist = (*dataptr == '1');
 	  dataptr += 2;
-	  if (add_breakpoint_commands (point_addr, &dataptr, persist))
+	  if (add_breakpoint_commands (bp, &dataptr, persist))
 	    skip_to_semicolon (&dataptr);
 	}
       else
@@ -3732,39 +3732,26 @@ process_serial_event (void)
 	p = unpack_varlen_hex (p, &addr);
 	len = strtol (p + 1, &dataptr, 16);
 
-	/* Default to unrecognized/unsupported.  */
-	res = 1;
-	switch (type)
+	if (insert)
 	  {
-	  case '0': /* software-breakpoint */
-	  case '1': /* hardware-breakpoint */
-	  case '2': /* write watchpoint */
-	  case '3': /* read watchpoint */
-	  case '4': /* access watchpoint */
-	    require_running (own_buf);
-	    if (insert && the_target->insert_point != NULL)
-	      {
-		/* Insert the breakpoint.  If it is already inserted, nothing
-		   will take place.  */
-		res = (*the_target->insert_point) (type, addr, len);
+	    struct breakpoint *bp;
 
-		/* GDB may have sent us a list of *point parameters to be
-		   evaluated on the target's side.  Read such list here.  If we
-		   already have a list of parameters, GDB is telling us to drop
-		   that list and use this one instead.  */
-		if (!res && (type == '0' || type == '1'))
-		  {
-		    /* Remove previous conditions.  */
-		    clear_gdb_breakpoint_conditions (addr);
-		    process_point_options (addr, &dataptr);
-		  }
+	    bp = set_gdb_breakpoint (type, addr, len, &res);
+	    if (bp != NULL)
+	      {
+		res = 0;
+
+		/* GDB may have sent us a list of *point parameters to
+		   be evaluated on the target's side.  Read such list
+		   here.  If we already have a list of parameters, GDB
+		   is telling us to drop that list and use this one
+		   instead.  */
+		clear_breakpoint_conditions (bp);
+		process_point_options (bp, &dataptr);
 	      }
-	    else if (!insert && the_target->remove_point != NULL)
-	      res = (*the_target->remove_point) (type, addr, len);
-	    break;
-	  default:
-	    break;
 	  }
+	else
+	  res = delete_gdb_breakpoint (type, addr, len);
 
 	if (res == 0)
 	  write_ok (own_buf);

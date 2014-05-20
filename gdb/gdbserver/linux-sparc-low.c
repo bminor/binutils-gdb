@@ -328,6 +328,7 @@ struct linux_target_ops the_low_target = {
   sparc_reinsert_addr,
   0,
   sparc_breakpoint_at,
+  NULL,  /* supports_z_point_type */
   NULL, NULL, NULL, NULL,
   NULL, NULL
 };

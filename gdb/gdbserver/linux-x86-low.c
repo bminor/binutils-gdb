@@ -647,32 +647,41 @@ i386_dr_low_get_status (void)
 /* Breakpoint/Watchpoint support.  */
 
 static int
-x86_insert_point (char type, CORE_ADDR addr, int len)
+x86_supports_z_point_type (char z_type)
+{
+  switch (z_type)
+    {
+    case Z_PACKET_SW_BP:
+    case Z_PACKET_HW_BP:
+    case Z_PACKET_WRITE_WP:
+    case Z_PACKET_ACCESS_WP:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+static int
+x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		  int size, struct raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
+
   switch (type)
     {
-    case '0': /* software-breakpoint */
-      {
-	int ret;
+    case raw_bkpt_type_sw:
+      return insert_memory_breakpoint (bp);
 
-	ret = prepare_to_access_memory ();
-	if (ret)
-	  return -1;
-	ret = set_gdb_breakpoint_at (addr);
-	done_accessing_memory ();
-	return ret;
-      }
-    case '1': /* hardware-breakpoint */
-    case '2': /* write watchpoint */
-    case '3': /* read watchpoint */
-    case '4': /* access watchpoint */
+    case raw_bkpt_type_hw:
+    case raw_bkpt_type_write_wp:
+    case raw_bkpt_type_access_wp:
       {
-	enum target_hw_bp_type hw_type = Z_packet_to_target_hw_bp_type (type);
+	enum target_hw_bp_type hw_type
+	  = raw_bkpt_type_to_target_hw_bp_type (type);
 	struct i386_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
-	return i386_low_insert_watchpoint (state, hw_type, addr, len);
+	return i386_low_insert_watchpoint (state, hw_type, addr, size);
       }
 
     default:
@@ -682,32 +691,26 @@ x86_insert_point (char type, CORE_ADDR addr, int len)
 }
 
 static int
-x86_remove_point (char type, CORE_ADDR addr, int len)
+x86_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		  int size, struct raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
+
   switch (type)
     {
-    case '0': /* software-breakpoint */
-      {
-	int ret;
+    case raw_bkpt_type_sw:
+      return remove_memory_breakpoint (bp);
 
-	ret = prepare_to_access_memory ();
-	if (ret)
-	  return -1;
-	ret = delete_gdb_breakpoint_at (addr);
-	done_accessing_memory ();
-	return ret;
-      }
-    case '1': /* hardware-breakpoint */
-    case '2': /* write watchpoint */
-    case '3': /* read watchpoint */
-    case '4': /* access watchpoint */
+    case raw_bkpt_type_hw:
+    case raw_bkpt_type_write_wp:
+    case raw_bkpt_type_access_wp:
       {
-	enum target_hw_bp_type hw_type = Z_packet_to_target_hw_bp_type (type);
+	enum target_hw_bp_type hw_type
+	  = raw_bkpt_type_to_target_hw_bp_type (type);
 	struct i386_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
-	return i386_low_remove_watchpoint (state, hw_type, addr, len);
+	return i386_low_remove_watchpoint (state, hw_type, addr, size);
       }
     default:
       /* Unsupported.  */
@@ -3402,6 +3405,7 @@ struct linux_target_ops the_low_target =
   NULL,
   1,
   x86_breakpoint_at,
+  x86_supports_z_point_type,
   x86_insert_point,
   x86_remove_point,
   x86_stopped_by_watchpoint,

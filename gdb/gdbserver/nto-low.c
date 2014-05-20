@@ -771,30 +771,46 @@ nto_read_auxv (CORE_ADDR offset, unsigned char *myaddr, unsigned int len)
   return nto_read_auxv_from_initial_stack (initial_stack, myaddr, len);
 }
 
-/* Insert {break/watch}point at address ADDR.
-   TYPE must be in '0'..'4' range.  LEN is not used.  */
+static int
+nto_supports_z_point_type (char z_type)
+{
+  switch (z_type)
+    {
+    case Z_PACKET_SW_BP:
+    case Z_PACKET_HW_BP:
+    case Z_PACKET_WRITE_WP:
+    case Z_PACKET_READ_WP:
+    case Z_PACKET_ACCESS_WP:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+/* Insert {break/watch}point at address ADDR.  SIZE is not used.  */
 
 static int
-nto_insert_point (char type, CORE_ADDR addr, int len)
+nto_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		  int size, struct raw_breakpoint *bp)
 {
   int wtype = _DEBUG_BREAK_HW; /* Always request HW.  */
 
   TRACE ("%s type:%c addr: 0x%08lx len:%d\n", __func__, (int)type, addr, len);
   switch (type)
     {
-    case '0': /* software-breakpoint */
+    case raw_bkpt_type_sw:
       wtype = _DEBUG_BREAK_EXEC;
       break;
-    case '1': /* hardware-breakpoint */
+    case raw_bkpt_type_hw:
       wtype |= _DEBUG_BREAK_EXEC;
       break;
-    case '2':  /* write watchpoint */
+    case raw_bkpt_type_write_wp:
       wtype |= _DEBUG_BREAK_RW;
       break;
-    case '3':  /* read watchpoint */
+    case raw_bkpt_type_read_wp:
       wtype |= _DEBUG_BREAK_RD;
       break;
-    case '4':  /* access watchpoint */
+    case raw_bkpt_type_access_wp:
       wtype |= _DEBUG_BREAK_RW;
       break;
     default:
@@ -803,30 +819,30 @@ nto_insert_point (char type, CORE_ADDR addr, int len)
   return nto_breakpoint (addr, wtype, 0);
 }
 
-/* Remove {break/watch}point at address ADDR.
-   TYPE must be in '0'..'4' range.  LEN is not used.  */
+/* Remove {break/watch}point at address ADDR.  SIZE is not used.  */
 
 static int
-nto_remove_point (char type, CORE_ADDR addr, int len)
+nto_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		  int size, struct raw_breakpoint *bp)
 {
   int wtype = _DEBUG_BREAK_HW; /* Always request HW.  */
 
   TRACE ("%s type:%c addr: 0x%08lx len:%d\n", __func__, (int)type, addr, len);
   switch (type)
     {
-    case '0': /* software-breakpoint */
+    case raw_bkpt_type_sw:
       wtype = _DEBUG_BREAK_EXEC;
       break;
-    case '1': /* hardware-breakpoint */
+    case raw_bkpt_type_hw:
       wtype |= _DEBUG_BREAK_EXEC;
       break;
-    case '2':  /* write watchpoint */
+    case raw_bkpt_type_write_wp:
       wtype |= _DEBUG_BREAK_RW;
       break;
-    case '3':  /* read watchpoint */
+    case raw_bkpt_type_read_wp:
       wtype |= _DEBUG_BREAK_RD;
       break;
-    case '4':  /* access watchpoint */
+    case raw_bkpt_type_access_wp:
       wtype |= _DEBUG_BREAK_RW;
       break;
     default:
@@ -927,6 +943,7 @@ static struct target_ops nto_target_ops = {
   NULL, /* nto_look_up_symbols */
   nto_request_interrupt,
   nto_read_auxv,
+  nto_supports_z_point_type,
   nto_insert_point,
   nto_remove_point,
   nto_stopped_by_watchpoint,

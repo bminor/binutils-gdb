@@ -4857,20 +4857,29 @@ linux_read_auxv (CORE_ADDR offset, unsigned char *myaddr, unsigned int len)
    corresponding function.  */
 
 static int
-linux_insert_point (char type, CORE_ADDR addr, int len)
+linux_supports_z_point_type (char z_type)
+{
+  return (the_low_target.supports_z_point_type != NULL
+	  && the_low_target.supports_z_point_type (z_type));
+}
+
+static int
+linux_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, struct raw_breakpoint *bp)
 {
   if (the_low_target.insert_point != NULL)
-    return the_low_target.insert_point (type, addr, len);
+    return the_low_target.insert_point (type, addr, size, bp);
   else
     /* Unsupported (see target.h).  */
     return 1;
 }
 
 static int
-linux_remove_point (char type, CORE_ADDR addr, int len)
+linux_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, struct raw_breakpoint *bp)
 {
   if (the_low_target.remove_point != NULL)
-    return the_low_target.remove_point (type, addr, len);
+    return the_low_target.remove_point (type, addr, size, bp);
   else
     /* Unsupported (see target.h).  */
     return 1;
@@ -5999,6 +6008,7 @@ static struct target_ops linux_target_ops = {
   linux_look_up_symbols,
   linux_request_interrupt,
   linux_read_auxv,
+  linux_supports_z_point_type,
   linux_insert_point,
   linux_remove_point,
   linux_stopped_by_watchpoint,

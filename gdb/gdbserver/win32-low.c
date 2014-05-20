@@ -247,20 +247,29 @@ child_delete_thread (DWORD pid, DWORD tid)
    if the low target has registered a corresponding function.  */
 
 static int
-win32_insert_point (char type, CORE_ADDR addr, int len)
+win32_supports_z_point_type (char z_type)
+{
+  return (the_low_target.supports_z_point_type != NULL
+	  && the_low_target.supports_z_point_type (z_type));
+}
+
+static int
+win32_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, struct raw_breakpoint *bp)
 {
   if (the_low_target.insert_point != NULL)
-    return the_low_target.insert_point (type, addr, len);
+    return the_low_target.insert_point (type, addr, size, bp);
   else
     /* Unsupported (see target.h).  */
     return 1;
 }
 
 static int
-win32_remove_point (char type, CORE_ADDR addr, int len)
+win32_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, struct raw_breakpoint *bp)
 {
   if (the_low_target.remove_point != NULL)
-    return the_low_target.remove_point (type, addr, len);
+    return the_low_target.remove_point (type, addr, size, bp);
   else
     /* Unsupported (see target.h).  */
     return 1;
@@ -1773,6 +1782,7 @@ static struct target_ops win32_target_ops = {
   NULL, /* lookup_symbols */
   win32_request_interrupt,
   NULL, /* read_auxv */
+  win32_supports_z_point_type,
   win32_insert_point,
   win32_remove_point,
   win32_stopped_by_watchpoint,

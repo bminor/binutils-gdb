@@ -132,6 +132,7 @@ struct win32_target_ops the_low_target = {
   (const unsigned char *) &arm_wince_breakpoint,
   arm_wince_breakpoint_len,
   /* Watchpoint related functions.  See target.h for comments.  */
+  NULL, /* supports_z_point_type */
   NULL, /* insert_point */
   NULL, /* remove_point */
   NULL, /* stopped_by_watchpoint */

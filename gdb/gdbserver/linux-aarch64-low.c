@@ -966,20 +966,18 @@ aarch64_supports_z_point_type (char z_type)
    Return -1 if an error occurs.  */
 
 static int
-aarch64_insert_point (char type, CORE_ADDR addr, int len)
+aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		      int len, struct raw_breakpoint *bp)
 {
   int ret;
   enum target_hw_bp_type targ_type;
-
-  if (!aarch64_supports_z_point_type (type))
-    return 1;
 
   if (debug_hw_points)
     fprintf (stderr, "insert_point on entry (addr=0x%08lx, len=%d)\n",
 	     (unsigned long) addr, len);
 
-  /* Determine the type from the packet.  */
-  targ_type = Z_packet_to_target_hw_bp_type (type);
+  /* Determine the type from the raw breakpoint type.  */
+  targ_type = raw_bkpt_type_to_target_hw_bp_type (type);
 
   if (targ_type != hw_execute)
     ret =
@@ -1004,20 +1002,18 @@ aarch64_insert_point (char type, CORE_ADDR addr, int len)
    Return -1 if an error occurs.  */
 
 static int
-aarch64_remove_point (char type, CORE_ADDR addr, int len)
+aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		      int len, struct raw_breakpoint *bp)
 {
   int ret;
   enum target_hw_bp_type targ_type;
-
-  if (!aarch64_supports_z_point_type (type))
-    return 1;
 
   if (debug_hw_points)
     fprintf (stderr, "remove_point on entry (addr=0x%08lx, len=%d)\n",
 	     (unsigned long) addr, len);
 
-  /* Determine the type from the packet.  */
-  targ_type = Z_packet_to_target_hw_bp_type (type);
+  /* Determine the type from the raw breakpoint type.  */
+  targ_type = raw_bkpt_type_to_target_hw_bp_type (type);
 
   /* Set up state pointers.  */
   if (targ_type != hw_execute)
@@ -1289,6 +1285,7 @@ struct linux_target_ops the_low_target =
   NULL,
   0,
   aarch64_breakpoint_at,
+  aarch64_supports_z_point_type,
   aarch64_insert_point,
   aarch64_remove_point,
   aarch64_stopped_by_watchpoint,
