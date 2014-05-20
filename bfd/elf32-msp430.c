@@ -1582,14 +1582,15 @@ msp430_elf_relax_adjust_locals (bfd * abfd, asection * sec, bfd_vma addr,
   irelend = irel + sec->reloc_count;
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
-  
+
   for (;irel < irelend; irel++)
     {
-      int sidx = ELF32_R_SYM(irel->r_info);
+      unsigned int sidx = ELF32_R_SYM(irel->r_info);
       Elf_Internal_Sym *lsym = isym + sidx;
-      
+
       /* Adjust symbols referenced by .sec+0xXX */
-      if (irel->r_addend > addr && irel->r_addend < toaddr 
+      if (irel->r_addend > addr && irel->r_addend < toaddr
+	  && sidx < symtab_hdr->sh_info
 	  && lsym->st_shndx == sec_shndx)
 	irel->r_addend -= count;
     }
