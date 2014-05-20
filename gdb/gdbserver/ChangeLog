@@ -1,5 +1,30 @@
 2014-05-20  Pedro Alves  <palves@redhat.com>
 
+	* mem-break.h: Include break-common.h.
+	(Z_PACKET_SW_BP, Z_PACKET_HW_BP, Z_PACKET_WRITE_WP)
+	(Z_PACKET_READ_WP, Z_PACKET_ACCESS_WP): New defines.
+	(Z_packet_to_target_hw_bp_type): New declaration.
+	* mem-break.c (Z_packet_to_target_hw_bp_type): New function.
+	* i386-low.c (Z_PACKET_HW_BP, Z_PACKET_WRITE_WP, Z_PACKET_READ_WP)
+	(Z_PACKET_ACCESS_WP): Delete macros.
+	(Z_packet_to_hw_type): Delete function.
+	* i386-low.h: Don't include break-common.h here.
+	(Z_packet_to_hw_type): Delete declaration.
+	* linux-x86-low.c (x86_insert_point, x86_insert_point): Call
+	Z_packet_to_target_hw_bp_type instead of Z_packet_to_hw_type.
+	* win32-i386-low.c (i386_insert_point, i386_remove_point): Call
+	Z_packet_to_target_hw_bp_type instead of Z_packet_to_hw_type.
+	* linux-aarch64-low.c: Don't include break-common.h here.
+	(Z_PACKET_SW_BP, Z_PACKET_HW_BP, Z_PACKET_WRITE_WP)
+	(Z_PACKET_READ_WP, Z_PACKET_ACCESS_WP): Delete macros.
+	(Z_packet_to_target_hw_bp_type): Delete function.
+	* linux-mips-low.c (rsp_bp_type_to_target_hw_bp_type): Delete
+	function.
+	(mips_insert_point, mips_remove_point): Use
+	Z_packet_to_target_hw_bp_type.
+
+2014-05-20  Pedro Alves  <palves@redhat.com>
+
 	* linux-aarch64-low.c: Include break-common.h.
 	(enum target_point_type): Delete.
 	(Z_packet_to_point_type): Rename to ...

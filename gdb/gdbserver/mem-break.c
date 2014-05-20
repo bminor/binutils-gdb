@@ -138,6 +138,24 @@ struct breakpoint
   int (*handler) (CORE_ADDR);
 };
 
+enum target_hw_bp_type
+Z_packet_to_target_hw_bp_type (char type)
+{
+  switch (type)
+    {
+    case Z_PACKET_HW_BP:
+      return hw_execute;
+    case Z_PACKET_WRITE_WP:
+      return hw_write;
+    case Z_PACKET_READ_WP:
+      return hw_read;
+    case Z_PACKET_ACCESS_WP:
+      return hw_access;
+    default:
+      fatal ("bad watchpoint type %c", type);
+    }
+}
+
 int
 any_persistent_commands ()
 {

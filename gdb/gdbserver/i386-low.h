@@ -29,12 +29,6 @@
    counts, and allow to watch regions up to 16 bytes long
    (32 bytes on 64 bit hosts).  */
 
-#include "break-common.h"
-
-/* Map the protocol watchpoint type TYPE to enum target_hw_bp_type.  */
-
-enum target_hw_bp_type Z_packet_to_hw_type (char type);
-
 /* Debug registers' indices.  */
 #define DR_FIRSTADDR 0
 #define DR_LASTADDR  3

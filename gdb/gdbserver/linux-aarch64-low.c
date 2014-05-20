@@ -29,7 +29,6 @@
 #include <sys/uio.h>
 
 #include "gdb_proc_service.h"
-#include "break-common.h"
 
 /* Defined in auto-generated files.  */
 void init_registers_aarch64 (void);
@@ -208,33 +207,6 @@ struct arch_lwp_info
 
 static int aarch64_num_bp_regs;
 static int aarch64_num_wp_regs;
-
-#define Z_PACKET_SW_BP '0'
-#define Z_PACKET_HW_BP '1'
-#define Z_PACKET_WRITE_WP '2'
-#define Z_PACKET_READ_WP '3'
-#define Z_PACKET_ACCESS_WP '4'
-
-/* Map the protocol breakpoint/watchpoint type TYPE to enum
-   target_hw_bp_type.  */
-
-static enum target_hw_bp_type
-Z_packet_to_target_hw_bp_type (char type)
-{
-  switch (type)
-    {
-    case Z_PACKET_HW_BP:
-      return hw_execute;
-    case Z_PACKET_WRITE_WP:
-      return hw_write;
-    case Z_PACKET_READ_WP:
-      return hw_read;
-    case Z_PACKET_ACCESS_WP:
-      return hw_access;
-    default:
-      fatal ("bad watchpoint type %c", type);
-    }
-}
 
 static int
 aarch64_cannot_store_register (int regno)

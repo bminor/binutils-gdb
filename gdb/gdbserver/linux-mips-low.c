@@ -372,24 +372,6 @@ mips_linux_prepare_to_resume (struct lwp_info *lwp)
     }
 }
 
-/* Translate breakpoint type TYPE in rsp to 'enum target_hw_bp_type'.  */
-
-static enum target_hw_bp_type
-rsp_bp_type_to_target_hw_bp_type (char type)
-{
-  switch (type)
-    {
-    case '2':
-      return hw_write;
-    case '3':
-      return hw_read;
-    case '4':
-      return hw_access;
-    }
-
-  gdb_assert_not_reached ("unhandled RSP breakpoint type");
-}
-
 /* This is the implementation of linux_target_ops method
    insert_point.  */
 
@@ -434,7 +416,7 @@ mips_insert_point (char type, CORE_ADDR addr, int len)
   mips_linux_watch_populate_regs (private->current_watches, &regs);
 
   /* Now try to add the new watch.  */
-  watch_type = rsp_bp_type_to_target_hw_bp_type (type);
+  watch_type = Z_packet_to_target_hw_bp_type (type);
   irw = mips_linux_watch_type_to_irw (watch_type);
   if (!mips_linux_watch_try_one_watch (&regs, addr, len, irw))
     return -1;
@@ -490,7 +472,7 @@ mips_remove_point (char type, CORE_ADDR addr, int len)
     }
 
   /* Search for a known watch that matches.  Then unlink and free it.  */
-  watch_type = rsp_bp_type_to_target_hw_bp_type (type);
+  watch_type = Z_packet_to_target_hw_bp_type (type);
   deleted_one = 0;
   pw = &private->current_watches;
   while ((w = *pw))

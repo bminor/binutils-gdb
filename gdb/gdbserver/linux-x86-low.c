@@ -668,7 +668,7 @@ x86_insert_point (char type, CORE_ADDR addr, int len)
     case '3': /* read watchpoint */
     case '4': /* access watchpoint */
       {
-	enum target_hw_bp_type hw_type = Z_packet_to_hw_type (type);
+	enum target_hw_bp_type hw_type = Z_packet_to_target_hw_bp_type (type);
 	struct i386_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
@@ -703,7 +703,7 @@ x86_remove_point (char type, CORE_ADDR addr, int len)
     case '3': /* read watchpoint */
     case '4': /* access watchpoint */
       {
-	enum target_hw_bp_type hw_type = Z_packet_to_hw_type (type);
+	enum target_hw_bp_type hw_type = Z_packet_to_target_hw_bp_type (type);
 	struct i386_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 

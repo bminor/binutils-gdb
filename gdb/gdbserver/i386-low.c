@@ -402,29 +402,6 @@ Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n",
   return retval;
 }
 
-#define Z_PACKET_HW_BP '1'
-#define Z_PACKET_WRITE_WP '2'
-#define Z_PACKET_READ_WP '3'
-#define Z_PACKET_ACCESS_WP '4'
-
-enum target_hw_bp_type
-Z_packet_to_hw_type (char type)
-{
-  switch (type)
-    {
-    case Z_PACKET_HW_BP:
-      return hw_execute;
-    case Z_PACKET_WRITE_WP:
-      return hw_write;
-    case Z_PACKET_READ_WP:
-      return hw_read;
-    case Z_PACKET_ACCESS_WP:
-      return hw_access;
-    default:
-      fatal ("Z_packet_to_hw_type: bad watchpoint type %c", type);
-    }
-}
-
 /* Update the inferior debug registers state, in INF_STATE, with the
    new debug registers state, in NEW_STATE.  */
 

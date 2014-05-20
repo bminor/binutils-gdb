@@ -21,9 +21,22 @@
 #ifndef MEM_BREAK_H
 #define MEM_BREAK_H
 
+#include "break-common.h"
+
 /* Breakpoints are opaque.  */
 struct breakpoint;
 struct fast_tracepoint_jump;
+
+#define Z_PACKET_SW_BP '0'
+#define Z_PACKET_HW_BP '1'
+#define Z_PACKET_WRITE_WP '2'
+#define Z_PACKET_READ_WP '3'
+#define Z_PACKET_ACCESS_WP '4'
+
+/* Map the protocol breakpoint/watchpoint type TYPE to enum
+   target_hw_bp_type.  */
+
+enum target_hw_bp_type Z_packet_to_target_hw_bp_type (char type);
 
 /* Create a new GDB breakpoint at WHERE.  Returns -1 if breakpoints
    are not supported on this target, 0 otherwise.  */
