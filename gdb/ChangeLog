@@ -1,5 +1,28 @@
 2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
 
+	* python/py-xmethods.c: New file.
+	* python/py-objfile.c (objfile_object): New field 'xmethods'.
+	(objfpy_dealloc): XDECREF on the new xmethods field.
+	(objfpy_new, objfile_to_objfile_object): Initialize xmethods
+	field.
+	(objfpy_get_xmethods): New function.
+	(objfile_getset): New entry 'xmethods'.
+	* python/py-progspace.c (pspace_object): New field 'xmethods'.
+	(pspy_dealloc): XDECREF on the new xmethods field.
+	(pspy_new, pspace_to_pspace_object): Initialize	xmethods
+	field.
+	(pspy_get_xmethods): New function.
+	(pspace_getset): New entry 'xmethods'.
+	* python/python-internal.h: Add declarations for new functions.
+	* python/python.c (_initialize_python): Invoke
+	gdbpy_initialize_xmethods.
+	* python/lib/gdb/__init__.py (xmethods): New
+	attribute.
+	* python/lib/gdb/xmethod.py: New file.
+	* python/lib/gdb/command/xmethods.py: New file.
+
+2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
+
 	* eval.c (evaluate_subexp_standard): Call the xmethod if the
 	best match method returned by find_overload_match is an xmethod.
 	* valarith.c (value_x_binop, value_x_unop): Call the xmethod if

@@ -350,6 +350,7 @@ SUBDIR_PYTHON_OBS = \
 	py-breakpoint.o \
 	py-cmd.o \
 	py-continueevent.o \
+	py-xmethods.o \
 	py-event.o \
 	py-evtregistry.o \
 	py-evts.o \
@@ -386,6 +387,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-breakpoint.c \
 	python/py-cmd.c \
 	python/py-continueevent.c \
+	python/py-xmethods.c \
 	python/py-event.c \
 	python/py-evtregistry.c \
 	python/py-evts.c \
@@ -2394,6 +2396,10 @@ py-cmd.o: $(srcdir)/python/py-cmd.c
 
 py-continueevent.o: $(srcdir)/python/py-continueevent.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-continueevent.c
+	$(POSTCOMPILE)
+
+py-xmethods.o: $(srcdir)/python/py-xmethods.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-xmethods.c
 	$(POSTCOMPILE)
 
 py-event.o: $(srcdir)/python/py-event.c
