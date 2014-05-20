@@ -1,5 +1,10 @@
 2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* messages.c (as_warn_internal): Remove extra whitespace from
+	warning messages.
+
+2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* config/tc-mips.c (FP64_ASES): Add ASE_MSA.
 	(mips_after_parse_args): Do not select ASE_MSA without -mfp64.
 

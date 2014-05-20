@@ -151,12 +151,12 @@ as_warn_internal (char *file, unsigned int line, char *buffer)
   if (file)
     {
       if (line != 0)
-	fprintf (stderr, "%s:%u: %s %s\n", file, line, _("Warning: "), buffer);
+	fprintf (stderr, "%s:%u: %s %s\n", file, line, _("Warning:"), buffer);
       else
-	fprintf (stderr, "%s: %s %s\n", file, _("Warning: "), buffer);
+	fprintf (stderr, "%s: %s %s\n", file, _("Warning:"), buffer);
     }
   else
-    fprintf (stderr, "%s %s\n", _("Warning: "), buffer);
+    fprintf (stderr, "%s %s\n", _("Warning:"), buffer);
 #ifndef NO_LISTING
   listing_warning (buffer);
 #endif
