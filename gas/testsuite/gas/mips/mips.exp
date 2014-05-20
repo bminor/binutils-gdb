@@ -442,7 +442,7 @@ mips_arch_create mips64r5 64	mips64r3 { mips32r5 ror } \
 mips_arch_create mips16	32	{}	{} \
 			{ -march=mips1 -mips16 } { -mmips:16 }
 mips_arch_create micromips 64	mips64r2 {} \
-			{ -march=mips64 -mmicromips } {}
+			{ -march=mips64r2 -mmicromips } {}
 mips_arch_create r3000 	32	mips1	{} \
 			{ -march=r3000 -mtune=r3000 } { -mmips:3000 }
 mips_arch_create r3900 	32	mips1	{ gpr_ilocks } \
@@ -787,7 +787,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "relax-swap1-mips2"
     run_dump_test "relax-swap2"
     run_dump_test_arches "relax-swap3"	[mips_arch_list_all]
-    run_list_test_arches "relax-bc1any" "-mips3d -relax-branch" \
+    run_list_test_arches "relax-bc1any" "-mips3d -mabi=o64 -relax-branch" \
 					[mips_arch_list_matching mips64 \
 					    !micromips]
     run_list_test_arches "relax-bposge" "-mdsp -relax-branch" \
@@ -1200,4 +1200,8 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "attr-gnu-abi-fp-1"
     run_dump_test "attr-gnu-abi-msa-1"
+
+    run_dump_test "module-override"
+    run_dump_test "module-defer-warn1"
+    run_list_test "module-defer-warn2" -32
 }

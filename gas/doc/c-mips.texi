@@ -693,6 +693,20 @@ Traditional MIPS assemblers do not support this directive.
 @node MIPS assembly options
 @section Directives to control code generation
 
+@cindex MIPS directives to override command line options
+@kindex @code{.module}
+The @code{.module} directive allows command line options to be set directly
+from assembly.  The format of the directive matches the @code{.set}
+directive but only those options which are relevant to a whole module are
+supported.  The effect of a @code{.module} directive is the same as the
+corresponding command line option.  Where @code{.set} directives support
+returning to a default then the @code{.module} directives do not as they
+define the defaults.
+
+These module-level directives must appear first in assembly.
+
+Traditional MIPS assemblers do not support this directive.
+
 @cindex MIPS 32-bit microMIPS instruction generation override
 @kindex @code{.set insn32}
 @kindex @code{.set noinsn32}
