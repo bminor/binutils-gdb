@@ -165,6 +165,8 @@ extern void obj_elf_change_section
   (const char *, int, bfd_vma, int, const char *, int, int);
 extern struct fix *obj_elf_vtable_inherit (int);
 extern struct fix *obj_elf_vtable_entry (int);
+extern bfd_boolean obj_elf_seen_attribute
+  (int, unsigned int);
 extern int obj_elf_vendor_attribute (int);
 
 /* BFD wants to write the udata field, which is a no-no for the
