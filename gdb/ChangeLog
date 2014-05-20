@@ -1,3 +1,10 @@
+2014-06-12  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* regcache.c (struct register_to_invalidate): New structure.
+	(do_register_invalidate, make_cleanup_regcache_invalidate): New
+	functions.
+	(regcache_raw_write): Call make_cleanup_regcache_invalidate.
+
 2014-06-12  Yao Qi  <yao@codesourcery.com>
 
 	* varobj.c (varobj_get_num_children): Call
