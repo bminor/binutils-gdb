@@ -545,6 +545,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32lppcsim.c \
 	eelf32m32c.c \
 	eelf32mb_linux.c \
+	eelf32mbel_linux.c \
 	eelf32mcore.c \
 	eelf32mep.c \
 	eelf32metag.c \
@@ -1155,6 +1156,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ltsmipn32_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32m32c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32mb_linux.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32mbel_linux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32mcore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32mep.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32metag.Po@am__quote@

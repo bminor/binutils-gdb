@@ -1,3 +1,8 @@
+2014-05-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add missing eelf32mbel_linux.c.
+	* Makefile.in: Regenerate.
+
 2014-05-20  Alan Modra  <amodra@gmail.com>
 
 	PR 16952
