@@ -1,3 +1,8 @@
+2014-05-26  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.server/no-thread-db.exp: Specify source file name
+	explicitly when setting a breakpoint.
+
 2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/vdso.c: New.
