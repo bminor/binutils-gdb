@@ -1,5 +1,42 @@
 2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* config/tc-mips.c (file_mips_opts_checked): New static global.
+	(s_module): New static function.
+	(file_ase): Remove.
+	(mips_pseudo_table): Add .module handler.
+	(mips_set_ase): Add opts argument and use instead of mips_opts.
+	(md_assemble): Use file_mips_check_options.
+	(md_parse_option): Update to use file_mips_opts instead of mips_opts.
+	(mips_set_architecture): Delete function.  Moved to...
+	(mips_after_parse_args): Here.  All logic now applies to
+	file_mips_opts first and then copies the final state to mips_opts.
+	Move error checking and defaults inference to mips_check_options and
+	file_mips_check_options.
+	(mips_check_options): New static function.  Common option checking for
+	command line, .module and .set.  Use .module values in error messages
+	instead of refering to command line options.
+	(file_mips_check_options): New static function.  A wrapper for
+	mips_check_options with file_mips_opts.  Updates BFD arch based on
+	final options.
+	(s_mipsset): Split into s_mipsset and parse_code_option.  Settings
+	supported by both .set and .module are moved to parse_code_option.
+	Warnings and errors are kept in s_mipsset because when
+	parse_code_option is used with s_module the warnings are deferred
+	until code is generated.  Any setting supporting 'default' value is
+	kept in s_mipsset as it is not applicable to s_module. Inferred
+	settings are also kept in s_mipsset as s_module does not infer any
+	settings.  Use mips_check_options.
+	(parse_code_option): New static function derived from s_mipsset.
+	(s_module): New static function that implements .module.  Allows file
+	level settings to be changed until code is generated.
+	(s_cpload, s_cpsetup, s_cplocal): Use file_mips_check_options.
+	(s_cprestore, s_cpreturn, s_cpadd, mips_address_bytes): Likewise.
+	(mips_elf_final_processing): Update file_ase to file_mips_opts.ase.
+	(md_mips_end): Use file_mips_check_options.
+	* doc/c-mips.texi: Document .module.
+
+2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* messages.c (as_warn_internal): Remove extra whitespace from
 	warning messages.
 

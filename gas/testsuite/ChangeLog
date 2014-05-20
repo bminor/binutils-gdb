@@ -1,5 +1,19 @@
 2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* gas/mips/mips.exp: Add new tests.  Use 64-bit ABI for relax-bc1any.
+	Fix micromips arch definition to use mips64r2 consistently.
+	* gas/mips/module-defer-warn1.s: New.
+	* gas/mips/module-defer-warn1.d: New.
+	* gas/mips/module-defer-warn2.s: New.
+	* gas/mips/module-defer-warn2.l: New.
+	* gas/mips/module-override.d: New.
+	* gas/mips/module-override.s: New.
+	* gas/mips/mips-gp32-fp64.l: Update expected output.
+	* gas/mips/mips-gp64-fp32-pic.l: Update expected output.
+	* gas/mips/mips-gp64-fp32.l: Update expected output.
+
+2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* gas/mips/micromips@msa-branch.d: Rework expected output for fp64.
 	* gas/mips/msa-branch.d: Likewise.
 
