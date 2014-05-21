@@ -2556,9 +2556,6 @@ windows_target (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_shortname = "child";
-  t->to_longname = "Win32 child process";
-  t->to_doc = "Win32 child process (started by the \"run\" command).";
   t->to_close = windows_close;
   t->to_attach = windows_attach;
   t->to_attach_no_wait = 1;
