@@ -1370,18 +1370,31 @@ procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return buf;
 }
 
-/* Create a nto-procfs target.  */
+/* to_can_run implementation for "target procfs".  Note this really
+  means "can this target be the default run target", which there can
+  be only one, and we make it be "target native" like other ports.
+  "target procfs <node>" wouldn't make sense as default run target, as
+  it needs <node>.  */
 
-static struct target_ops *
-procfs_target (void)
+static int
+procfs_can_run (struct target_ops *self)
+{
+  return 0;
+}
+
+/* "target procfs".  */
+static struct target_ops nto_procfs_ops;
+
+/* Create the "native" and "procfs" targets.  */
+
+static void
+init_procfs_targets (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_shortname = "procfs";
-  t->to_longname = "QNX Neutrino procfs child process";
-  t->to_doc
-    = "QNX Neutrino procfs child process (started by the \"run\" command).\n\
-	target procfs <node>";
+  /* Leave to_shortname as "native".  */
+  t->to_longname = "QNX Neutrino local process";
+  t->to_doc = "QNX Neutrino local process (started by the \"run\" command).";
   t->to_open = procfs_open;
   t->to_attach = procfs_attach;
   t->to_post_attach = procfs_post_attach;
@@ -1411,7 +1424,16 @@ procfs_target (void)
   t->to_have_continuable_watchpoint = 1;
   t->to_extra_thread_info = nto_extra_thread_info;
 
-  return t;
+  /* Register "target native".  This is the default run target.  */
+  add_target (t);
+
+  /* Register "target procfs <node>".  */
+  nto_procfs_ops = *t;
+  nto_procfs_ops.to_shortname = "procfs";
+  nto_procfs_ops.to_can_run = procfs_can_run;
+  t->to_longname = "QNX Neutrino local or remote process";
+  t->to_doc = "QNX Neutrino process.  target procfs <node>";
+  add_target (&nto_procfs_ops);
 }
 
 #define OSTYPE_NTO 1
@@ -1420,10 +1442,8 @@ void
 _initialize_procfs (void)
 {
   sigset_t set;
-  struct target_ops *t;
 
-  t = procfs_target ();
-  add_target (t);
+  init_procfs_targets ();
 
   /* We use SIGUSR1 to gain control after we block waiting for a process.
      We use sigwaitevent to wait.  */
