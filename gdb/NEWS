@@ -97,6 +97,17 @@ maint ada show ignore-descriptive-types
 * The "compare-sections" command is no longer specific to target
   remote.  It now works with all targets.
 
+* All native targets are now consistently called "native".
+  Consequently, the "target child", "target GNU", "target djgpp",
+  "target procfs" (Solaris/Irix/OSF/AIX) and "target darwin-child"
+  commands have been replaced with "target native".  The QNX/NTO port
+  leaves the "procfs" target in place and adds a "native" target for
+  consistency with other ports.  The impact on users should be minimal
+  as these commands previously either throwed an error, or were
+  no-ops.  The target's name is visible in the output of the following
+  commands: "help target", "info target", "info files", "maint print
+  target-stack".
+
 * New remote packets
 
 qXfer:btrace:read's annex

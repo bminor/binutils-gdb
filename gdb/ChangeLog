@@ -1,5 +1,10 @@
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention that the "child", "GNU, "djgpp", "darwin-child"
+	and "procfs" targets are now called "native" instead.
+
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
 	* go32-nat.c (go32_open): Delete.
 	(go32_target): Don't override the to_open method.
 
