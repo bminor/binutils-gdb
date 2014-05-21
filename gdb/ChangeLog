@@ -1,3 +1,13 @@
+2014-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix TLS access for -static -pthread.
+	* linux-thread-db.c (struct thread_db_info): Add td_thr_tlsbase_p.
+	(try_thread_db_load_1): Initialize it.
+	(thread_db_get_thread_local_address): Call it if LM is zero.
+	* target.c (target_translate_tls_address): Remove LM_ADDR zero check.
+	* target.h (struct target_ops) (to_get_thread_local_address): Add
+	load_module_addr comment.
+
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
 	* dcache.c (dcache_read_memory_partial): If reading the cache line

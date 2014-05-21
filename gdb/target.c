@@ -757,10 +757,6 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	  /* Fetch the load module address for this objfile.  */
 	  lm_addr = gdbarch_fetch_tls_load_module_address (target_gdbarch (),
 	                                                   objfile);
-	  /* If it's 0, throw the appropriate exception.  */
-	  if (lm_addr == 0)
-	    throw_error (TLS_LOAD_MODULE_NOT_FOUND_ERROR,
-			 _("TLS load module not found"));
 
 	  addr = target->to_get_thread_local_address (target, ptid,
 						      lm_addr, offset);

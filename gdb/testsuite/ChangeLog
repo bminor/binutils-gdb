@@ -1,3 +1,12 @@
+2014-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix TLS access for -static -pthread.
+	* gdb.threads/staticthreads.c <HAVE_TLS> (tlsvar): New.
+	<HAVE_TLS> (thread_function, main): Initialize it.
+	* gdb.threads/staticthreads.exp: Try gdb_compile_pthreads for $have_tls.
+	Add clean_restart.
+	<$have_tls != "">: Check TLSVAR.
+
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/dcache-line-read-error.c: New.

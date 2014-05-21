@@ -605,7 +605,8 @@ struct target_ops
        thread-local storage for the thread PTID and the shared library
        or executable file given by OBJFILE.  If that block of
        thread-local storage hasn't been allocated yet, this function
-       may return an error.  */
+       may return an error.  LOAD_MODULE_ADDR may be zero for statically
+       linked multithreaded inferiors.  */
     CORE_ADDR (*to_get_thread_local_address) (struct target_ops *ops,
 					      ptid_t ptid,
 					      CORE_ADDR load_module_addr,

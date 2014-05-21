@@ -1,3 +1,10 @@
+2014-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix TLS access for -static -pthread.
+	* gdbserver/thread-db.c (struct thread_db): Add td_thr_tlsbase_p.
+	(thread_db_get_tls_address): Call it if LOAD_MODULE is zero.
+	(thread_db_load_search, try_thread_db_load_1): Initialize it.
+
 2014-05-20  Pedro Alves  <palves@redhat.com>
 
 	* linux-aarch64-low.c (aarch64_insert_point)
