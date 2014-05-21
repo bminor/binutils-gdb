@@ -1,5 +1,10 @@
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
+	* go32-nat.c (go32_open): Delete.
+	(go32_target): Don't override the to_open method.
+
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
 	* nto-procfs.c (procfs_can_run): New function.
 	(nto_procfs_ops): New global.
 	(init_procfs_targets): New, based on procfs_target.  Install

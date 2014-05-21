@@ -339,12 +339,6 @@ static struct {
 };
 
 static void
-go32_open (char *name, int from_tty)
-{
-  printf_unfiltered ("Done.  Use the \"run\" command to run the program.\n");
-}
-
-static void
 go32_attach (struct target_ops *ops, char *args, int from_tty)
 {
   error (_("\
@@ -960,7 +954,6 @@ go32_target (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_open = go32_open;
   t->to_attach = go32_attach;
   t->to_resume = go32_resume;
   t->to_wait = go32_wait;
