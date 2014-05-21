@@ -2665,10 +2665,6 @@ gnu_target (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_shortname = "GNU";
-  t->to_longname = "GNU Hurd process";
-  t->to_doc = "GNU Hurd process";
-
   t->to_attach = gnu_attach;
   t->to_attach_no_wait = 1;
   t->to_detach = gnu_detach;
