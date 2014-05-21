@@ -1,3 +1,8 @@
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/dcache-line-read-error.c: New.
+	* gdb.base/dcache-line-read-error.exp: New.
+
 2014-05-20  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/compare-sections.c: New file.
