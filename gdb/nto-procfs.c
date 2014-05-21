@@ -54,8 +54,6 @@ static void (*ofunc) ();
 
 static procfs_run run;
 
-static void procfs_open (char *, int);
-
 static ptid_t do_attach (ptid_t ptid);
 
 static int procfs_can_use_hw_breakpoint (struct target_ops *self,
@@ -71,7 +69,7 @@ static int procfs_remove_hw_watchpoint (struct target_ops *self,
 
 static int procfs_stopped_by_watchpoint (struct target_ops *ops);
 
-/* These two globals are only ever set in procfs_open(), but are
+/* These two globals are only ever set in procfs_open_1, but are
    referenced elsewhere.  'nto_procfs_node' is a flag used to say
    whether we are local, or we should get the current node descriptor
    for the remote QNX node.  */
@@ -103,12 +101,12 @@ procfs_is_nto_target (bfd *abfd)
   return GDB_OSABI_QNXNTO;
 }
 
-/* This is called when we call 'target procfs <arg>' from the (gdb) prompt.
-   For QNX6 (nto), the only valid arg will be a QNX node string, 
-   eg: "/net/some_node".  If arg is not a valid QNX node, we will
-   default to local.  */
+/* This is called when we call 'target native' or 'target procfs
+   <arg>' from the (gdb) prompt.  For QNX6 (nto), the only valid arg
+   will be a QNX node string, eg: "/net/some_node".  If arg is not a
+   valid QNX node, we will default to local.  */
 static void
-procfs_open (char *arg, int from_tty)
+procfs_open_1 (struct target_ops *ops, char *arg, int from_tty)
 {
   char *nodestr;
   char *endstr;
@@ -116,6 +114,9 @@ procfs_open (char *arg, int from_tty)
   int fd, total_size;
   procfs_sysinfo *sysinfo;
   struct cleanup *cleanups;
+
+  /* Offer to kill previous inferiors before opening this target.  */
+  target_preopen (from_tty);
 
   nto_is_nto_target = procfs_is_nto_target;
 
@@ -197,6 +198,8 @@ procfs_open (char *arg, int from_tty)
 	}
     }
   do_cleanups (cleanups);
+
+  inf_child_open_target (ops, arg, from_tty);
   printf_filtered ("Debugging using %s\n", nto_procfs_path);
 }
 
@@ -628,7 +631,8 @@ procfs_attach (struct target_ops *ops, char *args, int from_tty)
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;
 
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
 
   procfs_find_new_threads (ops);
 }
@@ -904,7 +908,7 @@ procfs_detach (struct target_ops *ops, const char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (pid);
   init_thread_list ();
-  unpush_target (ops);	/* Pop out of handling an inferior.  */
+  inf_child_maybe_unpush_target (ops);
 }
 
 static int
@@ -1023,8 +1027,8 @@ procfs_mourn_inferior (struct target_ops *ops)
     }
   inferior_ptid = null_ptid;
   init_thread_list ();
-  unpush_target (ops);
   generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
 }
 
 /* This function breaks up an argument string into an argument
@@ -1207,7 +1211,8 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
       /* warning( "Failed to set Kill-on-Last-Close flag: errno = %d(%s)\n",
          errn, strerror(errn) ); */
     }
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
   target_terminal_init ();
 
   if (exec_bfd != NULL
@@ -1385,6 +1390,25 @@ procfs_can_run (struct target_ops *self)
 /* "target procfs".  */
 static struct target_ops nto_procfs_ops;
 
+/* "target native".  */
+static struct target_ops *nto_native_ops;
+
+/* to_open implementation for "target procfs".  */
+
+static void
+procfs_open (char *arg, int from_tty)
+{
+  procfs_open_1 (&nto_procfs_ops, arg, from_tty);
+}
+
+/* to_open implementation for "target native".  */
+
+static void
+procfs_native_open (char *arg, int from_tty)
+{
+  procfs_open_1 (nto_native_ops, arg, from_tty);
+}
+
 /* Create the "native" and "procfs" targets.  */
 
 static void
@@ -1395,7 +1419,7 @@ init_procfs_targets (void)
   /* Leave to_shortname as "native".  */
   t->to_longname = "QNX Neutrino local process";
   t->to_doc = "QNX Neutrino local process (started by the \"run\" command).";
-  t->to_open = procfs_open;
+  t->to_open = procfs_native_open;
   t->to_attach = procfs_attach;
   t->to_post_attach = procfs_post_attach;
   t->to_detach = procfs_detach;
@@ -1424,6 +1448,8 @@ init_procfs_targets (void)
   t->to_have_continuable_watchpoint = 1;
   t->to_extra_thread_info = nto_extra_thread_info;
 
+  nto_native_ops = t;
+
   /* Register "target native".  This is the default run target.  */
   add_target (t);
 
@@ -1433,6 +1459,8 @@ init_procfs_targets (void)
   nto_procfs_ops.to_can_run = procfs_can_run;
   t->to_longname = "QNX Neutrino local or remote process";
   t->to_doc = "QNX Neutrino process.  target procfs <node>";
+  t->to_open = procfs_open;
+
   add_target (&nto_procfs_ops);
 }
 

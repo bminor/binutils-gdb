@@ -710,7 +710,8 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
   inf = current_inferior ();
   inferior_appeared (inf, SOME_PID);
 
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
 
   add_thread_silent (inferior_ptid);
 
@@ -744,8 +745,8 @@ go32_mourn_inferior (struct target_ops *ops)
   delete_thread_silent (ptid);
   prog_has_started = 0;
 
-  unpush_target (ops);
   generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
 }
 
 /* Hardware watchpoint support.  */

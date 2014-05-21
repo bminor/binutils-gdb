@@ -201,6 +201,10 @@ static int (*linux_nat_siginfo_fixup) (siginfo_t *,
    Called by our to_xfer_partial.  */
 static target_xfer_partial_ftype *super_xfer_partial;
 
+/* The saved to_close method, inherited from inf-ptrace.c.
+   Called by our to_close.  */
+static void (*super_close) (struct target_ops *);
+
 static unsigned int debug_linux_nat;
 static void
 show_debug_linux_nat (struct ui_file *file, int from_tty,
@@ -4775,6 +4779,8 @@ linux_nat_close (struct target_ops *self)
 
   if (linux_ops->to_close)
     linux_ops->to_close (linux_ops);
+
+  super_close (self);
 }
 
 /* When requests are passed down from the linux-nat layer to the
@@ -4856,6 +4862,8 @@ linux_nat_add_target (struct target_ops *t)
   t->to_async = linux_nat_async;
   t->to_terminal_inferior = linux_nat_terminal_inferior;
   t->to_terminal_ours = linux_nat_terminal_ours;
+
+  super_close = t->to_close;
   t->to_close = linux_nat_close;
 
   /* Methods for non-stop support.  */

@@ -61,6 +61,12 @@ maint ada show ignore-descriptive-types
   the user manual for more details on descriptive types and the intended
   usage of this option.
 
+set auto-connect-native-target
+
+  Control whether GDB is allowed to automatically connect to the
+  native target for the run, attach, etc. commands when not connected
+  to any target yet.  See also "target native" below.
+
 * New features in the GDB remote stub, GDBserver
 
   ** New option --debug-format=option1[,option2,...] allows one to add
@@ -107,6 +113,10 @@ maint ada show ignore-descriptive-types
   no-ops.  The target's name is visible in the output of the following
   commands: "help target", "info target", "info files", "maint print
   target-stack".
+
+* The "target native" command now connects to the native target.  This
+  can be used to launch native programs even when "set
+  auto-connect-native-target" is set to off.
 
 * New remote packets
 

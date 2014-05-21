@@ -1,5 +1,12 @@
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
+	* boards/gdbserver-base.exp (GDBFLAGS): Set to "set
+	auto-connect-native-target off".
+	* gdb.base/auto-connect-native-target.c: New file.
+	* gdb.base/auto-connect-native-target.exp: New file.
+
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/default.exp: Test "target native" instead of "target
 	child".
 

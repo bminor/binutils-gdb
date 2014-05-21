@@ -34,6 +34,8 @@ set_board_info gdb,nofileio 1
 # The predefined TSVs in GDBserver.
 set_board_info gdb,predefined_tsv "\\\$trace_timestamp"
 
+set GDBFLAGS "${GDBFLAGS} -ex \"set auto-connect-native-target off\""
+
 proc ${board}_file { dest op args } {
     if { $op == "delete" } {
 	return 0

@@ -2148,6 +2148,57 @@ initialization file---such as @file{.cshrc} for C-shell,
 $@file{.zshenv} for the Z shell, or the file specified in the
 @samp{BASH_ENV} environment variable for BASH.
 
+@anchor{set auto-connect-native-target}
+@kindex set auto-connect-native-target
+@item set auto-connect-native-target
+@itemx set auto-connect-native-target on
+@itemx set auto-connect-native-target off
+@itemx show auto-connect-native-target
+
+By default, if not connected to any target yet (e.g., with
+@code{target remote}), the @code{run} command starts your program as a
+native process under @value{GDBN}, on your local machine.  If you're
+sure you don't want to debug programs on your local machine, you can
+tell @value{GDBN} to not connect to the native target automatically
+with the @code{set auto-connect-native-target off} command.
+
+If @code{on}, which is the default, and if @value{GDBN} is not
+connected to a target already, the @code{run} command automaticaly
+connects to the native target, if one is available.
+
+If @code{off}, and if @value{GDBN} is not connected to a target
+already, the @code{run} command fails with an error:
+
+@smallexample
+(@value{GDBP}) run
+Don't know how to run.  Try "help target".
+@end smallexample
+
+If @value{GDBN} is already connected to a target, @value{GDBN} always
+uses it with the @code{run} command.
+
+In any case, you can explicitly connect to the native target with the
+@code{target native} command.  For example,
+
+@smallexample
+(@value{GDBP}) set auto-connect-native-target off
+(@value{GDBP}) run
+Don't know how to run.  Try "help target".
+(@value{GDBP}) target native
+(@value{GDBP}) run
+Starting program: ./a.out
+[Inferior 1 (process 10421) exited normally]
+@end smallexample
+
+In case you connected explicitly to the @code{native} target,
+@value{GDBN} remains connected even if all inferiors exit, ready for
+the next @code{run} command.  Use the @code{disconnect} command to
+disconnect.
+
+Examples of other commands that likewise respect the
+@code{auto-connect-native-target} setting: @code{attach}, @code{info
+proc}, @code{info os}.
+
 @kindex set disable-randomization
 @item set disable-randomization
 @itemx set disable-randomization on
@@ -18078,6 +18129,13 @@ drivers, or even basic I/O is available, although some simulators do
 provide these.  For info about any processor-specific simulator details,
 see the appropriate section in @ref{Embedded Processors, ,Embedded
 Processors}.
+
+@item target native
+@cindex native target
+Setup for local/native process debugging.  Useful to make the
+@code{run} command spawn native processes (likewise @code{attach},
+etc.@:) even when @code{set auto-connect-native-target} is @code{off}
+(@pxref{set auto-connect-native-target}).
 
 @end table
 

@@ -2080,8 +2080,8 @@ gnu_mourn_inferior (struct target_ops *ops)
 {
   inf_debug (gnu_current_inf, "rip");
   inf_detach (gnu_current_inf);
-  unpush_target (ops);
   generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
 }
 
 
@@ -2253,7 +2253,7 @@ gnu_detach (struct target_ops *ops, const char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (pid);
 
-  unpush_target (ops);	/* Pop out of handling an inferior.  */
+  inf_child_maybe_unpush_target (ops);
 }
 
 static void

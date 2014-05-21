@@ -1,5 +1,73 @@
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
+	* inf-child.c (inf_child_ops, inf_child_explicitly_opened): New
+	globals.
+	(inf_child_open_target): New function.
+	(inf_child_open): Use inf_child_open_target to push the target
+	instead of erroring out.
+	(inf_child_disconnect, inf_child_close)
+	(inf_child_maybe_unpush_target): New functions.
+	(inf_child_target): Install inf_child_disconnect and
+	inf_child_close.  Store a pointer to the returned object.
+	* inf-child.h (inf_child_open_target, inf_child_maybe_unpush): New
+	declarations.
+	* target.c (auto_connect_native_target): New global.
+	(show_default_run_target): New function.
+	(find_default_run_target): Return NULL if automatically connecting
+	to the native target is disabled.
+	(_initialize_target): Install set/show auto-connect-native-target.
+	* NEWS: Mention "set auto-connect-native-target", and "target
+	native".
+	* linux-nat.c (super_close): New global.
+	(linux_nat_close): Call super_close.
+	(linux_nat_add_target): Store a pointer to the base class's
+	to_close method.
+	* inf-ptrace.c (inf_ptrace_mourn_inferior, inf_ptrace_detach): Use
+	inf_child_maybe_unpush.
+	* inf-ttrace.c (inf_ttrace_him): Don't push the target if it is
+	already pushed.
+	(inf_ttrace_mourn_inferior): Only unpush the target after mourning
+	the inferior.  Use inf_child_maybe_unpush_target.
+	(inf_ttrace_attach): Don't push the target if it is already
+	pushed.
+	(inf_ttrace_detach): Use inf_child_maybe_unpush_target.
+	* darwin-nat.c (darwin_mourn_inferior): Only unpush the target
+	after mourning the inferior.  Use inf_child_maybe_unpush_target.
+	(darwin_attach_pid): Don't push the target if it is already
+	pushed.
+	* gnu-nat.c (gnu_mourn_inferior): Only unpush the target after
+	mourning the inferior.  Use inf_child_maybe_unpush_target.
+	(gnu_detach): Use inf_child_maybe_unpush_target.
+	* go32-nat.c (go32_create_inferior): Don't push the target if it
+	is already pushed.
+	(go32_mourn_inferior): Use inf_child_maybe_unpush_target.
+	* nto-procfs.c (procfs_is_nto_target): Adjust comment.
+	(procfs_open): Rename to ...
+	(procfs_open_1): ... this.  Add target_ops parameter.  Adjust
+	comments.  Can target_preopen before changing node.  Call
+	inf_child_open_target to push the target explicitly.
+	(procfs_attach): Don't push the target if it is already pushed.
+	(procfs_detach): Use inf_child_maybe_unpush_target.
+	(procfs_create_inferior): Don't push the target if it is already
+	pushed.
+	(nto_native_ops): New global.
+	(procfs_open): Reimplement.
+	(procfs_native_open): New function.
+	(init_procfs_targets): Install procfs_native_open as to_open of
+	"target native".  Store a pointer to the "native" target in
+	nto_native_ops.
+	* procfs.c (procfs_attach): Don't push the target if it is already
+	pushed.
+	(procfs_detach): Use inf_child_maybe_unpush_target.
+	(procfs_mourn_inferior): Only unpush the target after mourning the
+	inferior.  Use inf_child_maybe_unpush_target.
+	(procfs_init_inferior): Don't push the target if it is already
+	pushed.
+	* windows-nat.c (do_initial_windows_stuff): Don't push the target
+	if it is already pushed.
+
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention that the "child", "GNU, "djgpp", "darwin-child"
 	and "procfs" targets are now called "native" instead.
 

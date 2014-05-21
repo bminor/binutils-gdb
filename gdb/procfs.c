@@ -3062,7 +3062,8 @@ procfs_attach (struct target_ops *ops, char *args, int from_tty)
       fflush (stdout);
     }
   inferior_ptid = do_attach (pid_to_ptid (pid));
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
 }
 
 static void
@@ -3091,7 +3092,7 @@ procfs_detach (struct target_ops *ops, const char *args, int from_tty)
 
   inferior_ptid = null_ptid;
   detach_inferior (pid);
-  unpush_target (ops);
+  inf_child_maybe_unpush_target (ops);
 }
 
 static ptid_t
@@ -4340,7 +4341,8 @@ procfs_mourn_inferior (struct target_ops *ops)
       if (pi)
 	destroy_procinfo (pi);
     }
-  unpush_target (ops);
+
+  generic_mourn_inferior ();
 
   if (dbx_link_bpt != NULL)
     {
@@ -4349,7 +4351,7 @@ procfs_mourn_inferior (struct target_ops *ops)
       dbx_link_bpt = NULL;
     }
 
-  generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
 }
 
 /* When GDB forks to create a runnable inferior process, this function
@@ -4367,7 +4369,8 @@ procfs_init_inferior (struct target_ops *ops, int pid)
 
   /* This routine called on the parent side (GDB side)
      after GDB forks the inferior.  */
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
 
   if ((pi = create_procinfo (pid, 0)) == NULL)
     perror (_("procfs: out of memory in 'init_inferior'"));

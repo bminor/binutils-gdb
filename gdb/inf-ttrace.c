@@ -644,7 +644,8 @@ inf_ttrace_him (struct target_ops *ops, int pid)
 
   do_cleanups (old_chain);
 
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
 
   startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
 
@@ -695,8 +696,8 @@ inf_ttrace_mourn_inferior (struct target_ops *ops)
     }
   inf_ttrace_page_dict.count = 0;
 
-  unpush_target (ops);
   generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
 }
 
 /* Assuming we just attached the debugger to a new inferior, create
@@ -796,7 +797,8 @@ inf_ttrace_attach (struct target_ops *ops, char *args, int from_tty)
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
     perror_with_name (("ttrace"));
 
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
 
   inf_ttrace_create_threads_after_attach (pid);
 }
@@ -837,7 +839,7 @@ inf_ttrace_detach (struct target_ops *ops, const char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (pid);
 
-  unpush_target (ops);
+  inf_child_maybe_unpush_target (ops);
 }
 
 static void

@@ -1214,8 +1214,6 @@ darwin_mourn_inferior (struct target_ops *ops)
   mach_port_t prev;
   int i;
 
-  unpush_target (darwin_ops);
-
   /* Deallocate threads.  */
   if (inf->private->threads)
     {
@@ -1271,6 +1269,7 @@ darwin_mourn_inferior (struct target_ops *ops)
   inf->private = NULL;
 
   generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
 }
 
 static void
@@ -1506,7 +1505,8 @@ impact on the debugging session."));
 	     "returned: %d"),
 	   kret);
 
-  push_target (darwin_ops);
+  if (!target_is_pushed (darwin_ops))
+    push_target (darwin_ops);
 }
 
 static void

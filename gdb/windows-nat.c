@@ -1726,7 +1726,8 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
 #endif
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
   disable_breakpoints_in_shlibs ();
   windows_clear_solib ();
   clear_proceed_status ();
@@ -1914,7 +1915,7 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (current_event.dwProcessId);
 
-  unpush_target (ops);
+  inf_child_maybe_unpush_target (ops);
 }
 
 /* Try to determine the executable filename.
@@ -2367,8 +2368,8 @@ windows_mourn_inferior (struct target_ops *ops)
       CHECK (CloseHandle (current_process_handle));
       open_process_used = 0;
     }
-  unpush_target (ops);
   generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
 }
 
 /* Send a SIGINT to the process group.  This acts just like the user typed a
