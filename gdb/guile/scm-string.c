@@ -183,19 +183,6 @@ gdbscm_scm_from_string (const char *string, size_t len,
   return scm_result;
 }
 
-/* Convert an SCM string to a target string.
-   This function will thrown a conversion error if there's a problem.
-   Space for the result is allocated with malloc, caller must free.
-   It is an error to call this if STRING is not a string.  */
-
-char *
-gdbscm_scm_to_target_string_unsafe (SCM string, size_t *lenp,
-				    struct gdbarch *gdbarch)
-{
-  return scm_to_stringn (string, lenp, target_charset (gdbarch),
-			 SCM_FAILED_CONVERSION_ERROR);
-}
-
 /* (string->argv string) -> list
    Return list of strings split up according to GDB's argv parsing rules.
    This is useful when writing GDB commands in Scheme.  */

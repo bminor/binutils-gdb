@@ -274,15 +274,15 @@ extern SCM gdbscm_make_type_error (const char *subr, int arg_pos,
 extern SCM gdbscm_make_invalid_object_error (const char *subr, int arg_pos,
 					     SCM bad_value, const char *error);
 
-extern SCM gdbscm_invalid_object_error (const char *subr, int arg_pos,
-					SCM bad_value, const char *error)
+extern void gdbscm_invalid_object_error (const char *subr, int arg_pos,
+					 SCM bad_value, const char *error)
    ATTRIBUTE_NORETURN;
 
 extern SCM gdbscm_make_out_of_range_error (const char *subr, int arg_pos,
 					   SCM bad_value, const char *error);
 
-extern SCM gdbscm_out_of_range_error (const char *subr, int arg_pos,
-				      SCM bad_value, const char *error)
+extern void gdbscm_out_of_range_error (const char *subr, int arg_pos,
+				       SCM bad_value, const char *error)
    ATTRIBUTE_NORETURN;
 
 extern SCM gdbscm_make_misc_error (const char *subr, int arg_pos,
@@ -307,7 +307,8 @@ extern excp_matcher_func gdbscm_memory_error_p;
 extern SCM gdbscm_make_memory_error (const char *subr, const char *msg,
 				     SCM args);
 
-extern SCM gdbscm_memory_error (const char *subr, const char *msg, SCM args);
+extern void gdbscm_memory_error (const char *subr, const char *msg, SCM args)
+  ATTRIBUTE_NORETURN;
 
 /* scm-safe-call.c */
 
@@ -440,9 +441,6 @@ extern char *gdbscm_scm_to_string (SCM string, size_t *lenp,
 
 extern SCM gdbscm_scm_from_string (const char *string, size_t len,
 				   const char *charset, int strict);
-
-extern char *gdbscm_scm_to_target_string_unsafe (SCM string, size_t *lenp,
-						 struct gdbarch *gdbarch);
 
 /* scm-symbol.c */
 

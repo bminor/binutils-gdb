@@ -332,7 +332,7 @@ gdbscm_make_invalid_object_error (const char *subr, int arg_pos, SCM bad_value,
 /* Throw an invalid-object error.
    OBJECT is the name of the kind of object that is invalid.  */
 
-SCM
+void
 gdbscm_invalid_object_error (const char *subr, int arg_pos, SCM bad_value,
 			     const char *object)
 {
@@ -356,7 +356,7 @@ gdbscm_make_out_of_range_error (const char *subr, int arg_pos, SCM bad_value,
 /* Throw an out-of-range error.
    This is the standard Guile out-of-range exception.  */
 
-SCM
+void
 gdbscm_out_of_range_error (const char *subr, int arg_pos, SCM bad_value,
 			   const char *error)
 {
@@ -387,7 +387,7 @@ gdbscm_make_memory_error (const char *subr, const char *msg, SCM args)
 
 /* Throw a gdb:memory-error exception.  */
 
-SCM
+void
 gdbscm_memory_error (const char *subr, const char *msg, SCM args)
 {
   SCM exception = gdbscm_make_memory_error (subr, msg, args);
