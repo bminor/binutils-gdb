@@ -112,7 +112,7 @@ inf_child_prepare_to_store (struct target_ops *self,
 static void
 inf_child_open (char *arg, int from_tty)
 {
-  error (_("Use the \"run\" command to start a child process."));
+  error (_("Use the \"run\" command to start a process."));
 }
 
 static void
@@ -406,9 +406,9 @@ inf_child_target (void)
 {
   struct target_ops *t = XCNEW (struct target_ops);
 
-  t->to_shortname = "child";
-  t->to_longname = "Child process";
-  t->to_doc = "Child process (started by the \"run\" command).";
+  t->to_shortname = "native";
+  t->to_longname = "Native process";
+  t->to_doc = "Native process (started by the \"run\" command).";
   t->to_open = inf_child_open;
   t->to_post_attach = inf_child_post_attach;
   t->to_fetch_registers = inf_child_fetch_inferior_registers;

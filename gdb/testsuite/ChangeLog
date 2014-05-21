@@ -1,3 +1,8 @@
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/default.exp: Test "target native" instead of "target
+	child".
+
 2014-05-21  Mark Wielaard  <mjw@redhat.com>
 
 	* gdb.cp/var-tag.exp (do_global_tests): Handle underlying type.

@@ -1,3 +1,8 @@
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
+	* inf-child.c (inf_child_open): Remove mention of "child".
+	(inf_child_target): Rename target to "native" instead of "child".
+
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* Makefile.in (SFILES): Delete "regset.c".
