@@ -1,3 +1,7 @@
+2014-05-21  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.cp/var-tag.exp (do_global_tests): Handle underlying type.
+
 2014-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix TLS access for -static -pthread.
