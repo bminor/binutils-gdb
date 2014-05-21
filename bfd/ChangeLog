@@ -1,3 +1,9 @@
+2014-06-04  Will Newton  <will.newton@linaro.org>
+
+        * elfnn-aarch64.c (tpoff_base): Make test of tls_sec
+	being non-NULL into an assert.
+	(elfNN_aarch64_tls_relax): Remove unused code.
+
 2014-06-03  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rx.c (rx_table_map): Use BFD_VMA_FMT for portability.

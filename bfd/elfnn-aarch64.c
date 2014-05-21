@@ -3301,8 +3301,7 @@ tpoff_base (struct bfd_link_info *info)
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   /* If tls_sec is NULL, we should have signalled an error already.  */
-  if (htab->tls_sec == NULL)
-    return 0;
+  BFD_ASSERT (htab->tls_sec != NULL);
 
   bfd_vma base = align_power ((bfd_vma) TCB_SIZE,
 			      htab->tls_sec->alignment_power);
@@ -3938,7 +3937,6 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	     or
 	     adrp x0, :tlsdesc:var   =>   adrp x0, :gottprel:var
 	   */
-	  insn = bfd_getl32 (contents + rel->r_offset);
 	  return bfd_reloc_continue;
 	}
 
