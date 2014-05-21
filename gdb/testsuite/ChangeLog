@@ -1,3 +1,8 @@
+2014-05-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdb.exp (default_gdb_init): Bump `match_max' up from
+	30000 to 65536.
+
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
 	* boards/gdbserver-base.exp (GDBFLAGS): Set to "set

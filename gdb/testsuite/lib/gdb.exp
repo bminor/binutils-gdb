@@ -3540,8 +3540,9 @@ proc default_gdb_init { test_file_name } {
     
     # Unlike most tests, we have a small number of tests that generate
     # a very large amount of output.  We therefore increase the expect
-    # buffer size to be able to contain the entire test output.
-    match_max -d 30000
+    # buffer size to be able to contain the entire test output.  This
+    # is especially needed by gdb.base/info-macros.exp.
+    match_max -d 65536
     # Also set this value for the currently running GDB. 
     match_max [match_max -d]
 
