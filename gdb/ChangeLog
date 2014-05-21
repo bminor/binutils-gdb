@@ -12,15 +12,15 @@
 
 2014-05-21  Doug Evans  <xdje42@gmail.com>
 
-	* scm-breakpoint.c (breakpoint_functions): Fix typo.
+	* guile/scm-breakpoint.c (breakpoint_functions): Fix typo.
 
 2014-05-21  Doug Evans  <xdje42@gmail.com>
 
-	* scm-exception.c (gdbscm_invalid_object_error): Make result is void.
+	* guile/scm-exception.c (gdbscm_invalid_object_error): Make result is void.
 	(gdbscm_out_of_range_error): Ditto.
 	(gdbscm_memory_error): Ditto.
-	* scm-string.c (gdbscm_scm_to_target_string_unsafe): Delete.
-	* guile-internal.h (gdbscm_invalid_object_error): Update.
+	* guile/scm-string.c (gdbscm_scm_to_target_string_unsafe): Delete.
+	* guile/guile-internal.h (gdbscm_invalid_object_error): Update.
 	(gdbscm_out_of_range_error): Update.
 	(gdbscm_memory_error): Update.
 	(gdbscm_scm_to_target_string_unsafe): Delete.
