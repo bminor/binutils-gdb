@@ -1,5 +1,10 @@
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
+	* darwin-nat.c (_initialize_darwin_inferior): Don't override
+	to_shortname, to_longname or to_doc.
+
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
 	* go32-nat.c (go32_target): Don't override to_shortname,
 	to_longname or to_doc.
 

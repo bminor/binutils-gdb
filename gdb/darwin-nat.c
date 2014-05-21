@@ -2148,10 +2148,6 @@ _initialize_darwin_inferior (void)
 
   darwin_ops = inf_child_target ();
 
-  darwin_ops->to_shortname = "darwin-child";
-  darwin_ops->to_longname = _("Darwin child process");
-  darwin_ops->to_doc =
-    _("Darwin child process (started by the \"run\" command).");
   darwin_ops->to_create_inferior = darwin_create_inferior;
   darwin_ops->to_attach = darwin_attach;
   darwin_ops->to_attach_no_wait = 0;
