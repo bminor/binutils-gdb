@@ -133,7 +133,9 @@ show_filename_display_string (struct ui_file *file, int from_tty,
 
 static int last_line_listed;
 
-/* First line number listed by last listing command.  */
+/* First line number listed by last listing command.  If 0, then no
+   source lines have yet been listed since the last time the current
+   source line was changed.  */
 
 static int first_line_listed;
 
@@ -151,6 +153,16 @@ int
 get_first_line_listed (void)
 {
   return first_line_listed;
+}
+
+/* Clear line listed range.  This makes the next "list" center the
+   printed source lines around the current source line.  */
+
+static void
+clear_lines_listed_range (void)
+{
+  first_line_listed = 0;
+  last_line_listed = 0;
 }
 
 /* Return the default number of lines to print with commands like the
@@ -219,6 +231,9 @@ set_current_source_symtab_and_line (const struct symtab_and_line *sal)
   current_source_pspace = sal->pspace;
   current_source_symtab = sal->symtab;
   current_source_line = sal->line;
+
+  /* Force the next "list" to center around the current line.  */
+  clear_lines_listed_range ();
 
   return cursal;
 }
@@ -1294,9 +1309,8 @@ identify_source_line (struct symtab *s, int line, int mid_statement,
 		   mid_statement, get_objfile_arch (s->objfile), pc);
 
   current_source_line = line;
-  first_line_listed = line;
-  last_line_listed = line;
   current_source_symtab = s;
+  clear_lines_listed_range ();
   return 1;
 }
 
@@ -1488,7 +1502,11 @@ line_info (char *arg, int from_tty)
     {
       sal.symtab = current_source_symtab;
       sal.pspace = current_program_space;
-      sal.line = last_line_listed;
+      if (last_line_listed != 0)
+	sal.line = last_line_listed;
+      else
+	sal.line = current_source_line;
+
       sals.nelts = 1;
       sals.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));

@@ -6170,7 +6170,7 @@ normal_stop (void)
      display the frame below, but the current SAL will be incorrect
      during a user hook-stop function.  */
   if (has_stack_frames () && !stop_stack_dummy)
-    set_current_sal_from_frame (get_current_frame (), 1);
+    set_current_sal_from_frame (get_current_frame ());
 
   /* Let the user/frontend see the threads as stopped.  */
   do_cleanups (old_chain);

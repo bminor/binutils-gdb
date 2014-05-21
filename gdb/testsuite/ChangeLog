@@ -1,3 +1,12 @@
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list.exp (build_pattern, test_list): New procedures.
+	Use them to test variations of "list" after reaching a breakpoint.
+	* gdb.mi/mi-cli.exp (line_main_callme_2): New global.
+	Test "list" with listsize 10 after reaching a breakpoint.
+	* gdb.python/python.exp (decode_line current location line
+	number): Adjust expected line number.
+
 2014-05-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* lib/mi-support.exp (mi_run_cmd_full): Revert to original

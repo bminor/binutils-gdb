@@ -175,7 +175,8 @@ if ![runto_main] then {
     return 0
 }
 
-runto [gdb_get_line_number "Break to end."]
+set lineno [gdb_get_line_number "Break to end."]
+runto $lineno
 
 # Test gdb.decode_line.
 gdb_test "python gdb.decode_line(\"main.c:43\")" \
@@ -186,7 +187,7 @@ gdb_test "python print (len(symtab))" "2" "Test decode_line current location"
 gdb_test "python print (symtab\[0\])" "None" "Test decode_line expression parse"
 gdb_test "python print (len(symtab\[1\]))" "1" "Test decode_line current location"
 gdb_test "python print (symtab\[1\]\[0\].symtab)" ".*gdb.python/python.c.*" "Test decode_line current locationn filename"
-gdb_test "python print (symtab\[1\]\[0\].line)" "22" "Test decode_line current location line number"
+gdb_test "python print (symtab\[1\]\[0\].line)" "$lineno" "Test decode_line current location line number"
 
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"python.c:26 if foo\")" "test decode_line python.c:26" 1
 gdb_test "python print (len(symtab))" "2" "Test decode_line python.c:26 length"

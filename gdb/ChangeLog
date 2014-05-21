@@ -1,5 +1,21 @@
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-cmds.c (list_command): Handle the first "list" after the
+	current source line having changed.
+	* frame.h (set_current_sal_from_frame): Remove 'center' parameter.
+	* infrun.c (normal_stop): Adjust call to
+	set_current_sal_from_frame.
+	* source.c (clear_lines_listed_range): New function.
+	(set_current_source_symtab_and_line, identify_source_line): Clear
+	the lines listed range.
+	(line_info): Handle the first "info line" after the current source
+	line having changed.
+	* stack.c (print_stack_frame): Remove center handling.
+	(set_current_sal_from_frame): Remove 'center' parameter.  Don't
+	center sal.line.
+
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
 	* inf-child.c (inf_child_mourn_inferior): New function.
 	* inf-child.h (inf_child_mourn_inferior): New declaration.
 	* darwin-nat.c (darwin_mourn_inferior): Use

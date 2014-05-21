@@ -395,10 +395,9 @@ extern void find_frame_sal (struct frame_info *frame,
 			    struct symtab_and_line *sal);
 
 /* Set the current source and line to the location given by frame
-   FRAME, if possible.  When CENTER is true, adjust so the relevant
-   line is in the center of the next 'list'.  */
+   FRAME, if possible.  */
 
-void set_current_sal_from_frame (struct frame_info *, int);
+void set_current_sal_from_frame (struct frame_info *);
 
 /* Return the frame base (what ever that is) (DEPRECATED).
 
