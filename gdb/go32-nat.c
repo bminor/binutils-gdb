@@ -960,10 +960,6 @@ go32_target (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_shortname = "djgpp";
-  t->to_longname = "djgpp target process";
-  t->to_doc
-    = "Program loaded by djgpp, when gdb is used as an external debugger";
   t->to_open = go32_open;
   t->to_attach = go32_attach;
   t->to_resume = go32_resume;
