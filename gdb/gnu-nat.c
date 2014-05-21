@@ -2080,8 +2080,7 @@ gnu_mourn_inferior (struct target_ops *ops)
 {
   inf_debug (gnu_current_inf, "rip");
   inf_detach (gnu_current_inf);
-  generic_mourn_inferior ();
-  inf_child_maybe_unpush_target (ops);
+  inf_child_mourn_inferior (ops);
 }
 
 

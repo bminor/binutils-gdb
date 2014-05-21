@@ -36,6 +36,10 @@ extern void store_waitstatus (struct target_waitstatus *, int);
 extern void inf_child_open_target (struct target_ops *target,
 				   char *arg, int from_tty);
 
+/* To be called by the native target's to_mourn_inferior routine.  */
+
+extern void inf_child_mourn_inferior (struct target_ops *ops);
+
 /* Unpush the target if it wasn't explicitly open with "target native"
    and there are no live inferiors left.  Note: if calling this as a
    result of a mourn or detach, the current inferior shall already

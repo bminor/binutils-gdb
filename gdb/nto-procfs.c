@@ -1027,8 +1027,7 @@ procfs_mourn_inferior (struct target_ops *ops)
     }
   inferior_ptid = null_ptid;
   init_thread_list ();
-  generic_mourn_inferior ();
-  inf_child_maybe_unpush_target (ops);
+  inf_child_mourn_inferior (ops);
 }
 
 /* This function breaks up an argument string into an argument

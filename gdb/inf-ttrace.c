@@ -696,8 +696,7 @@ inf_ttrace_mourn_inferior (struct target_ops *ops)
     }
   inf_ttrace_page_dict.count = 0;
 
-  generic_mourn_inferior ();
-  inf_child_maybe_unpush_target (ops);
+  inf_child_mourn_inferior (ops);
 }
 
 /* Assuming we just attached the debugger to a new inferior, create

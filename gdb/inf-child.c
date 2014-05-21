@@ -159,6 +159,13 @@ inf_child_close (struct target_ops *target)
   inf_child_explicitly_opened = 0;
 }
 
+void
+inf_child_mourn_inferior (struct target_ops *ops)
+{
+  generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
+}
+
 /* See inf-child.h.  */
 
 void

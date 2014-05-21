@@ -1,3 +1,15 @@
+2014-05-21  Pedro Alves  <palves@redhat.com>
+
+	* inf-child.c (inf_child_mourn_inferior): New function.
+	* inf-child.h (inf_child_mourn_inferior): New declaration.
+	* darwin-nat.c (darwin_mourn_inferior): Use
+	inf_child_mourn_inferior.
+	* gnu-nat.c (gnu_mourn_inferior): Likewise.
+	* inf-ptrace.c (inf_ptrace_mourn_inferior): Likewise.
+	* inf-ttrace.c (inf_ttrace_mourn_inferior): Likewise.
+	* nto-procfs.c (procfs_mourn_inferior): Likewise.
+	* windows-nat.c (windows_mourn_inferior): Likewise.
+
 2014-05-21  Doug Evans  <xdje42@gmail.com>
 
 	* scm-breakpoint.c (breakpoint_functions): Fix typo.
