@@ -1094,7 +1094,7 @@ Return #t if the breakpoint is enabled." },
     "\
 Set the breakpoint's enabled state.\n\
 \n\
-  Arguments: <gdb:breakpoint boolean" },
+  Arguments: <gdb:breakpoint> boolean" },
 
   { "breakpoint-silent?", 1, 0, 0, gdbscm_breakpoint_silent_p,
     "\

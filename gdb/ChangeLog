@@ -1,5 +1,9 @@
 2014-05-21  Doug Evans  <xdje42@gmail.com>
 
+	* scm-breakpoint.c (breakpoint_functions): Fix typo.
+
+2014-05-21  Doug Evans  <xdje42@gmail.com>
+
 	* scm-exception.c (gdbscm_invalid_object_error): Make result is void.
 	(gdbscm_out_of_range_error): Ditto.
 	(gdbscm_memory_error): Ditto.
