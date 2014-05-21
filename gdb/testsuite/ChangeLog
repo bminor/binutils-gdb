@@ -1,3 +1,8 @@
+2014-05-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/mi-support.exp (mi_run_cmd_full): Revert to original
+	behavior for $args, pass it directly to "run".
+
 2014-05-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* lib/gdb.exp (default_gdb_init): Bump `match_max' up from
