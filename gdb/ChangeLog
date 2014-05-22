@@ -1,5 +1,9 @@
 2014-05-22  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
+	* aarch64-linux-nat.c (asm/ptrace.h): Include.
+
+2014-05-22  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
 	* MAINTAINERS (Write After Approval): Move self back from
 	paper trail.
 
