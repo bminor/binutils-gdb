@@ -1,3 +1,8 @@
+2014-05-22  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* MAINTAINERS (Write After Approval): Move self back from
+	paper trail.
+
 2014-05-22  Pedro Alves  <palves@redhat.com>
 
 	* inferior.h (debug_infrun, debug_displaced, stop_on_solib_events)
