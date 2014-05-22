@@ -1,3 +1,7 @@
+2014-05-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/mi-support.exp (mi_run_cmd_full): Add comments.
+
 2014-05-21  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13860

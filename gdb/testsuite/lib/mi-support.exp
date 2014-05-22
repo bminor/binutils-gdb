@@ -830,6 +830,18 @@ proc mi_gdb_expect_cli_output {until message} {
 # In patterns, the newline sequence ``\r\n'' is matched explicitly as
 # ``.*$'' could swallow up output that we attempt to match elsewhere.
 
+# Send the command to run the test program.
+#
+# If USE_MI_COMMAND is true, the "-exec-run" command is used.
+# Otherwise, the "run" (CLI) command is used.  If the global USE_GDB_STUB is
+# true, -exec-continue and continue are used instead of their run counterparts.
+#
+# ARGS is passed as argument to the command used to run the test program.
+# Beware that arguments to "-exec-run" do not have the same semantics as
+# arguments to the "run" command, so USE_MI_COMMAND influences the meaning
+# of ARGS.  If USE_MI_COMMAND is true, they are arguments to -exec-run.
+# If USE_MI_COMMAND is false, they are effectively arguments passed
+# to the test program.  If the global USE_GDB_STUB is true, ARGS is not used.
 proc mi_run_cmd_full {use_mi_command args} {
     global suppress_flag
     if { $suppress_flag } {
