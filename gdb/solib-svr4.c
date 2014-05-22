@@ -30,6 +30,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "regcache.h"
 #include "gdbthread.h"
 #include "observer.h"

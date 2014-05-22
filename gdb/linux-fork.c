@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "regcache.h"
 #include "gdbcmd.h"
 #include "infcall.h"

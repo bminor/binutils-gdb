@@ -30,6 +30,7 @@
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"

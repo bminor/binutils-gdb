@@ -25,6 +25,7 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "regcache.h"
 
 /* User interface:

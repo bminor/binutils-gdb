@@ -35,6 +35,7 @@
 #include "regcache.h"
 #include "frame-unwind.h"
 #include "hashtab.h"
+#include "infrun.h"
 
 /* The target_ops of record-btrace.  */
 static struct target_ops record_btrace_ops;

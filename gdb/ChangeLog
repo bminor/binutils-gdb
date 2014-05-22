@@ -1,5 +1,66 @@
 2014-05-22  Pedro Alves  <palves@redhat.com>
 
+	* inferior.h (debug_infrun, debug_displaced, stop_on_solib_events)
+	(sync_execution, sched_multi, step_stop_if_no_debug, non_stop)
+	(disable_randomization, enum exec_direction_kind)
+	(execution_direction, stop_registers, start_remote)
+	(clear_proceed_status, proceed, resume, user_visible_resume_ptid)
+	(wait_for_inferior, normal_stop, get_last_target_status)
+	(prepare_for_detach, fetch_inferior_event, init_wait_for_inferior)
+	(insert_step_resume_breakpoint_at_sal)
+	(follow_inferior_reset_breakpoints, stepping_past_instruction_at)
+	(set_step_info, print_stop_event, signal_stop_state)
+	(signal_print_state, signal_pass_state, signal_stop_update)
+	(signal_print_update, signal_pass_update)
+	(update_signals_program_target, clear_exit_convenience_vars)
+	(displaced_step_dump_bytes, update_observer_mode)
+	(signal_catch_update, gdb_signal_from_command): Move
+	declarations ...
+	* infrun.h: ... to this new file.
+	* amd64-tdep.c: Include infrun.h.
+	* annotate.c: Include infrun.h.
+	* arch-utils.c: Include infrun.h.
+	* arm-linux-tdep.c: Include infrun.h.
+	* arm-tdep.c: Include infrun.h.
+	* break-catch-sig.c: Include infrun.h.
+	* breakpoint.c: Include infrun.h.
+	* common/agent.c: Include infrun.h instead of inferior.h.
+	* corelow.c: Include infrun.h.
+	* event-top.c: Include infrun.h.
+	* go32-nat.c: Include infrun.h.
+	* i386-tdep.c: Include infrun.h.
+	* inf-loop.c: Include infrun.h.
+	* infcall.c: Include infrun.h.
+	* infcmd.c: Include infrun.h.
+	* infrun.c: Include infrun.h.
+	* linux-fork.c: Include infrun.h.
+	* linux-nat.c: Include infrun.h.
+	* linux-thread-db.c: Include infrun.h.
+	* monitor.c: Include infrun.h.
+	* nto-tdep.c: Include infrun.h.
+	* procfs.c: Include infrun.h.
+	* record-btrace.c: Include infrun.h.
+	* record-full.c: Include infrun.h.
+	* remote-m32r-sdi.c: Include infrun.h.
+	* remote-mips.c: Include infrun.h.
+	* remote-notif.c: Include infrun.h.
+	* remote-sim.c: Include infrun.h.
+	* remote.c: Include infrun.h.
+	* reverse.c: Include infrun.h.
+	* rs6000-tdep.c: Include infrun.h.
+	* s390-linux-tdep.c: Include infrun.h.
+	* solib-irix.c: Include infrun.h.
+	* solib-osf.c: Include infrun.h.
+	* solib-svr4.c: Include infrun.h.
+	* target.c: Include infrun.h.
+	* top.c: Include infrun.h.
+	* windows-nat.c: Include infrun.h.
+	* mi/mi-interp.c: Include infrun.h.
+	* mi/mi-main.c: Include infrun.h.
+	* python/py-threadevent.c: Include infrun.h.
+
+2014-05-22  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (handle_inferior_event): Store the exit code for
 	--return-child-result here, instead of ...
 	(print_exited_reason): ... here.

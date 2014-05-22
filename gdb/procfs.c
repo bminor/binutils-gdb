@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "target.h"
 #include "gdbcore.h"
 #include "elf-bfd.h"		/* for elfcore_write_* */

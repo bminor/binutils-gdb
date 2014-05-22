@@ -32,6 +32,7 @@
 #include "value.h"
 #include "command.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbthread.h"
 #include "target.h"
 #include "language.h"

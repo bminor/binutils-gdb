@@ -23,6 +23,7 @@
 #include "event-top.h"
 #include "event-loop.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "ui-out.h"
 #include "top.h"
 #include "exceptions.h"

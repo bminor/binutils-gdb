@@ -38,6 +38,7 @@
 #include "event-loop.h"
 #include "target.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbcmd.h"
 
 #include <string.h>

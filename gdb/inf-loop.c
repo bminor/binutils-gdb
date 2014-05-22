@@ -18,7 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "inferior.h"		/* For fetch_inferior_event.  */
+#include "inferior.h"
+#include "infrun.h"
 #include "target.h"             /* For enum inferior_event_type.  */
 #include "event-loop.h"
 #include "event-top.h"

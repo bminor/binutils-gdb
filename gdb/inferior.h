@@ -84,35 +84,6 @@ extern const char *get_inferior_io_terminal (void);
 
 extern ptid_t inferior_ptid;
 
-/* Are we simulating synchronous execution? This is used in async gdb
-   to implement the 'run', 'continue' etc commands, which will not
-   redisplay the prompt until the execution is actually over.  */
-extern int sync_execution;
-
-/* Inferior environment.  */
-
-extern void clear_proceed_status (void);
-
-extern void proceed (CORE_ADDR, enum gdb_signal, int);
-
-extern int sched_multi;
-
-/* When set, stop the 'step' command if we enter a function which has
-   no line number information.  The normal behavior is that we step
-   over such function.  */
-extern int step_stop_if_no_debug;
-
-/* If set, the inferior should be controlled in non-stop mode.  In
-   this mode, each thread is controlled independently.  Execution
-   commands apply only to the selected thread by default, and stop
-   events stop only the thread that had the event -- the other threads
-   are kept running freely.  */
-extern int non_stop;
-
-/* When set (default), the target should attempt to disable the operating
-   system's address space randomization feature when starting an inferior.  */
-extern int disable_randomization;
-
 extern void generic_mourn_inferior (void);
 
 extern CORE_ADDR unsigned_pointer_to_address (struct gdbarch *gdbarch,
@@ -128,26 +99,7 @@ extern void address_to_signed_pointer (struct gdbarch *gdbarch,
 				       struct type *type, gdb_byte *buf,
 				       CORE_ADDR addr);
 
-extern void wait_for_inferior (void);
-
-extern void prepare_for_detach (void);
-
-extern void fetch_inferior_event (void *);
-
-extern void init_wait_for_inferior (void);
-
 extern void reopen_exec_file (void);
-
-/* The `resume' routine should only be called in special circumstances.
-   Normally, use `proceed', which handles a lot of bookkeeping.  */
-
-extern void resume (int, enum gdb_signal);
-
-extern ptid_t user_visible_resume_ptid (int step);
-
-extern void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
-						  struct symtab_and_line ,
-						  struct frame_id);
 
 /* From misc files */
 
@@ -184,49 +136,6 @@ extern int fork_inferior (char *, char *, char **,
 extern void startup_inferior (int);
 
 extern char *construct_inferior_arguments (int, char **);
-
-/* From infrun.c */
-
-extern unsigned int debug_infrun;
-
-extern int stop_on_solib_events;
-
-extern void start_remote (int from_tty);
-
-extern void normal_stop (void);
-
-extern void print_stop_event (struct target_waitstatus *ws);
-
-extern int signal_stop_state (int);
-
-extern int signal_print_state (int);
-
-extern int signal_pass_state (int);
-
-extern int signal_stop_update (int, int);
-
-extern int signal_print_update (int, int);
-
-extern int signal_pass_update (int, int);
-
-extern void get_last_target_status(ptid_t *ptid,
-                                   struct target_waitstatus *status);
-
-extern void follow_inferior_reset_breakpoints (void);
-
-void set_step_info (struct frame_info *frame, struct symtab_and_line sal);
-
-/* Clear the convenience variables associated with the exit of the
-   inferior.  Currently, those variables are $_exitcode and
-   $_exitsignal.  */
-
-extern void clear_exit_convenience_vars (void);
-
-/* Returns true if we're trying to step past the instruction at
-   ADDRESS in ASPACE.  */
-
-extern int stepping_past_instruction_at (struct address_space *aspace,
-					 CORE_ADDR address);
 
 /* From infcmd.c */
 
@@ -331,33 +240,6 @@ enum stop_kind
     STOP_QUIETLY_NO_SIGSTOP
   };
 
-/* Reverse execution.  */
-enum exec_direction_kind
-  {
-    EXEC_FORWARD,
-    EXEC_REVERSE
-  };
-
-/* The current execution direction.  This should only be set to enum
-   exec_direction_kind values.  It is only an int to make it
-   compatible with make_cleanup_restore_integer.  */
-extern int execution_direction;
-
-/* Save register contents here when executing a "finish" command or are
-   about to pop a stack dummy frame, if-and-only-if proceed_to_finish is set.
-   Thus this contains the return value from the called function (assuming
-   values are returned in a register).  */
-
-extern struct regcache *stop_registers;
-
-/* True if we are debugging displaced stepping.  */
-extern int debug_displaced;
-
-/* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
-void displaced_step_dump_bytes (struct ui_file *file,
-                                const gdb_byte *buf, size_t len);
-
-struct displaced_step_closure *get_displaced_step_closure_by_addr (CORE_ADDR addr);
 
 /* Possible values for gdbarch_call_dummy_location.  */
 #define ON_STACK 1
@@ -632,21 +514,5 @@ extern void prune_inferiors (void);
 extern int number_of_inferiors (void);
 
 extern struct inferior *add_inferior_with_spaces (void);
-
-extern void update_observer_mode (void);
-
-extern void update_signals_program_target (void);
-
-extern void signal_catch_update (const unsigned int *);
-
-/* In some circumstances we allow a command to specify a numeric
-   signal.  The idea is to keep these circumstances limited so that
-   users (and scripts) develop portable habits.  For comparison,
-   POSIX.2 `kill' requires that 1,2,3,6,9,14, and 15 work (and using a
-   numeric signal at all is obsolescent.  We are slightly more lenient
-   and allow 1-15 which should match host signal numbers on most
-   systems.  Use of symbolic signal names is strongly encouraged.  */
-
-enum gdb_signal gdb_signal_from_command (int num);
 
 #endif /* !defined (INFERIOR_H) */

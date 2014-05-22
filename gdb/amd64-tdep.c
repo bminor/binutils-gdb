@@ -29,6 +29,7 @@
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "objfiles.h"

@@ -24,6 +24,7 @@
 #include "arch-utils.h"
 #include "frame.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "symtab.h"
 #include "target.h"
 #include "gdbcore.h"

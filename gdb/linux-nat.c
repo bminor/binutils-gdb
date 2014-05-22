@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "target.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"

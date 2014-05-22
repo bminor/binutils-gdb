@@ -41,6 +41,7 @@
 #include "glibc-tdep.h"
 #include "arch-utils.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbthread.h"
 #include "symfile.h"
 

@@ -24,6 +24,7 @@
 #include "defs.h"
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
+#include "infrun.h"
 #include "target.h"
 #include "exceptions.h"
 #include "gdbcore.h"

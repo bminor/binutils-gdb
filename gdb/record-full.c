@@ -35,6 +35,7 @@
 #include "inf-loop.h"
 #include "gdb_bfd.h"
 #include "observer.h"
+#include "infrun.h"
 
 #include <signal.h>
 

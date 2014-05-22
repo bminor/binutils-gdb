@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include "inferior.h"
+#include "infrun.h"
 #include "bfd.h"
 #include "symfile.h"
 #include "exceptions.h"

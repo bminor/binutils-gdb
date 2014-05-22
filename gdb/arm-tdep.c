@@ -23,6 +23,7 @@
 
 #include "frame.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include <string.h>

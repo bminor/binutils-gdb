@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "infrun.h"
 #include <string.h>
 #include <ctype.h>
 #include "symtab.h"
