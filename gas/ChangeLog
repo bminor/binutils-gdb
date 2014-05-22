@@ -1,3 +1,9 @@
+2014-05-22  Alan Modra  <amodra@gmail.com>
+
+	* listing.c (listing_warning, listing_error): Add space after colon.
+	* messages.c (as_warn_internal, as_bad_internal): Use the same
+	string as above.
+
 2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c (file_mips_opts_checked): New static global.

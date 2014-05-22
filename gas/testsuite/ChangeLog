@@ -1,3 +1,18 @@
+2014-05-22  Alan Modra  <amodra@gmail.com>
+
+	* gas/d30v/bittest.l: Update for changed whitespace.
+	* gas/d30v/serial.l: Likewise.
+	* gas/d30v/serial2.l: Likewise.
+	* gas/d30v/serial2O.l: Likewise.
+	* gas/d30v/warn_oddreg.l: Likewise.
+	* gas/i386/inval-equ-2.l: Likewise.
+	* gas/i386/mpx-inval-1.l: Likewise.
+	* gas/i386/sse-check-error.l: Likewise.
+	* gas/i386/x86-64-mpx-inval-1.l: Likewise.
+	* gas/i386/x86-64-mpx-inval-2.l: Likewise.
+	* gas/i386/x86-64-size-inval-1.l: Likewise.
+	* gas/i386/x86-64-sse-check-error.l: Likewise.
+
 2014-05-20  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/mips.exp: Add new tests.  Use 64-bit ABI for relax-bc1any.

@@ -14,20 +14,20 @@ GAS LISTING .*
 [ 	]*2[ 	]+\.allow_index_reg
 [ 	]*3[ 	]+\.text
 [ 	]*4[ 	]+\?\?\?\? F24801C3 		bnd add %rax, %rbx  		\# Bad
-\*\*\*\*  Error:expecting valid branch instruction after `bnd'
+.*  Error: expecting valid branch instruction after `bnd'
 [ 	]*5[ 	]+\?\?\?\? 6766F2AB 		bnd stosw \(%edi\)    		\# Bad
-\*\*\*\*  Error:expecting valid branch instruction after `bnd'
+.*  Error: expecting valid branch instruction after `bnd'
 [ 	]*6[ 	]+\?\?\?\? F2E200   		bnd loop foo
-\*\*\*\*  Error:expecting valid branch instruction after `bnd'
+.*  Error: expecting valid branch instruction after `bnd'
 [ 	]*7[ 	]+\?\?\?\? F2E300   		bnd jrcxz foo
-\*\*\*\*  Error:expecting valid branch instruction after `bnd'
+.*  Error: expecting valid branch instruction after `bnd'
 [ 	]*8[ 	]+
 [ 	]*9[ 	]+\.intel_syntax noprefix
 [ 	]*10[ 	]+\?\?\?\? F24801C3 		bnd add rbx, rax		\# Bad
-\*\*\*\*  Error:expecting valid branch instruction after `bnd'
+.*  Error: expecting valid branch instruction after `bnd'
 [ 	]*11[ 	]+\?\?\?\? 6766F2AB 		bnd stos WORD PTR \[edi]		\# Bad
-\*\*\*\*  Error:expecting valid branch instruction after `bnd'
+.*  Error: expecting valid branch instruction after `bnd'
 [ 	]*12[ 	]+\?\?\?\? F2E200   		bnd loop foo
-\*\*\*\*  Error:expecting valid branch instruction after `bnd'
+.*  Error: expecting valid branch instruction after `bnd'
 [ 	]*13[ 	]+\?\?\?\? F2E300   		bnd jrcxz foo
-\*\*\*\*  Error:expecting valid branch instruction after `bnd'
+.*  Error: expecting valid branch instruction after `bnd'
