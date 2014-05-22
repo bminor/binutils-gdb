@@ -1502,7 +1502,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
   note_data = linux_make_mappings_corefile_notes (gdbarch, obfd,
 						  note_data, note_size);
 
-  make_cleanup (xfree, note_data);
   return note_data;
 }
 

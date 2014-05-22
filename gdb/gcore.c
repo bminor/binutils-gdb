@@ -68,6 +68,7 @@ create_gcore_bfd (const char *filename)
 void
 write_gcore_file (bfd *obfd)
 {
+  struct cleanup *cleanup;
   void *note_data = NULL;
   int note_size = 0;
   asection *note_sec = NULL;
@@ -80,6 +81,8 @@ write_gcore_file (bfd *obfd)
     note_data = target_make_corefile_notes (obfd, &note_size);
   else
     note_data = gdbarch_make_corefile_notes (target_gdbarch (), obfd, &note_size);
+
+  cleanup = make_cleanup (xfree, note_data);
 
   if (note_data == NULL || note_size == 0)
     error (_("Target does not support core file generation."));
@@ -104,6 +107,8 @@ write_gcore_file (bfd *obfd)
   /* Write out the contents of the note section.  */
   if (!bfd_set_section_contents (obfd, note_sec, note_data, 0, note_size))
     warning (_("writing note section (%s)"), bfd_errmsg (bfd_get_error ()));
+
+  do_cleanups (cleanup);
 }
 
 static void

@@ -5522,7 +5522,6 @@ procfs_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
       xfree (auxv);
     }
 
-  make_cleanup (xfree, note_data);
   return note_data;
 }
 #else /* !Solaris */

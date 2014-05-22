@@ -1,3 +1,11 @@
+2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* fbsd-nat.c (fbsd_make_corefile_notes): Remove make_cleanup call.
+	* gcore.c (write_gcore_file): Free memory returned from
+	make_corefile_notes.
+	* linux-tdep.c (linux_make_corefile_notes): Remove make_cleanup call.
+	* procfs.c (procfs_make_note_section): Remove make_cleanup call.
+
 2014-06-24  Yao Qi  <yao@codesourcery.com>
 
 	* arm-linux-tdep.c (arm_linux_skip_trampoline_code): New.
