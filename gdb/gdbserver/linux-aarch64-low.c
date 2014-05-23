@@ -26,6 +26,7 @@
 #include <signal.h>
 #include <sys/user.h>
 #include <sys/ptrace.h>
+#include <asm/ptrace.h>
 #include <sys/uio.h>
 
 #include "gdb_proc_service.h"

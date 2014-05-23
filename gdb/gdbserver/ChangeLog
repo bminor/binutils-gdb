@@ -1,3 +1,7 @@
+2014-05-23  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* linux-aarch64-low.c (asm/ptrace.h): Include.
+
 2014-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix TLS access for -static -pthread.
