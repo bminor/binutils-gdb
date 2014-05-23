@@ -1,5 +1,10 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
 
+	* observer.texi (sync_execution_done, command_error): New
+	subjects.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/13860
 	* observer.texi (signal_received, end_stepping_range)
 	(signal_exited, exited, no_history): New observer subjects.

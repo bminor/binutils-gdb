@@ -2950,7 +2950,7 @@ fetch_inferior_event (void *client_data)
      restore the prompt (a synchronous execution command has finished,
      and we're ready for input).  */
   if (interpreter_async && was_sync && !sync_execution)
-    display_gdb_prompt (0);
+    observer_notify_sync_execution_done ();
 
   if (cmd_done
       && !was_sync

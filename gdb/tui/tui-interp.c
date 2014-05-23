@@ -104,6 +104,24 @@ tui_on_no_history (void)
     print_no_history_reason (tui_ui_out (tui_interp));
 }
 
+/* Observer for the sync_execution_done notification.  */
+
+static void
+tui_on_sync_execution_done (void)
+{
+  if (!interp_quiet_p (tui_interp))
+    display_gdb_prompt (NULL);
+}
+
+/* Observer for the command_error notification.  */
+
+static void
+tui_on_command_error (void)
+{
+  if (!interp_quiet_p (tui_interp))
+    display_gdb_prompt (NULL);
+}
+
 /* These implement the TUI interpreter.  */
 
 static void *
@@ -127,6 +145,8 @@ tui_init (struct interp *self, int top_level)
   observer_attach_signal_exited (tui_on_signal_exited);
   observer_attach_exited (tui_on_exited);
   observer_attach_no_history (tui_on_no_history);
+  observer_attach_sync_execution_done (tui_on_sync_execution_done);
+  observer_attach_command_error (tui_on_command_error);
 
   return NULL;
 }
@@ -177,17 +197,6 @@ tui_suspend (void *data)
   return 1;
 }
 
-/* Display the prompt if we are silent.  */
-
-static int
-tui_display_prompt_p (void *data)
-{
-  if (interp_quiet_p (NULL))
-    return 0;
-  else
-    return 1;
-}
-
 static struct ui_out *
 tui_ui_out (struct interp *self)
 {
@@ -214,7 +223,6 @@ _initialize_tui_interp (void)
     tui_resume,
     tui_suspend,
     tui_exec,
-    tui_display_prompt_p,
     tui_ui_out,
     NULL,
     cli_command_loop

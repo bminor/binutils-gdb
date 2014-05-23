@@ -31,6 +31,7 @@
 #include "continuations.h"
 #include "interps.h"
 #include "top.h"
+#include "observer.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 
@@ -58,7 +59,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 	  do_all_intermediate_continuations (1);
 	  do_all_continuations (1);
 	  async_enable_stdin ();
-	  display_gdb_prompt (0);
+	  observer_notify_command_error ();
 	}
       break;
 

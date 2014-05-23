@@ -243,11 +243,6 @@ display_gdb_prompt (char *new_prompt)
   /* Reset the nesting depth used when trace-commands is set.  */
   reset_command_nest_depth ();
 
-  /* Each interpreter has its own rules on displaying the command
-     prompt.  */
-  if (!current_interp_display_prompt_p ())
-    return;
-
   old_chain = make_cleanup (free_current_contents, &actual_gdb_prompt);
 
   /* Do not call the python hook on an explicit prompt change as

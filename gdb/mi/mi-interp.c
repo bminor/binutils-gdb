@@ -223,14 +223,6 @@ mi_interpreter_exec (void *data, const char *command)
   return exception_none;
 }
 
-/* Never display the default GDB prompt in MI case.  */
-
-static int
-mi_interpreter_prompt_p (void *data)
-{
-  return 0;
-}
-
 void
 mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
@@ -1142,7 +1134,6 @@ _initialize_mi_interp (void)
       mi_interpreter_resume,	/* resume_proc */
       mi_interpreter_suspend,	/* suspend_proc */
       mi_interpreter_exec,	/* exec_proc */
-      mi_interpreter_prompt_p,	/* prompt_proc_p */
       mi_ui_out, 		/* ui_out_proc */
       mi_set_logging,		/* set_logging_proc */
       mi_command_loop		/* command_loop_proc */

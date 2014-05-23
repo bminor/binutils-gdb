@@ -1,5 +1,34 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-interp.c (cli_interpreter_display_prompt_p): Delete.
+	(_initialize_cli_interp): Adjust.
+	* event-loop.c: Include "observer.h".
+	(start_event_loop): Notify 'command_error' observers instead of
+	calling display_gdb_prompt.  Remove FIXME comment.
+	* event-top.c (display_gdb_prompt): Remove call into the
+	interpreters.
+	* inf-loop.c: Include "observer.h".
+	(inferior_event_handler): Notify 'command_error' observers instead
+	of calling display_gdb_prompt.
+	* infrun.c (fetch_inferior_event): Notify 'sync_execution_done'
+	observers instead of calling display_gdb_prompt.
+	* interps.c (interp_set): Don't call display_gdb_prompt.
+	(current_interp_display_prompt_p): Delete.
+	* interps.h (interp_prompt_p): Delete declaration.
+	(interp_prompt_p_ftype): Delete.
+	(struct interp_procs) <prompt_proc_p>: Delete field.
+	(current_interp_display_prompt_p): Delete declaration.
+	* mi-interp.c (mi_interpreter_prompt_p): Delete.
+	(_initialize_mi_interp): Adjust.
+	* tui-interp.c (tui_init): Install 'sync_execution_done' and
+	'command_error' observers.
+	(tui_on_sync_execution_done, tui_on_command_error): New
+	functions.
+	(tui_display_prompt_p): Delete.
+	(_initialize_tui_interp): Adjust.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/13860
 	* cli/cli-interp.c: Include infrun.h and observer.h.
 	(cli_uiout, cli_interp): New globals.

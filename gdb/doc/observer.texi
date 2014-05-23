@@ -114,6 +114,14 @@ The inferior program is finished.
 Reverse execution: target ran out of history info.
 @end deftypefun
 
+@deftypefun void sync_execution_done (void)
+A synchronous command finished.
+@end deftypefun
+
+@deftypefun void command_error (void)
+An error was caught while executing a command.
+@end deftypefun
+
 @deftypefun void target_changed (struct target_ops *@var{target})
 The target's register contents have changed.
 @end deftypefun

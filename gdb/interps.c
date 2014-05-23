@@ -204,19 +204,11 @@ interp_set (struct interp *interp, int top_level)
       return 0;
     }
 
-  /* Finally, put up the new prompt to show that we are indeed here. 
-     Also, display_gdb_prompt for the console does some readline magic
-     which is needed for the console interpreter, at least...  */
-
-  if (!first_time)
+  if (!first_time && !interp_quiet_p (interp))
     {
-      if (!interp_quiet_p (interp))
-	{
-	  xsnprintf (buffer, sizeof (buffer),
-		     "Switching to interpreter \"%.24s\".\n", interp->name);
-	  ui_out_text (current_uiout, buffer);
-	}
-      display_gdb_prompt (NULL);
+      xsnprintf (buffer, sizeof (buffer),
+		 "Switching to interpreter \"%.24s\".\n", interp->name);
+      ui_out_text (current_uiout, buffer);
     }
 
   return 1;
@@ -302,20 +294,6 @@ current_interp_named_p (const char *interp_name)
     return (strcmp (current_interpreter->name, interp_name) == 0);
 
   return 0;
-}
-
-/* This is called in display_gdb_prompt.  If the proc returns a zero
-   value, display_gdb_prompt will return without displaying the
-   prompt.  */
-int
-current_interp_display_prompt_p (void)
-{
-  if (current_interpreter == NULL
-      || current_interpreter->procs->prompt_proc_p == NULL)
-    return 0;
-  else
-    return current_interpreter->procs->prompt_proc_p (current_interpreter->
-						      data);
 }
 
 /* The interpreter that is active while `interp_exec' is active, NULL
