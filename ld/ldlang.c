@@ -112,8 +112,6 @@ struct asneeded_minfo **asneeded_list_tail;
     DEFINED() need to increment this at the start of the traversal.  */
 int lang_statement_iteration = 0;
 
-etree_type *base; /* Relocation base - or null */
-
 /* Return TRUE if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
    wildcards, we do not consider the mere presence of a backslash to

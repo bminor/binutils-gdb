@@ -1,3 +1,9 @@
+2014-05-24  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (base): Move variable to..
+	* mri.c: ..here, and make static.
+	* ldlang.h (base): Delete declaration.
+
 2014-05-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add missing eelf32mbel_linux.c.
