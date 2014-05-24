@@ -260,7 +260,7 @@ and height, and its pagination will be disabled; @pxref{Screen Size}.
 
 @deffn {Scheme Procedure} history-ref number
 Return a value from @value{GDBN}'s value history (@pxref{Value
-History}).  @var{number} indicates which history element to return.
+History}).  The @var{number} argument indicates which history element to return.
 If @var{number} is negative, then @value{GDBN} will take its absolute value
 and count backward from the last element (i.e., the most recent element) to
 find the value to return.  If @var{number} is zero, then @value{GDBN} will
@@ -290,7 +290,7 @@ facilities.
 @deffn {Scheme Procedure} parse-and-eval expression
 Parse @var{expression} as an expression in the current language,
 evaluate it, and return the result as a @code{<gdb:value>}.
-@var{expression} must be a string.
+The @var{expression} must be a string.
 
 This function is useful when computing values.
 For example, it is the only way to get the value of a
@@ -541,10 +541,10 @@ The following exception-related procedures are provided by the
 @code{(gdb)} module.
 
 @deffn {Scheme Procedure} make-exception key args
-Return a @code{<gdb:exception>} object.
-@var{key} and @var{args} are the standard Guile parameters of an exception.
-See the Guile documentation for more information
-(@pxref{Exceptions,,, guile, GNU Guile Reference Manual}).
+Return a @code{<gdb:exception>} object given by its @var{key} and
+@var{args}, which are the standard Guile parameters of an exception.
+See the Guile documentation for more information (@pxref{Exceptions,,,
+guile, GNU Guile Reference Manual}).
 @end deffn
 
 @deffn {Scheme Procedure} exception? object
@@ -821,7 +821,7 @@ Return field @var{field-name} from @code{<gdb:value>} object @var{value}.
 
 @deffn {Scheme Procedure} value-subscript value index
 Return the value of array @var{value} at index @var{index}.
-@var{value} must be a subscriptable @code{<gdb:value>} object.
+The @var{value} argument must be a subscriptable @code{<gdb:value>} object.
 @end deffn
 
 @deffn {Scheme Procedure} value-call value arg-list
@@ -922,24 +922,25 @@ The length must be a Scheme integer and not a @code{<gdb:value>} integer.
 
 @deffn {Scheme Procedure} value-lazy? value
 Return @code{#t} if @var{value} has not yet been fetched
-from the inferior.  
+from the inferior.
 Otherwise return @code{#f}.
-@value{GDBN} does not fetch values until necessary, for efficiency.  
+@value{GDBN} does not fetch values until necessary, for efficiency.
 For example:
 
 @smallexample
 (define myval (parse-and-eval "somevar"))
 @end smallexample
 
-The value of @code{somevar} is not fetched at this time.  It will be 
+The value of @code{somevar} is not fetched at this time.  It will be
 fetched when the value is needed, or when the @code{fetch-lazy}
-procedure is invoked.  
+procedure is invoked.
 @end deffn
 
 @deffn {Scheme Procedure} make-lazy-value type address
-Return a @code{<gdb:value>} that will be lazily fetched from the target.
-@var{type} is an object of type @code{<gdb:type>} and @var{address} is
-a Scheme integer of the address of the object in target memory.
+Return a @code{<gdb:value>} that will be lazily fetched from the
+target.  The object of type @code{<gdb:type>} whose value to fetch is
+specified by its @var{type} and its target memory @var{address}, which
+is a Scheme integer.
 @end deffn
 
 @deffn {Scheme Procedure} value-fetch-lazy! value
@@ -1064,8 +1065,7 @@ Otherwise return @code{#f}.
 @end deffn
 
 @deffn {Scheme Procedure} lookup-type name @r{[}#:block block@r{]}
-This function looks up a type by name.  @var{name} is the name of the
-type to look up.  It must be a string.
+This function looks up a type by its @var{name}, which must be a string.
 
 If @var{block} is given, it is an object of type @code{<gdb:block>},
 and @var{name} is looked up in that scope.
@@ -1728,7 +1728,7 @@ Return the list of registered @code{<gdb:pretty-printer>} objects for
 
 @deffn {Scheme Procedure} set-objfile-pretty-printers! objfile printer-list
 Set the list of registered @code{<gdb:pretty-printer>} objects for
-@var{objfile} to @var{printer-list}.
+@var{objfile} to @var{printer-list}.  The
 @var{printer-list} must be a list of @code{<gdb:pretty-printer>} objects.
 @xref{Guile Pretty Printing API}, for more information.
 @end deffn
@@ -1903,9 +1903,9 @@ Return the frame's @code{<gdb:sal>} (symtab and line) object.
 Return the value of @var{variable} in @var{frame}.  If the optional
 argument @var{block} is provided, search for the variable from that
 block; otherwise start at the frame's current block (which is
-determined by the frame's current program counter).  @var{variable}
-must be a string or a @code{<gdb:symbol>} object.  @var{block} must be a
-@code{<gdb:block>} object.
+determined by the frame's current program counter).  The
+@var{variable} must be given as a string or a @code{<gdb:symbol>}
+object, and @var{block} must be a @code{<gdb:block>} object.
 @end deffn
 
 @deffn {Scheme Procedure} frame-select frame
@@ -2397,14 +2397,14 @@ The following breakpoint-related procedures are provided by the
 
 @c TODO: line length
 @deffn {Scheme Procedure} create-breakpoint! location @r{[}#:type type@r{]} @r{[}#:wp-class wp-class@r{]} @r{[}#:internal internal@r{]}
-Create a new breakpoint.  @var{spec} is a string naming the
+Create a new breakpoint according to @var{spec}, a string naming the
 location of the breakpoint, or an expression that defines a watchpoint.
 The contents can be any location recognized by the @code{break} command,
 or in the case of a watchpoint, by the @code{watch} command.
 
 The optional @var{type} denotes the breakpoint to create.
-This argument can be either: @code{BP_BREAKPOINT} or @code{BP_WATCHPOINT}.
-@var{type} defaults to @code{BP_BREAKPOINT}.
+This argument can be either @code{BP_BREAKPOINT} or @code{BP_WATCHPOINT},
+and defaults to @code{BP_BREAKPOINT}.
 
 The optional @var{wp-class} argument defines the class of watchpoint to
 create, if @var{type} is @code{BP_WATCHPOINT}.  If a watchpoint class is
@@ -2594,7 +2594,7 @@ See @code{set-breakpoint-stop!} below in this section.
 @end deffn
 
 @deffn {Scheme Procedure} set-breakpoint-stop! breakpoint procedure|#f
-Set the stop predicate of @var{breakpoint}.
+Set the stop predicate of @var{breakpoint}.  The predicate
 @var{procedure} takes one argument: the <gdb:breakpoint> object.
 If this predicate is set to a procedure then it is invoked whenever
 the inferior reaches this breakpoint.  If it returns @code{#t},
@@ -2953,11 +2953,12 @@ returns a port object.  One can then read/write memory using that object.
 
 @deffn {Scheme Procedure} open-memory @r{[}#:mode mode{]} @r{[}#:start address{]} @r{[}#:size size{]}
 Return a port object that can be used for reading and writing memory.
-@var{mode} is the standard mode argument to Guile port open routines,
-except that it is restricted to one of @samp{"r"}, @samp{"w"}, or @samp{"r+"}.
-For compatibility @samp{"b"} (binary) may also be present,
-but we ignore it: memory ports are binary only.
-The default is @samp{"r"}, read-only.
+The port will be open according to @var{mode}, which is the standard
+mode argument to Guile port open routines, except that it is
+restricted to one of @samp{"r"}, @samp{"w"}, or @samp{"r+"}.  For
+compatibility @samp{"b"} (binary) may also be present, but we ignore
+it: memory ports are binary only.  The default is @samp{"r"},
+read-only.
 
 The chunk of memory that can be accessed can be bounded.
 If both @var{start} and @var{size} are unspecified, all of memory can be
@@ -3223,14 +3224,14 @@ Usage:
 
 @deffn {Scheme Procedure} prepend-pretty-printer! object printer
 Add @var{printer} to the front of the list of pretty-printers for
-@var{object}.  @var{object} must either be a @code{<gdb:objfile>} object
+@var{object}.  The @var{object} must either be a @code{<gdb:objfile>} object,
 or @code{#f} in which case @var{printer} is added to the global list of
 printers.
 @end deffn
 
 @deffn {Scheme Procecure} append-pretty-printer! object printer
 Add @var{printer} to the end of the list of pretty-printers for
-@var{object}.  @var{object} must either be a @code{<gdb:objfile>} object
+@var{object}.  The @var{object} must either be a @code{<gdb:objfile>} object,
 or @code{#f} in which case @var{printer} is added to the global list of
 printers.
 @end deffn

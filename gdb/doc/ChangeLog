@@ -1,3 +1,32 @@
+2014-05-24  Eli Zaretskii  <eliz@gnu.org>
+
+	* guile.texi (Types In Guile, Basic Guile, Frames In Guile)
+	(Breakpoints In Guile, Guile Printing Module)
+	(Guile Exception Handling, Values From Inferior In Guile)
+	(Objfiles In Guile, Breakpoints In Guile, Memory Ports in Guile):
+	Don't use @var at the beginning of a sentence.
+
+	* gdb.texinfo (Frame Filter Management, Trace Files)
+	(C Operators, Ada Tasks, Calling, Bootstrapping, ARM)
+	(PowerPC Embedded, Define, Annotations for Running)
+	(IPA Protocol Commands, Packets, General Query Packets)
+	(Tracepoint Packets, Notification Packets, Environment)
+	(Inferiors and Programs, Set Breaks, Set Catchpoints)
+	(Continuing and Stepping, Signals, Thread-Specific Breakpoints)
+	(Frames, Backtrace, Selection, Expressions, Registers)
+	(Trace State Variables, Built-In Func/Proc, Signaling, Files)
+	(Numbers, GDB/MI Async Records, GDB/MI Data Manipulation)
+	(Source Annotations, Using JIT Debug Info Readers, Packets)
+	(Stop Reply Packets, Host I/O Packets)
+	(Target Description Format): Don't use @var at the beginning of a
+	sentence.
+
+	* python.texi (Basic Python, Types In Python)
+	(Commands In Python, Frames In Python, Line Tables In Python)
+	(Breakpoints In Python, gdb.printing, gdb.types)
+	(Type Printing API): Don't use @var at the beginning of a
+	sentence.
+
 2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (Process Record and Replay): Document "set/show btrace

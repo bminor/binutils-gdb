@@ -215,7 +215,7 @@ Evaluate @var{command}, a string, as a @value{GDBN} CLI command.
 If a GDB exception happens while @var{command} runs, it is
 translated as described in @ref{Exception Handling,,Exception Handling}.
 
-@var{from_tty} specifies whether @value{GDBN} ought to consider this
+The @var{from_tty} flag specifies whether @value{GDBN} ought to consider this
 command as having originated from the user invoking it interactively.
 It must be a boolean value.  If omitted, it defaults to @code{False}.
 
@@ -237,10 +237,10 @@ Return a sequence holding all of @value{GDBN}'s breakpoints.
 
 @findex gdb.parameter
 @defun gdb.parameter (parameter)
-Return the value of a @value{GDBN} parameter.  @var{parameter} is a
-string naming the parameter to look up; @var{parameter} may contain
-spaces if the parameter has a multi-part name.  For example,
-@samp{print object} is a valid parameter name.
+Return the value of a @value{GDBN} @var{parameter} given by its name,
+a string; the parameter name string may contain spaces if the parameter has a
+multi-part name.  For example, @samp{print object} is a valid
+parameter name.
 
 If the named parameter does not exist, this function throws a
 @code{gdb.error} (@pxref{Exception Handling}).  Otherwise, the
@@ -251,7 +251,7 @@ type, and returned.
 @findex gdb.history
 @defun gdb.history (number)
 Return a value from @value{GDBN}'s value history (@pxref{Value
-History}).  @var{number} indicates which history element to return.
+History}).  The @var{number} argument indicates which history element to return.
 If @var{number} is negative, then @value{GDBN} will take its absolute value
 and count backward from the last element (i.e., the most recent element) to
 find the value to return.  If @var{number} is zero, then @value{GDBN} will
@@ -265,9 +265,9 @@ If no exception is raised, the return value is always an instance of
 
 @findex gdb.parse_and_eval
 @defun gdb.parse_and_eval (expression)
-Parse @var{expression} as an expression in the current language,
-evaluate it, and return the result as a @code{gdb.Value}.
-@var{expression} must be a string.
+Parse @var{expression}, which must be a string, as an expression in
+the current language, evaluate it, and return the result as a
+@code{gdb.Value}.
 
 This function can be useful when implementing a new command
 (@pxref{Commands In Python}), as it provides a way to parse the
@@ -871,8 +871,7 @@ module:
 
 @findex gdb.lookup_type
 @defun gdb.lookup_type (name @r{[}, block@r{]})
-This function looks up a type by name.  @var{name} is the name of the
-type to look up.  It must be a string.
+This function looks up a type by its @var{name}, which must be a string.
 
 If @var{block} is given, then @var{name} is looked up in that scope.
 Otherwise, it is searched for globally.
@@ -1533,8 +1532,8 @@ The recognition function is defined as:
 @defmethod type_recognizer recognize (self, type)
 If @var{type} is not recognized, return @code{None}.  Otherwise,
 return a string which is to be printed as the name of @var{type}.
-@var{type} will be an instance of @code{gdb.Type} (@pxref{Types In
-Python}).
+The @var{type} argument will be an instance of @code{gdb.Type}
+(@pxref{Types In Python}).
 @end defmethod
 
 @value{GDBN} uses this two-pass approach so that type printers can
@@ -2540,8 +2539,8 @@ this method, that is, the @key{TAB} and @key{M-?} key bindings
 (@pxref{Completion}), and the @code{complete} command (@pxref{Help,
 complete}).
 
-The arguments @var{text} and @var{word} are both strings.  @var{text}
-holds the complete command line up to the cursor's location.
+The arguments @var{text} and @var{word} are both strings; @var{text}
+holds the complete command line up to the cursor's location, while
 @var{word} holds the last word of the command line; this is computed
 using a word-breaking heuristic.
 
@@ -3246,8 +3245,8 @@ Return the frame's symtab and line object.
 Return the value of @var{variable} in this frame.  If the optional
 argument @var{block} is provided, search for the variable from that
 block; otherwise start at the frame's current block (which is
-determined by the frame's current program counter).  @var{variable}
-must be a string or a @code{gdb.Symbol} object.  @var{block} must be a
+determined by the frame's current program counter).  The @var{variable}
+argument must be a string or a @code{gdb.Symbol} object; @var{block} must be a
 @code{gdb.Block} object.
 @end defun
 
@@ -3777,8 +3776,8 @@ has the following direct access methods:
 
 @defun LineTable.line (line)
 Return a Python @code{Tuple} of @code{LineTableEntry} objects for any
-entries in the line table for the given @var{line}.  @var{line} refers
-to the source code line.  If there are no entries for that source code
+entries in the line table for the given @var{line}, which specifies
+the source code line.  If there are no entries for that source code
 @var{line}, the Python @code{None} is returned.
 @end defun
 
@@ -3805,13 +3804,13 @@ Python code can manipulate breakpoints via the @code{gdb.Breakpoint}
 class.
 
 @defun Breakpoint.__init__ (spec @r{[}, type @r{[}, wp_class @r{[},internal @r{[},temporary@r{]]]]})
-Create a new breakpoint.  @var{spec} is a string naming the location
-of the breakpoint, or an expression that defines a watchpoint.  The
-contents can be any location recognized by the @code{break} command,
-or in the case of a watchpoint, by the @code{watch} command.  The
-optional @var{type} denotes the breakpoint to create from the types
-defined later in this chapter.  This argument can be either:
-@code{gdb.BP_BREAKPOINT} or @code{gdb.BP_WATCHPOINT}.  @var{type}
+Create a new breakpoint according to @var{spec}, which is a string
+naming the location of the breakpoint, or an expression that defines a
+watchpoint.  The contents can be any location recognized by the
+@code{break} command, or in the case of a watchpoint, by the
+@code{watch} command.  The optional @var{type} denotes the breakpoint
+to create from the types defined later in this chapter.  This argument
+can be either @code{gdb.BP_BREAKPOINT} or @code{gdb.BP_WATCHPOINT}; it
 defaults to @code{gdb.BP_BREAKPOINT}.  The optional @var{internal}
 argument allows the breakpoint to become invisible to the user.  The
 breakpoint will neither be reported when created, nor will it be
@@ -4261,8 +4260,8 @@ regular expressions.
 A pretty-printer which handles printing of @code{enum} values.  Unlike
 @value{GDBN}'s built-in @code{enum} printing, this printer attempts to
 work properly when there is some overlap between the enumeration
-constants.  @var{name} is the name of the printer and also the name of
-the @code{enum} type to look up.
+constants.  The argument @var{name} is the name of the printer and
+also the name of the @code{enum} type to look up.
 
 @item register_pretty_printer (@var{obj}, @var{printer}, @var{replace}=False)
 Register @var{printer} with the pretty-printer list of @var{obj}.
@@ -4350,13 +4349,12 @@ string.  Otherwise, return @code{None}.  This is called by
 API}).
 
 @item register_type_printer (locus, printer)
-This is a convenience function to register a type printer.
-@var{printer} is the type printer to register.  It must implement the
-type printer protocol.  @var{locus} is either a @code{gdb.Objfile}, in
-which case the printer is registered with that objfile; a
-@code{gdb.Progspace}, in which case the printer is registered with
-that progspace; or @code{None}, in which case the printer is
-registered globally.
+This is a convenience function to register a type printer
+@var{printer}.  The printer must implement the type printer protocol.
+The @var{locus} argument is either a @code{gdb.Objfile}, in which case
+the printer is registered with that objfile; a @code{gdb.Progspace},
+in which case the printer is registered with that progspace; or
+@code{None}, in which case the printer is registered globally.
 
 @item TypePrinter
 This is a base class that implements the type printer protocol.  Type
