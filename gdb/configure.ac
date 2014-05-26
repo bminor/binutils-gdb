@@ -1154,7 +1154,7 @@ AC_MSG_RESULT([$with_guile])
 dnl We check guile with pkg-config.
 AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
 
-try_guile_versions="guile-2.0"
+try_guile_versions="guile-2.2 guile-2.0"
 have_libguile=no
 case "${with_guile}" in
 no)

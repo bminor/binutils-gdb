@@ -8750,7 +8750,7 @@ fi
 
 
 
-try_guile_versions="guile-2.0"
+try_guile_versions="guile-2.2 guile-2.0"
 have_libguile=no
 case "${with_guile}" in
 no)

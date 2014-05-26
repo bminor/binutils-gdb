@@ -1,3 +1,8 @@
+2014-05-26  Andy Wingo  <wingo@igalia.com>
+
+	* configure.ac (try_guile_versions): Allow building with guile 2.2.
+	* configure: Regenerate.
+
 2014-05-23  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* symfile-mem.c (symbol_file_add_from_memory): Add BFD sections.
