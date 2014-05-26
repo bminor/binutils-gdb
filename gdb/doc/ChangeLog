@@ -1,5 +1,9 @@
 2014-05-26  Andy Wingo  <wingo@igalia.com>
 
+	* guile.texi (Basic Guile): Fix some typos.
+
+2014-05-26  Andy Wingo  <wingo@igalia.com>
+
 	* guile.texi (Writing a Guile Pretty-Printer)
 	(Guile Types Module): Fix excess parentheses in use-modules forms.
 

@@ -238,7 +238,7 @@ int
 The @code{(gdb)} module provides these basic Guile functions.
 
 @c TODO: line length 
-@deffn {Scheme Procedure} execute command @r{[}#:from-tty boolean@r{]}@r{[}#:to-string boolean@r{]}
+@deffn {Scheme Procedure} execute command @r{[}#:from-tty boolean@r{]} @r{[}#:to-string boolean@r{]}
 Evaluate @var{command}, a string, as a @value{GDBN} CLI command.
 If a @value{GDBN} exception happens while @var{command} runs, it is
 translated as described in
@@ -251,7 +251,7 @@ It must be a boolean value.  If omitted, it defaults to @code{#f}.
 By default, any output produced by @var{command} is sent to
 @value{GDBN}'s standard output (and to the log output if logging is
 turned on).  If the @var{to-string} parameter is
-@code{#t}, then output will be collected by @code{gdb.execute} and
+@code{#t}, then output will be collected by @code{execute} and
 returned as a string.  The default is @code{#f}, in which case the
 return value is unspecified.  If @var{to-string} is @code{#t}, the
 @value{GDBN} virtual terminal will be temporarily set to unlimited width
