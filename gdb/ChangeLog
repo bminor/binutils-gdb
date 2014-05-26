@@ -150,7 +150,7 @@
 
 2014-05-21  Doug Evans  <xdje42@gmail.com>
 
-	* guile/scm-exception.c (gdbscm_invalid_object_error): Make result is void.
+	* guile/scm-exception.c (gdbscm_invalid_object_error): Make result void.
 	(gdbscm_out_of_range_error): Ditto.
 	(gdbscm_memory_error): Ditto.
 	* guile/scm-string.c (gdbscm_scm_to_target_string_unsafe): Delete.
