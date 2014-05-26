@@ -1600,7 +1600,7 @@ To continue the @code{my::string} example,
 this code might appear in @code{(my-project my-library v1)}:
 
 @smallexample
-(use-modules ((gdb)))
+(use-modules (gdb))
 (define (register-printers objfile)
   (append-objfile-pretty-printer!
    (make-pretty-printer "my-string" str-lookup-function)))
@@ -1610,7 +1610,7 @@ this code might appear in @code{(my-project my-library v1)}:
 And then the corresponding contents of the auto-load file would be:
 
 @smallexample
-(use-modules ((gdb) (my-project my-library v1)))
+(use-modules (gdb) (my-project my-library v1))
 (register-printers (current-objfile))
 @end smallexample
 
@@ -1661,7 +1661,7 @@ This example doesn't need a lookup function, that is handled by the
 the object that handles the lookup.
 
 @smallexample
-(use-modules ((gdb printing)))
+(use-modules (gdb printing))
 
 (define (build-pretty-printer)
   (let ((pp (make-pretty-printer-collection "my-library")))
@@ -1673,7 +1673,7 @@ the object that handles the lookup.
 And here is the autoload support:
 
 @smallexample
-(use-modules ((gdb) (my-library)))
+(use-modules (gdb) (my-library))
 (append-objfile-pretty-printer! (current-objfile) (build-pretty-printer))
 @end smallexample
 
@@ -3265,7 +3265,7 @@ Then in gdb:
 
 @smallexample
 (gdb) start
-(gdb) guile (use-modules ((gdb) (gdb types)))
+(gdb) guile (use-modules (gdb) (gdb types))
 (gdb) guile (define foo-ref (parse-and-eval "foo_ref"))
 (gdb) guile (get-basic-type (value-type foo-ref))
 int

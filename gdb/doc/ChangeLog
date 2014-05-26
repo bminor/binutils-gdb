@@ -1,3 +1,8 @@
+2014-05-26  Andy Wingo  <wingo@igalia.com>
+
+	* guile.texi (Writing a Guile Pretty-Printer)
+	(Guile Types Module): Fix excess parentheses in use-modules forms.
+
 2014-05-24  Eli Zaretskii  <eliz@gnu.org>
 
 	* guile.texi (Types In Guile, Basic Guile, Frames In Guile)
