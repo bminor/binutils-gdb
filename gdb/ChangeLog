@@ -1,3 +1,7 @@
+2014-05-28  Yao Qi  <yao@codesourcery.com>
+
+	* charset.c: Fix typo in comments.
+
 2014-05-27  Gary Benson  <gbenson@redhat.com>
 
 	* utils.c (internal_vproblem): Prompt for a bug report.
