@@ -1,3 +1,7 @@
+2014-06-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/completion.exp: Remove code aimed at restoring TIMEOUT.
+
 2014-06-01  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/watchpoint.exp (test_watch_location): Check null
