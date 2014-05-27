@@ -1,5 +1,10 @@
 2014-05-26  Andy Wingo  <wingo@igalia.com>
 
+	* guile.texi (GDB Scheme Data Types): Remove documentation for
+	removed interfaces.  Update spelling of gdb-object-kind.
+
+2014-05-26  Andy Wingo  <wingo@igalia.com>
+
 	* guile.texi (Basic Guile): Fix some typos.
 
 2014-05-26  Andy Wingo  <wingo@igalia.com>

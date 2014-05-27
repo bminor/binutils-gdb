@@ -109,9 +109,7 @@ exscm_mark_exception_smob (SCM self)
   exception_smob *e_smob = (exception_smob *) SCM_SMOB_DATA (self);
 
   scm_gc_mark (e_smob->key);
-  scm_gc_mark (e_smob->args);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&e_smob->base);
+  return e_smob->args;
 }
 
 /* The smob "print" function for <gdb:exception>.  */

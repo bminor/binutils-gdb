@@ -310,14 +310,14 @@ proc test_bkpt_eval_funcs { } {
 	    "(define set-bp-data-count! set-car!)" "" \
 	    "(define bp-data-inf-i cdr)" "" \
 	    "(define set-bp-data-inf-i! set-cdr!)" "" \
-	    "(define (bp-eval-count bkpt) (bp-data-count (gsmob-property bkpt 'bp-data)))" "" \
-	    "(define (bp-eval-inf-i bkpt) (bp-data-inf-i (gsmob-property bkpt 'bp-data)))" "" \
+	    "(define (bp-eval-count bkpt) (bp-data-count (object-property bkpt 'bp-data)))" "" \
+	    "(define (bp-eval-inf-i bkpt) (bp-data-inf-i (object-property bkpt 'bp-data)))" "" \
 	    "(define (make-bp-eval location)" "" \
 	    "  (let ((bp (create-breakpoint! location)))" "" \
-	    "    (set-gsmob-property! bp 'bp-data (make-bp-data))" "" \
+	    "    (set-object-property! bp 'bp-data (make-bp-data))" "" \
 	    "    (set-breakpoint-stop! bp" "" \
 	    "       (lambda (bkpt)" "" \
-	    "         (let ((data (gsmob-property bkpt 'bp-data))" "" \
+	    "         (let ((data (object-property bkpt 'bp-data))" "" \
 	    "               (inf-i (parse-and-eval \"i\")))" "" \
 	    "           (set-bp-data-count! data (+ (bp-data-count data) 1))" "" \
 	    "           (set-bp-data-inf-i! data inf-i)" "" \
@@ -329,10 +329,10 @@ proc test_bkpt_eval_funcs { } {
 	    "guile" "" \
 	    "(define (make-bp-also-eval location)" "" \
 	    "  (let ((bp (create-breakpoint! location)))" "" \
-	    "    (set-gsmob-property! bp 'bp-data (make-bp-data))" "" \
+	    "    (set-object-property! bp 'bp-data (make-bp-data))" "" \
 	    "    (set-breakpoint-stop! bp" "" \
 	    "       (lambda (bkpt)" "" \
-	    "         (let* ((data (gsmob-property bkpt 'bp-data))" "" \
+	    "         (let* ((data (object-property bkpt 'bp-data))" "" \
 	    "                (count (+ (bp-data-count data) 1)))" "" \
 	    "           (set-bp-data-count! data count)" "" \
 	    "           (= count 9))))" "" \
@@ -343,7 +343,7 @@ proc test_bkpt_eval_funcs { } {
 	    "guile" "" \
 	    "(define (make-bp-basic location)" "" \
 	    "  (let ((bp (create-breakpoint! location)))" "" \
-	    "    (set-gsmob-property! bp 'bp-data (make-bp-data))" "" \
+	    "    (set-object-property! bp 'bp-data (make-bp-data))" "" \
 	    "    bp))" "" \
 	    "end" ""
 

@@ -119,9 +119,7 @@ itscm_mark_iterator_smob (SCM self)
 
   scm_gc_mark (i_smob->object);
   scm_gc_mark (i_smob->progress);
-  scm_gc_mark (i_smob->next_x);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&i_smob->base);
+  return i_smob->next_x;
 }
 
 /* The smob "print" function for <gdb:iterator>.  */

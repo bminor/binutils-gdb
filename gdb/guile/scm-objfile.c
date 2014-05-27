@@ -69,13 +69,10 @@ ofscm_mark_objfile_smob (SCM self)
 {
   objfile_smob *o_smob = (objfile_smob *) SCM_SMOB_DATA (self);
 
-  scm_gc_mark (o_smob->pretty_printers);
-
   /* We don't mark containing_scm here.  It is just a backlink to our
      container, and is gc-protected until the objfile is deleted.  */
 
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&o_smob->base);
+  return o_smob->pretty_printers;
 }
 
 /* The smob "print" function for <gdb:objfile>.  */

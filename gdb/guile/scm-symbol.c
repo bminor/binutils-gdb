@@ -100,10 +100,7 @@ syscm_objfile_symbol_map (struct symbol *symbol)
 static SCM
 syscm_mark_symbol_smob (SCM self)
 {
-  symbol_smob *s_smob = (symbol_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_eqable_gsmob (&s_smob->base);
+  return SCM_BOOL_F;
 }
 
 /* The smob "free" function for <gdb:symbol>.  */

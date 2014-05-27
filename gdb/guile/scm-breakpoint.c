@@ -83,10 +83,7 @@ bpscm_mark_breakpoint_smob (SCM self)
   /* We don't mark containing_scm here.  It is just a backlink to our
      container, and is gc'protected until the breakpoint is deleted.  */
 
-  scm_gc_mark (bp_smob->stop);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&bp_smob->base);
+  return bp_smob->stop;
 }
 
 /* The smob "free" function for <gdb:breakpoint>.  */

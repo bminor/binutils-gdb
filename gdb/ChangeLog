@@ -1,4 +1,21 @@
 2014-05-26  Andy Wingo  <wingo@igalia.com>
+	    Doug Evans  <xdje42@gmail.com>
+
+	* guile/guile-internal.h (GDB_SMOB_HEAD): Replace properties with
+	empty_base_class.  All uses updated.
+	(gdbscm_mark_gsmob, gdbscm_mark_chained_gsmob)
+	(gdbscm_mark_eqable_gsmob): Remove these now-unneeded functions.
+	Adapt all callers.
+	* guile/scm-gsmob.c (gdbscm_mark_gsmob)
+	(gdbscm_mark_chained_gsmob, gdbscm_mark_eqable_gsmob): Remove.
+	(gdbscm_gsmob_property, gdbscm_set_gsmob_property_x)
+	(gdbscm_gsmob_has_property_p, add_property_name)
+	(gdbscm_gsmob_properties): Remove, and remove them from gsmob_functions.
+	* guile/lib/gdb.scm (gdb-object-property, set-gdb-object-property)
+	(gdb-object-has-property?, gdb-object-properties): Remove.
+	(gdb-object-kind): Renamed from gsmob-kind.
+
+2014-05-26  Andy Wingo  <wingo@igalia.com>
 
 	* configure.ac (try_guile_versions): Allow building with guile 2.2.
 	* configure: Regenerate.

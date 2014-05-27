@@ -331,46 +331,18 @@ This is the string passed to @code{--target} when @value{GDBN} was configured.
 
 @node GDB Scheme Data Types
 @subsubsection GDB Scheme Data Types
-@cindex gdb smobs
+@cindex gdb objects
 
-@value{GDBN} uses Guile's @dfn{smob} (small object)
-data type for all @value{GDBN} objects
-(@pxref{Defining New Types (Smobs),,, guile, GNU Guile Reference Manual}).
-The smobs that @value{GDBN} provides are called @dfn{gsmobs}.
+The values exposed by @value{GDBN} to Guile are known as
+@dfn{@value{GDBN} objects}.  There are several kinds of @value{GDBN}
+object, and each is disjoint from all other types known to Guile.
 
-@deffn {Scheme Procedure} gsmob-kind gsmob
-Return the kind of the gsmob, e.g., @code{<gdb:breakpoint>},
+@deffn {Scheme Procedure} gdb-object-kind object
+Return the kind of the @value{GDBN} object, e.g., @code{<gdb:breakpoint>},
 as a symbol.
 @end deffn
 
-Every @code{gsmob} provides a common set of functions for extending
-them in simple ways.  Each @code{gsmob} has a list of properties,
-initially empty.  These properties are akin to Guile's object properties,
-but are stored with the @code{gsmob}
-(@pxref{Object Properties,,, guile, GNU Guile Reference Manual}).
-Property names can be any @code{eq?}-able value, but it is recommended
-that they be symbols.
-
-@deffn {Scheme Procedure} set-gsmob-property! gsmob property-name value
-Set the value of property @code{property-name} to value @code{value}.
-The result is unspecified.
-@end deffn
-
-@deffn {Scheme Procedure} gsmob-property gsmob property-name
-Return the value of property @code{property-name}.
-If the property isn't present then @code{#f} is returned.
-@end deffn
-
-@deffn {Scheme Procedure} gsmob-has-property? gsmob property-name
-Return @code{#t} if @code{gsmob} has property @code{property-name}.
-Otherwise return @code{#f}.
-@end deffn
-
-@deffn {Scheme Procedure} gsmob-properties gsmob
-Return an unsorted list of names of properties.
-@end deffn
-
-@value{GDBN} defines the following Scheme smobs:
+@value{GDBN} defines the following object types:
 
 @table @code
 @item <gdb:arch>
@@ -425,8 +397,8 @@ Return an unsorted list of names of properties.
 @xref{Values From Inferior In Guile}.
 @end table
 
-The following gsmobs are managed internally so that the Scheme function
-@code{eq?} may be applied to them.
+The following @value{GDBN} objects are managed internally so that the
+Scheme function @code{eq?} may be applied to them.
 
 @table @code
 @item <gdb:arch>

@@ -30,25 +30,16 @@
    specify the gdb smob kind, that is left for another day if it ever is
    needed.
 
-   We want the objects we export to Scheme to be extensible by the user.
-   A gsmob (gdb smob) adds a simple API on top of smobs to support this.
-   This allows GDB objects to be easily extendable in a useful manner.
-   To that end, all smobs in gdb have gdb_smob as the first member.
-
-   On top of gsmobs there are "chained gsmobs".  They are used to assist with
-   life-time tracking of GDB objects vs Scheme objects.  Gsmobs can "subclass"
+   Some GDB smobs are "chained gsmobs".  They are used to assist with life-time
+   tracking of GDB objects vs Scheme objects.  Gsmobs can "subclass"
    chained_gdb_smob, which contains a doubly-linked list to assist with
    life-time tracking.
 
-   On top of gsmobs there are also "eqable gsmobs".  Gsmobs can "subclass"
-   eqable_gdb_smob instead of gdb_smob, and is used to make gsmobs eq?-able.
-   This is done by recording all gsmobs in a hash table and before creating a
-   gsmob first seeing if it's already in the table.  Eqable gsmobs can also be
-   used where lifetime-tracking is required.
-
-   Gsmobs (and chained/eqable gsmobs) add an extra field that is used to
-   record extra data: "properties".  It is a table of key/value pairs
-   that can be set with set-gsmob-property!, gsmob-property.  */
+   Some other GDB smobs are "eqable gsmobs".  Gsmob implementations can
+   "subclass" eqable_gdb_smob to make gsmobs eq?-able.  This is done by
+   recording all gsmobs in a hash table and before creating a gsmob first
+   seeing if it's already in the table.  Eqable gsmobs can also be used where
+   lifetime-tracking is required.  */
 
 #include "defs.h"
 #include "hashtab.h"
@@ -60,15 +51,6 @@
 #undef scm_make_smob_type
 
 static htab_t registered_gsmobs;
-
-/* Gsmob properties are initialize stored as an alist to minimize space
-   usage: GDB can be used to debug some really big programs, and property
-   lists generally have very few elements.  Once the list grows to this
-   many elements then we switch to a hash table.
-   The smallest Guile hashtable in 2.0 uses a vector of 31 elements.
-   The value we use here is large enough to hold several expected uses,
-   without being so large that we might as well just use a hashtable.  */
-#define SMOB_PROP_HTAB_THRESHOLD 7
 
 /* Hash function for registered_gsmobs hash table.  */
 
@@ -131,7 +113,7 @@ gdbscm_make_smob_type (const char *name, size_t size)
 void
 gdbscm_init_gsmob (gdb_smob *base)
 {
-  base->properties = SCM_EOL;
+  base->empty_base_class = 0;
 }
 
 /* Initialize a chained_gdb_smob.
@@ -157,46 +139,6 @@ gdbscm_init_eqable_gsmob (eqable_gdb_smob *base, SCM containing_scm)
   base->containing_scm = containing_scm;
 }
 
-/* Call this from each smob's "mark" routine.
-   In general, this should be called as:
-   return gdbscm_mark_gsmob (base);  */
-
-SCM
-gdbscm_mark_gsmob (gdb_smob *base)
-{
-  /* Return the last one to mark as an optimization.
-     The marking infrastructure will mark it for us.  */
-  return base->properties;
-}
-
-/* Call this from each smob's "mark" routine.
-   In general, this should be called as:
-   return gdbscm_mark_chained_gsmob (base);  */
-
-SCM
-gdbscm_mark_chained_gsmob (chained_gdb_smob *base)
-{
-  /* Return the last one to mark as an optimization.
-     The marking infrastructure will mark it for us.  */
-  return base->properties;
-}
-
-/* Call this from each smob's "mark" routine.
-   In general, this should be called as:
-   return gdbscm_mark_eqable_gsmob (base);  */
-
-SCM
-gdbscm_mark_eqable_gsmob (eqable_gdb_smob *base)
-{
-  /* There's no need to mark containing_scm.
-     Any references to it either come from Scheme in which case it will be
-     marked through them, or there's a reference to the smob from gdb in
-     which case the smob is GC-protected.  */
-
-  /* Return the last one to mark as an optimization.
-     The marking infrastructure will mark it for us.  */
-  return base->properties;
-}
 
 /* gsmob accessors */
 
@@ -212,9 +154,9 @@ gsscm_get_gsmob_arg_unsafe (SCM self, int arg_pos, const char *func_name)
   return self;
 }
 
-/* (gsmob-kind gsmob) -> symbol
+/* (gdb-object-kind gsmob) -> symbol
 
-   Note: While one might want to name this gsmob-class-name, it is named
+   Note: While one might want to name this gdb-object-class-name, it is named
    "-kind" because smobs aren't real GOOPS classes.  */
 
 static SCM
@@ -236,124 +178,6 @@ gdbscm_gsmob_kind (SCM self)
   return result;
 }
 
-/* (gsmob-property gsmob property) -> object
-   If property isn't present then #f is returned.  */
-
-static SCM
-gdbscm_gsmob_property (SCM self, SCM property)
-{
-  SCM smob;
-  gdb_smob *base;
-
-  smob = gsscm_get_gsmob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  base = (gdb_smob *) SCM_SMOB_DATA (self);
-
-  /* Have we switched to a hash table?  */
-  if (gdbscm_is_true (scm_hash_table_p (base->properties)))
-    return scm_hashq_ref (base->properties, property, SCM_BOOL_F);
-
-  return scm_assq_ref (base->properties, property);
-}
-
-/* (set-gsmob-property! gsmob property new-value) -> unspecified */
-
-static SCM
-gdbscm_set_gsmob_property_x (SCM self, SCM property, SCM new_value)
-{
-  SCM smob, alist;
-  gdb_smob *base;
-
-  smob = gsscm_get_gsmob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  base = (gdb_smob *) SCM_SMOB_DATA (self);
-
-  /* Have we switched to a hash table?  */
-  if (gdbscm_is_true (scm_hash_table_p (base->properties)))
-    {
-      scm_hashq_set_x (base->properties, property, new_value);
-      return SCM_UNSPECIFIED;
-    }
-
-  alist = scm_assq_set_x (base->properties, property, new_value);
-
-  /* Did we grow the list?  */
-  if (!scm_is_eq (alist, base->properties))
-    {
-      /* If we grew the list beyond a threshold in size,
-	 switch to a hash table.  */
-      if (scm_ilength (alist) >= SMOB_PROP_HTAB_THRESHOLD)
-	{
-	  SCM elm, htab;
-
-	  htab = scm_c_make_hash_table (SMOB_PROP_HTAB_THRESHOLD);
-	  for (elm = alist; elm != SCM_EOL; elm = scm_cdr (elm))
-	    scm_hashq_set_x (htab, scm_caar (elm), scm_cdar (elm));
-	  base->properties = htab;
-	  return SCM_UNSPECIFIED;
-	}
-    }
-
-  base->properties = alist;
-  return SCM_UNSPECIFIED;
-}
-
-/* (gsmob-has-property? gsmob property) -> boolean */
-
-static SCM
-gdbscm_gsmob_has_property_p (SCM self, SCM property)
-{
-  SCM smob, handle;
-  gdb_smob *base;
-
-  smob = gsscm_get_gsmob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  base = (gdb_smob *) SCM_SMOB_DATA (self);
-
-  if (gdbscm_is_true (scm_hash_table_p (base->properties)))
-    handle = scm_hashq_get_handle (base->properties, property);
-  else
-    handle = scm_assq (property, base->properties);
-
-  return scm_from_bool (gdbscm_is_true (handle));
-}
-
-/* Helper function for gdbscm_gsmob_properties.  */
-
-static SCM
-add_property_name (void *closure, SCM handle)
-{
-  SCM *resultp = closure;
-
-  *resultp = scm_cons (scm_car (handle), *resultp);
-  return SCM_UNSPECIFIED;
-}
-
-/* (gsmob-properties gsmob) -> list
-   The list is unsorted.  */
-
-static SCM
-gdbscm_gsmob_properties (SCM self)
-{
-  SCM smob, handle, result;
-  gdb_smob *base;
-
-  smob = gsscm_get_gsmob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  base = (gdb_smob *) SCM_SMOB_DATA (self);
-
-  result = SCM_EOL;
-  if (gdbscm_is_true (scm_hash_table_p (base->properties)))
-    {
-      scm_internal_hash_for_each_handle (add_property_name, &result,
-					 base->properties);
-    }
-  else
-    {
-      SCM elm;
-
-      for (elm = base->properties; elm != SCM_EOL; elm = scm_cdr (elm))
-	result = scm_cons (scm_caar (elm), result);
-    }
-
-  return result;
-}
 
 /* When underlying gdb data structures are deleted, we need to update any
    smobs with references to them.  There are several smobs that reference
@@ -449,25 +273,12 @@ gdbscm_clear_eqable_gsmob_ptr_slot (htab_t htab, eqable_gdb_smob *base)
 
 static const scheme_function gsmob_functions[] =
 {
-  { "gsmob-kind", 1, 0, 0, gdbscm_gsmob_kind,
+  /* N.B. There is a general rule of not naming symbols in gdb-guile with a
+     "gdb" prefix.  This symbol does not violate this rule because it is to
+     be read as "gdb-object-foo", not "gdb-foo".  */
+  { "gdb-object-kind", 1, 0, 0, gdbscm_gsmob_kind,
     "\
-Return the kind of the smob, e.g., <gdb:breakpoint>, as a symbol." },
-
-  { "gsmob-property", 2, 0, 0, gdbscm_gsmob_property,
-    "\
-Return the specified property of the gsmob." },
-
-  { "set-gsmob-property!", 3, 0, 0, gdbscm_set_gsmob_property_x,
-    "\
-Set the specified property of the gsmob." },
-
-  { "gsmob-has-property?", 2, 0, 0, gdbscm_gsmob_has_property_p,
-    "\
-Return #t if the specified property is present." },
-
-  { "gsmob-properties", 1, 0, 0, gdbscm_gsmob_properties,
-    "\
-Return an unsorted list of names of properties." },
+Return the kind of the GDB object, e.g., <gdb:breakpoint>, as a symbol." },
 
   END_FUNCTIONS
 };

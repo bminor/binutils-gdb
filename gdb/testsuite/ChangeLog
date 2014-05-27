@@ -1,3 +1,9 @@
+2014-05-26  Andy Wingo  <wingo@igalia.com>
+
+	* gdb.guile/scm-breakpoint.exp:
+	* gdb.guile/scm-gsmob.exp: Update to use plain old object
+	properties instead of gdb-object-properties.
+
 2014-05-26  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.server/no-thread-db.exp: Specify source file name

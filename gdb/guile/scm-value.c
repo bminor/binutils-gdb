@@ -132,9 +132,7 @@ vlscm_mark_value_smob (SCM self)
 
   scm_gc_mark (v_smob->address);
   scm_gc_mark (v_smob->type);
-  scm_gc_mark (v_smob->dynamic_type);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&v_smob->base);
+  return v_smob->dynamic_type;
 }
 
 /* The smob "free" function for <gdb:value>.  */

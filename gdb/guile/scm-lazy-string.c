@@ -68,10 +68,7 @@ static scm_t_bits lazy_string_smob_tag;
 static SCM
 lsscm_mark_lazy_string_smob (SCM self)
 {
-  lazy_string_smob *ls_smob = (lazy_string_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&ls_smob->base);
+  return SCM_BOOL_F;
 }
 
 /* The smob "free" function for <gdb:lazy-string>.  */

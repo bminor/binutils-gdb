@@ -127,10 +127,7 @@ stscm_objfile_symtab_map (struct symtab *symtab)
 static SCM
 stscm_mark_symtab_smob (SCM self)
 {
-  symtab_smob *st_smob = (symtab_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_eqable_gsmob (&st_smob->base);
+  return SCM_BOOL_F;
 }
 
 /* The smob "free" function for <gdb:symtab>.  */
@@ -407,10 +404,7 @@ stscm_mark_sal_smob (SCM self)
 {
   sal_smob *s_smob = (sal_smob *) SCM_SMOB_DATA (self);
 
-  scm_gc_mark (s_smob->symtab_scm);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&s_smob->base);
+  return s_smob->symtab_scm;
 }
 
 /* The smob "free" function for <gdb:sal>.  */

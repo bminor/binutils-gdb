@@ -135,10 +135,7 @@ frscm_inferior_frame_map (struct inferior *inferior)
 static SCM
 frscm_mark_frame_smob (SCM self)
 {
-  frame_smob *f_smob = (frame_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_eqable_gsmob (&f_smob->base);
+  return SCM_BOOL_F;
 }
 
 /* The smob "free" function for <gdb:frame>.  */

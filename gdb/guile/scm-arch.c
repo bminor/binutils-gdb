@@ -53,10 +53,7 @@ static int arscm_is_arch (SCM);
 static SCM
 arscm_mark_arch_smob (SCM self)
 {
-  arch_smob *a_smob = (arch_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&a_smob->base);
+  return SCM_BOOL_F;
 }
 
 /* The smob "print" function for <gdb:arch>.  */

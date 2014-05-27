@@ -186,10 +186,7 @@ tyscm_type_map (struct type *type)
 static SCM
 tyscm_mark_type_smob (SCM self)
 {
-  type_smob *t_smob = (type_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_eqable_gsmob (&t_smob->base);
+  return SCM_BOOL_F;
 }
 
 /* The smob "free" function for <gdb:type>.  */
@@ -422,9 +419,7 @@ tyscm_mark_field_smob (SCM self)
 {
   field_smob *f_smob = (field_smob *) SCM_SMOB_DATA (self);
 
-  scm_gc_mark (f_smob->type_scm);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&f_smob->base);
+  return f_smob->type_scm;
 }
 
 /* The smob "print" function for <gdb:field>.  */

@@ -136,9 +136,7 @@ ppscm_mark_pretty_printer_smob (SCM self)
 
   scm_gc_mark (pp_smob->name);
   scm_gc_mark (pp_smob->enabled);
-  scm_gc_mark (pp_smob->lookup);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&pp_smob->base);
+  return pp_smob->lookup;
 }
 
 /* The smob "print" function for <gdb:pretty-printer>.  */
@@ -267,9 +265,7 @@ ppscm_mark_pretty_printer_worker_smob (SCM self)
 
   scm_gc_mark (w_smob->display_hint);
   scm_gc_mark (w_smob->to_string);
-  scm_gc_mark (w_smob->children);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&w_smob->base);
+  return w_smob->children;
 }
 
 /* The smob "print" function for <gdb:pretty-printer-worker>.  */

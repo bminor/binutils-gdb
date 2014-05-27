@@ -125,10 +125,7 @@ bkscm_objfile_block_map (struct objfile *objfile)
 static SCM
 bkscm_mark_block_smob (SCM self)
 {
-  block_smob *b_smob = (block_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_eqable_gsmob (&b_smob->base);
+  return SCM_BOOL_F;
 }
 
 /* The smob "free" function for <gdb:block>.  */
@@ -540,11 +537,7 @@ gdbscm_block_symbols (SCM self)
 static SCM
 bkscm_mark_block_syms_progress_smob (SCM self)
 {
-  block_syms_progress_smob *i_smob
-    = (block_syms_progress_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&i_smob->base);
+  return SCM_BOOL_F;
 }
 
 /* The smob "print" function for <gdb:block-symbols-iterator>.  */
