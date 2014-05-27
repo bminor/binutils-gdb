@@ -2120,6 +2120,8 @@ lang_map (void)
     }
   lang_statement_iteration++;
   print_statements ();
+
+  ldemul_extra_map_file_text (link_info.output_bfd, &link_info, config.map_file);
 }
 
 static bfd_boolean

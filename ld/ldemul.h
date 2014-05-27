@@ -94,6 +94,8 @@ extern int  ldemul_find_potential_libraries
   (char *, struct lang_input_statement_struct *);
 extern struct bfd_elf_version_expr *ldemul_new_vers_pattern
   (struct bfd_elf_version_expr *);
+extern void ldemul_extra_map_file_text
+  (bfd *, struct bfd_link_info *, FILE *);
 
 typedef struct ld_emulation_xfer_struct {
   /* Run before parsing the command line and script file.
@@ -193,6 +195,11 @@ typedef struct ld_emulation_xfer_struct {
      this hook to add a pattern matching ".foo" for every "foo".  */
   struct bfd_elf_version_expr * (*new_vers_pattern)
     (struct bfd_elf_version_expr *);
+
+  /* Called when printing the map file, in case there are
+     emulation-specific sections for it.  */
+  void (*extra_map_file_text)
+    (bfd *, struct bfd_link_info *, FILE *);
 
 } ld_emulation_xfer_type;
 

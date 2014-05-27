@@ -1,3 +1,27 @@
+2014-05-27  DJ Delorie  <dj@redhat.com>
+
+	* ld/ldemul.h (extra_map_file_text): New field.
+	(ldemul_extra_map_file_text): Declare.
+	* ld/ldemul.c (ldemul_extra_map_file_text): Define.
+	* ld/ldlang.c (lang_map): Call it.
+
+	* ld/emultempl/rxelf.em: Add extra_map_file_text hook.
+	* ld/emultempl/aix.em: Add NULL extra_map_file_text hook.
+	* ld/emultempl/armcoff.em: Likewise.
+	* ld/emultempl/beos.em: Likewise.
+	* ld/emultempl/elf32.em: Likewise.
+	* ld/emultempl/generic.em: Likewise.
+	* ld/emultempl/gld960.em: Likewise.
+	* ld/emultempl/gld960c.em: Likewise.
+	* ld/emultempl/linux.em: Likewise.
+	* ld/emultempl/lnk960.em: Likewise.
+	* ld/emultempl/m68kcoff.em: Likewise.
+	* ld/emultempl/pe.em: Likewise.
+	* ld/emultempl/pep.em: Likewise.
+	* ld/emultempl/sunos.em: Likewise.
+	* ld/emultempl/ticoff.em: Likewise.
+	* ld/emultempl/vanilla.em: Likewise.
+
 2014-05-24  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (base): Move variable to..

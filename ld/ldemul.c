@@ -348,3 +348,10 @@ ldemul_new_vers_pattern (struct bfd_elf_version_expr *entry)
     entry = (*ld_emulation->new_vers_pattern) (entry);
   return entry;
 }
+
+void
+ldemul_extra_map_file_text (bfd *abfd, struct bfd_link_info *info, FILE *mapf)
+{
+  if (ld_emulation->extra_map_file_text)
+    ld_emulation->extra_map_file_text (abfd, info, mapf);
+}

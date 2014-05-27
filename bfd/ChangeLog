@@ -1,3 +1,19 @@
+2014-05-27  DJ Delorie  <dj@redhat.com>
+
+	* bfd/elf32-rx.c (get_symbol_value_maybe): New.
+	(rx_elf_relocate_section): If we find a reloc against
+	$tableentry$default$<name>, redirect it to the appropriate
+	$tableentry$<n>$.
+	(RX_Table_Info): New.
+	(rx_table_find): New.  Check all tables and SEC_KEEP all sections
+	with table parts in them.
+	(rx_check_directives): New.
+	(rx_table_map_2): New.
+	(rx_table_map): New.
+	(rx_additional_link_map_text): New.  Called to dump tables to the
+	map file.
+	* bfd/elf32-rx.h: New.
+
 2014-05-20  DJ Delorie  <dj@redhat.com>
 
 	* elf32-msp430.c (msp430_elf_relax_adjust_locals): Avoid overflow.
