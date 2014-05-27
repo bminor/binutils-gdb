@@ -1,3 +1,8 @@
+2014-06-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/wchar.exp: Set $cent to \u00A2 if "host-charset" is
+	CP1252.
+
 2014-06-17  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.mi/mi-var-rtti.cc (type_update_when_use_rtti_test):
