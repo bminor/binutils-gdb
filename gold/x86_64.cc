@@ -3327,7 +3327,9 @@ Target_x86_64<size>::Relocate::relocate(
   // We need to subtract the size of the GOT section to get
   // the actual offset to use in the relocation.
   bool have_got_offset = false;
-  unsigned int got_offset = 0;
+  // Since the actual offset is always negative, we use signed int to
+  // support 64-bit GOT relocations.
+  int got_offset = 0;
   switch (r_type)
     {
     case elfcpp::R_X86_64_GOT32:
@@ -3430,7 +3432,8 @@ Target_x86_64<size>::Relocate::relocate(
 	gold_assert(gsym->has_plt_offset()
 		    || gsym->final_value_is_known());
 	typename elfcpp::Elf_types<size>::Elf_Addr got_address;
-	got_address = target->got_section(NULL, NULL)->address();
+	// This is the address of GLOBAL_OFFSET_TABLE.
+	got_address = target->got_plt_section()->address();
 	Relocate_functions<size, false>::rela64(view, object, psymval,
 						addend - got_address);
       }

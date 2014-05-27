@@ -1,3 +1,9 @@
+2014-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/16945
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Use signed int
+	for got_offset.  Properly get GOT address for R_X86_64_PLTOFF64.
+
 2014-05-15  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (do_plt_fde_location): Handle zero length .glink.
