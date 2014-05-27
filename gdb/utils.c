@@ -746,6 +746,12 @@ internal_vproblem (struct internal_problem *problem,
   else
     internal_error (__FILE__, __LINE__, _("bad switch"));
 
+  fputs_unfiltered (_("\nThis is a bug, please report it."), gdb_stderr);
+  if (REPORT_BUGS_TO[0])
+    fprintf_unfiltered (gdb_stderr, _("  For instructions, see:\n%s."),
+			REPORT_BUGS_TO);
+  fputs_unfiltered ("\n\n", gdb_stderr);
+
   if (problem->should_dump_core == internal_problem_ask)
     {
       if (!can_dump_core (reason))
