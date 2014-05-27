@@ -497,6 +497,11 @@ proc ld_simple_link_defsyms {} {
 #   ld_after_inputfiles: FLAGS
 #       Similar to "ld", but put after all input files.
 #
+#   objcopy_objects: FLAGS
+#	Run objcopy with the specified flags after assembling any source
+#	that has the special marker RUN_OBJCOPY in the source specific
+#	flags.
+#
 #   objcopy_linked_file: FLAGS
 #	Run objcopy on the linked file with the specified flags.
 #	This lets you transform the linked file using objcopy, before the
@@ -605,6 +610,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(error) {}
     set opts(warning) {}
     set opts(objcopy_linked_file) {}
+    set opts(objcopy_objects) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -784,6 +790,12 @@ proc run_dump_test { name {extra_options {}} } {
     for { set i 0 } { $i < [llength $sourcefiles] } { incr i } {
 	set sourcefile [lindex $sourcefiles $i]
 	set sourceasflags [lindex $asflags $i]
+	set run_objcopy_objects 0
+
+	if { [string match "*RUN_OBJCOPY*" $sourceasflags] } {
+	    set run_objcopy_objects 1
+	}
+	regsub "RUN_OBJCOPY" $sourceasflags "" sourceasflags
 
 	set objfile "tmpdir/dump$i.o"
 	catch "exec rm -f $objfile" exec_output
@@ -806,6 +818,30 @@ proc run_dump_test { name {extra_options {}} } {
 	    verbose -log "$exitstat with: <$comp_output>"
 	    fail $testname
 	    return
+	}
+
+	if { $run_objcopy_objects } {
+	    set cmd "$OBJCOPY $opts(objcopy_objects) $objfile"
+
+	    send_log "$cmd\n"
+	    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] \
+			"" "/dev/null" "objcopy.tmp"]
+	    remote_upload host "objcopy.tmp"
+	    set comp_output [prune_warnings [file_contents "objcopy.tmp"]]
+	    remote_file host delete "objcopy.tmp"
+	    remote_file build delete "objcopy.tmp"
+
+	    if { [lindex $cmdret 0] != 0 \
+		  || ![string match "" $comp_output] } {
+		send_log "$comp_output\n"
+		verbose "$comp_output" 3
+
+		set exitstat "succeeded"
+		if { $cmdret != 0 } { set exitstat "failed" }
+		verbose -log "$exitstat with: <$comp_output>"
+		fail $testname
+		return
+	    }
 	}
     }
 
