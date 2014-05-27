@@ -1,3 +1,11 @@
+2014-06-01  Ludovic Courtès  <ludo@gnu.org>
+
+	* configure.ac: When Guile is available, check for the
+	availability of 'scm_new_smob'.
+	* configure, config.h.in: Regenerate.
+	* guile/guile-internal.h (scm_new_smob) [!HAVE_SCM_NEW_SMOB]: New
+	function.
+
 2014-05-30  Andrew Burgess  <aburgess@broadcom.com>
 
 	* frame.c (struct frame_info): Add stop_string field.

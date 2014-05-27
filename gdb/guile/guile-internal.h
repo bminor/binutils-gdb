@@ -97,6 +97,18 @@ typedef struct
 #define gdbscm_is_false(scm) scm_is_eq ((scm), SCM_BOOL_F)
 #define gdbscm_is_true(scm) (!gdbscm_is_false (scm))
 
+#ifndef HAVE_SCM_NEW_SMOB
+
+/* Guile <= 2.0.5 did not provide this function, so provide it here.  */
+
+static inline SCM
+scm_new_smob (scm_t_bits tc, scm_t_bits data)
+{
+  SCM_RETURN_NEWSMOB (tc, data);
+}
+
+#endif
+
 /* Function name that is passed around in case an error needs to be reported.
    __func is in C99, but we provide a wrapper "just in case",
    and because FUNC_NAME is the canonical value used in guile sources.

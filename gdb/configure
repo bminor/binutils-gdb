@@ -9076,6 +9076,24 @@ $as_echo "#define HAVE_GUILE 1" >>confdefs.h
   CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_GUILE_SRCS)"
   CONFIG_INSTALL="$CONFIG_INSTALL install-guile"
   ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_GUILE_CFLAGS)"
+
+    save_LIBS="$LIBS"
+  save_CPPFLAGS="$CPPFLAGS"
+  LIBS="$GUILE_LIBS"
+  CPPFLAGS="$GUILE_CPPFLAGS"
+  for ac_func in scm_new_smob
+do :
+  ac_fn_c_check_func "$LINENO" "scm_new_smob" "ac_cv_func_scm_new_smob"
+if test "x$ac_cv_func_scm_new_smob" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SCM_NEW_SMOB 1
+_ACEOF
+
+fi
+done
+
+  LIBS="$save_LIBS"
+  CPPFLAGS="$save_CPPFLAGS"
 else
   # Even if Guile support is not compiled in, we need to have these files
   # included.

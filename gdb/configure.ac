@@ -1200,6 +1200,15 @@ if test "${have_libguile}" != no; then
   CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_GUILE_SRCS)"
   CONFIG_INSTALL="$CONFIG_INSTALL install-guile"
   ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_GUILE_CFLAGS)"
+
+  dnl The 'scm_new_smob' function appeared in Guile 2.0.6.
+  save_LIBS="$LIBS"
+  save_CPPFLAGS="$CPPFLAGS"
+  LIBS="$GUILE_LIBS"
+  CPPFLAGS="$GUILE_CPPFLAGS"
+  AC_CHECK_FUNCS([scm_new_smob])
+  LIBS="$save_LIBS"
+  CPPFLAGS="$save_CPPFLAGS"
 else
   # Even if Guile support is not compiled in, we need to have these files
   # included.
