@@ -123,18 +123,6 @@ vlscm_forget_value_smob (value_smob *v_smob)
     v_smob->next->prev = v_smob->prev;
 }
 
-/* The smob "mark" function for <gdb:value>.  */
-
-static SCM
-vlscm_mark_value_smob (SCM self)
-{
-  value_smob *v_smob = (value_smob *) SCM_SMOB_DATA (self);
-
-  scm_gc_mark (v_smob->address);
-  scm_gc_mark (v_smob->type);
-  return v_smob->dynamic_type;
-}
-
 /* The smob "free" function for <gdb:value>.  */
 
 static size_t
@@ -1493,7 +1481,6 @@ gdbscm_initialize_values (void)
 {
   value_smob_tag = gdbscm_make_smob_type (value_smob_name,
 					  sizeof (value_smob));
-  scm_set_smob_mark (value_smob_tag, vlscm_mark_value_smob);
   scm_set_smob_free (value_smob_tag, vlscm_free_value_smob);
   scm_set_smob_print (value_smob_tag, vlscm_print_value_smob);
   scm_set_smob_equalp (value_smob_tag, vlscm_equal_p_value_smob);

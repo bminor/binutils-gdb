@@ -130,14 +130,6 @@ frscm_inferior_frame_map (struct inferior *inferior)
   return htab;
 }
 
-/* The smob "mark" function for <gdb:frame>.  */
-
-static SCM
-frscm_mark_frame_smob (SCM self)
-{
-  return SCM_BOOL_F;
-}
-
 /* The smob "free" function for <gdb:frame>.  */
 
 static size_t
@@ -1058,7 +1050,6 @@ gdbscm_initialize_frames (void)
 {
   frame_smob_tag
     = gdbscm_make_smob_type (frame_smob_name, sizeof (frame_smob));
-  scm_set_smob_mark (frame_smob_tag, frscm_mark_frame_smob);
   scm_set_smob_free (frame_smob_tag, frscm_free_frame_smob);
   scm_set_smob_print (frame_smob_tag, frscm_print_frame_smob);
 

@@ -1,4 +1,25 @@
 2014-05-26  Andy Wingo  <wingo@igalia.com>
+
+	* guile/scm-arch.c (arscm_mark_arch_smob):
+	* guile/scm-block.c (bkscm_mark_block_smob)
+	(bkscm_mark_block_syms_progress_smob):
+	* guile/scm-breakpoint.c (bpscm_mark_breakpoint_smob):
+	* guile/scm-exception.c (exscm_mark_exception_smob):
+	* guile/scm-frame.c (frscm_mark_frame_smob):
+	* guile/scm-iterator.c (itscm_mark_iterator_smob):
+	* guile/scm-lazy-string.c (lsscm_mark_lazy_string_smob):
+	* guile/scm-objfile.c (ofscm_mark_objfile_smob):
+	* guile/scm-pretty-print.c (ppscm_mark_pretty_printer_smob)
+	(ppscm_mark_pretty_printer_worker_smob):
+	* guile/scm-symbol.c (syscm_mark_symbol_smob):
+	* guile/scm-symtab.c (stscm_mark_symtab_smob, stscm_mark_sal_smob):
+	* guile/scm-type.c (tyscm_mark_type_smob, tyscm_mark_field_smob):
+	* guile/scm-value.c (vlscm_mark_value_smob): Remove unnecessary
+	mark functions.
+	* guile/scm-symtab.c (stscm_free_sal_smob): Remove unnecessary free
+	function.
+
+2014-05-26  Andy Wingo  <wingo@igalia.com>
 	    Doug Evans  <xdje42@gmail.com>
 
 	* guile/guile-internal.h (GDB_SMOB_HEAD): Replace properties with

@@ -73,19 +73,6 @@ static SCM internal_keyword;
 
 /* Administrivia for breakpoint smobs.  */
 
-/* The smob "mark" function for <gdb:breakpoint>.  */
-
-static SCM
-bpscm_mark_breakpoint_smob (SCM self)
-{
-  breakpoint_smob *bp_smob = (breakpoint_smob *) SCM_SMOB_DATA (self);
-
-  /* We don't mark containing_scm here.  It is just a backlink to our
-     container, and is gc'protected until the breakpoint is deleted.  */
-
-  return bp_smob->stop;
-}
-
 /* The smob "free" function for <gdb:breakpoint>.  */
 
 static size_t
@@ -1181,7 +1168,6 @@ gdbscm_initialize_breakpoints (void)
 {
   breakpoint_smob_tag
     = gdbscm_make_smob_type (breakpoint_smob_name, sizeof (breakpoint_smob));
-  scm_set_smob_mark (breakpoint_smob_tag, bpscm_mark_breakpoint_smob);
   scm_set_smob_free (breakpoint_smob_tag, bpscm_free_breakpoint_smob);
   scm_set_smob_print (breakpoint_smob_tag, bpscm_print_breakpoint_smob);
 

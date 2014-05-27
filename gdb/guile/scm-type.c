@@ -181,14 +181,6 @@ tyscm_type_map (struct type *type)
   return htab;
 }
 
-/* The smob "mark" function for <gdb:type>.  */
-
-static SCM
-tyscm_mark_type_smob (SCM self)
-{
-  return SCM_BOOL_F;
-}
-
 /* The smob "free" function for <gdb:type>.  */
 
 static size_t
@@ -411,16 +403,6 @@ save_objfile_types (struct objfile *objfile, void *datum)
 }
 
 /* Administrivia for field smobs.  */
-
-/* The smob "mark" function for <gdb:field>.  */
-
-static SCM
-tyscm_mark_field_smob (SCM self)
-{
-  field_smob *f_smob = (field_smob *) SCM_SMOB_DATA (self);
-
-  return f_smob->type_scm;
-}
 
 /* The smob "print" function for <gdb:field>.  */
 
@@ -1475,14 +1457,12 @@ void
 gdbscm_initialize_types (void)
 {
   type_smob_tag = gdbscm_make_smob_type (type_smob_name, sizeof (type_smob));
-  scm_set_smob_mark (type_smob_tag, tyscm_mark_type_smob);
   scm_set_smob_free (type_smob_tag, tyscm_free_type_smob);
   scm_set_smob_print (type_smob_tag, tyscm_print_type_smob);
   scm_set_smob_equalp (type_smob_tag, tyscm_equal_p_type_smob);
 
   field_smob_tag = gdbscm_make_smob_type (field_smob_name,
 					  sizeof (field_smob));
-  scm_set_smob_mark (field_smob_tag, tyscm_mark_field_smob);
   scm_set_smob_print (field_smob_tag, tyscm_print_field_smob);
 
   gdbscm_define_integer_constants (type_integer_constants, 1);
