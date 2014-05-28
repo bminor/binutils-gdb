@@ -577,6 +577,10 @@ struct range_bounds
 
   struct dynamic_prop high;
 
+  /* * Stride of range.  */
+
+  struct dynamic_prop stride;
+
   /* True if HIGH range bound contains the number of elements in the
      subrange. This affects how the final hight bound is computed.  */
 
@@ -739,7 +743,6 @@ struct main_type
     /* * Union member used for range types.  */
 
     struct range_bounds *bounds;
-
   } flds_bnds;
 
   /* * Slot to point to additional language-specific fields of this
@@ -1255,6 +1258,15 @@ extern void allocate_gnat_aux_type (struct type *);
   TYPE_RANGE_DATA(range_type)->high.kind
 #define TYPE_LOW_BOUND_KIND(range_type) \
   TYPE_RANGE_DATA(range_type)->low.kind
+#define TYPE_BYTE_STRIDE(range_type) \
+  TYPE_RANGE_DATA(range_type)->stride.data.const_val
+#define TYPE_BYTE_STRIDE_BLOCK(range_type) \
+  TYPE_RANGE_DATA(range_type)->stride.data.locexpr
+#define TYPE_BYTE_STRIDE_LOCLIST(range_type) \
+  TYPE_RANGE_DATA(range_type)->stride.data.loclist
+#define TYPE_BYTE_STRIDE_KIND(range_type) \
+  TYPE_RANGE_DATA(range_type)->stride.kind
+
 
 /* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION(thistype) \
@@ -1289,6 +1301,9 @@ extern void allocate_gnat_aux_type (struct type *);
    TYPE_HIGH_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
 #define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
    TYPE_LOW_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
+#define TYPE_ARRAY_STRIDE_IS_UNDEFINED(arraytype) \
+   (TYPE_BYTE_STRIDE(TYPE_INDEX_TYPE(arraytype)) == 0)
+
 
 #define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
    (TYPE_HIGH_BOUND(TYPE_INDEX_TYPE((arraytype))))
@@ -1782,6 +1797,7 @@ extern struct type *create_array_type_with_stride
   (struct type *, struct type *, struct type *, unsigned int);
 
 extern struct type *create_range_type (struct type *, struct type *,
+				       const struct dynamic_prop *,
 				       const struct dynamic_prop *,
 				       const struct dynamic_prop *);
 

@@ -1,0 +1,44 @@
+# Copyright 2016 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+standard_testfile ".f90"
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
+    {debug f90 quiet}] } {
+    return -1
+}
+
+if ![runto MAIN__] then {
+    perror "couldn't run to breakpoint MAIN__"
+    continue
+}
+
+gdb_breakpoint [gdb_get_line_number "re-reverse-elements"]
+gdb_continue_to_breakpoint "re-reverse-elements"
+gdb_test "print pvla" " = \\\(1, 2, 3, 4, 5, 6, 7, 8, 9, 10\\\)" \
+  "print re-reverse-elements"
+gdb_test "print pvla(1)" " = 1" "print first re-reverse-element"
+gdb_test "print pvla(10)" " = 10" "print last re-reverse-element"
+
+gdb_breakpoint [gdb_get_line_number "odd-elements"]
+gdb_continue_to_breakpoint "odd-elements"
+gdb_test "print pvla" " = \\\(1, 3, 5, 7, 9\\\)" "print odd-elements"
+gdb_test "print pvla(1)" " = 1" "print first odd-element"
+gdb_test "print pvla(5)" " = 9" "print last odd-element"
+
+gdb_breakpoint [gdb_get_line_number "single-element"]
+gdb_continue_to_breakpoint "single-element"
+gdb_test "print pvla" " = \\\(5\\\)" "print single-element"
+gdb_test "print pvla(1)" " = 5" "print one single-element"
