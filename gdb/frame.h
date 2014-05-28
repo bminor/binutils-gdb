@@ -503,7 +503,7 @@ enum unwind_stop_reason get_frame_unwind_stop_reason (struct frame_info *);
 
 /* Translate a reason code to an informative string.  */
 
-const char *frame_stop_reason_string (enum unwind_stop_reason);
+const char *unwind_stop_reason_to_string (enum unwind_stop_reason);
 
 /* Unwind the stack frame so that the value of REGNUM, in the previous
    (up, older) frame is returned.  If VALUEP is NULL, don't

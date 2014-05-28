@@ -2561,7 +2561,7 @@ get_frame_unwind_stop_reason (struct frame_info *frame)
 /* Return a string explaining REASON.  */
 
 const char *
-frame_stop_reason_string (enum unwind_stop_reason reason)
+unwind_stop_reason_to_string (enum unwind_stop_reason reason)
 {
   switch (reason)
     {

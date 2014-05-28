@@ -1,5 +1,16 @@
 2014-05-30  Andrew Burgess  <aburgess@broadcom.com>
 
+	* frame.c (frame_stop_reason_string): Rename to ...
+	(unwind_stop_reason_to_string): this.
+	* frame.h (frame_stop_reason_string): Rename to ...
+	(unwind_stop_reason_to_string): this.
+	* stack.c (frame_info): Update call to frame_stop_reason_string.
+	(backtrace_command_1): Likewise.
+	* guile/scm-frame.c (gdbscm_unwind_stop_reason_string): Likewise.
+	* python/py-frame.c (gdbpy_frame_stop_reason_string): Likewise.
+
+2014-05-30  Andrew Burgess  <aburgess@broadcom.com>
+
 	* frame.c (remove_prev_frame): New function.
 	(get_prev_frame_if_no_cycle): Create / discard cleanup using
 	remove_prev_frame.
