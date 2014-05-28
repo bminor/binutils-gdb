@@ -1,3 +1,7 @@
+2014-05-28  Alan Modra  <amodra@gmail.com>
+
+	* elf32-rx.c (rx_table_map): Delete set but not used variables.
+
 2014-05-28  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf2.c (lookup_address_in_function_table): Add best_fit_len
@@ -47,7 +51,7 @@
 
 2014-05-16  Ryan Mansfield  <rmansfield@qnx.com>
 
-        * config.bfd: Move QNX target_cflags from arm-*-netbsd* to arm-*-nto*.
+	* config.bfd: Move QNX target_cflags from arm-*-netbsd* to arm-*-nto*.
 
 2014-05-16  Jon Turney  <jon.turney@dronecode.org.uk>
 
@@ -599,14 +603,14 @@
 	when num == 0.
 
 2014-03-27  Yury Gribov  <y.gribov@samsung.com>
-    	    Pavel Fedin  <p.fedin@samsung.com>
+	    Pavel Fedin  <p.fedin@samsung.com>
 
-    	* elf32-arm.c: Add support for limited pretty-printing of PLT
+	* elf32-arm.c: Add support for limited pretty-printing of PLT
 	entries on eabi and nacl targets.
 	(elf32_arm_get_synthetic_symtab): Add new callback.
-    	(elf32_arm_nacl_plt_sym_val): Likewise.
-    	(elf32_arm_plt0_size): Add helper function.
-    	(elf32_arm_plt_size): Likewise.
+	(elf32_arm_nacl_plt_sym_val): Likewise.
+	(elf32_arm_plt0_size): Add helper function.
+	(elf32_arm_plt_size): Likewise.
 
 2014-03-27  Tristan Gingold  <gingold@adacore.com>
 
@@ -672,10 +676,10 @@
 
 2014-03-14  Meador Inge  <meadori@codesourcery.com>
 
-	 * configure.in: Add strnlen to AC_CHECK_DECLS.
-	 * config.in: Regenerate.
-         * configure: Regenerate.
-	 * sysdep.h (strnlen): Add prototype.
+	* configure.in: Add strnlen to AC_CHECK_DECLS.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* sysdep.h (strnlen): Add prototype.
 
 2014-03-14  Alan Modra  <amodra@gmail.com>
 
@@ -876,8 +880,8 @@
 
 2014-02-18  Jack Carter  <jack.carter@imgtec.com>
 
-        * elfxx-mips.c(_bfd_mips_elf_modify_segment_map): Deleted hard coding of
-        PT_DYNAMIC segment flags.
+	* elfxx-mips.c(_bfd_mips_elf_modify_segment_map): Deleted hard coding of
+	PT_DYNAMIC segment flags.
 
 2014-02-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 

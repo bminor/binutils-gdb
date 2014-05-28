@@ -3801,8 +3801,6 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
   RX_Table_Info *info = (RX_Table_Info *)vinfo;
   struct bfd_link_hash_entry *ent = (struct bfd_link_hash_entry *)vent;
   const char *name; /* of the symbol we've found */
-  asection *sec;
-  struct bfd *abfd;
   int idx;
   const char *tname; /* name of the table */
   bfd_vma start_addr, end_addr;
@@ -3817,8 +3815,6 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
     return TRUE;
 
   name = ent->root.string;
-  sec = ent->u.def.section;
-  abfd = sec->owner;
 
   if (strncmp (name, "$tablestart$", 12))
     return TRUE;
