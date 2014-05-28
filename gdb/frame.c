@@ -145,6 +145,10 @@ struct frame_info
   /* The reason why we could not set PREV, or UNWIND_NO_REASON if we
      could.  Only valid when PREV_P is set.  */
   enum unwind_stop_reason stop_reason;
+
+  /* A frame specific string describing the STOP_REASON in more detail.
+     Only valid when PREV_P is set, but even then may still be NULL.  */
+  const char *stop_string;
 };
 
 /* A frame stash used to speed up frame lookups.  Create a hash table
@@ -1798,14 +1802,12 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
   return prev_frame;
 }
 
-/* Return a "struct frame_info" corresponding to the frame that called
-   THIS_FRAME.  Returns NULL if there is no such frame.
+/* Helper function for get_prev_frame_always, this is called inside a
+   TRY_CATCH block.  Return the frame that called THIS_FRAME or NULL if
+   there is no such frame.  This may throw an exception.  */
 
-   Unlike get_prev_frame, this function always tries to unwind the
-   frame.  */
-
-struct frame_info *
-get_prev_frame_always (struct frame_info *this_frame)
+static struct frame_info *
+get_prev_frame_always_1 (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch;
 
@@ -1953,6 +1955,50 @@ get_prev_frame_always (struct frame_info *this_frame)
     }
 
   return get_prev_frame_if_no_cycle (this_frame);
+}
+
+/* Return a "struct frame_info" corresponding to the frame that called
+   THIS_FRAME.  Returns NULL if there is no such frame.
+
+   Unlike get_prev_frame, this function always tries to unwind the
+   frame.  */
+
+struct frame_info *
+get_prev_frame_always (struct frame_info *this_frame)
+{
+  volatile struct gdb_exception ex;
+  struct frame_info *prev_frame = NULL;
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      prev_frame = get_prev_frame_always_1 (this_frame);
+    }
+  if (ex.reason < 0)
+    {
+      if (ex.error == MEMORY_ERROR)
+	{
+	  this_frame->stop_reason = UNWIND_MEMORY_ERROR;
+	  if (ex.message != NULL)
+	    {
+	      char *stop_string;
+	      size_t size;
+
+	      /* The error needs to live as long as the frame does.
+	         Allocate using stack local STOP_STRING then assign the
+	         pointer to the frame, this allows the STOP_STRING on the
+	         frame to be of type 'const char *'.  */
+	      size = strlen (ex.message) + 1;
+	      stop_string = frame_obstack_zalloc (size);
+	      memcpy (stop_string, ex.message, size);
+	      this_frame->stop_string = stop_string;
+	    }
+	  prev_frame = NULL;
+	}
+      else
+	throw_exception (ex);
+    }
+
+  return prev_frame;
 }
 
 /* Construct a new "struct frame_info" and link it previous to
@@ -2574,6 +2620,20 @@ unwind_stop_reason_to_string (enum unwind_stop_reason reason)
       internal_error (__FILE__, __LINE__,
 		      "Invalid frame stop reason");
     }
+}
+
+const char *
+frame_stop_reason_string (struct frame_info *fi)
+{
+  gdb_assert (fi->prev_p);
+  gdb_assert (fi->prev == NULL);
+
+  /* Return the specific string if we have one.  */
+  if (fi->stop_string != NULL)
+    return fi->stop_string;
+
+  /* Return the generic string if we have nothing better.  */
+  return unwind_stop_reason_to_string (fi->stop_reason);
 }
 
 /* Return the enum symbol name of REASON as a string, to use in debug

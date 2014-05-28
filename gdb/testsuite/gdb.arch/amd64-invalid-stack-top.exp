@@ -45,27 +45,11 @@ if ![runto breakpt] {
 # Use 'bt no-filters' here as the python filters will raise their own
 # error during initialisation, the no-filters case is simpler.
 
-gdb_test "bt no-filters" "^bt no-filters\r\n#0 +$hex in func2 \\(\\)\r\nCannot access memory at address 0x\[0-9a-f\]+" \
+gdb_test "bt no-filters" "^bt no-filters\r\n#0 +$hex in func2 \\(\\)\r\nBacktrace stopped: Cannot access memory at address 0x\[0-9a-f\]+" \
 	 "first backtrace, with error message"
 
-send_gdb "bt no-filters\n"
-gdb_expect {
-    -re "^bt no-filters\r\n#0 +$hex in func2 \\(\\)\r\nCannot access memory at address 0x\[0-9a-f\]+\r\n$gdb_prompt $" {
-	# Currently gdb will not display the error message associated with
-	# the truncated backtrace after the first backtrace has been
-	# completed.  Ideally, we would do this.  If this case is ever hit
-	# then we have started to display the backtrace in all cases and
-	# the xpass should becomd a pass, and the previous pass case below
-	# should be removed, or changed to a fail.
-	xpass "second backtrace, with error message"
-    }
-    -re "^bt no-filters\r\n#0 +$hex in func2 \\(\\)\r\n$gdb_prompt $" {
-	pass "second backtrace, without error message"
-    }
-    timeout {
-	fail "second backtrace (timeout)"
-    }
-}
+gdb_test "bt no-filters" "^bt no-filters\r\n#0 +$hex in func2 \\(\\)\r\nBacktrace stopped: Cannot access memory at address 0x\[0-9a-f\]+" \
+	 "second backtrace, with error message"
 
 clean_restart ${binfile}
 
@@ -73,16 +57,9 @@ if ![runto breakpt] {
     return -1
 }
 
-set test_name "check mi -stack-info-depth command, first time"
-send_gdb "interpreter-exec mi \"-stack-info-depth\"\n"
-gdb_expect {
-    -re "\\^done,depth=\"1\"\r\n$gdb_prompt $" {
-	pass $test_name
-    }
-    -re "\\^error,msg=\"Cannot access memory at address $hex\"\r\n$gdb_prompt $" {
-	xfail $test_name
-    }
-}
+gdb_test "interpreter-exec mi \"-stack-info-depth\"" \
+    "\\^done,depth=\"1\"" \
+    "check mi -stack-info-depth command, first time"
 
 gdb_test "interpreter-exec mi \"-stack-info-depth\"" \
     "\\^done,depth=\"1\"" \
@@ -94,17 +71,9 @@ if ![runto breakpt] {
     return -1
 }
 
-set test_name "check mi -stack-list-frames command, first time"
-send_gdb "interpreter-exec mi \"-stack-list-frames\"\n"
-gdb_expect {
-    -re "\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"func2\"\}\\\]\r\n$gdb_prompt $" {
-	pass $test_name
-    }
-    -re "\\^error,msg=\"Cannot access memory at address $hex\"\r\n$gdb_prompt $" {
-	xfail $test_name
-    }
-}
-
+gdb_test "interpreter-exec mi \"-stack-list-frames\"" \
+    "\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"func2\"\}\\\]" \
+    "check mi -stack-list-frames command, first time"
 
 gdb_test "interpreter-exec mi \"-stack-list-frames\"" \
     "\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"func2\"\}\\\]" \

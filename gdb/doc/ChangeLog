@@ -1,3 +1,9 @@
+2014-05-30  Andrew Burgess  <aburgess@broadcom.com>
+
+	* guile.texi (Frames In Guile): Mention FRAME_UNWIND_MEMORY_ERROR.
+	* python.texi (Frames In Python): Mention
+	gdb.FRAME_UNWIND_MEMORY_ERROR.
+
 2014-05-29  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

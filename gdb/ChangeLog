@@ -1,5 +1,22 @@
 2014-05-30  Andrew Burgess  <aburgess@broadcom.com>
 
+	* frame.c (struct frame_info): Add stop_string field.
+	(get_prev_frame_always_1): Renamed from get_prev_frame_always.
+	(get_prev_frame_always): Old content moved into
+	get_prev_frame_always_1.  Call get_prev_frame_always_1 inside
+	TRY_CATCH, handle MEMORY_ERROR exceptions.
+	(frame_stop_reason_string): New function definition.
+	* frame.h (unwind_stop_reason_to_string): Extend comment to
+	mention frame_stop_reason_string.
+	(frame_stop_reason_string): New function declaration.
+	* stack.c (frame_info): Switch to frame_stop_reason_string.
+	(backtrace_command_1): Switch to frame_stop_reason_string.
+	* unwind_stop_reason.def: Add UNWIND_MEMORY_ERROR.
+	(LAST_ENTRY): Changed to UNWIND_MEMORY_ERROR.
+	* guile/lib/gdb.scm: Add FRAME_UNWIND_MEMORY_ERROR to export list.
+
+2014-05-30  Andrew Burgess  <aburgess@broadcom.com>
+
 	* frame.c (frame_stop_reason_string): Rename to ...
 	(unwind_stop_reason_to_string): this.
 	* frame.h (frame_stop_reason_string): Rename to ...

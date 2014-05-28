@@ -1529,7 +1529,7 @@ frame_info (char *addr_exp, int from_tty)
       reason = get_frame_unwind_stop_reason (fi);
       if (reason != UNWIND_NO_REASON)
 	printf_filtered (_(" Outermost frame: %s\n"),
-			 unwind_stop_reason_to_string (reason));
+			 frame_stop_reason_string (fi));
     }
   else if (get_frame_type (fi) == TAILCALL_FRAME)
     puts_filtered (" tail call frame");
@@ -1848,7 +1848,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
 	  reason = get_frame_unwind_stop_reason (trailing);
 	  if (reason >= UNWIND_FIRST_ERROR)
 	    printf_filtered (_("Backtrace stopped: %s\n"),
-			     unwind_stop_reason_to_string (reason));
+			     frame_stop_reason_string (trailing));
 	}
     }
 }
