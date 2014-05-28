@@ -1,3 +1,11 @@
+2014-05-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	* Makefile.am: Change all rules with ${GENSCRIPTS}
+	invocations to be just dependencies.
+	($(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES))
+	(run-genscripts): New rules.
+	* Makefile.in: Regenerate.
+
 2014-05-27  DJ Delorie  <dj@redhat.com>
 
 	* ld/ldemul.h (extra_map_file_text): New field.
