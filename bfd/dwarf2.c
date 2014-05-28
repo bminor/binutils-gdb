@@ -1994,6 +1994,7 @@ lookup_address_in_function_table (struct comp_unit *unit,
 {
   struct funcinfo* each_func;
   struct funcinfo* best_fit = NULL;
+  bfd_vma best_fit_len = 0;
   struct arange *arange;
 
   for (each_func = unit->function_table;
@@ -2007,9 +2008,11 @@ lookup_address_in_function_table (struct comp_unit *unit,
 	  if (addr >= arange->low && addr < arange->high)
 	    {
 	      if (!best_fit
-		  || (arange->high - arange->low
-		      < best_fit->arange.high - best_fit->arange.low))
-		best_fit = each_func;
+		  || arange->high - arange->low < best_fit_len)
+		{
+		  best_fit = each_func;
+		  best_fit_len = arange->high - arange->low;
+		}
 	    }
 	}
     }
@@ -2038,6 +2041,7 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 {
   struct funcinfo* each_func;
   struct funcinfo* best_fit = NULL;
+  bfd_vma best_fit_len = 0;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
   asection *sec = bfd_get_section (sym);
@@ -2056,9 +2060,11 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 	      && each_func->name
 	      && strcmp (name, each_func->name) == 0
 	      && (!best_fit
-		  || (arange->high - arange->low
-		      < best_fit->arange.high - best_fit->arange.low)))
-	    best_fit = each_func;
+		  || arange->high - arange->low < best_fit_len))
+	    {
+	      best_fit = each_func;
+	      best_fit_len = arange->high - arange->low;
+	    }
 	}
     }
 
@@ -3173,6 +3179,7 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 {
   struct funcinfo* each_func;
   struct funcinfo* best_fit = NULL;
+  bfd_vma best_fit_len = 0;
   struct info_list_node *node;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
@@ -3191,9 +3198,11 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 	      && addr >= arange->low
 	      && addr < arange->high
 	      && (!best_fit
-		  || (arange->high - arange->low
-		      < best_fit->arange.high - best_fit->arange.low)))
-	    best_fit = each_func;
+		  || arange->high - arange->low < best_fit_len))
+	    {
+	      best_fit = each_func;
+	      best_fit_len = arange->high - arange->low;
+	    }
 	}
     }
 

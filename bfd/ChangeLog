@@ -1,3 +1,10 @@
+2014-05-28  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf2.c (lookup_address_in_function_table): Add best_fit_len
+	to keep the length of the best fit range.
+	(lookup_symbol_in_function_table, info_hash_lookup_funcinfo):
+	Likewise.
+
 2014-05-27  DJ Delorie  <dj@redhat.com>
 
 	* bfd/elf32-rx.c (get_symbol_value_maybe): New.
