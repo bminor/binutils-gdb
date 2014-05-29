@@ -1780,6 +1780,7 @@ resume (int step, enum gdb_signal sig)
   CORE_ADDR pc = regcache_read_pc (regcache);
   struct address_space *aspace = get_regcache_aspace (regcache);
   ptid_t resume_ptid;
+  int hw_step = step;
 
   QUIT;
 
@@ -1799,7 +1800,7 @@ resume (int step, enum gdb_signal sig)
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog,
 			    "infrun: resume : clear step\n");
-      step = 0;
+      hw_step = 0;
     }
 
   if (debug_infrun)
@@ -1844,7 +1845,7 @@ a command like `return' or `jump' to continue execution."));
      step software breakpoint.  */
   if (use_displaced_stepping (gdbarch)
       && (tp->control.trap_expected
-	  || (step && gdbarch_software_single_step_p (gdbarch)))
+	  || (hw_step && gdbarch_software_single_step_p (gdbarch)))
       && sig == GDB_SIGNAL_0
       && !current_inferior ()->waiting_for_vfork_done)
     {
@@ -1854,11 +1855,14 @@ a command like `return' or `jump' to continue execution."));
 	{
 	  /* Got placed in displaced stepping queue.  Will be resumed
 	     later when all the currently queued displaced stepping
-	     requests finish.  The thread is not executing at this point,
-	     and the call to set_executing will be made later.  But we
-	     need to call set_running here, since from frontend point of view,
-	     the thread is running.  */
-	  set_running (inferior_ptid, 1);
+	     requests finish.  The thread is not executing at this
+	     point, and the call to set_executing will be made later.
+	     But we need to call set_running here, since from the
+	     user/frontend's point of view, threads were set running.
+	     Unless we're calling an inferior function, as in that
+	     case we pretend the inferior doesn't run at all.  */
+	  if (!tp->control.in_infcall)
+	    set_running (user_visible_resume_ptid (step), 1);
 	  discard_cleanups (old_cleanups);
 	  return;
 	}
@@ -1868,8 +1872,8 @@ a command like `return' or `jump' to continue execution."));
       pc = regcache_read_pc (get_thread_regcache (inferior_ptid));
 
       displaced = get_displaced_stepping_state (ptid_get_pid (inferior_ptid));
-      step = gdbarch_displaced_step_hw_singlestep (gdbarch,
-						   displaced->step_closure);
+      hw_step = gdbarch_displaced_step_hw_singlestep (gdbarch,
+						      displaced->step_closure);
     }
 
   /* Do we need to do it the hard way, w/temp breakpoints?  */
@@ -1932,6 +1936,14 @@ a command like `return' or `jump' to continue execution."));
      by assuming everything will be resumed, than narrow the set
      by applying increasingly restricting conditions.  */
   resume_ptid = user_visible_resume_ptid (step);
+
+  /* Even if RESUME_PTID is a wildcard, and we end up resuming less
+     (e.g., we might need to step over a breakpoint), from the
+     user/frontend's point of view, all threads in RESUME_PTID are now
+     running.  Unless we're calling an inferior function, as in that
+     case pretend we inferior doesn't run at all.  */
+  if (!tp->control.in_infcall)
+    set_running (resume_ptid, 1);
 
   /* Maybe resume a single thread after all.  */
   if ((step || singlestep_breakpoints_inserted_p)
@@ -6188,8 +6200,18 @@ normal_stop (void)
   if (has_stack_frames () && !stop_stack_dummy)
     set_current_sal_from_frame (get_current_frame ());
 
-  /* Let the user/frontend see the threads as stopped.  */
-  do_cleanups (old_chain);
+  /* Let the user/frontend see the threads as stopped, but do nothing
+     if the thread was running an infcall.  We may be e.g., evaluating
+     a breakpoint condition.  In that case, the thread had state
+     THREAD_RUNNING before the infcall, and shall remain set to
+     running, all without informing the user/frontend about state
+     transition changes.  If this is actually a call command, then the
+     thread was originally already stopped, so there's no state to
+     finish either.  */
+  if (target_has_execution && inferior_thread ()->control.in_infcall)
+    discard_cleanups (old_chain);
+  else
+    do_cleanups (old_chain);
 
   /* Look up the hook_stop and run it (CLI internally handles problem
      of stop_command's pre-hook not existing).  */

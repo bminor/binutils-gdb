@@ -1,3 +1,12 @@
+2014-05-29  Pedro Alves  <palves@redhat.com>
+	    Hui Zhu  <hui@codesourcery.com>
+
+	PR PR15693
+	* gdb.mi/mi-condbreak-call-thr-state-mt.c: New file.
+	* gdb.mi/mi-condbreak-call-thr-state-st.c: New file.
+	* gdb.mi/mi-condbreak-call-thr-state.c: New file.
+	* gdb.mi/mi-condbreak-call-thr-state.exp: New file.
+
 2014-05-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* config/monitor.exp (gdb_target_monitor): Replace use of

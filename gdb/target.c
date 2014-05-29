@@ -2150,8 +2150,9 @@ target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 			gdb_signal_to_name (signal));
 
   registers_changed_ptid (ptid);
+  /* We only set the internal executing state here.  The user/frontend
+     running state is set at a higher level.  */
   set_executing (ptid, 1);
-  set_running (ptid, 1);
   clear_inline_frame_state (ptid);
 }
 

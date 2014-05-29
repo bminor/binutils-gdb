@@ -1,3 +1,14 @@
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
+	PR PR15693
+	* infrun.c (resume): Determine how much to resume depending on
+	whether the caller wanted a step, not whether we can hardware step
+	the target.  Mark all threads that we intend to run as running,
+	unless we're calling an inferior function.
+	(normal_stop): If the thread is running an infcall, don't finish
+	thread state.
+	* target.c (target_resume): Don't mark threads as running here.
+
 2014-05-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* serial.c (_initialize_serial): Remove support for
