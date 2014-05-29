@@ -1,5 +1,22 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/15713
+	* linux-nat.c (linux_nat_resume_callback): Rename the second
+	parameter to 'except'.  Skip LP if it points to EXCEPT.
+	(linux_nat_resume): Don't mark the event lwp as not stopped
+	before resuming sibling lwps.  Instead ask
+	linux_nat_resume_callback to skip the event lwp.  Mark it as not
+	stopped after actually resuming it.
+	(linux_handle_syscall_trap): Mark the lwp as not stopped after
+	resuming it.
+	(wait_lwp): Mark the lwp as stopped here.
+	(stop_wait_callback): Mark the lwp as not stopped right after
+	resuming it.  Don't mark lwps as stopped here.
+	(linux_nat_filter_event): Mark the lwp as stopped earlier.
+	(linux_nat_wait_1): Don't mark dead lwps as stopped here.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
 	PR PR15693
 	* infrun.c (resume): Determine how much to resume depending on
 	whether the caller wanted a step, not whether we can hardware step
