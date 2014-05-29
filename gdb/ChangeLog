@@ -1,4 +1,9 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
+
+	* infcall.c (run_inferior_call): Don't check whether the current
+	thread is running after the proceed call.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Mention "maint set target-async", "set mi-async", and that
