@@ -71,6 +71,26 @@ set record btrace replay-memory-access (read-only|read-write)
 show record btrace replay-memory-access
   Control what memory accesses are allowed during replay.
 
+maint set target-async (on|off)
+maint show target-async
+  This controls whether GDB targets operate in syncronous or
+  asyncronous mode.  Normally the default is asyncronous, if it is
+  available; but this can be changed to more easily debug problems
+  occurring only in syncronous mode.
+
+set mi-async (on|off)
+show mi-async
+  Control whether MI asynchronous mode is preferred.  This supersedes
+  "set target-async" of previous GDB versions.
+
+* "set target-async" is deprecated as a CLI option and is now an alias
+  for "set mi-async" (only puts MI into async mode).
+
+* Background execution commands (e.g., "c&", "s&", etc.) are now
+  possible ``out of the box'' if the target supports them.  Previously
+  the user would need to explicitly enable the possibility with the
+  "set target-async on" command.
+
 * New features in the GDB remote stub, GDBserver
 
   ** New option --debug-format=option1[,option2,...] allows one to add
@@ -144,6 +164,17 @@ PowerPC64 GNU/Linux little-endian	powerpc64le-*-linux*
 * The commands "set remotebaud" and "show remotebaud" are no longer
   supported.  Use "set serial baud" and "show serial baud" (respectively)
   instead.
+
+* MI changes
+
+  ** A new option "-gdb-set mi-async" replaces "-gdb-set
+     target-async".  The latter is left as a deprecated alias of the
+     former for backward compatibility.  If the target supports it,
+     CLI background execution commands are now always possible by
+     default, independently of whether the frontend stated a
+     preference for asynchronous execution with "-gdb-set mi-async".
+     Previously "-gdb-set target-async off" affected both MI execution
+     commands and CLI execution commands.
 
 *** Changes in GDB 7.7
 

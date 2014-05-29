@@ -26,7 +26,6 @@ if [prepare_for_testing "failed to prepare for dprintf with non-stop" \
     return -1
 }
 
-gdb_test_no_output "set target-async on"
 gdb_test_no_output "set non-stop on"
 
 if ![runto main] {

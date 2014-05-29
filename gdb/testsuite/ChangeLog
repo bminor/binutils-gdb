@@ -1,4 +1,33 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/async-shell.exp: Don't enable target-async.
+	* gdb.base/async.exp
+	* gdb.base/corefile.exp (corefile_test_attach): Remove 'async'
+	parameter.  Adjust.
+	(top level): Don't test with "target-async".
+	* gdb.base/dprintf-non-stop.exp: Don't enable target-async.
+	* gdb.base/gdb-sigterm.exp: Don't test with "target-async".
+	* gdb.base/inferior-died.exp: Don't enable target-async.
+	* gdb.base/interrupt-noterm.exp: Likewise.
+	* gdb.mi/mi-async.exp: Use "mi-async" instead of "target-async".
+	* gdb.mi/mi-nonstop-exit.exp: Likewise.
+	* gdb.mi/mi-nonstop.exp: Likewise.
+	* gdb.mi/mi-ns-stale-regcache.exp: Likewise.
+	* gdb.mi/mi-nsintrall.exp: Likewise.
+	* gdb.mi/mi-nsmoribund.exp: Likewise.
+	* gdb.mi/mi-nsthrexec.exp: Likewise.
+	* gdb.mi/mi-watch-nonstop.exp: Likewise.
+	* gdb.multi/watchpoint-multi.exp: Adjust comment.
+	* gdb.python/py-evsignal.exp: Don't enable target-async.
+	* gdb.python/py-evthreads.exp: Likewise.
+	* gdb.python/py-prompt.exp: Likewise.
+	* gdb.reverse/break-precsave.exp: Don't test with "target-async".
+	* gdb.server/solib-list.exp: Don't enable target-async.
+	* gdb.threads/thread-specific-bp.exp: Likewise.
+	* lib/mi-support.exp: Adjust to use mi-async.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13860
 	* gdb.mi/mi-cli.exp: Always expect "end-stepping-range" stop

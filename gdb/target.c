@@ -4105,16 +4105,17 @@ maintenance_print_target_stack (char *cmd, int from_tty)
     }
 }
 
-/* Controls if async mode is permitted.  */
-int target_async_permitted = 0;
+/* Controls if targets can report that they can/are async.  This is
+   just for maintainers to use when debugging gdb.  */
+int target_async_permitted = 1;
 
 /* The set command writes to this variable.  If the inferior is
    executing, target_async_permitted is *not* updated.  */
-static int target_async_permitted_1 = 0;
+static int target_async_permitted_1 = 1;
 
 static void
-set_target_async_command (char *args, int from_tty,
-			  struct cmd_list_element *c)
+maint_set_target_async_command (char *args, int from_tty,
+				struct cmd_list_element *c)
 {
   if (have_live_inferiors ())
     {
@@ -4126,9 +4127,9 @@ set_target_async_command (char *args, int from_tty,
 }
 
 static void
-show_target_async_command (struct ui_file *file, int from_tty,
-			   struct cmd_list_element *c,
-			   const char *value)
+maint_show_target_async_command (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c,
+				 const char *value)
 {
   fprintf_filtered (file,
 		    _("Controlling the inferior in "
@@ -4233,10 +4234,10 @@ result in significant performance improvement for remote targets."),
 Set whether gdb controls the inferior in asynchronous mode."), _("\
 Show whether gdb controls the inferior in asynchronous mode."), _("\
 Tells gdb whether to control the inferior in asynchronous mode."),
-			   set_target_async_command,
-			   show_target_async_command,
-			   &setlist,
-			   &showlist);
+			   maint_set_target_async_command,
+			   maint_show_target_async_command,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 
   add_setshow_boolean_cmd ("may-write-registers", class_support,
 			   &may_write_registers_1, _("\

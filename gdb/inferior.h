@@ -164,6 +164,13 @@ extern void notice_new_inferior (ptid_t, int, int);
 extern struct value *get_return_value (struct value *function,
                                        struct type *value_type);
 
+/* Prepare for execution command.  TARGET is the target that will run
+   the command.  BACKGROUND determines whether this is a foreground
+   (synchronous) or background (asynchronous) command.  */
+
+extern void prepare_execution_command (struct target_ops *target,
+				       int background);
+
 /* Whether to start up the debuggee under a shell.
 
    If startup-with-shell is set, GDB's "run" will attempt to start up

@@ -85,6 +85,7 @@ static void mi_breakpoint_modified (struct breakpoint *b);
 static void mi_command_param_changed (const char *param, const char *value);
 static void mi_memory_changed (struct inferior *inf, CORE_ADDR memaddr,
 			       ssize_t len, const bfd_byte *myaddr);
+static void mi_on_sync_execution_done (void);
 
 static int report_initial_inferior (struct inferior *inf, void *closure);
 
@@ -158,6 +159,7 @@ mi_interpreter_init (struct interp *interp, int top_level)
       observer_attach_breakpoint_modified (mi_breakpoint_modified);
       observer_attach_command_param_changed (mi_command_param_changed);
       observer_attach_memory_changed (mi_memory_changed);
+      observer_attach_sync_execution_done (mi_on_sync_execution_done);
 
       /* The initial inferior is created before this function is
 	 called, so we need to report it explicitly.  Use iteration in
@@ -304,6 +306,28 @@ mi_execute_command_wrapper (const char *cmd)
   mi_execute_command (cmd, stdin == instream);
 }
 
+/* Observer for the synchronous_command_done notification.  */
+
+static void
+mi_on_sync_execution_done (void)
+{
+  /* MI generally prints a prompt after a command, indicating it's
+     ready for further input.  However, due to an historical wart, if
+     MI async, and a (CLI) synchronous command was issued, then we
+     will print the prompt right after printing "^running", even if we
+     cannot actually accept any input until the target stops.  See
+     mi_on_resume.  However, if the target is async but MI is sync,
+     then we need to output the MI prompt now, to replicate gdb's
+     behavior when neither the target nor MI are async.  (Note this
+     observer is only called by the asynchronous target event handling
+     code.)  */
+  if (!mi_async_p ())
+    {
+      fputs_unfiltered ("(gdb) \n", raw_stdout);
+      gdb_flush (raw_stdout);
+    }
+}
+
 /* mi_execute_command_wrapper wrapper suitable for INPUT_HANDLER.  */
 
 static void
@@ -311,8 +335,24 @@ mi_execute_command_input_handler (char *cmd)
 {
   mi_execute_command_wrapper (cmd);
 
-  fputs_unfiltered ("(gdb) \n", raw_stdout);
-  gdb_flush (raw_stdout);
+  /* MI generally prints a prompt after a command, indicating it's
+     ready for further input.  However, due to an historical wart, if
+     MI is async, and a synchronous command was issued, then we will
+     print the prompt right after printing "^running", even if we
+     cannot actually accept any input until the target stops.  See
+     mi_on_resume.
+
+     If MI is not async, then we print the prompt when the command
+     finishes.  If the target is sync, that means output the prompt
+     now, as in that case executing a command doesn't return until the
+     command is done.  However, if the target is async, we go back to
+     the event loop and output the prompt in the
+     'synchronous_command_done' observer.  */
+  if (!target_is_async_p () || !sync_execution)
+    {
+      fputs_unfiltered ("(gdb) \n", raw_stdout);
+      gdb_flush (raw_stdout);
+    }
 }
 
 static void
@@ -928,10 +968,10 @@ mi_on_resume (ptid_t ptid)
       running_result_record_printed = 1;
       /* This is what gdb used to do historically -- printing prompt even if
 	 it cannot actually accept any input.  This will be surely removed
-	 for MI3, and may be removed even earler.  */
-      /* FIXME: review the use of target_is_async_p here -- is that
-	 what we want? */
-      if (!target_is_async_p ())
+	 for MI3, and may be removed even earlier.  SYNC_EXECUTION is
+	 checked here because we only need to emit a prompt if a
+	 synchronous command was issued when the target is async.  */
+      if (!target_is_async_p () || sync_execution)
 	fputs_unfiltered ("(gdb) \n", raw_stdout);
     }
   gdb_flush (raw_stdout);

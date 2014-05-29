@@ -1,4 +1,38 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Mention "maint set target-async", "set mi-async", and that
+	background execution commands are now always available.
+	* target.h (target_async_permitted): Update comment.
+	* target.c (target_async_permitted, target_async_permitted_1):
+	Default to 1.
+	(set_target_async_command): Rename to ...
+	(maint_set_target_async_command): ... this.
+	(show_target_async_command): Rename to ...
+	(maint_show_target_async_command): ... this.
+	(_initialize_target): Adjust.
+	* infcmd.c (prepare_execution_command): Make extern.
+	* inferior.h (prepare_execution_command): Declare.
+	* infrun.c (set_observer_mode): Leave target async alone.
+	* mi/mi-interp.c (mi_interpreter_init): Install
+	mi_on_sync_execution_done as sync_execution_done observer.
+	(mi_on_sync_execution_done): New function.
+	(mi_execute_command_input_handler): Don't print the prompt if we
+	just started a synchronous command with an async target.
+	(mi_on_resume): Check sync_execution before printing prompt.
+	* mi/mi-main.h (mi_async_p): Declare.
+	* mi/mi-main.c: Include gdbcmd.h.
+	(mi_async_p): New function.
+	(mi_async, mi_async_1): New globals.
+	(set_mi_async_command, show_mi_async_command, mi_async): New
+	functions.
+	(exec_continue): Call prepare_execution_command.
+	(run_one_inferior, mi_cmd_exec_run, mi_cmd_list_target_features)
+	(mi_execute_async_cli_command): Use mi_async_p.
+	(_initialize_mi_main): Install "set mi-async".  Make
+	"target-async" a deprecated alias.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
 
 	* cli/cli-interp.c (cli_interpreter_display_prompt_p): Delete.
 	(_initialize_cli_interp): Adjust.

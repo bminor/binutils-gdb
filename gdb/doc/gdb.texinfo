@@ -5778,9 +5778,6 @@ To enter non-stop mode, use this sequence of commands before you run
 or attach to your program:
 
 @smallexample
-# Enable the async interface.
-set target-async 1
-
 # If using the CLI, pagination breaks non-stop.
 set pagination off
 
@@ -5849,21 +5846,6 @@ foreground (synchronous) behavior, and a background
 the program to report that some thread has stopped before prompting for
 another command.  In background execution, @value{GDBN} immediately gives
 a command prompt so that you can issue other commands while your program runs.
-
-You need to explicitly enable asynchronous mode before you can use
-background execution commands.  You can use these commands to
-manipulate the asynchronous mode setting:
-
-@table @code
-@kindex set target-async
-@item set target-async on
-Enable asynchronous mode.
-@item set target-async off
-Disable asynchronous mode.
-@kindex show target-async
-@item show target-async
-Show the current target-async setting.
-@end table
 
 If the target doesn't support async mode, @value{GDBN} issues an error
 message if you attempt to use the background execution commands.
@@ -24818,11 +24800,36 @@ On some targets, @value{GDBN} is capable of processing MI commands
 even while the target is running.  This is called @dfn{asynchronous
 command execution} (@pxref{Background Execution}).  The frontend may
 specify a preferrence for asynchronous execution using the
-@code{-gdb-set target-async 1} command, which should be emitted before
+@code{-gdb-set mi-async 1} command, which should be emitted before
 either running the executable or attaching to the target.  After the
 frontend has started the executable or attached to the target, it can
 find if asynchronous execution is enabled using the
 @code{-list-target-features} command.
+
+@table @code
+@item -gdb-set mi-async on
+@item -gdb-set mi-async off
+Set whether MI is in asynchronous mode.
+
+When @code{off}, which is the default, MI execution commands (e.g.,
+@code{-exec-continue}) are foreground commands, and @value{GDBN} waits
+for the program to stop before processing further commands.
+
+When @code{on}, MI execution commands are background execution
+commands (e.g., @code{-exec-continue} becomes the equivalent of the
+@code{c&} CLI command), and so @value{GDBN} is capable of processing
+MI commands even while the target is running.
+
+@item -gdb-show mi-async
+Show whether MI asynchronous mode is enabled.
+@end table
+
+Note: In @value{GDBN} version 7.7 and earlier, this option was called
+@code{target-async} instead of @code{mi-async}, and it had the effect
+of both putting MI in asynchronous mode and making CLI background
+commands possible.  CLI background commands are now always possible
+``out of the box'' if the target supports them.  The old spelling is
+kept as a deprecated alias for backwards compatibility.
 
 Even if @value{GDBN} can accept a command while target is running,
 many commands that access the target do not work when the target is
@@ -33531,6 +33538,15 @@ triggers a hardware-assisted breakpoint or watchpoint.
 Control whether to show all non zero areas within a 1k block starting
 at thread local base, when using the @samp{info w32 thread-information-block}
 command.
+
+@kindex maint set target-async
+@kindex maint show target-async
+@item maint set target-async
+@itemx maint show target-async
+This controls whether @value{GDBN} targets operate in synchronous or
+asynchronous mode (@pxref{Background Execution}).  Normally the
+default is asynchronous, if it is available; but this can be changed
+to more easily debug problems occurring only in synchronous mode.
 
 @kindex maint set per-command
 @kindex maint show per-command

@@ -25,8 +25,6 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
     return -1
 }
 
-gdb_test_no_output "set target-async on"
-
 #
 # set it up at a breakpoint so we can play with it
 #

@@ -1,4 +1,13 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Non-Stop Mode): Remove "set target-async 1"
+	from example.
+	(Asynchronous and non-stop modes): Document '-gdb-set mi-async'.
+	Mention that target-async is now deprecated.
+	(Maintenance Commands): Document maint set/show target-async.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
 
 	* observer.texi (sync_execution_done, command_error): New
 	subjects.

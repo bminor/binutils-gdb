@@ -497,11 +497,9 @@ Start it from the beginning? ")))
     }
 }
 
-/* Prepare for execution command.  TARGET is the target that will run
-   the command.  BACKGROUND determines whether this is a foreground
-   (synchronous) or background (asynchronous) command.  */
+/* See inferior.h.  */
 
-static void
+void
 prepare_execution_command (struct target_ops *target, int background)
 {
   /* If we get a request for running in the bg but the target
