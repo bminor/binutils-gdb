@@ -1,3 +1,9 @@
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13860
+	* observer.texi (signal_received, end_stepping_range)
+	(signal_exited, exited, no_history): New observer subjects.
+
 2014-05-26  Andy Wingo  <wingo@igalia.com>
 
 	* guile.texi (GDB Scheme Data Types): Remove documentation for

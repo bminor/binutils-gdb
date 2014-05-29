@@ -120,6 +120,28 @@ extern int stepping_past_instruction_at (struct address_space *aspace,
 extern void set_step_info (struct frame_info *frame,
 			   struct symtab_and_line sal);
 
+/* Several print_*_reason helper functions to print why the inferior
+   has stopped to the passed in UIOUT.  */
+
+/* Signal received, print why the inferior has stopped.  */
+extern void print_signal_received_reason (struct ui_out *uiout,
+					  enum gdb_signal siggnal);
+
+/* Print why the inferior has stopped.  We are done with a
+   step/next/si/ni command, print why the inferior has stopped.  */
+extern void print_end_stepping_range_reason (struct ui_out *uiout);
+
+/* The inferior was terminated by a signal, print why it stopped.  */
+extern void print_signal_exited_reason (struct ui_out *uiout,
+					enum gdb_signal siggnal);
+
+/* The inferior program is finished, print why it stopped.  */
+extern void print_exited_reason (struct ui_out *uiout, int exitstatus);
+
+/* Reverse execution: target ran out of history info, print why the
+   inferior has stopped.  */
+extern void print_no_history_reason (struct ui_out *uiout);
+
 extern void print_stop_event (struct target_waitstatus *ws);
 
 extern int signal_stop_state (int);

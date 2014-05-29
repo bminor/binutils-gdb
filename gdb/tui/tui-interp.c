@@ -30,10 +30,17 @@
 #include "tui/tui.h"
 #include "tui/tui-io.h"
 #include "exceptions.h"
+#include "infrun.h"
+#include "observer.h"
+
+static struct ui_out *tui_ui_out (struct interp *self);
 
 /* Set to 1 when the TUI mode must be activated when we first start
    gdb.  */
 static int tui_start_enabled = 0;
+
+/* The TUI interpreter.  */
+static struct interp *tui_interp;
 
 /* Cleanup the tui before exiting.  */
 
@@ -47,6 +54,55 @@ tui_exit (void)
 
 /* True if TUI is the top-level interpreter.  */
 static int tui_is_toplevel = 0;
+
+/* Observers for several run control events.  If the interpreter is
+   quiet (i.e., another interpreter is being run with
+   interpreter-exec), print nothing.  */
+
+/* Observer for the signal_received notification.  */
+
+static void
+tui_on_signal_received (enum gdb_signal siggnal)
+{
+  if (!interp_quiet_p (tui_interp))
+    print_signal_received_reason (tui_ui_out (tui_interp), siggnal);
+}
+
+/* Observer for the end_stepping_range notification.  */
+
+static void
+tui_on_end_stepping_range (void)
+{
+  if (!interp_quiet_p (tui_interp))
+    print_end_stepping_range_reason (tui_ui_out (tui_interp));
+}
+
+/* Observer for the signal_exited notification.  */
+
+static void
+tui_on_signal_exited (enum gdb_signal siggnal)
+{
+  if (!interp_quiet_p (tui_interp))
+    print_signal_exited_reason (tui_ui_out (tui_interp), siggnal);
+}
+
+/* Observer for the exited notification.  */
+
+static void
+tui_on_exited (int exitstatus)
+{
+  if (!interp_quiet_p (tui_interp))
+    print_exited_reason (tui_ui_out (tui_interp), exitstatus);
+}
+
+/* Observer for the no_history notification.  */
+
+static void
+tui_on_no_history (void)
+{
+  if (!interp_quiet_p (tui_interp))
+    print_no_history_reason (tui_ui_out (tui_interp));
+}
 
 /* These implement the TUI interpreter.  */
 
@@ -64,6 +120,13 @@ tui_init (struct interp *self, int top_level)
   tui_initialize_win ();
   if (ui_file_isatty (gdb_stdout))
     tui_initialize_readline ();
+
+  /* If changing this, remember to update cli-interp.c as well.  */
+  observer_attach_signal_received (tui_on_signal_received);
+  observer_attach_end_stepping_range (tui_on_end_stepping_range);
+  observer_attach_signal_exited (tui_on_signal_exited);
+  observer_attach_exited (tui_on_exited);
+  observer_attach_no_history (tui_on_no_history);
 
   return NULL;
 }
@@ -156,7 +219,6 @@ _initialize_tui_interp (void)
     NULL,
     cli_command_loop
   };
-  struct interp *tui_interp;
 
   /* Create a default uiout builder for the TUI.  */
   tui_interp = interp_new (INTERP_TUI, &procs);

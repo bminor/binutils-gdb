@@ -56,7 +56,13 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
+
+static void mi_on_signal_received (enum gdb_signal siggnal);
+static void mi_on_end_stepping_range (void);
+static void mi_on_signal_exited (enum gdb_signal siggnal);
+static void mi_on_exited (int exitstatus);
 static void mi_on_normal_stop (struct bpstats *bs, int print_frame);
+static void mi_on_no_history (void);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t, int silent);
@@ -118,7 +124,16 @@ mi_interpreter_init (struct interp *interp, int top_level)
   else
     gdb_assert_not_reached ("unhandled MI version");
 
-  mi->uiout = mi_out_new (mi_version);
+  mi->mi_uiout = mi_out_new (mi_version);
+  mi->cli_uiout = cli_out_new (mi->out);
+
+  /* There are installed even if MI is not the top level interpreter.
+     The callbacks themselves decide whether to be skipped.  */
+  observer_attach_signal_received (mi_on_signal_received);
+  observer_attach_end_stepping_range (mi_on_end_stepping_range);
+  observer_attach_signal_exited (mi_on_signal_exited);
+  observer_attach_exited (mi_on_exited);
+  observer_attach_no_history (mi_on_no_history);
 
   if (top_level)
     {
@@ -431,14 +446,111 @@ restore_current_uiout_cleanup (void *arg)
   current_uiout = saved_uiout;
 }
 
-/* Cleanup that destroys the a ui_out object.  */
+/* Return the MI interpreter, if it is active -- either because it's
+   the top-level interpreter or the interpreter executing the current
+   command.  Returns NULL if the MI interpreter is not being used.  */
+
+static struct interp *
+find_mi_interpreter (void)
+{
+  struct interp *interp;
+
+  interp = top_level_interpreter ();
+  if (ui_out_is_mi_like_p (interp_ui_out (interp)))
+    return interp;
+
+  interp = command_interp ();
+  if (ui_out_is_mi_like_p (interp_ui_out (interp)))
+    return interp;
+
+  return NULL;
+}
+
+/* Return the MI_INTERP structure of the active MI interpreter.
+   Returns NULL if MI is not active.  */
+
+static struct mi_interp *
+mi_interp_data (void)
+{
+  struct interp *interp = find_mi_interpreter ();
+
+  if (interp != NULL)
+    return interp_data (interp);
+  return NULL;
+}
+
+/* Observers for several run control events that print why the
+   inferior has stopped to both the the MI event channel and to the MI
+   console.  If the MI interpreter is not active, print nothing.  */
+
+/* Observer for the signal_received notification.  */
 
 static void
-ui_out_free_cleanup (void *arg)
+mi_on_signal_received (enum gdb_signal siggnal)
 {
-  struct ui_out *uiout = arg;
+  struct mi_interp *mi = mi_interp_data ();
 
-  ui_out_destroy (uiout);
+  if (mi == NULL)
+    return;
+
+  print_signal_received_reason (mi->mi_uiout, siggnal);
+  print_signal_received_reason (mi->cli_uiout, siggnal);
+}
+
+/* Observer for the end_stepping_range notification.  */
+
+static void
+mi_on_end_stepping_range (void)
+{
+  struct mi_interp *mi = mi_interp_data ();
+
+  if (mi == NULL)
+    return;
+
+  print_end_stepping_range_reason (mi->mi_uiout);
+  print_end_stepping_range_reason (mi->cli_uiout);
+}
+
+/* Observer for the signal_exited notification.  */
+
+static void
+mi_on_signal_exited (enum gdb_signal siggnal)
+{
+  struct mi_interp *mi = mi_interp_data ();
+
+  if (mi == NULL)
+    return;
+
+  print_signal_exited_reason (mi->mi_uiout, siggnal);
+  print_signal_exited_reason (mi->cli_uiout, siggnal);
+}
+
+/* Observer for the exited notification.  */
+
+static void
+mi_on_exited (int exitstatus)
+{
+  struct mi_interp *mi = mi_interp_data ();
+
+  if (mi == NULL)
+    return;
+
+  print_exited_reason (mi->mi_uiout, exitstatus);
+  print_exited_reason (mi->cli_uiout, exitstatus);
+}
+
+/* Observer for the no_history notification.  */
+
+static void
+mi_on_no_history (void)
+{
+  struct mi_interp *mi = mi_interp_data ();
+
+  if (mi == NULL)
+    return;
+
+  print_no_history_reason (mi->mi_uiout);
+  print_no_history_reason (mi->cli_uiout);
 }
 
 static void
@@ -506,16 +618,12 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	      struct mi_interp *mi = top_level_interpreter_data ();
 	      struct target_waitstatus last;
 	      ptid_t last_ptid;
-	      struct ui_out *cli_uiout;
 	      struct cleanup *old_chain;
 
-	      /* Sets the current uiout to a new temporary CLI uiout
-		 assigned to STREAM.  */
-	      cli_uiout = cli_out_new (mi->out);
-	      old_chain = make_cleanup (ui_out_free_cleanup, cli_uiout);
-
-	      make_cleanup (restore_current_uiout_cleanup, current_uiout);
-	      current_uiout = cli_uiout;
+	      /* Set the current uiout to CLI uiout temporarily.  */
+	      old_chain = make_cleanup (restore_current_uiout_cleanup,
+					current_uiout);
+	      current_uiout = mi->cli_uiout;
 
 	      get_last_target_status (&last_ptid, &last);
 	      print_stop_event (&last);
@@ -972,7 +1080,7 @@ mi_ui_out (struct interp *interp)
 {
   struct mi_interp *mi = interp_data (interp);
 
-  return mi->uiout;
+  return mi->mi_uiout;
 }
 
 /* Save the original value of raw_stdout here when logging, so we can

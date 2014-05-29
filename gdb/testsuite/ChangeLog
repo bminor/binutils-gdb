@@ -1,4 +1,10 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13860
+	* gdb.mi/mi-cli.exp: Always expect "end-stepping-range" stop
+	reason, even in sync mode.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
 	    Hui Zhu  <hui@codesourcery.com>
 
 	PR PR15693

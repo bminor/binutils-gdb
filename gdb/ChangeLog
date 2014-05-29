@@ -1,5 +1,52 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/13860
+	* cli/cli-interp.c: Include infrun.h and observer.h.
+	(cli_uiout, cli_interp): New globals.
+	(cli_on_signal_received, cli_on_end_stepping_range)
+	(cli_on_signal_exited, cli_on_exited, cli_on_no_history): New
+	functions.
+	(cli_interpreter_init): Install them as 'end_stepping_range',
+	'signal_received' 'signal_exited', 'exited' and 'no_history'
+	observers.
+	(_initialize_cli_interp): Remove cli_interp local.
+	* infrun.c (handle_inferior_event): Call the several stop reason
+	observers instead of printing the stop reason directly.
+	(end_stepping_range): New function.
+	(print_end_stepping_range_reason, print_signal_exited_reason)
+	(print_exited_reason, print_signal_received_reason)
+	(print_no_history_reason): Make static, and add an uiout
+	parameter.  Print to that instead of to CURRENT_UIOUT.
+	* infrun.h (print_end_stepping_range_reason)
+	(print_signal_exited_reason, print_exited_reason)
+	(print_signal_received_reason print_no_history_reason): New
+	declarations.
+	* mi/mi-common.h (struct mi_interp): Rename 'uiout' field to
+	'mi_uiout'.
+	<cli_uiout>: New field.
+	* mi/mi-interp.c (mi_interpreter_init): Adjust.  Create the new
+	uiout for CLI output.  Install 'signal_received',
+	'end_stepping_range', 'signal_exited', 'exited' and 'no_history'
+	observers.
+	(find_mi_interpreter, mi_interp_data, mi_on_signal_received)
+	(mi_on_end_stepping_range, mi_on_signal_exited, mi_on_exited)
+	(mi_on_no_history): New functions.
+	(ui_out_free_cleanup): Delete function.
+	(mi_on_normal_stop): Don't allocate a new uiout for CLI output,
+	instead use the one already stored in the MI interpreter data.
+	(mi_ui_out): Adjust.
+	* tui/tui-interp.c: Include infrun.h and observer.h.
+	(tui_interp): New global.
+	(tui_on_signal_received, tui_on_end_stepping_range)
+	(tui_on_signal_exited, tui_on_exited)
+	(tui_on_no_history): New functions.
+	(tui_init): Install them as 'end_stepping_range',
+	'signal_received' 'signal_exited', 'exited' and 'no_history'
+	observers.
+	(_initialize_tui_interp): Delete tui_interp local.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/15713
 	* linux-nat.c (linux_nat_resume_callback): Rename the second
 	parameter to 'except'.  Skip LP if it points to EXCEPT.

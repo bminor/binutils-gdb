@@ -25,21 +25,80 @@
 #include "top.h"		/* for "execute_command" */
 #include <string.h>
 #include "exceptions.h"
-
-struct ui_out *cli_uiout;
+#include "infrun.h"
+#include "observer.h"
 
 /* These are the ui_out and the interpreter for the console
    interpreter.  */
+struct ui_out *cli_uiout;
+static struct interp *cli_interp;
 
 /* Longjmp-safe wrapper for "execute_command".  */
 static struct gdb_exception safe_execute_command (struct ui_out *uiout,
 						  char *command, 
 						  int from_tty);
+
+/* Observers for several run control events.  If the interpreter is
+   quiet (i.e., another interpreter is being run with
+   interpreter-exec), print nothing.  */
+
+/* Observer for the signal_received notification.  */
+
+static void
+cli_on_signal_received (enum gdb_signal siggnal)
+{
+  if (!interp_quiet_p (cli_interp))
+    print_signal_received_reason (cli_uiout, siggnal);
+}
+
+/* Observer for the end_stepping_range notification.  */
+
+static void
+cli_on_end_stepping_range (void)
+{
+  if (!interp_quiet_p (cli_interp))
+    print_end_stepping_range_reason (cli_uiout);
+}
+
+/* Observer for the signalled notification.  */
+
+static void
+cli_on_signal_exited (enum gdb_signal siggnal)
+{
+  if (!interp_quiet_p (cli_interp))
+    print_signal_exited_reason (cli_uiout, siggnal);
+}
+
+/* Observer for the exited notification.  */
+
+static void
+cli_on_exited (int exitstatus)
+{
+  if (!interp_quiet_p (cli_interp))
+    print_exited_reason (cli_uiout, exitstatus);
+}
+
+/* Observer for the no_history notification.  */
+
+static void
+cli_on_no_history (void)
+{
+  if (!interp_quiet_p (cli_interp))
+    print_no_history_reason (cli_uiout);
+}
+
 /* These implement the cli out interpreter: */
 
 static void *
 cli_interpreter_init (struct interp *self, int top_level)
 {
+  /* If changing this, remember to update tui-interp.c as well.  */
+  observer_attach_end_stepping_range (cli_on_end_stepping_range);
+  observer_attach_signal_received (cli_on_signal_received);
+  observer_attach_signal_exited (cli_on_signal_exited);
+  observer_attach_exited (cli_on_exited);
+  observer_attach_no_history (cli_on_no_history);
+
   return NULL;
 }
 
@@ -155,7 +214,6 @@ _initialize_cli_interp (void)
     NULL,                       /* set_logging_proc */
     cli_command_loop            /* command_loop_proc */
   };
-  struct interp *cli_interp;
 
   /* Create a default uiout builder for the CLI.  */
   cli_uiout = cli_out_new (gdb_stdout);

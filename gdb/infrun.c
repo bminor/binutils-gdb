@@ -88,15 +88,7 @@ static int currently_stepping (struct thread_info *tp);
 
 static void xdb_handle_command (char *args, int from_tty);
 
-static void print_exited_reason (int exitstatus);
-
-static void print_signal_exited_reason (enum gdb_signal siggnal);
-
-static void print_no_history_reason (void);
-
-static void print_signal_received_reason (enum gdb_signal siggnal);
-
-static void print_end_stepping_range_reason (void);
+static void end_stepping_range (void);
 
 void _initialize_infrun (void);
 
@@ -3540,7 +3532,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  /* Support the --return-child-result option.  */
 	  return_child_result_value = ecs->ws.value.integer;
 
-	  print_exited_reason (ecs->ws.value.integer);
+	  observer_notify_exited (ecs->ws.value.integer);
 	}
       else
 	{
@@ -3569,7 +3561,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 Cannot fill $_exitsignal with the correct signal number.\n"));
 	    }
 
-	  print_signal_exited_reason (ecs->ws.value.sig);
+	  observer_notify_signal_exited (ecs->ws.value.sig);
 	}
 
       gdb_flush (gdb_stdout);
@@ -3837,7 +3829,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  singlestep_breakpoints_inserted_p = 0;
 	}
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
-      print_no_history_reason ();
+      observer_notify_no_history ();
       stop_stepping (ecs);
       return;
     }
@@ -4225,10 +4217,10 @@ handle_signal_stop (struct execution_control_state *ecs)
 
       if (signal_print[ecs->event_thread->suspend.stop_signal])
 	{
+	  /* The signal table tells us to print about this signal.  */
 	  printed = 1;
 	  target_terminal_ours_for_output ();
-	  print_signal_received_reason
-				     (ecs->event_thread->suspend.stop_signal);
+	  observer_notify_signal_received (ecs->event_thread->suspend.stop_signal);
 	}
       /* Always stop on signals if we're either just gaining control
 	 of the program, or the user explicitly requested this thread
@@ -4472,7 +4464,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	delete_step_resume_breakpoint (ecs->event_thread);
 
 	ecs->event_thread->control.stop_step = 1;
-	print_end_stepping_range_reason ();
+	end_stepping_range ();
 	stop_stepping (ecs);
       }
       return;
@@ -4637,7 +4629,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  && execution_direction == EXEC_REVERSE)
 	{
 	  ecs->event_thread->control.stop_step = 1;
-	  print_end_stepping_range_reason ();
+	  end_stepping_range ();
 	  stop_stepping (ecs);
 	}
       else
@@ -4791,7 +4783,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	     well.  FENN */
 	  /* And this works the same backward as frontward.  MVS */
 	  ecs->event_thread->control.stop_step = 1;
-	  print_end_stepping_range_reason ();
+	  end_stepping_range ();
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -4907,7 +4899,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  && step_stop_if_no_debug)
 	{
 	  ecs->event_thread->control.stop_step = 1;
-	  print_end_stepping_range_reason ();
+	  end_stepping_range ();
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -5003,7 +4995,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	     is set, we stop the step so that the user has a chance to
 	     switch in assembly mode.  */
 	  ecs->event_thread->control.stop_step = 1;
-	  print_end_stepping_range_reason ();
+	  end_stepping_range ();
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -5024,7 +5016,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepi/nexti\n");
       ecs->event_thread->control.stop_step = 1;
-      print_end_stepping_range_reason ();
+      end_stepping_range ();
       stop_stepping (ecs);
       return;
     }
@@ -5038,7 +5030,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: no line number info\n");
       ecs->event_thread->control.stop_step = 1;
-      print_end_stepping_range_reason ();
+      end_stepping_range ();
       stop_stepping (ecs);
       return;
     }
@@ -5071,7 +5063,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	    step_into_inline_frame (ecs->ptid);
 
 	  ecs->event_thread->control.stop_step = 1;
-	  print_end_stepping_range_reason ();
+	  end_stepping_range ();
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -5086,7 +5078,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  else
 	    {
 	      ecs->event_thread->control.stop_step = 1;
-	      print_end_stepping_range_reason ();
+	      end_stepping_range ();
 	      stop_stepping (ecs);
 	    }
 	  return;
@@ -5113,7 +5105,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       else
 	{
 	  ecs->event_thread->control.stop_step = 1;
-	  print_end_stepping_range_reason ();
+	  end_stepping_range ();
 	  stop_stepping (ecs);
 	}
       return;
@@ -5131,7 +5123,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	 fprintf_unfiltered (gdb_stdlog,
 			     "infrun: stepped to a different line\n");
       ecs->event_thread->control.stop_step = 1;
-      print_end_stepping_range_reason ();
+      end_stepping_range ();
       stop_stepping (ecs);
       return;
     }
@@ -5457,7 +5449,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
     {
       /* We are already there: stop now.  */
       ecs->event_thread->control.stop_step = 1;
-      print_end_stepping_range_reason ();
+      end_stepping_range ();
       stop_stepping (ecs);
       return;
     }
@@ -5506,7 +5498,7 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
     {
       /* We're there already.  Just stop stepping now.  */
       ecs->event_thread->control.stop_step = 1;
-      print_end_stepping_range_reason ();
+      end_stepping_range ();
       stop_stepping (ecs);
     }
   else
@@ -5906,35 +5898,46 @@ prepare_to_wait (struct execution_control_state *ecs)
   ecs->wait_some_more = 1;
 }
 
+/* We are done with the step range of a step/next/si/ni command.
+   Called once for each n of a "step n" operation.  Notify observers
+   if not in the middle of doing a "step N" operation for N > 1.  */
+
+static void
+end_stepping_range (void)
+{
+  if (inferior_thread ()->step_multi
+      && inferior_thread ()->control.stop_step)
+    return;
+
+  observer_notify_end_stepping_range ();
+}
+
 /* Several print_*_reason functions to print why the inferior has stopped.
    We always print something when the inferior exits, or receives a signal.
    The rest of the cases are dealt with later on in normal_stop and
    print_it_typical.  Ideally there should be a call to one of these
    print_*_reason functions functions from handle_inferior_event each time
-   stop_stepping is called.  */
+   stop_stepping is called.
 
-/* Print why the inferior has stopped.  
-   We are done with a step/next/si/ni command, print why the inferior has
-   stopped.  For now print nothing.  Print a message only if not in the middle
-   of doing a "step n" operation for n > 1.  */
+   Note that we don't call these directly, instead we delegate that to
+   the interpreters, through observers.  Interpreters then call these
+   with whatever uiout is right.  */
 
-static void
-print_end_stepping_range_reason (void)
+void
+print_end_stepping_range_reason (struct ui_out *uiout)
 {
-  if ((!inferior_thread ()->step_multi
-       || !inferior_thread ()->control.stop_step)
-      && ui_out_is_mi_like_p (current_uiout))
-    ui_out_field_string (current_uiout, "reason",
-                         async_reason_lookup (EXEC_ASYNC_END_STEPPING_RANGE));
+  /* For CLI-like interpreters, print nothing.  */
+
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_string (uiout, "reason",
+			   async_reason_lookup (EXEC_ASYNC_END_STEPPING_RANGE));
+    }
 }
 
-/* The inferior was terminated by a signal, print why it stopped.  */
-
-static void
-print_signal_exited_reason (enum gdb_signal siggnal)
+void
+print_signal_exited_reason (struct ui_out *uiout, enum gdb_signal siggnal)
 {
-  struct ui_out *uiout = current_uiout;
-
   annotate_signalled ();
   if (ui_out_is_mi_like_p (uiout))
     ui_out_field_string
@@ -5953,14 +5956,11 @@ print_signal_exited_reason (enum gdb_signal siggnal)
   ui_out_text (uiout, "The program no longer exists.\n");
 }
 
-/* The inferior program is finished, print why it stopped.  */
-
-static void
-print_exited_reason (int exitstatus)
+void
+print_exited_reason (struct ui_out *uiout, int exitstatus)
 {
   struct inferior *inf = current_inferior ();
   const char *pidstr = target_pid_to_str (pid_to_ptid (inf->pid));
-  struct ui_out *uiout = current_uiout;
 
   annotate_exited (exitstatus);
   if (exitstatus)
@@ -5989,14 +5989,9 @@ print_exited_reason (int exitstatus)
     }
 }
 
-/* Signal received, print why the inferior has stopped.  The signal table
-   tells us to print about it.  */
-
-static void
-print_signal_received_reason (enum gdb_signal siggnal)
+void
+print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
 {
-  struct ui_out *uiout = current_uiout;
-
   annotate_signal ();
 
   if (siggnal == GDB_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
@@ -6028,13 +6023,10 @@ print_signal_received_reason (enum gdb_signal siggnal)
   ui_out_text (uiout, ".\n");
 }
 
-/* Reverse execution: target ran out of history info, print why the inferior
-   has stopped.  */
-
-static void
-print_no_history_reason (void)
+void
+print_no_history_reason (struct ui_out *uiout)
 {
-  ui_out_text (current_uiout, "\nNo more reverse-execution history.\n");
+  ui_out_text (uiout, "\nNo more reverse-execution history.\n");
 }
 
 /* Print current location without a level number, if we have changed
