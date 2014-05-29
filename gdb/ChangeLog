@@ -1,5 +1,13 @@
 2014-05-29  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (resume): Rename local 'hw_step' to 'entry_step'
+	and make it const.  When a single-step decays to a continue,
+	clear 'step', not 'hw_step'.  Pass whether the caller wanted
+	to step to user_visible_resume_ptid, not what we ask the
+	target to do.
+
+2014-05-29  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (process_event_stop_test, handle_step_into_function)
 	(handle_step_into_function_backward): Adjust.
 	Don't set the even thread's stop_step and call stop_waiting before

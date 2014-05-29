@@ -1769,7 +1769,13 @@ resume (int step, enum gdb_signal sig)
   CORE_ADDR pc = regcache_read_pc (regcache);
   struct address_space *aspace = get_regcache_aspace (regcache);
   ptid_t resume_ptid;
-  int hw_step = step;
+  /* From here on, this represents the caller's step vs continue
+     request, while STEP represents what we'll actually request the
+     target to do.  STEP can decay from a step to a continue, if e.g.,
+     we need to implement single-stepping with breakpoints (software
+     single-step).  When deciding whether "set scheduler-locking step"
+     applies, it's the callers intention that counts.  */
+  const int entry_step = step;
 
   QUIT;
 
@@ -1789,7 +1795,7 @@ resume (int step, enum gdb_signal sig)
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog,
 			    "infrun: resume : clear step\n");
-      hw_step = 0;
+      step = 0;
     }
 
   if (debug_infrun)
@@ -1834,7 +1840,7 @@ a command like `return' or `jump' to continue execution."));
      step software breakpoint.  */
   if (use_displaced_stepping (gdbarch)
       && (tp->control.trap_expected
-	  || (hw_step && gdbarch_software_single_step_p (gdbarch)))
+	  || (step && gdbarch_software_single_step_p (gdbarch)))
       && sig == GDB_SIGNAL_0
       && !current_inferior ()->waiting_for_vfork_done)
     {
@@ -1851,7 +1857,7 @@ a command like `return' or `jump' to continue execution."));
 	     Unless we're calling an inferior function, as in that
 	     case we pretend the inferior doesn't run at all.  */
 	  if (!tp->control.in_infcall)
-	    set_running (user_visible_resume_ptid (step), 1);
+	    set_running (user_visible_resume_ptid (entry_step), 1);
 	  discard_cleanups (old_cleanups);
 	  return;
 	}
@@ -1861,8 +1867,8 @@ a command like `return' or `jump' to continue execution."));
       pc = regcache_read_pc (get_thread_regcache (inferior_ptid));
 
       displaced = get_displaced_stepping_state (ptid_get_pid (inferior_ptid));
-      hw_step = gdbarch_displaced_step_hw_singlestep (gdbarch,
-						      displaced->step_closure);
+      step = gdbarch_displaced_step_hw_singlestep (gdbarch,
+						   displaced->step_closure);
     }
 
   /* Do we need to do it the hard way, w/temp breakpoints?  */
@@ -1924,7 +1930,7 @@ a command like `return' or `jump' to continue execution."));
   /* Decide the set of threads to ask the target to resume.  Start
      by assuming everything will be resumed, than narrow the set
      by applying increasingly restricting conditions.  */
-  resume_ptid = user_visible_resume_ptid (step);
+  resume_ptid = user_visible_resume_ptid (entry_step);
 
   /* Even if RESUME_PTID is a wildcard, and we end up resuming less
      (e.g., we might need to step over a breakpoint), from the
