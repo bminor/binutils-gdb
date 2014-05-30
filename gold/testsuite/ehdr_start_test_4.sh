@@ -35,6 +35,6 @@ check()
     fi
 }
 
-check ehdr_start_test_4.syms "w __ehdr_start"
+check ehdr_start_test_4.syms "U __ehdr_start"
 
 exit 0

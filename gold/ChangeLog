@@ -1,3 +1,9 @@
+2014-05-30  Cary Coutant  <ccoutant@google.com>
+
+	* testsuite/Makefile.am (ehdr_start_test_4): Fix typo in -B option.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/ehdr_start_test_4.sh: Look for "U" instead of "w".
+
 2014-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/16945
