@@ -2179,7 +2179,7 @@ MOSTLYCLEANFILES += ehdr_start_test_4
 ehdr_start_test_4.syms: ehdr_start_test_4
 	$(TEST_NM) ehdr_start_test_4 > $@
 ehdr_start_test_4: ehdr_start_test_4.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ld/ -Wl,-Ttext=0x100100 $<
+	$(CXXLINK) -Bgcctestdir/ -Wl,-Ttext=0x100100 $<
 ehdr_start_test_4.o: ehdr_start_test.cc
 	$(CXXCOMPILE) -c -DEHDR_START_WEAK -o $@ $<
 

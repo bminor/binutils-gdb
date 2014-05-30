@@ -5506,7 +5506,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ehdr_start_test_4.syms: ehdr_start_test_4
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) ehdr_start_test_4 > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ehdr_start_test_4: ehdr_start_test_4.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ld/ -Wl,-Ttext=0x100100 $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,-Ttext=0x100100 $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ehdr_start_test_4.o: ehdr_start_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -DEHDR_START_WEAK -o $@ $<
 

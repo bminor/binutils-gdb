@@ -1,6 +1,11 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
+	2014-05-30  Cary Coutant  <ccoutant@google.com>
+	* testsuite/Makefile.am (ehdr_start_test_4): Fix typo in -B option.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/ehdr_start_test_4.sh: Look for "U" instead of "w".
+
 	2014-05-15  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (do_plt_fde_location): Handle zero length .glink.
 	Compare FDE contents with DW_CFA_nop rather than 0.
