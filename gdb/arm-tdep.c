@@ -2964,12 +2964,19 @@ arm_stub_unwind_sniffer (const struct frame_unwind *self,
 {
   CORE_ADDR addr_in_block;
   gdb_byte dummy[4];
+  CORE_ADDR pc, start_addr;
+  const char *name;
 
   addr_in_block = get_frame_address_in_block (this_frame);
+  pc = get_frame_pc (this_frame);
   if (in_plt_section (addr_in_block)
       /* We also use the stub winder if the target memory is unreadable
 	 to avoid having the prologue unwinder trying to read it.  */
-      || target_read_memory (get_frame_pc (this_frame), dummy, 4) != 0)
+      || target_read_memory (pc, dummy, 4) != 0)
+    return 1;
+
+  if (find_pc_partial_function (pc, &name, &start_addr, NULL) == 0
+      && arm_skip_bx_reg (this_frame, pc) != 0)
     return 1;
 
   return 0;

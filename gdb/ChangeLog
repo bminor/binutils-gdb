@@ -1,5 +1,10 @@
 2014-06-24  Yao Qi  <yao@codesourcery.com>
 
+	* arm-tdep.c (arm_stub_unwind_sniffer): Return 1 if
+	arm_skip_bx_reg returns non-zero.
+
+2014-06-24  Yao Qi  <yao@codesourcery.com>
+
 	* arm-tdep.c (arm_skip_bx_reg): New function.
 	(arm_skip_stub): Call arm_skip_bx_reg.
 
