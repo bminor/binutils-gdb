@@ -19,7 +19,7 @@
    this file, and should be regenerated if this file is modified.  */
 
 #ifdef __GNUC__
-# define ATTR __attribute__((always_inline))
+# define ATTR __attribute__((gnu_inline)) __attribute__((always_inline))
 #else
 # define ATTR
 #endif
