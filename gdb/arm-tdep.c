@@ -2870,6 +2870,64 @@ struct frame_unwind arm_exidx_unwind = {
   arm_exidx_unwind_sniffer
 };
 
+/* Recognize GCC's trampoline for thumb call-indirect.  If we are in a
+   trampoline, return the target PC.  Otherwise return 0.
+
+   void call0a (char c, short s, int i, long l) {}
+
+   int main (void)
+   {
+     (*pointer_to_call0a) (c, s, i, l);
+   }
+
+   Instead of calling a stub library function  _call_via_xx (xx is
+   the register name), GCC may inline the trampoline in the object
+   file as below (register r2 has the address of call0a).
+
+   .global main
+   .type main, %function
+   ...
+   bl .L1
+   ...
+   .size main, .-main
+
+   .L1:
+   bx r2
+
+   The trampoline 'bx r2' doesn't belong to main.  */
+
+static CORE_ADDR
+arm_skip_bx_reg (struct frame_info *frame, CORE_ADDR pc)
+{
+  /* The heuristics of recognizing such trampoline is that FRAME is
+     executing in Thumb mode and the instruction on PC is 'bx Rm'.  */
+  if (arm_frame_is_thumb (frame))
+    {
+      gdb_byte buf[2];
+
+      if (target_read_memory (pc, buf, 2) == 0)
+	{
+	  struct gdbarch *gdbarch = get_frame_arch (frame);
+	  enum bfd_endian byte_order_for_code
+	    = gdbarch_byte_order_for_code (gdbarch);
+	  uint16_t insn
+	    = extract_unsigned_integer (buf, 2, byte_order_for_code);
+
+	  if ((insn & 0xff80) == 0x4700)  /* bx <Rm> */
+	    {
+	      CORE_ADDR dest
+		= get_frame_register_unsigned (frame, bits (insn, 3, 6));
+
+	      /* Clear the LSB so that gdb core sets step-resume
+		 breakpoint at the right address.  */
+	      return UNMAKE_THUMB_ADDR (dest);
+	    }
+	}
+    }
+
+  return 0;
+}
+
 static struct arm_prologue_cache *
 arm_make_stub_cache (struct frame_info *this_frame)
 {
@@ -9226,7 +9284,15 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
 
   /* Find the starting address and name of the function containing the PC.  */
   if (find_pc_partial_function (pc, &name, &start_addr, NULL) == 0)
-    return 0;
+    {
+      /* Trampoline 'bx reg' doesn't belong to any functions.  Do the
+	 check here.  */
+      start_addr = arm_skip_bx_reg (frame, pc);
+      if (start_addr != 0)
+	return start_addr;
+
+      return 0;
+    }
 
   /* If PC is in a Thumb call or return stub, return the address of the
      target PC, which is in a register.  The thunk functions are called
