@@ -1,5 +1,12 @@
 2014-06-24  Yao Qi  <yao@codesourcery.com>
 
+	* arm-linux-tdep.c (arm_linux_skip_trampoline_code): New.
+	(arm_linux_init_abi): Set skip_trampoline_code with
+	gdbarch_skip_trampoline_code instead of
+	find_solib_trampoline_target.
+
+2014-06-24  Yao Qi  <yao@codesourcery.com>
+
 	* arm-tdep.c (arm_stub_unwind_sniffer): Return 1 if
 	arm_skip_bx_reg returns non-zero.
 
