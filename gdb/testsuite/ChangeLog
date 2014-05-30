@@ -1,3 +1,7 @@
+2014-05-30  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.reverse/sigall-reverse.exp: Fix a typo.
+
 2014-05-29  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
