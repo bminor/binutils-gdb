@@ -1,6 +1,11 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
+	2014-06-02  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::local_reloc_may_be_function_pointer):
+	Only ignore relocs on ELFv1.
+	(Target_powerpc::global_reloc_may_be_function_pointer): Likewise.
+
 	2014-05-30  Cary Coutant  <ccoutant@google.com>
 	* testsuite/Makefile.am (ehdr_start_test_4): Fix typo in -B option.
 	* testsuite/Makefile.in: Regenerate.

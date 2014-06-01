@@ -947,7 +947,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     inline bool
     local_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
 					Target_powerpc* ,
-					Sized_relobj_file<size, big_endian>* ,
+					Sized_relobj_file<size, big_endian>* relobj,
 					unsigned int ,
 					Output_section* ,
 					const elfcpp::Rela<size, big_endian>& ,
@@ -958,8 +958,13 @@ class Target_powerpc : public Sized_target<size, big_endian>
       // may be folded and we'll still keep function addresses distinct.
       // That means no reloc is of concern here.
       if (size == 64)
-	return false;
-      // For 32-bit, conservatively assume anything but calls to
+	{
+	  Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+	    <Powerpc_relobj<size, big_endian>*>(relobj);
+	  if (ppcobj->abiversion() == 1)
+	    return false;
+	}
+      // For 32-bit and ELFv2, conservatively assume anything but calls to
       // function code might be taking the address of the function.
       return !is_branch_reloc(r_type);
     }
@@ -967,7 +972,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     inline bool
     global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
 					 Target_powerpc* ,
-					 Sized_relobj_file<size, big_endian>* ,
+					 Sized_relobj_file<size, big_endian>* relobj,
 					 unsigned int ,
 					 Output_section* ,
 					 const elfcpp::Rela<size, big_endian>& ,
@@ -976,7 +981,12 @@ class Target_powerpc : public Sized_target<size, big_endian>
     {
       // As above.
       if (size == 64)
-	return false;
+	{
+	  Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+	    <Powerpc_relobj<size, big_endian>*>(relobj);
+	  if (ppcobj->abiversion() == 1)
+	    return false;
+	}
       return !is_branch_reloc(r_type);
     }
 
