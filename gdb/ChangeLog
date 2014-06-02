@@ -1,3 +1,9 @@
+2014-06-02  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (dprintf_breakpoint_hit): New function.
+	(initialize_breakpoint_ops): Install it as dprintf's
+	breakpoint_hit method.
+
 2014-06-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* source.c (substitute_path_rule_matches): Simplify using

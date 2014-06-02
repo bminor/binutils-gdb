@@ -13142,6 +13142,23 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
 }
 
 static int
+dprintf_breakpoint_hit (const struct bp_location *bl,
+			struct address_space *aspace, CORE_ADDR bp_addr,
+			const struct target_waitstatus *ws)
+{
+  if (dprintf_style == dprintf_style_agent
+      && target_can_run_breakpoint_commands ())
+    {
+      /* An agent-style dprintf never causes a stop.  If we see a trap
+	 for this address it must be for a breakpoint that happens to
+	 be set at the same address.  */
+      return 0;
+    }
+
+  return bkpt_breakpoint_hit (bl, aspace, bp_addr, ws);
+}
+
+static int
 bkpt_resources_needed (const struct bp_location *bl)
 {
   gdb_assert (bl->owner->type == bp_hardware_breakpoint);
@@ -16220,6 +16237,7 @@ initialize_breakpoint_ops (void)
   ops->print_mention = bkpt_print_mention;
   ops->print_recreate = dprintf_print_recreate;
   ops->after_condition_true = dprintf_after_condition_true;
+  ops->breakpoint_hit = dprintf_breakpoint_hit;
 }
 
 /* Chain containing all defined "enable breakpoint" subcommands.  */
