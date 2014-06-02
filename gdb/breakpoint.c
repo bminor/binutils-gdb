@@ -2351,13 +2351,25 @@ build_target_command_list (struct bp_location *bl)
   /* Release commands left over from a previous insert.  */
   VEC_free (agent_expr_p, bl->target_info.tcommands);
 
-  /* For now, limit to agent-style dprintf breakpoints.  */
-  if (bl->owner->type != bp_dprintf
-      || strcmp (dprintf_style, dprintf_style_agent) != 0)
-    return;
-
   if (!target_can_run_breakpoint_commands ())
     return;
+
+  /* For now, limit to agent-style dprintf breakpoints.  */
+  if (dprintf_style != dprintf_style_agent)
+    return;
+
+  /* For now, if we have any duplicate location that isn't a dprintf,
+     don't install the target-side commands, as that would make the
+     breakpoint not be reported to the core, and we'd lose
+     control.  */
+  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+    {
+      loc = (*loc2p);
+      if (is_breakpoint (loc->owner)
+	  && loc->pspace->num == bl->pspace->num
+	  && loc->owner->type != bp_dprintf)
+	return;
+    }
 
   /* Do a first pass to check for locations with no assigned
      conditions or conditions that fail to parse to a valid agent expression

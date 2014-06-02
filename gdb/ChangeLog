@@ -1,5 +1,10 @@
 2014-06-02  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (build_target_command_list): Don't build a command
+	list if we have any duplicate location that isn't a dprintf.
+
+2014-06-02  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (dprintf_breakpoint_hit): New function.
 	(initialize_breakpoint_ops): Install it as dprintf's
 	breakpoint_hit method.

@@ -1,3 +1,8 @@
+2014-06-02  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/dprintf-bp-same-addr.c: New file.
+	* gdb.base/dprintf-bp-same-addr.exp: New file.
+
 2014-06-02  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* gdb.arch/powerpc-power.exp: Add power8 instructions to the testcase.
