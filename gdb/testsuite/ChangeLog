@@ -1,3 +1,8 @@
+2014-06-03  Brad Mouring  <bmouring@ni.com>  (tiny patch)
+
+	* gdb.base/subst.exp: Add tests to verify partial path matching
+	output.
+
 2014-06-03  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/sss-bp-on-user-bp-2.exp: Skip if testing with a remote

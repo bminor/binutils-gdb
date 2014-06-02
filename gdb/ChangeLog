@@ -1,3 +1,9 @@
+2014-06-03  Brad Mouring  <bmouring@ni.com>  (tiny patch)
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>
+	* source.c (show_substitute_path_command): Fix display of matching
+	substitution rules.
+
 2014-06-03  Gary Benson  <gbenson@redhat.com>
 
 	* gnu-v2-abi.c (gnuv2_value_rtti_type): Use gdb_demangle.

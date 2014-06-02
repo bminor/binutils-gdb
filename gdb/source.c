@@ -1890,7 +1890,7 @@ show_substitute_path_command (char *args, int from_tty)
 
   while (rule != NULL)
     {
-      if (from == NULL || FILENAME_CMP (rule->from, from) == 0)
+      if (from == NULL || substitute_path_rule_matches (rule, from) != 0)
         printf_filtered ("  `%s' -> `%s'.\n", rule->from, rule->to);
       rule = rule->next;
     }
