@@ -1,3 +1,10 @@
+2014-06-06  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* symfile.c (symfile_free_objfile): Remove restriction to
+	OBJF_USERLOADED.
+	* symfile-mem.c (symbol_file_add_from_memory): Call
+	add_target_sections_of_objfile.
+
 2014-06-05  Ludovic Courtès  <ludo@gnu.org>
 
 	* guile/scm-value.c (gdbscm_history_append_x): Use
