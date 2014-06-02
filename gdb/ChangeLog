@@ -1,5 +1,10 @@
 2014-06-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* source.c (substitute_path_rule_matches): Simplify using
+	filename_ncmp instead of FILENAME_CMP.
+
+2014-06-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* source.c (substitute_path_rule_matches): Remove trailing spaces.
 
 2014-06-01  Ludovic Courtès  <ludo@gnu.org>
