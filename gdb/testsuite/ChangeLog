@@ -1,3 +1,8 @@
+2014-06-02  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp: Add power8 instructions to the testcase.
+	* gdb.arch/powerpc-power.s: Likewise.
+
 2014-06-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/completion.exp: Remove code aimed at restoring TIMEOUT.
