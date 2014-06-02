@@ -952,7 +952,7 @@ substitute_path_rule_matches (const struct substitute_path_rule *rule,
   /* Make sure that the region in the path that matches the substitution
      rule is immediately followed by a directory separator (or the end of
      string character).  */
-  
+
   if (path[from_len] != '\0' && !IS_DIR_SEPARATOR (path[from_len]))
     return 0;
 
