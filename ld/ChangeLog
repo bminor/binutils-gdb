@@ -2,11 +2,9 @@
 
 	* emulparams/elf32bfin.sh: Rename from bfin.sh.
 	* emulparams/elf32bfinfd.sh: Update to suit.
-	* emulparams/: Delete.
 	* emulparams/msp430.sh: Rename from msp430all.sh.  Remove
 	MSP430_NAME and msp430X vars.
 	* emulparams/msp430X.sh: New.
-	* emulparams/: Delete.
 	* emulparams/score3_elf.sh: Rename from scoreelf.sh.  Remove
 	SCORE_NAME and score7_elf ARCH setting.
 	* emulparams/score7_elf.sh: New.
