@@ -1,3 +1,15 @@
+2014-06-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR mi/15806
+	* utils.c (printchar): Don't escape at all if quoter is NUL.
+	Update function documentation to clarify effect of parameter
+	QUOTER.
+	* remote.c (escape_buffer): Pass '\\' as the quoter to
+	fputstrn_unfiltered.
+	* mi/mi-interp.c (mi_solib_loaded): Use ui_out_field_* functions to
+	generate the output.
+	(mi_solib_unloaded): Same.
+
 2014-06-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* development.sh: Delete.

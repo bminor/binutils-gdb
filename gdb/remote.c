@@ -7082,7 +7082,7 @@ escape_buffer (const char *buf, int n)
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  fputstrn_unfiltered (buf, n, 0, stb);
+  fputstrn_unfiltered (buf, n, '\\', stb);
   str = ui_file_xstrdup (stb, NULL);
   do_cleanups (old_chain);
   return str;

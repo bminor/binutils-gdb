@@ -1502,7 +1502,13 @@ parse_escape (struct gdbarch *gdbarch, const char **string_ptr)
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that this routine should only
    be call for printing things which are independent of the language
-   of the program being debugged.  */
+   of the program being debugged.
+
+   printchar will normally escape backslashes and instances of QUOTER. If
+   QUOTER is 0, printchar won't escape backslashes or any quoting character.
+   As a side effect, if you pass the backslash character as the QUOTER,
+   printchar will escape backslashes as usual, but not any other quoting
+   character. */
 
 static void
 printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
@@ -1545,7 +1551,7 @@ printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
     }
   else
     {
-      if (c == '\\' || c == quoter)
+      if (quoter != 0 && (c == '\\' || c == quoter))
 	do_fputs ("\\", stream);
       do_fprintf (stream, "%c", c);
     }

@@ -981,22 +981,24 @@ static void
 mi_solib_loaded (struct so_list *solib)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
+  struct ui_out *uiout = interp_ui_out (top_level_interpreter ());
 
   target_terminal_ours ();
-  if (gdbarch_has_global_solist (target_gdbarch ()))
-    fprintf_unfiltered (mi->event_channel,
-			"library-loaded,id=\"%s\",target-name=\"%s\","
-			"host-name=\"%s\",symbols-loaded=\"%d\"",
-			solib->so_original_name, solib->so_original_name,
-			solib->so_name, solib->symbols_loaded);
-  else
-    fprintf_unfiltered (mi->event_channel,
-			"library-loaded,id=\"%s\",target-name=\"%s\","
-			"host-name=\"%s\",symbols-loaded=\"%d\","
-			"thread-group=\"i%d\"",
-			solib->so_original_name, solib->so_original_name,
-			solib->so_name, solib->symbols_loaded,
-			current_inferior ()->num);
+
+  fprintf_unfiltered (mi->event_channel, "library-loaded");
+
+  ui_out_redirect (uiout, mi->event_channel);
+
+  ui_out_field_string (uiout, "id", solib->so_original_name);
+  ui_out_field_string (uiout, "target-name", solib->so_original_name);
+  ui_out_field_string (uiout, "host-name", solib->so_name);
+  ui_out_field_int (uiout, "symbols-loaded", solib->symbols_loaded);
+  if (!gdbarch_has_global_solist (target_gdbarch ()))
+    {
+      ui_out_field_fmt (uiout, "thread-group", "i%d", current_inferior ()->num);
+    }
+
+  ui_out_redirect (uiout, NULL);
 
   gdb_flush (mi->event_channel);
 }
@@ -1005,20 +1007,23 @@ static void
 mi_solib_unloaded (struct so_list *solib)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
+  struct ui_out *uiout = interp_ui_out (top_level_interpreter ());
 
   target_terminal_ours ();
-  if (gdbarch_has_global_solist (target_gdbarch ()))
-    fprintf_unfiltered (mi->event_channel,
-			"library-unloaded,id=\"%s\",target-name=\"%s\","
-			"host-name=\"%s\"",
-			solib->so_original_name, solib->so_original_name,
-			solib->so_name);
-  else
-    fprintf_unfiltered (mi->event_channel,
-			"library-unloaded,id=\"%s\",target-name=\"%s\","
-			"host-name=\"%s\",thread-group=\"i%d\"",
-			solib->so_original_name, solib->so_original_name,
-			solib->so_name, current_inferior ()->num);
+
+  fprintf_unfiltered (mi->event_channel, "library-unloaded");
+
+  ui_out_redirect (uiout, mi->event_channel);
+
+  ui_out_field_string (uiout, "id", solib->so_original_name);
+  ui_out_field_string (uiout, "target-name", solib->so_original_name);
+  ui_out_field_string (uiout, "host-name", solib->so_name);
+  if (!gdbarch_has_global_solist (target_gdbarch ()))
+    {
+      ui_out_field_fmt (uiout, "thread-group", "i%d", current_inferior ()->num);
+    }
+
+  ui_out_redirect (uiout, NULL);
 
   gdb_flush (mi->event_channel);
 }

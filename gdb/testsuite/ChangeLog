@@ -1,3 +1,8 @@
+2014-06-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-breakpoint-changed.exp (test_insert_delete_modify): Fix
+	erroneous dprintf expected input.
+
 2014-06-04  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.guile/scm-generics.exp: Delete.
