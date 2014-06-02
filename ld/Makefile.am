@@ -942,12 +942,12 @@ eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-eelf32bfin.c: $(srcdir)/emulparams/bfin.sh \
+eelf32bfin.c: $(srcdir)/emulparams/elf32bfin.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/bfin.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32bfinfd.c: $(srcdir)/emulparams/elf32bfinfd.sh \
-  $(srcdir)/emulparams/bfin.sh \
+  $(srcdir)/emulparams/elf32bfin.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/bfin.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -1480,13 +1480,11 @@ emn10300.c: $(srcdir)/emulparams/mn10300.sh \
   $(srcdir)/emulparams/mn10200.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-emsp430.c: $(srcdir)/emulparams/msp430all.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
-  ${GEN_DEPENDS}
+emsp430.c: $(srcdir)/emulparams/msp430.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc ${GEN_DEPENDS}
 
-emsp430X.c: $(srcdir)/emulparams/msp430all.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
-  ${GEN_DEPENDS}
+emsp430X.c: $(srcdir)/emulparams/msp430.sh $(srcdir)/emulparams/msp430X.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc ${GEN_DEPENDS}
 
 ends32elf.c: $(srcdir)/emulparams/nds32elf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
@@ -1586,11 +1584,12 @@ eppcpe.c: $(srcdir)/emulparams/ppcpe.sh \
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
-escore3_elf.c: $(srcdir)/emulparams/scoreelf.sh \
+escore3_elf.c: $(srcdir)/emulparams/score3_elf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/scoreelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-escore7_elf.c: $(srcdir)/emulparams/scoreelf.sh \
+escore7_elf.c: $(srcdir)/emulparams/score3_elf.sh \
+  $(srcdir)/emulparams/score7_elf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/scoreelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 

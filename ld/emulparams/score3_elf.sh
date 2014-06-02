@@ -26,15 +26,7 @@ OTHER_BSS_SYMBOLS='
 # This sets the stack to the top of the simulator memory (2^19 bytes).
 STACK_ADDR=0x8000000
 
-SCORE_NAME=${EMULATION_NAME}
-if [ "${SCORE_NAME}" = "score3_elf" ] ; then
 ARCH=score3
-fi
-
-if [ "${SCORE_NAME}" = "score7_elf" ] ; then
-ARCH=score7
-fi
-
 MACHINE=
 ENTRY=_start
 EMBEDDED=yes
