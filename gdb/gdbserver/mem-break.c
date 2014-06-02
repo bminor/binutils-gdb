@@ -1045,9 +1045,9 @@ delete_gdb_breakpoint_1 (char z_type, CORE_ADDR addr, int size)
   if (bp == NULL)
     return -1;
 
-  /* Before deleting the breakpoint, make sure to free
-     its condition list.  */
-  clear_breakpoint_conditions (bp);
+  /* Before deleting the breakpoint, make sure to free its condition
+     and command lists.  */
+  clear_breakpoint_conditions_and_commands (bp);
   err = delete_breakpoint (bp);
   if (err != 0)
     return -1;
@@ -1087,7 +1087,7 @@ delete_gdb_breakpoint (char z_type, CORE_ADDR addr, int size)
 
 /* Clear all conditions associated with a breakpoint.  */
 
-void
+static void
 clear_breakpoint_conditions (struct breakpoint *bp)
 {
   struct point_cond_list *cond;
@@ -1102,13 +1102,44 @@ clear_breakpoint_conditions (struct breakpoint *bp)
       struct point_cond_list *cond_next;
 
       cond_next = cond->next;
-      free (cond->cond->bytes);
-      free (cond->cond);
+      gdb_free_agent_expr (cond->cond);
       free (cond);
       cond = cond_next;
     }
 
   bp->cond_list = NULL;
+}
+
+/* Clear all commands associated with a breakpoint.  */
+
+static void
+clear_breakpoint_commands (struct breakpoint *bp)
+{
+  struct point_command_list *cmd;
+
+  if (bp->command_list == NULL)
+    return;
+
+  cmd = bp->command_list;
+
+  while (cmd != NULL)
+    {
+      struct point_command_list *cmd_next;
+
+      cmd_next = cmd->next;
+      gdb_free_agent_expr (cmd->cmd);
+      free (cmd);
+      cmd = cmd_next;
+    }
+
+  bp->command_list = NULL;
+}
+
+void
+clear_breakpoint_conditions_and_commands (struct breakpoint *bp)
+{
+  clear_breakpoint_conditions (bp);
+  clear_breakpoint_commands (bp);
 }
 
 /* Add condition CONDITION to GDBserver's breakpoint BP.  */

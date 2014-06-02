@@ -3746,7 +3746,7 @@ process_serial_event (void)
 		   here.  If we already have a list of parameters, GDB
 		   is telling us to drop that list and use this one
 		   instead.  */
-		clear_breakpoint_conditions (bp);
+		clear_breakpoint_conditions_and_commands (bp);
 		process_point_options (bp, &dataptr);
 	      }
 	  }

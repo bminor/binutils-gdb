@@ -90,9 +90,10 @@ int breakpoint_here (CORE_ADDR addr);
 
 int breakpoint_inserted_here (CORE_ADDR addr);
 
-/* Clear all breakpoint conditions associated with this address.  */
+/* Clear all breakpoint conditions and commands associated with a
+   breakpoint.  */
 
-void clear_breakpoint_conditions (struct breakpoint *bp);
+void clear_breakpoint_conditions_and_commands (struct breakpoint *bp);
 
 /* Set target-side condition CONDITION to the breakpoint at ADDR.
    Returns false on failure.  On success, advances CONDITION pointer

@@ -58,6 +58,9 @@ struct agent_expr
    of bytes in expression, a comma, and then the bytes.  */
 struct agent_expr *gdb_parse_agent_expr (char **actparm);
 
+/* Release an agent expression.  */
+void gdb_free_agent_expr (struct agent_expr *aexpr);
+
 /* Convert the bytes of an agent expression back into hex digits, so
    they can be printed or uploaded.  This allocates the buffer,
    callers should free when they are done with it.  */
