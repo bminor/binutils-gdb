@@ -36,6 +36,8 @@
 #include "frame-unwind.h"
 #include "hashtab.h"
 #include "infrun.h"
+#include "event-loop.h"
+#include "inf-loop.h"
 
 /* The target_ops of record-btrace.  */
 static struct target_ops record_btrace_ops;
@@ -59,6 +61,12 @@ static const char *replay_memory_access = replay_memory_access_read_only;
 /* Command lists for "set/show record btrace".  */
 static struct cmd_list_element *set_record_btrace_cmdlist;
 static struct cmd_list_element *show_record_btrace_cmdlist;
+
+/* The execution direction of the last resume we got.  See record-full.c.  */
+static enum exec_direction_kind record_btrace_resume_exec_dir = EXEC_FORWARD;
+
+/* The async event handler for reverse/replay execution.  */
+static struct async_event_handler *record_btrace_async_inferior_event_handler;
 
 /* Print a record-btrace debug message.  Use do ... while (0) to avoid
    ambiguities when used in if statements.  */
@@ -166,6 +174,14 @@ record_btrace_auto_disable (void)
   record_btrace_thread_observer = NULL;
 }
 
+/* The record-btrace async event handler function.  */
+
+static void
+record_btrace_handle_async_inferior_event (gdb_client_data data)
+{
+  inferior_event_handler (INF_REG_EVENT, NULL);
+}
+
 /* The to_open method of target record-btrace.  */
 
 static void
@@ -202,6 +218,10 @@ record_btrace_open (char *args, int from_tty)
 
   push_target (&record_btrace_ops);
 
+  record_btrace_async_inferior_event_handler
+    = create_async_event_handler (record_btrace_handle_async_inferior_event,
+				  NULL);
+
   observer_notify_record_changed (current_inferior (),  1);
 
   discard_cleanups (disable_chain);
@@ -229,6 +249,9 @@ static void
 record_btrace_close (struct target_ops *self)
 {
   struct thread_info *tp;
+
+  if (record_btrace_async_inferior_event_handler != NULL)
+    delete_async_event_handler (&record_btrace_async_inferior_event_handler);
 
   /* Make sure automatic recording gets disabled even if we did not stop
      recording before closing the record-btrace target.  */
@@ -1490,6 +1513,9 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
 
   DEBUG ("resume %s: %s", target_pid_to_str (ptid), step ? "step" : "cont");
 
+  /* Store the execution direction of the last resume.  */
+  record_btrace_resume_exec_dir = execution_direction;
+
   tp = record_btrace_find_resume_thread (ptid);
   if (tp == NULL)
     error (_("Cannot find thread to resume."));
@@ -1524,6 +1550,13 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
 
   /* We just indicate the resume intent here.  The actual stepping happens in
      record_btrace_wait below.  */
+
+  /* Async support.  */
+  if (target_can_async_p ())
+    {
+      target_async (inferior_event_handler, 0);
+      mark_async_event_handler (record_btrace_async_inferior_event_handler);
+    }
 }
 
 /* Find a thread to move.  */
@@ -1898,6 +1931,14 @@ record_btrace_goto (struct target_ops *self, ULONGEST insn)
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
+/* The to_execution_direction target method.  */
+
+static enum exec_direction_kind
+record_btrace_execution_direction (struct target_ops *self)
+{
+  return record_btrace_resume_exec_dir;
+}
+
 /* Initialize the record-btrace target ops.  */
 
 static void
@@ -1941,6 +1982,7 @@ init_record_btrace_ops (void)
   ops->to_goto_record = record_btrace_goto;
   ops->to_can_execute_reverse = record_btrace_can_execute_reverse;
   ops->to_decr_pc_after_break = record_btrace_decr_pc_after_break;
+  ops->to_execution_direction = record_btrace_execution_direction;
   ops->to_stratum = record_stratum;
   ops->to_magic = OPS_MAGIC;
 }

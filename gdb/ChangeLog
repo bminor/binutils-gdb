@@ -1,3 +1,16 @@
+2014-06-04  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c: Include event-loop.h and inf-loop.h.
+	(record_btrace_resume_exec_dir)
+	(record_btrace_async_inferior_event_handler)
+	(record_btrace_handle_async_inferior_event): New.
+	(record_btrace_open): Create async event handler.
+	(record_btrace_close): Delete async event handler.
+	(record_btrace_resume): Set record_btrace_resume_exec_dir,
+	Mark async event handler.
+	(record_btrace_execution_direction): New.
+	(init_record_btrace_ops): Initialize to_execution_direction.
+
 2014-06-03  Doug Evans  <xdje42@gmail.com>
 
 	* guile/scm-param.c (pascm_make_param_smob): Add ARI comment.
