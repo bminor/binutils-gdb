@@ -1,5 +1,24 @@
 2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
 
+	* eval.c (evaluate_subexp_standard): Call the xmethod if the
+	best match method returned by find_overload_match is an xmethod.
+	* valarith.c (value_x_binop, value_x_unop): Call the xmethod if
+	the best matching operator returned by find_overload_match is an
+	xmethod.
+	* valops.c: #include "extension.h".
+	(find_method_list): Add "fn_list" and "xm_worker_vec" arguments.
+	Return void.  The list of matching source methods is returned in
+	"fn_list" and a vector of matching debug method workers is
+	returned in "xm_worker_vec".  Update all callers.
+	(value_find_oload_method_list): Likewise.
+	(find_oload_champ): Add "xm_worker_vec" parameter.  If it is
+	non-NULL, then the index of the best matching method in this
+	vector is returned.  Update all callers.
+	(find_overload_match): Include xmethods while performing overload
+	resolution.
+
+2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
+
 	* defs.h (enum lval_type): New enumerator "lval_xcallable".
 	* extension-priv.h (struct extension_language_ops): Add the
 	xmethod interface.
