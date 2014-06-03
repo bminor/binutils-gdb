@@ -1,5 +1,10 @@
 2014-06-04  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.base/auto-connect-native-target.exp: Remove redundant
+	space from the regexp pattern.
+
+2014-06-04  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/default.exp: Replace "child" with "native" in
 	regexp pattern.
 

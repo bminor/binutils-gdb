@@ -27,7 +27,7 @@ set have_native 0
 
 set test "help target native"
 gdb_test_multiple $test $test {
-    -re "Undefined target command.* $gdb_prompt $" {
+    -re "Undefined target command.*$gdb_prompt $" {
 	set have_native 0
     }
     -re "Native process.*$gdb_prompt $" {
