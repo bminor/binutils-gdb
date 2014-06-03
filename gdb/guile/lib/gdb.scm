@@ -271,6 +271,17 @@
  make-pretty-printer-worker
  pretty-printer-worker?
 
+ ;; scm-progspace.c
+
+ progspace?
+ progspace-valid?
+ progspace-filename
+ progspace-objfiles
+ progspace-pretty-printers
+ set-progspace-pretty-printers!
+ current-progspace
+ progspaces
+
  ;; scm-gsmob.c
 
  gdb-object-kind

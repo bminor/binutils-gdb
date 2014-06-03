@@ -441,7 +441,11 @@ ppscm_find_pretty_printer_from_objfiles (SCM value)
 static SCM
 ppscm_find_pretty_printer_from_progspace (SCM value)
 {
-  return SCM_BOOL_F; /*TODO*/
+  pspace_smob *p_smob = psscm_pspace_smob_from_pspace (current_program_space);
+  SCM pp
+    = ppscm_search_pp_list (psscm_pspace_smob_pretty_printers (p_smob), value);
+
+  return pp;
 }
 
 /* Subroutine of find_pretty_printer to simplify it.

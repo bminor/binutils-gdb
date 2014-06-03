@@ -141,6 +141,7 @@ from the Guile interactive prompt.
 * Guile Pretty Printing API:: Pretty-printing values with Guile
 * Selecting Guile Pretty-Printers:: How GDB chooses a pretty-printer
 * Writing a Guile Pretty-Printer:: Writing a pretty-printer
+* Progspaces In Guile::      Program spaces
 * Objfiles In Guile::        Object files in Guile
 * Frames In Guile::          Accessing inferior stack frames from Guile
 * Blocks In Guile::          Accessing blocks from Guile
@@ -378,6 +379,9 @@ as a symbol.
 @item <gdb:pretty-printer-worker>
 @xref{Guile Pretty Printing API}.
 
+@item <gdb:progspace>
+@xref{Progspaces In Guile}.
+
 @item <gdb:symbol>
 @xref{Symbols In Guile}.
 
@@ -406,6 +410,7 @@ Scheme function @code{eq?} may be applied to them.
 @item <gdb:breakpoint>
 @item <gdb:frame>
 @item <gdb:objfile>
+@item <gdb:progspace>
 @item <gdb:symbol>
 @item <gdb:symtab>
 @item <gdb:type>
@@ -1659,6 +1664,79 @@ my_library.so:
     foo
     bar
 @end smallexample
+
+@node Progspaces In Guile
+@subsubsection Program Spaces In Guile
+
+@cindex progspaces in guile
+@tindex <gdb:progspace>
+A program space, or @dfn{progspace}, represents a symbolic view
+of an address space.
+It consists of all of the objfiles of the program.
+@xref{Objfiles In Guile}.
+@xref{Inferiors and Programs, program spaces}, for more details
+about program spaces.
+
+Each progspace is represented by an instance of the @code{<gdb:progspace>}
+smob.  @xref{GDB Scheme Data Types}.
+
+The following progspace-related functions are available in the
+@code{(gdb)} module:
+
+@deffn {Scheme Procedure} progspace? object
+Return @code{#t} if @var{object} is a @code{<gdb:progspace>} object.
+Otherwise return @code{#f}.
+@end deffn
+
+@deffn {Scheme Procedure} progspace-valid? progspace
+Return @code{#t} if @var{progspace} is valid, @code{#f} if not.
+A @code{<gdb:progspace>} object can become invalid
+if the program it refers to is not loaded in @value{GDBN} any longer.
+@end deffn
+
+@deffn {Scheme Procedure} current-progspace
+This function returns the program space of the currently selected inferior.
+There is always a current progspace, this never returns @code{#f}.
+@xref{Inferiors and Programs}.
+@end deffn
+
+@deffn {Scheme Procedure} progspaces
+Return a list of all the progspaces currently known to @value{GDBN}.
+@end deffn
+
+@deffn {Scheme Procedure} progspace-filename progspace
+Return the absolute file name of @var{progspace} as a string.
+This is the name of the file passed as the argument to the @code{file}
+or @code{symbol-file} commands.
+If the program space does not have an associated file name,
+then @code{#f} is returned.  This occurs, for example, when @value{GDBN}
+is started without a program to debug.
+
+A @code{gdb:invalid-object-error} exception is thrown if @var{progspace}
+is invalid.
+@end deffn
+
+@deffn {Scheme Procedure} progspace-objfiles progspace
+Return the list of objfiles of @var{progspace}.
+The order of objfiles in the result is arbitrary.
+Each element is an object of type @code{<gdb:objfile>}.
+@xref{Objfiles In Guile}.
+
+A @code{gdb:invalid-object-error} exception is thrown if @var{progspace}
+is invalid.
+@end deffn
+
+@deffn {Scheme Procedure} progspace-pretty-printers progspace
+Return the list of pretty-printers of @var{progspace}.
+Each element is an object of type @code{<gdb:pretty-printer>}.
+@xref{Guile Pretty Printing API}, for more information.
+@end deffn
+
+@deffn {Scheme Procedure} set-progspace-pretty-printers! progspace printer-list
+Set the list of registered @code{<gdb:pretty-printer>} objects for
+@var{progspace} to @var{printer-list}.
+@xref{Guile Pretty Printing API}, for more information.
+@end deffn
 
 @node Objfiles In Guile
 @subsubsection Objfiles In Guile

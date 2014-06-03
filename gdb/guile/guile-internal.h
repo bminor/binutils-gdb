@@ -438,6 +438,16 @@ extern objfile_smob *ofscm_objfile_smob_from_objfile (struct objfile *objfile);
 
 extern SCM ofscm_scm_from_objfile (struct objfile *objfile);
 
+/* scm-progspace.c */
+
+typedef struct _pspace_smob pspace_smob;
+
+extern SCM psscm_pspace_smob_pretty_printers (const pspace_smob *);
+
+extern pspace_smob *psscm_pspace_smob_from_pspace (struct program_space *);
+
+extern SCM psscm_scm_from_pspace (struct program_space *);
+
 /* scm-string.c */
 
 extern char *gdbscm_scm_to_c_string (SCM string);
@@ -542,6 +552,7 @@ extern void gdbscm_initialize_math (void);
 extern void gdbscm_initialize_objfiles (void);
 extern void gdbscm_initialize_pretty_printers (void);
 extern void gdbscm_initialize_ports (void);
+extern void gdbscm_initialize_pspaces (void);
 extern void gdbscm_initialize_smobs (void);
 extern void gdbscm_initialize_strings (void);
 extern void gdbscm_initialize_symbols (void);

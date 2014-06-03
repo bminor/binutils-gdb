@@ -19,8 +19,9 @@
 
 (define-module (gdb printing)
   #:use-module ((gdb) #:select
-		(*pretty-printers* pretty-printer? objfile?
-		 objfile-pretty-printers set-objfile-pretty-printers!))
+		(*pretty-printers* pretty-printer? objfile? progspace?
+		 objfile-pretty-printers set-objfile-pretty-printers!
+		 progspace-pretty-printers set-progspace-pretty-printers!))
   #:use-module (gdb init))
 
 (define-public (prepend-pretty-printer! obj matcher)
@@ -31,9 +32,11 @@ If OBJ is #f, add MATCHER to the global list."
   (cond ((eq? obj #f)
 	 (set! *pretty-printers* (cons matcher *pretty-printers*)))
 	((objfile? obj)
-	 (set-objfile-pretty-printers! obj
-				       (cons matcher
-					     (objfile-pretty-printers obj))))
+	 (set-objfile-pretty-printers!
+	  obj (cons matcher (objfile-pretty-printers obj))))
+	((progspace? obj)
+	 (set-progspace-pretty-printers!
+	  obj (cons matcher (progspace-pretty-printers obj))))
 	(else
 	 (%assert-type #f obj SCM_ARG1 'prepend-pretty-printer!))))
 
@@ -45,8 +48,10 @@ If OBJ is #f, add MATCHER to the global list."
   (cond ((eq? obj #f)
 	 (set! *pretty-printers* (append! *pretty-printers* (list matcher))))
 	((objfile? obj)
-	 (set-objfile-pretty-printers! obj
-				       (append! (objfile-pretty-printers obj)
-						(list matcher))))
+	 (set-objfile-pretty-printers!
+	  obj (append! (objfile-pretty-printers obj) (list matcher))))
+	((progspace? obj)
+	 (set-progspace-pretty-printers!
+	  obj (append! (progspace-pretty-printers obj) (list matcher))))
 	(else
 	 (%assert-type #f obj SCM_ARG1 'append-pretty-printer!))))

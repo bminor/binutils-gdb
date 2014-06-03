@@ -298,6 +298,7 @@ SUBDIR_GUILE_OBS = \
 	scm-math.o \
 	scm-ports.o \
 	scm-pretty-print.o \
+	scm-progspace.o \
 	scm-safe-call.o \
 	scm-string.o \
 	scm-symbol.o \
@@ -321,6 +322,7 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-math.c \
 	guile/scm-ports.c \
 	guile/scm-pretty-print.c \
+	guile/scm-progspace.c \
 	guile/scm-safe-call.c \
 	guile/scm-string.c \
 	guile/scm-symbol.c \
@@ -2308,6 +2310,10 @@ scm-ports.o: $(srcdir)/guile/scm-ports.c
 
 scm-pretty-print.o: $(srcdir)/guile/scm-pretty-print.c
 	$(COMPILE) $(srcdir)/guile/scm-pretty-print.c
+	$(POSTCOMPILE)
+
+scm-progspace.o: $(srcdir)/guile/scm-progspace.c
+	$(COMPILE) $(srcdir)/guile/scm-progspace.c
 	$(POSTCOMPILE)
 
 scm-safe-call.o: $(srcdir)/guile/scm-safe-call.c

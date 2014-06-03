@@ -1,3 +1,19 @@
+2014-06-02  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-pretty-print.exp: Add tests for objfile and progspace
+	pretty-printer lookup.
+	* gdb.guile/scm-pretty-print.scm (pp_s-printer): New function.
+	(make-pp_s-printer): Call it.
+	(make-pretty-printer-from-dict): New function.
+	(lookup-pretty-printer-maker-from-dict): New function.
+	(*pretty-printer*): Simplify.
+	(make-objfile-pp_s-printer): New function.
+	(install-objfile-pretty-printers!): New function.
+	(make-progspace-pp_s-printer): New function.
+	(install-progspace-pretty-printers!): New function.
+	* gdb.guile/scm-progspace.c: New file.
+	* gdb.guile/scm-progspace.exp: New file.
+
 2014-06-02  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/dprintf-bp-same-addr.c: New file.

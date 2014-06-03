@@ -1,3 +1,23 @@
+2014-06-02  Doug Evans  <xdje42@gmail.com>
+
+	Add progspace support for Guile.
+	* Makefile.in (SUBDIR_GUILE_OBS): Add scm-progspace.o.
+	(SUBDIR_GUILE_SRCS): Add scm-progspace.c.
+	(scm-progspace.o): New rule.
+	* guile/guile-internal.h (pspace_smob): New typedef.
+	(psscm_pspace_smob_pretty_printers): Declare.
+	(psscm_pspace_smob_from_pspace): Declare.
+	(psscm_scm_from_pspace): Declare.
+	* guile/guile.c (initialize_gdb_module): Call
+	gdbscm_initialize_pspaces.
+	* guile/lib/gdb.scm: Export progspace symbols.
+	* guile/lib/gdb/printing.scm (prepend-pretty-printer!): Add progspace
+	support.
+	(append-pretty-printer!): Ditto.
+	* guile/scm-pretty-print.c (ppscm_find_pretty_printer_from_progspace):
+	Implement.
+	* guile/scm-progspace.c: New file.
+
 2014-06-03  Alan Modra  <amodra@gmail.com>
 
 	* ppc64-tdep.c (ppc64_standard_linkage8): New.
