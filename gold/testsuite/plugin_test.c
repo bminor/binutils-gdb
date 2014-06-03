@@ -584,6 +584,13 @@ parse_readelf_line(char* p, struct sym_info* info)
   p += strcspn(p, " ");
   p += strspn(p, " ");
 
+  if (*p == '[')
+    {
+      /* Skip st_other.  */
+      p += strcspn(p, "]");
+      p += strspn(p, "] ");
+    }
+
   /* Section field.  */
   info->sect = p;
   p += strcspn(p, " ");
