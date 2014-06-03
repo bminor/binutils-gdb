@@ -303,6 +303,29 @@ static struct ppc_insn_pattern ppc64_standard_linkage7[] =
     { 0, 0, 0 }
   };
 
+/* ELFv2 PLT call stub to access PLT entries more than +/- 32k from r2,
+   supporting fusion.  */
+
+static struct ppc_insn_pattern ppc64_standard_linkage8[] =
+  {
+    /* std r2, 24(r1) <optional> */
+    { -1, insn_ds (62, 2, 1, 24, 0), 1 },
+
+    /* addis r12, r2, <any> */
+    { insn_d (-1, -1, -1, 0), insn_d (15, 12, 2, 0), 0 },
+
+    /* ld r12, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 12, 12, 0, 0), 0 },
+
+    /* mtctr r12 */
+    { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 12, 9, 467), 0 },
+
+    /* bctr */
+    { -1, 0x4e800420, 0 },
+
+    { 0, 0, 0 }
+  };
+
 /* When the dynamic linker is doing lazy symbol resolution, the first
    call to a function in another object will go like this:
 
@@ -437,10 +460,14 @@ ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 				    ARRAY_SIZE (ppc64_standard_linkage4))),
 			  MAX (MAX (ARRAY_SIZE (ppc64_standard_linkage5),
 				    ARRAY_SIZE (ppc64_standard_linkage6)),
-			       ARRAY_SIZE (ppc64_standard_linkage7))) - 1];
+			       MAX (ARRAY_SIZE (ppc64_standard_linkage7),
+				    ARRAY_SIZE (ppc64_standard_linkage8))))
+		     - 1];
   CORE_ADDR target;
 
-  if (ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage7, insns))
+  if (ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage8, insns))
+    pc = ppc64_standard_linkage4_target (frame, pc, insns);
+  else if (ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage7, insns))
     pc = ppc64_standard_linkage3_target (frame, pc, insns);
   else if (ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage6, insns))
     pc = ppc64_standard_linkage4_target (frame, pc, insns);

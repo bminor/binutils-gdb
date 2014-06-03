@@ -1,3 +1,7 @@
+2014-06-03  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/elfv2exe.d: Update for changed plt call stubs.
+
 2014-05-28  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* lib/ld-lib.exp: Add objcopy_objects command to run_dump_test.

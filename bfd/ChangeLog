@@ -1,3 +1,9 @@
+2014-06-03  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ADDIS_R12_R2): Define.
+	(build_plt_stub): Support fusion on ELFv2 stub.
+	(ppc_build_one_stub): Likewise for plt branch stubs.
+
 2014-05-28  Alan Modra  <amodra@gmail.com>
 
 	* elf32-rx.c (rx_table_map): Delete set but not used variables.

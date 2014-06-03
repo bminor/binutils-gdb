@@ -1,3 +1,8 @@
+2014-06-03  Alan Modra  <amodra@gmail.com>
+
+	* ppc64-tdep.c (ppc64_standard_linkage8): New.
+	(ppc64_skip_trampoline_code): Recognise ELFv2 stub supporting fusion.
+
 2014-06-02  Doug Evans  <dje@google.com>
 
 	Add support for skeletonless type units.
