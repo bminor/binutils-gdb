@@ -1,5 +1,10 @@
 2014-06-03  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/sss-bp-on-user-bp-2.exp: Skip if testing with a remote
+	target that doesn't use software single-stepping.
+
+2014-06-03  Pedro Alves  <palves@redhat.com>
+
 	PR breakpoints/17000
 	* gdb.base/sss-bp-on-user-bp-2.c: New file.
 	* gdb.base/sss-bp-on-user-bp-2.exp: New file.
