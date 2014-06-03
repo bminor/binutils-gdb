@@ -1,3 +1,8 @@
+2014-06-02  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* top.c (command_loop): Handle comments here...
+	(command_line_input): ... not here.
+
 2014-06-02  Doug Evans  <xdje42@gmail.com>
 
 	Add progspace support for Guile.

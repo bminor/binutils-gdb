@@ -561,11 +561,14 @@ command_loop (void)
 
       make_command_stats_cleanup (1);
 
-      execute_command (command, instream == stdin);
+      /* Do not execute commented lines.  */
+      if (command[0] != '#')
+	{
+	  execute_command (command, instream == stdin);
 
-      /* Do any commands attached to breakpoint we are stopped at.  */
-      bpstat_do_actions ();
-
+	  /* Do any commands attached to breakpoint we are stopped at.  */
+	  bpstat_do_actions ();
+	}
       do_cleanups (old_chain);
     }
 }
@@ -1057,15 +1060,6 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
   /* Add line to history if appropriate.  */
   if (*linebuffer && input_from_terminal_p ())
     add_history (linebuffer);
-
-  /* Note: lines consisting solely of comments are added to the command
-     history.  This is useful when you type a command, and then
-     realize you don't want to execute it quite yet.  You can comment
-     out the command and then later fetch it from the value history
-     and remove the '#'.  The kill ring is probably better, but some
-     people are in the habit of commenting things out.  */
-  if (*p1 == '#')
-    *p1 = '\0';			/* Found a comment.  */
 
   /* Save into global buffer if appropriate.  */
   if (repeat)
