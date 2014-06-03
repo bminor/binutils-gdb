@@ -747,7 +747,7 @@ gdb_test "step" "The program is not being run." "step #2"
 gdb_test "symbol-file" ".*" "symbol-file"
 
 #test target native
-gdb_test "target native" "Use the \"run\" command to start a process.*|Undefined target command: \"child\".  *Try \"help target\".*" "target native"
+gdb_test "target native" "Use the \"run\" command to start a process.*|Undefined target command: \"native\".  *Try \"help target\".*" "target native"
 
 #test target core
 send_gdb "target core\n"
