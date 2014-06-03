@@ -1,3 +1,15 @@
+2014-06-03  Doug Evans  <dje@google.com>
+
+	* exec.c (exec_close_1): Call clear_section_table instead of
+	resize_section_table.
+	(clear_section_table): New function.
+	(resize_section_table): Make static.  Rename arg num_added to
+	adjustment.
+	* exec.h (clear_section_table): Declare.
+	(resize_section_table): Delete.
+	* progspace.c (release_program_space): Call clear_section_table
+	instead of resize_section_table.
+
 2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* NEWS (Python Scripting): Add entry about the new xmethods

@@ -41,10 +41,9 @@ extern struct target_ops exec_ops;
 extern int build_section_table (struct bfd *, struct target_section **,
 				struct target_section **);
 
-/* Resize the section table held by TABLE, by NUM_ADDED.  Returns the
-   old size.  */
+/* Remove all entries from TABLE.  */
 
-extern int resize_section_table (struct target_section_table *, int);
+extern void clear_section_table (struct target_section_table *table);
 
 /* Read from mappable read-only sections of BFD executable files.
    Return TARGET_XFER_OK, if read is successful.  Return
