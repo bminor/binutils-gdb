@@ -1,3 +1,7 @@
+2014-06-03  Gary Benson  <gbenson@redhat.com>
+
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Use gdb_demangle.
+
 2014-06-02  Doug Evans  <xdje42@gmail.com>
 
 	Add parameter support for Guile.
