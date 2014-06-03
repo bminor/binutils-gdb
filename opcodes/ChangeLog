@@ -1,3 +1,8 @@
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-dis.c (msp430_doubleoperand): Use extension_word to
+	decide when extended addressing is being used.
+
 2014-06-02  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* sparc-opc.c (cas): Disable for LEON.
@@ -34,7 +39,7 @@
 	* mips-dis.c (mips_arch_choices): Add mips32r3, mips32r5, mips64r3 and
 	mips64r5.
 	(parse_mips_dis_option): Update MSA and virtualization support to
-	allow mips64r3 and mips64r5. 
+	allow mips64r3 and mips64r5.
 
 2014-05-07  Andrew Bennett  <andrew.bennett@imgtec.com>
 
