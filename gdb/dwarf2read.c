@@ -235,6 +235,10 @@ struct dwarf2_per_objfile
   /* The number of .debug_types-related CUs.  */
   int n_type_units;
 
+  /* The number of elements allocated in all_type_units.
+     If there are skeleton-less TUs, we add them to all_type_units lazily.  */
+  int n_allocated_type_units;
+
   /* The .debug_types-related CUs (TUs).
      This is stored in malloc space because we may realloc it.  */
   struct signatured_type **all_type_units;
@@ -255,6 +259,7 @@ struct dwarf2_per_objfile
     int nr_symtabs;
     int nr_symtab_sharers;
     int nr_stmt_less_type_units;
+    int nr_all_type_units_reallocs;
   } tu_stats;
 
   /* A chain of compilation units that are currently read in, so that
@@ -2772,7 +2777,9 @@ create_signatured_type_table_from_index (struct objfile *objfile,
   offset_type i;
   htab_t sig_types_hash;
 
-  dwarf2_per_objfile->n_type_units = elements / 3;
+  dwarf2_per_objfile->n_type_units
+    = dwarf2_per_objfile->n_allocated_type_units
+    = elements / 3;
   dwarf2_per_objfile->all_type_units
     = xmalloc (dwarf2_per_objfile->n_type_units
 	       * sizeof (struct signatured_type *));
@@ -4676,7 +4683,9 @@ create_all_type_units (struct objfile *objfile)
 
   dwarf2_per_objfile->signatured_types = types_htab;
 
-  dwarf2_per_objfile->n_type_units = htab_elements (types_htab);
+  dwarf2_per_objfile->n_type_units
+    = dwarf2_per_objfile->n_allocated_type_units
+    = htab_elements (types_htab);
   dwarf2_per_objfile->all_type_units
     = xmalloc (dwarf2_per_objfile->n_type_units
 	       * sizeof (struct signatured_type *));
@@ -4686,6 +4695,55 @@ create_all_type_units (struct objfile *objfile)
 	      == dwarf2_per_objfile->n_type_units);
 
   return 1;
+}
+
+/* Add an entry for signature SIG to dwarf2_per_objfile->signatured_types.
+   If SLOT is non-NULL, it is the entry to use in the hash table.
+   Otherwise we find one.  */
+
+static struct signatured_type *
+add_type_unit (ULONGEST sig, void **slot)
+{
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  int n_type_units = dwarf2_per_objfile->n_type_units;
+  struct signatured_type *sig_type;
+
+  gdb_assert (n_type_units <= dwarf2_per_objfile->n_allocated_type_units);
+  ++n_type_units;
+  if (n_type_units > dwarf2_per_objfile->n_allocated_type_units)
+    {
+      if (dwarf2_per_objfile->n_allocated_type_units == 0)
+	dwarf2_per_objfile->n_allocated_type_units = 1;
+      dwarf2_per_objfile->n_allocated_type_units *= 2;
+      dwarf2_per_objfile->all_type_units
+	= xrealloc (dwarf2_per_objfile->all_type_units,
+		    dwarf2_per_objfile->n_allocated_type_units
+		    * sizeof (struct signatured_type *));
+      ++dwarf2_per_objfile->tu_stats.nr_all_type_units_reallocs;
+    }
+  dwarf2_per_objfile->n_type_units = n_type_units;
+
+  sig_type = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+			     struct signatured_type);
+  dwarf2_per_objfile->all_type_units[n_type_units - 1] = sig_type;
+  sig_type->signature = sig;
+  sig_type->per_cu.is_debug_types = 1;
+  if (dwarf2_per_objfile->using_index)
+    {
+      sig_type->per_cu.v.quick =
+	OBSTACK_ZALLOC (&objfile->objfile_obstack,
+			struct dwarf2_per_cu_quick_data);
+    }
+
+  if (slot == NULL)
+    {
+      slot = htab_find_slot (dwarf2_per_objfile->signatured_types,
+			     sig_type, INSERT);
+    }
+  gdb_assert (*slot == NULL);
+  *slot = sig_type;
+  /* The rest of sig_type must be filled in by the caller.  */
+  return sig_type;
 }
 
 /* Subroutine of lookup_dwo_signatured_type and lookup_dwp_signatured_type.
@@ -4699,8 +4757,13 @@ fill_in_sig_entry_from_dwo_entry (struct objfile *objfile,
   /* Make sure we're not clobbering something we don't expect to.  */
   gdb_assert (! sig_entry->per_cu.queued);
   gdb_assert (sig_entry->per_cu.cu == NULL);
-  gdb_assert (sig_entry->per_cu.v.quick != NULL);
-  gdb_assert (sig_entry->per_cu.v.quick->symtab == NULL);
+  if (dwarf2_per_objfile->using_index)
+    {
+      gdb_assert (sig_entry->per_cu.v.quick != NULL);
+      gdb_assert (sig_entry->per_cu.v.quick->symtab == NULL);
+    }
+  else
+      gdb_assert (sig_entry->per_cu.v.psymtab == NULL);
   gdb_assert (sig_entry->signature == dwo_entry->signature);
   gdb_assert (sig_entry->type_offset_in_section.sect_off == 0);
   gdb_assert (sig_entry->type_unit_group == NULL);
@@ -4734,32 +4797,44 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   struct dwo_file *dwo_file;
   struct dwo_unit find_dwo_entry, *dwo_entry;
   struct signatured_type find_sig_entry, *sig_entry;
+  void **slot;
 
   gdb_assert (cu->dwo_unit && dwarf2_per_objfile->using_index);
+
+  /* If TU skeletons have been removed then we may not have read in any
+     TUs yet.  */
+  if (dwarf2_per_objfile->signatured_types == NULL)
+    {
+      dwarf2_per_objfile->signatured_types
+	= allocate_signatured_type_table (objfile);
+    }
+
+  /* We only ever need to read in one copy of a signatured type.
+     Use the global signatured_types array to do our own comdat-folding
+     of types.  If this is the first time we're reading this TU, and
+     the TU has an entry in .gdb_index, replace the recorded data from
+     .gdb_index with this TU.  */
+
+  find_sig_entry.signature = sig;
+  slot = htab_find_slot (dwarf2_per_objfile->signatured_types,
+			 &find_sig_entry, INSERT);
+  sig_entry = *slot;
+
+  /* We can get here with the TU already read, *or* in the process of being
+     read.  Don't reassign the global entry to point to this DWO if that's
+     the case.  Also note that if the TU is already being read, it may not
+     have come from a DWO, the program may be a mix of Fission-compiled
+     code and non-Fission-compiled code.  */
+
+  /* Have we already tried to read this TU?
+     Note: sig_entry can be NULL if the skeleton TU was removed (thus it
+     needn't exist in the global table yet).  */
+  if (sig_entry != NULL && sig_entry->per_cu.tu_read)
+    return sig_entry;
 
   /* Note: cu->dwo_unit is the dwo_unit that references this TU, not the
      dwo_unit of the TU itself.  */
   dwo_file = cu->dwo_unit->dwo_file;
-
-  /* We only ever need to read in one copy of a signatured type.
-     Just use the global signatured_types array.  If this is the first time
-     we're reading this type, replace the recorded data from .gdb_index with
-     this TU.  */
-
-  if (dwarf2_per_objfile->signatured_types == NULL)
-    return NULL;
-  find_sig_entry.signature = sig;
-  sig_entry = htab_find (dwarf2_per_objfile->signatured_types, &find_sig_entry);
-  if (sig_entry == NULL)
-    return NULL;
-
-  /* We can get here with the TU already read, *or* in the process of being
-     read.  Don't reassign it if that's the case.  Also note that if the TU is
-     already being read, it may not have come from a DWO, the program may be
-     a mix of Fission-compiled code and non-Fission-compiled code.  */
-  /* Have we already tried to read this TU?  */
-  if (sig_entry->per_cu.tu_read)
-    return sig_entry;
 
   /* Ok, this is the first time we're reading this TU.  */
   if (dwo_file->tus == NULL)
@@ -4769,51 +4844,19 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (dwo_entry == NULL)
     return NULL;
 
+  /* If the global table doesn't have an entry for this TU, add one.  */
+  if (sig_entry == NULL)
+    sig_entry = add_type_unit (sig, slot);
+
   fill_in_sig_entry_from_dwo_entry (objfile, sig_entry, dwo_entry);
   sig_entry->per_cu.tu_read = 1;
   return sig_entry;
 }
 
-/* Subroutine of lookup_dwp_signatured_type.
-   Add an entry for signature SIG to dwarf2_per_objfile->signatured_types.  */
-
-static struct signatured_type *
-add_type_unit (ULONGEST sig)
-{
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
-  int n_type_units = dwarf2_per_objfile->n_type_units;
-  struct signatured_type *sig_type;
-  void **slot;
-
-  ++n_type_units;
-  dwarf2_per_objfile->all_type_units =
-    xrealloc (dwarf2_per_objfile->all_type_units,
-	      n_type_units * sizeof (struct signatured_type *));
-  dwarf2_per_objfile->n_type_units = n_type_units;
-  sig_type = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-			     struct signatured_type);
-  dwarf2_per_objfile->all_type_units[n_type_units - 1] = sig_type;
-  sig_type->signature = sig;
-  sig_type->per_cu.is_debug_types = 1;
-  sig_type->per_cu.v.quick =
-    OBSTACK_ZALLOC (&objfile->objfile_obstack,
-		    struct dwarf2_per_cu_quick_data);
-  slot = htab_find_slot (dwarf2_per_objfile->signatured_types,
-			 sig_type, INSERT);
-  gdb_assert (*slot == NULL);
-  *slot = sig_type;
-  /* The rest of sig_type must be filled in by the caller.  */
-  return sig_type;
-}
-
 /* Subroutine of lookup_signatured_type.
    Look up the type for signature SIG, and if we can't find SIG in .gdb_index
-   then try the DWP file.
-   Normally this "can't happen", but if there's a bug in signature
-   generation and/or the DWP file is built incorrectly, it can happen.
-   Using the type directly from the DWP file means we don't have the stub
-   which has some useful attributes (e.g., DW_AT_comp_dir), but they're
-   not critical.  [Eventually the stub may go away for type units anyway.]  */
+   then try the DWP file.  If the TU stub (skeleton) has been removed then
+   it won't be in .gdb_index.  */
 
 static struct signatured_type *
 lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
@@ -4822,21 +4865,30 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   struct dwp_file *dwp_file = get_dwp_file ();
   struct dwo_unit *dwo_entry;
   struct signatured_type find_sig_entry, *sig_entry;
+  void **slot;
 
   gdb_assert (cu->dwo_unit && dwarf2_per_objfile->using_index);
   gdb_assert (dwp_file != NULL);
 
-  if (dwarf2_per_objfile->signatured_types != NULL)
+  /* If TU skeletons have been removed then we may not have read in any
+     TUs yet.  */
+  if (dwarf2_per_objfile->signatured_types == NULL)
     {
-      find_sig_entry.signature = sig;
-      sig_entry = htab_find (dwarf2_per_objfile->signatured_types,
-			     &find_sig_entry);
-      if (sig_entry != NULL)
-	return sig_entry;
+      dwarf2_per_objfile->signatured_types
+	= allocate_signatured_type_table (objfile);
     }
 
-  /* This is the "shouldn't happen" case.
-     Try the DWP file and hope for the best.  */
+  find_sig_entry.signature = sig;
+  slot = htab_find_slot (dwarf2_per_objfile->signatured_types,
+			 &find_sig_entry, INSERT);
+  sig_entry = *slot;
+
+  /* Have we already tried to read this TU?
+     Note: sig_entry can be NULL if the skeleton TU was removed (thus it
+     needn't exist in the global table yet).  */
+  if (sig_entry != NULL)
+    return sig_entry;
+
   if (dwp_file->tus == NULL)
     return NULL;
   dwo_entry = lookup_dwo_unit_in_dwp (dwp_file, NULL,
@@ -4844,18 +4896,8 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (dwo_entry == NULL)
     return NULL;
 
-  sig_entry = add_type_unit (sig);
+  sig_entry = add_type_unit (sig, slot);
   fill_in_sig_entry_from_dwo_entry (objfile, sig_entry, dwo_entry);
-
-  /* The caller will signal a complaint if we return NULL.
-     Here we don't return NULL but we still want to complain.  */
-  complaint (&symfile_complaints,
-	     _("Bad type signature %s referenced by %s at 0x%x,"
-	       " coping by using copy in DWP [in module %s]"),
-	     hex_string (sig),
-	     cu->per_cu->is_debug_types ? "TU" : "CU",
-	     cu->per_cu->offset.sect_off,
-	     objfile_name (objfile));
 
   return sig_entry;
 }
@@ -5177,16 +5219,23 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
 }
 
 /* Subroutine of init_cutu_and_read_dies to simplify it.
-   Read a TU directly from a DWO file, bypassing the stub.  */
+   See it for a description of the parameters.
+   Read a TU directly from a DWO file, bypassing the stub.
+
+   Note: This function could be a little bit simpler if we shared cleanups
+   with our caller, init_cutu_and_read_dies.  That's generally a fragile thing
+   to do, so we keep this function self-contained.  Or we could move this
+   into our caller, but it's complex enough already.  */
 
 static void
-init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu, int keep,
+init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
+			   int use_existing_cu, int keep,
 			   die_reader_func_ftype *die_reader_func,
 			   void *data)
 {
   struct dwarf2_cu *cu;
   struct signatured_type *sig_type;
-  struct cleanup *cleanups, *free_cu_cleanup;
+  struct cleanup *cleanups, *free_cu_cleanup = NULL;
   struct die_reader_specs reader;
   const gdb_byte *info_ptr;
   struct die_info *comp_unit_die;
@@ -5200,11 +5249,26 @@ init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu, int keep,
 
   cleanups = make_cleanup (null_cleanup, NULL);
 
-  gdb_assert (this_cu->cu == NULL);
-  cu = xmalloc (sizeof (*cu));
-  init_one_comp_unit (cu, this_cu);
-  /* If an error occurs while loading, release our storage.  */
-  free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
+  if (use_existing_cu && this_cu->cu != NULL)
+    {
+      gdb_assert (this_cu->cu->dwo_unit == sig_type->dwo_unit);
+      cu = this_cu->cu;
+      /* There's no need to do the rereading_dwo_cu handling that
+	 init_cutu_and_read_dies does since we don't read the stub.  */
+    }
+  else
+    {
+      /* If !use_existing_cu, this_cu->cu must be NULL.  */
+      gdb_assert (this_cu->cu == NULL);
+      cu = xmalloc (sizeof (*cu));
+      init_one_comp_unit (cu, this_cu);
+      /* If an error occurs while loading, release our storage.  */
+      free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
+    }
+
+  /* A future optimization, if needed, would be to use an existing
+     abbrev table.  When reading DWOs with skeletonless TUs, all the TUs
+     could share abbrev tables.  */
 
   if (read_cutu_die_from_dwo (this_cu, sig_type->dwo_unit,
 			      0 /* abbrev_table_provided */,
@@ -5221,26 +5285,29 @@ init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu, int keep,
   /* All the "real" work is done here.  */
   die_reader_func (&reader, info_ptr, comp_unit_die, has_children, data);
 
-  /* This duplicates some code in init_cutu_and_read_dies,
+  /* This duplicates the code in init_cutu_and_read_dies,
      but the alternative is making the latter more complex.
      This function is only for the special case of using DWO files directly:
      no point in overly complicating the general case just to handle this.  */
-  if (keep)
+  if (free_cu_cleanup != NULL)
     {
-      /* We've successfully allocated this compilation unit.  Let our
-	 caller clean it up when finished with it.  */
-      discard_cleanups (free_cu_cleanup);
+      if (keep)
+	{
+	  /* We've successfully allocated this compilation unit.  Let our
+	     caller clean it up when finished with it.  */
+	  discard_cleanups (free_cu_cleanup);
 
-      /* We can only discard free_cu_cleanup and all subsequent cleanups.
-	 So we have to manually free the abbrev table.  */
-      dwarf2_free_abbrev_table (cu);
+	  /* We can only discard free_cu_cleanup and all subsequent cleanups.
+	     So we have to manually free the abbrev table.  */
+	  dwarf2_free_abbrev_table (cu);
 
-      /* Link this CU into read_in_chain.  */
-      this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
-      dwarf2_per_objfile->read_in_chain = this_cu;
+	  /* Link this CU into read_in_chain.  */
+	  this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+	  dwarf2_per_objfile->read_in_chain = this_cu;
+	}
+      else
+	do_cleanups (free_cu_cleanup);
     }
-  else
-    do_cleanups (free_cu_cleanup);
 
   do_cleanups (cleanups);
 }
@@ -5300,8 +5367,8 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       /* Narrow down the scope of possibilities to have to understand.  */
       gdb_assert (this_cu->is_debug_types);
       gdb_assert (abbrev_table == NULL);
-      gdb_assert (!use_existing_cu);
-      init_tu_and_read_dwo_dies (this_cu, keep, die_reader_func, data);
+      init_tu_and_read_dwo_dies (this_cu, use_existing_cu, keep,
+				 die_reader_func, data);
       return;
     }
 
@@ -5317,7 +5384,6 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   if (use_existing_cu && this_cu->cu != NULL)
     {
       cu = this_cu->cu;
-
       /* If this CU is from a DWO file we need to start over, we need to
 	 refetch the attributes from the skeleton CU.
 	 This could be optimized by retrieving those attributes from when we
@@ -5331,10 +5397,8 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
     {
       /* If !use_existing_cu, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
-
       cu = xmalloc (sizeof (*cu));
       init_one_comp_unit (cu, this_cu);
-
       /* If an error occurs while loading, release our storage.  */
       free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
     }
@@ -6114,31 +6178,29 @@ build_type_psymtabs_1 (void)
 			       build_type_psymtabs_reader, NULL);
     }
 
-  /* type_unit_groups can be NULL if there is an error in the debug info.
-     Just create an empty table so the rest of gdb doesn't have to watch
-     for this error case.  */
-  if (dwarf2_per_objfile->type_unit_groups == NULL)
-    {
-      dwarf2_per_objfile->type_unit_groups =
-	allocate_type_unit_groups_table ();
-    }
-
   do_cleanups (cleanups);
+}
 
-  if (dwarf2_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "Done building type unit groups:\n");
-      fprintf_unfiltered (gdb_stdlog, "  %d TUs\n",
-			  dwarf2_per_objfile->n_type_units);
-      fprintf_unfiltered (gdb_stdlog, "  %d uniq abbrev tables\n",
-			  tu_stats->nr_uniq_abbrev_tables);
-      fprintf_unfiltered (gdb_stdlog, "  %d symtabs from stmt_list entries\n",
-			  tu_stats->nr_symtabs);
-      fprintf_unfiltered (gdb_stdlog, "  %d symtab sharers\n",
-			  tu_stats->nr_symtab_sharers);
-      fprintf_unfiltered (gdb_stdlog, "  %d type units without a stmt_list\n",
-			  tu_stats->nr_stmt_less_type_units);
-    }
+/* Print collected type unit statistics.  */
+
+static void
+print_tu_stats (void)
+{
+  struct tu_stats *tu_stats = &dwarf2_per_objfile->tu_stats;
+
+  fprintf_unfiltered (gdb_stdlog, "Type unit statistics:\n");
+  fprintf_unfiltered (gdb_stdlog, "  %d TUs\n",
+		      dwarf2_per_objfile->n_type_units);
+  fprintf_unfiltered (gdb_stdlog, "  %d uniq abbrev tables\n",
+		      tu_stats->nr_uniq_abbrev_tables);
+  fprintf_unfiltered (gdb_stdlog, "  %d symtabs from stmt_list entries\n",
+		      tu_stats->nr_symtabs);
+  fprintf_unfiltered (gdb_stdlog, "  %d symtab sharers\n",
+		      tu_stats->nr_symtab_sharers);
+  fprintf_unfiltered (gdb_stdlog, "  %d type units without a stmt_list\n",
+		      tu_stats->nr_stmt_less_type_units);
+  fprintf_unfiltered (gdb_stdlog, "  %d all_type_units reallocs\n",
+		      tu_stats->nr_all_type_units_reallocs);
 }
 
 /* Traversal function for build_type_psymtabs.  */
@@ -6184,10 +6246,78 @@ build_type_psymtabs (struct objfile *objfile)
     return;
 
   build_type_psymtabs_1 ();
+}
 
-  /* Now that all TUs have been processed we can fill in the dependencies.  */
-  htab_traverse_noresize (dwarf2_per_objfile->type_unit_groups,
-			  build_type_psymtab_dependencies, NULL);
+/* Traversal function for process_skeletonless_type_unit.
+   Read a TU in a DWO file and build partial symbols for it.  */
+
+static int
+process_skeletonless_type_unit (void **slot, void *info)
+{
+  struct dwo_unit *dwo_unit = (struct dwo_unit *) *slot;
+  struct objfile *objfile = info;
+  struct signatured_type find_entry, *entry;
+
+  /* If this TU doesn't exist in the global table, add it and read it in.  */
+
+  if (dwarf2_per_objfile->signatured_types == NULL)
+    {
+      dwarf2_per_objfile->signatured_types
+	= allocate_signatured_type_table (objfile);
+    }
+
+  find_entry.signature = dwo_unit->signature;
+  slot = htab_find_slot (dwarf2_per_objfile->signatured_types, &find_entry,
+			 INSERT);
+  /* If we've already seen this type there's nothing to do.  What's happening
+     is we're doing our own version of comdat-folding here.  */
+  if (*slot != NULL)
+    return 1;
+
+  /* This does the job that create_all_type_units would have done for
+     this TU.  */
+  entry = add_type_unit (dwo_unit->signature, slot);
+  fill_in_sig_entry_from_dwo_entry (objfile, entry, dwo_unit);
+  *slot = entry;
+
+  /* This does the job that build_type_psymtabs_1 would have done.  */
+  init_cutu_and_read_dies (&entry->per_cu, NULL, 0, 0,
+			   build_type_psymtabs_reader, NULL);
+
+  return 1;
+}
+
+/* Traversal function for process_skeletonless_type_units.  */
+
+static int
+process_dwo_file_for_skeletonless_type_units (void **slot, void *info)
+{
+  struct dwo_file *dwo_file = (struct dwo_file *) *slot;
+
+  if (dwo_file->tus != NULL)
+    {
+      htab_traverse_noresize (dwo_file->tus,
+			      process_skeletonless_type_unit, info);
+    }
+
+  return 1;
+}
+
+/* Scan all TUs of DWO files, verifying we've processed them.
+   This is needed in case a TU was emitted without its skeleton.
+   Note: This can't be done until we know what all the DWO files are.  */
+
+static void
+process_skeletonless_type_units (struct objfile *objfile)
+{
+  /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
+  if (get_dwp_file () == NULL
+      && dwarf2_per_objfile->dwo_files != NULL)
+    {
+      htab_traverse_noresize (dwarf2_per_objfile->dwo_files,
+			      process_dwo_file_for_skeletonless_type_units,
+			      objfile);
+    }
 }
 
 /* A cleanup function that clears objfile's psymtabs_addrmap field.  */
@@ -6266,6 +6396,19 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
 
       process_psymtab_comp_unit (per_cu, 0, language_minimal);
     }
+
+  /* This has to wait until we read the CUs, we need the list of DWOs.  */
+  process_skeletonless_type_units (objfile);
+
+  /* Now that all TUs have been processed we can fill in the dependencies.  */
+  if (dwarf2_per_objfile->type_unit_groups != NULL)
+    {
+      htab_traverse_noresize (dwarf2_per_objfile->type_unit_groups,
+			      build_type_psymtab_dependencies, NULL);
+    }
+
+  if (dwarf2_read_debug)
+    print_tu_stats ();
 
   set_partial_user (objfile);
 

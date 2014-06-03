@@ -1,3 +1,31 @@
+2014-06-02  Doug Evans  <dje@google.com>
+
+	Add support for skeletonless type units.
+	* dwarf2read.c (struct dwarf2_per_objfile): New member
+	n_allocated_type_units.
+	(struct dwarf2_per_objfile) <tu_stats>: New member
+	nr_all_type_units_reallocs.
+	(create_signatured_type_table_from_index): Initialize
+	n_allocated_type_units
+	(create_all_type_units): Ditto.
+	(add_type_unit): Move up in file.  New arg slot.
+	All callers updated.  Increase space for all_type_units more
+	efficiently.
+	(fill_in_sig_entry_from_dwo_entry): Handle psymtabs.
+	(lookup_dwo_signatured_type): Handle skeletonless TUs.
+	(lookup_dwp_signatured_type): Ditto.
+	(init_tu_and_read_dwo_dies): New arg use_existing_cu.
+	All callers updated.
+	(build_type_psymtabs_1): Leave type_unit_groups as
+	NULL if no TUs present.
+	(print_tu_stats): New function.
+	(process_skeletonless_type_unit): New function.
+	(process_dwo_file_for_skeletonless_type_units): New
+	function.
+	(process_skeletonless_type_units): New function.
+	(dwarf2_build_psymtabs_hard): Handle skeletonless TUs.
+	Call print tu_stats if debugging enabled.
+
 2014-06-02  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (build_target_command_list): Don't build a command
