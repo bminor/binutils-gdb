@@ -1,3 +1,9 @@
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16807
+	* peXXigen.c (rsrc_process_section): Page align the new contents
+	befgore writing out.
+
 2014-06-03  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ADDIS_R12_R2): Define.

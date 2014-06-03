@@ -2398,7 +2398,16 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	  if (data == (regions.section_end - 4))
 	    data = regions.section_end;
 	  else if (data < regions.section_end)
-	    fprintf (file, _("\nWARNING: Extra data in .rsrc section - it will be ignored by Windows:\n"));
+	    {
+	      /* If the extra data is all zeros then do not complain.
+		 This is just padding so that the section meets the
+		 page size requirements.  */
+	      while (data ++ < regions.section_end)
+		if (*data != 0)
+		  break;
+	      if (data < regions.section_end)
+		fprintf (file, _("\nWARNING: Extra data in .rsrc section - it will be ignored by Windows:\n"));
+	    }
 	}
     }
 
@@ -3911,6 +3920,7 @@ rsrc_process_section (bfd * abfd,
   data = bfd_malloc (size);
   if (data == NULL)
     return;
+
   datastart = data;
 
   if (! bfd_get_section_contents (abfd, sec, data, 0, size))
@@ -4052,7 +4062,7 @@ rsrc_process_section (bfd * abfd,
      starts on an 8-byte boundary.  FIXME: Is this correct ?  */
   sizeof_strings = (sizeof_strings + 7) & ~ 7;
 
-  new_data = bfd_malloc (size);
+  new_data = bfd_zalloc (abfd, size);
   if (new_data == NULL)
     goto end;
 
@@ -4069,6 +4079,24 @@ rsrc_process_section (bfd * abfd,
   /* Step five: Replace the old contents with the new.
      We recompute the size as we may have lost entries due to mergeing.  */
   size = ((write_data.next_data - new_data) + 3) & ~ 3;
+
+  {
+    int page_size;
+
+    if (coff_data (abfd)->link_info)
+      {
+	page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
+
+	/* If no file alignment has been set, default to one.
+	   This repairs 'ld -r' for arm-wince-pe target.  */
+	if (page_size == 0)
+	  page_size = 1;
+      }
+    else
+      page_size = PE_DEF_FILE_ALIGNMENT;
+    size = (size + page_size - 1) & - page_size;
+  }
+
   bfd_set_section_contents (pfinfo->output_bfd, sec, new_data, 0, size);
   sec->size = sec->rawsize = size;
 
