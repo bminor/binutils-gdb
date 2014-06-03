@@ -413,16 +413,24 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 	  switch (addr)
 	    {
 	    case 0x13A:
-	      rv = zero_ext (hwmult_result, 16);
+	      switch (hwmult_type)
+		{
+		case UNSIGN_MAC_32:
+		case UNSIGN_32:     rv = zero_ext (hwmult_result, 16); break;
+		case SIGN_MAC_32: 
+		case SIGN_32:       rv = sign_ext (hwmult_signed_result, 16); break;
+		}
 	      break;
 
 	    case 0x13C:
 	      switch (hwmult_type)
 		{
+		case UNSIGN_MAC_32:
 		case UNSIGN_32:
 		  rv = zero_ext (hwmult_result >> 16, 16);
 		  break;
 
+		case SIGN_MAC_32:
 		case SIGN_32:
 		  rv = sign_ext (hwmult_signed_result >> 16, 16);
 		  break;
@@ -599,7 +607,8 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		case UNSIGN_MAC_32:
 		  hwmult_accumulator += hwmult_op1 * hwmult_op2;
 		  hwmult_signed_accumulator += hwmult_op1 * hwmult_op2;
-		  hwmult_result = hwmult_signed_result = 0;
+		  hwmult_result = hwmult_accumulator;
+		  hwmult_signed_result = hwmult_signed_accumulator;
 		  break;
 
 		case SIGN_MAC_32:
@@ -607,11 +616,29 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		  b = sign_ext (hwmult_op2, 16);
 		  hwmult_accumulator += a * b;
 		  hwmult_signed_accumulator += a * b;
-		  hwmult_result = hwmult_signed_result = 0;
+		  hwmult_result = hwmult_accumulator;
+		  hwmult_signed_result = hwmult_signed_accumulator;
 		  break;
 		}
 	      break;
 
+	    case 0x13a:
+	      /* Copy into LOW result...  */
+	      switch (hwmult_type)
+		{
+		case UNSIGN_MAC_32:
+		case UNSIGN_32:
+		  hwmult_accumulator = hwmult_result = zero_ext (val, 16);
+		  hwmult_signed_accumulator = sign_ext (val, 16);
+		  break;
+		case SIGN_MAC_32:
+		case SIGN_32:
+		  hwmult_signed_accumulator = hwmult_result = sign_ext (val, 16);
+		  hwmult_accumulator = zero_ext (val, 16);
+		  break;
+		}
+	      break;
+		
 	    case 0x140: hw32mult_op1 = val; hw32mult_type = UNSIGN_64; break;
 	    case 0x142: hw32mult_op1 = (hw32mult_op1 & 0xFFFF) | (val << 16); break;
 	    case 0x144: hw32mult_op1 = val; hw32mult_type = SIGN_64; break;

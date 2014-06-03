@@ -1,3 +1,10 @@
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-sim.c (get_op): Handle reads of low result register when
+	in MAC mode.
+	(put_op): Copy MAC result into result words.
+	Handle writes to the low result register.
+
 2014-05-12  DJ Delorie  <dj@redhat.com>
 
 	* msp43-sim.c (sign_ext): Change to "long long" to support
