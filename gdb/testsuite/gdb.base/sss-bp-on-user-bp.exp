@@ -47,6 +47,5 @@ gdb_test "si" "Breakpoint .* bar break .*"
 
 # If the breakpoint is still correctly inserted, then this jump should
 # re-trigger it.  Otherwise, GDB will lose control and the program
-# will exit.
-setup_kfail "breakpoints/17000" "*-*-*"
+# will exit.  See PR breakpoints/17000.
 gdb_test "jump *\$pc" "Breakpoint .* bar break .*"

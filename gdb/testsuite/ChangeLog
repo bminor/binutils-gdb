@@ -1,3 +1,10 @@
+2014-06-03  Joel Brobecker  <brobecker@adacore.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/17000
+	* gdb.base/sss-bp-on-user-bp.exp: Remove kfail.
+	* gdb.base/sss-bp-on-user-bp-2.exp: Remove kfail.
+
 2014-06-03  Brad Mouring  <bmouring@ni.com>  (tiny patch)
 
 	* gdb.base/subst.exp: Add tests to verify partial path matching

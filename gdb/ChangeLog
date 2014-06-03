@@ -1,3 +1,26 @@
+2014-06-03  Joel Brobecker  <brobecker@adacore.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/17000
+	* breakpoint.c (find_non_raw_software_breakpoint_inserted_here):
+	New function, extracted from software_breakpoint_inserted_here_p.
+	(software_breakpoint_inserted_here_p): Replace factored out code
+	by call to find_non_raw_software_breakpoint_inserted_here.
+	(bp_target_info_copy_insertion_state): New function.
+	(bkpt_insert_location): Handle the case of a single-step
+	breakpoint already inserted at the same address.
+	(bkpt_remove_location): Handle the case of a single-step
+	breakpoint still inserted at the same address.
+	(deprecated_insert_raw_breakpoint): Handle the case of non-raw
+	breakpoint already inserted at the same address.
+	(deprecated_remove_raw_breakpoint): Handle the case of a
+	non-raw breakpoint still inserted at the same address.
+	(find_single_step_breakpoint): New function, extracted from
+	single_step_breakpoint_inserted_here_p.
+	(find_single_step_breakpoint): New function,
+	factored out from single_step_breakpoint_inserted_here_p.
+	(single_step_breakpoint_inserted_here_p): Reimplement.
+
 2014-06-03  Brad Mouring  <bmouring@ni.com>  (tiny patch)
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>

@@ -121,7 +121,6 @@ gdb_test_multiple $test $test {
 
 set command "stepi_del_break"
 set test $command
-setup_kfail "breakpoints/17000" "*-*-*"
 gdb_test_multiple $command $test {
     -re "^$command\r\n$gdb_prompt " {
 	# Note no end anchor, because "si&" finishes and prints the
