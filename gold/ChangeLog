@@ -1,3 +1,8 @@
+2014-06-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/plugin_test.c (parse_readelf_line): Skip non-visibility
+	st_other output.
+
 2014-06-02  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::local_reloc_may_be_function_pointer):
