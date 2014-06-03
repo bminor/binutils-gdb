@@ -3867,15 +3867,15 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
 
   bfd_hash_traverse (&(info->info->hash->table), rx_table_map_2, info);
 
-  fprintf (info->mapfile, "\nRX Vector Table: %s has %d entries at 0x%08lx\n\n",
+  fprintf (info->mapfile, "\nRX Vector Table: %s has %d entries at 0x%08" BFD_VMA_FMT "x\n\n",
 	   tname, info->table_size, start_addr);
 
   if (info->table_default_entry)
-    fprintf (info->mapfile, "  default handler is: %s at 0x%08lx\n",
+    fprintf (info->mapfile, "  default handler is: %s at 0x%08" BFD_VMA_FMT "x\n",
 	     info->table_default_entry->root.string,
 	     info->table_default_handler);
   else if (info->table_default_handler != (bfd_vma)(-1))
-    fprintf (info->mapfile, "  default handler is at 0x%08lx\n",
+    fprintf (info->mapfile, "  default handler is at 0x%08" BFD_VMA_FMT "x\n",
 	     info->table_default_handler);
   else
     fprintf (info->mapfile, "  no default handler\n");
@@ -3892,7 +3892,7 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
 	}
       need_elipses = 1;
 
-      fprintf (info->mapfile, "  0x%08lx [%3d] ", start_addr + 4 * idx, idx);
+      fprintf (info->mapfile, "  0x%08" BFD_VMA_FMT "x [%3d] ", start_addr + 4 * idx, idx);
 
       if (info->table_handlers[idx] == (bfd_vma) (-1))
 	fprintf (info->mapfile, "(no handler found)\n");
@@ -3907,12 +3907,12 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
 
       else if (info->table_entries[idx])
 	{
-	  fprintf (info->mapfile, "0x%08lx %s\n", info->table_handlers[idx], info->table_entries[idx]->root.string);
+	  fprintf (info->mapfile, "0x%08" BFD_VMA_FMT "x %s\n", info->table_handlers[idx], info->table_entries[idx]->root.string);
 	}
 
       else
 	{
-	  fprintf (info->mapfile, "0x%08lx ???\n", info->table_handlers[idx]);
+	  fprintf (info->mapfile, "0x%08" BFD_VMA_FMT "x ???\n", info->table_handlers[idx]);
 	}
     }
   if (need_elipses)

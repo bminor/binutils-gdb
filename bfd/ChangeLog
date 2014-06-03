@@ -1,3 +1,7 @@
+2014-06-03  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rx.c (rx_table_map): Use BFD_VMA_FMT for portability.
+
 2014-06-03  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16807
