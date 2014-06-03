@@ -1,3 +1,14 @@
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* regset.h (struct regset): Rename 'descr' field to 'regmap'.
+	* ppc-linux-tdep.c (ppc_linux_supply_gregset)
+	(ppc_linux_collect_gregset ): Likewise.
+	* rs6000-tdep.c (ppc_supply_gregset, ppc_supply_fpregset)
+	(ppc_supply_vrregset, ppc_collect_gregset, ppc_collect_fpregset)
+	(ppc_collect_vrregset): Likewise.
+	* s390-linux-tdep.c (s390_supply_regset, s390_collect_regset):
+	Likewise.
+
 2014-08-07  Yao Qi  <yao@codesourcery.com>
 
 	* corelow.c (core_xfer_partial): Replace 0 with TARGET_XFER_EOF.

@@ -609,7 +609,7 @@ s390_supply_regset (const struct regset *regset, struct regcache *regcache,
 		    int regnum, const void *regs, size_t len)
 {
   const short *map;
-  for (map = regset->descr; map[0] >= 0; map += 2)
+  for (map = regset->regmap; map[0] >= 0; map += 2)
     if (regnum == -1 || regnum == map[1])
       regcache_raw_supply (regcache, map[1],
 			   regs ? (const char *)regs + map[0] : NULL);
@@ -642,7 +642,7 @@ s390_collect_regset (const struct regset *regset,
 		     int regnum, void *regs, size_t len)
 {
   const short *map;
-  for (map = regset->descr; map[0] >= 0; map += 2)
+  for (map = regset->regmap; map[0] >= 0; map += 2)
     if (regnum == -1 || regnum == map[1])
       regcache_raw_collect (regcache, map[1], (char *)regs + map[0]);
 }

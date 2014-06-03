@@ -41,9 +41,10 @@ typedef void (collect_regset_ftype) (const struct regset *,
 
 struct regset
 {
-  /* Data pointer for private use by the methods below, presumably
-     providing some sort of description of the register set.  */
-  const void *descr;
+  /* Pointer to a "register map", for private use by the methods
+     below.  Typically describes how the regset's registers are
+     arranged in the buffer collected to or supplied from.  */
+  const void *regmap;
 
   /* Function supplying values in a register set to a register cache.  */
   supply_regset_ftype *supply_regset;
