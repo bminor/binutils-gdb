@@ -2322,7 +2322,7 @@ The @code{matcher} is registered with @code{locus}, replacing an
 existing matcher with the same name as @code{matcher} if
 @code{replace} is @code{True}.  @code{locus} can be a
 @code{gdb.Objfile} object (@pxref{Objfiles In Python}), or a
-@code{gdb.Progspace} object (@pxref{Program Spaces In Python}), or
+@code{gdb.Progspace} object (@pxref{Progspaces In Python}), or
 @code{None}.  If it is @code{None}, then @code{matcher} is registered
 globally.
 @end defun

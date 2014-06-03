@@ -1,3 +1,8 @@
+2014-06-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* python.texi (Xmethod API): Fix reference to "Progspaces In
+	Python".
+
 2014-06-03  Siva Chandra Reddy  <sivachandra@google.com>
 
 	*  python.texi (Xmethods In Python, XMethod API)
