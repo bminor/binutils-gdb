@@ -1,3 +1,8 @@
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/ar.exp: Skip tests involving bfdtest1 and bfdtest2
+	if these executables are not present.
+
 2014-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/debug_str.s: New test.
