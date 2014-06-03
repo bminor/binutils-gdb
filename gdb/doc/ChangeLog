@@ -1,5 +1,13 @@
 2014-06-02  Doug Evans  <xdje42@gmail.com>
 
+	* guile.texi (Guile API): Add entry for Commands In Guile.
+	(Basic Guile) <parse-and-eval>: Add reference.
+	(Basic Guile) <string->argv>: Move definition to Commands In Guile.
+	(GDB Scheme Data Types): Mention <gdb:command> object.
+	(Commands In Guile): New node.
+
+2014-06-02  Doug Evans  <xdje42@gmail.com>
+
 	* guile.texi (Guile API): Add entry for Progspaces In Guile.
 	(GDB Scheme Data Types): Mention <gdb:progspace> object.
 	(Progspaces In Guile): New node.

@@ -288,6 +288,7 @@ SUBDIR_GUILE_OBS = \
 	scm-auto-load.o \
 	scm-block.o \
 	scm-breakpoint.o \
+	scm-cmd.o \
 	scm-disasm.o \
 	scm-exception.o \
 	scm-frame.o \
@@ -312,6 +313,7 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-auto-load.c \
 	guile/scm-block.c \
 	guile/scm-breakpoint.c \
+	guile/scm-cmd.c \
 	guile/scm-disasm.c \
 	guile/scm-exception.c \
 	guile/scm-frame.c \
@@ -2270,6 +2272,10 @@ scm-block.o: $(srcdir)/guile/scm-block.c
 
 scm-breakpoint.o: $(srcdir)/guile/scm-breakpoint.c
 	$(COMPILE) $(srcdir)/guile/scm-breakpoint.c
+	$(POSTCOMPILE)
+
+scm-cmd.o: $(srcdir)/guile/scm-cmd.c
+	$(COMPILE) $(srcdir)/guile/scm-cmd.c
 	$(POSTCOMPILE)
 
 scm-disasm.o: $(srcdir)/guile/scm-disasm.c

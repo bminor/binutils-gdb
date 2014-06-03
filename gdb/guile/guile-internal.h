@@ -164,6 +164,8 @@ extern ULONGEST gdbscm_scm_to_ulongest (SCM u);
 extern void gdbscm_dynwind_xfree (void *ptr);
 
 extern int gdbscm_is_procedure (SCM proc);
+
+extern char *gdbscm_gc_xstrdup (const char *);
 
 /* GDB smobs, from scm-gsmob.c */
 
@@ -315,6 +317,8 @@ extern char *gdbscm_exception_message_to_string (SCM exception);
 
 extern excp_matcher_func gdbscm_memory_error_p;
 
+extern excp_matcher_func gdbscm_user_error_p;
+
 extern SCM gdbscm_make_memory_error (const char *subr, const char *msg,
 				     SCM args);
 
@@ -374,6 +378,15 @@ extern SCM bkscm_scm_from_block (const struct block *block,
 
 extern const struct block *bkscm_scm_to_block
   (SCM block_scm, int arg_pos, const char *func_name, SCM *excp);
+
+/* scm-cmd.c */
+
+extern char *gdbscm_parse_command_name (const char *name,
+					const char *func_name, int arg_pos,
+					struct cmd_list_element ***base_list,
+					struct cmd_list_element **start_list);
+
+extern int gdbscm_valid_command_class_p (int command_class);
 
 /* scm-frame.c */
 
@@ -543,6 +556,7 @@ extern void gdbscm_initialize_arches (void);
 extern void gdbscm_initialize_auto_load (void);
 extern void gdbscm_initialize_blocks (void);
 extern void gdbscm_initialize_breakpoints (void);
+extern void gdbscm_initialize_commands (void);
 extern void gdbscm_initialize_disasm (void);
 extern void gdbscm_initialize_exceptions (void);
 extern void gdbscm_initialize_frames (void);

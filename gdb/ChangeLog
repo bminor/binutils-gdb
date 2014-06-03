@@ -1,3 +1,25 @@
+2014-06-02  Doug Evans  <xdje42@gmail.com>
+
+	Add command support for Guile.
+	* Makefile.in (SUBDIR_GUILE_OBS): Add scm-cmd.o.
+	(SUBDIR_GUILE_SRCS): Add scm-cmd.c.
+	(scm-cmd.o): New rule.
+	* guile/guile-internal.h (gdbscm_gc_xstrdup): Declare.
+	(gdbscm_user_error_p): Declare.
+	(gdbscm_parse_command_name): Declare.
+	(gdbscm_valid_command_class_p): Declare.
+	(gdbscm_initialize_commands): Declare.
+	* guile/guile.c (initialize_gdb_module): Call
+	gdbscm_initialize_commands.
+	* guile/lib/gdb.scm: Export command symbols.
+	* guile/lib/gdb/init.scm (%exception-keys): Add gdb:user-error.
+	(throw-user-error): New function.
+	* guile/scm-cmd.c: New file.
+	* guile/scm-exception.c (user_error_symbol): New static global.
+	(gdbscm_user_error_p): New function.
+	(gdbscm_initialize_exceptions): Set user_error_symbol.
+	* scm-utils.c (gdbscm_gc_xstrdup): New function.
+
 2014-06-02  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* top.c (command_loop): Handle comments here...

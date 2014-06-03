@@ -583,3 +583,15 @@ gdbscm_is_procedure (SCM proc)
 {
   return gdbscm_is_true (scm_procedure_p (proc));
 }
+
+/* Same as xstrdup, but the string is allocated on the GC heap.  */
+
+char *
+gdbscm_gc_xstrdup (const char *str)
+{
+  size_t len = strlen (str);
+  char *result = scm_gc_malloc_pointerless (len + 1, "gdbscm_gc_xstrdup");
+
+  strcpy (result, str);
+  return result;
+}

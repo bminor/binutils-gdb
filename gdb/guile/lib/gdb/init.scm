@@ -37,7 +37,8 @@
 (define %exception-keys '(gdb:error
 			  gdb:invalid-object-error
 			  gdb:memory-error
-			  gdb:pp-type-error))
+			  gdb:pp-type-error
+			  gdb:user-error))
 
 ;; Printer for gdb exceptions, used when Scheme tries to print them directly.
 
@@ -171,3 +172,10 @@
 (define-public (orig-input-port) %orig-input-port)
 (define-public (orig-output-port) %orig-output-port)
 (define-public (orig-error-port) %orig-error-port)
+
+;; Utility to throw gdb:user-error for use in writing gdb commands.
+;; The requirements for the arguments to "throw" are a bit obscure,
+;; so give the user something simpler.
+
+(define-public (throw-user-error message . args)
+  (throw 'gdb:user-error #f message args))

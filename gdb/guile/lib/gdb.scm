@@ -141,6 +141,34 @@
  set-breakpoint-stop!
  breakpoint-commands
 
+ ;; scm-cmd.c
+
+ make-command
+ register-command!
+ command?
+ command-valid?
+ dont-repeat
+
+ COMPLETE_NONE
+ COMPLETE_FILENAME
+ COMPLETE_LOCATION
+ COMPLETE_COMMAND
+ COMPLETE_SYMBOL
+ COMPLETE_EXPRESSION
+
+ COMMAND_NONE
+ COMMAND_RUNNING
+ COMMAND_DATA
+ COMMAND_STACK
+ COMMAND_FILES
+ COMMAND_SUPPORT
+ COMMAND_STATUS
+ COMMAND_BREAKPOINTS
+ COMMAND_TRACEPOINTS
+ COMMAND_OBSCURE
+ COMMAND_MAINTENANCE
+ COMMAND_USER
+
  ;; scm-disasm.c
 
  arch-disassemble
@@ -457,4 +485,5 @@
  orig-input-port
  orig-output-port
  orig-error-port
+ throw-user-error
 )

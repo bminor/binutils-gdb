@@ -537,6 +537,7 @@ initialize_gdb_module (void *data)
   gdbscm_initialize_auto_load ();
   gdbscm_initialize_blocks ();
   gdbscm_initialize_breakpoints ();
+  gdbscm_initialize_commands ();
   gdbscm_initialize_disasm ();
   gdbscm_initialize_frames ();
   gdbscm_initialize_iterators ();

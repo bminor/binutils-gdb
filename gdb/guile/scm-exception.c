@@ -64,6 +64,9 @@ static SCM memory_error_symbol;
 /* User interrupt, e.g., RETURN_QUIT in struct gdb_exception.  */
 static SCM signal_symbol;
 
+/* A user error, e.g., bad arg to gdb command.  */
+static SCM user_error_symbol;
+
 /* Printing the stack is done by first capturing the stack and recording it in
    a <gdb:exception> object with this key and with the ARGS field set to
    (cons real-key (cons stack real-args)).
@@ -391,6 +394,15 @@ gdbscm_memory_error_p (SCM key)
   return scm_is_eq (key, memory_error_symbol);
 }
 
+/* Return non-zero if KEY is gdb:user-error.
+   Note: This is an excp_matcher_func function.  */
+
+int
+gdbscm_user_error_p (SCM key)
+{
+  return scm_is_eq (key, user_error_symbol);
+}
+
 /* Wrapper around scm_throw to throw a gdb:exception.
    This function does not return.
    This function cannot be called from inside TRY_CATCH.  */
@@ -662,6 +674,8 @@ gdbscm_initialize_exceptions (void)
   error_symbol = scm_from_latin1_symbol ("gdb:error");
 
   memory_error_symbol = scm_from_latin1_symbol ("gdb:memory-error");
+
+  user_error_symbol = scm_from_latin1_symbol ("gdb:user-error");
 
   gdbscm_invalid_object_error_symbol
     = scm_from_latin1_symbol ("gdb:invalid-object-error");

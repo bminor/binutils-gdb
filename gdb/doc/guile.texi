@@ -141,6 +141,7 @@ from the Guile interactive prompt.
 * Guile Pretty Printing API:: Pretty-printing values with Guile
 * Selecting Guile Pretty-Printers:: How GDB chooses a pretty-printer
 * Writing a Guile Pretty-Printer:: Writing a pretty-printer
+* Commands In Guile::        Implementing new commands in Guile
 * Progspaces In Guile::      Program spaces
 * Objfiles In Guile::        Object files in Guile
 * Frames In Guile::          Accessing inferior stack frames from Guile
@@ -293,14 +294,12 @@ Parse @var{expression} as an expression in the current language,
 evaluate it, and return the result as a @code{<gdb:value>}.
 The @var{expression} must be a string.
 
-This function is useful when computing values.
+This function can be useful when implementing a new command
+(@pxref{Commands In Guile}), as it provides a way to parse the
+command's arguments as an expression.
+It is also is useful when computing values.
 For example, it is the only way to get the value of a
 convenience variable (@pxref{Convenience Vars}) as a @code{<gdb:value>}.
-@end deffn
-
-@deffn {Scheme Procedure} string->argv string
-Convert a string to a list of strings split up according to
-@value{GDBN}'s argv parsing rules.
 @end deffn
 
 @node Guile Configuration
@@ -357,6 +356,9 @@ as a symbol.
 
 @item <gdb:breakpoint>
 @xref{Breakpoints In Guile}.
+
+@item <gdb:command>
+@xref{Commands In Guile}.
 
 @item <gdb:exception>
 @xref{Guile Exception Handling}.
@@ -1663,6 +1665,285 @@ my_library.so:
   my-library
     foo
     bar
+@end smallexample
+
+@node Commands In Guile
+@subsubsection Commands In Guile
+
+@cindex commands in guile
+@cindex guile commands
+You can implement new @value{GDBN} CLI commands in Guile.  A CLI
+command object is created with the @code{make-command} Guile function,
+and added to @value{GDBN} with the @code{register-command!} Guile function.
+This two-step approach is taken to separate out the side-effect of adding
+the command to @value{GDBN} from @code{make-command}.
+
+There is no support for multi-line commands, that is commands that
+consist of multiple lines and are terminated with @code{end}.
+
+@c TODO: line length
+@deffn {Scheme Procedure} (make-command name @r{[}#:invoke invoke{]} @r{[}#:command-class command-class@r{]} @r{[}#:completer-class completer{]} @r{[}#:prefix? prefix@r{]} @r{[}#:doc doc-string{]})
+
+The argument @var{name} is the name of the command.  If @var{name} consists of
+multiple words, then the initial words are looked for as prefix
+commands.  In this case, if one of the prefix commands does not exist,
+an exception is raised.
+
+The result is the @code{<gdb:command>} object representing the command.
+The command is not usable until it has been registered with @value{GDBN}
+with @code{register-command!}.
+
+The rest of the arguments are optional.
+
+The argument @var{invoke} is a procedure of three arguments: @var{self},
+@var{args} and @var{from-tty}.  The argument @var{self} is the
+@code{<gdb:command>} object representing the command.
+The argument @var{args} is a string representing the arguments passed to
+the command, after leading and trailing whitespace has been stripped.
+The argument @var{from-tty} is a boolean flag and specifies whether the
+command should consider itself to have been originated from the user
+invoking it interactively.  If this function throws an exception,
+it is turned into a @value{GDBN} @code{error} call.
+Otherwise, the return value is ignored.
+
+The argument @var{command-class} is one of the @samp{COMMAND_} constants
+defined below.  This argument tells @value{GDBN} how to categorize the
+new command in the help system.  The default is @code{COMMAND_NONE}.
+
+The argument @var{completer} is either @code{#f}, one of the @samp{COMPLETE_}
+constants defined below, or a procedure, also defined below.
+This argument tells @value{GDBN} how to perform completion
+for this command.  If not provided or if the value is @code{#f},
+then no completion is performed on the command.
+
+The argument @var{prefix} is a boolean flag indicating whether the new
+command is a prefix command; sub-commands of this command may be
+registered.
+
+The argument @var{doc-string} is help text for the new command.
+If no documentation string is provided, the default value ``This command is
+not documented.'' is used.
+@end deffn
+
+@deffn {Scheme Procedure} register-command! command
+Add @var{command}, a @code{<gdb:command>} object, to @value{GDBN}'s
+list of commands.
+It is an error to register a command more than once.
+The result is unspecified.
+@end deffn
+
+@deffn {Scheme Procedure} command? object
+Return @code{#t} if @var{object} is a @code{<gdb:command>} object.
+Otherwise return @code{#f}.
+@end deffn
+
+@cindex don't repeat Guile command
+@deffn {Scheme Procedure} dont-repeat
+By default, a @value{GDBN} command is repeated when the user enters a
+blank line at the command prompt.  A command can suppress this
+behavior by invoking the @code{dont-repeat} function.  This is similar
+to the user command @code{dont-repeat}, see @ref{Define, dont-repeat}.
+@end deffn
+
+@deffn {Scheme Procedure} string->argv string
+Convert a string to a list of strings split up according to
+@value{GDBN}'s argv parsing rules.
+It is recommended to use this for consistency.
+Arguments are separated by spaces and may be quoted.
+Example:
+
+@smallexample
+scheme@@(guile-user)> (string->argv "1 2\\ \\\"3 '4 \"5' \"6 '7\"")
+$1 = ("1" "2 \"3" "4 \"5" "6 '7")
+@end smallexample
+@end deffn
+
+@deffn {Scheme Procedure} throw-user-error message . args
+Throw a @code{gdb:user-error} exception.
+The argument @var{message} is the error message as a format string, like the 
+@var{fmt} argument to the @code{format} Scheme function.
+@xref{Formatted Output,,, guile, GNU Guile Reference Manual}.
+The argument @var{args} is a list of the optional arguments of @var{message}.
+
+This is used when the command detects a user error of some kind,
+say a bad command argument.
+
+@smallexample
+(gdb) guile (use-modules (gdb))
+(gdb) guile
+(register-command! (make-command "test-user-error"
+  #:command-class COMMAND_OBSCURE
+  #:invoke (lambda (self arg from-tty)
+    (throw-user-error "Bad argument ~a" arg))))
+end
+(gdb) test-user-error ugh
+ERROR: Bad argument ugh
+@end smallexample
+@end deffn
+
+@cindex completion of Guile commands
+@deffn completer self text word
+If the @var{completer} option to @code{make-command} is a procedure,
+it takes three arguments: @var{self} which is the @code{<gdb:command>}
+object, and @var{text} and @var{word} which are both strings.
+The argument @var{text} holds the complete command line up to the cursor's
+location.  The argument @var{word} holds the last word of the command line;
+this is computed using a word-breaking heuristic.
+
+All forms of completion are handled by this function, that is,
+the @key{TAB} and @key{M-?} key bindings (@pxref{Completion}),
+and the @code{complete} command (@pxref{Help, complete}).
+
+This procedure can return several kinds of values:
+
+@itemize @bullet
+@item
+If the return value is a list, the contents of the list are used as the
+completions.  It is up to @var{completer} to ensure that the
+contents actually do complete the word.  An empty list is
+allowed, it means that there were no completions available.  Only
+string elements of the list are used; other elements in the
+list are ignored.
+
+@item
+If the return value is a @code{<gdb:iterator>} object, it is iterated over to
+obtain the completions.  It is up to @code{completer-procedure} to ensure
+that the results actually do complete the word.  Only
+string elements of the result are used; other elements in the
+sequence are ignored.
+
+@item
+All other results are treated as though there were no available
+completions.
+@end itemize
+@end deffn
+
+When a new command is registered, it will have been declared as a member of
+some general class of commands.  This is used to classify top-level
+commands in the on-line help system; note that prefix commands are not
+listed under their own category but rather that of their top-level
+command.  The available classifications are represented by constants
+defined in the @code{gdb} module:
+
+@vtable @code
+@item COMMAND_NONE
+The command does not belong to any particular class.  A command in
+this category will not be displayed in any of the help categories.
+This is the default.
+
+@item COMMAND_RUNNING
+The command is related to running the inferior.  For example,
+@code{start}, @code{step}, and @code{continue} are in this category.
+Type @kbd{help running} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
+@item COMMAND_DATA
+The command is related to data or variables.  For example,
+@code{call}, @code{find}, and @code{print} are in this category.  Type
+@kbd{help data} at the @value{GDBN} prompt to see a list of commands
+in this category.
+
+@item COMMAND_STACK
+The command has to do with manipulation of the stack.  For example,
+@code{backtrace}, @code{frame}, and @code{return} are in this
+category.  Type @kbd{help stack} at the @value{GDBN} prompt to see a
+list of commands in this category.
+
+@item COMMAND_FILES
+This class is used for file-related commands.  For example,
+@code{file}, @code{list} and @code{section} are in this category.
+Type @kbd{help files} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
+@item COMMAND_SUPPORT
+This should be used for ``support facilities'', generally meaning
+things that are useful to the user when interacting with @value{GDBN},
+but not related to the state of the inferior.  For example,
+@code{help}, @code{make}, and @code{shell} are in this category.  Type
+@kbd{help support} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
+@item COMMAND_STATUS
+The command is an @samp{info}-related command, that is, related to the
+state of @value{GDBN} itself.  For example, @code{info}, @code{macro},
+and @code{show} are in this category.  Type @kbd{help status} at the
+@value{GDBN} prompt to see a list of commands in this category.
+
+@item COMMAND_BREAKPOINTS
+The command has to do with breakpoints.  For example, @code{break},
+@code{clear}, and @code{delete} are in this category.  Type @kbd{help
+breakpoints} at the @value{GDBN} prompt to see a list of commands in
+this category.
+
+@item COMMAND_TRACEPOINTS
+The command has to do with tracepoints.  For example, @code{trace},
+@code{actions}, and @code{tfind} are in this category.  Type
+@kbd{help tracepoints} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
+@item COMMAND_USER
+The command is a general purpose command for the user, and typically
+does not fit in one of the other categories.
+Type @kbd{help user-defined} at the @value{GDBN} prompt to see
+a list of commands in this category, as well as the list of gdb macros
+(@pxref{Sequences}).
+
+@item COMMAND_OBSCURE
+The command is only used in unusual circumstances, or is not of
+general interest to users.  For example, @code{checkpoint},
+@code{fork}, and @code{stop} are in this category.  Type @kbd{help
+obscure} at the @value{GDBN} prompt to see a list of commands in this
+category.
+
+@item COMMAND_MAINTENANCE
+The command is only useful to @value{GDBN} maintainers.  The
+@code{maintenance} and @code{flushregs} commands are in this category.
+Type @kbd{help internals} at the @value{GDBN} prompt to see a list of
+commands in this category.
+@end vtable
+
+A new command can use a predefined completion function, either by
+specifying it via an argument at initialization, or by returning it
+from the @code{completer} procedure.  These predefined completion
+constants are all defined in the @code{gdb} module:
+
+@vtable @code
+@item COMPLETE_NONE
+This constant means that no completion should be done.
+
+@item COMPLETE_FILENAME
+This constant means that filename completion should be performed.
+
+@item COMPLETE_LOCATION
+This constant means that location completion should be done.
+@xref{Specify Location}.
+
+@item COMPLETE_COMMAND
+This constant means that completion should examine @value{GDBN}
+command names.
+
+@item COMPLETE_SYMBOL
+This constant means that completion should be done using symbol names
+as the source.
+
+@item COMPLETE_EXPRESSION
+This constant means that completion should be done on expressions.
+Often this means completing on symbol names, but some language
+parsers also have support for completing on field names.
+@end vtable
+
+The following code snippet shows how a trivial CLI command can be
+implemented in Guile:
+
+@smallexample
+(gdb) guile
+(register-command! (make-command "hello-world"
+  #:command-class COMMAND_USER
+  #:doc "Greet the whole world."
+  #:invoke (lambda (self args from-tty) (display "Hello, World!\n"))))
+end
+(gdb) hello-world
+Hello, World!
 @end smallexample
 
 @node Progspaces In Guile
