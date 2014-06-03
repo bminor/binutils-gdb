@@ -275,6 +275,26 @@
  current-objfile
  objfiles
 
+ ;; scm-param.c
+
+ PARAM_BOOLEAN
+ PARAM_AUTO_BOOLEAN
+ PARAM_ZINTEGER
+ PARAM_UINTEGER
+ PARAM_ZUINTEGER
+ PARAM_ZUINTEGER_UNLIMITED
+ PARAM_STRING
+ PARAM_STRING_NOESCAPE
+ PARAM_OPTIONAL_FILENAME
+ PARAM_FILENAME
+ PARAM_ENUM
+
+ make-parameter
+ register-parameter!
+ parameter?
+ parameter-value
+ set-parameter-value!
+
  ;; scm-ports.c
 
  input-port

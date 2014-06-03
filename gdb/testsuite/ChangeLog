@@ -1,5 +1,9 @@
 2014-06-02  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.guile/scm-parameter.exp: New file.
+
+2014-06-02  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.guile/scm-cmd.c: New file.
 	* gdb.guile/scm-cmd.exp: New file.
 

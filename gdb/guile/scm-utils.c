@@ -595,3 +595,32 @@ gdbscm_gc_xstrdup (const char *str)
   strcpy (result, str);
   return result;
 }
+
+/* Return a duplicate of ARGV living on the GC heap.  */
+
+const char * const *
+gdbscm_gc_dup_argv (char **argv)
+{
+  int i, len;
+  size_t string_space;
+  char *p, **result;
+
+  for (len = 0, string_space = 0; argv[len] != NULL; ++len)
+    string_space += strlen (argv[len]) + 1;
+
+  /* Allocating "pointerless" works because the pointers are all
+     self-contained within the object.  */
+  result = scm_gc_malloc_pointerless (((len + 1) * sizeof (char *))
+				      + string_space, "parameter enum list");
+  p = (char *) &result[len + 1];
+
+  for (i = 0; i < len; ++i)
+    {
+      result[i] = p;
+      strcpy (p, argv[i]);
+      p += strlen (p) + 1;
+    }
+  result[i] = NULL;
+
+  return (const char * const *) result;
+}

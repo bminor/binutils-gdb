@@ -142,6 +142,7 @@ from the Guile interactive prompt.
 * Selecting Guile Pretty-Printers:: How GDB chooses a pretty-printer
 * Writing a Guile Pretty-Printer:: Writing a pretty-printer
 * Commands In Guile::        Implementing new commands in Guile
+* Parameters In Guile::      Adding new @value{GDBN} parameters
 * Progspaces In Guile::      Program spaces
 * Objfiles In Guile::        Object files in Guile
 * Frames In Guile::          Accessing inferior stack frames from Guile
@@ -374,6 +375,9 @@ as a symbol.
 
 @item <gdb:objfile>
 @xref{Objfiles In Guile}.
+
+@item <gdb:parameter>
+@xref{Parameters In Guile}.
 
 @item <gdb:pretty-printer>
 @xref{Guile Pretty Printing API}.
@@ -1945,6 +1949,177 @@ end
 (gdb) hello-world
 Hello, World!
 @end smallexample
+
+@node Parameters In Guile
+@subsubsection Parameters In Guile
+
+@cindex parameters in guile
+@cindex guile parameters
+@tindex Parameter
+You can implement new @value{GDBN} @dfn{parameters} using Guile
+@footnote{Note that @value{GDBN} parameters must not be confused with
+Guile’s parameter objects (@pxref{Parameters,,, guile, GNU Guile
+Reference Manual}).}.
+
+There are many parameters that already exist and can be set in
+@value{GDBN}.  Two examples are: @code{set follow-fork} and
+@code{set charset}.  Setting these parameters influences certain
+behavior in @value{GDBN}.  Similarly, you can define parameters that
+can be used to influence behavior in custom Guile scripts and commands.
+
+A new parameter is defined with the @code{make-parameter} Guile function,
+and added to @value{GDBN} with the @code{register-parameter!} Guile function.
+This two-step approach is taken to separate out the side-effect of adding
+the parameter to @value{GDBN} from @code{make-parameter}.
+
+Parameters are exposed to the user via the @code{set} and
+@code{show} commands.  @xref{Help}.
+
+@c TODO line length
+@deffn {Scheme Procedure} (make-parameter name @r{[}#:command-class command-class@r{]} @r{[}#:parameter-type parameter-type{]} @r{[}#:enum-list enum-list@r{]} @r{[}#:set-func set-func{]} @r{[}#:show-func show-func{]} @r{[}#:doc doc{]} @r{[}#:set-doc set-doc{]} @r{[}#:show-doc show-doc{]} @r{[}#:initial-value initial-value{]})
+
+The argument @var{name} is the name of the new parameter.  If @var{name}
+consists of multiple words, then the initial words are looked for as prefix
+parameters.  An example of this can be illustrated with the
+@code{set print} set of parameters.  If @var{name} is
+@code{print foo}, then @code{print} will be searched as the prefix
+parameter.  In this case the parameter can subsequently be accessed in
+@value{GDBN} as @code{set print foo}.
+If @var{name} consists of multiple words, and no prefix parameter group
+can be found, an exception is raised.
+
+The result is the @code{<gdb:parameter>} object representing the parameter.
+The parameter is not usable until it has been registered with @value{GDBN}
+with @code{register-parameter!}.
+
+The rest of the arguments are optional.
+
+The argument @var{command-class} should be one of the @samp{COMMAND_} constants
+(@pxref{Commands In Guile}).  This argument tells @value{GDBN} how to
+categorize the new parameter in the help system.
+The default is @code{COMMAND_NONE}.
+
+The argument @var{parameter-type} should be one of the @samp{PARAM_} constants
+defined below.  This argument tells @value{GDBN} the type of the new
+parameter; this information is used for input validation and
+completion.  The default is @code{PARAM_BOOLEAN}.
+
+If @var{parameter-type} is @code{PARAM_ENUM}, then
+@var{enum-list} must be a list of strings.  These strings
+represent the possible values for the parameter.
+
+If @var{parameter-type} is not @code{PARAM_ENUM}, then the presence
+of @var{enum-list} will cause an exception to be thrown.
+
+The argument @var{set-func} is a function of one argument: @var{self} which
+is the @code{<gdb:parameter>} object representing the parameter.
+@value{GDBN} will call this function when a @var{parameter}'s value has
+been changed via the @code{set} API (for example, @kbd{set foo off}).
+The value of the parameter has already been set to the new value.
+This function must return a string to be displayed to the user.
+@value{GDBN} will add a trailing newline if the string is non-empty.
+@value{GDBN} generally doesn't print anything when a parameter is set,
+thus typically this function should return @samp{""}.
+A non-empty string result should typically be used for displaying warnings
+and errors.
+
+The argument @var{show-func} is a function of two arguments: @var{self} which
+is the @code{<gdb:parameter>} object representing the parameter, and
+@var{svalue} which is the string representation of the current value.
+@value{GDBN} will call this function when a @var{parameter}'s
+@code{show} API has been invoked (for example, @kbd{show foo}).
+This function must return a string, and will be displayed to the user.
+@value{GDBN} will add a trailing newline.
+
+The argument @var{doc} is the help text for the new parameter.
+If there is no documentation string, a default value is used.
+
+The argument @var{set-doc} is the help text for this parameter's
+@code{set} command.
+
+The argument @var{show-doc} is the help text for this parameter's
+@code{show} command.
+
+The argument @var{initial-value} specifies the initial value of the parameter.
+If it is a function, it takes one parameter, the @code{<gdb:parameter>}
+object and its result is used as the initial value of the parameter.
+The initial value must be valid for the parameter type,
+otherwise an exception is thrown.
+@end deffn
+
+@deffn {Scheme Procedure} register-parameter! parameter
+Add @var{parameter}, a @code{<gdb:parameter>} object, to @value{GDBN}'s
+list of parameters.
+It is an error to register a parameter more than once.
+The result is unspecified.
+@end deffn
+
+@deffn {Scheme Procedure} parameter? object
+Return @code{#t} if @var{object} is a @code{<gdb:parameter>} object.
+Otherwise return @code{#f}.
+@end deffn
+
+@deffn {Scheme Procedure} parameter-value parameter
+Return the value of @var{parameter} which may either be
+a @code{<gdb:parameter>} object or a string naming the parameter.
+@end deffn
+
+@deffn {Scheme Procedure} set-parameter-value! parameter new-value
+Assign @var{parameter} the value of @var{new-value}.
+The argument @var{parameter} must be an object of type @code{<gdb:parameter>}.
+@value{GDBN} does validation when assignments are made.
+@end deffn
+
+When a new parameter is defined, its type must be specified.  The
+available types are represented by constants defined in the @code{gdb}
+module:
+
+@vtable @code
+@item PARAM_BOOLEAN
+The value is a plain boolean.  The Guile boolean values, @code{#t}
+and @code{#f} are the only valid values.
+
+@item PARAM_AUTO_BOOLEAN
+The value has three possible states: true, false, and @samp{auto}.  In
+Guile, true and false are represented using boolean constants, and
+@samp{auto} is represented using @code{#:auto}.
+
+@item PARAM_UINTEGER
+The value is an unsigned integer.  The value of 0 should be
+interpreted to mean ``unlimited''.
+
+@item PARAM_ZINTEGER
+The value is an integer.
+
+@item PARAM_ZUINTEGER
+The value is an unsigned integer.
+
+@item PARAM_ZUINTEGER_UNLIMITED
+The value is an integer in the range @samp{[0, INT_MAX]}.
+A value of @samp{-1} means ``unlimited'', and other negative
+numbers are not allowed.
+
+@item PARAM_STRING
+The value is a string.  When the user modifies the string, any escape
+sequences, such as @samp{\t}, @samp{\f}, and octal escapes, are
+translated into corresponding characters and encoded into the current
+host charset.
+
+@item PARAM_STRING_NOESCAPE
+The value is a string.  When the user modifies the string, escapes are
+passed through untranslated.
+
+@item PARAM_OPTIONAL_FILENAME
+The value is a either a filename (a string), or @code{#f}.
+
+@item PARAM_FILENAME
+The value is a filename.  This is just like
+@code{PARAM_STRING_NOESCAPE}, but uses file names for completion.
+
+@item PARAM_ENUM
+The value is a string, which must be one of a collection of string
+constants provided when the parameter is created.
+@end vtable
 
 @node Progspaces In Guile
 @subsubsection Program Spaces In Guile

@@ -1,5 +1,29 @@
 2014-06-02  Doug Evans  <xdje42@gmail.com>
 
+	Add parameter support for Guile.
+	* Makefile.in (SUBDIR_GUILE_OBS): Add scm-param.o.
+	(SUBDIR_GUILE_SRCS): Add scm-param.c.
+	(scm-param.o): New rule.
+	* guile/guile-internal.h (gdbscm_gc_dup_argv): Declare.
+	(gdbscm_misc_error): Declare.
+	(gdbscm_canonicalize_command_name): Declare.
+	(gdbscm_scm_to_host_string): Declare.
+	(gdbscm_scm_from_host_string): Declare.
+	(gdbscm_initialize_parameters): Declare.
+	* guile/guile.c (initialize_gdb_module): Call
+	gdbscm_initialize_parameters.
+	* guile/lib/gdb.scm: Export parameter symbols.
+	* guile/scm-cmd.c (gdbscm_canonicalize_command_name): Renamed from
+	cmdscm_canonicalize_name and made public.  All callers updated.
+	* guile/scm-exception.c (gdbscm_misc_error): New function.
+	* guile/scm-param.c: New file.
+	* guile/scm-string.c (gdbscm_scm_to_string): Add comments.
+	(gdbscm_scm_to_host_string): New function.
+	(gdbscm_scm_from_host_string): New function.
+	* scm-utils.c (gdbscm_gc_dup_argv): New function.
+
+2014-06-02  Doug Evans  <xdje42@gmail.com>
+
 	Add command support for Guile.
 	* Makefile.in (SUBDIR_GUILE_OBS): Add scm-cmd.o.
 	(SUBDIR_GUILE_SRCS): Add scm-cmd.c.

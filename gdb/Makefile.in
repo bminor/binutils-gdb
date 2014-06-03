@@ -297,6 +297,7 @@ SUBDIR_GUILE_OBS = \
 	scm-lazy-string.o \
 	scm-objfile.o \
 	scm-math.o \
+	scm-param.o \
 	scm-ports.o \
 	scm-pretty-print.o \
 	scm-progspace.o \
@@ -322,6 +323,7 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-lazy-string.c \
 	guile/scm-objfile.c \
 	guile/scm-math.c \
+	guile/scm-param.c \
 	guile/scm-ports.c \
 	guile/scm-pretty-print.c \
 	guile/scm-progspace.c \
@@ -2308,6 +2310,10 @@ scm-math.o: $(srcdir)/guile/scm-math.c
 
 scm-objfile.o: $(srcdir)/guile/scm-objfile.c
 	$(COMPILE) $(srcdir)/guile/scm-objfile.c
+	$(POSTCOMPILE)
+
+scm-param.o: $(srcdir)/guile/scm-param.c
+	$(COMPILE) $(srcdir)/guile/scm-param.c
 	$(POSTCOMPILE)
 
 scm-ports.o: $(srcdir)/guile/scm-ports.c

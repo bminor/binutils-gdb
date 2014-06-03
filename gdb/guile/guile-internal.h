@@ -166,6 +166,8 @@ extern void gdbscm_dynwind_xfree (void *ptr);
 extern int gdbscm_is_procedure (SCM proc);
 
 extern char *gdbscm_gc_xstrdup (const char *);
+
+extern const char * const *gdbscm_gc_dup_argv (char **argv);
 
 /* GDB smobs, from scm-gsmob.c */
 
@@ -301,6 +303,10 @@ extern void gdbscm_out_of_range_error (const char *subr, int arg_pos,
 extern SCM gdbscm_make_misc_error (const char *subr, int arg_pos,
 				   SCM bad_value, const char *error);
 
+extern void gdbscm_misc_error (const char *subr, int arg_pos,
+			       SCM bad_value, const char *error)
+   ATTRIBUTE_NORETURN;
+
 extern void gdbscm_throw (SCM exception) ATTRIBUTE_NORETURN;
 
 extern SCM gdbscm_scm_from_gdb_exception (struct gdb_exception exception);
@@ -387,6 +393,9 @@ extern char *gdbscm_parse_command_name (const char *name,
 					struct cmd_list_element **start_list);
 
 extern int gdbscm_valid_command_class_p (int command_class);
+
+extern char *gdbscm_canonicalize_command_name (const char *name,
+					       int want_trailing_space);
 
 /* scm-frame.c */
 
@@ -475,6 +484,10 @@ extern char *gdbscm_scm_to_string (SCM string, size_t *lenp,
 
 extern SCM gdbscm_scm_from_string (const char *string, size_t len,
 				   const char *charset, int strict);
+
+extern char *gdbscm_scm_to_host_string (SCM string, size_t *lenp, SCM *except);
+
+extern SCM gdbscm_scm_from_host_string (const char *string, size_t len);
 
 /* scm-symbol.c */
 
@@ -565,6 +578,7 @@ extern void gdbscm_initialize_lazy_strings (void);
 extern void gdbscm_initialize_math (void);
 extern void gdbscm_initialize_objfiles (void);
 extern void gdbscm_initialize_pretty_printers (void);
+extern void gdbscm_initialize_parameters (void);
 extern void gdbscm_initialize_ports (void);
 extern void gdbscm_initialize_pspaces (void);
 extern void gdbscm_initialize_smobs (void);

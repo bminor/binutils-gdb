@@ -603,8 +603,8 @@ gdbscm_valid_command_class_p (int command_class)
    but that is the caller's responsibility.
    Space for the result is allocated on the GC heap.  */
 
-static char *
-cmdscm_canonicalize_name (const char *name, int want_trailing_space)
+char *
+gdbscm_canonicalize_command_name (const char *name, int want_trailing_space)
 {
   int i, out, seen_word;
   char *result = scm_gc_malloc_pointerless (strlen (name) + 2, FUNC_NAME);
@@ -699,7 +699,7 @@ gdbscm_make_command (SCM name_scm, SCM rest)
     doc = xstrdup (_("This command is not documented."));
 
   s = name;
-  name = cmdscm_canonicalize_name (s, is_prefix);
+  name = gdbscm_canonicalize_command_name (s, is_prefix);
   xfree (s);
   s = doc;
   doc = gdbscm_gc_xstrdup (s);

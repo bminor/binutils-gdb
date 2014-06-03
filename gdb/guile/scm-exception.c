@@ -360,10 +360,21 @@ gdbscm_out_of_range_error (const char *subr, int arg_pos, SCM bad_value,
 
 SCM
 gdbscm_make_misc_error (const char *subr, int arg_pos, SCM bad_value,
-		       const char *error)
+			const char *error)
 {
   return gdbscm_make_arg_error (scm_misc_error_key,
 				subr, arg_pos, bad_value, NULL, error);
+}
+
+/* Throw a misc-error error.  */
+
+void
+gdbscm_misc_error (const char *subr, int arg_pos, SCM bad_value,
+		   const char *error)
+{
+  SCM exception = gdbscm_make_misc_error (subr, arg_pos, bad_value, error);
+
+  gdbscm_throw (exception);
 }
 
 /* Return a <gdb:exception> object for gdb:memory-error.  */
