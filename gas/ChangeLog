@@ -1,3 +1,9 @@
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (OPTION_WARN_INTR_NOPS): Use y instead of z.
+	(OPTION_NO_WARN_INTR_NOPS): Use Y instead of Z.
+	* doc/c-msp430.texi: Update command line option description.
+
 2014-05-22  Alan Modra  <amodra@gmail.com>
 
 	* listing.c (listing_warning, listing_error): Add space after colon.

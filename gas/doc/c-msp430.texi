@@ -61,7 +61,7 @@ disables the generation of a NOP instruction following any instruction
 that might change the interrupts enabled/disabled state.  This is the
 default behaviour.
 
-@item -mz
+@item -my
 tells the assembler to generate a warning message if a NOP does not
 immediately forllow an instruction that enables or disables
 interrupts.  This is the default.
@@ -70,7 +70,7 @@ Note that this option can be stacked with the @option{-mn} option so
 that the assembler will both warn about missing NOP instructions and
 then insert them automatically.
 
-@item -mZ
+@item -mY
 disables warnings about missing NOP instructions.
 
 @item -md

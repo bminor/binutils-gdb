@@ -1,3 +1,7 @@
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/bad.d: Use -my not -mz.
+
 2014-05-22  Alan Modra  <amodra@gmail.com>
 
 	* gas/d30v/bittest.l: Update for changed whitespace.

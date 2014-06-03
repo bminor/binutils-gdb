@@ -673,8 +673,8 @@ static bfd_boolean large_model = FALSE;
 #define OPTION_NO_INTR_NOPS 'N'
 #define OPTION_INTR_NOPS 'n'
 static bfd_boolean gen_interrupt_nops = FALSE;
-#define OPTION_WARN_INTR_NOPS 'z'
-#define OPTION_NO_WARN_INTR_NOPS 'Z'
+#define OPTION_WARN_INTR_NOPS 'y'
+#define OPTION_NO_WARN_INTR_NOPS 'Y'
 static bfd_boolean warn_interrupt_nops = TRUE;
 #define OPTION_MCPU 'c'
 #define OPTION_MOVE_DATA 'd'
@@ -919,7 +919,7 @@ const pseudo_typeS md_pseudo_table[] =
   {NULL, NULL, 0}
 };
 
-const char *md_shortopts = "mm:,mP,mQ,ml,mN,mn,mz,mZ";
+const char *md_shortopts = "mm:,mP,mQ,ml,mN,mn,my,mY";
 
 struct option md_longopts[] =
 {
@@ -930,8 +930,8 @@ struct option md_longopts[] =
   {"ml", no_argument, NULL, OPTION_LARGE},
   {"mN", no_argument, NULL, OPTION_NO_INTR_NOPS},
   {"mn", no_argument, NULL, OPTION_INTR_NOPS},
-  {"mZ", no_argument, NULL, OPTION_NO_WARN_INTR_NOPS},
-  {"mz", no_argument, NULL, OPTION_WARN_INTR_NOPS},
+  {"mY", no_argument, NULL, OPTION_NO_WARN_INTR_NOPS},
+  {"my", no_argument, NULL, OPTION_WARN_INTR_NOPS},
   {"md", no_argument, NULL, OPTION_MOVE_DATA},
   {NULL, no_argument, NULL, 0}
 };
@@ -955,9 +955,9 @@ md_show_usage (FILE * stream)
   fprintf (stream,
 	   _("  -mn - insert a NOP after changing interrupts\n"));
   fprintf (stream,
-	   _("  -mZ - do not warn about missing NOPs after changing interrupts\n"));
+	   _("  -mY - do not warn about missing NOPs after changing interrupts\n"));
   fprintf (stream,
-	   _("  -mz - warn about missing NOPs after changing interrupts (default)\n"));
+	   _("  -my - warn about missing NOPs after changing interrupts (default)\n"));
   fprintf (stream,
 	   _("  -md - Force copying of data from ROM to RAM at startup\n"));
 }
