@@ -3077,6 +3077,7 @@ static const uint32_t addis_3_13	= 0x3c6d0000;
 static const uint32_t addis_11_2	= 0x3d620000;
 static const uint32_t addis_11_11	= 0x3d6b0000;
 static const uint32_t addis_11_30	= 0x3d7e0000;
+static const uint32_t addis_12_2	= 0x3d820000;
 static const uint32_t addis_12_12	= 0x3d8c0000;
 static const uint32_t b			= 0x48000000;
 static const uint32_t bcl_20_31		= 0x429f0005;
@@ -4210,10 +4211,20 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		{
 		  write_insn<big_endian>(p, std_2_1 + this->targ_->stk_toc());
 		  p += 4;
-		  write_insn<big_endian>(p, addis_11_2 + ha(off));
-		  p += 4;
-		  write_insn<big_endian>(p, ld_12_11 + l(off));
-		  p += 4;
+		  if (plt_load_toc)
+		    {
+		      write_insn<big_endian>(p, addis_11_2 + ha(off));
+		      p += 4;
+		      write_insn<big_endian>(p, ld_12_11 + l(off));
+		      p += 4;
+		    }
+		  else
+		    {
+		      write_insn<big_endian>(p, addis_12_2 + ha(off));
+		      p += 4;
+		      write_insn<big_endian>(p, ld_12_12 + l(off));
+		      p += 4;
+		    }
 		  if (plt_load_toc
 		      && ha(off + 8 + 8 * static_chain) != ha(off))
 		    {
@@ -4312,8 +4323,8 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		}
 	      else
 		{
-		  write_insn<big_endian>(p, addis_11_2 + ha(brltoff)),	p += 4;
-		  write_insn<big_endian>(p, ld_12_11 + l(brltoff)),	p += 4;
+		  write_insn<big_endian>(p, addis_12_2 + ha(brltoff)),	p += 4;
+		  write_insn<big_endian>(p, ld_12_12 + l(brltoff)),	p += 4;
 		}
 	      write_insn<big_endian>(p, mtctr_12),			p += 4;
 	      write_insn<big_endian>(p, bctr);

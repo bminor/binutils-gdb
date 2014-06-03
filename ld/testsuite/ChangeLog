@@ -1,6 +1,9 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2014-06-03  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/elfv2exe.d: Update for changed plt call stubs.
+
 	2014-03-26  Alan Modra  <amodra@gmail.com>
 	* ld-powerpc/startv1.s, * ld-powerpc/startv2.s, * ld-powerpc/funref.s,
 	* ld-powerpc/funv1.s, * ld-powerpc/funv2.s,

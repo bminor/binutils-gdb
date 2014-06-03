@@ -2,6 +2,10 @@
 
 	Backport mainline patches
 	2014-06-03  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (addis_12_2): Define.
+	(Stub_table::do_write): Support fusion on ELFv2 stubs.
+
+	2014-06-03  Alan Modra  <amodra@gmail.com>
 	* testsuite/plugin_test.c (parse_readelf_line): Skip non-visibility
 	st_other output.
 

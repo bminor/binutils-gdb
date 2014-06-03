@@ -175,6 +175,7 @@ static bfd_vma opd_entry_value
 
 #define LD_R2_0R1	0xe8410000	/* ld    %r2,0(%r1)      */
 
+#define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha     */
 #define ADDIS_R12_R12	0x3d8c0000	/* addis %r12,%r12,xxx@ha */
 #define LD_R12_0R12	0xe98c0000	/* ld    %r12,xxx@l(%r12) */
 
@@ -10198,8 +10199,16 @@ build_plt_stub (struct ppc_link_hash_table *htab,
       if (ALWAYS_EMIT_R2SAVE
 	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
 	bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p),	p += 4;
-      bfd_put_32 (obfd, ADDIS_R11_R2 | PPC_HA (offset), p),	p += 4;
-      bfd_put_32 (obfd, LD_R12_0R11 | PPC_LO (offset), p),	p += 4;
+      if (plt_load_toc)
+	{
+	  bfd_put_32 (obfd, ADDIS_R11_R2 | PPC_HA (offset), p),	p += 4;
+	  bfd_put_32 (obfd, LD_R12_0R11 | PPC_LO (offset), p),	p += 4;
+	}
+      else
+	{
+	  bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
+	  bfd_put_32 (obfd, LD_R12_0R12 | PPC_LO (offset), p),	p += 4;
+	}
       if (plt_load_toc
 	  && PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
 	{
@@ -10620,10 +10629,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    {
 	      size = 16;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDIS_R11_R2 | PPC_HA (off), loc);
+			  ADDIS_R12_R2 | PPC_HA (off), loc);
 	      loc += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  LD_R12_0R11 | PPC_LO (off), loc);
+			  LD_R12_0R12 | PPC_LO (off), loc);
 	    }
 	  else
 	    {
@@ -10649,10 +10658,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    {
 	      size += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDIS_R11_R2 | PPC_HA (off), loc);
+			  ADDIS_R12_R2 | PPC_HA (off), loc);
 	      loc += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  LD_R12_0R11 | PPC_LO (off), loc);
+			  LD_R12_0R12 | PPC_LO (off), loc);
 	    }
 	  else
 	    bfd_put_32 (htab->params->stub_bfd, LD_R12_0R2 | PPC_LO (off), loc);

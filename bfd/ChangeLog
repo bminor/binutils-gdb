@@ -1,6 +1,11 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
+	2014-06-03  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ADDIS_R12_R2): Define.
+	(build_plt_stub): Support fusion on ELFv2 stub.
+	(ppc_build_one_stub): Likewise for plt branch stubs.
+
 	2014-03-26  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_check_relocs): Account for possibly
 	needed plt entries when taking the address of functions for
