@@ -1,3 +1,10 @@
+2014-06-10  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/python-internal.h (gdb_PyObject_GetAttrString)
+	(gdb_PyObject_HasAttrString): New inline function definitions.
+	* py-value.c (get_field_flag): Remove the now unnecessary cast to
+	char * of the second argument to PyObject_GetAttrString.
+	
 2014-06-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* serial.c (serial_write): Fix index of character to be printed

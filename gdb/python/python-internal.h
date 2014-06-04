@@ -187,6 +187,32 @@ gdb_Py_DECREF (void *op) /* ARI: editCase function */
 #undef Py_DECREF
 #define Py_DECREF(op) gdb_Py_DECREF (op)
 
+/* The second argument to PyObject_GetAttrString was missing the 'const'
+   qualifier in Python-2.4.  Hence, we wrap it in a function to avoid errors
+   when compiled with -Werror.  */
+
+static inline PyObject *
+gdb_PyObject_GetAttrString (PyObject *obj,
+			    const char *attr) /* ARI: editCase function */
+{
+  return PyObject_GetAttrString (obj, (char *) attr);
+}
+
+#define PyObject_GetAttrString(obj, attr) gdb_PyObject_GetAttrString (obj, attr)
+
+/* The second argument to PyObject_HasAttrString was also missing the 'const'
+   qualifier in Python-2.4.  Hence, we wrap it also in a function to avoid
+   errors when compiled with -Werror.  */
+
+static inline int
+gdb_PyObject_HasAttrString (PyObject *obj,
+			    const char *attr)  /* ARI: editCase function */
+{
+  return PyObject_HasAttrString (obj, (char *) attr);
+}
+
+#define PyObject_HasAttrString(obj, attr) gdb_PyObject_HasAttrString (obj, attr)
+
 /* In order to be able to parse symtab_and_line_to_sal_object function
    a real symtab_and_line structure is needed.  */
 #include "symtab.h"
