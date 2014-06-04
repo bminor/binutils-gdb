@@ -897,6 +897,7 @@ static int
 z_type_supported (char z_type)
 {
   return (z_type >= '0' && z_type <= '4'
+	  && the_target->supports_z_point_type != NULL
 	  && the_target->supports_z_point_type (z_type));
 }
 

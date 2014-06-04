@@ -1,3 +1,9 @@
+2014-06-04  Joel Brobecker  <brobecker@adacorer.com>
+
+	PR server/17023
+	* mem-break.c (z_type_supported): Return zero if
+	THE_TARGET->SUPPORTS_Z_POINT_TYPE is NULL.
+
 2014-06-04  Tom Tromey  <tromey@redhat.com>
 
 	* ada-lang.c (ada_template_to_fixed_record_type_1): Use
