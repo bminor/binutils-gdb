@@ -175,7 +175,7 @@ pascm_make_param_smob (void)
 
   memset (p_smob, 0, sizeof (*p_smob));
   p_smob->cmd_class = no_class;
-  p_smob->type = var_boolean;
+  p_smob->type = var_boolean; /* ARI: var_boolean */
   p_smob->set_func = SCM_BOOL_F;
   p_smob->show_func = SCM_BOOL_F;
   p_scm = scm_new_smob (parameter_smob_tag, (scm_t_bits) p_smob);
@@ -849,7 +849,7 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
   char *s;
   char *name;
   int cmd_class = no_class;
-  int param_type = var_boolean;
+  int param_type = var_boolean; /* ARI: var_boolean */
   SCM enum_list_scm = SCM_BOOL_F;
   SCM set_func = SCM_BOOL_F, show_func = SCM_BOOL_F;
   char *doc = NULL, *set_doc = NULL, *show_doc = NULL;
