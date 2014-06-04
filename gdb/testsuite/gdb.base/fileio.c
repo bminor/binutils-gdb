@@ -55,7 +55,11 @@ time(time_t *t);
 Not applicable.
 
 system (const char * string);
-1) Invalid string/command. -  returns 127.  */
+1) See if shell available - returns 0
+2) See if shell available - returns !0
+3) Execute simple shell command - returns 0
+4) Invalid string/command. -  returns 127.  */
+
 static const char *strerrno (int err);
 
 /* Note that OUTDIR is defined by the test suite.  */
@@ -375,21 +379,27 @@ test_system ()
    */
   int ret;
 
-  /* Test for shell */
+  /* Test for shell ('set remote system-call-allowed' is disabled
+     by default).  */
   ret = system (NULL);
-  printf ("system 1: ret = %d %s\n", ret, ret != 0 ? "OK" : "");
+  printf ("system 1: ret = %d %s\n", ret, ret == 0 ? "OK" : "");
+  stop ();
+  /* Test for shell again (the testsuite will have enabled it now).  */
+  ret = system (NULL);
+  printf ("system 2: ret = %d %s\n", ret, ret != 0 ? "OK" : "");
   stop ();
   /* This test prepares the directory for test_rename() */
   sprintf (sys, "mkdir -p %s/%s %s/%s", OUTDIR, TESTSUBDIR, OUTDIR, TESTDIR2);
   ret = system (sys);
   if (ret == 127)
-    printf ("system 2: ret = %d /bin/sh unavailable???\n", ret);
+    printf ("system 3: ret = %d /bin/sh unavailable???\n", ret);
   else
-    printf ("system 2: ret = %d %s\n", ret, ret == 0 ? "OK" : "");
+    printf ("system 3: ret = %d %s\n", ret, ret == 0 ? "OK" : "");
   stop ();
   /* Invalid command (just guessing ;-) ) */
   ret = system ("wrtzlpfrmpft");
-  printf ("system 3: ret = %d %s\n", ret, WEXITSTATUS (ret) == 127 ? "OK" : "");
+  printf ("system 4: ret = %d %s\n", ret,
+	  WEXITSTATUS (ret) == 127 ? "OK" : "");
   stop ();
 }
 

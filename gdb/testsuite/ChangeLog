@@ -1,3 +1,10 @@
+2014-06-04  Nathan Sidwell  <nathan@codesourcery.com>
+	    Hui Zhu  <hui@codesourcery.com>
+
+	* gdb.base/fileio.exp: Add test for shell not available as well as
+	available.
+	* gdb.base/fileio.c (test_system): Check for shell twice.
+
 2014-06-04  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/auto-connect-native-target.exp: Remove redundant
