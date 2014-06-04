@@ -21,10 +21,10 @@
 int
 main (void)
 {
-  /* Assume writes to integers compile to a single instruction.  */
   volatile int i = 0;
 
   i = 1;     /* set foo break here */
-  i = 2;     /* set bar break here */
+  i = 2;
+
   return 0;
 }
