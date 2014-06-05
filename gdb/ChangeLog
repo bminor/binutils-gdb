@@ -1,3 +1,9 @@
+2015-02-27  Tom Tromey  <tromey@redhat.com>
+
+	* minidebug.c (struct lzma_stream): Rename to ...
+	(struct gdb_lzma_stream): ... this.
+	(lzma_open, lzma_pread, lzma_close, lzma_stat): Adjust.
+
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
 	* mi/mi-cmd-stack.c (mi_apply_ext_lang_frame_filter): New
