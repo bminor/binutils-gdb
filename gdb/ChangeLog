@@ -1,3 +1,57 @@
+2014-06-13  Tom Tromey  <tromey@redhat.com>
+
+	* cp-support.c (maint_cplus_command): Pass all_commands, not -1,
+	to help_list.
+	* guile/guile.c (info_guile_command): Pass all_commands, not -1,
+	to help_list.
+	* tui/tui-win.c (tui_command): Pass all_commands, not -1, to
+	help_list.
+	* tui/tui-regs.c (tui_reg_command): Pass all_commands, not -1, to
+	help_list.Pass all_commands, not -1, to help_list.
+	* cli/cli-dump.c (dump_command, append_command)
+	(srec_dump_command, ihex_dump_command, tekhex_dump_command)
+	(binary_dump_command, binary_append_command): Pass all_commands,
+	not -1, to help_list.
+	* cli/cli-cmds.c (info_command, set_debug): Pass all_commands, not
+	-1, to help_list.
+	* valprint.c (set_print, set_print_raw): Pass all_commands, not
+	-1, to help_list.
+	* typeprint.c (set_print_type): Pass all_commands, not -1, to
+	help_list.
+	* top.c (set_history): Pass all_commands, not -1, to help_list.
+	* target-descriptions.c (set_tdesc_cmd, unset_tdesc_cmd): Pass
+	all_commands, not -1, to help_list.
+	* symfile.c (overlay_command): Pass all_commands, not -1, to
+	help_list.
+	* spu-tdep.c (info_spu_command): Pass all_commands, not -1, to
+	help_list.
+	* serial.c (serial_set_cmd): Pass all_commands, not -1, to
+	help_list.
+	* ser-tcp.c (set_tcp_cmd, show_tcp_cmd): Pass all_commands, not
+	-1, to help_list.
+	* remote.c (remote_command, set_remote_cmd): Pass all_commands,
+	not -1, to help_list.
+	* ravenscar-thread.c (set_ravenscar_command): Pass all_commands,
+	not -1, to help_list.
+	* maint.c (maintenance_command, maintenance_info_command)
+	(maintenance_print_command, maintenance_set_cmd): Pass
+	all_commands, not -1, to help_list.
+	* macrocmd.c (macro_command): Pass all_commands, not -1, to
+	help_list.
+	* language.c (set_check): Pass all_commands, not -1, to help_list.
+	* infcmd.c (unset_command): Pass all_commands, not -1, to
+	help_list.
+	* frame.c (set_backtrace_cmd): Pass all_commands, not -1, to
+	help_list.
+	* dwarf2read.c (set_dwarf2_cmd): Pass all_commands, not -1, to
+	help_list.
+	* dcache.c (set_dcache_command): Pass all_commands, not -1, to
+	help_list.
+	* breakpoint.c (save_command): Pass all_commands, not -1, to
+	help_list.
+	* ada-lang.c (maint_set_ada_cmd, set_ada_command): Pass
+	all_commands, not -1, to help_list.
+
 2014-06-12  Pierre Langlois  <pierre.langlois@embecosm.com>
 
 	* regcache.c (struct register_to_invalidate): New structure.

@@ -394,7 +394,7 @@ set_ravenscar_command (char *arg, int from_tty)
 {
   printf_unfiltered (_(\
 "\"set ravenscar\" must be followed by the name of a setting.\n"));
-  help_list (set_ravenscar_list, "set ravenscar ", -1, gdb_stdout);
+  help_list (set_ravenscar_list, "set ravenscar ", all_commands, gdb_stdout);
 }
 
 /* Implement the "show ravenscar" prefix command.  */

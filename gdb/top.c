@@ -1544,7 +1544,7 @@ set_history (char *args, int from_tty)
 {
   printf_unfiltered (_("\"set history\" must be followed "
 		       "by the name of a history subcommand.\n"));
-  help_list (sethistlist, "set history ", -1, gdb_stdout);
+  help_list (sethistlist, "set history ", all_commands, gdb_stdout);
 }
 
 void

@@ -21811,7 +21811,8 @@ static struct cmd_list_element *show_dwarf2_cmdlist;
 static void
 set_dwarf2_cmd (char *args, int from_tty)
 {
-  help_list (set_dwarf2_cmdlist, "maintenance set dwarf2 ", -1, gdb_stdout);
+  help_list (set_dwarf2_cmdlist, "maintenance set dwarf2 ", all_commands,
+	     gdb_stdout);
 }
 
 static void

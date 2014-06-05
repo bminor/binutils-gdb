@@ -88,7 +88,7 @@ maintenance_command (char *args, int from_tty)
 {
   printf_unfiltered (_("\"maintenance\" must be followed by "
 		       "the name of a maintenance command.\n"));
-  help_list (maintenancelist, "maintenance ", -1, gdb_stdout);
+  help_list (maintenancelist, "maintenance ", all_commands, gdb_stdout);
 }
 
 #ifndef _WIN32
@@ -192,7 +192,8 @@ maintenance_info_command (char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance info\" must be followed "
 		       "by the name of an info command.\n"));
-  help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
+  help_list (maintenanceinfolist, "maintenance info ", all_commands,
+	     gdb_stdout);
 }
 
 /* Mini tokenizing lexer for 'maint info sections' command.  */
@@ -439,7 +440,8 @@ maintenance_print_command (char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance print\" must be followed "
 		       "by the name of a print command.\n"));
-  help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
+  help_list (maintenanceprintlist, "maintenance print ", all_commands,
+	     gdb_stdout);
 }
 
 /* The "maintenance translate-address" command converts a section and address
@@ -664,7 +666,8 @@ maintenance_set_cmd (char *args, int from_tty)
 {
   printf_unfiltered (_("\"maintenance set\" must be followed "
 		       "by the name of a set command.\n"));
-  help_list (maintenance_set_cmdlist, "maintenance set ", -1, gdb_stdout);
+  help_list (maintenance_set_cmdlist, "maintenance set ", all_commands,
+	     gdb_stdout);
 }
 
 static void

@@ -1499,7 +1499,7 @@ maint_cplus_command (char *arg, int from_tty)
 		       "by the name of a command.\n"));
   help_list (maint_cplus_cmd_list,
 	     "maintenance cplus ",
-	     -1, gdb_stdout);
+	     all_commands, gdb_stdout);
 }
 
 /* This is a front end for cp_find_first_component, for unit testing.

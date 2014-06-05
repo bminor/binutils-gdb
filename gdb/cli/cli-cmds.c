@@ -218,7 +218,7 @@ info_command (char *arg, int from_tty)
 {
   printf_unfiltered (_("\"info\" must be followed by "
 		       "the name of an info command.\n"));
-  help_list (infolist, "info ", -1, gdb_stdout);
+  help_list (infolist, "info ", all_commands, gdb_stdout);
 }
 
 /* The "show" command with no arguments shows all the settings.  */
@@ -1567,7 +1567,7 @@ set_debug (char *arg, int from_tty)
 {
   printf_unfiltered (_("\"set debug\" must be followed by "
 		       "the name of a debug subcommand.\n"));
-  help_list (setdebuglist, "set debug ", -1, gdb_stdout);
+  help_list (setdebuglist, "set debug ", all_commands, gdb_stdout);
 }
 
 static void

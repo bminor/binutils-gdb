@@ -2707,7 +2707,8 @@ static struct cmd_list_element *show_backtrace_cmdlist;
 static void
 set_backtrace_cmd (char *args, int from_tty)
 {
-  help_list (set_backtrace_cmdlist, "set backtrace ", -1, gdb_stdout);
+  help_list (set_backtrace_cmdlist, "set backtrace ", all_commands,
+	     gdb_stdout);
 }
 
 static void

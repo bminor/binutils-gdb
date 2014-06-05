@@ -615,7 +615,7 @@ serial_set_cmd (char *args, int from_tty)
 {
   printf_unfiltered ("\"set serial\" must be followed "
 		     "by the name of a command.\n");
-  help_list (serial_set_cmdlist, "set serial ", -1, gdb_stdout);
+  help_list (serial_set_cmdlist, "set serial ", all_commands, gdb_stdout);
 }
 
 static void

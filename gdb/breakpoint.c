@@ -16093,7 +16093,7 @@ save_command (char *arg, int from_tty)
 {
   printf_unfiltered (_("\"save\" must be followed by "
 		       "the name of a save subcommand.\n"));
-  help_list (save_cmdlist, "save ", -1, gdb_stdout);
+  help_list (save_cmdlist, "save ", all_commands, gdb_stdout);
 }
 
 struct breakpoint *

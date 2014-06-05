@@ -357,7 +357,8 @@ static struct cmd_list_element *maint_show_ada_cmdlist;
 static void
 maint_set_ada_cmd (char *args, int from_tty)
 {
-  help_list (maint_set_ada_cmdlist, "maintenance set ada ", -1, gdb_stdout);
+  help_list (maint_set_ada_cmdlist, "maintenance set ada ", all_commands,
+	     gdb_stdout);
 }
 
 /* Implement the "maintenance show ada" (prefix) command.  */
@@ -13517,7 +13518,7 @@ set_ada_command (char *arg, int from_tty)
 {
   printf_unfiltered (_(\
 "\"set ada\" must be followed by the name of a setting.\n"));
-  help_list (set_ada_list, "set ada ", -1, gdb_stdout);
+  help_list (set_ada_list, "set ada ", all_commands, gdb_stdout);
 }
 
 /* Implement the "show ada" prefix command.  */

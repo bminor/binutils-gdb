@@ -3487,7 +3487,7 @@ overlay_command (char *args, int from_tty)
 {
   printf_unfiltered
     ("\"overlay\" must be followed by the name of an overlay command.\n");
-  help_list (overlaylist, "overlay ", -1, gdb_stdout);
+  help_list (overlaylist, "overlay ", all_commands, gdb_stdout);
 }
 
 /* Target Overlays for the "Simplest" overlay manager:
