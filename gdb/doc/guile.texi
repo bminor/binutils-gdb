@@ -2899,17 +2899,29 @@ object will be @code{#f} and 0 respectively.
 @tindex <gdb:breakpoint>
 
 Breakpoints in Guile are represented by objects of type
-@code{<gdb:breakpoint>}.
+@code{<gdb:breakpoint>}.  New breakpoints can be created with the
+@code{make-breakpoint} Guile function, and then added to @value{GDBN} with the
+@code{register-breakpoint!} Guile function.
+This two-step approach is taken to separate out the side-effect of adding
+the breakpoint to @value{GDBN} from @code{make-breakpoint}.
+
+Support is also provided to view and manipulate breakpoints created
+outside of Guile.
 
 The following breakpoint-related procedures are provided by the
 @code{(gdb)} module:
 
 @c TODO: line length
-@deffn {Scheme Procedure} create-breakpoint! location @r{[}#:type type@r{]} @r{[}#:wp-class wp-class@r{]} @r{[}#:internal internal@r{]}
-Create a new breakpoint according to @var{spec}, a string naming the
+@deffn {Scheme Procedure} make-breakpoint location @r{[}#:type type@r{]} @r{[}#:wp-class wp-class@r{]} @r{[}#:internal internal@r{]}
+Create a new breakpoint at @var{location}, a string naming the
 location of the breakpoint, or an expression that defines a watchpoint.
 The contents can be any location recognized by the @code{break} command,
 or in the case of a watchpoint, by the @code{watch} command.
+
+The breakpoint is initially marked as @samp{invalid}.
+The breakpoint is not usable until it has been registered with @value{GDBN}
+with @code{register-breakpoint!}, at which point it becomes @samp{valid}.
+The result is the @code{<gdb:breakpoint>} object representing the breakpoint.
 
 The optional @var{type} denotes the breakpoint to create.
 This argument can be either @code{BP_BREAKPOINT} or @code{BP_WATCHPOINT},
@@ -2921,7 +2933,7 @@ not provided, it is assumed to be a @code{WP_WRITE} class.
 
 The optional @var{internal} argument allows the breakpoint to become
 invisible to the user.  The breakpoint will neither be reported when
-created, nor will it be listed in the output from @code{info breakpoints}
+registered, nor will it be listed in the output from @code{info breakpoints}
 (but will be listed with the @code{maint info breakpoints} command).
 If an internal flag is not provided, the breakpoint is visible
 (non-internal).
@@ -2972,10 +2984,24 @@ Read/Write watchpoint.
 
 @end deffn
 
-@deffn {Scheme Procedure} breakpoint-delete! breakpoint
-Permanently delete @var{breakpoint}.  This also invalidates the
-Guile @var{breakpoint} object.  Any further attempt to access the
-object will throw an exception.
+@deffn {Scheme Procedure} register-breakpoint! breakpoint
+Add @var{breakpoint}, a @code{<gdb:breakpoint>} object, to @value{GDBN}'s
+list of breakpoints.  The breakpoint must have been created with
+@code{make-breakpoint}.  One cannot register breakpoints that have been
+created outside of Guile.  Once a breakpoint is registered it becomes
+@samp{valid}.
+It is an error to register an already registered breakpoint.
+The result is unspecified.
+@end deffn
+
+@deffn {Scheme Procedure} delete-breakpoint! breakpoint
+Remove @var{breakpoint} from @value{GDBN}'s list of breakpoints.
+This also invalidates the Guile @var{breakpoint} object.
+Any further attempt to access the object will throw an exception.
+
+If @var{breakpoint} was created from Guile with @code{make-breakpoint}
+it may be re-registered with @value{GDBN}, in which case the breakpoint
+becomes valid again.
 @end deffn
 
 @deffn {Scheme Procedure} breakpoints
@@ -2990,6 +3016,8 @@ and @code{#f} otherwise.
 
 @deffn {Scheme Procedure} breakpoint-valid? breakpoint
 Return @code{#t} if @var{breakpoint} is valid, @code{#f} otherwise.
+Breakpoints created with @code{make-breakpoint} are marked as invalid
+until they are registered with @value{GDBN} with @code{register-breakpoint!}.
 A @code{<gdb:breakpoint>} object can become invalid
 if the user deletes the breakpoint.  In this case, the object still
 exists, but the underlying breakpoint does not.  In the cases of
@@ -3129,7 +3157,8 @@ Example @code{stop} implementation:
 (define (my-stop? bkpt)
   (let ((int-val (parse-and-eval "foo")))
     (value=? int-val 3)))
-(define bkpt (create-breakpoint! "main.c:42"))
+(define bkpt (make-breakpoint "main.c:42"))
+(register-breakpoint! bkpt)
 (set-breakpoint-stop! bkpt my-stop?)
 @end smallexample
 @end deffn

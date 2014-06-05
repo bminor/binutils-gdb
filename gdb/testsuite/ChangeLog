@@ -1,3 +1,8 @@
+2014-06-04  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-breakpoint.exp: Update.
+	Add tests for breakpoint registration.
+
 2014-06-04  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/vla-datatypes.exp: Add tests for VLA-in-structure and

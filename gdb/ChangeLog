@@ -1,3 +1,16 @@
+2014-06-04  Doug Evans  <xdje42@gmail.com>
+
+	* guile/scm-breakpoint.c (struct gdbscm_breakpoint_object): New members
+	is_scheme_bkpt, spec.
+	(bpscm_make_breakpoint_smob): Initialize new members.
+	(gdbscm_create_breakpoint_x): Split into two ...
+	(gdbscm_make_breakpoint, gdbscm_register_breakpoint_x): New functions.
+	(bpscm_breakpoint_deleted): Reset breakpoint number and stop function.
+	(scheme_function breakpoint_functions): Update.
+	* guile/lib/gdb.scm: Delete create-breakpoint!.  Rename
+	breakpoint-delete! to delete-breakpoint!.  Add make-breakpoint,
+	register-breakpoint!.
+
 2014-06-04  Joel Brobecker  <brobecker@adacorer.com>
 
 	PR server/17023

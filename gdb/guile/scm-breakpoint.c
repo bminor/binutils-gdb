@@ -34,18 +34,51 @@
 #include "guile-internal.h"
 
 /* The <gdb:breakpoint> smob.
-   N.B.: The name of this struct is known to breakpoint.h.  */
+   N.B.: The name of this struct is known to breakpoint.h.
+
+   Note: Breakpoints are added to gdb using a two step process:
+   1) Call make-breakpoint to create a <gdb:breakpoint> object.
+   2) Call register-breakpoint! to add the breakpoint to gdb.
+   It is done this way so that the constructor, make-breakpoint, doesn't have
+   any side-effects.  This means that the smob needs to store everything
+   that was passed to make-breakpoint.  */
 
 typedef struct gdbscm_breakpoint_object
 {
   /* This always appears first.  */
   gdb_smob base;
 
+  /* Non-zero if this breakpoint was created with make-breakpoint.  */
+  int is_scheme_bkpt;
+
+  /* For breakpoints created with make-breakpoint, these are the parameters
+     that were passed to make-breakpoint.  These values are not used except
+     to register the breakpoint with GDB.  */
+  struct
+  {
+    /* The string representation of the breakpoint.
+       Space for this lives in GC space.  */
+    char *location;
+
+    /* The kind of breakpoint.
+       At the moment this can only be one of bp_breakpoint, bp_watchpoint.  */
+    enum bptype type;
+
+    /* If a watchpoint, the kind of watchpoint.  */
+    enum target_hw_bp_type access_type;
+
+    /* Non-zero if the breakpoint is an "internal" breakpoint.  */
+    int is_internal;
+  } spec;
+
   /* The breakpoint number according to gdb.
+     For breakpoints created from Scheme, this has the value -1 until the
+     breakpoint is registered with gdb.
      This is recorded here because BP will be NULL when deleted.  */
   int number;
 
-  /* The gdb breakpoint object, or NULL if the breakpoint has been deleted.  */
+  /* The gdb breakpoint object, or NULL if the breakpoint has not been
+     registered yet, or has been deleted.  */
   struct breakpoint *bp;
 
   /* Backlink to our containing <gdb:breakpoint> smob.
@@ -171,8 +204,8 @@ bpscm_make_breakpoint_smob (void)
     scm_gc_malloc (sizeof (breakpoint_smob), breakpoint_smob_name);
   SCM bp_scm;
 
+  memset (bp_smob, 0, sizeof (*bp_smob));
   bp_smob->number = -1;
-  bp_smob->bp = NULL;
   bp_smob->stop = SCM_BOOL_F;
   bp_scm = scm_new_smob (breakpoint_smob_tag, (scm_t_bits) bp_smob);
   bp_smob->containing_scm = bp_scm;
@@ -293,42 +326,111 @@ bpscm_get_valid_breakpoint_smob_arg_unsafe (SCM self, int arg_pos,
 
 /* Breakpoint methods.  */
 
-/* (create-breakpoint! string [#:type integer] [#:wp-class integer]
-    [#:internal boolean) -> <gdb:breakpoint> */
+/* (make-breakpoint string [#:type integer] [#:wp-class integer]
+    [#:internal boolean) -> <gdb:breakpoint>
+
+   The result is the <gdb:breakpoint> Scheme object.
+   The breakpoint is not available to be used yet, however.
+   It must still be added to gdb with register-breakpoint!.  */
 
 static SCM
-gdbscm_create_breakpoint_x (SCM spec_scm, SCM rest)
+gdbscm_make_breakpoint (SCM location_scm, SCM rest)
 {
   const SCM keywords[] = {
     type_keyword, wp_class_keyword, internal_keyword, SCM_BOOL_F
   };
-  char *spec;
+  char *s;
+  char *location;
   int type_arg_pos = -1, access_type_arg_pos = -1, internal_arg_pos = -1;
   int type = bp_breakpoint;
   int access_type = hw_write;
   int internal = 0;
   SCM result;
-  volatile struct gdb_exception except;
+  breakpoint_smob *bp_smob;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, keywords, "s#iit",
-			      spec_scm, &spec, rest,
+			      location_scm, &location, rest,
 			      &type_arg_pos, &type,
 			      &access_type_arg_pos, &access_type,
 			      &internal_arg_pos, &internal);
 
   result = bpscm_make_breakpoint_smob ();
-  pending_breakpoint_scm = result;
+  bp_smob = (breakpoint_smob *) SCM_SMOB_DATA (result);
+
+  s = location;
+  location = gdbscm_gc_xstrdup (s);
+  xfree (s);
+
+  switch (type)
+    {
+    case bp_breakpoint:
+      if (access_type_arg_pos > 0)
+	{
+	  gdbscm_misc_error (FUNC_NAME, access_type_arg_pos,
+			     scm_from_int (access_type),
+			     _("access type with breakpoint is not allowed"));
+	}
+      break;
+    case bp_watchpoint:
+      switch (access_type)
+	{
+	case hw_write:
+	case hw_access:
+	case hw_read:
+	  break;
+	default:
+	  gdbscm_out_of_range_error (FUNC_NAME, access_type_arg_pos,
+				     scm_from_int (access_type),
+				     _("invalid watchpoint class"));
+	}
+      break;
+    default:
+      gdbscm_out_of_range_error (FUNC_NAME, access_type_arg_pos,
+				 scm_from_int (type),
+				 _("invalid breakpoint type"));
+    }
+
+  bp_smob->is_scheme_bkpt = 1;
+  bp_smob->spec.location = location;
+  bp_smob->spec.type = type;
+  bp_smob->spec.access_type = access_type;
+  bp_smob->spec.is_internal = internal;
+
+  return result;
+}
+
+/* (register-breakpoint! <gdb:breakpoint>) -> unspecified
+
+   It is an error to register a breakpoint created outside of Guile,
+   or an already-registered breakpoint.  */
+
+static SCM
+gdbscm_register_breakpoint_x (SCM self)
+{
+  breakpoint_smob *bp_smob
+    = bpscm_get_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
+  volatile struct gdb_exception except;
+
+  /* We only support registering breakpoints created with make-breakpoint.  */
+  if (!bp_smob->is_scheme_bkpt)
+    scm_misc_error (FUNC_NAME, _("not a Scheme breakpoint"), SCM_EOL);
+
+  if (bpscm_is_valid (bp_smob))
+    scm_misc_error (FUNC_NAME, _("breakpoint is already registered"), SCM_EOL);
+
+  pending_breakpoint_scm = self;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      struct cleanup *cleanup = make_cleanup (xfree, spec);
+      char *location = bp_smob->spec.location;
+      int internal = bp_smob->spec.is_internal;
 
-      switch (type)
+      switch (bp_smob->spec.type)
 	{
 	case bp_breakpoint:
 	  {
 	    create_breakpoint (get_current_arch (),
-			       spec, NULL, -1, NULL,
+			       location, NULL, -1, NULL,
 			       0,
 			       0, bp_breakpoint,
 			       0,
@@ -339,36 +441,37 @@ gdbscm_create_breakpoint_x (SCM spec_scm, SCM rest)
 	  }
 	case bp_watchpoint:
 	  {
+	    enum target_hw_bp_type access_type = bp_smob->spec.access_type;
+
 	    if (access_type == hw_write)
-	      watch_command_wrapper (spec, 0, internal);
+	      watch_command_wrapper (location, 0, internal);
 	    else if (access_type == hw_access)
-	      awatch_command_wrapper (spec, 0, internal);
+	      awatch_command_wrapper (location, 0, internal);
 	    else if (access_type == hw_read)
-	      rwatch_command_wrapper (spec, 0, internal);
+	      rwatch_command_wrapper (location, 0, internal);
 	    else
-	      error (_("Invalid watchpoint access type"));
+	      gdb_assert_not_reached ("invalid access type");
 	    break;
 	  }
 	default:
-	  error (_("Invalid breakpoint type"));
+	  gdb_assert_not_reached ("invalid breakpoint type");
 	}
-
-      do_cleanups (cleanup);
     }
   /* Ensure this gets reset, even if there's an error.  */
   pending_breakpoint_scm = SCM_BOOL_F;
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
 
-  return result;
+  return SCM_UNSPECIFIED;
 }
 
-/* (breakpoint-delete! <gdb:breakpoint>) -> unspecified
-   Scheme function which deletes the underlying GDB breakpoint.  This
-   triggers the breakpoint_deleted observer which will call
-   gdbscm_breakpoint_deleted; that function cleans up the Scheme sections.  */
+/* (delete-breakpoint! <gdb:breakpoint>) -> unspecified
+   Scheme function which deletes (removes) the underlying GDB breakpoint
+   from GDB's list of breakpoints.  This triggers the breakpoint_deleted
+   observer which will call gdbscm_breakpoint_deleted; that function cleans
+   up the Scheme bits.  */
 
 static SCM
-gdbscm_breakpoint_delete_x (SCM self)
+gdbscm_delete_breakpoint_x (SCM self)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
@@ -999,6 +1102,8 @@ bpscm_breakpoint_deleted (struct breakpoint *b)
       if (bp_smob)
 	{
 	  bp_smob->bp = NULL;
+	  bp_smob->number = -1;
+	  bp_smob->stop = SCM_BOOL_F;
 	  scm_gc_unprotect_object (bp_smob->containing_scm);
 	}
     }
@@ -1024,14 +1129,20 @@ static const scheme_integer_constant breakpoint_integer_constants[] =
 
 static const scheme_function breakpoint_functions[] =
 {
-  { "create-breakpoint!", 1, 0, 1, gdbscm_create_breakpoint_x,
+  { "make-breakpoint", 1, 0, 1, gdbscm_make_breakpoint,
     "\
-Create and install a GDB breakpoint object.\n\
+Create a GDB breakpoint object.\n\
 \n\
   Arguments:\n\
-     location [#:type <type>] [#:wp-class <wp-class>] [#:internal <bool>]" },
+    location [#:type <type>] [#:wp-class <wp-class>] [#:internal <bool>]\n\
+  Returns:\n\
+    <gdb:breakpoint object" },
 
-  { "breakpoint-delete!", 1, 0, 0, gdbscm_breakpoint_delete_x,
+  { "register-breakpoint!", 1, 0, 0, gdbscm_register_breakpoint_x,
+    "\
+Register a <gdb:breakpoint> object with GDB." },
+
+  { "delete-breakpoint!", 1, 0, 0, gdbscm_delete_breakpoint_x,
     "\
 Delete the breakpoint from GDB." },
 

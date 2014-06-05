@@ -114,7 +114,8 @@
  WP_ACCESS
 
  make-breakpoint
- breakpoint-delete!
+ register-breakpoint!
+ delete-breakpoint!
  breakpoints
  breakpoint?
  breakpoint-valid?

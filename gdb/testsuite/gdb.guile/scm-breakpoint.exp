@@ -116,8 +116,10 @@ proc test_bkpt_deletion { } {
 	# Test breakpoints are deleted correctly.
 	set deltst_location [gdb_get_line_number "Break at multiply."]
 	set end_location [gdb_get_line_number "Break at end."]
-	gdb_scm_test_silent_cmd  "guile (define dp1 (create-breakpoint! \"$deltst_location\"))" \
+	gdb_scm_test_silent_cmd  "guile (define dp1 (make-breakpoint \"$deltst_location\"))" \
 	    "create deltst breakpoint"
+	gdb_scm_test_silent_cmd "guile (register-breakpoint! dp1)" \
+	    "register dp1"
 	gdb_breakpoint [gdb_get_line_number "Break at end."]
 	gdb_scm_test_silent_cmd "guile (define del-list (breakpoints))" \
 	    "get breakpoint list 4"
@@ -125,10 +127,10 @@ proc test_bkpt_deletion { } {
 	    "= 3" "number of breakpoints before delete"
 	gdb_continue_to_breakpoint "Break at multiply." \
 	    ".*/$srcfile:$deltst_location.*"
-	gdb_scm_test_silent_cmd  "guile (breakpoint-delete! dp1)" \
+	gdb_scm_test_silent_cmd  "guile (delete-breakpoint! dp1)" \
 	    "delete breakpoint"
 	gdb_test "guile (print (breakpoint-number dp1))" \
-	    "ERROR: .*: Invalid object: <gdb:breakpoint> in position 1: #<gdb:breakpoint #2>.*" \
+	    "ERROR: .*: Invalid object: <gdb:breakpoint> in position 1: #<gdb:breakpoint #-1>.*" \
 	    "check breakpoint invalidated"
 	gdb_scm_test_silent_cmd "guile (set! del-list (breakpoints))" \
 	    "get breakpoint list 5"
@@ -151,8 +153,10 @@ proc test_bkpt_cond_and_cmds { } {
 
 	# Test conditional setting.
 	set bp_location1 [gdb_get_line_number "Break at multiply."]
-	gdb_scm_test_silent_cmd  "guile (define bp1 (create-breakpoint! \"$bp_location1\"))" \
+	gdb_scm_test_silent_cmd  "guile (define bp1 (make-breakpoint \"$bp_location1\"))" \
 	    "create multiply breakpoint"
+	gdb_scm_test_silent_cmd "guile (register-breakpoint! bp1)" \
+	    "register bp1"
 	gdb_continue_to_breakpoint "Break at multiply."
 	gdb_scm_test_silent_cmd  "guile (set-breakpoint-condition! bp1 \"i == 5\")" \
 	    "set condition"
@@ -199,8 +203,10 @@ proc test_bkpt_invisible { } {
 	# Test invisible breakpoints.
 	delete_breakpoints
 	set ibp_location [gdb_get_line_number "Break at multiply."]
-	gdb_scm_test_silent_cmd  "guile (define vbp (create-breakpoint! \"$ibp_location\" #:internal #f))" \
+	gdb_scm_test_silent_cmd  "guile (define vbp1 (make-breakpoint \"$ibp_location\" #:internal #f))" \
 	    "create visible breakpoint"
+	gdb_scm_test_silent_cmd "guile (register-breakpoint! vbp1)" \
+	    "register vbp1"
 	gdb_scm_test_silent_cmd "guile (define vbp (car (breakpoints)))" \
 	    "get visible breakpoint"
 	gdb_test "guile (print vbp)" \
@@ -214,8 +220,10 @@ proc test_bkpt_invisible { } {
 	    "scm-breakpoint\.c:$ibp_location.*" \
 	    "check info breakpoints shows visible breakpoints"
 	delete_breakpoints
-	gdb_scm_test_silent_cmd  "guile (define ibp (create-breakpoint! \"$ibp_location\" #:internal #t))" \
+	gdb_scm_test_silent_cmd  "guile (define ibp (make-breakpoint \"$ibp_location\" #:internal #t))" \
 	    "create invisible breakpoint"
+	gdb_scm_test_silent_cmd "guile (register-breakpoint! ibp)" \
+	    "register ibp"
 	gdb_test "guile (print ibp)" \
 	    "= #<gdb:breakpoint #-$decimal BP_BREAKPOINT enabled noisy hit:0 ignore:0 @.*scm-breakpoint.c:$ibp_location>" \
 	    "check invisible bp obj exists"
@@ -247,8 +255,10 @@ proc test_watchpoints { } {
 	    return
 	}
 
-	gdb_scm_test_silent_cmd  "guile (define wp1 (create-breakpoint! \"result\" #:type BP_WATCHPOINT #:wp-class WP_WRITE))" \
+	gdb_scm_test_silent_cmd  "guile (define wp1 (make-breakpoint \"result\" #:type BP_WATCHPOINT #:wp-class WP_WRITE))" \
 	    "create watchpoint"
+	gdb_scm_test_silent_cmd "guile (register-breakpoint! wp1)" \
+	    "register wp1"
 	gdb_test "continue" \
 	    ".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*main.*" \
 	    "test watchpoint write"
@@ -272,8 +282,10 @@ proc test_bkpt_internal { } {
 
 	delete_breakpoints
 
-	gdb_scm_test_silent_cmd  "guile (define wp1 (create-breakpoint! \"result\" #:type BP_WATCHPOINT #:wp-class WP_WRITE #:internal #t))" \
+	gdb_scm_test_silent_cmd  "guile (define wp1 (make-breakpoint \"result\" #:type BP_WATCHPOINT #:wp-class WP_WRITE #:internal #t))" \
 	    "create invisible watchpoint"
+	gdb_scm_test_silent_cmd "guile (register-breakpoint! wp1)" \
+	    "register wp1"
 	gdb_test "info breakpoints" \
 	    "No breakpoints or watchpoints.*" \
 	    "check info breakpoints does not show invisible watchpoint"
@@ -302,6 +314,11 @@ proc test_bkpt_eval_funcs { } {
 	}
 
 	delete_breakpoints
+
+	# Define create-breakpoint! as a convenient wrapper around
+	# make-breakpoint, register-breakpoint!
+	gdb_test_no_output "guile (define (create-breakpoint! . args) (let ((bp (apply make-breakpoint args))) (register-breakpoint! bp) bp))" \
+	    "define create-breakpoint!"
 
 	gdb_test_multiline "data collection breakpoint 1" \
 	    "guile" "" \
@@ -429,6 +446,47 @@ proc test_bkpt_eval_funcs { } {
     }
 }
 
+proc test_bkpt_registration {} {
+    global srcfile testfile
+
+    with_test_prefix "test_bkpt_registration" {
+	# Start with a fresh gdb.
+	clean_restart ${testfile}
+
+	if ![gdb_guile_runto_main] {
+	    return
+	}
+
+	# Initially there should be one breakpoint: main.
+	gdb_scm_test_silent_cmd "guile (define blist (breakpoints))" \
+	    "get breakpoint list 1"
+	gdb_test "guile (register-breakpoint! (car blist))" \
+	    "ERROR: .*: not a Scheme breakpoint.*" \
+	    "try to register a non-guile breakpoint"
+
+	set bp_location1 [gdb_get_line_number "Break at multiply."]
+	gdb_scm_test_silent_cmd  "guile (define bp1 (make-breakpoint \"$bp_location1\"))" \
+	    "create multiply breakpoint"
+	gdb_test "guile (print (breakpoint-valid? bp1))" \
+	    "= #f" "breakpoint invalid after creation"
+	gdb_scm_test_silent_cmd "guile (register-breakpoint! bp1)" \
+	    "register bp1"
+	gdb_test "guile (print (breakpoint-valid? bp1))" \
+	    "= #t" "breakpoint valid after registration"
+	gdb_test "guile (register-breakpoint! bp1)" \
+	    "ERROR: .*: breakpoint is already registered.*" \
+	    "re-register already registered bp1"
+	gdb_scm_test_silent_cmd "guile (delete-breakpoint! bp1)" \
+	    "delete registered breakpoint"
+	gdb_test "guile (print (breakpoint-valid? bp1))" \
+	    "= #f" "breakpoint invalid after deletion"
+	gdb_scm_test_silent_cmd "guile (register-breakpoint! bp1)" \
+	    "re-register bp1"
+	gdb_test "guile (print (breakpoint-valid? bp1))" \
+	    "= #t" "breakpoint valid after re-registration"
+    }
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
@@ -436,3 +494,4 @@ test_bkpt_invisible
 test_watchpoints
 test_bkpt_internal
 test_bkpt_eval_funcs
+test_bkpt_registration
