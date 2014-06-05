@@ -1295,9 +1295,11 @@ gdbscm_history_append_x (SCM value)
 {
   int res_index = -1;
   struct value *v;
+  value_smob *v_smob;
   volatile struct gdb_exception except;
 
-  v = vlscm_scm_to_value (value);
+  v_smob = vlscm_get_value_smob_arg_unsafe (value, SCM_ARG1, FUNC_NAME);
+  v = v_smob->value;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {

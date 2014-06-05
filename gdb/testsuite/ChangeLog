@@ -1,3 +1,8 @@
+2014-06-05  Ludovic Courtès  <ludo@gnu.org>
+
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Add test
+	"history-append! type error".
+
 2014-06-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.mi/mi-breakpoint-changed.exp (test_insert_delete_modify): Fix
