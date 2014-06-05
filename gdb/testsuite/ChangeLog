@@ -1,3 +1,12 @@
+2014-06-18  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR gdb/17017
+	* gdb.python/py-xmethods.cc: Add global function call counters and
+	increment them in their respective functions.  Remove "cout"
+	statements.
+	* gdb.python/py-xmethods.exp: Make tests check the global function
+	call counters instead of depending on inferior IO.
+
 2014-06-18  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.base/foll-fork.exp (default_fork_parent_follow):
