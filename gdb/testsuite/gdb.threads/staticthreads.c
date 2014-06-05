@@ -38,7 +38,6 @@ thread_function (void *arg)
 #ifdef HAVE_TLS
   tlsvar = 2;
 #endif
-  printf ("Thread executing\n"); /* tlsvar-is-set */
   while (sem_wait (&semaphore) != 0)
     {
       if (errno != EINTR)
@@ -47,6 +46,7 @@ thread_function (void *arg)
 	  return NULL;
 	}
     }
+  printf ("Thread executing\n"); /* tlsvar-is-set */
   return NULL;
 }
 

@@ -105,7 +105,7 @@ if { "$have_tls" != "" } {
     gdb_continue_to_breakpoint "tlsvar-is-set" ".* tlsvar-is-set .*"
     gdb_test "p tlsvar" " = 2" "tlsvar in thread"
     gdb_test "thread 1" ".*"
-    # Unwind from pthread_join.
+    # Unwind to main.
     gdb_test "up 10" " in main .*"
     gdb_test "p tlsvar" " = 1" "tlsvar in main"
 }
