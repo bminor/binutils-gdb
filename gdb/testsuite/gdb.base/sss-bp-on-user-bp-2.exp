@@ -50,23 +50,20 @@ delete_breakpoints
 # delete the user breakpoint from the target, which will fail, with
 # "Cannot execute this command while the target is running.".  On
 # software single-step targets, that del shouldn't trigger any RSP
-# traffic.  Just skip the test if testing against a remove target and
-# not using software single-stepping.  IOW, skip the test if we see a
-# 'vCont;s' or 's' in the RSP traffic.
-
-gdb_test_no_output "set debug remote 1"
-
-set rsp_hardware_step 0
+# traffic.  Hardware-step targets that can't access memory while the
+# target is running, either remote or native, are likewise affected.
+# So we just skip the test if not using software single-stepping.  We
+# detect that by looking for 'target_resume (..., step)' in "debug
+# target" output.
 
 # Probe for software single-step breakpoint use.
-set test "probe RSP hardware step"
+
+gdb_test_no_output "set debug target 1"
+set hardware_step 0
+set test "probe target hardware step"
 gdb_test_multiple "si" $test {
-    -re "\\\$vCont;s.*$gdb_prompt $" {
-	set rsp_hardware_step 1
-	pass $test
-    }
-    -re "\\\$s#.*$gdb_prompt $" {
-	set rsp_hardware_step 1
+    -re "target_resume \\(\[^\r\n\]+, step, .*$gdb_prompt $" {
+	set hardware_step 1
 	pass $test
     }
     -re "$gdb_prompt $" {
@@ -74,12 +71,12 @@ gdb_test_multiple "si" $test {
     }
 }
 
-if { $rsp_hardware_step } {
-    unsupported "remote target doesn't use software single-stepping"
+if { $hardware_step } {
+    unsupported "target doesn't use software single-stepping"
     return
 }
 
-gdb_test_no_output "set debug remote 0"
+gdb_test_no_output "set debug target 0"
 
 set line_re "\[^\r\n\]*"
 

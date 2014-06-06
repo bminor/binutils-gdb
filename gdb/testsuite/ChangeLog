@@ -1,5 +1,12 @@
 2014-06-06  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/sss-bp-on-user-bp-2.exp: Look for target_resume(step)
+	in target debug output instead of looking at RSP packets,
+	disabling the test on any target that uses hardware stepping.
+	Update comments.
+
+2014-06-06  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/break-unload-file.exp: Fix typo.
 
 2014-06-06  Yao Qi  <yao@codesourcery.com>
