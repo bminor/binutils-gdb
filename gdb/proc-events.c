@@ -1404,39 +1404,29 @@ static struct trans signal_table[] =
 #ifdef SIGHUP
   { SIGHUP, "SIGHUP", "Hangup" },
 #endif
-#ifdef SIGINT
   { SIGINT, "SIGINT", "Interrupt (rubout)" },
-#endif
 #ifdef SIGQUIT
   { SIGQUIT, "SIGQUIT", "Quit (ASCII FS)" },
 #endif
-#ifdef SIGILL
   { SIGILL, "SIGILL", "Illegal instruction" },	/* not reset when caught */
-#endif
 #ifdef SIGTRAP
   { SIGTRAP, "SIGTRAP", "Trace trap" },		/* not reset when caught */
 #endif
-#ifdef SIGABRT
   { SIGABRT, "SIGABRT", "used by abort()" },	/* replaces SIGIOT */
-#endif
 #ifdef SIGIOT
   { SIGIOT, "SIGIOT", "IOT instruction" },
 #endif
 #ifdef SIGEMT
   { SIGEMT, "SIGEMT", "EMT instruction" },
 #endif
-#ifdef SIGFPE
   { SIGFPE, "SIGFPE", "Floating point exception" },
-#endif
 #ifdef SIGKILL
   { SIGKILL, "SIGKILL", "Kill" },	/* Solaris: cannot be caught/ignored */
 #endif
 #ifdef SIGBUS
   { SIGBUS, "SIGBUS", "Bus error" },
 #endif
-#ifdef SIGSEGV
   { SIGSEGV, "SIGSEGV", "Segmentation violation" },
-#endif
 #ifdef SIGSYS
   { SIGSYS, "SIGSYS", "Bad argument to system call" },
 #endif
@@ -1446,9 +1436,7 @@ static struct trans signal_table[] =
 #ifdef SIGALRM
   { SIGALRM, "SIGALRM", "Alarm clock" },
 #endif
-#ifdef SIGTERM
   { SIGTERM, "SIGTERM", "Software termination signal from kill" },
-#endif
 #ifdef SIGUSR1
   { SIGUSR1, "SIGUSR1", "User defined signal 1" },
 #endif

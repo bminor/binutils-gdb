@@ -131,34 +131,26 @@ gdb_signal_from_host (int hostsig)
   if (hostsig == SIGHUP)
     return GDB_SIGNAL_HUP;
 #endif
-#if defined (SIGINT)
   if (hostsig == SIGINT)
     return GDB_SIGNAL_INT;
-#endif
 #if defined (SIGQUIT)
   if (hostsig == SIGQUIT)
     return GDB_SIGNAL_QUIT;
 #endif
-#if defined (SIGILL)
   if (hostsig == SIGILL)
     return GDB_SIGNAL_ILL;
-#endif
 #if defined (SIGTRAP)
   if (hostsig == SIGTRAP)
     return GDB_SIGNAL_TRAP;
 #endif
-#if defined (SIGABRT)
   if (hostsig == SIGABRT)
     return GDB_SIGNAL_ABRT;
-#endif
 #if defined (SIGEMT)
   if (hostsig == SIGEMT)
     return GDB_SIGNAL_EMT;
 #endif
-#if defined (SIGFPE)
   if (hostsig == SIGFPE)
     return GDB_SIGNAL_FPE;
-#endif
 #if defined (SIGKILL)
   if (hostsig == SIGKILL)
     return GDB_SIGNAL_KILL;
@@ -167,10 +159,8 @@ gdb_signal_from_host (int hostsig)
   if (hostsig == SIGBUS)
     return GDB_SIGNAL_BUS;
 #endif
-#if defined (SIGSEGV)
   if (hostsig == SIGSEGV)
     return GDB_SIGNAL_SEGV;
-#endif
 #if defined (SIGSYS)
   if (hostsig == SIGSYS)
     return GDB_SIGNAL_SYS;
@@ -183,10 +173,8 @@ gdb_signal_from_host (int hostsig)
   if (hostsig == SIGALRM)
     return GDB_SIGNAL_ALRM;
 #endif
-#if defined (SIGTERM)
   if (hostsig == SIGTERM)
     return GDB_SIGNAL_TERM;
-#endif
 #if defined (SIGUSR1)
   if (hostsig == SIGUSR1)
     return GDB_SIGNAL_USR1;
@@ -388,34 +376,26 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
     case GDB_SIGNAL_HUP:
       return SIGHUP;
 #endif
-#if defined (SIGINT)
     case GDB_SIGNAL_INT:
       return SIGINT;
-#endif
 #if defined (SIGQUIT)
     case GDB_SIGNAL_QUIT:
       return SIGQUIT;
 #endif
-#if defined (SIGILL)
     case GDB_SIGNAL_ILL:
       return SIGILL;
-#endif
 #if defined (SIGTRAP)
     case GDB_SIGNAL_TRAP:
       return SIGTRAP;
 #endif
-#if defined (SIGABRT)
     case GDB_SIGNAL_ABRT:
       return SIGABRT;
-#endif
 #if defined (SIGEMT)
     case GDB_SIGNAL_EMT:
       return SIGEMT;
 #endif
-#if defined (SIGFPE)
     case GDB_SIGNAL_FPE:
       return SIGFPE;
-#endif
 #if defined (SIGKILL)
     case GDB_SIGNAL_KILL:
       return SIGKILL;
@@ -424,10 +404,8 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
     case GDB_SIGNAL_BUS:
       return SIGBUS;
 #endif
-#if defined (SIGSEGV)
     case GDB_SIGNAL_SEGV:
       return SIGSEGV;
-#endif
 #if defined (SIGSYS)
     case GDB_SIGNAL_SYS:
       return SIGSYS;
@@ -440,10 +418,8 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
     case GDB_SIGNAL_ALRM:
       return SIGALRM;
 #endif
-#if defined (SIGTERM)
     case GDB_SIGNAL_TERM:
       return SIGTERM;
-#endif
 #if defined (SIGUSR1)
     case GDB_SIGNAL_USR1:
       return SIGUSR1;

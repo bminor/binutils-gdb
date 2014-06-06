@@ -31,9 +31,7 @@ void
 gen_signal ()
 {
   /* According to sigall.exp, SIGABRT is always supported.  */
-#ifdef SIGABRT
   kill (getpid (), SIGABRT);
-#endif
   /* If we get here we couldn't generate a signal, tell dejagnu.  */
   printf ("no signal\n");
 }

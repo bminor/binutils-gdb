@@ -1,3 +1,12 @@
+2014-06-06  Gary Benson  <gbenson@redhat.com>
+
+	* gdb.base/call-signals.c: Remove preprocessor conditionals
+	for always-defined signals SIGINT, SIGILL, SIGABRT, SIGFPE,
+	SIGSEGV and SIGTERM.
+	* gdb.base/sigall.c: Likewise.
+	* gdb.base/unwindonsignal.c: Likewise.
+	* gdb.reverse/sigall-reverse.c: Likewise.
+
 2014-06-06  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/hbreak-unmapped.exp: Read memory at address 0.  If

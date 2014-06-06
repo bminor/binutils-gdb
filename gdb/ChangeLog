@@ -1,3 +1,10 @@
+2014-06-06  Gary Benson  <gbenson@redhat.com>
+
+	* common/signals.c: Remove preprocessor conditionals for
+	always-defined signals SIGINT, SIGILL, SIGABRT, SIGFPE,
+	SIGSEGV and SIGTERM.
+	* proc-events.c: Likewise.
+
 2014-06-06  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* symfile.c (symfile_free_objfile): Remove restriction to

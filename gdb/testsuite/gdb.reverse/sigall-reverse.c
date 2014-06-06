@@ -410,11 +410,7 @@ return 0;
 int
 gen_ILL (void)
 {
-#ifdef SIGILL
   kill (getpid (), SIGILL);
-#else
-  handle_ILL (0);
-#endif
 return 0;
 }
 
@@ -465,11 +461,7 @@ return 0;
 int
 gen_SEGV (void)
 {
-#ifdef SIGSEGV
   kill (getpid (), SIGSEGV);
-#else
-  handle_SEGV (0);
-#endif
 return 0;
 }
 
@@ -641,7 +633,7 @@ return 0;
 int
 gen_LOST (void)
 {
-#if defined(SIGLOST) && (!defined(SIGABRT) || SIGLOST != SIGABRT)
+#if defined(SIGLOST) && SIGLOST != SIGABRT
   kill (getpid (), SIGLOST);
 #else
   handle_LOST (0);
@@ -1183,21 +1175,15 @@ main ()
 #ifdef SIGQUIT
   signal (SIGQUIT, handle_QUIT);
 #endif
-#ifdef SIGILL
   signal (SIGILL, handle_ILL);
-#endif
 #ifdef SIGEMT
   signal (SIGEMT, handle_EMT);
 #endif
-#ifdef SIGFPE
   signal (SIGFPE, handle_FPE);
-#endif
 #ifdef SIGBUS
   signal (SIGBUS, handle_BUS);
 #endif
-#ifdef SIGSEGV
   signal (SIGSEGV, handle_SEGV);
-#endif
 #ifdef SIGSYS
   signal (SIGSYS, handle_SYS);
 #endif
@@ -1243,7 +1229,7 @@ main ()
 #ifdef SIGWINCH
   signal (SIGWINCH, handle_WINCH);
 #endif
-#if defined(SIGLOST) && (!defined(SIGABRT) || SIGLOST != SIGABRT)
+#if defined(SIGLOST) && SIGLOST != SIGABRT
   signal (SIGLOST, handle_LOST);
 #endif
 #ifdef SIGUSR1
