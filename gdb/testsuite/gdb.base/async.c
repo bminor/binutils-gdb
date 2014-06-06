@@ -11,7 +11,7 @@ foo ()
  int y;
  volatile int x;
 
- x = 5; x = 5;
+ x = 5; x = 5; x = 5;
  y = 3;
 
  return x + y;

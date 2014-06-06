@@ -1,3 +1,10 @@
+2014-06-06  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/async.c (foo): Add one statement.
+	* gdb.base/async.exp: Get the next instruction address and
+	match the output of "nexti" by instruction address.  Match
+	the hex address in the output of "finish".
+
 2014-06-06  Gary Benson  <gbenson@redhat.com>
 
 	* gdb.base/call-signals.c: Remove preprocessor conditionals
