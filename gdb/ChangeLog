@@ -1,5 +1,10 @@
 2014-06-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* serial.c (serial_write): Fix index of character to be printed
+	in call to serial_logchar when serial debug traces are enabled.
+
+2014-06-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes (resolve_dynamic_range): Add function description.
 
 2014-06-09  Gary Benson  <gbenson@redhat.com>

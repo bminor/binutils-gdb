@@ -423,7 +423,7 @@ serial_write (struct serial *scb, const void *buf, size_t count)
       for (c = 0; c < count; c++)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "[");
-	  serial_logchar (gdb_stdlog, 'w', str[count] & 0xff, 0);
+	  serial_logchar (gdb_stdlog, 'w', str[c] & 0xff, 0);
 	  fprintf_unfiltered (gdb_stdlog, "]");
 	}
       gdb_flush (gdb_stdlog);
