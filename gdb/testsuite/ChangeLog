@@ -1,5 +1,10 @@
 2014-06-06  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.base/hbreak-unmapped.exp: Read memory at address 0.  If
+	readable, skip the test.
+
+2014-06-06  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.threads/staticthreads.c (thread_function): Move the line
 	setting breakpoint on forward.
 	* gdb.threads/staticthreads.exp: Update comments.
