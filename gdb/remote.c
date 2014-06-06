@@ -8988,7 +8988,7 @@ remote_search_memory (struct target_ops* ops,
 }
 
 static void
-remote_rcmd (struct target_ops *self, char *command,
+remote_rcmd (struct target_ops *self, const char *command,
 	     struct ui_file *outbuf)
 {
   struct remote_state *rs = get_remote_state ();
@@ -9010,7 +9010,7 @@ remote_rcmd (struct target_ops *self, char *command,
     error (_("\"monitor\" command ``%s'' is too long."), command);
 
   /* Encode the actual command.  */
-  bin2hex ((gdb_byte *) command, p, strlen (command));
+  bin2hex ((const gdb_byte *) command, p, strlen (command));
 
   if (putpkt (rs->buf) < 0)
     error (_("Communication problem with target."));

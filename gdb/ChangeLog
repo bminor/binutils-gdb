@@ -1,3 +1,11 @@
+2014-06-16  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_rcmd>: Make "command" const.
+	* target.c (debug_to_rcmd, default_rcmd): Update.
+	* target-delegates.c: Rebuild.
+	* remote.c (remote_rcmd): Update.
+	* monitor.c (monitor_rcmd): Update.
+
 2014-06-16  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (insert_bp_location, remove_breakpoint_1): Adjust.

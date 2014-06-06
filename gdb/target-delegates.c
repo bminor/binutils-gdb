@@ -631,7 +631,7 @@ tdefault_stop (struct target_ops *self, ptid_t arg1)
 }
 
 static void
-delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
+delegate_rcmd (struct target_ops *self, const char *arg1, struct ui_file *arg2)
 {
   self = self->beneath;
   self->to_rcmd (self, arg1, arg2);

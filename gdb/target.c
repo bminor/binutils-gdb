@@ -57,7 +57,7 @@ static int default_watchpoint_addr_within_range (struct target_ops *,
 static int default_region_ok_for_hw_watchpoint (struct target_ops *,
 						CORE_ADDR, int);
 
-static void default_rcmd (struct target_ops *, char *, struct ui_file *);
+static void default_rcmd (struct target_ops *, const char *, struct ui_file *);
 
 static ptid_t default_get_ada_task_ptid (struct target_ops *self,
 					 long lwp, long tid);
@@ -4006,7 +4006,7 @@ debug_to_stop (struct target_ops *self, ptid_t ptid)
 }
 
 static void
-debug_to_rcmd (struct target_ops *self, char *command,
+debug_to_rcmd (struct target_ops *self, const char *command,
 	       struct ui_file *outbuf)
 {
   debug_target.to_rcmd (&debug_target, command, outbuf);
@@ -4080,7 +4080,8 @@ stack of targets currently in use (including the exec-file,\n\
 core-file, and process, if any), as well as the symbol file name.";
 
 static void
-default_rcmd (struct target_ops *self, char *command, struct ui_file *output)
+default_rcmd (struct target_ops *self, const char *command,
+	      struct ui_file *output)
 {
   error (_("\"monitor\" command not supported by this target."));
 }
