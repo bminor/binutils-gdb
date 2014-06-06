@@ -1,5 +1,20 @@
 2014-06-16  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_info_proc>: Make parameter
+	const.
+	(target_info_proc): Update.
+	* target.c (target_info_proc): Make "args" const.
+	* procfs.c (procfs_info_proc): Update.
+	* linux-tdep.c (linux_info_proc): Update.
+	(linux_core_info_proc_mappings): Make "args" const.
+	(linux_core_info_proc): Update.
+	* gdbarch.sh (info_proc, core_info_proc): Make "args" const.
+	* gdbarch.c: Rebuild.
+	* gdbarch.h: Rebuild.
+	* corelow.c (core_info_proc): Update.
+
+2014-06-16  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_disconnect>: Make parameter
 	const.
 	(target_disconnect): Update.

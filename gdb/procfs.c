@@ -148,7 +148,7 @@ static char * procfs_make_note_section (struct target_ops *self,
 static int procfs_can_use_hw_breakpoint (struct target_ops *self,
 					 int, int, int);
 
-static void procfs_info_proc (struct target_ops *, char *,
+static void procfs_info_proc (struct target_ops *, const char *,
 			      enum info_proc_what);
 
 #if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
@@ -5141,7 +5141,7 @@ info_proc_mappings (procinfo *pi, int summary)
 /* Implement the "info proc" command.  */
 
 static void
-procfs_info_proc (struct target_ops *ops, char *args,
+procfs_info_proc (struct target_ops *ops, const char *args,
 		  enum info_proc_what what)
 {
   struct cleanup *old_chain;

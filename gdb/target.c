@@ -2542,7 +2542,7 @@ find_run_target (void)
 /* Implement the "info proc" command.  */
 
 int
-target_info_proc (char *args, enum info_proc_what what)
+target_info_proc (const char *args, enum info_proc_what what)
 {
   struct target_ops *t;
 

@@ -815,7 +815,8 @@ struct target_ops
 
 
     /* Implement the "info proc" command.  */
-    void (*to_info_proc) (struct target_ops *, char *, enum info_proc_what);
+    void (*to_info_proc) (struct target_ops *, const char *,
+			  enum info_proc_what);
 
     /* Tracepoint-related operations.  */
 
@@ -1232,7 +1233,7 @@ struct address_space *target_thread_address_space (ptid_t);
    an error was encountered while attempting to handle the
    request.  */
 
-int target_info_proc (char *, enum info_proc_what);
+int target_info_proc (const char *, enum info_proc_what);
 
 /* Returns true if this target can debug multiple processes
    simultaneously.  */
