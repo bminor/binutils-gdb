@@ -1,5 +1,10 @@
 2014-06-06  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.base/jit.exp (one_jit_test): Restrict the pattern
+	from "jit_function" to "^jit_function".
+
+2014-06-06  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/async.c (foo): Add one statement.
 	* gdb.base/async.exp: Get the next instruction address and
 	match the output of "nexti" by instruction address.  Match
