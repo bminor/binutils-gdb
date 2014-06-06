@@ -1,3 +1,7 @@
+2014-06-06  Mingjie Xing  <mingjie.xing@gmail.com>
+
+	* main.c (print_gdb_help): Add -q and --silent.
+
 2014-06-06  Gary Benson  <gbenson@redhat.com>
 
 	* common/signals.c: Remove preprocessor conditionals for
