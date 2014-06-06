@@ -44,7 +44,7 @@ init_ss (struct ss *s, int a, int b)
 void
 foo (int x, struct ss ss)
 {
-  return; /* break-here */
+  x = ss.a.m; /* break-here */
 }
 
 int

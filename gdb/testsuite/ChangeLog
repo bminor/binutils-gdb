@@ -1,3 +1,7 @@
+2014-06-06  Doug Evans  <dje@google.com>
+
+	* gdb.guile/scm-frame-args.c (foo): Tweak to work with gcc 4.6.3.
+
 2014-06-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/sss-bp-on-user-bp-2.exp: Look for target_resume(step)
