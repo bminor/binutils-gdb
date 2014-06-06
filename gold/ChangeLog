@@ -1,3 +1,11 @@
+2014-06-06  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf_reader.h (Dwarf_pubnames_table): Remove output_section_offset_.
+	* dwarf_reader.cc (Dwarf_pubnames_table::read_section): Likewise.
+	(Dwarf_pubnames_table::read_header): Likewise.
+	* layout.cc (gdb_fast_lookup_sections): Add .debug_gnu_pubnames and
+	.debug_gnu_pubtypes.
+
 2014-06-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): New.

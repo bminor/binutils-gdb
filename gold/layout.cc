@@ -563,7 +563,9 @@ static const char* gdb_fast_lookup_sections[] =
 {
   "aranges",
   "pubnames",
+  "gnu_pubnames",
   "pubtypes",
+  "gnu_pubtypes",
 };
 
 // Returns whether the given debug section is in the list of
