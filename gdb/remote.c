@@ -4347,7 +4347,7 @@ extended_remote_detach (struct target_ops *ops, const char *args, int from_tty)
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
 
 static void
-remote_disconnect (struct target_ops *target, char *args, int from_tty)
+remote_disconnect (struct target_ops *target, const char *args, int from_tty)
 {
   if (args)
     error (_("Argument given to \"disconnect\" when remotely debugging."));

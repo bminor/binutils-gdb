@@ -28,14 +28,14 @@ tdefault_detach (struct target_ops *self, const char *arg1, int arg2)
 }
 
 static void
-delegate_disconnect (struct target_ops *self, char *arg1, int arg2)
+delegate_disconnect (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
   self->to_disconnect (self, arg1, arg2);
 }
 
 static void
-tdefault_disconnect (struct target_ops *self, char *arg1, int arg2)
+tdefault_disconnect (struct target_ops *self, const char *arg1, int arg2)
 {
   tcomplain ();
 }

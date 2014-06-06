@@ -1,5 +1,17 @@
 2014-06-16  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_disconnect>: Make parameter
+	const.
+	(target_disconnect): Update.
+	* target.c (target_disconnect): Make "args" const.
+	* target-delegates.c: Rebuild.
+	* remote.c (remote_disconnect): Update.
+	* record.h (record_disconnect): Update.
+	* record.c (record_disconnect): Update.
+	* inf-child.c (inf_child_disconnect): Update.
+
+2014-06-16  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_rcmd>: Make "command" const.
 	* target.c (debug_to_rcmd, default_rcmd): Update.
 	* target-delegates.c: Rebuild.

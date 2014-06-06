@@ -414,7 +414,7 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_detach) (struct target_ops *ops, const char *, int)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_disconnect) (struct target_ops *, char *, int)
+    void (*to_disconnect) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());
@@ -1177,7 +1177,7 @@ extern void target_detach (const char *, int);
 /* Disconnect from the current target without resuming it (leaving it
    waiting for a debugger).  */
 
-extern void target_disconnect (char *, int);
+extern void target_disconnect (const char *, int);
 
 /* Resume execution of the target process PTID (or a group of
    threads).  STEP says whether to single-step or to run free; SIGGNAL

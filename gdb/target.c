@@ -2087,7 +2087,7 @@ target_detach (const char *args, int from_tty)
 }
 
 void
-target_disconnect (char *args, int from_tty)
+target_disconnect (const char *args, int from_tty)
 {
   /* If we're in breakpoints-always-inserted mode or if breakpoints
      are global across processes, we have to remove them before

@@ -57,7 +57,7 @@ extern int record_read_memory (struct gdbarch *gdbarch,
 extern void cmd_record_goto (char *arg, int from_tty);
 
 /* The default "to_disconnect" target method for record targets.  */
-extern void record_disconnect (struct target_ops *, char *, int);
+extern void record_disconnect (struct target_ops *, const char *, int);
 
 /* The default "to_detach" target method for record targets.  */
 extern void record_detach (struct target_ops *, const char *, int);
