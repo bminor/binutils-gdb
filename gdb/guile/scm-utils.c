@@ -624,3 +624,22 @@ gdbscm_gc_dup_argv (char **argv)
 
   return (const char * const *) result;
 }
+
+/* Return non-zero if the version of Guile being used it at least
+   MAJOR.MINOR.MICRO.  */
+
+int
+gdbscm_guile_version_is_at_least (int major, int minor, int micro)
+{
+  if (major > gdbscm_guile_major_version)
+    return 0;
+  if (major < gdbscm_guile_major_version)
+    return 1;
+  if (minor > gdbscm_guile_minor_version)
+    return 0;
+  if (minor < gdbscm_guile_minor_version)
+    return 1;
+  if (micro > gdbscm_guile_micro_version)
+    return 0;
+  return 1;
+}

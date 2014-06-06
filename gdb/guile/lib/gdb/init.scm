@@ -155,9 +155,6 @@
 ;; GDB+Guile.
 
 (define (%initialize!)
-  (add-to-load-path (string-append (data-directory)
-				   file-name-separator-string "guile"))
-
   (for-each (lambda (key)
 	      (set-exception-printer! key %exception-printer))
 	    %exception-keys)

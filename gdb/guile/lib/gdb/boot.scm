@@ -21,10 +21,9 @@
 ;; loaded with it are not compiled.  So we do very little here, and do
 ;; most of the initialization elsewhere.
 
-;; data-directory is provided by the C code.
-(load (string-append
-       (data-directory) file-name-separator-string "guile"
-       file-name-separator-string "gdb.scm"))
+;; guile-data-directory is provided by the C code.
+(add-to-load-path (guile-data-directory))
+(load-from-path "gdb.scm")
 
 ;; Now that the Scheme side support is loaded, initialize it.
 (let ((init-proc (@@ (gdb init) %initialize!)))

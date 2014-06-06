@@ -312,8 +312,12 @@ parameters.
 
 @deffn {Scheme Procedure} data-directory
 Return a string containing @value{GDBN}'s data directory.
-This directory contains @value{GDBN}'s ancillary files, including
-the Guile modules provided by @value{GDBN}.
+This directory contains @value{GDBN}'s ancillary files.
+@end deffn
+
+@deffn {Scheme Procedure} guile-data-directory
+Return a string containing @value{GDBN}'s Guile data directory.
+This directory contains the Guile modules provided by @value{GDBN}.
 @end deffn
 
 @deffn {Scheme Procedure} gdb-version

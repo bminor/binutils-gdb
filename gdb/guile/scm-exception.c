@@ -521,7 +521,7 @@ gdbscm_print_exception_message (SCM port, SCM frame, SCM key, SCM args)
    KEY, ARGS are the standard arguments to scm_throw, et.al.
 
    Basically this function is just a wrapper around calling
-   %print-exception-with-args.  */
+   %print-exception-with-stack.  */
 
 void
 gdbscm_print_exception_with_stack (SCM port, SCM stack, SCM key, SCM args)
@@ -536,7 +536,7 @@ gdbscm_print_exception_with_stack (SCM port, SCM stack, SCM key, SCM args)
       percent_print_exception_with_stack_var
 	= scm_c_private_variable (gdbscm_init_module_name,
 				  percent_print_exception_with_stack_name);
-      /* If we can't find %print-exception-with-args, there's a problem on the
+      /* If we can't find %print-exception-with-stack, there's a problem on the
 	 Scheme side.  Don't kill GDB, just flag an error and leave it at
 	 that.  */
       if (gdbscm_is_false (percent_print_exception_with_stack_var))

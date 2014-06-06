@@ -1,3 +1,7 @@
+2014-06-06  Doug Evans  <dje@google.com>
+
+	* guile.texi (Guile Configuration): Document guile-data-directory.
+
 2014-06-06  Mingjie Xing  <mingjie.xing@gmail.com>
 
 	* gdb.texinfo (Invoking GDB): Add -q and --quiet.

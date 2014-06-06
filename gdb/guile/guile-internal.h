@@ -121,6 +121,10 @@ extern const char gdbscm_init_module_name[];
 
 extern int gdb_scheme_initialized;
 
+extern int gdbscm_guile_major_version;
+extern int gdbscm_guile_minor_version;
+extern int gdbscm_guile_micro_version;
+
 extern const char gdbscm_print_excp_none[];
 extern const char gdbscm_print_excp_full[];
 extern const char gdbscm_print_excp_message[];
@@ -168,6 +172,8 @@ extern int gdbscm_is_procedure (SCM proc);
 extern char *gdbscm_gc_xstrdup (const char *);
 
 extern const char * const *gdbscm_gc_dup_argv (char **argv);
+
+extern int gdbscm_guile_version_is_at_least (int major, int minor, int micro);
 
 /* GDB smobs, from scm-gsmob.c */
 
@@ -471,6 +477,8 @@ extern pspace_smob *psscm_pspace_smob_from_pspace (struct program_space *);
 extern SCM psscm_scm_from_pspace (struct program_space *);
 
 /* scm-string.c */
+
+extern int gdbscm_scm_string_to_int (SCM string);
 
 extern char *gdbscm_scm_to_c_string (SCM string);
 

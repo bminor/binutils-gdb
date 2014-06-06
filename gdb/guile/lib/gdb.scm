@@ -491,10 +491,6 @@
 )
 
 ;; Load the rest of the Scheme side.
-;; data-directory is provided by the C code.
-
-(add-to-load-path
- (string-append (data-directory) file-name-separator-string "guile"))
 
 (use-modules ((gdb init)))
 

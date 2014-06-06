@@ -25,6 +25,19 @@
 #include "charset.h"
 #include "guile-internal.h"
 
+/* Convert STRING to an int.
+   STRING must be a valid integer.  */
+
+int
+gdbscm_scm_string_to_int (SCM string)
+{
+  char *s = scm_to_latin1_string (string);
+  int r = atoi (s);
+
+  free (s);
+  return r;
+}
+
 /* Convert a C (latin1) string to an SCM string.
    "latin1" is chosen because Guile won't throw an exception.  */
 

@@ -1016,9 +1016,11 @@ gdbscm_value_to_real (SCM self)
    the target's charset.
 
    ERRORS is one of #f, 'error or 'substitute.
-   An error setting of #f means use the default, which is
-   Guile's %default-port-conversion-strategy.  If the default is not one
-   of 'error or 'substitute, 'substitute is used.
+   An error setting of #f means use the default, which is Guile's
+   %default-port-conversion-strategy when using Guile >= 2.0.6, or 'error if
+   using an earlier version of Guile.  Earlier versions do not properly
+   support obtaining the default port conversion strategy.
+   If the default is not one of 'error or 'substitute, 'substitute is used.
    An error setting of "error" causes an exception to be thrown if there's
    a decoding error.  An error setting of "substitute" causes invalid
    characters to be replaced with "?".
@@ -1069,7 +1071,14 @@ gdbscm_value_to_string (SCM self, SCM rest)
       gdbscm_throw (excp);
     }
   if (errors == SCM_BOOL_F)
-    errors = scm_port_conversion_strategy (SCM_BOOL_F);
+    {
+      /* N.B. scm_port_conversion_strategy in Guile versions prior to 2.0.6
+	 will throw a Scheme error when passed #f.  */
+      if (gdbscm_guile_version_is_at_least (2, 0, 6))
+	errors = scm_port_conversion_strategy (SCM_BOOL_F);
+      else
+	errors = error_symbol;
+    }
   /* We don't assume anything about the result of scm_port_conversion_strategy.
      From this point on, if errors is not 'errors, use 'substitute.  */
 
