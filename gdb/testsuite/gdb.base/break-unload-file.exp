@@ -89,7 +89,7 @@ proc test_break { always_inserted break_command } {
 	}
 
 	gdb_test "info break" "y.*PENDING.*foo" \
-	    "breakpoint is not pending"
+	    "breakpoint is pending"
 
 	# Now delete the breakpoint from GDB's tables, to make sure
 	# GDB doesn't reinsert it, masking the bug (with the bug, on
