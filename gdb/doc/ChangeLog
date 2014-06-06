@@ -1,4 +1,4 @@
-2014-06-06  Doug Evans  <dje@google.com>
+2014-06-06  Doug Evans  <xdje42@gmail.com>
 
 	* guile.texi (Guile Configuration): Document guile-data-directory.
 

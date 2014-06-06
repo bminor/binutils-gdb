@@ -1,4 +1,4 @@
-2014-06-06  Doug Evans  <dje@google.com>
+2014-06-06  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.guile/scm-frame-args.c (foo): Tweak to work with gcc 4.6.3.
 

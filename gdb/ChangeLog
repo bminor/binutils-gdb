@@ -1,4 +1,4 @@
-2014-06-06  Doug Evans  <dje@google.com>
+2014-06-06  Doug Evans  <xdje42@gmail.com>
 
 	* guile/guile-internal.h (gdbscm_guile_major_version): Declare.
 	(gdbscm_guile_minor_version, gdbscm_guile_micro_version): Declare.
