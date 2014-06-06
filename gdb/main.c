@@ -1173,7 +1173,8 @@ Output and user interface control:\n\n\
   fputs_unfiltered (_("\
   --dbx              DBX compatibility mode.\n\
   --xdb              XDB compatibility mode.\n\
-  --quiet            Do not print version number on startup.\n\n\
+  -q, --quiet, --silent\n\
+                     Do not print version number on startup.\n\n\
 "), stream);
   fputs_unfiltered (_("\
 Operating modes:\n\n\

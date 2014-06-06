@@ -885,10 +885,11 @@ This will cause @code{@value{GDBP}} to debug @code{gcc}, and to set
 @code{gcc}'s command-line arguments (@pxref{Arguments}) to @samp{-O2 -c foo.c}.
 
 You can run @code{@value{GDBP}} without printing the front material, which describes
-@value{GDBN}'s non-warranty, by specifying @code{-silent}:
+@value{GDBN}'s non-warranty, by specifying @code{--silent}
+(or @code{-q}/@code{--quiet}):
 
 @smallexample
-@value{GDBP} -silent
+@value{GDBP} --silent
 @end smallexample
 
 @noindent
