@@ -1,6 +1,10 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
+	2014-06-07  Alan Modra  <amodra@gmail.com>
+	* ldexp.c (exp_fold_tree_1 <etree_provide>): Make PROVIDEd
+	linker script symbol value override a built-in linker symbol.
+
 	2014-02-19  Alan Modra  <amodra@gmail.com>
 	* emultempl/ppc64elf.em (params): Init new field.
 	(ppc_create_output_section_statements): Set params.save_restore_funcs

@@ -889,7 +889,10 @@ exp_fold_tree_1 (etree_type *tree)
 	      if (h == NULL
 		  || (h->type != bfd_link_hash_new
 		      && h->type != bfd_link_hash_undefined
-		      && h->type != bfd_link_hash_common))
+		      && h->type != bfd_link_hash_common
+		      && !(h->type == bfd_link_hash_defined
+			   && (h->u.def.section->flags
+			       & SEC_LINKER_CREATED) != 0)))
 		{
 		  /* Do nothing.  The symbol was never referenced, or was
 		     defined by some object.  */
