@@ -656,8 +656,11 @@ const struct powerpc_operand powerpc_operands[] =
 #define UI TO + 1
   { 0xffff, 0, NULL, NULL, 0 },
 
+#define UISIGNOPT UI + 1
+  { 0xffff, 0, NULL, NULL, PPC_OPERAND_SIGNOPT },
+
   /* The IMM field in an SE_IM5 instruction.  */
-#define UI5 UI + 1
+#define UI5 UISIGNOPT + 1
   { 0x1f, 4, NULL, NULL, 0 },
 
   /* The OIMM field in an SE_OIM5 instruction.  */
@@ -3502,10 +3505,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"dozi",	OP(9),		OP_MASK,     M601,	PPCNONE,	{RT, RA, SI}},
 
-{"cmplwi",	OPL(10,0),	OPL_MASK,    PPCCOM,	PPCNONE,	{OBF, RA, UI}},
-{"cmpldi",	OPL(10,1),	OPL_MASK,    PPC64,	PPCNONE,	{OBF, RA, UI}},
-{"cmpli",	OP(10),		OP_MASK,     PPC,	PPCNONE,	{BF, L, RA, UI}},
-{"cmpli",	OP(10),		OP_MASK,     PWRCOM,	PPC,		{BF, RA, UI}},
+{"cmplwi",	OPL(10,0),	OPL_MASK,    PPCCOM,	PPCNONE,	{OBF, RA, UISIGNOPT}},
+{"cmpldi",	OPL(10,1),	OPL_MASK,    PPC64,	PPCNONE,	{OBF, RA, UISIGNOPT}},
+{"cmpli",	OP(10),		OP_MASK,     PPC,	PPCNONE,	{BF, L, RA, UISIGNOPT}},
+{"cmpli",	OP(10),		OP_MASK,     PWRCOM,	PPC,		{BF, RA, UISIGNOPT}},
 
 {"cmpwi",	OPL(11,0),	OPL_MASK,    PPCCOM,	PPCNONE,	{OBF, RA, SI}},
 {"cmpdi",	OPL(11,1),	OPL_MASK,    PPC64,	PPCNONE,	{OBF, RA, SI}},

@@ -1,3 +1,11 @@
+2014-06-12  Alan Modra  <amodra@gmail.com>
+
+	Backport mainline patches
+	2014-06-07  Alan Modra  <amodra@gmail.com>
+	* config/tc-ppc.c (ppc_insert_operand): Handle PPC_OPERAND_SIGNOPT
+	on unsigned fields.  Comment on PPC_OPERAND_SIGNOPT signed fields
+	in 64-bit mode.
+
 2014-04-16  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches for ppc476 workaround

@@ -1,6 +1,9 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
+	2014-06-07  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (relocate): Treat field of cmpli insn as a bitfield.
+
 	2014-06-03  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (addis_12_2): Define.
 	(Stub_table::do_write): Support fusion on ELFv2 stubs.

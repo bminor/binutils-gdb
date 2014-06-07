@@ -1,6 +1,11 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
+	2014-06-07  Alan Modra  <amodra@gmail.com>
+	* elf32-ppc.c (ppc_elf_relocate_section): Treat field of cmpli
+	insn as a bitfield; Use complain_overflow_bitfield.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+
 	2014-06-03  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ADDIS_R12_R2): Define.
 	(build_plt_stub): Support fusion on ELFv2 stub.
