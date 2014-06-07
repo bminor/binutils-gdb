@@ -1310,11 +1310,7 @@ demangle_for_lookup (const char *name, enum language lang,
    NAME is a field of the current implied argument `this'.  If so set
    *IS_A_FIELD_OF_THIS to 1, otherwise set it to zero.
    BLOCK_FOUND is set to the block in which NAME is found (in the case of
-   a field of `this', value_of_this sets BLOCK_FOUND to the proper value.)
-
-   If DOMAIN is VAR_DOMAIN and the language permits using tag names for
-   elaborated types, such as classes in C++, this function will search
-   STRUCT_DOMAIN if no matching is found.  */
+   a field of `this', value_of_this sets BLOCK_FOUND to the proper value.)  */
 
 /* This function (or rather its subordinates) have a bunch of loops and
    it would seem to be attractive to put in some QUIT's (though I'm not really
@@ -1337,23 +1333,6 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 
   returnval = lookup_symbol_aux (modified_name, block, domain, lang,
 				 is_a_field_of_this);
-  if (returnval == NULL)
-    {
-      if (is_a_field_of_this != NULL
-	  && is_a_field_of_this->type != NULL)
-	return NULL;
-
-      /* Some languages define typedefs of a type equal to its tag name,
-	 e.g., in C++, "struct foo { ... }" also defines a typedef for
-	 "foo".  */
-      if (domain == VAR_DOMAIN
-	  && (lang == language_cplus || lang == language_java
-	      || lang == language_ada || lang == language_d))
-	{
-	  returnval = lookup_symbol_aux (modified_name, block, STRUCT_DOMAIN,
-					 lang, is_a_field_of_this);
-	}
-    }
   do_cleanups (cleanup);
 
   return returnval;
@@ -1928,6 +1907,27 @@ lookup_symbol_global (const char *name,
   return lookup_data.result;
 }
 
+int
+symbol_matches_domain (enum language symbol_language,
+		       domain_enum symbol_domain,
+		       domain_enum domain)
+{
+  /* For C++ "struct foo { ... }" also defines a typedef for "foo".
+     A Java class declaration also defines a typedef for the class.
+     Similarly, any Ada type declaration implicitly defines a typedef.  */
+  if (symbol_language == language_cplus
+      || symbol_language == language_d
+      || symbol_language == language_java
+      || symbol_language == language_ada)
+    {
+      if ((domain == VAR_DOMAIN || domain == STRUCT_DOMAIN)
+	  && symbol_domain == STRUCT_DOMAIN)
+	return 1;
+    }
+  /* For all other languages, strict match is required.  */
+  return (symbol_domain == domain);
+}
+
 /* Look up a type named NAME in the struct_domain.  The type returned
    must not be opaque -- i.e., must have at least one field
    defined.  */
@@ -2050,12 +2050,7 @@ basic_lookup_transparent_type (const char *name)
    binary search terminates, we drop through and do a straight linear
    search on the symbols.  Each symbol which is marked as being a ObjC/C++
    symbol (language_cplus or language_objc set) has both the encoded and
-   non-encoded names tested for a match.
-
-   This function specifically disallows domain mismatches.  If a language
-   defines a typedef for an elaborated type, such as classes in C++,
-   then this function will need to be called twice, once to search
-   VAR_DOMAIN and once to search STRUCT_DOMAIN.  */
+   non-encoded names tested for a match.  */
 
 struct symbol *
 lookup_block_symbol (const struct block *block, const char *name,
@@ -2070,7 +2065,8 @@ lookup_block_symbol (const struct block *block, const char *name,
 	   sym != NULL;
 	   sym = block_iter_name_next (name, &iter))
 	{
-	  if (SYMBOL_DOMAIN (sym) == domain)
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				     SYMBOL_DOMAIN (sym), domain))
 	    return sym;
 	}
       return NULL;
@@ -2089,7 +2085,8 @@ lookup_block_symbol (const struct block *block, const char *name,
 	   sym != NULL;
 	   sym = block_iter_name_next (name, &iter))
 	{
-	  if (SYMBOL_DOMAIN (sym) == domain)
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				     SYMBOL_DOMAIN (sym), domain))
 	    {
 	      sym_found = sym;
 	      if (!SYMBOL_IS_ARGUMENT (sym))
@@ -2123,7 +2120,8 @@ iterate_over_symbols (const struct block *block, const char *name,
        sym != NULL;
        sym = block_iter_name_next (name, &iter))
     {
-      if (SYMBOL_DOMAIN (sym) == domain)
+      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				 SYMBOL_DOMAIN (sym), domain))
 	{
 	  if (!callback (sym, data))
 	    return;

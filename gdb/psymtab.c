@@ -594,7 +594,8 @@ match_partial_symbol (struct objfile *objfile,
       while (top <= real_top
 	     && match (SYMBOL_SEARCH_NAME (*top), name) == 0)
 	{
-	  if (SYMBOL_DOMAIN (*top) == domain)
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*top),
+				     SYMBOL_DOMAIN (*top), domain))
 	    return *top;
 	  top++;
 	}
@@ -607,7 +608,8 @@ match_partial_symbol (struct objfile *objfile,
     {
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (SYMBOL_DOMAIN (*psym) == domain
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*psym),
+				     SYMBOL_DOMAIN (*psym), domain)
 	      && match (SYMBOL_SEARCH_NAME (*psym), name) == 0)
 	    return *psym;
 	}
@@ -723,7 +725,8 @@ lookup_partial_symbol (struct objfile *objfile,
 
       while (top <= real_top && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name))
 	{
-	  if (SYMBOL_DOMAIN (*top) == domain)
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*top),
+				     SYMBOL_DOMAIN (*top), domain))
 	    {
 	      do_cleanups (cleanup);
 	      return (*top);
@@ -739,7 +742,8 @@ lookup_partial_symbol (struct objfile *objfile,
     {
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (SYMBOL_DOMAIN (*psym) == domain
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*psym),
+				     SYMBOL_DOMAIN (*psym), domain)
 	      && SYMBOL_MATCHES_SEARCH_NAME (*psym, search_name))
 	    {
 	      do_cleanups (cleanup);
@@ -1219,7 +1223,8 @@ map_block (const char *name, domain_enum namespace, struct objfile *objfile,
   for (sym = block_iter_match_first (block, name, match, &iter);
        sym != NULL; sym = block_iter_match_next (name, match, &iter))
     {
-      if (SYMBOL_DOMAIN (sym) == namespace)
+      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym), 
+				 SYMBOL_DOMAIN (sym), namespace))
 	{
 	  if (callback (block, sym, data))
 	    return 1;
