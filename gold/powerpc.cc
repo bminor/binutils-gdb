@@ -7409,14 +7409,15 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 
       overflow = Reloc::CHECK_SIGNED;
-      if (overflow == Reloc::CHECK_LOW_INSN
-	  ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
-	     || (insn & (0x3f << 26)) == 24u << 26 /* ori */
-	     || (insn & (0x3f << 26)) == 26u << 26 /* xori */
-	     || (insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
-	  : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
-	     || (insn & (0x3f << 26)) == 25u << 26 /* oris */
-	     || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
+      if ((insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
+	overflow = Reloc::CHECK_BITFIELD;
+      else if (overflow == Reloc::CHECK_LOW_INSN
+	       ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
+		  || (insn & (0x3f << 26)) == 24u << 26 /* ori */
+		  || (insn & (0x3f << 26)) == 26u << 26 /* xori */)
+	       : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
+		  || (insn & (0x3f << 26)) == 25u << 26 /* oris */
+		  || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
 	overflow = Reloc::CHECK_UNSIGNED;
     }
 

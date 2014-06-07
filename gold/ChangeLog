@@ -1,3 +1,7 @@
+2014-06-07  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (relocate): Treat field of cmpli insn as a bitfield.
+
 2014-06-06  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf_reader.h (Dwarf_pubnames_table): Remove output_section_offset_.

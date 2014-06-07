@@ -9147,10 +9147,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      unsigned int insn;
 
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
-	      if ((insn & (0x3f << 26)) == 28u << 26 /* andi */
-		  || (insn & (0x3f << 26)) == 24u << 26 /* ori */
-		  || (insn & (0x3f << 26)) == 26u << 26 /* xori */
-		  || (insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
+	      if ((insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
+		complain = complain_overflow_bitfield;
+	      else if ((insn & (0x3f << 26)) == 28u << 26 /* andi */
+		       || (insn & (0x3f << 26)) == 24u << 26 /* ori */
+		       || (insn & (0x3f << 26)) == 26u << 26 /* xori */)
 		complain = complain_overflow_unsigned;
 	    }
 	  if (howto->complain_on_overflow != complain)

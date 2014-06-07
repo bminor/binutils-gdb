@@ -14648,14 +14648,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  enum complain_overflow complain = complain_overflow_signed;
 
 	  insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
-	  if (howto->rightshift == 0
-	      ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
-		 || (insn & (0x3f << 26)) == 24u << 26 /* ori */
-		 || (insn & (0x3f << 26)) == 26u << 26 /* xori */
-		 || (insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
-	      : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
-		 || (insn & (0x3f << 26)) == 25u << 26 /* oris */
-		 || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
+	  if ((insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
+	    complain = complain_overflow_bitfield;
+	  else if (howto->rightshift == 0
+		   ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
+		      || (insn & (0x3f << 26)) == 24u << 26 /* ori */
+		      || (insn & (0x3f << 26)) == 26u << 26 /* xori */)
+		   : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
+		      || (insn & (0x3f << 26)) == 25u << 26 /* oris */
+		      || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
 	    complain = complain_overflow_unsigned;
 	  if (howto->complain_on_overflow != complain)
 	    {
