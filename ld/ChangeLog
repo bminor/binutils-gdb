@@ -1,3 +1,8 @@
+2014-06-07  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_fold_tree_1 <etree_provide>): Make PROVIDEd
+	linker script symbol value override a built-in linker symbol.
+
 2014-06-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Add dependency on
