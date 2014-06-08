@@ -1,5 +1,9 @@
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
+	* msp430-decode.c: Regenerate.
+
+2014-06-12  Alan Modra  <amodra@gmail.com>
+
 	Backport mainline patches
 	2014-06-07  Alan Modra  <amodra@gmail.com>
 	* ppc-opc.c (UISIGNOPT): Define and use with cmpli.
