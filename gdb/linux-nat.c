@@ -414,6 +414,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       if (detach_fork)
 	{
 	  struct cleanup *old_chain;
+	  int status = 0;
 
 	  /* Before detaching from the child, remove all breakpoints
 	     from it.  If we forked, then this has already been taken
@@ -447,7 +448,29 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 	  if (linux_nat_prepare_to_resume != NULL)
 	    linux_nat_prepare_to_resume (child_lp);
-	  ptrace (PTRACE_DETACH, child_pid, 0, 0);
+
+	  /* When debugging an inferior in an architecture that supports
+	     hardware single stepping on a kernel without commit
+	     6580807da14c423f0d0a708108e6df6ebc8bc83d, the vfork child
+	     process starts with the TIF_SINGLESTEP/X86_EFLAGS_TF bits
+	     set if the parent process had them set.
+	     To work around this, single step the child process
+	     once before detaching to clear the flags.  */
+
+	  if (!gdbarch_software_single_step_p (target_thread_architecture
+						   (child_lp->ptid)))
+	    {
+	      int status;
+
+	      linux_disable_event_reporting (child_pid);
+	      if (ptrace (PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
+		perror_with_name (_("Couldn't do single step"));
+	      if (my_waitpid (child_pid, &status, 0) < 0)
+		perror_with_name (_("Couldn't wait vfork process"));
+	    }
+
+	  if (WIFSTOPPED (status))
+	    ptrace (PTRACE_DETACH, child_pid, 0, WSTOPSIG (status));
 
 	  do_cleanups (old_chain);
 	}

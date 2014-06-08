@@ -476,6 +476,15 @@ linux_enable_event_reporting (pid_t pid)
 	  (PTRACE_TYPE_ARG4) (uintptr_t) current_ptrace_options);
 }
 
+/* Disable reporting of all currently supported ptrace events.  */
+
+void
+linux_disable_event_reporting (pid_t pid)
+{
+  /* Set the options.  */
+  ptrace (PTRACE_SETOPTIONS, pid, (PTRACE_TYPE_ARG3) 0, 0);
+}
+
 /* Returns non-zero if PTRACE_OPTIONS is contained within
    CURRENT_PTRACE_OPTIONS, therefore supported.  Returns 0
    otherwise.  */

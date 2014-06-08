@@ -86,6 +86,7 @@ struct buffer;
 extern void linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer);
 extern void linux_ptrace_init_warnings (void);
 extern void linux_enable_event_reporting (pid_t pid);
+extern void linux_disable_event_reporting (pid_t pid);
 extern int linux_supports_tracefork (void);
 extern int linux_supports_traceclone (void);
 extern int linux_supports_tracevforkdone (void);

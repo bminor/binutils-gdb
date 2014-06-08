@@ -1,3 +1,12 @@
+2014-06-08  Hui Zhu  <hui@codesourcery.com>
+
+	* common/linux-ptrace.c (linux_disable_event_reporting): New
+	function.
+	* common/linux-ptrace.h (linux_disable_event_reporting): New
+	declaration.
+	* linux-nat.c (linux_child_follow_fork): Do a single step before
+	detach.
+
 2014-06-07  Keith Seitz  <keiths@redhat.com>
 
 	Revert:
