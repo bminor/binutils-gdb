@@ -1,3 +1,10 @@
+2014-06-09  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_child_follow_fork): Initialize status with
+	W_STOPCODE (0) instead of 0.  Remove shodowing 'status' local from
+	inner block.  Only pass the signal to PTRACE_DETACH if in pass
+	state.
+
 2014-06-09  Gary Benson  <gbenson@redhat.com>
 
 	* gdb.base/sigall.c [Functions to send signals]: Reorder to

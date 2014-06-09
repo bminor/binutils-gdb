@@ -414,7 +414,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       if (detach_fork)
 	{
 	  struct cleanup *old_chain;
-	  int status = 0;
+	  int status = W_STOPCODE (0);
 
 	  /* Before detaching from the child, remove all breakpoints
 	     from it.  If we forked, then this has already been taken
@@ -460,8 +460,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  if (!gdbarch_software_single_step_p (target_thread_architecture
 						   (child_lp->ptid)))
 	    {
-	      int status;
-
 	      linux_disable_event_reporting (child_pid);
 	      if (ptrace (PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
 		perror_with_name (_("Couldn't do single step"));
@@ -470,7 +468,15 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	    }
 
 	  if (WIFSTOPPED (status))
-	    ptrace (PTRACE_DETACH, child_pid, 0, WSTOPSIG (status));
+	    {
+	      int signo;
+
+	      signo = WSTOPSIG (status);
+	      if (signo != 0
+		  && !signal_pass_state (gdb_signal_from_host (signo)))
+		signo = 0;
+	      ptrace (PTRACE_DETACH, child_pid, 0, signo);
+	    }
 
 	  do_cleanups (old_chain);
 	}
