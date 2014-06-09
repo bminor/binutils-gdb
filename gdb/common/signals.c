@@ -121,36 +121,47 @@ gdb_signal_from_name (const char *name)
 enum gdb_signal
 gdb_signal_from_host (int hostsig)
 {
-  /* A switch statement would make sense but would require special kludges
-     to deal with the cases where more than one signal has the same number.  */
+  /* A switch statement would make sense but would require special
+     kludges to deal with the cases where more than one signal has the
+     same number.  Signals are ordered ANSI-standard signals first,
+     other signals second, with signals in each block ordered by their
+     numerical values on a typical POSIX platform.  */
 
   if (hostsig == 0)
     return GDB_SIGNAL_0;
 
+  /* SIGINT, SIGILL, SIGABRT, SIGFPE, SIGSEGV and SIGTERM
+     are ANSI-standard signals and are always available.  */
+  if (hostsig == SIGINT)
+    return GDB_SIGNAL_INT;
+  if (hostsig == SIGILL)
+    return GDB_SIGNAL_ILL;
+  if (hostsig == SIGABRT)
+    return GDB_SIGNAL_ABRT;
+  if (hostsig == SIGFPE)
+    return GDB_SIGNAL_FPE;
+  if (hostsig == SIGSEGV)
+    return GDB_SIGNAL_SEGV;
+  if (hostsig == SIGTERM)
+    return GDB_SIGNAL_TERM;
+
+  /* All other signals need preprocessor conditionals.  */
 #if defined (SIGHUP)
   if (hostsig == SIGHUP)
     return GDB_SIGNAL_HUP;
 #endif
-  if (hostsig == SIGINT)
-    return GDB_SIGNAL_INT;
 #if defined (SIGQUIT)
   if (hostsig == SIGQUIT)
     return GDB_SIGNAL_QUIT;
 #endif
-  if (hostsig == SIGILL)
-    return GDB_SIGNAL_ILL;
 #if defined (SIGTRAP)
   if (hostsig == SIGTRAP)
     return GDB_SIGNAL_TRAP;
 #endif
-  if (hostsig == SIGABRT)
-    return GDB_SIGNAL_ABRT;
 #if defined (SIGEMT)
   if (hostsig == SIGEMT)
     return GDB_SIGNAL_EMT;
 #endif
-  if (hostsig == SIGFPE)
-    return GDB_SIGNAL_FPE;
 #if defined (SIGKILL)
   if (hostsig == SIGKILL)
     return GDB_SIGNAL_KILL;
@@ -159,8 +170,6 @@ gdb_signal_from_host (int hostsig)
   if (hostsig == SIGBUS)
     return GDB_SIGNAL_BUS;
 #endif
-  if (hostsig == SIGSEGV)
-    return GDB_SIGNAL_SEGV;
 #if defined (SIGSYS)
   if (hostsig == SIGSYS)
     return GDB_SIGNAL_SYS;
@@ -173,8 +182,6 @@ gdb_signal_from_host (int hostsig)
   if (hostsig == SIGALRM)
     return GDB_SIGNAL_ALRM;
 #endif
-  if (hostsig == SIGTERM)
-    return GDB_SIGNAL_TERM;
 #if defined (SIGUSR1)
   if (hostsig == SIGUSR1)
     return GDB_SIGNAL_USR1;
@@ -366,36 +373,48 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
      do not support signals.  */
   (void) retsig;
 
+  /* Signals are ordered ANSI-standard signals first, other signals
+     second, with signals in each block ordered by their numerical
+     values on a typical POSIX platform.  */
+
   *oursig_ok = 1;
   switch (oursig)
     {
     case GDB_SIGNAL_0:
       return 0;
 
+      /* SIGINT, SIGILL, SIGABRT, SIGFPE, SIGSEGV and SIGTERM
+	 are ANSI-standard signals and are always available.  */
+    case GDB_SIGNAL_INT:
+      return SIGINT;
+    case GDB_SIGNAL_ILL:
+      return SIGILL;
+    case GDB_SIGNAL_ABRT:
+      return SIGABRT;
+    case GDB_SIGNAL_FPE:
+      return SIGFPE;
+    case GDB_SIGNAL_SEGV:
+      return SIGSEGV;
+    case GDB_SIGNAL_TERM:
+      return SIGTERM;
+
+      /* All other signals need preprocessor conditionals.  */
 #if defined (SIGHUP)
     case GDB_SIGNAL_HUP:
       return SIGHUP;
 #endif
-    case GDB_SIGNAL_INT:
-      return SIGINT;
 #if defined (SIGQUIT)
     case GDB_SIGNAL_QUIT:
       return SIGQUIT;
 #endif
-    case GDB_SIGNAL_ILL:
-      return SIGILL;
 #if defined (SIGTRAP)
     case GDB_SIGNAL_TRAP:
       return SIGTRAP;
 #endif
-    case GDB_SIGNAL_ABRT:
-      return SIGABRT;
 #if defined (SIGEMT)
     case GDB_SIGNAL_EMT:
       return SIGEMT;
 #endif
-    case GDB_SIGNAL_FPE:
-      return SIGFPE;
 #if defined (SIGKILL)
     case GDB_SIGNAL_KILL:
       return SIGKILL;
@@ -404,8 +423,6 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
     case GDB_SIGNAL_BUS:
       return SIGBUS;
 #endif
-    case GDB_SIGNAL_SEGV:
-      return SIGSEGV;
 #if defined (SIGSYS)
     case GDB_SIGNAL_SYS:
       return SIGSYS;
@@ -418,8 +435,6 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
     case GDB_SIGNAL_ALRM:
       return SIGALRM;
 #endif
-    case GDB_SIGNAL_TERM:
-      return SIGTERM;
 #if defined (SIGUSR1)
     case GDB_SIGNAL_USR1:
       return SIGUSR1;

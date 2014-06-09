@@ -1396,37 +1396,47 @@ proc_prettyprint_syscalls (sysset_t *sysset, int verbose)
 
 /* Prettyprint signals.  */
 
-/* Signal translation table.  */
+/* Signal translation table, ordered ANSI-standard signals first,
+   other signals second, with signals in each block ordered by their
+   numerical values on a typical POSIX platform.  */
 
 static struct trans signal_table[] = 
 {
   { 0,      "<no signal>", "no signal" }, 
+
+  /* SIGINT, SIGILL, SIGABRT, SIGFPE, SIGSEGV and SIGTERM
+     are ANSI-standard signals and are always available.  */
+
+  { SIGINT, "SIGINT", "Interrupt (rubout)" },
+  { SIGILL, "SIGILL", "Illegal instruction" },	/* not reset when caught */
+  { SIGABRT, "SIGABRT", "used by abort()" },	/* replaces SIGIOT */
+  { SIGFPE, "SIGFPE", "Floating point exception" },
+  { SIGSEGV, "SIGSEGV", "Segmentation violation" },
+  { SIGTERM, "SIGTERM", "Software termination signal from kill" },
+
+  /* All other signals need preprocessor conditionals.  */
+
 #ifdef SIGHUP
   { SIGHUP, "SIGHUP", "Hangup" },
 #endif
-  { SIGINT, "SIGINT", "Interrupt (rubout)" },
 #ifdef SIGQUIT
   { SIGQUIT, "SIGQUIT", "Quit (ASCII FS)" },
 #endif
-  { SIGILL, "SIGILL", "Illegal instruction" },	/* not reset when caught */
 #ifdef SIGTRAP
   { SIGTRAP, "SIGTRAP", "Trace trap" },		/* not reset when caught */
 #endif
-  { SIGABRT, "SIGABRT", "used by abort()" },	/* replaces SIGIOT */
 #ifdef SIGIOT
   { SIGIOT, "SIGIOT", "IOT instruction" },
 #endif
 #ifdef SIGEMT
   { SIGEMT, "SIGEMT", "EMT instruction" },
 #endif
-  { SIGFPE, "SIGFPE", "Floating point exception" },
 #ifdef SIGKILL
   { SIGKILL, "SIGKILL", "Kill" },	/* Solaris: cannot be caught/ignored */
 #endif
 #ifdef SIGBUS
   { SIGBUS, "SIGBUS", "Bus error" },
 #endif
-  { SIGSEGV, "SIGSEGV", "Segmentation violation" },
 #ifdef SIGSYS
   { SIGSYS, "SIGSYS", "Bad argument to system call" },
 #endif
@@ -1436,7 +1446,6 @@ static struct trans signal_table[] =
 #ifdef SIGALRM
   { SIGALRM, "SIGALRM", "Alarm clock" },
 #endif
-  { SIGTERM, "SIGTERM", "Software termination signal from kill" },
 #ifdef SIGUSR1
   { SIGUSR1, "SIGUSR1", "User defined signal 1" },
 #endif

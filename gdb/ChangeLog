@@ -1,3 +1,11 @@
+2014-06-09  Gary Benson  <gbenson@redhat.com>
+
+	* common/signals.c (gdb_signal_from_host): Reorder to separate
+	the always-available ANSI-standard signals from the signals that
+	require checking.
+	(do_gdb_signal_to_host): Likewise.
+	* proc-events.c (signal_table): Likewise.
+
 2014-06-08  Hui Zhu  <hui@codesourcery.com>
 
 	* common/linux-ptrace.c (linux_disable_event_reporting): New

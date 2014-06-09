@@ -1,3 +1,13 @@
+2014-06-09  Gary Benson  <gbenson@redhat.com>
+
+	* gdb.base/sigall.c [Functions to send signals]: Reorder to
+	separate the always-available ANSI-standard signals from the
+	signals that require checking.
+	(main): Likewise.
+	* gdb.reverse/sigall-reverse.c [Functions to send signals]:
+	Likewise.
+	(main): Likewise.
+
 2014-06-07  Keith Seitz  <keiths@redhat.com>
 
 	Revert:
