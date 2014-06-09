@@ -1,3 +1,7 @@
+2014-06-09  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/msp430x.d: Update to match revised assembler output.
+
 2014-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* gas/msp430/bad.d: Use -my not -mz.
