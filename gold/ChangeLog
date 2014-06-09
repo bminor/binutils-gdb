@@ -1,3 +1,9 @@
+2014-06-09  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/16980
+	* layout.cc (Layout::print_to_mapfile): Print unattached sections in
+	map.
+
 2014-06-07  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (relocate): Treat field of cmpli insn as a bitfield.
