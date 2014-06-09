@@ -580,6 +580,12 @@ Dwarf_pubnames_table::read_header(off_t offset)
     }
   this->end_of_table_ = pinfo + unit_length;
 
+  // If unit_length is too big, maybe we should reject the whole table,
+  // but in cases we know about, it seems OK to assume that the table
+  // is valid through the actual end of the section.
+  if (this->end_of_table_ > this->buffer_end_)
+    this->end_of_table_ = this->buffer_end_;
+
   // Check the version.
   unsigned int version = this->dwinfo_->read_from_pointer<16>(pinfo);
   pinfo += 2;
