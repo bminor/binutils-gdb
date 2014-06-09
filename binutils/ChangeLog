@@ -1,3 +1,9 @@
+2014-06-09  Romain Chastenet  <romain.chastenet@free.fr>
+
+	PR binutils/16252
+	* dwarf.c (display_debug_frames): Remember the state of the
+	cfa_offset, cfa_reg, ra and cfa_exp field
+
 2014-06-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Add dependency on

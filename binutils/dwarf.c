@@ -5829,12 +5829,16 @@ display_debug_frames (struct dwarf_section *section,
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_remember_state\n");
 	      rs = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
+              rs->cfa_offset = fc->cfa_offset;
+	      rs->cfa_reg = fc->cfa_reg;
+	      rs->ra = fc->ra;
+	      rs->cfa_exp = fc->cfa_exp;
 	      rs->ncols = fc->ncols;
 	      rs->col_type = (short int *) xcmalloc (rs->ncols,
-                                                     sizeof (short int));
-	      rs->col_offset = (int *) xcmalloc (rs->ncols, sizeof (int));
-	      memcpy (rs->col_type, fc->col_type, rs->ncols);
-	      memcpy (rs->col_offset, fc->col_offset, rs->ncols * sizeof (int));
+                                                     sizeof (* rs->col_type));
+	      rs->col_offset = (int *) xcmalloc (rs->ncols, sizeof (* rs->col_offset));
+	      memcpy (rs->col_type, fc->col_type, rs->ncols * sizeof (* fc->col_type));
+	      memcpy (rs->col_offset, fc->col_offset, rs->ncols * sizeof (* fc->col_offset));
 	      rs->next = remembered_state;
 	      remembered_state = rs;
 	      break;
@@ -5846,10 +5850,14 @@ display_debug_frames (struct dwarf_section *section,
 	      if (rs)
 		{
 		  remembered_state = rs->next;
+		  fc->cfa_offset = rs->cfa_offset;
+		  fc->cfa_reg = rs->cfa_reg;
+	          fc->ra = rs->ra;
+	          fc->cfa_exp = rs->cfa_exp;
 		  frame_need_space (fc, rs->ncols - 1);
-		  memcpy (fc->col_type, rs->col_type, rs->ncols);
+		  memcpy (fc->col_type, rs->col_type, rs->ncols * sizeof (* rs->col_type));
 		  memcpy (fc->col_offset, rs->col_offset,
-			  rs->ncols * sizeof (int));
+			  rs->ncols * sizeof (* rs->col_offset));
 		  free (rs->col_type);
 		  free (rs->col_offset);
 		  free (rs);
