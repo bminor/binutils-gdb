@@ -1,3 +1,8 @@
+2014-06-09  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python.texi (Xmethod API): Add space before the opening
+	parenthesis in function descriptions.
+
 2014-06-06  Doug Evans  <xdje42@gmail.com>
 
 	* guile.texi (Guile Configuration): Document guile-data-directory.

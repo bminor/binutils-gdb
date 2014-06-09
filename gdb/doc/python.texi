@@ -2270,7 +2270,7 @@ disabled.
 The class @code{XMethod} is a convenience class with same
 attributes as above along with the following constructor:
 
-@defun XMethod.__init__(self, name)
+@defun XMethod.__init__ (self, name)
 Constructs an enabled xmethod with name @var{name}.
 @end defun
 @end defvar
@@ -2278,12 +2278,12 @@ Constructs an enabled xmethod with name @var{name}.
 @noindent
 The @code{XMethodMatcher} class has the following methods:
 
-@defun XMethodMatcher.__init__(self, name)
+@defun XMethodMatcher.__init__ (self, name)
 Constructs an enabled xmethod matcher with name @var{name}.  The
 @code{methods} attribute is initialized to @code{None}.
 @end defun
 
-@defun XMethodMatcher.match(self, class_type, method_name)
+@defun XMethodMatcher.match (self, class_type, method_name)
 Derived classes should override this method.  It should return a
 xmethod worker object (or a sequence of xmethod worker
 objects) matching the @var{class_type} and @var{method_name}.
@@ -2298,7 +2298,7 @@ An xmethod worker should be an instance of a class derived from
 @code{XMethodWorker} defined in the module @code{gdb.xmethod},
 or support the following interface:
 
-@defun XMethodWorker.get_arg_types(self)
+@defun XMethodWorker.get_arg_types (self)
 This method returns a sequence of @code{gdb.Type} objects corresponding
 to the arguments that the xmethod takes.  It can return an empty
 sequence or @code{None} if the xmethod does not take any arguments.
@@ -2306,7 +2306,7 @@ If the xmethod takes a single argument, then a single
 @code{gdb.Type} object corresponding to it can be returned.
 @end defun
 
-@defun XMethodWorker.__call__(self, *args)
+@defun XMethodWorker.__call__ (self, *args)
 This is the method which does the @emph{work} of the xmethod.  The
 @var{args} arguments is the tuple of arguments to the xmethod.  Each
 element in this tuple is a gdb.Value object.  The first element is
@@ -2317,7 +2317,7 @@ For @value{GDBN} to lookup xmethods, the xmethod matchers
 should be registered using the following function defined in the module
 @code{gdb.xmethod}:
 
-@defun register_xmethod_matcher(locus, matcher, replace=False)
+@defun register_xmethod_matcher (locus, matcher, replace=False)
 The @code{matcher} is registered with @code{locus}, replacing an
 existing matcher with the same name as @code{matcher} if
 @code{replace} is @code{True}.  @code{locus} can be a
