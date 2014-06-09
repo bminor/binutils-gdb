@@ -1,3 +1,7 @@
+2014-06-09  Ryan Mansfield  <rmansfield@qnx.com>
+
+        * config/default.exp (GASP): Remove.
+
 2014-06-03  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/elfv2exe.d: Update for changed plt call stubs.

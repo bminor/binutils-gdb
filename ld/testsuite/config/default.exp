@@ -242,10 +242,6 @@ if ![info exists AS] then {
     set AS $as
 }
 
-if ![info exists GASP] then {
-    set GASP [findfile $base_dir/../gas/gasp-new $base_dir/../gas/gasp-new [transform gasp]]
-}
-
 if ![info exists ASFLAGS] then {
     set ASFLAGS ""
 }
