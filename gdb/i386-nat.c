@@ -466,7 +466,7 @@ i386_handle_nonaligned_watchpoint (struct i386_debug_reg_state *state,
   int retval = 0;
   int max_wp_len = TARGET_HAS_DR_LEN_8 ? 8 : 4;
 
-  static int size_try_array[8][8] =
+  static const int size_try_array[8][8] =
   {
     {1, 1, 1, 1, 1, 1, 1, 1},	/* Trying size one.  */
     {2, 1, 2, 1, 2, 1, 2, 1},	/* Trying size two.  */

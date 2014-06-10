@@ -1,5 +1,10 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (i386_handle_nonaligned_watchpoint) <size_try_array>:
+	Make const.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c: Comment changes.
 
 2014-06-18  Gary Benson  <gbenson@redhat.com>
