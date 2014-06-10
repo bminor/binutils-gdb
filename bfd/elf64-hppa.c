@@ -3868,6 +3868,11 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 
 	  eh = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
+	  if (info->wrap_hash != NULL
+	      && (input_section->flags & SEC_DEBUGGING) != 0)
+	    eh = ((struct elf_link_hash_entry *)
+		  unwrap_hash_lookup (info, input_bfd, &eh->root));
+
 	  while (eh->root.type == bfd_link_hash_indirect
 		 || eh->root.type == bfd_link_hash_warning)
 	    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;

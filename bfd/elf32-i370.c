@@ -1090,6 +1090,12 @@ i370_elf_relocate_section (bfd *output_bfd,
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+	  if (info->wrap_hash != NULL
+	      && (input_section->flags & SEC_DEBUGGING) != 0)
+	    h = ((struct elf_link_hash_entry *)
+		 unwrap_hash_lookup (info, input_bfd, &h->root));
+
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
