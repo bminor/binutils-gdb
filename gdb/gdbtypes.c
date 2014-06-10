@@ -1653,6 +1653,9 @@ is_dynamic_type (struct type *type)
   return 0;
 }
 
+/* Given a dynamic range type (dyn_range_type), return a static version
+   of that type.  */
+
 static struct type *
 resolve_dynamic_range (struct type *dyn_range_type)
 {

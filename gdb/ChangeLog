@@ -1,3 +1,7 @@
+2014-06-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes (resolve_dynamic_range): Add function description.
+
 2014-06-09  Gary Benson  <gbenson@redhat.com>
 
 	* common/signals.c (gdb_signal_from_host): Reorder to separate
