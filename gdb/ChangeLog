@@ -1,5 +1,10 @@
 2014-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* probe.c (info_probes_for_ops): Make "arg" const.
+	* probe.h (info_probes_for_ops): Update.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* varobj.c (varobj_create): Update.
 	* valops.c (value_of_this): Update.
 	* tracepoint.c (add_local_symbols, scope_info): Update.
