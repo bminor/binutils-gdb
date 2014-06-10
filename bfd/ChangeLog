@@ -1,5 +1,6 @@
 2014-06-10  Alan Modra  <amodra@gmail.com>
 
+	PR ld/16910
 	* linker.c (unwrap_hash_lookup): New function.
 	* elf-bfd (RELOC_FOR_GLOBAL_SYMBOL): Call unwrap_hash_lookup.
 	* elf32-i370.c (i370_elf_relocate_section): Likewise.

@@ -1,5 +1,6 @@
 2014-06-10  Alan Modra  <amodra@gmail.com>
 
+	PR ld/16910
 	* bfdlink.h (unwrap_hash_lookup): Declare.
 
 2014-05-01  Steve Ellcey  <sellcey@mips.com>
