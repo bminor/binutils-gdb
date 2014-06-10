@@ -40,8 +40,10 @@ mi_gdb_load ${binfile}
 
 set line_dct_end [gdb_get_line_number "{int a = 0;}"]
 
-mi_create_breakpoint "$srcfile:$line_dct_end" 1 keep do_children_tests ".*var-cmd.c" $line_dct_end $hex \
-    "break-insert operation"
+mi_create_breakpoint "$srcfile:$line_dct_end" \
+    "break-insert operation" \
+    -number 1 -func do_children_tests -file ".*var-cmd.c" \
+    -line $line_dct_end
 
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "do_children_tests" "" ".*var-cmd.c" \
@@ -368,8 +370,10 @@ mi_gdb_test "-var-delete weird" \
 
 set line_dst_incr_a_2 [gdb_get_line_number "incr_a(2);"]
 
-mi_create_breakpoint "$line_dst_incr_a_2" 2 keep do_special_tests ".*var-cmd.c" $line_dst_incr_a_2 $hex \
-	"break-insert operation 2"
+mi_create_breakpoint "$line_dst_incr_a_2" \
+    "break-insert operation 2" \
+    -number 2 -func do_special_tests -file ".*var-cmd.c" \
+    -line $line_dst_incr_a_2
 
 mi_execute_to "exec-continue" "breakpoint-hit" "do_special_tests" "" \
     ".*var-cmd.c" $line_dst_incr_a_2 { "" "disp=\"keep\"" } \

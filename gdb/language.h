@@ -475,12 +475,6 @@ extern enum language set_language (enum language);
 
 extern int pointer_type (struct type *);
 
-/* Checks Binary and Unary operations for semantic type correctness.  */
-/* FIXME:  Does not appear to be used.  */
-#define unop_type_check(v,o) binop_type_check((v),NULL,(o))
-
-extern void binop_type_check (struct value *, struct value *, int);
-
 /* Error messages */
 
 extern void range_error (const char *, ...) ATTRIBUTE_PRINTF (1, 2);

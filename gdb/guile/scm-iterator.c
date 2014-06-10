@@ -110,20 +110,6 @@ itscm_set_iterator_smob_progress_x (iterator_smob *i_smob, SCM progress)
 
 /* Administrivia for iterator smobs.  */
 
-/* The smob "mark" function for <gdb:iterator>.  */
-
-static SCM
-itscm_mark_iterator_smob (SCM self)
-{
-  iterator_smob *i_smob = (iterator_smob *) SCM_SMOB_DATA (self);
-
-  scm_gc_mark (i_smob->object);
-  scm_gc_mark (i_smob->progress);
-  scm_gc_mark (i_smob->next_x);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&i_smob->base);
-}
-
 /* The smob "print" function for <gdb:iterator>.  */
 
 static int
@@ -364,7 +350,6 @@ gdbscm_initialize_iterators (void)
 {
   iterator_smob_tag = gdbscm_make_smob_type (iterator_smob_name,
 					     sizeof (iterator_smob));
-  scm_set_smob_mark (iterator_smob_tag, itscm_mark_iterator_smob);
   scm_set_smob_print (iterator_smob_tag, itscm_print_iterator_smob);
 
   gdbscm_define_functions (iterator_functions, 1);

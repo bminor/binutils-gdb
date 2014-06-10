@@ -296,7 +296,8 @@ OFILES = @BFD_MACHINES@
 
 # We should reconfigure whenever bfd/configure.in changes, because
 # that's where the version number in Makefile comes from.
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in \
+	$(BFDDIR)/development.sh
 
 AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
 

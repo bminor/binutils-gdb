@@ -171,6 +171,10 @@ ld_cleanup (void)
 #endif
   if (output_filename && delete_output_file_on_failure)
     unlink_if_ordinary (output_filename);
+
+  /* See open_output in ldlang.c.  */
+  if (output_bfd_hash_table_free_fn != NULL)
+    (*output_bfd_hash_table_free_fn) (link_info.hash);
 }
 
 /* If there's a BFD assertion, we'll notice and exit with an error

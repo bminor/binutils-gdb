@@ -24,6 +24,7 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "target.h"
 #include "regcache.h"
 #include <string.h>

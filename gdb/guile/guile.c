@@ -37,6 +37,18 @@
 #include "guile-internal.h"
 #endif
 
+/* The Guile version we're using.
+   We *could* use the macros in libguile/version.h but that would preclude
+   handling the user switching in a different version with, e.g.,
+   LD_LIBRARY_PATH (using a different version than what gdb was compiled with
+   is not something to be done lightly, but can be useful).  */
+int gdbscm_guile_major_version;
+int gdbscm_guile_minor_version;
+int gdbscm_guile_micro_version;
+
+/* The guile subdirectory within gdb's data-directory.  */
+static const char *guile_datadir;
+
 /* Declared constants and enum for guile exception printing.  */
 const char gdbscm_print_excp_none[] = "none";
 const char gdbscm_print_excp_full[] = "full";
@@ -353,6 +365,14 @@ gdbscm_data_directory (void)
   return gdbscm_scm_from_c_string (gdb_datadir);
 }
 
+/* (guile-data-directory) -> string */
+
+static SCM
+gdbscm_guile_data_directory (void)
+{
+  return gdbscm_scm_from_c_string (guile_datadir);
+}
+
 /* (gdb-version) -> string */
 
 static SCM
@@ -468,6 +488,10 @@ Execute the given GDB command.\n\
     "\
 Return the name of GDB's data directory." },
 
+  { "guile-data-directory", 0, 0, 0, gdbscm_guile_data_directory,
+    "\
+Return the name of the Guile directory within GDB's data directory." },
+
   { "gdb-version", 0, 0, 0, gdbscm_gdb_version,
     "\
 Return GDB's version string." },
@@ -489,10 +513,12 @@ Return the name of the target configuration." },
 static void
 initialize_scheme_side (void)
 {
-  char *gdb_guile_dir = concat (gdb_datadir, SLASH_STRING, "guile", NULL);
-  char *boot_scm_path = concat (gdb_guile_dir, SLASH_STRING, "gdb",
-				SLASH_STRING, boot_scm_filename, NULL);
+  char *boot_scm_path;
   char *msg;
+
+  guile_datadir = concat (gdb_datadir, SLASH_STRING, "guile", NULL);
+  boot_scm_path = concat (guile_datadir, SLASH_STRING, "gdb",
+			  SLASH_STRING, boot_scm_filename, NULL);
 
   /* While scm_c_primitive_load works, the loaded code is not compiled,
      instead it is left to be interpreted.  Eh?
@@ -512,7 +538,6 @@ initialize_scheme_side (void)
 	       boot_scm_path);
     }
 
-  xfree (gdb_guile_dir);
   xfree (boot_scm_path);
 }
 
@@ -524,6 +549,13 @@ initialize_scheme_side (void)
 static void
 initialize_gdb_module (void *data)
 {
+  /* Computing these is a pain, so only do it once.
+     Also, do it here and save the result so that obtaining the values
+     is thread-safe.  */
+  gdbscm_guile_major_version = gdbscm_scm_string_to_int (scm_major_version ());
+  gdbscm_guile_minor_version = gdbscm_scm_string_to_int (scm_minor_version ());
+  gdbscm_guile_micro_version = gdbscm_scm_string_to_int (scm_micro_version ());
+
   /* The documentation symbol needs to be defined before any calls to
      gdbscm_define_{variables,functions}.  */
   gdbscm_documentation_symbol = scm_from_latin1_symbol ("documentation");
@@ -537,14 +569,17 @@ initialize_gdb_module (void *data)
   gdbscm_initialize_auto_load ();
   gdbscm_initialize_blocks ();
   gdbscm_initialize_breakpoints ();
+  gdbscm_initialize_commands ();
   gdbscm_initialize_disasm ();
   gdbscm_initialize_frames ();
   gdbscm_initialize_iterators ();
   gdbscm_initialize_lazy_strings ();
   gdbscm_initialize_math ();
   gdbscm_initialize_objfiles ();
+  gdbscm_initialize_parameters ();
   gdbscm_initialize_ports ();
   gdbscm_initialize_pretty_printers ();
+  gdbscm_initialize_pspaces ();
   gdbscm_initialize_strings ();
   gdbscm_initialize_symbols ();
   gdbscm_initialize_symtabs ();

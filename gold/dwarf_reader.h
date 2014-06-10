@@ -401,7 +401,7 @@ class Dwarf_pubnames_table
     : dwinfo_(dwinfo), buffer_(NULL), buffer_end_(NULL), owns_buffer_(false),
       offset_size_(0), pinfo_(NULL), end_of_table_(NULL),
       is_pubtypes_(is_pubtypes), is_gnu_style_(false),
-      output_section_offset_(0), unit_length_(0), cu_offset_(0)
+      unit_length_(0), cu_offset_(0)
   { }
 
   ~Dwarf_pubnames_table()
@@ -455,11 +455,6 @@ class Dwarf_pubnames_table
   // Gnu-style pubnames table. This style has an extra flag byte between the
   // offset and the name, and is used for generating version 7 of gdb-index.
   bool is_gnu_style_;
-  // For incremental update links, this will hold the offset of the
-  // input section within the output section.  Offsets read from
-  // relocated data will be relative to the output section, and need
-  // to be corrected before reading data from the input section.
-  uint64_t output_section_offset_;
   // Fields read from the header.
   uint64_t unit_length_;
   off_t cu_offset_;

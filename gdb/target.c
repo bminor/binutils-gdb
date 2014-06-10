@@ -27,6 +27,7 @@
 #include "gdbcmd.h"
 #include "symtab.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -72,6 +73,13 @@ static int default_search_memory (struct target_ops *ops,
 				  const gdb_byte *pattern,
 				  ULONGEST pattern_len,
 				  CORE_ADDR *found_addrp);
+
+static int default_verify_memory (struct target_ops *self,
+				  const gdb_byte *data,
+				  CORE_ADDR memaddr, ULONGEST size);
+
+static struct address_space *default_thread_address_space
+     (struct target_ops *self, ptid_t ptid);
 
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
@@ -753,10 +761,6 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	  /* Fetch the load module address for this objfile.  */
 	  lm_addr = gdbarch_fetch_tls_load_module_address (target_gdbarch (),
 	                                                   objfile);
-	  /* If it's 0, throw the appropriate exception.  */
-	  if (lm_addr == 0)
-	    throw_error (TLS_LOAD_MODULE_NOT_FOUND_ERROR,
-			 _("TLS load module not found"));
 
 	  addr = target->to_get_thread_local_address (target, ptid,
 						      lm_addr, offset);
@@ -2149,8 +2153,9 @@ target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 			gdb_signal_to_name (signal));
 
   registers_changed_ptid (ptid);
+  /* We only set the internal executing state here.  The user/frontend
+     running state is set at a higher level.  */
   set_executing (ptid, 1);
-  set_running (ptid, 1);
   clear_inline_frame_state (ptid);
 }
 
@@ -2436,6 +2441,20 @@ target_require_runnable (void)
   internal_error (__FILE__, __LINE__, _("No targets found"));
 }
 
+/* Whether GDB is allowed to fall back to the default run target for
+   "run", "attach", etc. when no target is connected yet.  */
+static int auto_connect_native_target = 1;
+
+static void
+show_auto_connect_native_target (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Whether GDB may automatically connect to the "
+		      "native target is %s.\n"),
+		    value);
+}
+
 /* Look through the list of possible targets for a target that can
    execute a run or attach command without any other data.  This is
    used to locate the default process stratum.
@@ -2446,23 +2465,28 @@ target_require_runnable (void)
 static struct target_ops *
 find_default_run_target (char *do_mesg)
 {
-  struct target_ops **t;
   struct target_ops *runable = NULL;
-  int count;
 
-  count = 0;
-
-  for (t = target_structs; t < target_structs + target_struct_size;
-       ++t)
+  if (auto_connect_native_target)
     {
-      if ((*t)->to_can_run != delegate_can_run && target_can_run (*t))
+      struct target_ops **t;
+      int count = 0;
+
+      for (t = target_structs; t < target_structs + target_struct_size;
+	   ++t)
 	{
-	  runable = *t;
-	  ++count;
+	  if ((*t)->to_can_run != delegate_can_run && target_can_run (*t))
+	    {
+	      runable = *t;
+	      ++count;
+	    }
 	}
+
+      if (count != 1)
+	runable = NULL;
     }
 
-  if (count != 1)
+  if (runable == NULL)
     {
       if (do_mesg)
 	error (_("Don't know how to %s.  Try \"help target\"."), do_mesg);
@@ -2589,30 +2613,10 @@ target_get_osdata (const char *type)
   return target_read_stralloc (t, TARGET_OBJECT_OSDATA, type);
 }
 
-/* Determine the current address space of thread PTID.  */
-
-struct address_space *
-target_thread_address_space (ptid_t ptid)
+static struct address_space *
+default_thread_address_space (struct target_ops *self, ptid_t ptid)
 {
-  struct address_space *aspace;
   struct inferior *inf;
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_thread_address_space != NULL)
-	{
-	  aspace = t->to_thread_address_space (t, ptid);
-	  gdb_assert (aspace);
-
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_thread_address_space (%s) = %d\n",
-				target_pid_to_str (ptid),
-				address_space_num (aspace));
-	  return aspace;
-	}
-    }
 
   /* Fall-back to the "main" address space of the inferior.  */
   inf = find_inferior_pid (ptid_get_pid (ptid));
@@ -2624,6 +2628,25 @@ target_thread_address_space (ptid_t ptid)
 		    target_pid_to_str (ptid));
 
   return inf->aspace;
+}
+
+/* Determine the current address space of thread PTID.  */
+
+struct address_space *
+target_thread_address_space (ptid_t ptid)
+{
+  struct address_space *aspace;
+
+  aspace = current_target.to_thread_address_space (&current_target, ptid);
+  gdb_assert (aspace != NULL);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_thread_address_space (%s) = %d\n",
+			target_pid_to_str (ptid),
+			address_space_num (aspace));
+
+  return aspace;
 }
 
 
@@ -3258,6 +3281,45 @@ target_core_of_thread (ptid_t ptid)
 			"target_core_of_thread (%d) = %d\n",
 			ptid_get_pid (ptid), retval);
   return retval;
+}
+
+int
+simple_verify_memory (struct target_ops *ops,
+		      const gdb_byte *data, CORE_ADDR lma, ULONGEST size)
+{
+  LONGEST total_xfered = 0;
+
+  while (total_xfered < size)
+    {
+      ULONGEST xfered_len;
+      enum target_xfer_status status;
+      gdb_byte buf[1024];
+      ULONGEST howmuch = min (sizeof (buf), size - total_xfered);
+
+      status = target_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
+				    buf, NULL, lma + total_xfered, howmuch,
+				    &xfered_len);
+      if (status == TARGET_XFER_OK
+	  && memcmp (data + total_xfered, buf, xfered_len) == 0)
+	{
+	  total_xfered += xfered_len;
+	  QUIT;
+	}
+      else
+	return 0;
+    }
+  return 1;
+}
+
+/* Default implementation of memory verification.  */
+
+static int
+default_verify_memory (struct target_ops *self,
+		       const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
+{
+  /* Start over from the top of the target stack.  */
+  return simple_verify_memory (current_target.beneath,
+			       data, memaddr, size);
 }
 
 int
@@ -4045,16 +4107,17 @@ maintenance_print_target_stack (char *cmd, int from_tty)
     }
 }
 
-/* Controls if async mode is permitted.  */
-int target_async_permitted = 0;
+/* Controls if targets can report that they can/are async.  This is
+   just for maintainers to use when debugging gdb.  */
+int target_async_permitted = 1;
 
 /* The set command writes to this variable.  If the inferior is
    executing, target_async_permitted is *not* updated.  */
-static int target_async_permitted_1 = 0;
+static int target_async_permitted_1 = 1;
 
 static void
-set_target_async_command (char *args, int from_tty,
-			  struct cmd_list_element *c)
+maint_set_target_async_command (char *args, int from_tty,
+				struct cmd_list_element *c)
 {
   if (have_live_inferiors ())
     {
@@ -4066,9 +4129,9 @@ set_target_async_command (char *args, int from_tty,
 }
 
 static void
-show_target_async_command (struct ui_file *file, int from_tty,
-			   struct cmd_list_element *c,
-			   const char *value)
+maint_show_target_async_command (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c,
+				 const char *value)
 {
   fprintf_filtered (file,
 		    _("Controlling the inferior in "
@@ -4173,10 +4236,10 @@ result in significant performance improvement for remote targets."),
 Set whether gdb controls the inferior in asynchronous mode."), _("\
 Show whether gdb controls the inferior in asynchronous mode."), _("\
 Tells gdb whether to control the inferior in asynchronous mode."),
-			   set_target_async_command,
-			   show_target_async_command,
-			   &setlist,
-			   &showlist);
+			   maint_set_target_async_command,
+			   maint_show_target_async_command,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 
   add_setshow_boolean_cmd ("may-write-registers", class_support,
 			   &may_write_registers_1, _("\
@@ -4230,5 +4293,14 @@ Show permission to interrupt or signal the target."), _("\
 When this permission is on, GDB may interrupt/stop the target's execution.\n\
 Otherwise, any attempt to interrupt or stop will be ignored."),
 			   set_target_permissions, NULL,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("auto-connect-native-target", class_support,
+			   &auto_connect_native_target, _("\
+Set whether GDB may automatically connect to the native target."), _("\
+Show whether GDB may automatically connect to the native target."), _("\
+When on, and GDB is not connected to a target yet, GDB\n\
+attempts \"run\" and other commands with the native target."),
+			   NULL, show_auto_connect_native_target,
 			   &setlist, &showlist);
 }

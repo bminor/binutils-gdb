@@ -23,6 +23,7 @@
 #include "arch-utils.h"
 #include "target.h"
 #include "inferior.h"
+#include "infrun.h"
 #include <string.h>
 #include "exceptions.h"
 #include "top.h"
@@ -53,6 +54,7 @@
 #include "ada-lang.h"
 #include "linespec.h"
 #include "extension.h"
+#include "gdbcmd.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -103,6 +105,45 @@ static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
 static void output_register (struct frame_info *, int regnum, int format,
 			     int skip_unavailable);
+
+/* Controls whether the frontend wants MI in async mode.  */
+static int mi_async = 0;
+
+/* The set command writes to this variable.  If the inferior is
+   executing, mi_async is *not* updated.  */
+static int mi_async_1 = 0;
+
+static void
+set_mi_async_command (char *args, int from_tty,
+		      struct cmd_list_element *c)
+{
+  if (have_live_inferiors ())
+    {
+      mi_async_1 = mi_async;
+      error (_("Cannot change this setting while the inferior is running."));
+    }
+
+  mi_async = mi_async_1;
+}
+
+static void
+show_mi_async_command (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c,
+		       const char *value)
+{
+  fprintf_filtered (file,
+		    _("Whether MI is in asynchronous mode is %s.\n"),
+		    value);
+}
+
+/* A wrapper for target_can_async_p that takes the MI setting into
+   account.  */
+
+int
+mi_async_p (void)
+{
+  return mi_async && target_can_async_p ();
+}
 
 /* Command implementations.  FIXME: Is this libgdb?  No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
@@ -228,6 +269,8 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 static void
 exec_continue (char **argv, int argc)
 {
+  prepare_execution_command (&current_target, mi_async_p ());
+
   if (non_stop)
     {
       /* In non-stop mode, 'resume' always resumes a single thread.
@@ -394,8 +437,8 @@ run_one_inferior (struct inferior *inf, void *arg)
       switch_to_thread (null_ptid);
       set_current_program_space (inf->pspace);
     }
-  mi_execute_cli_command (run_cmd, target_can_async_p (),
-			  target_can_async_p () ? "&" : NULL);
+  mi_execute_cli_command (run_cmd, mi_async_p (),
+			  mi_async_p () ? "&" : NULL);
   return 0;
 }
 
@@ -449,8 +492,8 @@ mi_cmd_exec_run (char *command, char **argv, int argc)
     {
       const char *run_cmd = start_p ? "start" : "run";
 
-      mi_execute_cli_command (run_cmd, target_can_async_p (),
-			      target_can_async_p () ? "&" : NULL);
+      mi_execute_cli_command (run_cmd, mi_async_p (),
+			      mi_async_p () ? "&" : NULL);
     }
 }
 
@@ -1837,11 +1880,10 @@ mi_cmd_list_target_features (char *command, char **argv, int argc)
       struct ui_out *uiout = current_uiout;
 
       cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");
-      if (target_can_async_p ())
+      if (mi_async_p ())
 	ui_out_field_string (uiout, NULL, "async");
       if (target_can_execute_reverse)
 	ui_out_field_string (uiout, NULL, "reverse");
-
       do_cleanups (cleanup);
       return;
     }
@@ -2268,7 +2310,7 @@ mi_execute_async_cli_command (char *cli_command, char **argv, int argc)
   struct cleanup *old_cleanups;
   char *run;
 
-  if (target_can_async_p ())
+  if (mi_async_p ())
     run = xstrprintf ("%s %s&", cli_command, argc ? *argv : "");
   else
     run = xstrprintf ("%s %s", cli_command, argc ? *argv : "");
@@ -2918,4 +2960,26 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
   }
 
   do_cleanups (old_chain);
+}
+
+void
+_initialize_mi_main (void)
+{
+  struct cmd_list_element *c;
+
+  add_setshow_boolean_cmd ("mi-async", class_run,
+			   &mi_async_1, _("\
+Set whether MI asynchronous mode is enabled."), _("\
+Show whether MI asynchronous mode is enabled."), _("\
+Tells GDB whether MI should be in asynchronous mode."),
+			   set_mi_async_command,
+			   show_mi_async_command,
+			   &setlist,
+			   &showlist);
+
+  /* Alias old "target-async" to "mi-async".  */
+  c = add_alias_cmd ("target-async", "mi-async", class_run, 0, &setlist);
+  deprecate_cmd (c, "set mi-async");
+  c = add_alias_cmd ("target-async", "mi-async", class_run, 0, &showlist);
+  deprecate_cmd (c, "show mi-async");
 }

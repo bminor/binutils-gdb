@@ -3328,8 +3328,6 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
       || pool->next_free_entry == 0)
     return;
 
-  mapping_state (MAP_DATA);
-
   /* Align pool as you have word accesses.
      Only make a frag if we have to.  */
   if (!need_pass_2)
@@ -3337,6 +3335,10 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
 
   record_alignment (now_seg, 2);
 
+#ifdef OBJ_ELF
+  seg_info (now_seg)->tc_segment_info_data.mapstate = MAP_DATA;
+  make_mapping_symbol (MAP_DATA, (valueT) frag_now_fix (), frag_now);
+#endif
   sprintf (sym_name, "$$lit_\002%x", pool->id);
 
   symbol_locate (pool->symbol, sym_name, now_seg,

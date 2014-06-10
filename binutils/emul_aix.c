@@ -50,17 +50,17 @@ ar_emul_aix_usage (FILE *fp)
 static bfd_boolean
 check_aix (bfd *try_bfd)
 {
-  extern const bfd_target rs6000coff_vec;
-  extern const bfd_target rs6000coff64_vec;
-  extern const bfd_target aix5coff64_vec;
+  extern const bfd_target rs6000_xcoff_vec;
+  extern const bfd_target rs6000_xcoff64_vec;
+  extern const bfd_target rs6000_xcoff64_aix_vec;
 
   if (bfd_check_format (try_bfd, bfd_object))
     {
-      if (!X32 && try_bfd->xvec == &rs6000coff_vec)
+      if (!X32 && try_bfd->xvec == &rs6000_xcoff_vec)
 	return FALSE;
 
-      if (!X64 && (try_bfd->xvec == &rs6000coff64_vec
-		   || try_bfd->xvec == &aix5coff64_vec))
+      if (!X64 && (try_bfd->xvec == &rs6000_xcoff64_vec
+		   || try_bfd->xvec == &rs6000_xcoff64_aix_vec))
 	return FALSE;
     }
   return TRUE;

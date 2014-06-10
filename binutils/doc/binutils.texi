@@ -2132,6 +2132,9 @@ Disassemble MSA instructions.
 @item virt
 Disassemble the virtualization ASE instructions.
 
+@item xpa
+Disassemble the eXtended Physical Address (XPA) ASE instructions.
+
 @item gpr-names=@var{ABI}
 Print GPR (general-purpose register) names as appropriate
 for the specified ABI.  By default, GPR names are selected according to

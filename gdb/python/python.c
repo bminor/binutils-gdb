@@ -186,7 +186,13 @@ static const struct extension_language_ops python_extension_ops =
   gdbpy_set_quit_flag,
   gdbpy_check_quit_flag,
 
-  gdbpy_before_prompt_hook
+  gdbpy_before_prompt_hook,
+
+  gdbpy_clone_xmethod_worker_data,
+  gdbpy_free_xmethod_worker_data,
+  gdbpy_get_matching_xmethod_workers,
+  gdbpy_get_xmethod_arg_types,
+  gdbpy_invoke_xmethod
 };
 
 /* Architecture and language to be used in callbacks from
@@ -1752,7 +1758,8 @@ message == an error message without a stack will be printed."),
       || gdbpy_initialize_exited_event () < 0
       || gdbpy_initialize_thread_event () < 0
       || gdbpy_initialize_new_objfile_event ()  < 0
-      || gdbpy_initialize_arch () < 0)
+      || gdbpy_initialize_arch () < 0
+      || gdbpy_initialize_xmethods () < 0)
     goto fail;
 
   gdbpy_to_string_cst = PyString_FromString ("to_string");

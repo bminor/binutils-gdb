@@ -251,7 +251,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
     return NULL;
 
   /* If we just skip the prefix, we get screwed by namespaces.  */
-  demangled_name=cplus_demangle(linkage_name,DMGL_PARAMS|DMGL_ANSI);
+  demangled_name=gdb_demangle(linkage_name,DMGL_PARAMS|DMGL_ANSI);
   p = strchr (demangled_name, ' ');
   if (p)
     *p = '\0';

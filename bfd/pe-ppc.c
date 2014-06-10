@@ -25,10 +25,10 @@
 
 #define PPC_PE
 
-#define TARGET_LITTLE_SYM   bfd_powerpcle_pe_vec
+#define TARGET_LITTLE_SYM   powerpc_pe_le_vec
 #define TARGET_LITTLE_NAME "pe-powerpcle"
 
-#define TARGET_BIG_SYM      bfd_powerpc_pe_vec
+#define TARGET_BIG_SYM      powerpc_pe_vec
 #define TARGET_BIG_NAME    "pe-powerpc"
 
 #define COFF_WITH_PE

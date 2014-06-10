@@ -66,7 +66,6 @@ if ![runto_main] then {
         perror "tests suppressed"
 }
 
-set oldtimeout1 $timeout
 set timeout 30
 
 gdb_test_no_output "complete print values\[0\].x." \
@@ -110,7 +109,9 @@ gdb_test_multiple "target ctf" "" {
 # do the test on file completion.
 
 foreach dir1 [ list "./gdb.base" "./outputs/gdb.base/completion" ] {
-    if [remote_file host exists ${dir1}/completion] {
+    if { [remote_file host exists ${dir1}/completion]
+	 && [remote_file host exists ${dir1}/completion0.o]
+	 && [remote_file host exists ${dir1}/completion1.o] } {
 	foreach target_name ${targets} {
 	    gdb_test "complete target ${target_name} ${dir1}/completion" \
 		"target ${target_name} ${dir1}/completion.*${dir1}/completion0\\.o.*${dir1}/completion1\\.o.*"
@@ -744,8 +745,5 @@ gdb_test_multiple "" "$test" {
 	}
     }
 }
-
-# Restore globals modified in this test...
-set timeout $oldtimeout1
 
 return 0

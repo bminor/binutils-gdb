@@ -357,20 +357,6 @@ Gdb_index_info_reader::visit_top_die(Dwarf_die* die)
       case elfcpp::DW_TAG_compile_unit:
       case elfcpp::DW_TAG_type_unit:
 	this->cu_language_ = die->int_attribute(elfcpp::DW_AT_language);
-	// Check for languages that require specialized knowledge to
-	// construct fully-qualified names, that we don't yet support.
-	if (this->cu_language_ == elfcpp::DW_LANG_Ada83
-	    || this->cu_language_ == elfcpp::DW_LANG_Fortran77
-	    || this->cu_language_ == elfcpp::DW_LANG_Fortran90
-	    || this->cu_language_ == elfcpp::DW_LANG_Java
-	    || this->cu_language_ == elfcpp::DW_LANG_Ada95
-	    || this->cu_language_ == elfcpp::DW_LANG_Fortran95)
-	  {
-	    gold_warning(_("%s: --gdb-index currently supports "
-			   "only C and C++ languages"),
-			 this->object()->name().c_str());
-	    return;
-	  }
 	if (die->tag() == elfcpp::DW_TAG_compile_unit)
 	  this->record_cu_ranges(die);
 	// If there is a pubnames and/or pubtypes section for this
@@ -378,6 +364,20 @@ Gdb_index_info_reader::visit_top_die(Dwarf_die* die)
 	// info to extract the names.
 	if (!this->read_pubnames_and_pubtypes(die))
 	  {
+	    // Check for languages that require specialized knowledge to
+	    // construct fully-qualified names, that we don't yet support.
+	    if (this->cu_language_ == elfcpp::DW_LANG_Ada83
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran77
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran90
+		|| this->cu_language_ == elfcpp::DW_LANG_Java
+		|| this->cu_language_ == elfcpp::DW_LANG_Ada95
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran95)
+	      {
+		gold_warning(_("%s: --gdb-index currently supports "
+			       "only C and C++ languages"),
+			     this->object()->name().c_str());
+		return;
+	      }
 	    if (die->tag() == elfcpp::DW_TAG_compile_unit)
 	      ++Gdb_index_info_reader::dwarf_cu_nopubnames_count;
 	    else
@@ -392,7 +392,6 @@ Gdb_index_info_reader::visit_top_die(Dwarf_die* die)
 		     this->object()->name().c_str());
 	return;
     }
-
 }
 
 // Visit the children of PARENT, looking for symbols to add to the index.

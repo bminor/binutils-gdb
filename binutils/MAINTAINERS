@@ -114,6 +114,8 @@ responsibility among the other maintainers.
   NetBSD support   Matt Thomas <matt@netbsd.org>
   Nios II	   Sandra Loosemore <sandra@codesourcery.com>
   Nios II	   Andrew Jenner <andrew@codesourcery.com>
+  OR1K		   Christian Svensson <blue@cmd.nu>
+  OR1K		   Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>
   PPC		   Geoff Keating <geoffk@geoffk.org>
   PPC		   Alan Modra <amodra@gmail.com>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>

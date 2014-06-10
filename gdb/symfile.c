@@ -3892,8 +3892,8 @@ symfile_find_segment_sections (struct objfile *objfile)
 static void
 symfile_free_objfile (struct objfile *objfile)
 {
-  /* Remove the target sections of user-added objfiles.  */
-  if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
+  /* Remove the target sections owned by this objfile.  */
+  if (objfile != NULL)
     remove_target_sections ((void *) objfile);
 }
 

@@ -27,6 +27,7 @@
 # 11) 'info files' must not display ${lib_basename}, anymore.
 # 12) Check that the breakpoints at foo and bar are pending.
 # 13) Check that the execution can continue without error.
+# 14) Regression test for a stale breakpoints bug.
 
 if {![is_elf_target]} {
     return 0
@@ -159,4 +160,50 @@ gdb_test "info breakpoints 4" \
 	 "breakpoint at bar is pending"
 
 # 13) Check that the execution can continue without error.
-gdb_continue_to_end
+set lnum_reload [gdb_get_line_number "reload lib here"]
+gdb_breakpoint $lnum_reload
+gdb_continue_to_breakpoint reload ".*${srcfile}:$lnum_reload.*"
+
+# 14) Regression test for a stale breakpoints bug.  Check whether
+# unloading symbols manually without the program actually unloading
+# the library, when breakpoints are inserted doesn't leave stale
+# breakpoints behind.
+with_test_prefix "stale bkpts" {
+    # Force breakpoints always inserted.
+    gdb_test_no_output "set breakpoint always-inserted on"
+
+    # Get past the library reload.
+    gdb_continue_to_breakpoint gdb_add_symbol_file
+
+    # Load the library's symbols.
+    gdb_test "add-symbol-file ${lib_syms} addr" \
+	"Reading symbols from .*${lib_syms}\\.\\.\\.done\\." \
+	"add-symbol-file ${lib_basename}.so addr" \
+	"add symbol table from file \".*${lib_syms}\"\
+at.*\\(y or n\\) " \
+	"y"
+
+    # Set a breakpoint at baz, in the library.
+    gdb_breakpoint baz
+
+    gdb_test "info breakpoints 7" ".*y.*0x.*in baz.*" \
+	"breakpoint at baz is resolved"
+
+    # Unload symbols manually without the program actually unloading
+    # the library.
+    gdb_test "remove-symbol-file -a addr" \
+	"" \
+	"remove-symbol-file -a addr" \
+	"Remove symbol table from file \".*${lib_basename}\\.so\"\\?\
+.*\\(y or n\\) " \
+	"y"
+
+    gdb_test "info breakpoints 7" ".*PENDING.*" \
+	"breakpoint at baz is pending"
+
+    # Check that execution can continue without error.  If GDB leaves
+    # breakpoints behind, we'll get back a spurious SIGTRAP.
+    set lnum_end [gdb_get_line_number "end here"]
+    gdb_breakpoint $lnum_end
+    gdb_continue_to_breakpoint "end here" ".*end here.*"
+}

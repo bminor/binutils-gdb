@@ -2935,7 +2935,7 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 }
 
 /* Definitions for setting CR16 target vector.  */
-#define TARGET_LITTLE_SYM                 bfd_elf32_cr16_vec
+#define TARGET_LITTLE_SYM                 cr16_elf32_vec
 #define TARGET_LITTLE_NAME                "elf32-cr16"
 #define ELF_ARCH                          bfd_arch_cr16
 #define ELF_MACHINE_CODE                  EM_CR16

@@ -88,11 +88,11 @@ static bfd_boolean
 vxworks_object_p (bfd *abfd ATTRIBUTE_UNUSED)
 {
 #if !defined INCLUDE_SHMEDIA && !defined SH_TARGET_ALREADY_DEFINED
-  extern const bfd_target bfd_elf32_shlvxworks_vec;
-  extern const bfd_target bfd_elf32_shvxworks_vec;
+  extern const bfd_target sh_elf32_vxworks_le_vec;
+  extern const bfd_target sh_elf32_vxworks_vec;
 
-  return (abfd->xvec == &bfd_elf32_shlvxworks_vec
-	  || abfd->xvec == &bfd_elf32_shvxworks_vec);
+  return (abfd->xvec == &sh_elf32_vxworks_le_vec
+	  || abfd->xvec == &sh_elf32_vxworks_vec);
 #else
   return FALSE;
 #endif
@@ -104,11 +104,11 @@ static bfd_boolean
 fdpic_object_p (bfd *abfd ATTRIBUTE_UNUSED)
 {
 #if !defined INCLUDE_SHMEDIA && !defined SH_TARGET_ALREADY_DEFINED
-  extern const bfd_target bfd_elf32_shfd_vec;
-  extern const bfd_target bfd_elf32_shbfd_vec;
+  extern const bfd_target sh_elf32_fdpic_le_vec;
+  extern const bfd_target sh_elf32_fdpic_be_vec;
 
-  return (abfd->xvec == &bfd_elf32_shfd_vec
-	  || abfd->xvec == &bfd_elf32_shbfd_vec);
+  return (abfd->xvec == &sh_elf32_fdpic_le_vec
+	  || abfd->xvec == &sh_elf32_fdpic_be_vec);
 #else
   return FALSE;
 #endif
@@ -7403,9 +7403,9 @@ sh_elf_encode_eh_address (bfd *abfd,
 }
 
 #if !defined SH_TARGET_ALREADY_DEFINED
-#define TARGET_BIG_SYM		bfd_elf32_sh_vec
+#define TARGET_BIG_SYM		sh_elf32_vec
 #define TARGET_BIG_NAME		"elf32-sh"
-#define TARGET_LITTLE_SYM	bfd_elf32_shl_vec
+#define TARGET_LITTLE_SYM	sh_elf32_le_vec
 #define TARGET_LITTLE_NAME	"elf32-shl"
 #endif
 
@@ -7478,11 +7478,11 @@ sh_elf_encode_eh_address (bfd *abfd,
 
 /* NetBSD support.  */
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf32_shnbsd_vec
+#define	TARGET_BIG_SYM			sh_elf32_nbsd_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf32-sh-nbsd"
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_shlnbsd_vec
+#define	TARGET_LITTLE_SYM		sh_elf32_nbsd_le_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-shl-nbsd"
 #undef	ELF_MAXPAGESIZE
@@ -7498,11 +7498,11 @@ sh_elf_encode_eh_address (bfd *abfd,
 
 /* Linux support.  */
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf32_shblin_vec
+#define	TARGET_BIG_SYM			sh_elf32_linux_be_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf32-shbig-linux"
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_shlin_vec
+#define	TARGET_LITTLE_SYM		sh_elf32_linux_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-sh-linux"
 #undef	ELF_COMMONPAGESIZE
@@ -7520,11 +7520,11 @@ sh_elf_encode_eh_address (bfd *abfd,
 
 /* FDPIC support.  */
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf32_shbfd_vec
+#define	TARGET_BIG_SYM			sh_elf32_fdpic_be_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf32-shbig-fdpic"
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_shfd_vec
+#define	TARGET_LITTLE_SYM		sh_elf32_fdpic_le_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-sh-fdpic"
 
@@ -7537,11 +7537,11 @@ sh_elf_encode_eh_address (bfd *abfd,
 
 /* VxWorks support.  */
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf32_shvxworks_vec
+#define	TARGET_BIG_SYM			sh_elf32_vxworks_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf32-sh-vxworks"
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_shlvxworks_vec
+#define	TARGET_LITTLE_SYM		sh_elf32_vxworks_le_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-shl-vxworks"
 #undef	elf32_bed

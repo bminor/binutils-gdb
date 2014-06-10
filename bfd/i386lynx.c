@@ -26,7 +26,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) CONCAT2 (i386lynx_aout_,OP)
+#define MY(OP) CONCAT2 (i386_aout_lynx_,OP)
 #define TARGETNAME "a.out-i386-lynx"
 
 #include "sysdep.h"

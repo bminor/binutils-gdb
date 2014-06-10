@@ -1,3 +1,15 @@
+2014-05-08  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
+
+	* or1korbis.cpu (h-atomic-reserve): New hardware.
+	(h-atomic-address): Likewise.
+	(insn-opcode): Add opcodes for LWA and SWA.
+	(atomic-reserve): New operand.
+	(atomic-address): Likewise.
+	(l-lwa, l-swa): New instructions.
+	(l-lbs): Fix typo in comment.
+	(store-insn): Clear atomic reserve on store to atomic-address.
+	Fix register names in fmt field.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* openrisc.cpu: Delete.

@@ -205,6 +205,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL,	/* list options */
   NULL,	/* recognized file */
   NULL,	/* find_potential_libraries */
-  NULL	/* new_vers_pattern */
+  NULL,	/* new_vers_pattern */
+  NULL	/* extra_map_file_text */
 };
 EOF

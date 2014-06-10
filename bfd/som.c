@@ -5349,7 +5349,7 @@ som_canonicalize_reloc (bfd *abfd,
   return section->reloc_count;
 }
 
-extern const bfd_target som_vec;
+extern const bfd_target hppa_som_vec;
 
 /* A hook to set up object file dependent section information.  */
 
@@ -6750,7 +6750,7 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 #define som_bfd_set_private_flags		_bfd_generic_bfd_set_private_flags
 #define som_find_inliner_info			_bfd_nosymbols_find_inliner_info
 
-const bfd_target som_vec =
+const bfd_target hppa_som_vec =
 {
   "som",			/* Name.  */
   bfd_target_som_flavour,

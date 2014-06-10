@@ -19,7 +19,7 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#define TARGET_SYM	m68ksysvcoff_vec
+#define TARGET_SYM	m68k_coff_sysv_vec
 #define TARGET_NAME	"coff-m68k-sysv"
 #define STATIC_RELOCS
 #define COFF_COMMON_ADDEND

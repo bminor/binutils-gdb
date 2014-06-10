@@ -125,12 +125,7 @@ exec_close_1 (struct target_ops *self)
     ALL_PSPACES (ss)
     {
       set_current_program_space (ss);
-
-      /* Delete all target sections.  */
-      resize_section_table
-	(current_target_sections,
-	 -resize_section_table (current_target_sections, 0));
-
+      clear_section_table (current_target_sections);
       exec_close ();
     }
 
@@ -366,15 +361,29 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
   (*table_pp)++;
 }
 
-int
-resize_section_table (struct target_section_table *table, int num_added)
+/* See exec.h.  */
+
+void
+clear_section_table (struct target_section_table *table)
+{
+  xfree (table->sections);
+  table->sections = table->sections_end = NULL;
+}
+
+/* Resize section table TABLE by ADJUSTMENT.
+   ADJUSTMENT may be negative, in which case the caller must have already
+   removed the sections being deleted.
+   Returns the old size.  */
+
+static int
+resize_section_table (struct target_section_table *table, int adjustment)
 {
   int old_count;
   int new_count;
 
   old_count = table->sections_end - table->sections;
 
-  new_count = num_added + old_count;
+  new_count = adjustment + old_count;
 
   if (new_count)
     {
@@ -383,10 +392,7 @@ resize_section_table (struct target_section_table *table, int num_added)
       table->sections_end = table->sections + new_count;
     }
   else
-    {
-      xfree (table->sections);
-      table->sections = table->sections_end = NULL;
-    }
+    clear_section_table (table);
 
   return old_count;
 }

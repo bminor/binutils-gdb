@@ -23,7 +23,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SYM 		x86_64pei_vec
+#define TARGET_SYM 		x86_64_pei_vec
 #define TARGET_NAME 		"pei-x86-64"
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE

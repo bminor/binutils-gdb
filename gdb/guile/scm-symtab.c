@@ -122,17 +122,6 @@ stscm_objfile_symtab_map (struct symtab *symtab)
   return htab;
 }
 
-/* The smob "mark" function for <gdb:symtab>.  */
-
-static SCM
-stscm_mark_symtab_smob (SCM self)
-{
-  symtab_smob *st_smob = (symtab_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_eqable_gsmob (&st_smob->base);
-}
-
 /* The smob "free" function for <gdb:symtab>.  */
 
 static size_t
@@ -399,32 +388,6 @@ gdbscm_symtab_static_block (SCM self)
 }
 
 /* Administrivia for sal (symtab-and-line) smobs.  */
-
-/* The smob "mark" function for <gdb:sal>.  */
-
-static SCM
-stscm_mark_sal_smob (SCM self)
-{
-  sal_smob *s_smob = (sal_smob *) SCM_SMOB_DATA (self);
-
-  scm_gc_mark (s_smob->symtab_scm);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&s_smob->base);
-}
-
-/* The smob "free" function for <gdb:sal>.  */
-
-static size_t
-stscm_free_sal_smob (SCM self)
-{
-  sal_smob *s_smob = (sal_smob *) SCM_SMOB_DATA (self);
-
-  /* Not necessary, done to catch bugs.  */
-  s_smob->symtab_scm = SCM_UNDEFINED;
-
-  return 0;
-}
 
 /* The smob "print" function for <gdb:sal>.  */
 
@@ -716,13 +679,10 @@ gdbscm_initialize_symtabs (void)
 {
   symtab_smob_tag
     = gdbscm_make_smob_type (symtab_smob_name, sizeof (symtab_smob));
-  scm_set_smob_mark (symtab_smob_tag, stscm_mark_symtab_smob);
   scm_set_smob_free (symtab_smob_tag, stscm_free_symtab_smob);
   scm_set_smob_print (symtab_smob_tag, stscm_print_symtab_smob);
 
   sal_smob_tag = gdbscm_make_smob_type (sal_smob_name, sizeof (sal_smob));
-  scm_set_smob_mark (sal_smob_tag, stscm_mark_sal_smob);
-  scm_set_smob_free (sal_smob_tag, stscm_free_sal_smob);
   scm_set_smob_print (sal_smob_tag, stscm_print_sal_smob);
 
   gdbscm_define_functions (symtab_functions, 1);

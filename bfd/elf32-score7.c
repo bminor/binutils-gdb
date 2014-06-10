@@ -2376,6 +2376,12 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
           /* For global symbols we look up the symbol in the hash-table.  */
           h = ((struct score_elf_link_hash_entry *)
                elf_sym_hashes (input_bfd) [r_symndx - extsymoff]);
+
+	  if (info->wrap_hash != NULL
+	      && (input_section->flags & SEC_DEBUGGING) != 0)
+	    h = ((struct score_elf_link_hash_entry *)
+		  unwrap_hash_lookup (info, input_bfd, &h->root.root));
+
           /* Find the real hash-table entry for this symbol.  */
           while (h->root.root.type == bfd_link_hash_indirect
                  || h->root.root.type == bfd_link_hash_warning)

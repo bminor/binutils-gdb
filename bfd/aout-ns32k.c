@@ -27,7 +27,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MYNS(OP) CONCAT2 (ns32kaout_,OP)
+#define MYNS(OP) CONCAT2 (ns32k_aout_,OP)
 
 reloc_howto_type * MYNS (bfd_reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);
 reloc_howto_type * MYNS (bfd_reloc_name_lookup) (bfd *, const char *);

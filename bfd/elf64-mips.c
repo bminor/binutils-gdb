@@ -128,8 +128,8 @@ static bfd_boolean elf64_mips_grok_prstatus
 static bfd_boolean elf64_mips_grok_psinfo
   (bfd *, Elf_Internal_Note *);
 
-extern const bfd_target bfd_elf64_bigmips_vec;
-extern const bfd_target bfd_elf64_littlemips_vec;
+extern const bfd_target mips_elf64_be_vec;
+extern const bfd_target mips_elf64_le_vec;
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
@@ -4031,8 +4031,8 @@ mips_elf64_object_p (bfd *abfd)
 static irix_compat_t
 elf64_mips_irix_compat (bfd *abfd)
 {
-  if ((abfd->xvec == &bfd_elf64_bigmips_vec)
-      || (abfd->xvec == &bfd_elf64_littlemips_vec))
+  if ((abfd->xvec == &mips_elf64_be_vec)
+      || (abfd->xvec == &mips_elf64_le_vec))
     return ict_irix6;
   else
     return ict_none;
@@ -4300,9 +4300,9 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 			_bfd_archive_coff_update_armap_timestamp
 
 /* The SGI style (n)64 NewABI.  */
-#define TARGET_LITTLE_SYM		bfd_elf64_littlemips_vec
+#define TARGET_LITTLE_SYM		mips_elf64_le_vec
 #define TARGET_LITTLE_NAME		"elf64-littlemips"
-#define TARGET_BIG_SYM			bfd_elf64_bigmips_vec
+#define TARGET_BIG_SYM			mips_elf64_be_vec
 #define TARGET_BIG_NAME			"elf64-bigmips"
 
 #define ELF_MAXPAGESIZE			0x10000
@@ -4319,9 +4319,9 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #undef ELF_MAXPAGESIZE
 #undef ELF_COMMONPAGESIZE
 
-#define TARGET_LITTLE_SYM		bfd_elf64_tradlittlemips_vec
+#define TARGET_LITTLE_SYM		mips_elf64_trad_le_vec
 #define TARGET_LITTLE_NAME		"elf64-tradlittlemips"
-#define TARGET_BIG_SYM			bfd_elf64_tradbigmips_vec
+#define TARGET_BIG_SYM			mips_elf64_trad_be_vec
 #define TARGET_BIG_NAME			"elf64-tradbigmips"
 
 #define ELF_MAXPAGESIZE			0x10000
@@ -4339,9 +4339,9 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #undef TARGET_BIG_SYM
 #undef TARGET_BIG_NAME
 
-#define	TARGET_LITTLE_SYM		bfd_elf64_tradlittlemips_freebsd_vec
+#define	TARGET_LITTLE_SYM		mips_elf64_tradfbsd_le_vec
 #define	TARGET_LITTLE_NAME		"elf64-tradlittlemips-freebsd"
-#define	TARGET_BIG_SYM			bfd_elf64_tradbigmips_freebsd_vec
+#define	TARGET_BIG_SYM			mips_elf64_tradfbsd_be_vec
 #define	TARGET_BIG_NAME			"elf64-tradbigmips-freebsd"
 
 #undef	ELF_OSABI

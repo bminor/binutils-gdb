@@ -874,6 +874,27 @@ list_command (char *arg, int from_tty)
     {
       set_default_source_symtab_and_line ();
       cursal = get_current_source_symtab_and_line ();
+
+      /* If this is the first "list" since we've set the current
+	 source line, center the listing around that line.  */
+      if (get_first_line_listed () == 0)
+	{
+	  int first;
+
+	  first = max (cursal.line - get_lines_to_list () / 2, 1);
+
+	  /* A small special case --- if listing backwards, and we
+	     should list only one line, list the preceding line,
+	     instead of the exact line we've just shown after e.g.,
+	     stopping for a breakpoint.  */
+	  if (arg != NULL && arg[0] == '-'
+	      && get_lines_to_list () == 1 && first > 1)
+	    first -= 1;
+
+	  print_source_lines (cursal.symtab, first,
+			      first + get_lines_to_list (), 0);
+	  return;
+	}
     }
 
   /* "l" or "l +" lists next ten lines.  */
@@ -1685,7 +1706,11 @@ strict == evaluate script according to filename extension, error if not supporte
 			show_script_ext_mode,
 			&setlist, &showlist);
 
-  add_com ("quit", class_support, quit_command, _("Exit gdb."));
+  add_com ("quit", class_support, quit_command, _("\
+Exit gdb.\n\
+Usage: quit [EXPR]\n\
+The optional expression EXPR, if present, is evaluated and the result\n\
+used as GDB's exit code.  The default is zero."));
   c = add_com ("help", class_support, help_command,
 	       _("Print list of commands."));
   set_cmd_completer (c, command_completer);

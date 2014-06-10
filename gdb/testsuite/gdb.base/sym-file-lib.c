@@ -24,3 +24,9 @@ foo (int a)
 {
   return a; /* gdb break at foo */
 }
+
+extern int
+baz (int a)
+{
+  return a; /* gdb break at baz */
+}

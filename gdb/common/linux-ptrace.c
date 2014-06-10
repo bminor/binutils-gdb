@@ -37,24 +37,24 @@
    there are no supported features.  */
 static int current_ptrace_options = -1;
 
-/* Find all possible reasons we could fail to attach PID and append these
-   newline terminated reason strings to initialized BUFFER.  '\0' termination
-   of BUFFER must be done by the caller.  */
+/* Find all possible reasons we could fail to attach PID and append
+   these as strings to the already initialized BUFFER.  '\0'
+   termination of BUFFER must be done by the caller.  */
 
 void
-linux_ptrace_attach_warnings (pid_t pid, struct buffer *buffer)
+linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer)
 {
   pid_t tracerpid;
 
   tracerpid = linux_proc_get_tracerpid (pid);
   if (tracerpid > 0)
-    buffer_xml_printf (buffer, _("warning: process %d is already traced "
-				 "by process %d\n"),
+    buffer_xml_printf (buffer, _("process %d is already traced "
+				 "by process %d"),
 		       (int) pid, (int) tracerpid);
 
   if (linux_proc_pid_is_zombie (pid))
-    buffer_xml_printf (buffer, _("warning: process %d is a zombie "
-				 "- the process has already terminated\n"),
+    buffer_xml_printf (buffer, _("process %d is a zombie "
+				 "- the process has already terminated"),
 		       (int) pid);
 }
 
@@ -474,6 +474,15 @@ linux_enable_event_reporting (pid_t pid)
   /* Set the options.  */
   ptrace (PTRACE_SETOPTIONS, pid, (PTRACE_TYPE_ARG3) 0,
 	  (PTRACE_TYPE_ARG4) (uintptr_t) current_ptrace_options);
+}
+
+/* Disable reporting of all currently supported ptrace events.  */
+
+void
+linux_disable_event_reporting (pid_t pid)
+{
+  /* Set the options.  */
+  ptrace (PTRACE_SETOPTIONS, pid, (PTRACE_TYPE_ARG3) 0, 0);
 }
 
 /* Returns non-zero if PTRACE_OPTIONS is contained within

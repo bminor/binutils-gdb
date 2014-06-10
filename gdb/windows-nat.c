@@ -24,6 +24,7 @@
 #include "defs.h"
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
+#include "infrun.h"
 #include "target.h"
 #include "exceptions.h"
 #include "gdbcore.h"
@@ -1726,7 +1727,8 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
 #endif
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
-  push_target (ops);
+  if (!target_is_pushed (ops))
+    push_target (ops);
   disable_breakpoints_in_shlibs ();
   windows_clear_solib ();
   clear_proceed_status ();
@@ -1832,7 +1834,7 @@ out:
 
 /* Attach to process PID, then initialize for debugging it.  */
 static void
-windows_attach (struct target_ops *ops, char *args, int from_tty)
+windows_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   BOOL ok;
   DWORD pid;
@@ -1914,7 +1916,7 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (current_event.dwProcessId);
 
-  unpush_target (ops);
+  inf_child_maybe_unpush_target (ops);
 }
 
 /* Try to determine the executable filename.
@@ -2367,8 +2369,7 @@ windows_mourn_inferior (struct target_ops *ops)
       CHECK (CloseHandle (current_process_handle));
       open_process_used = 0;
     }
-  unpush_target (ops);
-  generic_mourn_inferior ();
+  inf_child_mourn_inferior (ops);
 }
 
 /* Send a SIGINT to the process group.  This acts just like the user typed a
@@ -2556,9 +2557,6 @@ windows_target (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_shortname = "child";
-  t->to_longname = "Win32 child process";
-  t->to_doc = "Win32 child process (started by the \"run\" command).";
   t->to_close = windows_close;
   t->to_attach = windows_attach;
   t->to_attach_no_wait = 1;

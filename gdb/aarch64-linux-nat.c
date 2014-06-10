@@ -33,6 +33,7 @@
 
 #include <sys/ptrace.h>
 #include <sys/utsname.h>
+#include <asm/ptrace.h>
 
 #include "gregset.h"
 

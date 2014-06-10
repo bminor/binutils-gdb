@@ -217,7 +217,7 @@ swap_abort (void)
 #define	NO_PUT64 ((void (*) (bfd_uint64_t, void *)) swap_abort)
 #define	NO_GETS64 ((bfd_int64_t (*) (const void *)) swap_abort)
 
-const bfd_target hppabsd_core_vec =
+const bfd_target core_hppabsd_vec =
   {
     "hppabsd-core",
     bfd_target_unknown_flavour,

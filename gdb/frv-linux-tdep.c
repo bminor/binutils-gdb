@@ -465,13 +465,13 @@ frv_linux_supply_fpregset (const struct regset *regset,
 
 /* FRV Linux kernel register sets.  */
 
-static struct regset frv_linux_gregset =
+static const struct regset frv_linux_gregset =
 {
   NULL,
   frv_linux_supply_gregset
 };
 
-static struct regset frv_linux_fpregset =
+static const struct regset frv_linux_fpregset =
 {
   NULL,
   frv_linux_supply_fpregset

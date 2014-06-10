@@ -4177,7 +4177,7 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
   };
 
 /* The transfer vector that leads the outside world to all of the above.  */
-const bfd_target rs6000coff_vec =
+const bfd_target rs6000_xcoff_vec =
   {
     "aixcoff-rs6000",
     bfd_target_xcoff_flavour,
@@ -4358,7 +4358,7 @@ static const struct xcoff_backend_data_rec bfd_pmac_xcoff_backend_data =
   };
 
 /* The transfer vector that leads the outside world to all of the above.  */
-const bfd_target pmac_xcoff_vec =
+const bfd_target powerpc_xcoff_vec =
   {
     "xcoff-powermac",
     bfd_target_xcoff_flavour,

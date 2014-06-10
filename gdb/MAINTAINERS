@@ -563,6 +563,7 @@ Michal Ludvig                                   mludvig@suse.cz
 Edjunior B. Machado				emachado@linux.vnet.ibm.com
 Luis Machado					lgustavo@codesourcery.com
 Jose E. Marchesi                                jose.marchesi@oracle.com
+Simon Marchi					simon.marchi@ericsson.com
 Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
 Roland McGrath					roland@redhat.com
@@ -598,6 +599,7 @@ Siddhesh Poyarekar				siddhesh@redhat.com
 Vladimir Prus                                   vladimir@codesourcery.com
 Yao Qi						yao@codesourcery.com
 Qinwei						qinwei@sunnorth.com.cn
+Ramana Radhakrishnan				ramana.radhakrishnan@arm.com
 Siva Chandra Reddy				sivachandra@google.com
 Matt Rice					ratmice@gmail.com
 Frederic Riss					frederic.riss@st.com
@@ -702,7 +704,6 @@ Christopher Faylor (MS Windows, host & native)
 Folks that have been caught up in a paper trail:
 
 David Carlton					carlton@bactrian.org
-Ramana Radhakrishnan 				ramana.r@gmail.com
 
 ;; Local Variables:
 ;; coding: utf-8

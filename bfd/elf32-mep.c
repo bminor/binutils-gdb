@@ -745,10 +745,10 @@ mep_elf_fake_sections (bfd *               abfd ATTRIBUTE_UNUSED,
 #define ELF_MACHINE_CODE	EM_CYGNUS_MEP
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_BIG_SYM		bfd_elf32_mep_vec
+#define TARGET_BIG_SYM		mep_elf32_vec
 #define TARGET_BIG_NAME		"elf32-mep"
 
-#define TARGET_LITTLE_SYM	bfd_elf32_mep_little_vec
+#define TARGET_LITTLE_SYM	mep_elf32_le_vec
 #define TARGET_LITTLE_NAME	"elf32-mep-little"
 
 #define elf_info_to_howto_rel			NULL

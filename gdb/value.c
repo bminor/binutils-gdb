@@ -230,6 +230,9 @@ struct value
     /* Pointer to internal variable.  */
     struct internalvar *internalvar;
 
+    /* Pointer to xmethod worker.  */
+    struct xmethod_worker *xm_worker;
+
     /* If lval == lval_computed, this is a set of function pointers
        to use to access and describe the value, and a closure pointer
        for them to use.  */
@@ -1340,7 +1343,8 @@ CORE_ADDR
 value_address (const struct value *value)
 {
   if (value->lval == lval_internalvar
-      || value->lval == lval_internalvar_component)
+      || value->lval == lval_internalvar_component
+      || value->lval == lval_xcallable)
     return 0;
   if (value->parent != NULL)
     return value_address (value->parent) + value->offset;
@@ -1352,7 +1356,8 @@ CORE_ADDR
 value_raw_address (struct value *value)
 {
   if (value->lval == lval_internalvar
-      || value->lval == lval_internalvar_component)
+      || value->lval == lval_internalvar_component
+      || value->lval == lval_xcallable)
     return 0;
   return value->location.address;
 }
@@ -1361,7 +1366,8 @@ void
 set_value_address (struct value *value, CORE_ADDR addr)
 {
   gdb_assert (value->lval != lval_internalvar
-	      && value->lval != lval_internalvar_component);
+	      && value->lval != lval_internalvar_component
+	      && value->lval != lval_xcallable);
   value->location.address = addr;
 }
 
@@ -1433,6 +1439,8 @@ value_free (struct value *val)
 	  if (funcs->free_closure)
 	    funcs->free_closure (val);
 	}
+      else if (VALUE_LVAL (val) == lval_xcallable)
+	  free_xmethod_worker (val->location.xm_worker);
 
       xfree (val->contents);
       VEC_free (range_s, val->unavailable);
@@ -1623,6 +1631,8 @@ void
 set_value_component_location (struct value *component,
 			      const struct value *whole)
 {
+  gdb_assert (whole->lval != lval_xcallable);
+
   if (whole->lval == lval_internalvar)
     VALUE_LVAL (component) = lval_internalvar_component;
   else
@@ -2454,6 +2464,37 @@ show_convenience (char *ignore, int from_tty)
 			   "use \"set\" as in \"set "
 			   "$foo = 5\" to define them.\n"));
     }
+}
+
+/* Return the TYPE_CODE_XMETHOD value corresponding to WORKER.  */
+
+struct value *
+value_of_xmethod (struct xmethod_worker *worker)
+{
+  if (worker->value == NULL)
+    {
+      struct value *v;
+
+      v = allocate_value (builtin_type (target_gdbarch ())->xmethod);
+      v->lval = lval_xcallable;
+      v->location.xm_worker = worker;
+      v->modifiable = 0;
+      worker->value = v;
+    }
+
+  return worker->value;
+}
+
+/* Call the xmethod corresponding to the TYPE_CODE_XMETHOD value METHOD.  */
+
+struct value *
+call_xmethod (struct value *method, int argc, struct value **argv)
+{
+  gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
+	      && method->lval == lval_xcallable && argc > 0);
+
+  return invoke_xmethod (method->location.xm_worker,
+			 argv[0], argv + 1, argc - 1);
 }
 
 /* Extract a value as a C number (either long or double).
@@ -3334,6 +3375,29 @@ value_from_pointer (struct type *type, CORE_ADDR addr)
   return val;
 }
 
+
+/* Create a value of type TYPE whose contents come from VALADDR, if it
+   is non-null, and whose memory address (in the inferior) is
+   ADDRESS.  The type of the created value may differ from the passed
+   type TYPE.  Make sure to retrieve values new type after this call.
+   Note that TYPE is not passed through resolve_dynamic_type; this is
+   a special API intended for use only by Ada.  */
+
+struct value *
+value_from_contents_and_address_unresolved (struct type *type,
+					    const gdb_byte *valaddr,
+					    CORE_ADDR address)
+{
+  struct value *v;
+
+  if (valaddr == NULL)
+    v = allocate_value_lazy (type);
+  else
+    v = value_from_contents (type, valaddr);
+  set_value_address (v, address);
+  VALUE_LVAL (v) = lval_memory;
+  return v;
+}
 
 /* Create a value of type TYPE whose contents come from VALADDR, if it
    is non-null, and whose memory address (in the inferior) is

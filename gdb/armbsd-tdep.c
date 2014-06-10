@@ -98,13 +98,13 @@ armbsd_supply_gregset (const struct regset *regset,
 
 /* ARM register sets.  */
 
-static struct regset armbsd_gregset =
+static const struct regset armbsd_gregset =
 {
   NULL,
   armbsd_supply_gregset
 };
 
-static struct regset armbsd_fpregset =
+static const struct regset armbsd_fpregset =
 {
   NULL,
   armbsd_supply_fpregset

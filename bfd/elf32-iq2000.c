@@ -893,7 +893,7 @@ iq2000_elf_object_p (bfd *abfd)
 #define ELF_MACHINE_CODE	EM_IQ2000
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_BIG_SYM		bfd_elf32_iq2000_vec
+#define TARGET_BIG_SYM		iq2000_elf32_vec
 #define TARGET_BIG_NAME		"elf32-iq2000"
 
 #define elf_info_to_howto_rel			NULL

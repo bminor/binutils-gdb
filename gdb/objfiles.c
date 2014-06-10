@@ -1453,6 +1453,22 @@ is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile)
   return 0;
 }
 
+int
+userloaded_objfile_contains_address_p (struct program_space *pspace,
+				       CORE_ADDR address)
+{
+  struct objfile *objfile;
+
+  ALL_PSPACE_OBJFILES (pspace, objfile)
+    {
+      if ((objfile->flags & OBJF_USERLOADED) != 0
+	  && is_addr_in_objfile (address, objfile))
+	return 1;
+    }
+
+  return 0;
+}
+
 /* The default implementation for the "iterate_over_objfiles_in_search_order"
    gdbarch method.  It is equivalent to use the ALL_OBJFILES macro,
    searching the objfiles in the order they are stored internally,

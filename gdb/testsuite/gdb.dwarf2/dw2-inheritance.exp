@@ -31,5 +31,4 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $binfile \
 
 clean_restart $testfile
 
-gdb_test_no_output "set language c++"
 gdb_test "ptype inherited" "type = class inherited .*"

@@ -25,6 +25,19 @@
 #include "charset.h"
 #include "guile-internal.h"
 
+/* Convert STRING to an int.
+   STRING must be a valid integer.  */
+
+int
+gdbscm_scm_string_to_int (SCM string)
+{
+  char *s = scm_to_latin1_string (string);
+  int r = atoi (s);
+
+  free (s);
+  return r;
+}
+
 /* Convert a C (latin1) string to an SCM string.
    "latin1" is chosen because Guile won't throw an exception.  */
 
@@ -90,10 +103,17 @@ gdbscm_call_scm_to_stringn (void *datap)
 
 /* Convert an SCM string to a string in charset CHARSET.
    This function is guaranteed to not throw an exception.
+
+   If LENP is NULL then the returned string is NUL-terminated,
+   and an exception is thrown if the string contains embedded NULs.
+   Otherwise the string is not guaranteed to be NUL-terminated, but worse
+   there's no space to put a NUL if we wanted to (scm_to_stringn limitation).
+
    If STRICT is non-zero, and there's a conversion error, then a
    <gdb:exception> object is stored in *EXCEPT_SCMP, and NULL is returned.
    If STRICT is zero, then escape sequences are used for characters that
    can't be converted, and EXCEPT_SCMP may be passed as NULL.
+
    Space for the result is allocated with malloc, caller must free.
    It is an error to call this if STRING is not a string.  */
 
@@ -151,6 +171,7 @@ gdbscm_call_scm_from_stringn (void *datap)
 
 /* Convert STRING to a Scheme string in charset CHARSET.
    This function is guaranteed to not throw an exception.
+
    If STRICT is non-zero, and there's a conversion error, then a
    <gdb:exception> object is returned.
    If STRICT is zero, then question marks are used for characters that
@@ -183,17 +204,34 @@ gdbscm_scm_from_string (const char *string, size_t len,
   return scm_result;
 }
 
-/* Convert an SCM string to a target string.
-   This function will thrown a conversion error if there's a problem.
+/* Convert an SCM string to a host string.
+   This function is guaranteed to not throw an exception.
+
+   If LENP is NULL then the returned string is NUL-terminated,
+   and if the string contains embedded NULs then NULL is returned with
+   an exception object stored in *EXCEPT_SCMP.
+   Otherwise the string is not guaranteed to be NUL-terminated, but worse
+   there's no space to put a NUL if we wanted to (scm_to_stringn limitation).
+
+   Returns NULL if there is a conversion error, with the exception object
+   stored in *EXCEPT_SCMP.
    Space for the result is allocated with malloc, caller must free.
    It is an error to call this if STRING is not a string.  */
 
 char *
-gdbscm_scm_to_target_string_unsafe (SCM string, size_t *lenp,
-				    struct gdbarch *gdbarch)
+gdbscm_scm_to_host_string (SCM string, size_t *lenp, SCM *except_scmp)
 {
-  return scm_to_stringn (string, lenp, target_charset (gdbarch),
-			 SCM_FAILED_CONVERSION_ERROR);
+  return gdbscm_scm_to_string (string, lenp, host_charset (), 1, except_scmp);
+}
+
+/* Convert a host string to an SCM string.
+   This function is guaranteed to not throw an exception.
+   Returns a <gdb:exception> object if there's a conversion error.  */
+
+SCM
+gdbscm_scm_from_host_string (const char *string, size_t len)
+{
+  return gdbscm_scm_from_string (string, len, host_charset (), 1);
 }
 
 /* (string->argv string) -> list

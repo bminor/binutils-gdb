@@ -2006,6 +2006,7 @@ nios2_consume_arg (nios2_insn_infoS *insn, char *argstr, const char *parsestr)
 	as_bad (_("badly formed expression near %s"), argstr);
       break;
     case 'o':
+    case 'E':
       break;
     default:
       BAD_CASE (*parsestr);

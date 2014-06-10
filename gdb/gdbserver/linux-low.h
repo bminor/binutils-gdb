@@ -153,8 +153,12 @@ struct linux_target_ops
 
   /* Breakpoint and watchpoint related functions.  See target.h for
      comments.  */
-  int (*insert_point) (char type, CORE_ADDR addr, int len);
-  int (*remove_point) (char type, CORE_ADDR addr, int len);
+  int (*supports_z_point_type) (char z_type);
+  int (*insert_point) (enum raw_bkpt_type type, CORE_ADDR addr,
+		       int size, struct raw_breakpoint *bp);
+  int (*remove_point) (enum raw_bkpt_type type, CORE_ADDR addr,
+		       int size, struct raw_breakpoint *bp);
+
   int (*stopped_by_watchpoint) (void);
   CORE_ADDR (*stopped_data_address) (void);
 
@@ -343,7 +347,16 @@ struct lwp_info
 
 int linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine);
 
-void linux_attach_lwp (unsigned long pid);
+/* Attach to PTID.  Returns 0 on success, non-zero otherwise (an
+   errno).  */
+int linux_attach_lwp (ptid_t ptid);
+
+/* Return the reason an attach failed, in string form.  ERR is the
+   error returned by linux_attach_lwp (an errno).  This string should
+   be copied into a buffer by the client if the string will not be
+   immediately used, or if it must persist.  */
+char *linux_attach_fail_reason_string (ptid_t ptid, int err);
+
 struct lwp_info *find_lwp_pid (ptid_t ptid);
 void linux_stop_lwp (struct lwp_info *lwp);
 

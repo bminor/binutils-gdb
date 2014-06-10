@@ -22,7 +22,7 @@
 #else
 #include "defs.h"
 #include "target.h"
-#include "inferior.h" /* for non_stop */
+#include "infrun.h"
 #include "objfiles.h"
 #endif
 

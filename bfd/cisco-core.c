@@ -313,9 +313,9 @@ cisco_core_file_failing_signal (bfd *abfd ATTRIBUTE_UNUSED)
   return abfd->tdata.cisco_core_data->sig;
 }
 
-extern const bfd_target cisco_core_little_vec;
+extern const bfd_target core_cisco_le_vec;
 
-const bfd_target cisco_core_big_vec =
+const bfd_target core_cisco_be_vec =
 {
     "cisco-ios-core-big",
     bfd_target_unknown_flavour,
@@ -361,12 +361,12 @@ const bfd_target cisco_core_big_vec =
        BFD_JUMP_TABLE_LINK (_bfd_nolink),
        BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-    & cisco_core_little_vec,
+    & core_cisco_le_vec,
 
     NULL	/* backend_data */
 };
 
-const bfd_target cisco_core_little_vec =
+const bfd_target core_cisco_le_vec =
 {
     "cisco-ios-core-little",
     bfd_target_unknown_flavour,
@@ -412,7 +412,7 @@ const bfd_target cisco_core_little_vec =
        BFD_JUMP_TABLE_LINK (_bfd_nolink),
        BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-    &cisco_core_big_vec,
+    &core_cisco_be_vec,
 
     NULL			/* backend_data */
 };

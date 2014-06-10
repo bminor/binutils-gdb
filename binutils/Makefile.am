@@ -514,7 +514,8 @@ all: info
 
 # We extract version from bfd/configure.in, make sure to rerun configure
 # when BFD's version changes.
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in \
+	$(BFDDIR)/development.sh
 
 DISTCLEANFILES = sysroff.c sysroff.h site.exp site.bak embedspu
 

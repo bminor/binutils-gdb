@@ -2018,7 +2018,7 @@ elf_vax_plt_sym_val (bfd_vma i, const asection *plt,
   return plt->vma + (i + 1) * PLT_ENTRY_SIZE;
 }
 
-#define TARGET_LITTLE_SYM		bfd_elf32_vax_vec
+#define TARGET_LITTLE_SYM		vax_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-vax"
 #define ELF_MACHINE_CODE		EM_VAX
 #define ELF_MAXPAGESIZE			0x1000

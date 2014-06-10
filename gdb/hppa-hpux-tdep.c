@@ -1367,7 +1367,7 @@ hppa_hpux_supply_save_state (const struct regset *regset,
 
 /* HP-UX register set.  */
 
-static struct regset hppa_hpux_regset =
+static const struct regset hppa_hpux_regset =
 {
   NULL,
   hppa_hpux_supply_save_state

@@ -741,7 +741,8 @@ OPTIONAL_BACKENDS_CFILES = \
 CONFIG_STATUS_DEPENDENCIES = \
 	$(srcdir)/configure.in \
 	$(srcdir)/config.bfd \
-	$(srcdir)/configure.host
+	$(srcdir)/configure.host \
+	$(srcdir)/development.sh
 
 # These are defined by configure.in:
 WORDSIZE = @wordsize@

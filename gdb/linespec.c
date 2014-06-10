@@ -1665,6 +1665,10 @@ linespec_parse_basic (linespec_parser *parser)
 	      discard_cleanups (cleanup);
 	      return;
 	    }
+
+	  /* The convenience variable/history value parsed correctly.
+	     NAME is no longer needed.  */
+	  do_cleanups (cleanup);
 	}
       else
 	{

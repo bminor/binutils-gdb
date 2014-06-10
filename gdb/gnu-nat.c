@@ -2080,8 +2080,7 @@ gnu_mourn_inferior (struct target_ops *ops)
 {
   inf_debug (gnu_current_inf, "rip");
   inf_detach (gnu_current_inf);
-  unpush_target (ops);
-  generic_mourn_inferior ();
+  inf_child_mourn_inferior (ops);
 }
 
 
@@ -2166,7 +2165,7 @@ gnu_create_inferior (struct target_ops *ops,
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
 static void
-gnu_attach (struct target_ops *ops, char *args, int from_tty)
+gnu_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   int pid;
   char *exec_file;
@@ -2253,7 +2252,7 @@ gnu_detach (struct target_ops *ops, const char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (pid);
 
-  unpush_target (ops);	/* Pop out of handling an inferior.  */
+  inf_child_maybe_unpush_target (ops);
 }
 
 static void
@@ -2664,10 +2663,6 @@ struct target_ops *
 gnu_target (void)
 {
   struct target_ops *t = inf_child_target ();
-
-  t->to_shortname = "GNU";
-  t->to_longname = "GNU Hurd process";
-  t->to_doc = "GNU Hurd process";
 
   t->to_attach = gnu_attach;
   t->to_attach_no_wait = 1;

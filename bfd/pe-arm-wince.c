@@ -21,9 +21,9 @@
 #define TARGET_UNDERSCORE    0
 #define USER_LABEL_PREFIX    ""
 
-#define TARGET_LITTLE_SYM    arm_wince_pe_little_vec
+#define TARGET_LITTLE_SYM    arm_pe_wince_le_vec
 #define TARGET_LITTLE_NAME   "pe-arm-wince-little"
-#define TARGET_BIG_SYM       arm_wince_pe_big_vec
+#define TARGET_BIG_SYM       arm_pe_wince_be_vec
 #define TARGET_BIG_NAME      "pe-arm-wince-big"
 
 #define bfd_arm_allocate_interworking_sections \

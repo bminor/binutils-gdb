@@ -212,7 +212,7 @@ abs_finder (bfd * abfd ATTRIBUTE_UNUSED, asection * sec, void * data)
 {
   bfd_vma abs_val = * (bfd_vma *) data;
 
-  return (sec->vma <= abs_val) && ((sec->vma + (1LL << 32)) > abs_val);
+  return (sec->vma <= abs_val) && ((sec->vma + (1ULL << 32)) > abs_val);
 }
 
 unsigned int
@@ -236,7 +236,12 @@ _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
      reduce the absolute value to < 1^32, and then transforming the
      symbol into a section relative symbol.  This of course is a hack.  */
   if (sizeof (in->n_value) > 4
-      && in->n_value > ((1ULL << 32) - 1)
+      /* The strange computation of the shift amount is here in order to
+	 avoid a compile time warning about the comparison always being
+	 false.  It does not matter if this test fails to work as expected
+	 as the worst that can happen is that some absolute symbols are
+	 needlessly converted into section relative symbols.  */
+      && in->n_value > ((1ULL << (sizeof (in->n_value) > 4 ? 32 : 31)) - 1)
       && in->n_scnum == -1)
     {
       asection * sec;
@@ -248,7 +253,7 @@ _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
 	  in->n_scnum = sec->target_index;
 	}
       /* else: FIXME: The value is outside the range of any section.  This
-	 happens for __image_base__ and __ImageBase__ and maybe some other
+	 happens for __image_base__ and __ImageBase and maybe some other
 	 symbols as well.  We should find a way to handle these values.  */
     }
 
@@ -1107,7 +1112,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
   if (bfd_bread (buffer, 256, abfd) < 4)
     return NULL;
 
-  /* ensure null termination of filename */
+  /* Ensure null termination of filename.  */
   buffer[256] = '\0';
 
   cvinfo->CVSignature = H_GET_32(abfd, buffer);
@@ -1119,7 +1124,15 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       CV_INFO_PDB70 *cvinfo70 = (CV_INFO_PDB70 *)(buffer);
 
       cvinfo->Age = H_GET_32(abfd, cvinfo70->Age);
-      memcpy (cvinfo->Signature, cvinfo70->Signature, CV_INFO_SIGNATURE_LENGTH);
+
+      /* A GUID consists of 4,2,2 byte values in little-endian order, followed
+         by 8 single bytes.  Byte swap them so we can conveniently treat the GUID
+         as 16 bytes in big-endian order.  */
+      bfd_putb32 (bfd_getl32 (cvinfo70->Signature), cvinfo->Signature);
+      bfd_putb16 (bfd_getl16 (&(cvinfo70->Signature[4])), &(cvinfo->Signature[4]));
+      bfd_putb16 (bfd_getl16 (&(cvinfo70->Signature[6])), &(cvinfo->Signature[6]));
+      memcpy (&(cvinfo->Signature[8]), &(cvinfo70->Signature[8]), 8);
+
       cvinfo->SignatureLength = CV_INFO_SIGNATURE_LENGTH;
       // cvinfo->PdbFileName = cvinfo70->PdbFileName;
 
@@ -1152,7 +1165,14 @@ _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinf
 
   cvinfo70 = (CV_INFO_PDB70 *) buffer;
   H_PUT_32 (abfd, CVINFO_PDB70_CVSIGNATURE, cvinfo70->CvSignature);
-  memcpy (&(cvinfo70->Signature), cvinfo->Signature, CV_INFO_SIGNATURE_LENGTH);
+
+  /* Byte swap the GUID from 16 bytes in big-endian order to 4,2,2 byte values
+     in little-endian order, followed by 8 single bytes.  */
+  bfd_putl32 (bfd_getb32 (cvinfo->Signature), cvinfo70->Signature);
+  bfd_putl16 (bfd_getb16 (&(cvinfo->Signature[4])), &(cvinfo70->Signature[4]));
+  bfd_putl16 (bfd_getb16 (&(cvinfo->Signature[6])), &(cvinfo70->Signature[6]));
+  memcpy (&(cvinfo70->Signature[8]), &(cvinfo->Signature[8]), 8);
+
   H_PUT_32 (abfd, cvinfo->Age, cvinfo70->Age);
   cvinfo70->PdbFileName[0] = '\0';
 
@@ -2145,48 +2165,61 @@ pe_print_reloc (bfd * abfd, void * vfile)
   return TRUE;
 }
 
+/* A data structure describing the regions of a .rsrc section.
+   Some fields are filled in as the section is parsed.  */
+
+typedef struct rsrc_regions
+{
+  bfd_byte * section_start;
+  bfd_byte * section_end;
+  bfd_byte * strings_start;
+  bfd_byte * resource_start;
+} rsrc_regions;
 
 static bfd_byte *
-rsrc_print_resource_directory (FILE * , bfd *, unsigned int,
-			       bfd_byte *, bfd_byte *, bfd_byte *, bfd_vma);
+rsrc_print_resource_directory (FILE * , bfd *, unsigned int, bfd_byte *,
+			       rsrc_regions *, bfd_vma);
 
 static bfd_byte *
-rsrc_print_resource_entries (FILE *        file,
-			     bfd *         abfd,
-			     unsigned int  indent,
-			     bfd_boolean   is_name,
-			     bfd_byte *    datastart,
-			     bfd_byte *    data,
-			     bfd_byte *    dataend,
-			     bfd_vma       rva_bias)
+rsrc_print_resource_entries (FILE *         file,
+			     bfd *          abfd,
+			     unsigned int   indent,
+			     bfd_boolean    is_name,
+			     bfd_byte *     data,
+			     rsrc_regions * regions,
+			     bfd_vma        rva_bias)
 {
   unsigned long entry, addr, size;
 
-  if (data + 8 >= dataend)
-    return dataend + 1;
+  if (data + 8 >= regions->section_end)
+    return regions->section_end + 1;
 
-  fprintf (file, _("%*.s Entry: "), indent, " ");
+  fprintf (file, _("%03x %*.s Entry: "), (int)(data - regions->section_start), indent, " ");
 
   entry = (long) bfd_get_32 (abfd, data);
   if (is_name)
     {
       bfd_byte * name;
 
-      /* Note - the documenation says that this field is an RVA value
+      /* Note - the documentation says that this field is an RVA value
 	 but windres appears to produce a section relative offset with
 	 the top bit set.  Support both styles for now.  */
       if (HighBitSet (entry))
-	name = datastart + WithoutHighBit (entry);
+	name = regions->section_start + WithoutHighBit (entry);
       else
-	name = datastart + entry - rva_bias;
+	name = regions->section_start + entry - rva_bias;
 
-      if (name + 2 < dataend)
+      if (name + 2 < regions->section_end)
 	{
 	  unsigned int len;
+
+	  if (regions->strings_start == NULL)
+	    regions->strings_start = name;
+
 	  len = bfd_get_16 (abfd, name);
 
 	  fprintf (file, _("name: [val: %08lx len %d]: "), entry, len);
-	  if (name + 2 + len * 2 < dataend)
+	  if (name + 2 + len * 2 < regions->section_end)
 	    {
 	      /* This strange loop is to cope with multibyte characters.  */
 	      while (len --)
@@ -2209,47 +2242,49 @@ rsrc_print_resource_entries (FILE *        file,
 
   if (HighBitSet  (entry))
     return rsrc_print_resource_directory (file, abfd, indent + 1,
-					  datastart,
-					  datastart + WithoutHighBit (entry),
-					  dataend, rva_bias);
+					  regions->section_start + WithoutHighBit (entry),
+					  regions, rva_bias);
 
-  if (datastart + entry + 16 >= dataend)
-    return dataend + 1;
+  if (regions->section_start + entry + 16 >= regions->section_end)
+    return regions->section_end + 1;
 
-  fprintf (file, _("%*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"),
+  fprintf (file, _("%03x %*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"),
+	   (int) (entry),
 	   indent, " ",
-	   addr = (long) bfd_get_32 (abfd, datastart + entry),
-	   size = (long) bfd_get_32 (abfd, datastart + entry + 4),
-	   (int) bfd_get_32 (abfd, datastart + entry + 8));
+	   addr = (long) bfd_get_32 (abfd, regions->section_start + entry),
+	   size = (long) bfd_get_32 (abfd, regions->section_start + entry + 4),
+	   (int) bfd_get_32 (abfd, regions->section_start + entry + 8));
 
   /* Check that the reserved entry is 0.  */
-  if (bfd_get_32 (abfd, datastart + entry + 12) != 0
+  if (bfd_get_32 (abfd, regions->section_start + entry + 12) != 0
       /* And that the data address/size is valid too.  */
-      || (datastart + (addr - rva_bias) + size > dataend))
-    return dataend + 1;
+      || (regions->section_start + (addr - rva_bias) + size > regions->section_end))
+    return regions->section_end + 1;
 
-  return datastart + (addr - rva_bias) + size;
+  if (regions->resource_start == NULL)
+    regions->resource_start = regions->section_start + (addr - rva_bias);
+
+  return regions->section_start + (addr - rva_bias) + size;
 }
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 static bfd_byte *
-rsrc_print_resource_directory (FILE *        file,
-			       bfd *         abfd,
-			       unsigned int  indent,
-			       bfd_byte *    datastart,
-			       bfd_byte *    data,
-			       bfd_byte *    dataend,
-			       bfd_vma       rva_bias)
+rsrc_print_resource_directory (FILE *         file,
+			       bfd *          abfd,
+			       unsigned int   indent,
+			       bfd_byte *     data,
+			       rsrc_regions * regions,
+			       bfd_vma        rva_bias)
 {
   unsigned int num_names, num_ids;
   bfd_byte * highest_data = data;
 
-  if (data + 16 >= dataend)
-    return dataend + 1;
+  if (data + 16 >= regions->section_end)
+    return regions->section_end + 1;
 
-  fprintf (file, "%*.s ", indent, " ");
+  fprintf (file, "%03x %*.s ", (int)(data - regions->section_start), indent, " ");
   switch (indent)
     {
     case 0: fprintf (file, "Type"); break;
@@ -2272,10 +2307,10 @@ rsrc_print_resource_directory (FILE *        file,
       bfd_byte * entry_end;
 
       entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, TRUE,
-					       datastart, data, dataend, rva_bias);
+					       data, regions, rva_bias);
       data += 8;
       highest_data = max (highest_data, entry_end);
-      if (entry_end >= dataend)
+      if (entry_end >= regions->section_end)
 	return entry_end;
     }
 
@@ -2284,11 +2319,10 @@ rsrc_print_resource_directory (FILE *        file,
       bfd_byte * entry_end;
 
       entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, FALSE,
-					       datastart, data, dataend,
-					       rva_bias);
+					       data, regions, rva_bias);
       data += 8;
       highest_data = max (highest_data, entry_end);
-      if (entry_end >= dataend)
+      if (entry_end >= regions->section_end)
 	return entry_end;
     }
 
@@ -2308,8 +2342,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
   bfd_size_type datasize;
   asection * section;
   bfd_byte * data;
-  bfd_byte * dataend;
-  bfd_byte * datastart;
+  rsrc_regions regions;
 
   pe = pe_data (abfd);
   if (pe == NULL)
@@ -2333,20 +2366,22 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	free (data);
       return FALSE;
     }
-  datastart = data;
-  dataend = data + datasize;
+
+  regions.section_start = data;
+  regions.section_end = data + datasize;
+  regions.strings_start = NULL;
+  regions.resource_start = NULL;
 
   fflush (file);
   fprintf (file, "\nThe .rsrc Resource Directory section:\n");
 
-  while (data < dataend)
+  while (data < regions.section_end)
     {
       bfd_byte * p = data;
 
-      data = rsrc_print_resource_directory (file, abfd, 0, data, data,
-					    dataend, rva_bias);
+      data = rsrc_print_resource_directory (file, abfd, 0, data, & regions, rva_bias);
 
-      if (data == dataend + 1)
+      if (data == regions.section_end + 1)
 	fprintf (file, _("Corrupt .rsrc section detected!\n"));
       else
 	{
@@ -2360,14 +2395,30 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	     aligned to a 1^3 boundary even when their alignment is set at
 	     1^2.  Catch that case here before we issue a spurious warning
 	     message.  */
-	  if (data == (dataend - 4))
-	    data = dataend;
-	  else if (data < dataend)
-	    fprintf (file, _("\nWARNING: Extra data in .rsrc section - it will be ignored by Windows:\n"));
+	  if (data == (regions.section_end - 4))
+	    data = regions.section_end;
+	  else if (data < regions.section_end)
+	    {
+	      /* If the extra data is all zeros then do not complain.
+		 This is just padding so that the section meets the
+		 page size requirements.  */
+	      while (data ++ < regions.section_end)
+		if (*data != 0)
+		  break;
+	      if (data < regions.section_end)
+		fprintf (file, _("\nWARNING: Extra data in .rsrc section - it will be ignored by Windows:\n"));
+	    }
 	}
     }
 
-  free (datastart);
+  if (regions.strings_start != NULL)
+    fprintf (file, " String table starts at %03x\n",
+	     (int) (regions.strings_start - regions.section_start));
+  if (regions.resource_start != NULL)
+    fprintf (file, " Resources start at %03xx\n",
+	     (int) (regions.resource_start - regions.section_start));
+  
+  free (regions.section_start);
   return TRUE;
 }
 
@@ -2417,6 +2468,13 @@ pe_print_debugdata (bfd * abfd, void * vfile)
     {
       fprintf (file,
                _("\nThere is a debug directory, but the section containing it could not be found\n"));
+      return TRUE;
+    }
+  else if (!(section->flags & SEC_HAS_CONTENTS))
+    {
+      fprintf (file,
+               _("\nThere is a debug directory in %s, but that section has no contents\n"),
+               section->name);
       return TRUE;
     }
 
@@ -2662,6 +2720,19 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   return TRUE;
 }
 
+static bfd_boolean
+is_vma_in_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
+{
+  bfd_vma addr = * (bfd_vma *) obj;
+  return (addr >= sect->vma) && (addr < (sect->vma + sect->size));
+}
+
+static asection *
+find_section_by_vma (bfd *abfd, bfd_vma addr)
+{
+  return bfd_sections_find_if (abfd, is_vma_in_section, (void *) & addr);
+}
+
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
@@ -2699,6 +2770,47 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
   if (! pe_data (ibfd)->has_reloc_section
       && ! (pe_data (ibfd)->real_flags & IMAGE_FILE_RELOCS_STRIPPED))
     pe_data (obfd)->dont_strip_reloc = 1;
+
+  /* The file offsets contained in the debug directory need rewriting.  */
+  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size != 0)
+    {
+      bfd_vma addr = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].VirtualAddress
+	+ ope->pe_opthdr.ImageBase;
+      asection *section = find_section_by_vma (obfd, addr);
+      bfd_byte *data;
+
+      if (section && bfd_malloc_and_get_section (obfd, section, &data))
+        {
+          unsigned int i;
+          struct external_IMAGE_DEBUG_DIRECTORY *dd =
+	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
+
+          for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
+		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
+            {
+              asection *ddsection;
+              struct external_IMAGE_DEBUG_DIRECTORY *edd = &(dd[i]);
+              struct internal_IMAGE_DEBUG_DIRECTORY idd;
+
+              _bfd_XXi_swap_debugdir_in (obfd, edd, &idd);
+
+              if (idd.AddressOfRawData == 0)
+                continue; /* RVA 0 means only offset is valid, not handled yet.  */
+
+              ddsection = find_section_by_vma (obfd, idd.AddressOfRawData + ope->pe_opthdr.ImageBase);
+              if (!ddsection)
+                continue; /* Not in a section! */
+
+              idd.PointerToRawData = ddsection->filepos + (idd.AddressOfRawData
+							   + ope->pe_opthdr.ImageBase) - ddsection->vma;
+
+              _bfd_XXi_swap_debugdir_out (obfd, &idd, edd);
+            }
+
+          if (!bfd_set_section_contents (obfd, section, data, 0, section->size))
+            _bfd_error_handler (_("Failed to update file offsets in debug directory"));
+        }
+    }
 
   return TRUE;
 }
@@ -2803,8 +2915,6 @@ rsrc_count_entries (bfd *          abfd,
       unsigned int len = bfd_get_16 (abfd, name);
       if (len == 0 || len > 256)
 	return dataend + 1;
-
-      sizeof_strings += (len + 1) * 2;
     }
 
   entry = (long) bfd_get_32 (abfd, data + 4);
@@ -2820,8 +2930,6 @@ rsrc_count_entries (bfd *          abfd,
 
   addr = (long) bfd_get_32 (abfd, datastart + entry);
   size = (long) bfd_get_32 (abfd, datastart + entry + 4);
-
-  sizeof_leaves += 16;
 
   return datastart + addr - rva_bias + size;
 }
@@ -2845,7 +2953,6 @@ rsrc_count_directory (bfd *          abfd,
   num_entries += num_ids;
 
   data += 16;
-  sizeof_tables_and_entries += 16;
 
   while (num_entries --)
     {
@@ -2854,7 +2961,6 @@ rsrc_count_directory (bfd *          abfd,
       entry_end = rsrc_count_entries (abfd, num_entries >= num_ids,
 				      datastart, data, dataend, rva_bias);
       data += 8;
-      sizeof_tables_and_entries += 8;
       highest_data = max (highest_data, entry_end);
       if (entry_end >= dataend)
 	break;
@@ -3116,7 +3222,9 @@ rsrc_write_leaf (rsrc_write_data * data,
   data->next_leaf += 16;
 
   memcpy (data->next_data, leaf->data, leaf->size);
-  data->next_data += leaf->size;
+  /* An undocumented feature of Windows resources is that each unit
+     of raw data is 8-byte aligned...  */
+  data->next_data += ((leaf->size + 7) & ~7);
 }
 
 static void rsrc_write_directory (rsrc_write_data *, rsrc_directory *);
@@ -3151,6 +3259,39 @@ rsrc_write_entry (rsrc_write_data *  data,
 }
 
 static void
+rsrc_compute_region_sizes (rsrc_directory * dir)
+{
+  struct rsrc_entry * entry;
+
+  if (dir == NULL)
+    return;
+
+  sizeof_tables_and_entries += 16;
+
+  for (entry = dir->names.first_entry; entry != NULL; entry = entry->next_entry)
+    {
+      sizeof_tables_and_entries += 8;
+
+      sizeof_strings += (entry->name_id.name.len + 1) * 2;
+	  
+      if (entry->is_dir)
+	rsrc_compute_region_sizes (entry->value.directory);
+      else
+	sizeof_leaves += 16;
+    }
+
+  for (entry = dir->ids.first_entry; entry != NULL; entry = entry->next_entry)
+    {
+      sizeof_tables_and_entries += 8;
+
+      if (entry->is_dir)
+	rsrc_compute_region_sizes (entry->value.directory);
+      else
+	sizeof_leaves += 16;
+    }
+}
+
+static void
 rsrc_write_directory (rsrc_write_data * data,
 		      rsrc_directory *  dir)
 {
@@ -3177,6 +3318,7 @@ rsrc_write_directory (rsrc_write_data * data,
        i > 0 && entry != NULL;
        i--, entry = entry->next_entry)
     {
+      BFD_ASSERT (entry->is_name);
       rsrc_write_entry (data, next_entry, entry);
       next_entry += 8;
     }
@@ -3187,6 +3329,7 @@ rsrc_write_directory (rsrc_write_data * data,
        i > 0 && entry != NULL;
        i--, entry = entry->next_entry)
     {
+      BFD_ASSERT (! entry->is_name);
       rsrc_write_entry (data, next_entry, entry);
       next_entry += 8;
     }
@@ -3551,7 +3694,7 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 		     resource manifests - there can only be one of these,
 		     even if they differ in language.  Zero-language manifests
 		     are assumed to be default manifests (provided by the
-		     cygwin build system) and these can be silently dropped,
+		     Cygwin/MinGW build system) and these can be silently dropped,
 		     unless that would reduce the number of manifests to zero.
 		     There should only ever be one non-zero lang manifest -
 		     if there are more it is an error.  A non-zero lang
@@ -3591,7 +3734,6 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 
 		      /* Unhook NEXT from the chain.  */
 		      /* FIXME: memory loss here.  */
-		      /* FIXME: do we need to decrement sizeof_tables_and_entries ?  */
 		      entry->next_entry = next->next_entry;
 		      chain->num_entries --;
 		      if (chain->num_entries < 2)
@@ -3655,7 +3797,6 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 		}
 
 	      /* Unhook NEXT from the chain.  */
-	      /* FIXME: do we need to decrement sizeof_tables_and_entries ?  */
 	      entry->next_entry = next->next_entry;
 	      chain->num_entries --;
 	      if (chain->num_entries < 2)
@@ -3779,6 +3920,7 @@ rsrc_process_section (bfd * abfd,
   data = bfd_malloc (size);
   if (data == NULL)
     return;
+
   datastart = data;
 
   if (! bfd_get_section_contents (abfd, sec, data, 0, size))
@@ -3826,7 +3968,6 @@ rsrc_process_section (bfd * abfd,
      leaves and data and decide if we need to do anything.  */
   dataend = data + size;
   num_resource_sets = 0;
-  sizeof_leaves = sizeof_strings = sizeof_tables_and_entries = 0;
 
   while (data < dataend)
     {
@@ -3912,15 +4053,18 @@ rsrc_process_section (bfd * abfd,
   rsrc_sort_entries (& new_table.ids, FALSE, & new_table);
 
   /* Step four: Create new contents for the .rsrc section.  */
-  new_data = bfd_malloc (size);
+  /* Step four point one: Compute the size of each region of the .rsrc section.
+     We do this now, rather than earlier, as the merging above may have dropped
+     some entries.  */
+  sizeof_leaves = sizeof_strings = sizeof_tables_and_entries = 0;
+  rsrc_compute_region_sizes (& new_table);
+  /* We increment sizeof_strings to make sure that resource data
+     starts on an 8-byte boundary.  FIXME: Is this correct ?  */
+  sizeof_strings = (sizeof_strings + 7) & ~ 7;
+
+  new_data = bfd_zalloc (abfd, size);
   if (new_data == NULL)
     goto end;
-
-  /* We have merged the top level Type Tables of all of the input
-     .rsrc sections into one Type Table.  So we can (and must)
-     reduce the count of the number of tables that we will be
-     emitting appropriately.  */
-  sizeof_tables_and_entries -= 16 * (num_resource_sets - 1);
 
   write_data.abfd        = abfd;
   write_data.datastart   = new_data;
@@ -3935,11 +4079,29 @@ rsrc_process_section (bfd * abfd,
   /* Step five: Replace the old contents with the new.
      We recompute the size as we may have lost entries due to mergeing.  */
   size = ((write_data.next_data - new_data) + 3) & ~ 3;
+
+  {
+    int page_size;
+
+    if (coff_data (abfd)->link_info)
+      {
+	page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
+
+	/* If no file alignment has been set, default to one.
+	   This repairs 'ld -r' for arm-wince-pe target.  */
+	if (page_size == 0)
+	  page_size = 1;
+      }
+    else
+      page_size = PE_DEF_FILE_ALIGNMENT;
+    size = (size + page_size - 1) & - page_size;
+  }
+
   bfd_set_section_contents (pfinfo->output_bfd, sec, new_data, 0, size);
   sec->size = sec->rawsize = size;
 
  end:
-  /* Step size: Free all the memory that we have used.  */
+  /* Step six: Free all the memory that we have used.  */
   /* FIXME: Free the resource tree, if we have one.  */
   free (datastart);
   free (rsrc_sizes);

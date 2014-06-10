@@ -25,7 +25,7 @@
 
 #define elf_symbol_leading_char 0
 
-#define TARGET_LITTLE_SYM	bfd_elf32_am33lin_vec
+#define TARGET_LITTLE_SYM	am33_elf32_linux_vec
 #define TARGET_LITTLE_NAME	"elf32-am33lin"
 #define ELF_ARCH		bfd_arch_mn10300
 #define ELF_MACHINE_CODE	EM_MN10300

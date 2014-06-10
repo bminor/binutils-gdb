@@ -55,7 +55,7 @@ struct dummy {
 enum dummy_enum {
   enum1,
   enum2
-};
+} tag_dummy_enum;
 
 void *
 hack (const struct dummy *t, const enum dummy_enum *e)

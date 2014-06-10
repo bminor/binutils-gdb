@@ -36,19 +36,19 @@ static int merge_exidx_entries = -1;
 static int
 is_tic6x_target (void)
 {
-  extern const bfd_target bfd_elf32_tic6x_le_vec;
-  extern const bfd_target bfd_elf32_tic6x_be_vec;
-  extern const bfd_target bfd_elf32_tic6x_linux_le_vec;
-  extern const bfd_target bfd_elf32_tic6x_linux_be_vec;
-  extern const bfd_target bfd_elf32_tic6x_elf_le_vec;
-  extern const bfd_target bfd_elf32_tic6x_elf_be_vec;
+  extern const bfd_target tic6x_elf32_le_vec;
+  extern const bfd_target tic6x_elf32_be_vec;
+  extern const bfd_target tic6x_elf32_linux_le_vec;
+  extern const bfd_target tic6x_elf32_linux_be_vec;
+  extern const bfd_target tic6x_elf32_c6000_le_vec;
+  extern const bfd_target tic6x_elf32_c6000_be_vec;
 
-  return (link_info.output_bfd->xvec == &bfd_elf32_tic6x_le_vec
-  	  || link_info.output_bfd->xvec == &bfd_elf32_tic6x_be_vec
-	  || link_info.output_bfd->xvec == &bfd_elf32_tic6x_linux_le_vec
-  	  || link_info.output_bfd->xvec == &bfd_elf32_tic6x_linux_be_vec
-	  || link_info.output_bfd->xvec == &bfd_elf32_tic6x_elf_le_vec
-  	  || link_info.output_bfd->xvec == &bfd_elf32_tic6x_elf_be_vec);
+  return (link_info.output_bfd->xvec == &tic6x_elf32_le_vec
+	  || link_info.output_bfd->xvec == &tic6x_elf32_be_vec
+	  || link_info.output_bfd->xvec == &tic6x_elf32_linux_le_vec
+	  || link_info.output_bfd->xvec == &tic6x_elf32_linux_be_vec
+	  || link_info.output_bfd->xvec == &tic6x_elf32_c6000_le_vec
+	  || link_info.output_bfd->xvec == &tic6x_elf32_c6000_be_vec);
 }
 
 /* Pass params to backend.  */

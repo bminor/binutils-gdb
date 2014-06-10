@@ -1,3 +1,139 @@
+2014-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (fwait_prefix): New.
+	(ckprefix): Set fwait_prefix.
+	(print_insn): Properly print prefixes before fwait.
+
+2014-06-07  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (UISIGNOPT): Define and use with cmpli.
+
+2014-06-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Add dependency on
+	bfd's development.sh.
+	* Makefile.in, configure: Regenerate.
+
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-dis.c (msp430_doubleoperand): Use extension_word to
+	decide when extended addressing is being used.
+
+2014-06-02  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* sparc-opc.c (cas): Disable for LEON.
+	(casl): Likewise.
+
+2014-05-20  Alan Modra  <amodra@gmail.com>
+
+	* m68k-dis.c: Don't include setjmp.h.
+
+2014-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (ADDR16_PREFIX): Removed.
+	(ADDR32_PREFIX): Likewise.
+	(DATA16_PREFIX): Likewise.
+	(DATA32_PREFIX): Likewise.
+	(prefix_name): Updated.
+	(print_insn): Simplify data and address size prefixes processing.
+
+2014-05-08  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
+
+	* or1k-desc.c: Regenerated.
+	* or1k-desc.h: Likewise.
+	* or1k-opc.c: Likewise.
+	* or1k-opc.h: Likewise.
+	* or1k-opinst.c: Likewise.
+
+2014-05-07  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add MIPS32r5 eretnc instruction.
+	(I34): New define.
+	(I36): New define.
+	(I66): New define.
+	(I68): New define.
+	* mips-dis.c (mips_arch_choices): Add mips32r3, mips32r5, mips64r3 and
+	mips64r5.
+	(parse_mips_dis_option): Update MSA and virtualization support to
+	allow mips64r3 and mips64r5.
+
+2014-05-07  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-opc.c (G3): Remove I4.
+
+2014-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16893
+	* i386-dis.c (twobyte_has_mandatory_prefix): New variable.
+	(end_codep): Likewise.
+	(mandatory_prefix): Likewise.
+	(active_seg_prefix): Likewise.
+	(ckprefix): Set active_seg_prefix to the active segment register
+	prefix.
+	(seg_prefix): Removed.
+	(get_valid_dis386): Use the last of PREFIX_REPNZ and PREFIX_REPZ
+	for prefix index.  Ignore the index if it is invalid and the
+	mandatory prefix isn't required.
+	(print_insn): Set mandatory_prefix if the PREFIX_XXX prefix is
+	mandatory.  Don't set PREFIX_REPZ/PREFIX_REPNZ/PREFIX_LOCK bits
+	in used_prefixes here.  Don't print unused prefixes.  Check
+	active_seg_prefix for the active segment register prefix.
+	Restore the DFLAG bit in sizeflag if the data size prefix is
+	unused.  Check the unused mandatory PREFIX_XXX prefixes
+	(append_seg): Only print the segment register which gets used.
+	(OP_E_memory): Check active_seg_prefix for the segment register
+	prefix.
+	(OP_OFF): Likewise.
+	(OP_OFF64): Likewise.
+	(OP_DSreg): Set active_seg_prefix to PREFIX_DS if it is unset.
+
+2014-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16886
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* configure.in: Check if sigsetjmp is available.
+	* h8500-dis.c (private): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_h8500): Replace setjmp with OPCODES_SIGSETJMP.
+	* i386-dis.c (dis_private): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn): Replace setjmp with OPCODES_SIGSETJMP.
+	* ns32k-dis.c (private): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_ns32k): Replace setjmp with OPCODES_SIGSETJMP.
+	* sysdep.h (OPCODES_SIGJMP_BUF): New macro.
+	(OPCODES_SIGSETJMP): Likewise.
+	(OPCODES_SIGLONGJMP): Likewise.
+	* vax-dis.c (private): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_vax): Replace setjmp with OPCODES_SIGSETJMP.
+	* xtensa-dis.c (dis_private): Replace jmp_buf with
+	OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_xtensa): Replace setjmp with OPCODES_SIGSETJMP.
+	* z8k-dis.c(instr_data_s): Replace jmp_buf with OPCODES_SIGJMP_BUF.
+	(fetch_data): Replace longjmp with OPCODES_SIGLONGJMP.
+	(print_insn_z8k): Replace setjmp with OPCODES_SIGSETJMP.
+
+2014-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16891
+	* i386-dis.c (print_insn): Handle prefixes before fwait.
+
+2014-04-26  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
+2014-04-23  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-dis.c (mips_arch_choices): Update mips32r2 and mips64r2
+	to allow the MIPS XPA ASE.
+	(parse_mips_dis_option): Process the -Mxpa option.
+	* mips-opc.c (XPA): New define.
+	(mips_builtin_opcodes): Add MIPS XPA instructions and move the
+	locations of the ctc0 and cfc0 instructions.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* Makefile.am: Remove openrisc and or32 support.  Add support for or1k.

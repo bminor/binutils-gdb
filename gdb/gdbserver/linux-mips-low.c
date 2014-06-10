@@ -372,29 +372,26 @@ mips_linux_prepare_to_resume (struct lwp_info *lwp)
     }
 }
 
-/* Translate breakpoint type TYPE in rsp to 'enum target_hw_bp_type'.  */
-
-static enum target_hw_bp_type
-rsp_bp_type_to_target_hw_bp_type (char type)
+static int
+mips_supports_z_point_type (char z_type)
 {
-  switch (type)
+  switch (z_type)
     {
-    case '2':
-      return hw_write;
-    case '3':
-      return hw_read;
-    case '4':
-      return hw_access;
+    case Z_PACKET_WRITE_WP:
+    case Z_PACKET_READ_WP:
+    case Z_PACKET_ACCESS_WP:
+      return 1;
+    default:
+      return 0;
     }
-
-  gdb_assert_not_reached ("unhandled RSP breakpoint type");
 }
 
 /* This is the implementation of linux_target_ops method
    insert_point.  */
 
 static int
-mips_insert_point (char type, CORE_ADDR addr, int len)
+mips_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		   int len, struct raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *private = proc->private->arch_private;
@@ -405,19 +402,6 @@ mips_insert_point (char type, CORE_ADDR addr, int len)
   long lwpid;
   enum target_hw_bp_type watch_type;
   uint32_t irw;
-
-  /* Breakpoint/watchpoint types:
-       '0' - software-breakpoint (not supported)
-       '1' - hardware-breakpoint (not supported)
-       '2' - write watchpoint (supported)
-       '3' - read watchpoint (supported)
-       '4' - access watchpoint (supported).  */
-
-  if (type < '2' || type > '4')
-    {
-      /* Unsupported.  */
-      return 1;
-    }
 
   lwpid = lwpid_of (current_inferior);
   if (!mips_linux_read_watch_registers (lwpid,
@@ -434,7 +418,7 @@ mips_insert_point (char type, CORE_ADDR addr, int len)
   mips_linux_watch_populate_regs (private->current_watches, &regs);
 
   /* Now try to add the new watch.  */
-  watch_type = rsp_bp_type_to_target_hw_bp_type (type);
+  watch_type = raw_bkpt_type_to_target_hw_bp_type (type);
   irw = mips_linux_watch_type_to_irw (watch_type);
   if (!mips_linux_watch_try_one_watch (&regs, addr, len, irw))
     return -1;
@@ -464,7 +448,8 @@ mips_insert_point (char type, CORE_ADDR addr, int len)
    remove_point.  */
 
 static int
-mips_remove_point (char type, CORE_ADDR addr, int len)
+mips_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		   int len, struct raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *private = proc->private->arch_private;
@@ -476,21 +461,8 @@ mips_remove_point (char type, CORE_ADDR addr, int len)
   struct mips_watchpoint **pw;
   struct mips_watchpoint *w;
 
-  /* Breakpoint/watchpoint types:
-       '0' - software-breakpoint (not supported)
-       '1' - hardware-breakpoint (not supported)
-       '2' - write watchpoint (supported)
-       '3' - read watchpoint (supported)
-       '4' - access watchpoint (supported).  */
-
-  if (type < '2' || type > '4')
-    {
-      /* Unsupported.  */
-      return 1;
-    }
-
   /* Search for a known watch that matches.  Then unlink and free it.  */
-  watch_type = rsp_bp_type_to_target_hw_bp_type (type);
+  watch_type = raw_bkpt_type_to_target_hw_bp_type (type);
   deleted_one = 0;
   pw = &private->current_watches;
   while ((w = *pw))
@@ -862,6 +834,7 @@ struct linux_target_ops the_low_target = {
   mips_reinsert_addr,
   0,
   mips_breakpoint_at,
+  mips_supports_z_point_type,
   mips_insert_point,
   mips_remove_point,
   mips_stopped_by_watchpoint,

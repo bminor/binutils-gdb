@@ -24,7 +24,7 @@ AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
 
 # Set the 'development' global.
-. $srcdir/development.sh
+. $srcdir/../bfd/development.sh
 
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
@@ -1154,7 +1154,7 @@ AC_MSG_RESULT([$with_guile])
 dnl We check guile with pkg-config.
 AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
 
-try_guile_versions="guile-2.0"
+try_guile_versions="guile-2.2 guile-2.0"
 have_libguile=no
 case "${with_guile}" in
 no)
@@ -1200,6 +1200,15 @@ if test "${have_libguile}" != no; then
   CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_GUILE_SRCS)"
   CONFIG_INSTALL="$CONFIG_INSTALL install-guile"
   ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_GUILE_CFLAGS)"
+
+  dnl The 'scm_new_smob' function appeared in Guile 2.0.6.
+  save_LIBS="$LIBS"
+  save_CPPFLAGS="$CPPFLAGS"
+  LIBS="$GUILE_LIBS"
+  CPPFLAGS="$GUILE_CPPFLAGS"
+  AC_CHECK_FUNCS([scm_new_smob])
+  LIBS="$save_LIBS"
+  CPPFLAGS="$save_CPPFLAGS"
 else
   # Even if Guile support is not compiled in, we need to have these files
   # included.

@@ -659,6 +659,7 @@ static struct target_ops spu_target_ops = {
   spu_look_up_symbols,
   spu_request_interrupt,
   NULL,
+  NULL,  /* supports_z_point_type */
   NULL,
   NULL,
   NULL,

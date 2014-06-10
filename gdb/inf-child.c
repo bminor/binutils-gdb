@@ -40,6 +40,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+/* A pointer to what is returned by inf_child_target.  Used by
+   inf_child_open to push the most-derived target in reaction to
+   "target native".  */
+static struct target_ops *inf_child_ops = NULL;
+
 /* Helper function for child_wait and the derivatives of child_wait.
    HOSTSTATUS is the waitstatus from wait() or the equivalent; store our
    translation of that in OURSTATUS.  */
@@ -109,10 +114,65 @@ inf_child_prepare_to_store (struct target_ops *self,
 {
 }
 
+/* True if the user did "target native".  In that case, we won't
+   unpush the child target automatically when the last inferior is
+   gone.  */
+static int inf_child_explicitly_opened;
+
+/* See inf-child.h.  */
+
+void
+inf_child_open_target (struct target_ops *target, char *arg, int from_tty)
+{
+  target_preopen (from_tty);
+  push_target (target);
+  inf_child_explicitly_opened = 1;
+  if (from_tty)
+    printf_filtered ("Done.  Use the \"run\" command to start a process.\n");
+}
+
 static void
 inf_child_open (char *arg, int from_tty)
 {
-  error (_("Use the \"run\" command to start a child process."));
+  inf_child_open_target (inf_child_ops, arg, from_tty);
+}
+
+/* Implement the to_disconnect target_ops method.  */
+
+static void
+inf_child_disconnect (struct target_ops *target, char *args, int from_tty)
+{
+  if (args != NULL)
+    error (_("Argument given to \"disconnect\"."));
+
+  /* This offers to detach/kill current inferiors, and then pops all
+     targets.  */
+  target_preopen (from_tty);
+}
+
+/* Implement the to_close target_ops method.  */
+
+static void
+inf_child_close (struct target_ops *target)
+{
+  /* In case we were forcibly closed.  */
+  inf_child_explicitly_opened = 0;
+}
+
+void
+inf_child_mourn_inferior (struct target_ops *ops)
+{
+  generic_mourn_inferior ();
+  inf_child_maybe_unpush_target (ops);
+}
+
+/* See inf-child.h.  */
+
+void
+inf_child_maybe_unpush_target (struct target_ops *ops)
+{
+  if (!inf_child_explicitly_opened && !have_inferiors ())
+    unpush_target (ops);
 }
 
 static void
@@ -406,10 +466,12 @@ inf_child_target (void)
 {
   struct target_ops *t = XCNEW (struct target_ops);
 
-  t->to_shortname = "child";
-  t->to_longname = "Child process";
-  t->to_doc = "Child process (started by the \"run\" command).";
+  t->to_shortname = "native";
+  t->to_longname = "Native process";
+  t->to_doc = "Native process (started by the \"run\" command).";
   t->to_open = inf_child_open;
+  t->to_close = inf_child_close;
+  t->to_disconnect = inf_child_disconnect;
   t->to_post_attach = inf_child_post_attach;
   t->to_fetch_registers = inf_child_fetch_inferior_registers;
   t->to_store_registers = inf_child_store_inferior_registers;
@@ -445,5 +507,10 @@ inf_child_target (void)
   t->to_magic = OPS_MAGIC;
   t->to_use_agent = inf_child_use_agent;
   t->to_can_use_agent = inf_child_can_use_agent;
+
+  /* Store a pointer so we can push the most-derived target from
+     inf_child_open.  */
+  inf_child_ops = t;
+
   return t;
 }

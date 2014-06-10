@@ -26,6 +26,7 @@
 #include <signal.h>
 #include <sys/user.h>
 #include <sys/ptrace.h>
+#include <asm/ptrace.h>
 #include <sys/uio.h>
 
 #include "gdb_proc_service.h"
@@ -208,49 +209,6 @@ struct arch_lwp_info
 static int aarch64_num_bp_regs;
 static int aarch64_num_wp_regs;
 
-/* Hardware breakpoint/watchpoint types.
-   The values map to their encodings in the bit 4 and bit 3 of the
-   hardware breakpoint/watchpoint control registers.  */
-
-enum target_point_type
-{
-  hw_execute = 0,		/* Execute HW breakpoint */
-  hw_read = 1,			/* Read    HW watchpoint */
-  hw_write = 2,			/* Common  HW watchpoint */
-  hw_access = 3,		/* Access  HW watchpoint */
-  point_type_unsupported
-};
-
-#define Z_PACKET_SW_BP '0'
-#define Z_PACKET_HW_BP '1'
-#define Z_PACKET_WRITE_WP '2'
-#define Z_PACKET_READ_WP '3'
-#define Z_PACKET_ACCESS_WP '4'
-
-/* Map the protocol breakpoint/watchpoint type TYPE to
-   enum target_point_type.  */
-
-static enum target_point_type
-Z_packet_to_point_type (char type)
-{
-  switch (type)
-    {
-    case Z_PACKET_SW_BP:
-      /* Leave the handling of the sw breakpoint with the gdb client.  */
-      return point_type_unsupported;
-    case Z_PACKET_HW_BP:
-      return hw_execute;
-    case Z_PACKET_WRITE_WP:
-      return hw_write;
-    case Z_PACKET_READ_WP:
-      return hw_read;
-    case Z_PACKET_ACCESS_WP:
-      return hw_access;
-    default:
-      return point_type_unsupported;
-    }
-}
-
 static int
 aarch64_cannot_store_register (int regno)
 {
@@ -358,7 +316,7 @@ aarch64_breakpoint_at (CORE_ADDR where)
 static void
 aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
 			      const char *func, CORE_ADDR addr,
-			      int len, enum target_point_type type)
+			      int len, enum target_hw_bp_type type)
 {
   int i;
 
@@ -448,12 +406,31 @@ aarch64_watchpoint_length (unsigned int ctrl)
    breakpoint/watchpoint control register.  */
 
 static unsigned int
-aarch64_point_encode_ctrl_reg (enum target_point_type type, int len)
+aarch64_point_encode_ctrl_reg (enum target_hw_bp_type type, int len)
 {
-  unsigned int ctrl;
+  unsigned int ctrl, ttype;
 
   /* type */
-  ctrl = type << 3;
+  switch (type)
+    {
+    case hw_write:
+      ttype = 2;
+      break;
+    case hw_read:
+      ttype = 1;
+      break;
+    case hw_access:
+      ttype = 3;
+      break;
+    case hw_execute:
+      ttype = 0;
+      break;
+    default:
+      perror_with_name (_("Unrecognized breakpoint/watchpoint type"));
+    }
+
+  /* type */
+  ctrl = ttype << 3;
   /* length bitmask */
   ctrl |= ((1 << len) - 1) << 5;
   /* enabled at el0 */
@@ -749,7 +726,7 @@ aarch64_get_debug_reg_state ()
 
 static int
 aarch64_dr_state_insert_one_point (struct aarch64_debug_reg_state *state,
-				   enum target_point_type type,
+				   enum target_hw_bp_type type,
 				   CORE_ADDR addr, int len)
 {
   int i, idx, num_regs, is_watchpoint;
@@ -822,7 +799,7 @@ aarch64_dr_state_insert_one_point (struct aarch64_debug_reg_state *state,
 
 static int
 aarch64_dr_state_remove_one_point (struct aarch64_debug_reg_state *state,
-				   enum target_point_type type,
+				   enum target_hw_bp_type type,
 				   CORE_ADDR addr, int len)
 {
   int i, num_regs, is_watchpoint;
@@ -876,7 +853,7 @@ aarch64_dr_state_remove_one_point (struct aarch64_debug_reg_state *state,
 }
 
 static int
-aarch64_handle_breakpoint (enum target_point_type type, CORE_ADDR addr,
+aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			   int len, int is_insert)
 {
   struct aarch64_debug_reg_state *state;
@@ -898,7 +875,7 @@ aarch64_handle_breakpoint (enum target_point_type type, CORE_ADDR addr,
    from that it is an aligned watchpoint to be handled.  */
 
 static int
-aarch64_handle_aligned_watchpoint (enum target_point_type type,
+aarch64_handle_aligned_watchpoint (enum target_hw_bp_type type,
 				   CORE_ADDR addr, int len, int is_insert)
 {
   struct aarch64_debug_reg_state *state;
@@ -919,7 +896,7 @@ aarch64_handle_aligned_watchpoint (enum target_point_type type,
    Return 0 if succeed.  */
 
 static int
-aarch64_handle_unaligned_watchpoint (enum target_point_type type,
+aarch64_handle_unaligned_watchpoint (enum target_hw_bp_type type,
 				     CORE_ADDR addr, int len, int is_insert)
 {
   struct aarch64_debug_reg_state *state
@@ -956,13 +933,29 @@ aarch64_handle_unaligned_watchpoint (enum target_point_type type,
 }
 
 static int
-aarch64_handle_watchpoint (enum target_point_type type, CORE_ADDR addr,
+aarch64_handle_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			   int len, int is_insert)
 {
   if (aarch64_point_is_aligned (1 /* is_watchpoint */ , addr, len))
     return aarch64_handle_aligned_watchpoint (type, addr, len, is_insert);
   else
     return aarch64_handle_unaligned_watchpoint (type, addr, len, is_insert);
+}
+
+static int
+aarch64_supports_z_point_type (char z_type)
+{
+  switch (z_type)
+    {
+    case Z_PACKET_HW_BP:
+    case Z_PACKET_WRITE_WP:
+    case Z_PACKET_READ_WP:
+    case Z_PACKET_ACCESS_WP:
+      return 1;
+    default:
+      /* Leave the handling of sw breakpoints with the gdb client.  */
+      return 0;
+    }
 }
 
 /* Insert a hardware breakpoint/watchpoint.
@@ -974,19 +967,18 @@ aarch64_handle_watchpoint (enum target_point_type type, CORE_ADDR addr,
    Return -1 if an error occurs.  */
 
 static int
-aarch64_insert_point (char type, CORE_ADDR addr, int len)
+aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		      int len, struct raw_breakpoint *bp)
 {
   int ret;
-  enum target_point_type targ_type;
+  enum target_hw_bp_type targ_type;
 
   if (debug_hw_points)
     fprintf (stderr, "insert_point on entry (addr=0x%08lx, len=%d)\n",
 	     (unsigned long) addr, len);
 
-  /* Determine the type from the packet.  */
-  targ_type = Z_packet_to_point_type (type);
-  if (targ_type == point_type_unsupported)
-    return 1;
+  /* Determine the type from the raw breakpoint type.  */
+  targ_type = raw_bkpt_type_to_target_hw_bp_type (type);
 
   if (targ_type != hw_execute)
     ret =
@@ -1011,19 +1003,18 @@ aarch64_insert_point (char type, CORE_ADDR addr, int len)
    Return -1 if an error occurs.  */
 
 static int
-aarch64_remove_point (char type, CORE_ADDR addr, int len)
+aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		      int len, struct raw_breakpoint *bp)
 {
   int ret;
-  enum target_point_type targ_type;
+  enum target_hw_bp_type targ_type;
 
   if (debug_hw_points)
     fprintf (stderr, "remove_point on entry (addr=0x%08lx, len=%d)\n",
 	     (unsigned long) addr, len);
 
-  /* Determine the type from the packet.  */
-  targ_type = Z_packet_to_point_type (type);
-  if (targ_type == point_type_unsupported)
-    return 1;
+  /* Determine the type from the raw breakpoint type.  */
+  targ_type = raw_bkpt_type_to_target_hw_bp_type (type);
 
   /* Set up state pointers.  */
   if (targ_type != hw_execute)
@@ -1295,6 +1286,7 @@ struct linux_target_ops the_low_target =
   NULL,
   0,
   aarch64_breakpoint_at,
+  aarch64_supports_z_point_type,
   aarch64_insert_point,
   aarch64_remove_point,
   aarch64_stopped_by_watchpoint,

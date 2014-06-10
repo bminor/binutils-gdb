@@ -374,4 +374,4 @@ w65_reloc16_extra_cases (bfd *abfd,
   bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
-CREATE_LITTLE_COFF_TARGET_VEC (w65_vec, "coff-w65", BFD_IS_RELAXABLE, 0, '_', NULL, COFF_SWAP_TABLE)
+CREATE_LITTLE_COFF_TARGET_VEC (w65_coff_vec, "coff-w65", BFD_IS_RELAXABLE, 0, '_', NULL, COFF_SWAP_TABLE)

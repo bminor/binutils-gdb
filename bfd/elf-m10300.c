@@ -5560,7 +5560,7 @@ mn10300_elf_mkobject (bfd *abfd)
 #define bfd_elf32_mkobject	mn10300_elf_mkobject
 
 #ifndef ELF_ARCH
-#define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
+#define TARGET_LITTLE_SYM	mn10300_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"
 #define ELF_ARCH		bfd_arch_mn10300
 #define ELF_TARGET_ID		MN10300_ELF_DATA

@@ -693,4 +693,6 @@ de-stage3:
 	- (cd stage3 ; rm -f as$(EXEEXT) ; mv -f * ..)
 	- rmdir stage3
 
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in $(srcdir)/configure.tgt
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in \
+	$(srcdir)/configure.tgt \
+	$(BFDDIR)/development.sh

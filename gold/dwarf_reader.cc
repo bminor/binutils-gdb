@@ -505,13 +505,11 @@ Dwarf_pubnames_table::read_section(Relobj* object, const unsigned char* symtab,
       if (strcmp(section_name_suffix, name) == 0)
         {
           shndx = i;
-          this->output_section_offset_ = object->output_section_offset(i);
           break;
         }
       else if (strcmp(section_name_suffix, gnu_name) == 0)
         {
           shndx = i;
-          this->output_section_offset_ = object->output_section_offset(i);
           this->is_gnu_style_ = true;
           break;
         }
@@ -560,11 +558,6 @@ Dwarf_pubnames_table::read_header(off_t offset)
   // Make sure we have actually read the section.
   gold_assert(this->buffer_ != NULL);
 
-  // Correct the offset.  For incremental update links, we have a
-  // relocated offset that is relative to the output section, but
-  // here we need an offset relative to the input section.
-  offset -= this->output_section_offset_;
-
   if (offset < 0 || offset + 14 >= this->buffer_end_ - this->buffer_)
     return false;
 
@@ -586,6 +579,12 @@ Dwarf_pubnames_table::read_header(off_t offset)
       this->offset_size_ = 4;
     }
   this->end_of_table_ = pinfo + unit_length;
+
+  // If unit_length is too big, maybe we should reject the whole table,
+  // but in cases we know about, it seems OK to assume that the table
+  // is valid through the actual end of the section.
+  if (this->end_of_table_ > this->buffer_end_)
+    this->end_of_table_ = this->buffer_end_;
 
   // Check the version.
   unsigned int version = this->dwinfo_->read_from_pointer<16>(pinfo);

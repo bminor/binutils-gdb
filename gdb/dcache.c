@@ -497,8 +497,11 @@ dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
 
   if (i == 0)
     {
-      /* FIXME: We lose the real error status.  */
-      return TARGET_XFER_E_IO;
+      /* Even though reading the whole line failed, we may be able to
+	 read a piece starting where the caller wanted.  */
+      return ops->to_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
+				   myaddr, NULL, memaddr, len,
+				   xfered_len);
     }
   else
     {

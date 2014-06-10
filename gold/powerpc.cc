@@ -947,7 +947,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     inline bool
     local_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
 					Target_powerpc* ,
-					Sized_relobj_file<size, big_endian>* ,
+					Sized_relobj_file<size, big_endian>* relobj,
 					unsigned int ,
 					Output_section* ,
 					const elfcpp::Rela<size, big_endian>& ,
@@ -958,8 +958,13 @@ class Target_powerpc : public Sized_target<size, big_endian>
       // may be folded and we'll still keep function addresses distinct.
       // That means no reloc is of concern here.
       if (size == 64)
-	return false;
-      // For 32-bit, conservatively assume anything but calls to
+	{
+	  Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+	    <Powerpc_relobj<size, big_endian>*>(relobj);
+	  if (ppcobj->abiversion() == 1)
+	    return false;
+	}
+      // For 32-bit and ELFv2, conservatively assume anything but calls to
       // function code might be taking the address of the function.
       return !is_branch_reloc(r_type);
     }
@@ -967,7 +972,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     inline bool
     global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
 					 Target_powerpc* ,
-					 Sized_relobj_file<size, big_endian>* ,
+					 Sized_relobj_file<size, big_endian>* relobj,
 					 unsigned int ,
 					 Output_section* ,
 					 const elfcpp::Rela<size, big_endian>& ,
@@ -976,7 +981,12 @@ class Target_powerpc : public Sized_target<size, big_endian>
     {
       // As above.
       if (size == 64)
-	return false;
+	{
+	  Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+	    <Powerpc_relobj<size, big_endian>*>(relobj);
+	  if (ppcobj->abiversion() == 1)
+	    return false;
+	}
       return !is_branch_reloc(r_type);
     }
 
@@ -2851,7 +2861,21 @@ Target_powerpc<size, big_endian>::do_plt_fde_location(const Output_data* plt,
   if (plt == this->glink_)
     {
       // See Output_data_glink::do_write() for glink contents.
-      if (size == 64)
+      if (len == 0)
+	{
+	  gold_assert(parameters->doing_static_link());
+	  // Static linking may need stubs, to support ifunc and long
+	  // branches.  We need to create an output section for
+	  // .eh_frame early in the link process, to have a place to
+	  // attach stub .eh_frame info.  We also need to have
+	  // registered a CIE that matches the stub CIE.  Both of
+	  // these requirements are satisfied by creating an FDE and
+	  // CIE for .glink, even though static linking will leave
+	  // .glink zero length.
+	  // ??? Hopefully generating an FDE with a zero address range
+	  // won't confuse anything that consumes .eh_frame info.
+	}
+      else if (size == 64)
 	{
 	  // There is one word before __glink_PLTresolve
 	  address += 8;
@@ -2863,7 +2887,7 @@ Target_powerpc<size, big_endian>::do_plt_fde_location(const Output_data* plt,
 	  // The first covers the branch table, the second
 	  // __glink_PLTresolve at the end of glink.
 	  off_t resolve_size = this->glink_->pltresolve_size;
-	  if (oview[9] == 0)
+	  if (oview[9] == elfcpp::DW_CFA_nop)
 	    len -= resolve_size;
 	  else
 	    {
@@ -3053,6 +3077,7 @@ static const uint32_t addis_3_13	= 0x3c6d0000;
 static const uint32_t addis_11_2	= 0x3d620000;
 static const uint32_t addis_11_11	= 0x3d6b0000;
 static const uint32_t addis_11_30	= 0x3d7e0000;
+static const uint32_t addis_12_2	= 0x3d820000;
 static const uint32_t addis_12_12	= 0x3d8c0000;
 static const uint32_t b			= 0x48000000;
 static const uint32_t bcl_20_31		= 0x429f0005;
@@ -4186,10 +4211,20 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		{
 		  write_insn<big_endian>(p, std_2_1 + this->targ_->stk_toc());
 		  p += 4;
-		  write_insn<big_endian>(p, addis_11_2 + ha(off));
-		  p += 4;
-		  write_insn<big_endian>(p, ld_12_11 + l(off));
-		  p += 4;
+		  if (plt_load_toc)
+		    {
+		      write_insn<big_endian>(p, addis_11_2 + ha(off));
+		      p += 4;
+		      write_insn<big_endian>(p, ld_12_11 + l(off));
+		      p += 4;
+		    }
+		  else
+		    {
+		      write_insn<big_endian>(p, addis_12_2 + ha(off));
+		      p += 4;
+		      write_insn<big_endian>(p, ld_12_12 + l(off));
+		      p += 4;
+		    }
 		  if (plt_load_toc
 		      && ha(off + 8 + 8 * static_chain) != ha(off))
 		    {
@@ -4288,8 +4323,8 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		}
 	      else
 		{
-		  write_insn<big_endian>(p, addis_11_2 + ha(brltoff)),	p += 4;
-		  write_insn<big_endian>(p, ld_12_11 + l(brltoff)),	p += 4;
+		  write_insn<big_endian>(p, addis_12_2 + ha(brltoff)),	p += 4;
+		  write_insn<big_endian>(p, ld_12_12 + l(brltoff)),	p += 4;
 		}
 	      write_insn<big_endian>(p, mtctr_12),			p += 4;
 	      write_insn<big_endian>(p, bctr);
@@ -5819,7 +5854,8 @@ Target_powerpc<size, big_endian>::Scan::global(
 	if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type, target))
 	    || (size == 64 && is_ifunc && target->abiversion() < 2))
 	  {
-	    if (gsym->may_need_copy_reloc())
+	    if (!parameters->options().output_is_position_independent()
+		&& gsym->may_need_copy_reloc())
 	      {
 		target->copy_reloc(symtab, layout, object,
 				   data_shndx, output_section, gsym, reloc);
@@ -5882,7 +5918,8 @@ Target_powerpc<size, big_endian>::Scan::global(
       // Make a dynamic relocation if necessary.
       if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type, target)))
 	{
-	  if (gsym->may_need_copy_reloc())
+	  if (!parameters->options().output_is_position_independent()
+	      && gsym->may_need_copy_reloc())
 	    {
 	      target->copy_reloc(symtab, layout, object,
 				 data_shndx, output_section, gsym,
@@ -7372,14 +7409,15 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 
       overflow = Reloc::CHECK_SIGNED;
-      if (overflow == Reloc::CHECK_LOW_INSN
-	  ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
-	     || (insn & (0x3f << 26)) == 24u << 26 /* ori */
-	     || (insn & (0x3f << 26)) == 26u << 26 /* xori */
-	     || (insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
-	  : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
-	     || (insn & (0x3f << 26)) == 25u << 26 /* oris */
-	     || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
+      if ((insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
+	overflow = Reloc::CHECK_BITFIELD;
+      else if (overflow == Reloc::CHECK_LOW_INSN
+	       ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
+		  || (insn & (0x3f << 26)) == 24u << 26 /* ori */
+		  || (insn & (0x3f << 26)) == 26u << 26 /* xori */)
+	       : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
+		  || (insn & (0x3f << 26)) == 25u << 26 /* oris */
+		  || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
 	overflow = Reloc::CHECK_UNSIGNED;
     }
 

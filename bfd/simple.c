@@ -106,6 +106,22 @@ struct saved_offsets
   struct saved_output_info *sections;
 };
 
+/* The sections in ABFD may already have output sections and offsets
+   set if we are here during linking.
+
+   DWARF-2 specifies offsets into debug sections in many cases and
+   bfd_simple_get_relocated_section_contents is called to relocate
+   debug info for a single relocatable object file.  So we want
+   offsets relative to that object file's sections, not offsets in the
+   output file.  For that reason, reset a debug section->output_offset
+   to zero.
+
+   If not called during linking then set section->output_section to
+   point back to the input section, because output_section must not be
+   NULL when calling the relocation routines.
+
+   Save the original output offset and section to restore later.  */
+
 static void
 simple_save_output_info (bfd *abfd ATTRIBUTE_UNUSED,
 			 asection *section,
@@ -220,15 +236,6 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
       outbuf = data;
     }
 
-  /* The sections in ABFD may already have output sections and offsets set.
-     Because this function is primarily for debug sections, and GCC uses the
-     knowledge that debug sections will generally have VMA 0 when emitting
-     relocations between DWARF-2 sections (which are supposed to be
-     section-relative offsets anyway), we need to reset the output offsets
-     to zero.  We also need to arrange for section->output_section->vma plus
-     section->output_offset to equal section->vma, which we do by setting
-     section->output_section to point back to section.  Save the original
-     output offset and output section to restore later.  */
   saved_offsets.section_count = abfd->section_count;
   saved_offsets.sections = malloc (sizeof (*saved_offsets.sections)
 				   * saved_offsets.section_count);

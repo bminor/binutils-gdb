@@ -656,7 +656,7 @@ const bfd_target
 #ifdef TARGET_SYM
   TARGET_SYM =
 #else
-  i860coff_vec =
+  i860_coff_vec =
 #endif
 {
 #ifdef TARGET_NAME

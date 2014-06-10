@@ -25,8 +25,6 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
     return -1
 }
 
-gdb_test_no_output "set target-async on"
-
 #
 # set it up at a breakpoint so we can play with it
 #
@@ -77,10 +75,22 @@ test_background "step&" "" " foo \\(\\) at .*async.c.*x = 5.*" "step& #2"
 
 test_background "stepi&" "" ".*$hex.*x = 5.*"
 
-test_background "nexti&" "" ".*y = 3.*"
+# Get the next instruction address.
+set next_insn_addr ""
+set test "get next insn"
+gdb_test_multiple {x/2i $pc} "$test" {
+    -re "=> $hex .* 0x(\[0-9a-f\]*) .*$gdb_prompt $" {
+	set next_insn_addr $expect_out(1,string)
+	pass "$test"
+    }
+}
 
+# We nexti into the same source line.  The current PC is printed out.
+test_background "nexti&" "" ".* 0x0*$next_insn_addr.* x = 5; .*"
+
+# PC is in the middle of a source line, so the PC address is displayed.
 test_background "finish&" \
-    "Run till exit from #0  foo \\(\\) at.*async.c.*\r\n" \
+    "Run till exit from #0  $hex in foo \\(\\) at.*async.c.*\r\n" \
     ".*$hex in main \\(\\) at.*async.c.*y = foo \\(\\).*Value returned is.*= 8.*"
 
 set jump_here [gdb_get_line_number "jump here"]

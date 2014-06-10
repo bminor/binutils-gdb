@@ -63,17 +63,6 @@ static scm_t_bits lazy_string_smob_tag;
 
 /* Administrivia for lazy string smobs.  */
 
-/* The smob "mark" function for <gdb:lazy-string>.  */
-
-static SCM
-lsscm_mark_lazy_string_smob (SCM self)
-{
-  lazy_string_smob *ls_smob = (lazy_string_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&ls_smob->base);
-}
-
 /* The smob "free" function for <gdb:lazy-string>.  */
 
 static size_t
@@ -365,7 +354,6 @@ gdbscm_initialize_lazy_strings (void)
 {
   lazy_string_smob_tag = gdbscm_make_smob_type (lazy_string_smob_name,
 						sizeof (lazy_string_smob));
-  scm_set_smob_mark (lazy_string_smob_tag, lsscm_mark_lazy_string_smob);
   scm_set_smob_free (lazy_string_smob_tag, lsscm_free_lazy_string_smob);
   scm_set_smob_print (lazy_string_smob_tag, lsscm_print_lazy_string_smob);
 

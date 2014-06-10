@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "target.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
@@ -200,6 +201,10 @@ static int (*linux_nat_siginfo_fixup) (siginfo_t *,
 /* The saved to_xfer_partial method, inherited from inf-ptrace.c.
    Called by our to_xfer_partial.  */
 static target_xfer_partial_ftype *super_xfer_partial;
+
+/* The saved to_close method, inherited from inf-ptrace.c.
+   Called by our to_close.  */
+static void (*super_close) (struct target_ops *);
 
 static unsigned int debug_linux_nat;
 static void
@@ -409,6 +414,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       if (detach_fork)
 	{
 	  struct cleanup *old_chain;
+	  int status = W_STOPCODE (0);
 
 	  /* Before detaching from the child, remove all breakpoints
 	     from it.  If we forked, then this has already been taken
@@ -442,7 +448,35 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 	  if (linux_nat_prepare_to_resume != NULL)
 	    linux_nat_prepare_to_resume (child_lp);
-	  ptrace (PTRACE_DETACH, child_pid, 0, 0);
+
+	  /* When debugging an inferior in an architecture that supports
+	     hardware single stepping on a kernel without commit
+	     6580807da14c423f0d0a708108e6df6ebc8bc83d, the vfork child
+	     process starts with the TIF_SINGLESTEP/X86_EFLAGS_TF bits
+	     set if the parent process had them set.
+	     To work around this, single step the child process
+	     once before detaching to clear the flags.  */
+
+	  if (!gdbarch_software_single_step_p (target_thread_architecture
+						   (child_lp->ptid)))
+	    {
+	      linux_disable_event_reporting (child_pid);
+	      if (ptrace (PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
+		perror_with_name (_("Couldn't do single step"));
+	      if (my_waitpid (child_pid, &status, 0) < 0)
+		perror_with_name (_("Couldn't wait vfork process"));
+	    }
+
+	  if (WIFSTOPPED (status))
+	    {
+	      int signo;
+
+	      signo = WSTOPSIG (status);
+	      if (signo != 0
+		  && !signal_pass_state (gdb_signal_from_host (signo)))
+		signo = 0;
+	      ptrace (PTRACE_DETACH, child_pid, 0, signo);
+	    }
 
 	  do_cleanups (old_chain);
 	}
@@ -1296,7 +1330,7 @@ linux_nat_create_inferior (struct target_ops *ops,
 }
 
 static void
-linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
+linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   struct lwp_info *lp;
   int status;
@@ -1320,13 +1354,16 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
       make_cleanup (xfree, message);
 
       buffer_init (&buffer);
-      linux_ptrace_attach_warnings (pid, &buffer);
+      linux_ptrace_attach_fail_reason (pid, &buffer);
 
       buffer_grow_str0 (&buffer, "");
       buffer_s = buffer_finish (&buffer);
       make_cleanup (xfree, buffer_s);
 
-      throw_error (ex.error, "%s%s", buffer_s, message);
+      if (*buffer_s != '\0')
+	throw_error (ex.error, "warning: %s\n%s", buffer_s, message);
+      else
+	throw_error (ex.error, "%s", message);
     }
 
   /* The ptrace base target adds the main thread with (pid,0,0)
@@ -1639,12 +1676,16 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
     }
 }
 
-/* Resume LWP, with the last stop signal, if it is in pass state.  */
+/* Callback for iterate_over_lwps.  If LWP is EXCEPT, do nothing.
+   Resume LWP with the last stop signal, if it is in pass state.  */
 
 static int
-linux_nat_resume_callback (struct lwp_info *lp, void *data)
+linux_nat_resume_callback (struct lwp_info *lp, void *except)
 {
   enum gdb_signal signo = GDB_SIGNAL_0;
+
+  if (lp == except)
+    return 0;
 
   if (lp->stopped)
     {
@@ -1761,12 +1802,8 @@ linux_nat_resume (struct target_ops *ops,
       return;
     }
 
-  /* Mark LWP as not stopped to prevent it from being continued by
-     linux_nat_resume_callback.  */
-  lp->stopped = 0;
-
   if (resume_many)
-    iterate_over_lwps (ptid, linux_nat_resume_callback, NULL);
+    iterate_over_lwps (ptid, linux_nat_resume_callback, lp);
 
   /* Convert to something the lower layer understands.  */
   ptid = pid_to_ptid (ptid_get_lwp (lp->ptid));
@@ -1775,6 +1812,7 @@ linux_nat_resume (struct target_ops *ops,
     linux_nat_prepare_to_resume (lp);
   linux_ops->to_resume (linux_ops, ptid, step, signo);
   lp->stopped_by_watchpoint = 0;
+  lp->stopped = 0;
 
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog,
@@ -1861,6 +1899,7 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
 
       lp->syscall_state = TARGET_WAITKIND_IGNORE;
       ptrace (PTRACE_CONT, ptid_get_lwp (lp->ptid), 0, 0);
+      lp->stopped = 0;
       return 1;
     }
 
@@ -1944,6 +1983,7 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
     linux_nat_prepare_to_resume (lp);
   linux_ops->to_resume (linux_ops, pid_to_ptid (ptid_get_lwp (lp->ptid)),
 			lp->step, GDB_SIGNAL_0);
+  lp->stopped = 0;
   return 1;
 }
 
@@ -2153,7 +2193,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  linux_ops->to_resume (linux_ops,
 				pid_to_ptid (ptid_get_lwp (lp->ptid)),
 				0, GDB_SIGNAL_0);
-
+	  lp->stopped = 0;
 	  return 1;
 	}
 
@@ -2308,6 +2348,7 @@ wait_lwp (struct lwp_info *lp)
     }
 
   gdb_assert (WIFSTOPPED (status));
+  lp->stopped = 1;
 
   /* Handle GNU/Linux's syscall SIGTRAPs.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SYSCALL_SIGTRAP)
@@ -2561,6 +2602,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
 	  errno = 0;
 	  ptrace (PTRACE_CONT, ptid_get_lwp (lp->ptid), 0, 0);
+	  lp->stopped = 0;
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"PTRACE_CONT %s, 0, 0 (%s) "
@@ -2587,9 +2629,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
 	  /* Save the sigtrap event.  */
 	  lp->status = status;
-	  gdb_assert (!lp->stopped);
 	  gdb_assert (lp->signalled);
-	  lp->stopped = 1;
 	}
       else
 	{
@@ -2600,8 +2640,6 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	    fprintf_unfiltered (gdb_stdlog,
 				"SWC: Delayed SIGSTOP caught for %s.\n",
 				target_pid_to_str (lp->ptid));
-
-	  lp->stopped = 1;
 
 	  /* Reset SIGNALLED only after the stop_wait_callback call
 	     above as it does gdb_assert on SIGNALLED.  */
@@ -2930,6 +2968,10 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
   if (!WIFSTOPPED (status) && !lp)
     return NULL;
 
+  /* This LWP is stopped now.  (And if dead, this prevents it from
+     ever being continued.)  */
+  lp->stopped = 1;
+
   /* Handle GNU/Linux's syscall SIGTRAPs.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SYSCALL_SIGTRAP)
     {
@@ -2972,7 +3014,6 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
 	 used.  */
       if (ptid_get_pid (lp->ptid) == ptid_get_lwp (lp->ptid))
 	{
-	  lp->stopped = 1;
 	  iterate_over_lwps (pid_to_ptid (ptid_get_pid (lp->ptid)),
 			     stop_and_resume_callback, new_pending_p);
 	}
@@ -3317,13 +3358,9 @@ retry:
 				     " cancelled it\n",
 				     ptid_get_lwp (lp->ptid));
 			}
-		      lp->stopped = 1;
 		    }
 		  else
-		    {
-		      lp->stopped = 1;
-		      lp->signalled = 0;
-		    }
+		    lp->signalled = 0;
 		}
 	      else if (WIFEXITED (lp->status) || WIFSIGNALED (lp->status))
 		{
@@ -3339,11 +3376,6 @@ retry:
 		     about the exit code/signal, leave the status
 		     pending for the next time we're able to report
 		     it.  */
-
-		  /* Prevent trying to stop this thread again.  We'll
-		     never try to resume it because it has a pending
-		     status.  */
-		  lp->stopped = 1;
 
 		  /* Dead LWP's aren't expected to reported a pending
 		     sigstop.  */
@@ -4772,6 +4804,8 @@ linux_nat_close (struct target_ops *self)
 
   if (linux_ops->to_close)
     linux_ops->to_close (linux_ops);
+
+  super_close (self);
 }
 
 /* When requests are passed down from the linux-nat layer to the
@@ -4853,6 +4887,8 @@ linux_nat_add_target (struct target_ops *t)
   t->to_async = linux_nat_async;
   t->to_terminal_inferior = linux_nat_terminal_inferior;
   t->to_terminal_ours = linux_nat_terminal_ours;
+
+  super_close = t->to_close;
   t->to_close = linux_nat_close;
 
   /* Methods for non-stop support.  */

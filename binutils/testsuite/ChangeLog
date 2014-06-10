@@ -1,3 +1,14 @@
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/ar.exp: Skip tests involving bfdtest1 and bfdtest2
+	if these executables are not present.
+
+2014-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/debug_str.s: New test.
+	* binutils-all/debug_str.d: New test control file.
+	* binutils-all/compress.exp: Run debug_str test.
+
 2014-04-22  Christian Svensson  <blue@cmd.nu>
 
 	* binutils-all/objcopy.exp: Remove openrisc and or32 support.  Add

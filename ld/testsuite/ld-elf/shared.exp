@@ -37,6 +37,11 @@ if { [which $CC] == 0 } {
     return
 }
 
+# Add -ldl to extralibs if needed
+if { ![istarget *-*-freebsd*]} {
+    set extralibs "-ldl"
+}
+
 set build_tests {
   {"Build libfoo.so"
    "-shared" "-fPIC"
@@ -275,10 +280,10 @@ set run_tests {
      "tmpdir/libbarhfoov.so tmpdir/libfoov.so" ""
      {main.c} "hidden" "hidden.out"}
     {"Run dl1a with --dynamic-list=dl1.list and dlopen on libdl1.so"
-     "--dynamic-list=dl1.list -ldl" ""
+     "--dynamic-list=dl1.list $extralibs" ""
      {dl1main.c} "dl1a" "dl1.out"}
     {"Run dl1b with --dynamic-list-data and dlopen on libdl1.so"
-     "--dynamic-list-data -ldl" ""
+     "--dynamic-list-data $extralibs" ""
      {dl1main.c} "dl1b" "dl1.out"}
     {"Run with libdl2a.so"
      "tmpdir/libdl2a.so" ""
@@ -308,37 +313,37 @@ set run_tests {
      "tmpdir/libdl4f.so" ""
      {dl4main.c} "dl4f" "dl4a.out"}
     {"Run dl6a1 with --dynamic-list-data and dlopen on libdl6a.so"
-     "--dynamic-list-data -ldl" ""
+     "--dynamic-list-data $extralibs" ""
      {dl6amain.c} "dl6a1" "dl6a.out"}
     {"Run dl6a2 with -Bsymbolic-functions and dlopen on libdl6a.so"
-     "-Bsymbolic-functions -ldl" ""
+     "-Bsymbolic-functions $extralibs" ""
      {dl6amain.c} "dl6a2" "dl6b.out"}
     {"Run dl6a3 with -Bsymbolic and dlopen on libdl6a.so"
-     "-Bsymbolic -ldl" ""
+     "-Bsymbolic $extralibs" ""
      {dl6amain.c} "dl6a3" "dl6b.out"}
     {"Run dl6a4 with -Bsymbolic --dynamic-list-data and dlopen on libdl6a.so"
-     "-Bsymbolic --dynamic-list-data -ldl" ""
+     "-Bsymbolic --dynamic-list-data $extralibs" ""
      {dl6amain.c} "dl6a4" "dl6a.out"}
     {"Run dl6a5 with -Bsymbolic-functions --dynamic-list-cpp-new and dlopen on libdl6a.so"
-     "-Bsymbolic-functions --dynamic-list-cpp-new -ldl" ""
+     "-Bsymbolic-functions --dynamic-list-cpp-new $extralibs" ""
      {dl6amain.c} "dl6a5" "dl6b.out"}
     {"Run dl6a6 with --dynamic-list-cpp-new -Bsymbolic-functions and dlopen on libdl6a.so"
-     "--dynamic-list-cpp-new -Bsymbolic-functions -ldl" ""
+     "--dynamic-list-cpp-new -Bsymbolic-functions $extralibs" ""
      {dl6amain.c} "dl6a6" "dl6b.out"}
     {"Run dl6a7 with --dynamic-list-data -Bsymbolic and dlopen on libdl6a.so"
-     "--dynamic-list-data -Bsymbolic -ldl" ""
+     "--dynamic-list-data -Bsymbolic $extralibs" ""
      {dl6amain.c} "dl6a7" "dl6a.out"}
     {"Run dl6b1 with --dynamic-list-data and dlopen on libdl6b.so"
-     "--dynamic-list-data -ldl" ""
+     "--dynamic-list-data $extralibs" ""
      {dl6bmain.c} "dl6b1" "dl6a.out"}
     {"Run dl6b2 with dlopen on libdl6b.so"
-     "-ldl" ""
+     "$extralibs" ""
      {dl6bmain.c} "dl6b2" "dl6b.out"}
     {"Run dl6c1 with --dynamic-list-data and dlopen on libdl6c.so"
-     "--dynamic-list-data -ldl" ""
+     "--dynamic-list-data $extralibs" ""
      {dl6cmain.c} "dl6c1" "dl6b.out"}
     {"Run dl6d1 with --dynamic-list-data and dlopen on libdl6d.so"
-     "--dynamic-list-data -ldl" ""
+     "--dynamic-list-data $extralibs" ""
      {dl6dmain.c} "dl6d1" "dl6b.out"}
     {"Run with libdata1.so"
      "tmpdir/libdata1.so" ""

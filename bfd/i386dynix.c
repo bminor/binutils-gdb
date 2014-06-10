@@ -34,7 +34,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) CONCAT2 (i386dynix_,OP)
+#define MY(OP) CONCAT2 (i386_aout_dynix_,OP)
 #define TARGETNAME "a.out-i386-dynix"
 #define NAME(x,y) CONCAT3 (i386dynix,_32_,y)
 #define ARCH_SIZE 32

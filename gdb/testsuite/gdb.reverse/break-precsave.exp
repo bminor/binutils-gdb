@@ -110,9 +110,3 @@ proc precsave_tests {} {
 }
 
 precsave_tests
-
-with_test_prefix "target-async" {
-    clean_restart $testfile
-    gdb_test_no_output "set target-async on"
-    precsave_tests
-}

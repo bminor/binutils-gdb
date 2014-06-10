@@ -131,6 +131,8 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
 				   from_tty ? SYMFILE_VERBOSE : 0,
                                    sai, OBJF_SHARED, NULL);
 
+  add_target_sections_of_objfile (objf);
+
   /* This might change our ideas about frames already looked at.  */
   reinit_frame_cache ();
 

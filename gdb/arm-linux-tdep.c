@@ -41,6 +41,7 @@
 #include "glibc-tdep.h"
 #include "arch-utils.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbthread.h"
 #include "symfile.h"
 
@@ -686,6 +687,21 @@ arm_linux_collect_vfp (const struct regset *regset,
 			    regs + (regno - ARM_D0_REGNUM) * 8);
 }
 
+static const struct regset arm_linux_gregset =
+  {
+    NULL, arm_linux_supply_gregset, arm_linux_collect_gregset
+  };
+
+static const struct regset arm_linux_fpregset =
+  {
+    NULL, arm_linux_supply_nwfpe, arm_linux_collect_nwfpe
+  };
+
+static const struct regset arm_linux_vfpregset =
+  {
+    NULL, arm_linux_supply_vfp, arm_linux_collect_vfp
+  };
+
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
@@ -693,34 +709,17 @@ static const struct regset *
 arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
 				    const char *sect_name, size_t sect_size)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   if (strcmp (sect_name, ".reg") == 0
       && sect_size == ARM_LINUX_SIZEOF_GREGSET)
-    {
-      if (tdep->gregset == NULL)
-        tdep->gregset = regset_alloc (gdbarch, arm_linux_supply_gregset,
-                                      arm_linux_collect_gregset);
-      return tdep->gregset;
-    }
+    return &arm_linux_gregset;
 
   if (strcmp (sect_name, ".reg2") == 0
       && sect_size == ARM_LINUX_SIZEOF_NWFPE)
-    {
-      if (tdep->fpregset == NULL)
-        tdep->fpregset = regset_alloc (gdbarch, arm_linux_supply_nwfpe,
-                                       arm_linux_collect_nwfpe);
-      return tdep->fpregset;
-    }
+    return &arm_linux_fpregset;
 
   if (strcmp (sect_name, ".reg-arm-vfp") == 0
       && sect_size == ARM_LINUX_SIZEOF_VFP)
-    {
-      if (tdep->vfpregset == NULL)
-        tdep->vfpregset = regset_alloc (gdbarch, arm_linux_supply_vfp,
-					arm_linux_collect_vfp);
-      return tdep->vfpregset;
-    }
+    return &arm_linux_vfpregset;
 
   return NULL;
 }

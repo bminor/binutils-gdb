@@ -2346,7 +2346,7 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
   _bfd_coff_section_already_linked
 #define _bfd_ecoff_bfd_define_common_symbol bfd_generic_define_common_symbol
 
-const bfd_target ecoffalpha_little_vec =
+const bfd_target alpha_ecoff_le_vec =
 {
   "ecoff-littlealpha",		/* name */
   bfd_target_ecoff_flavour,

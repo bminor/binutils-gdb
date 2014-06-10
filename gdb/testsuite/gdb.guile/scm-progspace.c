@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2014 Free Software Foundation, Inc.
+   Copyright 2010-2014 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,30 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int global = 3;
-
-class C {
-public:
-  struct C1 {} C1;
-  enum E1 {a1, b1, c1} E1;
-  union U1 {int a1; char b1;} U1;
-
-  C () : E1 (b1) {}
-  void global (void) const {}
-  int f (void) const { global (); return 0; }
-} C;
-
-struct S {} S;
-enum E {a, b, c} E;
-union U {int a; char b;} U;
-
-class CC {} cc;
-struct SS {} ss;
-enum EE {ea, eb, ec} ee;
-union UU {int aa; char bb;} uu;
-
 int
-main (void)
+main ()
 {
-  return C.f ();
+  return 0;
 }

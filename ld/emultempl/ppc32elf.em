@@ -135,6 +135,8 @@ ppc_before_allocation (void)
 
   gld${EMULATION_NAME}_before_allocation ();
 
+  ppc_elf_maybe_strip_sdata_syms (&link_info);
+
   if (RELAXATION_ENABLED)
     params.branch_trampolines = 1;
 

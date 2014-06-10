@@ -635,49 +635,41 @@ linux_create_inferior (char *program, char **allargs)
   return pid;
 }
 
+char *
+linux_attach_fail_reason_string (ptid_t ptid, int err)
+{
+  static char *reason_string;
+  struct buffer buffer;
+  char *warnings;
+  long lwpid = ptid_get_lwp (ptid);
+
+  xfree (reason_string);
+
+  buffer_init (&buffer);
+  linux_ptrace_attach_fail_reason (lwpid, &buffer);
+  buffer_grow_str0 (&buffer, "");
+  warnings = buffer_finish (&buffer);
+  if (warnings[0] != '\0')
+    reason_string = xstrprintf ("%s (%d), %s",
+				strerror (err), err, warnings);
+  else
+    reason_string = xstrprintf ("%s (%d)",
+				strerror (err), err);
+  xfree (warnings);
+  return reason_string;
+}
+
 /* Attach to an inferior process.  */
 
-static void
-linux_attach_lwp_1 (unsigned long lwpid, int initial)
+int
+linux_attach_lwp (ptid_t ptid)
 {
-  ptid_t ptid;
   struct lwp_info *new_lwp;
+  int lwpid = ptid_get_lwp (ptid);
 
   if (ptrace (PTRACE_ATTACH, lwpid, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0)
       != 0)
-    {
-      struct buffer buffer;
-
-      if (!initial)
-	{
-	  /* If we fail to attach to an LWP, just warn.  */
-	  fprintf (stderr, "Cannot attach to lwp %ld: %s (%d)\n", lwpid,
-		   strerror (errno), errno);
-	  fflush (stderr);
-	  return;
-	}
-
-      /* If we fail to attach to a process, report an error.  */
-      buffer_init (&buffer);
-      linux_ptrace_attach_warnings (lwpid, &buffer);
-      buffer_grow_str0 (&buffer, "");
-      error ("%sCannot attach to lwp %ld: %s (%d)", buffer_finish (&buffer),
-	     lwpid, strerror (errno), errno);
-    }
-
-  if (initial)
-    /* If lwp is the tgid, we handle adding existing threads later.
-       Otherwise we just add lwp without bothering about any other
-       threads.  */
-    ptid = ptid_build (lwpid, lwpid, 0);
-  else
-    {
-      /* Note that extracting the pid from the current inferior is
-	 safe, since we're always called in the context of the same
-	 process as this new thread.  */
-      int pid = pid_of (current_inferior);
-      ptid = ptid_build (pid, lwpid, 0);
-    }
+    return errno;
 
   new_lwp = add_lwp (ptid);
 
@@ -747,12 +739,8 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
      end of the list, and so the new thread has not yet reached
      wait_for_sigstop (but will).  */
   new_lwp->stop_expected = 1;
-}
 
-void
-linux_attach_lwp (unsigned long lwpid)
-{
-  linux_attach_lwp_1 (lwpid, 0);
+  return 0;
 }
 
 /* Attach to PID.  If PID is the tgid, attach to it and all
@@ -761,9 +749,16 @@ linux_attach_lwp (unsigned long lwpid)
 static int
 linux_attach (unsigned long pid)
 {
+  ptid_t ptid = ptid_build (pid, pid, 0);
+  int err;
+
   /* Attach to PID.  We will check for other threads
      soon.  */
-  linux_attach_lwp_1 (pid, 1);
+  err = linux_attach_lwp (ptid);
+  if (err != 0)
+    error ("Cannot attach to process %ld: %s",
+	   pid, linux_attach_fail_reason_string (ptid, err));
+
   linux_add_process (pid, 1);
 
   if (!non_stop)
@@ -794,13 +789,13 @@ linux_attach (unsigned long pid)
 	{
 	  /* At this point we attached to the tgid.  Scan the task for
 	     existing threads.  */
-	  unsigned long lwp;
 	  int new_threads_found;
 	  int iterations = 0;
-	  struct dirent *dp;
 
 	  while (iterations < 2)
 	    {
+	      struct dirent *dp;
+
 	      new_threads_found = 0;
 	      /* Add all the other threads.  While we go through the
 		 threads, new threads may be spawned.  Cycle through
@@ -808,19 +803,29 @@ linux_attach (unsigned long pid)
 		 finding new threads.  */
 	      while ((dp = readdir (dir)) != NULL)
 		{
+		  unsigned long lwp;
+		  ptid_t ptid;
+
 		  /* Fetch one lwp.  */
 		  lwp = strtoul (dp->d_name, NULL, 10);
 
+		  ptid = ptid_build (pid, lwp, 0);
+
 		  /* Is this a new thread?  */
-		  if (lwp
-		      && find_thread_ptid (ptid_build (pid, lwp, 0)) == NULL)
+		  if (lwp != 0 && find_thread_ptid (ptid) == NULL)
 		    {
-		      linux_attach_lwp_1 (lwp, 0);
-		      new_threads_found++;
+		      int err;
 
 		      if (debug_threads)
-			debug_printf ("Found and attached to new lwp %ld\n",
-				      lwp);
+			debug_printf ("Found new lwp %ld\n", lwp);
+
+		      err = linux_attach_lwp (ptid);
+		      if (err != 0)
+			warning ("Cannot attach to lwp %ld: %s",
+				 lwp,
+				 linux_attach_fail_reason_string (ptid, err));
+
+		      new_threads_found++;
 		    }
 		}
 
@@ -4852,20 +4857,29 @@ linux_read_auxv (CORE_ADDR offset, unsigned char *myaddr, unsigned int len)
    corresponding function.  */
 
 static int
-linux_insert_point (char type, CORE_ADDR addr, int len)
+linux_supports_z_point_type (char z_type)
+{
+  return (the_low_target.supports_z_point_type != NULL
+	  && the_low_target.supports_z_point_type (z_type));
+}
+
+static int
+linux_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, struct raw_breakpoint *bp)
 {
   if (the_low_target.insert_point != NULL)
-    return the_low_target.insert_point (type, addr, len);
+    return the_low_target.insert_point (type, addr, size, bp);
   else
     /* Unsupported (see target.h).  */
     return 1;
 }
 
 static int
-linux_remove_point (char type, CORE_ADDR addr, int len)
+linux_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, struct raw_breakpoint *bp)
 {
   if (the_low_target.remove_point != NULL)
-    return the_low_target.remove_point (type, addr, len);
+    return the_low_target.remove_point (type, addr, size, bp);
   else
     /* Unsupported (see target.h).  */
     return 1;
@@ -5994,6 +6008,7 @@ static struct target_ops linux_target_ops = {
   linux_look_up_symbols,
   linux_request_interrupt,
   linux_read_auxv,
+  linux_supports_z_point_type,
   linux_insert_point,
   linux_remove_point,
   linux_stopped_by_watchpoint,

@@ -601,7 +601,7 @@ sh_symbian_relocate_section (bfd *                  output_bfd,
 				  contents, relocs, local_syms, local_sections);
 }
 
-#define TARGET_LITTLE_SYM	bfd_elf32_shl_symbian_vec
+#define TARGET_LITTLE_SYM	sh_elf32_symbian_le_vec
 #define TARGET_LITTLE_NAME      "elf32-shl-symbian"
 
 #undef  elf_backend_relocate_section

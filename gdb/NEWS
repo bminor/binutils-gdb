@@ -2,7 +2,15 @@
 	     (Organized release by release)
 
 *** Changes since GDB 7.7
- 
+
+* New command line options
+
+-D data-directory
+  This is an alias for the --data-directory option.
+
+* GDB supports printing and modifying of variable length automatic arrays
+  as specified in ISO C99.
+
 * The ARM simulator now supports instruction level tracing
   with or without disassembly.
 
@@ -53,6 +61,36 @@ maint ada show ignore-descriptive-types
   the user manual for more details on descriptive types and the intended
   usage of this option.
 
+set auto-connect-native-target
+
+  Control whether GDB is allowed to automatically connect to the
+  native target for the run, attach, etc. commands when not connected
+  to any target yet.  See also "target native" below.
+
+set record btrace replay-memory-access (read-only|read-write)
+show record btrace replay-memory-access
+  Control what memory accesses are allowed during replay.
+
+maint set target-async (on|off)
+maint show target-async
+  This controls whether GDB targets operate in syncronous or
+  asyncronous mode.  Normally the default is asyncronous, if it is
+  available; but this can be changed to more easily debug problems
+  occurring only in syncronous mode.
+
+set mi-async (on|off)
+show mi-async
+  Control whether MI asynchronous mode is preferred.  This supersedes
+  "set target-async" of previous GDB versions.
+
+* "set target-async" is deprecated as a CLI option and is now an alias
+  for "set mi-async" (only puts MI into async mode).
+
+* Background execution commands (e.g., "c&", "s&", etc.) are now
+  possible ``out of the box'' if the target supports them.  Previously
+  the user would need to explicitly enable the possibility with the
+  "set target-async on" command.
+
 * New features in the GDB remote stub, GDBserver
 
   ** New option --debug-format=option1[,option2,...] allows one to add
@@ -86,6 +124,24 @@ maint ada show ignore-descriptive-types
 
 * The "catch syscall" command now works on s390*-linux* targets.
 
+* The "compare-sections" command is no longer specific to target
+  remote.  It now works with all targets.
+
+* All native targets are now consistently called "native".
+  Consequently, the "target child", "target GNU", "target djgpp",
+  "target procfs" (Solaris/Irix/OSF/AIX) and "target darwin-child"
+  commands have been replaced with "target native".  The QNX/NTO port
+  leaves the "procfs" target in place and adds a "native" target for
+  consistency with other ports.  The impact on users should be minimal
+  as these commands previously either throwed an error, or were
+  no-ops.  The target's name is visible in the output of the following
+  commands: "help target", "info target", "info files", "maint print
+  target-stack".
+
+* The "target native" command now connects to the native target.  This
+  can be used to launch native programs even when "set
+  auto-connect-native-target" is set to off.
+
 * New remote packets
 
 qXfer:btrace:read's annex
@@ -97,6 +153,11 @@ qXfer:btrace:read's annex
   ** Valid Python operations on gdb.Value objects representing
      structs/classes invoke the corresponding overloaded operators if
      available.
+  ** New `Xmethods' feature in the Python API.  Xmethods are
+     additional methods or replacements for existing methods of a C++
+     class.  This feature is useful for those cases where a method
+     defined in C++ source code could be inlined or optimized out by
+     the compiler, making it unavailable to GDB.
 
 * New targets
 PowerPC64 GNU/Linux little-endian	powerpc64le-*-linux*
@@ -104,6 +165,21 @@ PowerPC64 GNU/Linux little-endian	powerpc64le-*-linux*
 * The "dll-symbols" command, and its two aliases ("add-shared-symbol-files"
   and "assf"), have been deprecated.  Use the "sharedlibrary" command, or
   its alias "share", instead.
+
+* The commands "set remotebaud" and "show remotebaud" are no longer
+  supported.  Use "set serial baud" and "show serial baud" (respectively)
+  instead.
+
+* MI changes
+
+  ** A new option "-gdb-set mi-async" replaces "-gdb-set
+     target-async".  The latter is left as a deprecated alias of the
+     former for backward compatibility.  If the target supports it,
+     CLI background execution commands are now always possible by
+     default, independently of whether the frontend stated a
+     preference for asynchronous execution with "-gdb-set mi-async".
+     Previously "-gdb-set target-async off" affected both MI execution
+     commands and CLI execution commands.
 
 *** Changes in GDB 7.7
 
@@ -5694,3 +5770,8 @@ Host is the machine where GDB will run; targ is the machine
 where the program that you are debugging will run.
 
  *  GDB now supports access to Intel(R) MPX registers on GNU/Linux.
+
+ *  Support for Intel(R) AVX-512 registers on GNU/Linux.
+
+Support displaying and modifying Intel(R) AVX-512 registers $zmm0 - $zmm31 and
+$k0 - $k7 on GNU/Linux.

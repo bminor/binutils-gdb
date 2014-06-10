@@ -388,7 +388,7 @@ m32r_linux_supply_gregset (const struct regset *regset,
     }
 }
 
-static struct regset m32r_linux_gregset = {
+static const struct regset m32r_linux_gregset = {
   NULL, m32r_linux_supply_gregset
 };
 

@@ -23,7 +23,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SYM 		x86_64pe_vec
+#define TARGET_SYM 		x86_64_pe_vec
 #define TARGET_NAME 		"pe-x86-64"
 #define COFF_WITH_PE
 #define COFF_WITH_pex64
@@ -63,7 +63,7 @@
 /* Entry for big object files.  */
 
 const bfd_target
-x86_64pe_bigobj_vec =
+x86_64_pe_be_vec =
 {
   "pe-bigobj-x86-64",			/* Name.  */
   bfd_target_coff_flavour,

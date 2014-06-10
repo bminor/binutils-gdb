@@ -85,7 +85,7 @@ vax_supply_gregset (const struct regset *regset, struct regcache *regcache,
 
 /* VAX register set.  */
 
-static struct regset vax_gregset =
+static const struct regset vax_gregset =
 {
   NULL,
   vax_supply_gregset

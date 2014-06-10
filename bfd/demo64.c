@@ -24,7 +24,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) CONCAT2 (demo_64_,OP)
+#define MY(OP) CONCAT2 (aout64_,OP)
 
 #define TARGETNAME  "demo64"
 #include "aoutf1.h"

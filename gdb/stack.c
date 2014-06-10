@@ -166,12 +166,10 @@ print_stack_frame (struct frame_info *frame, int print_level,
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
     {
-      int center = (print_what == SRC_LINE || print_what == SRC_AND_LOC);
-
       print_frame_info (frame, print_level, print_what, 1 /* print_args */,
 			set_current_sal);
       if (set_current_sal)
-	set_current_sal_from_frame (frame, center);
+	set_current_sal_from_frame (frame);
     }
 }
 
@@ -716,17 +714,13 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
    line is in the center of the next 'list'.  */
 
 void
-set_current_sal_from_frame (struct frame_info *frame, int center)
+set_current_sal_from_frame (struct frame_info *frame)
 {
   struct symtab_and_line sal;
 
   find_frame_sal (frame, &sal);
-  if (sal.symtab)
-    {
-      if (center)
-        sal.line = max (sal.line - get_lines_to_list () / 2, 1);
-      set_current_source_symtab_and_line (&sal);
-    }
+  if (sal.symtab != NULL)
+    set_current_source_symtab_and_line (&sal);
 }
 
 /* If ON, GDB will display disassembly of the next source line when
@@ -835,6 +829,13 @@ print_frame_info (struct frame_info *frame, int print_level,
 	}
       ui_out_text (uiout, "\n");
       annotate_frame_end ();
+
+      /* If disassemble-next-line is set to auto or on output the next
+	 instruction.  */
+      if (disassemble_next_line == AUTO_BOOLEAN_AUTO
+	  || disassemble_next_line == AUTO_BOOLEAN_TRUE)
+	do_gdb_disassembly (get_frame_arch (frame), 1,
+			    get_frame_pc (frame), get_frame_pc (frame) + 1);
 
       do_cleanups (uiout_cleanup);
       return;
@@ -1528,7 +1529,7 @@ frame_info (char *addr_exp, int from_tty)
       reason = get_frame_unwind_stop_reason (fi);
       if (reason != UNWIND_NO_REASON)
 	printf_filtered (_(" Outermost frame: %s\n"),
-			 frame_stop_reason_string (reason));
+			 frame_stop_reason_string (fi));
     }
   else if (get_frame_type (fi) == TAILCALL_FRAME)
     puts_filtered (" tail call frame");
@@ -1847,7 +1848,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
 	  reason = get_frame_unwind_stop_reason (trailing);
 	  if (reason >= UNWIND_FIRST_ERROR)
 	    printf_filtered (_("Backtrace stopped: %s\n"),
-			     frame_stop_reason_string (reason));
+			     frame_stop_reason_string (trailing));
 	}
     }
 }

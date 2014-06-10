@@ -4021,7 +4021,7 @@ tilepro_additional_program_headers (bfd *abfd,
 #define ELF_MAXPAGESIZE		0x10000
 #define ELF_COMMONPAGESIZE	0x10000
 
-#define TARGET_LITTLE_SYM	bfd_elf32_tilepro_vec
+#define TARGET_LITTLE_SYM	tilepro_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-tilepro"
 
 #define elf_backend_reloc_type_class	     tilepro_reloc_type_class

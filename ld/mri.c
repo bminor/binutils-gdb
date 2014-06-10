@@ -44,6 +44,8 @@ struct section_name_struct {
 };
 
 static unsigned int symbol_truncate = 10000;
+static etree_type *base; /* Relocation base - or null */
+
 static struct section_name_struct *order;
 static struct section_name_struct *only_load;
 static struct section_name_struct *address;

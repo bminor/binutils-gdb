@@ -1458,6 +1458,62 @@ skip_past_char (char ** str, char c)
 }
 #define skip_past_comma(str) skip_past_char (str, ',')
 
+/* A list of attributes that have been explicitly set by the assembly code.
+   VENDOR is the vendor id, BASE is the tag shifted right by the number
+   of bits in MASK, and bit N of MASK is set if tag BASE+N has been set.  */
+struct recorded_attribute_info {
+  struct recorded_attribute_info *next;
+  int vendor;
+  unsigned int base;
+  unsigned long mask;
+};
+static struct recorded_attribute_info *recorded_attributes;
+
+/* Record that we have seen an explicit specification of attribute TAG
+   for vendor VENDOR.  */
+
+static void
+record_attribute (int vendor, unsigned int tag)
+{
+  unsigned int base;
+  unsigned long mask;
+  struct recorded_attribute_info *rai;
+
+  base = tag / (8 * sizeof (rai->mask));
+  mask = 1UL << (tag % (8 * sizeof (rai->mask)));
+  for (rai = recorded_attributes; rai; rai = rai->next)
+    if (rai->vendor == vendor && rai->base == base)
+      {
+	rai->mask |= mask;
+	return;
+      }
+
+  rai = XNEW (struct recorded_attribute_info);
+  rai->next = recorded_attributes;
+  rai->vendor = vendor;
+  rai->base = base;
+  rai->mask = mask;
+  recorded_attributes = rai;
+}
+
+/* Return true if we have seen an explicit specification of attribute TAG
+   for vendor VENDOR.  */
+
+bfd_boolean
+obj_elf_seen_attribute (int vendor, unsigned int tag)
+{
+  unsigned int base;
+  unsigned long mask;
+  struct recorded_attribute_info *rai;
+
+  base = tag / (8 * sizeof (rai->mask));
+  mask = 1UL << (tag % (8 * sizeof (rai->mask)));
+  for (rai = recorded_attributes; rai; rai = rai->next)
+    if (rai->vendor == vendor && rai->base == base)
+      return (rai->mask & mask) != 0;
+  return FALSE;
+}
+
 /* Parse an attribute directive for VENDOR.
    Returns the attribute number read, or zero on error.  */
 
@@ -1540,6 +1596,7 @@ obj_elf_vendor_attribute (int vendor)
       s = demand_copy_C_string (&len);
     }
 
+  record_attribute (vendor, tag);
   switch (type & 3)
     {
     case 3:

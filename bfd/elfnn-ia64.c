@@ -4936,8 +4936,8 @@ elfNN_ia64_object_p (bfd *abfd)
 static bfd_boolean
 elfNN_ia64_hpux_vec (const bfd_target *vec)
 {
-  extern const bfd_target bfd_elfNN_ia64_hpux_big_vec;
-  return (vec == & bfd_elfNN_ia64_hpux_big_vec);
+  extern const bfd_target ia64_elfNN_hpux_be_vec;
+  return (vec == &ia64_elfNN_hpux_be_vec);
 }
 
 static void
@@ -4978,9 +4978,9 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
     }
 }
 
-#define TARGET_LITTLE_SYM		bfd_elfNN_ia64_little_vec
+#define TARGET_LITTLE_SYM		ia64_elfNN_le_vec
 #define TARGET_LITTLE_NAME		"elfNN-ia64-little"
-#define TARGET_BIG_SYM			bfd_elfNN_ia64_big_vec
+#define TARGET_BIG_SYM			ia64_elfNN_be_vec
 #define TARGET_BIG_NAME			"elfNN-ia64-big"
 #define ELF_ARCH			bfd_arch_ia64
 #define ELF_TARGET_ID			IA64_ELF_DATA
@@ -5083,7 +5083,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #undef  TARGET_LITTLE_SYM
 #undef  TARGET_LITTLE_NAME
 #undef  TARGET_BIG_SYM
-#define TARGET_BIG_SYM                  bfd_elfNN_ia64_hpux_big_vec
+#define TARGET_BIG_SYM                  ia64_elfNN_hpux_be_vec
 #undef  TARGET_BIG_NAME
 #define TARGET_BIG_NAME                 "elfNN-ia64-hpux-big"
 

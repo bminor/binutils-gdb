@@ -549,16 +549,9 @@ proc gdb_continue_to_breakpoint {name {location_pattern .*}} {
     global gdb_prompt
     set full_name "continue to breakpoint: $name"
 
-    send_gdb "continue\n"
-    gdb_expect {
+    gdb_test_multiple "continue" $full_name {
 	-re "(?:Breakpoint|Temporary breakpoint) .* (at|in) $location_pattern\r\n$gdb_prompt $" {
 	    pass $full_name
-	}
-	-re ".*$gdb_prompt $" {
-	    fail $full_name
-	}
-	timeout { 
-	    fail "$full_name (timeout)"
 	}
     }
 }
@@ -2461,6 +2454,25 @@ proc skip_libstdcxx_probe_tests {} {
     return $ok
 }
 
+# Check whether we're testing with the remote or extended-remote
+# targets.
+
+proc gdb_is_target_remote {} {
+    global gdb_prompt
+
+    set test "probe for target remote"
+    gdb_test_multiple "maint print target-stack" $test {
+	-re ".*emote serial target in gdb-specific protocol.*$gdb_prompt $" {
+	    pass $test
+	    return 1
+	}
+	-re "$gdb_prompt $" {
+	    pass $test
+	}
+    }
+    return 0
+}
+
 set compiler_info		"unknown"
 set gcc_compiled		0
 set hp_cc_compiler		0
@@ -3479,11 +3491,14 @@ proc gdb_load_shlibs { args } {
 }
 
 #
-# gdb_load -- load a file into the debugger.
+# gdb_load -- load a file into the debugger.  Specifying no file
+# defaults to the executable currently being debugged.
 # Many files in config/*.exp override this procedure.
 #
 proc gdb_load { arg } {
-    return [gdb_file_cmd $arg]
+    if { $arg != "" } {
+	return [gdb_file_cmd $arg]
+    }
 }
 
 # gdb_reload -- load a file into the target.  Called before "running",
@@ -3504,17 +3519,18 @@ proc gdb_continue { function } {
     return [gdb_test "continue" ".*Breakpoint $decimal, $function .*" "continue to $function"]
 }
 
-proc default_gdb_init { args } {
+proc default_gdb_init { test_file_name } {
     global gdb_wrapper_initialized
     global gdb_wrapper_target
     global gdb_test_file_name
     global cleanfiles
+    global pf_prefix
     
     set cleanfiles {}
 
     gdb_clear_suppressed
 
-    set gdb_test_file_name [file rootname [file tail [lindex $args 0]]]
+    set gdb_test_file_name [file rootname [file tail $test_file_name]]
 
     # Make sure that the wrapper is rebuilt
     # with the appropriate multilib option.
@@ -3524,19 +3540,15 @@ proc default_gdb_init { args } {
     
     # Unlike most tests, we have a small number of tests that generate
     # a very large amount of output.  We therefore increase the expect
-    # buffer size to be able to contain the entire test output.
-    match_max -d 30000
+    # buffer size to be able to contain the entire test output.  This
+    # is especially needed by gdb.base/info-macros.exp.
+    match_max -d 65536
     # Also set this value for the currently running GDB. 
     match_max [match_max -d]
 
     # We want to add the name of the TCL testcase to the PASS/FAIL messages.
-    if { [llength $args] > 0 } {
-	global pf_prefix
+    set pf_prefix "[file tail [file dirname $test_file_name]]/[file tail $test_file_name]:"
 
-	set file [lindex $args 0]
-
-	set pf_prefix "[file tail [file dirname $file]]/[file tail $file]:"
-    }
     global gdb_prompt
     if [target_info exists gdb_prompt] {
 	set gdb_prompt [target_info gdb_prompt]
@@ -3672,13 +3684,18 @@ set banned_procedures { strace }
 # if the banned variables and procedures are already traced.
 set banned_traced 0
 
-proc gdb_init { args } {
+proc gdb_init { test_file_name } {
     # Reset the timeout value to the default.  This way, any testcase
     # that changes the timeout value without resetting it cannot affect
     # the timeout used in subsequent testcases.
     global gdb_test_timeout
     global timeout
     set timeout $gdb_test_timeout
+
+    if { [regexp ".*gdb\.reverse\/.*" $test_file_name]
+	 && [target_info exists gdb_reverse_timeout] } {
+	set timeout [target_info gdb_reverse_timeout]
+    }
 
     # If GDB_INOTIFY is given, check for writes to '.'.  This is a
     # debugging tool to help confirm that the test suite is
@@ -3751,7 +3768,7 @@ proc gdb_init { args } {
     set gdbserver_reconnect_p 1
     unset gdbserver_reconnect_p
 
-    return [eval default_gdb_init $args]
+    return [default_gdb_init $test_file_name]
 }
 
 proc gdb_finish { } {
@@ -4691,6 +4708,83 @@ proc run_on_host { test program args } {
 proc using_fission { } {
     set debug_flags [board_info [target_info name] debug_flags]
     return [regexp -- "-gsplit-dwarf" $debug_flags]
+}
+
+# Search the caller's ARGS list and set variables according to the list of
+# valid options described by ARGSET.
+#
+# The first member of each one- or two-element list in ARGSET defines the
+# name of a variable that will be added to the caller's scope.
+#
+# If only one element is given to describe an option, it the value is
+# 0 if the option is not present in (the caller's) ARGS or 1 if
+# it is.
+#
+# If two elements are given, the second element is the default value of
+# the variable.  This is then overwritten if the option exists in ARGS.
+#
+# Any parse_args elements in (the caller's) ARGS will be removed, leaving
+# any optional components.
+
+# Example:
+# proc myproc {foo args} {
+#  parse_args {{bar} {baz "abc"} {qux}}
+#    # ...
+# }
+# myproc ABC -bar -baz DEF peanut butter
+# will define the following variables in myproc:
+# foo (=ABC), bar (=1), baz (=DEF), and qux (=0)
+# args will be the list {peanut butter}
+
+proc parse_args { argset } {
+    upvar args args
+
+    foreach argument $argset {
+        if {[llength $argument] == 1} {
+            # No default specified, so we assume that we should set
+            # the value to 1 if the arg is present and 0 if it's not.
+            # It is assumed that no value is given with the argument.
+            set result [lsearch -exact $args "-$argument"]
+            if {$result != -1} then {
+                uplevel 1 [list set $argument 1]
+                set args [lreplace $args $result $result]
+            } else {
+                uplevel 1 [list set $argument 0]
+            }
+        } elseif {[llength $argument] == 2} {
+            # There are two items in the argument.  The second is a
+            # default value to use if the item is not present.
+            # Otherwise, the variable is set to whatever is provided
+            # after the item in the args.
+            set arg [lindex $argument 0]
+            set result [lsearch -exact $args "-[lindex $arg 0]"]
+            if {$result != -1} then {
+                uplevel 1 [list set $arg [lindex $args [expr $result+1]]]
+                set args [lreplace $args $result [expr $result+1]]
+            } else {
+                uplevel 1 [list set $arg [lindex $argument 1]]
+            }
+        } else {
+            error "Badly formatted argument \"$argument\" in argument set"
+        }
+    }
+
+    # The remaining args should be checked to see that they match the
+    # number of items expected to be passed into the procedure...
+}
+
+# Capture the output of COMMAND in a string ignoring PREFIX; return that string.
+proc capture_command_output { command prefix } {
+    global gdb_prompt
+    global expect_out
+
+    set output_string ""
+    gdb_test_multiple "$command" "capture_command_output for $command" {
+	-re "${command}\[\r\n\]+${prefix}(.*)\[\r\n\]+$gdb_prompt $" {
+	    set output_string $expect_out(1,string)
+	}
+    }
+    return $output_string
 }
 
 # Always load compatibility stuff.

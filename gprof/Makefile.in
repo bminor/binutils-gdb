@@ -325,7 +325,9 @@ EXTRA_DIST = $(BUILT_SOURCES) bbconv.pl $(man_MANS)
 
 # We extract version from bfd/configure.in, make sure to rerun configure
 # when BFD's version changes.
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in \
+	$(BFDDIR)/development.sh
+
 POTFILES = $(sources) $(noinst_HEADERS)
 MANCONF = -Dman
 TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl $(AM_MAKEINFOFLAGS)

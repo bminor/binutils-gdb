@@ -288,6 +288,7 @@ SUBDIR_GUILE_OBS = \
 	scm-auto-load.o \
 	scm-block.o \
 	scm-breakpoint.o \
+	scm-cmd.o \
 	scm-disasm.o \
 	scm-exception.o \
 	scm-frame.o \
@@ -296,8 +297,10 @@ SUBDIR_GUILE_OBS = \
 	scm-lazy-string.o \
 	scm-objfile.o \
 	scm-math.o \
+	scm-param.o \
 	scm-ports.o \
 	scm-pretty-print.o \
+	scm-progspace.o \
 	scm-safe-call.o \
 	scm-string.o \
 	scm-symbol.o \
@@ -311,6 +314,7 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-auto-load.c \
 	guile/scm-block.c \
 	guile/scm-breakpoint.c \
+	guile/scm-cmd.c \
 	guile/scm-disasm.c \
 	guile/scm-exception.c \
 	guile/scm-frame.c \
@@ -319,8 +323,10 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-lazy-string.c \
 	guile/scm-objfile.c \
 	guile/scm-math.c \
+	guile/scm-param.c \
 	guile/scm-ports.c \
 	guile/scm-pretty-print.c \
+	guile/scm-progspace.c \
 	guile/scm-safe-call.c \
 	guile/scm-string.c \
 	guile/scm-symbol.c \
@@ -344,6 +350,7 @@ SUBDIR_PYTHON_OBS = \
 	py-breakpoint.o \
 	py-cmd.o \
 	py-continueevent.o \
+	py-xmethods.o \
 	py-event.o \
 	py-evtregistry.o \
 	py-evts.o \
@@ -380,6 +387,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-breakpoint.c \
 	python/py-cmd.c \
 	python/py-continueevent.c \
+	python/py-xmethods.c \
 	python/py-event.c \
 	python/py-evtregistry.c \
 	python/py-evts.c \
@@ -836,7 +844,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	jit.c \
 	xml-syscall.c \
 	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
-	regset.c sol-thread.c windows-termcap.c \
+	sol-thread.c windows-termcap.c \
 	common/gdb_vecs.c common/common-utils.c common/xml-utils.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
@@ -1011,7 +1019,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	gnu-v2-abi.o gnu-v3-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
 	d-support.o \
-	reggroups.o regset.o \
+	reggroups.o \
 	trad-frame.o \
 	tramp-frame.o \
 	solib.o solib-target.o \
@@ -1468,7 +1476,7 @@ stamp-h: $(srcdir)/config.in config.status
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
-config.status: $(srcdir)/configure configure.tgt configure.host development.sh
+config.status: $(srcdir)/configure configure.tgt configure.host ../bfd/development.sh
 	$(SHELL) config.status --recheck
 
 ACLOCAL = aclocal
@@ -2270,6 +2278,10 @@ scm-breakpoint.o: $(srcdir)/guile/scm-breakpoint.c
 	$(COMPILE) $(srcdir)/guile/scm-breakpoint.c
 	$(POSTCOMPILE)
 
+scm-cmd.o: $(srcdir)/guile/scm-cmd.c
+	$(COMPILE) $(srcdir)/guile/scm-cmd.c
+	$(POSTCOMPILE)
+
 scm-disasm.o: $(srcdir)/guile/scm-disasm.c
 	$(COMPILE) $(srcdir)/guile/scm-disasm.c
 	$(POSTCOMPILE)
@@ -2302,12 +2314,20 @@ scm-objfile.o: $(srcdir)/guile/scm-objfile.c
 	$(COMPILE) $(srcdir)/guile/scm-objfile.c
 	$(POSTCOMPILE)
 
+scm-param.o: $(srcdir)/guile/scm-param.c
+	$(COMPILE) $(srcdir)/guile/scm-param.c
+	$(POSTCOMPILE)
+
 scm-ports.o: $(srcdir)/guile/scm-ports.c
 	$(COMPILE) $(srcdir)/guile/scm-ports.c
 	$(POSTCOMPILE)
 
 scm-pretty-print.o: $(srcdir)/guile/scm-pretty-print.c
 	$(COMPILE) $(srcdir)/guile/scm-pretty-print.c
+	$(POSTCOMPILE)
+
+scm-progspace.o: $(srcdir)/guile/scm-progspace.c
+	$(COMPILE) $(srcdir)/guile/scm-progspace.c
 	$(POSTCOMPILE)
 
 scm-safe-call.o: $(srcdir)/guile/scm-safe-call.c
@@ -2376,6 +2396,10 @@ py-cmd.o: $(srcdir)/python/py-cmd.c
 
 py-continueevent.o: $(srcdir)/python/py-continueevent.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-continueevent.c
+	$(POSTCOMPILE)
+
+py-xmethods.o: $(srcdir)/python/py-xmethods.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-xmethods.c
 	$(POSTCOMPILE)
 
 py-event.o: $(srcdir)/python/py-event.c

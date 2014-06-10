@@ -1,3 +1,341 @@
+2014-06-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* development.sh: Delete.
+	* Makefile.in (config.status): Adjust dependency on development.sh.
+	* configure.ac: Adjust development.sh source call.
+	* configure: Regenerate.
+
+2014-06-02  Pedro Alves  <palves@redhat.com>
+
+	* ax.c (gdb_free_agent_expr): New function.
+	* ax.h (gdb_free_agent_expr): New declaration.
+	* mem-break.c (delete_gdb_breakpoint_1): Also clear the commands
+	list.
+	(clear_breakpoint_conditions, clear_breakpoint_commands): Make
+	static.
+	(clear_breakpoint_conditions_and_commands): New function.
+	* mem-break.h (clear_breakpoint_conditions): Delete declaration.
+	(clear_breakpoint_conditions_and_commands): New declaration.
+
+2014-05-23  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* linux-aarch64-low.c (asm/ptrace.h): Include.
+
+2014-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix TLS access for -static -pthread.
+	* gdbserver/thread-db.c (struct thread_db): Add td_thr_tlsbase_p.
+	(thread_db_get_tls_address): Call it if LOAD_MODULE is zero.
+	(thread_db_load_search, try_thread_db_load_1): Initialize it.
+
+2014-05-20  Pedro Alves  <palves@redhat.com>
+
+	* linux-aarch64-low.c (aarch64_insert_point)
+	(aarch64_remove_point): No longer check whether the type is
+	supported here.  Adjust to new interface.
+	(the_low_target): Install aarch64_supports_z_point_type as
+	supports_z_point_type method.
+	* linux-arm-low.c (raw_bkpt_type_to_arm_hwbp_type): New function.
+	(arm_linux_hw_point_initialize): Take an enum raw_bkpt_type
+	instead of a Z packet char.  Adjust.
+	(arm_supports_z_point_type): New function.
+	(arm_insert_point, arm_remove_point): Adjust to new interface.
+	(the_low_target): Install arm_supports_z_point_type.
+	* linux-crisv32-low.c (cris_supports_z_point_type): New function.
+	(cris_insert_point, cris_remove_point): Adjust to new interface.
+	Don't check whether the type is supported here.
+	(the_low_target): Install cris_supports_z_point_type.
+	* linux-low.c (linux_supports_z_point_type): New function.
+	(linux_insert_point, linux_remove_point): Adjust to new interface.
+	* linux-low.h (struct linux_target_ops) <insert_point,
+	remove_point>: Take an enum raw_bkpt_type instead of a char.  Add
+	raw_breakpoint pointer parameter.
+	<supports_z_point_type>: New method.
+	* linux-mips-low.c (mips_supports_z_point_type): New function.
+	(mips_insert_point, mips_remove_point): Adjust to new interface.
+	Use mips_supports_z_point_type.
+	(the_low_target): Install mips_supports_z_point_type.
+	* linux-ppc-low.c (the_low_target): Install NULL as
+	supports_z_point_type method.
+	* linux-s390-low.c (the_low_target): Install NULL as
+	supports_z_point_type method.
+	* linux-sparc-low.c (the_low_target): Install NULL as
+	supports_z_point_type method.
+	* linux-x86-low.c (x86_supports_z_point_type): New function.
+	(x86_insert_point): Adjust to new insert_point interface.  Use
+	insert_memory_breakpoint.  Adjust to new
+	i386_low_insert_watchpoint interface.
+	(x86_remove_point): Adjust to remove_point interface.  Use
+	remove_memory_breakpoint.  Adjust to new
+	i386_low_remove_watchpoint interface.
+	(the_low_target): Install x86_supports_z_point_type.
+	* lynx-low.c (lynx_target_ops): Install NULL as
+	supports_z_point_type callback.
+	* nto-low.c (nto_supports_z_point_type): New.
+	(nto_insert_point, nto_remove_point): Adjust to new interface.
+	(nto_target_ops): Install nto_supports_z_point_type.
+	* mem-break.c: Adjust intro comment.
+	(struct raw_breakpoint) <raw_type, size>: New fields.
+	<inserted>: Update comment.
+	<shlib_disabled>: Delete field.
+	(enum bkpt_type) <gdb_breakpoint>: Delete value.
+	<gdb_breakpoint_Z0, gdb_breakpoint_Z1, gdb_breakpoint_Z2,
+	gdb_breakpoint_Z3, gdb_breakpoint_Z4>: New values.
+	(raw_bkpt_type_to_target_hw_bp_type): New function.
+	(find_enabled_raw_code_breakpoint_at): New function.
+	(find_raw_breakpoint_at): New type and size parameters.  Use them.
+	(insert_memory_breakpoint): New function, based off
+	set_raw_breakpoint_at.
+	(remove_memory_breakpoint): New function.
+	(set_raw_breakpoint_at): Reimplement.
+	(set_breakpoint): New, based on set_breakpoint_at.
+	(set_breakpoint_at): Reimplement.
+	(delete_raw_breakpoint): Go through the_target->remove_point
+	instead of assuming memory breakpoints.
+	(find_gdb_breakpoint_at): Delete.
+	(Z_packet_to_bkpt_type, Z_packet_to_raw_bkpt_type): New functions.
+	(find_gdb_breakpoint): New function.
+	(set_gdb_breakpoint_at): Delete.
+	(z_type_supported): New function.
+	(set_gdb_breakpoint_1): New function, loosely based off
+	set_gdb_breakpoint_at.
+	(check_gdb_bp_preconditions, set_gdb_breakpoint): New functions.
+	(delete_gdb_breakpoint_at): Delete.
+	(delete_gdb_breakpoint_1): New function, loosely based off
+	delete_gdb_breakpoint_at.
+	(delete_gdb_breakpoint): New function.
+	(clear_gdb_breakpoint_conditions): Rename to ...
+	(clear_breakpoint_conditions): ... this.  Don't handle a NULL
+	breakpoint.
+	(add_condition_to_breakpoint): Make static.
+	(add_breakpoint_condition): Take a struct breakpoint pointer
+	instead of an address.  Adjust.
+	(gdb_condition_true_at_breakpoint): Rename to ...
+	(gdb_condition_true_at_breakpoint_z_type): ... this, and add
+	z_type parameter.
+	(gdb_condition_true_at_breakpoint): Reimplement.
+	(add_breakpoint_commands): Take a struct breakpoint pointer
+	instead of an address.  Adjust.
+	(gdb_no_commands_at_breakpoint): Rename to ...
+	(gdb_no_commands_at_breakpoint_z_type): ... this.  Add z_type
+	parameter.  Return true if no breakpoint was found.  Change debug
+	output.
+	(gdb_no_commands_at_breakpoint): Reimplement.
+	(run_breakpoint_commands): Rename to ...
+	(run_breakpoint_commands_z_type): ... this.  Add z_type parameter,
+	and change return type to boolean.
+	(run_breakpoint_commands): New function.
+	(gdb_breakpoint_here): Also check for Z1 breakpoints.
+	(uninsert_raw_breakpoint): Don't try to reinsert a disabled
+	breakpoint.  Go through the_target->remove_point instead of
+	assuming memory breakpoint.
+	(uninsert_breakpoints_at, uninsert_all_breakpoints): Uninsert
+	software and hardware breakpoints.
+	(reinsert_raw_breakpoint): Go through the_target->insert_point
+	instead of assuming memory breakpoint.
+	(reinsert_breakpoints_at, reinsert_all_breakpoints): Reinsert
+	software and hardware breakpoints.
+	(check_breakpoints, breakpoint_here, breakpoint_inserted_here):
+	Check both software and hardware breakpoints.
+	(validate_inserted_breakpoint): Assert the breakpoint is a
+	software breakpoint.  Set the inserted flag to -1 instead of
+	setting shlib_disabled.
+	(delete_disabled_breakpoints): Adjust.
+	(validate_breakpoints): Only validate software breakpoints.
+	Adjust to inserted flag change.
+	(check_mem_read, check_mem_write): Skip breakpoint types other
+	than software breakpoints.  Adjust to inserted flag change.
+	* mem-break.h (enum raw_bkpt_type): New enum.
+	(raw_breakpoint, struct process_info): Forward declare.
+	(Z_packet_to_target_hw_bp_type): Delete declaration.
+	(raw_bkpt_type_to_target_hw_bp_type, Z_packet_to_raw_bkpt_type)
+	(set_gdb_breakpoint, delete_gdb_breakpoint)
+	(clear_breakpoint_conditions): New declarations.
+	(set_gdb_breakpoint_at, clear_gdb_breakpoint_conditions): Delete.
+	(breakpoint_inserted_here): Update comment.
+	(add_breakpoint_condition, add_breakpoint_commands): Replace
+	address parameter with a breakpoint pointer parameter.
+	(gdb_breakpoint_here): Update comment.
+	(delete_gdb_breakpoint_at): Delete.
+	(insert_memory_breakpoint, remove_memory_breakpoint): Declare.
+	* server.c (process_point_options): Take a struct breakpoint
+	pointer instead of an address.  Adjust.
+	(process_serial_event) <Z/z packets>: Use set_gdb_breakpoint and
+	delete_gdb_breakpoint.
+	* spu-low.c (spu_target_ops): Install NULL as
+	supports_z_point_type method.
+	* target.h: Include mem-break.h.
+	(struct target_ops) <prepare_to_access_memory>: Update comment.
+	<supports_z_point_type>: New field.
+	<insert_point, remove_point>: Take an enum raw_bkpt_type argument
+	instead of a char.  Also take a raw breakpoint pointer.
+	* win32-arm-low.c (the_low_target): Install NULL as
+	supports_z_point_type.
+	* win32-i386-low.c (i386_supports_z_point_type): New function.
+	(i386_insert_point, i386_remove_point): Adjust to new interface.
+	(the_low_target): Install i386_supports_z_point_type.
+	* win32-low.c (win32_supports_z_point_type): New function.
+	(win32_insert_point, win32_remove_point): Adjust to new interface.
+	(win32_target_ops): Install win32_supports_z_point_type.
+	* win32-low.h (struct win32_target_ops):
+	<supports_z_point_type>: New method.
+	<insert_point, remove_point>: Take an enum raw_bkpt_type argument
+	instead of a char.  Also take a raw breakpoint pointer.
+
+2014-05-20  Pedro Alves  <palves@redhat.com>
+
+	* mem-break.h: Include break-common.h.
+	(Z_PACKET_SW_BP, Z_PACKET_HW_BP, Z_PACKET_WRITE_WP)
+	(Z_PACKET_READ_WP, Z_PACKET_ACCESS_WP): New defines.
+	(Z_packet_to_target_hw_bp_type): New declaration.
+	* mem-break.c (Z_packet_to_target_hw_bp_type): New function.
+	* i386-low.c (Z_PACKET_HW_BP, Z_PACKET_WRITE_WP, Z_PACKET_READ_WP)
+	(Z_PACKET_ACCESS_WP): Delete macros.
+	(Z_packet_to_hw_type): Delete function.
+	* i386-low.h: Don't include break-common.h here.
+	(Z_packet_to_hw_type): Delete declaration.
+	* linux-x86-low.c (x86_insert_point, x86_insert_point): Call
+	Z_packet_to_target_hw_bp_type instead of Z_packet_to_hw_type.
+	* win32-i386-low.c (i386_insert_point, i386_remove_point): Call
+	Z_packet_to_target_hw_bp_type instead of Z_packet_to_hw_type.
+	* linux-aarch64-low.c: Don't include break-common.h here.
+	(Z_PACKET_SW_BP, Z_PACKET_HW_BP, Z_PACKET_WRITE_WP)
+	(Z_PACKET_READ_WP, Z_PACKET_ACCESS_WP): Delete macros.
+	(Z_packet_to_target_hw_bp_type): Delete function.
+	* linux-mips-low.c (rsp_bp_type_to_target_hw_bp_type): Delete
+	function.
+	(mips_insert_point, mips_remove_point): Use
+	Z_packet_to_target_hw_bp_type.
+
+2014-05-20  Pedro Alves  <palves@redhat.com>
+
+	* linux-aarch64-low.c: Include break-common.h.
+	(enum target_point_type): Delete.
+	(Z_packet_to_point_type): Rename to ...
+	(Z_packet_to_target_hw_bp_type): ... this, and return a
+	target_hw_bp_type instead.
+	(aarch64_show_debug_reg_state): Take an enum target_hw_bp_type
+	instead of an enum target_point_type.
+	(aarch64_point_encode_ctrl_reg): Likewise.  Compute type mask from
+	breakpoint type.
+	(aarch64_dr_state_insert_one_point)
+	(aarch64_dr_state_remove_one_point, aarch64_handle_breakpoint)
+	(aarch64_handle_aligned_watchpoint)
+	(aarch64_handle_unaligned_watchpoint, aarch64_handle_watchpoint):
+	Take an enum target_hw_bp_type instead of an enum
+	target_point_type.
+	(aarch64_supports_z_point_type): New function.
+	(aarch64_insert_point, aarch64_remove_point): Use it.  Adjust to
+	use Z_packet_to_target_hw_bp_type.
+
+2014-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Only use -Werror by default when DEVELOPMENT
+	is true.
+	* configure: Regenerate.
+
+2014-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix gdbserver qGetTLSAddr for x86_64 -m32.
+	* linux-x86-low.c (X86_64_USER_REGS): New.
+	(x86_fill_gregset): Call memset for BUF first in x86_64 -m32 case.
+
+2014-04-28  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (i386-avx512.c): Fix the typo of generated file
+	name.
+
+2014-04-25  Pedro Alves  <palves@redhat.com>
+
+	PR server/16255
+	* linux-low.c (linux_attach_fail_reason_string): New function.
+	(linux_attach_lwp): Delete.
+	(linux_attach_lwp_1): Rename to ...
+	(linux_attach_lwp): ... this.  Take a ptid instead of a pid as
+	argument.  Remove "initial" parameter.  Return int instead of
+	void.  Don't error or warn here.
+	(linux_attach): Adjust to call linux_attach_lwp.  Call error on
+	failure to attach to the tgid.  Call warning when failing to
+	attach to an lwp.
+	* linux-low.h (linux_attach_lwp): Take a ptid instead of a pid as
+	argument.  Remove "initial" parameter.  Return int instead of
+	void.  Don't error or warn here.
+	(linux_attach_fail_reason_string): New declaration.
+	* thread-db.c (attach_thread): Adjust to linux_attach_lwp's
+	interface change.  Use linux_attach_fail_reason_string.
+
+2014-04-24  Michael Sturm  <michael.sturm@mintel.com>
+	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* Makefile.in: Added rules to handle new files
+	i386-avx512.c i386-avx512-linux.c amd64-avx512.c
+	amd64-avx512-linux.c x32-avx512.c x32-avx512-linux.c.
+	* configure.srv (srv_i386_regobj): Add i386-avx512.o.
+	(srv_i386_linux_regobj): Add i386-avx512-linux.o.
+	(srv_amd64_regobj): Add amd64-avx512.o and x32-avx512.o.
+	(srv_amd64_linux_regobj): Add amd64-avx512-linux.o and
+	x32-avx512-linux.o.
+	(srv_i386_32bit_xmlfiles): Add i386/32bit-avx512.xml.
+	(srv_i386_64bit_xmlfiles): Add i386/64bit-avx512.xml.
+	(srv_amd64_xmlfiles): Add i386/amd64-avx512.xml and
+	i386/x32-avx512.xml.
+	(srv_i386_linux_xmlfiles): Add i386/i386-avx512-linux.xml.
+	(srv_amd64_linux_xmlfiles): Add i386/amd64-avx512-linux.xml and
+	i386/x32-avx512-linux.xml.
+	* i387-fp.c (num_avx512_k_registers): New constant for number
+	of K registers.
+	(num_avx512_zmmh_low_registers): New constant for number of
+	lower ZMM registers (0-15).
+	(num_avx512_zmmh_high_registers): New constant for number of
+	higher ZMM registers (16-31).
+	(num_avx512_ymmh_registers): New contant for number of higher
+	YMM registers (ymm16-31 added by avx521 on x86_64).
+	(num_avx512_xmm_registers): New constant for number of higher
+	XMM registers (xmm16-31 added by AVX512 on x86_64).
+	(struct i387_xsave): Add space for AVX512 registers.
+	(i387_cache_to_xsave): Change raw buffer size to 64 characters.
+	Add code to handle AVX512 registers.
+	(i387_xsave_to_cache): Add code to handle AVX512 registers.
+	* linux-x86-low.c (init_registers_amd64_avx512_linux): New
+	prototypei from generated file.
+	(tdesc_amd64_avx512_linux): Likewise.
+	(init_registers_x32_avx512_linux): Likewise.
+	(tdesc_x32_avx512_linux): Likewise.
+	(init_registers_i386_avx512_linux): Likewise.
+	(tdesc_i386_avx512_linux): Likewise.
+	(x86_64_regmap): Add AVX512 registers.
+	(x86_linux_read_description): Add code to handle AVX512 XSTATE
+	mask.
+	(initialize_low_arch): Add code to initialize AVX512 registers.
+
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
+	* mem-break.c (find_gdb_breakpoint_at): Make static.
+	* mem-break.h (find_gdb_breakpoint_at): Delete declaration.
+
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
+	* i386-low.c: Don't include break-common.h here.
+	(i386_low_insert_watchpoint, i386_low_remove_watchpoint): Change
+	prototype to take target_hw_bp_type as argument instead of a Z
+	packet char.
+	* i386-low.h: Include break-common.h here.
+	(Z_packet_to_hw_type): Declare.
+	(i386_low_insert_watchpoint, i386_low_remove_watchpoint): Change
+	prototypes.
+	* linux-x86-low.c (x86_insert_point): Convert the packet number to
+	a target_hw_bp_type before calling i386_low_insert_watchpoint.
+	(x86_remove_point): Convert the packet number to a
+	target_hw_bp_type before calling i386_low_remove_watchpoint.
+	* win32-i386-low.c (i386_insert_point): Convert the packet number
+	to a target_hw_bp_type before calling i386_low_insert_watchpoint.
+	(i386_remove_point): Convert the packet number to a
+	target_hw_bp_type before calling i386_low_remove_watchpoint.
+
+2014-04-23  Pedro Alves  <palves@redhat.com>
+
+	* utils.h (perror_with_name): Add ATTRIBUTE_NORETURN.
+
 2014-04-10  Pedro Alves  <palves@redhat.com>
 
 	* mem-break.c (add_breakpoint_condition, add_breakpoint_commands):

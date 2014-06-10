@@ -585,7 +585,7 @@ epiphany_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 }
 
 /* We only have a little-endian target.  */
-#define TARGET_LITTLE_SYM	 bfd_elf32_epiphany_vec
+#define TARGET_LITTLE_SYM	 epiphany_elf32_vec
 #define TARGET_LITTLE_NAME  "elf32-epiphany"
 
 #define ELF_ARCH	 bfd_arch_epiphany

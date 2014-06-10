@@ -945,6 +945,13 @@ delegate_thread_architecture (struct target_ops *self, ptid_t arg1)
   return self->to_thread_architecture (self, arg1);
 }
 
+static struct address_space *
+delegate_thread_address_space (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  return self->to_thread_address_space (self, arg1);
+}
+
 static void
 delegate_trace_init (struct target_ops *self)
 {
@@ -1246,12 +1253,6 @@ delegate_verify_memory (struct target_ops *self, const gdb_byte *arg1, CORE_ADDR
 {
   self = self->beneath;
   return self->to_verify_memory (self, arg1, arg2, arg3);
-}
-
-static int
-tdefault_verify_memory (struct target_ops *self, const gdb_byte *arg1, CORE_ADDR arg2, ULONGEST arg3)
-{
-  tcomplain ();
 }
 
 static int
@@ -1788,6 +1789,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_run_breakpoint_commands = delegate_can_run_breakpoint_commands;
   if (ops->to_thread_architecture == NULL)
     ops->to_thread_architecture = delegate_thread_architecture;
+  if (ops->to_thread_address_space == NULL)
+    ops->to_thread_address_space = delegate_thread_address_space;
   if (ops->to_trace_init == NULL)
     ops->to_trace_init = delegate_trace_init;
   if (ops->to_download_tracepoint == NULL)
@@ -1980,6 +1983,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_supports_evaluation_of_breakpoint_conditions = tdefault_supports_evaluation_of_breakpoint_conditions;
   ops->to_can_run_breakpoint_commands = tdefault_can_run_breakpoint_commands;
   ops->to_thread_architecture = default_thread_architecture;
+  ops->to_thread_address_space = default_thread_address_space;
   ops->to_trace_init = tdefault_trace_init;
   ops->to_download_tracepoint = tdefault_download_tracepoint;
   ops->to_can_download_tracepoint = tdefault_can_download_tracepoint;
@@ -2003,7 +2007,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_set_trace_buffer_size = tdefault_set_trace_buffer_size;
   ops->to_set_trace_notes = tdefault_set_trace_notes;
   ops->to_core_of_thread = tdefault_core_of_thread;
-  ops->to_verify_memory = tdefault_verify_memory;
+  ops->to_verify_memory = default_verify_memory;
   ops->to_get_tib_address = tdefault_get_tib_address;
   ops->to_set_permissions = tdefault_set_permissions;
   ops->to_static_tracepoint_marker_at = tdefault_static_tracepoint_marker_at;

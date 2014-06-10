@@ -22,7 +22,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SYM	i386lynx_coff_vec
+#define TARGET_SYM	i386_coff_lynx_vec
 #define TARGET_NAME	"coff-i386-lynx"
 
 #define LYNXOS

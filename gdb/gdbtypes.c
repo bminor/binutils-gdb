@@ -1623,66 +1623,52 @@ is_dynamic_type (struct type *type)
 
   switch (TYPE_CODE (type))
     {
+    case TYPE_CODE_RANGE:
+      return !has_static_range (TYPE_RANGE_DATA (type));
+
     case TYPE_CODE_ARRAY:
       {
-	const struct type *range_type;
-
 	gdb_assert (TYPE_NFIELDS (type) == 1);
-	range_type = TYPE_INDEX_TYPE (type);
-	if (!has_static_range (TYPE_RANGE_DATA (range_type)))
+
+	/* The array is dynamic if either the bounds are dynamic,
+	   or the elements it contains have a dynamic contents.  */
+	if (is_dynamic_type (TYPE_INDEX_TYPE (type)))
 	  return 1;
-	else
-	  return is_dynamic_type (TYPE_TARGET_TYPE (type));
-	break;
+	return is_dynamic_type (TYPE_TARGET_TYPE (type));
       }
-    default:
-      return 0;
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      {
+	int i;
+
+	for (i = 0; i < TYPE_NFIELDS (type); ++i)
+	  if (!field_is_static (&TYPE_FIELD (type, i))
+	      && is_dynamic_type (TYPE_FIELD_TYPE (type, i)))
+	    return 1;
+      }
       break;
     }
+
+  return 0;
 }
 
-/* Resolves dynamic bound values of an array type TYPE to static ones.
-   ADDRESS might be needed to resolve the subrange bounds, it is the location
-   of the associated array.  */
+/* Given a dynamic range type (dyn_range_type), return a static version
+   of that type.  */
 
 static struct type *
-resolve_dynamic_bounds (struct type *type, CORE_ADDR addr)
+resolve_dynamic_range (struct type *dyn_range_type)
 {
   CORE_ADDR value;
-  struct type *elt_type;
-  struct type *range_type;
-  struct type *ary_dim;
+  struct type *static_range_type;
   const struct dynamic_prop *prop;
   const struct dwarf2_locexpr_baton *baton;
   struct dynamic_prop low_bound, high_bound;
 
-  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
-    {
-      struct type *copy = copy_type (type);
+  gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
 
-      TYPE_TARGET_TYPE (copy)
-	= resolve_dynamic_bounds (TYPE_TARGET_TYPE (type), addr);
-
-      return copy;
-    }
-
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
-    {
-      struct type *copy = copy_type (type);
-      CORE_ADDR target_addr = read_memory_typed_address (addr, type);
-
-      TYPE_TARGET_TYPE (copy)
-	= resolve_dynamic_bounds (TYPE_TARGET_TYPE (type), target_addr);
-      return copy;
-    }
-
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
-
-  elt_type = type;
-  range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
-
-  prop = &TYPE_RANGE_DATA (range_type)->low;
-  if (dwarf2_evaluate_property (prop, addr, &value))
+  prop = &TYPE_RANGE_DATA (dyn_range_type)->low;
+  if (dwarf2_evaluate_property (prop, &value))
     {
       low_bound.kind = PROP_CONST;
       low_bound.data.const_val = value;
@@ -1693,13 +1679,13 @@ resolve_dynamic_bounds (struct type *type, CORE_ADDR addr)
       low_bound.data.const_val = 0;
     }
 
-  prop = &TYPE_RANGE_DATA (range_type)->high;
-  if (dwarf2_evaluate_property (prop, addr, &value))
+  prop = &TYPE_RANGE_DATA (dyn_range_type)->high;
+  if (dwarf2_evaluate_property (prop, &value))
     {
       high_bound.kind = PROP_CONST;
       high_bound.data.const_val = value;
 
-      if (TYPE_RANGE_DATA (range_type)->flag_upper_bound_is_count)
+      if (TYPE_RANGE_DATA (dyn_range_type)->flag_upper_bound_is_count)
 	high_bound.data.const_val
 	  = low_bound.data.const_val + high_bound.data.const_val - 1;
     }
@@ -1709,20 +1695,132 @@ resolve_dynamic_bounds (struct type *type, CORE_ADDR addr)
       high_bound.data.const_val = 0;
     }
 
+  static_range_type = create_range_type (copy_type (dyn_range_type),
+					 TYPE_TARGET_TYPE (dyn_range_type),
+					 &low_bound, &high_bound);
+  TYPE_RANGE_DATA (static_range_type)->flag_bound_evaluated = 1;
+  return static_range_type;
+}
+
+/* Resolves dynamic bound values of an array type TYPE to static ones.
+   ADDRESS might be needed to resolve the subrange bounds, it is the location
+   of the associated array.  */
+
+static struct type *
+resolve_dynamic_array (struct type *type)
+{
+  CORE_ADDR value;
+  struct type *elt_type;
+  struct type *range_type;
+  struct type *ary_dim;
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
+
+  elt_type = type;
+  range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
+  range_type = resolve_dynamic_range (range_type);
+
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
   if (ary_dim != NULL && TYPE_CODE (ary_dim) == TYPE_CODE_ARRAY)
-    elt_type = resolve_dynamic_bounds (TYPE_TARGET_TYPE (type), addr);
+    elt_type = resolve_dynamic_array (TYPE_TARGET_TYPE (type));
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
-  range_type = create_range_type (NULL,
-				  TYPE_TARGET_TYPE (range_type),
-				  &low_bound, &high_bound);
-  TYPE_RANGE_DATA (range_type)->flag_bound_evaluated = 1;
   return create_array_type (copy_type (type),
 			    elt_type,
 			    range_type);
+}
+
+/* Resolve dynamic bounds of members of the union TYPE to static
+   bounds.  */
+
+static struct type *
+resolve_dynamic_union (struct type *type, CORE_ADDR addr)
+{
+  struct type *resolved_type;
+  int i;
+  unsigned int max_len = 0;
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+
+  resolved_type = copy_type (type);
+  TYPE_FIELDS (resolved_type)
+    = TYPE_ALLOC (resolved_type,
+		  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+  memcpy (TYPE_FIELDS (resolved_type),
+	  TYPE_FIELDS (type),
+	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+  for (i = 0; i < TYPE_NFIELDS (resolved_type); ++i)
+    {
+      struct type *t;
+
+      if (field_is_static (&TYPE_FIELD (type, i)))
+	continue;
+
+      t = resolve_dynamic_type (TYPE_FIELD_TYPE (resolved_type, i), addr);
+      TYPE_FIELD_TYPE (resolved_type, i) = t;
+      if (TYPE_LENGTH (t) > max_len)
+	max_len = TYPE_LENGTH (t);
+    }
+
+  TYPE_LENGTH (resolved_type) = max_len;
+  return resolved_type;
+}
+
+/* Resolve dynamic bounds of members of the struct TYPE to static
+   bounds.  */
+
+static struct type *
+resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
+{
+  struct type *resolved_type;
+  int i;
+  int vla_field = TYPE_NFIELDS (type) - 1;
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
+  gdb_assert (TYPE_NFIELDS (type) > 0);
+
+  resolved_type = copy_type (type);
+  TYPE_FIELDS (resolved_type)
+    = TYPE_ALLOC (resolved_type,
+		  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+  memcpy (TYPE_FIELDS (resolved_type),
+	  TYPE_FIELDS (type),
+	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+  for (i = 0; i < TYPE_NFIELDS (resolved_type); ++i)
+    {
+      struct type *t;
+
+      if (field_is_static (&TYPE_FIELD (type, i)))
+	continue;
+
+      t = resolve_dynamic_type (TYPE_FIELD_TYPE (resolved_type, i), addr);
+
+      /* This is a bit odd.  We do not support a VLA in any position
+	 of a struct except for the last.  GCC does have an extension
+	 that allows a VLA in the middle of a structure, but the DWARF
+	 it emits is relatively useless to us, so we can't represent
+	 such a type properly -- and even if we could, we do not have
+	 enough information to redo structure layout anyway.
+	 Nevertheless, we check all the fields in case something odd
+	 slips through, since it's better to see an error than
+	 incorrect results.  */
+      if (t != TYPE_FIELD_TYPE (resolved_type, i)
+	  && i != vla_field)
+	error (_("Attempt to resolve a variably-sized type which appears "
+		 "in the interior of a structure type"));
+
+      TYPE_FIELD_TYPE (resolved_type, i) = t;
+    }
+
+  /* Due to the above restrictions we can successfully compute
+     the size of the resulting structure here, as the offset of
+     the final field plus its size.  */
+  TYPE_LENGTH (resolved_type)
+    = (TYPE_FIELD_BITPOS (resolved_type, vla_field) / TARGET_CHAR_BIT
+       + TYPE_LENGTH (TYPE_FIELD_TYPE (resolved_type, vla_field)));
+  return resolved_type;
 }
 
 /* See gdbtypes.h  */
@@ -1731,12 +1829,45 @@ struct type *
 resolve_dynamic_type (struct type *type, CORE_ADDR addr)
 {
   struct type *real_type = check_typedef (type);
-  struct type *resolved_type;
+  struct type *resolved_type = type;
 
   if (!is_dynamic_type (real_type))
     return type;
 
-  resolved_type = resolve_dynamic_bounds (type, addr);
+  switch (TYPE_CODE (type))
+    {
+      case TYPE_CODE_TYPEDEF:
+	resolved_type = copy_type (type);
+	TYPE_TARGET_TYPE (resolved_type)
+	  = resolve_dynamic_type (TYPE_TARGET_TYPE (type), addr);
+	break;
+
+      case TYPE_CODE_REF:
+	{
+	  CORE_ADDR target_addr = read_memory_typed_address (addr, type);
+
+	  resolved_type = copy_type (type);
+	  TYPE_TARGET_TYPE (resolved_type)
+	    = resolve_dynamic_type (TYPE_TARGET_TYPE (type), target_addr);
+	  break;
+	}
+
+      case TYPE_CODE_ARRAY:
+	resolved_type = resolve_dynamic_array (type);
+	break;
+
+      case TYPE_CODE_RANGE:
+	resolved_type = resolve_dynamic_range (type);
+	break;
+
+    case TYPE_CODE_UNION:
+      resolved_type = resolve_dynamic_union (type, addr);
+      break;
+
+    case TYPE_CODE_STRUCT:
+      resolved_type = resolve_dynamic_struct (type, addr);
+      break;
+    }
 
   return resolved_type;
 }
@@ -2561,7 +2692,7 @@ rank_function (struct type **parms, int nparms,
 
   bv = xmalloc (sizeof (struct badness_vector));
   bv->length = nargs + 1;	/* add 1 for the length-match rank.  */
-  bv->rank = xmalloc ((nargs + 1) * sizeof (int));
+  bv->rank = XNEWVEC (struct rank, nargs + 1);
 
   /* First compare the lengths of the supplied lists.
      If there is a mismatch, set it to a high value.  */
@@ -4365,6 +4496,10 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->internal_fn
     = arch_type (gdbarch, TYPE_CODE_INTERNAL_FUNCTION, 0,
 		 "<internal function>");
+
+  /* This type represents an xmethod.  */
+  builtin_type->xmethod
+    = arch_type (gdbarch, TYPE_CODE_XMETHOD, 0, "<xmethod>");
 
   return builtin_type;
 }

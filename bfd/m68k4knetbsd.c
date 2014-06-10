@@ -28,7 +28,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) CONCAT2 (m68k4knetbsd_,OP)
+#define MY(OP) CONCAT2 (m68k_aout_4knbsd_,OP)
 
 /* This needs to start with a.out so GDB knows it is an a.out variant.  */
 #define TARGETNAME "a.out-m68k4k-netbsd"

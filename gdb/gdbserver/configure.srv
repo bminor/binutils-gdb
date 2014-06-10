@@ -24,20 +24,20 @@
 # Default hostio_last_error implementation
 srv_hostio_err_objs="hostio-errno.o"
 
-srv_i386_regobj="i386.o i386-avx.o i386-mpx.o i386-mmx.o"
-srv_i386_linux_regobj="i386-linux.o i386-avx-linux.o i386-mpx-linux.o i386-mmx-linux.o"
-srv_amd64_regobj="amd64.o amd64-avx.o amd64-mpx.o x32.o x32-avx.o"
-srv_amd64_linux_regobj="amd64-linux.o amd64-avx-linux.o amd64-mpx-linux.o x32-linux.o x32-avx-linux.o"
+srv_i386_regobj="i386.o i386-avx.o i386-avx512.o i386-mpx.o i386-mmx.o"
+srv_i386_linux_regobj="i386-linux.o i386-avx-linux.o i386-avx512-linux.o i386-mpx-linux.o i386-mmx-linux.o"
+srv_amd64_regobj="amd64.o amd64-avx.o amd64-avx512.o amd64-mpx.o x32.o x32-avx.o x32-avx512.o"
+srv_amd64_linux_regobj="amd64-linux.o amd64-avx-linux.o amd64-avx512-linux.o amd64-mpx-linux.o x32-linux.o x32-avx-linux.o x32-avx512-linux.o"
 
 ipa_i386_linux_regobj=i386-linux-ipa.o
 ipa_amd64_linux_regobj=amd64-linux-ipa.o
 
-srv_i386_32bit_xmlfiles="i386/32bit-core.xml i386/32bit-sse.xml i386/32bit-avx.xml i386/32bit-mpx.xml"
-srv_i386_64bit_xmlfiles="i386/64bit-core.xml i386/64bit-sse.xml i386/64bit-avx.xml i386/x32-core.xml i386/64bit-mpx.xml"
-srv_i386_xmlfiles="i386/i386.xml i386/i386-avx.xml i386/i386-mpx.xml i386/i386-mmx.xml $srv_i386_32bit_xmlfiles"
-srv_amd64_xmlfiles="i386/amd64.xml i386/amd64-avx.xml i386/x32.xml i386/x32-avx.xml i386/amd64-mpx.xml $srv_i386_64bit_xmlfiles"
-srv_i386_linux_xmlfiles="i386/i386-linux.xml i386/i386-avx-linux.xml i386/i386-mmx-linux.xml i386/32bit-linux.xml i386/i386-mpx-linux.xml $srv_i386_32bit_xmlfiles"
-srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/amd64-avx-linux.xml i386/64bit-linux.xml i386/amd64-mpx-linux.xml i386/x32-linux.xml i386/x32-avx-linux.xml $srv_i386_64bit_xmlfiles"
+srv_i386_32bit_xmlfiles="i386/32bit-core.xml i386/32bit-sse.xml i386/32bit-avx.xml i386/32bit-avx512.xml i386/32bit-mpx.xml"
+srv_i386_64bit_xmlfiles="i386/64bit-core.xml i386/64bit-sse.xml i386/64bit-avx.xml i386/64bit-avx512.xml i386/x32-core.xml i386/64bit-mpx.xml"
+srv_i386_xmlfiles="i386/i386.xml i386/i386-avx.xml i386/i386-avx512.xml i386/i386-mpx.xml i386/i386-mmx.xml $srv_i386_32bit_xmlfiles"
+srv_amd64_xmlfiles="i386/amd64.xml i386/amd64-avx.xml i386/amd64-avx512.xml i386/x32.xml i386/x32-avx.xml i386/x32-avx512.xml i386/amd64-mpx.xml $srv_i386_64bit_xmlfiles"
+srv_i386_linux_xmlfiles="i386/i386-linux.xml i386/i386-avx-linux.xml i386/i386-avx512-linux.xml i386/i386-mmx-linux.xml i386/32bit-linux.xml i386/i386-mpx-linux.xml $srv_i386_32bit_xmlfiles"
+srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/amd64-avx-linux.xml i386/amd64-avx512-linux.xml i386/64bit-linux.xml i386/amd64-mpx-linux.xml i386/x32-linux.xml i386/x32-avx-linux.xml i386/x32-avx512-linux.xml $srv_i386_64bit_xmlfiles"
 
 
 # Linux object files.  This is so we don't have to repeat

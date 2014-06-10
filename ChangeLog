@@ -1,3 +1,44 @@
+2014-05-14  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* configure.ac (target_makefile_frag): Set for nios2-*-elf*.
+	* configure: Regenerated.
+
+2014-03-26  Jakub Jelinek  <jakub@redhat.com>
+
+	PR sanitizer/56781
+	* Makefile.def: Set bootstrap=true; for host fixincludes.
+	* configure.ac: Don't bootstrap host fixincludes unless
+	--with-build-config=bootstrap-{a,ub}san.
+	* Makefile.in: Regenerated.
+	* configure: Regenerated.
+
+2014-03-21  Jakub Jelinek  <jakub@redhat.com>
+
+	* configure.ac: Move BUILD_CONFIG set up earlier.  Add
+	--enable-vtable-verify option parsing.  Don't add
+	target-libsanitizer to bootstrap_target_libs unless
+	--with-build-config=bootstrap-asan or
+	--with-build-config=bootstrap-ubsan.  Don't add target-libvtv
+	to bootstrap_target_libs unless --enable-vtable-verify.
+	* configure: Regenerated.
+
+2014-03-07  Jakub Jelinek  <jakub@redhat.com>
+
+	PR bootstrap/58572
+	* Makefile.tpl (POSTSTAGE1_CXX_EXPORT): Use -isystem instead of
+	-I for libstdc++-v3 includes if $(LEAN).
+	* Makefile.in: Regenerated.
+
+2014-02-24  Walter Lee  <walt@tilera.com>
+
+	* configure.ac (tilepro-*-*) Change to tilepro*-*-*.
+	(tilegx-*-*): Change to tilegx*-*-*.
+	* configure: Regenerate.
+
+2014-05-01  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config.sub, config.guess: Import from upstream.
+
 2014-04-04  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR bootstrap/60620

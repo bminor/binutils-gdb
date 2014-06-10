@@ -30,7 +30,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) CONCAT2 (i386freebsd_,OP)
+#define MY(OP) CONCAT2 (i386_aout_fbsd_,OP)
 
 /* This needs to start with a.out so GDB knows it is an a.out variant.  */
 #define TARGETNAME "a.out-i386-freebsd"

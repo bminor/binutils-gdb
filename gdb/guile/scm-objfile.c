@@ -62,22 +62,6 @@ ofscm_objfile_smob_pretty_printers (objfile_smob *o_smob)
 
 /* Administrivia for objfile smobs.  */
 
-/* The smob "mark" function for <gdb:objfile>.  */
-
-static SCM
-ofscm_mark_objfile_smob (SCM self)
-{
-  objfile_smob *o_smob = (objfile_smob *) SCM_SMOB_DATA (self);
-
-  scm_gc_mark (o_smob->pretty_printers);
-
-  /* We don't mark containing_scm here.  It is just a backlink to our
-     container, and is gc-protected until the objfile is deleted.  */
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&o_smob->base);
-}
-
 /* The smob "print" function for <gdb:objfile>.  */
 
 static int
@@ -403,7 +387,6 @@ gdbscm_initialize_objfiles (void)
 {
   objfile_smob_tag
     = gdbscm_make_smob_type (objfile_smob_name, sizeof (objfile_smob));
-  scm_set_smob_mark (objfile_smob_tag, ofscm_mark_objfile_smob);
   scm_set_smob_print (objfile_smob_tag, ofscm_print_objfile_smob);
 
   gdbscm_define_functions (objfile_functions, 1);

@@ -919,6 +919,8 @@ const CGEN_HW_ENTRY or1k_cgen_hw_table[] =
   { "h-simm16", HW_H_SIMM16, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } } },
   { "h-uimm16", HW_H_UIMM16, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } } } } },
   { "h-uimm6", HW_H_UIMM6, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } } } } },
+  { "h-atomic-reserve", HW_H_ATOMIC_RESERVE, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } } } } },
+  { "h-atomic-address", HW_H_ATOMIC_ADDRESS, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } } } } },
   { 0, 0, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } } } } }
 };
 
@@ -1058,6 +1060,14 @@ const CGEN_OPERAND or1k_cgen_operand_table[] =
 /* mac-maclo: MAC LO result register */
   { "mac-maclo", OR1K_OPERAND_MAC_MACLO, HW_H_MAC_MACLO, 0, 0,
     { 0, { (const PTR) 0 } },
+    { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
+/* atomic-reserve: atomic reserve flag */
+  { "atomic-reserve", OR1K_OPERAND_ATOMIC_RESERVE, HW_H_ATOMIC_RESERVE, 0, 0,
+    { 0, { (const PTR) 0 } }, 
+    { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
+/* atomic-address: atomic address */
+  { "atomic-address", OR1K_OPERAND_ATOMIC_ADDRESS, HW_H_ATOMIC_ADDRESS, 0, 0,
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* uimm6: uimm6 */
   { "uimm6", OR1K_OPERAND_UIMM6, HW_H_UIMM6, 5, 6,
@@ -1224,6 +1234,11 @@ static const CGEN_IBASE or1k_cgen_insn_table[MAX_INSNS] =
     OR1K_INSN_L_LWS, "l-lws", "l.lws", 32,
     { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }
   },
+/* l.lwa $rD,${simm16}($rA) */
+  {
+    OR1K_INSN_L_LWA, "l-lwa", "l.lwa", 32,
+    { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }
+  },
 /* l.lbz $rD,${simm16}($rA) */
   {
     OR1K_INSN_L_LBZ, "l-lbz", "l.lbz", 32,
@@ -1257,6 +1272,11 @@ static const CGEN_IBASE or1k_cgen_insn_table[MAX_INSNS] =
 /* l.sh ${simm16-split}($rA),$rB */
   {
     OR1K_INSN_L_SH, "l-sh", "l.sh", 32,
+    { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }
+  },
+/* l.swa ${simm16-split}($rA),$rB */
+  {
+    OR1K_INSN_L_SWA, "l-swa", "l.swa", 32,
     { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }
   },
 /* l.sll $rD,$rA,$rB */

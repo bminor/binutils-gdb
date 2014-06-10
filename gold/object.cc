@@ -1632,7 +1632,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 				symtab->icf()->get_folded_section(this, i);
 		    Relobj* folded_obj =
 				reinterpret_cast<Relobj*>(folded.first);
-		    gold_info(_("%s: ICF folding section '%s' in file '%s'"
+		    gold_info(_("%s: ICF folding section '%s' in file '%s' "
 				"into '%s' in file '%s'"),
 			      program_name, this->section_name(i).c_str(),
 			      this->name().c_str(),

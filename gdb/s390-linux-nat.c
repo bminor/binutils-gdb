@@ -164,7 +164,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *regp, int regno)
 		  memset (p, 0, 4);
 		  p += 4;
 		}
-	      regcache_raw_collect (regcache, reg, p + 4);
+	      regcache_raw_collect (regcache, reg, p);
 	    }
 	}
 

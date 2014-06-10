@@ -42,7 +42,7 @@ int show_raw_fields;
 struct dis_private
 {
   bfd_byte *byte_buf;
-  jmp_buf bailout;
+  OPCODES_SIGJMP_BUF bailout;
 };
 
 
@@ -66,7 +66,7 @@ fetch_data (struct disassemble_info *info, bfd_vma memaddr)
 	return length;
     }
   (*info->memory_error_func) (status, memaddr, info);
-  longjmp (priv->bailout, 1);
+  OPCODES_SIGLONGJMP (priv->bailout, 1);
   /*NOTREACHED*/
 }
 
@@ -175,7 +175,7 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
   priv.byte_buf = byte_buf;
 
   info->private_data = (void *) &priv;
-  if (setjmp (priv.bailout) != 0)
+  if (OPCODES_SIGSETJMP (priv.bailout) != 0)
       /* Error return.  */
       return -1;
 

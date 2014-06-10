@@ -62,9 +62,10 @@ extern const char *symtab_to_filename_for_display (struct symtab *symtab);
    lines.  */
 extern void find_source_lines (struct symtab *s, int desc);
 
-/* Return the first line listed by print_source_lines.
-   Used by command interpreters to request listing from
-   a previous point.  */
+/* Return the first line listed by print_source_lines.  Used by
+   command interpreters to request listing from a previous point.  If
+   0, then no source lines have yet been listed since the last time
+   the current source line was changed.  */
 extern int get_first_line_listed (void);
 
 /* Return the default number of lines to print with commands like the

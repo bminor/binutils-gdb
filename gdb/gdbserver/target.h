@@ -24,6 +24,7 @@
 #include "target/resume.h"
 #include "target/wait.h"
 #include "target/waitstatus.h"
+#include "mem-break.h"
 
 struct emit_ops;
 struct btrace_target_info;
@@ -136,8 +137,8 @@ struct target_ops
      inferior such that it is possible to access memory.
 
      This should generally only be called from client facing routines,
-     such as gdb_read_memory/gdb_write_memory, or the insert_point
-     callbacks.
+     such as gdb_read_memory/gdb_write_memory, or the GDB breakpoint
+     insertion routine.
 
      Like `read_memory' and `write_memory' below, returns 0 on success
      and errno on failure.  */
@@ -187,17 +188,23 @@ struct target_ops
   int (*read_auxv) (CORE_ADDR offset, unsigned char *myaddr,
 		    unsigned int len);
 
-  /* Insert and remove a break or watchpoint.
-     Returns 0 on success, -1 on failure and 1 on unsupported.
-     The type is coded as follows:
+  /* Returns true if GDB Z breakpoint type TYPE is supported, false
+     otherwise.  The type is coded as follows:
        '0' - software-breakpoint
        '1' - hardware-breakpoint
        '2' - write watchpoint
        '3' - read watchpoint
-       '4' - access watchpoint  */
+       '4' - access watchpoint
+  */
+  int (*supports_z_point_type) (char z_type);
 
-  int (*insert_point) (char type, CORE_ADDR addr, int len);
-  int (*remove_point) (char type, CORE_ADDR addr, int len);
+  /* Insert and remove a break or watchpoint.
+     Returns 0 on success, -1 on failure and 1 on unsupported.  */
+
+  int (*insert_point) (enum raw_bkpt_type type, CORE_ADDR addr,
+		       int size, struct raw_breakpoint *bp);
+  int (*remove_point) (enum raw_bkpt_type type, CORE_ADDR addr,
+		       int size, struct raw_breakpoint *bp);
 
   /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
 

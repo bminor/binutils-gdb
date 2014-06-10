@@ -138,11 +138,19 @@ gdb_test "print ss" " = a=<a=<1> b=<$hex>> b=<a=<2> b=<$hex>>" \
     "print ss enabled #1"
 
 gdb_test_no_output "guile (disable-matcher!)"
-
 gdb_test "print ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}" \
     "print ss disabled"
 
 gdb_test_no_output "guile (enable-matcher!)"
-
 gdb_test "print ss" " = a=<a=<1> b=<$hex>> b=<a=<2> b=<$hex>>" \
     "print ss enabled #2"
+
+gdb_test_no_output "guile (install-progspace-pretty-printers! (current-progspace))"
+gdb_test "print ss" \
+    " = a=<progspace a=<1> b=<$hex>> b=<progspace a=<2> b=<$hex>>" \
+    "print ss via progspace"
+
+gdb_test_no_output "guile (install-objfile-pretty-printers! (current-progspace) \"scm-pretty-print\")"
+gdb_test "print ss" \
+    " = a=<objfile a=<1> b=<$hex>> b=<objfile a=<2> b=<$hex>>" \
+    "print ss via objfile"

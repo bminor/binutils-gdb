@@ -23,6 +23,7 @@
 
 #include "frame.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include <string.h>
@@ -1071,7 +1072,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      unsigned int constant;
 	      CORE_ADDR loc;
 
-	      offset = bits (insn, 0, 11);
+	      offset = bits (inst2, 0, 11);
 	      if (insn & 0x0080)
 		loc = start + 4 + offset;
 	      else
@@ -1087,7 +1088,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      unsigned int constant;
 	      CORE_ADDR loc;
 
-	      offset = bits (insn, 0, 7) << 2;
+	      offset = bits (inst2, 0, 7) << 2;
 	      if (insn & 0x0080)
 		loc = start + 4 + offset;
 	      else

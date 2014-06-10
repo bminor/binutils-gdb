@@ -29,6 +29,11 @@ if {[prepare_for_testing_full $testfile.exp \
     return -1
 }
 
+set remote_dwarf_srcfile [gdb_remote_download host \
+			      ${srcdir}/${subdir}/${dwarf_srcfile}]
+
 # Force the debugger to create the file1.txt symtab, to make sure that
 # the debugger does not crash doing so.
 gdb_test "list file1.txt:1" "File 1 Line 1.*File 1 Line 8" "list file1.txt"
+
+remote_file host delete ${remote_dwarf_srcfile}

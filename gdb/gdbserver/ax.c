@@ -110,6 +110,16 @@ gdb_parse_agent_expr (char **actparm)
   return aexpr;
 }
 
+void
+gdb_free_agent_expr (struct agent_expr *aexpr)
+{
+  if (aexpr != NULL)
+    {
+      free (aexpr->bytes);
+      free (aexpr);
+    }
+}
+
 /* Convert the bytes of an agent expression back into hex digits, so
    they can be printed or uploaded.  This allocates the buffer,
    callers should free when they are done with it.  */

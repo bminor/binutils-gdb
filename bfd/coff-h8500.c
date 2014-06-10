@@ -301,4 +301,4 @@ extra_case (bfd *in_abfd,
   bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
-CREATE_BIG_COFF_TARGET_VEC (h8500coff_vec, "coff-h8500", 0, 0, '_', NULL, COFF_SWAP_TABLE)
+CREATE_BIG_COFF_TARGET_VEC (h8500_coff_vec, "coff-h8500", 0, 0, '_', NULL, COFF_SWAP_TABLE)

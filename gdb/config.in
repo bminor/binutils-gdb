@@ -342,6 +342,9 @@
 /* Define to 1 if you have the `sbrk' function. */
 #undef HAVE_SBRK
 
+/* Define to 1 if you have the `scm_new_smob' function. */
+#undef HAVE_SCM_NEW_SMOB
+
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE
 

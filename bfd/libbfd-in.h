@@ -560,7 +560,8 @@ extern bfd_boolean _bfd_dwarf2_find_inliner_info
 
 /* Read DWARF 2 debugging information. */
 extern bfd_boolean _bfd_dwarf2_slurp_debug_info
-  (bfd *, bfd *, const struct dwarf_debug_section *, asymbol **, void **);
+  (bfd *, bfd *, const struct dwarf_debug_section *, asymbol **, void **,
+   bfd_boolean);
 
 /* Clean up the data used to handle DWARF 2 debugging information. */
 extern void _bfd_dwarf2_cleanup_debug_info

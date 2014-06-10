@@ -45,26 +45,24 @@ proc prop_name { i } {
 # Set and ref the properties in separate loops to verify previously set
 # properties are not lost when we set a new property or switch to htabs.
 for {set i 0} {$i <= $SMOB_PROP_HTAB_THRESHOLD} {incr i} {
-    gdb_test "gu (print (gsmob-has-property? arch '[prop_name $i]))" \
+    gdb_test "gu (print (object-property arch '[prop_name $i]))" \
 	"= #f" "property prop$i not present before set"
-    gdb_test_no_output "gu (set-gsmob-property! arch '[prop_name $i] $i)" \
-	"set prop $i"
-    gdb_test "gu (print (gsmob-has-property? arch '[prop_name $i]))" \
-	"= #t" "property prop$i present after set"
+    gdb_test "gu (print (set-object-property! arch '[prop_name $i] $i))" \
+	"= $i" "set prop $i"
+    gdb_test "gu (print (object-property arch '[prop_name $i]))" \
+	"= $i" "property prop$i present after set"
 }
 for {set i 0} {$i <= $SMOB_PROP_HTAB_THRESHOLD} {incr i} {
-    gdb_test "gu (print (gsmob-has-property? arch '[prop_name $i]))" \
-	"= #t" "property prop$i present after all set"
-    gdb_test "gu (print (gsmob-property arch '[prop_name $i]))" \
+    gdb_test "gu (print (object-property arch '[prop_name $i]))" \
 	"= $i" "ref prop $i"
 }
 
-# Verify gsmob-properties.
+# Verify properties.
 set prop_list ""
 for {set i 0} {$i <= $SMOB_PROP_HTAB_THRESHOLD} {incr i} {
     set prop_list "$prop_list [prop_name $i]"
 }
 set prop_list [lsort $prop_list]
 verbose -log "prop_list: $prop_list"
-gdb_test "gu (print (sort (gsmob-properties arch) (lambda (a b) (string<? (symbol->string a) (symbol->string b)))))" \
-    "= \\($prop_list\\)" "gsmob-properties"
+gdb_test "gu (print (sort (map car (object-properties arch)) (lambda (a b) (string<? (symbol->string a) (symbol->string b)))))" \
+    "= \\($prop_list\\)" "object-properties"

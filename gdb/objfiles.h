@@ -515,6 +515,13 @@ extern void objfiles_changed (void);
 
 extern int is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile);
 
+/* Return true if ADDRESS maps into one of the sections of the
+   userloaded ("add-symbol-file") objfiles of PSPACE and false
+   otherwise.  */
+
+extern int userloaded_objfile_contains_address_p (struct program_space *pspace,
+						  CORE_ADDR address);
+
 /* This operation deletes all objfile entries that represent solibs that
    weren't explicitly loaded by the user, via e.g., the add-symbol-file
    command.  */

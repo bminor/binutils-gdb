@@ -141,6 +141,9 @@ from the Guile interactive prompt.
 * Guile Pretty Printing API:: Pretty-printing values with Guile
 * Selecting Guile Pretty-Printers:: How GDB chooses a pretty-printer
 * Writing a Guile Pretty-Printer:: Writing a pretty-printer
+* Commands In Guile::        Implementing new commands in Guile
+* Parameters In Guile::      Adding new @value{GDBN} parameters
+* Progspaces In Guile::      Program spaces
 * Objfiles In Guile::        Object files in Guile
 * Frames In Guile::          Accessing inferior stack frames from Guile
 * Blocks In Guile::          Accessing blocks from Guile
@@ -238,7 +241,7 @@ int
 The @code{(gdb)} module provides these basic Guile functions.
 
 @c TODO: line length 
-@deffn {Scheme Procedure} execute command @r{[}#:from-tty boolean@r{]}@r{[}#:to-string boolean@r{]}
+@deffn {Scheme Procedure} execute command @r{[}#:from-tty boolean@r{]} @r{[}#:to-string boolean@r{]}
 Evaluate @var{command}, a string, as a @value{GDBN} CLI command.
 If a @value{GDBN} exception happens while @var{command} runs, it is
 translated as described in
@@ -251,7 +254,7 @@ It must be a boolean value.  If omitted, it defaults to @code{#f}.
 By default, any output produced by @var{command} is sent to
 @value{GDBN}'s standard output (and to the log output if logging is
 turned on).  If the @var{to-string} parameter is
-@code{#t}, then output will be collected by @code{gdb.execute} and
+@code{#t}, then output will be collected by @code{execute} and
 returned as a string.  The default is @code{#f}, in which case the
 return value is unspecified.  If @var{to-string} is @code{#t}, the
 @value{GDBN} virtual terminal will be temporarily set to unlimited width
@@ -260,7 +263,7 @@ and height, and its pagination will be disabled; @pxref{Screen Size}.
 
 @deffn {Scheme Procedure} history-ref number
 Return a value from @value{GDBN}'s value history (@pxref{Value
-History}).  @var{number} indicates which history element to return.
+History}).  The @var{number} argument indicates which history element to return.
 If @var{number} is negative, then @value{GDBN} will take its absolute value
 and count backward from the last element (i.e., the most recent element) to
 find the value to return.  If @var{number} is zero, then @value{GDBN} will
@@ -290,16 +293,14 @@ facilities.
 @deffn {Scheme Procedure} parse-and-eval expression
 Parse @var{expression} as an expression in the current language,
 evaluate it, and return the result as a @code{<gdb:value>}.
-@var{expression} must be a string.
+The @var{expression} must be a string.
 
-This function is useful when computing values.
+This function can be useful when implementing a new command
+(@pxref{Commands In Guile}), as it provides a way to parse the
+command's arguments as an expression.
+It is also is useful when computing values.
 For example, it is the only way to get the value of a
 convenience variable (@pxref{Convenience Vars}) as a @code{<gdb:value>}.
-@end deffn
-
-@deffn {Scheme Procedure} string->argv string
-Convert a string to a list of strings split up according to
-@value{GDBN}'s argv parsing rules.
 @end deffn
 
 @node Guile Configuration
@@ -311,8 +312,12 @@ parameters.
 
 @deffn {Scheme Procedure} data-directory
 Return a string containing @value{GDBN}'s data directory.
-This directory contains @value{GDBN}'s ancillary files, including
-the Guile modules provided by @value{GDBN}.
+This directory contains @value{GDBN}'s ancillary files.
+@end deffn
+
+@deffn {Scheme Procedure} guile-data-directory
+Return a string containing @value{GDBN}'s Guile data directory.
+This directory contains the Guile modules provided by @value{GDBN}.
 @end deffn
 
 @deffn {Scheme Procedure} gdb-version
@@ -331,46 +336,18 @@ This is the string passed to @code{--target} when @value{GDBN} was configured.
 
 @node GDB Scheme Data Types
 @subsubsection GDB Scheme Data Types
-@cindex gdb smobs
+@cindex gdb objects
 
-@value{GDBN} uses Guile's @dfn{smob} (small object)
-data type for all @value{GDBN} objects
-(@pxref{Defining New Types (Smobs),,, guile, GNU Guile Reference Manual}).
-The smobs that @value{GDBN} provides are called @dfn{gsmobs}.
+The values exposed by @value{GDBN} to Guile are known as
+@dfn{@value{GDBN} objects}.  There are several kinds of @value{GDBN}
+object, and each is disjoint from all other types known to Guile.
 
-@deffn {Scheme Procedure} gsmob-kind gsmob
-Return the kind of the gsmob, e.g., @code{<gdb:breakpoint>},
+@deffn {Scheme Procedure} gdb-object-kind object
+Return the kind of the @value{GDBN} object, e.g., @code{<gdb:breakpoint>},
 as a symbol.
 @end deffn
 
-Every @code{gsmob} provides a common set of functions for extending
-them in simple ways.  Each @code{gsmob} has a list of properties,
-initially empty.  These properties are akin to Guile's object properties,
-but are stored with the @code{gsmob}
-(@pxref{Object Properties,,, guile, GNU Guile Reference Manual}).
-Property names can be any @code{eq?}-able value, but it is recommended
-that they be symbols.
-
-@deffn {Scheme Procedure} set-gsmob-property! gsmob property-name value
-Set the value of property @code{property-name} to value @code{value}.
-The result is unspecified.
-@end deffn
-
-@deffn {Scheme Procedure} gsmob-property gsmob property-name
-Return the value of property @code{property-name}.
-If the property isn't present then @code{#f} is returned.
-@end deffn
-
-@deffn {Scheme Procedure} gsmob-has-property? gsmob property-name
-Return @code{#t} if @code{gsmob} has property @code{property-name}.
-Otherwise return @code{#f}.
-@end deffn
-
-@deffn {Scheme Procedure} gsmob-properties gsmob
-Return an unsorted list of names of properties.
-@end deffn
-
-@value{GDBN} defines the following Scheme smobs:
+@value{GDBN} defines the following object types:
 
 @table @code
 @item <gdb:arch>
@@ -384,6 +361,9 @@ Return an unsorted list of names of properties.
 
 @item <gdb:breakpoint>
 @xref{Breakpoints In Guile}.
+
+@item <gdb:command>
+@xref{Commands In Guile}.
 
 @item <gdb:exception>
 @xref{Guile Exception Handling}.
@@ -400,11 +380,17 @@ Return an unsorted list of names of properties.
 @item <gdb:objfile>
 @xref{Objfiles In Guile}.
 
+@item <gdb:parameter>
+@xref{Parameters In Guile}.
+
 @item <gdb:pretty-printer>
 @xref{Guile Pretty Printing API}.
 
 @item <gdb:pretty-printer-worker>
 @xref{Guile Pretty Printing API}.
+
+@item <gdb:progspace>
+@xref{Progspaces In Guile}.
 
 @item <gdb:symbol>
 @xref{Symbols In Guile}.
@@ -425,8 +411,8 @@ Return an unsorted list of names of properties.
 @xref{Values From Inferior In Guile}.
 @end table
 
-The following gsmobs are managed internally so that the Scheme function
-@code{eq?} may be applied to them.
+The following @value{GDBN} objects are managed internally so that the
+Scheme function @code{eq?} may be applied to them.
 
 @table @code
 @item <gdb:arch>
@@ -434,6 +420,7 @@ The following gsmobs are managed internally so that the Scheme function
 @item <gdb:breakpoint>
 @item <gdb:frame>
 @item <gdb:objfile>
+@item <gdb:progspace>
 @item <gdb:symbol>
 @item <gdb:symtab>
 @item <gdb:type>
@@ -541,10 +528,10 @@ The following exception-related procedures are provided by the
 @code{(gdb)} module.
 
 @deffn {Scheme Procedure} make-exception key args
-Return a @code{<gdb:exception>} object.
-@var{key} and @var{args} are the standard Guile parameters of an exception.
-See the Guile documentation for more information
-(@pxref{Exceptions,,, guile, GNU Guile Reference Manual}).
+Return a @code{<gdb:exception>} object given by its @var{key} and
+@var{args}, which are the standard Guile parameters of an exception.
+See the Guile documentation for more information (@pxref{Exceptions,,,
+guile, GNU Guile Reference Manual}).
 @end deffn
 
 @deffn {Scheme Procedure} exception? object
@@ -821,7 +808,7 @@ Return field @var{field-name} from @code{<gdb:value>} object @var{value}.
 
 @deffn {Scheme Procedure} value-subscript value index
 Return the value of array @var{value} at index @var{index}.
-@var{value} must be a subscriptable @code{<gdb:value>} object.
+The @var{value} argument must be a subscriptable @code{<gdb:value>} object.
 @end deffn
 
 @deffn {Scheme Procedure} value-call value arg-list
@@ -922,24 +909,25 @@ The length must be a Scheme integer and not a @code{<gdb:value>} integer.
 
 @deffn {Scheme Procedure} value-lazy? value
 Return @code{#t} if @var{value} has not yet been fetched
-from the inferior.  
+from the inferior.
 Otherwise return @code{#f}.
-@value{GDBN} does not fetch values until necessary, for efficiency.  
+@value{GDBN} does not fetch values until necessary, for efficiency.
 For example:
 
 @smallexample
 (define myval (parse-and-eval "somevar"))
 @end smallexample
 
-The value of @code{somevar} is not fetched at this time.  It will be 
+The value of @code{somevar} is not fetched at this time.  It will be
 fetched when the value is needed, or when the @code{fetch-lazy}
-procedure is invoked.  
+procedure is invoked.
 @end deffn
 
 @deffn {Scheme Procedure} make-lazy-value type address
-Return a @code{<gdb:value>} that will be lazily fetched from the target.
-@var{type} is an object of type @code{<gdb:type>} and @var{address} is
-a Scheme integer of the address of the object in target memory.
+Return a @code{<gdb:value>} that will be lazily fetched from the
+target.  The object of type @code{<gdb:type>} whose value to fetch is
+specified by its @var{type} and its target memory @var{address}, which
+is a Scheme integer.
 @end deffn
 
 @deffn {Scheme Procedure} value-fetch-lazy! value
@@ -1064,8 +1052,7 @@ Otherwise return @code{#f}.
 @end deffn
 
 @deffn {Scheme Procedure} lookup-type name @r{[}#:block block@r{]}
-This function looks up a type by name.  @var{name} is the name of the
-type to look up.  It must be a string.
+This function looks up a type by its @var{name}, which must be a string.
 
 If @var{block} is given, it is an object of type @code{<gdb:block>},
 and @var{name} is looked up in that scope.
@@ -1600,7 +1587,7 @@ To continue the @code{my::string} example,
 this code might appear in @code{(my-project my-library v1)}:
 
 @smallexample
-(use-modules ((gdb)))
+(use-modules (gdb))
 (define (register-printers objfile)
   (append-objfile-pretty-printer!
    (make-pretty-printer "my-string" str-lookup-function)))
@@ -1610,7 +1597,7 @@ this code might appear in @code{(my-project my-library v1)}:
 And then the corresponding contents of the auto-load file would be:
 
 @smallexample
-(use-modules ((gdb) (my-project my-library v1)))
+(use-modules (gdb) (my-project my-library v1))
 (register-printers (current-objfile))
 @end smallexample
 
@@ -1661,7 +1648,7 @@ This example doesn't need a lookup function, that is handled by the
 the object that handles the lookup.
 
 @smallexample
-(use-modules ((gdb printing)))
+(use-modules (gdb printing))
 
 (define (build-pretty-printer)
   (let ((pp (make-pretty-printer-collection "my-library")))
@@ -1673,7 +1660,7 @@ the object that handles the lookup.
 And here is the autoload support:
 
 @smallexample
-(use-modules ((gdb) (my-library)))
+(use-modules (gdb) (my-library))
 (append-objfile-pretty-printer! (current-objfile) (build-pretty-printer))
 @end smallexample
 
@@ -1687,6 +1674,529 @@ my_library.so:
     foo
     bar
 @end smallexample
+
+@node Commands In Guile
+@subsubsection Commands In Guile
+
+@cindex commands in guile
+@cindex guile commands
+You can implement new @value{GDBN} CLI commands in Guile.  A CLI
+command object is created with the @code{make-command} Guile function,
+and added to @value{GDBN} with the @code{register-command!} Guile function.
+This two-step approach is taken to separate out the side-effect of adding
+the command to @value{GDBN} from @code{make-command}.
+
+There is no support for multi-line commands, that is commands that
+consist of multiple lines and are terminated with @code{end}.
+
+@c TODO: line length
+@deffn {Scheme Procedure} (make-command name @r{[}#:invoke invoke{]} @r{[}#:command-class command-class@r{]} @r{[}#:completer-class completer{]} @r{[}#:prefix? prefix@r{]} @r{[}#:doc doc-string{]})
+
+The argument @var{name} is the name of the command.  If @var{name} consists of
+multiple words, then the initial words are looked for as prefix
+commands.  In this case, if one of the prefix commands does not exist,
+an exception is raised.
+
+The result is the @code{<gdb:command>} object representing the command.
+The command is not usable until it has been registered with @value{GDBN}
+with @code{register-command!}.
+
+The rest of the arguments are optional.
+
+The argument @var{invoke} is a procedure of three arguments: @var{self},
+@var{args} and @var{from-tty}.  The argument @var{self} is the
+@code{<gdb:command>} object representing the command.
+The argument @var{args} is a string representing the arguments passed to
+the command, after leading and trailing whitespace has been stripped.
+The argument @var{from-tty} is a boolean flag and specifies whether the
+command should consider itself to have been originated from the user
+invoking it interactively.  If this function throws an exception,
+it is turned into a @value{GDBN} @code{error} call.
+Otherwise, the return value is ignored.
+
+The argument @var{command-class} is one of the @samp{COMMAND_} constants
+defined below.  This argument tells @value{GDBN} how to categorize the
+new command in the help system.  The default is @code{COMMAND_NONE}.
+
+The argument @var{completer} is either @code{#f}, one of the @samp{COMPLETE_}
+constants defined below, or a procedure, also defined below.
+This argument tells @value{GDBN} how to perform completion
+for this command.  If not provided or if the value is @code{#f},
+then no completion is performed on the command.
+
+The argument @var{prefix} is a boolean flag indicating whether the new
+command is a prefix command; sub-commands of this command may be
+registered.
+
+The argument @var{doc-string} is help text for the new command.
+If no documentation string is provided, the default value ``This command is
+not documented.'' is used.
+@end deffn
+
+@deffn {Scheme Procedure} register-command! command
+Add @var{command}, a @code{<gdb:command>} object, to @value{GDBN}'s
+list of commands.
+It is an error to register a command more than once.
+The result is unspecified.
+@end deffn
+
+@deffn {Scheme Procedure} command? object
+Return @code{#t} if @var{object} is a @code{<gdb:command>} object.
+Otherwise return @code{#f}.
+@end deffn
+
+@cindex don't repeat Guile command
+@deffn {Scheme Procedure} dont-repeat
+By default, a @value{GDBN} command is repeated when the user enters a
+blank line at the command prompt.  A command can suppress this
+behavior by invoking the @code{dont-repeat} function.  This is similar
+to the user command @code{dont-repeat}, see @ref{Define, dont-repeat}.
+@end deffn
+
+@deffn {Scheme Procedure} string->argv string
+Convert a string to a list of strings split up according to
+@value{GDBN}'s argv parsing rules.
+It is recommended to use this for consistency.
+Arguments are separated by spaces and may be quoted.
+Example:
+
+@smallexample
+scheme@@(guile-user)> (string->argv "1 2\\ \\\"3 '4 \"5' \"6 '7\"")
+$1 = ("1" "2 \"3" "4 \"5" "6 '7")
+@end smallexample
+@end deffn
+
+@deffn {Scheme Procedure} throw-user-error message . args
+Throw a @code{gdb:user-error} exception.
+The argument @var{message} is the error message as a format string, like the 
+@var{fmt} argument to the @code{format} Scheme function.
+@xref{Formatted Output,,, guile, GNU Guile Reference Manual}.
+The argument @var{args} is a list of the optional arguments of @var{message}.
+
+This is used when the command detects a user error of some kind,
+say a bad command argument.
+
+@smallexample
+(gdb) guile (use-modules (gdb))
+(gdb) guile
+(register-command! (make-command "test-user-error"
+  #:command-class COMMAND_OBSCURE
+  #:invoke (lambda (self arg from-tty)
+    (throw-user-error "Bad argument ~a" arg))))
+end
+(gdb) test-user-error ugh
+ERROR: Bad argument ugh
+@end smallexample
+@end deffn
+
+@cindex completion of Guile commands
+@deffn completer self text word
+If the @var{completer} option to @code{make-command} is a procedure,
+it takes three arguments: @var{self} which is the @code{<gdb:command>}
+object, and @var{text} and @var{word} which are both strings.
+The argument @var{text} holds the complete command line up to the cursor's
+location.  The argument @var{word} holds the last word of the command line;
+this is computed using a word-breaking heuristic.
+
+All forms of completion are handled by this function, that is,
+the @key{TAB} and @key{M-?} key bindings (@pxref{Completion}),
+and the @code{complete} command (@pxref{Help, complete}).
+
+This procedure can return several kinds of values:
+
+@itemize @bullet
+@item
+If the return value is a list, the contents of the list are used as the
+completions.  It is up to @var{completer} to ensure that the
+contents actually do complete the word.  An empty list is
+allowed, it means that there were no completions available.  Only
+string elements of the list are used; other elements in the
+list are ignored.
+
+@item
+If the return value is a @code{<gdb:iterator>} object, it is iterated over to
+obtain the completions.  It is up to @code{completer-procedure} to ensure
+that the results actually do complete the word.  Only
+string elements of the result are used; other elements in the
+sequence are ignored.
+
+@item
+All other results are treated as though there were no available
+completions.
+@end itemize
+@end deffn
+
+When a new command is registered, it will have been declared as a member of
+some general class of commands.  This is used to classify top-level
+commands in the on-line help system; note that prefix commands are not
+listed under their own category but rather that of their top-level
+command.  The available classifications are represented by constants
+defined in the @code{gdb} module:
+
+@vtable @code
+@item COMMAND_NONE
+The command does not belong to any particular class.  A command in
+this category will not be displayed in any of the help categories.
+This is the default.
+
+@item COMMAND_RUNNING
+The command is related to running the inferior.  For example,
+@code{start}, @code{step}, and @code{continue} are in this category.
+Type @kbd{help running} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
+@item COMMAND_DATA
+The command is related to data or variables.  For example,
+@code{call}, @code{find}, and @code{print} are in this category.  Type
+@kbd{help data} at the @value{GDBN} prompt to see a list of commands
+in this category.
+
+@item COMMAND_STACK
+The command has to do with manipulation of the stack.  For example,
+@code{backtrace}, @code{frame}, and @code{return} are in this
+category.  Type @kbd{help stack} at the @value{GDBN} prompt to see a
+list of commands in this category.
+
+@item COMMAND_FILES
+This class is used for file-related commands.  For example,
+@code{file}, @code{list} and @code{section} are in this category.
+Type @kbd{help files} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
+@item COMMAND_SUPPORT
+This should be used for ``support facilities'', generally meaning
+things that are useful to the user when interacting with @value{GDBN},
+but not related to the state of the inferior.  For example,
+@code{help}, @code{make}, and @code{shell} are in this category.  Type
+@kbd{help support} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
+@item COMMAND_STATUS
+The command is an @samp{info}-related command, that is, related to the
+state of @value{GDBN} itself.  For example, @code{info}, @code{macro},
+and @code{show} are in this category.  Type @kbd{help status} at the
+@value{GDBN} prompt to see a list of commands in this category.
+
+@item COMMAND_BREAKPOINTS
+The command has to do with breakpoints.  For example, @code{break},
+@code{clear}, and @code{delete} are in this category.  Type @kbd{help
+breakpoints} at the @value{GDBN} prompt to see a list of commands in
+this category.
+
+@item COMMAND_TRACEPOINTS
+The command has to do with tracepoints.  For example, @code{trace},
+@code{actions}, and @code{tfind} are in this category.  Type
+@kbd{help tracepoints} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
+@item COMMAND_USER
+The command is a general purpose command for the user, and typically
+does not fit in one of the other categories.
+Type @kbd{help user-defined} at the @value{GDBN} prompt to see
+a list of commands in this category, as well as the list of gdb macros
+(@pxref{Sequences}).
+
+@item COMMAND_OBSCURE
+The command is only used in unusual circumstances, or is not of
+general interest to users.  For example, @code{checkpoint},
+@code{fork}, and @code{stop} are in this category.  Type @kbd{help
+obscure} at the @value{GDBN} prompt to see a list of commands in this
+category.
+
+@item COMMAND_MAINTENANCE
+The command is only useful to @value{GDBN} maintainers.  The
+@code{maintenance} and @code{flushregs} commands are in this category.
+Type @kbd{help internals} at the @value{GDBN} prompt to see a list of
+commands in this category.
+@end vtable
+
+A new command can use a predefined completion function, either by
+specifying it via an argument at initialization, or by returning it
+from the @code{completer} procedure.  These predefined completion
+constants are all defined in the @code{gdb} module:
+
+@vtable @code
+@item COMPLETE_NONE
+This constant means that no completion should be done.
+
+@item COMPLETE_FILENAME
+This constant means that filename completion should be performed.
+
+@item COMPLETE_LOCATION
+This constant means that location completion should be done.
+@xref{Specify Location}.
+
+@item COMPLETE_COMMAND
+This constant means that completion should examine @value{GDBN}
+command names.
+
+@item COMPLETE_SYMBOL
+This constant means that completion should be done using symbol names
+as the source.
+
+@item COMPLETE_EXPRESSION
+This constant means that completion should be done on expressions.
+Often this means completing on symbol names, but some language
+parsers also have support for completing on field names.
+@end vtable
+
+The following code snippet shows how a trivial CLI command can be
+implemented in Guile:
+
+@smallexample
+(gdb) guile
+(register-command! (make-command "hello-world"
+  #:command-class COMMAND_USER
+  #:doc "Greet the whole world."
+  #:invoke (lambda (self args from-tty) (display "Hello, World!\n"))))
+end
+(gdb) hello-world
+Hello, World!
+@end smallexample
+
+@node Parameters In Guile
+@subsubsection Parameters In Guile
+
+@cindex parameters in guile
+@cindex guile parameters
+@tindex Parameter
+You can implement new @value{GDBN} @dfn{parameters} using Guile
+@footnote{Note that @value{GDBN} parameters must not be confused with
+Guile’s parameter objects (@pxref{Parameters,,, guile, GNU Guile
+Reference Manual}).}.
+
+There are many parameters that already exist and can be set in
+@value{GDBN}.  Two examples are: @code{set follow-fork} and
+@code{set charset}.  Setting these parameters influences certain
+behavior in @value{GDBN}.  Similarly, you can define parameters that
+can be used to influence behavior in custom Guile scripts and commands.
+
+A new parameter is defined with the @code{make-parameter} Guile function,
+and added to @value{GDBN} with the @code{register-parameter!} Guile function.
+This two-step approach is taken to separate out the side-effect of adding
+the parameter to @value{GDBN} from @code{make-parameter}.
+
+Parameters are exposed to the user via the @code{set} and
+@code{show} commands.  @xref{Help}.
+
+@c TODO line length
+@deffn {Scheme Procedure} (make-parameter name @r{[}#:command-class command-class@r{]} @r{[}#:parameter-type parameter-type{]} @r{[}#:enum-list enum-list@r{]} @r{[}#:set-func set-func{]} @r{[}#:show-func show-func{]} @r{[}#:doc doc{]} @r{[}#:set-doc set-doc{]} @r{[}#:show-doc show-doc{]} @r{[}#:initial-value initial-value{]})
+
+The argument @var{name} is the name of the new parameter.  If @var{name}
+consists of multiple words, then the initial words are looked for as prefix
+parameters.  An example of this can be illustrated with the
+@code{set print} set of parameters.  If @var{name} is
+@code{print foo}, then @code{print} will be searched as the prefix
+parameter.  In this case the parameter can subsequently be accessed in
+@value{GDBN} as @code{set print foo}.
+If @var{name} consists of multiple words, and no prefix parameter group
+can be found, an exception is raised.
+
+The result is the @code{<gdb:parameter>} object representing the parameter.
+The parameter is not usable until it has been registered with @value{GDBN}
+with @code{register-parameter!}.
+
+The rest of the arguments are optional.
+
+The argument @var{command-class} should be one of the @samp{COMMAND_} constants
+(@pxref{Commands In Guile}).  This argument tells @value{GDBN} how to
+categorize the new parameter in the help system.
+The default is @code{COMMAND_NONE}.
+
+The argument @var{parameter-type} should be one of the @samp{PARAM_} constants
+defined below.  This argument tells @value{GDBN} the type of the new
+parameter; this information is used for input validation and
+completion.  The default is @code{PARAM_BOOLEAN}.
+
+If @var{parameter-type} is @code{PARAM_ENUM}, then
+@var{enum-list} must be a list of strings.  These strings
+represent the possible values for the parameter.
+
+If @var{parameter-type} is not @code{PARAM_ENUM}, then the presence
+of @var{enum-list} will cause an exception to be thrown.
+
+The argument @var{set-func} is a function of one argument: @var{self} which
+is the @code{<gdb:parameter>} object representing the parameter.
+@value{GDBN} will call this function when a @var{parameter}'s value has
+been changed via the @code{set} API (for example, @kbd{set foo off}).
+The value of the parameter has already been set to the new value.
+This function must return a string to be displayed to the user.
+@value{GDBN} will add a trailing newline if the string is non-empty.
+@value{GDBN} generally doesn't print anything when a parameter is set,
+thus typically this function should return @samp{""}.
+A non-empty string result should typically be used for displaying warnings
+and errors.
+
+The argument @var{show-func} is a function of two arguments: @var{self} which
+is the @code{<gdb:parameter>} object representing the parameter, and
+@var{svalue} which is the string representation of the current value.
+@value{GDBN} will call this function when a @var{parameter}'s
+@code{show} API has been invoked (for example, @kbd{show foo}).
+This function must return a string, and will be displayed to the user.
+@value{GDBN} will add a trailing newline.
+
+The argument @var{doc} is the help text for the new parameter.
+If there is no documentation string, a default value is used.
+
+The argument @var{set-doc} is the help text for this parameter's
+@code{set} command.
+
+The argument @var{show-doc} is the help text for this parameter's
+@code{show} command.
+
+The argument @var{initial-value} specifies the initial value of the parameter.
+If it is a function, it takes one parameter, the @code{<gdb:parameter>}
+object and its result is used as the initial value of the parameter.
+The initial value must be valid for the parameter type,
+otherwise an exception is thrown.
+@end deffn
+
+@deffn {Scheme Procedure} register-parameter! parameter
+Add @var{parameter}, a @code{<gdb:parameter>} object, to @value{GDBN}'s
+list of parameters.
+It is an error to register a parameter more than once.
+The result is unspecified.
+@end deffn
+
+@deffn {Scheme Procedure} parameter? object
+Return @code{#t} if @var{object} is a @code{<gdb:parameter>} object.
+Otherwise return @code{#f}.
+@end deffn
+
+@deffn {Scheme Procedure} parameter-value parameter
+Return the value of @var{parameter} which may either be
+a @code{<gdb:parameter>} object or a string naming the parameter.
+@end deffn
+
+@deffn {Scheme Procedure} set-parameter-value! parameter new-value
+Assign @var{parameter} the value of @var{new-value}.
+The argument @var{parameter} must be an object of type @code{<gdb:parameter>}.
+@value{GDBN} does validation when assignments are made.
+@end deffn
+
+When a new parameter is defined, its type must be specified.  The
+available types are represented by constants defined in the @code{gdb}
+module:
+
+@vtable @code
+@item PARAM_BOOLEAN
+The value is a plain boolean.  The Guile boolean values, @code{#t}
+and @code{#f} are the only valid values.
+
+@item PARAM_AUTO_BOOLEAN
+The value has three possible states: true, false, and @samp{auto}.  In
+Guile, true and false are represented using boolean constants, and
+@samp{auto} is represented using @code{#:auto}.
+
+@item PARAM_UINTEGER
+The value is an unsigned integer.  The value of 0 should be
+interpreted to mean ``unlimited''.
+
+@item PARAM_ZINTEGER
+The value is an integer.
+
+@item PARAM_ZUINTEGER
+The value is an unsigned integer.
+
+@item PARAM_ZUINTEGER_UNLIMITED
+The value is an integer in the range @samp{[0, INT_MAX]}.
+A value of @samp{-1} means ``unlimited'', and other negative
+numbers are not allowed.
+
+@item PARAM_STRING
+The value is a string.  When the user modifies the string, any escape
+sequences, such as @samp{\t}, @samp{\f}, and octal escapes, are
+translated into corresponding characters and encoded into the current
+host charset.
+
+@item PARAM_STRING_NOESCAPE
+The value is a string.  When the user modifies the string, escapes are
+passed through untranslated.
+
+@item PARAM_OPTIONAL_FILENAME
+The value is a either a filename (a string), or @code{#f}.
+
+@item PARAM_FILENAME
+The value is a filename.  This is just like
+@code{PARAM_STRING_NOESCAPE}, but uses file names for completion.
+
+@item PARAM_ENUM
+The value is a string, which must be one of a collection of string
+constants provided when the parameter is created.
+@end vtable
+
+@node Progspaces In Guile
+@subsubsection Program Spaces In Guile
+
+@cindex progspaces in guile
+@tindex <gdb:progspace>
+A program space, or @dfn{progspace}, represents a symbolic view
+of an address space.
+It consists of all of the objfiles of the program.
+@xref{Objfiles In Guile}.
+@xref{Inferiors and Programs, program spaces}, for more details
+about program spaces.
+
+Each progspace is represented by an instance of the @code{<gdb:progspace>}
+smob.  @xref{GDB Scheme Data Types}.
+
+The following progspace-related functions are available in the
+@code{(gdb)} module:
+
+@deffn {Scheme Procedure} progspace? object
+Return @code{#t} if @var{object} is a @code{<gdb:progspace>} object.
+Otherwise return @code{#f}.
+@end deffn
+
+@deffn {Scheme Procedure} progspace-valid? progspace
+Return @code{#t} if @var{progspace} is valid, @code{#f} if not.
+A @code{<gdb:progspace>} object can become invalid
+if the program it refers to is not loaded in @value{GDBN} any longer.
+@end deffn
+
+@deffn {Scheme Procedure} current-progspace
+This function returns the program space of the currently selected inferior.
+There is always a current progspace, this never returns @code{#f}.
+@xref{Inferiors and Programs}.
+@end deffn
+
+@deffn {Scheme Procedure} progspaces
+Return a list of all the progspaces currently known to @value{GDBN}.
+@end deffn
+
+@deffn {Scheme Procedure} progspace-filename progspace
+Return the absolute file name of @var{progspace} as a string.
+This is the name of the file passed as the argument to the @code{file}
+or @code{symbol-file} commands.
+If the program space does not have an associated file name,
+then @code{#f} is returned.  This occurs, for example, when @value{GDBN}
+is started without a program to debug.
+
+A @code{gdb:invalid-object-error} exception is thrown if @var{progspace}
+is invalid.
+@end deffn
+
+@deffn {Scheme Procedure} progspace-objfiles progspace
+Return the list of objfiles of @var{progspace}.
+The order of objfiles in the result is arbitrary.
+Each element is an object of type @code{<gdb:objfile>}.
+@xref{Objfiles In Guile}.
+
+A @code{gdb:invalid-object-error} exception is thrown if @var{progspace}
+is invalid.
+@end deffn
+
+@deffn {Scheme Procedure} progspace-pretty-printers progspace
+Return the list of pretty-printers of @var{progspace}.
+Each element is an object of type @code{<gdb:pretty-printer>}.
+@xref{Guile Pretty Printing API}, for more information.
+@end deffn
+
+@deffn {Scheme Procedure} set-progspace-pretty-printers! progspace printer-list
+Set the list of registered @code{<gdb:pretty-printer>} objects for
+@var{progspace} to @var{printer-list}.
+@xref{Guile Pretty Printing API}, for more information.
+@end deffn
 
 @node Objfiles In Guile
 @subsubsection Objfiles In Guile
@@ -1728,7 +2238,7 @@ Return the list of registered @code{<gdb:pretty-printer>} objects for
 
 @deffn {Scheme Procedure} set-objfile-pretty-printers! objfile printer-list
 Set the list of registered @code{<gdb:pretty-printer>} objects for
-@var{objfile} to @var{printer-list}.
+@var{objfile} to @var{printer-list}.  The
 @var{printer-list} must be a list of @code{<gdb:pretty-printer>} objects.
 @xref{Guile Pretty Printing API}, for more information.
 @end deffn
@@ -1855,6 +2365,9 @@ stack corruption.
 The frame unwinder did not find any saved PC, but we needed
 one to unwind further.
 
+@item FRAME_UNWIND_MEMORY_ERROR
+The frame unwinder caused an error while trying to access memory.
+
 @item FRAME_UNWIND_FIRST_ERROR
 Any stop reason greater or equal to this value indicates some kind
 of error.  This special value facilitates writing code that tests
@@ -1903,9 +2416,9 @@ Return the frame's @code{<gdb:sal>} (symtab and line) object.
 Return the value of @var{variable} in @var{frame}.  If the optional
 argument @var{block} is provided, search for the variable from that
 block; otherwise start at the frame's current block (which is
-determined by the frame's current program counter).  @var{variable}
-must be a string or a @code{<gdb:symbol>} object.  @var{block} must be a
-@code{<gdb:block>} object.
+determined by the frame's current program counter).  The
+@var{variable} must be given as a string or a @code{<gdb:symbol>}
+object, and @var{block} must be a @code{<gdb:block>} object.
 @end deffn
 
 @deffn {Scheme Procedure} frame-select frame
@@ -2390,21 +2903,33 @@ object will be @code{#f} and 0 respectively.
 @tindex <gdb:breakpoint>
 
 Breakpoints in Guile are represented by objects of type
-@code{<gdb:breakpoint>}.
+@code{<gdb:breakpoint>}.  New breakpoints can be created with the
+@code{make-breakpoint} Guile function, and then added to @value{GDBN} with the
+@code{register-breakpoint!} Guile function.
+This two-step approach is taken to separate out the side-effect of adding
+the breakpoint to @value{GDBN} from @code{make-breakpoint}.
+
+Support is also provided to view and manipulate breakpoints created
+outside of Guile.
 
 The following breakpoint-related procedures are provided by the
 @code{(gdb)} module:
 
 @c TODO: line length
-@deffn {Scheme Procedure} create-breakpoint! location @r{[}#:type type@r{]} @r{[}#:wp-class wp-class@r{]} @r{[}#:internal internal@r{]}
-Create a new breakpoint.  @var{spec} is a string naming the
+@deffn {Scheme Procedure} make-breakpoint location @r{[}#:type type@r{]} @r{[}#:wp-class wp-class@r{]} @r{[}#:internal internal@r{]}
+Create a new breakpoint at @var{location}, a string naming the
 location of the breakpoint, or an expression that defines a watchpoint.
 The contents can be any location recognized by the @code{break} command,
 or in the case of a watchpoint, by the @code{watch} command.
 
+The breakpoint is initially marked as @samp{invalid}.
+The breakpoint is not usable until it has been registered with @value{GDBN}
+with @code{register-breakpoint!}, at which point it becomes @samp{valid}.
+The result is the @code{<gdb:breakpoint>} object representing the breakpoint.
+
 The optional @var{type} denotes the breakpoint to create.
-This argument can be either: @code{BP_BREAKPOINT} or @code{BP_WATCHPOINT}.
-@var{type} defaults to @code{BP_BREAKPOINT}.
+This argument can be either @code{BP_BREAKPOINT} or @code{BP_WATCHPOINT},
+and defaults to @code{BP_BREAKPOINT}.
 
 The optional @var{wp-class} argument defines the class of watchpoint to
 create, if @var{type} is @code{BP_WATCHPOINT}.  If a watchpoint class is
@@ -2412,7 +2937,7 @@ not provided, it is assumed to be a @code{WP_WRITE} class.
 
 The optional @var{internal} argument allows the breakpoint to become
 invisible to the user.  The breakpoint will neither be reported when
-created, nor will it be listed in the output from @code{info breakpoints}
+registered, nor will it be listed in the output from @code{info breakpoints}
 (but will be listed with the @code{maint info breakpoints} command).
 If an internal flag is not provided, the breakpoint is visible
 (non-internal).
@@ -2463,10 +2988,24 @@ Read/Write watchpoint.
 
 @end deffn
 
-@deffn {Scheme Procedure} breakpoint-delete! breakpoint
-Permanently delete @var{breakpoint}.  This also invalidates the
-Guile @var{breakpoint} object.  Any further attempt to access the
-object will throw an exception.
+@deffn {Scheme Procedure} register-breakpoint! breakpoint
+Add @var{breakpoint}, a @code{<gdb:breakpoint>} object, to @value{GDBN}'s
+list of breakpoints.  The breakpoint must have been created with
+@code{make-breakpoint}.  One cannot register breakpoints that have been
+created outside of Guile.  Once a breakpoint is registered it becomes
+@samp{valid}.
+It is an error to register an already registered breakpoint.
+The result is unspecified.
+@end deffn
+
+@deffn {Scheme Procedure} delete-breakpoint! breakpoint
+Remove @var{breakpoint} from @value{GDBN}'s list of breakpoints.
+This also invalidates the Guile @var{breakpoint} object.
+Any further attempt to access the object will throw an exception.
+
+If @var{breakpoint} was created from Guile with @code{make-breakpoint}
+it may be re-registered with @value{GDBN}, in which case the breakpoint
+becomes valid again.
 @end deffn
 
 @deffn {Scheme Procedure} breakpoints
@@ -2481,6 +3020,8 @@ and @code{#f} otherwise.
 
 @deffn {Scheme Procedure} breakpoint-valid? breakpoint
 Return @code{#t} if @var{breakpoint} is valid, @code{#f} otherwise.
+Breakpoints created with @code{make-breakpoint} are marked as invalid
+until they are registered with @value{GDBN} with @code{register-breakpoint!}.
 A @code{<gdb:breakpoint>} object can become invalid
 if the user deletes the breakpoint.  In this case, the object still
 exists, but the underlying breakpoint does not.  In the cases of
@@ -2594,7 +3135,7 @@ See @code{set-breakpoint-stop!} below in this section.
 @end deffn
 
 @deffn {Scheme Procedure} set-breakpoint-stop! breakpoint procedure|#f
-Set the stop predicate of @var{breakpoint}.
+Set the stop predicate of @var{breakpoint}.  The predicate
 @var{procedure} takes one argument: the <gdb:breakpoint> object.
 If this predicate is set to a procedure then it is invoked whenever
 the inferior reaches this breakpoint.  If it returns @code{#t},
@@ -2620,7 +3161,8 @@ Example @code{stop} implementation:
 (define (my-stop? bkpt)
   (let ((int-val (parse-and-eval "foo")))
     (value=? int-val 3)))
-(define bkpt (create-breakpoint! "main.c:42"))
+(define bkpt (make-breakpoint "main.c:42"))
+(register-breakpoint! bkpt)
 (set-breakpoint-stop! bkpt my-stop?)
 @end smallexample
 @end deffn
@@ -2953,11 +3495,12 @@ returns a port object.  One can then read/write memory using that object.
 
 @deffn {Scheme Procedure} open-memory @r{[}#:mode mode{]} @r{[}#:start address{]} @r{[}#:size size{]}
 Return a port object that can be used for reading and writing memory.
-@var{mode} is the standard mode argument to Guile port open routines,
-except that it is restricted to one of @samp{"r"}, @samp{"w"}, or @samp{"r+"}.
-For compatibility @samp{"b"} (binary) may also be present,
-but we ignore it: memory ports are binary only.
-The default is @samp{"r"}, read-only.
+The port will be open according to @var{mode}, which is the standard
+mode argument to Guile port open routines, except that it is
+restricted to one of @samp{"r"}, @samp{"w"}, or @samp{"r+"}.  For
+compatibility @samp{"b"} (binary) may also be present, but we ignore
+it: memory ports are binary only.  The default is @samp{"r"},
+read-only.
 
 The chunk of memory that can be accessed can be bounded.
 If both @var{start} and @var{size} are unspecified, all of memory can be
@@ -3223,14 +3766,14 @@ Usage:
 
 @deffn {Scheme Procedure} prepend-pretty-printer! object printer
 Add @var{printer} to the front of the list of pretty-printers for
-@var{object}.  @var{object} must either be a @code{<gdb:objfile>} object
+@var{object}.  The @var{object} must either be a @code{<gdb:objfile>} object,
 or @code{#f} in which case @var{printer} is added to the global list of
 printers.
 @end deffn
 
 @deffn {Scheme Procecure} append-pretty-printer! object printer
 Add @var{printer} to the end of the list of pretty-printers for
-@var{object}.  @var{object} must either be a @code{<gdb:objfile>} object
+@var{object}.  The @var{object} must either be a @code{<gdb:objfile>} object,
 or @code{#f} in which case @var{printer} is added to the global list of
 printers.
 @end deffn
@@ -3264,7 +3807,7 @@ Then in gdb:
 
 @smallexample
 (gdb) start
-(gdb) guile (use-modules ((gdb) (gdb types)))
+(gdb) guile (use-modules (gdb) (gdb types))
 (gdb) guile (define foo-ref (parse-and-eval "foo_ref"))
 (gdb) guile (get-basic-type (value-type foo-ref))
 int

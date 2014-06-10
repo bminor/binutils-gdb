@@ -3957,9 +3957,9 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
   { NULL,                       0, 0, 0,            0 }
 };
 
-#define TARGET_BIG_SYM		bfd_elf64_sh64_vec
+#define TARGET_BIG_SYM		sh64_elf64_vec
 #define TARGET_BIG_NAME		"elf64-sh64"
-#define TARGET_LITTLE_SYM	bfd_elf64_sh64l_vec
+#define TARGET_LITTLE_SYM	sh64_elf64_le_vec
 #define TARGET_LITTLE_NAME	"elf64-sh64l"
 #define ELF_ARCH		bfd_arch_sh
 #define ELF_MACHINE_CODE	EM_SH
@@ -4029,11 +4029,11 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 
 /* NetBSD support.  */
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf64_sh64nbsd_vec
+#define	TARGET_BIG_SYM			sh64_elf64_nbsd_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf64-sh64-nbsd"
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf64_sh64lnbsd_vec
+#define	TARGET_LITTLE_SYM		sh64_elf64_nbsd_le_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf64-sh64l-nbsd"
 #undef	ELF_MAXPAGESIZE
@@ -4047,11 +4047,11 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 
 /* Linux support.  */
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf64_sh64blin_vec
+#define	TARGET_BIG_SYM			sh64_elf64_linux_be_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf64-sh64big-linux"
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf64_sh64lin_vec
+#define	TARGET_LITTLE_SYM		sh64_elf64_linux_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf64-sh64-linux"
 #undef elf64_bed

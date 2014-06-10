@@ -120,17 +120,6 @@ bkscm_objfile_block_map (struct objfile *objfile)
   return htab;
 }
 
-/* The smob "mark" function for <gdb:block>.  */
-
-static SCM
-bkscm_mark_block_smob (SCM self)
-{
-  block_smob *b_smob = (block_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_eqable_gsmob (&b_smob->base);
-}
-
 /* The smob "free" function for <gdb:block>.  */
 
 static size_t
@@ -535,18 +524,6 @@ gdbscm_block_symbols (SCM self)
 /* The <gdb:block-symbols-iterator> object,
    for iterating over all symbols in a block.  */
 
-/* The smob "mark" function for <gdb:block-symbols-iterator>.  */
-
-static SCM
-bkscm_mark_block_syms_progress_smob (SCM self)
-{
-  block_syms_progress_smob *i_smob
-    = (block_syms_progress_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&i_smob->base);
-}
-
 /* The smob "print" function for <gdb:block-symbols-iterator>.  */
 
 static int
@@ -798,15 +775,12 @@ gdbscm_initialize_blocks (void)
 {
   block_smob_tag
     = gdbscm_make_smob_type (block_smob_name, sizeof (block_smob));
-  scm_set_smob_mark (block_smob_tag, bkscm_mark_block_smob);
   scm_set_smob_free (block_smob_tag, bkscm_free_block_smob);
   scm_set_smob_print (block_smob_tag, bkscm_print_block_smob);
 
   block_syms_progress_smob_tag
     = gdbscm_make_smob_type (block_syms_progress_smob_name,
 			     sizeof (block_syms_progress_smob));
-  scm_set_smob_mark (block_syms_progress_smob_tag,
-		     bkscm_mark_block_syms_progress_smob);
   scm_set_smob_print (block_syms_progress_smob_tag,
 		      bkscm_print_block_syms_progress_smob);
 

@@ -856,7 +856,7 @@ const bfd_target
 #ifdef TARGET_SYM
   TARGET_SYM =
 #else
-  mipslpe_vec =
+  mips_pe_le_vec =
 #endif
 {
 #ifdef TARGET_NAME

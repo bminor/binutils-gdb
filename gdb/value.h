@@ -31,6 +31,7 @@ struct type;
 struct ui_file;
 struct language_defn;
 struct value_print_options;
+struct xmethod_worker;
 
 /* The structure which defines the type of a value.  It should never
    be possible for a program lval value to survive over a call to the
@@ -574,6 +575,8 @@ extern struct value *value_from_history_ref (char *, char **);
 extern struct value *value_at (struct type *type, CORE_ADDR addr);
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
 
+extern struct value *value_from_contents_and_address_unresolved
+     (struct type *, const gdb_byte *, CORE_ADDR);
 extern struct value *value_from_contents_and_address (struct type *,
 						      const gdb_byte *,
 						      CORE_ADDR);
@@ -1010,5 +1013,10 @@ struct value *call_internal_function (struct gdbarch *gdbarch,
 				      int argc, struct value **argv);
 
 char *value_internal_function_name (struct value *);
+
+extern struct value *value_of_xmethod (struct xmethod_worker *);
+
+struct value *call_xmethod (struct value *function,
+			    int argc, struct value **argv);
 
 #endif /* !defined (VALUE_H) */

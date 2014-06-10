@@ -2998,13 +2998,13 @@ sh_coff_get_relocated_section_contents (bfd *output_bfd,
 /* The target vectors.  */
 
 #ifndef TARGET_SHL_SYM
-CREATE_BIG_COFF_TARGET_VEC (shcoff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NULL, COFF_SWAP_TABLE)
+CREATE_BIG_COFF_TARGET_VEC (sh_coff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NULL, COFF_SWAP_TABLE)
 #endif
 
 #ifdef TARGET_SHL_SYM
 #define TARGET_SYM TARGET_SHL_SYM
 #else
-#define TARGET_SYM shlcoff_vec
+#define TARGET_SYM sh_coff_le_vec
 #endif
 
 #ifndef TARGET_SHL_NAME
@@ -3112,9 +3112,9 @@ static bfd_coff_backend_data bfd_coff_small_swap_table =
 #define coff_small_get_section_contents_in_window \
   coff_get_section_contents_in_window
 
-extern const bfd_target shlcoff_small_vec;
+extern const bfd_target sh_coff_small_le_vec;
 
-const bfd_target shcoff_small_vec =
+const bfd_target sh_coff_small_vec =
 {
   "coff-sh-small",		/* name */
   bfd_target_coff_flavour,
@@ -3154,12 +3154,12 @@ const bfd_target shcoff_small_vec =
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  & shlcoff_small_vec,
+  & sh_coff_small_le_vec,
 
   & bfd_coff_small_swap_table
 };
 
-const bfd_target shlcoff_small_vec =
+const bfd_target sh_coff_small_le_vec =
 {
   "coff-shl-small",		/* name */
   bfd_target_coff_flavour,
@@ -3199,7 +3199,7 @@ const bfd_target shlcoff_small_vec =
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  & shcoff_small_vec,
+  & sh_coff_small_vec,
 
   & bfd_coff_small_swap_table
 };

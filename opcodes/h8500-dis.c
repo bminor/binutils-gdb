@@ -39,7 +39,7 @@ struct private
   bfd_byte *max_fetched;
   bfd_byte the_buffer[MAXLEN];
   bfd_vma insn_start;
-  jmp_buf bailout;
+  OPCODES_SIGJMP_BUF bailout;
 };
 
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
@@ -63,7 +63,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
   if (status != 0)
     {
       (*info->memory_error_func) (status, start, info);
-      longjmp (priv->bailout, 1);
+      OPCODES_SIGLONGJMP (priv->bailout, 1);
     }
   else
     priv->max_fetched = addr;
@@ -84,7 +84,7 @@ print_insn_h8500 (bfd_vma addr, disassemble_info *info)
   info->private_data = (PTR) & priv;
   priv.max_fetched = priv.the_buffer;
   priv.insn_start = addr;
-  if (setjmp (priv.bailout) != 0)
+  if (OPCODES_SIGSETJMP (priv.bailout) != 0)
     /* Error return.  */
     return -1;
 

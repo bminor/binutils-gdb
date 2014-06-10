@@ -4849,7 +4849,7 @@ elf_m68k_add_symbol_hook (bfd *abfd,
   return TRUE;
 }
 
-#define TARGET_BIG_SYM			bfd_elf32_m68k_vec
+#define TARGET_BIG_SYM			m68k_elf32_vec
 #define TARGET_BIG_NAME			"elf32-m68k"
 #define ELF_MACHINE_CODE		EM_68K
 #define ELF_MAXPAGESIZE			0x2000

@@ -472,7 +472,7 @@ ppcboot_bfd_print_private_bfd_data (bfd *abfd, void * farg)
 #define ppcboot_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 #define ppcboot_bfd_print_private_bfd_dat ppcboot_bfd_print_private_bfd_data
 
-const bfd_target ppcboot_vec =
+const bfd_target powerpc_boot_vec =
 {
   "ppcboot",			/* name */
   bfd_target_unknown_flavour,	/* flavour */

@@ -1363,9 +1363,9 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
   _bfd_coff_section_already_linked
 #define _bfd_ecoff_bfd_define_common_symbol bfd_generic_define_common_symbol
 
-extern const bfd_target ecoff_big_vec;
+extern const bfd_target mips_ecoff_be_vec;
 
-const bfd_target ecoff_little_vec =
+const bfd_target mips_ecoff_le_vec =
 {
   "ecoff-littlemips",		/* name */
   bfd_target_ecoff_flavour,
@@ -1405,12 +1405,12 @@ const bfd_target ecoff_little_vec =
      BFD_JUMP_TABLE_LINK (_bfd_ecoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  & ecoff_big_vec,
+  & mips_ecoff_be_vec,
 
   & mips_ecoff_backend_data
 };
 
-const bfd_target ecoff_big_vec =
+const bfd_target mips_ecoff_be_vec =
 {
   "ecoff-bigmips",		/* name */
   bfd_target_ecoff_flavour,
@@ -1449,12 +1449,12 @@ const bfd_target ecoff_big_vec =
      BFD_JUMP_TABLE_LINK (_bfd_ecoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  & ecoff_little_vec,
+  & mips_ecoff_le_vec,
 
   & mips_ecoff_backend_data
 };
 
-const bfd_target ecoff_biglittle_vec =
+const bfd_target mips_ecoff_bele_vec =
 {
   "ecoff-biglittlemips",		/* name */
   bfd_target_ecoff_flavour,

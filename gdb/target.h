@@ -409,7 +409,7 @@ struct target_ops
        for normal operations, and should be ready to deliver the
        status of the process immediately (without waiting) to an
        upcoming target_wait call.  */
-    void (*to_attach) (struct target_ops *ops, char *, int);
+    void (*to_attach) (struct target_ops *ops, const char *, int);
     void (*to_post_attach) (struct target_ops *, int)
       TARGET_DEFAULT_IGNORE ();
     void (*to_detach) (struct target_ops *ops, const char *, int)
@@ -605,7 +605,8 @@ struct target_ops
        thread-local storage for the thread PTID and the shared library
        or executable file given by OBJFILE.  If that block of
        thread-local storage hasn't been allocated yet, this function
-       may return an error.  */
+       may return an error.  LOAD_MODULE_ADDR may be zero for statically
+       linked multithreaded inferiors.  */
     CORE_ADDR (*to_get_thread_local_address) (struct target_ops *ops,
 					      ptid_t ptid,
 					      CORE_ADDR load_module_addr,
@@ -771,7 +772,8 @@ struct target_ops
        The default implementation always returns the inferior's
        address space.  */
     struct address_space *(*to_thread_address_space) (struct target_ops *,
-						      ptid_t);
+						      ptid_t)
+      TARGET_DEFAULT_FUNC (default_thread_address_space);
 
     /* Target file operations.  */
 
@@ -941,7 +943,7 @@ struct target_ops
        encountered while reading memory.  */
     int (*to_verify_memory) (struct target_ops *, const gdb_byte *data,
 			     CORE_ADDR memaddr, ULONGEST size)
-      TARGET_DEFAULT_NORETURN (tcomplain ());
+      TARGET_DEFAULT_FUNC (default_verify_memory);
 
     /* Return the address of the start of the Thread Information Block
        a Windows OS specific feature.  */
@@ -1618,8 +1620,7 @@ extern int default_child_has_execution (struct target_ops *ops,
 #define target_can_lock_scheduler \
      (current_target.to_has_thread_control & tc_schedlock)
 
-/* Should the target enable async mode if it is supported?  Temporary
-   cludge until async mode is a strict superset of sync mode.  */
+/* Controls whether async mode is permitted.  */
 extern int target_async_permitted;
 
 /* Can the target support asynchronous execution?  */
@@ -2005,6 +2006,14 @@ extern const struct frame_unwind *target_get_unwinder (void);
 /* See to_get_tailcall_unwinder in struct target_ops.  */
 extern const struct frame_unwind *target_get_tailcall_unwinder (void);
 
+/* This implements basic memory verification, reading target memory
+   and performing the comparison here (as opposed to accelerated
+   verification making use of the qCRC packet, for example).  */
+
+extern int simple_verify_memory (struct target_ops* ops,
+				 const gdb_byte *data,
+				 CORE_ADDR memaddr, ULONGEST size);
+
 /* Verify that the memory in the [MEMADDR, MEMADDR+SIZE) range matches
    the contents of [DATA,DATA+SIZE).  Returns 1 if there's a match, 0
    if there's a mismatch, and -1 if an error is encountered while
@@ -2110,6 +2119,12 @@ extern int memory_remove_breakpoint (struct target_ops *, struct gdbarch *,
 extern int memory_insert_breakpoint (struct target_ops *, struct gdbarch *,
 				     struct bp_target_info *);
 
+/* Check whether the memory at the breakpoint's placed address still
+   contains the expected breakpoint instruction.  */
+
+extern int memory_validate_breakpoint (struct gdbarch *gdbarch,
+				       struct bp_target_info *bp_tgt);
+
 extern int default_memory_remove_breakpoint (struct gdbarch *,
 					     struct bp_target_info *);
 
@@ -2125,7 +2140,7 @@ extern void noprocess (void) ATTRIBUTE_NORETURN;
 
 extern void target_require_runnable (void);
 
-extern void find_default_attach (struct target_ops *, char *, int);
+extern void find_default_attach (struct target_ops *, const char *, int);
 
 extern void find_default_create_inferior (struct target_ops *,
 					  char *, char *, char **, int);

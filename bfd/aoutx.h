@@ -66,12 +66,12 @@ DESCRIPTION
 	from @file{sunos.c}:
 
 |	#define TARGET_NAME "a.out-sunos-big"
-|	#define VECNAME    sunos_big_vec
+|	#define VECNAME    sparc_aout_sunos_be_vec
 |	#include "aoutf1.h"
 
 	requires all the names from @file{aout32.c}, and produces the jump vector
 
-|	sunos_big_vec
+|	sparc_aout_sunos_be_vec
 
 	The file @file{host-aout.c} is a special case.  It is for a large set
 	of hosts that use ``more or less standard'' a.out files, and
@@ -791,9 +791,13 @@ NAME (aout, machine_type) (enum bfd_architecture arch,
 	case bfd_mach_mips16:
 	case bfd_mach_mipsisa32:
 	case bfd_mach_mipsisa32r2:
+	case bfd_mach_mipsisa32r3:
+	case bfd_mach_mipsisa32r5:
 	case bfd_mach_mips5:
 	case bfd_mach_mipsisa64:
 	case bfd_mach_mipsisa64r2:
+	case bfd_mach_mipsisa64r3:
+	case bfd_mach_mipsisa64r5:
 	case bfd_mach_mips_sb1:
 	case bfd_mach_mips_xlr:
 	  /* FIXME: These should be MIPS3, MIPS4, MIPS16, MIPS32, etc.  */

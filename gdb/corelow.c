@@ -28,6 +28,7 @@
 #endif
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
+#include "infrun.h"
 #include "symtab.h"
 #include "command.h"
 #include "bfd.h"

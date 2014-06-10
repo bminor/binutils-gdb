@@ -41,19 +41,6 @@ if { ! [ runto_main ] } then {
     return -1
 }
 
-proc capture_command_output { command prefix } {
-    global gdb_prompt
-    global expect_out
-
-    set output_string ""
-    gdb_test_multiple "$command" "capture_command_output for $command" {
-	-re "${command}\[\r\n\]+${prefix}(.*)\[\r\n\]+$gdb_prompt $" {
-	    set output_string $expect_out(1,string)
-	}
-    }
-    return $output_string
-}
-
 gdb_test "break terminal_func" "Breakpoint .* at .*${srcfile}, line .*" \
 	"set breakpoint at terminal_func"
 

@@ -11664,10 +11664,14 @@ mips_set_isa_flags (bfd *abfd)
       break;
 
     case bfd_mach_mipsisa32r2:
+    case bfd_mach_mipsisa32r3:
+    case bfd_mach_mipsisa32r5:
       val = E_MIPS_ARCH_32R2;
       break;
 
     case bfd_mach_mipsisa64r2:
+    case bfd_mach_mipsisa64r3:
+    case bfd_mach_mipsisa64r5:
       val = E_MIPS_ARCH_64R2;
       break;
     }
@@ -14364,176 +14368,49 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
   out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
   if (in_attr[Tag_GNU_MIPS_ABI_FP].i != out_attr[Tag_GNU_MIPS_ABI_FP].i)
     {
+      int out_fp, in_fp;
+
+      out_fp = out_attr[Tag_GNU_MIPS_ABI_FP].i;
+      in_fp = in_attr[Tag_GNU_MIPS_ABI_FP].i;
       out_attr[Tag_GNU_MIPS_ABI_FP].type = 1;
-      if (out_attr[Tag_GNU_MIPS_ABI_FP].i == Val_GNU_MIPS_ABI_FP_ANY)
-	out_attr[Tag_GNU_MIPS_ABI_FP].i = in_attr[Tag_GNU_MIPS_ABI_FP].i;
-      else if (in_attr[Tag_GNU_MIPS_ABI_FP].i != Val_GNU_MIPS_ABI_FP_ANY)
-	switch (out_attr[Tag_GNU_MIPS_ABI_FP].i)
-	  {
-	  case Val_GNU_MIPS_ABI_FP_DOUBLE:
-	    switch (in_attr[Tag_GNU_MIPS_ABI_FP].i)
-	      {
-	      case Val_GNU_MIPS_ABI_FP_SINGLE:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd, "-mdouble-float", "-msingle-float");
-		break;
+      if (out_fp == Val_GNU_MIPS_ABI_FP_ANY)
+	out_attr[Tag_GNU_MIPS_ABI_FP].i = in_fp;
+      else if (in_fp != Val_GNU_MIPS_ABI_FP_ANY)
+	{
+	  const char *out_string, *in_string;
 
-	      case Val_GNU_MIPS_ABI_FP_SOFT:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd, "-mhard-float", "-msoft-float");
-		break;
-
-	      case Val_GNU_MIPS_ABI_FP_64:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd,
-		   "-mdouble-float", "-mips32r2 -mfp64");
-		break;
-
-	      default:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), "
-		     "%B uses unknown floating point ABI %d"),
-		   obfd, abi_fp_bfd, ibfd,
-		   "-mdouble-float", in_attr[Tag_GNU_MIPS_ABI_FP].i);
-		break;
-	      }
-	    break;
-
-	  case Val_GNU_MIPS_ABI_FP_SINGLE:
-	    switch (in_attr[Tag_GNU_MIPS_ABI_FP].i)
-	      {
-	      case Val_GNU_MIPS_ABI_FP_DOUBLE:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd, "-msingle-float", "-mdouble-float");
-		break;
-
-	      case Val_GNU_MIPS_ABI_FP_SOFT:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd, "-mhard-float", "-msoft-float");
-		break;
-
-	      case Val_GNU_MIPS_ABI_FP_64:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd,
-		   "-msingle-float", "-mips32r2 -mfp64");
-		break;
-
-	      default:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), "
-		     "%B uses unknown floating point ABI %d"),
-		   obfd, abi_fp_bfd, ibfd,
-		   "-msingle-float", in_attr[Tag_GNU_MIPS_ABI_FP].i);
-		break;
-	      }
-	    break;
-
-	  case Val_GNU_MIPS_ABI_FP_SOFT:
-	    switch (in_attr[Tag_GNU_MIPS_ABI_FP].i)
-	      {
-	      case Val_GNU_MIPS_ABI_FP_DOUBLE:
-	      case Val_GNU_MIPS_ABI_FP_SINGLE:
-	      case Val_GNU_MIPS_ABI_FP_64:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd, "-msoft-float", "-mhard-float");
-		break;
-
-	      default:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), "
-		     "%B uses unknown floating point ABI %d"),
-		   obfd, abi_fp_bfd, ibfd,
-		   "-msoft-float", in_attr[Tag_GNU_MIPS_ABI_FP].i);
-		break;
-	      }
-	    break;
-
-	  case Val_GNU_MIPS_ABI_FP_64:
-	    switch (in_attr[Tag_GNU_MIPS_ABI_FP].i)
-	      {
-	      case Val_GNU_MIPS_ABI_FP_DOUBLE:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd,
-		   "-mips32r2 -mfp64", "-mdouble-float");
-		break;
-
-	      case Val_GNU_MIPS_ABI_FP_SINGLE:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd,
-		   "-mips32r2 -mfp64", "-msingle-float");
-		break;
-
-	      case Val_GNU_MIPS_ABI_FP_SOFT:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd, "-mhard-float", "-msoft-float");
-		break;
-
-	      default:
-		_bfd_error_handler
-		  (_("Warning: %B uses %s (set by %B), "
-		     "%B uses unknown floating point ABI %d"),
-		   obfd, abi_fp_bfd, ibfd,
-		   "-mips32r2 -mfp64", in_attr[Tag_GNU_MIPS_ABI_FP].i);
-		break;
-	      }
-	    break;
-
-	  default:
-	    switch (in_attr[Tag_GNU_MIPS_ABI_FP].i)
-	      {
-	      case Val_GNU_MIPS_ABI_FP_DOUBLE:
-		_bfd_error_handler
-		  (_("Warning: %B uses unknown floating point ABI %d "
-		     "(set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd,
-		   out_attr[Tag_GNU_MIPS_ABI_FP].i, "-mdouble-float");
-		break;
-
-	      case Val_GNU_MIPS_ABI_FP_SINGLE:
-		_bfd_error_handler
-		  (_("Warning: %B uses unknown floating point ABI %d "
-		     "(set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd,
-		   out_attr[Tag_GNU_MIPS_ABI_FP].i, "-msingle-float");
-		break;
-
-	      case Val_GNU_MIPS_ABI_FP_SOFT:
-		_bfd_error_handler
-		  (_("Warning: %B uses unknown floating point ABI %d "
-		     "(set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd,
-		   out_attr[Tag_GNU_MIPS_ABI_FP].i, "-msoft-float");
-		break;
-
-	      case Val_GNU_MIPS_ABI_FP_64:
-		_bfd_error_handler
-		  (_("Warning: %B uses unknown floating point ABI %d "
-		     "(set by %B), %B uses %s"),
-		   obfd, abi_fp_bfd, ibfd,
-		   out_attr[Tag_GNU_MIPS_ABI_FP].i, "-mips32r2 -mfp64");
-		break;
-
-	      default:
-		_bfd_error_handler
-		  (_("Warning: %B uses unknown floating point ABI %d "
-		     "(set by %B), %B uses unknown floating point ABI %d"),
-		   obfd, abi_fp_bfd, ibfd,
-		   out_attr[Tag_GNU_MIPS_ABI_FP].i,
-		   in_attr[Tag_GNU_MIPS_ABI_FP].i);
-		break;
-	      }
-	    break;
-	  }
+	  out_string = _bfd_mips_fp_abi_string (out_fp);
+	  in_string = _bfd_mips_fp_abi_string (in_fp);
+	  /* First warn about cases involving unrecognised ABIs.  */
+	  if (!out_string && !in_string)
+	    _bfd_error_handler
+	      (_("Warning: %B uses unknown floating point ABI %d "
+		 "(set by %B), %B uses unknown floating point ABI %d"),
+	       obfd, abi_fp_bfd, ibfd, out_fp, in_fp);
+	  else if (!out_string)
+	    _bfd_error_handler
+	      (_("Warning: %B uses unknown floating point ABI %d "
+		 "(set by %B), %B uses %s"),
+	       obfd, abi_fp_bfd, ibfd, out_fp, in_string);
+	  else if (!in_string)
+	    _bfd_error_handler
+	      (_("Warning: %B uses %s (set by %B), "
+		 "%B uses unknown floating point ABI %d"),
+	       obfd, abi_fp_bfd, ibfd, out_string, in_fp);
+	  else
+	    {
+	      /* If one of the bfds is soft-float, the other must be
+		 hard-float.  The exact choice of hard-float ABI isn't
+		 really relevant to the error message.  */
+	      if (in_fp == Val_GNU_MIPS_ABI_FP_SOFT)
+		out_string = "-mhard-float";
+	      else if (out_fp == Val_GNU_MIPS_ABI_FP_SOFT)
+		in_string = "-mhard-float";
+	      _bfd_error_handler
+		(_("Warning: %B uses %s (set by %B), %B uses %s"),
+		 obfd, abi_fp_bfd, ibfd, out_string, in_string);
+	    }
+	}
     }
 
   /* Check for conflicting Tag_GNU_MIPS_ABI_MSA attributes and merge
@@ -14941,6 +14818,33 @@ _bfd_mips_elf_get_target_dtag (bfd_vma dtag)
       return "DT_MIPS_PLTGOT";
     case DT_MIPS_RWPLT:
       return "DT_MIPS_RWPLT";
+    }
+}
+
+/* Return the meaning of Tag_GNU_MIPS_ABI_FP value FP, or null if
+   not known.  */
+
+const char *
+_bfd_mips_fp_abi_string (int fp)
+{
+  switch (fp)
+    {
+      /* These strings aren't translated because they're simply
+	 option lists.  */
+    case Val_GNU_MIPS_ABI_FP_DOUBLE:
+      return "-mdouble-float";
+
+    case Val_GNU_MIPS_ABI_FP_SINGLE:
+      return "-msingle-float";
+
+    case Val_GNU_MIPS_ABI_FP_SOFT:
+      return "-msoft-float";
+
+    case Val_GNU_MIPS_ABI_FP_64:
+      return "-mips32r2 -mfp64";
+
+    default:
+      return 0;
     }
 }
 

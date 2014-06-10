@@ -104,16 +104,22 @@
      (lambda (printer)
        (make-pointer-iterator-except elements (value->integer len))))))
 
+;; The actual pretty-printer for pp_s is split out so that we can pass
+;; in a prefix to distinguish objfile/progspace/global.
+
+(define (pp_s-printer prefix val)
+  (let ((a (value-field val "a"))
+	(b (value-field val "b")))
+    (if (not (value=? (value-address a) b))
+	(error (format #f "&a(~A) != b(~A)"
+		       (value-address a) b)))
+    (format #f "~aa=<~A> b=<~A>" prefix a b)))
+
 (define (make-pp_s-printer val)
   (make-pretty-printer-worker
    #f
    (lambda (printer)
-     (let ((a (value-field val "a"))
-	   (b (value-field val "b")))
-       (if (not (value=? (value-address a) b))
-	   (error (format #f "&a(~A) != b(~A)"
-			  (value-address a) b)))
-       (format #f "a=<~A> b=<~A>" a b)))
+     (pp_s-printer "" val))
    #f))
 
 (define (make-pp_ss-printer val)
@@ -285,17 +291,60 @@
 ;; This is one way to register a printer that is composed of several
 ;; subprinters, but there's no way to disable or list individual subprinters.
 
+(define (make-pretty-printer-from-dict name dict lookup-maker)
+  (make-pretty-printer
+   name
+   (lambda (matcher val)
+     (let ((printer-maker (lookup-maker dict val)))
+       (and printer-maker (printer-maker val))))))
+
+(define (lookup-pretty-printer-maker-from-dict dict val)
+  (let ((type-name (type-tag (get-type-for-printing val))))
+    (and type-name
+	 (hash-ref dict type-name))))
+
 (define *pretty-printer*
- (make-pretty-printer
-  "pretty-printer-test"
-  (let ((pretty-printers-dict (make-pretty-printer-dict)))
-    (lambda (matcher val)
-      "Look-up and return a pretty-printer that can print val."
-      (let ((type (get-type-for-printing val)))
-	(let ((typename (type-tag type)))
-	  (if typename
-	      (let ((printer-maker (hash-ref pretty-printers-dict typename)))
-		(and printer-maker (printer-maker val)))
-	      #f)))))))
+  (make-pretty-printer-from-dict "pretty-printer-test"
+				 (make-pretty-printer-dict)
+				 lookup-pretty-printer-maker-from-dict))
 
 (append-pretty-printer! #f *pretty-printer*)
+
+;; Different versions of a simple pretty-printer for use in testing
+;; objfile/progspace lookup.
+
+(define (make-objfile-pp_s-printer val)
+  (make-pretty-printer-worker
+   #f
+   (lambda (printer)
+     (pp_s-printer "objfile " val))
+   #f))
+
+(define (install-objfile-pretty-printers! pspace objfile-name)
+  (let ((objfiles (filter (lambda (objfile)
+			    (string-contains (objfile-filename objfile)
+					     objfile-name))
+			 (progspace-objfiles pspace)))
+	(dict (make-hash-table)))
+    (if (not (= (length objfiles) 1))
+	(error "objfile not found or ambiguous: " objfile-name))
+    (hash-set! dict "s" make-objfile-pp_s-printer)
+    (let ((pp (make-pretty-printer-from-dict
+	       "objfile-pretty-printer-test"
+	       dict lookup-pretty-printer-maker-from-dict)))
+      (append-pretty-printer! (car objfiles) pp))))
+
+(define (make-progspace-pp_s-printer val)
+  (make-pretty-printer-worker
+   #f
+   (lambda (printer)
+     (pp_s-printer "progspace " val))
+   #f))
+
+(define (install-progspace-pretty-printers! pspace)
+  (let ((dict (make-hash-table)))
+    (hash-set! dict "s" make-progspace-pp_s-printer)
+    (let ((pp (make-pretty-printer-from-dict
+	       "progspace-pretty-printer-test"
+	       dict lookup-pretty-printer-maker-from-dict)))
+      (append-pretty-printer! pspace pp))))

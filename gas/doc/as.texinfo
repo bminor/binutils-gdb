@@ -401,7 +401,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mabi}=@var{ABI}] [@b{-32}] [@b{-n32}] [@b{-64}] [@b{-mfp32}] [@b{-mgp32}]
    [@b{-march}=@var{CPU}] [@b{-mtune}=@var{CPU}] [@b{-mips1}] [@b{-mips2}]
    [@b{-mips3}] [@b{-mips4}] [@b{-mips5}] [@b{-mips32}] [@b{-mips32r2}]
-   [@b{-mips64}] [@b{-mips64r2}]
+   [@b{-mips32r3}] [@b{-mips32r5}] [@b{-mips64}] [@b{-mips64r2}]
+   [@b{-mips64r3}] [@b{-mips64r5}] 
    [@b{-construct-floats}] [@b{-no-construct-floats}]
    [@b{-mnan=@var{encoding}}]
    [@b{-trap}] [@b{-no-break}] [@b{-break}] [@b{-no-trap}]
@@ -413,6 +414,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mdsp}] [@b{-mno-dsp}]
    [@b{-mdspr2}] [@b{-mno-dspr2}]
    [@b{-mmsa}] [@b{-mno-msa}]
+   [@b{-mxpa}] [@b{-mno-xpa}]
    [@b{-mmt}] [@b{-mno-mt}]
    [@b{-mmcu}] [@b{-mno-mcu}]
    [@b{-minsn32}] [@b{-mno-insn32}]
@@ -476,6 +478,12 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mlittle}|@b{-mlittle-endian}|@b{-le}|@b{-mbig}|@b{-mbig-endian}|@b{-be}]
    [@b{-msolaris}|@b{-mno-solaris}]
    [@b{-nops=@var{count}}]
+@end ifset
+@ifset RL78
+
+@emph{Target RL78 options:}
+   [@b{-mg10}]
+   [@b{-m32bit-doubles}|@b{-m64bit-doubles}]
 @end ifset
 @ifset RX
 
@@ -1265,15 +1273,21 @@ Generate ``little endian'' format output.
 @itemx -mips5
 @itemx -mips32
 @itemx -mips32r2
+@itemx -mips32r3
+@itemx -mips32r5
 @itemx -mips64
 @itemx -mips64r2
+@itemx -mips64r3
+@itemx -mips64r5
 Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} is an alias for @samp{-march=r3000}, @samp{-mips2} is an
 alias for @samp{-march=r6000}, @samp{-mips3} is an alias for
 @samp{-march=r4000} and @samp{-mips4} is an alias for @samp{-march=r8000}.
-@samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, @samp{-mips64}, and
-@samp{-mips64r2} correspond to generic MIPS V, MIPS32, MIPS32 Release 2,
-MIPS64, and MIPS64 Release 2 ISA processors, respectively.
+@samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, @samp{-mips32r3},
+@samp{-mips32r5}, @samp{-mips64}, @samp{-mips64r2}, @samp{-mips64r3}, and
+@samp{-mips64r5} correspond to generic MIPS V, MIPS32, MIPS32 Release 2,
+MIPS32 Release 3, MIPS32 Release 5, MIPS64, MIPS64 Release 2, 
+MIPS64 Release 3, and MIPS64 Release 5 ISA processors, respectively.
 
 @item -march=@var{cpu}
 Generate code for a particular MIPS CPU.
@@ -1356,6 +1370,12 @@ This tells the assembler to accept DSP Release 2 instructions.
 Generate code for the MIPS SIMD Architecture Extension.
 This tells the assembler to accept MSA instructions.
 @samp{-mno-msa} turns off this option.
+
+@item -mxpa
+@itemx -mno-xpa
+Generate code for the MIPS eXtended Physical Address (XPA) Extension.
+This tells the assembler to accept XPA instructions.
+@samp{-mno-xpa} turns off this option.
 
 @item -mmt
 @itemx -mno-mt

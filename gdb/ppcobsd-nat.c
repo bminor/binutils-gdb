@@ -34,6 +34,7 @@
 #include "ppc-tdep.h"
 #include "ppcobsd-tdep.h"
 #include "inf-ptrace.h"
+#include "obsd-nat.h"
 #include "bsd-kvm.h"
 
 /* OpenBSD/powerpc didn't have PT_GETFPREGS/PT_SETFPREGS until release
@@ -199,7 +200,7 @@ _initialize_ppcobsd_nat (void)
   t = inf_ptrace_target ();
   t->to_fetch_registers = ppcobsd_fetch_registers;
   t->to_store_registers = ppcobsd_store_registers;
-  add_target (t);
+  obsd_add_target (t);
 
   /* General-purpose registers.  */
   ppcobsd_reg_offsets.r0_offset = offsetof (struct reg, gpr);

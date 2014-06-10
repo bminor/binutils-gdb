@@ -30,6 +30,7 @@
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"
@@ -196,6 +197,9 @@ struct thread_db_info
   td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
 				     psaddr_t map_address,
 				     size_t offset, psaddr_t *address);
+  td_err_e (*td_thr_tlsbase_p) (const td_thrhandle_t *th,
+				unsigned long int modid,
+				psaddr_t *base);
 };
 
 /* List of known processes using thread_db, and the required
@@ -799,6 +803,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
   info->td_ta_event_getmsg_p = dlsym (info->handle, "td_ta_event_getmsg");
   info->td_thr_event_enable_p = dlsym (info->handle, "td_thr_event_enable");
   info->td_thr_tls_get_addr_p = dlsym (info->handle, "td_thr_tls_get_addr");
+  info->td_thr_tlsbase_p = dlsym (info->handle, "td_thr_tlsbase");
 
   if (thread_db_find_new_threads_silently (inferior_ptid) != 0)
     {
@@ -1811,21 +1816,39 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 
       info = get_thread_db_info (ptid_get_pid (ptid));
 
-      /* glibc doesn't provide the needed interface.  */
-      if (!info->td_thr_tls_get_addr_p)
-	throw_error (TLS_NO_LIBRARY_SUPPORT_ERROR,
-		     _("No TLS library support"));
-
-      /* Caller should have verified that lm != 0.  */
-      gdb_assert (lm != 0);
-
       /* Finally, get the address of the variable.  */
-      /* Note the cast through uintptr_t: this interface only works if
-	 a target address fits in a psaddr_t, which is a host pointer.
-	 So a 32-bit debugger can not access 64-bit TLS through this.  */
-      err = info->td_thr_tls_get_addr_p (&thread_info->private->th,
-					 (psaddr_t)(uintptr_t) lm,
-					 offset, &address);
+      if (lm != 0)
+	{
+	  /* glibc doesn't provide the needed interface.  */
+	  if (!info->td_thr_tls_get_addr_p)
+	    throw_error (TLS_NO_LIBRARY_SUPPORT_ERROR,
+			 _("No TLS library support"));
+
+	  /* Note the cast through uintptr_t: this interface only works if
+	     a target address fits in a psaddr_t, which is a host pointer.
+	     So a 32-bit debugger can not access 64-bit TLS through this.  */
+	  err = info->td_thr_tls_get_addr_p (&thread_info->private->th,
+					     (psaddr_t)(uintptr_t) lm,
+					     offset, &address);
+	}
+      else
+	{
+	  /* If glibc doesn't provide the needed interface throw an error
+	     that LM is zero - normally cases it should not be.  */
+	  if (!info->td_thr_tlsbase_p)
+	    throw_error (TLS_LOAD_MODULE_NOT_FOUND_ERROR,
+			 _("TLS load module not found"));
+
+	  /* This code path handles the case of -static -pthread executables:
+	     https://sourceware.org/ml/libc-help/2014-03/msg00024.html
+	     For older GNU libc r_debug.r_map is NULL.  For GNU libc after
+	     PR libc/16831 due to GDB PR threads/16954 LOAD_MODULE is also NULL.
+	     The constant number 1 depends on GNU __libc_setup_tls
+	     initialization of l_tls_modid to 1.  */
+	  err = info->td_thr_tlsbase_p (&thread_info->private->th,
+					1, &address);
+	  address = (char *) address + offset;
+	}
 
 #ifdef THREAD_DB_HAS_TD_NOTALLOC
       /* The memory hasn't been allocated, yet.  */

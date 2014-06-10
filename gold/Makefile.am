@@ -197,6 +197,8 @@ dwp_LDADD = libgold.a $(LIBIBERTY) $(GOLD_LDADD) $(LIBINTL) $(THREADSLIB) \
 	$(LIBDL)
 dwp_LDFLAGS = $(GOLD_LDFLAGS)
 
+CONFIG_STATUS_DEPENDENCIES = $(srcdir)/../bfd/development.sh
+
 # Use an explicit dependency for the bison generated header file.
 expression.$(OBJEXT): yyscript.h
 script-sections.$(OBJEXT): yyscript.h

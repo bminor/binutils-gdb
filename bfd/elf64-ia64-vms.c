@@ -5512,7 +5512,7 @@ static const struct elf_size_info elf64_ia64_vms_size_info = {
 /* VMS-specific vectors.  */
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		bfd_elf64_ia64_vms_vec
+#define TARGET_LITTLE_SYM		ia64_elf64_vms_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf64-ia64-vms"
 #undef  TARGET_BIG_SYM

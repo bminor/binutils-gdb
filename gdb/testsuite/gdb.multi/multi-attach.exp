@@ -1,0 +1,60 @@
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 2007-2014 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test attaching to multiple threaded programs.
+
+standard_testfile
+
+# We need to use TCL's exec to get the pid.
+if [is_remote target] then {
+    return 0
+}
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug additional_flags=-lpthread}]} {
+    return -1
+}
+
+# Start the programs running and then wait for a bit, to be sure that
+# they can be attached to.
+set testpid1 [eval exec $binfile &]
+set testpid2 [eval exec $binfile &]
+exec sleep 2
+if { [istarget "*-*-cygwin*"] } {
+    # testpid{1,2} are the Cygwin PID, GDB uses the Windows PID, which might be
+    # different due to the way fork/exec works.
+    set testpid1 [ exec ps -e | gawk "{ if (\$1 == $testpid1) print \$4; }" ]
+    set testpid2 [ exec ps -e | gawk "{ if (\$1 == $testpid2) print \$4; }" ]
+}
+
+gdb_test "attach $testpid1" \
+    "Attaching to program: .*, process $testpid1.*(in|at).*" \
+    "attach to program 1"
+gdb_test "backtrace" ".*main.*" "backtrace 1"
+
+gdb_test "add-inferior -exec $binfile" \
+    "Added inferior 2.*" \
+    "add second inferior"
+gdb_test "inferior 2" ".*Switching to inferior 2.*" "switch to second inferior"
+
+gdb_test "attach $testpid2" \
+    "Attaching to program: .*, process $testpid2.*(in|at).*" \
+    "attach to program 2"
+gdb_test "backtrace" ".*main.*" "backtrace 2"
+
+gdb_test "kill" "" "kill inferior 2" "Kill the program being debugged.*" "y"
+gdb_test "inferior 1" ".*Switching to inferior 1.*"
+gdb_test "kill" "" "kill inferior 1" "Kill the program being debugged.*" "y"

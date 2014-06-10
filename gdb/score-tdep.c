@@ -1447,6 +1447,12 @@ score7_linux_supply_gregset(const struct regset *regset,
   }
 }
 
+static const struct regset score7_linux_gregset =
+  {
+    NULL,
+    score7_linux_supply_gregset, NULL
+  };
+
 /* Return the appropriate register set from the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
@@ -1454,20 +1460,11 @@ static const struct regset *
 score7_linux_regset_from_core_section(struct gdbarch *gdbarch,
                     const char *sect_name, size_t sect_size)
 {
-  struct gdbarch_tdep *tdep;
-
   gdb_assert (gdbarch != NULL);
   gdb_assert (sect_name != NULL);
 
-  tdep = gdbarch_tdep (gdbarch);
-
   if (strcmp(sect_name, ".reg") == 0 && sect_size == sizeof(elf_gregset_t))
-    {
-      if (tdep->gregset == NULL)
-	tdep->gregset = regset_alloc (gdbarch,
-				      score7_linux_supply_gregset, NULL);
-      return tdep->gregset;
-    }
+    return &score7_linux_gregset;
 
   return NULL;
 }
@@ -1476,7 +1473,6 @@ static struct gdbarch *
 score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   target_mach = info.bfd_arch_info->mach;
 
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -1484,8 +1480,7 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       return (arches->gdbarch);
     }
-  tdep = xcalloc(1, sizeof(struct gdbarch_tdep));
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch = gdbarch_alloc (&info, NULL);
 
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);

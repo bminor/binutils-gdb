@@ -186,6 +186,12 @@ extern struct bfd_link_hash_entry *bfd_wrapped_link_hash_lookup
   (bfd *, struct bfd_link_info *, const char *, bfd_boolean,
    bfd_boolean, bfd_boolean);
 
+/* If H is a wrapped symbol, ie. the symbol name starts with "__wrap_"
+   and the remainder is found in wrap_hash, return the real symbol.  */
+
+extern struct bfd_link_hash_entry *unwrap_hash_lookup
+  (struct bfd_link_info *, bfd *, struct bfd_link_hash_entry *);
+
 /* Traverse a link hash table.  */
 extern void bfd_link_hash_traverse
   (struct bfd_link_hash_table *,

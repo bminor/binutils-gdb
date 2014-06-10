@@ -541,7 +541,7 @@ elf32_d10v_relocate_section (bfd *output_bfd,
 #define ELF_MACHINE_ALT1	EM_CYGNUS_D10V
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_BIG_SYM          bfd_elf32_d10v_vec
+#define TARGET_BIG_SYM          d10v_elf32_vec
 #define TARGET_BIG_NAME		"elf32-d10v"
 
 #define elf_info_to_howto	             0

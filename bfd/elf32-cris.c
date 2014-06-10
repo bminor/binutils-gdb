@@ -4334,7 +4334,7 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #define ELF_MACHINE_CODE	EM_CRIS
 #define ELF_MAXPAGESIZE		0x2000
 
-#define TARGET_LITTLE_SYM	bfd_elf32_cris_vec
+#define TARGET_LITTLE_SYM	cris_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-cris"
 #define elf_symbol_leading_char 0
 
@@ -4403,7 +4403,7 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #undef TARGET_LITTLE_NAME
 #undef elf_symbol_leading_char
 
-#define TARGET_LITTLE_SYM bfd_elf32_us_cris_vec
+#define TARGET_LITTLE_SYM cris_elf32_us_vec
 #define TARGET_LITTLE_NAME "elf32-us-cris"
 #define elf_symbol_leading_char '_'
 #undef elf32_bed

@@ -37,7 +37,7 @@
 #include "nbsd-tdep.h"
 
 /* From <machine/reg.h>.  */
-const struct sparc_gregset sparc64nbsd_gregset =
+const struct sparc_gregmap sparc64nbsd_gregmap =
 {
   0 * 8,			/* "tstate" */
   1 * 8,			/* %pc */
@@ -56,7 +56,7 @@ sparc64nbsd_supply_gregset (const struct regset *regset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
-  sparc64_supply_gregset (&sparc64nbsd_gregset, regcache, regnum, gregs);
+  sparc64_supply_gregset (&sparc64nbsd_gregmap, regcache, regnum, gregs);
 }
 
 static void
@@ -64,7 +64,7 @@ sparc64nbsd_supply_fpregset (const struct regset *regset,
 			     struct regcache *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
-  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 
@@ -237,15 +237,25 @@ static const struct frame_unwind sparc64nbsd_sigcontext_frame_unwind =
 };
 
 
+static const struct regset sparc64nbsd_gregset =
+  {
+    NULL, sparc64nbsd_supply_gregset, NULL
+  };
+
+static const struct regset sparc64nbsd_fpregset =
+  {
+    NULL, sparc64nbsd_supply_fpregset, NULL
+  };
+
 static void
 sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = regset_alloc (gdbarch, sparc64nbsd_supply_gregset, NULL);
+  tdep->gregset = &sparc64nbsd_gregset;
   tdep->sizeof_gregset = 160;
 
-  tdep->fpregset = regset_alloc (gdbarch, sparc64nbsd_supply_fpregset, NULL);
+  tdep->fpregset =  &sparc64nbsd_fpregset;
   tdep->sizeof_fpregset = 272;
 
   /* Make sure we can single-step "new" syscalls.  */

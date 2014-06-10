@@ -151,13 +151,12 @@ as_warn_internal (char *file, unsigned int line, char *buffer)
   if (file)
     {
       if (line != 0)
-	fprintf (stderr, "%s:%u: ", file, line);
+	fprintf (stderr, "%s:%u: %s%s\n", file, line, _("Warning: "), buffer);
       else
-	fprintf (stderr, "%s: ", file);
+	fprintf (stderr, "%s: %s%s\n", file, _("Warning: "), buffer);
     }
-  fprintf (stderr, _("Warning: "));
-  fputs (buffer, stderr);
-  (void) putc ('\n', stderr);
+  else
+    fprintf (stderr, "%s%s\n", _("Warning: "), buffer);
 #ifndef NO_LISTING
   listing_warning (buffer);
 #endif
@@ -217,13 +216,12 @@ as_bad_internal (char *file, unsigned int line, char *buffer)
   if (file)
     {
       if (line != 0)
-	fprintf (stderr, "%s:%u: ", file, line);
+	fprintf (stderr, "%s:%u: %s%s\n", file, line, _("Error: "), buffer);
       else
-	fprintf (stderr, "%s: ", file);
+	fprintf (stderr, "%s: %s%s\n", file, _("Error: "), buffer);
     }
-  fprintf (stderr, _("Error: "));
-  fputs (buffer, stderr);
-  (void) putc ('\n', stderr);
+  else
+    fprintf (stderr, "%s%s\n", _("Error: "), buffer);
 #ifndef NO_LISTING
   listing_error (buffer);
 #endif

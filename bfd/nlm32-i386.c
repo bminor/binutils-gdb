@@ -423,7 +423,7 @@ static const struct nlm_backend_data nlm32_i386_backend =
 };
 
 #define TARGET_LITTLE_NAME		"nlm32-i386"
-#define TARGET_LITTLE_SYM		nlmNAME (i386_vec)
+#define TARGET_LITTLE_SYM		i386_nlm32_vec
 #define TARGET_BACKEND_DATA		& nlm32_i386_backend
 
 #include "nlm-target.h"

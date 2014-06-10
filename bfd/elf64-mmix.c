@@ -2902,7 +2902,7 @@ mmix_elf_relax_section (bfd *abfd,
    alignment.  */
 #define ELF_MAXPAGESIZE 0x100
 
-#define TARGET_BIG_SYM		bfd_elf64_mmix_vec
+#define TARGET_BIG_SYM		mmix_elf64_vec
 #define TARGET_BIG_NAME		"elf64-mmix"
 
 #define elf_info_to_howto_rel		NULL

@@ -2634,7 +2634,8 @@ Target_sparc<size, big_endian>::Scan::global(
 	// Make a dynamic relocation if necessary.
 	if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
 	  {
-	    if (gsym->may_need_copy_reloc())
+	    if (parameters->options().output_is_executable()
+		&& gsym->may_need_copy_reloc())
 	      {
 		target->copy_reloc(symtab, layout, object,
 				   data_shndx, output_section, gsym,
@@ -2723,7 +2724,8 @@ Target_sparc<size, big_endian>::Scan::global(
 		break;
 	      }
 
-	    if (gsym->may_need_copy_reloc())
+	    if (!parameters->options().output_is_position_independent()
+		&& gsym->may_need_copy_reloc())
 	      {
 		target->copy_reloc(symtab, layout, object,
 				   data_shndx, output_section, gsym, reloc);

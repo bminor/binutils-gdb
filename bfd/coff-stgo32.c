@@ -35,7 +35,7 @@
    To be compatible with any existing executables I have fixed this
    here and NOT in the DJGPP startup code.  */
 
-#define TARGET_SYM		go32stubbedcoff_vec
+#define TARGET_SYM		i386_coff_go32stubbed_vec
 #define TARGET_NAME		"coff-go32-exe"
 #define TARGET_UNDERSCORE	'_'
 #define COFF_GO32_EXE

@@ -3868,6 +3868,11 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 
 	  eh = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
+	  if (info->wrap_hash != NULL
+	      && (input_section->flags & SEC_DEBUGGING) != 0)
+	    eh = ((struct elf_link_hash_entry *)
+		  unwrap_hash_lookup (info, input_bfd, &eh->root));
+
 	  while (eh->root.type == bfd_link_hash_indirect
 		 || eh->root.type == bfd_link_hash_warning)
 	    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
@@ -4014,7 +4019,7 @@ const struct elf_size_info hppa64_elf_size_info =
   bfd_elf64_swap_reloca_out
 };
 
-#define TARGET_BIG_SYM			bfd_elf64_hppa_vec
+#define TARGET_BIG_SYM			hppa_elf64_vec
 #define TARGET_BIG_NAME			"elf64-hppa"
 #define ELF_ARCH			bfd_arch_hppa
 #define ELF_TARGET_ID			HPPA64_ELF_DATA
@@ -4096,7 +4101,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #include "elf64-target.h"
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM			bfd_elf64_hppa_linux_vec
+#define TARGET_BIG_SYM			hppa_elf64_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
 #undef ELF_OSABI

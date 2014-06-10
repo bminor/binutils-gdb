@@ -48,17 +48,6 @@ static int arscm_is_arch (SCM);
 
 /* Administrivia for arch smobs.  */
 
-/* The smob "mark" function for <gdb:arch>.  */
-
-static SCM
-arscm_mark_arch_smob (SCM self)
-{
-  arch_smob *a_smob = (arch_smob *) SCM_SMOB_DATA (self);
-
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&a_smob->base);
-}
-
 /* The smob "print" function for <gdb:arch>.  */
 
 static int
@@ -658,7 +647,6 @@ void
 gdbscm_initialize_arches (void)
 {
   arch_smob_tag = gdbscm_make_smob_type (arch_smob_name, sizeof (arch_smob));
-  scm_set_smob_mark (arch_smob_tag, arscm_mark_arch_smob);
   scm_set_smob_print (arch_smob_tag, arscm_print_arch_smob);
 
   gdbscm_define_functions (arch_functions, 1);

@@ -55,3 +55,17 @@
 #if !HAVE_DECL_STPCPY
 extern char *stpcpy (char *__dest, const char *__src);
 #endif
+
+/* Use sigsetjmp/siglongjmp without saving the signal mask if possible.
+   It is faster than setjmp/longjmp on systems where the signal mask is
+   saved.  */
+
+#if defined(HAVE_SIGSETJMP)
+#define OPCODES_SIGJMP_BUF		sigjmp_buf
+#define OPCODES_SIGSETJMP(buf)		sigsetjmp((buf), 0)
+#define OPCODES_SIGLONGJMP(buf,val)	siglongjmp((buf), (val))
+#else
+#define OPCODES_SIGJMP_BUF		jmp_buf
+#define OPCODES_SIGSETJMP(buf)		setjmp(buf)
+#define OPCODES_SIGLONGJMP(buf,val)	longjmp((buf), (val))
+#endif

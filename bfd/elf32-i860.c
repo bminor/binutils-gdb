@@ -1249,9 +1249,9 @@ elf32_i860_is_local_label_name (bfd *abfd, const char *name)
   return _bfd_elf_is_local_label_name (abfd, name);
 }
 
-#define TARGET_BIG_SYM		bfd_elf32_i860_vec
+#define TARGET_BIG_SYM		i860_elf32_vec
 #define TARGET_BIG_NAME		"elf32-i860"
-#define TARGET_LITTLE_SYM	bfd_elf32_i860_little_vec
+#define TARGET_LITTLE_SYM	i860_elf32_le_vec
 #define TARGET_LITTLE_NAME	"elf32-i860-little"
 #define ELF_ARCH		bfd_arch_i860
 #define ELF_MACHINE_CODE	EM_860

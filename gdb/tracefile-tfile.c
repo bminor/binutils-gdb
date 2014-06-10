@@ -853,6 +853,9 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       int pos = 0;
       enum target_xfer_status res;
+      /* Records the lowest available address of all blocks that
+	 intersects the requested range.  */
+      ULONGEST low_addr_available = 0;
 
       /* Iterate through the traceframe's blocks, looking for
 	 memory.  */
@@ -886,13 +889,19 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	      return TARGET_XFER_OK;
 	    }
 
+	  if (offset < maddr && maddr < (offset + len))
+	    if (low_addr_available == 0 || low_addr_available > maddr)
+	      low_addr_available = maddr;
+
 	  /* Skip over this block.  */
 	  pos += (8 + 2 + mlen);
 	}
 
       /* Requested memory is unavailable in the context of traceframes,
 	 and this address falls within a read-only section, fallback
-	 to reading from executable.  */
+	 to reading from executable, up to LOW_ADDR_AVAILABLE.  */
+      if (offset < low_addr_available)
+	len = min (len, low_addr_available - offset);
       res = exec_read_partial_read_only (readbuf, offset, len, xfered_len);
 
       if (res == TARGET_XFER_OK)

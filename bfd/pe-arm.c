@@ -34,9 +34,9 @@
 #include "bfd.h"
 
 #ifndef TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM    armpe_little_vec
+#define TARGET_LITTLE_SYM    arm_pe_le_vec
 #define TARGET_LITTLE_NAME   "pe-arm-little"
-#define TARGET_BIG_SYM       armpe_big_vec
+#define TARGET_BIG_SYM       arm_pe_be_vec
 #define TARGET_BIG_NAME      "pe-arm-big"
 #endif
 

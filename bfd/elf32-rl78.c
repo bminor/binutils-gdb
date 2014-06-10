@@ -1049,6 +1049,19 @@ rl78_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	    (*_bfd_error_handler) (_("- %s is G10, %s is not"),
 				   bfd_get_filename (ibfd), bfd_get_filename (obfd));
 	}
+
+      if (changed_flags & E_FLAG_RL78_64BIT_DOUBLES)
+	{
+	  (*_bfd_error_handler)
+	    (_("RL78 merge conflict: cannot link 32-bit and 64-bit objects together"));
+
+	  if (old_flags & E_FLAG_RL78_64BIT_DOUBLES)
+	    (*_bfd_error_handler) (_("- %s is 64-bit, %s is not"),
+				   bfd_get_filename (obfd), bfd_get_filename (ibfd));
+	  else
+	    (*_bfd_error_handler) (_("- %s is 64-bit, %s is not"),
+				   bfd_get_filename (ibfd), bfd_get_filename (obfd));
+	}    
     }
 
   return !error;
@@ -1070,6 +1083,9 @@ rl78_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 
   if (flags & E_FLAG_RL78_G10)
     fprintf (file, _(" [G10]"));
+
+  if (flags & E_FLAG_RL78_64BIT_DOUBLES)
+    fprintf (file, _(" [64-bit doubles]"));
 
   fputc ('\n', file);
   return TRUE;
@@ -2417,7 +2433,7 @@ rl78_elf_relax_section
 #define ELF_MACHINE_CODE	EM_RL78
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_LITTLE_SYM	bfd_elf32_rl78_vec
+#define TARGET_LITTLE_SYM	rl78_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-rl78"
 
 #define elf_info_to_howto_rel			NULL

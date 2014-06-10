@@ -88,6 +88,9 @@ struct thread_db
   td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
 				     psaddr_t map_address,
 				     size_t offset, psaddr_t *address);
+  td_err_e (*td_thr_tlsbase_p) (const td_thrhandle_t *th,
+				unsigned long int modid,
+				psaddr_t *base);
   const char ** (*td_symbol_list_p) (void);
 };
 
@@ -323,27 +326,33 @@ find_one_thread (ptid_t ptid)
 static int
 attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 {
+  struct process_info *proc = current_process ();
+  int pid = pid_of (proc);
+  ptid_t ptid = ptid_build (pid, ti_p->ti_lid, 0);
   struct lwp_info *lwp;
+  int err;
 
   if (debug_threads)
     debug_printf ("Attaching to thread %ld (LWP %d)\n",
 		  ti_p->ti_tid, ti_p->ti_lid);
-  linux_attach_lwp (ti_p->ti_lid);
-  lwp = find_lwp_pid (pid_to_ptid (ti_p->ti_lid));
-  if (lwp == NULL)
+  err = linux_attach_lwp (ptid);
+  if (err != 0)
     {
-      warning ("Could not attach to thread %ld (LWP %d)\n",
-	       ti_p->ti_tid, ti_p->ti_lid);
+      warning ("Could not attach to thread %ld (LWP %d): %s\n",
+	       ti_p->ti_tid, ti_p->ti_lid,
+	       linux_attach_fail_reason_string (ptid, err));
       return 0;
     }
 
+  lwp = find_lwp_pid (ptid);
+  gdb_assert (lwp != NULL);
   lwp->thread_known = 1;
   lwp->th = *th_p;
 
   if (thread_db_use_events)
     {
       td_err_e err;
-      struct thread_db *thread_db = current_process ()->private->thread_db;
+      struct thread_db *thread_db = proc->private->thread_db;
 
       err = thread_db->td_thr_event_enable_p (th_p, 1);
       if (err != TD_OK)
@@ -497,7 +506,10 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   if (thread_db == NULL || !thread_db->all_symbols_looked_up)
     return TD_ERR;
 
-  if (thread_db->td_thr_tls_get_addr_p == NULL)
+  /* If td_thr_tls_get_addr is missing rather do not expect td_thr_tlsbase
+     could work.  */
+  if (thread_db->td_thr_tls_get_addr_p == NULL
+      || (load_module == 0 && thread_db->td_thr_tlsbase_p == NULL))
     return -1;
 
   lwp = get_thread_lwp (thread);
@@ -508,12 +520,28 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 
   saved_inferior = current_inferior;
   current_inferior = thread;
-  /* Note the cast through uintptr_t: this interface only works if
-     a target address fits in a psaddr_t, which is a host pointer.
-     So a 32-bit debugger can not access 64-bit TLS through this.  */
-  err = thread_db->td_thr_tls_get_addr_p (&lwp->th,
-					  (psaddr_t) (uintptr_t) load_module,
-					  offset, &addr);
+
+  if (load_module != 0)
+    {
+      /* Note the cast through uintptr_t: this interface only works if
+	 a target address fits in a psaddr_t, which is a host pointer.
+	 So a 32-bit debugger can not access 64-bit TLS through this.  */
+      err = thread_db->td_thr_tls_get_addr_p (&lwp->th,
+					     (psaddr_t) (uintptr_t) load_module,
+					      offset, &addr);
+    }
+  else
+    {
+      /* This code path handles the case of -static -pthread executables:
+	 https://sourceware.org/ml/libc-help/2014-03/msg00024.html
+	 For older GNU libc r_debug.r_map is NULL.  For GNU libc after
+	 PR libc/16831 due to GDB PR threads/16954 LOAD_MODULE is also NULL.
+	 The constant number 1 depends on GNU __libc_setup_tls
+	 initialization of l_tls_modid to 1.  */
+      err = thread_db->td_thr_tlsbase_p (&lwp->th, 1, &addr);
+      addr = (char *) addr + offset;
+    }
+
   current_inferior = saved_inferior;
   if (err == TD_OK)
     {
@@ -565,6 +593,7 @@ thread_db_load_search (void)
   tdb->td_ta_set_event_p = &td_ta_set_event;
   tdb->td_ta_event_getmsg_p = &td_ta_event_getmsg;
   tdb->td_thr_tls_get_addr_p = &td_thr_tls_get_addr;
+  tdb->td_thr_tlsbase_p = &td_thr_tlsbase;
 
   return 1;
 }
@@ -633,6 +662,7 @@ try_thread_db_load_1 (void *handle)
   CHK (0, tdb->td_ta_set_event_p = dlsym (handle, "td_ta_set_event"));
   CHK (0, tdb->td_ta_event_getmsg_p = dlsym (handle, "td_ta_event_getmsg"));
   CHK (0, tdb->td_thr_tls_get_addr_p = dlsym (handle, "td_thr_tls_get_addr"));
+  CHK (0, tdb->td_thr_tlsbase_p = dlsym (handle, "td_thr_tlsbase"));
 
 #undef CHK
 

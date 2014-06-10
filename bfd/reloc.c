@@ -784,10 +784,6 @@ space consuming.  For each target:
 	    }
 	}
     }
-  else
-    {
-      reloc_entry->addend = 0;
-    }
 
   /* FIXME: This overflow checking is incomplete, because the value
      might have overflowed before we get here.  For a correct check we

@@ -114,7 +114,8 @@
  WP_ACCESS
 
  make-breakpoint
- breakpoint-delete!
+ register-breakpoint!
+ delete-breakpoint!
  breakpoints
  breakpoint?
  breakpoint-valid?
@@ -140,6 +141,34 @@
  breakpoint-stop
  set-breakpoint-stop!
  breakpoint-commands
+
+ ;; scm-cmd.c
+
+ make-command
+ register-command!
+ command?
+ command-valid?
+ dont-repeat
+
+ COMPLETE_NONE
+ COMPLETE_FILENAME
+ COMPLETE_LOCATION
+ COMPLETE_COMMAND
+ COMPLETE_SYMBOL
+ COMPLETE_EXPRESSION
+
+ COMMAND_NONE
+ COMMAND_RUNNING
+ COMMAND_DATA
+ COMMAND_STACK
+ COMMAND_FILES
+ COMMAND_SUPPORT
+ COMMAND_STATUS
+ COMMAND_BREAKPOINTS
+ COMMAND_TRACEPOINTS
+ COMMAND_OBSCURE
+ COMMAND_MAINTENANCE
+ COMMAND_USER
 
  ;; scm-disasm.c
 
@@ -169,6 +198,7 @@
  FRAME_UNWIND_INNER_ID
  FRAME_UNWIND_SAME_ID
  FRAME_UNWIND_NO_SAVED_PC
+ FRAME_UNWIND_MEMORY_ERROR
 
  frame?
  frame-valid?
@@ -246,6 +276,26 @@
  current-objfile
  objfiles
 
+ ;; scm-param.c
+
+ PARAM_BOOLEAN
+ PARAM_AUTO_BOOLEAN
+ PARAM_ZINTEGER
+ PARAM_UINTEGER
+ PARAM_ZUINTEGER
+ PARAM_ZUINTEGER_UNLIMITED
+ PARAM_STRING
+ PARAM_STRING_NOESCAPE
+ PARAM_OPTIONAL_FILENAME
+ PARAM_FILENAME
+ PARAM_ENUM
+
+ make-parameter
+ register-parameter!
+ parameter?
+ parameter-value
+ set-parameter-value!
+
  ;; scm-ports.c
 
  input-port
@@ -270,13 +320,20 @@
  make-pretty-printer-worker
  pretty-printer-worker?
 
- ;; scm-smob.c
+ ;; scm-progspace.c
 
- gsmob-kind
- gsmob-property
- set-gsmob-property!
- gsmob-has-property?
- gsmob-properties
+ progspace?
+ progspace-valid?
+ progspace-filename
+ progspace-objfiles
+ progspace-pretty-printers
+ set-progspace-pretty-printers!
+ current-progspace
+ progspaces
+
+ ;; scm-gsmob.c
+
+ gdb-object-kind
 
  ;; scm-string.c
 
@@ -434,10 +491,6 @@
 )
 
 ;; Load the rest of the Scheme side.
-;; data-directory is provided by the C code.
-
-(add-to-load-path
- (string-append (data-directory) file-name-separator-string "guile"))
 
 (use-modules ((gdb init)))
 
@@ -449,4 +502,5 @@
  orig-input-port
  orig-output-port
  orig-error-port
+ throw-user-error
 )

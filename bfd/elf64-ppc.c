@@ -56,9 +56,9 @@ static bfd_reloc_status_type ppc64_elf_unhandled_reloc
 static bfd_vma opd_entry_value
   (asection *, bfd_vma, asection **, bfd_vma *, bfd_boolean);
 
-#define TARGET_LITTLE_SYM	bfd_elf64_powerpcle_vec
+#define TARGET_LITTLE_SYM	powerpc_elf64_le_vec
 #define TARGET_LITTLE_NAME	"elf64-powerpcle"
-#define TARGET_BIG_SYM		bfd_elf64_powerpc_vec
+#define TARGET_BIG_SYM		powerpc_elf64_vec
 #define TARGET_BIG_NAME		"elf64-powerpc"
 #define ELF_ARCH		bfd_arch_powerpc
 #define ELF_TARGET_ID		PPC64_ELF_DATA
@@ -173,6 +173,7 @@ static bfd_vma opd_entry_value
 
 #define LD_R2_0R1	0xe8410000	/* ld    %r2,0(%r1)      */
 
+#define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha     */
 #define ADDIS_R12_R12	0x3d8c0000	/* addis %r12,%r12,xxx@ha */
 #define LD_R12_0R12	0xe98c0000	/* ld    %r12,xxx@l(%r12) */
 
@@ -10246,8 +10247,16 @@ build_plt_stub (struct ppc_link_hash_table *htab,
       if (ALWAYS_EMIT_R2SAVE
 	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
 	bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p),	p += 4;
-      bfd_put_32 (obfd, ADDIS_R11_R2 | PPC_HA (offset), p),	p += 4;
-      bfd_put_32 (obfd, LD_R12_0R11 | PPC_LO (offset), p),	p += 4;
+      if (plt_load_toc)
+	{
+	  bfd_put_32 (obfd, ADDIS_R11_R2 | PPC_HA (offset), p),	p += 4;
+	  bfd_put_32 (obfd, LD_R12_0R11 | PPC_LO (offset), p),	p += 4;
+	}
+      else
+	{
+	  bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
+	  bfd_put_32 (obfd, LD_R12_0R12 | PPC_LO (offset), p),	p += 4;
+	}
       if (plt_load_toc
 	  && PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
 	{
@@ -10668,10 +10677,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    {
 	      size = 16;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDIS_R11_R2 | PPC_HA (off), loc);
+			  ADDIS_R12_R2 | PPC_HA (off), loc);
 	      loc += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  LD_R12_0R11 | PPC_LO (off), loc);
+			  LD_R12_0R12 | PPC_LO (off), loc);
 	    }
 	  else
 	    {
@@ -10697,10 +10706,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    {
 	      size += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDIS_R11_R2 | PPC_HA (off), loc);
+			  ADDIS_R12_R2 | PPC_HA (off), loc);
 	      loc += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  LD_R12_0R11 | PPC_LO (off), loc);
+			  LD_R12_0R12 | PPC_LO (off), loc);
 	    }
 	  else
 	    bfd_put_32 (htab->params->stub_bfd, LD_R12_0R2 | PPC_LO (off), loc);
@@ -14639,14 +14648,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  enum complain_overflow complain = complain_overflow_signed;
 
 	  insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
-	  if (howto->rightshift == 0
-	      ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
-		 || (insn & (0x3f << 26)) == 24u << 26 /* ori */
-		 || (insn & (0x3f << 26)) == 26u << 26 /* xori */
-		 || (insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
-	      : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
-		 || (insn & (0x3f << 26)) == 25u << 26 /* oris */
-		 || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
+	  if ((insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
+	    complain = complain_overflow_bitfield;
+	  else if (howto->rightshift == 0
+		   ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
+		      || (insn & (0x3f << 26)) == 24u << 26 /* ori */
+		      || (insn & (0x3f << 26)) == 26u << 26 /* xori */)
+		   : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
+		      || (insn & (0x3f << 26)) == 25u << 26 /* oris */
+		      || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
 	    complain = complain_overflow_unsigned;
 	  if (howto->complain_on_overflow != complain)
 	    {
@@ -15090,7 +15100,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 #undef  TARGET_LITTLE_NAME
 
 #undef  TARGET_BIG_SYM
-#define TARGET_BIG_SYM	bfd_elf64_powerpc_freebsd_vec
+#define TARGET_BIG_SYM	powerpc_elf64_fbsd_vec
 #undef  TARGET_BIG_NAME
 #define TARGET_BIG_NAME "elf64-powerpc-freebsd"
 

@@ -221,12 +221,7 @@ cp_is_anonymous (const char *namespace)
    we're looking for, BLOCK is the block that we're searching within,
    DOMAIN says what kind of symbols we're looking for, and if SYMTAB
    is non-NULL, we should store the symtab where we found the symbol
-   in it.
-
-   Class, union, and enum tag names may be used in C++ without specifying
-   class-key or enum.  If searching for a VAR_DOMAIN symbol fails,
-   this function will search STRUCT_DOMAIN.  [This is actually done in
-   cp_lookup_symbol_in_namespace.]  */
+   in it.  */
 
 struct symbol *
 cp_lookup_symbol_nonlocal (const char *name,
@@ -247,10 +242,7 @@ cp_lookup_symbol_nonlocal (const char *name,
 
 /* Look up NAME in the C++ namespace NAMESPACE.  Other arguments are
    as in cp_lookup_symbol_nonlocal.  If SEARCH is non-zero, search
-   through base classes for a matching symbol.
-
-   If DOMAIN is VAR_DOMAIN and no matching symbol exists in that domain,
-   this function will search STRUCT_DOMAIN for a match.  */
+   through base classes for a matching symbol.  */
 
 static struct symbol *
 cp_lookup_symbol_in_namespace (const char *namespace,
@@ -260,30 +252,18 @@ cp_lookup_symbol_in_namespace (const char *namespace,
 {
   if (namespace[0] == '\0')
     {
-      struct symbol *sym = lookup_symbol_file (name, block, domain, 0, search);
-
-      if (sym == NULL && domain == VAR_DOMAIN)
-	sym = lookup_symbol_file (name, block, STRUCT_DOMAIN, 0, search);
-
-      return sym;
+      return lookup_symbol_file (name, block, domain, 0, search);
     }
   else
     {
-      struct symbol *sym;
       char *concatenated_name = alloca (strlen (namespace) + 2
 					+ strlen (name) + 1);
 
       strcpy (concatenated_name, namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, name);
-      sym = lookup_symbol_file (concatenated_name, block, domain,
-				cp_is_anonymous (namespace), search);
-
-      if (sym == NULL && domain == VAR_DOMAIN)
-	sym = lookup_symbol_file (concatenated_name, block, STRUCT_DOMAIN,
-				  cp_is_anonymous (namespace), search);
-
-      return sym;
+      return lookup_symbol_file (concatenated_name, block, domain,
+				 cp_is_anonymous (namespace), search);
     }
 }
 
@@ -536,12 +516,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
  /* Searches for NAME in the current namespace, and by applying
     relevant import statements belonging to BLOCK and its parents.
     SCOPE is the namespace scope of the context in which the search is
-    being evaluated.
-
-    Class, union, and enum tag names may be used in C++ without specifying
-    class-key or enum.  If searching for a VAR_DOMAIN symbol fails,
-    this function will search STRUCT_DOMAIN.  [This is done in
-    cp_lookup_symbol_in_namespace.]  */
+    being evaluated.  */
 
 struct symbol*
 cp_lookup_symbol_namespace (const char *scope,
@@ -718,7 +693,7 @@ lookup_symbol_file (const char *name,
 
       /* Lookup a class named KLASS.  If none is found, there is nothing
 	 more that can be done.  */
-      klass_sym = lookup_symbol_global (klass, block, STRUCT_DOMAIN);
+      klass_sym = lookup_symbol_global (klass, block, domain);
       if (klass_sym == NULL)
 	{
 	  do_cleanups (cleanup);

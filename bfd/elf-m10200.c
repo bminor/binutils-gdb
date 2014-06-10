@@ -1374,7 +1374,7 @@ mn10200_elf_get_relocated_section_contents (bfd *output_bfd,
   return NULL;
 }
 
-#define TARGET_LITTLE_SYM	bfd_elf32_mn10200_vec
+#define TARGET_LITTLE_SYM	mn10200_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10200"
 #define ELF_ARCH		bfd_arch_mn10200
 #define ELF_MACHINE_CODE	EM_MN10200

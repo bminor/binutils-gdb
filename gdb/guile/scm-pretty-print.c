@@ -127,20 +127,6 @@ static SCM ppscm_string_string;
 
 /* Administrivia for pretty-printer matcher smobs.  */
 
-/* The smob "mark" function for <gdb:pretty-printer>.  */
-
-static SCM
-ppscm_mark_pretty_printer_smob (SCM self)
-{
-  pretty_printer_smob *pp_smob = (pretty_printer_smob *) SCM_SMOB_DATA (self);
-
-  scm_gc_mark (pp_smob->name);
-  scm_gc_mark (pp_smob->enabled);
-  scm_gc_mark (pp_smob->lookup);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&pp_smob->base);
-}
-
 /* The smob "print" function for <gdb:pretty-printer>.  */
 
 static int
@@ -256,21 +242,6 @@ gdbscm_set_pretty_printer_enabled_x (SCM self, SCM enabled)
 
 /* Administrivia for pretty-printer-worker smobs.
    These are created when a matcher recognizes a value.  */
-
-/* The smob "mark" function for <gdb:pretty-printer-worker>.  */
-
-static SCM
-ppscm_mark_pretty_printer_worker_smob (SCM self)
-{
-  pretty_printer_worker_smob *w_smob
-    = (pretty_printer_worker_smob *) SCM_SMOB_DATA (self);
-
-  scm_gc_mark (w_smob->display_hint);
-  scm_gc_mark (w_smob->to_string);
-  scm_gc_mark (w_smob->children);
-  /* Do this last.  */
-  return gdbscm_mark_gsmob (&w_smob->base);
-}
 
 /* The smob "print" function for <gdb:pretty-printer-worker>.  */
 
@@ -470,7 +441,11 @@ ppscm_find_pretty_printer_from_objfiles (SCM value)
 static SCM
 ppscm_find_pretty_printer_from_progspace (SCM value)
 {
-  return SCM_BOOL_F; /*TODO*/
+  pspace_smob *p_smob = psscm_pspace_smob_from_pspace (current_program_space);
+  SCM pp
+    = ppscm_search_pp_list (psscm_pspace_smob_pretty_printers (p_smob), value);
+
+  return pp;
 }
 
 /* Subroutine of find_pretty_printer to simplify it.
@@ -1108,16 +1083,12 @@ gdbscm_initialize_pretty_printers (void)
   pretty_printer_smob_tag
     = gdbscm_make_smob_type (pretty_printer_smob_name,
 			     sizeof (pretty_printer_smob));
-  scm_set_smob_mark (pretty_printer_smob_tag,
-		     ppscm_mark_pretty_printer_smob);
   scm_set_smob_print (pretty_printer_smob_tag,
 		      ppscm_print_pretty_printer_smob);
 
   pretty_printer_worker_smob_tag
     = gdbscm_make_smob_type (pretty_printer_worker_smob_name,
 			     sizeof (pretty_printer_worker_smob));
-  scm_set_smob_mark (pretty_printer_worker_smob_tag,
-		     ppscm_mark_pretty_printer_worker_smob);
   scm_set_smob_print (pretty_printer_worker_smob_tag,
 		      ppscm_print_pretty_printer_worker_smob);
 

@@ -97,7 +97,7 @@ tilegx_linux_supply_regset (const struct regset *regset,
 }
 
 /* TILE-Gx Linux kernel register set.  */
-static struct regset tilegx_linux_regset =
+static const struct regset tilegx_linux_regset =
 {
   NULL,
   tilegx_linux_supply_regset

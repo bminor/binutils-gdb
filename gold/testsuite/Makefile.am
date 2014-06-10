@@ -517,6 +517,16 @@ two_file_pie_test: two_file_test_1_pie.o two_file_test_1b_pie.o \
 		two_file_test_2_pie.o two_file_test_main_pie.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -pie two_file_test_1_pie.o two_file_test_1b_pie.o two_file_test_2_pie.o two_file_test_main_pie.o
 
+check_PROGRAMS += pie_copyrelocs_test
+pie_copyrelocs_test_SOURCES = pie_copyrelocs_test.cc
+pie_copyrelocs_test_DEPENDENCIES = gcctestdir/ld pie_copyrelocs_shared_test.so
+pie_copyrelocs_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -pie
+pie_copyrelocs_test_LDADD = pie_copyrelocs_shared_test.so
+pie_copyrelocs_shared_test.o: pie_copyrelocs_shared_test.cc
+	$(CXXCOMPILE) -O2 -fpic -c -o $@ $<
+pie_copyrelocs_shared_test.so: pie_copyrelocs_shared_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared pie_copyrelocs_shared_test.o
+
 check_SCRIPTS += two_file_shared.sh
 check_DATA += two_file_shared.dbg
 MOSTLYCLEANFILES += two_file_shared.dbg
@@ -2198,6 +2208,50 @@ gdb_index_test_4.stdout: gdb_index_test_4
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 
 endif HAVE_PUBNAMES
+
+# Test that __ehdr_start is defined correctly.
+check_PROGRAMS += ehdr_start_test_1
+ehdr_start_test_1_SOURCES = ehdr_start_test.cc
+ehdr_start_test_1_DEPENDENCIES = gcctestdir/ld
+ehdr_start_test_1_CXXFLAGS =
+ehdr_start_test_1_LDFLAGS = -Bgcctestdir/
+ehdr_start_test_1_LDADD =
+
+# Test that __ehdr_start is defined correctly with a weak reference.
+check_PROGRAMS += ehdr_start_test_2
+ehdr_start_test_2_SOURCES = ehdr_start_test.cc
+ehdr_start_test_2_DEPENDENCIES = gcctestdir/ld
+ehdr_start_test_2_CXXFLAGS = -DEHDR_START_WEAK
+ehdr_start_test_2_LDFLAGS = -Bgcctestdir/
+ehdr_start_test_2_LDADD =
+
+# Test that __ehdr_start is defined correctly when used with a linker script.
+check_PROGRAMS += ehdr_start_test_3
+ehdr_start_test_3_SOURCES = ehdr_start_test.cc
+ehdr_start_test_3_DEPENDENCIES = gcctestdir/ld $(srcdir)/ehdr_start_test.t
+ehdr_start_test_3_CXXFLAGS = -DEHDR_START_WEAK
+ehdr_start_test_3_LDFLAGS = -Bgcctestdir/ -Wl,-T,$(srcdir)/ehdr_start_test.t
+ehdr_start_test_3_LDADD =
+
+# Test that __ehdr_start is left undefined when the text segment is not
+# appropriately aligned.
+check_SCRIPTS += ehdr_start_test_4.sh
+check_DATA += ehdr_start_test_4.syms
+MOSTLYCLEANFILES += ehdr_start_test_4
+ehdr_start_test_4.syms: ehdr_start_test_4
+	$(TEST_NM) ehdr_start_test_4 > $@
+ehdr_start_test_4: ehdr_start_test_4.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,-Ttext=0x100100 $<
+ehdr_start_test_4.o: ehdr_start_test.cc
+	$(CXXCOMPILE) -c -DEHDR_START_WEAK -o $@ $<
+
+# Test that __ehdr_start is not overridden when supplied by the user.
+check_PROGRAMS += ehdr_start_test_5
+ehdr_start_test_5_SOURCES = ehdr_start_test.cc ehdr_start_def.cc
+ehdr_start_test_5_DEPENDENCIES = gcctestdir/ld
+ehdr_start_test_5_CXXFLAGS = -DEHDR_START_USER_DEF
+ehdr_start_test_5_LDFLAGS = -Bgcctestdir/
+ehdr_start_test_5_LDADD =
 
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.

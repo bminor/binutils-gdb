@@ -112,8 +112,6 @@ struct asneeded_minfo **asneeded_list_tail;
     DEFINED() need to increment this at the start of the traversal.  */
 int lang_statement_iteration = 0;
 
-etree_type *base; /* Relocation base - or null */
-
 /* Return TRUE if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
    wildcards, we do not consider the mere presence of a backslash to
@@ -1237,7 +1235,6 @@ lang_init (void)
 void
 lang_finish (void)
 {
-  bfd_link_hash_table_free (link_info.output_bfd, link_info.hash);
   bfd_hash_table_free (&lang_definedness_table);
   output_section_statement_table_free ();
 }
@@ -2123,6 +2120,8 @@ lang_map (void)
     }
   lang_statement_iteration++;
   print_statements ();
+
+  ldemul_extra_map_file_text (link_info.output_bfd, &link_info, config.map_file);
 }
 
 static bfd_boolean
@@ -3073,6 +3072,9 @@ lang_get_output_target (void)
   return default_target;
 }
 
+/* Stashed function to free link_info.hash; see open_output.  */
+void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
+
 /* Open the output file.  */
 
 static void
@@ -3151,6 +3153,18 @@ open_output (const char *name)
   link_info.hash = bfd_link_hash_table_create (link_info.output_bfd);
   if (link_info.hash == NULL)
     einfo (_("%P%F: can not create hash table: %E\n"));
+
+  /* We want to please memory leak checkers by deleting link_info.hash.
+     We can't do it in lang_finish, as a bfd target may hold references to
+     symbols in this table and use them when their _bfd_write_contents
+     function is invoked, as part of bfd_close on the output_bfd.  But,
+     output_bfd is deallocated at bfd_close, so we can't refer to
+     output_bfd after that time, and dereferencing it is needed to call
+     "bfd_link_hash_table_free".  Smash this dependency deadlock and grab
+     the function pointer; arrange to call it on link_info.hash in
+     ld_cleanup.  */
+  output_bfd_hash_table_free_fn
+    = link_info.output_bfd->xvec->_bfd_link_hash_table_free;
 
   bfd_set_gp_size (link_info.output_bfd, g_switch_value);
 }
@@ -4594,12 +4608,15 @@ size_input_section
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
+  asection *o = output_section_statement->bfd_section;
 
-  if (i->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
-      && (i->flags & SEC_EXCLUDE) == 0)
+  if (i->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+    i->output_offset = i->vma - o->vma;
+  else if ((i->flags & SEC_EXCLUDE) != 0)
+    i->output_offset = dot - o->vma;
+  else
     {
       bfd_size_type alignment_needed;
-      asection *o;
 
       /* Align this section first to the input sections requirement,
 	 then to the output section's requirement.  If this alignment
@@ -4609,7 +4626,6 @@ size_input_section
       if (output_section_statement->subsection_alignment != -1)
 	i->alignment_power = output_section_statement->subsection_alignment;
 
-      o = output_section_statement->bfd_section;
       if (o->alignment_power < i->alignment_power)
 	o->alignment_power = i->alignment_power;
 
@@ -4622,16 +4638,11 @@ size_input_section
 	}
 
       /* Remember where in the output section this input section goes.  */
-
       i->output_offset = dot - o->vma;
 
       /* Mark how big the output section must be to contain this now.  */
       dot += TO_ADDR (i->size);
       o->size = TO_SIZE (dot - o->vma);
-    }
-  else
-    {
-      i->output_offset = i->vma - output_section_statement->bfd_section->vma;
     }
 
   return dot;

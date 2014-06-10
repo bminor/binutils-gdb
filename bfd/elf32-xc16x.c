@@ -462,7 +462,7 @@ elf32_xc16x_object_p (bfd *abfd)
 #define ELF_MACHINE_CODE	EM_XC16X
 #define ELF_MAXPAGESIZE		0x100
 
-#define TARGET_LITTLE_SYM       bfd_elf32_xc16x_vec
+#define TARGET_LITTLE_SYM       xc16x_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-xc16x"
 #define elf_backend_final_write_processing	elf32_xc16x_final_write_processing
 #define elf_backend_object_p   		elf32_xc16x_object_p

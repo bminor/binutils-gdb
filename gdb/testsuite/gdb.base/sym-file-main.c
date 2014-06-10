@@ -42,6 +42,8 @@ main (int argc, const char *argv[])
   char *text_addr = NULL;
   int (*pbar) () = NULL;
   int (*pfoo) (int) = NULL;
+  int (*pbaz) () = NULL;
+  int i;
 
   lib = load_shlib (file);
   if (lib == NULL)
@@ -64,8 +66,28 @@ main (int argc, const char *argv[])
 
   (*pfoo) (2);
 
-  /* Notify GDB to remove the symbol file.  */
+  /* Unload the library, invalidating all memory breakpoints.  */
+  unload_shlib (lib);
+
+  /* Notify GDB to remove the symbol file.  Also check that GDB
+     doesn't complain that it can't remove breakpoints from the
+     unmapped library.  */
   gdb_remove_symbol_file (text_addr);
 
-  return 0;
+  /* Reload the library.  */
+  lib = load_shlib (file); /* reload lib here */
+  if (lib == NULL)
+    return 1;
+
+  if (get_text_addr (lib,  (void **) &text_addr) != 0)
+    return 1;
+
+  gdb_add_symbol_file (text_addr, file);
+
+  if (lookup_function (lib, "baz", (void *) &pbaz) != 0)
+    return 1;
+
+  (*pbaz) ();
+
+  return 0; /* end here */
 }

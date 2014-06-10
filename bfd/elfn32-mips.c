@@ -83,8 +83,8 @@ static bfd_boolean elf32_mips_grok_psinfo
 static irix_compat_t elf_n32_mips_irix_compat
   (bfd *);
 
-extern const bfd_target bfd_elf32_nbigmips_vec;
-extern const bfd_target bfd_elf32_nlittlemips_vec;
+extern const bfd_target mips_elf32_n_be_vec;
+extern const bfd_target mips_elf32_n_le_vec;
 
 /* Nonzero if ABFD is using the N32 ABI.  */
 #define ABI_N32_P(abfd) \
@@ -3354,8 +3354,8 @@ elf32_mips_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 static irix_compat_t
 elf_n32_mips_irix_compat (bfd *abfd)
 {
-  if ((abfd->xvec == &bfd_elf32_nbigmips_vec)
-      || (abfd->xvec == &bfd_elf32_nlittlemips_vec))
+  if ((abfd->xvec == &mips_elf32_n_be_vec)
+      || (abfd->xvec == &mips_elf32_n_le_vec))
     return ict_irix6;
   else
     return ict_none;
@@ -3493,9 +3493,9 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 
 /* Support for SGI-ish mips targets using n32 ABI.  */
 
-#define TARGET_LITTLE_SYM               bfd_elf32_nlittlemips_vec
+#define TARGET_LITTLE_SYM               mips_elf32_n_le_vec
 #define TARGET_LITTLE_NAME              "elf32-nlittlemips"
-#define TARGET_BIG_SYM                  bfd_elf32_nbigmips_vec
+#define TARGET_BIG_SYM                  mips_elf32_n_be_vec
 #define TARGET_BIG_NAME                 "elf32-nbigmips"
 
 #define ELF_MAXPAGESIZE			0x10000
@@ -3512,9 +3512,9 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #undef ELF_MAXPAGESIZE
 #undef ELF_COMMONPAGESIZE
 
-#define TARGET_LITTLE_SYM               bfd_elf32_ntradlittlemips_vec
+#define TARGET_LITTLE_SYM               mips_elf32_ntrad_le_vec
 #define TARGET_LITTLE_NAME              "elf32-ntradlittlemips"
-#define TARGET_BIG_SYM                  bfd_elf32_ntradbigmips_vec
+#define TARGET_BIG_SYM                  mips_elf32_ntrad_be_vec
 #define TARGET_BIG_NAME                 "elf32-ntradbigmips"
 
 #define ELF_MAXPAGESIZE			0x10000
@@ -3532,9 +3532,9 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #undef TARGET_BIG_SYM
 #undef TARGET_BIG_NAME
 
-#define	TARGET_LITTLE_SYM		bfd_elf32_ntradlittlemips_freebsd_vec
+#define	TARGET_LITTLE_SYM		mips_elf32_ntradfbsd_le_vec
 #define	TARGET_LITTLE_NAME		"elf32-ntradlittlemips-freebsd"
-#define	TARGET_BIG_SYM			bfd_elf32_ntradbigmips_freebsd_vec
+#define	TARGET_BIG_SYM			mips_elf32_ntradfbsd_be_vec
 #define	TARGET_BIG_NAME			"elf32-ntradbigmips-freebsd"
 
 #undef	ELF_OSABI

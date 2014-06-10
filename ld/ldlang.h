@@ -505,7 +505,6 @@ extern lang_output_section_statement_type *abs_output_section;
 extern lang_statement_list_type lang_output_section_statement;
 extern struct lang_input_statement_flags input_flags;
 extern bfd_boolean lang_has_input_file;
-extern etree_type *base;
 extern lang_statement_list_type *stat_ptr;
 extern bfd_boolean delete_output_file_on_failure;
 
@@ -517,6 +516,8 @@ extern lang_statement_list_type input_file_chain;
 
 extern int lang_statement_iteration;
 extern struct asneeded_minfo **asneeded_list_tail;
+
+extern void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
 
 extern void lang_init
   (void);

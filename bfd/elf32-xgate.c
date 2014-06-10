@@ -702,7 +702,7 @@ elf32_xgate_post_process_headers (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_in
 
 #define ELF_MAXPAGESIZE                      0x1000
 
-#define TARGET_BIG_SYM                       bfd_elf32_xgate_vec
+#define TARGET_BIG_SYM                       xgate_elf32_vec
 #define TARGET_BIG_NAME                      "elf32-xgate"
 
 #define elf_info_to_howto                    0

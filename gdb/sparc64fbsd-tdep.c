@@ -34,7 +34,7 @@
 #include "solib-svr4.h"
 
 /* From <machine/reg.h>.  */
-const struct sparc_gregset sparc64fbsd_gregset =
+const struct sparc_gregmap sparc64fbsd_gregmap =
 {
   26 * 8,			/* "tstate" */
   25 * 8,			/* %pc */
@@ -53,7 +53,7 @@ sparc64fbsd_supply_gregset (const struct regset *regset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
-  sparc64_supply_gregset (&sparc64fbsd_gregset, regcache, regnum, gregs);
+  sparc64_supply_gregset (&sparc64fbsd_gregmap, regcache, regnum, gregs);
 }
 
 static void
@@ -61,7 +61,7 @@ sparc64fbsd_collect_gregset (const struct regset *regset,
 			     const struct regcache *regcache,
 			     int regnum, void *gregs, size_t len)
 {
-  sparc64_collect_gregset (&sparc64fbsd_gregset, regcache, regnum, gregs);
+  sparc64_collect_gregset (&sparc64fbsd_gregmap, regcache, regnum, gregs);
 }
 
 static void
@@ -69,7 +69,7 @@ sparc64fbsd_supply_fpregset (const struct regset *regset,
 			     struct regcache *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
-  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 static void
@@ -77,7 +77,7 @@ sparc64fbsd_collect_fpregset (const struct regset *regset,
 			      const struct regcache *regcache,
 			      int regnum, void *fpregs, size_t len)
 {
-  sparc64_collect_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
+  sparc64_collect_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 
@@ -209,17 +209,25 @@ static const struct frame_unwind sparc64fbsd_sigtramp_frame_unwind =
 };
 
 
+static const struct regset sparc64fbsd_gregset =
+  {
+    NULL, sparc64fbsd_supply_gregset, sparc64fbsd_collect_gregset
+  };
+
+static const struct regset sparc64fbsd_fpregset =
+  {
+    NULL, sparc64fbsd_supply_fpregset, sparc64fbsd_collect_fpregset
+  };
+
 static void
 sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = regset_alloc (gdbarch, sparc64fbsd_supply_gregset,
-				sparc64fbsd_collect_gregset);
+  tdep->gregset = &sparc64fbsd_gregset;
   tdep->sizeof_gregset = 256;
 
-  tdep->fpregset = regset_alloc (gdbarch, sparc64fbsd_supply_fpregset,
-				 sparc64fbsd_collect_fpregset);
+  tdep->fpregset = &sparc64fbsd_fpregset;
   tdep->sizeof_fpregset = 272;
 
   frame_unwind_append_unwinder (gdbarch, &sparc64fbsd_sigtramp_frame_unwind);

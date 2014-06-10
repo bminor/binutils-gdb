@@ -141,6 +141,20 @@ const Define_symbol_in_segment in_segment[] =
     true			// only_if_ref
   },
   {
+    "__ehdr_start",		// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF(0),		// segment_flags_set
+    elfcpp::PF(0),		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_HIDDEN,		// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_START,	// offset_from_base
+    true			// only_if_ref
+  },
+  {
     "etext",			// name
     elfcpp::PT_LOAD,		// segment_type
     elfcpp::PF_X,		// segment_flags_set

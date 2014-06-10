@@ -608,11 +608,11 @@ coff_i960_adjust_symndx (bfd *obfd ATTRIBUTE_UNUSED,
 
 #include "coffcode.h"
 
-extern const bfd_target icoff_big_vec;
+extern const bfd_target icoff_be_vec;
 
-CREATE_LITTLE_COFF_TARGET_VEC (icoff_little_vec, "coff-Intel-little", 0, 0, '_', & icoff_big_vec, COFF_SWAP_TABLE)
+CREATE_LITTLE_COFF_TARGET_VEC (icoff_le_vec, "coff-Intel-little", 0, 0, '_', & icoff_be_vec, COFF_SWAP_TABLE)
 
-const bfd_target icoff_big_vec =
+const bfd_target icoff_be_vec =
 {
   "coff-Intel-big",		/* name */
   bfd_target_coff_flavour,
@@ -653,7 +653,7 @@ bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      BFD_JUMP_TABLE_LINK (coff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  & icoff_little_vec,
+  & icoff_le_vec,
 
   COFF_SWAP_TABLE
 };

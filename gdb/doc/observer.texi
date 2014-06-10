@@ -94,6 +94,34 @@ the breakpoints were are stopped at, if any.  Second argument
 inferior has stopped.
 @end deftypefun
 
+@deftypefun void signal_received (enum gdb_signal @var{siggnal})
+The inferior was stopped by a signal.
+@end deftypefun
+
+@deftypefun void end_stepping_range (void)
+We are done with a step/next/si/ni command.
+@end deftypefun
+
+@deftypefun void signal_exited (enum gdb_signal @var{siggnal})
+The inferior was terminated by a signal.
+@end deftypefun
+
+@deftypefun void exited (int @var{exitstatus})
+The inferior program is finished.
+@end deftypefun
+
+@deftypefun void no_history (void)
+Reverse execution: target ran out of history info.
+@end deftypefun
+
+@deftypefun void sync_execution_done (void)
+A synchronous command finished.
+@end deftypefun
+
+@deftypefun void command_error (void)
+An error was caught while executing a command.
+@end deftypefun
+
 @deftypefun void target_changed (struct target_ops *@var{target})
 The target's register contents have changed.
 @end deftypefun

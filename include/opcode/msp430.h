@@ -26,7 +26,8 @@ struct msp430_operand_s
   int ol;	/* Operand length words.  */
   int am;	/* Addr mode.  */
   int reg;	/* Register.  */
-  int mode;	/* Pperand mode.  */
+  int mode;	/* Operand mode.  */
+  int vshift;   /* Number of bytes to shift operand down.  */
 #define OP_REG		0
 #define OP_EXP		1
 #ifndef DASM_SECTION

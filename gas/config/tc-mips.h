@@ -194,4 +194,7 @@ extern int tc_mips_regname_to_dw2regnum (char *regname);
    64-bit form for n64 CFIs.  */
 #define CFI_DIFF_EXPR_OK 0
 
+#define CONVERT_SYMBOLIC_ATTRIBUTE(name) mips_convert_symbolic_attribute (name)
+extern int mips_convert_symbolic_attribute (const char *);
+
 #endif /* TC_MIPS */

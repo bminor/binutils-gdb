@@ -1141,6 +1141,24 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
   return FALSE;
 }
 
+static bfd_boolean
+is_nondebug_keep_contents_section (bfd *ibfd, asection *isection)
+{
+  /* Always keep ELF note sections.  */
+  if (ibfd->xvec->flavour == bfd_target_elf_flavour)
+    return (elf_section_type (isection) == SHT_NOTE);
+
+  /* Always keep the .build-id section for PE/COFF.
+
+     Strictly, this should be written "always keep the section storing the debug
+     directory", but that may be the .text section for objects produced by some
+     tools, which it is not sensible to keep.  */
+  if (ibfd->xvec->flavour == bfd_target_coff_flavour)
+    return (strcmp (bfd_get_section_name (ibfd, isection), ".build-id") == 0);
+
+  return FALSE;
+}
+
 /* Return true if SYM is a hidden symbol.  */
 
 static bfd_boolean
@@ -2695,8 +2713,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
   else if (strip_symbols == STRIP_NONDEBUG
 	   && (flags & (SEC_ALLOC | SEC_GROUP)) != 0
-	   && !(ibfd->xvec->flavour == bfd_target_elf_flavour
-		&& elf_section_type (isection) == SHT_NOTE))
+           && !is_nondebug_keep_contents_section (ibfd, isection))
     {
       flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP);
       if (obfd->xvec->flavour == bfd_target_elf_flavour)

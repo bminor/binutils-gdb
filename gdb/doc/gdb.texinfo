@@ -885,10 +885,11 @@ This will cause @code{@value{GDBP}} to debug @code{gcc}, and to set
 @code{gcc}'s command-line arguments (@pxref{Arguments}) to @samp{-O2 -c foo.c}.
 
 You can run @code{@value{GDBP}} without printing the front material, which describes
-@value{GDBN}'s non-warranty, by specifying @code{-silent}:
+@value{GDBN}'s non-warranty, by specifying @code{--silent}
+(or @code{-q}/@code{--quiet}):
 
 @smallexample
-@value{GDBP} -silent
+@value{GDBP} --silent
 @end smallexample
 
 @noindent
@@ -1164,7 +1165,9 @@ Run @value{GDBN} using @var{directory} as its working directory,
 instead of the current directory.
 
 @item -data-directory @var{directory}
+@itemx -D @var{directory}
 @cindex @code{--data-directory}
+@cindex @code{-D}
 Run @value{GDBN} using @var{directory} as its data directory.
 The data directory is where @value{GDBN} searches for its
 auxiliary files.  @xref{Data Files}.
@@ -2146,6 +2149,57 @@ initialization file---such as @file{.cshrc} for C-shell,
 $@file{.zshenv} for the Z shell, or the file specified in the
 @samp{BASH_ENV} environment variable for BASH.
 
+@anchor{set auto-connect-native-target}
+@kindex set auto-connect-native-target
+@item set auto-connect-native-target
+@itemx set auto-connect-native-target on
+@itemx set auto-connect-native-target off
+@itemx show auto-connect-native-target
+
+By default, if not connected to any target yet (e.g., with
+@code{target remote}), the @code{run} command starts your program as a
+native process under @value{GDBN}, on your local machine.  If you're
+sure you don't want to debug programs on your local machine, you can
+tell @value{GDBN} to not connect to the native target automatically
+with the @code{set auto-connect-native-target off} command.
+
+If @code{on}, which is the default, and if @value{GDBN} is not
+connected to a target already, the @code{run} command automaticaly
+connects to the native target, if one is available.
+
+If @code{off}, and if @value{GDBN} is not connected to a target
+already, the @code{run} command fails with an error:
+
+@smallexample
+(@value{GDBP}) run
+Don't know how to run.  Try "help target".
+@end smallexample
+
+If @value{GDBN} is already connected to a target, @value{GDBN} always
+uses it with the @code{run} command.
+
+In any case, you can explicitly connect to the native target with the
+@code{target native} command.  For example,
+
+@smallexample
+(@value{GDBP}) set auto-connect-native-target off
+(@value{GDBP}) run
+Don't know how to run.  Try "help target".
+(@value{GDBP}) target native
+(@value{GDBP}) run
+Starting program: ./a.out
+[Inferior 1 (process 10421) exited normally]
+@end smallexample
+
+In case you connected explicitly to the @code{native} target,
+@value{GDBN} remains connected even if all inferiors exit, ready for
+the next @code{run} command.  Use the @code{disconnect} command to
+disconnect.
+
+Examples of other commands that likewise respect the
+@code{auto-connect-native-target} setting: @code{attach}, @code{info
+proc}, @code{info os}.
+
 @kindex set disable-randomization
 @item set disable-randomization
 @itemx set disable-randomization on
@@ -2281,7 +2335,7 @@ your program.  You can abbreviate @code{environment} as @code{env}.
 @item set environment @var{varname} @r{[}=@var{value}@r{]}
 Set environment variable @var{varname} to @var{value}.  The value
 changes for your program (and the shell @value{GDBN} uses to launch
-it), not for @value{GDBN} itself.  @var{value} may be any string; the
+it), not for @value{GDBN} itself.  The @var{value} may be any string; the
 values of environment variables are just strings, and any
 interpretation is supplied by your program itself.  The @var{value}
 parameter is optional; if it is eliminated, the variable is set to a
@@ -2591,7 +2645,7 @@ remove inferiors from the debugging session use the
 @kindex add-inferior
 @item add-inferior [ -copies @var{n} ] [ -exec @var{executable} ]
 Adds @var{n} inferiors to be run using @var{executable} as the
-executable.  @var{n} defaults to 1.  If no executable is specified,
+executable; @var{n} defaults to 1.  If no executable is specified,
 the inferiors begins empty, with no program.  You can still assign or
 change the program assigned to the inferior at any time by using the
 @code{file} command with the executable name as its argument.
@@ -2599,7 +2653,7 @@ change the program assigned to the inferior at any time by using the
 @kindex clone-inferior
 @item clone-inferior [ -copies @var{n} ] [ @var{infno} ]
 Adds @var{n} inferiors ready to execute the same program as inferior
-@var{infno}.  @var{n} defaults to 1.  @var{infno} defaults to the
+@var{infno}; @var{n} defaults to 1, and @var{infno} defaults to the
 number of the current inferior.  This is a convenient command when you
 want to run another instance of the inferior you are debugging.
 
@@ -2798,7 +2852,7 @@ program information from the perspective of the current thread.
 @c thread without first checking `info threads'.
 Whenever @value{GDBN} detects a new thread in your program, it displays
 the target system's identification for the thread with a message in the
-form @samp{[New @var{systag}]}.  @var{systag} is a thread identifier
+form @samp{[New @var{systag}]}, where @var{systag} is a thread identifier
 whose form varies depending on the particular system.  For example, on
 @sc{gnu}/Linux, you might see
 
@@ -3490,7 +3544,7 @@ above (or no argument) specifying where to break.  @xref{Conditions,
 
 @kindex tbreak
 @item tbreak @var{args}
-Set a breakpoint enabled only for one stop.  @var{args} are the
+Set a breakpoint enabled only for one stop.  The @var{args} are the
 same as for the @code{break} command, and the breakpoint is set in the same
 way, but the breakpoint is automatically deleted after the first time your
 program stops there.  @xref{Disabling, ,Disabling Breakpoints}.
@@ -3498,7 +3552,7 @@ program stops there.  @xref{Disabling, ,Disabling Breakpoints}.
 @kindex hbreak
 @cindex hardware breakpoints
 @item hbreak @var{args}
-Set a hardware-assisted breakpoint.  @var{args} are the same as for the
+Set a hardware-assisted breakpoint.  The @var{args} are the same as for the
 @code{break} command and the breakpoint is set in the same way, but the
 breakpoint requires hardware support and some target hardware may not
 have this support.  The main purpose of this is EPROM/ROM code
@@ -3519,7 +3573,7 @@ hardware-breakpoint-limit}.
 
 @kindex thbreak
 @item thbreak @var{args}
-Set a hardware-assisted breakpoint enabled only for one stop.  @var{args}
+Set a hardware-assisted breakpoint enabled only for one stop.  The @var{args}
 are the same as for the @code{hbreak} command and the breakpoint is set in
 the same way.  However, like the @code{tbreak} command,
 the breakpoint is automatically deleted after the
@@ -4110,7 +4164,7 @@ shared library.  Use the @code{catch} command to set a catchpoint.
 @table @code
 @kindex catch
 @item catch @var{event}
-Stop when @var{event} occurs.  @var{event} can be any of the following:
+Stop when @var{event} occurs.  The @var{event} can be any of the following:
 
 @table @code
 @item throw @r{[}@var{regexp}@r{]}
@@ -5214,8 +5268,8 @@ argument.
 
 @item until @var{location}
 @itemx u @var{location}
-Continue running your program until either the specified location is
-reached, or the current stack frame returns.  @var{location} is any of
+Continue running your program until either the specified @var{location} is
+reached, or the current stack frame returns.  The location is any of
 the forms described in @ref{Specify Location}.
 This form of the command uses temporary breakpoints, and
 hence is quicker than @code{until} without an argument.  The specified
@@ -5463,7 +5517,7 @@ for details about this command.
 
 @kindex handle
 @item handle @var{signal} @r{[}@var{keywords}@dots{}@r{]}
-Change the way @value{GDBN} handles signal @var{signal}.  @var{signal}
+Change the way @value{GDBN} handles signal @var{signal}.  The @var{signal}
 can be the number of a signal or its name (with or without the
 @samp{SIG} at the beginning); a list of signal numbers of the form
 @samp{@var{low}-@var{high}}; or the word @samp{all}, meaning all the
@@ -5725,9 +5779,6 @@ To enter non-stop mode, use this sequence of commands before you run
 or attach to your program:
 
 @smallexample
-# Enable the async interface.
-set target-async 1
-
 # If using the CLI, pagination breaks non-stop.
 set pagination off
 
@@ -5796,21 +5847,6 @@ foreground (synchronous) behavior, and a background
 the program to report that some thread has stopped before prompting for
 another command.  In background execution, @value{GDBN} immediately gives
 a command prompt so that you can issue other commands while your program runs.
-
-You need to explicitly enable asynchronous mode before you can use
-background execution commands.  You can use these commands to
-manipulate the asynchronous mode setting:
-
-@table @code
-@kindex set target-async
-@item set target-async on
-Enable asynchronous mode.
-@item set target-async off
-Disable asynchronous mode.
-@kindex show target-async
-@item show target-async
-Show the current target-async setting.
-@end table
 
 If the target doesn't support async mode, @value{GDBN} issues an error
 message if you attempt to use the background execution commands.
@@ -5899,9 +5935,9 @@ specify some source line.
 
 Use the qualifier @samp{thread @var{threadno}} with a breakpoint command
 to specify that you only want @value{GDBN} to stop the program when a
-particular thread reaches this breakpoint.  @var{threadno} is one of the
-numeric thread identifiers assigned by @value{GDBN}, shown in the first
-column of the @samp{info threads} display.
+particular thread reaches this breakpoint.  The @var{threadno} specifier
+is one of the numeric thread identifiers assigned by @value{GDBN}, shown
+in the first column of the @samp{info threads} display.
 
 If you do not specify @samp{thread @var{threadno}} when you set a
 breakpoint, the breakpoint applies to @emph{all} threads of your
@@ -6398,6 +6434,28 @@ results.
 @item show record full memory-query
 Show the current setting of @code{memory-query}.
 
+@kindex set record btrace
+The @code{btrace} record target does not trace data.  As a
+convenience, when replaying, @value{GDBN} reads read-only memory off
+the live program directly, assuming that the addresses of the
+read-only areas don't change.  This for example makes it possible to
+disassemble code while replaying, but not to print variables.
+In some cases, being able to inspect variables might be useful.
+You can use the following command for that:
+
+@item set record btrace replay-memory-access
+Control the behavior of the @code{btrace} recording method when
+accessing memory during replay.  If @code{read-only} (the default),
+@value{GDBN} will only allow accesses to read-only memory.
+If @code{read-write}, @value{GDBN} will allow accesses to read-only
+and to read-write memory.  Beware that the accessed memory corresponds
+to the live target and not necessarily to the current replay
+position.
+
+@kindex show record btrace
+@item show record btrace replay-memory-access
+Show the current setting of @code{replay-memory-access}.
+
 @kindex info record
 @item info record
 Show various statistics about the recording depending on the recording
@@ -6653,9 +6711,9 @@ no provision for frameless functions elsewhere in the stack.
 @table @code
 @kindex frame@r{, command}
 @cindex current stack frame
-@item frame @var{args}
+@item frame @r{[}@var{framespec}@r{]}
 The @code{frame} command allows you to move from one stack frame to another,
-and to print the stack frame you select.  @var{args} may be either the
+and to print the stack frame you select.  The @var{framespec} may be either the
 address of the frame or the stack frame number.  Without an argument,
 @code{frame} prints the current stack frame.
 
@@ -6701,8 +6759,8 @@ Similar, but print only the outermost @var{n} frames.
 @itemx bt full
 @itemx bt full @var{n}
 @itemx bt full -@var{n}
-Print the values of the local variables also.  @var{n} specifies the
-number of frames to print, as described above.
+Print the values of the local variables also.  As described above,
+@var{n} specifies the number of frames to print.
 
 @item backtrace no-filters
 @itemx bt no-filters
@@ -6886,11 +6944,11 @@ their name, priority and enabled status.
 @anchor{disable frame-filter all}
 @item disable frame-filter @var{filter-dictionary} @var{filter-name}
 Disable a frame filter in the dictionary matching
-@var{filter-dictionary}, or @code{all}, and @var{filter-name}.
+@var{filter-dictionary} and @var{filter-name}.  The
 @var{filter-dictionary} may be @code{all}, @code{global},
-@code{progspace} or the name of the object file where the frame filter
+@code{progspace}, or the name of the object file where the frame filter
 dictionary resides.  When @code{all} is specified, all frame filters
-across all dictionaries are disabled.  @var{filter-name} is the name
+across all dictionaries are disabled.  The @var{filter-name} is the name
 of the frame filter and is used when @code{all} is not the option for
 @var{filter-dictionary}.  A disabled frame-filter is not deleted, it
 may be enabled again later.
@@ -6898,11 +6956,11 @@ may be enabled again later.
 @kindex enable frame-filter
 @item enable frame-filter @var{filter-dictionary} @var{filter-name}
 Enable a frame filter in the dictionary matching
-@var{filter-dictionary}, or @code{all}, and @var{filter-name}.
+@var{filter-dictionary} and @var{filter-name}.  The
 @var{filter-dictionary} may be @code{all}, @code{global},
 @code{progspace} or the name of the object file where the frame filter
 dictionary resides.  When @code{all} is specified, all frame filters across
-all dictionaries are enabled.  @var{filter-name} is the name of the frame
+all dictionaries are enabled.  The @var{filter-name} is the name of the frame
 filter and is used when @code{all} is not the option for
 @var{filter-dictionary}.
 
@@ -6961,15 +7019,15 @@ objfile /build/test frame-filters:
 @item set frame-filter priority @var{filter-dictionary} @var{filter-name} @var{priority}
 Set the @var{priority} of a frame filter in the dictionary matching
 @var{filter-dictionary}, and the frame filter name matching
-@var{filter-name}.  @var{filter-dictionary} may be @code{global},
+@var{filter-name}.  The @var{filter-dictionary} may be @code{global},
 @code{progspace} or the name of the object file where the frame filter
-dictionary resides.  @var{priority} is an integer.
+dictionary resides.  The @var{priority} is an integer.
 
 @kindex show frame-filter priority
 @item show frame-filter priority @var{filter-dictionary} @var{filter-name}
 Show the @var{priority} of a frame filter in the dictionary matching
 @var{filter-dictionary}, and the frame filter name matching
-@var{filter-name}.  @var{filter-dictionary} may be @code{global},
+@var{filter-name}.  The @var{filter-dictionary} may be @code{global},
 @code{progspace} or the name of the object file where the frame filter
 dictionary resides.
 
@@ -7046,17 +7104,17 @@ pointer, a program counter, and a memory stack pointer.
 
 @kindex up
 @item up @var{n}
-Move @var{n} frames up the stack.  For positive numbers @var{n}, this
-advances toward the outermost frame, to higher frame numbers, to frames
-that have existed longer.  @var{n} defaults to one.
+Move @var{n} frames up the stack; @var{n} defaults to 1.  For positive
+numbers @var{n}, this advances toward the outermost frame, to higher
+frame numbers, to frames that have existed longer.
 
 @kindex down
 @kindex do @r{(@code{down})}
 @item down @var{n}
-Move @var{n} frames down the stack.  For positive numbers @var{n}, this
-advances toward the innermost frame, to lower frame numbers, to frames
-that were created more recently.  @var{n} defaults to one.  You may
-abbreviate @code{down} as @code{do}.
+Move @var{n} frames down the stack; @var{n} defaults to 1.  For
+positive numbers @var{n}, this advances toward the innermost frame, to
+lower frame numbers, to frames that were created more recently.
+You may abbreviate @code{down} as @code{do}.
 @end table
 
 All of these commands end by printing two lines of output describing the
@@ -8149,10 +8207,10 @@ function where it is defined.  @xref{Variables, ,Program Variables}.
 @cindex casts, to view memory
 @item @{@var{type}@} @var{addr}
 Refers to an object of type @var{type} stored at address @var{addr} in
-memory.  @var{addr} may be any expression whose value is an integer or
-pointer (but parentheses are required around binary operators, just as in
-a cast).  This construct is allowed regardless of what kind of data is
-normally supposed to reside at @var{addr}.
+memory.  The address @var{addr} may be any expression whose value is
+an integer or pointer (but parentheses are required around binary
+operators, just as in a cast).  This construct is allowed regardless
+of what kind of data is normally supposed to reside at @var{addr}.
 @end table
 
 @node Ambiguous Expressions
@@ -8763,22 +8821,28 @@ are from the last memory unit printed; this is not the same as the last
 address printed if several units were printed on the last line of output.
 
 @cindex remote memory comparison
+@cindex target memory comparison
 @cindex verify remote memory image
+@cindex verify target memory image
 When you are debugging a program running on a remote target machine
-(@pxref{Remote Debugging}), you may wish to verify the program's image in the
-remote machine's memory against the executable file you downloaded to
-the target.  The @code{compare-sections} command is provided for such
-situations.
+(@pxref{Remote Debugging}), you may wish to verify the program's image
+in the remote machine's memory against the executable file you
+downloaded to the target.  Or, on any target, you may want to check
+whether the program has corrupted its own read-only sections.  The
+@code{compare-sections} command is provided for such situations.
 
 @table @code
 @kindex compare-sections
-@item compare-sections @r{[}@var{section-name}@r{]}
+@item compare-sections @r{[}@var{section-name}@r{|}@code{-r}@r{]}
 Compare the data of a loadable section @var{section-name} in the
 executable file of the program being debugged with the same section in
-the remote machine's memory, and report any mismatches.  With no
-arguments, compares all loadable sections.  This command's
-availability depends on the target's support for the @code{"qCRC"}
-remote request.
+the target machine's memory, and report any mismatches.  With no
+arguments, compares all loadable sections.  With an argument of
+@code{-r}, compares all loadable read-only sections.
+
+Note: for remote targets, this command can be accelerated if the
+target supports computing the CRC checksum of a block of memory
+(@pxref{qCRC packet}).
 @end table
 
 @node Auto Display
@@ -10070,7 +10134,7 @@ and vector registers (in the selected stack frame).
 @item info registers @var{regname} @dots{}
 Print the @dfn{relativized} value of each specified register @var{regname}.
 As discussed in detail below, register values are normally relative to
-the selected stack frame.  @var{regname} may be any register name valid on
+the selected stack frame.  The @var{regname} may be any register name valid on
 the machine you are using, with or without the initial @samp{$}.
 @end table
 
@@ -11959,7 +12023,7 @@ variable with the same name.
 @kindex tvariable
 The @code{tvariable} command creates a new trace state variable named
 @code{$@var{name}}, and optionally gives it an initial value of
-@var{expression}.  @var{expression} is evaluated when this command is
+@var{expression}.  The @var{expression} is evaluated when this command is
 entered; the result will be converted to an integer if possible,
 otherwise @value{GDBN} will report an error. A subsequent
 @code{tvariable} command specifying the same name does not create a
@@ -12821,7 +12885,7 @@ a source of trace data.  Commands that examine data work as they do with
 a live target, but it is not possible to run any new trace experiments.
 @code{tstatus} will report the state of the trace run at the moment
 the data was saved, as well as the current trace frame you are examining.
-@var{filename} or @var{dirname} must be on a filesystem accessible to
+Both @var{filename} and @var{dirname} must be on a filesystem accessible to
 the host.
 
 @smallexample
@@ -13672,14 +13736,14 @@ assigned.  Defined on scalar types.
 @item @var{op}=
 Used in an expression of the form @w{@code{@var{a} @var{op}= @var{b}}},
 and translated to @w{@code{@var{a} = @var{a op b}}}.
-@w{@code{@var{op}=}} and @code{=} have the same precedence.
+@w{@code{@var{op}=}} and @code{=} have the same precedence.  The operator
 @var{op} is any one of the operators @code{|}, @code{^}, @code{&},
 @code{<<}, @code{>>}, @code{+}, @code{-}, @code{*}, @code{/}, @code{%}.
 
 @item ?:
 The ternary operator.  @code{@var{a} ? @var{b} : @var{c}} can be thought
-of as:  if @var{a} then @var{b} else @var{c}.  @var{a} should be of an
-integral type.
+of as:  if @var{a} then @var{b} else @var{c}.  The argument @var{a}
+should be of an integral type.
 
 @item ||
 Logical @sc{or}.  Defined on integral types.
@@ -14633,18 +14697,20 @@ Returns boolean TRUE if @var{i} is an odd number.
 
 @item ORD(@var{x})
 Returns the ordinal value of its argument.  For example, the ordinal
-value of a character is its @sc{ascii} value (on machines supporting the
-@sc{ascii} character set).  @var{x} must be of an ordered type, which include
-integral, character and enumerated types.
+value of a character is its @sc{ascii} value (on machines supporting
+the @sc{ascii} character set).  The argument @var{x} must be of an
+ordered type, which include integral, character and enumerated types.
 
 @item SIZE(@var{x})
-Returns the size of its argument.  @var{x} can be a variable or a type.
+Returns the size of its argument.  The argument @var{x} can be a
+variable or a type.
 
 @item TRUNC(@var{r})
 Returns the integral part of @var{r}.
 
 @item TSIZE(@var{x})
-Returns the size of its argument.  @var{x} can be a variable or a type.
+Returns the size of its argument.  The argument @var{x} can be a
+variable or a type.
 
 @item VAL(@var{t},@var{i})
 Returns the member of the type @var{t} whose ordinal value is @var{i}.
@@ -15547,13 +15613,13 @@ from the current task to the given task.
 @cindex task breakpoints, in Ada
 @kindex break @dots{} task @var{taskno}@r{ (Ada)}
 These commands are like the @code{break @dots{} thread @dots{}}
-command (@pxref{Thread Stops}).
-@var{linespec} specifies source lines, as described
+command (@pxref{Thread Stops}).  The
+@var{linespec} argument specifies source lines, as described
 in @ref{Specify Location}.
 
 Use the qualifier @samp{task @var{taskno}} with a breakpoint command
 to specify that you only want @value{GDBN} to stop the program when a
-particular Ada task reaches this breakpoint.  @var{taskno} is one of the
+particular Ada task reaches this breakpoint.  The @var{taskno} is one of the
 numeric task identifiers assigned by @value{GDBN}, shown in the first
 column of the @samp{info tasks} display.
 
@@ -16481,7 +16547,7 @@ detail.
 @kindex signal
 @item signal @var{signal}
 Resume execution where your program stopped, but immediately give it the
-signal @var{signal}.  @var{signal} can be the name or the number of a
+signal @var{signal}.  The @var{signal} can be the name or the number of a
 signal.  For example, on many systems @code{signal 2} and @code{signal
 SIGINT} are both ways of sending an interrupt signal.
 
@@ -16589,7 +16655,7 @@ Make selected stack frame return now? (y or n) y
 @cindex inferior functions, calling
 @item print @var{expr}
 Evaluate the expression @var{expr} and display the resulting value.
-@var{expr} may include calls to functions in the program being
+The expression may include calls to functions in the program being
 debugged.
 
 @kindex call
@@ -16857,7 +16923,7 @@ the program is running.  To do this, use the @code{kill} command
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command
 when @var{filename} has been dynamically loaded (by some other means)
-into the program that is running.  @var{address} should be the memory
+into the program that is running.  The @var{address} should give the memory
 address at which the file has been loaded; @value{GDBN} cannot figure
 this out for itself.  You can additionally specify an arbitrary number
 of @samp{-s @var{section} @var{address}} pairs, to give an explicit
@@ -17576,11 +17642,10 @@ the final result is inverted to ensure trailing zeros also affect the
 CRC.
 
 @emph{Note:} This is the same CRC polynomial as used in handling the
-@dfn{Remote Serial Protocol} @code{qCRC} packet (@pxref{Remote Protocol,
-, @value{GDBN} Remote Serial Protocol}).  However in the
-case of the Remote Serial Protocol, the CRC is computed @emph{most}
-significant bit first, and the result is not inverted, so trailing
-zeros have no effect on the CRC value.
+@dfn{Remote Serial Protocol} @code{qCRC} packet (@pxref{qCRC packet}).
+However in the case of the Remote Serial Protocol, the CRC is computed
+@emph{most} significant bit first, and the result is not inverted, so
+trailing zeros have no effect on the CRC value.
 
 To complete the description, we show below the code of the function
 which produces the CRC used in @code{.gnu_debuglink}.  Inverting the
@@ -18071,6 +18136,13 @@ drivers, or even basic I/O is available, although some simulators do
 provide these.  For info about any processor-specific simulator details,
 see the appropriate section in @ref{Embedded Processors, ,Embedded
 Processors}.
+
+@item target native
+@cindex native target
+Setup for local/native process debugging.  Useful to make the
+@code{run} command spawn native processes (likewise @code{attach},
+etc.@:) even when @code{set auto-connect-native-target} is @code{off}
+(@pxref{set auto-connect-native-target}).
 
 @end table
 
@@ -19359,7 +19431,7 @@ handling tables.  You need to do this because the stub does not have any
 way of knowing what the exception handling tables on your target system
 are like (for example, the processor's table might be in @sc{rom},
 containing entries which point to a table in @sc{ram}).
-@var{exception_number} is the exception number which should be changed;
+The @var{exception_number} specifies the exception which should be changed;
 its meaning is architecture-dependent (for example, different numbers
 might represent divide by zero, misaligned access, etc).  When this
 exception occurs, control should be transferred directly to
@@ -20383,7 +20455,7 @@ installed with the name @code{vxgdb}, to distinguish it from a
 @item VxWorks-timeout @var{args}
 @kindex vxworks-timeout
 All VxWorks-based targets now support the option @code{vxworks-timeout}.
-This option is set by the user, and  @var{args} represents the number of
+This option is set by the user, and @var{args} represents the number of
 seconds @value{GDBN} waits for responses to rpc's.  You might use this if
 your VxWorks target is a slow software simulator or is on the far side
 of a thin network line.
@@ -20692,7 +20764,7 @@ The @value{GDBN} ARM simulator accepts the following optional arguments.
 
 @table @code
 @item --swi-support=@var{type}
-Tell the simulator which SWI interfaces to support.
+Tell the simulator which SWI interfaces to support.  The argument
 @var{type} may be a comma separated list of the following values.
 The default value is @code{all}.
 
@@ -21061,8 +21133,8 @@ use the @code{break-range} command.
 @table @code
 @kindex break-range
 @item break-range @var{start-location}, @var{end-location}
-Set a breakpoint for an address range.
-@var{start-location} and @var{end-location} can specify a function name,
+Set a breakpoint for an address range given by
+@var{start-location} and @var{end-location}, which can specify a function name,
 a line number, an offset of lines from the current line or from the start
 location, or an address of an instruction (see @ref{Specify Location},
 for a list of all the possible ways to specify a @var{location}.)
@@ -21157,7 +21229,7 @@ both the Unix host and on the Sparclet target.  The program
 @item remotetimeout @var{args}
 @kindex remotetimeout
 @value{GDBN} supports the option @code{remotetimeout}.
-This option is set by the user, and  @var{args} represents the number of
+This option is set by the user, and @var{args} represents the number of
 seconds @value{GDBN} waits for responses.
 @end table
 
@@ -22102,7 +22174,7 @@ both input and output with the commands described below.
 @kindex set input-radix
 @item set input-radix @var{base}
 Set the default base for numeric input.  Supported choices
-for @var{base} are decimal 8, 10, or 16.  @var{base} must itself be
+for @var{base} are decimal 8, 10, or 16.  The base must itself be
 specified either unambiguously or using the current input radix; for
 example, any of
 
@@ -22123,7 +22195,7 @@ change the radix.
 @kindex set output-radix
 @item set output-radix @var{base}
 Set the default base for numeric display.  Supported choices
-for @var{base} are decimal 8, 10, or 16.  @var{base} must itself be
+for @var{base} are decimal 8, 10, or 16.  The base must itself be
 specified either unambiguously or using the current input radix.
 
 @kindex show input-radix
@@ -22925,11 +22997,11 @@ message.
 @item show debug timestamp
 Displays the current state of displaying timestamps with @value{GDBN}
 debugging info.
-@item set debugvarobj
+@item set debug varobj
 @cindex variable object debugging info
 Turns on or off display of @value{GDBN} variable object debugging
 info. The default is off.
-@item show debugvarobj
+@item show debug varobj
 Displays the current state of displaying @value{GDBN} variable object
 debugging info.
 @item set debug xml
@@ -23084,7 +23156,7 @@ end
 @item define @var{commandname}
 Define a command named @var{commandname}.  If there is already a command
 by that name, you are asked to confirm that you want to redefine it.
-@var{commandname} may be a bare command name consisting of letters,
+The argument @var{commandname} may be a bare command name consisting of letters,
 numbers, dashes, and underscores.  It may also start with any predefined
 prefix command.  For example, @samp{define target my-target} creates
 a user-defined @samp{target my-target} command.
@@ -24729,11 +24801,36 @@ On some targets, @value{GDBN} is capable of processing MI commands
 even while the target is running.  This is called @dfn{asynchronous
 command execution} (@pxref{Background Execution}).  The frontend may
 specify a preferrence for asynchronous execution using the
-@code{-gdb-set target-async 1} command, which should be emitted before
+@code{-gdb-set mi-async 1} command, which should be emitted before
 either running the executable or attaching to the target.  After the
 frontend has started the executable or attached to the target, it can
 find if asynchronous execution is enabled using the
 @code{-list-target-features} command.
+
+@table @code
+@item -gdb-set mi-async on
+@item -gdb-set mi-async off
+Set whether MI is in asynchronous mode.
+
+When @code{off}, which is the default, MI execution commands (e.g.,
+@code{-exec-continue}) are foreground commands, and @value{GDBN} waits
+for the program to stop before processing further commands.
+
+When @code{on}, MI execution commands are background execution
+commands (e.g., @code{-exec-continue} becomes the equivalent of the
+@code{c&} CLI command), and so @value{GDBN} is capable of processing
+MI commands even while the target is running.
+
+@item -gdb-show mi-async
+Show whether MI asynchronous mode is enabled.
+@end table
+
+Note: In @value{GDBN} version 7.7 and earlier, this option was called
+@code{target-async} instead of @code{mi-async}, and it had the effect
+of both putting MI in asynchronous mode and making CLI background
+commands possible.  CLI background commands are now always possible
+``out of the box'' if the target supports them.  The old spelling is
+kept as a deprecated alias for backwards compatibility.
 
 Even if @value{GDBN} can accept a command while target is running,
 many commands that access the target do not work when the target is
@@ -25294,7 +25391,7 @@ contains process identifier, specific to the operating system.
 A thread group is no longer associated with a running program,
 either because the program has exited, or because it was detached
 from.  The @var{id} field contains the @value{GDBN} identifier of the
-thread group.  @var{code} is the exit code of the inferior; it exists
+thread group.  The @var{code} field is the exit code of the inferior; it exists
 only when the inferior exited with some code.
 
 @item =thread-created,id="@var{id}",group-id="@var{gid}"
@@ -29104,12 +29201,12 @@ For the PPC MBX board:
     [ @code{--skip-unavailable} ] @var{fmt} [ ( @var{regno} )*]
 @end smallexample
 
-Display the registers' contents.  @var{fmt} is the format according to
-which the registers' contents are to be returned, followed by an optional
-list of numbers specifying the registers to display.  A missing list of
-numbers indicates that the contents of all the registers must be
-returned.  The @code{--skip-unavailable} option indicates that only
-the available registers are to be returned.
+Display the registers' contents.  The format according to which the
+registers' contents are to be returned is given by @var{fmt}, followed
+by an optional list of numbers specifying the registers to display.  A
+missing list of numbers indicates that the contents of all the
+registers must be returned.  The @code{--skip-unavailable} option
+indicates that only the available registers are to be returned.
 
 Allowed formats for @var{fmt} are:
 
@@ -31686,7 +31783,7 @@ annotation continues:
 @noindent
 where @var{name} is the name of the signal, such as @code{SIGILL} or
 @code{SIGSEGV}, and @var{string} is the explanation of the signal, such
-as @code{Illegal Instruction} or @code{Segmentation fault}.
+as @code{Illegal Instruction} or @code{Segmentation fault}.  The arguments
 @var{intro-text}, @var{middle-text}, and @var{end-text} are for the
 user's benefit and have no particular format.
 
@@ -31724,7 +31821,7 @@ debug formats this will necessarily point to the beginning of a line),
 @var{middle} is @samp{middle} if @var{addr} is in the middle of the
 line, or @samp{beg} if @var{addr} is at the beginning of the line, and
 @var{addr} is the address in the target program associated with the
-source which is being displayed.  @var{addr} is in the form @samp{0x}
+source which is being displayed.  The @var{addr} is in the form @samp{0x}
 followed by one or more lowercase hex digits (note that this does not
 depend on the language).
 
@@ -31897,7 +31994,7 @@ and @code{jit-reader-unload} commands.
 
 @table @code
 @item jit-reader-load @var{reader}
-Load the JIT reader named @var{reader}.  @var{reader} is a shared
+Load the JIT reader named @var{reader}, which is a shared
 object specified as either an absolute or a relative file name.  In
 the latter case, @value{GDBN} will try to load the reader from a
 pre-configured directory, usually @file{@var{libdir}/gdb/} on a UNIX
@@ -32152,7 +32249,7 @@ specification.  They don't exist in real commands.
 
 @item FastTrace:@var{tracepoint_object} @var{gdb_jump_pad_head}
 Installs a new fast tracepoint described by @var{tracepoint_object}
-(@pxref{tracepoint object}).  @var{gdb_jump_pad_head}, 8-byte long, is the
+(@pxref{tracepoint object}).  The @var{gdb_jump_pad_head}, 8-byte long, is the
 head of @dfn{jumppad}, which is used to jump to data collection routine
 in IPA finally.
 
@@ -32160,10 +32257,10 @@ Replies:
 @table @samp
 @item OK @var{target_address} @var{gdb_jump_pad_head} @var{fjump_size} @var{fjump}
 @var{target_address} is address of tracepoint in the inferior.
-@var{gdb_jump_pad_head} is updated head of jumppad.  Both of
+The @var{gdb_jump_pad_head} is updated head of jumppad.  Both of
 @var{target_address} and @var{gdb_jump_pad_head} are 8-byte long.
-@var{fjump} contains a sequence of instructions jump to jumppad entry.
-@var{fjump_size}, 4-byte long, is the size of @var{fjump}.
+The @var{fjump} contains a sequence of instructions jump to jumppad entry.
+The @var{fjump_size}, 4-byte long, is the size of @var{fjump}.
 @item E @var{NN}
 for an error
 
@@ -33443,6 +33540,15 @@ Control whether to show all non zero areas within a 1k block starting
 at thread local base, when using the @samp{info w32 thread-information-block}
 command.
 
+@kindex maint set target-async
+@kindex maint show target-async
+@item maint set target-async
+@itemx maint show target-async
+This controls whether @value{GDBN} targets operate in synchronous or
+asynchronous mode (@pxref{Background Execution}).  Normally the
+default is asynchronous, if it is available; but this can be changed
+to more easily debug problems occurring only in synchronous mode.
+
 @kindex maint set per-command
 @kindex maint show per-command
 @item maint set per-command
@@ -33829,8 +33935,8 @@ Reply:
 
 @item c @r{[}@var{addr}@r{]}
 @cindex @samp{c} packet
-Continue.  @var{addr} is address to resume.  If @var{addr} is omitted,
-resume at current address.
+Continue at @var{addr}, which is the address to resume.  If @var{addr}
+is omitted, resume at current address.
 
 This packet is deprecated for multi-threading support.  @xref{vCont
 packet}.
@@ -33931,10 +34037,10 @@ for an error
 @item H @var{op} @var{thread-id}
 @cindex @samp{H} packet
 Set thread for subsequent operations (@samp{m}, @samp{M}, @samp{g},
-@samp{G}, et.al.).  @var{op} depends on the operation to be performed:
-it should be @samp{c} for step and continue operations (note that this
+@samp{G}, et.al.).  Depending on the operation to be performed, @var{op}
+should be @samp{c} for step and continue operations (note that this
 is deprecated, supporting the @samp{vCont} command is a better
-option), @samp{g} for other operations.  The thread designator
+option), and @samp{g} for other operations.  The thread designator
 @var{thread-id} has the format and interpretation described in
 @ref{thread-id syntax}.
 
@@ -34024,7 +34130,7 @@ server was able to read only part of the region of memory.
 @item M @var{addr},@var{length}:@var{XX@dots{}}
 @cindex @samp{M} packet
 Write @var{length} bytes of memory starting at address @var{addr}.
-@var{XX@dots{}} is the data; each byte is transmitted as a two-digit
+The data is given by @var{XX@dots{}}; each byte is transmitted as a two-digit
 hexadecimal number.
 
 Reply:
@@ -34082,14 +34188,14 @@ Don't use this packet; use the @samp{R} packet instead.
 
 @item R @var{XX}
 @cindex @samp{R} packet
-Restart the program being debugged.  @var{XX}, while needed, is ignored.
+Restart the program being debugged.  The @var{XX}, while needed, is ignored.
 This packet is only available in extended mode (@pxref{extended mode}).
 
 The @samp{R} packet has no reply.
 
 @item s @r{[}@var{addr}@r{]}
 @cindex @samp{s} packet
-Single step.  @var{addr} is the address at which to resume.  If
+Single step, resuming at @var{addr}.  If
 @var{addr} is omitted, resume at same address.
 
 This packet is deprecated for multi-threading support.  @xref{vCont
@@ -34113,8 +34219,8 @@ Reply:
 @item t @var{addr}:@var{PP},@var{MM}
 @cindex @samp{t} packet
 Search backwards starting at address @var{addr} for a match with pattern
-@var{PP} and mask @var{MM}.  @var{PP} and @var{MM} are 4 bytes.
-@var{addr} must be at least 3 digits.
+@var{PP} and mask @var{MM}, both of which are are 4 byte long.
+There must be at least 3 digits in @var{addr}.
 
 @item T @var{thread-id}
 @cindex @samp{T} packet
@@ -34298,7 +34404,7 @@ request is completed.
 @item vKill;@var{pid}
 @cindex @samp{vKill} packet
 @anchor{vKill packet}
-Kill the process with the specified process ID.  @var{pid} is a
+Kill the process with the specified process ID @var{pid}, which is a
 hexadecimal integer identifying the process.  This packet is used in
 preference to @samp{k} when multiprocess protocol extensions are
 supported; see @ref{multiprocess extensions}.
@@ -34339,7 +34445,7 @@ for success (@pxref{Stop Reply Packets})
 @anchor{X packet}
 @cindex @samp{X} packet
 Write data to memory, where the data is transmitted in binary.
-@var{addr} is address, @var{length} is number of bytes,
+Memory is specified by its address @var{addr} and number of bytes @var{length};
 @samp{@var{XX}@dots{}} is binary data (@pxref{Binary Data}).
 
 Reply:
@@ -34438,7 +34544,7 @@ Insert (@samp{Z1}) or remove (@samp{z1}) a hardware breakpoint at
 address @var{addr}.
 
 A hardware breakpoint is implemented using a mechanism that is not
-dependant on being able to modify the target's memory.  @var{kind}
+dependant on being able to modify the target's memory.  The @var{kind}
 and @var{cond_list} have the same meaning as in @samp{Z0} packets.
 
 @emph{Implementation note: A hardware breakpoint is not affected by code
@@ -34459,7 +34565,7 @@ for an error
 @cindex @samp{z2} packet
 @cindex @samp{Z2} packet
 Insert (@samp{Z2}) or remove (@samp{z2}) a write watchpoint at @var{addr}.
-@var{kind} is interpreted as the number of bytes to watch.
+The number of bytes to watch is specified by @var{kind}.
 
 Reply:
 @table @samp
@@ -34476,7 +34582,7 @@ for an error
 @cindex @samp{z3} packet
 @cindex @samp{Z3} packet
 Insert (@samp{Z3}) or remove (@samp{z3}) a read watchpoint at @var{addr}.
-@var{kind} is interpreted as the number of bytes to watch.
+The number of bytes to watch is specified by @var{kind}.
 
 Reply:
 @table @samp
@@ -34493,7 +34599,7 @@ for an error
 @cindex @samp{z4} packet
 @cindex @samp{Z4} packet
 Insert (@samp{Z4}) or remove (@samp{z4}) an access watchpoint at @var{addr}.
-@var{kind} is interpreted as the number of bytes to watch.
+The number of bytes to watch is specified by @var{kind}.
 
 Reply:
 @table @samp
@@ -34543,7 +34649,7 @@ this way.  Each @samp{@var{n}:@var{r}} pair is interpreted as follows:
 @itemize @bullet
 @item
 If @var{n} is a hexadecimal number, it is a register number, and the
-corresponding @var{r} gives that register's value.  @var{r} is a
+corresponding @var{r} gives that register's value.  The data @var{r} is a
 series of bytes in target byte order, with each byte given by a
 two-digit hex number.
 
@@ -34558,7 +34664,7 @@ the core on which the stop event was detected.
 @item
 If @var{n} is a recognized @dfn{stop reason}, it describes a more
 specific event that stopped the target.  The currently defined stop
-reasons are listed below.  @var{aa} should be @samp{05}, the trap
+reasons are listed below.  The @var{aa} should be @samp{05}, the trap
 signal.  At most one stop reason should be present.
 
 @item
@@ -34580,7 +34686,7 @@ hex.
 @item library
 The packet indicates that the loaded libraries have changed.
 @value{GDBN} should use @samp{qXfer:libraries:read} to fetch a new
-list of loaded libraries.  @var{r} is ignored.
+list of loaded libraries.  The @var{r} part is ignored.
 
 @cindex replay log events, remote reply
 @item replaylog
@@ -34719,6 +34825,7 @@ Any other reply implies the old thread ID.
 @item qCRC:@var{addr},@var{length}
 @cindex CRC of memory block, remote request
 @cindex @samp{qCRC} packet
+@anchor{qCRC packet}
 Compute the CRC checksum of a block of memory using CRC-32 defined in
 IEEE 802.3.  The CRC is computed byte at a time, taking the most
 significant bit of each byte first.  The initial pattern code
@@ -34759,7 +34866,7 @@ Reply:
 The request succeeded.
 
 @item E @var{nn}
-An error occurred.  @var{nn} are hex digits.
+An error occurred.  The error number @var{nn} is given as hex digits.
 
 @item @w{}
 An empty reply indicates that @samp{QDisableRandomization} is not supported
@@ -34803,6 +34910,12 @@ with @samp{l} (lower-case ell, for @dfn{last}).
 Refer to @ref{thread-id syntax}, for the format of the @var{thread-id}
 fields.
 
+@emph{Note: @value{GDBN} will send the @code{qfThreadInfo} query during the
+initial connection with the remote target, and the very first thread ID
+mentioned in the reply will be stopped by @value{GDBN} in a subsequent
+message.  Therefore, the stub should ensure that the first thread ID in
+the @code{qfThreadInfo} reply is suitable for being stopped by @value{GDBN}.}
+
 @item qGetTLSAddr:@var{thread-id},@var{offset},@var{lm}
 @cindex get thread-local storage address, remote request
 @cindex @samp{qGetTLSAddr} packet
@@ -34830,7 +34943,7 @@ Hex encoded (big endian) bytes representing the address of the thread
 local storage requested.
 
 @item E @var{nn}
-An error occurred.  @var{nn} are hex digits.
+An error occurred.  The error number @var{nn} is given as hex digits.
 
 @item @w{}
 An empty reply indicates that @samp{qGetTLSAddr} is not supported by the stub.
@@ -34874,8 +34987,8 @@ Where: @var{count} (two hex digits) is the number of threads being
 returned; @var{done} (one hex digit) is zero to indicate more threads
 and one indicates no further threads; @var{argthreadid} (eight hex
 digits) is @var{nextthread} from the request packet; @var{thread}@dots{}
-is a sequence of thread IDs from the target.  @var{threadid} (eight hex
-digits).  See @code{remote.c:parse_threadlist_response()}.
+is a sequence of thread IDs, @var{threadid} (eight hex
+digits), from the target.  See @code{remote.c:parse_threadlist_response()}.
 @end table
 
 @item qOffsets
@@ -34934,7 +35047,7 @@ Reply:
 The request succeeded.
 
 @item E @var{nn}
-An error occurred.  @var{nn} are hex digits.
+An error occurred.  The error number @var{nn} is given as hex digits.
 
 @item @w{}
 An empty reply indicates that @samp{QNonStop} is not supported by
@@ -34966,7 +35079,7 @@ Reply:
 The request succeeded.
 
 @item E @var{nn}
-An error occurred.  @var{nn} are hex digits.
+An error occurred.  The error number @var{nn} is given as hex digits.
 
 @item @w{}
 An empty reply indicates that @samp{QPassSignals} is not supported by
@@ -35008,7 +35121,7 @@ Reply:
 The request succeeded.
 
 @item E @var{nn}
-An error occurred.  @var{nn} are hex digits.
+An error occurred.  The error number @var{nn} is given as hex digits.
 
 @item @w{}
 An empty reply indicates that @samp{QProgramSignals} is not supported
@@ -35055,8 +35168,8 @@ packets.)
 @cindex @samp{qSearch memory} packet
 @anchor{qSearch memory}
 Search @var{length} bytes at @var{address} for @var{search-pattern}.
-@var{address} and @var{length} are encoded in hex.
-@var{search-pattern} is a sequence of bytes, hex encoded.
+Both @var{address} and @var{length} are encoded in hex;
+@var{search-pattern} is a sequence of bytes, also hex encoded.
 
 Reply:
 @table @samp
@@ -35612,9 +35725,9 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 @item qThreadExtraInfo,@var{thread-id}
 @cindex thread attributes info, remote request
 @cindex @samp{qThreadExtraInfo} packet
-Obtain a printable string description of a thread's attributes from
-the target OS.  @var{thread-id} is a thread ID; 
-see @ref{thread-id syntax}.  This
+Obtain from the target OS a printable string description of thread
+attributes for the thread @var{thread-id}; see @ref{thread-id syntax},
+for the forms of @var{thread-id}.  This
 string may contain anything that the target OS thinks is interesting
 for @value{GDBN} to tell the user about the thread.  The string is
 displayed in @value{GDBN}'s @code{info threads} display.  Some
@@ -35844,7 +35957,7 @@ by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 
 @item qXfer:osdata:read::@var{offset},@var{length}
 @anchor{qXfer osdata read}
-Access the target's @dfn{operating system information}.  
+Access the target's @dfn{operating system information}.
 @xref{Operating System Information}.
 
 @end table
@@ -35856,13 +35969,13 @@ Data @var{data} (@pxref{Binary Data}) has been read from the
 target.  There may be more data at a higher address (although
 it is permitted to return @samp{m} even for the last valid
 block of data, as long as at least one byte of data was read).
-@var{data} may have fewer bytes than the @var{length} in the
+It is possible for @var{data} to have fewer bytes than the @var{length} in the
 request.
 
 @item l @var{data}
 Data @var{data} (@pxref{Binary Data}) has been read from the target.
-There is no more data to be read.  @var{data} may have fewer bytes
-than the @var{length} in the request.
+There is no more data to be read.  It is possible for @var{data} to
+have fewer bytes than the @var{length} in the request.
 
 @item l
 The @var{offset} in the request is at the end of the data.
@@ -35873,7 +35986,7 @@ The request was malformed, or @var{annex} was invalid.
 
 @item E @var{nn}
 The offset was invalid, or there was an error encountered reading the data.
-@var{nn} is a hex-encoded @code{errno} value.
+The @var{nn} part is a hex-encoded @code{errno} value.
 
 @item @w{}
 An empty reply indicates the @var{object} string was not recognized by
@@ -35885,8 +35998,8 @@ the stub, or that the object does not support reading.
 @anchor{qXfer write}
 Write uninterpreted bytes into the target's special data area
 identified by the keyword @var{object}, starting at @var{offset} bytes
-into the data.  @var{data}@dots{} is the binary-encoded data
-(@pxref{Binary Data}) to be written.  The content and encoding of @var{annex}
+into the data.  The binary-encoded data (@pxref{Binary Data}) to be
+written is given by @var{data}@dots{}.  The content and encoding of @var{annex}
 is specific to @var{object}; it can supply additional details about what data
 to access.
 
@@ -35928,7 +36041,7 @@ The request was malformed, or @var{annex} was invalid.
 
 @item E @var{nn}
 The offset was invalid, or there was an error encountered writing the data.
-@var{nn} is a hex-encoded @code{errno} value.
+The @var{nn} part is a hex-encoded @code{errno} value.
 
 @item @w{}
 An empty reply indicates the @var{object} string was not
@@ -36096,8 +36209,8 @@ tracepoints (@pxref{Tracepoints}).
 @cindex @samp{QTDP} packet
 Create a new tracepoint, number @var{n}, at @var{addr}.  If @var{ena}
 is @samp{E}, then the tracepoint is enabled; if it is @samp{D}, then
-the tracepoint is disabled.  @var{step} is the tracepoint's step
-count, and @var{pass} is its pass count.  If an @samp{F} is present,
+the tracepoint is disabled.  The @var{step} gives the tracepoint's step
+count, and @var{pass} gives its pass count.  If an @samp{F} is present,
 then the tracepoint is to be a fast tracepoint, and the @var{flen} is
 the number of bytes that the target should copy elsewhere to make room
 for the tracepoint.  If an @samp{X} is present, it introduces a
@@ -36118,7 +36231,7 @@ The packet was not recognized.
 @end table
 
 @item QTDP:-@var{n}:@var{addr}:@r{[}S@r{]}@var{action}@dots{}@r{[}-@r{]}
-Define actions to be taken when a tracepoint is hit.  @var{n} and
+Define actions to be taken when a tracepoint is hit.  The @var{n} and
 @var{addr} must be the same as in the initial @samp{QTDP} packet for
 this tracepoint.  This packet may only be sent immediately after
 another @samp{QTDP} packet that ended with a @samp{-}.  If the
@@ -36140,7 +36253,7 @@ following forms:
 @table @samp
 
 @item R @var{mask}
-Collect the registers whose bits are set in @var{mask}.  @var{mask} is
+Collect the registers whose bits are set in @var{mask},
 a hexadecimal number whose @var{i}'th bit is set if register number
 @var{i} should be collected.  (The least significant bit is numbered
 zero.)  Note that @var{mask} may be any number of digits long; it may
@@ -36156,7 +36269,7 @@ values (the @samp{-1} value for @var{basereg} is a special case).
 
 @item X @var{len},@var{expr}
 Evaluate @var{expr}, whose length is @var{len}, and collect memory as
-it directs.  @var{expr} is an agent expression, as described in
+it directs.  The agent expression @var{expr} is as described in
 @ref{Agent Expressions}.  Each byte of the expression is encoded as a
 two-digit hex number in the packet; @var{len} is the number of bytes
 in the expression (and thus one-half the number of hex digits in the
@@ -36187,7 +36300,7 @@ The packet was not recognized.
 @cindex @samp{QTDPsrc} packet
 Specify a source string of tracepoint @var{n} at address @var{addr}.
 This is useful to get accurate reproduction of the tracepoints
-originally downloaded at the beginning of the trace run.  @var{type}
+originally downloaded at the beginning of the trace run.  The @var{type}
 is the name of the tracepoint part, such as @samp{cond} for the
 tracepoint's conditional expression (see below for a list of types), while
 @var{bytes} is the string, encoded in hexadecimal.
@@ -36286,9 +36399,10 @@ Replies:
 @item 0
 The minimum instruction length is currently unknown.
 @item @var{length}
-The minimum instruction length is @var{length}, where @var{length} is greater
-or equal to 1.  @var{length} is a hexadecimal number.  A reply of 1 means
-that a fast tracepoint may be placed on any instruction regardless of size.
+The minimum instruction length is @var{length}, where @var{length}
+is a hexadecimal number greater or equal to 1.  A reply
+of 1 means that a fast tracepoint may be placed on any instruction
+regardless of size.
 @item E
 An error has occurred.
 @item @w{}
@@ -36383,8 +36497,8 @@ The trace stopped because tracepoint @var{tpnum} exceeded its pass count.
 @item terror:@var{text}:@var{tpnum}
 The trace stopped because tracepoint @var{tpnum} had an error.  The
 string @var{text} is available to describe the nature of the error
-(for instance, a divide by zero in the condition expression).
-@var{text} is hex encoded.
+(for instance, a divide by zero in the condition expression); it
+is hex encoded.
 
 @item tunknown:0
 The trace stopped for some other reason.
@@ -36502,13 +36616,13 @@ a comma-separated list of markers
 @item l
 (lower case letter @samp{L}) denotes end of list.
 @item E @var{nn}
-An error occurred.  @var{nn} are hex digits.
+An error occurred.  The error number @var{nn} is given as hex digits.
 @item @w{}
 An empty reply indicates that the request is not supported by the
 stub.
 @end table
 
-@var{address} is encoded in hex.
+The @var{address} is encoded in hex;
 @var{id} and @var{extra} are strings encoded in hex.
 
 In response to each query, the target will reply with a list of one or
@@ -36528,7 +36642,7 @@ tracepoint markers.
 @item QTSave:@var{filename}
 @cindex @samp{QTSave} packet
 This packet directs the target to save trace data to the file name
-@var{filename} in the target's filesystem.  @var{filename} is encoded
+@var{filename} in the target's filesystem.  The @var{filename} is encoded
 as a hex string; the interpretation of the file name (relative vs
 absolute, wild cards, etc) is up to the target.
 
@@ -36592,7 +36706,7 @@ memory starting at @var{to}.
 Replies:
 @table @samp
 @item qRelocInsn:@var{adjusted_size}
-Informs the stub the relocation is complete.  @var{adjusted_size} is
+Informs the stub the relocation is complete.  The @var{adjusted_size} is
 the length in bytes of resulting relocated instruction sequence.
 @item E @var{NN}
 A badly formed request was detected, or an error was encountered while
@@ -36639,7 +36753,7 @@ The valid responses to Host I/O packets are:
 @item F @var{result} [, @var{errno}] [; @var{attachment}]
 @var{result} is the integer value returned by this operation, usually
 non-negative for success and -1 for errors.  If an error has occured,
-@var{errno} will be included in the result.  @var{errno} will have a
+@var{errno} will be included in the result specifying a
 value defined by the File-I/O protocol (@pxref{Errno Values}).  For
 operations which return data, @var{attachment} supplies the data as a
 binary buffer.  Binary buffers in response packets are escaped in the
@@ -36655,9 +36769,9 @@ An empty response indicates that this operation is not recognized.
 These are the supported Host I/O operations:
 
 @table @samp
-@item vFile:open: @var{pathname}, @var{flags}, @var{mode}
-Open a file at @var{pathname} and return a file descriptor for it, or
-return -1 if an error occurs.  @var{pathname} is a string,
+@item vFile:open: @var{filename}, @var{flags}, @var{mode}
+Open a file at @var{filename} and return a file descriptor for it, or
+return -1 if an error occurs.  The @var{filename} is a string,
 @var{flags} is an integer indicating a mask of open flags
 (@pxref{Open Flags}), and @var{mode} is an integer indicating a mask
 of mode bits to use if the file is created (@pxref{mode_t Values}).
@@ -36691,9 +36805,9 @@ packet is used.  @samp{vFile:write} returns the number of bytes written,
 which may be shorter than the length of @var{data}, or -1 if an
 error occurred.
 
-@item vFile:unlink: @var{pathname}
-Delete the file at @var{pathname} on the target.  Return 0,
-or -1 if an error occurs.  @var{pathname} is a string.
+@item vFile:unlink: @var{filename}
+Delete the file at @var{filename} on the target.  Return 0,
+or -1 if an error occurs.  The @var{filename} is a string.
 
 @item vFile:readlink: @var{filename}
 Read value of symbolic link @var{filename} on the target.  Return
@@ -36794,8 +36908,8 @@ Each notification is comprised of three parts:
 @item @var{name}:@var{event}
 The notification packet is sent by the side that initiates the
 exchange (currently, only the stub does that), with @var{event}
-carrying the specific information about the notification.
-@var{name} is the name of the notification.
+carrying the specific information about the notification, and
+@var{name} specifying the name of the notification.
 @item @var{ack}
 The acknowledge sent by the other side, usually @value{GDBN}, to
 acknowledge the exchange and request the event.
@@ -38859,7 +38973,7 @@ some system control registers; this is not related to the target's
 ABI.
 
 @item type
-The type of the register.  @var{type} may be a predefined type, a type
+The type of the register.  It may be a predefined type, a type
 defined in the current feature, or one of the special types @code{int}
 and @code{float}.  @code{int} is an integer type of the correct size
 for @var{bitsize}, and @code{float} is a floating point type (in the
@@ -38867,7 +38981,7 @@ architecture's normal floating point format) of the correct size for
 @var{bitsize}.  The default is @code{int}.
 
 @item group
-The register group to which this register belongs.  @var{group} must
+The register group to which this register belongs.  It must
 be either @code{general}, @code{float}, or @code{vector}.  If no
 @var{group} is specified, @value{GDBN} will not display the register
 in @code{info registers}.
@@ -39080,6 +39194,40 @@ Memory Protection Extension (MPX).  It should describe the following registers:
 
 The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should
 describe a single register, @samp{orig_eax}.
+
+The @samp{org.gnu.gdb.i386.avx512} feature is optional and requires the
+@samp{org.gnu.gdb.i386.avx} feature.  It should
+describe additional @sc{xmm} registers:
+
+@itemize @minus
+@item
+@samp{xmm16h} through @samp{xmm31h}, only valid for amd64.
+@end itemize
+
+It should describe the upper 128 bits of additional @sc{ymm} registers:
+
+@itemize @minus
+@item
+@samp{ymm16h} through @samp{ymm31h}, only valid for amd64.
+@end itemize
+
+It should
+describe the upper 256 bits of @sc{zmm} registers:
+
+@itemize @minus
+@item
+@samp{zmm0h} through @samp{zmm7h} for i386.
+@item
+@samp{zmm0h} through @samp{zmm15h} for amd64.
+@end itemize
+
+It should
+describe the additional @sc{zmm} registers:
+
+@itemize @minus
+@item
+@samp{zmm16h} through @samp{zmm31h}, only valid for amd64.
+@end itemize
 
 @node MIPS Features
 @subsection @acronym{MIPS} Features

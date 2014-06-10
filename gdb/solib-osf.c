@@ -52,6 +52,7 @@
 #include "objfiles.h"
 #include "target.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbthread.h"
 #include "solist.h"
 #include "solib.h"

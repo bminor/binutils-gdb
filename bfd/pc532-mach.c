@@ -51,7 +51,7 @@
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) CONCAT2 (pc532machaout_,OP)
+#define MY(OP) CONCAT2 (ns32k_aout_pc532mach_,OP)
 
 /* Must be the same as aout-ns32k.c */
 #define NAME(x,y) CONCAT3 (ns32kaout,_32_,y)
@@ -64,7 +64,7 @@
 #include "libbfd.h"
 #include "aout/aout64.h"
 
-#define MY_bfd_reloc_type_lookup ns32kaout_bfd_reloc_type_lookup
+#define MY_bfd_reloc_type_lookup ns32k_aout_bfd_reloc_type_lookup
 
 /* libaout doesn't use NAME for these ...  */
 
@@ -74,7 +74,7 @@
 
 #define MY_exec_header_not_counted 1
 
-reloc_howto_type *ns32kaout_bfd_reloc_type_lookup
+reloc_howto_type *MY_bfd_reloc_type_lookup
   (bfd *abfd, bfd_reloc_code_real_type code);
 
 static bfd_boolean
