@@ -276,7 +276,7 @@ const struct frame_unwind inline_frame_unwind = {
 static int
 block_starting_point_at (CORE_ADDR pc, const struct block *block)
 {
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct block *new_block;
 
   bv = blockvector_for_pc (pc, NULL);

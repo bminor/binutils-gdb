@@ -517,7 +517,7 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
 	   information (but NAME might contain it).  */
 	if (stab->primary)
 	  {
-	    struct blockvector *bv = BLOCKVECTOR (stab);
+	    const struct blockvector *bv = BLOCKVECTOR (stab);
 	    struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	    sym = lookup_block_symbol (block, name, domain);
@@ -2003,7 +2003,7 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
   struct partial_symbol **psym;
   struct symtab *s = NULL;
   struct partial_symtab *ps;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct objfile *objfile;
   struct block *b;
   int length;

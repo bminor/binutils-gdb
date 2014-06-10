@@ -145,15 +145,15 @@ extern int block_inlined_p (const struct block *block);
 
 extern int contained_in (const struct block *, const struct block *);
 
-extern struct blockvector *blockvector_for_pc (CORE_ADDR,
+extern const struct blockvector *blockvector_for_pc (CORE_ADDR,
 					       const struct block **);
 
-extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR, 
-						    struct obj_section *,
-						    const struct block **,
-                                                    struct symtab *);
+extern const struct blockvector *blockvector_for_pc_sect (CORE_ADDR, 
+							  struct obj_section *,
+							  const struct block **,
+							  struct symtab *);
 
-extern int blockvector_contains_pc (struct blockvector *bv, CORE_ADDR pc);
+extern int blockvector_contains_pc (const struct blockvector *bv, CORE_ADDR pc);
 
 extern struct call_site *call_site_for_pc (struct gdbarch *gdbarch,
 					   CORE_ADDR pc);

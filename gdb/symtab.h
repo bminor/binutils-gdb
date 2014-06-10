@@ -882,7 +882,7 @@ struct symtab
      between different symtabs (and normally is for all the symtabs
      in a given compilation unit).  */
 
-  struct blockvector *blockvector;
+  const struct blockvector *blockvector;
 
   /* Table mapping core addresses to line numbers for this file.
      Can be NULL if none.  Never shared between different symtabs.  */

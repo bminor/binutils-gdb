@@ -10104,7 +10104,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 
   if (sal->section == 0 && sal->symtab != NULL)
     {
-      struct blockvector *bv;
+      const struct blockvector *bv;
       const struct block *b;
       struct symbol *sym;
 

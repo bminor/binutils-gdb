@@ -12819,7 +12819,7 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 
   ALL_PRIMARY_SYMTABS (objfile, s)
     {
-      struct blockvector *bv = BLOCKVECTOR (s);
+      const struct blockvector *bv = BLOCKVECTOR (s);
       int i;
 
       for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)

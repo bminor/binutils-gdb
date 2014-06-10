@@ -3616,7 +3616,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	     information (but NAME might contain it).  */
 	  if (stab->primary)
 	    {
-	      struct blockvector *bv = BLOCKVECTOR (stab);
+	      const struct blockvector *bv = BLOCKVECTOR (stab);
 	      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	      sym = lookup_block_symbol (block, name, domain);

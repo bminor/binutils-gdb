@@ -1,5 +1,37 @@
 2014-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.h (struct symtab) <blockvector>: Now const.
+	* ada-lang.c (ada_add_global_exceptions): Update.
+	* buildsym.c (augment_type_symtab): Update.
+	* dwarf2read.c (dw2_lookup_symbol): Update.
+	* jit.c (finalize_symtab): Update.
+	* jv-lang.c (add_class_symtab_symbol): Update.
+	* mdebugread.c (parse_symbol, add_block, sort_blocks, new_symtab):
+	Update.
+	* objfiles.c (objfile_relocate1): Update.
+	* psymtab.c (lookup_symbol_aux_psymtabs)
+	(maintenance_check_psymtabs): Update.
+	* python/py-symtab.c (stpy_global_block, stpy_static_block):
+	Update.
+	* spu-tdep.c (spu_catch_start): Update.
+	* symmisc.c (dump_symtab_1): Update.
+	* symtab.c (lookup_global_symbol_from_objfile)
+	(lookup_symbol_aux_objfile, lookup_symbol_aux_quick)
+	(basic_lookup_transparent_type_quick)
+	(basic_lookup_transparent_type, find_pc_sect_symtab)
+	(find_pc_sect_line, search_symbols): Update.
+	* block.c (find_block_in_blockvector): Make "bl" const.
+	(blockvector_for_pc_sect, blockvector_for_pc): Make return type
+	const.
+	(blockvector_contains_pc): Make "bv" const.
+	(block_for_pc_sect): Update.
+	* block.h (blockvector_for_pc, blockvector_for_pc_sect)
+	(blockvector_contains_pc): Update.
+	* breakpoint.c (resolve_sal_pc): Update.
+	* inline-frame.c (block_starting_point_at): Update.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* completer.c (complete_line): Make "line_buffer" const.
 	* completer.h (complete_line): Update.
 

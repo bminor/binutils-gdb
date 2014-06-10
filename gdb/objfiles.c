@@ -746,7 +746,7 @@ objfile_relocate1 (struct objfile *objfile,
     ALL_OBJFILE_SYMTABS (objfile, s)
     {
       struct linetable *l;
-      struct blockvector *bv;
+      const struct blockvector *bv;
       int i;
 
       /* First the line table.  */

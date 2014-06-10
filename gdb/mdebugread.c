@@ -756,7 +756,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       b = top_stack->cur_block;
       if (sh->st == stProc)
 	{
-	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
+	  const struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
 
 	  /* The next test should normally be true, but provides a
 	     hook for nested functions (which we don't want to make
@@ -1131,7 +1131,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		top_stack->blocktype == stStaticProc))
 	{
 	  /* Finished with procedure */
-	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
+	  const struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
 	  struct mdebug_extra_func_info *e;
 	  struct block *b = top_stack->cur_block;
 	  struct type *ftype = top_stack->cur_type;
@@ -4608,7 +4608,9 @@ add_symbol (struct symbol *s, struct symtab *symtab, struct block *b)
 static void
 add_block (struct block *b, struct symtab *s)
 {
-  struct blockvector *bv = BLOCKVECTOR (s);
+  /* Cast away "const", but that's ok because we're building the
+     symtab and blockvector here.  */
+  struct blockvector *bv = (struct blockvector *) BLOCKVECTOR (s);
 
   bv = (struct blockvector *) xrealloc ((void *) bv,
 					(sizeof (struct blockvector)
@@ -4677,7 +4679,9 @@ compare_blocks (const void *arg1, const void *arg2)
 static void
 sort_blocks (struct symtab *s)
 {
-  struct blockvector *bv = BLOCKVECTOR (s);
+  /* We have to cast away const here, but this is ok because we're
+     constructing the blockvector in this code.  */
+  struct blockvector *bv = (struct blockvector *) BLOCKVECTOR (s);
 
   if (BLOCKVECTOR_NBLOCKS (bv) <= FIRST_LOCAL_BLOCK)
     {
@@ -4729,17 +4733,17 @@ static struct symtab *
 new_symtab (const char *name, int maxlines, struct objfile *objfile)
 {
   struct symtab *s = allocate_symtab (name, objfile);
+  struct blockvector *bv;
 
   LINETABLE (s) = new_linetable (maxlines);
 
   /* All symtabs must have at least two blocks.  */
-  BLOCKVECTOR (s) = new_bvect (2);
-  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK)
-    = new_block (NON_FUNCTION_BLOCK);
-  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)
-    = new_block (NON_FUNCTION_BLOCK);
-  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)) =
-    BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+  bv = new_bvect (2);
+  BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = new_block (NON_FUNCTION_BLOCK);
+  BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = new_block (NON_FUNCTION_BLOCK);
+  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
+    BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+  BLOCKVECTOR (s) = bv;
 
   s->debugformat = "ECOFF";
   return (s);

@@ -639,6 +639,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   struct block *block_iter;
   int actual_nblocks, i, blockvector_size;
   CORE_ADDR begin, end;
+  struct blockvector *bv;
 
   actual_nblocks = FIRST_LOCAL_BLOCK + stab->nblocks;
 
@@ -662,16 +663,16 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
   blockvector_size = (sizeof (struct blockvector)
                       + (actual_nblocks - 1) * sizeof (struct block *));
-  symtab->blockvector = obstack_alloc (&objfile->objfile_obstack,
-                                       blockvector_size);
+  bv = obstack_alloc (&objfile->objfile_obstack, blockvector_size);
+  symtab->blockvector = bv;
 
   /* (begin, end) will contain the PC range this entire blockvector
      spans.  */
   set_symtab_primary (symtab, 1);
-  BLOCKVECTOR_MAP (symtab->blockvector) = NULL;
+  BLOCKVECTOR_MAP (bv) = NULL;
   begin = stab->blocks->begin;
   end = stab->blocks->end;
-  BLOCKVECTOR_NBLOCKS (symtab->blockvector) = actual_nblocks;
+  BLOCKVECTOR_NBLOCKS (bv) = actual_nblocks;
 
   /* First run over all the gdb_block objects, creating a real block
      object for each.  Simultaneously, keep setting the real_block
@@ -706,7 +707,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
       BLOCK_FUNCTION (new_block) = block_name;
 
-      BLOCKVECTOR_BLOCK (symtab->blockvector, i) = new_block;
+      BLOCKVECTOR_BLOCK (bv, i) = new_block;
       if (begin > BLOCK_START (new_block))
         begin = BLOCK_START (new_block);
       if (end < BLOCK_END (new_block))
@@ -732,7 +733,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCK_START (new_block) = (CORE_ADDR) begin;
       BLOCK_END (new_block) = (CORE_ADDR) end;
 
-      BLOCKVECTOR_BLOCK (symtab->blockvector, i) = new_block;
+      BLOCKVECTOR_BLOCK (bv, i) = new_block;
 
       if (i == GLOBAL_BLOCK)
 	set_block_symtab (new_block, symtab);
@@ -755,7 +756,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 	{
 	  /* And if not, we set a default parent block.  */
 	  BLOCK_SUPERBLOCK (gdb_block_iter->real_block) =
-	    BLOCKVECTOR_BLOCK (symtab->blockvector, STATIC_BLOCK);
+	    BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	}
     }
 
