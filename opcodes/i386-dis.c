@@ -2883,6 +2883,7 @@ static int last_data_prefix;
 static int last_addr_prefix;
 static int last_rex_prefix;
 static int last_seg_prefix;
+static int fwait_prefix;
 /* The PREFIX_REPZ/PREFIX_REPNZ/PREFIX_DATA prefix is mandatory.  */
 static int mandatory_prefix;
 /* The active segment register prefix.  */
@@ -11631,6 +11632,7 @@ ckprefix (void)
   last_addr_prefix = -1;
   last_rex_prefix = -1;
   last_seg_prefix = -1;
+  fwait_prefix = -1;
   active_seg_prefix = 0;
   for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
     all_prefixes[i] = 0;
@@ -11720,6 +11722,7 @@ ckprefix (void)
 	  /* fwait is really an instruction.  If there are prefixes
 	     before the fwait, they belong to the fwait, *not* to the
 	     following instruction.  */
+	  fwait_prefix = i;
 	  if (prefixes || rex)
 	    {
 	      prefixes |= PREFIX_FWAIT;
@@ -12569,8 +12572,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
        && ((*codep < 0xd8) || (*codep > 0xdf))))
     {
       /* Handle prefixes before fwait.  */
-      for (i = 0;
-	   i < (int) ARRAY_SIZE (all_prefixes) && all_prefixes[i];
+      for (i = 0; i < fwait_prefix && all_prefixes[i];
 	   i++)
 	(*info->fprintf_func) (info->stream, "%s ",
 			       prefix_name (all_prefixes[i], sizeflag));

@@ -4,6 +4,9 @@
 
  es fwait
 
+	fwait
+	movl $0,%gs:fpu_owner_task
+
 	.byte 0x66
 	.byte 0xf2
 	.byte 0x0f

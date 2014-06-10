@@ -1,3 +1,9 @@
+2014-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (fwait_prefix): New.
+	(ckprefix): Set fwait_prefix.
+	(print_insn): Properly print prefixes before fwait.
+
 2014-06-07  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (UISIGNOPT): Define and use with cmpli.
