@@ -1,5 +1,11 @@
 2014-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* f-valprint.c (info_common_command_for_block): Update.
+	* symtab.h (struct general_symbol_info) <common_block>: Now
+	const.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.h (struct symtab) <blockvector>: Now const.
 	* ada-lang.c (ada_add_global_exceptions): Update.
 	* buildsym.c (augment_type_symtab): Update.

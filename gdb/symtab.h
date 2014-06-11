@@ -122,7 +122,7 @@ struct general_symbol_info
 
     /* A common block.  Used with LOC_COMMON_BLOCK.  */
 
-    struct common_block *common_block;
+    const struct common_block *common_block;
 
     /* For opaque typedef struct chain.  */
 
