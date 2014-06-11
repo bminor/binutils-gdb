@@ -1,3 +1,8 @@
+2014-06-11  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.8 branch created (173373c6f6388171d1d62a217fae90a052395be2):
+	* version.in: Bump version to 7.8.50.DATE-cvs.
+
 2014-06-11  Pedro Alves  <palves@redhat.com>
 
 	PR remote/17028
