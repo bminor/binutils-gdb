@@ -37,6 +37,9 @@
    The functions below implement debug registers sharing by reference
    counts, and allow to watch regions up to 16 bytes long.  */
 
+/* Whether or not to print the mirrored debug registers.  */
+static int debug_hw_points;
+
 /* Function used for printing mirrored debug registers.  */
 #define debug_printf(fmt, args...) \
   fprintf_unfiltered (gdb_stdlog, fmt, ##args);
@@ -255,9 +258,6 @@ i386_forget_process (pid_t pid)
       proc = *proc_link;
     }
 }
-
-/* Whether or not to print the mirrored debug registers.  */
-static int maint_show_dr;
 
 /* Types of operations supported by i386_handle_nonaligned_watchpoint.  */
 typedef enum { WP_INSERT, WP_REMOVE, WP_COUNT } i386_wp_op_t;
@@ -588,7 +588,7 @@ i386_insert_watchpoint (struct target_ops *self,
   if (retval == 0)
     i386_update_inferior_debug_regs (&local_state);
 
-  if (maint_show_dr)
+  if (debug_hw_points)
     i386_show_dr (state, "insert_watchpoint", addr, len, type);
 
   return retval;
@@ -628,7 +628,7 @@ i386_remove_watchpoint (struct target_ops *self,
   if (retval == 0)
     i386_update_inferior_debug_regs (&local_state);
 
-  if (maint_show_dr)
+  if (debug_hw_points)
     i386_show_dr (state, "remove_watchpoint", addr, len, type);
 
   return retval;
@@ -721,12 +721,12 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 	{
 	  addr = i386_dr_low.get_addr (i);
 	  rc = 1;
-	  if (maint_show_dr)
+	  if (debug_hw_points)
 	    i386_show_dr (state, "watchpoint_hit", addr, -1, hw_write);
 	}
     }
 
-  if (maint_show_dr && addr == 0)
+  if (debug_hw_points && addr == 0)
     i386_show_dr (state, "stopped_data_addr", 0, 0, hw_write);
 
   if (rc)
@@ -763,7 +763,7 @@ i386_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
   if (retval == 0)
     i386_update_inferior_debug_regs (&local_state);
 
-  if (maint_show_dr)
+  if (debug_hw_points)
     i386_show_dr (state, "insert_hwbp", addr, 1, hw_execute);
 
   return retval;
@@ -789,7 +789,7 @@ i386_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
   if (retval == 0)
     i386_update_inferior_debug_regs (&local_state);
 
-  if (maint_show_dr)
+  if (debug_hw_points)
     i386_show_dr (state, "remove_hwbp", addr, 1, hw_execute);
 
   return retval;
@@ -825,7 +825,7 @@ add_show_debug_regs_command (void)
   /* A maintenance command to enable printing the internal DRi mirror
      variables.  */
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
-			   &maint_show_dr, _("\
+			   &debug_hw_points, _("\
 Set whether to show variables that mirror the x86 debug registers."), _("\
 Show whether to show variables that mirror the x86 debug registers."), _("\
 Use \"on\" to enable, \"off\" to disable.\n\

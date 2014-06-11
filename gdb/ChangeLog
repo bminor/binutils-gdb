@@ -1,5 +1,10 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (maint_show_dr): Renamed to debug_hw_points.
+	All uses updated.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c (debug_printf): New macro.
 	(i386_get_debug_register_length): Likewise.
 	(TARGET_HAS_DR_LEN_8): Use above macro.
