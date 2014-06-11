@@ -1,3 +1,7 @@
+2014-06-11  Alan Modra  <amodra@gmail.com>
+
+	* linker.c (unwrap_hash_lookup): Add missing parens.
+
 2014-06-11  Kai Tietz  <ktietz@redhat.com>
 
 	* libcoff-in.h (coff_tdata): Make relocbase member unsigned.

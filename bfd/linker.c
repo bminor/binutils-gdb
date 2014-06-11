@@ -621,7 +621,7 @@ unwrap_hash_lookup (struct bfd_link_info *info,
       if (bfd_hash_lookup (info->wrap_hash, l, FALSE, FALSE) != NULL)
 	{
 	  char save = 0;
-	  if (l - sizeof WRAP - 1 != h->root.string)
+	  if (l - (sizeof WRAP - 1) != h->root.string)
 	    {
 	      --l;
 	      save = *l;
