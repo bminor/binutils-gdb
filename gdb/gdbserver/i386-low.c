@@ -225,7 +225,9 @@ i386_length_and_rw_bits (int len, enum target_hw_bp_type type)
 	rw = DR_RW_WRITE;
 	break;
       case hw_read:
-	fatal ("The i386 doesn't support data-read watchpoints.\n");
+	internal_error (__FILE__, __LINE__,
+			_("The i386 doesn't support "
+			  "data-read watchpoints.\n"));
       case hw_access:
 	rw = DR_RW_READ;
 	break;
@@ -236,8 +238,8 @@ i386_length_and_rw_bits (int len, enum target_hw_bp_type type)
 	break;
 #endif
       default:
-	error ("\
-Invalid hardware breakpoint type %d in i386_length_and_rw_bits.\n",
+	internal_error (__FILE__, __LINE__, _("\
+Invalid hardware breakpoint type %d in i386_length_and_rw_bits.\n"),
 			(int) type);
     }
 
@@ -254,8 +256,8 @@ Invalid hardware breakpoint type %d in i386_length_and_rw_bits.\n",
  	  return (DR_LEN_8 | rw);
 	/* ELSE FALL THROUGH */
       default:
-	error ("\
-Invalid hardware breakpoint length %d in i386_length_and_rw_bits.\n", len);
+	internal_error (__FILE__, __LINE__, _("\
+Invalid hardware breakpoint length %d in i386_length_and_rw_bits.\n"), len);
     }
 }
 
@@ -401,10 +403,9 @@ i386_handle_nonaligned_watchpoint (struct i386_debug_reg_state *state,
 	  else if (what == WP_REMOVE)
 	    retval = i386_remove_aligned_watchpoint (state, addr, len_rw);
 	  else
-	    fatal ("\
-Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n",
-		   (int) what);
-
+	    internal_error (__FILE__, __LINE__, _("\
+Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n"),
+			    (int) what);
 	  if (retval)
 	    break;
 	}

@@ -1,5 +1,11 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-low.c (i386_length_and_rw_bits): Use internal_error
+	instead of fatal and error.
+	(i386_handle_nonaligned_watchpoint): Likewise.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-low.c (i386_get_debug_register_length): New macro.
 	(TARGET_HAS_DR_LEN_8): Remove conditional.  Use above macro.
 	(i386_show_dr): Use debug_printf instead of fprintf.  Use
