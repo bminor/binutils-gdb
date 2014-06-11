@@ -1,3 +1,9 @@
+2014-06-16  Keith Seitz  <keiths@redhat.com>
+
+	PR mi/15863
+	* mi/mi-cmd-var.c (mi_cmd_var_update_iter): Do not attempt
+	to update the varobj if inferior_ptid is null_ptid.
+
 2014-06-16  Tom Tromey  <tromey@redhat.com>
 
 	* target.h (struct target_ops) <to_info_proc>: Make parameter

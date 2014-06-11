@@ -642,7 +642,9 @@ mi_cmd_var_update_iter (struct varobj *var, void *data_pointer)
 
   thread_id = varobj_get_thread_id (var);
 
-  if (thread_id == -1 && is_stopped (inferior_ptid))
+  if (thread_id == -1
+      && (ptid_equal (inferior_ptid, null_ptid)
+	  || is_stopped (inferior_ptid)))
     thread_stopped = 1;
   else
     {

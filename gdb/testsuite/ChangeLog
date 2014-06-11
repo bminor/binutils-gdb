@@ -1,3 +1,9 @@
+2014-06-16  Keith Seitz  <keiths@redhat.com>
+
+	PR mi/15863
+	* gdb.mi/mi-var-cmd.exp: Add test for -var-update before
+	the inferior is started.
+
 2014-06-16  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/break-main-file-remove-fail.c: New file.
