@@ -1,3 +1,7 @@
+2014-06-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* development.sh (development): Set to false.
+
 2014-06-11  Alan Modra  <amodra@gmail.com>
 
 	* linker.c (unwrap_hash_lookup): Add missing parens.
