@@ -430,7 +430,7 @@ index 0000000..61b4307
 +	(lto_run_tests): Add "LTO 4[acd]" tests.
 +	Build liblto-4.a.  Run "lto-4r-[abcd]" tests.
 diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index e38441c..5257191 100644
+index 8b7f2ee..e097b5b 100644
 --- a/bfd/bfd-in2.h
 +++ b/bfd/bfd-in2.h
 @@ -1082,6 +1082,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
@@ -453,7 +453,7 @@ index e38441c..5257191 100644
  /* Pointer to the common section.  */
  #define bfd_com_section_ptr (&_bfd_std_section[0])
  /* Pointer to the undefined section.  */
-@@ -6215,6 +6221,14 @@ enum bfd_direction
+@@ -6219,6 +6225,14 @@ enum bfd_direction
      both_direction = 3
    };
  
@@ -468,7 +468,7 @@ index e38441c..5257191 100644
  struct bfd
  {
    /* A unique identifier of the BFD  */
-@@ -6362,6 +6376,9 @@ struct bfd
+@@ -6366,6 +6380,9 @@ struct bfd
    /* The last section on the section list.  */
    struct bfd_section *section_last;
  
@@ -478,7 +478,7 @@ index e38441c..5257191 100644
    /* The number of sections.  */
    unsigned int section_count;
  
-@@ -6480,6 +6497,9 @@ struct bfd
+@@ -6484,6 +6501,9 @@ struct bfd
    /* Set if only required symbols should be added in the link hash table for
       this object.  Used by VMS linkers.  */
    unsigned int selective_search : 1;
@@ -488,7 +488,7 @@ index e38441c..5257191 100644
  };
  
  /* See note beside bfd_set_section_userdata.  */
-@@ -6692,6 +6712,8 @@ void bfd_emul_set_commonpagesize (const char *, bfd_vma);
+@@ -6696,6 +6716,8 @@ void bfd_emul_set_commonpagesize (const char *, bfd_vma);
  
  char *bfd_demangle (bfd *, const char *, int);
  
@@ -704,10 +704,10 @@ index c4bc944..63ad2e6 100644
        return TRUE;
      }
 diff --git a/bfd/linker.c b/bfd/linker.c
-index a20a276..4eeb363 100644
+index d00238c..a9f37a4 100644
 --- a/bfd/linker.c
 +++ b/bfd/linker.c
-@@ -1902,8 +1902,10 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
+@@ -1936,8 +1936,10 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
  	  break;
  
  	case WARNC:
@@ -720,7 +720,7 @@ index a20a276..4eeb363 100644
  	    {
  	      if (! (*info->callbacks->warning) (info, h->u.i.warning,
  						 h->root.string, abfd,
-@@ -1928,6 +1930,11 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
+@@ -1962,6 +1964,11 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
  	  break;
  
  	case WARN:
@@ -732,7 +732,7 @@ index a20a276..4eeb363 100644
  	  /* Issue a warning.  */
  	  if (! (*info->callbacks->warning) (info, string, h->root.string,
  					     hash_entry_bfd (h), NULL, 0))
-@@ -1949,6 +1956,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
+@@ -1983,6 +1990,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
  	    }
  	  /* Fall through.  */
  	case MWARN:
@@ -1061,7 +1061,7 @@ index b27539a..b3e0c3d 100644
  .#define bfd_com_section_ptr (&_bfd_std_section[0])
  .{* Pointer to the undefined section.  *}
 diff --git a/binutils/objcopy.c b/binutils/objcopy.c
-index 873908c..fdefbf4 100644
+index 46fd8bc..81d3be9 100644
 --- a/binutils/objcopy.c
 +++ b/binutils/objcopy.c
 @@ -1009,30 +1009,6 @@ is_specified_symbol (const char *name, htab_t htab)
@@ -1104,7 +1104,7 @@ index 873908c..fdefbf4 100644
        if (gsym != NULL)
  	gname = gsym->name;
        else
-@@ -2793,7 +2769,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
+@@ -2810,7 +2786,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
  
    if ((isection->flags & SEC_GROUP) != 0)
      {
@@ -1114,10 +1114,10 @@ index 873908c..fdefbf4 100644
        if (gsym != NULL)
  	{
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index 9cafd7c..d93671d 100644
+index af6463e..3f4a4fd 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
-@@ -3526,6 +3526,7 @@ get_section_type_name (unsigned int sh_type)
+@@ -3528,6 +3528,7 @@ get_section_type_name (unsigned int sh_type)
      case 0x7ffffffd:		return "AUXILIARY";
      case 0x7fffffff:		return "FILTER";
      case SHT_GNU_LIBLIST:	return "GNU_LIBLIST";
@@ -1146,10 +1146,10 @@ index 6b8b107..abcdea1 100644
 +	.section .gnu_object_only
 +	.byte 0,0,0,0
 diff --git a/include/bfdlink.h b/include/bfdlink.h
-index 9f1b50b..adf26b2 100644
+index 509d626..eaff23e 100644
 --- a/include/bfdlink.h
 +++ b/include/bfdlink.h
-@@ -378,6 +378,12 @@ struct bfd_link_info
+@@ -384,6 +384,12 @@ struct bfd_link_info
    /* TRUE if ok to have multiple definition.  */
    unsigned int allow_multiple_definition: 1;
  
@@ -1244,7 +1244,7 @@ index 34028ee..04f238b 100644
 -LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 +LDEMUL_FINISH=arm_finish
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index 31761ca..016f980 100644
+index 3ebf3b5..d8e48d6 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
 @@ -65,6 +65,7 @@ static void gld${EMULATION_NAME}_before_allocation (void);
@@ -1381,7 +1381,7 @@ index 78faf68..710eae7 100644
  LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
  LDEMUL_NEW_VERS_PATTERN=gld${EMULATION_NAME}_new_vers_pattern
 diff --git a/ld/emultempl/spuelf.em b/ld/emultempl/spuelf.em
-index 5167b35..5d29560 100644
+index 1b4d72f..8c8090c 100644
 --- a/ld/emultempl/spuelf.em
 +++ b/ld/emultempl/spuelf.em
 @@ -416,7 +416,7 @@ spu_elf_relink (void)
@@ -1424,7 +1424,7 @@ index 782ed7f..ead7345 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index d147ee0..2688361 100644
+index 585914f..d63880a 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -1466,7 +1466,7 @@ index d147ee0..2688361 100644
  
  /* Exported variables.  */
  const char *output_target;
-@@ -1202,14 +1213,17 @@ output_section_statement_table_free (void)
+@@ -1200,14 +1211,17 @@ output_section_statement_table_free (void)
  /* Build enough state so that the parser can build its tree.  */
  
  void
@@ -1486,7 +1486,7 @@ index d147ee0..2688361 100644
    lang_list_init (stat_ptr);
  
    lang_list_init (&input_file_chain);
-@@ -1224,10 +1238,11 @@ lang_init (void)
+@@ -1222,10 +1236,11 @@ lang_init (void)
  
    /* The value "13" is ad-hoc, somewhat related to the expected number of
       assignments in a linker script.  */
@@ -1502,21 +1502,20 @@ index d147ee0..2688361 100644
      einfo (_("%P%F: can not create hash table: %E\n"));
  
    asneeded_list_head = NULL;
-@@ -1235,10 +1250,11 @@ lang_init (void)
+@@ -1233,9 +1248,10 @@ lang_init (void)
  }
  
  void
 -lang_finish (void)
 +lang_finish (bfd_boolean object_only)
  {
-   bfd_link_hash_table_free (link_info.output_bfd, link_info.hash);
 -  bfd_hash_table_free (&lang_definedness_table);
 +  if (!object_only)
 +    bfd_hash_table_free (&lang_definedness_table);
    output_section_statement_table_free ();
  }
  
-@@ -2822,6 +2838,12 @@ load_symbols (lang_input_statement_type *entry,
+@@ -2821,6 +2837,12 @@ load_symbols (lang_input_statement_type *entry,
  		  loaded = FALSE;
  		}
  
@@ -1529,7 +1528,7 @@ index d147ee0..2688361 100644
  	      subsbfd = member;
  	      if (!(*link_info.callbacks
  		    ->add_archive_element) (&link_info, member,
-@@ -6703,7 +6725,38 @@ lang_process (void)
+@@ -6714,7 +6736,38 @@ lang_process (void)
  	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
  	}
      }
@@ -1568,7 +1567,7 @@ index d147ee0..2688361 100644
  
    link_info.gc_sym_list = &entry_symbol;
    if (entry_symbol.name == NULL)
-@@ -8105,3 +8158,963 @@ lang_ld_feature (char *str)
+@@ -8116,3 +8169,963 @@ lang_ld_feature (char *str)
        p = q;
      }
  }
@@ -2533,11 +2532,11 @@ index d147ee0..2688361 100644
 +      }
 +}
 diff --git a/ld/ldlang.h b/ld/ldlang.h
-index aacd5dc..9f8d819 100644
+index 7d69c56..1307993 100644
 --- a/ld/ldlang.h
 +++ b/ld/ldlang.h
-@@ -519,9 +519,9 @@ extern int lang_statement_iteration;
- extern struct asneeded_minfo **asneeded_list_tail;
+@@ -520,9 +520,9 @@ extern struct asneeded_minfo **asneeded_list_tail;
+ extern void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
  
  extern void lang_init
 -  (void);
@@ -2548,7 +2547,7 @@ index aacd5dc..9f8d819 100644
  extern lang_memory_region_type * lang_memory_region_lookup
    (const char * const, bfd_boolean);
  extern void lang_memory_region_alias
-@@ -692,4 +692,45 @@ ldlang_override_segment_assignment
+@@ -693,4 +693,45 @@ ldlang_override_segment_assignment
  extern void
  lang_ld_feature (char *);
  
@@ -2607,10 +2606,10 @@ index b2753c3..f9eb6e5 100644
    OPTION_DEFAULT_SCRIPT,
    OPTION_PRINT_OUTPUT_FORMAT,
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 4c7ea68..e1cd73c 100644
+index 2d987b8..a0faade 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
-@@ -220,6 +220,9 @@ main (int argc, char **argv)
+@@ -224,6 +224,9 @@ main (int argc, char **argv)
  
    xatexit (ld_cleanup);
  
@@ -2620,7 +2619,7 @@ index 4c7ea68..e1cd73c 100644
    /* Set up the sysroot directory.  */
    ld_sysroot = get_sysroot (argc, argv);
    if (*ld_sysroot)
-@@ -296,7 +299,7 @@ main (int argc, char **argv)
+@@ -300,7 +303,7 @@ main (int argc, char **argv)
    default_target = ldemul_choose_target (argc, argv);
    config.maxpagesize = bfd_emul_get_maxpagesize (default_target);
    config.commonpagesize = bfd_emul_get_commonpagesize (default_target);
@@ -2629,7 +2628,7 @@ index 4c7ea68..e1cd73c 100644
    ldemul_before_parse ();
    lang_has_input_file = FALSE;
    parse_args (argc, argv);
-@@ -311,34 +314,7 @@ main (int argc, char **argv)
+@@ -315,34 +318,7 @@ main (int argc, char **argv)
  
    ldemul_set_symbols ();
  
@@ -2665,7 +2664,7 @@ index 4c7ea68..e1cd73c 100644
  
    if (verbose)
      {
-@@ -440,7 +416,7 @@ main (int argc, char **argv)
+@@ -444,7 +420,7 @@ main (int argc, char **argv)
      fprintf (stderr, "lookup = %p val %lx\n", h, h ? h->u.def.value : 1);
    }
  #endif
@@ -2674,7 +2673,7 @@ index 4c7ea68..e1cd73c 100644
  
    /* Even if we're producing relocatable output, some non-fatal errors should
       be reported in the exit status.  (What non-fatal errors, if any, do we
-@@ -459,6 +435,8 @@ main (int argc, char **argv)
+@@ -463,6 +439,8 @@ main (int argc, char **argv)
        if (! bfd_close (link_info.output_bfd))
  	einfo (_("%F%B: final close failed: %E\n"), link_info.output_bfd);
  
@@ -2683,7 +2682,7 @@ index 4c7ea68..e1cd73c 100644
        /* If the --force-exe-suffix is enabled, and we're making an
  	 executable file and it doesn't end in .exe, copy it to one
  	 which does.  */
-@@ -505,6 +483,9 @@ main (int argc, char **argv)
+@@ -509,6 +487,9 @@ main (int argc, char **argv)
  	}
      }
  
@@ -2693,7 +2692,7 @@ index 4c7ea68..e1cd73c 100644
    END_PROGRESS (program_name);
  
    if (config.stats)
-@@ -812,7 +793,9 @@ add_archive_element (struct bfd_link_info *info,
+@@ -816,7 +797,9 @@ add_archive_element (struct bfd_link_info *info,
  	    }
  	}
      }
@@ -2703,7 +2702,7 @@ index 4c7ea68..e1cd73c 100644
  
    ldlang_add_file (input);
  
-@@ -1491,3 +1474,38 @@ notice (struct bfd_link_info *info,
+@@ -1495,3 +1478,38 @@ notice (struct bfd_link_info *info,
  
    return TRUE;
  }
