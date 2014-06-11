@@ -1,3 +1,13 @@
+2014-06-11  Pedro Alves  <palves@redhat.com>
+
+	PR remote/17028
+	* ser-mingw.c (net_windows_socket_check_pending): New function.
+	(net_windows_select_thread): Ignore spurious wakeups.  Use
+	net_windows_socket_check_pending.
+	(net_windows_wait_handle): Check for pending events with
+	ioctlsocket, through net_windows_socket_check_pending, instead of
+	checking the socket's event.
+
 2014-06-10  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python/python-internal.h (gdb_PyObject_GetAttrString)
