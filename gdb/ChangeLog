@@ -1,3 +1,8 @@
+2014-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* amd64-windows-tdep.c (amd64_windows_frame_decode_insns):
+	Remove "+ 8" offset in computation of CHAIN_VMA.
+
 2014-07-31  Doug Evans  <dje@google.com>
 
 	* inflow.c (child_terminal_inferior): Add comment.

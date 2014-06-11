@@ -826,7 +826,7 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 	  CORE_ADDR chain_vma;
 
 	  chain_vma = cache->image_base + unwind_info
-	    + sizeof (ex_ui) + ((codes_count + 1) & ~1) * 2 + 8;
+	    + sizeof (ex_ui) + ((codes_count + 1) & ~1) * 2;
 
 	  if (target_read_memory (chain_vma, (gdb_byte *) &d, sizeof (d)) != 0)
 	    return;
