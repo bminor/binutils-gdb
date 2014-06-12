@@ -417,27 +417,27 @@ Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n"),
   return retval;
 }
 
-/* Update the inferior debug registers state, in INF_STATE, with the
+/* Update the inferior debug registers state, in STATE, with the
    new debug registers state, in NEW_STATE.  */
 
 static void
-i386_update_inferior_debug_regs (struct i386_debug_reg_state *inf_state,
+i386_update_inferior_debug_regs (struct i386_debug_reg_state *state,
 				 struct i386_debug_reg_state *new_state)
 {
   int i;
 
   ALL_DEBUG_REGISTERS (i)
     {
-      if (I386_DR_VACANT (new_state, i) != I386_DR_VACANT (inf_state, i))
+      if (I386_DR_VACANT (new_state, i) != I386_DR_VACANT (state, i))
 	i386_dr_low_set_addr (new_state, i);
       else
-	gdb_assert (new_state->dr_mirror[i] == inf_state->dr_mirror[i]);
+	gdb_assert (new_state->dr_mirror[i] == state->dr_mirror[i]);
     }
 
-  if (new_state->dr_control_mirror != inf_state->dr_control_mirror)
+  if (new_state->dr_control_mirror != state->dr_control_mirror)
     i386_dr_low_set_control (new_state);
 
-  *inf_state = *new_state;
+  *state = *new_state;
 }
 
 /* Insert a watchpoint to watch a memory region which starts at

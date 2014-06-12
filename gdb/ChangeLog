@@ -1,5 +1,10 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (i386_update_inferior_debug_regs) <state>:
+	New parameter.  All uses updated.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c (maint_show_dr): Renamed to debug_hw_points.
 	All uses updated.
 

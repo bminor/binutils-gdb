@@ -1,5 +1,10 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-low.c (i386_update_inferior_debug_regs) <inf_state>:
+	Renamed to state.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-low.c (i386_length_and_rw_bits): Use internal_error
 	instead of fatal and error.
 	(i386_handle_nonaligned_watchpoint): Likewise.

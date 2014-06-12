@@ -526,14 +526,13 @@ Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n"),
   return retval;
 }
 
-/* Update the inferior's debug registers with the new debug registers
-   state, in NEW_STATE, and then update our local mirror to match.  */
+/* Update the inferior debug registers state, in STATE, with the
+   new debug registers state, in NEW_STATE.  */
 
 static void
-i386_update_inferior_debug_regs (struct i386_debug_reg_state *new_state)
+i386_update_inferior_debug_regs (struct i386_debug_reg_state *state,
+				 struct i386_debug_reg_state *new_state)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
   int i;
 
   ALL_DEBUG_REGISTERS (i)
@@ -586,7 +585,7 @@ i386_insert_watchpoint (struct target_ops *self,
     }
 
   if (retval == 0)
-    i386_update_inferior_debug_regs (&local_state);
+    i386_update_inferior_debug_regs (state, &local_state);
 
   if (debug_hw_points)
     i386_show_dr (state, "insert_watchpoint", addr, len, type);
@@ -626,7 +625,7 @@ i386_remove_watchpoint (struct target_ops *self,
     }
 
   if (retval == 0)
-    i386_update_inferior_debug_regs (&local_state);
+    i386_update_inferior_debug_regs (state, &local_state);
 
   if (debug_hw_points)
     i386_show_dr (state, "remove_watchpoint", addr, len, type);
@@ -761,7 +760,7 @@ i386_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 					       addr, len_rw) ? EBUSY : 0;
 
   if (retval == 0)
-    i386_update_inferior_debug_regs (&local_state);
+    i386_update_inferior_debug_regs (state, &local_state);
 
   if (debug_hw_points)
     i386_show_dr (state, "insert_hwbp", addr, 1, hw_execute);
@@ -787,7 +786,7 @@ i386_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 					       addr, len_rw);
 
   if (retval == 0)
-    i386_update_inferior_debug_regs (&local_state);
+    i386_update_inferior_debug_regs (state, &local_state);
 
   if (debug_hw_points)
     i386_show_dr (state, "remove_hwbp", addr, 1, hw_execute);
