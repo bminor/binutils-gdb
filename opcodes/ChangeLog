@@ -1,3 +1,8 @@
+2014-06-12  Alan Modra  <amodra@gmail.com>
+
+	* or1k-asm.c, * or1k-desc.c, * or1k-desc.h, * or1k-dis.c,
+	* or1k-ibld.c, * or1k-opc.c, * or1k-opc.h, * or1k-opinst.c: Regenerate.
+
 2014-06-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (fwait_prefix): New.
