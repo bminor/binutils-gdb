@@ -256,42 +256,6 @@ static int maint_show_dr;
 /* Types of operations supported by i386_handle_nonaligned_watchpoint.  */
 typedef enum { WP_INSERT, WP_REMOVE, WP_COUNT } i386_wp_op_t;
 
-/* Internal functions.  */
-
-/* Return the value of a 4-bit field for DR7 suitable for watching a
-   region of LEN bytes for accesses of type TYPE.  LEN is assumed to
-   have the value of 1, 2, or 4.  */
-static unsigned i386_length_and_rw_bits (int len, enum target_hw_bp_type type);
-
-/* Insert a watchpoint at address ADDR, which is assumed to be aligned
-   according to the length of the region to watch.  LEN_RW_BITS is the
-   value of the bit-field from DR7 which describes the length and
-   access type of the region to be watched by this watchpoint.  Return
-   0 on success, -1 on failure.  */
-static int i386_insert_aligned_watchpoint (struct i386_debug_reg_state *state,
-					   CORE_ADDR addr,
-					   unsigned len_rw_bits);
-
-/* Remove a watchpoint at address ADDR, which is assumed to be aligned
-   according to the length of the region to watch.  LEN_RW_BITS is the
-   value of the bits from DR7 which describes the length and access
-   type of the region watched by this watchpoint.  Return 0 on
-   success, -1 on failure.  */
-static int i386_remove_aligned_watchpoint (struct i386_debug_reg_state *state,
-					   CORE_ADDR addr,
-					   unsigned len_rw_bits);
-
-/* Insert or remove a (possibly non-aligned) watchpoint, or count the
-   number of debug registers required to watch a region at address
-   ADDR whose length is LEN for accesses of type TYPE.  Return 0 on
-   successful insertion or removal, a positive number when queried
-   about the number of registers, or -1 on failure.  If WHAT is not a
-   valid value, bombs through internal_error.  */
-static int i386_handle_nonaligned_watchpoint (struct i386_debug_reg_state *state,
-					      i386_wp_op_t what,
-					      CORE_ADDR addr, int len,
-					      enum target_hw_bp_type type);
-
 /* Implementation.  */
 
 /* Clear the reference counts and forget everything we knew about the

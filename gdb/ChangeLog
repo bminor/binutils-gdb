@@ -1,5 +1,12 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (i386_length_and_rw_bits): Remove prototype.
+	(i386_insert_aligned_watchpoint): Likewise.
+	(i386_remove_aligned_watchpoint): Likewise.
+	(i386_handle_nonaligned_watchpoint): Likewise.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c: Whitespace changes.
 
 2014-06-17  Samuel Bronson  <naesten@gmail.com>
