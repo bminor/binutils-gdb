@@ -114,7 +114,8 @@ foreach dir1 [ list "./gdb.base" "./outputs/gdb.base/completion" ] {
 	 && [remote_file host exists ${dir1}/completion1.o] } {
 	foreach target_name ${targets} {
 	    gdb_test "complete target ${target_name} ${dir1}/completion" \
-		"target ${target_name} ${dir1}/completion.*${dir1}/completion0\\.o.*${dir1}/completion1\\.o.*"
+		"target ${target_name} ${dir1}/completion.*${dir1}/completion0\\.o.*${dir1}/completion1\\.o.*" \
+		"complete target ${target_name}"
 	}
 	break
     }

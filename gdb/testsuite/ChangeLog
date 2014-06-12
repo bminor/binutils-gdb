@@ -1,3 +1,7 @@
+2014-06-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/completion.exp: Don't use directory name in test.
+
 2014-06-09  Gary Benson  <gbenson@redhat.com>
 
 	* gdb.base/sigall.c [Functions to send signals]: Reorder to
