@@ -350,6 +350,8 @@ ALL_EMULATION_SOURCES = \
 	ends32belf_linux.c \
 	enews.c \
 	ens32knbsd.c \
+	enios2elf.c \
+	enios2linux.c \
 	epc532macha.c \
 	epdp11.c \
 	epjelf.c \
