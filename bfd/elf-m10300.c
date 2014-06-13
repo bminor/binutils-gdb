@@ -2679,7 +2679,7 @@ mn10300_elf_relax_section (bfd *abfd,
       /* Iterate over all the input bfds.  */
       for (input_bfd = link_info->input_bfds;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next)
+	   input_bfd = input_bfd->link.next)
 	{
 	  /* We're going to need all the symbols for each bfd.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -3022,7 +3022,7 @@ mn10300_elf_relax_section (bfd *abfd,
 	 a "call" instruction.  */
       for (input_bfd = link_info->input_bfds;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next)
+	   input_bfd = input_bfd->link.next)
 	{
 	  /* We're going to need all the local symbols for each bfd.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;

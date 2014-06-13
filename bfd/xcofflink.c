@@ -2985,7 +2985,7 @@ xcoff_sweep (struct bfd_link_info *info)
 {
   bfd *sub;
 
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       asection *o;
 
@@ -3710,7 +3710,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 
       /* We still need to call xcoff_mark, in order to set ldrel_count
 	 correctly.  */
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
 	{
 	  asection *o;
 
@@ -3804,7 +3804,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
      and figure out the contents of the .debug section.  */
   debug_strtab = xcoff_hash_table (info)->debug_strtab;
 
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       asection *subdeb;
       bfd_size_type symcount;
@@ -3973,7 +3973,7 @@ bfd_xcoff_link_generate_rtinit (bfd *abfd,
   bim->size = 0;
   bim->buffer = 0;
 
-  abfd->link_next = 0;
+  abfd->link.next = 0;
   abfd->format = bfd_object;
   abfd->iostream = (void *) bim;
   abfd->flags = BFD_IN_MEMORY;
@@ -5041,7 +5041,7 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
   section_index = -1;
   for (input_bfd = flinfo->info->input_bfds;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next)
+       input_bfd = input_bfd->link.next)
     for (sec = input_bfd->sections; sec != NULL; sec = sec->next)
       if ((sec->flags & SEC_MARK) != 0 && xcoff_toc_section_p (sec))
 	{
@@ -5073,7 +5073,7 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
       best_address = toc_end;
       for (input_bfd = flinfo->info->input_bfds;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next)
+	   input_bfd = input_bfd->link.next)
 	for (sec = input_bfd->sections; sec != NULL; sec = sec->next)
 	  if ((sec->flags & SEC_MARK) != 0 && xcoff_toc_section_p (sec))
 	    {
@@ -6103,7 +6103,7 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
      input BFD's.  We want at least 6 symbols, since that is the
      number which xcoff_write_global_symbol may need.  */
   max_sym_count = 6;
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       bfd_size_type sz;
 

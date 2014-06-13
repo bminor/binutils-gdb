@@ -8652,7 +8652,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       bfd *startbfd = NULL;
 
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
         {
           /* Consider only VMS object files.  */
           if (sub->xvec != abfd->xvec)
@@ -8756,7 +8756,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     dmt = NULL;
 
   /* Read all sections from the inputs.  */
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       if (sub->flags & DYNAMIC)
         {
@@ -8807,7 +8807,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
           unsigned int off = 0;
 
           /* For each object file (ie for each module).  */
-          for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+          for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
             {
               asection *sub_dst;
               struct vms_dmt_header *dmth = NULL;

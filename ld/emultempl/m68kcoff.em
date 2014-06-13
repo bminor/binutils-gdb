@@ -67,7 +67,7 @@ gld${EMULATION_NAME}_after_open (void)
       || link_info.relocatable)
     return;
 
-  for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link_next)
+  for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
       asection *datasec;
 
@@ -133,7 +133,7 @@ gld${EMULATION_NAME}_after_allocation (void)
       || link_info.relocatable)
     return;
 
-  for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link_next)
+  for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
       asection *datasec, *relsec;
       char *errmsg;

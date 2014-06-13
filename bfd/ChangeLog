@@ -1,3 +1,21 @@
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (struct bfd): Replace link_next with a union.
+	* aoutx.h, * bfd.c, * coff-ppc.c, * coff-rs6000.c, * cofflink.c,
+	* ecoff.c, * elf-m10300.c, * elf32-arm.c, * elf32-avr.c,
+	* elf32-hppa.c, * elf32-i386.c, * elf32-lm32.c, * elf32-m32c.c,
+	* elf32-m32r.c, * elf32-m68hc1x.c, * elf32-metag.c,
+	* elf32-microblaze.c, * elf32-nds32.c, * elf32-nios2.c,
+	* elf32-or1k.c, * elf32-ppc.c, * elf32-rl78.c, * elf32-s390.c,
+	* elf32-score.c, * elf32-score7.c, * elf32-sh.c, * elf32-spu.c,
+	* elf32-tic6x.c, * elf32-tilepro.c, * elf32-xstormy16.c,
+	* elf32-xtensa.c, * elf64-alpha.c, * elf64-hppa.c, * elf64-ia64-vms.c,
+	* elf64-mmix.c, * elf64-ppc.c, * elf64-s390.c, * elf64-x86-64.c,
+	* elflink.c, * elfnn-aarch64.c, * elfxx-mips.c, * elfxx-sparc.c,
+	* elfxx-tilegx.c, * linker.c, * pdp11.c, * peXXigen.c, * simple.c,
+	* sunos.c, * vms-alpha.c, * xcofflink.c: Update for above.
+	* bfd-in2.h: Regenerate.
+
 2014-06-11  Alan Modra  <amodra@gmail.com>
 
 	* linker.c (unwrap_hash_lookup): Add missing parens.

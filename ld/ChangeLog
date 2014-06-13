@@ -1,5 +1,12 @@
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/cr16elf.em, * emultempl/elf32.em, * emultempl/genelf.em,
+	* emultempl/m68kcoff.em, * emultempl/m68kelf.em,
+	* emultempl/nds32elf.em, * emultempl/pe.em, * emultempl/pep.em,
+	* ldlang.c, * ldmain.c, * pe-dll.c: Update for bfd.link_next change.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am (ALL_EMULATION_SOURCES): Add enios2elf.c, enios2linux.c.
 	* Makefile.in: Regenerate.
 

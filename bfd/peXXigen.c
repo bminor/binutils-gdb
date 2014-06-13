@@ -3941,7 +3941,7 @@ rsrc_process_section (bfd * abfd,
 
   for (input = pfinfo->info->input_bfds;
        input != NULL;
-       input = input->link_next)
+       input = input->link.next)
     {
       asection * rsrc_sec = bfd_get_section_by_name (input, ".rsrc");
 

@@ -654,7 +654,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
   /* First, run around to all the objects looking for the .drectve
      sections, and push those into the def file too.  */
-  for (b = info->input_bfds; b; b = b->link_next)
+  for (b = info->input_bfds; b; b = b->link.next)
     {
       s = bfd_get_section_by_name (b, ".drectve");
       if (s)
@@ -700,7 +700,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
   if ((pe_dll_export_everything || pe_def_file->num_exports == 0)
       && !pe_dll_exclude_all_symbols)
     {
-      for (b = info->input_bfds; b; b = b->link_next)
+      for (b = info->input_bfds; b; b = b->link.next)
 	{
 	  asymbol **symbols;
 	  int nsyms;
@@ -1267,7 +1267,7 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
   bfd *b;
   asection *s;
 
-  for (b = info->input_bfds; b; b = b->link_next)
+  for (b = info->input_bfds; b; b = b->link.next)
     {
       asymbol **symbols;
 
@@ -1330,7 +1330,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   struct bfd_section *s;
 
   total_relocs = 0;
-  for (b = info->input_bfds; b; b = b->link_next)
+  for (b = info->input_bfds; b; b = b->link.next)
     for (s = b->sections; s; s = s->next)
       total_relocs += s->reloc_count;
 
@@ -1338,7 +1338,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
   total_relocs = 0;
   bi = 0;
-  for (bi = 0, b = info->input_bfds; b; bi++, b = b->link_next)
+  for (bi = 0, b = info->input_bfds; b; bi++, b = b->link.next)
     {
       arelent **relocs;
       int relsize, nrelocs;
@@ -2726,7 +2726,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
   ar_head = make_head (outarch);
 
   /* Iterate the input BFDs, looking for exclude-modules-for-implib.  */
-  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
     {
       /* Iterate the exclude list.  */
       struct exclude_list_struct *ex;

@@ -1391,7 +1391,7 @@ gld_${EMULATION_NAME}_after_open (void)
 	printf ("-%s\n", sym->root.string);
       bfd_hash_traverse (&link_info.hash->table, pr_sym, NULL);
 
-      for (a = link_info.input_bfds; a; a = a->link_next)
+      for (a = link_info.input_bfds; a; a = a->link.next)
 	printf ("*%s\n",a->filename);
     }
 #endif
@@ -1402,7 +1402,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
       /* Find a COFF input.  */
       for (abfd = link_info.input_bfds;
-	   abfd != (bfd *) NULL; abfd = abfd->link_next)
+	   abfd != (bfd *) NULL; abfd = abfd->link.next)
 	if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
 	  break;
 

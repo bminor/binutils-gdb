@@ -1014,7 +1014,7 @@ gld${EMULATION_NAME}_after_open (void)
 
       /* Find an ELF input.  */
       for (abfd = link_info.input_bfds;
-	   abfd != (bfd *) NULL; abfd = abfd->link_next)
+	   abfd != (bfd *) NULL; abfd = abfd->link.next)
 	if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	  break;
 
@@ -1051,7 +1051,7 @@ gld${EMULATION_NAME}_after_open (void)
       bfd_boolean warn_eh_frame = FALSE;
       asection *s;
 
-      for (abfd = link_info.input_bfds; abfd; abfd = abfd->link_next)
+      for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
 	{
 	  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	    elfbfd = abfd;
@@ -1459,7 +1459,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   if (rpath == NULL)
     rpath = (const char *) getenv ("LD_RUN_PATH");
 
-  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link_next)
+  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
     if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
       {
 	const char *audit_libs = elf_dt_audit (abfd);

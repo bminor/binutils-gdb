@@ -219,8 +219,12 @@ CODE_FRAGMENT
 .  struct bfd *nested_archives; {* List of nested archive in a flattened
 .                                  thin archive.  *}
 .
-.  {* A chain of BFD structures involved in a link.  *}
-.  struct bfd *link_next;
+.  union {
+.    {* For input BFDs, a chain of BFDs involved in a link.  *}
+.    struct bfd *next;
+.    {* For output BFD, the linker hash table.  *}
+.    struct bfd_link_hash_table *hash;
+.  } link;
 .
 .  {* A field used by _bfd_generic_link_add_archive_symbols.  This will
 .     be used only for archive elements.  *}

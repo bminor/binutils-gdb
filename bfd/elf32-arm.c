@@ -4436,7 +4436,7 @@ elf32_arm_setup_section_lists (bfd *output_bfd,
   /* Count the number of input BFDs and find the top input section id.  */
   for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next)
+       input_bfd = input_bfd->link.next)
     {
       bfd_count += 1;
       for (section = input_bfd->sections;
@@ -5045,7 +5045,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
       num_a8_fixes = 0;
       for (input_bfd = info->input_bfds, bfd_indx = 0;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next, bfd_indx++)
+	   input_bfd = input_bfd->link.next, bfd_indx++)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
@@ -10911,7 +10911,7 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
 
   /* Walk over all EXIDX sections, and create backlinks from the corrsponding
      text sections.  */
-  for (inp = info->input_bfds; inp != NULL; inp = inp->link_next)
+  for (inp = info->input_bfds; inp != NULL; inp = inp->link.next)
     {
       asection *sec;
 
@@ -12991,7 +12991,7 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
   while (again)
     {
       again = FALSE;
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
 	{
 	  asection *o;
 
@@ -13729,7 +13729,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       bfd_signed_vma *local_got;
       bfd_signed_vma *end_local_got;
@@ -13906,7 +13906,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
   elf_link_hash_traverse (& htab->root, allocate_dynrelocs_for_symbol, info);
 
   /* Here we rummage through the found bfds to collect glue information.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       if (! is_arm_elf (ibfd))
 	continue;
@@ -15072,7 +15072,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
      mapping symbols.  */
   for (input_bfd = info->input_bfds;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next)
+       input_bfd = input_bfd->link.next)
     {
       if ((input_bfd->flags & (BFD_LINKER_CREATED | HAS_SYMS)) == HAS_SYMS)
 	for (osi.sec = input_bfd->sections;
@@ -15230,7 +15230,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
       elf_link_hash_traverse (&htab->root, elf32_arm_output_plt_map, &osi);
       for (input_bfd = info->input_bfds;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next)
+	   input_bfd = input_bfd->link.next)
 	{
 	  struct arm_local_iplt_info **local_iplt;
 	  unsigned int i, num_syms;

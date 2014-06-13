@@ -5488,7 +5488,7 @@ _bfd_elf_size_group_sections (struct bfd_link_info *info)
 {
   bfd *ibfd;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
 	&& !_bfd_elf_fixup_group_sections (ibfd, bfd_abs_section_ptr))
       return FALSE;
@@ -5615,7 +5615,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       for (inputobj = info->input_bfds;
 	   inputobj;
-	   inputobj = inputobj->link_next)
+	   inputobj = inputobj->link.next)
 	{
 	  asection *s;
 
@@ -5881,7 +5881,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      asection *o;
 
 	      for (sub = info->input_bfds; sub != NULL;
-		   sub = sub->link_next)
+		   sub = sub->link.next)
 		if (bfd_get_flavour (sub) == bfd_target_elf_flavour)
 		  for (o = sub->sections; o != NULL; o = o->next)
 		    if (elf_section_data (o)->this_hdr.sh_type
@@ -6711,7 +6711,7 @@ _bfd_elf_merge_sections (bfd *abfd, struct bfd_link_info *info)
   if (!is_elf_hash_table (info->hash))
     return FALSE;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     if ((ibfd->flags & DYNAMIC) == 0)
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	if ((sec->flags & SEC_MERGE) != 0
@@ -10929,7 +10929,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
      we could write the relocs out and then read them again; I don't
      know how bad the memory loss will be.  */
 
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     sub->output_has_begun = FALSE;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
@@ -10991,7 +10991,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Free symbol buffer if needed.  */
   if (!info->reduce_memory_overheads)
     {
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
 	if (bfd_get_flavour (sub) == bfd_target_elf_flavour
 	    && elf_tdata (sub)->symbuf)
 	  {
@@ -11677,7 +11677,7 @@ _bfd_elf_gc_mark_hook (asection *sec,
 	    {
 	      bfd *i;
 
-	      for (i = info->input_bfds; i; i = i->link_next)
+	      for (i = info->input_bfds; i; i = i->link.next)
 		{
 		  sec = bfd_get_section_by_name (i, sec_name);
 		  if (sec)
@@ -11826,7 +11826,7 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 {
   bfd *ibfd;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       asection *isec;
       bfd_boolean some_kept;
@@ -11954,7 +11954,7 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
   unsigned long section_sym_count;
   struct elf_gc_sweep_symbol_info sweep_info;
 
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       asection *o;
 
@@ -12207,7 +12207,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   /* Try to parse each bfd's .eh_frame section.  Point elf_eh_frame_section
      at the .eh_frame section if we can mark the FDEs individually.  */
   _bfd_elf_begin_eh_frame_parsing (info);
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       asection *sec;
       struct elf_reloc_cookie cookie;
@@ -12247,7 +12247,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* Grovel through relocs to find out who stays ...  */
   gc_mark_hook = bed->gc_mark_hook;
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       asection *o;
 
@@ -12556,7 +12556,7 @@ bfd_elf_gc_common_finalize_got_offsets (bfd *abfd,
     gotoff = bed->got_header_size;
 
   /* Do the local .got entries first.  */
-  for (i = info->input_bfds; i; i = i->link_next)
+  for (i = info->input_bfds; i; i = i->link.next)
     {
       bfd_signed_vma *local_got;
       bfd_size_type j, locsymcount;
@@ -12688,7 +12688,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
     return FALSE;
 
   _bfd_elf_begin_eh_frame_parsing (info);
-  for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
+  for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
       if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
 	continue;

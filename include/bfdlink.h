@@ -469,7 +469,7 @@ struct bfd_link_info
   bfd *output_bfd;
 
   /* The list of input BFD's involved in the link.  These are chained
-     together via the link_next field.  */
+     together via the link.next field.  */
   bfd *input_bfds;
   bfd **input_bfds_tail;
 

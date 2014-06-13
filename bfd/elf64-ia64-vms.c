@@ -2818,7 +2818,7 @@ elf64_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
         return FALSE;
 
       /* Add entries for shared libraries.  */
-      for (abfd = info->input_bfds; abfd; abfd = abfd->link_next)
+      for (abfd = info->input_bfds; abfd; abfd = abfd->link.next)
         {
           char *soname;
           size_t soname_len;

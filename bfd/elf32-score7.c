@@ -3006,7 +3006,7 @@ s7_bfd_score_elf_always_size_sections (bfd *output_bfd,
 
   /* Calculate the total loadable size of the output.  That will give us the
      maximum number of GOT_PAGE entries required.  */
-  for (sub = info->input_bfds; sub; sub = sub->link_next)
+  for (sub = info->input_bfds; sub; sub = sub->link.next)
     {
       asection *subsection;
 

@@ -4447,7 +4447,7 @@ _bfd_ecoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Accumulate the debugging symbols from each input BFD.  */
   for (input_bfd = info->input_bfds;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next)
+       input_bfd = input_bfd->link.next)
     {
       bfd_boolean ret;
 

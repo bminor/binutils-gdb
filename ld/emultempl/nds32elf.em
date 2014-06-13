@@ -105,7 +105,7 @@ nds32_elf_after_open (void)
 
   /* For now, make sure all object files are of the same architecture.
      We may try to merge object files with different architecture together.  */
-  for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link_next)
+  for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
       if (arch_ver == (unsigned int)-1 && E_N1_ARCH != (elf_elfheader (abfd)->e_flags & EF_NDS_ARCH))
 	arch_ver = elf_elfheader (abfd)->e_flags & EF_NDS_ARCH ;
@@ -125,7 +125,7 @@ nds32_elf_after_open (void)
 	}
 
       /* Append .ex9.itable section in the last input object file.  */
-      if (!link_info.relocatable && abfd->link_next == NULL)
+      if (!link_info.relocatable && abfd->link.next == NULL)
 	{
 	  asection *itable;
 	  struct bfd_link_hash_entry *h;
@@ -165,7 +165,7 @@ nds32_elf_after_open (void)
   if (elf_hash_table (&link_info)->dynamic_sections_created
       || link_info.shared || link_info.pie)
     {
-      for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link_next)
+      for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
 	{
 	  if (!(elf_elfheader (abfd)->e_flags & E_NDS32_HAS_PIC))
 	    {

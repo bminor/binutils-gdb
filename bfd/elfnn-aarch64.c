@@ -2487,7 +2487,7 @@ elfNN_aarch64_setup_section_lists (bfd *output_bfd,
 
   /* Count the number of input BFDs and find the top input section id.  */
   for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
-       input_bfd != NULL; input_bfd = input_bfd->link_next)
+       input_bfd != NULL; input_bfd = input_bfd->link.next)
     {
       bfd_count += 1;
       for (section = input_bfd->sections;
@@ -2691,7 +2691,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
       asection *stub_sec;
 
       for (input_bfd = info->input_bfds, bfd_indx = 0;
-	   input_bfd != NULL; input_bfd = input_bfd->link_next, bfd_indx++)
+	   input_bfd != NULL; input_bfd = input_bfd->link.next, bfd_indx++)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
@@ -6289,7 +6289,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       struct elf_aarch64_local_symbol *locals = NULL;
       Elf_Internal_Shdr *symtab_hdr;

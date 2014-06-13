@@ -313,7 +313,7 @@ SUBSUBSECTION
 
 	The <<input_bfds>> field of the <<bfd_link_info>> structure
 	will point to a list of all the input files included in the
-	link.  These files are linked through the <<link_next>> field
+	link.  These files are linked through the <<link.next>> field
 	of the <<bfd>> structure.
 
 	Each section in the output file will have a list of
@@ -2046,7 +2046,7 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
 	p->u.indirect.section->linker_mark = TRUE;
 
   /* Build the output symbol table.  */
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     if (! _bfd_generic_link_output_symbols (abfd, sub, info, &outsymalloc))
       return FALSE;
 

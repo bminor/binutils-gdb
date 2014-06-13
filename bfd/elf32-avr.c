@@ -2822,7 +2822,7 @@ elf32_avr_setup_section_lists (bfd *output_bfd,
   /* Count the number of input BFDs and find the top input section id.  */
   for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next)
+       input_bfd = input_bfd->link.next)
     {
       bfd_count += 1;
       for (section = input_bfd->sections;
@@ -2896,7 +2896,7 @@ get_local_syms (bfd *input_bfd, struct bfd_link_info *info)
      export stubs.  */
   for (bfd_indx = 0;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next, bfd_indx++)
+       input_bfd = input_bfd->link.next, bfd_indx++)
     {
       Elf_Internal_Shdr *symtab_hdr;
 
@@ -2973,7 +2973,7 @@ elf32_avr_size_stubs (bfd *output_bfd,
       bfd_hash_traverse (&htab->bstab, avr_mark_stub_not_to_be_necessary, htab);
       for (input_bfd = info->input_bfds, bfd_indx = 0;
            input_bfd != NULL;
-           input_bfd = input_bfd->link_next, bfd_indx++)
+           input_bfd = input_bfd->link.next, bfd_indx++)
         {
           Elf_Internal_Shdr *symtab_hdr;
           asection *section;

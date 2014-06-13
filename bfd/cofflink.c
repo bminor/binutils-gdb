@@ -860,7 +860,7 @@ _bfd_coff_final_link (bfd *abfd,
      the opportunity to clear the output_has_begun fields of all the
      input BFD's.  */
   max_sym_count = 0;
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       size_t sz;
 
@@ -945,7 +945,7 @@ _bfd_coff_final_link (bfd *abfd,
   if (flaginfo.info->strip != strip_all && flaginfo.info->discard != discard_all)
     {
       /* Add local symbols from foreign inputs.  */
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
 	{
 	  unsigned int i;
 

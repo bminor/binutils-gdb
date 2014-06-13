@@ -7558,7 +7558,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       asection *sec;
       Elf_Internal_Rela *relstart, *rel, *relend;
@@ -8105,7 +8105,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
      and plt refcounts.  */
   toc_ref = NULL;
   for (pass = 0; pass < 2; ++pass)
-    for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
       {
 	Elf_Internal_Sym *locsyms = NULL;
 	asection *toc = bfd_get_section_by_name (ibfd, ".toc");
@@ -8602,7 +8602,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 
   htab->do_toc_opt = 1;
   toc_inf.global_toc_syms = TRUE;
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       asection *toc, *sec;
       Elf_Internal_Shdr *symtab_hdr;
@@ -9662,7 +9662,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       struct got_entry **lgot_ents;
       struct got_entry **end_lgot_ents;
@@ -9784,7 +9784,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
     elf_link_hash_traverse (&htab->elf, size_global_entry_stubs, info);
 
   first_tlsld = NULL;
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       struct got_entry *ent;
 
@@ -9892,7 +9892,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	return FALSE;
     }
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       if (!is_ppc64_elf (ibfd))
 	continue;
@@ -11071,7 +11071,7 @@ ppc64_elf_setup_section_lists (struct bfd_link_info *info)
   /* Find the top input section id.  */
   for (input_bfd = info->input_bfds, top_id = 3;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next)
+       input_bfd = input_bfd->link.next)
     {
       for (section = input_bfd->sections;
 	   section != NULL;
@@ -11252,7 +11252,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
   elf_link_hash_traverse (&htab->elf, merge_global_got, info);
 
   /* And tlsld_got.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       struct got_entry *ent, *ent2;
 
@@ -11263,7 +11263,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
       if (!ent->is_indirect
 	  && ent->got.offset != (bfd_vma) -1)
 	{
-	  for (ibfd2 = ibfd->link_next; ibfd2 != NULL; ibfd2 = ibfd2->link_next)
+	  for (ibfd2 = ibfd->link.next; ibfd2 != NULL; ibfd2 = ibfd2->link.next)
 	    {
 	      if (!is_ppc64_elf (ibfd2))
 		continue;
@@ -11285,7 +11285,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
   htab->elf.irelplt->size -= htab->got_reli_size;
   htab->got_reli_size = 0;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       asection *got, *relgot;
 
@@ -11305,7 +11305,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 
   /* Now reallocate the got, local syms first.  We don't need to
      allocate section contents again since we never increase size.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       struct got_entry **lgot_ents;
       struct got_entry **end_lgot_ents;
@@ -11362,7 +11362,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 
   elf_link_hash_traverse (&htab->elf, reallocate_got, info);
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       struct got_entry *ent;
 
@@ -11386,7 +11386,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 
   done_something = htab->elf.irelplt->rawsize != htab->elf.irelplt->size;
   if (!done_something)
-    for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
       {
 	asection *got;
 
@@ -11953,7 +11953,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 
       for (input_bfd = info->input_bfds, bfd_indx = 0;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next, bfd_indx++)
+	   input_bfd = input_bfd->link.next, bfd_indx++)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
@@ -15064,7 +15064,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
   /* We need to handle writing out multiple GOT sections ourselves,
      since we didn't add them to DYNOBJ.  We know dynobj is the first
      bfd.  */
-  while ((dynobj = dynobj->link_next) != NULL)
+  while ((dynobj = dynobj->link.next) != NULL)
     {
       asection *s;
 

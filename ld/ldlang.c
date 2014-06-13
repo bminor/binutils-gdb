@@ -6228,11 +6228,11 @@ ldlang_add_file (lang_input_statement_type *entry)
 
   /* The BFD linker needs to have a list of all input BFDs involved in
      a link.  */
-  ASSERT (entry->the_bfd->link_next == NULL);
+  ASSERT (entry->the_bfd->link.next == NULL);
   ASSERT (entry->the_bfd != link_info.output_bfd);
 
   *link_info.input_bfds_tail = entry->the_bfd;
-  link_info.input_bfds_tail = &entry->the_bfd->link_next;
+  link_info.input_bfds_tail = &entry->the_bfd->link.next;
   entry->the_bfd->usrdata = entry;
   bfd_set_gp_size (entry->the_bfd, g_switch_value);
 
