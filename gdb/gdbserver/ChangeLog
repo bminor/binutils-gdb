@@ -1,3 +1,8 @@
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* server.h (CORE_ADDR): Now unsigned.
+
 2014-07-16  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_kill_one_lwp): Use kill_lwp, not kill.

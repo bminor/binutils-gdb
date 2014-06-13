@@ -87,7 +87,7 @@ typedef unsigned char gdb_byte;
 
 /* FIXME: This should probably be autoconf'd for.  It's an integer type at
    least the size of a (void *).  */
-typedef long long CORE_ADDR;
+typedef unsigned long long CORE_ADDR;
 
 typedef long long LONGEST;
 typedef unsigned long long ULONGEST;
