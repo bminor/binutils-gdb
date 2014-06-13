@@ -1087,6 +1087,13 @@ f:CORE_ADDR:infcall_mmap:CORE_ADDR size, unsigned prot:size, prot::default_infca
 # These options are put before CU's DW_AT_producer compilation options so that
 # they can override it.  Method may also return NULL.
 m:char *:gcc_target_options:void:::default_gcc_target_options::0
+
+# Return a regular expression that matches names used by this
+# architecture in GNU configury triplets.  The result is statically
+# allocated and must not be freed.  The default implementation simply
+# returns the BFD architecture name, which is correct in nearly every
+# case.
+m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
 EOF
 }
 

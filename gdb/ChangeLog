@@ -1,3 +1,21 @@
+2014-12-12  Tom Tromey  <tromey@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* osabi.h (osabi_triplet_regexp): Declare.
+	* osabi.c (struct osabi_names): New.
+	(gdb_osabi_names): Change type to struct osabi_names.  Update
+	values.
+	(gdbarch_osabi_name): Update.
+	(osabi_triplet_regexp): New function.
+	(osabi_from_tdesc_string, _initialize_gdb_osabi): Update.
+	* i386-tdep.c (i386_gnu_triplet_regexp): New method.
+	(i386_elf_init_abi, i386_go32_init_abi, i386_gdbarch_init): Call
+	set_gdbarch_gnu_triplet_regexp.
+	* gdbarch.sh (gnu_triplet_regexp): New method.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* arch-utils.h (default_gnu_triplet_regexp): Declare.
+	* arch-utils.c (default_gnu_triplet_regexp): New function.
+
 2014-12-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* arch-utils.c (default_infcall_mmap)

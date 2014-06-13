@@ -1407,6 +1407,16 @@ typedef char * (gdbarch_gcc_target_options_ftype) (struct gdbarch *gdbarch);
 extern char * gdbarch_gcc_target_options (struct gdbarch *gdbarch);
 extern void set_gdbarch_gcc_target_options (struct gdbarch *gdbarch, gdbarch_gcc_target_options_ftype *gcc_target_options);
 
+/* Return a regular expression that matches names used by this
+   architecture in GNU configury triplets.  The result is statically
+   allocated and must not be freed.  The default implementation simply
+   returns the BFD architecture name, which is correct in nearly every
+   case. */
+
+typedef const char * (gdbarch_gnu_triplet_regexp_ftype) (struct gdbarch *gdbarch);
+extern const char * gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch);
+extern void set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch, gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 

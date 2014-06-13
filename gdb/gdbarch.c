@@ -323,6 +323,7 @@ struct gdbarch
   gdbarch_vsyscall_range_ftype *vsyscall_range;
   gdbarch_infcall_mmap_ftype *infcall_mmap;
   gdbarch_gcc_target_options_ftype *gcc_target_options;
+  gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -421,6 +422,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->vsyscall_range = default_vsyscall_range;
   gdbarch->infcall_mmap = default_infcall_mmap;
   gdbarch->gcc_target_options = default_gcc_target_options;
+  gdbarch->gnu_triplet_regexp = default_gnu_triplet_regexp;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -648,6 +650,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of vsyscall_range, invalid_p == 0 */
   /* Skip verify of infcall_mmap, invalid_p == 0 */
   /* Skip verify of gcc_target_options, invalid_p == 0 */
+  /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -959,6 +962,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: get_syscall_number = <%s>\n",
                       host_address_to_string (gdbarch->get_syscall_number));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gnu_triplet_regexp = <%s>\n",
+                      host_address_to_string (gdbarch->gnu_triplet_regexp));
   fprintf_unfiltered (file,
                       "gdbarch_dump: half_bit = %s\n",
                       plongest (gdbarch->half_bit));
@@ -4563,6 +4569,23 @@ set_gdbarch_gcc_target_options (struct gdbarch *gdbarch,
                                 gdbarch_gcc_target_options_ftype gcc_target_options)
 {
   gdbarch->gcc_target_options = gcc_target_options;
+}
+
+const char *
+gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->gnu_triplet_regexp != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_gnu_triplet_regexp called\n");
+  return gdbarch->gnu_triplet_regexp (gdbarch);
+}
+
+void
+set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch,
+                                gdbarch_gnu_triplet_regexp_ftype gnu_triplet_regexp)
+{
+  gdbarch->gnu_triplet_regexp = gnu_triplet_regexp;
 }
 
 
