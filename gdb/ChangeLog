@@ -1,3 +1,9 @@
+2014-06-20  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dw2_get_real_path): Use correct type in
+	OBSTACK_CALLOC.
+	* gdb_obstack.h (OBSTACK_ZALLOC, OBSTACK_CALLOC): Cast result.
+
 2014-06-20  Gary Benson  <gbenson@redhat.com>
 
 	* common/gdb_thread_db.h: Moved to nat.  All includes updated.
