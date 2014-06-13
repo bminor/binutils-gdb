@@ -1,3 +1,8 @@
+2014-06-13  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* config/tc-score7.c: Replace sprintf with strcpy where
+	appropriate.
+
 2014-06-07  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_insert_operand): Handle PPC_OPERAND_SIGNOPT

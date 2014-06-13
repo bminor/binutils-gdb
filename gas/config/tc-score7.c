@@ -2795,7 +2795,7 @@ s7_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
   *p = c;
 
   memset (&s7_inst, '\0', sizeof (s7_inst));
-  sprintf (s7_inst.str, "%s", insnstr);
+  strcpy (s7_inst.str, insnstr);
   if (opcode)
     {
       s7_inst.instruction = opcode->value;
@@ -2804,7 +2804,7 @@ s7_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
       s7_inst.size = s7_GET_INSN_SIZE (s7_inst.type);
       s7_inst.relax_size = 0;
       s7_inst.bwarn = 0;
-      sprintf (s7_inst.name, "%s", opcode->template_name);
+      strcpy (s7_inst.name, opcode->template_name);
       strcpy (s7_inst.reg, "");
       s7_inst.error = NULL;
       s7_inst.reloc.type = BFD_RELOC_NONE;
@@ -5308,12 +5308,12 @@ s7_parse_pce_inst (char *insnstr)
   p = strstr (insnstr, "||");
   c = *p;
   *p = '\0';
-  sprintf (first, "%s", insnstr);
+  strcpy (first, insnstr);
 
   /* Get second part string of PCE.  */
   *p = c;
   p += 2;
-  sprintf (second, "%s", p);
+  strcpy (second, p);
 
   s7_parse_16_32_inst (first, FALSE);
   if (s7_inst.error)
@@ -5337,7 +5337,7 @@ s7_parse_pce_inst (char *insnstr)
       || ((pec_part_1.size == s7_INSN16_SIZE) && (s7_inst.size == s7_INSN_SIZE)))
     {
       s7_inst.error = _("pce instruction error (16 bit || 16 bit)'");
-      sprintf (s7_inst.str, insnstr);
+      strcpy (s7_inst.str, insnstr);
       return;
     }
 
