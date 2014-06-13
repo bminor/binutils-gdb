@@ -1056,6 +1056,7 @@ elf_metag_link_hash_table_create (bfd *abfd)
   if (!bfd_hash_table_init (&htab->bstab, stub_hash_newfunc,
 			    sizeof (struct elf_metag_stub_hash_entry)))
     return NULL;
+  (void) elf_metag_link_hash_table_free;
 
   return &htab->etab.root;
 }
@@ -4295,7 +4296,6 @@ elf_metag_plt_sym_val (bfd_vma i, const asection *plt,
 #define bfd_elf32_bfd_is_local_label_name	elf_metag_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create \
 	elf_metag_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free	elf_metag_link_hash_table_free
 #define elf_backend_relocate_section		elf_metag_relocate_section
 #define elf_backend_gc_mark_hook		elf_metag_gc_mark_hook
 #define elf_backend_gc_sweep_hook		elf_metag_gc_sweep_hook

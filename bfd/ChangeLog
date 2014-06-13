@@ -1,5 +1,27 @@
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
+	PR 17047
+	* targets.c (BFD_JUMP_TABLE): Delete NAME##_bfd_link_hash_table_free.
+	(struct bfd_target <_bfd_link_hash_table_free>): Delete.
+	* bfd.c (bfd_link_hash_table_free): Don't define.
+	* aout-adobe.c, * aout-target.h, * aout-tic30.c, * binary.c, * bout.c,
+	* coff64-rs6000.c, * coffcode.h, * elf-m10300.c, * elf32-arm.c,
+	* elf32-avr.c, * elf32-hppa.c, * elf32-i386.c, * elf32-m68hc11.c,
+	* elf32-m68hc12.c, * elf32-m68k.c, * elf32-metag.c, * elf32-nios2.c,
+	* elf32-sparc.c, * elf32-xgate.c, * elf64-ia64-vms.c, * elf64-ppc.c,
+	* elf64-sparc.c, * elf64-x86-64.c, * elfnn-aarch64.c, * elfnn-ia64.c,
+	* elfxx-target.h, * i386msdos.c, * i386os9k.c, * ieee.c, * ihex.c,
+	* libbfd-in.h, * libecoff.h, * mach-o-target.c, * mmo.c,
+	* nlm-target.h, * oasys.c, * pef.c, * plugin.c, * ppcboot.c, * som.c,
+	* srec.c, * tekhex.c, * verilog.c, * versados.c, * vms-alpha.c,
+	* xsym.c: Don't define various link_hash_table_free defines, and
+	remove from bfd_target vars.  Temporarily reference some of the
+	target link_hash_table_free functions to avoid warnings.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
 	* elf-m10300.c, * elf32-arm.c, * elf32-avr.c, * elf32-hppa.c,
 	* elf32-i386.c, * elf32-m68hc1x.c, * elf32-m68k.c, * elf32-metag.c,
 	* elf32-nios2.c, * elf64-ia64-vms.c, * elf64-ppc.c, * elf64-x86-64.c,

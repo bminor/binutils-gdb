@@ -2114,6 +2114,7 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  (void) elfNN_aarch64_link_hash_table_free;
 
   return &ret->root.root;
 }
@@ -7195,9 +7196,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define bfd_elfNN_bfd_link_hash_table_create    \
   elfNN_aarch64_link_hash_table_create
-
-#define bfd_elfNN_bfd_link_hash_table_free      \
-  elfNN_aarch64_link_hash_table_free
 
 #define bfd_elfNN_bfd_merge_private_bfd_data	\
   elfNN_aarch64_merge_private_bfd_data

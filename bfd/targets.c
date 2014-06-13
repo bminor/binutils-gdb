@@ -446,7 +446,6 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_get_relocated_section_contents, \
 .  NAME##_bfd_relax_section, \
 .  NAME##_bfd_link_hash_table_create, \
-.  NAME##_bfd_link_hash_table_free, \
 .  NAME##_bfd_link_add_symbols, \
 .  NAME##_bfd_link_just_syms, \
 .  NAME##_bfd_copy_link_hash_symbol_type, \
@@ -472,9 +471,6 @@ BFD_JUMP_TABLE macros.
 .     different information in this table.  *}
 .  struct bfd_link_hash_table *
 .              (*_bfd_link_hash_table_create) (bfd *);
-.
-.  {* Release the memory associated with the linker hash table.  *}
-.  void        (*_bfd_link_hash_table_free) (struct bfd_link_hash_table *);
 .
 .  {* Add symbols from this object file into the hash table.  *}
 .  bfd_boolean (*_bfd_link_add_symbols) (bfd *, struct bfd_link_info *);

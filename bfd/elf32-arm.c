@@ -3573,6 +3573,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  (void) elf32_arm_link_hash_table_free;
 
   return &ret->root.root;
 }
@@ -16105,7 +16106,6 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 #define bfd_elf32_bfd_set_private_flags		elf32_arm_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	elf32_arm_print_private_bfd_data
 #define bfd_elf32_bfd_link_hash_table_create    elf32_arm_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free      elf32_arm_link_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup		elf32_arm_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup		elf32_arm_reloc_name_lookup
 #define bfd_elf32_find_nearest_line	        elf32_arm_find_nearest_line

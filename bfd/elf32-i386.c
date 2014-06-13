@@ -973,6 +973,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  (void) elf_i386_link_hash_table_free;
 
   return &ret->elf.root;
 }
@@ -5041,7 +5042,6 @@ elf_i386_add_symbol_hook (bfd * abfd,
 
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create  elf_i386_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free    elf_i386_link_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
 

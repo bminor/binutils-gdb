@@ -1,5 +1,12 @@
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
+	PR 17047
+	* ldlang.c (output_bfd_hash_table_free_fn): Delete.
+	(open_output): Don't set it..
+	* ldmain.c (ld_cleanup): ..or call it.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/cr16elf.em, * emultempl/elf32.em, * emultempl/genelf.em,
 	* emultempl/m68kcoff.em, * emultempl/m68kelf.em,
 	* emultempl/nds32elf.em, * emultempl/pe.em, * emultempl/pep.em,

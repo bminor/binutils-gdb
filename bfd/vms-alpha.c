@@ -9239,7 +9239,6 @@ bfd_vms_get_data (bfd *abfd)
   _bfd_generic_section_already_linked
 
 #define alpha_vms_bfd_define_common_symbol bfd_generic_define_common_symbol
-#define alpha_vms_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define alpha_vms_bfd_link_just_syms _bfd_generic_link_just_syms
 #define alpha_vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type

@@ -84,7 +84,6 @@ static bfd_vma opd_entry_value
 #define bfd_elf64_bfd_print_private_bfd_data  ppc64_elf_print_private_bfd_data
 #define bfd_elf64_new_section_hook	      ppc64_elf_new_section_hook
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
-#define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
 #define bfd_elf64_get_synthetic_symtab	      ppc64_elf_get_synthetic_symtab
 #define bfd_elf64_bfd_link_just_syms	      ppc64_elf_link_just_syms
 
@@ -4204,6 +4203,7 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
       _bfd_elf_link_hash_table_free ((struct bfd_link_hash_table *) htab);
       return NULL;
     }
+  (void) ppc64_elf_link_hash_table_free;
 
   /* Initializing two fields of the union is just cosmetic.  We really
      only care about glist, but when compiled on a 32-bit host the

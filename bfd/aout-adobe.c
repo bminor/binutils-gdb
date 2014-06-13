@@ -464,7 +464,6 @@ aout_adobe_sizeof_headers (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 #define aout_32_section_already_linked              _bfd_generic_section_already_linked
 #define aout_32_bfd_define_common_symbol            bfd_generic_define_common_symbol
 #define aout_32_bfd_link_hash_table_create          _bfd_generic_link_hash_table_create
-#define aout_32_bfd_link_hash_table_free            _bfd_generic_link_hash_table_free
 #define aout_32_bfd_link_add_symbols	            _bfd_generic_link_add_symbols
 #define aout_32_bfd_link_just_syms	            _bfd_generic_link_just_syms
 #define aout_32_bfd_copy_link_hash_symbol_type \

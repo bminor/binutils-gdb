@@ -756,6 +756,7 @@ elf32_avr_link_hash_table_create (bfd *abfd)
   if (!bfd_hash_table_init (&htab->bstab, stub_hash_newfunc,
                             sizeof (struct elf32_avr_stub_hash_entry)))
     return NULL;
+  (void) elf32_avr_link_hash_table_free;
 
   return &htab->etab.root;
 }
@@ -3249,7 +3250,6 @@ elf32_avr_build_stubs (struct bfd_link_info *info)
 #define TARGET_LITTLE_NAME	"elf32-avr"
 
 #define bfd_elf32_bfd_link_hash_table_create elf32_avr_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free   elf32_avr_link_hash_table_free
 
 #define elf_info_to_howto	             avr_info_to_howto_rela
 #define elf_info_to_howto_rel	             NULL

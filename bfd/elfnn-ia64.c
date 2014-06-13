@@ -1461,6 +1461,7 @@ elfNN_ia64_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  (void) elfNN_ia64_link_hash_table_free;
 
   return &ret->root.root;
 }
@@ -5024,8 +5025,6 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 /* Stuff for the BFD linker: */
 #define bfd_elfNN_bfd_link_hash_table_create \
 	elfNN_ia64_hash_table_create
-#define bfd_elfNN_bfd_link_hash_table_free \
-	elfNN_ia64_link_hash_table_free
 #define elf_backend_create_dynamic_sections \
 	elfNN_ia64_create_dynamic_sections
 #define elf_backend_check_relocs \

@@ -717,7 +717,6 @@ elf32_xgate_post_process_headers (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_in
 #define elf_backend_add_symbol_hook          elf32_xgate_add_symbol_hook
 
 #define bfd_elf32_bfd_link_hash_table_create xgate_elf_bfd_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free   xgate_elf_bfd_link_hash_table_free
 #define bfd_elf32_bfd_merge_private_bfd_data _bfd_xgate_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags      _bfd_xgate_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data _bfd_xgate_elf_print_private_bfd_data

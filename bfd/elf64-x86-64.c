@@ -1030,6 +1030,7 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  (void) elf_x86_64_link_hash_table_free;
 
   return &ret->elf.root;
 }
@@ -5640,8 +5641,6 @@ static const struct bfd_elf_special_section
 
 #define bfd_elf64_bfd_link_hash_table_create \
   elf_x86_64_link_hash_table_create
-#define bfd_elf64_bfd_link_hash_table_free \
-  elf_x86_64_link_hash_table_free
 #define bfd_elf64_bfd_reloc_type_lookup	    elf_x86_64_reloc_type_lookup
 #define bfd_elf64_bfd_reloc_name_lookup \
   elf_x86_64_reloc_name_lookup
@@ -5913,8 +5912,6 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
 
 #define bfd_elf32_bfd_link_hash_table_create \
   elf_x86_64_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-  elf_x86_64_link_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup	\
   elf_x86_64_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup \

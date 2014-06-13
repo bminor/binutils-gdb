@@ -92,7 +92,6 @@ dlerror (void)
 #define bfd_plugin_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define bfd_plugin_bfd_relax_section                  bfd_generic_relax_section
 #define bfd_plugin_bfd_link_hash_table_create         _bfd_generic_link_hash_table_create
-#define bfd_plugin_bfd_link_hash_table_free           _bfd_generic_link_hash_table_free
 #define bfd_plugin_bfd_link_add_symbols               _bfd_generic_link_add_symbols
 #define bfd_plugin_bfd_link_just_syms                 _bfd_generic_link_just_syms
 #define bfd_plugin_bfd_final_link                     _bfd_generic_final_link

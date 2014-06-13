@@ -977,6 +977,7 @@ elf_m68k_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  (void) elf_m68k_link_hash_table_free;
 
   ret->multi_got_.global_symndx = 1;
 
@@ -4857,9 +4858,6 @@ elf_m68k_add_symbol_hook (bfd *abfd,
 					_bfd_elf_create_dynamic_sections
 #define bfd_elf32_bfd_link_hash_table_create \
 					elf_m68k_link_hash_table_create
-/* ??? Should it be this macro or bfd_elfNN_bfd_link_hash_table_create?  */
-#define bfd_elf32_bfd_link_hash_table_free \
-					elf_m68k_link_hash_table_free
 #define bfd_elf32_bfd_final_link	bfd_elf_final_link
 
 #define elf_backend_check_relocs	elf_m68k_check_relocs

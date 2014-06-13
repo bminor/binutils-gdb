@@ -5140,6 +5140,7 @@ nios2_elf32_link_hash_table_create (bfd *abfd)
   if (!bfd_hash_table_init (&ret->bstab, stub_hash_newfunc,
 			    sizeof (struct elf32_nios2_stub_hash_entry)))
     return NULL;
+  (void) nios2_elf32_link_hash_table_free;
 
   return &ret->root.root;
 }
@@ -5250,8 +5251,6 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 
 #define bfd_elf32_bfd_link_hash_table_create \
 					  nios2_elf32_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-					  nios2_elf32_link_hash_table_free
 
 /* Relocation table lookup macros.  */
 

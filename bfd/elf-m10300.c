@@ -4652,6 +4652,7 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  (void) elf32_mn10300_link_hash_table_free;
   return & ret->root.root;
 }
 
@@ -5581,8 +5582,6 @@ mn10300_elf_mkobject (bfd *abfd)
 				mn10300_elf_get_relocated_section_contents
 #define bfd_elf32_bfd_link_hash_table_create \
 				elf32_mn10300_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-				elf32_mn10300_link_hash_table_free
 
 #ifndef elf_symbol_leading_char
 #define elf_symbol_leading_char '_'

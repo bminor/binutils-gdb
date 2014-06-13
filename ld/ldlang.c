@@ -3072,9 +3072,6 @@ lang_get_output_target (void)
   return default_target;
 }
 
-/* Stashed function to free link_info.hash; see open_output.  */
-void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
-
 /* Open the output file.  */
 
 static void
@@ -3153,18 +3150,6 @@ open_output (const char *name)
   link_info.hash = bfd_link_hash_table_create (link_info.output_bfd);
   if (link_info.hash == NULL)
     einfo (_("%P%F: can not create hash table: %E\n"));
-
-  /* We want to please memory leak checkers by deleting link_info.hash.
-     We can't do it in lang_finish, as a bfd target may hold references to
-     symbols in this table and use them when their _bfd_write_contents
-     function is invoked, as part of bfd_close on the output_bfd.  But,
-     output_bfd is deallocated at bfd_close, so we can't refer to
-     output_bfd after that time, and dereferencing it is needed to call
-     "bfd_link_hash_table_free".  Smash this dependency deadlock and grab
-     the function pointer; arrange to call it on link_info.hash in
-     ld_cleanup.  */
-  output_bfd_hash_table_free_fn
-    = link_info.output_bfd->xvec->_bfd_link_hash_table_free;
 
   bfd_set_gp_size (link_info.output_bfd, g_switch_value);
 }

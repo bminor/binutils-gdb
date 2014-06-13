@@ -1070,6 +1070,7 @@ elf64_ia64_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  (void) elf64_ia64_link_hash_table_free;
 
   return &ret->root.root;
 }
@@ -5458,8 +5459,6 @@ static const struct elf_size_info elf64_ia64_vms_size_info = {
 /* Stuff for the BFD linker: */
 #define bfd_elf64_bfd_link_hash_table_create \
 	elf64_ia64_hash_table_create
-#define bfd_elf64_bfd_link_hash_table_free \
-	elf64_ia64_link_hash_table_free
 #define elf_backend_create_dynamic_sections \
 	elf64_ia64_create_dynamic_sections
 #define elf_backend_check_relocs \
