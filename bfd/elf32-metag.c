@@ -1017,6 +1017,18 @@ metag_link_hash_newfunc (struct bfd_hash_entry *entry,
   return entry;
 }
 
+/* Free the derived linker hash table.  */
+
+static void
+elf_metag_link_hash_table_free (struct bfd_link_hash_table *btab)
+{
+  struct elf_metag_link_hash_table *htab
+    = (struct elf_metag_link_hash_table *) btab;
+
+  bfd_hash_table_free (&htab->bstab);
+  _bfd_elf_link_hash_table_free (btab);
+}
+
 /* Create the derived linker hash table.  The Meta ELF port uses the derived
    hash table to keep information specific to the Meta ELF linker (without
    using static variables).  */
@@ -1046,18 +1058,6 @@ elf_metag_link_hash_table_create (bfd *abfd)
     return NULL;
 
   return &htab->etab.root;
-}
-
-/* Free the derived linker hash table.  */
-
-static void
-elf_metag_link_hash_table_free (struct bfd_link_hash_table *btab)
-{
-  struct elf_metag_link_hash_table *htab
-    = (struct elf_metag_link_hash_table *) btab;
-
-  bfd_hash_table_free (&htab->bstab);
-  _bfd_elf_link_hash_table_free (btab);
 }
 
 /* Section name for stubs is the associated section name plus this

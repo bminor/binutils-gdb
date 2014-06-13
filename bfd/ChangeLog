@@ -1,5 +1,14 @@
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
+	* elf-m10300.c, * elf32-arm.c, * elf32-avr.c, * elf32-hppa.c,
+	* elf32-i386.c, * elf32-m68hc1x.c, * elf32-m68k.c, * elf32-metag.c,
+	* elf32-nios2.c, * elf64-ia64-vms.c, * elf64-ppc.c, * elf64-x86-64.c,
+	* elfnn-aarch64.c, * elfnn-ia64.c, * elfxx-sparc.c, * xcofflink.c:
+	Move link_hash_table_free functions before their corresponding
+	link_hash_table_create functions.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
 	* bfd.c (struct bfd): Replace link_next with a union.
 	* aoutx.h, * bfd.c, * coff-ppc.c, * coff-rs6000.c, * cofflink.c,
 	* ecoff.c, * elf-m10300.c, * elf32-arm.c, * elf32-avr.c,

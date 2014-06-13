@@ -571,7 +571,19 @@ xcoff_link_hash_newfunc (struct bfd_hash_entry *entry,
   return (struct bfd_hash_entry *) ret;
 }
 
-/* Create a XCOFF link hash table.  */
+/* Destroy an XCOFF link hash table.  */
+
+void
+_bfd_xcoff_bfd_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct xcoff_link_hash_table *ret = (struct xcoff_link_hash_table *) hash;
+
+  _bfd_stringtab_free (ret->debug_strtab);
+  bfd_hash_table_free (&ret->root.table);
+  free (ret);
+}
+
+/* Create an XCOFF link hash table.  */
 
 struct bfd_link_hash_table *
 _bfd_xcoff_bfd_link_hash_table_create (bfd *abfd)
@@ -599,18 +611,6 @@ _bfd_xcoff_bfd_link_hash_table_create (bfd *abfd)
   xcoff_data (abfd)->full_aouthdr = TRUE;
 
   return &ret->root;
-}
-
-/* Free a XCOFF link hash table.  */
-
-void
-_bfd_xcoff_bfd_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct xcoff_link_hash_table *ret = (struct xcoff_link_hash_table *) hash;
-
-  _bfd_stringtab_free (ret->debug_strtab);
-  bfd_hash_table_free (&ret->root.table);
-  free (ret);
 }
 
 /* Read internal relocs for an XCOFF csect.  This is a wrapper around

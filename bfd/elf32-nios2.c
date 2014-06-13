@@ -5104,6 +5104,17 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+/* Free the derived linker hash table.  */
+static void
+nios2_elf32_link_hash_table_free (struct bfd_link_hash_table *btab)
+{
+  struct elf32_nios2_link_hash_table *htab
+    = (struct elf32_nios2_link_hash_table *) btab;
+
+  bfd_hash_table_free (&htab->bstab);
+  _bfd_elf_link_hash_table_free (btab);
+}
+
 /* Implement bfd_elf32_bfd_link_hash_table_create.  */
 static struct bfd_link_hash_table *
 nios2_elf32_link_hash_table_create (bfd *abfd)
@@ -5131,17 +5142,6 @@ nios2_elf32_link_hash_table_create (bfd *abfd)
     return NULL;
 
   return &ret->root.root;
-}
-
-/* Free the derived linker hash table.  */
-static void
-nios2_elf32_link_hash_table_free (struct bfd_link_hash_table *btab)
-{
-  struct elf32_nios2_link_hash_table *htab
-    = (struct elf32_nios2_link_hash_table *) btab;
-
-  bfd_hash_table_free (&htab->bstab);
-  _bfd_elf_link_hash_table_free (btab);
 }
 
 /* Implement elf_backend_reloc_type_class.  */

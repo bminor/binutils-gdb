@@ -2055,6 +2055,23 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
+/* Destroy an AArch64 elf linker hash table.  */
+
+static void
+elfNN_aarch64_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct elf_aarch64_link_hash_table *ret
+    = (struct elf_aarch64_link_hash_table *) hash;
+
+  if (ret->loc_hash_table)
+    htab_delete (ret->loc_hash_table);
+  if (ret->loc_hash_memory)
+    objalloc_free ((struct objalloc *) ret->loc_hash_memory);
+
+  bfd_hash_table_free (&ret->stub_hash_table);
+  _bfd_elf_link_hash_table_free (hash);
+}
+
 /* Create an AArch64 elf linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -2099,23 +2116,6 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
     }
 
   return &ret->root.root;
-}
-
-/* Free the derived linker hash table.  */
-
-static void
-elfNN_aarch64_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf_aarch64_link_hash_table *ret
-    = (struct elf_aarch64_link_hash_table *) hash;
-
-  if (ret->loc_hash_table)
-    htab_delete (ret->loc_hash_table);
-  if (ret->loc_hash_memory)
-    objalloc_free ((struct objalloc *) ret->loc_hash_memory);
-
-  bfd_hash_table_free (&ret->stub_hash_table);
-  _bfd_elf_link_hash_table_free (hash);
 }
 
 static bfd_boolean
@@ -7197,7 +7197,7 @@ const struct elf_size_info elfNN_aarch64_size_info =
   elfNN_aarch64_link_hash_table_create
 
 #define bfd_elfNN_bfd_link_hash_table_free      \
-  elfNN_aarch64_hash_table_free
+  elfNN_aarch64_link_hash_table_free
 
 #define bfd_elfNN_bfd_merge_private_bfd_data	\
   elfNN_aarch64_merge_private_bfd_data

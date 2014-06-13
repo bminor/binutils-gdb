@@ -1102,6 +1102,21 @@ elf_sparc_get_local_sym_hash (struct _bfd_sparc_elf_link_hash_table *htab,
   return &ret->elf;
 }
 
+/* Destroy a SPARC ELF linker hash table.  */
+
+void
+_bfd_sparc_elf_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct _bfd_sparc_elf_link_hash_table *htab
+    = (struct _bfd_sparc_elf_link_hash_table *) hash;
+
+  if (htab->loc_hash_table)
+    htab_delete (htab->loc_hash_table);
+  if (htab->loc_hash_memory)
+    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
+  _bfd_generic_link_hash_table_free (hash);
+}
+
 /* Create a SPARC ELF linker hash table.  */
 
 struct bfd_link_hash_table *
@@ -1173,21 +1188,6 @@ _bfd_sparc_elf_link_hash_table_create (bfd *abfd)
     }
 
   return &ret->elf.root;
-}
-
-/* Destroy a SPARC ELF linker hash table.  */
-
-void
-_bfd_sparc_elf_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct _bfd_sparc_elf_link_hash_table *htab
-    = (struct _bfd_sparc_elf_link_hash_table *) hash;
-
-  if (htab->loc_hash_table)
-    htab_delete (htab->loc_hash_table);
-  if (htab->loc_hash_memory)
-    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
-  _bfd_generic_link_hash_table_free (hash);
 }
 
 /* Create .plt, .rela.plt, .got, .rela.got, .dynbss, and

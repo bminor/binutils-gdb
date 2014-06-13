@@ -711,6 +711,24 @@ elf32_avr_link_hash_newfunc (struct bfd_hash_entry * entry,
   return _bfd_elf_link_hash_newfunc (entry, table, string);
 }
 
+/* Free the derived linker hash table.  */
+
+static void
+elf32_avr_link_hash_table_free (struct bfd_link_hash_table *btab)
+{
+  struct elf32_avr_link_hash_table *htab
+    = (struct elf32_avr_link_hash_table *) btab;
+
+  /* Free the address mapping table.  */
+  if (htab->amt_stub_offsets != NULL)
+    free (htab->amt_stub_offsets);
+  if (htab->amt_destination_addr != NULL)
+    free (htab->amt_destination_addr);
+
+  bfd_hash_table_free (&htab->bstab);
+  _bfd_elf_link_hash_table_free (btab);
+}
+
 /* Create the derived linker hash table.  The AVR ELF port uses the derived
    hash table to keep information specific to the AVR ELF linker (without
    using static variables).  */
@@ -740,24 +758,6 @@ elf32_avr_link_hash_table_create (bfd *abfd)
     return NULL;
 
   return &htab->etab.root;
-}
-
-/* Free the derived linker hash table.  */
-
-static void
-elf32_avr_link_hash_table_free (struct bfd_link_hash_table *btab)
-{
-  struct elf32_avr_link_hash_table *htab
-    = (struct elf32_avr_link_hash_table *) btab;
-
-  /* Free the address mapping table.  */
-  if (htab->amt_stub_offsets != NULL)
-    free (htab->amt_stub_offsets);
-  if (htab->amt_destination_addr != NULL)
-    free (htab->amt_destination_addr);
-
-  bfd_hash_table_free (&htab->bstab);
-  _bfd_elf_link_hash_table_free (btab);
 }
 
 /* Calculates the effective distance of a pc relative jump/call.  */

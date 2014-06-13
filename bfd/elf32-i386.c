@@ -927,6 +927,21 @@ elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
   return &ret->elf;
 }
 
+/* Destroy an i386 ELF linker hash table.  */
+
+static void
+elf_i386_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct elf_i386_link_hash_table *htab
+    = (struct elf_i386_link_hash_table *) hash;
+
+  if (htab->loc_hash_table)
+    htab_delete (htab->loc_hash_table);
+  if (htab->loc_hash_memory)
+    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
+  _bfd_elf_link_hash_table_free (hash);
+}
+
 /* Create an i386 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -960,21 +975,6 @@ elf_i386_link_hash_table_create (bfd *abfd)
     }
 
   return &ret->elf.root;
-}
-
-/* Destroy an i386 ELF linker hash table.  */
-
-static void
-elf_i386_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf_i386_link_hash_table *htab
-    = (struct elf_i386_link_hash_table *) hash;
-
-  if (htab->loc_hash_table)
-    htab_delete (htab->loc_hash_table);
-  if (htab->loc_hash_memory)
-    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
-  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Create .plt, .rel.plt, .got, .got.plt, .rel.got, .dynbss, and

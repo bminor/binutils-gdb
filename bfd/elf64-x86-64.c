@@ -967,6 +967,21 @@ elf_x86_64_get_local_sym_hash (struct elf_x86_64_link_hash_table *htab,
   return &ret->elf;
 }
 
+/* Destroy an X86-64 ELF linker hash table.  */
+
+static void
+elf_x86_64_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct elf_x86_64_link_hash_table *htab
+    = (struct elf_x86_64_link_hash_table *) hash;
+
+  if (htab->loc_hash_table)
+    htab_delete (htab->loc_hash_table);
+  if (htab->loc_hash_memory)
+    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
+  _bfd_elf_link_hash_table_free (hash);
+}
+
 /* Create an X86-64 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -1017,21 +1032,6 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
     }
 
   return &ret->elf.root;
-}
-
-/* Destroy an X86-64 ELF linker hash table.  */
-
-static void
-elf_x86_64_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf_x86_64_link_hash_table *htab
-    = (struct elf_x86_64_link_hash_table *) hash;
-
-  if (htab->loc_hash_table)
-    htab_delete (htab->loc_hash_table);
-  if (htab->loc_hash_memory)
-    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
-  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and

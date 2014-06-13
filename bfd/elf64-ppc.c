@@ -4142,6 +4142,20 @@ tocsave_htab_eq (const void *p1, const void *p2)
   return e1->sec == e2->sec && e1->offset == e2->offset;
 }
 
+/* Destroy a ppc64 ELF linker hash table.  */
+
+static void
+ppc64_elf_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct ppc_link_hash_table *htab = (struct ppc_link_hash_table *) hash;
+
+  bfd_hash_table_free (&htab->stub_hash_table);
+  bfd_hash_table_free (&htab->branch_hash_table);
+  if (htab->tocsave_htab)
+    htab_delete (htab->tocsave_htab);
+  _bfd_elf_link_hash_table_free (hash);
+}
+
 /* Create a ppc64 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -4205,20 +4219,6 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
   htab->elf.init_plt_offset.glist = NULL;
 
   return &htab->elf.root;
-}
-
-/* Free the derived linker hash table.  */
-
-static void
-ppc64_elf_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct ppc_link_hash_table *htab = (struct ppc_link_hash_table *) hash;
-
-  bfd_hash_table_free (&htab->stub_hash_table);
-  bfd_hash_table_free (&htab->branch_hash_table);
-  if (htab->tocsave_htab)
-    htab_delete (htab->tocsave_htab);
-  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Create sections for linker generated code.  */

@@ -940,6 +940,23 @@ elf_m68k_link_hash_newfunc (struct bfd_hash_entry *entry,
   return ret;
 }
 
+/* Destroy an m68k ELF linker hash table.  */
+
+static void
+elf_m68k_link_hash_table_free (struct bfd_link_hash_table *_htab)
+{
+  struct elf_m68k_link_hash_table *htab;
+
+  htab = (struct elf_m68k_link_hash_table *) _htab;
+
+  if (htab->multi_got_.bfd2got != NULL)
+    {
+      htab_delete (htab->multi_got_.bfd2got);
+      htab->multi_got_.bfd2got = NULL;
+    }
+  _bfd_elf_link_hash_table_free (_htab);
+}
+
 /* Create an m68k ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -964,23 +981,6 @@ elf_m68k_link_hash_table_create (bfd *abfd)
   ret->multi_got_.global_symndx = 1;
 
   return &ret->root.root;
-}
-
-/* Destruct local data.  */
-
-static void
-elf_m68k_link_hash_table_free (struct bfd_link_hash_table *_htab)
-{
-  struct elf_m68k_link_hash_table *htab;
-
-  htab = (struct elf_m68k_link_hash_table *) _htab;
-
-  if (htab->multi_got_.bfd2got != NULL)
-    {
-      htab_delete (htab->multi_got_.bfd2got);
-      htab->multi_got_.bfd2got = NULL;
-    }
-  _bfd_elf_link_hash_table_free (_htab);
 }
 
 /* Set the right machine number.  */

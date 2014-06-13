@@ -407,6 +407,18 @@ hppa_link_hash_newfunc (struct bfd_hash_entry *entry,
   return entry;
 }
 
+/* Free the derived linker hash table.  */
+
+static void
+elf32_hppa_link_hash_table_free (struct bfd_link_hash_table *btab)
+{
+  struct elf32_hppa_link_hash_table *htab
+    = (struct elf32_hppa_link_hash_table *) btab;
+
+  bfd_hash_table_free (&htab->bstab);
+  _bfd_elf_link_hash_table_free (btab);
+}
+
 /* Create the derived linker hash table.  The PA ELF port uses the derived
    hash table to keep information specific to the PA ELF linker (without
    using static variables).  */
@@ -437,18 +449,6 @@ elf32_hppa_link_hash_table_create (bfd *abfd)
   htab->text_segment_base = (bfd_vma) -1;
   htab->data_segment_base = (bfd_vma) -1;
   return &htab->etab.root;
-}
-
-/* Free the derived linker hash table.  */
-
-static void
-elf32_hppa_link_hash_table_free (struct bfd_link_hash_table *btab)
-{
-  struct elf32_hppa_link_hash_table *htab
-    = (struct elf32_hppa_link_hash_table *) btab;
-
-  bfd_hash_table_free (&htab->bstab);
-  _bfd_elf_link_hash_table_free (btab);
 }
 
 /* Build a name for an entry in the stub hash table.  */

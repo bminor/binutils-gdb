@@ -4598,6 +4598,20 @@ _bfd_mn10300_copy_indirect_symbol (struct bfd_link_info *        info,
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
+/* Destroy an mn10300 ELF linker hash table.  */
+
+static void
+elf32_mn10300_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct elf32_mn10300_link_hash_table *ret
+    = (struct elf32_mn10300_link_hash_table *) hash;
+
+  _bfd_elf_link_hash_table_free
+    ((struct bfd_link_hash_table *) ret->static_hash_table);
+  _bfd_elf_link_hash_table_free
+    ((struct bfd_link_hash_table *) ret);
+}
+
 /* Create an mn10300 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -4639,20 +4653,6 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
       return NULL;
     }
   return & ret->root.root;
-}
-
-/* Free an mn10300 ELF linker hash table.  */
-
-static void
-elf32_mn10300_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf32_mn10300_link_hash_table *ret
-    = (struct elf32_mn10300_link_hash_table *) hash;
-
-  _bfd_elf_link_hash_table_free
-    ((struct bfd_link_hash_table *) ret->static_hash_table);
-  _bfd_elf_link_hash_table_free
-    ((struct bfd_link_hash_table *) ret);
 }
 
 static unsigned long
