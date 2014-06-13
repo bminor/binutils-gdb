@@ -5263,8 +5263,8 @@ s7_b32_relax_to_b16 (fragS * fragp)
     frag_addr = 0;
   else
     {
-      if (s->bsym != 0)
-	symbol_address = (addressT) s->sy_frag->fr_address;
+      if (s->bsym != NULL)
+	symbol_address = (addressT) symbol_get_frag (s)->fr_address;
     }
 
   value = s7_md_chars_to_number (fragp->fr_literal, s7_INSN_SIZE);

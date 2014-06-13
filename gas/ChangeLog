@@ -2,6 +2,10 @@
 
 	* config/tc-score7.c: Replace sprintf with strcpy where
 	appropriate.
+	(s7_b32_relax_to_b16): Use symbol_get_frag() to access a symbol's
+	frag.
+	* config/tc-score.c (s3_relax_branch_inst16): Likewise.
+	(s3_relax_cmpbranch_inst32): Likewise.
 
 2014-06-07  Alan Modra  <amodra@gmail.com>
 

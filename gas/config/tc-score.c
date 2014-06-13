@@ -6854,8 +6854,8 @@ s3_relax_branch_inst16 (fragS * fragp)
     frag_addr = 0;
   else
     {
-      if (s->bsym != 0)
-        symbol_address = (addressT) s->sy_frag->fr_address;
+      if (s->bsym != NULL)
+        symbol_address = (addressT) symbol_get_frag (s)->fr_address;
     }
 
   inst_value = s3_md_chars_to_number (fragp->fr_literal, s3_INSN16_SIZE);
@@ -6901,8 +6901,8 @@ s3_relax_cmpbranch_inst32 (fragS * fragp)
     frag_addr = 0;
   else
     {
-      if (s->bsym != 0)
-        symbol_address = (addressT) s->sy_frag->fr_address;
+      if (s->bsym != NULL)
+	symbol_address = (addressT) symbol_get_frag (s)->fr_address;
     }
 
   inst_value = s3_md_chars_to_number (fragp->fr_literal, s3_INSN_SIZE);
