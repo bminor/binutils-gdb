@@ -1,3 +1,13 @@
+2014-06-13  Omair Javaid  <omair.javaid@linaro.org>
+
+	* elfxx-aarch64.c (stdarg.h): Include.
+	(string.h): Include.
+	(_bfd_aarch64_elf_grok_prstatus): Updated.
+	(_bfd_aarch64_elf_grok_psinfo): New function.
+	(_bfd_aarch64_elf_write_core_note): New function.
+	* elfxx-aarch64.h (elf_backend_grok_psinfo): Define.
+	(elf_backend_write_core_note): Define.
+
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
 	* archive.c: Include bfdlink.h.
