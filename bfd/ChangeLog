@@ -1,5 +1,43 @@
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
+	* archive.c: Include bfdlink.h.
+	(_bfd_archive_close_and_cleanup): Call linker hash_table_free.
+	* bfd.c (struct bfd): Add is_linker_output field.
+	* elf-bfd.h (_bfd_elf_link_hash_table_free): Update prototype.
+	* linker.c (_bfd_link_hash_table_init): Set up hash_table_free,
+	link.hash and is_linker_output.
+	(_bfd_generic_link_hash_table_free): Replace bfd_link_hash_table*
+	param with bfd*.  Assert is_linker_output and link.hash, and
+	clear them before exit.
+	* elf-m10300.c (elf32_mn10300_link_hash_table_free): Replace
+	bfd_link_hash_table* param with bfd*.  Hack is_linker_output
+	and link.hash so we can free two linker hash tables.
+	(elf32_mn10300_link_hash_table_create): Create static_hash_table
+	first.  Clean up on errors.  Set hash_table_free pointer.
+	* elf32-arm.c (elf32_arm_link_hash_table_free): Replace
+	bfd_link_hash_table* param with bfd*.
+	(elf32_arm_link_hash_table_create): Clean up on errors.  Set
+	hash_table_free pointer.
+	* elf32-avr.c, * elf32-hppa.c, * elf32-i386.c, * elf32-m68hc1x.c,
+	* elf32-m68k.c, * elf32-metag.c, * elf32-nios2.c, * elf32-xgate.c,
+	* elf64-ia64-vms.c, * elf64-ppc.c, * elf64-x86-64.c, * elflink.c,
+	* elfnn-aarch64.c, * elfnn-ia64.c, * elfxx-sparc.c,
+	* xcofflink.c: Similarly.
+	* simple.c (bfd_simple_get_relocated_section_contents): Save and
+	clear link.next before creating linker hash table.  Clean up on
+	errors, and restore link.next on exit.
+	* elf32-m68hc1x.h (m68hc11_elf_bfd_link_hash_table_free): Delete.
+	* elf32-xgate.h (xgate_elf_bfd_link_hash_table_free): Delete.
+	* elfxx-sparc.h (_bfd_sparc_elf_link_hash_table_free): Delete.
+	* libcoff-in.h (_bfd_xcoff_bfd_link_hash_table_free): Delete.
+	* hash.c (bfd_hash_table_init_n): Free table on error.
+	* libbfd-in.h (_bfd_generic_link_hash_table_free): Update proto.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
 	PR 17047
 	* targets.c (BFD_JUMP_TABLE): Delete NAME##_bfd_link_hash_table_free.
 	(struct bfd_target <_bfd_link_hash_table_free>): Delete.

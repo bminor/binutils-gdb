@@ -313,6 +313,9 @@ CODE_FRAGMENT
 .  {* Set if only required symbols should be added in the link hash table for
 .     this object.  Used by VMS linkers.  *}
 .  unsigned int selective_search : 1;
+.
+.  {* Set if this is the linker output BFD.  *}
+.  unsigned int is_linker_output : 1;
 .};
 .
 .{* See note beside bfd_set_section_userdata.  *}

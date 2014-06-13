@@ -410,13 +410,13 @@ hppa_link_hash_newfunc (struct bfd_hash_entry *entry,
 /* Free the derived linker hash table.  */
 
 static void
-elf32_hppa_link_hash_table_free (struct bfd_link_hash_table *btab)
+elf32_hppa_link_hash_table_free (bfd *obfd)
 {
   struct elf32_hppa_link_hash_table *htab
-    = (struct elf32_hppa_link_hash_table *) btab;
+    = (struct elf32_hppa_link_hash_table *) obfd->link.hash;
 
   bfd_hash_table_free (&htab->bstab);
-  _bfd_elf_link_hash_table_free (btab);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create the derived linker hash table.  The PA ELF port uses the derived
@@ -444,8 +444,11 @@ elf32_hppa_link_hash_table_create (bfd *abfd)
   /* Init the stub hash table too.  */
   if (!bfd_hash_table_init (&htab->bstab, stub_hash_newfunc,
 			    sizeof (struct elf32_hppa_stub_hash_entry)))
-    return NULL;
-  (void) elf32_hppa_link_hash_table_free;
+    {
+      _bfd_elf_link_hash_table_free (abfd);
+      return NULL;
+    }
+  htab->etab.root.hash_table_free = elf32_hppa_link_hash_table_free;
 
   htab->text_segment_base = (bfd_vma) -1;
   htab->data_segment_base = (bfd_vma) -1;

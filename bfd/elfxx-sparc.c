@@ -1104,17 +1104,17 @@ elf_sparc_get_local_sym_hash (struct _bfd_sparc_elf_link_hash_table *htab,
 
 /* Destroy a SPARC ELF linker hash table.  */
 
-void
-_bfd_sparc_elf_link_hash_table_free (struct bfd_link_hash_table *hash)
+static void
+_bfd_sparc_elf_link_hash_table_free (bfd *obfd)
 {
   struct _bfd_sparc_elf_link_hash_table *htab
-    = (struct _bfd_sparc_elf_link_hash_table *) hash;
+    = (struct _bfd_sparc_elf_link_hash_table *) obfd->link.hash;
 
   if (htab->loc_hash_table)
     htab_delete (htab->loc_hash_table);
   if (htab->loc_hash_memory)
     objalloc_free ((struct objalloc *) htab->loc_hash_memory);
-  _bfd_generic_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create a SPARC ELF linker hash table.  */
@@ -1183,9 +1183,10 @@ _bfd_sparc_elf_link_hash_table_create (bfd *abfd)
   ret->loc_hash_memory = objalloc_create ();
   if (!ret->loc_hash_table || !ret->loc_hash_memory)
     {
-      free (ret);
+      _bfd_sparc_elf_link_hash_table_free (abfd);
       return NULL;
     }
+  ret->elf.root.hash_table_free = _bfd_sparc_elf_link_hash_table_free;
 
   return &ret->elf.root;
 }

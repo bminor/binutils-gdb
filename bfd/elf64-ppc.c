@@ -4144,15 +4144,16 @@ tocsave_htab_eq (const void *p1, const void *p2)
 /* Destroy a ppc64 ELF linker hash table.  */
 
 static void
-ppc64_elf_link_hash_table_free (struct bfd_link_hash_table *hash)
+ppc64_elf_link_hash_table_free (bfd *obfd)
 {
-  struct ppc_link_hash_table *htab = (struct ppc_link_hash_table *) hash;
+  struct ppc_link_hash_table *htab;
 
-  bfd_hash_table_free (&htab->stub_hash_table);
-  bfd_hash_table_free (&htab->branch_hash_table);
+  htab = (struct ppc_link_hash_table *) obfd->link.hash;
   if (htab->tocsave_htab)
     htab_delete (htab->tocsave_htab);
-  _bfd_elf_link_hash_table_free (hash);
+  bfd_hash_table_free (&htab->branch_hash_table);
+  bfd_hash_table_free (&htab->stub_hash_table);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create a ppc64 ELF linker hash table.  */
@@ -4179,7 +4180,7 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
   if (!bfd_hash_table_init (&htab->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct ppc_stub_hash_entry)))
     {
-      _bfd_elf_link_hash_table_free ((struct bfd_link_hash_table *) htab);
+      _bfd_elf_link_hash_table_free (abfd);
       return NULL;
     }
 
@@ -4188,7 +4189,7 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
 			    sizeof (struct ppc_branch_hash_entry)))
     {
       bfd_hash_table_free (&htab->stub_hash_table);
-      _bfd_elf_link_hash_table_free ((struct bfd_link_hash_table *) htab);
+      _bfd_elf_link_hash_table_free (abfd);
       return NULL;
     }
 
@@ -4198,12 +4199,10 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
 					NULL);
   if (htab->tocsave_htab == NULL)
     {
-      bfd_hash_table_free (&htab->branch_hash_table);
-      bfd_hash_table_free (&htab->stub_hash_table);
-      _bfd_elf_link_hash_table_free ((struct bfd_link_hash_table *) htab);
+      ppc64_elf_link_hash_table_free (abfd);
       return NULL;
     }
-  (void) ppc64_elf_link_hash_table_free;
+  htab->elf.root.hash_table_free = ppc64_elf_link_hash_table_free;
 
   /* Initializing two fields of the union is just cosmetic.  We really
      only care about glist, but when compiled on a 32-bit host the

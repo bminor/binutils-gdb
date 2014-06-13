@@ -943,18 +943,18 @@ elf_m68k_link_hash_newfunc (struct bfd_hash_entry *entry,
 /* Destroy an m68k ELF linker hash table.  */
 
 static void
-elf_m68k_link_hash_table_free (struct bfd_link_hash_table *_htab)
+elf_m68k_link_hash_table_free (bfd *obfd)
 {
   struct elf_m68k_link_hash_table *htab;
 
-  htab = (struct elf_m68k_link_hash_table *) _htab;
+  htab = (struct elf_m68k_link_hash_table *) obfd->link.hash;
 
   if (htab->multi_got_.bfd2got != NULL)
     {
       htab_delete (htab->multi_got_.bfd2got);
       htab->multi_got_.bfd2got = NULL;
     }
-  _bfd_elf_link_hash_table_free (_htab);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create an m68k ELF linker hash table.  */
@@ -977,7 +977,7 @@ elf_m68k_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-  (void) elf_m68k_link_hash_table_free;
+  ret->root.root.hash_table_free = elf_m68k_link_hash_table_free;
 
   ret->multi_got_.global_symndx = 1;
 

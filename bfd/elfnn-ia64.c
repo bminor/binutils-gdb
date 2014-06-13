@@ -1414,10 +1414,10 @@ elfNN_ia64_local_dyn_info_free (void **slot,
 /* Destroy IA-64 linker hash table.  */
 
 static void
-elfNN_ia64_link_hash_table_free (struct bfd_link_hash_table *hash)
+elfNN_ia64_link_hash_table_free (bfd *obfd)
 {
   struct elfNN_ia64_link_hash_table *ia64_info
-    = (struct elfNN_ia64_link_hash_table *) hash;
+    = (struct elfNN_ia64_link_hash_table *) obfd->link.hash;
   if (ia64_info->loc_hash_table)
     {
       htab_traverse (ia64_info->loc_hash_table,
@@ -1428,7 +1428,7 @@ elfNN_ia64_link_hash_table_free (struct bfd_link_hash_table *hash)
     objalloc_free ((struct objalloc *) ia64_info->loc_hash_memory);
   elf_link_hash_traverse (&ia64_info->root,
 			  elfNN_ia64_global_dyn_info_free, NULL);
-  _bfd_elf_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create the derived linker hash table.  The IA-64 ELF port uses this
@@ -1458,10 +1458,10 @@ elfNN_ia64_hash_table_create (bfd *abfd)
   ret->loc_hash_memory = objalloc_create ();
   if (!ret->loc_hash_table || !ret->loc_hash_memory)
     {
-      free (ret);
+      elfNN_ia64_link_hash_table_free (abfd);
       return NULL;
     }
-  (void) elfNN_ia64_link_hash_table_free;
+  ret->root.root.hash_table_free = elfNN_ia64_link_hash_table_free;
 
   return &ret->root.root;
 }

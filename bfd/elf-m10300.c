@@ -4601,15 +4601,16 @@ _bfd_mn10300_copy_indirect_symbol (struct bfd_link_info *        info,
 /* Destroy an mn10300 ELF linker hash table.  */
 
 static void
-elf32_mn10300_link_hash_table_free (struct bfd_link_hash_table *hash)
+elf32_mn10300_link_hash_table_free (bfd *obfd)
 {
   struct elf32_mn10300_link_hash_table *ret
-    = (struct elf32_mn10300_link_hash_table *) hash;
+    = (struct elf32_mn10300_link_hash_table *) obfd->link.hash;
 
-  _bfd_elf_link_hash_table_free
-    ((struct bfd_link_hash_table *) ret->static_hash_table);
-  _bfd_elf_link_hash_table_free
-    ((struct bfd_link_hash_table *) ret);
+  obfd->link.hash = &ret->static_hash_table->root.root;
+  _bfd_elf_link_hash_table_free (obfd);
+  obfd->is_linker_output = TRUE;
+  obfd->link.hash = &ret->root.root;
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create an mn10300 ELF linker hash table.  */
@@ -4623,17 +4624,6 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
-
-  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      elf32_mn10300_link_hash_newfunc,
-				      sizeof (struct elf32_mn10300_link_hash_entry),
-				      MN10300_ELF_DATA))
-    {
-      free (ret);
-      return NULL;
-    }
-
-  ret->tls_ldm_got.offset = -1;
 
   amt = sizeof (struct elf_link_hash_table);
   ret->static_hash_table = bfd_zmalloc (amt);
@@ -4652,7 +4642,24 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-  (void) elf32_mn10300_link_hash_table_free;
+
+  abfd->is_linker_output = FALSE;
+  abfd->link.hash = NULL;
+  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
+				      elf32_mn10300_link_hash_newfunc,
+				      sizeof (struct elf32_mn10300_link_hash_entry),
+				      MN10300_ELF_DATA))
+    {
+      abfd->is_linker_output = TRUE;
+      abfd->link.hash = &ret->static_hash_table->root.root;
+      _bfd_elf_link_hash_table_free (abfd);
+      free (ret);
+      return NULL;
+    }
+  ret->root.root.hash_table_free = elf32_mn10300_link_hash_table_free;
+
+  ret->tls_ldm_got.offset = -1;
+
   return & ret->root.root;
 }
 

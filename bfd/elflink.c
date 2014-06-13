@@ -6901,6 +6901,7 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+  ret->root.hash_table_free = _bfd_elf_link_hash_table_free;
 
   return &ret->root;
 }
@@ -6908,13 +6909,15 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
 /* Destroy an ELF linker hash table.  */
 
 void
-_bfd_elf_link_hash_table_free (struct bfd_link_hash_table *hash)
+_bfd_elf_link_hash_table_free (bfd *obfd)
 {
-  struct elf_link_hash_table *htab = (struct elf_link_hash_table *) hash;
+  struct elf_link_hash_table *htab;
+
+  htab = (struct elf_link_hash_table *) obfd->link.hash;
   if (htab->dynstr != NULL)
     _bfd_elf_strtab_free (htab->dynstr);
   _bfd_merge_sections_free (htab->merge_info);
-  _bfd_generic_link_hash_table_free (hash);
+  _bfd_generic_link_hash_table_free (obfd);
 }
 
 /* This is a hook for the ELF emulation code in the generic linker to

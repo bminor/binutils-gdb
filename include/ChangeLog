@@ -1,5 +1,9 @@
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
+	* bfdlink.h (struct bfd_link_hash_table): Add hash_table_free field.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
 	* bfdlink.h: Update for bfd.link_next change.
 
 2014-06-10  Alan Modra  <amodra@gmail.com>

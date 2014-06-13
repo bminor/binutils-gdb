@@ -60,15 +60,15 @@ struct m68hc11_scan_param
 
 /* Destroy a 68HC11/68HC12 ELF linker hash table.  */
 
-void
-m68hc11_elf_bfd_link_hash_table_free (struct bfd_link_hash_table *hash)
+static void
+m68hc11_elf_bfd_link_hash_table_free (bfd *obfd)
 {
   struct m68hc11_elf_link_hash_table *ret
-    = (struct m68hc11_elf_link_hash_table *) hash;
+    = (struct m68hc11_elf_link_hash_table *) obfd->link.hash;
 
   bfd_hash_table_free (ret->stub_hash_table);
   free (ret->stub_hash_table);
-  _bfd_elf_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create a 68HC11/68HC12 ELF linker hash table.  */
@@ -97,12 +97,17 @@ m68hc11_elf_hash_table_create (bfd *abfd)
   ret->stub_hash_table = (struct bfd_hash_table*) bfd_malloc (amt);
   if (ret->stub_hash_table == NULL)
     {
-      free (ret);
+      _bfd_elf_link_hash_table_free (abfd);
       return NULL;
     }
   if (!bfd_hash_table_init (ret->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct elf32_m68hc11_stub_hash_entry)))
-    return NULL;
+    {
+      free (ret->stub_hash_table);
+      _bfd_elf_link_hash_table_free (abfd);
+      return NULL;
+    }
+  ret->root.root.hash_table_free = m68hc11_elf_bfd_link_hash_table_free;
 
   return ret;
 }

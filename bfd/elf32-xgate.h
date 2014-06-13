@@ -100,7 +100,6 @@ struct xgate_elf_link_hash_table
 
 extern struct xgate_elf_link_hash_table* xgate_elf_hash_table_create
   (bfd *);
-extern void xgate_elf_bfd_link_hash_table_free (struct bfd_link_hash_table *);
 
 extern void xgate_elf_get_bank_parameters (struct bfd_link_info *);
 

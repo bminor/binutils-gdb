@@ -1020,13 +1020,13 @@ metag_link_hash_newfunc (struct bfd_hash_entry *entry,
 /* Free the derived linker hash table.  */
 
 static void
-elf_metag_link_hash_table_free (struct bfd_link_hash_table *btab)
+elf_metag_link_hash_table_free (bfd *obfd)
 {
   struct elf_metag_link_hash_table *htab
-    = (struct elf_metag_link_hash_table *) btab;
+    = (struct elf_metag_link_hash_table *) obfd->link.hash;
 
   bfd_hash_table_free (&htab->bstab);
-  _bfd_elf_link_hash_table_free (btab);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create the derived linker hash table.  The Meta ELF port uses the derived
@@ -1055,8 +1055,11 @@ elf_metag_link_hash_table_create (bfd *abfd)
   /* Init the stub hash table too.  */
   if (!bfd_hash_table_init (&htab->bstab, stub_hash_newfunc,
 			    sizeof (struct elf_metag_stub_hash_entry)))
-    return NULL;
-  (void) elf_metag_link_hash_table_free;
+    {
+      _bfd_elf_link_hash_table_free (abfd);
+      return NULL;
+    }
+  htab->etab.root.hash_table_free = elf_metag_link_hash_table_free;
 
   return &htab->etab.root;
 }

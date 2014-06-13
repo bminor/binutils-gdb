@@ -140,6 +140,7 @@ SUBSECTION
 #include "safe-ctype.h"
 #include "hashtab.h"
 #include "filenames.h"
+#include "bfdlink.h"
 
 #ifndef errno
 extern int errno;
@@ -2751,5 +2752,8 @@ _bfd_archive_close_and_cleanup (bfd *abfd)
 	    }
 	}
     }
+  if (abfd->is_linker_output)
+    (*abfd->link.hash->hash_table_free) (abfd);
+
   return TRUE;
 }

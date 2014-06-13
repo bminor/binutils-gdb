@@ -5106,13 +5106,13 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 /* Free the derived linker hash table.  */
 static void
-nios2_elf32_link_hash_table_free (struct bfd_link_hash_table *btab)
+nios2_elf32_link_hash_table_free (bfd *obfd)
 {
   struct elf32_nios2_link_hash_table *htab
-    = (struct elf32_nios2_link_hash_table *) btab;
+    = (struct elf32_nios2_link_hash_table *) obfd->link.hash;
 
   bfd_hash_table_free (&htab->bstab);
-  _bfd_elf_link_hash_table_free (btab);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Implement bfd_elf32_bfd_link_hash_table_create.  */
@@ -5139,8 +5139,11 @@ nios2_elf32_link_hash_table_create (bfd *abfd)
   /* Init the stub hash table too.  */
   if (!bfd_hash_table_init (&ret->bstab, stub_hash_newfunc,
 			    sizeof (struct elf32_nios2_stub_hash_entry)))
-    return NULL;
-  (void) nios2_elf32_link_hash_table_free;
+    {
+      _bfd_elf_link_hash_table_free (abfd);
+      return NULL;
+    }
+  ret->root.root.hash_table_free = nios2_elf32_link_hash_table_free;
 
   return &ret->root.root;
 }

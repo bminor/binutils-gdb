@@ -573,14 +573,17 @@ xcoff_link_hash_newfunc (struct bfd_hash_entry *entry,
 
 /* Destroy an XCOFF link hash table.  */
 
-void
-_bfd_xcoff_bfd_link_hash_table_free (struct bfd_link_hash_table *hash)
+static void
+_bfd_xcoff_bfd_link_hash_table_free (bfd *obfd)
 {
-  struct xcoff_link_hash_table *ret = (struct xcoff_link_hash_table *) hash;
+  struct xcoff_link_hash_table *ret;
 
-  _bfd_stringtab_free (ret->debug_strtab);
-  bfd_hash_table_free (&ret->root.table);
-  free (ret);
+  ret = (struct xcoff_link_hash_table *) obfd->link.hash;
+  if (ret->archive_info)
+    htab_delete (ret->archive_info);
+  if (ret->debug_strtab)
+    _bfd_stringtab_free (ret->debug_strtab);
+  _bfd_generic_link_hash_table_free (obfd);
 }
 
 /* Create an XCOFF link hash table.  */
@@ -604,6 +607,12 @@ _bfd_xcoff_bfd_link_hash_table_create (bfd *abfd)
   ret->debug_strtab = _bfd_xcoff_stringtab_init ();
   ret->archive_info = htab_create (37, xcoff_archive_info_hash,
 				   xcoff_archive_info_eq, NULL);
+  if (!ret->debug_strtab || !ret->archive_info)
+    {
+      _bfd_xcoff_bfd_link_hash_table_free (abfd);
+      return NULL;
+    }
+  ret->root.hash_table_free = _bfd_xcoff_bfd_link_hash_table_free;
 
   /* The linker will always generate a full a.out header.  We need to
      record that fact now, before the sizeof_headers routine could be

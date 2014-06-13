@@ -3526,13 +3526,13 @@ elf32_arm_copy_indirect_symbol (struct bfd_link_info *info,
 /* Destroy an ARM elf linker hash table.  */
 
 static void
-elf32_arm_link_hash_table_free (struct bfd_link_hash_table *hash)
+elf32_arm_link_hash_table_free (bfd *obfd)
 {
   struct elf32_arm_link_hash_table *ret
-    = (struct elf32_arm_link_hash_table *) hash;
+    = (struct elf32_arm_link_hash_table *) obfd->link.hash;
 
   bfd_hash_table_free (&ret->stub_hash_table);
-  _bfd_elf_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (obfd);
 }
 
 /* Create an ARM elf linker hash table.  */
@@ -3570,10 +3570,10 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct elf32_arm_stub_hash_entry)))
     {
-      free (ret);
+      _bfd_elf_link_hash_table_free (abfd);
       return NULL;
     }
-  (void) elf32_arm_link_hash_table_free;
+  ret->root.root.hash_table_free = elf32_arm_link_hash_table_free;
 
   return &ret->root.root;
 }

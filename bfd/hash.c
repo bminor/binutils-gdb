@@ -392,6 +392,7 @@ bfd_hash_table_init_n (struct bfd_hash_table *table,
       objalloc_alloc ((struct objalloc *) table->memory, alloc);
   if (table->table == NULL)
     {
+      bfd_hash_table_free (table);
       bfd_set_error (bfd_error_no_memory);
       return FALSE;
     }
