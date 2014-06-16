@@ -1,3 +1,11 @@
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/elf.sc: Edit out __rela_iplt symbol assignments from
+	.rel sections, and __rel_iplt from .rela sections.
+	* scripttempl/nds32elf.sc: Likewise.
+	* Makefile.am (ends32*.c) Depend on nds32elf.sc.
+	* Makefile.in: Regenerate.
+
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
 	PR 17047
