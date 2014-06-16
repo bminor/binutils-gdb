@@ -1,5 +1,12 @@
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-tic54x.c (tic54x_mlib): Don't write garbage past
+	end of archive to temp file.
+	(tic54x_start_line_hook): Start scan for parallel on next line,
+	not one char into next line (which may overrun the buffer).
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-vax.c (md_apply_fix): Rewrite.
 	(tc_gen_reloc, vax_cons, vax_cons_fix_new): Style: Use NO_RELOC
 	define rather than the equivalent BFD_RELOC_NONE.
