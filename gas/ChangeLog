@@ -1,5 +1,11 @@
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-tic6x.c (s_tic6x_ehtype): Clear after frag_more.
+	(tic6x_output_exidx_entry): Likewise.
+	(md_apply_fix): Simplify 1 byte md_number_to_chars.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-tic54x.c (tic54x_mlib): Don't write garbage past
 	end of archive to temp file.
 	(tic54x_start_line_hook): Start scan for parallel on next line,
