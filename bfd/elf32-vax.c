@@ -1221,7 +1221,7 @@ elf_vax_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	continue;
 
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->size);
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return FALSE;
     }
