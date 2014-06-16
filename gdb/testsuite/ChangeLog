@@ -1,3 +1,12 @@
+2014-06-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break-main-file-remove-fail.c: New file.
+	* gdb.base/break-main-file-remove-fail.exp: New file.
+	* gdb.base/break-unload-file.exp: Use build_executable instead of
+	prepare_for_testing.
+	(test_break): New parameter "initial_load".  Handle it.
+	(top level): Add initial_load cmdline/file axis.
+
 2014-06-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/completion.exp: Don't use directory name in test.

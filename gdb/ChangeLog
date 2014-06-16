@@ -1,3 +1,20 @@
+2014-06-16  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (insert_bp_location, remove_breakpoint_1): Adjust.
+	(disable_breakpoints_in_freed_objfile): Skip objfiles that don't
+	have OBJF_SHARED set.
+	* objfiles.c (userloaded_objfile_contains_address_p): Rename to...
+	(shared_objfile_contains_address_p): ... this.  Check OBJF_SHARED
+	instead of OBJF_USERLOADED.
+	* objfiles.h (OBJF_SHARED): Update comment.
+	(userloaded_objfile_contains_address_p): Rename to ...
+	(shared_objfile_contains_address_p): ... this, and update
+	comments.
+	* symfile.c (add_symbol_file_command): Also set OBJF_SHARED in the
+	new objfile.
+	(remove_symbol_file_command): Skip objfiles that don't have
+	OBJF_SHARED set.
+
 2014-06-16  Tom Tromey  <tromey@redhat.com>
 
 	* minsyms.h (prim_record_minimal_symbol)

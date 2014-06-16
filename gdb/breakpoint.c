@@ -2665,8 +2665,8 @@ insert_bp_location (struct bp_location *bl,
 	  if ((bp_err == GENERIC_ERROR || bp_err == MEMORY_ERROR)
 	      && bl->loc_type == bp_loc_software_breakpoint
 	      && (solib_name_from_address (bl->pspace, bl->address)
-		  || userloaded_objfile_contains_address_p (bl->pspace,
-							    bl->address)))
+		  || shared_objfile_contains_address_p (bl->pspace,
+							bl->address)))
 	    {
 	      /* See also: disable_breakpoints_in_shlibs.  */
 	      bl->shlib_disabled = 1;
@@ -3805,7 +3805,7 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
 	     whether another dynamic object might have loaded over the
 	     breakpoint's address -- the user might well let us know
 	     about it next with add-symbol-file (the whole point of
-	     OBJF_USERLOADED is letting the user manually maintain a
+	     add-symbol-file is letting the user manually maintain a
 	     list of dynamically loaded objects).  If we have the
 	     breakpoint's shadow memory, that is, this is a software
 	     breakpoint managed by GDB, check whether the breakpoint
@@ -3878,8 +3878,8 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
 	  && (bl->loc_type == bp_loc_software_breakpoint
 	      && (bl->shlib_disabled
 		  || solib_name_from_address (bl->pspace, bl->address)
-		  || userloaded_objfile_contains_address_p (bl->pspace,
-							    bl->address))))
+		  || shared_objfile_contains_address_p (bl->pspace,
+							bl->address))))
 	val = 0;
 
       if (val)
@@ -7729,18 +7729,19 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
   if (objfile == NULL)
     return;
 
-  /* OBJF_USERLOADED are dynamic modules manually managed by the user
-     with add-symbol-file/remove-symbol-file.  Similarly to how
-     breakpoints in shared libraries are handled in response to
-     "nosharedlibrary", mark breakpoints in OBJF_USERLOADED modules
+  /* OBJF_SHARED|OBJF_USERLOADED objfiles are dynamic modules manually
+     managed by the user with add-symbol-file/remove-symbol-file.
+     Similarly to how breakpoints in shared libraries are handled in
+     response to "nosharedlibrary", mark breakpoints in such modules
      shlib_disabled so they end up uninserted on the next global
      location list update.  Shared libraries not loaded by the user
      aren't handled here -- they're already handled in
      disable_breakpoints_in_unloaded_shlib, called by solib.c's
      solib_unloaded observer.  We skip objfiles that are not
-     OBJF_USERLOADED (nor OBJF_SHARED) as those aren't considered
-     dynamic objects (e.g. the main objfile).  */
-  if ((objfile->flags & OBJF_USERLOADED) == 0)
+     OBJF_SHARED as those aren't considered dynamic objects (e.g. the
+     main objfile).  */
+  if ((objfile->flags & OBJF_SHARED) == 0
+      || (objfile->flags & OBJF_USERLOADED) == 0)
     return;
 
   ALL_BREAKPOINTS (b)
