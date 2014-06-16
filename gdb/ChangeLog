@@ -1,5 +1,9 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (I386_DR_WATCH_MASK): Remove macro.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c (i386_length_and_rw_bits): Remove prototype.
 	(i386_insert_aligned_watchpoint): Likewise.
 	(i386_remove_aligned_watchpoint): Likewise.

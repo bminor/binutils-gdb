@@ -143,9 +143,6 @@ struct i386_dr_low_type i386_dr_low;
   (((dr7) \
     >> (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i))) & 0x0f)
 
-/* Mask that this I'th watchpoint has triggered.  */
-#define I386_DR_WATCH_MASK(i)	(1 << (i))
-
 /* Did the watchpoint whose address is in the I'th register break?  */
 #define I386_DR_WATCH_HIT(dr6, i) ((dr6) & (1 << (i)))
 
