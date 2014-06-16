@@ -3453,7 +3453,8 @@ s_arm_elf_cons (int nbytes)
 		  memcpy (base, save_buf, p - base);
 
 		  offset = nbytes - size;
-		  p = frag_more ((int) nbytes);
+		  p = frag_more (nbytes);
+		  memset (p, 0, nbytes);
 		  fix_new_exp (frag_now, p - frag_now->fr_literal + offset,
 			       size, &exp, 0, (enum bfd_reloc_code_real) reloc);
 		}
@@ -22384,7 +22385,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_8:
       if (fixP->fx_done || !seg->use_rela_p)
-	md_number_to_chars (buf, value, 1);
+	*buf = value;
       break;
 
     case BFD_RELOC_16:
@@ -22397,9 +22398,6 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_THM_TLS_CALL:
     case BFD_RELOC_ARM_TLS_DESCSEQ:
     case BFD_RELOC_ARM_THM_TLS_DESCSEQ:
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      break;
-
     case BFD_RELOC_ARM_TLS_GOTDESC:
     case BFD_RELOC_ARM_TLS_GD32:
     case BFD_RELOC_ARM_TLS_LE32:
@@ -22407,12 +22405,10 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_TLS_LDM32:
     case BFD_RELOC_ARM_TLS_LDO32:
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      /* fall through */
+      break;
 
     case BFD_RELOC_ARM_GOT32:
     case BFD_RELOC_ARM_GOTOFF:
-      if (fixP->fx_done || !seg->use_rela_p)
-	md_number_to_chars (buf, 0, 4);
       break;
 
     case BFD_RELOC_ARM_GOT_PREL:
