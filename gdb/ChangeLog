@@ -1,5 +1,22 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (i386_show_dr): Renamed to
+	i386_dr_show and made nonstatic.  All uses updated.
+	(i386_length_and_rw_bits): Renamed to
+	i386_dr_length_and_rw_bits and made nonstatic.
+	All uses updated.
+	(i386_insert_aligned_watchpoint): Renamed to
+	i386_dr_insert_aligned_watchpoint and made nonstatic.
+	All uses updated.
+	(i386_remove_aligned_watchpoint): Renamed to
+	i386_dr_remove_aligned_watchpoint and made nonstatic.
+	All uses updated.
+	(i386_update_inferior_debug_regs): Renamed to
+	i386_dr_update_inferior_debug_regs and made nonstatic.
+	All uses updated.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c (i386_dr_low_can_set_addr): New macro.
 	(i386_dr_low_can_set_control): Likewise.
 	(i386_dr_low_set_addr): Likewise.

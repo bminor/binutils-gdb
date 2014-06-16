@@ -58,33 +58,33 @@ extern void i386_low_init_dregs (struct i386_debug_reg_state *state);
 /* Insert a watchpoint to watch a memory region which starts at
    address ADDR and whose length is LEN bytes.  Watch memory accesses
    of the type TYPE.  Return 0 on success, -1 on failure.  */
-extern int i386_low_insert_watchpoint (struct i386_debug_reg_state *state,
-				       enum target_hw_bp_type type,
-				       CORE_ADDR addr,
-				       int len);
+extern int i386_dr_insert_watchpoint (struct i386_debug_reg_state *state,
+				      enum target_hw_bp_type type,
+				      CORE_ADDR addr,
+				      int len);
 
 /* Remove a watchpoint that watched the memory region which starts at
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
-extern int i386_low_remove_watchpoint (struct i386_debug_reg_state *state,
-				       enum target_hw_bp_type type,
-				       CORE_ADDR addr,
-				       int len);
+extern int i386_dr_remove_watchpoint (struct i386_debug_reg_state *state,
+				      enum target_hw_bp_type type,
+				      CORE_ADDR addr,
+				      int len);
 
 /* Return non-zero if we can watch a memory region that starts at
    address ADDR and whose length is LEN bytes.  */
-extern int i386_low_region_ok_for_watchpoint (struct i386_debug_reg_state *state,
-					      CORE_ADDR addr, int len);
+extern int i386_dr_region_ok_for_watchpoint (struct i386_debug_reg_state *state,
+					     CORE_ADDR addr, int len);
 
 /* If the inferior has some break/watchpoint that triggered, set the
    address associated with that break/watchpoint and return true.
    Otherwise, return false.  */
-extern int i386_low_stopped_data_address (struct i386_debug_reg_state *state,
-					  CORE_ADDR *addr_p);
+extern int i386_dr_stopped_data_address (struct i386_debug_reg_state *state,
+					 CORE_ADDR *addr_p);
 
 /* Return true if the inferior has some watchpoint that triggered.
    Otherwise return false.  */
-extern int i386_low_stopped_by_watchpoint (struct i386_debug_reg_state *state);
+extern int i386_dr_stopped_by_watchpoint (struct i386_debug_reg_state *state);
 
 /* Each target needs to provide several low-level functions
    that will be called to insert watchpoints and hardware breakpoints

@@ -122,8 +122,8 @@ i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	enum target_hw_bp_type hw_type
 	  = raw_bkpt_type_to_target_hw_bp_type (type);
 
-	return i386_low_insert_watchpoint (&debug_reg_state,
-					   hw_type, addr, size);
+	return i386_dr_insert_watchpoint (&debug_reg_state,
+					  hw_type, addr, size);
       }
     default:
       /* Unsupported.  */
@@ -143,8 +143,8 @@ i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	enum target_hw_bp_type hw_type
 	  = raw_bkpt_type_to_target_hw_bp_type (type);
 
-	return i386_low_remove_watchpoint (&debug_reg_state,
-					   hw_type, addr, size);
+	return i386_dr_remove_watchpoint (&debug_reg_state,
+					  hw_type, addr, size);
       }
     default:
       /* Unsupported.  */
@@ -155,14 +155,14 @@ i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 static int
 i386_stopped_by_watchpoint (void)
 {
-  return i386_low_stopped_by_watchpoint (&debug_reg_state);
+  return i386_dr_stopped_by_watchpoint (&debug_reg_state);
 }
 
 static CORE_ADDR
 i386_stopped_data_address (void)
 {
   CORE_ADDR addr;
-  if (i386_low_stopped_data_address (&debug_reg_state, &addr))
+  if (i386_dr_stopped_data_address (&debug_reg_state, &addr))
     return addr;
   return 0;
 }

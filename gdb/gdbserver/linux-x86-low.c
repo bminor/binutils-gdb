@@ -681,7 +681,7 @@ x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	struct i386_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
-	return i386_low_insert_watchpoint (state, hw_type, addr, size);
+	return i386_dr_insert_watchpoint (state, hw_type, addr, size);
       }
 
     default:
@@ -710,7 +710,7 @@ x86_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	struct i386_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
-	return i386_low_remove_watchpoint (state, hw_type, addr, size);
+	return i386_dr_remove_watchpoint (state, hw_type, addr, size);
       }
     default:
       /* Unsupported.  */
@@ -722,7 +722,7 @@ static int
 x86_stopped_by_watchpoint (void)
 {
   struct process_info *proc = current_process ();
-  return i386_low_stopped_by_watchpoint (&proc->private->arch_private->debug_reg_state);
+  return i386_dr_stopped_by_watchpoint (&proc->private->arch_private->debug_reg_state);
 }
 
 static CORE_ADDR
@@ -730,8 +730,8 @@ x86_stopped_data_address (void)
 {
   struct process_info *proc = current_process ();
   CORE_ADDR addr;
-  if (i386_low_stopped_data_address (&proc->private->arch_private->debug_reg_state,
-				     &addr))
+  if (i386_dr_stopped_data_address (&proc->private->arch_private->debug_reg_state,
+				    &addr))
     return addr;
   return 0;
 }
@@ -784,7 +784,7 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 
 	    /* If we're setting a watchpoint, any change the inferior
 	       had done itself to the debug registers needs to be
-	       discarded, otherwise, i386_low_stopped_data_address can
+	       discarded, otherwise, i386_dr_stopped_data_address can
 	       get confused.  */
 	    clear_status = 1;
 	  }
