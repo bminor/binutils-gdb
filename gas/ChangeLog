@@ -1,5 +1,11 @@
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-vax.c (md_apply_fix): Rewrite.
+	(tc_gen_reloc, vax_cons, vax_cons_fix_new): Style: Use NO_RELOC
+	define rather than the equivalent BFD_RELOC_NONE.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-arm.c (s_arm_elf_cons): Initialise after frag_more.
 	(md_apply_fix): Delete now unnecessary zeroing for BFD_RELOC_ARM_GOT*
 	and BFD_RELOC_ARM_TLS* relocs.  Simplify BFD_RELOC_8 case.

@@ -1,5 +1,9 @@
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
+	* gas/vax/elf-rel.d: Update.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
 	* gas/cris/rd-bkw4v32.d: Update.
 
 2014-06-10  H.J. Lu  <hongjiu.lu@intel.com>
