@@ -1,3 +1,8 @@
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-cris.c (md_create_long_jump): Follow "short" jump
+	with a nop rather than leaving uninitialised.
+
 2014-06-13  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	* config/tc-score7.c: Replace sprintf with strcpy where

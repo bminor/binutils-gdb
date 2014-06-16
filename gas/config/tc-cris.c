@@ -1124,9 +1124,15 @@ md_create_long_jump (char *storep, addressT from_addr, addressT to_addr,
 
   if (max_short_minus_distance <= distance
       && distance <= max_short_plus_distance)
-    /* Then make it a "short" long jump.  */
-    md_create_short_jump (storep, from_addr, to_addr, fragP,
+    {
+      /* Then make it a "short" long jump.  */
+      md_create_short_jump (storep, from_addr, to_addr, fragP,
 			    to_symbol);
+      if (cris_arch == arch_crisv32)
+	md_number_to_chars (storep + 6, NOP_OPCODE_V32, 2);
+      else
+	md_number_to_chars (storep + 6, NOP_OPCODE, 2);
+    }
   else
     {
       /* We have a "long" long jump: "JUMP [PC+]".  If CRISv32, always
