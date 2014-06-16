@@ -7745,9 +7745,10 @@ fixup_go_packaging (struct dwarf2_cu *cu)
   if (package_name != NULL)
     {
       struct objfile *objfile = cu->objfile;
-      const char *saved_package_name = obstack_copy0 (&objfile->objfile_obstack,
-						      package_name,
-						      strlen (package_name));
+      const char *saved_package_name
+	= obstack_copy0 (&objfile->per_bfd->storage_obstack,
+			 package_name,
+			 strlen (package_name));
       struct type *type = init_type (TYPE_CODE_MODULE, 0, 0,
 				     saved_package_name, objfile);
       struct symbol *sym;
@@ -8365,6 +8366,8 @@ dwarf2_compute_name (const char *name,
 	  long length;
 	  const char *prefix;
 	  struct ui_file *buf;
+	  char *intermediate_name;
+	  const char *canonical_name = NULL;
 
 	  prefix = determine_prefix (die, cu);
 	  buf = mem_fileopen ();
@@ -8541,19 +8544,25 @@ dwarf2_compute_name (const char *name,
 		}
 	    }
 
-	  name = ui_file_obsavestring (buf, &objfile->objfile_obstack,
-				       &length);
+	  intermediate_name = ui_file_xstrdup (buf, &length);
 	  ui_file_delete (buf);
 
 	  if (cu->language == language_cplus)
-	    {
-	      const char *cname
-		= dwarf2_canonicalize_name (name, cu,
-					    &objfile->objfile_obstack);
+	    canonical_name
+	      = dwarf2_canonicalize_name (intermediate_name, cu,
+					  &objfile->per_bfd->storage_obstack);
 
-	      if (cname != NULL)
-		name = cname;
-	    }
+	  /* If we only computed INTERMEDIATE_NAME, or if
+	     INTERMEDIATE_NAME is already canonical, then we need to
+	     copy it to the appropriate obstack.  */
+	  if (canonical_name == NULL || canonical_name == intermediate_name)
+	    name = obstack_copy0 (&objfile->per_bfd->storage_obstack,
+				  intermediate_name,
+				  strlen (intermediate_name));
+	  else
+	    name = canonical_name;
+
+	  xfree (intermediate_name);
 	}
     }
 
@@ -8562,7 +8571,7 @@ dwarf2_compute_name (const char *name,
 
 /* Return the fully qualified name of DIE, based on its DW_AT_name.
    If scope qualifiers are appropriate they will be added.  The result
-   will be allocated on the objfile_obstack, or NULL if the DIE does
+   will be allocated on the storage_obstack, or NULL if the DIE does
    not have a name.  NAME may either be from a previous call to
    dwarf2_name or NULL.
 
@@ -8677,7 +8686,8 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
     retval = canon;
 
   if (need_copy)
-    retval = obstack_copy0 (&objfile->objfile_obstack, retval, strlen (retval));
+    retval = obstack_copy0 (&objfile->per_bfd->storage_obstack,
+			    retval, strlen (retval));
 
   do_cleanups (back_to);
   return retval;
@@ -15508,7 +15518,7 @@ read_partial_die (const struct die_reader_specs *reader,
 	    default:
 	      part_die->name
 		= dwarf2_canonicalize_name (DW_STRING (&attr), cu,
-					    &objfile->objfile_obstack);
+					    &objfile->per_bfd->storage_obstack);
 	      break;
 	    }
 	  break;
@@ -15793,7 +15803,7 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 	  if (actual_class_name != NULL)
 	    {
 	      struct_pdi->name
-		= obstack_copy0 (&cu->objfile->objfile_obstack,
+		= obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
 				 actual_class_name,
 				 strlen (actual_class_name));
 	      xfree (actual_class_name);
@@ -15879,8 +15889,9 @@ fixup_partial_die (struct partial_die_info *part_die,
 	  else
 	    base = demangled;
 
-	  part_die->name = obstack_copy0 (&cu->objfile->objfile_obstack,
-					  base, strlen (base));
+	  part_die->name
+	    = obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
+			     base, strlen (base));
 	  xfree (demangled);
 	}
     }
@@ -18557,7 +18568,7 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
 			  && actual_name[actual_name_len
 					 - die_name_len - 1] == ':')
 			name =
-			  obstack_copy0 (&cu->objfile->objfile_obstack,
+			  obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
 					 actual_name,
 					 actual_name_len - die_name_len - 2);
 		    }
@@ -18603,7 +18614,7 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
   if (base == NULL || base == DW_STRING (attr) || base[-1] != ':')
     return "";
 
-  return obstack_copy0 (&cu->objfile->objfile_obstack,
+  return obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
 			DW_STRING (attr), &base[-1] - DW_STRING (attr));
 }
 
@@ -18943,8 +18954,9 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	      char *base;
 
 	      /* FIXME: we already did this for the partial symbol... */
-	      DW_STRING (attr) = obstack_copy0 (&cu->objfile->objfile_obstack,
-						demangled, strlen (demangled));
+	      DW_STRING (attr)
+		= obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
+				 demangled, strlen (demangled));
 	      DW_STRING_IS_CANONICAL (attr) = 1;
 	      xfree (demangled);
 
@@ -18967,7 +18979,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
     {
       DW_STRING (attr)
 	= dwarf2_canonicalize_name (DW_STRING (attr), cu,
-				    &cu->objfile->objfile_obstack);
+				    &cu->objfile->per_bfd->storage_obstack);
       DW_STRING_IS_CANONICAL (attr) = 1;
     }
   return DW_STRING (attr);
