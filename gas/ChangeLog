@@ -1,3 +1,7 @@
+2014-06-16  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-aarch64.c (md_apply_fix): Ignore unused relocs.
+
 2014-06-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (END_OF_INSN): New macro.

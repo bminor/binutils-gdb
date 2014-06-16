@@ -6665,6 +6665,10 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
       break;
 
+    case BFD_RELOC_UNUSED:
+      /* An error will already have been reported.  */
+      break;
+
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("unexpected %s fixup"),
