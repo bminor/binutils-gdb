@@ -1,5 +1,10 @@
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-dlx.c (machine_ip): Move initialisation of the_insn
+	earlier.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-i386.c (reloc): Don't avoid pcrel check for
 	BFD_RELOC_SIZE64.  Return NO_RELOC on failing pcrel check.
 
