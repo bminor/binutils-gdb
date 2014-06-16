@@ -17,9 +17,9 @@ GAS LISTING .*
 .*  Error: expecting valid branch instruction after `bnd'
 [ 	]*5[ 	]+\?\?\?\? 6766F2AB 		bnd stosw \(%edi\)    		\# Bad
 .*  Error: expecting valid branch instruction after `bnd'
-[ 	]*6[ 	]+\?\?\?\? F2E200   		bnd loop foo
+[ 	]*6[ 	]+\?\?\?\? F2E2(00|0A)   		bnd loop foo
 .*  Error: expecting valid branch instruction after `bnd'
-[ 	]*7[ 	]+\?\?\?\? F2E300   		bnd jrcxz foo
+[ 	]*7[ 	]+\?\?\?\? F2E3(00|0D)   		bnd jrcxz foo
 .*  Error: expecting valid branch instruction after `bnd'
 [ 	]*8[ 	]+
 [ 	]*9[ 	]+\.intel_syntax noprefix
@@ -27,7 +27,8 @@ GAS LISTING .*
 .*  Error: expecting valid branch instruction after `bnd'
 [ 	]*11[ 	]+\?\?\?\? 6766F2AB 		bnd stos WORD PTR \[edi]		\# Bad
 .*  Error: expecting valid branch instruction after `bnd'
-[ 	]*12[ 	]+\?\?\?\? F2E200   		bnd loop foo
+[ 	]*12[ 	]+\?\?\?\? F2E2(00|18)   		bnd loop foo
 .*  Error: expecting valid branch instruction after `bnd'
-[ 	]*13[ 	]+\?\?\?\? F2E300   		bnd jrcxz foo
+[ 	]*13[ 	]+\?\?\?\? F2E3(00|1B)(  |90) 		bnd jrcxz foo
 .*  Error: expecting valid branch instruction after `bnd'
+#pass

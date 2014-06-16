@@ -1,5 +1,21 @@
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
+	* gas/elf/bad-group.s: Use %function.
+	* gas/elf/bad-group.err: Expect correct line number.  Allow
+	other errors.
+	* gas/elf/bad-size.err: Allow other errors.  Match expected
+	error somewhat more rigorously.
+	* gas/i386/reloc32.l: Allow other errors.
+	* gas/i386/mpx-inval-1.l: Match applied relocs.
+	* gas/i386/x86-64-mpx-inval-1.l: Likewise, and nop padding.
+	* gas/i386/x86-64-mpx-inval-2.l: Match nop padding, and allow
+	other errors.
+	* gas/macros/dot.s: Use .balign.
+	* gas/macros/dot.l: Update alignment output.
+	* gas/symver/symver6.l: Allow other errors.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
 	* gas/vax/elf-rel.d: Update.
 
 2014-06-16  Alan Modra  <amodra@gmail.com>

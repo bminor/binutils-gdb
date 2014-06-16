@@ -1692,7 +1692,7 @@ set_symtab (void)
 #endif
 #endif
 
-void
+static void
 subsegs_finish (void)
 {
   struct frchain *frchainP;
@@ -1761,32 +1761,11 @@ write_object_file (void)
   fragS *fragP;			/* Track along all frags.  */
 #endif
 
+  subsegs_finish ();
+
 #ifdef md_pre_output_hook
   md_pre_output_hook;
 #endif
-
-  /* Do we really want to write it?  */
-  {
-    int n_warns, n_errs;
-    n_warns = had_warnings ();
-    n_errs = had_errors ();
-    /* The -Z flag indicates that an object file should be generated,
-       regardless of warnings and errors.  */
-    if (flag_always_generate_output)
-      {
-	if (n_warns || n_errs)
-	  as_warn (_("%d error%s, %d warning%s, generating bad object file"),
-		   n_errs, n_errs == 1 ? "" : "s",
-		   n_warns, n_warns == 1 ? "" : "s");
-      }
-    else
-      {
-	if (n_errs)
-	  as_fatal (_("%d error%s, %d warning%s, no object file generated"),
-		    n_errs, n_errs == 1 ? "" : "s",
-		    n_warns, n_warns == 1 ? "" : "s");
-      }
-  }
 
 #ifdef md_pre_relax_hook
   md_pre_relax_hook;

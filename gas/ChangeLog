@@ -1,5 +1,19 @@
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
+	* write.h (subsegs_finish): Delete declaration.
+	* write.c (subsegs_finish): Make static.
+	(write_object_file): Call subsegs_finish from here.  Don't print
+	warning and error count here..
+	* as.c (main): ..do so here instead.  Remove dead code for "no
+	object file generated".  Split out count strings to better support
+	internationalisation.  Don't call subsegs_finish. Tidy setting of
+	"keep_it".  Run write_object_file even after errors.
+	(keep_it): Make static.
+	* config/obj-elf.c (elf_frob_symbol): Remove assert.
+	(elf_frob_file_before_adjust): Likewise.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-dlx.c (machine_ip): Move initialisation of the_insn
 	earlier.
 

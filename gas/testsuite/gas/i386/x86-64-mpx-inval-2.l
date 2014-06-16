@@ -170,4 +170,5 @@ GAS LISTING .*
 [ 	]*65[ 	]+\?\?\?\? 670F1A14 		bndldx bnd2, \[1\*ebx\+3\]
 .*  Error: 32-bit address isn't allowed in 64-bit MPX instructions\.
 [ 	]*65[ 	]+1D030000 
-[ 	]*65[ 	]+00
+[ 	]*65[ 	]+00(|909090 )
+#pass
