@@ -32,13 +32,6 @@
    The functions below implement debug registers sharing by reference
    counts, and allow to watch regions up to 16 bytes long.  */
 
-#define i386_dr_low_can_set_addr() 1
-#define i386_dr_low_can_set_control() 1
-
-/* Debug register size, in bytes.  */
-/* NOTE: sizeof (long) == 4 on win64.  */
-#define i386_get_debug_register_length() (sizeof (void *))
-
 /* Support for 8-byte wide hw watchpoints.  */
 #define TARGET_HAS_DR_LEN_8 (i386_get_debug_register_length () == 8)
 

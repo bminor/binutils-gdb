@@ -1,5 +1,14 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-low.h (i386_dr_low_can_set_addr): New macro.
+	(i386_dr_low_can_set_control): Likewise.
+	(i386_get_debug_register_length): Likewise.
+	* i386-low.c (i386_dr_low_can_set_addr): Now in i386-low.h.
+	(i386_dr_low_can_set_control): Likewise.
+	(i386_get_debug_register_length): Likewise.
+
+2014-06-17  Gary Benson  <gbenson@redhat.com>
+
 	* i386-low.h (i386-dregs.h): New include.
 	(DR_FIRSTADDR): Now in i386-dregs.h.
 	(DR_LASTADDR): Likewise.

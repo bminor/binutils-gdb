@@ -47,23 +47,6 @@ static int debug_hw_points;
 /* Low-level function vector.  */
 struct i386_dr_low_type i386_dr_low;
 
-#define i386_dr_low_can_set_addr() (i386_dr_low.set_addr != NULL)
-#define i386_dr_low_can_set_control() (i386_dr_low.set_control != NULL)
-
-#define i386_dr_low_set_addr(new_state, i) \
-  (i386_dr_low.set_addr ((i), (new_state)->dr_mirror[(i)]))
-
-#define i386_dr_low_set_control(new_state) \
-  (i386_dr_low.set_control ((new_state)->dr_control_mirror))
-
-#define i386_dr_low_get_addr(i) (i386_dr_low.get_addr ((i)))
-#define i386_dr_low_get_status() (i386_dr_low.get_status ())
-#define i386_dr_low_get_control() (i386_dr_low.get_control ())
-
-/* Debug register size, in bytes.  */
-#define i386_get_debug_register_length() \
-  (i386_dr_low.debug_register_length)
-
 /* Support for 8-byte wide hw watchpoints.  */
 #define TARGET_HAS_DR_LEN_8 (i386_get_debug_register_length () == 8)
 

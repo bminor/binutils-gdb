@@ -38,12 +38,18 @@ extern void i386_low_init_dregs (struct i386_debug_reg_state *state);
 				  status (DR6) register.
 */
 
+/* Can we update the inferior's debug registers?  */
+#define i386_dr_low_can_set_addr() 1
+
 /* Update the inferior's debug register REGNUM from STATE.  */
 extern void i386_dr_low_set_addr (const struct i386_debug_reg_state *state,
 				  int regnum);
 
 /* Return the inferior's debug register REGNUM.  */
 extern CORE_ADDR i386_dr_low_get_addr (int regnum);
+
+/* Can we update the inferior's DR7 control register?  */
+#define i386_dr_low_can_set_control() 1
 
 /* Update the inferior's DR7 debug control register from STATE.  */
 extern void i386_dr_low_set_control (const struct i386_debug_reg_state *state);
@@ -53,3 +59,7 @@ extern unsigned i386_dr_low_get_control (void);
 
 /* Return the value of the inferior's DR6 debug status register.  */
 extern unsigned i386_dr_low_get_status (void);
+
+/* Return the debug register size, in bytes.  */
+/* Note that sizeof (long) == 4 on win64.  */
+#define i386_get_debug_register_length() (sizeof (void *))

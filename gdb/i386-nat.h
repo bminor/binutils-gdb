@@ -73,6 +73,33 @@ struct i386_dr_low_type
 
 extern struct i386_dr_low_type i386_dr_low;
 
+/* Can we update the inferior's debug registers?  */
+#define i386_dr_low_can_set_addr() (i386_dr_low.set_addr != NULL)
+
+/* Update the inferior's debug register REGNUM from STATE.  */
+#define i386_dr_low_set_addr(new_state, i) \
+  (i386_dr_low.set_addr ((i), (new_state)->dr_mirror[(i)]))
+
+/* Return the inferior's debug register REGNUM.  */
+#define i386_dr_low_get_addr(i) (i386_dr_low.get_addr ((i)))
+
+/* Can we update the inferior's DR7 control register?  */
+#define i386_dr_low_can_set_control() (i386_dr_low.set_control != NULL)
+
+/* Update the inferior's DR7 debug control register from STATE.  */
+#define i386_dr_low_set_control(new_state) \
+  (i386_dr_low.set_control ((new_state)->dr_control_mirror))
+
+/* Return the value of the inferior's DR7 debug control register.  */
+#define i386_dr_low_get_control() (i386_dr_low.get_control ())
+
+/* Return the value of the inferior's DR6 debug status register.  */
+#define i386_dr_low_get_status() (i386_dr_low.get_status ())
+
+/* Return the debug register size, in bytes.  */
+#define i386_get_debug_register_length() \
+  (i386_dr_low.debug_register_length)
+
 /* Use this function to set i386_dr_low debug_register_length field
    rather than setting it directly to check that the length is only
    set once.  It also enables the 'maint set/show show-debug-regs' 
