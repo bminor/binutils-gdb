@@ -2846,9 +2846,12 @@ reloc (unsigned int size,
       if (other == BFD_RELOC_SIZE32)
 	{
 	  if (size == 8)
-	    return BFD_RELOC_SIZE64;
+	    other = BFD_RELOC_SIZE64;
 	  if (pcrel)
-	    as_bad (_("there are no pc-relative size relocations"));
+	    {
+	      as_bad (_("there are no pc-relative size relocations"));
+	      return NO_RELOC;
+	    }
 	}
 #endif
 

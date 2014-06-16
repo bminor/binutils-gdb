@@ -1,5 +1,10 @@
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-i386.c (reloc): Don't avoid pcrel check for
+	BFD_RELOC_SIZE64.  Return NO_RELOC on failing pcrel check.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-tic6x.c (s_tic6x_ehtype): Clear after frag_more.
 	(tic6x_output_exidx_entry): Likewise.
 	(md_apply_fix): Simplify 1 byte md_number_to_chars.
