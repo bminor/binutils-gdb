@@ -1,3 +1,51 @@
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* make-target-delegates (munge_type, write_debugmethod): New
+	functions.
+	(debug_names): New global.
+	($TARGET_DEBUG_PRINTER): New global.
+	(write_function_header): Strip TARGET_DEBUG_PRINTER from the type
+	name.
+	Write debug methods.  Generate init_debug_target.
+	* target-debug.h: New file.
+	* target-delegates.c: Rebuild.
+	* target.c: Include target-debug.h.
+	(debug_target): Hoist definition.
+	(target_kill, target_get_section_table, target_memory_map)
+	(target_flash_erase, target_flash_done, target_detach)
+	(target_disconnect, target_wait, target_resume)
+	(target_pass_signals, target_program_signals, target_follow_fork)
+	(target_mourn_inferior, target_search_memory)
+	(target_thread_address_space, target_close)
+	(target_find_new_threads, target_core_of_thread)
+	(target_verify_memory, target_insert_mask_watchpoint)
+	(target_remove_mask_watchpoint): Remove targetdebug code.
+	(debug_to_post_attach, debug_to_prepare_to_store)
+	(debug_to_files_info, debug_to_insert_breakpoint)
+	(debug_to_remove_breakpoint, debug_to_can_use_hw_breakpoint)
+	(debug_to_region_ok_for_hw_watchpoint)
+	(debug_to_can_accel_watchpoint_condition)
+	(debug_to_stopped_by_watchpoint, debug_to_stopped_data_address)
+	(debug_to_watchpoint_addr_within_range)
+	(debug_to_insert_hw_breakpoint, debug_to_remove_hw_breakpoint)
+	(debug_to_insert_watchpoint, debug_to_remove_watchpoint)
+	(debug_to_terminal_init, debug_to_terminal_inferior)
+	(debug_to_terminal_ours_for_output, debug_to_terminal_ours)
+	(debug_to_terminal_save_ours, debug_to_terminal_info)
+	(debug_to_load, debug_to_post_startup_inferior)
+	(debug_to_insert_fork_catchpoint)
+	(debug_to_remove_fork_catchpoint)
+	(debug_to_insert_vfork_catchpoint)
+	(debug_to_remove_vfork_catchpoint)
+	(debug_to_insert_exec_catchpoint)
+	(debug_to_remove_exec_catchpoint, debug_to_has_exited)
+	(debug_to_can_run, debug_to_thread_architecture, debug_to_stop)
+	(debug_to_rcmd, debug_to_pid_to_exec_file): Remove.
+	(setup_target_debug): Call init_debug_target.
+	* target.h (TARGET_DEBUG_PRINTER): New macro.
+	(struct target_ops) <to_resume, to_wait, to_pass_signals,
+	to_program_signals>: Use TARGET_DEBUG_PRINTER.
+
 2014-07-24  Gary Benson  <gbenson@redhat.com>
 
 	* exceptions.h (throw_vfatal): Renamed to...

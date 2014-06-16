@@ -357,6 +357,16 @@ struct thread_info;		/* fwd decl for parameter list below: */
 typedef void async_callback_ftype (enum inferior_event_type event_type,
 				   void *context);
 
+/* Normally target debug printing is purely type-based.  However,
+   sometimes it is necessary to override the debug printing on a
+   per-argument basis.  This macro can be used, attribute-style, to
+   name the target debug printing function for a particular method
+   argument.  FUNC is the name of the function.  The macro's
+   definition is empty because it is only used by the
+   make-target-delegates script.  */
+
+#define TARGET_DEBUG_PRINTER(FUNC)
+
 /* These defines are used to mark target_ops methods.  The script
    make-target-delegates scans these and auto-generates the base
    method implementations.  There are four macros that can be used:
@@ -416,10 +426,13 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_disconnect) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
-    void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
+    void (*to_resume) (struct target_ops *, ptid_t,
+		       int TARGET_DEBUG_PRINTER (target_debug_print_step),
+		       enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());
     ptid_t (*to_wait) (struct target_ops *,
-		       ptid_t, struct target_waitstatus *, int)
+		       ptid_t, struct target_waitstatus *,
+		       int TARGET_DEBUG_PRINTER (target_debug_print_options))
       TARGET_DEFAULT_NORETURN (noprocess ());
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int)
       TARGET_DEFAULT_IGNORE ();
@@ -539,12 +552,14 @@ struct target_ops
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
-    void (*to_pass_signals) (struct target_ops *, int, unsigned char *)
+    void (*to_pass_signals) (struct target_ops *, int,
+			     unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
     /* Documentation of this routine is provided with the
        corresponding target_* function.  */
-    void (*to_program_signals) (struct target_ops *, int, unsigned char *)
+    void (*to_program_signals) (struct target_ops *, int,
+				unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
     int (*to_thread_alive) (struct target_ops *, ptid_t ptid)
