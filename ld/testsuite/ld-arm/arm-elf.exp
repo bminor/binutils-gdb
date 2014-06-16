@@ -460,6 +460,9 @@ set armelftests_nonacl {
      "" {long-plt-format.s}
      {{objdump "-d -j .plt" long-plt-format.d}}
      "long-plt-format"}
+    {"IFUNC and TLS descriptor shared library" "-shared -T arm-lib.ld --version-script=ifunc-gdesc.ver" "" "" {ifunc-gdesc.s}
+     {{objdump "-Rw" ifunc-gdesc.r}}
+     "ifunc-gdesc.so"}
 }
 
 run_ld_link_tests $armelftests_common

@@ -1,3 +1,11 @@
+2014-06-16  Will Newton  <will.newton@linaro.org>
+
+	* elf32-arm.c (elf32_arm_allocate_plt_entry): Increment
+	htab->next_tls_desc_index in the non-IPLT case.
+	Calculate GOT offset correctly for the non-IPLT case.
+	(allocate_dynrelocs_for_symbol): Don't increment
+	htab->next_tls_desc_index here.
+
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
 	* elf32-vax.c (elf_vax_size_dynamic_sections): Clear linker

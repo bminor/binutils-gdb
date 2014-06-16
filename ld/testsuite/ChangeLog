@@ -1,3 +1,10 @@
+2014-06-16  Will Newton  <will.newton@linaro.org>
+
+	* ld-arm/arm-elf.exp: Add ifunc-gdesc test.
+	* ld-arm/ifunc-gdesc.r: New file.
+	* ld-arm/ifunc-gdesc.s: Likewise.
+	* ld-arm/ifunc-gdesc.ver: Likewise.
+
 2014-06-09  Ryan Mansfield  <rmansfield@qnx.com>
 
         * config/default.exp (GASP): Remove.

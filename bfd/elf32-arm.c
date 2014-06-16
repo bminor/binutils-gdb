@@ -7522,6 +7522,8 @@ elf32_arm_allocate_plt_entry (struct bfd_link_info *info,
 	 first entry.  */
       if (splt->size == 0)
 	splt->size += htab->plt_header_size;
+
+      htab->next_tls_desc_index++;
     }
 
   /* Allocate the PLT entry itself, including any leading Thumb stub.  */
@@ -7534,7 +7536,10 @@ elf32_arm_allocate_plt_entry (struct bfd_link_info *info,
     {
       /* We also need to make an entry in the .got.plt section, which
 	 will be placed in the .got section by the linker script.  */
-      arm_plt->got_offset = sgotplt->size - 8 * htab->num_tls_desc;
+      if (is_iplt_entry)
+	arm_plt->got_offset = sgotplt->size;
+      else
+	arm_plt->got_offset = sgotplt->size - 8 * htab->num_tls_desc;
       sgotplt->size += 4;
     }
 }
@@ -13359,8 +13364,6 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 		 point to the PLT entry.  */
 	      h->target_internal = ST_BRANCH_TO_ARM;
 	    }
-
-	  htab->next_tls_desc_index++;
 
 	  /* VxWorks executables have a second set of relocations for
 	     each PLT entry.  They go in a separate relocation section,
