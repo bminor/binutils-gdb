@@ -1,3 +1,9 @@
+2014-06-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (END_OF_INSN): New macro.
+	(parse_operands): Handle operand given and in wrong format when
+	operand is optional.
+
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
 	* write.h (subsegs_finish): Delete declaration.

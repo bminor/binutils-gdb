@@ -42,6 +42,8 @@
 
 #define streq(a, b)	      (strcmp (a, b) == 0)
 
+#define END_OF_INSN '\0'
+
 static aarch64_feature_set cpu_variant;
 
 /* Variables that we set while parsing command-line options.  Once all
@@ -5302,6 +5304,37 @@ failure:
       if (! backtrack_pos)
 	goto parse_operands_return;
 
+      {
+	/* We reach here because this operand is marked as optional, and
+	   either no operand was supplied or the operand was supplied but it
+	   was syntactically incorrect.  In the latter case we report an
+	   error.  In the former case we perform a few more checks before
+	   dropping through to the code to insert the default operand.  */
+
+	char *tmp = backtrack_pos;
+	char endchar = END_OF_INSN;
+
+	if (i != (aarch64_num_of_operands (opcode) - 1))
+	  endchar = ',';
+	skip_past_char (&tmp, ',');
+
+	if (*tmp != endchar)
+	  /* The user has supplied an operand in the wrong format.  */
+	  goto parse_operands_return;
+
+	/* Make sure there is not a comma before the optional operand.
+	   For example the fifth operand of 'sys' is optional:
+
+	     sys #0,c0,c0,#0,  <--- wrong
+	     sys #0,c0,c0,#0   <--- correct.  */
+	if (comma_skipped_p && i && endchar == END_OF_INSN)
+	  {
+	    set_fatal_syntax_error
+	      (_("unexpected comma before the omitted optional operand"));
+	    goto parse_operands_return;
+	  }
+      }
+
       /* Reaching here means we are dealing with an optional operand that is
 	 omitted from the assembly line.  */
       gas_assert (optional_operand_p (opcode, i));
@@ -5311,15 +5344,6 @@ failure:
       /* Try again, skipping the optional operand at backtrack_pos.  */
       str = backtrack_pos;
       backtrack_pos = 0;
-
-      /* If this is the last operand that is optional and omitted, but without
-	 the presence of a comma.  */
-      if (i && comma_skipped_p && i == aarch64_num_of_operands (opcode) - 1)
-	{
-	  set_fatal_syntax_error
-	    (_("unexpected comma before the omitted optional operand"));
-	  goto parse_operands_return;
-	}
 
       /* Clear any error record after the omitted optional operand has been
 	 successfully handled.  */
