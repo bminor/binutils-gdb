@@ -1,3 +1,16 @@
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* nat/i386-dregs.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add the above.
+	* i386-nat.h (i386-dregs.h): New include.
+	(DR_FIRSTADDR): Now in i386-dregs.h.
+	(DR_LASTADDR): Likewise.
+	(DR_NADDR): Likewise.
+	(DR_STATUS): Likewise.
+	(DR_CONTROL): Likewise.
+	(i386_debug_reg_state): Likewise.
+	* i386-nat.c (ALL_DEBUG_REGISTERS): Likewise.
+
 2014-06-18  Don Breazeal  <donb@codesourcery.com>
 
 	* breakpoint.c (set_longjmp_breakpoint): Call

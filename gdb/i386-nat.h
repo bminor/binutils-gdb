@@ -23,6 +23,8 @@
 #ifndef I386_NAT_H
 #define I386_NAT_H 1
 
+#include "nat/i386-dregs.h"
+
 /* Hardware-assisted breakpoints and watchpoints.  */
 
 /* Add watchpoint methods to the provided target_ops.  
@@ -34,12 +36,7 @@ extern void i386_use_watchpoints (struct target_ops *);
 /* Support for hardware watchpoints and breakpoints using the i386
    debug registers.
 
-   This provides several functions for inserting and removing
-   hardware-assisted breakpoints and watchpoints, testing if one or
-   more of the watchpoints triggered and at what address, checking
-   whether a given region can be watched, etc.
-
-   In addition, each target should provide several low-level functions
+   Each target should provide several low-level functions
    regrouped into i386_dr_low_type struct below.  These functions
    that will be called to insert watchpoints and hardware breakpoints
    into the inferior, remove them, and check their status.  These
@@ -75,29 +72,6 @@ struct i386_dr_low_type
   };
 
 extern struct i386_dr_low_type i386_dr_low;
-
-/* Debug registers' indices.  */
-#define DR_FIRSTADDR 0
-#define DR_LASTADDR  3
-#define DR_NADDR     4	/* The number of debug address registers.  */
-#define DR_STATUS    6	/* Index of debug status register (DR6).  */
-#define DR_CONTROL   7	/* Index of debug control register (DR7).  */
-
-/* Global state needed to track h/w watchpoints.  */
-
-struct i386_debug_reg_state
-{
-  /* Mirror the inferior's DRi registers.  We keep the status and
-     control registers separated because they don't hold addresses.
-     Note that since we can change these mirrors while threads are
-     running, we never trust them to explain a cause of a trap.
-     For that, we need to peek directly in the inferior registers.  */
-  CORE_ADDR dr_mirror[DR_NADDR];
-  unsigned dr_status_mirror, dr_control_mirror;
-
-  /* Reference counts for each debug register.  */
-  int dr_ref_count[DR_NADDR];
-};
 
 /* Use this function to set i386_dr_low debug_register_length field
    rather than setting it directly to check that the length is only

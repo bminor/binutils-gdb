@@ -1,5 +1,21 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-low.h (i386-dregs.h): New include.
+	(DR_FIRSTADDR): Now in i386-dregs.h.
+	(DR_LASTADDR): Likewise.
+	(DR_NADDR): Likewise.
+	(DR_STATUS): Likewise.
+	(DR_CONTROL): Likewise.
+	(i386_debug_reg_state): Likewise.
+	(i386_dr_insert_watchpoint): Likewise.
+	(i386_dr_remove_watchpoint): Likewise.
+	(i386_dr_region_ok_for_watchpoint): Likewise.
+	(i386_dr_stopped_data_address): Likewise.
+	(i386_dr_stopped_by_watchpoint): Likewise.
+	* i386-low.c (ALL_DEBUG_REGISTERS): Likewise.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-low.h (i386_low_insert_watchpoint): Renamed to
 	i386_dr_insert_watchpoint.
 	(i386_low_remove_watchpoint): Renamed to

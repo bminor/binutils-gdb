@@ -171,9 +171,6 @@ struct i386_dr_low_type i386_dr_low;
 /* Did the watchpoint whose address is in the I'th register break?  */
 #define I386_DR_WATCH_HIT(dr6, i) ((dr6) & (1 << (i)))
 
-/* A macro to loop over all debug registers.  */
-#define ALL_DEBUG_REGISTERS(i)	for (i = 0; i < DR_NADDR; i++)
-
 /* Per-process data.  We don't bind this to a per-inferior registry
    because of targets like x86 GNU/Linux that need to keep track of
    processes that aren't bound to any inferior (e.g., fork children,

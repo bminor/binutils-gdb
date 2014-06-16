@@ -146,9 +146,6 @@
 /* Did the watchpoint whose address is in the I'th register break?  */
 #define I386_DR_WATCH_HIT(dr6, i) ((dr6) & (1 << (i)))
 
-/* A macro to loop over all debug registers.  */
-#define ALL_DEBUG_REGISTERS(i)	for (i = 0; i < DR_NADDR; i++)
-
 /* Types of operations supported by i386_handle_nonaligned_watchpoint.  */
 typedef enum { WP_INSERT, WP_REMOVE, WP_COUNT } i386_wp_op_t;
 
