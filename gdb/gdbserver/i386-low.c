@@ -32,6 +32,9 @@
    The functions below implement debug registers sharing by reference
    counts, and allow to watch regions up to 16 bytes long.  */
 
+#define i386_dr_low_can_set_addr() 1
+#define i386_dr_low_can_set_control() 1
+
 /* Debug register size, in bytes.  */
 /* NOTE: sizeof (long) == 4 on win64.  */
 #define i386_get_debug_register_length() (sizeof (void *))
@@ -272,6 +275,9 @@ i386_insert_aligned_watchpoint (struct i386_debug_reg_state *state,
 				CORE_ADDR addr, unsigned len_rw_bits)
 {
   int i;
+
+  if (!i386_dr_low_can_set_addr () || !i386_dr_low_can_set_control ())
+    return -1;
 
   /* First, look for an occupied debug register with the same address
      and the same RW and LEN definitions.  If we find one, we can

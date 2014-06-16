@@ -1,5 +1,11 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-low.c (i386_dr_low_can_set_addr): New macro.
+	(i386_dr_low_can_set_control): Likewise.
+	(i386_insert_aligned_watchpoint): New check.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-low.c (i386_update_inferior_debug_regs) <inf_state>:
 	Renamed to state.
 

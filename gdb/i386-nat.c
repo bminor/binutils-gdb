@@ -47,6 +47,19 @@ static int debug_hw_points;
 /* Low-level function vector.  */
 struct i386_dr_low_type i386_dr_low;
 
+#define i386_dr_low_can_set_addr() (i386_dr_low.set_addr != NULL)
+#define i386_dr_low_can_set_control() (i386_dr_low.set_control != NULL)
+
+#define i386_dr_low_set_addr(new_state, i) \
+  (i386_dr_low.set_addr ((i), (new_state)->dr_mirror[(i)]))
+
+#define i386_dr_low_set_control(new_state) \
+  (i386_dr_low.set_control ((new_state)->dr_control_mirror))
+
+#define i386_dr_low_get_addr(i) (i386_dr_low.get_addr ((i)))
+#define i386_dr_low_get_status() (i386_dr_low.get_status ())
+#define i386_dr_low_get_control() (i386_dr_low.get_control ())
+
 /* Debug register size, in bytes.  */
 #define i386_get_debug_register_length() \
   (i386_dr_low.debug_register_length)
@@ -379,7 +392,7 @@ i386_insert_aligned_watchpoint (struct i386_debug_reg_state *state,
 {
   int i;
 
-  if (!i386_dr_low.set_addr || !i386_dr_low.set_control)
+  if (!i386_dr_low_can_set_addr () || !i386_dr_low_can_set_control ())
     return -1;
 
   /* First, look for an occupied debug register with the same address
@@ -538,13 +551,13 @@ i386_update_inferior_debug_regs (struct i386_debug_reg_state *state,
   ALL_DEBUG_REGISTERS (i)
     {
       if (I386_DR_VACANT (new_state, i) != I386_DR_VACANT (state, i))
-	i386_dr_low.set_addr (i, new_state->dr_mirror[i]);
+	i386_dr_low_set_addr (new_state, i);
       else
 	gdb_assert (new_state->dr_mirror[i] == state->dr_mirror[i]);
     }
 
   if (new_state->dr_control_mirror != state->dr_control_mirror)
-    i386_dr_low.set_control (new_state->dr_control_mirror);
+    i386_dr_low_set_control (new_state);
 
   *state = *new_state;
 }
@@ -698,7 +711,7 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
      was running when we last changed watchpoints, the mirror no
      longer represents what was set in this thread's debug
      registers.  */
-  status = i386_dr_low.get_status ();
+  status = i386_dr_low_get_status ();
 
   ALL_DEBUG_REGISTERS (i)
     {
@@ -707,7 +720,7 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 
       if (!control_p)
 	{
-	  control = i386_dr_low.get_control ();
+	  control = i386_dr_low_get_control ();
 	  control_p = 1;
 	}
 
@@ -718,7 +731,7 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 	 paranoiac.  */
       if (I386_DR_GET_RW_LEN (control, i) != 0)
 	{
-	  addr = i386_dr_low.get_addr (i);
+	  addr = i386_dr_low_get_addr (i);
 	  rc = 1;
 	  if (debug_hw_points)
 	    i386_show_dr (state, "watchpoint_hit", addr, -1, hw_write);
