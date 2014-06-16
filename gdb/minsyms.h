@@ -102,7 +102,7 @@ struct minimal_symbol *prim_record_minimal_symbol_full
 
 /* Like prim_record_minimal_symbol_full, but:
    - uses strlen to compute NAME_LEN,
-   - passes COPY_NAME = 0,
+   - passes COPY_NAME = 1,
    - and passes a default SECTION, depending on the type
    
    This variant does not return the new symbol.  */
@@ -113,7 +113,7 @@ void prim_record_minimal_symbol (const char *, CORE_ADDR,
 
 /* Like prim_record_minimal_symbol_full, but:
    - uses strlen to compute NAME_LEN,
-   - passes COPY_NAME = 0.  */
+   - passes COPY_NAME = 1.  */
 
 struct minimal_symbol *prim_record_minimal_symbol_and_info
     (const char *,

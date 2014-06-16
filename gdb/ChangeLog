@@ -1,3 +1,8 @@
+2014-06-16  Tom Tromey  <tromey@redhat.com>
+
+	* minsyms.h (prim_record_minimal_symbol)
+	(prim_record_minimal_symbol_and_info): Update comments.
+
 2014-06-14  Eli Zaretskii  <eliz@gnu.org>
 
 	* top.c (print_gdb_configuration) [HAVE_GUILE]: Print --with-guile
