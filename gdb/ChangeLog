@@ -1,3 +1,12 @@
+2014-06-26  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/16902:
+	* dwarf2read.c (fixup_go_packaging, dwarf2_compute_name)
+	(dwarf2_physname, read_partial_die)
+	(guess_partial_die_structure_name, fixup_partial_die)
+	(guess_full_die_structure_name, anonymous_struct_prefix)
+	(dwarf2_name): Use per-BFD obstack.
+
 2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python/lib/gdb/command/xmethods.py
