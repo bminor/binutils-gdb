@@ -1,3 +1,8 @@
+2014-06-17  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/elf.sc: Edit out __rela_iplt symbol assignments from
+	.rel sections, and __rel_iplt from .rela sections.
+
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches
