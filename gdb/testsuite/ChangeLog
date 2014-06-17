@@ -1,3 +1,9 @@
+2014-06-17  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.mi/mi-var-rtti.cc (type_update_when_use_rtti_test):
+	Initialize ptr and S explicitly.
+	(skip_type_update_when_not_use_rtti_test): Likewise.
+
 2014-06-16  Keith Seitz  <keiths@redhat.com>
 
 	PR mi/15863
