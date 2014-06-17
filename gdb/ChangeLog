@@ -1,5 +1,9 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c: Comment changes.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c (I386_DR_WATCH_MASK): Remove macro.
 
 2014-06-18  Gary Benson  <gbenson@redhat.com>

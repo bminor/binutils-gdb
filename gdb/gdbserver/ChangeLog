@@ -1,5 +1,10 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-low.h: Comment changes.
+	* i386-low.c: Likewise.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-low.c: Whitespace changes.
 
 2014-06-12  Tom Tromey  <tromey@redhat.com>

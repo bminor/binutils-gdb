@@ -21,6 +21,17 @@
 #include "target.h"
 #include "i386-low.h"
 
+/* Support for hardware watchpoints and breakpoints using the i386
+   debug registers.
+
+   This provides several functions for inserting and removing
+   hardware-assisted breakpoints and watchpoints, testing if one or
+   more of the watchpoints triggered and at what address, checking
+   whether a given region can be watched, etc.
+
+   The functions below implement debug registers sharing by reference
+   counts, and allow to watch regions up to 16 bytes long.  */
+
 /* Support for 8-byte wide hw watchpoints.  */
 #ifndef TARGET_HAS_DR_LEN_8
 /* NOTE: sizeof (long) == 4 on win64.  */
@@ -156,8 +167,7 @@ i386_low_init_dregs (struct i386_debug_reg_state *state)
   state->dr_status_mirror  = 0;
 }
 
-/* Print the values of the mirrored debug registers.  This is enabled via
-   the "set debug-hw-points 1" monitor command.  */
+/* Print the values of the mirrored debug registers.  */
 
 static void
 i386_show_dr (struct i386_debug_reg_state *state,
@@ -427,7 +437,7 @@ i386_update_inferior_debug_regs (struct i386_debug_reg_state *inf_state,
 
 /* Insert a watchpoint to watch a memory region which starts at
    address ADDR and whose length is LEN bytes.  Watch memory accesses
-   of the type TYPE_FROM_PACKET.  Return 0 on success, -1 on failure.  */
+   of the type TYPE.  Return 0 on success, -1 on failure.  */
 
 int
 i386_low_insert_watchpoint (struct i386_debug_reg_state *state,
@@ -523,8 +533,8 @@ i386_low_region_ok_for_watchpoint (struct i386_debug_reg_state *state,
 }
 
 /* If the inferior has some break/watchpoint that triggered, set the
-   address associated with that break/watchpoint and return true.
-   Otherwise, return false.  */
+   address associated with that break/watchpoint and return non-zero.
+   Otherwise, return zero.  */
 
 int
 i386_low_stopped_data_address (struct i386_debug_reg_state *state,
@@ -603,8 +613,8 @@ i386_low_stopped_data_address (struct i386_debug_reg_state *state,
   return rc;
 }
 
-/* Return true if the inferior has some watchpoint that triggered.
-   Otherwise return false.  */
+/* Return non-zero if the inferior has some watchpoint that triggered.
+   Otherwise return zero.  */
 
 int
 i386_low_stopped_by_watchpoint (struct i386_debug_reg_state *state)

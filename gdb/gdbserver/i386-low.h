@@ -32,9 +32,9 @@
 /* Debug registers' indices.  */
 #define DR_FIRSTADDR 0
 #define DR_LASTADDR  3
-#define DR_NADDR     4 /* The number of debug address registers.  */
-#define DR_STATUS    6
-#define DR_CONTROL   7
+#define DR_NADDR     4	/* The number of debug address registers.  */
+#define DR_STATUS    6	/* Index of debug status register (DR6).  */
+#define DR_CONTROL   7	/* Index of debug control register (DR7).  */
 
 /* Global state needed to track h/w watchpoints.  */
 

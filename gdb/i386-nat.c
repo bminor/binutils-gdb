@@ -37,6 +37,7 @@
    The functions below implement debug registers sharing by reference
    counts, and allow to watch regions up to 16 bytes long.  */
 
+/* Low-level function vector.  */
 struct i386_dr_low_type i386_dr_low;
 
 /* Support for 8-byte wide hw watchpoints.  */
@@ -265,9 +266,7 @@ i386_cleanup_dregs (void)
   i386_forget_process (ptid_get_pid (inferior_ptid));
 }
 
-/* Print the values of the mirrored debug registers.  This is called
-   when maint_show_dr is non-zero.  To set that up, type "maint
-   show-debug-regs" at GDB's prompt.  */
+/* Print the values of the mirrored debug registers.  */
 
 static void
 i386_show_dr (struct i386_debug_reg_state *state,
@@ -439,7 +438,7 @@ i386_remove_aligned_watchpoint (struct i386_debug_reg_state *state,
 	  && state->dr_mirror[i] == addr
 	  && I386_DR_GET_RW_LEN (state->dr_control_mirror, i) == len_rw_bits)
 	{
-	  if (--state->dr_ref_count[i] == 0) /* no longer in use?  */
+	  if (--state->dr_ref_count[i] == 0) /* No longer in use?  */
 	    {
 	      /* Reset our mirror.  */
 	      state->dr_mirror[i] = 0;
@@ -646,8 +645,8 @@ i386_region_ok_for_watchpoint (struct target_ops *self,
   return nregs <= DR_NADDR ? 1 : 0;
 }
 
-/* If the inferior has some watchpoint that triggered, set the
-   address associated with that watchpoint and return non-zero.
+/* If the inferior has some break/watchpoint that triggered, set the
+   address associated with that break/watchpoint and return non-zero.
    Otherwise, return zero.  */
 
 static int
@@ -668,24 +667,25 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
   unsigned control = 0;
 
   /* In non-stop/async, threads can be running while we change the
-     STATE (and friends).  Say, we set a watchpoint, and let threads
-     resume.  Now, say you delete the watchpoint, or add/remove
-     watchpoints such that STATE changes while threads are running.
-     On targets that support non-stop, inserting/deleting watchpoints
-     updates the STATE only.  It does not update the real thread's
-     debug registers; that's only done prior to resume.  Instead, if
-     threads are running when the mirror changes, a temporary and
-     transparent stop on all threads is forced so they can get their
-     copy of the debug registers updated on re-resume.  Now, say,
-     a thread hit a watchpoint before having been updated with the new
-     STATE contents, and we haven't yet handled the corresponding
-     SIGTRAP.  If we trusted STATE below, we'd mistake the real
-     trapped address (from the last time we had updated debug
-     registers in the thread) with whatever was currently in STATE.
-     So to fix this, STATE always represents intention, what we _want_
-     threads to have in debug registers.  To get at the address and
-     cause of the trap, we need to read the state the thread still has
-     in its debug registers.
+     global dr_mirror (and friends).  Say, we set a watchpoint, and
+     let threads resume.  Now, say you delete the watchpoint, or
+     add/remove watchpoints such that dr_mirror changes while threads
+     are running.  On targets that support non-stop,
+     inserting/deleting watchpoints updates the global dr_mirror only.
+     It does not update the real thread's debug registers; that's only
+     done prior to resume.  Instead, if threads are running when the
+     mirror changes, a temporary and transparent stop on all threads
+     is forced so they can get their copy of the debug registers
+     updated on re-resume.  Now, say, a thread hit a watchpoint before
+     having been updated with the new dr_mirror contents, and we
+     haven't yet handled the corresponding SIGTRAP.  If we trusted
+     dr_mirror below, we'd mistake the real trapped address (from the
+     last time we had updated debug registers in the thread) with
+     whatever was currently in dr_mirror.  So to fix this, dr_mirror
+     always represents intention, what we _want_ threads to have in
+     debug registers.  To get at the address and cause of the trap, we
+     need to read the state the thread still has in its debug
+     registers.
 
      In sum, always get the current debug register values the current
      thread has, instead of trusting the global mirror.  If the thread
@@ -726,6 +726,9 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
     *addr_p = addr;
   return rc;
 }
+
+/* Return non-zero if the inferior has some watchpoint that triggered.
+   Otherwise return zero.  */
 
 static int
 i386_stopped_by_watchpoint (struct target_ops *ops)
