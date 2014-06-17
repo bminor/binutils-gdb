@@ -37,11 +37,19 @@
    The functions below implement debug registers sharing by reference
    counts, and allow to watch regions up to 16 bytes long.  */
 
+/* Function used for printing mirrored debug registers.  */
+#define debug_printf(fmt, args...) \
+  fprintf_unfiltered (gdb_stdlog, fmt, ##args);
+
 /* Low-level function vector.  */
 struct i386_dr_low_type i386_dr_low;
 
+/* Debug register size, in bytes.  */
+#define i386_get_debug_register_length() \
+  (i386_dr_low.debug_register_length)
+
 /* Support for 8-byte wide hw watchpoints.  */
-#define TARGET_HAS_DR_LEN_8 (i386_dr_low.debug_register_length == 8)
+#define TARGET_HAS_DR_LEN_8 (i386_get_debug_register_length () == 8)
 
 /* DR7 Debug Control register fields.  */
 
@@ -273,35 +281,34 @@ i386_show_dr (struct i386_debug_reg_state *state,
 	      const char *func, CORE_ADDR addr,
 	      int len, enum target_hw_bp_type type)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
   int i;
 
-  puts_unfiltered (func);
+  debug_printf ("%s", func);
   if (addr || len)
-    printf_unfiltered (" (addr=%lx, len=%d, type=%s)",
-		       /* This code is for ia32, so casting CORE_ADDR
-			  to unsigned long should be okay.  */
-		       (unsigned long) addr, len,
-		       type == hw_write ? "data-write"
-		       : (type == hw_read ? "data-read"
-			  : (type == hw_access ? "data-read/write"
-			     : (type == hw_execute ? "instruction-execute"
-				/* FIXME: if/when I/O read/write
-				   watchpoints are supported, add them
-				   here.  */
-				: "??unknown??"))));
-  puts_unfiltered (":\n");
-  printf_unfiltered ("\tCONTROL (DR7): %s          STATUS (DR6): %s\n",
-		     phex (state->dr_control_mirror, 8),
-		     phex (state->dr_status_mirror, 8));
+    debug_printf (" (addr=%s, len=%d, type=%s)",
+		  phex (addr, 8), len,
+		  type == hw_write ? "data-write"
+		  : (type == hw_read ? "data-read"
+		     : (type == hw_access ? "data-read/write"
+			: (type == hw_execute ? "instruction-execute"
+			   /* FIXME: if/when I/O read/write
+			      watchpoints are supported, add them
+			      here.  */
+			   : "??unknown??"))));
+  debug_printf (":\n");
+  debug_printf ("\tCONTROL (DR7): %s          STATUS (DR6): %s\n",
+		phex (state->dr_control_mirror, 8),
+		phex (state->dr_status_mirror, 8));
   ALL_DEBUG_REGISTERS (i)
     {
-      printf_unfiltered ("\
+      debug_printf ("\
 \tDR%d: addr=0x%s, ref.count=%d  DR%d: addr=0x%s, ref.count=%d\n",
-			 i, phex (state->dr_mirror[i], addr_size),
-			 state->dr_ref_count[i],
-			 i + 1, phex (state->dr_mirror[i + 1], addr_size),
-			 state->dr_ref_count[i + 1]);
+		    i, phex (state->dr_mirror[i],
+			     i386_get_debug_register_length ()),
+		    state->dr_ref_count[i],
+		    i + 1, phex (state->dr_mirror[i + 1],
+				 i386_get_debug_register_length ()),
+		    state->dr_ref_count[i + 1]);
       i++;
     }
 }

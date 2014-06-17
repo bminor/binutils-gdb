@@ -32,11 +32,12 @@
    The functions below implement debug registers sharing by reference
    counts, and allow to watch regions up to 16 bytes long.  */
 
-/* Support for 8-byte wide hw watchpoints.  */
-#ifndef TARGET_HAS_DR_LEN_8
+/* Debug register size, in bytes.  */
 /* NOTE: sizeof (long) == 4 on win64.  */
-#define TARGET_HAS_DR_LEN_8 (sizeof (void *) == 8)
-#endif
+#define i386_get_debug_register_length() (sizeof (void *))
+
+/* Support for 8-byte wide hw watchpoints.  */
+#define TARGET_HAS_DR_LEN_8 (i386_get_debug_register_length () == 8)
 
 /* DR7 Debug Control register fields.  */
 
@@ -176,29 +177,32 @@ i386_show_dr (struct i386_debug_reg_state *state,
 {
   int i;
 
-  fprintf (stderr, "%s", func);
+  debug_printf ("%s", func);
   if (addr || len)
-    fprintf (stderr, " (addr=%lx, len=%d, type=%s)",
-	     (unsigned long) addr, len,
-	     type == hw_write ? "data-write"
-	     : (type == hw_read ? "data-read"
-		: (type == hw_access ? "data-read/write"
-		   : (type == hw_execute ? "instruction-execute"
-		      /* FIXME: if/when I/O read/write
-			 watchpoints are supported, add them
-			 here.  */
-		      : "??unknown??"))));
-  fprintf (stderr, ":\n");
-  fprintf (stderr, "\tCONTROL (DR7): %08x          STATUS (DR6): %08x\n",
-	   state->dr_control_mirror, state->dr_status_mirror);
+    debug_printf (" (addr=%s, len=%d, type=%s)",
+		  phex (addr, 8), len,
+		  type == hw_write ? "data-write"
+		  : (type == hw_read ? "data-read"
+		     : (type == hw_access ? "data-read/write"
+			: (type == hw_execute ? "instruction-execute"
+			   /* FIXME: if/when I/O read/write
+			      watchpoints are supported, add them
+			      here.  */
+			   : "??unknown??"))));
+  debug_printf (":\n");
+  debug_printf ("\tCONTROL (DR7): %s          STATUS (DR6): %s\n",
+		phex (state->dr_control_mirror, 8),
+		phex (state->dr_status_mirror, 8));
   ALL_DEBUG_REGISTERS (i)
     {
-      fprintf (stderr, "\
+      debug_printf ("\
 \tDR%d: addr=0x%s, ref.count=%d  DR%d: addr=0x%s, ref.count=%d\n",
-	      i, paddress (state->dr_mirror[i]),
-	      state->dr_ref_count[i],
-	      i + 1, paddress (state->dr_mirror[i + 1]),
-	      state->dr_ref_count[i + 1]);
+		    i, phex (state->dr_mirror[i],
+			     i386_get_debug_register_length ()),
+		    state->dr_ref_count[i],
+		    i + 1, phex (state->dr_mirror[i + 1],
+				 i386_get_debug_register_length ()),
+		    state->dr_ref_count[i + 1]);
       i++;
     }
 }

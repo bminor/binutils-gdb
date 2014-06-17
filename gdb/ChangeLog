@@ -1,5 +1,13 @@
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (debug_printf): New macro.
+	(i386_get_debug_register_length): Likewise.
+	(TARGET_HAS_DR_LEN_8): Use above macro.
+	(i386_show_dr): Use debug_printf instead of puts_unfiltered
+	and printf_unfiltered.  Use phex to format values.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c (i386_handle_nonaligned_watchpoint) <size_try_array>:
 	Make const.
 
