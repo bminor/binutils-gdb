@@ -17266,6 +17266,9 @@ static const struct depr_insn_mask depr_it_insns[] = {
   { 0x4800, 0xf800, N_("Literal loads") },
   { 0x4478, 0xf478, N_("Hi-register ADD, MOV, CMP, BX, BLX using pc") },
   { 0x4487, 0xfc87, N_("Hi-register ADD, MOV, CMP using pc") },
+  /* NOTE: 0x00dd is not the real encoding, instead, it is the 'tvalue'
+     field in asm_opcode. 'tvalue' is used at the stage this check happen.  */
+  { 0x00dd, 0x7fff, N_("ADD/SUB sp, sp #imm") },
   { 0, 0, NULL }
 };
 
