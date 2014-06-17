@@ -7888,7 +7888,7 @@ extended_remote_run (char *args)
       char **argv;
 
       argv = gdb_buildargv (args);
-      back_to = make_cleanup ((void (*) (void *)) freeargv, argv);
+      back_to = make_cleanup_freeargv (argv);
       for (i = 0; argv[i] != NULL; i++)
 	{
 	  if (strlen (argv[i]) * 2 + 1 + len >= get_remote_packet_size ())
