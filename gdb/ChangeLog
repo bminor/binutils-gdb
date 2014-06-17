@@ -1,3 +1,7 @@
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c: Whitespace changes.
+
 2014-06-17  Samuel Bronson  <naesten@gmail.com>
 
 	* MAINTAINERS: Update Roland McGrath's email address.

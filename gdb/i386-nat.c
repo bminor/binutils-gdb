@@ -39,7 +39,6 @@
 
 struct i386_dr_low_type i386_dr_low;
 
-
 /* Support for 8-byte wide hw watchpoints.  */
 #define TARGET_HAS_DR_LEN_8 (i386_dr_low.debug_register_length == 8)
 
@@ -90,7 +89,7 @@ struct i386_dr_low_type i386_dr_low;
    later processors do that automatically.  We set these flags for
    backwards compatibility.  */
 #define DR_LOCAL_SLOWDOWN	(0x100)
-#define DR_GLOBAL_SLOWDOWN     	(0x200)
+#define DR_GLOBAL_SLOWDOWN	(0x200)
 
 /* Fields reserved by Intel.  This includes the GD (General Detect
    Enable) flag, which causes a debug exception to be generated when a
@@ -106,7 +105,7 @@ struct i386_dr_low_type i386_dr_low;
 
 /* The I'th debug register is vacant if its Local and Global Enable
    bits are reset in the Debug Control register.  */
-#define I386_DR_VACANT(state, i)					\
+#define I386_DR_VACANT(state, i) \
   (((state)->dr_control_mirror & (3 << (DR_ENABLE_SIZE * (i)))) == 0)
 
 /* Locally enable the break/watchpoint in the I'th debug register.  */
@@ -322,7 +321,7 @@ i386_show_dr (struct i386_debug_reg_state *state,
     printf_unfiltered (" (addr=%lx, len=%d, type=%s)",
 		       /* This code is for ia32, so casting CORE_ADDR
 			  to unsigned long should be okay.  */
-		       (unsigned long)addr, len,
+		       (unsigned long) addr, len,
 		       type == hw_write ? "data-write"
 		       : (type == hw_read ? "data-read"
 			  : (type == hw_access ? "data-read/write"
@@ -335,14 +334,14 @@ i386_show_dr (struct i386_debug_reg_state *state,
   printf_unfiltered ("\tCONTROL (DR7): %s          STATUS (DR6): %s\n",
 		     phex (state->dr_control_mirror, 8),
 		     phex (state->dr_status_mirror, 8));
-  ALL_DEBUG_REGISTERS(i)
+  ALL_DEBUG_REGISTERS (i)
     {
       printf_unfiltered ("\
 \tDR%d: addr=0x%s, ref.count=%d  DR%d: addr=0x%s, ref.count=%d\n",
 			 i, phex (state->dr_mirror[i], addr_size),
 			 state->dr_ref_count[i],
 			 i + 1, phex (state->dr_mirror[i + 1], addr_size),
-			 state->dr_ref_count[i+1]);
+			 state->dr_ref_count[i + 1]);
       i++;
     }
 }
@@ -419,7 +418,7 @@ i386_insert_aligned_watchpoint (struct i386_debug_reg_state *state,
   /* First, look for an occupied debug register with the same address
      and the same RW and LEN definitions.  If we find one, we can
      reuse it for this watchpoint as well (and save a register).  */
-  ALL_DEBUG_REGISTERS(i)
+  ALL_DEBUG_REGISTERS (i)
     {
       if (!I386_DR_VACANT (state, i)
 	  && state->dr_mirror[i] == addr
@@ -431,7 +430,7 @@ i386_insert_aligned_watchpoint (struct i386_debug_reg_state *state,
     }
 
   /* Next, look for a vacant debug register.  */
-  ALL_DEBUG_REGISTERS(i)
+  ALL_DEBUG_REGISTERS (i)
     {
       if (I386_DR_VACANT (state, i))
 	break;
@@ -473,7 +472,7 @@ i386_remove_aligned_watchpoint (struct i386_debug_reg_state *state,
 {
   int i, retval = -1;
 
-  ALL_DEBUG_REGISTERS(i)
+  ALL_DEBUG_REGISTERS (i)
     {
       if (!I386_DR_VACANT (state, i)
 	  && state->dr_mirror[i] == addr
@@ -548,7 +547,7 @@ i386_handle_nonaligned_watchpoint (struct i386_debug_reg_state *state,
 	  else
 	    internal_error (__FILE__, __LINE__, _("\
 Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n"),
-			    (int)what);
+			    (int) what);
 	  if (retval)
 	    break;
 	}
@@ -603,10 +602,14 @@ i386_insert_watchpoint (struct target_ops *self,
   if (type == hw_read)
     return 1; /* unsupported */
 
-  if (((len != 1 && len !=2 && len !=4) && !(TARGET_HAS_DR_LEN_8 && len == 8))
+  if (((len != 1 && len != 2 && len != 4)
+       && !(TARGET_HAS_DR_LEN_8 && len == 8))
       || addr % len != 0)
-    retval = i386_handle_nonaligned_watchpoint (&local_state,
-						WP_INSERT, addr, len, type);
+    {
+      retval = i386_handle_nonaligned_watchpoint (&local_state,
+						  WP_INSERT,
+						  addr, len, type);
+    }
   else
     {
       unsigned len_rw = i386_length_and_rw_bits (len, type);
@@ -639,10 +642,14 @@ i386_remove_watchpoint (struct target_ops *self,
      commit the change back to the inferior.  */
   struct i386_debug_reg_state local_state = *state;
 
-  if (((len != 1 && len !=2 && len !=4) && !(TARGET_HAS_DR_LEN_8 && len == 8))
+  if (((len != 1 && len != 2 && len != 4)
+       && !(TARGET_HAS_DR_LEN_8 && len == 8))
       || addr % len != 0)
-    retval = i386_handle_nonaligned_watchpoint (&local_state,
-						WP_REMOVE, addr, len, type);
+    {
+      retval = i386_handle_nonaligned_watchpoint (&local_state,
+						  WP_REMOVE,
+						  addr, len, type);
+    }
   else
     {
       unsigned len_rw = i386_length_and_rw_bits (len, type);
@@ -673,8 +680,8 @@ i386_region_ok_for_watchpoint (struct target_ops *self,
 
   /* Compute how many aligned watchpoints we would need to cover this
      region.  */
-  nregs = i386_handle_nonaligned_watchpoint (state,
-					     WP_COUNT, addr, len, hw_write);
+  nregs = i386_handle_nonaligned_watchpoint (state, WP_COUNT,
+					     addr, len, hw_write);
   return nregs <= DR_NADDR ? 1 : 0;
 }
 
@@ -726,7 +733,7 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
      registers.  */
   status = i386_dr_low.get_status ();
 
-  ALL_DEBUG_REGISTERS(i)
+  ALL_DEBUG_REGISTERS (i)
     {
       if (!I386_DR_WATCH_HIT (status, i))
 	continue;
@@ -750,6 +757,7 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 	    i386_show_dr (state, "watchpoint_hit", addr, -1, hw_write);
 	}
     }
+
   if (maint_show_dr && addr == 0)
     i386_show_dr (state, "stopped_data_addr", 0, 0, hw_write);
 

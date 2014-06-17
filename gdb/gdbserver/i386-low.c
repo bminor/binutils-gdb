@@ -115,7 +115,7 @@
   } while (0)
 
 /* Set in DR7 the RW and LEN fields for the I'th debug register.  */
-#define I386_DR_SET_RW_LEN(state, i,rwlen) \
+#define I386_DR_SET_RW_LEN(state, i, rwlen) \
   do { \
     (state)->dr_control_mirror &= \
       ~(0x0f << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i))); \
@@ -136,7 +136,7 @@
 
 /* Types of operations supported by i386_handle_nonaligned_watchpoint.  */
 typedef enum { WP_INSERT, WP_REMOVE, WP_COUNT } i386_wp_op_t;
-
+
 /* Implementation.  */
 
 /* Clear the reference counts and forget everything we knew about the
@@ -446,14 +446,16 @@ i386_low_insert_watchpoint (struct i386_debug_reg_state *state,
        && !(TARGET_HAS_DR_LEN_8 && len == 8))
       || addr % len != 0)
     {
-      retval = i386_handle_nonaligned_watchpoint (&local_state, WP_INSERT,
+      retval = i386_handle_nonaligned_watchpoint (&local_state,
+						  WP_INSERT,
 						  addr, len, type);
     }
   else
     {
       unsigned len_rw = i386_length_and_rw_bits (len, type);
 
-      retval = i386_insert_aligned_watchpoint (&local_state, addr, len_rw);
+      retval = i386_insert_aligned_watchpoint (&local_state,
+					       addr, len_rw);
     }
 
   if (retval == 0)
@@ -483,14 +485,16 @@ i386_low_remove_watchpoint (struct i386_debug_reg_state *state,
        && !(TARGET_HAS_DR_LEN_8 && len == 8))
       || addr % len != 0)
     {
-      retval = i386_handle_nonaligned_watchpoint (&local_state, WP_REMOVE,
+      retval = i386_handle_nonaligned_watchpoint (&local_state,
+						  WP_REMOVE,
 						  addr, len, type);
     }
   else
     {
       unsigned len_rw = i386_length_and_rw_bits (len, type);
 
-      retval = i386_remove_aligned_watchpoint (&local_state, addr, len_rw);
+      retval = i386_remove_aligned_watchpoint (&local_state,
+					       addr, len_rw);
     }
 
   if (retval == 0)
