@@ -1,5 +1,9 @@
 2014-06-17  Tom Tromey  <tromey@redhat.com>
 
+	* utils.h (savestring): Remove declaration.
+
+2014-06-17  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (extended_remote_run): Use make_cleanup_freeargv.
 
 2014-06-16  Keith Seitz  <keiths@redhat.com>

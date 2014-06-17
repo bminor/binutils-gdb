@@ -31,8 +31,6 @@ extern void initialize_utils (void);
 
 extern int sevenbit_strings;
 
-extern char *savestring (const char *, size_t);
-
 extern int strcmp_iw (const char *, const char *);
 
 extern int strcmp_iw_ordered (const char *, const char *);
