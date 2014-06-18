@@ -1,3 +1,9 @@
+2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/lib/gdb/command/xmethods.py
+	(get_method_matchers_in_loci):  Lookup xmethod matchers in the
+	current progspace only if the string "progspace" matches LOCUS_RE.
+
 2014-06-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix --with-system-readline with readline-6.3 patch 5.
