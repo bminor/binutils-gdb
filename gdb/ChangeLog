@@ -1,3 +1,18 @@
+2014-06-18  Don Breazeal  <donb@codesourcery.com>
+
+	* breakpoint.c (set_longjmp_breakpoint): Call
+	momentary_breakpoint_from_master with additional argument.
+	(set_longjmp_breakpoint_for_call_dummy): Call
+	momentary_breakpoint_from_master with additional argument.
+	(set_std_terminate_breakpoint): Call
+	momentary_breakpoint_from_master with additional argument.
+	(momentary_breakpoint_from_master): Add argument to function
+	definition and use it to initialize structure member flag.
+	(clone_momentary_breakpoint): Call 
+	momentary_breakpoint_from_master with additional argument.
+	* infrun.c (follow_inferior_reset_breakpoints): Clear structure
+	member flags set in momentary_breakpoint_from_master.
+
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
 	* i386-nat.c (i386_show_dr): Renamed to

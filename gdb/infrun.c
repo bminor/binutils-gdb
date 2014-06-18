@@ -569,7 +569,9 @@ follow_inferior_reset_breakpoints (void)
 
   /* Was there a step_resume breakpoint?  (There was if the user
      did a "next" at the fork() call.)  If so, explicitly reset its
-     thread number.
+     thread number.  Cloned step_resume breakpoints are disabled on
+     creation, so enable it here now that it is associated with the
+     correct thread.
 
      step_resumes are a form of bp that are made to be per-thread.
      Since we created the step_resume bp when the parent process
@@ -579,10 +581,17 @@ follow_inferior_reset_breakpoints (void)
      it is for, or it'll be ignored when it triggers.  */
 
   if (tp->control.step_resume_breakpoint)
-    breakpoint_re_set_thread (tp->control.step_resume_breakpoint);
+    {
+      breakpoint_re_set_thread (tp->control.step_resume_breakpoint);
+      tp->control.step_resume_breakpoint->loc->enabled = 1;
+    }
 
+  /* Treat exception_resume breakpoints like step_resume breakpoints.  */
   if (tp->control.exception_resume_breakpoint)
-    breakpoint_re_set_thread (tp->control.exception_resume_breakpoint);
+    {
+      breakpoint_re_set_thread (tp->control.exception_resume_breakpoint);
+      tp->control.exception_resume_breakpoint->loc->enabled = 1;
+    }
 
   /* Reinsert all breakpoints in the child.  The user may have set
      breakpoints after catching the fork, in which case those

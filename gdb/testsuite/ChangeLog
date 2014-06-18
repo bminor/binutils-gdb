@@ -1,3 +1,14 @@
+2014-06-18  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-fork.exp (default_fork_parent_follow):
+	Deleted procedure.
+	(explicit_fork_parent_follow): Deleted procedure.
+	(explicit_fork_child_follow): Deleted procedure.
+	(test_follow_fork): New procedure.
+	(do_fork_tests): Replace calls to deleted procedures with
+	calls to test_follow_fork and reset GDB for subsequent 
+	procedure calls.
+
 2014-06-17  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/wchar.exp: Set $cent to \u00A2 if "host-charset" is

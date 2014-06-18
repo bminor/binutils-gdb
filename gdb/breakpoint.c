@@ -154,7 +154,8 @@ struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
 static struct breakpoint *
   momentary_breakpoint_from_master (struct breakpoint *orig,
 				    enum bptype type,
-				    const struct breakpoint_ops *ops);
+				    const struct breakpoint_ops *ops,
+				    int loc_enabled);
 
 static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
@@ -7390,7 +7391,7 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 	/* longjmp_breakpoint_ops ensures INITIATING_FRAME is cleared again
 	   after their removal.  */
 	clone = momentary_breakpoint_from_master (b, type,
-						  &longjmp_breakpoint_ops);
+						  &longjmp_breakpoint_ops, 1);
 	clone->thread = thread;
       }
 
@@ -7440,7 +7441,8 @@ set_longjmp_breakpoint_for_call_dummy (void)
 	struct breakpoint *new_b;
 
 	new_b = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
-						  &momentary_breakpoint_ops);
+						  &momentary_breakpoint_ops,
+						  1);
 	new_b->thread = pid_to_thread_id (inferior_ptid);
 
 	/* Link NEW_B into the chain of RETVAL breakpoints.  */
@@ -7533,7 +7535,7 @@ set_std_terminate_breakpoint (void)
 	&& b->type == bp_std_terminate_master)
       {
 	momentary_breakpoint_from_master (b, bp_std_terminate,
-					  &momentary_breakpoint_ops);
+					  &momentary_breakpoint_ops, 1);
       }
 }
 
@@ -9052,13 +9054,14 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
 }
 
 /* Make a momentary breakpoint based on the master breakpoint ORIG.
-   The new breakpoint will have type TYPE, and use OPS as it
-   breakpoint_ops.  */
+   The new breakpoint will have type TYPE, use OPS as its
+   breakpoint_ops, and will set enabled to LOC_ENABLED.  */
 
 static struct breakpoint *
 momentary_breakpoint_from_master (struct breakpoint *orig,
 				  enum bptype type,
-				  const struct breakpoint_ops *ops)
+				  const struct breakpoint_ops *ops,
+				  int loc_enabled)
 {
   struct breakpoint *copy;
 
@@ -9074,6 +9077,7 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   copy->loc->probe = orig->loc->probe;
   copy->loc->line_number = orig->loc->line_number;
   copy->loc->symtab = orig->loc->symtab;
+  copy->loc->enabled = loc_enabled;
   copy->frame_id = orig->frame_id;
   copy->thread = orig->thread;
   copy->pspace = orig->pspace;
@@ -9096,7 +9100,7 @@ clone_momentary_breakpoint (struct breakpoint *orig)
   if (orig == NULL)
     return NULL;
 
-  return momentary_breakpoint_from_master (orig, orig->type, orig->ops);
+  return momentary_breakpoint_from_master (orig, orig->type, orig->ops, 0);
 }
 
 struct breakpoint *
