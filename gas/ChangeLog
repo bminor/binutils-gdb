@@ -1,3 +1,8 @@
+2014-06-18  DJ Delorie  <dj@redhat.com>
+
+	* config/rx-parse.y (BSET, BCLR, BTST, BNOT, BMCMD): Make .B
+	suffix optional.
+
 2014-06-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-mmix.c (loc_assert_s): New member frag.
