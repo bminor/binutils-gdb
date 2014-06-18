@@ -1,3 +1,9 @@
+2014-06-17  Samuel Bronson  <naesten@gmail.com>
+
+	* MAINTAINERS: Update Roland McGrath's email address.
+	Thanks to Sergio Durigan Junior for pointing out that he left
+	Red Hat a while ago.
+
 2014-06-17  Tom Tromey  <tromey@redhat.com>
 
 	* utils.h (savestring): Remove declaration.
