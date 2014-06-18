@@ -99,19 +99,19 @@ gdb_test "p g_ptr->mul<char>('a')" "From Python G<>::mul.*" \
   "After: g_ptr->mul<char>('a')"
 
 # Tests for 'disable/enable xmethod' command.
-gdb_test_no_output "disable xmethod .*xmethods G_methods" \
+gdb_test_no_output "disable xmethod progspace G_methods" \
   "Disable G_methods"
 gdb_test "p g.mul<char>('a')" "Couldn't find method.*" \
   "g.mul<char>('a') after disabling G_methods"
-gdb_test_no_output "enable xmethod .*xmethods G_methods" \
+gdb_test_no_output "enable xmethod progspace G_methods" \
   "Enable G_methods"
 gdb_test "p g.mul<char>('a')" "From Python G<>::mul.*" \
   "After enabling G_methods"
-gdb_test_no_output "disable xmethod .*xmethods G_methods;mul" \
+gdb_test_no_output "disable xmethod progspace G_methods;mul" \
   "Disable G_methods;mul"
 gdb_test "p g.mul<char>('a')" "Couldn't find method.*" \
   "g.mul<char>('a') after disabling G_methods;mul"
-gdb_test_no_output "enable xmethod .*xmethods G_methods;mul" \
+gdb_test_no_output "enable xmethod progspace G_methods;mul" \
   "Enable G_methods;mul"
 gdb_test "p g.mul<char>('a')" "From Python G<>::mul.*" \
   "After enabling G_methods;mul"
@@ -119,9 +119,9 @@ gdb_test "p g.mul<char>('a')" "From Python G<>::mul.*" \
 # Test for 'info xmethods' command
 gdb_test "info xmethod global plus" "global.*plus_plus_A" \
   "info xmethod global plus 1"
-gdb_test_no_output "disable xmethod .*xmethods E_methods;method_int" \
-  "disable xmethod .*xmethods E_methods;method_int"
-gdb_test "info xmethod .*xmethods E_methods;method_int" ".* \\\[disabled\\\]" \
+gdb_test_no_output "disable xmethod progspace E_methods;method_int" \
+  "disable xmethod progspace E_methods;method_int"
+gdb_test "info xmethod progspace E_methods;method_int" ".* \\\[disabled\\\]" \
   "info xmethod xmethods E_methods;method_int"
 
 remote_file host delete ${xmethods_script}

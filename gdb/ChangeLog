@@ -1,3 +1,9 @@
+2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/lib/gdb/command/xmethods.py
+	(get_method_matchers_in_loci):  Lookup xmethod matchers in the
+	current progspace only if the string "progspace" matches LOCUS_RE.
+
 2014-06-23  Pedro Alves  <palves@redhat.com>
 
 	* amd64-linux-nat.c (amd64_linux_prepare_to_resume): Clear

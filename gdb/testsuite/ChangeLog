@@ -1,3 +1,9 @@
+2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-xmethods.exp: Use "progspace" instead of the
+	progspace's filename in 'info', 'enable' and 'disable' command
+	tests.
+
 2014-06-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/watchpoint-reuse-slot.c: New file.
