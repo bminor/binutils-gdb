@@ -1,5 +1,10 @@
 2014-06-19  Yao Qi  <yao@codesourcery.com>
 
+	* gdbthread.h (any_running): Remove the declaration.
+	* thread.c (any_running): Remove.
+
+2014-06-19  Yao Qi  <yao@codesourcery.com>
+
 	* gdbthread.h (struct thread_info) <state>: Change its type to
 	'enum thread_state'.  Update comments.
 
