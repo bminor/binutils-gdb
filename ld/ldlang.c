@@ -1238,7 +1238,14 @@ lang_init (void)
 void
 lang_finish (void)
 {
+  /* Some targets require access to the linker hash table during the
+     _bfd_write_contents call in bfd_close, so it can't be freed
+     before bfd_close.  It can't be freed after bfd_close either,
+     since bfd_alloc memory holding side data structures disappears
+     (PR17047).  So don't free it.
+
   bfd_link_hash_table_free (link_info.output_bfd, link_info.hash);
+  */
   bfd_hash_table_free (&lang_definedness_table);
   output_section_statement_table_free ();
 }
