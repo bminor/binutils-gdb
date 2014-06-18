@@ -1,3 +1,12 @@
+2014-06-18  Andreas Tobler  <andreast@fgznet.ch>
+
+	* configure.tgt (arm*-*-freebsd*): Update targ_extra_emuls.
+	(arm*b-*-freebsd*): Add target.
+	* emulparams/armelfb_fbsd.sh: Added.
+	* emulparams/armelf_fbsd.sh: Updated.
+	* Makefile.am (ALL_EMULATION_SOURCES): Add earmelfb_fbsd.c.
+	* Makefile.in: Regenerate.
+
 2014-06-16  Alan Modra  <amodra@gmail.com>
 
 	* scripttempl/elf.sc: Edit out __rela_iplt symbol assignments from

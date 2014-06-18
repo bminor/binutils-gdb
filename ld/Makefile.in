@@ -474,6 +474,7 @@ ALL_EMULATION_SOURCES = \
 	earmelf_nbsd.c \
 	earmelf_vxworks.c \
 	earmelfb.c \
+	earmelfb_fbsd.c \
 	earmelfb_linux.c \
 	earmelfb_linux_eabi.c \
 	earmelfb_nacl.c \
@@ -1065,6 +1066,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_nbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_vxworks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelfb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelfb_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelfb_linux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelfb_linux_eabi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelfb_nacl.Po@am__quote@
@@ -2167,6 +2169,11 @@ earmelf_vxworks.c: $(srcdir)/emulparams/armelf_vxworks.sh \
   ${GEN_DEPENDS}
 
 earmelfb.c: $(srcdir)/emulparams/armelfb.sh $(srcdir)/emulparams/armelf.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+earmelfb_fbsd.c: $(srcdir)/emulparams/armelfb_fbsd.sh \
+  $(srcdir)/emulparams/armelf_fbsd.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
