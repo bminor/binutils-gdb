@@ -1,5 +1,27 @@
 2014-06-19  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (i386_dr_show): Renamed to
+	i386_show_dr and made static.  All uses updated.
+	(i386_dr_length_and_rw_bits): Renamed to
+	i386_length_and_rw_bits and made static.
+	All uses updated.
+	(i386_dr_insert_aligned_watchpoint): Renamed to
+	i386_insert_aligned_watchpoint and made static.
+	All uses updated.
+	(i386_dr_remove_aligned_watchpoint): Renamed to
+	i386_remove_aligned_watchpoint and made static.
+	All uses updated.
+	(i386_dr_update_inferior_debug_regs): Renamed to
+	i386_update_inferior_debug_regs and made static.
+	All uses updated.
+	* nat/i386-dregs.h (i386_dr_show): Removed.
+	(i386_dr_length_and_rw_bits): Likewise.
+	(i386_dr_insert_aligned_watchpoint): Likewise.
+	(i386_dr_remove_aligned_watchpoint): Likewise.
+	(i386_dr_update_inferior_debug_regs): Likewise.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
 	* configure.ac [AC_CHECK_FUNCS] <sigaltstack>: New check.
 	* configure: Regenerate.
 	* config.in: Likewise.

@@ -60,8 +60,6 @@ struct i386_debug_reg_state
 
 /* A macro to loop over all debug registers.  */
 #define ALL_DEBUG_REGISTERS(i)	for (i = 0; i < DR_NADDR; i++)
-
-/* High-level functions.  */
 
 /* Insert a watchpoint to watch a memory region which starts at
    address ADDR and whose length is LEN bytes.  Watch memory accesses
@@ -93,46 +91,5 @@ extern int i386_dr_stopped_data_address (struct i386_debug_reg_state *state,
 /* Return true if the inferior has some watchpoint that triggered.
    Otherwise return false.  */
 extern int i386_dr_stopped_by_watchpoint (struct i386_debug_reg_state *state);
-
-/* Low-level functions.  */
-
-/* Print the values of the mirrored debug registers.  */
-
-extern void i386_dr_show (struct i386_debug_reg_state *state,
-			  const char *func, CORE_ADDR addr,
-			  int len, enum target_hw_bp_type type);
-
-/* Return the value of a 4-bit field for DR7 suitable for watching a
-   region of LEN bytes for accesses of type TYPE.  LEN is assumed to
-   have the value of 1, 2, or 4.  */
-
-extern unsigned i386_dr_length_and_rw_bits (int len,
-					    enum target_hw_bp_type type);
-
-/* Insert a watchpoint at address ADDR, which is assumed to be aligned
-   according to the length of the region to watch.  LEN_RW_BITS is the
-   value of the bits from DR7 which describes the length and access
-   type of the region to be watched by this watchpoint.  Return 0 on
-   success, -1 on failure.  */
-
-extern int i386_dr_insert_aligned_watchpoint (struct i386_debug_reg_state *state,
-					      CORE_ADDR addr,
-					      unsigned len_rw_bits);
-
-/* Remove a watchpoint at address ADDR, which is assumed to be aligned
-   according to the length of the region to watch.  LEN_RW_BITS is the
-   value of the bits from DR7 which describes the length and access
-   type of the region watched by this watchpoint.  Return 0 on
-   success, -1 on failure.  */
-
-extern int i386_dr_remove_aligned_watchpoint (struct i386_debug_reg_state *state,
-					      CORE_ADDR addr,
-					      unsigned len_rw_bits);
-
-/* Update the inferior debug registers state, in STATE, with the
-   new debug registers state, in NEW_STATE.  */
-
-extern void i386_dr_update_inferior_debug_regs (struct i386_debug_reg_state *state,
-						struct i386_debug_reg_state *new_state);
 
 #endif /* I386_DREGS_H */
