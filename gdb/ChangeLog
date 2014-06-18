@@ -1,3 +1,8 @@
+2014-06-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdbthread.h (struct thread_info) <state>: Change its type to
+	'enum thread_state'.  Update comments.
+
 2014-06-19  Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (ALL_THREADS): Delete.
