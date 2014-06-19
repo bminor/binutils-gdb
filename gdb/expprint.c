@@ -1011,12 +1011,29 @@ dump_subexp_body_standard (struct expression *exp,
 	elt = dump_subexp (exp, stream, elt);
       }
       break;
+    case OP_STRING:
+      {
+	LONGEST len = exp->elts[elt].longconst;
+	LONGEST type = exp->elts[elt + 1].longconst;
+
+	fprintf_filtered (stream, "Language-specific string type: %s",
+			  plongest (type));
+
+	/* Skip length.  */
+	elt += 1;
+
+	/* Skip string content. */
+	elt += BYTES_TO_EXP_ELEM (len);
+
+	/* Skip length and ending OP_STRING. */
+	elt += 2;
+      }
+      break;
     default:
     case OP_NULL:
     case MULTI_SUBSCRIPT:
     case OP_F77_UNDETERMINED_ARGLIST:
     case OP_COMPLEX:
-    case OP_STRING:
     case OP_BOOL:
     case OP_M2_STRING:
     case OP_THIS:

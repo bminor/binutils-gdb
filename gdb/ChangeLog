@@ -1,3 +1,7 @@
+2014-07-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* expprint.c (dump_subexp_body_standard): Handle OP_STRING.
+
 2014-07-14  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Report no hardware
