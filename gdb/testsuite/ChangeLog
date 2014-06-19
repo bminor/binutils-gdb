@@ -1,3 +1,8 @@
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
+	* gdb.arch/i386-avx.exp: Fix include file location.
+	* gdb.arch/i386-sse.exp: Likewise.
+
 2014-06-19  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* gdb.dlang/expression.exp: New file.

@@ -36,7 +36,7 @@
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
 
-#include "mips-linux-watch.h"
+#include "nat/mips-linux-watch.h"
 
 #include "features/mips-linux.c"
 #include "features/mips-dsp-linux.c"

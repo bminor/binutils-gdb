@@ -22,7 +22,7 @@
 #include "gdb_assert.h"
 #include <dlfcn.h>
 #include "gdb_proc_service.h"
-#include "gdb_thread_db.h"
+#include "nat/gdb_thread_db.h"
 #include "gdb_vecs.h"
 #include "bfd.h"
 #include "command.h"
@@ -40,8 +40,8 @@
 #include "gdbcore.h"
 #include "observer.h"
 #include "linux-nat.h"
-#include "linux-procfs.h"
-#include "linux-osdata.h"
+#include "nat/linux-procfs.h"
+#include "nat/linux-osdata.h"
 #include "auto-load.h"
 #include "cli/cli-utils.h"
 

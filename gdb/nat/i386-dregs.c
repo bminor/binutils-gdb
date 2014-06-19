@@ -23,7 +23,7 @@
 #include "defs.h"
 #include "inferior.h"
 #endif
-#include "nat/i386-dregs.h"
+#include "i386-dregs.h"
 
 /* Support for hardware watchpoints and breakpoints using the i386
    debug registers.

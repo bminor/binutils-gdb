@@ -16,14 +16,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "gdb_thread_db.h"
+#include "nat/gdb_thread_db.h"
 #include <signal.h>
 
 #include "gdbthread.h"
 #include "gdb_proc_service.h"
 
 /* Included for ptrace type definitions.  */
-#include "linux-ptrace.h"
+#include "nat/linux-ptrace.h"
 
 #define PTRACE_XFER_TYPE long
 

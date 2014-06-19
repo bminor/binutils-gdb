@@ -25,7 +25,7 @@
 
 #include "linux-ptrace.h"
 #include "linux-procfs.h"
-#include "nat/linux-waitpid.h"
+#include "linux-waitpid.h"
 #include "buffer.h"
 #include "gdb_assert.h"
 #include "gdb_wait.h"

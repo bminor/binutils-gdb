@@ -22,7 +22,7 @@
 #include <sys/ptrace.h>
 #include <endian.h>
 
-#include "mips-linux-watch.h"
+#include "nat/mips-linux-watch.h"
 #include "gdb_proc_service.h"
 
 /* Defined in auto-generated file mips-linux.c.  */

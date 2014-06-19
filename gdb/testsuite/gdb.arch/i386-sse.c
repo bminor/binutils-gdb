@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdio.h>
-#include "i386-cpuid.h"
+#include "nat/i386-cpuid.h"
 
 typedef struct {
   float f[4];

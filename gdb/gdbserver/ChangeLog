@@ -1,5 +1,11 @@
 2014-06-20  Gary Benson  <gbenson@redhat.com>
 
+	* Makefile.in (SFILES): Update locations for files moved
+	from common to nat.
+	(object file files): Reordered.
+
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
 	* i386-low.h (i386_dr_low_can_set_addr): Removed.
 	(i386_dr_low_set_addr): Likewise.
 	(i386_dr_low_get_addr): Likewise.

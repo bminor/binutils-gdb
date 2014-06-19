@@ -32,7 +32,7 @@ if [get_compiler_info] {
 
 set additional_flags ""
 if [test_compiler_info gcc*] {
-    set additional_flags "additional_flags=-mavx -I${srcdir}/../common"
+    set additional_flags "additional_flags=-mavx -I${srcdir}/.."
 }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {

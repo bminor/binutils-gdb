@@ -32,8 +32,8 @@
 #endif
 #include <sys/ptrace.h>
 #include "linux-nat.h"
-#include "linux-ptrace.h"
-#include "linux-procfs.h"
+#include "nat/linux-ptrace.h"
+#include "nat/linux-procfs.h"
 #include "linux-fork.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
@@ -59,7 +59,7 @@
 #include "terminal.h"
 #include <sys/vfs.h>
 #include "solib.h"
-#include "linux-osdata.h"
+#include "nat/linux-osdata.h"
 #include "linux-tdep.h"
 #include "symfile.h"
 #include "agent.h"

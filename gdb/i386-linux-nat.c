@@ -25,7 +25,7 @@
 #include "regset.h"
 #include "target.h"
 #include "linux-nat.h"
-#include "linux-btrace.h"
+#include "nat/linux-btrace.h"
 #include "btrace.h"
 
 #include "gdb_assert.h"

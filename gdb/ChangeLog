@@ -1,5 +1,40 @@
 2014-06-20  Gary Benson  <gbenson@redhat.com>
 
+	* common/gdb_thread_db.h: Moved to nat.  All includes updated.
+	* common/glibc_thread_db.h: Likewise.
+	* common/i386-cpuid.h: Likewise.
+	* common/i386-gcc-cpuid.h: Likewise.
+	* common/linux-btrace.h: Likewise.
+	* common/linux-osdata.h: Likewise.
+	* common/linux-procfs.h: Likewise.
+	* common/linux-ptrace.h: Likewise.
+	* common/mips-linux-watch.h: Likewise.
+	* common/linux-btrace.c: Moved to nat.
+	* common/linux-osdata.c: Likewise.
+	* common/linux-procfs.c: Likewise.
+	* common/linux-ptrace.c: Likewise.
+	* common/mips-linux-watch.c: Likewise.
+	* nat/gdb_thread_db.h: Moved from common.
+	* nat/glibc_thread_db.h: Likewise.
+	* nat/i386-cpuid.h: Likewise.
+	* nat/i386-gcc-cpuid.h: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* nat/linux-btrace.h: Likewise.
+	* nat/linux-osdata.c: Likewise.
+	* nat/linux-osdata.h: Likewise.
+	* nat/linux-procfs.c: Likewise.
+	* nat/linux-procfs.h: Likewise.
+	* nat/linux-ptrace.c: Likewise.
+	* nat/linux-ptrace.h: Likewise.
+	* nat/mips-linux-watch.c: Likewise.
+	* nat/mips-linux-watch.h: Likewise.
+	* Makefile.in (HFILES_NO_SRCDIR): Reflect new locations.
+	(object file files): Reordered.
+	* gdb/copyright.py (EXCLUDE_LIST): Reflect new location
+	of glibc_thread_db.h.
+
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.h (debug_hw_points): Moved to nat/i386-dregs.c.
 	(i386_dr_low_type): Moved to nat/i386-dregs.h.
 	(i386_dr_low): Likewise.
