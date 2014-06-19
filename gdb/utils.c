@@ -600,7 +600,7 @@ error_stream (struct ui_file *stream)
 
 /* Dump core trying to increase the core soft limit to hard limit first.  */
 
-static void
+void
 dump_core (void)
 {
 #ifdef HAVE_SETRLIMIT
@@ -613,10 +613,12 @@ dump_core (void)
 }
 
 /* Check whether GDB will be able to dump core using the dump_core
-   function.  */
+   function.  Returns zero if GDB cannot or should not dump core.
+   If LIMIT_KIND is LIMIT_CUR the user's soft limit will be respected.
+   If LIMIT_KIND is LIMIT_MAX only the hard limit will be respected.  */
 
-static int
-can_dump_core (const char *reason)
+int
+can_dump_core (enum resource_limit_kind limit_kind)
 {
 #ifdef HAVE_GETRLIMIT
   struct rlimit rlim;
@@ -625,17 +627,45 @@ can_dump_core (const char *reason)
   if (getrlimit (RLIMIT_CORE, &rlim) != 0)
     return 1;
 
-  if (rlim.rlim_max == 0)
+  switch (limit_kind)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("%s\nUnable to dump core, use `ulimit -c"
-			    " unlimited' before executing GDB next time.\n"),
-			  reason);
-      return 0;
+    case LIMIT_CUR:
+      if (rlim.rlim_cur == 0)
+	return 0;
+
+    case LIMIT_MAX:
+      if (rlim.rlim_max == 0)
+	return 0;
     }
 #endif /* HAVE_GETRLIMIT */
 
   return 1;
+}
+
+/* Print a warning that we cannot dump core.  */
+
+void
+warn_cant_dump_core (const char *reason)
+{
+  fprintf_unfiltered (gdb_stderr,
+		      _("%s\nUnable to dump core, use `ulimit -c"
+			" unlimited' before executing GDB next time.\n"),
+		      reason);
+}
+
+/* Check whether GDB will be able to dump core using the dump_core
+   function, and print a warning if we cannot.  */
+
+static int
+can_dump_core_warn (enum resource_limit_kind limit_kind,
+		    const char *reason)
+{
+  int core_dump_allowed = can_dump_core (limit_kind);
+
+  if (!core_dump_allowed)
+    warn_cant_dump_core (reason);
+
+  return core_dump_allowed;
 }
 
 /* Allow the user to configure the debugger behavior with respect to
@@ -756,7 +786,7 @@ internal_vproblem (struct internal_problem *problem,
 
   if (problem->should_dump_core == internal_problem_ask)
     {
-      if (!can_dump_core (reason))
+      if (!can_dump_core_warn (LIMIT_MAX, reason))
 	dump_core_p = 0;
       else
 	{
@@ -767,7 +797,7 @@ internal_vproblem (struct internal_problem *problem,
 	}
     }
   else if (problem->should_dump_core == internal_problem_yes)
-    dump_core_p = can_dump_core (reason);
+    dump_core_p = can_dump_core_warn (LIMIT_MAX, reason);
   else if (problem->should_dump_core == internal_problem_no)
     dump_core_p = 0;
   else

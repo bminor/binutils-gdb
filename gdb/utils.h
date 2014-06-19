@@ -372,4 +372,28 @@ extern ULONGEST align_down (ULONGEST v, int n);
 
 extern LONGEST gdb_sign_extend (LONGEST value, int bit);
 
+/* Resource limits used by getrlimit and setrlimit.  */
+
+enum resource_limit_kind
+  {
+    LIMIT_CUR,
+    LIMIT_MAX
+  };
+
+/* Check whether GDB will be able to dump core using the dump_core
+   function.  Returns zero if GDB cannot or should not dump core.
+   If LIMIT_KIND is LIMIT_CUR the user's soft limit will be respected.
+   If LIMIT_KIND is LIMIT_MAX only the hard limit will be respected.  */
+
+extern int can_dump_core (enum resource_limit_kind limit_kind);
+
+/* Print a warning that we cannot dump core.  */
+
+extern void warn_cant_dump_core (const char *reason);
+
+/* Dump core trying to increase the core soft limit to hard limit
+   first.  */
+
+extern void dump_core (void);
+
 #endif /* UTILS_H */

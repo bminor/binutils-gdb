@@ -1,5 +1,19 @@
 2014-06-19  Gary Benson  <gbenson@redhat.com>
 
+	* utils.h (resource_limit_kind): New enum.
+	(can_dump_core): New declaration.
+	(warn_cant_dump_core): Likewise.
+	(dump_core): Likewise.
+	* utils.c (dump_core): Made nonstatic.  Added new
+	parameter "limit_kind".
+	(can_dump_core): Made nonstatic. Moved printing code to...
+	(warn_cant_dump_core): New function.
+	(can_dump_core_warn): Likewise.
+	(internal_vproblem): Replace calls to can_dump_core with
+	calls to can_dump_core_warn.  Supply new argument to each.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
 	* utils.h (demangler_vwarning): New declaration.
 	(demangler_warning): Likewise.
 	* utils.c (struct internal_problem)
