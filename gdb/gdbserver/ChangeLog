@@ -1,5 +1,48 @@
 2014-06-19  Gary Benson  <gbenson@redhat.com>
 
+	* Makefile.in (i386-dregs.o): New rule.
+	* configure.srv: Add i386-dregs.o to all targets using i386-low.o.
+	* i386-low.c (target.h): Remove include.
+	(TARGET_HAS_DR_LEN_8): Now in i386-dregs.c.
+	(DR_CONTROL_SHIFT): Likewise.
+	(DR_CONTROL_SIZE): Likewise.
+	(DR_RW_EXECUTE): Likewise.
+	(DR_RW_WRITE): Likewise.
+	(DR_RW_READ): Likewise.
+	(DR_RW_IORW): Likewise.
+	(DR_LEN_1): Likewise.
+	(DR_LEN_2): Likewise.
+	(DR_LEN_4): Likewise.
+	(DR_LEN_8): Likewise.
+	(DR_LOCAL_ENABLE_SHIFT): Likewise.
+	(DR_GLOBAL_ENABLE_SHIFT): Likewise.
+	(DR_ENABLE_SIZE): Likewise.
+	(DR_LOCAL_SLOWDOWN): Likewise.
+	(DR_GLOBAL_SLOWDOWN): Likewise.
+	(DR_CONTROL_RESERVED): Likewise.
+	(I386_DR_CONTROL_MASK): Likewise.
+	(I386_DR_VACANT): Likewise.
+	(I386_DR_LOCAL_ENABLE): Likewise.
+	(I386_DR_GLOBAL_ENABLE): Likewise.
+	(I386_DR_DISABLE): Likewise.
+	(I386_DR_SET_RW_LEN): Likewise.
+	(I386_DR_GET_RW_LEN): Likewise.
+	(I386_DR_WATCH_HIT): Likewise.
+	(i386_wp_op_t): Likewise.
+	(i386_show_dr): Likewise.
+	(i386_length_and_rw_bits): Likewise.
+	(i386_insert_aligned_watchpoint): Likewise.
+	(i386_remove_aligned_watchpoint): Likewise.
+	(i386_handle_nonaligned_watchpoint): Likewise.
+	i386_update_inferior_debug_regs(): Likewise.
+	(i386_dr_insert_watchpoint): Likewise.
+	(i386_dr_remove_watchpoint): Likewise.
+	(i386_dr_region_ok_for_watchpoint): Likewise.
+	(i386_dr_stopped_data_address): Likewise.
+	(i386_dr_stopped_by_watchpoint): Likewise.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
 	* i386-low.c (i386_dr_show): Renamed to
 	i386_show_dr and made static.  All uses updated.
 	(i386_dr_length_and_rw_bits): Renamed to

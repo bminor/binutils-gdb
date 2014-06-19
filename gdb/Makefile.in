@@ -2178,6 +2178,10 @@ waitstatus.o: ${srcdir}/target/waitstatus.c
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the sub-directory.
 
+i386-dregs.o: ${srcdir}/nat/i386-dregs.c
+	$(COMPILE) $(srcdir)/nat/i386-dregs.c
+	$(POSTCOMPILE)
+
 linux-waitpid.o: ${srcdir}/nat/linux-waitpid.c
 	$(COMPILE) $(srcdir)/nat/linux-waitpid.c
 	$(POSTCOMPILE)

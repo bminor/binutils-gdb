@@ -27,6 +27,9 @@
 
 /* Hardware-assisted breakpoints and watchpoints.  */
 
+/* Whether or not to print the mirrored debug registers.  */
+extern int debug_hw_points;
+
 /* Add watchpoint methods to the provided target_ops.  
    Targets using i386 family debug registers for watchpoints should call
    this.  */

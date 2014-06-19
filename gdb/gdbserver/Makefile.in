@@ -551,6 +551,10 @@ mips-linux-watch.o: ../common/mips-linux-watch.c
 
 # Native object files rules from ../nat
 
+i386-dregs.o: ../nat/i386-dregs.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
 linux-waitpid.o: ../nat/linux-waitpid.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
