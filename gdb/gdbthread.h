@@ -317,10 +317,12 @@ void thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid);
 typedef int (*thread_callback_func) (struct thread_info *, void *);
 extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
-/* Traverse all threads.  */
+/* Traverse all threads, except those that have THREAD_EXITED
+   state.  */
 
-#define ALL_THREADS(T)				\
-  for (T = thread_list; T; T = T->next)
+#define ALL_NON_EXITED_THREADS(T)				\
+  for (T = thread_list; T; T = T->next) \
+    if ((T)->state != THREAD_EXITED)
 
 extern int thread_count (void);
 

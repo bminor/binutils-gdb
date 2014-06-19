@@ -1,3 +1,10 @@
+2014-06-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/thread-execl.exp (do_test): New procedure, factored
+	out from ...
+	(top level): ... here.  Iterate running tests under different
+	scheduler-locking settings.
+
 2014-06-18  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.cp/nsalias.exp: Set type of low_pc and high_pc entries
