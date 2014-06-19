@@ -659,7 +659,9 @@ static const char *const internal_problem_modes[] =
 struct internal_problem
 {
   const char *name;
+  int user_settable_should_quit;
   const char *should_quit;
+  int user_settable_should_dump_core;
   const char *should_dump_core;
 };
 
@@ -794,7 +796,7 @@ internal_vproblem (struct internal_problem *problem,
 }
 
 static struct internal_problem internal_error_problem = {
-  "internal-error", internal_problem_ask, internal_problem_ask
+  "internal-error", 1, internal_problem_ask, 1, internal_problem_ask
 };
 
 void
@@ -815,7 +817,7 @@ internal_error (const char *file, int line, const char *string, ...)
 }
 
 static struct internal_problem internal_warning_problem = {
-  "internal-warning", internal_problem_ask, internal_problem_ask
+  "internal-warning", 1, internal_problem_ask, 1, internal_problem_ask
 };
 
 void
@@ -831,6 +833,26 @@ internal_warning (const char *file, int line, const char *string, ...)
 
   va_start (ap, string);
   internal_vwarning (file, line, string, ap);
+  va_end (ap);
+}
+
+static struct internal_problem demangler_warning_problem = {
+  "demangler-warning", 1, internal_problem_ask, 0, internal_problem_no
+};
+
+void
+demangler_vwarning (const char *file, int line, const char *fmt, va_list ap)
+{
+  internal_vproblem (&demangler_warning_problem, file, line, fmt, ap);
+}
+
+void
+demangler_warning (const char *file, int line, const char *string, ...)
+{
+  va_list ap;
+
+  va_start (ap, string);
+  demangler_vwarning (file, line, string, ap);
   va_end (ap);
 }
 
@@ -894,45 +916,51 @@ add_internal_problem_command (struct internal_problem *problem)
 			  (char *) NULL),
 		  0/*allow-unknown*/, &maintenance_show_cmdlist);
 
-  set_doc = xstrprintf (_("Set whether GDB should quit "
-			  "when an %s is detected"),
-			problem->name);
-  show_doc = xstrprintf (_("Show whether GDB will quit "
-			   "when an %s is detected"),
-			 problem->name);
-  add_setshow_enum_cmd ("quit", class_maintenance,
-			internal_problem_modes,
-			&problem->should_quit,
-			set_doc,
-			show_doc,
-			NULL, /* help_doc */
-			NULL, /* setfunc */
-			NULL, /* showfunc */
-			set_cmd_list,
-			show_cmd_list);
+  if (problem->user_settable_should_quit)
+    {
+      set_doc = xstrprintf (_("Set whether GDB should quit "
+			      "when an %s is detected"),
+			    problem->name);
+      show_doc = xstrprintf (_("Show whether GDB will quit "
+			       "when an %s is detected"),
+			     problem->name);
+      add_setshow_enum_cmd ("quit", class_maintenance,
+			    internal_problem_modes,
+			    &problem->should_quit,
+			    set_doc,
+			    show_doc,
+			    NULL, /* help_doc */
+			    NULL, /* setfunc */
+			    NULL, /* showfunc */
+			    set_cmd_list,
+			    show_cmd_list);
 
-  xfree (set_doc);
-  xfree (show_doc);
+      xfree (set_doc);
+      xfree (show_doc);
+    }
 
-  set_doc = xstrprintf (_("Set whether GDB should create a core "
-			  "file of GDB when %s is detected"),
-			problem->name);
-  show_doc = xstrprintf (_("Show whether GDB will create a core "
-			   "file of GDB when %s is detected"),
-			 problem->name);
-  add_setshow_enum_cmd ("corefile", class_maintenance,
-			internal_problem_modes,
-			&problem->should_dump_core,
-			set_doc,
-			show_doc,
-			NULL, /* help_doc */
-			NULL, /* setfunc */
-			NULL, /* showfunc */
-			set_cmd_list,
-			show_cmd_list);
+  if (problem->user_settable_should_dump_core)
+    {
+      set_doc = xstrprintf (_("Set whether GDB should create a core "
+			      "file of GDB when %s is detected"),
+			    problem->name);
+      show_doc = xstrprintf (_("Show whether GDB will create a core "
+			       "file of GDB when %s is detected"),
+			     problem->name);
+      add_setshow_enum_cmd ("corefile", class_maintenance,
+			    internal_problem_modes,
+			    &problem->should_dump_core,
+			    set_doc,
+			    show_doc,
+			    NULL, /* help_doc */
+			    NULL, /* setfunc */
+			    NULL, /* showfunc */
+			    set_cmd_list,
+			    show_cmd_list);
 
-  xfree (set_doc);
-  xfree (show_doc);
+      xfree (set_doc);
+      xfree (show_doc);
+    }
 }
 
 /* Return a newly allocated string, containing the PREFIX followed
@@ -3529,4 +3557,5 @@ _initialize_utils (void)
 {
   add_internal_problem_command (&internal_error_problem);
   add_internal_problem_command (&internal_warning_problem);
+  add_internal_problem_command (&demangler_warning_problem);
 }

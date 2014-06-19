@@ -131,6 +131,15 @@ maintenance_internal_warning (char *args, int from_tty)
   internal_warning (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
 }
 
+/* Stimulate the internal error mechanism that GDB uses when an
+   demangler problem is detected.  Allows testing of the mechanism.  */
+
+static void
+maintenance_demangler_warning (char *args, int from_tty)
+{
+  demangler_warning (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
+}
+
 /* Someday we should allow demangling for things other than just
    explicit strings.  For example, we might want to be able to specify
    the address of a string in either GDB's process space or the
@@ -1053,6 +1062,12 @@ Cause GDB to behave as if an internal error was detected."),
 	   maintenance_internal_warning, _("\
 Give GDB an internal warning.\n\
 Cause GDB to behave as if an internal warning was reported."),
+	   &maintenancelist);
+
+  add_cmd ("demangler-warning", class_maintenance,
+	   maintenance_demangler_warning, _("\
+Give GDB a demangler warning.\n\
+Cause GDB to behave as if a demangler warning was reported."),
 	   &maintenancelist);
 
   add_cmd ("demangle", class_maintenance, maintenance_demangle, _("\

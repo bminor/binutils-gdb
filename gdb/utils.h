@@ -311,6 +311,14 @@ extern void internal_warning (const char *file, int line,
 extern void warning (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void vwarning (const char *, va_list args) ATTRIBUTE_PRINTF (1, 0);
+
+extern void demangler_vwarning (const char *file, int line,
+			       const char *, va_list ap)
+     ATTRIBUTE_PRINTF (3, 0);
+
+extern void demangler_warning (const char *file, int line,
+			      const char *, ...) ATTRIBUTE_PRINTF (3, 4);
+
 
 /* Misc. utilities.  */
 

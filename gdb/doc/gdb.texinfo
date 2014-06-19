@@ -33268,13 +33268,18 @@ with the @code{SIGQUIT} signal.
 
 @kindex maint internal-error
 @kindex maint internal-warning
+@kindex maint demangler-warning
+@cindex demangler crashes
 @item maint internal-error @r{[}@var{message-text}@r{]}
 @itemx maint internal-warning @r{[}@var{message-text}@r{]}
-Cause @value{GDBN} to call the internal function @code{internal_error}
-or @code{internal_warning} and hence behave as though an internal error
-or internal warning has been detected.  In addition to reporting the
-internal problem, these functions give the user the opportunity to
-either quit @value{GDBN} or create a core file of the current
+@itemx maint demangler-warning @r{[}@var{message-text}@r{]}
+
+Cause @value{GDBN} to call the internal function @code{internal_error},
+@code{internal_warning} or @code{demangler_warning} and hence behave
+as though an internal problam has been detected.  In addition to
+reporting the internal problem, these functions give the user the
+opportunity to either quit @value{GDBN} or (for @code{internal_error}
+and @code{internal_warning}) create a core file of the current
 @value{GDBN} session.
 
 These commands take an optional parameter @var{message-text} that is
@@ -33294,15 +33299,20 @@ Create a core file? (y or n) @kbd{n}
 
 @cindex @value{GDBN} internal error
 @cindex internal errors, control of @value{GDBN} behavior
+@cindex demangler crashes
 
 @kindex maint set internal-error
 @kindex maint show internal-error
 @kindex maint set internal-warning
 @kindex maint show internal-warning
+@kindex maint set demangler-warning
+@kindex maint show demangler-warning
 @item maint set internal-error @var{action} [ask|yes|no]
 @itemx maint show internal-error @var{action}
 @itemx maint set internal-warning @var{action} [ask|yes|no]
 @itemx maint show internal-warning @var{action}
+@itemx maint set demangler-warning @var{action} [ask|yes|no]
+@itemx maint show demangler-warning @var{action}
 When @value{GDBN} reports an internal problem (error or warning) it
 gives the user the opportunity to both quit @value{GDBN} and create a
 core file of the current @value{GDBN} session.  These commands let you
@@ -33316,7 +33326,10 @@ quit.  The default is to ask the user what to do.
 
 @item corefile
 You can specify that @value{GDBN} should always (yes) or never (no)
-create a core file.  The default is to ask the user what to do.
+create a core file.  The default is to ask the user what to do.  Note
+that there is no @code{corefile} option for @code{demangler-warning}:
+demangler warnings always create a core file and this cannot be
+disabled.
 @end table
 
 @kindex maint packet

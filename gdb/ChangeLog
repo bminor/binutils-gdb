@@ -1,3 +1,20 @@
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* utils.h (demangler_vwarning): New declaration.
+	(demangler_warning): Likewise.
+	* utils.c (struct internal_problem)
+	<user_settable_should_quit>: New field.
+	<user_settable_should_dump_core>: Likewise
+	(internal_error_problem): Add values for above new fields.
+	(internal_warning_problem): Likewise.
+	(demangler_warning_problem): New static global.
+	(demangler_vwarning): New function.
+	(demangler_warning): Likewise.
+	(add_internal_problem_command): Selectively add commands.
+	(_initialize_utils): New internal problem command.
+	* maint.c (maintenance_demangler_warning): New function.
+	(_initialize_maint_cmds): New command.
+
 2014-06-18  Tom Tromey  <tromey@redhat.com>
 
 	* f-valprint.c (info_common_command_for_block): Update.

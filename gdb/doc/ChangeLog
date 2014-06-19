@@ -1,3 +1,9 @@
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document new
+	"maint demangler-warning" command and new
+	"maint set/show demangler-warning" option.
+
 2014-06-09  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python.texi (Xmethod API): Add space before the opening
