@@ -19,12 +19,11 @@
 
 #ifdef GDBSERVER
 #include "server.h"
-#include "i386-low.h"
 #else
 #include "defs.h"
-#include "i386-nat.h"
 #include "inferior.h"
 #endif
+#include "nat/i386-dregs.h"
 
 /* Support for hardware watchpoints and breakpoints using the i386
    debug registers.
@@ -36,6 +35,35 @@
 
    The functions below implement debug registers sharing by reference
    counts, and allow to watch regions up to 16 bytes long.  */
+
+/* Accessor macros for low-level function vector.  */
+
+/* Can we update the inferior's debug registers?  */
+#define i386_dr_low_can_set_addr() (i386_dr_low.set_addr != NULL)
+
+/* Update the inferior's debug register REGNUM from STATE.  */
+#define i386_dr_low_set_addr(new_state, i) \
+  (i386_dr_low.set_addr ((i), (new_state)->dr_mirror[(i)]))
+
+/* Return the inferior's debug register REGNUM.  */
+#define i386_dr_low_get_addr(i) (i386_dr_low.get_addr ((i)))
+
+/* Can we update the inferior's DR7 control register?  */
+#define i386_dr_low_can_set_control() (i386_dr_low.set_control != NULL)
+
+/* Update the inferior's DR7 debug control register from STATE.  */
+#define i386_dr_low_set_control(new_state) \
+  (i386_dr_low.set_control ((new_state)->dr_control_mirror))
+
+/* Return the value of the inferior's DR7 debug control register.  */
+#define i386_dr_low_get_control() (i386_dr_low.get_control ())
+
+/* Return the value of the inferior's DR6 debug status register.  */
+#define i386_dr_low_get_status() (i386_dr_low.get_status ())
+
+/* Return the debug register size, in bytes.  */
+#define i386_get_debug_register_length() \
+  (i386_dr_low.debug_register_length)
 
 /* Support for 8-byte wide hw watchpoints.  */
 #define TARGET_HAS_DR_LEN_8 (i386_get_debug_register_length () == 8)
@@ -147,8 +175,11 @@
 /* Types of operations supported by i386_handle_nonaligned_watchpoint.  */
 typedef enum { WP_INSERT, WP_REMOVE, WP_COUNT } i386_wp_op_t;
 
-/* Print debugging messages.  */
 #ifndef GDBSERVER
+/* Whether or not to print the mirrored debug registers.  */
+extern int debug_hw_points;
+
+/* Print debugging messages.  */
 #define debug_printf(fmt, args...) \
   fprintf_unfiltered (gdb_stdlog, fmt, ##args);
 #endif

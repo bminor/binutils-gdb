@@ -35,6 +35,37 @@
 /* Forward declaration.  */
 enum target_hw_bp_type;
 
+/* Low-level function vector.  */
+
+struct i386_dr_low_type
+  {
+    /* Set the debug control (DR7) register to a given value for
+       all LWPs.  May be NULL if the debug control register cannot
+       be set.  */
+    void (*set_control) (unsigned long);
+
+    /* Put an address into one debug register for all LWPs.  May
+       be NULL if debug registers cannot be set*/
+    void (*set_addr) (int, CORE_ADDR);
+
+    /* Return the address in a given debug register of the current
+       LWP.  */
+    CORE_ADDR (*get_addr) (int);
+
+    /* Return the value of the debug status (DR6) register for
+       current LWP.  */
+    unsigned long (*get_status) (void);
+
+    /* Return the value of the debug control (DR7) register for
+       current LWP.  */
+    unsigned long (*get_control) (void);
+
+    /* Number of bytes used for debug registers (4 or 8).  */
+    int debug_register_length;
+  };
+
+extern struct i386_dr_low_type i386_dr_low;
+
 /* Debug registers' indices.  */
 #define DR_FIRSTADDR 0
 #define DR_LASTADDR  3

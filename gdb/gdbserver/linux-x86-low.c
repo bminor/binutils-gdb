@@ -587,8 +587,8 @@ update_debug_registers_callback (struct inferior_list_entry *entry,
 
 /* Update the inferior's debug register REGNUM from STATE.  */
 
-void
-i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
+static void
+i386_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
   /* Only update the threads of this process.  */
   int pid = pid_of (current_inferior);
@@ -601,7 +601,7 @@ i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
 
 /* Return the inferior's debug register REGNUM.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_dr_low_get_addr (int regnum)
 {
   ptid_t ptid = ptid_of (current_inferior);
@@ -614,8 +614,8 @@ i386_dr_low_get_addr (int regnum)
 
 /* Update the inferior's DR7 debug control register from STATE.  */
 
-void
-i386_dr_low_set_control (const struct i386_debug_reg_state *state)
+static void
+i386_dr_low_set_control (unsigned long control)
 {
   /* Only update the threads of this process.  */
   int pid = pid_of (current_inferior);
@@ -625,7 +625,7 @@ i386_dr_low_set_control (const struct i386_debug_reg_state *state)
 
 /* Return the inferior's DR7 debug control register.  */
 
-unsigned
+static unsigned long
 i386_dr_low_get_control (void)
 {
   ptid_t ptid = ptid_of (current_inferior);
@@ -636,13 +636,24 @@ i386_dr_low_get_control (void)
 /* Get the value of the DR6 debug status register from the inferior
    and record it in STATE.  */
 
-unsigned
+static unsigned long
 i386_dr_low_get_status (void)
 {
   ptid_t ptid = ptid_of (current_inferior);
 
   return x86_linux_dr_get (ptid, DR_STATUS);
 }
+
+/* Low-level function vector.  */
+struct i386_dr_low_type i386_dr_low =
+  {
+    i386_dr_low_set_control,
+    i386_dr_low_set_addr,
+    i386_dr_low_get_addr,
+    i386_dr_low_get_status,
+    i386_dr_low_get_control,
+    sizeof (void *),
+  };
 
 /* Breakpoint/Watchpoint support.  */
 

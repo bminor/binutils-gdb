@@ -1,3 +1,31 @@
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.h (debug_hw_points): Moved to nat/i386-dregs.c.
+	(i386_dr_low_type): Moved to nat/i386-dregs.h.
+	(i386_dr_low): Likewise.
+	(i386_dr_low_can_set_addr): Moved to nat/i386-dregs.c.
+	(i386_dr_low_set_addr): Likewise.
+	(i386_dr_low_get_addr): Likewise.
+	(i386_dr_low_can_set_control): Likewise.
+	(i386_dr_low_set_control): Likewise.
+	(i386_dr_low_get_control): Likewise.
+	(i386_dr_low_get_status): Likewise.
+	(i386_get_debug_register_length): Likewise.
+	* nat/i386-dregs.h (i386_dr_low_type): Moved from i386-nat.h.
+	(i386_dr_low): Likewise.
+	* nat/i386-dregs.c (i386-low.h): Remove include.
+	(i386-nat.h): Likewise.
+	(nat/i386-dregs.h): New include.
+	(i386_dr_low_can_set_addr): Moved from i386-nat.h.
+	(i386_dr_low_set_addr): Likewise.
+	(i386_dr_low_get_addr): Likewise.
+	(i386_dr_low_can_set_control): Likewise.
+	(i386_dr_low_set_control): Likewise.
+	(i386_dr_low_get_control): Likewise.
+	(i386_dr_low_get_status): Likewise.
+	(i386_get_debug_register_length): Likewise.
+	(debug_hw_points): Likewise.
+
 2014-06-19  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* Makefile.in (SFILES): Add d-exp.y.
