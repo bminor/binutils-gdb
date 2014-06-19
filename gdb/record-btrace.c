@@ -206,7 +206,7 @@ record_btrace_open (char *args, int from_tty)
   gdb_assert (record_btrace_thread_observer == NULL);
 
   disable_chain = make_cleanup (null_cleanup, NULL);
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     if (args == NULL || *args == 0 || number_is_in_list (args, tp->num))
       {
 	btrace_enable (tp);
@@ -238,7 +238,7 @@ record_btrace_stop_recording (struct target_ops *self)
 
   record_btrace_auto_disable ();
 
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     if (tp->btrace.target != NULL)
       btrace_disable (tp);
 }
@@ -259,7 +259,7 @@ record_btrace_close (struct target_ops *self)
 
   /* We should have already stopped recording.
      Tear down btrace in case we have not.  */
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     btrace_teardown (tp);
 }
 
@@ -835,7 +835,7 @@ record_btrace_is_replaying (struct target_ops *self)
 {
   struct thread_info *tp;
 
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     if (btrace_is_replaying (tp))
       return 1;
 
@@ -1522,7 +1522,7 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
 
   /* Stop replaying other threads if the thread to resume is not replaying.  */
   if (!btrace_is_replaying (tp) && execution_direction != EXEC_REVERSE)
-    ALL_THREADS (other)
+    ALL_NON_EXITED_THREADS (other)
       record_btrace_stop_replaying (other);
 
   /* As long as we're not replaying, just forward the request.  */
@@ -1572,7 +1572,7 @@ record_btrace_find_thread_to_move (ptid_t ptid)
     return tp;
 
   /* Otherwise, find one other thread that has been resumed.  */
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     if ((tp->btrace.flags & BTHR_MOVE) != 0)
       return tp;
 
@@ -1777,7 +1777,7 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 
   /* Stop all other threads. */
   if (!non_stop)
-    ALL_THREADS (other)
+    ALL_NON_EXITED_THREADS (other)
       other->btrace.flags &= ~BTHR_MOVE;
 
   /* Start record histories anew from the current position.  */

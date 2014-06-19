@@ -1,3 +1,19 @@
+2014-06-19  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (ALL_THREADS): Delete.
+	(ALL_NON_EXITED_THREADS): New macro.
+	* btrace.c (btrace_free_objfile): Use ALL_NON_EXITED_THREADS
+	instead of ALL_THREADS.
+	* infrun.c (find_thread_needs_step_over)
+	(switch_back_to_stepped_thread): Use ALL_NON_EXITED_THREADS
+	instead of ALL_THREADS.
+	* record-btrace.c (record_btrace_open)
+	(record_btrace_stop_recording, record_btrace_close)
+	(record_btrace_is_replaying, record_btrace_resume)
+	(record_btrace_find_thread_to_move, record_btrace_wait): Likewise.
+	* remote.c (append_pending_thread_resumptions): Likewise.
+	* thread.c (thread_apply_all_command): Likewise.
+
 2014-06-16  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (insert_bp_location, remove_breakpoint_1): Adjust.

@@ -2151,7 +2151,7 @@ find_thread_needs_step_over (int step, struct thread_info *except)
       return NULL;
     }
 
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     {
       /* Ignore the EXCEPT thread.  */
       if (tp == except)
@@ -5195,7 +5195,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	 step/next/etc.  */
       stepping_thread = NULL;
       step_over = NULL;
-      ALL_THREADS (tp)
+      ALL_NON_EXITED_THREADS (tp)
         {
 	  /* Ignore threads of processes we're not resuming.  */
 	  if (!sched_multi

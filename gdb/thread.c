@@ -1243,7 +1243,7 @@ thread_apply_all_command (char *cmd, int from_tty)
       ta_cleanup.tp_array = tp_array;
       ta_cleanup.count = tc;
 
-      ALL_THREADS (tp)
+      ALL_NON_EXITED_THREADS (tp)
         {
           tp_array[i] = tp;
           tp->refcount++;

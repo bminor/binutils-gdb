@@ -4626,7 +4626,7 @@ append_pending_thread_resumptions (char *p, char *endp, ptid_t ptid)
 {
   struct thread_info *thread;
 
-  ALL_THREADS (thread)
+  ALL_NON_EXITED_THREADS (thread)
     if (ptid_match (thread->ptid, ptid)
 	&& !ptid_equal (inferior_ptid, thread->ptid)
 	&& thread->suspend.stop_signal != GDB_SIGNAL_0
