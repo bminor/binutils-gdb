@@ -1,3 +1,17 @@
+2014-06-19  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* Makefile.in (SFILES): Add d-exp.y.
+	(YYFILES): Add d-exp.c.
+	(YYOBJ): Add d-exp.o.
+	(local-maintainer-clean): Delete d-exp.c.
+	* d-exp.y: New file.
+	* d-lang.h (d_parse): New declaration.
+	(d_error): New declaration.
+	* d-lang.c (d_op_print_tab): Add entry for BINOP_CONCAT and BINOP_EXP.
+	Set BINOP_EQUAL and BINOP_NOTEQUAL to same precedence as other
+	PREC_ORDER operators.
+	(d_language_defn): Use d_parse, d_error instead of c_parse, c_error.
+
 2014-06-19  Yao Qi  <yao@codesourcery.com>
 
 	* gdbthread.h (any_running): Remove the declaration.

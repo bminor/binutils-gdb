@@ -54,6 +54,12 @@ struct builtin_d_type
   struct type *builtin_dchar;
 };
 
+/* Defined in d-exp.y.  */
+
+extern int d_parse (struct parser_state *);
+
+extern void d_error (char *);
+
 /* Defined in d-lang.c  */
 
 extern const char *d_main_name (void);

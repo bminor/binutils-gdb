@@ -1,3 +1,7 @@
+2014-06-19  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/expression.exp: New file.
+
 2014-06-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/thread-execl.exp (do_test): New procedure, factored
