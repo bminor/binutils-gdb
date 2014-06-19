@@ -1,5 +1,12 @@
 2014-06-19  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (i386_stopped_by_watchpoint):
+	Use i386_dr_stopped_by_watchpoint.
+	(i386_insert_hw_breakpoint): Use i386_dr_insert_watchpoint.
+	(i386_remove_hw_breakpoint): Use i386_dr_remove_watchpoint.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
 	* nat/i386-dregs.c: New file.
 	* Makefile.in (i386-dregs.o): New rule.
 	* config/i386/cygwin.mh (NATDEPFILES): Add i386-dregs.o.

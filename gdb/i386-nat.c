@@ -208,8 +208,10 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 static int
 i386_stopped_by_watchpoint (struct target_ops *ops)
 {
-  CORE_ADDR addr = 0;
-  return i386_stopped_data_address (ops, &addr);
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+  return i386_dr_stopped_by_watchpoint (state);
 }
 
 /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
@@ -219,8 +221,11 @@ static int
 i386_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
-  return i386_insert_watchpoint (self, bp_tgt->placed_address, 1,
-				 hw_execute, NULL) ? EBUSY : 0;
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+  return i386_dr_insert_watchpoint (state, hw_execute,
+				    bp_tgt->placed_address, 1) ? EBUSY : 0;
 }
 
 /* Remove a hardware-assisted breakpoint at BP_TGT->placed_address.
@@ -230,8 +235,11 @@ static int
 i386_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
-  return i386_remove_watchpoint (self, bp_tgt->placed_address, 1,
-				 hw_execute, NULL);
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+  return i386_dr_remove_watchpoint (state, hw_execute,
+				    bp_tgt->placed_address, 1);
 }
 
 /* Returns the number of hardware watchpoints of type TYPE that we can
