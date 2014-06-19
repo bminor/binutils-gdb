@@ -33236,6 +33236,17 @@ Expand symbol tables.
 If @var{regexp} is specified, only expand symbol tables for file
 names matching @var{regexp}.
 
+@kindex maint set catch-demangler-crashes
+@kindex maint show catch-demangler-crashes
+@cindex demangler crashes
+@item maint set catch-demangler-crashes [on|off]
+@itemx maint show catch-demangler-crashes
+Control whether @value{GDBN} should attempt to catch crashes in the
+symbol name demangler.  The default is to attempt to catch crashes.
+If enabled, the first time a crash is caught, a core file is created,
+the offending symbol is displayed and the user is presented with the
+option to terminate the current session.
+
 @kindex maint cplus first_component
 @item maint cplus first_component @var{name}
 Print the first C@t{++} class/namespace component of @var{name}.

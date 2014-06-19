@@ -1,6 +1,11 @@
 2014-06-19  Gary Benson  <gbenson@redhat.com>
 
 	* gdb.texinfo (Maintenance Commands): Document new
+	"maint set/show catch-demangler-crashes" option.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document new
 	"maint demangler-warning" command and new
 	"maint set/show demangler-warning" option.
 

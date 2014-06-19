@@ -35,6 +35,7 @@
 #include "expression.h"
 #include "value.h"
 #include "cp-abi.h"
+#include <signal.h>
 
 #include "safe-ctype.h"
 
@@ -1482,12 +1483,142 @@ cp_lookup_rtti_type (const char *name, struct block *block)
   return rtti_type;
 }
 
+#ifdef HAVE_WORKING_FORK
+
+/* If nonzero, attempt to catch crashes in the demangler and print
+   useful debugging information.  */
+
+static int catch_demangler_crashes = 1;
+
+/* Wrap set/long jmp so that it's more portable.  */
+
+#if defined(HAVE_SIGSETJMP)
+#define SIGJMP_BUF		sigjmp_buf
+#define SIGSETJMP(buf)		sigsetjmp((buf), 1)
+#define SIGLONGJMP(buf,val)	siglongjmp((buf), (val))
+#else
+#define SIGJMP_BUF		jmp_buf
+#define SIGSETJMP(buf)		setjmp(buf)
+#define SIGLONGJMP(buf,val)	longjmp((buf), (val))
+#endif
+
+/* Stack context and environment for demangler crash recovery.  */
+
+static SIGJMP_BUF gdb_demangle_jmp_buf;
+
+/* If nonzero, attempt to dump core from the signal handler.  */
+
+static int gdb_demangle_attempt_core_dump = 1;
+
+/* Signal handler for gdb_demangle.  */
+
+static void
+gdb_demangle_signal_handler (int signo)
+{
+  if (gdb_demangle_attempt_core_dump)
+    {
+      if (fork () == 0)
+	dump_core ();
+
+      gdb_demangle_attempt_core_dump = 0;
+    }
+
+  SIGLONGJMP (gdb_demangle_jmp_buf, signo);
+}
+
+#endif
+
 /* A wrapper for bfd_demangle.  */
 
 char *
 gdb_demangle (const char *name, int options)
 {
-  return bfd_demangle (NULL, name, options);
+  char *result = NULL;
+  int crash_signal = 0;
+
+#ifdef HAVE_WORKING_FORK
+#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
+  struct sigaction sa, old_sa;
+#else
+  void (*ofunc) ();
+#endif
+  static int core_dump_allowed = -1;
+
+  if (core_dump_allowed == -1)
+    {
+      core_dump_allowed = can_dump_core (LIMIT_CUR);
+
+      if (!core_dump_allowed)
+	gdb_demangle_attempt_core_dump = 0;
+    }
+
+  if (catch_demangler_crashes)
+    {
+#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
+      sa.sa_handler = gdb_demangle_signal_handler;
+      sigemptyset (&sa.sa_mask);
+      sa.sa_flags = SA_ONSTACK;
+      sigaction (SIGSEGV, &sa, &old_sa);
+#else
+      ofunc = (void (*)()) signal (SIGSEGV, gdb_demangle_signal_handler);
+#endif
+
+      crash_signal = SIGSETJMP (gdb_demangle_jmp_buf);
+    }
+#endif
+
+  if (crash_signal == 0)
+    result = bfd_demangle (NULL, name, options);
+
+#ifdef HAVE_WORKING_FORK
+  if (catch_demangler_crashes)
+    {
+#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
+      sigaction (SIGSEGV, &old_sa, NULL);
+#else
+      signal (SIGSEGV, ofunc);
+#endif
+
+      if (crash_signal != 0)
+	{
+	  static int error_reported = 0;
+
+	  if (!error_reported)
+	    {
+	      char *short_msg, *long_msg;
+	      struct cleanup *back_to;
+
+	      short_msg = xstrprintf (_("unable to demangle '%s' "
+				      "(demangler failed with signal %d)"),
+				    name, crash_signal);
+	      back_to = make_cleanup (xfree, short_msg);
+
+	      long_msg = xstrprintf ("%s:%d: %s: %s", __FILE__, __LINE__,
+				    "demangler-warning", short_msg);
+	      make_cleanup (xfree, long_msg);
+
+	      target_terminal_ours ();
+	      begin_line ();
+	      if (core_dump_allowed)
+		fprintf_unfiltered (gdb_stderr,
+				    _("%s\nAttempting to dump core.\n"),
+				    long_msg);
+	      else
+		warn_cant_dump_core (long_msg);
+
+	      demangler_warning (__FILE__, __LINE__, "%s", short_msg);
+
+	      do_cleanups (back_to);
+
+	      error_reported = 1;
+	    }
+
+	  result = NULL;
+	}
+    }
+#endif
+
+  return result;
 }
 
 /* Don't allow just "maintenance cplus".  */
@@ -1562,4 +1693,17 @@ _initialize_cp_support (void)
 Usage: info vtbl EXPRESSION\n\
 Evaluate EXPRESSION and display the virtual function table for the\n\
 resulting object."));
+
+#ifdef HAVE_WORKING_FORK
+  add_setshow_boolean_cmd ("catch-demangler-crashes", class_maintenance,
+			   &catch_demangler_crashes, _("\
+Set whether to attempt to catch demangler crashes."), _("\
+Show whether to attempt to catch demangler crashes."), _("\
+If enabled GDB will attempt to catch demangler crashes and\n\
+display the offending symbol."),
+			   NULL,
+			   NULL,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
+#endif
 }

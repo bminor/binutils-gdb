@@ -1,5 +1,28 @@
 2014-06-19  Gary Benson  <gbenson@redhat.com>
 
+	* configure.ac [AC_CHECK_FUNCS] <sigaltstack>: New check.
+	* configure: Regenerate.
+	* config.in: Likewise.
+	* main.c (signal.h): New include.
+	(setup_alternate_signal_stack): New function.
+	(captured_main): Call the above.
+	* cp-support.c (signal.h): New include.
+	(catch_demangler_crashes): New flag.
+	(SIGJMP_BUF): New define.
+	(SIGSETJMP): Likewise.
+	(SIGLONGJMP): Likewise.
+	(gdb_demangle_jmp_buf): New static global.
+	(gdb_demangle_attempt_core_dump): Likewise.
+	(gdb_demangle_signal_handler): New function.
+	(gdb_demangle): If catch_demangler_crashes is set, install the
+	above signal handler before calling bfd_demangle, and restore
+	the original signal handler afterwards.  Display the offending
+	symbol and call demangler_warning the first time a segmentation
+	fault is caught.
+	(_initialize_cp_support): New maint set/show command.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
 	* utils.h (resource_limit_kind): New enum.
 	(can_dump_core): New declaration.
 	(warn_cant_dump_core): Likewise.
