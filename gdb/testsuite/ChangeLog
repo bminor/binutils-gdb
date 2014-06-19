@@ -1,3 +1,8 @@
+2014-06-18  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.cp/nsalias.exp: Set type of low_pc and high_pc entries
+	to DW_FORM_addr and use non-zero addresses.
+
 2014-06-18  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR gdb/17017
