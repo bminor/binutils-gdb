@@ -738,27 +738,13 @@ i386_stopped_by_watchpoint (struct target_ops *ops)
 
 /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, EBUSY on failure.  */
+
 static int
 i386_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
-  unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
-  CORE_ADDR addr = bp_tgt->placed_address;
-  /* Work on a local copy of the debug registers, and on success,
-     commit the change back to the inferior.  */
-  struct i386_debug_reg_state local_state = *state;
-  int retval = i386_insert_aligned_watchpoint (&local_state,
-					       addr, len_rw) ? EBUSY : 0;
-
-  if (retval == 0)
-    i386_update_inferior_debug_regs (state, &local_state);
-
-  if (debug_hw_points)
-    i386_show_dr (state, "insert_hwbp", addr, 1, hw_execute);
-
-  return retval;
+  return i386_insert_watchpoint (self, bp_tgt->placed_address, 1,
+				 hw_execute, NULL) ? EBUSY : 0;
 }
 
 /* Remove a hardware-assisted breakpoint at BP_TGT->placed_address.
@@ -768,23 +754,8 @@ static int
 i386_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
-  unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
-  CORE_ADDR addr = bp_tgt->placed_address;
-  /* Work on a local copy of the debug registers, and on success,
-     commit the change back to the inferior.  */
-  struct i386_debug_reg_state local_state = *state;
-  int retval = i386_remove_aligned_watchpoint (&local_state,
-					       addr, len_rw);
-
-  if (retval == 0)
-    i386_update_inferior_debug_regs (state, &local_state);
-
-  if (debug_hw_points)
-    i386_show_dr (state, "remove_hwbp", addr, 1, hw_execute);
-
-  return retval;
+  return i386_remove_watchpoint (self, bp_tgt->placed_address, 1,
+				 hw_execute, NULL);
 }
 
 /* Returns the number of hardware watchpoints of type TYPE that we can

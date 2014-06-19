@@ -1,5 +1,11 @@
 2014-06-19  Gary Benson  <gbenson@redhat.com>
 
+	* i386-nat.c (i386_insert_hw_breakpoint): Use
+	i386_insert_watchpoint.
+	(i386_remove_hw_breakpoint): Use i386_remove_watchpoint.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
 	* i386-nat.c (i386_dr_show): Renamed to
 	i386_show_dr and made static.  All uses updated.
 	(i386_dr_length_and_rw_bits): Renamed to
