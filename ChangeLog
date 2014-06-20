@@ -1,3 +1,7 @@
+2014-07-25  Samuel Bronson  <naesten@gmail.com>
+
+	* .gitattributes: New file for use with git-merge-changelog.
+
 2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	Disable gdb for or1k*-*-* until supported
