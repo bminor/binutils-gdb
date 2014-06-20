@@ -1,3 +1,8 @@
+2014-06-20  Kyle McMartin <kyle@redhat.com>
+
+	* elf32-arm.c (elf32_arm_check_relocs): Set DF_STATIC_TLS when
+	emitting initial-exec relocs when not linking an executable.
+
 2014-06-16  Will Newton  <will.newton@linaro.org>
 
 	* elf32-arm.c (elf32_arm_allocate_plt_entry): Increment

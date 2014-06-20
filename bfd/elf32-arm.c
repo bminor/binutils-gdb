@@ -12711,6 +12711,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		default: tls_type = GOT_NORMAL; break;
 		}
 
+	      if (!info->executable && (tls_type & GOT_TLS_IE))
+		info->flags |= DF_STATIC_TLS;
+
 	      if (h != NULL)
 		{
 		  h->got.refcount++;
