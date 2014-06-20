@@ -589,6 +589,7 @@ ac_includes_default="\
 #endif"
 
 ac_subst_vars='LTLIBOBJS
+LIBOBJS
 GNULIB_STDINT_H
 extra_libraries
 IPA_DEPFILES
@@ -604,7 +605,6 @@ WERROR_CFLAGS
 WARN_CFLAGS
 ustinc
 ustlibs
-LIBOBJS
 SET_MAKE
 GMAKE_FALSE
 GMAKE_TRUE
@@ -4930,27 +4930,6 @@ _ACEOF
 
 fi
 done
-
-for ac_func in vasprintf vsnprintf
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-eval as_val=\$$as_ac_var
-   if test "x$as_val" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-else
-  case " $LIBOBJS " in
-  *" $ac_func.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS $ac_func.$ac_objext"
- ;;
-esac
-
-fi
-done
-
 
 
 

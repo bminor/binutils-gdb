@@ -1,5 +1,11 @@
 2014-06-20  Gary Benson  <gbenson@redhat.com>
 
+	* configure.ac (AC_REPLACE_FUNCS) <vasprintf, vsnprintf>: Removed.
+	* configure: Regenerated.
+	* config.in: Likewise.
+
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
 	* Makefile.in (SFILES): Update locations for files moved
 	from common to nat.
 	(object file files): Reordered.

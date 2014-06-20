@@ -86,7 +86,6 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h)
 AC_CHECK_FUNCS(pread pwrite pread64 readlink)
-AC_REPLACE_FUNCS(vasprintf vsnprintf)
 
 GDB_AC_COMMON
 
