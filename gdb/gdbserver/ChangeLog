@@ -1,3 +1,9 @@
+2014-06-20  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* configure.ac: Invoke. AC_CHECK_TOOL(AR, ar).
+	* Makefile.in (AR, AR_FLAGS): Define.
+	* configure: Regenerate.
+
 2014-06-19  Gary Benson  <gbenson@redhat.com>
 
 	* Makefile.in (i386-dregs.o): New rule.

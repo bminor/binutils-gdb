@@ -50,6 +50,8 @@ INSTALL_DATA = @INSTALL_DATA@
 RANLIB = @RANLIB@
 
 CC = @CC@
+AR = @AR@
+AR_FLAGS = rc
 
 # Dependency tracking information.
 DEPMODE = @CCDEPMODE@
