@@ -1,3 +1,10 @@
+2014-06-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix --with-system-readline with readline-6.3 patch 5.
+	* tui/tui-io.c (tui_old_rl_getc_function, tui_old_rl_redisplay_function)
+	(tui_old_rl_prep_terminal, tui_old_rl_deprep_terminal): Use rl_*_t
+	types.
+
 2014-06-20  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dw2_get_real_path): Use correct type in
