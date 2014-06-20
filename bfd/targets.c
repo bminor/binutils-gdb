@@ -1032,8 +1032,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	   the file even if we don't recognize the machine type.  */
 	&elf32_be_vec,
 	&elf32_le_vec,
+#ifdef BFD64
 	&elf64_be_vec,
 	&elf64_le_vec,
+#endif
 
 	&epiphany_elf32_vec,
 
@@ -1049,8 +1051,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	&hppa_elf32_vec,
 	&hppa_elf32_linux_vec,
 	&hppa_elf32_nbsd_vec,
+#ifdef BFD64
 	&hppa_elf64_vec,
 	&hppa_elf64_linux_vec,
+#endif
 	&hppa_som_vec,
 
 	&i370_elf32_vec,
@@ -1114,10 +1118,12 @@ static const bfd_target * const _bfd_target_vector[] =
 	&ip2k_elf32_vec,
 	&iq2000_elf32_vec,
 
+#ifdef BFD64
 	&k1om_elf64_vec,
 	&k1om_elf64_fbsd_vec,
 	&l1om_elf64_vec,
 	&l1om_elf64_fbsd_vec,
+#endif
 
 	&lm32_elf32_vec,
 

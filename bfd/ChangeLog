@@ -1,3 +1,8 @@
+2014-06-24  Philippe De Muyter  <phdm@macqel.be>
+
+	* targets.c (_bfd_target_vector): Add missing #ifdef BFD64 for
+	a number of targets.
+
 2014-06-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* development.sh (development): Set to false.
