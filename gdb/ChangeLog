@@ -1,3 +1,7 @@
+2014-06-23  Don Breazeal  <donb@codesourcery.com>
+
+	* MAINTAINERS: Add myself as write-after-approval maintainer.
+
 2014-06-23  Pedro Alves  <palves@redhat.com>
 
 	* amd64-linux-nat.c (amd64_linux_prepare_to_resume): Clear
