@@ -1,3 +1,8 @@
+2014-06-23  Pedro Alves  <palves@redhat.com>
+
+	* linux-x86-low.c (x86_linux_prepare_to_resume): Clear DR_CONTROL
+	before setting DR0..DR3.
+
 2014-06-20  Gary Benson  <gbenson@redhat.com>
 
 	* configure.ac (AC_REPLACE_FUNCS) <vasprintf, vsnprintf>: Removed.

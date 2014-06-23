@@ -1,3 +1,13 @@
+2014-06-23  Pedro Alves  <palves@redhat.com>
+
+	* amd64-linux-nat.c (amd64_linux_prepare_to_resume): Clear
+	DR_CONTROL before setting DR0..DR3.
+	* i386-linux-nat.c (i386_linux_prepare_to_resume): Likewise.
+	* nat/i386-dregs.c (i386_remove_aligned_watchpoint): Clear all
+	bits of DR_CONTROL related to the debug register slot being
+	disabled.  If all slots are vacant, clear local slowdown as well,
+	and assert DR_CONTROL is 0.
+
 2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python/lib/gdb/command/xmethods.py

@@ -1,3 +1,8 @@
+2014-06-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watchpoint-reuse-slot.c: New file.
+	* gdb.base/watchpoint-reuse-slot.exp: New file.
+
 2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/py-xmethods.exp: Use "progspace" instead of the
