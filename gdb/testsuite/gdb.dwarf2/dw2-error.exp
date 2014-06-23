@@ -22,6 +22,11 @@ if {![dwarf2_support]} {
 
 standard_testfile .S
 
+if { ![istarget "x86_64-*-*"] || ![is_lp64_target] } {
+    verbose "Skipping $testfile.exp"
+    return
+}
+
 # We can't use prepare_for_testing here because we need to check the
 # 'file' command's output.
 if {[build_executable $testfile.exp $testfile $srcfile {nodebug}]} {

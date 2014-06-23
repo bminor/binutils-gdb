@@ -1,3 +1,9 @@
+2014-06-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-stap-special-operands.exp: Use is_lp64_target.
+	* gdb.arch/amd64-stap-optional-prefix.exp: Likewise.
+	* gdb.dwarf2/dw2-error.exp: Use istarget and is_lp64_target.
+
 2014-06-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/thread-execl.exp (do_test): New procedure, factored
