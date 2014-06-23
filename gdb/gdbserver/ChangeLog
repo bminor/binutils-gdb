@@ -1,3 +1,12 @@
+2014-06-23  Pedro Alves  <palves@redhat.com>
+
+	* linux-x86-low.c (x86_linux_prepare_to_resume): Clear DR_CONTROL
+	before setting DR0..DR3.
+	* i386-low.c (i386_remove_aligned_watchpoint): Clear all bits of
+	DR_CONTROL related to the debug register slot being disabled.  If
+	all slots are vacant, clear local slowdown as well, and assert
+	DR_CONTROL is 0.
+
 2014-06-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* development.sh: Delete.

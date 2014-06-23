@@ -777,6 +777,8 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       struct i386_debug_reg_state *state
 	= &proc->private->arch_private->debug_reg_state;
 
+      x86_linux_dr_set (ptid, DR_CONTROL, 0);
+
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 	if (state->dr_ref_count[i] > 0)
 	  {
@@ -789,7 +791,8 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 	    clear_status = 1;
 	  }
 
-      x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
+      if (state->dr_control_mirror != 0)
+	x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
 
       lwp->arch_private->debug_registers_changed = 0;
     }

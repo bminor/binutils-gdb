@@ -1,3 +1,8 @@
+2014-06-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watchpoint-reuse-slot.c: New file.
+	* gdb.base/watchpoint-reuse-slot.exp: New file.
+
 2014-06-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/amd64-stap-special-operands.exp: Use is_lp64_target.

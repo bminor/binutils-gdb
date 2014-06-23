@@ -778,6 +778,8 @@ i386_linux_prepare_to_resume (struct lwp_info *lwp)
       /* See amd64_linux_prepare_to_resume for Linux kernel note on
 	 i386_linux_dr_set calls ordering.  */
 
+      i386_linux_dr_set (lwp->ptid, DR_CONTROL, 0);
+
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 	if (state->dr_ref_count[i] > 0)
 	  {
@@ -790,7 +792,8 @@ i386_linux_prepare_to_resume (struct lwp_info *lwp)
 	    clear_status = 1;
 	  }
 
-      i386_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
+      if (state->dr_control_mirror != 0)
+	i386_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
 
       lwp->arch_private->debug_registers_changed = 0;
     }

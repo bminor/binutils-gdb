@@ -472,6 +472,7 @@ i386_remove_aligned_watchpoint (struct i386_debug_reg_state *state,
 				CORE_ADDR addr, unsigned len_rw_bits)
 {
   int i, retval = -1;
+  int all_vacant = 1;
 
   ALL_DEBUG_REGISTERS(i)
     {
@@ -484,11 +485,30 @@ i386_remove_aligned_watchpoint (struct i386_debug_reg_state *state,
 	      /* Reset our mirror.  */
 	      state->dr_mirror[i] = 0;
 	      I386_DR_DISABLE (state, i);
+	      /* Even though not strictly necessary, clear out all
+		 bits in DR_CONTROL related to this debug register.
+		 Debug output is clearer when we don't have stale bits
+		 in place.  This also allows the assertion below.  */
+	      I386_DR_SET_RW_LEN (state, i, 0);
 	    }
 	  retval = 0;
 	}
+
+      if (!I386_DR_VACANT (state, i))
+	all_vacant = 0;
     }
 
+  if (all_vacant)
+    {
+      /* Even though not strictly necessary, clear out all of
+	 DR_CONTROL, so that when we have no debug registers in use,
+	 we end up with DR_CONTROL == 0.  The Linux support relies on
+	 this for an optimization.  Plus, it makes for clearer debug
+	 output.  */
+      state->dr_control_mirror &= ~DR_LOCAL_SLOWDOWN;
+
+      gdb_assert (state->dr_control_mirror == 0);
+    }
   return retval;
 }
 
