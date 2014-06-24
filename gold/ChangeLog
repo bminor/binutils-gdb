@@ -1,3 +1,9 @@
+2014-06-24  Cary Coutant  <ccoutant@google.com>
+
+	* dwp.cc (Dwo_file::read): Allow files with no .debug_types
+	sections.
+	(Dwo_file::sized_read_unit_index): Likewise.
+
 2014-06-23  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
 	* mips.cc: New file.
