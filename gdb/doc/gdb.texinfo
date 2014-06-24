@@ -22102,6 +22102,9 @@ Print ten commands just after the commands last printed.
 @node Screen Size
 @section Screen Size
 @cindex size of screen
+@cindex screen size
+@cindex pagination
+@cindex page size
 @cindex pauses in output
 
 Certain commands to @value{GDBN} may produce large amounts of
