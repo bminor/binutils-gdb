@@ -195,9 +195,6 @@ dummy_frame_sniffer (const struct frame_unwind *self,
 		     struct frame_info *this_frame,
 		     void **this_prologue_cache)
 {
-  struct dummy_frame *dummyframe;
-  struct frame_id this_id;
-
   /* When unwinding a normal frame, the stack structure is determined
      by analyzing the frame's function's code (be it using brute force
      prologue analysis, or the dwarf2 CFI).  In the case of a dummy
@@ -209,9 +206,11 @@ dummy_frame_sniffer (const struct frame_unwind *self,
   /* Don't bother unless there is at least one dummy frame.  */
   if (dummy_frame_stack != NULL)
     {
+      struct dummy_frame *dummyframe;
       /* Use an architecture specific method to extract this frame's
 	 dummy ID, assuming it is a dummy frame.  */
-      this_id = gdbarch_dummy_id (get_frame_arch (this_frame), this_frame);
+      struct frame_id this_id
+	= gdbarch_dummy_id (get_frame_arch (this_frame), this_frame);
 
       /* Use that ID to find the corresponding cache entry.  */
       for (dummyframe = dummy_frame_stack;
