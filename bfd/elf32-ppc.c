@@ -6304,6 +6304,16 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
       sda->root.u.def.section = htab->elf.hgot->root.u.def.section;
       sda->root.u.def.value = htab->elf.hgot->root.u.def.value;
     }
+  if (info->emitrelocations)
+    {
+      struct elf_link_hash_entry *sda = htab->sdata[0].sym;
+
+      if (sda != NULL && sda->ref_regular)
+	sda->root.u.def.section->flags |= SEC_KEEP;
+      sda = htab->sdata[1].sym;
+      if (sda != NULL && sda->ref_regular)
+	sda->root.u.def.section->flags |= SEC_KEEP;
+    }
 
   if (htab->glink != NULL
       && htab->glink->size != 0
@@ -6396,11 +6406,14 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	       || s == htab->sgotplt
 	       || s == htab->sbss
 	       || s == htab->dynbss
-	       || s == htab->dynsbss
-	       || s == htab->sdata[0].section
-	       || s == htab->sdata[1].section)
+	       || s == htab->dynsbss)
 	{
 	  /* Strip these too.  */
+	}
+      else if (s == htab->sdata[0].section
+	       || s == htab->sdata[1].section)
+	{
+	  strip_section = (s->flags & SEC_KEEP) == 0;
 	}
       else if (CONST_STRNEQ (bfd_get_section_name (htab->elf.dynobj, s),
 			     ".rela"))
