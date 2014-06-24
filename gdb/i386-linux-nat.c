@@ -647,7 +647,7 @@ i386_linux_store_inferior_registers (struct target_ops *ops,
 /* Get debug register REGNUM value from only the one LWP of PTID.  */
 
 static unsigned long
-i386_linux_dr_get (ptid_t ptid, int regnum)
+x86_linux_dr_get (ptid_t ptid, int regnum)
 {
   int tid;
   unsigned long value;
@@ -668,7 +668,7 @@ i386_linux_dr_get (ptid_t ptid, int regnum)
 /* Set debug register REGNUM to VALUE in only the one LWP of PTID.  */
 
 static void
-i386_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
+x86_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 {
   int tid;
 
@@ -686,28 +686,28 @@ i386_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 /* Return the inferior's debug register REGNUM.  */
 
 static CORE_ADDR
-i386_linux_dr_get_addr (int regnum)
+x86_linux_dr_get_addr (int regnum)
 {
   /* DR6 and DR7 are retrieved with some other way.  */
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
-  return i386_linux_dr_get (inferior_ptid, regnum);
+  return x86_linux_dr_get (inferior_ptid, regnum);
 }
 
 /* Return the inferior's DR7 debug control register.  */
 
 static unsigned long
-i386_linux_dr_get_control (void)
+x86_linux_dr_get_control (void)
 {
-  return i386_linux_dr_get (inferior_ptid, DR_CONTROL);
+  return x86_linux_dr_get (inferior_ptid, DR_CONTROL);
 }
 
 /* Get DR_STATUS from only the one LWP of INFERIOR_PTID.  */
 
 static unsigned long
-i386_linux_dr_get_status (void)
+x86_linux_dr_get_status (void)
 {
-  return i386_linux_dr_get (inferior_ptid, DR_STATUS);
+  return x86_linux_dr_get (inferior_ptid, DR_STATUS);
 }
 
 /* Callback for iterate_over_lwps.  Update the debug registers of
@@ -735,7 +735,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 /* Set DR_CONTROL to ADDR in all LWPs of the current inferior.  */
 
 static void
-i386_linux_dr_set_control (unsigned long control)
+x86_linux_dr_set_control (unsigned long control)
 {
   ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
 
@@ -746,7 +746,7 @@ i386_linux_dr_set_control (unsigned long control)
    inferior.  */
 
 static void
-i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
+x86_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
   ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
 
@@ -759,7 +759,7 @@ i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
    If the debug regs have changed, update the thread's copies.  */
 
 static void
-i386_linux_prepare_to_resume (struct lwp_info *lwp)
+x86_linux_prepare_to_resume (struct lwp_info *lwp)
 {
   int clear_status = 0;
 
@@ -778,12 +778,12 @@ i386_linux_prepare_to_resume (struct lwp_info *lwp)
       /* See amd64_linux_prepare_to_resume for Linux kernel note on
 	 i386_linux_dr_set calls ordering.  */
 
-      i386_linux_dr_set (lwp->ptid, DR_CONTROL, 0);
+      x86_linux_dr_set (lwp->ptid, DR_CONTROL, 0);
 
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 	if (state->dr_ref_count[i] > 0)
 	  {
-	    i386_linux_dr_set (lwp->ptid, i, state->dr_mirror[i]);
+	    x86_linux_dr_set (lwp->ptid, i, state->dr_mirror[i]);
 
 	    /* If we're setting a watchpoint, any change the inferior
 	       had done itself to the debug registers needs to be
@@ -793,17 +793,17 @@ i386_linux_prepare_to_resume (struct lwp_info *lwp)
 	  }
 
       if (state->dr_control_mirror != 0)
-	i386_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
+	x86_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
 
       lwp->arch_private->debug_registers_changed = 0;
     }
 
   if (clear_status || lwp->stopped_by_watchpoint)
-    i386_linux_dr_set (lwp->ptid, DR_STATUS, 0);
+    x86_linux_dr_set (lwp->ptid, DR_STATUS, 0);
 }
 
 static void
-i386_linux_new_thread (struct lwp_info *lp)
+x86_linux_new_thread (struct lwp_info *lp)
 {
   struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
 
@@ -815,7 +815,7 @@ i386_linux_new_thread (struct lwp_info *lp)
 /* linux_nat_new_fork hook.   */
 
 static void
-i386_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+x86_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
 {
   pid_t parent_pid;
   struct i386_debug_reg_state *parent_state;
@@ -989,7 +989,7 @@ static void (*super_post_startup_inferior) (struct target_ops *self,
 					    ptid_t ptid);
 
 static void
-i386_linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
+x86_linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
   i386_cleanup_dregs ();
   super_post_startup_inferior (self, ptid);
@@ -1067,7 +1067,7 @@ i386_linux_read_description (struct target_ops *ops)
 /* Enable branch tracing.  */
 
 static struct btrace_target_info *
-i386_linux_enable_btrace (struct target_ops *self, ptid_t ptid)
+x86_linux_enable_btrace (struct target_ops *self, ptid_t ptid)
 {
   struct btrace_target_info *tinfo;
   struct gdbarch *gdbarch;
@@ -1089,8 +1089,8 @@ i386_linux_enable_btrace (struct target_ops *self, ptid_t ptid)
 /* Disable branch tracing.  */
 
 static void
-i386_linux_disable_btrace (struct target_ops *self,
-			   struct btrace_target_info *tinfo)
+x86_linux_disable_btrace (struct target_ops *self,
+			  struct btrace_target_info *tinfo)
 {
   enum btrace_error errcode = linux_disable_btrace (tinfo);
 
@@ -1101,18 +1101,18 @@ i386_linux_disable_btrace (struct target_ops *self,
 /* Teardown branch tracing.  */
 
 static void
-i386_linux_teardown_btrace (struct target_ops *self,
-			    struct btrace_target_info *tinfo)
+x86_linux_teardown_btrace (struct target_ops *self,
+			   struct btrace_target_info *tinfo)
 {
   /* Ignore errors.  */
   linux_disable_btrace (tinfo);
 }
 
 static enum btrace_error
-i386_linux_read_btrace (struct target_ops *self,
-			VEC (btrace_block_s) **data,
-			struct btrace_target_info *btinfo,
-			enum btrace_read_type type)
+x86_linux_read_btrace (struct target_ops *self,
+		       VEC (btrace_block_s) **data,
+		       struct btrace_target_info *btinfo,
+		       enum btrace_read_type type)
 {
   return linux_read_btrace (data, btinfo, type);
 }
@@ -1130,11 +1130,11 @@ _initialize_i386_linux_nat (void)
 
   i386_use_watchpoints (t);
 
-  i386_dr_low.set_control = i386_linux_dr_set_control;
-  i386_dr_low.set_addr = i386_linux_dr_set_addr;
-  i386_dr_low.get_addr = i386_linux_dr_get_addr;
-  i386_dr_low.get_status = i386_linux_dr_get_status;
-  i386_dr_low.get_control = i386_linux_dr_get_control;
+  i386_dr_low.set_control = x86_linux_dr_set_control;
+  i386_dr_low.set_addr = x86_linux_dr_set_addr;
+  i386_dr_low.get_addr = x86_linux_dr_get_addr;
+  i386_dr_low.get_status = x86_linux_dr_get_status;
+  i386_dr_low.get_control = x86_linux_dr_get_control;
   i386_set_debug_register_length (4);
 
   /* Override the default ptrace resume method.  */
@@ -1142,7 +1142,7 @@ _initialize_i386_linux_nat (void)
 
   /* Override the GNU/Linux inferior startup hook.  */
   super_post_startup_inferior = t->to_post_startup_inferior;
-  t->to_post_startup_inferior = i386_linux_child_post_startup_inferior;
+  t->to_post_startup_inferior = x86_linux_child_post_startup_inferior;
 
   /* Add our register access methods.  */
   t->to_fetch_registers = i386_linux_fetch_inferior_registers;
@@ -1152,15 +1152,15 @@ _initialize_i386_linux_nat (void)
 
   /* Add btrace methods.  */
   t->to_supports_btrace = linux_supports_btrace;
-  t->to_enable_btrace = i386_linux_enable_btrace;
-  t->to_disable_btrace = i386_linux_disable_btrace;
-  t->to_teardown_btrace = i386_linux_teardown_btrace;
-  t->to_read_btrace = i386_linux_read_btrace;
+  t->to_enable_btrace = x86_linux_enable_btrace;
+  t->to_disable_btrace = x86_linux_disable_btrace;
+  t->to_teardown_btrace = x86_linux_teardown_btrace;
+  t->to_read_btrace = x86_linux_read_btrace;
 
   /* Register the target.  */
   linux_nat_add_target (t);
-  linux_nat_set_new_thread (t, i386_linux_new_thread);
-  linux_nat_set_new_fork (t, i386_linux_new_fork);
+  linux_nat_set_new_thread (t, x86_linux_new_thread);
+  linux_nat_set_new_fork (t, x86_linux_new_fork);
   linux_nat_set_forget_process (t, i386_forget_process);
-  linux_nat_set_prepare_to_resume (t, i386_linux_prepare_to_resume);
+  linux_nat_set_prepare_to_resume (t, x86_linux_prepare_to_resume);
 }

@@ -1,3 +1,66 @@
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
+	* amd64-linux-nat.c (amd64_linux_dr_get): Renamed to
+	x86_linux_dr_get.  All uses updated.
+	(amd64_linux_dr_set): Renamed to
+	x86_linux_dr_set.  All uses updated.
+	(amd64_linux_dr_get_addr): Renamed to
+	x86_linux_dr_get_addr.  All uses updated.
+	(amd64_linux_dr_get_control): Renamed to
+	x86_linux_dr_get_control.  All uses updated.
+	(amd64_linux_dr_get_status): Renamed to
+	x86_linux_dr_get_status.  All uses updated.
+	(amd64_linux_dr_set_control): Renamed to
+	x86_linux_dr_set_control.  All uses updated.
+	(amd64_linux_dr_set_addr): Renamed to
+	x86_linux_dr_set_addr.  All uses updated.
+	(amd64_linux_prepare_to_resume): Renamed to
+	x86_linux_prepare_to_resume.  All uses updated.
+	(amd64_linux_new_thread): Renamed to
+	x86_linux_new_thread.  All uses updated.
+	(amd64_linux_new_fork): Renamed to
+	x86_linux_new_fork.  All uses updated.
+	(amd64_linux_child_post_startup_inferior): Renamed to
+	x86_linux_child_post_startup_inferior.  All uses updated.
+	(amd64_linux_enable_btrace): Renamed to
+	x86_linux_enable_btrace.  All uses updated.
+	(amd64_linux_disable_btrace): Renamed to
+	x86_linux_disable_btrace.  All uses updated.
+	(amd64_linux_teardown_btrace): Renamed to
+	x86_linux_teardown_btrace.  All uses updated.
+	(amd64_linux_read_btrace): Renamed to
+	x86_linux_read_btrace.  All uses updated.
+	* i386-linux-nat.c (i386_linux_dr_get): Renamed to
+	x86_linux_dr_get.  All uses updated.
+	(i386_linux_dr_set): Renamed to
+	x86_linux_dr_set.  All uses updated.
+	(i386_linux_dr_get_addr): Renamed to
+	x86_linux_dr_get_addr.  All uses updated.
+	(i386_linux_dr_get_control): Renamed to
+	x86_linux_dr_get_control.  All uses updated.
+	(i386_linux_dr_get_status): Renamed to
+	x86_linux_dr_get_status.  All uses updated.
+	(i386_linux_dr_set_control): Renamed to
+	x86_linux_dr_set_control.  All uses updated.
+	(i386_linux_dr_set_addr): Renamed to
+	x86_linux_dr_set_addr.  All uses updated.
+	(i386_linux_prepare_to_resume): Renamed to
+	x86_linux_prepare_to_resume.  All uses updated.
+	(i386_linux_new_thread): Renamed to
+	x86_linux_new_thread.  All uses updated.
+	(i386_linux_new_fork): Renamed to
+	x86_linux_new_fork.  All uses updated.
+	(i386_linux_child_post_startup_inferior): Renamed to
+	x86_linux_child_post_startup_inferior.  All uses updated.
+	(i386_linux_enable_btrace): Renamed to
+	x86_linux_enable_btrace.  All uses updated.
+	(i386_linux_disable_btrace): Renamed to
+	x86_linux_disable_btrace.  All uses updated.
+	(i386_linux_teardown_btrace): Renamed to
+	x86_linux_teardown_btrace.  All uses updated.
+	(i386_linux_read_btrace): Renamed to
+	x86_linux_read_btrace.  All uses updated.
+
 2014-07-11  Adrian Sendroiu  <adrian.sendroiu@freescale.com>
 
 	* remote.c (extended_remote_post_attach): New function.
