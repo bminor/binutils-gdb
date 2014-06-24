@@ -1269,6 +1269,52 @@ x86_linux_read_btrace (struct target_ops *self,
   return linux_read_btrace (data, btinfo, type);
 }
 
+/* Create an x86 GNU/Linux target.  */
+
+static struct target_ops *
+x86_linux_create_target (void)
+{
+  /* Fill in the generic GNU/Linux methods.  */
+  struct target_ops *t = linux_target ();
+
+  /* Initialize the debug register function vectors.  */
+  i386_use_watchpoints (t);
+  i386_dr_low.set_control = x86_linux_dr_set_control;
+  i386_dr_low.set_addr = x86_linux_dr_set_addr;
+  i386_dr_low.get_addr = x86_linux_dr_get_addr;
+  i386_dr_low.get_status = x86_linux_dr_get_status;
+  i386_dr_low.get_control = x86_linux_dr_get_control;
+  i386_set_debug_register_length (sizeof (void *));
+
+  /* Override the GNU/Linux inferior startup hook.  */
+  super_post_startup_inferior = t->to_post_startup_inferior;
+  t->to_post_startup_inferior = x86_linux_child_post_startup_inferior;
+
+  /* Add the description reader.  */
+  t->to_read_description = x86_linux_read_description;
+
+  /* Add btrace methods.  */
+  t->to_supports_btrace = linux_supports_btrace;
+  t->to_enable_btrace = x86_linux_enable_btrace;
+  t->to_disable_btrace = x86_linux_disable_btrace;
+  t->to_teardown_btrace = x86_linux_teardown_btrace;
+  t->to_read_btrace = x86_linux_read_btrace;
+
+  return t;
+}
+
+/* Add an x86 GNU/Linux target.  */
+
+static void
+x86_linux_add_target (struct target_ops *t)
+{
+  linux_nat_add_target (t);
+  linux_nat_set_new_thread (t, x86_linux_new_thread);
+  linux_nat_set_new_fork (t, x86_linux_new_fork);
+  linux_nat_set_forget_process (t, i386_forget_process);
+  linux_nat_set_prepare_to_resume (t, x86_linux_prepare_to_resume);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64_linux_nat (void);
 
@@ -1285,40 +1331,16 @@ _initialize_amd64_linux_nat (void)
   gdb_assert (ARRAY_SIZE (amd64_linux_gregset32_reg_offset)
 	      == amd64_native_gregset32_num_regs);
 
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
-
-  i386_use_watchpoints (t);
-
-  i386_dr_low.set_control = x86_linux_dr_set_control;
-  i386_dr_low.set_addr = x86_linux_dr_set_addr;
-  i386_dr_low.get_addr = x86_linux_dr_get_addr;
-  i386_dr_low.get_status = x86_linux_dr_get_status;
-  i386_dr_low.get_control = x86_linux_dr_get_control;
-  i386_set_debug_register_length (8);
-
-  /* Override the GNU/Linux inferior startup hook.  */
-  super_post_startup_inferior = t->to_post_startup_inferior;
-  t->to_post_startup_inferior = x86_linux_child_post_startup_inferior;
+  /* Create a generic x86 GNU/Linux target.  */
+  t = x86_linux_create_target ();
 
   /* Add our register access methods.  */
   t->to_fetch_registers = amd64_linux_fetch_inferior_registers;
   t->to_store_registers = amd64_linux_store_inferior_registers;
 
-  t->to_read_description = x86_linux_read_description;
+  /* Add the target.  */
+  x86_linux_add_target (t);
 
-  /* Add btrace methods.  */
-  t->to_supports_btrace = linux_supports_btrace;
-  t->to_enable_btrace = x86_linux_enable_btrace;
-  t->to_disable_btrace = x86_linux_disable_btrace;
-  t->to_teardown_btrace = x86_linux_teardown_btrace;
-  t->to_read_btrace = x86_linux_read_btrace;
-
-  /* Register the target.  */
-  linux_nat_add_target (t);
-  linux_nat_set_new_thread (t, x86_linux_new_thread);
-  linux_nat_set_new_fork (t, x86_linux_new_fork);
-  linux_nat_set_forget_process (t, i386_forget_process);
+  /* Add our siginfo layout converter.  */
   linux_nat_set_siginfo_fixup (t, amd64_linux_siginfo_fixup);
-  linux_nat_set_prepare_to_resume (t, x86_linux_prepare_to_resume);
 }

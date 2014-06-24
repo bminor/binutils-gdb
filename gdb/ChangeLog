@@ -1,5 +1,14 @@
 2014-07-11  Gary Benson  <gbenson@redhat.com>
 
+	* amd64-linux-nat.c (x86_linux_create_target): New function.
+	(x86_linux_add_target): Likewise.
+	(_initialize_amd64_linux_nat): Delegate to the above new functions.
+	* i386-linux-nat.c (x86_linux_create_target): New function.
+	(x86_linux_add_target): Likewise.
+	(_initialize_i386_linux_nat): Delegate to the above new functions.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
 	* amd64-linux-nat.c (x86_linux_get_thread_area): New function.
 	(ps_get_thread_area): Delegate to the above in 32-bit mode.
 	* i386-linux-nat.c (x86_linux_get_thread_area): New function.

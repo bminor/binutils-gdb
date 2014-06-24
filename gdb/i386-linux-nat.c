@@ -1217,37 +1217,28 @@ x86_linux_read_btrace (struct target_ops *self,
   return linux_read_btrace (data, btinfo, type);
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_i386_linux_nat;
+/* Create an x86 GNU/Linux target.  */
 
-void
-_initialize_i386_linux_nat (void)
+static struct target_ops *
+x86_linux_create_target (void)
 {
-  struct target_ops *t;
-
   /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
+  struct target_ops *t = linux_target ();
 
+  /* Initialize the debug register function vectors.  */
   i386_use_watchpoints (t);
-
   i386_dr_low.set_control = x86_linux_dr_set_control;
   i386_dr_low.set_addr = x86_linux_dr_set_addr;
   i386_dr_low.get_addr = x86_linux_dr_get_addr;
   i386_dr_low.get_status = x86_linux_dr_get_status;
   i386_dr_low.get_control = x86_linux_dr_get_control;
-  i386_set_debug_register_length (4);
-
-  /* Override the default ptrace resume method.  */
-  t->to_resume = i386_linux_resume;
+  i386_set_debug_register_length (sizeof (void *));
 
   /* Override the GNU/Linux inferior startup hook.  */
   super_post_startup_inferior = t->to_post_startup_inferior;
   t->to_post_startup_inferior = x86_linux_child_post_startup_inferior;
 
-  /* Add our register access methods.  */
-  t->to_fetch_registers = i386_linux_fetch_inferior_registers;
-  t->to_store_registers = i386_linux_store_inferior_registers;
-
+  /* Add the description reader.  */
   t->to_read_description = x86_linux_read_description;
 
   /* Add btrace methods.  */
@@ -1257,10 +1248,37 @@ _initialize_i386_linux_nat (void)
   t->to_teardown_btrace = x86_linux_teardown_btrace;
   t->to_read_btrace = x86_linux_read_btrace;
 
-  /* Register the target.  */
+  return t;
+}
+
+/* Add an x86 GNU/Linux target.  */
+
+static void
+x86_linux_add_target (struct target_ops *t)
+{
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, x86_linux_new_thread);
   linux_nat_set_new_fork (t, x86_linux_new_fork);
   linux_nat_set_forget_process (t, i386_forget_process);
   linux_nat_set_prepare_to_resume (t, x86_linux_prepare_to_resume);
+}
+
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_i386_linux_nat;
+
+void
+_initialize_i386_linux_nat (void)
+{
+  /* Create a generic x86 GNU/Linux target.  */
+  struct target_ops *t = x86_linux_create_target ();
+
+  /* Override the default ptrace resume method.  */
+  t->to_resume = i386_linux_resume;
+
+  /* Add our register access methods.  */
+  t->to_fetch_registers = i386_linux_fetch_inferior_registers;
+  t->to_store_registers = i386_linux_store_inferior_registers;
+
+  /* Add the target.  */
+  x86_linux_add_target (t);
 }
