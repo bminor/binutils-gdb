@@ -105,21 +105,17 @@ ftrace_debug (const struct btrace_function *bfun, const char *prefix)
 {
   const char *fun, *file;
   unsigned int ibegin, iend;
-  int lbegin, lend, level;
+  int level;
 
   fun = ftrace_print_function_name (bfun);
   file = ftrace_print_filename (bfun);
   level = bfun->level;
 
-  lbegin = bfun->lbegin;
-  lend = bfun->lend;
-
   ibegin = bfun->insn_offset;
   iend = ibegin + VEC_length (btrace_insn_s, bfun->insn);
 
-  DEBUG_FTRACE ("%s: fun = %s, file = %s, level = %d, lines = [%d; %d], "
-		"insn = [%u; %u)", prefix, fun, file, level, lbegin, lend,
-		ibegin, iend);
+  DEBUG_FTRACE ("%s: fun = %s, file = %s, level = %d, insn = [%u; %u)",
+		prefix, fun, file, level, ibegin, iend);
 }
 
 /* Return non-zero if BFUN does not match MFUN and FUN,
@@ -168,26 +164,6 @@ ftrace_function_switched (const struct btrace_function *bfun,
   return 0;
 }
 
-/* Return non-zero if we should skip this file when generating the function
-   call history, zero otherwise.
-   We would want to do that if, say, a macro that is defined in another file
-   is expanded in this function.  */
-
-static int
-ftrace_skip_file (const struct btrace_function *bfun, const char *fullname)
-{
-  struct symbol *sym;
-  const char *bfile;
-
-  sym = bfun->sym;
-  if (sym == NULL)
-    return 1;
-
-  bfile = symtab_to_fullname (symbol_symtab (sym));
-
-  return (filename_cmp (bfile, fullname) != 0);
-}
-
 /* Allocate and initialize a new branch trace function segment.
    PREV is the chronologically preceding function segment.
    MFUN and FUN are the symbol information we have for this function.  */
@@ -204,10 +180,6 @@ ftrace_new_function (struct btrace_function *prev,
   bfun->msym = mfun;
   bfun->sym = fun;
   bfun->flow.prev = prev;
-
-  /* We start with the identities of min and max, respectively.  */
-  bfun->lbegin = INT_MAX;
-  bfun->lend = INT_MIN;
 
   if (prev == NULL)
     {
@@ -543,39 +515,6 @@ ftrace_update_function (struct btrace_function *bfun, CORE_ADDR pc)
   return bfun;
 }
 
-/* Update BFUN's source range with respect to the instruction at PC.  */
-
-static void
-ftrace_update_lines (struct btrace_function *bfun, CORE_ADDR pc)
-{
-  struct symtab_and_line sal;
-  const char *fullname;
-
-  sal = find_pc_line (pc, 0);
-  if (sal.symtab == NULL || sal.line == 0)
-    {
-      DEBUG_FTRACE ("no lines at %s", core_addr_to_string_nz (pc));
-      return;
-    }
-
-  /* Check if we switched files.  This could happen if, say, a macro that
-     is defined in another file is expanded here.  */
-  fullname = symtab_to_fullname (sal.symtab);
-  if (ftrace_skip_file (bfun, fullname))
-    {
-      DEBUG_FTRACE ("ignoring file at %s, file=%s",
-		    core_addr_to_string_nz (pc), fullname);
-      return;
-    }
-
-  /* Update the line range.  */
-  bfun->lbegin = min (bfun->lbegin, sal.line);
-  bfun->lend = max (bfun->lend, sal.line);
-
-  if (record_debug > 1)
-    ftrace_debug (bfun, "update lines");
-}
-
 /* Add the instruction at PC to BFUN's instructions.  */
 
 static void
@@ -680,7 +619,6 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  insn.iclass = ftrace_classify_insn (gdbarch, pc);
 
 	  ftrace_update_insns (end, &insn);
-	  ftrace_update_lines (end, pc);
 
 	  /* We're done once we pushed the instruction at the end.  */
 	  if (block->end == pc)

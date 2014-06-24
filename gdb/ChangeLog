@@ -1,3 +1,13 @@
+2015-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.h (btrace_function) <lbegin, lend>: Remove.
+	* btrace.c (ftrace_debug): Do not print the line range.
+	(ftrace_skip_file, ftrace_update_lines): Remove.
+	(ftrace_new_function): Remove lbegin and lend initialization.
+	(btrace_compute_ftrace_bts): Remove call to ftrace_update_lines.
+	* record-btrace.c (btrace_compute_src_line_range): New.
+	(btrace_call_history_src_line): Call btrace_compute_src_line_range.
+
 2015-03-02  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (follow_exec): Delete all threads of the process except

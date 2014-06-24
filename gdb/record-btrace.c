@@ -721,6 +721,47 @@ btrace_call_history_insn_range (struct ui_out *uiout,
   ui_out_field_uint (uiout, "insn end", end);
 }
 
+/* Compute the lowest and highest source line for the instructions in BFUN
+   and return them in PBEGIN and PEND.
+   Ignore instructions that can't be mapped to BFUN, e.g. instructions that
+   result from inlining or macro expansion.  */
+
+static void
+btrace_compute_src_line_range (const struct btrace_function *bfun,
+			       int *pbegin, int *pend)
+{
+  struct btrace_insn *insn;
+  struct symtab *symtab;
+  struct symbol *sym;
+  unsigned int idx;
+  int begin, end;
+
+  begin = INT_MAX;
+  end = INT_MIN;
+
+  sym = bfun->sym;
+  if (sym == NULL)
+    goto out;
+
+  symtab = symbol_symtab (sym);
+
+  for (idx = 0; VEC_iterate (btrace_insn_s, bfun->insn, idx, insn); ++idx)
+    {
+      struct symtab_and_line sal;
+
+      sal = find_pc_line (insn->pc, 0);
+      if (sal.symtab != symtab || sal.line == 0)
+	continue;
+
+      begin = min (begin, sal.line);
+      end = max (end, sal.line);
+    }
+
+ out:
+  *pbegin = begin;
+  *pend = end;
+}
+
 /* Print the source line information for a function call history line.  */
 
 static void
@@ -737,9 +778,7 @@ btrace_call_history_src_line (struct ui_out *uiout,
   ui_out_field_string (uiout, "file",
 		       symtab_to_filename_for_display (symbol_symtab (sym)));
 
-  begin = bfun->lbegin;
-  end = bfun->lend;
-
+  btrace_compute_src_line_range (bfun, &begin, &end);
   if (end < begin)
     return;
 

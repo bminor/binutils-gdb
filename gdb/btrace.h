@@ -150,9 +150,6 @@ struct btrace_function
      a fixup to normalize function levels so the smallest level is zero.  */
   int level;
 
-  /* The source line range of this function segment (both inclusive).  */
-  int lbegin, lend;
-
   /* A bit-vector of btrace_function_flag.  */
   enum btrace_function_flag flags;
 };
