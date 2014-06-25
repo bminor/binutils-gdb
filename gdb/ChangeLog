@@ -1,5 +1,12 @@
 2014-07-11  Gary Benson  <gbenson@redhat.com>
 
+	* amd64-linux-nat.c (x86_linux_get_thread_area): New function.
+	(ps_get_thread_area): Delegate to the above in 32-bit mode.
+	* i386-linux-nat.c (x86_linux_get_thread_area): New function.
+	(ps_get_thread_area): Delegate to the above.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
 	* amd64-linux-nat.c (amd64_linux_read_description): Renamed to
 	x86_linux_read_description.  All uses updated.  amd64-specific
 	code conditionalized.  Conditionalized i386-specific code added.

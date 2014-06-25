@@ -490,6 +490,47 @@ x86_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
 
 
 
+/* Helper for ps_get_thread_area.  Sets BASE_ADDR to a pointer to
+   the thread local storage (or its descriptor) and returns PS_OK
+   on success.  Returns PS_ERR on failure.  */
+
+static ps_err_e
+x86_linux_get_thread_area (pid_t pid, void *addr, unsigned int *base_addr)
+{
+  /* NOTE: cagney/2003-08-26: The definition of this buffer is found
+     in the kernel header <asm-i386/ldt.h>.  It, after padding, is 4 x
+     4 byte integers in size: `entry_number', `base_addr', `limit',
+     and a bunch of status bits.
+
+     The values returned by this ptrace call should be part of the
+     regcache buffer, and ps_get_thread_area should channel its
+     request through the regcache.  That way remote targets could
+     provide the value using the remote protocol and not this direct
+     call.
+
+     Is this function needed?  I'm guessing that the `base' is the
+     address of a descriptor that libthread_db uses to find the
+     thread local address base that GDB needs.  Perhaps that
+     descriptor is defined by the ABI.  Anyway, given that
+     libthread_db calls this function without prompting (gdb
+     requesting tls base) I guess it needs info in there anyway.  */
+  unsigned int desc[4];
+
+  /* This code assumes that "int" is 32 bits and that
+     GET_THREAD_AREA returns no more than 4 int values.  */
+  gdb_assert (sizeof (int) == 4);
+
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 25
+#endif
+
+  if (ptrace (PTRACE_GET_THREAD_AREA, pid, addr, &desc) < 0)
+    return PS_ERR;
+
+  *base_addr = desc[1];
+  return PS_OK;
+}
+
 /* This function is called by libthread_db as part of its handling of
    a request for a thread's local storage address.  */
 
@@ -499,26 +540,18 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 {
   if (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 32)
     {
-      /* The full structure is found in <asm-i386/ldt.h>.  The second
-	 integer is the LDT's base_address and that is used to locate
-	 the thread's local storage.  See i386-linux-nat.c more
-	 info.  */
-      unsigned int desc[4];
+      unsigned int base_addr;
+      ps_err_e result;
 
-      /* This code assumes that "int" is 32 bits and that
-	 GET_THREAD_AREA returns no more than 4 int values.  */
-      gdb_assert (sizeof (int) == 4);	
-#ifndef PTRACE_GET_THREAD_AREA
-#define PTRACE_GET_THREAD_AREA 25
-#endif
-      if  (ptrace (PTRACE_GET_THREAD_AREA, 
-		   lwpid, (void *) (long) idx, (unsigned long) &desc) < 0)
-	return PS_ERR;
-      
-      /* Extend the value to 64 bits.  Here it's assumed that a "long"
-	 and a "void *" are the same.  */
-      (*base) = (void *) (long) desc[1];
-      return PS_OK;
+      result = x86_linux_get_thread_area (lwpid, (void *) (long) idx,
+					  &base_addr);
+      if (result == PS_OK)
+	{
+	  /* Extend the value to 64 bits.  Here it's assumed that
+	     a "long" and a "void *" are the same.  */
+	  (*base) = (void *) (long) base_addr;
+	}
+      return result;
     }
   else
     {

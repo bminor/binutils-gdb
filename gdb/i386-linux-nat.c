@@ -848,12 +848,12 @@ x86_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
 
 
 
-/* Called by libthread_db.  Returns a pointer to the thread local
-   storage (or its descriptor).  */
+/* Helper for ps_get_thread_area.  Sets BASE_ADDR to a pointer to
+   the thread local storage (or its descriptor) and returns PS_OK
+   on success.  Returns PS_ERR on failure.  */
 
-ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph, 
-		    lwpid_t lwpid, int idx, void **base)
+static ps_err_e
+x86_linux_get_thread_area (pid_t pid, void *addr, unsigned int *base_addr)
 {
   /* NOTE: cagney/2003-08-26: The definition of this buffer is found
      in the kernel header <asm-i386/ldt.h>.  It, after padding, is 4 x
@@ -873,18 +873,38 @@ ps_get_thread_area (const struct ps_prochandle *ph,
      libthread_db calls this function without prompting (gdb
      requesting tls base) I guess it needs info in there anyway.  */
   unsigned int desc[4];
+
+  /* This code assumes that "int" is 32 bits and that
+     GET_THREAD_AREA returns no more than 4 int values.  */
   gdb_assert (sizeof (int) == 4);
 
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
 #endif
 
-  if (ptrace (PTRACE_GET_THREAD_AREA, lwpid,
-	      (void *) idx, (unsigned long) &desc) < 0)
+  if (ptrace (PTRACE_GET_THREAD_AREA, pid, addr, &desc) < 0)
     return PS_ERR;
 
-  *(int *)base = desc[1];
+  *base_addr = desc[1];
   return PS_OK;
+}
+
+/* Called by libthread_db.  Returns a pointer to the thread local
+   storage (or its descriptor).  */
+
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+		    lwpid_t lwpid, int idx, void **base)
+{
+  unsigned int base_addr;
+  ps_err_e result;
+
+  result = x86_linux_get_thread_area (lwpid, (void *) idx, &base_addr);
+
+  if (result == PS_OK)
+    *(int *) base = base_addr;
+
+  return result;
 }
 
 
