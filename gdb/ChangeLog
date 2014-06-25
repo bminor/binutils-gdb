@@ -1,3 +1,15 @@
+2014-07-07  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_get_thread_local_address>: Use
+	TARGET_DEFAULT_NORETURN.
+	* target.c (generic_tls_error): New function.
+	(target_translate_tls_address): Don't search target stack.
+	* target-delegates.c: Rebuild.
+	* ppc-linux-tdep.c (ppc_linux_spe_context): Don't search target
+	stack.
+	* linux-thread-db.c (thread_db_get_thread_local_address):
+	Unconditionally call beneath target.
+
 2014-07-03  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* cli/cli-logging.c (pop_output_files): Assign targerr to

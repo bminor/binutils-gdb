@@ -49,6 +49,8 @@
 
 static void target_info (char *, int);
 
+static void generic_tls_error (void) ATTRIBUTE_NORETURN;
+
 static void default_terminal_info (struct target_ops *, const char *, int);
 
 static int default_watchpoint_addr_within_range (struct target_ops *,
@@ -732,24 +734,24 @@ target_is_pushed (struct target_ops *t)
   return 0;
 }
 
+/* Default implementation of to_get_thread_local_address.  */
+
+static void
+generic_tls_error (void)
+{
+  throw_error (TLS_GENERIC_ERROR,
+	       _("Cannot find thread-local variables on this target"));
+}
+
 /* Using the objfile specified in OBJFILE, find the address for the
    current thread's thread-local storage with offset OFFSET.  */
 CORE_ADDR
 target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 {
   volatile CORE_ADDR addr = 0;
-  struct target_ops *target;
+  struct target_ops *target = &current_target;
 
-  for (target = current_target.beneath;
-       target != NULL;
-       target = target->beneath)
-    {
-      if (target->to_get_thread_local_address != NULL)
-	break;
-    }
-
-  if (target != NULL
-      && gdbarch_fetch_tls_load_module_address_p (target_gdbarch ()))
+  if (gdbarch_fetch_tls_load_module_address_p (target_gdbarch ()))
     {
       ptid_t ptid = inferior_ptid;
       volatile struct gdb_exception ex;

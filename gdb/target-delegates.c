@@ -767,6 +767,19 @@ tdefault_goto_bookmark (struct target_ops *self, const gdb_byte *arg1, int arg2)
   tcomplain ();
 }
 
+static CORE_ADDR
+delegate_get_thread_local_address (struct target_ops *self, ptid_t arg1, CORE_ADDR arg2, CORE_ADDR arg3)
+{
+  self = self->beneath;
+  return self->to_get_thread_local_address (self, arg1, arg2, arg3);
+}
+
+static CORE_ADDR
+tdefault_get_thread_local_address (struct target_ops *self, ptid_t arg1, CORE_ADDR arg2, CORE_ADDR arg3)
+{
+  generic_tls_error ();
+}
+
 static enum target_xfer_status 
 delegate_xfer_partial (struct target_ops *self, enum target_object  arg1, const char *arg2, gdb_byte *arg3, const gdb_byte *arg4, ULONGEST arg5, ULONGEST arg6, ULONGEST *arg7)
 {
@@ -1781,6 +1794,8 @@ install_delegators (struct target_ops *ops)
     ops->to_get_bookmark = delegate_get_bookmark;
   if (ops->to_goto_bookmark == NULL)
     ops->to_goto_bookmark = delegate_goto_bookmark;
+  if (ops->to_get_thread_local_address == NULL)
+    ops->to_get_thread_local_address = delegate_get_thread_local_address;
   if (ops->to_xfer_partial == NULL)
     ops->to_xfer_partial = delegate_xfer_partial;
   if (ops->to_memory_map == NULL)
@@ -1995,6 +2010,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_make_corefile_notes = dummy_make_corefile_notes;
   ops->to_get_bookmark = tdefault_get_bookmark;
   ops->to_goto_bookmark = tdefault_goto_bookmark;
+  ops->to_get_thread_local_address = tdefault_get_thread_local_address;
   ops->to_xfer_partial = tdefault_xfer_partial;
   ops->to_memory_map = tdefault_memory_map;
   ops->to_flash_erase = tdefault_flash_erase;

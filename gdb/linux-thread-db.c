@@ -1874,11 +1874,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
     }
 
   beneath = find_target_beneath (ops);
-  if (beneath->to_get_thread_local_address)
-    return beneath->to_get_thread_local_address (beneath, ptid, lm, offset);
-  else
-    throw_error (TLS_GENERIC_ERROR,
-	         _("TLS not supported on this target"));
+  return beneath->to_get_thread_local_address (beneath, ptid, lm, offset);
 }
 
 /* Callback routine used to find a thread based on the TID part of

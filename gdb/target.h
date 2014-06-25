@@ -610,7 +610,8 @@ struct target_ops
     CORE_ADDR (*to_get_thread_local_address) (struct target_ops *ops,
 					      ptid_t ptid,
 					      CORE_ADDR load_module_addr,
-					      CORE_ADDR offset);
+					      CORE_ADDR offset)
+      TARGET_DEFAULT_NORETURN (generic_tls_error ());
 
     /* Request that OPS transfer up to LEN 8-bit bytes of the target's
        OBJECT.  The OFFSET, for a seekable object, specifies the
