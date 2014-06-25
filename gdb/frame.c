@@ -960,7 +960,7 @@ frame_pop (struct frame_info *this_frame)
     {
       /* Popping a dummy frame involves restoring more than just registers.
 	 dummy_frame_pop does all the work.  */
-      dummy_frame_pop (get_frame_id (this_frame));
+      dummy_frame_pop (get_frame_id (this_frame), inferior_ptid);
       return;
     }
 

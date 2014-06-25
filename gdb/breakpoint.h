@@ -1329,7 +1329,7 @@ extern void delete_longjmp_breakpoint (int thread);
 extern void delete_longjmp_breakpoint_at_next_stop (int thread);
 
 extern struct breakpoint *set_longjmp_breakpoint_for_call_dummy (void);
-extern void check_longjmp_breakpoint_for_call_dummy (int thread);
+extern void check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp);
 
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);

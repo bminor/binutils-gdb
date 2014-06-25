@@ -7460,7 +7460,7 @@ set_longjmp_breakpoint_for_call_dummy (void)
 }
 
 /* Verify all existing dummy frames and their associated breakpoints for
-   THREAD.  Remove those which can no longer be found in the current frame
+   TP.  Remove those which can no longer be found in the current frame
    stack.
 
    You should call this function only at places where it is safe to currently
@@ -7468,12 +7468,12 @@ set_longjmp_breakpoint_for_call_dummy (void)
    frames.  */
 
 void
-check_longjmp_breakpoint_for_call_dummy (int thread)
+check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
 {
   struct breakpoint *b, *b_tmp;
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
-    if (b->type == bp_longjmp_call_dummy && b->thread == thread)
+    if (b->type == bp_longjmp_call_dummy && b->thread == tp->num)
       {
 	struct breakpoint *dummy_b = b->related_breakpoint;
 
@@ -7483,7 +7483,7 @@ check_longjmp_breakpoint_for_call_dummy (int thread)
 	    || frame_find_by_id (dummy_b->frame_id) != NULL)
 	  continue;
 	
-	dummy_frame_discard (dummy_b->frame_id);
+	dummy_frame_discard (dummy_b->frame_id, tp->ptid);
 
 	while (b->related_breakpoint != b)
 	  {

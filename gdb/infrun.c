@@ -4443,7 +4443,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	if (what.is_longjmp)
 	  {
-	    check_longjmp_breakpoint_for_call_dummy (ecs->event_thread->num);
+	    check_longjmp_breakpoint_for_call_dummy (ecs->event_thread);
 
 	    if (!frame_id_p (ecs->event_thread->initiating_frame))
 	      {

@@ -33378,9 +33378,7 @@ Breakpoint 2, add (a=2, b=3) at @dots{}
 The program being debugged stopped while in a function called from GDB.
 @dots{}
 (@value{GDBP}) @kbd{maint print dummy-frames}
-0x1a57c80: pc=0x01014068 fp=0x0200bddc sp=0x0200bdd6
- top=0x0200bdd4 id=@{stack=0x200bddc,code=0x101405c@}
- call_lo=0x01014000 call_hi=0x01014001
+0xa8206d8: id=@{stack=0xbfffe734,code=0xbfffe73f,!special@}, ptid=process 9353
 (@value{GDBP})
 @end smallexample
 
