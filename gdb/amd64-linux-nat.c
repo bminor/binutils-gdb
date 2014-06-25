@@ -277,7 +277,10 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
     }
 }
 
+
 /* Support for debug registers.  */
+
+/* Get debug register REGNUM value from only the one LWP of PTID.  */
 
 static unsigned long
 x86_linux_dr_get (ptid_t ptid, int regnum)

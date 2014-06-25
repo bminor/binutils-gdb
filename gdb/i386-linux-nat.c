@@ -732,7 +732,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
   return 0;
 }
 
-/* Set DR_CONTROL to ADDR in all LWPs of the current inferior.  */
+/* Set DR_CONTROL to CONTROL in all LWPs of the current inferior.  */
 
 static void
 x86_linux_dr_set_control (unsigned long control)
@@ -775,9 +775,16 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 	= i386_debug_reg_state (ptid_get_pid (lwp->ptid));
       int i;
 
-      /* See amd64_linux_prepare_to_resume for Linux kernel note on
-	 i386_linux_dr_set calls ordering.  */
+      /* On Linux kernel before 2.6.33 commit
+	 72f674d203cd230426437cdcf7dd6f681dad8b0d
+	 if you enable a breakpoint by the DR_CONTROL bits you need to have
+	 already written the corresponding DR_FIRSTADDR...DR_LASTADDR registers.
 
+	 Ensure DR_CONTROL gets written as the very last register here.  */
+
+      /* Clear DR_CONTROL first.  In some cases, setting DR0-3 to a
+	 value that doesn't match what is enabled in DR_CONTROL
+	 results in EINVAL.  */
       x86_linux_dr_set (lwp->ptid, DR_CONTROL, 0);
 
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
@@ -792,6 +799,8 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 	    clear_status = 1;
 	  }
 
+      /* If DR_CONTROL is supposed to be zero, we've already set it
+	 above.  */
       if (state->dr_control_mirror != 0)
 	x86_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
 
