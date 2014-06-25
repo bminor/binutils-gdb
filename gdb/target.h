@@ -1022,7 +1022,8 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
 
     /* Print information about the recording.  */
-    void (*to_info_record) (struct target_ops *);
+    void (*to_info_record) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
 
     /* Save the recorded execution trace into a file.  */
     void (*to_save_record) (struct target_ops *, const char *filename)
@@ -2220,9 +2221,6 @@ extern enum btrace_error target_read_btrace (VEC (btrace_block_s) **,
 
 /* See to_stop_recording in struct target_ops.  */
 extern void target_stop_recording (void);
-
-/* See to_info_record in struct target_ops.  */
-extern void target_info_record (void);
 
 /* See to_save_record in struct target_ops.  */
 extern void target_save_record (const char *filename);

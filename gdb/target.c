@@ -3443,23 +3443,6 @@ target_stop_recording (void)
 /* See target.h.  */
 
 void
-target_info_record (void)
-{
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_info_record != NULL)
-      {
-	t->to_info_record (t);
-	return;
-      }
-
-  tcomplain ();
-}
-
-/* See target.h.  */
-
-void
 target_save_record (const char *filename)
 {
   current_target.to_save_record (&current_target, filename);

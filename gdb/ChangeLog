@@ -1,5 +1,15 @@
 2014-07-07  Tom Tromey  <tromey@redhat.com>
 
+	* target-delegates.c: Rebuild.
+	* target.c (target_info_record): Remove.
+	* record.c (info_record_command): Unconditionally call
+	to_info_record.
+	* target.h (struct target_ops) <to_info_record>: Use
+	TARGET_DEFAULT_IGNORE.
+	(target_info_record): Remove.
+
+2014-07-07  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_get_thread_local_address>: Use
 	TARGET_DEFAULT_NORETURN.
 	* target.c (generic_tls_error): New function.
