@@ -1,3 +1,7 @@
+2014-06-25  Kyle McMartin  <kyle@redhat.com>
+
+	* ld-arm/tls-gdierelax2.d: Fix expected offsets.
+
 2014-06-16  Will Newton  <will.newton@linaro.org>
 
 	* ld-arm/arm-elf.exp: Add ifunc-gdesc test.
