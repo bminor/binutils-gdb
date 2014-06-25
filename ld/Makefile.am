@@ -318,7 +318,6 @@ ALL_EMULATION_SOURCES = \
 	ei386nw.c \
 	ei386pe.c \
 	ei386pe_posix.c \
-	ei386pep.c \
 	elnk960.c \
 	em32relf.c \
 	em32relf_linux.c \
@@ -480,6 +479,7 @@ ALL_64_EMULATION_SOURCES = \
 	eelf_x86_64_nacl.c \
 	eelf_x86_64_sol2.c \
 	ehppa64linux.c \
+	ei386pep.c \
 	emmo.c \
 	eshelf64.c \
 	eshelf64_nbsd.c \
@@ -490,7 +490,9 @@ ALL_64_EMULATIONS = $(ALL_64_EMULATION_SOURCES:.c=.@OBJEXT@)
 
 ALL_EMUL_EXTRA_OFILES = \
 	deffilep.@OBJEXT@ \
-	pe-dll.@OBJEXT@ \
+	pe-dll.@OBJEXT@
+
+ALL_64_EMUL_EXTRA_OFILES = \
 	pep-dll.@OBJEXT@
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \

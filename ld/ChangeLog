@@ -1,3 +1,15 @@
+2014-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Move ei386pep.c from
+	here...
+	(ALL_64_EMULATION_SOURCES): ... to here.
+	(ALL_EMUL_EXTRA_OFILES): Move pep-dll.o from here...
+	(ALL_64_EMUL_EXTRA_OFILES): New.  ... to here.
+	* configure.in (EMUL_EXTRA_OFILES): Include
+	ALL_64_EMUL_EXTRA_OFILES when making a 64-bit enabled build.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2014-06-18  Andreas Tobler  <andreast@fgznet.ch>
 
 	* configure.tgt (arm*-*-freebsd*): Update targ_extra_emuls.
