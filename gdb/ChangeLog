@@ -1,3 +1,8 @@
+2014-06-26  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c (_initialize_infrun): Replace "signal_program[0]"
+	with "signal_pass[0]" in the initialization of signal_pass.
+
 2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record-btrace.c (record_btrace_generating_corefile)

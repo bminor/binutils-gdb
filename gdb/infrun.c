@@ -7343,7 +7343,7 @@ leave it stopped or free to run as needed."),
   signal_catch = (unsigned char *)
     xmalloc (sizeof (signal_catch[0]) * numsigs);
   signal_pass = (unsigned char *)
-    xmalloc (sizeof (signal_program[0]) * numsigs);
+    xmalloc (sizeof (signal_pass[0]) * numsigs);
   for (i = 0; i < numsigs; i++)
     {
       signal_stop[i] = 1;
