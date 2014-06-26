@@ -1,3 +1,8 @@
+2014-06-26  Philippe De Muyter <phdm@macqel.be>
+
+	* or1k-desc.h (spr_field_masks): Add U suffix to the end of long
+	constants.
+
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	* or1k-asm.c, * or1k-desc.c, * or1k-desc.h, * or1k-dis.c,
