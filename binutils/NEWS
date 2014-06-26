@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add --include-all-whitespace to strings.
+
 * Add --dump-section option to objcopy.
 
 * Add support for the Andes NDS32.

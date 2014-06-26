@@ -1,3 +1,11 @@
+2014-06-26  Erik Akermann  <kurterikackermann@gmail.com>
+
+	* strings.c: Add -w/--include-all-whitespace option to include any
+	whitespace character in the displayed strings.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi (strings): Document the new command line
+	option.
+
 2014-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (process_note_sections): If there are no note sections
