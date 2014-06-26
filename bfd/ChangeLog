@@ -1,3 +1,10 @@
+2014-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16949
+	* dwarf2.c (is_str_attr): New function.
+	(find_abstract_instance_name): Use it to determine when an
+	attribute has a string value.
+
 2014-06-24  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Arrange to keep
