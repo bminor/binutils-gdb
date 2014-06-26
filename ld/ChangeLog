@@ -1,3 +1,12 @@
+2014-06-26  Linda Zhang  <lindasc@qq.com>
+
+	* emultempl/pe.em: Initialise insert_timestamp to true.
+	Add a --no-insert-timestamp command line option.
+	* emultempl/pep.em: Likewise.
+	* ld.texinfo: Document that --insert-timestamp is enabled by
+	default and that it now has an inverse command line option.
+	* NEWS: Mention the new behaviour.
+
 2014-06-25  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Move ei386pep.c from
