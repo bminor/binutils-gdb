@@ -1,3 +1,12 @@
+2014-07-08  Will Newton  <will.newton@linaro.org>
+
+	* ld-arm/arm-lib.ld: Increase MAXPAGESIZE value to
+	match bfd.
+	* ld-arm/cortex-a8-fix-bl-rel-plt.d: Update offsets to
+	take into account increased segment alignment.
+	* ld-arm/ifunc-gdesc.r: Likewise.
+	* ld-arm/tls-lib.d: Likewise.
+
 2014-07-08  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/emit-relocs-local-addend-bar.s: New source file.

@@ -1,3 +1,8 @@
+2014-07-08  Will Newton  <will.newton@linaro.org>
+
+	* elf32-arm.c (ELF_MAXPAGESIZE): Increase the default
+	value to 64kB and remove custom setting for NaCl.
+
 2014-07-08  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_copy_link_hash_symbol_type): Copy st_other

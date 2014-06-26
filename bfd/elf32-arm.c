@@ -16100,7 +16100,7 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 #ifdef __QNXTARGET__
 #define ELF_MAXPAGESIZE			0x1000
 #else
-#define ELF_MAXPAGESIZE			0x8000
+#define ELF_MAXPAGESIZE			0x10000
 #endif
 #define ELF_MINPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
@@ -16250,8 +16250,6 @@ elf32_arm_nacl_plt_sym_val (bfd_vma i, const asection *plt,
 #undef  elf_backend_plt_sym_val
 #define elf_backend_plt_sym_val			elf32_arm_nacl_plt_sym_val
 
-#undef	ELF_MAXPAGESIZE
-#define ELF_MAXPAGESIZE			0x10000
 #undef	ELF_MINPAGESIZE
 #undef	ELF_COMMONPAGESIZE
 
