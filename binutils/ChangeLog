@@ -1,3 +1,8 @@
+2014-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_note_sections): If there are no note sections
+	try processing note segments instead.
+
 2014-06-17  Anton Lavrentiwev  <lavr@ncbi.nim.nih.gov>
 
 	PR binutils/16923

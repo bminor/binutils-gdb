@@ -14050,15 +14050,23 @@ process_note_sections (FILE * file)
 {
   Elf_Internal_Shdr * section;
   unsigned long i;
+  int n = 0;
   int res = 1;
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum && section != NULL;
        i++, section++)
     if (section->sh_type == SHT_NOTE)
-      res &= process_corefile_note_segment (file,
-					    (bfd_vma) section->sh_offset,
-					    (bfd_vma) section->sh_size);
+      {
+	res &= process_corefile_note_segment (file,
+					      (bfd_vma) section->sh_offset,
+					      (bfd_vma) section->sh_size);
+	n++;
+      }
+
+  if (n == 0)
+    /* Try processing NOTE segments instead.  */
+    return process_corefile_note_segments (file);
 
   return res;
 }
