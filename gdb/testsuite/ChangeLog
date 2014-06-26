@@ -1,3 +1,8 @@
+2014-06-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/watchpoint-reuse-slot.exp: Handle the case that the
+	target lacks support for awatch, rwatch, or hbreak.
+
 2014-06-27  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.multi/dummy-frame-restore.exp: New.

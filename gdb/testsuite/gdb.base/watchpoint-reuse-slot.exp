@@ -103,6 +103,9 @@ foreach cmd {"watch" "awatch" "rwatch"} {
 	-re "You may have requested too many.*$gdb_prompt $" {
 	    unsupported $test
 	}
+	-re "Target does not support.*$gdb_prompt $" {
+	    unsupported $test
+	}
 	-re "$gdb_prompt $" {
 	    pass $test
 	    lappend cmds $cmd
@@ -115,7 +118,10 @@ foreach cmd {"watch" "awatch" "rwatch"} {
 set test "hbreak"
 gdb_test_multiple "hbreak main" $test {
     -re "You may have requested too many.*$gdb_prompt $" {
-	pass $test
+	unsupported $test
+    }
+    -re "No hardware breakpoint support.*$gdb_prompt $" {
+	unsupported $test
     }
     -re "$gdb_prompt $" {
 	pass $test
