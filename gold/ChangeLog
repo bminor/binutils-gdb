@@ -1,3 +1,7 @@
+2014-06-27  Alan Modra  <amodra@gmail.com>
+
+	* symtab.cc (Symbol::should_add_dynsym_entry): Don't make inline.
+
 2014-06-24  Cary Coutant  <ccoutant@google.com>
 
 	* dwp.cc (Dwo_file::read): Allow files with no .debug_types
