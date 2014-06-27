@@ -1,5 +1,16 @@
 2014-07-11  Gary Benson  <gbenson@redhat.com>
 
+	* amd64-linux-nat.c (amd64_linux_read_description): Renamed to
+	x86_linux_read_description.  All uses updated.  amd64-specific
+	code conditionalized.  Conditionalized i386-specific code added.
+	Redundant cast removed.
+	* i386-linux-nat.c (i386_linux_read_description): Renamed to
+	x86_linux_read_description.  All uses updated.  i386-specific
+	code conditionalized.  Conditionalized amd64-specific code added.
+	One sizeof replaced with the actual type it is describing.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
 	* amd64-linux-nat.c (amd64_linux_dr_get): Renamed to
 	x86_linux_dr_get.  All uses updated.
 	(amd64_linux_dr_set): Renamed to

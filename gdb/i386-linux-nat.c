@@ -995,20 +995,63 @@ x86_linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
   super_post_startup_inferior (self, ptid);
 }
 
+#ifdef __x86_64__
+/* Value of CS segment register:
+     64bit process: 0x33
+     32bit process: 0x23  */
+#define AMD64_LINUX_USER64_CS 0x33
+
+/* Value of DS segment register:
+     LP64 process: 0x0
+     X32 process: 0x2b  */
+#define AMD64_LINUX_X32_DS 0x2b
+#endif
+
 /* Get Linux/x86 target description from running target.  */
 
 static const struct target_desc *
-i386_linux_read_description (struct target_ops *ops)
+x86_linux_read_description (struct target_ops *ops)
 {
   int tid;
+  int is_64bit = 0;
+#ifdef __x86_64__
+  int is_x32;
+#endif
   static uint64_t xcr0;
+  uint64_t xcr0_features_bits;
 
   /* GNU/Linux LWP ID's are process ID's.  */
   tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
     tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
-#ifdef HAVE_PTRACE_GETFPXREGS
+#ifdef __x86_64__
+  {
+    unsigned long cs;
+    unsigned long ds;
+
+    /* Get CS register.  */
+    errno = 0;
+    cs = ptrace (PTRACE_PEEKUSER, tid,
+		 offsetof (struct user_regs_struct, cs), 0);
+    if (errno != 0)
+      perror_with_name (_("Couldn't get CS register"));
+
+    is_64bit = cs == AMD64_LINUX_USER64_CS;
+
+    /* Get DS register.  */
+    errno = 0;
+    ds = ptrace (PTRACE_PEEKUSER, tid,
+		 offsetof (struct user_regs_struct, ds), 0);
+    if (errno != 0)
+      perror_with_name (_("Couldn't get DS register"));
+
+    is_x32 = ds == AMD64_LINUX_X32_DS;
+
+    if (sizeof (void *) == 4 && is_64bit && !is_x32)
+      error (_("Can't debug 64-bit process with 32-bit GDB"));
+  }
+#elif HAVE_PTRACE_GETFPXREGS
   if (have_ptrace_getfpxregs == -1)
     {
       elf_fpxregset_t fpxregs;
@@ -1031,8 +1074,8 @@ i386_linux_read_description (struct target_ops *ops)
       iov.iov_len = sizeof (xstateregs);
 
       /* Check if PTRACE_GETREGSET works.  */
-      if (ptrace (PTRACE_GETREGSET, tid, (unsigned int) NT_X86_XSTATE,
-		  &iov) < 0)
+      if (ptrace (PTRACE_GETREGSET, tid,
+		  (unsigned int) NT_X86_XSTATE, &iov) < 0)
 	have_ptrace_getregset = 0;
       else
 	{
@@ -1040,14 +1083,51 @@ i386_linux_read_description (struct target_ops *ops)
 
 	  /* Get XCR0 from XSAVE extended state.  */
 	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
-			     / sizeof (long long))];
+			     / sizeof (uint64_t))];
 	}
     }
 
-  /* Check the native XCR0 only if PTRACE_GETREGSET is available.  */
+  /* Check the native XCR0 only if PTRACE_GETREGSET is available.  If
+     PTRACE_GETREGSET is not available then set xcr0_features_bits to
+     zero so that the "no-features" descriptions are returned by the
+     switches below.  */
   if (have_ptrace_getregset)
+    xcr0_features_bits = xcr0 & I386_XSTATE_ALL_MASK;
+  else
+    xcr0_features_bits = 0;
+
+  if (is_64bit)
     {
-      switch ((xcr0 & I386_XSTATE_ALL_MASK))
+#ifdef __x86_64__
+      switch (xcr0_features_bits)
+	{
+	case I386_XSTATE_MPX_AVX512_MASK:
+	case I386_XSTATE_AVX512_MASK:
+	  if (is_x32)
+	    return tdesc_x32_avx512_linux;
+	  else
+	    return tdesc_amd64_avx512_linux;
+	case I386_XSTATE_MPX_MASK:
+	  if (is_x32)
+	    return tdesc_x32_avx_linux; /* No MPX on x32 using AVX.  */
+	  else
+	    return tdesc_amd64_mpx_linux;
+	case I386_XSTATE_AVX_MASK:
+	  if (is_x32)
+	    return tdesc_x32_avx_linux;
+	  else
+	    return tdesc_amd64_avx_linux;
+	default:
+	  if (is_x32)
+	    return tdesc_x32_linux;
+	  else
+	    return tdesc_amd64_linux;
+	}
+#endif
+    }
+  else
+    {
+      switch (xcr0_features_bits)
 	{
 	case I386_XSTATE_MPX_AVX512_MASK:
 	case I386_XSTATE_AVX512_MASK:
@@ -1060,8 +1140,8 @@ i386_linux_read_description (struct target_ops *ops)
 	  return tdesc_i386_linux;
 	}
     }
-  else
-    return tdesc_i386_linux;
+
+  gdb_assert_not_reached ("failed to return tdesc");
 }
 
 /* Enable branch tracing.  */
@@ -1148,7 +1228,7 @@ _initialize_i386_linux_nat (void)
   t->to_fetch_registers = i386_linux_fetch_inferior_registers;
   t->to_store_registers = i386_linux_store_inferior_registers;
 
-  t->to_read_description = i386_linux_read_description;
+  t->to_read_description = x86_linux_read_description;
 
   /* Add btrace methods.  */
   t->to_supports_btrace = linux_supports_btrace;
