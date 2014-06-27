@@ -1,3 +1,10 @@
+2014-06-27  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-macho.c (obj_mach_o_set_symbol_qualifier): Don't set
+	SYM_MACHO_FIELDS_NOT_VALIDATED after reporting an error.
+	(obj_mach_o_frob_label): Avoid cascading errors.
+	(obj_mach_o_frob_symbol): Don't set SYM_MACHO_FIELDS_NOT_VALIDATED.
+
 2014-06-18  DJ Delorie  <dj@redhat.com>
 
 	* config/rx-parse.y (BSET, BCLR, BTST, BNOT, BMCMD): Make .B
