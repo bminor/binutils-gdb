@@ -1,5 +1,35 @@
 2014-07-11  Gary Benson  <gbenson@redhat.com>
 
+	* amd64-linux-nat.c (gdbcore.h): Remove include.
+	(regset.h): Likewise.
+	(nat/linux-btrace.h): Likewise.
+	(btrace.h): Likewise.
+	(gdb_assert.h): Likewise.
+	(string.h): Likewise.
+	(sys/uio.h): Likewise.
+	(sys/debugreg.h): Likewise.
+	(sys/syscall.h): Likewise.
+	(sys/procfs.h): Likewise.
+	(sys/user.h): Likewise.
+	(asm/ptrace.h): Likewise.
+	(i386-nat.h): Likewise.
+	* i386-linux-nat.c (i386-nat.h): Likewise.
+	(regset.h): Likewise.
+	(target.h): Likewise.
+	(linux-nat.h): Likewise.
+	(nat/linux-btrace.h): Likewise.
+	(btrace.h): Likewise.
+	(gdb_assert.h): Likewise.
+	(string.h): Likewise.
+	(sys/uio.h): Likewise.
+	(sys/user.h): Likewise.
+	(sys/procfs.h): Likewise.
+	(sys/reg.h): Likewise.
+	(sys/debugreg.h): Likewise.
+	(ORIG_EAX): Remove definition.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
 	* i386-linux-nat.h: New file.
 	* x86-linux-nat.h: Likewise.
 	* x86-linux-nat.c: Likewise.

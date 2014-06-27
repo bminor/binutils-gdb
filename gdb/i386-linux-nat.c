@@ -18,46 +18,19 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "i386-nat.h"
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
-#include "regset.h"
-#include "target.h"
-#include "linux-nat.h"
-#include "nat/linux-btrace.h"
-#include "btrace.h"
-
-#include "gdb_assert.h"
-#include <string.h>
 #include "elf/common.h"
-#include <sys/uio.h>
 #include <sys/ptrace.h>
-#include <sys/user.h>
-#include <sys/procfs.h>
-
-#ifdef HAVE_SYS_REG_H
-#include <sys/reg.h>
-#endif
-
-#ifndef ORIG_EAX
-#define ORIG_EAX -1
-#endif
-
-#ifdef HAVE_SYS_DEBUGREG_H
-#include <sys/debugreg.h>
-#endif
-
-/* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
+#include "gdb_proc_service.h"
 
+#include "x86-linux-nat.h"
+#include "i386-linux-nat.h"
 #include "i387-tdep.h"
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
-
-/* Defines ps_err_e, struct ps_prochandle.  */
-#include "gdb_proc_service.h"
-
 #include "i386-xstate.h"
 
 #include "x86-linux-nat.h"

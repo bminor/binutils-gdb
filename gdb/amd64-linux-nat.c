@@ -20,42 +20,20 @@
 
 #include "defs.h"
 #include "inferior.h"
-#include "gdbcore.h"
 #include "regcache.h"
-#include "regset.h"
-#include "linux-nat.h"
-#include "amd64-linux-tdep.h"
-#include "nat/linux-btrace.h"
-#include "btrace.h"
-
-#include "gdb_assert.h"
-#include <string.h>
 #include "elf/common.h"
-#include <sys/uio.h>
 #include <sys/ptrace.h>
-#include <sys/debugreg.h>
-#include <sys/syscall.h>
-#include <sys/procfs.h>
-#include <sys/user.h>
 #include <asm/prctl.h>
-/* FIXME ezannoni-2003-07-09: we need <sys/reg.h> to be included after
-   <asm/ptrace.h> because the latter redefines FS and GS for no apparent
-   reason, and those definitions don't match the ones that libpthread_db
-   uses, which come from <sys/reg.h>.  */
-/* ezannoni-2003-07-09: I think this is fixed.  The extraneous defs have
-   been removed from ptrace.h in the kernel.  However, better safe than
-   sorry.  */
-#include <asm/ptrace.h>
 #include <sys/reg.h>
+#include "gregset.h"
 #include "gdb_proc_service.h"
 
-/* Prototypes for supply_gregset etc.  */
-#include "gregset.h"
-
-#include "amd64-tdep.h"
-#include "i386-linux-tdep.h"
 #include "amd64-nat.h"
-#include "i386-nat.h"
+#include "linux-nat.h"
+#include "x86-linux-nat.h"
+#include "amd64-tdep.h"
+#include "amd64-linux-tdep.h"
+#include "i386-linux-tdep.h"
 #include "i386-xstate.h"
 
 #include "x86-linux-nat.h"
