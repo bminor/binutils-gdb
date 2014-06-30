@@ -1,3 +1,11 @@
+2014-06-30  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.base/constvars.c (violent, violet, vips, virgen, vulgar,
+	vulture, vilify, villar): New volatile array constants.
+	(vindictive, vegetation): New const volatile array constants.
+	* gdb.base/volatile.exp: Test volatile and const volatile array
+	types.
+
 2014-06-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/watchpoint-reuse-slot.exp: Handle the case that the

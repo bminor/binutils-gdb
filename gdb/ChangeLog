@@ -1,3 +1,9 @@
+2014-07-01  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (add_array_cv_type): New function.
+	(read_tag_const_type): Call add_array_cv_type for TYPE_CODE_ARRAY.
+	(read_tag_volatile_type): Likewise.
+
 2014-07-01  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (add_catch_command): Use cmd_sfunc_ftype.

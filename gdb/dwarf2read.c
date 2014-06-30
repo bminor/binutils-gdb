@@ -14098,6 +14098,36 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
+/* Add the given cv-qualifiers to the element type of the array.  GCC
+   outputs DWARF type qualifiers that apply to an array, not the
+   element type.  But GDB relies on the array element type to carry
+   the cv-qualifiers.  This mimics section 6.7.3 of the C99
+   specification.  */
+
+static struct type *
+add_array_cv_type (struct die_info *die, struct dwarf2_cu *cu,
+		   struct type *base_type, int cnst, int voltl)
+{
+  struct type *el_type, *inner_array;
+
+  base_type = copy_type (base_type);
+  inner_array = base_type;
+
+  while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
+    {
+      TYPE_TARGET_TYPE (inner_array) =
+	copy_type (TYPE_TARGET_TYPE (inner_array));
+      inner_array = TYPE_TARGET_TYPE (inner_array);
+    }
+
+  el_type = TYPE_TARGET_TYPE (inner_array);
+  cnst |= TYPE_CONST (el_type);
+  voltl |= TYPE_VOLATILE (el_type);
+  TYPE_TARGET_TYPE (inner_array) = make_cv_type (cnst, voltl, el_type, NULL);
+
+  return set_die_type (die, base_type, cu);
+}
+
 static struct type *
 read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -14113,25 +14143,7 @@ read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
   /* In case the const qualifier is applied to an array type, the element type
      is so qualified, not the array type (section 6.7.3 of C99).  */
   if (TYPE_CODE (base_type) == TYPE_CODE_ARRAY)
-    {
-      struct type *el_type, *inner_array;
-
-      base_type = copy_type (base_type);
-      inner_array = base_type;
-
-      while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
-	{
-	  TYPE_TARGET_TYPE (inner_array) =
-	    copy_type (TYPE_TARGET_TYPE (inner_array));
-	  inner_array = TYPE_TARGET_TYPE (inner_array);
-	}
-
-      el_type = TYPE_TARGET_TYPE (inner_array);
-      TYPE_TARGET_TYPE (inner_array) =
-	make_cv_type (1, TYPE_VOLATILE (el_type), el_type, NULL);
-
-      return set_die_type (die, base_type, cu);
-    }
+    return add_array_cv_type (die, cu, base_type, 1, 0);
 
   cv_type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
   return set_die_type (die, cv_type, cu);
@@ -14148,6 +14160,12 @@ read_tag_volatile_type (struct die_info *die, struct dwarf2_cu *cu)
   cv_type = get_die_type (die, cu);
   if (cv_type)
     return cv_type;
+
+  /* In case the volatile qualifier is applied to an array type, the
+     element type is so qualified, not the array type (section 6.7.3
+     of C99).  */
+  if (TYPE_CODE (base_type) == TYPE_CODE_ARRAY)
+    return add_array_cv_type (die, cu, base_type, 0, 1);
 
   cv_type = make_cv_type (TYPE_CONST (base_type), 1, base_type, 0);
   return set_die_type (die, cv_type, cu);
