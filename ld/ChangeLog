@@ -1,3 +1,9 @@
+2014-06-30  Ulrich Drepper  <drepper@gmail.com>
+
+	* lexsup.c (parse_args): Check whether provided SONAME is empty
+	string.  If yes, warn and ignore it.  Don't overwrite valid SONAME
+	with empty string.
+
 2014-06-26  Linda Zhang  <lindasc@qq.com>
 
 	* emultempl/pe.em: Initialise insert_timestamp to true.
