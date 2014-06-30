@@ -1,3 +1,7 @@
+2014-07-08  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* infcmd.c (finish_backward): Turn internal error into normal error.
+
 2014-07-07  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17096

@@ -1573,8 +1573,7 @@ finish_backward (struct symbol *function)
   pc = get_frame_pc (get_current_frame ());
 
   if (find_pc_partial_function (pc, NULL, &func_addr, NULL) == 0)
-    internal_error (__FILE__, __LINE__,
-		    _("Finish: couldn't find function."));
+    error (_("Cannot find bounds of current function"));
 
   sal = find_pc_line (func_addr, 0);
 
