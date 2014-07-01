@@ -1,3 +1,8 @@
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (target_require_runnable): Also check record_stratum.
+	Update comment.
+
 2014-07-11  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (thumb_analyze_prologue): Break the loop if
