@@ -1,3 +1,10 @@
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h: Don't include limits.h and sys/param.h.  Don't
+	include unistd.h twice.
+	(LD_PATHMAX): Don't define.
+	* ldlang.c (lang_common): Don't use UINT_MAX.
+
 2014-07-01  Barney Stratford  <barney_stratford@fastmail.fm>
             Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
             Pitchumani Sivanupandi  <pitchumani.s@atmel.com>

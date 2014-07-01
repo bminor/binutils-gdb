@@ -5981,7 +5981,7 @@ lang_common (void)
 	  for (power = 0; power <= 4; power++)
 	    bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
 
-	  power = UINT_MAX;
+	  power = (unsigned int) -1;
 	  bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
 	}
     }
