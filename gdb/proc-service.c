@@ -81,8 +81,7 @@ core_addr_to_ps_addr (CORE_ADDR addr)
    else transfer them from the process.  Returns PS_OK for success,
    PS_ERR on failure.
 
-   This is a helper function for ps_pdread, ps_pdwrite, ps_ptread and
-   ps_ptwrite.  */
+   This is a helper function for ps_pdread and ps_pdwrite.  */
 
 static ps_err_e
 ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
@@ -104,88 +103,6 @@ ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
   return (ret == 0 ? PS_OK : PS_ERR);
 }
 
-
-/* Stop the target process PH.  */
-
-ps_err_e
-ps_pstop (gdb_ps_prochandle_t ph)
-{
-  /* The process is always stopped when under control of GDB.  */
-  return PS_OK;
-}
-
-/* Resume the target process PH.  */
-
-ps_err_e
-ps_pcontinue (gdb_ps_prochandle_t ph)
-{
-  /* Pretend we did successfully continue the process.  GDB will take
-     care of it later on.  */
-  return PS_OK;
-}
-
-/* Stop the lightweight process LWPID within the target process PH.  */
-
-ps_err_e
-ps_lstop (gdb_ps_prochandle_t ph, lwpid_t lwpid)
-{
-  /* All lightweight processes are stopped when under control of GDB.  */
-  return PS_OK;
-}
-
-/* Resume the lightweight process (LWP) LWPID within the target
-   process PH.  */
-
-ps_err_e
-ps_lcontinue (gdb_ps_prochandle_t ph, lwpid_t lwpid)
-{
-  /* Pretend we did successfully continue LWPID.  GDB will take care
-     of it later on.  */
-  return PS_OK;
-}
-
-/* Get the size of the architecture-dependent extra state registers
-   for LWP LWPID within the target process PH and return it in
-   *XREGSIZE.  */
-
-ps_err_e
-ps_lgetxregsize (gdb_ps_prochandle_t ph, lwpid_t lwpid, int *xregsize)
-{
-  /* FIXME: Not supported yet.  */
-  return PS_OK;
-}
-
-/* Get the extra state registers of LWP LWPID within the target
-   process PH and store them in XREGSET.  */
-
-ps_err_e
-ps_lgetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
-{
-  /* FIXME: Not supported yet.  */
-  return PS_OK;
-}
-
-/* Set the extra state registers of LWP LWPID within the target
-   process PH from XREGSET.  */
-
-ps_err_e
-ps_lsetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
-{
-  /* FIXME: Not supported yet.  */
-  return PS_OK;
-}
-
-/* Log (additional) diognostic information.  */
-
-void
-ps_plog (const char *fmt, ...)
-{
-  va_list args;
-
-  va_start (args, fmt);
-  vfprintf_filtered (gdb_stderr, fmt, args);
-  va_end (args);
-}
 
 /* Search for the symbol named NAME within the object named OBJ within
    the target process PH.  If the symbol is found the address of the
@@ -230,25 +147,6 @@ ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
 
 ps_err_e
 ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
-	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
-{
-  return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);
-}
-
-/* Read SIZE bytes from the target process PH at address ADDR and copy
-   them into BUF.  */
-
-ps_err_e
-ps_ptread (gdb_ps_prochandle_t ph, psaddr_t addr,
-	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
-{
-  return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 0);
-}
-
-/* Write SIZE bytes from BUF into the target process PH at address ADDR.  */
-
-ps_err_e
-ps_ptwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
   return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);

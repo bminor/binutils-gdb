@@ -1,3 +1,17 @@
+2014-07-02  Gary Benson  <gbenson@redhat.com>
+
+	* proc-service.c (ps_xfer_memory): Update comment.
+	(ps_pstop): Remove unused function.
+	(ps_pcontinue): Likewise.
+	(ps_lstop): Likewise.
+	(ps_lcontinue): Likewise.
+	(ps_lgetxregsize): Likewise.
+	(ps_lgetxregs): Likewise.
+	(ps_lsetxregs): Likewise.
+	(ps_plog): Likewise.
+	(ps_ptread): Likewise.
+	(ps_ptwrite): Likewise.
+
 2014-07-01  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2read.c (add_array_cv_type): New function.
