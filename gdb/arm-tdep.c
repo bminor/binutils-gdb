@@ -737,16 +737,11 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 		pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[regno]);
 	      }
 	}
-      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
-						   sub sp, #simm */
+      else if ((insn & 0xff80) == 0xb080)	/* sub sp, #imm */
 	{
 	  offset = (insn & 0x7f) << 2;		/* get scaled offset */
-	  if (insn & 0x80)			/* Check for SUB.  */
-	    regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
-						   -offset);
-	  else
-	    regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
-						   offset);
+	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
+						 -offset);
 	}
       else if ((insn & 0xf800) == 0xa800)	/* add Rd, sp, #imm */
 	regs[bits (insn, 8, 10)] = pv_add_constant (regs[ARM_SP_REGNUM],
@@ -3264,7 +3259,7 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	found_return = 1;
       else if (insn == 0x46bd)  /* mov sp, r7 */
 	found_stack_adjust = 1;
-      else if ((insn & 0xff00) == 0xb000)  /* add sp, imm or sub sp, imm  */
+      else if ((insn & 0xff80) == 0xb000)  /* add sp, imm */
 	found_stack_adjust = 1;
       else if ((insn & 0xfe00) == 0xbc00)  /* pop <registers> */
 	{
@@ -3324,7 +3319,7 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       if (insn2 == 0x46bd)  /* mov sp, r7 */
 	found_stack_adjust = 1;
-      else if ((insn2 & 0xff00) == 0xb000)  /* add sp, imm or sub sp, imm  */
+      else if ((insn2 & 0xff80) == 0xb000)  /* add sp, imm */
 	found_stack_adjust = 1;
       else if ((insn2 & 0xff00) == 0xbc00)  /* pop <registers> without PC */
 	found_stack_adjust = 1;

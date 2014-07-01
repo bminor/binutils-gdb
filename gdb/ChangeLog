@@ -1,3 +1,9 @@
+2014-07-11  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (thumb_analyze_prologue): Don't match instruction
+	'add sp, #imm'.
+	(thumb_in_function_epilogue_p): Don't match 'sub sp, #imm'.
+
 2014-07-11  Gary Benson  <gbenson@redhat.com>
 
 	* amd64-linux-nat.c (gdbcore.h): Remove include.
