@@ -1,3 +1,11 @@
+2014-07-02  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/entry-values.c: Define labels 'foo_start' and
+	'bar_start' at the beginning of functions 'foo' and 'bar'
+	respectively.
+	* gdb.trace/entry-values.exp: Use 'foo_start' and 'bar_start'
+	instead of 'foo' and 'bar'.
+
 2014-07-08  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/segv.exp: New.
