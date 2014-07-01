@@ -1,3 +1,8 @@
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.reverse/rerun-prec.c: New file.
+	* gdb.reverse/rerun-prec.exp: New file.
+
 2014-07-11  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/kill.c: New file.

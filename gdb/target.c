@@ -2423,10 +2423,11 @@ target_require_runnable (void)
       if (t->to_create_inferior != NULL)
 	return;
 
-      /* Do not worry about thread_stratum targets that can not
+      /* Do not worry about targets at certain strata that can not
 	 create inferiors.  Assume they will be pushed again if
 	 necessary, and continue to the process_stratum.  */
       if (t->to_stratum == thread_stratum
+	  || t->to_stratum == record_stratum
 	  || t->to_stratum == arch_stratum)
 	continue;
 
