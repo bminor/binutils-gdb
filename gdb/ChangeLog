@@ -1,3 +1,9 @@
+2014-08-13  Yao Qi  <yao@codesourcery.com>
+
+	PR build/17104
+	* configure.ac: Use local variable 'pos'.
+	* configure: Regenerated.
+
 2014-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (Changes in GDB-4.0): Move Intel MPX and Intel AVX-512 items ...
