@@ -1,5 +1,13 @@
 2014-07-01  Alan Modra  <amodra@gmail.com>
 
+	* bfd.c (struct bfd): Reorganise for better packing.  Delete
+	"ifd" field.  Make "format", "direction" and "flags" bitfields.
+	(HAS_LOAD_PAGE): Delete, renumber following flags.
+	* bfd-in2.h: Regenerate.
+	* coff-tic4x.c: Remove HAS_LOAD_PAGE from extra flags in target vecs.
+
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc_stub_type): Add ppc_stub_global_entry.
 	(struct ppc_link_hash_table): Increase size of stub_count array.
 	(build_global_entry_stubs): Emit symbol on global entry stub.

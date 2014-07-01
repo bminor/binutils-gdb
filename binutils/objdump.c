@@ -2629,7 +2629,6 @@ dump_bfd_header (bfd *abfd)
   PF (WP_TEXT, "WP_TEXT");
   PF (D_PAGED, "D_PAGED");
   PF (BFD_IS_RELAXABLE, "BFD_IS_RELAXABLE");
-  PF (HAS_LOAD_PAGE, "HAS_LOAD_PAGE");
   printf (_("\nstart address 0x"));
   bfd_printf_vma (abfd, abfd->start_address);
   printf ("\n");

@@ -6226,9 +6226,6 @@ enum bfd_direction
 
 struct bfd
 {
-  /* A unique identifier of the BFD  */
-  unsigned int id;
-
   /* The filename the application opened the BFD with.  */
   const char *filename;
 
@@ -6251,17 +6248,17 @@ struct bfd
   /* File modified time, if mtime_set is TRUE.  */
   long mtime;
 
-  /* Reserved for an unimplemented file locking extension.  */
-  int ifd;
+  /* A unique identifier of the BFD  */
+  unsigned int id;
 
   /* The format which belongs to the BFD. (object, core, etc.)  */
-  bfd_format format;
+  ENUM_BITFIELD (bfd_format) format : 3;
 
   /* The direction with which the BFD was opened.  */
-  enum bfd_direction direction;
+  ENUM_BITFIELD (bfd_direction) direction : 2;
 
   /* Format_specific flags.  */
-  flagword flags;
+  flagword flags : 17;
 
   /* Values that may appear in the flags field of a BFD.  These also
      appear in the object_flags field of the bfd_target structure, where
@@ -6320,26 +6317,23 @@ struct bfd
      struct.  */
 #define BFD_IN_MEMORY 0x800
 
-  /* The sections in this BFD specify a memory page.  */
-#define HAS_LOAD_PAGE 0x1000
-
   /* This BFD has been created by the linker and doesn't correspond
      to any input file.  */
-#define BFD_LINKER_CREATED 0x2000
+#define BFD_LINKER_CREATED 0x1000
 
   /* This may be set before writing out a BFD to request that it
      be written using values for UIDs, GIDs, timestamps, etc. that
      will be consistent from run to run.  */
-#define BFD_DETERMINISTIC_OUTPUT 0x4000
+#define BFD_DETERMINISTIC_OUTPUT 0x2000
 
   /* Compress sections in this BFD.  */
-#define BFD_COMPRESS 0x8000
+#define BFD_COMPRESS 0x4000
 
   /* Decompress sections in this BFD.  */
-#define BFD_DECOMPRESS 0x10000
+#define BFD_DECOMPRESS 0x8000
 
   /* BFD is a dummy, for plugins.  */
-#define BFD_PLUGIN 0x20000
+#define BFD_PLUGIN 0x10000
 
   /* Flags bits to be saved in bfd_preserve_save.  */
 #define BFD_FLAGS_SAVED \
@@ -6349,6 +6343,42 @@ struct bfd
 #define BFD_FLAGS_FOR_BFD_USE_MASK \
   (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
    | BFD_PLUGIN | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT)
+
+  /* Is the file descriptor being cached?  That is, can it be closed as
+     needed, and re-opened when accessed later?  */
+  unsigned int cacheable : 1;
+
+  /* Marks whether there was a default target specified when the
+     BFD was opened. This is used to select which matching algorithm
+     to use to choose the back end.  */
+  unsigned int target_defaulted : 1;
+
+  /* ... and here: (``once'' means at least once).  */
+  unsigned int opened_once : 1;
+
+  /* Set if we have a locally maintained mtime value, rather than
+     getting it from the file each time.  */
+  unsigned int mtime_set : 1;
+
+  /* Flag set if symbols from this BFD should not be exported.  */
+  unsigned int no_export : 1;
+
+  /* Remember when output has begun, to stop strange things
+     from happening.  */
+  unsigned int output_has_begun : 1;
+
+  /* Have archive map.  */
+  unsigned int has_armap : 1;
+
+  /* Set if this is a thin archive.  */
+  unsigned int is_thin_archive : 1;
+
+  /* Set if only required symbols should be added in the link hash table for
+     this object.  Used by VMS linkers.  */
+  unsigned int selective_search : 1;
+
+  /* Set if this is the linker output BFD.  */
+  unsigned int is_linker_output : 1;
 
   /* Currently my_archive is tested before adding origin to
      anything. I believe that this can become always an add of
@@ -6374,16 +6404,20 @@ struct bfd
   /* The number of sections.  */
   unsigned int section_count;
 
+  /* A field used by _bfd_generic_link_add_archive_symbols.  This will
+     be used only for archive elements.  */
+  int archive_pass;
+
   /* Stuff only useful for object files:
      The start address.  */
   bfd_vma start_address;
 
-  /* Used for input and output.  */
-  unsigned int symcount;
-
   /* Symbol table for output BFD (with symcount entries).
      Also used by the linker to cache input BFD symbols.  */
   struct bfd_symbol  **outsymbols;
+
+  /* Used for input and output.  */
+  unsigned int symcount;
 
   /* Used for slurped dynamic symbol tables.  */
   unsigned int dynsymcount;
@@ -6405,10 +6439,6 @@ struct bfd
     /* For output BFD, the linker hash table.  */
     struct bfd_link_hash_table *hash;
   } link;
-
-  /* A field used by _bfd_generic_link_add_archive_symbols.  This will
-     be used only for archive elements.  */
-  int archive_pass;
 
   /* Used by the back end to hold private data.  */
   union
@@ -6460,42 +6490,6 @@ struct bfd
      struct objalloc *, but we use void * to avoid requiring the inclusion
      of objalloc.h.  */
   void *memory;
-
-  /* Is the file descriptor being cached?  That is, can it be closed as
-     needed, and re-opened when accessed later?  */
-  unsigned int cacheable : 1;
-
-  /* Marks whether there was a default target specified when the
-     BFD was opened. This is used to select which matching algorithm
-     to use to choose the back end.  */
-  unsigned int target_defaulted : 1;
-
-  /* ... and here: (``once'' means at least once).  */
-  unsigned int opened_once : 1;
-
-  /* Set if we have a locally maintained mtime value, rather than
-     getting it from the file each time.  */
-  unsigned int mtime_set : 1;
-
-  /* Flag set if symbols from this BFD should not be exported.  */
-  unsigned int no_export : 1;
-
-  /* Remember when output has begun, to stop strange things
-     from happening.  */
-  unsigned int output_has_begun : 1;
-
-  /* Have archive map.  */
-  unsigned int has_armap : 1;
-
-  /* Set if this is a thin archive.  */
-  unsigned int is_thin_archive : 1;
-
-  /* Set if only required symbols should be added in the link hash table for
-     this object.  Used by VMS linkers.  */
-  unsigned int selective_search : 1;
-
-  /* Set if this is the linker output BFD.  */
-  unsigned int is_linker_output : 1;
 };
 
 /* See note beside bfd_set_section_userdata.  */
