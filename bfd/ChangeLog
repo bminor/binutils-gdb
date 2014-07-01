@@ -1,5 +1,13 @@
 2014-07-01  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc_stub_type): Add ppc_stub_global_entry.
+	(struct ppc_link_hash_table): Increase size of stub_count array.
+	(build_global_entry_stubs): Emit symbol on global entry stub.
+	(ppc64_elf_build_stubs): NULL check htab->brlt.  Add global entry
+	stub stats.
+
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (abiversion, set_abiversion): Move earlier.
 	(ppc64_elf_branch_reloc): Adjust addend for ELFv2 local offset.
 	(ppc64_elf_set_toc): Set ".TOC." symbol value when using

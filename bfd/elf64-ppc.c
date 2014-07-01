@@ -3785,7 +3785,8 @@ enum ppc_stub_type {
   ppc_stub_plt_branch,
   ppc_stub_plt_branch_r2off,
   ppc_stub_plt_call,
-  ppc_stub_plt_call_r2save
+  ppc_stub_plt_call_r2save,
+  ppc_stub_global_entry
 };
 
 struct ppc_stub_hash_entry {
@@ -3959,7 +3960,7 @@ struct ppc_link_hash_table
   bfd_size_type got_reli_size;
 
   /* Statistics.  */
-  unsigned long stub_count[ppc_stub_plt_call_r2save];
+  unsigned long stub_count[ppc_stub_global_entry];
 
   /* Number of stubs against global syms.  */
   unsigned long stub_globals;
@@ -12491,6 +12492,32 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	    htab->stub_error = TRUE;
 	  }
 
+	htab->stub_count[ppc_stub_global_entry - 1] += 1;
+	if (htab->params->emit_stub_syms)
+	  {
+	    size_t len = strlen (h->root.root.string);
+	    char *name = bfd_malloc (sizeof "12345678.global_entry." + len);
+
+	    if (name == NULL)
+	      return FALSE;
+
+	    sprintf (name, "%08x.global_entry.%s", s->id, h->root.root.string);
+	    h = elf_link_hash_lookup (&htab->elf, name, TRUE, FALSE, FALSE);
+	    if (h == NULL)
+	      return FALSE;
+	    if (h->root.type == bfd_link_hash_new)
+	      {
+		h->root.type = bfd_link_hash_defined;
+		h->root.u.def.section = s;
+		h->root.u.def.value = p - s->contents;
+		h->ref_regular = 1;
+		h->def_regular = 1;
+		h->ref_regular_nonweak = 1;
+		h->forced_local = 1;
+		h->non_elf = 0;
+	      }
+	  }
+
 	if (PPC_HA (off) != 0)
 	  {
 	    bfd_put_32 (s->owner, ADDIS_R12_R12 | PPC_HA (off), p);
@@ -12669,7 +12696,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	elf_link_hash_traverse (&htab->elf, build_global_entry_stubs, info);
     }
 
-  if (htab->brlt->size != 0)
+  if (htab->brlt != NULL && htab->brlt->size != 0)
     {
       htab->brlt->contents = bfd_zalloc (htab->brlt->owner,
 					 htab->brlt->size);
@@ -12843,7 +12870,8 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 			 "  long branch  %lu\n"
 			 "  long toc adj %lu\n"
 			 "  plt call     %lu\n"
-			 "  plt call toc %lu"),
+			 "  plt call toc %lu\n"
+			 "  global entry %lu"),
 	       stub_sec_count,
 	       stub_sec_count == 1 ? "" : "s",
 	       htab->stub_count[ppc_stub_long_branch - 1],
@@ -12851,7 +12879,8 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	       htab->stub_count[ppc_stub_plt_branch - 1],
 	       htab->stub_count[ppc_stub_plt_branch_r2off - 1],
 	       htab->stub_count[ppc_stub_plt_call - 1],
-	       htab->stub_count[ppc_stub_plt_call_r2save - 1]);
+	       htab->stub_count[ppc_stub_plt_call_r2save - 1],
+	       htab->stub_count[ppc_stub_global_entry - 1]);
     }
   return TRUE;
 }

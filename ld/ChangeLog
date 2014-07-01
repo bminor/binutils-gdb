@@ -1,5 +1,12 @@
 2014-07-01  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/ppc64elf.em (stub_added): Delete.
+	(gld${EMULATION_NAME}_finish): Call ppc64_elf_build_stubs even when
+	none of the usual stubs have been added.  Only change entry_section
+	for ELFv1.
+
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
 	* sysdep.h: Don't include limits.h and sys/param.h.  Don't
 	include unistd.h twice.
 	(LD_PATHMAX): Don't define.
