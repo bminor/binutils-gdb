@@ -33,13 +33,8 @@ static bfd_boolean debug_relax = FALSE;
 static bfd_boolean debug_stubs = FALSE;
 
 static bfd_reloc_status_type
-bfd_elf_avr_diff_reloc (bfd *abfd,
-              arelent *reloc_entry,
-              asymbol *symbol,
-              void *data,
-              asection *input_section,
-              bfd *output_bfd,
-              char **error_message);
+bfd_elf_avr_diff_reloc (bfd *, arelent *, asymbol *, void *,
+			asection *, bfd *, char **);
 
 /* Hash table initialization and handling.  Code is taken from the hppa port
    and adapted to the needs of AVR.  */
@@ -566,45 +561,59 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 0xffffff,		/* src_mask */
 	 0xffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-  HOWTO (R_AVR_DIFF8,      /* type */
-     0,             /* rightshift */
-     0, 			/* size (0 = byte, 1 = short, 2 = long) */
-     8, 			/* bitsize */
-     FALSE,         /* pc_relative */
-     0,             /* bitpos */
-     complain_overflow_bitfield, /* complain_on_overflow */
-     bfd_elf_avr_diff_reloc, /* special_function */
-     "R_AVR_DIFF8",     /* name */
-     FALSE,         /* partial_inplace */
-     0,             /* src_mask */
-     0xff,          /* dst_mask */
-     FALSE),        /* pcrel_offset */
-  HOWTO (R_AVR_DIFF16,     /* type */
-     0,             /* rightshift */
-     1,			/* size (0 = byte, 1 = short, 2 = long) */
-     16,			/* bitsize */
-     FALSE,         /* pc_relative */
-     0,             /* bitpos */
-     complain_overflow_bitfield, /* complain_on_overflow */
-     bfd_elf_avr_diff_reloc, /* special_function */
-     "R_AVR_DIFF16",     /* name */
-     FALSE,         /* partial_inplace */
-     0,             /* src_mask */
-     0xffff,        /* dst_mask */
-     FALSE),        /* pcrel_offset */
-  HOWTO (R_AVR_DIFF32,    /* type */
-     0,             /* rightshift */
-     2,         /* size (0 = byte, 1 = short, 2 = long) */
-     32,        /* bitsize */
-     FALSE,         /* pc_relative */
-     0,             /* bitpos */
-     complain_overflow_bitfield, /* complain_on_overflow */
-     bfd_elf_avr_diff_reloc, /* special_function */
-     "R_AVR_DIFF32",     /* name */
-     FALSE,         /* partial_inplace */
-     0,             /* src_mask */
-     0xffffffff,    /* dst_mask */ 
-     FALSE)         /* pcrel_offset */
+  HOWTO (R_AVR_DIFF8,		/* type */
+	 0,             	/* rightshift */
+	 0, 			/* size (0 = byte, 1 = short, 2 = long) */
+	 8, 			/* bitsize */
+	 FALSE,         	/* pc_relative */
+	 0,             	/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_avr_diff_reloc, /* special_function */
+	 "R_AVR_DIFF8",     	/* name */
+	 FALSE,         	/* partial_inplace */
+	 0,             	/* src_mask */
+	 0xff,          	/* dst_mask */
+	 FALSE),        	/* pcrel_offset */
+  HOWTO (R_AVR_DIFF16,  	/* type */
+	 0,             	/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,         	/* pc_relative */
+	 0,             	/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_avr_diff_reloc,/* special_function */
+	 "R_AVR_DIFF16",     	/* name */
+	 FALSE,         	/* partial_inplace */
+	 0,             	/* src_mask */
+	 0xffff,        	/* dst_mask */
+	 FALSE),        	/* pcrel_offset */
+  HOWTO (R_AVR_DIFF32,  	/* type */
+	 0,             	/* rightshift */
+	 2,         		/* size (0 = byte, 1 = short, 2 = long) */
+	 32,        		/* bitsize */
+	 FALSE,         	/* pc_relative */
+	 0,             	/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_avr_diff_reloc,/* special_function */
+	 "R_AVR_DIFF32",     	/* name */
+	 FALSE,         	/* partial_inplace */
+	 0,             	/* src_mask */
+	 0xffffffff,    	/* dst_mask */
+	 FALSE),        	/* pcrel_offset */
+  /* 7 bit immediate for LDS/STS in Tiny core.  */
+  HOWTO (R_AVR_LDS_STS_16,  /* type */
+	 0,                     /* rightshift */
+	 1,                     /* size (0 = byte, 1 = short, 2 = long) */
+	 7,                     /* bitsize */
+	 FALSE,                 /* pc_relative */
+	 0,                     /* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_AVR_LDS_STS_16",    /* name */
+	 FALSE,                 /* partial_inplace */
+	 0xffff,                /* src_mask */
+	 0xffff,                /* dst_mask */
+	 FALSE)                 /* pcrel_offset */
 };
 
 /* Map BFD reloc types to AVR ELF reloc types.  */
@@ -649,7 +658,8 @@ static const struct avr_reloc_map avr_reloc_map[] =
   { BFD_RELOC_AVR_8_HLO,            R_AVR_8_HLO8 },
   { BFD_RELOC_AVR_DIFF8,            R_AVR_DIFF8 },
   { BFD_RELOC_AVR_DIFF16,           R_AVR_DIFF16 },
-  { BFD_RELOC_AVR_DIFF32,           R_AVR_DIFF32 }
+  { BFD_RELOC_AVR_DIFF32,           R_AVR_DIFF32 },
+  { BFD_RELOC_AVR_LDS_STS_16,       R_AVR_LDS_STS_16}
 };
 
 /* Meant to be filled one day with the wrap around address for the
@@ -1227,6 +1237,17 @@ avr_final_link_relocate (reloc_howto_type *                 howto,
       r = bfd_reloc_ok;
       break;
 
+   case R_AVR_LDS_STS_16:
+      contents += rel->r_offset;
+      srel = (bfd_signed_vma) relocation + rel->r_addend;
+      if ((srel & 0xFFFF) < 0x40 || (srel & 0xFFFF) > 0xbf)
+        return bfd_reloc_outofrange;
+      srel = srel & 0x7f;
+      x = bfd_get_16 (input_bfd, contents);
+      x |= (srel & 0x0f) | ((srel & 0x30) << 5) | ((srel & 0x40) << 2);
+      bfd_put_16 (input_bfd, x, contents);
+      break;
+
     default:
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
@@ -1439,6 +1460,10 @@ bfd_elf_avr_final_write_processing (bfd *abfd,
     case bfd_mach_avrxmega7:
       val = E_AVR_MACH_XMEGA7;
       break;
+
+   case bfd_mach_avrtiny:
+      val = E_AVR_MACH_AVRTINY;
+      break;
     }
 
   elf_elfheader (abfd)->e_machine = EM_AVR;
@@ -1529,6 +1554,10 @@ elf32_avr_object_p (bfd *abfd)
 	case E_AVR_MACH_XMEGA7:
 	  e_set = bfd_mach_avrxmega7;
 	  break;
+
+    case E_AVR_MACH_AVRTINY:
+      e_set = bfd_mach_avrtiny;
+      break;
 	}
     }
   return bfd_default_set_arch_mach (abfd, bfd_arch_avr,
@@ -1545,9 +1574,9 @@ elf32_avr_is_diff_reloc (Elf_Internal_Rela *irel)
           || ELF32_R_TYPE (irel->r_info) == R_AVR_DIFF32);
 }
 
-/* Reduce the diff value written in the section by count if the shrinked 
-   insn address happens to fall between the two symbols for which this 
-   diff reloc was emitted. */
+/* Reduce the diff value written in the section by count if the shrinked
+   insn address happens to fall between the two symbols for which this
+   diff reloc was emitted.  */
 
 static void
 elf32_avr_adjust_diff_reloc_value (bfd *abfd,
@@ -1602,11 +1631,11 @@ elf32_avr_adjust_diff_reloc_value (bfd *abfd,
   bfd_vma end_address = symval + irel->r_addend;
   bfd_vma start_address = end_address - x;
 
-  /* Reduce the diff value by count bytes and write it back into section 
+  /* Reduce the diff value by count bytes and write it back into section
     contents. */
 
-  if (shrinked_insn_address >= start_address && 
-      shrinked_insn_address <= end_address)
+  if (shrinked_insn_address >= start_address
+      && shrinked_insn_address <= end_address)
   {
     switch (ELF32_R_TYPE (irel->r_info))
     {
@@ -1949,8 +1978,8 @@ elf32_avr_relax_section (bfd *abfd,
       bfd_vma symval;
 
       if (   ELF32_R_TYPE (irel->r_info) != R_AVR_13_PCREL
-	     && ELF32_R_TYPE (irel->r_info) != R_AVR_7_PCREL
-	     && ELF32_R_TYPE (irel->r_info) != R_AVR_CALL)
+	  && ELF32_R_TYPE (irel->r_info) != R_AVR_7_PCREL
+	  && ELF32_R_TYPE (irel->r_info) != R_AVR_CALL)
         continue;
 
       /* Get the section contents if we haven't done so already.  */
@@ -2377,7 +2406,7 @@ elf32_avr_relax_section (bfd *abfd,
 			  {
 			    Elf_Internal_Rela *rel;
 			    Elf_Internal_Rela *relend;
-              
+
 			    rel = elf_section_data (isec)->relocs;
 			    if (rel == NULL)
 			      rel = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL, TRUE);

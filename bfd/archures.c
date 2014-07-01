@@ -410,6 +410,7 @@ DESCRIPTION
 .#define bfd_mach_avr5		5
 .#define bfd_mach_avr51		51
 .#define bfd_mach_avr6		6
+.#define bfd_mach_avrtiny   100
 .#define bfd_mach_avrxmega1 101
 .#define bfd_mach_avrxmega2 102
 .#define bfd_mach_avrxmega3 103

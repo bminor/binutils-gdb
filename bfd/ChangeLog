@@ -1,3 +1,21 @@
+2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
+            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+            Soundararajan  <Sounderarajan.D@atmel.com>
+
+	* archures.c: Add avrtiny architecture for avr target.
+	* cpu-avr.c (arch_info_struct): Add avrtiny arch info.
+	* elf32-avr.c (elf_avr_howto_table): New relocation R_AVR_LDS_STS_16
+	added for 16 bit LDS/STS instruction of avrtiny arch.
+	(avr_reloc_map): Reloc R_AVR_LDS_STS_16 is mapped to
+	BFD_RELOC_AVR_LDS_STS_16.
+	(bfd_elf_avr_final_write_processing): Select machine number
+	avrtiny arch.
+	(elf32_avr_object_p): Set machine number for avrtiny arch.
+	* reloc.c: Add documentation for BFD_RELOC_AVR_LDS_STS_16 reloc.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2014-06-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16949

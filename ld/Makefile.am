@@ -193,6 +193,7 @@ ALL_EMULATION_SOURCES = \
 	eavrxmega5.c \
 	eavrxmega6.c \
 	eavrxmega7.c \
+	eavrtiny.c   \
 	ecoff_i860.c \
 	ecoff_sparc.c \
 	ecrisaout.c \
@@ -846,6 +847,10 @@ eavrxmega6.c: $(srcdir)/emulparams/avrxmega6.sh \
 
 eavrxmega7.c: $(srcdir)/emulparams/avrxmega7.sh \
   $(srcdir)/emultempl/avrelf.em $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+
+eavrtiny.c: $(srcdir)/emulparams/avrtiny.sh \
+  $(srcdir)/emultempl/avrelf.em $(ELF_DEPS) $(srcdir)/scripttempl/avrtiny.sc \
   ${GEN_DEPENDS}
 
 ecoff_i860.c: $(srcdir)/emulparams/coff_i860.sh \

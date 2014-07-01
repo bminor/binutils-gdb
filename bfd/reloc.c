@@ -4790,6 +4790,11 @@ ENUMDOC
   second symbol so the linker can determine whether to adjust the field
   value.
 ENUM
+  BFD_RELOC_AVR_LDS_STS_16
+ENUMDOC
+  This is a 7 bit reloc for the AVR that stores SRAM address for 16bit
+  lds and sts instructions supported only tiny core.
+ENUM
   BFD_RELOC_RL78_NEG8
 ENUMX
   BFD_RELOC_RL78_NEG16

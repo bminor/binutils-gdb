@@ -1,3 +1,19 @@
+2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
+            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+            Soundararajan  <Sounderarajan.D@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add avrtiny arch.
+	Add avrtiny arch devices attiny4, attiny5, attiny9, attiny10, attiny20
+	and attiny40.
+	(md_show_usage): Add avrtiny arch in usage message.
+	(avr_operand): validate and issue error for invalid register for avrtiny.
+	add new reloc exp for 16 bit lds/sts instruction.
+	(md_apply_fix): check 16 bit lds/sts operand for out of range and encode.
+	(md_assemble): check ISA for arch and issue diagnostic.
+	* NEWS: Mention new support.
+	* doc/c-avr.texi: Document support for avrtiny architecture.
+
 2014-06-27  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-macho.c (obj_mach_o_set_symbol_qualifier): Don't set

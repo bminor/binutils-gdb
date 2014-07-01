@@ -1,3 +1,17 @@
+2014-07-01  Barney Stratford  <barney_stratford@fastmail.fm>
+            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+            Soundararajan  <Sounderarajan.D@atmel.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add avrtiny emulation source.
+	(eavrtiny.c): Add rules for avrtiny emulation source.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add avrtiny to avr target emulations.
+	* scripttempl/avrtiny.sc: New file.  Linker script template for
+	avrtiny arch.
+	* emulparams/avrtiny.sh: New file.  Emulation parameters for
+	avrtiny arch.
+
 2014-06-30  Ulrich Drepper  <drepper@gmail.com>
 
 	* lexsup.c (parse_args): Check whether provided SONAME is empty
