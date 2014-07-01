@@ -1,3 +1,9 @@
+2014-08-13  Yao Qi  <yao@codesourcery.com>
+
+	PR build/17104
+	* configure.ac: Use local variable 'pos'.
+	* configure: Regenerated.
+
 2014-08-11  Doug Evans  <dje@google.com>
 
 	* solib.c (solib_read_symbols): Delete "Loaded symbols for ..."
