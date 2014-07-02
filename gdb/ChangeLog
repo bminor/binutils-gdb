@@ -1,5 +1,17 @@
 2014-07-14  Tom Tromey  <tromey@redhat.com>
 
+	PR exp/17106:
+	* gdbtypes.c (is_dynamic_type_internal): New function, from
+	is_dynamic_type.
+	(is_dynamic_type): Rewrite.
+	(resolve_dynamic_union): Use resolve_dynamic_type_internal.
+	(resolve_dynamic_struct): Likewise.
+	(resolve_dynamic_type_internal): New function, from
+	resolve_dynamic_type.
+	(resolve_dynamic_type): Rewrite.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
 	* target.c (target_require_runnable): Also check record_stratum.
 	Update comment.
 
