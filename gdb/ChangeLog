@@ -1,5 +1,10 @@
 2014-07-11  Yao Qi  <yao@codesourcery.com>
 
+	* arm-tdep.c (thumb_analyze_prologue): Break the loop if
+	thumb_instruction_restores_sp return true.
+
+2014-07-11  Yao Qi  <yao@codesourcery.com>
+
 	* arm-tdep.c (thumb_instruction_restores_sp): New function.
 	(thumb_in_function_epilogue_p): Call
 	thumb_instruction_restores_sp.

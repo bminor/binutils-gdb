@@ -754,6 +754,11 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
 						 -offset);
 	}
+      else if (thumb_instruction_restores_sp (insn))
+	{
+	  /* Don't scan past the epilogue.  */
+	  break;
+	}
       else if ((insn & 0xf800) == 0xa800)	/* add Rd, sp, #imm */
 	regs[bits (insn, 8, 10)] = pv_add_constant (regs[ARM_SP_REGNUM],
 						    (insn & 0xff) << 2);
