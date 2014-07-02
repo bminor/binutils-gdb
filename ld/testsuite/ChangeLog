@@ -1,3 +1,11 @@
+2014-07-02  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/ambiguousv1.d: Match symbol table too.
+	* ld-powerpc/ambiguousv2.d: Likewise.
+	* ld-powerpc/ambiguousv1b.d: New.
+	* ld-powerpc/ambiguousv2b.d: New.
+	* ld-powerpc/powerpc.exp: Run new tests.
+
 2014-06-25  Kyle McMartin  <kyle@redhat.com>
 
 	* ld-arm/tls-gdierelax2.d: Fix expected offsets.

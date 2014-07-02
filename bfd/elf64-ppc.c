@@ -6993,9 +6993,21 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	{
 	  h->plt.plist = NULL;
 	  h->needs_plt = 0;
+	  h->pointer_equality_needed = 0;
 	}
       else if (abiversion (info->output_bfd) == 2)
 	{
+	  /* Taking a function's address in a read/write section
+	     doesn't require us to define the function symbol in the
+	     executable on a global entry stub.  A dynamic reloc can
+	     be used instead.  */
+	  if (h->pointer_equality_needed
+	      && !readonly_dynrelocs (h))
+	    {
+	      h->pointer_equality_needed = 0;
+	      h->non_got_ref = 0;
+	    }
+
 	  /* After adjust_dynamic_symbol, non_got_ref set in the
 	     non-shared case means that we have allocated space in
 	     .dynbss for the symbol and thus dyn_relocs for this
@@ -7005,10 +7017,10 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     relocations against this symbol to the PLT entry.  Allow
 	     dynamic relocs if the reference is weak, and the dynamic
 	     relocs will not cause text relocation.  */
-	  if (!h->ref_regular_nonweak
-	      && h->non_got_ref
-	      && h->type != STT_GNU_IFUNC
-	      && !readonly_dynrelocs (h))
+	  else if (!h->ref_regular_nonweak
+		   && h->non_got_ref
+		   && h->type != STT_GNU_IFUNC
+		   && !readonly_dynrelocs (h))
 	    h->non_got_ref = 0;
 
 	  /* If making a plt entry, then we don't need copy relocs.  */
