@@ -490,7 +490,7 @@ class Sized_pluginobj : public Pluginobj
 
   // Get the name of a section.
   std::string
-  do_section_name(unsigned int shndx);
+  do_section_name(unsigned int shndx) const;
 
   // Return a view of the contents of a section.
   const unsigned char*

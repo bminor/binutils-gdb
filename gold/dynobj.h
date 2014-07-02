@@ -203,7 +203,7 @@ class Sized_dynobj : public Dynobj
 
   // Get the name of a section.
   std::string
-  do_section_name(unsigned int shndx)
+  do_section_name(unsigned int shndx) const
   { return this->elf_file_.section_name(shndx); }
 
   // Return a view of the contents of a section.  Set *PLEN to the

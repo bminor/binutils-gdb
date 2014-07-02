@@ -1,5 +1,19 @@
 2014-09-02  Cary Coutant  <ccoutant@google.com>
 
+	* dwp.cc (Sized_relobj_dwo::do_section_name): Add const attribute.
+	* dynobj.h (Sized_dynobj::do_section_name): Likewise.
+	* incremental.cc (Sized_relobj_incr::do_section_name): Likewise.
+	(Sized_incr_dynobj::do_section_name): Likewise.
+	* incremental.h (Sized_relobj_incr::do_section_name): Likewise.
+	(Sized_incr_dynobj::do_section_name): Likewise.
+	* object.h (Object::section_name): Likewise.
+	(Object::do_section_name): Likewise.
+	(Sized_relobj_file::do_section_name): Likewise.
+	* plugin.cc (Sized_pluginobj::do_section_name): Likewise.
+	* plugin.h (Sized_pluginobj::do_section_name): Likewise.
+
+2014-09-02  Cary Coutant  <ccoutant@google.com>
+
 	PR gold/17005
 	* ehframe.cc (Fde::write): Add output_offset parameter.
 	(Cie::write): Likewise.

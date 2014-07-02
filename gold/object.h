@@ -507,7 +507,7 @@ class Object
 
   // Return the name of a section given a section index.
   std::string
-  section_name(unsigned int shndx)
+  section_name(unsigned int shndx) const
   { return this->do_section_name(shndx); }
 
   // Return the section flags given a section index.
@@ -822,7 +822,7 @@ class Object
 
   // Get the name of a section--implemented by child class.
   virtual std::string
-  do_section_name(unsigned int shndx) = 0;
+  do_section_name(unsigned int shndx) const = 0;
 
   // Get section flags--implemented by child class.
   virtual uint64_t
@@ -2315,7 +2315,7 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 
   // Get the name of a section.
   std::string
-  do_section_name(unsigned int shndx)
+  do_section_name(unsigned int shndx) const
   { return this->elf_file_.section_name(shndx); }
 
   // Return the location of the contents of a section.
