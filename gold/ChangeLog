@@ -1,3 +1,25 @@
+2014-09-02  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17005
+	* ehframe.cc (Fde::write): Add output_offset parameter.
+	(Cie::write): Likewise.
+	(Eh_frame::set_final_data_size): Account for offset within output
+	section.
+	(Eh_frame::do_sized_write): Likewise.
+	* ehframe.h (Fde::write): Add output_offset parameter.
+	(Cie::write): Likewise.
+	* output.cc (Output_section::Input_section_sort_entry): Remove
+	section_has_name_; add output_section_name parameter. Use
+	output section name for non-input sections.
+	(Output_section::Input_section_sort_entry::section_has_name): Remove.
+	(Output_section::Input_section_sort_entry::section_has_name_): Remove.
+	(Output_section::Input_section_sort_compare): Remove logic for
+	sections without names.
+	(Output_section::Input_section_sort_init_fini_compare): Likewise.
+	(Output_section::Input_section_sort_section_prefix_special_ordering_compare):
+	Likewise.
+	(Output_section::Input_section_sort_section_name_compare): Likewise.
+
 2014-08-29 Han Shen <shenhan@google.com>
 	   Jing Yu <jingyu@google.com>
 
