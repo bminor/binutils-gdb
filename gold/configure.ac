@@ -199,6 +199,7 @@ for targ in $target $canon_targets; do
 	default_big_endian=$targ_big_endian
 	default_osabi=$targ_osabi
 
+	AM_CONDITIONAL(DEFAULT_TARGET_AARCH64, test "$targ_obj" = "aarch64")
 	AM_CONDITIONAL(DEFAULT_TARGET_ARM, test "$targ_obj" = "arm")
 	AM_CONDITIONAL(DEFAULT_TARGET_I386, test "$targ_obj" = "i386")
 	AM_CONDITIONAL(DEFAULT_TARGET_POWERPC, test "$targ_obj" = "powerpc")

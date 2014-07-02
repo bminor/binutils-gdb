@@ -268,6 +268,7 @@ enum EM
   EM_UNICORE = 110,
   EM_ALTERA_NIOS2 = 113,
   EM_CRX = 114,
+  EM_AARCH64 = 183,
   EM_TILEGX = 191,
   // The Morph MT.
   EM_MT = 0x2530,
@@ -406,6 +407,9 @@ enum SHT
   // Section contains miscellaneous options.
   SHT_MIPS_OPTIONS = 0x7000000d,
 
+  // AARCH64-specific section type.
+  SHT_AARCH64_ATTRIBUTES = 0x70000003,
+
   // Link editor is to sort the entries in this section based on the
   // address specified in the associated symbol table entry.
   SHT_ORDERED = 0x7fffffff
@@ -490,7 +494,11 @@ enum PT
   // Runtime procedure table.
   PT_MIPS_RTPROC = 0x70000001,
   // .MIPS.options section.
-  PT_MIPS_OPTIONS = 0x70000002
+  PT_MIPS_OPTIONS = 0x70000002,
+  // Platform architecture compatibility information
+  PT_AARCH64_ARCHEXT = 0x70000000,
+  // Exception unwind tables
+  PT_AARCH64_UNWIND = 0x70000001
 };
 
 // The valid bit flags found in the Phdr p_flags field.

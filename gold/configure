@@ -698,6 +698,8 @@ DEFAULT_TARGET_I386_FALSE
 DEFAULT_TARGET_I386_TRUE
 DEFAULT_TARGET_ARM_FALSE
 DEFAULT_TARGET_ARM_TRUE
+DEFAULT_TARGET_AARCH64_FALSE
+DEFAULT_TARGET_AARCH64_TRUE
 PLUGINS_FALSE
 PLUGINS_TRUE
 THREADS_FALSE
@@ -3432,6 +3434,14 @@ for targ in $target $canon_targets; do
 	default_size=$targ_size
 	default_big_endian=$targ_big_endian
 	default_osabi=$targ_osabi
+
+	 if test "$targ_obj" = "aarch64"; then
+  DEFAULT_TARGET_AARCH64_TRUE=
+  DEFAULT_TARGET_AARCH64_FALSE='#'
+else
+  DEFAULT_TARGET_AARCH64_TRUE='#'
+  DEFAULT_TARGET_AARCH64_FALSE=
+fi
 
 	 if test "$targ_obj" = "arm"; then
   DEFAULT_TARGET_ARM_TRUE=
@@ -7775,6 +7785,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${PLUGINS_TRUE}" && test -z "${PLUGINS_FALSE}"; then
   as_fn_error "conditional \"PLUGINS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_AARCH64_TRUE}" && test -z "${DEFAULT_TARGET_AARCH64_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_AARCH64\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEFAULT_TARGET_ARM_TRUE}" && test -z "${DEFAULT_TARGET_ARM_FALSE}"; then
