@@ -79,6 +79,8 @@ if { [istarget "arm*-*-*"] || [istarget "aarch64*-*-*"] } {
     set call_insn "bl"
 } elseif { [istarget "s390*-*-*"] } {
     set call_insn "brasl"
+} elseif { [istarget "powerpc*-*-*"] } {
+    set call_insn "bl"
 } else {
     set call_insn "call"
 }

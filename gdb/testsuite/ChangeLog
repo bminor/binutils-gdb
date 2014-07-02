@@ -1,3 +1,8 @@
+2014-07-02  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.trace/entry-values.exp: Handle powerpc-specific branch
+	instruction.
+
 2014-06-30  Mark Wielaard  <mjw@redhat.com>
 
 	* gdb.base/constvars.c (violent, violet, vips, virgen, vulgar,
