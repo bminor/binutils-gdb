@@ -1,5 +1,10 @@
 2014-07-14  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/vla-cxx.cc: New file.
+	* gdb.cp/vla-cxx.exp: New file.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.reverse/rerun-prec.c: New file.
 	* gdb.reverse/rerun-prec.exp: New file.
 
