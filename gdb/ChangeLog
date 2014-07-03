@@ -1,3 +1,8 @@
+2014-07-03  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* cli/cli-logging.c (pop_output_files): Assign targerr to
+	gdb_stdtargerr.
+
 2014-07-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* MAINTAINERS (Write After Approval): Update my email address.
