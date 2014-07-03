@@ -1,3 +1,14 @@
+2014-07-03  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/pr17068.s: New.
+	* ld-elf/pr17068a.s: New.
+	* ld-elf/pr17068b.s: New.
+	* ld-elf/pr17068c.s: New.
+	* ld-elf/pr17068d.s: New.
+	* ld-elf/pr17068e.s: New.
+	* ld-elf/pr17068ez.s: New.
+	* ld-elf/elf.exp: Run new test.
+
 2014-07-02  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/ambiguousv1.d: Match symbol table too.

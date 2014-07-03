@@ -279,7 +279,7 @@ struct lang_input_statement_flags
   /* Set if the file was claimed from an archive.  */
   unsigned int claim_archive : 1;
 
-  /* Set if reloading an --as-needed lib.  */
+  /* Set if reloading an archive or --as-needed lib.  */
   unsigned int reload : 1;
 #endif /* ENABLE_PLUGINS */
 };
