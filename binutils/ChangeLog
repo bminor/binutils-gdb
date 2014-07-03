@@ -1,3 +1,7 @@
+2014-07-03  Tristan Gingold  <gingold@adacore.com>
+
+	* doc/binutils.texi: Clarify addr2line output.
+
 2014-07-01  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (dump_bfd_header): Don't print HAS_LOAD_PAGE.
