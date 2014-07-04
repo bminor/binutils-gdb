@@ -112,8 +112,6 @@ MAINTAINERCLEANFILES = asconfig.texi
 BASEDIR = $(srcdir)/../..
 BFDDIR = $(BASEDIR)/bfd
 
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
-
 # Maintenance
 
 # We need it for the taz target in ../../Makefile.in.

@@ -732,11 +732,9 @@ OPTIONAL_BACKENDS_CFILES = \
 	sco5-core.c \
 	trad-core.c
 
-# We want to rerun configure if configure.in, config.bfd or
-# configure.host change. configure.in is needed since the version
-# number in Makefile comes from configure.in.
+# Reconfigure if config.bfd or configure.host changes.
+# development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = \
-	$(srcdir)/configure.in \
 	$(srcdir)/config.bfd \
 	$(srcdir)/configure.host \
 	$(srcdir)/development.sh

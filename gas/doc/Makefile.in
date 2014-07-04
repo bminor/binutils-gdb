@@ -347,7 +347,6 @@ noinst_TEXINFOS = internals.texi
 MAINTAINERCLEANFILES = asconfig.texi as.info
 BASEDIR = $(srcdir)/../..
 BFDDIR = $(BASEDIR)/bfd
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
 
 # Automake 1.9 will only build info files in the objdir if they are
 # mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,

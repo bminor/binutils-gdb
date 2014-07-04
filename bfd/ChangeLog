@@ -1,5 +1,10 @@
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Remove configure.in.
+	* Makefile.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
 	* version.m4: New file.
 	* configure.in: Include version.m4.
 	(AC_INIT): Update.
