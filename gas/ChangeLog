@@ -1,5 +1,12 @@
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
+	* configure.ac: Rename from configure.in.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
 	* doc/Makefile.am (CONFIG_STATUS_DEPENDENCIES): Delete.
 	* doc/Makefile.in: Regenerate.
 

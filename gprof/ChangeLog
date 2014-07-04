@@ -1,5 +1,11 @@
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
+	* configure.ac: Rename from configure.in.
+	* Makefile.in: Regenerate.
+	* gconfig.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
 	* configure.in: Include bfd/version.m4.
 	(AC_INIT, AM_INIT_AUTOMAKE): Use modern form.
 	(BFD_VERSION): Delete.
