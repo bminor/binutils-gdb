@@ -1,4 +1,4 @@
-dnl Common configure.in fragment
+dnl Common configure.ac fragment
 dnl
 dnl   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 dnl

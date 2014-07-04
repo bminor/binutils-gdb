@@ -16846,7 +16846,7 @@ all_libpath=
 rm -f tdirs
 
 # If the host is 64-bit, then we enable 64-bit targets by default.
-# This is consistent with what ../bfd/configure.in does.
+# This is consistent with what ../bfd/configure.ac does.
 if test x${want64} = xfalse; then
   # The cast to long int works around a bug in the HP C Compiler
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects

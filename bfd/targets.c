@@ -930,7 +930,7 @@ static const bfd_target * const _bfd_target_vector[] =
 #endif
 	/* This list is alphabetized to make it easy to compare
 	   with other vector lists -- the decls above and
-	   the case statement in configure.in.
+	   the case statement in configure.ac.
 	   Try to keep it in order when adding new targets, and
 	   use a name of the form <cpu>_<format>_<other>_<endian>_vec.
 	   Note that sorting is done as if _<endian>_vec wasn't present.

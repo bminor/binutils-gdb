@@ -739,7 +739,7 @@ CONFIG_STATUS_DEPENDENCIES = \
 	$(srcdir)/configure.host \
 	$(srcdir)/development.sh
 
-# These are defined by configure.in:
+# These are defined by configure:
 WORDSIZE = @wordsize@
 ALL_BACKENDS = @all_backends@
 BFD_BACKENDS = @bfd_backends@

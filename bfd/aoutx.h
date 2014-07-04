@@ -101,7 +101,7 @@ DESCRIPTION
 |	TDEFAULTS = -DDEFAULT_VECTOR=host_aout_big_vec
 |	TDEPFILES= host-aout.o trad-core.o
 
-	in the @file{config/@var{XXX}.mt} file, and modify @file{configure.in}
+	in the @file{config/@var{XXX}.mt} file, and modify @file{configure.ac}
 	to use the
 	@file{@var{XXX}.mt} file (by setting "<<bfd_target=XXX>>") when your
 	configuration is selected.  */

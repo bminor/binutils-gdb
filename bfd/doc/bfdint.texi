@@ -1548,7 +1548,7 @@ following:
 Define either @samp{TARGET_BIG_SYM} or @samp{TARGET_LITTLE_SYM}, or
 both, to a unique C name to use for the target vector.  This name should
 appear in the list of target vectors in @file{targets.c}, and will also
-have to appear in @file{config.bfd} and @file{configure.in}.  Define
+have to appear in @file{config.bfd} and @file{configure.ac}.  Define
 @samp{TARGET_BIG_SYM} for a big-endian processor,
 @samp{TARGET_LITTLE_SYM} for a little-endian processor, and define both
 for a bi-endian processor.

@@ -1,5 +1,11 @@
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
+	* doc/internals.texi: Update "configure.in" comments.
+	* acinclude.m4: Likewise.
+	* config/tc-sparc.c: Likewise.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac: Rename from configure.in.
 	* Makefile.in: Regenerate.
 	* config.in: Regenerate.

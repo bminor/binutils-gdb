@@ -282,7 +282,7 @@ dnl file.
 rm -f tdirs
 
 # If the host is 64-bit, then we enable 64-bit targets by default.
-# This is consistent with what ../bfd/configure.in does.
+# This is consistent with what ../bfd/configure.ac does.
 if test x${want64} = xfalse; then
   AC_CHECK_SIZEOF(void *)
   if test "x${ac_cv_sizeof_void_p}" = "x8"; then
