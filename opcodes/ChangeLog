@@ -1,11 +1,20 @@
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Include bfd/version.m4.
+	(AC_INIT, AM_INIT_AUTOMAKE): Use modern form.
+	(BFD_VERSION): Delete.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Remove bfd/configure.in.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
             Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
             Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
             Soundararajan  <Sounderarajan.D@atmel.com>
 
 	* avr-dis.c (avr_operand): Handle constraint j for 16 bit lds/sts.
-	(print_insn_avr): Do not select opcode if insn ISA is avrtiny and machine
-	is not avrtiny.
+	(print_insn_avr): Do not select opcode if insn ISA is avrtiny and
+	machine is not avrtiny.
 
 2014-06-26  Philippe De Muyter <phdm@macqel.be>
 

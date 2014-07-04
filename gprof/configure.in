@@ -17,16 +17,14 @@ dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
 dnl
 AC_PREREQ(2.59)
-AC_INIT
+m4_include([../bfd/version.m4])
+AC_INIT([gprof], BFD_VERSION)
 AC_CONFIG_SRCDIR([gprof.c])
 
 AC_CANONICAL_TARGET([])
 AC_ISC_POSIX
 
-changequote(,)dnl
-BFD_VERSION=`${srcdir}/../bfd/configure --version | sed -n -e '1s,.* ,,p'`
-changequote([,])dnl
-AM_INIT_AUTOMAKE(gprof, ${BFD_VERSION})
+AM_INIT_AUTOMAKE
 
 dnl For simplicity, we use the BFD configuration file for most
 dnl things.  However, we also need our own configuration file for

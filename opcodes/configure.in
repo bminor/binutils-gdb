@@ -18,20 +18,14 @@ dnl <http://www.gnu.org/licenses/>.
 dnl
 
 AC_PREREQ(2.59)
-AC_INIT
+m4_include([../bfd/version.m4])
+AC_INIT([opcodes], BFD_VERSION)
 AC_CONFIG_SRCDIR([z8k-dis.c])
 
 AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
-# We currently only use the version number for the name of any shared
-# library.  For user convenience, we always use the same version
-# number that BFD is using.
-changequote(,)dnl
-BFD_VERSION=`${srcdir}/../bfd/configure --version | sed -n -e '1s,.* ,,p'`
-changequote([,])dnl
-
-AM_INIT_AUTOMAKE(opcodes, ${BFD_VERSION})
+AM_INIT_AUTOMAKE
 
 AC_PROG_CC
 AC_GNU_SOURCE

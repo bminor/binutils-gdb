@@ -18,16 +18,14 @@ dnl <http://www.gnu.org/licenses/>.
 dnl
 
 AC_PREREQ(2.59)
-AC_INIT
+m4_include([../bfd/version.m4])
+AC_INIT([binutils], BFD_VERSION)
 AC_CONFIG_SRCDIR(ar.c)
 
 AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
-changequote(,)dnl
-BFD_VERSION=`${srcdir}/../bfd/configure --version | sed -n -e '1s,.* ,,p'`
-changequote([,])dnl
-AM_INIT_AUTOMAKE(binutils, ${BFD_VERSION})
+AM_INIT_AUTOMAKE
 
 AC_PROG_CC
 AC_GNU_SOURCE

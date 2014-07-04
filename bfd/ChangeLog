@@ -1,3 +1,13 @@
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* version.m4: New file.
+	* configure.in: Include version.m4.
+	(AC_INIT): Update.
+	* Makefile.am (RELEASE): Delete.
+	(bfdver.h): Depend on development.sh, use instead of RELEASE.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2014-07-02  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Clear

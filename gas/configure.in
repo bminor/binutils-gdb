@@ -21,7 +21,8 @@ dnl <http://www.gnu.org/licenses/>.
 dnl
 dnl v2.5 needed for --bindir et al
 AC_PREREQ(2.59)
-AC_INIT
+m4_include([../bfd/version.m4])
+AC_INIT([gas], BFD_VERSION)
 AC_CONFIG_SRCDIR(as.h)
 
 dnl Autoconf 2.57 will find the aux dir without this.  However, unless
@@ -31,10 +32,7 @@ AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
-changequote(,)dnl
-BFD_VERSION=`${srcdir}/../bfd/configure --version | sed -n -e '1s,.* ,,p'`
-changequote([,])dnl
-AM_INIT_AUTOMAKE(gas, ${BFD_VERSION})
+AM_INIT_AUTOMAKE
 
 AC_PROG_CC
 AC_GNU_SOURCE
