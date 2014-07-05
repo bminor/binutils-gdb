@@ -1,3 +1,12 @@
+2014-07-05  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (run_ld_link_tests): Stop after assembling objects
+	if binfile is empty.
+	(run_ld_link_exec_tests, run_cc_link_tests): Likewise.  Tidy
+	status checks.
+	* ld-plugin/lto.exp: Don't use libdummy.a trick to compile objects.
+	Instead use an empty output file.
+
 2014-07-03  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/pr17068.s: New.
