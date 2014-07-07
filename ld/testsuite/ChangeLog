@@ -1,3 +1,7 @@
+2014-07-10  Will Newton  <will.newton@linaro.org>
+
+	* ld-elfvers/vers.exp: Set pic to yes for ARM targets.
+
 2014-07-08  Will Newton  <will.newton@linaro.org>
 
 	* ld-arm/arm-lib.ld: Increase MAXPAGESIZE value to
