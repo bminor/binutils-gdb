@@ -1,3 +1,10 @@
+2014-07-07  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (async_handle_remote_sigint)
+	(async_handle_remote_sigint_twice): Call
+	gdb_call_async_signal_handler instead of
+	mark_async_signal_handler.
+
 2014-07-07  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.

@@ -4818,7 +4818,9 @@ static void
 async_handle_remote_sigint (int sig)
 {
   signal (sig, async_handle_remote_sigint_twice);
-  mark_async_signal_handler (async_sigint_remote_token);
+  /* Note we need to go through gdb_call_async_signal_handler in order
+     to wake up the event loop on Windows.  */
+  gdb_call_async_signal_handler (async_sigint_remote_token, 0);
 }
 
 /* Signal handler for SIGINT, installed after SIGINT has already been
@@ -4828,7 +4830,8 @@ static void
 async_handle_remote_sigint_twice (int sig)
 {
   signal (sig, async_handle_remote_sigint);
-  mark_async_signal_handler (async_sigint_remote_twice_token);
+  /* See note in async_handle_remote_sigint.  */
+  gdb_call_async_signal_handler (async_sigint_remote_twice_token, 0);
 }
 
 /* Perform the real interruption of the target execution, in response
