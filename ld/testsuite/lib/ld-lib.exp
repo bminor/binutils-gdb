@@ -79,14 +79,33 @@ proc default_ld_version { ld } {
 
 proc run_host_cmd { prog command } {
     global link_output
+    global gcc_B_opt
+    global ld_L_opt
 
     if { ![is_remote host] && [which "$prog"] == 0 } then {
 	perror "$prog does not exist"
 	return 0
     }
 
-    verbose -log "$prog $command"
-    set status [remote_exec host [concat sh -c [list "$prog $command 2>&1"]] "" "/dev/null" "ld.tmp"]
+    # If we are compiling with gcc, we want to add gcc_B_opt and
+    # ld_L_opt to flags.  However, if $prog already has -B options,
+    # which might be the case when running gcc out of a build
+    # directory, we want our -B options to come first.
+    set gccexe $prog
+    set gccparm [string first " " $gccexe]
+    set gccflags ""
+    if { $gccparm > 0 } then {
+	set gccflags [string range $gccexe $gccparm end]
+	set gccexe [string range $gccexe 0 $gccparm]
+	set prog $gccexe
+    }
+    set gccexe [string replace $gccexe 0 [string last "/" $gccexe] ""]
+    if {[string match "*cc*" $gccexe] || [string match "*++*" $gccexe]} then {
+	set gccflags "$gcc_B_opt $gccflags $ld_L_opt"
+    }
+
+    verbose -log "$prog $gccflags $command"
+    set status [remote_exec host [concat sh -c [list "$prog $gccflags $command 2>&1"]] "" "/dev/null" "ld.tmp"]
     remote_upload host "ld.tmp"
     set link_output [file_contents "ld.tmp"]
     regsub "\n$" $link_output "" link_output
@@ -208,45 +227,22 @@ proc default_ld_link { ld target objects } {
 #
 proc default_ld_simple_link { ld target objects } {
     global host_triplet
-    global gcc_ld_flag
     global exec_output
 
+    set flags ""
     if [is_endian_output_format $objects] then {
 	set flags [big_or_little_endian]
-    } else {
-	set flags ""
-    }
-
-    # If we are compiling with gcc, we want to add gcc_ld_flag to
-    # flags.  Rather than determine this in some complex way, we guess
-    # based on the name of the compiler.
-    set ldexe $ld
-    set ldparm [string first " " $ld]
-    set ldflags ""
-    if { $ldparm > 0 } then {
-	set ldflags [string range $ld $ldparm end]
-	set ldexe [string range $ld 0 $ldparm]
-	set ld $ldexe
-    }
-    set ldexe [string replace $ldexe 0 [string last "/" $ldexe] ""]
-    if {[string match "*gcc*" $ldexe] || [string match "*++*" $ldexe]} then {
-	set ldflags "$gcc_ld_flag $ldflags"
     }
 
     remote_file host delete $target
-
-    set exec_output [run_host_cmd "$ld" "$ldflags $flags -o $target $objects"]
+    set exec_output [run_host_cmd "$ld" "$flags -o $target $objects"]
     set exec_output [prune_warnings $exec_output]
 
     # We don't care if we get a warning about a non-existent start
     # symbol, since the default linker script might use ENTRY.
     regsub -all "(^|\n)(\[^\n\]*: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
 
-    if [string match "" $exec_output] then {
-	return 1
-    } else {
-	return 0
-    }
+    return [string match "" $exec_output]
 }
 
 # Compile an object using cc.
@@ -257,7 +253,7 @@ proc default_ld_compile { cc source object } {
     global srcdir
     global subdir
     global host_triplet
-    global gcc_gas_flag
+    global gcc_B_opt
 
     set cc_prog $cc
     if {[llength $cc_prog] > 1} then {
@@ -271,11 +267,12 @@ proc default_ld_compile { cc source object } {
     remote_file build delete "$object"
     remote_file host delete "$object"
 
-    set flags "-I$srcdir/$subdir"
+    set flags "$gcc_B_opt -I$srcdir/$subdir"
 
-    # If we are compiling with gcc, we want to add gcc_gas_flag to
-    # flags.  Rather than determine this in some complex way, we guess
-    # based on the name of the compiler.
+    # If we are compiling with gcc, we want to add gcc_B_opt to flags.
+    # However, if $prog already has -B options, which might be the
+    # case when running gcc out of a build directory, we want our -B
+    # options to come first.
     set ccexe $cc
     set ccparm [string first " " $cc]
     set ccflags ""
@@ -284,15 +281,12 @@ proc default_ld_compile { cc source object } {
 	set ccexe [string range $cc 0 $ccparm]
 	set cc $ccexe
     }
-    set ccexe [string replace $ccexe 0 [string last "/" $ccexe] ""]
-    if {[string match "*gcc*" $ccexe] || [string match "*++*" $ccexe]} then {
-	set flags "$gcc_gas_flag $flags"
-    }
 
+    set ccexe [string replace $ccexe 0 [string last "/" $ccexe] ""]
     if {[string match "*++*" $ccexe]} {
-	set flags "$flags $CXXFLAGS"
+	append flags " $CXXFLAGS"
     } else {
-	set flags "$flags $CFLAGS"
+	append flags " $CFLAGS"
     }
 
     if [board_info [target_info name] exists cflags] {
@@ -303,9 +297,10 @@ proc default_ld_compile { cc source object } {
 	append flags " [board_info [target_info name] multilib_flags]"
     }
 
-    verbose -log "$cc $flags $ccflags -c $source -o $object"
+    set cmd "$cc $flags $ccflags -c $source -o $object"
+    verbose -log "$cmd"
 
-    set status [remote_exec host [concat sh -c [list "$cc $flags $ccflags -c $source -o $object 2>&1"]] "" "/dev/null" "ld.tmp"]
+    set status [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]
     remote_upload host "ld.tmp"
     set exec_output [file_contents "ld.tmp"]
     remote_file build delete "ld.tmp"
@@ -1670,36 +1665,27 @@ proc check_lto_available { } {
     global lto_available_saved
     global CC
 
-    set flags ""
-
-    if [board_info [target_info name] exists cflags] {
-        append flags " [board_info [target_info name] cflags]"
-    }
-
-    if [board_info [target_info name] exists ldflags] {
-        append flags " [board_info [target_info name] ldflags]"
-    }
-
     if {![info exists lto_available_saved]} {
 	# Check if gcc supports -flto -fuse-linker-plugin
-	if { [which $CC] == 0 } {
-	    set lto_available_saved 0
-	    return 0
+	set flags ""
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
 	}
-	set basename "lto"
-	set src ${basename}[pid].c
-	set output ${basename}[pid].out
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+
+	set basename "tmpdir/lto[pid]"
+	set src ${basename}.c
+	set output ${basename}.out
 	set f [open $src "w"]
 	puts $f "int main() { return 0; }"
 	close $f
-	set status [remote_exec host $CC "$flags -B[pwd]/tmpdir/ld/ -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
-	if { [lindex $status 0] == 0 } {
-	    set lto_available_saved 1
-	} else {
-	    set lto_available_saved 0
-	}
+	remote_download host $src
+	set lto_available_saved [run_host_cmd_yesno "$CC" "$flags -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
+	remote_file host delete $src
+	remote_file host delete $output
 	file delete $src
-	file delete $output
     }
     return $lto_available_saved
 }
@@ -1709,36 +1695,27 @@ proc check_lto_shared_available { } {
     global lto_shared_available_saved
     global CC
 
-    set flags ""
-
-    if [board_info [target_info name] exists cflags] {
-        append flags " [board_info [target_info name] cflags]"
-    }
-
-    if [board_info [target_info name] exists ldflags] {
-        append flags " [board_info [target_info name] ldflags]"
-    }
-
     if {![info exists lto_shared_available_saved]} {
 	# Check if gcc supports -flto -fuse-linker-plugin -shared
-	if { [which $CC] == 0 } {
-	    set lto_shared_available_saved 0
-	    return 0
+	set flags ""
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
 	}
-	set basename "lto_shared"
-	set src ${basename}[pid].c
-	set output ${basename}[pid].so
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+
+	set basename "tmpdir/lto_shared[pid]"
+	set src ${basename}.c
+	set output ${basename}.so
 	set f [open $src "w"]
 	puts $f ""
 	close $f
-	set status [remote_exec host $CC "$flags -shared -fPIC -B[pwd]/tmpdir/ld/ -flto -fuse-linker-plugin $src -o $output"]
-	if { [lindex $status 0] == 0 } {
-	    set lto_shared_available_saved 1
-	} else {
-	    set lto_shared_available_saved 0
-	}
+	remote_download host $src
+	set lto_shared_available_saved [run_host_cmd_yesno "$CC" "$flags -shared -fPIC -flto -fuse-linker-plugin $src -o $output"]
+	remote_file host delete $src
+	remote_file host delete $output
 	file delete $src
-	file delete $output
     }
     return $lto_shared_available_saved
 }

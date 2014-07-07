@@ -1,3 +1,18 @@
+2014-07-07  Alan Modra  <amodra@gmail.com>
+
+	* config/default.exp: Don't make tmpdir/gas.  Put as symlink into
+	tmpdir/ld.
+	(gcc_gas_flag, gcc_ld_flag): Delete.
+	(gcc_B_opt, ld_L_opt): New globals.
+	ld-elf/shared.exp: Remove all refs to gcc_gas_flag and gcc_ld_flag.
+	ld-plugin/lto.exp: Likewise.
+	lib/ld-lib.exp (run_host_cmd): Add gcc_B_opt and ld_L_opt here.
+	(ld_simple_link): Remove -B handling now that this is done in
+	run_host_cmd.  Simplify.
+	(default_ld_compile): Simplify.
+	(check_lto_available): Use run_host_cmd_yesno.
+	(check_lto_shared_available): Likewise.
+
 2014-07-05  Alan Modra  <amodra@gmail.com>
 
 	* lib/ld-lib.exp (run_ld_link_tests): Stop after assembling objects
