@@ -213,6 +213,12 @@ struct lang_varobj_ops
      Languages where types do not mutate can set this to NULL.  */
   int (*value_has_mutated) (struct varobj *var, struct value *new_value,
 			    struct type *new_type);
+
+  /* Return nonzero if VAR is a suitable path expression parent.
+
+     For C like languages with anonymous structures and unions an anonymous
+     structure or union is not a suitable parent.  */
+  int (*is_path_expr_parent) (struct varobj *var);
 };
 
 extern const struct lang_varobj_ops c_varobj_ops;
@@ -328,4 +334,7 @@ extern void varobj_formatted_print_options (struct value_print_options *opts,
 
 extern void varobj_restrict_range (VEC (varobj_p) *children, int *from,
 				   int *to);
+
+extern int varobj_default_is_path_expr_parent (struct varobj *var);
+
 #endif /* VAROBJ_H */

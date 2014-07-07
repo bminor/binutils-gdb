@@ -1,3 +1,12 @@
+2014-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/var-cmd.c (do_nested_struct_union_tests): New function
+	setting up test structures.
+	(main): Call new test function.
+	* gdb.mi/mi2-var-child.exp: Create additional breakpoint in new
+	test function, continue into test function and walk test
+	structures.
+
 2014-07-02  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/entry-values.c: Define labels 'foo_start' and

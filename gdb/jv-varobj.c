@@ -101,5 +101,6 @@ const struct lang_varobj_ops java_varobj_ops =
    java_type_of_child,
    java_value_of_variable,
    varobj_default_value_is_changeable_p,
-   NULL /* value_has_mutated */
+   NULL, /* value_has_mutated */
+   varobj_default_is_path_expr_parent
 };
