@@ -168,9 +168,6 @@ set armelftests_common {
     {"callweak" "-static -T arm.ld" "" "" {callweak.s}
      {{objdump -dr callweak.d}}
      "callweak"}
-    {"callweak-2" "-static -T arm.ld" "" "" {callweak-2.s}
-     {{objdump -dr callweak-2.d}}
-     "callweak-2"}
     {"Relocation boundaries" "-defsym x=0 -defsym y=0 -defsym _start=0" "" "" {reloc-boundaries.s}
      {{objdump -s reloc-boundaries.d}}
      "reloc-boundaries"}
@@ -188,9 +185,6 @@ set armelftests_common {
      "" {exec-got-1b.s}
      {{readelf --relocs exec-got-1.d}}
      "exec-got-1"}
-    {"abs call" "-T arm.ld" "" "" {abs-call-1.s}
-     {{objdump -d abs-call-1.d}}
-     "abs-call-1"}
     {"Simple non-PIC shared library (no PLT check)" "-shared" "" "" {arm-lib.s}
      {{objdump -Rw arm-lib.r}}
      "arm-lib.so"}
@@ -230,9 +224,6 @@ set armelftests_nonacl {
     {"Thumb and -gc-sections" "-pie -T arm.ld -gc-sections tmpdir/gc-thumb-lib.so" "" "" {gc-thumb.s}
      {{readelf --relocs gc-thumb.d}}
      "gc-thumb"}
-    {"arm-pic-veneer" "-static -T arm.ld --pic-veneer" "" "" {arm-pic-veneer.s}
-     {{objdump -d arm-pic-veneer.d}}
-     "arm-pic-veneer"}
 
     {"Simple non-PIC shared library" "-shared" "" "" {arm-lib.s}
      {{objdump -fdw arm-lib.d} {objdump -Rw arm-lib.r}}
@@ -276,193 +267,12 @@ set armelftests_nonacl {
     {"Using Thumb lib by another lib" "-shared tmpdir/mixed-lib.so" "" "" {use-thumb-lib.s}
      {{readelf -Ds use-thumb-lib.sym}}
      "use-thumb-lib.so"}
-    {"Preempt Thumb symbol" "tmpdir/mixed-lib.so -T arm-dyn.ld --use-blx" "" ""
-     {preempt-app.s}
-     {{readelf -Ds preempt-app.sym}}
-     "preempt-app"}
     {"TLS gnu shared library inlined trampoline" "--no-fix-arm1176 -shared -T arm-dyn.ld" "" "" {tls-descseq.s}
      {{objdump -fdw tls-descseq.d} {objdump -Rw tls-descseq.r}}
      "tls-lib2inline.so"}
     {"TLS shared library gdesc local" "--no-fix-arm1176 -shared -T arm-dyn.ld" "" "" {tls-lib-loc.s}
      {{objdump -fdw tls-lib-loc.d} {objdump -Rw tls-lib-loc.r}}
      "tls-lib-loc.so"}
-    {"Cortex-A8 erratum fix, b.w"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-b.s}
-     {{objdump -dr cortex-a8-fix-b.d}}
-     "cortex-a8-fix-b"}
-    {"Cortex-A8 erratum fix, bl.w"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-bl.s}
-     {{objdump -dr cortex-a8-fix-bl.d}}
-     "cortex-a8-fix-bl"}
-    {"Cortex-A8 erratum fix, bcc.w"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-bcc.s}
-     {{objdump -dr cortex-a8-fix-bcc.d}}
-     "cortex-a8-fix-bcc"}
-    {"Cortex-A8 erratum fix, blx.w"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-blx.s}
-     {{objdump -dr cortex-a8-fix-blx.d}}
-     "cortex-a8-fix-blx"}
-    {"Cortex-A8 erratum fix, relocate b.w to ARM"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-b-rel.s}
-     {{objdump -dr cortex-a8-fix-b-rel-arm.d}}
-     "cortex-a8-fix-b-rel-arm"}
-    {"Cortex-A8 erratum fix, relocate b.w to Thumb"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-b-rel.s}
-     {{objdump -dr cortex-a8-fix-b-rel-thumb.d}}
-     "cortex-a8-fix-b-rel-thumb"}
-    {"Cortex-A8 erratum fix, relocate bl.w to ARM"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-bl-rel.s}
-     {{objdump -dr cortex-a8-fix-bl-rel-arm.d}}
-     "cortex-a8-fix-bl-rel-arm"}
-    {"Cortex-A8 erratum fix, relocate bl.w to Thumb"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bl-rel.s}
-     {{objdump -dr cortex-a8-fix-bl-rel-thumb.d}}
-     "cortex-a8-fix-bl-rel-thumb"}
-    {"Cortex-A8 erratum fix, relocate b<cond>.w to Thumb"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bcc-rel.s}
-     {{objdump -dr cortex-a8-fix-bcc-rel-thumb.d}}
-     "cortex-a8-fix-bcc-rel-thumb"}
-    {"Cortex-A8 erratum fix, relocate blx.w to ARM"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-blx-rel.s}
-     {{objdump -dr cortex-a8-fix-blx-rel-arm.d}}
-     "cortex-a8-fix-blx-rel-arm"}
-    {"Cortex-A8 erratum fix, relocate blx.w to Thumb"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-blx-rel.s}
-     {{objdump -dr cortex-a8-fix-blx-rel-thumb.d}}
-     "cortex-a8-fix-blx-rel-thumb"}
-    {"Cortex-A8 erratum fix, relocate bl.w and far call"
-     "-EL -Ttext=0x00 --fix-cortex-a8 --defsym _start=0" ""
-     "-EL -mcpu=cortex-a8" {cortex-a8-far-1.s cortex-a8-far-2.s cortex-a8-far-3.s}
-     {{objdump -dr cortex-a8-far.d}}
-     "cortex-a8-far"}
-    {"Cortex-A8 erratum fix, headers"
-     "-EL --fix-cortex-a8 -T cortex-a8-fix-hdr.t" ""
-     "-EL -mcpu=cortex-a8" {cortex-a8-fix-hdr.s}
-     {{objdump -dr cortex-a8-fix-hdr.d}}
-     "cortex-a8-fix-hdr"}
-    {"Cortex-A8 erratum fix, blx.w and b<cond>.w together"
-     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-blx-bcond.s}
-     {{objdump -dr cortex-a8-fix-blx-bcond.d}}
-     "cortex-a8-fix-blx-bcond"}
-    {"Cortex-A8 erratum fix, b.w to PLT"
-     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
-     {cortex-a8-fix-b-plt.s}
-     {{objdump -dr cortex-a8-fix-b-plt.d}}
-     "cortex-a8-fix-b-plt"}
-    {"Cortex-A8 erratum fix, bl.w to PLT"
-     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
-     {cortex-a8-fix-bl-plt.s}
-     {{objdump -dr cortex-a8-fix-bl-plt.d}}
-     "cortex-a8-fix-bl-plt"}
-    {"Cortex-A8 erratum fix, bcc.w to PLT"
-     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
-     {cortex-a8-fix-bcc-plt.s}
-     {{objdump -dr cortex-a8-fix-bcc-plt.d}}
-     "cortex-a8-fix-bcc-plt"}
-    {"Cortex-A8 erratum fix, blx.w to PLT"
-     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
-     {cortex-a8-fix-blx-plt.s}
-     {{objdump -dr cortex-a8-fix-blx-plt.d}}
-     "cortex-a8-fix-blx-plt"}
-    {"Cortex-A8 erratum fix, relocate bl.w to PLT"
-     "-EL --section-start=.plt=0x8e00 -Ttext=0x8f00 --fix-cortex-a8 -shared" ""
-     "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bl-rel.s}
-     {{objdump -dr cortex-a8-fix-bl-rel-plt.d}}
-     "cortex-a8-fix-bl-rel-thumb"}
-    {"IFUNC test 1" "-T ifunc-static.ld" "" "" {ifunc-1.s}
-     {{objdump -d ifunc-1.dd}
-      {objdump {-s -j.data -j.got} ifunc-1.gd}
-      {readelf -dr ifunc-1.rd}}
-     "ifunc-1"}
-    {"IFUNC test 2" "-T ifunc-static.ld" "" "" {ifunc-2.s}
-     {{objdump -d ifunc-2.dd}
-      {objdump {-s -j.data -j.got} ifunc-2.gd}
-      {readelf -dr ifunc-2.rd}}
-     "ifunc-2"}
-    {"IFUNC test 3" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-3.s}
-     {{objdump -d ifunc-3.dd}
-      {objdump {-s -j.data -j.got} ifunc-3.gd}
-      {readelf -r ifunc-3.rd}}
-     "ifunc-3.so"}
-    {"IFUNC test 4" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-4.s}
-     {{objdump -d ifunc-4.dd}
-      {objdump {-s -j.data -j.got} ifunc-4.gd}
-      {readelf -r ifunc-4.rd}}
-     "ifunc-4.so"}
-    {"IFUNC test 5" "-T ifunc-static.ld" "" "" {ifunc-5.s}
-     {{objdump -d ifunc-5.dd}
-      {objdump {-s -j.data -j.got} ifunc-5.gd}
-      {readelf -dr ifunc-5.rd}}
-     "ifunc-5"}
-    {"IFUNC test 6" "-T ifunc-static.ld" "" "" {ifunc-6.s}
-     {{objdump -d ifunc-6.dd}
-      {objdump {-s -j.data -j.got} ifunc-6.gd}
-      {readelf -dr ifunc-6.rd}}
-     "ifunc-6"}
-    {"IFUNC test 7" "-T ifunc-dynamic.ld tmpdir/ifunc-3.so -shared" ""
-     "" {ifunc-7.s}
-     {{objdump -d ifunc-7.dd}
-      {objdump {-s -j.data -j.got} ifunc-7.gd}
-      {readelf -r ifunc-7.rd}}
-     "ifunc-7.so"}
-    {"IFUNC test 8" "-T ifunc-dynamic.ld tmpdir/ifunc-4.so -shared" ""
-     "" {ifunc-8.s}
-     {{objdump -d ifunc-8.dd}
-      {objdump {-s -j.data -j.got} ifunc-8.gd}
-      {readelf -r ifunc-8.rd}}
-     "ifunc-8.so"}
-    {"IFUNC test 9" "-T ifunc-dynamic.ld tmpdir/ifunc-3.so" "" "" {ifunc-9.s}
-     {{objdump -d ifunc-9.dd}
-      {objdump {-s -j.data -j.got} ifunc-9.gd}
-      {readelf -r ifunc-9.rd}}
-     "ifunc-9"}
-    {"IFUNC test 10" "-T ifunc-dynamic.ld tmpdir/ifunc-4.so" "" "" {ifunc-10.s}
-     {{objdump -d ifunc-10.dd}
-      {objdump {-s -j.data -j.got} ifunc-10.gd}
-      {readelf -r ifunc-10.rd}}
-     "ifunc-10"}
-    {"IFUNC test 11" "-T ifunc-static.ld" "" "" {ifunc-11.s}
-     {{objdump -d ifunc-11.dd}
-      {objdump {-s -j.data -j.got} ifunc-11.gd}
-      {readelf -dr ifunc-11.rd}}
-     "ifunc-11"}
-    {"IFUNC test 12" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-12.s}
-     {{objdump -d ifunc-12.dd}
-      {objdump {-s -j.data -j.got} ifunc-12.gd}
-      {readelf -r ifunc-12.rd}}
-     "ifunc-12.so"}
-    {"IFUNC test 13" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-13.s}
-     {{objdump -d ifunc-13.dd}
-      {objdump {-s -j.data -j.got} ifunc-13.gd}
-      {readelf -r ifunc-13.rd}}
-     "ifunc-13"}
-    {"IFUNC test 14" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-14.s}
-     {{objdump -d ifunc-14.dd}
-      {objdump {-s -j.data -j.got} ifunc-14.gd}
-      {readelf -r ifunc-14.rd}}
-     "ifunc-14"}
-    {"IFUNC test 15" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-15.s}
-     {{objdump -d ifunc-15.dd}
-      {objdump {-s -j.data -j.got} ifunc-15.gd}
-      {readelf -r ifunc-15.rd}}
-     "ifunc-15"}
-    {"IFUNC test 16" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-16.s}
-     {{objdump -d ifunc-16.dd}
-      {objdump {-s -j.data -j.got} ifunc-16.gd}
-      {readelf -r ifunc-16.rd}}
-     "ifunc-16"}
-    {"IFUNC test 17" "-T ifunc-static.ld" "" "" {ifunc-17.s}
-     {{objdump -d ifunc-17.dd}
-      {objdump {-s -j.data -j.got} ifunc-17.gd}
-      {readelf -r ifunc-17.rd}}
-     "ifunc-17"}
-    {"Long PLT entries in executables" "--long-plt -shared --section-start=.plt=0x1000 --section-start=.got=0xf0001100" ""
-     "" {long-plt-format.s}
-     {{objdump "-d -j .plt" long-plt-format.d}}
-     "long-plt-format"}
-    {"IFUNC and TLS descriptor shared library" "-shared -T arm-lib.ld --version-script=ifunc-gdesc.ver" "" "" {ifunc-gdesc.s}
-     {{objdump "-Rw" ifunc-gdesc.r}}
-     "ifunc-gdesc.so"}
 }
 
 run_ld_link_tests $armelftests_common
@@ -573,6 +383,12 @@ set armeabitests_common {
     {"Long branch with mixed text and data" "-T arm.ld" "" "" {farcall-data.s}
      {{objdump -dr farcall-data.d farcall-data-nacl.d}}
      "farcall-data"}
+    {"callweak-2" "-static -T arm.ld" "" "" {callweak-2.s}
+     {{objdump -dr callweak-2.d}}
+     "callweak-2"}
+    {"abs call" "-T arm.ld" "" "" {abs-call-1.s}
+     {{objdump -d abs-call-1.d}}
+     "abs-call-1"}
 }
 
 set armeabitests_nonacl {
@@ -756,6 +572,190 @@ set armeabitests_nonacl {
     {"TLS thumb1" "-shared -T arm-dyn.ld --section-start .foo=0x4001000" "" "" {tls-thumb1.s}
      {{objdump -fdw tls-thumb1.d}}
      "tls-thumb1"}
+    {"Cortex-A8 erratum fix, b.w"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-b.s}
+     {{objdump -dr cortex-a8-fix-b.d}}
+     "cortex-a8-fix-b"}
+    {"Cortex-A8 erratum fix, bl.w"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-bl.s}
+     {{objdump -dr cortex-a8-fix-bl.d}}
+     "cortex-a8-fix-bl"}
+    {"Cortex-A8 erratum fix, bcc.w"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-bcc.s}
+     {{objdump -dr cortex-a8-fix-bcc.d}}
+     "cortex-a8-fix-bcc"}
+    {"Cortex-A8 erratum fix, blx.w"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-blx.s}
+     {{objdump -dr cortex-a8-fix-blx.d}}
+     "cortex-a8-fix-blx"}
+    {"Cortex-A8 erratum fix, relocate b.w to ARM"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-b-rel.s}
+     {{objdump -dr cortex-a8-fix-b-rel-arm.d}}
+     "cortex-a8-fix-b-rel-arm"}
+    {"Cortex-A8 erratum fix, relocate b.w to Thumb"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-b-rel.s}
+     {{objdump -dr cortex-a8-fix-b-rel-thumb.d}}
+     "cortex-a8-fix-b-rel-thumb"}
+    {"Cortex-A8 erratum fix, relocate bl.w to ARM"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-bl-rel.s}
+     {{objdump -dr cortex-a8-fix-bl-rel-arm.d}}
+     "cortex-a8-fix-bl-rel-arm"}
+    {"Cortex-A8 erratum fix, relocate bl.w to Thumb"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bl-rel.s}
+     {{objdump -dr cortex-a8-fix-bl-rel-thumb.d}}
+     "cortex-a8-fix-bl-rel-thumb"}
+    {"Cortex-A8 erratum fix, relocate b<cond>.w to Thumb"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bcc-rel.s}
+     {{objdump -dr cortex-a8-fix-bcc-rel-thumb.d}}
+     "cortex-a8-fix-bcc-rel-thumb"}
+    {"Cortex-A8 erratum fix, relocate blx.w to ARM"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-blx-rel.s}
+     {{objdump -dr cortex-a8-fix-blx-rel-arm.d}}
+     "cortex-a8-fix-blx-rel-arm"}
+    {"Cortex-A8 erratum fix, relocate blx.w to Thumb"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-blx-rel.s}
+     {{objdump -dr cortex-a8-fix-blx-rel-thumb.d}}
+     "cortex-a8-fix-blx-rel-thumb"}
+    {"Cortex-A8 erratum fix, relocate bl.w and far call"
+     "-EL -Ttext=0x00 --fix-cortex-a8 --defsym _start=0" ""
+     "-EL -mcpu=cortex-a8" {cortex-a8-far-1.s cortex-a8-far-2.s cortex-a8-far-3.s}
+     {{objdump -dr cortex-a8-far.d}}
+     "cortex-a8-far"}
+    {"Cortex-A8 erratum fix, headers"
+     "-EL --fix-cortex-a8 -T cortex-a8-fix-hdr.t" ""
+     "-EL -mcpu=cortex-a8" {cortex-a8-fix-hdr.s}
+     {{objdump -dr cortex-a8-fix-hdr.d}}
+     "cortex-a8-fix-hdr"}
+    {"Cortex-A8 erratum fix, blx.w and b<cond>.w together"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-blx-bcond.s}
+     {{objdump -dr cortex-a8-fix-blx-bcond.d}}
+     "cortex-a8-fix-blx-bcond"}
+    {"Cortex-A8 erratum fix, b.w to PLT"
+     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
+     {cortex-a8-fix-b-plt.s}
+     {{objdump -dr cortex-a8-fix-b-plt.d}}
+     "cortex-a8-fix-b-plt"}
+    {"Cortex-A8 erratum fix, bl.w to PLT"
+     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
+     {cortex-a8-fix-bl-plt.s}
+     {{objdump -dr cortex-a8-fix-bl-plt.d}}
+     "cortex-a8-fix-bl-plt"}
+    {"Cortex-A8 erratum fix, bcc.w to PLT"
+     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
+     {cortex-a8-fix-bcc-plt.s}
+     {{objdump -dr cortex-a8-fix-bcc-plt.d}}
+     "cortex-a8-fix-bcc-plt"}
+    {"Cortex-A8 erratum fix, blx.w to PLT"
+     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
+     {cortex-a8-fix-blx-plt.s}
+     {{objdump -dr cortex-a8-fix-blx-plt.d}}
+     "cortex-a8-fix-blx-plt"}
+    {"Cortex-A8 erratum fix, relocate bl.w to PLT"
+     "-EL --section-start=.plt=0x8e00 -Ttext=0x8f00 --fix-cortex-a8 -shared" ""
+     "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bl-rel.s}
+     {{objdump -dr cortex-a8-fix-bl-rel-plt.d}}
+     "cortex-a8-fix-bl-rel-thumb"}
+    {"IFUNC test 1" "-T ifunc-static.ld" "" "" {ifunc-1.s}
+     {{objdump -d ifunc-1.dd}
+      {objdump {-s -j.data -j.got} ifunc-1.gd}
+      {readelf -dr ifunc-1.rd}}
+     "ifunc-1"}
+    {"IFUNC test 2" "-T ifunc-static.ld" "" "" {ifunc-2.s}
+     {{objdump -d ifunc-2.dd}
+      {objdump {-s -j.data -j.got} ifunc-2.gd}
+      {readelf -dr ifunc-2.rd}}
+     "ifunc-2"}
+    {"IFUNC test 3" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-3.s}
+     {{objdump -d ifunc-3.dd}
+      {objdump {-s -j.data -j.got} ifunc-3.gd}
+      {readelf -r ifunc-3.rd}}
+     "ifunc-3.so"}
+    {"IFUNC test 4" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-4.s}
+     {{objdump -d ifunc-4.dd}
+      {objdump {-s -j.data -j.got} ifunc-4.gd}
+      {readelf -r ifunc-4.rd}}
+     "ifunc-4.so"}
+    {"IFUNC test 5" "-T ifunc-static.ld" "" "" {ifunc-5.s}
+     {{objdump -d ifunc-5.dd}
+      {objdump {-s -j.data -j.got} ifunc-5.gd}
+      {readelf -dr ifunc-5.rd}}
+     "ifunc-5"}
+    {"IFUNC test 6" "-T ifunc-static.ld" "" "" {ifunc-6.s}
+     {{objdump -d ifunc-6.dd}
+      {objdump {-s -j.data -j.got} ifunc-6.gd}
+      {readelf -dr ifunc-6.rd}}
+     "ifunc-6"}
+    {"IFUNC test 7" "-T ifunc-dynamic.ld tmpdir/ifunc-3.so -shared" ""
+     "" {ifunc-7.s}
+     {{objdump -d ifunc-7.dd}
+      {objdump {-s -j.data -j.got} ifunc-7.gd}
+      {readelf -r ifunc-7.rd}}
+     "ifunc-7.so"}
+    {"IFUNC test 8" "-T ifunc-dynamic.ld tmpdir/ifunc-4.so -shared" ""
+     "" {ifunc-8.s}
+     {{objdump -d ifunc-8.dd}
+      {objdump {-s -j.data -j.got} ifunc-8.gd}
+      {readelf -r ifunc-8.rd}}
+     "ifunc-8.so"}
+    {"IFUNC test 9" "-T ifunc-dynamic.ld tmpdir/ifunc-3.so" "" "" {ifunc-9.s}
+     {{objdump -d ifunc-9.dd}
+      {objdump {-s -j.data -j.got} ifunc-9.gd}
+      {readelf -r ifunc-9.rd}}
+     "ifunc-9"}
+    {"IFUNC test 10" "-T ifunc-dynamic.ld tmpdir/ifunc-4.so" "" "" {ifunc-10.s}
+     {{objdump -d ifunc-10.dd}
+      {objdump {-s -j.data -j.got} ifunc-10.gd}
+      {readelf -r ifunc-10.rd}}
+     "ifunc-10"}
+    {"IFUNC test 11" "-T ifunc-static.ld" "" "" {ifunc-11.s}
+     {{objdump -d ifunc-11.dd}
+      {objdump {-s -j.data -j.got} ifunc-11.gd}
+      {readelf -dr ifunc-11.rd}}
+     "ifunc-11"}
+    {"IFUNC test 12" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-12.s}
+     {{objdump -d ifunc-12.dd}
+      {objdump {-s -j.data -j.got} ifunc-12.gd}
+      {readelf -r ifunc-12.rd}}
+     "ifunc-12.so"}
+    {"IFUNC test 13" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-13.s}
+     {{objdump -d ifunc-13.dd}
+      {objdump {-s -j.data -j.got} ifunc-13.gd}
+      {readelf -r ifunc-13.rd}}
+     "ifunc-13"}
+    {"IFUNC test 14" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-14.s}
+     {{objdump -d ifunc-14.dd}
+      {objdump {-s -j.data -j.got} ifunc-14.gd}
+      {readelf -r ifunc-14.rd}}
+     "ifunc-14"}
+    {"IFUNC test 15" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-15.s}
+     {{objdump -d ifunc-15.dd}
+      {objdump {-s -j.data -j.got} ifunc-15.gd}
+      {readelf -r ifunc-15.rd}}
+     "ifunc-15"}
+    {"IFUNC test 16" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-16.s}
+     {{objdump -d ifunc-16.dd}
+      {objdump {-s -j.data -j.got} ifunc-16.gd}
+      {readelf -r ifunc-16.rd}}
+     "ifunc-16"}
+    {"IFUNC test 17" "-T ifunc-static.ld" "" "" {ifunc-17.s}
+     {{objdump -d ifunc-17.dd}
+      {objdump {-s -j.data -j.got} ifunc-17.gd}
+      {readelf -r ifunc-17.rd}}
+     "ifunc-17"}
+    {"Long PLT entries in executables" "--long-plt -shared --section-start=.plt=0x1000 --section-start=.got=0xf0001100" ""
+     "" {long-plt-format.s}
+     {{objdump "-d -j .plt" long-plt-format.d}}
+     "long-plt-format"}
+    {"IFUNC and TLS descriptor shared library" "-shared -T arm-lib.ld --version-script=ifunc-gdesc.ver" "" "" {ifunc-gdesc.s}
+     {{objdump "-Rw" ifunc-gdesc.r}}
+     "ifunc-gdesc.so"}
+    {"arm-pic-veneer" "-static -T arm.ld --pic-veneer" "" "" {arm-pic-veneer.s}
+     {{objdump -d arm-pic-veneer.d}}
+     "arm-pic-veneer"}
+    {"Preempt Thumb symbol" "tmpdir/mixed-lib.so -T arm-dyn.ld --use-blx" "" ""
+     {preempt-app.s}
+     {{readelf -Ds preempt-app.sym}}
+     "preempt-app"}
 }
 
 # Massage the $armeabitests_common list into run_ld_link_tests standard form.

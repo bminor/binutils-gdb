@@ -1,3 +1,11 @@
+2014-07-10  Will Newton  <will.newton@linaro.org>
+
+	* gas/arm/bl-local-2.d: Only enable the test on EABI and
+	NaCl configurations.
+	* gas/arm/bl-local-v4t.d: Likewise.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/branch-reloc.d: Likewise.
+
 2014-07-08  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/evex-lig256-intel.d: Updated.
