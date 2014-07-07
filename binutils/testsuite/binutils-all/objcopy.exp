@@ -953,8 +953,10 @@ if [is_elf_format] {
     run_dump_test "strip-7"
     run_dump_test "strip-8"
     run_dump_test "strip-9"
+    # Non-EABI ARM targets will set OSABI to ARM
     if { ![istarget "*-*-hpux*"]
-	 && ![istarget "msp*-*-*"] } {
+	 && ![istarget "msp*-*-*"]
+         && !([istarget "arm*-*-*"] && ![istarget "arm-*-*eabi*"])} {
 	run_dump_test "strip-10"
     }
 
