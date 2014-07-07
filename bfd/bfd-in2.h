@@ -4480,6 +4480,14 @@ value.  */
 lds and sts instructions supported only tiny core.  */
   BFD_RELOC_AVR_LDS_STS_16,
 
+/* This is a 6 bit reloc for the AVR that stores an I/O register
+number for the IN and OUT instructions  */
+  BFD_RELOC_AVR_PORT6,
+
+/* This is a 5 bit reloc for the AVR that stores an I/O register
+number for the SBIC, SBIS, SBI and CBI instructions  */
+  BFD_RELOC_AVR_PORT5,
+
 /* Renesas RL78 Relocations.  */
   BFD_RELOC_RL78_NEG8,
   BFD_RELOC_RL78_NEG16,

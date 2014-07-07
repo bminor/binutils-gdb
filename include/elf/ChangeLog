@@ -1,3 +1,7 @@
+2014-07-07  Barney Stratford  <barney_stratford@fastmail.fm>
+
+	* avr.h: Add R_AVR_PORT5 and R_AVR_PORT6.
+
 2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
             Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
             Pitchumani Sivanupandi  <pitchumani.s@atmel.com>

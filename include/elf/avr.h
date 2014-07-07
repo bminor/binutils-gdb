@@ -85,6 +85,8 @@ START_RELOC_NUMBERS (elf_avr_reloc_type)
      RELOC_NUMBER (R_AVR_DIFF16,               31)
      RELOC_NUMBER (R_AVR_DIFF32,               32)
      RELOC_NUMBER (R_AVR_LDS_STS_16,           33)
+     RELOC_NUMBER (R_AVR_PORT6,                34)
+     RELOC_NUMBER (R_AVR_PORT5,                35)
 END_RELOC_NUMBERS (R_AVR_max)
 
 #endif /* _ELF_AVR_H */

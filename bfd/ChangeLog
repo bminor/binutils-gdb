@@ -1,3 +1,10 @@
+2014-07-07  Barney Stratford  <barney_stratford@fastmail.fm>
+
+	* elf32-avr.c: Handle R_AVR_PORT5 and R_AVR_PORT6.
+	* reloc.c: Add BFD_RELOC_AVR_PORT5 and BFD_RELOC_AVR_PORT6.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am: Update "configure.in" comments.

@@ -4795,6 +4795,16 @@ ENUMDOC
   This is a 7 bit reloc for the AVR that stores SRAM address for 16bit
   lds and sts instructions supported only tiny core.
 ENUM
+  BFD_RELOC_AVR_PORT6
+ENUMDOC
+  This is a 6 bit reloc for the AVR that stores an I/O register
+  number for the IN and OUT instructions
+ENUM
+  BFD_RELOC_AVR_PORT5
+ENUMDOC
+  This is a 5 bit reloc for the AVR that stores an I/O register
+  number for the SBIC, SBIS, SBI and CBI instructions
+ENUM
   BFD_RELOC_RL78_NEG8
 ENUMX
   BFD_RELOC_RL78_NEG16

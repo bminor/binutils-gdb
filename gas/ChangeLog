@@ -1,3 +1,12 @@
+2014-07-07  Barney Stratford  <barney_stratford@fastmail.fm>
+
+	* config/tc-avr.c (avr_operand): Permit referring to r26-r31 by
+	name as [xyz][hl].  Permit using a symbol whoes name begins with
+	‘r’ to refer to a register.
+	Allow arbitrary expressions for the P and p operators.
+	(md_apply_fix): Check the BFD_RELOC_AVR_PORT5 and
+	BFD_RELOC_AVR_PORT6 relocations.
+
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
 	* doc/internals.texi: Update "configure.in" comments.

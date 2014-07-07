@@ -613,7 +613,34 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 FALSE,                 /* partial_inplace */
 	 0xffff,                /* src_mask */
 	 0xffff,                /* dst_mask */
-	 FALSE)                 /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_AVR_PORT6,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 6,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_AVR_PORT6",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffff,		/* src_mask */
+	 0xffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+  HOWTO (R_AVR_PORT5,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 5,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_AVR_PORT5",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffff,		/* src_mask */
+	 0xffffff,		/* dst_mask */
+	 FALSE) 		/* pcrel_offset */
 };
 
 /* Map BFD reloc types to AVR ELF reloc types.  */
@@ -659,7 +686,9 @@ static const struct avr_reloc_map avr_reloc_map[] =
   { BFD_RELOC_AVR_DIFF8,            R_AVR_DIFF8 },
   { BFD_RELOC_AVR_DIFF16,           R_AVR_DIFF16 },
   { BFD_RELOC_AVR_DIFF32,           R_AVR_DIFF32 },
-  { BFD_RELOC_AVR_LDS_STS_16,       R_AVR_LDS_STS_16}
+  { BFD_RELOC_AVR_LDS_STS_16,       R_AVR_LDS_STS_16},
+  { BFD_RELOC_AVR_PORT6,            R_AVR_PORT6},
+  { BFD_RELOC_AVR_PORT5,            R_AVR_PORT5}
 };
 
 /* Meant to be filled one day with the wrap around address for the
@@ -1245,6 +1274,26 @@ avr_final_link_relocate (reloc_howto_type *                 howto,
       srel = srel & 0x7f;
       x = bfd_get_16 (input_bfd, contents);
       x |= (srel & 0x0f) | ((srel & 0x30) << 5) | ((srel & 0x40) << 2);
+      bfd_put_16 (input_bfd, x, contents);
+      break;
+
+    case R_AVR_PORT6:
+      contents += rel->r_offset;
+      srel = (bfd_signed_vma) relocation + rel->r_addend;
+      if ((srel & 0xffff) > 0x3f)
+        return bfd_reloc_outofrange;
+      x = bfd_get_16 (input_bfd, contents);
+      x = (x & 0xf9f0) | ((srel & 0x30) << 5) | (srel & 0x0f);
+      bfd_put_16 (input_bfd, x, contents);
+      break;
+
+    case R_AVR_PORT5:
+      contents += rel->r_offset;
+      srel = (bfd_signed_vma) relocation + rel->r_addend;
+      if ((srel & 0xffff) > 0x1f)
+        return bfd_reloc_outofrange;
+      x = bfd_get_16 (input_bfd, contents);
+      x = (x & 0xff07) | ((srel & 0x1f) << 3);
       bfd_put_16 (input_bfd, x, contents);
       break;
 
