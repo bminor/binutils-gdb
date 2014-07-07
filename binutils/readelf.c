@@ -9297,13 +9297,8 @@ get_symbol_type (unsigned int type)
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{
-	  if (elf_header.e_machine == EM_ARM)
-	    {
-	      if (type == STT_ARM_TFUNC)
-		return "THUMB_FUNC";
-	      if (type == STT_ARM_16BIT)
-		return "THUMB_LABEL";
-	    }
+	  if (elf_header.e_machine == EM_ARM && type == STT_ARM_TFUNC)
+	    return "THUMB_FUNC";
 
 	  if (elf_header.e_machine == EM_SPARCV9 && type == STT_REGISTER)
 	    return "REGISTER";

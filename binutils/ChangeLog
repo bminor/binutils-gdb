@@ -1,3 +1,8 @@
+2014-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_symbol_type): Revert accidental change to
+	detection of thumb function symbols.
+
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Rename from configure.in.
