@@ -6683,7 +6683,7 @@ void
 Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
   // Call parent class to read symbol information.
-  Sized_relobj_file<32, big_endian>::do_read_symbols(sd);
+  this->base_read_symbols(sd);
 
   // If this input file is a binary file, it has no processor
   // specific flags and attributes section.
@@ -6974,7 +6974,7 @@ void
 Arm_dynobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
   // Call parent class to read symbol information.
-  Sized_dynobj<32, big_endian>::do_read_symbols(sd);
+  this->base_read_symbols(sd);
 
   // Read processor-specific flags in ELF file header.
   const unsigned char* pehdr = this->get_view(elfcpp::file_header_offset,

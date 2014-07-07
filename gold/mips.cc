@@ -5857,7 +5857,7 @@ void
 Mips_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
   // Call parent class to read symbol information.
-  Sized_relobj_file<size, big_endian>::do_read_symbols(sd);
+  this->base_read_symbols(sd);
 
   // Read processor-specific flags in ELF file header.
   const unsigned char* pehdr = this->get_view(elfcpp::file_header_offset,

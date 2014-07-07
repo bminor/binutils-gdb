@@ -1,3 +1,16 @@
+2014-07-08  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/15639
+	* dynobj.h (Sized_dynobj::base_read_symbols): New method.
+	* dynobj.cc (Sized_dynobj::do_read_symbols): Move body to...
+	(Sized_dynobj::base_read_symbols): ...new method.
+	* object.h (Sized_relobj_file::base_read_symbols): New method.
+	* object.cc (Sized_relobj_file::do_read_symbols): Move body to...
+	(Sized_relobj_file::base_read_symbols): ...new method.
+	* arm.cc (Arm_relobj::do_read_symbols): Call base_read_symbols.
+	* mips.cc: (Mips_relobj::do_read_symbols): Likewise.
+	* powerpc.cc (Powerpc_dynobj::do_read_symbols): Likewise.
+
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.
