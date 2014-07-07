@@ -1,3 +1,8 @@
+2014-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* lib/ld-lib.exp (check_lto_available): Check that a compiler is
+	available before testing for LTO support.
+
 2014-07-07  Alan Modra  <amodra@gmail.com>
 
 	* config/default.exp: Don't make tmpdir/gas.  Put as symlink into
