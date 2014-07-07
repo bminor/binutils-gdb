@@ -1700,6 +1700,10 @@ proc check_lto_shared_available { } {
     global CC
 
     if {![info exists lto_shared_available_saved]} {
+        if { [which $CC] == 0 } {
+	    set lto_shared_available_saved 0
+	    return 0
+	}
 	# Check if gcc supports -flto -fuse-linker-plugin -shared
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
