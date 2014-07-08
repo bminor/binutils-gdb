@@ -1305,8 +1305,6 @@ static const struct bfd_elf_special_section elf32_m68hc11_special_sections[] =
 
 #define bfd_elf32_bfd_link_hash_table_create \
                                 m68hc11_elf_bfd_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-				m68hc11_elf_bfd_link_hash_table_free
 #define bfd_elf32_bfd_merge_private_bfd_data \
 					_bfd_m68hc11_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags	_bfd_m68hc11_elf_set_private_flags

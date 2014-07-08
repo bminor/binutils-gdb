@@ -555,7 +555,7 @@ spu_elf_create_sections (struct bfd_link_info *info)
   struct spu_link_hash_table *htab = spu_hash_table (info);
   bfd *ibfd;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     if (bfd_get_section_by_name (ibfd, SPU_PTNOTE_SPUNAME) != NULL)
       break;
 
@@ -1520,7 +1520,7 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
   struct spu_link_hash_table *htab = spu_hash_table (info);
   bfd *ibfd;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       extern const bfd_target spu_elf32_vec;
       Elf_Internal_Shdr *symtab_hdr;
@@ -2936,7 +2936,7 @@ discover_functions (struct bfd_link_info *info)
   bfd_boolean gaps = FALSE;
 
   bfd_idx = 0;
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     bfd_idx++;
 
   psym_arr = bfd_zmalloc (bfd_idx * sizeof (*psym_arr));
@@ -2948,7 +2948,7 @@ discover_functions (struct bfd_link_info *info)
 
   for (ibfd = info->input_bfds, bfd_idx = 0;
        ibfd != NULL;
-       ibfd = ibfd->link_next, bfd_idx++)
+       ibfd = ibfd->link.next, bfd_idx++)
     {
       extern const bfd_target spu_elf32_vec;
       Elf_Internal_Shdr *symtab_hdr;
@@ -3056,7 +3056,7 @@ discover_functions (struct bfd_link_info *info)
 	 relocations.  */
       for (ibfd = info->input_bfds, bfd_idx = 0;
 	   ibfd != NULL;
-	   ibfd = ibfd->link_next, bfd_idx++)
+	   ibfd = ibfd->link.next, bfd_idx++)
 	{
 	  asection *sec;
 
@@ -3070,7 +3070,7 @@ discover_functions (struct bfd_link_info *info)
 
       for (ibfd = info->input_bfds, bfd_idx = 0;
 	   ibfd != NULL;
-	   ibfd = ibfd->link_next, bfd_idx++)
+	   ibfd = ibfd->link.next, bfd_idx++)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *sec;
@@ -3109,7 +3109,7 @@ discover_functions (struct bfd_link_info *info)
 	    }
 	}
 
-      for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+      for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
 	{
 	  extern const bfd_target spu_elf32_vec;
 	  asection *sec;
@@ -3152,7 +3152,7 @@ discover_functions (struct bfd_link_info *info)
 
   for (ibfd = info->input_bfds, bfd_idx = 0;
        ibfd != NULL;
-       ibfd = ibfd->link_next, bfd_idx++)
+       ibfd = ibfd->link.next, bfd_idx++)
     {
       if (psym_arr[bfd_idx] == NULL)
 	continue;
@@ -3181,7 +3181,7 @@ for_each_node (bfd_boolean (*doit) (struct function_info *,
 {
   bfd *ibfd;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       extern const bfd_target spu_elf32_vec;
       asection *sec;
@@ -3330,7 +3330,7 @@ build_call_tree (struct bfd_link_info *info)
   bfd *ibfd;
   unsigned int depth;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       extern const bfd_target spu_elf32_vec;
       asection *sec;
@@ -3707,7 +3707,7 @@ auto_ovl_lib_functions (struct bfd_link_info *info, unsigned int lib_size)
 
   memset (&dummy_caller, 0, sizeof (dummy_caller));
   lib_count = 0;
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       extern const bfd_target spu_elf32_vec;
       asection *sec;
@@ -4252,7 +4252,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
     goto err_exit;
 
   bfd_count = 0;
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     ++bfd_count;
   bfd_arr = bfd_malloc (bfd_count * sizeof (*bfd_arr));
   if (bfd_arr == NULL)
@@ -4262,7 +4262,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
   count = 0;
   bfd_count = 0;
   total_overlay_size = 0;
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       extern const bfd_target spu_elf32_vec;
       asection *sec;
@@ -5395,7 +5395,7 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
       bfd *ibfd;
       size_t size;
 
-      for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+      for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
 	{
 	  asection *isec;
 

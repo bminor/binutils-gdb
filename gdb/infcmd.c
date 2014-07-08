@@ -1573,8 +1573,7 @@ finish_backward (struct symbol *function)
   pc = get_frame_pc (get_current_frame ());
 
   if (find_pc_partial_function (pc, NULL, &func_addr, NULL) == 0)
-    internal_error (__FILE__, __LINE__,
-		    _("Finish: couldn't find function."));
+    error (_("Cannot find bounds of current function"));
 
   sal = find_pc_line (func_addr, 0);
 
@@ -2769,7 +2768,7 @@ unset_command (char *args, int from_tty)
 {
   printf_filtered (_("\"unset\" must be followed by the "
 		     "name of an unset subcommand.\n"));
-  help_list (unsetlist, "unset ", -1, gdb_stdout);
+  help_list (unsetlist, "unset ", all_commands, gdb_stdout);
 }
 
 /* Implement `info proc' family of commands.  */

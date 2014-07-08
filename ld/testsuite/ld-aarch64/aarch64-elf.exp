@@ -87,6 +87,10 @@ run_dump_test "emit-relocs-309-low-bad"
 run_dump_test "emit-relocs-311"
 run_dump_test "emit-relocs-312"
 
+# test addend correctness when --emit-relocs specified for non-relocatable obj.
+run_dump_test "emit-relocs-local-addend"
+# test addend correctness when -r specified.
+run_dump_test "local-addend-r"
 
 run_dump_test "limit-b"
 run_dump_test "limit-bl"

@@ -1390,7 +1390,7 @@ set_missing_symtab (struct pending *pending_list, struct symtab *symtab)
 void
 augment_type_symtab (struct objfile *objfile, struct symtab *primary_symtab)
 {
-  struct blockvector *blockvector = primary_symtab->blockvector;
+  const struct blockvector *blockvector = primary_symtab->blockvector;
 
   if (context_stack_depth > 0)
     {

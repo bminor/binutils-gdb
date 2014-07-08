@@ -161,7 +161,7 @@ stpy_global_block (PyObject *self, PyObject *args)
 {
   struct symtab *symtab = NULL;
   struct block *block = NULL;
-  struct blockvector *blockvector;
+  const struct blockvector *blockvector;
 
   STPY_REQUIRE_VALID (self, symtab);
 
@@ -177,7 +177,7 @@ stpy_static_block (PyObject *self, PyObject *args)
 {
   struct symtab *symtab = NULL;
   struct block *block = NULL;
-  struct blockvector *blockvector;
+  const struct blockvector *blockvector;
 
   STPY_REQUIRE_VALID (self, symtab);
 

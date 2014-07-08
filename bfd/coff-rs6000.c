@@ -2608,7 +2608,7 @@ _bfd_xcoff_sizeof_headers (bfd *abfd,
 	return -1;
 
       /* Sum.  */
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
 	for (s = sub->sections; s != NULL; s = s->next)
 	  {
 	    struct nbr_reloc_lineno *e = &n_rl[s->output_section->index];

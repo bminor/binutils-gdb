@@ -87,8 +87,11 @@ def get_method_matchers_in_loci(loci, locus_re, matcher_re):
 
     Arguments:
         loci: The list of loci to lookup matching xmethods in.
-        locus_re: Xmethod matchers will be looked up in a particular locus
-                  only if its filename matches the regular expression LOCUS_RE.
+        locus_re: If a locus is an objfile, then xmethod matchers will be
+                  looked up in it only if its filename matches the regular
+                  expression LOCUS_RE.  If a locus is the current progspace,
+                  then xmethod matchers will be looked up in it only if the
+                  string "progspace" matches LOCUS_RE.
         matcher_re: The regular expression to match the xmethod matcher
                     names.
 
@@ -99,8 +102,7 @@ def get_method_matchers_in_loci(loci, locus_re, matcher_re):
     xm_dict = {}
     for locus in loci:
         if isinstance(locus, gdb.Progspace):
-            if (not locus_re.match(locus.filename) and
-                not locus_re.match('progspace')):
+            if not locus_re.match('progspace'):
                 continue
             locus_type = "progspace"
         else:

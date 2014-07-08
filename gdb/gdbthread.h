@@ -157,14 +157,12 @@ struct thread_info
      thread is off and running.  */
   int executing;
 
-  /* Frontend view of the thread state.  Note that the RUNNING/STOPPED
-     states are different from EXECUTING.  When the thread is stopped
-     internally while handling an internal event, like a software
-     single-step breakpoint, EXECUTING will be false, but running will
-     still be true.  As a possible future extension, this could turn
-     into enum { stopped, exited, stepping, finishing, until(ling),
-     running ... }  */
-  int state;
+  /* Frontend view of the thread state.  Note that the THREAD_RUNNING/
+     THREAD_STOPPED states are different from EXECUTING.  When the
+     thread is stopped internally while handling an internal event,
+     like a software single-step breakpoint, EXECUTING will be false,
+     but STATE will still be THREAD_RUNNING.  */
+  enum thread_state state;
 
   /* If this is > 0, then it means there's code out there that relies
      on this thread being listed.  Don't delete it from the lists even
@@ -317,10 +315,12 @@ void thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid);
 typedef int (*thread_callback_func) (struct thread_info *, void *);
 extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
-/* Traverse all threads.  */
+/* Traverse all threads, except those that have THREAD_EXITED
+   state.  */
 
-#define ALL_THREADS(T)				\
-  for (T = thread_list; T; T = T->next)
+#define ALL_NON_EXITED_THREADS(T)				\
+  for (T = thread_list; T; T = T->next) \
+    if ((T)->state != THREAD_EXITED)
 
 extern int thread_count (void);
 
@@ -362,9 +362,6 @@ extern int is_exited (ptid_t ptid);
 
 /* In the frontend's perpective, is this thread stopped?  */
 extern int is_stopped (ptid_t ptid);
-
-/* In the frontend's perpective is there any thread running?  */
-extern int any_running (void);
 
 /* Marks thread PTID as executing, or not.  If ptid_get_pid (PTID) is -1,
    marks all threads.

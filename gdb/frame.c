@@ -699,7 +699,7 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
 	   && l.special_addr == r.special_addr)
     {
       /* Same function, different inlined functions.  */
-      struct block *lb, *rb;
+      const struct block *lb, *rb;
 
       gdb_assert (l.code_addr_p && r.code_addr_p);
 
@@ -960,7 +960,7 @@ frame_pop (struct frame_info *this_frame)
     {
       /* Popping a dummy frame involves restoring more than just registers.
 	 dummy_frame_pop does all the work.  */
-      dummy_frame_pop (get_frame_id (this_frame));
+      dummy_frame_pop (get_frame_id (this_frame), inferior_ptid);
       return;
     }
 
@@ -2707,7 +2707,8 @@ static struct cmd_list_element *show_backtrace_cmdlist;
 static void
 set_backtrace_cmd (char *args, int from_tty)
 {
-  help_list (set_backtrace_cmdlist, "set backtrace ", -1, gdb_stdout);
+  help_list (set_backtrace_cmdlist, "set backtrace ", all_commands,
+	     gdb_stdout);
 }
 
 static void

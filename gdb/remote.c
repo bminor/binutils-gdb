@@ -4347,7 +4347,7 @@ extended_remote_detach (struct target_ops *ops, const char *args, int from_tty)
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
 
 static void
-remote_disconnect (struct target_ops *target, char *args, int from_tty)
+remote_disconnect (struct target_ops *target, const char *args, int from_tty)
 {
   if (args)
     error (_("Argument given to \"disconnect\" when remotely debugging."));
@@ -4626,7 +4626,7 @@ append_pending_thread_resumptions (char *p, char *endp, ptid_t ptid)
 {
   struct thread_info *thread;
 
-  ALL_THREADS (thread)
+  ALL_NON_EXITED_THREADS (thread)
     if (ptid_match (thread->ptid, ptid)
 	&& !ptid_equal (inferior_ptid, thread->ptid)
 	&& thread->suspend.stop_signal != GDB_SIGNAL_0
@@ -4818,7 +4818,9 @@ static void
 async_handle_remote_sigint (int sig)
 {
   signal (sig, async_handle_remote_sigint_twice);
-  mark_async_signal_handler (async_sigint_remote_token);
+  /* Note we need to go through gdb_call_async_signal_handler in order
+     to wake up the event loop on Windows.  */
+  gdb_call_async_signal_handler (async_sigint_remote_token, 0);
 }
 
 /* Signal handler for SIGINT, installed after SIGINT has already been
@@ -4828,7 +4830,8 @@ static void
 async_handle_remote_sigint_twice (int sig)
 {
   signal (sig, async_handle_remote_sigint);
-  mark_async_signal_handler (async_sigint_remote_twice_token);
+  /* See note in async_handle_remote_sigint.  */
+  gdb_call_async_signal_handler (async_sigint_remote_twice_token, 0);
 }
 
 /* Perform the real interruption of the target execution, in response
@@ -7888,7 +7891,7 @@ extended_remote_run (char *args)
       char **argv;
 
       argv = gdb_buildargv (args);
-      back_to = make_cleanup ((void (*) (void *)) freeargv, argv);
+      back_to = make_cleanup_freeargv (argv);
       for (i = 0; argv[i] != NULL; i++)
 	{
 	  if (strlen (argv[i]) * 2 + 1 + len >= get_remote_packet_size ())
@@ -8988,7 +8991,7 @@ remote_search_memory (struct target_ops* ops,
 }
 
 static void
-remote_rcmd (struct target_ops *self, char *command,
+remote_rcmd (struct target_ops *self, const char *command,
 	     struct ui_file *outbuf)
 {
   struct remote_state *rs = get_remote_state ();
@@ -9010,7 +9013,7 @@ remote_rcmd (struct target_ops *self, char *command,
     error (_("\"monitor\" command ``%s'' is too long."), command);
 
   /* Encode the actual command.  */
-  bin2hex ((gdb_byte *) command, p, strlen (command));
+  bin2hex ((const gdb_byte *) command, p, strlen (command));
 
   if (putpkt (rs->buf) < 0)
     error (_("Communication problem with target."));
@@ -10249,7 +10252,7 @@ remote_delete_command (char *args, int from_tty)
 static void
 remote_command (char *args, int from_tty)
 {
-  help_list (remote_cmdlist, "remote ", -1, gdb_stdout);
+  help_list (remote_cmdlist, "remote ", all_commands, gdb_stdout);
 }
 
 static int
@@ -11378,7 +11381,7 @@ remote_augmented_libraries_svr4_read (struct target_ops *self)
 /* Implementation of to_load.  */
 
 static void
-remote_load (struct target_ops *self, char *name, int from_tty)
+remote_load (struct target_ops *self, const char *name, int from_tty)
 {
   generic_load (name, from_tty);
 }
@@ -11601,7 +11604,7 @@ remote_async (struct target_ops *ops,
 static void
 set_remote_cmd (char *args, int from_tty)
 {
-  help_list (remote_set_cmdlist, "set remote ", -1, gdb_stdout);
+  help_list (remote_set_cmdlist, "set remote ", all_commands, gdb_stdout);
 }
 
 static void

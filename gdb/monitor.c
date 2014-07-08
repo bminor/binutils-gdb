@@ -2200,7 +2200,7 @@ monitor_wait_srec_ack (void)
 /* monitor_load -- download a file.  */
 
 static void
-monitor_load (struct target_ops *self, char *args, int from_tty)
+monitor_load (struct target_ops *self, const char *args, int from_tty)
 {
   CORE_ADDR load_offset = 0;
   char **argv;
@@ -2282,7 +2282,7 @@ monitor_stop (struct target_ops *self, ptid_t ptid)
    ourseleves here cause of a nasty echo.  */
 
 static void
-monitor_rcmd (struct target_ops *self, char *command,
+monitor_rcmd (struct target_ops *self, const char *command,
 	      struct ui_file *outbuf)
 {
   char *p;

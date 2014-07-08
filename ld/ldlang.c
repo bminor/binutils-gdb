@@ -2790,9 +2790,7 @@ load_symbols (lang_input_statement_type *entry,
       break;
 
     case bfd_object:
-#ifdef ENABLE_PLUGINS
       if (!entry->flags.reload)
-#endif
 	ldlang_add_file (entry);
       if (trace_files || verbose)
 	info_msg ("%I\n", entry);
@@ -3072,9 +3070,6 @@ lang_get_output_target (void)
   return default_target;
 }
 
-/* Stashed function to free link_info.hash; see open_output.  */
-void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
-
 /* Open the output file.  */
 
 static void
@@ -3153,18 +3148,6 @@ open_output (const char *name)
   link_info.hash = bfd_link_hash_table_create (link_info.output_bfd);
   if (link_info.hash == NULL)
     einfo (_("%P%F: can not create hash table: %E\n"));
-
-  /* We want to please memory leak checkers by deleting link_info.hash.
-     We can't do it in lang_finish, as a bfd target may hold references to
-     symbols in this table and use them when their _bfd_write_contents
-     function is invoked, as part of bfd_close on the output_bfd.  But,
-     output_bfd is deallocated at bfd_close, so we can't refer to
-     output_bfd after that time, and dereferencing it is needed to call
-     "bfd_link_hash_table_free".  Smash this dependency deadlock and grab
-     the function pointer; arrange to call it on link_info.hash in
-     ld_cleanup.  */
-  output_bfd_hash_table_free_fn
-    = link_info.output_bfd->xvec->_bfd_link_hash_table_free;
 
   bfd_set_gp_size (link_info.output_bfd, g_switch_value);
 }
@@ -3283,38 +3266,32 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 	    {
 	      lang_statement_union_type **os_tail;
 	      lang_statement_list_type add;
+	      bfd *abfd;
 
 	      s->input_statement.target = current_target;
 
 	      /* If we are being called from within a group, and this
 		 is an archive which has already been searched, then
 		 force it to be researched unless the whole archive
-		 has been loaded already.  Do the same for a rescan.  */
+		 has been loaded already.  Do the same for a rescan.
+		 Likewise reload --as-needed shared libs.  */
 	      if (mode != OPEN_BFD_NORMAL
 #ifdef ENABLE_PLUGINS
 		  && ((mode & OPEN_BFD_RESCAN) == 0
 		      || plugin_insert == NULL)
 #endif
-		  && !s->input_statement.flags.whole_archive
 		  && s->input_statement.flags.loaded
-		  && s->input_statement.the_bfd != NULL
-		  && bfd_check_format (s->input_statement.the_bfd,
-				       bfd_archive))
-		s->input_statement.flags.loaded = FALSE;
-#ifdef ENABLE_PLUGINS
-	      /* When rescanning, reload --as-needed shared libs.  */
-	      else if ((mode & OPEN_BFD_RESCAN) != 0
-		       && plugin_insert == NULL
-		       && s->input_statement.flags.loaded
-		       && s->input_statement.flags.add_DT_NEEDED_for_regular
-		       && s->input_statement.the_bfd != NULL
-		       && ((s->input_statement.the_bfd->flags) & DYNAMIC) != 0
-		       && plugin_should_reload (s->input_statement.the_bfd))
+		  && (abfd = s->input_statement.the_bfd) != NULL
+		  && ((bfd_get_format (abfd) == bfd_archive
+		       && !s->input_statement.flags.whole_archive)
+		      || (bfd_get_format (abfd) == bfd_object
+			  && ((abfd->flags) & DYNAMIC) != 0
+			  && s->input_statement.flags.add_DT_NEEDED_for_regular
+			  && plugin_should_reload (abfd))))
 		{
 		  s->input_statement.flags.loaded = FALSE;
 		  s->input_statement.flags.reload = TRUE;
 		}
-#endif
 
 	      os_tail = lang_output_section_statement.tail;
 	      lang_list_init (&add);
@@ -5996,7 +5973,7 @@ lang_common (void)
 	  for (power = 0; power <= 4; power++)
 	    bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
 
-	  power = UINT_MAX;
+	  power = (unsigned int) -1;
 	  bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
 	}
     }
@@ -6228,11 +6205,11 @@ ldlang_add_file (lang_input_statement_type *entry)
 
   /* The BFD linker needs to have a list of all input BFDs involved in
      a link.  */
-  ASSERT (entry->the_bfd->link_next == NULL);
+  ASSERT (entry->the_bfd->link.next == NULL);
   ASSERT (entry->the_bfd != link_info.output_bfd);
 
   *link_info.input_bfds_tail = entry->the_bfd;
-  link_info.input_bfds_tail = &entry->the_bfd->link_next;
+  link_info.input_bfds_tail = &entry->the_bfd->link.next;
   entry->the_bfd->usrdata = entry;
   bfd_set_gp_size (entry->the_bfd, g_switch_value);
 

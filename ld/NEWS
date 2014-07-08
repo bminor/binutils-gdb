@@ -1,5 +1,9 @@
 -*- text -*-
 
+* PE binaries now once again contain real timestamps by default.  To disable
+  the inclusion of a timestamp in a PE binary, use the --no-insert-timestamp
+  command line option.
+
 * Replace support for openrisc and or32 with support for or1k.
 
 * Add support for the --build-id command line option to COFF based targets.

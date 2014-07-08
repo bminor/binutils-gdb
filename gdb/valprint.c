@@ -2704,7 +2704,7 @@ set_print (char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print\" must be followed by the name of a print subcommand.\n");
-  help_list (setprintlist, "set print ", -1, gdb_stdout);
+  help_list (setprintlist, "set print ", all_commands, gdb_stdout);
 }
 
 static void
@@ -2718,7 +2718,7 @@ set_print_raw (char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print raw\" must be followed by the name of a \"print raw\" subcommand.\n");
-  help_list (setprintrawlist, "set print raw ", -1, gdb_stdout);
+  help_list (setprintrawlist, "set print raw ", all_commands, gdb_stdout);
 }
 
 static void

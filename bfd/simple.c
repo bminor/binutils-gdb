@@ -188,6 +188,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   bfd_byte *contents, *data;
   int storage_needed;
   struct saved_offsets saved_offsets;
+  bfd *link_next;
 
   /* Don't apply relocation on executable and shared library.  See
      PR 4756.  */
@@ -207,8 +208,10 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   memset (&link_info, 0, sizeof (link_info));
   link_info.output_bfd = abfd;
   link_info.input_bfds = abfd;
-  link_info.input_bfds_tail = &abfd->link_next;
+  link_info.input_bfds_tail = &abfd->link.next;
 
+  link_next = abfd->link.next;
+  abfd->link.next = NULL;
   link_info.hash = _bfd_generic_link_hash_table_create (abfd);
   link_info.callbacks = &callbacks;
   callbacks.warning = simple_dummy_warning;
@@ -232,7 +235,11 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
       bfd_size_type amt = sec->rawsize > sec->size ? sec->rawsize : sec->size;
       data = (bfd_byte *) bfd_malloc (amt);
       if (data == NULL)
-	return NULL;
+	{
+	  _bfd_generic_link_hash_table_free (abfd);
+	  abfd->link.next = link_next;
+	  return NULL;
+	}
       outbuf = data;
     }
 
@@ -243,6 +250,8 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
     {
       if (data)
 	free (data);
+      _bfd_generic_link_hash_table_free (abfd);
+      abfd->link.next = link_next;
       return NULL;
     }
   bfd_map_over_sections (abfd, simple_save_output_info, &saved_offsets);
@@ -270,6 +279,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   bfd_map_over_sections (abfd, simple_restore_output_info, &saved_offsets);
   free (saved_offsets.sections);
 
-  _bfd_generic_link_hash_table_free (link_info.hash);
+  _bfd_generic_link_hash_table_free (abfd);
+  abfd->link.next = link_next;
   return contents;
 }

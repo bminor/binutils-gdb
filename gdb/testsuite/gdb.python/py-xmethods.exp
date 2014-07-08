@@ -40,25 +40,45 @@ gdb_breakpoint [gdb_get_line_number "Break here."]
 gdb_continue_to_breakpoint "Break here" ".*Break here.*"
 
 # Tests before loading the debug methods.
-gdb_test "p a1 + a2" "From CC <A_plus_A>.*15" "Before: a1 + a2"
-gdb_test "p a2 - a1" "From CC <A_minus_A>.*5" "Before: a1 - a2"
-gdb_test "p b1 - a1" "From CC <A_minus_A>.*25" "Before: b1 - a1"
-gdb_test "p a1.geta()" "From CC A::geta.*5" "Before: a1.geta()"
+gdb_test "p a1 + a2" ".* = 15" "Before: a1 + a2"
+gdb_test "p a_plus_a" ".* = 1" "Before: a_plus_a 1"
+
+gdb_test "p a2 - a1" ".* = 5" "Before: a2 - a1"
+gdb_test "p a_minus_a" ".* = 1" "Before: a_minus_a 1"
+
+gdb_test "p b1 - a1" ".* = 25" "Before: b1 - a1"
+gdb_test "p a_minus_a" ".* = 2" "Before: a_minus_a 2"
+
+gdb_test "p a1.geta()" ".* = 5" "Before: a1.geta()"
+gdb_test "p a_geta" ".* = 1" "Before: a_geta 1"
+
 gdb_test "p ++a1" "No symbol.*" "Before: ++a1"
 gdb_test "p a1.getarrayind(5)" "Couldn't find method.*" \
   "Before: a1.getarrayind(5)"
-gdb_test "p a_ptr->geta()" "From CC B::geta.*60" "Before: a_ptr->geta()"
-gdb_test "p e.geta()" "From CC A::geta.*100" "Before: e.geta()"
-gdb_test "p g.size_diff<float>()" "From CC G<>::size_diff.*" \
-  "Before: g.size_diff<float>()"
+
+gdb_test "p a_ptr->geta()" ".* = 60" "Before: a_ptr->geta()"
+gdb_test "p b_geta" ".* = 1" "Before: b_geta 1"
+
+gdb_test "p e.geta()" ".* = 100" "Before: e.geta()"
+gdb_test "p a_geta" ".* = 2" "Before: a_geta 2"
+
+# Since g.size_diff operates of sizes of int and float, do not check for
+# actual result value as it could be different on different platforms.
+gdb_test "p g.size_diff<float>()" ".*" "Before: call g.size_diff<float>()"
+gdb_test "p g_size_diff" ".* = 2" "Before: g_size_diff 2"
+
 gdb_test "p g.size_diff<unsigned long>()" "Couldn't find method.*" \
   "Before: g.size_diff<unsigned long>()"
-gdb_test "p g.size_mul<2>()" "From CC G<>::size_mul.*" \
-  "Before: g.size_mul<2>()"
+
+gdb_test "p g.size_mul<2>()" ".*" "Before: g.size_mul<2>()"
+gdb_test "p g_size_mul" ".* = 2" "Before: g_size_mul 2"
+
 gdb_test "p g.size_mul<5>()" "Couldn't find method.*" \
   "Before: g.size_mul<5>()"
-gdb_test "p g.mul<double>(2.0)" "From CC G<>::mul.*" \
-  "Before: g.mul<double>(2.0)"
+
+gdb_test "p g.mul<double>(2.0)" ".* = 10" "Before: g.mul<double>(2.0)"
+gdb_test "p g_mul" ".* = 2" "Before: g_mul 2"
+
 gdb_test "p g.mul<char>('a')" "Couldn't find method.*" \
   "Before: g.mul<char>('a')"
 
@@ -67,9 +87,15 @@ gdb_test_no_output "source ${xmethods_script}" "load the script file"
 
 # Tests after loading debug methods.
 gdb_test "p a1 + a2" "From Python <A_plus_A>.*15" "After: a1 + a2"
-gdb_test "p a2 - a1" "From CC <A_minus_A>.*5" "After: a1 - a2"
+
+gdb_test "p a2 - a1" ".* = 5" "After: a2 - a1"
+gdb_test "p a_minus_a" ".* = 3" "After: a_minus_a 3"
+
 gdb_test "p b1 + a1" "From Python <A_plus_A>.*35" "After: b1 + a1"
-gdb_test "p b1 - a1" "From CC <A_minus_A>.*25" "After: b1 - a1"
+
+gdb_test "p b1 - a1" ".* = 25" "After: b1 - a1"
+gdb_test "p a_minus_a" ".* = 4" "After: a_minus_a 4"
+
 gdb_test "p a1.geta()" "From Python <A_geta>.*5" "After: a1.geta()"
 gdb_test "p ++a1" "From Python <plus_plus_A>.*6" "After: ++a1"
 gdb_test "p a1.getarrayind(5)" "From Python <A_getarrayind>.*5" \
@@ -99,19 +125,19 @@ gdb_test "p g_ptr->mul<char>('a')" "From Python G<>::mul.*" \
   "After: g_ptr->mul<char>('a')"
 
 # Tests for 'disable/enable xmethod' command.
-gdb_test_no_output "disable xmethod .*xmethods G_methods" \
+gdb_test_no_output "disable xmethod progspace G_methods" \
   "Disable G_methods"
 gdb_test "p g.mul<char>('a')" "Couldn't find method.*" \
   "g.mul<char>('a') after disabling G_methods"
-gdb_test_no_output "enable xmethod .*xmethods G_methods" \
+gdb_test_no_output "enable xmethod progspace G_methods" \
   "Enable G_methods"
 gdb_test "p g.mul<char>('a')" "From Python G<>::mul.*" \
   "After enabling G_methods"
-gdb_test_no_output "disable xmethod .*xmethods G_methods;mul" \
+gdb_test_no_output "disable xmethod progspace G_methods;mul" \
   "Disable G_methods;mul"
 gdb_test "p g.mul<char>('a')" "Couldn't find method.*" \
   "g.mul<char>('a') after disabling G_methods;mul"
-gdb_test_no_output "enable xmethod .*xmethods G_methods;mul" \
+gdb_test_no_output "enable xmethod progspace G_methods;mul" \
   "Enable G_methods;mul"
 gdb_test "p g.mul<char>('a')" "From Python G<>::mul.*" \
   "After enabling G_methods;mul"
@@ -119,9 +145,9 @@ gdb_test "p g.mul<char>('a')" "From Python G<>::mul.*" \
 # Test for 'info xmethods' command
 gdb_test "info xmethod global plus" "global.*plus_plus_A" \
   "info xmethod global plus 1"
-gdb_test_no_output "disable xmethod .*xmethods E_methods;method_int" \
-  "disable xmethod .*xmethods E_methods;method_int"
-gdb_test "info xmethod .*xmethods E_methods;method_int" ".* \\\[disabled\\\]" \
+gdb_test_no_output "disable xmethod progspace E_methods;method_int" \
+  "disable xmethod progspace E_methods;method_int"
+gdb_test "info xmethod progspace E_methods;method_int" ".* \\\[disabled\\\]" \
   "info xmethod xmethods E_methods;method_int"
 
 remote_file host delete ${xmethods_script}

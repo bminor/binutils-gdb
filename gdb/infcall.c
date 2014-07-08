@@ -826,7 +826,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* Everything's ready, push all the info needed to restore the
      caller (and identify the dummy-frame) onto the dummy-frame
      stack.  */
-  dummy_frame_push (caller_state, &dummy_id);
+  dummy_frame_push (caller_state, &dummy_id, inferior_ptid);
 
   /* Discard both inf_status and caller_state cleanups.
      From this point on we explicitly restore the associated state
@@ -952,7 +952,7 @@ When the function is done executing, GDB will silently stop."),
 
 	      /* We must get back to the frame we were before the
 		 dummy call.  */
-	      dummy_frame_pop (dummy_id);
+	      dummy_frame_pop (dummy_id, call_thread_ptid);
 
 	      /* We also need to restore inferior status to that before the
 		 dummy call.  */
@@ -993,7 +993,7 @@ When the function is done executing, GDB will silently stop."),
 	{
 	  /* We must get back to the frame we were before the dummy
 	     call.  */
-	  dummy_frame_pop (dummy_id);
+	  dummy_frame_pop (dummy_id, call_thread_ptid);
 
 	  /* We also need to restore inferior status to that before
 	     the dummy call.  */

@@ -1,3 +1,94 @@
+2014-07-08  Will Newton  <will.newton@linaro.org>
+
+	* ld-arm/arm-lib.ld: Increase MAXPAGESIZE value to
+	match bfd.
+	* ld-arm/cortex-a8-fix-bl-rel-plt.d: Update offsets to
+	take into account increased segment alignment.
+	* ld-arm/ifunc-gdesc.r: Likewise.
+	* ld-arm/tls-lib.d: Likewise.
+
+2014-07-08  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/emit-relocs-local-addend-bar.s: New source file.
+	* ld-aarch64/emit-relocs-local-addend-foo.s: Likewise.
+	* ld-aarch64/emit-relocs-local-addend.d: New testcase.
+	* ld-aarch64/local-addend-r.d: Likewise.
+
+2014-07-08  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/defsym.s, * ld-powerpc/defsym.d: New test.
+	* ld-powerpc/powerpc.exp: Run it.
+
+2014-07-08  Alan Modra  <amodra@gmail.com>
+
+	PR 17112
+	* ld-plugin/lto.exp: When building liblti-11.a, pass
+	--plugin path_to_gcc/liblto_plugin.so to ar.
+
+2014-07-07  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (check_lto_shared_available): Reinstate compiler
+	check here too.
+
+2014-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* lib/ld-lib.exp (check_lto_available): Check that a compiler is
+	available before testing for LTO support.
+
+2014-07-07  Alan Modra  <amodra@gmail.com>
+
+	* config/default.exp: Don't make tmpdir/gas.  Put as symlink into
+	tmpdir/ld.
+	(gcc_gas_flag, gcc_ld_flag): Delete.
+	(gcc_B_opt, ld_L_opt): New globals.
+	ld-elf/shared.exp: Remove all refs to gcc_gas_flag and gcc_ld_flag.
+	ld-plugin/lto.exp: Likewise.
+	lib/ld-lib.exp (run_host_cmd): Add gcc_B_opt and ld_L_opt here.
+	(ld_simple_link): Remove -B handling now that this is done in
+	run_host_cmd.  Simplify.
+	(default_ld_compile): Simplify.
+	(check_lto_available): Use run_host_cmd_yesno.
+	(check_lto_shared_available): Likewise.
+
+2014-07-05  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (run_ld_link_tests): Stop after assembling objects
+	if binfile is empty.
+	(run_ld_link_exec_tests, run_cc_link_tests): Likewise.  Tidy
+	status checks.
+	* ld-plugin/lto.exp: Don't use libdummy.a trick to compile objects.
+	Instead use an empty output file.
+
+2014-07-03  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/pr17068.s: New.
+	* ld-elf/pr17068a.s: New.
+	* ld-elf/pr17068b.s: New.
+	* ld-elf/pr17068c.s: New.
+	* ld-elf/pr17068d.s: New.
+	* ld-elf/pr17068e.s: New.
+	* ld-elf/pr17068ez.s: New.
+	* ld-elf/elf.exp: Run new test.
+
+2014-07-02  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/ambiguousv1.d: Match symbol table too.
+	* ld-powerpc/ambiguousv2.d: Likewise.
+	* ld-powerpc/ambiguousv1b.d: New.
+	* ld-powerpc/ambiguousv2b.d: New.
+	* ld-powerpc/powerpc.exp: Run new tests.
+
+2014-06-25  Kyle McMartin  <kyle@redhat.com>
+
+	* ld-arm/tls-gdierelax2.d: Fix expected offsets.
+
+2014-06-16  Will Newton  <will.newton@linaro.org>
+
+	* ld-arm/arm-elf.exp: Add ifunc-gdesc test.
+	* ld-arm/ifunc-gdesc.r: New file.
+	* ld-arm/ifunc-gdesc.s: Likewise.
+	* ld-arm/ifunc-gdesc.ver: Likewise.
+
 2014-06-09  Ryan Mansfield  <rmansfield@qnx.com>
 
         * config/default.exp (GASP): Remove.

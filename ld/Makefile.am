@@ -167,6 +167,7 @@ ALL_EMULATION_SOURCES = \
 	earmelf_nbsd.c \
 	earmelf_vxworks.c \
 	earmelfb.c \
+	earmelfb_fbsd.c \
 	earmelfb_linux.c \
 	earmelfb_linux_eabi.c \
 	earmelfb_nacl.c \
@@ -192,6 +193,7 @@ ALL_EMULATION_SOURCES = \
 	eavrxmega5.c \
 	eavrxmega6.c \
 	eavrxmega7.c \
+	eavrtiny.c   \
 	ecoff_i860.c \
 	ecoff_sparc.c \
 	ecrisaout.c \
@@ -317,7 +319,6 @@ ALL_EMULATION_SOURCES = \
 	ei386nw.c \
 	ei386pe.c \
 	ei386pe_posix.c \
-	ei386pep.c \
 	elnk960.c \
 	em32relf.c \
 	em32relf_linux.c \
@@ -350,6 +351,8 @@ ALL_EMULATION_SOURCES = \
 	ends32belf_linux.c \
 	enews.c \
 	ens32knbsd.c \
+	enios2elf.c \
+	enios2linux.c \
 	epc532macha.c \
 	epdp11.c \
 	epjelf.c \
@@ -477,6 +480,7 @@ ALL_64_EMULATION_SOURCES = \
 	eelf_x86_64_nacl.c \
 	eelf_x86_64_sol2.c \
 	ehppa64linux.c \
+	ei386pep.c \
 	emmo.c \
 	eshelf64.c \
 	eshelf64_nbsd.c \
@@ -487,7 +491,9 @@ ALL_64_EMULATIONS = $(ALL_64_EMULATION_SOURCES:.c=.@OBJEXT@)
 
 ALL_EMUL_EXTRA_OFILES = \
 	deffilep.@OBJEXT@ \
-	pe-dll.@OBJEXT@ \
+	pe-dll.@OBJEXT@
+
+ALL_64_EMUL_EXTRA_OFILES = \
 	pep-dll.@OBJEXT@
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
@@ -730,6 +736,11 @@ earmelfb.c: $(srcdir)/emulparams/armelfb.sh $(srcdir)/emulparams/armelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
+earmelfb_fbsd.c: $(srcdir)/emulparams/armelfb_fbsd.sh \
+  $(srcdir)/emulparams/armelf_fbsd.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
 earmelfb_linux.c: $(srcdir)/emulparams/armelfb_linux.sh \
   $(srcdir)/emulparams/armelf_linux.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
@@ -836,6 +847,10 @@ eavrxmega6.c: $(srcdir)/emulparams/avrxmega6.sh \
 
 eavrxmega7.c: $(srcdir)/emulparams/avrxmega7.sh \
   $(srcdir)/emultempl/avrelf.em $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+
+eavrtiny.c: $(srcdir)/emulparams/avrtiny.sh \
+  $(srcdir)/emultempl/avrelf.em $(ELF_DEPS) $(srcdir)/scripttempl/avrtiny.sc \
   ${GEN_DEPENDS}
 
 ecoff_i860.c: $(srcdir)/emulparams/coff_i860.sh \
@@ -1488,27 +1503,27 @@ emsp430X.c: $(srcdir)/emulparams/msp430.sh $(srcdir)/emulparams/msp430X.sh \
 
 ends32elf.c: $(srcdir)/emulparams/nds32elf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/nds32elf.sc ${GEN_DEPENDS}
 
 ends32elf16m.c: $(srcdir)/emulparams/nds32elf16m.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/nds32elf.sc ${GEN_DEPENDS}
 
 ends32belf.c: $(srcdir)/emulparams/nds32belf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/nds32elf.sc ${GEN_DEPENDS}
 
 ends32belf16m.c: $(srcdir)/emulparams/nds32belf16m.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/nds32elf.sc ${GEN_DEPENDS}
 
 ends32elf_linux.c: $(srcdir)/emulparams/nds32elf_linux.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/nds32elf.sc ${GEN_DEPENDS}
 
 ends32belf_linux.c: $(srcdir)/emulparams/nds32belf_linux.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/nds32elf.sc ${GEN_DEPENDS}
 
 enews.c: $(srcdir)/emulparams/news.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
@@ -2054,11 +2069,10 @@ ld.1: $(srcdir)/ld.texinfo configdoc.texi
 
 MAINTAINERCLEANFILES = configdoc.texi ld.1
 
-# We want to reconfigure if configure.host or configure.tgt changes.  We
-# extract version from bfd/configure.in, so we must depend on that also.
+# We want to reconfigure if configure.host or configure.tgt changes.
+# development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.host $(srcdir)/configure.tgt \
-	$(srcdir)/../bfd/configure.in \
-	$(srcdir)/../bfd/development.sh
+	$(BFDDIR)/development.sh
 
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.@OBJEXT@ crtend.@OBJEXT@ ld.log ld.sum

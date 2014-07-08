@@ -587,8 +587,8 @@ update_debug_registers_callback (struct inferior_list_entry *entry,
 
 /* Update the inferior's debug register REGNUM from STATE.  */
 
-void
-i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
+static void
+i386_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
   /* Only update the threads of this process.  */
   int pid = pid_of (current_inferior);
@@ -601,7 +601,7 @@ i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
 
 /* Return the inferior's debug register REGNUM.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_dr_low_get_addr (int regnum)
 {
   ptid_t ptid = ptid_of (current_inferior);
@@ -614,8 +614,8 @@ i386_dr_low_get_addr (int regnum)
 
 /* Update the inferior's DR7 debug control register from STATE.  */
 
-void
-i386_dr_low_set_control (const struct i386_debug_reg_state *state)
+static void
+i386_dr_low_set_control (unsigned long control)
 {
   /* Only update the threads of this process.  */
   int pid = pid_of (current_inferior);
@@ -625,7 +625,7 @@ i386_dr_low_set_control (const struct i386_debug_reg_state *state)
 
 /* Return the inferior's DR7 debug control register.  */
 
-unsigned
+static unsigned long
 i386_dr_low_get_control (void)
 {
   ptid_t ptid = ptid_of (current_inferior);
@@ -636,13 +636,24 @@ i386_dr_low_get_control (void)
 /* Get the value of the DR6 debug status register from the inferior
    and record it in STATE.  */
 
-unsigned
+static unsigned long
 i386_dr_low_get_status (void)
 {
   ptid_t ptid = ptid_of (current_inferior);
 
   return x86_linux_dr_get (ptid, DR_STATUS);
 }
+
+/* Low-level function vector.  */
+struct i386_dr_low_type i386_dr_low =
+  {
+    i386_dr_low_set_control,
+    i386_dr_low_set_addr,
+    i386_dr_low_get_addr,
+    i386_dr_low_get_status,
+    i386_dr_low_get_control,
+    sizeof (void *),
+  };
 
 /* Breakpoint/Watchpoint support.  */
 
@@ -681,7 +692,7 @@ x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	struct i386_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
-	return i386_low_insert_watchpoint (state, hw_type, addr, size);
+	return i386_dr_insert_watchpoint (state, hw_type, addr, size);
       }
 
     default:
@@ -710,7 +721,7 @@ x86_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	struct i386_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
-	return i386_low_remove_watchpoint (state, hw_type, addr, size);
+	return i386_dr_remove_watchpoint (state, hw_type, addr, size);
       }
     default:
       /* Unsupported.  */
@@ -722,7 +733,7 @@ static int
 x86_stopped_by_watchpoint (void)
 {
   struct process_info *proc = current_process ();
-  return i386_low_stopped_by_watchpoint (&proc->private->arch_private->debug_reg_state);
+  return i386_dr_stopped_by_watchpoint (&proc->private->arch_private->debug_reg_state);
 }
 
 static CORE_ADDR
@@ -730,8 +741,8 @@ x86_stopped_data_address (void)
 {
   struct process_info *proc = current_process ();
   CORE_ADDR addr;
-  if (i386_low_stopped_data_address (&proc->private->arch_private->debug_reg_state,
-				     &addr))
+  if (i386_dr_stopped_data_address (&proc->private->arch_private->debug_reg_state,
+				    &addr))
     return addr;
   return 0;
 }
@@ -777,6 +788,8 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       struct i386_debug_reg_state *state
 	= &proc->private->arch_private->debug_reg_state;
 
+      x86_linux_dr_set (ptid, DR_CONTROL, 0);
+
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 	if (state->dr_ref_count[i] > 0)
 	  {
@@ -784,12 +797,13 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 
 	    /* If we're setting a watchpoint, any change the inferior
 	       had done itself to the debug registers needs to be
-	       discarded, otherwise, i386_low_stopped_data_address can
+	       discarded, otherwise, i386_dr_stopped_data_address can
 	       get confused.  */
 	    clear_status = 1;
 	  }
 
-      x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
+      if (state->dr_control_mirror != 0)
+	x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
 
       lwp->arch_private->debug_registers_changed = 0;
     }

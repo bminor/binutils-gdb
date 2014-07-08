@@ -576,7 +576,7 @@ static SCM
 gdbscm_frame_block (SCM self)
 {
   frame_smob *f_smob;
-  struct block *block = NULL, *fn_block;
+  const struct block *block = NULL, *fn_block;
   struct frame_info *frame = NULL;
   volatile struct gdb_exception except;
 

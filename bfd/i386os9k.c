@@ -174,7 +174,6 @@ os9k_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
   _bfd_generic_section_already_linked
 #define os9k_bfd_define_common_symbol bfd_generic_define_common_symbol
 #define os9k_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
-#define os9k_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define os9k_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define os9k_bfd_link_just_syms _bfd_generic_link_just_syms
 #define os9k_bfd_copy_link_hash_symbol_type \

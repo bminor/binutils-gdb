@@ -291,7 +291,7 @@ extern char *re_comp (const char *);
 extern void symbol_file_command (char *, int);
 
 /* * Remote targets may wish to use this as their load function.  */
-extern void generic_load (char *name, int from_tty);
+extern void generic_load (const char *name, int from_tty);
 
 /* * Report on STREAM the performance of memory transfer operation,
    such as 'load'.

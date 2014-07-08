@@ -371,7 +371,7 @@ PyObject *
 gdbpy_block_for_pc (PyObject *self, PyObject *args)
 {
   gdb_py_ulongest pc;
-  struct block *block = NULL;
+  const struct block *block = NULL;
   struct obj_section *section = NULL;
   struct symtab *symtab = NULL;
   volatile struct gdb_exception except;

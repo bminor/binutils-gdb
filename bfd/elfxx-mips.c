@@ -4737,7 +4737,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
   /* Try to merge the GOTs of input bfds together, as long as they
      don't seem to exceed the maximum GOT size, choosing one of them
      to be the primary GOT.  */
-  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
     {
       gg = mips_elf_bfd_got (ibfd, FALSE);
       if (gg && !mips_elf_merge_got (ibfd, gg, &got_per_bfd_arg))
@@ -9092,7 +9092,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   /* Calculate the total loadable size of the output.  That
      will give us the maximum number of GOT_PAGE entries
      required.  */
-  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
     {
       asection *subsection;
 
@@ -9141,7 +9141,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
     {
       /* Record that all bfds use G.  This also has the effect of freeing
 	 the per-bfd GOTs, which we no longer need.  */
-      for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
+      for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
 	if (mips_elf_bfd_got (ibfd, FALSE))
 	  mips_elf_replace_bfd_got (ibfd, g);
       mips_elf_replace_bfd_got (output_bfd, g);

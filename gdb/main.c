@@ -45,6 +45,7 @@
 
 #include "filenames.h"
 #include "filestuff.h"
+#include <signal.h>
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -286,6 +287,27 @@ get_init_files (const char **system_gdbinit,
   *system_gdbinit = sysgdbinit;
   *home_gdbinit = homeinit;
   *local_gdbinit = localinit;
+}
+
+/* Try to set up an alternate signal stack for SIGSEGV handlers.
+   This allows us to handle SIGSEGV signals generated when the
+   normal process stack is exhausted.  If this stack is not set
+   up (sigaltstack is unavailable or fails) and a SIGSEGV is
+   generated when the normal stack is exhausted then the program
+   will behave as though no SIGSEGV handler was installed.  */
+
+static void
+setup_alternate_signal_stack (void)
+{
+#ifdef HAVE_SIGALTSTACK
+  stack_t ss;
+
+  ss.ss_sp = xmalloc (SIGSTKSZ);
+  ss.ss_size = SIGSTKSZ;
+  ss.ss_flags = 0;
+
+  sigaltstack(&ss, NULL);
+#endif
 }
 
 /* Call command_loop.  If it happens to return, pass that through as a
@@ -784,6 +806,9 @@ captured_main (void *data)
     if (batch_flag)
       quiet = 1;
   }
+
+  /* Try to set up an alternate signal stack for SIGSEGV handlers.  */
+  setup_alternate_signal_stack ();
 
   /* Initialize all files.  Give the interpreter a chance to take
      control of the console via the deprecated_init_ui_hook ().  */

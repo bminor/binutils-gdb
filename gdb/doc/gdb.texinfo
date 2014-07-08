@@ -22102,6 +22102,9 @@ Print ten commands just after the commands last printed.
 @node Screen Size
 @section Screen Size
 @cindex size of screen
+@cindex screen size
+@cindex pagination
+@cindex page size
 @cindex pauses in output
 
 Certain commands to @value{GDBN} may produce large amounts of
@@ -33236,6 +33239,17 @@ Expand symbol tables.
 If @var{regexp} is specified, only expand symbol tables for file
 names matching @var{regexp}.
 
+@kindex maint set catch-demangler-crashes
+@kindex maint show catch-demangler-crashes
+@cindex demangler crashes
+@item maint set catch-demangler-crashes [on|off]
+@itemx maint show catch-demangler-crashes
+Control whether @value{GDBN} should attempt to catch crashes in the
+symbol name demangler.  The default is to attempt to catch crashes.
+If enabled, the first time a crash is caught, a core file is created,
+the offending symbol is displayed and the user is presented with the
+option to terminate the current session.
+
 @kindex maint cplus first_component
 @item maint cplus first_component @var{name}
 Print the first C@t{++} class/namespace component of @var{name}.
@@ -33268,13 +33282,18 @@ with the @code{SIGQUIT} signal.
 
 @kindex maint internal-error
 @kindex maint internal-warning
+@kindex maint demangler-warning
+@cindex demangler crashes
 @item maint internal-error @r{[}@var{message-text}@r{]}
 @itemx maint internal-warning @r{[}@var{message-text}@r{]}
-Cause @value{GDBN} to call the internal function @code{internal_error}
-or @code{internal_warning} and hence behave as though an internal error
-or internal warning has been detected.  In addition to reporting the
-internal problem, these functions give the user the opportunity to
-either quit @value{GDBN} or create a core file of the current
+@itemx maint demangler-warning @r{[}@var{message-text}@r{]}
+
+Cause @value{GDBN} to call the internal function @code{internal_error},
+@code{internal_warning} or @code{demangler_warning} and hence behave
+as though an internal problam has been detected.  In addition to
+reporting the internal problem, these functions give the user the
+opportunity to either quit @value{GDBN} or (for @code{internal_error}
+and @code{internal_warning}) create a core file of the current
 @value{GDBN} session.
 
 These commands take an optional parameter @var{message-text} that is
@@ -33294,15 +33313,20 @@ Create a core file? (y or n) @kbd{n}
 
 @cindex @value{GDBN} internal error
 @cindex internal errors, control of @value{GDBN} behavior
+@cindex demangler crashes
 
 @kindex maint set internal-error
 @kindex maint show internal-error
 @kindex maint set internal-warning
 @kindex maint show internal-warning
+@kindex maint set demangler-warning
+@kindex maint show demangler-warning
 @item maint set internal-error @var{action} [ask|yes|no]
 @itemx maint show internal-error @var{action}
 @itemx maint set internal-warning @var{action} [ask|yes|no]
 @itemx maint show internal-warning @var{action}
+@itemx maint set demangler-warning @var{action} [ask|yes|no]
+@itemx maint show demangler-warning @var{action}
 When @value{GDBN} reports an internal problem (error or warning) it
 gives the user the opportunity to both quit @value{GDBN} and create a
 core file of the current @value{GDBN} session.  These commands let you
@@ -33316,7 +33340,10 @@ quit.  The default is to ask the user what to do.
 
 @item corefile
 You can specify that @value{GDBN} should always (yes) or never (no)
-create a core file.  The default is to ask the user what to do.
+create a core file.  The default is to ask the user what to do.  Note
+that there is no @code{corefile} option for @code{demangler-warning}:
+demangler warnings always create a core file and this cannot be
+disabled.
 @end table
 
 @kindex maint packet
@@ -33351,9 +33378,7 @@ Breakpoint 2, add (a=2, b=3) at @dots{}
 The program being debugged stopped while in a function called from GDB.
 @dots{}
 (@value{GDBP}) @kbd{maint print dummy-frames}
-0x1a57c80: pc=0x01014068 fp=0x0200bddc sp=0x0200bdd6
- top=0x0200bdd4 id=@{stack=0x200bddc,code=0x101405c@}
- call_lo=0x01014000 call_hi=0x01014001
+0xa8206d8: id=@{stack=0xbfffe734,code=0xbfffe73f,!special@}, ptid=process 9353
 (@value{GDBP})
 @end smallexample
 

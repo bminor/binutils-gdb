@@ -45,8 +45,8 @@ static int debug_registers_used = 0;
 
 /* Update the inferior's debug register REGNUM from STATE.  */
 
-void
-i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
+static void
+i386_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
   if (! (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR))
     fatal ("Invalid debug register %d", regnum);
@@ -58,7 +58,7 @@ i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
   debug_registers_used = 1;
 }
 
-CORE_ADDR
+static CORE_ADDR
 i386_dr_low_get_addr (int regnum)
 {
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
@@ -68,8 +68,8 @@ i386_dr_low_get_addr (int regnum)
 
 /* Update the inferior's DR7 debug control register from STATE.  */
 
-void
-i386_dr_low_set_control (const struct i386_debug_reg_state *state)
+static void
+i386_dr_low_set_control (unsigned long control)
 {
   /* debug_reg_state.dr_control_mirror is already set.
      Just notify i386_set_thread_context, i386_thread_added
@@ -78,7 +78,7 @@ i386_dr_low_set_control (const struct i386_debug_reg_state *state)
   debug_registers_used = 1;
 }
 
-unsigned
+static unsigned long
 i386_dr_low_get_control (void)
 {
   return debug_reg_state.dr_control_mirror;
@@ -87,13 +87,24 @@ i386_dr_low_get_control (void)
 /* Get the value of the DR6 debug status register from the inferior
    and record it in STATE.  */
 
-unsigned
+static unsigned long
 i386_dr_low_get_status (void)
 {
   /* We don't need to do anything here, the last call to thread_rec for
      current_event.dwThreadId id has already set it.  */
   return debug_reg_state.dr_status_mirror;
 }
+
+/* Low-level function vector.  */
+struct i386_dr_low_type i386_dr_low =
+  {
+    i386_dr_low_set_control,
+    i386_dr_low_set_addr,
+    i386_dr_low_get_addr,
+    i386_dr_low_get_status,
+    i386_dr_low_get_control,
+    sizeof (void *),
+  };
 
 /* Breakpoint/watchpoint support.  */
 
@@ -122,8 +133,8 @@ i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	enum target_hw_bp_type hw_type
 	  = raw_bkpt_type_to_target_hw_bp_type (type);
 
-	return i386_low_insert_watchpoint (&debug_reg_state,
-					   hw_type, addr, size);
+	return i386_dr_insert_watchpoint (&debug_reg_state,
+					  hw_type, addr, size);
       }
     default:
       /* Unsupported.  */
@@ -143,8 +154,8 @@ i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	enum target_hw_bp_type hw_type
 	  = raw_bkpt_type_to_target_hw_bp_type (type);
 
-	return i386_low_remove_watchpoint (&debug_reg_state,
-					   hw_type, addr, size);
+	return i386_dr_remove_watchpoint (&debug_reg_state,
+					  hw_type, addr, size);
       }
     default:
       /* Unsupported.  */
@@ -155,14 +166,14 @@ i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 static int
 i386_stopped_by_watchpoint (void)
 {
-  return i386_low_stopped_by_watchpoint (&debug_reg_state);
+  return i386_dr_stopped_by_watchpoint (&debug_reg_state);
 }
 
 static CORE_ADDR
 i386_stopped_data_address (void)
 {
   CORE_ADDR addr;
-  if (i386_low_stopped_data_address (&debug_reg_state, &addr))
+  if (i386_dr_stopped_data_address (&debug_reg_state, &addr))
     return addr;
   return 0;
 }

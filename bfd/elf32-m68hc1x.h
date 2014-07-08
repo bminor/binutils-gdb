@@ -136,7 +136,6 @@ struct m68hc11_elf_link_hash_table
 
 extern struct m68hc11_elf_link_hash_table* m68hc11_elf_hash_table_create
   (bfd*);
-extern void m68hc11_elf_bfd_link_hash_table_free (struct bfd_link_hash_table*);
 
 extern void m68hc11_elf_get_bank_parameters (struct bfd_link_info*);
 

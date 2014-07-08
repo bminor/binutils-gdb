@@ -730,7 +730,7 @@ all the fixups (@code{fixup_segment}), resolves all the symbol values (using
 @cindex porting
 
 Each GAS target specifies two main things: the CPU file and the object format
-file.  Two main switches in the @file{configure.in} file handle this.  The
+file.  Two main switches in the @file{configure.ac} file handle this.  The
 first switches on CPU type to set the shell variable @code{cpu_type}.  The
 second switches on the entire target to set the shell variable @code{fmt}.
 

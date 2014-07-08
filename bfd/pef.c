@@ -58,7 +58,6 @@
 #define bfd_pef_section_already_linked	            _bfd_generic_section_already_linked
 #define bfd_pef_bfd_define_common_symbol            bfd_generic_define_common_symbol
 #define bfd_pef_bfd_link_hash_table_create          _bfd_generic_link_hash_table_create
-#define bfd_pef_bfd_link_hash_table_free            _bfd_generic_link_hash_table_free
 #define bfd_pef_bfd_link_add_symbols                _bfd_generic_link_add_symbols
 #define bfd_pef_bfd_link_just_syms                  _bfd_generic_link_just_syms
 #define bfd_pef_bfd_copy_link_hash_symbol_type \

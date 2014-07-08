@@ -8652,7 +8652,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       bfd *startbfd = NULL;
 
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
         {
           /* Consider only VMS object files.  */
           if (sub->xvec != abfd->xvec)
@@ -8756,7 +8756,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     dmt = NULL;
 
   /* Read all sections from the inputs.  */
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       if (sub->flags & DYNAMIC)
         {
@@ -8807,7 +8807,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
           unsigned int off = 0;
 
           /* For each object file (ie for each module).  */
-          for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+          for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
             {
               asection *sub_dst;
               struct vms_dmt_header *dmth = NULL;
@@ -9239,7 +9239,6 @@ bfd_vms_get_data (bfd *abfd)
   _bfd_generic_section_already_linked
 
 #define alpha_vms_bfd_define_common_symbol bfd_generic_define_common_symbol
-#define alpha_vms_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define alpha_vms_bfd_link_just_syms _bfd_generic_link_just_syms
 #define alpha_vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type

@@ -77,7 +77,6 @@ case "${target}" in
 			;;
   arm*-*-mingw32ce*)	srv_regobj=reg-arm.o
 			srv_tgtobj="win32-low.o win32-arm-low.o"
-			srv_tgtobj="${srv_tgtobj} safe-ctype.o lbasename.o"
 			srv_tgtobj="${srv_tgtobj} wincecompat.o"
 			# hostio_last_error implementation is in win32-low.c
 			srv_hostio_err_objs=""
@@ -100,8 +99,7 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			;;
   i[34567]86-*-cygwin*)	srv_regobj="$srv_i386_regobj"
-			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
-			srv_tgtobj="${srv_tgtobj} safe-ctype.o lbasename.o"
+			srv_tgtobj="i386-low.o i386-dregs.o win32-low.o win32-i386-low.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			;;
   i[34567]86-*-linux*)	srv_regobj="$srv_i386_linux_regobj"
@@ -110,7 +108,7 @@ case "${target}" in
 			    srv_regobj="$srv_regobj $srv_amd64_linux_regobj"
 			    srv_xmlfiles="${srv_xmlfiles} $srv_amd64_linux_xmlfiles"
 			fi
-			srv_tgtobj="$srv_linux_obj linux-x86-low.o i386-low.o i387-fp.o"
+			srv_tgtobj="$srv_linux_obj linux-x86-low.o i386-low.o i386-dregs.o i387-fp.o"
 			srv_tgtobj="${srv_tgtobj} linux-btrace.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
@@ -127,8 +125,7 @@ case "${target}" in
 			;;
   i[34567]86-*-mingw32ce*)
 			srv_regobj="$srv_i386_regobj"
-			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
-			srv_tgtobj="${srv_tgtobj} safe-ctype.o lbasename.o"
+			srv_tgtobj="i386-low.o i386-dregs.o win32-low.o win32-i386-low.o"
 			srv_tgtobj="${srv_tgtobj} wincecompat.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			# hostio_last_error implementation is in win32-low.c
@@ -137,8 +134,7 @@ case "${target}" in
 			srv_mingwce=yes
 			;;
   i[34567]86-*-mingw*)	srv_regobj="$srv_i386_regobj"
-			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
-			srv_tgtobj="${srv_tgtobj} safe-ctype.o lbasename.o"
+			srv_tgtobj="i386-low.o i386-dregs.o win32-low.o win32-i386-low.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			srv_mingw=yes
 			;;
@@ -319,7 +315,7 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			;;
   x86_64-*-linux*)	srv_regobj="$srv_amd64_linux_regobj $srv_i386_linux_regobj"
-			srv_tgtobj="$srv_linux_obj linux-x86-low.o i386-low.o i387-fp.o"
+			srv_tgtobj="$srv_linux_obj linux-x86-low.o i386-low.o i386-dregs.o i387-fp.o"
 			srv_tgtobj="${srv_tgtobj} linux-btrace.o"
 			srv_xmlfiles="$srv_i386_linux_xmlfiles $srv_amd64_linux_xmlfiles"
 			srv_linux_usrregs=yes # This is for i386 progs.
@@ -329,14 +325,12 @@ case "${target}" in
 			ipa_obj="${ipa_amd64_linux_regobj} linux-amd64-ipa.o"
 			;;
   x86_64-*-mingw*)	srv_regobj="$srv_amd64_regobj"
-			srv_tgtobj="i386-low.o i387-fp.o win32-low.o win32-i386-low.o"
-			srv_tgtobj="${srv_tgtobj} safe-ctype.o lbasename.o"
+			srv_tgtobj="i386-low.o i386-dregs.o i387-fp.o win32-low.o win32-i386-low.o"
 			srv_xmlfiles="$srv_i386_xmlfiles $srv_amd64_xmlfiles"
 			srv_mingw=yes
 			;;
   x86_64-*-cygwin*)	srv_regobj="$srv_amd64_regobj"
-			srv_tgtobj="i386-low.o i387-fp.o win32-low.o win32-i386-low.o"
-			srv_tgtobj="${srv_tgtobj} safe-ctype.o lbasename.o"
+			srv_tgtobj="i386-low.o i386-dregs.o i387-fp.o win32-low.o win32-i386-low.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			;;
 

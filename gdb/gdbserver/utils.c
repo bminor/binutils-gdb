@@ -55,27 +55,6 @@ xstrdup (const char *s)
   return ret;
 }
 
-#ifndef IN_PROCESS_AGENT
-
-/* Free a standard argv vector.  */
-
-void
-freeargv (char **vector)
-{
-  char **scan;
-
-  if (vector != NULL)
-    {
-      for (scan = vector; *scan != NULL; scan++)
-	{
-	  free (*scan);
-	}
-      free (vector);
-    }
-}
-
-#endif
-
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
    Then return to command level.  */

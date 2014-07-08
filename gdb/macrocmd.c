@@ -38,7 +38,7 @@ macro_command (char *arg, int from_tty)
 {
   printf_unfiltered
     ("\"macro\" must be followed by the name of a macro command.\n");
-  help_list (macrolist, "macro ", -1, gdb_stdout);
+  help_list (macrolist, "macro ", all_commands, gdb_stdout);
 }
 
 

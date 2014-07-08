@@ -130,7 +130,7 @@ record_unpush (struct target_ops *t)
 /* See record.h.  */
 
 void
-record_disconnect (struct target_ops *t, char *args, int from_tty)
+record_disconnect (struct target_ops *t, const char *args, int from_tty)
 {
   gdb_assert (t->to_stratum == record_stratum);
 
@@ -285,8 +285,7 @@ info_record_command (char *args, int from_tty)
     }
 
   printf_filtered (_("Active record target: %s\n"), t->to_shortname);
-  if (t->to_info_record != NULL)
-    t->to_info_record (t);
+  t->to_info_record (t);
 }
 
 /* The "record save" command.  */
@@ -311,13 +310,10 @@ cmd_record_save (char *args, int from_tty)
   target_save_record (recfilename);
 }
 
-/* "record goto" command.  Argument is an instruction number,
-   as given by "info record".
-
-   Rewinds the recording (forward or backward) to the given instruction.  */
+/* See record.h.  */
 
 void
-cmd_record_goto (char *arg, int from_tty)
+record_goto (const char *arg)
 {
   ULONGEST insn;
 
@@ -328,6 +324,17 @@ cmd_record_goto (char *arg, int from_tty)
 
   require_record_target ();
   target_goto_record (insn);
+}
+
+/* "record goto" command.  Argument is an instruction number,
+   as given by "info record".
+
+   Rewinds the recording (forward or backward) to the given instruction.  */
+
+static void
+cmd_record_goto (char *arg, int from_tty)
+{
+  record_goto (arg);
 }
 
 /* The "record goto begin" command.  */

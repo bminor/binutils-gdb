@@ -97,7 +97,7 @@ int debug_memory = 0;
 int verbose = 0;
 
 /* Keep the output file.  */
-int keep_it = 0;
+static int keep_it = 0;
 
 segT reg_section;
 segT expr_section;
@@ -1283,20 +1283,45 @@ main (int argc, char ** argv)
      directives from the user or by the backend, emit it now.  */
   cfi_finish ();
 
-  if (seen_at_least_1_file ()
-      && (flag_always_generate_output || had_errors () == 0))
-    keep_it = 1;
-  else
-    keep_it = 0;
+  keep_it = 0;
+  if (seen_at_least_1_file ())
+    {
+      int n_warns, n_errs;
+      char warn_msg[50];
+      char err_msg[50];
 
-  /* This used to be done at the start of write_object_file in
-     write.c, but that caused problems when doing listings when
-     keep_it was zero.  This could probably be moved above md_end, but
-     I didn't want to risk the change.  */
-  subsegs_finish ();
+      write_object_file ();
 
-  if (keep_it)
-    write_object_file ();
+      n_warns = had_warnings ();
+      n_errs = had_errors ();
+
+      if (n_warns == 1)
+	sprintf (warn_msg, _("%d warning"), n_warns);
+      else
+	sprintf (warn_msg, _("%d warnings"), n_warns);
+      if (n_errs == 1)
+	sprintf (err_msg, _("%d error"), n_errs);
+      else
+	sprintf (err_msg, _("%d errors"), n_errs);
+
+      if (flag_fatal_warnings && n_warns != 0)
+	{
+	  if (n_errs == 0)
+	    as_bad (_("%s, treating warnings as errors"), warn_msg);
+	  n_errs += n_warns;
+	}
+
+      if (n_errs == 0)
+	keep_it = 1;
+      else if (flag_always_generate_output)
+	{
+	  /* The -Z flag indicates that an object file should be generated,
+	     regardless of warnings and errors.  */
+	  keep_it = 1;
+	  fprintf (stderr, _("%s, %s, generating bad object file\n"),
+		   err_msg, warn_msg);
+	}
+    }
 
   fflush (stderr);
 
@@ -1304,19 +1329,13 @@ main (int argc, char ** argv)
   listing_print (listing_filename, argv_orig);
 #endif
 
-  if (flag_fatal_warnings && had_warnings () > 0 && had_errors () == 0)
-    as_bad (_("%d warnings, treating warnings as errors"), had_warnings ());
-
-  if (had_errors () > 0 && ! flag_always_generate_output)
-    keep_it = 0;
-
   input_scrub_end ();
 
   END_PROGRESS (myname);
 
   /* Use xexit instead of return, because under VMS environments they
      may not place the same interpretation on the value given.  */
-  if (had_errors () > 0)
+  if (had_errors () != 0)
     xexit (EXIT_FAILURE);
 
   /* Only generate dependency file if assembler was successful.  */

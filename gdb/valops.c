@@ -3712,7 +3712,7 @@ struct value *
 value_of_this (const struct language_defn *lang)
 {
   struct symbol *sym;
-  struct block *b;
+  const struct block *b;
   struct frame_info *frame;
 
   if (!lang->la_name_of_this)

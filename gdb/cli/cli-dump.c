@@ -160,14 +160,14 @@ static void
 dump_command (char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump\" must be followed by a subcommand.\n\n"));
-  help_list (dump_cmdlist, "dump ", -1, gdb_stdout);
+  help_list (dump_cmdlist, "dump ", all_commands, gdb_stdout);
 }
 
 static void
 append_command (char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"append\" must be followed by a subcommand.\n\n"));
-  help_list (dump_cmdlist, "append ", -1, gdb_stdout);
+  help_list (dump_cmdlist, "append ", all_commands, gdb_stdout);
 }
 
 static void
@@ -626,35 +626,36 @@ static void
 srec_dump_command (char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump srec\" must be followed by a subcommand.\n");
-  help_list (srec_cmdlist, "dump srec ", -1, gdb_stdout);
+  help_list (srec_cmdlist, "dump srec ", all_commands, gdb_stdout);
 }
 
 static void
 ihex_dump_command (char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump ihex\" must be followed by a subcommand.\n");
-  help_list (ihex_cmdlist, "dump ihex ", -1, gdb_stdout);
+  help_list (ihex_cmdlist, "dump ihex ", all_commands, gdb_stdout);
 }
 
 static void
 tekhex_dump_command (char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump tekhex\" must be followed by a subcommand.\n");
-  help_list (tekhex_cmdlist, "dump tekhex ", -1, gdb_stdout);
+  help_list (tekhex_cmdlist, "dump tekhex ", all_commands, gdb_stdout);
 }
 
 static void
 binary_dump_command (char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump binary\" must be followed by a subcommand.\n");
-  help_list (binary_dump_cmdlist, "dump binary ", -1, gdb_stdout);
+  help_list (binary_dump_cmdlist, "dump binary ", all_commands, gdb_stdout);
 }
 
 static void
 binary_append_command (char *cmd, int from_tty)
 {
   printf_unfiltered ("\"append binary\" must be followed by a subcommand.\n");
-  help_list (binary_append_cmdlist, "append binary ", -1, gdb_stdout);
+  help_list (binary_append_cmdlist, "append binary ", all_commands,
+	     gdb_stdout);
 }
 
 extern initialize_file_ftype _initialize_cli_dump; /* -Wmissing-prototypes */

@@ -665,8 +665,8 @@ extern void *frame_obstack_zalloc (unsigned long size);
 /* Create a regcache, and copy the frame's registers into it.  */
 struct regcache *frame_save_as_regcache (struct frame_info *this_frame);
 
-extern struct block *get_frame_block (struct frame_info *,
-                                      CORE_ADDR *addr_in_block);
+extern const struct block *get_frame_block (struct frame_info *,
+					    CORE_ADDR *addr_in_block);
 
 /* Return the `struct block' that belongs to the selected thread's
    selected frame.  If the inferior has no state, return NULL.
@@ -694,7 +694,7 @@ extern struct block *get_frame_block (struct frame_info *,
    it occurs in the CLI code and makes it possible for commands to
    work, even when the inferior has no state.  */
 
-extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
+extern const struct block *get_selected_block (CORE_ADDR *addr_in_block);
 
 extern struct symbol *get_frame_function (struct frame_info *);
 

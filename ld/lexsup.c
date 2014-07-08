@@ -1107,7 +1107,11 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case 'h':		/* Used on Solaris.  */
 	case OPTION_SONAME:
-	  command_line.soname = optarg;
+	  if (optarg[0] == '\0' && command_line.soname
+	      && command_line.soname[0])
+	    einfo (_("%P: SONAME must not be empty string; keeping previous one\n"));
+	  else
+	    command_line.soname = optarg;
 	  break;
 	case OPTION_SORT_COMMON:
 	  if (optarg == NULL
@@ -1441,6 +1445,12 @@ parse_args (unsigned argc, char **argv)
           }
           break;
 	}
+    }
+
+  if (command_line.soname && command_line.soname[0] == '\0')
+    {
+      einfo (_("%P: SONAME must not be empty string; ignored\n"));
+      command_line.soname = NULL;
     }
 
   while (ingroup)

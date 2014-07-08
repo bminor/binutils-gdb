@@ -1,3 +1,129 @@
+2014-07-08  Will Newton  <will.newton@linaro.org>
+
+	* emulparams/armelf_linux.sh (TEXT_START_ADDR): Increase
+	alignment to 64kB boundary.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Update "configure.in" comments.
+	* configure: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Rename from configure.in.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Include bfd/version.m4.
+	(AC_INIT, AM_INIT_AUTOMAKE): Use modern form.
+	(BFD_VERSION): Delete.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Remove bfd/configure.in.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
+2014-07-03  Alan Modra  <amodra@gmail.com>
+
+	PR 17068
+	* ldlang.c (load_symbols): Always check flags.reload.
+	(open_input_bfds): Always reload --as-needed shared libraries,
+	not just when rescanning.
+	* ldlang.h (struct lang_input_statement_flags): Update reload comment.
+	* plugin.c (plugin_should_reload): Assume shared library arg.
+	* plugin.h (plugin_should_reload): Update comment.
+
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (stub_added): Delete.
+	(gld${EMULATION_NAME}_finish): Call ppc64_elf_build_stubs even when
+	none of the usual stubs have been added.  Only change entry_section
+	for ELFv1.
+
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h: Don't include limits.h and sys/param.h.  Don't
+	include unistd.h twice.
+	(LD_PATHMAX): Don't define.
+	* ldlang.c (lang_common): Don't use UINT_MAX.
+
+2014-07-01  Barney Stratford  <barney_stratford@fastmail.fm>
+            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+            Soundararajan  <Sounderarajan.D@atmel.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add avrtiny emulation source.
+	(eavrtiny.c): Add rules for avrtiny emulation source.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add avrtiny to avr target emulations.
+	* scripttempl/avrtiny.sc: New file.  Linker script template for
+	avrtiny arch.
+	* emulparams/avrtiny.sh: New file.  Emulation parameters for
+	avrtiny arch.
+
+2014-06-30  Ulrich Drepper  <drepper@gmail.com>
+
+	* lexsup.c (parse_args): Check whether provided SONAME is empty
+	string.  If yes, warn and ignore it.  Don't overwrite valid SONAME
+	with empty string.
+
+2014-06-26  Linda Zhang  <lindasc@qq.com>
+
+	* emultempl/pe.em: Initialise insert_timestamp to true.
+	Add a --no-insert-timestamp command line option.
+	* emultempl/pep.em: Likewise.
+	* ld.texinfo: Document that --insert-timestamp is enabled by
+	default and that it now has an inverse command line option.
+	* NEWS: Mention the new behaviour.
+
+2014-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Move ei386pep.c from
+	here...
+	(ALL_64_EMULATION_SOURCES): ... to here.
+	(ALL_EMUL_EXTRA_OFILES): Move pep-dll.o from here...
+	(ALL_64_EMUL_EXTRA_OFILES): New.  ... to here.
+	* configure.in (EMUL_EXTRA_OFILES): Include
+	ALL_64_EMUL_EXTRA_OFILES when making a 64-bit enabled build.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2014-06-18  Andreas Tobler  <andreast@fgznet.ch>
+
+	* configure.tgt (arm*-*-freebsd*): Update targ_extra_emuls.
+	(arm*b-*-freebsd*): Add target.
+	* emulparams/armelfb_fbsd.sh: Added.
+	* emulparams/armelf_fbsd.sh: Updated.
+	* Makefile.am (ALL_EMULATION_SOURCES): Add earmelfb_fbsd.c.
+	* Makefile.in: Regenerate.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/elf.sc: Edit out __rela_iplt symbol assignments from
+	.rel sections, and __rel_iplt from .rela sections.
+	* scripttempl/nds32elf.sc: Likewise.
+	* Makefile.am (ends32*.c) Depend on nds32elf.sc.
+	* Makefile.in: Regenerate.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
+	PR 17047
+	* ldlang.c (output_bfd_hash_table_free_fn): Delete.
+	(open_output): Don't set it..
+	* ldmain.c (ld_cleanup): ..or call it.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/cr16elf.em, * emultempl/elf32.em, * emultempl/genelf.em,
+	* emultempl/m68kcoff.em, * emultempl/m68kelf.em,
+	* emultempl/nds32elf.em, * emultempl/pe.em, * emultempl/pep.em,
+	* ldlang.c, * ldmain.c, * pe-dll.c: Update for bfd.link_next change.
+
+2014-06-13  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add enios2elf.c, enios2linux.c.
+	* Makefile.in: Regenerate.
+
 2014-06-07  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (exp_fold_tree_1 <etree_provide>): Make PROVIDEd

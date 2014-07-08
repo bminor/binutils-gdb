@@ -154,7 +154,8 @@ struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
 static struct breakpoint *
   momentary_breakpoint_from_master (struct breakpoint *orig,
 				    enum bptype type,
-				    const struct breakpoint_ops *ops);
+				    const struct breakpoint_ops *ops,
+				    int loc_enabled);
 
 static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
@@ -2665,8 +2666,8 @@ insert_bp_location (struct bp_location *bl,
 	  if ((bp_err == GENERIC_ERROR || bp_err == MEMORY_ERROR)
 	      && bl->loc_type == bp_loc_software_breakpoint
 	      && (solib_name_from_address (bl->pspace, bl->address)
-		  || userloaded_objfile_contains_address_p (bl->pspace,
-							    bl->address)))
+		  || shared_objfile_contains_address_p (bl->pspace,
+							bl->address)))
 	    {
 	      /* See also: disable_breakpoints_in_shlibs.  */
 	      bl->shlib_disabled = 1;
@@ -3805,7 +3806,7 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
 	     whether another dynamic object might have loaded over the
 	     breakpoint's address -- the user might well let us know
 	     about it next with add-symbol-file (the whole point of
-	     OBJF_USERLOADED is letting the user manually maintain a
+	     add-symbol-file is letting the user manually maintain a
 	     list of dynamically loaded objects).  If we have the
 	     breakpoint's shadow memory, that is, this is a software
 	     breakpoint managed by GDB, check whether the breakpoint
@@ -3878,8 +3879,8 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
 	  && (bl->loc_type == bp_loc_software_breakpoint
 	      && (bl->shlib_disabled
 		  || solib_name_from_address (bl->pspace, bl->address)
-		  || userloaded_objfile_contains_address_p (bl->pspace,
-							    bl->address))))
+		  || shared_objfile_contains_address_p (bl->pspace,
+							bl->address))))
 	val = 0;
 
       if (val)
@@ -7390,7 +7391,7 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 	/* longjmp_breakpoint_ops ensures INITIATING_FRAME is cleared again
 	   after their removal.  */
 	clone = momentary_breakpoint_from_master (b, type,
-						  &longjmp_breakpoint_ops);
+						  &longjmp_breakpoint_ops, 1);
 	clone->thread = thread;
       }
 
@@ -7440,7 +7441,8 @@ set_longjmp_breakpoint_for_call_dummy (void)
 	struct breakpoint *new_b;
 
 	new_b = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
-						  &momentary_breakpoint_ops);
+						  &momentary_breakpoint_ops,
+						  1);
 	new_b->thread = pid_to_thread_id (inferior_ptid);
 
 	/* Link NEW_B into the chain of RETVAL breakpoints.  */
@@ -7458,7 +7460,7 @@ set_longjmp_breakpoint_for_call_dummy (void)
 }
 
 /* Verify all existing dummy frames and their associated breakpoints for
-   THREAD.  Remove those which can no longer be found in the current frame
+   TP.  Remove those which can no longer be found in the current frame
    stack.
 
    You should call this function only at places where it is safe to currently
@@ -7466,12 +7468,12 @@ set_longjmp_breakpoint_for_call_dummy (void)
    frames.  */
 
 void
-check_longjmp_breakpoint_for_call_dummy (int thread)
+check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
 {
   struct breakpoint *b, *b_tmp;
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
-    if (b->type == bp_longjmp_call_dummy && b->thread == thread)
+    if (b->type == bp_longjmp_call_dummy && b->thread == tp->num)
       {
 	struct breakpoint *dummy_b = b->related_breakpoint;
 
@@ -7481,7 +7483,7 @@ check_longjmp_breakpoint_for_call_dummy (int thread)
 	    || frame_find_by_id (dummy_b->frame_id) != NULL)
 	  continue;
 	
-	dummy_frame_discard (dummy_b->frame_id);
+	dummy_frame_discard (dummy_b->frame_id, tp->ptid);
 
 	while (b->related_breakpoint != b)
 	  {
@@ -7533,7 +7535,7 @@ set_std_terminate_breakpoint (void)
 	&& b->type == bp_std_terminate_master)
       {
 	momentary_breakpoint_from_master (b, bp_std_terminate,
-					  &momentary_breakpoint_ops);
+					  &momentary_breakpoint_ops, 1);
       }
 }
 
@@ -7729,18 +7731,19 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
   if (objfile == NULL)
     return;
 
-  /* OBJF_USERLOADED are dynamic modules manually managed by the user
-     with add-symbol-file/remove-symbol-file.  Similarly to how
-     breakpoints in shared libraries are handled in response to
-     "nosharedlibrary", mark breakpoints in OBJF_USERLOADED modules
+  /* OBJF_SHARED|OBJF_USERLOADED objfiles are dynamic modules manually
+     managed by the user with add-symbol-file/remove-symbol-file.
+     Similarly to how breakpoints in shared libraries are handled in
+     response to "nosharedlibrary", mark breakpoints in such modules
      shlib_disabled so they end up uninserted on the next global
      location list update.  Shared libraries not loaded by the user
      aren't handled here -- they're already handled in
      disable_breakpoints_in_unloaded_shlib, called by solib.c's
      solib_unloaded observer.  We skip objfiles that are not
-     OBJF_USERLOADED (nor OBJF_SHARED) as those aren't considered
-     dynamic objects (e.g. the main objfile).  */
-  if ((objfile->flags & OBJF_USERLOADED) == 0)
+     OBJF_SHARED as those aren't considered dynamic objects (e.g. the
+     main objfile).  */
+  if ((objfile->flags & OBJF_SHARED) == 0
+      || (objfile->flags & OBJF_USERLOADED) == 0)
     return;
 
   ALL_BREAKPOINTS (b)
@@ -9051,13 +9054,14 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
 }
 
 /* Make a momentary breakpoint based on the master breakpoint ORIG.
-   The new breakpoint will have type TYPE, and use OPS as it
-   breakpoint_ops.  */
+   The new breakpoint will have type TYPE, use OPS as its
+   breakpoint_ops, and will set enabled to LOC_ENABLED.  */
 
 static struct breakpoint *
 momentary_breakpoint_from_master (struct breakpoint *orig,
 				  enum bptype type,
-				  const struct breakpoint_ops *ops)
+				  const struct breakpoint_ops *ops,
+				  int loc_enabled)
 {
   struct breakpoint *copy;
 
@@ -9073,6 +9077,7 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   copy->loc->probe = orig->loc->probe;
   copy->loc->line_number = orig->loc->line_number;
   copy->loc->symtab = orig->loc->symtab;
+  copy->loc->enabled = loc_enabled;
   copy->frame_id = orig->frame_id;
   copy->thread = orig->thread;
   copy->pspace = orig->pspace;
@@ -9095,7 +9100,7 @@ clone_momentary_breakpoint (struct breakpoint *orig)
   if (orig == NULL)
     return NULL;
 
-  return momentary_breakpoint_from_master (orig, orig->type, orig->ops);
+  return momentary_breakpoint_from_master (orig, orig->type, orig->ops, 0);
 }
 
 struct breakpoint *
@@ -10099,8 +10104,8 @@ resolve_sal_pc (struct symtab_and_line *sal)
 
   if (sal->section == 0 && sal->symtab != NULL)
     {
-      struct blockvector *bv;
-      struct block *b;
+      const struct blockvector *bv;
+      const struct block *b;
       struct symbol *sym;
 
       bv = blockvector_for_pc_sect (sal->pc, 0, &b, sal->symtab);
@@ -16056,8 +16061,7 @@ static struct cmd_list_element *tcatch_cmdlist;
 
 void
 add_catch_command (char *name, char *docstring,
-		   void (*sfunc) (char *args, int from_tty,
-				  struct cmd_list_element *command),
+		   cmd_sfunc_ftype *sfunc,
 		   completer_ftype *completer,
 		   void *user_data_catch,
 		   void *user_data_tcatch)
@@ -16093,7 +16097,7 @@ save_command (char *arg, int from_tty)
 {
   printf_unfiltered (_("\"save\" must be followed by "
 		       "the name of a save subcommand.\n"));
-  help_list (save_cmdlist, "save ", -1, gdb_stdout);
+  help_list (save_cmdlist, "save ", all_commands, gdb_stdout);
 }
 
 struct breakpoint *

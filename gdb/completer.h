@@ -20,7 +20,7 @@
 #include "gdb_vecs.h"
 
 extern VEC (char_ptr) *complete_line (const char *text,
-				      char *line_buffer,
+				      const char *line_buffer,
 				      int point);
 
 extern char *readline_line_completion_function (const char *text,

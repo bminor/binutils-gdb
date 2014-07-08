@@ -462,7 +462,7 @@ info_guile_command (char *args, int from_tty)
 {
   printf_unfiltered (_("\"info guile\" must be followed"
 		       " by the name of an info command.\n"));
-  help_list (info_guile_list, "info guile ", -1, gdb_stdout);
+  help_list (info_guile_list, "info guile ", all_commands, gdb_stdout);
 }
 
 /* Initialization.  */

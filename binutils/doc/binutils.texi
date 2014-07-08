@@ -2665,6 +2665,7 @@ strings [@option{-afovV}] [@option{-}@var{min-len}]
         [@option{-e} @var{encoding}] [@option{--encoding=}@var{encoding}]
         [@option{-}] [@option{--all}] [@option{--print-file-name}]
         [@option{-T} @var{bfdname}] [@option{--target=}@var{bfdname}]
+        [@option{-w}] [@option{--include-all-whitespace}]
         [@option{--help}] [@option{--version}] @var{file}@dots{}
 @c man end
 @end smallexample
@@ -2736,6 +2737,13 @@ Specify an object code format other than your system's default format.
 @itemx -V
 @itemx --version
 Print the program version number on the standard output and exit.
+
+@item -w
+@itemx --include-all-whitespace
+By default tab and space characters are included in the strings that
+are displayed, but other whitespace characters, such a newlines and
+carriage returns, are not.  The @option{-w} option changes this so
+that all whitespace characters are considered to be part of a string.
 @end table
 
 @c man end
@@ -3206,26 +3214,33 @@ standard input, and prints the file name and line number for each
 address on standard output.  In this mode, @command{addr2line} may be used
 in a pipe to convert dynamically chosen addresses.
 
-The format of the output is @samp{FILENAME:LINENO}.  The file name and
-line number for each input address is printed on separate lines.
+The format of the output is @samp{FILENAME:LINENO}.  By default
+each input address generates one line of output.
 
-If the @option{-f} option is used, then each @samp{FILENAME:LINENO}
-line is preceded by @samp{FUNCTIONNAME} which is the name of the
-function containing the address.
+Two options can generate additional lines before each
+@samp{FILENAME:LINENO} line (in that order).
+
+If the @option{-a} option is used then a line with the input address
+is displayed.
+
+If the @option{-f} option is used, then a line with the
+@samp{FUNCTIONNAME} is displayed.  This is the name of the function
+containing the address.
+
+One option can generate additional lines after the
+@samp{FILENAME:LINENO} line.
 
 If the @option{-i} option is used and the code at the given address is
-present there because of inlining by the compiler then the
-@samp{@{FUNCTIONNAME@} FILENAME:LINENO} information for the inlining
-function will be displayed afterwards.  This continues recursively
-until there is no more inlining to report.
+present there because of inlining by the compiler then additional
+lines are displayed afterwards.  One or two extra lines (if the
+@option{-f} option is used) are displayed for each inlined function.
 
-If the @option{-a} option is used then the output is prefixed by the
-input address.
-
-If the @option{-p} option is used then the output for each input
-address is displayed on one, possibly quite long, line.  If
-@option{-p} is not used then the output is broken up into multiple
-lines, based on the paragraphs above.
+Alternatively if the @option{-p} option is used then each input
+address generates a single, long, output line containing the address,
+the function name, the file name and the line number.  If the
+@option{-i} option has also been used then any inlined functions will
+be displayed in the same manner, but on separate lines, and prefixed
+by the text @samp{(inlined by)}.
 
 If the file name or function name can not be determined,
 @command{addr2line} will print two question marks in their place.  If the

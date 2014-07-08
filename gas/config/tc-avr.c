@@ -89,6 +89,7 @@ static struct mcu_type_s mcu_types[] =
   {"avrxmega5",  AVR_ISA_XMEGA,   bfd_mach_avrxmega5},
   {"avrxmega6",  AVR_ISA_XMEGA,   bfd_mach_avrxmega6},
   {"avrxmega7",  AVR_ISA_XMEGA,   bfd_mach_avrxmega7},
+  {"avrtiny",    AVR_ISA_AVRTINY, bfd_mach_avrtiny},
   {"at90s1200",  AVR_ISA_1200,    bfd_mach_avr1},
   {"attiny11",   AVR_ISA_AVR1,    bfd_mach_avr1},
   {"attiny12",   AVR_ISA_AVR1,    bfd_mach_avr1},
@@ -323,6 +324,12 @@ static struct mcu_type_s mcu_types[] =
   {"atxmega128a1", AVR_ISA_XMEGA, bfd_mach_avrxmega7},
   {"atxmega128a1u", AVR_ISA_XMEGAU, bfd_mach_avrxmega7},
   {"atxmega128a4u", AVR_ISA_XMEGAU, bfd_mach_avrxmega7},
+  {"attiny4",      AVR_ISA_AVRTINY, bfd_mach_avrtiny},
+  {"attiny5",      AVR_ISA_AVRTINY, bfd_mach_avrtiny},
+  {"attiny9",      AVR_ISA_AVRTINY, bfd_mach_avrtiny},
+  {"attiny10",     AVR_ISA_AVRTINY, bfd_mach_avrtiny},
+  {"attiny20",     AVR_ISA_AVRTINY, bfd_mach_avrtiny},
+  {"attiny40",     AVR_ISA_AVRTINY, bfd_mach_avrtiny},
   {NULL, 0, 0}
 };
 
@@ -338,8 +345,8 @@ struct avr_opt_s
   int all_opcodes;  /* -mall-opcodes: accept all known AVR opcodes.  */
   int no_skip_bug;  /* -mno-skip-bug: no warnings for skipping 2-word insns.  */
   int no_wrap;      /* -mno-wrap: reject rjmp/rcall with 8K wrap-around.  */
-  int link_relax;   /* -mlink-relax: generate relocations for linker 
-                       relaxation. */
+  int link_relax;   /* -mlink-relax: generate relocations for linker
+                       relaxation.  */
 };
 
 static struct avr_opt_s avr_opt = { 0, 0, 0, 0 };
@@ -513,7 +520,7 @@ md_show_usage (FILE *stream)
 	"                   avrxmega5 - XMEGA, > 64K, <= 128K FLASH, > 64K RAM\n"
 	"                   avrxmega6 - XMEGA, > 128K, <= 256K FLASH, <= 64K RAM\n"
 	"                   avrxmega7 - XMEGA, > 128K, <= 256K FLASH, > 64K RAM\n"
-	"                   or immediate microcontroller name.\n"));
+	"                   avrtiny   - AVR Tiny core with 16 gp registers\n"));
   fprintf (stream,
       _("  -mall-opcodes    accept all AVR opcodes, even if not supported by MCU\n"
 	"  -mno-skip-bug    disable warnings for skipping two-word instructions\n"
@@ -854,30 +861,55 @@ avr_operand (struct avr_opcodes_s *opcode,
     case 'r':
     case 'a':
     case 'v':
-      if (*str == 'r' || *str == 'R')
-	{
-	  char r_name[20];
+      {
+        char * old_str = str;
+        char *lower;
+        char r_name[20];
 
-	  str = extract_word (str, r_name, sizeof (r_name));
-	  op_mask = 0xff;
-	  if (ISDIGIT (r_name[1]))
-	    {
-	      if (r_name[2] == '\0')
-		op_mask = r_name[1] - '0';
-	      else if (r_name[1] != '0'
-		       && ISDIGIT (r_name[2])
-		       && r_name[3] == '\0')
-		op_mask = (r_name[1] - '0') * 10 + r_name[2] - '0';
-	    }
-	}
-      else
-	{
-	  op_mask = avr_get_constant (str, 31);
-	  str = input_line_pointer;
-	}
+        str = extract_word (str, r_name, sizeof (r_name));
+        for (lower = r_name; *lower; ++lower)
+	  {
+	    if (*lower >= 'A' && *lower <= 'Z')
+	      *lower += 'a' - 'A';
+          }
 
-      if (op_mask <= 31)
-	{
+        if (r_name[0] == 'r' && ISDIGIT (r_name[1]) && r_name[2] == 0)
+          /* Single-digit register number, ie r0-r9.  */
+          op_mask = r_name[1] - '0';
+        else if (r_name[0] == 'r' && ISDIGIT (r_name[1])
+		 && ISDIGIT (r_name[2]) && r_name[3] == 0)
+          /* Double-digit register number, ie r10 - r32.  */
+          op_mask = (r_name[1] - '0') * 10 + r_name[2] - '0';
+        else if (r_name[0] >= 'x' && r_name[0] <= 'z'
+		 && (r_name[1] == 'l' || r_name[1] == 'h') && r_name[2] == 0)
+          /* Registers r26-r31 referred to by name, ie xl, xh, yl, yh, zl, zh.  */
+          op_mask = (r_name[0] - 'x') * 2 + (r_name[1] == 'h') + 26;
+        else if ((*op == 'v' || *op == 'w')
+		 && r_name[0] >= 'x' && r_name[0] <= 'z' && r_name[1] == 0)
+          /* For the movw and addiw instructions, refer to registers x, y and z by name.  */
+          op_mask = (r_name[0] - 'x') * 2 + 26;
+        else
+          {
+            /* Numeric or symbolic constant register number.  */
+            op_mask = avr_get_constant (old_str, 31);
+            str = input_line_pointer;
+          }
+      }
+
+      if (avr_mcu->mach == bfd_mach_avrtiny)
+        {
+          if (op_mask < 16 || op_mask > 31)
+            {
+              as_bad (_("register name or number from 16 to 31 required"));
+              break;
+            }
+        }
+      else if (op_mask > 31)
+        {
+          as_bad (_("register name or number from 0 to 31 required"));
+          break;
+        }
+
 	  switch (*op)
 	    {
 	    case 'a':
@@ -905,9 +937,6 @@ avr_operand (struct avr_opcodes_s *opcode,
 	      break;
 	    }
 	  break;
-	}
-      as_bad (_("register name or number from 0 to 31 required"));
-      break;
 
     case 'e':
       {
@@ -1014,6 +1043,12 @@ avr_operand (struct avr_opcodes_s *opcode,
 		   &op_expr, FALSE, BFD_RELOC_16);
       break;
 
+    case 'j':
+      str = parse_exp (str, &op_expr);
+      fix_new_exp (frag_now, where, opcode->insn_size * 2,
+		   &op_expr, FALSE, BFD_RELOC_AVR_LDS_STS_16);
+      break;
+
     case 'M':
       {
 	bfd_reloc_code_real_type r_type;
@@ -1058,23 +1093,15 @@ avr_operand (struct avr_opcodes_s *opcode,
       break;
 
     case 'P':
-      {
-	unsigned int x;
-
-	x = avr_get_constant (str, 63);
-	str = input_line_pointer;
-	op_mask |= (x & 0xf) | ((x & 0x30) << 5);
-      }
+      str = parse_exp (str, &op_expr);
+      fix_new_exp (frag_now, where, opcode->insn_size * 2,
+		     &op_expr, FALSE, BFD_RELOC_AVR_PORT6);
       break;
 
     case 'p':
-      {
-	unsigned int x;
-
-	x = avr_get_constant (str, 31);
-	str = input_line_pointer;
-	op_mask |= x << 3;
-      }
+      str = parse_exp (str, &op_expr);
+      fix_new_exp (frag_now, where, opcode->insn_size * 2,
+		     &op_expr, FALSE, BFD_RELOC_AVR_PORT5);
       break;
 
     case 'E':
@@ -1215,7 +1242,7 @@ relaxable_section (asection *sec)
   return (sec->flags & SEC_DEBUGGING) == 0;
 }
 
-/* Does whatever the xtensa port does. */
+/* Does whatever the xtensa port does.  */
 int
 avr_validate_fix_sub (fixS *fix)
 {
@@ -1245,7 +1272,7 @@ avr_validate_fix_sub (fixS *fix)
 
 /* If linkrelax is turned on, and the symbol to relocate
    against is in a relaxable segment, don't compute the value -
-   generate a relocation instead. */
+   generate a relocation instead.  */
 int
 avr_force_relocation (fixS *fix)
 {
@@ -1288,8 +1315,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
          expression. fixP->fx_addsy holds the section start symbol,
          fixP->fx_offset holds sym2's offset, and fixP->fx_subsy
          holds sym1. Calculate the current difference and write value,
-         but leave fx_offset as is - during relaxation, 
-         fx_offset - value gives sym1's value */
+         but leave fx_offset as is - during relaxation,
+         fx_offset - value gives sym1's value.  */
 
        switch (fixP->fx_r_type)
          {
@@ -1318,7 +1345,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 
   /* For the DIFF relocs, write the value into the object file while still
      keeping fx_done FALSE, as both the difference (recorded in the object file)
-     and the sym offset (part of fixP) are needed at link relax time */
+     and the sym offset (part of fixP) are needed at link relax time.  */
   where = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
   switch (fixP->fx_r_type)
     {
@@ -1415,11 +1442,21 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value), where);
 	  break;
 
+	case BFD_RELOC_AVR_LDS_STS_16:
+	  if ((value < 0x40) || (value > 0xBF))
+	    as_warn_where (fixP->fx_file, fixP->fx_line,
+			   _("operand out of range: 0x%lx"),
+			   (unsigned long)value);
+	  insn |= ((value & 0xF) | ((value & 0x30) << 5) | ((value & 0x40) << 2));
+	  bfd_putl16 ((bfd_vma) insn, where);
+	  break;
+
 	case BFD_RELOC_AVR_6:
 	  if ((value > 63) || (value < 0))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("operand out of range: %ld"), value);
-	  bfd_putl16 ((bfd_vma) insn | ((value & 7) | ((value & (3 << 3)) << 7) | ((value & (1 << 5)) << 8)), where);
+	  bfd_putl16 ((bfd_vma) insn | ((value & 7) | ((value & (3 << 3)) << 7)
+					| ((value & (1 << 5)) << 8)), where);
 	  break;
 
 	case BFD_RELOC_AVR_6_ADIW:
@@ -1516,6 +1553,20 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  as_fatal (_("line %d: unknown relocation type: 0x%x"),
 		    fixP->fx_line, fixP->fx_r_type);
 	  break;
+
+	case BFD_RELOC_AVR_PORT6:
+	  if (value > 63)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("operand out of range: %ld"), value);
+	  bfd_putl16 ((bfd_vma) insn | ((value & 0x30) << 5) | (value & 0x0f), where);
+	  break;
+
+	case BFD_RELOC_AVR_PORT5:
+	  if (value > 31)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("operand out of range: %ld"), value);
+	  bfd_putl16 ((bfd_vma) insn | ((value & 0x1f) << 3), where);
+	  break;
 	}
     }
   else
@@ -1594,6 +1645,28 @@ md_assemble (char *str)
 
   opcode = (struct avr_opcodes_s *) hash_find (avr_hash, op);
 
+  if (opcode && !avr_opt.all_opcodes)
+    {
+      /* Check if the instruction's ISA bit is ON in the ISA bits of the part
+         specified by the user.  If not look for other instructions
+	 specifications with same mnemonic who's ISA bits matches.
+
+         This requires include/opcode/avr.h to have the instructions with
+         same mnenomic to be specified in sequence.  */
+
+      while ((opcode->isa & avr_mcu->isa) != opcode->isa)
+        {
+          opcode++;
+
+          if (opcode->name && strcmp(op, opcode->name))
+            {
+              as_bad (_("illegal opcode %s for mcu %s"),
+                      opcode->name, avr_mcu->name);
+              return;
+            }
+        }
+    }
+
   if (opcode == NULL)
     {
       as_bad (_("unknown opcode `%s'"), op);
@@ -1605,9 +1678,6 @@ md_assemble (char *str)
 
   if (*str && *opcode->constraints == '?')
     ++opcode;
-
-  if (!avr_opt.all_opcodes && (opcode->isa & avr_mcu->isa) != opcode->isa)
-    as_bad (_("illegal opcode %s for mcu %s"), opcode->name, avr_mcu->name);
 
   dwarf2_emit_insn (0);
 
@@ -1735,10 +1805,10 @@ avr_cons_fix_new (fragS *frag,
 static bfd_boolean
 mcu_has_3_byte_pc (void)
 {
-  int mach = avr_mcu->mach; 
+  int mach = avr_mcu->mach;
 
-  return mach == bfd_mach_avr6 
-    || mach == bfd_mach_avrxmega6 
+  return mach == bfd_mach_avr6
+    || mach == bfd_mach_avrxmega6
     || mach == bfd_mach_avrxmega7;
 }
 
@@ -1762,7 +1832,7 @@ avr_allow_local_subtract (expressionS * left,
 			     expressionS * right,
 			     segT section)
 {
-  /* If we are not in relaxation mode, subtraction is OK. */
+  /* If we are not in relaxation mode, subtraction is OK.  */
   if (!linkrelax)
     return TRUE;
 

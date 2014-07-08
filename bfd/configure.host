@@ -20,7 +20,7 @@
 
 # Since the "bfd/hosts" directory is shared by the bfd, opcodes, and
 # binutils directories (at least), the index to it is also shared.
-# This is that index.  Each configure.in file should source this file
+# This is that index.  Each configure.ac file should source this file
 # in its per-host part.
 
 # This sets the following shell variables:

@@ -15,10 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see  <http://www.gnu.org/licenses/>.  */
 
-#include <iostream>
-
-using namespace std;
-
 namespace dop
 {
 
@@ -35,24 +31,30 @@ public:
 
 A::~A () { }
 
+int a_plus_a = 0;
+
 int
 A::operator+ (const A &obj)
 {
-  cout << "From CC <A_plus_A>:" << endl;
+  a_plus_a++;
   return a + obj.a;
 }
+
+int a_minus_a = 0;
 
 int
 A::operator- (const A &obj)
 {
-  cout << "From CC <A_minus_A>:" << endl;
+  a_minus_a++;
   return a - obj.a;
 }
+
+int a_geta = 0;
 
 int
 A::geta (void)
 {
-  cout << "From CC A::geta:" << endl;
+  a_geta++;
   return a;
 }
 
@@ -62,10 +64,12 @@ public:
   virtual int geta (void);
 };
 
+int b_geta = 0;
+
 int
 B::geta (void)
 {
-  cout << "From CC B::geta:" << endl;
+  b_geta++;
   return 2 * a;
 }
 
@@ -100,30 +104,36 @@ class G
   T t;
 };
 
+int g_size_diff = 0;
+
 template <typename T>
 template <typename T1>
 int
 G<T>::size_diff ()
 {
-  cout << "From CC G<>::size_diff:" << endl;
+  g_size_diff++;
   return sizeof (T1) - sizeof (T);
 }
+
+int g_size_mul = 0;
 
 template <typename T>
 template <int M>
 int
 G<T>::size_mul ()
 {
-  cout << "From CC G<>::size_mul:" << endl;
+  g_size_mul++;
   return M * sizeof (T);
 }
+
+int g_mul = 0;
 
 template <typename T>
 template <typename T1>
 T
 G<T>::mul (const T1 t1)
 {
-  cout << "From CC G<>::mul:" << endl;
+  g_mul++;
   return t1 * t;
 }
 

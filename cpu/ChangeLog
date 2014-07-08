@@ -1,3 +1,7 @@
+2014-06-12  Alan Modra  <amodra@gmail.com>
+
+	* or1k.opc: Whitespace fixes.
+
 2014-05-08  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
 
 	* or1korbis.cpu (h-atomic-reserve): New hardware.

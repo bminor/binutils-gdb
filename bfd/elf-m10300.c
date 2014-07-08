@@ -2679,7 +2679,7 @@ mn10300_elf_relax_section (bfd *abfd,
       /* Iterate over all the input bfds.  */
       for (input_bfd = link_info->input_bfds;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next)
+	   input_bfd = input_bfd->link.next)
 	{
 	  /* We're going to need all the symbols for each bfd.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -3022,7 +3022,7 @@ mn10300_elf_relax_section (bfd *abfd,
 	 a "call" instruction.  */
       for (input_bfd = link_info->input_bfds;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next)
+	   input_bfd = input_bfd->link.next)
 	{
 	  /* We're going to need all the local symbols for each bfd.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -4598,6 +4598,21 @@ _bfd_mn10300_copy_indirect_symbol (struct bfd_link_info *        info,
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
+/* Destroy an mn10300 ELF linker hash table.  */
+
+static void
+elf32_mn10300_link_hash_table_free (bfd *obfd)
+{
+  struct elf32_mn10300_link_hash_table *ret
+    = (struct elf32_mn10300_link_hash_table *) obfd->link.hash;
+
+  obfd->link.hash = &ret->static_hash_table->root.root;
+  _bfd_elf_link_hash_table_free (obfd);
+  obfd->is_linker_output = TRUE;
+  obfd->link.hash = &ret->root.root;
+  _bfd_elf_link_hash_table_free (obfd);
+}
+
 /* Create an mn10300 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -4609,17 +4624,6 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
-
-  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      elf32_mn10300_link_hash_newfunc,
-				      sizeof (struct elf32_mn10300_link_hash_entry),
-				      MN10300_ELF_DATA))
-    {
-      free (ret);
-      return NULL;
-    }
-
-  ret->tls_ldm_got.offset = -1;
 
   amt = sizeof (struct elf_link_hash_table);
   ret->static_hash_table = bfd_zmalloc (amt);
@@ -4638,21 +4642,25 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+
+  abfd->is_linker_output = FALSE;
+  abfd->link.hash = NULL;
+  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
+				      elf32_mn10300_link_hash_newfunc,
+				      sizeof (struct elf32_mn10300_link_hash_entry),
+				      MN10300_ELF_DATA))
+    {
+      abfd->is_linker_output = TRUE;
+      abfd->link.hash = &ret->static_hash_table->root.root;
+      _bfd_elf_link_hash_table_free (abfd);
+      free (ret);
+      return NULL;
+    }
+  ret->root.root.hash_table_free = elf32_mn10300_link_hash_table_free;
+
+  ret->tls_ldm_got.offset = -1;
+
   return & ret->root.root;
-}
-
-/* Free an mn10300 ELF linker hash table.  */
-
-static void
-elf32_mn10300_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf32_mn10300_link_hash_table *ret
-    = (struct elf32_mn10300_link_hash_table *) hash;
-
-  _bfd_elf_link_hash_table_free
-    ((struct bfd_link_hash_table *) ret->static_hash_table);
-  _bfd_elf_link_hash_table_free
-    ((struct bfd_link_hash_table *) ret);
 }
 
 static unsigned long
@@ -5581,8 +5589,6 @@ mn10300_elf_mkobject (bfd *abfd)
 				mn10300_elf_get_relocated_section_contents
 #define bfd_elf32_bfd_link_hash_table_create \
 				elf32_mn10300_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-				elf32_mn10300_link_hash_table_free
 
 #ifndef elf_symbol_leading_char
 #define elf_symbol_leading_char '_'

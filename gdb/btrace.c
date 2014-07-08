@@ -958,7 +958,7 @@ btrace_free_objfile (struct objfile *objfile)
 
   DEBUG ("free objfile");
 
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     btrace_clear (tp);
 }
 

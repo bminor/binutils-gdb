@@ -536,6 +536,7 @@ s_tic6x_ehtype (int ignored ATTRIBUTE_UNUSED)
     }
 
   p = frag_more (4);
+  memset (p, 0, 4);
   fix_new_exp (frag_now, p - frag_now->fr_literal, 4,
 	       &exp, 0, BFD_RELOC_C6000_EHTYPE);
 
@@ -3823,7 +3824,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  if (value < -0x80 || value > 0xff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("value too large for 1-byte field"));
-	  md_number_to_chars (buf, value, 1);
+	  *buf = value;
 	}
       break;
 
@@ -4835,6 +4836,7 @@ tic6x_output_exidx_entry (void)
   record_alignment (now_seg, 2);
 
   ptr = frag_more (8);
+  memset (ptr, 0, 8);
   where = frag_now_fix () - 8;
 
   /* Self relative offset of the function start.  */

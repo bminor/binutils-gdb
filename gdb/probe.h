@@ -230,7 +230,7 @@ extern VEC (probe_p) *find_probes_in_objfile (struct objfile *objfile,
    function that can be used by the probe backends to print their
    `info probe TYPE'.  */
 
-extern void info_probes_for_ops (char *arg, int from_tty,
+extern void info_probes_for_ops (const char *arg, int from_tty,
 				 const struct probe_ops *pops);
 
 /* Return the `cmd_list_element' associated with the `info probes' command,

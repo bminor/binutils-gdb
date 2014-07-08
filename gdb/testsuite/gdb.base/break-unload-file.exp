@@ -18,24 +18,46 @@
 
 standard_testfile
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
-if ![runto_main] then {
-    fail "Can't run to main"
-    return 0
-}
-
-# Run the test proper.  ALWAYS_INSERT determines whether
-# always-inserted mode is on/off, and BREAK_COMMAND is the break
-# command being tested.
+# Run the test proper.  INITIAL_LOAD determines whether the program is
+# initially loaded by the "file" command or by passing it to GDB on
+# the command line.  ALWAYS_INSERT determines whether always-inserted
+# mode is on/off.  BREAK_COMMAND is the break command being tested.
 #
-proc test_break { always_inserted break_command } {
-    global gdb_prompt binfile hex
+proc test_break { initial_load always_inserted break_command } {
+    global srcdir subdir binfile
+    global gdb_prompt hex
+    global GDBFLAGS
 
-    with_test_prefix "always-inserted $always_inserted: $break_command" {
-	clean_restart $binfile
+    append prefix "$initial_load: "
+    append prefix "always-inserted $always_inserted: "
+    append prefix "$break_command"
+    with_test_prefix "$prefix" {
+	gdb_exit
+
+	set saved_gdbflags $GDBFLAGS
+
+	# See "used to behave differently" further below.
+	if { $initial_load == "file" } {
+	    gdb_start
+	    gdb_file_cmd $binfile
+	} else {
+	    global last_loaded_file
+
+	    # gdb_file_cmd sets this.  This is what gdb_reload
+	    # implementations use as binary.
+	    set last_loaded_file $binfile
+
+	    set GDBFLAGS "$GDBFLAGS $binfile"
+	    gdb_start
+	}
+
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_reload
+	set GDBFLAGS $saved_gdbflags
 
 	if ![runto_main] then {
 	    fail "Can't run to main"
@@ -88,8 +110,12 @@ proc test_break { always_inserted break_command } {
 	    }
 	}
 
-	gdb_test "info break" "y.*PENDING.*foo" \
-	    "breakpoint is pending"
+	# This test used to behave differently depending on whether
+	# the program was first loaded through "file PROGRAM" or "gdb
+	# PROGRAM".
+	set ws "\[ \t\]"
+	gdb_test "info break" "breakpoint${ws}+keep${ws}+n${ws}+$hex${ws}*" \
+	    "breakpoint is disabled"
 
 	# Now delete the breakpoint from GDB's tables, to make sure
 	# GDB doesn't reinsert it, masking the bug (with the bug, on
@@ -118,11 +144,14 @@ proc test_break { always_inserted break_command } {
     }
 }
 
-# While it doesn't trigger the original bug this is a regression test
-# for, test with breakpoint always-inserted off for extra coverage.
-foreach always_inserted { "off" "on" } {
-    test_break $always_inserted "break"
-    if {![skip_hw_breakpoint_tests]} {
-	test_break $always_inserted "hbreak"
+foreach initial_load { "cmdline" "file" } {
+    # While it doesn't trigger the original bug this is a regression
+    # test for, test with breakpoint always-inserted off for extra
+    # coverage.
+    foreach always_inserted { "off" "on" } {
+	test_break $initial_load $always_inserted "break"
+	if {![skip_hw_breakpoint_tests]} {
+	    test_break $initial_load $always_inserted "hbreak"
+	}
     }
 }

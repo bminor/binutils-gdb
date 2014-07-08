@@ -112,6 +112,7 @@ static struct loc_assert_s
  {
    segT old_seg;
    symbolS *loc_sym;
+   fragS *frag;
    struct loc_assert_s *next;
  } *loc_asserts = NULL;
 
@@ -3560,6 +3561,15 @@ mmix_md_end (void)
 	  as_bad_where (fnam, line,
 			_("LOC to section unknown or indeterminable "
 			  "at first pass"));
+
+	  /* Patch up the generic location data to avoid cascading
+	     error messages from later passes.  (See original in
+	     write.c:relax_segment.)  */
+	  fragP = loc_assert->frag;
+	  fragP->fr_type = rs_align;
+	  fragP->fr_subtype = 0;
+	  fragP->fr_offset = 0;
+	  fragP->fr_fix = 0;
 	}
     }
 
@@ -4084,6 +4094,7 @@ s_loc (int ignore ATTRIBUTE_UNUSED)
 	  loc_asserts->next = next;
 	  loc_asserts->old_seg = now_seg;
 	  loc_asserts->loc_sym = esym;
+	  loc_asserts->frag = frag_now;
 	}
 
       p = frag_var (rs_org, 1, 1, (relax_substateT) 0, sym, off, (char *) 0);

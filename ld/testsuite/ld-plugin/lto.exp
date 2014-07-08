@@ -43,81 +43,81 @@ set lto_link_tests {
   {"LTO 1"
    "-O2 -flto -fuse-linker-plugin" "-flto -fuse-linker-plugin"
    {lto-1a.c lto-1b.c} {} "lto-1.exe"}
-  {"Build libdummy.a 2"
+  {"Compile 2"
    "" "-O2 -flto -fuse-linker-plugin"
-   {lto-2.c} {} "libdummy.a"}
+   {lto-2.c} {} ""}
   {"LTO 2"
    "-static -O2 -flto -fuse-linker-plugin tmpdir/lto-2.o -lm" ""
    {dummy.c} {} "lto-2.exe"}
-  {"Build libdummy.a 3a"
+  {"Compile 3a"
    "" "-flto"
-   {lto-3a.c} {} "libdummy.a"}
-  {"Build libdummy.a 3c"
+   {lto-3a.c} {} ""}
+  {"Compile 3c"
    "" "-O2"
-   {lto-3c.c} {} "libdummy.a"}
+   {lto-3c.c} {} ""}
   {"Build liblto-3.a"
    "" "-flto -ffat-lto-objects"
    {lto-3b.c} {} "liblto-3.a"}
-  {"Build libdummy.a 5a"
+  {"Compile 5a"
    "" "-flto"
-   {lto-5a.c} {} "libdummy.a"}
-  {"Build libdummy.a 5b"
+   {lto-5a.c} {} ""}
+  {"Compile 5b"
    "" "-flto"
-   {lto-5b.c} {} "libdummy.a"}
+   {lto-5b.c} {} ""}
   {"LTO 6"
    "-O2 -flto -fuse-linker-plugin" ""
    {lto-6.c} {} "lto-6.exe" "c"}
-  {"Build libdummy.a 9"
+  {"Compile 9"
    "" "-O2 -finline -flto"
-   {lto-9.cc} {} "libdummy.a" "c++"}
-  {"Build libdummy.a 11a"
+   {lto-9.cc} {} "" "c++"}
+  {"Compile 11a"
    "" "-O -flto"
-   {lto-11a.c} {} "libdummy.a"}
-  {"Build libdummy.a 11b"
+   {lto-11a.c} {} ""}
+  {"Compile 11b"
    "" "-O -flto"
-   {lto-11b.c} {} "libdummy.a"}
-  {"Build libdummy.a 11c"
+   {lto-11b.c} {} ""}
+  {"Compile 11c"
    "" "-O"
-   {lto-11c.c} {} "libdummy.a"}
+   {lto-11c.c} {} ""}
   {"Build liblto-12.a"
    "" "-O2 -flto"
    {lto-12c.c} {} "liblto-12.a"}
-  {"Build libdummy.a 12"
+  {"Compile 12"
    "" "-O2 -flto"
-   {lto-12a.c lto-12b.c} {} "libdummy.a"}
-  {"Build libdummy.a 13"
+   {lto-12a.c lto-12b.c} {} ""}
+  {"Compile 13"
    "" "-O2 -flto"
-   {lto-13a.c lto-13b.c} {} "libdummy.a"}
+   {lto-13a.c lto-13b.c} {} ""}
   {"Build liblto-13.a"
    "" "-O2"
    {lto-13c.c} {} "liblto-13.a"}
-  {"Build libdummy.a 14a"
+  {"Compile 14a"
    "" "-flto"
-   {lto-14a.c lto-14b.c} {} "libdummy.a"}
+   {lto-14a.c lto-14b.c} {} ""}
   {"Build liblto-14.a"
    "" "-flto"
    {lto-14c.c} {} "liblto-14.a"}
-  {"Build libdummy.a 15a"
+  {"Compile 15a"
    "" "-flto"
-   {lto-15a.c} {} "libdummy.a"}
+   {lto-15a.c} {} ""}
   {"Build liblto-15.a"
    "" "-flto"
    {lto-15b.c} {} "liblto-15.a"}
   {"PR ld/12696"
    "-O2 -flto -fuse-linker-plugin -r -nostdlib" "-O2 -flto"
    {pr12696-1.cc} {} "pr12696-1r.o" "c++"}
-  {"Build libdummy.a PR ld/12758"
+  {"Compile PR ld/12758"
    "" ""
-   {pr12758a.s} {} "libdummy.a"}
+   {pr12758a.s} {} ""}
   {"Build libpr12758.a"
    "" "-flto -O2 -ffat-lto-objects"
    {pr12758b.c} {} "libpr12758.a"}
   {"PR ld/12758"
    "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12758a.o -Wl,--start-group tmpdir/libpr12758.a -Wl,--end-group" ""
    {dummy.c} {} "pr12758.exe"}
-  {"Build libdummy.a PR ld/12760"
+  {"Compile PR ld/12760"
    "" "-g -O0"
-   {pr12760a.c} {} "libdummy.a"}
+   {pr12760a.c} {} ""}
   {"Build libpr12760.a"
    "" "-flto -O2 -ffat-lto-objects"
    {pr12760b.c} {} "libpr12760.a"}
@@ -127,24 +127,24 @@ set lto_link_tests {
   {"Build libpr13183.a"
    "-T" "-flto -O2 -ffat-lto-objects"
    {pr13183a.c} {} "libpr13183.a"}
-  {"Build libdummy.a PR ld/13183"
+  {"Compile PR ld/13183"
    "" "-flto -O2"
-   {pr13183b.c} {} "libdummy.a"}
-  {"Build libdummy.a PR ld/13201"
+   {pr13183b.c} {} ""}
+  {"Compile PR ld/13201"
    "" "-flto -O2"
-   {pr13201.c} {} "libdummy.a"}
+   {pr13201.c} {} ""}
   {"PR ld/13287"
    "-flto -fuse-linker-plugin -Wl,--as-needed" "-flto"
    {pr13287.cc} {} "pr13287.exe" "c++"}
   {"PR ld/15323"
    "" "-O2"
-   {pr15323a.c} {} "libdummy.a" "c"}
-  {"Build libdummy.a(1) PR ld/pr16846"
+   {pr15323a.c} {} "" "c"}
+  {"Compile(1) PR ld/pr16846"
    "" "-flto"
-   {pr16846a.c pr16846b.c} {} "libdummy.a"}
-  {"Build libdummy.a(2) PR ld/pr16846"
+   {pr16846a.c pr16846b.c} {} ""}
+  {"Compile(2) PR ld/pr16846"
    "" ""
-   {pr16846c.c} {} "libdummy.a"}
+   {pr16846c.c} {} ""}
   {"PR ld/pr16846(1)"
    "-flto -fuse-linker-plugin tmpdir/pr16846a.o tmpdir/pr16846b.o tmpdir/pr16846c.o" ""
    {dummy.c} {} "pr16846a.exe"}
@@ -155,29 +155,29 @@ set lto_link_tests {
 
 if { [at_least_gcc_version 4 7] } {
     set lto_link_tests [concat $lto_link_tests {
-      {"Build libdummy.a PR ld/12942 (1)"
+      {"Compile PR ld/12942 (1)"
        "" "-flto -O2"
-       {pr12942a.cc pr12942c.cc} {} "libdummy.a" "c++"}
-      {"Build libdummy.a PR ld/12942 (2)"
+       {pr12942a.cc pr12942c.cc} {} "" "c++"}
+      {"Compile PR ld/12942 (2)"
        "" "-O0"
-       {pr12942b.cc} {} "libdummy.a" "c++"}
+       {pr12942b.cc} {} "" "c++"}
     }]
 }
 
 # Generate input files for complex LTO tests for ELF.
 set lto_link_elf_tests {
-  {"Build libdummy.a 7"
+  {"Compile 7"
    "" "-flto -O2"
-   {lto-7a.c lto-7b.c lto-7c.c} {} "libdummy.a"}
+   {lto-7a.c lto-7b.c lto-7c.c} {} ""}
   {"Build liblto-7.so"
    "-shared" "-O2 -fpic"
    {lto-7d.c} {} "liblto-7.so" "c"}
-  {"Build libdummy.a 8a"
+  {"Compile 8a"
    "" "-O2"
-   {lto-8a.c} {} "libdummy.a"}
-  {"Build libdummy.a 8b"
+   {lto-8a.c} {} ""}
+  {"Compile 8b"
    "" "-flto -O2"
-   {lto-8b.c} {} "libdummy.a"}
+   {lto-8b.c} {} ""}
   {"Build liblto-17a.so"
    "-shared -O2 -fpic -flto -fuse-linker-plugin" "-O2 -fpic -flto"
    {lto-17a.c} {{"nm" {} "lto-17a.d"}} "liblto-17a.so" "c"}
@@ -314,7 +314,7 @@ run_cc_link_tests $lto_link_tests
 if { [is_elf_format] && [check_lto_shared_available] } {
     run_cc_link_tests $lto_link_elf_tests
     set testname "PR ld/15146 (2)"
-    set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
+    set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
     if { [ regexp "undefined reference to symbol 'xxx'" $exec_output ] } {
 	pass $testname
     } {
@@ -324,7 +324,20 @@ if { [is_elf_format] && [check_lto_shared_available] } {
 
 set testname "Build liblto-11.a"
 remote_file host delete "tmpdir/liblto-11.a"
-set catch_output [run_host_cmd "$ar" "rc tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
+set plugin_names {
+    liblto_plugin.so
+    liblto_plugin-0.dll
+    cyglto_plugin-0.dll
+}
+set plug_opt ""
+foreach plug $plugin_names {
+    set plug_so [run_host_cmd $CC "--print-prog-name $plug"]
+    if { $plug_so ne $plug } then {
+	set plug_opt "--plugin $plug_so"
+	break
+    }
+}
+set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
 if {![string match "" $catch_output]} {
     unresolved $testname
     restore_notify
@@ -334,7 +347,7 @@ if {![string match "" $catch_output]} {
 if { [at_least_gcc_version 4 7] } {
     # Check expected LTO linker errors.
     set testname "PR ld/12942 (3)"
-    set exec_output [run_host_cmd "$CXX" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
+    set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
     if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
         pass $testname
     } {

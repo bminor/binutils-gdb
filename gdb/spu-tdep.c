@@ -1985,7 +1985,7 @@ spu_catch_start (struct objfile *objfile)
 							 minsym.minsym));
   if (symtab != NULL)
     {
-      struct blockvector *bv = BLOCKVECTOR (symtab);
+      const struct blockvector *bv = BLOCKVECTOR (symtab);
       struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
       struct symbol *sym;
       struct symtab_and_line sal;
@@ -2649,7 +2649,7 @@ info_spu_command (char *args, int from_tty)
 {
   printf_unfiltered (_("\"info spu\" must be followed by "
 		       "the name of an SPU facility.\n"));
-  help_list (infospucmdlist, "info spu ", -1, gdb_stdout);
+  help_list (infospucmdlist, "info spu ", all_commands, gdb_stdout);
 }
 
 

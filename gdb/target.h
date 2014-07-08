@@ -414,7 +414,7 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_detach) (struct target_ops *ops, const char *, int)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_disconnect) (struct target_ops *, char *, int)
+    void (*to_disconnect) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());
@@ -499,7 +499,7 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_terminal_info);
     void (*to_kill) (struct target_ops *)
       TARGET_DEFAULT_NORETURN (noprocess ());
-    void (*to_load) (struct target_ops *, char *, int)
+    void (*to_load) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* Start an inferior process and set inferior_ptid to its pid.
        EXEC_FILE is the file to run.
@@ -560,7 +560,7 @@ struct target_ops
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
     void (*to_rcmd) (struct target_ops *,
-		     char *command, struct ui_file *output)
+		     const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
     char *(*to_pid_to_exec_file) (struct target_ops *, int pid)
       TARGET_DEFAULT_RETURN (NULL);
@@ -596,10 +596,10 @@ struct target_ops
     char * (*to_make_corefile_notes) (struct target_ops *, bfd *, int *)
       TARGET_DEFAULT_FUNC (dummy_make_corefile_notes);
     /* get_bookmark support method for bookmarks */
-    gdb_byte * (*to_get_bookmark) (struct target_ops *, char *, int)
+    gdb_byte * (*to_get_bookmark) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* goto_bookmark support method for bookmarks */
-    void (*to_goto_bookmark) (struct target_ops *, gdb_byte *, int)
+    void (*to_goto_bookmark) (struct target_ops *, const gdb_byte *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* Return the thread-local address at OFFSET in the
        thread-local storage for the thread PTID and the shared library
@@ -610,7 +610,8 @@ struct target_ops
     CORE_ADDR (*to_get_thread_local_address) (struct target_ops *ops,
 					      ptid_t ptid,
 					      CORE_ADDR load_module_addr,
-					      CORE_ADDR offset);
+					      CORE_ADDR offset)
+      TARGET_DEFAULT_NORETURN (generic_tls_error ());
 
     /* Request that OPS transfer up to LEN 8-bit bytes of the target's
        OBJECT.  The OFFSET, for a seekable object, specifies the
@@ -815,7 +816,8 @@ struct target_ops
 
 
     /* Implement the "info proc" command.  */
-    void (*to_info_proc) (struct target_ops *, char *, enum info_proc_what);
+    void (*to_info_proc) (struct target_ops *, const char *,
+			  enum info_proc_what);
 
     /* Tracepoint-related operations.  */
 
@@ -1020,7 +1022,8 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
 
     /* Print information about the recording.  */
-    void (*to_info_record) (struct target_ops *);
+    void (*to_info_record) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
 
     /* Save the recorded execution trace into a file.  */
     void (*to_save_record) (struct target_ops *, const char *filename)
@@ -1108,6 +1111,14 @@ struct target_ops
 					 struct gdbarch *gdbarch)
       TARGET_DEFAULT_FUNC (default_target_decr_pc_after_break);
 
+    /* Prepare to generate a core file.  */
+    void (*to_prepare_to_generate_core) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
+
+    /* Cleanup after generating a core file.  */
+    void (*to_done_generating_core) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1177,7 +1188,7 @@ extern void target_detach (const char *, int);
 /* Disconnect from the current target without resuming it (leaving it
    waiting for a debugger).  */
 
-extern void target_disconnect (char *, int);
+extern void target_disconnect (const char *, int);
 
 /* Resume execution of the target process PTID (or a group of
    threads).  STEP says whether to single-step or to run free; SIGGNAL
@@ -1232,7 +1243,7 @@ struct address_space *target_thread_address_space (ptid_t);
    an error was encountered while attempting to handle the
    request.  */
 
-int target_info_proc (char *, enum info_proc_what);
+int target_info_proc (const char *, enum info_proc_what);
 
 /* Returns true if this target can debug multiple processes
    simultaneously.  */
@@ -1414,7 +1425,7 @@ extern void target_kill (void);
    sections.  The target may define switches, or other non-switch
    arguments, as it pleases.  */
 
-extern void target_load (char *arg, int from_tty);
+extern void target_load (const char *arg, int from_tty);
 
 /* Some targets (such as ttrace-based HPUX) don't allow us to request
    notification of inferior events such as fork and vork immediately
@@ -2211,9 +2222,6 @@ extern enum btrace_error target_read_btrace (VEC (btrace_block_s) **,
 /* See to_stop_recording in struct target_ops.  */
 extern void target_stop_recording (void);
 
-/* See to_info_record in struct target_ops.  */
-extern void target_info_record (void);
-
 /* See to_save_record in struct target_ops.  */
 extern void target_save_record (const char *filename);
 
@@ -2259,5 +2267,11 @@ extern CORE_ADDR forward_target_decr_pc_after_break (struct target_ops *ops,
 
 /* See to_decr_pc_after_break.  */
 extern CORE_ADDR target_decr_pc_after_break (struct gdbarch *gdbarch);
+
+/* See to_prepare_to_generate_core.  */
+extern void target_prepare_to_generate_core (void);
+
+/* See to_done_generating_core.  */
+extern void target_done_generating_core (void);
 
 #endif /* !defined (TARGET_H) */

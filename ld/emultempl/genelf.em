@@ -38,7 +38,7 @@ gld${EMULATION_NAME}_after_open (void)
   after_open_default ();
 
   if (link_info.relocatable)
-    for (ibfd = link_info.input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    for (ibfd = link_info.input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
       if ((syms = bfd_get_outsymbols (ibfd)) != NULL
 	  && bfd_get_flavour (ibfd) == bfd_target_elf_flavour)
 	for (sec = ibfd->sections; sec != NULL; sec = sec->next)

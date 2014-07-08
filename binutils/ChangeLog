@@ -1,3 +1,52 @@
+2014-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_symbol_type): Revert accidental change to
+	detection of thumb function symbols.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Rename from configure.in.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Include bfd/version.m4.
+	(AC_INIT, AM_INIT_AUTOMAKE): Use modern form.
+	(BFD_VERSION): Delete.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Remove bfd/configure.in.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2014-07-03  Tristan Gingold  <gingold@adacore.com>
+
+	* doc/binutils.texi: Clarify addr2line output.
+
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (dump_bfd_header): Don't print HAS_LOAD_PAGE.
+
+2014-06-26  Erik Akermann  <kurterikackermann@gmail.com>
+
+	* strings.c: Add -w/--include-all-whitespace option to include any
+	whitespace character in the displayed strings.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi (strings): Document the new command line
+	option.
+
+2014-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_note_sections): If there are no note sections
+	try processing note segments instead.
+
+2014-06-17  Anton Lavrentiwev  <lavr@ncbi.nim.nih.gov>
+
+	PR binutils/16923
+	* rcparse.y (fixedverinfo): Prevent large version numbers from
+	corrupting other values.
+
 2014-06-09  Romain Chastenet  <romain.chastenet@free.fr>
 
 	PR binutils/16252

@@ -446,7 +446,6 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_get_relocated_section_contents, \
 .  NAME##_bfd_relax_section, \
 .  NAME##_bfd_link_hash_table_create, \
-.  NAME##_bfd_link_hash_table_free, \
 .  NAME##_bfd_link_add_symbols, \
 .  NAME##_bfd_link_just_syms, \
 .  NAME##_bfd_copy_link_hash_symbol_type, \
@@ -473,16 +472,14 @@ BFD_JUMP_TABLE macros.
 .  struct bfd_link_hash_table *
 .              (*_bfd_link_hash_table_create) (bfd *);
 .
-.  {* Release the memory associated with the linker hash table.  *}
-.  void        (*_bfd_link_hash_table_free) (struct bfd_link_hash_table *);
-.
 .  {* Add symbols from this object file into the hash table.  *}
 .  bfd_boolean (*_bfd_link_add_symbols) (bfd *, struct bfd_link_info *);
 .
 .  {* Indicate that we are only retrieving symbol values from this section.  *}
 .  void        (*_bfd_link_just_syms) (asection *, struct bfd_link_info *);
 .
-.  {* Copy the symbol type of a linker hash table entry.  *}
+.  {* Copy the symbol type and other attributes for a linker script
+.     assignment of one symbol to another.  *}
 .#define bfd_copy_link_hash_symbol_type(b, t, f) \
 .  BFD_SEND (b, _bfd_copy_link_hash_symbol_type, (b, t, f))
 .  void (*_bfd_copy_link_hash_symbol_type)
@@ -934,7 +931,7 @@ static const bfd_target * const _bfd_target_vector[] =
 #endif
 	/* This list is alphabetized to make it easy to compare
 	   with other vector lists -- the decls above and
-	   the case statement in configure.in.
+	   the case statement in configure.ac.
 	   Try to keep it in order when adding new targets, and
 	   use a name of the form <cpu>_<format>_<other>_<endian>_vec.
 	   Note that sorting is done as if _<endian>_vec wasn't present.
@@ -1032,8 +1029,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	   the file even if we don't recognize the machine type.  */
 	&elf32_be_vec,
 	&elf32_le_vec,
+#ifdef BFD64
 	&elf64_be_vec,
 	&elf64_le_vec,
+#endif
 
 	&epiphany_elf32_vec,
 
@@ -1049,8 +1048,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	&hppa_elf32_vec,
 	&hppa_elf32_linux_vec,
 	&hppa_elf32_nbsd_vec,
+#ifdef BFD64
 	&hppa_elf64_vec,
 	&hppa_elf64_linux_vec,
+#endif
 	&hppa_som_vec,
 
 	&i370_elf32_vec,
@@ -1114,10 +1115,12 @@ static const bfd_target * const _bfd_target_vector[] =
 	&ip2k_elf32_vec,
 	&iq2000_elf32_vec,
 
+#ifdef BFD64
 	&k1om_elf64_vec,
 	&k1om_elf64_fbsd_vec,
 	&l1om_elf64_vec,
 	&l1om_elf64_fbsd_vec,
+#endif
 
 	&lm32_elf32_vec,
 

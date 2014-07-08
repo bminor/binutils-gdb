@@ -31,8 +31,6 @@ extern void initialize_utils (void);
 
 extern int sevenbit_strings;
 
-extern char *savestring (const char *, size_t);
-
 extern int strcmp_iw (const char *, const char *);
 
 extern int strcmp_iw_ordered (const char *, const char *);
@@ -313,6 +311,14 @@ extern void internal_warning (const char *file, int line,
 extern void warning (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void vwarning (const char *, va_list args) ATTRIBUTE_PRINTF (1, 0);
+
+extern void demangler_vwarning (const char *file, int line,
+			       const char *, va_list ap)
+     ATTRIBUTE_PRINTF (3, 0);
+
+extern void demangler_warning (const char *file, int line,
+			      const char *, ...) ATTRIBUTE_PRINTF (3, 4);
+
 
 /* Misc. utilities.  */
 
@@ -365,5 +371,29 @@ extern ULONGEST align_down (ULONGEST v, int n);
    to sign-extend.  */
 
 extern LONGEST gdb_sign_extend (LONGEST value, int bit);
+
+/* Resource limits used by getrlimit and setrlimit.  */
+
+enum resource_limit_kind
+  {
+    LIMIT_CUR,
+    LIMIT_MAX
+  };
+
+/* Check whether GDB will be able to dump core using the dump_core
+   function.  Returns zero if GDB cannot or should not dump core.
+   If LIMIT_KIND is LIMIT_CUR the user's soft limit will be respected.
+   If LIMIT_KIND is LIMIT_MAX only the hard limit will be respected.  */
+
+extern int can_dump_core (enum resource_limit_kind limit_kind);
+
+/* Print a warning that we cannot dump core.  */
+
+extern void warn_cant_dump_core (const char *reason);
+
+/* Dump core trying to increase the core soft limit to hard limit
+   first.  */
+
+extern void dump_core (void);
 
 #endif /* UTILS_H */

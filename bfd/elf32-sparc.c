@@ -209,8 +209,6 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
   _bfd_sparc_elf_reloc_name_lookup
 #define bfd_elf32_bfd_link_hash_table_create \
 					_bfd_sparc_elf_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-					_bfd_sparc_elf_link_hash_table_free
 #define bfd_elf32_bfd_relax_section	_bfd_sparc_elf_relax_section
 #define bfd_elf32_new_section_hook	_bfd_sparc_elf_new_section_hook
 #define elf_backend_copy_indirect_symbol \

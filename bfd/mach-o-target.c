@@ -37,7 +37,6 @@
 #define bfd_mach_o_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define bfd_mach_o_bfd_relax_section                  bfd_generic_relax_section
 #define bfd_mach_o_bfd_link_hash_table_create         _bfd_generic_link_hash_table_create
-#define bfd_mach_o_bfd_link_hash_table_free           _bfd_generic_link_hash_table_free
 #define bfd_mach_o_bfd_link_add_symbols               _bfd_generic_link_add_symbols
 #define bfd_mach_o_bfd_link_just_syms                 _bfd_generic_link_just_syms
 #define bfd_mach_o_bfd_copy_link_hash_symbol_type \

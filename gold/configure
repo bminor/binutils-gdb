@@ -684,6 +684,8 @@ CC
 NM
 TARGETOBJS
 DEFAULT_TARGET
+DEFAULT_TARGET_MIPS_FALSE
+DEFAULT_TARGET_MIPS_TRUE
 DEFAULT_TARGET_TILEGX_FALSE
 DEFAULT_TARGET_TILEGX_TRUE
 DEFAULT_TARGET_X86_64_FALSE
@@ -696,6 +698,8 @@ DEFAULT_TARGET_I386_FALSE
 DEFAULT_TARGET_I386_TRUE
 DEFAULT_TARGET_ARM_FALSE
 DEFAULT_TARGET_ARM_TRUE
+DEFAULT_TARGET_AARCH64_FALSE
+DEFAULT_TARGET_AARCH64_TRUE
 PLUGINS_FALSE
 PLUGINS_TRUE
 THREADS_FALSE
@@ -3431,6 +3435,14 @@ for targ in $target $canon_targets; do
 	default_big_endian=$targ_big_endian
 	default_osabi=$targ_osabi
 
+	 if test "$targ_obj" = "aarch64"; then
+  DEFAULT_TARGET_AARCH64_TRUE=
+  DEFAULT_TARGET_AARCH64_FALSE='#'
+else
+  DEFAULT_TARGET_AARCH64_TRUE='#'
+  DEFAULT_TARGET_AARCH64_FALSE=
+fi
+
 	 if test "$targ_obj" = "arm"; then
   DEFAULT_TARGET_ARM_TRUE=
   DEFAULT_TARGET_ARM_FALSE='#'
@@ -3477,6 +3489,14 @@ fi
 else
   DEFAULT_TARGET_TILEGX_TRUE='#'
   DEFAULT_TARGET_TILEGX_FALSE=
+fi
+
+         if test "$targ_obj" = "mips"; then
+  DEFAULT_TARGET_MIPS_TRUE=
+  DEFAULT_TARGET_MIPS_FALSE='#'
+else
+  DEFAULT_TARGET_MIPS_TRUE='#'
+  DEFAULT_TARGET_MIPS_FALSE=
 fi
 
 	DEFAULT_TARGET=${targ_obj}
@@ -7767,6 +7787,10 @@ if test -z "${PLUGINS_TRUE}" && test -z "${PLUGINS_FALSE}"; then
   as_fn_error "conditional \"PLUGINS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${DEFAULT_TARGET_AARCH64_TRUE}" && test -z "${DEFAULT_TARGET_AARCH64_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_AARCH64\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${DEFAULT_TARGET_ARM_TRUE}" && test -z "${DEFAULT_TARGET_ARM_FALSE}"; then
   as_fn_error "conditional \"DEFAULT_TARGET_ARM\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -7789,6 +7813,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEFAULT_TARGET_TILEGX_TRUE}" && test -z "${DEFAULT_TARGET_TILEGX_FALSE}"; then
   as_fn_error "conditional \"DEFAULT_TARGET_TILEGX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_MIPS_TRUE}" && test -z "${DEFAULT_TARGET_MIPS_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_MIPS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then

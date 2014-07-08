@@ -1377,7 +1377,6 @@ b_out_bfd_get_relocated_section_contents (bfd *output_bfd,
 #define aout_32_bfd_make_debug_symbol          _bfd_nosymbols_bfd_make_debug_symbol
 #define aout_32_close_and_cleanup              aout_32_bfd_free_cached_info
 #define b_out_bfd_link_hash_table_create       _bfd_generic_link_hash_table_create
-#define b_out_bfd_link_hash_table_free         _bfd_generic_link_hash_table_free
 #define b_out_bfd_link_add_symbols             _bfd_generic_link_add_symbols
 #define b_out_bfd_link_just_syms               _bfd_generic_link_just_syms
 #define b_out_bfd_copy_link_hash_symbol_type \

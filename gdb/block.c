@@ -107,7 +107,7 @@ block_inlined_p (const struct block *bl)
    It returns the containing block if there is one, or else NULL.  */
 
 static struct block *
-find_block_in_blockvector (struct blockvector *bl, CORE_ADDR pc)
+find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
 {
   struct block *b;
   int bot, top, half;
@@ -155,11 +155,11 @@ find_block_in_blockvector (struct blockvector *bl, CORE_ADDR pc)
    is none.  PBLOCK is a pointer to the block.  If PBLOCK is NULL, we
    don't pass this information back to the caller.  */
 
-struct blockvector *
+const struct blockvector *
 blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
-			 struct block **pblock, struct symtab *symtab)
+			 const struct block **pblock, struct symtab *symtab)
 {
-  struct blockvector *bl;
+  const struct blockvector *bl;
   struct block *b;
 
   if (symtab == 0)		/* if no symtab specified by caller */
@@ -185,7 +185,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
 /* Return true if the blockvector BV contains PC, false otherwise.  */
 
 int
-blockvector_contains_pc (struct blockvector *bv, CORE_ADDR pc)
+blockvector_contains_pc (const struct blockvector *bv, CORE_ADDR pc)
 {
   return find_block_in_blockvector (bv, pc) != NULL;
 }
@@ -227,8 +227,8 @@ call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
    containing the specified pc value, or 0 if there is none.
    Backward compatibility, no section.  */
 
-struct blockvector *
-blockvector_for_pc (CORE_ADDR pc, struct block **pblock)
+const struct blockvector *
+blockvector_for_pc (CORE_ADDR pc, const struct block **pblock)
 {
   return blockvector_for_pc_sect (pc, find_pc_mapped_section (pc),
 				  pblock, NULL);
@@ -237,11 +237,11 @@ blockvector_for_pc (CORE_ADDR pc, struct block **pblock)
 /* Return the innermost lexical block containing the specified pc value
    in the specified section, or 0 if there is none.  */
 
-struct block *
+const struct block *
 block_for_pc_sect (CORE_ADDR pc, struct obj_section *section)
 {
-  struct blockvector *bl;
-  struct block *b;
+  const struct blockvector *bl;
+  const struct block *b;
 
   bl = blockvector_for_pc_sect (pc, section, &b, NULL);
   if (bl)
@@ -252,7 +252,7 @@ block_for_pc_sect (CORE_ADDR pc, struct obj_section *section)
 /* Return the innermost lexical block containing the specified pc value,
    or 0 if there is none.  Backward compatibility, no section.  */
 
-struct block *
+const struct block *
 block_for_pc (CORE_ADDR pc)
 {
   return block_for_pc_sect (pc, find_pc_mapped_section (pc));

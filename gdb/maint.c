@@ -88,7 +88,7 @@ maintenance_command (char *args, int from_tty)
 {
   printf_unfiltered (_("\"maintenance\" must be followed by "
 		       "the name of a maintenance command.\n"));
-  help_list (maintenancelist, "maintenance ", -1, gdb_stdout);
+  help_list (maintenancelist, "maintenance ", all_commands, gdb_stdout);
 }
 
 #ifndef _WIN32
@@ -129,6 +129,15 @@ static void
 maintenance_internal_warning (char *args, int from_tty)
 {
   internal_warning (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
+}
+
+/* Stimulate the internal error mechanism that GDB uses when an
+   demangler problem is detected.  Allows testing of the mechanism.  */
+
+static void
+maintenance_demangler_warning (char *args, int from_tty)
+{
+  demangler_warning (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
 }
 
 /* Someday we should allow demangling for things other than just
@@ -192,7 +201,8 @@ maintenance_info_command (char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance info\" must be followed "
 		       "by the name of an info command.\n"));
-  help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
+  help_list (maintenanceinfolist, "maintenance info ", all_commands,
+	     gdb_stdout);
 }
 
 /* Mini tokenizing lexer for 'maint info sections' command.  */
@@ -439,7 +449,8 @@ maintenance_print_command (char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance print\" must be followed "
 		       "by the name of a print command.\n"));
-  help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
+  help_list (maintenanceprintlist, "maintenance print ", all_commands,
+	     gdb_stdout);
 }
 
 /* The "maintenance translate-address" command converts a section and address
@@ -664,7 +675,8 @@ maintenance_set_cmd (char *args, int from_tty)
 {
   printf_unfiltered (_("\"maintenance set\" must be followed "
 		       "by the name of a set command.\n"));
-  help_list (maintenance_set_cmdlist, "maintenance set ", -1, gdb_stdout);
+  help_list (maintenance_set_cmdlist, "maintenance set ", all_commands,
+	     gdb_stdout);
 }
 
 static void
@@ -1050,6 +1062,12 @@ Cause GDB to behave as if an internal error was detected."),
 	   maintenance_internal_warning, _("\
 Give GDB an internal warning.\n\
 Cause GDB to behave as if an internal warning was reported."),
+	   &maintenancelist);
+
+  add_cmd ("demangler-warning", class_maintenance,
+	   maintenance_demangler_warning, _("\
+Give GDB a demangler warning.\n\
+Cause GDB to behave as if a demangler warning was reported."),
 	   &maintenancelist);
 
   add_cmd ("demangle", class_maintenance, maintenance_demangle, _("\

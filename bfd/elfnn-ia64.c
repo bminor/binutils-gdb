@@ -1369,40 +1369,6 @@ elfNN_ia64_local_htab_eq (const void *ptr1, const void *ptr2)
   return entry1->id == entry2->id && entry1->r_sym == entry2->r_sym;
 }
 
-/* Create the derived linker hash table.  The IA-64 ELF port uses this
-   derived hash table to keep information specific to the IA-64 ElF
-   linker (without using static variables).  */
-
-static struct bfd_link_hash_table *
-elfNN_ia64_hash_table_create (bfd *abfd)
-{
-  struct elfNN_ia64_link_hash_table *ret;
-
-  ret = bfd_zmalloc ((bfd_size_type) sizeof (*ret));
-  if (!ret)
-    return NULL;
-
-  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      elfNN_ia64_new_elf_hash_entry,
-				      sizeof (struct elfNN_ia64_link_hash_entry),
-				      IA64_ELF_DATA))
-    {
-      free (ret);
-      return NULL;
-    }
-
-  ret->loc_hash_table = htab_try_create (1024, elfNN_ia64_local_htab_hash,
-					 elfNN_ia64_local_htab_eq, NULL);
-  ret->loc_hash_memory = objalloc_create ();
-  if (!ret->loc_hash_table || !ret->loc_hash_memory)
-    {
-      free (ret);
-      return NULL;
-    }
-
-  return &ret->root.root;
-}
-
 /* Free the global elfNN_ia64_dyn_sym_info array.  */
 
 static bfd_boolean
@@ -1448,10 +1414,10 @@ elfNN_ia64_local_dyn_info_free (void **slot,
 /* Destroy IA-64 linker hash table.  */
 
 static void
-elfNN_ia64_hash_table_free (struct bfd_link_hash_table *hash)
+elfNN_ia64_link_hash_table_free (bfd *obfd)
 {
   struct elfNN_ia64_link_hash_table *ia64_info
-    = (struct elfNN_ia64_link_hash_table *) hash;
+    = (struct elfNN_ia64_link_hash_table *) obfd->link.hash;
   if (ia64_info->loc_hash_table)
     {
       htab_traverse (ia64_info->loc_hash_table,
@@ -1462,7 +1428,42 @@ elfNN_ia64_hash_table_free (struct bfd_link_hash_table *hash)
     objalloc_free ((struct objalloc *) ia64_info->loc_hash_memory);
   elf_link_hash_traverse (&ia64_info->root,
 			  elfNN_ia64_global_dyn_info_free, NULL);
-  _bfd_elf_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (obfd);
+}
+
+/* Create the derived linker hash table.  The IA-64 ELF port uses this
+   derived hash table to keep information specific to the IA-64 ElF
+   linker (without using static variables).  */
+
+static struct bfd_link_hash_table *
+elfNN_ia64_hash_table_create (bfd *abfd)
+{
+  struct elfNN_ia64_link_hash_table *ret;
+
+  ret = bfd_zmalloc ((bfd_size_type) sizeof (*ret));
+  if (!ret)
+    return NULL;
+
+  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
+				      elfNN_ia64_new_elf_hash_entry,
+				      sizeof (struct elfNN_ia64_link_hash_entry),
+				      IA64_ELF_DATA))
+    {
+      free (ret);
+      return NULL;
+    }
+
+  ret->loc_hash_table = htab_try_create (1024, elfNN_ia64_local_htab_hash,
+					 elfNN_ia64_local_htab_eq, NULL);
+  ret->loc_hash_memory = objalloc_create ();
+  if (!ret->loc_hash_table || !ret->loc_hash_memory)
+    {
+      elfNN_ia64_link_hash_table_free (abfd);
+      return NULL;
+    }
+  ret->root.root.hash_table_free = elfNN_ia64_link_hash_table_free;
+
+  return &ret->root.root;
 }
 
 /* Traverse both local and global hash tables.  */
@@ -5024,8 +5025,6 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 /* Stuff for the BFD linker: */
 #define bfd_elfNN_bfd_link_hash_table_create \
 	elfNN_ia64_hash_table_create
-#define bfd_elfNN_bfd_link_hash_table_free \
-	elfNN_ia64_hash_table_free
 #define elf_backend_create_dynamic_sections \
 	elfNN_ia64_create_dynamic_sections
 #define elf_backend_check_relocs \

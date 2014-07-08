@@ -171,10 +171,6 @@ ld_cleanup (void)
 #endif
   if (output_filename && delete_output_file_on_failure)
     unlink_if_ordinary (output_filename);
-
-  /* See open_output in ldlang.c.  */
-  if (output_bfd_hash_table_free_fn != NULL)
-    (*output_bfd_hash_table_free_fn) (link_info.hash);
 }
 
 /* If there's a BFD assertion, we'll notice and exit with an error
@@ -1213,7 +1209,7 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
     {
       bfd *b;
       /* Search all input files for a reference to SYMBOL.  */
-      for (b = info->input_bfds; b; b = b->link_next)
+      for (b = info->input_bfds; b; b = b->link.next)
 	if (b != abfd && symbol_warning (warning, symbol, b))
 	  return TRUE;
       einfo ("%B: %s%s\n", abfd, _("warning: "), warning);

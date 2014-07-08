@@ -1,3 +1,42 @@
+2014-07-08  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis-evex.h (EVEX_W_0F10_P_1_M_1): Fix vmovss.
+	(EVEX_W_0F10_P_3_M_1): Fix vmovsd.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Rename from configure.in.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Include bfd/version.m4.
+	(AC_INIT, AM_INIT_AUTOMAKE): Use modern form.
+	(BFD_VERSION): Delete.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Remove bfd/configure.in.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
+2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
+            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+            Soundararajan  <Sounderarajan.D@atmel.com>
+
+	* avr-dis.c (avr_operand): Handle constraint j for 16 bit lds/sts.
+	(print_insn_avr): Do not select opcode if insn ISA is avrtiny and
+	machine is not avrtiny.
+
+2014-06-26  Philippe De Muyter <phdm@macqel.be>
+
+	* or1k-desc.h (spr_field_masks): Add U suffix to the end of long
+	constants.
+
+2014-06-12  Alan Modra  <amodra@gmail.com>
+
+	* or1k-asm.c, * or1k-desc.c, * or1k-desc.h, * or1k-dis.c,
+	* or1k-ibld.c, * or1k-opc.c, * or1k-opc.h, * or1k-opinst.c: Regenerate.
+
 2014-06-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (fwait_prefix): New.

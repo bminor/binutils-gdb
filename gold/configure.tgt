@@ -144,6 +144,28 @@ arm*-*-*)
  targ_big_endian=false
  targ_extra_big_endian=true
  ;;
+aarch64*-*)
+ targ_obj=aarch64
+ targ_machine=EM_AARCH64
+ targ_size=64
+ targ_extra_size=32
+ targ_big_endian=false
+ targ_extra_big_endian=true
+ ;;
+mips*el*-*-*|mips*le*-*-*)
+ targ_obj=mips
+ targ_machine=EM_MIPS_RS3_LE
+ targ_size=32
+ targ_big_endian=false
+ targ_extra_big_endian=true
+ ;;
+mips*-*-*)
+ targ_obj=mips
+ targ_machine=EM_MIPS
+ targ_size=32
+ targ_big_endian=true
+ targ_extra_big_endian=false
+ ;;
 *)
   targ_obj=UNKNOWN
   ;;

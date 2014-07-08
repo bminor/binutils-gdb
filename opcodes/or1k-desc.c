@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2010 Free Software Foundation, Inc.
+Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -1007,59 +1007,59 @@ const CGEN_OPERAND or1k_cgen_operand_table[] =
 {
 /* pc: program counter */
   { "pc", OR1K_OPERAND_PC, HW_H_PC, 0, 0,
-    { 0, { (const PTR) &or1k_cgen_ifld_table[OR1K_F_NIL] } },
+    { 0, { (const PTR) &or1k_cgen_ifld_table[OR1K_F_NIL] } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_BASE), 0 } } } }  },
 /* sys-sr: supervision register */
   { "sys-sr", OR1K_OPERAND_SYS_SR, HW_H_SYS_SR, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-esr0: exception supervision register 0 */
   { "sys-esr0", OR1K_OPERAND_SYS_ESR0, HW_H_SYS_ESR0, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-epcr0: exception PC register 0 */
   { "sys-epcr0", OR1K_OPERAND_SYS_EPCR0, HW_H_SYS_EPCR0, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-sr-lee: SR little endian enable bit */
   { "sys-sr-lee", OR1K_OPERAND_SYS_SR_LEE, HW_H_SYS_SR_LEE, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-sr-f: SR flag bit */
   { "sys-sr-f", OR1K_OPERAND_SYS_SR_F, HW_H_SYS_SR_F, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-sr-cy: SR carry bit */
   { "sys-sr-cy", OR1K_OPERAND_SYS_SR_CY, HW_H_SYS_SR_CY, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-sr-ov: SR overflow bit */
   { "sys-sr-ov", OR1K_OPERAND_SYS_SR_OV, HW_H_SYS_SR_OV, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-sr-ove: SR overflow exception enable bit */
   { "sys-sr-ove", OR1K_OPERAND_SYS_SR_OVE, HW_H_SYS_SR_OVE, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-cpucfgr-ob64s: CPUCFGR ORBIS64 supported bit */
   { "sys-cpucfgr-ob64s", OR1K_OPERAND_SYS_CPUCFGR_OB64S, HW_H_SYS_CPUCFGR_OB64S, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-cpucfgr-nd: CPUCFGR no delay bit */
   { "sys-cpucfgr-nd", OR1K_OPERAND_SYS_CPUCFGR_ND, HW_H_SYS_CPUCFGR_ND, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* sys-fpcsr-rm: floating point round mode */
   { "sys-fpcsr-rm", OR1K_OPERAND_SYS_FPCSR_RM, HW_H_SYS_FPCSR_RM, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* mac-machi: MAC HI result register */
   { "mac-machi", OR1K_OPERAND_MAC_MACHI, HW_H_MAC_MACHI, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* mac-maclo: MAC LO result register */
   { "mac-maclo", OR1K_OPERAND_MAC_MACLO, HW_H_MAC_MACLO, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* atomic-reserve: atomic reserve flag */
   { "atomic-reserve", OR1K_OPERAND_ATOMIC_RESERVE, HW_H_ATOMIC_RESERVE, 0, 0,
@@ -1071,7 +1071,7 @@ const CGEN_OPERAND or1k_cgen_operand_table[] =
     { 0|A(SEM_ONLY), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* uimm6: uimm6 */
   { "uimm6", OR1K_OPERAND_UIMM6, HW_H_UIMM6, 5, 6,
-    { 0, { (const PTR) &or1k_cgen_ifld_table[OR1K_F_UIMM6] } },
+    { 0, { (const PTR) &or1k_cgen_ifld_table[OR1K_F_UIMM6] } }, 
     { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* rD: destination register */
   { "rD", OR1K_OPERAND_RD, HW_H_GPR, 25, 5,

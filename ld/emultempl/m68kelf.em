@@ -75,7 +75,7 @@ m68k_elf_after_open (void)
 	 input file with a nonzero .data section.  The BFD backend will fill in
 	 these sections with magic numbers which can be used to relocate the
 	 data section at run time.  */
-      for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link_next)
+      for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
 	{
 	  asection *datasec;
 
@@ -153,7 +153,7 @@ m68k_elf_after_allocation (void)
 
       /* If we are generating embedded relocs, call a special BFD backend
 	 routine to do the work.  */
-      for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link_next)
+      for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
 	{
 	  asection *datasec, *relsec;
 	  char *errmsg;

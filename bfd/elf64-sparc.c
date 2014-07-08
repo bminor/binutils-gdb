@@ -864,8 +864,6 @@ const struct elf_size_info elf64_sparc_size_info =
   _bfd_sparc_elf_plt_sym_val
 #define bfd_elf64_bfd_link_hash_table_create \
   _bfd_sparc_elf_link_hash_table_create
-#define bfd_elf64_bfd_link_hash_table_free \
-  _bfd_sparc_elf_link_hash_table_free
 #define elf_info_to_howto \
   _bfd_sparc_elf_info_to_howto
 #define elf_backend_copy_indirect_symbol \

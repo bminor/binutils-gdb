@@ -175,7 +175,7 @@ add_class_symtab_symbol (struct symbol *sym)
 {
   struct symtab *symtab
     = get_java_class_symtab (get_objfile_arch (SYMBOL_SYMTAB (sym)->objfile));
-  struct blockvector *bv = BLOCKVECTOR (symtab);
+  const struct blockvector *bv = BLOCKVECTOR (symtab);
 
   dict_add_symbol (BLOCK_DICT (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)), sym);
 }

@@ -311,7 +311,6 @@ extern int _bfd_ecoff_sizeof_headers (bfd *, struct bfd_link_info *);
 /* ecoff_bfd_relax_section defined by backend.  */
 extern struct bfd_link_hash_table *_bfd_ecoff_bfd_link_hash_table_create
   (bfd *);
-#define _bfd_ecoff_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 extern bfd_boolean _bfd_ecoff_bfd_link_add_symbols
   (bfd *, struct bfd_link_info *);
 #define _bfd_ecoff_bfd_link_just_syms _bfd_generic_link_just_syms

@@ -315,7 +315,7 @@ read_mapping (const char *line,
 /* Implement the "info proc" command.  */
 
 static void
-linux_info_proc (struct gdbarch *gdbarch, char *args,
+linux_info_proc (struct gdbarch *gdbarch, const char *args,
 		 enum info_proc_what what)
 {
   /* A long is used for pid instead of an int to avoid a loss of precision
@@ -332,7 +332,12 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
   int target_errno;
 
   if (args && isdigit (args[0]))
-    pid = strtoul (args, &args, 10);
+    {
+      char *tem;
+
+      pid = strtoul (args, &tem, 10);
+      args = tem;
+    }
   else
     {
       if (!target_has_execution)
@@ -343,7 +348,7 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
       pid = current_inferior ()->pid;
     }
 
-  args = skip_spaces (args);
+  args = skip_spaces_const (args);
   if (args && args[0])
     error (_("Too many parameters: %s"), args);
 
@@ -603,7 +608,7 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
 /* Implement "info proc mappings" for a corefile.  */
 
 static void
-linux_core_info_proc_mappings (struct gdbarch *gdbarch, char *args)
+linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 {
   asection *section;
   ULONGEST count, page_size;
@@ -706,7 +711,7 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, char *args)
 /* Implement "info proc" for a corefile.  */
 
 static void
-linux_core_info_proc (struct gdbarch *gdbarch, char *args,
+linux_core_info_proc (struct gdbarch *gdbarch, const char *args,
 		      enum info_proc_what what)
 {
   int exe_f = (what == IP_MINIMAL || what == IP_EXE || what == IP_ALL);
@@ -1497,7 +1502,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
   note_data = linux_make_mappings_corefile_notes (gdbarch, obfd,
 						  note_data, note_size);
 
-  make_cleanup (xfree, note_data);
   return note_data;
 }
 

@@ -3297,7 +3297,7 @@ dw2_get_real_path (struct objfile *objfile,
 {
   if (qfn->real_names == NULL)
     qfn->real_names = OBSTACK_CALLOC (&objfile->objfile_obstack,
-				      qfn->num_file_names, char *);
+				      qfn->num_file_names, const char *);
 
   if (qfn->real_names[index] == NULL)
     qfn->real_names[index] = gdb_realpath (qfn->file_names[index]);
@@ -3616,7 +3616,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	     information (but NAME might contain it).  */
 	  if (stab->primary)
 	    {
-	      struct blockvector *bv = BLOCKVECTOR (stab);
+	      const struct blockvector *bv = BLOCKVECTOR (stab);
 	      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	      sym = lookup_block_symbol (block, name, domain);
@@ -7745,9 +7745,10 @@ fixup_go_packaging (struct dwarf2_cu *cu)
   if (package_name != NULL)
     {
       struct objfile *objfile = cu->objfile;
-      const char *saved_package_name = obstack_copy0 (&objfile->objfile_obstack,
-						      package_name,
-						      strlen (package_name));
+      const char *saved_package_name
+	= obstack_copy0 (&objfile->per_bfd->storage_obstack,
+			 package_name,
+			 strlen (package_name));
       struct type *type = init_type (TYPE_CODE_MODULE, 0, 0,
 				     saved_package_name, objfile);
       struct symbol *sym;
@@ -8365,6 +8366,8 @@ dwarf2_compute_name (const char *name,
 	  long length;
 	  const char *prefix;
 	  struct ui_file *buf;
+	  char *intermediate_name;
+	  const char *canonical_name = NULL;
 
 	  prefix = determine_prefix (die, cu);
 	  buf = mem_fileopen ();
@@ -8541,19 +8544,25 @@ dwarf2_compute_name (const char *name,
 		}
 	    }
 
-	  name = ui_file_obsavestring (buf, &objfile->objfile_obstack,
-				       &length);
+	  intermediate_name = ui_file_xstrdup (buf, &length);
 	  ui_file_delete (buf);
 
 	  if (cu->language == language_cplus)
-	    {
-	      const char *cname
-		= dwarf2_canonicalize_name (name, cu,
-					    &objfile->objfile_obstack);
+	    canonical_name
+	      = dwarf2_canonicalize_name (intermediate_name, cu,
+					  &objfile->per_bfd->storage_obstack);
 
-	      if (cname != NULL)
-		name = cname;
-	    }
+	  /* If we only computed INTERMEDIATE_NAME, or if
+	     INTERMEDIATE_NAME is already canonical, then we need to
+	     copy it to the appropriate obstack.  */
+	  if (canonical_name == NULL || canonical_name == intermediate_name)
+	    name = obstack_copy0 (&objfile->per_bfd->storage_obstack,
+				  intermediate_name,
+				  strlen (intermediate_name));
+	  else
+	    name = canonical_name;
+
+	  xfree (intermediate_name);
 	}
     }
 
@@ -8562,7 +8571,7 @@ dwarf2_compute_name (const char *name,
 
 /* Return the fully qualified name of DIE, based on its DW_AT_name.
    If scope qualifiers are appropriate they will be added.  The result
-   will be allocated on the objfile_obstack, or NULL if the DIE does
+   will be allocated on the storage_obstack, or NULL if the DIE does
    not have a name.  NAME may either be from a previous call to
    dwarf2_name or NULL.
 
@@ -8677,7 +8686,8 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
     retval = canon;
 
   if (need_copy)
-    retval = obstack_copy0 (&objfile->objfile_obstack, retval, strlen (retval));
+    retval = obstack_copy0 (&objfile->per_bfd->storage_obstack,
+			    retval, strlen (retval));
 
   do_cleanups (back_to);
   return retval;
@@ -12972,10 +12982,11 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
-  if (producer_is_icc (cu))
+  if (producer_is_icc (cu) && (TYPE_LENGTH (type) == 0))
     {
       /* ICC does not output the required DW_AT_declaration
 	 on incomplete types, but gives them a size of zero.  */
+      TYPE_STUB (type) = 1;
     }
   else
     TYPE_STUB_SUPPORTED (type) = 1;
@@ -14087,6 +14098,36 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
+/* Add the given cv-qualifiers to the element type of the array.  GCC
+   outputs DWARF type qualifiers that apply to an array, not the
+   element type.  But GDB relies on the array element type to carry
+   the cv-qualifiers.  This mimics section 6.7.3 of the C99
+   specification.  */
+
+static struct type *
+add_array_cv_type (struct die_info *die, struct dwarf2_cu *cu,
+		   struct type *base_type, int cnst, int voltl)
+{
+  struct type *el_type, *inner_array;
+
+  base_type = copy_type (base_type);
+  inner_array = base_type;
+
+  while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
+    {
+      TYPE_TARGET_TYPE (inner_array) =
+	copy_type (TYPE_TARGET_TYPE (inner_array));
+      inner_array = TYPE_TARGET_TYPE (inner_array);
+    }
+
+  el_type = TYPE_TARGET_TYPE (inner_array);
+  cnst |= TYPE_CONST (el_type);
+  voltl |= TYPE_VOLATILE (el_type);
+  TYPE_TARGET_TYPE (inner_array) = make_cv_type (cnst, voltl, el_type, NULL);
+
+  return set_die_type (die, base_type, cu);
+}
+
 static struct type *
 read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -14102,25 +14143,7 @@ read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
   /* In case the const qualifier is applied to an array type, the element type
      is so qualified, not the array type (section 6.7.3 of C99).  */
   if (TYPE_CODE (base_type) == TYPE_CODE_ARRAY)
-    {
-      struct type *el_type, *inner_array;
-
-      base_type = copy_type (base_type);
-      inner_array = base_type;
-
-      while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
-	{
-	  TYPE_TARGET_TYPE (inner_array) =
-	    copy_type (TYPE_TARGET_TYPE (inner_array));
-	  inner_array = TYPE_TARGET_TYPE (inner_array);
-	}
-
-      el_type = TYPE_TARGET_TYPE (inner_array);
-      TYPE_TARGET_TYPE (inner_array) =
-	make_cv_type (1, TYPE_VOLATILE (el_type), el_type, NULL);
-
-      return set_die_type (die, base_type, cu);
-    }
+    return add_array_cv_type (die, cu, base_type, 1, 0);
 
   cv_type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
   return set_die_type (die, cv_type, cu);
@@ -14137,6 +14160,12 @@ read_tag_volatile_type (struct die_info *die, struct dwarf2_cu *cu)
   cv_type = get_die_type (die, cu);
   if (cv_type)
     return cv_type;
+
+  /* In case the volatile qualifier is applied to an array type, the
+     element type is so qualified, not the array type (section 6.7.3
+     of C99).  */
+  if (TYPE_CODE (base_type) == TYPE_CODE_ARRAY)
+    return add_array_cv_type (die, cu, base_type, 0, 1);
 
   cv_type = make_cv_type (TYPE_CONST (base_type), 1, base_type, 0);
   return set_die_type (die, cv_type, cu);
@@ -15508,7 +15537,7 @@ read_partial_die (const struct die_reader_specs *reader,
 	    default:
 	      part_die->name
 		= dwarf2_canonicalize_name (DW_STRING (&attr), cu,
-					    &objfile->objfile_obstack);
+					    &objfile->per_bfd->storage_obstack);
 	      break;
 	    }
 	  break;
@@ -15793,7 +15822,7 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 	  if (actual_class_name != NULL)
 	    {
 	      struct_pdi->name
-		= obstack_copy0 (&cu->objfile->objfile_obstack,
+		= obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
 				 actual_class_name,
 				 strlen (actual_class_name));
 	      xfree (actual_class_name);
@@ -15879,8 +15908,9 @@ fixup_partial_die (struct partial_die_info *part_die,
 	  else
 	    base = demangled;
 
-	  part_die->name = obstack_copy0 (&cu->objfile->objfile_obstack,
-					  base, strlen (base));
+	  part_die->name
+	    = obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
+			     base, strlen (base));
 	  xfree (demangled);
 	}
     }
@@ -18557,7 +18587,7 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
 			  && actual_name[actual_name_len
 					 - die_name_len - 1] == ':')
 			name =
-			  obstack_copy0 (&cu->objfile->objfile_obstack,
+			  obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
 					 actual_name,
 					 actual_name_len - die_name_len - 2);
 		    }
@@ -18603,7 +18633,7 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
   if (base == NULL || base == DW_STRING (attr) || base[-1] != ':')
     return "";
 
-  return obstack_copy0 (&cu->objfile->objfile_obstack,
+  return obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
 			DW_STRING (attr), &base[-1] - DW_STRING (attr));
 }
 
@@ -18943,8 +18973,9 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	      char *base;
 
 	      /* FIXME: we already did this for the partial symbol... */
-	      DW_STRING (attr) = obstack_copy0 (&cu->objfile->objfile_obstack,
-						demangled, strlen (demangled));
+	      DW_STRING (attr)
+		= obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
+				 demangled, strlen (demangled));
 	      DW_STRING_IS_CANONICAL (attr) = 1;
 	      xfree (demangled);
 
@@ -18967,7 +18998,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
     {
       DW_STRING (attr)
 	= dwarf2_canonicalize_name (DW_STRING (attr), cu,
-				    &cu->objfile->objfile_obstack);
+				    &cu->objfile->per_bfd->storage_obstack);
       DW_STRING_IS_CANONICAL (attr) = 1;
     }
   return DW_STRING (attr);
@@ -21811,7 +21842,8 @@ static struct cmd_list_element *show_dwarf2_cmdlist;
 static void
 set_dwarf2_cmd (char *args, int from_tty)
 {
-  help_list (set_dwarf2_cmdlist, "maintenance set dwarf2 ", -1, gdb_stdout);
+  help_list (set_dwarf2_cmdlist, "maintenance set dwarf2 ", all_commands,
+	     gdb_stdout);
 }
 
 static void

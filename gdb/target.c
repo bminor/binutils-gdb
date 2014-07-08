@@ -49,6 +49,8 @@
 
 static void target_info (char *, int);
 
+static void generic_tls_error (void) ATTRIBUTE_NORETURN;
+
 static void default_terminal_info (struct target_ops *, const char *, int);
 
 static int default_watchpoint_addr_within_range (struct target_ops *,
@@ -57,7 +59,7 @@ static int default_watchpoint_addr_within_range (struct target_ops *,
 static int default_region_ok_for_hw_watchpoint (struct target_ops *,
 						CORE_ADDR, int);
 
-static void default_rcmd (struct target_ops *, char *, struct ui_file *);
+static void default_rcmd (struct target_ops *, const char *, struct ui_file *);
 
 static ptid_t default_get_ada_task_ptid (struct target_ops *self,
 					 long lwp, long tid);
@@ -169,7 +171,7 @@ static void debug_to_terminal_save_ours (struct target_ops *self);
 
 static void debug_to_terminal_ours (struct target_ops *self);
 
-static void debug_to_load (struct target_ops *self, char *, int);
+static void debug_to_load (struct target_ops *self, const char *, int);
 
 static int debug_to_can_run (struct target_ops *self);
 
@@ -476,7 +478,7 @@ target_kill (void)
 }
 
 void
-target_load (char *arg, int from_tty)
+target_load (const char *arg, int from_tty)
 {
   target_dcache_invalidate ();
   (*current_target.to_load) (&current_target, arg, from_tty);
@@ -732,24 +734,24 @@ target_is_pushed (struct target_ops *t)
   return 0;
 }
 
+/* Default implementation of to_get_thread_local_address.  */
+
+static void
+generic_tls_error (void)
+{
+  throw_error (TLS_GENERIC_ERROR,
+	       _("Cannot find thread-local variables on this target"));
+}
+
 /* Using the objfile specified in OBJFILE, find the address for the
    current thread's thread-local storage with offset OFFSET.  */
 CORE_ADDR
 target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 {
   volatile CORE_ADDR addr = 0;
-  struct target_ops *target;
+  struct target_ops *target = &current_target;
 
-  for (target = current_target.beneath;
-       target != NULL;
-       target = target->beneath)
-    {
-      if (target->to_get_thread_local_address != NULL)
-	break;
-    }
-
-  if (target != NULL
-      && gdbarch_fetch_tls_load_module_address_p (target_gdbarch ()))
+  if (gdbarch_fetch_tls_load_module_address_p (target_gdbarch ()))
     {
       ptid_t ptid = inferior_ptid;
       volatile struct gdb_exception ex;
@@ -2087,7 +2089,7 @@ target_detach (const char *args, int from_tty)
 }
 
 void
-target_disconnect (char *args, int from_tty)
+target_disconnect (const char *args, int from_tty)
 {
   /* If we're in breakpoints-always-inserted mode or if breakpoints
      are global across processes, we have to remove them before
@@ -2542,7 +2544,7 @@ find_run_target (void)
 /* Implement the "info proc" command.  */
 
 int
-target_info_proc (char *args, enum info_proc_what what)
+target_info_proc (const char *args, enum info_proc_what what)
 {
   struct target_ops *t;
 
@@ -3441,23 +3443,6 @@ target_stop_recording (void)
 /* See target.h.  */
 
 void
-target_info_record (void)
-{
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_info_record != NULL)
-      {
-	t->to_info_record (t);
-	return;
-      }
-
-  tcomplain ();
-}
-
-/* See target.h.  */
-
-void
 target_save_record (const char *filename)
 {
   current_target.to_save_record (&current_target, filename);
@@ -3604,6 +3589,22 @@ CORE_ADDR
 target_decr_pc_after_break (struct gdbarch *gdbarch)
 {
   return current_target.to_decr_pc_after_break (&current_target, gdbarch);
+}
+
+/* See target.h.  */
+
+void
+target_prepare_to_generate_core (void)
+{
+  current_target.to_prepare_to_generate_core (&current_target);
+}
+
+/* See target.h.  */
+
+void
+target_done_generating_core (void)
+{
+  current_target.to_done_generating_core (&current_target);
 }
 
 static void
@@ -3860,7 +3861,7 @@ debug_to_terminal_info (struct target_ops *self,
 }
 
 static void
-debug_to_load (struct target_ops *self, char *args, int from_tty)
+debug_to_load (struct target_ops *self, const char *args, int from_tty)
 {
   debug_target.to_load (&debug_target, args, from_tty);
 
@@ -4006,7 +4007,7 @@ debug_to_stop (struct target_ops *self, ptid_t ptid)
 }
 
 static void
-debug_to_rcmd (struct target_ops *self, char *command,
+debug_to_rcmd (struct target_ops *self, const char *command,
 	       struct ui_file *outbuf)
 {
   debug_target.to_rcmd (&debug_target, command, outbuf);
@@ -4080,7 +4081,8 @@ stack of targets currently in use (including the exec-file,\n\
 core-file, and process, if any), as well as the symbol file name.";
 
 static void
-default_rcmd (struct target_ops *self, char *command, struct ui_file *output)
+default_rcmd (struct target_ops *self, const char *command,
+	      struct ui_file *output)
 {
   error (_("\"monitor\" command not supported by this target."));
 }

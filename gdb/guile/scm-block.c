@@ -674,7 +674,7 @@ static SCM
 gdbscm_lookup_block (SCM pc_scm)
 {
   CORE_ADDR pc;
-  struct block *block = NULL;
+  const struct block *block = NULL;
   struct obj_section *section = NULL;
   struct symtab *symtab = NULL;
   volatile struct gdb_exception except;

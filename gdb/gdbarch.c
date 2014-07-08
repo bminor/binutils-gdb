@@ -4257,7 +4257,7 @@ gdbarch_info_proc_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what)
+gdbarch_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->info_proc != NULL);
@@ -4281,7 +4281,7 @@ gdbarch_core_info_proc_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_core_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what)
+gdbarch_core_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_info_proc != NULL);

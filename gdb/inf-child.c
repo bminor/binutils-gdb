@@ -140,7 +140,7 @@ inf_child_open (char *arg, int from_tty)
 /* Implement the to_disconnect target_ops method.  */
 
 static void
-inf_child_disconnect (struct target_ops *target, char *args, int from_tty)
+inf_child_disconnect (struct target_ops *target, const char *args, int from_tty)
 {
   if (args != NULL)
     error (_("Argument given to \"disconnect\"."));

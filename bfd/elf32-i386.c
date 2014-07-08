@@ -927,6 +927,21 @@ elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
   return &ret->elf;
 }
 
+/* Destroy an i386 ELF linker hash table.  */
+
+static void
+elf_i386_link_hash_table_free (bfd *obfd)
+{
+  struct elf_i386_link_hash_table *htab
+    = (struct elf_i386_link_hash_table *) obfd->link.hash;
+
+  if (htab->loc_hash_table)
+    htab_delete (htab->loc_hash_table);
+  if (htab->loc_hash_memory)
+    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
+  _bfd_elf_link_hash_table_free (obfd);
+}
+
 /* Create an i386 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -955,26 +970,12 @@ elf_i386_link_hash_table_create (bfd *abfd)
   ret->loc_hash_memory = objalloc_create ();
   if (!ret->loc_hash_table || !ret->loc_hash_memory)
     {
-      free (ret);
+      elf_i386_link_hash_table_free (abfd);
       return NULL;
     }
+  ret->elf.root.hash_table_free = elf_i386_link_hash_table_free;
 
   return &ret->elf.root;
-}
-
-/* Destroy an i386 ELF linker hash table.  */
-
-static void
-elf_i386_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf_i386_link_hash_table *htab
-    = (struct elf_i386_link_hash_table *) hash;
-
-  if (htab->loc_hash_table)
-    htab_delete (htab->loc_hash_table);
-  if (htab->loc_hash_memory)
-    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
-  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Create .plt, .rel.plt, .got, .got.plt, .rel.got, .dynbss, and
@@ -2686,7 +2687,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       bfd_signed_vma *local_got;
       bfd_signed_vma *end_local_got;
@@ -5041,7 +5042,6 @@ elf_i386_add_symbol_hook (bfd * abfd,
 
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create  elf_i386_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free    elf_i386_link_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
 

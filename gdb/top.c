@@ -1188,6 +1188,15 @@ This GDB was configured as follows:\n\
              --with-python=%s%s\n\
 "), WITH_PYTHON_PATH, PYTHON_PATH_RELOCATABLE ? " (relocatable)" : "");
 #endif
+#if HAVE_GUILE
+  fprintf_filtered (stream, _("\
+             --with-guile\n\
+"));
+#else
+  fprintf_filtered (stream, _("\
+             --without-guile\n\
+"));
+#endif
 #ifdef RELOC_SRCDIR
   fprintf_filtered (stream, _("\
              --with-relocated-sources=%s\n\
@@ -1544,7 +1553,7 @@ set_history (char *args, int from_tty)
 {
   printf_unfiltered (_("\"set history\" must be followed "
 		       "by the name of a history subcommand.\n"));
-  help_list (sethistlist, "set history ", -1, gdb_stdout);
+  help_list (sethistlist, "set history ", all_commands, gdb_stdout);
 }
 
 void

@@ -267,6 +267,32 @@ make_cleanup_regcache_xfree (struct regcache *regcache)
   return make_cleanup (do_regcache_xfree, regcache);
 }
 
+/* Cleanup routines for invalidating a register.  */
+
+struct register_to_invalidate
+{
+  struct regcache *regcache;
+  int regnum;
+};
+
+static void
+do_regcache_invalidate (void *data)
+{
+  struct register_to_invalidate *reg = data;
+
+  regcache_invalidate (reg->regcache, reg->regnum);
+}
+
+static struct cleanup *
+make_cleanup_regcache_invalidate (struct regcache *regcache, int regnum)
+{
+  struct register_to_invalidate* reg = XNEW (struct register_to_invalidate);
+
+  reg->regcache = regcache;
+  reg->regnum = regnum;
+  return make_cleanup_dtor (do_regcache_invalidate, (void *) reg, xfree);
+}
+
 /* Return REGCACHE's architecture.  */
 
 struct gdbarch *
@@ -846,7 +872,8 @@ void
 regcache_raw_write (struct regcache *regcache, int regnum,
 		    const gdb_byte *buf)
 {
-  struct cleanup *old_chain;
+  struct cleanup *chain_before_save_inferior;
+  struct cleanup *chain_before_invalidate_register;
 
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
@@ -864,16 +891,26 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 		  regcache->descr->sizeof_register[regnum]) == 0))
     return;
 
-  old_chain = save_inferior_ptid ();
+  chain_before_save_inferior = save_inferior_ptid ();
   inferior_ptid = regcache->ptid;
 
   target_prepare_to_store (regcache);
   memcpy (register_buffer (regcache, regnum), buf,
 	  regcache->descr->sizeof_register[regnum]);
   regcache->register_status[regnum] = REG_VALID;
+
+  /* Register a cleanup function for invalidating the register after it is
+     written, in case of a failure.  */
+  chain_before_invalidate_register
+    = make_cleanup_regcache_invalidate (regcache, regnum);
+
   target_store_registers (regcache, regnum);
 
-  do_cleanups (old_chain);
+  /* The target did not throw an error so we can discard invalidating the
+     register and restore the cleanup chain to what it was.  */
+  discard_cleanups (chain_before_invalidate_register);
+
+  do_cleanups (chain_before_save_inferior);
 }
 
 void

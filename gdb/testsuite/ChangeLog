@@ -1,9 +1,130 @@
-2014-06-09  Pedro Alves  <palves@redhat.com>
+2014-07-02  Yao Qi  <yao@codesourcery.com>
 
-	* linux-nat.c (linux_child_follow_fork): Initialize status with
-	W_STOPCODE (0) instead of 0.  Remove shodowing 'status' local from
-	inner block.  Only pass the signal to PTRACE_DETACH if in pass
-	state.
+	* gdb.trace/entry-values.c: Define labels 'foo_start' and
+	'bar_start' at the beginning of functions 'foo' and 'bar'
+	respectively.
+	* gdb.trace/entry-values.exp: Use 'foo_start' and 'bar_start'
+	instead of 'foo' and 'bar'.
+
+2014-07-08  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/segv.exp: New.
+	* gdb.btrace/segv.c: New.
+
+2014-07-02  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.trace/entry-values.exp: Handle powerpc-specific branch
+	instruction.
+
+2014-06-30  Mark Wielaard  <mjw@redhat.com>
+
+	* gdb.base/constvars.c (violent, violet, vips, virgen, vulgar,
+	vulture, vilify, villar): New volatile array constants.
+	(vindictive, vegetation): New const volatile array constants.
+	* gdb.base/volatile.exp: Test volatile and const volatile array
+	types.
+
+2014-06-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/watchpoint-reuse-slot.exp: Handle the case that the
+	target lacks support for awatch, rwatch, or hbreak.
+
+2014-06-27  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.multi/dummy-frame-restore.exp: New.
+	* gdb.multi/dummy-frame-restore.c: New.
+
+2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/gcore.exp: New.
+
+2014-06-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watchpoint-reuse-slot.c: New file.
+	* gdb.base/watchpoint-reuse-slot.exp: New file.
+
+2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-xmethods.exp: Use "progspace" instead of the
+	progspace's filename in 'info', 'enable' and 'disable' command
+	tests.
+
+2014-06-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-stap-special-operands.exp: Use is_lp64_target.
+	* gdb.arch/amd64-stap-optional-prefix.exp: Likewise.
+	* gdb.dwarf2/dw2-error.exp: Use istarget and is_lp64_target.
+
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
+	* gdb.arch/i386-avx.exp: Fix include file location.
+	* gdb.arch/i386-sse.exp: Likewise.
+
+2014-06-19  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/expression.exp: New file.
+
+2014-06-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/thread-execl.exp (do_test): New procedure, factored
+	out from ...
+	(top level): ... here.  Iterate running tests under different
+	scheduler-locking settings.
+
+2014-06-18  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.cp/nsalias.exp: Set type of low_pc and high_pc entries
+	to DW_FORM_addr and use non-zero addresses.
+
+2014-06-18  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR gdb/17017
+	* gdb.python/py-xmethods.cc: Add global function call counters and
+	increment them in their respective functions.  Remove "cout"
+	statements.
+	* gdb.python/py-xmethods.exp: Make tests check the global function
+	call counters instead of depending on inferior IO.
+
+2014-06-18  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-fork.exp (default_fork_parent_follow):
+	Deleted procedure.
+	(explicit_fork_parent_follow): Deleted procedure.
+	(explicit_fork_child_follow): Deleted procedure.
+	(test_follow_fork): New procedure.
+	(do_fork_tests): Replace calls to deleted procedures with
+	calls to test_follow_fork and reset GDB for subsequent 
+	procedure calls.
+
+2014-06-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/wchar.exp: Set $cent to \u00A2 if "host-charset" is
+	CP1252.
+
+2014-06-17  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.mi/mi-var-rtti.cc (type_update_when_use_rtti_test):
+	Initialize ptr and S explicitly.
+	(skip_type_update_when_not_use_rtti_test): Likewise.
+
+2014-06-16  Keith Seitz  <keiths@redhat.com>
+
+	PR mi/15863
+	* gdb.mi/mi-var-cmd.exp: Add test for -var-update before
+	the inferior is started.
+
+2014-06-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break-main-file-remove-fail.c: New file.
+	* gdb.base/break-main-file-remove-fail.exp: New file.
+	* gdb.base/break-unload-file.exp: Use build_executable instead of
+	prepare_for_testing.
+	(test_break): New parameter "initial_load".  Handle it.
+	(top level): Add initial_load cmdline/file axis.
+
+2014-06-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/completion.exp: Don't use directory name in test.
 
 2014-06-09  Gary Benson  <gbenson@redhat.com>
 

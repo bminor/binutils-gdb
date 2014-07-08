@@ -291,7 +291,7 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
   struct dict_iterator iter;
   int len;
   struct linetable *l;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct symbol *sym;
   struct block *b;
   int depth;

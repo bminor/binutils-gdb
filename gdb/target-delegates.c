@@ -28,14 +28,14 @@ tdefault_detach (struct target_ops *self, const char *arg1, int arg2)
 }
 
 static void
-delegate_disconnect (struct target_ops *self, char *arg1, int arg2)
+delegate_disconnect (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
   self->to_disconnect (self, arg1, arg2);
 }
 
 static void
-tdefault_disconnect (struct target_ops *self, char *arg1, int arg2)
+tdefault_disconnect (struct target_ops *self, const char *arg1, int arg2)
 {
   tcomplain ();
 }
@@ -381,14 +381,14 @@ tdefault_kill (struct target_ops *self)
 }
 
 static void
-delegate_load (struct target_ops *self, char *arg1, int arg2)
+delegate_load (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
   self->to_load (self, arg1, arg2);
 }
 
 static void
-tdefault_load (struct target_ops *self, char *arg1, int arg2)
+tdefault_load (struct target_ops *self, const char *arg1, int arg2)
 {
   tcomplain ();
 }
@@ -631,7 +631,7 @@ tdefault_stop (struct target_ops *self, ptid_t arg1)
 }
 
 static void
-delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
+delegate_rcmd (struct target_ops *self, const char *arg1, struct ui_file *arg2)
 {
   self = self->beneath;
   self->to_rcmd (self, arg1, arg2);
@@ -742,29 +742,42 @@ delegate_make_corefile_notes (struct target_ops *self, bfd *arg1, int *arg2)
 }
 
 static gdb_byte * 
-delegate_get_bookmark (struct target_ops *self, char *arg1, int arg2)
+delegate_get_bookmark (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
   return self->to_get_bookmark (self, arg1, arg2);
 }
 
 static gdb_byte * 
-tdefault_get_bookmark (struct target_ops *self, char *arg1, int arg2)
+tdefault_get_bookmark (struct target_ops *self, const char *arg1, int arg2)
 {
   tcomplain ();
 }
 
 static void
-delegate_goto_bookmark (struct target_ops *self, gdb_byte *arg1, int arg2)
+delegate_goto_bookmark (struct target_ops *self, const gdb_byte *arg1, int arg2)
 {
   self = self->beneath;
   self->to_goto_bookmark (self, arg1, arg2);
 }
 
 static void
-tdefault_goto_bookmark (struct target_ops *self, gdb_byte *arg1, int arg2)
+tdefault_goto_bookmark (struct target_ops *self, const gdb_byte *arg1, int arg2)
 {
   tcomplain ();
+}
+
+static CORE_ADDR
+delegate_get_thread_local_address (struct target_ops *self, ptid_t arg1, CORE_ADDR arg2, CORE_ADDR arg3)
+{
+  self = self->beneath;
+  return self->to_get_thread_local_address (self, arg1, arg2, arg3);
+}
+
+static CORE_ADDR
+tdefault_get_thread_local_address (struct target_ops *self, ptid_t arg1, CORE_ADDR arg2, CORE_ADDR arg3)
+{
+  generic_tls_error ();
 }
 
 static enum target_xfer_status 
@@ -1625,6 +1638,30 @@ delegate_decr_pc_after_break (struct target_ops *self, struct gdbarch *arg1)
 }
 
 static void
+delegate_prepare_to_generate_core (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_prepare_to_generate_core (self);
+}
+
+static void
+tdefault_prepare_to_generate_core (struct target_ops *self)
+{
+}
+
+static void
+delegate_done_generating_core (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_done_generating_core (self);
+}
+
+static void
+tdefault_done_generating_core (struct target_ops *self)
+{
+}
+
+static void
 install_delegators (struct target_ops *ops)
 {
   if (ops->to_post_attach == NULL)
@@ -1757,6 +1794,8 @@ install_delegators (struct target_ops *ops)
     ops->to_get_bookmark = delegate_get_bookmark;
   if (ops->to_goto_bookmark == NULL)
     ops->to_goto_bookmark = delegate_goto_bookmark;
+  if (ops->to_get_thread_local_address == NULL)
+    ops->to_get_thread_local_address = delegate_get_thread_local_address;
   if (ops->to_xfer_partial == NULL)
     ops->to_xfer_partial = delegate_xfer_partial;
   if (ops->to_memory_map == NULL)
@@ -1897,6 +1936,10 @@ install_delegators (struct target_ops *ops)
     ops->to_get_tailcall_unwinder = delegate_get_tailcall_unwinder;
   if (ops->to_decr_pc_after_break == NULL)
     ops->to_decr_pc_after_break = delegate_decr_pc_after_break;
+  if (ops->to_prepare_to_generate_core == NULL)
+    ops->to_prepare_to_generate_core = delegate_prepare_to_generate_core;
+  if (ops->to_done_generating_core == NULL)
+    ops->to_done_generating_core = delegate_done_generating_core;
 }
 
 static void
@@ -1967,6 +2010,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_make_corefile_notes = dummy_make_corefile_notes;
   ops->to_get_bookmark = tdefault_get_bookmark;
   ops->to_goto_bookmark = tdefault_goto_bookmark;
+  ops->to_get_thread_local_address = tdefault_get_thread_local_address;
   ops->to_xfer_partial = tdefault_xfer_partial;
   ops->to_memory_map = tdefault_memory_map;
   ops->to_flash_erase = tdefault_flash_erase;
@@ -2037,4 +2081,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_get_unwinder = tdefault_get_unwinder;
   ops->to_get_tailcall_unwinder = tdefault_get_tailcall_unwinder;
   ops->to_decr_pc_after_break = default_target_decr_pc_after_break;
+  ops->to_prepare_to_generate_core = tdefault_prepare_to_generate_core;
+  ops->to_done_generating_core = tdefault_done_generating_core;
 }

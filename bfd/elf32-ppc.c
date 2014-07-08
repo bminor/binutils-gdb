@@ -2629,7 +2629,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
   apuinfo_list_init ();
 
   /* Read in the input sections contents.  */
-  for (ibfd = link_info->input_bfds; ibfd; ibfd = ibfd->link_next)
+  for (ibfd = link_info->input_bfds; ibfd; ibfd = ibfd->link.next)
     {
       unsigned long datum;
 
@@ -4017,7 +4017,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_GOT_TPREL16_LO:
 	case R_PPC_GOT_TPREL16_HI:
 	case R_PPC_GOT_TPREL16_HA:
-	  if (!info->executable)
+	  if (info->shared)
 	    info->flags |= DF_STATIC_TLS;
 	  tls_type = TLS_TLS | TLS_TPREL;
 	  goto dogottls;
@@ -4308,7 +4308,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_TPREL16_LO:
 	case R_PPC_TPREL16_HI:
 	case R_PPC_TPREL16_HA:
-	  if (!info->executable)
+	  if (info->shared)
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
 
@@ -4828,7 +4828,7 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 	     --secure-plt and we never see REL16 relocs.  */
 	  if (plt_type == PLT_UNSET)
 	    plt_type = PLT_OLD;
-	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
+	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
 	    if (is_ppc_elf (ibfd))
 	      {
 		if (ppc_elf_tdata (ibfd)->has_rel16)
@@ -5197,7 +5197,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
      notify relocate_section that optimization can be done, and
      adjust got and plt refcounts.  */
   for (pass = 0; pass < 2; ++pass)
-    for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
       {
 	Elf_Internal_Sym *locsyms = NULL;
 	Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (ibfd);
@@ -5506,9 +5506,21 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     will go to this object, or will remain undefined.  */
 	  h->plt.plist = NULL;
 	  h->needs_plt = 0;
+	  h->pointer_equality_needed = 0;
 	}
       else
 	{
+	  /* Taking a function's address in a read/write section
+	     doesn't require us to define the function symbol in the
+	     executable on a global entry stub.  A dynamic reloc can
+	     be used instead.  */
+	  if (h->pointer_equality_needed
+	      && !readonly_dynrelocs (h))
+	    {
+	      h->pointer_equality_needed = 0;
+	      h->non_got_ref = 0;
+	    }
+
 	  /* After adjust_dynamic_symbol, non_got_ref set in the
 	     non-shared case means that we have allocated space in
 	     .dynbss for the symbol and thus dyn_relocs for this
@@ -5518,12 +5530,12 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     relocations against this symbol to the PLT entry.  Allow
 	     dynamic relocs if the reference is weak, and the dynamic
 	     relocs will not cause text relocation.  */
-	  if (!h->ref_regular_nonweak
-	      && h->non_got_ref
-	      && h->type != STT_GNU_IFUNC
-	      && !htab->is_vxworks
-	      && !ppc_elf_hash_entry (h)->has_sda_refs
-	      && !readonly_dynrelocs (h))
+	  else if (!h->ref_regular_nonweak
+		   && h->non_got_ref
+		   && h->type != STT_GNU_IFUNC
+		   && !htab->is_vxworks
+		   && !ppc_elf_hash_entry (h)->has_sda_refs
+		   && !readonly_dynrelocs (h))
 	    h->non_got_ref = 0;
 	}
       return TRUE;
@@ -6130,7 +6142,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       bfd_signed_vma *local_got;
       bfd_signed_vma *end_local_got;
@@ -6304,6 +6316,16 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
       sda->root.u.def.section = htab->elf.hgot->root.u.def.section;
       sda->root.u.def.value = htab->elf.hgot->root.u.def.value;
     }
+  if (info->emitrelocations)
+    {
+      struct elf_link_hash_entry *sda = htab->sdata[0].sym;
+
+      if (sda != NULL && sda->ref_regular)
+	sda->root.u.def.section->flags |= SEC_KEEP;
+      sda = htab->sdata[1].sym;
+      if (sda != NULL && sda->ref_regular)
+	sda->root.u.def.section->flags |= SEC_KEEP;
+    }
 
   if (htab->glink != NULL
       && htab->glink->size != 0
@@ -6396,11 +6418,14 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	       || s == htab->sgotplt
 	       || s == htab->sbss
 	       || s == htab->dynbss
-	       || s == htab->dynsbss
-	       || s == htab->sdata[0].section
-	       || s == htab->sdata[1].section)
+	       || s == htab->dynsbss)
 	{
 	  /* Strip these too.  */
+	}
+      else if (s == htab->sdata[0].section
+	       || s == htab->sdata[1].section)
+	{
+	  strip_section = (s->flags & SEC_KEEP) == 0;
 	}
       else if (CONST_STRNEQ (bfd_get_section_name (htab->elf.dynobj, s),
 			     ".rela"))

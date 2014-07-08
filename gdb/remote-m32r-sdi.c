@@ -1238,9 +1238,9 @@ m32r_remove_breakpoint (struct target_ops *ops,
 }
 
 static void
-m32r_load (struct target_ops *self, char *args, int from_tty)
+m32r_load (struct target_ops *self, const char *args, int from_tty)
 {
-  struct cleanup *old_chain;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   asection *section;
   bfd *pbfd;
   bfd_vma entry;
@@ -1258,17 +1258,11 @@ m32r_load (struct target_ops *self, char *args, int from_tty)
 
   while (*args != '\000')
     {
-      char *arg;
+      char *arg = extract_arg_const (&args);
 
-      args = skip_spaces (args);
-
-      arg = args;
-
-      while ((*args != '\000') && !isspace (*args))
-	args++;
-
-      if (*args != '\000')
-	*args++ = '\000';
+      if (arg == NULL)
+	break;
+      make_cleanup (xfree, arg);
 
       if (*arg != '-')
 	filename = arg;
@@ -1285,11 +1279,8 @@ m32r_load (struct target_ops *self, char *args, int from_tty)
 
   pbfd = gdb_bfd_open (filename, gnutarget, -1);
   if (pbfd == NULL)
-    {
-      perror_with_name (filename);
-      return;
-    }
-  old_chain = make_cleanup_bfd_unref (pbfd);
+    perror_with_name (filename);
+  make_cleanup_bfd_unref (pbfd);
 
   if (!bfd_check_format (pbfd, bfd_object))
     error (_("\"%s\" is not an object file: %s"), filename,

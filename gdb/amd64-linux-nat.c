@@ -25,7 +25,7 @@
 #include "regset.h"
 #include "linux-nat.h"
 #include "amd64-linux-tdep.h"
-#include "linux-btrace.h"
+#include "nat/linux-btrace.h"
 #include "btrace.h"
 
 #include "gdb_assert.h"
@@ -415,6 +415,11 @@ amd64_linux_prepare_to_resume (struct lwp_info *lwp)
 
 	 Ensure DR_CONTROL gets written as the very last register here.  */
 
+      /* Clear DR_CONTROL first.  In some cases, setting DR0-3 to a
+	 value that doesn't match what is enabled in DR_CONTROL
+	 results in EINVAL.  */
+      amd64_linux_dr_set (lwp->ptid, DR_CONTROL, 0);
+
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 	if (state->dr_ref_count[i] > 0)
 	  {
@@ -427,7 +432,10 @@ amd64_linux_prepare_to_resume (struct lwp_info *lwp)
 	    clear_status = 1;
 	  }
 
-      amd64_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
+      /* If DR_CONTROL is supposed to be zero, we've already set it
+	 above.  */
+      if (state->dr_control_mirror != 0)
+	amd64_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
 
       lwp->arch_private->debug_registers_changed = 0;
     }

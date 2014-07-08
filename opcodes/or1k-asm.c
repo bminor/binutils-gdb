@@ -4,7 +4,7 @@
    THIS FILE IS MACHINE GENERATED WITH CGEN.
    - the resultant file is machine generated, cgen-asm.in isn't
 
-   Copyright 1996-2014 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
    This file is part of libopcodes.
 
@@ -56,11 +56,11 @@ static const char * MISSING_CLOSING_PARENTHESIS = N_("missing `)'");
 
 static const char *
 parse_disp26 (CGEN_CPU_DESC cd,
-              const char ** strp,
-              int opindex,
-              int opinfo,
-              enum cgen_parse_operand_result * resultp,
-              bfd_vma * valuep)
+	      const char ** strp,
+	      int opindex,
+	      int opinfo,
+	      enum cgen_parse_operand_result * resultp,
+	      bfd_vma * valuep)
 {
   const char *errmsg = NULL;
   enum cgen_parse_operand_result result_type;
@@ -71,13 +71,13 @@ parse_disp26 (CGEN_CPU_DESC cd,
 
       *strp += 4;
       errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_OR1K_PLT26,
-                                   & result_type, & value);
+				   & result_type, & value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value = (value >> 2) & 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 2) & 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -100,9 +100,9 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 3;
       errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_HI16,
-        			   & result_type, & value);
+				   & result_type, & value);
       if (**strp != ')')
-        errmsg = MISSING_CLOSING_PARENTHESIS;
+	errmsg = MISSING_CLOSING_PARENTHESIS;
       ++*strp;
 
       ret = value;
@@ -121,11 +121,11 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 3;
       errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_LO16,
-        			   & result_type, & value);
+				   & result_type, & value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
-      
+
       ret = value;
 
       if (result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
@@ -140,13 +140,13 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 4;
       errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_OR1K_GOT16,
-                                   & result_type, & value);
+				   & result_type, & value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value &= 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -156,14 +156,14 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 8;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_GOTPC_HI16,
-                                   & result_type, & value);
+				   BFD_RELOC_OR1K_GOTPC_HI16,
+				   & result_type, & value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value = (value >> 16) & 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 16) & 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -173,14 +173,14 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 8;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_GOTPC_LO16,
-                                   &result_type, &value);
+				   BFD_RELOC_OR1K_GOTPC_LO16,
+				   &result_type, &value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value &= 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -190,15 +190,15 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 9;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_GOTOFF_HI16,
-                                   & result_type, & value);
+				   BFD_RELOC_OR1K_GOTOFF_HI16,
+				   & result_type, & value);
 
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value = (value >> 16) & 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 16) & 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -208,14 +208,14 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 9;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_GOTOFF_LO16,
-                                   &result_type, &value);
+				   BFD_RELOC_OR1K_GOTOFF_LO16,
+				   &result_type, &value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value &= 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -225,15 +225,15 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 8;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_GD_HI16,
-                                   & result_type, & value);
+				   BFD_RELOC_OR1K_TLS_GD_HI16,
+				   & result_type, & value);
 
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value = (value >> 16) & 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 16) & 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -243,14 +243,14 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 8;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_GD_LO16,
-                                   &result_type, &value);
+				   BFD_RELOC_OR1K_TLS_GD_LO16,
+				   &result_type, &value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value &= 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -260,15 +260,15 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 9;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_LDM_HI16,
-                                   & result_type, & value);
+				   BFD_RELOC_OR1K_TLS_LDM_HI16,
+				   & result_type, & value);
 
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value = (value >> 16) & 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 16) & 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -278,14 +278,14 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 9;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_LDM_LO16,
-                                   &result_type, &value);
+				   BFD_RELOC_OR1K_TLS_LDM_LO16,
+				   &result_type, &value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value &= 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -295,15 +295,15 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 9;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_LDO_HI16,
-                                   & result_type, & value);
+				   BFD_RELOC_OR1K_TLS_LDO_HI16,
+				   & result_type, & value);
 
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value = (value >> 16) & 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 16) & 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -313,14 +313,14 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 9;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_LDO_LO16,
-                                   &result_type, &value);
+				   BFD_RELOC_OR1K_TLS_LDO_LO16,
+				   &result_type, &value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value &= 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -330,15 +330,15 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 11;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_IE_HI16,
-                                   & result_type, & value);
+				   BFD_RELOC_OR1K_TLS_IE_HI16,
+				   & result_type, & value);
 
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value = (value >> 16) & 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 16) & 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -348,14 +348,14 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 11;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_IE_LO16,
-                                   &result_type, &value);
+				   BFD_RELOC_OR1K_TLS_IE_LO16,
+				   &result_type, &value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value &= 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -365,15 +365,15 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 8;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_LE_HI16,
-                                   & result_type, & value);
+				   BFD_RELOC_OR1K_TLS_LE_HI16,
+				   & result_type, & value);
 
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value = (value >> 16) & 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 16) & 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -383,14 +383,14 @@ parse_simm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
 
       *strp += 8;
       errmsg = cgen_parse_address (cd, strp, opindex,
-                                   BFD_RELOC_OR1K_TLS_LE_LO16,
-                                   &result_type, &value);
+				   BFD_RELOC_OR1K_TLS_LE_LO16,
+				   &result_type, &value);
       if (**strp != ')')
-        return MISSING_CLOSING_PARENTHESIS;
+	return MISSING_CLOSING_PARENTHESIS;
       ++*strp;
       if (errmsg == NULL
-          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        value &= 0xffff;
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
       *valuep = value;
       return errmsg;
     }
@@ -411,6 +411,7 @@ static const char *
 parse_uimm16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, unsigned long * valuep)
 {
   const char *errmsg = parse_simm16(cd, strp, opindex, (long *) valuep);
+
   if (errmsg == NULL)
     *valuep &= 0xffff;
   return errmsg;
@@ -505,7 +506,7 @@ or1k_cgen_parse_operand (CGEN_CPU_DESC cd,
   return errmsg;
 }
 
-cgen_parse_fn * const or1k_cgen_parse_handlers[] =
+cgen_parse_fn * const or1k_cgen_parse_handlers[] = 
 {
   parse_insn_normal,
 };
@@ -535,9 +536,9 @@ CGEN_ASM_INIT_HOOK
 
    Returns NULL for success, an error message for failure.  */
 
-char *
+char * 
 or1k_cgen_build_insn_regex (CGEN_INSN *insn)
-{
+{  
   CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
   char rxbuf[CGEN_MAX_RX_ELEMENTS];
@@ -576,18 +577,18 @@ or1k_cgen_build_insn_regex (CGEN_INSN *insn)
   /* Copy any remaining literals from the syntax string into the rx.  */
   for(; * syn != 0 && rx <= rxbuf + (CGEN_MAX_RX_ELEMENTS - 7 - 4); ++syn)
     {
-      if (CGEN_SYNTAX_CHAR_P (* syn))
+      if (CGEN_SYNTAX_CHAR_P (* syn)) 
 	{
 	  char c = CGEN_SYNTAX_CHAR (* syn);
 
-	  switch (c)
+	  switch (c) 
 	    {
 	      /* Escape any regex metacharacters in the syntax.  */
-	    case '.': case '[': case '\\':
-	    case '*': case '^': case '$':
+	    case '.': case '[': case '\\': 
+	    case '*': case '^': case '$': 
 
 #ifdef CGEN_ESCAPE_EXTENDED_REGEX
-	    case '?': case '{': case '}':
+	    case '?': case '{': case '}': 
 	    case '(': case ')': case '*':
 	    case '|': case '+': case ']':
 #endif
@@ -617,20 +618,20 @@ or1k_cgen_build_insn_regex (CGEN_INSN *insn)
     }
 
   /* Trailing whitespace ok.  */
-  * rx++ = '[';
-  * rx++ = ' ';
-  * rx++ = '\t';
-  * rx++ = ']';
-  * rx++ = '*';
+  * rx++ = '['; 
+  * rx++ = ' '; 
+  * rx++ = '\t'; 
+  * rx++ = ']'; 
+  * rx++ = '*'; 
 
   /* But anchor it after that.  */
-  * rx++ = '$';
+  * rx++ = '$'; 
   * rx = '\0';
 
   CGEN_INSN_RX (insn) = xmalloc (sizeof (regex_t));
   reg_err = regcomp ((regex_t *) CGEN_INSN_RX (insn), rxbuf, REG_NOSUB);
 
-  if (reg_err == 0)
+  if (reg_err == 0) 
     return NULL;
   else
     {
@@ -829,7 +830,7 @@ or1k_cgen_assemble_insn (CGEN_CPU_DESC cd,
       const CGEN_INSN *insn = ilist->insn;
       recognized_mnemonic = 1;
 
-#ifdef CGEN_VALIDATE_INSN_SUPPORTED
+#ifdef CGEN_VALIDATE_INSN_SUPPORTED 
       /* Not usually needed as unsupported opcodes
 	 shouldn't be in the hash lists.  */
       /* Is this insn supported by the selected cpu?  */
@@ -889,7 +890,7 @@ or1k_cgen_assemble_insn (CGEN_CPU_DESC cd,
 	if (strlen (start) > 50)
 	  /* xgettext:c-format */
 	  sprintf (errbuf, "%s `%.50s...'", tmp_errmsg, start);
-	else
+	else 
 	  /* xgettext:c-format */
 	  sprintf (errbuf, "%s `%.50s'", tmp_errmsg, start);
       }
@@ -898,11 +899,11 @@ or1k_cgen_assemble_insn (CGEN_CPU_DESC cd,
 	if (strlen (start) > 50)
 	  /* xgettext:c-format */
 	  sprintf (errbuf, _("bad instruction `%.50s...'"), start);
-	else
+	else 
 	  /* xgettext:c-format */
 	  sprintf (errbuf, _("bad instruction `%.50s'"), start);
       }
-
+      
     *errmsg = errbuf;
     return NULL;
   }

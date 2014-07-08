@@ -278,15 +278,21 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 {
   valueT value = * valueP;
 
-  if (((fixP->fx_addsy == NULL && fixP->fx_subsy == NULL)
-       && fixP->fx_r_type != BFD_RELOC_32_PLT_PCREL
-       && fixP->fx_r_type != BFD_RELOC_32_GOT_PCREL)
-      || fixP->fx_r_type == NO_RELOC)
+  if (fixP->fx_subsy != (symbolS *) NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+
+  if (fixP->fx_addsy == NULL)
+    fixP->fx_done = 1;
+
+  if (fixP->fx_done)
     number_to_chars_littleendian (fixP->fx_where + fixP->fx_frag->fr_literal,
 				  value, fixP->fx_size);
-
-  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
-    fixP->fx_done = 1;
+  else
+    /* Initialise the part of an instruction frag covered by the
+       relocation.  (Many occurrences of frag_more followed by fix_new
+       lack any init of the frag.)  Since VAX uses RELA relocs the
+       value we write into this field doesn't really matter.  */
+    memset (fixP->fx_where + fixP->fx_frag->fr_literal, 0, fixP->fx_size);
 }
 
 /* Convert a number from VAX byte order (little endian)
@@ -2336,7 +2342,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   if (fixp->fx_tcbit)
     abort ();
 
-  if (fixp->fx_r_type != BFD_RELOC_NONE)
+  if (fixp->fx_r_type != NO_RELOC)
     {
       code = fixp->fx_r_type;
 
@@ -3379,7 +3385,7 @@ vax_cons (expressionS *exp, int size)
       case 2: return BFD_RELOC_16_PCREL;
       case 4: return BFD_RELOC_32_PCREL;
       }
-  return BFD_RELOC_NONE;
+  return NO_RELOC;
 }
 
 /* This is called by emit_expr via TC_CONS_FIX_NEW when creating a
@@ -3389,7 +3395,7 @@ void
 vax_cons_fix_new (fragS *frag, int where, unsigned int nbytes, expressionS *exp,
 		  bfd_reloc_code_real_type r)
 {
-  if (r == BFD_RELOC_NONE)
+  if (r == NO_RELOC)
     r = (nbytes == 1 ? BFD_RELOC_8
 	 : nbytes == 2 ? BFD_RELOC_16
 	 : BFD_RELOC_32);

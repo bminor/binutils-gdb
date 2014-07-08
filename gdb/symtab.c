@@ -1615,7 +1615,7 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
 {
   const struct objfile *objfile;
   struct symbol *sym;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symtab *s;
 
@@ -1655,7 +1655,7 @@ lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
 			   const char *name, const domain_enum domain)
 {
   struct symbol *sym = NULL;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symtab *s;
 
@@ -1758,7 +1758,7 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
 			 const char *name, const domain_enum domain)
 {
   struct symtab *symtab;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symbol *sym;
 
@@ -1946,7 +1946,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
 				     const char *name)
 {
   struct symtab *symtab;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct block *block;
   struct symbol *sym;
 
@@ -1979,7 +1979,7 @@ basic_lookup_transparent_type (const char *name)
 {
   struct symbol *sym;
   struct symtab *s = NULL;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct objfile *objfile;
   struct block *block;
   struct type *t;
@@ -2136,7 +2136,7 @@ struct symtab *
 find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
 {
   struct block *b;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct symtab *s = NULL;
   struct symtab *best_s = NULL;
   struct objfile *objfile;
@@ -2279,7 +2279,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   int i;
   struct linetable_entry *item;
   struct symtab_and_line val;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct bound_minimal_symbol msymbol;
   struct objfile *objfile;
 
@@ -2877,7 +2877,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
   const char *name;
   struct objfile *objfile;
   struct gdbarch *gdbarch;
-  struct block *b, *function_block;
+  const struct block *b, *function_block;
   int force_skip, skip;
 
   /* Do not change the SAL if PC was specified explicitly.  */
@@ -3041,8 +3041,8 @@ skip_prologue_sal (struct symtab_and_line *sal)
    beginning of the substring of the operator text.
    Otherwise, return "".  */
 
-static char *
-operator_chars (char *p, char **end)
+static const char *
+operator_chars (const char *p, const char **end)
 {
   *end = "";
   if (strncmp (p, "operator", 8))
@@ -3062,7 +3062,7 @@ operator_chars (char *p, char **end)
 
   if (isalpha (*p) || *p == '_' || *p == '$')
     {
-      char *q = p + 1;
+      const char *q = p + 1;
 
       while (isalnum (*q) || *q == '_' || *q == '$')
 	q++;
@@ -3341,7 +3341,7 @@ sources_info (char *ignore, int from_tty)
    non-zero compare only lbasename of FILES.  */
 
 static int
-file_matches (const char *file, char *files[], int nfiles, int basenames)
+file_matches (const char *file, const char *files[], int nfiles, int basenames)
 {
   int i;
 
@@ -3466,7 +3466,7 @@ sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
 struct search_symbols_data
 {
   int nfiles;
-  char **files;
+  const char **files;
 
   /* It is true if PREG contains valid data, false otherwise.  */
   unsigned preg_p : 1;
@@ -3511,12 +3511,12 @@ search_symbols_name_matches (const char *symname, void *user_data)
    Duplicate entries are removed.  */
 
 void
-search_symbols (char *regexp, enum search_domain kind,
-		int nfiles, char *files[],
+search_symbols (const char *regexp, enum search_domain kind,
+		int nfiles, const char *files[],
 		struct symbol_search **matches)
 {
   struct symtab *s;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct block *b;
   int i = 0;
   struct block_iterator iter;
@@ -3562,8 +3562,8 @@ search_symbols (char *regexp, enum search_domain kind,
          This is just a courtesy to make the matching less sensitive
          to how many spaces the user leaves between 'operator'
          and <TYPENAME> or <OPERATOR>.  */
-      char *opend;
-      char *opname = operator_chars (regexp, &opend);
+      const char *opend;
+      const char *opname = operator_chars (regexp, &opend);
       int errcode;
 
       if (*opname)
@@ -3871,7 +3871,7 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
   gdb_assert (kind <= TYPES_DOMAIN);
 
   /* Must make sure that if we're interrupted, symbols gets freed.  */
-  search_symbols (regexp, kind, 0, (char **) NULL, &symbols);
+  search_symbols (regexp, kind, 0, NULL, &symbols);
   old_chain = make_cleanup_free_search_symbols (&symbols);
 
   if (regexp != NULL)
@@ -3950,7 +3950,8 @@ rbreak_command (char *regexp, int from_tty)
   struct cleanup *old_chain;
   char *string = NULL;
   int len = 0;
-  char **files = NULL, *file_name;
+  const char **files = NULL;
+  const char *file_name;
   int nfiles = 0;
 
   if (regexp)
@@ -3960,13 +3961,15 @@ rbreak_command (char *regexp, int from_tty)
       if (colon && *(colon + 1) != ':')
 	{
 	  int colon_index;
+	  char *local_name;
 
 	  colon_index = colon - regexp;
-	  file_name = alloca (colon_index + 1);
-	  memcpy (file_name, regexp, colon_index);
-	  file_name[colon_index--] = 0;
-	  while (isspace (file_name[colon_index]))
-	    file_name[colon_index--] = 0; 
+	  local_name = alloca (colon_index + 1);
+	  memcpy (local_name, regexp, colon_index);
+	  local_name[colon_index--] = 0;
+	  while (isspace (local_name[colon_index]))
+	    local_name[colon_index--] = 0;
+	  file_name = local_name;
 	  files = &file_name;
 	  nfiles = 1;
 	  regexp = skip_spaces (colon + 1);
@@ -4284,7 +4287,7 @@ add_macro_name (const char *name, const struct macro_definition *ignore,
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
 
-  completion_list_add_name ((char *) name,
+  completion_list_add_name (name,
 			    datum->sym_text, datum->sym_text_len,
 			    datum->text, datum->word);
 }
@@ -4313,7 +4316,7 @@ default_make_symbol_completion_list_break_on (const char *text,
   struct symtab *s;
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
-  struct block *b;
+  const struct block *b;
   const struct block *surrounding_static_block, *surrounding_global_block;
   struct block_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
@@ -4923,7 +4926,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
   struct symtab_and_line prologue_sal;
   CORE_ADDR start_pc;
   CORE_ADDR end_pc;
-  struct block *bl;
+  const struct block *bl;
 
   /* Get an initial range for the function.  */
   find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);

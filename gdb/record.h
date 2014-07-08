@@ -53,11 +53,11 @@ extern int record_read_memory (struct gdbarch *gdbarch,
 			       CORE_ADDR memaddr, gdb_byte *myaddr,
 			       ssize_t len);
 
-/* The "record goto" command.  */
-extern void cmd_record_goto (char *arg, int from_tty);
+/* A wrapper for target_goto_record that parses ARG as a number.  */
+extern void record_goto (const char *arg);
 
 /* The default "to_disconnect" target method for record targets.  */
-extern void record_disconnect (struct target_ops *, char *, int);
+extern void record_disconnect (struct target_ops *, const char *, int);
 
 /* The default "to_detach" target method for record targets.  */
 extern void record_detach (struct target_ops *, const char *, int);

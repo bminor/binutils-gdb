@@ -2090,7 +2090,7 @@ clear_memory_write_data (void *arg)
 }
 
 void
-generic_load (char *args, int from_tty)
+generic_load (const char *args, int from_tty)
 {
   bfd *loadfile_bfd;
   struct timeval start_time, end_time;
@@ -2262,7 +2262,7 @@ add_symbol_file_command (char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   char *filename = NULL;
-  int flags = OBJF_USERLOADED;
+  int flags = OBJF_USERLOADED | OBJF_SHARED;
   char *arg;
   int section_index = 0;
   int argcnt = 0;
@@ -2445,8 +2445,8 @@ remove_symbol_file_command (char *args, int from_tty)
 
       ALL_OBJFILES (objf)
 	{
-	  if (objf != 0
-	      && objf->flags & OBJF_USERLOADED
+	  if ((objf->flags & OBJF_USERLOADED) != 0
+	      && (objf->flags & OBJF_SHARED) != 0
 	      && objf->pspace == pspace && is_addr_in_objfile (addr, objf))
 	    break;
 	}
@@ -2464,8 +2464,8 @@ remove_symbol_file_command (char *args, int from_tty)
 
       ALL_OBJFILES (objf)
 	{
-	  if (objf != 0
-	      && objf->flags & OBJF_USERLOADED
+	  if ((objf->flags & OBJF_USERLOADED) != 0
+	      && (objf->flags & OBJF_SHARED) != 0
 	      && objf->pspace == pspace
 	      && filename_cmp (filename, objfile_name (objf)) == 0)
 	    break;
@@ -3487,7 +3487,7 @@ overlay_command (char *args, int from_tty)
 {
   printf_unfiltered
     ("\"overlay\" must be followed by the name of an overlay command.\n");
-  help_list (overlaylist, "overlay ", -1, gdb_stdout);
+  help_list (overlaylist, "overlay ", all_commands, gdb_stdout);
 }
 
 /* Target Overlays for the "Simplest" overlay manager:

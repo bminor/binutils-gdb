@@ -990,12 +990,12 @@ v:int:has_dos_based_file_system:::0:0::0
 m:void:gen_return_address:struct agent_expr *ax, struct axs_value *value, CORE_ADDR scope:ax, value, scope::default_gen_return_address::0
 
 # Implement the "info proc" command.
-M:void:info_proc:char *args, enum info_proc_what what:args, what
+M:void:info_proc:const char *args, enum info_proc_what what:args, what
 
 # Implement the "info proc" command for core files.  Noe that there
 # are two "info_proc"-like methods on gdbarch -- one for core files,
 # one for live targets.
-M:void:core_info_proc:char *args, enum info_proc_what what:args, what
+M:void:core_info_proc:const char *args, enum info_proc_what what:args, what
 
 # Iterate over all objfiles in the order that makes the most sense
 # for the architecture to make global symbol searches.

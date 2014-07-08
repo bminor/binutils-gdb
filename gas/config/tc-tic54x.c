@@ -2368,13 +2368,13 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
       FILE *ftmp;
 
       /* We're not sure how big it is, but it will be smaller than "size".  */
-      bfd_bread (buf, size, mbfd);
+      size = bfd_bread (buf, size, mbfd);
 
       /* Write to a temporary file, then use s_include to include it
 	 a bit of a hack.  */
       ftmp = fopen (fname, "w+b");
       fwrite ((void *) buf, size, 1, ftmp);
-      if (buf[size - 1] != '\n')
+      if (size == 0 || buf[size - 1] != '\n')
 	fwrite ("\n", 1, 1, ftmp);
       fclose (ftmp);
       free (buf);
@@ -4777,7 +4777,7 @@ tic54x_start_line_hook (void)
   line[endp - input_line_pointer] = 0;
 
   /* Scan ahead for parallel insns.  */
-  parallel_on_next_line_hint = next_line_shows_parallel (endp + 1);
+  parallel_on_next_line_hint = next_line_shows_parallel (endp);
 
   /* If within a macro, first process forced replacements.  */
   if (macro_level > 0)

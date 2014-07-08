@@ -2213,7 +2213,7 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F10_P_1_M_1 */
   {
-    { "vmovss",	{ XMScalar, VexScalar, EXx } },
+    { "vmovss",	{ XMScalar, VexScalar, EXxmm_md } },
   },
   /* EVEX_W_0F10_P_2 */
   {
@@ -2228,7 +2228,7 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0F10_P_3_M_1 */
   {
     { Bad_Opcode },
-    { "vmovsd",	{ XMScalar, VexScalar, EXx } },
+    { "vmovsd",	{ XMScalar, VexScalar, EXxmm_mq } },
   },
   /* EVEX_W_0F11_P_0 */
   {

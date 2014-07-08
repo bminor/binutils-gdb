@@ -427,12 +427,9 @@ struct objfile
 #define OBJF_REORDERED	(1 << 0)	/* Functions are reordered */
 
 /* Distinguish between an objfile for a shared library and a "vanilla"
-   objfile.  (If not set, the objfile may still actually be a solib.
-   This can happen if the user created the objfile by using the
-   add-symbol-file command.  GDB doesn't in that situation actually
-   check whether the file is a solib.  Rather, the target's
-   implementation of the solib interface is responsible for setting
-   this flag when noticing solibs used by an inferior.)  */
+   objfile.  This may come from a target's implementation of the solib
+   interface, from add-symbol-file, or any other mechanism that loads
+   dynamic objects.  */
 
 #define OBJF_SHARED     (1 << 1)	/* From a shared library */
 
@@ -515,12 +512,11 @@ extern void objfiles_changed (void);
 
 extern int is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile);
 
-/* Return true if ADDRESS maps into one of the sections of the
-   userloaded ("add-symbol-file") objfiles of PSPACE and false
-   otherwise.  */
+/* Return true if ADDRESS maps into one of the sections of a
+   OBJF_SHARED objfile of PSPACE and false otherwise.  */
 
-extern int userloaded_objfile_contains_address_p (struct program_space *pspace,
-						  CORE_ADDR address);
+extern int shared_objfile_contains_address_p (struct program_space *pspace,
+					      CORE_ADDR address);
 
 /* This operation deletes all objfile entries that represent solibs that
    weren't explicitly loaded by the user, via e.g., the add-symbol-file

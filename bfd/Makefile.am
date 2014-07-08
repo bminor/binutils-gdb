@@ -20,9 +20,6 @@
 AUTOMAKE_OPTIONS = 1.11 no-dist foreign
 ACLOCAL_AMFLAGS = -I . -I .. -I ../config
 
-# Uncomment the following line when doing a release.
-# RELEASE=y
-
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 
@@ -735,16 +732,14 @@ OPTIONAL_BACKENDS_CFILES = \
 	sco5-core.c \
 	trad-core.c
 
-# We want to rerun configure if configure.in, config.bfd or
-# configure.host change. configure.in is needed since the version
-# number in Makefile comes from configure.in.
+# Reconfigure if config.bfd or configure.host changes.
+# development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = \
-	$(srcdir)/configure.in \
 	$(srcdir)/config.bfd \
 	$(srcdir)/configure.host \
 	$(srcdir)/development.sh
 
-# These are defined by configure.in:
+# These are defined by configure:
 WORDSIZE = @wordsize@
 ALL_BACKENDS = @all_backends@
 BFD_BACKENDS = @bfd_backends@
@@ -1027,14 +1022,15 @@ CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 
 DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES) libtool-soversion
 
-bfdver.h: $(srcdir)/version.h $(srcdir)/Makefile.in
+bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	@echo "creating $@"
 	@bfd_version=`echo "$(VERSION)" | sed -e 's/\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\).*/\1.00\2.00\3.00\4.00\5/' -e 's/\([^\.]*\)\..*\(..\)\..*\(..\)\..*\(..\)\..*\(..\)$$/\1\2\3\4\5/'` ;\
 	bfd_version_string="\"$(VERSION)\"" ;\
 	bfd_soversion="$(VERSION)" ;\
 	bfd_version_package="\"$(PKGVERSION)\"" ;\
 	report_bugs_to="\"$(REPORT_BUGS_TO)\"" ;\
-	if test "x$(RELEASE)" = x ; then \
+	. $(srcdir)/development.sh ;\
+	if test "$$development" = true ; then \
 	  bfd_version_date=`sed -n -e 's/.*DATE //p' < $(srcdir)/version.h` ;\
 	  bfd_version_string="\"$(VERSION).$${bfd_version_date}\"" ;\
 	  bfd_soversion="$(VERSION).$${bfd_version_date}" ;\

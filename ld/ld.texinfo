@@ -2665,9 +2665,15 @@ The image is Terminal Server aware.
 
 @kindex --insert-timestamp
 @item --insert-timestamp
-Insert a real timestamp into the image, rather than the default value
-of zero.  This will result in a slightly different results with each
-invocation, which could be helpful for distributing unique images.
+@itemx --no-insert-timestamp
+Insert a real timestamp into the image.  This is the default behaviour
+as it matches legacy code and it means that the image will work with
+other, proprietary tools.  The problem with this default is that it
+will result in slightly different images being produced each tiem the
+same sources are linked.  The option @option{--no-insert-timestamp}
+can be used to insert a zero value for the timestamp, this ensuring
+that binaries produced from indentical sources will compare
+identically.
 @end table
 
 @c man end

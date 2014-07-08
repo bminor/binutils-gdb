@@ -277,7 +277,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  /* This is entry PC record present only at entry point
 	     of a function.  Verify it is really the function entry point.  */
 
-	  struct block *pc_block = block_for_pc (pc);
+	  const struct block *pc_block = block_for_pc (pc);
 	  struct symbol *pc_func = NULL;
 
 	  if (pc_block)
@@ -353,7 +353,7 @@ dwarf_expr_frame_base (void *baton, const gdb_byte **start, size_t * length)
      this_base method.  */
   struct symbol *framefunc;
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
-  struct block *bl = get_frame_block (debaton->frame, NULL);
+  const struct block *bl = get_frame_block (debaton->frame, NULL);
 
   if (bl == NULL)
     error (_("frame address is not available."));
@@ -3087,7 +3087,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  {
 	    const gdb_byte *datastart;
 	    size_t datalen;
-	    struct block *b;
+	    const struct block *b;
 	    struct symbol *framefunc;
 
 	    b = block_for_pc (expr->scope);
@@ -3542,7 +3542,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
     }
   else if (data[0] == DW_OP_fbreg)
     {
-      struct block *b;
+      const struct block *b;
       struct symbol *framefunc;
       int frame_reg = 0;
       int64_t frame_offset;

@@ -50,7 +50,7 @@ microblaze_extract_unsigned_integer (unsigned char *addr, int len)
 
   if (len > (int) sizeof (unsigned long))
     printf ("That operation is not available on integers of more than "
-	    "%d bytes.", sizeof (unsigned long));
+	    "%ld bytes.", sizeof (unsigned long));
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
@@ -325,7 +325,7 @@ sim_size (int size)
     {
       if (issue_messages)
 	fprintf (stderr,
-		 "Not enough VM for simulation of %d bytes of RAM\n",
+		 "Not enough VM for simulation of %ld bytes of RAM\n",
 		 CPU.msize);
 
       CPU.msize = 1;
@@ -356,7 +356,7 @@ set_initial_gprs ()
   memsize = CPU.msize / (1024 * 1024);
 
   if (issue_messages > 1)
-    fprintf (stderr, "Simulated memory of %d Mbytes (0x0 .. 0x%08x)\n",
+    fprintf (stderr, "Simulated memory of %ld Mbytes (0x0 .. 0x%08lx)\n",
 	     memsize, CPU.msize - 1);
 
   /* Clean out the GPRs */

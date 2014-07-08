@@ -147,7 +147,7 @@ static flagword real_flags = IMAGE_FILE_LARGE_ADDRESS_AWARE;
 static int support_old_code = 0;
 static lang_assignment_statement_type *image_base_statement = 0;
 static unsigned short pe_dll_characteristics = 0;
-static bfd_boolean insert_timestamp = FALSE;
+static bfd_boolean insert_timestamp = TRUE;
 static const char *emit_build_id;
 
 #ifdef DLL_SUPPORT
@@ -245,6 +245,7 @@ enum options
   OPTION_NO_BIND,
   OPTION_WDM_DRIVER,
   OPTION_INSERT_TIMESTAMP,
+  OPTION_NO_INSERT_TIMESTAMP,
   OPTION_TERMINAL_SERVER_AWARE,
   OPTION_BUILD_ID
 };
@@ -322,6 +323,7 @@ gld${EMULATION_NAME}_add_options
     {"wdmdriver", no_argument, NULL, OPTION_WDM_DRIVER},
     {"tsaware", no_argument, NULL, OPTION_TERMINAL_SERVER_AWARE},
     {"insert-timestamp", no_argument, NULL, OPTION_INSERT_TIMESTAMP},
+    {"no-insert-timestamp", no_argument, NULL, OPTION_NO_INSERT_TIMESTAMP},
     {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
     {NULL, no_argument, NULL, 0}
   };
@@ -409,7 +411,7 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
   fprintf (file, _("  --[no-]leading-underscore          Set explicit symbol underscore prefix mode\n"));
-  fprintf (file, _("  --insert-timestamp                 Use a real timestamp rather than zero.\n"));
+  fprintf (file, _("  --[no-]insert-timestamp            Use a real timestamp rather than zero. (default)\n"));
   fprintf (file, _("                                     This makes binaries non-deterministic\n"));
 #ifdef DLL_SUPPORT
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
@@ -720,6 +722,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_INSERT_TIMESTAMP:
       insert_timestamp = TRUE;
+      break;
+    case OPTION_NO_INSERT_TIMESTAMP:
+      insert_timestamp = FALSE;
       break;
 #ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:
@@ -1391,7 +1396,7 @@ gld_${EMULATION_NAME}_after_open (void)
 	printf ("-%s\n", sym->root.string);
       bfd_hash_traverse (&link_info.hash->table, pr_sym, NULL);
 
-      for (a = link_info.input_bfds; a; a = a->link_next)
+      for (a = link_info.input_bfds; a; a = a->link.next)
 	printf ("*%s\n",a->filename);
     }
 #endif
@@ -1402,7 +1407,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
       /* Find a COFF input.  */
       for (abfd = link_info.input_bfds;
-	   abfd != (bfd *) NULL; abfd = abfd->link_next)
+	   abfd != (bfd *) NULL; abfd = abfd->link.next)
 	if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
 	  break;
 

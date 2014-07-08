@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "i386-cpuid.h"
+#include "nat/i386-cpuid.h"
 
 typedef struct
 {

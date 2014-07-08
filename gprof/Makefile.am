@@ -58,10 +58,8 @@ EXTRA_DIST    = $(BUILT_SOURCES) bbconv.pl $(man_MANS)
 
 diststuff: $(BUILT_SOURCES) info $(man_MANS)
 
-# We extract version from bfd/configure.in, make sure to rerun configure
-# when BFD's version changes.
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in \
-	$(BFDDIR)/development.sh
+# development.sh is used to determine -Werror default.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 
 # This empty rule is a hack against gmake patched by Apple.
 %.o:%.m

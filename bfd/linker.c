@@ -313,7 +313,7 @@ SUBSUBSECTION
 
 	The <<input_bfds>> field of the <<bfd_link_info>> structure
 	will point to a list of all the input files included in the
-	link.  These files are linked through the <<link_next>> field
+	link.  These files are linked through the <<link.next>> field
 	of the <<bfd>> structure.
 
 	Each section in the output file will have a list of
@@ -482,11 +482,22 @@ _bfd_link_hash_table_init
 				      const char *),
    unsigned int entsize)
 {
+  bfd_boolean ret;
+
+  BFD_ASSERT (!abfd->is_linker_output && !abfd->link.hash);
   table->undefs = NULL;
   table->undefs_tail = NULL;
   table->type = bfd_link_generic_hash_table;
 
-  return bfd_hash_table_init (&table->table, newfunc, entsize);
+  ret = bfd_hash_table_init (&table->table, newfunc, entsize);
+  if (ret)
+    {
+      /* Arrange for destruction of this hash table on closing ABFD.  */
+      table->hash_table_free = _bfd_generic_link_hash_table_free;
+      abfd->link.hash = table;
+      abfd->is_linker_output = TRUE;
+    }
+  return ret;
 }
 
 /* Look up a symbol in a link hash table.  If follow is TRUE, we
@@ -621,7 +632,7 @@ unwrap_hash_lookup (struct bfd_link_info *info,
       if (bfd_hash_lookup (info->wrap_hash, l, FALSE, FALSE) != NULL)
 	{
 	  char save = 0;
-	  if (l - sizeof WRAP - 1 != h->root.string)
+	  if (l - (sizeof WRAP - 1) != h->root.string)
 	    {
 	      --l;
 	      save = *l;
@@ -771,13 +782,16 @@ _bfd_generic_link_hash_table_create (bfd *abfd)
 }
 
 void
-_bfd_generic_link_hash_table_free (struct bfd_link_hash_table *hash)
+_bfd_generic_link_hash_table_free (bfd *obfd)
 {
-  struct generic_link_hash_table *ret
-    = (struct generic_link_hash_table *) hash;
+  struct generic_link_hash_table *ret;
 
+  BFD_ASSERT (obfd->is_linker_output && obfd->link.hash);
+  ret = (struct generic_link_hash_table *) obfd->link.hash;
   bfd_hash_table_free (&ret->root.table);
   free (ret);
+  obfd->link.hash = NULL;
+  obfd->is_linker_output = FALSE;
 }
 
 /* Grab the symbols for an object file when doing a generic link.  We
@@ -847,14 +861,13 @@ _bfd_generic_link_just_syms (asection *sec,
   sec->output_offset = sec->vma;
 }
 
-/* Copy the type of a symbol assiciated with a linker hast table entry.
-   Override this so that symbols created in linker scripts get their
-   type from the RHS of the assignment.
+/* Copy the symbol type and other attributes for a linker script
+   assignment from HSRC to HDEST.
    The default implementation does nothing.  */
 void
 _bfd_generic_copy_link_hash_symbol_type (bfd *abfd ATTRIBUTE_UNUSED,
-    struct bfd_link_hash_entry * hdest ATTRIBUTE_UNUSED,
-    struct bfd_link_hash_entry * hsrc ATTRIBUTE_UNUSED)
+    struct bfd_link_hash_entry *hdest ATTRIBUTE_UNUSED,
+    struct bfd_link_hash_entry *hsrc ATTRIBUTE_UNUSED)
 {
 }
 
@@ -2046,7 +2059,7 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
 	p->u.indirect.section->linker_mark = TRUE;
 
   /* Build the output symbol table.  */
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     if (! _bfd_generic_link_output_symbols (abfd, sub, info, &outsymalloc))
       return FALSE;
 

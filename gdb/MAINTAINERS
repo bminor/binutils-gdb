@@ -473,6 +473,7 @@ David Blaikie					dblaikie@gmail.com
 Philip Blundell					philb@gnu.org
 Eric Botcazou					ebotcazou@libertysurf.fr
 Per Bothner					per@bothner.com
+Don Breazeal					donb@codesourcery.com
 Joel Brobecker					brobecker@adacore.com
 Dave Brolley					brolley@redhat.com
 Samuel Bronson                                  naesten@gmail.com
@@ -480,7 +481,7 @@ Paul Brook					paul@codesourcery.com
 Julian Brown					julian@codesourcery.com
 Iain Buclaw					ibuclaw@gdcproject.org
 Kevin Buettner					kevinb@redhat.com
-Andrew Burgess					aburgess@broadcom.com
+Andrew Burgess					andrew.burgess@embecosm.com
 Andrew Cagney					cagney@gnu.org
 David Carlton					carlton@bactrian.org
 Stephane Carrez					Stephane.Carrez@gmail.com
@@ -566,7 +567,7 @@ Jose E. Marchesi                                jose.marchesi@oracle.com
 Simon Marchi					simon.marchi@ericsson.com
 Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
-Roland McGrath					roland@redhat.com
+Roland McGrath					roland@hack.frob.com
 Bryce McKinlay					mckinlay@redhat.com
 Jason Merrill					jason@redhat.com
 David S. Miller					davem@redhat.com

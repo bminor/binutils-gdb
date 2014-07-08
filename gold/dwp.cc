@@ -970,10 +970,13 @@ Dwo_file::read(Dwp_output_file* output_file)
 	this->read_unit_index(debug_cu_index, debug_shndx, output_file, false);
       if (debug_tu_index > 0)
         {
-	  if (debug_types.size() != 1)
-	    gold_fatal(_("%s: .dwp file must have exactly one "
+	  if (debug_types.size() > 1)
+	    gold_fatal(_("%s: .dwp file must have no more than one "
 			 ".debug_types.dwo section"), this->name_);
-	  debug_shndx[elfcpp::DW_SECT_TYPES] = debug_types[0];
+          if (debug_types.size() == 1)
+            debug_shndx[elfcpp::DW_SECT_TYPES] = debug_types[0];
+          else
+            debug_shndx[elfcpp::DW_SECT_TYPES] = 0;
 	  this->read_unit_index(debug_tu_index, debug_shndx, output_file, true);
 	}
       return;
@@ -1154,7 +1157,7 @@ Dwo_file::sized_read_unit_index(unsigned int shndx,
 			       : elfcpp::DW_SECT_INFO);
   unsigned int info_shndx = debug_shndx[info_sect];
 
-  gold_assert(shndx > 0 && info_shndx > 0);
+  gold_assert(shndx > 0);
 
   section_size_type index_len;
   bool index_is_new;
@@ -1179,6 +1182,8 @@ Dwo_file::sized_read_unit_index(unsigned int shndx,
 						      + 2 * sizeof(uint32_t));
   if (ncols == 0 || nused == 0)
     return;
+
+  gold_assert(info_shndx > 0);
 
   unsigned int nslots =
       elfcpp::Swap_unaligned<32, big_endian>::readval(contents

@@ -521,9 +521,6 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 #ifndef MY_bfd_link_hash_table_create
 #define MY_bfd_link_hash_table_create NAME (aout, link_hash_table_create)
 #endif
-#ifndef MY_bfd_link_hash_table_free
-#define MY_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
-#endif
 #ifndef MY_bfd_link_add_symbols
 #define MY_bfd_link_add_symbols NAME (aout, link_add_symbols)
 #endif

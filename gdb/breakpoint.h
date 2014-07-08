@@ -1221,8 +1221,7 @@ extern void initialize_breakpoint_ops (void);
 
 extern void
   add_catch_command (char *name, char *docstring,
-		     void (*sfunc) (char *args, int from_tty,
-				    struct cmd_list_element *command),
+		     cmd_sfunc_ftype *sfunc,
 		     completer_ftype *completer,
 		     void *user_data_catch,
 		     void *user_data_tcatch);
@@ -1329,7 +1328,7 @@ extern void delete_longjmp_breakpoint (int thread);
 extern void delete_longjmp_breakpoint_at_next_stop (int thread);
 
 extern struct breakpoint *set_longjmp_breakpoint_for_call_dummy (void);
-extern void check_longjmp_breakpoint_for_call_dummy (int thread);
+extern void check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp);
 
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);

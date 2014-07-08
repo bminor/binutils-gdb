@@ -1078,11 +1078,6 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
       struct target_ops *target = &current_target;
       volatile struct gdb_exception ex;
 
-      while (target && !target->to_get_thread_local_address)
-	target = find_target_beneath (target);
-      if (!target)
-	return 0;
-
       TRY_CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  /* We do not call target_translate_tls_address here, because

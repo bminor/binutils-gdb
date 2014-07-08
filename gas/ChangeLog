@@ -1,3 +1,187 @@
+2014-07-08  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (literal_pool): New field "alignment".
+	(find_or_make_literal_pool): Initialize "alignment" to 2.
+	(s_ltorg): Align the pool using value of "alignment"
+	(parse_big_immediate): New parameter "in_exp". Return
+	parsed expression if "in_exp" is not null.
+	(parse_address_main): Invoke "parse_big_immediate" for
+	constant parameter.
+	(add_to_lit_pool): Add one parameter 'nbytes'.
+	Split 8 byte entry into two 4 byte entry.
+	Add padding to align 8 byte entry to 8 byte boundary.
+	(encode_arm_cp_address): Generate literal pool entry if possible.
+	(move_or_literal_pool): Generate entry for vldr case.
+	(enum lit_type): New enum type.
+	(do_ldst): Use new enum type.
+	(do_ldstv4): Likewise.
+	(do_t_ldst): Likewise.
+	(neon_write_immbits): Support Thumb-2 mode.
+
+2014-07-07  Barney Stratford  <barney_stratford@fastmail.fm>
+
+	* config/tc-avr.c (avr_operand): Permit referring to r26-r31 by
+	name as [xyz][hl].  Permit using a symbol whoes name begins with
+	‘r’ to refer to a register.
+	Allow arbitrary expressions for the P and p operators.
+	(md_apply_fix): Check the BFD_RELOC_AVR_PORT5 and
+	BFD_RELOC_AVR_PORT6 relocations.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* doc/internals.texi: Update "configure.in" comments.
+	* acinclude.m4: Likewise.
+	* config/tc-sparc.c: Likewise.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Rename from configure.in.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* doc/Makefile.am (CONFIG_STATUS_DEPENDENCIES): Delete.
+	* doc/Makefile.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Include bfd/version.m4.
+	(AC_INIT, AM_INIT_AUTOMAKE): Use modern form.
+	(BFD_VERSION): Delete.
+	* configure.com: Get bfd version from bfd/version.m4.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Remove bfd/configure.in.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
+            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+            Soundararajan  <Sounderarajan.D@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add avrtiny arch.
+	Add avrtiny arch devices attiny4, attiny5, attiny9, attiny10, attiny20
+	and attiny40.
+	(md_show_usage): Add avrtiny arch in usage message.
+	(avr_operand): validate and issue error for invalid register for
+	avrtiny.
+	add new reloc exp for 16 bit lds/sts instruction.
+	(md_apply_fix): check 16 bit lds/sts operand for out of range and
+	encode.
+	(md_assemble): check ISA for arch and issue diagnostic.
+	* NEWS: Mention new support.
+	* doc/c-avr.texi: Document support for avrtiny architecture.
+
+2014-06-27  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-macho.c (obj_mach_o_set_symbol_qualifier): Don't set
+	SYM_MACHO_FIELDS_NOT_VALIDATED after reporting an error.
+	(obj_mach_o_frob_label): Avoid cascading errors.
+	(obj_mach_o_frob_symbol): Don't set SYM_MACHO_FIELDS_NOT_VALIDATED.
+
+2014-06-18  DJ Delorie  <dj@redhat.com>
+
+	* config/rx-parse.y (BSET, BCLR, BTST, BNOT, BMCMD): Make .B
+	suffix optional.
+
+2014-06-17  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-mmix.c (loc_assert_s): New member frag.
+	(s_loc): Set it.
+	(mmix_md_end): If an error is reported for a LOC expression, patch
+	up the related frag.
+
+2014-06-17  Chris Metcalf  <cmetcalf@tilera.com>
+
+	PR gas/16908
+	* macro.c (buffer_and_nest): Honour #line directives inside
+	macros.
+
+2014-06-17 Jiong Wang <jiong.wang@arm.com>
+
+	* config/tc-arm.c (depr_it_insns): New check for inc/dec sp.
+
+2014-06-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c (cris_bad): New function.
+	(cris_process_instruction): Where applicable, use it instead of
+	as_bad.
+
+2014-06-16  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-aarch64.c (md_apply_fix): Ignore unused relocs.
+
+2014-06-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (END_OF_INSN): New macro.
+	(parse_operands): Handle operand given and in wrong format when
+	operand is optional.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* write.h (subsegs_finish): Delete declaration.
+	* write.c (subsegs_finish): Make static.
+	(write_object_file): Call subsegs_finish from here.  Don't print
+	warning and error count here..
+	* as.c (main): ..do so here instead.  Remove dead code for "no
+	object file generated".  Split out count strings to better support
+	internationalisation.  Don't call subsegs_finish. Tidy setting of
+	"keep_it".  Run write_object_file even after errors.
+	(keep_it): Make static.
+	* config/obj-elf.c (elf_frob_symbol): Remove assert.
+	(elf_frob_file_before_adjust): Likewise.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-dlx.c (machine_ip): Move initialisation of the_insn
+	earlier.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-i386.c (reloc): Don't avoid pcrel check for
+	BFD_RELOC_SIZE64.  Return NO_RELOC on failing pcrel check.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-tic6x.c (s_tic6x_ehtype): Clear after frag_more.
+	(tic6x_output_exidx_entry): Likewise.
+	(md_apply_fix): Simplify 1 byte md_number_to_chars.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-tic54x.c (tic54x_mlib): Don't write garbage past
+	end of archive to temp file.
+	(tic54x_start_line_hook): Start scan for parallel on next line,
+	not one char into next line (which may overrun the buffer).
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-vax.c (md_apply_fix): Rewrite.
+	(tc_gen_reloc, vax_cons, vax_cons_fix_new): Style: Use NO_RELOC
+	define rather than the equivalent BFD_RELOC_NONE.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-arm.c (s_arm_elf_cons): Initialise after frag_more.
+	(md_apply_fix): Delete now unnecessary zeroing for BFD_RELOC_ARM_GOT*
+	and BFD_RELOC_ARM_TLS* relocs.  Simplify BFD_RELOC_8 case.
+
+2014-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-cris.c (md_create_long_jump): Follow "short" jump
+	with a nop rather than leaving uninitialised.
+
+2014-06-13  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* config/tc-score7.c: Replace sprintf with strcpy where
+	appropriate.
+	(s7_b32_relax_to_b16): Use symbol_get_frag() to access a symbol's
+	frag.
+	* config/tc-score.c (s3_relax_branch_inst16): Likewise.
+	(s3_relax_cmpbranch_inst32): Likewise.
+
 2014-06-07  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_insert_operand): Handle PPC_OPERAND_SIGNOPT

@@ -967,6 +967,21 @@ elf_x86_64_get_local_sym_hash (struct elf_x86_64_link_hash_table *htab,
   return &ret->elf;
 }
 
+/* Destroy an X86-64 ELF linker hash table.  */
+
+static void
+elf_x86_64_link_hash_table_free (bfd *obfd)
+{
+  struct elf_x86_64_link_hash_table *htab
+    = (struct elf_x86_64_link_hash_table *) obfd->link.hash;
+
+  if (htab->loc_hash_table)
+    htab_delete (htab->loc_hash_table);
+  if (htab->loc_hash_memory)
+    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
+  _bfd_elf_link_hash_table_free (obfd);
+}
+
 /* Create an X86-64 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -1012,26 +1027,12 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
   ret->loc_hash_memory = objalloc_create ();
   if (!ret->loc_hash_table || !ret->loc_hash_memory)
     {
-      free (ret);
+      elf_x86_64_link_hash_table_free (abfd);
       return NULL;
     }
+  ret->elf.root.hash_table_free = elf_x86_64_link_hash_table_free;
 
   return &ret->elf.root;
-}
-
-/* Destroy an X86-64 ELF linker hash table.  */
-
-static void
-elf_x86_64_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf_x86_64_link_hash_table *htab
-    = (struct elf_x86_64_link_hash_table *) hash;
-
-  if (htab->loc_hash_table)
-    htab_delete (htab->loc_hash_table);
-  if (htab->loc_hash_memory)
-    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
-  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and
@@ -2935,7 +2936,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       bfd_signed_vma *local_got;
       bfd_signed_vma *end_local_got;
@@ -5640,8 +5641,6 @@ static const struct bfd_elf_special_section
 
 #define bfd_elf64_bfd_link_hash_table_create \
   elf_x86_64_link_hash_table_create
-#define bfd_elf64_bfd_link_hash_table_free \
-  elf_x86_64_link_hash_table_free
 #define bfd_elf64_bfd_reloc_type_lookup	    elf_x86_64_reloc_type_lookup
 #define bfd_elf64_bfd_reloc_name_lookup \
   elf_x86_64_reloc_name_lookup
@@ -5913,8 +5912,6 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
 
 #define bfd_elf32_bfd_link_hash_table_create \
   elf_x86_64_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-  elf_x86_64_link_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup	\
   elf_x86_64_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup \

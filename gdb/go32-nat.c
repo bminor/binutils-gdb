@@ -97,7 +97,7 @@
 #include "buildsym.h"
 #include "i387-tdep.h"
 #include "i386-tdep.h"
-#include "i386-cpuid.h"
+#include "nat/i386-cpuid.h"
 #include "value.h"
 #include "regcache.h"
 #include <string.h>

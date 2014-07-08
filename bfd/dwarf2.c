@@ -911,6 +911,14 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
   return abbrevs;
 }
 
+/* Returns true if the form is one which has a string value.  */
+
+static inline bfd_boolean
+is_str_attr (enum dwarf_form form)
+{
+  return form == DW_FORM_string || form == DW_FORM_strp || form == DW_FORM_GNU_strp_alt;
+}
+
 /* Read an attribute value described by an attribute form.  */
 
 static bfd_byte *
@@ -2201,7 +2209,7 @@ find_abstract_instance_name (struct comp_unit *unit,
 		case DW_AT_name:
 		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
 		     over DW_AT_name.  */
-		  if (name == NULL)
+		  if (name == NULL && is_str_attr (attr.form))
 		    name = attr.u.str;
 		  break;
 		case DW_AT_specification:
@@ -2209,7 +2217,10 @@ find_abstract_instance_name (struct comp_unit *unit,
 		  break;
 		case DW_AT_linkage_name:
 		case DW_AT_MIPS_linkage_name:
-		  name = attr.u.str;
+		  /* PR 16949:  Corrupt debug info can place
+		     non-string forms into these attributes.  */
+		  if (is_str_attr (attr.name))
+		    name = attr.u.str;
 		  break;
 		default:
 		  break;
@@ -2381,13 +2392,16 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		case DW_AT_name:
 		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
 		     over DW_AT_name.  */
-		  if (func->name == NULL)
+		  if (func->name == NULL && is_str_attr (attr.form))
 		    func->name = attr.u.str;
 		  break;
 
 		case DW_AT_linkage_name:
 		case DW_AT_MIPS_linkage_name:
-		  func->name = attr.u.str;
+		  /* PR 16949:  Corrupt debug info can place
+		     non-string forms into these attributes.  */
+		  if (is_str_attr (attr.form))
+		    func->name = attr.u.str;
 		  break;
 
 		case DW_AT_low_pc:

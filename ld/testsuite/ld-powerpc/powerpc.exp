@@ -275,7 +275,10 @@ if [ supports_ppc64 ] then {
     run_dump_test "elfv2-2so"
     run_dump_test "elfv2-2exe"
     run_dump_test "ambiguousv1"
+    run_dump_test "ambiguousv1b"
     run_dump_test "ambiguousv2"
+    run_dump_test "ambiguousv2b"
+    run_dump_test "defsym"
 }
 
 if { [istarget "powerpc*-eabi*"] } {

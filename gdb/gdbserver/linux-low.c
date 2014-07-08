@@ -18,7 +18,7 @@
 
 #include "server.h"
 #include "linux-low.h"
-#include "linux-osdata.h"
+#include "nat/linux-osdata.h"
 #include "agent.h"
 
 #include "nat/linux-nat.h"
@@ -26,8 +26,8 @@
 #include "gdb_wait.h"
 #include <stdio.h>
 #include <sys/ptrace.h>
-#include "linux-ptrace.h"
-#include "linux-procfs.h"
+#include "nat/linux-ptrace.h"
+#include "nat/linux-procfs.h"
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -105,7 +105,7 @@
 #endif
 
 #ifdef HAVE_LINUX_BTRACE
-# include "linux-btrace.h"
+# include "nat/linux-btrace.h"
 #endif
 
 #ifndef HAVE_ELF32_AUXV_T

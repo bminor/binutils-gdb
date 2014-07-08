@@ -1,7 +1,7 @@
 // mips.h -- ELF definitions specific to EM_MIPS  -*- C++ -*-
 
 // Copyright (C) 2012-2014 Free Software Foundation, Inc.
-// Written by Sasa Stankovic <sasa.stankovic@rt-rk.com>
+// Written by Sasa Stankovic <sasa.stankovic@imgtec.com>
 //        and Aleksandar Simeonov <aleksandar.simeonov@rt-rk.com>.
 
 // This file is part of elfcpp.

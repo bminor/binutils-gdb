@@ -1322,6 +1322,19 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
   return 0;
 }
 
+/* Implement the skip_trampoline_code gdbarch method.  */
+
+static CORE_ADDR
+arm_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+{
+  CORE_ADDR target_pc = arm_skip_stub (frame, pc);
+
+  if (target_pc != 0)
+    return target_pc;
+
+  return find_solib_trampoline_target (frame, pc);
+}
+
 static void
 arm_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
@@ -1387,7 +1400,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_software_single_step (gdbarch, arm_linux_software_single_step);
 
   /* Shared library handling.  */
-  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_gdbarch_skip_trampoline_code (gdbarch, arm_linux_skip_trampoline_code);
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
   /* Enable TLS support.  */

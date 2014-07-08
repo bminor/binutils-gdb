@@ -2481,7 +2481,7 @@ elf64_alpha_size_got_sections (struct bfd_link_info *info,
      consisting of all of the input files.  */
   if (got_list == NULL)
     {
-      for (i = info->input_bfds; i ; i = i->link_next)
+      for (i = info->input_bfds; i ; i = i->link.next)
 	{
 	  bfd *this_got;
 

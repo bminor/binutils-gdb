@@ -569,7 +569,9 @@ follow_inferior_reset_breakpoints (void)
 
   /* Was there a step_resume breakpoint?  (There was if the user
      did a "next" at the fork() call.)  If so, explicitly reset its
-     thread number.
+     thread number.  Cloned step_resume breakpoints are disabled on
+     creation, so enable it here now that it is associated with the
+     correct thread.
 
      step_resumes are a form of bp that are made to be per-thread.
      Since we created the step_resume bp when the parent process
@@ -579,10 +581,17 @@ follow_inferior_reset_breakpoints (void)
      it is for, or it'll be ignored when it triggers.  */
 
   if (tp->control.step_resume_breakpoint)
-    breakpoint_re_set_thread (tp->control.step_resume_breakpoint);
+    {
+      breakpoint_re_set_thread (tp->control.step_resume_breakpoint);
+      tp->control.step_resume_breakpoint->loc->enabled = 1;
+    }
 
+  /* Treat exception_resume breakpoints like step_resume breakpoints.  */
   if (tp->control.exception_resume_breakpoint)
-    breakpoint_re_set_thread (tp->control.exception_resume_breakpoint);
+    {
+      breakpoint_re_set_thread (tp->control.exception_resume_breakpoint);
+      tp->control.exception_resume_breakpoint->loc->enabled = 1;
+    }
 
   /* Reinsert all breakpoints in the child.  The user may have set
      breakpoints after catching the fork, in which case those
@@ -2151,7 +2160,7 @@ find_thread_needs_step_over (int step, struct thread_info *except)
       return NULL;
     }
 
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     {
       /* Ignore the EXCEPT thread.  */
       if (tp == except)
@@ -4434,7 +4443,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	if (what.is_longjmp)
 	  {
-	    check_longjmp_breakpoint_for_call_dummy (ecs->event_thread->num);
+	    check_longjmp_breakpoint_for_call_dummy (ecs->event_thread);
 
 	    if (!frame_id_p (ecs->event_thread->initiating_frame))
 	      {
@@ -5195,7 +5204,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	 step/next/etc.  */
       stepping_thread = NULL;
       step_over = NULL;
-      ALL_THREADS (tp)
+      ALL_NON_EXITED_THREADS (tp)
         {
 	  /* Ignore threads of processes we're not resuming.  */
 	  if (!sched_multi
@@ -5611,7 +5620,7 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 static void
 insert_exception_resume_breakpoint (struct thread_info *tp,
-				    struct block *b,
+				    const struct block *b,
 				    struct frame_info *frame,
 				    struct symbol *sym)
 {
@@ -5708,7 +5717,7 @@ check_exception_resume (struct execution_control_state *ecs,
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
     {
-      struct block *b;
+      const struct block *b;
       struct block_iterator iter;
       struct symbol *sym;
       int argno = 0;
@@ -7334,7 +7343,7 @@ leave it stopped or free to run as needed."),
   signal_catch = (unsigned char *)
     xmalloc (sizeof (signal_catch[0]) * numsigs);
   signal_pass = (unsigned char *)
-    xmalloc (sizeof (signal_program[0]) * numsigs);
+    xmalloc (sizeof (signal_pass[0]) * numsigs);
   for (i = 0; i < numsigs; i++)
     {
       signal_stop[i] = 1;

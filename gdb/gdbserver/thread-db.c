@@ -27,7 +27,7 @@ extern int debug_threads;
 static int thread_db_use_events;
 
 #include "gdb_proc_service.h"
-#include "gdb_thread_db.h"
+#include "nat/gdb_thread_db.h"
 #include "gdb_vecs.h"
 
 #ifndef USE_LIBTHREAD_DB_DIRECTLY

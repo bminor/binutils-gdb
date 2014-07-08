@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the AVR Tiny microcontrollers.
+
 * Replace support for openrisc and or32 with support for or1k.
 
 * Enhanced the ARM port to accept the assembler output from the CodeComposer

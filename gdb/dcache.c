@@ -681,7 +681,7 @@ set_dcache_command (char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set dcache\" must be followed by the name of a subcommand.\n");
-  help_list (dcache_set_list, "set dcache ", -1, gdb_stdout);
+  help_list (dcache_set_list, "set dcache ", all_commands, gdb_stdout);
 }
 
 static void

@@ -1,1 +1,1 @@
-NATDEPFILES= i386-nat.o windows-nat.o amd64-windows-nat.o
+NATDEPFILES= i386-nat.o i386-dregs.o windows-nat.o amd64-windows-nat.o
