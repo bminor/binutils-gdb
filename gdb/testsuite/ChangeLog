@@ -1,3 +1,10 @@
+2014-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/vla-datatypes.c (vla_factory): Add new variable
+	inner_vla_struct_object_size.
+	* gdb.base/vla-datatypes.exp: Adjust last test, and mark it
+	as xfail.
+
 2014-07-30  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/signal-command-handle-nopass.exp (test): Add

@@ -1,5 +1,11 @@
 2014-08-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbtypes.c (resolve_dynamic_struct): Do not generate an error
+	if detecting a variable-sized field that is not the last field.
+	Fix struct type length computation.
+
+2014-08-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* amd64-windows-tdep.c (amd64_windows_frame_decode_insns):
 	Add debug trace.
 

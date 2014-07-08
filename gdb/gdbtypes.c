@@ -1790,7 +1790,7 @@ resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
 {
   struct type *resolved_type;
   int i;
-  int vla_field = TYPE_NFIELDS (type) - 1;
+  unsigned resolved_type_bit_length = 0;
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
   gdb_assert (TYPE_NFIELDS (type) > 0);
@@ -1804,37 +1804,45 @@ resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
 	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
   for (i = 0; i < TYPE_NFIELDS (resolved_type); ++i)
     {
-      struct type *t;
+      unsigned new_bit_length;
 
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
 
-      t = resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
+      TYPE_FIELD_TYPE (resolved_type, i)
+	= resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
 					 addr, 0);
 
-      /* This is a bit odd.  We do not support a VLA in any position
-	 of a struct except for the last.  GCC does have an extension
-	 that allows a VLA in the middle of a structure, but the DWARF
-	 it emits is relatively useless to us, so we can't represent
-	 such a type properly -- and even if we could, we do not have
-	 enough information to redo structure layout anyway.
-	 Nevertheless, we check all the fields in case something odd
-	 slips through, since it's better to see an error than
-	 incorrect results.  */
-      if (t != TYPE_FIELD_TYPE (resolved_type, i)
-	  && i != vla_field)
-	error (_("Attempt to resolve a variably-sized type which appears "
-		 "in the interior of a structure type"));
+      /* As we know this field is not a static field, the field's
+	 field_loc_kind should be FIELD_LOC_KIND_BITPOS.  Verify
+	 this is the case, but only trigger a simple error rather
+	 than an internal error if that fails.  While failing
+	 that verification indicates a bug in our code, the error
+	 is not severe enough to suggest to the user he stops
+	 his debugging session because of it.  */
+      if (TYPE_FIELD_LOC_KIND (resolved_type, i) != FIELD_LOC_KIND_BITPOS)
+	error (_("Cannot determine struct field location"
+		 " (invalid location kind)"));
+      new_bit_length = TYPE_FIELD_BITPOS (resolved_type, i);
+      if (TYPE_FIELD_BITSIZE (resolved_type, i) != 0)
+	new_bit_length += TYPE_FIELD_BITSIZE (resolved_type, i);
+      else
+	new_bit_length += (TYPE_LENGTH (TYPE_FIELD_TYPE (resolved_type, i))
+			   * TARGET_CHAR_BIT);
 
-      TYPE_FIELD_TYPE (resolved_type, i) = t;
+      /* Normally, we would use the position and size of the last field
+	 to determine the size of the enclosing structure.  But GCC seems
+	 to be encoding the position of some fields incorrectly when
+	 the struct contains a dynamic field that is not placed last.
+	 So we compute the struct size based on the field that has
+	 the highest position + size - probably the best we can do.  */
+      if (new_bit_length > resolved_type_bit_length)
+	resolved_type_bit_length = new_bit_length;
     }
 
-  /* Due to the above restrictions we can successfully compute
-     the size of the resulting structure here, as the offset of
-     the final field plus its size.  */
   TYPE_LENGTH (resolved_type)
-    = (TYPE_FIELD_BITPOS (resolved_type, vla_field) / TARGET_CHAR_BIT
-       + TYPE_LENGTH (TYPE_FIELD_TYPE (resolved_type, vla_field)));
+    = (resolved_type_bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
+
   return resolved_type;
 }
 
