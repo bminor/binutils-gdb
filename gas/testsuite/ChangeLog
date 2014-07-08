@@ -1,5 +1,11 @@
 2014-07-10  Will Newton  <will.newton@linaro.org>
 
+	* gas/elf/elf.exp: Remove special handling of arm-elf for
+	section2 test.
+	* gas/elf/section2.e-armeabi: Rename to...
+	* gas/elf/section2.e-arm: ...here.
+	* gas/elf/section2.e-armelf: Remove file.
+
 	* gas/arm/bl-local-2.d: Only enable the test on EABI and
 	NaCl configurations.
 	* gas/arm/bl-local-v4t.d: Likewise.
