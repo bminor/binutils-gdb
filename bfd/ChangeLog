@@ -1,3 +1,9 @@
+2014-07-08  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/17110
+	* elf32-sh.c (sh_elf_osec_to_segment): Do not look for output
+	segments in input bfds.
+
 2014-07-08  Will Newton  <will.newton@linaro.org>
 
 	* elf32-arm.c (ELF_MAXPAGESIZE): Increase the default

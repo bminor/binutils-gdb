@@ -3676,7 +3676,9 @@ sh_elf_osec_to_segment (bfd *output_bfd, asection *osec)
 {
   Elf_Internal_Phdr *p = NULL;
 
-  if (output_bfd->xvec->flavour == bfd_target_elf_flavour)
+  if (output_bfd->xvec->flavour == bfd_target_elf_flavour
+      /* PR ld/17110: Do not look for output segments in an input bfd.  */
+      && output_bfd->direction != read_direction)
     p = _bfd_elf_find_segment_containing_section (output_bfd, osec);
 
   /* FIXME: Nothing ever says what this index is relative to.  The kernel
