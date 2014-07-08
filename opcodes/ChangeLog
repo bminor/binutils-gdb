@@ -1,3 +1,8 @@
+2014-07-08  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis-evex.h (EVEX_W_0F10_P_1_M_1): Fix vmovss.
+	(EVEX_W_0F10_P_3_M_1): Fix vmovsd.
+
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	* msp430-decode.c: Regenerate.
