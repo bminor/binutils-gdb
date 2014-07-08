@@ -13044,17 +13044,24 @@ _bfd_elf_make_dynamic_reloc_section (asection *         sec,
   return reloc_sec;
 }
 
-/* Copy the ELF symbol type associated with a linker hash entry.  */
+/* Copy the ELF symbol type and other attributes for a linker script
+   assignment from HSRC to HDEST.  Generally this should be treated as
+   if we found a strong non-dynamic definition for HDEST (except that
+   ld ignores multiple definition errors).  */
 void
-_bfd_elf_copy_link_hash_symbol_type (bfd *abfd ATTRIBUTE_UNUSED,
-    struct bfd_link_hash_entry * hdest,
-    struct bfd_link_hash_entry * hsrc)
+_bfd_elf_copy_link_hash_symbol_type (bfd *abfd,
+				     struct bfd_link_hash_entry *hdest,
+				     struct bfd_link_hash_entry *hsrc)
 {
-  struct elf_link_hash_entry *ehdest = (struct elf_link_hash_entry *)hdest;
-  struct elf_link_hash_entry *ehsrc = (struct elf_link_hash_entry *)hsrc;
+  struct elf_link_hash_entry *ehdest = (struct elf_link_hash_entry *) hdest;
+  struct elf_link_hash_entry *ehsrc = (struct elf_link_hash_entry *) hsrc;
+  Elf_Internal_Sym isym;
 
   ehdest->type = ehsrc->type;
   ehdest->target_internal = ehsrc->target_internal;
+
+  isym.st_other = ehsrc->other;
+  elf_merge_st_other (abfd, ehdest, &isym, TRUE, FALSE);
 }
 
 /* Append a RELA relocation REL to section S in BFD.  */

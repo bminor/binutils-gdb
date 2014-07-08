@@ -7,6 +7,11 @@
 
 2014-07-08  Alan Modra  <amodra@gmail.com>
 
+	* ld-powerpc/defsym.s, * ld-powerpc/defsym.d: New test.
+	* ld-powerpc/powerpc.exp: Run it.
+
+2014-07-08  Alan Modra  <amodra@gmail.com>
+
 	PR 17112
 	* ld-plugin/lto.exp: When building liblti-11.a, pass
 	--plugin path_to_gcc/liblto_plugin.so to ar.

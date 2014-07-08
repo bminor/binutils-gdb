@@ -7084,7 +7084,8 @@ typedef struct bfd_target
   /* Indicate that we are only retrieving symbol values from this section.  */
   void        (*_bfd_link_just_syms) (asection *, struct bfd_link_info *);
 
-  /* Copy the symbol type of a linker hash table entry.  */
+  /* Copy the symbol type and other attributes for a linker script
+     assignment of one symbol to another.  */
 #define bfd_copy_link_hash_symbol_type(b, t, f) \
   BFD_SEND (b, _bfd_copy_link_hash_symbol_type, (b, t, f))
   void (*_bfd_copy_link_hash_symbol_type)
