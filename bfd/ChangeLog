@@ -1,3 +1,9 @@
+2014-07-08  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elf_backend_rela_normal): Set to 1.
+	(elfNN_aarch64_relocate_section): Remove duplicated addend adjustment
+	when info->relocatable be true.
+
 2014-07-07  Barney Stratford  <barney_stratford@fastmail.fm>
 
 	* elf32-avr.c: Handle R_AVR_PORT5 and R_AVR_PORT6.
