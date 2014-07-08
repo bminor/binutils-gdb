@@ -1,3 +1,23 @@
+2014-07-08  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (literal_pool): New field "alignment".
+	(find_or_make_literal_pool): Initialize "alignment" to 2.
+	(s_ltorg): Align the pool using value of "alignment"
+	(parse_big_immediate): New parameter "in_exp". Return
+	parsed expression if "in_exp" is not null.
+	(parse_address_main): Invoke "parse_big_immediate" for
+	constant parameter.
+	(add_to_lit_pool): Add one parameter 'nbytes'.
+	Split 8 byte entry into two 4 byte entry.
+	Add padding to align 8 byte entry to 8 byte boundary.
+	(encode_arm_cp_address): Generate literal pool entry if possible.
+	(move_or_literal_pool): Generate entry for vldr case.
+	(enum lit_type): New enum type.
+	(do_ldst): Use new enum type.
+	(do_ldstv4): Likewise.
+	(do_t_ldst): Likewise.
+	(neon_write_immbits): Support Thumb-2 mode.
+
 2014-07-07  Barney Stratford  <barney_stratford@fastmail.fm>
 
 	* config/tc-avr.c (avr_operand): Permit referring to r26-r31 by
