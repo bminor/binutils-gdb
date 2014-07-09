@@ -2253,6 +2253,17 @@ ehdr_start_test_5_CXXFLAGS = -DEHDR_START_USER_DEF
 ehdr_start_test_5_LDFLAGS = -Bgcctestdir/
 ehdr_start_test_5_LDADD =
 
+# Test that the --defsym option copies the symbol type and visibility.
+check_SCRIPTS += defsym_test.sh
+check_DATA += defsym_test.syms
+MOSTLYCLEANFILES += defsym_test.syms
+defsym_test.syms: defsym_test
+	$(TEST_READELF) -sW $< > $@
+defsym_test: defsym_test.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -Wl,--defsym=bar=foo defsym_test.o
+defsym_test.o: defsym_test.c
+	$(COMPILE) -c -o $@ $<
+
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.
 
