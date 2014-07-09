@@ -1,5 +1,10 @@
 2014-07-15  Alan Modra  <amodra@gmail.com>
 
+	* cache.c (cache_bread_1): Don't return -1 when fread returns
+	a positive value.
+
+2014-07-15  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (elf_merge_st_other): Update comments.  Simplify
 	visibility handling.  Make isym const.  Move code modifying
 	isym->st_other for --exclude-libs to..
