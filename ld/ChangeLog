@@ -1,3 +1,9 @@
+2014-07-10  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* emultempl/xtensaelf.em (is_inconsistent_linkonce_section):
+	correctly handle missing dot in section name after
+	".gnu.linkonce.prop.".
+
 2014-07-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* scripttempl/avr.sc: Remove KEEP for .data and
