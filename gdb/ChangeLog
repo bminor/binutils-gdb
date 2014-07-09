@@ -1,3 +1,9 @@
+2014-07-09  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (attach_command_post_wait): Don't call
+	target_terminal_inferior here.
+	(attach_command): Call it here instead.
+
 2014-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ada-varobj.c (ada_varobj_ops): Fill in is_path_expr_parent

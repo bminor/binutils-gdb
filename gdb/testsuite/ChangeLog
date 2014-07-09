@@ -1,3 +1,8 @@
+2014-07-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/attach-wait-input.exp: New file.
+	* gdb.base/attach-wait-input.c: New file.
+
 2014-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.mi/var-cmd.c (do_nested_struct_union_tests): New function
