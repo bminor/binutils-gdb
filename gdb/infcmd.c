@@ -2381,9 +2381,6 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 
   post_create_inferior (&current_target, from_tty);
 
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
-
   if (async_exec)
     {
       /* The user requested an `attach&', so be sure to leave threads
@@ -2498,6 +2495,22 @@ attach_command (char *args, int from_tty)
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */
   target_terminal_init ();
+
+  /* Install inferior's terminal modes.  This may look like a no-op,
+     as we've just saved them above, however, this does more than
+     restore terminal settings:
+
+     - installs a SIGINT handler that forwards SIGINT to the inferior.
+       Otherwise a Ctrl-C pressed just while waiting for the initial
+       stop would end up as a spurious Quit.
+
+     - removes stdin from the event loop, which we need if attaching
+       in the foreground, otherwise on targets that report an initial
+       stop on attach (which are most) we'd process input/commands
+       while we're in the event loop waiting for that stop.  That is,
+       before the attach continuation runs and the command is really
+       finished.  */
+  target_terminal_inferior ();
 
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */

@@ -1,3 +1,8 @@
+2014-07-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/attach-wait-input.exp: New file.
+	* gdb.base/attach-wait-input.c: New file.
+
 2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/py-xmethods.exp: Use "progspace" instead of the
