@@ -1,5 +1,15 @@
 2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
 
+	PR c++/17132
+	* eval.c: Update all calls to find_overload_match.
+	* valarith.c: Likewise.
+	(value_user_defined_cpp_op, value_user_defined_op): New
+	argument NOSIDE.  Update all callers.
+	* valops.c (find_overload_match): New argument NOSIDE.
+	* value.h (find_overload_match): Update signature.
+
+2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
+
 	* python/lib/gdb/command/xmethods.py (set_xm_status1): Use the
 	'items'	methods instead of 'iteritems' method on dictionaries.
 

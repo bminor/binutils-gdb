@@ -1,5 +1,11 @@
 2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
 
+	PR c++/17132
+	* gdb.cp/pr17132.cc: New file.
+	* gdb.cp/pr17132.exp: New file.
+
+2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
+
 	* gdb.python/py-xmethods.py (A_getarrayind)
 	(E_method_char_worker.__call__, E_method_int_worker.__call__):
 	Use 'print' with function call syntax.

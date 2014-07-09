@@ -693,7 +693,8 @@ extern int find_overload_match (struct value **args, int nargs,
 				enum oload_search_type method,
 				struct value **objp, struct symbol *fsym,
 				struct value **valp, struct symbol **symp,
-				int *staticp, const int no_adl);
+				int *staticp, const int no_adl,
+				enum noside noside);
 
 extern struct value *value_field (struct value *arg1, int fieldno);
 

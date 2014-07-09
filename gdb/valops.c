@@ -2449,6 +2449,12 @@ value_find_oload_method_list (struct value **argp, const char *method,
    ADL overload candidates when performing overload resolution for a fully
    qualified name.
 
+   If NOSIDE is EVAL_AVOID_SIDE_EFFECTS, then OBJP's memory cannot be
+   read while picking the best overload match (it may be all zeroes and thus
+   not have a vtable pointer), in which case skip virtual function lookup.
+   This is ok as typically EVAL_AVOID_SIDE_EFFECTS is only used to determine
+   the result type.
+
    Note: This function does *not* check the value of
    overload_resolution.  Caller must check it to see whether overload
    resolution is permitted.  */
@@ -2458,7 +2464,8 @@ find_overload_match (struct value **args, int nargs,
 		     const char *name, enum oload_search_type method,
 		     struct value **objp, struct symbol *fsym,
 		     struct value **valp, struct symbol **symp, 
-		     int *staticp, const int no_adl)
+		     int *staticp, const int no_adl,
+		     const enum noside noside)
 {
   struct value *obj = (objp ? *objp : NULL);
   struct type *obj_type = obj ? value_type (obj) : NULL;
@@ -2764,9 +2771,13 @@ find_overload_match (struct value **args, int nargs,
     {
       if (src_method_oload_champ >= 0)
 	{
-	  if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, method_oload_champ))
-	    *valp = value_virtual_fn_field (&temp, fns_ptr, method_oload_champ,
-					    basetype, boffset);
+	  if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, method_oload_champ)
+	      && noside != EVAL_AVOID_SIDE_EFFECTS)
+	    {
+	      *valp = value_virtual_fn_field (&temp, fns_ptr,
+					      method_oload_champ, basetype,
+					      boffset);
+	    }
 	  else
 	    *valp = value_fn_field (&temp, fns_ptr, method_oload_champ,
 				    basetype, boffset);
