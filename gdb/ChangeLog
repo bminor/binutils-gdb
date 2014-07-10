@@ -1,3 +1,8 @@
+2014-07-10  Doug Evans  <dje@google.com>
+
+	* gdbthread.h (any_running): Declare.
+	* thread.c (any_running): New function.
+
 2014-07-09  Pedro Alves  <palves@redhat.com>
 
 	* infcmd.c (attach_command_post_wait): Don't call
