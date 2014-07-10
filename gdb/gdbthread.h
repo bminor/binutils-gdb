@@ -363,9 +363,6 @@ extern int is_exited (ptid_t ptid);
 /* In the frontend's perpective, is this thread stopped?  */
 extern int is_stopped (ptid_t ptid);
 
-/* In the frontend's perpective is there any thread running?  */
-extern int any_running (void);
-
 /* Marks thread PTID as executing, or not.  If ptid_get_pid (PTID) is -1,
    marks all threads.
 
