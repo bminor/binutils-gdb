@@ -934,7 +934,8 @@ nat/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h nat/linux-btrace.h \
 ctf.h nat/i386-cpuid.h nat/i386-gcc-cpuid.h target/resume.h \
 target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h \
-common/print-utils.h common/rsp-low.h nat/i386-dregs.h
+common/print-utils.h common/rsp-low.h nat/i386-dregs.h x86-linux-nat.h \
+i386-linux-nat.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
