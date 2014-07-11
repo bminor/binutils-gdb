@@ -896,13 +896,9 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
     }
 
   /* Forward the request.  */
-  for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
-    if (ops->to_xfer_partial != NULL)
-      return ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
-				   offset, len, xfered_len);
-
-  *xfered_len = len;
-  return TARGET_XFER_UNAVAILABLE;
+  ops = ops->beneath;
+  return ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
+			       offset, len, xfered_len);
 }
 
 /* The to_insert_breakpoint method of target record-btrace.  */
@@ -996,14 +992,9 @@ record_btrace_fetch_registers (struct target_ops *ops,
     }
   else
     {
-      struct target_ops *t;
+      struct target_ops *t = ops->beneath;
 
-      for (t = ops->beneath; t != NULL; t = t->beneath)
-	if (t->to_fetch_registers != NULL)
-	  {
-	    t->to_fetch_registers (t, regcache, regno);
-	    break;
-	  }
+      t->to_fetch_registers (t, regcache, regno);
     }
 }
 
@@ -1020,14 +1011,8 @@ record_btrace_store_registers (struct target_ops *ops,
 
   gdb_assert (may_write_registers != 0);
 
-  for (t = ops->beneath; t != NULL; t = t->beneath)
-    if (t->to_store_registers != NULL)
-      {
-	t->to_store_registers (t, regcache, regno);
-	return;
-      }
-
-  noprocess ();
+  t = ops->beneath;
+  t->to_store_registers (t, regcache, regno);
 }
 
 /* The to_prepare_to_store method of target record-btrace.  */
@@ -1041,12 +1026,8 @@ record_btrace_prepare_to_store (struct target_ops *ops,
   if (!record_btrace_generating_corefile && record_btrace_is_replaying (ops))
     return;
 
-  for (t = ops->beneath; t != NULL; t = t->beneath)
-    if (t->to_prepare_to_store != NULL)
-      {
-	t->to_prepare_to_store (t, regcache);
-	return;
-      }
+  t = ops->beneath;
+  t->to_prepare_to_store (t, regcache);
 }
 
 /* The branch trace frame cache.  */
@@ -1533,11 +1514,8 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
   /* As long as we're not replaying, just forward the request.  */
   if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
     {
-      for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
-	if (ops->to_resume != NULL)
-	  return ops->to_resume (ops, ptid, step, signal);
-
-      error (_("Cannot find target for stepping."));
+      ops = ops->beneath;
+      return ops->to_resume (ops, ptid, step, signal);
     }
 
   /* Compute the btrace thread flag for the requested move.  */
@@ -1760,11 +1738,8 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   /* As long as we're not replaying, just forward the request.  */
   if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
     {
-      for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
-	if (ops->to_wait != NULL)
-	  return ops->to_wait (ops, ptid, status, options);
-
-      error (_("Cannot find target for waiting."));
+      ops = ops->beneath;
+      return ops->to_wait (ops, ptid, status, options);
     }
 
   /* Let's find a thread to move.  */
@@ -1826,12 +1801,8 @@ record_btrace_find_new_threads (struct target_ops *ops)
     return;
 
   /* Forward the request.  */
-  for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
-    if (ops->to_find_new_threads != NULL)
-      {
-	ops->to_find_new_threads (ops);
-	break;
-      }
+  ops = ops->beneath;
+  ops->to_find_new_threads (ops);
 }
 
 /* The to_thread_alive method of target record-btrace.  */
@@ -1844,11 +1815,8 @@ record_btrace_thread_alive (struct target_ops *ops, ptid_t ptid)
     return find_thread_ptid (ptid) != NULL;
 
   /* Forward the request.  */
-  for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
-    if (ops->to_thread_alive != NULL)
-      return ops->to_thread_alive (ops, ptid);
-
-  return 0;
+  ops = ops->beneath;
+  return ops->to_thread_alive (ops, ptid);
 }
 
 /* Set the replay branch trace instruction iterator.  If IT is NULL, replay

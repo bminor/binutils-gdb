@@ -1084,8 +1084,7 @@ sol_find_new_threads (struct target_ops *ops)
   struct target_ops *beneath = find_target_beneath (ops);
 
   /* First Find any new LWP's.  */
-  if (beneath->to_find_new_threads != NULL)
-    beneath->to_find_new_threads (beneath);
+  beneath->to_find_new_threads (beneath);
 
   /* Then find any new user-level threads.  */
   p_td_ta_thr_iter (main_ta, sol_find_new_threads_callback, (void *) 0,

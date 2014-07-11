@@ -1,5 +1,23 @@
 2014-07-18  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/17130:
+	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint)
+	(spu_fetch_registers, spu_store_registers, spu_xfer_partial)
+	(spu_search_memory, spu_mourn_inferior): Simplify delegation.
+	* linux-thread-db.c (thread_db_pid_to_str): Always delegate.
+	* windows-nat.c (windows_xfer_partial): Always delegate.
+	* record-btrace.c (record_btrace_xfer_partial): Simplify
+	delegation.
+	(record_btrace_fetch_registers, record_btrace_store_registers)
+	(record_btrace_prepare_to_store, record_btrace_resume)
+	(record_btrace_wait, record_btrace_find_new_threads)
+	(record_btrace_thread_alive): Likewise.
+	* procfs.c (procfs_xfer_partial): Always delegate.
+	* corelow.c (core_xfer_partial): Always delegate.
+	* sol-thread.c (sol_find_new_threads): Simplify delegation.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* exec.c (exec_make_note_section): Move earlier.
 
 2014-07-17  Doug Evans  <dje@google.com>

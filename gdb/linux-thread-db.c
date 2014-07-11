@@ -1767,10 +1767,7 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
     }
 
   beneath = find_target_beneath (ops);
-  if (beneath->to_pid_to_str (beneath, ptid))
-    return beneath->to_pid_to_str (beneath, ptid);
-
-  return normal_pid_to_str (ptid);
+  return beneath->to_pid_to_str (beneath, ptid);
 }
 
 /* Return a string describing the state of the thread specified by
