@@ -5298,7 +5298,7 @@ prep_headers (bfd *abfd)
   elf_tdata (abfd)->shstrtab_hdr.sh_name =
     (unsigned int) _bfd_elf_strtab_add (shstrtab, ".shstrtab", FALSE);
   if (elf_tdata (abfd)->symtab_hdr.sh_name == (unsigned int) -1
-      || elf_tdata (abfd)->symtab_hdr.sh_name == (unsigned int) -1
+      || elf_tdata (abfd)->strtab_hdr.sh_name == (unsigned int) -1
       || elf_tdata (abfd)->shstrtab_hdr.sh_name == (unsigned int) -1)
     return FALSE;
 

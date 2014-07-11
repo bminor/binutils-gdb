@@ -1,3 +1,8 @@
+2014-07-11  Maks Naumov  <maksqwe1@ukr.net>
+
+	PR 17141
+	* elf.c (_bfd_elf_strtab_add): Check strtab name for failure.
+
 2014-07-08  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/17110
