@@ -1,3 +1,9 @@
+2014-07-11  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (kill_wait_lwp): New function, based on
+	kill_one_lwp_callback, but use my_waitpid directly.
+	(kill_one_lwp_callback, linux_kill): Use it.
+
 2014-06-23  Pedro Alves  <palves@redhat.com>
 
 	* linux-x86-low.c (x86_linux_prepare_to_resume): Clear DR_CONTROL
