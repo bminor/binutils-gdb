@@ -200,7 +200,9 @@ test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long > 0" "\\$\[0-
 # Test expressions with casts to a pointer.
 # NB: Some architectures convert a ``NULL'' pointer into
 #     something else. Don't simply test for 0.
-#
+# Prevent symbol on address 0x0 being printed.
+gdb_test_no_output "set print symbol off"
+
 test_expr "set variable v_signed_char = 0" "print (void*)v_signed_char" "\\$\[0-9\]* = .void \\*. $hex" "print (void*)v_signed_char"
 test_expr "set variable v_signed_short = 0" "print (void*)v_signed_short" "\\$\[0-9\]* = .void \\*. $hex" "print (void*)v_signed_short"
 test_expr "set variable v_signed_int = 0" "print (void*)v_signed_int" "\\$\[0-9\]* = .void \\*. $hex" "print (void*)v_signed_int"

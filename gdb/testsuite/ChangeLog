@@ -1,3 +1,7 @@
+2014-07-11  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/exprs.exp: "set print symbol off".
+
 2014-07-11  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/kill.c: New file.
