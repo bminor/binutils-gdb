@@ -1,5 +1,13 @@
 2014-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint): Pass "self"
+	to find_target_beneath.
+	* ravenscar-thread.c (ravenscar_prepare_to_store): Pass "ops" to
+	find_target_beneath.
+	(ravenscar_mourn_inferior): Pass "self" to find_target_beneath.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
 	PR gdb/17130:
 	* utils.c (quit): Use target_supports_terminal_ours.
 	* target.h (target_supports_terminal_ours): Declare.

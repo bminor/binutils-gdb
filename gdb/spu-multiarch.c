@@ -121,7 +121,7 @@ static int
 spu_region_ok_for_hw_watchpoint (struct target_ops *self,
 				 CORE_ADDR addr, int len)
 {
-  struct target_ops *ops_beneath = find_target_beneath (&spu_ops);
+  struct target_ops *ops_beneath = find_target_beneath (self);
 
   /* We cannot watch SPU local store.  */
   if (SPUADDR_SPU (addr) != -1)

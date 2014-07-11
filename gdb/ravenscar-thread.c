@@ -308,7 +308,7 @@ static void
 ravenscar_prepare_to_store (struct target_ops *self,
 			    struct regcache *regcache)
 {
-  struct target_ops *beneath = find_target_beneath (&ravenscar_ops);
+  struct target_ops *beneath = find_target_beneath (self);
 
   if (!ravenscar_runtime_initialized ()
       || ptid_equal (inferior_ptid, base_magic_null_ptid)
@@ -327,7 +327,7 @@ ravenscar_prepare_to_store (struct target_ops *self,
 static void
 ravenscar_mourn_inferior (struct target_ops *ops)
 {
-  struct target_ops *beneath = find_target_beneath (&ravenscar_ops);
+  struct target_ops *beneath = find_target_beneath (ops);
 
   base_ptid = null_ptid;
   beneath->to_mourn_inferior (beneath);
