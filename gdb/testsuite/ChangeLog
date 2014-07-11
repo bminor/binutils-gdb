@@ -1,3 +1,9 @@
+2014-07-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix false FAIL running under a very long directory name.
+	* gdb.base/argv0-symlink.exp: Add "set print repeats 10000"
+	and "set print elements 10000".  Twice.
+
 2014-07-11  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/exprs.exp: "set print symbol off".
