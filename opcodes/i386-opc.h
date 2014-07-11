@@ -104,6 +104,8 @@ enum
   CpuAVX512PF,
   /* Intel AVX-512 VL Instructions support required.  */
   CpuAVX512VL,
+  /* Intel AVX-512 BW Instructions support required.  */
+  CpuAVX512BW,
   /* Intel L1OM support required */
   CpuL1OM,
   /* Intel K1OM support required */
@@ -239,6 +241,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512er:1;
       unsigned int cpuavx512pf:1;
       unsigned int cpuavx512vl:1;
+      unsigned int cpuavx512bw:1;
       unsigned int cpul1om:1;
       unsigned int cpuk1om:1;
       unsigned int cpuxsave:1;
