@@ -1,3 +1,8 @@
+2014-07-11  Adrian Sendroiu  <adrian.sendroiu@freescale.com>
+
+	* remote.c (extended_remote_post_attach): New function.
+	(init_extended_remote_ops): Install it as to_post_attach method.
+
 2014-07-09  Pedro Alves  <palves@redhat.com>
 
 	* infcmd.c (attach_command_post_wait): Don't call
