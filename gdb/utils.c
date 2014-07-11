@@ -1095,7 +1095,7 @@ quit (void)
   if (job_control
       /* If there is no terminal switching for this target, then we can't
          possibly get screwed by the lack of job control.  */
-      || current_target.to_terminal_ours == NULL)
+      || !target_supports_terminal_ours ())
     fatal ("Quit");
   else
     fatal ("Quit (expect signal SIGINT when the program is resumed)");

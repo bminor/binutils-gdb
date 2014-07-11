@@ -499,6 +499,23 @@ target_terminal_inferior (void)
   (*current_target.to_terminal_inferior) (&current_target);
 }
 
+/* See target.h.  */
+
+int
+target_supports_terminal_ours (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_terminal_ours != delegate_terminal_ours
+	  && t->to_terminal_ours != tdefault_terminal_ours)
+	return 1;
+    }
+
+  return 0;
+}
+
 static void
 tcomplain (void)
 {
@@ -3457,7 +3474,8 @@ target_supports_delete_record (void)
   struct target_ops *t;
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_delete_record != NULL)
+    if (t->to_delete_record != delegate_delete_record
+	&& t->to_delete_record != tdefault_delete_record)
       return 1;
 
   return 0;

@@ -1,6 +1,15 @@
 2014-07-18  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/17130:
+	* utils.c (quit): Use target_supports_terminal_ours.
+	* target.h (target_supports_terminal_ours): Declare.
+	* target.c (target_supports_delete_record): Don't check
+	to_delete_record against NULL.
+	(target_supports_terminal_ours): New function.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/17130:
 	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint)
 	(spu_fetch_registers, spu_store_registers, spu_xfer_partial)
 	(spu_search_memory, spu_mourn_inferior): Simplify delegation.

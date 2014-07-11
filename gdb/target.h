@@ -1397,6 +1397,11 @@ extern void target_terminal_inferior (void);
 #define target_terminal_ours() \
      (*current_target.to_terminal_ours) (&current_target)
 
+/* Return true if the target stack has a non-default
+  "to_terminal_ours" method.  */
+
+extern int target_supports_terminal_ours (void);
+
 /* Save our terminal settings.
    This is called from TUI after entering or leaving the curses
    mode.  Since curses modifies our terminal this call is here
