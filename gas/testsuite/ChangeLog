@@ -1,3 +1,8 @@
+2014-07-12  David Majnemer <david.majnemer@gmail.com>
+
+	* gas/pe/set.s, * gas/pe/set.d: New test.
+	* gas/pe/pe.exp: Run it.
+
 2014-07-10  Will Newton  <will.newton@linaro.org>
 
 	* gas/elf/elf.exp: Remove special handling of arm-elf for

@@ -36,6 +36,8 @@ run_dump_test "section-align-1"
 run_dump_test "section-align-3"
 run_dump_test "section-exclude"
 
+run_dump_test "set"
+
 # SEH related tests
 
 # These tests are only for x86_64 targets

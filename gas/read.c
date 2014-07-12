@@ -3187,7 +3187,7 @@ assign_symbol (char *name, int mode)
 	  symbol_set_frag (symbolP, dummy_frag);
 	}
 #endif
-#ifdef OBJ_COFF
+#if defined (OBJ_COFF) && !defined (TE_PE)
       /* "set" symbols are local unless otherwise specified.  */
       SF_SET_LOCAL (symbolP);
 #endif

@@ -1,3 +1,7 @@
+2014-07-12  David Majnemer  <david.majnemer@gmail.com>
+
+	* read.c (assign_symbol): Don't force "set" symbols local for PE.
+
 2014-07-08  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-arm.c (literal_pool): New field "alignment".
