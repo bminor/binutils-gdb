@@ -1,3 +1,13 @@
+2014-07-12  Maciej W. Rozycki  <macro@mips.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdb-utils.exp: New file.
+	* lib/gdb.exp (gdb_run_cmd): Call gdb_init_commands, replacing
+	inline `gdb_init_command' processing.
+	(gdb_start_cmd): Likewise.
+	* lib/mi-support.exp (mi_run_cmd): Likewise.
+	* README: Document `gdb_init_command' and `gdb_init_commands'.
+
 2014-07-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix false FAIL running under a very long directory name.

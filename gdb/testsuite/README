@@ -271,6 +271,16 @@ gdb,use_precord
 
   The board supports process record.
 
+gdb_init_command
+gdb_init_commands
+
+  Commands to send to GDB every time a program is about to be run.  The
+  first of these settings defines a single command as a string.  The
+  second defines a TCL list of commands being a string each.  The commands
+  are sent one by one in a sequence, first from `gdb_init_command', if any,
+  followed by individual commands from `gdb_init_command', if any, in this
+  list's order.
+
 gdb_server_prog
 
   The location of GDBserver.  If GDBserver somewhere other than its

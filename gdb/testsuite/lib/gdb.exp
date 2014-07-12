@@ -27,6 +27,7 @@ if {$tool == ""} {
 
 load_lib libgloss.exp
 load_lib cache.exp
+load_lib gdb-utils.exp
 
 global GDB
 
@@ -209,8 +210,8 @@ proc delete_breakpoints {} {
 proc gdb_run_cmd {args} {
     global gdb_prompt use_gdb_stub
 
-    if [target_info exists gdb_init_command] {
-	send_gdb "[target_info gdb_init_command]\n"
+    foreach command [gdb_init_commands] {
+	send_gdb "$command\n"
 	gdb_expect 30 {
 	    -re "$gdb_prompt $" { }
 	    default {
@@ -311,8 +312,8 @@ proc gdb_run_cmd {args} {
 proc gdb_start_cmd {args} {
     global gdb_prompt use_gdb_stub
 
-    if [target_info exists gdb_init_command] {
-	send_gdb "[target_info gdb_init_command]\n"
+    foreach command [gdb_init_commands] {
+	send_gdb "$command\n"
 	gdb_expect 30 {
 	    -re "$gdb_prompt $" { }
 	    default {

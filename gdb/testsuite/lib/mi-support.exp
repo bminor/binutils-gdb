@@ -17,6 +17,8 @@
 
 # Test setup routines that work with the MI interpreter.
 
+load_lib gdb-utils.exp
+
 # The variable mi_gdb_prompt is a regexp which matches the gdb mi prompt.
 # Set it if it is not already set.
 global mi_gdb_prompt
@@ -859,8 +861,8 @@ proc mi_run_cmd_full {use_mi_command args} {
 	set run_match ""
     }
 
-    if [target_info exists gdb_init_command] {
-	send_gdb "[target_info gdb_init_command]\n"
+    foreach command [gdb_init_commands] {
+	send_gdb "$command\n"
 	gdb_expect 30 {
 	    -re "$mi_gdb_prompt$" { }
 	    default {
