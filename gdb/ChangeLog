@@ -1,5 +1,12 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17072
+	* main.c: Include event-top.h.
+	(handle_command_errors): New function.
+	(catch_command_errors, catch_command_errors_const): Use it.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
 	* exceptions.c (catch_command_errors, catch_command_errors_const):
 	Moved to main.c.
 	* exceptions.h (catch_command_errors_ftype)

@@ -1,5 +1,16 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17072
+	* gdb.base/paginate-execution-startup.c: New file.
+	* gdb.base/paginate-execution-startup.exp: New file.
+	* lib/gdb.exp (pagination_prompt): New global.
+	(default_gdb_spawn): New procedure, factored out from
+	default_gdb_spawn.
+	(default_gdb_start): Adjust to call default_gdb_spawn.
+	(gdb_spawn): New procedure.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb.exp (gdb_assert): New procedure.
 	* gdb.trace/backtrace.exp (gdb_backtrace_tdp_4): Use it.
 
