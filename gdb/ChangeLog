@@ -1,3 +1,8 @@
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* value.c (value_contents_equal): Delete function.
+	* value.h (value_contents_equal): Delete declaration.
+
 2014-07-14  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/17106:

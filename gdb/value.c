@@ -1210,25 +1210,6 @@ value_contents_writeable (struct value *value)
   return value_contents_raw (value);
 }
 
-/* Return non-zero if VAL1 and VAL2 have the same contents.  Note that
-   this function is different from value_equal; in C the operator ==
-   can return 0 even if the two values being compared are equal.  */
-
-int
-value_contents_equal (struct value *val1, struct value *val2)
-{
-  struct type *type1;
-  struct type *type2;
-
-  type1 = check_typedef (value_type (val1));
-  type2 = check_typedef (value_type (val2));
-  if (TYPE_LENGTH (type1) != TYPE_LENGTH (type2))
-    return 0;
-
-  return (memcmp (value_contents (val1), value_contents (val2),
-		  TYPE_LENGTH (type1)) == 0);
-}
-
 int
 value_optimized_out (struct value *value)
 {
