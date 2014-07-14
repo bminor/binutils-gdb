@@ -1,6 +1,12 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17072
+	* gdb.base/paginate-inferior-exit.c: New file.
+	* gdb.base/paginate-inferior-exit.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
 	* gdb.base/paginate-bg-execution.c: New file.
 	* gdb.base/paginate-bg-execution.exp: New file.
 
