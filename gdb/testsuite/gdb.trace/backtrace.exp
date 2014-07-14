@@ -256,11 +256,8 @@ proc gdb_backtrace_tdp_4 { msg depth traceframe } {
 
 	# Output of 'tdump' on frame 0 and frame 1 should be
 	# identical.
-	if ![string compare $output_string0 $output_string1]  {
-	    pass "tdump output"
-	} else {
-	    fail "tdump output"
-	}
+	gdb_assert ![string compare $output_string0 $output_string1] \
+	    "tdump output"
     }
 }
 
