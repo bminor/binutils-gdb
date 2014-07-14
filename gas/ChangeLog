@@ -1,3 +1,8 @@
+2014-07-14  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* config/tc-m68k.c (md_convert_frag_1): Don't complain with
+	--pcrel about TAB (DBCCLBR, LONG) conversion.
+
 2014-07-12  David Majnemer  <david.majnemer@gmail.com>
 
 	* read.c (assign_symbol): Don't force "set" symbols local for PE.

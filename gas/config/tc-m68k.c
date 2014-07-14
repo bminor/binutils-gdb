@@ -5166,10 +5166,6 @@ md_convert_frag_1 (fragS *fragP)
       /* Only DBcc instructions can come here.
 	 Change dbcc into dbcc/bral.
 	 JF: these used to be fr_opcode[2-7], but that's wrong.  */
-      if (flag_keep_pcrel)
-    	as_bad_where (fragP->fr_file, fragP->fr_line,
-		  _("Conversion of DBcc to absolute jump"));
-
       *buffer_address++ = 0x00;	/* Branch offset = 4.  */
       *buffer_address++ = 0x04;
       *buffer_address++ = 0x60;	/* Put in bra pc+6.  */
