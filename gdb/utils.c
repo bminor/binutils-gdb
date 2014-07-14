@@ -1819,6 +1819,10 @@ prompt_for_continue (void)
 
   immediate_quit++;
   QUIT;
+
+  /* We'll need to handle input.  */
+  target_terminal_ours ();
+
   /* On a real operating system, the user can quit with SIGINT.
      But not on GO32.
 

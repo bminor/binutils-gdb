@@ -1,5 +1,10 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/paginate-after-ctrl-c-running.c: New file.
+	* gdb.base/paginate-after-ctrl-c-running.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/double-prompt-target-event-error.c: New file.
 	* gdb.base/double-prompt-target-event-error.exp: New file.
 
