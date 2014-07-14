@@ -756,7 +756,8 @@ gdb_readline_wrapper_line (char *line)
   after_char_processing_hook = NULL;
 
   /* Prevent parts of the prompt from being redisplayed if annotations
-     are enabled, and readline's state getting out of sync.  */
+     are enabled, and readline's state getting out of sync.  We'll
+     restore it in gdb_readline_wrapper_cleanup.  */
   if (async_command_editing_p)
     rl_callback_handler_remove ();
 }
@@ -776,6 +777,12 @@ gdb_readline_wrapper_cleanup (void *arg)
 
   gdb_assert (input_handler == gdb_readline_wrapper_line);
   input_handler = cleanup->handler_orig;
+
+  /* Reinstall INPUT_HANDLER in readline, without displaying a
+     prompt.  */
+  if (async_command_editing_p)
+    rl_callback_handler_install (NULL, input_handler);
+
   gdb_readline_wrapper_result = NULL;
   gdb_readline_wrapper_done = 0;
 

@@ -1,6 +1,13 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17072
+	* top.c (gdb_readline_wrapper_line): Tweak comment.
+	(gdb_readline_wrapper_cleanup): If readline is enabled, reinstall
+	the input handler callback.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
 	* main.c: Include event-top.h.
 	(handle_command_errors): New function.
 	(catch_command_errors, catch_command_errors_const): Use it.
