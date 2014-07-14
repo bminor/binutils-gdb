@@ -1,5 +1,15 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
+	* exceptions.c (print_any_exception): Delete.
+	(catch_exceptions_with_msg): Use exception_print instead of
+	print_any_exception.
+	(catch_errors): Use exception_fprintf instead of
+	print_any_exception.
+	(catch_command_errors, catch_command_errors_const): Use
+	exception_print instead of print_any_exception.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
 	* infcall.c (run_inferior_call): Set 'sync_execution' while
 	running the inferior call.
 
