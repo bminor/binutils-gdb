@@ -1,6 +1,12 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17072
+	* gdb.base/paginate-bg-execution.c: New file.
+	* gdb.base/paginate-bg-execution.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
 	* gdb.base/paginate-execution-startup.c: New file.
 	* gdb.base/paginate-execution-startup.exp: New file.
 	* lib/gdb.exp (pagination_prompt): New global.
