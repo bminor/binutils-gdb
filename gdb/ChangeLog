@@ -1,5 +1,10 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
+	* infcall.c (run_inferior_call): Set 'sync_execution' while
+	running the inferior call.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
 	* value.c (value_contents_equal): Delete function.
 	* value.h (value_contents_equal): Delete declaration.
 
