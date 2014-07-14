@@ -1,5 +1,9 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
+	* utils.c (prompt_for_continue): Call target_terminal_ours.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
 	* inf-loop.c (inferior_event_handler): Use TRY_CATCH instead of
 	catch_errors.  Don't re-enable stdin or notify observers where,
 	and rethrow error.
