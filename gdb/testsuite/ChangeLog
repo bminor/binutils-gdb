@@ -1,5 +1,10 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (gdb_assert): New procedure.
+	* gdb.trace/backtrace.exp (gdb_backtrace_tdp_4): Use it.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/execution-termios.c: New file.
 	* gdb.base/execution-termios.exp: New file.
 

@@ -1204,6 +1204,27 @@ proc gdb_test_list_exact { cmd name elm_find_regexp elm_extract_regexp result_ma
     }
 }
 
+
+# Issue a PASS and return true if evaluating CONDITION in the caller's
+# frame returns true, and issue a FAIL and return false otherwise.
+# MESSAGE is the pass/fail message to be printed.  If MESSAGE is
+# omitted or is empty, then the pass/fail messages use the condition
+# string as the message.
+
+proc gdb_assert { condition {message ""} } {
+    if { $message == ""} {
+	set message $condition
+    }
+
+    set res [uplevel 1 expr $condition]
+    if {!$res} {
+	fail $message
+    } else {
+	pass $message
+    }
+    return $res
+}
+
 proc gdb_reinitialize_dir { subdir } {
     global gdb_prompt
 
