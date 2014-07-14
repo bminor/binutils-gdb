@@ -68,6 +68,7 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "tracepoint.h"
+#include "inf-loop.h"
 
 extern void initialize_all_files (void);
 
@@ -766,6 +767,9 @@ struct gdb_readline_wrapper_cleanup
   {
     void (*handler_orig) (char *);
     int already_prompted_orig;
+
+    /* Whether the target was async.  */
+    int target_is_async_orig;
   };
 
 static void
@@ -789,6 +793,9 @@ gdb_readline_wrapper_cleanup (void *arg)
   after_char_processing_hook = saved_after_char_processing_hook;
   saved_after_char_processing_hook = NULL;
 
+  if (cleanup->target_is_async_orig)
+    target_async (inferior_event_handler, 0);
+
   xfree (cleanup);
 }
 
@@ -805,7 +812,12 @@ gdb_readline_wrapper (char *prompt)
 
   cleanup->already_prompted_orig = rl_already_prompted;
 
+  cleanup->target_is_async_orig = target_is_async_p ();
+
   back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
+
+  if (cleanup->target_is_async_orig)
+    target_async (NULL, NULL);
 
   /* Display our prompt and prevent double prompt display.  */
   display_gdb_prompt (prompt);

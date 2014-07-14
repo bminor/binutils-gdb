@@ -1,6 +1,17 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17072
+	* top.c: Include "inf-loop.h".
+	(struct gdb_readline_wrapper_cleanup) <target_is_async_orig>: New
+	field.
+	(gdb_readline_wrapper_cleanup): Make the target async again, if it
+	was async before.
+	(gdb_readline_wrapper): Store whether the target is async, and
+	make it sync.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
 	* top.c (gdb_readline_wrapper_line): Tweak comment.
 	(gdb_readline_wrapper_cleanup): If readline is enabled, reinstall
 	the input handler callback.
