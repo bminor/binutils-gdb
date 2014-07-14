@@ -337,6 +337,50 @@ captured_command_loop (void *data)
   return 1;
 }
 
+/* Type of the command callback passed to catch_command_errors.  */
+
+typedef void (catch_command_errors_ftype) (char *, int);
+
+/* Wrap calls to commands run before the event loop is started.  */
+
+static int
+catch_command_errors (catch_command_errors_ftype *command,
+		      char *arg, int from_tty, return_mask mask)
+{
+  volatile struct gdb_exception e;
+
+  TRY_CATCH (e, mask)
+    {
+      command (arg, from_tty);
+    }
+  exception_print (gdb_stderr, e);
+  if (e.reason < 0)
+    return 0;
+  return 1;
+}
+
+/* Type of the command callback passed to catch_command_errors_const.  */
+
+typedef void (catch_command_errors_const_ftype) (const char *, int);
+
+/* Like catch_command_errors, but works with const command and args.  */
+
+static int
+catch_command_errors_const (catch_command_errors_const_ftype *command,
+			    const char *arg, int from_tty, return_mask mask)
+{
+  volatile struct gdb_exception e;
+
+  TRY_CATCH (e, mask)
+    {
+      command (arg, from_tty);
+    }
+  exception_print (gdb_stderr, e);
+  if (e.reason < 0)
+    return 0;
+  return 1;
+}
+
 /* Arguments of --command option and its counterpart.  */
 typedef struct cmdarg {
   /* Type of this option.  */

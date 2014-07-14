@@ -1,5 +1,18 @@
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
+	* exceptions.c (catch_command_errors, catch_command_errors_const):
+	Moved to main.c.
+	* exceptions.h (catch_command_errors_ftype)
+	(catch_command_errors_const_ftype): Moved to main.c.
+	(catch_command_errors, catch_command_errors_const): Delete
+	declarations.
+	* main.c (catch_command_errors_ftype)
+	(catch_command_errors_const_ftype): Moved here from exceptions.h.
+	(catch_command_errors, catch_command_errors_const)): Moved here
+	from exceptions.c and make static.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
 	* exceptions.c (print_any_exception): Delete.
 	(catch_exceptions_with_msg): Use exception_print instead of
 	print_any_exception.
