@@ -388,6 +388,11 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   volatile struct gdb_exception e;
   int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
+  int saved_sync_execution = sync_execution;
+
+  /* Infcalls run synchronously, in the foreground.  */
+  if (target_can_async_p ())
+    sync_execution = 1;
 
   call_thread->control.in_infcall = 1;
 
@@ -440,6 +445,8 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 
   if (call_thread != NULL)
     call_thread->control.in_infcall = saved_in_infcall;
+
+  sync_execution = saved_sync_execution;
 
   return e;
 }

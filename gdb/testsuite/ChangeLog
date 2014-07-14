@@ -1,3 +1,8 @@
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/execution-termios.c: New file.
+	* gdb.base/execution-termios.exp: New file.
+
 2014-07-14  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/vla-cxx.cc: New file.
