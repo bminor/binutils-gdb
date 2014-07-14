@@ -1,3 +1,8 @@
+2014-07-14  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Report no hardware
+	breakpoint support correctly.
+
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
 	* utils.c (prompt_for_continue): Call target_terminal_ours.
