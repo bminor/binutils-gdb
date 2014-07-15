@@ -1,3 +1,8 @@
+2014-07-15  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* gdb.arch/avr-flash-qualifer.c: New.
+	* gdb.arch/avr-flash-qualifer.exp: New.
+
 2014-07-14  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/paginate-after-ctrl-c-running.c: New file.

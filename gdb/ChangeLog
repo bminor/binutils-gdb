@@ -1,3 +1,16 @@
+2014-07-15  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (AVR_TYPE_ADDRESS_CLASS_FLASH): New macro.
+	(AVR_TYPE_INSTANCE_FLAG_ADDRESS_CLASS_FLASH): Likewise.
+	(avr_address_to_pointer): Check for AVR_TYPE_ADDRESS_CLASS_FLASH.
+	(avr_pointer_to_address): Likewise.
+	(avr_address_class_type_flags): New function.
+	(avr_address_class_type_flags_to_name): Likewise.
+	(avr_address_class_name_to_type_flags): Likewise.
+	(avr_gdbarch_init): Set address_class_type_flags,
+	address_class_type_flags_to_name and
+	address_class_name_to_type_flags.
+
 2014-07-15  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (kill_callback): Save errno and work with saved
