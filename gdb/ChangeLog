@@ -1,3 +1,8 @@
+2014-07-15  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (kill_callback): Save errno and work with saved
+	copy.
+
 2014-07-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* expprint.c (dump_subexp_body_standard): Handle OP_STRING.
