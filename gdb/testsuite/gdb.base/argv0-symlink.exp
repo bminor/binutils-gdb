@@ -36,6 +36,9 @@ if ![runto_main] {
     return -1
 }
 
+gdb_test_no_output "set print repeats 10000"
+gdb_test_no_output "set print elements 10000"
+
 gdb_test {print argv[0]} "/$filelink\"" $test
 
 # For a link named /PATH/TO/DIR/LINK, we want to check the output
@@ -66,6 +69,9 @@ if ![runto_main] {
     untested "could not run to main"
     return -1
 }
+
+gdb_test_no_output "set print repeats 10000"
+gdb_test_no_output "set print elements 10000"
 
 # gdbserver does not have this issue.
 if ![is_remote target] {

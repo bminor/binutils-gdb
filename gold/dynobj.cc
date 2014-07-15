@@ -336,6 +336,17 @@ template<int size, bool big_endian>
 void
 Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
+  this->base_read_symbols(sd);
+}
+
+// Read the symbols and sections from a dynamic object.  We read the
+// dynamic symbols, not the normal symbols.  This is common code for
+// all target-specific overrides of do_read_symbols().
+
+template<int size, bool big_endian>
+void
+Sized_dynobj<size, big_endian>::base_read_symbols(Read_symbols_data* sd)
+{
   this->read_section_data(&this->elf_file_, sd);
 
   const unsigned char* const pshdrs = sd->section_headers->data();

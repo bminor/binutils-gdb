@@ -1,3 +1,14 @@
+2014-07-10  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* emultempl/xtensaelf.em (is_inconsistent_linkonce_section):
+	correctly handle missing dot in section name after
+	".gnu.linkonce.prop.".
+
+2014-07-08  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* scripttempl/avr.sc: Remove KEEP for .data and
+	force .bss VMA to end of .data VMA.
+
 2014-07-08  Will Newton  <will.newton@linaro.org>
 
 	* emulparams/armelf_linux.sh (TEXT_START_ADDR): Increase

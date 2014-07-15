@@ -1026,5 +1026,6 @@ const struct lang_varobj_ops ada_varobj_ops =
   ada_type_of_child,
   ada_value_of_variable,
   ada_value_is_changeable_p,
-  ada_value_has_mutated
+  ada_value_has_mutated,
+  varobj_default_is_path_expr_parent
 };

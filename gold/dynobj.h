@@ -270,6 +270,12 @@ class Sized_dynobj : public Dynobj
   do_get_global_symbols() const
   { return this->symbols_; }
 
+ protected:
+  // Read the symbols.  This is common code for all target-specific
+  // overrides of do_read_symbols().
+  void
+  base_read_symbols(Read_symbols_data*);
+
  private:
   // For convenience.
   typedef Sized_dynobj<size, big_endian> This;

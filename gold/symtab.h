@@ -215,6 +215,11 @@ class Symbol
   type() const
   { return this->type_; }
 
+  // Set the symbol type.
+  void
+  set_type(elfcpp::STT type)
+  { this->type_ = type; }
+
   // Return true for function symbol.
   bool
   is_func() const

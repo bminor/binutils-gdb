@@ -851,47 +851,26 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 
 static void
 elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
-		    Elf_Internal_Sym *isym, bfd_boolean definition,
-		    bfd_boolean dynamic)
+		    const Elf_Internal_Sym *isym,
+		    bfd_boolean definition, bfd_boolean dynamic)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   /* If st_other has a processor-specific meaning, specific
-     code might be needed here. We never merge the visibility
-     attribute with the one from a dynamic object.  */
+     code might be needed here.  */
   if (bed->elf_backend_merge_symbol_attribute)
     (*bed->elf_backend_merge_symbol_attribute) (h, isym, definition,
 						dynamic);
 
-  /* If this symbol has default visibility and the user has requested
-     we not re-export it, then mark it as hidden.  */
-  if (definition
-      && !dynamic
-      && (abfd->no_export
-	  || (abfd->my_archive && abfd->my_archive->no_export))
-      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
-    isym->st_other = (STV_HIDDEN
-		      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
-
-  if (!dynamic && ELF_ST_VISIBILITY (isym->st_other) != 0)
+  if (!dynamic)
     {
-      unsigned char hvis, symvis, other, nvis;
+      unsigned symvis = ELF_ST_VISIBILITY (isym->st_other);
+      unsigned hvis = ELF_ST_VISIBILITY (h->other);
 
-      /* Only merge the visibility. Leave the remainder of the
-	 st_other field to elf_backend_merge_symbol_attribute.  */
-      other = h->other & ~ELF_ST_VISIBILITY (-1);
-
-      /* Combine visibilities, using the most constraining one.  */
-      hvis = ELF_ST_VISIBILITY (h->other);
-      symvis = ELF_ST_VISIBILITY (isym->st_other);
-      if (! hvis)
-	nvis = symvis;
-      else if (! symvis)
-	nvis = hvis;
-      else
-	nvis = hvis < symvis ? hvis : symvis;
-
-      h->other = other | nvis;
+      /* Keep the most constraining visibility.  Leave the remainder
+	 of the st_other field to elf_backend_merge_symbol_attribute.  */
+      if (symvis - 1 < hvis - 1)
+	h->other = symvis | (h->other & ~ELF_ST_VISIBILITY (-1));
     }
 }
 
@@ -4094,6 +4073,16 @@ error_free_dyn:
 
 	      name = newname;
 	    }
+
+	  /* If this symbol has default visibility and the user has
+	     requested we not re-export it, then mark it as hidden.  */
+	  if (definition
+	      && !dynamic
+	      && (abfd->no_export
+		  || (abfd->my_archive && abfd->my_archive->no_export))
+	      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
+	    isym->st_other = (STV_HIDDEN
+			      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
 
 	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
 				      sym_hash, &old_bfd, &old_weak,

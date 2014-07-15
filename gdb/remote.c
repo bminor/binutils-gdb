@@ -4484,6 +4484,20 @@ extended_remote_attach (struct target_ops *ops, const char *args, int from_tty)
   extended_remote_attach_1 (ops, args, from_tty);
 }
 
+/* Implementation of the to_post_attach method.  */
+
+static void
+extended_remote_post_attach (struct target_ops *ops, int pid)
+{
+  /* In certain cases GDB might not have had the chance to start
+     symbol lookup up until now.  This could happen if the debugged
+     binary is not using shared libraries, the vsyscall page is not
+     present (on Linux) and the binary itself hadn't changed since the
+     debugging process was started.  */
+  if (symfile_objfile != NULL)
+    remote_check_symbols();
+}
+
 
 /* Check for the availability of vCont.  This function should also check
    the response.  */
@@ -11530,6 +11544,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_mourn_inferior = extended_remote_mourn;
   extended_remote_ops.to_detach = extended_remote_detach;
   extended_remote_ops.to_attach = extended_remote_attach;
+  extended_remote_ops.to_post_attach = extended_remote_post_attach;
   extended_remote_ops.to_kill = extended_remote_kill;
   extended_remote_ops.to_supports_disable_randomization
     = extended_remote_supports_disable_randomization;

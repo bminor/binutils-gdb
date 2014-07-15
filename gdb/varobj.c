@@ -1004,18 +1004,18 @@ varobj_get_gdb_type (struct varobj *var)
 static int
 is_path_expr_parent (struct varobj *var)
 {
-  struct type *type;
+  gdb_assert (var->root->lang_ops->is_path_expr_parent != NULL);
+  return var->root->lang_ops->is_path_expr_parent (var);
+}
 
-  /* "Fake" children are not path_expr parents.  */
-  if (CPLUS_FAKE_CHILD (var))
-    return 0;
+/* Is VAR a path expression parent, i.e., can it be used to construct
+   a valid path expression?  By default we assume any VAR can be a path
+   parent.  */
 
-  type = varobj_get_value_type (var);
-
-  /* Anonymous unions and structs are also not path_expr parents.  */
-  return !((TYPE_CODE (type) == TYPE_CODE_STRUCT
-	    || TYPE_CODE (type) == TYPE_CODE_UNION)
-	   && TYPE_NAME (type) == NULL);
+int
+varobj_default_is_path_expr_parent (struct varobj *var)
+{
+  return 1;
 }
 
 /* Return the path expression parent for VAR.  */

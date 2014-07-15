@@ -3706,20 +3706,28 @@ kill_callback (struct lwp_info *lp, void *data)
   errno = 0;
   kill (ptid_get_lwp (lp->ptid), SIGKILL);
   if (debug_linux_nat)
-    fprintf_unfiltered (gdb_stdlog,
-			"KC:  kill (SIGKILL) %s, 0, 0 (%s)\n",
-			target_pid_to_str (lp->ptid),
-			errno ? safe_strerror (errno) : "OK");
+    {
+      int save_errno = errno;
+
+      fprintf_unfiltered (gdb_stdlog,
+			  "KC:  kill (SIGKILL) %s, 0, 0 (%s)\n",
+			  target_pid_to_str (lp->ptid),
+			  save_errno ? safe_strerror (save_errno) : "OK");
+    }
 
   /* Some kernels ignore even SIGKILL for processes under ptrace.  */
 
   errno = 0;
   ptrace (PTRACE_KILL, ptid_get_lwp (lp->ptid), 0, 0);
   if (debug_linux_nat)
-    fprintf_unfiltered (gdb_stdlog,
-			"KC:  PTRACE_KILL %s, 0, 0 (%s)\n",
-			target_pid_to_str (lp->ptid),
-			errno ? safe_strerror (errno) : "OK");
+    {
+      int save_errno = errno;
+
+      fprintf_unfiltered (gdb_stdlog,
+			  "KC:  PTRACE_KILL %s, 0, 0 (%s)\n",
+			  target_pid_to_str (lp->ptid),
+			  save_errno ? safe_strerror (save_errno) : "OK");
+    }
 
   return 0;
 }

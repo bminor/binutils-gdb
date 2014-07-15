@@ -34,6 +34,7 @@
 #include <string>
 #include <vector>
 
+#include "elfcpp.h"
 #include "script-sections.h"
 
 namespace gold
@@ -111,6 +112,7 @@ class Expression
 		 bool is_dot_available, uint64_t dot_value,
 		 Output_section* dot_section,
 		 Output_section** result_section, uint64_t* result_alignment,
+		 elfcpp::STT* type, elfcpp::STV* vis, unsigned char* nonvis,
 		 bool is_section_dot_assignment);
 
   // Print the expression to the FILE.  This is for debugging.

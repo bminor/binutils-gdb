@@ -331,24 +331,6 @@ exception_fprintf (struct ui_file *file, struct gdb_exception e,
     }
 }
 
-static void
-print_any_exception (struct ui_file *file, const char *prefix,
-		     struct gdb_exception e)
-{
-  if (e.reason < 0 && e.message != NULL)
-    {
-      target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output.  */
-      gdb_flush (gdb_stdout);
-      annotate_error_begin ();
-
-      /* Print the prefix.  */
-      if (prefix != NULL && prefix[0] != '\0')
-	fputs_filtered (prefix, file);
-      print_exception (file, e);
-    }
-}
-
 /* A stack of exception messages.
    This is needed to handle nested calls to throw_it: we don't want to
    xfree space for a message before it's used.
@@ -486,7 +468,7 @@ catch_exceptions_with_msg (struct ui_out *func_uiout,
       throw_exception (exception);
     }
 
-  print_any_exception (gdb_stderr, NULL, exception);
+  exception_print (gdb_stderr, exception);
   gdb_assert (val >= 0);
   gdb_assert (exception.reason <= 0);
   if (exception.reason < 0)
@@ -534,40 +516,8 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
       throw_exception (exception);
     }
 
-  print_any_exception (gdb_stderr, errstring, exception);
+  exception_fprintf (gdb_stderr, exception, "%s", errstring);
   if (exception.reason != 0)
     return 0;
   return val;
-}
-
-int
-catch_command_errors (catch_command_errors_ftype *command,
-		      char *arg, int from_tty, return_mask mask)
-{
-  volatile struct gdb_exception e;
-
-  TRY_CATCH (e, mask)
-    {
-      command (arg, from_tty);
-    }
-  print_any_exception (gdb_stderr, NULL, e);
-  if (e.reason < 0)
-    return 0;
-  return 1;
-}
-
-int
-catch_command_errors_const (catch_command_errors_const_ftype *command,
-			    const char *arg, int from_tty, return_mask mask)
-{
-  volatile struct gdb_exception e;
-
-  TRY_CATCH (e, mask)
-    {
-      command (arg, from_tty);
-    }
-  print_any_exception (gdb_stderr, NULL, e);
-  if (e.reason < 0)
-    return 0;
-  return 1;
 }

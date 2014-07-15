@@ -1,3 +1,350 @@
+2014-07-15  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (AVR_TYPE_ADDRESS_CLASS_FLASH): New macro.
+	(AVR_TYPE_INSTANCE_FLAG_ADDRESS_CLASS_FLASH): Likewise.
+	(avr_address_to_pointer): Check for AVR_TYPE_ADDRESS_CLASS_FLASH.
+	(avr_pointer_to_address): Likewise.
+	(avr_address_class_type_flags): New function.
+	(avr_address_class_type_flags_to_name): Likewise.
+	(avr_address_class_name_to_type_flags): Likewise.
+	(avr_gdbarch_init): Set address_class_type_flags,
+	address_class_type_flags_to_name and
+	address_class_name_to_type_flags.
+
+2014-07-15  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (kill_callback): Save errno and work with saved
+	copy.
+
+2014-07-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* expprint.c (dump_subexp_body_standard): Handle OP_STRING.
+
+2014-07-14  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Report no hardware
+	breakpoint support correctly.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (prompt_for_continue): Call target_terminal_ours.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* inf-loop.c (inferior_event_handler): Use TRY_CATCH instead of
+	catch_errors.  Don't re-enable stdin or notify observers where,
+	and rethrow error.
+	(fetch_inferior_event_wrapper): Delete.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* top.c: Include "inf-loop.h".
+	(struct gdb_readline_wrapper_cleanup) <target_is_async_orig>: New
+	field.
+	(gdb_readline_wrapper_cleanup): Make the target async again, if it
+	was async before.
+	(gdb_readline_wrapper): Store whether the target is async, and
+	make it sync.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* top.c (gdb_readline_wrapper_line): Tweak comment.
+	(gdb_readline_wrapper_cleanup): If readline is enabled, reinstall
+	the input handler callback.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* main.c: Include event-top.h.
+	(handle_command_errors): New function.
+	(catch_command_errors, catch_command_errors_const): Use it.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (catch_command_errors, catch_command_errors_const):
+	Moved to main.c.
+	* exceptions.h (catch_command_errors_ftype)
+	(catch_command_errors_const_ftype): Moved to main.c.
+	(catch_command_errors, catch_command_errors_const): Delete
+	declarations.
+	* main.c (catch_command_errors_ftype)
+	(catch_command_errors_const_ftype): Moved here from exceptions.h.
+	(catch_command_errors, catch_command_errors_const)): Moved here
+	from exceptions.c and make static.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (print_any_exception): Delete.
+	(catch_exceptions_with_msg): Use exception_print instead of
+	print_any_exception.
+	(catch_errors): Use exception_fprintf instead of
+	print_any_exception.
+	(catch_command_errors, catch_command_errors_const): Use
+	exception_print instead of print_any_exception.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* infcall.c (run_inferior_call): Set 'sync_execution' while
+	running the inferior call.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* value.c (value_contents_equal): Delete function.
+	* value.h (value_contents_equal): Delete declaration.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/17106:
+	* gdbtypes.c (is_dynamic_type_internal): New function, from
+	is_dynamic_type.
+	(is_dynamic_type): Rewrite.
+	(resolve_dynamic_union): Use resolve_dynamic_type_internal.
+	(resolve_dynamic_struct): Likewise.
+	(resolve_dynamic_type_internal): New function, from
+	resolve_dynamic_type.
+	(resolve_dynamic_type): Rewrite.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (target_require_runnable): Also check record_stratum.
+	Update comment.
+
+2014-07-11  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (thumb_analyze_prologue): Break the loop if
+	thumb_instruction_restores_sp return true.
+
+2014-07-11  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (thumb_instruction_restores_sp): New function.
+	(thumb_in_function_epilogue_p): Call
+	thumb_instruction_restores_sp.
+
+2014-07-11  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (thumb_analyze_prologue): Don't match instruction
+	'add sp, #imm'.
+	(thumb_in_function_epilogue_p): Don't match 'sub sp, #imm'.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
+	* amd64-linux-nat.c (gdbcore.h): Remove include.
+	(regset.h): Likewise.
+	(nat/linux-btrace.h): Likewise.
+	(btrace.h): Likewise.
+	(gdb_assert.h): Likewise.
+	(string.h): Likewise.
+	(sys/uio.h): Likewise.
+	(sys/debugreg.h): Likewise.
+	(sys/syscall.h): Likewise.
+	(sys/procfs.h): Likewise.
+	(sys/user.h): Likewise.
+	(asm/ptrace.h): Likewise.
+	(i386-nat.h): Likewise.
+	* i386-linux-nat.c (i386-nat.h): Likewise.
+	(regset.h): Likewise.
+	(target.h): Likewise.
+	(linux-nat.h): Likewise.
+	(nat/linux-btrace.h): Likewise.
+	(btrace.h): Likewise.
+	(gdb_assert.h): Likewise.
+	(string.h): Likewise.
+	(sys/uio.h): Likewise.
+	(sys/user.h): Likewise.
+	(sys/procfs.h): Likewise.
+	(sys/reg.h): Likewise.
+	(sys/debugreg.h): Likewise.
+	(ORIG_EAX): Remove definition.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
+	* i386-linux-nat.h: New file.
+	* x86-linux-nat.h: Likewise.
+	* x86-linux-nat.c: Likewise.
+	* Makefile.in (HFILES_NO_SRCDIR): Add the above new headers.
+	* config/i386/linux.mh (NATDEPFILES): Add x86-linux-nat.o.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* amd64-linux-nat.c (x86-linux-nat.h): New include.
+	(PTRACE_GETREGSET): Now in x86-linux-nat.h.
+	(PTRACE_SETREGSET): Likewise.
+	(arch_lwp_info): Now in x86-linux-nat.c.
+	(have_ptrace_getregset): Now in x86-linux-nat.h.
+	(x86_linux_dr_get): Now in x86-linux-nat.c.
+	(x86_linux_dr_set): Likewise.
+	(x86_linux_dr_get_addr): Likewise.
+	(x86_linux_dr_get_control): Likewise.
+	(x86_linux_dr_get_status): Likewise.
+	(update_debug_registers_callback): Likewise.
+	(x86_linux_dr_set_control): Likewise.
+	(x86_linux_dr_set_addr): Likewise.
+	(x86_linux_prepare_to_resume): Likewise.
+	(x86_linux_new_thread): Likewise.
+	(x86_linux_new_fork): Likewise.
+	(x86_linux_get_thread_area): Likewise.
+	(super_post_startup_inferior): Likewise.
+	(x86_linux_child_post_startup_inferior): Likewise.
+	(AMD64_LINUX_USER64_CS): Likewise.
+	(AMD64_LINUX_X32_DS): Likewise.
+	(x86_linux_read_description): Likewise.
+	(x86_linux_enable_btrace): Likewise.
+	(x86_linux_disable_btrace): Likewise.
+	(x86_linux_teardown_btrace): Likewise.
+	(x86_linux_read_btrace): Likewise.
+	(x86_linux_create_target): Likewise.
+	(x86_linux_add_target): Likewise.
+	* i386-linux-nat.c (x86-linux-nat.h): New include.
+	(PTRACE_GETREGSET): Now in x86-linux-nat.h.
+	(PTRACE_SETREGSET): Likewise.
+	(arch_lwp_info): Now in x86-linux-nat.c.
+	(have_ptrace_getregset): Now in x86-linux-nat.h.
+	(x86_linux_dr_get): Now in x86-linux-nat.c.
+	(x86_linux_dr_set): Likewise.
+	(x86_linux_dr_get_addr): Likewise.
+	(x86_linux_dr_get_control): Likewise.
+	(x86_linux_dr_get_status): Likewise.
+	(update_debug_registers_callback): Likewise.
+	(x86_linux_dr_set_control): Likewise.
+	(x86_linux_dr_set_addr): Likewise.
+	(x86_linux_prepare_to_resume): Likewise.
+	(x86_linux_new_thread): Likewise.
+	(x86_linux_new_fork): Likewise.
+	(x86_linux_get_thread_area): Likewise.
+	(super_post_startup_inferior): Likewise.
+	(x86_linux_child_post_startup_inferior): Likewise.
+	(AMD64_LINUX_USER64_CS): Likewise.
+	(AMD64_LINUX_X32_DS): Likewise.
+	(x86_linux_read_description): Likewise.
+	(x86_linux_enable_btrace): Likewise.
+	(x86_linux_disable_btrace): Likewise.
+	(x86_linux_teardown_btrace): Likewise.
+	(x86_linux_read_btrace): Likewise.
+	(x86_linux_create_target): Likewise.
+	(x86_linux_add_target): Likewise.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
+	* amd64-linux-nat.c: Comment and whitespace changes.
+	* i386-linux-nat.c: Comment and whitespace changes.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
+	* amd64-linux-nat.c (x86_linux_create_target): New function.
+	(x86_linux_add_target): Likewise.
+	(_initialize_amd64_linux_nat): Delegate to the above new functions.
+	* i386-linux-nat.c (x86_linux_create_target): New function.
+	(x86_linux_add_target): Likewise.
+	(_initialize_i386_linux_nat): Delegate to the above new functions.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
+	* amd64-linux-nat.c (x86_linux_get_thread_area): New function.
+	(ps_get_thread_area): Delegate to the above in 32-bit mode.
+	* i386-linux-nat.c (x86_linux_get_thread_area): New function.
+	(ps_get_thread_area): Delegate to the above.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
+	* amd64-linux-nat.c (amd64_linux_read_description): Renamed to
+	x86_linux_read_description.  All uses updated.  amd64-specific
+	code conditionalized.  Conditionalized i386-specific code added.
+	Redundant cast removed.
+	* i386-linux-nat.c (i386_linux_read_description): Renamed to
+	x86_linux_read_description.  All uses updated.  i386-specific
+	code conditionalized.  Conditionalized amd64-specific code added.
+	One sizeof replaced with the actual type it is describing.
+
+2014-07-11  Gary Benson  <gbenson@redhat.com>
+
+	* amd64-linux-nat.c (amd64_linux_dr_get): Renamed to
+	x86_linux_dr_get.  All uses updated.
+	(amd64_linux_dr_set): Renamed to
+	x86_linux_dr_set.  All uses updated.
+	(amd64_linux_dr_get_addr): Renamed to
+	x86_linux_dr_get_addr.  All uses updated.
+	(amd64_linux_dr_get_control): Renamed to
+	x86_linux_dr_get_control.  All uses updated.
+	(amd64_linux_dr_get_status): Renamed to
+	x86_linux_dr_get_status.  All uses updated.
+	(amd64_linux_dr_set_control): Renamed to
+	x86_linux_dr_set_control.  All uses updated.
+	(amd64_linux_dr_set_addr): Renamed to
+	x86_linux_dr_set_addr.  All uses updated.
+	(amd64_linux_prepare_to_resume): Renamed to
+	x86_linux_prepare_to_resume.  All uses updated.
+	(amd64_linux_new_thread): Renamed to
+	x86_linux_new_thread.  All uses updated.
+	(amd64_linux_new_fork): Renamed to
+	x86_linux_new_fork.  All uses updated.
+	(amd64_linux_child_post_startup_inferior): Renamed to
+	x86_linux_child_post_startup_inferior.  All uses updated.
+	(amd64_linux_enable_btrace): Renamed to
+	x86_linux_enable_btrace.  All uses updated.
+	(amd64_linux_disable_btrace): Renamed to
+	x86_linux_disable_btrace.  All uses updated.
+	(amd64_linux_teardown_btrace): Renamed to
+	x86_linux_teardown_btrace.  All uses updated.
+	(amd64_linux_read_btrace): Renamed to
+	x86_linux_read_btrace.  All uses updated.
+	* i386-linux-nat.c (i386_linux_dr_get): Renamed to
+	x86_linux_dr_get.  All uses updated.
+	(i386_linux_dr_set): Renamed to
+	x86_linux_dr_set.  All uses updated.
+	(i386_linux_dr_get_addr): Renamed to
+	x86_linux_dr_get_addr.  All uses updated.
+	(i386_linux_dr_get_control): Renamed to
+	x86_linux_dr_get_control.  All uses updated.
+	(i386_linux_dr_get_status): Renamed to
+	x86_linux_dr_get_status.  All uses updated.
+	(i386_linux_dr_set_control): Renamed to
+	x86_linux_dr_set_control.  All uses updated.
+	(i386_linux_dr_set_addr): Renamed to
+	x86_linux_dr_set_addr.  All uses updated.
+	(i386_linux_prepare_to_resume): Renamed to
+	x86_linux_prepare_to_resume.  All uses updated.
+	(i386_linux_new_thread): Renamed to
+	x86_linux_new_thread.  All uses updated.
+	(i386_linux_new_fork): Renamed to
+	x86_linux_new_fork.  All uses updated.
+	(i386_linux_child_post_startup_inferior): Renamed to
+	x86_linux_child_post_startup_inferior.  All uses updated.
+	(i386_linux_enable_btrace): Renamed to
+	x86_linux_enable_btrace.  All uses updated.
+	(i386_linux_disable_btrace): Renamed to
+	x86_linux_disable_btrace.  All uses updated.
+	(i386_linux_teardown_btrace): Renamed to
+	x86_linux_teardown_btrace.  All uses updated.
+	(i386_linux_read_btrace): Renamed to
+	x86_linux_read_btrace.  All uses updated.
+
+2014-07-11  Adrian Sendroiu  <adrian.sendroiu@freescale.com>
+
+	* remote.c (extended_remote_post_attach): New function.
+	(init_extended_remote_ops): Install it as to_post_attach method.
+
+2014-07-09  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (attach_command_post_wait): Don't call
+	target_terminal_inferior here.
+	(attach_command): Call it here instead.
+
+2014-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-varobj.c (ada_varobj_ops): Fill in is_path_expr_parent
+	field.
+	* c-varobj.c (c_is_path_expr_parent): New function, moved core
+	from varobj.c, with additional checks.
+	(c_varobj_ops): Fill in is_path_expr_parent field.
+	(cplus_varobj_ops): Fill in is_path_expr_parent field.
+	* jv-varobj.c (java_varobj_ops): Fill in is_path_expr_parent
+	field.
+	* varobj.c (is_path_expr_parent): Call is_path_expr_parent varobj
+	ops method.
+	(varobj_default_is_path_expr_parent): New function.
+	* varobj.h (lang_varobj_ops): Add is_path_expr_parent field.
+	(varobj_default_is_path_expr_parent): Declare new function.
+
 2014-07-08  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* infcmd.c (finish_backward): Turn internal error into normal error.

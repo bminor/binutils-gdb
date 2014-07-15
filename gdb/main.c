@@ -46,6 +46,7 @@
 #include "filenames.h"
 #include "filestuff.h"
 #include <signal.h>
+#include "event-top.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -335,6 +336,63 @@ captured_command_loop (void *data)
      loop.  */
   quit_command (NULL, instream == stdin);
   return 1;
+}
+
+/* Handle command errors thrown from within
+   catch_command_errors/catch_command_errors_const.  */
+
+static int
+handle_command_errors (volatile struct gdb_exception e)
+{
+  if (e.reason < 0)
+    {
+      exception_print (gdb_stderr, e);
+
+      /* If any exception escaped to here, we better enable stdin.
+	 Otherwise, any command that calls async_disable_stdin, and
+	 then throws, will leave stdin inoperable.  */
+      async_enable_stdin ();
+      return 0;
+    }
+  return 1;
+}
+
+/* Type of the command callback passed to catch_command_errors.  */
+
+typedef void (catch_command_errors_ftype) (char *, int);
+
+/* Wrap calls to commands run before the event loop is started.  */
+
+static int
+catch_command_errors (catch_command_errors_ftype *command,
+		      char *arg, int from_tty, return_mask mask)
+{
+  volatile struct gdb_exception e;
+
+  TRY_CATCH (e, mask)
+    {
+      command (arg, from_tty);
+    }
+  return handle_command_errors (e);
+}
+
+/* Type of the command callback passed to catch_command_errors_const.  */
+
+typedef void (catch_command_errors_const_ftype) (const char *, int);
+
+/* Like catch_command_errors, but works with const command and args.  */
+
+static int
+catch_command_errors_const (catch_command_errors_const_ftype *command,
+			    const char *arg, int from_tty, return_mask mask)
+{
+  volatile struct gdb_exception e;
+
+  TRY_CATCH (e, mask)
+    {
+      command (arg, from_tty);
+    }
+  return handle_command_errors (e);
 }
 
 /* Arguments of --command option and its counterpart.  */

@@ -568,9 +568,14 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 
 # Test that __ehdr_start is left undefined when the text segment is not
 # appropriately aligned.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_70 = ehdr_start_test_4.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_71 = ehdr_start_test_4.syms
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_72 = ehdr_start_test_4
+
+# Test that the --defsym option copies the symbol type and visibility.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_70 = ehdr_start_test_4.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	defsym_test.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_71 = ehdr_start_test_4.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	defsym_test.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_72 = ehdr_start_test_4 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	defsym_test.syms
 @GCC_FALSE@ehdr_start_test_5_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@ehdr_start_test_5_DEPENDENCIES =
 
@@ -4132,6 +4137,8 @@ gdb_index_test_4.sh.log: gdb_index_test_4.sh
 	@p='gdb_index_test_4.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ehdr_start_test_4.sh.log: ehdr_start_test_4.sh
 	@p='ehdr_start_test_4.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+defsym_test.sh.log: defsym_test.sh
+	@p='defsym_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_10.sh.log: script_test_10.sh
 	@p='script_test_10.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 split_i386.sh.log: split_i386.sh
@@ -5600,6 +5607,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,-Ttext=0x100100 $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ehdr_start_test_4.o: ehdr_start_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -DEHDR_START_WEAK -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@defsym_test.syms: defsym_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sW $< > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@defsym_test: defsym_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--defsym=bar=foo defsym_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@defsym_test.o: defsym_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -o $@ $<
 
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.

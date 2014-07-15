@@ -1,3 +1,26 @@
+2014-07-15  Alan Modra  <amodra@gmail.com>
+
+	* cache.c (cache_bread_1): Don't return -1 when fread returns
+	a positive value.
+
+2014-07-15  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_merge_st_other): Update comments.  Simplify
+	visibility handling.  Make isym const.  Move code modifying
+	isym->st_other for --exclude-libs to..
+	(elf_link_add_object_symbols): ..here.
+
+2014-07-11  Maks Naumov  <maksqwe1@ukr.net>
+
+	PR 17141
+	* elf.c (_bfd_elf_strtab_add): Check strtab name for failure.
+
+2014-07-08  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/17110
+	* elf32-sh.c (sh_elf_osec_to_segment): Do not look for output
+	segments in input bfds.
+
 2014-07-08  Will Newton  <will.newton@linaro.org>
 
 	* elf32-arm.c (ELF_MAXPAGESIZE): Increase the default
@@ -1306,7 +1329,7 @@
 	(struct ppc_elf_relax_info): New.
 	(ppc_elf_relax_section): Exclude linker created sections and
 	those too small to hold one instruction.  Don't add another
-	branch 	around trampolines on later relax passes.  Don't
+	branch around trampolines on later relax passes.  Don't
 	generate trampolines for undefined symbols when !relocatable,
 	nor for plugin symbols.  Allocate space for ppc476 workaround
 	patch area.  Free fixups on error return path.

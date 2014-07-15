@@ -1163,6 +1163,13 @@ mi_create_breakpoint \
     "$srcfile:$lineno" "break in do_anonymous_type_tests" \
     -disp keep -func do_anonymous_type_tests \
     -file ".*var-cmd.c" -line $lineno
+
+set lineno [gdb_get_line_number "nested struct union tests breakpoint"]
+mi_create_breakpoint \
+    "$srcfile:$lineno" "break in do_nested_struct_union_tests" \
+    -disp keep -func do_nested_struct_union_tests \
+    -file ".*var-cmd.c" -line $lineno
+
 mi_execute_to "exec-continue" "breakpoint-hit" "do_anonymous_type_tests" ""\
     ".*" ".*" {"" "disp=\"keep\""} \
     "continue to do_anonymous_type_tests breakpoint"
@@ -1233,6 +1240,75 @@ set tree {
     }
   }
 }
+
+mi_walk_varobj_tree c $tree verify_everything
+
+mi_send_resuming_command "exec-continue" \
+    "continuing execution to enter do_nested_struct_union_tests"
+mi_expect_stop "breakpoint-hit" "do_nested_struct_union_tests" ".*" ".*" ".*" \
+    {.* disp="keep"} "Run till MI stops in do_nested_struct_union_tests"
+
+set struct_ss_tree {
+    {struct s_a} a1 {
+      int a {}
+    }
+    {struct s_b} b1 {
+      int b {}
+    }
+    {union u_ab} u1 {
+      {struct s_a} a {
+        int a {}
+      }
+      {struct s_b} b {
+        int b {}
+      }
+    }
+    anonymous union {
+      {struct s_a} a2 {
+        int a {}
+      }
+      {struct s_b} b2 {
+        int b {}
+      }
+    }
+    {union {...}} u2 {
+      {struct s_a} a3 {
+        int a {}
+      }
+      {struct s_b} b3 {
+        int b {}
+      }
+    }
+  }
+
+set tree "
+  {struct ss} var {
+    $struct_ss_tree
+  }
+"
+
+mi_walk_varobj_tree c $tree verify_everything
+
+set tree {
+  {struct {...}} var2 {
+    {td_u_ab} ab {
+      {td_s_a} a {
+	int a {}
+      }
+      {td_s_b} b {
+	int b {}
+      }
+    }
+  }
+}
+
+mi_walk_varobj_tree c $tree verify_everything
+
+set tree "
+  {struct ss *} ss_ptr {
+    $struct_ss_tree
+  }
+"
 
 mi_walk_varobj_tree c $tree verify_everything
 

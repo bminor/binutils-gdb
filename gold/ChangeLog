@@ -1,3 +1,35 @@
+2014-07-08  Cary Coutant  <ccoutant@google.com>
+
+	* expression.cc (struct Expression::Expression_eval_info): Add
+	new fields type_pointer, vis_pointer, and nonvis_pointer.
+	(Expression::eval_maybe_dot): Add type_pointer, vis_pointer, and
+	nonvis_pointer parameters. Adjust all calls.
+	(Symbol_expression::value): Update type, visibility, and nonvis bits
+	in caller.
+	* script.cc (Symbol_assignment::sized_finalize): Update type,
+	visibility, and remaining st_other bits for new symbol.
+	* script.h: (Expression::eval_maybe_dot): Add type_pointer,
+	vis_pointer, and nonvis_pointer parameters.
+	* symtab.h (Symbol::set_type): New method.
+
+	* testsuite/Makefile.am (defsym_test): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/defsym_test.c: New file.
+	* testsuite/defsym_test.sh: New file.
+
+2014-07-08  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/15639
+	* dynobj.h (Sized_dynobj::base_read_symbols): New method.
+	* dynobj.cc (Sized_dynobj::do_read_symbols): Move body to...
+	(Sized_dynobj::base_read_symbols): ...new method.
+	* object.h (Sized_relobj_file::base_read_symbols): New method.
+	* object.cc (Sized_relobj_file::do_read_symbols): Move body to...
+	(Sized_relobj_file::base_read_symbols): ...new method.
+	* arm.cc (Arm_relobj::do_read_symbols): Call base_read_symbols.
+	* mips.cc: (Mips_relobj::do_read_symbols): Likewise.
+	* powerpc.cc (Powerpc_dynobj::do_read_symbols): Likewise.
+
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.

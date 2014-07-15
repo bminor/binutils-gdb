@@ -27,6 +27,7 @@ if {$tool == ""} {
 
 load_lib libgloss.exp
 load_lib cache.exp
+load_lib gdb-utils.exp
 
 global GDB
 
@@ -68,6 +69,9 @@ global gdb_prompt
 if ![info exists gdb_prompt] then {
     set gdb_prompt "\[(\]gdb\[)\]"
 }
+
+# A regexp that matches the pagination prompt.
+set pagination_prompt "---Type <return> to continue, or q <return> to quit---"
 
 # The variable fullname_syntax_POSIX is a regexp which matches a POSIX 
 # absolute path ie. /foo/ 
@@ -209,8 +213,8 @@ proc delete_breakpoints {} {
 proc gdb_run_cmd {args} {
     global gdb_prompt use_gdb_stub
 
-    if [target_info exists gdb_init_command] {
-	send_gdb "[target_info gdb_init_command]\n"
+    foreach command [gdb_init_commands] {
+	send_gdb "$command\n"
 	gdb_expect 30 {
 	    -re "$gdb_prompt $" { }
 	    default {
@@ -311,8 +315,8 @@ proc gdb_run_cmd {args} {
 proc gdb_start_cmd {args} {
     global gdb_prompt use_gdb_stub
 
-    if [target_info exists gdb_init_command] {
-	send_gdb "[target_info gdb_init_command]\n"
+    foreach command [gdb_init_commands] {
+	send_gdb "$command\n"
 	gdb_expect 30 {
 	    -re "$gdb_prompt $" { }
 	    default {
@@ -1204,6 +1208,27 @@ proc gdb_test_list_exact { cmd name elm_find_regexp elm_extract_regexp result_ma
     }
 }
 
+
+# Issue a PASS and return true if evaluating CONDITION in the caller's
+# frame returns true, and issue a FAIL and return false otherwise.
+# MESSAGE is the pass/fail message to be printed.  If MESSAGE is
+# omitted or is empty, then the pass/fail messages use the condition
+# string as the message.
+
+proc gdb_assert { condition {message ""} } {
+    if { $message == ""} {
+	set message $condition
+    }
+
+    set res [uplevel 1 expr $condition]
+    if {!$res} {
+	fail $message
+    } else {
+	pass $message
+    }
+    return $res
+}
+
 proc gdb_reinitialize_dir { subdir } {
     global gdb_prompt
 
@@ -1404,19 +1429,12 @@ proc gdb_file_cmd { arg } {
     }
 }
 
-#
-# start gdb -- start gdb running, default procedure
-#
-# When running over NFS, particularly if running many simultaneous
-# tests on different hosts all using the same server, things can
-# get really slow.  Give gdb at least 3 minutes to start up.
-#
-proc default_gdb_start { } {
-    global verbose use_gdb_stub
+# Default gdb_spawn procedure.
+
+proc default_gdb_spawn { } {
+    global use_gdb_stub
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
-    global gdb_prompt
-    global timeout
     global gdb_spawn_id
 
     gdb_stop_suppressing_tests
@@ -1447,21 +1465,45 @@ proc default_gdb_start { } {
 	perror "Spawning $GDB failed."
 	return 1
     }
+    set gdb_spawn_id -1
+    return 0
+}
+
+# Default gdb_start procedure.
+
+proc default_gdb_start { } {
+    global gdb_prompt
+    global gdb_spawn_id
+
+    if [info exists gdb_spawn_id] {
+	return 0
+    }
+
+    set res [gdb_spawn]
+    if { $res != 0} {
+	return $res
+    }
+
+    # When running over NFS, particularly if running many simultaneous
+    # tests on different hosts all using the same server, things can
+    # get really slow.  Give gdb at least 3 minutes to start up.
     gdb_expect 360 {
 	-re "\[\r\n\]$gdb_prompt $" {
 	    verbose "GDB initialized."
 	}
 	-re "$gdb_prompt $"	{
 	    perror "GDB never initialized."
+	    unset gdb_spawn_id
 	    return -1
 	}
 	timeout	{
 	    perror "(timeout) GDB never initialized after 10 seconds."
 	    remote_close host
+	    unset gdb_spawn_id
 	    return -1
 	}
     }
-    set gdb_spawn_id -1
+
     # force the height to "unlimited", so no pagers get used
 
     send_gdb "set height 0\n"
@@ -3263,6 +3305,23 @@ proc gdb_clear_suppressed { } {
 
     set suppress_flag 0
 }
+
+# Spawn the gdb process.
+#
+# This doesn't expect any output or do any other initialization,
+# leaving those to the caller.
+#
+# Overridable function -- you can override this function in your
+# baseboard file.
+
+proc gdb_spawn { } {
+    default_gdb_spawn
+}
+
+# Start gdb running, wait for prompt, and disable the pagers.
+
+# Overridable function -- you can override this function in your
+# baseboard file.
 
 proc gdb_start { } {
     default_gdb_start

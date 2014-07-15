@@ -1611,14 +1611,15 @@ stub_noname_complaint (void)
   complaint (&symfile_complaints, _("stub type has NULL name"));
 }
 
-/* See gdbtypes.h.  */
+/* Worker for is_dynamic_type.  */
 
-int
-is_dynamic_type (struct type *type)
+static int
+is_dynamic_type_internal (struct type *type, int top_level)
 {
   type = check_typedef (type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  /* We only want to recognize references at the outermost level.  */
+  if (top_level && TYPE_CODE (type) == TYPE_CODE_REF)
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
   switch (TYPE_CODE (type))
@@ -1632,9 +1633,9 @@ is_dynamic_type (struct type *type)
 
 	/* The array is dynamic if either the bounds are dynamic,
 	   or the elements it contains have a dynamic contents.  */
-	if (is_dynamic_type (TYPE_INDEX_TYPE (type)))
+	if (is_dynamic_type_internal (TYPE_INDEX_TYPE (type), 0))
 	  return 1;
-	return is_dynamic_type (TYPE_TARGET_TYPE (type));
+	return is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0);
       }
 
     case TYPE_CODE_STRUCT:
@@ -1644,7 +1645,7 @@ is_dynamic_type (struct type *type)
 
 	for (i = 0; i < TYPE_NFIELDS (type); ++i)
 	  if (!field_is_static (&TYPE_FIELD (type, i))
-	      && is_dynamic_type (TYPE_FIELD_TYPE (type, i)))
+	      && is_dynamic_type_internal (TYPE_FIELD_TYPE (type, i), 0))
 	    return 1;
       }
       break;
@@ -1652,6 +1653,18 @@ is_dynamic_type (struct type *type)
 
   return 0;
 }
+
+/* See gdbtypes.h.  */
+
+int
+is_dynamic_type (struct type *type)
+{
+  return is_dynamic_type_internal (type, 1);
+}
+
+static struct type *resolve_dynamic_type_internal (struct type *type,
+						   CORE_ADDR addr,
+						   int top_level);
 
 /* Given a dynamic range type (dyn_range_type), return a static version
    of that type.  */
@@ -1758,7 +1771,8 @@ resolve_dynamic_union (struct type *type, CORE_ADDR addr)
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
 
-      t = resolve_dynamic_type (TYPE_FIELD_TYPE (resolved_type, i), addr);
+      t = resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
+					 addr, 0);
       TYPE_FIELD_TYPE (resolved_type, i) = t;
       if (TYPE_LENGTH (t) > max_len)
 	max_len = TYPE_LENGTH (t);
@@ -1795,7 +1809,8 @@ resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
 
-      t = resolve_dynamic_type (TYPE_FIELD_TYPE (resolved_type, i), addr);
+      t = resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
+					 addr, 0);
 
       /* This is a bit odd.  We do not support a VLA in any position
 	 of a struct except for the last.  GCC does have an extension
@@ -1823,15 +1838,16 @@ resolve_dynamic_struct (struct type *type, CORE_ADDR addr)
   return resolved_type;
 }
 
-/* See gdbtypes.h  */
+/* Worker for resolved_dynamic_type.  */
 
-struct type *
-resolve_dynamic_type (struct type *type, CORE_ADDR addr)
+static struct type *
+resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
+			       int top_level)
 {
   struct type *real_type = check_typedef (type);
   struct type *resolved_type = type;
 
-  if (!is_dynamic_type (real_type))
+  if (!is_dynamic_type_internal (real_type, top_level))
     return type;
 
   switch (TYPE_CODE (type))
@@ -1839,7 +1855,8 @@ resolve_dynamic_type (struct type *type, CORE_ADDR addr)
       case TYPE_CODE_TYPEDEF:
 	resolved_type = copy_type (type);
 	TYPE_TARGET_TYPE (resolved_type)
-	  = resolve_dynamic_type (TYPE_TARGET_TYPE (type), addr);
+	  = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type), addr,
+					   top_level);
 	break;
 
       case TYPE_CODE_REF:
@@ -1848,7 +1865,8 @@ resolve_dynamic_type (struct type *type, CORE_ADDR addr)
 
 	  resolved_type = copy_type (type);
 	  TYPE_TARGET_TYPE (resolved_type)
-	    = resolve_dynamic_type (TYPE_TARGET_TYPE (type), target_addr);
+	    = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (type),
+					     target_addr, top_level);
 	  break;
 	}
 
@@ -1870,6 +1888,14 @@ resolve_dynamic_type (struct type *type, CORE_ADDR addr)
     }
 
   return resolved_type;
+}
+
+/* See gdbtypes.h  */
+
+struct type *
+resolve_dynamic_type (struct type *type, CORE_ADDR addr)
+{
+  return resolve_dynamic_type_internal (type, addr, 1);
 }
 
 /* Find the real type of TYPE.  This function returns the real type,

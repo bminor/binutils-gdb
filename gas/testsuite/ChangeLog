@@ -1,3 +1,22 @@
+2014-07-12  David Majnemer <david.majnemer@gmail.com>
+
+	* gas/pe/set.s, * gas/pe/set.d: New test.
+	* gas/pe/pe.exp: Run it.
+
+2014-07-10  Will Newton  <will.newton@linaro.org>
+
+	* gas/elf/elf.exp: Remove special handling of arm-elf for
+	section2 test.
+	* gas/elf/section2.e-armeabi: Rename to...
+	* gas/elf/section2.e-arm: ...here.
+	* gas/elf/section2.e-armelf: Remove file.
+
+	* gas/arm/bl-local-2.d: Only enable the test on EABI and
+	NaCl configurations.
+	* gas/arm/bl-local-v4t.d: Likewise.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/branch-reloc.d: Likewise.
+
 2014-07-08  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/evex-lig256-intel.d: Updated.

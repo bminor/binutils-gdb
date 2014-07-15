@@ -1839,7 +1839,7 @@ template<int size, bool big_endian>
 void
 Powerpc_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
-  Sized_relobj_file<size, big_endian>::do_read_symbols(sd);
+  this->base_read_symbols(sd);
   if (size == 64)
     {
       const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
@@ -1896,14 +1896,14 @@ Powerpc_dynobj<size, big_endian>::set_abiversion(int ver)
     }
 }
 
-// Call Sized_dynobj::do_read_symbols to read the symbols then
+// Call Sized_dynobj::base_read_symbols to read the symbols then
 // read .opd from a dynamic object, filling in opd_ent_ vector,
 
 template<int size, bool big_endian>
 void
 Powerpc_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
-  Sized_dynobj<size, big_endian>::do_read_symbols(sd);
+  this->base_read_symbols(sd);
   if (size == 64)
     {
       const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;

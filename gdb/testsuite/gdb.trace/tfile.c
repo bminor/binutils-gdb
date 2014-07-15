@@ -91,6 +91,7 @@ write_basic_trace_file (void)
 {
   int fd, int_x;
   short short_x;
+  long func_addr;
 
   fd = start_trace_file (TFILE_DIR "tfile-basic.tf");
 
@@ -109,8 +110,14 @@ write_basic_trace_file (void)
   /* Dump tracepoint definitions, in syntax similar to that used
      for reconnection uploads.  */
   /* FIXME need a portable way to print function address in hex */
-  snprintf (spbuf, sizeof spbuf, "tp T1:%lx:E:0:0\n",
-	    (long) &write_basic_trace_file);
+  func_addr = (long) &write_basic_trace_file;
+#if defined(__thumb__) || defined(__thumb2__)
+  /* Although Thumb functions are two-byte aligned, function
+     pointers have the Thumb bit set.  Clear it.  */
+  func_addr &= ~1;
+#endif
+
+  snprintf (spbuf, sizeof spbuf, "tp T1:%lx:E:0:0\n", func_addr);
   write (fd, spbuf, strlen (spbuf));
   /* (Note that we would only need actions defined if we wanted to
      test tdump.) */

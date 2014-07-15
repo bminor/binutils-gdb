@@ -1,3 +1,8 @@
+2014-07-10  Will Newton  <will.newton@linaro.org>
+
+	* binutils-all/objcopy.exp: Disable the strip-10 test on
+	non-EABI ARM configurations.
+
 2014-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/ar.exp: Skip tests involving bfdtest1 and bfdtest2

@@ -2214,6 +2214,11 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   void
   do_read_symbols(Read_symbols_data*);
 
+  // Read the symbols.  This is common code for all target-specific
+  // overrides of do_read_symbols.
+  void
+  base_read_symbols(Read_symbols_data*);
+
   // Return the value of a local symbol.
   uint64_t
   do_local_symbol_value(unsigned int symndx, uint64_t addend) const

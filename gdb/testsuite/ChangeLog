@@ -1,3 +1,110 @@
+2014-07-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/reread.exp: Use clean_restart.
+
+2014-07-15  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* gdb.arch/avr-flash-qualifer.c: New.
+	* gdb.arch/avr-flash-qualifer.exp: New.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/paginate-after-ctrl-c-running.c: New file.
+	* gdb.base/paginate-after-ctrl-c-running.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/double-prompt-target-event-error.c: New file.
+	* gdb.base/double-prompt-target-event-error.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* gdb.base/paginate-inferior-exit.c: New file.
+	* gdb.base/paginate-inferior-exit.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* gdb.base/paginate-bg-execution.c: New file.
+	* gdb.base/paginate-bg-execution.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* gdb.base/paginate-execution-startup.c: New file.
+	* gdb.base/paginate-execution-startup.exp: New file.
+	* lib/gdb.exp (pagination_prompt): New global.
+	(default_gdb_spawn): New procedure, factored out from
+	default_gdb_spawn.
+	(default_gdb_start): Adjust to call default_gdb_spawn.
+	(gdb_spawn): New procedure.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_assert): New procedure.
+	* gdb.trace/backtrace.exp (gdb_backtrace_tdp_4): Use it.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/execution-termios.c: New file.
+	* gdb.base/execution-termios.exp: New file.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/vla-cxx.cc: New file.
+	* gdb.cp/vla-cxx.exp: New file.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.reverse/rerun-prec.c: New file.
+	* gdb.reverse/rerun-prec.exp: New file.
+
+2014-07-12  Maciej W. Rozycki  <macro@mips.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdb-utils.exp: New file.
+	* lib/gdb.exp (gdb_run_cmd): Call gdb_init_commands, replacing
+	inline `gdb_init_command' processing.
+	(gdb_start_cmd): Likewise.
+	* lib/mi-support.exp (mi_run_cmd): Likewise.
+	* README: Document `gdb_init_command' and `gdb_init_commands'.
+
+2014-07-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix false FAIL running under a very long directory name.
+	* gdb.base/argv0-symlink.exp: Add "set print repeats 10000"
+	and "set print elements 10000".  Twice.
+
+2014-07-11  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/exprs.exp: "set print symbol off".
+
+2014-07-11  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/kill.c: New file.
+	* gdb.threads/kill.exp: New file.
+
+2014-07-10  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.c (write_basic_trace_file)
+	[__thumb__||__thumb2__]: Clear the Thumb bit of the function
+	address written to trace file.
+
+2014-07-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/attach-wait-input.exp: New file.
+	* gdb.base/attach-wait-input.c: New file.
+
+2014-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/var-cmd.c (do_nested_struct_union_tests): New function
+	setting up test structures.
+	(main): Call new test function.
+	* gdb.mi/mi2-var-child.exp: Create additional breakpoint in new
+	test function, continue into test function and walk test
+	structures.
+
 2014-07-02  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/entry-values.c: Define labels 'foo_start' and
