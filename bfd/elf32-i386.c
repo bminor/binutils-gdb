@@ -826,7 +826,7 @@ struct elf_i386_link_hash_table
   == I386_ELF_DATA ? ((struct elf_i386_link_hash_table *) ((p)->hash)) : NULL)
 
 #define elf_i386_compute_jump_table_size(htab) \
-  ((htab)->next_tls_desc_index * 4)
+  ((htab)->elf.srelplt->reloc_count * 4)
 
 /* Create an entry in an i386 ELF linker hash table.  */
 

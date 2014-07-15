@@ -1,3 +1,10 @@
+2014-07-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17057
+	* ld-i386/i386.exp: Run pr17057.
+	* ld-i386/pr17057.d: New file.
+	* ld-i386/pr17057.s: Likewise.
+
 2014-07-15  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/emit-relocs-local-addend.d: Use target linker script.
