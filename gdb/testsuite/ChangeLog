@@ -1,3 +1,7 @@
+2014-07-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/reread.exp: Use clean_restart.
+
 2014-07-15  Pierre Langlois  <pierre.langlois@embecosm.com>
 
 	* gdb.arch/avr-flash-qualifer.c: New.
