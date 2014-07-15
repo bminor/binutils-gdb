@@ -9,6 +9,31 @@
 	    Kirill Yukhin  <kirill.yukhin@intel.com>
 	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
+	* gas/i386/avx512dq-intel.d: New.
+	* gas/i386/avx512dq.d: New.
+	* gas/i386/avx512dq.s: New.
+	* gas/i386/avx512dq_vl-intel.d: New.
+	* gas/i386/avx512dq_vl.d: New.
+	* gas/i386/avx512dq_vl.s: New.
+	* gas/i386/i386.exp: Run new AVX-512 tests.
+	* gas/i386/x86-64-avx512dq-intel.d: New.
+	* gas/i386/x86-64-avx512dq.d: New.
+	* gas/i386/x86-64-avx512dq.s: New.
+	* gas/i386/x86-64-avx512dq_vl-intel.d: New.
+	* gas/i386/x86-64-avx512dq_vl.d: New.
+	* gas/i386/x86-64-avx512dq_vl.s: New.
+
+2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
+	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
+	    Sergey Lega  <sergey.s.lega@intel.com>
+	    Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Ilya Tocar  <ilya.tocar@intel.com>
+	    Andrey Turetskiy  <andrey.turetskiy@intel.com>
+	    Ilya Verbin  <ilya.verbin@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
 	* gas/i386/avx512bw-intel.d: New.
 	* gas/i386/avx512bw-opts-intel.d: New.
 	* gas/i386/avx512bw-opts.d: New.

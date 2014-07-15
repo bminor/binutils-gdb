@@ -1304,6 +1304,10 @@ enum
   PREFIX_EVEX_0F2E,
   PREFIX_EVEX_0F2F,
   PREFIX_EVEX_0F51,
+  PREFIX_EVEX_0F54,
+  PREFIX_EVEX_0F55,
+  PREFIX_EVEX_0F56,
+  PREFIX_EVEX_0F57,
   PREFIX_EVEX_0F58,
   PREFIX_EVEX_0F59,
   PREFIX_EVEX_0F5A,
@@ -1546,6 +1550,7 @@ enum
   PREFIX_EVEX_0F3A0F,
   PREFIX_EVEX_0F3A14,
   PREFIX_EVEX_0F3A15,
+  PREFIX_EVEX_0F3A16,
   PREFIX_EVEX_0F3A17,
   PREFIX_EVEX_0F3A18,
   PREFIX_EVEX_0F3A19,
@@ -1556,6 +1561,7 @@ enum
   PREFIX_EVEX_0F3A1F,
   PREFIX_EVEX_0F3A20,
   PREFIX_EVEX_0F3A21,
+  PREFIX_EVEX_0F3A22,
   PREFIX_EVEX_0F3A23,
   PREFIX_EVEX_0F3A25,
   PREFIX_EVEX_0F3A26,
@@ -1568,8 +1574,14 @@ enum
   PREFIX_EVEX_0F3A3F,
   PREFIX_EVEX_0F3A42,
   PREFIX_EVEX_0F3A43,
+  PREFIX_EVEX_0F3A50,
+  PREFIX_EVEX_0F3A51,
   PREFIX_EVEX_0F3A54,
-  PREFIX_EVEX_0F3A55
+  PREFIX_EVEX_0F3A55,
+  PREFIX_EVEX_0F3A56,
+  PREFIX_EVEX_0F3A57,
+  PREFIX_EVEX_0F3A66,
+  PREFIX_EVEX_0F3A67
 };
 
 enum
@@ -1698,8 +1710,10 @@ enum
   VEX_LEN_0F91_P_0,
   VEX_LEN_0F91_P_2,
   VEX_LEN_0F92_P_0,
+  VEX_LEN_0F92_P_2,
   VEX_LEN_0F92_P_3,
   VEX_LEN_0F93_P_0,
+  VEX_LEN_0F93_P_2,
   VEX_LEN_0F93_P_3,
   VEX_LEN_0F98_P_0,
   VEX_LEN_0F98_P_2,
@@ -1915,8 +1929,10 @@ enum
   VEX_W_0F91_P_0_LEN_0,
   VEX_W_0F91_P_2_LEN_0,
   VEX_W_0F92_P_0_LEN_0,
+  VEX_W_0F92_P_2_LEN_0,
   VEX_W_0F92_P_3_LEN_0,
   VEX_W_0F93_P_0_LEN_0,
+  VEX_W_0F93_P_2_LEN_0,
   VEX_W_0F93_P_3_LEN_0,
   VEX_W_0F98_P_0_LEN_0,
   VEX_W_0F98_P_2_LEN_0,
@@ -2134,6 +2150,14 @@ enum
   EVEX_W_0F51_P_1,
   EVEX_W_0F51_P_2,
   EVEX_W_0F51_P_3,
+  EVEX_W_0F54_P_0,
+  EVEX_W_0F54_P_2,
+  EVEX_W_0F55_P_0,
+  EVEX_W_0F55_P_2,
+  EVEX_W_0F56_P_0,
+  EVEX_W_0F56_P_2,
+  EVEX_W_0F57_P_0,
+  EVEX_W_0F57_P_2,
   EVEX_W_0F58_P_0,
   EVEX_W_0F58_P_1,
   EVEX_W_0F58_P_2,
@@ -2182,10 +2206,14 @@ enum
   EVEX_W_0F73_R_6_P_2,
   EVEX_W_0F76_P_2,
   EVEX_W_0F78_P_0,
+  EVEX_W_0F78_P_2,
   EVEX_W_0F79_P_0,
+  EVEX_W_0F79_P_2,
   EVEX_W_0F7A_P_1,
+  EVEX_W_0F7A_P_2,
   EVEX_W_0F7A_P_3,
   EVEX_W_0F7B_P_1,
+  EVEX_W_0F7B_P_2,
   EVEX_W_0F7B_P_3,
   EVEX_W_0F7E_P_1,
   EVEX_W_0F7E_P_2,
@@ -2254,6 +2282,8 @@ enum
   EVEX_W_0F3835_P_1,
   EVEX_W_0F3835_P_2,
   EVEX_W_0F3837_P_2,
+  EVEX_W_0F3838_P_1,
+  EVEX_W_0F3839_P_1,
   EVEX_W_0F383A_P_1,
   EVEX_W_0F3840_P_2,
   EVEX_W_0F3858_P_2,
@@ -2285,12 +2315,14 @@ enum
   EVEX_W_0F3A09_P_2,
   EVEX_W_0F3A0A_P_2,
   EVEX_W_0F3A0B_P_2,
+  EVEX_W_0F3A16_P_2,
   EVEX_W_0F3A18_P_2,
   EVEX_W_0F3A19_P_2,
   EVEX_W_0F3A1A_P_2,
   EVEX_W_0F3A1B_P_2,
   EVEX_W_0F3A1D_P_2,
   EVEX_W_0F3A21_P_2,
+  EVEX_W_0F3A22_P_2,
   EVEX_W_0F3A23_P_2,
   EVEX_W_0F3A38_P_2,
   EVEX_W_0F3A39_P_2,
@@ -2299,7 +2331,13 @@ enum
   EVEX_W_0F3A3E_P_2,
   EVEX_W_0F3A3F_P_2,
   EVEX_W_0F3A42_P_2,
-  EVEX_W_0F3A43_P_2
+  EVEX_W_0F3A43_P_2,
+  EVEX_W_0F3A50_P_2,
+  EVEX_W_0F3A51_P_2,
+  EVEX_W_0F3A56_P_2,
+  EVEX_W_0F3A57_P_2,
+  EVEX_W_0F3A66_P_2,
+  EVEX_W_0F3A67_P_2
 };
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
@@ -5003,7 +5041,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { VEX_LEN_TABLE (VEX_LEN_0F92_P_0) },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F92_P_2) },
     { VEX_LEN_TABLE (VEX_LEN_0F92_P_3) },
   },
 
@@ -5011,7 +5049,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { VEX_LEN_TABLE (VEX_LEN_0F93_P_0) },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F93_P_2) },
     { VEX_LEN_TABLE (VEX_LEN_0F93_P_3) },
   },
 
@@ -9780,6 +9818,11 @@ static const struct dis386 vex_len_table[][2] = {
     { VEX_W_TABLE (VEX_W_0F92_P_0_LEN_0) },
   },
 
+  /* VEX_LEN_0F92_P_2 */
+  {
+    { VEX_W_TABLE (VEX_W_0F92_P_2_LEN_0) },
+  },
+
   /* VEX_LEN_0F92_P_3 */
   {
     { VEX_W_TABLE (VEX_W_0F92_P_3_LEN_0) },
@@ -9788,6 +9831,11 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F93_P_0 */
   {
     { VEX_W_TABLE (VEX_W_0F93_P_0_LEN_0) },
+  },
+
+  /* VEX_LEN_0F93_P_2 */
+  {
+    { VEX_W_TABLE (VEX_W_0F93_P_2_LEN_0) },
   },
 
   /* VEX_LEN_0F93_P_3 */
@@ -10346,7 +10394,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F41_P_2_LEN_1 */
-    { Bad_Opcode },
+    { "kandb",          { MaskG, MaskVex, MaskR } },
     { "kandd",          { MaskG, MaskVex, MaskR } },
   },
   {
@@ -10356,7 +10404,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F42_P_2_LEN_1 */
-    { Bad_Opcode },
+    { "kandnb",         { MaskG, MaskVex, MaskR } },
     { "kandnd",         { MaskG, MaskVex, MaskR } },
   },
   {
@@ -10366,7 +10414,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F44_P_2_LEN_0 */
-    { Bad_Opcode },
+    { "knotb",		{ MaskG, MaskR } },
     { "knotd",		{ MaskG, MaskR } },
   },
   {
@@ -10376,7 +10424,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F45_P_2_LEN_1 */
-    { Bad_Opcode },
+    { "korb",           { MaskG, MaskVex, MaskR } },
     { "kord",           { MaskG, MaskVex, MaskR } },
   },
   {
@@ -10386,7 +10434,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F46_P_2_LEN_1 */
-    { Bad_Opcode },
+    { "kxnorb",         { MaskG, MaskVex, MaskR } },
     { "kxnord",         { MaskG, MaskVex, MaskR } },
   },
   {
@@ -10396,7 +10444,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F47_P_2_LEN_1 */
-    { Bad_Opcode },
+    { "kxorb",          { MaskG, MaskVex, MaskR } },
     { "kxord",          { MaskG, MaskVex, MaskR } },
   },
   {
@@ -10406,7 +10454,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F4A_P_2_LEN_1 */
-    { Bad_Opcode },
+    { "kaddb",          { MaskG, MaskVex, MaskR } },
     { "kaddd",          { MaskG, MaskVex, MaskR } },
   },
   {
@@ -10741,7 +10789,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F90_P_2_LEN_0 */
-    { Bad_Opcode },
+    { "kmovb",		{ MaskG, MaskBDE } },
     { "kmovd",		{ MaskG, MaskBDE } },
   },
   {
@@ -10751,12 +10799,16 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F91_P_2_LEN_0 */
-    { Bad_Opcode },
+    { "kmovb",		{ Eb, MaskG } },
     { "kmovd",		{ Ed, MaskG } },
   },
   {
     /* VEX_W_0F92_P_0_LEN_0 */
     { "kmovw",		{ MaskG, Rdq } },
+  },
+  {
+    /* VEX_W_0F92_P_2_LEN_0 */
+    { "kmovb",		{ MaskG, Rdq } },
   },
   {
     /* VEX_W_0F92_P_3_LEN_0 */
@@ -10766,6 +10818,10 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F93_P_0_LEN_0 */
     { "kmovw",		{ Gdq, MaskR } },
+  },
+  {
+    /* VEX_W_0F93_P_2_LEN_0 */
+    { "kmovb",		{ Gdq, MaskR } },
   },
   {
     /* VEX_W_0F93_P_3_LEN_0 */
@@ -10789,7 +10845,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F99_P_2_LEN_0 */
-    { Bad_Opcode },
+    { "ktestb",	{ MaskG, MaskR } },
     { "ktestd",	{ MaskG, MaskR } },
   },
   {
@@ -11376,7 +11432,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F3A30_P_2_LEN_0 */
-    { Bad_Opcode },
+    { "kshiftrb",	{ MaskG, MaskR, Ib } },
     { "kshiftrw",	{ MaskG, MaskR, Ib } },
   },
   {
@@ -11386,7 +11442,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F3A32_P_2_LEN_0 */
-    { Bad_Opcode },
+    { "kshiftlb",	{ MaskG, MaskR, Ib } },
     { "kshiftlw",	{ MaskG, MaskR, Ib } },
   },
   {
@@ -14664,6 +14720,7 @@ OP_E_memory (int bytemode, int sizeflag)
       /* In EVEX, if operand doesn't allow broadcast, vex.b should be 0.  */
       if (vex.b
 	  && bytemode != x_mode
+	  && bytemode != xmmq_mode
 	  && bytemode != evex_half_bcst_xmmq_mode)
 	{
 	  BadOp ();
@@ -14690,6 +14747,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	  break;
 	case x_mode:
 	case evex_half_bcst_xmmq_mode:
+	case xmmq_mode:
 	  if (vex.b)
 	    {
 	      shift = vex.w ? 3 : 2;
@@ -14698,7 +14756,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	  /* Fall through if vex.b == 0.  */
 	case xmmqd_mode:
 	case xmmdw_mode:
-	case xmmq_mode:
 	case ymmq_mode:
 	case evex_x_nobcst_mode:
 	case x_swap_mode:
@@ -14753,9 +14810,9 @@ OP_E_memory (int bytemode, int sizeflag)
 	 operand).  We might want to make it 3, 4 or 5 (e.g. for
 	 xmmq_mode).  In case of broadcast enabled the corrections
 	 aren't needed, as element size is always 32 or 64 bits.  */
-      if (bytemode == xmmq_mode
-	  || (bytemode == evex_half_bcst_xmmq_mode
-	      && !vex.b))
+      if (!vex.b
+	  && (bytemode == xmmq_mode
+	      || bytemode == evex_half_bcst_xmmq_mode))
 	shift -= 1;
       else if (bytemode == xmmqd_mode)
 	shift -= 2;
@@ -15057,9 +15114,12 @@ OP_E_memory (int bytemode, int sizeflag)
     }
   if (vex.evex && vex.b
       && (bytemode == x_mode
+	  || bytemode == xmmq_mode
 	  || bytemode == evex_half_bcst_xmmq_mode))
     {
-      if (vex.w || bytemode == evex_half_bcst_xmmq_mode)
+      if (vex.w
+	  || bytemode == xmmq_mode
+	  || bytemode == evex_half_bcst_xmmq_mode)
 	{
 	  switch (vex.length)
 	    {
