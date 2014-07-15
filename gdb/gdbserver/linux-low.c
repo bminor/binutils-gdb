@@ -897,16 +897,24 @@ linux_kill_one_lwp (struct lwp_info *lwp)
   errno = 0;
   kill (pid, SIGKILL);
   if (debug_threads)
-    debug_printf ("LKL:  kill (SIGKILL) %s, 0, 0 (%s)\n",
-		  target_pid_to_str (ptid_of (thr)),
-		  errno ? strerror (errno) : "OK");
+    {
+      int save_errno = errno;
+
+      debug_printf ("LKL:  kill_lwp (SIGKILL) %s, 0, 0 (%s)\n",
+		    target_pid_to_str (ptid_of (thr)),
+		    save_errno ? strerror (save_errno) : "OK");
+    }
 
   errno = 0;
   ptrace (PTRACE_KILL, pid, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0);
   if (debug_threads)
-    debug_printf ("LKL:  PTRACE_KILL %s, 0, 0 (%s)\n",
-		  target_pid_to_str (ptid_of (thr)),
-		  errno ? strerror (errno) : "OK");
+    {
+      int save_errno = errno;
+
+      debug_printf ("LKL:  PTRACE_KILL %s, 0, 0 (%s)\n",
+		    target_pid_to_str (ptid_of (thr)),
+		    save_errno ? strerror (save_errno) : "OK");
+    }
 }
 
 /* Kill LWP and wait for it to die.  */
