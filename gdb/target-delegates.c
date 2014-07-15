@@ -734,21 +734,21 @@ delegate_find_memory_regions (struct target_ops *self, find_memory_region_ftype 
   return self->to_find_memory_regions (self, arg1, arg2);
 }
 
-static char * 
+static char *
 delegate_make_corefile_notes (struct target_ops *self, bfd *arg1, int *arg2)
 {
   self = self->beneath;
   return self->to_make_corefile_notes (self, arg1, arg2);
 }
 
-static gdb_byte * 
+static gdb_byte *
 delegate_get_bookmark (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
   return self->to_get_bookmark (self, arg1, arg2);
 }
 
-static gdb_byte * 
+static gdb_byte *
 tdefault_get_bookmark (struct target_ops *self, const char *arg1, int arg2)
 {
   tcomplain ();
@@ -780,15 +780,15 @@ tdefault_get_thread_local_address (struct target_ops *self, ptid_t arg1, CORE_AD
   generic_tls_error ();
 }
 
-static enum target_xfer_status 
-delegate_xfer_partial (struct target_ops *self, enum target_object  arg1, const char *arg2, gdb_byte *arg3, const gdb_byte *arg4, ULONGEST arg5, ULONGEST arg6, ULONGEST *arg7)
+static enum target_xfer_status
+delegate_xfer_partial (struct target_ops *self, enum target_object arg1, const char *arg2, gdb_byte *arg3, const gdb_byte *arg4, ULONGEST arg5, ULONGEST arg6, ULONGEST *arg7)
 {
   self = self->beneath;
   return self->to_xfer_partial (self, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
-static enum target_xfer_status 
-tdefault_xfer_partial (struct target_ops *self, enum target_object  arg1, const char *arg2, gdb_byte *arg3, const gdb_byte *arg4, ULONGEST arg5, ULONGEST arg6, ULONGEST *arg7)
+static enum target_xfer_status
+tdefault_xfer_partial (struct target_ops *self, enum target_object arg1, const char *arg2, gdb_byte *arg3, const gdb_byte *arg4, ULONGEST arg5, ULONGEST arg6, ULONGEST *arg7)
 {
   return TARGET_XFER_E_IO;
 }
@@ -879,7 +879,7 @@ tdefault_can_execute_reverse (struct target_ops *self)
   return 0;
 }
 
-static enum exec_direction_kind 
+static enum exec_direction_kind
 delegate_execution_direction (struct target_ops *self)
 {
   self = self->beneath;
@@ -1109,14 +1109,14 @@ tdefault_trace_stop (struct target_ops *self)
 }
 
 static int
-delegate_trace_find (struct target_ops *self, enum trace_find_type  arg1, int arg2, CORE_ADDR arg3, CORE_ADDR arg4, int *arg5)
+delegate_trace_find (struct target_ops *self, enum trace_find_type arg1, int arg2, CORE_ADDR arg3, CORE_ADDR arg4, int *arg5)
 {
   self = self->beneath;
   return self->to_trace_find (self, arg1, arg2, arg3, arg4, arg5);
 }
 
 static int
-tdefault_trace_find (struct target_ops *self, enum trace_find_type  arg1, int arg2, CORE_ADDR arg3, CORE_ADDR arg4, int *arg5)
+tdefault_trace_find (struct target_ops *self, enum trace_find_type arg1, int arg2, CORE_ADDR arg3, CORE_ADDR arg4, int *arg5)
 {
   return -1;
 }
@@ -1410,15 +1410,15 @@ tdefault_teardown_btrace (struct target_ops *self, struct btrace_target_info *ar
   tcomplain ();
 }
 
-static enum btrace_error 
-delegate_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type  arg3)
+static enum btrace_error
+delegate_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
 {
   self = self->beneath;
   return self->to_read_btrace (self, arg1, arg2, arg3);
 }
 
-static enum btrace_error 
-tdefault_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type  arg3)
+static enum btrace_error
+tdefault_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
 {
   tcomplain ();
 }

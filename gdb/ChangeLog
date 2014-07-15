@@ -1,3 +1,15 @@
+2014-07-23  Tom Tromey  <tromey@redhat.com>
+
+	* make-target-delegates ($ARGS_PART): Match trailing close paren.
+	($INTRO_PART): Don't match whitespace.
+	($METHOD_TRAILER): Move earlier.  Remove trailing semicolon and
+	argument matching.
+	($METHOD): Add $METHOD_TRAILER.
+	(trim): Rewrite.
+	(scan_target_h): New sub.
+	Change main loop not to collect state.
+	* target-delegates.c: Rebuild.
+
 2014-07-23  Gary Benson  <gbenson@redhat.com>
 
 	* cp-support.c (gdb_demangle): Fix build on systems without

@@ -31,10 +31,10 @@ $ENDER = qr,^\s*};$,;
 $SYMBOL = qr,[a-zA-Z_][a-zA-Z0-9_]*,;
 # Match the name part of a method in struct target_ops.
 $NAME_PART = qr,\(\*(?<name>${SYMBOL}+)\)\s,;
-# Match the start of arguments to a method.
-$ARGS_PART = qr,(?<args>\(.*)$,;
-# Match indentation.
-$INTRO_PART = qr,^\s*,;
+# Match the arguments to a method.
+$ARGS_PART = qr,(?<args>\(.*\)),;
+# We strip the indentation so here we only need the caret.
+$INTRO_PART = qr,^,;
 
 # Match the return type when it is "ordinary".
 $SIMPLE_RETURN_PART = qr,[^\(]+,;
@@ -44,17 +44,22 @@ $VEC_RETURN_PART = qr,VEC\s*\([^\)]+\)[^\(]*,;
 # Match the TARGET_DEFAULT_* attribute for a method.
 $TARGET_DEFAULT_PART = qr,TARGET_DEFAULT_(?<style>[A-Z_]+)\s*\((?<default_arg>.*)\),;
 
-# Match the introductory line to a method definition.
+# Match the arguments and trailing attribute of a method definition.
+# Note we don't match the trailing ";".
+$METHOD_TRAILER = qr,\s*${TARGET_DEFAULT_PART}$,;
+
+# Match an entire method definition.
 $METHOD = ($INTRO_PART . "(?<return_type>" . $SIMPLE_RETURN_PART
 	   . "|" . $VEC_RETURN_PART . ")"
-	   . $NAME_PART . $ARGS_PART);
-
-# Match the arguments and trailing attribute of a method definition.
-$METHOD_TRAILER = qr,(?<args>\(.+\))\s*${TARGET_DEFAULT_PART};$,;
+	   . $NAME_PART . $ARGS_PART
+	   . $METHOD_TRAILER);
 
 sub trim($) {
     my ($result) = @_;
-    $result =~ s,^\s*(\S*)\s*$,\1,;
+
+    $result =~ s,^\s+,,;
+    $result =~ s,\s+$,,;
+
     return $result;
 }
 
@@ -67,6 +72,30 @@ sub find_trigger() {
     }
 
     die "could not find trigger line\n";
+}
+
+# Scan target.h and return a list of possible target_ops method entries.
+sub scan_target_h() {
+    my $all_the_text = '';
+
+    find_trigger();
+    while (<>) {
+	chomp;
+	# Skip the open brace.
+	next if /{/;
+	last if m/$ENDER/;
+
+	# Just in case somebody ever uses C99.
+	$_ =~ s,//.*$,,;
+	$_ = trim ($_);
+
+	$all_the_text .= $_;
+    }
+
+    # Now strip out the C comments.
+    $all_the_text =~ s,/\*(.*?)\*/,,g;
+
+    return split (/;/, $all_the_text);
 }
 
 # Parse arguments into a list.
@@ -193,45 +222,32 @@ print "/* vi:set ro: */\n\n";
 print "/* To regenerate this file, run:*/\n";
 print "/*      make-target-delegates target.h > target-delegates.c */\n";
 
-find_trigger();
+@lines = scan_target_h();
+
 
 %tdefault_names = ();
 @delegators = ();
-$current_line = '';
-while (<>) {
-    chomp;
-    last if m/$ENDER/;
+foreach $current_line (@lines) {
+    next unless $current_line =~ m/$METHOD/;
 
-    if ($current_line ne '') {
-	s/^\s*//;
-	$current_line .= $_;
-    } elsif (m/$METHOD/) {
-	$name = $+{name};
-	$current_line = $+{args};
-	$return_type = trim ($+{return_type});
-    }
+    $name = $+{name};
+    $current_line = $+{args};
+    $return_type = trim ($+{return_type});
+    $current_args = $+{args};
+    $tdefault = $+{default_arg};
+    $style = $+{style};
 
-    if ($current_line =~ /\);\s*$/) {
-	if ($current_line =~ m,$METHOD_TRAILER,) {
-	    $current_args = $+{args};
-	    $tdefault = $+{default_arg};
-	    $style = $+{style};
+    @argtypes = parse_argtypes ($current_args);
 
-	    @argtypes = parse_argtypes ($current_args);
+    # The first argument must be "this" to be delegatable.
+    if ($argtypes[0] =~ /\s*struct\s+target_ops\s*\*\s*/) {
+	write_delegator ($name, $return_type, @argtypes);
 
-	    # The first argument must be "this" to be delegatable.
-	    if ($argtypes[0] =~ /\s*struct\s+target_ops\s*\*\s*/) {
-		write_delegator ($name, $return_type, @argtypes);
+	push @delegators, $name;
 
-		push @delegators, $name;
-
-		$tdefault_names{$name} = write_tdefault ($tdefault, $style,
-							 $name, $return_type,
-							 @argtypes);
-	    }
-	}
-
-	$current_line = '';
+	$tdefault_names{$name} = write_tdefault ($tdefault, $style,
+						 $name, $return_type,
+						 @argtypes);
     }
 }
 
