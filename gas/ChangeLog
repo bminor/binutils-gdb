@@ -1,3 +1,9 @@
+2014-07-15  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (add_to_lit_pool): Use "inst.operands[1].imm" for
+	sign extension.  Casting the type of imm1 and imm2 to offsetT.  Fix
+	one logic error when checking X_op.
+
 2014-07-14  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* config/tc-m68k.c (md_convert_frag_1): Don't complain with

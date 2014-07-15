@@ -3198,7 +3198,7 @@ add_to_lit_pool (unsigned int nbytes)
       imm1 = inst.operands[1].imm;
       imm2 = (inst.operands[1].regisimm ? inst.operands[1].reg
 	       : inst.reloc.exp.X_unsigned ? 0
-	       : ((int64_t)(imm1)) >> 32);
+	       : ((int64_t) inst.operands[1].imm) >> 32);
       if (target_big_endian)
 	{
 	  imm1 = imm2;
@@ -3237,11 +3237,11 @@ add_to_lit_pool (unsigned int nbytes)
 	       && !(pool_size & 0x7)
 	       && ((entry + 1) != pool->next_free_entry)
 	       && (pool->literals[entry].X_op == O_constant)
-	       && (pool->literals[entry].X_add_number == imm1)
+	       && (pool->literals[entry].X_add_number == (offsetT) imm1)
 	       && (pool->literals[entry].X_unsigned
 		   == inst.reloc.exp.X_unsigned)
 	       && (pool->literals[entry + 1].X_op == O_constant)
-	       && (pool->literals[entry + 1].X_add_number == imm2)
+	       && (pool->literals[entry + 1].X_add_number == (offsetT) imm2)
 	       && (pool->literals[entry + 1].X_unsigned
 		   == inst.reloc.exp.X_unsigned))
 	break;
@@ -3275,8 +3275,8 @@ add_to_lit_pool (unsigned int nbytes)
 
 	     We also check to make sure the literal operand is a
 	     constant number.  */
-	  if (!(inst.reloc.exp.X_op == O_constant)
-	      || (inst.reloc.exp.X_op == O_big))
+	  if (!(inst.reloc.exp.X_op == O_constant
+	        || inst.reloc.exp.X_op == O_big))
 	    {
 	      inst.error = _("invalid type for literal pool");
 	      return FAIL;
