@@ -1,5 +1,52 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-nat.c: Include "regset.h".
+	(regmap_gregset): Delete macro.
+	(s390_64_regmap_gregset): New register map for
+	regcache_supply/_collect_regset.
+	(s390_64_gregset): New regset.
+	(S390_PSWM_OFFSET, S390_PSWA_OFFSET): New macros.
+	(regmap_fpregset): Delete macro.
+	(s390_native_supply, s390_native_collect): Delete functions.
+	(supply_gregset, fill_gregset): Replace s390-specific regmap
+	handling by a call to regcache_supply/_collect_regset.
+	(supply_fpregset, fill_fpregset): Call regcache_supply/
+	_collect_regset instead of s390_native_supply/_collect.
+	(fetch_regset, store_regset): Likewise.  Also change the last
+	parameter to a regset instead of a regmap.
+	(s390_linux_fetch_inferior_registers)
+	(390_linux_store_inferior_registers): Adjust last parameter in
+	calls to fetch_regset and store_regset.
+	* s390-linux-tdep.c (s390_regmap_gregset): Rename to...
+	(s390_gregmap): ... this.  Also make static const and convert to
+	regcache_map_entry format.
+	(s390x_regmap_gregset): Delete.
+	(s390_regmap_fpregset): Rename to...
+	(s390_fpregmap): ... this.  Make static const and convert to
+	regcache_map_entry format.
+	(s390_regmap_upper, s390_regmap_last_break)
+	(s390x_regmap_last_break, s390_regmap_system_call)
+	(s390_regmap_tdb): Likewise.
+	(s390_supply_regset, s390_collect_regset): Remove functions.
+	(s390_supply_tdb_regset): Call regcache_supply_regset instead of
+	s390_supply_regset.
+	(s390_gregset, s390_fpregset, s390_upper_regset)
+	(s390_last_break_regset, s390x_last_break_regset)
+	(s390_system_call_regset, s390_tdb_regset): Make global and
+	replace s390_supply/_collect_regset by regcache_supply/
+	_collect_regset.
+	(s390x_gregset): Delete.
+	(s390_gdbarch_init): Replace s390x_gregset by s390_gregset.
+	* s390-linux-tdep.h (s390_regmap_gregset, s390x_regmap_gregset)
+	(s390_regmap_fpregset, s390_regmap_last_break)
+	(s390x_regmap_last_break, s390_regmap_system_call)
+	(s390_regmap_tdb): Delete global variable declarations.
+	(s390_gregset, s390_fpregset, s390_last_break_regset)
+	(s390x_last_break_regset, s390_system_call_regset)
+	(s390_tdb_regset): New global variable declarations.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* regcache.c: Include "regset.h".
 	(regcache_transfer_regset): New local function.
 	(regcache_supply_regset, regcache_collect_regset): New functions.
