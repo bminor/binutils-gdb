@@ -5311,6 +5311,10 @@ elf_x86_64_plt_sym_val (bfd_vma i, const asection *plt,
   abfd = plt->owner;
   bed = get_elf_x86_64_backend_data (abfd);
   plt_offset = bed->plt_entry_size;
+
+  if (elf_elfheader (abfd)->e_ident[EI_OSABI] != ELFOSABI_GNU)
+    return plt->vma + (i + 1) * plt_offset;
+
   while (plt_offset < plt->size)
     {
       bfd_vma reloc_index;
@@ -5340,6 +5344,10 @@ elf_x86_64_plt_sym_val_offset_plt_bnd (bfd_vma i, const asection *plt)
   const struct elf_x86_64_backend_data *bed = &elf_x86_64_bnd_arch_bed;
   bfd *abfd = plt->owner;
   bfd_vma plt_offset = bed->plt_entry_size;
+
+  if (elf_elfheader (abfd)->e_ident[EI_OSABI] != ELFOSABI_GNU)
+    return i * sizeof (elf_x86_64_legacy_plt2_entry);
+
   while (plt_offset < plt->size)
     {
       bfd_vma reloc_index;
