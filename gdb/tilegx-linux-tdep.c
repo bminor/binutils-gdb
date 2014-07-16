@@ -73,34 +73,22 @@ static const struct tramp_frame tilegx_linux_rt_sigframe =
   tilegx_linux_sigframe_init
 };
 
-/* Supply raw registers from REGCACHE to REGS.  */
+/* Register map; must match struct pt_regs in "ptrace.h".  */
 
-static void
-tilegx_linux_supply_regset (const struct regset *regset,
-			    struct regcache *regcache,
-			    int regnum, const void *regs, size_t len)
-{
-  struct gdbarch *arch = get_regcache_arch (regcache);
-  const char *ptr = regs;
-  int i;
-
-  /* This logic must match that of struct pt_regs in "ptrace.h".  */
-  for (i = 0; i < TILEGX_NUM_EASY_REGS + 2; i++, ptr += tilegx_reg_size)
-    {
-      int gri = (i < TILEGX_NUM_EASY_REGS)
-                 ? i : (i == TILEGX_NUM_EASY_REGS)
-                        ? TILEGX_PC_REGNUM : TILEGX_FAULTNUM_REGNUM;
-
-      if (regnum == gri || regnum == -1)
-	regcache_raw_supply (regcache, gri, ptr);
-    }
-}
+static const struct regcache_map_entry tilegx_linux_regmap[] =
+  {
+    { TILEGX_NUM_EASY_REGS, TILEGX_FIRST_EASY_REGNUM, 8 },
+    { 1, TILEGX_PC_REGNUM, 8 },
+    { 1, TILEGX_FAULTNUM_REGNUM, 8 },
+    { 0 }
+  };
 
 /* TILE-Gx Linux kernel register set.  */
+
 static const struct regset tilegx_linux_regset =
 {
-  NULL,
-  tilegx_linux_supply_regset
+  tilegx_linux_regmap,
+  regcache_supply_regset, regcache_collect_regset
 };
 
 static const struct regset *

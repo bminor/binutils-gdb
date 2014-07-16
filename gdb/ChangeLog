@@ -1,5 +1,15 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* tilegx-linux-tdep.c (tilegx_linux_supply_regset): Delete
+	function.  Move logic to...
+	(tilegx_linux_regmap): ... this new register map.
+	(tilegx_linux_regset): Refer to register map, replace supply
+	method by regcache_supply_regset, and add collect method.
+	* tilegx-tdep.h (enum tilegx_regnum): New enum value
+	TILEGX_FIRST_EASY_REGNUM.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* score-tdep.c (score7_linux_supply_gregset): Reduce to small stub
 	that calls regcache_supply_regset and handles the EPC register
 	separately.  Move main logic to...
