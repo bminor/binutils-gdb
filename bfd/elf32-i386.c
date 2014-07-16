@@ -4976,14 +4976,42 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
-/* Return address for Ith PLT stub in section PLT, for relocation REL
-   or (bfd_vma) -1 if it should not be included.  */
+/* Return address in section PLT for the Ith GOTPLT relocation, for
+   relocation REL or (bfd_vma) -1 if it should not be included.  */
 
 static bfd_vma
-elf_i386_plt_sym_val (bfd_vma i, const asection *plt,
-		      const arelent *rel ATTRIBUTE_UNUSED)
+elf_i386_plt_sym_val (bfd_vma i, const asection *plt, const arelent *rel)
 {
-  return plt->vma + (i + 1) * GET_PLT_ENTRY_SIZE (plt->owner);
+  bfd *abfd;
+  const struct elf_i386_backend_data *bed;
+  bfd_vma plt_offset;
+
+  /* Only match R_386_JUMP_SLOT and R_386_IRELATIVE.  */
+  if (rel->howto->type != R_386_JUMP_SLOT
+      && rel->howto->type != R_386_IRELATIVE)
+    return (bfd_vma) -1;
+
+  abfd = plt->owner;
+  bed = get_elf_i386_backend_data (abfd);
+  plt_offset = bed->plt->plt_entry_size;
+  while (plt_offset < plt->size)
+    {
+      bfd_vma reloc_offset;
+      bfd_byte reloc_offset_raw[4];
+
+      if (!bfd_get_section_contents (abfd, (asection *) plt,
+				     reloc_offset_raw,
+				     plt_offset + bed->plt->plt_reloc_offset,
+				     sizeof (reloc_offset_raw)))
+	return (bfd_vma) -1;
+
+      reloc_offset = H_GET_32 (abfd, reloc_offset_raw);
+      if (reloc_offset == i * sizeof (Elf32_External_Rel))
+	return plt->vma + plt_offset;
+      plt_offset += bed->plt->plt_entry_size;
+    }
+
+  abort ();
 }
 
 /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */

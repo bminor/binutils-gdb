@@ -5292,14 +5292,77 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
-/* Return address for Ith PLT stub in section PLT, for relocation REL
-   or (bfd_vma) -1 if it should not be included.  */
+/* Return address in section PLT for the Ith GOTPLT relocation, for
+   relocation REL or (bfd_vma) -1 if it should not be included.  */
 
 static bfd_vma
 elf_x86_64_plt_sym_val (bfd_vma i, const asection *plt,
-			const arelent *rel ATTRIBUTE_UNUSED)
+			const arelent *rel)
 {
-  return plt->vma + (i + 1) * GET_PLT_ENTRY_SIZE (plt->owner);
+  bfd *abfd;
+  const struct elf_x86_64_backend_data *bed;
+  bfd_vma plt_offset;
+
+  /* Only match R_X86_64_JUMP_SLOT and R_X86_64_IRELATIVE.  */
+  if (rel->howto->type != R_X86_64_JUMP_SLOT
+      && rel->howto->type != R_X86_64_IRELATIVE)
+    return (bfd_vma) -1;
+
+  abfd = plt->owner;
+  bed = get_elf_x86_64_backend_data (abfd);
+  plt_offset = bed->plt_entry_size;
+  while (plt_offset < plt->size)
+    {
+      bfd_vma reloc_index;
+      bfd_byte reloc_index_raw[4];
+
+      if (!bfd_get_section_contents (abfd, (asection *) plt,
+				     reloc_index_raw,
+				     plt_offset + bed->plt_reloc_offset,
+				     sizeof (reloc_index_raw)))
+	return (bfd_vma) -1;
+
+      reloc_index = H_GET_32 (abfd, reloc_index_raw);
+      if (reloc_index == i)
+	return plt->vma + plt_offset;
+      plt_offset += bed->plt_entry_size;
+    }
+
+  abort ();
+}
+
+/* Return offset in .plt.bnd section for the Ith GOTPLT relocation with
+   PLT section, or (bfd_vma) -1 if it should not be included.  */
+
+static bfd_vma
+elf_x86_64_plt_sym_val_offset_plt_bnd (bfd_vma i, const asection *plt)
+{
+  const struct elf_x86_64_backend_data *bed = &elf_x86_64_bnd_arch_bed;
+  bfd *abfd = plt->owner;
+  bfd_vma plt_offset = bed->plt_entry_size;
+  while (plt_offset < plt->size)
+    {
+      bfd_vma reloc_index;
+      bfd_byte reloc_index_raw[4];
+
+      if (!bfd_get_section_contents (abfd, (asection *) plt,
+				     reloc_index_raw,
+				     plt_offset + bed->plt_reloc_offset,
+				     sizeof (reloc_index_raw)))
+	return (bfd_vma) -1;
+
+      reloc_index = H_GET_32 (abfd, reloc_index_raw);
+      if (reloc_index == i)
+	{
+	  /* This is the index in .plt section.  */
+	  long plt_index = plt_offset / bed->plt_entry_size;
+	  /* Return the offset in .plt.bnd section.  */
+	  return (plt_index - 1) * sizeof (elf_x86_64_legacy_plt2_entry);
+	}
+      plt_offset += bed->plt_entry_size;
+    }
+
+  abort ();
 }
 
 /* Similar to _bfd_elf_get_synthetic_symtab, with .plt.bnd section
@@ -5322,8 +5385,11 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
   size_t size;
   Elf_Internal_Shdr *hdr;
   char *names;
-  asection *plt;
-  bfd_vma addr;
+  asection *plt, *plt_push;
+
+  plt_push = bfd_get_section_by_name (abfd, ".plt");
+  if (plt_push == NULL)
+    return 0;
 
   plt = bfd_get_section_by_name (abfd, ".plt.bnd");
   /* Use the generic ELF version if there is no .plt.bnd section.  */
@@ -5369,10 +5435,16 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
   names = (char *) (s + count);
   p = relplt->relocation;
   n = 0;
-  addr = 0;
   for (i = 0; i < count; i++, p++)
     {
+      bfd_vma offset;
       size_t len;
+
+      if (p->howto->type != R_X86_64_JUMP_SLOT
+	  && p->howto->type != R_X86_64_IRELATIVE)
+	continue;
+
+      offset = elf_x86_64_plt_sym_val_offset_plt_bnd (i, plt_push);
 
       *s = **p->sym_ptr_ptr;
       /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
@@ -5381,7 +5453,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 	s->flags |= BSF_GLOBAL;
       s->flags |= BSF_SYNTHETIC;
       s->section = plt;
-      s->value = addr;
+      s->value = offset;
       s->name = names;
       s->udata.p = NULL;
       len = strlen ((*p->sym_ptr_ptr)->name);
@@ -5403,7 +5475,6 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
       memcpy (names, "@plt", sizeof ("@plt"));
       names += sizeof ("@plt");
       ++s, ++n;
-      addr += sizeof (elf_x86_64_legacy_plt2_entry);
     }
 
   return n;
