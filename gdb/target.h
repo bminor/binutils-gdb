@@ -1029,7 +1029,8 @@ struct target_ops
     void (*to_save_record) (struct target_ops *, const char *filename)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
-    /* Delete the recorded execution trace from the current position onwards.  */
+    /* Delete the recorded execution trace from the current position
+       onwards.  */
     void (*to_delete_record) (struct target_ops *)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 

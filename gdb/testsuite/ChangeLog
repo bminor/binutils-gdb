@@ -1,3 +1,8 @@
+2014-07-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/debug-expr.exp: Test string evaluation with
+	"debug expression" on.
+
 2014-07-15  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/reread.exp: Use clean_restart.

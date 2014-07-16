@@ -1436,6 +1436,18 @@ tdefault_stop_recording (struct target_ops *self)
 }
 
 static void
+delegate_info_record (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_info_record (self);
+}
+
+static void
+tdefault_info_record (struct target_ops *self)
+{
+}
+
+static void
 delegate_save_record (struct target_ops *self, const char *arg1)
 {
   self = self->beneath;
@@ -1904,6 +1916,8 @@ install_delegators (struct target_ops *ops)
     ops->to_read_btrace = delegate_read_btrace;
   if (ops->to_stop_recording == NULL)
     ops->to_stop_recording = delegate_stop_recording;
+  if (ops->to_info_record == NULL)
+    ops->to_info_record = delegate_info_record;
   if (ops->to_save_record == NULL)
     ops->to_save_record = delegate_save_record;
   if (ops->to_delete_record == NULL)
@@ -2065,6 +2079,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_teardown_btrace = tdefault_teardown_btrace;
   ops->to_read_btrace = tdefault_read_btrace;
   ops->to_stop_recording = tdefault_stop_recording;
+  ops->to_info_record = tdefault_info_record;
   ops->to_save_record = tdefault_save_record;
   ops->to_delete_record = tdefault_delete_record;
   ops->to_record_is_replaying = tdefault_record_is_replaying;

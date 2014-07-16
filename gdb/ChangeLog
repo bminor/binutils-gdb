@@ -1,3 +1,12 @@
+2014-07-16  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_delete_record>: Reformat
+	comment.
+
+2014-07-16  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+
 2014-07-15  Pierre Langlois  <pierre.langlois@embecosm.com>
 
 	* avr-tdep.c (AVR_TYPE_ADDRESS_CLASS_FLASH): New macro.
