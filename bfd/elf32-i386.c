@@ -4994,6 +4994,10 @@ elf_i386_plt_sym_val (bfd_vma i, const asection *plt, const arelent *rel)
   abfd = plt->owner;
   bed = get_elf_i386_backend_data (abfd);
   plt_offset = bed->plt->plt_entry_size;
+
+  if (elf_elfheader (abfd)->e_ident[EI_OSABI] != ELFOSABI_GNU)
+    return plt->vma + (i + 1) * plt_offset;
+
   while (plt_offset < plt->size)
     {
       bfd_vma reloc_offset;
