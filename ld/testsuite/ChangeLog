@@ -1,3 +1,15 @@
+2014-07-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/17154
+	* ld-ifunc/pr17154-i386.d: New file.
+	* ld-ifunc/pr17154-x86-64.d: Likewise.
+	* ld-ifunc/pr17154-x86.s: Likewise.
+	* ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* ld-x86-64/bnd-ifunc-2.s: Likewise.
+	* ld-x86-64/mpx.exp: Run bnd-ifunc-2.
+	* ld-x86-64/tlsdesc-nacl.pd: Updated.
+	* ld-x86-64/tlsdesc.pd: Likewise.
+
 2014-06-09  Ryan Mansfield  <rmansfield@qnx.com>
 
         * config/default.exp (GASP): Remove.
