@@ -1,3 +1,7 @@
+2014-07-16  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (kill_callback): Use kill_lwp, not kill.
+
 2014-07-16  Tom Tromey  <tromey@redhat.com>
 
 	* target.h (struct target_ops) <to_delete_record>: Reformat

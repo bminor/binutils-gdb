@@ -3704,7 +3704,7 @@ kill_callback (struct lwp_info *lp, void *data)
   /* PTRACE_KILL may resume the inferior.  Send SIGKILL first.  */
 
   errno = 0;
-  kill (ptid_get_lwp (lp->ptid), SIGKILL);
+  kill_lwp (ptid_get_lwp (lp->ptid), SIGKILL);
   if (debug_linux_nat)
     {
       int save_errno = errno;

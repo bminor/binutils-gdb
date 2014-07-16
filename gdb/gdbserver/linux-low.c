@@ -895,7 +895,7 @@ linux_kill_one_lwp (struct lwp_info *lwp)
      everywhere.  */
 
   errno = 0;
-  kill (pid, SIGKILL);
+  kill_lwp (pid, SIGKILL);
   if (debug_threads)
     {
       int save_errno = errno;
