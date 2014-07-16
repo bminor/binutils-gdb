@@ -1,3 +1,20 @@
+2014-07-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/tfile.c: Include unistd.h and stdint.h.
+	(start_trace_file): Guard S_IRGRP and S_IROTH uses behind #ifdef.
+	(tfile_write_64, tfile_write_16, tfile_write_8, tfile_write_addr)
+	(tfile_write_buf): New functions.
+	(add_memory_block): Rewrite using the above.
+	(adjust_function_address): New function.
+	(FUNCTION_ADDRESS): New macro.
+	(write_basic_trace_file): Remove short_x local, and use
+	tfile_write_16. Change type of func_addr local to unsigned long
+	long.  Use FUNCTION_ADDRESS instead of handling the Thumb bit
+	here.  Cast argument of add_memory_block to char pointer.
+	(write_error_trace_file): Avoid alloca.  Use FUNCTION_ADDRESS.
+	(main): Remove parameters.
+	* gdb.trace/tfile.exp: Remove nowarnings.
+
 2014-07-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/debug-expr.exp: Test string evaluation with
