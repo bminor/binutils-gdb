@@ -1,5 +1,12 @@
 2014-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_plt_sym_val): Match PLT entry only for
+	ELFOSABI_GNU input.
+	* elf64-x86-64.c (elf_x86_64_plt_sym_val): Likewise.
+	(elf_x86_64_plt_sym_val_offset_plt_bnd): Likewise.
+
+2014-07-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/17154
 	* elf32-i386.c (elf_i386_plt_sym_val): Only match R_*_JUMP_SLOT
 	and R_*_IRELATIVE relocation offset with PLT entry.
