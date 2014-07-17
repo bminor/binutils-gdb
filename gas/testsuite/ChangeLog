@@ -1,3 +1,9 @@
+2014-07-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/x86-64-equ.d: New.
+	* gas/i386/x86-64-equ.s: New.
+	* gas/i386/i386.exp: Run x86-64-equ.
+
 2014-07-12  David Majnemer <david.majnemer@gmail.com>
 
 	* gas/pe/set.s, * gas/pe/set.d: New test.

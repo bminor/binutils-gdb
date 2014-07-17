@@ -1,3 +1,7 @@
+2014-07-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (parse_register): Set need_vrex.
+
 2014-07-15  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-arm.c (add_to_lit_pool): Use "inst.operands[1].imm" for
