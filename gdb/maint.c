@@ -830,13 +830,19 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_primary_symtabs_ptr,
   int nr_primary_symtabs = 0;
   int nr_blocks = 0;
 
-  ALL_SYMTABS (o, s)
+  /* When collecting statistics during startup, this is called before
+     pretty much anything in gdb has been initialized, and thus
+     current_program_space may be NULL.  */
+  if (current_program_space != NULL)
     {
-      ++nr_symtabs;
-      if (s->primary)
+      ALL_SYMTABS (o, s)
 	{
-	  ++nr_primary_symtabs;
-	  nr_blocks += BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s));
+	  ++nr_symtabs;
+	  if (s->primary)
+	    {
+	      ++nr_primary_symtabs;
+	      nr_blocks += BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s));
+	    }
 	}
     }
 
@@ -856,7 +862,7 @@ report_command_stats (void *arg)
   struct cmd_stats *start_stats = (struct cmd_stats *) arg;
   int msg_type = start_stats->msg_type;
 
-  if (start_stats->time_enabled)
+  if (start_stats->time_enabled && per_command_time)
     {
       long cmd_time = get_run_time () - start_stats->start_cpu_time;
       struct timeval now_wall_time, delta_wall_time, wait_time;
@@ -877,7 +883,7 @@ report_command_stats (void *arg)
 			 (long) delta_wall_time.tv_usec);
     }
 
-  if (start_stats->space_enabled)
+  if (start_stats->space_enabled && per_command_space)
     {
 #ifdef HAVE_SBRK
       char *lim = (char *) sbrk (0);
@@ -894,7 +900,7 @@ report_command_stats (void *arg)
 #endif
     }
 
-  if (start_stats->symtab_enabled)
+  if (start_stats->symtab_enabled && per_command_symtab)
     {
       int nr_symtabs, nr_primary_symtabs, nr_blocks;
 
@@ -920,8 +926,14 @@ make_command_stats_cleanup (int msg_type)
 {
   struct cmd_stats *new_stat;
 
-  /* Early exit if we're not reporting any stats.  */
-  if (!per_command_time
+  /* Early exit if we're not reporting any stats.  It can be expensive to
+     compute the pre-command values so don't collect them at all if we're
+     not reporting stats.  Alas this doesn't work in the startup case because
+     we don't know yet whether we will be reporting the stats.  For the
+     startup case collect the data anyway (it should be cheap at this point),
+     and leave it to the reporter to decide whether to print them.  */
+  if (msg_type != 0
+      && !per_command_time
       && !per_command_space
       && !per_command_symtab)
     return make_cleanup (null_cleanup, 0);
@@ -930,7 +942,7 @@ make_command_stats_cleanup (int msg_type)
 
   new_stat->msg_type = msg_type;
 
-  if (per_command_space)
+  if (msg_type == 0 || per_command_space)
     {
 #ifdef HAVE_SBRK
       char *lim = (char *) sbrk (0);
@@ -939,14 +951,14 @@ make_command_stats_cleanup (int msg_type)
 #endif
     }
 
-  if (per_command_time)
+  if (msg_type == 0 || per_command_time)
     {
       new_stat->start_cpu_time = get_run_time ();
       gettimeofday (&new_stat->start_wall_time, NULL);
       new_stat->time_enabled = 1;
     }
 
-  if (per_command_symtab)
+  if (msg_type == 0 || per_command_symtab)
     {
       int nr_symtabs, nr_primary_symtabs, nr_blocks;
 

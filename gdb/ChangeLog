@@ -1,3 +1,11 @@
+2014-07-17  Doug Evans  <dje@google.com>
+
+	* maint.c (count_symtabs_and_blocks): Handle NULL
+	current_program_space.
+	(report_command_stats): Check global enabled flag in addition to
+	recorded enabled flag.
+	(make_command_stats_cleanup): Handle msg_type == 0, startup.
+
 2014-07-16  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (kill_callback): Use kill_lwp, not kill.
