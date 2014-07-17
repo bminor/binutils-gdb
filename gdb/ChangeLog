@@ -1,5 +1,6 @@
 2014-07-17  Doug Evans  <dje@google.com>
 
+	PR gdb/17170
 	* maint.c (count_symtabs_and_blocks): Handle NULL
 	current_program_space.
 	(report_command_stats): Check global enabled flag in addition to

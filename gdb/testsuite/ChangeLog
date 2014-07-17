@@ -1,5 +1,6 @@
 2014-07-17  Doug Evans  <dje@google.com>
 
+	PR gdb/17170
 	* gdb.base/maint.exp: Update testing of per-command stats.
 
 2014-07-16  Pedro Alves  <palves@redhat.com>
