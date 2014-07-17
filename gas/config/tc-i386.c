@@ -9410,6 +9410,8 @@ parse_register (char *reg_string, char **end_op)
 	  know (e->X_add_number >= 0
 		&& (valueT) e->X_add_number < i386_regtab_size);
 	  r = i386_regtab + e->X_add_number;
+	  if ((r->reg_flags & RegVRex))
+	    i.need_vrex = 1;
 	  *end_op = input_line_pointer;
 	}
       *input_line_pointer = c;

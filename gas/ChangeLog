@@ -1,3 +1,10 @@
+2014-07-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	Backport mainline patches
+	2014-07-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (parse_register): Set need_vrex.
+
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Backport mainline patches

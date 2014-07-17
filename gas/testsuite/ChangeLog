@@ -1,3 +1,12 @@
+2014-07-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	Backport mainline patches
+	2014-07-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/x86-64-equ.d: New.
+	* gas/i386/x86-64-equ.s: New.
+	* gas/i386/i386.exp: Run x86-64-equ.
+
 2014-07-08  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/evex-lig256-intel.d: Updated.
