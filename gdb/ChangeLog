@@ -1,5 +1,15 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* m68klinux-tdep.c: Include "regset.h".
+	(m68k_linux_gregmap, m68k_linux_fpregmap): New register maps.
+	(M68K_LINUX_GREGS_SIZE, M68K_LINUX_FPREGS_SIZE): New macros.
+	(m68k_linux_gregset, m68k_linux_fpregset): New regsets.
+	(m68k_linux_regset_from_core_section): New function.
+	(m68k_linux_init_abi): Set regset_from_core_section gdbarch
+	method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* tilegx-linux-tdep.c (tilegx_linux_supply_regset): Delete
 	function.  Move logic to...
 	(tilegx_linux_regmap): ... this new register map.
