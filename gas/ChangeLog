@@ -1,3 +1,20 @@
+2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
+	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
+	    Sergey Lega  <sergey.s.lega@intel.com>
+	    Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Ilya Tocar  <ilya.tocar@intel.com>
+	    Andrey Turetskiy  <andrey.turetskiy@intel.com>
+	    Ilya Verbin  <ilya.verbin@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512vl, CPU_AVX512VL_FLAGS.
+	(build_vex_prefix): Don't abort on VEX.W.
+	(check_VecOperands): Support BROADCAST_1TO4 and BROADCAST_1TO2.
+	(check_VecOperations): Ditto.
+	* doc/c-i386.texi: Document avx512vl/.avx512vl.
+
 2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	Add or reactivate or1k-*-rtems*

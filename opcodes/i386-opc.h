@@ -102,6 +102,8 @@ enum
   CpuAVX512ER,
   /* Intel AVX-512 Prefetch Instructions support required */
   CpuAVX512PF,
+  /* Intel AVX-512 VL Instructions support required.  */
+  CpuAVX512VL,
   /* Intel L1OM support required */
   CpuL1OM,
   /* Intel K1OM support required */
@@ -236,6 +238,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512cd:1;
       unsigned int cpuavx512er:1;
       unsigned int cpuavx512pf:1;
+      unsigned int cpuavx512vl:1;
       unsigned int cpul1om:1;
       unsigned int cpuk1om:1;
       unsigned int cpuxsave:1;
@@ -492,6 +495,8 @@ enum
 #define NO_BROADCAST	0
 #define BROADCAST_1TO16	1
 #define BROADCAST_1TO8	2
+#define BROADCAST_1TO4	3
+#define BROADCAST_1TO2	4
   Broadcast,
 
   /* Static rounding control is supported.  */

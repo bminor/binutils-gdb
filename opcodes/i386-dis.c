@@ -14114,17 +14114,41 @@ intel_operand_size (int bytemode, int sizeflag)
 	}
       else
 	{
-	  if (vex.length != 512)
-	    abort ();
-	  oappend ("ZMMWORD PTR ");
+	  switch (vex.length)
+	    {
+	    case 128:
+	      oappend ("XMMWORD PTR ");
+	      break;
+	    case 256:
+	      oappend ("YMMWORD PTR ");
+	      break;
+	    case 512:
+	      oappend ("ZMMWORD PTR ");
+	      break;
+	    default:
+	      abort ();
+	    }
 	}
       break;
     case vex_vsib_q_w_d_mode:
     case vex_vsib_d_w_d_mode:
-      if (!need_vex || !vex.evex || vex.length != 512)
+      if (!need_vex || !vex.evex)
 	abort ();
 
-      oappend ("YMMWORD PTR ");
+      switch (vex.length)
+	{
+	case 128:
+	  oappend ("QWORD PTR ");
+	  break;
+	case 256:
+	  oappend ("XMMWORD PTR ");
+	  break;
+	case 512:
+	  oappend ("YMMWORD PTR ");
+	  break;
+	default:
+	  abort ();
+	}
 
       break;
     case mask_mode:
@@ -14324,6 +14348,8 @@ OP_E_memory (int bytemode, int sizeflag)
 	shift -= 2;
       else if (bytemode == xmmdw_mode)
 	shift -= 3;
+      else if (bytemode == ymmq_mode && vex.length == 128)
+	shift -= 1;
     }
   else
     shift = 0;
@@ -14621,9 +14647,39 @@ OP_E_memory (int bytemode, int sizeflag)
 	  || bytemode == evex_half_bcst_xmmq_mode))
     {
       if (vex.w || bytemode == evex_half_bcst_xmmq_mode)
-	oappend ("{1to8}");
+	{
+	  switch (vex.length)
+	    {
+	    case 128:
+	      oappend ("{1to2}");
+	      break;
+	    case 256:
+	      oappend ("{1to4}");
+	      break;
+	    case 512:
+	      oappend ("{1to8}");
+	      break;
+	    default:
+	      abort ();
+	    }
+	}
       else
-	oappend ("{1to16}");
+	{
+	  switch (vex.length)
+	    {
+	    case 128:
+	      oappend ("{1to4}");
+	      break;
+	    case 256:
+	      oappend ("{1to8}");
+	      break;
+	    case 512:
+	      oappend ("{1to16}");
+	      break;
+	    default:
+	      abort ();
+	    }
+	}
     }
 }
 

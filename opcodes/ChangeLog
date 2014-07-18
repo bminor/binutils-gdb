@@ -1,3 +1,26 @@
+2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
+	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
+	    Sergey Lega  <sergey.s.lega@intel.com>
+	    Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Ilya Tocar  <ilya.tocar@intel.com>
+	    Andrey Turetskiy  <andrey.turetskiy@intel.com>
+	    Ilya Verbin  <ilya.verbin@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* i386-dis.c (intel_operand_size): Support 128/256 length in
+	vex_vsib_q_w_dq_mode.
+	(OP_E_memory): Add ymmq_mode handling, handle new broadcast.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512VL_FLAGS.
+	(cpu_flags): Add CpuAVX512VL.
+	* i386-init.h: Regenerated.
+	* i386-opc.h (CpuAVX512VL): New.
+	(i386_cpu_flags): Add cpuavx512vl.
+	(BROADCAST_1TO4, BROADCAST_1TO2): Define.
+	* i386-opc.tbl: Add AVX512VL instructions.
+	* i386-tbl.h: Regenerate.
+
 2014-07-20  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
 
 	* or1k-desc.c, * or1k-desc.h, * or1k-opc.c, * or1k-opc.h,

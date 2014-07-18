@@ -916,6 +916,8 @@ static const arch_entry cpu_arch[] =
     CPU_PREFETCHWT1_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".se1"), PROCESSOR_UNKNOWN,
     CPU_SE1_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".avx512vl"), PROCESSOR_UNKNOWN,
+    CPU_AVX512VL_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF
@@ -3163,14 +3165,8 @@ build_vex_prefix (const insn_template *t)
 
       /* Check the REX.W bit.  */
       w = (i.rex & REX_W) ? 1 : 0;
-      if (i.tm.opcode_modifier.vexw)
-	{
-	  if (w)
-	    abort ();
-
-	  if (i.tm.opcode_modifier.vexw == VEXW1)
-	    w = 1;
-	}
+      if (i.tm.opcode_modifier.vexw == VEXW1)
+	w = 1;
 
       i.vex.bytes[2] = (w << 7
 			| register_specifier << 3
@@ -4450,6 +4446,10 @@ check_VecOperands (const insn_template *t)
 	broadcasted_opnd_size <<= 4; /* Broadcast 1to16.  */
       else if (i.broadcast->type == BROADCAST_1TO8)
 	broadcasted_opnd_size <<= 3; /* Broadcast 1to8.  */
+      else if (i.broadcast->type == BROADCAST_1TO4)
+	broadcasted_opnd_size <<= 2; /* Broadcast 1to4.  */
+      else if (i.broadcast->type == BROADCAST_1TO2)
+	broadcasted_opnd_size <<= 1; /* Broadcast 1to2.  */
       else
 	goto bad_broadcast;
 
@@ -7752,6 +7752,10 @@ check_VecOperations (char *op_string, char *op_end)
 	      op_string += 3;
 	      if (*op_string == '8')
 		bcst_type = BROADCAST_1TO8;
+	      else if (*op_string == '4')
+		bcst_type = BROADCAST_1TO4;
+	      else if (*op_string == '2')
+		bcst_type = BROADCAST_1TO2;
 	      else if (*op_string == '1'
 		       && *(op_string+1) == '6')
 		{
