@@ -1,3 +1,7 @@
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* exec.c (exec_make_note_section): Move earlier.
+
 2014-07-17  Doug Evans  <dje@google.com>
 
 	PR gdb/17170
