@@ -1,3 +1,7 @@
+2014-07-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 7.7.91.
+
 2014-07-17  Doug Evans  <dje@google.com>
 
 	PR gdb/17170
