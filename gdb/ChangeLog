@@ -1,5 +1,10 @@
 2014-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* exec.c (exec_ops): Now static.
+	* exec.h (exec_ops): Don't declare.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint): Pass "self"
 	to find_target_beneath.
 	* ravenscar-thread.c (ravenscar_prepare_to_store): Pass "ops" to

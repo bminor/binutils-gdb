@@ -61,7 +61,7 @@ void _initialize_exec (void);
 
 /* The target vector for executable files.  */
 
-struct target_ops exec_ops;
+static struct target_ops exec_ops;
 
 /* True if the exec target is pushed on the stack.  */
 static int using_exec_ops;
