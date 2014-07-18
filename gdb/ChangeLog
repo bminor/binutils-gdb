@@ -1,5 +1,16 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* ia64-linux-tdep.c: Include "regset.h".
+	(ia64_linux_gregmap, ia64_linux_fpregmap): New register maps.
+	(IA64_LINUX_GREGS_SIZE, IA64_LINUX_FPREGS_SIZE): New macros.
+	(ia64_linux_supply_fpregset): New function.
+	(ia64_linux_gregset, ia64_linux_fpregset): New regsets.
+	(ia64_linux_regset_from_core_section): New function.
+	(ia64_linux_init_abi): Set regset_from_core_section gdbarch
+	method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* m68klinux-tdep.c: Include "regset.h".
 	(m68k_linux_gregmap, m68k_linux_fpregmap): New register maps.
 	(M68K_LINUX_GREGS_SIZE, M68K_LINUX_FPREGS_SIZE): New macros.
