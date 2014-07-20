@@ -1,3 +1,8 @@
+2014-07-20  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
+
+	* or1k-desc.c, * or1k-desc.h, * or1k-opc.c, * or1k-opc.h,
+	* or1k-opinst.c: Regenerate.
+
 2014-07-08  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* i386-dis-evex.h (EVEX_W_0F10_P_1_M_1): Fix vmovss.

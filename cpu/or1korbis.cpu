@@ -52,6 +52,7 @@
 (dnf f-resv-25-10  "resv-25-10"                ((MACH ORBIS-MACHS) RESERVED) 25 10)
 (dnf f-resv-25-5   "resv-25-5"                 ((MACH ORBIS-MACHS) RESERVED) 25 5)
 (dnf f-resv-23-8   "resv-23-8"                 ((MACH ORBIS-MACHS) RESERVED) 23 8)
+(dnf f-resv-20-21  "resv-20-21"                ((MACH ORBIS-MACHS) RESERVED) 20 21)
 (dnf f-resv-20-5   "resv-20-5"                 ((MACH ORBIS-MACHS) RESERVED) 20 5)
 (dnf f-resv-20-4   "resv-20-4"                 ((MACH ORBIS-MACHS) RESERVED) 20 4)
 (dnf f-resv-15-8   "resv-15-8"                 ((MACH ORBIS-MACHS) RESERVED) 15 8)
@@ -484,6 +485,29 @@
      ()
 )
 
+(dni l-msync "memory sync"
+     ((MACH ORBIS-MACHS))
+     "l.msync"
+     (+ OPC_SYSTRAPSYNCS OPC_SYSTRAPSYNCS_MSYNC (f-resv-20-21 0))
+     (nop)
+     ()
+)
+
+(dni l-psync "pipeline sync"
+     ((MACH ORBIS-MACHS))
+     "l.psync"
+     (+ OPC_SYSTRAPSYNCS OPC_SYSTRAPSYNCS_PSYNC (f-resv-20-21 0))
+     (nop)
+     ()
+)
+
+(dni l-csync "context sync"
+     ((MACH ORBIS-MACHS))
+     "l.csync"
+     (+ OPC_SYSTRAPSYNCS OPC_SYSTRAPSYNCS_CSYNC (f-resv-20-21 0))
+     (nop)
+     ()
+)
 
 (dni l-rfe "return from exception"
      ; This function may not be in delay slot
