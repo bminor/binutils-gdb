@@ -7135,7 +7135,11 @@ putpkt_binary (char *buf, int cnt)
      running.  This is not a problem in non-stop mode, because in that
      case, the stub is always ready to process serial input.  */
   if (!non_stop && target_can_async_p () && rs->waiting_for_stop_reply)
-    error (_("Cannot execute this command while the target is running."));
+    {
+      error (_("Cannot execute this command while the target is running.\n"
+	       "Use the \"interrupt\" command to stop the target\n"
+	       "and then try again."));
+    }
 
   /* We're sending out a new packet.  Make sure we don't look at a
      stale cached response.  */
