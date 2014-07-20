@@ -39104,6 +39104,7 @@ registers using the capitalization used in the description.
 * AArch64 Features::
 * ARM Features::
 * i386 Features::
+* MicroBlaze Features::
 * MIPS Features::
 * M68K Features::
 * Nios II Features::
@@ -39253,6 +39254,19 @@ describe the additional @sc{zmm} registers:
 @item
 @samp{zmm16h} through @samp{zmm31h}, only valid for amd64.
 @end itemize
+
+@node MicroBlaze Features
+@subsection MicroBlaze Features
+@cindex target descriptions, MicroBlaze features
+
+The @samp{org.gnu.gdb.microblaze.core} feature is required for MicroBlaze
+targets.  It should contain registers @samp{r0} through @samp{r31},
+@samp{rpc}, @samp{rmsr}, @samp{rear}, @samp{resr}, @samp{rfsr}, @samp{rbtr},
+@samp{rpvr}, @samp{rpvr1} through @samp{rpvr11}, @samp{redr}, @samp{rpid},
+@samp{rzpr}, @samp{rtlbx}, @samp{rtlbsx}, @samp{rtlblo}, and @samp{rtlbhi}.
+
+The @samp{org.gnu.gdb.microblaze.stack-protect} feature is optional.
+If present, it should contain registers @samp{rshr} and @samp{rslr}
 
 @node MIPS Features
 @subsection @acronym{MIPS} Features

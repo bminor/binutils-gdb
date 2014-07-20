@@ -1,3 +1,29 @@
+2014-07-19  Ajit Agarwal  <ajitkum@xilinx.com>
+
+	* microblaze-tdep.c (microblaze_register_names): Add
+	the rshr and rslr register names.
+	(microblaze_gdbarch_init): Use of tdesc_has_registers.
+	Use of tdesc_find_feature. Use of tdesc_data_alloc.
+	Use of tdesc_numbered_register. Use of
+	microblaze_register_g_packet_guesses. Use of
+	tdesc_use_registers. Use of set_gdbarch_register_type.
+	(microblaze_register_g_packet_guesses): New.
+	* microblaze-tdep.h (microblaze_reg_num): Add
+	field MICROBLAZE_SLR_REGNUM MICROBLAZE_SHR_REGNUM
+	MICROBLAZE_NUM_REGS and MICROBLAZE_NUM_CORE_REGS.
+	(microblaze_frame_cache): Use of MICROBLAZE_NUM_REGS.
+	* features/microblaze-core.xml: New file.
+	* features/microblaze-stack-protect.xml: New file.
+	* features/microblaze-with-stack-protect.c: New file.
+	* features/microblaze-with-stack-protect.xml: New file.
+	* features/microblaze.xml: New file.
+	* features/microblaze.c: New file.
+	* features/Makefile (microblaze-with-stack-protect): Add
+	microblaze-with-stack-protect microblaze and microblaze-expedite.
+	* regformats/microblaze-with-stack-protect.dat: New file.
+	* regformats/microblaze.dat: New file.
+	* doc/gdb.texinfo (MicroBlaze Features): Added.
+
 2014-07-18  Tom Tromey  <tromey@redhat.com>
 
 	* exec.c (exec_ops): Now static.
