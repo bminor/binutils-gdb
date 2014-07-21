@@ -216,7 +216,7 @@ extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 
 /* Functions that implement commands about CLI commands.  */
 
-extern void help_cmd (char *, struct ui_file *);
+extern void help_cmd (const char *, struct ui_file *);
 
 extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
                          struct re_pattern_buffer *, char *);

@@ -1,5 +1,10 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-decode.c (help_cmd): Make parameter "const".
+	* cli/cli-decode.h (help_cmd): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* stack.c (up_silently_base, down_silently_base): Make argument
 	const.
 
