@@ -1,5 +1,20 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* score-tdep.c (score7_linux_supply_gregset): Reduce to small stub
+	that calls regcache_supply_regset and handles the EPC register
+	separately.  Move main logic to...
+	(score7_linux_gregmap): ... this new register map.
+	(SCORE7_LINUX_SIZEOF_GREGSET, SCORE7_LINUX_EPC_OFFSET): New macros.
+	(score7_linux_gregset): Refer to register map.  Add collect method.
+	(score7_linux_regset_from_core_section): Replace
+	sizeof elf_gregset_t by SCORE7_LINUX_SIZEOF_GREGSET.
+	* score-tdep.h (enum gdb_regnum): New enum value SCORE_EPC_REGNUM.
+	(struct regset): Delete unused forward declaraction.
+	(struct pt_regs): Delete structure definition.
+	(elf_gregset_t): Delete typedef.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* nios2-linux-tdep.c (nios2_collect_gregset): New function.
 	(nios2_core_regset): Add collect method.
 
