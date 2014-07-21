@@ -1,3 +1,12 @@
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-dump.c (scan_expression_with_cleanup): Return const.
+	Make "cmd" const.
+	(scan_filename_with_cleanup): Likewise.
+	(dump_memory_to_file, dump_value_to_file, restore_binary_file):
+	Make arguments const.
+	(restore_command): Update.
+
 2014-07-24  Pedro Alves  <palves@redhat.com>
 
 	* tui/tui-io.c (tui_prep_terminal): Handle NULL rl_prompt.

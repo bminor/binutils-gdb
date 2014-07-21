@@ -35,8 +35,8 @@
 #include "filestuff.h"
 
 
-static char *
-scan_expression_with_cleanup (char **cmd, const char *def)
+static const char *
+scan_expression_with_cleanup (const char **cmd, const char *def)
 {
   if ((*cmd) == NULL || (**cmd) == '\0')
     {
@@ -48,19 +48,19 @@ scan_expression_with_cleanup (char **cmd, const char *def)
   else
     {
       char *exp;
-      char *end;
+      const char *end;
 
       end = (*cmd) + strcspn (*cmd, " \t");
       exp = savestring ((*cmd), end - (*cmd));
       make_cleanup (xfree, exp);
-      (*cmd) = skip_spaces (end);
+      (*cmd) = skip_spaces_const (end);
       return exp;
     }
 }
 
 
 static char *
-scan_filename_with_cleanup (char **cmd, const char *defname)
+scan_filename_with_cleanup (const char **cmd, const char *defname)
 {
   char *filename;
   char *fullname;
@@ -78,13 +78,13 @@ scan_filename_with_cleanup (char **cmd, const char *defname)
   else
     {
       /* FIXME: should parse a possibly quoted string.  */
-      char *end;
+      const char *end;
 
-      (*cmd) = skip_spaces (*cmd);
+      (*cmd) = skip_spaces_const (*cmd);
       end = *cmd + strcspn (*cmd, " \t");
       filename = savestring ((*cmd), end - (*cmd));
       make_cleanup (xfree, filename);
-      (*cmd) = skip_spaces (end);
+      (*cmd) = skip_spaces_const (end);
     }
   gdb_assert (filename != NULL);
 
@@ -206,16 +206,16 @@ dump_bfd_file (const char *filename, const char *mode,
 }
 
 static void
-dump_memory_to_file (char *cmd, char *mode, char *file_format)
+dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
   CORE_ADDR lo;
   CORE_ADDR hi;
   ULONGEST count;
-  char *filename;
+  const char *filename;
   void *buf;
-  char *lo_exp;
-  char *hi_exp;
+  const char *lo_exp;
+  const char *hi_exp;
 
   /* Open the file.  */
   filename = scan_filename_with_cleanup (&cmd, NULL);
@@ -262,11 +262,11 @@ dump_memory_command (char *cmd, char *mode)
 }
 
 static void
-dump_value_to_file (char *cmd, char *mode, char *file_format)
+dump_value_to_file (const char *cmd, const char *mode, const char *file_format)
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
   struct value *val;
-  char *filename;
+  const char *filename;
 
   /* Open the file.  */
   filename = scan_filename_with_cleanup (&cmd, NULL);
@@ -503,7 +503,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 }
 
 static void
-restore_binary_file (char *filename, struct callback_data *data)
+restore_binary_file (const char *filename, struct callback_data *data)
 {
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   FILE *file = fopen_with_cleanup (filename, FOPEN_RB);
@@ -555,12 +555,13 @@ restore_binary_file (char *filename, struct callback_data *data)
 }
 
 static void
-restore_command (char *args, int from_tty)
+restore_command (char *args_in, int from_tty)
 {
   char *filename;
   struct callback_data data;
   bfd *ibfd;
   int binary_flag = 0;
+  const char *args = args_in;
 
   if (!target_has_execution)
     noprocess ();
@@ -580,7 +581,7 @@ restore_command (char *args, int from_tty)
 	{
 	  binary_flag = 1;
 	  args += strlen (binary_string);
-	  args = skip_spaces (args);
+	  args = skip_spaces_const (args);
 	}
       /* Parse offset (optional).  */
       if (args != NULL && *args != '\0')
