@@ -1,5 +1,10 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* monitor.c (monitor_open): Make "args" const.
+	* monitor.h (monitor_open): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* maint.c (match_bfd_flags): Make "string" const.
 	(print_bfd_section_info): Remove casts.
 	(print_objfile_section_info): Make "string" const.

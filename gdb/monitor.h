@@ -239,7 +239,8 @@ struct monitor_ops
 
 #define SREC_SIZE 160
 
-extern void monitor_open (char *args, struct monitor_ops *ops, int from_tty);
+extern void monitor_open (const char *args, struct monitor_ops *ops,
+			  int from_tty);
 extern void monitor_close (struct target_ops *self);
 extern char *monitor_supply_register (struct regcache *regcache,
 				      int regno, char *valstr);
