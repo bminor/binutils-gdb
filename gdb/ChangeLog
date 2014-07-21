@@ -1,5 +1,10 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* solib.c (solib_add): Make "pattern" const.
+	* solib.h (solib_add): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (remote_serial_open, print_packet, putpkt)
 	(putpkt_binary): Constify.
 	* remote.h (putpkt): Update.
