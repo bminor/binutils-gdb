@@ -1,5 +1,10 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* environ.c (unset_in_environ): Make "var" const.
+	* environ.h (unset_in_environ): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-dump.c (scan_expression_with_cleanup): Return const.
 	Make "cmd" const.
 	(scan_filename_with_cleanup): Likewise.
