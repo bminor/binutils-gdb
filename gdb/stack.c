@@ -2306,7 +2306,7 @@ current_frame_command (char *level_exp, int from_tty)
    previously selected frame, and print it briefly.  */
 
 static void
-up_silently_base (char *count_exp)
+up_silently_base (const char *count_exp)
 {
   struct frame_info *frame;
   int count = 1;
@@ -2337,7 +2337,7 @@ up_command (char *count_exp, int from_tty)
    selected frame, and print it briefly.  */
 
 static void
-down_silently_base (char *count_exp)
+down_silently_base (const char *count_exp)
 {
   struct frame_info *frame;
   int count = -1;
