@@ -1,5 +1,11 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (remote_serial_open, print_packet, putpkt)
+	(putpkt_binary): Constify.
+	* remote.h (putpkt): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* monitor.c (monitor_open): Make "args" const.
 	* monitor.h (monitor_open): Update.
 

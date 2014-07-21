@@ -164,7 +164,7 @@ static int hexnumnstr (char *, ULONGEST, int);
 
 static CORE_ADDR remote_address_masked (CORE_ADDR);
 
-static void print_packet (char *);
+static void print_packet (const char *);
 
 static void compare_sections_command (char *, int);
 
@@ -176,7 +176,7 @@ static ptid_t remote_current_thread (ptid_t oldptid);
 
 static void remote_find_new_threads (void);
 
-static int putpkt_binary (char *buf, int cnt);
+static int putpkt_binary (const char *buf, int cnt);
 
 static void check_binary_download (CORE_ADDR addr);
 
@@ -3727,7 +3727,7 @@ remote_check_symbols (void)
 }
 
 static struct serial *
-remote_serial_open (char *name)
+remote_serial_open (const char *name)
 {
   static int udp_warning = 0;
 
@@ -7109,7 +7109,7 @@ escape_buffer (const char *buf, int n)
    string notation.  */
 
 static void
-print_packet (char *buf)
+print_packet (const char *buf)
 {
   puts_filtered ("\"");
   fputstr_filtered (buf, '"', gdb_stdout);
@@ -7117,7 +7117,7 @@ print_packet (char *buf)
 }
 
 int
-putpkt (char *buf)
+putpkt (const char *buf)
 {
   return putpkt_binary (buf, strlen (buf));
 }
@@ -7129,7 +7129,7 @@ putpkt (char *buf)
    to print the sent packet as a string.  */
 
 static int
-putpkt_binary (char *buf, int cnt)
+putpkt_binary (const char *buf, int cnt)
 {
   struct remote_state *rs = get_remote_state ();
   int i;
