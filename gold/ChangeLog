@@ -1,3 +1,8 @@
+2014-07-21  Sriraman Tallam  <tmsriram@google.com>
+
+	* object.cc (Relobj::is_section_name_included): Add
+	".rodata.nptl_version".
+
 2014-07-08  Cary Coutant  <ccoutant@google.com>
 
 	* expression.cc (struct Expression::Expression_eval_info): Add
