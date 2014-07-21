@@ -1,3 +1,11 @@
+2014-07-30  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (open_target): New function.
+	(add_target_with_completer, add_deprecated_target_alias): Use
+	set_cmd_sfunc, set_cmd_context.
+	(debug_to_open): Remove.
+	(setup_target_debug): Update.
+
 2014-07-30  Yao Qi  <yao@codesourcery.com>
 
 	* parser-defs.h (struct exp_descriptor) <operator_check>: Update

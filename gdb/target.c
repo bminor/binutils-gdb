@@ -118,8 +118,6 @@ static struct target_ops debug_target;
 
 static void init_dummy_target (void);
 
-static void debug_to_open (char *, int);
-
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the
    array.  */
@@ -345,6 +343,24 @@ complete_target_initialization (struct target_ops *t)
   install_delegators (t);
 }
 
+/* This is used to implement the various target commands.  */
+
+static void
+open_target (char *args, int from_tty, struct cmd_list_element *command)
+{
+  struct target_ops *ops = get_cmd_context (command);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "-> %s->to_open (...)\n",
+			ops->to_shortname);
+
+  ops->to_open (args, from_tty);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "<- %s->to_open (%s, %d)\n",
+			ops->to_shortname, args, from_tty);
+}
+
 /* Add possible target architecture T to the list and add a new
    command 'target T->to_shortname'.  Set COMPLETER as the command's
    completer if not NULL.  */
@@ -380,8 +396,9 @@ Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
 		    &targetlist, "target ", 0, &cmdlist);
-  c = add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc,
-	       &targetlist);
+  c = add_cmd (t->to_shortname, no_class, NULL, t->to_doc, &targetlist);
+  set_cmd_sfunc (c, open_target);
+  set_cmd_context (c, t);
   if (completer != NULL)
     set_cmd_completer (c, completer);
 }
@@ -404,7 +421,9 @@ add_deprecated_target_alias (struct target_ops *t, char *alias)
 
   /* If we use add_alias_cmd, here, we do not get the deprecated warning,
      see PR cli/15104.  */
-  c = add_cmd (alias, no_class, t->to_open, t->to_doc, &targetlist);
+  c = add_cmd (alias, no_class, NULL, t->to_doc, &targetlist);
+  set_cmd_sfunc (c, open_target);
+  set_cmd_context (c, t);
   alt = xstrprintf ("target %s", t->to_shortname);
   deprecate_cmd (c, alt);
 }
@@ -2963,13 +2982,6 @@ init_dummy_target (void)
   install_dummy_methods (&dummy_target);
 }
 
-static void
-debug_to_open (char *args, int from_tty)
-{
-  debug_target.to_open (args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog, "target_open (%s, %d)\n", args, from_tty);
-}
 
 void
 target_close (struct target_ops *targ)
@@ -3415,7 +3427,6 @@ setup_target_debug (void)
 {
   memcpy (&debug_target, &current_target, sizeof debug_target);
 
-  current_target.to_open = debug_to_open;
   init_debug_target (&current_target);
 }
 
