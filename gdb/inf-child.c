@@ -122,7 +122,8 @@ static int inf_child_explicitly_opened;
 /* See inf-child.h.  */
 
 void
-inf_child_open_target (struct target_ops *target, char *arg, int from_tty)
+inf_child_open_target (struct target_ops *target, const char *arg,
+		       int from_tty)
 {
   target_preopen (from_tty);
   push_target (target);

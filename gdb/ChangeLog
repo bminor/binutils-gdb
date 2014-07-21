@@ -1,5 +1,10 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* inf-child.c (inf_child_open_target): Make "arg" const.
+	* inf-child.h (inf_child_open_target): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* environ.c (unset_in_environ): Make "var" const.
 	* environ.h (unset_in_environ): Update.
 
