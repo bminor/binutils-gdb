@@ -236,7 +236,7 @@ match_substring (const char *string, const char *substr)
 }
 
 static int 
-match_bfd_flags (char *string, flagword flags)
+match_bfd_flags (const char *string, flagword flags)
 {
   if (flags & SEC_ALLOC)
     if (match_substring (string, "ALLOC"))
@@ -324,14 +324,15 @@ maint_print_section_info (const char *name, flagword flags,
 static void
 print_bfd_section_info (bfd *abfd, 
 			asection *asect, 
-			void *arg)
+			void *datum)
 {
   flagword flags = bfd_get_section_flags (abfd, asect);
   const char *name = bfd_section_name (abfd, asect);
+  const char *arg = datum;
 
-  if (arg == NULL || *((char *) arg) == '\0'
-      || match_substring ((char *) arg, name)
-      || match_bfd_flags ((char *) arg, flags))
+  if (arg == NULL || *arg == '\0'
+      || match_substring (arg, name)
+      || match_bfd_flags (arg, flags))
     {
       struct gdbarch *gdbarch = gdbarch_from_bfd (abfd);
       int addr_size = gdbarch_addr_bit (gdbarch) / 8;
@@ -348,7 +349,7 @@ print_bfd_section_info (bfd *abfd,
 static void
 print_objfile_section_info (bfd *abfd, 
 			    struct obj_section *asect, 
-			    char *string)
+			    const char *string)
 {
   flagword flags = bfd_get_section_flags (abfd, asect->the_bfd_section);
   const char *name = bfd_section_name (abfd, asect->the_bfd_section);
