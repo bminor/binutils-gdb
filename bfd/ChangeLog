@@ -1,3 +1,8 @@
+2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	Add or reactivate or1k-*-rtems*
+	* bfd/config.bfd (or1k-*-rtems*): Reactivate.
+
 2014-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_plt_sym_val): Match PLT entry only for

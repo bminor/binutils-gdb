@@ -1,3 +1,8 @@
+2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	Add or reactivate or1k-*-rtems*
+	* gas/configure.tgt (or1k-*-rtems*): Add.
+
 2014-07-17  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* config/tc-i386.c (parse_register): Set need_vrex.
