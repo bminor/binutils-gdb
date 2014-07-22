@@ -1,3 +1,10 @@
+2014-07-27  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	Add RTEMS target support and simplify matching
+
+	* gas/configure.tgt (or1k*-*-rtems*): Ensure a match.
+	(or1k*-*-*): Use or1k* to match or1knd and or1kZ.
+
 2014-07-27  Anthony Green  <green@moxielogic.com>
 
 	* configure.tgt (generic_target): Add moxie-*-moxiebox*
