@@ -1,3 +1,8 @@
+2014-07-22  Pedro Alves  <palves@redhat.com>
+
+	* value.c (allocate_optimized_out_value): Don't mark value as
+	non-lazy.
+
 2014-07-20  Doug Evans  <dje@google.com>
 
 	PR server/17147
