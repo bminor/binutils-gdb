@@ -1,3 +1,8 @@
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* stack.c (read_frame_arg): Verify value_optimized_out before calling
+	value_available_contents_eq.
+
 2014-07-22  Pedro Alves  <palves@redhat.com>
 
 	* value.c (allocate_optimized_out_value): Don't mark value as
