@@ -1,3 +1,12 @@
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-entry-value-paramref.S: New file.
+	* gdb.arch/amd64-entry-value-paramref.cc: New file.
+	* gdb.arch/amd64-entry-value-paramref.exp: New file.
+	* gdb.arch/amd64-optimout-repeat.S: New file.
+	* gdb.arch/amd64-optimout-repeat.c: New file.
+	* gdb.arch/amd64-optimout-repeat.exp: New file.
+
 2014-07-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/17170
