@@ -123,7 +123,7 @@ extern int valid_user_defined_cmd_name_p (const char *name);
 
 extern struct cmd_list_element *add_cmd (const char *, enum command_class,
 					 cmd_cfunc_ftype *fun,
-					 char *,
+					 const char *,
 					 struct cmd_list_element **);
 
 extern struct cmd_list_element *add_alias_cmd (const char *, const char *,
@@ -132,7 +132,7 @@ extern struct cmd_list_element *add_alias_cmd (const char *, const char *,
 
 extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class,
 						cmd_cfunc_ftype *fun,
-						char *,
+						const char *,
 						struct cmd_list_element **,
 						const char *, int,
 						struct cmd_list_element **);
@@ -140,7 +140,7 @@ extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class
 extern struct cmd_list_element *add_abbrev_prefix_cmd (const char *,
 						       enum command_class,
 						       cmd_cfunc_ftype *fun,
-						       char *,
+						       const char *,
 						       struct cmd_list_element
 						       **, const char *, int,
 						       struct cmd_list_element
@@ -205,16 +205,17 @@ extern int lookup_cmd_composition (const char *text,
 
 extern struct cmd_list_element *add_com (const char *, enum command_class,
 					 cmd_cfunc_ftype *fun,
-					 char *);
+					 const char *);
 
 extern struct cmd_list_element *add_com_alias (const char *, const char *,
 					       enum command_class, int);
 
 extern struct cmd_list_element *add_info (const char *,
 					  cmd_cfunc_ftype *fun,
-					  char *);
+					  const char *);
 
-extern struct cmd_list_element *add_info_alias (const char *, char *, int);
+extern struct cmd_list_element *add_info_alias (const char *, const char *,
+						int);
 
 extern VEC (char_ptr) *complete_on_cmdlist (struct cmd_list_element *,
 					    const char *, const char *, int);

@@ -128,7 +128,7 @@ struct cmd_list_element
        First line is brief documentation; remaining lines form, with it,
        the full documentation.  First line should end with a period.
        Entire string should also end with a period, not a newline.  */
-    char *doc;
+    const char *doc;
 
     /* For set/show commands.  A method for printing the output to the
        specified stream.  */
@@ -229,7 +229,7 @@ extern void not_just_help_class_command (char *arg, int from_tty);
 
 /* Exported to cli/cli-setshow.c */
 
-extern void print_doc_line (struct ui_file *, char *);
+extern void print_doc_line (struct ui_file *, const char *);
 
 extern const char * const auto_boolean_enums[];
 

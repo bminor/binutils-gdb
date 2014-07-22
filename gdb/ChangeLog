@@ -1,5 +1,20 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-decode.c (add_cmd, add_prefix_cmd)
+	(add_abbrev_prefix_cmd, add_set_or_show_cmd, add_info)
+	(add_info_alias, add_com): Make "doc" const.
+	(print_doc_line): Make "str" const.
+	(delete_cmd): Update.
+	* cli/cli-decode.h (struct cmd_list_element) <doc>: Now const.
+	(print_doc_line): Update.
+	* cli/cli-script.c (document_command): Update.
+	* command.h (add_cmd, add_prefix_cmd, add_abbrev_prefix_cmd)
+	(add_com, add_info, add_info_alias): Update.
+	* guile/scm-cmd.c (cmdscm_destroyer): Update.
+	* python/py-cmd.c (cmdpy_destroyer): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-decode.c (print_help_for_command): Make "prefix" const.
 	(add_prefix_cmd, add_abbrev_prefix_cmd, apropos_cmd, help_list)
 	(help_cmd_list): Constify.

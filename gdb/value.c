@@ -2315,7 +2315,7 @@ static void
 function_destroyer (struct cmd_list_element *self, void *ignore)
 {
   xfree ((char *) self->name);
-  xfree (self->doc);
+  xfree ((char *) self->doc);
 }
 
 /* Add a new internal function.  NAME is the name of the function; DOC

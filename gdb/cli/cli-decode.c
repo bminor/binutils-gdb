@@ -183,7 +183,7 @@ set_cmd_completer (struct cmd_list_element *cmd, completer_ftype *completer)
 
 struct cmd_list_element *
 add_cmd (const char *name, enum command_class class, cmd_cfunc_ftype *fun,
-	 char *doc, struct cmd_list_element **list)
+	 const char *doc, struct cmd_list_element **list)
 {
   struct cmd_list_element *c
     = (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
@@ -329,7 +329,7 @@ add_alias_cmd (const char *name, const char *oldname, enum command_class class,
 struct cmd_list_element *
 add_prefix_cmd (const char *name, enum command_class class,
 		cmd_cfunc_ftype *fun,
-		char *doc, struct cmd_list_element **prefixlist,
+		const char *doc, struct cmd_list_element **prefixlist,
 		const char *prefixname, int allow_unknown,
 		struct cmd_list_element **list)
 {
@@ -356,7 +356,7 @@ add_prefix_cmd (const char *name, enum command_class class,
 
 struct cmd_list_element *
 add_abbrev_prefix_cmd (const char *name, enum command_class class,
-		       cmd_cfunc_ftype *fun, char *doc,
+		       cmd_cfunc_ftype *fun, const char *doc,
 		       struct cmd_list_element **prefixlist,
 		       const char *prefixname,
 		       int allow_unknown, struct cmd_list_element **list)
@@ -398,7 +398,7 @@ add_set_or_show_cmd (const char *name,
 		     enum command_class class,
 		     var_types var_type,
 		     void *var,
-		     char *doc,
+		     const char *doc,
 		     struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, class, NULL, doc, list);
@@ -805,7 +805,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 	  if (iter->hookee_post)
 	    iter->hookee_post->hook_post = 0;
 	  if (iter->doc && iter->doc_allocated)
-	    xfree (iter->doc);
+	    xfree ((char *) iter->doc);
 	  *posthook = iter->hook_post;
 	  *posthookee = iter->hookee_post;
 
@@ -846,7 +846,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 /* Add an element to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info (const char *name, cmd_cfunc_ftype *fun, char *doc)
+add_info (const char *name, cmd_cfunc_ftype *fun, const char *doc)
 {
   return add_cmd (name, no_class, fun, doc, &infolist);
 }
@@ -854,7 +854,7 @@ add_info (const char *name, cmd_cfunc_ftype *fun, char *doc)
 /* Add an alias to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info_alias (const char *name, char *oldname, int abbrev_flag)
+add_info_alias (const char *name, const char *oldname, int abbrev_flag)
 {
   return add_alias_cmd (name, oldname, 0, abbrev_flag, &infolist);
 }
@@ -863,7 +863,7 @@ add_info_alias (const char *name, char *oldname, int abbrev_flag)
 
 struct cmd_list_element *
 add_com (const char *name, enum command_class class, cmd_cfunc_ftype *fun,
-	 char *doc)
+	 const char *doc)
 {
   return add_cmd (name, class, fun, doc, &cmdlist);
 }
@@ -1111,11 +1111,11 @@ help_all (struct ui_file *stream)
 
 /* Print only the first line of STR on STREAM.  */
 void
-print_doc_line (struct ui_file *stream, char *str)
+print_doc_line (struct ui_file *stream, const char *str)
 {
   static char *line_buffer = 0;
   static int line_size;
-  char *p;
+  const char *p;
 
   if (!line_buffer)
     {
