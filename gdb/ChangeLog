@@ -1,5 +1,14 @@
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* regcache.c: Include "regset.h".
+	(regcache_transfer_regset): New local function.
+	(regcache_supply_regset, regcache_collect_regset): New functions.
+	* regcache.h (struct regcache_map_entry): New structure.
+	(REGCACHE_MAP_SKIP): New enum value.
+	(regcache_supply_regset, regcache_collect_regset): New prototypes.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* regset.h (struct regset): Rename 'descr' field to 'regmap'.
 	* ppc-linux-tdep.c (ppc_linux_supply_gregset)
 	(ppc_linux_collect_gregset ): Likewise.
