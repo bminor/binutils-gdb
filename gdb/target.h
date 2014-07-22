@@ -394,9 +394,9 @@ typedef void async_callback_ftype (enum inferior_event_type event_type,
 struct target_ops
   {
     struct target_ops *beneath;	/* To the target under this one.  */
-    char *to_shortname;		/* Name this target type */
-    char *to_longname;		/* Name for printing */
-    char *to_doc;		/* Documentation.  Does not include trailing
+    const char *to_shortname;	/* Name this target type */
+    const char *to_longname;	/* Name for printing */
+    const char *to_doc;		/* Documentation.  Does not include trailing
 				   newline, and starts with a one-line descrip-
 				   tion (probably similar to to_longname).  */
     /* Per-target scratch pad.  */

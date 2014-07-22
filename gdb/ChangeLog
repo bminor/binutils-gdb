@@ -1,5 +1,11 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* monitor.c (compile_pattern): Update.
+	* target.h (struct target_ops) <to_shortname, to_longname,
+	to_doc>: Now const.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-decode.c (add_cmd, add_prefix_cmd)
 	(add_abbrev_prefix_cmd, add_set_or_show_cmd, add_info)
 	(add_info_alias, add_com): Make "doc" const.

@@ -715,7 +715,7 @@ compile_pattern (char *pattern, struct re_pattern_buffer *compiled_pattern,
 void
 monitor_open (const char *args, struct monitor_ops *mon_ops, int from_tty)
 {
-  char *name;
+  const char *name;
   char **p;
   struct inferior *inf;
 
