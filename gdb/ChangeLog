@@ -1,5 +1,20 @@
 2014-07-30  Tom Tromey  <tromey@redhat.com>
 
+	* breakpoint.c (map_breakpoint_numbers): Update.
+	* cli/cli-utils.c (get_number_trailer): Make "pp" const.  Update.
+	(get_number_const): New function.
+	(get_number): Rewrite using get_number_const.
+	(init_number_or_range): Make "string" const.
+	(number_is_in_list): Make "list" const.
+	* cli/cli-utils.h (get_number_const): Declare.
+	(struct get_number_or_range_state) <string, end_ptr>: Now const.
+	(init_number_or_range, number_is_in_list): Update.
+	* printcmd.c (map_display_numbers): Update.
+	* value.c (value_from_history_ref): Constify.
+	* value.h (value_from_history_ref): Update.
+
+2014-07-30  Tom Tromey  <tromey@redhat.com>
+
 	* corefile.c (hook_type, call_extra_exec_file_hooks)
 	(specify_exec_file_hook): Constify.
 	* exec.c (exec_file_attach): Make "filename" const.

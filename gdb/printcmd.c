@@ -1618,7 +1618,7 @@ map_display_numbers (char *args,
 
   while (!state.finished)
     {
-      char *p = state.string;
+      const char *p = state.string;
 
       num = get_number_or_range (&state);
       if (num == 0)

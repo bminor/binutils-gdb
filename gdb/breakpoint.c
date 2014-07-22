@@ -14788,7 +14788,7 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 
   while (!state.finished)
     {
-      char *p = state.string;
+      const char *p = state.string;
 
       match = 0;
 
