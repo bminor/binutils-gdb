@@ -261,7 +261,7 @@ add_cmd (const char *name, enum command_class class, cmd_cfunc_ftype *fun,
    Returns a pointer to the deprecated command.  */
 
 struct cmd_list_element *
-deprecate_cmd (struct cmd_list_element *cmd, char *replacement)
+deprecate_cmd (struct cmd_list_element *cmd, const char *replacement)
 {
   cmd->cmd_deprecated = 1;
   cmd->deprecated_warn_user = 1;

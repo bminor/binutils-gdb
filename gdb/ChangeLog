@@ -1,5 +1,13 @@
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-decode.c (deprecate_cmd): Make "replacement" const.
+	* cli/cli-decode.h (struct cmd_list_element) <replacement>: Now
+	const.
+	* command.h (deprecate_cmd): Update.
+	* maint.c (maintenance_do_deprecate): Add casts.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-decode.c (help_cmd): Make parameter "const".
 	* cli/cli-decode.h (help_cmd): Update.
 

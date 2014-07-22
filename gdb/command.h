@@ -194,7 +194,7 @@ extern struct cmd_list_element *lookup_cmd_1 (const char **,
 					      int);
 
 extern struct cmd_list_element *deprecate_cmd (struct cmd_list_element *,
-					       char * );
+					       const char * );
 
 extern void deprecated_cmd_warning (const char *);
 

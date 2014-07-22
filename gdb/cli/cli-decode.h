@@ -135,7 +135,7 @@ struct cmd_list_element
     show_value_ftype *show_value_func;
 
     /* If this command is deprecated, this is the replacement name.  */
-    char *replacement;
+    const char *replacement;
 
     /* If this command represents a show command, then this function
        is called before the variable's value is examined.  */

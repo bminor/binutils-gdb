@@ -628,7 +628,7 @@ maintenance_do_deprecate (char *text, int deprecate)
   if (alias)
     {
       if (alias->malloced_replacement)
-	xfree (alias->replacement);
+	xfree ((char *) alias->replacement);
 
       if (deprecate)
 	{
@@ -647,7 +647,7 @@ maintenance_do_deprecate (char *text, int deprecate)
   else if (cmd)
     {
       if (cmd->malloced_replacement)
-	xfree (cmd->replacement);
+	xfree ((char *) cmd->replacement);
 
       if (deprecate)
 	{
