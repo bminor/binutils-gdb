@@ -1,5 +1,10 @@
 2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2loc.c (value_of_dwarf_reg_entry): Remove setting value address
+	for reference entry value target data value.
+
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* stack.c (read_frame_arg): Verify value_optimized_out before calling
 	value_available_contents_eq.
 
