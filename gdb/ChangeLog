@@ -1,5 +1,14 @@
 2014-07-30  Tom Tromey  <tromey@redhat.com>
 
+	* corefile.c (hook_type, call_extra_exec_file_hooks)
+	(specify_exec_file_hook): Constify.
+	* exec.c (exec_file_attach): Make "filename" const.
+	* gdbcore.h (deprecated_exec_file_display_hook)
+	(specify_exec_file_hook, exec_file_attach): Constify.
+	* main.c (captured_main): Use catch_command_errors_const.
+
+2014-07-30  Tom Tromey  <tromey@redhat.com>
+
 	* target.c (open_target): New function.
 	(add_target_with_completer, add_deprecated_target_alias): Use
 	set_cmd_sfunc, set_cmd_context.

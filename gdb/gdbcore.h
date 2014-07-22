@@ -127,14 +127,14 @@ extern void write_memory_signed_integer (CORE_ADDR addr, int len,
 
 /* Hook for `exec_file_command' command to call.  */
 
-extern void (*deprecated_exec_file_display_hook) (char *filename);
+extern void (*deprecated_exec_file_display_hook) (const char *filename);
 
 /* Hook for "file_command", which is more useful than above
    (because it is invoked AFTER symbols are read, not before).  */
 
 extern void (*deprecated_file_changed_hook) (char *filename);
 
-extern void specify_exec_file_hook (void (*hook) (char *filename));
+extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
 /* Binary File Diddler for the core file.  */
 
@@ -148,7 +148,7 @@ extern int write_files;
 
 extern void core_file_command (char *filename, int from_tty);
 
-extern void exec_file_attach (char *filename, int from_tty);
+extern void exec_file_attach (const char *filename, int from_tty);
 
 extern void exec_file_clear (int from_tty);
 

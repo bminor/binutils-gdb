@@ -39,7 +39,6 @@
 /* Local function declarations.  */
 
 extern void _initialize_core (void);
-static void call_extra_exec_file_hooks (char *filename);
 
 /* You can have any number of hooks for `exec_file_command' command to
    call.  If there's only one hook, it is set in exec_file_display
@@ -50,7 +49,7 @@ static void call_extra_exec_file_hooks (char *filename);
    only one hook could be set, and which called
    deprecated_exec_file_display_hook directly.  */
 
-typedef void (*hook_type) (char *);
+typedef void (*hook_type) (const char *);
 
 hook_type deprecated_exec_file_display_hook;	/* The original hook.  */
 static hook_type *exec_file_extra_hooks;	/* Array of additional
@@ -87,7 +86,7 @@ core_file_command (char *filename, int from_tty)
    functions.  */
 
 static void
-call_extra_exec_file_hooks (char *filename)
+call_extra_exec_file_hooks (const char *filename)
 {
   int i;
 
@@ -99,7 +98,7 @@ call_extra_exec_file_hooks (char *filename)
    This is called from the x-window display code.  */
 
 void
-specify_exec_file_hook (void (*hook) (char *))
+specify_exec_file_hook (void (*hook) (const char *))
 {
   hook_type *new_array;
 

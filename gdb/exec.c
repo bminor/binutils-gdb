@@ -154,7 +154,7 @@ exec_file_clear (int from_tty)
    we're supplying the exec pathname late for good reason.)  */
 
 void
-exec_file_attach (char *filename, int from_tty)
+exec_file_attach (const char *filename, int from_tty)
 {
   struct cleanup *cleanups;
 
