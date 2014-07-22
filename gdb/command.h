@@ -134,7 +134,7 @@ extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class
 						cmd_cfunc_ftype *fun,
 						char *,
 						struct cmd_list_element **,
-						char *, int,
+						const char *, int,
 						struct cmd_list_element **);
 
 extern struct cmd_list_element *add_abbrev_prefix_cmd (const char *,
@@ -142,7 +142,7 @@ extern struct cmd_list_element *add_abbrev_prefix_cmd (const char *,
 						       cmd_cfunc_ftype *fun,
 						       char *,
 						       struct cmd_list_element
-						       **, char *, int,
+						       **, const char *, int,
 						       struct cmd_list_element
 						       **);
 
@@ -224,7 +224,7 @@ extern VEC (char_ptr) *complete_on_enum (const char *const *enumlist,
 
 /* Functions that implement commands about CLI commands.  */
 
-extern void help_list (struct cmd_list_element *, char *,
+extern void help_list (struct cmd_list_element *, const char *,
 		       enum command_class, struct ui_file *);
 
 /* Method for show a set/show variable's VALUE on FILE.  If this
@@ -374,7 +374,7 @@ extern void
 
 /* Do a "show" command for each thing on a command list.  */
 
-extern void cmd_show_list (struct cmd_list_element *, int, char *);
+extern void cmd_show_list (struct cmd_list_element *, int, const char *);
 
 /* Used everywhere whenever at least one parameter is required and
    none is specified.  */

@@ -291,7 +291,7 @@ cmdscm_destroyer (struct cmd_list_element *self, void *context)
   /* We allocated the name, doc string, and perhaps the prefix name.  */
   xfree ((char *) self->name);
   xfree (self->doc);
-  xfree (self->prefixname);
+  xfree ((char *) self->prefixname);
 }
 
 /* Called by gdb to invoke the command.  */

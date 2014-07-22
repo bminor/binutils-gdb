@@ -29,6 +29,6 @@ extern void do_show_command (const char *arg, int from_tty,
 			     struct cmd_list_element *c);
 
 extern void cmd_show_list (struct cmd_list_element *list, int from_tty,
-			   char *prefix);
+			   const char *prefix);
 
 #endif /* !defined (CLI_SETSHOW_H) */

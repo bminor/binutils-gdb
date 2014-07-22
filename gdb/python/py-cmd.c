@@ -109,7 +109,7 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
      name.  */
   xfree ((char *) self->name);
   xfree (self->doc);
-  xfree (self->prefixname);
+  xfree ((char *) self->prefixname);
 
   do_cleanups (cleanup);
 }

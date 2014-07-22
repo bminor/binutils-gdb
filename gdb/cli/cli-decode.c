@@ -93,8 +93,8 @@ set_cmd_prefix (struct cmd_list_element *c, struct cmd_list_element **list)
 }
 
 static void
-print_help_for_command (struct cmd_list_element *c, char *prefix, int recurse,
-			struct ui_file *stream);
+print_help_for_command (struct cmd_list_element *c, const char *prefix,
+			int recurse, struct ui_file *stream);
 
 
 /* Set the callback function for the specified command.  For each both
@@ -330,7 +330,7 @@ struct cmd_list_element *
 add_prefix_cmd (const char *name, enum command_class class,
 		cmd_cfunc_ftype *fun,
 		char *doc, struct cmd_list_element **prefixlist,
-		char *prefixname, int allow_unknown,
+		const char *prefixname, int allow_unknown,
 		struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
@@ -357,7 +357,8 @@ add_prefix_cmd (const char *name, enum command_class class,
 struct cmd_list_element *
 add_abbrev_prefix_cmd (const char *name, enum command_class class,
 		       cmd_cfunc_ftype *fun, char *doc,
-		       struct cmd_list_element **prefixlist, char *prefixname,
+		       struct cmd_list_element **prefixlist,
+		       const char *prefixname,
 		       int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
@@ -883,7 +884,7 @@ add_com_alias (const char *name, const char *oldname, enum command_class class,
 void 
 apropos_cmd (struct ui_file *stream, 
 	     struct cmd_list_element *commandlist,
-	     struct re_pattern_buffer *regex, char *prefix)
+	     struct re_pattern_buffer *regex, const char *prefix)
 {
   struct cmd_list_element *c;
   int returnvalue;
@@ -1011,7 +1012,7 @@ help_cmd (const char *command, struct ui_file *stream)
  * If you call this routine with a class >= 0, it recurses.
  */
 void
-help_list (struct cmd_list_element *list, char *cmdtype,
+help_list (struct cmd_list_element *list, const char *cmdtype,
 	   enum command_class class, struct ui_file *stream)
 {
   int len;
@@ -1145,8 +1146,8 @@ print_doc_line (struct ui_file *stream, char *str)
    If RECURSE is non-zero, also print one-line descriptions
    of all prefixed subcommands.  */
 static void
-print_help_for_command (struct cmd_list_element *c, char *prefix, int recurse,
-			struct ui_file *stream)
+print_help_for_command (struct cmd_list_element *c, const char *prefix,
+			int recurse, struct ui_file *stream)
 {
   fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
   print_doc_line (stream, c->doc);
@@ -1179,7 +1180,7 @@ print_help_for_command (struct cmd_list_element *c, char *prefix, int recurse,
  */
 void
 help_cmd_list (struct cmd_list_element *list, enum command_class class,
-	       char *prefix, int recurse, struct ui_file *stream)
+	       const char *prefix, int recurse, struct ui_file *stream)
 {
   struct cmd_list_element *c;
 
@@ -1505,7 +1506,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list, char *cmdtype,
          values.  */
       int local_allow_unknown = (last_list ? last_list->allow_unknown :
 				 allow_unknown);
-      char *local_cmdtype = last_list ? last_list->prefixname : cmdtype;
+      const char *local_cmdtype = last_list ? last_list->prefixname : cmdtype;
       struct cmd_list_element *local_list =
 	(last_list ? *(last_list->prefixlist) : list);
 

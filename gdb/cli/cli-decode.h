@@ -156,7 +156,7 @@ struct cmd_list_element
        plus any others needed to get to it.  Should end in a space.
        It is used before the word "command" in describing the
        commands reached through this prefix.  */
-    char *prefixname;
+    const char *prefixname;
 
     /* The prefix command of this command.  */
     struct cmd_list_element *prefix;
@@ -212,14 +212,14 @@ struct cmd_list_element
   };
 
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
-			   char *, int, struct ui_file *);
+			   const char *, int, struct ui_file *);
 
 /* Functions that implement commands about CLI commands.  */
 
 extern void help_cmd (const char *, struct ui_file *);
 
 extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
-                         struct re_pattern_buffer *, char *);
+                         struct re_pattern_buffer *, const char *);
 
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or

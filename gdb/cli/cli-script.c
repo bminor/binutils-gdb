@@ -1707,7 +1707,7 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
 
   if (c->prefixlist != NULL)
     {
-      char *prefixname = c->prefixname;
+      const char *prefixname = c->prefixname;
 
       for (c = *c->prefixlist; c != NULL; c = c->next)
 	if (c->class == class_user || c->prefixlist != NULL)
