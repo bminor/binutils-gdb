@@ -1,3 +1,15 @@
+2014-07-28  Will Newton  <will.newton@linaro.org>
+
+	* arm-linux-tdep.c (THUMB2_SET_R7_SIGRETURN1): New define.
+	(THUMB2_SET_R7_SIGRETURN2): Likewise.
+	(THUMB2_SET_R7_RT_SIGRETURN1): Likewise.
+	(THUMB2_SET_R7_RT_SIGRETURN2): Likewise.
+	(THUMB2_EABI_SYSCALL): Likewise.
+	(thumb2_eabi_linux_sigreturn_tramp_frame): Create new
+	struct tramp_frame.
+	(thumb2_eabi_linux_rt_sigreturn_tramp_frame): Likewise.
+	(arm_linux_init_abi): Add Thumb2 tramp frame unwinders.
+
 2014-07-27  Doug Evans  <xdje42@gmail.com>
 
 	* guile/scm-param.c (pascm_print_param_smob): Fix output.

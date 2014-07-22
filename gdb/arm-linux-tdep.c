@@ -246,6 +246,13 @@ static const gdb_byte arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa
 #define ARM_SET_R7_RT_SIGRETURN		0xe3a070ad
 #define ARM_EABI_SYSCALL		0xef000000
 
+/* Equivalent patterns for Thumb2.  */
+#define THUMB2_SET_R7_SIGRETURN1	0xf04f
+#define THUMB2_SET_R7_SIGRETURN2	0x0777
+#define THUMB2_SET_R7_RT_SIGRETURN1	0xf04f
+#define THUMB2_SET_R7_RT_SIGRETURN2	0x07ad
+#define THUMB2_EABI_SYSCALL		0xdf00
+
 /* OABI syscall restart trampoline, used for EABI executables too
    whenever OABI support has been enabled in the kernel.  */
 #define ARM_OABI_SYSCALL_RESTART_SYSCALL 0xef900000
@@ -439,6 +446,30 @@ static struct tramp_frame arm_eabi_linux_rt_sigreturn_tramp_frame = {
   {
     { ARM_SET_R7_RT_SIGRETURN, -1 },
     { ARM_EABI_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_rt_sigreturn_init
+};
+
+static struct tramp_frame thumb2_eabi_linux_sigreturn_tramp_frame = {
+  SIGTRAMP_FRAME,
+  2,
+  {
+    { THUMB2_SET_R7_SIGRETURN1, -1 },
+    { THUMB2_SET_R7_SIGRETURN2, -1 },
+    { THUMB2_EABI_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_sigreturn_init
+};
+
+static struct tramp_frame thumb2_eabi_linux_rt_sigreturn_tramp_frame = {
+  SIGTRAMP_FRAME,
+  2,
+  {
+    { THUMB2_SET_R7_RT_SIGRETURN1, -1 },
+    { THUMB2_SET_R7_RT_SIGRETURN2, -1 },
+    { THUMB2_EABI_SYSCALL, -1 },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_rt_sigreturn_init
@@ -1415,6 +1446,10 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_eabi_linux_sigreturn_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_eabi_linux_rt_sigreturn_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&thumb2_eabi_linux_sigreturn_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&thumb2_eabi_linux_rt_sigreturn_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_linux_restart_syscall_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
