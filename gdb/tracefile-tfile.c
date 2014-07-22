@@ -376,7 +376,7 @@ tfile_read (gdb_byte *readbuf, int size)
 }
 
 static void
-tfile_open (char *filename, int from_tty)
+tfile_open (const char *arg, int from_tty)
 {
   volatile struct gdb_exception ex;
   char *temp;
@@ -390,12 +390,13 @@ tfile_open (char *filename, int from_tty)
   struct trace_status *ts;
   struct uploaded_tp *uploaded_tps = NULL;
   struct uploaded_tsv *uploaded_tsvs = NULL;
+  char *filename;
 
   target_preopen (from_tty);
-  if (!filename)
+  if (!arg)
     error (_("No trace file specified."));
 
-  filename = tilde_expand (filename);
+  filename = tilde_expand (arg);
   if (!IS_ABSOLUTE_PATH(filename))
     {
       temp = concat (current_directory, "/", filename, (char *) NULL);

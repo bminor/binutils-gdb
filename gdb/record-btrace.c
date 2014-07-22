@@ -188,7 +188,7 @@ record_btrace_handle_async_inferior_event (gdb_client_data data)
 /* The to_open method of target record-btrace.  */
 
 static void
-record_btrace_open (char *args, int from_tty)
+record_btrace_open (const char *args, int from_tty)
 {
   struct cleanup *disable_chain;
   struct thread_info *tp;

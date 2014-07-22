@@ -133,7 +133,7 @@ inf_child_open_target (struct target_ops *target, const char *arg,
 }
 
 static void
-inf_child_open (char *arg, int from_tty)
+inf_child_open (const char *arg, int from_tty)
 {
   inf_child_open_target (inf_child_ops, arg, from_tty);
 }

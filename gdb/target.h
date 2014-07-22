@@ -405,7 +405,7 @@ struct target_ops
        command, and (if successful) pushes a new target onto the
        stack.  Targets should supply this routine, if only to provide
        an error message.  */
-    void (*to_open) (char *, int);
+    void (*to_open) (const char *, int);
     /* Old targets with a static target vector provide "to_close".
        New re-entrant targets provide "to_xclose" and that is expected
        to xfree everything (including the "struct target_ops").  */

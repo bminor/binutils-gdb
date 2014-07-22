@@ -359,7 +359,7 @@ m32r_create_inferior (struct target_ops *ops, char *execfile,
    NAME is the filename used for communication.  */
 
 static void
-m32r_open (char *args, int from_tty)
+m32r_open (const char *args, int from_tty)
 {
   struct hostent *host_ent;
   struct sockaddr_in server_addr;

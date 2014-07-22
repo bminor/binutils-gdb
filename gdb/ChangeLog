@@ -1,5 +1,29 @@
 2014-07-30  Tom Tromey  <tromey@redhat.com>
 
+	* bsd-kvm.c (bsd_kvm_open): Constify.
+	* corelow.c (core_open): Constify.
+	* ctf.c (ctf_open): Constify.
+	* dbug-rom.c (dbug_open): Constify.
+	* exec.c (exec_open): Constify.
+	* m32r-rom.c (m32r_open, mon2000_open): Constify.
+	* microblaze-rom.c (picobug_open): Constify.
+	* nto-procfs.c (procfs_open_1, procfs_open, procfs_native_open):
+	Constify.
+	* ppcbug-rom.c (ppcbug_open0, ppcbug_open1): Constify.
+	* record-btrace.c (record_btrace_open): Constify.
+	* record-full.c (record_full_core_open_1, record_full_open_1)
+	(record_full_open): Constify.
+	* remote-m32r-sdi.c (m32r_open): Constify.
+	* remote-mips.c (common_open, mips_open, pmon_open, ddb_open)
+	(rockhopper_open, lsi_open): Constify.
+	* remote-sim.c (gdbsim_open): Constify.
+	* remote.c (remote_open, extended_remote_open, remote_open_1):
+	Constify.
+	* target.h (struct target_ops) <to_open>: Make "arg" const.
+	* tracefile-tfile.c (tfile_open): Constify.
+
+2014-07-30  Tom Tromey  <tromey@redhat.com>
+
 	* breakpoint.c (map_breakpoint_numbers): Update.
 	* cli/cli-utils.c (get_number_trailer): Make "pp" const.  Update.
 	(get_number_const): New function.

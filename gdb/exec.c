@@ -76,7 +76,7 @@ show_write_files (struct ui_file *file, int from_tty,
 
 
 static void
-exec_open (char *args, int from_tty)
+exec_open (const char *args, int from_tty)
 {
   target_preopen (from_tty);
   exec_file_attach (args, from_tty);

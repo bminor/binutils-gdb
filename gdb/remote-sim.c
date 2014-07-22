@@ -667,7 +667,7 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
 /* Called when selecting the simulator.  E.g. (gdb) target sim name.  */
 
 static void
-gdbsim_open (char *args, int from_tty)
+gdbsim_open (const char *args, int from_tty)
 {
   int len;
   char *arg_buf;

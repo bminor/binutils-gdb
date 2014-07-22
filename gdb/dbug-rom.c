@@ -32,8 +32,6 @@
 
 #include "m68k-tdep.h"
 
-static void dbug_open (char *args, int from_tty);
-
 static void
 dbug_supply_register (struct regcache *regcache, char *regname,
 		      int regnamelen, char *val, int vallen)
@@ -155,7 +153,7 @@ init_dbug_cmds (void)
 }				/* init_debug_ops */
 
 static void
-dbug_open (char *args, int from_tty)
+dbug_open (const char *args, int from_tty)
 {
   monitor_open (args, &dbug_cmds, from_tty);
 }
