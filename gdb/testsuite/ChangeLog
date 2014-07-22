@@ -1,3 +1,7 @@
+2014-07-28  Will Newton  <will.newton@linaro.org>
+
+	* gdb.base/varargs.exp: Remove KFAILs for ARM.
+
 2014-07-26  Ludovic Courtès  <ludo@gnu.org>
 	    Doug Evans  <xdje42@gmail.com>
 
