@@ -291,12 +291,6 @@ extern void error (const char *fmt, ...)
 
 extern void error_stream (struct ui_file *) ATTRIBUTE_NORETURN;
 
-extern void vfatal (const char *fmt, va_list ap)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
-
-extern void fatal (const char *fmt, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
-
 extern void internal_verror (const char *file, int line, const char *,
 			     va_list ap)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0);

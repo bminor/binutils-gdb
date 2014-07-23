@@ -1,3 +1,19 @@
+2014-07-24  Gary Benson  <gbenson@redhat.com>
+
+	* exceptions.h (throw_vfatal): Renamed to...
+	(throw_vquit): New declaration.
+	(throw_quit): Likewise.
+	* exceptions.c (throw_vfatal): Renamed to...
+	(throw_vquit): New function.
+	(throw_quit): Likewise.
+	(throw_error): Call throw_verror rather than throw_it.
+	* utils.h (vfatal): Removed.
+	(fatal): Likewise.
+	* utils.c (vfatal): Removed.
+	(fatal): Likewise.
+	(internal_verror): Replaced call to fatal with call to throw_quit.
+	(quit): Replaced calls to fatal with calls to throw_quit.
+
 2014-07-23  Ajit Agarwal <ajitkum@xilinx.com>
 
 	* microblaze-tdep.c (microblaze_fetch_instruction): Use of

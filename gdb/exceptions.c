@@ -390,7 +390,7 @@ throw_verror (enum errors error, const char *fmt, va_list ap)
 }
 
 void
-throw_vfatal (const char *fmt, va_list ap)
+throw_vquit (const char *fmt, va_list ap)
 {
   throw_it (RETURN_QUIT, GDB_NO_ERROR, fmt, ap);
 }
@@ -401,7 +401,17 @@ throw_error (enum errors error, const char *fmt, ...)
   va_list args;
 
   va_start (args, fmt);
-  throw_it (RETURN_ERROR, error, fmt, args);
+  throw_verror (error, fmt, args);
+  va_end (args);
+}
+
+void
+throw_quit (const char *fmt, ...)
+{
+  va_list args;
+
+  va_start (args, fmt);
+  throw_vquit (fmt, args);
   va_end (args);
 }
 
