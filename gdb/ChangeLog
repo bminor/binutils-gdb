@@ -1,3 +1,8 @@
+2014-07-23  Gary Benson  <gbenson@redhat.com>
+
+	* cp-support.c (gdb_demangle): Fix build on systems without
+	sigaltstack.
+
 2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2loc.c (value_of_dwarf_reg_entry): Remove setting value address
