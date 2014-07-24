@@ -1,5 +1,10 @@
 2014-07-30  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-utils.h: Do not include config.h.
+	* nat/linux-btrace.h: Likewise.
+
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
 	* btrace.c: Include defs.h.
 	* common/ptid.c: Include defs.h or server.h as appropriate.
 	* nat/mips-linux-watch.c: Likewise.
