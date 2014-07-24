@@ -130,7 +130,7 @@ microblaze_fetch_instruction (CORE_ADDR pc)
   gdb_byte buf[4];
 
   /* If we can't read the instruction at PC, return zero.  */
-  if (target_read_memory (pc, buf, sizeof (buf)))
+  if (target_read_code (pc, buf, sizeof (buf)))
     return 0;
 
   return extract_unsigned_integer (buf, 4, byte_order);

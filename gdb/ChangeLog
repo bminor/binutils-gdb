@@ -1,3 +1,8 @@
+2014-07-23  Ajit Agarwal <ajitkum@xilinx.com>
+
+	* microblaze-tdep.c (microblaze_fetch_instruction): Use of
+	target_read_code.
+
 2014-07-23  Chen Gang <gang.chen.5i5j@gmail.com>
 
 	* microblaze-tdep.c (microblaze_dwarf2_reg_to_regnum): Check whether
