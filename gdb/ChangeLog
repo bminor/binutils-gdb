@@ -1,3 +1,8 @@
+2014-07-23  Chen Gang <gang.chen.5i5j@gmail.com>
+
+	* microblaze-tdep.c (microblaze_dwarf2_reg_to_regnum): Check whether
+	less than zero in conditional expression.
+
 2014-07-23  Tom Tromey  <tromey@redhat.com>
 
 	* make-target-delegates ($ARGS_PART): Match trailing close paren.

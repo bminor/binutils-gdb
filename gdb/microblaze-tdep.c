@@ -664,7 +664,7 @@ static int dwarf2_to_reg_map[78] =
 static int
 microblaze_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  gdb_assert (reg < sizeof (dwarf2_to_reg_map));
+  gdb_assert ((size_t) reg < sizeof (dwarf2_to_reg_map));
   return dwarf2_to_reg_map[reg];
 }
 
