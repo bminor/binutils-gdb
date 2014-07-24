@@ -1,5 +1,10 @@
 2014-07-30  Gary Benson  <gbenson@redhat.com>
 
+	* server.h: Include common-defs.h.
+	Do not include config.h or build-gnulib-gdbserver/config.h.
+
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
 	* hostio-errno.c: Move server.h to top of includes list.
 	* inferiors.c: Likewise.
 	* linux-x86-low.c: Likewise.

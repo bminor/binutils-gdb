@@ -1,5 +1,12 @@
 2014-07-30  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/common-defs.h.
+	* defs.h: Include common-defs.h.
+	Do not include config.h or build-gnulib/config.h.
+
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-utils.h: Do not include config.h.
 	* nat/linux-btrace.h: Likewise.
 
