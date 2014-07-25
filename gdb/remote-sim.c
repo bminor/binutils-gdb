@@ -658,7 +658,7 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
   insert_breakpoints ();	/* Needed to get correct instruction
 				   in cache.  */
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 }
 
 /* The open routine takes the rest of the parameters from the command,

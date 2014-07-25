@@ -1,5 +1,15 @@
 2014-07-25  Pedro Alves  <palves@redhat.com>
 
+	* go32-nat.c (go32_create_inferior): Pass 0 to clear_proceed_status.
+	* monitor.c (monitor_create_inferior): Likewise.
+	* remote-m32r-sdi.c (m32r_create_inferior): Likewise.
+	* remote-sim.c (gdbsim_create_inferior): Likewise.
+	* solib-irix.c (irix_solib_create_inferior_hook): Likewise.
+	* solib-osf.c (osf_solib_create_inferior_hook): Likewise.
+	* windows-nat.c (do_initial_windows_stuff): Likewise.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention signal passing and "signal" command changes.
 	* gdbthread.h (struct thread_suspend_state) <stop_signal>: Extend
 	comment.

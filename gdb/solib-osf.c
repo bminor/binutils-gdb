@@ -340,7 +340,7 @@ osf_solib_create_inferior_hook (int from_tty)
     return;
 
   tp = inferior_thread ();
-  clear_proceed_status ();
+  clear_proceed_status (0);
   inf->control.stop_soon = STOP_QUIETLY;
   tp->suspend.stop_signal = GDB_SIGNAL_0;
   do

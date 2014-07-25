@@ -1731,7 +1731,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
     push_target (ops);
   disable_breakpoints_in_shlibs ();
   windows_clear_solib ();
-  clear_proceed_status ();
+  clear_proceed_status (0);
   init_wait_for_inferior ();
 
   inf = current_inferior ();

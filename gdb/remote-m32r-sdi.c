@@ -340,7 +340,7 @@ m32r_create_inferior (struct target_ops *ops, char *execfile,
   /* The "process" (board) is already stopped awaiting our commands, and
      the program is already downloaded.  We just set its PC and go.  */
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 
   /* Tell wait_for_inferior that we've started a new process.  */
   init_wait_for_inferior ();

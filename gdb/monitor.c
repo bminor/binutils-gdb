@@ -2080,7 +2080,7 @@ monitor_create_inferior (struct target_ops *ops, char *exec_file,
     error (_("Args are not supported by the monitor."));
 
   first_time = 1;
-  clear_proceed_status ();
+  clear_proceed_status (0);
   regcache_write_pc (get_current_regcache (),
 		     bfd_get_start_address (exec_bfd));
 }
