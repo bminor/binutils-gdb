@@ -1,3 +1,9 @@
+2014-07-30  Yao Qi  <yao@codesourcery.com>
+
+	* parser-defs.h (struct exp_descriptor) <operator_check>: Update
+	comments.
+	* parse.c (exp_iterate): Update comments.
+
 2014-07-30  Gary Benson  <gbenson@redhat.com>
 
 	* common/common-defs.h: New file.
