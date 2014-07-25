@@ -1,3 +1,10 @@
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
+	* hostio-errno.c: Move server.h to top of includes list.
+	* inferiors.c: Likewise.
+	* linux-x86-low.c: Likewise.
+	* notif.c: Include server.h.
+
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 
