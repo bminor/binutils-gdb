@@ -1,3 +1,9 @@
+2014-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (target_stopped_data_address)
+	(target_watchpoint_addr_within_range): Use "->", not ".".  Fix
+	parentheses.
+
 2014-07-25  Pierre Langlois  <pierre.langlois@embecosm.com>
 
 	* avr-tdep.c (avr_address_to_pointer): Clarify the conversion in the
