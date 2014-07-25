@@ -1,3 +1,8 @@
+2014-07-25  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Also check the compressed ISA
+	variation in gdbarch matching.
+
 2014-07-25  Tom Tromey  <tromey@redhat.com>
 
 	* exec.c (using_exec_ops): Remove.
