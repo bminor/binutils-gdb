@@ -21,7 +21,6 @@
 #include "server.h"
 
 #include "gdb_wait.h"
-#include <stdio.h>
 #include <sys/ptrace.h>
 #include <fcntl.h>
 #include <string.h>

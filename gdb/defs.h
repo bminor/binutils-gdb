@@ -28,7 +28,6 @@
 #include "common-defs.h"
 
 #include <sys/types.h>
-#include <stdio.h>
 #include <errno.h>		/* System call error return status.  */
 #include <limits.h>
 #include <stdint.h>

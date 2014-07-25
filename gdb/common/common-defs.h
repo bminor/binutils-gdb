@@ -27,4 +27,6 @@
 #include "build-gnulib/config.h"
 #endif
 
+#include <stdio.h>
+
 #endif /* COMMON_DEFS_H */

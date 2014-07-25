@@ -105,7 +105,6 @@
 #include "cli/cli-utils.h"
 #include "inf-child.h"
 
-#include <stdio.h>		/* might be required for __DJGPP_MINOR__ */
 #include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>

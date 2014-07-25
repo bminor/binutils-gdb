@@ -27,7 +27,6 @@
 #include <string.h>
 
 #include <stdlib.h>
-#include <stdio.h>
 
 /* The xmalloc() (libiberty.h) family of memory management routines.
 

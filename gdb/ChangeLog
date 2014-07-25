@@ -1,3 +1,23 @@
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include stdio.h.
+	* defs.h: Do not include stdio.h.
+	* ada-lang.c: Likewise.
+	* common/buffer.c: Likewise.
+	* common/common-utils.c: Likewise.
+	* cp-name-parser.y: Likewise.
+	* gnu-nat.c: Likewise.
+	* go32-nat.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+	* proc-api.c: Likewise.
+	* proc-events.c: Likewise.
+	* proc-flags.c: Likewise.
+	* proc-why.c: Likewise.
+	* python/python-internal.h: Likewise.
+	* target-memory.c: Likewise.
+	* tui/tui-io.c: Likewise.
+	* tui/tui.c: Likewise.
+
 2014-08-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* solib-svr4.c (scan_dyntag): Rename dyntag and dyn_tag variables.

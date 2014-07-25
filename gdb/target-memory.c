@@ -25,7 +25,6 @@
 
 #include "gdb_assert.h"
 
-#include <stdio.h>
 #include <sys/time.h>
 
 static int

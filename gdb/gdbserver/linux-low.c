@@ -24,7 +24,6 @@
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
 #include "gdb_wait.h"
-#include <stdio.h>
 #include <sys/ptrace.h>
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"

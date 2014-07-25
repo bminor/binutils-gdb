@@ -1,3 +1,12 @@
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include stdio.h.
+	* linux-low.c: Likewise.
+	* remote-utils.c: Likewise.
+	* spu-low.c: Likewise.
+	* utils.c: Likewise.
+	* wincecompat.c: Likewise.
+
 2014-08-06  Gary Benson  <gbenson@redhat.com>
 
 	* regcache.c (init_register_cache): Move conditionals inside if.
