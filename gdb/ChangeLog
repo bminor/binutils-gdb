@@ -1,5 +1,20 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include stdlib.h.
+	* defs.h: Do not include stdlib.h.
+	* addrmap.c: Likewise.
+	* bcache.c: Likewise.
+	* common/buffer.c: Likewise.
+	* common/common-utils.c: Likewise.
+	* cp-name-parser.y: Likewise.
+	* go32-nat.c: Likewise.
+	* mn10300-linux-tdep.c: Likewise.
+	* nat/linux-osdata.c: Likewise.
+	* tui/tui.c: Likewise.
+	* windows-nat.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include stdio.h.
 	* defs.h: Do not include stdio.h.
 	* ada-lang.c: Likewise.

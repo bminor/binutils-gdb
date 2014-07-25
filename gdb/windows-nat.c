@@ -35,7 +35,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <stdlib.h>
 #include <windows.h>
 #include <imagehlp.h>
 #include <psapi.h>

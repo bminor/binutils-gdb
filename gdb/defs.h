@@ -597,9 +597,6 @@ enum gdb_osabi
 
 /* From other system libraries */
 
-#include <stdlib.h>
-
-
 #ifndef atof
 extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
 #endif

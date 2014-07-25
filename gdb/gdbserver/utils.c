@@ -18,7 +18,6 @@
 
 #include "server.h"
 #include <string.h>
-#include <stdlib.h>
 #if HAVE_ERRNO_H
 #include <errno.h>
 #endif

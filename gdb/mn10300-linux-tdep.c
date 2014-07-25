@@ -33,8 +33,6 @@
 #include "tramp-frame.h"
 #include "linux-tdep.h"
 
-#include <stdlib.h>
-
 /* Transliterated from <asm-mn10300/elf.h>...  */
 #define MN10300_ELF_NGREG 28
 #define MN10300_ELF_NFPREG 32

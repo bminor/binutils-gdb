@@ -1,5 +1,15 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* server.h: Do not include stdlib.h.
+	* inferiors.c: Likewise.
+	* linux-low.c: Likewise.
+	* regcache.c: Likewise.
+	* spu-low.c: Likewise.
+	* tracepoint.c: Likewise.
+	* utils.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* server.h: Do not include stdio.h.
 	* linux-low.c: Likewise.
 	* remote-utils.c: Likewise.

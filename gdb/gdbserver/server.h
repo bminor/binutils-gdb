@@ -30,7 +30,6 @@
 #include "version.h"
 
 #include <stdarg.h>
-#include <stdlib.h>
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif

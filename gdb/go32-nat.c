@@ -105,7 +105,6 @@
 #include "cli/cli-utils.h"
 #include "inf-child.h"
 
-#include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>
 #include <unistd.h>

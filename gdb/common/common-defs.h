@@ -28,5 +28,6 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #endif /* COMMON_DEFS_H */

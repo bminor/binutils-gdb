@@ -7110,7 +7110,6 @@ gdb_ust_init (void)
 #endif /* HAVE_UST */
 
 #include <sys/syscall.h>
-#include <stdlib.h>
 
 static void
 gdb_agent_remove_socket (void)

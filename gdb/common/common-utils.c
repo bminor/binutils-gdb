@@ -26,8 +26,6 @@
 #include "gdb_assert.h"
 #include <string.h>
 
-#include <stdlib.h>
-
 /* The xmalloc() (libiberty.h) family of memory management routines.
 
    These are like the ISO-C malloc() family except that they implement
