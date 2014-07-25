@@ -1,3 +1,9 @@
+2014-07-25  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (avr_address_to_pointer): Clarify the conversion in the
+	comments.
+	(avr_pointer_to_address): Likewise.
+
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
 	* monitor.c (compile_pattern): Update.

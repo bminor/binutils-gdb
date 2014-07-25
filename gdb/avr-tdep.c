@@ -308,7 +308,7 @@ avr_address_to_pointer (struct gdbarch *gdbarch,
   /* Is it a data address in flash?  */
   if (AVR_TYPE_ADDRESS_CLASS_FLASH (type))
     {
-      /* A data address in flash is always byte addressed.  */
+      /* A data pointer in flash is byte addressed.  */
       store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
 			      avr_convert_iaddr_to_raw (addr));
     }
@@ -316,8 +316,8 @@ avr_address_to_pointer (struct gdbarch *gdbarch,
   else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
 	   || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
     {
-      /* A code address, either a function pointer or the program counter, is
-	 word (16 bits) addressed.  */
+      /* A code pointer is word (16 bits) addressed.  We shift the address down
+	 by 1 bit to convert it to a pointer.  */
       store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
 			      avr_convert_iaddr_to_raw (addr >> 1));
     }
@@ -339,12 +339,19 @@ avr_pointer_to_address (struct gdbarch *gdbarch,
 
   /* Is it a data address in flash?  */
   if (AVR_TYPE_ADDRESS_CLASS_FLASH (type))
-    return avr_make_iaddr (addr);
+    {
+      /* A data pointer in flash is already byte addressed.  */
+      return avr_make_iaddr (addr);
+    }
   /* Is it a code address?  */
   else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
 	   || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD
 	   || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
-    return avr_make_iaddr (addr << 1);
+    {
+      /* A code pointer is word (16 bits) addressed so we shift it up
+	 by 1 bit to convert it to an address.  */
+      return avr_make_iaddr (addr << 1);
+    }
   else
     return avr_make_saddr (addr);
 }
