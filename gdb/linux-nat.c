@@ -1694,8 +1694,7 @@ linux_nat_resume_callback (struct lwp_info *lp, void *except)
       thread = find_thread_ptid (lp->ptid);
       if (thread != NULL)
 	{
-	  if (signal_pass_state (thread->suspend.stop_signal))
-	    signo = thread->suspend.stop_signal;
+	  signo = thread->suspend.stop_signal;
 	  thread->suspend.stop_signal = GDB_SIGNAL_0;
 	}
     }

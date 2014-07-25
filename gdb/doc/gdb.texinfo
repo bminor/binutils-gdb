@@ -16546,7 +16546,7 @@ detail.
 @table @code
 @kindex signal
 @item signal @var{signal}
-Resume execution where your program stopped, but immediately give it the
+Resume execution where your program is stopped, but immediately give it the
 signal @var{signal}.  The @var{signal} can be the name or the number of a
 signal.  For example, on many systems @code{signal 2} and @code{signal
 SIGINT} are both ways of sending an interrupt signal.
@@ -16556,6 +16556,15 @@ giving a signal.  This is useful when your program stopped on account of
 a signal and would ordinarily see the signal when resumed with the
 @code{continue} command; @samp{signal 0} causes it to resume without a
 signal.
+
+@emph{Note:} When resuming a multi-threaded program, @var{signal} is
+delivered to the currently selected thread, not the thread that last
+reported a stop.  This includes the situation where a thread was
+stopped due to a signal.  So if you want to continue execution
+suppressing the signal that stopped a thread, you should select that
+same thread before issuing the @samp{signal 0} command.  If you issue
+the @samp{signal 0} command with another thread as the selected one,
+@value{GDBN} detects that and asks for confirmation.
 
 @code{signal} does not repeat when you press @key{RET} a second time
 after executing the command.

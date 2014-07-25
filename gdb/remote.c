@@ -4643,8 +4643,7 @@ append_pending_thread_resumptions (char *p, char *endp, ptid_t ptid)
   ALL_NON_EXITED_THREADS (thread)
     if (ptid_match (thread->ptid, ptid)
 	&& !ptid_equal (inferior_ptid, thread->ptid)
-	&& thread->suspend.stop_signal != GDB_SIGNAL_0
-	&& signal_pass_state (thread->suspend.stop_signal))
+	&& thread->suspend.stop_signal != GDB_SIGNAL_0)
       {
 	p = append_resumption (p, endp, thread->ptid,
 			       0, thread->suspend.stop_signal);

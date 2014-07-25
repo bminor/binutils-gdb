@@ -1,3 +1,39 @@
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention signal passing and "signal" command changes.
+	* gdbthread.h (struct thread_suspend_state) <stop_signal>: Extend
+	comment.
+	* breakpoint.c (until_break_command): Adjust clear_proceed_status
+	call.
+	* infcall.c (run_inferior_call): Adjust clear_proceed_status call.
+	* infcmd.c (proceed_thread_callback, continue_1, step_once)
+	(jump_command): Adjust clear_proceed_status call.
+	(signal_command): Warn if other thread that are resumed have
+	signals that will be delivered.  Adjust clear_proceed_status call.
+	(until_next_command, finish_command)
+	(proceed_after_attach_callback, attach_command_post_wait)
+	(attach_command): Adjust clear_proceed_status call.
+	* infrun.c (proceed_after_vfork_done): Likewise.
+	(proceed_after_attach_callback): Adjust comment.
+	(clear_proceed_status_thread): Clear stop_signal if not in pass
+	state.
+	(clear_proceed_status_callback): Delete.
+	(clear_proceed_status): New 'step' parameter.  Only clear the
+	proceed status of threads the command being prepared is about to
+	resume.
+	(proceed): If passed in an explicit signal, override stop_signal
+	with it.  Don't pass the last stop signal to the thread we're
+	resuming.
+	(init_wait_for_inferior): Adjust clear_proceed_status call.
+	(switch_back_to_stepped_thread): Clear the signal if it should not
+	be passed.
+	* infrun.h (clear_proceed_status): New 'step' parameter.
+	(user_visible_resume_ptid): Add comment.
+	* linux-nat.c (linux_nat_resume_callback): Don't check whether the
+	signal is in pass state.
+	* remote.c (append_pending_thread_resumptions): Likewise.
+	* mi/mi-main.c (proceed_thread): Adjust clear_proceed_status call.
+
 2014-07-25  Tom Tromey  <tromey@redhat.com>
 
 	* target.h (target_stopped_data_address)

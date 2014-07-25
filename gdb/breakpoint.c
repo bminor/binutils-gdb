@@ -11668,7 +11668,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
   int thread;
   struct thread_info *tp;
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 
   /* Set a breakpoint where the user wants it and at return from
      this function.  */

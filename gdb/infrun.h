@@ -83,7 +83,11 @@ extern struct regcache *stop_registers;
 
 extern void start_remote (int from_tty);
 
-extern void clear_proceed_status (void);
+/* Clear out all variables saying what to do when inferior is
+   continued or stepped.  First do this, then set the ones you want,
+   then call `proceed'.  STEP indicates whether we're preparing for a
+   step/stepi command.  */
+extern void clear_proceed_status (int step);
 
 extern void proceed (CORE_ADDR, enum gdb_signal, int);
 
@@ -91,6 +95,8 @@ extern void proceed (CORE_ADDR, enum gdb_signal, int);
    Normally, use `proceed', which handles a lot of bookkeeping.  */
 extern void resume (int, enum gdb_signal);
 
+/* Return a ptid representing the set of threads that we will proceed,
+   in the perspective of the user/frontend.  */
 extern ptid_t user_visible_resume_ptid (int step);
 
 extern void wait_for_inferior (void);

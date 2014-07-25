@@ -1,5 +1,14 @@
 2014-07-25  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/signal-command-handle-nopass.c: New file.
+	* gdb.threads/signal-command-handle-nopass.exp: New file.
+	* gdb.threads/signal-command-multiple-signals-pending.c: New file.
+	* gdb.threads/signal-command-multiple-signals-pending.exp: New file.
+	* gdb.threads/signal-delivered-right-thread.c: New file.
+	* gdb.threads/signal-delivered-right-thread.exp: New file.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/double-prompt-target-event-error.exp
 	(cancel_pagination_in_target_event): Remove '-notransfer <return>'
 	match.

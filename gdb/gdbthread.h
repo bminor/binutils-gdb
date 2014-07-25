@@ -135,7 +135,13 @@ struct thread_control_state
 
 struct thread_suspend_state
 {
-  /* Last signal that the inferior received (why it stopped).  */
+  /* Last signal that the inferior received (why it stopped).  When
+     the thread is resumed, this signal is delivered.  Note: the
+     target should not check whether the signal is in pass state,
+     because the signal may have been explicitly passed with the
+     "signal" command, which overrides "handle nopass".  If the signal
+     should be suppressed, the core will take care of clearing this
+     before the target is resumed.  */
   enum gdb_signal stop_signal;
 };
 

@@ -396,7 +396,7 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 
   call_thread->control.in_infcall = 1;
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 
   disable_watchpoints_before_interactive_call_start ();
 
