@@ -1,3 +1,31 @@
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/double-prompt-target-event-error.exp
+	(cancel_pagination_in_target_event): Remove '-notransfer <return>'
+	match.
+	(cancel_pagination_in_target_event): Rework double prompt
+	detection.
+	* gdb.base/paginate-after-ctrl-c-running.exp
+	(test_ctrlc_while_target_running_paginates): Remove '-notransfer
+	<return>' match.
+	* gdb.base/paginate-bg-execution.exp
+	(test_bg_execution_pagination_return)
+	(test_bg_execution_pagination_cancel): Remove '-notransfer
+	<return>' matches.
+	* gdb.base/paginate-execution-startup.exp
+	(test_fg_execution_pagination_return)
+	(test_fg_execution_pagination_cancel): Remove '-notransfer
+	<return>' matches.
+	* gdb.base/paginate-inferior-exit.exp
+	(test_paginate_inferior_exited): Remove '-notransfer <return>'
+	match.
+	* lib/gdb-utils.exp (string_to_regexp): Move here from lib/gdb.exp.
+	* lib/gdb.exp (pagination_prompt): Run text through
+	string_to_regexp.
+	(gdb_test_multiple): Match $pagination_prompt instead of
+	"<return>".
+	(string_to_regexp): Move to lib/gdb-utils.exp.
+
 2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/amd64-entry-value-paramref.S: New file.

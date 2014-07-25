@@ -27,6 +27,7 @@ if {$tool == ""} {
 
 load_lib libgloss.exp
 load_lib cache.exp
+load_lib gdb-utils.exp
 
 global GDB
 
@@ -70,7 +71,7 @@ if ![info exists gdb_prompt] then {
 }
 
 # A regexp that matches the pagination prompt.
-set pagination_prompt "---Type <return> to continue, or q <return> to quit---"
+set pagination_prompt [string_to_regexp "---Type <return> to continue, or q <return> to quit---"]
 
 # The variable fullname_syntax_POSIX is a regexp which matches a POSIX 
 # absolute path ie. /foo/ 
@@ -648,7 +649,7 @@ proc gdb_internal_error_resync {} {
 #
 proc gdb_test_multiple { command message user_code } {
     global verbose use_gdb_stub
-    global gdb_prompt
+    global gdb_prompt pagination_prompt
     global GDB
     global inferior_exited_re
     upvar timeout timeout
@@ -872,7 +873,7 @@ proc gdb_test_multiple { command message user_code } {
 	    }
 	    set result 1
 	}
-	"<return>" {
+	-re "$pagination_prompt" {
 	    send_gdb "\n"
 	    perror "Window too small."
 	    fail "$message"
@@ -1108,14 +1109,6 @@ proc test_print_reject { args } {
     }
 }
 
-# Given an input string, adds backslashes as needed to create a
-# regexp that will match the string.
-
-proc string_to_regexp {str} {
-    set result $str
-    regsub -all {[]*+.|()^$\[\\]} $str {\\&} result
-    return $result
-}
 
 # Same as gdb_test, but the second parameter is not a regexp,
 # but a string that must match exactly.
