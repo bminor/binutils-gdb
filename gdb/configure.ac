@@ -1053,6 +1053,7 @@ fi
 AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(PYTHON_LIBS)
+AM_CONDITIONAL(HAVE_PYTHON, test "${have_libpython}" != no)
 
 # -------------------- #
 # Check for libguile.  #
@@ -1217,6 +1218,7 @@ else
 fi
 AC_SUBST(GUILE_CPPFLAGS)
 AC_SUBST(GUILE_LIBS)
+AM_CONDITIONAL(HAVE_GUILE, test "${have_libguile}" != no)
 
 # PR 17185, see if we can get the libgc version to see if we need
 # to apply the workaround.
