@@ -27,7 +27,6 @@
 
 #include "as.h"
 #include "safe-ctype.h"
-#include "obstack.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>

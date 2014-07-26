@@ -104,7 +104,7 @@ symbol_new (const char *name, segT segment, valueT valu, fragS *frag)
 static char *
 save_symbol_name (const char *name)
 {
-  unsigned int name_length;
+  size_t name_length;
   char *ret;
 
   name_length = strlen (name) + 1;	/* +1 for \0.  */

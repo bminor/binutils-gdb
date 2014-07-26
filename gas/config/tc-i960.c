@@ -64,7 +64,6 @@
 #include "as.h"
 
 #include "safe-ctype.h"
-#include "obstack.h"
 
 #include "opcode/i960.h"
 

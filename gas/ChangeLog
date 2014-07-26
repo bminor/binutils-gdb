@@ -1,3 +1,33 @@
+2014-07-26  Alan Modra  <amodra@gmail.com>
+
+	* config/bfin-parse.y: Don't include obstack.h.
+	* config/obj-aout.c: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-som.c: Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-rl78.c: Likewise.
+	* config/tc-rx.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* expr.c: Likewise.
+	* listing.c: Likewise.
+	* config/obj-elf.c (elf_file_symbol): Make name_length a size_t.
+	* config/tc-aarch64.c (symbol_locate): Likewise.
+	* config/tc-arm.c (symbol_locate): Likewise.
+	* config/tc-mmix.c (mmix_handle_mmixal): Make len_0 a size_t.
+	* config/tc-score.c (s3_build_score_ops_hsh): Make len a size_t.
+	(s3_build_dependency_insn_hsh): Likewise.
+	* config/tc-score7.c (s7_build_score_ops_hsh): Likewise.
+	(s7_build_dependency_insn_hsh): Likewise.
+	* frags.c (frag_grow): Make parameter a size_t, and use size_t locals.
+	(frag_new): Make parameter a size_t.
+	(frag_var_init): Make max_chars and var parameters size_t.
+	(frag_var, frag_variant): Likewise.
+	(frag_room): Return a size_t.
+	(frag_align_pattern): Make n_fill parameter a size_t.
+	* frags.h: Update function prototypes.
+	* symbols.c (save_symbol_name): Make name_length a size_t.
+
 2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
 	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
 	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>

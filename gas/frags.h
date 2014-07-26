@@ -127,27 +127,27 @@ extern void frag_append_1_char (int);
 
 void frag_init (void);
 fragS *frag_alloc (struct obstack *);
-void frag_grow (unsigned int nchars);
-char *frag_more (int nchars);
+void frag_grow (size_t nchars);
+char *frag_more (size_t nchars);
 void frag_align (int alignment, int fill_character, int max);
 void frag_align_pattern (int alignment, const char *fill_pattern,
-			 int n_fill, int max);
+			 size_t n_fill, int max);
 void frag_align_code (int alignment, int max);
-void frag_new (int old_frags_var_max_size);
+void frag_new (size_t old_frags_var_max_size);
 void frag_wane (fragS * fragP);
-int frag_room (void);
+size_t frag_room (void);
 
 char *frag_variant (relax_stateT type,
-		    int max_chars,
-		    int var,
+		    size_t max_chars,
+		    size_t var,
 		    relax_substateT subtype,
 		    symbolS * symbol,
 		    offsetT offset,
 		    char *opcode);
 
 char *frag_var (relax_stateT type,
-		int max_chars,
-		int var,
+		size_t max_chars,
+		size_t var,
 		relax_substateT subtype,
 		symbolS * symbol,
 		offsetT offset,

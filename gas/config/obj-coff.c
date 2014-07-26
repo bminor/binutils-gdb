@@ -22,7 +22,6 @@
 
 #include "as.h"
 #include "safe-ctype.h"
-#include "obstack.h"
 #include "subsegs.h"
 #include "struc-symbol.h"
 

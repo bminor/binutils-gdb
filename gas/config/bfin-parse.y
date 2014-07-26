@@ -20,7 +20,6 @@
 %{
 
 #include "as.h"
-#include <obstack.h>
 
 #include "bfin-aux.h"  /* Opcode generating auxiliaries.  */
 #include "libbfd.h"

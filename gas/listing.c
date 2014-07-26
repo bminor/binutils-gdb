@@ -89,7 +89,6 @@
 
 #include "as.h"
 #include "filenames.h"
-#include "obstack.h"
 #include "safe-ctype.h"
 #include "input-file.h"
 #include "subsegs.h"

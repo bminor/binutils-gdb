@@ -20,7 +20,6 @@
 
 #include "as.h"
 #include "struc-symbol.h"
-#include "obstack.h"
 #include "safe-ctype.h"
 #include "dwarf2dbg.h"
 #include "libbfd.h"
