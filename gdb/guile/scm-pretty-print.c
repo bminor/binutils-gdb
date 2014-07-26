@@ -111,11 +111,8 @@ static const char pretty_printer_worker_smob_name[] =
 static scm_t_bits pretty_printer_smob_tag;
 static scm_t_bits pretty_printer_worker_smob_tag;
 
-/* Global list of pretty-printers.  */
-static const char pretty_printer_list_name[] = "*pretty-printers*";
-
-/* The *pretty-printer* variable.  */
-static SCM pretty_printer_list_var;
+/* The global pretty-printer list.  */
+static SCM pretty_printer_list;
 
 /* gdb:pp-type-error.  */
 static SCM pp_type_error_symbol;
@@ -236,6 +233,29 @@ gdbscm_set_pretty_printer_enabled_x (SCM self, SCM enabled)
     = ppscm_get_pretty_printer_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
   pp_smob->enabled = scm_from_bool (gdbscm_is_true (enabled));
+
+  return SCM_UNSPECIFIED;
+}
+
+/* (pretty-printers) -> list
+   Returns the list of global pretty-printers.  */
+
+static SCM
+gdbscm_pretty_printers (void)
+{
+  return pretty_printer_list;
+}
+
+/* (set-pretty-printers! list) -> unspecified
+   Set the global pretty-printers list.  */
+
+static SCM
+gdbscm_set_pretty_printers_x (SCM printers)
+{
+  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (printers)), printers,
+		   SCM_ARG1, FUNC_NAME, _("list"));
+
+  pretty_printer_list = printers;
 
   return SCM_UNSPECIFIED;
 }
@@ -457,11 +477,8 @@ ppscm_find_pretty_printer_from_progspace (SCM value)
 static SCM
 ppscm_find_pretty_printer_from_gdb (SCM value)
 {
-  SCM pp_list, pp;
+  SCM pp = ppscm_search_pp_list (pretty_printer_list, value);
 
-  /* Fetch the global pretty printer list.  */
-  pp_list = scm_variable_ref (pretty_printer_list_var);
-  pp = ppscm_search_pp_list (pp_list, value);
   return pp;
 }
 
@@ -1074,6 +1091,15 @@ Create a <gdb:pretty-printer-worker> object.\n\
     "\
 Return #t if the object is a <gdb:pretty-printer-worker> object." },
 
+  { "pretty-printers", 0, 0, 0, gdbscm_pretty_printers,
+    "\
+Return the list of global pretty-printers." },
+
+  { "set-pretty-printers!", 1, 0, 0,
+    gdbscm_set_pretty_printers_x,
+    "\
+Set the list of global pretty-printers." },
+
   END_FUNCTIONS
 };
 
@@ -1094,12 +1120,7 @@ gdbscm_initialize_pretty_printers (void)
 
   gdbscm_define_functions (pretty_printer_functions, 1);
 
-  scm_c_define (pretty_printer_list_name, SCM_EOL);
-
-  pretty_printer_list_var
-    = scm_c_private_variable (gdbscm_module_name,
-			      pretty_printer_list_name);
-  gdb_assert (!gdbscm_is_false (pretty_printer_list_var));
+  pretty_printer_list = SCM_EOL;
 
   pp_type_error_symbol = scm_from_latin1_symbol ("gdb:pp-type-error");
 

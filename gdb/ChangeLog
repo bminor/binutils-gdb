@@ -1,5 +1,21 @@
 2014-07-26  Doug Evans  <xdje42@gmail.com>
 
+	PR guile/17177
+	* guile/lib/gdb.scm (pretty-printers): Export.
+	(set-pretty-printers!): Export.
+	* guile/lib/gdb/printing.scm (gdb module): Update.
+	(prepend-pretty-printer!, append-pretty-printer!): Update.
+	* guile/scm-pretty-print.c (pretty_printer_list_name): Delete.
+	(pretty_printer_list_var): Delete.
+	(pretty_printer_list): New static global.
+	(gdbscm_pretty_printers): New function.
+	(gdbscm_set_pretty_printers_x): New function.
+	(ppscm_find_pretty_printer_from_gdb): Update.
+	(pretty_printer_functions): Add pretty-printers, set-pretty-printers!.
+	(gdbscm_initialize_pretty_printers): Update.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
 	PR 17185
 	* configure.ac: Add check for header gc/gc.h.
 	Add check for function setenv.
