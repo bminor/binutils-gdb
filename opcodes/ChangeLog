@@ -1,5 +1,10 @@
 2014-08-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (ifetch): Do not align pc to 2 bytes.
+	(_print_insn_bfin): Add check for unaligned pc.
+
+2014-08-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (ifetch): New function.
 	(_print_insn_bfin, print_insn_bfin): Call new ifetch and return
 	-1 when it errors.

@@ -4645,7 +4645,7 @@ ifetch (bfd_vma pc, disassemble_info *outf, TIword *iw)
   bfd_byte buf[2];
   int status;
 
-  status = (*outf->read_memory_func) (pc & ~0x01, buf, 2, outf);
+  status = (*outf->read_memory_func) (pc, buf, 2, outf);
   if (status != 0)
     {
       (*outf->memory_error_func) (status, pc, outf);
@@ -4662,6 +4662,14 @@ _print_insn_bfin (bfd_vma pc, disassemble_info *outf)
   TIword iw0;
   TIword iw1;
   int rv = 0;
+
+  /* The PC must be 16-bit aligned.  */
+  if (pc & 1)
+    {
+      OUTS (outf, "ILLEGAL (UNALIGNED)");
+      /* For people dumping data, just re-align the return value.  */
+      return 1;
+    }
 
   if (ifetch (pc, outf, &iw0))
     return -1;
