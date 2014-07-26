@@ -1,5 +1,15 @@
 2014-08-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (struct private): Change int's to bfd_boolean's.
+	(decode_LOGI2op_0, decode_COMPI2opD_0, decode_COMPI2opP_0,
+	decode_dagMODik_0, decode_LDIMMhalf_0, decode_linkage_0):
+	Change assignment of 1 to priv->comment to TRUE.
+	(print_insn_bfin): Change legal to a bfd_boolean.  Change
+	assignment of 0/1 with priv comment and parallel and legal
+	to FALSE/TRUE.
+
+2014-08-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (OUT): Define.
 	(decode_CC2stat_0): Declare new op_names array.
 	Replace multiple if statements with a single one.
