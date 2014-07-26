@@ -1218,6 +1218,11 @@ fi
 AC_SUBST(GUILE_CPPFLAGS)
 AC_SUBST(GUILE_LIBS)
 
+# PR 17185, see if we can get the libgc version to see if we need
+# to apply the workaround.
+AC_CHECK_HEADERS(gc/gc.h)
+AC_CHECK_FUNCS([setenv])
+
 # --------------------- #
 # Check for libmcheck.  #
 # --------------------- #

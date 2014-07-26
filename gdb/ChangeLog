@@ -1,3 +1,12 @@
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR 17185
+	* configure.ac: Add check for header gc/gc.h.
+	Add check for function setenv.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* guile/guile.c (_initialize_guile): Add workaround for libgc 7.4.0.
+
 2014-07-25  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Also check the compressed ISA

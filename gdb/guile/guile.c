@@ -35,6 +35,9 @@
 #ifdef HAVE_GUILE
 #include "guile.h"
 #include "guile-internal.h"
+#ifdef HAVE_GC_GC_H
+#include <gc/gc.h> /* PR 17185 */
+#endif
 #endif
 
 /* The Guile version we're using.
@@ -749,6 +752,18 @@ _initialize_guile (void)
   /* The Python support puts the C side in module "_gdb", leaving the Python
      side to define module "gdb" which imports "_gdb".  There is evidently no
      similar convention in Guile so we skip this.  */
+
+  /* PR 17185 There are problems with using libgc 7.4.0.
+     Copy over the workaround Guile uses (Guile is working around a different
+     problem, but the workaround is the same).  */
+#if (GC_VERSION_MAJOR == 7 && GC_VERSION_MINOR == 4 && GC_VERSION_MICRO == 0)
+  /* The bug is only known to appear with pthreads.  We assume any system
+     using pthreads also uses setenv (and not putenv).  That is why we don't
+     have a similar call to putenv here.  */
+#if defined (HAVE_SETENV)
+  setenv ("GC_MARKERS", "1", 1);
+#endif
+#endif
 
   /* scm_with_guile is the most portable way to initialize Guile.
      Plus we need to initialize the Guile support while in Guile mode
