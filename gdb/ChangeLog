@@ -2,6 +2,29 @@
 	    Doug Evans  <xdje42@gmail.com>
 
 	PR guile/17146
+	* acinclude.m4 (GDB_GUILE_PROGRAM_NAMES): New macro.
+	(GDB_GUILD_TARGET_FLAG, GDB_TRY_GUILD): New macros.
+	* configure.ac: Try to use guild to compile an scm file, if it fails
+	then disable guile support.
+	* configure: Regenerate.
+	* data-directory/Makefile.in (GUILE_SOURCE_FILES): Renamed from
+	GUILE_FILE_LIST.
+	(GUILE_COMPILED_FILES): New variable.
+	(GUILE_FILES) Update.
+	(GUILD, GUILD_TARGET_FLAG, GUILD_COMPILE_FLAGS): New variables.
+	(stamp-guile): Compile scm files.
+	* guile/guile.c (boot_guile_support): New function.
+	(standard_throw_args_p): New function.
+	(print_standard_throw_error, print_throw_error): New functions.
+	(handle_boot_error): New function.
+	(initialize_scheme_side): Rewrite to call boot_guile_support.
+	* guile/lib/gdb/boot.scm: Update %load-compiled-path.  Load gdb.go.
+	* guile/lib/gdb/init.scm (%silence-compiler-warnings%): New function.
+
+2014-07-26  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17146
 	* data-directory/Makefile.in (GUILE_FILES): Add support.scm.
 	* guile/lib/gdb/support.scm: New file.
 	* guile/guile.c (gdbscm_init_module_name): Change to "gdb".

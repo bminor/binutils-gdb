@@ -147,6 +147,12 @@
   (set! %orig-input-port (set-current-input-port (input-port)))
   (set! %orig-output-port (set-current-output-port (output-port)))
   (set! %orig-error-port (set-current-error-port (error-port))))
+
+;; Dummy routine to silence "possibly unused local top-level variable"
+;; warnings from the compiler.
+
+(define-public (%silence-compiler-warnings%)
+  (list %print-exception-with-stack %initialize!))
 
 ;; Public routines.
 
