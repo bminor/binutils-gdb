@@ -658,9 +658,13 @@ TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
 RDYNAMIC
 ALLOCA
+HAVE_GUILE_FALSE
+HAVE_GUILE_TRUE
 GUILE_LIBS
 GUILE_CPPFLAGS
 pkg_config_prog_path
+HAVE_PYTHON_FALSE
+HAVE_PYTHON_TRUE
 PYTHON_LIBS
 PYTHON_CPPFLAGS
 PYTHON_CFLAGS
@@ -8686,6 +8690,14 @@ fi
 
 
 
+ if test "${have_libpython}" != no; then
+  HAVE_PYTHON_TRUE=
+  HAVE_PYTHON_FALSE='#'
+else
+  HAVE_PYTHON_TRUE='#'
+  HAVE_PYTHON_FALSE=
+fi
+
 
 # -------------------- #
 # Check for libguile.  #
@@ -9101,6 +9113,14 @@ else
   CONFIG_SRCS="$CONFIG_SRCS guile/guile.c"
 fi
 
+
+ if test "${have_libguile}" != no; then
+  HAVE_GUILE_TRUE=
+  HAVE_GUILE_FALSE='#'
+else
+  HAVE_GUILE_TRUE='#'
+  HAVE_GUILE_FALSE=
+fi
 
 
 # PR 17185, see if we can get the libgc version to see if we need
@@ -15473,6 +15493,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${GMAKE_TRUE}" && test -z "${GMAKE_FALSE}"; then
   as_fn_error "conditional \"GMAKE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_PYTHON_TRUE}" && test -z "${HAVE_PYTHON_FALSE}"; then
+  as_fn_error "conditional \"HAVE_PYTHON\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_GUILE_TRUE}" && test -z "${HAVE_GUILE_FALSE}"; then
+  as_fn_error "conditional \"HAVE_GUILE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

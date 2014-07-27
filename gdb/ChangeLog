@@ -1,5 +1,19 @@
 2014-07-26  Doug Evans  <xdje42@gmail.com>
 
+	PR build/17105
+	* configure.ac: Add AM_CONDITIONALs for HAVE_PYTHON, HAVE_GUILE.
+	* configure: Regenerate.
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Renamed from
+	PYTHON_FILES.
+	(PYTHON_FILES): New variable.
+	(GUILE_FILE_LIST): Renamed from GUILE_FILES.
+	(GUILE_FILES): New variable.
+	(stamp-python, install-python, uninstall-python): Handle empty
+	file list.
+	(stamp-guile, install-guile, uninstall-guile): Ditto.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
 	PR guile/17177
 	* guile/lib/gdb.scm (pretty-printers): Export.
 	(set-pretty-printers!): Export.
