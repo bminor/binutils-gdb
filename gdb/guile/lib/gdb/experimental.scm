@@ -22,8 +22,7 @@
 ;; E.g., (gdb experimental ports), etc.
 
 (define-module (gdb experimental)
-  #:use-module (gdb)
-  #:use-module (gdb init))
+  #:use-module (gdb))
 
 ;; These are defined in C.
 (define-public with-gdb-output-to-port (@@ (gdb) %with-gdb-output-to-port))

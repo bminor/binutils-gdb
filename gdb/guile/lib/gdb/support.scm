@@ -1,4 +1,4 @@
-;; Bootstrap the Scheme side of the gdb module.
+;; Internal support routines.
 ;;
 ;; Copyright (C) 2014 Free Software Foundation, Inc.
 ;;
@@ -17,14 +17,17 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;; This file is loaded with scm_c_primitive_load, which is ok, but files
-;; loaded with it are not compiled.  So we do very little here, and do
-;; most of the initialization elsewhere.
+(define-module (gdb support))
 
-;; guile-data-directory is provided by the C code.
-(add-to-load-path (guile-data-directory))
-(load-from-path "gdb.scm")
+;; Symbolic values for the ARG parameter of assert-type.
 
-;; Now that the Scheme side support is loaded, initialize it.
-(let ((init-proc (@@ (gdb) %initialize!)))
-  (init-proc))
+(define-public SCM_ARG1 1)
+(define-public SCM_ARG2 2)
+
+;; Utility to check the type of an argument, akin to SCM_ASSERT_TYPE.
+
+(define-public (assert-type test-result arg pos func-name expecting)
+  (if (not test-result)
+      (scm-error 'wrong-type-arg func-name
+		 "Wrong type argument in position ~a (expecting ~a): ~s"
+		 (list pos expecting arg) (list arg))))

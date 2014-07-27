@@ -16,8 +16,8 @@
 
 (define-module (gdb types)
   #:use-module (gdb)
-  #:use-module (gdb init)
-  #:use-module (gdb iterator))
+  #:use-module (gdb iterator)
+  #:use-module (gdb support))
 
 (define-public (type-has-field-deep? type field-name)
   "Return #t if the type, including baseclasses, has the specified field.
@@ -50,8 +50,8 @@
       (set! type (type-target type)))
   (set! type (type-strip-typedefs type))
 
-  (%assert-type (memq (type-code type) (list TYPE_CODE_STRUCT TYPE_CODE_UNION))
-		type SCM_ARG1 'type-has-field-deep?)
+  (assert-type (memq (type-code type) (list TYPE_CODE_STRUCT TYPE_CODE_UNION))
+	       type SCM_ARG1 'type-has-field-deep? "struct or union")
 
   (search-class type))
 
@@ -69,8 +69,8 @@
   Raises:
     wrong-type-arg: The type is not an enum."
 
-  (%assert-type (= (type-code enum-type) TYPE_CODE_ENUM)
-		enum-type SCM_ARG1 'make-enum-hashtable)
+  (assert-type (= (type-code enum-type) TYPE_CODE_ENUM)
+	       enum-type SCM_ARG1 'make-enum-hashtable "enum")
   (let ((htab (make-hash-table)))
     (for-each (lambda (enum)
 		(hash-set! htab (field-name enum) (field-enumval enum)))
