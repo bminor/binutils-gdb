@@ -1,3 +1,17 @@
+2014-07-26  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17146
+	* data-directory/Makefile.in (GUILE_FILES): Add support.scm.
+	* guile/lib/gdb/support.scm: New file.
+	* guile/guile.c (gdbscm_init_module_name): Change to "gdb".
+	* guile/lib/gdb.scm: Load gdb/init.scm as an include file.
+	All uses updated.
+	* guile/lib/gdb/init.scm (SCM_ARG1, SCM_ARG2): Moved to support.scm.
+	All uses updated.
+	(%assert-type): Ditto, and renamed to assert-type.
+	(%exception-print-style): Delete.
+
 2014-07-26  Doug Evans  <xdje42@gmail.com>
 
 	PR build/17105

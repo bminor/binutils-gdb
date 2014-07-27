@@ -120,7 +120,7 @@ static SCM to_string_keyword;
 
 /* The name of the various modules (without the surrounding parens).  */
 const char gdbscm_module_name[] = "gdb";
-const char gdbscm_init_module_name[] = "gdb init";
+const char gdbscm_init_module_name[] = "gdb";
 
 /* The name of the bootstrap file.  */
 static const char boot_scm_filename[] = "boot.scm";

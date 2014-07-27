@@ -1,3 +1,9 @@
+2014-07-26  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17146
+	* gdb.guile/types-module.exp: Add tests for wrong type arguments.
+
 2014-07-25  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/double-prompt-target-event-error.exp

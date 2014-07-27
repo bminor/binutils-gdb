@@ -87,6 +87,7 @@ GUILE_FILE_LIST = \
 	gdb/init.scm \
 	gdb/iterator.scm \
 	gdb/printing.scm \
+	gdb/support.scm \
 	gdb/types.scm
 
 @HAVE_GUILE_TRUE@GUILE_FILES = $(GUILE_FILE_LIST)
