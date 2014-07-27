@@ -150,7 +150,7 @@ pascm_print_param_smob (SCM self, SCM port, scm_print_state *pstate)
   if (! pascm_is_valid (p_smob))
     scm_puts (" {invalid}", port);
 
-  gdbscm_printf (port, " %s", pascm_param_type_name (p_smob->type));
+  gdbscm_printf (port, " %s ", pascm_param_type_name (p_smob->type));
 
   value = pascm_param_value (p_smob->type, &p_smob->value,
 			     GDBSCM_ARG_NONE, NULL);

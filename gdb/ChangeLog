@@ -1,5 +1,9 @@
 2014-07-27  Doug Evans  <xdje42@gmail.com>
 
+	* guile/scm-param.c (pascm_print_param_smob): Fix output.
+
+2014-07-27  Doug Evans  <xdje42@gmail.com>
+
 	* guile/guile.c (gdbscm_execute_gdb_command): Fix typo in comment.
 
 2014-07-26  Ludovic Courtès  <ludo@gnu.org>
