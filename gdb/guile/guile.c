@@ -304,7 +304,7 @@ gdbscm_source_script (const struct extension_language_defn *extlang,
     }
 }
 
-/* (execute string [#:from-tty boolean] [#:to-string boolean\
+/* (execute string [#:from-tty boolean] [#:to-string boolean])
    A Scheme function which evaluates a string using the gdb CLI.  */
 
 static SCM
