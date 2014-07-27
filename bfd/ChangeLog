@@ -1,3 +1,7 @@
+2014-07-27  Anthony Green  <green@moxielogic.org>
+
+	* config.bfd: Add moxie-*-moxiebox*.
+
 2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	Add or reactivate or1k-*-rtems*

@@ -1,3 +1,11 @@
+2014-07-27  Anthony Green  <green@moxielogic.com>
+
+	* configure.tgt (generic_target): Add moxie-*-moxiebox*
+	* config/tc-moxie.c: Remove moxie_target_format.
+	(md_begin): Set default target_big_endian.
+	* config/tc-moxie.h: Only set TARGET_BYTES_BIG_ENDIAN if unset.
+	(TARGET_FORMAT): Set based on target_big_endian.
+
 2014-07-26  Alan Modra  <amodra@gmail.com>
 
 	* config/bfin-parse.y: Don't include obstack.h.

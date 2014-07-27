@@ -446,6 +446,10 @@ case "${targ}" in
     targ_selvecs=moxie_elf32_le_vec
     ;;
 
+  moxie-*-moxiebox*)
+    targ_defvec=moxie_elf32_le_vec
+    ;;
+
   h8300*-*-rtemscoff*)
     targ_defvec=h8300_coff_vec
     targ_underscore=yes

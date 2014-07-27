@@ -247,6 +247,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32microblazeel.c \
 	eelf32microblaze.c \
 	eelf32moxie.c \
+	emoxiebox.c \
 	eelf32mt.c \
 	eelf32or1k.c \
 	eelf32or1k_linux.c \
@@ -1158,6 +1159,9 @@ eelf32mipswindiss.c: $(srcdir)/emulparams/elf32mipswindiss.sh $(ELF_DEPS) \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32moxie.c: $(srcdir)/emulparams/elf32moxie.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+emoxiebox.c: $(srcdir)/emulparams/moxiebox.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32mt.c: $(srcdir)/emulparams/elf32mt.sh \

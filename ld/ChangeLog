@@ -1,3 +1,11 @@
+2014-07-27  Anthony Green  <green@moxielogic.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add moxiebox support.
+	(emoxiebox.c): Build.
+	* configure.tgt (targ_extra_ofiles): Add moxie-*-moxiebox*.
+	* emulparams/moxiebox.sh (TEXT_START_ADDR): New file.
+	* Makefile.in: Rebuilt.
+
 2014-07-17  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
 
 	* emulparams/elf32or1k_linux.sh (TEXT_START_ADDR): Increase from
