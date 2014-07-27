@@ -1377,7 +1377,16 @@ Otherwise return @code{#f}.
 
 @deffn {Scheme Procedure} set-pretty-printer-enabled! pretty-printer flag
 Set the enabled flag of @var{pretty-printer} to @var{flag}.
-The value returned in unspecified.
+The value returned is unspecified.
+@end deffn
+
+@deffn {Scheme Procedure} pretty-printers
+Return the list of global pretty-printers.
+@end deffn
+
+@deffn {Scheme Procedure} set-pretty-printers! pretty-printers
+Set the list of global pretty-printers to @var{pretty-printers}.
+The value returned is unspecified.
 @end deffn
 
 @deffn {Scheme Procedure} make-pretty-printer-worker display-hint to-string children
@@ -1476,27 +1485,36 @@ printer exists, then this returns @code{#f}.
 @subsubsection Selecting Guile Pretty-Printers
 @cindex selecting guile pretty-printers
 
-The Guile list @code{*pretty-printers*} contains a set of
-@code{<gdb:pretty-printer>} registered objects.
-Printers in this list are called @code{global}
-printers, they're available when debugging any inferior.
-In addition to this, each @code{<gdb:objfile>} object contains its
-own set of pretty-printers (@pxref{Objfiles In Guile}).
+There are three sets of pretty-printers that @value{GDBN} searches:
+
+@itemize @bullet
+@item
+Per-objfile list of pretty-printers (@pxref{Objfiles In Guile}).
+@item
+Per-progspace list of pretty-printers (@pxref{Progspaces In Guile}).
+@item
+The global list of pretty-printers (@pxref{Guile Pretty Printing API}).
+These printers are available when debugging any inferior.
+@end itemize
 
 Pretty-printer lookup is done by passing the value to be printed to the
 lookup function of each enabled object in turn.
 Lookup stops when a lookup function returns a non-@code{#f} value
 or when the list is exhausted.
+Lookup functions must return either a @code{<gdb:pretty-printer-worker>}
+object or @code{#f}.  Otherwise an exception is thrown.
 
 @value{GDBN} first checks the result of @code{objfile-pretty-printers}
 of each @code{<gdb:objfile>} in the current program space and iteratively
 calls each enabled lookup function in the list for that @code{<gdb:objfile>}
 until a non-@code{#f} object is returned.
-Lookup functions must return either a @code{<gdb:pretty-printer-worker>}
-object or @code{#f}.  Otherwise an exception is thrown.
 If no pretty-printer is found in the objfile lists, @value{GDBN} then
-searches the global pretty-printer list, calling each enabled function
-until a non-@code{#f} object is returned.
+searches the result of @code{progspace-pretty-printers} of the current
+program space, calling each enabled function until a non-@code{#f} object
+is returned.
+After these lists have been exhausted, it tries the global pretty-printers
+list, obtained with @code{pretty-printers}, again calling each enabled
+function until a non-@code{#f} object is returned.
 
 The order in which the objfiles are searched is not specified.  For a
 given list, functions are always invoked from the head of the list,

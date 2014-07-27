@@ -319,6 +319,8 @@
  set-pretty-printer-enabled!
  make-pretty-printer-worker
  pretty-printer-worker?
+ pretty-printers
+ set-pretty-printers!
 
  ;; scm-progspace.c
 
