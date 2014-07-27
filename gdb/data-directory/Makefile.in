@@ -80,7 +80,8 @@ PYTHON_FILE_LIST = \
 
 GUILE_DIR = guile
 GUILE_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(GUILE_DIR)
-GUILE_FILE_LIST = \
+
+GUILE_SOURCE_FILES = \
 	./gdb.scm \
 	gdb/boot.scm \
 	gdb/experimental.scm \
@@ -90,8 +91,30 @@ GUILE_FILE_LIST = \
 	gdb/support.scm \
 	gdb/types.scm
 
-@HAVE_GUILE_TRUE@GUILE_FILES = $(GUILE_FILE_LIST)
+GUILE_COMPILED_FILES = \
+	./gdb.go \
+	gdb/experimental.go \
+	gdb/iterator.go \
+	gdb/printing.go \
+	gdb/support.go \
+	gdb/types.go
+
+@HAVE_GUILE_TRUE@GUILE_FILES = $(GUILE_SOURCE_FILES) $(GUILE_COMPILED_FILES)
 @HAVE_GUILE_FALSE@GUILE_FILES =
+
+GUILD = @GUILD@
+GUILD_TARGET_FLAG = @GUILD_TARGET_FLAG@
+
+# Flags passed to 'guild compile'.
+# Note: We can't use -Wunbound-variable because all the variables
+# defined in C aren't visible when we compile.
+# Note: To work around a guile 2.0.5 issue (it can't find gdb/init.scm even if
+# we pass -L <dir>) we have to compile in the directory containing gdb.scm.
+# We still need to pass "-L ." so that other modules are found.
+GUILD_COMPILE_FLAGS = \
+	$(GUILD_TARGET_FLAG) \
+	-Warity-mismatch -Wformat -Wunused-toplevel \
+	-L .
 
 SYSTEM_GDBINIT_DIR = system-gdbinit
 SYSTEM_GDBINIT_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(SYSTEM_GDBINIT_DIR)
@@ -222,14 +245,21 @@ uninstall-python:
 	  done ; \
 	fi
 
-stamp-guile: Makefile $(GUILE_FILES)
+stamp-guile: Makefile $(GUILE_SOURCE_FILES)
 	rm -rf ./$(GUILE_DIR)
-	files='$(GUILE_FILES)' ; \
-	if test "x$$files" != x ; then \
+	if test "x$(GUILE_FILES)" != x ; then \
+	  files='$(GUILE_SOURCE_FILES)' ; \
 	  for file in $$files ; do \
 	    dir=`echo "$$file" | sed 's,/[^/]*$$,,'` ; \
 	    $(INSTALL_DIR) ./$(GUILE_DIR)/$$dir ; \
 	    $(INSTALL_DATA) $(GUILE_SRCDIR)/$$file ./$(GUILE_DIR)/$$dir ; \
+	  done ; \
+	  files='$(GUILE_COMPILED_FILES)' ; \
+	  cd ./$(GUILE_DIR) ; \
+	  for go in $$files ; do \
+	    source="`echo $$go | sed 's/\.go$$/.scm/'`" ; \
+	    echo $(GUILD) compile $(GUILD_COMPILE_FLAGS) -o "$$go" "$$source" ; \
+	    $(GUILD) compile $(GUILD_COMPILE_FLAGS) -o "$$go" "$$source" || exit 1 ; \
 	  done ; \
 	fi
 	touch $@
