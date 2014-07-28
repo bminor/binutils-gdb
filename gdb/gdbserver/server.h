@@ -71,7 +71,6 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 /* A type used for binary buffers.  */
 typedef unsigned char gdb_byte;
 
-#include "ptid.h"
 #include "buffer.h"
 #include "xml-utils.h"
 

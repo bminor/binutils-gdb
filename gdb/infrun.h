@@ -18,7 +18,6 @@
 #ifndef INFRUN_H
 #define INFRUN_H 1
 
-#include "ptid.h"
 #include "symtab.h"
 
 struct target_waitstatus;

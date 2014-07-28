@@ -20,8 +20,6 @@
 #ifndef COMMON_LINUX_OSDATA_H
 #define COMMON_LINUX_OSDATA_H
 
-#include "ptid.h"
-
 extern int linux_common_core_of_thread (ptid_t ptid);
 extern LONGEST linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
 					 ULONGEST offset, ULONGEST len);

@@ -21,7 +21,6 @@
 #define WAITSTATUS_H
 
 #include "common-utils.h"
-#include "ptid.h"
 #include "gdb_signals.h"
 
 /* Stuff for target_wait.  */

@@ -1,5 +1,15 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include ptid.h.
+	* defs.h: Do not include ptid.h.
+	* inferior.h: Likewise.
+	* infrun.h: Likewise.
+	* nat/linux-btrace.h: Likewise.
+	* nat/linux-osdata.h: Likewise.
+	* target/waitstatus.h: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include gdb_locale.h.
 	* defs.h: Do not include gdb_locale.h.
 

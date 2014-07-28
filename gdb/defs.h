@@ -113,8 +113,6 @@ typedef bfd_vma CORE_ADDR;
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-#include "ptid.h"
-
 /* * Enable xdb commands if set.  */
 extern int xdb_commands;
 

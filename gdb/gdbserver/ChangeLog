@@ -1,5 +1,10 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* server.h: Do not include ptid.h.
+	* notif.h: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* server.h: Do not include gdb_locale.h.
 
 2014-08-07  Gary Benson  <gbenson@redhat.com>

@@ -24,7 +24,6 @@
 
 #include "btrace-common.h"
 #include "vec.h"
-#include "ptid.h"
 #include <stdint.h>
 
 #if HAVE_LINUX_PERF_EVENT_H
