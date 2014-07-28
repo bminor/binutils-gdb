@@ -1,3 +1,8 @@
+2014-07-28  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Report no hardware
+	breakpoint support correctly.
+
 2014-07-26  Ludovic Courtès  <ludo@gnu.org>
 	    Doug Evans  <xdje42@gmail.com>
 

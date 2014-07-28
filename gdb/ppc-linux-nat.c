@@ -1473,6 +1473,11 @@ ppc_linux_can_use_hw_breakpoint (struct target_ops *self,
     }
   else if (type == bp_hardware_breakpoint)
     {
+      if (total_hw_bp == 0)
+	{
+	  /* No hardware breakpoint support. */
+	  return 0;
+	}
       if (cnt > total_hw_bp)
 	return -1;
     }
