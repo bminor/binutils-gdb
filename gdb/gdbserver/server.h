@@ -32,9 +32,6 @@
 #endif
 #include <setjmp.h>
 
-/* For gnulib's PATH_MAX.  */
-#include "pathmax.h"
-
 #include <string.h>
 
 #ifdef HAVE_ALLOCA_H

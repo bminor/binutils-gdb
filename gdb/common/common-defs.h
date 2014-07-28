@@ -33,5 +33,6 @@
 #include <stddef.h>
 #include "ansidecl.h"
 #include "libiberty.h"
+#include "pathmax.h"
 
 #endif /* COMMON_DEFS_H */

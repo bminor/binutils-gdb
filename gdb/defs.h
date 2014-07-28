@@ -48,9 +48,6 @@
 
 #include <unistd.h>
 
-/* For gnulib's PATH_MAX.  */
-#include "pathmax.h"
-
 #include <fcntl.h>
 
 #include "gdb_locale.h"
