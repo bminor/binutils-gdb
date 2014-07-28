@@ -118,6 +118,8 @@ static struct target_ops debug_target;
 
 static void init_dummy_target (void);
 
+static void update_current_target (void);
+
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the
    array.  */
@@ -173,6 +175,13 @@ int may_stop = 1;
 /* Non-zero if we want to see trace of target level stuff.  */
 
 static unsigned int targetdebug = 0;
+
+static void
+set_targetdebug  (char *args, int from_tty, struct cmd_list_element *c)
+{
+  update_current_target ();
+}
+
 static void
 show_targetdebug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
@@ -3565,9 +3574,8 @@ initialize_targets (void)
 Set target debugging."), _("\
 Show target debugging."), _("\
 When non-zero, target debugging is enabled.  Higher numbers are more\n\
-verbose.  Changes do not take effect until the next \"run\" or \"target\"\n\
-command."),
-			     NULL,
+verbose."),
+			     set_targetdebug,
 			     show_targetdebug,
 			     &setdebuglist, &showdebuglist);
 

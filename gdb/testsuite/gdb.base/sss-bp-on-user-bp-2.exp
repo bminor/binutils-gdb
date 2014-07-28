@@ -76,7 +76,7 @@ if { $hardware_step } {
     return
 }
 
-gdb_test_no_output "set debug target 0"
+gdb_test "set debug target 0" "->to_log_command.*\\)"
 
 set line_re "\[^\r\n\]*"
 

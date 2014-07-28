@@ -1,3 +1,8 @@
+2014-08-04  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Debugging Output): Update for change to "set debug
+	target".
+
 2014-08-01  Masaki Muranaka  <monaka@monami-software.com>
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>.

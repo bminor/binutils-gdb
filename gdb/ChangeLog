@@ -1,3 +1,9 @@
+2014-08-04  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (set_targetdebug): New function.
+	(initialize_targets): Pass set_targetdebug when creating "set
+	debug target".
+
 2014-08-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (resolve_dynamic_struct): Do not generate an error
