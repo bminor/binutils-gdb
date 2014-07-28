@@ -54,9 +54,6 @@
 
 #include "gdb_wchar.h"
 
-/* For ``enum gdb_signal''.  */
-#include "gdb/signals.h"
-
 #include "ui-file.h"
 
 #include "host-defs.h"

@@ -84,7 +84,6 @@ typedef long long LONGEST;
 typedef unsigned long long ULONGEST;
 
 #include "regcache.h"
-#include "gdb/signals.h"
 #include "gdb_signals.h"
 #include "target.h"
 #include "mem-break.h"
