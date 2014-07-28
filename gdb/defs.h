@@ -53,11 +53,6 @@
 
 #include <fcntl.h>
 
-/* First include ansidecl.h so we can use the various macro definitions
-   here and in all subsequent file inclusions.  */
-
-#include "ansidecl.h"
-
 #include "gdb_locale.h"
 
 #include "gdb_wchar.h"

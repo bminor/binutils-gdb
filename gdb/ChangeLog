@@ -1,5 +1,12 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include ansidecl.h.
+	* defs.h: Do not include ansidecl.h.
+	* common/buffer.h: Likewise.
+	* common/common-utils.h: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include stddef.h.
 	* defs.h: Do not include stddef.h.
 	* common/common-utils.h: Likewise.

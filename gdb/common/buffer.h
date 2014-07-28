@@ -21,7 +21,6 @@
 #define BUFFER_H
 
 #include <string.h>
-#include "ansidecl.h"
 
 struct buffer
 {

@@ -26,7 +26,6 @@
 #endif
 
 #include "libiberty.h"
-#include "ansidecl.h"
 #include "version.h"
 
 #ifdef HAVE_ERRNO_H

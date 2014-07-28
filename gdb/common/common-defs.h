@@ -31,5 +31,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include "ansidecl.h"
 
 #endif /* COMMON_DEFS_H */
