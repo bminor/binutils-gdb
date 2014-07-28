@@ -26,7 +26,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include <stddef.h>
 #include <inttypes.h>
 #include <stdint.h>
 

@@ -1,5 +1,23 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include stddef.h.
+	* defs.h: Do not include stddef.h.
+	* common/common-utils.h: Likewise.
+	* amd64fbsd-nat.c: Likewise.
+	* bcache.c: Likewise.
+	* charset.c: Likewise.
+	* common/buffer.h: Likewise.
+	* common/vec.h: Likewise.
+	* i386bsd-nat.c: Likewise.
+	* nat/linux-btrace.h: Likewise.
+	* ppcfbsd-nat.c: Likewise.
+	* ppcnbsd-tdep.h: Likewise.
+	* ppcobsd-nat.c: Likewise.
+	* ppcobsd-tdep.h: Likewise.
+	* python/py-gdb-readline.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include stdarg.h.
 	* defs.h: Do not include stdarg.h.
 	* ada-lang.c: Likewise.

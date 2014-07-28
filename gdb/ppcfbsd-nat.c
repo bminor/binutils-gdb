@@ -23,7 +23,6 @@
 #include "regcache.h"
 
 #include "gdb_assert.h"
-#include <stddef.h>
 #include <sys/types.h>
 #include <sys/procfs.h>
 #include <sys/ptrace.h>

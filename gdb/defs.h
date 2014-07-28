@@ -46,8 +46,6 @@
    included, so it's ok to blank out gstdint.h.  */
 #define GCC_GENERATED_STDINT_H 1
 
-#include <stddef.h>
-
 #include <unistd.h>
 
 /* For gnulib's PATH_MAX.  */

@@ -20,8 +20,6 @@
 #if !defined (GDB_VEC_H)
 #define GDB_VEC_H
 
-#include <stddef.h>
-
 #include <string.h>
 #include "gdb_assert.h"
 

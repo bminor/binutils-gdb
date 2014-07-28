@@ -1,5 +1,11 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* linux-x86-low.c: Do not include stddef.h.
+	* lynx-ppc-low.c: Likewise.
+	* tracepoint.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* server.h: Do not include stdarg.h.
 	* nto-low.c: Likewise.
 

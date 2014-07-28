@@ -24,7 +24,6 @@
 
 #include "gdb_assert.h"
 #include <signal.h>
-#include <stddef.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/sysctl.h>

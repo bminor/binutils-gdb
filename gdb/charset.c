@@ -29,7 +29,6 @@
 #include "arch-utils.h"
 #include "gdb_vecs.h"
 
-#include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 

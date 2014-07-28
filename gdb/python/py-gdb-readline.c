@@ -24,8 +24,6 @@
 #include "cli/cli-utils.h"
 #include <string.h>
 
-#include <stddef.h>
-
 /* Readline function suitable for PyOS_ReadlineFunctionPointer, which
    is used for Python's interactive parser and raw_input.  In both
    cases, sys_stdin and sys_stdout are always stdin and stdout
