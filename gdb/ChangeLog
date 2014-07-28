@@ -1,5 +1,15 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include stdarg.h.
+	* defs.h: Do not include stdarg.h.
+	* ada-lang.c: Likewise.
+	* common/common-utils.h: Likewise.
+	* guile/scm-string.c: Likewise.
+	* guile/scm-utils.c: Likewise.
+	* m32c-tdep.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include stdlib.h.
 	* defs.h: Do not include stdlib.h.
 	* addrmap.c: Likewise.

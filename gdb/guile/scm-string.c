@@ -21,7 +21,6 @@
    conventions, et.al.  */
 
 #include "defs.h"
-#include <stdarg.h>
 #include "charset.h"
 #include "guile-internal.h"
 

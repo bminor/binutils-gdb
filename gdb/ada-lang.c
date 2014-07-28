@@ -21,7 +21,6 @@
 #include "defs.h"
 #include <string.h>
 #include <ctype.h>
-#include <stdarg.h>
 #include "demangle.h"
 #include "gdb_regex.h"
 #include "frame.h"

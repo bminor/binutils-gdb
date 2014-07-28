@@ -1,5 +1,10 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* server.h: Do not include stdarg.h.
+	* nto-low.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* server.h: Do not include stdlib.h.
 	* inferiors.c: Likewise.
 	* linux-low.c: Likewise.

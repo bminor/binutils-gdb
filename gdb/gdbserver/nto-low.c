@@ -28,7 +28,6 @@
 #include <spawn.h>
 #include <sys/procfs.h>
 #include <sys/auxv.h>
-#include <stdarg.h>
 #include <sys/iomgr.h>
 #include <sys/neutrino.h>
 

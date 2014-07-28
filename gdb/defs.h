@@ -90,8 +90,6 @@
 #define O_BINARY 0
 #endif
 
-#include <stdarg.h>		/* For va_list.  */
-
 #include "libiberty.h"
 #include "hashtab.h"
 
