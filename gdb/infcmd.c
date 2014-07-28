@@ -1315,7 +1315,9 @@ until_next_command (int from_tty)
 	error (_("Execution is not within a known function."));
 
       tp->control.step_range_start = BMSYMBOL_VALUE_ADDRESS (msymbol);
-      tp->control.step_range_end = pc;
+      /* The upper-bound of step_range is exclusive.  In order to make PC
+	 within the range, set the step_range_end with PC + 1.  */
+      tp->control.step_range_end = pc + 1;
     }
   else
     {
