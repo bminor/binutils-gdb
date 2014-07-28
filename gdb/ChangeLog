@@ -1,3 +1,8 @@
+2014-07-29  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/17206
+	* infcmd.c (until_next_command): Set step_range_end to PC + 1.
+
 2014-07-28  Doug Evans  <xdje42@gmail.com>
 
 	PR guile/17203
