@@ -1,5 +1,14 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include common-utils.h.
+	* defs.h: Do not include common-utils.h.
+	* common/gdb_assert.h: Likewise.
+	* darwin-nat.h: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* target/waitstatus.h: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include ptid.h.
 	* defs.h: Do not include ptid.h.
 	* inferior.h: Likewise.

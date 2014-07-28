@@ -26,7 +26,6 @@
 #endif
 
 #include "linux-btrace.h"
-#include "common-utils.h"
 #include "gdb_assert.h"
 #include "regcache.h"
 #include "gdbthread.h"

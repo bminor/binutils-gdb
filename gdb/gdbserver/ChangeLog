@@ -1,5 +1,9 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* server.h: Do not include common-utils.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* server.h: Do not include ptid.h.
 	* notif.h: Likewise.
 

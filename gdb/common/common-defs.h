@@ -37,5 +37,6 @@
 #include "gdb/signals.h"
 #include "gdb_locale.h"
 #include "ptid.h"
+#include "common-utils.h"
 
 #endif /* COMMON_DEFS_H */

@@ -131,7 +131,6 @@ extern int handle_target_event (int err, gdb_client_data client_data);
 
 #include "remote-utils.h"
 
-#include "common-utils.h"
 #include "utils.h"
 #include "debug.h"
 
