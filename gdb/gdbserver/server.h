@@ -74,7 +74,6 @@ typedef unsigned char gdb_byte;
 #include "ptid.h"
 #include "buffer.h"
 #include "xml-utils.h"
-#include "gdb_locale.h"
 
 /* FIXME: This should probably be autoconf'd for.  It's an integer type at
    least the size of a (void *).  */

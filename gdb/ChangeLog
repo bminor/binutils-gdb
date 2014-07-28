@@ -1,5 +1,10 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include gdb_locale.h.
+	* defs.h: Do not include gdb_locale.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include gdb/signals.h.
 	* defs.h: Do not include gdb/signals.h.
 

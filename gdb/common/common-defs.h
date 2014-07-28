@@ -35,5 +35,6 @@
 #include "libiberty.h"
 #include "pathmax.h"
 #include "gdb/signals.h"
+#include "gdb_locale.h"
 
 #endif /* COMMON_DEFS_H */

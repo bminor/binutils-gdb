@@ -50,8 +50,6 @@
 
 #include <fcntl.h>
 
-#include "gdb_locale.h"
-
 #include "gdb_wchar.h"
 
 #include "ui-file.h"
