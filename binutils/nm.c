@@ -434,6 +434,10 @@ filter_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
+      if (strcmp (sym->name, "__gnu_lto_slim") == 0)
+	non_fatal (_("%s: plugin needed to handle lto object"),
+		   bfd_get_filename (abfd));
+
       if (undefined_only)
 	keep = bfd_is_und_section (sym->section);
       else if (external_only)

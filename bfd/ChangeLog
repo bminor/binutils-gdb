@@ -1,3 +1,11 @@
+2014-07-28  Alan Modra  <amodra@gmail.com>
+
+	PR 13227
+	* archive.c (_bfd_compute_and_write_armap): Warn on adding
+	__gnu_lto_slim to armap.
+	* linker.c (_bfd_generic_link_add_one_symbol): Warn on adding
+	__gnu_lto_slim to linker hash table.
+
 2014-07-27  Anthony Green  <green@moxielogic.org>
 
 	* config.bfd: Add moxie-*-moxiebox*.

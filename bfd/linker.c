@@ -1642,7 +1642,13 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
   else if ((flags & BSF_WEAK) != 0)
     row = DEFW_ROW;
   else if (bfd_is_com_section (section))
-    row = COMMON_ROW;
+    {
+      row = COMMON_ROW;
+      if (strcmp (name, "__gnu_lto_slim") == 0)
+	(*_bfd_error_handler)
+	  (_("%s: plugin needed to handle lto object"),
+	   bfd_get_filename (abfd));
+    }
   else
     row = DEF_ROW;
 

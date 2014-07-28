@@ -1,3 +1,8 @@
+2014-07-28  Alan Modra  <amodra@gmail.com>
+
+	PR 13227
+	* nm.c (filter_symbols): Warn on __gnu_lto_slim.
+
 2014-07-07  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_symbol_type): Revert accidental change to
