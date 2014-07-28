@@ -25,7 +25,6 @@
 #include "wincecompat.h"
 #endif
 
-#include "libiberty.h"
 #include "version.h"
 
 #ifdef HAVE_ERRNO_H

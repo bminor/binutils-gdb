@@ -22,7 +22,6 @@
 #include "arch-utils.h"
 #include "breakpoint.h"
 #include "gdb.h"
-#include "libiberty.h"
 #include "ada-lang.h"
 #include "mi-cmds.h"
 #include "mi-getopt.h"

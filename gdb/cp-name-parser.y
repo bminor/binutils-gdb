@@ -35,7 +35,6 @@
 #include <string.h>
 
 #include "safe-ctype.h"
-#include "libiberty.h"
 #include "demangle.h"
 #include "cp-support.h"
 #include "gdb_assert.h"

@@ -83,7 +83,6 @@
 #define O_BINARY 0
 #endif
 
-#include "libiberty.h"
 #include "hashtab.h"
 
 /* Rather than duplicate all the logic in BFD for figuring out what

@@ -86,7 +86,6 @@ const struct extension_language_defn extension_language_python =
 
 #ifdef HAVE_PYTHON
 
-#include "libiberty.h"
 #include "cli/cli-decode.h"
 #include "charset.h"
 #include "top.h"

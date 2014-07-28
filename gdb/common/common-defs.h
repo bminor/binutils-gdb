@@ -32,5 +32,6 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include "ansidecl.h"
+#include "libiberty.h"
 
 #endif /* COMMON_DEFS_H */

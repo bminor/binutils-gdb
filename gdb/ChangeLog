@@ -1,5 +1,14 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include libiberty.h.
+	* defs.h: Do not include libiberty.h.
+	* common/queue.h: Likewise.
+	* cp-name-parser.y: Likewise.
+	* mi/mi-cmd-catch.c: Likewise.
+	* python/python.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include ansidecl.h.
 	* defs.h: Do not include ansidecl.h.
 	* common/buffer.h: Likewise.
