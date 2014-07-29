@@ -966,9 +966,23 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
   return p_scm;
 }
 
+/* Subroutine of gdbscm_register_parameter_x to simplify it.
+   Return non-zero if parameter NAME is already defined in LIST.  */
+
+static int
+pascm_parameter_defined_p (const char *name, struct cmd_list_element *list)
+{
+  struct cmd_list_element *c;
+
+  c = lookup_cmd_1 (&name, list, NULL, 1);
+
+  /* If the name is ambiguous that's ok, it's a new parameter still.  */
+  return c != NULL && c != CMD_LIST_AMBIGUOUS;
+}
+
 /* (register-parameter! <gdb:parameter>) -> unspecified
 
-   It is an error to register a parameter more than once.  */
+   It is an error to register a pre-existing parameter.  */
 
 static SCM
 gdbscm_register_parameter_x (SCM self)
@@ -989,6 +1003,17 @@ gdbscm_register_parameter_x (SCM self)
 					&show_list, &showlist);
   p_smob->cmd_name = gdbscm_gc_xstrdup (cmd_name);
   xfree (cmd_name);
+
+  if (pascm_parameter_defined_p (p_smob->cmd_name, *set_list))
+    {
+      gdbscm_misc_error (FUNC_NAME, SCM_ARG1, self,
+		_("parameter exists, \"set\" command is already defined"));
+    }
+  if (pascm_parameter_defined_p (p_smob->cmd_name, *show_list))
+    {
+      gdbscm_misc_error (FUNC_NAME, SCM_ARG1, self,
+		_("parameter exists, \"show\" command is already defined"));
+    }
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {

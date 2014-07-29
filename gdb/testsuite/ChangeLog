@@ -1,3 +1,10 @@
+2014-07-28  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17203
+	* gdb.guile/scm-parameter.exp: Add tests for trying to create
+	previously existing parameter, and previously ambiguously spelled
+	parameter.
+
 2014-07-28  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/watchpoint-reuse-slot.exp: Handle the case that the
