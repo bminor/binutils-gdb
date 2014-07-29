@@ -1,3 +1,10 @@
+2014-07-28  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17203
+	* guile/scm-param.c (pascm_parameter_defined_p): New function.
+	(gdbscm_register_parameter_x): Call it.  Raise error for pre-existing
+	parameters.
+
 2014-07-28  Will Newton  <will.newton@linaro.org>
 
 	* arm-linux-tdep.c (THUMB2_SET_R7_SIGRETURN1): New define.
