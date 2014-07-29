@@ -1,5 +1,13 @@
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* micromips-opc.c (COD): Rename throughout to...
+	(CM): New define, update to use INSN_COPROC_MOVE.
+	(LCD): Rename throughout to...
+	(LC): New define, update to use INSN_LOAD_COPROC.
+	* mips-opc.c: Likewise.
+
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* micromips-opc.c (COD, LCD) New macros.
 	(cfc1, ctc1): Remove FP_S attribute.
 	(dmfc1, mfc1, mfhc1): Add LCD attribute.

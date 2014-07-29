@@ -1,5 +1,10 @@
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* config/tc-mips.c: Rename INSN_LOAD_COPROC_DELAY to INSN_LOAD_COPROC
+	and INSN_COPROC_MOVE_DELAY to INSN_COPROC_MOVE throughout.
+
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* config/tc-mips.c (mips_flags_frag): New static global.
 	(struct mips_set_options): Add oddspreg field.
 	(file_mips_opts, mips_opts): Initialize oddspreg.

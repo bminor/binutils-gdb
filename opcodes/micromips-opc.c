@@ -202,8 +202,8 @@ decode_micromips_operand (const char *p)
 #define TRAP	INSN_NO_DELAY_SLOT
 #define LM	INSN_LOAD_MEMORY
 #define SM	INSN_STORE_MEMORY
-#define COD	INSN_COPROC_MOVE_DELAY
-#define LCD	INSN_LOAD_COPROC_DELAY
+#define CM	INSN_COPROC_MOVE
+#define LC	INSN_LOAD_COPROC
 #define BD16	INSN2_BRANCH_DELAY_16BIT	/* Used in pinfo2.  */
 #define BD32	INSN2_BRANCH_DELAY_32BIT	/* Used in pinfo2.  */
 
@@ -625,10 +625,10 @@ const struct mips_opcode micromips_opcodes[] =
 {"dmtc0",		"t,G,H",	0x580002fc, 0xfc00c7ff,	RD_1|WR_C0|WR_CC,	0,		I3,		0,	0 },
 {"dmtgc0",		"t,G",		0x580006fc, 0xfc00ffff,	RD_1|WR_C0|WR_CC,	0,		0,		IVIRT64, 0 },
 {"dmtgc0",		"t,G,H",	0x580006fc, 0xfc00c7ff,	RD_1|WR_C0|WR_CC,	0,		0,		IVIRT64, 0 },
-{"dmfc1",		"t,S",		0x5400243b, 0xfc00ffff,	WR_1|RD_2|FP_S|LCD,	0,		I3,		0,	0 },
-{"dmfc1",		"t,G",		0x5400243b, 0xfc00ffff,	WR_1|RD_2|FP_S|LCD,	0,		I3,		0,	0 },
-{"dmtc1",		"t,G",		0x54002c3b, 0xfc00ffff,	RD_1|WR_2|FP_S|COD,	0,		I3,		0,	0 },
-{"dmtc1",		"t,S",		0x54002c3b, 0xfc00ffff,	RD_1|WR_2|FP_S|COD,	0,		I3,		0,	0 },
+{"dmfc1",		"t,S",		0x5400243b, 0xfc00ffff,	WR_1|RD_2|FP_S|LC,	0,		I3,		0,	0 },
+{"dmfc1",		"t,G",		0x5400243b, 0xfc00ffff,	WR_1|RD_2|FP_S|LC,	0,		I3,		0,	0 },
+{"dmtc1",		"t,G",		0x54002c3b, 0xfc00ffff,	RD_1|WR_2|FP_S|CM,	0,		I3,		0,	0 },
+{"dmtc1",		"t,S",		0x54002c3b, 0xfc00ffff,	RD_1|WR_2|FP_S|CM,	0,		I3,		0,	0 },
 {"dmfc2",		"t,G",		0x00006d3c, 0xfc00ffff,	WR_1|RD_C2,		0,		I3,		0,	0 },
 /*{"dmfc2",		"t,G,H",	0x58000283, 0xfc001fff,	WR_1|RD_C2,		0,		I3,		0,	0 },*/
 {"dmtc2",		"t,G",		0x00007d3c, 0xfc00ffff,	RD_1|WR_C2|WR_CC,	0,		I3,		0,	0 },
@@ -825,13 +825,13 @@ const struct mips_opcode micromips_opcodes[] =
 {"maddu",		"7,s,t",	0x00001abc, 0xfc003fff,	RD_2|RD_3|MOD_a,	0,		0,		D32,	0 },
 {"mfc0",		"t,G",		0x000000fc, 0xfc00ffff,	WR_1|RD_C0,		0,		I1,		0,	0 },
 {"mfc0",		"t,G,H",	0x000000fc, 0xfc00c7ff,	WR_1|RD_C0,		0,		I1,		0,	0 },
-{"mfc1",		"t,S",		0x5400203b, 0xfc00ffff,	WR_1|RD_2|FP_S|LCD,	0,		I1,		0,	0 },
-{"mfc1",		"t,G",		0x5400203b, 0xfc00ffff,	WR_1|RD_2|FP_S|LCD,	0,		I1,		0,	0 },
+{"mfc1",		"t,S",		0x5400203b, 0xfc00ffff,	WR_1|RD_2|FP_S|LC,	0,		I1,		0,	0 },
+{"mfc1",		"t,G",		0x5400203b, 0xfc00ffff,	WR_1|RD_2|FP_S|LC,	0,		I1,		0,	0 },
 {"mfc2",		"t,G",		0x00004d3c, 0xfc00ffff,	WR_1|RD_C2,		0,		I1,		0,	0 },
 {"mfgc0",		"t,G",		0x000004fc, 0xfc00ffff,	WR_1|RD_C0,		0,		0,		IVIRT,	0 },
 {"mfgc0",		"t,G,H",	0x000004fc, 0xfc00c7ff,	WR_1|RD_C0,		0,		0,		IVIRT,	0 },
-{"mfhc1",		"t,S",		0x5400303b, 0xfc00ffff,	WR_1|RD_2|FP_D|LCD,	0,		I1,		0,	0 },
-{"mfhc1",		"t,G",		0x5400303b, 0xfc00ffff,	WR_1|RD_2|FP_D|LCD,	0,		I1,		0,	0 },
+{"mfhc1",		"t,S",		0x5400303b, 0xfc00ffff,	WR_1|RD_2|FP_D|LC,	0,		I1,		0,	0 },
+{"mfhc1",		"t,G",		0x5400303b, 0xfc00ffff,	WR_1|RD_2|FP_D|LC,	0,		I1,		0,	0 },
 {"mfhc2",		"t,G",		0x00008d3c, 0xfc00ffff,	WR_1|RD_C2,		0,		I1,		0,	0 },
 {"mfhi",		"mj",		    0x4600,     0xffe0,	WR_1|RD_HI,		0,		I1,		0,	0 },
 {"mfhi",		"s",		0x00000d7c, 0xffe0ffff,	WR_1|RD_HI,		0,		I1,		0,	0 },
@@ -871,13 +871,13 @@ const struct mips_opcode micromips_opcodes[] =
 {"msubu",		"7,s,t",	0x00003abc, 0xfc003fff,	RD_2|RD_3|MOD_a,	0,		0,		D32,	0 },
 {"mtc0",		"t,G",		0x000002fc, 0xfc00ffff,	RD_1|WR_C0|WR_CC,	0,		I1,		0,	0 },
 {"mtc0",		"t,G,H",	0x000002fc, 0xfc00c7ff,	RD_1|WR_C0|WR_CC,	0,		I1,		0,	0 },
-{"mtc1",		"t,S",		0x5400283b, 0xfc00ffff,	RD_1|WR_2|FP_S|COD,	0,		I1,		0,	0 },
-{"mtc1",		"t,G",		0x5400283b, 0xfc00ffff,	RD_1|WR_2|FP_S|COD,	0,		I1,		0,	0 },
+{"mtc1",		"t,S",		0x5400283b, 0xfc00ffff,	RD_1|WR_2|FP_S|CM,	0,		I1,		0,	0 },
+{"mtc1",		"t,G",		0x5400283b, 0xfc00ffff,	RD_1|WR_2|FP_S|CM,	0,		I1,		0,	0 },
 {"mtc2",		"t,G",		0x00005d3c, 0xfc00ffff,	RD_1|WR_C2|WR_CC,	0,		I1,		0,	0 },
 {"mtgc0",		"t,G",		0x000006fc, 0xfc00ffff,	RD_1|WR_C0|WR_CC,	0,		0,		IVIRT,	0 },
 {"mtgc0",		"t,G,H",	0x000006fc, 0xfc00c7ff,	RD_1|WR_C0|WR_CC,	0,		0,		IVIRT,	0 },
-{"mthc1",		"t,S",		0x5400383b, 0xfc00ffff,	RD_1|WR_2|FP_D|COD,	0,		I1,		0,	0 },
-{"mthc1",		"t,G",		0x5400383b, 0xfc00ffff,	RD_1|WR_2|FP_D|COD,	0,		I1,		0,	0 },
+{"mthc1",		"t,S",		0x5400383b, 0xfc00ffff,	RD_1|WR_2|FP_D|CM,	0,		I1,		0,	0 },
+{"mthc1",		"t,G",		0x5400383b, 0xfc00ffff,	RD_1|WR_2|FP_D|CM,	0,		I1,		0,	0 },
 {"mthc2",		"t,G",		0x00009d3c, 0xfc00ffff,	RD_1|WR_C2|WR_CC,	0,		I1,		0,	0 },
 {"mthi",		"s",		0x00002d7c, 0xffe0ffff,	RD_1|WR_HI,		0,		I1,		0,	0 },
 {"mthi",		"s,7",		0x0000207c, 0xffe03fff,	RD_1|WR_HI,		0,		0,		D32,	0 },

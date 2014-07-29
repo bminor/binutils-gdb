@@ -1,3 +1,10 @@
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips.h (INSN_LOAD_COPROC_DELAY): Rename to...
+	(INSN_LOAD_COPROC): New define.
+	(INSN_COPROC_MOVE_DELAY): Rename to...
+	(INSN_COPROC_MOVE): New define.
+
 2014-07-01  Barney Stratford   <barney_stratford@fastmail.fm>
             Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
             Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
