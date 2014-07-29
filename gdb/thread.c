@@ -32,7 +32,6 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "gdb.h"
-#include <string.h>
 #include "btrace.h"
 
 #include <ctype.h>

@@ -41,8 +41,6 @@
 #include "symcat.h"
 
 #include "floatformat.h"
-
-#include <string.h>
 #include "reggroups.h"
 #include "osabi.h"
 #include "gdb_obstack.h"

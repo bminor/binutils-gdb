@@ -46,7 +46,6 @@
 #include "regcache.h"
 #include "gdbcmd.h"
 #include "ppc-tdep.h"
-#include <string.h>
 #include "observer.h"
 #include "objfiles.h"
 

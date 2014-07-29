@@ -21,7 +21,6 @@
 
 #include "defs.h"
 #include <errno.h>
-#include <string.h>
 #include "target.h"
 #include "target-dcache.h"
 #include "gdbcmd.h"

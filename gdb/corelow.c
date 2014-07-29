@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include <string.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>

@@ -18,7 +18,6 @@
 
 #include "defs.h"
 #include "frame.h"
-#include <string.h>
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "symtab.h"

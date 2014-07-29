@@ -26,8 +26,6 @@
 #include "xml-utils.h"
 #include "buffer.h"
 #include "inttypes.h"
-
-#include <string.h>
 #include <stdint.h>
 
 void

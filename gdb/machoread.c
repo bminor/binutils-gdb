@@ -34,8 +34,6 @@
 #include "complaints.h"
 #include "gdb_bfd.h"
 
-#include <string.h>
-
 /* If non-zero displays debugging message.  */
 static unsigned int mach_o_debug_level = 0;
 

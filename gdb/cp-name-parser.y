@@ -32,8 +32,6 @@
 #include "defs.h"
 
 #include <unistd.h>
-#include <string.h>
-
 #include "safe-ctype.h"
 #include "demangle.h"
 #include "cp-support.h"

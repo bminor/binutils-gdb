@@ -34,8 +34,6 @@
 #include "tui/tui-stack.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-source.h"
-
-#include <string.h>
 #include "gdb_curses.h"
 
 /* Function to display source in the source window.  */

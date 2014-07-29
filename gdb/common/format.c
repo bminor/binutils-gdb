@@ -23,8 +23,6 @@
 #include "defs.h"
 #endif
 
-#include <string.h>
-
 #include "format.h"
 
 struct format_piece *

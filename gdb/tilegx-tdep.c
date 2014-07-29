@@ -30,7 +30,6 @@
 #include "value.h"
 #include "dis-asm.h"
 #include "inferior.h"
-#include <string.h>
 #include "arch-utils.h"
 #include "floatformat.h"
 #include "regcache.h"

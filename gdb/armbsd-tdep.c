@@ -22,8 +22,6 @@
 #include "regcache.h"
 #include "regset.h"
 
-#include <string.h>
-
 #include "arm-tdep.h"
 
 /* Core file support.  */

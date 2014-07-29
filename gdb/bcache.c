@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "gdb_obstack.h"
 #include "bcache.h"
-#include <string.h>		/* For memcpy declaration */
 
 /* The type used to hold a single bcache string.  The user data is
    stored in d.data.  Since it can be any type, it needs to have the

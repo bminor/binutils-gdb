@@ -30,8 +30,6 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "f-lang.h"
-
-#include <string.h>
 #include <errno.h>
 
 #if 0				/* Currently unused.  */

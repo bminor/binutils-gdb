@@ -21,8 +21,6 @@
 #include "memory-map.h"
 #include "exceptions.h"
 
-#include <string.h>
-
 #if !defined(HAVE_LIBEXPAT)
 
 VEC(mem_region_s) *

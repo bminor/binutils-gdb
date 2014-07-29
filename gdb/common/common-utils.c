@@ -23,8 +23,6 @@
 #include "defs.h"
 #endif
 
-#include <string.h>
-
 /* The xmalloc() (libiberty.h) family of memory management routines.
 
    These are like the ISO-C malloc() family except that they implement

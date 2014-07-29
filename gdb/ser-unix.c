@@ -29,7 +29,6 @@
 #include <sys/time.h>
 
 #include "gdb_select.h"
-#include <string.h>
 #include "gdbcmd.h"
 #include "filestuff.h"
 

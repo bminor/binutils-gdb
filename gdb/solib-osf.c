@@ -44,8 +44,6 @@
 
 #include <sys/types.h>
 #include <signal.h>
-#include <string.h>
-
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"

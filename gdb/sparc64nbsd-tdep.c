@@ -30,8 +30,6 @@
 #include "solib-svr4.h"
 #include "trad-frame.h"
 
-#include <string.h>
-
 #include "sparc64-tdep.h"
 #include "nbsd-tdep.h"
 

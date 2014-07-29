@@ -39,8 +39,6 @@
 #include "dwarf2loc.h"
 #include "dwarf2-frame.h"
 
-#include <string.h>
-
 extern int dwarf2_always_disassemble;
 
 static void dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,

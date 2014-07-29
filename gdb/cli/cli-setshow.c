@@ -19,7 +19,6 @@
 #include "readline/tilde.h"
 #include "value.h"
 #include <ctype.h>
-#include <string.h>
 #include "arch-utils.h"
 #include "observer.h"
 

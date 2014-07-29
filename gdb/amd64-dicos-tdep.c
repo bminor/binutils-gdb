@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "osabi.h"
-#include <string.h>
 #include "amd64-tdep.h"
 #include "dicos-tdep.h"
 

@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "registry.h"
-#include <string.h>
-
 const struct registry_data *
 register_data_with_cleanup (struct registry_data_registry *registry,
 			    registry_data_callback save,

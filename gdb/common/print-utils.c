@@ -24,8 +24,6 @@
 #endif
 
 #include "print-utils.h"
-
-#include <string.h>
 #include <stdint.h>
 
 /* Temporary storage using circular buffer.  */

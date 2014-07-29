@@ -21,7 +21,6 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
 #include "symtab.h"
 #include "bfd.h"
 #include "symfile.h"

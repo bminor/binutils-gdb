@@ -61,7 +61,6 @@
 #include <sys/types.h>
 
 #include "event-top.h"
-#include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include "ui-out.h"

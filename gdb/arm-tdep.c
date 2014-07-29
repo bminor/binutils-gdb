@@ -26,7 +26,6 @@
 #include "infrun.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "dis-asm.h"		/* For register styles.  */
 #include "regcache.h"
 #include "reggroups.h"

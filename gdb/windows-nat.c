@@ -50,7 +50,6 @@
 #include "objfiles.h"
 #include "gdb_bfd.h"
 #include "gdb_obstack.h"
-#include <string.h>
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include <unistd.h>

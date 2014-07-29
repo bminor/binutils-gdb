@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "infrun.h"
-#include <string.h>
 #include <ctype.h>
 #include "symtab.h"
 #include "frame.h"

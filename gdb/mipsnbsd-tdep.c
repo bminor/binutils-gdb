@@ -27,8 +27,6 @@
 #include "value.h"
 #include "osabi.h"
 
-#include <string.h>
-
 #include "nbsd-tdep.h"
 #include "mipsnbsd-tdep.h"
 #include "mips-tdep.h"

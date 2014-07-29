@@ -27,8 +27,6 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
-#include <string.h>
-
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"
 #include "solib-svr4.h"

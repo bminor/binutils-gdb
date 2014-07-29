@@ -28,7 +28,6 @@
 #include <sys/types.h>
 #include <sys/sysinfo.h>
 #include <ctype.h>
-#include <string.h>
 #include <utmp.h>
 #include <time.h>
 #include <unistd.h>

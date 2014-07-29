@@ -31,7 +31,6 @@
 #endif
 
 #include <sys/types.h>
-#include <string.h>
 #include <errno.h>
 #include <sys/time.h>
 #include "exceptions.h"

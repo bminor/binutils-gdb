@@ -20,8 +20,6 @@
 #if !defined (GDB_VEC_H)
 #define GDB_VEC_H
 
-#include <string.h>
-
 /* The macros here implement a set of templated vector types and
    associated interfaces.  These templates are implemented with
    macros, as we're not in C++ land.  The interface functions are

@@ -25,8 +25,6 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
-#include <string.h>
-
 #include "hppa-tdep.h"
 #include "hppabsd-tdep.h"
 

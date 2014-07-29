@@ -23,8 +23,6 @@
 #include "tdesc.h"
 #include "dll.h"
 #include "rsp-low.h"
-
-#include <string.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif

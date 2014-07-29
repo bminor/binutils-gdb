@@ -35,8 +35,6 @@
 #include "target.h"
 #include "value.h"
 
-#include <string.h>
-
 #include "sparc-tdep.h"
 #include "sparc-ravenscar-thread.h"
 

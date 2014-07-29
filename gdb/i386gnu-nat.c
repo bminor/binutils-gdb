@@ -23,8 +23,6 @@
 #include "regcache.h"
 
 #include <errno.h>
-#include <string.h>
-
 #include <mach.h>
 #include <mach_error.h>
 #include <mach/message.h>

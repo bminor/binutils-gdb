@@ -53,7 +53,6 @@
 #endif
 
 #include <signal.h>
-#include <string.h>
 #include "gdb_select.h"
 
 #ifndef HAVE_SOCKLEN_T

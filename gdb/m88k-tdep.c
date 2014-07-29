@@ -31,8 +31,6 @@
 #include "trad-frame.h"
 #include "value.h"
 
-#include <string.h>
-
 #include "m88k-tdep.h"
 
 /* Fetch the instruction at PC.  */

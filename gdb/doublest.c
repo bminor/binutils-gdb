@@ -26,7 +26,6 @@
 #include "defs.h"
 #include "doublest.h"
 #include "floatformat.h"
-#include <string.h>
 #include "gdbtypes.h"
 #include <math.h>		/* ldexp */
 

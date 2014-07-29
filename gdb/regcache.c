@@ -24,7 +24,6 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include <string.h>
 #include "observer.h"
 #include "exceptions.h"
 #include "remote.h"

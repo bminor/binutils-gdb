@@ -27,7 +27,6 @@
 #include "dis-asm.h"
 #include "arch-utils.h"
 #include "gdbtypes.h"
-#include <string.h>
 #include "regcache.h"
 #include "reggroups.h"
 #include "gdbcore.h"

@@ -24,8 +24,6 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "tui.h"
-#include <string.h>
-
 struct tui_ui_out_data
   {
     struct cli_ui_out_data base;

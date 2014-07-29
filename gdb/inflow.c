@@ -25,8 +25,6 @@
 #include "target.h"
 #include "gdbthread.h"
 #include "observer.h"
-
-#include <string.h>
 #include <signal.h>
 #include <fcntl.h>
 #include "gdb_select.h"

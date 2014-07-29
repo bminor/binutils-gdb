@@ -21,7 +21,6 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include <string.h>
 #endif
 
 #ifdef HAVE_SIGNAL_H

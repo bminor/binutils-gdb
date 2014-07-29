@@ -27,7 +27,6 @@
 #include "infrun.h"
 #include "target.h"
 #include "regcache.h"
-#include <string.h>
 #include "gdbthread.h"
 #include <ctype.h>
 #include <signal.h>

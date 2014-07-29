@@ -27,8 +27,6 @@
 #include "tramp-frame.h"
 #include "gdbtypes.h"
 
-#include <string.h>
-
 #include "m68k-tdep.h"
 #include "solib-svr4.h"
 

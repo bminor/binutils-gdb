@@ -21,8 +21,6 @@
 #include "gdbarch.h"
 #include "regcache.h"
 
-#include <string.h>
-
 #include "i386-tdep.h"
 #include "amd64-tdep.h"
 #include "amd64-nat.h"

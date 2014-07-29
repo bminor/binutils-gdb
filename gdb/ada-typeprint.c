@@ -34,7 +34,6 @@
 #include "ada-lang.h"
 
 #include <ctype.h>
-#include <string.h>
 #include <errno.h>
 
 static int print_selected_record_field_types (struct type *, struct type *,

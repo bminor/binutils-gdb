@@ -24,8 +24,6 @@
 #include "vax-tdep.h"
 #include "solib-svr4.h"
 
-#include <string.h>
-
 /* NetBSD ELF.  */
 
 static void

@@ -30,7 +30,6 @@
 #include "objfiles.h"
 #include "gdbcmd.h"
 #include "command.h"
-#include <string.h>
 #include "infcall.h"
 #include "dummy-frame.h"
 #include "ada-lang.h"

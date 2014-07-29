@@ -18,7 +18,6 @@
 
 #include "defs.h"
 #include "main.h"
-#include <string.h>
 #include "interps.h"
 
 int

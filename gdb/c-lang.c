@@ -28,7 +28,6 @@
 #include "valprint.h"
 #include "macroscope.h"
 #include "charset.h"
-#include <string.h>
 #include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"

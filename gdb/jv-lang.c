@@ -25,7 +25,6 @@
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include <string.h>
 #include "value.h"
 #include "c-lang.h"
 #include "jv-lang.h"

@@ -30,7 +30,6 @@
 #include "serial.h"
 #include "target.h"
 #include "exceptions.h"
-#include <string.h>
 #include <sys/stat.h>
 #include "gdb_usleep.h"
 #include "regcache.h"

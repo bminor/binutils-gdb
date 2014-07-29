@@ -27,8 +27,6 @@
 
 #include "vax-tdep.h"
 
-#include <string.h>
-
 /* Signal trampolines.  */
 
 /* Since OpenBSD 3.2, the sigtramp routine is mapped at a random page

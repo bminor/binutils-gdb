@@ -37,8 +37,6 @@
 #include "reggroups.h"
 #include "opcodes/lm32-desc.h"
 
-#include <string.h>
-
 /* Macros to extract fields from an instruction.  */
 #define LM32_OPCODE(insn)       ((insn >> 26) & 0x3f)
 #define LM32_REG0(insn)         ((insn >> 21) & 0x1f)

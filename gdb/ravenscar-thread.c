@@ -26,7 +26,6 @@
 #include "command.h"
 #include "ravenscar-thread.h"
 #include "observer.h"
-#include <string.h>
 #include "gdbcmd.h"
 #include "top.h"
 #include "regcache.h"

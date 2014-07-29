@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "cp-support.h"
-#include <string.h>
 #include "demangle.h"
 #include "gdbcmd.h"
 #include "dictionary.h"

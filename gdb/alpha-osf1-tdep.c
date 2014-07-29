@@ -21,7 +21,6 @@
 #include "gdbcore.h"
 #include "value.h"
 #include "osabi.h"
-#include <string.h>
 #include "objfiles.h"
 
 #include "alpha-tdep.h"

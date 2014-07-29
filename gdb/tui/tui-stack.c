@@ -28,7 +28,6 @@
 #include "target.h"
 #include "top.h"
 #include "gdb-demangle.h"
-#include <string.h>
 #include "source.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"

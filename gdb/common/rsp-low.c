@@ -23,8 +23,6 @@
 #include "defs.h"
 #endif
 
-#include <string.h>
-
 #include "rsp-low.h"
 
 /* See rsp-low.h.  */

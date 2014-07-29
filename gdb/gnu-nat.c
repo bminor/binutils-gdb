@@ -27,7 +27,6 @@
 #include <limits.h>
 #include <setjmp.h>
 #include <signal.h>
-#include <string.h>
 #include <sys/ptrace.h>
 
 #include <mach.h>

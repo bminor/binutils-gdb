@@ -25,8 +25,6 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
-#include <string.h>
-
 #include "obsd-tdep.h"
 #include "mips-tdep.h"
 #include "solib-svr4.h"

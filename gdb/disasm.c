@@ -21,7 +21,6 @@
 #include "target.h"
 #include "value.h"
 #include "ui-out.h"
-#include <string.h>
 #include "disasm.h"
 #include "gdbcore.h"
 #include "dis-asm.h"

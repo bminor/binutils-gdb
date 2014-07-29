@@ -22,8 +22,6 @@
 #include "ui-out.h"
 #include "interps.h"
 
-#include <string.h>
-
 /* These hold the pushed copies of the gdb output files.
    If NULL then nothing has yet been pushed.  */
 struct saved_output_files

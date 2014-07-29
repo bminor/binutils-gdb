@@ -28,7 +28,6 @@
 #include "target.h"
 #include "target-dcache.h"
 #include "language.h"
-#include <string.h>
 #include "inferior.h"
 #include "breakpoint.h"
 #include "tracepoint.h"

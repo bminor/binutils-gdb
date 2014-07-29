@@ -25,7 +25,6 @@
 #include "dwarf2-frame.h"
 #include "gdbtypes.h"
 #include "inferior.h"
-#include <string.h>
 #include "gdbcore.h"
 #include "arch-utils.h"
 #include "regcache.h"

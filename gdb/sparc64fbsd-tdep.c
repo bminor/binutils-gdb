@@ -27,8 +27,6 @@
 #include "target.h"
 #include "trad-frame.h"
 
-#include <string.h>
-
 #include "sparc64-tdep.h"
 #include "solib-svr4.h"
 

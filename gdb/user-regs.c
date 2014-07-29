@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "user-regs.h"
 #include "gdbtypes.h"
-#include <string.h>
 #include "frame.h"
 
 /* A table of user registers.

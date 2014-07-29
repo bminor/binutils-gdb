@@ -28,8 +28,6 @@
 #include "symtab.h"
 #include "trad-frame.h"
 
-#include <string.h>
-
 #include "ppc-tdep.h"
 #include "ppcobsd-tdep.h"
 #include "solib-svr4.h"

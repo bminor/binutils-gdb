@@ -24,7 +24,6 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "value.h"
-#include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <signal.h>

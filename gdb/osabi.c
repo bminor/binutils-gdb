@@ -19,8 +19,6 @@
 
 #include "defs.h"
 
-#include <string.h>
-
 #include "osabi.h"
 #include "arch-utils.h"
 #include "gdbcmd.h"

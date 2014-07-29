@@ -24,7 +24,6 @@
 #include "expression.h"
 #include "target.h"
 #include "language.h"
-#include <string.h>
 #include "doublest.h"
 #include "dfp.h"
 #include <math.h>

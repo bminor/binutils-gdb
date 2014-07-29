@@ -30,8 +30,6 @@
 #include "target.h"
 #include "trad-frame.h"
 
-#include <string.h>
-
 #include "ppc-tdep.h"
 #include "ppc64-tdep.h"
 #include "ppcfbsd-tdep.h"

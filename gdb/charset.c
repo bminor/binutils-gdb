@@ -27,8 +27,6 @@
 #include "environ.h"
 #include "arch-utils.h"
 #include "gdb_vecs.h"
-
-#include <string.h>
 #include <ctype.h>
 
 #ifdef USE_WIN32API

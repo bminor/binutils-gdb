@@ -23,7 +23,6 @@
 #include "symtab.h"
 #include "gdbcore.h"
 #include "block.h"
-#include <string.h>
 #include "trad-frame.h"
 
 #include "alpha-tdep.h"

@@ -38,7 +38,6 @@
 #if HAVE_LINUX_PERF_EVENT_H && defined(SYS_perf_event_open)
 
 #include <errno.h>
-#include <string.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <sys/mman.h>

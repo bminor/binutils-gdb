@@ -30,8 +30,6 @@
 #include "symtab.h"
 #include "trad-frame.h"
 
-#include <string.h>
-
 #include "sparc-tdep.h"
 #include "nbsd-tdep.h"
 

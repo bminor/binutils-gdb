@@ -55,7 +55,6 @@
 #include "dictionary.h"
 #include "mdebugread.h"
 #include <sys/stat.h>
-#include <string.h>
 #include "psympriv.h"
 #include "source.h"
 

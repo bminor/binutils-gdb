@@ -27,8 +27,6 @@
 #include "regset.h"
 #include "value.h"
 
-#include <string.h>
-
 #include "alpha-tdep.h"
 #include "alphabsd-tdep.h"
 #include "nbsd-tdep.h"

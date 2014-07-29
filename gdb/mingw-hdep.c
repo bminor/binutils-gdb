@@ -23,7 +23,6 @@
 #include "event-loop.h"
 
 #include "gdb_select.h"
-#include <string.h>
 #include "readline/readline.h"
 
 #include <windows.h>

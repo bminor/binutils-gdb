@@ -20,7 +20,6 @@
 #include "value.h"
 #include "valprint.h"
 #include "ui-out.h"
-#include <string.h>
 #include "symtab.h"
 #include "gdbcmd.h"
 #include "command.h"

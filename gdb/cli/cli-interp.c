@@ -23,7 +23,6 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "top.h"		/* for "execute_command" */
-#include <string.h>
 #include "exceptions.h"
 #include "infrun.h"
 #include "observer.h"

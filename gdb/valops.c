@@ -37,7 +37,6 @@
 #include "dfp.h"
 #include "tracepoint.h"
 #include <errno.h>
-#include <string.h>
 #include "observer.h"
 #include "objfiles.h"
 #include "exceptions.h"

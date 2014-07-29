@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "regcache.h"
 #include "mn10300-tdep.h"
 #include "bfd.h"

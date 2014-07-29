@@ -22,7 +22,6 @@
 #include "queue.h"
 
 #include <sys/types.h>
-#include <string.h>
 #include <sys/time.h>
 
 #ifdef USE_WIN32API

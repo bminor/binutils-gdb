@@ -27,8 +27,6 @@
 #include "regcache.h"
 #include "value.h"
 
-#include <string.h>
-
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 #include "i386-xstate.h"

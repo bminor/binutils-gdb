@@ -72,7 +72,6 @@
 #include "build-id.h"
 
 #include <fcntl.h>
-#include <string.h>
 #include <sys/types.h>
 
 typedef struct symbol *symbolp;

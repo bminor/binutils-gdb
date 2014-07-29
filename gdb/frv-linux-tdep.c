@@ -30,7 +30,6 @@
 #include "trad-frame.h"
 #include "frame-unwind.h"
 #include "regset.h"
-#include <string.h>
 #include "linux-tdep.h"
 
 /* Define the size (in bytes) of an FR-V instruction.  */

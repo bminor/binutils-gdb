@@ -50,8 +50,6 @@
 #include "objfiles.h"
 
 #include <ctype.h>
-#include <string.h>
-
 #include "symfile.h"
 #include "extension.h"
 

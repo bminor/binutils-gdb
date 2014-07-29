@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "target.h"
 #include "inferior.h"
 #include "inf-child.h"

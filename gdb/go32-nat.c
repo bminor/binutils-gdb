@@ -100,7 +100,6 @@
 #include "nat/i386-cpuid.h"
 #include "value.h"
 #include "regcache.h"
-#include <string.h>
 #include "top.h"
 #include "cli/cli-utils.h"
 #include "inf-child.h"

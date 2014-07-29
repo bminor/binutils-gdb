@@ -24,7 +24,6 @@
 #include "inferior.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "dis-asm.h"
 #include "regcache.h"
 #include "reggroups.h"

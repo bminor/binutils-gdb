@@ -23,7 +23,6 @@
 #include "event-loop.h"
 
 #include "gdb_select.h"
-#include <string.h>
 #include <sys/time.h>
 #ifdef USE_WIN32API
 #include <winsock2.h>

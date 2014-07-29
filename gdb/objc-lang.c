@@ -34,7 +34,6 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include <string.h>		/* for strchr */
 #include "target.h"		/* for target_has_execution */
 #include "gdbcore.h"
 #include "gdbcmd.h"

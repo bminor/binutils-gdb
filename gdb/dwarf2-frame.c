@@ -33,8 +33,6 @@
 #include "value.h"
 #include "record.h"
 
-#include <string.h>
-
 #include "complaints.h"
 #include "dwarf2-frame.h"
 #include "ax.h"
