@@ -29,7 +29,6 @@
 #include "inferior.h"
 #include "annotate.h"
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "dummy-frame.h"
 #include "command.h"
 #include "gdbcmd.h"

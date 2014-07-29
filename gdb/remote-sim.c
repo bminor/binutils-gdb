@@ -37,7 +37,6 @@
 #include "gdb/remote-sim.h"
 #include "command.h"
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "sim-regno.h"
 #include "arch-utils.h"
 #include "readline/readline.h"

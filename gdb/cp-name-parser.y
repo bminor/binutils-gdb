@@ -37,7 +37,6 @@
 #include "safe-ctype.h"
 #include "demangle.h"
 #include "cp-support.h"
-#include "gdb_assert.h"
 
 /* Bison does not make it easy to create a parser without global
    state, unfortunately.  Here are all the global variables used

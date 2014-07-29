@@ -21,8 +21,6 @@
 #include "splay-tree.h"
 #include "gdb_obstack.h"
 #include "addrmap.h"
-#include "gdb_assert.h"
-
 
 
 /* The "abstract class".  */

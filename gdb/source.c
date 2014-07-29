@@ -26,7 +26,6 @@
 #include "gdbcmd.h"
 #include "frame.h"
 #include "value.h"
-#include "gdb_assert.h"
 #include "filestuff.h"
 
 #include <sys/types.h>

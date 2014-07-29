@@ -44,8 +44,6 @@
 #include "doublest.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gdb_assert.h"
-
 #include <ctype.h>
 
 /* Ask stabsread.h to define the vars it normally declares `extern'.  */

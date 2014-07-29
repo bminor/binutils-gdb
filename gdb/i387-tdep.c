@@ -27,7 +27,6 @@
 #include "regcache.h"
 #include "value.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 
 #include "i386-tdep.h"

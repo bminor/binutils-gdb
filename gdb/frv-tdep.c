@@ -28,7 +28,6 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "dis-asm.h"
-#include "gdb_assert.h"
 #include "sim-regno.h"
 #include "gdb/sim-frv.h"
 #include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */

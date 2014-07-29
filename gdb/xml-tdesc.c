@@ -28,8 +28,6 @@
 
 #include "filenames.h"
 
-#include "gdb_assert.h"
-
 #if !defined(HAVE_LIBEXPAT)
 
 /* Parse DOCUMENT into a target description.  Or don't, since we don't have

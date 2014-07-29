@@ -34,7 +34,6 @@
 #include "dcache.h"
 #include <signal.h>
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "gdbcore.h"
 #include "exceptions.h"
 #include "target-descriptions.h"

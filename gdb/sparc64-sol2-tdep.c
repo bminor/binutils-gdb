@@ -26,8 +26,6 @@
 #include "osabi.h"
 #include "trad-frame.h"
 
-#include "gdb_assert.h"
-
 #include "sol2-tdep.h"
 #include "sparc64-tdep.h"
 #include "solib-svr4.h"

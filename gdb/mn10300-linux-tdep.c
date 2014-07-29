@@ -22,7 +22,6 @@
 #include <string.h>
 #include "regcache.h"
 #include "mn10300-tdep.h"
-#include "gdb_assert.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "osabi.h"

@@ -44,7 +44,6 @@
 #include "linux-tdep.h"
 #include "solib.h"
 #include "objfiles.h"
-#include "gdb_assert.h"
 #include "osabi.h"
 #include "tic6x-tdep.h"
 #include "language.h"

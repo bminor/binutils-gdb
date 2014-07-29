@@ -45,7 +45,6 @@
 #include "disasm.h"
 #include "remote.h"
 #include "exceptions.h"
-#include "gdb_assert.h"
 #include <string.h>
 
 #include "i386-tdep.h"

@@ -24,7 +24,6 @@
 
 #include "gdb_select.h"
 #include <string.h>
-#include "gdb_assert.h"
 #include <sys/time.h>
 #ifdef USE_WIN32API
 #include <winsock2.h>

@@ -38,5 +38,6 @@
 #include "gdb_locale.h"
 #include "ptid.h"
 #include "common-utils.h"
+#include "gdb_assert.h"
 
 #endif /* COMMON_DEFS_H */

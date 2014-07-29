@@ -27,7 +27,6 @@
 #include "language.h"
 #include "varobj.h"
 #include "c-lang.h"
-#include "gdb_assert.h"
 
 extern void _initialize_opencl_language (void);
 

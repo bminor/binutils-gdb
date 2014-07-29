@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "gdb_assert.h"
 #include "inferior.h"
 #include "mips-tdep.h"
 #include "target.h"

@@ -21,7 +21,6 @@
 #include "symtab.h"
 #include "psympriv.h"
 #include "objfiles.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "filenames.h"
 #include "source.h"

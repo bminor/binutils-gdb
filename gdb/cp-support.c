@@ -22,7 +22,6 @@
 #include "cp-support.h"
 #include <string.h>
 #include "demangle.h"
-#include "gdb_assert.h"
 #include "gdbcmd.h"
 #include "dictionary.h"
 #include "objfiles.h"

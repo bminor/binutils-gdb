@@ -30,7 +30,6 @@
 #include "language.h"
 #include "demangle.h"
 #include "doublest.h"
-#include "gdb_assert.h"
 #include "regcache.h"
 #include "block.h"
 #include "dfp.h"

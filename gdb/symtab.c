@@ -56,7 +56,6 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "observer.h"
-#include "gdb_assert.h"
 #include "solist.h"
 #include "macrotab.h"
 #include "macroscope.h"

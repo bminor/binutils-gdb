@@ -46,7 +46,6 @@
 #include "symfile.h"		/* for overlay functions */
 #include "inferior.h"
 #include "doublest.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "source.h"
 #include "objfiles.h"

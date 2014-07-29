@@ -42,7 +42,6 @@
 #include "version.h"
 #include "serial.h"
 #include "doublest.h"
-#include "gdb_assert.h"
 #include "main.h"
 #include "event-loop.h"
 #include "gdbthread.h"

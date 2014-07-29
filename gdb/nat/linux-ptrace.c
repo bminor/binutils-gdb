@@ -27,7 +27,6 @@
 #include "linux-procfs.h"
 #include "linux-waitpid.h"
 #include "buffer.h"
-#include "gdb_assert.h"
 #include "gdb_wait.h"
 
 #include <stdint.h>

@@ -45,7 +45,6 @@
 #include "bcache.h"
 #include "hashtab.h"
 #include "readline/readline.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "observer.h"
 #include "exec.h"

@@ -30,7 +30,6 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-script.h"
-#include "gdb_assert.h"
 
 #include "extension.h"
 #include "interps.h"

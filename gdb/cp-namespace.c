@@ -23,7 +23,6 @@
 #include "gdb_obstack.h"
 #include "symtab.h"
 #include "symfile.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "objfiles.h"
 #include "gdbtypes.h"

@@ -46,7 +46,6 @@
 #include "main.h"
 #include "dictionary.h"
 #include "block.h"
-#include "gdb_assert.h"
 #include "mi/mi-common.h"
 #include "event-top.h"
 #include "record.h"

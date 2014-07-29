@@ -30,7 +30,6 @@
 #include "frame-unwind.h"
 #include "doublest.h"
 #include "value.h"
-#include "gdb_assert.h"
 #include "objfiles.h"
 #include "elf/common.h"		/* for DT_PLTGOT value */
 #include "elf-bfd.h"

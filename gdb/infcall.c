@@ -24,7 +24,6 @@
 #include "regcache.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "gdbcore.h"
 #include "language.h"

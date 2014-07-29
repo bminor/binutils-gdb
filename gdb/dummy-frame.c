@@ -23,7 +23,6 @@
 #include "regcache.h"
 #include "frame.h"
 #include "inferior.h"
-#include "gdb_assert.h"
 #include "frame-unwind.h"
 #include "command.h"
 #include "gdbcmd.h"

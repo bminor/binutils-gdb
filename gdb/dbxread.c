@@ -57,8 +57,6 @@
 #include "psympriv.h"
 #include "block.h"
 
-#include "gdb_assert.h"
-
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not
 				   native, now.  */

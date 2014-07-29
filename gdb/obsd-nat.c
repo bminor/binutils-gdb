@@ -22,7 +22,6 @@
 #include "inferior.h"
 #include "target.h"
 
-#include "gdb_assert.h"
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include "gdb_wait.h"

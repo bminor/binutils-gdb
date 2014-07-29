@@ -43,7 +43,6 @@
 #include "block.h"
 #include "solib.h"
 #include <ctype.h>
-#include "gdb_assert.h"
 #include "observer.h"
 #include "target-descriptions.h"
 #include "user-regs.h"

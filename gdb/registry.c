@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "registry.h"
-#include "gdb_assert.h"
 #include <string.h>
 
 const struct registry_data *

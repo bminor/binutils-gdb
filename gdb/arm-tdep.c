@@ -53,7 +53,6 @@
 #include "coff/internal.h"
 #include "elf/arm.h"
 
-#include "gdb_assert.h"
 #include "vec.h"
 
 #include "record.h"

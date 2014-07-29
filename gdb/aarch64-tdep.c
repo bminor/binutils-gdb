@@ -49,7 +49,6 @@
 #include "elf-bfd.h"
 #include "elf/aarch64.h"
 
-#include "gdb_assert.h"
 #include "vec.h"
 
 #include "features/aarch64.c"

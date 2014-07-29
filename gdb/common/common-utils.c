@@ -23,7 +23,6 @@
 #include "defs.h"
 #endif
 
-#include "gdb_assert.h"
 #include <string.h>
 
 /* The xmalloc() (libiberty.h) family of memory management routines.

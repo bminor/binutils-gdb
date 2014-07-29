@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "frame.h"
-#include "gdb_assert.h"
 #include <string.h>
 #include "osabi.h"
 #include "solib-svr4.h"

@@ -30,7 +30,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
-#include "gdb_assert.h"
 #include "complaints.h"
 #include <string.h>
 #include "expression.h"		/* For "enum exp_opcode" used by...  */

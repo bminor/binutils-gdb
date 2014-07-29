@@ -22,7 +22,6 @@
 #include "expression.h"
 #include "filenames.h"		/* For DOSish file names.  */
 #include "language.h"
-#include "gdb_assert.h"
 #include "exceptions.h"
 #include "gdb_signals.h"
 

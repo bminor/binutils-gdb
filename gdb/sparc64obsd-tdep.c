@@ -28,8 +28,6 @@
 #include "objfiles.h"
 #include "trad-frame.h"
 
-#include "gdb_assert.h"
-
 #include "obsd-tdep.h"
 #include "sparc64-tdep.h"
 #include "solib-svr4.h"

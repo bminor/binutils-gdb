@@ -134,8 +134,6 @@ extern int handle_target_event (int err, gdb_client_data client_data);
 #include "utils.h"
 #include "debug.h"
 
-#include "gdb_assert.h"
-
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */
 #define MAXBUFBYTES(N) (((N)-32)/2)

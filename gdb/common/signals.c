@@ -29,7 +29,6 @@
 #endif
 
 #include "gdb_signals.h"
-#include "gdb_assert.h"
 
 struct gdbarch;
 

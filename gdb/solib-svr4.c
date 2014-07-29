@@ -35,8 +35,6 @@
 #include "gdbthread.h"
 #include "observer.h"
 
-#include "gdb_assert.h"
-
 #include "solist.h"
 #include "solib.h"
 #include "solib-svr4.h"

@@ -23,7 +23,6 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "target.h"
 #include "linux-nat.h"
 

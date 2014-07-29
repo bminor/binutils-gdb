@@ -38,7 +38,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "value.h"
-#include "gdb_assert.h"
 #include "top.h"
 #include "timeval-utils.h"
 #include "maint.h"

@@ -27,7 +27,6 @@
 #include "regset.h"
 #include "value.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 
 #include "alpha-tdep.h"

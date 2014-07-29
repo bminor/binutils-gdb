@@ -25,7 +25,6 @@
 #include "nat/linux-waitpid.h"
 #include <string.h>
 #include "gdb_wait.h"
-#include "gdb_assert.h"
 #ifdef HAVE_TKILL_SYSCALL
 #include <unistd.h>
 #include <sys/syscall.h>

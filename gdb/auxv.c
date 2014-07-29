@@ -23,7 +23,6 @@
 #include "command.h"
 #include "inferior.h"
 #include "valprint.h"
-#include "gdb_assert.h"
 #include "gdbcore.h"
 #include "observer.h"
 #include "filestuff.h"

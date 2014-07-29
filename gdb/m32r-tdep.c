@@ -38,8 +38,6 @@
 #include "dis-asm.h"
 #include "objfiles.h"
 
-#include "gdb_assert.h"
-
 #include "m32r-tdep.h"
 
 /* Local functions */

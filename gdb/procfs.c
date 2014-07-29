@@ -48,7 +48,6 @@
 #include <ctype.h>
 #include "gdb_bfd.h"
 #include <string.h>
-#include "gdb_assert.h"
 #include "inflow.h"
 #include "auxv.h"
 #include "procfs.h"

@@ -26,7 +26,6 @@
 #include "regcache.h"
 #include "completer.h"
 #include "osabi.h"
-#include "gdb_assert.h"
 #include "arch-utils.h"
 /* For argument passing to the inferior.  */
 #include "symtab.h"

@@ -38,7 +38,6 @@
 #include "tracepoint.h"
 #include <errno.h>
 #include <string.h>
-#include "gdb_assert.h"
 #include "observer.h"
 #include "objfiles.h"
 #include "exceptions.h"

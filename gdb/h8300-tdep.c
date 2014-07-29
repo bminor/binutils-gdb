@@ -28,7 +28,6 @@
 #include "regcache.h"
 #include "gdbcore.h"
 #include "objfiles.h"
-#include "gdb_assert.h"
 #include "dis-asm.h"
 #include "dwarf2-frame.h"
 #include "frame-base.h"

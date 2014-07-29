@@ -23,7 +23,6 @@
 #include "arch-utils.h"
 #include "reggroups.h"
 #include "gdbtypes.h"
-#include "gdb_assert.h"
 #include "regcache.h"
 #include "command.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */

@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "filenames.h"
-#include "gdb_assert.h"
 #include "guile-internal.h"
 
 /* Struct to marshall args to scscm_safe_call_body.  */

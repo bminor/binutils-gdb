@@ -26,7 +26,6 @@
 #include "target.h"
 #include "trad-frame.h"
 #include "frame-base.h"
-#include "gdb_assert.h"
 
 struct frame_data
 {

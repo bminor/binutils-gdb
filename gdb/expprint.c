@@ -29,7 +29,6 @@
 #include <string.h>
 #include "block.h"
 #include "objfiles.h"
-#include "gdb_assert.h"
 #include "valprint.h"
 
 #include <ctype.h>

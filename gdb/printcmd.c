@@ -37,7 +37,6 @@
 #include "objfiles.h"		/* ditto */
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "disasm.h"
 #include "dfp.h"

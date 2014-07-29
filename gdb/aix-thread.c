@@ -40,7 +40,6 @@
      */
 
 #include "defs.h"
-#include "gdb_assert.h"
 #include "gdbthread.h"
 #include "target.h"
 #include "inferior.h"

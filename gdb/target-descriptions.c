@@ -31,7 +31,6 @@
 #include "xml-tdesc.h"
 #include "osabi.h"
 
-#include "gdb_assert.h"
 #include "gdb_obstack.h"
 #include "hashtab.h"
 #include "inferior.h"

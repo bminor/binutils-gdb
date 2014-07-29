@@ -34,7 +34,6 @@
 #include "complaints.h"
 #include "gdbcmd.h"
 #include "cp-abi.h"
-#include "gdb_assert.h"
 #include "hashtab.h"
 #include "exceptions.h"
 #include "cp-support.h"

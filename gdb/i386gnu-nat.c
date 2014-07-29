@@ -22,7 +22,6 @@
 #include "floatformat.h"
 #include "regcache.h"
 
-#include "gdb_assert.h"
 #include <errno.h>
 #include <string.h>
 

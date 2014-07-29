@@ -34,7 +34,6 @@
 #include "target.h"
 #include "value.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 
 #include "sparc64-tdep.h"

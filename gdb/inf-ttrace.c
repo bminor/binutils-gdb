@@ -30,7 +30,6 @@
 #include "terminal.h"
 #include "target.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/ttrace.h>

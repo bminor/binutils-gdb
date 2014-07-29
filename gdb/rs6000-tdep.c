@@ -55,7 +55,6 @@
 #include "ppc-tdep.h"
 #include "ppc-ravenscar-thread.h"
 
-#include "gdb_assert.h"
 #include "dis-asm.h"
 
 #include "trad-frame.h"

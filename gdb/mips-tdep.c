@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include <string.h>
-#include "gdb_assert.h"
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"

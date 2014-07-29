@@ -38,7 +38,6 @@
 #include "remote-notif.h"
 #include "regcache.h"
 #include "value.h"
-#include "gdb_assert.h"
 #include "observer.h"
 #include "solib.h"
 #include "cli/cli-decode.h"

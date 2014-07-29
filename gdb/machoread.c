@@ -28,7 +28,6 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "mach-o.h"
-#include "gdb_assert.h"
 #include "aout/stab_gnu.h"
 #include "vec.h"
 #include "psympriv.h"

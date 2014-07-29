@@ -38,7 +38,6 @@
 #include "symfile.h"
 #include "arch-utils.h"
 #include "floatformat.h"
-#include "gdb_assert.h"
 #include "infcall.h"
 #include "regset.h"
 #include "target-descriptions.h"

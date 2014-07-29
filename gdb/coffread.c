@@ -37,7 +37,6 @@
 #include "stabsread.h"
 #include "complaints.h"
 #include "target.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "dictionary.h"
 

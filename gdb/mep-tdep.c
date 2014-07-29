@@ -48,8 +48,6 @@
 #include "cgen/bitset.h"
 #include "infcall.h"
 
-#include "gdb_assert.h"
-
 /* Get the user's customized MeP coprocessor register names from
    libopcodes.  */
 #include "opcodes/mep-desc.h"

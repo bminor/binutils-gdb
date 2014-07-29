@@ -25,7 +25,6 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include <string.h>
-#include "gdb_assert.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"

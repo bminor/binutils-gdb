@@ -40,7 +40,6 @@
 #include "dwarf2-frame.h"
 
 #include <string.h>
-#include "gdb_assert.h"
 
 extern int dwarf2_always_disassemble;
 

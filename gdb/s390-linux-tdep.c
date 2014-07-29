@@ -39,7 +39,6 @@
 #include "reggroups.h"
 #include "regset.h"
 #include "value.h"
-#include "gdb_assert.h"
 #include "dis-asm.h"
 #include "solib-svr4.h"
 #include "prologue-value.h"

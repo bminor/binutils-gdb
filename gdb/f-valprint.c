@@ -34,7 +34,6 @@
 #include "command.h"
 #include "block.h"
 #include "dictionary.h"
-#include "gdb_assert.h"
 #include "exceptions.h"
 
 extern void _initialize_f_valprint (void);

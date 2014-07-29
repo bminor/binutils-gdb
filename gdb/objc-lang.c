@@ -44,7 +44,6 @@
 #include "block.h"
 #include "infcall.h"
 #include "valprint.h"
-#include "gdb_assert.h"
 #include "cli/cli-utils.h"
 
 #include <ctype.h>

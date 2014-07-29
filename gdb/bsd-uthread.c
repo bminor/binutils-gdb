@@ -29,7 +29,6 @@
 #include "symfile.h"
 #include "target.h"
 
-#include "gdb_assert.h"
 #include "gdb_obstack.h"
 
 #include "bsd-uthread.h"

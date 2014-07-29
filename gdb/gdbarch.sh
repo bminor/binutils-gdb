@@ -1473,7 +1473,6 @@ cat <<EOF
 
 #include "floatformat.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 #include "reggroups.h"
 #include "osabi.h"

@@ -30,7 +30,6 @@
 #include "symtab.h"
 #include "trad-frame.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 
 #include "sparc-tdep.h"

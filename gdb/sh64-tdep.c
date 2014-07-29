@@ -33,7 +33,6 @@
 #include "dis-asm.h"
 #include "inferior.h"
 #include <string.h>
-#include "gdb_assert.h"
 #include "arch-utils.h"
 #include "regcache.h"
 #include "osabi.h"

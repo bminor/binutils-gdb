@@ -40,7 +40,6 @@
 
 #include <string.h>
 #include "gdb_curses.h"
-#include "gdb_assert.h"
 
 /* Function to display the "main" routine.  */
 void

@@ -35,7 +35,6 @@
 #include "inferior.h"
 #include "dwarf2-frame.h"
 #include "infcall.h"
-#include "gdb_assert.h"
 #include "language.h"
 #include "valprint.h"
 

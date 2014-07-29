@@ -22,7 +22,6 @@
 #include "inferior.h"
 #include "regcache.h"
 
-#include "gdb_assert.h"
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>

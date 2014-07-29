@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include <string.h>
-#include "gdb_assert.h"
 #include "elf-bfd.h"
 #include "elf/m32c.h"
 #include "gdb/sim-m32c.h"

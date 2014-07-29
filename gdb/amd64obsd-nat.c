@@ -22,8 +22,6 @@
 #include "regcache.h"
 #include "target.h"
 
-#include "gdb_assert.h"
-
 #include "amd64-tdep.h"
 #include "amd64-nat.h"
 #include "obsd-nat.h"

@@ -73,7 +73,6 @@
 
 #include <fcntl.h>
 #include <string.h>
-#include "gdb_assert.h"
 #include <sys/types.h>
 
 typedef struct symbol *symbolp;

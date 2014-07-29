@@ -29,7 +29,6 @@
 #include "c-lang.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gdb_assert.h"
 
 /* Local functions */
 

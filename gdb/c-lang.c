@@ -27,7 +27,6 @@
 #include "c-lang.h"
 #include "valprint.h"
 #include "macroscope.h"
-#include "gdb_assert.h"
 #include "charset.h"
 #include <string.h>
 #include "demangle.h"

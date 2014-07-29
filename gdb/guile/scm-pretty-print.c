@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "charset.h"
-#include "gdb_assert.h"
 #include "symtab.h" /* Needed by language.h.  */
 #include "language.h"
 #include "objfiles.h"

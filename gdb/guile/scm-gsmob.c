@@ -43,7 +43,6 @@
 
 #include "defs.h"
 #include "hashtab.h"
-#include "gdb_assert.h"
 #include "objfiles.h"
 #include "guile-internal.h"
 

@@ -48,7 +48,6 @@
 #include "gdb.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "solib.h"
 #include "solist.h"

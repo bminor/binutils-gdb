@@ -25,7 +25,6 @@
 #include "cli-out.h"
 #include "tui.h"
 #include <string.h>
-#include "gdb_assert.h"
 
 struct tui_ui_out_data
   {

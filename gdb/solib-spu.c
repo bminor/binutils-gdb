@@ -22,7 +22,6 @@
 #include "solib-spu.h"
 #include "gdbcore.h"
 #include <string.h>
-#include "gdb_assert.h"
 #include <sys/stat.h>
 #include "arch-utils.h"
 #include "bfd.h"

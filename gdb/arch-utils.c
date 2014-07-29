@@ -26,7 +26,6 @@
 #include "infrun.h"
 #include <string.h>
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "sim-regno.h"
 #include "gdbcore.h"
 #include "osabi.h"

@@ -39,8 +39,6 @@
 #include "record.h"
 #include "record-full.h"
 
-#include "gdb_assert.h"
-
 #include "moxie-tdep.h"
 
 /* Local functions.  */

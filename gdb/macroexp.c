@@ -22,7 +22,6 @@
 #include "bcache.h"
 #include "macrotab.h"
 #include "macroexp.h"
-#include "gdb_assert.h"
 #include "c-lang.h"
 
 

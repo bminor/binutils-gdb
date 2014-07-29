@@ -40,9 +40,6 @@
 #include "valprint.h"
 #include "gdb_obstack.h"
 #include "objfiles.h"
-
-#include "gdb_assert.h"
-
 #include <ctype.h>
 
 /* This is defined in valops.c */

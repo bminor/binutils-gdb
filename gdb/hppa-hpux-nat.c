@@ -22,7 +22,6 @@
 #include "regcache.h"
 #include "target.h"
 
-#include "gdb_assert.h"
 #include <sys/ptrace.h>
 #include <sys/utsname.h>
 #include <machine/save_state.h>

@@ -50,7 +50,6 @@
 #include "block.h"
 #include "cp-support.h"
 #include "dfp.h"
-#include "gdb_assert.h"
 #include "macroscope.h"
 #include "objc-lang.h"
 #include "typeprint.h"

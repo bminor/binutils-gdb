@@ -33,7 +33,6 @@
 #include "value.h"
 #include "record.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 
 #include "complaints.h"

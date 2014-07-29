@@ -35,7 +35,6 @@
 #include "demangle.h"
 #include "dictionary.h"
 #include <ctype.h>
-#include "gdb_assert.h"
 #include "charset.h"
 #include "valprint.h"
 #include "cp-support.h"

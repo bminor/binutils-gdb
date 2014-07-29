@@ -29,7 +29,6 @@
 #include "exceptions.h"
 #include "typeprint.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 
 static struct cp_abi_ops gnu_v3_abi_ops;

@@ -25,7 +25,6 @@
 #include "cli/cli-cmds.h"
 #include "value.h"
 #include "completer.h"
-#include "gdb_assert.h"
 #include <ctype.h>
 #include "target.h"
 #include "readline/readline.h"

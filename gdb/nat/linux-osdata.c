@@ -40,7 +40,6 @@
 
 #include "xml-utils.h"
 #include "buffer.h"
-#include "gdb_assert.h"
 #include <dirent.h>
 #include <sys/stat.h>
 #include "filestuff.h"

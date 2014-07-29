@@ -25,7 +25,6 @@
 #include "expression.h"		/* For language.h */
 #include "language.h"
 #include "ui-out.h"
-#include "gdb_assert.h"
 
 /* table header structures */
 

@@ -31,7 +31,6 @@
 #include "trad-frame.h"
 #include "value.h"
 
-#include "gdb_assert.h"
 #include <string.h>
 
 #include "m88k-tdep.h"
