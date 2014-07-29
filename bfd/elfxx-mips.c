@@ -547,6 +547,10 @@ struct mips_elf_obj_tdata
   /* Input BFD providing Tag_GNU_MIPS_ABI_MSA attribute for output.  */
   bfd *abi_msa_bfd;
 
+  /* The abiflags for this object.  */
+  Elf_Internal_ABIFlags_v0 abiflags;
+  bfd_boolean abiflags_valid;
+
   /* The GOT requirements of input bfds.  */
   struct mips_got_info *got;
 
@@ -776,6 +780,10 @@ static bfd *reldyn_sorting_bfd;
 #define PIC_OBJECT_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_PIC) != 0)
 
+/* Nonzero if ABFD is using the O32 ABI.  */
+#define ABI_O32_P(abfd) \
+  ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI) == E_MIPS_ABI_O32)
+
 /* Nonzero if ABFD is using the N32 ABI.  */
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
@@ -807,6 +815,10 @@ static bfd *reldyn_sorting_bfd;
    Some IRIX system files do not use MIPS_ELF_OPTIONS_SECTION_NAME.  */
 #define MIPS_ELF_OPTIONS_SECTION_NAME_P(NAME) \
   (strcmp (NAME, ".MIPS.options") == 0 || strcmp (NAME, ".options") == 0)
+
+/* True if NAME is the recognized name of any SHT_MIPS_ABIFLAGS section.  */
+#define MIPS_ELF_ABIFLAGS_SECTION_NAME_P(NAME) \
+  (strcmp (NAME, ".MIPS.abiflags") == 0)
 
 /* Whether the section is readonly.  */
 #define MIPS_ELF_READONLY_SECTION(sec) \
@@ -2663,6 +2675,46 @@ bfd_mips_elf_swap_options_out (bfd *abfd, const Elf_Internal_Options *in,
   H_PUT_8 (abfd, in->size, ex->size);
   H_PUT_16 (abfd, in->section, ex->section);
   H_PUT_32 (abfd, in->info, ex->info);
+}
+
+/* Swap in an abiflags structure.  */
+
+void
+bfd_mips_elf_swap_abiflags_v0_in (bfd *abfd,
+				  const Elf_External_ABIFlags_v0 *ex,
+				  Elf_Internal_ABIFlags_v0 *in)
+{
+  in->version = H_GET_16 (abfd, ex->version);
+  in->isa_level = H_GET_8 (abfd, ex->isa_level);
+  in->isa_rev = H_GET_8 (abfd, ex->isa_rev);
+  in->gpr_size = H_GET_8 (abfd, ex->gpr_size);
+  in->cpr1_size = H_GET_8 (abfd, ex->cpr1_size);
+  in->cpr2_size = H_GET_8 (abfd, ex->cpr2_size);
+  in->fp_abi = H_GET_8 (abfd, ex->fp_abi);
+  in->isa_ext = H_GET_32 (abfd, ex->isa_ext);
+  in->ases = H_GET_32 (abfd, ex->ases);
+  in->flags1 = H_GET_32 (abfd, ex->flags1);
+  in->flags2 = H_GET_32 (abfd, ex->flags2);
+}
+
+/* Swap out an abiflags structure.  */
+
+void
+bfd_mips_elf_swap_abiflags_v0_out (bfd *abfd,
+				   const Elf_Internal_ABIFlags_v0 *in,
+				   Elf_External_ABIFlags_v0 *ex)
+{
+  H_PUT_16 (abfd, in->version, ex->version);
+  H_PUT_8 (abfd, in->isa_level, ex->isa_level);
+  H_PUT_8 (abfd, in->isa_rev, ex->isa_rev);
+  H_PUT_8 (abfd, in->gpr_size, ex->gpr_size);
+  H_PUT_8 (abfd, in->cpr1_size, ex->cpr1_size);
+  H_PUT_8 (abfd, in->cpr2_size, ex->cpr2_size);
+  H_PUT_8 (abfd, in->fp_abi, ex->fp_abi);
+  H_PUT_32 (abfd, in->isa_ext, ex->isa_ext);
+  H_PUT_32 (abfd, in->ases, ex->ases);
+  H_PUT_32 (abfd, in->flags1, ex->flags1);
+  H_PUT_32 (abfd, in->flags2, ex->flags2);
 }
 
 /* This function is called via qsort() to sort the dynamic relocation
@@ -6910,6 +6962,11 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
       if (!MIPS_ELF_OPTIONS_SECTION_NAME_P (name))
 	return FALSE;
       break;
+    case SHT_MIPS_ABIFLAGS:
+      if (!MIPS_ELF_ABIFLAGS_SECTION_NAME_P (name))
+	return FALSE;
+      flags = (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_SIZE);
+      break;
     case SHT_MIPS_DWARF:
       if (! CONST_STRNEQ (name, ".debug_")
           && ! CONST_STRNEQ (name, ".zdebug_"))
@@ -6938,6 +6995,20 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 							   hdr->bfd_section)
 				    | flags)))
 	return FALSE;
+    }
+
+  if (hdr->sh_type == SHT_MIPS_ABIFLAGS)
+    {
+      Elf_External_ABIFlags_v0 ext;
+
+      if (! bfd_get_section_contents (abfd, hdr->bfd_section,
+				      &ext, 0, sizeof ext))
+	return FALSE;
+      bfd_mips_elf_swap_abiflags_v0_in (abfd, &ext,
+					&mips_elf_tdata (abfd)->abiflags);
+      if (mips_elf_tdata (abfd)->abiflags.version != 0)
+	return FALSE;
+      mips_elf_tdata (abfd)->abiflags_valid = TRUE;
     }
 
   /* FIXME: We should record sh_info for a .gptab section.  */
@@ -7105,6 +7176,11 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_type = SHT_MIPS_OPTIONS;
       hdr->sh_entsize = 1;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
+    }
+  else if (CONST_STRNEQ (name, ".MIPS.abiflags"))
+    {
+      hdr->sh_type = SHT_MIPS_ABIFLAGS;
+      hdr->sh_entsize = sizeof (Elf_External_ABIFlags_v0);
     }
   else if (CONST_STRNEQ (name, ".debug_")
            || CONST_STRNEQ (name, ".zdebug_"))
@@ -9025,7 +9101,7 @@ bfd_boolean
 _bfd_mips_elf_always_size_sections (bfd *output_bfd,
 				    struct bfd_link_info *info)
 {
-  asection *ri;
+  asection *sect;
   struct mips_elf_link_hash_table *htab;
   struct mips_htab_traverse_info hti;
 
@@ -9033,9 +9109,14 @@ _bfd_mips_elf_always_size_sections (bfd *output_bfd,
   BFD_ASSERT (htab != NULL);
 
   /* The .reginfo section has a fixed size.  */
-  ri = bfd_get_section_by_name (output_bfd, ".reginfo");
-  if (ri != NULL)
-    bfd_set_section_size (output_bfd, ri, sizeof (Elf32_External_RegInfo));
+  sect = bfd_get_section_by_name (output_bfd, ".reginfo");
+  if (sect != NULL)
+    bfd_set_section_size (output_bfd, sect, sizeof (Elf32_External_RegInfo));
+
+  /* The .MIPS.abiflags section has a fixed size.  */
+  sect = bfd_get_section_by_name (output_bfd, ".MIPS.abiflags");
+  if (sect != NULL)
+    bfd_set_section_size (output_bfd, sect, sizeof (Elf_External_ABIFlags_v0));
 
   hti.info = info;
   hti.output_bfd = output_bfd;
@@ -11782,6 +11863,10 @@ _bfd_mips_elf_additional_program_headers (bfd *abfd,
   if (s && (s->flags & SEC_LOAD))
     ++ret;
 
+  /* See if we need a PT_MIPS_ABIFLAGS segment.  */
+  if (bfd_get_section_by_name (abfd, ".MIPS.abiflags"))
+    ++ret;
+
   /* See if we need a PT_MIPS_OPTIONS segment.  */
   if (IRIX_COMPAT (abfd) == ict_irix6
       && bfd_get_section_by_name (abfd,
@@ -11829,6 +11914,37 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 	    return FALSE;
 
 	  m->p_type = PT_MIPS_REGINFO;
+	  m->count = 1;
+	  m->sections[0] = s;
+
+	  /* We want to put it after the PHDR and INTERP segments.  */
+	  pm = &elf_seg_map (abfd);
+	  while (*pm != NULL
+		 && ((*pm)->p_type == PT_PHDR
+		     || (*pm)->p_type == PT_INTERP))
+	    pm = &(*pm)->next;
+
+	  m->next = *pm;
+	  *pm = m;
+	}
+    }
+
+  /* If there is a .MIPS.abiflags section, we need a PT_MIPS_ABIFLAGS
+     segment.  */
+  s = bfd_get_section_by_name (abfd, ".MIPS.abiflags");
+  if (s != NULL && (s->flags & SEC_LOAD) != 0)
+    {
+      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
+	if (m->p_type == PT_MIPS_ABIFLAGS)
+	  break;
+      if (m == NULL)
+	{
+	  amt = sizeof *m;
+	  m = bfd_zalloc (abfd, amt);
+	  if (m == NULL)
+	    return FALSE;
+
+	  m->p_type = PT_MIPS_ABIFLAGS;
 	  m->count = 1;
 	  m->sections[0] = s;
 
@@ -12124,6 +12240,36 @@ _bfd_mips_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 	break;
       }
 #endif
+
+  return TRUE;
+}
+
+/* Prevent .MIPS.abiflags from being discarded with --gc-sections.  */
+
+bfd_boolean
+_bfd_mips_elf_gc_mark_extra_sections (struct bfd_link_info *info,
+				      elf_gc_mark_hook_fn gc_mark_hook)
+{
+  bfd *sub;
+
+  _bfd_elf_gc_mark_extra_sections (info, gc_mark_hook);
+
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
+    {
+      asection *o;
+
+      if (! is_mips_elf (sub))
+	continue;
+
+      for (o = sub->sections; o != NULL; o = o->next)
+	if (!o->gc_mark
+	    && MIPS_ELF_ABIFLAGS_SECTION_NAME_P
+		 (bfd_get_section_name (sub, o)))
+	  {
+	    if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
+	      return FALSE;
+	  }
+    }
 
   return TRUE;
 }
@@ -13577,6 +13723,170 @@ _bfd_mips_elf_insn32 (struct bfd_link_info *info, bfd_boolean on)
   mips_elf_hash_table (info)->insn32 = on;
 }
 
+/* Return the .MIPS.abiflags value representing each ISA Extension.  */
+
+unsigned int
+bfd_mips_isa_ext (bfd *abfd)
+{
+  switch (bfd_get_mach (abfd))
+    {
+    case bfd_mach_mips3900:
+      return AFL_EXT_3900;
+    case bfd_mach_mips4010:
+      return AFL_EXT_4010;
+    case bfd_mach_mips4100:
+      return AFL_EXT_4100;
+    case bfd_mach_mips4111:
+      return AFL_EXT_4111;
+    case bfd_mach_mips4120:
+      return AFL_EXT_4120;
+    case bfd_mach_mips4650:
+      return AFL_EXT_4650;
+    case bfd_mach_mips5400:
+      return AFL_EXT_5400;
+    case bfd_mach_mips5500:
+      return AFL_EXT_5500;
+    case bfd_mach_mips5900:
+      return AFL_EXT_5900;
+    case bfd_mach_mips10000:
+      return AFL_EXT_10000;
+    case bfd_mach_mips_loongson_2e:
+      return AFL_EXT_LOONGSON_2E;
+    case bfd_mach_mips_loongson_2f:
+      return AFL_EXT_LOONGSON_2F;
+    case bfd_mach_mips_loongson_3a:
+      return AFL_EXT_LOONGSON_3A;
+    case bfd_mach_mips_sb1:
+      return AFL_EXT_SB1;
+    case bfd_mach_mips_octeon:
+      return AFL_EXT_OCTEON;
+    case bfd_mach_mips_octeonp:
+      return AFL_EXT_OCTEONP;
+    case bfd_mach_mips_octeon2:
+      return AFL_EXT_OCTEON2;
+    case bfd_mach_mips_xlr:
+      return AFL_EXT_XLR;
+    }
+  return 0;
+}
+
+/* Update the isa_level, isa_rev, isa_ext fields of abiflags.  */
+
+static void
+update_mips_abiflags_isa (bfd *abfd, Elf_Internal_ABIFlags_v0 *abiflags)
+{
+  switch (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH)
+    {
+    case E_MIPS_ARCH_1:
+      abiflags->isa_level = 1;
+      abiflags->isa_rev = 0;
+      break;
+    case E_MIPS_ARCH_2:
+      abiflags->isa_level = 2;
+      abiflags->isa_rev = 0;
+      break;
+    case E_MIPS_ARCH_3:
+      abiflags->isa_level = 3;
+      abiflags->isa_rev = 0;
+      break;
+    case E_MIPS_ARCH_4:
+      abiflags->isa_level = 4;
+      abiflags->isa_rev = 0;
+      break;
+    case E_MIPS_ARCH_5:
+      abiflags->isa_level = 5;
+      abiflags->isa_rev = 0;
+      break;
+    case E_MIPS_ARCH_32:
+      abiflags->isa_level = 32;
+      abiflags->isa_rev = 1;
+      break;
+    case E_MIPS_ARCH_32R2:
+      abiflags->isa_level = 32;
+      /* Handle MIPS32r3 and MIPS32r5 which do not have a header flag.  */
+      if (abiflags->isa_rev < 2)
+	abiflags->isa_rev = 2;
+      break;
+    case E_MIPS_ARCH_64:
+      abiflags->isa_level = 64;
+      abiflags->isa_rev = 1;
+      break;
+    case E_MIPS_ARCH_64R2:
+      /* Handle MIPS64r3 and MIPS64r5 which do not have a header flag.  */
+      abiflags->isa_level = 64;
+      if (abiflags->isa_rev < 2)
+	abiflags->isa_rev = 2;
+      break;
+    default:
+      (*_bfd_error_handler)
+	(_("%B: Unknown architecture %s"),
+	 abfd, bfd_printable_name (abfd));
+    }
+
+  abiflags->isa_ext = bfd_mips_isa_ext (abfd);
+}
+
+/* Return true if the given ELF header flags describe a 32-bit binary.  */
+
+static bfd_boolean
+mips_32bit_flags_p (flagword flags)
+{
+  return ((flags & EF_MIPS_32BITMODE) != 0
+	  || (flags & EF_MIPS_ABI) == E_MIPS_ABI_O32
+	  || (flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI32
+	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_1
+	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_2
+	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32
+	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R2);
+}
+
+/* Infer the content of the ABI flags based on the elf header.  */
+
+static void
+infer_mips_abiflags (bfd *abfd, Elf_Internal_ABIFlags_v0* abiflags)
+{
+  obj_attribute *in_attr;
+
+  memset (abiflags, 0, sizeof (Elf_Internal_ABIFlags_v0));
+  update_mips_abiflags_isa (abfd, abiflags);
+
+  if (mips_32bit_flags_p (elf_elfheader (abfd)->e_flags))
+    abiflags->gpr_size = AFL_REG_32;
+  else
+    abiflags->gpr_size = AFL_REG_64;
+
+  abiflags->cpr1_size = AFL_REG_NONE;
+
+  in_attr = elf_known_obj_attributes (abfd)[OBJ_ATTR_GNU];
+  abiflags->fp_abi = in_attr[Tag_GNU_MIPS_ABI_FP].i;
+
+  if (abiflags->fp_abi == Val_GNU_MIPS_ABI_FP_SINGLE
+      || abiflags->fp_abi == Val_GNU_MIPS_ABI_FP_XX
+      || (abiflags->fp_abi == Val_GNU_MIPS_ABI_FP_DOUBLE
+	  && abiflags->gpr_size == AFL_REG_32))
+    abiflags->cpr1_size = AFL_REG_32;
+  else if (abiflags->fp_abi == Val_GNU_MIPS_ABI_FP_DOUBLE
+	   || abiflags->fp_abi == Val_GNU_MIPS_ABI_FP_64
+	   || abiflags->fp_abi == Val_GNU_MIPS_ABI_FP_64A)
+    abiflags->cpr1_size = AFL_REG_64;
+
+  abiflags->cpr2_size = AFL_REG_NONE;
+
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_MDMX)
+    abiflags->ases |= AFL_ASE_MDMX;
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_M16)
+    abiflags->ases |= AFL_ASE_MIPS16;
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_MICROMIPS)
+    abiflags->ases |= AFL_ASE_MICROMIPS;
+
+  if (abiflags->fp_abi != Val_GNU_MIPS_ABI_FP_ANY
+      && abiflags->fp_abi != Val_GNU_MIPS_ABI_FP_SOFT
+      && abiflags->fp_abi != Val_GNU_MIPS_ABI_FP_64A
+      && abiflags->isa_level >= 32
+      && abiflags->isa_ext != AFL_EXT_LOONGSON_3A)
+    abiflags->flags1 |= AFL_FLAGS1_ODDSPREG;
+}
+
 /* We need to use a special link routine to handle the .reginfo and
    the .mdebug sections.  We need to merge all instances of these
    sections together, not write them all out sequentially.  */
@@ -13587,7 +13897,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *o;
   struct bfd_link_order *p;
   asection *reginfo_sec, *mdebug_sec, *gptab_data_sec, *gptab_bss_sec;
-  asection *rtproc_sec;
+  asection *rtproc_sec, *abiflags_sec;
   Elf32_RegInfo reginfo;
   struct ecoff_debug_info debug;
   struct mips_htab_traverse_info hti;
@@ -13669,12 +13979,46 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Go through the sections and collect the .reginfo and .mdebug
      information.  */
+  abiflags_sec = NULL;
   reginfo_sec = NULL;
   mdebug_sec = NULL;
   gptab_data_sec = NULL;
   gptab_bss_sec = NULL;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
+      if (strcmp (o->name, ".MIPS.abiflags") == 0)
+	{
+	  /* We have found the .MIPS.abiflags section in the output file.
+	     Look through all the link_orders comprising it and remove them.
+	     The data is merged in _bfd_mips_elf_merge_private_bfd_data.  */
+	  for (p = o->map_head.link_order; p != NULL; p = p->next)
+	    {
+	      asection *input_section;
+
+	      if (p->type != bfd_indirect_link_order)
+		{
+		  if (p->type == bfd_data_link_order)
+		    continue;
+		  abort ();
+		}
+
+	      input_section = p->u.indirect.section;
+
+	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
+		 elf_link_input_bfd ignores this section.  */
+	      input_section->flags &= ~SEC_HAS_CONTENTS;
+	    }
+
+	  /* Size has been set in _bfd_mips_elf_always_size_sections.  */
+	  BFD_ASSERT(o->size == sizeof (Elf_External_ABIFlags_v0));
+
+	  /* Skip this section later on (I don't think this currently
+	     matters, but someday it might).  */
+	  o->map_head.link_order = NULL;
+
+	  abiflags_sec = o;
+	}
+
       if (strcmp (o->name, ".reginfo") == 0)
 	{
 	  memset (&reginfo, 0, sizeof reginfo);
@@ -14159,6 +14503,24 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Now write out the computed sections.  */
 
+  if (abiflags_sec != NULL)
+    {
+      Elf_External_ABIFlags_v0 ext;
+      Elf_Internal_ABIFlags_v0 *abiflags;
+
+      abiflags = &mips_elf_tdata (abfd)->abiflags;
+
+      /* Set up the abiflags if no valid input sections were found.  */
+      if (!mips_elf_tdata (abfd)->abiflags_valid)
+	{
+	  infer_mips_abiflags (abfd, abiflags);
+	  mips_elf_tdata (abfd)->abiflags_valid = TRUE;
+	}
+      bfd_mips_elf_swap_abiflags_v0_out (abfd, abiflags, &ext);
+      if (! bfd_set_section_contents (abfd, abiflags_sec, &ext, 0, sizeof ext))
+	return FALSE;
+    }
+
   if (reginfo_sec != NULL)
     {
       Elf32_External_RegInfo ext;
@@ -14316,21 +14678,6 @@ mips_mach_extends_p (unsigned long base, unsigned long extension)
 }
 
 
-/* Return true if the given ELF header flags describe a 32-bit binary.  */
-
-static bfd_boolean
-mips_32bit_flags_p (flagword flags)
-{
-  return ((flags & EF_MIPS_32BITMODE) != 0
-	  || (flags & EF_MIPS_ABI) == E_MIPS_ABI_O32
-	  || (flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI32
-	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_1
-	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_2
-	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32
-	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R2);
-}
-
-
 /* Merge object attributes from IBFD into OBFD.  Raise an error if
    there are conflicting attributes.  */
 static bfd_boolean
@@ -14375,6 +14722,28 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
       out_attr[Tag_GNU_MIPS_ABI_FP].type = 1;
       if (out_fp == Val_GNU_MIPS_ABI_FP_ANY)
 	out_attr[Tag_GNU_MIPS_ABI_FP].i = in_fp;
+      else if (out_fp == Val_GNU_MIPS_ABI_FP_XX
+	       && (in_fp == Val_GNU_MIPS_ABI_FP_DOUBLE
+		   || in_fp == Val_GNU_MIPS_ABI_FP_64
+		   || in_fp == Val_GNU_MIPS_ABI_FP_64A))
+	{
+	  mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
+	  out_attr[Tag_GNU_MIPS_ABI_FP].i = in_attr[Tag_GNU_MIPS_ABI_FP].i;
+	}
+      else if (in_fp == Val_GNU_MIPS_ABI_FP_XX
+	       && (out_fp == Val_GNU_MIPS_ABI_FP_DOUBLE
+		   || out_fp == Val_GNU_MIPS_ABI_FP_64
+		   || out_fp == Val_GNU_MIPS_ABI_FP_64A))
+	/* Keep the current setting.  */;
+      else if (out_fp == Val_GNU_MIPS_ABI_FP_64A
+	       && in_fp == Val_GNU_MIPS_ABI_FP_64)
+	{
+	  mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
+	  out_attr[Tag_GNU_MIPS_ABI_FP].i = in_attr[Tag_GNU_MIPS_ABI_FP].i;
+	}
+      else if (in_fp == Val_GNU_MIPS_ABI_FP_64A
+	       && out_fp == Val_GNU_MIPS_ABI_FP_64)
+	/* Keep the current setting.  */;
       else if (in_fp != Val_GNU_MIPS_ABI_FP_ANY)
 	{
 	  const char *out_string, *in_string;
@@ -14471,6 +14840,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   bfd_boolean ok;
   bfd_boolean null_input_bfd = TRUE;
   asection *sec;
+  obj_attribute *out_attr;
 
   /* Check if we have the same endianness.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
@@ -14492,54 +14862,18 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       return FALSE;
     }
 
-  if (!mips_elf_merge_obj_attributes (ibfd, obfd))
-    return FALSE;
-
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_NOREORDER;
-  old_flags = elf_elfheader (obfd)->e_flags;
-
-  if (! elf_flags_init (obfd))
+  /* Set up the FP ABI attribute from the abiflags if it is not already
+     set.  */
+  if (mips_elf_tdata (ibfd)->abiflags_valid)
     {
-      elf_flags_init (obfd) = TRUE;
-      elf_elfheader (obfd)->e_flags = new_flags;
-      elf_elfheader (obfd)->e_ident[EI_CLASS]
-	= elf_elfheader (ibfd)->e_ident[EI_CLASS];
-
-      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
-	  && (bfd_get_arch_info (obfd)->the_default
-	      || mips_mach_extends_p (bfd_get_mach (obfd),
-				      bfd_get_mach (ibfd))))
-	{
-	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
-				   bfd_get_mach (ibfd)))
-	    return FALSE;
-	}
-
-      return TRUE;
+      obj_attribute *in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+      if (in_attr[Tag_GNU_MIPS_ABI_FP].i == Val_GNU_MIPS_ABI_FP_ANY)
+        in_attr[Tag_GNU_MIPS_ABI_FP].i =
+	  mips_elf_tdata (ibfd)->abiflags.fp_abi;
     }
 
-  /* Check flag compatibility.  */
-
-  new_flags &= ~EF_MIPS_NOREORDER;
-  old_flags &= ~EF_MIPS_NOREORDER;
-
-  /* Some IRIX 6 BSD-compatibility objects have this bit set.  It
-     doesn't seem to matter.  */
-  new_flags &= ~EF_MIPS_XGOT;
-  old_flags &= ~EF_MIPS_XGOT;
-
-  /* MIPSpro generates ucode info in n64 objects.  Again, we should
-     just be able to ignore this.  */
-  new_flags &= ~EF_MIPS_UCODE;
-  old_flags &= ~EF_MIPS_UCODE;
-
-  /* DSOs should only be linked with CPIC code.  */
-  if ((ibfd->flags & DYNAMIC) != 0)
-    new_flags |= EF_MIPS_PIC | EF_MIPS_CPIC;
-
-  if (new_flags == old_flags)
-    return TRUE;
+  if (!mips_elf_merge_obj_attributes (ibfd, obfd))
+    return FALSE;
 
   /* Check to see if the input BFD actually contains any sections.
      If not, its flags may not have been initialised either, but it cannot
@@ -14563,6 +14897,130 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	}
     }
   if (null_input_bfd)
+    return TRUE;
+
+  /* Populate abiflags using existing information.  */
+  if (!mips_elf_tdata (ibfd)->abiflags_valid)
+    {
+      infer_mips_abiflags (ibfd, &mips_elf_tdata (ibfd)->abiflags);
+      mips_elf_tdata (ibfd)->abiflags_valid = TRUE;
+    }
+  else
+    {
+      Elf_Internal_ABIFlags_v0 abiflags;
+      Elf_Internal_ABIFlags_v0 in_abiflags;
+      infer_mips_abiflags (ibfd, &abiflags);
+      in_abiflags = mips_elf_tdata (ibfd)->abiflags;
+
+      /* It is not possible to infer the correct ISA revision
+         for R3 or R5 so drop down to R2 for the checks.  */
+      if (in_abiflags.isa_rev == 3 || in_abiflags.isa_rev == 5)
+	in_abiflags.isa_rev = 2;
+
+      if (in_abiflags.isa_level != abiflags.isa_level
+	  || in_abiflags.isa_rev != abiflags.isa_rev
+	  || in_abiflags.isa_ext != abiflags.isa_ext)
+	(*_bfd_error_handler)
+	  (_("%B: warning: Inconsistent ISA between e_flags and "
+	     ".MIPS.abiflags"), ibfd);
+      if (abiflags.fp_abi != Val_GNU_MIPS_ABI_FP_ANY
+	  && in_abiflags.fp_abi != abiflags.fp_abi)
+	(*_bfd_error_handler)
+	  (_("%B: warning: Inconsistent FP ABI between e_flags and "
+	     ".MIPS.abiflags"), ibfd);
+      if ((in_abiflags.ases & abiflags.ases) != abiflags.ases)
+	(*_bfd_error_handler)
+	  (_("%B: warning: Inconsistent ASEs between e_flags and "
+	     ".MIPS.abiflags"), ibfd);
+      if (in_abiflags.isa_ext != abiflags.isa_ext)
+	(*_bfd_error_handler)
+	  (_("%B: warning: Inconsistent ISA extensions between e_flags and "
+	     ".MIPS.abiflags"), ibfd);
+      if (in_abiflags.flags2 != 0)
+	(*_bfd_error_handler)
+	  (_("%B: warning: Unexpected flag in the flags2 field of "
+	     ".MIPS.abiflags (0x%lx)"), ibfd,
+	   (unsigned long) in_abiflags.flags2);
+    }
+
+  if (!mips_elf_tdata (obfd)->abiflags_valid)
+    {
+      /* Copy input abiflags if output abiflags are not already valid.  */
+      mips_elf_tdata (obfd)->abiflags = mips_elf_tdata (ibfd)->abiflags;
+      mips_elf_tdata (obfd)->abiflags_valid = TRUE;
+    }
+
+  if (! elf_flags_init (obfd))
+    {
+      elf_flags_init (obfd) = TRUE;
+      elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+      elf_elfheader (obfd)->e_ident[EI_CLASS]
+	= elf_elfheader (ibfd)->e_ident[EI_CLASS];
+
+      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+	  && (bfd_get_arch_info (obfd)->the_default
+	      || mips_mach_extends_p (bfd_get_mach (obfd),
+				      bfd_get_mach (ibfd))))
+	{
+	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
+				   bfd_get_mach (ibfd)))
+	    return FALSE;
+
+	  /* Update the ABI flags isa_level, isa_rev and isa_ext fields.  */
+	  update_mips_abiflags_isa (obfd, &mips_elf_tdata (obfd)->abiflags);
+	}
+
+      return TRUE;
+    }
+
+  /* Update the output abiflags fp_abi using the computed fp_abi.  */
+  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+  mips_elf_tdata (obfd)->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
+
+#define max(a,b) ((a) > (b) ? (a) : (b))
+  /* Merge abiflags.  */
+  mips_elf_tdata (obfd)->abiflags.isa_rev
+    = max (mips_elf_tdata (obfd)->abiflags.isa_rev,
+	   mips_elf_tdata (ibfd)->abiflags.isa_rev);
+  mips_elf_tdata (obfd)->abiflags.gpr_size
+    = max (mips_elf_tdata (obfd)->abiflags.gpr_size,
+	   mips_elf_tdata (ibfd)->abiflags.gpr_size);
+  mips_elf_tdata (obfd)->abiflags.cpr1_size
+    = max (mips_elf_tdata (obfd)->abiflags.cpr1_size,
+	   mips_elf_tdata (ibfd)->abiflags.cpr1_size);
+  mips_elf_tdata (obfd)->abiflags.cpr2_size
+    = max (mips_elf_tdata (obfd)->abiflags.cpr2_size,
+	   mips_elf_tdata (ibfd)->abiflags.cpr2_size);
+#undef max
+  mips_elf_tdata (obfd)->abiflags.ases
+    |= mips_elf_tdata (ibfd)->abiflags.ases;
+  mips_elf_tdata (obfd)->abiflags.flags1
+    |= mips_elf_tdata (ibfd)->abiflags.flags1;
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_NOREORDER;
+  old_flags = elf_elfheader (obfd)->e_flags;
+
+  /* Check flag compatibility.  */
+
+  new_flags &= ~EF_MIPS_NOREORDER;
+  old_flags &= ~EF_MIPS_NOREORDER;
+
+  /* Some IRIX 6 BSD-compatibility objects have this bit set.  It
+     doesn't seem to matter.  */
+  new_flags &= ~EF_MIPS_XGOT;
+  old_flags &= ~EF_MIPS_XGOT;
+
+  /* MIPSpro generates ucode info in n64 objects.  Again, we should
+     just be able to ignore this.  */
+  new_flags &= ~EF_MIPS_UCODE;
+  old_flags &= ~EF_MIPS_UCODE;
+
+  /* DSOs should only be linked with CPIC code.  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    new_flags |= EF_MIPS_PIC | EF_MIPS_CPIC;
+
+  if (new_flags == old_flags)
     return TRUE;
 
   ok = TRUE;
@@ -14604,6 +15062,9 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  elf_elfheader (obfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
 	  elf_elfheader (obfd)->e_flags
 	    |= new_flags & (EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
+
+	  /* Update the ABI flags isa_level, isa_rev, isa_ext fields.  */
+	  update_mips_abiflags_isa (obfd, &mips_elf_tdata (obfd)->abiflags);
 
 	  /* Copy across the ABI flags if OBFD doesn't use them
 	     and if that was what caused us to treat IBFD as 32-bit.  */
@@ -14688,6 +15149,20 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       ok = FALSE;
       new_flags &= ~EF_MIPS_NAN2008;
       old_flags &= ~EF_MIPS_NAN2008;
+    }
+
+  /* Compare FP64 state.  */
+  if ((new_flags & EF_MIPS_FP64) != (old_flags & EF_MIPS_FP64))
+    {
+      _bfd_error_handler (_("%B: linking %s module with previous %s modules"),
+			  ibfd,
+			  (new_flags & EF_MIPS_FP64
+			   ? "-mfp64" : "-mfp32"),
+			  (old_flags & EF_MIPS_FP64
+			   ? "-mfp64" : "-mfp32"));
+      ok = FALSE;
+      new_flags &= ~EF_MIPS_FP64;
+      old_flags &= ~EF_MIPS_FP64;
     }
 
   /* Warn about any other mismatches */
@@ -14840,12 +15315,167 @@ _bfd_mips_fp_abi_string (int fp)
     case Val_GNU_MIPS_ABI_FP_SOFT:
       return "-msoft-float";
 
+    case Val_GNU_MIPS_ABI_FP_OLD_64:
+      return _("-mips32r2 -mfp64 (12 callee-saved)");
+
+    case Val_GNU_MIPS_ABI_FP_XX:
+      return "-mfpxx";
+
     case Val_GNU_MIPS_ABI_FP_64:
-      return "-mips32r2 -mfp64";
+      return "-mgp32 -mfp64";
+
+    case Val_GNU_MIPS_ABI_FP_64A:
+      return "-mgp32 -mfp64 -mno-odd-spreg";
 
     default:
       return 0;
     }
+}
+
+static void
+print_mips_ases (FILE *file, unsigned int mask)
+{
+  if (mask & AFL_ASE_DSP)
+    fputs ("\n\tDSP ASE", file);
+  if (mask & AFL_ASE_DSPR2)
+    fputs ("\n\tDSP R2 ASE", file);
+  if (mask & AFL_ASE_EVA)
+    fputs ("\n\tEnhanced VA Scheme", file);
+  if (mask & AFL_ASE_MCU)
+    fputs ("\n\tMCU (MicroController) ASE", file);
+  if (mask & AFL_ASE_MDMX)
+    fputs ("\n\tMDMX ASE", file);
+  if (mask & AFL_ASE_MIPS3D)
+    fputs ("\n\tMIPS-3D ASE", file);
+  if (mask & AFL_ASE_MT)
+    fputs ("\n\tMT ASE", file);
+  if (mask & AFL_ASE_SMARTMIPS)
+    fputs ("\n\tSmartMIPS ASE", file);
+  if (mask & AFL_ASE_VIRT)
+    fputs ("\n\tVZ ASE", file);
+  if (mask & AFL_ASE_MSA)
+    fputs ("\n\tMSA ASE", file);
+  if (mask & AFL_ASE_MIPS16)
+    fputs ("\n\tMIPS16 ASE", file);
+  if (mask & AFL_ASE_MICROMIPS)
+    fputs ("\n\tMICROMIPS ASE", file);
+  if (mask & AFL_ASE_XPA)
+    fputs ("\n\tXPA ASE", file);
+  if (mask == 0)
+    fprintf (file, "\n\t%s", _("None"));
+}
+
+static void
+print_mips_isa_ext (FILE *file, unsigned int isa_ext)
+{
+  switch (isa_ext)
+    {
+    case 0:
+      fputs (_("None"), file);
+      break;
+    case AFL_EXT_XLR:
+      fputs ("RMI XLR", file);
+      break;
+    case AFL_EXT_OCTEON2:
+      fputs ("Cavium Networks Octeon2", file);
+      break;
+    case AFL_EXT_OCTEONP:
+      fputs ("Cavium Networks OcteonP", file);
+      break;
+    case AFL_EXT_LOONGSON_3A:
+      fputs ("Loongson 3A", file);
+      break;
+    case AFL_EXT_OCTEON:
+      fputs ("Cavium Networks Octeon", file);
+      break;
+    case AFL_EXT_5900:
+      fputs ("Toshiba R5900", file);
+      break;
+    case AFL_EXT_4650:
+      fputs ("MIPS R4650", file);
+      break;
+    case AFL_EXT_4010:
+      fputs ("LSI R4010", file);
+      break;
+    case AFL_EXT_4100:
+      fputs ("NEC VR4100", file);
+      break;
+    case AFL_EXT_3900:
+      fputs ("Toshiba R3900", file);
+      break;
+    case AFL_EXT_10000:
+      fputs ("MIPS R10000", file);
+      break;
+    case AFL_EXT_SB1:
+      fputs ("Broadcom SB-1", file);
+      break;
+    case AFL_EXT_4111:
+      fputs ("NEC VR4111/VR4181", file);
+      break;
+    case AFL_EXT_4120:
+      fputs ("NEC VR4120", file);
+      break;
+    case AFL_EXT_5400:
+      fputs ("NEC VR5400", file);
+      break;
+    case AFL_EXT_5500:
+      fputs ("NEC VR5500", file);
+      break;
+    case AFL_EXT_LOONGSON_2E:
+      fputs ("ST Microelectronics Loongson 2E", file);
+      break;
+    case AFL_EXT_LOONGSON_2F:
+      fputs ("ST Microelectronics Loongson 2F", file);
+      break;
+    default:
+      fputs (_("Unknown"), file);
+      break;
+    }
+}
+
+static void
+print_mips_fp_abi_value (FILE *file, int val)
+{
+  switch (val)
+    {
+    case Val_GNU_MIPS_ABI_FP_ANY:
+      fprintf (file, _("Hard or soft float\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_DOUBLE:
+      fprintf (file, _("Hard float (double precision)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_SINGLE:
+      fprintf (file, _("Hard float (single precision)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_SOFT:
+      fprintf (file, _("Soft float\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_OLD_64:
+      fprintf (file, _("Hard float (MIPS32r2 64-bit FPU 12 callee-saved)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_XX:
+      fprintf (file, _("Hard float (32-bit CPU, Any FPU)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_64:
+      fprintf (file, _("Hard float (32-bit CPU, 64-bit FPU)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_64A:
+      fprintf (file, _("Hard float compat (32-bit CPU, 64-bit FPU)\n"));
+      break;
+    default:
+      fprintf (file, "??? (%d)\n", val);
+      break;
+    }
+}
+
+static int
+get_mips_reg_size (int reg_size)
+{
+  return (reg_size == AFL_REG_NONE) ? 0
+	 : (reg_size == AFL_REG_32) ? 32
+	 : (reg_size == AFL_REG_64) ? 64
+	 : (reg_size == AFL_REG_128) ? 128
+	 : -1;
 }
 
 bfd_boolean
@@ -14912,7 +15542,7 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
     fprintf (file, " [nan2008]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_FP64)
-    fprintf (file, " [fp64]");
+    fprintf (file, " [old fp64]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_32BITMODE)
     fprintf (file, " [32bitmode]");
@@ -14935,6 +15565,30 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
     fprintf (file, " [UCODE]");
 
   fputc ('\n', file);
+
+  if (mips_elf_tdata (abfd)->abiflags_valid)
+    {
+      Elf_Internal_ABIFlags_v0 *abiflags = &mips_elf_tdata (abfd)->abiflags;
+      fprintf (file, "\nMIPS ABI Flags Version: %d\n", abiflags->version);
+      fprintf (file, "\nISA: MIPS%d", abiflags->isa_level);
+      if (abiflags->isa_rev > 1)
+	fprintf (file, "r%d", abiflags->isa_rev);
+      fprintf (file, "\nGPR size: %d",
+	       get_mips_reg_size (abiflags->gpr_size));
+      fprintf (file, "\nCPR1 size: %d",
+	       get_mips_reg_size (abiflags->cpr1_size));
+      fprintf (file, "\nCPR2 size: %d",
+	       get_mips_reg_size (abiflags->cpr2_size));
+      fputs ("\nFP ABI: ", file);
+      print_mips_fp_abi_value (file, abiflags->fp_abi);
+      fputs ("ISA Extension: ", file);
+      print_mips_isa_ext (file, abiflags->isa_ext);
+      fputs ("\nASEs:", file);
+      print_mips_ases (file, abiflags->ases);
+      fprintf (file, "\nFLAGS 1: %8.8lx", abiflags->flags1);
+      fprintf (file, "\nFLAGS 2: %8.8lx", abiflags->flags2);
+      fputc ('\n', file);
+    }
 
   return TRUE;
 }
@@ -15258,4 +15912,8 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
     }
 
   _bfd_elf_post_process_headers (abfd, link_info);
+
+  if (mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64
+      || mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64A)
+    i_ehdrp->e_ident[EI_ABIVERSION] = 3;
 }

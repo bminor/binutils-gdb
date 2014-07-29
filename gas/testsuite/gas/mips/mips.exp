@@ -86,6 +86,10 @@
 #	nollsc
 #		The CPU doesn't support ll, sc, lld and scd instructions.
 #
+#	oddspreg
+#		The CPU has odd-numbered single-precision registers
+#		available and GAS enables use of them by default.
+#
 # as_flags: The assembler flags used when assembling tests for this
 # architecture.
 #
@@ -452,19 +456,19 @@ mips_arch_create r4000 	64	mips3	{} \
 			{ -march=r4000 -mtune=r4000 } { -mmips:4000 }
 mips_arch_create vr5400	64	mips4	{ ror } \
 			{ -march=vr5400 -mtune=vr5400 } { -mmips:5400 }
-mips_arch_create sb1 	64	mips64	{ mips3d } \
+mips_arch_create sb1 	64	mips64	{ mips3d oddspreg } \
 			{ -march=sb1 -mtune=sb1 } { -mmips:sb1 } \
 			{ mipsisa64sb1-*-* mipsisa64sb1el-*-* }
-mips_arch_create octeon 64	mips64r2 {} \
+mips_arch_create octeon 64	mips64r2 { oddspreg } \
 			{ -march=octeon -mtune=octeon } { -mmips:octeon } \
 			{ mips64octeon*-*-* }
-mips_arch_create octeonp 64	octeon {} \
+mips_arch_create octeonp 64	octeon { oddspreg } \
 			{ -march=octeon+ -mtune=octeon+ } { -mmips:octeon+ } \
 			{ }
-mips_arch_create octeon2 64	octeonp {} \
+mips_arch_create octeon2 64	octeonp { oddspreg } \
 			{ -march=octeon2 -mtune=octeon2 } { -mmips:octeon2 } \
 			{ }
-mips_arch_create xlr 	64	mips64	{} \
+mips_arch_create xlr 	64	mips64	{ oddspreg } \
 			{ -march=xlr -mtune=xlr } { -mmips:xlr }
 mips_arch_create r5900 	64	mips3	{ gpr_ilocks singlefloat nollsc } \
 			{ -march=r5900 -mtune=r5900 } { -mmips:5900 } \
@@ -824,8 +828,12 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "elf_arch_mips5"
     run_dump_test "elf_arch_mips32"
     run_dump_test "elf_arch_mips32r2"
+    run_dump_test "elf_arch_mips32r3"
+    run_dump_test "elf_arch_mips32r5"
     run_dump_test "elf_arch_mips64"
     run_dump_test "elf_arch_mips64r2"
+    run_dump_test "elf_arch_mips64r3"
+    run_dump_test "elf_arch_mips64r5"
 
     # Verify that ASE markings are handled properly.
     run_dump_test "elf_ase_mips16"
@@ -1187,7 +1195,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "msa-branch"	[mips_arch_list_matching mips32r2]
 
     run_dump_test_arches "xpa"		[mips_arch_list_matching mips32r2 !micromips]
-    run_dump_test_arches "r5"		[mips_arch_list_matching mips32r5 !micromips]
+    run_dump_test_arches "r5" "-32"	[mips_arch_list_matching mips32r5 !micromips]
 
     run_dump_test "pcrel-1"
     run_dump_test "pcrel-2"
@@ -1198,10 +1206,192 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "pcrel-4-64"
     }
 
+    run_dump_test_arches "attr-gnu-4-0" "-32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-0" "-64" \
+				    [mips_arch_list_matching mips3]
+    run_dump_test_arches "attr-gnu-4-0" "-mfp32 -32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-0" "-mfpxx -32" \
+				    [mips_arch_list_matching mips2 !r5900]
+    run_dump_test_arches "attr-gnu-4-0" "-mfp64 -32" \
+				    [mips_arch_list_matching mips32r2]
+    run_dump_test_arches "attr-gnu-4-0" "-mfp64 -mno-odd-spreg -32" \
+				    [mips_arch_list_matching mips32r2]
+    run_dump_test_arches "attr-gnu-4-0" "-mfp64 -64" \
+				    [mips_arch_list_matching mips3]
+    run_dump_test_arches "attr-gnu-4-0" "-msingle-float -32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-0" "-msingle-float -64" \
+				    [mips_arch_list_matching mips3]
+    run_dump_test_arches "attr-gnu-4-0" "-msoft-float -32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-0" "-msoft-float -64" \
+				    [mips_arch_list_matching mips3]
+    run_dump_test_arches "attr-none-double" "-32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-none-double" "-64" \
+				    [mips_arch_list_matching mips3]
+    run_dump_test_arches "attr-none-o32-fpxx" \
+				    [mips_arch_list_matching mips2 !r5900]
+    run_dump_test_arches "attr-none-o32-fp64" \
+				    [mips_arch_list_matching mips32r2]
+    run_dump_test_arches "attr-none-o32-fp64-nooddspreg" \
+				    [mips_arch_list_matching mips32r2]
+    run_dump_test_arches "attr-none-single-float" "-32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-none-single-float" "-64" \
+				    [mips_arch_list_matching mips3]
+    run_dump_test_arches "attr-none-soft-float" "-32 -msoft-float" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-none-soft-float" "-64 -msoft-float" \
+				    [mips_arch_list_matching mips3]
+
+    run_list_test_arches "attr-gnu-4-1-mfp64" \
+				    "-32 -mfp64 -mno-odd-spreg" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-1-mfp64" "-32 -mfp64" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-1-mfp32" "-64 -mfp32" \
+				    [mips_arch_list_matching mips3]
+    run_list_test_arches "attr-gnu-4-1-msingle-float" "-32 -msingle-float" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-1-msoft-float" "-32 -msoft-float" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-1" "-32 -mfpxx" \
+				    [mips_arch_list_matching mips2 !r5900]
+    run_dump_test_arches "attr-gnu-4-1" "-32 -mfp32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-1" "-64 -mfp64" \
+				    [mips_arch_list_matching mips3]
+
+    run_list_test_arches "attr-gnu-4-2-mdouble-float" "-32 -mfp32" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-2-mdouble-float" "-32 -mfpxx" \
+				    [mips_arch_list_matching mips2 !r5900]
+    run_list_test_arches "attr-gnu-4-2-mdouble-float" "-32 -mfp64" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-2-mdouble-float" \
+				    "-32 -mfp64 -mno-odd-spreg" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-2-mdouble-float" "-64 -mfp64" \
+				    [mips_arch_list_matching mips3]
+    run_list_test_arches "attr-gnu-4-2-msoft-float" "-32 -msoft-float" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-2" "-32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-2" "-64" \
+				    [mips_arch_list_matching mips3]
+
+    run_list_test_arches "attr-gnu-4-3-mhard-float" "-32 -mfp32" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-3-mhard-float" "-32 -mfpxx" \
+				    [mips_arch_list_matching mips2 !r5900]
+    run_list_test_arches "attr-gnu-4-3-mhard-float" "-32 -mfp64" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-3-mhard-float" \
+				    "-32 -mfp64 -mno-odd-spreg" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-3-mhard-float" "-64 -mfp64" \
+				    [mips_arch_list_matching mips3]
+    run_list_test_arches "attr-gnu-4-3-mhard-float" "-32 -msingle-float" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-3" "-32" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-3" "-64" \
+				    [mips_arch_list_matching mips3]
+ 
+    run_list_test_arches "attr-gnu-4-4" "-32 -mfp32" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-4" "-32 -mfpxx" \
+				    [mips_arch_list_matching mips2 !r5900]
+    run_list_test_arches "attr-gnu-4-4" "-32 -mfp64" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-4" "-32 -mfp64 -mno-odd-spreg" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-4" "-64 -mfp64" \
+				    [mips_arch_list_matching mips3]
+    run_list_test_arches "attr-gnu-4-4" "-32 -msingle-float" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-4" "-32 -msoft-float" \
+				    [mips_arch_list_matching mips1]
+
+    run_list_test_arches "attr-gnu-4-5" "-32 -mfp32" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-5" "-32 -mfp64" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-5" "-32 -mfp64 -mno-odd-spreg" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-5-64" "-64 -mfp64" \
+				    [mips_arch_list_matching mips3]
+    run_list_test_arches "attr-gnu-4-5" "-32 -msingle-float" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-5" "-32 -msoft-float" \
+				    [mips_arch_list_matching mips1]
+    run_dump_test_arches "attr-gnu-4-5" \
+				    [mips_arch_list_matching mips2 !r5900]
+
+    run_list_test_arches "attr-gnu-4-6" "-32 -mfp32" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-6-noodd" "-32 -mfp64 -mno-odd-spreg" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-6-64" "-64 -mfp64" \
+				    [mips_arch_list_matching mips3]
+    run_list_test_arches "attr-gnu-4-6" "-32 -msingle-float" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-6" "-32 -msoft-float" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-6" "-32 -mfpxx" \
+				    [mips_arch_list_matching mips2 !r5900]
+    run_dump_test_arches "attr-gnu-4-6" "-32 -mfp64" \
+				    [mips_arch_list_matching mips32r2]
+
+    run_list_test_arches "attr-gnu-4-7" "-32 -mfp32" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-7-odd" "-32 -mfp64" \
+				    [mips_arch_list_matching mips32r2]
+    run_list_test_arches "attr-gnu-4-7-64" "-64 -mfp64" \
+				    [mips_arch_list_matching mips3]
+    run_list_test_arches "attr-gnu-4-7" "-32 -msingle-float" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-7" "-32 -msoft-float" \
+				    [mips_arch_list_matching mips1]
+    run_list_test_arches "attr-gnu-4-7" "-32 -mfpxx" \
+				    [mips_arch_list_matching mips2 !r5900]
+    run_dump_test_arches "attr-gnu-4-7" "-32 -mfp64 -mno-odd-spreg" \
+				    [mips_arch_list_matching mips32r2]
+
     run_dump_test "attr-gnu-abi-fp-1"
     run_dump_test "attr-gnu-abi-msa-1"
 
     run_dump_test "module-override"
     run_dump_test "module-defer-warn1"
-    run_list_test "module-defer-warn2" -32
+    run_list_test "module-defer-warn2" "-32"
+
+    foreach testopt [list -mfp32 -mfpxx -mfp64 "-mfp64-noodd" \
+			  -msingle-float -msoft-float] {
+      foreach cmdopt [list -mfp32 -mfpxx -mfp64 "-mfp64 -mno-odd-spreg" \
+			   -msingle-float -msoft-float] {
+        run_dump_test "module${testopt}" \
+			    [list [list as $cmdopt] [list name ($cmdopt)]]
+      }
+    }
+
+    run_dump_test "module-set-mfpxx"
+    run_list_test_arches "fpxx-oddfpreg" "-32 -mfpxx" \
+			[mips_arch_list_matching mips2 !singlefloat]
+    run_list_test_arches "fpxx-oddfpreg" "-32 -mfpxx -mno-odd-spreg" \
+			[mips_arch_list_matching mips2 !singlefloat]
+    run_dump_test_arches "fpxx-oddfpreg" \
+			[mips_arch_list_matching oddspreg]
+    run_dump_test_arches "odd-spreg" "-mfp32" [mips_arch_list_matching oddspreg]
+    run_dump_test_arches "odd-spreg" "-mfpxx" [mips_arch_list_matching oddspreg]
+    run_dump_test_arches "odd-spreg" "-mfp64" [mips_arch_list_matching mips32r2]
+    run_dump_test_arches "no-odd-spreg" "-mfp32" [mips_arch_list_matching mips1]
+    run_dump_test_arches "no-odd-spreg" "-mfpxx" [mips_arch_list_matching mips2 !r5900]
+    run_dump_test_arches "no-odd-spreg" "-mfp64" [mips_arch_list_matching mips32r2]
+    run_dump_test "module-check"
+    run_list_test "module-check-warn" "-32"
+
+    run_dump_test "li-d"
 }

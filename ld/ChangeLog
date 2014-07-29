@@ -1,3 +1,9 @@
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* emulparams/elf32bmip.sh: Add .MIPS.abiflags.
+	* emulparams/elf32bmipn32-defs.sh: Likewise.
+	* emulparams/elf64bmip-defs.sh: Likewise.
+
 2014-07-27  Anthony Green  <green@moxielogic.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add moxiebox support.

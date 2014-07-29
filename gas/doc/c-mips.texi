@@ -28,6 +28,7 @@ Assembly Language Programming'' in the same work.
 * MIPS assembly options:: Directives to control code generation
 * MIPS autoextend::	Directives for extending MIPS 16 bit instructions
 * MIPS insn::		Directive to mark data as an instruction
+* MIPS FP ABIs::	Marking which FP ABI is in use
 * MIPS NaN Encodings::	Directives to record which NaN encoding is being used
 * MIPS Option Stack::	Directives to save and restore options
 * MIPS ASE Instruction Generation Overrides:: Directives to control
@@ -124,6 +125,22 @@ interests of symmetry with @samp{-mgp32} and @samp{-mfp32}.
 The @code{.set gp=64} and @code{.set fp=64} directives allow the size
 of registers to be changed for parts of an object. The default value is
 restored by @code{.set gp=default} and @code{.set fp=default}.
+
+@item -mfpxx
+Make no assumptions about whether 32-bit or 64-bit floating-point
+registers are available. This is provided to support having modules
+compatible with either @samp{-mfp32} or @samp{-mfp64}. This option can
+only be used with MIPS II and above.
+
+The @code{.set fp=xx} directive allows a part of an object to be marked
+as not making assumptions about 32-bit or 64-bit FP registers.  The
+default value is restored by @code{.set fp=default}.
+
+@item -modd-spreg
+@itemx -mno-odd-spreg
+Enable use of floating-point operations on odd-numbered single-precision
+registers when supported by the ISA.  @samp{-mfpxx} implies
+@samp{-mno-odd-spreg}, otherwise the default is @samp{-modd-spreg}
 
 @item -mips16
 @itemx -no-mips16
@@ -768,6 +785,115 @@ baz:
         .word 0x1
 
 @end example
+
+@node MIPS FP ABIs
+@section Directives to control the FP ABI
+@menu
+* MIPS FP ABI History::                History of FP ABIs
+* MIPS FP ABI Variants::               Supported FP ABIs
+* MIPS FP ABI Selection::              Automatic selection of FP ABI
+* MIPS FP ABI Compatibility::          Linking different FP ABI variants
+@end menu
+
+@node MIPS FP ABI History
+@subsection History of FP ABIs
+@cindex @code{.gnu_attribute 4, @var{n}} directive, MIPS
+@cindex @code{.gnu_attribute Tag_GNU_MIPS_ABI_FP, @var{n}} directive, MIPS
+The MIPS ABIs support a variety of different floating-point extensions
+where calling-convention and register sizes vary for floating-point data.
+The extensions exist to support a wide variety of optional architecture
+features.  The resulting ABI variants are generally incompatible with each
+other and must be tracked carefully.
+
+Traditionally the use of an explicit @code{.gnu_attribute 4, @var{n}}
+directive is used to indicate which ABI is in use by a specific module.
+It was then left to the user to ensure that command line options and the
+selected ABI were compatible with some potential for inconsistencies.
+
+@node MIPS FP ABI Variants
+@subsection Supported FP ABIs
+The supported floating-point ABI variants are:
+
+@table @code
+@item 0 - No floating-point
+This variant is used to indicate that floating-point is not used within
+the module at all and therefore has no impact on the ABI.  This is the
+default.
+
+@item 1 - Double-precision
+This variant indicates that double-precision support is used.  For 64-bit
+ABIs this means that 64-bit wide floating-point registers are required.
+For 32-bit ABIs this means that 32-bit wide floating-point registers are
+required and double-precision operations use pairs of registers.
+
+@item 2 - Single-precision
+This variant indicates that single-precision support is used.  Double
+precision operations will be supported via soft-float routines.
+
+@item 3 - Soft-float
+This variant indicates that although floating-point support is used all
+operations are emulated in software.  This means the ABI is modified to
+pass all floating-point data in general-purpose registers.
+
+@item 4 - Deprecated
+This variant existed as an initial attempt at supporting 64-bit wide
+floating-point registers for O32 ABI on a MIPS32r2 cpu.  This has been
+superceded by @value{5}, @value{6} and @value{7}.
+
+@item 5 - Double-precision 32-bit CPU, 32-bit or 64-bit FPU
+This variant is used by 32-bit ABIs to indicate that the floating-point
+code in the module has been designed to operate correctly with either
+32-bit wide or 64-bit wide floating-point registers.  Double-precision
+support is used.  Only O32 currently supports this variant and requires
+a minimum architecture of MIPS II.
+
+@item 6 - Double-precision 32-bit FPU, 64-bit FPU
+This variant is used by 32-bit ABIs to indicate that the floating-point
+code in the module requires 64-bit wide floating-point registers.
+Double-precision support is used.  Only O32 currently supports this
+variant and requires a minimum architecture of MIPS32r2.
+
+@item 7 - Double-precision compat 32-bit FPU, 64-bit FPU
+This variant is used by 32-bit ABIs to indicate that the floating-point
+code in the module requires 64-bit wide floating-point registers.
+Double-precision support is used.  This differs from the previous ABI
+as it restricts use of odd-numbered single-precision registers.  Only
+O32 currently supports this variant and requires a minimum architecture
+of MIPS32r2.
+@end table
+
+@node MIPS FP ABI Selection
+@subsection Automatic selection of FP ABI
+@cindex @code{.module fp=@var{nn}} directive, MIPS
+In order to simplify and add safety to the process of selecting the
+correct floating-point ABI, the assembler will automatically infer the
+correct @code{.gnu_attribute 4, @var{n}} directive based on command line
+options and @code{.module} overrides.  Where an explicit
+@code{.gnu_attribute 4, @var{n}} directive has been seen then a warning
+will be raised if it does not match an inferred setting.
+
+The floating-point ABI is inferred as follows.  If @samp{-msoft-float}
+has been used the module will be marked as soft-float.  If
+@samp{-msingle-float} has been used then the module will be marked as
+single-precision.  The remaining ABIs are then selected based
+on the FP register width.  Double-precision is selected if the width
+of GP and FP registers match and the special double-precision variants
+for 32-bit ABIs are then selected depending on @samp{-mfpxx},
+@samp{-mfp64} and @samp{-mno-odd-spreg}.
+
+@node MIPS FP ABI Compatibility
+@subsection Linking different FP ABI variants
+Modules using the default FP ABI (no floating-point) can be linked with
+any other (singular) FP ABI variant.
+
+Special compatibility support exists for O32 with the four
+double-precision FP ABI variants.  The @samp{-mfpxx} FP ABI is specifically
+designed to be compatible with the standard double-precision ABI and the
+@samp{-mfp64} FP ABIs.  This makes it desirable for O32 modules to be
+built as @samp{-mfpxx} to ensure the maximum compatibility with other
+modules produced for more specific needs.  The only FP ABIs which cannot
+be linked together are the standard double-precision ABI and the full
+@samp{-mfp64} ABI with @samp{-modd-spreg}.
 
 @node MIPS NaN Encodings
 @section Directives to record which NaN encoding is being used

@@ -1,3 +1,40 @@
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_flags_frag): New static global.
+	(struct mips_set_options): Add oddspreg field.
+	(file_mips_opts, mips_opts): Initialize oddspreg.
+	(ISA_HAS_ODD_SINGLE_FPR): Add CPU argument and update for R5900 and
+	Loongson-3a.
+	(enum options, md_longopts, md_parse_option): Add -mfpxx, -modd-spreg
+	and -mno-odd-spreg options.
+	(md_begin): Create .MIPS.abiflags section.
+	(fpabi_incompatible_with, fpabi_requires): New static function.
+	(check_fpabi): Likewise.
+	(mips_check_options): Handle fp=xx and oddspreg restrictions.
+	(file_mips_check_options): Set oddspreg by default for fp=xx.
+	(mips_oddfpreg_ok): Re-write function.
+	(check_regno): Check odd numbered registers regardless of FPR size.
+	For fp != 32 use as_bad instead of as_warn.
+	(match_float_constant): Rewrite check regarding FP register width.  Add
+	support for generating constants when MXHC1 is present.  Handle fp=xx
+	to comply with the ABI.
+	(macro): Update M_LI_DD similarly to match_float_constant.  Generate
+	MTHC1 when available.  Check that correct code can be generated for
+	fp=xx and fp=64 ABIs.
+	(parse_code_option, s_mipsset): Add fp=xx, oddspreg and nooddspreg
+	options.
+	(mips_convert_ase_flags): New static function.
+	(mips_elf_final_processing): Use fpabi == Val_GNU_MIPS_ABI_FP_OLD_64
+	to determine when to add the EF_MIPS_FP64 flag.  Populate the
+	.MIPS.abiflags section.
+	(md_mips_end): Update .gnu_attribute based on command line and .module
+	as applicable.  Use check_fpabi to ensure .gnu.attribute and command
+	line/.module options are consistent.
+	* doc/as.texinfo: Add missing -mgp64/-mfp64 options and document new
+	-mfpxx, -modd-spreg and -mno-odd-spreg options.
+	* doc/c-mips.texi: Document -mfpxx, -modd-spreg, -mno-odd-spreg,
+	gnu_attribute values and FP ABIs.
+
 2014-07-27  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	Add RTEMS target support and simplify matching

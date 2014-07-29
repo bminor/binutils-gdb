@@ -219,5 +219,5 @@ SECTIONS
   .debug_varnames  0 : { *(.debug_varnames) }
   .gptab.sdata : { *(.gptab.data) *(.gptab.sdata) }
   .gptab.sbss : { *(.gptab.bss) *(.gptab.sbss) }
-  /DISCARD/ : { *(.note.GNU-stack) }
+  /DISCARD/ : { *(.note.GNU-stack) *(.MIPS.abiflags) }
 }

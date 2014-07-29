@@ -1,3 +1,35 @@
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elfxx-mips.c (ABI_O32_P, MIPS_ELF_ABIFLAGS_SECTION_NAME_P): New macro.
+	(mips_elf_obj_tdata): Add abiflags and abiflags_valid fields.
+	(bfd_mips_elf_swap_abiflags_v0_in): New function.
+	(bfd_mips_elf_swap_abiflags_v0_out): Likewise.
+	(_bfd_mips_elf_section_from_shdr): Handle SHT_MIPS_ABIFLAGS.
+	(_bfd_mips_elf_fake_sections): Likewise.
+	(_bfd_mips_elf_always_size_sections): Handle .MIPS.abiflags.
+	(_bfd_mips_elf_additional_program_headers): Account for new
+	PT_MIPS_ABIFLAGS program header.
+	(_bfd_mips_elf_modify_segment_map): Create PT_MIPS_ABIFLAGS segment and
+	associate with .MIPS.abiflags.
+	(_bfd_mips_elf_gc_mark_extra_sections): New function.
+	(bfd_mips_isa_ext, update_mips_abiflags_isa): New static function.
+	(infer_mips_abiflags): Likewise.
+	(_bfd_mips_elf_final_link): Handle .MIPS.abiflags.
+	(mips_32bit_flags_p): Moved higher.
+	(mips_elf_merge_obj_attributes, _bfd_mips_fp_abi_string): Error
+	checking for FP ABIs.
+	(_bfd_mips_elf_merge_private_bfd_data): Restructure and add abiflags
+	checks.  Check EF_MIPS_FP64 flag consistency.
+	(print_mips_ases, print_mips_isa_ext): New static function.
+	(print_mips_fp_abi_value, get_mips_reg_size): Likewise.
+	(_bfd_mips_elf_print_private_bfd_data): Display abiflags data.
+	(_bfd_mips_post_process_headers): Set EI_ABIVERSION = 3 for
+	Val_GNU_MIPS_ABI_FP_64 or Val_GNU_MIPS_ABI_FP_64A.
+	* elfxx-mips.h (_bfd_mips_elf_gc_mark_extra_sections): New prototype.
+	* elf32-mips.c (elf_backend_gc_mark_extra_sections): Implement.
+	* elfn32-mips.c (elf_backend_gc_mark_extra_sections): Implement.
+	* elf64-mips.c (elf_backend_gc_mark_extra_sections): Implement.
+
 2014-07-28  Alan Modra  <amodra@gmail.com>
 
 	PR 13227

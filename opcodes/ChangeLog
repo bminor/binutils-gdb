@@ -1,3 +1,11 @@
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* micromips-opc.c (COD, LCD) New macros.
+	(cfc1, ctc1): Remove FP_S attribute.
+	(dmfc1, mfc1, mfhc1): Add LCD attribute.
+	(dmtc1, mtc1, mthc1): Add COD attribute.
+	* mips-opc.c (cfc1, cftc1, ctc, cttc1): Remove FP_S attribute.
+
 2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
 	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
 	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>

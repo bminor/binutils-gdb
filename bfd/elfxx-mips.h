@@ -157,6 +157,8 @@ extern bfd_vma _bfd_mips_elf_plt_sym_val
   (bfd_vma, const asection *, const arelent *rel);
 extern long _bfd_mips_elf_get_synthetic_symtab
   (bfd *, long, asymbol **, long, asymbol **, asymbol **);
+extern bfd_boolean _bfd_mips_elf_gc_mark_extra_sections
+  (struct bfd_link_info *, elf_gc_mark_hook_fn);
 extern void _bfd_mips_post_process_headers
   (bfd *abfd, struct bfd_link_info *link_info);
 

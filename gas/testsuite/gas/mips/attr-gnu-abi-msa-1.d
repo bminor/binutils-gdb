@@ -4,4 +4,7 @@
 
 Attribute Section: gnu
 File Attributes
+  Tag_GNU_MIPS_ABI_FP: Hard float \(double precision\)
   Tag_GNU_MIPS_ABI_MSA: 128-bit MSA
+
+#...

@@ -1,3 +1,10 @@
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* binutils-all/readelf.s: Account for .MIPS.abiflags and
+	.gnu.attributes.
+	* binutils-all/readelf.ss-tmips: Likewise.
+	* binutils-all/strip-3.d: Likewise.
+
 2014-07-10  Will Newton  <will.newton@linaro.org>
 
 	* binutils-all/objcopy.exp: Disable the strip-10 test on
