@@ -169,7 +169,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/buffer.c $(srcdir)/nat/linux-btrace.c \
 	$(srcdir)/common/filestuff.c $(srcdir)/target/waitstatus.c \
 	$(srcdir)/nat/mips-linux-watch.c $(srcdir)/common/print-utils.c \
-	$(srcdir)/common/rsp-low.c
+	$(srcdir)/common/rsp-low.c $(srcdir)/common/errors.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -182,7 +182,8 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       target.o waitstatus.o utils.o debug.o version.o vec.o gdb_vecs.o \
       mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
-      tdesc.o print-utils.o rsp-low.o $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
+      tdesc.o print-utils.o rsp-low.o errors.o $(XML_BUILTIN) $(DEPFILES) \
+      $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@
@@ -300,7 +301,10 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU) $(LIBIBERTY)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS) $(LIBGNU) $(LIBIBERTY)
 
-IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o tdesc-ipa.o print-utils-ipa.o rsp-low-ipa.o ${IPA_DEPFILES}
+IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o \
+	regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o \
+	tdesc-ipa.o print-utils-ipa.o rsp-low-ipa.o errors-ipa.o \
+	${IPA_DEPFILES}
 
 IPA_LIB=libinproctrace.so
 
@@ -489,6 +493,9 @@ print-utils-ipa.o: ../common/print-utils.c
 rsp-low-ipa.o: ../common/rsp-low.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
+errors-ipa.o: ../common/errors.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
 
 ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
@@ -528,6 +535,9 @@ filestuff.o: ../common/filestuff.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 agent.o: ../common/agent.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+errors.o: ../common/errors.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 waitstatus.o: ../target/waitstatus.c

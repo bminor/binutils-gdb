@@ -71,18 +71,15 @@ perror_with_name (const char *string)
   error ("%s.", combined);
 }
 
-/* Print an error message and return to command level.
-   STRING is the error message, used as a fprintf string,
-   and ARG is passed as an argument to it.  */
+/* Print an error message and return to top level.  */
 
 void
-error (const char *string,...)
+verror (const char *string, va_list args)
 {
 #ifndef IN_PROCESS_AGENT
   extern jmp_buf toplevel;
 #endif
-  va_list args;
-  va_start (args, string);
+
   fflush (stdout);
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
@@ -110,31 +107,25 @@ fatal (const char *string,...)
   exit (1);
 }
 
-/* VARARGS */
+/* Print a warning message.  */
+
 void
-warning (const char *string,...)
+vwarning (const char *string, va_list args)
 {
-  va_list args;
-  va_start (args, string);
   fprintf (stderr, PREFIX);
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
-  va_end (args);
 }
 
 /* Report a problem internal to GDBserver, and exit.  */
 
 void
-internal_error (const char *file, int line, const char *fmt, ...)
+internal_verror (const char *file, int line, const char *fmt, va_list args)
 {
-  va_list args;
-  va_start (args, fmt);
-
   fprintf (stderr,  "\
 %s:%d: A problem internal to " TOOLNAME " has been detected.\n", file, line);
   vfprintf (stderr, fmt, args);
   fprintf (stderr, "\n");
-  va_end (args);
   exit (1);
 }
 

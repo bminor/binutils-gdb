@@ -1,3 +1,18 @@
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* common/errors.h: New file.
+	* common/errors.c: Likewise.
+	* Makefile.in (SFILES): Add common/errors.c.
+	(HFILES_NO_SRCDIR): Add common/errors.h.
+	(COMMON_OBS): Add errors.o.
+	(errors.o): New rule.
+	* common/common-defs.h: Include errors.h.
+	* utils.h (perror_with_name, error, verror, warning, vwarning):
+	Don't declare.
+	* common/common-utils.h: (malloc_failure, internal_error):
+	Likewise.
+
 2014-08-19  Gary Benson  <gbenson@redhat.com>
 
 	* utils.c (internal_vproblem): Always print the message.

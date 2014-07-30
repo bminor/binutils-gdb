@@ -1,3 +1,19 @@
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* Makefile.in (SFILES): Add common/errors.c.
+	(OBS): Add errors.o.
+	(IPA_OBS): Add errors-ipa.o.
+	(errors.o): New rule.
+	(errors-ipa.o): Likewise.
+	* utils.h (perror_with_name, error, warning): Don't declare.
+	* utils.c (warning): Renamed and rewritten as...
+	(vwarning): New function.
+	(error): Renamed and rewritten as...
+	(verror): New function.
+	(internal_error): Renamed and rewritten as...
+	(internal_verror): New function.
+
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
 	* configure.ac (AC_CHECK_HEADERS): Remove errno.h.
