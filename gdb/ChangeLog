@@ -1,3 +1,7 @@
+2014-07-30  Roland McGrath  <mcgrathr@google.com>
+
+	* remote-sim.c (gdbsim_open): Apply constification to forward decl.
+
 2014-07-30  Tom Tromey  <tromey@redhat.com>
 
 	* bsd-kvm.c (bsd_kvm_open): Constify.
@@ -1602,7 +1606,7 @@
 	momentary_breakpoint_from_master with additional argument.
 	(momentary_breakpoint_from_master): Add argument to function
 	definition and use it to initialize structure member flag.
-	(clone_momentary_breakpoint): Call 
+	(clone_momentary_breakpoint): Call
 	momentary_breakpoint_from_master with additional argument.
 	* infrun.c (follow_inferior_reset_breakpoints): Clear structure
 	member flags set in momentary_breakpoint_from_master.
@@ -1920,7 +1924,7 @@
 	(gdb_PyObject_HasAttrString): New inline function definitions.
 	* py-value.c (get_field_flag): Remove the now unnecessary cast to
 	char * of the second argument to PyObject_GetAttrString.
-	
+
 2014-06-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* serial.c (serial_write): Fix index of character to be printed
@@ -9402,7 +9406,7 @@
 
 2014-02-03  Kevin Buettner  <kevinb@redhat.com>
 
-	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Rewrite 
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Rewrite
 	dwarf2_to_gdb[] table using symbolic constants.  Adjust
 	penultimate entry from number representing the PC register
 	to symbolic constant representing the MDR register.  Add
