@@ -1,3 +1,8 @@
+2014-07-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/signal-command-handle-nopass.exp (test): Add
+	comment.
+
 2014-07-29  Yao Qi  <yao@codesourcery.com>
 
 	PR gdb/17206

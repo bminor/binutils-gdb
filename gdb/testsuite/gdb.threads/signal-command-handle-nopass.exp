@@ -69,6 +69,10 @@ proc test { step_over } {
 
 	gdb_test "signal SIGUSR1" "handler .*"
 
+	# Make sure it was thread 1 that got the signal.  Note we list
+	# all threads instead of just thread 1, so that if something
+	# goes wrong and another thread ends up selected, we can
+	# easily see which in the logs.
 	gdb_test "info threads" $pattern "thread 1 got the signal"
     }
 }
