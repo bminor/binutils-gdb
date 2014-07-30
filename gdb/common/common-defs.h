@@ -42,5 +42,6 @@
 #include "common-utils.h"
 #include "gdb_assert.h"
 #include "errors.h"
+#include "common-types.h"
 
 #endif /* COMMON_DEFS_H */

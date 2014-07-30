@@ -1,6 +1,15 @@
 2014-08-19  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 
+	* common/common-types.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/common-types.h.
+	* common/common-defs.h: Include common-types.h.
+	* defs.h (gdb_byte, CORE_ADDR, CORE_ADDR_MAX, LONGEST)
+	(ULONGEST): Remove.
+
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
 	* common/errors.h: New file.
 	* common/errors.c: Likewise.
 	* Makefile.in (SFILES): Add common/errors.c.

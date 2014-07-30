@@ -21,6 +21,8 @@
 
 #include "common-defs.h"
 
+gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
+
 #ifdef __MINGW32CE__
 #include "wincecompat.h"
 #endif
@@ -63,19 +65,8 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #  define PROG "gdbserver"
 #endif
 
-/* A type used for binary buffers.  */
-typedef unsigned char gdb_byte;
-
 #include "buffer.h"
 #include "xml-utils.h"
-
-/* FIXME: This should probably be autoconf'd for.  It's an integer type at
-   least the size of a (void *).  */
-typedef unsigned long long CORE_ADDR;
-
-typedef long long LONGEST;
-typedef unsigned long long ULONGEST;
-
 #include "regcache.h"
 #include "gdb_signals.h"
 #include "target.h"

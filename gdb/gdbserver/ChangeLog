@@ -1,6 +1,12 @@
 2014-08-19  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 
+	* server.h: Add static assertion.
+	(gdb_byte, CORE_ADDR, LONGEST, ULONGEST): Remove.
+
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
 	* Makefile.in (SFILES): Add common/errors.c.
 	(OBS): Add errors.o.
 	(IPA_OBS): Add errors-ipa.o.
