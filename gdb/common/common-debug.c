@@ -1,6 +1,6 @@
-/* Common definitions.
+/* Debug printing functions.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,33 +17,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_DEFS_H
-#define COMMON_DEFS_H
-
-#include "config.h"
 #ifdef GDBSERVER
-#include "build-gnulib-gdbserver/config.h"
+#include "server.h"
 #else
-#include "build-gnulib/config.h"
+#include "defs.h"
 #endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <string.h>
-#include <errno.h>
-#include "ansidecl.h"
-#include "libiberty.h"
-#include "pathmax.h"
-#include "gdb/signals.h"
-#include "gdb_locale.h"
-#include "ptid.h"
-#include "common-utils.h"
-#include "gdb_assert.h"
-#include "errors.h"
-#include "common-types.h"
-#include "print-utils.h"
 #include "common-debug.h"
 
-#endif /* COMMON_DEFS_H */
+/* See common/common-debug.h.  */
+
+void
+debug_printf (const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+  debug_vprintf (fmt, ap);
+  va_end (ap);
+}

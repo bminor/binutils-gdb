@@ -1,6 +1,6 @@
-/* Common definitions.
+/* Declarations for debug printing functions.
 
-   Copyright (C) 1986-2014 Free Software Foundation, Inc.
+   Copyright (C) 2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,33 +17,20 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_DEFS_H
-#define COMMON_DEFS_H
+#ifndef COMMON_DEBUG_H
+#define COMMON_DEBUG_H
 
-#include "config.h"
-#ifdef GDBSERVER
-#include "build-gnulib-gdbserver/config.h"
-#else
-#include "build-gnulib/config.h"
-#endif
+/* Print a formatted message to the appropriate channel for
+   debugging output for the client.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <string.h>
-#include <errno.h>
-#include "ansidecl.h"
-#include "libiberty.h"
-#include "pathmax.h"
-#include "gdb/signals.h"
-#include "gdb_locale.h"
-#include "ptid.h"
-#include "common-utils.h"
-#include "gdb_assert.h"
-#include "errors.h"
-#include "common-types.h"
-#include "print-utils.h"
-#include "common-debug.h"
+extern void debug_printf (const char *format, ...)
+     ATTRIBUTE_PRINTF (1, 2);
 
-#endif /* COMMON_DEFS_H */
+/* Print a formatted message to the appropriate channel for
+   debugging output for the client.  This function must be
+   provided by the client.  */
+
+extern void debug_vprintf (const char *format, va_list ap)
+     ATTRIBUTE_PRINTF (1, 0);
+
+#endif /* COMMON_DEBUG_H */

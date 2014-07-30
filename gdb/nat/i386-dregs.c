@@ -178,10 +178,6 @@ typedef enum { WP_INSERT, WP_REMOVE, WP_COUNT } i386_wp_op_t;
 #ifndef GDBSERVER
 /* Whether or not to print the mirrored debug registers.  */
 extern int debug_hw_points;
-
-/* Print debugging messages.  */
-#define debug_printf(fmt, args...) \
-  fprintf_unfiltered (gdb_stdlog, fmt, ##args);
 #endif
 
 /* Print the values of the mirrored debug registers.  */

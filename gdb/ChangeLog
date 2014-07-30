@@ -1,3 +1,18 @@
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* common/common-debug.h: New file.
+	* common/common-debug.c: Likewise.
+	* debug.c: Likewise.
+	* Makefile.in (SFILES): Add common/common-debug.c.
+	(HFILES_NO_SRCDIR): Add common/common-debug.h.
+	(COMMON_OBS): Add common-debug.o and debug.o.
+	(common-debug.o): New rule.
+	* common/common-defs.h: Include common-debug.h.
+	* common/agent.c (debug_agent_printf): New function.
+	(DEBUG_AGENT): Redefine.
+	* nat/i386-dregs.c (debug_printf): Undefine.
+
 2014-08-19  Gary Benson  <gbenson@redhat.com>
 
 	* common/common-defs.h: Include print-utils.h.

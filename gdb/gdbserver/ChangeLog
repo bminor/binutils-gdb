@@ -1,3 +1,13 @@
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* Makefile.in (SFILES): Add common/common-debug.c.
+	(OBS): Add common-debug.o.
+	(common-debug.o): New rule.
+	* debug.h (debug_printf): Don't declare.
+	* debug.c (debug_printf): Renamed and rewritten as...
+	(debug_vprintf): New function.
+
 2014-08-19  Gary Benson  <gbenson@redhat.com>
 
 	* utils.h: Do not include print-utils.h.

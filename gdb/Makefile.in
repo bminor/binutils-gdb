@@ -851,7 +851,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
-	common/errors.c
+	common/errors.c common/common-debug.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -936,7 +936,8 @@ gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h nat/linux-btrace.h \
 ctf.h nat/i386-cpuid.h nat/i386-gcc-cpuid.h target/resume.h \
 target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h \
 common/print-utils.h common/rsp-low.h nat/i386-dregs.h x86-linux-nat.h \
-i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h
+i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
+common/common-debug.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1035,7 +1036,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	gdb_vecs.o jit.o progspace.o skip.o probe.o \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
-	print-utils.o rsp-low.o errors.o
+	print-utils.o rsp-low.o errors.o common-debug.o debug.o
 
 TSOBS = inflow.o
 
@@ -2147,6 +2148,10 @@ rsp-low.o: ${srcdir}/common/rsp-low.c
 
 errors.o: ${srcdir}/common/errors.c
 	$(COMPILE) $(srcdir)/common/errors.c
+	$(POSTCOMPILE)
+
+common-debug.o: ${srcdir}/common/common-debug.c
+	$(COMPILE) $(srcdir)/common/common-debug.c
 	$(POSTCOMPILE)
 
 #
