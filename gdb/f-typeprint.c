@@ -30,7 +30,6 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "f-lang.h"
-#include <errno.h>
 
 #if 0				/* Currently unused.  */
 static void f_type_print_args (struct type *, struct ui_file *);

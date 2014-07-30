@@ -34,7 +34,6 @@
 #include "regcache.h"
 
 #include <fcntl.h>
-#include <errno.h>
 #include <time.h>
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>

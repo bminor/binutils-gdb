@@ -22,7 +22,6 @@
    on top of errno.  */
 
 #include "server.h"
-#include <errno.h>
 #include "gdb/fileio.h"
 
 static int

@@ -31,7 +31,6 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <errno.h>
 #include <sys/syscall.h>
 #include <sched.h>
 #include <ctype.h>

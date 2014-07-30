@@ -23,7 +23,6 @@
 #include "defs.h"
 
 #include <ctype.h>
-#include <errno.h>
 #include <limits.h>
 #include <setjmp.h>
 #include <signal.h>

@@ -33,7 +33,6 @@
 #include "typeprint.h"
 #include "exceptions.h"
 #include "valprint.h"
-#include <errno.h>
 #include <ctype.h>
 #include "cli/cli-utils.h"
 #include "extension.h"

@@ -31,7 +31,6 @@
 #include "c-lang.h"
 #include "typeprint.h"
 #include "cp-abi.h"
-#include <errno.h>
 
 static void m2_print_bounds (struct type *type,
 			     struct ui_file *stream, int show, int level,

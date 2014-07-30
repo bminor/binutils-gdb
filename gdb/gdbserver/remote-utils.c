@@ -56,9 +56,6 @@
 #include <arpa/inet.h>
 #endif
 #include <sys/stat.h>
-#if HAVE_ERRNO_H
-#include <errno.h>
-#endif
 
 #if USE_WIN32API
 #include <winsock2.h>

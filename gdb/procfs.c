@@ -42,7 +42,6 @@
 #ifdef HAVE_SYS_SYSCALL_H
 #include <sys/syscall.h>
 #endif
-#include <sys/errno.h>
 #include "gdb_wait.h"
 #include <signal.h>
 #include <ctype.h>

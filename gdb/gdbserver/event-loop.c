@@ -29,10 +29,6 @@
 #include <io.h>
 #endif
 
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif
-
 #include <unistd.h>
 
 typedef struct gdb_event gdb_event;

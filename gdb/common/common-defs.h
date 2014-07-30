@@ -32,6 +32,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <string.h>
+#include <errno.h>
 #include "ansidecl.h"
 #include "libiberty.h"
 #include "pathmax.h"

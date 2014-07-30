@@ -105,7 +105,6 @@
 #include "inf-child.h"
 
 #include <ctype.h>
-#include <errno.h>
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <io.h>

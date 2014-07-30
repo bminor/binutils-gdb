@@ -1,5 +1,31 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include errno.h.
+	* defs.h: Do not include errno.h.
+	* ada-typeprint.c: Likewise.
+	* c-typeprint.c: Likewise.
+	* core-regset.c: Likewise.
+	* corefile.c: Likewise.
+	* corelow.c: Likewise.
+	* event-loop.c: Likewise.
+	* f-typeprint.c: Likewise.
+	* gnu-nat.c: Likewise.
+	* go32-nat.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+	* m2-typeprint.c: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* p-typeprint.c: Likewise.
+	* procfs.c: Likewise.
+	* remote-sim.c: Likewise.
+	* rs6000-nat.c: Likewise.
+	* target.c: Likewise.
+	* typeprint.c: Likewise.
+	* ui-file.c: Likewise.
+	* valops.c: Likewise.
+	* valprint.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include string.h.
 	* aarch64-tdep.c: Do not include string.h.
 	* ada-exp.y: Likewise.

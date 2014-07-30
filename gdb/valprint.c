@@ -37,8 +37,6 @@
 #include "charset.h"
 #include <ctype.h>
 
-#include <errno.h>
-
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
 

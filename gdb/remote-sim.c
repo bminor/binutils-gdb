@@ -28,7 +28,6 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <setjmp.h>
-#include <errno.h>
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"

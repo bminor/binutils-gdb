@@ -27,9 +27,6 @@
 
 #include "version.h"
 
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif
 #include <setjmp.h>
 
 #ifdef HAVE_ALLOCA_H

@@ -1,5 +1,19 @@
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
+	* configure.ac (AC_CHECK_HEADERS): Remove errno.h.
+	* configure: Regenerate.
+	* config.in: Likewise.
+	* server.h: Do not include errno.h.
+	* event-loop.c: Likewise.
+	* hostio-errno.c: Likewise.
+	* linux-low.c: Likewise.
+	* remote-utils.c: Likewise.
+	* spu-low.c: Likewise.
+	* utils.c: Likewise.
+	* gdbreplay.c: Unconditionally include errno.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
 	* server.h: Do not include string.h.
 	* event-loop.c: Likewise.
 	* linux-low.c: Likewise.

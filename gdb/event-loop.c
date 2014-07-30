@@ -31,7 +31,6 @@
 #endif
 
 #include <sys/types.h>
-#include <errno.h>
 #include <sys/time.h>
 #include "exceptions.h"
 #include "gdb_select.h"

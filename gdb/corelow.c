@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
 #ifdef HAVE_SYS_FILE_H
