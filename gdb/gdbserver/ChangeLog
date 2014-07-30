@@ -1,3 +1,7 @@
+2014-08-19  Gary Benson  <gbenson@redhat.com>
+
+	* utils.h: Do not include print-utils.h.
+
 2014-08-19  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 

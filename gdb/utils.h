@@ -23,7 +23,6 @@
 
 #include "cleanups.h"
 #include "exceptions.h"
-#include "print-utils.h"
 
 extern void initialize_utils (void);
 
