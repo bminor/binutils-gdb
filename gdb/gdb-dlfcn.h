@@ -20,8 +20,6 @@
 #ifndef GDB_DLFCN_H
 #define GDB_DLFCN_H
 
-#include "defs.h"
-
 /* Load the dynamic library file named FILENAME, and return a handle
    for that dynamic library.  Return NULL if the loading fails for any
    reason.  */

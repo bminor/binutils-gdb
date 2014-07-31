@@ -1,3 +1,10 @@
+2014-07-31  Gary Benson  <gbenson@redhat.com>
+
+	* common/btrace-common.h: Do not include defs.h or server.h.
+	* nat/mips-linux-watch.h: Likewise.
+	* gdb-dlfcn.h: Do not include defs.h.
+	* tracefile.h: Likewise.
+
 2014-07-30  Roland McGrath  <mcgrathr@google.com>
 
 	* remote-sim.c (gdbsim_open): Apply constification to forward decl.

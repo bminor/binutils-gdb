@@ -17,7 +17,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "ptid.h"
-#include "server.h"
 #include "target.h"
 #include "queue.h"
 

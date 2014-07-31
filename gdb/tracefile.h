@@ -1,7 +1,6 @@
 #ifndef TRACEFILE_H
 #define TRACEFILE_H 1
 
-#include "defs.h"
 #include "tracepoint.h"
 
 struct trace_file_writer;
