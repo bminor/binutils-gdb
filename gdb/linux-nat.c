@@ -4595,7 +4595,9 @@ linux_nat_supports_disable_randomization (struct target_ops *self)
 
 static int async_terminal_is_ours = 1;
 
-/* target_terminal_inferior implementation.  */
+/* target_terminal_inferior implementation.
+
+   This is a wrapper around child_terminal_inferior to add async support.  */
 
 static void
 linux_nat_terminal_inferior (struct target_ops *self)
@@ -4618,7 +4620,14 @@ linux_nat_terminal_inferior (struct target_ops *self)
   set_sigint_trap ();
 }
 
-/* target_terminal_ours implementation.  */
+/* target_terminal_ours implementation.
+
+   This is a wrapper around child_terminal_ours to add async support (and
+   implement the target_terminal_ours vs target_terminal_ours_for_output
+   distinction).  child_terminal_ours is currently no different than
+   child_terminal_ours_for_output.
+   We leave target_terminal_ours_for_output alone, leaving it to
+   child_terminal_ours_for_output.  */
 
 static void
 linux_nat_terminal_ours (struct target_ops *self)
