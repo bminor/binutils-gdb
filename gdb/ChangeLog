@@ -1,5 +1,11 @@
 2014-08-28  Yao Qi  <yao@codesourcery.com>
 
+	* arm-tdep.c (thumb_in_function_epilogue_p): Don't set
+	found_stack_adjust in forward scan.  Remove condition check
+	on found_stack_adjust which is always true.  Indent the code.
+
+2014-08-28  Yao Qi  <yao@codesourcery.com>
+
 	* dwarf2read.c (dwarf_decode_lines): Update declaration.
 	(handle_DW_AT_stmt_list): Remove comment about WANT_LINE_INFO.
 	(dwarf_decode_lines): Remove argument
