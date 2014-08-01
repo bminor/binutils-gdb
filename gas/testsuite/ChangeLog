@@ -1,3 +1,10 @@
+2014-08-06  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/i386.exp: Run new tests.
+	* gas/i386/omit-lock-no.d: New.
+	* gas/i386/omit-lock-yes.d: Ditto.
+	* gas/i386/omit-lock.s: Ditto.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/attr-gnu-4-0.d: New.

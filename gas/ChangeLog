@@ -1,3 +1,13 @@
+2014-08-06  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (omit_lock_prefix): New.
+	(output_insn): Omit lock prefix if omit_lock_prefix is true.
+	(OPTION_omit_lock_prefix): New.
+	(md_longopts): Add momit-lock-prefix.
+	(md_parse_option): Handle momit-lock-prefix.
+	(md_show_usage): Add momit-lock-prefix=[no|yes].
+	* doc/c-i386.texi (momit-lock-prefix): Document.
+
 2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
 
 	PR 10378
