@@ -110,6 +110,26 @@ if ![ld_simple_link $ld tmpdir/sh1.s1 $srec_relax_arg ] {
     }
 }
 
+set testadjsw8 "SH switch8 adjustment after relax"
+if ![ld_assemble $as "-relax $srcdir/$subdir/adjsw8.s" tmpdir/adjsw8.o] {
+    unresolved $testadjsw8
+} else {
+    if ![ld_simple_link $ld tmpdir/adjsw8 "-relax tmpdir/adjsw8.o"] {
+	fail $testadjsw8
+    } else {
+	send_log "exec $objdump -s tmpdir/adjsw8\n"
+	verbose "exec $objdump -s tmpdir/adjsw8"
+	catch "exec $objdump -s tmpdir/adjsw8" exec_output
+	if [string match "*04080c00*" $exec_output] {
+	    pass $testadjsw8
+	} else {
+	    send_log "bad switch table\n"
+	    verbose "bad switch table"
+	    fail $testadjsw8
+	}
+    }
+}
+
 set testlink "SH relaxing"
 set testjsr "SH confirm relaxing"
 set testrun "SH relaxing execution"

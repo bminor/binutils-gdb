@@ -1,3 +1,9 @@
+2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
+
+	PR 10378
+	* ld-sh/adjsw8.s: New.
+	* ld-sh/sh.exp: Add switch8 adjustment test.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* ld-mips-elf/abiflags-strip1-ph.d: New.

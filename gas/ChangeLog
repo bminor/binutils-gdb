@@ -1,3 +1,9 @@
+2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
+
+	PR 10378
+	* config/tc-sh.c (tc_gen_reloc): Fix initialization of addend in
+	SWITCH_TABLE case.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c: Rename INSN_LOAD_COPROC_DELAY to INSN_LOAD_COPROC
