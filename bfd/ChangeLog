@@ -1,3 +1,8 @@
+2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
+
+	PR 10373
+	* elf32-sh.c (sh_elf_relax_section): Add jmp to bra relaxing.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elfxx-mips.c (ABI_O32_P, MIPS_ELF_ABIFLAGS_SECTION_NAME_P): New macro.

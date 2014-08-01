@@ -1,5 +1,11 @@
 2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
 
+	PR 10373
+	* ld-sh/sh1.s: Add jmp relaxing test.
+	* ld-sh/sh.exp: Likewise.
+
+2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
+
 	PR 10378
 	* ld-sh/adjsw8.s: New.
 	* ld-sh/sh.exp: Add switch8 adjustment test.

@@ -49,7 +49,7 @@ if ![ld_assemble $as "-relax $srcdir/$subdir/sh1.s" tmpdir/sh1.o] {
 	    verbose "bad output from nm"
 	    fail $testsimple
 	} else {
-	    if {$nm_output(bar) != $nm_output(foo) + 4} {
+	    if {$nm_output(bar) != $nm_output(foo) + 0xc} {
 		send_log "foo == $nm_output(foo)\n"
 		verbose "foo == $nm_output(foo)"
 		send_log "bar == $nm_output(bar)\n"
@@ -149,7 +149,7 @@ if [istarget sh*-*linux*] {
 }
 
 if {![ld_assemble $as "-relax tmpdir/start.s" tmpdir/start.o] \
-    || ![ld_compile $CC "-O -mrelax $srcdir/$subdir/sh2.c" tmpdir/sh2.o]} {
+    || ![ld_compile $CC "-O -mrelax -foptimize-sibling-calls $srcdir/$subdir/sh2.c" tmpdir/sh2.o]} {
     unresolved $testlink
     unresolved $testjsr
     unresolved $testrun
@@ -168,7 +168,8 @@ pass $testlink
 send_log "$objdump -d tmpdir/sh2\n"
 verbose "$objdump -d tmpdir/sh2"
 catch "exec $objdump -d tmpdir/sh2" exec_output
-if [string match "*jsr*" $exec_output] {
+if {[string match "*jsr*" $exec_output]
+    || [string match "*jmp*" $exec_output]} {
     fail $testjsr
 } else {
     pass $testjsr
