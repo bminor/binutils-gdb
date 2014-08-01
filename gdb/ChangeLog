@@ -1,3 +1,8 @@
+2014-08-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-svr4.c (scan_dyntag): Rename dyntag and dyn_tag variables.
+	(scan_dyntag_auxv): Same.
+
 2014-08-06  Yao Qi  <yao@codesourcery.com>
 
 	* amd64-linux-nat.c: Remove duplicated include
