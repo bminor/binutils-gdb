@@ -35,10 +35,10 @@
    commonly this is `-'.  If you don't want a trailer, use \0.  */
 
 static int
-get_number_trailer (char **pp, int trailer)
+get_number_trailer (const char **pp, int trailer)
 {
   int retval = 0;	/* default */
-  char *p = *pp;
+  const char *p = *pp;
 
   if (*p == '$')
     {
@@ -59,7 +59,7 @@ get_number_trailer (char **pp, int trailer)
 	  /* Internal variable.  Make a copy of the name, so we can
 	     null-terminate it to pass to lookup_internalvar().  */
 	  char *varname;
-	  char *start = ++p;
+	  const char *start = ++p;
 	  LONGEST val;
 
 	  while (isalnum (*p) || *p == '_')
@@ -102,7 +102,7 @@ get_number_trailer (char **pp, int trailer)
 	++p;
       retval = 0;
     }
-  p = skip_spaces (p);
+  p = skip_spaces_const (p);
   *pp = p;
   return retval;
 }
@@ -110,16 +110,29 @@ get_number_trailer (char **pp, int trailer)
 /* See documentation in cli-utils.h.  */
 
 int
-get_number (char **pp)
+get_number_const (const char **pp)
 {
   return get_number_trailer (pp, '\0');
 }
 
 /* See documentation in cli-utils.h.  */
 
+int
+get_number (char **pp)
+{
+  int result;
+  const char *p = *pp;
+
+  result = get_number_trailer (&p, '\0');
+  *pp = (char *) p;
+  return result;
+}
+
+/* See documentation in cli-utils.h.  */
+
 void
 init_number_or_range (struct get_number_or_range_state *state,
-		      char *string)
+		      const char *string)
 {
   memset (state, 0, sizeof (*state));
   state->string = string;
@@ -137,15 +150,15 @@ get_number_or_range (struct get_number_or_range_state *state)
       state->last_retval = get_number_trailer (&state->string, '-');
       if (*state->string == '-')
 	{
-	  char **temp;
+	  const char **temp;
 
 	  /* This is the start of a range (<number1> - <number2>).
 	     Skip the '-', parse and remember the second number,
 	     and also remember the end of the final token.  */
 
 	  temp = &state->end_ptr; 
-	  state->end_ptr = skip_spaces (state->string + 1);
-	  state->end_value = get_number (temp);
+	  state->end_ptr = skip_spaces_const (state->string + 1);
+	  state->end_value = get_number_const (temp);
 	  if (state->end_value < state->last_retval) 
 	    {
 	      error (_("inverted range"));
@@ -191,7 +204,7 @@ get_number_or_range (struct get_number_or_range_state *state)
    no arguments.  */
 
 int
-number_is_in_list (char *list, int number)
+number_is_in_list (const char *list, int number)
 {
   struct get_number_or_range_state state;
 

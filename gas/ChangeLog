@@ -1,3 +1,150 @@
+2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
+
+	PR 10378
+	* config/tc-sh.c (tc_gen_reloc): Fix initialization of addend in
+	SWITCH_TABLE case.
+
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c: Rename INSN_LOAD_COPROC_DELAY to INSN_LOAD_COPROC
+	and INSN_COPROC_MOVE_DELAY to INSN_COPROC_MOVE throughout.
+
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_flags_frag): New static global.
+	(struct mips_set_options): Add oddspreg field.
+	(file_mips_opts, mips_opts): Initialize oddspreg.
+	(ISA_HAS_ODD_SINGLE_FPR): Add CPU argument and update for R5900 and
+	Loongson-3a.
+	(enum options, md_longopts, md_parse_option): Add -mfpxx, -modd-spreg
+	and -mno-odd-spreg options.
+	(md_begin): Create .MIPS.abiflags section.
+	(fpabi_incompatible_with, fpabi_requires): New static function.
+	(check_fpabi): Likewise.
+	(mips_check_options): Handle fp=xx and oddspreg restrictions.
+	(file_mips_check_options): Set oddspreg by default for fp=xx.
+	(mips_oddfpreg_ok): Re-write function.
+	(check_regno): Check odd numbered registers regardless of FPR size.
+	For fp != 32 use as_bad instead of as_warn.
+	(match_float_constant): Rewrite check regarding FP register width.  Add
+	support for generating constants when MXHC1 is present.  Handle fp=xx
+	to comply with the ABI.
+	(macro): Update M_LI_DD similarly to match_float_constant.  Generate
+	MTHC1 when available.  Check that correct code can be generated for
+	fp=xx and fp=64 ABIs.
+	(parse_code_option, s_mipsset): Add fp=xx, oddspreg and nooddspreg
+	options.
+	(mips_convert_ase_flags): New static function.
+	(mips_elf_final_processing): Use fpabi == Val_GNU_MIPS_ABI_FP_OLD_64
+	to determine when to add the EF_MIPS_FP64 flag.  Populate the
+	.MIPS.abiflags section.
+	(md_mips_end): Update .gnu_attribute based on command line and .module
+	as applicable.  Use check_fpabi to ensure .gnu.attribute and command
+	line/.module options are consistent.
+	* doc/as.texinfo: Add missing -mgp64/-mfp64 options and document new
+	-mfpxx, -modd-spreg and -mno-odd-spreg options.
+	* doc/c-mips.texi: Document -mfpxx, -modd-spreg, -mno-odd-spreg,
+	gnu_attribute values and FP ABIs.
+
+2014-07-27  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	Add RTEMS target support and simplify matching
+
+	* gas/configure.tgt (or1k*-*-rtems*): Ensure a match.
+	(or1k*-*-*): Use or1k* to match or1knd and or1kZ.
+
+2014-07-27  Anthony Green  <green@moxielogic.com>
+
+	* configure.tgt (generic_target): Add moxie-*-moxiebox*
+	* config/tc-moxie.c: Remove moxie_target_format.
+	(md_begin): Set default target_big_endian.
+	* config/tc-moxie.h: Only set TARGET_BYTES_BIG_ENDIAN if unset.
+	(TARGET_FORMAT): Set based on target_big_endian.
+
+2014-07-26  Alan Modra  <amodra@gmail.com>
+
+	* config/bfin-parse.y: Don't include obstack.h.
+	* config/obj-aout.c: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-som.c: Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-rl78.c: Likewise.
+	* config/tc-rx.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* expr.c: Likewise.
+	* listing.c: Likewise.
+	* config/obj-elf.c (elf_file_symbol): Make name_length a size_t.
+	* config/tc-aarch64.c (symbol_locate): Likewise.
+	* config/tc-arm.c (symbol_locate): Likewise.
+	* config/tc-mmix.c (mmix_handle_mmixal): Make len_0 a size_t.
+	* config/tc-score.c (s3_build_score_ops_hsh): Make len a size_t.
+	(s3_build_dependency_insn_hsh): Likewise.
+	* config/tc-score7.c (s7_build_score_ops_hsh): Likewise.
+	(s7_build_dependency_insn_hsh): Likewise.
+	* frags.c (frag_grow): Make parameter a size_t, and use size_t locals.
+	(frag_new): Make parameter a size_t.
+	(frag_var_init): Make max_chars and var parameters size_t.
+	(frag_var, frag_variant): Likewise.
+	(frag_room): Return a size_t.
+	(frag_align_pattern): Make n_fill parameter a size_t.
+	* frags.h: Update function prototypes.
+	* symbols.c (save_symbol_name): Make name_length a size_t.
+
+2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
+	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
+	    Sergey Lega  <sergey.s.lega@intel.com>
+	    Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Ilya Tocar  <ilya.tocar@intel.com>
+	    Andrey Turetskiy  <andrey.turetskiy@intel.com>
+	    Ilya Verbin  <ilya.verbin@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512dq, CPU_AVX512DQ_FLAGS.
+	* doc/c-i386.texi: Document avx512dq/.avx512dq.
+
+2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
+	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
+	    Sergey Lega  <sergey.s.lega@intel.com>
+	    Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Ilya Tocar  <ilya.tocar@intel.com>
+	    Andrey Turetskiy  <andrey.turetskiy@intel.com>
+	    Ilya Verbin  <ilya.verbin@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512bw, CPU_AVX512BW_FLAGS.
+	* doc/c-i386.texi: Document avx512bw/.avx512bw.
+
+2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
+	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
+	    Sergey Lega  <sergey.s.lega@intel.com>
+	    Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Ilya Tocar  <ilya.tocar@intel.com>
+	    Andrey Turetskiy  <andrey.turetskiy@intel.com>
+	    Ilya Verbin  <ilya.verbin@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512vl, CPU_AVX512VL_FLAGS.
+	(build_vex_prefix): Don't abort on VEX.W.
+	(check_VecOperands): Support BROADCAST_1TO4 and BROADCAST_1TO2.
+	(check_VecOperations): Ditto.
+	* doc/c-i386.texi: Document avx512vl/.avx512vl.
+
+2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	Add or reactivate or1k-*-rtems*
+	* gas/configure.tgt (or1k-*-rtems*): Add.
+
+2014-07-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (parse_register): Set need_vrex.
+
 2014-07-15  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-arm.c (add_to_lit_pool): Use "inst.operands[1].imm" for

@@ -37,7 +37,7 @@ extern void getpkt (char **buf, long *sizeof_buf, int forever);
    we are debugging (remote_debug) and want to print the sent packet
    as a string.  */
 
-extern int putpkt (char *buf);
+extern int putpkt (const char *buf);
 
 void register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				     const struct target_desc *tdesc);

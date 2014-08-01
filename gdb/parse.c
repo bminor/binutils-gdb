@@ -1835,12 +1835,12 @@ operator_check_standard (struct expression *exp, int pos,
   return 0;
 }
 
-/* Call OBJFILE_FUNC for any TYPE and OBJFILE found being referenced by EXP.
-   The functions are never called with NULL OBJFILE.  Functions get passed an
-   arbitrary caller supplied DATA pointer.  If any of the functions returns
-   non-zero value then (any other) non-zero value is immediately returned to
-   the caller.  Otherwise zero is returned after iterating through whole EXP.
-   */
+/* Call OBJFILE_FUNC for any objfile found being referenced by EXP.
+   OBJFILE_FUNC is never called with NULL OBJFILE.  OBJFILE_FUNC get
+   passed an arbitrary caller supplied DATA pointer.  If OBJFILE_FUNC
+   returns non-zero value then (any other) non-zero value is immediately
+   returned to the caller.  Otherwise zero is returned after iterating
+   through whole EXP.  */
 
 static int
 exp_iterate (struct expression *exp,

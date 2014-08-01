@@ -357,6 +357,16 @@ struct thread_info;		/* fwd decl for parameter list below: */
 typedef void async_callback_ftype (enum inferior_event_type event_type,
 				   void *context);
 
+/* Normally target debug printing is purely type-based.  However,
+   sometimes it is necessary to override the debug printing on a
+   per-argument basis.  This macro can be used, attribute-style, to
+   name the target debug printing function for a particular method
+   argument.  FUNC is the name of the function.  The macro's
+   definition is empty because it is only used by the
+   make-target-delegates script.  */
+
+#define TARGET_DEBUG_PRINTER(FUNC)
+
 /* These defines are used to mark target_ops methods.  The script
    make-target-delegates scans these and auto-generates the base
    method implementations.  There are four macros that can be used:
@@ -384,9 +394,9 @@ typedef void async_callback_ftype (enum inferior_event_type event_type,
 struct target_ops
   {
     struct target_ops *beneath;	/* To the target under this one.  */
-    char *to_shortname;		/* Name this target type */
-    char *to_longname;		/* Name for printing */
-    char *to_doc;		/* Documentation.  Does not include trailing
+    const char *to_shortname;	/* Name this target type */
+    const char *to_longname;	/* Name for printing */
+    const char *to_doc;		/* Documentation.  Does not include trailing
 				   newline, and starts with a one-line descrip-
 				   tion (probably similar to to_longname).  */
     /* Per-target scratch pad.  */
@@ -395,7 +405,7 @@ struct target_ops
        command, and (if successful) pushes a new target onto the
        stack.  Targets should supply this routine, if only to provide
        an error message.  */
-    void (*to_open) (char *, int);
+    void (*to_open) (const char *, int);
     /* Old targets with a static target vector provide "to_close".
        New re-entrant targets provide "to_xclose" and that is expected
        to xfree everything (including the "struct target_ops").  */
@@ -416,10 +426,13 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_disconnect) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
-    void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
+    void (*to_resume) (struct target_ops *, ptid_t,
+		       int TARGET_DEBUG_PRINTER (target_debug_print_step),
+		       enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());
     ptid_t (*to_wait) (struct target_ops *,
-		       ptid_t, struct target_waitstatus *, int)
+		       ptid_t, struct target_waitstatus *,
+		       int TARGET_DEBUG_PRINTER (target_debug_print_options))
       TARGET_DEFAULT_NORETURN (noprocess ());
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int)
       TARGET_DEFAULT_IGNORE ();
@@ -539,12 +552,14 @@ struct target_ops
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
-    void (*to_pass_signals) (struct target_ops *, int, unsigned char *)
+    void (*to_pass_signals) (struct target_ops *, int,
+			     unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
     /* Documentation of this routine is provided with the
        corresponding target_* function.  */
-    void (*to_program_signals) (struct target_ops *, int, unsigned char *)
+    void (*to_program_signals) (struct target_ops *, int,
+				unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
     int (*to_thread_alive) (struct target_ops *, ptid_t ptid)
@@ -1397,6 +1412,11 @@ extern void target_terminal_inferior (void);
 #define target_terminal_ours() \
      (*current_target.to_terminal_ours) (&current_target)
 
+/* Return true if the target stack has a non-default
+  "to_terminal_ours" method.  */
+
+extern int target_supports_terminal_ours (void);
+
 /* Save our terminal settings.
    This is called from TUI after entering or leaving the curses
    mode.  Since curses modifies our terminal this call is here
@@ -1802,12 +1822,12 @@ extern int target_ranged_break_num_registers (void);
    target_stopped_by_watchpoint, in such case place it to *ADDR_P.  Only the
    INFERIOR_PTID task is being queried.  */
 #define target_stopped_data_address(target, addr_p) \
-    (*target.to_stopped_data_address) (target, addr_p)
+    (*(target)->to_stopped_data_address) (target, addr_p)
 
 /* Return non-zero if ADDR is within the range of a watchpoint spanning
    LENGTH bytes beginning at START.  */
 #define target_watchpoint_addr_within_range(target, addr, start, length) \
-  (*target.to_watchpoint_addr_within_range) (target, addr, start, length)
+  (*(target)->to_watchpoint_addr_within_range) (target, addr, start, length)
 
 /* Return non-zero if the target is capable of using hardware to evaluate
    the condition expression.  In this case, if the condition is false when

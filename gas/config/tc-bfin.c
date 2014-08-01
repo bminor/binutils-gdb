@@ -948,7 +948,7 @@ int ninsns;
 int count_insns;
 
 static void *
-allocate (int n)
+allocate (size_t n)
 {
   return obstack_alloc (&mempool, n);
 }

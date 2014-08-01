@@ -802,8 +802,6 @@ dump_subexp_body_standard (struct expression *exp,
     case BINOP_ASSIGN_MODIFY:
     case BINOP_VAL:
     case BINOP_CONCAT:
-    case BINOP_IN:
-    case BINOP_RANGE:
     case BINOP_END:
     case STRUCTOP_MEMBER:
     case STRUCTOP_MPTR:

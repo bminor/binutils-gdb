@@ -1694,8 +1694,7 @@ linux_nat_resume_callback (struct lwp_info *lp, void *except)
       thread = find_thread_ptid (lp->ptid);
       if (thread != NULL)
 	{
-	  if (signal_pass_state (thread->suspend.stop_signal))
-	    signo = thread->suspend.stop_signal;
+	  signo = thread->suspend.stop_signal;
 	  thread->suspend.stop_signal = GDB_SIGNAL_0;
 	}
     }
@@ -3704,7 +3703,7 @@ kill_callback (struct lwp_info *lp, void *data)
   /* PTRACE_KILL may resume the inferior.  Send SIGKILL first.  */
 
   errno = 0;
-  kill (ptid_get_lwp (lp->ptid), SIGKILL);
+  kill_lwp (ptid_get_lwp (lp->ptid), SIGKILL);
   if (debug_linux_nat)
     {
       int save_errno = errno;
@@ -4596,7 +4595,9 @@ linux_nat_supports_disable_randomization (struct target_ops *self)
 
 static int async_terminal_is_ours = 1;
 
-/* target_terminal_inferior implementation.  */
+/* target_terminal_inferior implementation.
+
+   This is a wrapper around child_terminal_inferior to add async support.  */
 
 static void
 linux_nat_terminal_inferior (struct target_ops *self)
@@ -4619,7 +4620,14 @@ linux_nat_terminal_inferior (struct target_ops *self)
   set_sigint_trap ();
 }
 
-/* target_terminal_ours implementation.  */
+/* target_terminal_ours implementation.
+
+   This is a wrapper around child_terminal_ours to add async support (and
+   implement the target_terminal_ours vs target_terminal_ours_for_output
+   distinction).  child_terminal_ours is currently no different than
+   child_terminal_ours_for_output.
+   We leave target_terminal_ours_for_output alone, leaving it to
+   child_terminal_ours_for_output.  */
 
 static void
 linux_nat_terminal_ours (struct target_ops *self)
@@ -5033,6 +5041,14 @@ Enables printf debugging output."),
   sigdelset (&suspend_mask, SIGCHLD);
 
   sigemptyset (&blocked_mask);
+
+  /* Do not enable PTRACE_O_TRACEEXIT until GDB is more prepared to
+     support read-only process state.  */
+  linux_ptrace_set_additional_flags (PTRACE_O_TRACESYSGOOD
+				     | PTRACE_O_TRACEVFORKDONE
+				     | PTRACE_O_TRACEVFORK
+				     | PTRACE_O_TRACEFORK
+				     | PTRACE_O_TRACEEXEC);
 }
 
 

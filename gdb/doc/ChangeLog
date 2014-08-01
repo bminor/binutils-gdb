@@ -1,3 +1,23 @@
+2014-08-01  Masaki Muranaka  <monaka@monami-software.com>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	* Makefile.in (transform): New variable.
+	(install-man1, install-man5): Apply $(transform) to man file names.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17177
+	* guile.texi (Guile Pretty Printing API): Fix typo.
+	Document set-pretty-printers!, pretty-printers.
+	(Selecting Guile Pretty-Printers): Update.
+	Mention program-space based pretty-printers.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Signaling) <signal command>: Explain what happens
+	with multi-threaded programs.
+
 2014-06-27  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Maintenance Commands): Update the output of

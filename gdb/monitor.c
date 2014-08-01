@@ -713,9 +713,9 @@ compile_pattern (char *pattern, struct re_pattern_buffer *compiled_pattern,
    for communication.  */
 
 void
-monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
+monitor_open (const char *args, struct monitor_ops *mon_ops, int from_tty)
 {
-  char *name;
+  const char *name;
   char **p;
   struct inferior *inf;
 
@@ -2080,7 +2080,7 @@ monitor_create_inferior (struct target_ops *ops, char *exec_file,
     error (_("Args are not supported by the monitor."));
 
   first_time = 1;
-  clear_proceed_status ();
+  clear_proceed_status (0);
   regcache_write_pc (get_current_regcache (),
 		     bfd_get_start_address (exec_bfd));
 }

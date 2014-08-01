@@ -399,6 +399,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-g}[@var{debug level}]] [@b{-G} @var{num}] [@b{-KPIC}] [@b{-call_shared}]
    [@b{-non_shared}] [@b{-xgot} [@b{-mvxworks-pic}]
    [@b{-mabi}=@var{ABI}] [@b{-32}] [@b{-n32}] [@b{-64}] [@b{-mfp32}] [@b{-mgp32}]
+   [@b{-mfp64}] [@b{-mgp64}] [@b{-mfpxx}]
+   [@b{-modd-spreg}] [@b{-mno-odd-spreg}]
    [@b{-march}=@var{CPU}] [@b{-mtune}=@var{CPU}] [@b{-mips1}] [@b{-mips2}]
    [@b{-mips3}] [@b{-mips4}] [@b{-mips5}] [@b{-mips32}] [@b{-mips32r2}]
    [@b{-mips32r3}] [@b{-mips32r5}] [@b{-mips64}] [@b{-mips64r2}]
@@ -1320,6 +1322,25 @@ The register sizes are normally inferred from the ISA and ABI, but these
 flags force a certain group of registers to be treated as 32 bits wide at
 all times.  @samp{-mgp32} controls the size of general-purpose registers
 and @samp{-mfp32} controls the size of floating-point registers.
+
+@item -mgp64
+@itemx -mfp64
+The register sizes are normally inferred from the ISA and ABI, but these
+flags force a certain group of registers to be treated as 64 bits wide at
+all times.  @samp{-mgp64} controls the size of general-purpose registers
+and @samp{-mfp64} controls the size of floating-point registers.
+
+@item -mfpxx
+The register sizes are normally inferred from the ISA and ABI, but using
+this flag in combination with @samp{-mabi=32} enables an ABI variant
+which will operate correctly with floating-point registers which are
+32 or 64 bits wide.
+
+@item -modd-spreg
+@itemx -mno-odd-spreg
+Enable use of floating-point operations on odd-numbered single-precision
+registers when supported by the ISA.  @samp{-mfpxx} implies
+@samp{-mno-odd-spreg}, otherwise the default is @samp{-modd-spreg}.
 
 @item -mips16
 @itemx -no-mips16

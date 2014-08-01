@@ -293,7 +293,7 @@ tui_prep_terminal (int notused1)
      (we can't use gdb_prompt() due to secondary prompts and can't use
      rl_prompt because it points to an alloca buffer).  */
   xfree (tui_rl_saved_prompt);
-  tui_rl_saved_prompt = xstrdup (rl_prompt);
+  tui_rl_saved_prompt = rl_prompt != NULL ? xstrdup (rl_prompt) : NULL;
 }
 
 /* Readline callback to restore the terminal.  It is called once each

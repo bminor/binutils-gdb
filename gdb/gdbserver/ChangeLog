@@ -1,3 +1,31 @@
+2014-07-31  Gary Benson  <gbenson@redhat.com>
+
+	* ax.h: Do not include server.h.
+	* gdbthread.h: Likewise.
+	* lynx-low.h: Likewise.
+	* notif.h: Likewise.
+
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Include common-defs.h.
+	Do not include config.h or build-gnulib-gdbserver/config.h.
+
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
+	* hostio-errno.c: Move server.h to top of includes list.
+	* inferiors.c: Likewise.
+	* linux-x86-low.c: Likewise.
+	* notif.c: Include server.h.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* server.h (CORE_ADDR): Now unsigned.
+
+2014-07-16  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_kill_one_lwp): Use kill_lwp, not kill.
+
 2014-07-15  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_kill_one_lwp): Save errno and work with saved

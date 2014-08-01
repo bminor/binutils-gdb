@@ -1,3 +1,18 @@
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_mips_segment_type): Display name for PT_MIPS_ABIFLAGS.
+	(get_mips_section_type_name): Display name for SHT_MIPS_ABIFLAGS.
+	(display_mips_gnu_attribute): Abstracted fp abi printing to...
+	(print_mips_fp_abi_value): New static function. Handle new FP ABIs.
+	(print_mips_ases, print_mips_isa_ext): New static functions.
+	(get_mips_reg_size): Likewise.
+	(process_mips_specific): Display abiflags data.
+
+2014-07-28  Alan Modra  <amodra@gmail.com>
+
+	PR 13227
+	* nm.c (filter_symbols): Warn on __gnu_lto_slim.
+
 2014-07-07  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_symbol_type): Revert accidental change to

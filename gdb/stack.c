@@ -413,6 +413,8 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 		      /* If the reference addresses match but dereferenced
 			 content does not match print them.  */
 		      if (val != val_deref
+		          && !value_optimized_out (val_deref)
+		          && !value_optimized_out (entryval_deref)
 			  && value_available_contents_eq (val_deref, 0,
 							  entryval_deref, 0,
 						      TYPE_LENGTH (type_deref)))
@@ -2304,7 +2306,7 @@ current_frame_command (char *level_exp, int from_tty)
    previously selected frame, and print it briefly.  */
 
 static void
-up_silently_base (char *count_exp)
+up_silently_base (const char *count_exp)
 {
   struct frame_info *frame;
   int count = 1;
@@ -2335,7 +2337,7 @@ up_command (char *count_exp, int from_tty)
    selected frame, and print it briefly.  */
 
 static void
-down_silently_base (char *count_exp)
+down_silently_base (const char *count_exp)
 {
   struct frame_info *frame;
   int count = -1;

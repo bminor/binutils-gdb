@@ -346,12 +346,11 @@ evaluate_struct_tuple (struct value *struct_val,
   return struct_val;
 }
 
-/* Recursive helper function for setting elements of array tuples for
-   (the deleted) Chill.  The target is ARRAY (which has bounds
-   LOW_BOUND to HIGH_BOUND); the element value is ELEMENT; EXP, POS
-   and NOSIDE are as usual.  Evaluates index expresions and sets the
-   specified element(s) of ARRAY to ELEMENT.  Returns last index
-   value.  */
+/* Recursive helper function for setting elements of array tuples.
+   The target is ARRAY (which has bounds LOW_BOUND to HIGH_BOUND); the
+   element value is ELEMENT; EXP, POS and NOSIDE are as usual.
+   Evaluates index expresions and sets the specified element(s) of
+   ARRAY to ELEMENT.  Returns last index value.  */
 
 static LONGEST
 init_array_element (struct value *array, struct value *element,
@@ -368,22 +367,6 @@ init_array_element (struct value *array, struct value *element,
 			  low_bound, high_bound);
       return init_array_element (array, element,
 				 exp, pos, noside, low_bound, high_bound);
-    }
-  else if (exp->elts[*pos].opcode == BINOP_RANGE)
-    {
-      LONGEST low, high;
-
-      (*pos)++;
-      low = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
-      high = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
-      if (low < low_bound || high > high_bound)
-	error (_("tuple range index out of range"));
-      for (index = low; index <= high; index++)
-	{
-	  memcpy (value_contents_raw (array)
-		  + (index - low_bound) * element_size,
-		  value_contents (element), element_size);
-	}
     }
   else
     {
@@ -903,11 +886,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	      struct value *element;
 	      int index_pc = 0;
 
-	      if (exp->elts[*pos].opcode == BINOP_RANGE)
-		{
-		  index_pc = ++(*pos);
-		  evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
-		}
 	      element = evaluate_subexp (element_type, exp, pos, noside);
 	      if (value_type (element) != element_type)
 		element = value_cast (element_type, element);
@@ -958,22 +936,10 @@ evaluate_subexp_standard (struct type *expect_type,
 	      struct type *range_low_type, *range_high_type;
 	      struct value *elem_val;
 
-	      if (exp->elts[*pos].opcode == BINOP_RANGE)
-		{
-		  (*pos)++;
-		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
-		  range_low_type = value_type (elem_val);
-		  range_low = value_as_long (elem_val);
-		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
-		  range_high_type = value_type (elem_val);
-		  range_high = value_as_long (elem_val);
-		}
-	      else
-		{
-		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
-		  range_low_type = range_high_type = value_type (elem_val);
-		  range_low = range_high = value_as_long (elem_val);
-		}
+	      elem_val = evaluate_subexp (element_type, exp, pos, noside);
+	      range_low_type = range_high_type = value_type (elem_val);
+	      range_low = range_high = value_as_long (elem_val);
+
 	      /* Check types of elements to avoid mixture of elements from
 	         different types. Also check if type of element is "compatible"
 	         with element type of powerset.  */
@@ -2127,13 +2093,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	}
 
-    case BINOP_RANGE:
-      evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      error (_("':' operator used in invalid context"));
-
     case BINOP_SUBSCRIPT:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -2164,15 +2123,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    return value_subscript (arg1, value_as_long (arg2));
 	}
-
-    case BINOP_IN:
-      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      type = language_bool_type (exp->language_defn, exp->gdbarch);
-      return value_from_longest (type, (LONGEST) value_in (arg1, arg2));
-
     case MULTI_SUBSCRIPT:
       (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);

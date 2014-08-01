@@ -19,7 +19,6 @@
 #if !defined (AX_H)
 #define AX_H 1
 
-#include "server.h"
 #include "regcache.h"
 
 #ifdef IN_PROCESS_AGENT

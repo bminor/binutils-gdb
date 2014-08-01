@@ -3007,7 +3007,7 @@ mmix_handle_mmixal (void)
 	 it the same alignment and address as the associated instruction.  */
 
       /* Make room for the label including the ending nul.  */
-      int len_0 = s - label + 1;
+      size_t len_0 = s - label + 1;
 
       /* Save this label on the MMIX symbol obstack.  Saving it on an
 	 obstack is needless for "IS"-pseudos, but it's harmless and we

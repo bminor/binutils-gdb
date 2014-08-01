@@ -42,7 +42,7 @@ extern char *get_in_environ (const struct gdb_environ *, const char *);
 
 extern void set_in_environ (struct gdb_environ *, const char *, const char *);
 
-extern void unset_in_environ (struct gdb_environ *, char *);
+extern void unset_in_environ (struct gdb_environ *, const char *);
 
 extern char **environ_vector (struct gdb_environ *);
 

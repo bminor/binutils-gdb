@@ -1312,7 +1312,6 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
   struct value *outer_val, *target_val, *val;
   struct call_site_parameter *parameter;
   struct dwarf2_per_cu_data *caller_per_cu;
-  CORE_ADDR addr;
 
   parameter = dwarf_expr_reg_to_entry_parameter (frame, kind, kind_u,
 						 &caller_per_cu);
@@ -1334,14 +1333,6 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
 					       TYPE_LENGTH (target_type),
 					       target_type, caller_frame,
 					       caller_per_cu);
-
-  /* value_as_address dereferences TYPE_CODE_REF.  */
-  addr = extract_typed_address (value_contents (outer_val), checked_type);
-
-  /* The target entry value has artificial address of the entry value
-     reference.  */
-  VALUE_LVAL (target_val) = lval_memory;
-  set_value_address (target_val, addr);
 
   release_value (target_val);
   val = allocate_computed_value (type, &entry_data_value_funcs,

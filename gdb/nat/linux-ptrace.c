@@ -37,6 +37,10 @@
    there are no supported features.  */
 static int current_ptrace_options = -1;
 
+/* Additional flags to test.  */
+
+static int additional_flags;
+
 /* Find all possible reasons we could fail to attach PID and append
    these as strings to the already initialized BUFFER.  '\0'
    termination of BUFFER must be done by the caller.  */
@@ -359,16 +363,16 @@ linux_check_ptrace_features (void)
 static void
 linux_test_for_tracesysgood (int child_pid)
 {
-#ifdef GDBSERVER
-  /* gdbserver does not support PTRACE_O_TRACESYSGOOD.  */
-#else
   int ret;
+
+  if ((additional_flags & PTRACE_O_TRACESYSGOOD) == 0)
+    return;
 
   ret = ptrace (PTRACE_SETOPTIONS, child_pid, (PTRACE_TYPE_ARG3) 0,
 		(PTRACE_TYPE_ARG4) PTRACE_O_TRACESYSGOOD);
+
   if (ret == 0)
     current_ptrace_options |= PTRACE_O_TRACESYSGOOD;
-#endif
 }
 
 /* Determine if PTRACE_O_TRACEFORK can be used to follow fork
@@ -388,16 +392,15 @@ linux_test_for_tracefork (int child_pid)
   if (ret != 0)
     return;
 
-#ifdef GDBSERVER
-  /* gdbserver does not support PTRACE_O_TRACEVFORKDONE yet.  */
-#else
-  /* Check if the target supports PTRACE_O_TRACEVFORKDONE.  */
-  ret = ptrace (PTRACE_SETOPTIONS, child_pid, (PTRACE_TYPE_ARG3) 0,
-		(PTRACE_TYPE_ARG4) (PTRACE_O_TRACEFORK
-				    | PTRACE_O_TRACEVFORKDONE));
-  if (ret == 0)
-    current_ptrace_options |= PTRACE_O_TRACEVFORKDONE;
-#endif
+  if ((additional_flags & PTRACE_O_TRACEVFORKDONE) != 0)
+    {
+      /* Check if the target supports PTRACE_O_TRACEVFORKDONE.  */
+      ret = ptrace (PTRACE_SETOPTIONS, child_pid, (PTRACE_TYPE_ARG3) 0,
+		    (PTRACE_TYPE_ARG4) (PTRACE_O_TRACEFORK
+					| PTRACE_O_TRACEVFORKDONE));
+      if (ret == 0)
+	current_ptrace_options |= PTRACE_O_TRACEVFORKDONE;
+    }
 
   /* Setting PTRACE_O_TRACEFORK did not cause an error, however we
      don't know for sure that the feature is available; old
@@ -433,18 +436,10 @@ linux_test_for_tracefork (int child_pid)
 
 	  /* We got the PID from the grandchild, which means fork
 	     tracing is supported.  */
-#ifdef GDBSERVER
-	  /* Do not enable all the options for now since gdbserver does not
-	     properly support them.  This restriction will be lifted when
-	     gdbserver is augmented to support them.  */
 	  current_ptrace_options |= PTRACE_O_TRACECLONE;
-#else
-	  current_ptrace_options |= PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK
-	    | PTRACE_O_TRACECLONE | PTRACE_O_TRACEEXEC;
-
-	  /* Do not enable PTRACE_O_TRACEEXIT until GDB is more prepared to
-	     support read-only process state.  */
-#endif
+	  current_ptrace_options |= (additional_flags & (PTRACE_O_TRACEFORK
+                                                         | PTRACE_O_TRACEVFORK
+                                                         | PTRACE_O_TRACEEXEC));
 
 	  /* Do some cleanup and kill the grandchild.  */
 	  my_waitpid (second_pid, &second_status, 0);
@@ -550,4 +545,15 @@ linux_ptrace_init_warnings (void)
   warned = 1;
 
   linux_ptrace_test_ret_to_nx ();
+}
+
+/* Set additional ptrace flags to use.  Some such flags may be checked
+   by the implementation above.  This function must be called before
+   any other function in this file; otherwise the flags may not take
+   effect appropriately.  */
+
+void
+linux_ptrace_set_additional_flags (int flags)
+{
+  additional_flags = flags;
 }

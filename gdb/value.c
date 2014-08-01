@@ -906,7 +906,10 @@ allocate_optimized_out_value (struct type *type)
   struct value *retval = allocate_value_lazy (type);
 
   set_value_optimized_out (retval, 1);
-  set_value_lazy (retval, 0);
+  /* FIXME: we should be able to avoid allocating the value's contents
+     buffer, but value_available_contents_bits_eq can't handle
+     that.  */
+  /* set_value_lazy (retval, 0); */
   return retval;
 }
 
@@ -2312,7 +2315,7 @@ static void
 function_destroyer (struct cmd_list_element *self, void *ignore)
 {
   xfree ((char *) self->name);
-  xfree (self->doc);
+  xfree ((char *) self->doc);
 }
 
 /* Add a new internal function.  NAME is the name of the function; DOC
@@ -3446,7 +3449,7 @@ value_from_decfloat (struct type *type, const gdb_byte *dec)
    for details.  */
 
 struct value *
-value_from_history_ref (char *h, char **endp)
+value_from_history_ref (const char *h, const char **endp)
 {
   int index, len;
 
@@ -3477,7 +3480,12 @@ value_from_history_ref (char *h, char **endp)
 	  *endp += len;
 	}
       else
-	index = -strtol (&h[2], endp, 10);
+	{
+	  char *local_end;
+
+	  index = -strtol (&h[2], &local_end, 10);
+	  *endp = local_end;
+	}
     }
   else
     {
@@ -3488,7 +3496,12 @@ value_from_history_ref (char *h, char **endp)
 	  *endp += len;
 	}
       else
-	index = strtol (&h[1], endp, 10);
+	{
+	  char *local_end;
+
+	  index = strtol (&h[1], &local_end, 10);
+	  *endp = local_end;
+	}
     }
 
   return access_value_history (index);

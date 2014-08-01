@@ -826,7 +826,7 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 	  CORE_ADDR chain_vma;
 
 	  chain_vma = cache->image_base + unwind_info
-	    + sizeof (ex_ui) + ((codes_count + 1) & ~1) * 2 + 8;
+	    + sizeof (ex_ui) + ((codes_count + 1) & ~1) * 2;
 
 	  if (target_read_memory (chain_vma, (gdb_byte *) &d, sizeof (d)) != 0)
 	    return;
@@ -837,6 +837,15 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 	    extract_unsigned_integer (d.rva_EndAddress, 4, byte_order);
 	  unwind_info =
 	    extract_unsigned_integer (d.rva_UnwindData, 4, byte_order);
+
+	  if (frame_debug)
+	    fprintf_unfiltered
+	      (gdb_stdlog,
+	       "amd64_windows_frame_decodes_insn (next in chain):"
+	       " unwind_data=%s, start_rva=%s, end_rva=%s\n",
+	       paddress (gdbarch, unwind_info),
+	       paddress (gdbarch, cache->start_rva),
+	       paddress (gdbarch, cache->end_rva));
 	}
 
       /* Allow the user to break this loop.  */

@@ -28,3 +28,12 @@ proc gdb_init_commands {} {
     }
     return $commands
 }
+
+# Given an input string, adds backslashes as needed to create a
+# regexp that will match the string.
+
+proc string_to_regexp {str} {
+    set result $str
+    regsub -all {[]*+.|()^$\[\\]} $str {\\&} result
+    return $result
+}

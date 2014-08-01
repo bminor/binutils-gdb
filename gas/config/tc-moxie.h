@@ -19,13 +19,13 @@
    Foundation, 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #define TC_MOXIE 1
+#ifndef TARGET_BYTES_BIG_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN 1
+#endif
 #define WORKING_DOT_WORD
 
 /* This macro is the BFD architecture to pass to `bfd_set_arch_mach'.  */
-const char *moxie_target_format;
-#define DEFAULT_TARGET_FORMAT  "elf32-bigmoxie"
-#define TARGET_FORMAT          moxie_target_format
+#define TARGET_FORMAT (target_big_endian ? "elf32-bigmoxie" : "elf32-littlemoxie")
 
 #define TARGET_ARCH bfd_arch_moxie
 

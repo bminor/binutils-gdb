@@ -1,3 +1,20 @@
+2014-07-27  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	GDB not supported for or1k*-*-rtems*
+	* configure.ac (or1k*-*-rtems*): gdb not supported.  The ordering
+	of the stanzas results in this not being caught by or1k*-*-* later.
+	* configure. Regenerated.
+
+2014-07-25  Samuel Bronson  <naesten@gmail.com>
+
+	* .gitattributes: New file for use with git-merge-changelog.
+
+2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	Disable gdb for or1k*-*-* until supported
+	* configure.ac (or1k*-*-*): Disable gdb.
+	* configure: Regenerated.
+
 2014-05-14  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* configure.ac (target_makefile_frag): Set for nios2-*-elf*.

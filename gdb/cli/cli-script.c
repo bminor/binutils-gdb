@@ -1611,24 +1611,27 @@ document_command (char *comname, int from_tty)
   doclines = read_command_lines (tmpbuf, from_tty, 0, 0, 0);
 
   if (c->doc)
-    xfree (c->doc);
+    xfree ((char *) c->doc);
 
   {
     struct command_line *cl1;
     int len = 0;
+    char *doc;
 
     for (cl1 = doclines; cl1; cl1 = cl1->next)
       len += strlen (cl1->line) + 1;
 
-    c->doc = (char *) xmalloc (len + 1);
-    *c->doc = 0;
+    doc = (char *) xmalloc (len + 1);
+    *doc = 0;
 
     for (cl1 = doclines; cl1; cl1 = cl1->next)
       {
-	strcat (c->doc, cl1->line);
+	strcat (doc, cl1->line);
 	if (cl1->next)
-	  strcat (c->doc, "\n");
+	  strcat (doc, "\n");
       }
+
+    c->doc = doc;
   }
 
   free_command_lines (&doclines);
@@ -1707,7 +1710,7 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
 
   if (c->prefixlist != NULL)
     {
-      char *prefixname = c->prefixname;
+      const char *prefixname = c->prefixname;
 
       for (c = *c->prefixlist; c != NULL; c = c->next)
 	if (c->class == class_user || c->prefixlist != NULL)

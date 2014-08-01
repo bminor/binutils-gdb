@@ -679,7 +679,7 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
     return 0;
 
   switch_to_thread (thread->ptid);
-  clear_proceed_status ();
+  clear_proceed_status (0);
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
   return 0;
 }
@@ -745,7 +745,7 @@ continue_1 (int all_threads)
     {
       ensure_valid_thread ();
       ensure_not_running ();
-      clear_proceed_status ();
+      clear_proceed_status (0);
       proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
     }
 }
@@ -1013,7 +1013,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	 THREAD is set.  */
       struct thread_info *tp = inferior_thread ();
 
-      clear_proceed_status ();
+      clear_proceed_status (!skip_subroutines);
       set_step_frame ();
 
       if (!single_inst)
@@ -1186,7 +1186,7 @@ jump_command (char *arg, int from_tty)
       printf_filtered (".\n");
     }
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
   proceed (addr, GDB_SIGNAL_0, 0);
 }
 
@@ -1245,6 +1245,50 @@ signal_command (char *signum_exp, int from_tty)
 	oursig = gdb_signal_from_command (num);
     }
 
+  /* Look for threads other than the current that this command ends up
+     resuming too (due to schedlock off), and warn if they'll get a
+     signal delivered.  "signal 0" is used to suppress a previous
+     signal, but if the current thread is no longer the one that got
+     the signal, then the user is potentially suppressing the signal
+     of the wrong thread.  */
+  if (!non_stop)
+    {
+      struct thread_info *tp;
+      ptid_t resume_ptid;
+      int must_confirm = 0;
+
+      /* This indicates what will be resumed.  Either a single thread,
+	 a whole process, or all threads of all processes.  */
+      resume_ptid = user_visible_resume_ptid (0);
+
+      ALL_NON_EXITED_THREADS (tp)
+	{
+	  if (ptid_equal (tp->ptid, inferior_ptid))
+	    continue;
+	  if (!ptid_match (tp->ptid, resume_ptid))
+	    continue;
+
+	  if (tp->suspend.stop_signal != GDB_SIGNAL_0
+	      && signal_pass_state (tp->suspend.stop_signal))
+	    {
+	      if (!must_confirm)
+		printf_unfiltered (_("Note:\n"));
+	      printf_unfiltered (_("  Thread %d previously stopped with signal %s, %s.\n"),
+				 tp->num,
+				 gdb_signal_to_name (tp->suspend.stop_signal),
+				 gdb_signal_to_string (tp->suspend.stop_signal));
+	      must_confirm = 1;
+	    }
+	}
+
+      if (must_confirm
+	  && !query (_("Continuing thread %d (the current thread) with specified signal will\n"
+		       "still deliver the signals noted above to their respective threads.\n"
+		       "Continue anyway? "),
+		     inferior_thread ()->num))
+	error (_("Not confirmed."));
+    }
+
   if (from_tty)
     {
       if (oursig == GDB_SIGNAL_0)
@@ -1254,7 +1298,7 @@ signal_command (char *signum_exp, int from_tty)
 			 gdb_signal_to_name (oursig));
     }
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
   proceed ((CORE_ADDR) -1, oursig, 0);
 }
 
@@ -1295,7 +1339,7 @@ until_next_command (int from_tty)
   int thread = tp->num;
   struct cleanup *old_chain;
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
   set_step_frame ();
 
   frame = get_current_frame ();
@@ -1315,7 +1359,9 @@ until_next_command (int from_tty)
 	error (_("Execution is not within a known function."));
 
       tp->control.step_range_start = BMSYMBOL_VALUE_ADDRESS (msymbol);
-      tp->control.step_range_end = pc;
+      /* The upper-bound of step_range is exclusive.  In order to make PC
+	 within the range, set the step_range_end with PC + 1.  */
+      tp->control.step_range_end = pc + 1;
     }
   else
     {
@@ -1686,7 +1732,7 @@ finish_command (char *arg, int from_tty)
   if (frame == 0)
     error (_("\"finish\" not meaningful in the outermost frame."));
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 
   /* Finishing from an inline frame is completely different.  We don't
      try to show the "return value" - no way to locate it.  So we do
@@ -2298,7 +2344,7 @@ proceed_after_attach_callback (struct thread_info *thread,
       && thread->suspend.stop_signal == GDB_SIGNAL_0)
     {
       switch_to_thread (thread->ptid);
-      clear_proceed_status ();
+      clear_proceed_status (0);
       proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
     }
 
@@ -2395,7 +2441,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 	{
 	  if (inferior_thread ()->suspend.stop_signal == GDB_SIGNAL_0)
 	    {
-	      clear_proceed_status ();
+	      clear_proceed_status (0);
 	      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
 	    }
 	}
@@ -2514,7 +2560,7 @@ attach_command (char *args, int from_tty)
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
-  clear_proceed_status ();
+  clear_proceed_status (0);
 
   if (non_stop)
     {

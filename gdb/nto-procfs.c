@@ -106,7 +106,7 @@ procfs_is_nto_target (bfd *abfd)
    will be a QNX node string, eg: "/net/some_node".  If arg is not a
    valid QNX node, we will default to local.  */
 static void
-procfs_open_1 (struct target_ops *ops, char *arg, int from_tty)
+procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
 {
   char *nodestr;
   char *endstr;
@@ -1395,7 +1395,7 @@ static struct target_ops *nto_native_ops;
 /* to_open implementation for "target procfs".  */
 
 static void
-procfs_open (char *arg, int from_tty)
+procfs_open (const char *arg, int from_tty)
 {
   procfs_open_1 (&nto_procfs_ops, arg, from_tty);
 }
@@ -1403,7 +1403,7 @@ procfs_open (char *arg, int from_tty)
 /* to_open implementation for "target native".  */
 
 static void
-procfs_native_open (char *arg, int from_tty)
+procfs_native_open (const char *arg, int from_tty)
 {
   procfs_open_1 (nto_native_ops, arg, from_tty);
 }

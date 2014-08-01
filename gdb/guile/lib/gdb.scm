@@ -319,6 +319,8 @@
  set-pretty-printer-enabled!
  make-pretty-printer-worker
  pretty-printer-worker?
+ pretty-printers
+ set-pretty-printers!
 
  ;; scm-progspace.c
 
@@ -492,11 +494,11 @@
 
 ;; Load the rest of the Scheme side.
 
-(use-modules ((gdb init)))
+(include "gdb/init.scm")
 
 ;; These come from other files, but they're really part of this module.
 
-(re-export
+(export
 
  ;; init.scm
  orig-input-port

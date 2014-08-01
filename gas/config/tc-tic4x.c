@@ -43,7 +43,6 @@
 #include "safe-ctype.h"
 #include "opcode/tic4x.h"
 #include "subsegs.h"
-#include "obstack.h"
 
 /* OK, we accept a syntax similar to the other well known C30
    assembly tools.  With TIC4X_ALT_SYNTAX defined we are more

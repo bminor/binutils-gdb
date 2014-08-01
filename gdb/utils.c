@@ -569,26 +569,6 @@ error (const char *string, ...)
   va_end (args);
 }
 
-/* Print an error message and quit.
-   The first argument STRING is the error message, used as a fprintf string,
-   and the remaining args are passed as arguments to it.  */
-
-void
-vfatal (const char *string, va_list args)
-{
-  throw_vfatal (string, args);
-}
-
-void
-fatal (const char *string, ...)
-{
-  va_list args;
-
-  va_start (args, string);
-  throw_vfatal (string, args);
-  va_end (args);
-}
-
 void
 error_stream (struct ui_file *stream)
 {
@@ -833,7 +813,7 @@ void
 internal_verror (const char *file, int line, const char *fmt, va_list ap)
 {
   internal_vproblem (&internal_error_problem, file, line, fmt, ap);
-  fatal (_("Command aborted."));
+  throw_quit (_("Command aborted."));
 }
 
 void
@@ -1090,15 +1070,15 @@ quit (void)
 #ifdef __MSDOS__
   /* No steenking SIGINT will ever be coming our way when the
      program is resumed.  Don't lie.  */
-  fatal ("Quit");
+  throw_quit ("Quit");
 #else
   if (job_control
       /* If there is no terminal switching for this target, then we can't
          possibly get screwed by the lack of job control.  */
-      || current_target.to_terminal_ours == NULL)
-    fatal ("Quit");
+      || !target_supports_terminal_ours ())
+    throw_quit ("Quit");
   else
-    fatal ("Quit (expect signal SIGINT when the program is resumed)");
+    throw_quit ("Quit (expect signal SIGINT when the program is resumed)");
 #endif
 }
 

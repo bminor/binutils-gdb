@@ -3,6 +3,17 @@
 
 *** Changes since GDB 7.8
 
+* On resume, GDB now always passes the signal the program had stopped
+  for to the thread the signal was sent to, even if the user changed
+  threads before resuming.  Previously GDB would often (but not
+  always) deliver the signal to the thread that happens to be current
+  at resume time.
+
+* Conversely, the "signal" command now consistently delivers the
+  requested signal to the current thread.  GDB now asks for
+  confirmation if the program had stopped for a signal and the user
+  switched threads meanwhile.
+
 *** Changes in GDB 7.8
 
 * New command line options

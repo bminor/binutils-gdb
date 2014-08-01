@@ -1,3 +1,7 @@
+2014-07-20  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
+
+	* or1korbis.cpu (l-msync, l-psync, l-csync): New instructions.
+
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	* or1k.opc: Whitespace fixes.

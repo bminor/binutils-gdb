@@ -4185,6 +4185,8 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_collect		TRUE
 #define elf_backend_type_change_ok	TRUE
 #define elf_backend_can_gc_sections	TRUE
+#define elf_backend_gc_mark_extra_sections \
+					_bfd_mips_elf_gc_mark_extra_sections
 #define elf_info_to_howto		mips_elf64_info_to_howto_rela
 #define elf_info_to_howto_rel		mips_elf64_info_to_howto_rel
 #define elf_backend_object_p		mips_elf64_object_p

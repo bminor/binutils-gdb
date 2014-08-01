@@ -1,3 +1,25 @@
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elf/mips.h (PT_MIPS_ABIFLAGS, SHT_MIPS_ABIFLAGS): Define.
+	(Val_GNU_MIPS_ABI_FP_OLD_64): Rename from Val_GNU_MIPS_ABI_FP_64.
+	(Val_GNU_MIPS_ABI_FP_64): Redefine.
+	(Val_GNU_MIPS_ABI_FP_XX): Define.
+	(Elf_External_ABIFlags_v0, Elf_Internal_ABIFlags_v0): New structures.
+	(AFL_REG_NONE, AFL_REG_32, AFL_REG_64, AFL_REG_128): Define.
+	(AFL_ASE_DSP, AFL_ASE_DSPR2, AFL_ASE_EVA, AFL_ASE_MCU): Likewise.
+	(AFL_ASE_MDMX, AFL_ASE_MIPS3D, AFL_ASE_MT, AFL_ASE_SMARTMIPS): Likewise.
+	(AFL_ASE_VIRT, AFL_ASE_MSA, AFL_ASE_MIPS16): Likewise.
+	(AFL_ASE_MICROMIPS, AFL_ASE_XPA): Likewise.
+	(AFL_EXT_XLR, AFL_EXT_OCTEON2, AFL_EXT_OCTEONP): Likewise.
+	(AFL_EXT_LOONGSON_3A, AFL_EXT_OCTEON, AFL_EXT_5900): Likewise.
+	(AFL_EXT_4650, AFL_EXT_4010, AFL_EXT_4100, AFL_EXT_3900): Likewise.
+	(AFL_EXT_10000, AFL_EXT_SB1, AFL_EXT_4111, AFL_EXT_4120): Likewise.
+	(AFL_EXT_5400, AFL_EXT_5500, AFL_EXT_LOONGSON_2E): Likewise.
+	(AFL_EXT_LOONGSON_2F): Likewise.
+	(bfd_mips_elf_swap_abiflags_v0_in): Prototype.
+	(bfd_mips_elf_swap_abiflags_v0_out): Likewise.
+	(bfd_mips_isa_ext): Likewise.
+
 2014-06-13  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_hash_table): Add hash_table_free field.

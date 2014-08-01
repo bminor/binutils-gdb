@@ -26,12 +26,6 @@
    inferior.  For presentation purposes, the branch trace is represented as a
    list of sequential control-flow blocks, one such list per thread.  */
 
-#ifdef GDBSERVER
-#  include "server.h"
-#else
-#  include "defs.h"
-#endif
-
 #include "vec.h"
 
 /* A branch trace block.

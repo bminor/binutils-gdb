@@ -1,3 +1,639 @@
+2014-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (resolve_dynamic_struct): Do not generate an error
+	if detecting a variable-sized field that is not the last field.
+	Fix struct type length computation.
+
+2014-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* amd64-windows-tdep.c (amd64_windows_frame_decode_insns):
+	Add debug trace.
+
+2014-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* amd64-windows-tdep.c (amd64_windows_frame_decode_insns):
+	Remove "+ 8" offset in computation of CHAIN_VMA.
+
+2014-07-31  Doug Evans  <dje@google.com>
+
+	* inflow.c (child_terminal_inferior): Add comment.
+	(child_terminal_ours_for_output): Add comment.
+	(child_terminal_ours): Add comment.
+	* linux-nat.c (linux_nat_terminal_inferior): Add comment.
+	(linux_nat_terminal_ours): Add comment.
+
+2014-07-31  Gary Benson  <gbenson@redhat.com>
+
+	* common/btrace-common.h: Do not include defs.h or server.h.
+	* nat/mips-linux-watch.h: Likewise.
+	* gdb-dlfcn.h: Do not include defs.h.
+	* tracefile.h: Likewise.
+
+2014-07-30  Roland McGrath  <mcgrathr@google.com>
+
+	* remote-sim.c (gdbsim_open): Apply constification to forward decl.
+
+2014-07-30  Tom Tromey  <tromey@redhat.com>
+
+	* bsd-kvm.c (bsd_kvm_open): Constify.
+	* corelow.c (core_open): Constify.
+	* ctf.c (ctf_open): Constify.
+	* dbug-rom.c (dbug_open): Constify.
+	* exec.c (exec_open): Constify.
+	* m32r-rom.c (m32r_open, mon2000_open): Constify.
+	* microblaze-rom.c (picobug_open): Constify.
+	* nto-procfs.c (procfs_open_1, procfs_open, procfs_native_open):
+	Constify.
+	* ppcbug-rom.c (ppcbug_open0, ppcbug_open1): Constify.
+	* record-btrace.c (record_btrace_open): Constify.
+	* record-full.c (record_full_core_open_1, record_full_open_1)
+	(record_full_open): Constify.
+	* remote-m32r-sdi.c (m32r_open): Constify.
+	* remote-mips.c (common_open, mips_open, pmon_open, ddb_open)
+	(rockhopper_open, lsi_open): Constify.
+	* remote-sim.c (gdbsim_open): Constify.
+	* remote.c (remote_open, extended_remote_open, remote_open_1):
+	Constify.
+	* target.h (struct target_ops) <to_open>: Make "arg" const.
+	* tracefile-tfile.c (tfile_open): Constify.
+
+2014-07-30  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (map_breakpoint_numbers): Update.
+	* cli/cli-utils.c (get_number_trailer): Make "pp" const.  Update.
+	(get_number_const): New function.
+	(get_number): Rewrite using get_number_const.
+	(init_number_or_range): Make "string" const.
+	(number_is_in_list): Make "list" const.
+	* cli/cli-utils.h (get_number_const): Declare.
+	(struct get_number_or_range_state) <string, end_ptr>: Now const.
+	(init_number_or_range, number_is_in_list): Update.
+	* printcmd.c (map_display_numbers): Update.
+	* value.c (value_from_history_ref): Constify.
+	* value.h (value_from_history_ref): Update.
+
+2014-07-30  Tom Tromey  <tromey@redhat.com>
+
+	* corefile.c (hook_type, call_extra_exec_file_hooks)
+	(specify_exec_file_hook): Constify.
+	* exec.c (exec_file_attach): Make "filename" const.
+	* gdbcore.h (deprecated_exec_file_display_hook)
+	(specify_exec_file_hook, exec_file_attach): Constify.
+	* main.c (captured_main): Use catch_command_errors_const.
+
+2014-07-30  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (open_target): New function.
+	(add_target_with_completer, add_deprecated_target_alias): Use
+	set_cmd_sfunc, set_cmd_context.
+	(debug_to_open): Remove.
+	(setup_target_debug): Update.
+
+2014-07-30  Yao Qi  <yao@codesourcery.com>
+
+	* parser-defs.h (struct exp_descriptor) <operator_check>: Update
+	comments.
+	* parse.c (exp_iterate): Update comments.
+
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/common-defs.h.
+	* defs.h: Include common-defs.h.
+	Do not include config.h or build-gnulib/config.h.
+
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-utils.h: Do not include config.h.
+	* nat/linux-btrace.h: Likewise.
+
+2014-07-30  Gary Benson  <gbenson@redhat.com>
+
+	* btrace.c: Include defs.h.
+	* common/ptid.c: Include defs.h or server.h as appropriate.
+	* nat/mips-linux-watch.c: Likewise.
+
+2014-07-29  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (target_is_pushed): Simplify.
+
+2014-07-29  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.8 released.
+
+2014-07-29  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/17206
+	* infcmd.c (until_next_command): Set step_range_end to PC + 1.
+
+2014-07-28  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17203
+	* guile/scm-param.c (pascm_parameter_defined_p): New function.
+	(gdbscm_register_parameter_x): Call it.  Raise error for pre-existing
+	parameters.
+
+2014-07-28  Will Newton  <will.newton@linaro.org>
+
+	* arm-linux-tdep.c (THUMB2_SET_R7_SIGRETURN1): New define.
+	(THUMB2_SET_R7_SIGRETURN2): Likewise.
+	(THUMB2_SET_R7_RT_SIGRETURN1): Likewise.
+	(THUMB2_SET_R7_RT_SIGRETURN2): Likewise.
+	(THUMB2_EABI_SYSCALL): Likewise.
+	(thumb2_eabi_linux_sigreturn_tramp_frame): Create new
+	struct tramp_frame.
+	(thumb2_eabi_linux_rt_sigreturn_tramp_frame): Likewise.
+	(arm_linux_init_abi): Add Thumb2 tramp frame unwinders.
+
+2014-07-27  Doug Evans  <xdje42@gmail.com>
+
+	* guile/scm-param.c (pascm_print_param_smob): Fix output.
+
+2014-07-27  Doug Evans  <xdje42@gmail.com>
+
+	* guile/guile.c (gdbscm_execute_gdb_command): Fix typo in comment.
+
+2014-07-26  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17146
+	* acinclude.m4 (GDB_GUILE_PROGRAM_NAMES): New macro.
+	(GDB_GUILD_TARGET_FLAG, GDB_TRY_GUILD): New macros.
+	* configure.ac: Try to use guild to compile an scm file, if it fails
+	then disable guile support.
+	* configure: Regenerate.
+	* data-directory/Makefile.in (GUILE_SOURCE_FILES): Renamed from
+	GUILE_FILE_LIST.
+	(GUILE_COMPILED_FILES): New variable.
+	(GUILE_FILES) Update.
+	(GUILD, GUILD_TARGET_FLAG, GUILD_COMPILE_FLAGS): New variables.
+	(stamp-guile): Compile scm files.
+	* guile/guile.c (boot_guile_support): New function.
+	(standard_throw_args_p): New function.
+	(print_standard_throw_error, print_throw_error): New functions.
+	(handle_boot_error): New function.
+	(initialize_scheme_side): Rewrite to call boot_guile_support.
+	* guile/lib/gdb/boot.scm: Update %load-compiled-path.  Load gdb.go.
+	* guile/lib/gdb/init.scm (%silence-compiler-warnings%): New function.
+
+2014-07-26  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17146
+	* data-directory/Makefile.in (GUILE_FILES): Add support.scm.
+	* guile/lib/gdb/support.scm: New file.
+	* guile/guile.c (gdbscm_init_module_name): Change to "gdb".
+	* guile/lib/gdb.scm: Load gdb/init.scm as an include file.
+	All uses updated.
+	* guile/lib/gdb/init.scm (SCM_ARG1, SCM_ARG2): Moved to support.scm.
+	All uses updated.
+	(%assert-type): Ditto, and renamed to assert-type.
+	(%exception-print-style): Delete.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR build/17105
+	* configure.ac: Add AM_CONDITIONALs for HAVE_PYTHON, HAVE_GUILE.
+	* configure: Regenerate.
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Renamed from
+	PYTHON_FILES.
+	(PYTHON_FILES): New variable.
+	(GUILE_FILE_LIST): Renamed from GUILE_FILES.
+	(GUILE_FILES): New variable.
+	(stamp-python, install-python, uninstall-python): Handle empty
+	file list.
+	(stamp-guile, install-guile, uninstall-guile): Ditto.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17177
+	* guile/lib/gdb.scm (pretty-printers): Export.
+	(set-pretty-printers!): Export.
+	* guile/lib/gdb/printing.scm (gdb module): Update.
+	(prepend-pretty-printer!, append-pretty-printer!): Update.
+	* guile/scm-pretty-print.c (pretty_printer_list_name): Delete.
+	(pretty_printer_list_var): Delete.
+	(pretty_printer_list): New static global.
+	(gdbscm_pretty_printers): New function.
+	(gdbscm_set_pretty_printers_x): New function.
+	(ppscm_find_pretty_printer_from_gdb): Update.
+	(pretty_printer_functions): Add pretty-printers, set-pretty-printers!.
+	(gdbscm_initialize_pretty_printers): Update.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR 17185
+	* configure.ac: Add check for header gc/gc.h.
+	Add check for function setenv.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* guile/guile.c (_initialize_guile): Add workaround for libgc 7.4.0.
+
+2014-07-25  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Also check the compressed ISA
+	variation in gdbarch matching.
+
+2014-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* exec.c (using_exec_ops): Remove.
+	(exec_close_1): Update.  Remove extraneous block, reindent.
+	(add_target_sections): Use target_is_pushed.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c (go32_create_inferior): Pass 0 to clear_proceed_status.
+	* monitor.c (monitor_create_inferior): Likewise.
+	* remote-m32r-sdi.c (m32r_create_inferior): Likewise.
+	* remote-sim.c (gdbsim_create_inferior): Likewise.
+	* solib-irix.c (irix_solib_create_inferior_hook): Likewise.
+	* solib-osf.c (osf_solib_create_inferior_hook): Likewise.
+	* windows-nat.c (do_initial_windows_stuff): Likewise.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention signal passing and "signal" command changes.
+	* gdbthread.h (struct thread_suspend_state) <stop_signal>: Extend
+	comment.
+	* breakpoint.c (until_break_command): Adjust clear_proceed_status
+	call.
+	* infcall.c (run_inferior_call): Adjust clear_proceed_status call.
+	* infcmd.c (proceed_thread_callback, continue_1, step_once)
+	(jump_command): Adjust clear_proceed_status call.
+	(signal_command): Warn if other thread that are resumed have
+	signals that will be delivered.  Adjust clear_proceed_status call.
+	(until_next_command, finish_command)
+	(proceed_after_attach_callback, attach_command_post_wait)
+	(attach_command): Adjust clear_proceed_status call.
+	* infrun.c (proceed_after_vfork_done): Likewise.
+	(proceed_after_attach_callback): Adjust comment.
+	(clear_proceed_status_thread): Clear stop_signal if not in pass
+	state.
+	(clear_proceed_status_callback): Delete.
+	(clear_proceed_status): New 'step' parameter.  Only clear the
+	proceed status of threads the command being prepared is about to
+	resume.
+	(proceed): If passed in an explicit signal, override stop_signal
+	with it.  Don't pass the last stop signal to the thread we're
+	resuming.
+	(init_wait_for_inferior): Adjust clear_proceed_status call.
+	(switch_back_to_stepped_thread): Clear the signal if it should not
+	be passed.
+	* infrun.h (clear_proceed_status): New 'step' parameter.
+	(user_visible_resume_ptid): Add comment.
+	* linux-nat.c (linux_nat_resume_callback): Don't check whether the
+	signal is in pass state.
+	* remote.c (append_pending_thread_resumptions): Likewise.
+	* mi/mi-main.c (proceed_thread): Adjust clear_proceed_status call.
+
+2014-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (target_stopped_data_address)
+	(target_watchpoint_addr_within_range): Use "->", not ".".  Fix
+	parentheses.
+
+2014-07-25  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (avr_address_to_pointer): Clarify the conversion in the
+	comments.
+	(avr_pointer_to_address): Likewise.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* monitor.c (compile_pattern): Update.
+	* target.h (struct target_ops) <to_shortname, to_longname,
+	to_doc>: Now const.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (add_cmd, add_prefix_cmd)
+	(add_abbrev_prefix_cmd, add_set_or_show_cmd, add_info)
+	(add_info_alias, add_com): Make "doc" const.
+	(print_doc_line): Make "str" const.
+	(delete_cmd): Update.
+	* cli/cli-decode.h (struct cmd_list_element) <doc>: Now const.
+	(print_doc_line): Update.
+	* cli/cli-script.c (document_command): Update.
+	* command.h (add_cmd, add_prefix_cmd, add_abbrev_prefix_cmd)
+	(add_com, add_info, add_info_alias): Update.
+	* guile/scm-cmd.c (cmdscm_destroyer): Update.
+	* python/py-cmd.c (cmdpy_destroyer): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (print_help_for_command): Make "prefix" const.
+	(add_prefix_cmd, add_abbrev_prefix_cmd, apropos_cmd, help_list)
+	(help_cmd_list): Constify.
+	(lookup_cmd): Update.
+	* cli/cli-decode.h (struct cmd_list_element) <prefixname>: Now
+	const.
+	(help_cmd_list, apropos_cmd): Update.
+	* cli/cli-script.c (show_user): Update.
+	* cli/cli-setshow.c (cmd_show_list): Make "prefix" const.
+	* cli/cli-setshow.h (cmd_show_list): Update.
+	* command.h (add_prefix_cmd, add_abbrev_prefix_cmd, help_list)
+	(cmd_show_list): Update.
+	* guile/scm-cmd.c (cmdscm_destroyer): Update.
+	* python/py-cmd.c (cmdpy_destroyer): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (deprecate_cmd): Make "replacement" const.
+	* cli/cli-decode.h (struct cmd_list_element) <replacement>: Now
+	const.
+	* command.h (deprecate_cmd): Update.
+	* maint.c (maintenance_do_deprecate): Add casts.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (help_cmd): Make parameter "const".
+	* cli/cli-decode.h (help_cmd): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* stack.c (up_silently_base, down_silently_base): Make argument
+	const.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* solib.c (solib_add): Make "pattern" const.
+	* solib.h (solib_add): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* remote.c (remote_serial_open, print_packet, putpkt)
+	(putpkt_binary): Constify.
+	* remote.h (putpkt): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* monitor.c (monitor_open): Make "args" const.
+	* monitor.h (monitor_open): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* maint.c (match_bfd_flags): Make "string" const.
+	(print_bfd_section_info): Remove casts.
+	(print_objfile_section_info): Make "string" const.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* inf-child.c (inf_child_open_target): Make "arg" const.
+	* inf-child.h (inf_child_open_target): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* environ.c (unset_in_environ): Make "var" const.
+	* environ.h (unset_in_environ): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-dump.c (scan_expression_with_cleanup): Return const.
+	Make "cmd" const.
+	(scan_filename_with_cleanup): Likewise.
+	(dump_memory_to_file, dump_value_to_file, restore_binary_file):
+	Make arguments const.
+	(restore_command): Update.
+
+2014-07-24  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-io.c (tui_prep_terminal): Handle NULL rl_prompt.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-ptrace.c (additional_flags): New global.
+	(linux_test_for_tracesysgood, linux_test_for_tracefork): Use
+	additional_flags; don't check GDBSERVER.
+	(linux_ptrace_set_additional_flags): New function.
+	* nat/linux-ptrace.h (linux_ptrace_set_additional_flags):
+	Declare.
+	* linux-nat.c (_initialize_linux_nat): Call
+	linux_ptrace_set_additional_flags.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* make-target-delegates (munge_type, write_debugmethod): New
+	functions.
+	(debug_names): New global.
+	($TARGET_DEBUG_PRINTER): New global.
+	(write_function_header): Strip TARGET_DEBUG_PRINTER from the type
+	name.
+	Write debug methods.  Generate init_debug_target.
+	* target-debug.h: New file.
+	* target-delegates.c: Rebuild.
+	* target.c: Include target-debug.h.
+	(debug_target): Hoist definition.
+	(target_kill, target_get_section_table, target_memory_map)
+	(target_flash_erase, target_flash_done, target_detach)
+	(target_disconnect, target_wait, target_resume)
+	(target_pass_signals, target_program_signals, target_follow_fork)
+	(target_mourn_inferior, target_search_memory)
+	(target_thread_address_space, target_close)
+	(target_find_new_threads, target_core_of_thread)
+	(target_verify_memory, target_insert_mask_watchpoint)
+	(target_remove_mask_watchpoint): Remove targetdebug code.
+	(debug_to_post_attach, debug_to_prepare_to_store)
+	(debug_to_files_info, debug_to_insert_breakpoint)
+	(debug_to_remove_breakpoint, debug_to_can_use_hw_breakpoint)
+	(debug_to_region_ok_for_hw_watchpoint)
+	(debug_to_can_accel_watchpoint_condition)
+	(debug_to_stopped_by_watchpoint, debug_to_stopped_data_address)
+	(debug_to_watchpoint_addr_within_range)
+	(debug_to_insert_hw_breakpoint, debug_to_remove_hw_breakpoint)
+	(debug_to_insert_watchpoint, debug_to_remove_watchpoint)
+	(debug_to_terminal_init, debug_to_terminal_inferior)
+	(debug_to_terminal_ours_for_output, debug_to_terminal_ours)
+	(debug_to_terminal_save_ours, debug_to_terminal_info)
+	(debug_to_load, debug_to_post_startup_inferior)
+	(debug_to_insert_fork_catchpoint)
+	(debug_to_remove_fork_catchpoint)
+	(debug_to_insert_vfork_catchpoint)
+	(debug_to_remove_vfork_catchpoint)
+	(debug_to_insert_exec_catchpoint)
+	(debug_to_remove_exec_catchpoint, debug_to_has_exited)
+	(debug_to_can_run, debug_to_thread_architecture, debug_to_stop)
+	(debug_to_rcmd, debug_to_pid_to_exec_file): Remove.
+	(setup_target_debug): Call init_debug_target.
+	* target.h (TARGET_DEBUG_PRINTER): New macro.
+	(struct target_ops) <to_resume, to_wait, to_pass_signals,
+	to_program_signals>: Use TARGET_DEBUG_PRINTER.
+
+2014-07-24  Gary Benson  <gbenson@redhat.com>
+
+	* exceptions.h (throw_vfatal): Renamed to...
+	(throw_vquit): New declaration.
+	(throw_quit): Likewise.
+	* exceptions.c (throw_vfatal): Renamed to...
+	(throw_vquit): New function.
+	(throw_quit): Likewise.
+	(throw_error): Call throw_verror rather than throw_it.
+	* utils.h (vfatal): Removed.
+	(fatal): Likewise.
+	* utils.c (vfatal): Removed.
+	(fatal): Likewise.
+	(internal_verror): Replaced call to fatal with call to throw_quit.
+	(quit): Replaced calls to fatal with calls to throw_quit.
+
+2014-07-23  Ajit Agarwal <ajitkum@xilinx.com>
+
+	* microblaze-tdep.c (microblaze_fetch_instruction): Use of
+	target_read_code.
+
+2014-07-23  Chen Gang <gang.chen.5i5j@gmail.com>
+
+	* microblaze-tdep.c (microblaze_dwarf2_reg_to_regnum): Check whether
+	less than zero in conditional expression.
+
+2014-07-23  Tom Tromey  <tromey@redhat.com>
+
+	* make-target-delegates ($ARGS_PART): Match trailing close paren.
+	($INTRO_PART): Don't match whitespace.
+	($METHOD_TRAILER): Move earlier.  Remove trailing semicolon and
+	argument matching.
+	($METHOD): Add $METHOD_TRAILER.
+	(trim): Rewrite.
+	(scan_target_h): New sub.
+	Change main loop not to collect state.
+	* target-delegates.c: Rebuild.
+
+2014-07-23  Gary Benson  <gbenson@redhat.com>
+
+	* cp-support.c (gdb_demangle): Fix build on systems without
+	sigaltstack.
+
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (value_of_dwarf_reg_entry): Remove setting value address
+	for reference entry value target data value.
+
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* stack.c (read_frame_arg): Verify value_optimized_out before calling
+	value_available_contents_eq.
+
+2014-07-22  Pedro Alves  <palves@redhat.com>
+
+	* value.c (allocate_optimized_out_value): Don't mark value as
+	non-lazy.
+
+2014-07-22  Jiong Wang  <jiong.wang@arm.com>
+
+	* MAINTAINERS (Write After Approval): Update my email address.
+
+2014-07-20  Doug Evans  <dje@google.com>
+
+	PR server/17147
+	* remote.c (putpkt_binary): Add text to error message.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* eval.c: Remove "Chill" from comments.
+	* gdbtypes.h: Likewise.
+	* symtab.h: Likewise.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Update comments to TERNOP_SLICE.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Remove BINOP_RANGE.
+	* breakpoint.c (watchpoint_exp_is_const): Update.
+	* expprint.c (dump_subexp_body_standard): Likewise.
+	* eval.c (init_array_element): Remove dead code.
+	(evaluate_subexp_standard): Likewise.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Remove BINOP_IN.
+	* breakpoint.c (watchpoint_exp_is_const): Update.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* expprint.c (dump_subexp_body_standard): Likewise.
+
+2014-07-19  Ajit Agarwal  <ajitkum@xilinx.com>
+
+	* microblaze-tdep.c (microblaze_register_names): Add
+	the rshr and rslr register names.
+	(microblaze_gdbarch_init): Use of tdesc_has_registers.
+	Use of tdesc_find_feature. Use of tdesc_data_alloc.
+	Use of tdesc_numbered_register. Use of
+	microblaze_register_g_packet_guesses. Use of
+	tdesc_use_registers. Use of set_gdbarch_register_type.
+	(microblaze_register_g_packet_guesses): New.
+	* microblaze-tdep.h (microblaze_reg_num): Add
+	field MICROBLAZE_SLR_REGNUM MICROBLAZE_SHR_REGNUM
+	MICROBLAZE_NUM_REGS and MICROBLAZE_NUM_CORE_REGS.
+	(microblaze_frame_cache): Use of MICROBLAZE_NUM_REGS.
+	* features/microblaze-core.xml: New file.
+	* features/microblaze-stack-protect.xml: New file.
+	* features/microblaze-with-stack-protect.c: New file.
+	* features/microblaze-with-stack-protect.xml: New file.
+	* features/microblaze.xml: New file.
+	* features/microblaze.c: New file.
+	* features/Makefile (microblaze-with-stack-protect): Add
+	microblaze-with-stack-protect microblaze and microblaze-expedite.
+	* regformats/microblaze-with-stack-protect.dat: New file.
+	* regformats/microblaze.dat: New file.
+	* doc/gdb.texinfo (MicroBlaze Features): Added.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* exec.c (exec_ops): Now static.
+	* exec.h (exec_ops): Don't declare.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint): Pass "self"
+	to find_target_beneath.
+	* ravenscar-thread.c (ravenscar_prepare_to_store): Pass "ops" to
+	find_target_beneath.
+	(ravenscar_mourn_inferior): Pass "self" to find_target_beneath.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/17130:
+	* utils.c (quit): Use target_supports_terminal_ours.
+	* target.h (target_supports_terminal_ours): Declare.
+	* target.c (target_supports_delete_record): Don't check
+	to_delete_record against NULL.
+	(target_supports_terminal_ours): New function.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/17130:
+	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint)
+	(spu_fetch_registers, spu_store_registers, spu_xfer_partial)
+	(spu_search_memory, spu_mourn_inferior): Simplify delegation.
+	* linux-thread-db.c (thread_db_pid_to_str): Always delegate.
+	* windows-nat.c (windows_xfer_partial): Always delegate.
+	* record-btrace.c (record_btrace_xfer_partial): Simplify
+	delegation.
+	(record_btrace_fetch_registers, record_btrace_store_registers)
+	(record_btrace_prepare_to_store, record_btrace_resume)
+	(record_btrace_wait, record_btrace_find_new_threads)
+	(record_btrace_thread_alive): Likewise.
+	* procfs.c (procfs_xfer_partial): Always delegate.
+	* corelow.c (core_xfer_partial): Always delegate.
+	* sol-thread.c (sol_find_new_threads): Simplify delegation.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* exec.c (exec_make_note_section): Move earlier.
+
+2014-07-17  Doug Evans  <dje@google.com>
+
+	PR gdb/17170
+	* maint.c (count_symtabs_and_blocks): Handle NULL
+	current_program_space.
+	(report_command_stats): Check global enabled flag in addition to
+	recorded enabled flag.
+	(make_command_stats_cleanup): Handle msg_type == 0, startup.
+
+2014-07-16  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (kill_callback): Use kill_lwp, not kill.
+
 2014-07-16  Tom Tromey  <tromey@redhat.com>
 
 	* target.h (struct target_ops) <to_delete_record>: Reformat
@@ -1001,7 +1637,7 @@
 	momentary_breakpoint_from_master with additional argument.
 	(momentary_breakpoint_from_master): Add argument to function
 	definition and use it to initialize structure member flag.
-	(clone_momentary_breakpoint): Call 
+	(clone_momentary_breakpoint): Call
 	momentary_breakpoint_from_master with additional argument.
 	* infrun.c (follow_inferior_reset_breakpoints): Clear structure
 	member flags set in momentary_breakpoint_from_master.
@@ -1319,7 +1955,7 @@
 	(gdb_PyObject_HasAttrString): New inline function definitions.
 	* py-value.c (get_field_flag): Remove the now unnecessary cast to
 	char * of the second argument to PyObject_GetAttrString.
-	
+
 2014-06-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* serial.c (serial_write): Fix index of character to be printed
@@ -8801,7 +9437,7 @@
 
 2014-02-03  Kevin Buettner  <kevinb@redhat.com>
 
-	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Rewrite 
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Rewrite
 	dwarf2_to_gdb[] table using symbolic constants.  Adjust
 	penultimate entry from number representing the PC register
 	to symbolic constant representing the MDR register.  Add

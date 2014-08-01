@@ -23,7 +23,6 @@
 #include "as.h"
 #undef NO_RELOC
 #include "aout/aout64.h"
-#include "obstack.h"
 
 void
 obj_aout_frob_symbol (symbolS *sym, int *punt ATTRIBUTE_UNUSED)

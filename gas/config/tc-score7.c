@@ -5090,7 +5090,7 @@ s7_build_score_ops_hsh (void)
   for (i = 0; i < sizeof (s7_score_insns) / sizeof (struct s7_asm_opcode); i++)
     {
       const struct s7_asm_opcode *insn = s7_score_insns + i;
-      unsigned len = strlen (insn->template_name);
+      size_t len = strlen (insn->template_name);
       struct s7_asm_opcode *new_opcode;
       char *template_name;
       new_opcode = (struct s7_asm_opcode *)
@@ -5119,7 +5119,7 @@ s7_build_dependency_insn_hsh (void)
   for (i = 0; i < ARRAY_SIZE (s7_insn_to_dependency_table); i++)
     {
       const struct s7_insn_to_dependency *tmp = s7_insn_to_dependency_table + i;
-      unsigned len = strlen (tmp->insn_name);
+      size_t len = strlen (tmp->insn_name);
       struct s7_insn_to_dependency *new_i2d;
 
       new_i2d = (struct s7_insn_to_dependency *)

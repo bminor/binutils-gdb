@@ -61,10 +61,7 @@ void _initialize_exec (void);
 
 /* The target vector for executable files.  */
 
-struct target_ops exec_ops;
-
-/* True if the exec target is pushed on the stack.  */
-static int using_exec_ops;
+static struct target_ops exec_ops;
 
 /* Whether to open exec and core files read-only or read-write.  */
 
@@ -79,7 +76,7 @@ show_write_files (struct ui_file *file, int from_tty,
 
 
 static void
-exec_open (char *args, int from_tty)
+exec_open (const char *args, int from_tty)
 {
   target_preopen (from_tty);
   exec_file_attach (args, from_tty);
@@ -115,22 +112,18 @@ exec_close (void)
 static void
 exec_close_1 (struct target_ops *self)
 {
-  using_exec_ops = 0;
+  struct program_space *ss;
+  struct cleanup *old_chain;
 
+  old_chain = save_current_program_space ();
+  ALL_PSPACES (ss)
   {
-    struct program_space *ss;
-    struct cleanup *old_chain;
-
-    old_chain = save_current_program_space ();
-    ALL_PSPACES (ss)
-    {
-      set_current_program_space (ss);
-      clear_section_table (current_target_sections);
-      exec_close ();
-    }
-
-    do_cleanups (old_chain);
+    set_current_program_space (ss);
+    clear_section_table (current_target_sections);
+    exec_close ();
   }
+
+  do_cleanups (old_chain);
 }
 
 void
@@ -161,7 +154,7 @@ exec_file_clear (int from_tty)
    we're supplying the exec pathname late for good reason.)  */
 
 void
-exec_file_attach (char *filename, int from_tty)
+exec_file_attach (const char *filename, int from_tty)
 {
   struct cleanup *cleanups;
 
@@ -445,11 +438,8 @@ add_target_sections (void *owner,
 
       /* If these are the first file sections we can provide memory
 	 from, push the file_stratum target.  */
-      if (!using_exec_ops)
-	{
-	  using_exec_ops = 1;
-	  push_target (&exec_ops);
-	}
+      if (!target_is_pushed (&exec_ops))
+	push_target (&exec_ops);
     }
 }
 
@@ -951,7 +941,11 @@ exec_has_memory (struct target_ops *ops)
 	  != current_target_sections->sections_end);
 }
 
-static char *exec_make_note_section (struct target_ops *self, bfd *, int *);
+static char *
+exec_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
+{
+  error (_("Can't create a corefile"));
+}
 
 /* Fill in the exec file target vector.  Very few entries need to be
    defined.  */
@@ -1018,10 +1012,4 @@ Show writing into executable and core files."), NULL,
 			   &setlist, &showlist);
 
   add_target_with_completer (&exec_ops, filename_completer);
-}
-
-static char *
-exec_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
-{
-  error (_("Can't create a corefile"));
 }

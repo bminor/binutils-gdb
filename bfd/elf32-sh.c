@@ -702,10 +702,10 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       elf_section_data (sec)->this_hdr.contents = contents;
       symtab_hdr->contents = (unsigned char *) isymbuf;
 
-      /* Replace the jsr with a bsr.  */
+      /* Replace the jmp/jsr with a bra/bsr.  */
 
       /* Change the R_SH_USES reloc into an R_SH_IND12W reloc, and
-	 replace the jsr with a bsr.  */
+	 replace the jmp/jsr with a bra/bsr.  */
       irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irelfn->r_info), R_SH_IND12W);
       /* We used to test (ELF32_R_SYM (irelfn->r_info) < symtab_hdr->sh_info)
 	 here, but that only checks if the symbol is an external symbol,
@@ -716,7 +716,10 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       /* We can't fully resolve this yet, because the external
 	 symbol value may be changed by future relaxing.  We let
 	 the final link phase handle it.  */
-      bfd_put_16 (abfd, (bfd_vma) 0xb000, contents + irel->r_offset);
+      if (bfd_get_16 (abfd, contents + irel->r_offset) & 0x0020)
+	bfd_put_16 (abfd, (bfd_vma) 0xa000, contents + irel->r_offset);
+      else
+	bfd_put_16 (abfd, (bfd_vma) 0xb000, contents + irel->r_offset);
 
       irel->r_addend = -4;
 

@@ -340,7 +340,7 @@ m32r_create_inferior (struct target_ops *ops, char *execfile,
   /* The "process" (board) is already stopped awaiting our commands, and
      the program is already downloaded.  We just set its PC and go.  */
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 
   /* Tell wait_for_inferior that we've started a new process.  */
   init_wait_for_inferior ();
@@ -359,7 +359,7 @@ m32r_create_inferior (struct target_ops *ops, char *execfile,
    NAME is the filename used for communication.  */
 
 static void
-m32r_open (char *args, int from_tty)
+m32r_open (const char *args, int from_tty)
 {
   struct hostent *host_ent;
   struct sockaddr_in server_addr;

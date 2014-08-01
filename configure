@@ -3369,6 +3369,10 @@ case "${target}" in
     ;;
   *-*-rtems*)
     noconfigdirs="$noconfigdirs ${libgcj}"
+    # this is not caught below because this stanza matches earlier
+    case $target in
+      or1k*-*-*) noconfigdirs="$noconfigdirs gdb" ;;
+    esac
     ;;
   *-*-tpf*)
     noconfigdirs="$noconfigdirs ${libgcj}"
@@ -3800,6 +3804,9 @@ case "${target}" in
     ;;
   mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
+    ;;
+  or1k*-*-*)
+    noconfigdirs="$noconfigdirs gdb"
     ;;
   sh-*-* | sh64-*-*)
     case "${target}" in

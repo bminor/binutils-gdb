@@ -89,6 +89,7 @@ int mips_flag_pdr = TRUE;
 #include "ecoff.h"
 
 static char *mips_regmask_frag;
+static char *mips_flags_frag;
 
 #define ZERO 0
 #define ATREG 1
@@ -257,6 +258,10 @@ struct mips_set_options
      Changed by .set singlefloat or .set doublefloat, command-line options
      -msingle-float or -mdouble-float.  The default is false.  */
   bfd_boolean single_float;
+
+  /* 1 if single-precision operations on odd-numbered registers are
+     allowed.  */
+  int oddspreg;
 };
 
 /* Specifies whether module level options have been checked yet.  */
@@ -275,7 +280,7 @@ static struct mips_set_options file_mips_opts =
   /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
   /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* insn32 */ FALSE,
   /* gp */ -1, /* fp */ -1, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
-  /* soft_float */ FALSE, /* single_float */ FALSE
+  /* soft_float */ FALSE, /* single_float */ FALSE, /* oddspreg */ -1
 };
 
 /* This is similar to file_mips_opts, but for the current set of options.  */
@@ -286,7 +291,7 @@ static struct mips_set_options mips_opts =
   /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
   /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* insn32 */ FALSE,
   /* gp */ -1, /* fp */ -1, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
-  /* soft_float */ FALSE, /* single_float */ FALSE
+  /* soft_float */ FALSE, /* single_float */ FALSE, /* oddspreg */ -1
 };
 
 /* Which bits of file_ase were explicitly set or cleared by ASE options.  */
@@ -392,15 +397,17 @@ static int mips_32bitmode = 0;
    )
 
 /* Return true if ISA supports single-precision floats in odd registers.  */
-#define ISA_HAS_ODD_SINGLE_FPR(ISA)	\
-  ((ISA) == ISA_MIPS32			\
-   || (ISA) == ISA_MIPS32R2		\
-   || (ISA) == ISA_MIPS32R3		\
-   || (ISA) == ISA_MIPS32R5		\
-   || (ISA) == ISA_MIPS64		\
-   || (ISA) == ISA_MIPS64R2		\
-   || (ISA) == ISA_MIPS64R3		\
-   || (ISA) == ISA_MIPS64R5)
+#define ISA_HAS_ODD_SINGLE_FPR(ISA, CPU)\
+  (((ISA) == ISA_MIPS32			\
+    || (ISA) == ISA_MIPS32R2		\
+    || (ISA) == ISA_MIPS32R3		\
+    || (ISA) == ISA_MIPS32R5		\
+    || (ISA) == ISA_MIPS64		\
+    || (ISA) == ISA_MIPS64R2		\
+    || (ISA) == ISA_MIPS64R3		\
+    || (ISA) == ISA_MIPS64R5		\
+    || (CPU) == CPU_R5900)		\
+   && (CPU) != CPU_LOONGSON_3A)
 
 /* Return true if ISA supports move to/from high part of a 64-bit
    floating-point register. */
@@ -526,8 +533,8 @@ static int mips_32bitmode = 0;
 /* Whether the processor uses hardware interlocks to avoid delays
    required by coprocessor instructions, and thus does not require
    nops to be inserted.  This applies to instructions marked
-   INSN_LOAD_COPROC_DELAY, INSN_COPROC_MOVE_DELAY, and to delays
-   between instructions marked INSN_WRITE_COND_CODE and ones marked
+   INSN_LOAD_COPROC, INSN_COPROC_MOVE, and to delays between
+   instructions marked INSN_WRITE_COND_CODE and ones marked
    INSN_READ_COND_CODE.  These nops are only required at MIPS ISA
    levels I, II, and III and microMIPS mode instructions are always
    interlocked.  */
@@ -1407,6 +1414,7 @@ enum options
     OPTION_CONSTRUCT_FLOATS,
     OPTION_NO_CONSTRUCT_FLOATS,
     OPTION_FP64,
+    OPTION_FPXX,
     OPTION_GP64,
     OPTION_RELAX_BRANCH,
     OPTION_NO_RELAX_BRANCH,
@@ -1434,6 +1442,8 @@ enum options
     OPTION_NO_PDR,
     OPTION_MVXWORKS_PIC,
     OPTION_NAN,
+    OPTION_ODD_SPREG,
+    OPTION_NO_ODD_SPREG,
     OPTION_END_OF_ENUM
   };
 
@@ -1526,6 +1536,7 @@ struct option md_longopts[] =
   {"construct-floats", no_argument, NULL, OPTION_CONSTRUCT_FLOATS},
   {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
   {"mfp64", no_argument, NULL, OPTION_FP64},
+  {"mfpxx", no_argument, NULL, OPTION_FPXX},
   {"mgp64", no_argument, NULL, OPTION_GP64},
   {"relax-branch", no_argument, NULL, OPTION_RELAX_BRANCH},
   {"no-relax-branch", no_argument, NULL, OPTION_NO_RELAX_BRANCH},
@@ -1539,6 +1550,8 @@ struct option md_longopts[] =
   {"mhard-float", no_argument, NULL, OPTION_HARD_FLOAT},
   {"msingle-float", no_argument, NULL, OPTION_SINGLE_FLOAT},
   {"mdouble-float", no_argument, NULL, OPTION_DOUBLE_FLOAT},
+  {"modd-spreg", no_argument, NULL, OPTION_ODD_SPREG},
+  {"mno-odd-spreg", no_argument, NULL, OPTION_NO_ODD_SPREG},
 
   /* Strictly speaking this next option is ELF specific,
      but we allow it for other ports as well in order to
@@ -3612,6 +3625,12 @@ md_begin (void)
 	}
       }
 
+    sec = subseg_new (".MIPS.abiflags", (subsegT) 0);
+    bfd_set_section_flags (stdoutput, sec,
+			   SEC_READONLY | SEC_DATA | SEC_ALLOC | SEC_LOAD);
+    bfd_set_section_alignment (stdoutput, sec, 3);
+    mips_flags_frag = frag_more (sizeof (Elf_External_ABIFlags_v0));
+
     if (ECOFF_DEBUGGING)
       {
 	sec = subseg_new (".mdebug", (subsegT) 0);
@@ -3635,6 +3654,88 @@ md_begin (void)
     init_vr4120_conflicts ();
 }
 
+static inline void
+fpabi_incompatible_with (int fpabi, const char *what)
+{
+  as_warn (_(".gnu_attribute %d,%d is incompatible with `%s'"),
+	   Tag_GNU_MIPS_ABI_FP, fpabi, what);
+}
+
+static inline void
+fpabi_requires (int fpabi, const char *what)
+{
+  as_warn (_(".gnu_attribute %d,%d requires `%s'"),
+	   Tag_GNU_MIPS_ABI_FP, fpabi, what);
+}
+
+/* Check -mabi and register sizes against the specified FP ABI.  */
+static void
+check_fpabi (int fpabi)
+{
+  bfd_boolean needs_check = FALSE;
+  switch (fpabi)
+    {
+    case Val_GNU_MIPS_ABI_FP_DOUBLE:
+      if (file_mips_opts.gp == 64 && file_mips_opts.fp == 32)
+	fpabi_incompatible_with (fpabi, "gp=64 fp=32");
+      else if (file_mips_opts.gp == 32 && file_mips_opts.fp == 64)
+	fpabi_incompatible_with (fpabi, "gp=32 fp=64");
+      else
+	needs_check = TRUE;
+      break;
+
+    case Val_GNU_MIPS_ABI_FP_XX:
+      if (mips_abi != O32_ABI)
+	fpabi_requires (fpabi, "-mabi=32");
+      else if (file_mips_opts.fp != 0)
+	fpabi_requires (fpabi, "fp=xx");
+      else
+	needs_check = TRUE;
+      break;
+
+    case Val_GNU_MIPS_ABI_FP_64A:
+    case Val_GNU_MIPS_ABI_FP_64:
+      if (mips_abi != O32_ABI)
+	fpabi_requires (fpabi, "-mabi=32");
+      else if (file_mips_opts.fp != 64)
+	fpabi_requires (fpabi, "fp=64");
+      else if (fpabi == Val_GNU_MIPS_ABI_FP_64 && !file_mips_opts.oddspreg)
+	fpabi_incompatible_with (fpabi, "nooddspreg");
+      else if (fpabi == Val_GNU_MIPS_ABI_FP_64A && file_mips_opts.oddspreg)
+	fpabi_requires (fpabi, "nooddspreg");
+      else
+	needs_check = TRUE;
+      break;
+
+    case Val_GNU_MIPS_ABI_FP_SINGLE:
+      if (file_mips_opts.soft_float)
+	fpabi_incompatible_with (fpabi, "softfloat");
+      else if (!file_mips_opts.single_float)
+	fpabi_requires (fpabi, "singlefloat");
+      break;
+
+    case Val_GNU_MIPS_ABI_FP_SOFT:
+      if (!file_mips_opts.soft_float)
+	fpabi_requires (fpabi, "softfloat");
+      break;
+
+    case Val_GNU_MIPS_ABI_FP_OLD_64:
+      as_warn (_(".gnu_attribute %d,%d is no longer supported"),
+	       Tag_GNU_MIPS_ABI_FP, fpabi);
+      break;
+
+    default:
+      as_warn (_(".gnu_attribute %d,%d is not a recognized"
+	         " floating-point ABI"), Tag_GNU_MIPS_ABI_FP, fpabi);
+      break;
+    }
+
+  if (needs_check && file_mips_opts.soft_float)
+    fpabi_incompatible_with (fpabi, "softfloat");
+  else if (needs_check && file_mips_opts.single_float)
+    fpabi_incompatible_with (fpabi, "singlefloat");
+}
+
 /* Perform consistency checks on the current options.  */
 
 static void
@@ -3653,6 +3754,12 @@ mips_check_options (struct mips_set_options *opts, bfd_boolean abi_checks)
   /* Check the size of the float registers agrees with the ABI and ISA.  */
   switch (opts->fp)
     {
+    case 0:
+      if (!CPU_HAS_LDC1_SDC1 (opts->arch))
+	as_bad (_("`fp=xx' used with a cpu lacking ldc1/sdc1 instructions"));
+      else if (opts->single_float == 1)
+	as_bad (_("`fp=xx' cannot be used with `singlefloat'"));
+      break;
     case 64:
       if (!ISA_HAS_64BIT_FPRS (opts->isa))
 	as_bad (_("`fp=64' used with a 32-bit fpu"));
@@ -3670,6 +3777,9 @@ mips_check_options (struct mips_set_options *opts, bfd_boolean abi_checks)
       as_bad (_("Unknown size of floating point registers"));
       break;
     }
+
+  if (ABI_NEEDS_64BIT_REGS (mips_abi) && !opts->oddspreg)
+    as_bad (_("`nooddspreg` cannot be used with a 64-bit ABI"));
 
   if (opts->micromips == 1 && opts->mips16 == 1)
     as_bad (_("`mips16' cannot be used with `micromips'"));
@@ -3727,6 +3837,16 @@ file_mips_check_options (void)
     }
 
   arch_info = mips_cpu_info_from_arch (file_mips_opts.arch);
+
+  /* Disable operations on odd-numbered floating-point registers by default
+     when using the FPXX ABI.  */
+  if (file_mips_opts.oddspreg < 0)
+    {
+      if (file_mips_opts.fp == 0)
+	file_mips_opts.oddspreg = 0;
+      else
+	file_mips_opts.oddspreg = 1;
+    }
 
   /* End of GCC-shared inference code.  */
 
@@ -4377,39 +4497,42 @@ static bfd_boolean
 mips_oddfpreg_ok (const struct mips_opcode *insn, int opnum)
 {
   const char *s = insn->name;
+  bfd_boolean oddspreg = (ISA_HAS_ODD_SINGLE_FPR (mips_opts.isa, mips_opts.arch)
+			  || FPR_SIZE == 64)
+			 && mips_opts.oddspreg;
 
   if (insn->pinfo == INSN_MACRO)
     /* Let a macro pass, we'll catch it later when it is expanded.  */
     return TRUE;
 
-  if (ISA_HAS_ODD_SINGLE_FPR (mips_opts.isa) || mips_opts.arch == CPU_R5900)
-    {
-      /* Allow odd registers for single-precision ops.  */
-      switch (insn->pinfo & (FP_S | FP_D))
-	{
-	case FP_S:
-	case 0:
-	  return TRUE;
-	case FP_D:
-	  return FALSE;
-	default:
-	  break;
-	}
+  /* Single-precision coprocessor loads and moves are OK for 32-bit registers,
+     otherwise it depends on oddspreg.  */
+  if ((insn->pinfo & FP_S)
+      && (insn->pinfo & (INSN_LOAD_MEMORY | INSN_STORE_MEMORY
+			 | INSN_LOAD_COPROC | INSN_COPROC_MOVE)))
+    return FPR_SIZE == 32 || oddspreg;
 
-      /* Cvt.w.x and cvt.x.w allow an odd register for a 'w' or 's' operand.  */
-      s = strchr (insn->name, '.');
-      if (s != NULL && opnum == 2)
-	s = strchr (s + 1, '.');
-      return (s != NULL && (s[1] == 'w' || s[1] == 's'));
+  /* Allow odd registers for single-precision ops and double-precision if the
+     floating-point registers are 64-bit wide.  */
+  switch (insn->pinfo & (FP_S | FP_D))
+    {
+    case FP_S:
+    case 0:
+      return oddspreg;
+    case FP_D:
+      return FPR_SIZE == 64;
+    default:
+      break;
     }
 
-  /* Single-precision coprocessor loads and moves are OK too.  */
-  if ((insn->pinfo & FP_S)
-      && (insn->pinfo & (INSN_COPROC_MEMORY_DELAY | INSN_STORE_MEMORY
-			 | INSN_LOAD_COPROC_DELAY | INSN_COPROC_MOVE_DELAY)))
-    return TRUE;
+  /* Cvt.w.x and cvt.x.w allow an odd register for a 'w' or 's' operand.  */
+  s = strchr (insn->name, '.');
+  if (s != NULL && opnum == 2)
+    s = strchr (s + 1, '.');
+  if (s != NULL && (s[1] == 'w' || s[1] == 's'))
+    return oddspreg;
 
-  return FALSE;
+  return FPR_SIZE == 64;
 }
 
 /* Information about an instruction argument that we're trying to match.  */
@@ -4565,9 +4688,9 @@ convert_reg_type (const struct mips_opcode *opcode,
 	 FPR load, store or move (including moves to and from GPRs).  */
       if ((mips_opts.ase & ASE_MDMX)
 	  && (opcode->pinfo & FP_D)
-	  && (opcode->pinfo & (INSN_COPROC_MOVE_DELAY
+	  && (opcode->pinfo & (INSN_COPROC_MOVE
 			       | INSN_COPROC_MEMORY_DELAY
-			       | INSN_LOAD_COPROC_DELAY
+			       | INSN_LOAD_COPROC
 			       | INSN_LOAD_MEMORY
 			       | INSN_STORE_MEMORY)))
 	return RTYPE_FPU | RTYPE_VEC;
@@ -4632,9 +4755,16 @@ check_regno (struct mips_arg_info *arg,
 
   if (type == OP_REG_FP
       && (regno & 1) != 0
-      && FPR_SIZE != 64
       && !mips_oddfpreg_ok (arg->insn->insn_mo, arg->opnum))
-    as_warn (_("float register should be even, was %d"), regno);
+    {
+      /* This was a warning prior to introducing O32 FPXX and FP64 support
+	 so maintain a warning for FP32 but raise an error for the new
+	 cases.  */
+      if (FPR_SIZE == 32)
+	as_warn (_("float register should be even, was %d"), regno);
+      else
+	as_bad (_("float register should be even, was %d"), regno);
+    }
 
   if (type == OP_REG_CCC)
     {
@@ -5488,13 +5618,16 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
   /* Handle 64-bit constants for which an immediate value is best.  */
   if (length == 8
       && !mips_disable_float_construction
-      /* Constants can only be constructed in GPRs and copied
-	 to FPRs if the GPRs are at least as wide as the FPRs.
-	 Force the constant into memory if we are using 64-bit FPRs
-	 but the GPRs are only 32 bits wide.  */
-      /* ??? No longer true with the addition of MTHC1, but this
-	 is legacy code...  */
-      && (using_gprs || !(FPR_SIZE == 64 && GPR_SIZE == 32))
+      /* Constants can only be constructed in GPRs and copied to FPRs if the
+	 GPRs are at least as wide as the FPRs or MTHC1 is available.
+	 Unlike most tests for 32-bit floating-point registers this check
+	 specifically looks for GPR_SIZE == 32 as the FPXX ABI does not
+	 permit 64-bit moves without MXHC1.
+	 Force the constant into memory otherwise.  */
+      && (using_gprs
+	  || GPR_SIZE == 64
+	  || ISA_HAS_MXHC1 (mips_opts.isa)
+	  || FPR_SIZE == 32)
       && ((data[0] == 0 && data[1] == 0)
 	  || (data[2] == 0 && data[3] == 0))
       && ((data[4] == 0 && data[5] == 0)
@@ -5504,7 +5637,7 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
 	 If using 32-bit registers, set IMM to the high order 32 bits and
 	 OFFSET to the low order 32 bits.  Otherwise, set IMM to the entire
 	 64 bit constant.  */
-      if (using_gprs ? GPR_SIZE == 32 : FPR_SIZE != 64)
+      if (GPR_SIZE == 32 || (!using_gprs && FPR_SIZE != 64))
 	{
 	  imm->X_op = O_constant;
 	  offset->X_op = O_constant;
@@ -5709,7 +5842,7 @@ reg_needs_delay (unsigned int reg)
   prev_pinfo = history[0].insn_mo->pinfo;
   if (!mips_opts.noreorder
       && (((prev_pinfo & INSN_LOAD_MEMORY) && !gpr_interlocks)
-	  || ((prev_pinfo & INSN_LOAD_COPROC_DELAY) && !cop_interlocks))
+	  || ((prev_pinfo & INSN_LOAD_COPROC) && !cop_interlocks))
       && (gpr_write_mask (&history[0]) & (1 << reg)))
     return TRUE;
 
@@ -5827,7 +5960,7 @@ insns_between (const struct mips_cl_insn *insn1,
 	 are on the RT register.  */
       /* Itbl support may require additional care here.  */
       if ((!gpr_interlocks && (pinfo1 & INSN_LOAD_MEMORY))
-	  || (!cop_interlocks && (pinfo1 & INSN_LOAD_COPROC_DELAY)))
+	  || (!cop_interlocks && (pinfo1 & INSN_LOAD_COPROC)))
 	{
 	  if (insn2 == NULL || (gpr_read_mask (insn2) & gpr_write_mask (insn1)))
 	    return 1;
@@ -5841,7 +5974,7 @@ insns_between (const struct mips_cl_insn *insn1,
       /* Itbl support may require additional care here. FIXME!
 	 Need to modify this to include knowledge about
 	 user specified delays!  */
-      else if ((!cop_interlocks && (pinfo1 & INSN_COPROC_MOVE_DELAY))
+      else if ((!cop_interlocks && (pinfo1 & INSN_COPROC_MOVE))
 	       || (!cop_mem_interlocks && (pinfo1 & INSN_COPROC_MEMORY_DELAY)))
 	{
 	  /* Handle cases where INSN1 writes to a known general coprocessor
@@ -11686,14 +11819,18 @@ macro (struct mips_cl_insn *ip, char *str)
 	{
 	  used_at = 1;
 	  load_register (AT, &imm_expr, FPR_SIZE == 64);
-	  if (FPR_SIZE == 64)
-	    {
-	      gas_assert (GPR_SIZE == 64);
-	      macro_build (NULL, "dmtc1", "t,S", AT, op[0]);
-	    }
+	  if (FPR_SIZE == 64 && GPR_SIZE == 64)
+	    macro_build (NULL, "dmtc1", "t,S", AT, op[0]);
 	  else
 	    {
-	      macro_build (NULL, "mtc1", "t,G", AT, op[0] + 1);
+	      if (ISA_HAS_MXHC1 (mips_opts.isa))
+	        macro_build (NULL, "mthc1", "t,G", AT, op[0]);
+	      else if (FPR_SIZE != 32)
+		as_bad (_("Unable to generate `%s' compliant code "
+			  "without mthc1"),
+			(FPR_SIZE == 64) ? "fp64" : "fpxx");
+	      else
+		macro_build (NULL, "mtc1", "t,G", AT, op[0] + 1);
 	      if (offset_expr.X_op == O_absent)
 		macro_build (NULL, "mtc1", "t,G", 0, op[0]);
 	      else
@@ -13939,8 +14076,20 @@ md_parse_option (int c, char *arg)
       file_mips_opts.fp = 32;
       break;
 
+    case OPTION_FPXX:
+      file_mips_opts.fp = 0;
+      break;
+
     case OPTION_FP64:
       file_mips_opts.fp = 64;
+      break;
+
+    case OPTION_ODD_SPREG:
+      file_mips_opts.oddspreg = 1;
+      break;
+
+    case OPTION_NO_ODD_SPREG:
+      file_mips_opts.oddspreg = 0;
       break;
 
     case OPTION_SINGLE_FLOAT:
@@ -15031,6 +15180,8 @@ parse_code_option (char * name)
     mips_opts.gp = 64;
   else if (strcmp (name, "fp=32") == 0)
     mips_opts.fp = 32;
+  else if (strcmp (name, "fp=xx") == 0)
+    mips_opts.fp = 0;
   else if (strcmp (name, "fp=64") == 0)
     mips_opts.fp = 64;
   else if (strcmp (name, "softfloat") == 0)
@@ -15041,6 +15192,10 @@ parse_code_option (char * name)
     mips_opts.single_float = 1;
   else if (strcmp (name, "doublefloat") == 0)
     mips_opts.single_float = 0;
+  else if (strcmp (name, "nooddspreg") == 0)
+    mips_opts.oddspreg = 0;
+  else if (strcmp (name, "oddspreg") == 0)
+    mips_opts.oddspreg = 1;
   else if (strcmp (name, "mips16") == 0
 	   || strcmp (name, "MIPS-16") == 0)
     mips_opts.mips16 = 1;
@@ -15202,13 +15357,17 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	case 0:
 	  break;
 	case ISA_MIPS1:
+	  /* MIPS I cannot support FPXX.  */
+	  mips_opts.fp = 32;
+	  /* fall-through.  */
 	case ISA_MIPS2:
 	case ISA_MIPS32:
 	case ISA_MIPS32R2:
 	case ISA_MIPS32R3:
 	case ISA_MIPS32R5:
 	  mips_opts.gp = 32;
-	  mips_opts.fp = 32;
+	  if (mips_opts.fp != 0)
+	    mips_opts.fp = 32;
 	  break;
 	case ISA_MIPS3:
 	case ISA_MIPS4:
@@ -15218,10 +15377,13 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	case ISA_MIPS64R3:
 	case ISA_MIPS64R5:
 	  mips_opts.gp = 64;
-	  if (mips_opts.arch == CPU_R5900)
-	    mips_opts.fp = 32;
-	  else
-	    mips_opts.fp = 64;
+	  if (mips_opts.fp != 0)
+	    {
+	      if (mips_opts.arch == CPU_R5900)
+		mips_opts.fp = 32;
+	      else
+		mips_opts.fp = 64;
+	    }
 	  break;
 	default:
 	  as_bad (_("unknown ISA level %s"), name + 4);
@@ -17371,11 +17533,123 @@ mips_add_dot_label (symbolS *sym)
     mips_compressed_mark_label (sym);
 }
 
+/* Converting ASE flags from internal to .MIPS.abiflags values.  */
+static unsigned int
+mips_convert_ase_flags (int ase)
+{
+  unsigned int ext_ases = 0;
+
+  if (ase & ASE_DSP)
+    ext_ases |= AFL_ASE_DSP;
+  if (ase & ASE_DSPR2)
+    ext_ases |= AFL_ASE_DSPR2;
+  if (ase & ASE_EVA)
+    ext_ases |= AFL_ASE_EVA;
+  if (ase & ASE_MCU)
+    ext_ases |= AFL_ASE_MCU;
+  if (ase & ASE_MDMX)
+    ext_ases |= AFL_ASE_MDMX;
+  if (ase & ASE_MIPS3D)
+    ext_ases |= AFL_ASE_MIPS3D;
+  if (ase & ASE_MT)
+    ext_ases |= AFL_ASE_MT;
+  if (ase & ASE_SMARTMIPS)
+    ext_ases |= AFL_ASE_SMARTMIPS;
+  if (ase & ASE_VIRT)
+    ext_ases |= AFL_ASE_VIRT;
+  if (ase & ASE_MSA)
+    ext_ases |= AFL_ASE_MSA;
+  if (ase & ASE_XPA)
+    ext_ases |= AFL_ASE_XPA;
+
+  return ext_ases;
+}
 /* Some special processing for a MIPS ELF file.  */
 
 void
 mips_elf_final_processing (void)
 {
+  int fpabi;
+  Elf_Internal_ABIFlags_v0 flags;
+
+  flags.version = 0;
+  flags.isa_rev = 0;
+  switch (file_mips_opts.isa)
+    {
+    case INSN_ISA1:
+      flags.isa_level = 1;
+      break;
+    case INSN_ISA2:
+      flags.isa_level = 2;
+      break;
+    case INSN_ISA3:
+      flags.isa_level = 3;
+      break;
+    case INSN_ISA4:
+      flags.isa_level = 4;
+      break;
+    case INSN_ISA5:
+      flags.isa_level = 5;
+      break;
+    case INSN_ISA32:
+      flags.isa_level = 32;
+      flags.isa_rev = 1;
+      break;
+    case INSN_ISA32R2:
+      flags.isa_level = 32;
+      flags.isa_rev = 2;
+      break;
+    case INSN_ISA32R3:
+      flags.isa_level = 32;
+      flags.isa_rev = 3;
+      break;
+    case INSN_ISA32R5:
+      flags.isa_level = 32;
+      flags.isa_rev = 5;
+      break;
+    case INSN_ISA64:
+      flags.isa_level = 64;
+      flags.isa_rev = 1;
+      break;
+    case INSN_ISA64R2:
+      flags.isa_level = 64;
+      flags.isa_rev = 2;
+      break;
+    case INSN_ISA64R3:
+      flags.isa_level = 64;
+      flags.isa_rev = 3;
+      break;
+    case INSN_ISA64R5:
+      flags.isa_level = 64;
+      flags.isa_rev = 5;
+      break;
+    }
+
+  flags.gpr_size = file_mips_opts.gp == 32 ? AFL_REG_32 : AFL_REG_64;
+  flags.cpr1_size = file_mips_opts.soft_float ? AFL_REG_NONE
+		    : (file_mips_opts.ase & ASE_MSA) ? AFL_REG_128
+		    : (file_mips_opts.fp == 64) ? AFL_REG_64
+		    : AFL_REG_32;
+  flags.cpr2_size = AFL_REG_NONE;
+  flags.fp_abi = bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
+                                           Tag_GNU_MIPS_ABI_FP);
+  flags.isa_ext = bfd_mips_isa_ext (stdoutput);
+  flags.ases = mips_convert_ase_flags (file_mips_opts.ase);
+  if (file_ase_mips16)
+    flags.ases |= AFL_ASE_MIPS16;
+  if (file_ase_micromips)
+    flags.ases |= AFL_ASE_MICROMIPS;
+  flags.flags1 = 0;
+  if ((ISA_HAS_ODD_SINGLE_FPR (file_mips_opts.isa, file_mips_opts.arch)
+       || file_mips_opts.fp == 64)
+      && file_mips_opts.oddspreg)
+    flags.flags1 |= AFL_FLAGS1_ODDSPREG;
+  flags.flags2 = 0;
+
+  bfd_mips_elf_swap_abiflags_v0_out (stdoutput, &flags,
+				     ((Elf_External_ABIFlags_v0 *)
+				     mips_flags_frag));
+
   /* Write out the register information.  */
   if (mips_abi != N64_ABI)
     {
@@ -17454,7 +17728,9 @@ mips_elf_final_processing (void)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_NAN2008;
 
   /* 32 bit code with 64 bit FP registers.  */
-  if (file_mips_opts.fp == 64 && ABI_NEEDS_32BIT_REGS (mips_abi))
+  fpabi = bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
+				    Tag_GNU_MIPS_ABI_FP);
+  if (fpabi == Val_GNU_MIPS_ABI_FP_OLD_64)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_FP64;
 }
 
@@ -18402,10 +18678,56 @@ mips_convert_symbolic_attribute (const char *name)
 void
 md_mips_end (void)
 {
+  int fpabi = Val_GNU_MIPS_ABI_FP_ANY;
+
   mips_emit_delays ();
   if (cur_proc_ptr)
     as_warn (_("missing .end at end of assembly"));
 
   /* Just in case no code was emitted, do the consistency check.  */
   file_mips_check_options ();
+
+  /* Set a floating-point ABI if the user did not.  */
+  if (obj_elf_seen_attribute (OBJ_ATTR_GNU, Tag_GNU_MIPS_ABI_FP))
+    {
+      /* Perform consistency checks on the floating-point ABI.  */
+      fpabi = bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
+					Tag_GNU_MIPS_ABI_FP);
+      if (fpabi != Val_GNU_MIPS_ABI_FP_ANY)
+	check_fpabi (fpabi);
+    }
+  else
+    {
+      /* Soft-float gets precedence over single-float, the two options should
+         not be used together so this should not matter.  */
+      if (file_mips_opts.soft_float == 1)
+	fpabi = Val_GNU_MIPS_ABI_FP_SOFT;
+      /* Single-float gets precedence over all double_float cases.  */
+      else if (file_mips_opts.single_float == 1)
+	fpabi = Val_GNU_MIPS_ABI_FP_SINGLE;
+      else
+	{
+	  switch (file_mips_opts.fp)
+	    {
+	    case 32:
+	      if (file_mips_opts.gp == 32)
+		fpabi = Val_GNU_MIPS_ABI_FP_DOUBLE;
+	      break;
+	    case 0:
+	      fpabi = Val_GNU_MIPS_ABI_FP_XX;
+	      break;
+	    case 64:
+	      if (file_mips_opts.gp == 32 && !file_mips_opts.oddspreg)
+		fpabi = Val_GNU_MIPS_ABI_FP_64A;
+	      else if (file_mips_opts.gp == 32)
+		fpabi = Val_GNU_MIPS_ABI_FP_64;
+	      else
+		fpabi = Val_GNU_MIPS_ABI_FP_DOUBLE;
+	      break;
+	    }
+	}
+
+      bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
+				Tag_GNU_MIPS_ABI_FP, fpabi);
+    }
 }

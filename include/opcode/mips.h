@@ -973,16 +973,16 @@ struct mips_opcode
 #define INSN_COP                    0x00000400
 /* Instruction loads value from memory.  */
 #define INSN_LOAD_MEMORY	    0x00000800
-/* Instruction loads value from coprocessor, requiring delay.  */
-#define INSN_LOAD_COPROC_DELAY	    0x00001000
+/* Instruction loads value from coprocessor, (may require delay).  */
+#define INSN_LOAD_COPROC	    0x00001000
 /* Instruction has unconditional branch delay slot.  */
 #define INSN_UNCOND_BRANCH_DELAY    0x00002000
 /* Instruction has conditional branch delay slot.  */
 #define INSN_COND_BRANCH_DELAY      0x00004000
 /* Conditional branch likely: if branch not taken, insn nullified.  */
 #define INSN_COND_BRANCH_LIKELY	    0x00008000
-/* Moves to coprocessor register, requiring delay.  */
-#define INSN_COPROC_MOVE_DELAY      0x00010000
+/* Moves to coprocessor register, (may require delay).  */
+#define INSN_COPROC_MOVE            0x00010000
 /* Loads coprocessor register from memory, requiring delay.  */
 #define INSN_COPROC_MEMORY_DELAY    0x00020000
 /* Reads the HI register.  */

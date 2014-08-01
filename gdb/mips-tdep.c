@@ -8296,11 +8296,13 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      /* MIPS needs to be pedantic about which ABI the object is
-         using.  */
+      /* MIPS needs to be pedantic about which ABI and the compressed
+         ISA variation the object is using.  */
       if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
 	continue;
       if (gdbarch_tdep (arches->gdbarch)->mips_abi != mips_abi)
+	continue;
+      if (gdbarch_tdep (arches->gdbarch)->mips_isa != mips_isa)
 	continue;
       /* Need to be pedantic about which register virtual size is
          used.  */

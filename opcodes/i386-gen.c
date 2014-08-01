@@ -231,6 +231,12 @@ static initializer cpu_flag_init[] =
     "CpuPREFETCHWT1" },
   { "CPU_SE1_FLAGS",
     "CpuSE1" },
+  { "CPU_AVX512DQ_FLAGS",
+    "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX|CpuAVX2|CpuAVX512F|CpuAVX512DQ" },
+  { "CPU_AVX512BW_FLAGS",
+    "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX|CpuAVX2|CpuAVX512F|CpuAVX512BW" },
+  { "CPU_AVX512VL_FLAGS",
+    "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX|CpuAVX2|CpuAVX512F|CpuAVX512VL" },
 };
 
 static initializer operand_type_init[] =
@@ -379,6 +385,9 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuAVX512CD),
   BITFIELD (CpuAVX512ER),
   BITFIELD (CpuAVX512PF),
+  BITFIELD (CpuAVX512VL),
+  BITFIELD (CpuAVX512DQ),
+  BITFIELD (CpuAVX512BW),
   BITFIELD (CpuL1OM),
   BITFIELD (CpuK1OM),
   BITFIELD (CpuSSE4a),

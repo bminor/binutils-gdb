@@ -102,11 +102,8 @@ static void remote_files_info (struct target_ops *ignore);
 static void remote_prepare_to_store (struct target_ops *self,
 				     struct regcache *regcache);
 
-static void remote_open (char *name, int from_tty);
-
-static void extended_remote_open (char *name, int from_tty);
-
-static void remote_open_1 (char *, int, struct target_ops *, int extended_p);
+static void remote_open_1 (const char *, int, struct target_ops *,
+			   int extended_p);
 
 static void remote_close (struct target_ops *self);
 
@@ -164,7 +161,7 @@ static int hexnumnstr (char *, ULONGEST, int);
 
 static CORE_ADDR remote_address_masked (CORE_ADDR);
 
-static void print_packet (char *);
+static void print_packet (const char *);
 
 static void compare_sections_command (char *, int);
 
@@ -176,7 +173,7 @@ static ptid_t remote_current_thread (ptid_t oldptid);
 
 static void remote_find_new_threads (void);
 
-static int putpkt_binary (char *buf, int cnt);
+static int putpkt_binary (const char *buf, int cnt);
 
 static void check_binary_download (CORE_ADDR addr);
 
@@ -3619,7 +3616,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
    NAME is the filename used for communication.  */
 
 static void
-remote_open (char *name, int from_tty)
+remote_open (const char *name, int from_tty)
 {
   remote_open_1 (name, from_tty, &remote_ops, 0);
 }
@@ -3628,7 +3625,7 @@ remote_open (char *name, int from_tty)
    remote gdb protocol.  NAME is the filename used for communication.  */
 
 static void
-extended_remote_open (char *name, int from_tty)
+extended_remote_open (const char *name, int from_tty)
 {
   remote_open_1 (name, from_tty, &extended_remote_ops, 1 /*extended_p */);
 }
@@ -3727,7 +3724,7 @@ remote_check_symbols (void)
 }
 
 static struct serial *
-remote_serial_open (char *name)
+remote_serial_open (const char *name)
 {
   static int udp_warning = 0;
 
@@ -4128,7 +4125,7 @@ remote_unpush_target (void)
 }
 
 static void
-remote_open_1 (char *name, int from_tty,
+remote_open_1 (const char *name, int from_tty,
 	       struct target_ops *target, int extended_p)
 {
   struct remote_state *rs = get_remote_state ();
@@ -4643,8 +4640,7 @@ append_pending_thread_resumptions (char *p, char *endp, ptid_t ptid)
   ALL_NON_EXITED_THREADS (thread)
     if (ptid_match (thread->ptid, ptid)
 	&& !ptid_equal (inferior_ptid, thread->ptid)
-	&& thread->suspend.stop_signal != GDB_SIGNAL_0
-	&& signal_pass_state (thread->suspend.stop_signal))
+	&& thread->suspend.stop_signal != GDB_SIGNAL_0)
       {
 	p = append_resumption (p, endp, thread->ptid,
 			       0, thread->suspend.stop_signal);
@@ -7109,7 +7105,7 @@ escape_buffer (const char *buf, int n)
    string notation.  */
 
 static void
-print_packet (char *buf)
+print_packet (const char *buf)
 {
   puts_filtered ("\"");
   fputstr_filtered (buf, '"', gdb_stdout);
@@ -7117,7 +7113,7 @@ print_packet (char *buf)
 }
 
 int
-putpkt (char *buf)
+putpkt (const char *buf)
 {
   return putpkt_binary (buf, strlen (buf));
 }
@@ -7129,7 +7125,7 @@ putpkt (char *buf)
    to print the sent packet as a string.  */
 
 static int
-putpkt_binary (char *buf, int cnt)
+putpkt_binary (const char *buf, int cnt)
 {
   struct remote_state *rs = get_remote_state ();
   int i;
@@ -7149,7 +7145,11 @@ putpkt_binary (char *buf, int cnt)
      running.  This is not a problem in non-stop mode, because in that
      case, the stub is always ready to process serial input.  */
   if (!non_stop && target_can_async_p () && rs->waiting_for_stop_reply)
-    error (_("Cannot execute this command while the target is running."));
+    {
+      error (_("Cannot execute this command while the target is running.\n"
+	       "Use the \"interrupt\" command to stop the target\n"
+	       "and then try again."));
+    }
 
   /* We're sending out a new packet.  Make sure we don't look at a
      stale cached response.  */

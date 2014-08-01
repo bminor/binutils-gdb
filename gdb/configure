@@ -658,9 +658,15 @@ TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
 RDYNAMIC
 ALLOCA
+HAVE_GUILE_FALSE
+HAVE_GUILE_TRUE
 GUILE_LIBS
 GUILE_CPPFLAGS
+GUILD_TARGET_FLAG
+GUILD
 pkg_config_prog_path
+HAVE_PYTHON_FALSE
+HAVE_PYTHON_TRUE
 PYTHON_LIBS
 PYTHON_CPPFLAGS
 PYTHON_CFLAGS
@@ -8686,6 +8692,14 @@ fi
 
 
 
+ if test "${have_libpython}" != no; then
+  HAVE_PYTHON_TRUE=
+  HAVE_PYTHON_FALSE='#'
+else
+  HAVE_PYTHON_TRUE='#'
+  HAVE_PYTHON_FALSE=
+fi
+
 
 # -------------------- #
 # Check for libguile.  #
@@ -9069,6 +9083,68 @@ esac
 
 if test "${have_libguile}" != no; then
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the absolute file name of the 'guild' command" >&5
+$as_echo_n "checking for the absolute file name of the 'guild' command... " >&6; }
+if test "${ac_cv_guild_program_name+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_guild_program_name="`"${pkg_config_prog_path}" "${guile_version}" --variable guild`"
+
+     # In Guile up to 2.0.11 included, guile-2.0.pc would not define
+     # the 'guild' and 'bindir' variables.  In that case, try to guess
+     # what the program name is, at the risk of getting it wrong if
+     # Guile was configured with '--program-suffix' or similar.
+     if test "x$ac_cv_guild_program_name" = "x"; then
+       guile_exec_prefix="`"${pkg_config_prog_path}" "${guile_version}" --variable exec_prefix`"
+       ac_cv_guild_program_name="$guile_exec_prefix/bin/guild"
+     fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_guild_program_name" >&5
+$as_echo "$ac_cv_guild_program_name" >&6; }
+
+  if ! "$ac_cv_guild_program_name" --version >&5 2>&5; then
+    as_fn_error "'$ac_cv_guild_program_name' appears to be unusable" "$LINENO" 5
+  fi
+
+  GUILD="$ac_cv_guild_program_name"
+
+
+
+
+  if test "$cross_compiling" = no; then
+    GUILD_TARGET_FLAG=
+  else
+    GUILD_TARGET_FLAG="--target=$host"
+  fi
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether guild supports this host" >&5
+$as_echo_n "checking whether guild supports this host... " >&6; }
+if test "${ac_cv_guild_ok+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  echo "$ac_cv_guild_program_name compile $GUILD_TARGET_FLAG -o conftest.go $srcdir/guile/lib/gdb/support.scm" >&5
+     if "$ac_cv_guild_program_name" compile $GUILD_TARGET_FLAG -o conftest.go "$srcdir/guile/lib/gdb/support.scm" >&5 2>&5; then
+       ac_cv_guild_ok=yes
+     else
+       ac_cv_guild_ok=no
+     fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_guild_ok" >&5
+$as_echo "$ac_cv_guild_ok" >&6; }
+
+    if test "$ac_cv_guild_ok" = no; then
+    have_libguile=no
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling guile support" >&5
+$as_echo "$as_me: WARNING: disabling guile support" >&2;}
+  fi
+fi
+
+if test "${have_libguile}" != no; then
+
 $as_echo "#define HAVE_GUILE 1" >>confdefs.h
 
   CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GUILE_OBS)"
@@ -9101,6 +9177,40 @@ else
   CONFIG_SRCS="$CONFIG_SRCS guile/guile.c"
 fi
 
+
+ if test "${have_libguile}" != no; then
+  HAVE_GUILE_TRUE=
+  HAVE_GUILE_FALSE='#'
+else
+  HAVE_GUILE_TRUE='#'
+  HAVE_GUILE_FALSE=
+fi
+
+
+# PR 17185, see if we can get the libgc version to see if we need
+# to apply the workaround.
+for ac_header in gc/gc.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "gc/gc.h" "ac_cv_header_gc_gc_h" "$ac_includes_default"
+if test "x$ac_cv_header_gc_gc_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GC_GC_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_func in setenv
+do :
+  ac_fn_c_check_func "$LINENO" "setenv" "ac_cv_func_setenv"
+if test "x$ac_cv_func_setenv" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SETENV 1
+_ACEOF
+
+fi
+done
 
 
 # --------------------- #
@@ -15447,6 +15557,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${GMAKE_TRUE}" && test -z "${GMAKE_FALSE}"; then
   as_fn_error "conditional \"GMAKE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_PYTHON_TRUE}" && test -z "${HAVE_PYTHON_FALSE}"; then
+  as_fn_error "conditional \"HAVE_PYTHON\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_GUILE_TRUE}" && test -z "${HAVE_GUILE_FALSE}"; then
+  as_fn_error "conditional \"HAVE_GUILE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

@@ -128,14 +128,14 @@ struct cmd_list_element
        First line is brief documentation; remaining lines form, with it,
        the full documentation.  First line should end with a period.
        Entire string should also end with a period, not a newline.  */
-    char *doc;
+    const char *doc;
 
     /* For set/show commands.  A method for printing the output to the
        specified stream.  */
     show_value_ftype *show_value_func;
 
     /* If this command is deprecated, this is the replacement name.  */
-    char *replacement;
+    const char *replacement;
 
     /* If this command represents a show command, then this function
        is called before the variable's value is examined.  */
@@ -156,7 +156,7 @@ struct cmd_list_element
        plus any others needed to get to it.  Should end in a space.
        It is used before the word "command" in describing the
        commands reached through this prefix.  */
-    char *prefixname;
+    const char *prefixname;
 
     /* The prefix command of this command.  */
     struct cmd_list_element *prefix;
@@ -212,14 +212,14 @@ struct cmd_list_element
   };
 
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
-			   char *, int, struct ui_file *);
+			   const char *, int, struct ui_file *);
 
 /* Functions that implement commands about CLI commands.  */
 
-extern void help_cmd (char *, struct ui_file *);
+extern void help_cmd (const char *, struct ui_file *);
 
 extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
-                         struct re_pattern_buffer *, char *);
+                         struct re_pattern_buffer *, const char *);
 
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or
@@ -229,7 +229,7 @@ extern void not_just_help_class_command (char *arg, int from_tty);
 
 /* Exported to cli/cli-setshow.c */
 
-extern void print_doc_line (struct ui_file *, char *);
+extern void print_doc_line (struct ui_file *, const char *);
 
 extern const char * const auto_boolean_enums[];
 

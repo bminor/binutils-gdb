@@ -184,13 +184,13 @@ static struct monitor_ops ppcbug_cmds0;
 static struct monitor_ops ppcbug_cmds1;
 
 static void
-ppcbug_open0 (char *args, int from_tty)
+ppcbug_open0 (const char *args, int from_tty)
 {
   monitor_open (args, &ppcbug_cmds0, from_tty);
 }
 
 static void
-ppcbug_open1 (char *args, int from_tty)
+ppcbug_open1 (const char *args, int from_tty)
 {
   monitor_open (args, &ppcbug_cmds1, from_tty);
 }

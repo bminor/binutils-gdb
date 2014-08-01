@@ -76,7 +76,7 @@ static void gdbsim_kill (struct target_ops *);
 static void gdbsim_load (struct target_ops *self, const char *prog,
 			 int fromtty);
 
-static void gdbsim_open (char *args, int from_tty);
+static void gdbsim_open (const char *args, int from_tty);
 
 static void gdbsim_close (struct target_ops *self);
 
@@ -180,7 +180,7 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
      a potential allocation of a sim_inferior_data struct in order to
      avoid needlessly allocating that struct in the event that the sim
      instance allocation fails.  */
-  if (sim_instance_needed == SIM_INSTANCE_NEEDED 
+  if (sim_instance_needed == SIM_INSTANCE_NEEDED
       && (sim_data == NULL || sim_data->gdbsim_desc == NULL))
     {
       struct inferior *idup;
@@ -190,7 +190,7 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
 	       inf->num);
 
       idup = iterate_over_inferiors (check_for_duplicate_sim_descriptor,
-                                     sim_desc);
+				     sim_desc);
       if (idup != NULL)
 	{
 	  /* We don't close the descriptor due to the fact that it's
@@ -203,8 +203,8 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
 	  error (
  _("Inferior %d and inferior %d would have identical simulator state.\n"
    "(This simulator does not support the running of more than one inferior.)"),
-		 inf->num, idup->num); 
-        }
+		 inf->num, idup->num);
+	}
     }
 
   if (sim_data == NULL)
@@ -225,7 +225,7 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
   else if (sim_desc)
     {
       /* This handles the case where sim_data was allocated prior to
-         needing a sim instance.  */
+	 needing a sim instance.  */
       sim_data->gdbsim_desc = sim_desc;
     }
 
@@ -245,7 +245,7 @@ get_sim_inferior_data_by_ptid (ptid_t ptid, int sim_instance_needed)
 
   if (pid <= 0)
     return NULL;
-  
+
   inf = find_inferior_pid (pid);
 
   if (inf)
@@ -447,7 +447,7 @@ gdbsim_fetch_register (struct target_ops *ops,
     case SIM_REGNO_DOES_NOT_EXIST:
       {
 	/* For moment treat a `does not exist' register the same way
-           as an ``unavailable'' register.  */
+	   as an ``unavailable'' register.  */
 	gdb_byte buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
 
@@ -455,7 +455,7 @@ gdbsim_fetch_register (struct target_ops *ops,
 	regcache_raw_supply (regcache, regno, buf);
 	break;
       }
-      
+
     default:
       {
 	static int warn_user = 1;
@@ -529,11 +529,11 @@ gdbsim_store_register (struct target_ops *ops,
 	internal_error (__FILE__, __LINE__,
 			_("Register size different to expected"));
       if (nr_bytes < 0)
-        internal_error (__FILE__, __LINE__,
- 			_("Register %d not updated"), regno);
+	internal_error (__FILE__, __LINE__,
+			_("Register %d not updated"), regno);
       if (nr_bytes == 0)
-        warning (_("Register %s not updated"),
-                 gdbarch_register_name (gdbarch, regno));
+	warning (_("Register %s not updated"),
+		 gdbarch_register_name (gdbarch, regno));
 
       if (remote_debug)
 	{
@@ -658,7 +658,7 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
   insert_breakpoints ();	/* Needed to get correct instruction
 				   in cache.  */
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 }
 
 /* The open routine takes the rest of the parameters from the command,
@@ -667,7 +667,7 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
 /* Called when selecting the simulator.  E.g. (gdb) target sim name.  */
 
 static void
-gdbsim_open (char *args, int from_tty)
+gdbsim_open (const char *args, int from_tty)
 {
   int len;
   char *arg_buf;
@@ -764,7 +764,7 @@ static int
 gdbsim_close_inferior (struct inferior *inf, void *arg)
 {
   struct sim_inferior_data *sim_data = inferior_data (inf,
-                                                      sim_inferior_data_key);
+						      sim_inferior_data_key);
   if (sim_data != NULL)
     {
       ptid_t ptid = sim_data->remote_sim_ptid;
@@ -1008,7 +1008,7 @@ gdbsim_wait (struct target_ops *ops,
   prev_sigint = signal (SIGINT, gdbsim_cntrl_c);
 #endif
   sim_resume (sim_data->gdbsim_desc, sim_data->resume_step,
-              sim_data->resume_siggnal);
+	      sim_data->resume_siggnal);
 
   signal (SIGINT, prev_sigint);
   sim_data->resume_step = 0;
@@ -1200,14 +1200,14 @@ simulator_command (char *args, int from_tty)
     {
 
       /* PREVIOUSLY: The user may give a command before the simulator
-         is opened. [...] (??? assuming of course one wishes to
-         continue to allow commands to be sent to unopened simulators,
-         which isn't entirely unreasonable).  */
+	 is opened. [...] (??? assuming of course one wishes to
+	 continue to allow commands to be sent to unopened simulators,
+	 which isn't entirely unreasonable).  */
 
       /* The simulator is a builtin abstraction of a remote target.
-         Consistent with that model, access to the simulator, via sim
-         commands, is restricted to the period when the channel to the
-         simulator is open.  */
+	 Consistent with that model, access to the simulator, via sim
+	 commands, is restricted to the period when the channel to the
+	 simulator is open.  */
 
       error (_("Not connected to the simulator target"));
     }

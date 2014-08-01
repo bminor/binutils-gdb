@@ -87,7 +87,7 @@ static const CGEN_OPINST sfmt_l_trap_ops[] ATTRIBUTE_UNUSED = {
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
-static const CGEN_OPINST sfmt_l_rfe_ops[] ATTRIBUTE_UNUSED = {
+static const CGEN_OPINST sfmt_l_msync_ops[] ATTRIBUTE_UNUSED = {
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
@@ -459,9 +459,12 @@ static const CGEN_OPINST *or1k_cgen_opinst_table[MAX_INSNS] = {
   & sfmt_l_bnf_ops[0],
   & sfmt_l_trap_ops[0],
   & sfmt_l_trap_ops[0],
-  & sfmt_l_rfe_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
   & sfmt_l_nop_imm_ops[0],
-  & sfmt_l_rfe_ops[0],
+  & sfmt_l_msync_ops[0],
   & sfmt_l_movhi_ops[0],
   & sfmt_l_macrc_ops[0],
   & sfmt_l_mfspr_ops[0],
@@ -533,14 +536,14 @@ static const CGEN_OPINST *or1k_cgen_opinst_table[MAX_INSNS] = {
   & sfmt_l_mac_ops[0],
   & sfmt_l_mac_ops[0],
   & sfmt_l_maci_ops[0],
-  & sfmt_l_rfe_ops[0],
-  & sfmt_l_rfe_ops[0],
-  & sfmt_l_rfe_ops[0],
-  & sfmt_l_rfe_ops[0],
-  & sfmt_l_rfe_ops[0],
-  & sfmt_l_rfe_ops[0],
-  & sfmt_l_rfe_ops[0],
-  & sfmt_l_rfe_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
   & sfmt_lf_add_s_ops[0],
   & sfmt_lf_add_d_ops[0],
   & sfmt_lf_add_s_ops[0],
@@ -569,8 +572,8 @@ static const CGEN_OPINST *or1k_cgen_opinst_table[MAX_INSNS] = {
   & sfmt_lf_eq_d_ops[0],
   & sfmt_lf_madd_s_ops[0],
   & sfmt_lf_madd_d_ops[0],
-  & sfmt_l_rfe_ops[0],
-  & sfmt_l_rfe_ops[0],
+  & sfmt_l_msync_ops[0],
+  & sfmt_l_msync_ops[0],
 };
 
 /* Function to call before using the operand instance table.  */

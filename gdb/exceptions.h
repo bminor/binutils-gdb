@@ -191,10 +191,12 @@ extern void throw_exception (struct gdb_exception exception)
      ATTRIBUTE_NORETURN;
 extern void throw_verror (enum errors, const char *fmt, va_list ap)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
-extern void throw_vfatal (const char *fmt, va_list ap)
+extern void throw_vquit (const char *fmt, va_list ap)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
 extern void throw_error (enum errors error, const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
+extern void throw_quit (const char *fmt, ...)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
 /* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception
    handler.  If an exception (enum return_reason) is thrown using

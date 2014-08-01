@@ -6315,7 +6315,7 @@ s3_build_score_ops_hsh (void)
   for (i = 0; i < sizeof (s3_score_insns) / sizeof (struct s3_asm_opcode); i++)
     {
       const struct s3_asm_opcode *insn = s3_score_insns + i;
-      unsigned len = strlen (insn->template_name);
+      size_t len = strlen (insn->template_name);
       struct s3_asm_opcode *new_opcode;
       char *template_name;
       new_opcode = (struct s3_asm_opcode *)
@@ -6344,7 +6344,7 @@ s3_build_dependency_insn_hsh (void)
   for (i = 0; i < sizeof (s3_insn_to_dependency_table) / sizeof (s3_insn_to_dependency_table[0]); i++)
     {
       const struct s3_insn_to_dependency *tmp = s3_insn_to_dependency_table + i;
-      unsigned len = strlen (tmp->insn_name);
+      size_t len = strlen (tmp->insn_name);
       struct s3_insn_to_dependency *new_i2n;
 
       new_i2n = (struct s3_insn_to_dependency *)

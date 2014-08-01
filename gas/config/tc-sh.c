@@ -4435,7 +4435,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   if (SWITCH_TABLE (fixp))
     {
       *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
-      rel->addend = 0;
+      rel->addend = rel->address - S_GET_VALUE(fixp->fx_subsy);
       if (r_type == BFD_RELOC_16)
 	r_type = BFD_RELOC_SH_SWITCH16;
       else if (r_type == BFD_RELOC_8)

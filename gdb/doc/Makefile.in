@@ -30,6 +30,8 @@ mandir = @mandir@
 man1dir = $(mandir)/man1
 man5dir = $(mandir)/man5
 
+transform = @program_transform_name@
+
 SHELL = @SHELL@
 
 LN_S = @LN_S@
@@ -308,7 +310,7 @@ install-man1: $(MAN1S)
 	    continue; \
 	  fi; \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=`echo $$p | sed -e 's|^.*/||'`; \
+	  f=`echo $$p | sed -e 's|^.*/||' -e '$(transform)'`; \
 	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(man1dir)/$$f'"; \
 	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(man1dir)/$$f"; \
 	done
@@ -317,7 +319,7 @@ install-man5: $(MAN5S)
 	test -z "$(man5dir)" || $(mkinstalldirs) "$(DESTDIR)$(man5dir)"
 	@list='$(MAN5S)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=`echo $$p | sed -e 's|^.*/||'`; \
+	  f=`echo $$p | sed -e 's|^.*/||' -e '$(transform)'`; \
 	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(man5dir)/$$f'"; \
 	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(man5dir)/$$f"; \
 	done

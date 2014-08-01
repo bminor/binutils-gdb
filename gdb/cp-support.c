@@ -1557,7 +1557,11 @@ gdb_demangle (const char *name, int options)
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
       sa.sa_handler = gdb_demangle_signal_handler;
       sigemptyset (&sa.sa_mask);
+#ifdef HAVE_SIGALTSTACK
       sa.sa_flags = SA_ONSTACK;
+#else
+      sa.sa_flags = 0;
+#endif
       sigaction (SIGSEGV, &sa, &old_sa);
 #else
       ofunc = (void (*)()) signal (SIGSEGV, gdb_demangle_signal_handler);

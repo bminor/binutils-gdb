@@ -267,7 +267,11 @@ child_terminal_init (struct target_ops *self)
 }
 
 /* Put the inferior's terminal settings into effect.
-   This is preparation for starting or resuming the inferior.  */
+   This is preparation for starting or resuming the inferior.
+
+   N.B. Targets that want to use this with async support must build that
+   support on top of this (e.g., the caller still needs to remove stdin
+   from the event loop).  E.g., see linux_nat_terminal_inferior.  */
 
 void
 child_terminal_inferior (struct target_ops *self)
@@ -348,7 +352,10 @@ child_terminal_inferior (struct target_ops *self)
    so that no input is discarded.
 
    After doing this, either terminal_ours or terminal_inferior
-   should be called to get back to a normal state of affairs.  */
+   should be called to get back to a normal state of affairs.
+
+   N.B. The implementation is (currently) no different than
+   child_terminal_ours.  See child_terminal_ours_1.  */
 
 void
 child_terminal_ours_for_output (struct target_ops *self)
@@ -358,7 +365,11 @@ child_terminal_ours_for_output (struct target_ops *self)
 
 /* Put our terminal settings into effect.
    First record the inferior's terminal settings
-   so they can be restored properly later.  */
+   so they can be restored properly later.
+
+   N.B. Targets that want to use this with async support must build that
+   support on top of this (e.g., the caller still needs to add stdin to the
+   event loop).  E.g., see linux_nat_terminal_ours.  */
 
 void
 child_terminal_ours (struct target_ops *self)

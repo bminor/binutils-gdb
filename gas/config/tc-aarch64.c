@@ -1681,7 +1681,7 @@ symbol_locate (symbolS * symbolP,
 	       valueT valu,	/* Symbol value.  */
 	       fragS * frag)	/* Associated fragment.  */
 {
-  unsigned int name_length;
+  size_t name_length;
   char *preserved_copy_of_name;
 
   name_length = strlen (name) + 1;	/* +1 for \0.  */

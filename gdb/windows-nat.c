@@ -1731,7 +1731,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
     push_target (ops);
   disable_breakpoints_in_shlibs ();
   windows_clear_solib ();
-  clear_proceed_status ();
+  clear_proceed_status (0);
   init_wait_for_inferior ();
 
   inf = current_inferior ();
@@ -2519,11 +2519,9 @@ windows_xfer_partial (struct target_ops *ops, enum target_object object,
 					    writebuf, offset, len, xfered_len);
 
     default:
-      if (ops->beneath != NULL)
-	return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					      readbuf, writebuf, offset, len,
-					      xfered_len);
-      return TARGET_XFER_E_IO;
+      return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					    readbuf, writebuf, offset, len,
+					    xfered_len);
     }
 }
 

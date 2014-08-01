@@ -339,9 +339,10 @@ case ${generic_target} in
   mn10300-*-linux*)			fmt=elf em=linux ;;
   mn10300-*-*)				fmt=elf ;;
 
-  moxie-*-uclinux)			fmt=elf em=linux;;
+  moxie-*-uclinux)			fmt=elf em=linux ;;
+  moxie-*-moxiebox*)                    fmt=elf endian=little ;;
   moxie-*-*)				fmt=elf ;;
-
+    
   mt-*-elf)				fmt=elf bfd_gas=yes ;;
 
   msp430-*-*)				fmt=elf ;;
@@ -357,8 +358,8 @@ case ${generic_target} in
   ns32k-pc532-lites*)			fmt=aout em=nbsd532 ;;
   ns32k-*-*n*bsd*)			fmt=aout em=nbsd532 ;;
 
-  or1k-*-elf | or1knd-*-elf)		fmt=elf endian=big ;;
-  or1k-*-linux* | or1knd-*-linux*)	fmt=elf em=linux endian=big ;;
+  or1k*-*-elf | or1k*-*-rtems*) 	fmt=elf endian=big ;;
+  or1k*-*-linux*)			fmt=elf em=linux endian=big ;;
 
   pj*)					fmt=elf ;;
 

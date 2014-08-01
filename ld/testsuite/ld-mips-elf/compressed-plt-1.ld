@@ -35,4 +35,6 @@ SECTIONS
   .got : { *(.got) }
   . = ALIGN(0x1000);
   .rld_map : { *(.rld_map) }
+
+  /DISCARD/ : { *(.MIPS.abiflags) *(.gnu.attributes) }
 }

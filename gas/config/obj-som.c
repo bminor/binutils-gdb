@@ -24,7 +24,6 @@
 #include "as.h"
 #include "subsegs.h"
 #include "aout/stab_gnu.h"
-#include "obstack.h"
 
 static int version_seen = 0;
 static int copyright_seen = 0;

@@ -792,7 +792,7 @@ record_full_async_inferior_event_handler (gdb_client_data data)
 /* Open the process record target.  */
 
 static void
-record_full_core_open_1 (char *name, int from_tty)
+record_full_core_open_1 (const char *name, int from_tty)
 {
   struct regcache *regcache = get_current_regcache ();
   int regnum = gdbarch_num_regs (get_regcache_arch (regcache));
@@ -822,7 +822,7 @@ record_full_core_open_1 (char *name, int from_tty)
 /* "to_open" target method for 'live' processes.  */
 
 static void
-record_full_open_1 (char *name, int from_tty)
+record_full_open_1 (const char *name, int from_tty)
 {
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open\n");
@@ -846,7 +846,7 @@ static void record_full_init_record_breakpoints (void);
 /* "to_open" target method.  Open the process record target.  */
 
 static void
-record_full_open (char *name, int from_tty)
+record_full_open (const char *name, int from_tty)
 {
   struct target_ops *t;
 

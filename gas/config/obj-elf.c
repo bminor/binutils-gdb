@@ -266,7 +266,7 @@ elf_file_symbol (const char *s, int appfile)
       || (symbol_rootP->bsym->flags & BSF_FILE) == 0)
     {
       symbolS *sym;
-      unsigned int name_length;
+      size_t name_length;
 
       sym = symbol_new (s, absolute_section, 0, NULL);
       symbol_set_frag (sym, &zero_address_frag);

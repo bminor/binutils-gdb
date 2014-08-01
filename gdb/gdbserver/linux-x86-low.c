@@ -17,11 +17,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "server.h"
 #include <stddef.h>
 #include <signal.h>
 #include <limits.h>
 #include <inttypes.h>
-#include "server.h"
 #include "linux-low.h"
 #include "i387-fp.h"
 #include "i386-low.h"

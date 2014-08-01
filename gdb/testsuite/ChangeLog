@@ -1,3 +1,110 @@
+2014-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/vla-datatypes.c (vla_factory): Add new variable
+	inner_vla_struct_object_size.
+	* gdb.base/vla-datatypes.exp: Adjust last test, and mark it
+	as xfail.
+
+2014-07-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/signal-command-handle-nopass.exp (test): Add
+	comment.
+
+2014-07-29  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/17206
+	* gdb.base/until-nodebug.exp: New.
+
+2014-07-28  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17203
+	* gdb.guile/scm-parameter.exp: Add tests for trying to create
+	previously existing parameter, and previously ambiguously spelled
+	parameter.
+
+2014-07-28  Will Newton  <will.newton@linaro.org>
+
+	* gdb.base/varargs.exp: Remove KFAILs for ARM.
+
+2014-07-26  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17146
+	* gdb.guile/types-module.exp: Add tests for wrong type arguments.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/signal-command-handle-nopass.c: New file.
+	* gdb.threads/signal-command-handle-nopass.exp: New file.
+	* gdb.threads/signal-command-multiple-signals-pending.c: New file.
+	* gdb.threads/signal-command-multiple-signals-pending.exp: New file.
+	* gdb.threads/signal-delivered-right-thread.c: New file.
+	* gdb.threads/signal-delivered-right-thread.exp: New file.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/double-prompt-target-event-error.exp
+	(cancel_pagination_in_target_event): Remove '-notransfer <return>'
+	match.
+	(cancel_pagination_in_target_event): Rework double prompt
+	detection.
+	* gdb.base/paginate-after-ctrl-c-running.exp
+	(test_ctrlc_while_target_running_paginates): Remove '-notransfer
+	<return>' match.
+	* gdb.base/paginate-bg-execution.exp
+	(test_bg_execution_pagination_return)
+	(test_bg_execution_pagination_cancel): Remove '-notransfer
+	<return>' matches.
+	* gdb.base/paginate-execution-startup.exp
+	(test_fg_execution_pagination_return)
+	(test_fg_execution_pagination_cancel): Remove '-notransfer
+	<return>' matches.
+	* gdb.base/paginate-inferior-exit.exp
+	(test_paginate_inferior_exited): Remove '-notransfer <return>'
+	match.
+	* lib/gdb-utils.exp (string_to_regexp): Move here from lib/gdb.exp.
+	* lib/gdb.exp (pagination_prompt): Run text through
+	string_to_regexp.
+	(gdb_test_multiple): Match $pagination_prompt instead of
+	"<return>".
+	(string_to_regexp): Move to lib/gdb-utils.exp.
+
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-entry-value-paramref.S: New file.
+	* gdb.arch/amd64-entry-value-paramref.cc: New file.
+	* gdb.arch/amd64-entry-value-paramref.exp: New file.
+	* gdb.arch/amd64-optimout-repeat.S: New file.
+	* gdb.arch/amd64-optimout-repeat.c: New file.
+	* gdb.arch/amd64-optimout-repeat.exp: New file.
+
+2014-07-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/17170
+	* gdb.base/statistics.exp: New file.
+
+2014-07-17  Doug Evans  <dje@google.com>
+
+	PR gdb/17170
+	* gdb.base/maint.exp: Update testing of per-command stats.
+
+2014-07-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/tfile.c: Include unistd.h and stdint.h.
+	(start_trace_file): Guard S_IRGRP and S_IROTH uses behind #ifdef.
+	(tfile_write_64, tfile_write_16, tfile_write_8, tfile_write_addr)
+	(tfile_write_buf): New functions.
+	(add_memory_block): Rewrite using the above.
+	(adjust_function_address): New function.
+	(FUNCTION_ADDRESS): New macro.
+	(write_basic_trace_file): Remove short_x local, and use
+	tfile_write_16. Change type of func_addr local to unsigned long
+	long.  Use FUNCTION_ADDRESS instead of handling the Thumb bit
+	here.  Cast argument of add_memory_block to char pointer.
+	(write_error_trace_file): Avoid alloca.  Use FUNCTION_ADDRESS.
+	(main): Remove parameters.
+	* gdb.trace/tfile.exp: Remove nowarnings.
+
 2014-07-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/debug-expr.exp: Test string evaluation with

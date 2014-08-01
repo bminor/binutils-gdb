@@ -51,11 +51,6 @@ proc test_bg_execution_pagination_return {} {
 		send_gdb "\n"
 		exp_continue
 	    }
-	    -notransfer -re "<return>" {
-		# Otherwise gdb_test_multiple considers this an
-		# error.
-		exp_continue
-	    }
 	    -re "after sleep\[^\r\n\]+\r\n$" {
 		gdb_assert $saw_pagination_prompt $test
 	    }
@@ -95,10 +90,6 @@ proc test_bg_execution_pagination_cancel { how } {
 	gdb_test_multiple "" $test {
 	    -re "$pagination_prompt$" {
 		pass $test
-	    }
-	    -notransfer -re "<return>" {
-		# Otherwise gdb_test_multiple considers this an error.
-		exp_continue
 	    }
 	}
 

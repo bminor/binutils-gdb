@@ -1053,6 +1053,7 @@ fi
 AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(PYTHON_LIBS)
+AM_CONDITIONAL(HAVE_PYTHON, test "${have_libpython}" != no)
 
 # -------------------- #
 # Check for libguile.  #
@@ -1194,6 +1195,19 @@ yes)
 esac
 
 if test "${have_libguile}" != no; then
+  dnl Get the name of the 'guild' program.
+  GDB_GUILE_PROGRAM_NAMES(["${pkg_config_prog_path}"], ["${guile_version}"])
+
+  dnl Make sure guild can handle this host.
+  GDB_TRY_GUILD([$srcdir/guile/lib/gdb/support.scm])
+  dnl If not, disable guile support.
+  if test "$ac_cv_guild_ok" = no; then
+    have_libguile=no
+    AC_MSG_WARN(disabling guile support, $GUILD fails compiling for $host)
+  fi
+fi
+
+if test "${have_libguile}" != no; then
   AC_DEFINE(HAVE_GUILE, 1, [Define if Guile interpreter is being linked in.])
   CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GUILE_OBS)"
   CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_GUILE_DEPS)"
@@ -1217,6 +1231,12 @@ else
 fi
 AC_SUBST(GUILE_CPPFLAGS)
 AC_SUBST(GUILE_LIBS)
+AM_CONDITIONAL(HAVE_GUILE, test "${have_libguile}" != no)
+
+# PR 17185, see if we can get the libgc version to see if we need
+# to apply the workaround.
+AC_CHECK_HEADERS(gc/gc.h)
+AC_CHECK_FUNCS([setenv])
 
 # --------------------- #
 # Check for libmcheck.  #

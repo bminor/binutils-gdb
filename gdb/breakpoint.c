@@ -10602,8 +10602,6 @@ watchpoint_exp_is_const (const struct expression *exp)
 	case BINOP_MAX:
 	case BINOP_INTDIV:
 	case BINOP_CONCAT:
-	case BINOP_IN:
-	case BINOP_RANGE:
 	case TERNOP_COND:
 	case TERNOP_SLICE:
 
@@ -11670,7 +11668,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
   int thread;
   struct thread_info *tp;
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 
   /* Set a breakpoint where the user wants it and at return from
      this function.  */
@@ -14790,7 +14788,7 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 
   while (!state.finished)
     {
-      char *p = state.string;
+      const char *p = state.string;
 
       match = 0;
 

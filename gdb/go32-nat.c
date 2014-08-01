@@ -716,7 +716,7 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
 
   add_thread_silent (inferior_ptid);
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
   insert_breakpoints ();
   prog_has_started = 1;
 }
