@@ -170,7 +170,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/filestuff.c $(srcdir)/target/waitstatus.c \
 	$(srcdir)/nat/mips-linux-watch.c $(srcdir)/common/print-utils.c \
 	$(srcdir)/common/rsp-low.c $(srcdir)/common/errors.c \
-	$(srcdir)/common/common-debug.c
+	$(srcdir)/common/common-debug.c $(srcdir)/common/cleanups.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -183,7 +183,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       target.o waitstatus.o utils.o debug.o version.o vec.o gdb_vecs.o \
       mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
-      tdesc.o print-utils.o rsp-low.o errors.o common-debug.o \
+      tdesc.o print-utils.o rsp-low.o errors.o common-debug.o cleanups.o \
       $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
@@ -542,6 +542,9 @@ errors.o: ../common/errors.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 common-debug.o: ../common/common-debug.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+cleanups.o: ../common/cleanups.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 waitstatus.o: ../target/waitstatus.c

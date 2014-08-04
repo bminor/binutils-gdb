@@ -1,5 +1,16 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* cleanups.h: Moved to...
+	* common/cleanups.h: New file.
+	* cleanups.c: Moved to...
+	* common/cleanups.c: New file.  Include common-defs.h and
+	cleanups.h.  Do not include defs.h.
+	* Makefile.in (SFILES): Replace cleanups.c with common/cleanups.c.
+	(HFILES_NO_SRCDIR): Replace cleanups.h with common/cleanups.h.
+	(cleanups.o): New rule.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* common/errors.h (internal_warning): New declaration.
 	(internal_vwarning): Likewise.
 	* common/errors.c (internal_warning): New function.

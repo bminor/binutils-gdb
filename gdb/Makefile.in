@@ -794,7 +794,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	breakpoint.c break-catch-sig.c break-catch-throw.c \
 	build-id.c buildsym.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c c-varobj.c \
-	charset.c cleanups.c cli-out.c coffread.c coff-pe-read.c \
+	charset.c common/cleanups.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c continuations.c corefile.c corelow.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
 	d-exp.y d-lang.c d-support.c d-valprint.c \
@@ -885,7 +885,7 @@ objfiles.h common/vec.h disasm.h mips-tdep.h ser-base.h \
 gdb_curses.h bfd-target.h memattr.h inferior.h ax.h dummy-frame.h \
 inflow.h fbsd-nat.h ia64-libunwind-tdep.h completer.h inf-ttrace.h \
 solib-target.h gdb_vfork.h alpha-tdep.h dwarf2expr.h \
-m2-lang.h stack.h charset.h cleanups.h addrmap.h command.h solist.h source.h \
+m2-lang.h stack.h charset.h addrmap.h command.h solist.h source.h \
 target.h target-dcache.h prologue-value.h cp-abi.h tui/tui-hooks.h tui/tui.h \
 tui/tui-file.h tui/tui-command.h tui/tui-disasm.h tui/tui-wingeneral.h \
 tui/tui-windata.h tui/tui-data.h tui/tui-win.h tui/tui-stack.h \
@@ -937,7 +937,7 @@ ctf.h nat/i386-cpuid.h nat/i386-gcc-cpuid.h target/resume.h \
 target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h \
 common/print-utils.h common/rsp-low.h nat/i386-dregs.h x86-linux-nat.h \
 i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
-common/common-debug.h
+common/common-debug.h common/cleanups.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -2160,6 +2160,10 @@ errors.o: ${srcdir}/common/errors.c
 
 common-debug.o: ${srcdir}/common/common-debug.c
 	$(COMPILE) $(srcdir)/common/common-debug.c
+	$(POSTCOMPILE)
+
+cleanups.o: ${srcdir}/common/cleanups.c
+	$(COMPILE) $(srcdir)/common/cleanups.c
 	$(POSTCOMPILE)
 
 #
