@@ -616,16 +616,12 @@ tui_initialize_io (void)
      readline output in a pipe, read that pipe and output the content
      in the curses command window.  */
   if (gdb_pipe_cloexec (tui_readline_pipe) != 0)
-    {
-      fprintf_unfiltered (gdb_stderr, "Cannot create pipe for readline");
-      exit (1);
-    }
+    error (_("Cannot create pipe for readline"));
+
   tui_rl_outstream = fdopen (tui_readline_pipe[1], "w");
   if (tui_rl_outstream == 0)
-    {
-      fprintf_unfiltered (gdb_stderr, "Cannot redirect readline output");
-      exit (1);
-    }
+    error (_("Cannot redirect readline output"));
+
   setvbuf (tui_rl_outstream, (char*) NULL, _IOLBF, 0);
 
 #ifdef O_NONBLOCK

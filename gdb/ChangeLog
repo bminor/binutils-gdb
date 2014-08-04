@@ -1,5 +1,10 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* tui/tui-io.c (tui_initialize_io): Replace two fprintf/exit
+	pairs with calls to error.  Wrap the message with _().
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* utils.c (vwarning): Protect calls to target_terminal_ours
 	and wrap_here.
 
