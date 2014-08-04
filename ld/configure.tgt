@@ -95,7 +95,8 @@ arm-*-netbsd*)		targ_emul=armnbsd;
 arm-*-nto*)		targ_emul=armnto ;;
 arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-rtems*)		targ_emul=armelf ;;
-armeb-*-elf)		targ_emul=armelfb ;;
+armeb-*-elf | armeb-*-eabi*)
+			targ_emul=armelfb ;;
 arm-*-elf | arm*-*-eabi*)
 	  		targ_emul=armelf ;;
 arm*-*-symbianelf*)     targ_emul=armsymbian;;
