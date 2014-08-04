@@ -1,3 +1,10 @@
+2014-09-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/break-on-linker-gcd-function.exp: Move test into new
+	proc set_breakpoint_on_gcd_function.  Invoke
+	set_breakpoint_on_gcd_function.  Restart GDB with --readnow and
+	invoke set_breakpoint_on_gcd_function again.
+
 2014-09-18  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/symtab-producer.exp: New file.

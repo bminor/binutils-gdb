@@ -1,3 +1,14 @@
+2014-09-19  Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Update declaration.
+	(handle_DW_AT_stmt_list): Add argument 'lowpc'.  Update
+	comments.  Callers update.
+	(dwarf_decode_lines): Likewise.
+	(dwarf_decode_lines_1): Add argument 'lowpc'.  Update
+	comments.  Skip the line table if  'lowpc' is greater than
+	'address'.  Don't check
+	dwarf2_per_objfile->has_section_at_zero.
+
 2014-09-18  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention new "producer" attribute of gdb.Symtab.
