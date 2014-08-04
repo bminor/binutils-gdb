@@ -1,3 +1,8 @@
+2014-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes in GDB-4.0): Move Intel MPX and Intel AVX-512 items ...
+	(Changes in GDB 7.8): ... here.
+
 2014-07-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 7.8.0.DATE-cvs.
