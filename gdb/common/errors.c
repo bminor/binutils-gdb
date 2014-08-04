@@ -59,3 +59,15 @@ internal_error (const char *file, int line, const char *fmt, ...)
   internal_verror (file, line, fmt, ap);
   va_end (ap);
 }
+
+/* See common/errors.h.  */
+
+void
+internal_warning (const char *file, int line, const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+  internal_vwarning (file, line, fmt, ap);
+  va_end (ap);
+}

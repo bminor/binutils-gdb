@@ -1,3 +1,7 @@
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* utils.c (internal_vwarning): New function.
+
 2014-08-28  Gary Benson  <gbenson@redhat.com>
 
 	* utils.h (fatal): Remove declaration.

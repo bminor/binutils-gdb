@@ -286,13 +286,6 @@ extern char *warning_pre_print;
 
 extern void error_stream (struct ui_file *) ATTRIBUTE_NORETURN;
 
-extern void internal_vwarning (const char *file, int line,
-			       const char *, va_list ap)
-     ATTRIBUTE_PRINTF (3, 0);
-
-extern void internal_warning (const char *file, int line,
-			      const char *, ...) ATTRIBUTE_PRINTF (3, 4);
-
 extern void demangler_vwarning (const char *file, int line,
 			       const char *, va_list ap)
      ATTRIBUTE_PRINTF (3, 0);

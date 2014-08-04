@@ -1,5 +1,14 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* common/errors.h (internal_warning): New declaration.
+	(internal_vwarning): Likewise.
+	* common/errors.c (internal_warning): New function.
+	* utils.h (internal_warning): Don't declare.
+	(internal_vwarning): Likewise.
+	* utils.c (internal_warning): Removed.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* main.c (captured_main): Use warning during startup.
 	Prefix startup warning messages with command name.
 

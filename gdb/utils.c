@@ -823,16 +823,6 @@ internal_vwarning (const char *file, int line, const char *fmt, va_list ap)
   internal_vproblem (&internal_warning_problem, file, line, fmt, ap);
 }
 
-void
-internal_warning (const char *file, int line, const char *string, ...)
-{
-  va_list ap;
-
-  va_start (ap, string);
-  internal_vwarning (file, line, string, ap);
-  va_end (ap);
-}
-
 static struct internal_problem demangler_warning_problem = {
   "demangler-warning", 1, internal_problem_ask, 0, internal_problem_no
 };
