@@ -984,12 +984,7 @@ captured_main (void *data)
       error (_("Interpreter `%s' unrecognized"), interpreter_p);
     /* Install it.  */
     if (!interp_set (interp, 1))
-      {
-        fprintf_unfiltered (gdb_stderr,
-			    "Interpreter `%s' failed to initialize.\n",
-                            interpreter_p);
-        exit (1);
-      }
+      error (_("Interpreter `%s' failed to initialize."), interpreter_p);
   }
 
   /* FIXME: cagney/2003-02-03: The big hack (part 2 of 2) that lets
