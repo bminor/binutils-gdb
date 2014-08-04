@@ -638,6 +638,7 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
   char **env_save = environ;
   size_t cmdlen;
   struct inferior *inf;
+  int result;
 
   /* If no exec file handed to us, get it from the exec-file command -- with
      a good, common error message if none is specified.  */
@@ -689,14 +690,13 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
 
   environ = env;
 
-  if (v2loadimage (exec_file, cmdline, start_state))
-    {
-      environ = env_save;
-      printf_unfiltered ("Load failed for image %s\n", exec_file);
-      exit (1);
-    }
+  result = v2loadimage (exec_file, cmdline, start_state);
+
   environ = env_save;
   xfree (cmdline);
+
+  if (result != 0)
+    error (_("Load failed for image %s", exec_file);
 
   edi_init (start_state);
 #if __DJGPP_MINOR__ < 3
