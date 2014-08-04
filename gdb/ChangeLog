@@ -1,5 +1,9 @@
 2014-08-07  Yao Qi  <yao@codesourcery.com>
 
+	* dwarf2read.c (struct dwarf2_per_cu_data) <u>: Tweak comments.
+
+2014-08-07  Yao Qi  <yao@codesourcery.com>
+
 	PR remote/17230
 	* remote-mips.c (mips_xfer_memory): Set *xfered_len and return
 	TARGET_XFER_OK instead of 0.

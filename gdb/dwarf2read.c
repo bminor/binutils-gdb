@@ -611,8 +611,8 @@ struct dwarf2_per_cu_data
      However we can enter this file with just a "per_cu" handle.  */
   struct objfile *objfile;
 
-  /* When using partial symbol tables, the 'psymtab' field is active.
-     Otherwise the 'quick' field is active.  */
+  /* When dwarf2_per_objfile->using_index is true, the 'quick' field
+     is active.  Otherwise, the 'psymtab' field is active.  */
   union
   {
     /* The partial symbol table associated with this compilation unit,
