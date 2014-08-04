@@ -1,3 +1,8 @@
+2014-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes in GDB-4.0): Move Intel MPX and Intel AVX-512 items ...
+	(Changes in GDB 7.8): ... here.
+
 2014-08-04  Tom Tromey  <tromey@redhat.com>
 
 	* target.c (set_targetdebug): New function.
