@@ -733,18 +733,17 @@ internal_vproblem (struct internal_problem *problem,
     make_cleanup (xfree, reason);
   }
 
+  /* Emit the message unless query will emit it below.  */
+  if (problem->should_quit != internal_problem_ask || !confirm)
+    fprintf_unfiltered (gdb_stderr, "%s\n", reason);
+
   if (problem->should_quit == internal_problem_ask)
     {
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
 	 this lessens the likelihood of GDB going into an infinite
 	 loop.  */
       if (!confirm)
-        {
-          /* Emit the message and quit.  */
-          fputs_unfiltered (reason, gdb_stderr);
-          fputs_unfiltered ("\n", gdb_stderr);
-          quit_p = 1;
-        }
+	quit_p = 1;
       else
         quit_p = query (_("%s\nQuit this debugging session? "), reason);
     }
