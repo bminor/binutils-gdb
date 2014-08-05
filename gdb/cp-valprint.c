@@ -208,8 +208,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      int statmem_obstack_initial_size = 0;
-      int stat_array_obstack_initial_size = 0;
+      size_t statmem_obstack_initial_size = 0;
+      size_t stat_array_obstack_initial_size = 0;
       struct type *vptr_basetype = NULL;
       int vptr_fieldno;
 
@@ -370,7 +370,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
       if (dont_print_statmem == 0)
 	{
-	  int obstack_final_size =
+	  size_t obstack_final_size =
            obstack_object_size (&dont_print_statmem_obstack);
 
 	  if (obstack_final_size > statmem_obstack_initial_size)
@@ -387,7 +387,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
 	  if (last_set_recurse != recurse)
 	    {
-	      int obstack_final_size =
+	      size_t obstack_final_size =
 		obstack_object_size (&dont_print_stat_array_obstack);
 	      
 	      if (obstack_final_size > stat_array_obstack_initial_size)

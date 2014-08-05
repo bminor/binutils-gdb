@@ -1,3 +1,13 @@
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
+	* charset.c (convert_between_encodings): Cast result of obstack_base.
+	* cp-valprint.c (cp_print_value_fields): Use size_t locals.
+	* hppa-tdep.c (internalize_unwinds): Change "size" parm to size_t.
+	(read_unwind_info): Use size_t for some locals.
+	* jit.c (finalize_symtab): Likewise.
+	* utils.c (hashtab_obstack_allocate): Likewise.
+	* symmisc.c (print_objfile_statistics): Update format strings.
+
 2014-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (Changes in GDB-4.0): Move Intel MPX and Intel AVX-512 items ...
