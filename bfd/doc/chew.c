@@ -474,8 +474,10 @@ remove_noncomments (src, dst)
 static void
 print_stack_level ()
 {
-  fprintf (stderr, "current string stack depth = %ld, ", tos - stack);
-  fprintf (stderr, "current integer stack depth = %ld\n", isp - istack);
+  fprintf (stderr, "current string stack depth = %ld, ",
+	   (long) (tos - stack));
+  fprintf (stderr, "current integer stack depth = %ld\n",
+	   (long) (isp - istack));
   pc++;
 }
 
@@ -1562,7 +1564,7 @@ main (ac, av)
   if (tos != stack)
     {
       fprintf (stderr, "finishing with current stack level %ld\n",
-	       tos - stack);
+	       (long) (tos - stack));
       return 1;
     }
   return 0;
