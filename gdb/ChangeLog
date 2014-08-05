@@ -1,3 +1,8 @@
+2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/lib/gdb/command/xmethods.py (set_xm_status1): Use the
+	'items'	methods instead of 'iteritems' method on dictionaries.
+
 2014-08-15  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf_decode_lines_1): Move definition of adj_opcode
