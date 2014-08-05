@@ -520,8 +520,10 @@ vwarning (const char *string, va_list args)
     (*deprecated_warning_hook) (string, args);
   else
     {
-      target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output.  */
+      if (target_supports_terminal_ours ())
+	target_terminal_ours ();
+      if (filtered_printing_initialized ())
+	wrap_here ("");		/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
       if (warning_pre_print)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
