@@ -244,6 +244,9 @@ extern void fputstrn_filtered (const char *str, int n, int quotr,
 extern void fputstrn_unfiltered (const char *str, int n, int quotr,
 				 struct ui_file * stream);
 
+/* Return nonzero if filtered printing is initialized.  */
+extern int filtered_printing_initialized (void);
+
 /* Display the host ADDR on STREAM formatted as ``0x%x''.  */
 extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
 

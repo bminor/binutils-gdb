@@ -1,3 +1,11 @@
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* utils.h (filtered_printing_initialized): New declaration.
+	* utils.c (abort_with_message): New function.
+	(internal_vproblem): Use abort_with_message for first level
+	recursive internal problems, and if gdb_stderr is not set up.
+	Protect calls to target_terminal_ours, begin_line and query.
+
 2014-08-28  Doug Evans  <dje@google.com>
 
 	* symtab.c (in_prologue): Move definition to better spot.
