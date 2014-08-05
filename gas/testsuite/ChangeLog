@@ -120,7 +120,7 @@
 	* gas/mips/tmips16-f.d: Likewise.
 	* gas/mips/tmipsel16-e.d: Likewise.
 	* gas/mips/tmipsel16-f.d: Likewise.
-	* gas/testsuite/gas/mips/mips.exp: Add new tests.
+	* gas/mips/mips.exp: Add new tests.
 
 2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
 	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
