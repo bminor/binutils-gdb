@@ -239,7 +239,9 @@ print_flush (void)
 
   if (deprecated_error_begin_hook)
     deprecated_error_begin_hook ();
-  target_terminal_ours ();
+
+  if (target_supports_terminal_ours ())
+    target_terminal_ours ();
 
   /* We want all output to appear now, before we print the error.  We
      have 3 levels of buffering we have to flush (it's possible that
@@ -247,7 +249,8 @@ print_flush (void)
      too):  */
 
   /* 1.  The _filtered buffer.  */
-  wrap_here ("");
+  if (filtered_printing_initialized ())
+    wrap_here ("");
 
   /* 2.  The stdio buffer.  */
   gdb_flush (gdb_stdout);

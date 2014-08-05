@@ -1,5 +1,10 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* exceptions.c (print_flush): Protect calls to
+	target_terminal_ours and wrap_here.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* utils.h (filtered_printing_initialized): New declaration.
 	* utils.c (abort_with_message): New function.
 	(internal_vproblem): Use abort_with_message for first level
