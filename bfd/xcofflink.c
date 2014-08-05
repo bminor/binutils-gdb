@@ -2384,6 +2384,8 @@ xcoff_link_check_ar_symbols (bfd *abfd,
 static bfd_boolean
 xcoff_link_check_archive_element (bfd *abfd,
 				  struct bfd_link_info *info,
+				  struct bfd_link_hash_entry *h ATTRIBUTE_UNUSED,
+				  const char *name ATTRIBUTE_UNUSED,
 				  bfd_boolean *pneeded)
 {
   bfd_boolean keep_syms_p;
@@ -2463,7 +2465,7 @@ _bfd_xcoff_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		bfd_boolean needed;
 
 		if (! xcoff_link_check_archive_element (member, info,
-							&needed))
+							NULL, NULL, &needed))
 		  return FALSE;
 		if (needed)
 		  member->archive_pass = -1;

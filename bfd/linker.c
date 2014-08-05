@@ -229,28 +229,16 @@ SUBSUBSECTION
 @findex _bfd_generic_link_add_archive_symbols
 	In most cases the work of looking through the symbols in the
 	archive should be done by the
-	<<_bfd_generic_link_add_archive_symbols>> function.  This
-	function builds a hash table from the archive symbol table and
-	looks through the list of undefined symbols to see which
-	elements should be included.
+	<<_bfd_generic_link_add_archive_symbols>> function.
 	<<_bfd_generic_link_add_archive_symbols>> is passed a function
 	to call to make the final decision about adding an archive
 	element to the link and to do the actual work of adding the
-	symbols to the linker hash table.
-
-	The function passed to
-	<<_bfd_generic_link_add_archive_symbols>> must read the
-	symbols of the archive element and decide whether the archive
-	element should be included in the link.  If the element is to
+	symbols to the linker hash table.  If the element is to
 	be included, the <<add_archive_element>> linker callback
 	routine must be called with the element as an argument, and
 	the element's symbols must be added to the linker hash table
 	just as though the element had itself been passed to the
-	<<_bfd_link_add_symbols>> function.  The <<add_archive_element>>
-	callback has the option to indicate that it would like to
-	replace the element archive with a substitute BFD, in which
-	case it is the symbols of that substitute BFD that must be
-	added to the linker hash table instead.
+	<<_bfd_link_add_symbols>> function.
 
 	When the a.out <<_bfd_link_add_symbols>> function receives an
 	archive, it calls <<_bfd_generic_link_add_archive_symbols>>
@@ -419,11 +407,14 @@ static bfd_boolean generic_link_add_object_symbols
 static bfd_boolean generic_link_add_symbols
   (bfd *, struct bfd_link_info *, bfd_boolean);
 static bfd_boolean generic_link_check_archive_element_no_collect
-  (bfd *, struct bfd_link_info *, bfd_boolean *);
+  (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *, const char *,
+   bfd_boolean *);
 static bfd_boolean generic_link_check_archive_element_collect
-  (bfd *, struct bfd_link_info *, bfd_boolean *);
+  (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *, const char *,
+   bfd_boolean *);
 static bfd_boolean generic_link_check_archive_element
-  (bfd *, struct bfd_link_info *, bfd_boolean *, bfd_boolean);
+  (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *, const char *,
+   bfd_boolean *, bfd_boolean);
 static bfd_boolean generic_link_add_symbol_list
   (bfd *, struct bfd_link_info *, bfd_size_type count, asymbol **,
    bfd_boolean);
@@ -917,138 +908,32 @@ generic_link_add_object_symbols (bfd *abfd,
   return generic_link_add_symbol_list (abfd, info, symcount, outsyms, collect);
 }
 
-/* We build a hash table of all symbols defined in an archive.  */
-
-/* An archive symbol may be defined by multiple archive elements.
-   This linked list is used to hold the elements.  */
-
-struct archive_list
-{
-  struct archive_list *next;
-  unsigned int indx;
-};
-
-/* An entry in an archive hash table.  */
-
-struct archive_hash_entry
-{
-  struct bfd_hash_entry root;
-  /* Where the symbol is defined.  */
-  struct archive_list *defs;
-};
-
-/* An archive hash table itself.  */
-
-struct archive_hash_table
-{
-  struct bfd_hash_table table;
-};
-
-/* Create a new entry for an archive hash table.  */
-
-static struct bfd_hash_entry *
-archive_hash_newfunc (struct bfd_hash_entry *entry,
-		      struct bfd_hash_table *table,
-		      const char *string)
-{
-  struct archive_hash_entry *ret = (struct archive_hash_entry *) entry;
-
-  /* Allocate the structure if it has not already been allocated by a
-     subclass.  */
-  if (ret == NULL)
-    ret = (struct archive_hash_entry *)
-        bfd_hash_allocate (table, sizeof (struct archive_hash_entry));
-  if (ret == NULL)
-    return NULL;
-
-  /* Call the allocation method of the superclass.  */
-  ret = ((struct archive_hash_entry *)
-	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
-
-  if (ret)
-    {
-      /* Initialize the local fields.  */
-      ret->defs = NULL;
-    }
-
-  return &ret->root;
-}
-
-/* Initialize an archive hash table.  */
-
-static bfd_boolean
-archive_hash_table_init
-  (struct archive_hash_table *table,
-   struct bfd_hash_entry *(*newfunc) (struct bfd_hash_entry *,
-				      struct bfd_hash_table *,
-				      const char *),
-   unsigned int entsize)
-{
-  return bfd_hash_table_init (&table->table, newfunc, entsize);
-}
-
-/* Look up an entry in an archive hash table.  */
-
-#define archive_hash_lookup(t, string, create, copy) \
-  ((struct archive_hash_entry *) \
-   bfd_hash_lookup (&(t)->table, (string), (create), (copy)))
-
-/* Allocate space in an archive hash table.  */
-
-#define archive_hash_allocate(t, size) bfd_hash_allocate (&(t)->table, (size))
-
-/* Free an archive hash table.  */
-
-#define archive_hash_table_free(t) bfd_hash_table_free (&(t)->table)
-
 /* Generic function to add symbols from an archive file to the global
    hash file.  This function presumes that the archive symbol table
    has already been read in (this is normally done by the
-   bfd_check_format entry point).  It looks through the undefined and
-   common symbols and searches the archive symbol table for them.  If
-   it finds an entry, it includes the associated object file in the
-   link.
-
-   The old linker looked through the archive symbol table for
-   undefined symbols.  We do it the other way around, looking through
-   undefined symbols for symbols defined in the archive.  The
-   advantage of the newer scheme is that we only have to look through
-   the list of undefined symbols once, whereas the old method had to
-   re-search the symbol table each time a new object file was added.
-
-   The CHECKFN argument is used to see if an object file should be
-   included.  CHECKFN should set *PNEEDED to TRUE if the object file
-   should be included, and must also call the bfd_link_info
-   add_archive_element callback function and handle adding the symbols
-   to the global hash table.  CHECKFN must notice if the callback
-   indicates a substitute BFD, and arrange to add those symbols instead
-   if it does so.  CHECKFN should only return FALSE if some sort of
-   error occurs.
-
-   For some formats, such as a.out, it is possible to look through an
-   object file but not actually include it in the link.  The
-   archive_pass field in a BFD is used to avoid checking the symbols
-   of an object files too many times.  When an object is included in
-   the link, archive_pass is set to -1.  If an object is scanned but
-   not included, archive_pass is set to the pass number.  The pass
-   number is incremented each time a new object file is included.  The
-   pass number is used because when a new object file is included it
-   may create new undefined symbols which cause a previously examined
-   object file to be included.  */
+   bfd_check_format entry point).  It looks through the archive symbol
+   table for symbols that are undefined or common in the linker global
+   symbol hash table.  When one is found, the CHECKFN argument is used
+   to see if an object file should be included.  This allows targets
+   to customize common symbol behaviour.  CHECKFN should set *PNEEDED
+   to TRUE if the object file should be included, and must also call
+   the bfd_link_info add_archive_element callback function and handle
+   adding the symbols to the global hash table.  CHECKFN must notice
+   if the callback indicates a substitute BFD, and arrange to add
+   those symbols instead if it does so.  CHECKFN should only return
+   FALSE if some sort of error occurs.  */
 
 bfd_boolean
 _bfd_generic_link_add_archive_symbols
   (bfd *abfd,
    struct bfd_link_info *info,
-   bfd_boolean (*checkfn) (bfd *, struct bfd_link_info *, bfd_boolean *))
+   bfd_boolean (*checkfn) (bfd *, struct bfd_link_info *,
+			   struct bfd_link_hash_entry *, const char *,
+			   bfd_boolean *))
 {
-  carsym *arsyms;
-  carsym *arsym_end;
-  register carsym *arsym;
-  int pass;
-  struct archive_hash_table arsym_hash;
-  unsigned int indx;
-  struct bfd_link_hash_entry **pundef;
+  bfd_boolean loop;
+  bfd_size_type amt;
+  unsigned char *included;
 
   if (! bfd_has_map (abfd))
     {
@@ -1059,148 +944,103 @@ _bfd_generic_link_add_archive_symbols
       return FALSE;
     }
 
-  arsyms = bfd_ardata (abfd)->symdefs;
-  arsym_end = arsyms + bfd_ardata (abfd)->symdef_count;
-
-  /* In order to quickly determine whether an symbol is defined in
-     this archive, we build a hash table of the symbols.  */
-  if (! archive_hash_table_init (&arsym_hash, archive_hash_newfunc,
-				 sizeof (struct archive_hash_entry)))
+  amt = bfd_ardata (abfd)->symdef_count;
+  if (amt == 0)
+    return TRUE;
+  amt *= sizeof (*included);
+  included = (unsigned char *) bfd_zmalloc (amt);
+  if (included == NULL)
     return FALSE;
-  for (arsym = arsyms, indx = 0; arsym < arsym_end; arsym++, indx++)
+
+  do
     {
-      struct archive_hash_entry *arh;
-      struct archive_list *l, **pp;
+      carsym *arsyms;
+      carsym *arsym_end;
+      carsym *arsym;
+      unsigned int indx;
+      file_ptr last_ar_offset = -1;
+      bfd_boolean needed = FALSE;
+      bfd *element = NULL;
 
-      arh = archive_hash_lookup (&arsym_hash, arsym->name, TRUE, FALSE);
-      if (arh == NULL)
-	goto error_return;
-      l = ((struct archive_list *)
-	   archive_hash_allocate (&arsym_hash, sizeof (struct archive_list)));
-      if (l == NULL)
-	goto error_return;
-      l->indx = indx;
-      for (pp = &arh->defs; *pp != NULL; pp = &(*pp)->next)
-	;
-      *pp = l;
-      l->next = NULL;
-    }
-
-  /* The archive_pass field in the archive itself is used to
-     initialize PASS, sine we may search the same archive multiple
-     times.  */
-  pass = abfd->archive_pass + 1;
-
-  /* New undefined symbols are added to the end of the list, so we
-     only need to look through it once.  */
-  pundef = &info->hash->undefs;
-  while (*pundef != NULL)
-    {
-      struct bfd_link_hash_entry *h;
-      struct archive_hash_entry *arh;
-      struct archive_list *l;
-
-      h = *pundef;
-
-      /* When a symbol is defined, it is not necessarily removed from
-	 the list.  */
-      if (h->type != bfd_link_hash_undefined
-	  && h->type != bfd_link_hash_common)
+      loop = FALSE;
+      arsyms = bfd_ardata (abfd)->symdefs;
+      arsym_end = arsyms + bfd_ardata (abfd)->symdef_count;
+      for (arsym = arsyms, indx = 0; arsym < arsym_end; arsym++, indx++)
 	{
-	  /* Remove this entry from the list, for general cleanliness
-	     and because we are going to look through the list again
-	     if we search any more libraries.  We can't remove the
-	     entry if it is the tail, because that would lose any
-	     entries we add to the list later on (it would also cause
-	     us to lose track of whether the symbol has been
-	     referenced).  */
-	  if (*pundef != info->hash->undefs_tail)
-	    *pundef = (*pundef)->u.undef.next;
-	  else
-	    pundef = &(*pundef)->u.undef.next;
-	  continue;
-	}
+	  struct bfd_link_hash_entry *h;
+	  struct bfd_link_hash_entry *undefs_tail;
 
-      /* Look for this symbol in the archive symbol map.  */
-      arh = archive_hash_lookup (&arsym_hash, h->root.string, FALSE, FALSE);
-      if (arh == NULL)
-	{
-	  /* If we haven't found the exact symbol we're looking for,
-	     let's look for its import thunk */
-	  if (info->pei386_auto_import)
+	  if (included[indx])
+	    continue;
+	  if (needed && arsym->file_offset == last_ar_offset)
 	    {
-	      bfd_size_type amt = strlen (h->root.string) + 10;
-	      char *buf = (char *) bfd_malloc (amt);
-	      if (buf == NULL)
-		return FALSE;
-
-	      sprintf (buf, "__imp_%s", h->root.string);
-	      arh = archive_hash_lookup (&arsym_hash, buf, FALSE, FALSE);
-	      free(buf);
-	    }
-	  if (arh == NULL)
-	    {
-	      pundef = &(*pundef)->u.undef.next;
+	      included[indx] = 1;
 	      continue;
 	    }
-	}
-      /* Look at all the objects which define this symbol.  */
-      for (l = arh->defs; l != NULL; l = l->next)
-	{
-	  bfd *element;
-	  bfd_boolean needed;
 
-	  /* If the symbol has gotten defined along the way, quit.  */
-	  if (h->type != bfd_link_hash_undefined
-	      && h->type != bfd_link_hash_common)
-	    break;
+	  h = bfd_link_hash_lookup (info->hash, arsym->name,
+				    FALSE, FALSE, TRUE);
 
-	  element = bfd_get_elt_at_index (abfd, l->indx);
-	  if (element == NULL)
-	    goto error_return;
-
-	  /* If we've already included this element, or if we've
-	     already checked it on this pass, continue.  */
-	  if (element->archive_pass == -1
-	      || element->archive_pass == pass)
+	  if (h == NULL
+	      && info->pei386_auto_import
+	      && CONST_STRNEQ (arsym->name, "__imp_"))
+	    h = bfd_link_hash_lookup (info->hash, arsym->name + 6,
+				      FALSE, FALSE, TRUE);
+	  if (h == NULL)
 	    continue;
 
-	  /* If we can't figure this element out, just ignore it.  */
-	  if (! bfd_check_format (element, bfd_object))
+	  if (h->type != bfd_link_hash_undefined
+	      && h->type != bfd_link_hash_common)
 	    {
-	      element->archive_pass = -1;
+	      if (h->type != bfd_link_hash_undefweak)
+		/* Symbol must be defined.  Don't check it again.  */
+		included[indx] = 1;
 	      continue;
 	    }
+
+	  if (last_ar_offset != arsym->file_offset)
+	    {
+	      last_ar_offset = arsym->file_offset;
+	      element = _bfd_get_elt_at_filepos (abfd, last_ar_offset);
+	      if (element == NULL
+		  || !bfd_check_format (element, bfd_object))
+		goto error_return;
+	    }
+
+	  undefs_tail = info->hash->undefs_tail;
 
 	  /* CHECKFN will see if this element should be included, and
 	     go ahead and include it if appropriate.  */
-	  if (! (*checkfn) (element, info, &needed))
+	  if (! (*checkfn) (element, info, h, arsym->name, &needed))
 	    goto error_return;
 
-	  if (! needed)
-	    element->archive_pass = pass;
-	  else
+	  if (needed)
 	    {
-	      element->archive_pass = -1;
+	      unsigned int mark;
 
-	      /* Increment the pass count to show that we may need to
-		 recheck object files which were already checked.  */
-	      ++pass;
+	      /* Look backward to mark all symbols from this object file
+		 which we have already seen in this pass.  */
+	      mark = indx;
+	      do
+		{
+		  included[mark] = 1;
+		  if (mark == 0)
+		    break;
+		  --mark;
+		}
+	      while (arsyms[mark].file_offset == last_ar_offset);
+
+	      if (undefs_tail != info->hash->undefs_tail)
+		loop = TRUE;
 	    }
 	}
+    } while (loop);
 
-      pundef = &(*pundef)->u.undef.next;
-    }
-
-  archive_hash_table_free (&arsym_hash);
-
-  /* Save PASS in case we are called again.  */
-  abfd->archive_pass = pass;
-
+  free (included);
   return TRUE;
 
  error_return:
-  archive_hash_table_free (&arsym_hash);
+  free (included);
   return FALSE;
 }
 
@@ -1210,12 +1050,14 @@ _bfd_generic_link_add_archive_symbols
    for finding them.  */
 
 static bfd_boolean
-generic_link_check_archive_element_no_collect (
-					       bfd *abfd,
+generic_link_check_archive_element_no_collect (bfd *abfd,
 					       struct bfd_link_info *info,
+					       struct bfd_link_hash_entry *h,
+					       const char *name,
 					       bfd_boolean *pneeded)
 {
-  return generic_link_check_archive_element (abfd, info, pneeded, FALSE);
+  return generic_link_check_archive_element (abfd, info, h, name, pneeded,
+					     FALSE);
 }
 
 /* See if we should include an archive element.  This version is used
@@ -1225,9 +1067,12 @@ generic_link_check_archive_element_no_collect (
 static bfd_boolean
 generic_link_check_archive_element_collect (bfd *abfd,
 					    struct bfd_link_info *info,
+					    struct bfd_link_hash_entry *h,
+					    const char *name,
 					    bfd_boolean *pneeded)
 {
-  return generic_link_check_archive_element (abfd, info, pneeded, TRUE);
+  return generic_link_check_archive_element (abfd, info, h, name, pneeded,
+					     TRUE);
 }
 
 /* See if we should include an archive element.  Optionally collect
@@ -1236,6 +1081,8 @@ generic_link_check_archive_element_collect (bfd *abfd,
 static bfd_boolean
 generic_link_check_archive_element (bfd *abfd,
 				    struct bfd_link_info *info,
+				    struct bfd_link_hash_entry *h,
+				    const char *name ATTRIBUTE_UNUSED,
 				    bfd_boolean *pneeded,
 				    bfd_boolean collect)
 {
@@ -1251,7 +1098,6 @@ generic_link_check_archive_element (bfd *abfd,
   for (; pp < ppend; pp++)
     {
       asymbol *p;
-      struct bfd_link_hash_entry *h;
 
       p = *pp;
 
