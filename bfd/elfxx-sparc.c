@@ -1970,7 +1970,7 @@ _bfd_sparc_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	}
 
       r_type = SPARC_ELF_R_TYPE (rel->r_info);
-      r_type = sparc_elf_tls_transition (info, abfd, r_type, h != NULL);
+      r_type = sparc_elf_tls_transition (info, abfd, r_type, h == NULL);
       switch (r_type)
 	{
 	case R_SPARC_TLS_LDM_HI22:

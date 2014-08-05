@@ -1,5 +1,10 @@
 2014-08-05  Alan Modra  <amodra@gmail.com>
 
+	PR ld/17226
+	* elfxx-sparc.c (_bfd_sparc_elf_gc_sweep_hook): Typo fix.
+
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
 	* linker.c (generic_link_check_archive_element): Move handling
 	of command link -u symbols with a common symbol def to the
 	code handling non-common symbols so that archive element symbols
