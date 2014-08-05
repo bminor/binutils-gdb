@@ -1,5 +1,12 @@
 2014-08-05  Alan Modra  <amodra@gmail.com>
 
+	* linker.c (generic_link_check_archive_element): Move handling
+	of command link -u symbols with a common symbol def to the
+	code handling non-common symbols so that archive element symbols
+	are loaded.  Use generic_link_add_object_symbols.
+
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
 	PR 13557
 	* linker.c (struct archive_list, struct archive_hash_entry,
 	struct archive_hash_table, archive_hash_newfunc,

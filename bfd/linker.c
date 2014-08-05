@@ -1120,29 +1120,21 @@ generic_link_check_archive_element (bfd *abfd,
 
       /* P is a symbol we are looking for.  */
 
-      if (! bfd_is_com_section (p->section))
+      if (! bfd_is_com_section (p->section)
+	  || (h->type == bfd_link_hash_undefined
+	      && h->u.undef.abfd == NULL))
 	{
-	  bfd_size_type symcount;
-	  asymbol **symbols;
-	  bfd *oldbfd = abfd;
-
-	  /* This object file defines this symbol, so pull it in.  */
+	  /* P is not a common symbol, or an undefined reference was
+	     created from outside BFD such as from a linker -u option.
+	     This object file defines the symbol, so pull it in.  */
+	  *pneeded = TRUE;
 	  if (!(*info->callbacks
 		->add_archive_element) (info, abfd, bfd_asymbol_name (p),
 					&abfd))
 	    return FALSE;
 	  /* Potentially, the add_archive_element hook may have set a
 	     substitute BFD for us.  */
-	  if (abfd != oldbfd
-	      && !bfd_generic_link_read_symbols (abfd))
-	    return FALSE;
-	  symcount = _bfd_generic_link_get_symcount (abfd);
-	  symbols = _bfd_generic_link_get_symbols (abfd);
-	  if (! generic_link_add_symbol_list (abfd, info, symcount,
-					      symbols, collect))
-	    return FALSE;
-	  *pneeded = TRUE;
-	  return TRUE;
+	  return generic_link_add_object_symbols (abfd, info, collect);
 	}
 
       /* P is a common symbol.  */
@@ -1153,23 +1145,6 @@ generic_link_check_archive_element (bfd *abfd,
 	  bfd_vma size;
 	  unsigned int power;
 
-	  symbfd = h->u.undef.abfd;
-	  if (symbfd == NULL)
-	    {
-	      /* This symbol was created as undefined from outside
-		 BFD.  We assume that we should link in the object
-		 file.  This is for the -u option in the linker.  */
-	      if (!(*info->callbacks
-		    ->add_archive_element) (info, abfd, bfd_asymbol_name (p),
-					    &abfd))
-		return FALSE;
-	      /* Potentially, the add_archive_element hook may have set a
-		 substitute BFD for us.  But no symbols are going to get
-		 registered by anything we're returning to from here.  */
-	      *pneeded = TRUE;
-	      return TRUE;
-	    }
-
 	  /* Turn the symbol into a common symbol but do not link in
 	     the object file.  This is how a.out works.  Object
 	     formats that require different semantics must implement
@@ -1177,6 +1152,7 @@ generic_link_check_archive_element (bfd *abfd,
 	     undefs list.  We add the section to a common section
 	     attached to symbfd to ensure that it is in a BFD which
 	     will be linked in.  */
+	  symbfd = h->u.undef.abfd;
 	  h->type = bfd_link_hash_common;
 	  h->u.c.p = (struct bfd_link_hash_common_entry *)
 	    bfd_hash_allocate (&info->hash->table,
