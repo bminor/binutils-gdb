@@ -25,22 +25,22 @@ from gdb.xmethod import SimpleXMethodMatcher
 
 
 def A_plus_A(obj, opr):
-  print ('From Python <A_plus_A>:')
+  print('From Python <A_plus_A>:')
   return obj['a'] + opr['a']
 
 
 def plus_plus_A(obj):
-  print ('From Python <plus_plus_A>:')
+  print('From Python <plus_plus_A>:')
   return obj['a'] + 1
 
 
 def A_geta(obj):
-  print ('From Python <A_geta>:')
+  print('From Python <A_geta>:')
   return obj['a']
 
 
 def A_getarrayind(obj, index):
-  print 'From Python <A_getarrayind>:'
+  print('From Python <A_getarrayind>:')
   return obj['array'][index]
 
 
@@ -61,7 +61,7 @@ class E_method_char_worker(XMethodWorker):
         return gdb.lookup_type('char')
 
     def __call__(self, obj, arg):
-        print 'From Python <E_method_char>'
+        print('From Python <E_method_char>')
         return None
 
 
@@ -73,7 +73,7 @@ class E_method_int_worker(XMethodWorker):
         return gdb.lookup_type('int')
 
     def __call__(self, obj, arg):
-        print 'From Python <E_method_int>'
+        print('From Python <E_method_int>')
         return None
 
 
@@ -86,7 +86,7 @@ class E_method_matcher(XMethodMatcher):
         class_tag = class_type.unqualified().tag
         if not re.match('^dop::E$', class_tag):
             return None
-	if not re.match('^method$', method_name):
+        if not re.match('^method$', method_name):
             return None
         workers = []
         if self.methods[0].enabled:
@@ -109,7 +109,7 @@ class G_size_diff_worker(XMethodWorker):
         pass
 
     def __call__(self, obj):
-        print ('From Python G<>::size_diff()')
+        print('From Python G<>::size_diff()')
         return (self._method_template_type.sizeof -
                 self._class_template_type.sizeof)
 
@@ -123,7 +123,7 @@ class G_size_mul_worker(XMethodWorker):
         pass
 
     def __call__(self, obj):
-        print ('From Python G<>::size_mul()')
+        print('From Python G<>::size_mul()')
         return self._class_template_type.sizeof * self._method_template_val
 
 
@@ -136,7 +136,7 @@ class G_mul_worker(XMethodWorker):
         return self._method_template_type
 
     def __call__(self, obj, arg):
-        print ('From Python G<>::mul()')
+        print('From Python G<>::mul()')
         return obj['t'] * arg
 
 

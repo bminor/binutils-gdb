@@ -140,7 +140,7 @@ def print_xm_info(xm_dict, name_re):
 
 def set_xm_status1(xm_dict, name_re, status):
     """Set the status (enabled/disabled) of a dictionary of xmethods."""
-    for locus_str, matchers in xm_dict.iteritems():
+    for locus_str, matchers in xm_dict.items():
         for matcher in matchers:
             if not name_re:
                 # If the name regex is missing, then set the status of the

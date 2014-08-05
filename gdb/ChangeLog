@@ -1,3 +1,8 @@
+2014-08-30  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/lib/gdb/command/xmethods.py (set_xm_status1): Use the
+	'items'	methods instead of 'iteritems' method on dictionaries.
+
 2014-08-27  Yao Qi  <yao@codesourcery.com>
 
 	* ctf.c (CTF_FILE_MIN_SIZE): Remove.
