@@ -1,3 +1,8 @@
+2014-08-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_discard_info): Set section's
+	rawsize if changing size.
+
 2014-08-05  Alan Modra  <amodra@gmail.com>
 
 	PR ld/17226
