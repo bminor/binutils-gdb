@@ -1,5 +1,12 @@
 2014-08-05  Gary Benson  <gbenson@redhat.com>
 
+	* interps.c (initialize_interps): Remove prototype.
+	(interpreter_initialized): Remove static global.
+	(interp_add): Do not call initialize_interps.
+	(initialize_interps): Remove function.
+
+2014-08-05  Gary Benson  <gbenson@redhat.com>
+
 	* utils.c (vwarning): Remove spurious va_end.
 
 2014-08-05  Alan Modra  <amodra@gmail.com>

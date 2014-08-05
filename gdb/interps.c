@@ -70,9 +70,6 @@ struct interp
   int quiet_p;
 };
 
-/* Functions local to this file.  */
-static void initialize_interps (void);
-
 /* The magic initialization routine for this module.  */
 
 void _initialize_interpreter (void);
@@ -82,8 +79,6 @@ void _initialize_interpreter (void);
 static struct interp *interp_list = NULL;
 static struct interp *current_interpreter = NULL;
 static struct interp *top_level_interpreter_ptr = NULL;
-
-static int interpreter_initialized = 0;
 
 /* interp_new - This allocates space for a new interpreter,
    fills the fields from the inputs, and returns a pointer to the
@@ -112,9 +107,6 @@ interp_new (const char *name, const struct interp_procs *procs)
 void
 interp_add (struct interp *interp)
 {
-  if (!interpreter_initialized)
-    initialize_interps ();
-
   gdb_assert (interp_lookup (interp->name) == NULL);
 
   interp->next = interp_list;
@@ -387,17 +379,6 @@ clear_interpreter_hooks (void)
   deprecated_target_wait_hook = 0;
   deprecated_call_command_hook = 0;
   deprecated_error_begin_hook = 0;
-}
-
-/* This is a lazy init routine, called the first time the interpreter
-   module is used.  I put it here just in case, but I haven't thought
-   of a use for it yet.  I will probably bag it soon, since I don't
-   think it will be necessary.  */
-static void
-initialize_interps (void)
-{
-  interpreter_initialized = 1;
-  /* Don't know if anything needs to be done here...  */
 }
 
 static void
