@@ -529,7 +529,6 @@ vwarning (const char *string, va_list args)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
       vfprintf_unfiltered (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
-      va_end (args);
     }
 }
 
