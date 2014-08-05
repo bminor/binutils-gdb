@@ -687,10 +687,7 @@ captured_main (void *data)
 	    xfree (interpreter_p);
 	    interpreter_p = xstrdup (INTERP_TUI);
 #else
-	    fprintf_unfiltered (gdb_stderr,
-				_("%s: TUI mode is not supported\n"),
-				argv[0]);
-	    exit (1);
+	    error (_("%s: TUI mode is not supported"), gdb_program_name);
 #endif
 	    break;
 	  case OPT_WINDOWS:
@@ -756,13 +753,8 @@ captured_main (void *data)
 	    break;
 	  case 'D':
 	    if (optarg[0] == '\0')
-	      {
-		fprintf_unfiltered (gdb_stderr,
-				    _("%s: empty path for"
-				      " `--data-directory'\n"),
-				    argv[0]);
-		exit (1);
-	      }
+	      error (_("%s: empty path for `--data-directory'"),
+		     gdb_program_name);
 	    set_gdb_data_directory (optarg);
 	    gdb_datadir_provided = 1;
 	    break;
@@ -772,13 +764,8 @@ captured_main (void *data)
 	      extern int gdbtk_test (char *);
 
 	      if (!gdbtk_test (optarg))
-		{
-		  fprintf_unfiltered (gdb_stderr,
-				      _("%s: unable to load "
-					"tclcommand file \"%s\""),
-				      argv[0], optarg);
-		  exit (1);
-		}
+		error (_("%s: unable to load tclcommand file \"%s\""),
+		       gdb_program_name, optarg);
 	      break;
 	    }
 	  case 'y':
@@ -851,11 +838,8 @@ captured_main (void *data)
 	    break;
 
 	  case '?':
-	    fprintf_unfiltered (gdb_stderr,
-				_("Use `%s --help' for a "
-				  "complete list of options.\n"),
-				argv[0]);
-	    exit (1);
+	    error (_("Use `%s --help' for a complete list of options."),
+		   gdb_program_name);
 	  }
       }
 
@@ -878,13 +862,9 @@ captured_main (void *data)
 	 inferior.  The first one is the sym/exec file, and the rest
 	 are arguments.  */
       if (optind >= argc)
-	{
-	  fprintf_unfiltered (gdb_stderr,
-			      _("%s: `--args' specified but "
-				"no program specified\n"),
-			      argv[0]);
-	  exit (1);
-	}
+	error (_("%s: `--args' specified but no program specified"),
+	       gdb_program_name);
+
       symarg = argv[optind];
       execarg = argv[optind];
       ++optind;

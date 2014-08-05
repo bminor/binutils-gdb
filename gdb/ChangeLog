@@ -1,5 +1,9 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* main.c (captured_main): Handle usage errors with error.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* go32-nat.c (go32_create_inferior): Replace a fprintf/
 	exit pair with a call to error.  Wrap the message with _().
 
