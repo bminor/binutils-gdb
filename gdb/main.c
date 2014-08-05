@@ -517,14 +517,12 @@ captured_main (void *data)
   gdb_program_name = xstrdup (argv[0]);
 #endif
 
+  /* Prefix warning messages with the command name.  */
+  warning_pre_print = xstrprintf ("%s: warning: ", gdb_program_name);
+
   if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
-    /* Don't use *_filtered or warning() (which relies on
-       current_target) until after initialize_all_files().  */
-    fprintf_unfiltered (gdb_stderr,
-			_("%s: warning: error finding "
-			  "working directory: %s\n"),
-                        argv[0], safe_strerror (errno));
-    
+    perror_warning_with_name (_("error finding working directory"));
+
   current_directory = gdb_dirbuf;
 
   /* Set the sysroot path.  */
@@ -807,13 +805,8 @@ captured_main (void *data)
 
 	      i = strtol (optarg, &p, 0);
 	      if (i == 0 && p == optarg)
-
-		/* Don't use *_filtered or warning() (which relies on
-		   current_target) until after initialize_all_files().  */
-
-		fprintf_unfiltered
-		  (gdb_stderr,
-		   _("warning: could not set baud rate to `%s'.\n"), optarg);
+		warning (_("could not set baud rate to `%s'."),
+			 optarg);
 	      else
 		baud_rate = i;
 	    }
@@ -825,13 +818,8 @@ captured_main (void *data)
 
 	      i = strtol (optarg, &p, 0);
 	      if (i == 0 && p == optarg)
-
-		/* Don't use *_filtered or warning() (which relies on
-		   current_target) until after initialize_all_files().  */
-
-		fprintf_unfiltered (gdb_stderr,
-				    _("warning: could not set "
-				      "timeout limit to `%s'.\n"), optarg);
+		warning (_("could not set timeout limit to `%s'."),
+			 optarg);
 	      else
 		remote_timeout = i;
 	    }
@@ -985,6 +973,7 @@ captured_main (void *data)
     }
 
   /* Set off error and warning messages with a blank line.  */
+  xfree (warning_pre_print);
   warning_pre_print = _("\nwarning: ");
 
   /* Read and execute the system-wide gdbinit file, if it exists.

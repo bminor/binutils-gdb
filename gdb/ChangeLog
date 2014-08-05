@@ -1,5 +1,10 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* main.c (captured_main): Use warning during startup.
+	Prefix startup warning messages with command name.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* main.c (captured_main): Handle usage errors with error.
 
 2014-08-29  Gary Benson  <gbenson@redhat.com>
