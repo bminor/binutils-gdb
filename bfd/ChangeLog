@@ -1,3 +1,8 @@
+2014-08-05  Doug Evans  <dje@google.com>
+
+	* bfd-in2.h: Regenerate.
+	* libcoff.h: Regenerate.
+
 2014-08-05  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_discard_info): Set section's

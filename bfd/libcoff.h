@@ -625,6 +625,7 @@ extern bfd_boolean ppc_allocate_toc_section
 extern bfd_boolean ppc_process_before_allocation
   (bfd *, struct bfd_link_info *);
 /* Extracted from coffcode.h.  */
+
 typedef struct coff_ptr_struct
 {
   /* Remembers the offset from the first symbol in the file for
