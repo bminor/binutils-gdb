@@ -1,5 +1,9 @@
 2014-08-06  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/defsym_test.sh: Allow ppc64le localentry annotation.
+
+2014-08-06  Alan Modra  <amodra@gmail.com>
+
 	PR 13227
 	* symtab.cc (Symbol_table::add_from_relobj): Warn on __gnu_lto_slim.
 
