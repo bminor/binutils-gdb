@@ -7290,7 +7290,7 @@ gdb_agent_init (void)
   sigfillset (&new_mask);
   res = pthread_sigmask (SIG_SETMASK, &new_mask, &orig_mask);
   if (res)
-    fatal ("pthread_sigmask (1) failed: %s", strerror (res));
+    perror_with_name ("pthread_sigmask (1)");
 
   res = pthread_create (&thread,
 			NULL,
@@ -7299,7 +7299,7 @@ gdb_agent_init (void)
 
   res = pthread_sigmask (SIG_SETMASK, &orig_mask, NULL);
   if (res)
-    fatal ("pthread_sigmask (2) failed: %s", strerror (res));
+    perror_with_name ("pthread_sigmask (2)");
 
   while (helper_thread_id == 0)
     usleep (1);
@@ -7380,7 +7380,7 @@ initialize_tracepoint (void)
 
     pagesize = sysconf (_SC_PAGE_SIZE);
     if (pagesize == -1)
-      fatal ("sysconf");
+      perror_with_name ("sysconf");
 
     gdb_tp_heap_buffer = xmalloc (5 * 1024 * 1024);
 
@@ -7399,9 +7399,7 @@ initialize_tracepoint (void)
       }
 
     if (addr == 0)
-      fatal ("\
-initialize_tracepoint: mmap'ing jump pad buffer failed with %s",
-	     strerror (errno));
+      perror_with_name ("mmap");
 
     gdb_jump_pad_buffer_end = gdb_jump_pad_buffer + pagesize * SCRATCH_BUFFER_NPAGES;
   }

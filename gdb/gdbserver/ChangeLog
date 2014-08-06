@@ -1,5 +1,11 @@
 2014-08-28  Gary Benson  <gbenson@redhat.com>
 
+	* tracepoint.c (gdb_agent_init): Replace fatal with
+	perror_with_name.
+	(initialize_tracepoint): Likewise.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
 	* remote-utils.c (remote_prepare): Replace fatal with error.
 
 2014-08-28  Gary Benson  <gbenson@redhat.com>
