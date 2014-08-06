@@ -543,6 +543,10 @@ static int add_bnd_prefix = 0;
 /* 1 if pseudo index register, eiz/riz, is allowed .  */
 static int allow_index_reg = 0;
 
+/* 1 if the assembler should ignore LOCK prefix, even if it was
+   specified explicitly.  */
+static int omit_lock_prefix = 0;
+
 static enum check_kind
   {
     check_none = 0,
@@ -6938,6 +6942,15 @@ output_insn (void)
       unsigned int j;
       unsigned int prefix;
 
+      /* Some processors fail on LOCK prefix. This options makes
+	 assembler ignore LOCK prefix and serves as a workaround.  */
+      if (omit_lock_prefix)
+	{
+	  if (i.tm.base_opcode == LOCK_PREFIX_OPCODE)
+	    return;
+	  i.prefix[LOCK_PREFIX] = 0;
+	}
+
       /* Since the VEX/EVEX prefix contains the implicit prefix, we
 	 don't need the explicit prefix.  */
       if (!i.tm.opcode_modifier.vex && !i.tm.opcode_modifier.evex)
@@ -9532,6 +9545,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MEVEXLIG (OPTION_MD_BASE + 16)
 #define OPTION_MEVEXWIG (OPTION_MD_BASE + 17)
 #define OPTION_MBIG_OBJ (OPTION_MD_BASE + 18)
+#define OPTION_omit_lock_prefix (OPTION_MD_BASE + 19)
 
 struct option md_longopts[] =
 {
@@ -9561,6 +9575,7 @@ struct option md_longopts[] =
 # if defined (TE_PE) || defined (TE_PEP)
   {"mbig-obj", no_argument, NULL, OPTION_MBIG_OBJ},
 #endif
+  {"momit-lock-prefix", required_argument, NULL, OPTION_omit_lock_prefix},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -9848,6 +9863,15 @@ md_parse_option (int c, char *arg)
       break;
 #endif
 
+    case OPTION_omit_lock_prefix:
+      if (strcasecmp (arg, "yes") == 0)
+        omit_lock_prefix = 1;
+      else if (strcasecmp (arg, "no") == 0)
+        omit_lock_prefix = 0;
+      else
+        as_fatal (_("invalid -momit-lock-prefix= option: `%s'"), arg);
+      break;
+
     default:
       return 0;
     }
@@ -10004,6 +10028,9 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -mbig-obj               generate big object files\n"));
 #endif
+  fprintf (stream, _("\
+  -momit-lock-prefix=[no|yes]\n\
+                          strip all lock prefixes\n"));
 }
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \

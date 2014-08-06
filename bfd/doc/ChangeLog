@@ -1,3 +1,14 @@
+2014-08-05  Doug Evans  <dje@google.com>
+
+	* chew.c (skip_past_newline_1): New function.
+	(outputdots): Call it.
+	(skip_past_newline): Ditto.
+
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
+	* chew.c (print_stack_level, main): Cast result of pointer
+	difference to match format string.
+
 2014-04-09  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am ($(MKDOC)): New rule, depend on chew.stamp.  Move

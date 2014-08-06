@@ -53,7 +53,7 @@ delete_breakpoints
 # traffic.  Hardware-step targets that can't access memory while the
 # target is running, either remote or native, are likewise affected.
 # So we just skip the test if not using software single-stepping.  We
-# detect that by looking for 'target_resume (..., step)' in "debug
+# detect that by looking for 'to_resume (..., step)' in "debug
 # target" output.
 
 # Probe for software single-step breakpoint use.
@@ -62,7 +62,7 @@ gdb_test_no_output "set debug target 1"
 set hardware_step 0
 set test "probe target hardware step"
 gdb_test_multiple "si" $test {
-    -re "target_resume \\(\[^\r\n\]+, step, .*$gdb_prompt $" {
+    -re "to_resume \\(\[^\r\n\]+, step, .*$gdb_prompt $" {
 	set hardware_step 1
 	pass $test
     }
@@ -76,7 +76,7 @@ if { $hardware_step } {
     return
 }
 
-gdb_test_no_output "set debug target 0"
+gdb_test "set debug target 0" "->to_log_command.*\\)"
 
 set line_re "\[^\r\n\]*"
 

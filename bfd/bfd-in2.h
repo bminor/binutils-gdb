@@ -1022,6 +1022,7 @@ extern struct coff_comdat_info * bfd_coff_get_comdat_section
 void bfd_init (void);
 
 /* Extracted from opncls.c.  */
+/* Set to N to open the next N BFDs using an alternate id space.  */
 extern unsigned int bfd_use_reserved_id;
 bfd *bfd_fopen (const char *filename, const char *target,
     const char *mode, int fd);
@@ -1206,6 +1207,7 @@ void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
 
 /* Extracted from bfdwin.c.  */
 /* Extracted from section.c.  */
+
 typedef struct bfd_section
 {
   /* The name of the section; the name isn't a copy, the pointer is
@@ -2344,6 +2346,7 @@ unsigned int bfd_arch_mach_octets_per_byte
    (enum bfd_architecture arch, unsigned long machine);
 
 /* Extracted from reloc.c.  */
+
 typedef enum bfd_reloc_status
 {
   /* No errors detected.  */
@@ -2393,6 +2396,7 @@ typedef struct reloc_cache_entry
 }
 arelent;
 
+
 enum complain_overflow
 {
   /* Do not complain on overflow.  */
@@ -2411,6 +2415,7 @@ enum complain_overflow
      unsigned number.  */
   complain_overflow_unsigned
 };
+struct bfd_symbol;             /* Forward declaration.  */
 
 struct reloc_howto_struct
 {
@@ -6027,6 +6032,7 @@ assembler and not (currently) written to any object files.  */
 /* Adapteva EPIPHANY - 8 bit immediate for 16 bit mov instruction.  */
   BFD_RELOC_EPIPHANY_IMM8,
   BFD_RELOC_UNUSED };
+
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *bfd_reloc_type_lookup
    (bfd *abfd, bfd_reloc_code_real_type code);
@@ -6224,6 +6230,7 @@ bfd_boolean bfd_copy_private_symbol_data
             (ibfd, isymbol, obfd, osymbol))
 
 /* Extracted from bfd.c.  */
+
 enum bfd_direction
   {
     no_direction = 0,
@@ -6508,6 +6515,7 @@ bfd_set_cacheable (bfd * abfd, bfd_boolean val)
   return TRUE;
 }
 
+
 typedef enum bfd_error
 {
   bfd_error_no_error = 0,
@@ -6543,6 +6551,7 @@ const char *bfd_errmsg (bfd_error_type error_tag);
 
 void bfd_perror (const char *message);
 
+
 typedef void (*bfd_error_handler_type) (const char *, ...);
 
 bfd_error_handler_type bfd_set_error_handler (bfd_error_handler_type);
@@ -6550,6 +6559,7 @@ bfd_error_handler_type bfd_set_error_handler (bfd_error_handler_type);
 void bfd_set_error_program_name (const char *);
 
 bfd_error_handler_type bfd_get_error_handler (void);
+
 
 typedef void (*bfd_assert_handler_type) (const char *bfd_formatmsg,
                                          const char *bfd_version,

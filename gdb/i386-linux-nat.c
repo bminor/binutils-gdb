@@ -26,7 +26,6 @@
 #include "gregset.h"
 #include "gdb_proc_service.h"
 
-#include "x86-linux-nat.h"
 #include "i386-linux-nat.h"
 #include "i387-tdep.h"
 #include "i386-tdep.h"

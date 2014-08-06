@@ -291,6 +291,18 @@ if such prefix was not explicitly specified in the source code.
 On x86-64 PE/COFF target this option forces the use of big object file
 format, which allows more than 32768 sections.
 
+@cindex @samp{-momit-lock-prefix=} option, i386
+@cindex @samp{-momit-lock-prefix=} option, x86-64
+@item -momit-lock-prefix=@var{no}
+@itemx -momit-lock-prefix=@var{yes}
+These options control how the assembler should encode lock prefix.
+This option is intended as a workaround for processors, that fail on
+lock prefix. This option can only be safely used with single-core,
+single-thread computers
+@option{-momit-lock-prefix=@var{yes}} will omit all lock prefixes.
+@option{-momit-lock-prefix=@var{no}} will encode lock prefix as usual,
+which is the default.
+
 @end table
 @c man end
 

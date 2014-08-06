@@ -217,6 +217,17 @@ plugin_opt_plugin_arg (const char *arg)
   if (!last_plugin)
     return set_plugin_error (_("<no plugin>"));
 
+  /* Ignore -pass-through= from GCC driver.  */
+  if (*arg == '-')
+    {
+      const char *p = arg + 1;
+
+      if (*p == '-')
+	++p;
+      if (strncmp (p, "pass-through=", 13) == 0)
+	return 0;
+    }
+
   newarg = xmalloc (sizeof *newarg);
   newarg->arg = arg;
   newarg->next = NULL;

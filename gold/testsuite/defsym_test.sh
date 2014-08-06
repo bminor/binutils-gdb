@@ -35,6 +35,6 @@ check()
     fi
 }
 
-check defsym_test.syms "FUNC *GLOBAL *HIDDEN *[0-9]* *bar"
+check defsym_test.syms "FUNC *GLOBAL *HIDDEN .* bar"
 
 exit 0

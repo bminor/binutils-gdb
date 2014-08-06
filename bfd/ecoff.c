@@ -3497,171 +3497,29 @@ ecoff_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   return FALSE;
 }
 
-/* Factored out from ecoff_link_check_archive_element.  */
-
-static bfd_boolean
-read_ext_syms_and_strs (HDRR **symhdr, bfd_size_type *external_ext_size,
-	bfd_size_type *esize, void **external_ext, char **ssext, bfd *abfd,
-	const struct ecoff_backend_data * const backend)
-{
-  if (! ecoff_slurp_symbolic_header (abfd))
-    return FALSE;
-
-  /* If there are no symbols, we don't want it.  */
-  if (bfd_get_symcount (abfd) == 0)
-    return TRUE;
-
-  *symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
-
-  *external_ext_size = backend->debug_swap.external_ext_size;
-  *esize = (*symhdr)->iextMax * *external_ext_size;
-  *external_ext = bfd_malloc (*esize);
-  if (*external_ext == NULL && *esize != 0)
-    return FALSE;
-
-  if (bfd_seek (abfd, (file_ptr) (*symhdr)->cbExtOffset, SEEK_SET) != 0
-      || bfd_bread (*external_ext, *esize, abfd) != *esize)
-    return FALSE;
-
-  *ssext = (char *) bfd_malloc ((bfd_size_type) (*symhdr)->issExtMax);
-  if (*ssext == NULL && (*symhdr)->issExtMax != 0)
-    return FALSE;
-
-  if (bfd_seek (abfd, (file_ptr) (*symhdr)->cbSsExtOffset, SEEK_SET) != 0
-      || (bfd_bread (*ssext, (bfd_size_type) (*symhdr)->issExtMax, abfd)
-	  != (bfd_size_type) (*symhdr)->issExtMax))
-    return FALSE;
-  return TRUE;
-}
-
-static bfd_boolean
-reread_ext_syms_and_strs (HDRR **symhdr, bfd_size_type *external_ext_size,
-	bfd_size_type *esize, void **external_ext, char **ssext, bfd *abfd,
-	const struct ecoff_backend_data * const backend)
-{
-  if (*external_ext != NULL)
-    free (*external_ext);
-  *external_ext = NULL;
-  if (*ssext != NULL)
-    free (*ssext);
-  *ssext = NULL;
-  return read_ext_syms_and_strs (symhdr, external_ext_size, esize,
-				external_ext, ssext, abfd, backend);
-}
-
 /* This is called if we used _bfd_generic_link_add_archive_symbols
    because we were not dealing with an ECOFF archive.  */
 
 static bfd_boolean
 ecoff_link_check_archive_element (bfd *abfd,
 				  struct bfd_link_info *info,
+				  struct bfd_link_hash_entry *h,
+				  const char *name,
 				  bfd_boolean *pneeded)
 {
-  const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
-  void (* const swap_ext_in) (bfd *, void *, EXTR *)
-    = backend->debug_swap.swap_ext_in;
-  HDRR *symhdr;
-  bfd_size_type external_ext_size = 0;
-  void * external_ext = NULL;
-  bfd_size_type esize = 0;
-  char *ssext = NULL;
-  char *ext_ptr;
-  char *ext_end;
-
   *pneeded = FALSE;
 
-  /* Read in the external symbols and external strings.  */
-  if (!read_ext_syms_and_strs (&symhdr, &external_ext_size, &esize,
-	&external_ext, &ssext, abfd, backend))
-    goto error_return;
+  /* Unlike the generic linker, we do not pull in elements because
+     of common symbols.  */
+  if (h->type != bfd_link_hash_undefined)
+    return TRUE;
 
-  /* If there are no symbols, we don't want it.  */
-  if (bfd_get_symcount (abfd) == 0)
-    goto successful_return;
+  /* Include this element.  */
+  if (!(*info->callbacks->add_archive_element) (info, abfd, name, &abfd))
+    return FALSE;
+  *pneeded = TRUE;
 
-  /* Look through the external symbols to see if they define some
-     symbol that is currently undefined.  */
-  ext_ptr = (char *) external_ext;
-  ext_end = ext_ptr + esize;
-  for (; ext_ptr < ext_end; ext_ptr += external_ext_size)
-    {
-      EXTR esym;
-      bfd_boolean def;
-      const char *name;
-      bfd *oldbfd;
-      struct bfd_link_hash_entry *h;
-
-      (*swap_ext_in) (abfd, (void *) ext_ptr, &esym);
-
-      /* See if this symbol defines something.  */
-      if (esym.asym.st != stGlobal
-	  && esym.asym.st != stLabel
-	  && esym.asym.st != stProc)
-	continue;
-
-      switch (esym.asym.sc)
-	{
-	case scText:
-	case scData:
-	case scBss:
-	case scAbs:
-	case scSData:
-	case scSBss:
-	case scRData:
-	case scCommon:
-	case scSCommon:
-	case scInit:
-	case scFini:
-	case scRConst:
-	  def = TRUE;
-	  break;
-	default:
-	  def = FALSE;
-	  break;
-	}
-
-      if (! def)
-	continue;
-
-      name = ssext + esym.asym.iss;
-      h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, TRUE);
-
-      /* Unlike the generic linker, we do not pull in elements because
-	 of common symbols.  */
-      if (h == NULL
-	  || h->type != bfd_link_hash_undefined)
-	continue;
-
-      /* Include this element.  */
-      oldbfd = abfd;
-      if (!(*info->callbacks
-	    ->add_archive_element) (info, abfd, name, &abfd))
-	goto error_return;
-      /* Potentially, the add_archive_element hook may have set a
-	 substitute BFD for us.  */
-      if (abfd != oldbfd
-	  && !reread_ext_syms_and_strs (&symhdr, &external_ext_size, &esize,
-					&external_ext, &ssext, abfd, backend))
-	goto error_return;
-      if (! ecoff_link_add_externals (abfd, info, external_ext, ssext))
-	goto error_return;
-
-      *pneeded = TRUE;
-      goto successful_return;
-    }
-
- successful_return:
-  if (external_ext != NULL)
-    free (external_ext);
-  if (ssext != NULL)
-    free (ssext);
-  return TRUE;
- error_return:
-  if (external_ext != NULL)
-    free (external_ext);
-  if (ssext != NULL)
-    free (ssext);
-  return FALSE;
+  return ecoff_link_add_object_symbols (abfd, info);
 }
 
 /* Add the symbols from an archive file to the global hash table.

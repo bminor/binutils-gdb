@@ -17241,7 +17241,8 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 
 	  if (op_code >= lh->opcode_base)
 	    {
-	      /* Special operand.  */
+	      /* Special opcode.  */
+
 	      adj_opcode = op_code - lh->opcode_base;
 	      address += (((op_index + (adj_opcode / lh->line_range))
 			   / lh->maximum_ops_per_instruction)

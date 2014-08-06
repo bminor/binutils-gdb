@@ -251,7 +251,7 @@ HOWTO( 1,	       0,  1,  16,  TRUE,  0, complain_overflow_signed,0,"DISP16",	TRU
 #define TABLE_SIZE(TABLE)	(sizeof(TABLE)/sizeof(TABLE[0]))
 
 
-static bfd_boolean aout_link_check_archive_element (bfd *, struct bfd_link_info *, bfd_boolean *);
+static bfd_boolean aout_link_check_archive_element (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *, const char *, bfd_boolean *);
 static bfd_boolean aout_link_add_object_symbols    (bfd *, struct bfd_link_info *);
 static bfd_boolean aout_link_add_symbols           (bfd *, struct bfd_link_info *);
 static bfd_boolean aout_link_write_symbols         (struct aout_final_link_info *, bfd *);
@@ -2679,6 +2679,8 @@ aout_link_check_ar_symbols (bfd *abfd,
 static bfd_boolean
 aout_link_check_archive_element (bfd *abfd,
 				 struct bfd_link_info *info,
+				 struct bfd_link_hash_entry *h ATTRIBUTE_UNUSED,
+				 const char *name ATTRIBUTE_UNUSED,
 				 bfd_boolean *pneeded)
 {
   bfd *oldbfd;

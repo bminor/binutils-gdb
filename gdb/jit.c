@@ -637,7 +637,8 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   struct symtab *symtab;
   struct gdb_block *gdb_block_iter, *gdb_block_iter_tmp;
   struct block *block_iter;
-  int actual_nblocks, i, blockvector_size;
+  int actual_nblocks, i;
+  size_t blockvector_size;
   CORE_ADDR begin, end;
   struct blockvector *bv;
 
@@ -650,9 +651,9 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   /* Copy over the linetable entry if one was provided.  */
   if (stab->linetable)
     {
-      int size = ((stab->linetable->nitems - 1)
-                  * sizeof (struct linetable_entry)
-                  + sizeof (struct linetable));
+      size_t size = ((stab->linetable->nitems - 1)
+		     * sizeof (struct linetable_entry)
+		     + sizeof (struct linetable));
       LINETABLE (symtab) = obstack_alloc (&objfile->objfile_obstack, size);
       memcpy (LINETABLE (symtab), stab->linetable, size);
     }

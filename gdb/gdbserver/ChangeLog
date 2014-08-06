@@ -1,3 +1,11 @@
+2014-08-06  Gary Benson  <gbenson@redhat.com>
+
+	* regcache.c (init_register_cache): Move conditionals inside if.
+
+2014-08-06  Gary Benson  <gbenson@redhat.com>
+
+	* linux-low.c (linux_supports_non_stop): Use target_is_async_p.
+
 2014-07-31  Gary Benson  <gbenson@redhat.com>
 
 	* ax.h: Do not include server.h.

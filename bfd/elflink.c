@@ -2931,13 +2931,6 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
   if (! bfd_check_format (abfd, bfd_object))
     return FALSE;
 
-  /* If we have already included the element containing this symbol in the
-     link then we do not need to include it again.  Just claim that any symbol
-     it contains is not a definition, so that our caller will not decide to
-     (re)include this element.  */
-  if (abfd->archive_pass)
-    return FALSE;
-
   /* Select the appropriate symbol table.  */
   if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
     hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -4928,20 +4921,8 @@ _bfd_elf_archive_symbol_lookup (bfd *abfd,
 }
 
 /* Add symbols from an ELF archive file to the linker hash table.  We
-   don't use _bfd_generic_link_add_archive_symbols because of a
-   problem which arises on UnixWare.  The UnixWare libc.so is an
-   archive which includes an entry libc.so.1 which defines a bunch of
-   symbols.  The libc.so archive also includes a number of other
-   object files, which also define symbols, some of which are the same
-   as those defined in libc.so.1.  Correct linking requires that we
-   consider each object file in turn, and include it if it defines any
-   symbols we need.  _bfd_generic_link_add_archive_symbols does not do
-   this; it looks through the list of undefined symbols, and includes
-   any object file which defines them.  When this algorithm is used on
-   UnixWare, it winds up pulling in libc.so.1 early and defining a
-   bunch of symbols.  This means that some of the other objects in the
-   archive are not included in the link, which is incorrect since they
-   precede libc.so.1 in the archive.
+   don't use _bfd_generic_link_add_archive_symbols because we need to
+   handle versioned symbols.
 
    Fortunately, ELF archive handling is simpler than that done by
    _bfd_generic_link_add_archive_symbols, which has to allow for a.out
@@ -4956,8 +4937,7 @@ static bfd_boolean
 elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 {
   symindex c;
-  bfd_boolean *defined = NULL;
-  bfd_boolean *included = NULL;
+  unsigned char *included = NULL;
   carsym *symdefs;
   bfd_boolean loop;
   bfd_size_type amt;
@@ -4981,11 +4961,10 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
   if (c == 0)
     return TRUE;
   amt = c;
-  amt *= sizeof (bfd_boolean);
-  defined = (bfd_boolean *) bfd_zmalloc (amt);
-  included = (bfd_boolean *) bfd_zmalloc (amt);
-  if (defined == NULL || included == NULL)
-    goto error_return;
+  amt *= sizeof (*included);
+  included = (unsigned char *) bfd_zmalloc (amt);
+  if (included == NULL)
+    return FALSE;
 
   symdefs = bfd_ardata (abfd)->symdefs;
   bed = get_elf_backend_data (abfd);
@@ -5010,7 +4989,7 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	  struct bfd_link_hash_entry *undefs_tail;
 	  symindex mark;
 
-	  if (defined[i] || included[i])
+	  if (included[i])
 	    continue;
 	  if (symdef->file_offset == last)
 	    {
@@ -5045,7 +5024,8 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	  else if (h->root.type != bfd_link_hash_undefined)
 	    {
 	      if (h->root.type != bfd_link_hash_undefweak)
-		defined[i] = TRUE;
+		/* Symbol must be defined.  Don't check it again.  */
+		included[i] = TRUE;
 	      continue;
 	    }
 
@@ -5056,16 +5036,6 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  if (! bfd_check_format (element, bfd_object))
 	    goto error_return;
-
-	  /* Doublecheck that we have not included this object
-	     already--it should be impossible, but there may be
-	     something wrong with the archive.  */
-	  if (element->archive_pass != 0)
-	    {
-	      bfd_set_error (bfd_error_bad_value);
-	      goto error_return;
-	    }
-	  element->archive_pass = 1;
 
 	  undefs_tail = info->hash->undefs_tail;
 
@@ -5104,14 +5074,11 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
     }
   while (loop);
 
-  free (defined);
   free (included);
 
   return TRUE;
 
  error_return:
-  if (defined != NULL)
-    free (defined);
   if (included != NULL)
     free (included);
   return FALSE;

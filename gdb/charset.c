@@ -503,7 +503,7 @@ convert_between_encodings (const char *from, const char *to,
       old_size = obstack_object_size (output);
       obstack_blank (output, space_request);
 
-      outp = obstack_base (output) + old_size;
+      outp = (char *) obstack_base (output) + old_size;
       outleft = space_request;
 
       r = iconv (desc, &inp, &inleft, &outp, &outleft);

@@ -1,3 +1,55 @@
+2014-08-05  Doug Evans  <dje@google.com>
+
+	* bfd-in2.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+2014-08-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_discard_info): Set section's
+	rawsize if changing size.
+
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17226
+	* elfxx-sparc.c (_bfd_sparc_elf_gc_sweep_hook): Typo fix.
+
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
+	* linker.c (generic_link_check_archive_element): Move handling
+	of command link -u symbols with a common symbol def to the
+	code handling non-common symbols so that archive element symbols
+	are loaded.  Use generic_link_add_object_symbols.
+
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
+	PR 13557
+	* linker.c (struct archive_list, struct archive_hash_entry,
+	struct archive_hash_table, archive_hash_newfunc,
+	archive_hash_table_init, archive_hash_lookup, archive_hash_allocate,
+	archive_hash_table_free): Delete.
+	(_bfd_generic_link_add_archive_symbols): Add h and name params to
+	checkfn.  Rewrite using a straight-forward scan over archive map.
+	(generic_link_check_archive_element_no_collect,
+	generic_link_check_archive_element_collect,
+	generic_link_check_archive_element): Add h and name params.
+	* aoutx.h (aout_link_check_archive_element): Likewise.
+	* pdp11.c (aout_link_check_archive_element): Likewise.
+	* xcofflink.c (xcoff_link_check_archive_element): Likewise.
+	* cofflink.c (coff_link_check_archive_element): Likewise.  Don't
+	scan symbols, simply add archive element whenever h is undefined.
+	(coff_link_check_ar_symbols): Delete.
+	* ecoff.c (read_ext_syms_and_strs): Delete.
+	(reread_ext_syms_and_strs): Delete.
+	(ecoff_link_check_archive_element): Add h and name param.  Don't
+	scan symbols, simply add based on h.  Use ecoff_link_add_object_symbols.
+	* elflink.c (elf_link_is_defined_archive_symbol): Don't test
+	archive_pass.
+	(elf_link_add_archive_symbols): Delete "defined" array, merge
+	functionality into "included".  Make "included" a char array.  Don't
+	set or test archive_pass.
+	* libbfd-in.h (_bfd_generic_link_add_archive_symbols): Update.
+	* libbfd.h: Regenerate.
+
 2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
 
 	PR 10373

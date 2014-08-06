@@ -529,7 +529,6 @@ vwarning (const char *string, va_list args)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
       vfprintf_unfiltered (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
-      va_end (args);
     }
 }
 
@@ -3080,7 +3079,7 @@ gdb_sign_extend (LONGEST value, int bit)
 void *
 hashtab_obstack_allocate (void *data, size_t size, size_t count)
 {
-  unsigned int total = size * count;
+  size_t total = size * count;
   void *ptr = obstack_alloc ((struct obstack *) data, total);
 
   memset (ptr, 0, total);

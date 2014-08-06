@@ -1,3 +1,46 @@
+2014-08-06  Yao Qi  <yao@codesourcery.com>
+
+	* amd64-linux-nat.c: Remove duplicated include
+	"x86-linux-nat.h".
+	* i386-linux-nat.c: Likewise.
+
+2014-08-06  Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2read.c (dwarf_decode_lines_1): Replace "Special
+	operand" with "Special opcode" in comments.
+
+2014-08-05  Gary Benson  <gbenson@redhat.com>
+
+	* interps.c (initialize_interps): Remove prototype.
+	(interpreter_initialized): Remove static global.
+	(interp_add): Do not call initialize_interps.
+	(initialize_interps): Remove function.
+
+2014-08-05  Gary Benson  <gbenson@redhat.com>
+
+	* utils.c (vwarning): Remove spurious va_end.
+
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
+	* charset.c (convert_between_encodings): Cast result of obstack_base.
+	* cp-valprint.c (cp_print_value_fields): Use size_t locals.
+	* hppa-tdep.c (internalize_unwinds): Change "size" parm to size_t.
+	(read_unwind_info): Use size_t for some locals.
+	* jit.c (finalize_symtab): Likewise.
+	* utils.c (hashtab_obstack_allocate): Likewise.
+	* symmisc.c (print_objfile_statistics): Update format strings.
+
+2014-08-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes in GDB-4.0): Move Intel MPX and Intel AVX-512 items ...
+	(Changes in GDB 7.8): ... here.
+
+2014-08-04  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (set_targetdebug): New function.
+	(initialize_targets): Pass set_targetdebug when creating "set
+	debug target".
+
 2014-08-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (resolve_dynamic_struct): Do not generate an error

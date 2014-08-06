@@ -12380,6 +12380,8 @@ _bfd_mips_elf_discard_info (bfd *abfd, struct elf_reloc_cookie *cookie,
   if (skip != 0)
     {
       mips_elf_section_data (o)->u.tdata = tdata;
+      if (o->rawsize == 0)
+	o->rawsize = o->size;
       o->size -= skip * PDR_SIZE;
       ret = TRUE;
     }

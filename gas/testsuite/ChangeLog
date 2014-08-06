@@ -1,3 +1,10 @@
+2014-08-06  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/i386.exp: Run new tests.
+	* gas/i386/omit-lock-no.d: New.
+	* gas/i386/omit-lock-yes.d: Ditto.
+	* gas/i386/omit-lock.s: Ditto.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/attr-gnu-4-0.d: New.
@@ -120,7 +127,7 @@
 	* gas/mips/tmips16-f.d: Likewise.
 	* gas/mips/tmipsel16-e.d: Likewise.
 	* gas/mips/tmipsel16-f.d: Likewise.
-	* gas/testsuite/gas/mips/mips.exp: Add new tests.
+	* gas/mips/mips.exp: Add new tests.
 
 2014-07-22  Sergey Guriev  <sergey.s.guriev@intel.com>
 	    Alexander Ivchenko  <alexander.ivchenko@intel.com>

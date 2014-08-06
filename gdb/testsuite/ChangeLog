@@ -1,3 +1,13 @@
+2014-08-04  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/sss-bp-on-user-bp-2.exp: Expect output from "set debug
+	target 0".
+
+2014-08-04  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/sss-bp-on-user-bp-2.exp: Match "to_resume", not
+	"target_resume".
+
 2014-08-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/vla-datatypes.c (vla_factory): Add new variable

@@ -265,6 +265,19 @@ skip_white_and_stars (src, idx)
   return idx;
 }
 
+static unsigned int
+skip_past_newline_1 (ptr, idx)
+     string_type *ptr;
+     unsigned int idx;
+{
+  while (at (ptr, idx)
+	 && at (ptr, idx) != '\n')
+    idx++;
+  if (at (ptr, idx) == '\n')
+    return idx + 1;
+  return idx;
+}
+
 /***********************************************************************/
 
 string_type stack[STACK];
@@ -474,8 +487,10 @@ remove_noncomments (src, dst)
 static void
 print_stack_level ()
 {
-  fprintf (stderr, "current string stack depth = %ld, ", tos - stack);
-  fprintf (stderr, "current integer stack depth = %ld\n", isp - istack);
+  fprintf (stderr, "current string stack depth = %ld, ",
+	   (long) (tos - stack));
+  fprintf (stderr, "current integer stack depth = %ld\n",
+	   (long) (isp - istack));
   pc++;
 }
 
@@ -601,10 +616,12 @@ outputdots ()
 
   while (at (tos, idx))
     {
-      if (at (tos, idx) == '\n' && at (tos, idx + 1) == '.')
+      /* Every iteration begins at the start of a line.  */
+      if (at (tos, idx) == '.')
 	{
 	  char c;
-	  idx += 2;
+
+	  idx++;
 
 	  while ((c = at (tos, idx)) && c != '\n')
 	    {
@@ -624,11 +641,13 @@ outputdots ()
 		  idx++;
 		}
 	    }
+	  if (c == '\n')
+	    idx++;
 	  catchar (&out, '\n');
 	}
       else
 	{
-	  idx++;
+	  idx = skip_past_newline_1 (tos, idx);
 	}
     }
 
@@ -1093,10 +1112,7 @@ icatstr ()
 static void
 skip_past_newline ()
 {
-  while (at (ptr, idx)
-	 && at (ptr, idx) != '\n')
-    idx++;
-  idx++;
+  idx = skip_past_newline_1 (ptr, idx);
   pc++;
 }
 
@@ -1562,7 +1578,7 @@ main (ac, av)
   if (tos != stack)
     {
       fprintf (stderr, "finishing with current stack level %ld\n",
-	       tos - stack);
+	       (long) (tos - stack));
       return 1;
     }
   return 0;

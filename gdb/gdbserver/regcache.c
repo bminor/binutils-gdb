@@ -117,9 +117,9 @@ init_register_cache (struct regcache *regcache,
 		     const struct target_desc *tdesc,
 		     unsigned char *regbuf)
 {
-#ifndef IN_PROCESS_AGENT
   if (regbuf == NULL)
     {
+#ifndef IN_PROCESS_AGENT
       /* Make sure to zero-initialize the register cache when it is
 	 created, in case there are registers the target never
 	 fetches.  This way they'll read as zero instead of
@@ -129,13 +129,11 @@ init_register_cache (struct regcache *regcache,
       regcache->registers_owned = 1;
       regcache->register_status = xcalloc (1, tdesc->num_registers);
       gdb_assert (REG_UNAVAILABLE == 0);
+#else
+      fatal ("init_register_cache: can't allocate memory from the heap");
+#endif
     }
   else
-#else
-  if (regbuf == NULL)
-    fatal ("init_register_cache: can't allocate memory from the heap");
-  else
-#endif
     {
       regcache->tdesc = tdesc;
       regcache->registers = regbuf;

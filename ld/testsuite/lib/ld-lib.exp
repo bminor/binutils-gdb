@@ -1424,6 +1424,15 @@ proc run_cc_link_tests { ldtests } {
 	set is_unresolved 0
 	set failed 0
 
+	#verbose -log "testname  is $testname"
+	#verbose -log "ldflags   is $ldflags"
+	#verbose -log "cflags    is $cflags"
+	#verbose -log "src_files is $src_files"
+	#verbose -log "actions   is $actions"
+	#verbose -log "binfile   is $binfile"
+	#verbose -log "lang      is $lang"
+	#verbose -log "warnings  is $warnings"
+
 	# Compile each file in the test.
 	foreach src_file $src_files {
 	    set fileroot "[file rootname [file tail $src_file]]"
@@ -1686,12 +1695,46 @@ proc check_lto_available { } {
 	puts $f "int main() { return 0; }"
 	close $f
 	remote_download host $src
-	set lto_available_saved [run_host_cmd_yesno "$CC" "$flags -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
+	set lto_available_saved [run_host_cmd_yesno "$CC" "$flags -flto -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
     }
     return $lto_available_saved
+}
+
+# Returns true if the target compiler supports LTO  -ffat-lto-objects
+proc check_lto_fat_available { } {
+    global lto_fat_available_saved
+    global CC
+
+    if {![info exists lto_fat_available_saved]} {
+        if { [which $CC] == 0 } {
+	    set lto_fat_available_saved 0
+	    return 0
+	}
+	# Check if gcc supports -flto -fuse-linker-plugin
+	set flags ""
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
+	}
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+
+	set basename "tmpdir/lto[pid]"
+	set src ${basename}.c
+	set output ${basename}.out
+	set f [open $src "w"]
+	puts $f "int main() { return 0; }"
+	close $f
+	remote_download host $src
+	set lto_fat_available_saved [run_host_cmd_yesno "$CC" "$flags -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
+	remote_file host delete $src
+	remote_file host delete $output
+	file delete $src
+    }
+    return $lto_fat_available_saved
 }
 
 # Returns true if the target compiler supports LTO and -shared
