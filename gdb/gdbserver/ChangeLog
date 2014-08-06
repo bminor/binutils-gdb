@@ -1,5 +1,9 @@
 2014-08-28  Gary Benson  <gbenson@redhat.com>
 
+	* remote-utils.c (remote_prepare): Replace fatal with error.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
 	* linux-low.c (linux_async): Replace fatal with warning.
 	Tidy up and return.
 	(linux_start_non_stop): Return -1 if linux_async failed.

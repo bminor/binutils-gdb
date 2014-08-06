@@ -247,7 +247,7 @@ remote_prepare (char *name)
 
   port = strtoul (port_str + 1, &port_end, 10);
   if (port_str[1] == '\0' || *port_end != '\0')
-    fatal ("Bad port argument: %s", name);
+    error ("Bad port argument: %s", name);
 
 #ifdef USE_WIN32API
   if (!winsock_initialized)
