@@ -1,5 +1,11 @@
 2014-08-28  Gary Benson  <gbenson@redhat.com>
 
+	* linux-low.c (linux_async): Replace fatal with warning.
+	Tidy up and return.
+	(linux_start_non_stop): Return -1 if linux_async failed.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
 	* linux-x86-low.c (i386_dr_low_set_addr): Replace check with
 	gdb_assert.
 	(i386_dr_low_get_addr): Remove vague comment.

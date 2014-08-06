@@ -5107,7 +5107,14 @@ linux_async (int enable)
       if (enable)
 	{
 	  if (pipe (linux_event_pipe) == -1)
-	    fatal ("creating event pipe failed.");
+	    {
+	      linux_event_pipe[0] = -1;
+	      linux_event_pipe[1] = -1;
+	      sigprocmask (SIG_UNBLOCK, &mask, NULL);
+
+	      warning ("creating event pipe failed.");
+	      return previous;
+	    }
 
 	  fcntl (linux_event_pipe[0], F_SETFL, O_NONBLOCK);
 	  fcntl (linux_event_pipe[1], F_SETFL, O_NONBLOCK);
@@ -5140,6 +5147,10 @@ linux_start_non_stop (int nonstop)
 {
   /* Register or unregister from event-loop accordingly.  */
   linux_async (nonstop);
+
+  if (target_is_async_p () != (nonstop != 0))
+    return -1;
+
   return 0;
 }
 
