@@ -1,3 +1,11 @@
+2014-08-06  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (check_lto_fat_available): New.
+	(check_lto_available): Remove -ffat-lto-objects test.
+	* ld-plugin/lto.exp: Use [list ] rather than { } to set up list
+	variables, allowing substition of vars.  Set lto_fat and plug_opt
+	and add to various tests.
+
 2014-08-01  Takashi Yoshii  <yoshii.takashi@renesas.com>
 
 	PR 10373
