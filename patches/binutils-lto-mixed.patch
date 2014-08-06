@@ -86,10 +86,10 @@ for Linux kernel build with LTO.
 
 diff --git a/ChangeLog.lto-mixed b/ChangeLog.lto-mixed
 new file mode 100644
-index 0000000..61b4307
+index 0000000..570510b
 --- /dev/null
 +++ b/ChangeLog.lto-mixed
-@@ -0,0 +1,339 @@
+@@ -0,0 +1,332 @@
 +bfd/
 +
 +2014-03-25  H.J. Lu  <hongjiu.lu@intel.com>
@@ -175,12 +175,6 @@ index 0000000..61b4307
 +	object_only_syms.
 +
 +	* bfd-in2.h: Regenerated.
-+
-+2011-05-14  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/12758
-+	* elflink.c (elf_link_add_archive_symbols): Don't load the IR
-+	archive member twice.
 +
 +2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
 +
@@ -353,9 +347,8 @@ index 0000000..61b4307
 +
 +	* ldmain.h (ld_parse_linker_script): New.
 +
-+	* plugin.c (plugin_opt_plugin_arg): Ignore -pass-through=.
-+	(plugin_maybe_claim): Call cmdline_check_object_only_section
-+	on claimed IR files.
++	* plugin.c (plugin_maybe_claim): Call
++	cmdline_check_object_only_section on claimed IR files.
 +
 +	* scripttempl/armbpabi.sc: Also discard .gnu_object_only
 +	sections.
@@ -430,10 +423,10 @@ index 0000000..61b4307
 +	(lto_run_tests): Add "LTO 4[acd]" tests.
 +	Build liblto-4.a.  Run "lto-4r-[abcd]" tests.
 diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index 3886adc..fb406a7 100644
+index 8c77c81..1387606 100644
 --- a/bfd/bfd-in2.h
 +++ b/bfd/bfd-in2.h
-@@ -1082,6 +1082,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
+@@ -1083,6 +1083,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
  bfd_boolean bfd_fill_in_gnu_debuglink_section
     (bfd *abfd, struct bfd_section *sect, const char *filename);
  
@@ -443,7 +436,7 @@ index 3886adc..fb406a7 100644
  /* Extracted from libbfd.c.  */
  
  /* Byte swapping macros for user section data.  */
-@@ -1634,6 +1637,9 @@ extern asection _bfd_std_section[4];
+@@ -1636,6 +1639,9 @@ extern asection _bfd_std_section[4];
  #define BFD_COM_SECTION_NAME "*COM*"
  #define BFD_IND_SECTION_NAME "*IND*"
  
@@ -453,7 +446,7 @@ index 3886adc..fb406a7 100644
  /* Pointer to the common section.  */
  #define bfd_com_section_ptr (&_bfd_std_section[0])
  /* Pointer to the undefined section.  */
-@@ -6232,6 +6238,14 @@ enum bfd_direction
+@@ -6239,6 +6245,14 @@ enum bfd_direction
      both_direction = 3
    };
  
@@ -468,7 +461,7 @@ index 3886adc..fb406a7 100644
  struct bfd
  {
    /* The filename the application opened the BFD with.  */
-@@ -6388,6 +6402,9 @@ struct bfd
+@@ -6395,6 +6409,9 @@ struct bfd
    /* Set if this is the linker output BFD.  */
    unsigned int is_linker_output : 1;
  
@@ -478,7 +471,7 @@ index 3886adc..fb406a7 100644
    /* Currently my_archive is tested before adding origin to
       anything. I believe that this can become always an add of
       origin, with origin set to 0 for non archive files.  */
-@@ -6409,6 +6426,9 @@ struct bfd
+@@ -6416,6 +6433,9 @@ struct bfd
    /* The last section on the section list.  */
    struct bfd_section *section_last;
  
@@ -488,7 +481,7 @@ index 3886adc..fb406a7 100644
    /* The number of sections.  */
    unsigned int section_count;
  
-@@ -6707,6 +6727,8 @@ void bfd_emul_set_commonpagesize (const char *, bfd_vma);
+@@ -6717,6 +6737,8 @@ void bfd_emul_set_commonpagesize (const char *, bfd_vma);
  
  char *bfd_demangle (bfd *, const char *, int);
  
@@ -574,7 +567,7 @@ index 8b60911..537433c 100644
 +  return NULL;
 +}
 diff --git a/bfd/elf.c b/bfd/elf.c
-index 3f377d1..bc8a181 100644
+index 9dc6b6d..d52fe15 100644
 --- a/bfd/elf.c
 +++ b/bfd/elf.c
 @@ -2100,6 +2100,7 @@ static const struct bfd_elf_special_section special_sections_g[] =
@@ -586,10 +579,10 @@ index 3f377d1..bc8a181 100644
    { STRING_COMMA_LEN (".gnu.version_d"),   0, SHT_GNU_verdef,  0 },
    { STRING_COMMA_LEN (".gnu.version_r"),   0, SHT_GNU_verneed, 0 },
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 46d65f4..8ad5380 100644
+index 69a87a6..bbcd3e1 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
-@@ -2446,6 +2446,20 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
+@@ -2425,6 +2425,20 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
      }
    else
      {
@@ -610,16 +603,6 @@ index 46d65f4..8ad5380 100644
        /* Unfortunately, NON_ELF is only correct if the symbol
  	 was first seen in a non-ELF file.  Fortunately, if the symbol
  	 was first seen in an ELF file, we're probably OK unless the
-@@ -5073,6 +5087,9 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
- 	     something wrong with the archive.  */
- 	  if (element->archive_pass != 0)
- 	    {
-+	      /* Don't load the IR archive member twice.  */
-+	      if (element->lto_type == lto_ir_object)
-+		continue;
- 	      bfd_set_error (bfd_error_bad_value);
- 	      goto error_return;
- 	    }
 diff --git a/bfd/format.c b/bfd/format.c
 index c4bc944..63ad2e6 100644
 --- a/bfd/format.c
@@ -704,10 +687,10 @@ index c4bc944..63ad2e6 100644
        return TRUE;
      }
 diff --git a/bfd/linker.c b/bfd/linker.c
-index f6ae4e2..0a9fbda 100644
+index 1877e67..db625b2 100644
 --- a/bfd/linker.c
 +++ b/bfd/linker.c
-@@ -1949,8 +1949,10 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
+@@ -1777,8 +1777,10 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
  	  break;
  
  	case WARNC:
@@ -720,7 +703,7 @@ index f6ae4e2..0a9fbda 100644
  	    {
  	      if (! (*info->callbacks->warning) (info, h->u.i.warning,
  						 h->root.string, abfd,
-@@ -1975,6 +1977,11 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
+@@ -1803,6 +1805,11 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
  	  break;
  
  	case WARN:
@@ -732,7 +715,7 @@ index f6ae4e2..0a9fbda 100644
  	  /* Issue a warning.  */
  	  if (! (*info->callbacks->warning) (info, string, h->root.string,
  					     hash_entry_bfd (h), NULL, 0))
-@@ -1996,6 +2003,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
+@@ -1824,6 +1831,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
  	    }
  	  /* Fall through.  */
  	case MWARN:
@@ -1114,10 +1097,10 @@ index 46fd8bc..81d3be9 100644
        if (gsym != NULL)
  	{
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index f038422..b5dba2e 100644
+index 7463c55..e68ae19 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
-@@ -3528,6 +3528,7 @@ get_section_type_name (unsigned int sh_type)
+@@ -3531,6 +3531,7 @@ get_section_type_name (unsigned int sh_type)
      case 0x7ffffffd:		return "AUXILIARY";
      case 0x7fffffff:		return "FILTER";
      case SHT_GNU_LIBLIST:	return "GNU_LIBLIST";
@@ -2777,7 +2760,7 @@ index 52b4fdb..0fb4588 100644
  	case 'q':
  	  link_info.emitrelocations = TRUE;
 diff --git a/ld/plugin.c b/ld/plugin.c
-index cd6ae60..08f4c1f 100644
+index f10c273..5b0a535 100644
 --- a/ld/plugin.c
 +++ b/ld/plugin.c
 @@ -39,6 +39,9 @@
@@ -2790,25 +2773,7 @@ index cd6ae60..08f4c1f 100644
  /* The suffix to append to the name of the real (claimed) object file
     when generating a dummy BFD to hold the IR symbols sent from the
     plugin.  For cosmetic use only; appears in maps, crefs etc.  */
-@@ -217,6 +220,17 @@ plugin_opt_plugin_arg (const char *arg)
-   if (!last_plugin)
-     return set_plugin_error (_("<no plugin>"));
- 
-+  /* Ignore -pass-through= from GCC driver.  */
-+  if (*arg == '-')
-+    {
-+      const char *p;
-+      for (p = arg + 1; p; p++)
-+	if (*p != '-')
-+	  break;
-+      if (strncmp (p, "pass-through=", 13) == 0)
-+	return 0;
-+    }
-+
-   newarg = xmalloc (sizeof *newarg);
-   newarg->arg = arg;
-   newarg->next = NULL;
-@@ -874,6 +888,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
+@@ -885,6 +888,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
    close (file->fd);
    if (claimed)
      {
@@ -2818,7 +2783,7 @@ index cd6ae60..08f4c1f 100644
        /* Discard the real file's BFD and substitute the dummy one.  */
  
        /* BFD archive handling caches elements so we can't call
-@@ -927,14 +944,17 @@ plugin_call_cleanup (void)
+@@ -938,14 +944,17 @@ plugin_call_cleanup (void)
      {
        if (curplug->cleanup_handler && !curplug->cleanup_done)
  	{
@@ -3106,89 +3071,89 @@ index 0000000..d4c5852
 +.* .gnu_object_only.*
 +#pass
 diff --git a/ld/testsuite/ld-plugin/lto.exp b/ld/testsuite/ld-plugin/lto.exp
-index 765d85f..cf0e4f7 100644
+index 432c753..2af9c3a 100644
 --- a/ld/testsuite/ld-plugin/lto.exp
 +++ b/ld/testsuite/ld-plugin/lto.exp
-@@ -58,6 +58,15 @@ set lto_link_tests {
-   {"Build liblto-3.a"
-    "" "-flto -ffat-lto-objects"
-    {lto-3b.c} {} "liblto-3.a"}
-+  {"Compile 4a"
-+   "" "-flto"
-+   {lto-4a.c} {} ""}
-+  {"Compile 4b"
-+   "" "-O2"
-+   {lto-4b.c} {} ""}
-+  {"Compile 4c"
-+   "" "-O2"
-+   {lto-4c.c} {} ""}
-   {"Compile 5a"
-    "" "-flto"
-    {lto-5a.c} {} ""}
-@@ -67,9 +76,18 @@ set lto_link_tests {
-   {"LTO 6"
-    "-O2 -flto -fuse-linker-plugin" ""
-    {lto-6.c} {} "lto-6.exe" "c"}
-+  {"Compile PR ld/12365"
-+   "" "-flto -O2"
-+   {pr12365a.c pr12365b.c pr12365c.c} {} ""}
-   {"Compile 9"
-    "" "-O2 -finline -flto"
-    {lto-9.cc} {} "" "c++"}
-+  {"Compile 10a"
-+   "" "-O2"
-+   {lto-10a.c} {} ""}
-+  {"Compile 10b"
-+   "" "-O2 -flto"
-+   {lto-10b.c} {} ""}
-   {"Compile 11a"
-    "" "-O -flto"
-    {lto-11a.c} {} ""}
-@@ -217,6 +235,21 @@ set lto_link_elf_tests {
-   {"Build libpr15146d.a"
-    "" "-flto -O2"
-    {pr15146d.c} {} "lib15146d.a"}
-+  {"PR ld/14918"
-+   "-flto" "-flto"
-+   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"}
-+  {"Build libpr16746a.a"
-+   "" ""
-+   {pr16746a.c pr16746b.c} {} "lib16746a.a"}
-+  {"Build libpr16746b.a"
-+   "" "-O2 -flto"
-+   {pr16746c.c pr16746d.c} {} "lib16746b.a"}
-+  {"PR ld/16746 (1)"
-+   "-O2 -flto -fuse-linker-plugin tmpdir/pr16746a.o tmpdir/pr16746c.o" "-O2 -flto"
-+   {dummy.c} {} "pr16746a.exe"}
-+  {"PR ld/16746 (2)"
-+   "-O2 -flto -fuse-linker-plugin tmpdir/pr16746c.o tmpdir/pr16746a.o" "-O2 -flto"
-+   {dummy.c} {} "pr16746b.exe"}
- }
+@@ -76,6 +76,15 @@ set lto_link_tests [list \
+   [list "Build liblto-3.a" \
+    "" "-flto $lto_fat" \
+    {lto-3b.c} {} "liblto-3.a"] \
++  [list "Compile 4a" \
++   "" "-flto $lto_fat" \
++   {lto-4a.c} {} ""] \
++  [list "Compile 4b" \
++   "" "-O2" \
++   {lto-4b.c} {} ""] \
++  [list "Compile 4c" \
++   "" "-O2" \
++   {lto-4c.c} {} ""] \
+   [list "Compile 5a" \
+    "" "-flto $lto_fat" \
+    {lto-5a.c} {} ""] \
+@@ -85,9 +94,18 @@ set lto_link_tests [list \
+   [list "LTO 6" \
+    "-O2 -flto -fuse-linker-plugin" "" \
+    {lto-6.c} {} "lto-6.exe" "c"] \
++  [list "Compile PR ld/12365" \
++   "" "-flto -O2 $lto_fat" \
++   {pr12365a.c pr12365b.c pr12365c.c} {} ""] \
+   [list "Compile 9" \
+    "" "-O2 -finline -flto" \
+    {lto-9.cc} {} "" "c++"] \
++  [list "Compile 10a" \
++   "" "-O2" \
++   {lto-10a.c} {} ""] \
++  [list "Compile 10b" \
++   "" "-O2 -flto $lto_fat" \
++   {lto-10b.c} {} ""] \
+   [list "Compile 11a" \
+    "" "-O -flto" \
+    {lto-11a.c} {} ""] \
+@@ -232,6 +250,21 @@ set lto_link_elf_tests [list \
+   [list "Build libpr15146d.a" \
+    "$plug_opt" "-flto -O2" \
+    {pr15146d.c} {} "lib15146d.a"] \
++  [list "PR ld/14918" \
++   "-flto" "-flto" \
++   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
++  [list "Build libpr16746a.a" \
++   "" "" \
++   {pr16746a.c pr16746b.c} {} "lib16746a.a"] \
++  [list "Build libpr16746b.a" \
++   "" "-O2 -flto" \
++   {pr16746c.c pr16746d.c} {} "lib16746b.a"] \
++  [list "PR ld/16746 (1)" \
++   "-O2 -flto -fuse-linker-plugin tmpdir/pr16746a.o tmpdir/pr16746c.o" "-O2 -flto" \
++   {dummy.c} {} "pr16746a.exe"] \
++  [list "PR ld/16746 (2)" \
++   "-O2 -flto -fuse-linker-plugin tmpdir/pr16746c.o tmpdir/pr16746a.o" "-O2 -flto" \
++   {dummy.c} {} "pr16746b.exe"] \
+ ]
  
  # Check final symbols in executables.
-@@ -252,9 +285,21 @@ set lto_run_tests {
-   {"LTO 3c"
-    "-O2 -flto -fuse-linker-plugin tmpdir/lto-3a.o tmpdir/lto-3c.o -Wl,--whole-archive tmpdir/liblto-3.a -Wl,--no-whole-archive tmpdir/liblto-3.a" ""
-    {dummy.c} "lto-3d.exe" "lto-3.out" "" "c"}
-+  {"LTO 4a"
-+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-a.o" ""
-+   {dummy.c} "lto-4a.exe" "lto-4.out" "" "c"}
-+  {"LTO 4c"
-+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-c.o" ""
-+   {dummy.c} "lto-4c.exe" "lto-4.out" "" "c"}
-+  {"LTO 4d"
-+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-d.o" ""
-+   {dummy.c} "lto-4d.exe" "lto-4.out" "" "c"}
-   {"LTO 5"
-    "-O2 -flto -fuse-linker-plugin tmpdir/lto-5.o" ""
-    {dummy.c} "lto-5.exe" "lto-5.out" "" "c"}
-+  {"LTO 10"
-+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-10.o" ""
-+   {dummy.c} "lto-10.exe" "lto-10.out" "" "c"}
-   {"LTO 11"
-    "-O -flto -fuse-linker-plugin tmpdir/liblto-11.a" ""
-    {dummy.c} "lto-11.exe" "lto-11.out" "" "c"}
-@@ -320,6 +365,29 @@ if { [is_elf_format] && [check_lto_shared_available] } {
+@@ -267,9 +300,21 @@ set lto_run_tests [list \
+   [list "LTO 3c" \
+    "-O2 -flto -fuse-linker-plugin tmpdir/lto-3a.o tmpdir/lto-3c.o -Wl,--whole-archive tmpdir/liblto-3.a -Wl,--no-whole-archive tmpdir/liblto-3.a" "" \
+    {dummy.c} "lto-3d.exe" "lto-3.out" "" "c"] \
++  [list "LTO 4a" \
++   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-a.o" "" \
++   {dummy.c} "lto-4a.exe" "lto-4.out" "" "c"] \
++  [list "LTO 4c" \
++   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-c.o" "" \
++   {dummy.c} "lto-4c.exe" "lto-4.out" "" "c"] \
++  [list "LTO 4d" \
++   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-d.o" "" \
++   {dummy.c} "lto-4d.exe" "lto-4.out" "" "c"] \
+   [list "LTO 5" \
+    "-O2 -flto -fuse-linker-plugin tmpdir/lto-5.o" "" \
+    {dummy.c} "lto-5.exe" "lto-5.out" "" "c"] \
++  [list "LTO 10" \
++   "-O2 -flto -fuse-linker-plugin tmpdir/lto-10.o" "" \
++   {dummy.c} "lto-10.exe" "lto-10.out" "" "c"] \
+   [list "LTO 11" \
+    "-O -flto -fuse-linker-plugin tmpdir/liblto-11.a" "" \
+    {dummy.c} "lto-11.exe" "lto-11.out" "" "c"] \
+@@ -335,6 +380,29 @@ if { [is_elf_format] && [check_lto_shared_available] } {
      } {
  	fail $testname
      }
@@ -3218,12 +3183,12 @@ index 765d85f..cf0e4f7 100644
  }
  
  set testname "Build liblto-11.a"
-@@ -346,6 +414,13 @@ if {![string match "" $catch_output]} {
+@@ -348,6 +416,13 @@ if {![string match "" $catch_output]} {
  
  if { [at_least_gcc_version 4 7] } {
      # Check expected LTO linker errors.
 +    set testname "PR ld/12365"
-+    set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin tmpdir/pr12365a.o tmpdir/pr12365b.o tmpdir/pr12365c.o"]
++    set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin tmpdir/pr12365a.o tmpdir/pr12365b.o tmpdir/pr12365c.o"]
 +    if { [ regexp "undefined reference to `my_bcopy'" $exec_output ] } {
 +	pass $testname
 +    } {
@@ -3232,7 +3197,7 @@ index 765d85f..cf0e4f7 100644
      set testname "PR ld/12942 (3)"
      set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
      if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
-@@ -358,8 +433,30 @@ if { [at_least_gcc_version 4 7] } {
+@@ -360,8 +435,30 @@ if { [at_least_gcc_version 4 7] } {
  # Run "ld -r" to generate inputs for complex LTO tests.
  run_dump_test "lto-3r"
  remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
