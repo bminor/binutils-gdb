@@ -5087,7 +5087,7 @@ linux_supports_non_stop (void)
 static int
 linux_async (int enable)
 {
-  int previous = (linux_event_pipe[0] != -1);
+  int previous = target_is_async_p ();
 
   if (debug_threads)
     debug_printf ("linux_async (%d), previous=%d\n",
