@@ -1,3 +1,8 @@
+2014-08-06  Alan Modra  <amodra@gmail.com>
+
+	PR 13227
+	* symtab.cc (Symbol_table::add_from_relobj): Warn on __gnu_lto_slim.
+
 2014-07-21  Sriraman Tallam  <tmsriram@google.com>
 
 	* object.cc (Relobj::is_section_name_included): Add
