@@ -355,8 +355,6 @@ get_thread_process (struct thread_info *thread)
 struct process_info *
 current_process (void)
 {
-  if (current_inferior == NULL)
-    fatal ("Current inferior requested, but current_inferior is NULL\n");
-
+  gdb_assert (current_inferior != NULL);
   return get_thread_process (current_inferior);
 }

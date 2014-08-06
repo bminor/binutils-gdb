@@ -2942,7 +2942,10 @@ get_jump_space_head (void)
     {
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_jump_pad_buffer,
 				      &gdb_jump_pad_head))
-	fatal ("error extracting jump_pad_buffer");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "error extracting jump_pad_buffer");
+	}
     }
 
   return gdb_jump_pad_head;
@@ -2973,15 +2976,15 @@ claim_trampoline_space (ULONGEST used, CORE_ADDR *trampoline)
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer,
 				      &trampoline_buffer_tail))
 	{
-	  fatal ("error extracting trampoline_buffer");
-	  return 0;
+	  internal_error (__FILE__, __LINE__,
+			  "error extracting trampoline_buffer");
 	}
 
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
 				      &trampoline_buffer_head))
 	{
-	  fatal ("error extracting trampoline_buffer_end");
-	  return 0;
+	  internal_error (__FILE__, __LINE__,
+			  "error extracting trampoline_buffer_end");
 	}
     }
 
@@ -3016,8 +3019,8 @@ have_fast_tracepoint_trampoline_buffer (char *buf)
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
 				  &trampoline_end))
     {
-      fatal ("error extracting trampoline_buffer_end");
-      return 0;
+      internal_error (__FILE__, __LINE__,
+		      "error extracting trampoline_buffer_end");
     }
   
   if (buf)
@@ -3027,8 +3030,8 @@ have_fast_tracepoint_trampoline_buffer (char *buf)
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_error,
 				  &errbuf))
 	{
-	  fatal ("error extracting errbuf");
-	  return 0;
+	  internal_error (__FILE__, __LINE__,
+			  "error extracting errbuf");
 	}
 
       read_inferior_memory (errbuf, (unsigned char *) buf, 100);
@@ -3370,14 +3373,25 @@ cmd_qtstart (char *packet)
   if (agent_loaded_p ())
     {
       if (write_inferior_integer (ipa_sym_addrs.addr_tracing, 1))
-	fatal ("Error setting tracing variable in lib");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "Error setting tracing variable in lib");
+	}
 
       if (write_inferior_data_pointer (ipa_sym_addrs.addr_stopping_tracepoint,
 				       0))
-	fatal ("Error clearing stopping_tracepoint variable in lib");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "Error clearing stopping_tracepoint variable"
+			  " in lib");
+	}
 
       if (write_inferior_integer (ipa_sym_addrs.addr_trace_buffer_is_full, 0))
-	fatal ("Error clearing trace_buffer_is_full variable in lib");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "Error clearing trace_buffer_is_full variable"
+			  " in lib");
+	}
 
       stop_tracing_bkpt = set_breakpoint_at (ipa_sym_addrs.addr_stop_tracing,
 					     stop_tracing_handler);
@@ -3429,7 +3443,10 @@ stop_tracing (void)
   if (agent_loaded_p ())
     {
       if (write_inferior_integer (ipa_sym_addrs.addr_tracing, 0))
-	fatal ("Error clearing tracing variable in lib");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "Error clearing tracing variable in lib");
+	}
     }
 
   tracing_stop_time = get_timestamp ();
@@ -5607,17 +5624,29 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_jump_pad_buffer,
 				  &ipa_gdb_jump_pad_buffer))
-    fatal ("error extracting `gdb_jump_pad_buffer'");
+    {
+      internal_error (__FILE__, __LINE__,
+		      "error extracting `gdb_jump_pad_buffer'");
+    }
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_jump_pad_buffer_end,
 				  &ipa_gdb_jump_pad_buffer_end))
-    fatal ("error extracting `gdb_jump_pad_buffer_end'");
+    {
+      internal_error (__FILE__, __LINE__,
+		      "error extracting `gdb_jump_pad_buffer_end'");
+    }
 
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer,
 				  &ipa_gdb_trampoline_buffer))
-    fatal ("error extracting `gdb_trampoline_buffer'");
+    {
+      internal_error (__FILE__, __LINE__,
+		      "error extracting `gdb_trampoline_buffer'");
+    }
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
 				  &ipa_gdb_trampoline_buffer_end))
-    fatal ("error extracting `gdb_trampoline_buffer_end'");
+    {
+      internal_error (__FILE__, __LINE__,
+		      "error extracting `gdb_trampoline_buffer_end'");
+    }
 
   if (ipa_gdb_jump_pad_buffer <= stop_pc
       && stop_pc < ipa_gdb_jump_pad_buffer_end)
@@ -5937,7 +5966,10 @@ target_malloc (ULONGEST size)
       /* We have the pointer *address*, need what it points to.  */
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_tp_heap_buffer,
 				      &target_tp_heap))
-	fatal ("could get target heap head pointer");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "couldn't get target heap head pointer");
+	}
     }
 
   ptr = target_tp_heap;
@@ -6161,7 +6193,10 @@ download_tracepoint (struct tracepoint *tpoint)
       if (read_inferior_data_pointer (tp_prev->obj_addr_on_target
 				      + offsetof (struct tracepoint, next),
 				      &tp_prev_target_next_addr))
-	fatal ("error reading `tp_prev->next'");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "error reading `tp_prev->next'");
+	}
 
       /* tpoint->next = tp_prev->next */
       write_inferior_data_ptr (tpoint->obj_addr_on_target
@@ -6238,10 +6273,7 @@ download_trace_state_variables (void)
 				   name_addr);
 	}
 
-      if (tsv->getter != NULL)
-	{
-	  fatal ("what to do with these?");
-	}
+      gdb_assert (tsv->getter == NULL);
     }
 
   if (prev_ptr != 0)
@@ -6414,9 +6446,13 @@ upload_fast_traceframes (void)
 	error ("Uploading: couldn't read traceframe at %s\n", paddress (tf));
 
       if (ipa_tframe.tpnum == 0)
-	fatal ("Uploading: No (more) fast traceframes, but "
-	       "ipa_traceframe_count == %u??\n",
-	       ipa_traceframe_write_count - ipa_traceframe_read_count);
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "Uploading: No (more) fast traceframes, but"
+			  " ipa_traceframe_count == %u??\n",
+			  ipa_traceframe_write_count
+			  - ipa_traceframe_read_count);
+	}
 
       /* Note that this will be incorrect for multi-location
 	 tracepoints...  */

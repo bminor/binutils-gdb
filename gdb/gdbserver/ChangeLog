@@ -1,3 +1,33 @@
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
+	* inferiors.c (get_thread_process): Replace check with gdb_assert.
+	* linux-low.c (linux_wait_for_event_filtered): Replace fatal with
+	internal_error.
+	(linux_resume_one_lwp): Likewise.
+	* linux-x86-low.c (x86_siginfo_fixup): Replace checks with
+	gdb_assert.
+	* mem-break.c (raw_bkpt_type_to_target_hw_bp_type): Replace fatal
+	with internal_error.
+	* regcache.c (get_thread_regcache): Replace check with gdb_assert.
+	(init_register_cache): Replace fatal with gdb_assert_not_reached.
+	(find_register_by_name): Replace fatal with internal_error.
+	(find_regno): Likewise.
+	* tdesc.c (init_target_desc): Replace check with gdb_assert.
+	* thread-db.c (thread_db_create_event): Likewise.
+	(thread_db_load_search): Likewise.
+	(try_thread_db_load_1): Likewise.
+	* tracepoint.c (get_jump_space_head): Replace fatal with
+	internal_error.
+	(claim_trampoline_space): Likewise.
+	(have_fast_tracepoint_trampoline_buffer): Likewise.
+	(cmd_qtstart): Likewise.
+	(stop_tracing): Likewise.
+	(fast_tracepoint_collecting): Likewise.
+	(target_malloc): Likewise.
+	(download_tracepoint): Likewise.
+	(download_trace_state_variables): Replace check with gdb_assert.
+	(upload_fast_traceframes): Replace fatal with internal_error.
+
 2014-08-19  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 

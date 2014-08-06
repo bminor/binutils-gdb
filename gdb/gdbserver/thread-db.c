@@ -193,8 +193,7 @@ thread_db_create_event (CORE_ADDR where)
   struct lwp_info *lwp;
   struct thread_db *thread_db = current_process ()->private->thread_db;
 
-  if (thread_db->td_ta_event_getmsg_p == NULL)
-    fatal ("unexpected thread_db->td_ta_event_getmsg_p == NULL");
+  gdb_assert (thread_db->td_ta_event_getmsg_p != NULL);
 
   if (debug_threads)
     debug_printf ("Thread creation event.\n");
@@ -561,8 +560,7 @@ thread_db_load_search (void)
   struct thread_db *tdb;
   struct process_info *proc = current_process ();
 
-  if (proc->private->thread_db != NULL)
-    fatal ("unexpected: proc->private->thread_db != NULL");
+  gdb_assert (proc->private->thread_db == NULL);
 
   tdb = xcalloc (1, sizeof (*tdb));
   proc->private->thread_db = tdb;
@@ -607,8 +605,7 @@ try_thread_db_load_1 (void *handle)
   struct thread_db *tdb;
   struct process_info *proc = current_process ();
 
-  if (proc->private->thread_db != NULL)
-    fatal ("unexpected: proc->private->thread_db != NULL");
+  gdb_assert (proc->private->thread_db == NULL);
 
   tdb = xcalloc (1, sizeof (*tdb));
   proc->private->thread_db = tdb;

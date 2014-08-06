@@ -35,8 +35,7 @@ init_target_desc (struct target_desc *tdesc)
 
   /* Make sure PBUFSIZ is large enough to hold a full register
      packet.  */
-  if (2 * tdesc->registers_size + 32 > PBUFSIZ)
-    fatal ("Register packet size exceeds PBUFSIZ.");
+  gdb_assert (2 * tdesc->registers_size + 32 <= PBUFSIZ);
 }
 
 #ifndef IN_PROCESS_AGENT

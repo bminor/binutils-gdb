@@ -2026,7 +2026,11 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 
       if (requested_child->suspended
 	  && requested_child->status_pending_p)
-	fatal ("requesting an event out of a suspended child?");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "requesting an event out of a"
+			  " suspended child?");
+	}
 
       if (requested_child->status_pending_p)
 	{
@@ -3432,8 +3436,11 @@ linux_resume_one_lwp (struct lwp_info *lwp,
       if (can_hardware_single_step ())
 	step = 1;
       else
-	fatal ("moving out of jump pad single-stepping"
-	       " not implemented on this target");
+	{
+	  internal_error (__FILE__, __LINE__,
+			  "moving out of jump pad single-stepping"
+			  " not implemented on this target");
+	}
 
       /* Postpone any pending signal.  It was enqueued above.  */
       signal = 0;

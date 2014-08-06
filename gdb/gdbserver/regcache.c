@@ -41,8 +41,7 @@ get_thread_regcache (struct thread_info *thread, int fetch)
     {
       struct process_info *proc = get_thread_process (thread);
 
-      if (proc->tdesc == NULL)
-	fatal ("no target description");
+      gdb_assert (proc->tdesc != NULL);
 
       regcache = new_register_cache (proc->tdesc);
       set_inferior_regcache_data (thread, regcache);
@@ -126,7 +125,7 @@ init_register_cache (struct regcache *regcache,
       regcache->register_status = xcalloc (1, tdesc->num_registers);
       gdb_assert (REG_UNAVAILABLE == 0);
 #else
-      fatal ("init_register_cache: can't allocate memory from the heap");
+      gdb_assert_not_reached ("can't allocate memory from the heap");
 #endif
     }
   else
@@ -239,8 +238,8 @@ find_register_by_name (const struct target_desc *tdesc, const char *name)
   for (i = 0; i < tdesc->num_registers; i++)
     if (strcmp (name, tdesc->reg_defs[i].name) == 0)
       return &tdesc->reg_defs[i];
-  fatal ("Unknown register %s requested", name);
-  return 0;
+  internal_error (__FILE__, __LINE__, "Unknown register %s requested",
+		  name);
 }
 
 int
@@ -251,8 +250,8 @@ find_regno (const struct target_desc *tdesc, const char *name)
   for (i = 0; i < tdesc->num_registers; i++)
     if (strcmp (name, tdesc->reg_defs[i].name) == 0)
       return i;
-  fatal ("Unknown register %s requested", name);
-  return -1;
+  internal_error (__FILE__, __LINE__, "Unknown register %s requested",
+		  name);
 }
 
 struct reg *

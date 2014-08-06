@@ -1227,8 +1227,7 @@ x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
     {
-      if (sizeof (siginfo_t) != sizeof (compat_siginfo_t))
-	fatal ("unexpected difference in siginfo");
+      gdb_assert (sizeof (siginfo_t) == sizeof (compat_siginfo_t));
 
       if (direction == 0)
 	compat_siginfo_from_siginfo ((struct compat_siginfo *) inf, native);
@@ -1240,8 +1239,7 @@ x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
   /* No fixup for native x32 GDB.  */
   else if (!is_elf64 && sizeof (void *) == 8)
     {
-      if (sizeof (siginfo_t) != sizeof (compat_x32_siginfo_t))
-	fatal ("unexpected difference in siginfo");
+      gdb_assert (sizeof (siginfo_t) == sizeof (compat_x32_siginfo_t));
 
       if (direction == 0)
 	compat_x32_siginfo_from_siginfo ((struct compat_x32_siginfo *) inf,
