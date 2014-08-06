@@ -1,5 +1,13 @@
 2014-08-28  Gary Benson  <gbenson@redhat.com>
 
+	* linux-x86-low.c (i386_dr_low_set_addr): Replace check with
+	gdb_assert.
+	(i386_dr_low_get_addr): Remove vague comment.
+	* win32-i386-low.c (i386_dr_low_set_addr): Replace check with
+	gdb_assert.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
 	* inferiors.c (get_thread_process): Replace check with gdb_assert.
 	* linux-low.c (linux_wait_for_event_filtered): Replace fatal with
 	internal_error.

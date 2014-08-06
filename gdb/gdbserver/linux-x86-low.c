@@ -592,8 +592,7 @@ i386_dr_low_set_addr (int regnum, CORE_ADDR addr)
   /* Only update the threads of this process.  */
   int pid = pid_of (current_inferior);
 
-  if (! (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR))
-    fatal ("Invalid debug register %d", regnum);
+  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   find_inferior (&all_threads, update_debug_registers_callback, &pid);
 }
@@ -605,7 +604,6 @@ i386_dr_low_get_addr (int regnum)
 {
   ptid_t ptid = ptid_of (current_inferior);
 
-  /* DR6 and DR7 are retrieved with some other way.  */
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   return x86_linux_dr_get (ptid, regnum);

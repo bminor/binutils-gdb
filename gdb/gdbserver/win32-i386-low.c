@@ -48,8 +48,7 @@ static int debug_registers_used = 0;
 static void
 i386_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
-  if (! (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR))
-    fatal ("Invalid debug register %d", regnum);
+  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   /* debug_reg_state.dr_mirror is already set.
      Just notify i386_set_thread_context, i386_thread_added
