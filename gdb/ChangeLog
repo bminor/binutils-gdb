@@ -1,5 +1,11 @@
 2014-08-06  Yao Qi  <yao@codesourcery.com>
 
+	* amd64-linux-nat.c: Remove duplicated include
+	"x86-linux-nat.h".
+	* i386-linux-nat.c: Likewise.
+
+2014-08-06  Yao Qi  <yao@codesourcery.com>
+
 	* dwarf2read.c (dwarf_decode_lines_1): Replace "Special
 	operand" with "Special opcode" in comments.
 
