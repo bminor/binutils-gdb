@@ -6823,7 +6823,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 		   gdb_byte *myaddr, ULONGEST len, ULONGEST *xfered_len)
 {
   if (len == 0)
-    return 0;
+    return TARGET_XFER_EOF;
 
   if (get_traceframe_number () != -1)
     {

@@ -734,7 +734,7 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	  size = bfd_section_size (core_bfd, section);
 	  if (offset >= size)
-	    return 0;
+	    return TARGET_XFER_EOF;
 	  size -= offset;
 	  if (size > len)
 	    size = len;

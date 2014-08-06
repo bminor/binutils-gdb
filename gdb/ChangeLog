@@ -1,5 +1,11 @@
 2014-08-07  Yao Qi  <yao@codesourcery.com>
 
+	* corelow.c (core_xfer_partial): Replace 0 with TARGET_XFER_EOF.
+	* remote-m32r-sdi.c (m32r_xfer_memory): Likewise.
+	* remote.c (remote_read_bytes): Likewise.
+
+2014-08-07  Yao Qi  <yao@codesourcery.com>
+
 	* dwarf2read.c (struct dwarf2_per_cu_data) <u>: Tweak comments.
 
 2014-08-07  Yao Qi  <yao@codesourcery.com>
