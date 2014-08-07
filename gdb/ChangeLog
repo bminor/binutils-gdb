@@ -1,5 +1,50 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-exceptions.h: New file.
+	* common/common-exceptions.c: Likewise.
+	* Makefile.in (SFILES): Add common/common-exceptions.c.
+	(HFILES_NO_SRCDIR): Add common/common-exceptions.h.
+	(COMMON_OBS): Add common-exceptions.o.
+	(common-exceptions.o): New rule.
+	* exceptions.h (common-exceptions.h): Include.
+	(gdb_setjmp.h): Do not include.
+	(return_reason): Moved to common-exceptions.h.
+	(enum return_reason): Likewise.
+	(RETURN_MASK): Likewise.
+	(typedef return_mask): Likewise.
+	(enum errors): Likewise.
+	(struct gdb_exception): Likewise.
+	(exceptions_state_mc_init): Likewise.
+	(exceptions_state_mc_action_iter): Likewise.
+	(exceptions_state_mc_action_iter_1): Likewise.
+	(TRY_CATCH): Likewise.
+	(throw_exception): Likewise.
+	(throw_verror): Likewise.
+	(throw_vquit): Likewise.
+	(throw_error): Likewise.
+	(throw_quit): Likewise.
+	* exceptions.c (enum catcher_state): Moved to common-exceptions.c.
+	(enum catcher_action): Likewise.
+	(struct catcher): Likewise.
+	(current_catcher): Likewise.
+	(catcher_list_size): Likewise.
+	(exceptions_state_mc_init): Likewise.
+	(catcher_pop): Likewise.
+	(exceptions_state_mc): Likewise.
+	(exceptions_state_mc_action_iter): Likewise.
+	(exceptions_state_mc_action_iter_1): Likewise.
+	(throw_exception): Likewise.
+	(exception_messages): Likewise.
+	(exception_messages_size): Likewise.
+	(throw_it): Likewise.
+	(throw_verror): Likewise.
+	(throw_vquit): Likewise.
+	(throw_error): Likewise.
+	(throw_quit): Likewise.
+	(prepare_to_throw_exception): New function.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* common/gdb_setjmp.h: New file.
 	* Makefile.in (HFILES_NO_SRCDIR): Add common/gdb_setjmp.h.
 	* configure.ac: Move sigsetjmp check...

@@ -141,3 +141,11 @@ pfildes (gdb_fildes_t fd)
   return plongest (fd);
 #endif
 }
+
+/* See common/common-exceptions.h.  */
+
+void
+prepare_to_throw_exception (void)
+{
+  /* No client-specific actions required.  */
+}

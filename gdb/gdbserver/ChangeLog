@@ -1,5 +1,12 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* Makefile.in (SFILES): Add common/common-exceptions.c.
+	(OBS): Add common-exceptions.o.
+	(common-exceptions.o): New rule.
+	* utils.c (prepare_to_throw_exception): New function.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* config.in: Regenerate.
 	* configure: Likewise.
 
