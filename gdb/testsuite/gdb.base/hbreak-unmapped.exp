@@ -29,13 +29,9 @@ if ![runto_main] {
 }
 
 # If we can read the memory at address 0, skip the test.
-gdb_test_multiple "x 0" "memory at address 0" {
-    -re "0x0:.*Cannot access memory at address 0x0.*$gdb_prompt $" { }
-    -re "0x0:.*Error accessing memory address 0x0.*$gdb_prompt $" { }
-    -re ".*$gdb_prompt $" {
-	untested "Memory at address 0 is readable"
-	return
-    }
+if { [is_address_zero_readable] } {
+    untested "Memory at address 0 is readable"
+    return
 }
 
 delete_breakpoints

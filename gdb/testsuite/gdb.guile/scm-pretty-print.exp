@@ -81,7 +81,9 @@ proc run_lang_tests {exefile lang} {
 	gdb_scm_test_silent_cmd "set print elements 200" "" 1
     }
 
-    gdb_test "print ns2" "<error reading variable: ERROR: Cannot access memory at address 0x0>"
+    if { ![is_address_zero_readable] } {
+	gdb_test "print ns2" "<error reading variable: ERROR: Cannot access memory at address 0x0>"
+    }
 
     gdb_test "print x" " = \"this is x\""
     gdb_test "print cstring" " = \"const string\""
