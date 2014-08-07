@@ -1,3 +1,8 @@
+2014-08-09  Yao Qi  <yao@codesourcery.com>
+
+	PR testsuite/13443
+	* gdb.mi/mi-var-display.exp: Make test messages unique.
+
 2014-08-04  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/sss-bp-on-user-bp-2.exp: Expect output from "set debug
