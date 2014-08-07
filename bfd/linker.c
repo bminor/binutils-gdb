@@ -1342,8 +1342,7 @@ enum link_action
   CIND,		/* Make indirect symbol from existing common symbol.  */
   SET,		/* Add value to set.  */
   MWARN,	/* Make warning symbol.  */
-  WARN,		/* Issue warning.  */
-  CWARN,	/* Warn if referenced, else MWARN.  */
+  WARN,		/* Warn if referenced, else MWARN.  */
   CYCLE,	/* Repeat with symbol pointed to.  */
   REFC,		/* Mark indirect symbol referenced and then CYCLE.  */
   WARNC		/* Issue warning and then CYCLE.  */
@@ -1361,7 +1360,7 @@ static const enum link_action link_action[8][8] =
   /* DEFW_ROW 	*/  {DEFW,  DEFW,  DEFW,  NOACT, NOACT, NOACT, NOACT, CYCLE },
   /* COMMON_ROW	*/  {COM,   COM,   COM,   CREF,  COM,   BIG,   REFC,  WARNC },
   /* INDR_ROW	*/  {IND,   IND,   IND,   MDEF,  IND,   CIND,  MIND,  CYCLE },
-  /* WARN_ROW   */  {MWARN, WARN,  WARN,  CWARN, CWARN, WARN,  CWARN, NOACT },
+  /* WARN_ROW   */  {MWARN, WARN,  WARN,  WARN,  WARN,  WARN,  WARN,  NOACT },
   /* SET_ROW	*/  {SET,   SET,   SET,   SET,   SET,   SET,   CYCLE, CYCLE }
 };
 
@@ -1803,13 +1802,6 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  break;
 
 	case WARN:
-	  /* Issue a warning.  */
-	  if (! (*info->callbacks->warning) (info, string, h->root.string,
-					     hash_entry_bfd (h), NULL, 0))
-	    return FALSE;
-	  break;
-
-	case CWARN:
 	  /* Warn if this symbol has been referenced already,
 	     otherwise add a warning.  A symbol has been referenced if
 	     the u.undef.next field is not NULL, or it is the tail of the
