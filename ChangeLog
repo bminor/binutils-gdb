@@ -1,3 +1,8 @@
+2014-08-27  Will Newton  <will.newton@linaro.org>
+
+	* src-release.sh: New file.
+	* src-release: Remove file.
+
 2014-07-27  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	GDB not supported for or1k*-*-rtems*
