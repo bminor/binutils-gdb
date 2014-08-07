@@ -1,3 +1,8 @@
+2014-08-07  Chen Gang <gang.chen.5i5j@gmail.com>
+
+	* coff-ppc.c (coff_ppc_relocate_section): Ensure local symbols are
+	zero terminated.
+
 2014-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@gmail.com>
 
