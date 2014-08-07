@@ -51,7 +51,7 @@ struct catcher
 {
   enum catcher_state state;
   /* Jump buffer pointing back at the exception handler.  */
-  EXCEPTIONS_SIGJMP_BUF buf;
+  SIGJMP_BUF buf;
   /* Status buffer belonging to the exception handler.  */
   volatile struct gdb_exception *exception;
   /* Saved/current state.  */
@@ -80,7 +80,7 @@ catcher_list_size (void)
   return size;
 }
 
-EXCEPTIONS_SIGJMP_BUF *
+SIGJMP_BUF *
 exceptions_state_mc_init (volatile struct gdb_exception *exception,
 			  return_mask mask)
 {
@@ -229,7 +229,7 @@ throw_exception (struct gdb_exception exception)
      be zero, by definition in defs.h.  */
   exceptions_state_mc (CATCH_THROWING);
   *current_catcher->exception = exception;
-  EXCEPTIONS_SIGLONGJMP (current_catcher->buf, exception.reason);
+  SIGLONGJMP (current_catcher->buf, exception.reason);
 }
 
 static void

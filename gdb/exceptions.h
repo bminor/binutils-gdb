@@ -21,7 +21,7 @@
 #define EXCEPTIONS_H
 
 #include "ui-out.h"
-#include <setjmp.h>
+#include "gdb_setjmp.h"
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be less than zero.  enum value 0 is reserved for internal use
@@ -114,24 +114,11 @@ struct gdb_exception
 /* A pre-defined non-exception.  */
 extern const struct gdb_exception exception_none;
 
-/* Wrap set/long jmp so that it's more portable (internal to
-   exceptions).  */
-
-#if defined(HAVE_SIGSETJMP)
-#define EXCEPTIONS_SIGJMP_BUF		sigjmp_buf
-#define EXCEPTIONS_SIGSETJMP(buf)	sigsetjmp((buf), 1)
-#define EXCEPTIONS_SIGLONGJMP(buf,val)	siglongjmp((buf), (val))
-#else
-#define EXCEPTIONS_SIGJMP_BUF		jmp_buf
-#define EXCEPTIONS_SIGSETJMP(buf)	setjmp(buf)
-#define EXCEPTIONS_SIGLONGJMP(buf,val)	longjmp((buf), (val))
-#endif
-
 /* Functions to drive the exceptions state m/c (internal to
    exceptions).  */
-EXCEPTIONS_SIGJMP_BUF *exceptions_state_mc_init (volatile struct
-						 gdb_exception *exception,
-						 return_mask mask);
+SIGJMP_BUF *exceptions_state_mc_init (volatile struct
+				      gdb_exception *exception,
+				      return_mask mask);
 int exceptions_state_mc_action_iter (void);
 int exceptions_state_mc_action_iter_1 (void);
 
@@ -159,9 +146,9 @@ int exceptions_state_mc_action_iter_1 (void);
 
 #define TRY_CATCH(EXCEPTION,MASK) \
      { \
-       EXCEPTIONS_SIGJMP_BUF *buf = \
+       SIGJMP_BUF *buf = \
 	 exceptions_state_mc_init (&(EXCEPTION), (MASK)); \
-       EXCEPTIONS_SIGSETJMP (*buf); \
+       SIGSETJMP (*buf); \
      } \
      while (exceptions_state_mc_action_iter ()) \
        while (exceptions_state_mc_action_iter_1 ())

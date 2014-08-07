@@ -1,5 +1,24 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* common/gdb_setjmp.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/gdb_setjmp.h.
+	* configure.ac: Move sigsetjmp check...
+	* common/common.m4: ...here.
+	* configure: Regenerate.
+	* cp-support.c (SIGJMP_BUF): Delete.
+	(SIGSETJMP): Likewise.
+	(SIGLONGJMP): Likewise.
+	* exceptions.h (gdb_setjmp.h): Include.
+	(setjmp.h): Do not include.
+	(EXCEPTIONS_SIGJMP_BUF): Delete.
+	(EXCEPTIONS_SIGSETJMP): Likewise.
+	(EXCEPTIONS_SIGLONGJMP): Likewise.
+	Replace all uses of EXCEPTIONS_SIG* macros with SIG* macros
+	from gdb_setjmp.h.
+	* exceptions.c: Likewise.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* cleanups.h: Moved to...
 	* common/cleanups.h: New file.
 	* cleanups.c: Moved to...
