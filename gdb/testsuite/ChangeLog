@@ -1,3 +1,9 @@
+2014-08-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.guile/scm-value.exp (test_lazy_strings): Set print
+	symbol off.
+	* gdb.python/py-value.exp (test_lazy_strings): Likewise.
+
 2014-08-22  Doug Evans  <dje@google.com>
 
 	PR 17276
