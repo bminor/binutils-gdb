@@ -1,3 +1,10 @@
+2014-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR ld/16746
+	* linker.c (_bfd_generic_link_add_one_symbol): Don't issue a
+	warning for references in LTO IR to warning symbols.
+
 2014-08-07  Alan Modra  <amodra@gmail.com>
 
 	* linker.c (WARN, CWARN): Collapse these states to WARN.

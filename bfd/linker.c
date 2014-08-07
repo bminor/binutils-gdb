@@ -1776,8 +1776,10 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  break;
 
 	case WARNC:
-	  /* Issue a warning and cycle.  */
-	  if (h->u.i.warning != NULL)
+	  /* Issue a warning and cycle, except when the reference is
+	     in LTO IR.  */
+	  if (h->u.i.warning != NULL
+	      && (abfd->flags & BFD_PLUGIN) == 0)
 	    {
 	      if (! (*info->callbacks->warning) (info, h->u.i.warning,
 						 h->root.string, abfd,
@@ -1802,12 +1804,9 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  break;
 
 	case WARN:
-	  /* Warn if this symbol has been referenced already,
-	     otherwise add a warning.  A symbol has been referenced if
-	     the u.undef.next field is not NULL, or it is the tail of the
-	     undefined symbol list.  The REF case above helps to
-	     ensure this.  */
-	  if (h->u.undef.next != NULL || info->hash->undefs_tail == h)
+	  /* Warn if this symbol has been referenced already from non-IR,
+	     otherwise add a warning.  */
+	  if (h->non_ir_ref)
 	    {
 	      if (! (*info->callbacks->warning) (info, string, h->root.string,
 						 hash_entry_bfd (h), NULL, 0))
