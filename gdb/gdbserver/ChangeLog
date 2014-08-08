@@ -1,5 +1,18 @@
 2014-08-29  Gary Benson  <gbenson@redhat.com>
 
+	* server.h (setjmp.h): Do not include.
+	(toplevel): Do not declare.
+	(common-exceptions.h): Include.
+	(cleanups.h): Likewise.
+	* server.c (toplevel): Do not define.
+	(exit_code): New static global.
+	(detach_or_kill_for_exit_cleanup): New function.
+	(main): New function.  Original main renamed to...
+	(captured_main): New function.
+	* utils.c (verror) [!IN_PROCESS_AGENT]: Use throw_verror.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
 	* Makefile.in (SFILES): Add common/common-exceptions.c.
 	(OBS): Add common-exceptions.o.
 	(common-exceptions.o): New rule.

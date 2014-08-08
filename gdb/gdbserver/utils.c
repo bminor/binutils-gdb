@@ -76,17 +76,13 @@ perror_with_name (const char *string)
 void
 verror (const char *string, va_list args)
 {
-#ifndef IN_PROCESS_AGENT
-  extern jmp_buf toplevel;
-#endif
-
+#ifdef IN_PROCESS_AGENT
   fflush (stdout);
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
-#ifndef IN_PROCESS_AGENT
-  longjmp (toplevel, 1);
-#else
   exit (1);
+#else
+  throw_verror (GENERIC_ERROR, string, args);
 #endif
 }
 

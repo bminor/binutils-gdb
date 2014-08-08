@@ -29,8 +29,6 @@ gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 
 #include "version.h"
 
-#include <setjmp.h>
-
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
@@ -89,8 +87,6 @@ extern int pass_signals[];
 extern int program_signals[];
 extern int program_signals_p;
 
-extern jmp_buf toplevel;
-
 extern int disable_packet_vCont;
 extern int disable_packet_Tthread;
 extern int disable_packet_qC;
@@ -128,5 +124,8 @@ extern int handle_target_event (int err, gdb_client_data client_data);
    value to accomodate multiple register formats.  This value must be at least
    as large as the largest register set supported by gdbserver.  */
 #define PBUFSIZ 16384
+
+#include "common-exceptions.h"
+#include "cleanups.h"
 
 #endif /* SERVER_H */
