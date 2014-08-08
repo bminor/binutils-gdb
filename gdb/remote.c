@@ -8863,10 +8863,6 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return TARGET_XFER_E_IO;
     }
 
-  /* Note: a zero OFFSET and LEN can be used to query the minimum
-     buffer size.  */
-  if (offset == 0 && len == 0)
-    return (get_remote_packet_size ());
   /* Minimum outbuf size is get_remote_packet_size ().  If LEN is not
      large enough let the caller deal with it.  */
   if (len < get_remote_packet_size ())

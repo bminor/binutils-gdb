@@ -1,3 +1,8 @@
+2014-08-09  Yao Qi  <yao@codesourcery.com>
+
+	PR remote/9053
+	* remote.c (remote_xfer_partial): Remove dead code.
+
 2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* ia64-linux-tdep.c: Include "regset.h".
