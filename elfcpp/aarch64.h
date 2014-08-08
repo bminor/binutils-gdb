@@ -46,7 +46,7 @@ enum
 {
   // Null relocation codes
   R_AARCH64_NONE = 0,		// None
-  withdrawn = 256,		// Treat as R_AARCH64_NONE
+  R_AARCH64_withdrawn = 256,	// Treat as R_AARCH64_NONE
 
   // Static relocations
   R_AARCH64_ABS64 = 257,	// S + A
