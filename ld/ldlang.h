@@ -282,6 +282,9 @@ struct lang_input_statement_flags
   /* Set if reloading an archive or --as-needed lib.  */
   unsigned int reload : 1;
 #endif /* ENABLE_PLUGINS */
+
+  /* Head of list of pushed flags.  */
+  struct lang_input_statement_flags *pushed;
 };
 
 typedef struct lang_input_statement_struct

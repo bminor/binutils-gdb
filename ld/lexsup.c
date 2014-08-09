@@ -505,6 +505,12 @@ static const struct ld_option ld_options[] =
     OPTION_IGNORE_UNRESOLVED_SYMBOL},
     '\0', N_("SYMBOL"),
     N_("Unresolved SYMBOL will not cause an error or warning"), TWO_DASHES },
+  { {"push-state", no_argument, NULL, OPTION_PUSH_STATE},
+    '\0', NULL, N_("Push state of flags governing input file handling"),
+    TWO_DASHES },
+  { {"pop-state", no_argument, NULL, OPTION_POP_STATE},
+    '\0', NULL, N_("Pop state of flags governing input file handling"),
+    TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1444,6 +1450,23 @@ parse_args (unsigned argc, char **argv)
               einfo (_("%P%X: --hash-size needs a numeric argument\n"));
           }
           break;
+
+	case OPTION_PUSH_STATE:
+	  input_flags.pushed = xmemdup (&input_flags,
+					sizeof (input_flags),
+					sizeof (input_flags));
+	  break;
+
+	case OPTION_POP_STATE:
+	  if (input_flags.pushed == NULL)
+	    einfo (_("%P%F: no state pushed before popping\n"));
+	  else
+	    {
+	      struct lang_input_statement_flags *oldp = input_flags.pushed;
+	      memcpy (&input_flags, oldp, sizeof (input_flags));
+	      free (oldp);
+	    }
+	  break;
 	}
     }
 

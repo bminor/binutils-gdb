@@ -137,6 +137,8 @@ enum option_values
   OPTION_DEFAULT_SCRIPT,
   OPTION_PRINT_OUTPUT_FORMAT,
   OPTION_IGNORE_UNRESOLVED_SYMBOL,
+  OPTION_PUSH_STATE,
+  OPTION_POP_STATE,
 };
 
 /* The initial parser states.  */

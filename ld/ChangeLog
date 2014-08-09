@@ -1,3 +1,14 @@
+2014-08-08  Ulrich Drepper  <drepper@gmail.com>
+
+	* ldlang.h (struct lang_input_statement_flags): Add pushed
+	member.
+	* ldlex.h (enum option_values): Add OPTION_PUSH_STATE and
+	OPTION_POP_STATE.
+	* lexsup.c (ld_options): Add entries for --push-state and
+	--pop-state.
+	(parse_args): Handle OPTION_PUSH_STATE and OPTION_POP_STATE.
+	* ld.texinfo: Document --push-state and --pop-state.
+
 2014-08-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR14918
