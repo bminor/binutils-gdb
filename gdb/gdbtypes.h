@@ -724,6 +724,11 @@ struct main_type
 
     struct func_type *func_stuff;
   } type_specific;
+
+  /* * Contains a location description value for the current type. Evaluating
+     this field yields to the location of the data for an object.  */
+
+  struct dynamic_prop *data_location;
 };
 
 /* * A ``struct type'' describes a particular instance of a type, with
@@ -1202,6 +1207,16 @@ extern void allocate_gnat_aux_type (struct type *);
   TYPE_RANGE_DATA(range_type)->high.kind
 #define TYPE_LOW_BOUND_KIND(range_type) \
   TYPE_RANGE_DATA(range_type)->low.kind
+
+/* Attribute accessors for the type data location.  */
+#define TYPE_DATA_LOCATION(thistype) \
+  TYPE_MAIN_TYPE(thistype)->data_location
+#define TYPE_DATA_LOCATION_BATON(thistype) \
+  TYPE_DATA_LOCATION (thistype)->data.baton
+#define TYPE_DATA_LOCATION_ADDR(thistype) \
+  TYPE_DATA_LOCATION (thistype)->data.const_val
+#define TYPE_DATA_LOCATION_KIND(thistype) \
+  TYPE_DATA_LOCATION (thistype)->kind
 
 /* Moto-specific stuff for FORTRAN arrays.  */
 

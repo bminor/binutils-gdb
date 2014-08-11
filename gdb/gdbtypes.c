@@ -1620,6 +1620,17 @@ is_dynamic_type_internal (struct type *type, int top_level)
   if (top_level && TYPE_CODE (type) == TYPE_CODE_REF)
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
+  /* Types that have a dynamic TYPE_DATA_LOCATION are considered
+     dynamic, even if the type itself is statically defined.
+     From a user's point of view, this may appear counter-intuitive;
+     but it makes sense in this context, because the point is to determine
+     whether any part of the type needs to be resolved before it can
+     be exploited.  */
+  if (TYPE_DATA_LOCATION (type) != NULL
+      && (TYPE_DATA_LOCATION_KIND (type) == PROP_LOCEXPR
+	  || TYPE_DATA_LOCATION_KIND (type) == PROP_LOCLIST))
+    return 1;
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -1852,6 +1863,8 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
 {
   struct type *real_type = check_typedef (type);
   struct type *resolved_type = type;
+  const struct dynamic_prop *prop;
+  CORE_ADDR value;
 
   if (!is_dynamic_type_internal (real_type, top_level))
     return type;
@@ -1892,6 +1905,16 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
       resolved_type = resolve_dynamic_struct (type, addr);
       break;
     }
+
+  /* Resolve data_location attribute.  */
+  prop = TYPE_DATA_LOCATION (resolved_type);
+  if (dwarf2_evaluate_property (prop, addr, &value))
+    {
+      TYPE_DATA_LOCATION_ADDR (resolved_type) = value;
+      TYPE_DATA_LOCATION_KIND (resolved_type) = PROP_CONST;
+    }
+  else
+    TYPE_DATA_LOCATION (resolved_type) = NULL;
 
   return resolved_type;
 }
@@ -4110,6 +4133,15 @@ copy_type_recursive (struct objfile *objfile,
       *TYPE_RANGE_DATA (new_type) = *TYPE_RANGE_DATA (type);
     }
 
+  /* Copy the data location information.  */
+  if (TYPE_DATA_LOCATION (type) != NULL)
+    {
+      TYPE_DATA_LOCATION (new_type)
+	= TYPE_ALLOC (new_type, sizeof (struct dynamic_prop));
+      memcpy (TYPE_DATA_LOCATION (new_type), TYPE_DATA_LOCATION (type),
+	      sizeof (struct dynamic_prop));
+    }
+
   /* Copy pointers to other types.  */
   if (TYPE_TARGET_TYPE (type))
     TYPE_TARGET_TYPE (new_type) = 
@@ -4155,6 +4187,13 @@ copy_type (const struct type *type)
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
   memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
 	  sizeof (struct main_type));
+  if (TYPE_DATA_LOCATION (type) != NULL)
+    {
+      TYPE_DATA_LOCATION (new_type)
+	= TYPE_ALLOC (new_type, sizeof (struct dynamic_prop));
+      memcpy (TYPE_DATA_LOCATION (new_type), TYPE_DATA_LOCATION (type),
+	      sizeof (struct dynamic_prop));
+    }
 
   return new_type;
 }

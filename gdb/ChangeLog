@@ -1,6 +1,21 @@
 2014-08-18  Keven Boell  <keven.boell@intel.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbtypes.h (struct main_type): Add field "data_location".
+	(TYPE_DATA_LOCATION, TYPE_DATA_LOCATION_BATON)
+	(TYPE_DATA_LOCATION_ADDR, TYPE_DATA_LOCATION_KIND): New macros.
+	* gdbtypes.c (is_dynamic_type): Return 1 if the type has
+	a dynamic data location.
+	(resolve_dynamic_type): Add DW_AT_data_location handling.
+	(copy_recursive, copy_type): Copy the data_location information
+	when present.
+	* dwarf2read.c (set_die_type): Add DW_AT_data_location handling.
+	* value.c (value_from_contents_and_address): Add
+	DW_AT_data_location handling.
+
+2014-08-18  Keven Boell  <keven.boell@intel.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2expr.h (struct dwarf_expr_context_funcs): Uncomment
 	field "get_object_address".
 	* dwarf2expr.c (execute_stack_op): Add handling for

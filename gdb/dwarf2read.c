@@ -21669,6 +21669,8 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 {
   struct dwarf2_per_cu_offset_and_type **slot, ofs;
   struct objfile *objfile = cu->objfile;
+  struct attribute *attr;
+  struct dynamic_prop prop;
 
   /* For Ada types, make sure that the gnat-specific data is always
      initialized (if not already set).  There are a few types where
@@ -21682,6 +21684,15 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
       && TYPE_CODE (type) != TYPE_CODE_FLT
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
+
+  /* Read DW_AT_data_location and set in type.  */
+  attr = dwarf2_attr (die, DW_AT_data_location, cu);
+  if (attr_to_dynamic_prop (attr, die, cu, &prop))
+    {
+      TYPE_DATA_LOCATION (type)
+        = obstack_alloc (&objfile->objfile_obstack, sizeof (prop));
+      *TYPE_DATA_LOCATION (type) = prop;
+    }
 
   if (dwarf2_per_objfile->die_type_hash == NULL)
     {
