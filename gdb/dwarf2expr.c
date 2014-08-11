@@ -1477,6 +1477,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  }
 	  break;
 
+	case DW_OP_push_object_address:
+	  /* Return the address of the object we are currently observing.  */
+	  result = (ctx->funcs->get_object_address) (ctx->baton);
+	  result_val = value_from_ulongest (address_type, result);
+	  break;
+
 	default:
 	  error (_("Unhandled dwarf expression opcode 0x%x"), op);
 	}

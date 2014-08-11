@@ -303,6 +303,7 @@ struct dwarf_expr_baton
 {
   struct frame_info *frame;
   struct dwarf2_per_cu_data *per_cu;
+  CORE_ADDR obj_address;
 };
 
 /* Helper functions for dwarf2_evaluate_loc_desc.  */
@@ -1206,6 +1207,7 @@ dwarf_expr_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
 
   baton_local.frame = caller_frame;
   baton_local.per_cu = caller_per_cu;
+  baton_local.obj_address = 0;
 
   saved_ctx.gdbarch = ctx->gdbarch;
   saved_ctx.addr_size = ctx->addr_size;
@@ -1233,6 +1235,22 @@ dwarf_expr_get_addr_index (void *baton, unsigned int index)
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
 
   return dwarf2_read_addr_index (debaton->per_cu, index);
+}
+
+/* Callback function for get_object_address. Return the address of the VLA
+   object.  */
+
+static CORE_ADDR
+dwarf_expr_get_obj_addr (void *baton)
+{
+  struct dwarf_expr_baton *debaton = baton;
+
+  gdb_assert (debaton != NULL);
+
+  if (debaton->obj_address == 0)
+    error (_("Location address is not set."));
+
+  return debaton->obj_address;
 }
 
 /* VALUE must be of type lval_computed with entry_data_value_funcs.  Perform
@@ -2190,7 +2208,8 @@ static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
   dwarf_expr_dwarf_call,
   dwarf_expr_get_base_type,
   dwarf_expr_push_dwarf_reg_entry_value,
-  dwarf_expr_get_addr_index
+  dwarf_expr_get_addr_index,
+  dwarf_expr_get_obj_addr
 };
 
 /* Evaluate a location description, starting at DATA and with length
@@ -2219,6 +2238,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
   baton.frame = frame;
   baton.per_cu = per_cu;
+  baton.obj_address = 0;
 
   ctx = new_dwarf_expr_context ();
   old_chain = make_cleanup_free_dwarf_expr_context (ctx);
@@ -2424,6 +2444,7 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 
 static int
 dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
+			   CORE_ADDR addr,
 			   CORE_ADDR *valp)
 {
   struct dwarf_expr_context *ctx;
@@ -2439,6 +2460,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
   baton.frame = get_selected_frame (NULL);
   baton.per_cu = dlbaton->per_cu;
+  baton.obj_address = addr;
 
   objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
 
@@ -2479,7 +2501,8 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 /* See dwarf2loc.h.  */
 
 int
-dwarf2_evaluate_property (const struct dynamic_prop *prop, CORE_ADDR *value)
+dwarf2_evaluate_property (const struct dynamic_prop *prop,
+			  CORE_ADDR address, CORE_ADDR *value)
 {
   if (prop == NULL)
     return 0;
@@ -2490,7 +2513,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop, CORE_ADDR *value)
       {
 	const struct dwarf2_property_baton *baton = prop->data.baton;
 
-	if (dwarf2_locexpr_baton_eval (&baton->locexpr, value))
+	if (dwarf2_locexpr_baton_eval (&baton->locexpr, address, value))
 	  {
 	    if (baton->referenced_type)
 	      {
@@ -2641,6 +2664,15 @@ needs_get_addr_index (void *baton, unsigned int index)
   return 1;
 }
 
+/* DW_OP_push_object_address has a frame already passed through.  */
+
+static CORE_ADDR
+needs_get_obj_addr (void *baton)
+{
+  /* Nothing to do.  */
+  return 1;
+}
+
 /* Virtual method table for dwarf2_loc_desc_needs_frame below.  */
 
 static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
@@ -2655,7 +2687,8 @@ static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
   needs_frame_dwarf_call,
   NULL,				/* get_base_type */
   needs_dwarf_reg_entry_value,
-  needs_get_addr_index
+  needs_get_addr_index,
+  needs_get_obj_addr
 };
 
 /* Return non-zero iff the location expression at DATA (length SIZE)
@@ -3301,6 +3334,10 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  break;
 
 	case DW_OP_GNU_push_tls_address:
+	  unimplemented (op);
+	  break;
+
+	case DW_OP_push_object_address:
 	  unimplemented (op);
 	  break;
 
