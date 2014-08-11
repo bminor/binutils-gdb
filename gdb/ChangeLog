@@ -1,3 +1,8 @@
+2014-08-19  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_vfp_cprc_sub_candidate): Handle _Complex
+	types.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* acinclude.m4 (GDB_AC_CHECK_BFD): Don't add -ldl.
