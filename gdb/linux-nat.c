@@ -4836,7 +4836,6 @@ linux_nat_thread_address_space (struct target_ops *t, ptid_t ptid)
   struct inferior *inf;
   int pid;
 
-  pid = ptid_get_lwp (ptid);
   if (ptid_get_lwp (ptid) == 0)
     {
       /* An (lwpid,0,0) ptid.  Look up the lwp object to get at the
