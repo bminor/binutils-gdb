@@ -1,3 +1,7 @@
+2014-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/omit-lock.s: Remove type directive.
+
 2014-08-06  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/i386.exp: Run new tests.

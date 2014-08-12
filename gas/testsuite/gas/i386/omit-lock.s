@@ -1,6 +1,5 @@
-        .code32
+	.text
 .globl main
-        .type   main, @function
 main:
 	lock
         lock addl $0x1,(%eax)
