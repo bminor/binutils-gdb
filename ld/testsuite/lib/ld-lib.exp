@@ -1660,7 +1660,7 @@ proc check_plugin_api_available { } {
     if {![info exists plugin_api_available_saved]} {
 	# Check if the ld used by gcc supports --plugin.
 	set ld_output [remote_exec host $ld "--help"]
-	if { [ string first "-plugin" $ld_output ] >= 0 } {
+	if { [ string first "-plugin PLUGIN" $ld_output ] >= 0 } {
 	    set plugin_api_available_saved 1
 	} else {
 	    set plugin_api_available_saved 0
