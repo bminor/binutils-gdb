@@ -272,15 +272,15 @@ struct lang_input_statement_flags
   /* Set if the file does not exist.  */
   unsigned int missing_file : 1;
 
+  /* Set if reloading an archive or --as-needed lib.  */
+  unsigned int reload : 1;
+
 #ifdef ENABLE_PLUGINS
   /* Set if the file was claimed by a plugin.  */
   unsigned int claimed : 1;
 
   /* Set if the file was claimed from an archive.  */
   unsigned int claim_archive : 1;
-
-  /* Set if reloading an archive or --as-needed lib.  */
-  unsigned int reload : 1;
 #endif /* ENABLE_PLUGINS */
 
   /* Head of list of pushed flags.  */

@@ -1045,12 +1045,3 @@ plugin_notice (struct bfd_link_info *info,
 				      abfd, section, value, flags);
   return TRUE;
 }
-
-/* Return true if ABFD, a dynamic library, should be reloaded.  */
-
-bfd_boolean
-plugin_should_reload (bfd *abfd)
-{
-  return (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-	  && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0);
-}

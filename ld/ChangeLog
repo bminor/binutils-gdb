@@ -1,5 +1,13 @@
 2014-08-12  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.h (struct lang_input_statement_flags): Don't make "reload"
+	field conditional on ENABLE_PLUGINS.
+	* ldlang.c (open_input_bfds): Expand plugin_should_reload.
+	* plugin.h (plugin_should_reload): Delete.
+	* plugin.c (plugin_should_reload): Delete.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
 	* ldmain.c (notice): Update args.
 	* plugin.c (plugin_notice): Likewise.  Follow warning sym link.
 	Handle new indirect symbol.

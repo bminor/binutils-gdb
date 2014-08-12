@@ -3287,7 +3287,9 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		      || (bfd_get_format (abfd) == bfd_object
 			  && ((abfd->flags) & DYNAMIC) != 0
 			  && s->input_statement.flags.add_DT_NEEDED_for_regular
-			  && plugin_should_reload (abfd))))
+			  && bfd_get_flavour (abfd) == bfd_target_elf_flavour
+			  && (bfd_elf_get_dyn_lib_class (abfd)
+			      & DYN_AS_NEEDED) != 0)))
 		{
 		  s->input_statement.flags.loaded = FALSE;
 		  s->input_statement.flags.reload = TRUE;
