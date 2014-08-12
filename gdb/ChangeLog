@@ -1,3 +1,8 @@
+2014-08-11  Doug Evans  <dje@google.com>
+
+	* solib.c (solib_read_symbols): Delete "Loaded symbols for ..."
+	message, it is redundant with "Reading symbols from ..." message.
+
 2014-08-10  Doug Evans  <xdje42@gmail.com>
 
 	* linux-nat.c (linux_nat_thread_address_space): Delete dead code.

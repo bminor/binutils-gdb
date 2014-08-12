@@ -603,8 +603,6 @@ master_so_list (void)
 int
 solib_read_symbols (struct so_list *so, int flags)
 {
-  const int from_tty = flags & SYMFILE_VERBOSE;
-
   if (so->symbols_loaded)
     {
       /* If needed, we've already warned in our caller.  */
@@ -648,11 +646,7 @@ solib_read_symbols (struct so_list *so, int flags)
 					    " library symbols for %s:\n"),
 			   so->so_name);
       else
-	{
-	  if (print_symbol_loading_p (from_tty, 0, 1))
-	    printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
-	  so->symbols_loaded = 1;
-	}
+	so->symbols_loaded = 1;
       return 1;
     }
 

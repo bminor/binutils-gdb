@@ -1,3 +1,8 @@
+2014-08-11  Doug Evans  <dje@google.com>
+
+	* gdb.base/print-symbol-loading.exp (test_load_core): Update.
+	(test_load_shlib): Update.
+
 2014-08-09  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/display.exp: Invoke is_address_zero_readable.
