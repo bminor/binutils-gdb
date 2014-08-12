@@ -1,5 +1,15 @@
 2014-08-12  Alan Modra  <amodra@gmail.com>
 
+	* coff-aux.c (coff_m68k_aux_link_add_one_symbol): Only call "notice"
+	here when not calling the generic add_symbol function.  Formatting.
+	Correct handling of indirect symbols.  Update notice call.
+	* elflink.c (_bfd_elf_notice_as_needed): Update notice call.
+	* linker.c (_bfd_generic_link_add_one_symbol): Create indirect
+	symbols early.  Update notice call.  Add comments regarding weak
+	symbols vs. indirect.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
 	PR ld/16746
 	* linker.c (_bfd_generic_link_add_one_symbol <WARN>): Handle
 	!lto_plugin_active.

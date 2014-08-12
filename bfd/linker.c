@@ -1442,13 +1442,23 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 {
   enum link_row row;
   struct bfd_link_hash_entry *h;
+  struct bfd_link_hash_entry *inh = NULL;
   bfd_boolean cycle;
 
   BFD_ASSERT (section != NULL);
 
   if (bfd_is_ind_section (section)
       || (flags & BSF_INDIRECT) != 0)
-    row = INDR_ROW;
+    {
+      row = INDR_ROW;
+      /* Create the indirect symbol here.  This is for the benefit of
+	 the plugin "notice" function.
+	 STRING is the name of the symbol we want to indirect to.  */
+      inh = bfd_wrapped_link_hash_lookup (abfd, info, string, TRUE,
+					  copy, FALSE);
+      if (inh == NULL)
+	return FALSE;
+    }
   else if ((flags & BSF_WARNING) != 0)
     row = WARN_ROW;
   else if ((flags & BSF_CONSTRUCTOR) != 0)
@@ -1493,8 +1503,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
       || (info->notice_hash != NULL
 	  && bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE) != NULL))
     {
-      if (! (*info->callbacks->notice) (info, h,
-					abfd, section, value, flags, string))
+      if (! (*info->callbacks->notice) (info, h, inh,
+					abfd, section, value, flags))
 	return FALSE;
     }
 
@@ -1728,44 +1738,40 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	    return FALSE;
 	  /* Fall through.  */
 	case IND:
-	  /* Create an indirect symbol.  */
-	  {
-	    struct bfd_link_hash_entry *inh;
-
-	    /* STRING is the name of the symbol we want to indirect
-	       to.  */
-	    inh = bfd_wrapped_link_hash_lookup (abfd, info, string, TRUE,
-						copy, FALSE);
-	    if (inh == NULL)
+	  if (inh->type == bfd_link_hash_indirect
+	      && inh->u.i.link == h)
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: indirect symbol `%s' to `%s' is a loop"),
+		 abfd, name, string);
+	      bfd_set_error (bfd_error_invalid_operation);
 	      return FALSE;
-	    if (inh->type == bfd_link_hash_indirect
-		&& inh->u.i.link == h)
-	      {
-		(*_bfd_error_handler)
-		  (_("%B: indirect symbol `%s' to `%s' is a loop"),
-		   abfd, name, string);
-		bfd_set_error (bfd_error_invalid_operation);
-		return FALSE;
-	      }
-	    if (inh->type == bfd_link_hash_new)
-	      {
-		inh->type = bfd_link_hash_undefined;
-		inh->u.undef.abfd = abfd;
-		bfd_link_add_undef (info->hash, inh);
-	      }
+	    }
+	  if (inh->type == bfd_link_hash_new)
+	    {
+	      inh->type = bfd_link_hash_undefined;
+	      inh->u.undef.abfd = abfd;
+	      bfd_link_add_undef (info->hash, inh);
+	    }
 
-	    /* If the indirect symbol has been referenced, we need to
-	       push the reference down to the symbol we are
-	       referencing.  */
-	    if (h->type != bfd_link_hash_new)
-	      {
-		row = UNDEF_ROW;
-		cycle = TRUE;
-	      }
+	  /* If the indirect symbol has been referenced, we need to
+	     push the reference down to the symbol we are referencing.  */
+	  if (h->type != bfd_link_hash_new)
+	    {
+	      /* ??? If inh->type == bfd_link_hash_undefweak this
+		 converts inh to bfd_link_hash_undefined.  */
+	      row = UNDEF_ROW;
+	      cycle = TRUE;
+	    }
 
-	    h->type = bfd_link_hash_indirect;
-	    h->u.i.link = inh;
-	  }
+	  h->type = bfd_link_hash_indirect;
+	  h->u.i.link = inh;
+	  /* Not setting h = h->u.i.link here means that when cycle is
+	     set above we'll always go to REFC, and then cycle again
+	     to the indirected symbol.  This means that any successful
+	     change of an existing symbol to indirect counts as a
+	     reference.  ??? That may not be correct when the existing
+	     symbol was defweak.  */
 	  break;
 
 	case SET:

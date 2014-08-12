@@ -127,8 +127,9 @@ static const size_t tv_header_size = ARRAY_SIZE (tv_header_tags);
 
 /* Forward references.  */
 static bfd_boolean plugin_notice (struct bfd_link_info *,
-				  struct bfd_link_hash_entry *, bfd *,
-				  asection *, bfd_vma, flagword, const char *);
+				  struct bfd_link_hash_entry *,
+				  struct bfd_link_hash_entry *,
+				  bfd *, asection *, bfd_vma, flagword);
 
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 
@@ -962,15 +963,20 @@ plugin_call_cleanup (void)
 static bfd_boolean
 plugin_notice (struct bfd_link_info *info,
 	       struct bfd_link_hash_entry *h,
+	       struct bfd_link_hash_entry *inh,
 	       bfd *abfd,
 	       asection *section,
 	       bfd_vma value,
-	       flagword flags,
-	       const char *string)
+	       flagword flags)
 {
+  struct bfd_link_hash_entry *orig_h = h;
+
   if (h != NULL)
     {
       bfd *sym_bfd;
+
+      if (h->type == bfd_link_hash_warning)
+	h = h->u.i.link;
 
       /* Nothing to do here if this def/ref is from an IR dummy BFD.  */
       if (is_ir_dummy_bfd (abfd))
@@ -981,16 +987,15 @@ plugin_notice (struct bfd_link_info *info,
       else if (bfd_is_ind_section (section)
 	       || (flags & BSF_INDIRECT) != 0)
 	{
+	  /* ??? Some of this is questionable.  See comments in
+	     _bfd_generic_link_add_one_symbol for case IND.  */
 	  if (h->type != bfd_link_hash_new)
 	    {
-	      struct bfd_link_hash_entry *inh;
-
 	      h->non_ir_ref = TRUE;
-	      inh = bfd_wrapped_link_hash_lookup (abfd, info, string, FALSE,
-						  FALSE, FALSE);
-	      if (inh != NULL)
-		inh->non_ir_ref = TRUE;
+	      inh->non_ir_ref = TRUE;
 	    }
+	  else if (inh->type == bfd_link_hash_new)
+	    inh->non_ir_ref = TRUE;
 	}
 
       /* Nothing to do here for warning symbols.  */
@@ -1031,13 +1036,13 @@ plugin_notice (struct bfd_link_info *info,
     }
 
   /* Continue with cref/nocrossref/trace-sym processing.  */
-  if (h == NULL
+  if (orig_h == NULL
       || orig_notice_all
       || (info->notice_hash != NULL
-	  && bfd_hash_lookup (info->notice_hash, h->root.string,
+	  && bfd_hash_lookup (info->notice_hash, orig_h->root.string,
 			      FALSE, FALSE) != NULL))
-    return (*orig_callbacks->notice) (info, h,
-				      abfd, section, value, flags, string);
+    return (*orig_callbacks->notice) (info, orig_h, inh,
+				      abfd, section, value, flags);
   return TRUE;
 }
 

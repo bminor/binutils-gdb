@@ -1,5 +1,10 @@
 2014-08-12  Alan Modra  <amodra@gmail.com>
 
+	* bfdlink.h (struct bfd_link_callbacks <notice>): Remove "string"
+	param, add "inh".
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
 	* bfdlink.h (struct bfd_link_info): Add lto_plugin_active.
 
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>

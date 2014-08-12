@@ -73,20 +73,17 @@ coff_m68k_aux_link_add_one_symbol (struct bfd_link_info *info,
 				   bfd_boolean collect,
 				   struct bfd_link_hash_entry **hashp)
 {
-  struct bfd_link_hash_entry *h;
+  struct bfd_link_hash_entry *h, *inh, *t;
 
-  if ((flags & (BSF_WARNING | BSF_CONSTRUCTOR | BSF_WEAK)) == 0 &&
-      !bfd_is_und_section (section) &&
-      !bfd_is_com_section (section))
+  if ((flags & (BSF_WARNING | BSF_CONSTRUCTOR | BSF_WEAK)) == 0
+      && !bfd_is_und_section (section)
+      && !bfd_is_com_section (section))
     {
       /* The new symbol is a definition or an indirect definition */
 
       /* This bit copied from linker.c */
       if (hashp != NULL && *hashp != NULL)
-	{
-	  h = *hashp;
-	  BFD_ASSERT (strcmp (h->root.string, name) == 0);
-	}
+	h = *hashp;
       else
 	{
 	  h = bfd_link_hash_lookup (info->hash, name, TRUE, copy, FALSE);
@@ -98,37 +95,46 @@ coff_m68k_aux_link_add_one_symbol (struct bfd_link_info *info,
 	    }
 	}
 
-      if (info->notice_hash != (struct bfd_hash_table *) NULL
-	  && (bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE)
-	      != (struct bfd_hash_entry *) NULL))
-	{
-	  if (! (*info->callbacks->notice) (info, h, abfd, section, value,
-					    flags, string))
-	    return FALSE;
-	}
-
       if (hashp != (struct bfd_link_hash_entry **) NULL)
 	*hashp = h;
       /* end duplication from linker.c */
 
-      if (h->type == bfd_link_hash_defined
-	  || h->type == bfd_link_hash_indirect)
+      t = h;
+      inh = NULL;
+      if (h->type == bfd_link_hash_indirect)
 	{
-	  asection *msec;
+	  inh = h->u.i.link;
+	  t = inh;
+	}
 
-	  if (h->type == bfd_link_hash_defined)
-	    msec = h->u.def.section;
-	  else
-	    msec = bfd_ind_section_ptr;
+      if (t->type == bfd_link_hash_defined)
+	{
+	  asection *msec = t->u.def.section;
+	  bfd_boolean special = FALSE;
 
 	  if (bfd_is_abs_section (msec) && !bfd_is_abs_section (section))
 	    {
-	      h->u.def.section = section;
-	      h->u.def.value = value;
-	      return TRUE;
+	      t->u.def.section = section;
+	      t->u.def.value = value;
+	      special = TRUE;
 	    }
 	  else if (bfd_is_abs_section (section) && !bfd_is_abs_section (msec))
-	    return TRUE;
+	    special = TRUE;
+
+	  if (special)
+	    {
+	      if (info->notice_all
+		  || (info->notice_hash != NULL
+		      && bfd_hash_lookup (info->notice_hash, name,
+					  FALSE, FALSE) != NULL))
+		{
+		  if (!(*info->callbacks->notice) (info, h, inh,
+						   abfd, section, value, flags))
+		    return FALSE;
+		}
+
+	      return TRUE;
+	    }
 	}
     }
 

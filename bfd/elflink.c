@@ -3299,7 +3299,7 @@ _bfd_elf_notice_as_needed (bfd *ibfd,
 			   struct bfd_link_info *info,
 			   enum notice_asneeded_action act)
 {
-  return (*info->callbacks->notice) (info, NULL, ibfd, NULL, act, 0, NULL);
+  return (*info->callbacks->notice) (info, NULL, NULL, ibfd, NULL, act, 0);
 }
 
 /* Add symbols from an ELF object file to the linker hash table.  */

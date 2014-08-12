@@ -1,5 +1,11 @@
 2014-08-12  Alan Modra  <amodra@gmail.com>
 
+	* ldmain.c (notice): Update args.
+	* plugin.c (plugin_notice): Likewise.  Follow warning sym link.
+	Handle new indirect symbol.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
 	* plugin.c (plugin_load_plugins): Set link_info.lto_plugin_active.
 
 2014-08-08  Ulrich Drepper  <drepper@gmail.com>
