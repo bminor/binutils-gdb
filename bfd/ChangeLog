@@ -1,3 +1,9 @@
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	PR ld/16746
+	* linker.c (_bfd_generic_link_add_one_symbol <WARN>): Handle
+	!lto_plugin_active.
+
 2014-08-07  Chen Gang <gang.chen.5i5j@gmail.com>
 
 	* coff-ppc.c (coff_ppc_relocate_section): Ensure local symbols are
