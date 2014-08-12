@@ -292,6 +292,9 @@ struct bfd_link_info
      callback.  */
   unsigned int notice_all: 1;
 
+  /* TRUE if the LTO plugin is active.  */
+  unsigned int lto_plugin_active: 1;
+
   /* TRUE if we are loading LTO outputs.  */
   unsigned int loading_lto_outputs: 1;
 

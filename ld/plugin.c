@@ -841,6 +841,7 @@ plugin_load_plugins (void)
   plugin_callbacks = *orig_callbacks;
   plugin_callbacks.notice = &plugin_notice;
   link_info.notice_all = TRUE;
+  link_info.lto_plugin_active = TRUE;
   link_info.callbacks = &plugin_callbacks;
 }
 
