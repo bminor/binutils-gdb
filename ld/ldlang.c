@@ -40,6 +40,7 @@
 #include "demangle.h"
 #include "hashtab.h"
 #include "libbfd.h"
+#include "elf-bfd.h"
 #ifdef ENABLE_PLUGINS
 #include "plugin.h"
 #endif /* ENABLE_PLUGINS */
@@ -3288,8 +3289,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 			  && ((abfd->flags) & DYNAMIC) != 0
 			  && s->input_statement.flags.add_DT_NEEDED_for_regular
 			  && bfd_get_flavour (abfd) == bfd_target_elf_flavour
-			  && (bfd_elf_get_dyn_lib_class (abfd)
-			      & DYN_AS_NEEDED) != 0)))
+			  && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0)))
 		{
 		  s->input_statement.flags.loaded = FALSE;
 		  s->input_statement.flags.reload = TRUE;
