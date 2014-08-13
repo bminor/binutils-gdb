@@ -1,3 +1,8 @@
+2014-08-13  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	* pe-dll.c (autofilter_entry_type autofilter_symbollist_i386): Add
+	__dso_handle.
+
 2014-08-13  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (open_input_bfds): Don't use bfd_elf_get_dyn_lib_class.
