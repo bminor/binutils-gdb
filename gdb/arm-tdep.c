@@ -12016,6 +12016,217 @@ arm_record_unsupported_insn (insn_decode_record *arm_insn_r)
   return -1;
 }
 
+/* Record handler for arm/thumb mode VFP data processing instructions.  */
+
+static int
+arm_record_vfp_data_proc_insn (insn_decode_record *arm_insn_r)
+{
+  uint32_t opc1, opc2, opc3, dp_op_sz, bit_d, reg_vd;
+  uint32_t record_buf[4];
+  enum insn_types {INSN_T0, INSN_T1, INSN_T2, INSN_T3, INSN_INV};
+  enum insn_types curr_insn_type = INSN_INV;
+
+  reg_vd = bits (arm_insn_r->arm_insn, 12, 15);
+  opc1 = bits (arm_insn_r->arm_insn, 20, 23);
+  opc2 = bits (arm_insn_r->arm_insn, 16, 19);
+  opc3 = bits (arm_insn_r->arm_insn, 6, 7);
+  dp_op_sz = bit (arm_insn_r->arm_insn, 8);
+  bit_d = bit (arm_insn_r->arm_insn, 22);
+  opc1 = opc1 & 0x04;
+
+  /* Handle VMLA, VMLS.  */
+  if (opc1 == 0x00)
+    {
+      if (bit (arm_insn_r->arm_insn, 10))
+        {
+          if (bit (arm_insn_r->arm_insn, 6))
+            curr_insn_type = INSN_T0;
+          else
+            curr_insn_type = INSN_T1;
+        }
+      else
+        {
+          if (dp_op_sz)
+            curr_insn_type = INSN_T1;
+          else
+            curr_insn_type = INSN_T2;
+        }
+    }
+  /* Handle VNMLA, VNMLS, VNMUL.  */
+  else if (opc1 == 0x01)
+    {
+      if (dp_op_sz)
+        curr_insn_type = INSN_T1;
+      else
+        curr_insn_type = INSN_T2;
+    }
+  /* Handle VMUL.  */
+  else if (opc1 == 0x02 && !(opc3 & 0x01))
+    {
+      if (bit (arm_insn_r->arm_insn, 10))
+        {
+          if (bit (arm_insn_r->arm_insn, 6))
+            curr_insn_type = INSN_T0;
+          else
+            curr_insn_type = INSN_T1;
+        }
+      else
+        {
+          if (dp_op_sz)
+            curr_insn_type = INSN_T1;
+          else
+            curr_insn_type = INSN_T2;
+        }
+    }
+  /* Handle VADD, VSUB.  */
+  else if (opc1 == 0x03)
+    {
+      if (!bit (arm_insn_r->arm_insn, 9))
+        {
+          if (bit (arm_insn_r->arm_insn, 6))
+            curr_insn_type = INSN_T0;
+          else
+            curr_insn_type = INSN_T1;
+        }
+      else
+        {
+          if (dp_op_sz)
+            curr_insn_type = INSN_T1;
+          else
+            curr_insn_type = INSN_T2;
+        }
+    }
+  /* Handle VDIV.  */
+  else if (opc1 == 0x0b)
+    {
+      if (dp_op_sz)
+        curr_insn_type = INSN_T1;
+      else
+        curr_insn_type = INSN_T2;
+    }
+  /* Handle all other vfp data processing instructions.  */
+  else if (opc1 == 0x0b)
+    {
+      /* Handle VMOV.  */
+      if (!(opc3 & 0x01) || (opc2 == 0x00 && opc3 == 0x01))
+        {
+          if (bit (arm_insn_r->arm_insn, 4))
+            {
+              if (bit (arm_insn_r->arm_insn, 6))
+                curr_insn_type = INSN_T0;
+              else
+                curr_insn_type = INSN_T1;
+            }
+          else
+            {
+              if (dp_op_sz)
+                curr_insn_type = INSN_T1;
+              else
+                curr_insn_type = INSN_T2;
+            }
+        }
+      /* Handle VNEG and VABS.  */
+      else if ((opc2 == 0x01 && opc3 == 0x01)
+              || (opc2 == 0x00 && opc3 == 0x03))
+        {
+          if (!bit (arm_insn_r->arm_insn, 11))
+            {
+              if (bit (arm_insn_r->arm_insn, 6))
+                curr_insn_type = INSN_T0;
+              else
+                curr_insn_type = INSN_T1;
+            }
+          else
+            {
+              if (dp_op_sz)
+                curr_insn_type = INSN_T1;
+              else
+                curr_insn_type = INSN_T2;
+            }
+        }
+      /* Handle VSQRT.  */
+      else if (opc2 == 0x01 && opc3 == 0x03)
+        {
+          if (dp_op_sz)
+            curr_insn_type = INSN_T1;
+          else
+            curr_insn_type = INSN_T2;
+        }
+      /* Handle VCVT.  */
+      else if (opc2 == 0x07 && opc3 == 0x03)
+        {
+          if (!dp_op_sz)
+            curr_insn_type = INSN_T1;
+          else
+            curr_insn_type = INSN_T2;
+        }
+      else if (opc3 & 0x01)
+        {
+          /* Handle VCVT.  */
+          if ((opc2 == 0x08) || (opc2 & 0x0e) == 0x0c)
+            {
+              if (!bit (arm_insn_r->arm_insn, 18))
+                curr_insn_type = INSN_T2;
+              else
+                {
+                  if (dp_op_sz)
+                    curr_insn_type = INSN_T1;
+                  else
+                    curr_insn_type = INSN_T2;
+                }
+            }
+          /* Handle VCVT.  */
+          else if ((opc2 & 0x0e) == 0x0a || (opc2 & 0x0e) == 0x0e)
+            {
+              if (dp_op_sz)
+                curr_insn_type = INSN_T1;
+              else
+                curr_insn_type = INSN_T2;
+            }
+          /* Handle VCVTB, VCVTT.  */
+          else if ((opc2 & 0x0e) == 0x02)
+            curr_insn_type = INSN_T2;
+          /* Handle VCMP, VCMPE.  */
+          else if ((opc2 & 0x0e) == 0x04)
+            curr_insn_type = INSN_T3;
+        }
+    }
+
+  switch (curr_insn_type)
+    {
+      case INSN_T0:
+        reg_vd = reg_vd | (bit_d << 4);
+        record_buf[0] = reg_vd + ARM_D0_REGNUM;
+        record_buf[1] = reg_vd + ARM_D0_REGNUM + 1;
+        arm_insn_r->reg_rec_count = 2;
+        break;
+
+      case INSN_T1:
+        reg_vd = reg_vd | (bit_d << 4);
+        record_buf[0] = reg_vd + ARM_D0_REGNUM;
+        arm_insn_r->reg_rec_count = 1;
+        break;
+
+      case INSN_T2:
+        reg_vd = (reg_vd << 1) | bit_d;
+        record_buf[0] = reg_vd + ARM_D0_REGNUM;
+        arm_insn_r->reg_rec_count = 1;
+        break;
+
+      case INSN_T3:
+        record_buf[0] = ARM_FPSCR_REGNUM;
+        arm_insn_r->reg_rec_count = 1;
+        break;
+
+      default:
+        gdb_assert_not_reached ("no decoding pattern found");
+        break;
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  return 0;
+}
+
 /* Handling opcode 110 insns.  */
 
 static int
@@ -12113,7 +12324,7 @@ arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
     {
       /* VFP data-processing instructions.  */
       if (!op1_sbit && !op)
-        return arm_record_unsupported_insn (arm_insn_r);
+        return arm_record_vfp_data_proc_insn (arm_insn_r);
 
       /* Advanced SIMD, VFP instructions.  */
       if (!op1_sbit && op)
