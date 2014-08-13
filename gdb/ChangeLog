@@ -1,5 +1,11 @@
 2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
 
+	* arm-tdep.c (arm_record_vdata_transfer_insn): Added record handler for
+	vector data transfer instructions.
+	(arm_record_coproc_data_proc): Updated.
+
+2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
+
 	* arm-tdep.c (arm_record_asimd_vfp_coproc): Replace stub handler with
 	arm_record_exreg_ld_st_insn.
 	(arm_record_exreg_ld_st_insn): Add record handler for ex-register

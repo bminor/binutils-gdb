@@ -12016,6 +12016,102 @@ arm_record_unsupported_insn (insn_decode_record *arm_insn_r)
   return -1;
 }
 
+/* Record handler for vector data transfer instructions.  */
+
+static int
+arm_record_vdata_transfer_insn (insn_decode_record *arm_insn_r)
+{
+  uint32_t bits_a, bit_c, bit_l, reg_t, reg_v;
+  uint32_t record_buf[4];
+
+  const int num_regs = gdbarch_num_regs (arm_insn_r->gdbarch);
+  reg_t = bits (arm_insn_r->arm_insn, 12, 15);
+  reg_v = bits (arm_insn_r->arm_insn, 21, 23);
+  bits_a = bits (arm_insn_r->arm_insn, 21, 23);
+  bit_l = bit (arm_insn_r->arm_insn, 20);
+  bit_c = bit (arm_insn_r->arm_insn, 8);
+
+  /* Handle VMOV instruction.  */
+  if (bit_l && bit_c)
+    {
+      record_buf[0] = reg_t;
+      arm_insn_r->reg_rec_count = 1;
+    }
+  else if (bit_l && !bit_c)
+    {
+      /* Handle VMOV instruction.  */
+      if (bits_a == 0x00)
+        {
+          if (bit (arm_insn_r->arm_insn, 20))
+            record_buf[0] = reg_t;
+          else
+            record_buf[0] = num_regs + (bit (arm_insn_r->arm_insn, 7) |
+                            (reg_v << 1));
+
+          arm_insn_r->reg_rec_count = 1;
+        }
+      /* Handle VMRS instruction.  */
+      else if (bits_a == 0x07)
+        {
+          if (reg_t == 15)
+            reg_t = ARM_PS_REGNUM;
+
+          record_buf[0] = reg_t;
+          arm_insn_r->reg_rec_count = 1;
+        }
+    }
+  else if (!bit_l && !bit_c)
+    {
+      /* Handle VMOV instruction.  */
+      if (bits_a == 0x00)
+        {
+          if (bit (arm_insn_r->arm_insn, 20))
+            record_buf[0] = reg_t;
+          else
+            record_buf[0] = num_regs + (bit (arm_insn_r->arm_insn, 7) |
+                            (reg_v << 1));
+
+          arm_insn_r->reg_rec_count = 1;
+        }
+      /* Handle VMSR instruction.  */
+      else if (bits_a == 0x07)
+        {
+          record_buf[0] = ARM_FPSCR_REGNUM;
+          arm_insn_r->reg_rec_count = 1;
+        }
+    }
+  else if (!bit_l && bit_c)
+    {
+      /* Handle VMOV instruction.  */
+      if (!(bits_a & 0x04))
+        {
+          record_buf[0] = (reg_v | (bit (arm_insn_r->arm_insn, 7) << 4))
+                          + ARM_D0_REGNUM;
+          arm_insn_r->reg_rec_count = 1;
+        }
+      /* Handle VDUP instruction.  */
+      else
+        {
+          if (bit (arm_insn_r->arm_insn, 21))
+            {
+              reg_v = reg_v | (bit (arm_insn_r->arm_insn, 7) << 4);
+              record_buf[0] = reg_v + ARM_D0_REGNUM;
+              record_buf[1] = reg_v + ARM_D0_REGNUM + 1;
+              arm_insn_r->reg_rec_count = 2;
+            }
+          else
+            {
+              reg_v = reg_v | (bit (arm_insn_r->arm_insn, 7) << 4);
+              record_buf[0] = reg_v + ARM_D0_REGNUM;
+              arm_insn_r->reg_rec_count = 1;
+            }
+        }
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  return 0;
+}
+
 /* Record handler for extension register load/store instructions.  */
 
 static int
@@ -12502,7 +12598,7 @@ arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
 
       /* Advanced SIMD, VFP instructions.  */
       if (!op1_sbit && op)
-        return arm_record_unsupported_insn (arm_insn_r);
+        return arm_record_vdata_transfer_insn (arm_insn_r);
     }
   else
     {
