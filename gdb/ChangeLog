@@ -1,3 +1,9 @@
+2014-08-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbarch.sh: #include "frame.h" in gdbarch.h.  Delete "struct
+	frame_info" partial declaration.
+	* gdbarch.h: Regenerate.
+
 2014-08-15  Yao Qi  <yao@codesourcery.com>
 
 	* dwarf2read.c (dwarf_decode_lines_1): Remove parameter 'pst'.
