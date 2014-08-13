@@ -1,3 +1,7 @@
+2014-08-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/data-loc.c, gdb.dwarf2/data-loc.exp: New files.
+
 2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR c++/17132
