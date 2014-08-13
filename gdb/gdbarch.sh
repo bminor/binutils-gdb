@@ -1124,9 +1124,10 @@ cat <<EOF
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
+#include "frame.h"
+
 struct floatformat;
 struct ui_file;
-struct frame_info;
 struct value;
 struct objfile;
 struct obj_section;
