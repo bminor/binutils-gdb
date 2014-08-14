@@ -30,6 +30,9 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
+set remote_source2_py [gdb_remote_download host \
+			   ${srcdir}/${subdir}/source2.py]
+
 # Do this instead of the skip_python_check.
 # We want to do some tests when Python is not present.
 gdb_test_multiple "python print (23)" "verify python support" {
@@ -38,7 +41,7 @@ gdb_test_multiple "python print (23)" "verify python support" {
 
       # If Python is not supported, verify that sourcing a python script
       # causes an error.
-      gdb_test "source $srcdir/$subdir/source2.py" \
+      gdb_test "source $remote_source2_py" \
 	  "Error in sourced command file:.*" \
 	  "source source2.py when python disabled"
 
@@ -73,7 +76,7 @@ gdb_py_test_multiple "indented multi-line python command" \
   "foo ()" "" \
   "end" "hello, world!"
 
-gdb_test "source $srcdir/$subdir/source2.py" "yes" "source source2.py"
+gdb_test "source $remote_source2_py" "yes" "source source2.py"
 
 gdb_test "source -s source2.py" "yes" "source -s source2.py"
 

@@ -1,3 +1,10 @@
+2014-08-22  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.python/py-finish-breakpoint.exp: Copy .py file to host.
+	* gdb.python/py-finish-breakpoint2.exp: Likewise.
+	* gdb.python/python.exp: Likewise.  Use .py file on the host
+	instead of the build.
+
 2014-08-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/gcore-stale-thread.c: New file.
