@@ -1,3 +1,10 @@
+2014-08-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.cp/casts.exp: Set print symbol off.
+	* gdb.cp/class2.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+
 2014-08-11  Doug Evans  <dje@google.com>
 
 	* gdb.base/print-symbol-loading.exp (test_load_core): Update.

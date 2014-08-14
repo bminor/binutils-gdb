@@ -42,6 +42,9 @@ if ![runto_main] then {
     continue
 }
 
+# Prevent symbol on address 0x0 being printed.
+gdb_test_no_output "set print symbol off"
+
 gdb_test "break [gdb_get_line_number "casts.exp: 1"]" \
     "Breakpoint.*at.* file .*" \
     ""
