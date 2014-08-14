@@ -1,5 +1,12 @@
 2014-08-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp) <OP_VAR_VALUE>:
+	When noside is EVAL_AVOID_SIDE_EFFECTS, only return a statically
+	fixed value for records and unions for which some GNAT encodings
+	are present.
+
+2014-08-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp) <OP_VAR_VALUE>: Slight code
 	rewrite to avoid "else if" and "else" constructs.  Should be
 	a no-op in practice.

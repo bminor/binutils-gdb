@@ -10185,8 +10185,22 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		}
 	    }
 
-          *pos += 4;
-          return value_zero (to_static_fixed_type (type), not_lval);
+	  /* Records and unions for which GNAT encodings have been
+	     generated need to be statically fixed as well.
+	     Otherwise, non-static fixing produces a type where
+	     all dynamic properties are removed, which prevents "ptype"
+	     from being able to completely describe the type.
+	     For instance, a case statement in a variant record would be
+	     replaced by the relevant components based on the actual
+	     value of the discriminants.  */
+	  if ((TYPE_CODE (type) == TYPE_CODE_STRUCT
+	       && dynamic_template_type (type) != NULL)
+	      || (TYPE_CODE (type) == TYPE_CODE_UNION
+		  && ada_find_parallel_type (type, "___XVU") != NULL))
+	    {
+	      *pos += 4;
+	      return value_zero (to_static_fixed_type (type), not_lval);
+	    }
         }
 
       arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
