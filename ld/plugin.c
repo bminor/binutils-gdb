@@ -271,17 +271,12 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 }
 
 /* Check if the BFD passed in is an IR dummy object file.  */
-static bfd_boolean
+static inline bfd_boolean
 is_ir_dummy_bfd (const bfd *abfd)
 {
   /* ABFD can sometimes legitimately be NULL, e.g. when called from one
-     of the linker callbacks for a symbol in the *ABS* or *UND* sections.
-     Likewise, the usrdata field may be NULL if ABFD was added by the
-     backend without a corresponding input statement, as happens e.g.
-     when processing DT_NEEDED dependencies.  */
-  return (abfd
-	  && abfd->usrdata
-	  && ((lang_input_statement_type *)(abfd->usrdata))->flags.claimed);
+     of the linker callbacks for a symbol in the *ABS* or *UND* sections.  */
+  return abfd != NULL && (abfd->flags & BFD_PLUGIN) != 0;
 }
 
 /* Helpers to convert between BFD and GOLD symbol formats.  */
