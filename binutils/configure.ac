@@ -31,8 +31,8 @@ AC_PROG_CC
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
 
-ACX_LARGEFILE
 LT_INIT
+ACX_LARGEFILE
 
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],

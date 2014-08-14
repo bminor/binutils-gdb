@@ -1,3 +1,9 @@
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Move ACX_LARGEFILE after LT_INIT.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* readelf.c (get_mips_segment_type): Display name for PT_MIPS_ABIFLAGS.

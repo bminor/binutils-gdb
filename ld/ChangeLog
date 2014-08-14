@@ -1,5 +1,12 @@
 2014-08-14  Alan Modra  <amodra@gmail.com>
 
+	* configure.ac: Move AC_PROG_CC and other macros earlier.  Delete
+	plugin checks now done in config/plugins.m4.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
 	* plugin.c (is_ir_dummy_bfd): Test BFD_PLUGIN flag rather than
 	flags.claimed.
 

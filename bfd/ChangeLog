@@ -1,3 +1,8 @@
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Delete redundant plugin related checks.
+	* configure: Regenerate.
+
 2014-08-13  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
 
 	* elf32-or1k.c (or1k_elf_relocate_section, or1k_elf_check_relocs,

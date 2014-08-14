@@ -29,6 +29,15 @@ AC_ISC_POSIX
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
+AC_PROG_CC
+AC_PROG_CXX
+AC_GNU_SOURCE
+AC_USE_SYSTEM_EXTENSIONS
+AC_PROG_INSTALL
+
+LT_INIT
+ACX_LARGEFILE
+
 AC_ARG_WITH(lib-path, [  --with-lib-path=dir1:dir2...  set default LIB_PATH],LIB_PATH=$withval)
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],
@@ -157,15 +166,6 @@ fi
 
 # host-specific stuff:
 
-AC_PROG_CC
-AC_PROG_CXX
-AC_GNU_SOURCE
-AC_USE_SYSTEM_EXTENSIONS
-ACX_LARGEFILE
-AC_PROG_INSTALL
-
-LT_INIT
-
 ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id bg it uk"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
@@ -195,16 +195,8 @@ AC_CHECK_FUNCS(glob mkstemp realpath sbrk setlocale waitpid)
 AC_CHECK_FUNCS(open lseek close)
 AC_HEADER_DIRENT
 
-# Check for dlopen support and enable plugins if possible.
-enable_plugins=yes
-AC_CHECK_HEADER([dlfcn.h],[],[enable_plugins=no],[AC_INCLUDES_DEFAULT])
-AC_SEARCH_LIBS([dlopen],[dl],[],[enable_plugins=no],[])
-AC_CHECK_FUNCS([dlopen dlsym dlclose],[],[enable_plugins=no])
-# We also support plugins on Windows (MinGW).
-if test x$enable_plugins = xno ; then
-  AC_CHECK_HEADERS([windows.h],[enable_plugins=yes],[],[AC_INCLUDES_DEFAULT])
-fi
-AM_CONDITIONAL([ENABLE_PLUGINS], [test x$enable_plugins = xyes])
+AC_SEARCH_LIBS([dlopen], [dl])
+AM_CONDITIONAL([ENABLE_PLUGINS], [test x$plugins = xyes])
 
 AC_ARG_ENABLE(initfini-array,
 	[  --enable-initfini-array	use .init_array/.fini_array sections],

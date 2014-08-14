@@ -1,3 +1,9 @@
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Move ACX_LARGEFILE after LT_INIT.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2014-08-06  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* config/tc-i386.c (omit_lock_prefix): New.

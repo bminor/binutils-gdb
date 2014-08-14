@@ -1435,7 +1435,7 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --enable-plugins        Enable support for plugins (defaults no)
+  --enable-plugins        Enable support for plugins
   --disable-largefile     omit support for large files
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
   --enable-targets        alternative target configurations
@@ -11776,15 +11776,46 @@ CC="$lt_save_CC"
 # even in directories otherwise not depending on the $plugins option.
 
 
-# Check whether --enable-plugins was given.
+  maybe_plugins=no
+  for ac_header in dlfcn.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "dlfcn.h" "ac_cv_header_dlfcn_h" "$ac_includes_default
+"
+if test "x$ac_cv_header_dlfcn_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DLFCN_H 1
+_ACEOF
+ maybe_plugins=yes
+fi
+
+done
+
+  for ac_header in windows.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "windows.h" "ac_cv_header_windows_h" "$ac_includes_default
+"
+if test "x$ac_cv_header_windows_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WINDOWS_H 1
+_ACEOF
+ maybe_plugins=yes
+fi
+
+done
+
+
+  # Check whether --enable-plugins was given.
 if test "${enable_plugins+set}" = set; then :
   enableval=$enable_plugins; case "${enableval}" in
-  yes | "") plugins=yes ;;
-  no) plugins=no ;;
-  *) plugins=yes ;;
- esac
+      no) plugins=no ;;
+      *) plugins=yes
+         if test "$maybe_plugins" != "yes" ; then
+	   as_fn_error "Building with plugin support requires a host that supports dlopen." "$LINENO" 5
+	 fi ;;
+     esac
 else
-  plugins=no
+  plugins=$maybe_plugins
+
 fi
 
 
@@ -12012,10 +12043,6 @@ fi
 
 
 if test "$plugins" = "yes"; then
-  if test "$enable_dlopen" != "yes" ; then
-    as_fn_error "
-      Building BFD with plugin support requires a host that supports -ldl." "$LINENO" 5
-  fi
   enable_targets="$enable_targets plugin"
 fi
 
@@ -13530,21 +13557,6 @@ if test "$ac_res" != no; then :
 fi
 
 fi
-
-
-for ac_header in windows.h dlfcn.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether string.h and strings.h may both be included" >&5
