@@ -1,3 +1,9 @@
+2014-08-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-typeprint.c (type_is_full_subrange_of_target_type):
+	Return 0 if TYPE is dynamic.
+	(print_range): Add handling of dynamic ranges.
+
 2014-08-18  Keven Boell  <keven.boell@intel.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
