@@ -1,3 +1,8 @@
+2014-08-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <OP_VAR_VALUE>: Fix identation
+	of lexical block.
+
 2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR c++/17132
