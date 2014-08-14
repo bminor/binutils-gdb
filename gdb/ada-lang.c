@@ -10121,13 +10121,15 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           *pos += 4;
           goto nosideret;
         }
-      else if (SYMBOL_DOMAIN (exp->elts[pc + 2].symbol) == UNDEF_DOMAIN)
+
+      if (SYMBOL_DOMAIN (exp->elts[pc + 2].symbol) == UNDEF_DOMAIN)
         /* Only encountered when an unresolved symbol occurs in a
            context other than a function call, in which case, it is
            invalid.  */
         error (_("Unexpected unresolved symbol, %s, during evaluation"),
                SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
         {
           type = static_unwrap_type (SYMBOL_TYPE (exp->elts[pc + 2].symbol));
           /* Check to see if this is a tagged type.  We also need to handle
@@ -10186,11 +10188,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           *pos += 4;
           return value_zero (to_static_fixed_type (type), not_lval);
         }
-      else
-        {
-          arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
-          return ada_to_fixed_value (arg1);
-        }
+
+      arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
+      return ada_to_fixed_value (arg1);
 
     case OP_FUNCALL:
       (*pos) += 2;
