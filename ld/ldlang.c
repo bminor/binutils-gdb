@@ -57,7 +57,7 @@ static struct obstack map_obstack;
 #define obstack_chunk_free free
 static const char *entry_symbol_default = "start";
 static bfd_boolean placed_commons = FALSE;
-static bfd_boolean stripped_excluded_sections = FALSE;
+static bfd_boolean map_head_is_link_order = FALSE;
 static lang_output_section_statement_type *default_common_section;
 static bfd_boolean map_option_f;
 static bfd_vma print_dot;
@@ -2412,7 +2412,7 @@ lang_add_section (lang_statement_list_type *ptr,
   section->output_section = output->bfd_section;
 
   if (!link_info.relocatable
-      && !stripped_excluded_sections)
+      && !map_head_is_link_order)
     {
       asection *s = output->bfd_section->map_tail.s;
       output->bfd_section->map_tail.s = section;
@@ -3912,10 +3912,6 @@ strip_excluded_output_sections (void)
 	      }
 	}
 
-      /* TODO: Don't just junk map_head.s, turn them into link_orders.  */
-      output_section->map_head.link_order = NULL;
-      output_section->map_tail.link_order = NULL;
-
       if (exclude)
 	{
 	  /* We don't set bfd_section to NULL since bfd_section of the
@@ -3927,10 +3923,42 @@ strip_excluded_output_sections (void)
 	  link_info.output_bfd->section_count--;
 	}
     }
+}
+
+/* Called from ldwrite to clear out asection.map_head and
+   asection.map_tail for use as link_orders in ldwrite.
+   FIXME: Except for sh64elf.em which starts creating link_orders in
+   its after_allocation routine so needs to call it early.  */
+
+void
+lang_clear_os_map (void)
+{
+  lang_output_section_statement_type *os;
+
+  if (map_head_is_link_order)
+    return;
+
+  for (os = &lang_output_section_statement.head->output_section_statement;
+       os != NULL;
+       os = os->next)
+    {
+      asection *output_section;
+
+      if (os->constraint < 0)
+	continue;
+
+      output_section = os->bfd_section;
+      if (output_section == NULL)
+	continue;
+
+      /* TODO: Don't just junk map_head.s, turn them into link_orders.  */
+      output_section->map_head.link_order = NULL;
+      output_section->map_tail.link_order = NULL;
+    }
 
   /* Stop future calls to lang_add_section from messing with map_head
      and map_tail link_order fields.  */
-  stripped_excluded_sections = TRUE;
+  map_head_is_link_order = TRUE;
 }
 
 static void

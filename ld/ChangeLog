@@ -1,5 +1,17 @@
 2014-08-14  Alan Modra  <amodra@gmail.com>
 
+	PR 16563
+	* ldlang.c (map_head_is_link_order): Rename from
+	stripped_excluded_sections.
+	(lang_clear_os_map): New function, extracted from..
+	(strip_excluded_output_sections): ..here.
+	* ldlang.h (lang_clear_os_map): Declare.
+	* ldwrite.c (ldwrite): Call lang_clear_os_map.
+	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_after_allocation):
+	Likewise.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac: Move AC_PROG_CC and other macros earlier.  Delete
 	plugin checks now done in config/plugins.m4.
 	* config.in: Regenerate.

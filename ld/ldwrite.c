@@ -572,6 +572,7 @@ ldwrite (void)
   /* Reset error indicator, which can typically something like invalid
      format from opening up the .o files.  */
   bfd_set_error (bfd_error_no_error);
+  lang_clear_os_map ();
   lang_for_each_statement (build_link_order);
 
   if (config.split_by_reloc != (unsigned) -1

@@ -636,6 +636,8 @@ extern void *stat_alloc
   (size_t);
 extern void strip_excluded_output_sections
   (void);
+extern void lang_clear_os_map
+  (void);
 extern void dprint_statement
   (lang_statement_union_type *, int);
 extern void lang_size_sections
