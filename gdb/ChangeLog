@@ -1,3 +1,15 @@
+2014-08-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.c (target_struct_size): Remove.
+	(target_struct_allocsize): Remove.
+	(DEFAULT_ALLOCSIZE): Remove.
+	(target_ops_p): New typedef.
+	(DEF_VEC_P (target_ops_p)): New vector type.
+	(target_structs): Change type to VEC (target_ops_p).
+	(add_target_with_completer): Replace "push" code by VEC_safe_push.
+	(find_default_run_target): Rewrite for loop following changes to
+	target_structs.
+
 2014-08-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* value.c (value_from_pointer): Remove use of resolve_dynamic_type.
