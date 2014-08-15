@@ -17298,6 +17298,8 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 				   "[in module %s]"),
 				 line_offset, objfile_name (objfile));
 		      p_record_line = noop_record_line;
+		      /* Note: p_record_line is left as noop_record_line
+			 until we see DW_LNE_end_sequence.  */
 		    }
 
 		  op_index = 0;
