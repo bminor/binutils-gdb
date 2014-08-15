@@ -1,3 +1,13 @@
+2014-08-24  Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2read.c (scan_partial_symbols):  Update comments.
+	Rename argument 'need_pc' with 'set_addrmap'.
+	（add_partial_namespace): Rename argument 'need_pc' with
+	'set_addrmap'.
+	(add_partial_module): Likewise.
+	(add_partial_subprogram): Likewise.  Update comments.
+	(dwarf2_name): Fix typo.
+
 2014-08-22  Doug Evans  <dje@google.com>
 
 	PR 17276

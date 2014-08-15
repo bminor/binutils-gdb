@@ -1387,10 +1387,10 @@ static void add_partial_symbol (struct partial_die_info *,
 
 static void add_partial_namespace (struct partial_die_info *pdi,
 				   CORE_ADDR *lowpc, CORE_ADDR *highpc,
-				   int need_pc, struct dwarf2_cu *cu);
+				   int set_addrmap, struct dwarf2_cu *cu);
 
 static void add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
-				CORE_ADDR *highpc, int need_pc,
+				CORE_ADDR *highpc, int set_addrmap,
 				struct dwarf2_cu *cu);
 
 static void add_partial_enumeration (struct partial_die_info *enum_pdi,
@@ -6542,15 +6542,15 @@ create_all_comp_units (struct objfile *objfile)
 }
 
 /* Process all loaded DIEs for compilation unit CU, starting at
-   FIRST_DIE.  The caller should pass NEED_PC == 1 if the compilation
+   FIRST_DIE.  The caller should pass SET_ADDRMAP == 1 if the compilation
    unit DIE did not have PC info (DW_AT_low_pc and DW_AT_high_pc, or
-   DW_AT_ranges).  If NEED_PC is set, then this function will set
-   *LOWPC and *HIGHPC to the lowest and highest PC values found in CU
-   and record the covered ranges in the addrmap.  */
+   DW_AT_ranges).  See the comments of add_partial_subprogram on how
+   SET_ADDRMAP is used and how *LOWPC and *HIGHPC are updated.  */
 
 static void
 scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
-		      CORE_ADDR *highpc, int need_pc, struct dwarf2_cu *cu)
+		      CORE_ADDR *highpc, int set_addrmap,
+		      struct dwarf2_cu *cu)
 {
   struct partial_die_info *pdi;
 
@@ -6575,7 +6575,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	  switch (pdi->tag)
 	    {
 	    case DW_TAG_subprogram:
-	      add_partial_subprogram (pdi, lowpc, highpc, need_pc, cu);
+	      add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_constant:
 	    case DW_TAG_variable:
@@ -6605,10 +6605,10 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	      add_partial_symbol (pdi, cu);
 	      break;
 	    case DW_TAG_namespace:
-	      add_partial_namespace (pdi, lowpc, highpc, need_pc, cu);
+	      add_partial_namespace (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_module:
-	      add_partial_module (pdi, lowpc, highpc, need_pc, cu);
+	      add_partial_module (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_imported_unit:
 	      {
@@ -6975,7 +6975,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 static void
 add_partial_namespace (struct partial_die_info *pdi,
 		       CORE_ADDR *lowpc, CORE_ADDR *highpc,
-		       int need_pc, struct dwarf2_cu *cu)
+		       int set_addrmap, struct dwarf2_cu *cu)
 {
   /* Add a symbol for the namespace.  */
 
@@ -6984,14 +6984,14 @@ add_partial_namespace (struct partial_die_info *pdi,
   /* Now scan partial symbols in that namespace.  */
 
   if (pdi->has_children)
-    scan_partial_symbols (pdi->die_child, lowpc, highpc, need_pc, cu);
+    scan_partial_symbols (pdi->die_child, lowpc, highpc, set_addrmap, cu);
 }
 
 /* Read a partial die corresponding to a Fortran module.  */
 
 static void
 add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
-		    CORE_ADDR *highpc, int need_pc, struct dwarf2_cu *cu)
+		    CORE_ADDR *highpc, int set_addrmap, struct dwarf2_cu *cu)
 {
   /* Add a symbol for the namespace.  */
 
@@ -7000,23 +7000,25 @@ add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
   /* Now scan partial symbols in that module.  */
 
   if (pdi->has_children)
-    scan_partial_symbols (pdi->die_child, lowpc, highpc, need_pc, cu);
+    scan_partial_symbols (pdi->die_child, lowpc, highpc, set_addrmap, cu);
 }
 
 /* Read a partial die corresponding to a subprogram and create a partial
    symbol for that subprogram.  When the CU language allows it, this
    routine also defines a partial symbol for each nested subprogram
-   that this subprogram contains.
+   that this subprogram contains.  If SET_ADDRMAP is true, record the
+   covered ranges in the addrmap.  *LOWPC and *HIGHPC to the lowest and
+   highest PC values are found in PDI.
 
-   DIE my also be a lexical block, in which case we simply search
-   recursively for suprograms defined inside that lexical block.
+   PDI may also be a lexical block, in which case we simply search
+   recursively for subprograms defined inside that lexical block.
    Again, this is only performed when the CU language allows this
    type of definitions.  */
 
 static void
 add_partial_subprogram (struct partial_die_info *pdi,
 			CORE_ADDR *lowpc, CORE_ADDR *highpc,
-			int need_pc, struct dwarf2_cu *cu)
+			int set_addrmap, struct dwarf2_cu *cu)
 {
   if (pdi->tag == DW_TAG_subprogram)
     {
@@ -7026,7 +7028,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
             *lowpc = pdi->lowpc;
           if (pdi->highpc > *highpc)
             *highpc = pdi->highpc;
-	  if (need_pc)
+	  if (set_addrmap)
 	    {
 	      CORE_ADDR baseaddr;
 	      struct objfile *objfile = cu->objfile;
@@ -7062,7 +7064,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	  fixup_partial_die (pdi, cu);
 	  if (pdi->tag == DW_TAG_subprogram
 	      || pdi->tag == DW_TAG_lexical_block)
-	    add_partial_subprogram (pdi, lowpc, highpc, need_pc, cu);
+	    add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
 	  pdi = pdi->die_sibling;
 	}
     }
@@ -19025,7 +19027,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	  /* GCJ will output '<init>' for Java constructor names.
 	     For this special case, return the name of the parent class.  */
 
-	  /* GCJ may output suprogram DIEs with AT_specification set.
+	  /* GCJ may output subprogram DIEs with AT_specification set.
 	     If so, use the name of the specified DIE.  */
 	  spec_die = die_specification (die, &spec_cu);
 	  if (spec_die != NULL)
