@@ -1388,7 +1388,7 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-plugins        Enable support for plugins (defaults no)
+  --enable-plugins        Enable support for plugins
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -8767,15 +8767,46 @@ fi
 
 # BFD uses libdl when when plugins enabled.
 
-# Check whether --enable-plugins was given.
+  maybe_plugins=no
+  for ac_header in dlfcn.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "dlfcn.h" "ac_cv_header_dlfcn_h" "$ac_includes_default
+"
+if test "x$ac_cv_header_dlfcn_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DLFCN_H 1
+_ACEOF
+ maybe_plugins=yes
+fi
+
+done
+
+  for ac_header in windows.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "windows.h" "ac_cv_header_windows_h" "$ac_includes_default
+"
+if test "x$ac_cv_header_windows_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WINDOWS_H 1
+_ACEOF
+ maybe_plugins=yes
+fi
+
+done
+
+
+  # Check whether --enable-plugins was given.
 if test "${enable_plugins+set}" = set; then :
   enableval=$enable_plugins; case "${enableval}" in
-  yes | "") plugins=yes ;;
-  no) plugins=no ;;
-  *) plugins=yes ;;
- esac
+      no) plugins=no ;;
+      *) plugins=yes
+         if test "$maybe_plugins" != "yes" ; then
+	   as_fn_error "Building with plugin support requires a host that supports dlopen." "$LINENO" 5
+	 fi ;;
+     esac
 else
-  plugins=no
+  plugins=$maybe_plugins
+
 fi
 
 
@@ -12264,7 +12295,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12267 "configure"
+#line 12298 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12370,7 +12401,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12373 "configure"
+#line 12404 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
