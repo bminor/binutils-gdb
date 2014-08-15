@@ -1,5 +1,10 @@
 2014-08-15  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf_decode_lines_1): Move definition of adj_opcode
+	closer to use.
+
+2014-08-15  Doug Evans  <dje@google.com>
+
 	* dwarf2read.c (dwarf_decode_lines_1): Add comment.
 
 2014-08-15  Doug Evans  <dje@google.com>

@@ -17182,7 +17182,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
   const gdb_byte *line_ptr, *extended_end;
   const gdb_byte *line_end;
   unsigned int bytes_read, extended_len;
-  unsigned char op_code, extended_op, adj_opcode;
+  unsigned char op_code, extended_op;
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
@@ -17237,6 +17237,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 	  if (op_code >= lh->opcode_base)
 	    {
 	      /* Special opcode.  */
+	      unsigned char adj_opcode;
 
 	      adj_opcode = op_code - lh->opcode_base;
 	      address += (((op_index + (adj_opcode / lh->line_range))
