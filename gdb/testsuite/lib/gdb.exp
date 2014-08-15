@@ -4202,9 +4202,11 @@ gdb_caching_proc gdb_skip_xml_test {
     global gdb_prompt
     global srcdir
 
+    set xml_file [gdb_remote_download host "${srcdir}/gdb.xml/trivial.xml"]
+
     gdb_start
     set xml_missing 0
-    gdb_test_multiple "set tdesc filename ${srcdir}/gdb.xml/trivial.xml" "" {
+    gdb_test_multiple "set tdesc filename $xml_file" "" {
 	-re ".*XML support was disabled at compile time.*$gdb_prompt $" {
 	    set xml_missing 1
 	}

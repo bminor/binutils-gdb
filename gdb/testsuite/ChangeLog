@@ -1,3 +1,8 @@
+2014-10-17  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (gdb_skip_xml_test): Copy trivial.xml to host.
+	* gdb.xml/tdesc-regs.exp: Copy single-reg.xml to host.
+
 2014-10-17  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17471
