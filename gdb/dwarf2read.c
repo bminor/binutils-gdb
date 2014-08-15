@@ -17205,7 +17205,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
       unsigned int line = 1;
       unsigned int column = 0;
       int is_stmt = lh->default_is_stmt;
-      int basic_block = 0;
       int end_sequence = 0;
       CORE_ADDR addr;
       unsigned char op_index = 0;
@@ -17268,7 +17267,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		      (*p_record_line) (current_subfile, line, addr);
 		    }
 		}
-	      basic_block = 0;
 	    }
 	  else switch (op_code)
 	    {
@@ -17366,7 +17364,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		      (*p_record_line) (current_subfile, line, addr);
 		    }
 		}
-	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
 	      {
@@ -17418,7 +17415,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 	      is_stmt = (!is_stmt);
 	      break;
 	    case DW_LNS_set_basic_block:
-	      basic_block = 1;
 	      break;
 	    /* Add to the address register of the state machine the
 	       address increment value corresponding to special opcode
