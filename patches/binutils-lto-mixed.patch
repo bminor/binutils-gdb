@@ -86,17 +86,11 @@ for Linux kernel build with LTO.
 
 diff --git a/ChangeLog.lto-mixed b/ChangeLog.lto-mixed
 new file mode 100644
-index 0000000..570510b
+index 0000000..bdbabea
 --- /dev/null
 +++ b/ChangeLog.lto-mixed
-@@ -0,0 +1,332 @@
+@@ -0,0 +1,317 @@
 +bfd/
-+
-+2014-03-25  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/16746
-+	* linker.c (_bfd_generic_link_add_one_symbol): Don't issue a
-+	warning for reference in LTO IR which may be removed by LTO later.
 +
 +2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 +
@@ -362,15 +356,6 @@ index 0000000..570510b
 +
 +ld/testsuite/
 +
-+2014-03-25  H.J. Lu  <hongjiu.lu@intel.com>
-+
-+	PR ld/16746
-+	* ld-plugin/lto.exp: Add 4 tests for PR ld/16746.
-+	* ld-plugin/pr16746a.c: New file.
-+	* ld-plugin/pr16746b.c: Likewise.
-+	* ld-plugin/pr16746c.c: Likewise.
-+	* ld-plugin/pr16746d.c: Likewise.
-+
 +2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 +
 +	* ld-plugin/lto.exp: Add test for nm on mixed LTO/non-LTO object.
@@ -579,7 +564,7 @@ index 9dc6b6d..d52fe15 100644
    { STRING_COMMA_LEN (".gnu.version_d"),   0, SHT_GNU_verdef,  0 },
    { STRING_COMMA_LEN (".gnu.version_r"),   0, SHT_GNU_verneed, 0 },
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 69a87a6..bbcd3e1 100644
+index 5e5af32..2602c56 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
 @@ -2425,6 +2425,20 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
@@ -686,43 +671,6 @@ index c4bc944..63ad2e6 100644
        /* File position has moved, BTW.  */
        return TRUE;
      }
-diff --git a/bfd/linker.c b/bfd/linker.c
-index 1877e67..db625b2 100644
---- a/bfd/linker.c
-+++ b/bfd/linker.c
-@@ -1777,8 +1777,10 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
- 	  break;
- 
- 	case WARNC:
--	  /* Issue a warning and cycle.  */
--	  if (h->u.i.warning != NULL)
-+	  /* Issue a warning and cycle.  Don't issue a warning for
-+	     reference in LTO IR which may be removed by LTO later. */
-+	  if (h->u.i.warning != NULL
-+	      && (abfd->flags & BFD_PLUGIN) == 0)
- 	    {
- 	      if (! (*info->callbacks->warning) (info, h->u.i.warning,
- 						 h->root.string, abfd,
-@@ -1803,6 +1805,11 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
- 	  break;
- 
- 	case WARN:
-+	  /* Don't issue a warning for reference in LTO IR which may be
-+	     removed by LTO later.  Make a warning symbol instead.  */
-+	  if ((hash_entry_bfd (h)->flags & BFD_PLUGIN) != 0)
-+	    goto mwarn;
-+
- 	  /* Issue a warning.  */
- 	  if (! (*info->callbacks->warning) (info, string, h->root.string,
- 					     hash_entry_bfd (h), NULL, 0))
-@@ -1824,6 +1831,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
- 	    }
- 	  /* Fall through.  */
- 	case MWARN:
-+mwarn:
- 	  /* Make a warning symbol.  */
- 	  {
- 	    struct bfd_link_hash_entry *sub;
 diff --git a/bfd/opncls.c b/bfd/opncls.c
 index a2a35f4..5873196 100644
 --- a/bfd/opncls.c
@@ -1129,10 +1077,10 @@ index 6b8b107..abcdea1 100644
 +	.section .gnu_object_only
 +	.byte 0,0,0,0
 diff --git a/include/bfdlink.h b/include/bfdlink.h
-index fc14a9f..9698816 100644
+index 125683d..45a6a13 100644
 --- a/include/bfdlink.h
 +++ b/include/bfdlink.h
-@@ -386,6 +386,12 @@ struct bfd_link_info
+@@ -389,6 +389,12 @@ struct bfd_link_info
    /* TRUE if ok to have multiple definition.  */
    unsigned int allow_multiple_definition: 1;
  
@@ -1407,7 +1355,7 @@ index 782ed7f..ead7345 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index 5e10c4a..1ed2f1c 100644
+index 899f710..342a547 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -1418,7 +1366,7 @@ index 5e10c4a..1ed2f1c 100644
  #include "fnmatch.h"
  #include "demangle.h"
  #include "hashtab.h"
-@@ -44,6 +45,9 @@
+@@ -45,6 +46,9 @@
  #include "plugin.h"
  #endif /* ENABLE_PLUGINS */
  
@@ -1428,7 +1376,7 @@ index 5e10c4a..1ed2f1c 100644
  #ifndef offsetof
  #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
  #endif
-@@ -68,6 +72,9 @@ static lang_statement_list_type *stat_save[10];
+@@ -69,6 +73,9 @@ static lang_statement_list_type *stat_save[10];
  static lang_statement_list_type **stat_save_ptr = &stat_save[0];
  static struct unique_sections *unique_section_list;
  static struct asneeded_minfo *asneeded_list_head;
@@ -1438,7 +1386,7 @@ index 5e10c4a..1ed2f1c 100644
  
  /* Forward declarations.  */
  static void exp_init_os (etree_type *);
-@@ -87,6 +94,10 @@ static void lang_record_phdrs (void);
+@@ -88,6 +95,10 @@ static void lang_record_phdrs (void);
  static void lang_do_version_exports_section (void);
  static void lang_finalize_version_expr_head
    (struct bfd_elf_version_expr_head *);
@@ -1449,7 +1397,7 @@ index 5e10c4a..1ed2f1c 100644
  
  /* Exported variables.  */
  const char *output_target;
-@@ -1200,14 +1211,17 @@ output_section_statement_table_free (void)
+@@ -1201,14 +1212,17 @@ output_section_statement_table_free (void)
  /* Build enough state so that the parser can build its tree.  */
  
  void
@@ -1469,7 +1417,7 @@ index 5e10c4a..1ed2f1c 100644
    lang_list_init (stat_ptr);
  
    lang_list_init (&input_file_chain);
-@@ -1222,10 +1236,11 @@ lang_init (void)
+@@ -1223,10 +1237,11 @@ lang_init (void)
  
    /* The value "13" is ad-hoc, somewhat related to the expected number of
       assignments in a linker script.  */
@@ -1485,7 +1433,7 @@ index 5e10c4a..1ed2f1c 100644
      einfo (_("%P%F: can not create hash table: %E\n"));
  
    asneeded_list_head = NULL;
-@@ -1233,9 +1248,10 @@ lang_init (void)
+@@ -1234,9 +1249,10 @@ lang_init (void)
  }
  
  void
@@ -1498,7 +1446,7 @@ index 5e10c4a..1ed2f1c 100644
    output_section_statement_table_free ();
  }
  
-@@ -2819,6 +2835,12 @@ load_symbols (lang_input_statement_type *entry,
+@@ -2820,6 +2836,12 @@ load_symbols (lang_input_statement_type *entry,
  		  loaded = FALSE;
  		}
  
@@ -1511,7 +1459,7 @@ index 5e10c4a..1ed2f1c 100644
  	      subsbfd = member;
  	      if (!(*link_info.callbacks
  		    ->add_archive_element) (&link_info, member,
-@@ -6691,7 +6713,38 @@ lang_process (void)
+@@ -6721,7 +6743,38 @@ lang_process (void)
  	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
  	}
      }
@@ -1550,7 +1498,7 @@ index 5e10c4a..1ed2f1c 100644
  
    link_info.gc_sym_list = &entry_symbol;
    if (entry_symbol.name == NULL)
-@@ -8093,3 +8146,963 @@ lang_ld_feature (char *str)
+@@ -8123,3 +8176,963 @@ lang_ld_feature (char *str)
        p = q;
      }
  }
@@ -2515,10 +2463,10 @@ index 5e10c4a..1ed2f1c 100644
 +      }
 +}
 diff --git a/ld/ldlang.h b/ld/ldlang.h
-index 0f7fdd4..87afdc0 100644
+index 5f6faae..0b334e0 100644
 --- a/ld/ldlang.h
 +++ b/ld/ldlang.h
-@@ -520,9 +520,9 @@ extern struct asneeded_minfo **asneeded_list_tail;
+@@ -523,9 +523,9 @@ extern struct asneeded_minfo **asneeded_list_tail;
  extern void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
  
  extern void lang_init
@@ -2530,7 +2478,7 @@ index 0f7fdd4..87afdc0 100644
  extern lang_memory_region_type * lang_memory_region_lookup
    (const char * const, bfd_boolean);
  extern void lang_memory_region_alias
-@@ -693,4 +693,45 @@ ldlang_override_segment_assignment
+@@ -698,4 +698,45 @@ ldlang_override_segment_assignment
  extern void
  lang_ld_feature (char *);
  
@@ -2577,7 +2525,7 @@ index 0f7fdd4..87afdc0 100644
 +
  #endif
 diff --git a/ld/ldlex.h b/ld/ldlex.h
-index b2753c3..f9eb6e5 100644
+index 63f4c81..2019bc3 100644
 --- a/ld/ldlex.h
 +++ b/ld/ldlex.h
 @@ -133,6 +133,7 @@ enum option_values
@@ -2589,7 +2537,7 @@ index b2753c3..f9eb6e5 100644
    OPTION_DEFAULT_SCRIPT,
    OPTION_PRINT_OUTPUT_FORMAT,
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index ea25afe..aec200b 100644
+index 77235d5..5670328 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
 @@ -220,6 +220,9 @@ main (int argc, char **argv)
@@ -2736,7 +2684,7 @@ index dce9650..5c1efc3 100644
 +
  #endif
 diff --git a/ld/lexsup.c b/ld/lexsup.c
-index 52b4fdb..0fb4588 100644
+index 3a1ea9e..a0612e1 100644
 --- a/ld/lexsup.c
 +++ b/ld/lexsup.c
 @@ -166,6 +166,9 @@ static const struct ld_option ld_options[] =
@@ -2749,7 +2697,7 @@ index 52b4fdb..0fb4588 100644
    { {"flto", optional_argument, NULL, OPTION_IGNORE},
      '\0', NULL, N_("Ignored for GCC LTO option compatibility"),
      ONE_DASH },
-@@ -965,6 +968,9 @@ parse_args (unsigned argc, char **argv)
+@@ -971,6 +974,9 @@ parse_args (unsigned argc, char **argv)
  	  if (plugin_opt_plugin_arg (optarg))
  	    einfo(_("%P%F: bad -plugin-opt option\n"));
  	  break;
@@ -2760,7 +2708,7 @@ index 52b4fdb..0fb4588 100644
  	case 'q':
  	  link_info.emitrelocations = TRUE;
 diff --git a/ld/plugin.c b/ld/plugin.c
-index f10c273..5b0a535 100644
+index f02a97f..0a16644 100644
 --- a/ld/plugin.c
 +++ b/ld/plugin.c
 @@ -39,6 +39,9 @@
@@ -2773,7 +2721,7 @@ index f10c273..5b0a535 100644
  /* The suffix to append to the name of the real (claimed) object file
     when generating a dummy BFD to hold the IR symbols sent from the
     plugin.  For cosmetic use only; appears in maps, crefs etc.  */
-@@ -885,6 +888,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
+@@ -882,6 +885,9 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
    close (file->fd);
    if (claimed)
      {
@@ -2783,7 +2731,7 @@ index f10c273..5b0a535 100644
        /* Discard the real file's BFD and substitute the dummy one.  */
  
        /* BFD archive handling caches elements so we can't call
-@@ -938,14 +944,17 @@ plugin_call_cleanup (void)
+@@ -935,14 +941,17 @@ plugin_call_cleanup (void)
      {
        if (curplug->cleanup_handler && !curplug->cleanup_done)
  	{
@@ -2810,7 +2758,7 @@ index f10c273..5b0a535 100644
  	}
        curplug = curplug->next;
 diff --git a/ld/plugin.h b/ld/plugin.h
-index 1e239ca..cc413c8 100644
+index bccbee3..483519e 100644
 --- a/ld/plugin.h
 +++ b/ld/plugin.h
 @@ -24,6 +24,9 @@
@@ -3071,7 +3019,7 @@ index 0000000..d4c5852
 +.* .gnu_object_only.*
 +#pass
 diff --git a/ld/testsuite/ld-plugin/lto.exp b/ld/testsuite/ld-plugin/lto.exp
-index 432c753..2af9c3a 100644
+index 7ff5bfb..d1d5a21 100644
 --- a/ld/testsuite/ld-plugin/lto.exp
 +++ b/ld/testsuite/ld-plugin/lto.exp
 @@ -76,6 +76,15 @@ set lto_link_tests [list \
@@ -3109,29 +3057,17 @@ index 432c753..2af9c3a 100644
    [list "Compile 11a" \
     "" "-O -flto" \
     {lto-11a.c} {} ""] \
-@@ -232,6 +250,21 @@ set lto_link_elf_tests [list \
-   [list "Build libpr15146d.a" \
-    "$plug_opt" "-flto -O2" \
-    {pr15146d.c} {} "lib15146d.a"] \
+@@ -244,6 +262,9 @@ set lto_link_elf_tests [list \
+   [list "PR ld/16746 (2)" \
+    "-O2 -flto -fuse-linker-plugin tmpdir/pr16746c.o tmpdir/pr16746a.o" "-O2 -flto" \
+    {dummy.c} {} "pr16746b.exe"] \
 +  [list "PR ld/14918" \
 +   "-flto" "-flto" \
 +   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
-+  [list "Build libpr16746a.a" \
-+   "" "" \
-+   {pr16746a.c pr16746b.c} {} "lib16746a.a"] \
-+  [list "Build libpr16746b.a" \
-+   "" "-O2 -flto" \
-+   {pr16746c.c pr16746d.c} {} "lib16746b.a"] \
-+  [list "PR ld/16746 (1)" \
-+   "-O2 -flto -fuse-linker-plugin tmpdir/pr16746a.o tmpdir/pr16746c.o" "-O2 -flto" \
-+   {dummy.c} {} "pr16746a.exe"] \
-+  [list "PR ld/16746 (2)" \
-+   "-O2 -flto -fuse-linker-plugin tmpdir/pr16746c.o tmpdir/pr16746a.o" "-O2 -flto" \
-+   {dummy.c} {} "pr16746b.exe"] \
  ]
  
  # Check final symbols in executables.
-@@ -267,9 +300,21 @@ set lto_run_tests [list \
+@@ -279,9 +300,21 @@ set lto_run_tests [list \
    [list "LTO 3c" \
     "-O2 -flto -fuse-linker-plugin tmpdir/lto-3a.o tmpdir/lto-3c.o -Wl,--whole-archive tmpdir/liblto-3.a -Wl,--no-whole-archive tmpdir/liblto-3.a" "" \
     {dummy.c} "lto-3d.exe" "lto-3.out" "" "c"] \
@@ -3153,26 +3089,10 @@ index 432c753..2af9c3a 100644
    [list "LTO 11" \
     "-O -flto -fuse-linker-plugin tmpdir/liblto-11.a" "" \
     {dummy.c} "lto-11.exe" "lto-11.out" "" "c"] \
-@@ -335,6 +380,29 @@ if { [is_elf_format] && [check_lto_shared_available] } {
-     } {
- 	fail $testname
+@@ -363,6 +396,15 @@ if { [is_elf_format] && [check_lto_shared_available] } {
      }
-+    set testname "PR ld/16746 (3)"
-+    set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin tmpdir/pr16746b.o tmpdir/pr16746d.o"]
-+    if { [ regexp "warning: foobar" $exec_output ] && ![ regexp "symbol from plugin" $exec_output ] } {
-+	pass $testname
-+    } {
-+	fail $testname
-+    }
-+    set testname "PR ld/16746 (4)"
-+    set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin tmpdir/pr16746d.o tmpdir/pr16746b.o"]
-+    if { [ regexp "warning: foobar" $exec_output ] && ![ regexp "symbol from plugin" $exec_output ] } {
-+	pass $testname
-+    } {
-+	fail $testname
-+    }
-+}
-+
+ }
+ 
 +set testname "Build liblto-4.a"
 +remote_file host delete "tmpdir/liblto-4.a"
 +set catch_output [run_host_cmd "$ar" "rc tmpdir/liblto-4.a tmpdir/lto-4a.o tmpdir/lto-4b.o tmpdir/lto-4c.o"]
@@ -3180,10 +3100,12 @@ index 432c753..2af9c3a 100644
 +    unresolved $testname
 +    restore_notify
 +    return
- }
- 
++}
++
  set testname "Build liblto-11.a"
-@@ -348,6 +416,13 @@ if {![string match "" $catch_output]} {
+ remote_file host delete "tmpdir/liblto-11.a"
+ set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
+@@ -374,6 +416,13 @@ if {![string match "" $catch_output]} {
  
  if { [at_least_gcc_version 4 7] } {
      # Check expected LTO linker errors.
@@ -3197,7 +3119,7 @@ index 432c753..2af9c3a 100644
      set testname "PR ld/12942 (3)"
      set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
      if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
-@@ -360,8 +435,30 @@ if { [at_least_gcc_version 4 7] } {
+@@ -386,8 +435,30 @@ if { [at_least_gcc_version 4 7] } {
  # Run "ld -r" to generate inputs for complex LTO tests.
  run_dump_test "lto-3r"
  remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
@@ -3418,51 +3340,3 @@ index 0000000..0b14948
 +#...
 + 0x0+1 \(NEEDED\) +Shared library: \[libgcc_s.so.[0-9]+\]
 +#...
-diff --git a/ld/testsuite/ld-plugin/pr16746a.c b/ld/testsuite/ld-plugin/pr16746a.c
-new file mode 100644
-index 0000000..1705ef1
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr16746a.c
-@@ -0,0 +1,3 @@
-+static const char __evoke_link_warning_foobar[]
-+ __attribute__ ((used, section (".gnu.warning.foobar\n\t#")))
-+ = "foobar";
-diff --git a/ld/testsuite/ld-plugin/pr16746b.c b/ld/testsuite/ld-plugin/pr16746b.c
-new file mode 100644
-index 0000000..c3b7a78
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr16746b.c
-@@ -0,0 +1,5 @@
-+static const char __evoke_link_warning_foobar[]
-+ __attribute__ ((used, section (".gnu.warning.foobar\n\t#")))
-+ = "foobar";
-+
-+void foobar (void) {}
-diff --git a/ld/testsuite/ld-plugin/pr16746c.c b/ld/testsuite/ld-plugin/pr16746c.c
-new file mode 100644
-index 0000000..fb68ab7
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr16746c.c
-@@ -0,0 +1,8 @@
-+extern void foobar (void);
-+int
-+main (int argc, char **argv)
-+{
-+  if (__builtin_constant_p (argc))
-+    foobar ();
-+  return 0;
-+}
-diff --git a/ld/testsuite/ld-plugin/pr16746d.c b/ld/testsuite/ld-plugin/pr16746d.c
-new file mode 100644
-index 0000000..1fee4dd
---- /dev/null
-+++ b/ld/testsuite/ld-plugin/pr16746d.c
-@@ -0,0 +1,8 @@
-+extern void foobar (void);
-+int
-+main (int argc, char **argv)
-+{
-+  if (!__builtin_constant_p (argc))
-+    foobar ();
-+  return 0;
-+}
