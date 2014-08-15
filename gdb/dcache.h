@@ -21,6 +21,8 @@
 #ifndef DCACHE_H
 #define DCACHE_H
 
+#include "target.h"	/* for enum target_xfer_status */
+
 typedef struct dcache_struct DCACHE;
 
 /* Invalidate DCACHE.  */
