@@ -1946,6 +1946,24 @@ gdb_caching_proc is_elf_target {
     return 1
 }
 
+# Return 1 if the memory at address zero is readable.
+
+gdb_caching_proc is_address_zero_readable {
+    global gdb_prompt
+
+    set ret 0
+    gdb_test_multiple "x 0" "" {
+	-re "Cannot access memory at address 0x0.*$gdb_prompt $" {
+	    set ret 0
+	}
+	-re ".*$gdb_prompt $" {
+	    set ret 1
+	}
+    }
+
+    return $ret
+}
+
 # Produce source file NAME and write SOURCES into it.
 
 proc gdb_produce_source { name sources } {

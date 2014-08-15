@@ -23,14 +23,12 @@
 #include <ctype.h>
 
 #include "ui-out.h"
-#include <string.h>
 #include "exceptions.h"
 #include "top.h"
 #include "breakpoint.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-script.h"
-#include "gdb_assert.h"
 
 #include "extension.h"
 #include "interps.h"

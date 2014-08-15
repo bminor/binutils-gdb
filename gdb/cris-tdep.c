@@ -37,13 +37,11 @@
 #include "osabi.h"
 #include "arch-utils.h"
 #include "regcache.h"
-#include "gdb_assert.h"
 
 #include "objfiles.h"
 
 #include "solib.h"              /* Support for shared libraries.  */
 #include "solib-svr4.h"
-#include <string.h>
 #include "dis-asm.h"
 
 #include "cris-tdep.h"

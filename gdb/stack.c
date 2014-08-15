@@ -49,10 +49,7 @@
 #include "cli/cli-utils.h"
 #include "objfiles.h"
 
-#include "gdb_assert.h"
 #include <ctype.h>
-#include <string.h>
-
 #include "symfile.h"
 #include "extension.h"
 

@@ -291,8 +291,6 @@ false		{ return FALSEKEYWORD; }
 %%
 
 #include <ctype.h>
-#include <string.h>
-
 /* Initialize the lexer for processing new expression. */
 
 static void

@@ -19,10 +19,8 @@
 
 #include "defs.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "regcache.h"
 #include "mn10300-tdep.h"
-#include "gdb_assert.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "osabi.h"
@@ -32,8 +30,6 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 #include "linux-tdep.h"
-
-#include <stdlib.h>
 
 /* Transliterated from <asm-mn10300/elf.h>...  */
 #define MN10300_ELF_NGREG 28

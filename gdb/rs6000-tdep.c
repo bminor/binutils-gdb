@@ -55,7 +55,6 @@
 #include "ppc-tdep.h"
 #include "ppc-ravenscar-thread.h"
 
-#include "gdb_assert.h"
 #include "dis-asm.h"
 
 #include "trad-frame.h"
@@ -506,7 +505,7 @@ ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const struct ppc_reg_offsets *offsets = regset->descr;
+  const struct ppc_reg_offsets *offsets = regset->regmap;
   size_t offset;
   int regsize;
 
@@ -558,7 +557,7 @@ ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
     return;
 
   tdep = gdbarch_tdep (gdbarch);
-  offsets = regset->descr;
+  offsets = regset->regmap;
   if (regnum == -1)
     {
       int i;
@@ -626,7 +625,7 @@ ppc_supply_vrregset (const struct regset *regset, struct regcache *regcache,
     return;
 
   tdep = gdbarch_tdep (gdbarch);
-  offsets = regset->descr;
+  offsets = regset->regmap;
   if (regnum == -1)
     {
       int i;
@@ -665,7 +664,7 @@ ppc_collect_gregset (const struct regset *regset,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const struct ppc_reg_offsets *offsets = regset->descr;
+  const struct ppc_reg_offsets *offsets = regset->regmap;
   size_t offset;
   int regsize;
 
@@ -719,7 +718,7 @@ ppc_collect_fpregset (const struct regset *regset,
     return;
 
   tdep = gdbarch_tdep (gdbarch);
-  offsets = regset->descr;
+  offsets = regset->regmap;
   if (regnum == -1)
     {
       int i;
@@ -792,7 +791,7 @@ ppc_collect_vrregset (const struct regset *regset,
     return;
 
   tdep = gdbarch_tdep (gdbarch);
-  offsets = regset->descr;
+  offsets = regset->regmap;
   if (regnum == -1)
     {
       int i;

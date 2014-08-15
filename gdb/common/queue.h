@@ -20,9 +20,6 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#include "libiberty.h" /* xmalloc */
-#include "gdb_assert.h"
-
 /* These macros implement functions and structs for a general queue.
    Macro 'DEFINE_QUEUE_P(TYPEDEF)' is to define the new queue type for
    TYPEDEF', and macro 'DECLARE_QUEUE_P' is to declare external queue

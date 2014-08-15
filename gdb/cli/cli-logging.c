@@ -21,9 +21,6 @@
 #include "gdbcmd.h"
 #include "ui-out.h"
 #include "interps.h"
-#include "gdb_assert.h"
-
-#include <string.h>
 
 /* These hold the pushed copies of the gdb output files.
    If NULL then nothing has yet been pushed.  */

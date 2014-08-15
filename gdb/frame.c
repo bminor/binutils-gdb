@@ -23,8 +23,6 @@
 #include "value.h"
 #include "inferior.h"	/* for inferior_ptid */
 #include "regcache.h"
-#include "gdb_assert.h"
-#include <string.h>
 #include "user-regs.h"
 #include "gdb_obstack.h"
 #include "dummy-frame.h"

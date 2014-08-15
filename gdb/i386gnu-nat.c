@@ -22,11 +22,6 @@
 #include "floatformat.h"
 #include "regcache.h"
 
-#include "gdb_assert.h"
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-
 #include <mach.h>
 #include <mach_error.h>
 #include <mach/message.h>

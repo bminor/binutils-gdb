@@ -22,8 +22,6 @@
 #include "inferior.h"
 #include "regcache.h"
 
-#include "gdb_assert.h"
-#include <stddef.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/signal.h>

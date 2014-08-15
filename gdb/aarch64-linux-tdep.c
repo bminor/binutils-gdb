@@ -41,16 +41,6 @@
 #include "user-regs.h"
 #include <ctype.h>
 
-/* The general-purpose regset consists of 31 X registers, plus SP, PC,
-   and PSTATE registers, as defined in the AArch64 port of the Linux
-   kernel.  */
-#define AARCH64_LINUX_SIZEOF_GREGSET  (34 * X_REGISTER_SIZE)
-
-/* The fp regset consists of 32 V registers, plus FPCR and FPSR which
-   are 4 bytes wide each, and the whole structure is padded to 128 bit
-   alignment.  */
-#define AARCH64_LINUX_SIZEOF_FPREGSET (33 * V_REGISTER_SIZE)
-
 /* Signal frame handling.
 
       +------------+  ^
@@ -190,71 +180,37 @@ static const struct tramp_frame aarch64_linux_rt_sigframe =
   aarch64_linux_sigframe_init
 };
 
-/* Fill GDB's register array with the general-purpose register values
-   in the buffer pointed by GREGS_BUF.  */
+/* Register maps.  */
 
-void
-aarch64_linux_supply_gregset (struct regcache *regcache,
-			      const gdb_byte *gregs_buf)
-{
-  int regno;
-
-  for (regno = AARCH64_X0_REGNUM; regno <= AARCH64_CPSR_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno,
-			 gregs_buf + X_REGISTER_SIZE
-			 * (regno - AARCH64_X0_REGNUM));
-}
-
-/* The "supply_regset" function for the general-purpose register set.  */
-
-static void
-supply_gregset_from_core (const struct regset *regset,
-			  struct regcache *regcache,
-			  int regnum, const void *regbuf, size_t len)
-{
-  aarch64_linux_supply_gregset (regcache, (const gdb_byte *) regbuf);
-}
-
-/* Fill GDB's register array with the floating-point register values
-   in the buffer pointed by FPREGS_BUF.  */
-
-void
-aarch64_linux_supply_fpregset (struct regcache *regcache,
-			       const gdb_byte *fpregs_buf)
-{
-  int regno;
-
-  for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno,
-			 fpregs_buf + V_REGISTER_SIZE
-			 * (regno - AARCH64_V0_REGNUM));
-
-  regcache_raw_supply (regcache, AARCH64_FPSR_REGNUM,
-		       fpregs_buf + V_REGISTER_SIZE * 32);
-  regcache_raw_supply (regcache, AARCH64_FPCR_REGNUM,
-		       fpregs_buf + V_REGISTER_SIZE * 32 + 4);
-}
-
-/* The "supply_regset" function for the floating-point register set.  */
-
-static void
-supply_fpregset_from_core (const struct regset *regset,
-			   struct regcache *regcache,
-			   int regnum, const void *regbuf, size_t len)
-{
-  aarch64_linux_supply_fpregset (regcache, (const gdb_byte *) regbuf);
-}
-
-/* Register set definitions. */
-
-static const struct regset aarch64_linux_gregset =
+static const struct regcache_map_entry aarch64_linux_gregmap[] =
   {
-    NULL, supply_gregset_from_core, NULL
+    { 31, AARCH64_X0_REGNUM, 8 }, /* x0 ... x30 */
+    { 1, AARCH64_SP_REGNUM, 8 },
+    { 1, AARCH64_PC_REGNUM, 8 },
+    { 1, AARCH64_CPSR_REGNUM, 8 },
+    { 0 }
   };
 
-static const struct regset aarch64_linux_fpregset =
+static const struct regcache_map_entry aarch64_linux_fpregmap[] =
   {
-    NULL, supply_fpregset_from_core, NULL
+    { 32, AARCH64_V0_REGNUM, 16 }, /* v0 ... v31 */
+    { 1, AARCH64_FPSR_REGNUM, 4 },
+    { 1, AARCH64_FPCR_REGNUM, 4 },
+    { 0 }
+  };
+
+/* Register set definitions.  */
+
+const struct regset aarch64_linux_gregset =
+  {
+    aarch64_linux_gregmap,
+    regcache_supply_regset, regcache_collect_regset
+  };
+
+const struct regset aarch64_linux_fpregset =
+  {
+    aarch64_linux_fpregmap,
+    regcache_supply_regset, regcache_collect_regset
   };
 
 /* Implement the "regset_from_core_section" gdbarch method.  */

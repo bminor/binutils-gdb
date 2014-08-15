@@ -20,10 +20,6 @@
 #ifndef COMMON_UTILS_H
 #define COMMON_UTILS_H
 
-#include "ansidecl.h"
-#include <stddef.h>
-#include <stdarg.h>
-
 /* If possible, define FUNCTION_NAME, a macro containing the name of
    the function being defined.  Since this macro may not always be
    defined, all uses must be protected by appropriate macro definition

@@ -25,8 +25,6 @@
 #include "ax.h"
 
 #include "value.h"
-#include <string.h>
-
 #include "user-regs.h"
 
 static void grow_expr (struct agent_expr *x, int n);

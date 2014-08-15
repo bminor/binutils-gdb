@@ -29,9 +29,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "command.h"
 
 void _initialize_ser_windows (void);

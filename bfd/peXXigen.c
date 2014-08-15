@@ -2092,8 +2092,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
   FILE *file = (FILE *) vfile;
   bfd_byte *data = 0;
   asection *section = bfd_get_section_by_name (abfd, ".reloc");
-  bfd_size_type i;
-  bfd_size_type start, stop;
+  bfd_byte *p, *end;
 
   if (section == NULL || section->size == 0 || !(section->flags & SEC_HAS_CONTENTS))
     return TRUE;
@@ -2108,20 +2107,20 @@ pe_print_reloc (bfd * abfd, void * vfile)
       return FALSE;
     }
 
-  start = 0;
-
-  stop = section->size;
-
-  for (i = start; i < stop;)
+  p = data;
+  end = data + section->size;
+  while (p + 8 <= end)
     {
       int j;
       bfd_vma virtual_address;
       long number, size;
+      bfd_byte *chunk_end;
 
       /* The .reloc section is a sequence of blocks, with a header consisting
 	 of two 32 bit quantities, followed by a number of 16 bit entries.  */
-      virtual_address = bfd_get_32 (abfd, data+i);
-      size = bfd_get_32 (abfd, data+i+4);
+      virtual_address = bfd_get_32 (abfd, p);
+      size = bfd_get_32 (abfd, p + 4);
+      p += 8;
       number = (size - 8) / 2;
 
       if (size == 0)
@@ -2131,9 +2130,13 @@ pe_print_reloc (bfd * abfd, void * vfile)
 	       _("\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"),
 	       (unsigned long) virtual_address, size, (unsigned long) size, number);
 
-      for (j = 0; j < number; ++j)
+      chunk_end = p + size;
+      if (chunk_end > end)
+	chunk_end = end;
+      j = 0;
+      while (p + 2 <= chunk_end)
 	{
-	  unsigned short e = bfd_get_16 (abfd, data + i + 8 + j * 2);
+	  unsigned short e = bfd_get_16 (abfd, p);
 	  unsigned int t = (e & 0xF000) >> 12;
 	  int off = e & 0x0FFF;
 
@@ -2144,20 +2147,20 @@ pe_print_reloc (bfd * abfd, void * vfile)
 		   _("\treloc %4d offset %4x [%4lx] %s"),
 		   j, off, (unsigned long) (off + virtual_address), tbl[t]);
 
+	  p += 2;
+	  j++;
+
 	  /* HIGHADJ takes an argument, - the next record *is* the
 	     low 16 bits of addend.  */
-	  if (t == IMAGE_REL_BASED_HIGHADJ)
+	  if (t == IMAGE_REL_BASED_HIGHADJ && p + 2 <= chunk_end)
 	    {
-	      fprintf (file, " (%4x)",
-		       ((unsigned int)
-			bfd_get_16 (abfd, data + i + 8 + j * 2 + 2)));
+	      fprintf (file, " (%4x)", (unsigned int) bfd_get_16 (abfd, p));
+	      p += 2;
 	      j++;
 	    }
 
 	  fprintf (file, "\n");
 	}
-
-      i += size;
     }
 
   free (data);

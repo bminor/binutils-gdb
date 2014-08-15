@@ -21,8 +21,6 @@
 #include "defs.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "arch-utils.h"
 #include "observer.h"
 #include "inferior.h"

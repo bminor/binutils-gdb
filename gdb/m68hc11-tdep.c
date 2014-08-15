@@ -30,7 +30,6 @@
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "value.h"
 #include "inferior.h"
 #include "dis-asm.h"  

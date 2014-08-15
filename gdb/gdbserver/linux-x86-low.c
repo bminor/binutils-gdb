@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
-#include <stddef.h>
 #include <signal.h>
 #include <limits.h>
 #include <inttypes.h>

@@ -1,3 +1,9 @@
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Move ACX_LARGEFILE after LT_INIT.
+	* configure: Regenerate.
+	* gconfig.in: Regenerate.
+
 2014-07-04  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Rename from configure.in.

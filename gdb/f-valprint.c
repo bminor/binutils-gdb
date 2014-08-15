@@ -21,7 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -34,7 +33,6 @@
 #include "command.h"
 #include "block.h"
 #include "dictionary.h"
-#include "gdb_assert.h"
 #include "exceptions.h"
 
 extern void _initialize_f_valprint (void);

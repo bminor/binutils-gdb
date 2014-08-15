@@ -20,7 +20,6 @@
 /* This file is derived from c-lang.c */
 
 #include "defs.h"
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"

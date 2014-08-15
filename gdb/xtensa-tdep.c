@@ -47,7 +47,6 @@
 
 #include "command.h"
 #include "gdbcmd.h"
-#include "gdb_assert.h"
 
 #include "xtensa-isa.h"
 #include "xtensa-tdep.h"

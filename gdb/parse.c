@@ -32,7 +32,6 @@
 #include "defs.h"
 #include <ctype.h>
 #include "arch-utils.h"
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "frame.h"
@@ -46,7 +45,6 @@
 #include "symfile.h"		/* for overlay functions */
 #include "inferior.h"
 #include "doublest.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "source.h"
 #include "objfiles.h"

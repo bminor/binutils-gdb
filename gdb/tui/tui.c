@@ -38,8 +38,6 @@
 #include "symtab.h"
 #include "source.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <signal.h>
 #include <fcntl.h>

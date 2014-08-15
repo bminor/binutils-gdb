@@ -20,7 +20,6 @@
 /* See the GDB User Guide for details of the GDB remote protocol.  */
 
 #include "defs.h"
-#include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include "inferior.h"
@@ -38,7 +37,6 @@
 #include "remote-notif.h"
 #include "regcache.h"
 #include "value.h"
-#include "gdb_assert.h"
 #include "observer.h"
 #include "solib.h"
 #include "cli/cli-decode.h"
@@ -6825,7 +6823,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 		   gdb_byte *myaddr, ULONGEST len, ULONGEST *xfered_len)
 {
   if (len == 0)
-    return 0;
+    return TARGET_XFER_EOF;
 
   if (get_traceframe_number () != -1)
     {
@@ -8865,10 +8863,6 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return TARGET_XFER_E_IO;
     }
 
-  /* Note: a zero OFFSET and LEN can be used to query the minimum
-     buffer size.  */
-  if (offset == 0 && len == 0)
-    return (get_remote_packet_size ());
   /* Minimum outbuf size is get_remote_packet_size ().  If LEN is not
      large enough let the caller deal with it.  */
   if (len < get_remote_packet_size ())

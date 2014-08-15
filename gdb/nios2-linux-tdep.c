@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "frame.h"
-#include "gdb_assert.h"
-#include <string.h>
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "trad-frame.h"
@@ -73,11 +71,30 @@ nios2_supply_gregset (const struct regset *regset,
       }
 }
 
+/* Implement the collect_regset hook for core files.  */
+
+static void
+nios2_collect_gregset (const struct regset *regset,
+		       const struct regcache *regcache,
+		       int regnum, void *gregs_buf, size_t len)
+{
+  gdb_byte *gregs = gregs_buf;
+  int regno;
+
+  for (regno = NIOS2_Z_REGNUM; regno <= NIOS2_MPUACC_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      {
+	if (reg_offsets[regno] != -1)
+	  regcache_raw_collect (regcache, regno,
+				gregs + 4 * reg_offsets[regno]);
+      }
+}
+
 static const struct regset nios2_core_regset =
 {
   NULL,
   nios2_supply_gregset,
-  NULL,
+  nios2_collect_gregset
 };
 
 /* Implement the regset_from_core_section gdbarch method.  */

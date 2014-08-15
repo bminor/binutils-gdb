@@ -36,8 +36,6 @@
 #include "event-top.h"
 #include "interps.h"
 #include "completer.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "top.h"		/* For command_loop.  */
 #include "exceptions.h"
 #include "continuations.h"

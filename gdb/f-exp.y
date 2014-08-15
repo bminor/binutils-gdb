@@ -43,7 +43,6 @@
 %{
 
 #include "defs.h"
-#include <string.h>
 #include "expression.h"
 #include "value.h"
 #include "parser-defs.h"

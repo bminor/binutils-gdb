@@ -1,3 +1,930 @@
+2014-08-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* dcache.h: Include target.h, to avoid compile time warnings.
+
+2014-08-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbarch.sh: #include "frame.h" in gdbarch.h.  Delete "struct
+	frame_info" partial declaration.
+	* gdbarch.h: Regenerate.
+
+2014-08-15  Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2read.c (dwarf_decode_lines_1): Remove parameter 'pst'.
+	Add parameter 'decode_for_pst_p'.  Callers update.
+
+2014-08-13  Yao Qi  <yao@codesourcery.com>
+
+	PR build/17104
+	* configure.ac: Use local variable 'pos'.
+	* configure: Regenerated.
+
+2014-08-11  Doug Evans  <dje@google.com>
+
+	* solib.c (solib_read_symbols): Delete "Loaded symbols for ..."
+	message, it is redundant with "Reading symbols from ..." message.
+
+2014-08-10  Doug Evans  <xdje42@gmail.com>
+
+	* linux-nat.c (linux_nat_thread_address_space): Delete dead code.
+
+2014-08-09  Yao Qi  <yao@codesourcery.com>
+
+	PR remote/9053
+	* remote.c (remote_xfer_partial): Remove dead code.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* ia64-linux-tdep.c: Include "regset.h".
+	(ia64_linux_gregmap, ia64_linux_fpregmap): New register maps.
+	(IA64_LINUX_GREGS_SIZE, IA64_LINUX_FPREGS_SIZE): New macros.
+	(ia64_linux_supply_fpregset): New function.
+	(ia64_linux_gregset, ia64_linux_fpregset): New regsets.
+	(ia64_linux_regset_from_core_section): New function.
+	(ia64_linux_init_abi): Set regset_from_core_section gdbarch
+	method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* m68klinux-tdep.c: Include "regset.h".
+	(m68k_linux_gregmap, m68k_linux_fpregmap): New register maps.
+	(M68K_LINUX_GREGS_SIZE, M68K_LINUX_FPREGS_SIZE): New macros.
+	(m68k_linux_gregset, m68k_linux_fpregset): New regsets.
+	(m68k_linux_regset_from_core_section): New function.
+	(m68k_linux_init_abi): Set regset_from_core_section gdbarch
+	method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* tilegx-linux-tdep.c (tilegx_linux_supply_regset): Delete
+	function.  Move logic to...
+	(tilegx_linux_regmap): ... this new register map.
+	(tilegx_linux_regset): Refer to register map, replace supply
+	method by regcache_supply_regset, and add collect method.
+	* tilegx-tdep.h (enum tilegx_regnum): New enum value
+	TILEGX_FIRST_EASY_REGNUM.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* score-tdep.c (score7_linux_supply_gregset): Reduce to small stub
+	that calls regcache_supply_regset and handles the EPC register
+	separately.  Move main logic to...
+	(score7_linux_gregmap): ... this new register map.
+	(SCORE7_LINUX_SIZEOF_GREGSET, SCORE7_LINUX_EPC_OFFSET): New macros.
+	(score7_linux_gregset): Refer to register map.  Add collect method.
+	(score7_linux_regset_from_core_section): Replace
+	sizeof elf_gregset_t by SCORE7_LINUX_SIZEOF_GREGSET.
+	* score-tdep.h (enum gdb_regnum): New enum value SCORE_EPC_REGNUM.
+	(struct regset): Delete unused forward declaraction.
+	(struct pt_regs): Delete structure definition.
+	(elf_gregset_t): Delete typedef.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* nios2-linux-tdep.c (nios2_collect_gregset): New function.
+	(nios2_core_regset): Add collect method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* m32r-linux-tdep.c (m32r_linux_supply_gregset): Make
+	platform-independent and don't write to read-only input buffer.
+	(m32r_linux_collect_gregset): New function.
+	(m32r_linux_gregset): Add collect method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* hppa-linux-tdep.c (greg_map): Rename to...
+	(hppa_linux_gregmap): ... this.  Also convert to
+	regcache_map_entry format.
+	(hppa_linux_supply_regset): Delete function.
+	(hppa_linux_supply_fpregset): Delete function.  Move logic to...
+	(hppa_linux_fpregmap): ... this new register map.
+	(hppa_linux_regset, hppa_linux_fpregset): Refer to appropriate
+	register map, replace supply method by regcache_supply_regset, and
+	add collect method regcache_collect_regset.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* frv-linux-tdep.c (FRV_PT_PSR, FRV_PT_ISR, FRV_PT_CCR)
+	(FRV_PT_CCCR, FRV_PT_LR, FRV_PT_LCR, FRV_PT_PC, FRV_PT_GNER0)
+	(FRV_PT_GNER1, FRV_PT_IACC0H, FRV_PT_IACC0L, FRV_PT_GR)
+	(FRV_PT_TBR, FRV_PT_GR, FRV_PT_EXEC_FDPIC_LOADMAP)
+	(FRV_PT_INTERP_FDPIC_LOADMAP): Delete macros.
+	(frv_linux_gregmap, frv_linux_fpregmap): New register maps.
+	(frv_linux_supply_gregset): Replace main logic by call to
+	regcache_supply_regset, but keep clearing gr32-gr63.
+	(frv_linux_supply_fpregset): Delete function.
+	(frv_linux_gregset): Refer to appropriate register map and add
+	regcache_collect_regset as the collect method.
+	(frv_linux_fpregset): Likewise.  Also exchange the supply method
+	by regcache_supply_regset.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* alpha-linux-tdep.c (alpha_linux_supply_gregset): Replace logic
+	by call to alpha_supply_int_regs.
+	(alpha_linux_collect_gregset): New function.
+	(alpha_linux_supply_fpregset): Replace logic by call to
+	alpha_supply_fp_regs.
+	(alpha_linux_collect_fpregset): New function.
+	(alpha_linux_gregset, alpha_linux_fpregset): Add collect method.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* aarch64-linux-nat.c (fill_gregset, fill_fpregset): Replace logic
+	by call to regcache_collect_regset.
+	(supply_gregset, supply_fpregset): Call regcache_supply_regset
+	instead of aarch64_linux_supply_gregset/_fpregset.
+	* aarch64-linux-tdep.c (AARCH64_LINUX_SIZEOF_GREGSET)
+	(AARCH64_LINUX_SIZEOF_FPREGSET): Delete macros here, move to
+	header file instead.
+	(aarch64_linux_supply_gregset, supply_gregset_from_core)
+	(aarch64_linux_suply_fpregset, supply_fpregset_from_core): Delete
+	functions.  Move logic to ...
+	(aarch64_linux_gregmap, aarch64_linux_fpregmap): ... these new
+	register maps.
+	(aarch64_linux_gregset, aarch64_linux_fpregset): Make global,
+	refer to new register maps, replace *_regset_from_core by
+	regcache_supply_regset, and also use regcache_collect_regset.
+	* aarch64-linux-tdep.h: Include "regset.h".
+	(aarch64_linux_supply_gregset, aarch64_linux_supply_fpregset):
+	Delete prototypes.
+	(AARCH64_LINUX_SIZEOF_GREGSET, AARCH64_LINUX_SIZEOF_FPREGSET): New
+	macros, moved from C source file.
+	(aarch64_linux_gregset, aarch64_linux_fpregset): New global
+	variable declarations.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c: Include "regset.h".
+	(regmap_gregset): Delete macro.
+	(s390_64_regmap_gregset): New register map for
+	regcache_supply/_collect_regset.
+	(s390_64_gregset): New regset.
+	(S390_PSWM_OFFSET, S390_PSWA_OFFSET): New macros.
+	(regmap_fpregset): Delete macro.
+	(s390_native_supply, s390_native_collect): Delete functions.
+	(supply_gregset, fill_gregset): Replace s390-specific regmap
+	handling by a call to regcache_supply/_collect_regset.
+	(supply_fpregset, fill_fpregset): Call regcache_supply/
+	_collect_regset instead of s390_native_supply/_collect.
+	(fetch_regset, store_regset): Likewise.  Also change the last
+	parameter to a regset instead of a regmap.
+	(s390_linux_fetch_inferior_registers)
+	(390_linux_store_inferior_registers): Adjust last parameter in
+	calls to fetch_regset and store_regset.
+	* s390-linux-tdep.c (s390_regmap_gregset): Rename to...
+	(s390_gregmap): ... this.  Also make static const and convert to
+	regcache_map_entry format.
+	(s390x_regmap_gregset): Delete.
+	(s390_regmap_fpregset): Rename to...
+	(s390_fpregmap): ... this.  Make static const and convert to
+	regcache_map_entry format.
+	(s390_regmap_upper, s390_regmap_last_break)
+	(s390x_regmap_last_break, s390_regmap_system_call)
+	(s390_regmap_tdb): Likewise.
+	(s390_supply_regset, s390_collect_regset): Remove functions.
+	(s390_supply_tdb_regset): Call regcache_supply_regset instead of
+	s390_supply_regset.
+	(s390_gregset, s390_fpregset, s390_upper_regset)
+	(s390_last_break_regset, s390x_last_break_regset)
+	(s390_system_call_regset, s390_tdb_regset): Make global and
+	replace s390_supply/_collect_regset by regcache_supply/
+	_collect_regset.
+	(s390x_gregset): Delete.
+	(s390_gdbarch_init): Replace s390x_gregset by s390_gregset.
+	* s390-linux-tdep.h (s390_regmap_gregset, s390x_regmap_gregset)
+	(s390_regmap_fpregset, s390_regmap_last_break)
+	(s390x_regmap_last_break, s390_regmap_system_call)
+	(s390_regmap_tdb): Delete global variable declarations.
+	(s390_gregset, s390_fpregset, s390_last_break_regset)
+	(s390x_last_break_regset, s390_system_call_regset)
+	(s390_tdb_regset): New global variable declarations.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* regcache.c: Include "regset.h".
+	(regcache_transfer_regset): New local function.
+	(regcache_supply_regset, regcache_collect_regset): New functions.
+	* regcache.h (struct regcache_map_entry): New structure.
+	(REGCACHE_MAP_SKIP): New enum value.
+	(regcache_supply_regset, regcache_collect_regset): New prototypes.
+
+2014-08-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* regset.h (struct regset): Rename 'descr' field to 'regmap'.
+	* ppc-linux-tdep.c (ppc_linux_supply_gregset)
+	(ppc_linux_collect_gregset ): Likewise.
+	* rs6000-tdep.c (ppc_supply_gregset, ppc_supply_fpregset)
+	(ppc_supply_vrregset, ppc_collect_gregset, ppc_collect_fpregset)
+	(ppc_collect_vrregset): Likewise.
+	* s390-linux-tdep.c (s390_supply_regset, s390_collect_regset):
+	Likewise.
+
+2014-08-07  Yao Qi  <yao@codesourcery.com>
+
+	* corelow.c (core_xfer_partial): Replace 0 with TARGET_XFER_EOF.
+	* remote-m32r-sdi.c (m32r_xfer_memory): Likewise.
+	* remote.c (remote_read_bytes): Likewise.
+
+2014-08-07  Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2read.c (struct dwarf2_per_cu_data) <u>: Tweak comments.
+
+2014-08-07  Yao Qi  <yao@codesourcery.com>
+
+	PR remote/17230
+	* remote-mips.c (mips_xfer_memory): Set *xfered_len and return
+	TARGET_XFER_OK instead of 0.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include errno.h.
+	* defs.h: Do not include errno.h.
+	* ada-typeprint.c: Likewise.
+	* c-typeprint.c: Likewise.
+	* core-regset.c: Likewise.
+	* corefile.c: Likewise.
+	* corelow.c: Likewise.
+	* event-loop.c: Likewise.
+	* f-typeprint.c: Likewise.
+	* gnu-nat.c: Likewise.
+	* go32-nat.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+	* m2-typeprint.c: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* p-typeprint.c: Likewise.
+	* procfs.c: Likewise.
+	* remote-sim.c: Likewise.
+	* rs6000-nat.c: Likewise.
+	* target.c: Likewise.
+	* typeprint.c: Likewise.
+	* ui-file.c: Likewise.
+	* valops.c: Likewise.
+	* valprint.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include string.h.
+	* aarch64-tdep.c: Do not include string.h.
+	* ada-exp.y: Likewise.
+	* ada-lang.c: Likewise.
+	* ada-lex.l: Likewise.
+	* ada-typeprint.c: Likewise.
+	* ada-valprint.c: Likewise.
+	* aix-thread.c: Likewise.
+	* alpha-linux-tdep.c: Likewise.
+	* alpha-mdebug-tdep.c: Likewise.
+	* alpha-nat.c: Likewise.
+	* alpha-osf1-tdep.c: Likewise.
+	* alpha-tdep.c: Likewise.
+	* alphanbsd-tdep.c: Likewise.
+	* amd64-dicos-tdep.c: Likewise.
+	* amd64-linux-tdep.c: Likewise.
+	* amd64-nat.c: Likewise.
+	* amd64-sol2-tdep.c: Likewise.
+	* amd64fbsd-tdep.c: Likewise.
+	* amd64obsd-tdep.c: Likewise.
+	* arch-utils.c: Likewise.
+	* arm-linux-nat.c: Likewise.
+	* arm-linux-tdep.c: Likewise.
+	* arm-tdep.c: Likewise.
+	* arm-wince-tdep.c: Likewise.
+	* armbsd-tdep.c: Likewise.
+	* armnbsd-nat.c: Likewise.
+	* armnbsd-tdep.c: Likewise.
+	* armobsd-tdep.c: Likewise.
+	* avr-tdep.c: Likewise.
+	* ax-gdb.c: Likewise.
+	* ax-general.c: Likewise.
+	* bcache.c: Likewise.
+	* bfin-tdep.c: Likewise.
+	* breakpoint.c: Likewise.
+	* build-id.c: Likewise.
+	* buildsym.c: Likewise.
+	* c-exp.y: Likewise.
+	* c-lang.c: Likewise.
+	* c-typeprint.c: Likewise.
+	* c-valprint.c: Likewise.
+	* charset.c: Likewise.
+	* cli-out.c: Likewise.
+	* cli/cli-cmds.c: Likewise.
+	* cli/cli-decode.c: Likewise.
+	* cli/cli-dump.c: Likewise.
+	* cli/cli-interp.c: Likewise.
+	* cli/cli-logging.c: Likewise.
+	* cli/cli-script.c: Likewise.
+	* cli/cli-setshow.c: Likewise.
+	* cli/cli-utils.c: Likewise.
+	* coffread.c: Likewise.
+	* common/agent.c: Likewise.
+	* common/buffer.c: Likewise.
+	* common/buffer.h: Likewise.
+	* common/common-utils.c: Likewise.
+	* common/filestuff.c: Likewise.
+	* common/filestuff.c: Likewise.
+	* common/format.c: Likewise.
+	* common/print-utils.c: Likewise.
+	* common/rsp-low.c: Likewise.
+	* common/signals.c: Likewise.
+	* common/vec.h: Likewise.
+	* common/xml-utils.c: Likewise.
+	* core-regset.c: Likewise.
+	* corefile.c: Likewise.
+	* corelow.c: Likewise.
+	* cp-abi.c: Likewise.
+	* cp-name-parser.y: Likewise.
+	* cp-support.c: Likewise.
+	* cp-valprint.c: Likewise.
+	* cris-tdep.c: Likewise.
+	* d-exp.y: Likewise.
+	* darwin-nat.c: Likewise.
+	* dbxread.c: Likewise.
+	* dcache.c: Likewise.
+	* demangle.c: Likewise.
+	* dicos-tdep.c: Likewise.
+	* disasm.c: Likewise.
+	* doublest.c: Likewise.
+	* dsrec.c: Likewise.
+	* dummy-frame.c: Likewise.
+	* dwarf2-frame.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* dwarf2read.c: Likewise.
+	* elfread.c: Likewise.
+	* environ.c: Likewise.
+	* eval.c: Likewise.
+	* event-loop.c: Likewise.
+	* exceptions.c: Likewise.
+	* exec.c: Likewise.
+	* expprint.c: Likewise.
+	* f-exp.y: Likewise.
+	* f-lang.c: Likewise.
+	* f-typeprint.c: Likewise.
+	* f-valprint.c: Likewise.
+	* fbsd-nat.c: Likewise.
+	* findcmd.c: Likewise.
+	* findvar.c: Likewise.
+	* fork-child.c: Likewise.
+	* frame.c: Likewise.
+	* frv-linux-tdep.c: Likewise.
+	* frv-tdep.c: Likewise.
+	* gdb.c: Likewise.
+	* gdb_bfd.c: Likewise.
+	* gdbarch.c: Likewise.
+	* gdbarch.sh: Likewise.
+	* gdbtypes.c: Likewise.
+	* gnu-nat.c: Likewise.
+	* gnu-v2-abi.c: Likewise.
+	* gnu-v3-abi.c: Likewise.
+	* go-exp.y: Likewise.
+	* go-lang.c: Likewise.
+	* go32-nat.c: Likewise.
+	* guile/guile.c: Likewise.
+	* guile/scm-auto-load.c: Likewise.
+	* hppa-hpux-tdep.c: Likewise.
+	* hppa-linux-nat.c: Likewise.
+	* hppanbsd-tdep.c: Likewise.
+	* hppaobsd-tdep.c: Likewise.
+	* i386-cygwin-tdep.c: Likewise.
+	* i386-dicos-tdep.c: Likewise.
+	* i386-linux-tdep.c: Likewise.
+	* i386-nto-tdep.c: Likewise.
+	* i386-sol2-tdep.c: Likewise.
+	* i386-tdep.c: Likewise.
+	* i386bsd-tdep.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+	* i386nbsd-tdep.c: Likewise.
+	* i386obsd-tdep.c: Likewise.
+	* i387-tdep.c: Likewise.
+	* ia64-libunwind-tdep.c: Likewise.
+	* ia64-linux-nat.c: Likewise.
+	* inf-child.c: Likewise.
+	* inf-ptrace.c: Likewise.
+	* inf-ttrace.c: Likewise.
+	* infcall.c: Likewise.
+	* infcmd.c: Likewise.
+	* inflow.c: Likewise.
+	* infrun.c: Likewise.
+	* interps.c: Likewise.
+	* iq2000-tdep.c: Likewise.
+	* irix5-nat.c: Likewise.
+	* jv-exp.y: Likewise.
+	* jv-lang.c: Likewise.
+	* jv-typeprint.c: Likewise.
+	* jv-valprint.c: Likewise.
+	* language.c: Likewise.
+	* linux-fork.c: Likewise.
+	* linux-nat.c: Likewise.
+	* lm32-tdep.c: Likewise.
+	* m2-exp.y: Likewise.
+	* m2-typeprint.c: Likewise.
+	* m32c-tdep.c: Likewise.
+	* m32r-linux-nat.c: Likewise.
+	* m32r-linux-tdep.c: Likewise.
+	* m32r-rom.c: Likewise.
+	* m32r-tdep.c: Likewise.
+	* m68hc11-tdep.c: Likewise.
+	* m68k-tdep.c: Likewise.
+	* m68kbsd-tdep.c: Likewise.
+	* m68klinux-nat.c: Likewise.
+	* m68klinux-tdep.c: Likewise.
+	* m88k-tdep.c: Likewise.
+	* machoread.c: Likewise.
+	* macrocmd.c: Likewise.
+	* main.c: Likewise.
+	* mdebugread.c: Likewise.
+	* mem-break.c: Likewise.
+	* memattr.c: Likewise.
+	* memory-map.c: Likewise.
+	* mep-tdep.c: Likewise.
+	* mi/mi-cmd-break.c: Likewise.
+	* mi/mi-cmd-disas.c: Likewise.
+	* mi/mi-cmd-env.c: Likewise.
+	* mi/mi-cmd-stack.c: Likewise.
+	* mi/mi-cmd-var.c: Likewise.
+	* mi/mi-cmds.c: Likewise.
+	* mi/mi-console.c: Likewise.
+	* mi/mi-getopt.c: Likewise.
+	* mi/mi-interp.c: Likewise.
+	* mi/mi-main.c: Likewise.
+	* mi/mi-parse.c: Likewise.
+	* microblaze-rom.c: Likewise.
+	* microblaze-tdep.c: Likewise.
+	* mingw-hdep.c: Likewise.
+	* minidebug.c: Likewise.
+	* minsyms.c: Likewise.
+	* mips-irix-tdep.c: Likewise.
+	* mips-linux-tdep.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* mips64obsd-tdep.c: Likewise.
+	* mipsnbsd-tdep.c: Likewise.
+	* mipsread.c: Likewise.
+	* mn10300-linux-tdep.c: Likewise.
+	* mn10300-tdep.c: Likewise.
+	* monitor.c: Likewise.
+	* moxie-tdep.c: Likewise.
+	* mt-tdep.c: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* nat/linux-osdata.c: Likewise.
+	* nat/linux-procfs.c: Likewise.
+	* nat/linux-ptrace.c: Likewise.
+	* nat/linux-waitpid.c: Likewise.
+	* nbsd-tdep.c: Likewise.
+	* nios2-linux-tdep.c: Likewise.
+	* nto-procfs.c: Likewise.
+	* nto-tdep.c: Likewise.
+	* objc-lang.c: Likewise.
+	* objfiles.c: Likewise.
+	* opencl-lang.c: Likewise.
+	* osabi.c: Likewise.
+	* osdata.c: Likewise.
+	* p-exp.y: Likewise.
+	* p-lang.c: Likewise.
+	* p-typeprint.c: Likewise.
+	* parse.c: Likewise.
+	* posix-hdep.c: Likewise.
+	* ppc-linux-nat.c: Likewise.
+	* ppc-sysv-tdep.c: Likewise.
+	* ppcfbsd-tdep.c: Likewise.
+	* ppcnbsd-tdep.c: Likewise.
+	* ppcobsd-tdep.c: Likewise.
+	* printcmd.c: Likewise.
+	* procfs.c: Likewise.
+	* prologue-value.c: Likewise.
+	* python/py-auto-load.c: Likewise.
+	* python/py-gdb-readline.c: Likewise.
+	* ravenscar-thread.c: Likewise.
+	* regcache.c: Likewise.
+	* registry.c: Likewise.
+	* remote-fileio.c: Likewise.
+	* remote-m32r-sdi.c: Likewise.
+	* remote-mips.c: Likewise.
+	* remote-notif.c: Likewise.
+	* remote-sim.c: Likewise.
+	* remote.c: Likewise.
+	* reverse.c: Likewise.
+	* rs6000-aix-tdep.c: Likewise.
+	* ser-base.c: Likewise.
+	* ser-go32.c: Likewise.
+	* ser-mingw.c: Likewise.
+	* ser-pipe.c: Likewise.
+	* ser-tcp.c: Likewise.
+	* ser-unix.c: Likewise.
+	* serial.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* sh64-tdep.c: Likewise.
+	* shnbsd-tdep.c: Likewise.
+	* skip.c: Likewise.
+	* sol-thread.c: Likewise.
+	* solib-dsbt.c: Likewise.
+	* solib-frv.c: Likewise.
+	* solib-osf.c: Likewise.
+	* solib-som.c: Likewise.
+	* solib-spu.c: Likewise.
+	* solib-target.c: Likewise.
+	* solib.c: Likewise.
+	* somread.c: Likewise.
+	* source.c: Likewise.
+	* sparc-nat.c: Likewise.
+	* sparc-sol2-tdep.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* sparc64-tdep.c: Likewise.
+	* sparc64fbsd-tdep.c: Likewise.
+	* sparc64nbsd-tdep.c: Likewise.
+	* sparcnbsd-tdep.c: Likewise.
+	* spu-linux-nat.c: Likewise.
+	* spu-multiarch.c: Likewise.
+	* spu-tdep.c: Likewise.
+	* stabsread.c: Likewise.
+	* stack.c: Likewise.
+	* std-regs.c: Likewise.
+	* symfile.c: Likewise.
+	* symmisc.c: Likewise.
+	* symtab.c: Likewise.
+	* target.c: Likewise.
+	* thread.c: Likewise.
+	* tilegx-linux-nat.c: Likewise.
+	* tilegx-tdep.c: Likewise.
+	* top.c: Likewise.
+	* tracepoint.c: Likewise.
+	* tui/tui-command.c: Likewise.
+	* tui/tui-data.c: Likewise.
+	* tui/tui-disasm.c: Likewise.
+	* tui/tui-file.c: Likewise.
+	* tui/tui-layout.c: Likewise.
+	* tui/tui-out.c: Likewise.
+	* tui/tui-regs.c: Likewise.
+	* tui/tui-source.c: Likewise.
+	* tui/tui-stack.c: Likewise.
+	* tui/tui-win.c: Likewise.
+	* tui/tui-windata.c: Likewise.
+	* tui/tui-winsource.c: Likewise.
+	* typeprint.c: Likewise.
+	* ui-file.c: Likewise.
+	* ui-out.c: Likewise.
+	* user-regs.c: Likewise.
+	* utils.c: Likewise.
+	* v850-tdep.c: Likewise.
+	* valarith.c: Likewise.
+	* valops.c: Likewise.
+	* valprint.c: Likewise.
+	* value.c: Likewise.
+	* varobj.c: Likewise.
+	* vax-tdep.c: Likewise.
+	* vaxnbsd-tdep.c: Likewise.
+	* vaxobsd-tdep.c: Likewise.
+	* windows-nat.c: Likewise.
+	* xcoffread.c: Likewise.
+	* xml-support.c: Likewise.
+	* xstormy16-tdep.c: Likewise.
+	* xtensa-linux-nat.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include gdb_assert.h.
+	* aarch64-tdep.c: Do not include gdb_assert.h.
+	* addrmap.c: Likewise.
+	* aix-thread.c: Likewise.
+	* alpha-linux-tdep.c: Likewise.
+	* alpha-mdebug-tdep.c: Likewise.
+	* alphanbsd-tdep.c: Likewise.
+	* amd64-nat.c: Likewise.
+	* amd64-tdep.c: Likewise.
+	* amd64bsd-nat.c: Likewise.
+	* amd64fbsd-nat.c: Likewise.
+	* amd64fbsd-tdep.c: Likewise.
+	* amd64nbsd-nat.c: Likewise.
+	* amd64nbsd-tdep.c: Likewise.
+	* amd64obsd-nat.c: Likewise.
+	* amd64obsd-tdep.c: Likewise.
+	* arch-utils.c: Likewise.
+	* arm-tdep.c: Likewise.
+	* armbsd-tdep.c: Likewise.
+	* auxv.c: Likewise.
+	* bcache.c: Likewise.
+	* bfin-tdep.c: Likewise.
+	* blockframe.c: Likewise.
+	* breakpoint.c: Likewise.
+	* bsd-kvm.c: Likewise.
+	* bsd-uthread.c: Likewise.
+	* buildsym.c: Likewise.
+	* c-exp.y: Likewise.
+	* c-lang.c: Likewise.
+	* charset.c: Likewise.
+	* cleanups.c: Likewise.
+	* cli-out.c: Likewise.
+	* cli/cli-decode.c: Likewise.
+	* cli/cli-dump.c: Likewise.
+	* cli/cli-logging.c: Likewise.
+	* cli/cli-script.c: Likewise.
+	* cli/cli-utils.c: Likewise.
+	* coffread.c: Likewise.
+	* common/common-utils.c: Likewise.
+	* common/queue.h: Likewise.
+	* common/signals.c: Likewise.
+	* common/vec.h: Likewise.
+	* complaints.c: Likewise.
+	* completer.c: Likewise.
+	* corelow.c: Likewise.
+	* cp-abi.c: Likewise.
+	* cp-name-parser.y: Likewise.
+	* cp-namespace.c: Likewise.
+	* cp-support.c: Likewise.
+	* cris-tdep.c: Likewise.
+	* dbxread.c: Likewise.
+	* dictionary.c: Likewise.
+	* doublest.c: Likewise.
+	* dsrec.c: Likewise.
+	* dummy-frame.c: Likewise.
+	* dwarf2-frame-tailcall.c: Likewise.
+	* dwarf2-frame.c: Likewise.
+	* dwarf2expr.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* dwarf2read.c: Likewise.
+	* eval.c: Likewise.
+	* event-loop.c: Likewise.
+	* exceptions.c: Likewise.
+	* expprint.c: Likewise.
+	* f-valprint.c: Likewise.
+	* fbsd-nat.c: Likewise.
+	* findvar.c: Likewise.
+	* frame-unwind.c: Likewise.
+	* frame.c: Likewise.
+	* frv-tdep.c: Likewise.
+	* gcore.c: Likewise.
+	* gdb-dlfcn.c: Likewise.
+	* gdb_bfd.c: Likewise.
+	* gdbarch.c: Likewise.
+	* gdbarch.sh: Likewise.
+	* gdbtypes.c: Likewise.
+	* gnu-nat.c: Likewise.
+	* gnu-v3-abi.c: Likewise.
+	* go-lang.c: Likewise.
+	* guile/scm-exception.c: Likewise.
+	* guile/scm-gsmob.c: Likewise.
+	* guile/scm-lazy-string.c: Likewise.
+	* guile/scm-math.c: Likewise.
+	* guile/scm-pretty-print.c: Likewise.
+	* guile/scm-safe-call.c: Likewise.
+	* guile/scm-utils.c: Likewise.
+	* guile/scm-value.c: Likewise.
+	* h8300-tdep.c: Likewise.
+	* hppa-hpux-nat.c: Likewise.
+	* hppa-tdep.c: Likewise.
+	* hppanbsd-tdep.c: Likewise.
+	* hppaobsd-tdep.c: Likewise.
+	* i386-darwin-nat.c: Likewise.
+	* i386-darwin-tdep.c: Likewise.
+	* i386-nto-tdep.c: Likewise.
+	* i386-tdep.c: Likewise.
+	* i386bsd-nat.c: Likewise.
+	* i386fbsd-tdep.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+	* i386nbsd-tdep.c: Likewise.
+	* i386obsd-tdep.c: Likewise.
+	* i387-tdep.c: Likewise.
+	* ia64-libunwind-tdep.c: Likewise.
+	* ia64-tdep.c: Likewise.
+	* inf-ptrace.c: Likewise.
+	* inf-ttrace.c: Likewise.
+	* infcall.c: Likewise.
+	* infcmd.c: Likewise.
+	* infrun.c: Likewise.
+	* inline-frame.c: Likewise.
+	* interps.c: Likewise.
+	* jv-lang.c: Likewise.
+	* jv-typeprint.c: Likewise.
+	* linux-fork.c: Likewise.
+	* linux-nat.c: Likewise.
+	* linux-thread-db.c: Likewise.
+	* m32c-tdep.c: Likewise.
+	* m32r-linux-nat.c: Likewise.
+	* m32r-tdep.c: Likewise.
+	* m68k-tdep.c: Likewise.
+	* m68kbsd-nat.c: Likewise.
+	* m68kbsd-tdep.c: Likewise.
+	* m88k-tdep.c: Likewise.
+	* machoread.c: Likewise.
+	* macroexp.c: Likewise.
+	* macrotab.c: Likewise.
+	* maint.c: Likewise.
+	* mdebugread.c: Likewise.
+	* memory-map.c: Likewise.
+	* mep-tdep.c: Likewise.
+	* mi/mi-common.c: Likewise.
+	* microblaze-tdep.c: Likewise.
+	* mingw-hdep.c: Likewise.
+	* mips-linux-nat.c: Likewise.
+	* mips-linux-tdep.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* mips64obsd-tdep.c: Likewise.
+	* mipsnbsd-tdep.c: Likewise.
+	* mn10300-linux-tdep.c: Likewise.
+	* mn10300-tdep.c: Likewise.
+	* moxie-tdep.c: Likewise.
+	* mt-tdep.c: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* nat/linux-osdata.c: Likewise.
+	* nat/linux-ptrace.c: Likewise.
+	* nat/mips-linux-watch.c: Likewise.
+	* nios2-linux-tdep.c: Likewise.
+	* nios2-tdep.c: Likewise.
+	* objc-lang.c: Likewise.
+	* objfiles.c: Likewise.
+	* obsd-nat.c: Likewise.
+	* opencl-lang.c: Likewise.
+	* osabi.c: Likewise.
+	* parse.c: Likewise.
+	* ppc-linux-nat.c: Likewise.
+	* ppc-sysv-tdep.c: Likewise.
+	* ppcfbsd-nat.c: Likewise.
+	* ppcfbsd-tdep.c: Likewise.
+	* ppcnbsd-nat.c: Likewise.
+	* ppcnbsd-tdep.c: Likewise.
+	* ppcobsd-nat.c: Likewise.
+	* ppcobsd-tdep.c: Likewise.
+	* printcmd.c: Likewise.
+	* procfs.c: Likewise.
+	* prologue-value.c: Likewise.
+	* psymtab.c: Likewise.
+	* python/py-lazy-string.c: Likewise.
+	* python/py-value.c: Likewise.
+	* regcache.c: Likewise.
+	* reggroups.c: Likewise.
+	* registry.c: Likewise.
+	* remote-sim.c: Likewise.
+	* remote.c: Likewise.
+	* rs6000-aix-tdep.c: Likewise.
+	* rs6000-tdep.c: Likewise.
+	* s390-linux-tdep.c: Likewise.
+	* score-tdep.c: Likewise.
+	* ser-base.c: Likewise.
+	* ser-mingw.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* sh64-tdep.c: Likewise.
+	* solib-darwin.c: Likewise.
+	* solib-spu.c: Likewise.
+	* solib-svr4.c: Likewise.
+	* source.c: Likewise.
+	* sparc-nat.c: Likewise.
+	* sparc-sol2-tdep.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* sparc64-sol2-tdep.c: Likewise.
+	* sparc64-tdep.c: Likewise.
+	* sparc64fbsd-tdep.c: Likewise.
+	* sparc64nbsd-tdep.c: Likewise.
+	* sparc64obsd-tdep.c: Likewise.
+	* sparcnbsd-tdep.c: Likewise.
+	* sparcobsd-tdep.c: Likewise.
+	* spu-multiarch.c: Likewise.
+	* spu-tdep.c: Likewise.
+	* stabsread.c: Likewise.
+	* stack.c: Likewise.
+	* symfile.c: Likewise.
+	* symtab.c: Likewise.
+	* target-descriptions.c: Likewise.
+	* target-memory.c: Likewise.
+	* target.c: Likewise.
+	* tic6x-linux-tdep.c: Likewise.
+	* tic6x-tdep.c: Likewise.
+	* tilegx-linux-nat.c: Likewise.
+	* tilegx-tdep.c: Likewise.
+	* top.c: Likewise.
+	* tramp-frame.c: Likewise.
+	* tui/tui-out.c: Likewise.
+	* tui/tui-winsource.c: Likewise.
+	* ui-out.c: Likewise.
+	* user-regs.c: Likewise.
+	* utils.c: Likewise.
+	* v850-tdep.c: Likewise.
+	* valops.c: Likewise.
+	* value.c: Likewise.
+	* varobj.c: Likewise.
+	* vax-nat.c: Likewise.
+	* xml-syscall.c: Likewise.
+	* xml-tdesc.c: Likewise.
+	* xstormy16-tdep.c: Likewise.
+	* xtensa-linux-nat.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include common-utils.h.
+	* defs.h: Do not include common-utils.h.
+	* common/gdb_assert.h: Likewise.
+	* darwin-nat.h: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* target/waitstatus.h: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include ptid.h.
+	* defs.h: Do not include ptid.h.
+	* inferior.h: Likewise.
+	* infrun.h: Likewise.
+	* nat/linux-btrace.h: Likewise.
+	* nat/linux-osdata.h: Likewise.
+	* target/waitstatus.h: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include gdb_locale.h.
+	* defs.h: Do not include gdb_locale.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include gdb/signals.h.
+	* defs.h: Do not include gdb/signals.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include pathmax.h.
+	* defs.h: Do not include pathmax.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include libiberty.h.
+	* defs.h: Do not include libiberty.h.
+	* common/queue.h: Likewise.
+	* cp-name-parser.y: Likewise.
+	* mi/mi-cmd-catch.c: Likewise.
+	* python/python.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include ansidecl.h.
+	* defs.h: Do not include ansidecl.h.
+	* common/buffer.h: Likewise.
+	* common/common-utils.h: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include stddef.h.
+	* defs.h: Do not include stddef.h.
+	* common/common-utils.h: Likewise.
+	* amd64fbsd-nat.c: Likewise.
+	* bcache.c: Likewise.
+	* charset.c: Likewise.
+	* common/buffer.h: Likewise.
+	* common/vec.h: Likewise.
+	* i386bsd-nat.c: Likewise.
+	* nat/linux-btrace.h: Likewise.
+	* ppcfbsd-nat.c: Likewise.
+	* ppcnbsd-tdep.h: Likewise.
+	* ppcobsd-nat.c: Likewise.
+	* ppcobsd-tdep.h: Likewise.
+	* python/py-gdb-readline.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include stdarg.h.
+	* defs.h: Do not include stdarg.h.
+	* ada-lang.c: Likewise.
+	* common/common-utils.h: Likewise.
+	* guile/scm-string.c: Likewise.
+	* guile/scm-utils.c: Likewise.
+	* m32c-tdep.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include stdlib.h.
+	* defs.h: Do not include stdlib.h.
+	* addrmap.c: Likewise.
+	* bcache.c: Likewise.
+	* common/buffer.c: Likewise.
+	* common/common-utils.c: Likewise.
+	* cp-name-parser.y: Likewise.
+	* go32-nat.c: Likewise.
+	* mn10300-linux-tdep.c: Likewise.
+	* nat/linux-osdata.c: Likewise.
+	* tui/tui.c: Likewise.
+	* windows-nat.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include stdio.h.
+	* defs.h: Do not include stdio.h.
+	* ada-lang.c: Likewise.
+	* common/buffer.c: Likewise.
+	* common/common-utils.c: Likewise.
+	* cp-name-parser.y: Likewise.
+	* gnu-nat.c: Likewise.
+	* go32-nat.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+	* proc-api.c: Likewise.
+	* proc-events.c: Likewise.
+	* proc-flags.c: Likewise.
+	* proc-why.c: Likewise.
+	* python/python-internal.h: Likewise.
+	* target-memory.c: Likewise.
+	* tui/tui-io.c: Likewise.
+	* tui/tui.c: Likewise.
+
+2014-08-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-svr4.c (scan_dyntag): Rename dyntag and dyn_tag variables.
+	(scan_dyntag_auxv): Same.
+
 2014-08-06  Yao Qi  <yao@codesourcery.com>
 
 	* amd64-linux-nat.c: Remove duplicated include

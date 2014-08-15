@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_assert.h"
 
 /* The cleanup list records things that have to be undone
    if an error happens (descriptors to be closed, memory to be freed, etc.)

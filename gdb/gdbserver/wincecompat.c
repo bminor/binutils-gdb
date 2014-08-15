@@ -18,7 +18,6 @@
 
 #include "server.h"
 
-#include <stdio.h>
 #include <windows.h>
 
 void

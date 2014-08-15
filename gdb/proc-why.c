@@ -24,7 +24,6 @@
 #define _STRUCTURED_PROC 1
 #endif
 
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/procfs.h>
 

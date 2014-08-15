@@ -36,7 +36,6 @@
 %{
 
 #include "defs.h"
-#include <string.h>
 #include <ctype.h>
 #include "expression.h"
 #include "value.h"
@@ -50,7 +49,6 @@
 #include "block.h"
 #include "cp-support.h"
 #include "dfp.h"
-#include "gdb_assert.h"
 #include "macroscope.h"
 #include "objc-lang.h"
 #include "typeprint.h"

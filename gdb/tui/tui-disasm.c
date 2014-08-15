@@ -27,7 +27,6 @@
 #include "value.h"
 #include "source.h"
 #include "disasm.h"
-#include <string.h>
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "tui/tui-win.h"

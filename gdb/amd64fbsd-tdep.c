@@ -24,9 +24,6 @@
 #include "regcache.h"
 #include "osabi.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "amd64-tdep.h"
 #include "bsd-uthread.h"
 #include "solib-svr4.h"

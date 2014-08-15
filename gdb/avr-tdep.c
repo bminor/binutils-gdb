@@ -34,7 +34,6 @@
 #include "symfile.h"
 #include "arch-utils.h"
 #include "regcache.h"
-#include <string.h>
 #include "dis-asm.h"
 #include "objfiles.h"
 

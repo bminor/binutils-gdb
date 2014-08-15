@@ -150,15 +150,14 @@
 
 /* Core file register sets, defined in s390-tdep.c.  */
 #define s390_sizeof_gregset 0x90
-extern const short s390_regmap_gregset[];
 #define s390x_sizeof_gregset 0xd8
-extern const short s390x_regmap_gregset[];
+extern const struct regset s390_gregset;
 #define s390_sizeof_fpregset 0x88
-extern const short s390_regmap_fpregset[];
-extern const short s390_regmap_last_break[];
-extern const short s390x_regmap_last_break[];
-extern const short s390_regmap_system_call[];
-extern const short s390_regmap_tdb[];
+extern const struct regset s390_fpregset;
+extern const struct regset s390_last_break_regset;
+extern const struct regset s390x_last_break_regset;
+extern const struct regset s390_system_call_regset;
+extern const struct regset s390_tdb_regset;
 #define s390_sizeof_tdbregset 0x100
 
 /* GNU/Linux target descriptions.  */

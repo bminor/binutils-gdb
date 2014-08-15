@@ -26,7 +26,6 @@
 #include "infrun.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "dis-asm.h"		/* For register styles.  */
 #include "regcache.h"
 #include "reggroups.h"
@@ -53,7 +52,6 @@
 #include "coff/internal.h"
 #include "elf/arm.h"
 
-#include "gdb_assert.h"
 #include "vec.h"
 
 #include "record.h"

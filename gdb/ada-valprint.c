@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"

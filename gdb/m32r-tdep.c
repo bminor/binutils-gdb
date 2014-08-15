@@ -25,7 +25,6 @@
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "value.h"
 #include "inferior.h"
 #include "symfile.h"
@@ -37,8 +36,6 @@
 #include "trad-frame.h"
 #include "dis-asm.h"
 #include "objfiles.h"
-
-#include "gdb_assert.h"
 
 #include "m32r-tdep.h"
 

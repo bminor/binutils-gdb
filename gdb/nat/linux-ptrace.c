@@ -20,14 +20,12 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include <string.h>
 #endif
 
 #include "linux-ptrace.h"
 #include "linux-procfs.h"
 #include "linux-waitpid.h"
 #include "buffer.h"
-#include "gdb_assert.h"
 #include "gdb_wait.h"
 
 #include <stdint.h>

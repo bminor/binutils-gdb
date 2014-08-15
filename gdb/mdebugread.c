@@ -51,12 +51,10 @@
 #include "complaints.h"
 #include "demangle.h"
 #include "gdb-demangle.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "dictionary.h"
 #include "mdebugread.h"
 #include <sys/stat.h>
-#include <string.h>
 #include "psympriv.h"
 #include "source.h"
 

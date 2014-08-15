@@ -25,7 +25,6 @@
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include <string.h>
 #include "value.h"
 #include "c-lang.h"
 #include "jv-lang.h"
@@ -35,7 +34,6 @@
 #include "demangle.h"
 #include "dictionary.h"
 #include <ctype.h>
-#include "gdb_assert.h"
 #include "charset.h"
 #include "valprint.h"
 #include "cp-support.h"

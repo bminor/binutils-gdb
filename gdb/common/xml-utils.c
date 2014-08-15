@@ -25,8 +25,6 @@
 
 #include "xml-utils.h"
 
-#include <string.h>
-
 /* Return a malloc allocated string with special characters from TEXT
    replaced by entity references.  */
 

@@ -32,8 +32,6 @@
 #include "trad-frame.h"
 #include "value.h"
 
-#include <string.h>
-
 #include "vax-tdep.h"
 
 /* Return the name of register REGNUM.  */

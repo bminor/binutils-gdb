@@ -27,7 +27,6 @@
 #include "block.h"
 #include "stack.h"
 #include "dictionary.h"
-#include <string.h>
 #include "language.h"
 #include "valprint.h"
 #include "exceptions.h"

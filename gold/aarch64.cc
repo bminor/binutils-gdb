@@ -1,7 +1,7 @@
 // aarch64.cc -- aarch64 target support for gold.
 
 // Copyright (C) 2014 Free Software Foundation, Inc.
-// Written by Jing Yu <jingyu@google.com>.
+// Written by Jing Yu <jingyu@google.com> and Han Shen <shenhan@google.com>.
 
 // This file is part of gold.
 
@@ -42,6 +42,7 @@
 #include "nacl.h"
 #include "gc.h"
 #include "icf.h"
+#include "aarch64-reloc-property.h"
 
 // The first three .got.plt entries are reserved.
 const int32_t AARCH64_GOTPLT_RESERVE_COUNT = 3;
@@ -60,6 +61,9 @@ class Output_data_plt_aarch64_standard;
 template<int size, bool big_endian>
 class Target_aarch64;
 
+template<int size, bool big_endian>
+class AArch64_relocate_functions;
+
 // Output_data_got_aarch64 class.
 
 template<int size, bool big_endian>
@@ -68,7 +72,8 @@ class Output_data_got_aarch64 : public Output_data_got<size, big_endian>
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Valtype;
   Output_data_got_aarch64(Symbol_table* symtab, Layout* layout)
-    : Output_data_got<size, big_endian>(), layout_(layout)
+    : Output_data_got<size, big_endian>(),
+      symbol_table_(symtab), layout_(layout)
   { }
 
  protected:
@@ -84,10 +89,14 @@ class Output_data_got_aarch64 : public Output_data_got<size, big_endian>
   }
 
  private:
+  // Symbol table of the output object.
+  Symbol_table* symbol_table_;
   // A pointer to the Layout class, so that we can find the .dynamic
   // section when we write out the GOT section.
   Layout* layout_;
 };
+
+AArch64_reloc_property_table* aarch64_reloc_property_table = NULL;
 
 // The aarch64 target class.
 // See the ABI at
@@ -184,6 +193,15 @@ class Target_aarch64 : public Sized_target<size, big_endian>
       unsigned char* reloc_view,
       section_size_type reloc_view_size);
 
+  // Return the PLT section.
+  uint64_t
+  do_plt_address_for_global(const Symbol* gsym) const
+  { return this->plt_section()->address_for_global(gsym); }
+
+  uint64_t
+  do_plt_address_for_local(const Relobj* relobj, unsigned int symndx) const
+  { return this->plt_section()->address_for_local(relobj, symndx); }
+
   // Return the number of entries in the PLT.
   unsigned int
   plt_entry_count() const;
@@ -196,6 +214,27 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   unsigned int
   plt_entry_size() const;
 
+ protected:
+  void
+  do_select_as_default_target()
+  {
+    gold_assert(aarch64_reloc_property_table == NULL);
+    aarch64_reloc_property_table = new AArch64_reloc_property_table();
+  }
+
+  virtual Output_data_plt_aarch64<size, big_endian>*
+  do_make_data_plt(Layout* layout, Output_data_space* got_plt)
+  {
+    return new Output_data_plt_aarch64_standard<size, big_endian>(layout,
+								  got_plt);
+  }
+
+  Output_data_plt_aarch64<size, big_endian>*
+  make_data_plt(Layout* layout, Output_data_space* got_plt)
+  {
+    return this->do_make_data_plt(layout, got_plt);
+  }
+
  private:
   // The class which scans relocations.
   class Scan
@@ -204,9 +243,6 @@ class Target_aarch64 : public Sized_target<size, big_endian>
     Scan()
       : issued_non_pic_error_(false)
     { }
-
-    static inline int
-    get_reference_flags(unsigned int r_type);
 
     inline void
     local(Symbol_table* symtab, Layout* layout, Target_aarch64* target,
@@ -227,23 +263,23 @@ class Target_aarch64 : public Sized_target<size, big_endian>
 
     inline bool
     local_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
-                                        Target_aarch64<size, big_endian>* ,
-                                        Sized_relobj_file<size, big_endian>* ,
-                                        unsigned int ,
-                                        Output_section* ,
-                                        const elfcpp::Rela<size, big_endian>& ,
-                                        unsigned int r_type,
-                                        const elfcpp::Sym<size, big_endian>&);
+					Target_aarch64<size, big_endian>* ,
+					Sized_relobj_file<size, big_endian>* ,
+					unsigned int ,
+					Output_section* ,
+					const elfcpp::Rela<size, big_endian>& ,
+					unsigned int r_type,
+					const elfcpp::Sym<size, big_endian>&);
 
     inline bool
     global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
-                                         Target_aarch64<size, big_endian>* ,
-                                         Sized_relobj_file<size, big_endian>* ,
-                                         unsigned int ,
-                                         Output_section* ,
-                                         const elfcpp::Rela<size, big_endian>& ,
-                                         unsigned int r_type,
-                                         Symbol* gsym);
+					 Target_aarch64<size, big_endian>* ,
+					 Sized_relobj_file<size, big_endian>* ,
+					 unsigned int ,
+					 Output_section* ,
+					 const elfcpp::Rela<size, big_endian>& ,
+					 unsigned int r_type,
+					 Symbol* gsym);
 
   private:
     static void
@@ -489,7 +525,7 @@ const Target::Target_info Target_aarch64<32, true>::aarch64_info =
 template<int size, bool big_endian>
 Output_data_got_aarch64<size, big_endian>*
 Target_aarch64<size, big_endian>::got_section(Symbol_table* symtab,
-                                              Layout* layout)
+					      Layout* layout)
 {
   if (this->got_ == NULL)
     {
@@ -515,10 +551,10 @@ Target_aarch64<size, big_endian>::got_section(Symbol_table* symtab,
 
       // Generate .got section.
       this->got_ = new Output_data_got_aarch64<size, big_endian>(symtab,
-                                                                 layout);
+								 layout);
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-                                      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
-                                      this->got_, got_order, true);
+				      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
+				      this->got_, got_order, true);
       // The first word of GOT is reserved for the address of .dynamic.
       // We put 0 here now. The value will be replaced later in
       // Output_data_got_aarch64::do_write.
@@ -528,32 +564,32 @@ Target_aarch64<size, big_endian>::got_section(Symbol_table* symtab,
       // _GLOBAL_OFFSET_TABLE_ value points to the start of the .got section,
       // even if there is a .got.plt section.
       this->global_offset_table_ =
-        symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
-                                      Symbol_table::PREDEFINED,
-                                      this->got_,
-                                      0, 0, elfcpp::STT_OBJECT,
-                                      elfcpp::STB_LOCAL,
-                                      elfcpp::STV_HIDDEN, 0,
-                                      false, false);
+	symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+				      Symbol_table::PREDEFINED,
+				      this->got_,
+				      0, 0, elfcpp::STT_OBJECT,
+				      elfcpp::STB_LOCAL,
+				      elfcpp::STV_HIDDEN, 0,
+				      false, false);
 
       // Generate .got.plt section.
       this->got_plt_ = new Output_data_space(size / 8, "** GOT PLT");
       layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
-                                      (elfcpp::SHF_ALLOC
-                                       | elfcpp::SHF_WRITE),
-                                      this->got_plt_, got_plt_order,
-                                      is_got_plt_relro);
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_WRITE),
+				      this->got_plt_, got_plt_order,
+				      is_got_plt_relro);
 
       // The first three entries are reserved.
-      this->got_plt_->set_current_data_size
-          (AARCH64_GOTPLT_RESERVE_COUNT * (size / 8));
+      this->got_plt_->set_current_data_size(
+	AARCH64_GOTPLT_RESERVE_COUNT * (size / 8));
 
       if (!is_got_plt_relro)
-        {
-          // Those bytes can go into the relro segment.
-          layout->increase_relro
-              (AARCH64_GOTPLT_RESERVE_COUNT * (size / 8));
-        }
+	{
+	  // Those bytes can go into the relro segment.
+	  layout->increase_relro(
+	    AARCH64_GOTPLT_RESERVE_COUNT * (size / 8));
+	}
 
     }
   return this->got_;
@@ -590,8 +626,8 @@ class Output_data_plt_aarch64 : public Output_section_data
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
 
   Output_data_plt_aarch64(Layout* layout,
-                          uint64_t addralign,
-                          Output_data_space* got_plt)
+			  uint64_t addralign,
+			  Output_data_space* got_plt)
     : Output_section_data(addralign),
       got_plt_(got_plt),
       count_(0)
@@ -610,6 +646,11 @@ class Output_data_plt_aarch64 : public Output_section_data
   rela_plt()
   { return this->rel_; }
 
+  // Return whether we created a section for IRELATIVE relocations.
+  bool
+  has_irelative_section() const
+  { return this->irelative_rel_ != NULL; }
+
   // Return the number of PLT entries.
   unsigned int
   entry_count() const
@@ -624,6 +665,14 @@ class Output_data_plt_aarch64 : public Output_section_data
   unsigned int
   get_plt_entry_size() const
   { return this->do_get_plt_entry_size(); }
+
+  // Return the PLT address to use for a global symbol.
+  uint64_t
+  address_for_global(const Symbol*);
+
+  // Return the PLT address to use for a local symbol.
+  uint64_t
+  address_for_local(const Relobj*, unsigned int symndx);
 
  protected:
   // Fill in the first PLT entry.
@@ -682,6 +731,9 @@ class Output_data_plt_aarch64 : public Output_section_data
 
   // The reloc section.
   Reloc_section* rel_;
+  // The IRELATIVE relocs, if necessary.  These must follow the
+  // regular PLT relocations.
+  Reloc_section* irelative_rel_;
   // The .got section.
   Output_data_got_aarch64<size, big_endian>* got_;
   // The .got.plt section.
@@ -717,16 +769,67 @@ void
 Output_data_plt_aarch64<size, big_endian>::add_entry(Symbol* gsym)
 {
   gold_assert(!gsym->has_plt_offset());
-  //TODO
+
+  gsym->set_plt_offset((this->count_) * this->get_plt_entry_size()
+		       + this->first_plt_entry_offset());
+
+  ++this->count_;
+
+  section_offset_type got_offset = this->got_plt_->current_data_size();
+
+  // Every PLT entry needs a GOT entry which points back to the PLT
+  // entry (this will be changed by the dynamic linker, normally
+  // lazily when the function is called).
+  this->got_plt_->set_current_data_size(got_offset + size / 8);
+
+  // Every PLT entry needs a reloc.
+  gsym->set_needs_dynsym_entry();
+  this->rel_->add_global(gsym, elfcpp::R_AARCH64_JUMP_SLOT,
+			 this->got_plt_, got_offset, 0);
+
+  // Note that we don't need to save the symbol. The contents of the
+  // PLT are independent of which symbols are used. The symbols only
+  // appear in the relocations.
+}
+
+// Return the PLT address to use for a global symbol.
+
+template<int size, bool big_endian>
+uint64_t
+Output_data_plt_aarch64<size, big_endian>::address_for_global(
+  const Symbol* gsym)
+{
+  uint64_t offset = 0;
+  if (gsym->type() == elfcpp::STT_GNU_IFUNC
+      && gsym->can_use_relative_reloc(false))
+    offset = (this->first_plt_entry_offset() +
+	      this->count_ * this->get_plt_entry_size());
+  return this->address() + offset + gsym->plt_offset();
+}
+
+// Return the PLT address to use for a local symbol.  These are always
+// IRELATIVE relocs.
+
+template<int size, bool big_endian>
+uint64_t
+Output_data_plt_aarch64<size, big_endian>::address_for_local(
+    const Relobj* object,
+    unsigned int r_sym)
+{
+  return (this->address()
+	  + this->first_plt_entry_offset()
+	  + this->count_ * this->get_plt_entry_size()
+	  + object->local_plt_offset(r_sym));
 }
 
 // Set the final size.
+
 template<int size, bool big_endian>
 void
 Output_data_plt_aarch64<size, big_endian>::set_final_data_size()
 {
   this->set_data_size(this->first_plt_entry_offset()
-                      + this->count * this->get_plt_entry_size());
+                      + this->count_ * this->get_plt_entry_size());
 }
 
 template<int size, bool big_endian>
@@ -737,8 +840,8 @@ class Output_data_plt_aarch64_standard :
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   Output_data_plt_aarch64_standard(Layout* layout, Output_data_space* got_plt)
     : Output_data_plt_aarch64<size, big_endian>(layout,
-                                                size == 32 ? 4 : 8,
-                                                got_plt)
+						size == 32 ? 4 : 8,
+						got_plt)
   { }
 
  protected:
@@ -754,15 +857,15 @@ class Output_data_plt_aarch64_standard :
 
   virtual void
   do_fill_first_plt_entry(unsigned char* pov,
-                          Address got_address,
-                          Address plt_address);
+			  Address got_address,
+			  Address plt_address);
 
   virtual void
   do_fill_plt_entry(unsigned char* pov,
-                    Address got_address,
-                    Address plt_address,
-                    unsigned int got_offset,
-                    unsigned int plt_offset);
+		    Address got_address,
+		    Address plt_address,
+		    unsigned int got_offset,
+		    unsigned int plt_offset);
 
  private:
   // The size of the first plt entry size.
@@ -885,8 +988,8 @@ template<int size, bool big_endian>
 void
 Output_data_plt_aarch64_standard<size, big_endian>::do_fill_first_plt_entry(
     unsigned char* pov,
-    Address /* got_address */,
-    Address /* plt_address */)
+    Address got_address,
+    Address plt_address)
 {
   // PLT0 of the small PLT looks like this in ELF64 -
   // stp x16, x30, [sp, #-16]!	 	Save the reloc and lr on stack.
@@ -899,22 +1002,62 @@ Output_data_plt_aarch64_standard<size, big_endian>::do_fill_first_plt_entry(
   // PLT0 will be slightly different in ELF32 due to different got entry
   // size.
   memcpy(pov, this->first_plt_entry, this->first_plt_entry_size);
-  // TODO
+  Address gotplt_2nd_ent = got_address + (size / 8) * 2;
+
+  // Fill in the top 21 bits for this: ADRP x16, PLT_GOT + 8 * 2.
+  // ADRP:  (PG(S+A)-PG(P)) >> 12) & 0x1fffff.
+  // FIXME: This only works for 64bit
+  AArch64_relocate_functions<size, big_endian>::adrp(pov + 4,
+      gotplt_2nd_ent, plt_address + 4);
+
+  // Fill in R_AARCH64_LDST8_LO12
+  elfcpp::Swap<32, big_endian>::writeval(
+      pov + 8,
+      ((this->first_plt_entry[2] & 0xffc003ff)
+       | ((gotplt_2nd_ent & 0xff8) << 7)));
+
+  // Fill in R_AARCH64_ADD_ABS_LO12
+  elfcpp::Swap<32, big_endian>::writeval(
+      pov + 12,
+      ((this->first_plt_entry[3] & 0xffc003ff)
+       | ((gotplt_2nd_ent & 0xfff) << 10)));
 }
 
 // Subsequent entries in the PLT for an executable.
+// FIXME: This only works for 64bit
 
 template<int size, bool big_endian>
 void
 Output_data_plt_aarch64_standard<size, big_endian>::do_fill_plt_entry(
     unsigned char* pov,
-    Address /* got_address*/,
-    Address /* plt_address */,
-    unsigned int /* got_offset */,
-    unsigned int /* plt_offset */)
+    Address got_address,
+    Address plt_address,
+    unsigned int got_offset,
+    unsigned int plt_offset)
 {
   memcpy(pov, this->plt_entry, this->plt_entry_size);
-  //TODO
+
+  Address gotplt_entry_address = got_address + got_offset;
+  Address plt_entry_address = plt_address + plt_offset;
+
+  // Fill in R_AARCH64_PCREL_ADR_HI21
+  AArch64_relocate_functions<size, big_endian>::adrp(
+      pov,
+      gotplt_entry_address,
+      plt_entry_address);
+
+  // Fill in R_AARCH64_LDST64_ABS_LO12
+  elfcpp::Swap<32, big_endian>::writeval(
+      pov + 4,
+      ((this->plt_entry[1] & 0xffc003ff)
+       | ((gotplt_entry_address & 0xff8) << 7)));
+
+  // Fill in R_AARCH64_ADD_ABS_LO12
+  elfcpp::Swap<32, big_endian>::writeval(
+      pov + 8,
+      ((this->plt_entry[2] & 0xffc003ff)
+       | ((gotplt_entry_address & 0xfff) <<10)));
+
 }
 
 // Write out the PLT.  This uses the hand-coded instructions above,
@@ -939,8 +1082,6 @@ Output_data_plt_aarch64<size, big_endian>::do_write(Output_file* of)
 
   // The base address of the .plt section.
   typename elfcpp::Elf_types<size>::Elf_Addr plt_address = this->address();
-  // The base address of the .got section.
-  typename elfcpp::Elf_types<size>::Elf_Addr got_base = this->got_->address();
   // The base address of the PLT portion of the .got section.
   typename elfcpp::Elf_types<size>::Elf_Addr got_address
     = this->got_plt_->address();
@@ -966,11 +1107,10 @@ Output_data_plt_aarch64<size, big_endian>::do_write(Output_file* of)
     {
       // Set and adjust the PLT entry itself.
       this->fill_plt_entry(pov, got_address, plt_address,
-                           got_offset, plt_offset);
+			   got_offset, plt_offset);
 
-      // Set the entry in the GOT.
-      elfcpp::Swap<size, big_endian>::writeval(got_pov,
-          plt_address + plt_offset);
+      // Set the entry in the GOT, which points to plt0.
+      elfcpp::Swap<size, big_endian>::writeval(got_pov, plt_address);
     }
 
   gold_assert(static_cast<section_size_type>(pov - oview) == oview_size);
@@ -979,6 +1119,333 @@ Output_data_plt_aarch64<size, big_endian>::do_write(Output_file* of)
   of->write_output_view(offset, oview_size, oview);
   of->write_output_view(got_file_offset, got_size, got_view);
 }
+
+// Telling how to update the immediate field of an instruction.
+struct AArch64_howto
+{
+  // The immediate field mask.
+  elfcpp::Elf_Xword dst_mask;
+
+  // The offset to apply relocation immediate
+  int doffset;
+
+  // The second part offset, if the immediate field has two parts.
+  // -1 if the immediate field has only one part.
+  int doffset2;
+};
+
+static const AArch64_howto aarch64_howto[AArch64_reloc_property::INST_NUM] =
+{
+  {0, -1, -1},		// DATA
+  {0x1fffe0, 5, -1},	// MOVW  [20:5]-imm16
+  {0xffffe0, 5, -1},	// LD    [23:5]-imm19
+  {0x60ffffe0, 29, 5},	// ADR   [30:29]-immlo  [23:5]-immhi
+  {0x60ffffe0, 29, 5},	// ADRP  [30:29]-immlo  [23:5]-immhi
+  {0x3ffc00, 10, -1},	// ADD   [21:10]-imm12
+  {0x3ffc00, 10, -1},	// LDST  [21:10]-imm12
+  {0x7ffe0, 5, -1},	// TBZNZ [18:5]-imm14
+  {0xffffe0, 5, -1},	// CONDB [23:5]-imm19
+  {0x3ffffff, 0, -1},	// B     [25:0]-imm26
+  {0x3ffffff, 0, -1},	// CALL  [25:0]-imm26
+};
+
+// AArch64 relocate function class
+
+template<int size, bool big_endian>
+class AArch64_relocate_functions
+{
+ public:
+  typedef enum
+  {
+    STATUS_OKAY,	// No error during relocation.
+    STATUS_OVERFLOW,	// Relocation overflow.
+    STATUS_BAD_RELOC,	// Relocation cannot be applied.
+  } Status;
+
+ private:
+  typedef AArch64_relocate_functions<size, big_endian> This;
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+
+  // Return the page address of the address.
+  // Page(address) = address & ~0xFFF
+
+  static inline typename elfcpp::Swap<size, big_endian>::Valtype
+  Page(Address address)
+  {
+    return (address & (~static_cast<Address>(0xFFF)));
+  }
+
+  // Update instruction (pointed by view) with selected bits (immed).
+  // val = (val & ~dst_mask) | (immed << doffset)
+
+  template<int valsize>
+  static inline void
+  update_view(unsigned char* view,
+	      typename elfcpp::Swap<size, big_endian>::Valtype immed,
+	      elfcpp::Elf_Xword doffset,
+	      elfcpp::Elf_Xword dst_mask)
+  {
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<valsize, big_endian>::readval(wv);
+
+    // Clear immediate fields.
+    val &= ~dst_mask;
+    elfcpp::Swap<valsize, big_endian>::writeval(wv,
+      static_cast<Valtype>(val | (immed << doffset)));
+  }
+
+  // Update two parts of an instruction (pointed by view) with selected
+  // bits (immed1 and immed2).
+  // val = (val & ~dst_mask) | (immed1 << doffset1) | (immed2 << doffset2)
+
+  template<int valsize>
+  static inline void
+  update_view_two_parts(
+    unsigned char* view,
+    typename elfcpp::Swap<size, big_endian>::Valtype immed1,
+    typename elfcpp::Swap<size, big_endian>::Valtype immed2,
+    elfcpp::Elf_Xword doffset1,
+    elfcpp::Elf_Xword doffset2,
+    elfcpp::Elf_Xword dst_mask)
+  {
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<valsize, big_endian>::readval(wv);
+    val &= ~dst_mask;
+    elfcpp::Swap<valsize, big_endian>::writeval(wv,
+      static_cast<Valtype>(val | (immed1 << doffset1) |
+			   (immed2 << doffset2)));
+  }
+
+  // Update adr or adrp instruction with [32:12] of X.
+  // In adr and adrp: [30:29] immlo   [23:5] immhi
+
+  static inline void
+  update_adr(unsigned char* view,
+	     typename elfcpp::Swap<size, big_endian>::Valtype x,
+	     const AArch64_reloc_property* /* reloc_property */)
+  {
+    elfcpp::Elf_Xword dst_mask = (0x3 << 29) | (0x7ffff << 5);
+    typename elfcpp::Swap<32, big_endian>::Valtype immed =
+      (x >> 12) & 0x1fffff;
+    This::template update_view_two_parts<32>(
+      view,
+      immed & 0x3,
+      (immed & 0x1ffffc) >> 2,
+      29,
+      5,
+      dst_mask);
+  }
+
+ public:
+
+  // Do a simple rela relocation at unaligned addresses.
+
+  template<int valsize>
+  static inline typename This::Status
+  rela_ua(unsigned char* view,
+	  const Sized_relobj_file<size, big_endian>* object,
+	  const Symbol_value<size>* psymval,
+	  typename elfcpp::Swap<size, big_endian>::Valtype addend,
+	  const AArch64_reloc_property* reloc_property)
+  {
+    typedef typename elfcpp::Swap_unaligned<valsize, big_endian>::Valtype
+      Valtype;
+    typename elfcpp::Elf_types<size>::Elf_Addr x =
+	psymval->value(object, addend);
+    elfcpp::Swap_unaligned<valsize, big_endian>::writeval(view,
+      static_cast<Valtype>(x));
+    return (reloc_property->checkup_x_value(x)
+	    ? This::STATUS_OKAY
+	    : This::STATUS_OVERFLOW);
+  }
+
+  // Do a simple pc-relative relocation at unaligned addresses.
+
+  template<int valsize>
+  static inline typename This::Status
+  pcrela_ua(unsigned char* view,
+	    const Sized_relobj_file<size, big_endian>* object,
+	    const Symbol_value<size>* psymval,
+	    typename elfcpp::Swap<size, big_endian>::Valtype addend,
+	    Address address,
+	    const AArch64_reloc_property* reloc_property)
+  {
+    typedef typename elfcpp::Swap_unaligned<valsize, big_endian>::Valtype
+      Valtype;
+    Address x =	psymval->value(object, addend) - address;
+    elfcpp::Swap_unaligned<valsize, big_endian>::writeval(view,
+      static_cast<Valtype>(x));
+    return (reloc_property->checkup_x_value(x)
+	    ? This::STATUS_OKAY
+	    : This::STATUS_OVERFLOW);
+  }
+
+  // Do a simple rela relocation at aligned addresses.
+
+  template<int valsize>
+  static inline typename This::Status
+  rela(
+    unsigned char* view,
+    const Sized_relobj_file<size, big_endian>* object,
+    const Symbol_value<size>* psymval,
+    typename elfcpp::Swap<size, big_endian>::Valtype addend,
+    const AArch64_reloc_property* reloc_property)
+  {
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype
+      Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Address x =	psymval->value(object, addend);
+    elfcpp::Swap<valsize, big_endian>::writeval(wv,
+      static_cast<Valtype>(x));
+    return (reloc_property->checkup_x_value(x)
+	    ? This::STATUS_OKAY
+	    : This::STATUS_OVERFLOW);
+  }
+
+  // Do relocate. Update selected bits in text.
+  // new_val = (val & ~dst_mask) | (immed << doffset)
+
+  template<int valsize>
+  static inline typename This::Status
+  rela_general(unsigned char* view,
+	       const Sized_relobj_file<size, big_endian>* object,
+	       const Symbol_value<size>* psymval,
+	       typename elfcpp::Swap<size, big_endian>::Valtype addend,
+	       const AArch64_reloc_property* reloc_property)
+  {
+    // Calculate relocation.
+    Address x =	psymval->value(object, addend);
+
+    // Select bits from X.
+    Address immed = reloc_property->select_x_value(x);
+
+    // Update view.
+    const AArch64_reloc_property::Reloc_inst inst =
+      reloc_property->reloc_inst();
+    // If it is a data relocation or instruction has 2 parts of immediate
+    // fields, you should not call rela_general.
+    gold_assert(aarch64_howto[inst].doffset2 == -1 &&
+		aarch64_howto[inst].doffset != -1);
+    This::template update_view<valsize>(view, immed,
+					aarch64_howto[inst].doffset,
+					aarch64_howto[inst].dst_mask);
+
+    // Do check overflow or alignment if needed.
+    return (reloc_property->checkup_x_value(x)
+	    ? This::STATUS_OKAY
+	    : This::STATUS_OVERFLOW);
+  }
+
+  // Do relocate. Update selected bits in text.
+  // new val = (val & ~dst_mask) | (immed << doffset)
+
+  template<int valsize>
+  static inline typename This::Status
+  rela_general(
+    unsigned char* view,
+    typename elfcpp::Swap<size, big_endian>::Valtype s,
+    typename elfcpp::Swap<size, big_endian>::Valtype addend,
+    const AArch64_reloc_property* reloc_property)
+  {
+    // Calculate relocation.
+    Address x = s + addend;
+
+    // Select bits from X.
+    Address immed = reloc_property->select_x_value(x);
+
+    // Update view.
+    const AArch64_reloc_property::Reloc_inst inst =
+      reloc_property->reloc_inst();
+    // If it is a data relocation or instruction has 2 parts of immediate
+    // fields, you should not call rela_general.
+    gold_assert(aarch64_howto[inst].doffset2 == -1 &&
+		aarch64_howto[inst].doffset != -1);
+    This::template update_view<valsize>(view, immed,
+					aarch64_howto[inst].doffset,
+					aarch64_howto[inst].dst_mask);
+
+    // Do check overflow or alignment if needed.
+    return (reloc_property->checkup_x_value(x)
+	    ? This::STATUS_OKAY
+	    : This::STATUS_OVERFLOW);
+  }
+
+  // Do address relative relocate. Update selected bits in text.
+  // new val = (val & ~dst_mask) | (immed << doffset)
+
+  template<int valsize>
+  static inline typename This::Status
+  pcrela_general(
+    unsigned char* view,
+    const Sized_relobj_file<size, big_endian>* object,
+    const Symbol_value<size>* psymval,
+    typename elfcpp::Swap<size, big_endian>::Valtype addend,
+    Address address,
+    const AArch64_reloc_property* reloc_property)
+  {
+    // Calculate relocation.
+    Address x =	psymval->value(object, addend) - address;
+
+    // Select bits from X.
+    Address immed = reloc_property->select_x_value(x);
+
+    // Update view.
+    const AArch64_reloc_property::Reloc_inst inst =
+      reloc_property->reloc_inst();
+    // If it is a data relocation or instruction has 2 parts of immediate
+    // fields, you should not call pcrela_general.
+    gold_assert(aarch64_howto[inst].doffset2 == -1 &&
+		aarch64_howto[inst].doffset != -1);
+    This::template update_view<valsize>(view, immed,
+					aarch64_howto[inst].doffset,
+					aarch64_howto[inst].dst_mask);
+
+    // Do check overflow or alignment if needed.
+    return (reloc_property->checkup_x_value(x)
+	    ? This::STATUS_OKAY
+	    : This::STATUS_OVERFLOW);
+  }
+
+  // Calculate PG(S+A) - PG(address), update adrp instruction.
+  // R_AARCH64_ADR_PREL_PG_HI21
+
+  static inline typename This::Status
+  adrp(
+    unsigned char* view,
+    Address sa,
+    Address address)
+  {
+    typename elfcpp::Swap<size, big_endian>::Valtype x =
+      This::Page(sa) - This::Page(address);
+    update_adr(view, x, NULL);
+    return (size == 64 && Bits<32>::has_overflow(x)
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
+  }
+
+  // Calculate PG(S+A) - PG(address), update adrp instruction.
+  // R_AARCH64_ADR_PREL_PG_HI21
+
+  static inline typename This::Status
+  adrp(unsigned char* view,
+       const Sized_relobj_file<size, big_endian>* object,
+       const Symbol_value<size>* psymval,
+       Address addend,
+       Address address,
+       const AArch64_reloc_property* reloc_property)
+  {
+    Address sa = psymval->value(object, addend);
+    typename elfcpp::Swap<size, big_endian>::Valtype x =
+	This::Page(sa) - This::Page(address);
+    update_adr(view, x, reloc_property);
+    return (reloc_property->checkup_x_value(x)
+	    ? This::STATUS_OKAY
+	    : This::STATUS_OVERFLOW);
+  }
+
+};
 
 // Return the number of entries in the PLT.
 
@@ -1016,27 +1483,10 @@ Target_aarch64<size, big_endian>::plt_entry_size() const
 template<int size, bool big_endian>
 tls::Tls_optimization
 Target_aarch64<size, big_endian>::optimize_tls_reloc(bool /* is_final */,
-                                                     int /* r_type */)
+						     int /* r_type */)
 {
   //TODO
   return tls::TLSOPT_NONE;
-}
-
-// Get the Reference_flags for a particular relocation.
-template<int size, bool big_endian>
-int
-Target_aarch64<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
-{
-  switch (r_type)
-    {
-    case elfcpp::R_AARCH64_NONE:
-      // No symbol reference.
-      return 0;
-    //TODO
-    default:
-      // Not expected. We will give an error later.
-    return 0;
-    }
 }
 
 // Returns true if this relocation type could be that of a function pointer.
@@ -1051,7 +1501,7 @@ Target_aarch64<size, big_endian>::Scan::possible_function_pointer_reloc(
     case elfcpp::R_AARCH64_ABS64:
     //TODO
       {
-        return true;
+	return true;
       }
     }
   return false;
@@ -1078,7 +1528,7 @@ Target_aarch64<size, big_endian>::Scan::local_reloc_may_be_function_pointer(
   // not possible to distinguish pointer taken versus a call by looking at
   // the relocation types.
   return (parameters->options().shared()
-          || possible_function_pointer_reloc(r_type));
+	  || possible_function_pointer_reloc(r_type));
 }
 
 // For safe ICF, scan a relocation for a global symbol to check if it
@@ -1101,10 +1551,10 @@ Target_aarch64<size, big_endian>::Scan::global_reloc_may_be_function_pointer(
   // When building a shared library, do not fold symbols whose visibility
   // is hidden, internal or protected.
   return ((parameters->options().shared()
-           && (gsym->visibility() == elfcpp::STV_INTERNAL
-               || gsym->visibility() == elfcpp::STV_PROTECTED
-               || gsym->visibility() == elfcpp::STV_HIDDEN))
-          || possible_function_pointer_reloc(r_type));
+	   && (gsym->visibility() == elfcpp::STV_INTERNAL
+	       || gsym->visibility() == elfcpp::STV_PROTECTED
+	       || gsym->visibility() == elfcpp::STV_HIDDEN))
+	  || possible_function_pointer_reloc(r_type));
 }
 
 // Report an unsupported relocation against a local symbol.
@@ -1125,7 +1575,7 @@ Target_aarch64<size, big_endian>::Scan::unsupported_reloc_local(
 template<int size, bool big_endian>
 void
 Target_aarch64<size, big_endian>::Scan::check_non_pic(Relobj* object,
-                                                      unsigned int r_type)
+						      unsigned int r_type)
 {
   gold_assert(r_type != elfcpp::R_AARCH64_NONE);
 
@@ -1157,7 +1607,7 @@ Target_aarch64<size, big_endian>::Scan::check_non_pic(Relobj* object,
     return;
   gold_assert(parameters->options().output_is_position_independent());
   object->error(_("requires unsupported dynamic reloc; "
-                  "recompile with -fPIC"));
+		  "recompile with -fPIC"));
   this->issued_non_pic_error_ = true;
   return;
 }
@@ -1170,7 +1620,7 @@ Target_aarch64<size, big_endian>::Scan::local(
     Symbol_table* /* symtab */,
     Layout* /* layout */,
     Target_aarch64<size, big_endian>* /* target */,
-    Sized_relobj_file<size, big_endian>* /* object */,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int /* data_shndx */,
     Output_section* /* output_section */,
     const elfcpp::Rela<size, big_endian>& /* reloc */,
@@ -1183,10 +1633,35 @@ Target_aarch64<size, big_endian>::Scan::local(
 
   switch (r_type)
     {
-    case elfcpp::R_AARCH64_NONE:
+    case elfcpp::R_AARCH64_ABS64:
+    case elfcpp::R_AARCH64_ABS32:
+    case elfcpp::R_AARCH64_ABS16:
+      // If building a shared library or pie, we need to mark this as a dynmic
+      // reloction, so that the dynamic loader can relocate it.
+      // Not supported yet.
+      if (parameters->options().output_is_position_independent())
+	{
+	  gold_error(_("%s: unsupported ABS64 relocation type for pie or "
+		       "shared library.\n"),
+		     object->name().c_str());
+	}
       break;
 
-      //TODO
+      // Relocations to generate 19, 21 and 33-bit PC-relative address
+    case elfcpp::R_AARCH64_ADR_PREL_PG_HI21: // 275
+    case elfcpp::R_AARCH64_LDST8_ABS_LO12_NC: // 278
+    case elfcpp::R_AARCH64_LDST64_ABS_LO12_NC: // 286
+    case elfcpp::R_AARCH64_ADD_ABS_LO12_NC: // 277
+      break;
+
+      // Control flow, pc-relative. We don't need to do anything for a relative
+      // addressing relocation against a local symbol if it does not reference
+      // the GOT.
+    case elfcpp::R_AARCH64_CALL26: // 283
+      break;
+
+    default:
+      unsupported_reloc_local(object, r_type);
     }
 }
 
@@ -1207,18 +1682,132 @@ Target_aarch64<size, big_endian>::Scan::unsupported_reloc_global(
 template<int size, bool big_endian>
 inline void
 Target_aarch64<size, big_endian>::Scan::global(
-    Symbol_table* /* symtab */,
-    Layout* /* layout */,
-    Target_aarch64<size, big_endian>* /* target */,
+    Symbol_table* symtab,
+    Layout* layout,
+    Target_aarch64<size, big_endian>* target,
     Sized_relobj_file<size, big_endian>* /* object */,
     unsigned int /* data_shndx */,
     Output_section* /* output_section */,
     const elfcpp::Rela<size, big_endian>& /* reloc */,
-    unsigned int /* r_type */,
-    Symbol* /* gsym */)
+    unsigned int r_type,
+    Symbol* gsym)
 {
-  //TODO
+  switch (r_type)
+    {
+    case elfcpp::R_AARCH64_ABS64:
+      // This is used to fill the GOT absolute address.
+      if (gsym->needs_plt_entry())
+	{
+	  target->make_plt_entry(symtab, layout, gsym);
+	}
+      break;
+
+    case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:
+    case elfcpp::R_AARCH64_ADR_PREL_PG_HI21_NC:
+    case elfcpp::R_AARCH64_ADD_ABS_LO12_NC:
+      {
+	// Do nothing here.
+	break;
+      }
+
+    case elfcpp::R_AARCH64_ADR_GOT_PAGE:
+    case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
+      {
+	// This pair of relocations is used to access a specific GOT entry.
+	// Note a GOT entry is an *address* to a symbol.
+	// The symbol requires a GOT entry
+	Output_data_got_aarch64<size, big_endian>* got =
+	  target->got_section(symtab, layout);
+	if (gsym->final_value_is_known())
+	  {
+	    got->add_global(gsym, GOT_TYPE_STANDARD);
+	  }
+	else
+	  {
+	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	    if (gsym->is_from_dynobj()
+		|| gsym->is_undefined()
+		|| gsym->is_preemptible()
+		|| (gsym->visibility() == elfcpp::STV_PROTECTED
+		    && parameters->options().shared()))
+	      got->add_global_with_rel(gsym, GOT_TYPE_STANDARD,
+				       rela_dyn, elfcpp::R_AARCH64_GLOB_DAT);
+	    else
+	      {
+		// Not implemented yet.
+		gold_assert(false);
+	      }
+	  }
+	break;
+      }
+
+    case elfcpp::R_AARCH64_JUMP26:
+    case elfcpp::R_AARCH64_CALL26:
+      {
+	if (gsym->final_value_is_known())
+	  break;
+
+	if (gsym->is_defined() &&
+	    !gsym->is_from_dynobj() &&
+	    !gsym->is_preemptible())
+	  break;
+
+	// Make plt entry for function call.
+	const AArch64_reloc_property* arp =
+	    aarch64_reloc_property_table->get_reloc_property(r_type);
+	gold_assert(arp != NULL);
+	target->make_plt_entry(symtab, layout, gsym);
+	break;
+      }
+
+    default:
+      gold_error(_("%s: unsupported reloc type"),
+		 aarch64_reloc_property_table->
+		   reloc_name_in_error_message(r_type).c_str());
+    }
   return;
+}  // End of Scan::global
+
+// Create the PLT section.
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::make_plt_section(
+  Symbol_table* symtab, Layout* layout)
+{
+  if (this->plt_ == NULL)
+    {
+      // Create the GOT section first.
+      this->got_section(symtab, layout);
+
+      this->plt_ = this->make_data_plt(layout, this->got_plt_);
+
+      layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_EXECINSTR),
+				      this->plt_, ORDER_PLT, false);
+
+      // Make the sh_info field of .rela.plt point to .plt.
+      Output_section* rela_plt_os = this->plt_->rela_plt()->output_section();
+      rela_plt_os->set_info_section(this->plt_->output_section());
+    }
+}
+
+// Create a PLT entry for a global symbol.
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::make_plt_entry(
+    Symbol_table* symtab,
+    Layout* layout,
+    Symbol* gsym)
+{
+  if (gsym->has_plt_offset())
+    return;
+
+  if (this->plt_ == NULL)
+    this->make_plt_section(symtab, layout);
+
+  this->plt_->add_entry(gsym);
 }
 
 template<int size, bool big_endian>
@@ -1241,11 +1830,12 @@ Target_aarch64<size, big_endian>::gc_process_relocs(
       return;
     }
 
-  gold::gc_process_relocs<size, big_endian,
-                          Target_aarch64<size, big_endian>,
-                          elfcpp::SHT_RELA,
-                          typename Target_aarch64<size, big_endian>::Scan,
-                          typename Target_aarch64<size, big_endian>::Relocatable_size_for_reloc>(
+  gold::gc_process_relocs<
+    size, big_endian,
+    Target_aarch64<size, big_endian>,
+    elfcpp::SHT_RELA,
+    typename Target_aarch64<size, big_endian>::Scan,
+    typename Target_aarch64<size, big_endian>::Relocatable_size_for_reloc>(
     symtab,
     layout,
     this,
@@ -1282,10 +1872,7 @@ Target_aarch64<size, big_endian>::scan_relocs(
 		 object->name().c_str());
       return;
     }
-
-  gold::scan_relocs<size, big_endian, Target_aarch64<size, big_endian>,
-                    elfcpp::SHT_RELA,
-                    typename Target_aarch64<size, big_endian>::Scan>(
+  gold::scan_relocs<size, big_endian, Target_aarch64, elfcpp::SHT_RELA, Scan>(
     symtab,
     layout,
     this,
@@ -1304,11 +1891,73 @@ Target_aarch64<size, big_endian>::scan_relocs(
 template<int size, bool big_endian>
 void
 Target_aarch64<size, big_endian>::do_finalize_sections(
-    Layout* /* layout */,
+    Layout* layout,
     const Input_objects*,
-    Symbol_table* /* symtab */)
+    Symbol_table* symtab)
 {
-  //TODO
+  const Reloc_section* rel_plt = (this->plt_ == NULL
+				  ? NULL
+				  : this->plt_->rela_plt());
+  layout->add_target_dynamic_tags(false, this->got_plt_, rel_plt,
+				  this->rela_dyn_, true, false);
+
+  // Set the size of the _GLOBAL_OFFSET_TABLE_ symbol to the size of
+  // the .got.plt section.
+  Symbol* sym = this->global_offset_table_;
+  if (sym != NULL)
+    {
+      uint64_t data_size = this->got_plt_->current_data_size();
+      symtab->get_sized_symbol<size>(sym)->set_symsize(data_size);
+
+      // If the .got section is more than 0x8000 bytes, we add
+      // 0x8000 to the value of _GLOBAL_OFFSET_TABLE_, so that 16
+      // bit relocations have a greater chance of working.
+      if (data_size >= 0x8000)
+	symtab->get_sized_symbol<size>(sym)->set_value(
+	  symtab->get_sized_symbol<size>(sym)->value() + 0x8000);
+    }
+
+  if (parameters->doing_static_link()
+      && (this->plt_ == NULL || !this->plt_->has_irelative_section()))
+    {
+      // If linking statically, make sure that the __rela_iplt symbols
+      // were defined if necessary, even if we didn't create a PLT.
+      static const Define_symbol_in_segment syms[] =
+	{
+	  {
+	    "__rela_iplt_start",	// name
+	    elfcpp::PT_LOAD,		// segment_type
+	    elfcpp::PF_W,		// segment_flags_set
+	    elfcpp::PF(0),		// segment_flags_clear
+	    0,				// value
+	    0,				// size
+	    elfcpp::STT_NOTYPE,		// type
+	    elfcpp::STB_GLOBAL,		// binding
+	    elfcpp::STV_HIDDEN,		// visibility
+	    0,				// nonvis
+	    Symbol::SEGMENT_START,	// offset_from_base
+	    true			// only_if_ref
+	  },
+	  {
+	    "__rela_iplt_end",		// name
+	    elfcpp::PT_LOAD,		// segment_type
+	    elfcpp::PF_W,		// segment_flags_set
+	    elfcpp::PF(0),		// segment_flags_clear
+	    0,				// value
+	    0,				// size
+	    elfcpp::STT_NOTYPE,		// type
+	    elfcpp::STB_GLOBAL,		// binding
+	    elfcpp::STV_HIDDEN,		// visibility
+	    0,				// nonvis
+	    Symbol::SEGMENT_START,	// offset_from_base
+	    true			// only_if_ref
+	  }
+	};
+
+      symtab->define_symbols(layout, 2, syms,
+			     layout->script_options()->saw_sections_clause());
+    }
+
   return;
 }
 
@@ -1317,19 +1966,198 @@ Target_aarch64<size, big_endian>::do_finalize_sections(
 template<int size, bool big_endian>
 inline bool
 Target_aarch64<size, big_endian>::Relocate::relocate(
-    const Relocate_info<size, big_endian>* /* relinfo */,
-    Target_aarch64<size, big_endian>* /* target */,
+    const Relocate_info<size, big_endian>* relinfo,
+    Target_aarch64<size, big_endian>* target,
     Output_section* ,
-    size_t /* relnum */,
-    const elfcpp::Rela<size, big_endian>& /* rela */,
-    unsigned int /* r_type */,
-    const Sized_symbol<size>* /* gsym */,
-    const Symbol_value<size>* /* psymval */,
-    unsigned char* /* view */,
-    typename elfcpp::Elf_types<size>::Elf_Addr /* address */,
+    size_t relnum,
+    const elfcpp::Rela<size, big_endian>& rela,
+    unsigned int r_type,
+    const Sized_symbol<size>* gsym,
+    const Symbol_value<size>* psymval,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type /* view_size */)
 {
-  //TODO
+  if (view == NULL)
+    return true;
+
+  typedef AArch64_relocate_functions<size, big_endian> Reloc;
+
+  const AArch64_reloc_property* reloc_property =
+      aarch64_reloc_property_table->get_reloc_property(r_type);
+
+  if (reloc_property == NULL)
+    {
+      std::string reloc_name =
+	  aarch64_reloc_property_table->reloc_name_in_error_message(r_type);
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+			     _("cannot relocate %s in object file"),
+			     reloc_name.c_str());
+      return true;
+    }
+
+  const Sized_relobj_file<size, big_endian>* object = relinfo->object;
+
+  // Pick the value to use for symbols defined in the PLT.
+  Symbol_value<size> symval;
+  if (gsym != NULL
+      && gsym->use_plt_offset(reloc_property->reference_flags()))
+    {
+      symval.set_output_value(target->plt_address_for_global(gsym));
+      psymval = &symval;
+    }
+  else if (gsym == NULL && psymval->is_ifunc_symbol())
+    {
+      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+      if (object->local_has_plt_offset(r_sym))
+	{
+	  symval.set_output_value(target->plt_address_for_local(object, r_sym));
+	  psymval = &symval;
+	}
+    }
+
+  const elfcpp::Elf_Xword addend = rela.get_r_addend();
+
+  // Get the GOT offset if needed.
+  // For aarch64, the GOT pointer points to the start of the GOT section.
+  bool have_got_offset = false;
+  int got_offset = 0;
+  int got_base = (target->got_ != NULL
+		  ? (target->got_->current_data_size() >= 0x8000
+		     ? 0x8000 : 0)
+		  : 0);
+  switch (r_type)
+    {
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G3:
+    case elfcpp::R_AARCH64_GOTREL64:
+    case elfcpp::R_AARCH64_GOTREL32:
+    case elfcpp::R_AARCH64_GOT_LD_PREL19:
+    case elfcpp::R_AARCH64_LD64_GOTOFF_LO15:
+    case elfcpp::R_AARCH64_ADR_GOT_PAGE:
+    case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
+    case elfcpp::R_AARCH64_LD64_GOTPAGE_LO15:
+      if (gsym != NULL)
+	{
+	  gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
+	  got_offset = gsym->got_offset(GOT_TYPE_STANDARD) - got_base;
+	}
+      else
+	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
+	  got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
+			- got_base);
+	}
+      have_got_offset = true;
+      break;
+    default:
+      break;
+    }
+
+  typename Reloc::Status reloc_status = Reloc::STATUS_OKAY;
+  typename elfcpp::Elf_types<size>::Elf_Addr value;
+  switch (r_type)
+    {
+    case elfcpp::R_AARCH64_NONE:
+      break;
+
+    case elfcpp::R_AARCH64_ABS64:
+      reloc_status = Reloc::template rela_ua<64>(
+	view, object, psymval, addend, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_ABS32:
+      reloc_status = Reloc::template rela_ua<32>(
+	view, object, psymval, addend, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_ABS16:
+      reloc_status = Reloc::template rela_ua<16>(
+	view, object, psymval, addend, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_PREL64:
+      reloc_status = Reloc::template pcrela_ua<64>(
+	view, object, psymval, addend, address, reloc_property);
+
+    case elfcpp::R_AARCH64_PREL32:
+      reloc_status = Reloc::template pcrela_ua<32>(
+	view, object, psymval, addend, address, reloc_property);
+
+    case elfcpp::R_AARCH64_PREL16:
+      reloc_status = Reloc::template pcrela_ua<16>(
+	view, object, psymval, addend, address, reloc_property);
+
+    case elfcpp::R_AARCH64_ADR_PREL_PG_HI21_NC:
+    case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:
+      reloc_status = Reloc::adrp(view, object, psymval, addend, address,
+				 reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_LDST8_ABS_LO12_NC:
+    case elfcpp::R_AARCH64_LDST16_ABS_LO12_NC:
+    case elfcpp::R_AARCH64_LDST32_ABS_LO12_NC:
+    case elfcpp::R_AARCH64_LDST64_ABS_LO12_NC:
+    case elfcpp::R_AARCH64_LDST128_ABS_LO12_NC:
+    case elfcpp::R_AARCH64_ADD_ABS_LO12_NC:
+      reloc_status = Reloc::template rela_general<32>(
+	view, object, psymval, addend, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_CALL26:
+    case elfcpp::R_AARCH64_JUMP26:
+      reloc_status = Reloc::template pcrela_general<32>(
+	view, object, psymval, addend, address, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_ADR_GOT_PAGE:
+      gold_assert(have_got_offset);
+      value = target->got_->address() + got_base + got_offset;
+      reloc_status = Reloc::adrp(view, value + addend, address);
+      break;
+
+    case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
+      gold_assert(have_got_offset);
+      value = target->got_->address() + got_base + got_offset;
+      reloc_status = Reloc::template rela_general<32>(
+	view, value, addend, reloc_property);
+      break;
+
+    default:
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+			     _("unsupported reloc aaa %u"),
+			     r_type);
+      break;
+    }
+
+  // Report any errors.
+  switch (reloc_status)
+    {
+    case Reloc::STATUS_OKAY:
+      break;
+    case Reloc::STATUS_OVERFLOW:
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+			     _("relocation overflow in %s"),
+			     reloc_property->name().c_str());
+      break;
+    case Reloc::STATUS_BAD_RELOC:
+      gold_error_at_location(
+	  relinfo,
+	  relnum,
+	  rela.get_r_offset(),
+	  _("unexpected opcode while processing relocation %s"),
+	  reloc_property->name().c_str());
+      break;
+    default:
+      gold_unreachable();
+    }
+
   return true;
 }
 
@@ -1338,19 +2166,31 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 template<int size, bool big_endian>
 void
 Target_aarch64<size, big_endian>::relocate_section(
-    const Relocate_info<size, big_endian>* /* relinfo */,
+    const Relocate_info<size, big_endian>* relinfo,
     unsigned int sh_type,
-    const unsigned char* /* prelocs */,
-    size_t /* reloc_count */,
-    Output_section* /* output_section */,
-    bool /*needs_special_offset_handling */,
-    unsigned char* /* view */,
-    typename elfcpp::Elf_types<size>::Elf_Addr /* address */,
-    section_size_type /* view_size */,
-    const Reloc_symbol_changes* /* reloc_symbol_changes */)
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr address,
+    section_size_type view_size,
+    const Reloc_symbol_changes* reloc_symbol_changes)
 {
-  //TODO
   gold_assert(sh_type == elfcpp::SHT_RELA);
+  typedef typename Target_aarch64<size, big_endian>::Relocate AArch64_relocate;
+  gold::relocate_section<size, big_endian, Target_aarch64, elfcpp::SHT_RELA,
+			 AArch64_relocate, gold::Default_comdat_behavior>(
+    relinfo,
+    this,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    view,
+    address,
+    view_size,
+    reloc_symbol_changes);
 }
 
 // Return the size of a relocation while scanning during a relocatable
@@ -1412,36 +2252,46 @@ Target_aarch64<size, big_endian>::relocate_relocs(
   gold_assert(sh_type == elfcpp::SHT_RELA);
 }
 
-
 // The selector for aarch64 object files.
 
 template<int size, bool big_endian>
 class Target_selector_aarch64 : public Target_selector
 {
  public:
-  Target_selector_aarch64()
-    : Target_selector(elfcpp::EM_AARCH64, size, big_endian,
-                      (size == 64
-                       ? (big_endian ? "elf64-bigaarch64"
-                                     : "elf64-littleaarch64")
-                       : (big_endian ? "elf32-bigaarch64"
-                                     : "elf32-littleaarch64")),
-                      (size == 64
-                       ? (big_endian ? "aarch64_elf64_be_vec"
-                                     : "aarch64_elf64_le_vec")
-                       : (big_endian ? "aarch64_elf32_be_vec"
-                                     : "aarch64_elf32_le_vec")))
-  { }
+  Target_selector_aarch64();
 
   virtual Target*
   do_instantiate_target()
   { return new Target_aarch64<size, big_endian>(); }
 };
 
+template<>
+Target_selector_aarch64<32, true>::Target_selector_aarch64()
+  : Target_selector(elfcpp::EM_AARCH64, 32, true,
+		    "elf32-bigaarch64", "aarch64_elf32_be_vec")
+{ }
+
+template<>
+Target_selector_aarch64<32, false>::Target_selector_aarch64()
+  : Target_selector(elfcpp::EM_AARCH64, 32, false,
+		    "elf32-littleaarch64", "aarch64_elf32_le_vec")
+{ }
+
+template<>
+Target_selector_aarch64<64, true>::Target_selector_aarch64()
+  : Target_selector(elfcpp::EM_AARCH64, 64, true,
+		    "elf64-bigaarch64", "aarch64_elf64_be_vec")
+{ }
+
+template<>
+Target_selector_aarch64<64, false>::Target_selector_aarch64()
+  : Target_selector(elfcpp::EM_AARCH64, 64, false,
+		    "elf64-littleaarch64", "aarch64_elf64_le_vec")
+{ }
+
 Target_selector_aarch64<32, true> target_selector_aarch64elf32b;
 Target_selector_aarch64<32, false> target_selector_aarch64elf32;
 Target_selector_aarch64<64, true> target_selector_aarch64elfb;
 Target_selector_aarch64<64, false> target_selector_aarch64elf;
-
 
 } // End anonymous namespace.

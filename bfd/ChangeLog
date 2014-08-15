@@ -1,3 +1,59 @@
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* peXXigen.c (pe_print_reloc): Protect against access past end
+	of .reloc section.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	PR 16563
+	* elflink.c (bfd_elf_discard_info): Process .eh_frame and .stab
+	in the order they are mapped to output sections.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Delete redundant plugin related checks.
+	* configure: Regenerate.
+
+2014-08-13  Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
+
+	* elf32-or1k.c (or1k_elf_relocate_section, or1k_elf_check_relocs,
+	allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL, SYMBOL_CALLS_LOCAL
+	and SYMBOLIC_BIND.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	* coff-aux.c (coff_m68k_aux_link_add_one_symbol): Only call "notice"
+	here when not calling the generic add_symbol function.  Formatting.
+	Correct handling of indirect symbols.  Update notice call.
+	* elflink.c (_bfd_elf_notice_as_needed): Update notice call.
+	* linker.c (_bfd_generic_link_add_one_symbol): Create indirect
+	symbols early.  Update notice call.  Add comments regarding weak
+	symbols vs. indirect.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	PR ld/16746
+	* linker.c (_bfd_generic_link_add_one_symbol <WARN>): Handle
+	!lto_plugin_active.
+
+2014-08-07  Chen Gang <gang.chen.5i5j@gmail.com>
+
+	* coff-ppc.c (coff_ppc_relocate_section): Ensure local symbols are
+	zero terminated.
+
+2014-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR ld/16746
+	* linker.c (_bfd_generic_link_add_one_symbol): Don't issue a
+	warning for references in LTO IR to warning symbols.
+
+2014-08-07  Alan Modra  <amodra@gmail.com>
+
+	* linker.c (WARN, CWARN): Collapse these states to WARN.
+	(_bfd_generic_link_add_one_symbol): Use old CWARN case for
+	new WARN.
+
 2014-08-05  Doug Evans  <dje@google.com>
 
 	* bfd-in2.h: Regenerate.

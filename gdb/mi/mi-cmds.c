@@ -21,7 +21,6 @@
 #include "defs.h"
 #include "top.h"
 #include "mi-cmds.h"
-#include <string.h>
 #include "mi-main.h"
 
 extern void _initialize_mi_cmds (void);

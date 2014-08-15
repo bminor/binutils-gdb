@@ -22,8 +22,6 @@
 #include "dis-asm.h"
 #include "gdbtypes.h"
 #include "regcache.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "gdbcore.h"	/* For write_memory_unsigned_integer.  */
 #include "value.h"
 #include "frame.h"

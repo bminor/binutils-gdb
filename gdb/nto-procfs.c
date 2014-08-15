@@ -32,7 +32,6 @@
 #include <sys/netmgr.h>
 
 #include "exceptions.h"
-#include <string.h>
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"

@@ -22,9 +22,7 @@
 #include "regcache.h"
 #include "target.h"
 
-#include "gdb_assert.h"
 #include <signal.h>
-#include <string.h>
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
 #ifdef HAVE_MACHINE_REG_H

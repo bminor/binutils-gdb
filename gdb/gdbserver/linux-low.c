@@ -24,17 +24,13 @@
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
 #include "gdb_wait.h"
-#include <stdio.h>
 #include <sys/ptrace.h>
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
 #include <sys/syscall.h>
 #include <sched.h>
 #include <ctype.h>

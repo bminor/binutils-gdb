@@ -50,13 +50,11 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "observer.h"
-#include "gdb_assert.h"
 #include "solist.h"
 #include "macrotab.h"
 #include "macroscope.h"

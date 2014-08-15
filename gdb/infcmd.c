@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include <signal.h>
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "frame.h"
@@ -43,7 +42,6 @@
 #include "block.h"
 #include "solib.h"
 #include <ctype.h>
-#include "gdb_assert.h"
 #include "observer.h"
 #include "target-descriptions.h"
 #include "user-regs.h"

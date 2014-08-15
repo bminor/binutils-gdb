@@ -28,8 +28,6 @@
 #include <sys/types.h>
 #include <sys/sysinfo.h>
 #include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
 #include <utmp.h>
 #include <time.h>
 #include <unistd.h>
@@ -41,7 +39,6 @@
 
 #include "xml-utils.h"
 #include "buffer.h"
-#include "gdb_assert.h"
 #include <dirent.h>
 #include <sys/stat.h>
 #include "filestuff.h"

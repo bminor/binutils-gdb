@@ -20,8 +20,6 @@
 #ifndef PPCOBSD_TDEP_H
 #define PPCOBSD_TDEP_H
 
-#include <stddef.h>
-
 struct regset;
 struct regcache;
 

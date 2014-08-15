@@ -18,8 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_assert.h"
-
 #include "gdb-dlfcn.h"
 
 #ifdef HAVE_DLFCN_H

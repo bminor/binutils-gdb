@@ -34,9 +34,6 @@
 #include "target.h"
 #include "value.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "sparc64-tdep.h"
 
 /* This file implements the SPARC 64-bit ABI as defined by the

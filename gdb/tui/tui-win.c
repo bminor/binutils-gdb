@@ -45,8 +45,6 @@
 #include "tui/tui-win.h"
 
 #include "gdb_curses.h"
-
-#include <string.h>
 #include <ctype.h>
 #include "readline/readline.h"
 

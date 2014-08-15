@@ -38,7 +38,6 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include <string.h>
 #include "symtab.h"
 #include "bfd.h"
 #include "filenames.h"

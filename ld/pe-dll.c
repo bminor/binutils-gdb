@@ -235,6 +235,7 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
   { STRING_COMMA_LEN ("_impure_ptr") },
   { STRING_COMMA_LEN ("_fmode") },
   { STRING_COMMA_LEN ("environ") },
+  { STRING_COMMA_LEN ("__dso_handle") },
   { NULL, 0 }
 };
 

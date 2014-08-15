@@ -22,7 +22,6 @@
 #include "vec.h"
 #include "xml-support.h"
 #include "osdata.h"
-#include <string.h>
 #include "ui-out.h"
 #include "gdbcmd.h"
 

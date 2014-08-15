@@ -30,7 +30,6 @@
 #include "serial.h"
 #include "target.h"
 #include "exceptions.h"
-#include <string.h>
 #include <sys/stat.h>
 #include "gdb_usleep.h"
 #include "regcache.h"
@@ -2233,7 +2232,8 @@ mips_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
       /* Copy appropriate bytes out of the buffer.  */
       memcpy (readbuf, buffer + (memaddr & 3), len);
     }
-  return len;
+  *xfered_len = len;
+  return TARGET_XFER_OK;
 }
 
 /* Target to_xfer_partial implementation.  */

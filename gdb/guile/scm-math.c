@@ -27,7 +27,6 @@
 #include "doublest.h" /* Needed by dfp.h.  */
 #include "expression.h" /* Needed by dfp.h.  */
 #include "dfp.h"
-#include "gdb_assert.h"
 #include "symtab.h" /* Needed by language.h.  */
 #include "language.h"
 #include "valprint.h"

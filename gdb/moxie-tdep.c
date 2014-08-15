@@ -25,7 +25,6 @@
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "value.h"
 #include "inferior.h"
 #include "symfile.h"
@@ -38,8 +37,6 @@
 #include "dis-asm.h"
 #include "record.h"
 #include "record-full.h"
-
-#include "gdb_assert.h"
 
 #include "moxie-tdep.h"
 

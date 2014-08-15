@@ -33,8 +33,6 @@
 #include "frame-unwind.h"
 #include "dwarf2-frame.h"
 #include "osabi.h"
-#include "gdb_assert.h"
-#include <string.h>
 #include "target-descriptions.h"
 #include "opcodes/microblaze-opcm.h"
 #include "opcodes/microblaze-dis.h"

@@ -20,7 +20,6 @@
 /* See the GDB User Guide for details of the GDB remote protocol.  */
 
 #include "defs.h"
-#include <string.h>
 #include "gdbcmd.h"
 #include "remote.h"
 #include "gdb/fileio.h"

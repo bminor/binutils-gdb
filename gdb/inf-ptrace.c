@@ -24,9 +24,6 @@
 #include "terminal.h"
 #include "gdbcore.h"
 #include "regcache.h"
-
-#include "gdb_assert.h"
-#include <string.h>
 #include "gdb_ptrace.h"
 #include "gdb_wait.h"
 #include <signal.h>

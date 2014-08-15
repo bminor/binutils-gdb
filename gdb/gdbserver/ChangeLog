@@ -1,3 +1,92 @@
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* configure.ac (AC_CHECK_HEADERS): Remove errno.h.
+	* configure: Regenerate.
+	* config.in: Likewise.
+	* server.h: Do not include errno.h.
+	* event-loop.c: Likewise.
+	* hostio-errno.c: Likewise.
+	* linux-low.c: Likewise.
+	* remote-utils.c: Likewise.
+	* spu-low.c: Likewise.
+	* utils.c: Likewise.
+	* gdbreplay.c: Unconditionally include errno.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include string.h.
+	* event-loop.c: Likewise.
+	* linux-low.c: Likewise.
+	* regcache.c: Likewise.
+	* remote-utils.c: Likewise.
+	* spu-low.c: Likewise.
+	* utils.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include gdb_assert.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include common-utils.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include ptid.h.
+	* notif.h: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include gdb_locale.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include gdb/signals.h.
+	* win32-low.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include pathmax.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include libiberty.h.
+	* linux-bfin-low.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include ansidecl.h.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* linux-x86-low.c: Do not include stddef.h.
+	* lynx-ppc-low.c: Likewise.
+	* tracepoint.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include stdarg.h.
+	* nto-low.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include stdlib.h.
+	* inferiors.c: Likewise.
+	* linux-low.c: Likewise.
+	* regcache.c: Likewise.
+	* spu-low.c: Likewise.
+	* tracepoint.c: Likewise.
+	* utils.c: Likewise.
+
+2014-08-07  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include stdio.h.
+	* linux-low.c: Likewise.
+	* remote-utils.c: Likewise.
+	* spu-low.c: Likewise.
+	* utils.c: Likewise.
+	* wincecompat.c: Likewise.
+
 2014-08-06  Gary Benson  <gbenson@redhat.com>
 
 	* regcache.c (init_register_cache): Move conditionals inside if.

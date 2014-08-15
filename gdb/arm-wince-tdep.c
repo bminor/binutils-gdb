@@ -24,8 +24,6 @@
 #include "target.h"
 #include "frame.h"
 
-#include <string.h>
-
 #include "arm-tdep.h"
 #include "windows-tdep.h"
 

@@ -19,9 +19,6 @@
 
 #include "defs.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "osabi.h"
 #include "arch-utils.h"
 #include "gdbcmd.h"

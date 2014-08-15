@@ -20,10 +20,6 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include <stddef.h>
-#include <string.h>
-#include "ansidecl.h"
-
 struct buffer
 {
   char *buffer;

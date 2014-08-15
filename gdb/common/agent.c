@@ -25,8 +25,6 @@
 #include "infrun.h"
 #include "objfiles.h"
 #endif
-
-#include <string.h>
 #include <unistd.h>
 #include "agent.h"
 #include "filestuff.h"

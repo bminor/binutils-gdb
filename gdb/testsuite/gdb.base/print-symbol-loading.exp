@@ -93,7 +93,7 @@ proc test_load_core { print_symbol_loading } {
 	    }
 	    "full" {
 		gdb_test "set solib-search-path [file dirname ${binfile_lib}]" \
-		    "Reading symbols from.*Loaded symbols for.*" \
+		    "Reading symbols from.*" \
 		    ${test_name}
 	    }
 	}
@@ -129,7 +129,7 @@ proc test_load_shlib { print_symbol_loading } {
 	    }
 	    "full" {
 		gdb_test "sharedlibrary .*" \
-		    "Reading symbols from.*Loaded symbols for.*" \
+		    "Reading symbols from.*" \
 		    ${test_name}
 	    }
 	}

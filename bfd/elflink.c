@@ -3299,7 +3299,7 @@ _bfd_elf_notice_as_needed (bfd *ibfd,
 			   struct bfd_link_info *info,
 			   enum notice_asneeded_action act)
 {
-  return (*info->callbacks->notice) (info, NULL, ibfd, NULL, act, 0, NULL);
+  return (*info->callbacks->notice) (info, NULL, NULL, ibfd, NULL, act, 0);
 }
 
 /* Add symbols from an ELF object file to the linker hash table.  */
@@ -12637,8 +12637,7 @@ bfd_boolean
 bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 {
   struct elf_reloc_cookie cookie;
-  asection *stab, *eh;
-  const struct elf_backend_data *bed;
+  asection *o;
   bfd *abfd;
   bfd_boolean ret = FALSE;
 
@@ -12646,70 +12645,86 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
       || !is_elf_hash_table (info->hash))
     return FALSE;
 
-  _bfd_elf_begin_eh_frame_parsing (info);
+  o = bfd_get_section_by_name (output_bfd, ".stab");
+  if (o != NULL)
+    {
+      asection *i;
+
+      for (i = o->map_head.s; i != NULL; i = i->map_head.s)
+	{
+	  if (i->size == 0
+	      || i->reloc_count == 0
+	      || i->sec_info_type != SEC_INFO_TYPE_STABS)
+	    continue;
+
+	  abfd = i->owner;
+	  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+	    continue;
+
+	  if (!init_reloc_cookie_for_section (&cookie, info, i))
+	    return FALSE;
+
+	  if (_bfd_discard_section_stabs (abfd, i,
+					  elf_section_data (i)->sec_info,
+					  bfd_elf_reloc_symbol_deleted_p,
+					  &cookie))
+	    ret = TRUE;
+
+	  fini_reloc_cookie_for_section (&cookie, i);
+	}
+    }
+
+  o = NULL;
+  if (!info->relocatable)
+    o = bfd_get_section_by_name (output_bfd, ".eh_frame");
+  if (o != NULL)
+    {
+      asection *i;
+
+      _bfd_elf_begin_eh_frame_parsing (info);
+      for (i = o->map_head.s; i != NULL; i = i->map_head.s)
+	{
+	  if (i->size == 0)
+	    continue;
+
+	  abfd = i->owner;
+	  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+	    continue;
+
+	  if (!init_reloc_cookie_for_section (&cookie, info, i))
+	    return FALSE;
+
+	  _bfd_elf_parse_eh_frame (abfd, info, i, &cookie);
+	  if (_bfd_elf_discard_section_eh_frame (abfd, info, i,
+						 bfd_elf_reloc_symbol_deleted_p,
+						 &cookie))
+	    ret = TRUE;
+
+	  fini_reloc_cookie_for_section (&cookie, i);
+	}
+      _bfd_elf_end_eh_frame_parsing (info);
+    }
+
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
+      const struct elf_backend_data *bed;
+
       if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
 	continue;
 
       bed = get_elf_backend_data (abfd);
 
-      eh = NULL;
-      if (!info->relocatable)
+      if (bed->elf_backend_discard_info != NULL)
 	{
-	  eh = bfd_get_section_by_name (abfd, ".eh_frame");
-	  while (eh != NULL
-		 && (eh->size == 0
-		     || bfd_is_abs_section (eh->output_section)))
-	    eh = bfd_get_next_section_by_name (eh);
-	}
+	  if (!init_reloc_cookie (&cookie, info, abfd))
+	    return FALSE;
 
-      stab = bfd_get_section_by_name (abfd, ".stab");
-      if (stab != NULL
-	  && (stab->size == 0
-	      || bfd_is_abs_section (stab->output_section)
-	      || stab->sec_info_type != SEC_INFO_TYPE_STABS))
-	stab = NULL;
-
-      if (stab == NULL
-	  && eh == NULL
-	  && bed->elf_backend_discard_info == NULL)
-	continue;
-
-      if (!init_reloc_cookie (&cookie, info, abfd))
-	return FALSE;
-
-      if (stab != NULL
-	  && stab->reloc_count > 0
-	  && init_reloc_cookie_rels (&cookie, info, abfd, stab))
-	{
-	  if (_bfd_discard_section_stabs (abfd, stab,
-					  elf_section_data (stab)->sec_info,
-					  bfd_elf_reloc_symbol_deleted_p,
-					  &cookie))
+	  if ((*bed->elf_backend_discard_info) (abfd, &cookie, info))
 	    ret = TRUE;
-	  fini_reloc_cookie_rels (&cookie, stab);
+
+	  fini_reloc_cookie (&cookie, abfd);
 	}
-
-      while (eh != NULL
-	     && init_reloc_cookie_rels (&cookie, info, abfd, eh))
-	{
-	  _bfd_elf_parse_eh_frame (abfd, info, eh, &cookie);
-	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh,
-						 bfd_elf_reloc_symbol_deleted_p,
-						 &cookie))
-	    ret = TRUE;
-	  fini_reloc_cookie_rels (&cookie, eh);
-	  eh = bfd_get_next_section_by_name (eh);
-	}
-
-      if (bed->elf_backend_discard_info != NULL
-	  && (*bed->elf_backend_discard_info) (abfd, &cookie, info))
-	ret = TRUE;
-
-      fini_reloc_cookie (&cookie, abfd);
     }
-  _bfd_elf_end_eh_frame_parsing (info);
 
   if (info->eh_frame_hdr
       && !info->relocatable

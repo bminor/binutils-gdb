@@ -30,8 +30,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
-
-#include <string.h>
 #include "event-loop.h"
 #include "ui-out.h"
 

@@ -45,7 +45,6 @@
 #include "bcache.h"
 #include "hashtab.h"
 #include "readline/readline.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "observer.h"
 #include "exec.h"
@@ -60,7 +59,6 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <time.h>

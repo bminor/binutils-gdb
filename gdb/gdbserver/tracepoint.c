@@ -26,7 +26,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include <stddef.h>
 #include <inttypes.h>
 #include <stdint.h>
 
@@ -7110,7 +7109,6 @@ gdb_ust_init (void)
 #endif /* HAVE_UST */
 
 #include <sys/syscall.h>
-#include <stdlib.h>
 
 static void
 gdb_agent_remove_socket (void)

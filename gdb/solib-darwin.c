@@ -30,8 +30,6 @@
 #include "gdbthread.h"
 #include "gdb_bfd.h"
 
-#include "gdb_assert.h"
-
 #include "solist.h"
 #include "solib.h"
 #include "solib-svr4.h"

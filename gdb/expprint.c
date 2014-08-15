@@ -26,10 +26,8 @@
 #include "parser-defs.h"
 #include "user-regs.h"		/* For user_reg_map_regnum_to_name.  */
 #include "target.h"
-#include <string.h>
 #include "block.h"
 #include "objfiles.h"
-#include "gdb_assert.h"
 #include "valprint.h"
 
 #include <ctype.h>

@@ -27,4 +27,19 @@
 #include "build-gnulib/config.h"
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <string.h>
+#include <errno.h>
+#include "ansidecl.h"
+#include "libiberty.h"
+#include "pathmax.h"
+#include "gdb/signals.h"
+#include "gdb_locale.h"
+#include "ptid.h"
+#include "common-utils.h"
+#include "gdb_assert.h"
+
 #endif /* COMMON_DEFS_H */

@@ -17,7 +17,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_assert.h"
 #include "mi-common.h"
 
 static const char * const async_reason_string_lookup[] =

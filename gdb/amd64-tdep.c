@@ -37,7 +37,6 @@
 #include "regset.h"
 #include "symfile.h"
 #include "disasm.h"
-#include "gdb_assert.h"
 #include "exceptions.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"

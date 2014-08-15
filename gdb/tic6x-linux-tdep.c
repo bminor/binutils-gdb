@@ -24,7 +24,6 @@
 #include "tic6x-tdep.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
-#include "gdb_assert.h"
 #include "elf-bfd.h"
 #include "elf/tic6x.h"
 

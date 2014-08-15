@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "inferior.h"
 
-#include "gdb_assert.h"
 #include <sys/types.h>
 #include <sys/dir.h>
 #include <sys/user.h>

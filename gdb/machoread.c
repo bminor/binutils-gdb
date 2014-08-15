@@ -28,14 +28,11 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "mach-o.h"
-#include "gdb_assert.h"
 #include "aout/stab_gnu.h"
 #include "vec.h"
 #include "psympriv.h"
 #include "complaints.h"
 #include "gdb_bfd.h"
-
-#include <string.h>
 
 /* If non-zero displays debugging message.  */
 static unsigned int mach_o_debug_level = 0;

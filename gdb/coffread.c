@@ -25,8 +25,6 @@
 
 #include "bfd.h"
 #include "gdb_obstack.h"
-
-#include <string.h>
 #include <ctype.h>
 
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
@@ -37,7 +35,6 @@
 #include "stabsread.h"
 #include "complaints.h"
 #include "target.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "dictionary.h"
 

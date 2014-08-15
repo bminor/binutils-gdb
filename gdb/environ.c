@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "environ.h"
-#include <string.h>
 
 
 /* Return a new environment object.  */

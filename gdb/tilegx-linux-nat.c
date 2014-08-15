@@ -25,9 +25,6 @@
 
 #include <sys/ptrace.h>
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include <sys/procfs.h>
 
 /* Defines ps_err_e, struct ps_prochandle.  */

@@ -18,14 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
 #include "observer.h"
 #include "frame.h"
 #include "inferior.h"
 #include "gdbthread.h"
 #include "gdbcore.h"
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "target.h"
 #include "linux-nat.h"
 

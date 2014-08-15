@@ -100,15 +100,11 @@
 #include "nat/i386-cpuid.h"
 #include "value.h"
 #include "regcache.h"
-#include <string.h>
 #include "top.h"
 #include "cli/cli-utils.h"
 #include "inf-child.h"
 
-#include <stdio.h>		/* might be required for __DJGPP_MINOR__ */
-#include <stdlib.h>
 #include <ctype.h>
-#include <errno.h>
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <io.h>

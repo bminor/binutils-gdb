@@ -17,8 +17,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "prologue-value.h"
 #include "regcache.h"
 

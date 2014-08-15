@@ -42,13 +42,10 @@
 #ifdef HAVE_SYS_SYSCALL_H
 #include <sys/syscall.h>
 #endif
-#include <sys/errno.h>
 #include "gdb_wait.h"
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_bfd.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "inflow.h"
 #include "auxv.h"
 #include "procfs.h"

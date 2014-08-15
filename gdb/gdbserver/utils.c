@@ -17,12 +17,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#if HAVE_ERRNO_H
-#include <errno.h>
-#endif
 
 #ifdef IN_PROCESS_AGENT
 #  define PREFIX "ipa: "

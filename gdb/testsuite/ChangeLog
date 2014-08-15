@@ -1,3 +1,42 @@
+2014-08-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.exp: Return -1 if generate_tracefile returns
+	false.
+
+2014-08-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.cp/casts.exp: Set print symbol off.
+	* gdb.cp/class2.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+
+2014-08-11  Doug Evans  <dje@google.com>
+
+	* gdb.base/print-symbol-loading.exp (test_load_core): Update.
+	(test_load_shlib): Update.
+
+2014-08-09  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/display.exp: Invoke is_address_zero_readable.
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Likewise.
+	* gdb.python/py-value.exp (test_value_in_inferior): Likewise.
+	* gdb.base/hbreak-unmapped.exp: Return if
+	is_address_zero_readable returns true.
+	* gdb.base/signest.exp: Likewise.
+	* gdb.base/signull.exp: Likewise.
+	* gdb.base/sigbpt.exp: Likewise.
+	* gdb.guile/scm-disasm.exp: Do the test if
+	is_address_zero_readable returns false.
+	* gdb.guile/scm-pretty-print.exp (run_lang_tests): Likewise.
+	* gdb.python/py-arch.exp: Likewise.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Likewise.
+	* lib/gdb.exp (is_address_zero_readable): New proc.
+
+2014-08-09  Yao Qi  <yao@codesourcery.com>
+
+	PR testsuite/13443
+	* gdb.mi/mi-var-display.exp: Make test messages unique.
+
 2014-08-04  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/sss-bp-on-user-bp-2.exp: Expect output from "set debug

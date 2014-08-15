@@ -23,8 +23,6 @@
 #include "defs.h"
 #include "ui-out.h"
 #include "cli-out.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "vec.h"
 
 typedef struct cli_ui_out_data cli_out_data;

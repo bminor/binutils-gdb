@@ -27,7 +27,6 @@
 #include "gdbcore.h"		/* for get_exec_file */
 #include "gdbthread.h"
 
-#include "gdb_assert.h"
 #include <fcntl.h>
 #include <kvm.h>
 #ifdef HAVE_NLIST_H

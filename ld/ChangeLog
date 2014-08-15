@@ -1,3 +1,65 @@
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	PR 16563
+	* ldlang.c (map_head_is_link_order): Rename from
+	stripped_excluded_sections.
+	(lang_clear_os_map): New function, extracted from..
+	(strip_excluded_output_sections): ..here.
+	* ldlang.h (lang_clear_os_map): Declare.
+	* ldwrite.c (ldwrite): Call lang_clear_os_map.
+	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_after_allocation):
+	Likewise.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Move AC_PROG_CC and other macros earlier.  Delete
+	plugin checks now done in config/plugins.m4.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (is_ir_dummy_bfd): Test BFD_PLUGIN flag rather than
+	flags.claimed.
+
+2014-08-13  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	* pe-dll.c (autofilter_entry_type autofilter_symbollist_i386): Add
+	__dso_handle.
+
+2014-08-13  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (open_input_bfds): Don't use bfd_elf_get_dyn_lib_class.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (struct lang_input_statement_flags): Don't make "reload"
+	field conditional on ENABLE_PLUGINS.
+	* ldlang.c (open_input_bfds): Expand plugin_should_reload.
+	* plugin.h (plugin_should_reload): Delete.
+	* plugin.c (plugin_should_reload): Delete.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (notice): Update args.
+	* plugin.c (plugin_notice): Likewise.  Follow warning sym link.
+	Handle new indirect symbol.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (plugin_load_plugins): Set link_info.lto_plugin_active.
+
+2014-08-08  Ulrich Drepper  <drepper@gmail.com>
+
+	* ldlang.h (struct lang_input_statement_flags): Add pushed
+	member.
+	* ldlex.h (enum option_values): Add OPTION_PUSH_STATE and
+	OPTION_POP_STATE.
+	* lexsup.c (ld_options): Add entries for --push-state and
+	--pop-state.
+	(parse_args): Handle OPTION_PUSH_STATE and OPTION_POP_STATE.
+	* ld.texinfo: Document --push-state and --pop-state.
+
 2014-08-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR14918

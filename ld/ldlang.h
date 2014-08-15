@@ -272,16 +272,19 @@ struct lang_input_statement_flags
   /* Set if the file does not exist.  */
   unsigned int missing_file : 1;
 
+  /* Set if reloading an archive or --as-needed lib.  */
+  unsigned int reload : 1;
+
 #ifdef ENABLE_PLUGINS
   /* Set if the file was claimed by a plugin.  */
   unsigned int claimed : 1;
 
   /* Set if the file was claimed from an archive.  */
   unsigned int claim_archive : 1;
-
-  /* Set if reloading an archive or --as-needed lib.  */
-  unsigned int reload : 1;
 #endif /* ENABLE_PLUGINS */
+
+  /* Head of list of pushed flags.  */
+  struct lang_input_statement_flags *pushed;
 };
 
 typedef struct lang_input_statement_struct
@@ -632,6 +635,8 @@ extern void lang_for_each_statement_worker
 extern void *stat_alloc
   (size_t);
 extern void strip_excluded_output_sections
+  (void);
+extern void lang_clear_os_map
   (void);
 extern void dprint_statement
   (lang_statement_union_type *, int);

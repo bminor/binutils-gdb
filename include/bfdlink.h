@@ -292,6 +292,9 @@ struct bfd_link_info
      callback.  */
   unsigned int notice_all: 1;
 
+  /* TRUE if the LTO plugin is active.  */
+  unsigned int lto_plugin_active: 1;
+
   /* TRUE if we are loading LTO outputs.  */
   unsigned int loading_lto_outputs: 1;
 
@@ -637,15 +640,14 @@ struct bfd_link_callbacks
     (struct bfd_link_info *, const char *name,
      bfd *abfd, asection *section, bfd_vma address);
   /* A function which is called when a symbol in notice_hash is
-     defined or referenced.  H is the symbol.  ABFD, SECTION and
-     ADDRESS are the (new) value of the symbol.  If SECTION is
-     bfd_und_section, this is a reference.  FLAGS are the symbol
-     BSF_* flags.  STRING is the name of the symbol to indirect to if
-     the sym is indirect, or the warning string if a warning sym.  */
+     defined or referenced.  H is the symbol, INH the indirect symbol
+     if applicable.  ABFD, SECTION and ADDRESS are the (new) value of
+     the symbol.  If SECTION is bfd_und_section, this is a reference.
+     FLAGS are the symbol BSF_* flags.  */
   bfd_boolean (*notice)
     (struct bfd_link_info *, struct bfd_link_hash_entry *h,
-     bfd *abfd, asection *section, bfd_vma address, flagword flags,
-     const char *string);
+     struct bfd_link_hash_entry *inh,
+     bfd *abfd, asection *section, bfd_vma address, flagword flags);
   /* Error or warning link info message.  */
   void (*einfo)
     (const char *fmt, ...);

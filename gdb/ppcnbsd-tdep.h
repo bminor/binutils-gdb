@@ -20,8 +20,6 @@
 #ifndef PPCNBSD_TDEP_H
 #define PPCNBSD_TDEP_H
 
-#include <stddef.h>
-
 struct regset;
 
 /* Register offsets for NetBSD/powerpc.  */

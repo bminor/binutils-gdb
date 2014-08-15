@@ -28,8 +28,6 @@
 #include "common-defs.h"
 
 #include <sys/types.h>
-#include <stdio.h>
-#include <errno.h>		/* System call error return status.  */
 #include <limits.h>
 #include <stdint.h>
 
@@ -47,26 +45,11 @@
    included, so it's ok to blank out gstdint.h.  */
 #define GCC_GENERATED_STDINT_H 1
 
-#include <stddef.h>
-
 #include <unistd.h>
-
-/* For gnulib's PATH_MAX.  */
-#include "pathmax.h"
 
 #include <fcntl.h>
 
-/* First include ansidecl.h so we can use the various macro definitions
-   here and in all subsequent file inclusions.  */
-
-#include "ansidecl.h"
-
-#include "gdb_locale.h"
-
 #include "gdb_wchar.h"
-
-/* For ``enum gdb_signal''.  */
-#include "gdb/signals.h"
 
 #include "ui-file.h"
 
@@ -91,9 +74,6 @@
 #define O_BINARY 0
 #endif
 
-#include <stdarg.h>		/* For va_list.  */
-
-#include "libiberty.h"
 #include "hashtab.h"
 
 /* Rather than duplicate all the logic in BFD for figuring out what
@@ -131,8 +111,6 @@ typedef bfd_vma CORE_ADDR;
 #ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
-
-#include "ptid.h"
 
 /* * Enable xdb commands if set.  */
 extern int xdb_commands;
@@ -554,8 +532,6 @@ enum val_prettyformat
 
 extern int longest_to_int (LONGEST);
 
-#include "common-utils.h"
-
 /* * List of known OS ABIs.  If you change this, make sure to update the
    table in osabi.c.  */
 enum gdb_osabi
@@ -597,9 +573,6 @@ enum gdb_osabi
    above, instead.  */
 
 /* From other system libraries */
-
-#include <stdlib.h>
-
 
 #ifndef atof
 extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */

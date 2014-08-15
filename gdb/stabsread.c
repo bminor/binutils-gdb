@@ -24,7 +24,6 @@
    Avoid placing any object file format specific code in this file.  */
 
 #include "defs.h"
-#include <string.h>
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"
@@ -44,8 +43,6 @@
 #include "doublest.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gdb_assert.h"
-
 #include <ctype.h>
 
 /* Ask stabsread.h to define the vars it normally declares `extern'.  */

@@ -19,12 +19,10 @@
 #include "symtab.h"
 #include <ctype.h>
 #include "gdb_regex.h"
-#include <string.h>
 #include "completer.h"
 #include "ui-out.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
-#include "gdb_assert.h"
 
 /* Prototypes for local functions.  */
 

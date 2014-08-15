@@ -64,7 +64,6 @@
 #include "solib.h"
 #include "symfile.h"
 #include "observer.h"
-#include <string.h>
 #include "procfs.h"
 #include "symtab.h"
 #include "minsyms.h"

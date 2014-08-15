@@ -19,7 +19,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
-#include <stdlib.h>
 #include "gdbthread.h"
 #include "dll.h"
 

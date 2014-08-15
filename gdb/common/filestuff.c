@@ -20,12 +20,9 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include <string.h>
 #endif
 #include "filestuff.h"
 #include "gdb_vecs.h"
-
-#include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>

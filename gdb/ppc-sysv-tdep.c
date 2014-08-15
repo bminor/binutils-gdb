@@ -23,8 +23,6 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "value.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "ppc-tdep.h"
 #include "target.h"
 #include "objfiles.h"

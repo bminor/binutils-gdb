@@ -26,8 +26,6 @@
 #endif
 
 #include "linux-btrace.h"
-#include "common-utils.h"
-#include "gdb_assert.h"
 #include "regcache.h"
 #include "gdbthread.h"
 #include "gdb_wait.h"
@@ -39,8 +37,6 @@
 
 #if HAVE_LINUX_PERF_EVENT_H && defined(SYS_perf_event_open)
 
-#include <errno.h>
-#include <string.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <sys/mman.h>

@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "charset.h"
 #include "gdbcmd.h"
-#include "gdb_assert.h"
 #include "gdb_obstack.h"
 #include "gdb_wait.h"
 #include "charset-list.h"
@@ -28,9 +27,6 @@
 #include "environ.h"
 #include "arch-utils.h"
 #include "gdb_vecs.h"
-
-#include <stddef.h>
-#include <string.h>
 #include <ctype.h>
 
 #ifdef USE_WIN32API

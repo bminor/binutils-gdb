@@ -19,10 +19,7 @@
 
 #include "defs.h"
 #include "memory-map.h"
-#include "gdb_assert.h"
 #include "exceptions.h"
-
-#include <string.h>
 
 #if !defined(HAVE_LIBEXPAT)
 

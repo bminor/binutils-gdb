@@ -48,10 +48,6 @@ ACX_LARGEFILE
 AM_CONDITIONAL(PLUGINS, test "$plugins" = "yes")
 
 if test "$plugins" = "yes"; then
-  if test "$enable_dlopen" != "yes" ; then
-    AC_MSG_ERROR([
-      Building BFD with plugin support requires a host that supports -ldl.])
-  fi
   enable_targets="$enable_targets plugin"
 fi
 
@@ -216,8 +212,6 @@ AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h sys/stat.h sys/resource.h)
 GCC_HEADER_STDINT(bfd_stdint.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
-
-AC_CHECK_HEADERS(windows.h dlfcn.h)
 
 ACX_HEADER_STRING
 AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid fileno)

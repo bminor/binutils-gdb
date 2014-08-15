@@ -35,7 +35,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <stdlib.h>
 #include <windows.h>
 #include <imagehlp.h>
 #include <psapi.h>
@@ -51,7 +50,6 @@
 #include "objfiles.h"
 #include "gdb_bfd.h"
 #include "gdb_obstack.h"
-#include <string.h>
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include <unistd.h>

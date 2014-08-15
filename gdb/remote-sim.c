@@ -24,12 +24,10 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "value.h"
-#include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <setjmp.h>
-#include <errno.h>
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
@@ -37,7 +35,6 @@
 #include "gdb/remote-sim.h"
 #include "command.h"
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "sim-regno.h"
 #include "arch-utils.h"
 #include "readline/readline.h"

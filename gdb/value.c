@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -30,7 +29,6 @@
 #include "language.h"
 #include "demangle.h"
 #include "doublest.h"
-#include "gdb_assert.h"
 #include "regcache.h"
 #include "block.h"
 #include "dfp.h"

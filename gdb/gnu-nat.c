@@ -23,12 +23,9 @@
 #include "defs.h"
 
 #include <ctype.h>
-#include <errno.h>
 #include <limits.h>
 #include <setjmp.h>
 #include <signal.h>
-#include <stdio.h>
-#include <string.h>
 #include <sys/ptrace.h>
 
 #include <mach.h>
@@ -61,7 +58,6 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
-#include "gdb_assert.h"
 #include "gdb_obstack.h"
 
 #include "gnu-nat.h"

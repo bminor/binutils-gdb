@@ -26,7 +26,6 @@
 #include "gdbcore.h"
 #include "dwarf2.h"
 #include "dwarf2expr.h"
-#include "gdb_assert.h"
 
 /* Local prototypes.  */
 

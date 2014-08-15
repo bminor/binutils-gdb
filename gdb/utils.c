@@ -19,9 +19,7 @@
 
 #include "defs.h"
 #include "dyn-string.h"
-#include "gdb_assert.h"
 #include <ctype.h>
-#include <string.h>
 #include "gdb_wait.h"
 #include "event-top.h"
 #include "exceptions.h"

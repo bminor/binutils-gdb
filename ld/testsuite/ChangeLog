@@ -1,3 +1,16 @@
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (check_plugin_api_available): Match "-plugin PLUGIN".
+
+2014-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16746
+	* ld-plugin/lto.exp: Add 4 tests for PR ld/16746.
+	* ld-plugin/pr16746a.c: New file.
+	* ld-plugin/pr16746b.c: Likewise.
+	* ld-plugin/pr16746c.c: Likewise.
+	* ld-plugin/pr16746d.c: Likewise.
+
 2014-08-06  Alan Modra  <amodra@gmail.com>
 
 	* lib/ld-lib.exp (check_lto_fat_available): New.

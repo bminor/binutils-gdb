@@ -62,8 +62,6 @@
 #define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 #endif
 
-#include <stdio.h>
-
 /* Python 2.4 doesn't include stdint.h soon enough to get {u,}intptr_t
    needed by pyport.h.  */
 #include <stdint.h>

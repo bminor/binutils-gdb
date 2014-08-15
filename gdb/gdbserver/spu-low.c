@@ -21,13 +21,9 @@
 #include "server.h"
 
 #include "gdb_wait.h"
-#include <stdio.h>
 #include <sys/ptrace.h>
 #include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
 #include <sys/syscall.h>
 #include "filestuff.h"
 #include "hostio.h"

@@ -24,7 +24,6 @@
 #include "arch-utils.h"
 #include "charset.h"
 #include "cp-abi.h"
-#include "gdb_assert.h"
 #include "infcall.h"
 #include "symtab.h" /* Needed by language.h.  */
 #include "language.h"

@@ -23,9 +23,6 @@
 #include "target.h"
 #include "memory-map.h"
 
-#include "gdb_assert.h"
-
-#include <stdio.h>
 #include <sys/time.h>
 
 static int

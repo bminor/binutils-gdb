@@ -21,9 +21,7 @@
    conventions, et.al.  */
 
 #include "defs.h"
-#include <stdarg.h>
 #include <stdint.h>
-#include "gdb_assert.h"
 #include "guile-internal.h"
 
 /* Define VARIABLES in the gdb module.  */

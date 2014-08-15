@@ -83,9 +83,11 @@ gdb_test "guile (print (length insn-list4))" \
 
 test_disassemble_1 "basic" "pc" ""
 
-# Negative test
-gdb_test "guile (arch-disassemble arch 0 #:size 1)" \
-    "ERROR: Cannot access memory at address 0x.*" "test bad memory access"
+if { ![is_address_zero_readable] } {
+    # Negative test
+    gdb_test "guile (arch-disassemble arch 0 #:size 1)" \
+	"ERROR: Cannot access memory at address 0x.*" "test bad memory access"
+}
 
 # Test disassembly through a port.
 

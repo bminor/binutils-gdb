@@ -21,7 +21,6 @@
 
 #include "server.h"
 #include "linux-low.h"
-#include "libiberty.h"
 #include <asm/ptrace.h>
 
 /* Defined in auto-generated file reg-bfin.c.  */

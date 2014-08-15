@@ -54,8 +54,6 @@
 #include "user-regs.h"
 #include <ctype.h>
 #include "elf/common.h"
-#include <string.h>
-
 extern int arm_apcs_32;
 
 /* Under ARM GNU/Linux the traditional way of performing a breakpoint

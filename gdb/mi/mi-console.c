@@ -26,8 +26,6 @@
 
 #include "defs.h"
 #include "mi-console.h"
-#include <string.h>
-
 static ui_file_fputs_ftype mi_console_file_fputs;
 static ui_file_flush_ftype mi_console_file_flush;
 static ui_file_delete_ftype mi_console_file_delete;

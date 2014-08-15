@@ -20,7 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"
@@ -34,7 +33,6 @@
 #include "complaints.h"
 #include "gdbcmd.h"
 #include "cp-abi.h"
-#include "gdb_assert.h"
 #include "hashtab.h"
 #include "exceptions.h"
 #include "cp-support.h"

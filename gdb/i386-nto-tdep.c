@@ -25,9 +25,6 @@
 #include "regcache.h"
 #include "target.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 #include "nto-tdep.h"

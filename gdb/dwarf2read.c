@@ -72,8 +72,6 @@
 #include "build-id.h"
 
 #include <fcntl.h>
-#include <string.h>
-#include "gdb_assert.h"
 #include <sys/types.h>
 
 typedef struct symbol *symbolp;
@@ -613,8 +611,8 @@ struct dwarf2_per_cu_data
      However we can enter this file with just a "per_cu" handle.  */
   struct objfile *objfile;
 
-  /* When using partial symbol tables, the 'psymtab' field is active.
-     Otherwise the 'quick' field is active.  */
+  /* When dwarf2_per_objfile->using_index is true, the 'quick' field
+     is active.  Otherwise, the 'psymtab' field is active.  */
   union
   {
     /* The partial symbol table associated with this compilation unit,
@@ -17179,7 +17177,7 @@ noop_record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 
 static void
 dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
-		      struct dwarf2_cu *cu, struct partial_symtab *pst)
+		      struct dwarf2_cu *cu, const int decode_for_pst_p)
 {
   const gdb_byte *line_ptr, *extended_end;
   const gdb_byte *line_end;
@@ -17189,7 +17187,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  const int decode_for_pst_p = (pst != NULL);
   struct subfile *last_subfile = NULL;
   void (*p_record_line) (struct subfile *subfile, int line, CORE_ADDR pc)
     = record_line;
@@ -17503,7 +17500,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
   struct subfile *first_subfile = current_subfile;
 
   if (want_line_info)
-    dwarf_decode_lines_1 (lh, comp_dir, cu, pst);
+    dwarf_decode_lines_1 (lh, comp_dir, cu, decode_for_pst_p);
 
   if (decode_for_pst_p)
     {

@@ -37,8 +37,6 @@
 #include "typeprint.h"
 #include "gdbcmd.h"
 #include "source.h"
-
-#include <string.h>
 #include "readline/readline.h"
 
 #include "psymtab.h"

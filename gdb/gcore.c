@@ -29,7 +29,6 @@
 #include "completer.h"
 #include "gcore.h"
 #include "cli/cli-decode.h"
-#include "gdb_assert.h"
 #include <fcntl.h>
 #include "regcache.h"
 #include "regset.h"

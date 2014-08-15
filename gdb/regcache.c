@@ -24,12 +24,11 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "gdb_assert.h"
-#include <string.h>
 #include "observer.h"
 #include "exceptions.h"
 #include "remote.h"
 #include "valprint.h"
+#include "regset.h"
 
 /*
  * DATA STRUCTURE
@@ -1066,6 +1065,92 @@ regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
   regbuf = register_buffer (regcache, regnum);
   size = regcache->descr->sizeof_register[regnum];
   memcpy (buf, regbuf, size);
+}
+
+/* Transfer a single or all registers belonging to a certain register
+   set to or from a buffer.  This is the main worker function for
+   regcache_supply_regset and regcache_collect_regset.  */
+
+static void
+regcache_transfer_regset (const struct regset *regset,
+			  const struct regcache *regcache,
+			  struct regcache *out_regcache,
+			  int regnum, const void *in_buf,
+			  void *out_buf, size_t size)
+{
+  const struct regcache_map_entry *map;
+  int offs = 0, count;
+
+  for (map = regset->regmap; (count = map->count) != 0; map++)
+    {
+      int regno = map->regno;
+      int slot_size = map->size;
+
+      if (slot_size == 0 && regno != REGCACHE_MAP_SKIP)
+	slot_size = regcache->descr->sizeof_register[regno];
+
+      if (regno == REGCACHE_MAP_SKIP
+	  || (regnum != -1
+	      && (regnum < regno || regnum >= regno + count)))
+	  offs += count * slot_size;
+
+      else if (regnum == -1)
+	for (; count--; regno++, offs += slot_size)
+	  {
+	    if (offs + slot_size > size)
+	      break;
+
+	    if (out_buf)
+	      regcache_raw_collect (regcache, regno,
+				    (gdb_byte *) out_buf + offs);
+	    else
+	      regcache_raw_supply (out_regcache, regno, in_buf
+				   ? (const gdb_byte *) in_buf + offs
+				   : NULL);
+	  }
+      else
+	{
+	  /* Transfer a single register and return.  */
+	  offs += (regnum - regno) * slot_size;
+	  if (offs + slot_size > size)
+	    return;
+
+	  if (out_buf)
+	    regcache_raw_collect (regcache, regnum,
+				  (gdb_byte *) out_buf + offs);
+	  else
+	    regcache_raw_supply (out_regcache, regnum, in_buf
+				 ? (const gdb_byte *) in_buf + offs
+				 : NULL);
+	  return;
+	}
+    }
+}
+
+/* Supply register REGNUM from BUF to REGCACHE, using the register map
+   in REGSET.  If REGNUM is -1, do this for all registers in REGSET.
+   If BUF is NULL, set the register(s) to "unavailable" status. */
+
+void
+regcache_supply_regset (const struct regset *regset,
+			struct regcache *regcache,
+			int regnum, const void *buf, size_t size)
+{
+  regcache_transfer_regset (regset, regcache, regcache, regnum,
+			    buf, NULL, size);
+}
+
+/* Collect register REGNUM from REGCACHE to BUF, using the register
+   map in REGSET.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+void
+regcache_collect_regset (const struct regset *regset,
+			 const struct regcache *regcache,
+			 int regnum, void *buf, size_t size)
+{
+  regcache_transfer_regset (regset, regcache, NULL, regnum,
+			    NULL, buf, size);
 }
 
 

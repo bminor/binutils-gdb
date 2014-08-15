@@ -1124,9 +1124,10 @@ cat <<EOF
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
+#include "frame.h"
+
 struct floatformat;
 struct ui_file;
-struct frame_info;
 struct value;
 struct objfile;
 struct obj_section;
@@ -1472,9 +1473,6 @@ cat <<EOF
 #include "symcat.h"
 
 #include "floatformat.h"
-
-#include "gdb_assert.h"
-#include <string.h>
 #include "reggroups.h"
 #include "osabi.h"
 #include "gdb_obstack.h"

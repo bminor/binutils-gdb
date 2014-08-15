@@ -29,8 +29,6 @@
 #include "jv-lang.h"
 #include "c-lang.h"
 #include "annotate.h"
-#include <string.h>
-
 /* Local functions */
 
 void

@@ -34,7 +34,6 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include <string.h>		/* for strchr */
 #include "target.h"		/* for target_has_execution */
 #include "gdbcore.h"
 #include "gdbcmd.h"
@@ -44,7 +43,6 @@
 #include "block.h"
 #include "infcall.h"
 #include "valprint.h"
-#include "gdb_assert.h"
 #include "cli/cli-utils.h"
 
 #include <ctype.h>

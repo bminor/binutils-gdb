@@ -27,8 +27,6 @@
 #include "reggroups.h"
 #include "regset.h"
 
-#include <string.h>
-
 #include "glibc-tdep.h"
 #include "solib-svr4.h"
 #include "symtab.h"
@@ -351,14 +349,19 @@ m32r_linux_supply_gregset (const struct regset *regset,
 			   struct regcache *regcache, int regnum,
 			   const void *gregs, size_t size)
 {
-  const char *regs = gregs;
-  unsigned long psw, bbpsw;
+  const gdb_byte *regs = gregs;
+  enum bfd_endian byte_order =
+    gdbarch_byte_order (get_regcache_arch (regcache));
+  ULONGEST psw, bbpsw;
+  gdb_byte buf[4];
+  const gdb_byte *p;
   int i;
 
-  psw = *((unsigned long *) (regs + PSW_OFFSET));
-  bbpsw = *((unsigned long *) (regs + BBPSW_OFFSET));
+  psw = extract_unsigned_integer (regs + PSW_OFFSET, 4, byte_order);
+  bbpsw = extract_unsigned_integer (regs + BBPSW_OFFSET, 4, byte_order);
+  psw = ((0x00c1 & bbpsw) << 8) | ((0xc100 & psw) >> 8);
 
-  for (i = 0; i < sizeof (m32r_pt_regs_offset) / 4; i++)
+  for (i = 0; i < ARRAY_SIZE (m32r_pt_regs_offset); i++)
     {
       if (regnum != -1 && regnum != i)
 	continue;
@@ -366,30 +369,68 @@ m32r_linux_supply_gregset (const struct regset *regset,
       switch (i)
 	{
 	case PSW_REGNUM:
-	  *((unsigned long *) (regs + m32r_pt_regs_offset[i])) =
-	    ((0x00c1 & bbpsw) << 8) | ((0xc100 & psw) >> 8);
+	  store_unsigned_integer (buf, 4, byte_order, psw);
+	  p = buf;
 	  break;
 	case CBR_REGNUM:
-	  *((unsigned long *) (regs + m32r_pt_regs_offset[i])) =
-	    ((psw >> 8) & 1);
+	  store_unsigned_integer (buf, 4, byte_order, psw & 1);
+	  p = buf;
 	  break;
 	case M32R_SP_REGNUM:
-	  if (psw & 0x8000)
-	    *((unsigned long *) (regs + m32r_pt_regs_offset[i])) =
-	      *((unsigned long *) (regs + SPU_OFFSET));
-	  else
-	    *((unsigned long *) (regs + m32r_pt_regs_offset[i])) =
-	      *((unsigned long *) (regs + SPI_OFFSET));
+	  p = regs + ((psw & 0x80) ? SPU_OFFSET : SPI_OFFSET);
 	  break;
+	default:
+	  p = regs + m32r_pt_regs_offset[i];
 	}
 
-      regcache_raw_supply (regcache, i,
-			   regs + m32r_pt_regs_offset[i]);
+      regcache_raw_supply (regcache, i, p);
+    }
+}
+
+static void
+m32r_linux_collect_gregset (const struct regset *regset,
+			    const struct regcache *regcache,
+			    int regnum, void *gregs, size_t size)
+{
+  gdb_byte *regs = gregs;
+  int i;
+  enum bfd_endian byte_order =
+    gdbarch_byte_order (get_regcache_arch (regcache));
+  ULONGEST psw;
+  gdb_byte buf[4];
+
+  regcache_raw_collect (regcache, PSW_REGNUM, buf);
+  psw = extract_unsigned_integer (buf, 4, byte_order);
+
+  for (i = 0; i < ARRAY_SIZE (m32r_pt_regs_offset); i++)
+    {
+      if (regnum != -1 && regnum != i)
+	continue;
+
+      switch (i)
+	{
+	case PSW_REGNUM:
+	  store_unsigned_integer (regs + PSW_OFFSET, 4, byte_order,
+				  (psw & 0xc1) << 8);
+	  store_unsigned_integer (regs + BBPSW_OFFSET, 4, byte_order,
+				  (psw >> 8) & 0xc1);
+	  break;
+	case CBR_REGNUM:
+	  break;
+	case M32R_SP_REGNUM:
+	  regcache_raw_collect (regcache, i, regs
+				+ ((psw & 0x80) ? SPU_OFFSET : SPI_OFFSET));
+	  break;
+	default:
+	  regcache_raw_collect (regcache, i,
+				regs + m32r_pt_regs_offset[i]);
+	}
     }
 }
 
 static const struct regset m32r_linux_gregset = {
-  NULL, m32r_linux_supply_gregset
+  NULL,
+  m32r_linux_supply_gregset, m32r_linux_collect_gregset
 };
 
 static const struct regset *

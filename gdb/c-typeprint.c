@@ -31,8 +31,6 @@
 #include "typeprint.h"
 #include "cp-abi.h"
 #include "jv-lang.h"
-#include <string.h>
-#include <errno.h>
 #include "cp-support.h"
 
 static void c_type_print_varspec_prefix (struct type *,

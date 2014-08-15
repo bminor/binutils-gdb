@@ -31,8 +31,6 @@ struct ui_out;
 struct terminal_info;
 struct target_desc_info;
 
-#include "ptid.h"
-
 /* For bpstat.  */
 #include "breakpoint.h"
 

@@ -20,7 +20,6 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include <string.h>
 #endif
 
 #include "linux-procfs.h"

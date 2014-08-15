@@ -1,3 +1,7 @@
+2014-08-08  Han Shen  <shenhan@google.com>
+
+	* aarch64.h (withdrawn): Replaced with R_AARCH64_withdrawn.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elfcpp.h (PT_MIPS_ABIFLAGS): New program header type.

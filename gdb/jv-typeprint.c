@@ -24,12 +24,10 @@
 #include "demangle.h"
 #include "gdb-demangle.h"
 #include "jv-lang.h"
-#include <string.h>
 #include "typeprint.h"
 #include "c-lang.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gdb_assert.h"
 
 /* Local functions */
 

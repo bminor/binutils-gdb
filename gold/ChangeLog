@@ -1,3 +1,49 @@
+2014-08-13  Sriraman Tallam  <tmsriram@google.com>
+
+	* options.h (-no-pie): Add option.
+
+2014-08-08  Jing Yu  <jingyu@google.com>
+	    Han Shen  <shenhan@google.com>
+
+	* Makefile.am (HFILES): Add aarch64-reloc-property.h.
+	(DEFFILES): add aarch64-reloc.def.
+	(TARGETSOURCES): Add aarch64-reloc-property.cc.
+	(ALL_TARGETOBJS): Add aarch64-reloc-property.$(OBJEXT).
+	* Makefile.in: Regenerate.
+	* aarch64-reloc-property.cc: New file.
+	* aarch64-reloc-property.h: New file.
+	* aarch64-reloc.def: New file.
+	* aarch64.cc: Include aarch64-reloc-property.h. Replace spaces
+	with tab to make the format consistent.
+	(Output_data_got_aarch64::symbol_table_): New method.
+	(Target_aarch64::do_plt_address_for_global): New method.
+	(Target_aarch64::do_plt_address_for_local): New method.
+	(Target_aarch64::do_select_as_default_target): New method.
+	(Target_aarch64::do_make_data_plt): New method.
+	(Target_aarch64::make_data_plt): New method.
+	(Output_data_plt_aarch64::has_irelative_section): New method.
+	(Output_data_plt_aarch64::address_for_global): New method.
+	(Output_data_plt_aarch64::address_for_local): New method.
+	(Output_data_plt_aarch64::irelative_rel_): New parameter.
+	(Output_data_plt_aarch64::add_entry): Implement contents.
+	(Output_data_plt_aarch64::set_final_data_size): Fix typo.
+	(Output_data_plt_aarch64::do_write): Remove useless got_base. Set
+	the got_pov entry to plt0.
+	(Output_data_plt_aarch64_standard::do_fill_first_plt_entry):
+	Implement contents.
+	(Output_data_plt_aarch64_standard::do_fill_plt_entry): Implement.
+	(AArch64_howto): New struct.
+	(aarch64_howto[]): New static const array.
+	(AArch64_relocate_functions): New class.
+	(Target_aarch64::Scan::get_reference_flags): Remove method.
+	(Target_aarch64::Scan::local): Implement to support a few relocations.
+	(Target_aarch64::Scan::global): Implement to support a few relocations.
+	(Target_aarch64::make_plt_section): Implement contents.
+	(Target_aarch64::make_plt_entry): Implement contents.
+	(Target_aarch64::do_finalize_sections): Implement contents.
+	(Target_aarch64::Relocate::relocate): Implement a few relocations.
+	(Target_aarch64::relocate_section): Implement contents.
+
 2014-08-06  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/defsym_test.sh: Allow ppc64le localentry annotation.

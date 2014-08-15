@@ -21,7 +21,6 @@
 
 #include "defs.h"
 #include <sys/stat.h>
-#include <string.h>
 #include "nto-tdep.h"
 #include "top.h"
 #include "inferior.h"

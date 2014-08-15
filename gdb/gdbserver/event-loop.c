@@ -22,16 +22,11 @@
 #include "queue.h"
 
 #include <sys/types.h>
-#include <string.h>
 #include <sys/time.h>
 
 #ifdef USE_WIN32API
 #include <windows.h>
 #include <io.h>
-#endif
-
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
 #endif
 
 #include <unistd.h>

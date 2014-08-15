@@ -28,9 +28,6 @@
 #include "tui/tui-command.h"
 
 #include "gdb_curses.h"
-#include <string.h>
-
-
 /*****************************************
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/

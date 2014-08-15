@@ -24,9 +24,7 @@
 #include "gdbcmd.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et al.  */
 #include "infrun.h"
-#include <string.h>
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "sim-regno.h"
 #include "gdbcore.h"
 #include "osabi.h"

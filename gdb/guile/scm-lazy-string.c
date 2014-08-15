@@ -26,7 +26,6 @@
 #include "exceptions.h"
 #include "valprint.h"
 #include "language.h"
-#include "gdb_assert.h"
 #include "guile-internal.h"
 
 /* The <gdb:lazy-string> smob.  */

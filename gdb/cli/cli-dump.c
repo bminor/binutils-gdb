@@ -20,12 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
 #include "cli/cli-decode.h"
 #include "cli/cli-cmds.h"
 #include "value.h"
 #include "completer.h"
-#include "gdb_assert.h"
 #include <ctype.h>
 #include "target.h"
 #include "readline/readline.h"

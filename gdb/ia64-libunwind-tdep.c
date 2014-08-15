@@ -33,9 +33,6 @@
 
 #include <dlfcn.h>
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "ia64-libunwind-tdep.h"
 
 #include "complaints.h"

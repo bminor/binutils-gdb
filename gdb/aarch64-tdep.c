@@ -24,7 +24,6 @@
 #include "inferior.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "dis-asm.h"
 #include "regcache.h"
 #include "reggroups.h"
@@ -49,7 +48,6 @@
 #include "elf-bfd.h"
 #include "elf/aarch64.h"
 
-#include "gdb_assert.h"
 #include "vec.h"
 
 #include "features/aarch64.c"

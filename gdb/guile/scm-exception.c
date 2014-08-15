@@ -30,7 +30,6 @@
 
 #include "defs.h"
 #include <signal.h>
-#include "gdb_assert.h"
 #include "guile-internal.h"
 
 /* The <gdb:exception> smob.

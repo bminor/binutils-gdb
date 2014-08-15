@@ -31,8 +31,6 @@
 #include "p-lang.h"
 #include "typeprint.h"
 #include "gdb-demangle.h"
-#include <string.h>
-#include <errno.h>
 #include <ctype.h>
 
 static void pascal_type_print_varspec_suffix (struct type *, struct ui_file *,

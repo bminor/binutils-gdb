@@ -46,7 +46,6 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#include <errno.h>
 
 #include <a.out.h>
 #include <sys/file.h>

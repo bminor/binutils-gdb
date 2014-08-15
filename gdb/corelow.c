@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include <string.h>
-#include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
 #ifdef HAVE_SYS_FILE_H
@@ -40,7 +38,6 @@
 #include "symfile.h"
 #include "exec.h"
 #include "readline/readline.h"
-#include "gdb_assert.h"
 #include "exceptions.h"
 #include "solib.h"
 #include "filenames.h"
@@ -737,7 +734,7 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	  size = bfd_section_size (core_bfd, section);
 	  if (offset >= size)
-	    return 0;
+	    return TARGET_XFER_EOF;
 	  size -= offset;
 	  if (size > len)
 	    size = len;

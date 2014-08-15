@@ -395,7 +395,7 @@ ppc_linux_supply_gregset (const struct regset *regset,
 			  struct regcache *regcache,
 			  int regnum, const void *gregs, size_t len)
 {
-  const struct ppc_reg_offsets *offsets = regset->descr;
+  const struct ppc_reg_offsets *offsets = regset->regmap;
 
   ppc_supply_gregset (regset, regcache, regnum, gregs, len);
 
@@ -420,7 +420,7 @@ ppc_linux_collect_gregset (const struct regset *regset,
 			   const struct regcache *regcache,
 			   int regnum, void *gregs, size_t len)
 {
-  const struct ppc_reg_offsets *offsets = regset->descr;
+  const struct ppc_reg_offsets *offsets = regset->regmap;
 
   /* Clear areas in the linux gregset not written elsewhere.  */
   if (regnum == -1)

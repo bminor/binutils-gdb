@@ -31,8 +31,6 @@
 #include "solib.h"
 #include "solib-som.h"
 
-#include <string.h>
-
 #undef SOLIB_SOM_DBG 
 
 /* These ought to be defined in some public interface, but aren't.  They

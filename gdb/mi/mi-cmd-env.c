@@ -30,8 +30,6 @@
 #include "command.h"
 #include "ui-out.h"
 #include "top.h"
-
-#include <string.h>
 #include <sys/stat.h>
 
 static void env_mod_path (char *dirname, char **which_path);

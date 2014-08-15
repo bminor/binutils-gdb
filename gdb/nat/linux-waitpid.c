@@ -28,8 +28,6 @@
 #include "linux-waitpid.h"
 #include "gdb_wait.h"
 
-#include <string.h>
-
 /* Print debugging output based on the format string FORMAT and
    its parameters.  */
 

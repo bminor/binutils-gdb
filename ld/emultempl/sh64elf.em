@@ -248,6 +248,9 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
 
   gld${EMULATION_NAME}_after_allocation ();
 
+  /* Needed, since we create link_orders here.  */
+  lang_clear_os_map ();
+
   cranges = bfd_get_section_by_name (link_info.output_bfd,
 				     SH64_CRANGES_SECTION_NAME);
 

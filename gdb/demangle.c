@@ -28,8 +28,6 @@
 #include "gdbcmd.h"
 #include "demangle.h"
 #include "gdb-demangle.h"
-#include <string.h>
-
 /* Select the default C++ demangling style to use.  The default is "auto",
    which allows gdb to attempt to pick an appropriate demangling style for
    the executable it has loaded.  It can be set to a specific style ("gnu",

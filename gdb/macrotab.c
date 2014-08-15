@@ -25,7 +25,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "macrotab.h"
-#include "gdb_assert.h"
 #include "bcache.h"
 #include "complaints.h"
 #include "macroexp.h"

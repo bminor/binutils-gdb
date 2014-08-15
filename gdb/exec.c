@@ -38,8 +38,6 @@
 
 #include <fcntl.h>
 #include "readline/readline.h"
-#include <string.h>
-
 #include "gdbcore.h"
 
 #include <ctype.h>

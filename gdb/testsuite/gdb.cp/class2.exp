@@ -28,9 +28,10 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1
 }
 
-# Start with "set print object off".
+# Start with "set print object off" and "set print symbol off".
 
 gdb_test_no_output "set print object off"
+gdb_test_no_output "set print symbol off"
 
 if ![runto_main] then {
     perror "couldn't run to main"

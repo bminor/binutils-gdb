@@ -39,7 +39,6 @@
 #include "reggroups.h"
 #include "regset.h"
 #include "value.h"
-#include "gdb_assert.h"
 #include "dis-asm.h"
 #include "solib-svr4.h"
 #include "prologue-value.h"
@@ -420,204 +419,62 @@ s390_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 /* Maps for register sets.  */
 
-const short s390_regmap_gregset[] =
+static const struct regcache_map_entry s390_gregmap[] =
   {
-    0x00, S390_PSWM_REGNUM,
-    0x04, S390_PSWA_REGNUM,
-    0x08, S390_R0_REGNUM,
-    0x0c, S390_R1_REGNUM,
-    0x10, S390_R2_REGNUM,
-    0x14, S390_R3_REGNUM,
-    0x18, S390_R4_REGNUM,
-    0x1c, S390_R5_REGNUM,
-    0x20, S390_R6_REGNUM,
-    0x24, S390_R7_REGNUM,
-    0x28, S390_R8_REGNUM,
-    0x2c, S390_R9_REGNUM,
-    0x30, S390_R10_REGNUM,
-    0x34, S390_R11_REGNUM,
-    0x38, S390_R12_REGNUM,
-    0x3c, S390_R13_REGNUM,
-    0x40, S390_R14_REGNUM,
-    0x44, S390_R15_REGNUM,
-    0x48, S390_A0_REGNUM,
-    0x4c, S390_A1_REGNUM,
-    0x50, S390_A2_REGNUM,
-    0x54, S390_A3_REGNUM,
-    0x58, S390_A4_REGNUM,
-    0x5c, S390_A5_REGNUM,
-    0x60, S390_A6_REGNUM,
-    0x64, S390_A7_REGNUM,
-    0x68, S390_A8_REGNUM,
-    0x6c, S390_A9_REGNUM,
-    0x70, S390_A10_REGNUM,
-    0x74, S390_A11_REGNUM,
-    0x78, S390_A12_REGNUM,
-    0x7c, S390_A13_REGNUM,
-    0x80, S390_A14_REGNUM,
-    0x84, S390_A15_REGNUM,
-    0x88, S390_ORIG_R2_REGNUM,
-    -1, -1
+    { 1, S390_PSWM_REGNUM },
+    { 1, S390_PSWA_REGNUM },
+    { 16, S390_R0_REGNUM },
+    { 16, S390_A0_REGNUM },
+    { 1, S390_ORIG_R2_REGNUM },
+    { 0 }
   };
 
-const short s390x_regmap_gregset[] =
+static const struct regcache_map_entry s390_fpregmap[] =
   {
-    0x00, S390_PSWM_REGNUM,
-    0x08, S390_PSWA_REGNUM,
-    0x10, S390_R0_REGNUM,
-    0x18, S390_R1_REGNUM,
-    0x20, S390_R2_REGNUM,
-    0x28, S390_R3_REGNUM,
-    0x30, S390_R4_REGNUM,
-    0x38, S390_R5_REGNUM,
-    0x40, S390_R6_REGNUM,
-    0x48, S390_R7_REGNUM,
-    0x50, S390_R8_REGNUM,
-    0x58, S390_R9_REGNUM,
-    0x60, S390_R10_REGNUM,
-    0x68, S390_R11_REGNUM,
-    0x70, S390_R12_REGNUM,
-    0x78, S390_R13_REGNUM,
-    0x80, S390_R14_REGNUM,
-    0x88, S390_R15_REGNUM,
-    0x90, S390_A0_REGNUM,
-    0x94, S390_A1_REGNUM,
-    0x98, S390_A2_REGNUM,
-    0x9c, S390_A3_REGNUM,
-    0xa0, S390_A4_REGNUM,
-    0xa4, S390_A5_REGNUM,
-    0xa8, S390_A6_REGNUM,
-    0xac, S390_A7_REGNUM,
-    0xb0, S390_A8_REGNUM,
-    0xb4, S390_A9_REGNUM,
-    0xb8, S390_A10_REGNUM,
-    0xbc, S390_A11_REGNUM,
-    0xc0, S390_A12_REGNUM,
-    0xc4, S390_A13_REGNUM,
-    0xc8, S390_A14_REGNUM,
-    0xcc, S390_A15_REGNUM,
-    0x10, S390_R0_UPPER_REGNUM,
-    0x18, S390_R1_UPPER_REGNUM,
-    0x20, S390_R2_UPPER_REGNUM,
-    0x28, S390_R3_UPPER_REGNUM,
-    0x30, S390_R4_UPPER_REGNUM,
-    0x38, S390_R5_UPPER_REGNUM,
-    0x40, S390_R6_UPPER_REGNUM,
-    0x48, S390_R7_UPPER_REGNUM,
-    0x50, S390_R8_UPPER_REGNUM,
-    0x58, S390_R9_UPPER_REGNUM,
-    0x60, S390_R10_UPPER_REGNUM,
-    0x68, S390_R11_UPPER_REGNUM,
-    0x70, S390_R12_UPPER_REGNUM,
-    0x78, S390_R13_UPPER_REGNUM,
-    0x80, S390_R14_UPPER_REGNUM,
-    0x88, S390_R15_UPPER_REGNUM,
-    0xd0, S390_ORIG_R2_REGNUM,
-    -1, -1
+    { 1, S390_FPC_REGNUM, 8 },
+    { 16, S390_F0_REGNUM, 8 },
+    { 0 }
   };
 
-const short s390_regmap_fpregset[] =
+static const struct regcache_map_entry s390_regmap_upper[] =
   {
-    0x00, S390_FPC_REGNUM,
-    0x08, S390_F0_REGNUM,
-    0x10, S390_F1_REGNUM,
-    0x18, S390_F2_REGNUM,
-    0x20, S390_F3_REGNUM,
-    0x28, S390_F4_REGNUM,
-    0x30, S390_F5_REGNUM,
-    0x38, S390_F6_REGNUM,
-    0x40, S390_F7_REGNUM,
-    0x48, S390_F8_REGNUM,
-    0x50, S390_F9_REGNUM,
-    0x58, S390_F10_REGNUM,
-    0x60, S390_F11_REGNUM,
-    0x68, S390_F12_REGNUM,
-    0x70, S390_F13_REGNUM,
-    0x78, S390_F14_REGNUM,
-    0x80, S390_F15_REGNUM,
-    -1, -1
+    { 16, S390_R0_UPPER_REGNUM, 4 },
+    { 0 }
   };
 
-const short s390_regmap_upper[] =
+static const struct regcache_map_entry s390_regmap_last_break[] =
   {
-    0x00, S390_R0_UPPER_REGNUM,
-    0x04, S390_R1_UPPER_REGNUM,
-    0x08, S390_R2_UPPER_REGNUM,
-    0x0c, S390_R3_UPPER_REGNUM,
-    0x10, S390_R4_UPPER_REGNUM,
-    0x14, S390_R5_UPPER_REGNUM,
-    0x18, S390_R6_UPPER_REGNUM,
-    0x1c, S390_R7_UPPER_REGNUM,
-    0x20, S390_R8_UPPER_REGNUM,
-    0x24, S390_R9_UPPER_REGNUM,
-    0x28, S390_R10_UPPER_REGNUM,
-    0x2c, S390_R11_UPPER_REGNUM,
-    0x30, S390_R12_UPPER_REGNUM,
-    0x34, S390_R13_UPPER_REGNUM,
-    0x38, S390_R14_UPPER_REGNUM,
-    0x3c, S390_R15_UPPER_REGNUM,
-    -1, -1
+    { 1, REGCACHE_MAP_SKIP, 4 },
+    { 1, S390_LAST_BREAK_REGNUM, 4 },
+    { 0 }
   };
 
-const short s390_regmap_last_break[] =
+static const struct regcache_map_entry s390x_regmap_last_break[] =
   {
-    0x04, S390_LAST_BREAK_REGNUM,
-    -1, -1
+    { 1, S390_LAST_BREAK_REGNUM, 8 },
+    { 0 }
   };
 
-const short s390x_regmap_last_break[] =
+static const struct regcache_map_entry s390_regmap_system_call[] =
   {
-    0x00, S390_LAST_BREAK_REGNUM,
-    -1, -1
+    { 1, S390_SYSTEM_CALL_REGNUM, 4 },
+    { 0 }
   };
 
-const short s390_regmap_system_call[] =
+static const struct regcache_map_entry s390_regmap_tdb[] =
   {
-    0x00, S390_SYSTEM_CALL_REGNUM,
-    -1, -1
-  };
-
-const short s390_regmap_tdb[] =
-  {
-    0x00, S390_TDB_DWORD0_REGNUM,
-    0x08, S390_TDB_ABORT_CODE_REGNUM,
-    0x10, S390_TDB_CONFLICT_TOKEN_REGNUM,
-    0x18, S390_TDB_ATIA_REGNUM,
-    0x80, S390_TDB_R0_REGNUM,
-    0x88, S390_TDB_R1_REGNUM,
-    0x90, S390_TDB_R2_REGNUM,
-    0x98, S390_TDB_R3_REGNUM,
-    0xa0, S390_TDB_R4_REGNUM,
-    0xa8, S390_TDB_R5_REGNUM,
-    0xb0, S390_TDB_R6_REGNUM,
-    0xb8, S390_TDB_R7_REGNUM,
-    0xc0, S390_TDB_R8_REGNUM,
-    0xc8, S390_TDB_R9_REGNUM,
-    0xd0, S390_TDB_R10_REGNUM,
-    0xd8, S390_TDB_R11_REGNUM,
-    0xe0, S390_TDB_R12_REGNUM,
-    0xe8, S390_TDB_R13_REGNUM,
-    0xf0, S390_TDB_R14_REGNUM,
-    0xf8, S390_TDB_R15_REGNUM,
-    -1, -1
+    { 1, S390_TDB_DWORD0_REGNUM, 8 },
+    { 1, S390_TDB_ABORT_CODE_REGNUM, 8 },
+    { 1, S390_TDB_CONFLICT_TOKEN_REGNUM, 8 },
+    { 1, S390_TDB_ATIA_REGNUM, 8 },
+    { 12, REGCACHE_MAP_SKIP, 8 },
+    { 16, S390_TDB_R0_REGNUM, 8 },
+    { 0 }
   };
 
 
-/* Supply register REGNUM from the register set REGSET to register cache
-   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
-static void
-s390_supply_regset (const struct regset *regset, struct regcache *regcache,
-		    int regnum, const void *regs, size_t len)
-{
-  const short *map;
-  for (map = regset->descr; map[0] >= 0; map += 2)
-    if (regnum == -1 || regnum == map[1])
-      regcache_raw_supply (regcache, map[1],
-			   regs ? (const char *)regs + map[0] : NULL);
-}
-
-/* Supply the TDB regset.  Like s390_supply_regset, but invalidate the
-   TDB registers unless the TDB format field is valid.  */
+/* Supply the TDB regset.  Like regcache_supply_regset, but invalidate
+   the TDB registers unless the TDB format field is valid.  */
 
 static void
 s390_supply_tdb_regset (const struct regset *regset, struct regcache *regcache,
@@ -627,73 +484,52 @@ s390_supply_tdb_regset (const struct regset *regset, struct regcache *regcache,
   enum register_status ret;
   int i;
 
-  s390_supply_regset (regset, regcache, regnum, regs, len);
+  regcache_supply_regset (regset, regcache, regnum, regs, len);
   ret = regcache_cooked_read_unsigned (regcache, S390_TDB_DWORD0_REGNUM, &tdw);
   if (ret != REG_VALID || (tdw >> 56) != 1)
-    s390_supply_regset (regset, regcache, regnum, NULL, len);
+    regcache_supply_regset (regset, regcache, regnum, NULL, len);
 }
 
-/* Collect register REGNUM from the register cache REGCACHE and store
-   it in the buffer specified by REGS and LEN as described by the
-   general-purpose register set REGSET.  If REGNUM is -1, do this for
-   all registers in REGSET.  */
-static void
-s390_collect_regset (const struct regset *regset,
-		     const struct regcache *regcache,
-		     int regnum, void *regs, size_t len)
-{
-  const short *map;
-  for (map = regset->descr; map[0] >= 0; map += 2)
-    if (regnum == -1 || regnum == map[1])
-      regcache_raw_collect (regcache, map[1], (char *)regs + map[0]);
-}
-
-static const struct regset s390_gregset = {
-  s390_regmap_gregset,
-  s390_supply_regset,
-  s390_collect_regset
+const struct regset s390_gregset = {
+  s390_gregmap,
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
-static const struct regset s390x_gregset = {
-  s390x_regmap_gregset,
-  s390_supply_regset,
-  s390_collect_regset
-};
-
-static const struct regset s390_fpregset = {
-  s390_regmap_fpregset,
-  s390_supply_regset,
-  s390_collect_regset
+const struct regset s390_fpregset = {
+  s390_fpregmap,
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
 static const struct regset s390_upper_regset = {
   s390_regmap_upper,
-  s390_supply_regset,
-  s390_collect_regset
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
-static const struct regset s390_last_break_regset = {
+const struct regset s390_last_break_regset = {
   s390_regmap_last_break,
-  s390_supply_regset,
-  s390_collect_regset
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
-static const struct regset s390x_last_break_regset = {
+const struct regset s390x_last_break_regset = {
   s390x_regmap_last_break,
-  s390_supply_regset,
-  s390_collect_regset
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
-static const struct regset s390_system_call_regset = {
+const struct regset s390_system_call_regset = {
   s390_regmap_system_call,
-  s390_supply_regset,
-  s390_collect_regset
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
-static const struct regset s390_tdb_regset = {
+const struct regset s390_tdb_regset = {
   s390_regmap_tdb,
   s390_supply_tdb_regset,
-  s390_collect_regset
+  regcache_collect_regset
 };
 
 static struct core_regset_section s390_linux32_regset_sections[] =
@@ -3371,7 +3207,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case ABI_LINUX_ZSERIES:
-      tdep->gregset = &s390x_gregset;
+      tdep->gregset = &s390_gregset;
       tdep->sizeof_gregset = s390x_sizeof_gregset;
       tdep->fpregset = &s390_fpregset;
       tdep->sizeof_fpregset = s390_sizeof_fpregset;

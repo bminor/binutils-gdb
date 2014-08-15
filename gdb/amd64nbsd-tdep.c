@@ -24,8 +24,6 @@
 #include "osabi.h"
 #include "symtab.h"
 
-#include "gdb_assert.h"
-
 #include "amd64-tdep.h"
 #include "nbsd-tdep.h"
 #include "solib-svr4.h"

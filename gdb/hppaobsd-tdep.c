@@ -22,9 +22,6 @@
 #include "regcache.h"
 #include "regset.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "hppa-tdep.h"
 #include "hppabsd-tdep.h"
 

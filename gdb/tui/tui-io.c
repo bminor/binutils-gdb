@@ -36,7 +36,6 @@
 #include "cli-out.h"
 #include <fcntl.h>
 #include <signal.h>
-#include <stdio.h>
 #include "filestuff.h"
 
 #include "gdb_curses.h"

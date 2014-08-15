@@ -35,8 +35,6 @@
 #include "gdbthread.h"
 #include "observer.h"
 
-#include "gdb_assert.h"
-
 #include "solist.h"
 #include "solib.h"
 #include "solib-svr4.h"
@@ -614,14 +612,14 @@ find_program_interpreter (void)
 }
 
 
-/* Scan for DYNTAG in .dynamic section of ABFD.  If DYNTAG is found 1 is
-   returned and the corresponding PTR is set.  */
+/* Scan for DESIRED_DYNTAG in .dynamic section of ABFD.  If DESIRED_DYNTAG is
+   found, 1 is returned and the corresponding PTR is set.  */
 
 static int
-scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
+scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr)
 {
   int arch_size, step, sect_size;
-  long dyn_tag;
+  long current_dyntag;
   CORE_ADDR dyn_ptr, dyn_addr;
   gdb_byte *bufend, *bufstart, *buf;
   Elf32_External_Dyn *x_dynp_32;
@@ -679,18 +677,18 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
     if (arch_size == 32)
       {
 	x_dynp_32 = (Elf32_External_Dyn *) buf;
-	dyn_tag = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp_32->d_tag);
+	current_dyntag = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp_32->d_tag);
 	dyn_ptr = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp_32->d_un.d_ptr);
       }
     else
       {
 	x_dynp_64 = (Elf64_External_Dyn *) buf;
-	dyn_tag = bfd_h_get_64 (abfd, (bfd_byte *) x_dynp_64->d_tag);
+	current_dyntag = bfd_h_get_64 (abfd, (bfd_byte *) x_dynp_64->d_tag);
 	dyn_ptr = bfd_h_get_64 (abfd, (bfd_byte *) x_dynp_64->d_un.d_ptr);
       }
-     if (dyn_tag == DT_NULL)
+     if (current_dyntag == DT_NULL)
        return 0;
-     if (dyn_tag == dyntag)
+     if (current_dyntag == desired_dyntag)
        {
 	 /* If requested, try to read the runtime value of this .dynamic
 	    entry.  */
@@ -713,16 +711,16 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
   return 0;
 }
 
-/* Scan for DYNTAG in .dynamic section of the target's main executable,
-   found by consulting the OS auxillary vector.  If DYNTAG is found 1 is
-   returned and the corresponding PTR is set.  */
+/* Scan for DESIRED_DYNTAG in .dynamic section of the target's main executable,
+   found by consulting the OS auxillary vector.  If DESIRED_DYNTAG is found, 1
+   is returned and the corresponding PTR is set.  */
 
 static int
-scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
+scan_dyntag_auxv (const int desired_dyntag, CORE_ADDR *ptr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int sect_size, arch_size, step;
-  long dyn_tag;
+  long current_dyntag;
   CORE_ADDR dyn_ptr;
   gdb_byte *bufend, *bufstart, *buf;
 
@@ -742,7 +740,7 @@ scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
       {
 	Elf32_External_Dyn *dynp = (Elf32_External_Dyn *) buf;
 
-	dyn_tag = extract_unsigned_integer ((gdb_byte *) dynp->d_tag,
+	current_dyntag = extract_unsigned_integer ((gdb_byte *) dynp->d_tag,
 					    4, byte_order);
 	dyn_ptr = extract_unsigned_integer ((gdb_byte *) dynp->d_un.d_ptr,
 					    4, byte_order);
@@ -751,15 +749,15 @@ scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
       {
 	Elf64_External_Dyn *dynp = (Elf64_External_Dyn *) buf;
 
-	dyn_tag = extract_unsigned_integer ((gdb_byte *) dynp->d_tag,
+	current_dyntag = extract_unsigned_integer ((gdb_byte *) dynp->d_tag,
 					    8, byte_order);
 	dyn_ptr = extract_unsigned_integer ((gdb_byte *) dynp->d_un.d_ptr,
 					    8, byte_order);
       }
-    if (dyn_tag == DT_NULL)
+    if (current_dyntag == DT_NULL)
       break;
 
-    if (dyn_tag == dyntag)
+    if (current_dyntag == desired_dyntag)
       {
 	if (ptr)
 	  *ptr = dyn_ptr;

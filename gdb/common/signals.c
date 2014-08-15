@@ -21,7 +21,6 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include <string.h>
 #endif
 
 #ifdef HAVE_SIGNAL_H
@@ -29,7 +28,6 @@
 #endif
 
 #include "gdb_signals.h"
-#include "gdb_assert.h"
 
 struct gdbarch;
 
