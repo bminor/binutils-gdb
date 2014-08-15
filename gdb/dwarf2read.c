@@ -17203,7 +17203,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
       CORE_ADDR address = 0;
       unsigned int file = 1;
       unsigned int line = 1;
-      unsigned int column = 0;
       int is_stmt = lh->default_is_stmt;
       int end_sequence = 0;
       CORE_ADDR addr;
@@ -17408,7 +17407,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
               }
 	      break;
 	    case DW_LNS_set_column:
-	      column = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	      (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	      line_ptr += bytes_read;
 	      break;
 	    case DW_LNS_negate_stmt:

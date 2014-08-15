@@ -1,5 +1,9 @@
 2014-08-15  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf_decode_lines_1): Delete local "column", unused.
+
+2014-08-15  Doug Evans  <dje@google.com>
+
 	* dwarf2read.c (dwarf_decode_lines_1): Delete local basic_block,
 	unused.
 
