@@ -1,3 +1,7 @@
+2014-08-18  Doug Evans  <dje@google.com>
+
+	* ada-typeprint.c (print_range): Initialize lo,hi for gcc -Wall.
+
 2014-08-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-typeprint.c (type_is_full_subrange_of_target_type):

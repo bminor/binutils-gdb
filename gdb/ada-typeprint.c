@@ -160,7 +160,7 @@ print_range (struct type *type, struct ui_file *stream,
       {
 	struct type *target_type;
 	volatile struct gdb_exception e;
-	LONGEST lo, hi;
+	LONGEST lo = 0, hi = 0; /* init for gcc -Wall */
 
 	target_type = TYPE_TARGET_TYPE (type);
 	if (target_type == NULL)
