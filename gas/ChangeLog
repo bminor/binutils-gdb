@@ -1,3 +1,7 @@
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* read.c (parse_mri_cons): Warning fix.
+
 2014-08-14  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Move ACX_LARGEFILE after LT_INIT.
