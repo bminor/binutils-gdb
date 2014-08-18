@@ -74,7 +74,6 @@ Dwarf::assemble $asm_file {
                         DW_OP_plus_uconst [get_sizeof "int" 4]
                         DW_OP_deref_size [get_sizeof "int" 4]
                     } SPECIAL_expr}
-		    {DW_AT_upper_bound 5 DW_FORM_data1}
 		}
 	    }
             DW_TAG_typedef {
