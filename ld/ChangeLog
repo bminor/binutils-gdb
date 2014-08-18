@@ -1,5 +1,10 @@
 2014-08-18  Alan Modra  <amodra@gmail.com>
 
+	* ld.texinfo (--as-needed): Clarify that references from libraries
+	must be from needed libraries.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_after_allocation):
 	Handle error status from bfd_elf_discard_info.
 	* emultempl/armelf.em: Likewise.

@@ -3086,7 +3086,8 @@ static bfd_boolean
 on_needed_list (const char *soname, struct bfd_link_needed_list *needed)
 {
   for (; needed != NULL; needed = needed->next)
-    if (strcmp (soname, needed->name) == 0)
+    if ((elf_dyn_lib_class (needed->by) & DYN_AS_NEEDED) == 0
+	&& strcmp (soname, needed->name) == 0)
       return TRUE;
 
   return FALSE;

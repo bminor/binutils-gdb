@@ -1,5 +1,11 @@
 2014-08-18  Alan Modra  <amodra@gmail.com>
 
+	PR 17287
+	* elflink.c (on_needed_list): Only consider libraries that have
+	been loaded.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (bfd_elf_discard_info): Return int error status.
 	* stabs.c (_bfd_discard_section_stabs): Comment typo fix.
 	* bfd-in.h (bfd_elf_discard_info): Updata prototype.

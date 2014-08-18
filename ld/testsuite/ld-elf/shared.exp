@@ -222,6 +222,18 @@ set build_tests {
   {"Build needed2"
    "tmpdir/libneeded2c.o -Wl,--as-needed tmpdir/libneeded2a.so tmpdir/libneeded2b.so" ""
    {dummy.c} {} "needed2"}
+  {"Build libneeded3a.so"
+   "-shared -Wl,--no-add-needed" "-fPIC"
+   {needed1a.c} {} "libneeded3a.so"}
+  {"Build libneeded3b.so"
+   "-shared -Wl,--no-as-needed,--add-needed -Ltmpdir -lneeded1b" "-fPIC"
+   {dummy.c} {} "libneeded3b.so"}
+  {"Build needed3.o"
+   "-r -nostdlib" ""
+   {needed3.c} {} "libneeded3.so"}
+  {"Build needed3"
+   "tmpdir/needed3.o -Wl,--as-needed -Ltmpdir -lneeded3a -lneeded3b -lneeded1b" ""
+   {dummy.c} {} "needed3"}
   {"Build libpr2404a.so"
    "-shared" "-fPIC"
    {pr2404a.c} {} "libpr2404a.so"}
