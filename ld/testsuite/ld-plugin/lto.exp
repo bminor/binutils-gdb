@@ -45,7 +45,7 @@ set plugin_names {
 }
 set plug_opt ""
 foreach plug $plugin_names {
-    set plug_so [run_host_cmd $CC "--print-prog-name $plug"]
+    set plug_so [run_host_cmd $CC "--print-file-name $plug"]
     if { $plug_so ne $plug } then {
 	set plug_opt "--plugin $plug_so"
 	break

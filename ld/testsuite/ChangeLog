@@ -1,5 +1,9 @@
 2014-08-18  Alan Modra  <amodra@gmail.com>
 
+	* ld-plugin/lto.exp: Use gcc -print-file-name to find lto plugin.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
 	* ld-plugin/needed3.c: New file.
 	* ld-elf/shared.exp: Add needed3 test.
 
