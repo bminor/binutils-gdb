@@ -1,3 +1,7 @@
+2014-08-18  David Blaikie  <dblaikie@gmail.com>
+
+	* boards/fission.exp: Explicitly pass -ggnu-pubnames for clang.
+
 2014-08-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/data-loc.exp: Remove second DW_AT_upper bound
