@@ -1,5 +1,11 @@
 2014-08-18  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Don't attempt to
+	use dynrelocs for ifunc.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Similarly.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
 	PR 17287
 	* elflink.c (on_needed_list): Only consider libraries that have
 	been loaded.
