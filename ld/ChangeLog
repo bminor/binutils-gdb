@@ -1,3 +1,16 @@
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_after_allocation):
+	Handle error status from bfd_elf_discard_info.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/metagelf.em: Likewise.
+	* emultempl/nios2elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
+	* emultempl/vms.em: Likewise.
+
 2014-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR 16563

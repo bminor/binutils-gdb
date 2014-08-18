@@ -271,6 +271,8 @@ compare_output_sec_vma (const void *a, const void *b)
 static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
+  int ret;
+
   if (!link_info.relocatable)
     {
       /* Build a sorted list of input text sections, then use that to process
@@ -325,15 +327,20 @@ gld${EMULATION_NAME}_after_allocation (void)
      ie. doesn't affect any code, so we can delay resizing the
      sections.  It's likely we'll resize everything in the process of
      adding stubs.  */
-  if (bfd_elf_discard_info (link_info.output_bfd, & link_info))
+  ret = bfd_elf_discard_info (link_info.output_bfd, & link_info);
+  if (ret < 0)
+    {
+      einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+      return;
+    }
+  else if (ret > 0)
     need_laying_out = 1;
 
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
   if (stub_file != NULL && !link_info.relocatable)
     {
-      int  ret = elf32_arm_setup_section_lists (link_info.output_bfd, & link_info);
-
+      ret = elf32_arm_setup_section_lists (link_info.output_bfd, &link_info);
       if (ret != 0)
 	{
 	  if (ret < 0)

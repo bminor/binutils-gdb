@@ -95,6 +95,7 @@ static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
   int layout_changed = 0;
+  int ret;
 
   if (!link_info.relocatable)
     {
@@ -149,7 +150,13 @@ gld${EMULATION_NAME}_after_allocation (void)
   /* bfd_elf32_discard_info just plays with debugging sections,
      ie. doesn't affect any code, so we can delay resizing the
      sections.  */
-  if (bfd_elf_discard_info (link_info.output_bfd, & link_info))
+  ret = bfd_elf_discard_info (link_info.output_bfd, & link_info);
+  if (ret < 0)
+    {
+      einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+      return;
+    }
+  else if (ret > 0)
     layout_changed = 1;
 
   gld${EMULATION_NAME}_map_segments (layout_changed);
