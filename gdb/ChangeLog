@@ -1,3 +1,104 @@
+2014-08-19  Andrew Burgess  <aburgess@broadcom.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR symtab/14604
+	PR symtab/14605
+	* ada-lang.c (coerce_unspec_val_to_type): Use
+	value_contents_copy_raw.
+	* ada-valprint.c (val_print_packed_array_elements): Adjust.
+	* c-valprint.c (c_val_print): Use value_bits_any_optimized_out.
+	* cp-valprint.c (cp_print_value_fields): Let the common printing
+	code handle optimized out values.
+	(cp_print_value_fields_rtti): Use value_bits_any_optimized_out.
+	* d-valprint.c (dynamic_array_type): Use
+	value_bits_any_optimized_out.
+	* dwarf2loc.c (entry_data_value_funcs): Remove check_validity and
+	check_any_valid fields.
+	(check_pieced_value_bits): Delete and inline ...
+	(check_pieced_synthetic_pointer): ... here.
+	(check_pieced_value_validity): Delete.
+	(check_pieced_value_invalid): Delete.
+	(pieced_value_funcs): Remove check_validity and check_any_valid
+	fields.
+	(read_pieced_value): Use mark_value_bits_optimized_out.
+	(write_pieced_value): Switch to use
+	mark_value_bytes_optimized_out.
+	(dwarf2_evaluate_loc_desc_full): Copy the value contents instead
+	of assuming the whole value is optimized out.
+	* findvar.c (read_frame_register_value): Remove special handling
+	of optimized out registers.
+	(value_from_register): Use mark_value_bytes_optimized_out.
+	* frame-unwind.c (frame_unwind_got_optimized): Use
+	mark_value_bytes_optimized_out.
+	* jv-valprint.c (java_value_print): Adjust.
+	(java_print_value_fields): Let the common printing code handle
+	optimized out values.
+	* mips-tdep.c (mips_print_register): Remove special handling of
+	optimized out registers.
+	* opencl-lang.c (lval_func_check_validity): Delete.
+	(lval_func_check_any_valid): Delete.
+	(opencl_value_funcs): Remove check_validity and check_any_valid
+	fields.
+	* p-valprint.c (pascal_object_print_value_fields): Let the common
+	printing code handle optimized out values.
+	* stack.c (read_frame_arg): Remove special handling of optimized
+	out values.  Fetch both VAL and ENTRYVAL before comparing
+	contents.  Adjust to value_available_contents_eq rename.
+	* valprint.c (valprint_check_validity)
+	(val_print_scalar_formatted): Use value_bits_any_optimized_out.
+	(val_print_array_elements): Adjust.
+	* value.c (struct value) <optimized_out>: Now a VEC(range_s).
+	(value_bits_any_optimized_out): New function.
+	(value_entirely_covered_by_range_vector): New function, factored
+	out from value_entirely_unavailable.
+	(value_entirely_unavailable): Reimplement.
+	(value_entirely_optimized_out): New function.
+	(insert_into_bit_range_vector): New function, factored out from
+	mark_value_bits_unavailable.
+	(mark_value_bits_unavailable): Reimplement.
+	(struct ranges_and_idx): New struct.
+	(find_first_range_overlap_and_match): New function, factored out
+	from value_available_contents_bits_eq.
+	(value_available_contents_bits_eq): Rename to ...
+	(value_contents_bits_eq): ... this.  Check both unavailable
+	contents and optimized out contents.
+	(value_available_contents_eq): Rename to ...
+	(value_contents_eq): ... this.
+	(allocate_value_lazy): Remove reference to the old optimized_out
+	boolean.
+	(allocate_optimized_out_value): Use
+	mark_value_bytes_optimized_out.
+	(require_not_optimized_out): Adjust to check whether the
+	optimized_out vec is empty.
+	(ranges_copy_adjusted): New function, factored out from
+	value_contents_copy_raw.
+	(value_contents_copy_raw): Also copy the optimized out ranges.
+	Assert the destination ranges aren't optimized out.
+	(value_contents_copy): Update comment, remove call to
+	require_not_optimized_out.
+	(value_contents_equal): Adjust to check whether the optimized_out
+	vec is empty.
+	(set_value_optimized_out, value_optimized_out_const): Delete.
+	(mark_value_bytes_optimized_out, mark_value_bits_optimized_out):
+	New functions.
+	(value_entirely_optimized_out, value_bits_valid): Delete.
+	(value_copy): Take a VEC copy of the 'optimized_out' field.
+	(value_primitive_field): Remove special handling of optimized out.
+	(value_fetch_lazy): Assert that lazy values have no unavailable
+	regions.  Use value_bits_any_optimized_out.  Remove some special
+	handling for optimized out values.
+	* value.h: Add intro comment about <optimized out> and
+	<unavailable>.
+	(struct lval_funcs): Remove check_validity and check_any_valid
+	fields.
+	(set_value_optimized_out, value_optimized_out_const): Remove.
+	(mark_value_bytes_optimized_out, mark_value_bits_optimized_out):
+	New declarations.
+	(value_bits_any_optimized_out): New declaration.
+	(value_bits_valid): Delete declaration.
+	(value_available_contents_eq): Rename to ...
+	(value_contents_eq): ... this, and extend comments.
+
 2014-08-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix -fsanitize=address on unreadable inferior strings.

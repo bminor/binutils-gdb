@@ -679,12 +679,6 @@ read_frame_register_value (struct value *value, struct frame_info *frame)
       struct value *regval = get_frame_register_value (frame, regnum);
       int reg_len = TYPE_LENGTH (value_type (regval)) - reg_offset;
 
-      if (value_optimized_out (regval))
-	{
-	  set_value_optimized_out (value, 1);
-	  break;
-	}
-
       /* If the register length is larger than the number of bytes
          remaining to copy, then only copy the appropriate bytes.  */
       if (reg_len > len)
@@ -730,7 +724,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       if (!ok)
 	{
 	  if (optim)
-	    set_value_optimized_out (v, 1);
+	    mark_value_bytes_optimized_out (v, 0, TYPE_LENGTH (type));
 	  if (unavail)
 	    mark_value_bytes_unavailable (v, 0, TYPE_LENGTH (type));
 	}

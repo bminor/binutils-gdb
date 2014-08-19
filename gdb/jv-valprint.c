@@ -181,10 +181,10 @@ java_value_print (struct value *val, struct ui_file *stream,
 		  set_value_offset (next_v, value_offset (next_v)
 				    + TYPE_LENGTH (el_type));
 		  value_fetch_lazy (next_v);
-		  if (!(value_available_contents_eq
-			(v, value_embedded_offset (v),
-			 next_v, value_embedded_offset (next_v),
-			 TYPE_LENGTH (el_type))))
+		  if (!value_contents_eq (v, value_embedded_offset (v),
+					  next_v,
+					  value_embedded_offset (next_v),
+					  TYPE_LENGTH (el_type)))
 		    break;
 		}
 
@@ -390,11 +390,6 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 									 i)))
 		{
 		  fputs_filtered (_("<synthetic pointer>"), stream);
-		}
-	      else if (!value_bits_valid (val, TYPE_FIELD_BITPOS (type, i),
-					  TYPE_FIELD_BITSIZE (type, i)))
-		{
-		  val_print_optimized_out (val, stream);
 		}
 	      else
 		{

@@ -6194,12 +6194,6 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
     }
 
   val = get_frame_register_value (frame, regnum);
-  if (value_optimized_out (val))
-    {
-      fprintf_filtered (file, "%s: [Invalid]",
-			gdbarch_register_name (gdbarch, regnum));
-      return;
-    }
 
   fputs_filtered (gdbarch_register_name (gdbarch, regnum), file);
 

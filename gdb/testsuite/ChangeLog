@@ -1,3 +1,11 @@
+2014-08-19  Andrew Burgess  <aburgess@broadcom.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR symtab/14604
+	PR symtab/14605
+	* gdb.dwarf2/dw2-op-out-param.exp: Remove kfail branches and use
+	gdb_test.
+
 2014-08-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/watchpoint-hw-hit-once.c (main): Update comment.

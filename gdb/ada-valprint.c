@@ -185,9 +185,9 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 					       (i * bitsize) / HOST_CHAR_BIT,
 					       (i * bitsize) % HOST_CHAR_BIT,
 					       bitsize, elttype);
-	  if (!value_available_contents_eq (v0, value_embedded_offset (v0),
-					    v1, value_embedded_offset (v1),
-					    eltlen))
+	  if (!value_contents_eq (v0, value_embedded_offset (v0),
+				  v1, value_embedded_offset (v1),
+				  eltlen))
 	    break;
 	}
 

@@ -1300,8 +1300,6 @@ static const struct lval_funcs entry_data_value_funcs =
 {
   NULL,	/* read */
   NULL,	/* write */
-  NULL,	/* check_validity */
-  NULL,	/* check_any_valid */
   NULL,	/* indirect */
   entry_data_value_coerce_ref,
   NULL,	/* check_synthetic_pointer */
@@ -1710,7 +1708,7 @@ read_pieced_value (struct value *v)
 		    memset (buffer, 0, this_size);
 
 		    if (optim)
-		      set_value_optimized_out (v, 1);
+		      mark_value_bits_optimized_out (v, offset, this_size_bits);
 		    if (unavail)
 		      mark_value_bits_unavailable (v, offset, this_size_bits);
 		  }
@@ -1770,7 +1768,7 @@ read_pieced_value (struct value *v)
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
-	  set_value_optimized_out (v, 1);
+	  mark_value_bits_optimized_out (v, offset, this_size_bits);
 	  break;
 
 	default:
@@ -1808,7 +1806,7 @@ write_pieced_value (struct value *to, struct value *from)
 
   if (frame == NULL)
     {
-      set_value_optimized_out (to, 1);
+      mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
       return;
     }
 
@@ -1940,7 +1938,7 @@ write_pieced_value (struct value *to, struct value *from)
 			source_buffer, this_size);
 	  break;
 	default:
-	  set_value_optimized_out (to, 1);
+	  mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
 	  break;
 	}
       offset += this_size_bits;
@@ -1949,24 +1947,16 @@ write_pieced_value (struct value *to, struct value *from)
   do_cleanups (cleanup);
 }
 
-/* A helper function that checks bit validity in a pieced value.
-   CHECK_FOR indicates the kind of validity checking.
-   DWARF_VALUE_MEMORY means to check whether any bit is valid.
-   DWARF_VALUE_OPTIMIZED_OUT means to check whether any bit is
-   optimized out.
-   DWARF_VALUE_IMPLICIT_POINTER means to check whether the bits are an
-   implicit pointer.  */
+/* An implementation of an lval_funcs method to see whether a value is
+   a synthetic pointer.  */
 
 static int
-check_pieced_value_bits (const struct value *value, int bit_offset,
-			 int bit_length,
-			 enum dwarf_value_location check_for)
+check_pieced_synthetic_pointer (const struct value *value, int bit_offset,
+				int bit_length)
 {
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (value);
   int i;
-  int validity = (check_for == DWARF_VALUE_MEMORY
-		  || check_for == DWARF_VALUE_IMPLICIT_POINTER);
 
   bit_offset += 8 * value_offset (value);
   if (value_bitsize (value))
@@ -1991,52 +1981,11 @@ check_pieced_value_bits (const struct value *value, int bit_offset,
       else
 	bit_length -= this_size_bits;
 
-      if (check_for == DWARF_VALUE_IMPLICIT_POINTER)
-	{
-	  if (p->location != DWARF_VALUE_IMPLICIT_POINTER)
-	    return 0;
-	}
-      else if (p->location == DWARF_VALUE_OPTIMIZED_OUT
-	       || p->location == DWARF_VALUE_IMPLICIT_POINTER)
-	{
-	  if (validity)
-	    return 0;
-	}
-      else
-	{
-	  if (!validity)
-	    return 1;
-	}
+      if (p->location != DWARF_VALUE_IMPLICIT_POINTER)
+	return 0;
     }
 
-  return validity;
-}
-
-static int
-check_pieced_value_validity (const struct value *value, int bit_offset,
-			     int bit_length)
-{
-  return check_pieced_value_bits (value, bit_offset, bit_length,
-				  DWARF_VALUE_MEMORY);
-}
-
-static int
-check_pieced_value_invalid (const struct value *value)
-{
-  return check_pieced_value_bits (value, 0,
-				  8 * TYPE_LENGTH (value_type (value)),
-				  DWARF_VALUE_OPTIMIZED_OUT);
-}
-
-/* An implementation of an lval_funcs method to see whether a value is
-   a synthetic pointer.  */
-
-static int
-check_pieced_synthetic_pointer (const struct value *value, int bit_offset,
-				int bit_length)
-{
-  return check_pieced_value_bits (value, bit_offset, bit_length,
-				  DWARF_VALUE_IMPLICIT_POINTER);
+  return 1;
 }
 
 /* A wrapper function for get_frame_address_in_block.  */
@@ -2185,8 +2134,6 @@ free_pieced_value_closure (struct value *v)
 static const struct lval_funcs pieced_value_funcs = {
   read_pieced_value,
   write_pieced_value,
-  check_pieced_value_validity,
-  check_pieced_value_invalid,
   indirect_pieced_value,
   NULL,	/* coerce_ref */
   check_pieced_synthetic_pointer,
@@ -2316,6 +2263,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	   retval = value_from_register (type, gdb_regnum, frame);
 	   if (value_optimized_out (retval))
 	     {
+	       struct value *tmp;
+
 	       /* This means the register has undefined value / was
 		  not saved.  As we're computing the location of some
 		  variable etc. in the program, not a value for
@@ -2323,7 +2272,9 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 		  generic optimized out value instead, so that we show
 		  <optimized out> instead of <not saved>.  */
 	       do_cleanups (value_chain);
-	       retval = allocate_optimized_out_value (type);
+	       tmp = allocate_value (type);
+	       value_contents_copy (tmp, 0, retval, 0, TYPE_LENGTH (type));
+	       retval = tmp;
 	     }
 	  }
 	  break;
