@@ -1,3 +1,7 @@
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2014-08-19  Nick Clifton  <nickc@redhat.com>
 
 	* msp430-sim.c: Move static hardware multiply support variables

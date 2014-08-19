@@ -1,3 +1,8 @@
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* plugins.m4 (AC_PLUGINS): If plugins are enabled, add -ldl to
+	LIBS via AC_SEARCH_LIBS.
+
 2014-08-14  Alan Modra  <amodra@gmail.com>
 
 	* plugins.m4: Test for dlfcn.h or windows.h here to set default

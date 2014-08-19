@@ -1,3 +1,9 @@
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* acinclude.m4 (GDB_AC_CHECK_BFD): Don't add -ldl.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2014-08-19  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 

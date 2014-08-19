@@ -1,3 +1,7 @@
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2014-08-18  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rl78.c (md_apply_fix): Correct handling of small sized

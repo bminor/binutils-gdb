@@ -1,3 +1,7 @@
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2014-08-18  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (--as-needed): Clarify that references from libraries
