@@ -1,3 +1,8 @@
+2014-08-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* value.c (value_from_pointer): Remove use of resolve_dynamic_type.
+	Adjust code accordingly.  Adjust function description comment.
+
 2014-08-19  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (arm_vfp_cprc_sub_candidate): Handle _Complex

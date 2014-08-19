@@ -3342,18 +3342,15 @@ value_from_ulongest (struct type *type, ULONGEST num)
 
 
 /* Create a value representing a pointer of type TYPE to the address
-   ADDR.  The type of the created value may differ from the passed
-   type TYPE. Make sure to retrieve the returned values's new type
-   after this call e.g. in case of an variable length array.  */
+   ADDR.  */
 
 struct value *
 value_from_pointer (struct type *type, CORE_ADDR addr)
 {
-  struct type *resolved_type = resolve_dynamic_type (type, addr);
-  struct value *val = allocate_value (resolved_type);
+  struct value *val = allocate_value (type);
 
   store_typed_address (value_contents_raw (val),
-		       check_typedef (resolved_type), addr);
+		       check_typedef (type), addr);
   return val;
 }
 
