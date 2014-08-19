@@ -317,18 +317,6 @@ trace_reg_get (SIM_DESC sd, int n)
 #define REG_GET(N)   trace_reg_get (sd, N)
 
 /* Hardware multiply (and accumulate) support.  */
-static enum { UNSIGN_32, SIGN_32, UNSIGN_MAC_32, SIGN_MAC_32 } hwmult_type;
-static unsigned32 hwmult_op1;
-static unsigned32 hwmult_op2;
-static unsigned32 hwmult_result;
-static   signed32 hwmult_signed_result;
-static unsigned32 hwmult_accumulator;
-static   signed32 hwmult_signed_accumulator;
-
-static enum { UNSIGN_64, SIGN_64 } hw32mult_type;
-static unsigned64 hw32mult_op1;
-static unsigned64 hw32mult_op2;
-static unsigned64 hw32mult_result;
 
 static unsigned int
 zero_ext (unsigned int v, unsigned int bits)
@@ -413,65 +401,69 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 	  switch (addr)
 	    {
 	    case 0x13A:
-	      switch (hwmult_type)
+	      switch (HWMULT (sd, hwmult_type))
 		{
 		case UNSIGN_MAC_32:
-		case UNSIGN_32:     rv = zero_ext (hwmult_result, 16); break;
+		case UNSIGN_32:
+		  rv = zero_ext (HWMULT (sd, hwmult_result), 16);
+		  break;
 		case SIGN_MAC_32: 
-		case SIGN_32:       rv = sign_ext (hwmult_signed_result, 16); break;
+		case SIGN_32:
+		  rv = sign_ext (HWMULT (sd, hwmult_signed_result), 16);
+		  break;
 		}
 	      break;
 
 	    case 0x13C:
-	      switch (hwmult_type)
+	      switch (HWMULT (sd, hwmult_type))
 		{
 		case UNSIGN_MAC_32:
 		case UNSIGN_32:
-		  rv = zero_ext (hwmult_result >> 16, 16);
+		  rv = zero_ext (HWMULT (sd, hwmult_result) >> 16, 16);
 		  break;
 
 		case SIGN_MAC_32:
 		case SIGN_32:
-		  rv = sign_ext (hwmult_signed_result >> 16, 16);
+		  rv = sign_ext (HWMULT (sd, hwmult_signed_result) >> 16, 16);
 		  break;
 		}
 	      break;
 
 	    case 0x13E:
-	      switch (hwmult_type)
+	      switch (HWMULT (sd, hwmult_type))
 		{
 		case UNSIGN_32:
 		  rv = 0;
 		  break;
 		case SIGN_32:
-		  rv = hwmult_signed_result < 0 ? -1 : 0;
+		  rv = HWMULT (sd, hwmult_signed_result) < 0 ? -1 : 0;
 		  break;
 		case UNSIGN_MAC_32:
 		  rv = 0; /* FIXME: Should be carry of last accumulate.  */
 		  break;
 		case SIGN_MAC_32:
-		  rv = hwmult_signed_accumulator < 0 ? -1 : 0;
+		  rv = HWMULT (sd, hwmult_signed_accumulator) < 0 ? -1 : 0;
 		  break;
 		}
 	      break;
 
 	    case 0x154:
-	      rv = zero_ext (hw32mult_result, 16);
+	      rv = zero_ext (HWMULT (sd, hw32mult_result), 16);
 	      break;
 
 	    case 0x156:
-	      rv = zero_ext (hw32mult_result >> 16, 16);
+	      rv = zero_ext (HWMULT (sd, hw32mult_result) >> 16, 16);
 	      break;
 
 	    case 0x158:
-	      rv = zero_ext (hw32mult_result >> 32, 16);
+	      rv = zero_ext (HWMULT (sd, hw32mult_result) >> 32, 16);
 	      break;
 
 	    case 0x15A:
-	      switch (hw32mult_type)
+	      switch (HWMULT (sd, hw32mult_type))
 		{
-		case UNSIGN_64: rv = zero_ext (hw32mult_result >> 48, 16); break;
-		case   SIGN_64: rv = sign_ext (hw32mult_result >> 48, 16); break;
+		case UNSIGN_64: rv = zero_ext (HWMULT (sd, hw32mult_result) >> 48, 16); break;
+		case   SIGN_64: rv = sign_ext (HWMULT (sd, hw32mult_result) >> 48, 16); break;
 		}
 	      break;
 
@@ -582,77 +574,91 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 
 	  switch (addr)
 	    {
-	    case 0x130: hwmult_op1 = val; hwmult_type = UNSIGN_32; break;
-	    case 0x132: hwmult_op1 = val; hwmult_type = SIGN_32; break;
-	    case 0x134: hwmult_op1 = val; hwmult_type = UNSIGN_MAC_32; break;
-	    case 0x136: hwmult_op1 = val; hwmult_type = SIGN_MAC_32; break;
+	    case 0x130: HWMULT (sd, hwmult_op1) = val; HWMULT (sd, hwmult_type) = UNSIGN_32; break;
+	    case 0x132: HWMULT (sd, hwmult_op1) = val; HWMULT (sd, hwmult_type) = SIGN_32; break;
+	    case 0x134: HWMULT (sd, hwmult_op1) = val; HWMULT (sd, hwmult_type) = UNSIGN_MAC_32; break;
+	    case 0x136: HWMULT (sd, hwmult_op1) = val; HWMULT (sd, hwmult_type) = SIGN_MAC_32; break;
 
-	    case 0x138: hwmult_op2 = val;
-	      switch (hwmult_type)
+	    case 0x138: HWMULT (sd, hwmult_op2) = val;
+	      switch (HWMULT (sd, hwmult_type))
 		{
 		case UNSIGN_32:
-		  hwmult_result = hwmult_op1 * hwmult_op2;
-		  hwmult_signed_result = (signed) hwmult_result;
-		  hwmult_accumulator = hwmult_signed_accumulator = 0;
+		  HWMULT (sd, hwmult_result) = HWMULT (sd, hwmult_op1) * HWMULT (sd, hwmult_op2);
+		  HWMULT (sd, hwmult_signed_result) = (signed) HWMULT (sd, hwmult_result);
+		  HWMULT (sd, hwmult_accumulator) = HWMULT (sd, hwmult_signed_accumulator) = 0;
 		  break;
 
 		case SIGN_32:
-		  a = sign_ext (hwmult_op1, 16);
-		  b = sign_ext (hwmult_op2, 16);
-		  hwmult_signed_result = a * b;
-		  hwmult_result = (unsigned) hwmult_signed_result;
-		  hwmult_accumulator = hwmult_signed_accumulator = 0;
+		  a = sign_ext (HWMULT (sd, hwmult_op1), 16);
+		  b = sign_ext (HWMULT (sd, hwmult_op2), 16);
+		  HWMULT (sd, hwmult_signed_result) = a * b;
+		  HWMULT (sd, hwmult_result) = (unsigned) HWMULT (sd, hwmult_signed_result);
+		  HWMULT (sd, hwmult_accumulator) = HWMULT (sd, hwmult_signed_accumulator) = 0;
 		  break;
 
 		case UNSIGN_MAC_32:
-		  hwmult_accumulator += hwmult_op1 * hwmult_op2;
-		  hwmult_signed_accumulator += hwmult_op1 * hwmult_op2;
-		  hwmult_result = hwmult_accumulator;
-		  hwmult_signed_result = hwmult_signed_accumulator;
+		  HWMULT (sd, hwmult_accumulator) += HWMULT (sd, hwmult_op1) * HWMULT (sd, hwmult_op2);
+		  HWMULT (sd, hwmult_signed_accumulator) += HWMULT (sd, hwmult_op1) * HWMULT (sd, hwmult_op2);
+		  HWMULT (sd, hwmult_result) = HWMULT (sd, hwmult_accumulator);
+		  HWMULT (sd, hwmult_signed_result) = HWMULT (sd, hwmult_signed_accumulator);
 		  break;
 
 		case SIGN_MAC_32:
-		  a = sign_ext (hwmult_op1, 16);
-		  b = sign_ext (hwmult_op2, 16);
-		  hwmult_accumulator += a * b;
-		  hwmult_signed_accumulator += a * b;
-		  hwmult_result = hwmult_accumulator;
-		  hwmult_signed_result = hwmult_signed_accumulator;
+		  a = sign_ext (HWMULT (sd, hwmult_op1), 16);
+		  b = sign_ext (HWMULT (sd, hwmult_op2), 16);
+		  HWMULT (sd, hwmult_accumulator) += a * b;
+		  HWMULT (sd, hwmult_signed_accumulator) += a * b;
+		  HWMULT (sd, hwmult_result) = HWMULT (sd, hwmult_accumulator);
+		  HWMULT (sd, hwmult_signed_result) = HWMULT (sd, hwmult_signed_accumulator);
 		  break;
 		}
 	      break;
 
 	    case 0x13a:
 	      /* Copy into LOW result...  */
-	      switch (hwmult_type)
+	      switch (HWMULT (sd, hwmult_type))
 		{
 		case UNSIGN_MAC_32:
 		case UNSIGN_32:
-		  hwmult_accumulator = hwmult_result = zero_ext (val, 16);
-		  hwmult_signed_accumulator = sign_ext (val, 16);
+		  HWMULT (sd, hwmult_accumulator) = HWMULT (sd, hwmult_result) = zero_ext (val, 16);
+		  HWMULT (sd, hwmult_signed_accumulator) = sign_ext (val, 16);
 		  break;
 		case SIGN_MAC_32:
 		case SIGN_32:
-		  hwmult_signed_accumulator = hwmult_result = sign_ext (val, 16);
-		  hwmult_accumulator = zero_ext (val, 16);
+		  HWMULT (sd, hwmult_signed_accumulator) = HWMULT (sd, hwmult_result) = sign_ext (val, 16);
+		  HWMULT (sd, hwmult_accumulator) = zero_ext (val, 16);
 		  break;
 		}
 	      break;
 		
-	    case 0x140: hw32mult_op1 = val; hw32mult_type = UNSIGN_64; break;
-	    case 0x142: hw32mult_op1 = (hw32mult_op1 & 0xFFFF) | (val << 16); break;
-	    case 0x144: hw32mult_op1 = val; hw32mult_type = SIGN_64; break;
-	    case 0x146: hw32mult_op1 = (hw32mult_op1 & 0xFFFF) | (val << 16); break;
-	    case 0x150: hw32mult_op2 = val; break;
+	    case 0x140:
+	      HWMULT (sd, hw32mult_op1) = val;
+	      HWMULT (sd, hw32mult_type) = UNSIGN_64;
+	      break;
+	    case 0x142:
+	      HWMULT (sd, hw32mult_op1) = (HWMULT (sd, hw32mult_op1) & 0xFFFF) | (val << 16);
+	      break;
+	    case 0x144:
+	      HWMULT (sd, hw32mult_op1) = val;
+	      HWMULT (sd, hw32mult_type) = SIGN_64;
+	      break;
+	    case 0x146:
+	      HWMULT (sd, hw32mult_op1) = (HWMULT (sd, hw32mult_op1) & 0xFFFF) | (val << 16);
+	      break;
+	    case 0x150:
+	      HWMULT (sd, hw32mult_op2) = val;
+	      break;
 
-	    case 0x152: hw32mult_op2 = (hw32mult_op2 & 0xFFFF) | (val << 16);
-	      switch (hw32mult_type)
+	    case 0x152:
+	      HWMULT (sd, hw32mult_op2) = (HWMULT (sd, hw32mult_op2) & 0xFFFF) | (val << 16);
+	      switch (HWMULT (sd, hw32mult_type))
 		{
 		case UNSIGN_64:
-		  hw32mult_result = hw32mult_op1 * hw32mult_op2;
+		  HWMULT (sd, hw32mult_result) = HWMULT (sd, hw32mult_op1) * HWMULT (sd, hw32mult_op2);
 		  break;
 		case SIGN_64:
-		  hw32mult_result = sign_ext (hw32mult_op1, 32) * sign_ext (hw32mult_op2, 32);
+		  HWMULT (sd, hw32mult_result) = sign_ext (HWMULT (sd, hw32mult_op1), 32)
+		    * sign_ext (HWMULT (sd, hw32mult_op2), 32);
 		  break;
 		}
 	      break;
