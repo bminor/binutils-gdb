@@ -2510,8 +2510,10 @@ val_print_string (struct type *elttype, const char *encoding,
      LEN is -1.  */
 
   /* Determine found_nul by looking at the last character read.  */
-  found_nul = extract_unsigned_integer (buffer + bytes_read - width, width,
-					byte_order) == 0;
+  found_nul = 0;
+  if (bytes_read >= width)
+    found_nul = extract_unsigned_integer (buffer + bytes_read - width, width,
+					  byte_order) == 0;
   if (len == -1 && !found_nul)
     {
       gdb_byte *peekbuf;

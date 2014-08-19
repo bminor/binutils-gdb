@@ -1,3 +1,8 @@
+2014-08-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -fsanitize=address on unreadable inferior strings.
+	* valprint.c (val_print_string): Fix access before BUFFER.
+
 2014-08-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target.c (target_struct_size): Remove.
