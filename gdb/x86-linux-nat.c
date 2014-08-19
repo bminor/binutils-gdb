@@ -25,7 +25,7 @@
 #include <sys/user.h>
 #include <sys/procfs.h>
 
-#include "i386-nat.h"
+#include "x86-nat.h"
 #include "linux-nat.h"
 #ifndef __x86_64__
 #include "i386-linux-nat.h"
@@ -35,7 +35,7 @@
 #ifdef __x86_64__
 #include "amd64-linux-tdep.h"
 #endif
-#include "i386-xstate.h"
+#include "x86-xstate.h"
 #include "nat/linux-btrace.h"
 
 /* Per-thread arch-specific data we want to keep.  */
@@ -179,8 +179,8 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 
   if (lwp->arch_private->debug_registers_changed)
     {
-      struct i386_debug_reg_state *state
-	= i386_debug_reg_state (ptid_get_pid (lwp->ptid));
+      struct x86_debug_reg_state *state
+	= x86_debug_reg_state (ptid_get_pid (lwp->ptid));
       int i;
 
       /* On Linux kernel before 2.6.33 commit
@@ -202,7 +202,7 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 
 	    /* If we're setting a watchpoint, any change the inferior
 	       had done itself to the debug registers needs to be
-	       discarded, otherwise, i386_stopped_data_address can get
+	       discarded, otherwise, x86_stopped_data_address can get
 	       confused.  */
 	    clear_status = 1;
 	  }
@@ -236,8 +236,8 @@ static void
 x86_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
 {
   pid_t parent_pid;
-  struct i386_debug_reg_state *parent_state;
-  struct i386_debug_reg_state *child_state;
+  struct x86_debug_reg_state *parent_state;
+  struct x86_debug_reg_state *child_state;
 
   /* NULL means no watchpoint has ever been set in the parent.  In
      that case, there's nothing to do.  */
@@ -259,8 +259,8 @@ x86_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
      this compatible with older Linux kernels too.  */
 
   parent_pid = ptid_get_pid (parent->ptid);
-  parent_state = i386_debug_reg_state (parent_pid);
-  child_state = i386_debug_reg_state (child_pid);
+  parent_state = x86_debug_reg_state (parent_pid);
+  child_state = x86_debug_reg_state (child_pid);
   *child_state = *parent_state;
 }
 
@@ -271,7 +271,7 @@ static void (*super_post_startup_inferior) (struct target_ops *self,
 static void
 x86_linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 {
-  i386_cleanup_dregs ();
+  x86_cleanup_dregs ();
   super_post_startup_inferior (self, ptid);
 }
 
@@ -347,7 +347,7 @@ x86_linux_read_description (struct target_ops *ops)
 
   if (have_ptrace_getregset == -1)
     {
-      uint64_t xstateregs[(I386_XSTATE_SSE_SIZE / sizeof (uint64_t))];
+      uint64_t xstateregs[(X86_XSTATE_SSE_SIZE / sizeof (uint64_t))];
       struct iovec iov;
 
       iov.iov_base = xstateregs;
@@ -372,7 +372,7 @@ x86_linux_read_description (struct target_ops *ops)
      zero so that the "no-features" descriptions are returned by the
      switches below.  */
   if (have_ptrace_getregset)
-    xcr0_features_bits = xcr0 & I386_XSTATE_ALL_MASK;
+    xcr0_features_bits = xcr0 & X86_XSTATE_ALL_MASK;
   else
     xcr0_features_bits = 0;
 
@@ -381,18 +381,18 @@ x86_linux_read_description (struct target_ops *ops)
 #ifdef __x86_64__
       switch (xcr0_features_bits)
 	{
-	case I386_XSTATE_MPX_AVX512_MASK:
-	case I386_XSTATE_AVX512_MASK:
+	case X86_XSTATE_MPX_AVX512_MASK:
+	case X86_XSTATE_AVX512_MASK:
 	  if (is_x32)
 	    return tdesc_x32_avx512_linux;
 	  else
 	    return tdesc_amd64_avx512_linux;
-	case I386_XSTATE_MPX_MASK:
+	case X86_XSTATE_MPX_MASK:
 	  if (is_x32)
 	    return tdesc_x32_avx_linux; /* No MPX on x32 using AVX.  */
 	  else
 	    return tdesc_amd64_mpx_linux;
-	case I386_XSTATE_AVX_MASK:
+	case X86_XSTATE_AVX_MASK:
 	  if (is_x32)
 	    return tdesc_x32_avx_linux;
 	  else
@@ -409,12 +409,12 @@ x86_linux_read_description (struct target_ops *ops)
     {
       switch (xcr0_features_bits)
 	{
-	case I386_XSTATE_MPX_AVX512_MASK:
-	case I386_XSTATE_AVX512_MASK:
+	case X86_XSTATE_MPX_AVX512_MASK:
+	case X86_XSTATE_AVX512_MASK:
 	  return tdesc_i386_avx512_linux;
-	case I386_XSTATE_MPX_MASK:
+	case X86_XSTATE_MPX_MASK:
 	  return tdesc_i386_mpx_linux;
-	case I386_XSTATE_AVX_MASK:
+	case X86_XSTATE_AVX_MASK:
 	  return tdesc_i386_avx_linux;
 	default:
 	  return tdesc_i386_linux;
@@ -530,13 +530,13 @@ x86_linux_create_target (void)
   struct target_ops *t = linux_target ();
 
   /* Initialize the debug register function vectors.  */
-  i386_use_watchpoints (t);
-  i386_dr_low.set_control = x86_linux_dr_set_control;
-  i386_dr_low.set_addr = x86_linux_dr_set_addr;
-  i386_dr_low.get_addr = x86_linux_dr_get_addr;
-  i386_dr_low.get_status = x86_linux_dr_get_status;
-  i386_dr_low.get_control = x86_linux_dr_get_control;
-  i386_set_debug_register_length (sizeof (void *));
+  x86_use_watchpoints (t);
+  x86_dr_low.set_control = x86_linux_dr_set_control;
+  x86_dr_low.set_addr = x86_linux_dr_set_addr;
+  x86_dr_low.get_addr = x86_linux_dr_get_addr;
+  x86_dr_low.get_status = x86_linux_dr_get_status;
+  x86_dr_low.get_control = x86_linux_dr_get_control;
+  x86_set_debug_register_length (sizeof (void *));
 
   /* Override the GNU/Linux inferior startup hook.  */
   super_post_startup_inferior = t->to_post_startup_inferior;
@@ -563,6 +563,6 @@ x86_linux_add_target (struct target_ops *t)
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, x86_linux_new_thread);
   linux_nat_set_new_fork (t, x86_linux_new_fork);
-  linux_nat_set_forget_process (t, i386_forget_process);
+  linux_nat_set_forget_process (t, x86_forget_process);
   linux_nat_set_prepare_to_resume (t, x86_linux_prepare_to_resume);
 }

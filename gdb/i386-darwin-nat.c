@@ -33,7 +33,7 @@
 #include "arch-utils.h"
 #include "gdbcore.h"
 
-#include "i386-nat.h"
+#include "x86-nat.h"
 #include "darwin-nat.h"
 #include "i386-darwin-tdep.h"
 
@@ -628,19 +628,19 @@ darwin_complete_target (struct target_ops *target)
   amd64_native_gregset32_num_regs = i386_darwin_thread_state_num_regs;
 #endif
 
-  i386_use_watchpoints (target);
+  x86_use_watchpoints (target);
 
-  i386_dr_low.set_control = i386_darwin_dr_set_control;
-  i386_dr_low.set_addr = i386_darwin_dr_set_addr;
-  i386_dr_low.get_addr = i386_darwin_dr_get_addr;
-  i386_dr_low.get_status = i386_darwin_dr_get_status;
-  i386_dr_low.get_control = i386_darwin_dr_get_control;
+  x86_dr_low.set_control = i386_darwin_dr_set_control;
+  x86_dr_low.set_addr = i386_darwin_dr_set_addr;
+  x86_dr_low.get_addr = i386_darwin_dr_get_addr;
+  x86_dr_low.get_status = i386_darwin_dr_get_status;
+  x86_dr_low.get_control = i386_darwin_dr_get_control;
 
   /* Let's assume that the kernel is 64 bits iff the executable is.  */
 #ifdef __x86_64__
-  i386_set_debug_register_length (8);
+  x86_set_debug_register_length (8);
 #else
-  i386_set_debug_register_length (4);
+  x86_set_debug_register_length (4);
 #endif
 
   target->to_fetch_registers = i386_darwin_fetch_inferior_registers;

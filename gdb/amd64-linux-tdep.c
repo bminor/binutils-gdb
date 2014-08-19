@@ -31,7 +31,7 @@
 #include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
 #include "linux-tdep.h"
-#include "i386-xstate.h"
+#include "x86-xstate.h"
 
 #include "amd64-tdep.h"
 #include "solib-svr4.h"
@@ -58,7 +58,7 @@ static struct core_regset_section amd64_linux_regset_sections[] =
 {
   { ".reg", 27 * 8, "general-purpose" },
   { ".reg2", 512, "floating-point" },
-  { ".reg-xstate", I386_XSTATE_MAX_SIZE, "XSAVE extended state" },
+  { ".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state" },
   { NULL, 0 }
 };
 
@@ -1583,20 +1583,20 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
   /* Linux/x86-64.  */
   uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
 
-  switch (xcr0 & I386_XSTATE_ALL_MASK)
+  switch (xcr0 & X86_XSTATE_ALL_MASK)
     {
-    case I386_XSTATE_MPX_AVX512_MASK:
-    case I386_XSTATE_AVX512_MASK:
+    case X86_XSTATE_MPX_AVX512_MASK:
+    case X86_XSTATE_AVX512_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	return tdesc_x32_avx512_linux;
       else
 	return tdesc_amd64_avx512_linux;
-    case I386_XSTATE_MPX_MASK:
+    case X86_XSTATE_MPX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	return tdesc_x32_avx_linux;  /* No x32 MPX falling back to AVX.  */
       else
 	return tdesc_amd64_mpx_linux;
-    case I386_XSTATE_AVX_MASK:
+    case X86_XSTATE_AVX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	return tdesc_x32_avx_linux;
       else

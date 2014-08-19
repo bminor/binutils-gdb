@@ -149,7 +149,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/thread-db.c $(srcdir)/utils.c $(srcdir)/debug.c \
 	$(srcdir)/linux-arm-low.c $(srcdir)/linux-bfin-low.c \
 	$(srcdir)/linux-cris-low.c $(srcdir)/linux-crisv32-low.c \
-	${srcdir}/i386-low.c $(srcdir)/i387-fp.c \
+	${srcdir}/x86-low.c $(srcdir)/i387-fp.c \
 	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
 	$(srcdir)/linux-m32r-low.c \
 	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
@@ -558,7 +558,7 @@ waitstatus.o: ../target/waitstatus.c
 
 # Native object files rules from ../nat
 
-i386-dregs.o: ../nat/i386-dregs.c
+x86-dregs.o: ../nat/x86-dregs.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 linux-btrace.o: ../nat/linux-btrace.c

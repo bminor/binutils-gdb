@@ -1,4 +1,4 @@
-/* Misc. low level support for i386.
+/* Low level support for x86 (i386 and x86-64).
 
    Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
@@ -17,8 +17,22 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "server.h"
+#include "x86-low.h"
 
-#include "nat/i386-dregs.h"
+/* Clear the reference counts and forget everything we knew about the
+   debug registers.  */
 
-/* Initialize STATE.  */
-extern void i386_low_init_dregs (struct i386_debug_reg_state *state);
+void
+x86_low_init_dregs (struct x86_debug_reg_state *state)
+{
+  int i;
+
+  ALL_DEBUG_REGISTERS (i)
+    {
+      state->dr_mirror[i] = 0;
+      state->dr_ref_count[i] = 0;
+    }
+  state->dr_control_mirror = 0;
+  state->dr_status_mirror  = 0;
+}

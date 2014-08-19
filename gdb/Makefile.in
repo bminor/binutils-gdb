@@ -863,7 +863,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
 HFILES_NO_SRCDIR = \
 common/gdb_signals.h nat/gdb_thread_db.h common/gdb_vecs.h \
-common/i386-xstate.h nat/linux-ptrace.h nat/mips-linux-watch.h \
+common/x86-xstate.h nat/linux-ptrace.h nat/mips-linux-watch.h \
 proc-utils.h aarch64-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
 ppcnbsd-tdep.h cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h amd64bsd-nat.h \
@@ -921,7 +921,7 @@ psymtab.h psympriv.h progspace.h bfin-tdep.h ia64-hpux-tdep.h \
 amd64-darwin-tdep.h charset-list.h \
 config/djgpp/langinfo.h config/djgpp/nl_types.h darwin-nat.h \
 dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
-i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h nios2-tdep.h \
+i386-darwin-tdep.h x86-nat.h linux-record.h moxie-tdep.h nios2-tdep.h \
 osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
 record-full.h solib-aix.h \
@@ -933,9 +933,9 @@ common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/format.h common/host-defs.h utils.h common/queue.h \
 nat/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h nat/linux-btrace.h \
-ctf.h nat/i386-cpuid.h nat/i386-gcc-cpuid.h target/resume.h \
+ctf.h nat/x86-cpuid.h nat/x86-gcc-cpuid.h target/resume.h \
 target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h \
-common/print-utils.h common/rsp-low.h nat/i386-dregs.h x86-linux-nat.h \
+common/print-utils.h common/rsp-low.h nat/x86-dregs.h x86-linux-nat.h \
 i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h
@@ -1636,7 +1636,7 @@ ALLDEPFILES = \
 	i387-tdep.c \
 	i386-darwin-tdep.c i386-darwin-nat.c \
 	i386-dicos-tdep.c \
-	i386-linux-tdep.c i386-nat.c \
+	i386-linux-tdep.c x86-nat.c \
 	i386-sol2-nat.c i386-sol2-tdep.c \
 	i386gnu-nat.c i386gnu-tdep.c \
 	ia64-hpux-nat.c ia64-hpux-tdep.c \
@@ -2187,8 +2187,8 @@ waitstatus.o: ${srcdir}/target/waitstatus.c
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the sub-directory.
 
-i386-dregs.o: ${srcdir}/nat/i386-dregs.c
-	$(COMPILE) $(srcdir)/nat/i386-dregs.c
+x86-dregs.o: ${srcdir}/nat/x86-dregs.c
+	$(COMPILE) $(srcdir)/nat/x86-dregs.c
 	$(POSTCOMPILE)
 
 linux-btrace.o: ${srcdir}/nat/linux-btrace.c

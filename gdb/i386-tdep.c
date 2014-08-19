@@ -47,7 +47,7 @@
 #include "exceptions.h"
 #include "i386-tdep.h"
 #include "i387-tdep.h"
-#include "i386-xstate.h"
+#include "x86-xstate.h"
 
 #include "record.h"
 #include "record-full.h"
@@ -4478,12 +4478,12 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   ymm_avx512_regnum_p = i386_ymm_avx512_regnum_p (gdbarch, regnum);
   zmm_regnum_p = i386_zmm_regnum_p (gdbarch, regnum);
 
-  avx512_p = ((tdep->xcr0 & I386_XSTATE_AVX512_MASK)
-	       == I386_XSTATE_AVX512_MASK);
-  avx_p = ((tdep->xcr0 & I386_XSTATE_AVX512_MASK)
-	    == I386_XSTATE_AVX_MASK) && !avx512_p;
-  sse_p = ((tdep->xcr0 & I386_XSTATE_AVX512_MASK)
-	    == I386_XSTATE_SSE_MASK) && !avx512_p && ! avx_p;
+  avx512_p = ((tdep->xcr0 & X86_XSTATE_AVX512_MASK)
+	      == X86_XSTATE_AVX512_MASK);
+  avx_p = ((tdep->xcr0 & X86_XSTATE_AVX512_MASK)
+	   == X86_XSTATE_AVX_MASK) && !avx512_p;
+  sse_p = ((tdep->xcr0 & X86_XSTATE_AVX512_MASK)
+	   == X86_XSTATE_SSE_MASK) && !avx512_p && ! avx_p;
 
   if (group == vector_reggroup)
     return (mmx_regnum_p
@@ -4512,17 +4512,17 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
   bnd_regnum_p = i386_bnd_regnum_p (gdbarch, regnum);
   if (group == all_reggroup
-      && ((bnd_regnum_p && (tdep->xcr0 & I386_XSTATE_MPX_MASK))))
+      && ((bnd_regnum_p && (tdep->xcr0 & X86_XSTATE_MPX_MASK))))
     return bnd_regnum_p;
 
   bndr_regnum_p = i386_bndr_regnum_p (gdbarch, regnum);
   if (group == all_reggroup
-      && ((bndr_regnum_p && (tdep->xcr0 & I386_XSTATE_MPX_MASK))))
+      && ((bndr_regnum_p && (tdep->xcr0 & X86_XSTATE_MPX_MASK))))
     return 0;
 
   mpx_ctrl_regnum_p = i386_mpx_ctrl_regnum_p (gdbarch, regnum);
   if (group == all_reggroup
-      && ((mpx_ctrl_regnum_p && (tdep->xcr0 & I386_XSTATE_MPX_MASK))))
+      && ((mpx_ctrl_regnum_p && (tdep->xcr0 & X86_XSTATE_MPX_MASK))))
     return mpx_ctrl_regnum_p;
 
   if (group == general_reggroup)
@@ -8160,7 +8160,7 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
       if (!feature_avx)
 	return 0;
 
-      tdep->xcr0 = I386_XSTATE_MPX_AVX512_MASK;
+      tdep->xcr0 = X86_XSTATE_MPX_AVX512_MASK;
 
       /* It may have been set by OSABI initialization function.  */
       if (tdep->k0_regnum < 0)
@@ -8203,7 +8203,7 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 	return 0;
 
       if (!feature_avx512)
-	tdep->xcr0 = I386_XSTATE_AVX_MASK;
+	tdep->xcr0 = X86_XSTATE_AVX_MASK;
 
       /* It may have been set by OSABI initialization function.  */
       if (tdep->num_ymm_regs == 0)
@@ -8219,10 +8219,10 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 					    tdep->ymmh_register_names[i]);
     }
   else if (feature_sse)
-    tdep->xcr0 = I386_XSTATE_SSE_MASK;
+    tdep->xcr0 = X86_XSTATE_SSE_MASK;
   else
     {
-      tdep->xcr0 = I386_XSTATE_X87_MASK;
+      tdep->xcr0 = X86_XSTATE_X87_MASK;
       tdep->num_xmm_regs = 0;
     }
 
@@ -8242,7 +8242,7 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 
   if (feature_mpx)
     {
-      tdep->xcr0 |= I386_XSTATE_MPX_MASK;
+      tdep->xcr0 |= X86_XSTATE_MPX_MASK;
 
       if (tdep->bnd0r_regnum < 0)
 	{

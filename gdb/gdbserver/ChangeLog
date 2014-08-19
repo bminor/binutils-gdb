@@ -1,5 +1,14 @@
 2014-09-02  Gary Benson  <gbenson@redhat.com>
 
+	* i386-low.h: Renamed as...
+	* x86-low.h: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* i386-low.c: Renamed as...
+	* x86-low.c: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+
+2014-09-02  Gary Benson  <gbenson@redhat.com>
+
 	* linux-x86-low.c (x86_linux_new_process): Use XCNEW.
 	(x86_linux_new_thread): Likewise.
 

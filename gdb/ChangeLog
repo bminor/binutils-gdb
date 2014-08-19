@@ -1,3 +1,29 @@
+2014-09-02  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.h: Renamed as...
+	* x86-nat.h: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* i386-nat.c: Renamed as...
+	* x86-nat.c: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* common/i386-xstate.h: Renamed as...
+	* common/x86-xstate.h: New file.  All type, function and variable
+	name prefixes changed from "i386_" to "x86_".  All references
+	updated.
+	* nat/i386-cpuid.h: Renamed as...
+	* nat/x86-cpuid.h: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* nat/i386-gcc-cpuid.h: Renamed as...
+	* nat/x86-gcc-cpuid.h: New file.  All type, function and variable
+	name prefixes changed from "i386_" to "x86_".  All references
+	updated.
+	* nat/i386-dregs.h: Renamed as...
+	* nat/x86-dregs.h: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* nat/i386-dregs.c: Renamed as...
+	* nat/x86-dregs.c: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+
 2014-09-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* varobj.c (_initialize_varobj): Move to the end of file.

@@ -33,7 +33,7 @@
 #include "amd64-tdep.h"
 #include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
-#include "i386-xstate.h"
+#include "x86-xstate.h"
 
 #include "x86-linux-nat.h"
 
@@ -150,7 +150,7 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 
       if (have_ptrace_getregset)
 	{
-	  char xstateregs[I386_XSTATE_MAX_SIZE];
+	  char xstateregs[X86_XSTATE_MAX_SIZE];
 	  struct iovec iov;
 
 	  iov.iov_base = xstateregs;
@@ -209,7 +209,7 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
 
       if (have_ptrace_getregset)
 	{
-	  char xstateregs[I386_XSTATE_MAX_SIZE];
+	  char xstateregs[X86_XSTATE_MAX_SIZE];
 	  struct iovec iov;
 
 	  iov.iov_base = xstateregs;
