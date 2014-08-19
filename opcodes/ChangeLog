@@ -1,3 +1,30 @@
+2014-08-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-dis.c (s390_insn_length, s390_insn_matches_opcode)
+	(s390_print_insn_with_opcode, opcode_mask_more_specific): New
+	static functions, code was moved from...
+	(print_insn_s390): ...here.
+	(s390_extract_operand): Adjust comment.  Change type of first
+	parameter from 'unsigned char *' to 'const bfd_byte *'.
+	(union operand_value): New.
+	(s390_extract_operand): Change return type to union operand_value.
+	Also avoid integer overflow in sign-extension.
+	(s390_print_insn_with_opcode): Adjust to changed return value from
+	s390_extract_operand().  Change "%i" printf format to "%u" for
+	unsigned values.
+	(init_disasm): Simplify initialization of opc_index[].  This also
+	fixes an access after the last element of s390_opcodes[].
+	(print_insn_s390): Simplify the opcode search loop.
+	Check architecture mask against all searched opcodes, not just the
+	first matching one.
+	(s390_print_insn_with_opcode): Drop function pointer dereferences
+	without effect.
+	(print_insn_s390): Likewise.
+	(s390_insn_length): Simplify formula for return value.
+	(s390_print_insn_with_opcode): Avoid special handling for the
+	separator before the first operand.  Use new local variable
+	'flags' in place of 'operand->flags'.
+
 2014-08-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (struct private): Change int's to bfd_boolean's.
