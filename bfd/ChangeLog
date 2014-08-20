@@ -1,3 +1,9 @@
+2014-08-22  Kai Tietz  <ktietz@redhat.com>
+
+	PR binutils/11822
+	* coffcode.h (coff_compute_section_file_positions): Keep
+	FileAlignment valid as set.
+
 2014-08-22  Alan Modra  <amodra@gmail.com>
 
 	* elf-eh-frame.c (struct cie): Delete "output_sec" field.
