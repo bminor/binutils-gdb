@@ -3475,15 +3475,16 @@ value_from_contents_and_address (struct type *type,
 				 CORE_ADDR address)
 {
   struct type *resolved_type = resolve_dynamic_type (type, address);
+  struct type *resolved_type_no_typedef = check_typedef (resolved_type);
   struct value *v;
 
   if (valaddr == NULL)
     v = allocate_value_lazy (resolved_type);
   else
     v = value_from_contents (resolved_type, valaddr);
-  if (TYPE_DATA_LOCATION (resolved_type) != NULL
-      && TYPE_DATA_LOCATION_KIND (resolved_type) == PROP_CONST)
-    address = TYPE_DATA_LOCATION_ADDR (resolved_type);
+  if (TYPE_DATA_LOCATION (resolved_type_no_typedef) != NULL
+      && TYPE_DATA_LOCATION_KIND (resolved_type_no_typedef) == PROP_CONST)
+    address = TYPE_DATA_LOCATION_ADDR (resolved_type_no_typedef);
   set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
   return v;
