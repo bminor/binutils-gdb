@@ -1,3 +1,10 @@
+2014-08-20  Roland McGrath  <mcgrathr@google.com>
+
+	PR ld/17277
+	* ld-arm/pcrel-shared.s: New file.
+	* ld-arm/pcrel-shared.rd: New file.
+	* ld-arm/arm-elf.exp (armelftests_common): Add it.
+
 2014-06-12  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches

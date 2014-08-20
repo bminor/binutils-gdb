@@ -209,6 +209,10 @@ set armelftests_common {
     {"EABI ABI flags ld -r" "-r" "" "-mfloat-abi=soft -meabi=5" {eabi-soft-float.s}
      {{readelf -h eabi-soft-float-r.d}}
      "eabi-soft-float-r.o"}
+    {"PC-relative in -shared" "-shared" ""
+     "" {pcrel-shared.s}
+     {{readelf -dr pcrel-shared.rd}}
+     "pcrel-shared.so"}
 }
 
 set armelftests_nonacl {
