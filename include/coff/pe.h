@@ -40,6 +40,7 @@
 
 /* DllCharacteristics flag bits.  The inconsistent naming may seem
    odd, but that is how they are defined in the PE specification.  */
+#define IMAGE_DLL_CHARACTERISTICS_HIGH_ENTROPY_VA       0x0020
 #define IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE          0x0040
 #define IMAGE_DLL_CHARACTERISTICS_FORCE_INTEGRITY       0x0080
 #define IMAGE_DLL_CHARACTERISTICS_NX_COMPAT             0x0100
@@ -59,16 +60,16 @@
 
 /* Section characteristics added for ppc-nt.  */
 
-#define IMAGE_SCN_TYPE_NO_PAD                0x00000008  /* Reserved. */
+#define IMAGE_SCN_TYPE_NO_PAD                0x00000008  /* Reserved.  */
 
-#define IMAGE_SCN_CNT_CODE                   0x00000020  /* Section contains code. */
-#define IMAGE_SCN_CNT_INITIALIZED_DATA       0x00000040  /* Section contains initialized data. */
-#define IMAGE_SCN_CNT_UNINITIALIZED_DATA     0x00000080  /* Section contains uninitialized data. */
+#define IMAGE_SCN_CNT_CODE                   0x00000020  /* Section contains code.  */
+#define IMAGE_SCN_CNT_INITIALIZED_DATA       0x00000040  /* Section contains initialized data.  */
+#define IMAGE_SCN_CNT_UNINITIALIZED_DATA     0x00000080  /* Section contains uninitialized data.  */
 
-#define IMAGE_SCN_LNK_OTHER                  0x00000100  /* Reserved. */
-#define IMAGE_SCN_LNK_INFO                   0x00000200  /* Section contains comments or some other type of information. */
-#define IMAGE_SCN_LNK_REMOVE                 0x00000800  /* Section contents will not become part of image. */
-#define IMAGE_SCN_LNK_COMDAT                 0x00001000  /* Section contents comdat. */
+#define IMAGE_SCN_LNK_OTHER                  0x00000100  /* Reserved.  */
+#define IMAGE_SCN_LNK_INFO                   0x00000200  /* Section contains comments or some other type of information.  */
+#define IMAGE_SCN_LNK_REMOVE                 0x00000800  /* Section contents will not become part of image.  */
+#define IMAGE_SCN_LNK_COMDAT                 0x00001000  /* Section contents comdat.  */
 
 #define IMAGE_SCN_MEM_FARDATA                0x00008000
 
@@ -77,7 +78,7 @@
 #define IMAGE_SCN_MEM_LOCKED                 0x00040000
 #define IMAGE_SCN_MEM_PRELOAD                0x00080000
 
-/* Bit position in the s_flags field where the alignment values start. */
+/* Bit position in the s_flags field where the alignment values start.  */
 #define IMAGE_SCN_ALIGN_POWER_BIT_POS	     20
 #define IMAGE_SCN_ALIGN_POWER_BIT_MASK	     0x00f00000
 #define IMAGE_SCN_ALIGN_POWER_NUM(val)	     \
@@ -89,7 +90,7 @@
 #define IMAGE_SCN_ALIGN_2BYTES		     IMAGE_SCN_ALIGN_POWER_CONST (1)
 #define IMAGE_SCN_ALIGN_4BYTES		     IMAGE_SCN_ALIGN_POWER_CONST (2)
 #define IMAGE_SCN_ALIGN_8BYTES		     IMAGE_SCN_ALIGN_POWER_CONST (3)
-/* Default alignment if no others are specified. */
+/* Default alignment if no others are specified.  */
 #define IMAGE_SCN_ALIGN_16BYTES		     IMAGE_SCN_ALIGN_POWER_CONST (4)
 #define IMAGE_SCN_ALIGN_32BYTES		     IMAGE_SCN_ALIGN_POWER_CONST (5)
 #define IMAGE_SCN_ALIGN_64BYTES		     IMAGE_SCN_ALIGN_POWER_CONST (6)
@@ -101,7 +102,7 @@
 #define IMAGE_SCN_ALIGN_4096BYTES	     IMAGE_SCN_ALIGN_POWER_CONST (12)
 #define IMAGE_SCN_ALIGN_8192BYTES	     IMAGE_SCN_ALIGN_POWER_CONST (13)
 
-/* Encode alignment power into IMAGE_SCN_ALIGN bits of s_flags */
+/* Encode alignment power into IMAGE_SCN_ALIGN bits of s_flags.  */
 #define COFF_ENCODE_ALIGNMENT(SECTION, ALIGNMENT_POWER) \
   ((SECTION).s_flags |= IMAGE_SCN_ALIGN_POWER_CONST ((ALIGNMENT_POWER)))
 
@@ -200,7 +201,7 @@ struct external_PEI_DOS_hdr
 
 struct external_PEI_IMAGE_hdr
 {
-  char nt_signature[4];		/* required NT signature, 0x4550.  */
+  char nt_signature[4];		/* Required NT signature, 0x4550.  */
 
   /* From standard header.  */
   char f_magic[2];		/* Magic number.		*/
@@ -239,7 +240,7 @@ struct external_PEI_filehdr
   /* Note: additional bytes may be inserted before the signature.  Use
    the e_lfanew field to find the actual location of the NT signature.  */
 
-  char nt_signature[4];		/* required NT signature, 0x4550.  */
+  char nt_signature[4];		/* Required NT signature, 0x4550.  */
 
   /* From standard header.  */
   char f_magic[2];		/* Magic number.		*/
@@ -262,7 +263,7 @@ struct external_PEI_filehdr
 
 #endif /* COFF_IMAGE_WITH_PE */
 
-/* 32-bit PE a.out header: */
+/* 32-bit PE a.out header:  */
 
 typedef struct
 {
@@ -422,14 +423,14 @@ union external_AUX_SYMBOL_EX
 
   struct
   {
-    char Length[4];	/* section length */
-    char NumberOfRelocations[2];	/* # relocation entries */
-    char NumberOfLinenumbers[2];	/* # line numbers */
-    char Checksum[4];		   /* section COMDAT checksum	      */
-    char Number[2];	   /* COMDAT associated section index */
-    char Selection[1];		   /* COMDAT selection number	      */
+    char Length[4];		/* Section length.  */
+    char NumberOfRelocations[2];/* # relocation entries.  */
+    char NumberOfLinenumbers[2];/* # line numbers.  */
+    char Checksum[4];		/* Section COMDAT checksum.  */
+    char Number[2];	   	/* COMDAT associated section index.  */
+    char Selection[1];		/* COMDAT selection number.  */
     char bReserved[1];
-    char HighNumber[2];           /* High bits of COMDAT associated sec.  */
+    char HighNumber[2];         /* High bits of COMDAT associated sec.  */
     char rgbReserved[2];
   } Section;
 } ATTRIBUTE_PACKED;
@@ -584,8 +585,9 @@ struct external_pex64_scope_entry
   (PEX64_OFFSET_TO_SCOPE_COUNT(COUNTOFUNWINDCODES) + \
    PEX64_SCOPE_ENTRY_SIZE * (IDX))
 
-/* Extra structure used in debug directory */
-struct external_IMAGE_DEBUG_DIRECTORY {
+/* Extra structure used in debug directory.  */
+struct external_IMAGE_DEBUG_DIRECTORY
+{
   char Characteristics[4];
   char TimeDateStamp[4];
   char MajorVersion[2];
@@ -596,8 +598,8 @@ struct external_IMAGE_DEBUG_DIRECTORY {
   char PointerToRawData[4];
 };
 
-/* Extra structures used in codeview debug record */
-/* This is not part of the PE specification */
+/* Extra structures used in codeview debug record.  */
+/* This is not part of the PE specification.  */
 
 #define CVINFO_PDB70_CVSIGNATURE 0x53445352 // "RSDS"
 #define CVINFO_PDB20_CVSIGNATURE 0x3031424e // "NB10"

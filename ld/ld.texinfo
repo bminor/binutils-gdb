@@ -2655,6 +2655,11 @@ The following options set flags in the @code{DllCharacteristics} field
 of the PE file header:
 [These options are specific to PE targeted ports of the linker]
 
+@kindex --high-entropy-va
+@item --high-entropy-va
+Image is compatible with 64-bit address space layout randomization
+(ASLR).
+
 @kindex --dynamicbase
 @item --dynamicbase
 The image base address may be relocated using address space layout

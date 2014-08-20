@@ -1,3 +1,8 @@
+2014-08-20  Daniel Micay  <danielmicay@gmail.com>
+
+	* emultempl/pep.em: Add --high-entropy-va switch.
+	* ld.texinfo: Document the --high-entropy-va switch.
+
 2014-08-20  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/DWARF.sc: Add copyright notice.
