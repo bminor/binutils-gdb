@@ -827,7 +827,7 @@ value_contents_bits_eq (const struct value *val1, int offset1,
 
   while (length > 0)
     {
-      ULONGEST l, h;
+      ULONGEST l = 0, h = 0; /* init for gcc -Wall */
       int i;
 
       for (i = 0; i < 2; i++)

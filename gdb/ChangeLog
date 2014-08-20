@@ -1,3 +1,7 @@
+2014-08-20  Pedro Alves  <palves@redhat.com>
+
+	* value.c (value_contents_bits_eq): Initialize l,h for gcc -Wall.
+
 2014-08-20  Yao Qi  <yao@codesourcery.com>
 
 	* amd64-tdep.c (amd64_classify): Add a blank line after the
