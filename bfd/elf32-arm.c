@@ -2172,7 +2172,7 @@ static const bfd_vma elf32_thumb2_plt0_entry [] =
      an instruction maybe encoded to one or two array elements.  */
   0xf8dfb500,		/* push    {lr}          */
   0x44fee008,		/* ldr.w   lr, [pc, #8]  */
-                        /* add     lr, pc        */
+			/* add     lr, pc        */
   0xff08f85e,		/* ldr.w   pc, [lr, #8]! */
   0x00000000,		/* &GOT[0] - .           */
 };
@@ -2187,7 +2187,7 @@ static const bfd_vma elf32_thumb2_plt_entry [] =
   0x0c00f2c0,		/* movt    ip, #0xNNNN    */
   0xf8dc44fc,           /* add     ip, pc         */
   0xbf00f000            /* ldr.w   pc, [ip]       */
-                        /* nop                    */
+			/* nop                    */
 };
 
 /* The format of the first entry in the procedure linkage table
@@ -7760,7 +7760,7 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
       else if (using_thumb_only (htab))
 	{
 	  /* PR ld/16017: Generate thumb only PLT entries.  */
-          if (!using_thumb2 (htab))
+	  if (!using_thumb2 (htab))
 	    {
 	      /* FIXME: We ought to be able to generate thumb-1 PLT
 		 instructions...  */
@@ -12500,7 +12500,7 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
 	      if (h == NULL
-		  && (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI))
+		  && elf32_arm_howto_from_type (r_type)->pc_relative)
 		{
 		  call_reloc_p = TRUE;
 		  may_need_local_target_p = TRUE;
@@ -12826,7 +12826,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		&& (sec->flags & SEC_ALLOC) != 0)
 	      {
 		if (h == NULL
-		    && (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI))
+		    && elf32_arm_howto_from_type (r_type)->pc_relative)
 		  {
 		    /* In shared libraries and relocatable executables,
 		       we treat local relative references as calls;
@@ -12972,7 +12972,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      p->pc_count = 0;
 	    }
 
-	  if (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI)
+	  if (elf32_arm_howto_from_type (r_type)->pc_relative)
 	    p->pc_count += 1;
 	  p->count += 1;
 	}
@@ -13551,12 +13551,12 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 
   if (info->shared || htab->root.is_relocatable_executable)
     {
-      /* The only relocs that use pc_count are R_ARM_REL32 and
-	 R_ARM_REL32_NOI, which will appear on something like
-	 ".long foo - .".  We want calls to protected symbols to resolve
-	 directly to the function rather than going via the plt.  If people
-	 want function pointer comparisons to work as expected then they
-	 should avoid writing assembly like ".long foo - .".  */
+      /* Relocs that use pc_count are PC-relative forms, which will appear
+	 on something like ".long foo - ." or "movw REG, foo - .".  We want
+	 calls to protected symbols to resolve directly to the function
+	 rather than going via the plt.  If people want function pointer
+	 comparisons to work as expected then they should avoid writing
+	 assembly like ".long foo - .".  */
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct elf_dyn_relocs **pp;
