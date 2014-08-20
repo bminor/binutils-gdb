@@ -1,3 +1,19 @@
+2014-08-20  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (EXTRA_RULES, CC): New variables, get from
+	configure.
+	(EXPECT): Handle READ1 being set.
+	(all): Depend on EXTRA_RULES.
+	(check-read1, expect-read1, read1.so, read1): New rules.
+	* README (Testsuite Parameters): Document the READ1 make variable.
+	(Race detection): New section.
+	* configure: Regenerate.
+	* configure.ac: If build==host==target, and running under a
+	GNU/glibc system, add read1 to the extra Makefile rules.
+	(EXTRA_RULES): AC_SUBST it.
+	* lib/read1.c: New file.
+
 2014-08-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/data-loc.exp: Add additional tests exercising
