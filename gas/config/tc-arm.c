@@ -249,6 +249,8 @@ static arm_feature_set selected_cpu = ARM_ARCH_NONE;
 /* Must be long enough to hold any of the names in arm_cpus.  */
 static char selected_cpu_name[16];
 
+extern FLONUM_TYPE generic_floating_point_number;
+
 /* Return if no cpu was selected on command-line.  */
 static bfd_boolean
 no_cpu_selected (void)
@@ -4944,6 +4946,31 @@ is_quarter_float (unsigned imm)
   return (imm & 0x7ffff) == 0 && ((imm & 0x7e000000) ^ bs) == 0;
 }
 
+
+/* Detect the presence of a floating point or integer zero constant,
+   i.e. #0.0 or #0.  */
+
+static bfd_boolean
+parse_ifimm_zero (char **in)
+{
+  int error_code;
+
+  if (!is_immediate_prefix (**in))
+    return FALSE;
+
+  ++*in;
+  error_code = atof_generic (in, ".", EXP_CHARS,
+                             &generic_floating_point_number);
+
+  if (!error_code
+      && generic_floating_point_number.sign == '+'
+      && (generic_floating_point_number.low
+          > generic_floating_point_number.leader))
+    return TRUE;
+
+  return FALSE;
+}
+
 /* Parse an 8-bit "quarter-precision" floating point number of the form:
    0baBbbbbbc defgh000 00000000 00000000.
    The zero and minus-zero cases need special handling, since they can't be
@@ -6417,6 +6444,7 @@ enum operand_parse_code
 
   OP_RNDQ_I0,   /* Neon D or Q reg, or immediate zero.  */
   OP_RVSD_I0,	/* VFP S or D reg, or immediate zero.  */
+  OP_RSVD_FI0, /* VFP S or D reg, or floating point immediate zero.  */
   OP_RR_RNSC,   /* ARM reg or Neon scalar.  */
   OP_RNSDQ_RNSC, /* Vector S, D or Q reg, or Neon scalar.  */
   OP_RNDQ_RNSC, /* Neon D or Q reg, or Neon scalar.  */
@@ -6698,6 +6726,22 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 	case OP_RVSD_I0:
 	  po_reg_or_goto (REG_TYPE_VFSD, try_imm0);
+	  break;
+
+	case OP_RSVD_FI0:
+	  {
+	    po_reg_or_goto (REG_TYPE_VFSD, try_ifimm0);
+	    break;
+	    try_ifimm0:
+	    if (parse_ifimm_zero (&str))
+	      inst.operands[i].imm = 0;
+	    else
+	    {
+	      inst.error
+	        = _("only floating point zero is allowed as immediate value");
+	      goto failure;
+	    }
+	  }
 	  break;
 
 	case OP_RR_RNSC:
@@ -19543,8 +19587,8 @@ static const struct asm_opcode insns[] =
  nCE(vnmul,     _vnmul,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
  nCE(vnmla,     _vnmla,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
  nCE(vnmls,     _vnmls,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
- nCE(vcmp,      _vcmp,    2, (RVSD, RVSD_I0),    vfp_nsyn_cmp),
- nCE(vcmpe,     _vcmpe,   2, (RVSD, RVSD_I0),    vfp_nsyn_cmp),
+ nCE(vcmp,      _vcmp,    2, (RVSD, RSVD_FI0),    vfp_nsyn_cmp),
+ nCE(vcmpe,     _vcmpe,   2, (RVSD, RSVD_FI0),    vfp_nsyn_cmp),
  NCE(vpush,     0,       1, (VRSDLST),          vfp_nsyn_push),
  NCE(vpop,      0,       1, (VRSDLST),          vfp_nsyn_pop),
  NCE(vcvtz,     0,       2, (RVSD, RVSD),       vfp_nsyn_cvtz),
