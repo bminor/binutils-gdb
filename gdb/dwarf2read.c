@@ -17125,7 +17125,9 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
 	 include_name = "hello.c"
 	 dir_name = "."
 	 DW_AT_comp_dir = comp_dir = "/tmp"
-	 DW_AT_name = "./hello.c"  */
+	 DW_AT_name = "./hello.c"
+
+      */
 
       if (dir_name != NULL)
 	{

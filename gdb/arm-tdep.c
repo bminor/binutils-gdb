@@ -3602,7 +3602,9 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	 {
 	   T real;
 	   T imag;
-	 };  */
+	 };
+
+      */
       switch (TYPE_LENGTH (t))
 	{
 	case 8:
