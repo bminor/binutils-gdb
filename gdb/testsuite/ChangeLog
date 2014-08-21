@@ -1,3 +1,8 @@
+2014-08-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/gcore-stale-thread.c: New file.
+	* gdb.threads/gcore-stale-thread.exp: New file.
+
 2014-07-29  Yao Qi  <yao@codesourcery.com>
 
 	PR gdb/17206

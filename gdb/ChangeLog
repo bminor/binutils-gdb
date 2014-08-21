@@ -1,3 +1,9 @@
+2014-08-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-tdep.c (linux_corefile_thread_callback): Ignore THREAD_EXITED.
+	(linux_make_corefile_notes): call update_thread_list, protected against
+	exceptions.
+
 2014-08-15  Eli Zaretskii  <eliz@gnu.org>
 
 	* dcache.h: Include target.h, to avoid compile time warnings.

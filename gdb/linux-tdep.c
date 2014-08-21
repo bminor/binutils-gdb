@@ -1189,6 +1189,11 @@ linux_corefile_thread_callback (struct thread_info *info, void *data)
 {
   struct linux_corefile_thread_data *args = data;
 
+  /* It can be current thread
+     which cannot be removed by update_thread_list.  */
+  if (info->state == THREAD_EXITED)
+    return 0;
+
   if (ptid_get_pid (info->ptid) == args->pid)
     {
       struct cleanup *old_chain;
@@ -1440,6 +1445,7 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
   char *note_data = NULL;
   gdb_byte *auxv;
   int auxv_len;
+  volatile struct gdb_exception e;
 
   if (linux_fill_prpsinfo (&prpsinfo))
     {
@@ -1463,6 +1469,12 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
     }
 
   /* Thread register information.  */
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      update_thread_list ();
+    }
+  if (e.reason < 0)
+    exception_print (gdb_stderr, e);
   thread_args.gdbarch = gdbarch;
   thread_args.pid = ptid_get_pid (inferior_ptid);
   thread_args.obfd = obfd;
