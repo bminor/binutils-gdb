@@ -3086,7 +3086,8 @@ static bfd_boolean
 on_needed_list (const char *soname, struct bfd_link_needed_list *needed)
 {
   for (; needed != NULL; needed = needed->next)
-    if (strcmp (soname, needed->name) == 0)
+    if ((elf_dyn_lib_class (needed->by) & DYN_AS_NEEDED) == 0
+	&& strcmp (soname, needed->name) == 0)
       return TRUE;
 
   return FALSE;
@@ -12629,21 +12630,21 @@ bfd_elf_reloc_symbol_deleted_p (bfd_vma offset, void *cookie)
 }
 
 /* Discard unneeded references to discarded sections.
-   Returns TRUE if any section's size was changed.  */
-/* This function assumes that the relocations are in sorted order,
-   which is true for all known assemblers.  */
+   Returns -1 on error, 1 if any section's size was changed, 0 if
+   nothing changed.  This function assumes that the relocations are in
+   sorted order, which is true for all known assemblers.  */
 
-bfd_boolean
+int
 bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 {
   struct elf_reloc_cookie cookie;
   asection *o;
   bfd *abfd;
-  bfd_boolean ret = FALSE;
+  int changed = 0;
 
   if (info->traditional_format
       || !is_elf_hash_table (info->hash))
-    return FALSE;
+    return 0;
 
   o = bfd_get_section_by_name (output_bfd, ".stab");
   if (o != NULL)
@@ -12662,13 +12663,13 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	    continue;
 
 	  if (!init_reloc_cookie_for_section (&cookie, info, i))
-	    return FALSE;
+	    return -1;
 
 	  if (_bfd_discard_section_stabs (abfd, i,
 					  elf_section_data (i)->sec_info,
 					  bfd_elf_reloc_symbol_deleted_p,
 					  &cookie))
-	    ret = TRUE;
+	    changed = 1;
 
 	  fini_reloc_cookie_for_section (&cookie, i);
 	}
@@ -12692,13 +12693,13 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	    continue;
 
 	  if (!init_reloc_cookie_for_section (&cookie, info, i))
-	    return FALSE;
+	    return -1;
 
 	  _bfd_elf_parse_eh_frame (abfd, info, i, &cookie);
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, i,
 						 bfd_elf_reloc_symbol_deleted_p,
 						 &cookie))
-	    ret = TRUE;
+	    changed = 1;
 
 	  fini_reloc_cookie_for_section (&cookie, i);
 	}
@@ -12717,10 +12718,10 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
       if (bed->elf_backend_discard_info != NULL)
 	{
 	  if (!init_reloc_cookie (&cookie, info, abfd))
-	    return FALSE;
+	    return -1;
 
 	  if ((*bed->elf_backend_discard_info) (abfd, &cookie, info))
-	    ret = TRUE;
+	    changed = 1;
 
 	  fini_reloc_cookie (&cookie, abfd);
 	}
@@ -12729,9 +12730,9 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   if (info->eh_frame_hdr
       && !info->relocatable
       && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info))
-    ret = TRUE;
+    changed = 1;
 
-  return ret;
+  return changed;
 }
 
 bfd_boolean

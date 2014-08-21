@@ -458,10 +458,6 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
   LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-  # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
-  if test "$plugins" = "yes"; then
-    AC_SEARCH_LIBS(dlopen, dl)
-  fi
   LIBS="-lbfd -liberty $intl $LIBS"
   AC_CACHE_CHECK([$1], [$2],
   [AC_TRY_LINK(

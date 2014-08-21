@@ -17125,7 +17125,9 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
 	 include_name = "hello.c"
 	 dir_name = "."
 	 DW_AT_comp_dir = comp_dir = "/tmp"
-	 DW_AT_name = "./hello.c"  */
+	 DW_AT_name = "./hello.c"
+
+      */
 
       if (dir_name != NULL)
 	{
@@ -17182,7 +17184,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
   const gdb_byte *line_ptr, *extended_end;
   const gdb_byte *line_end;
   unsigned int bytes_read, extended_len;
-  unsigned char op_code, extended_op, adj_opcode;
+  unsigned char op_code, extended_op;
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
@@ -17203,9 +17205,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
       CORE_ADDR address = 0;
       unsigned int file = 1;
       unsigned int line = 1;
-      unsigned int column = 0;
       int is_stmt = lh->default_is_stmt;
-      int basic_block = 0;
       int end_sequence = 0;
       CORE_ADDR addr;
       unsigned char op_index = 0;
@@ -17239,6 +17239,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 	  if (op_code >= lh->opcode_base)
 	    {
 	      /* Special opcode.  */
+	      unsigned char adj_opcode;
 
 	      adj_opcode = op_code - lh->opcode_base;
 	      address += (((op_index + (adj_opcode / lh->line_range))
@@ -17268,7 +17269,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		      (*p_record_line) (current_subfile, line, addr);
 		    }
 		}
-	      basic_block = 0;
 	    }
 	  else switch (op_code)
 	    {
@@ -17301,6 +17301,8 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 				   "[in module %s]"),
 				 line_offset, objfile_name (objfile));
 		      p_record_line = noop_record_line;
+		      /* Note: p_record_line is left as noop_record_line
+			 until we see DW_LNE_end_sequence.  */
 		    }
 
 		  op_index = 0;
@@ -17366,7 +17368,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		      (*p_record_line) (current_subfile, line, addr);
 		    }
 		}
-	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
 	      {
@@ -17411,14 +17412,13 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
               }
 	      break;
 	    case DW_LNS_set_column:
-	      column = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	      (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	      line_ptr += bytes_read;
 	      break;
 	    case DW_LNS_negate_stmt:
 	      is_stmt = (!is_stmt);
 	      break;
 	    case DW_LNS_set_basic_block:
-	      basic_block = 1;
 	      break;
 	    /* Add to the address register of the state machine the
 	       address increment value corresponding to special opcode
@@ -21671,6 +21671,8 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 {
   struct dwarf2_per_cu_offset_and_type **slot, ofs;
   struct objfile *objfile = cu->objfile;
+  struct attribute *attr;
+  struct dynamic_prop prop;
 
   /* For Ada types, make sure that the gnat-specific data is always
      initialized (if not already set).  There are a few types where
@@ -21684,6 +21686,15 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
       && TYPE_CODE (type) != TYPE_CODE_FLT
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
+
+  /* Read DW_AT_data_location and set in type.  */
+  attr = dwarf2_attr (die, DW_AT_data_location, cu);
+  if (attr_to_dynamic_prop (attr, die, cu, &prop))
+    {
+      TYPE_DATA_LOCATION (type)
+        = obstack_alloc (&objfile->objfile_obstack, sizeof (prop));
+      *TYPE_DATA_LOCATION (type) = prop;
+    }
 
   if (dwarf2_per_objfile->die_type_hash == NULL)
     {

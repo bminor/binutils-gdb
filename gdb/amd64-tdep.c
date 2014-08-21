@@ -670,7 +670,9 @@ amd64_classify (struct type *type, enum amd64_reg_class class[2])
      struct complexT {
        T real;
        T imag;
-     };  */
+     };
+
+  */
   else if (code == TYPE_CODE_COMPLEX && len == 8)
     class[0] = AMD64_SSE;
   else if (code == TYPE_CODE_COMPLEX && len == 16)

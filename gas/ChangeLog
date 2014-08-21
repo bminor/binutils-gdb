@@ -1,3 +1,43 @@
+2014-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* dw2gencfi.c (make_debug_seg): Replace leading spaces with tabs.
+	(dot_cfi_val_encoded_addr, output_cfi_insn): Likewise.
+	(output_cie, cfi_change_reg_numbers, cfi_finish): Likewise.
+
+2014-08-20  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c (parse_ifimm_zero): New function.
+	(enum operand_parse_code): Add OP_RSVD_FI0 value.
+	(parse_operands): Handle OP_RSVD_FI0.
+	(asm_opcode_insns): Use RSVD_FI0 for second operand of vcmp, vcmpe.
+
+2014-08-20  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am: Typo fix.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2014-08-19  Andreas Tobler  <andreast@fgznet.ch>
+
+	* Makefile.am: Add FreeBSD ARM support.
+	* Mafefile.in: Regenerate.
+	* configure.tgt: Add FreeBSD ARM support.
+	* config/te-armfbsdeabi.h: New file.
+	* config/te-armfbsdvfp.h: Likewise.
+
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2014-08-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.c (md_apply_fix): Correct handling of small sized
+	RELOC_RL78_DIFF fixups.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* read.c (parse_mri_cons): Warning fix.
+
 2014-08-14  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Move ACX_LARGEFILE after LT_INIT.

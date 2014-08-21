@@ -1,3 +1,9 @@
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Invoke AC_PLUGINS.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2014-03-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim_calls.c (sim_do_command): Add const to cmd.

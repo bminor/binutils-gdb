@@ -207,9 +207,12 @@ gld${EMULATION_NAME}_before_allocation (void)
 static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
-  bfd_boolean need_layout = bfd_elf_discard_info (link_info.output_bfd,
-						  &link_info);
-  gld${EMULATION_NAME}_map_segments (need_layout);
+  int need_layout = bfd_elf_discard_info (link_info.output_bfd, &link_info);
+
+  if (need_layout < 0)
+    einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+  else
+    gld${EMULATION_NAME}_map_segments (need_layout);
 }
 
 static void

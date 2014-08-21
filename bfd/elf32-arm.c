@@ -2172,7 +2172,7 @@ static const bfd_vma elf32_thumb2_plt0_entry [] =
      an instruction maybe encoded to one or two array elements.  */
   0xf8dfb500,		/* push    {lr}          */
   0x44fee008,		/* ldr.w   lr, [pc, #8]  */
-                        /* add     lr, pc        */
+			/* add     lr, pc        */
   0xff08f85e,		/* ldr.w   pc, [lr, #8]! */
   0x00000000,		/* &GOT[0] - .           */
 };
@@ -2187,7 +2187,7 @@ static const bfd_vma elf32_thumb2_plt_entry [] =
   0x0c00f2c0,		/* movt    ip, #0xNNNN    */
   0xf8dc44fc,           /* add     ip, pc         */
   0xbf00f000            /* ldr.w   pc, [ip]       */
-                        /* nop                    */
+			/* nop                    */
 };
 
 /* The format of the first entry in the procedure linkage table
@@ -2283,6 +2283,8 @@ static const bfd_vma elf32_arm_nacl_plt_entry [] =
 #define THM_MAX_BWD_BRANCH_OFFSET  (-(1 << 22) + 4)
 #define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4)
 #define THM2_MAX_BWD_BRANCH_OFFSET (-(1 << 24) + 4)
+#define THM2_MAX_FWD_COND_BRANCH_OFFSET (((1 << 20) -2) + 4)
+#define THM2_MAX_BWD_COND_BRANCH_OFFSET (-(1 << 20) + 4)
 
 enum stub_insn_type
 {
@@ -3667,7 +3669,8 @@ arm_type_of_stub (struct bfd_link_info *info,
 
   /* ST_BRANCH_TO_ARM is nonsense to thumb-only targets when we
      are considering a function call relocation.  */
-  if (thumb_only && (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24)
+  if (thumb_only && (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24
+                     || r_type == R_ARM_THM_JUMP19)
       && branch_type == ST_BRANCH_TO_ARM)
     branch_type = ST_BRANCH_TO_THUMB;
 
@@ -3711,7 +3714,7 @@ arm_type_of_stub (struct bfd_link_info *info,
   branch_offset = (bfd_signed_vma)(destination - location);
 
   if (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24
-      || r_type == R_ARM_THM_TLS_CALL)
+      || r_type == R_ARM_THM_TLS_CALL || r_type == R_ARM_THM_JUMP19)
     {
       /* Handle cases where:
 	 - this call goes too far (different Thumb/Thumb2 max
@@ -3727,10 +3730,15 @@ arm_type_of_stub (struct bfd_link_info *info,
 	  || (thumb2
 	      && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
 		  || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
+	  || (thumb2
+	      && (branch_offset > THM2_MAX_FWD_COND_BRANCH_OFFSET
+		  || (branch_offset < THM2_MAX_BWD_COND_BRANCH_OFFSET))
+	      && (r_type == R_ARM_THM_JUMP19))
 	  || (branch_type == ST_BRANCH_TO_ARM
 	      && (((r_type == R_ARM_THM_CALL
 		    || r_type == R_ARM_THM_TLS_CALL) && !globals->use_blx)
-		  || (r_type == R_ARM_THM_JUMP24))
+		  || (r_type == R_ARM_THM_JUMP24)
+                  || (r_type == R_ARM_THM_JUMP19))
 	      && !use_plt))
 	{
 	  if (branch_type == ST_BRANCH_TO_THUMB)
@@ -5347,7 +5355,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      /* For historical reasons, use the existing names for
 			 ARM-to-Thumb and Thumb-to-ARM stubs.  */
 		      if ((r_type == (unsigned int) R_ARM_THM_CALL
-			   || r_type == (unsigned int) R_ARM_THM_JUMP24)
+			   || r_type == (unsigned int) R_ARM_THM_JUMP24
+                           || r_type == (unsigned int) R_ARM_THM_JUMP19)
 			  && branch_type == ST_BRANCH_TO_ARM)
 			sprintf (stub_entry->output_name,
 				 THUMB2ARM_GLUE_ENTRY_NAME, sym_name);
@@ -7760,7 +7769,7 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
       else if (using_thumb_only (htab))
 	{
 	  /* PR ld/16017: Generate thumb only PLT entries.  */
-          if (!using_thumb2 (htab))
+	  if (!using_thumb2 (htab))
 	    {
 	      /* FIXME: We ought to be able to generate thumb-1 PLT
 		 instructions...  */
@@ -9125,6 +9134,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma reloc_signed_max = 0xffffe;
 	bfd_signed_vma reloc_signed_min = -0x100000;
 	bfd_signed_vma signed_check;
+        enum elf32_arm_stub_type stub_type = arm_stub_none;
+	struct elf32_arm_stub_hash_entry *stub_entry;
+	struct elf32_arm_link_hash_entry *hash;
 
 	/* Need to refetch the addend, reconstruct the top three bits,
 	   and squish the two 11 bit pieces together.  */
@@ -9156,8 +9168,25 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    *unresolved_reloc_p = FALSE;
 	  }
 
-	/* ??? Should handle interworking?  GCC might someday try to
-	   use this for tail calls.  */
+	hash = (struct elf32_arm_link_hash_entry *)h;
+
+	stub_type = arm_type_of_stub (info, input_section, rel,
+		                      st_type, &branch_type,
+		                      hash, value, sym_sec,
+		                      input_bfd, sym_name);
+	if (stub_type != arm_stub_none)
+	  {
+	    stub_entry = elf32_arm_get_stub_entry (input_section,
+				                   sym_sec, h,
+				                   rel, globals,
+				                   stub_type);
+	    if (stub_entry != NULL)
+	      {
+	        value = (stub_entry->stub_offset
+                        + stub_entry->stub_sec->output_offset
+                        + stub_entry->stub_sec->output_section->vma);
+	      }
+	  }
 
 	relocation = value + signed_addend;
 	relocation -= (input_section->output_section->vma
@@ -12500,7 +12529,7 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
 	      if (h == NULL
-		  && (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI))
+		  && elf32_arm_howto_from_type (r_type)->pc_relative)
 		{
 		  call_reloc_p = TRUE;
 		  may_need_local_target_p = TRUE;
@@ -12826,7 +12855,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		&& (sec->flags & SEC_ALLOC) != 0)
 	      {
 		if (h == NULL
-		    && (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI))
+		    && elf32_arm_howto_from_type (r_type)->pc_relative)
 		  {
 		    /* In shared libraries and relocatable executables,
 		       we treat local relative references as calls;
@@ -12972,7 +13001,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      p->pc_count = 0;
 	    }
 
-	  if (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI)
+	  if (elf32_arm_howto_from_type (r_type)->pc_relative)
 	    p->pc_count += 1;
 	  p->count += 1;
 	}
@@ -13551,12 +13580,12 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 
   if (info->shared || htab->root.is_relocatable_executable)
     {
-      /* The only relocs that use pc_count are R_ARM_REL32 and
-	 R_ARM_REL32_NOI, which will appear on something like
-	 ".long foo - .".  We want calls to protected symbols to resolve
-	 directly to the function rather than going via the plt.  If people
-	 want function pointer comparisons to work as expected then they
-	 should avoid writing assembly like ".long foo - .".  */
+      /* Relocs that use pc_count are PC-relative forms, which will appear
+	 on something like ".long foo - ." or "movw REG, foo - .".  We want
+	 calls to protected symbols to resolve directly to the function
+	 rather than going via the plt.  If people want function pointer
+	 comparisons to work as expected then they should avoid writing
+	 assembly like ".long foo - .".  */
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct elf_dyn_relocs **pp;

@@ -303,6 +303,7 @@ struct dwarf_expr_baton
 {
   struct frame_info *frame;
   struct dwarf2_per_cu_data *per_cu;
+  CORE_ADDR obj_address;
 };
 
 /* Helper functions for dwarf2_evaluate_loc_desc.  */
@@ -1206,6 +1207,7 @@ dwarf_expr_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
 
   baton_local.frame = caller_frame;
   baton_local.per_cu = caller_per_cu;
+  baton_local.obj_address = 0;
 
   saved_ctx.gdbarch = ctx->gdbarch;
   saved_ctx.addr_size = ctx->addr_size;
@@ -1233,6 +1235,22 @@ dwarf_expr_get_addr_index (void *baton, unsigned int index)
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
 
   return dwarf2_read_addr_index (debaton->per_cu, index);
+}
+
+/* Callback function for get_object_address. Return the address of the VLA
+   object.  */
+
+static CORE_ADDR
+dwarf_expr_get_obj_addr (void *baton)
+{
+  struct dwarf_expr_baton *debaton = baton;
+
+  gdb_assert (debaton != NULL);
+
+  if (debaton->obj_address == 0)
+    error (_("Location address is not set."));
+
+  return debaton->obj_address;
 }
 
 /* VALUE must be of type lval_computed with entry_data_value_funcs.  Perform
@@ -1282,8 +1300,6 @@ static const struct lval_funcs entry_data_value_funcs =
 {
   NULL,	/* read */
   NULL,	/* write */
-  NULL,	/* check_validity */
-  NULL,	/* check_any_valid */
   NULL,	/* indirect */
   entry_data_value_coerce_ref,
   NULL,	/* check_synthetic_pointer */
@@ -1692,7 +1708,7 @@ read_pieced_value (struct value *v)
 		    memset (buffer, 0, this_size);
 
 		    if (optim)
-		      set_value_optimized_out (v, 1);
+		      mark_value_bits_optimized_out (v, offset, this_size_bits);
 		    if (unavail)
 		      mark_value_bits_unavailable (v, offset, this_size_bits);
 		  }
@@ -1752,7 +1768,7 @@ read_pieced_value (struct value *v)
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
-	  set_value_optimized_out (v, 1);
+	  mark_value_bits_optimized_out (v, offset, this_size_bits);
 	  break;
 
 	default:
@@ -1790,7 +1806,7 @@ write_pieced_value (struct value *to, struct value *from)
 
   if (frame == NULL)
     {
-      set_value_optimized_out (to, 1);
+      mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
       return;
     }
 
@@ -1922,7 +1938,7 @@ write_pieced_value (struct value *to, struct value *from)
 			source_buffer, this_size);
 	  break;
 	default:
-	  set_value_optimized_out (to, 1);
+	  mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
 	  break;
 	}
       offset += this_size_bits;
@@ -1931,24 +1947,16 @@ write_pieced_value (struct value *to, struct value *from)
   do_cleanups (cleanup);
 }
 
-/* A helper function that checks bit validity in a pieced value.
-   CHECK_FOR indicates the kind of validity checking.
-   DWARF_VALUE_MEMORY means to check whether any bit is valid.
-   DWARF_VALUE_OPTIMIZED_OUT means to check whether any bit is
-   optimized out.
-   DWARF_VALUE_IMPLICIT_POINTER means to check whether the bits are an
-   implicit pointer.  */
+/* An implementation of an lval_funcs method to see whether a value is
+   a synthetic pointer.  */
 
 static int
-check_pieced_value_bits (const struct value *value, int bit_offset,
-			 int bit_length,
-			 enum dwarf_value_location check_for)
+check_pieced_synthetic_pointer (const struct value *value, int bit_offset,
+				int bit_length)
 {
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (value);
   int i;
-  int validity = (check_for == DWARF_VALUE_MEMORY
-		  || check_for == DWARF_VALUE_IMPLICIT_POINTER);
 
   bit_offset += 8 * value_offset (value);
   if (value_bitsize (value))
@@ -1973,52 +1981,11 @@ check_pieced_value_bits (const struct value *value, int bit_offset,
       else
 	bit_length -= this_size_bits;
 
-      if (check_for == DWARF_VALUE_IMPLICIT_POINTER)
-	{
-	  if (p->location != DWARF_VALUE_IMPLICIT_POINTER)
-	    return 0;
-	}
-      else if (p->location == DWARF_VALUE_OPTIMIZED_OUT
-	       || p->location == DWARF_VALUE_IMPLICIT_POINTER)
-	{
-	  if (validity)
-	    return 0;
-	}
-      else
-	{
-	  if (!validity)
-	    return 1;
-	}
+      if (p->location != DWARF_VALUE_IMPLICIT_POINTER)
+	return 0;
     }
 
-  return validity;
-}
-
-static int
-check_pieced_value_validity (const struct value *value, int bit_offset,
-			     int bit_length)
-{
-  return check_pieced_value_bits (value, bit_offset, bit_length,
-				  DWARF_VALUE_MEMORY);
-}
-
-static int
-check_pieced_value_invalid (const struct value *value)
-{
-  return check_pieced_value_bits (value, 0,
-				  8 * TYPE_LENGTH (value_type (value)),
-				  DWARF_VALUE_OPTIMIZED_OUT);
-}
-
-/* An implementation of an lval_funcs method to see whether a value is
-   a synthetic pointer.  */
-
-static int
-check_pieced_synthetic_pointer (const struct value *value, int bit_offset,
-				int bit_length)
-{
-  return check_pieced_value_bits (value, bit_offset, bit_length,
-				  DWARF_VALUE_IMPLICIT_POINTER);
+  return 1;
 }
 
 /* A wrapper function for get_frame_address_in_block.  */
@@ -2167,8 +2134,6 @@ free_pieced_value_closure (struct value *v)
 static const struct lval_funcs pieced_value_funcs = {
   read_pieced_value,
   write_pieced_value,
-  check_pieced_value_validity,
-  check_pieced_value_invalid,
   indirect_pieced_value,
   NULL,	/* coerce_ref */
   check_pieced_synthetic_pointer,
@@ -2190,7 +2155,8 @@ static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
   dwarf_expr_dwarf_call,
   dwarf_expr_get_base_type,
   dwarf_expr_push_dwarf_reg_entry_value,
-  dwarf_expr_get_addr_index
+  dwarf_expr_get_addr_index,
+  dwarf_expr_get_obj_addr
 };
 
 /* Evaluate a location description, starting at DATA and with length
@@ -2219,6 +2185,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
   baton.frame = frame;
   baton.per_cu = per_cu;
+  baton.obj_address = 0;
 
   ctx = new_dwarf_expr_context ();
   old_chain = make_cleanup_free_dwarf_expr_context (ctx);
@@ -2296,6 +2263,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	   retval = value_from_register (type, gdb_regnum, frame);
 	   if (value_optimized_out (retval))
 	     {
+	       struct value *tmp;
+
 	       /* This means the register has undefined value / was
 		  not saved.  As we're computing the location of some
 		  variable etc. in the program, not a value for
@@ -2303,7 +2272,9 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 		  generic optimized out value instead, so that we show
 		  <optimized out> instead of <not saved>.  */
 	       do_cleanups (value_chain);
-	       retval = allocate_optimized_out_value (type);
+	       tmp = allocate_value (type);
+	       value_contents_copy (tmp, 0, retval, 0, TYPE_LENGTH (type));
+	       retval = tmp;
 	     }
 	  }
 	  break;
@@ -2424,6 +2395,7 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 
 static int
 dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
+			   CORE_ADDR addr,
 			   CORE_ADDR *valp)
 {
   struct dwarf_expr_context *ctx;
@@ -2439,6 +2411,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
   baton.frame = get_selected_frame (NULL);
   baton.per_cu = dlbaton->per_cu;
+  baton.obj_address = addr;
 
   objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
 
@@ -2479,7 +2452,8 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 /* See dwarf2loc.h.  */
 
 int
-dwarf2_evaluate_property (const struct dynamic_prop *prop, CORE_ADDR *value)
+dwarf2_evaluate_property (const struct dynamic_prop *prop,
+			  CORE_ADDR address, CORE_ADDR *value)
 {
   if (prop == NULL)
     return 0;
@@ -2490,7 +2464,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop, CORE_ADDR *value)
       {
 	const struct dwarf2_property_baton *baton = prop->data.baton;
 
-	if (dwarf2_locexpr_baton_eval (&baton->locexpr, value))
+	if (dwarf2_locexpr_baton_eval (&baton->locexpr, address, value))
 	  {
 	    if (baton->referenced_type)
 	      {
@@ -2641,6 +2615,15 @@ needs_get_addr_index (void *baton, unsigned int index)
   return 1;
 }
 
+/* DW_OP_push_object_address has a frame already passed through.  */
+
+static CORE_ADDR
+needs_get_obj_addr (void *baton)
+{
+  /* Nothing to do.  */
+  return 1;
+}
+
 /* Virtual method table for dwarf2_loc_desc_needs_frame below.  */
 
 static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
@@ -2655,7 +2638,8 @@ static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
   needs_frame_dwarf_call,
   NULL,				/* get_base_type */
   needs_dwarf_reg_entry_value,
-  needs_get_addr_index
+  needs_get_addr_index,
+  needs_get_obj_addr
 };
 
 /* Return non-zero iff the location expression at DATA (length SIZE)
@@ -3301,6 +3285,10 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  break;
 
 	case DW_OP_GNU_push_tls_address:
+	  unimplemented (op);
+	  break;
+
+	case DW_OP_push_object_address:
 	  unimplemented (op);
 	  break;
 

@@ -1,3 +1,78 @@
+2014-08-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/gcore-buffer-overflow.exp: Remove "help gcore" test.
+	* gdb.base/gcore-relro-pie.exp: Likewise.
+	* gdb.base/gcore-relro.exp: Likewise.
+	* gdb.base/gcore.exp: Likewise.
+	* gdb.base/print-symbol-loading.exp: Likewise.
+	* gdb.threads/gcore-thread.exp: Likewise.
+	* lib/gdb.exp (gdb_gcore_cmd): Don't expect "Undefined command".
+
+2014-08-20  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (EXTRA_RULES, CC): New variables, get from
+	configure.
+	(EXPECT): Handle READ1 being set.
+	(all): Depend on EXTRA_RULES.
+	(check-read1, expect-read1, read1.so, read1): New rules.
+	* README (Testsuite Parameters): Document the READ1 make variable.
+	(Race detection): New section.
+	* configure: Regenerate.
+	* configure.ac: If build==host==target, and running under a
+	GNU/glibc system, add read1 to the extra Makefile rules.
+	(EXTRA_RULES): AC_SUBST it.
+	* lib/read1.c: New file.
+
+2014-08-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/data-loc.exp: Add additional tests exercising
+	the handling of variables declared as a typedef to an array
+	which a DW_AT_data_location attribute.
+
+2014-08-19  Andrew Burgess  <aburgess@broadcom.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR symtab/14604
+	PR symtab/14605
+	* gdb.dwarf2/dw2-op-out-param.exp: Remove kfail branches and use
+	gdb_test.
+
+2014-08-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watchpoint-hw-hit-once.c (main): Update comment.
+
+2014-08-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/watchpoint-hw-hit-once.exp: Set breakpoint on the
+	right line.
+
+2014-08-18  David Blaikie  <dblaikie@gmail.com>
+
+	* boards/fission.exp: Explicitly pass -ggnu-pubnames for clang.
+
+2014-08-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/data-loc.exp: Remove second DW_AT_upper bound
+	attribute in array range.
+
+2014-08-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/data-loc.c, gdb.dwarf2/data-loc.exp: New files.
+
+2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR c++/17132
+	* gdb.cp/pr17132.cc: New file.
+	* gdb.cp/pr17132.exp: New file.
+
+2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-xmethods.py (A_getarrayind)
+	(E_method_char_worker.__call__, E_method_int_worker.__call__):
+	Use 'print' with function call syntax.
+	(E_method_matcher.match): Fix tab vs space indentation mixup.
+
 2014-08-15  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/tfile.exp: Return -1 if generate_tracefile returns

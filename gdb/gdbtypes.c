@@ -1620,6 +1620,17 @@ is_dynamic_type_internal (struct type *type, int top_level)
   if (top_level && TYPE_CODE (type) == TYPE_CODE_REF)
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
+  /* Types that have a dynamic TYPE_DATA_LOCATION are considered
+     dynamic, even if the type itself is statically defined.
+     From a user's point of view, this may appear counter-intuitive;
+     but it makes sense in this context, because the point is to determine
+     whether any part of the type needs to be resolved before it can
+     be exploited.  */
+  if (TYPE_DATA_LOCATION (type) != NULL
+      && (TYPE_DATA_LOCATION_KIND (type) == PROP_LOCEXPR
+	  || TYPE_DATA_LOCATION_KIND (type) == PROP_LOCLIST))
+    return 1;
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -1664,11 +1675,11 @@ static struct type *resolve_dynamic_type_internal (struct type *type,
 						   CORE_ADDR addr,
 						   int top_level);
 
-/* Given a dynamic range type (dyn_range_type), return a static version
-   of that type.  */
+/* Given a dynamic range type (dyn_range_type) and address,
+   return a static version of that type.  */
 
 static struct type *
-resolve_dynamic_range (struct type *dyn_range_type)
+resolve_dynamic_range (struct type *dyn_range_type, CORE_ADDR addr)
 {
   CORE_ADDR value;
   struct type *static_range_type;
@@ -1679,7 +1690,7 @@ resolve_dynamic_range (struct type *dyn_range_type)
   gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->low;
-  if (dwarf2_evaluate_property (prop, &value))
+  if (dwarf2_evaluate_property (prop, addr, &value))
     {
       low_bound.kind = PROP_CONST;
       low_bound.data.const_val = value;
@@ -1691,7 +1702,7 @@ resolve_dynamic_range (struct type *dyn_range_type)
     }
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->high;
-  if (dwarf2_evaluate_property (prop, &value))
+  if (dwarf2_evaluate_property (prop, addr, &value))
     {
       high_bound.kind = PROP_CONST;
       high_bound.data.const_val = value;
@@ -1718,7 +1729,7 @@ resolve_dynamic_range (struct type *dyn_range_type)
    of the associated array.  */
 
 static struct type *
-resolve_dynamic_array (struct type *type)
+resolve_dynamic_array (struct type *type, CORE_ADDR addr)
 {
   CORE_ADDR value;
   struct type *elt_type;
@@ -1729,12 +1740,12 @@ resolve_dynamic_array (struct type *type)
 
   elt_type = type;
   range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
-  range_type = resolve_dynamic_range (range_type);
+  range_type = resolve_dynamic_range (range_type, addr);
 
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
   if (ary_dim != NULL && TYPE_CODE (ary_dim) == TYPE_CODE_ARRAY)
-    elt_type = resolve_dynamic_array (TYPE_TARGET_TYPE (type));
+    elt_type = resolve_dynamic_array (TYPE_TARGET_TYPE (type), addr);
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
@@ -1852,6 +1863,8 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
 {
   struct type *real_type = check_typedef (type);
   struct type *resolved_type = type;
+  const struct dynamic_prop *prop;
+  CORE_ADDR value;
 
   if (!is_dynamic_type_internal (real_type, top_level))
     return type;
@@ -1877,11 +1890,11 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
 	}
 
       case TYPE_CODE_ARRAY:
-	resolved_type = resolve_dynamic_array (type);
+	resolved_type = resolve_dynamic_array (type, addr);
 	break;
 
       case TYPE_CODE_RANGE:
-	resolved_type = resolve_dynamic_range (type);
+	resolved_type = resolve_dynamic_range (type, addr);
 	break;
 
     case TYPE_CODE_UNION:
@@ -1892,6 +1905,16 @@ resolve_dynamic_type_internal (struct type *type, CORE_ADDR addr,
       resolved_type = resolve_dynamic_struct (type, addr);
       break;
     }
+
+  /* Resolve data_location attribute.  */
+  prop = TYPE_DATA_LOCATION (resolved_type);
+  if (dwarf2_evaluate_property (prop, addr, &value))
+    {
+      TYPE_DATA_LOCATION_ADDR (resolved_type) = value;
+      TYPE_DATA_LOCATION_KIND (resolved_type) = PROP_CONST;
+    }
+  else
+    TYPE_DATA_LOCATION (resolved_type) = NULL;
 
   return resolved_type;
 }
@@ -4110,6 +4133,15 @@ copy_type_recursive (struct objfile *objfile,
       *TYPE_RANGE_DATA (new_type) = *TYPE_RANGE_DATA (type);
     }
 
+  /* Copy the data location information.  */
+  if (TYPE_DATA_LOCATION (type) != NULL)
+    {
+      TYPE_DATA_LOCATION (new_type)
+	= TYPE_ALLOC (new_type, sizeof (struct dynamic_prop));
+      memcpy (TYPE_DATA_LOCATION (new_type), TYPE_DATA_LOCATION (type),
+	      sizeof (struct dynamic_prop));
+    }
+
   /* Copy pointers to other types.  */
   if (TYPE_TARGET_TYPE (type))
     TYPE_TARGET_TYPE (new_type) = 
@@ -4155,6 +4187,13 @@ copy_type (const struct type *type)
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
   memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
 	  sizeof (struct main_type));
+  if (TYPE_DATA_LOCATION (type) != NULL)
+    {
+      TYPE_DATA_LOCATION (new_type)
+	= TYPE_ALLOC (new_type, sizeof (struct dynamic_prop));
+      memcpy (TYPE_DATA_LOCATION (new_type), TYPE_DATA_LOCATION (type),
+	      sizeof (struct dynamic_prop));
+    }
 
   return new_type;
 }

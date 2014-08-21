@@ -1,3 +1,131 @@
+2014-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* emultempl/armelf.em (OPTION_STUBGROUP_SIZE): Fix formatting.
+	(OPTION_NO_MERGE_EXIDX_ENTRIES, OPTION_LONG_PLT): Likewise.
+
+2014-08-20  Will Newton  <will.newton@linaro.org>
+
+	* configure.tgt: Default armeb-*-eabi* to big endian.
+
+2014-08-20  Daniel Micay  <danielmicay@gmail.com>
+
+	* emultempl/pep.em: Add --high-entropy-va switch.
+	* ld.texinfo: Document the --high-entropy-va switch.
+
+2014-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/DWARF.sc: Add copyright notice.
+	* scripttempl/aix.sc: Likewise.
+	* scripttempl/alpha.sc: Likewise.
+	* scripttempl/alphavms.sc: Likewise.
+	* scripttempl/aout.sc: Likewise.
+	* scripttempl/armaout.sc: Likewise.
+	* scripttempl/armbpabi.sc: Likewise.
+	* scripttempl/armcoff.sc: Likewise.
+	* scripttempl/avr.sc: Likewise.
+	* scripttempl/avrtiny.sc: Likewise.
+	* scripttempl/crisaout.sc: Likewise.
+	* scripttempl/delta68.sc: Likewise.
+	* scripttempl/dlx.sc: Likewise.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf32cr16.sc: Likewise.
+	* scripttempl/elf32cr16c.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/elf32msp430.sc: Likewise.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf32xc16x.sc: Likewise.
+	* scripttempl/elf32xc16xl.sc: Likewise.
+	* scripttempl/elf32xc16xs.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfd30v.sc: Likewise.
+	* scripttempl/elfi370.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/elfmicroblaze.sc: Likewise.
+	* scripttempl/elfxgate.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/epiphany_4x4.sc: Likewise.
+	* scripttempl/epocpe.sc: Likewise.
+	* scripttempl/h8300.sc: Likewise.
+	* scripttempl/h8300h.sc: Likewise.
+	* scripttempl/h8300hn.sc: Likewise.
+	* scripttempl/h8300s.sc: Likewise.
+	* scripttempl/h8300sn.sc: Likewise.
+	* scripttempl/h8300sx.sc: Likewise.
+	* scripttempl/h8300sxn.sc: Likewise.
+	* scripttempl/h8500.sc: Likewise.
+	* scripttempl/h8500b.sc: Likewise.
+	* scripttempl/h8500c.sc: Likewise.
+	* scripttempl/h8500m.sc: Likewise.
+	* scripttempl/h8500s.sc: Likewise.
+	* scripttempl/hppaelf.sc: Likewise.
+	* scripttempl/i386beos.sc: Likewise.
+	* scripttempl/i386coff.sc: Likewise.
+	* scripttempl/i386go32.sc: Likewise.
+	* scripttempl/i386msdos.sc: Likewise.
+	* scripttempl/i860coff.sc: Likewise.
+	* scripttempl/i960.sc: Likewise.
+	* scripttempl/ia64vms.sc: Likewise.
+	* scripttempl/ip2k.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/m68kaux.sc: Likewise.
+	* scripttempl/m68kcoff.sc: Likewise.
+	* scripttempl/m88kbcs.sc: Likewise.
+	* scripttempl/mcorepe.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/mips.sc: Likewise.
+	* scripttempl/mipsbsd.sc: Likewise.
+	* scripttempl/mmo.sc: Likewise.
+	* scripttempl/moxie.sc: Likewise.
+	* scripttempl/nds32elf.sc: Likewise.
+	* scripttempl/nw.sc: Likewise.
+	* scripttempl/pe.sc: Likewise.
+	* scripttempl/pep.sc: Likewise.
+	* scripttempl/pj.sc: Likewise.
+	* scripttempl/ppcpe.sc: Likewise.
+	* scripttempl/psos.sc: Likewise.
+	* scripttempl/riscix.sc: Likewise.
+	* scripttempl/sh.sc: Likewise.
+	* scripttempl/sparccoff.sc: Likewise.
+	* scripttempl/st2000.sc: Likewise.
+	* scripttempl/tic30aout.sc: Likewise.
+	* scripttempl/tic30coff.sc: Likewise.
+	* scripttempl/tic4xcoff.sc: Likewise.
+	* scripttempl/tic54xcoff.sc: Likewise.
+	* scripttempl/tic80coff.sc: Likewise.
+	* scripttempl/v850.sc: Likewise.
+	* scripttempl/v850_rh850.sc: Likewise.
+	* scripttempl/vanilla.sc: Likewise.
+	* scripttempl/w65.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+	* scripttempl/z80.sc: Likewise.
+	* scripttempl/z8000.sc: Likewise.
+
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (--as-needed): Clarify that references from libraries
+	must be from needed libraries.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_after_allocation):
+	Handle error status from bfd_elf_discard_info.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/metagelf.em: Likewise.
+	* emultempl/nios2elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
+	* emultempl/vms.em: Likewise.
+
 2014-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR 16563

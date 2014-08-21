@@ -382,9 +382,12 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	    {
 	      struct type *type = value_type (val);
 
-	      if (!value_optimized_out (val)
-		  && value_available_contents_eq (val, 0, entryval, 0,
-						  TYPE_LENGTH (type)))
+	      if (value_lazy (val))
+		value_fetch_lazy (val);
+	      if (value_lazy (entryval))
+		value_fetch_lazy (entryval);
+
+	      if (value_contents_eq (val, 0, entryval, 0, TYPE_LENGTH (type)))
 		{
 		  /* Initialize it just to avoid a GCC false warning.  */
 		  struct value *val_deref = NULL, *entryval_deref;
@@ -410,11 +413,9 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 		      /* If the reference addresses match but dereferenced
 			 content does not match print them.  */
 		      if (val != val_deref
-		          && !value_optimized_out (val_deref)
-		          && !value_optimized_out (entryval_deref)
-			  && value_available_contents_eq (val_deref, 0,
-							  entryval_deref, 0,
-						      TYPE_LENGTH (type_deref)))
+			  && value_contents_eq (val_deref, 0,
+						entryval_deref, 0,
+						TYPE_LENGTH (type_deref)))
 			val_equal = 1;
 		    }
 

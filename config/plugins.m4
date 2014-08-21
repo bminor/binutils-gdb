@@ -15,4 +15,7 @@ AC_DEFUN([AC_PLUGINS],
      esac],
     [plugins=$maybe_plugins]
   )
+  if test "$plugins" = "yes"; then
+    AC_SEARCH_LIBS([dlopen], [dl])
+  fi
 ])

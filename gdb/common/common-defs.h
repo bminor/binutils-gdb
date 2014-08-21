@@ -41,5 +41,9 @@
 #include "ptid.h"
 #include "common-utils.h"
 #include "gdb_assert.h"
+#include "errors.h"
+#include "common-types.h"
+#include "print-utils.h"
+#include "common-debug.h"
 
 #endif /* COMMON_DEFS_H */

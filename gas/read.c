@@ -4605,7 +4605,7 @@ parse_mri_cons (expressionS *exp, unsigned int nbytes)
       && (input_line_pointer[1] != '\''
 	  || (*input_line_pointer != 'A'
 	      && *input_line_pointer != 'E')))
-    TC_PARSE_CONS_EXPRESSION (exp, nbytes);
+    (void) TC_PARSE_CONS_EXPRESSION (exp, nbytes);
   else
     {
       unsigned int scan;

@@ -39,9 +39,17 @@ ALL_SUBDIRS = gdb.ada gdb.arch gdb.asm gdb.base gdb.btrace gdb.cell gdb.cp \
 	gdb.stabs gdb.reverse gdb.threads gdb.trace gdb.xml \
 	$(SUBDIRS)
 
-EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
-          echo $${rootme}/../../expect/expect ; \
-          else echo expect ; fi`
+EXTRA_RULES = @EXTRA_RULES@
+
+CC=@CC@
+
+EXPECT = `if [ "$${READ1}" != "" ] ; then \
+            echo $${rootme}/expect-read1; \
+          elif [ -f $${rootme}/../../expect/expect ] ; then \
+            echo $${rootme}/../../expect/expect ; \
+          else \
+            echo expect ; \
+          fi`
 
 RUNTEST = $(RUNTEST_FOR_TARGET)
 
@@ -84,7 +92,7 @@ TARGET_FLAGS_TO_PASS = \
         "RUNTEST=$(RUNTEST)" \
         "RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
-all:
+all: $(EXTRA_RULES)
 	@echo "Nothing to be done for all..."
 
 .NOEXPORT:
@@ -145,6 +153,9 @@ installcheck:
 # in conditions.
 check: all $(abs_builddir)/site.exp
 	$(MAKE) $(CHECK_TARGET)
+
+check-read1:
+	$(MAKE) READ1="1" check
 
 # All the hair to invoke dejagnu.  A given invocation can just append
 # $(RUNTESTFLAGS)
@@ -230,6 +241,7 @@ clean mostlyclean:
 	-rm -f core.* *.tf *.cl *.py tracecommandsscript copy1.txt zzz-gdbscript
 	-rm -f *.dwo *.dwp
 	-rm -rf outputs temp cache
+	-rm -f read1.so expect-read1
 	if [ x"${ALL_SUBDIRS}" != x ] ; then \
 	    for dir in ${ALL_SUBDIRS}; \
 	    do \
@@ -263,3 +275,27 @@ config.status: configure
 TAGS: force
 	find $(srcdir) -name '*.exp' -print | \
 	    etags --regex='/proc[ \t]+\([^ \t]+\)/\1/' -
+
+# Build the expect wrapper script that preloads the read1.so library.
+expect-read1:
+	@echo Making expect-read1
+	@rm -f expect-read1-tmp
+	@touch expect-read1-tmp
+	@echo "# THIS FILE IS GENERATED -*- buffer-read-only: t -*- \n" >>expect-read1-tmp
+	@echo "# vi:set ro: */\n\n" >>expect-read1-tmp
+	@echo "# To regenerate this file, run:\n" >>expect-read1-tmp
+	@echo "#      make clean; make/\n" >>expect-read1-tmp
+	@echo "export LD_PRELOAD=`pwd`/read1.so" >>expect-read1-tmp
+	@echo 'exec expect "$$@"' >>expect-read1-tmp
+	@chmod +x expect-read1-tmp
+	@mv expect-read1-tmp expect-read1
+
+# Build the read1.so preload library.  This overrides the `read'
+# function, making it read one byte at a time.  Running the testsuite
+# with this catches racy tests.
+read1.so: lib/read1.c
+	$(CC) -o $@ ${srcdir}/lib/read1.c -Wall -g -shared -fPIC $(CFLAGS)
+
+# Build the read1 machinery.
+.PHONY: read1
+read1: read1.so expect-read1

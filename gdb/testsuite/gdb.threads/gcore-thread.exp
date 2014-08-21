@@ -55,17 +55,6 @@ set nl "\[\r\n\]+"
 
 set timeout 30
 
-gdb_test_multiple "help gcore" "help gcore" {
-    -re "Undefined command: .gcore.*$gdb_prompt $" {
-	# gcore command not supported -- nothing to test here.
-	unsupported "gdb does not support gcore on this target"
-	return -1
-    }
-    -re "Save a core file .*$gdb_prompt $" {
-	pass "help gcore"
-    }
-}
-
 if { ! [ runto_main ] } then {
     untested gcore-thread.exp
     return -1

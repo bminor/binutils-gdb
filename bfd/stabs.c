@@ -536,7 +536,7 @@ _bfd_discard_section_stabs (bfd *abfd,
        link, so we should just ignore them.  */
     return FALSE;
 
-  /* We should have initialized our data in _bfd_link_stab_sections.
+  /* We should have initialized our data in _bfd_link_section_stabs.
      If there was some bizarre error reading the string sections, though,
      we might not have.  Bail rather than asserting.  */
   if (psecinfo == NULL)

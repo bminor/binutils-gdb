@@ -296,10 +296,6 @@ const struct mips_opcode micromips_opcodes[] =
 {"li",			"md,mI",	    0xec00,     0xfc00,	WR_1,			0,		I1,		0,	0 },
 {"li",			"t,j",		0x30000000, 0xfc1f0000,	WR_1,			INSN2_ALIAS,	I1,		0,	0 }, /* addiu */
 {"li",			"t,i",		0x50000000, 0xfc1f0000,	WR_1,			INSN2_ALIAS,	I1,		0,	0 }, /* ori */
-#if 0
-/* Disabled until we can handle 48-bit opcodes.  */
-{"li",			"s,I",	0x7c0000010000, 0xfc00001f0000,	WR_t,			0,		I3,		0,	0 }, /* li48 */
-#endif
 {"li",			"t,I",		0,    (int) M_LI,	INSN_MACRO,		0,		I1,		0,	0 },
 {"move",		"d,s",		0,    (int) M_MOVE,	INSN_MACRO,		0,		I1,		0,	0 },
 {"move",		"mp,mj",	    0x0c00,     0xfc00,	WR_1|RD_2,		0,		I1,		0,	0 },

@@ -45,9 +45,12 @@ arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   CORE_ADDR next_pc;
 
   /* The format of an ARM DLL trampoline is:
+
        ldr  ip, [pc]
        ldr  pc, [ip]
-       .dw __imp_<func>  */
+       .dw __imp_<func>
+
+  */
 
   if (pc == 0
       || read_memory_unsigned_integer (pc + 0, 4, byte_order) != 0xe59fc000

@@ -22,7 +22,7 @@ main (void)
 {
   volatile int dummy;
 
-  /* Stub lines are present as no breakpoints/watchpoint gets hit if current PC
+  /* Stub lines are present as no breakpoint gets hit if current PC
      already stays on the line PC while entering "step"/"continue".  */
 
   dummy = 0;	/* Stub to catch WATCHEE access after runto_main.  */

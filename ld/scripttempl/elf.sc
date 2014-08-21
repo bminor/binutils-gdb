@@ -1,3 +1,8 @@
+# Copyright (C) 2014 Free Software Foundation, Inc.
+# 
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.
 #
 # Unusual variables checked by this code:
 #	NOP - four byte opcode for no-op (defaults to none)
@@ -308,7 +313,7 @@ else
   SIZEOF_HEADERS_CODE=
 fi
 
-# if this is for an embedded system, don't add SIZEOF_HEADERS.
+# If this is for an embedded system, don't add SIZEOF_HEADERS.
 if [ -z "$EMBEDDED" ]; then
    test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR}${SIZEOF_HEADERS_CODE}"
 else
@@ -316,6 +321,12 @@ else
 fi
 
 cat <<EOF
+/* Copyright (C) 2014 Free Software Foundation, Inc.
+
+   Copying and distribution of this script, with or without modification,
+   are permitted in any medium without royalty provided the copyright
+   notice and this notice are preserved.  */
+
 OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
 	      "${LITTLE_OUTPUT_FORMAT}")
 OUTPUT_ARCH(${OUTPUT_ARCH})

@@ -87,6 +87,15 @@ AC_CHECK_HEADERS(pthread.h)
 
 AC_EXEEXT
 
+if test "${build}" = "${host}" -a "${host}" = "${target}"; then
+   case "${host}" in
+     *gnu*)
+       EXTRA_RULES=read1
+       ;;
+   esac
+fi
+AC_SUBST(EXTRA_RULES)
+
 AC_OUTPUT([Makefile \
   gdb.ada/Makefile \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.btrace/Makefile \

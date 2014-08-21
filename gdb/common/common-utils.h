@@ -38,10 +38,6 @@
 #endif
 #endif
 
-extern void malloc_failure (long size) ATTRIBUTE_NORETURN;
-extern void internal_error (const char *file, int line, const char *, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 4);
-
 /* xmalloc(), xrealloc() and xcalloc() have already been declared in
    "libiberty.h". */
 

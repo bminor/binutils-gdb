@@ -565,6 +565,8 @@ TARG_ENV_HFILES = \
 	config/te-386bsd.h \
 	config/te-aix5.h \
 	config/te-armeabi.h \
+	config/te-armfbsdeabi.h \
+	config/te-armfbsdvfp.h \
 	config/te-armlinuxeabi.h \
 	config/te-dynix.h \
 	config/te-epoc-pe.h \

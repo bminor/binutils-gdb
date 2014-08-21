@@ -29,7 +29,6 @@
 extern int debug_threads;
 extern int debug_timestamp;
 
-void debug_printf (const char *msg, ...) ATTRIBUTE_PRINTF (1, 2);
 void debug_flush (void);
 void do_debug_enter (const char *function_name);
 void do_debug_exit (const char *function_name);

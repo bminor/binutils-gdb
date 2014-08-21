@@ -1361,11 +1361,20 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
       break;
 
     case BFD_RELOC_32:
-    case BFD_RELOC_RL78_DIFF:
       op[0] = val;
       op[1] = val >> 8;
       op[2] = val >> 16;
       op[3] = val >> 24;
+      break;
+
+    case BFD_RELOC_RL78_DIFF:
+      op[0] = val;
+      if (f->fx_size > 1)
+	op[1] = val >> 8;
+      if (f->fx_size > 2)
+	op[2] = val >> 16;
+      if (f->fx_size > 3)
+	op[3] = val >> 24;
       break;
 
     case BFD_RELOC_RL78_HI8:

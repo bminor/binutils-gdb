@@ -308,8 +308,9 @@ valprint_check_validity (struct ui_file *stream,
       && TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_ARRAY)
     {
-      if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
-			     TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+      if (value_bits_any_optimized_out (val,
+					TARGET_CHAR_BIT * embedded_offset,
+					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
 	  val_print_optimized_out (val, stream);
 	  return 0;
@@ -980,8 +981,9 @@ val_print_scalar_formatted (struct type *type,
 
   /* A scalar object that does not have all bits available can't be
      printed, because all bits contribute to its representation.  */
-  if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
-			      TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+  if (value_bits_any_optimized_out (val,
+				    TARGET_CHAR_BIT * embedded_offset,
+				    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
     val_print_optimized_out (val, stream);
   else if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
     val_print_unavailable (stream);
@@ -1682,12 +1684,12 @@ val_print_array_elements (struct type *type,
       if (options->repeat_count_threshold < UINT_MAX)
 	{
 	  while (rep1 < len
-		 && value_available_contents_eq (val,
-						 embedded_offset + i * eltlen,
-						 val,
-						 (embedded_offset
-						  + rep1 * eltlen),
-						 eltlen))
+		 && value_contents_eq (val,
+				       embedded_offset + i * eltlen,
+				       val,
+				       (embedded_offset
+					+ rep1 * eltlen),
+				       eltlen))
 	    {
 	      ++reps;
 	      ++rep1;
@@ -2510,8 +2512,10 @@ val_print_string (struct type *elttype, const char *encoding,
      LEN is -1.  */
 
   /* Determine found_nul by looking at the last character read.  */
-  found_nul = extract_unsigned_integer (buffer + bytes_read - width, width,
-					byte_order) == 0;
+  found_nul = 0;
+  if (bytes_read >= width)
+    found_nul = extract_unsigned_integer (buffer + bytes_read - width, width,
+					  byte_order) == 0;
   if (len == -1 && !found_nul)
     {
       gdb_byte *peekbuf;

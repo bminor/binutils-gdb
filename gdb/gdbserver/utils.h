@@ -19,12 +19,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "print-utils.h"
-
-void perror_with_name (const char *string) ATTRIBUTE_NORETURN;
-void error (const char *string,...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 void fatal (const char *string,...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
-void warning (const char *string,...) ATTRIBUTE_PRINTF (1, 2);
 char *paddress (CORE_ADDR addr);
 char *pfildes (gdb_fildes_t fd);
 

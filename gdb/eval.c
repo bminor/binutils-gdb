@@ -1563,7 +1563,7 @@ evaluate_subexp_standard (struct type *expect_type,
                                NON_METHOD, /* not method */
                                NULL, NULL, /* pass NULL symbol since
 					      symbol is unknown */
-                               NULL, &symp, NULL, 0);
+                               NULL, &symp, NULL, 0, noside);
 
           /* Now fix the expression being evaluated.  */
           exp->elts[save_pos1 + 2].symbol = symp;
@@ -1599,7 +1599,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	                                  METHOD, /* method */
 					  &arg2,  /* the object */
 					  NULL, &valp, NULL,
-					  &static_memfuncp, 0);
+					  &static_memfuncp, 0, noside);
 
 	      if (op == OP_SCOPE && !static_memfuncp)
 		{
@@ -1670,7 +1670,7 @@ evaluate_subexp_standard (struct type *expect_type,
 					  NULL,        /* no need for name */
 	                                  NON_METHOD,  /* not method */
 	                                  NULL, function, /* the function */
-					  NULL, &symp, NULL, no_adl);
+					  NULL, &symp, NULL, no_adl, noside);
 
 	      if (op == OP_VAR_VALUE)
 		{

@@ -2365,16 +2365,6 @@ proceed_after_attach (int pid)
   do_cleanups (old_chain);
 }
 
-/*
- * TODO:
- * Should save/restore the tty state since it might be that the
- * program to be debugged was started on this tty and it wants
- * the tty in some state other than what we want.  If it's running
- * on another terminal or without a terminal, then saving and
- * restoring the tty state is a harmless no-op.
- * This only needs to be done if we are attaching to a process.
- */
-
 /* attach_command --
    takes a program started up outside of gdb and ``attaches'' to it.
    This stops it cold in its tracks and allows us to start debugging it.

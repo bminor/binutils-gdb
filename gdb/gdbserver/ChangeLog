@@ -1,3 +1,39 @@
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* Makefile.in (SFILES): Add common/common-debug.c.
+	(OBS): Add common-debug.o.
+	(common-debug.o): New rule.
+	* debug.h (debug_printf): Don't declare.
+	* debug.c (debug_printf): Renamed and rewritten as...
+	(debug_vprintf): New function.
+
+2014-08-19  Gary Benson  <gbenson@redhat.com>
+
+	* utils.h: Do not include print-utils.h.
+
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Add static assertion.
+	(gdb_byte, CORE_ADDR, LONGEST, ULONGEST): Remove.
+
+2014-08-19  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* Makefile.in (SFILES): Add common/errors.c.
+	(OBS): Add errors.o.
+	(IPA_OBS): Add errors-ipa.o.
+	(errors.o): New rule.
+	(errors-ipa.o): Likewise.
+	* utils.h (perror_with_name, error, warning): Don't declare.
+	* utils.c (warning): Renamed and rewritten as...
+	(vwarning): New function.
+	(error): Renamed and rewritten as...
+	(verror): New function.
+	(internal_error): Renamed and rewritten as...
+	(internal_verror): New function.
+
 2014-08-07  Gary Benson  <gbenson@redhat.com>
 
 	* configure.ac (AC_CHECK_HEADERS): Remove errno.h.

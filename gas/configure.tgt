@@ -138,6 +138,10 @@ case ${generic_target} in
   arm-*-symbianelf*)			fmt=elf em=symbian ;;
   arm-*-kaos*)				fmt=elf ;;
   arm-*-conix*)				fmt=elf ;;
+  arm-*-freebsd[89].* | armeb-*-freebsd[89].*)
+					fmt=elf  em=freebsd ;;
+  arm-*-freebsd* | armeb-*-freebsd*)	fmt=elf  em=armfbsdeabi ;;
+  arm*-*-freebsd*)			fmt=elf  em=armfbsdvfp ;;
   arm-*-linux*aout*)			fmt=aout em=linux ;;
   arm-*-linux-*eabi*)			fmt=elf  em=armlinuxeabi ;;
   arm-*-linux-*)			fmt=elf  em=linux ;;

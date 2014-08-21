@@ -172,9 +172,9 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 				      options->format)
 	      && value_bytes_available (original_value, embedded_offset,
 					TYPE_LENGTH (type))
-	      && value_bits_valid (original_value,
-				   TARGET_CHAR_BIT * embedded_offset,
-				   TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+	      && !value_bits_any_optimized_out (original_value,
+						TARGET_CHAR_BIT * embedded_offset,
+						TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	    {
 	      int force_ellipses = 0;
 

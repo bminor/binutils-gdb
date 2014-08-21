@@ -76,35 +76,6 @@
 
 #include "hashtab.h"
 
-/* Rather than duplicate all the logic in BFD for figuring out what
-   types to use (which can be pretty complicated), symply define them
-   in terms of the corresponding type from BFD.  */
-
-#include "bfd.h"
-
-/* * A byte from the program being debugged.  */
-typedef bfd_byte gdb_byte;
-
-/* * An address in the program being debugged.  Host byte order.  */
-typedef bfd_vma CORE_ADDR;
-
-/* * The largest CORE_ADDR value.  */
-#define CORE_ADDR_MAX (~ (CORE_ADDR) 0)
-
-/* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
-
-#ifdef BFD64
-
-#define LONGEST BFD_HOST_64_BIT
-#define ULONGEST BFD_HOST_U_64_BIT
-
-#else /* No BFD64 */
-
-#define LONGEST long long
-#define ULONGEST unsigned long long
-
-#endif /* No BFD64 */
-
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif

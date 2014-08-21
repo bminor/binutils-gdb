@@ -117,13 +117,10 @@ static void init_dummy_target (void);
 
 static void update_current_target (void);
 
-/* Pointer to array of target architecture structures; the size of the
-   array; the current index into the array; the allocated size of the
-   array.  */
-struct target_ops **target_structs;
-unsigned target_struct_size;
-unsigned target_struct_allocsize;
-#define	DEFAULT_ALLOCSIZE	10
+/* Vector of existing target structures. */
+typedef struct target_ops *target_ops_p;
+DEF_VEC_P (target_ops_p);
+static VEC (target_ops_p) *target_structs;
 
 /* The initial current target, so that there is always a semi-valid
    current target.  */
@@ -379,20 +376,7 @@ add_target_with_completer (struct target_ops *t,
 
   complete_target_initialization (t);
 
-  if (!target_structs)
-    {
-      target_struct_allocsize = DEFAULT_ALLOCSIZE;
-      target_structs = (struct target_ops **) xmalloc
-	(target_struct_allocsize * sizeof (*target_structs));
-    }
-  if (target_struct_size >= target_struct_allocsize)
-    {
-      target_struct_allocsize *= 2;
-      target_structs = (struct target_ops **)
-	xrealloc ((char *) target_structs,
-		  target_struct_allocsize * sizeof (*target_structs));
-    }
-  target_structs[target_struct_size++] = t;
+  VEC_safe_push (target_ops_p, target_structs, t);
 
   if (targetlist == NULL)
     add_prefix_cmd ("target", class_run, target_command, _("\
@@ -2363,15 +2347,15 @@ find_default_run_target (char *do_mesg)
 
   if (auto_connect_native_target)
     {
-      struct target_ops **t;
+      struct target_ops *t;
       int count = 0;
+      int i;
 
-      for (t = target_structs; t < target_structs + target_struct_size;
-	   ++t)
+      for (i = 0; VEC_iterate (target_ops_p, target_structs, i, t); ++i)
 	{
-	  if ((*t)->to_can_run != delegate_can_run && target_can_run (*t))
+	  if (t->to_can_run != delegate_can_run && target_can_run (t))
 	    {
-	      runable = *t;
+	      runable = t;
 	      ++count;
 	    }
 	}

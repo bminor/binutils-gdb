@@ -658,7 +658,7 @@ extern int bfd_elf_get_dyn_lib_class
   (bfd *);
 extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf_discard_info
+extern int bfd_elf_discard_info
   (bfd *, struct bfd_link_info *);
 extern unsigned int _bfd_elf_default_action_discarded
   (struct bfd_section *);

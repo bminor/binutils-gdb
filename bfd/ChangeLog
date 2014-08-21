@@ -1,3 +1,53 @@
+2014-08-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elf64-ppc.h (ppc64_elf_set_toc): Fix indentation.
+
+2014-08-21  Tony Wang  <tony.wang@arm.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Implement
+	the veneer routine for R_ARM_THM_JUMP19.
+	(arm_type_of_stub): Add conditional clause for R_ARM_THM_JUMP19
+	(elf32_arm_size_stub): Ditto.
+
+2014-08-20  Roland McGrath  <mcgrathr@google.com>
+
+	PR ld/17277
+	* elf32-arm.c (elf32_arm_check_relocs): Increment P->pc_count for
+	all reloc types with pc_relative set in the howto, not just for
+	R_ARM_REL32 and R_ARM_REL32_NOI.
+	(allocate_dynrelocs_for_symbol): Update comment.
+	(elf32_arm_gc_sweep_hook): For all reloc types with pc_relative
+	set in the howto, set call_reloc_p and may_need_local_target_p but
+	not may_become_dynamic_p; not only for R_ARM_REL32 and R_ARM_REL32_NOI.
+	(elf32_arm_check_relocs): Likewise.
+
+2014-08-20  Will Newton  <will.newton@linaro.org>
+
+	* config.bfd: Default armeb-*-eabi* to big endian.
+
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Don't attempt to
+	use dynrelocs for ifunc.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Similarly.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	PR 17287
+	* elflink.c (on_needed_list): Only consider libraries that have
+	been loaded.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (bfd_elf_discard_info): Return int error status.
+	* stabs.c (_bfd_discard_section_stabs): Comment typo fix.
+	* bfd-in.h (bfd_elf_discard_info): Updata prototype.
+	* bfd-in2.h: Regenerate.
+
 2014-08-14  Alan Modra  <amodra@gmail.com>
 
 	* peXXigen.c (pe_print_reloc): Protect against access past end

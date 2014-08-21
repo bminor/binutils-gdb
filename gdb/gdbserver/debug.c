@@ -33,9 +33,8 @@ int debug_timestamp;
    previous call ended with "\n".  */
 
 void
-debug_printf (const char *msg, ...)
+debug_vprintf (const char *format, va_list ap)
 {
-  va_list args;
 #if !defined (IN_PROCESS_AGENT)
   /* N.B. Not thread safe, and can't be used, as is, with IPA.  */
   static int new_line = 1;
@@ -53,13 +52,11 @@ debug_printf (const char *msg, ...)
     }
 #endif
 
-  va_start (args, msg);
-  vfprintf (stderr, msg, args);
-  va_end (args);
+  vfprintf (stderr, format, ap);
 
 #if !defined (IN_PROCESS_AGENT)
-  if (*msg)
-    new_line = msg[strlen (msg) - 1] == '\n';
+  if (*format)
+    new_line = format[strlen (format) - 1] == '\n';
 #endif
 }
 

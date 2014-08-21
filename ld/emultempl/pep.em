@@ -237,6 +237,7 @@ enum options
   OPTION_LEADING_UNDERSCORE,
   OPTION_ENABLE_LONG_SECTION_NAMES,
   OPTION_DISABLE_LONG_SECTION_NAMES,
+  OPTION_HIGH_ENTROPY_VA,
   OPTION_DYNAMIC_BASE,
   OPTION_FORCE_INTEGRITY,
   OPTION_NX_COMPAT,
@@ -314,6 +315,7 @@ gld${EMULATION_NAME}_add_options
 #endif
     {"enable-long-section-names", no_argument, NULL, OPTION_ENABLE_LONG_SECTION_NAMES},
     {"disable-long-section-names", no_argument, NULL, OPTION_DISABLE_LONG_SECTION_NAMES},
+    {"high-entropy-va", no_argument, NULL, OPTION_HIGH_ENTROPY_VA},
     {"dynamicbase",no_argument, NULL, OPTION_DYNAMIC_BASE},
     {"forceinteg", no_argument, NULL, OPTION_FORCE_INTEGRITY},
     {"nxcompat", no_argument, NULL, OPTION_NX_COMPAT},
@@ -450,6 +452,8 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
                                        executable image files\n"));
   fprintf (file, _("  --disable-long-section-names       Never use long COFF section names, even\n\
                                        in object files\n"));
+  fprintf (file, _("  --high-entropy-va                  Image is compatible with 64-bit address space\n\
+                                       layout randomization (ASLR)\n"));
   fprintf (file, _("  --dynamicbase			 Image base address may be relocated using\n\
 				       address space layout randomization (ASLR)\n"));
   fprintf (file, _("  --forceinteg		 Code integrity checks are enforced\n"));
@@ -804,6 +808,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
       pep_use_coff_long_section_names = 0;
       break;
     /*  Get DLLCharacteristics bits  */
+    case OPTION_HIGH_ENTROPY_VA:
+      pe_dll_characteristics |= IMAGE_DLL_CHARACTERISTICS_HIGH_ENTROPY_VA;
+      break;
     case OPTION_DYNAMIC_BASE:
       pe_dll_characteristics |= IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE;
       break;

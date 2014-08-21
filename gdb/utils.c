@@ -530,22 +530,6 @@ vwarning (const char *string, va_list args)
     }
 }
 
-/* Print a warning message.
-   The first argument STRING is the warning message, used as a fprintf string,
-   and the remaining args are passed as arguments to it.
-   The primary difference between warnings and errors is that a warning
-   does not force the return to command level.  */
-
-void
-warning (const char *string, ...)
-{
-  va_list args;
-
-  va_start (args, string);
-  vwarning (string, args);
-  va_end (args);
-}
-
 /* Print an error message and return to command level.
    The first argument STRING is the error message, used as a fprintf string,
    and the remaining args are passed as arguments to it.  */
@@ -554,16 +538,6 @@ void
 verror (const char *string, va_list args)
 {
   throw_verror (GENERIC_ERROR, string, args);
-}
-
-void
-error (const char *string, ...)
-{
-  va_list args;
-
-  va_start (args, string);
-  throw_verror (GENERIC_ERROR, string, args);
-  va_end (args);
 }
 
 void
@@ -733,18 +707,17 @@ internal_vproblem (struct internal_problem *problem,
     make_cleanup (xfree, reason);
   }
 
+  /* Emit the message unless query will emit it below.  */
+  if (problem->should_quit != internal_problem_ask || !confirm)
+    fprintf_unfiltered (gdb_stderr, "%s\n", reason);
+
   if (problem->should_quit == internal_problem_ask)
     {
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
 	 this lessens the likelihood of GDB going into an infinite
 	 loop.  */
       if (!confirm)
-        {
-          /* Emit the message and quit.  */
-          fputs_unfiltered (reason, gdb_stderr);
-          fputs_unfiltered ("\n", gdb_stderr);
-          quit_p = 1;
-        }
+	quit_p = 1;
       else
         quit_p = query (_("%s\nQuit this debugging session? "), reason);
     }
@@ -811,16 +784,6 @@ internal_verror (const char *file, int line, const char *fmt, va_list ap)
 {
   internal_vproblem (&internal_error_problem, file, line, fmt, ap);
   throw_quit (_("Command aborted."));
-}
-
-void
-internal_error (const char *file, int line, const char *string, ...)
-{
-  va_list ap;
-
-  va_start (ap, string);
-  internal_verror (file, line, string, ap);
-  va_end (ap);
 }
 
 static struct internal_problem internal_warning_problem = {
