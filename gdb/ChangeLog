@@ -1,3 +1,8 @@
+2014-08-27  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (CTF_FILE_MIN_SIZE): Remove.
+	(ctf_end): Remove code.
+
 2014-08-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-tdep.c (linux_corefile_thread_callback): Ignore THREAD_EXITED.
