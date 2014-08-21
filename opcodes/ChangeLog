@@ -1,3 +1,8 @@
+2014-08-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* micromips-opc.c (micromips_opcodes): Remove #ifdef-ed out
+	48-bit "li" encoding.
+
 2014-08-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-dis.c (s390_insn_length, s390_insn_matches_opcode)
