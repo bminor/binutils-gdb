@@ -1,3 +1,7 @@
+2014-08-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/mips.exp: Correct indentation.
+
 2014-08-20  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/ual-vcmp.s: New file.
