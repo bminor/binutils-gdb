@@ -1,3 +1,15 @@
+2014-08-21  Tony Wang  <tony.wang@arm.com>
+
+	* ld-arm/jump-reloc-veneers-cond.s: New test.
+	* ld-arm/farcall-cond-thumb-arm.s: Ditto.
+	* ld-arm/jump-reloc-veneers-cond-short.d: Expected output
+	for target without a veneer generation.
+	* ld-arm/jump-reloc-veneers-cond-long.d: Expected output
+	for target with a veneer generation.
+	* ld-arm/farcall-cond-thumb-arm.d: Expected output for
+	inter working veneer generation.
+	* ld-arm/arm-elf.exp: Add tests for conditional branch veneer.
+
 2014-08-20  Roland McGrath  <mcgrathr@google.com>
 
 	PR ld/17277

@@ -453,6 +453,16 @@ set armeabitests_nonacl {
      {{objdump -d farcall-thumb-arm-pic-veneer.d}}
      "farcall-thumb-arm-pic-veneer"}
 
+    {"Thumb-ARM farcall cond" "-Ttext 0x8000 --section-start .foo=0x118000" "" "-W" {farcall-cond-thumb-arm.s}
+     {{objdump -d farcall-cond-thumb-arm.d}}
+     "farcall-cond-thumb-arm"}
+    {"Thumb-ARM farcall cond (BE8)" "-Ttext 0x8000 --section-start .foo=0x118000 -EB --be8" "" "-W -EB" {farcall-cond-thumb-arm.s}
+     {{objdump -d farcall-cond-thumb-arm.d}}
+     "farcall-cond-thumb-arm-be8"}
+    {"Thumb-ARM farcall cond (BE)" "-Ttext 0x8000 --section-start .foo=0x118000 -EB" "" "-W -EB" {farcall-cond-thumb-arm.s}
+     {{objdump -d farcall-cond-thumb-arm.d}}
+     "farcall-cond-thumb-arm-be"}
+
     {"Multiple farcalls" "-Ttext 0x1000 --section-start .foo=0x2002020" "" "" {farcall-mix.s}
      {{objdump -d farcall-mix.d}}
      "farcall-mix"}
@@ -550,6 +560,31 @@ set armeabitests_nonacl {
      {jump-reloc-veneers.s}
      {{objdump -d jump-reloc-veneers-long.d}}
      "jump-reloc-veneers-long"}
+
+    {"R_ARM_THM_JUMP19 Relocation veneers: Short"
+     "--section-start destsect=0x000108002 --section-start .text=0x8000" ""
+     "-march=armv7-m -mthumb"
+     {jump-reloc-veneers-cond.s}
+     {{objdump -d jump-reloc-veneers-cond-short.d}}
+     "jump-reloc-veneers-cond-short"}
+    {"R_ARM_THM_JUMP19 Relocation veneers: Long"
+     "--section-start destsect=0x00108004 --section-start .text=0x8000" ""
+     "-march=armv7-m -mthumb"
+     {jump-reloc-veneers-cond.s}
+     {{objdump -d jump-reloc-veneers-cond-long.d}}
+     "jump-reloc-veneers-cond-long"}
+    {"R_ARM_THM_JUMP19 Relocation veneers: Short backward"
+     "--section-start destsect=0x8004 --section-start .text=0x108000" ""
+     "-march=armv7-m -mthumb"
+     {jump-reloc-veneers-cond.s}
+     {{objdump -d jump-reloc-veneers-cond-short-backward.d}}
+     "jump-reloc-veneers-cond-short-backward"}
+    {"R_ARM_THM_JUMP19 Relocation veneers: Long backward"
+     "--section-start destsect=0x8002 --section-start .text=0x108000" ""
+     "-march=armv7-m -mthumb"
+     {jump-reloc-veneers-cond.s}
+     {{objdump -d jump-reloc-veneers-cond-long-backward.d}}
+     "jump-reloc-veneers-cond-long-backward"}
 
     {"Default group size" "-Ttext 0x1000 --section-start .foo=0x2003020" "" "" {farcall-group.s farcall-group2.s}
      {{objdump -d farcall-group.d}}

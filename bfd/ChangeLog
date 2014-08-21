@@ -1,3 +1,10 @@
+2014-08-21  Tony Wang  <tony.wang@arm.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Implement
+	the veneer routine for R_ARM_THM_JUMP19.
+	(arm_type_of_stub): Add conditional clause for R_ARM_THM_JUMP19
+	(elf32_arm_size_stub): Ditto.
+
 2014-08-20  Roland McGrath  <mcgrathr@google.com>
 
 	PR ld/17277
