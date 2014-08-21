@@ -1,5 +1,10 @@
 2014-08-22  Alan Modra  <amodra@gmail.com>
 
+	* elf-eh-frame.c (struct cie): Delete "output_sec" field.
+	(cie_eq, cie_compute_hash): Use output_section from cie_inf instead.
+
+2014-08-22  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (struct eh_frame_hdr_info): Delete merge_cies and
 	parsed_eh_frames.
 	(_bfd_elf_begin_eh_frame_parsing): Delete.

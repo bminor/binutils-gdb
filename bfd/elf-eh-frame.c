@@ -46,7 +46,6 @@ struct cie
     } sym;
     unsigned int reloc_index;
   } personality;
-  asection *output_sec;
   struct eh_cie_fde *cie_inf;
   unsigned char per_encoding;
   unsigned char lsda_encoding;
@@ -232,7 +231,8 @@ cie_eq (const void *e1, const void *e2)
       && c1->augmentation_size == c2->augmentation_size
       && memcmp (&c1->personality, &c2->personality,
 		 sizeof (c1->personality)) == 0
-      && c1->output_sec == c2->output_sec
+      && (c1->cie_inf->u.cie.u.sec->output_section
+	  == c2->cie_inf->u.cie.u.sec->output_section)
       && c1->per_encoding == c2->per_encoding
       && c1->lsda_encoding == c2->lsda_encoding
       && c1->fde_encoding == c2->fde_encoding
@@ -266,7 +266,7 @@ cie_compute_hash (struct cie *c)
   h = iterative_hash_object (c->ra_column, h);
   h = iterative_hash_object (c->augmentation_size, h);
   h = iterative_hash_object (c->personality, h);
-  h = iterative_hash_object (c->output_sec, h);
+  h = iterative_hash_object (c->cie_inf->u.cie.u.sec->output_section, h);
   h = iterative_hash_object (c->per_encoding, h);
   h = iterative_hash_object (c->lsda_encoding, h);
   h = iterative_hash_object (c->fde_encoding, h);
@@ -625,7 +625,6 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
 	  cie->cie_inf = this_inf;
 	  cie->length = hdr_length;
-	  cie->output_sec = sec->output_section;
 	  start = buf;
 	  REQUIRE (read_byte (&buf, end, &cie->version));
 
@@ -1072,7 +1071,6 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
     }
 
   /* See if we can merge this CIE with an earlier one.  */
-  cie->output_sec = sec->output_section;
   cie_compute_hash (cie);
   if (hdr_info->cies == NULL)
     {
