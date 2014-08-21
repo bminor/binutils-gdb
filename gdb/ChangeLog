@@ -1,3 +1,8 @@
+2014-08-21  Bin Cheng  <bin.cheng@arm.com>
+
+	* aarch64-linux-nat.c (dr_changed_t): Change the type from
+	unsigned LONGEST to ULONGEST.
+
 2014-08-20  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (check-read1): New rule.
