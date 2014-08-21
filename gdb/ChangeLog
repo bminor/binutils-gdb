@@ -1,3 +1,7 @@
+2014-08-21  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (attach_command): Remove comment.
+
 2014-08-21  Bin Cheng  <bin.cheng@arm.com>
 
 	* aarch64-linux-nat.c (dr_changed_t): Change the type from
