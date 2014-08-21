@@ -1,3 +1,9 @@
+2014-08-22  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_after_allocation): Call
+	bfd_elf_discard_info after generating glink .eh_frame.  Delete
+	redundant test on ppc64_elf_setup_section_lists status.
+
 2014-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* emultempl/armelf.em (OPTION_STUBGROUP_SIZE): Fix formatting.

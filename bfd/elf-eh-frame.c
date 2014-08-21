@@ -452,18 +452,6 @@ make_pc_relative (unsigned char encoding, unsigned int ptr_size)
   return encoding | DW_EH_PE_pcrel;
 }
 
-/* Called before calling _bfd_elf_parse_eh_frame on every input bfd's
-   .eh_frame section.  */
-
-void
-_bfd_elf_begin_eh_frame_parsing (struct bfd_link_info *info)
-{
-  struct eh_frame_hdr_info *hdr_info;
-
-  hdr_info = &elf_hash_table (info)->eh_info;
-  hdr_info->merge_cies = !info->relocatable;
-}
-
 /* Try to parse .eh_frame section SEC, which belongs to ABFD.  Store the
    information in the section's sec_info field on success.  COOKIE
    describes the relocations in SEC.  */
@@ -494,8 +482,6 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
-  if (hdr_info->parsed_eh_frames)
-    return;
 
   if (sec->size == 0
       || sec->sec_info_type != SEC_INFO_TYPE_NONE)
@@ -777,7 +763,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  buf += initial_insn_length;
 	  ENSURE_NO_RELOCS (buf);
 
-	  if (hdr_info->merge_cies)
+	  if (!info->relocatable)
+	    /* Keep info for merging cies.  */
 	    this_inf->u.cie.u.full_cie = cie;
 	  this_inf->u.cie.per_encoding_relative
 	    = (cie->per_encoding & 0x70) == DW_EH_PE_pcrel;
@@ -911,8 +898,9 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   elf_section_data (sec)->sec_info = sec_info;
   sec->sec_info_type = SEC_INFO_TYPE_EH_FRAME;
-  if (hdr_info->merge_cies)
+  if (!info->relocatable)
     {
+      /* Keep info for merging cies.  */
       sec_info->cies = local_cies;
       local_cies = NULL;
     }
@@ -931,17 +919,6 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   if (local_cies)
     free (local_cies);
 #undef REQUIRE
-}
-
-/* Finish a pass over all .eh_frame sections.  */
-
-void
-_bfd_elf_end_eh_frame_parsing (struct bfd_link_info *info)
-{
-  struct eh_frame_hdr_info *hdr_info;
-
-  hdr_info = &elf_hash_table (info)->eh_info;
-  hdr_info->parsed_eh_frames = TRUE;
 }
 
 /* Mark all relocations against CIE or FDE ENT, which occurs in

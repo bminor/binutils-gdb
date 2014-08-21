@@ -383,10 +383,6 @@ struct eh_frame_hdr_info
   asection *hdr_sec;
   unsigned int fde_count, array_count;
   struct eh_frame_array_ent *array;
-  /* TRUE if we should try to merge CIEs between input sections.  */
-  bfd_boolean merge_cies;
-  /* TRUE if all .eh_frames have been parsd.  */
-  bfd_boolean parsed_eh_frames;
   /* TRUE if .eh_frame_hdr should contain the sorted search table.
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
@@ -1968,13 +1964,8 @@ extern bfd_boolean _bfd_elf_strtab_emit
 extern void _bfd_elf_strtab_finalize
   (struct elf_strtab_hash *);
 
-extern void _bfd_elf_begin_eh_frame_parsing
-  (struct bfd_link_info *info);
 extern void _bfd_elf_parse_eh_frame
   (bfd *, struct bfd_link_info *, asection *, struct elf_reloc_cookie *);
-extern void _bfd_elf_end_eh_frame_parsing
-  (struct bfd_link_info *info);
-
 extern bfd_boolean _bfd_elf_discard_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *,
    bfd_boolean (*) (bfd_vma, void *), struct elf_reloc_cookie *);
