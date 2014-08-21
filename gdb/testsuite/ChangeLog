@@ -1,3 +1,13 @@
+2014-08-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/gcore-buffer-overflow.exp: Remove "help gcore" test.
+	* gdb.base/gcore-relro-pie.exp: Likewise.
+	* gdb.base/gcore-relro.exp: Likewise.
+	* gdb.base/gcore.exp: Likewise.
+	* gdb.base/print-symbol-loading.exp: Likewise.
+	* gdb.threads/gcore-thread.exp: Likewise.
+	* lib/gdb.exp (gdb_gcore_cmd): Don't expect "Undefined command".
+
 2014-08-20  Pedro Alves  <palves@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
