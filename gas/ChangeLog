@@ -2,6 +2,8 @@
 
 	* config/tc-aarch64.c (tc_aarch64_regname_to_dw2regnum): Fix
 	register number for vector register types.
+	* config/tc-aarch64.h (DWARF2_LINE_MIN_INSN_LENGTH): Set to 4.
+	(DWARF2_CIE_DATA_ALIGNMENT): Set to -8.
 
 2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
 

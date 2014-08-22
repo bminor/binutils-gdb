@@ -145,13 +145,13 @@ struct aarch64_frag_type
       goto LABEL;								\
     }
 
-#define DWARF2_LINE_MIN_INSN_LENGTH 	2
+#define DWARF2_LINE_MIN_INSN_LENGTH 	4
 
 /* The lr register is r30.  */
 #define DWARF2_DEFAULT_RETURN_COLUMN  30
 
 /* Registers are generally saved at negative offsets to the CFA.  */
-#define DWARF2_CIE_DATA_ALIGNMENT     (-4)
+#define DWARF2_CIE_DATA_ALIGNMENT     (-8)
 
 extern int aarch64_dwarf2_addr_size (void);
 #define DWARF2_ADDR_SIZE(bfd) aarch64_dwarf2_addr_size ()
