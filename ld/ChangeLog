@@ -1,3 +1,8 @@
+2014-08-22  Andreas Tobler  <andreast@fgznet.ch>
+
+	* emulparams/armelf_fbsd.sh (TEXT_START_ADDR): Increase alignment to
+	64kB boundary like in armelf_linux.sh.
+
 2014-08-22  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_after_allocation): Call
