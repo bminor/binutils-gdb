@@ -1,3 +1,9 @@
+2014-08-21  Nathan Sidwell  <nathan@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* arm-dis.c (print_arm_address): Negate the GPR-relative offset
+	returned if the U bit is set.
+
 2014-08-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c (micromips_opcodes): Remove #ifdef-ed out

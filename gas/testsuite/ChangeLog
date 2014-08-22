@@ -1,3 +1,9 @@
+2014-08-22  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/arch7a-mp.d: Adjust according to `print_arm_address'
+	offset fix.
+	* gas/arm/arch7r-mp.d: Likewise.
+
 2014-08-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/mips.exp: Correct indentation.
