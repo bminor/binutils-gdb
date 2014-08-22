@@ -1,3 +1,7 @@
+2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-arm.c (add_to_lit_pool): Preinitialize `imm1'.
+
 2014-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* dw2gencfi.c (make_debug_seg): Replace leading spaces with tabs.

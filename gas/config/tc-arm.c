@@ -3192,7 +3192,7 @@ add_to_lit_pool (unsigned int nbytes)
   literal_pool * pool;
   unsigned int entry, pool_size = 0;
   bfd_boolean padding_slot_p = FALSE;
-  unsigned imm1;
+  unsigned imm1 = 0;
   unsigned imm2 = 0;
 
   if (nbytes == 8)
