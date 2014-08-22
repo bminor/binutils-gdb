@@ -17174,6 +17174,32 @@ noop_record_line (struct subfile *subfile, int line, CORE_ADDR pc)
   return;
 }
 
+/* Use P_RECORD_LINE to record line number LINE beginning at address ADDRESS
+   in the line table of subfile SUBFILE.  */
+
+static void
+dwarf_record_line (struct gdbarch *gdbarch, struct subfile *subfile,
+		   unsigned int line, CORE_ADDR address,
+		   record_line_ftype p_record_line)
+{
+  CORE_ADDR addr = gdbarch_addr_bits_remove (gdbarch, address);
+
+  (*p_record_line) (current_subfile, line, addr);
+}
+
+/* Subroutine of dwarf_decode_lines_1 to simplify it.
+   Mark the end of a set of line number records.
+   The arguments are the same as for dwarf_record_line.
+   If SUBFILE is NULL the request is ignored.  */
+
+static void
+dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
+		   CORE_ADDR address, record_line_ftype p_record_line)
+{
+  if (subfile != NULL)
+    dwarf_record_line (gdbarch, subfile, 0, address, p_record_line);
+}
+
 /* Subroutine of dwarf_decode_lines to simplify it.
    Process the line number information in LH.  */
 
@@ -17207,7 +17233,6 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
       unsigned int line = 1;
       int is_stmt = lh->default_is_stmt;
       int end_sequence = 0;
-      CORE_ADDR addr;
       unsigned char op_index = 0;
 
       if (!decode_for_pst_p && lh->num_file_names >= file)
@@ -17259,14 +17284,13 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		    {
 		      if (last_subfile != current_subfile)
 			{
-			  addr = gdbarch_addr_bits_remove (gdbarch, address);
-			  if (last_subfile)
-			    (*p_record_line) (last_subfile, 0, addr);
+			  dwarf_finish_line (gdbarch, last_subfile,
+					     address, p_record_line);
 			  last_subfile = current_subfile;
 			}
 		      /* Append row to matrix using current values.  */
-		      addr = gdbarch_addr_bits_remove (gdbarch, address);
-		      (*p_record_line) (current_subfile, line, addr);
+		      dwarf_record_line (gdbarch, current_subfile,
+					 line, address, p_record_line);
 		    }
 		}
 	    }
@@ -17359,13 +17383,12 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		    {
 		      if (last_subfile != current_subfile)
 			{
-			  addr = gdbarch_addr_bits_remove (gdbarch, address);
-			  if (last_subfile)
-			    (*p_record_line) (last_subfile, 0, addr);
+			  dwarf_finish_line (gdbarch, last_subfile,
+					     address, p_record_line);
 			  last_subfile = current_subfile;
 			}
-		      addr = gdbarch_addr_bits_remove (gdbarch, address);
-		      (*p_record_line) (current_subfile, line, addr);
+		      dwarf_record_line (gdbarch, current_subfile,
+					 line, address, p_record_line);
 		    }
 		}
 	      break;
@@ -17461,8 +17484,8 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
           lh->file_names[file - 1].included_p = 1;
           if (!decode_for_pst_p)
 	    {
-	      addr = gdbarch_addr_bits_remove (gdbarch, address);
-	      (*p_record_line) (current_subfile, 0, addr);
+	      dwarf_finish_line (gdbarch, current_subfile, address,
+				 p_record_line);
 	    }
         }
     }

@@ -1,3 +1,10 @@
+2014-08-22  Doug Evans  <dje@google.com>
+
+	* buildsym.h (record_line_ftype): New typedef.
+	(record_line): Use it.
+	* dwarf2read.c (dwarf_record_line, dwarf_finish_line): New functions.
+	(dwarf_decode_lines_1): Call them.
+
 2014-08-22  Yao Qi  <yao@codesourcery.com>
 
 	* ctf.c (CTF_FILE_MIN_SIZE): Remove.
