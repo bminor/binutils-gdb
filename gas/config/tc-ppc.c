@@ -3369,7 +3369,12 @@ md_assemble (char *str)
 	ppc_apuinfo_section_add (PPC_APUINFO_CACHELCK, 1);
       if (opcode->flags & PPC_OPCODE_RFMCI)
 	ppc_apuinfo_section_add (PPC_APUINFO_RFMCI, 1);
-      if (opcode->flags & PPC_OPCODE_VLE)
+      /* Only set the VLE flag if the instruction has been pulled via
+         the VLE instruction set.  This way the flag is guaranteed to
+         be set for VLE-only instructions or for VLE-only processors,
+         however it'll remain clear for dual-mode instructions on
+         dual-mode and, more importantly, standard-mode processors.  */
+      if ((ppc_cpu & opcode->flags) == PPC_OPCODE_VLE)
 	ppc_apuinfo_section_add (PPC_APUINFO_VLE, 1);
     }
 #endif

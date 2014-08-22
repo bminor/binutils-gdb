@@ -1,5 +1,10 @@
 2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-ppc.c (md_assemble): Only set the PPC_APUINFO_VLE
+	flag if both the processor and opcode flags match.
+
+2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-arm.c (add_to_lit_pool): Preinitialize `imm1'.
 
 2014-08-20  Maciej W. Rozycki  <macro@codesourcery.com>

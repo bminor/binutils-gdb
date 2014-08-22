@@ -1,3 +1,11 @@
+2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-powerpc/apuinfo-vle.rd: New test.
+	* ld-powerpc/apuinfo-vle.s: New test source.
+	* ld-powerpc/apuinfo.rd: Adjust according to GAS PPC_APUINFO_VLE
+	handling change.
+	* ld-powerpc/powerpc.exp: Run the new test.
+
 2014-08-21  Tony Wang  <tony.wang@arm.com>
 
 	* ld-arm/jump-reloc-veneers-cond.s: New test.
