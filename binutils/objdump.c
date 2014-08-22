@@ -2407,6 +2407,10 @@ dump_dwarf (bfd *abfd)
 	}
       break;
 
+    case bfd_arch_aarch64:
+      init_dwarf_regnames_aarch64();
+      break;
+
     default:
       break;
     }
