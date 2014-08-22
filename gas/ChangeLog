@@ -1,3 +1,8 @@
+2014-08-22  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-aarch64.c (tc_aarch64_regname_to_dw2regnum): Fix
+	register number for vector register types.
+
 2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-ppc.c (md_assemble): Only set the PPC_APUINFO_VLE
