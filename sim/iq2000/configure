@@ -13445,7 +13445,7 @@ fi
 
 
 
-if test x"always" != x"no"; then
+if test x"no" != x"no"; then
   enable_sim_hardware=yes
 else
   enable_sim_hardware=no
@@ -13476,7 +13476,7 @@ case ${enable_sim_hardware} in
 esac
 
 if test "$sim_hw_p" != yes; then
-  if test "always" = "always"; then
+  if test "no" = "always"; then
     as_fn_error "Sorry, but this simulator requires that hardware support
 be enabled. Please configure without --disable-hw-support." "$LINENO" 5
   fi
@@ -13559,12 +13559,6 @@ fi
   esac
 fi
 
-
-if test -z "$SIM_DV_SOCKSER_O"; then
-	as_fn_error "Sorry, but hardware support in this simulator
-unconditionally relies on dv-sockser.o which is unavailable for your host.
-Please fix this simulator." "$LINENO" 5
-fi
 
 
 ac_sources="$sim_link_files"
