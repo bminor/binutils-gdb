@@ -38,8 +38,7 @@ SIM_OBJS = \
 	$(M32RX_OBJS) \
 	$(M32R2_OBJS) \
 	$(TRAPS_OBJ) \
-	devices.o \
-	$(m32r_extra_objs)
+	devices.o
 
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \

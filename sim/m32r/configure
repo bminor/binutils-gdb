@@ -601,7 +601,6 @@ ac_includes_default="\
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 cgen_breaks
-m32r_extra_objs
 SIM_DV_SOCKSER_O
 sim_extra_cflags
 traps_obj
@@ -12378,7 +12377,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12381 "configure"
+#line 12380 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12484,7 +12483,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12487 "configure"
+#line 12486 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13461,7 +13460,7 @@ fi
 
 
 
-if test x"yes" != x"no"; then
+if test x"no" != x"no"; then
   enable_sim_hardware=yes
 else
   enable_sim_hardware=no
@@ -13492,7 +13491,7 @@ case ${enable_sim_hardware} in
 esac
 
 if test "$sim_hw_p" != yes; then
-  if test "yes" = "always"; then
+  if test "no" = "always"; then
     as_fn_error "Sorry, but this simulator requires that hardware support
 be enabled. Please configure without --disable-hw-support." "$LINENO" 5
   fi
@@ -13574,8 +13573,6 @@ fi
 ;;
   esac
 fi
-
-m32r_extra_objs="$SIM_DV_SOCKSER_O"
 
 
 
