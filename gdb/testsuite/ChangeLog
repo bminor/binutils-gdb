@@ -1,3 +1,9 @@
+2014-10-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-var-child.exp: Use mi_varobj_update to simplify
+	tests.
+	* gdb.mi/mi2-var-child.exp: Likewise.
+
 2014-10-13  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-objfile.exp: Change name of file name test.
