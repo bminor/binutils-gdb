@@ -1,3 +1,10 @@
+2014-08-22  Doug Evans  <dje@google.com>
+
+	PR 17276
+	* gdb.dwarf2/dw2-single-line-discriminators.S: New file.
+	* gdb.dwarf2/dw2-single-line-discriminators.c: New file.
+	* gdb.dwarf2/dw2-single-line-discriminators.exp: New file.
+
 2014-08-22  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.python/py-finish-breakpoint.exp: Copy .py file to host.

@@ -1,5 +1,12 @@
 2014-08-22  Doug Evans  <dje@google.com>
 
+	PR 17276
+	* dwarf2read.c (dwarf_record_line_p): New function.
+	(dwarf_decode_lines_1): Ignore subsequent line number entries
+	for the same line if any entry had a non-zero discriminator.
+
+2014-08-22  Doug Evans  <dje@google.com>
+
 	* buildsym.h (record_line_ftype): New typedef.
 	(record_line): Use it.
 	* dwarf2read.c (dwarf_record_line, dwarf_finish_line): New functions.

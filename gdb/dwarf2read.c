@@ -17174,6 +17174,53 @@ noop_record_line (struct subfile *subfile, int line, CORE_ADDR pc)
   return;
 }
 
+/* Return non-zero if we should add LINE to the line number table.
+   LINE is the line to add, LAST_LINE is the last line that was added,
+   LAST_SUBFILE is the subfile for LAST_LINE.
+   LINE_HAS_NON_ZERO_DISCRIMINATOR is non-zero if LINE has ever
+   had a non-zero discriminator.
+
+   We have to be careful in the presence of discriminators.
+   E.g., for this line:
+
+     for (i = 0; i < 100000; i++);
+
+   clang can emit four line number entries for that one line,
+   each with a different discriminator.
+   See gdb.dwarf2/dw2-single-line-discriminators.exp for an example.
+
+   However, we want gdb to coalesce all four entries into one.
+   Otherwise the user could stepi into the middle of the line and
+   gdb would get confused about whether the pc really was in the
+   middle of the line.
+
+   Things are further complicated by the fact that two consecutive
+   line number entries for the same line is a heuristic used by gcc
+   to denote the end of the prologue.  So we can't just discard duplicate
+   entries, we have to be selective about it.  The heuristic we use is
+   that we only collapse consecutive entries for the same line if at least
+   one of those entries has a non-zero discriminator.  PR 17276.
+
+   Note: Addresses in the line number state machine can never go backwards
+   within one sequence, thus this coalescing is ok.  */
+
+static int
+dwarf_record_line_p (unsigned int line, unsigned int last_line,
+		     int line_has_non_zero_discriminator,
+		     struct subfile *last_subfile)
+{
+  if (current_subfile != last_subfile)
+    return 1;
+  if (line != last_line)
+    return 1;
+  /* Same line for the same file that we've seen already.
+     As a last check, for pr 17276, only record the line if the line
+     has never had a non-zero discriminator.  */
+  if (!line_has_non_zero_discriminator)
+    return 1;
+  return 0;
+}
+
 /* Use P_RECORD_LINE to record line number LINE beginning at address ADDRESS
    in the line table of subfile SUBFILE.  */
 
@@ -17234,6 +17281,12 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
       int is_stmt = lh->default_is_stmt;
       int end_sequence = 0;
       unsigned char op_index = 0;
+      unsigned int discriminator = 0;
+      /* The last line number that was recorded, used to coalesce
+	 consecutive entries for the same line.  This can happen, for
+	 example, when discriminators are present.  PR 17276.  */
+      unsigned int last_line = 0;
+      int line_has_non_zero_discriminator = 0;
 
       if (!decode_for_pst_p && lh->num_file_names >= file)
 	{
@@ -17265,6 +17318,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 	    {
 	      /* Special opcode.  */
 	      unsigned char adj_opcode;
+	      int line_delta;
 
 	      adj_opcode = op_code - lh->opcode_base;
 	      address += (((op_index + (adj_opcode / lh->line_range))
@@ -17272,7 +17326,10 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 			  * lh->minimum_instruction_length);
 	      op_index = ((op_index + (adj_opcode / lh->line_range))
 			  % lh->maximum_ops_per_instruction);
-	      line += lh->line_base + (adj_opcode % lh->line_range);
+	      line_delta = lh->line_base + (adj_opcode % lh->line_range);
+	      line += line_delta;
+	      if (line_delta != 0)
+		line_has_non_zero_discriminator = discriminator != 0;
 	      if (lh->num_file_names < file || file == 0)
 		dwarf2_debug_line_missing_file_complaint ();
 	      /* For now we ignore lines not starting on an
@@ -17286,13 +17343,19 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 			{
 			  dwarf_finish_line (gdbarch, last_subfile,
 					     address, p_record_line);
-			  last_subfile = current_subfile;
 			}
-		      /* Append row to matrix using current values.  */
-		      dwarf_record_line (gdbarch, current_subfile,
-					 line, address, p_record_line);
+		      if (dwarf_record_line_p (line, last_line,
+					       line_has_non_zero_discriminator,
+					       last_subfile))
+			{
+			  dwarf_record_line (gdbarch, current_subfile,
+					     line, address, p_record_line);
+			}
+		      last_subfile = current_subfile;
+		      last_line = line;
 		    }
 		}
+	      discriminator = 0;
 	    }
 	  else switch (op_code)
 	    {
@@ -17355,8 +17418,14 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		  break;
 		case DW_LNE_set_discriminator:
 		  /* The discriminator is not interesting to the debugger;
-		     just ignore it.  */
-		  line_ptr = extended_end;
+		     just ignore it.  We still need to check its value though:
+		     if there are consecutive entries for the same
+		     (non-prologue) line we want to coalesce them.
+		     PR 17276.  */
+		  discriminator = read_unsigned_leb128 (abfd, line_ptr,
+							&bytes_read);
+		  line_has_non_zero_discriminator |= discriminator != 0;
+		  line_ptr += bytes_read;
 		  break;
 		default:
 		  complaint (&symfile_complaints,
@@ -17385,12 +17454,19 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 			{
 			  dwarf_finish_line (gdbarch, last_subfile,
 					     address, p_record_line);
-			  last_subfile = current_subfile;
 			}
-		      dwarf_record_line (gdbarch, current_subfile,
-					 line, address, p_record_line);
+		      if (dwarf_record_line_p (line, last_line,
+					       line_has_non_zero_discriminator,
+					       last_subfile))
+			{
+			  dwarf_record_line (gdbarch, current_subfile,
+					     line, address, p_record_line);
+			}
+		      last_subfile = current_subfile;
+		      last_line = line;
 		    }
 		}
+	      discriminator = 0;
 	      break;
 	    case DW_LNS_advance_pc:
 	      {
@@ -17406,8 +17482,15 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 	      }
 	      break;
 	    case DW_LNS_advance_line:
-	      line += read_signed_leb128 (abfd, line_ptr, &bytes_read);
-	      line_ptr += bytes_read;
+	      {
+		int line_delta
+		  = read_signed_leb128 (abfd, line_ptr, &bytes_read);
+
+		line += line_delta;
+		if (line_delta != 0)
+		  line_has_non_zero_discriminator = discriminator != 0;
+		line_ptr += bytes_read;
+	      }
 	      break;
 	    case DW_LNS_set_file:
               {
@@ -17429,6 +17512,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
                     if (!decode_for_pst_p)
                       {
                         last_subfile = current_subfile;
+			line_has_non_zero_discriminator = discriminator != 0;
                         dwarf2_start_subfile (fe->name, dir, comp_dir);
                       }
                   }
