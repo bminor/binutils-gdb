@@ -241,7 +241,7 @@ child_terminal_init_with_pgrp (int pgrp)
    and gdb must be able to restore it correctly.  */
 
 void
-child_terminal_save_ours (struct target_ops *self)
+gdb_save_tty_state (void)
 {
   if (gdb_has_a_terminal ())
     {
