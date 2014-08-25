@@ -1,3 +1,17 @@
+2014-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gas/sparc/ldx_stx.s: New file.
+	* gas/sparc/ldx_stx.d: Likewise.
+
+	* gas/sparc/ldx_efsr.s: New file.
+	* gas/sparc/ldx_efsr.d: Likewise.
+
+	* gas/sparc/ld_st_fsr.s: New file.
+	* gas/sparc/ld_st_fsr.d: Likewise.
+
+	* gas/sparc/sparc.exp: Run the tests ldx_stx, ldx_efsr and
+	ld_st_fsr.
+
 2014-08-22  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/arch7a-mp.d: Adjust according to `print_arm_address'
