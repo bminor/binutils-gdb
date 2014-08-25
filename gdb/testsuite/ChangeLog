@@ -1,5 +1,10 @@
 2014-08-25  Doug Evans  <dje@google.com>
 
+	* gdb.mi/basics.c (callee3, callee2, callee1): Specify result type.
+	(main): Ditto.
+
+2014-08-25  Doug Evans  <dje@google.com>
+
 	* gdb.threads/thread-execl.exp: #include <stdio.h>.
 
 2014-08-24  Yao Qi  <yao@codesourcery.com>
