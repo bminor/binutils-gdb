@@ -1,3 +1,7 @@
+2014-08-25  Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2read.c: Fix grammatical error.
+
 2014-08-24  Yao Qi  <yao@codesourcery.com>
 
 	* dwarf2read.c (scan_partial_symbols):  Update comments.

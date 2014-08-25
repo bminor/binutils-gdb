@@ -7007,8 +7007,8 @@ add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
    symbol for that subprogram.  When the CU language allows it, this
    routine also defines a partial symbol for each nested subprogram
    that this subprogram contains.  If SET_ADDRMAP is true, record the
-   covered ranges in the addrmap.  *LOWPC and *HIGHPC to the lowest and
-   highest PC values are found in PDI.
+   covered ranges in the addrmap.  Set *LOWPC and *HIGHPC to the lowest
+   and highest PC values found in PDI.
 
    PDI may also be a lexical block, in which case we simply search
    recursively for subprograms defined inside that lexical block.
