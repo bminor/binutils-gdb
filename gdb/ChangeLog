@@ -1,3 +1,8 @@
+2014-08-25  Doug Evans  <dje@google.com>
+
+	* linux-nat.c (linux_nat_close): Don't pass NULL for "this".
+	Pass NULL instead of 0 for context pointer.
+
 2014-08-25  Yao Qi  <yao@codesourcery.com>
 
 	* dwarf2read.c: Fix grammatical error.
