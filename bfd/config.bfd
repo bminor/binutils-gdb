@@ -1177,7 +1177,7 @@ case "${targ}" in
     targ_defvec=or1k_elf32_vec
     ;;
 
-  or1knd-*-elf | or1knd-*-linux* | or1k-*-rtems*)
+  or1knd-*-elf | or1knd-*-linux* | or1knd-*-rtems*)
     targ_defvec=or1k_elf32_vec
     ;;
 

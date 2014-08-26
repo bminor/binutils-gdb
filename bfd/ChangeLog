@@ -1,3 +1,7 @@
+2014-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Fix typo in or1knd selection.
+
 2014-08-22  Kai Tietz  <ktietz@redhat.com>
 
 	PR binutils/11822
