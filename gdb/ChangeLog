@@ -1,3 +1,11 @@
+2014-08-28  Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Update declaration.
+	(handle_DW_AT_stmt_list): Remove comment about WANT_LINE_INFO.
+	(dwarf_decode_lines): Remove argument
+	want_line_info.  Remove condition check on want_line_info.
+	Callers update.
+
 2014-08-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf_record_line): Fix typo.

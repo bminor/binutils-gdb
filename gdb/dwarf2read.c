@@ -1512,8 +1512,7 @@ static struct line_header *dwarf_decode_line_header (unsigned int offset,
 						     struct dwarf2_cu *cu);
 
 static void dwarf_decode_lines (struct line_header *, const char *,
-				struct dwarf2_cu *, struct partial_symtab *,
-				int);
+				struct dwarf2_cu *, struct partial_symtab *);
 
 static void dwarf2_start_subfile (const char *, const char *, const char *);
 
@@ -4449,7 +4448,7 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
     return;  /* No linetable, so no includes.  */
 
   /* NOTE: pst->dirname is DW_AT_comp_dir (if present).  */
-  dwarf_decode_lines (lh, pst->dirname, cu, pst, 1);
+  dwarf_decode_lines (lh, pst->dirname, cu, pst);
 
   free_line_header (lh);
 }
@@ -8968,8 +8967,7 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
 
 /* Handle DW_AT_stmt_list for a compilation unit.
    DIE is the DW_TAG_compile_unit die for CU.
-   COMP_DIR is the compilation directory.
-   WANT_LINE_INFO is non-zero if the pc/line-number mapping is needed.  */
+   COMP_DIR is the compilation directory.  */
 
 static void
 handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
@@ -8990,7 +8988,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
 	{
 	  cu->line_header = line_header;
 	  make_cleanup (free_cu_line_header, cu);
-	  dwarf_decode_lines (line_header, comp_dir, cu, NULL, 1);
+	  dwarf_decode_lines (line_header, comp_dir, cu, NULL);
 	}
     }
 }
@@ -17601,15 +17599,13 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 
 static void
 dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
-		    struct dwarf2_cu *cu, struct partial_symtab *pst,
-		    int want_line_info)
+		    struct dwarf2_cu *cu, struct partial_symtab *pst)
 {
   struct objfile *objfile = cu->objfile;
   const int decode_for_pst_p = (pst != NULL);
   struct subfile *first_subfile = current_subfile;
 
-  if (want_line_info)
-    dwarf_decode_lines_1 (lh, comp_dir, cu, decode_for_pst_p);
+  dwarf_decode_lines_1 (lh, comp_dir, cu, decode_for_pst_p);
 
   if (decode_for_pst_p)
     {
