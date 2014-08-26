@@ -1,3 +1,10 @@
+2014-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* ld-aarch64/eh-frame-foo.s: Use 8-byte offset for X30.
+	* ld-aarch64/eh-frame-bar.s: Likewise.
+	* ld-aarch64/eh-frame.d: Updated to match current readelf output.
+	* ld-elf/eh5.d: Allow any register names.
+
 2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* ld-powerpc/apuinfo-vle.rd: New test.
