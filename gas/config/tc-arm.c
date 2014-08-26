@@ -20848,7 +20848,8 @@ arm_handle_align (fragS * fragP)
 
   if (fragP->tc_frag_data.thumb_mode & (~ MODE_RECORDED))
     {
-      if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6t2))
+      if (ARM_CPU_HAS_FEATURE (selected_cpu_name[0]
+			       ? selected_cpu : arm_arch_none, arm_ext_v6t2))
 	{
 	  narrow_noop = thumb_noop[1][target_big_endian];
 	  noop = wide_thumb_noop[target_big_endian];
@@ -20862,7 +20863,9 @@ arm_handle_align (fragS * fragP)
     }
   else
     {
-      noop = arm_noop[ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6k) != 0]
+      noop = arm_noop[ARM_CPU_HAS_FEATURE (selected_cpu_name[0]
+					   ? selected_cpu : arm_arch_none,
+					   arm_ext_v6k) != 0]
 		     [target_big_endian];
       noop_size = 4;
 #ifdef OBJ_ELF
@@ -25108,6 +25111,8 @@ aeabi_set_public_attributes (void)
 
   if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_any))
     ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v4t);
+
+  selected_cpu = flags;
 
   /* Allow the user to override the reported architecture.  */
   if (object_arch)

@@ -1,3 +1,9 @@
+2014-08-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/arm/blx-bl-convert.d: New testcase.
+	* gas/arm/blx-bl-convert.l: Warning expectation.
+	* gas/arm/blx-bl-convert.s: Source file.
+
 2014-08-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/l_d.d: Remove ECOFF offset alternatives.
