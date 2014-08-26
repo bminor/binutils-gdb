@@ -1,3 +1,10 @@
+2014-08-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Initialize non_got_ref
+	properly for MOVW_G0/1/2_NC and MOVW_G3.  Reject them when linking
+	shared library.
+	(elfNN_aarch64_gc_sweep_hook): Add check on these relocs.
+
 2014-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Fix typo in or1knd selection.

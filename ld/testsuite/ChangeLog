@@ -1,3 +1,14 @@
+2014-08-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/copy-relocs-so.s: New test file.
+	* ld-aarch64/copy-relocs-exe.s: Likewise.
+	* ld-aarch64/copy-relocs.d: New expectation file.
+	* ld-aarch64/emit-relocs-264-bad.d: New test file.
+	* ld-aarch64/emit-relocs-266-bad.d: Likewise.
+	* ld-aarch64/emit-relocs-268-bad.d: Likewise.
+	* ld-aarch64/emit-relocs-269-bad.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new added test.
+
 2014-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* ld-aarch64/eh-frame-foo.s: Use 8-byte offset for X30.

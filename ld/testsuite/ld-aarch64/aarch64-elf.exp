@@ -51,11 +51,15 @@ run_dump_test "emit-relocs-260-be"
 run_dump_test "emit-relocs-262"
 run_dump_test "emit-relocs-263"
 run_dump_test "emit-relocs-264"
+run_dump_test "emit-relocs-264-bad"
 run_dump_test "emit-relocs-265"
 run_dump_test "emit-relocs-266"
+run_dump_test "emit-relocs-266-bad"
 run_dump_test "emit-relocs-267"
 run_dump_test "emit-relocs-268"
+run_dump_test "emit-relocs-268-bad"
 run_dump_test "emit-relocs-269"
+run_dump_test "emit-relocs-269-bad"
 run_dump_test "emit-relocs-270"
 run_dump_test "emit-relocs-270-bad"
 run_dump_test "emit-relocs-271"
@@ -163,3 +167,12 @@ run_dump_test "ifunc-21"
 run_dump_test "ifunc-22"
 
 run_dump_test "relasz"
+
+set aarch64elflinktests {
+  {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
+  {} "copy-reloc-so.so"}
+  {"ld-aarch64/exe with copy relocation" "-e0 tmpdir/copy-reloc-so.so" "" ""
+  {copy-reloc-exe.s} {{objdump -R copy-reloc.d}} "copy-reloc"}
+}
+
+run_ld_link_tests $aarch64elflinktests
