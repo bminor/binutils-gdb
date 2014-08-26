@@ -2056,7 +2056,6 @@ extern const int bfd_mips16_num_opcodes;
    "y" 5-bit source 3 register for ALNV.PS (MICROMIPSOP_*_RS3)
    "z" must be zero register
    "C" 23-bit coprocessor function code (MICROMIPSOP_*_COPZ)
-   "B" 10-bit syscall/wait function code (MICROMIPSOP_*_CODE10)
    "K" 5-bit Hardware Register (RDHWR instruction) (MICROMIPSOP_*_RS)
 
    "+A" 5-bit INS/EXT/DINS/DEXT/DINSM/DEXTM position, which becomes
@@ -2081,6 +2080,8 @@ extern const int bfd_mips16_num_opcodes;
    "+H" 5-bit DEXTU size, which becomes MSBD (MICROMIPSOP_*_EXTMSBD).
 	Requires that "+A" or "+E" occur first to set position.
 	Enforces: 32 < (pos+size) <= 64.
+   "+J" 10-bit SYSCALL/WAIT/SDBBP/HYPCALL function code
+        (MICROMIPSOP_*_CODE10)
 
    PC-relative addition (ADDIUPC) instruction:
    "mQ" 23-bit offset (-4194304 .. 4194303) << 2 (MICROMIPSOP_*_IMMQ)
@@ -2160,14 +2161,14 @@ extern const int bfd_mips16_num_opcodes;
    Characters used so far, for quick reference when adding more:
    "12345678 0"
    "<>(),+.@\^|~"
-   "ABCDEFGHI KLMN   RST V    "
+   "A CDEFGHI KLMN   RST V    "
    "abcd f hijklmnopqrstuvw yz"
 
    Extension character sequences used so far ("+" followed by the
    following), for quick reference when adding more:
    ""
    "~!@#$%^&*|"
-   "ABCEFGHTUVW"
+   "ABCEFGHJTUVW"
    "dehijklnouvwx"
 
    Extension character sequences used so far ("m" followed by the
