@@ -1,3 +1,8 @@
+2014-08-26  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (rl78_elf_relax_section): Disambiguate test for
+	relaxation type.
+
 2014-08-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Initialize non_got_ref
