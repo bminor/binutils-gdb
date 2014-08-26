@@ -1,3 +1,7 @@
+2014-08-26  DJ Delorie  <dj@redhat.com>
+
+	* rl78.h (RL78_RELAXA_MASK): New.  Relax types are enums, not bits
+
 2014-07-07  Barney Stratford  <barney_stratford@fastmail.fm>
 
 	* avr.h: Add R_AVR_PORT5 and R_AVR_PORT6.
