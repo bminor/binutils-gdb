@@ -1,3 +1,7 @@
+2014-08-26  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* config/tc-moxie.h (md_convert_frag): Silence warning.
+
 2014-08-22  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-aarch64.c (tc_aarch64_regname_to_dw2regnum): Fix
