@@ -1,3 +1,20 @@
+2014-08-27  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* target.h (struct target_ops::to_terminal_save_ours): Remove
+	declaration.
+	(target_terminal_save_ours): Remove macro.
+	* target-delegates.c: Regenerate.
+	* inf-child.c (inf_child_target): Don't set the nonexistent
+	field to_terminal_save_ours.
+	* inferior.h (child_terminal_save_ours): Remove declaration.
+	* terminal.h (gdb_save_tty_state): New declaration.
+	* inflow.c (child_terminal_save_ours): Rename to ...
+	(gdb_save_tty_state): ... this.
+	* tui/tui.c: Include terminal.h.
+	(tui_enable): Use gdb_save_tty_state instead of
+	target_terminal_save_ours.
+	(tui_disable): Likewise.
+
 2014-08-25  Doug Evans  <dje@google.com>
 
 	* linux-nat.c (linux_nat_close): Don't pass NULL for "this".
