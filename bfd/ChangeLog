@@ -1,3 +1,9 @@
+2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17313
+	* elflink.c (elf_link_add_object_symbols): Don't attach dynamic
+	sections to input from ld --just-symbols.
+
 2014-08-26  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rl78.c (rl78_elf_relax_section): Disambiguate test for

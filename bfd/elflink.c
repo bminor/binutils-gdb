@@ -3339,6 +3339,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   bfd_size_type old_dynstr_size = 0;
   size_t tabsize = 0;
   asection *s;
+  bfd_boolean just_syms;
 
   htab = elf_hash_table (info);
   bed = get_elf_backend_data (abfd);
@@ -3442,15 +3443,20 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
+  just_syms = ((s = abfd->sections) != NULL
+	       && s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS);
+
   add_needed = TRUE;
   if (! dynamic)
     {
       /* If we are creating a shared library, create all the dynamic
 	 sections immediately.  We need to attach them to something,
 	 so we attach them to this BFD, provided it is the right
-	 format.  FIXME: If there are no input BFD's of the same
-	 format as the output, we can't make a shared library.  */
-      if (info->shared
+	 format and is not from ld --just-symbols.  FIXME: If there
+	 are no input BFD's of the same format as the output, we can't
+	 make a shared library.  */
+      if (!just_syms
+	  && info->shared
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
@@ -3470,8 +3476,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       /* ld --just-symbols and dynamic objects don't mix very well.
 	 ld shouldn't allow it.  */
-      if ((s = abfd->sections) != NULL
-	  && s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+      if (just_syms)
 	abort ();
 
       /* If this dynamic lib was specified on the command line with

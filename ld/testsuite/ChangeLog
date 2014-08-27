@@ -1,3 +1,9 @@
+2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17313
+	* ld-i386/i386.exp (i386tests): Add tests for PR ld/17313.
+	* ld-x86-64/x86-64.exp (x86_64tests): Likewise.
+
 2014-08-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/copy-relocs-so.s: New test file.
