@@ -1,3 +1,7 @@
+2014-08-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf_record_line): Fix typo.
+
 2014-08-27  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* target.h (struct target_ops::to_terminal_save_ours): Remove

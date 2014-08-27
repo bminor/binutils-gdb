@@ -17233,7 +17233,7 @@ dwarf_record_line (struct gdbarch *gdbarch, struct subfile *subfile,
 {
   CORE_ADDR addr = gdbarch_addr_bits_remove (gdbarch, address);
 
-  (*p_record_line) (current_subfile, line, addr);
+  (*p_record_line) (subfile, line, addr);
 }
 
 /* Subroutine of dwarf_decode_lines_1 to simplify it.
