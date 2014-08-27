@@ -2947,6 +2947,12 @@ proc gdb_compile_shlib {sources dest options} {
         "xlc-*" {
             lappend obj_options "additional_flags=-qpic"
         }
+	"clang-*" {
+	    if { !([istarget "*-*-cygwin*"]
+		   || [istarget "*-*-mingw*"]) } {
+		lappend obj_options "additional_flags=-fpic"
+	    }
+	}
         "gcc-*" {
             if { !([istarget "powerpc*-*-aix*"]
                    || [istarget "rs6000*-*-aix*"]

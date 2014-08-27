@@ -1,3 +1,7 @@
+2014-08-27  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_compile_shlib): Add support for clang.
+
 2014-08-25  Doug Evans  <dje@google.com>
 
 	* gdb.mi/basics.c (callee3, callee2, callee1): Specify result type.
