@@ -1,5 +1,16 @@
 2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/17306
+	* ld-i386/i386.exp (i386tests): Add tests for PR ld/17306.
+	* ld-x86-64/x86-64.exp (x86_64tests): Likewise.
+
+	* ld-i386/pr17306a.s: New file.
+	* ld-i386/pr17306b.s: Likewise.
+	* ld-x86-64/pr17306a.s: Likewise.
+	* ld-x86-64/pr17306b.s: Likewise.
+
+2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/17313
 	* ld-i386/i386.exp (i386tests): Add tests for PR ld/17313.
 	* ld-x86-64/x86-64.exp (x86_64tests): Likewise.

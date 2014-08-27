@@ -2533,7 +2533,7 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
   /* Nothing to do if there are no codes, no relocations or no output.  */
   if ((sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
       || sec->reloc_count == 0
-      || discarded_section (sec))
+      || bfd_is_abs_section (sec->output_section))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;

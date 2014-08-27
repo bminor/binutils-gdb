@@ -1,5 +1,12 @@
 2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/17306
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): Use bfd_is_abs_section
+	to check discarded input section.
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Likewise.
+
+2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/17313
 	* elflink.c (elf_link_add_object_symbols): Don't attach dynamic
 	sections to input from ld --just-symbols.
