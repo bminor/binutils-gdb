@@ -1,3 +1,7 @@
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
+	* sim-trace.h (debug_printf): New define.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

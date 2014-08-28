@@ -583,6 +583,9 @@ extern void trace_vprintf (SIM_DESC, sim_cpu *, const char *, va_list);
 /* Non-zero if "--debug-insn" specified.  */
 #define DEBUG_INSN_P(cpu) DEBUG_P (cpu, DEBUG_INSN_IDX)
 
+/* GDB also has a debug_printf, so we shadow ours.  */
+#define debug_printf sim_debug_printf
+
 extern void debug_printf (sim_cpu *, const char *, ...)
      __attribute__((format (printf, 2, 3)));
 
