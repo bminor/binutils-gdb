@@ -1,3 +1,10 @@
+2014-08-28  Doug Evans  <dje@google.com>
+
+	* gdb.arch/amd64-pseudo.c (main): Rewrite to better specify when
+	eax,etc. are live with values set by gdb and thus the compiler can't
+	use them.
+	* gdb.arch/i386-pseudo.c (main): Ditto.
+
 2014-08-27  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (gdb_compile_shlib): Add support for clang.
