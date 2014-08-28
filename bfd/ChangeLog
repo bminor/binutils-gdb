@@ -1,3 +1,7 @@
+2014-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* srec.c (srec_scan): Return error for 0 size.
+
 2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17306

@@ -486,7 +486,8 @@ srec_scan (bfd *abfd)
 		bufsize = bytes * 2;
 	      }
 
-	    if (bfd_bread (buf, (bfd_size_type) bytes * 2, abfd) != bytes * 2)
+	    if (bytes == 0
+		|| bfd_bread (buf, (bfd_size_type) bytes * 2, abfd) != bytes * 2)
 	      goto error_return;
 
 	    /* Ignore the checksum byte.  */
