@@ -592,8 +592,7 @@ i386_dr_low_set_addr (int regnum, CORE_ADDR addr)
   /* Only update the threads of this process.  */
   int pid = pid_of (current_inferior);
 
-  if (! (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR))
-    fatal ("Invalid debug register %d", regnum);
+  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   find_inferior (&all_threads, update_debug_registers_callback, &pid);
 }
@@ -605,7 +604,6 @@ i386_dr_low_get_addr (int regnum)
 {
   ptid_t ptid = ptid_of (current_inferior);
 
-  /* DR6 and DR7 are retrieved with some other way.  */
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   return x86_linux_dr_get (ptid, regnum);
@@ -1227,8 +1225,7 @@ x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
     {
-      if (sizeof (siginfo_t) != sizeof (compat_siginfo_t))
-	fatal ("unexpected difference in siginfo");
+      gdb_assert (sizeof (siginfo_t) == sizeof (compat_siginfo_t));
 
       if (direction == 0)
 	compat_siginfo_from_siginfo ((struct compat_siginfo *) inf, native);
@@ -1240,8 +1237,7 @@ x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
   /* No fixup for native x32 GDB.  */
   else if (!is_elf64 && sizeof (void *) == 8)
     {
-      if (sizeof (siginfo_t) != sizeof (compat_x32_siginfo_t))
-	fatal ("unexpected difference in siginfo");
+      gdb_assert (sizeof (siginfo_t) == sizeof (compat_x32_siginfo_t));
 
       if (direction == 0)
 	compat_x32_siginfo_from_siginfo ((struct compat_x32_siginfo *) inf,

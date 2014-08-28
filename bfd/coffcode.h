@@ -3134,7 +3134,8 @@ coff_compute_section_file_positions (bfd * abfd)
 #ifdef COFF_IMAGE_WITH_PE
   int page_size;
 
-  if (coff_data (abfd)->link_info)
+  if (coff_data (abfd)->link_info
+      || (pe_data (abfd) && pe_data (abfd)->pe_opthdr.FileAlignment))
     {
       page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
 

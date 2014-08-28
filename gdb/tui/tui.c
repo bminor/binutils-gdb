@@ -37,6 +37,7 @@
 #include "inferior.h"
 #include "symtab.h"
 #include "source.h"
+#include "terminal.h"
 
 #include <ctype.h>
 #include <signal.h>
@@ -425,7 +426,7 @@ tui_enable (void)
   tui_refresh_all_win ();
 
   /* Update gdb's knowledge of its terminal.  */
-  target_terminal_save_ours ();
+  gdb_save_tty_state ();
   tui_update_gdb_sizes ();
 }
 
@@ -455,7 +456,7 @@ tui_disable (void)
   tui_setup_io (0);
 
   /* Update gdb's knowledge of its terminal.  */
-  target_terminal_save_ours ();
+  gdb_save_tty_state ();
 
   tui_active = 0;
   tui_update_gdb_sizes ();

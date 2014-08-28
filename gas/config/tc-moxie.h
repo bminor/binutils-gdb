@@ -34,7 +34,7 @@
 /* These macros must be defined, but is will be a fatal assembler
    error if we ever hit them.  */
 #define md_estimate_size_before_relax(A, B) (as_fatal (_("estimate size\n")), 0)
-#define md_convert_frag(B, S, F)            (as_fatal (_("convert_frag\n")), 0)
+#define md_convert_frag(B, S, F)            as_fatal (_("convert_frag\n"))
 
 /* If you define this macro, it should return the offset between the
    address of a PC relative fixup and the position from which the PC

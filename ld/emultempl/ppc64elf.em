@@ -460,19 +460,6 @@ gld${EMULATION_NAME}_after_allocation (void)
 {
   int ret;
 
-  /* bfd_elf_discard_info just plays with data and debugging sections,
-     ie. doesn't affect code size, so we can delay resizing the
-     sections.  It's likely we'll resize everything in the process of
-     adding stubs.  */
-  ret = bfd_elf_discard_info (link_info.output_bfd, &link_info);
-  if (ret < 0)
-    {
-      einfo ("%X%P: .eh_frame/.stab edit: %E\n");
-      return;
-    }
-  else if (ret > 0)
-    need_laying_out = 1;
-
   /* If generating a relocatable output file, then we don't have any
      stubs.  */
   if (stub_file != NULL && !link_info.relocatable)
@@ -480,7 +467,7 @@ gld${EMULATION_NAME}_after_allocation (void)
       ret = ppc64_elf_setup_section_lists (&link_info);
       if (ret < 0)
 	einfo ("%X%P: can not size stub section: %E\n");
-      else if (ret > 0)
+      else
 	{
 	  ppc64_elf_start_multitoc_partition (&link_info);
 
@@ -509,6 +496,19 @@ gld${EMULATION_NAME}_after_allocation (void)
 	    einfo ("%X%P: can not size stub section: %E\n");
 	}
     }
+
+  /* We can't parse and merge .eh_frame until the glink .eh_frame has
+     been generated.  Otherwise the glink .eh_frame CIE won't be
+     merged with other CIEs, and worse, the glink .eh_frame FDEs won't
+     be listed in .eh_frame_hdr.  */
+  ret = bfd_elf_discard_info (link_info.output_bfd, &link_info);
+  if (ret < 0)
+    {
+      einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+      return;
+    }
+  else if (ret > 0)
+    need_laying_out = 1;
 
   if (need_laying_out != -1)
     {

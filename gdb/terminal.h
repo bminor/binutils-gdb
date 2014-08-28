@@ -101,6 +101,8 @@ extern void initialize_stdin_serial (void);
 
 extern int gdb_has_a_terminal (void);
 
+extern void gdb_save_tty_state (void);
+
 /* Set the process group of the caller to its own pid, or do nothing
    if we lack job control.  */
 extern int gdb_setpgid (void);

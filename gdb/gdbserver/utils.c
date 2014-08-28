@@ -90,25 +90,6 @@ verror (const char *string, va_list args)
 #endif
 }
 
-/* Print an error message and exit reporting failure.
-   This is for a error that we cannot continue from.
-   STRING and ARG are passed to fprintf.  */
-
-/* VARARGS */
-void
-fatal (const char *string,...)
-{
-  va_list args;
-  va_start (args, string);
-  fprintf (stderr, PREFIX);
-  vfprintf (stderr, string, args);
-  fprintf (stderr, "\n");
-  va_end (args);
-  exit (1);
-}
-
-/* Print a warning message.  */
-
 void
 vwarning (const char *string, va_list args)
 {

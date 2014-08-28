@@ -219,7 +219,11 @@ proc test_lazy_strings {} {
 	"= const char \*." "Test lazy-string type name equality"
     gdb_test "gu (print (value-type sptr))" \
 	"= const char \*." "Test string type name equality"
+
+    # Prevent symbol on address 0x0 being printed.
+    gdb_test_no_output "set print symbol off"
     gdb_test "print sn" "0x0"
+
     gdb_scm_test_silent_cmd "gu (define snptr (history-ref 0))" \
 	"lazy strings: get snptr value from history"
     gdb_test "gu (define snstr (value->lazy-string snptr #:length 5))" \

@@ -1,3 +1,46 @@
+2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17306
+	* ld-i386/i386.exp (i386tests): Add tests for PR ld/17306.
+	* ld-x86-64/x86-64.exp (x86_64tests): Likewise.
+
+	* ld-i386/pr17306a.s: New file.
+	* ld-i386/pr17306b.s: Likewise.
+	* ld-x86-64/pr17306a.s: Likewise.
+	* ld-x86-64/pr17306b.s: Likewise.
+
+2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17313
+	* ld-i386/i386.exp (i386tests): Add tests for PR ld/17313.
+	* ld-x86-64/x86-64.exp (x86_64tests): Likewise.
+
+2014-08-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/copy-relocs-so.s: New test file.
+	* ld-aarch64/copy-relocs-exe.s: Likewise.
+	* ld-aarch64/copy-relocs.d: New expectation file.
+	* ld-aarch64/emit-relocs-264-bad.d: New test file.
+	* ld-aarch64/emit-relocs-266-bad.d: Likewise.
+	* ld-aarch64/emit-relocs-268-bad.d: Likewise.
+	* ld-aarch64/emit-relocs-269-bad.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new added test.
+
+2014-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* ld-aarch64/eh-frame-foo.s: Use 8-byte offset for X30.
+	* ld-aarch64/eh-frame-bar.s: Likewise.
+	* ld-aarch64/eh-frame.d: Updated to match current readelf output.
+	* ld-elf/eh5.d: Allow any register names.
+
+2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-powerpc/apuinfo-vle.rd: New test.
+	* ld-powerpc/apuinfo-vle.s: New test source.
+	* ld-powerpc/apuinfo.rd: Adjust according to GAS PPC_APUINFO_VLE
+	handling change.
+	* ld-powerpc/powerpc.exp: Run the new test.
+
 2014-08-21  Tony Wang  <tony.wang@arm.com>
 
 	* ld-arm/jump-reloc-veneers-cond.s: New test.

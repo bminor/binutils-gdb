@@ -1,3 +1,48 @@
+2014-08-28  Doug Evans  <dje@google.com>
+
+	* gdb.arch/amd64-pseudo.c (main): Rewrite to better specify when
+	eax,etc. are live with values set by gdb and thus the compiler can't
+	use them.
+	* gdb.arch/i386-pseudo.c (main): Ditto.
+
+2014-08-27  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_compile_shlib): Add support for clang.
+
+2014-08-25  Doug Evans  <dje@google.com>
+
+	* gdb.mi/basics.c (callee3, callee2, callee1): Specify result type.
+	(main): Ditto.
+
+2014-08-25  Doug Evans  <dje@google.com>
+
+	* gdb.threads/thread-execl.exp: #include <stdio.h>.
+
+2014-08-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.guile/scm-value.exp (test_lazy_strings): Set print
+	symbol off.
+	* gdb.python/py-value.exp (test_lazy_strings): Likewise.
+
+2014-08-22  Doug Evans  <dje@google.com>
+
+	PR 17276
+	* gdb.dwarf2/dw2-single-line-discriminators.S: New file.
+	* gdb.dwarf2/dw2-single-line-discriminators.c: New file.
+	* gdb.dwarf2/dw2-single-line-discriminators.exp: New file.
+
+2014-08-22  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.python/py-finish-breakpoint.exp: Copy .py file to host.
+	* gdb.python/py-finish-breakpoint2.exp: Likewise.
+	* gdb.python/python.exp: Likewise.  Use .py file on the host
+	instead of the build.
+
+2014-08-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/gcore-stale-thread.c: New file.
+	* gdb.threads/gcore-stale-thread.exp: New file.
+
 2014-08-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/gcore-buffer-overflow.exp: Remove "help gcore" test.

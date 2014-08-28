@@ -506,8 +506,6 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_ours) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_terminal_save_ours) (struct target_ops *)
-      TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_info) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_FUNC (default_terminal_info);
     void (*to_kill) (struct target_ops *)
@@ -1416,14 +1414,6 @@ extern void target_terminal_inferior (void);
   "to_terminal_ours" method.  */
 
 extern int target_supports_terminal_ours (void);
-
-/* Save our terminal settings.
-   This is called from TUI after entering or leaving the curses
-   mode.  Since curses modifies our terminal this call is here
-   to take this change into account.  */
-
-#define target_terminal_save_ours() \
-     (*current_target.to_terminal_save_ours) (&current_target)
 
 /* Print useful information about our terminal status, if such a thing
    exists.  */

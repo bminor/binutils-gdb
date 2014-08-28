@@ -623,11 +623,6 @@ ctf_write_definition_end (struct trace_file_writer *self)
   self->ops->frame_ops->end (self);
 }
 
-/* The minimal file size of data stream.  It is required by
-   babeltrace.  */
-
-#define CTF_FILE_MIN_SIZE		4096
-
 /* This is the implementation of trace_file_write_ops method
    end.  */
 
@@ -637,50 +632,6 @@ ctf_end (struct trace_file_writer *self)
   struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
 
   gdb_assert (writer->tcs.content_size == 0);
-  /* The babeltrace requires or assumes that the size of datastream
-     file is greater than 4096 bytes.  If we don't generate enough
-     packets and events, create a fake packet which has zero event,
-      to use up the space.  */
-  if (writer->tcs.packet_start < CTF_FILE_MIN_SIZE)
-    {
-      uint32_t u32;
-
-      /* magic.  */
-      u32 = CTF_MAGIC;
-      ctf_save_write_uint32 (&writer->tcs, u32);
-
-      /* content_size.  */
-      u32 = 0;
-      ctf_save_write_uint32 (&writer->tcs, u32);
-
-      /* packet_size.  */
-      u32 = 12;
-      if (writer->tcs.packet_start + u32 < CTF_FILE_MIN_SIZE)
-	u32 = CTF_FILE_MIN_SIZE - writer->tcs.packet_start;
-
-      u32 *= TARGET_CHAR_BIT;
-      ctf_save_write_uint32 (&writer->tcs, u32);
-
-      /* tpnum.  */
-      u32 = 0;
-      ctf_save_write (&writer->tcs, (gdb_byte *) &u32, 2);
-
-      /* Enlarge the file to CTF_FILE_MIN_SIZE is it is still less
-	 than that.  */
-      if (CTF_FILE_MIN_SIZE
-	  > (writer->tcs.packet_start + writer->tcs.content_size))
-	{
-	  gdb_byte b = 0;
-
-	  /* Fake the content size to avoid assertion failure in
-	     ctf_save_fseek.  */
-	  writer->tcs.content_size = (CTF_FILE_MIN_SIZE
-				      - 1 - writer->tcs.packet_start);
-	  ctf_save_fseek (&writer->tcs, CTF_FILE_MIN_SIZE - 1,
-			  SEEK_SET);
-	  ctf_save_write (&writer->tcs, &b, 1);
-	}
-    }
 }
 
 /* This is the implementation of trace_frame_write_ops method

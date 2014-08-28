@@ -1,3 +1,36 @@
+2014-08-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (aeabi_set_public_attributes): Update selected_cpu
+	based on the info we got during parsing.
+	(arm_handle_align): Make sure the p2align expanding logic under thumb
+	unchanged.
+
+2014-08-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (macro) <M_SAA_AB>: Remove duplicate code and
+	jump to...
+	<M_SAAD_AB>: ... here.  Assert that !microMIPS.
+
+2014-08-26  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* config/tc-moxie.h (md_convert_frag): Silence warning.
+
+2014-08-22  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-aarch64.c (tc_aarch64_regname_to_dw2regnum): Fix
+	register number for vector register types.
+	* config/tc-aarch64.h (DWARF2_LINE_MIN_INSN_LENGTH): Set to 4.
+	(DWARF2_CIE_DATA_ALIGNMENT): Set to -8.
+
+2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-ppc.c (md_assemble): Only set the PPC_APUINFO_VLE
+	flag if both the processor and opcode flags match.
+
+2014-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-arm.c (add_to_lit_pool): Preinitialize `imm1'.
+
 2014-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* dw2gencfi.c (make_debug_seg): Replace leading spaces with tabs.

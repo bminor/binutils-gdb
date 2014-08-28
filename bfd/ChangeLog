@@ -1,3 +1,64 @@
+2014-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* srec.c (srec_scan): Return error for 0 size.
+
+2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17306
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): Use bfd_is_abs_section
+	to check discarded input section.
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Likewise.
+
+2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17313
+	* elflink.c (elf_link_add_object_symbols): Don't attach dynamic
+	sections to input from ld --just-symbols.
+
+2014-08-26  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (rl78_elf_relax_section): Disambiguate test for
+	relaxation type.
+
+2014-08-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Initialize non_got_ref
+	properly for MOVW_G0/1/2_NC and MOVW_G3.  Reject them when linking
+	shared library.
+	(elfNN_aarch64_gc_sweep_hook): Add check on these relocs.
+
+2014-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Fix typo in or1knd selection.
+
+2014-08-22  Kai Tietz  <ktietz@redhat.com>
+
+	PR binutils/11822
+	* coffcode.h (coff_compute_section_file_positions): Keep
+	FileAlignment valid as set.
+
+2014-08-22  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (struct cie): Delete "output_sec" field.
+	(cie_eq, cie_compute_hash): Use output_section from cie_inf instead.
+
+2014-08-22  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct eh_frame_hdr_info): Delete merge_cies and
+	parsed_eh_frames.
+	(_bfd_elf_begin_eh_frame_parsing): Delete.
+	(_bfd_elf_end_eh_frame_parsing): Delete.
+	* elf-eh-frame.c (_bfd_elf_begin_eh_frame_parsing): Delete.
+	(_bfd_elf_end_eh_frame_parsing): Delete.
+	(_bfd_elf_parse_eh_frame): Don't test parsed_eh_frame.  Test
+	!info->relocatable in place of merge_cies.
+	* elflink.c (bfd_elf_gc_sections, bfd_elf_discard_info): Adjust.
+	* elf64-ppc.c (glink_eh_frame_cie): Pad to multiple of 8.
+	(ppc64_elf_size_stubs): Likewise pad stub FDE.
+	(ppc64_elf_build_stubs): Move code setting glink .eh_frame to..
+	(ppc64_elf_size_stubs): ..here and..
+	(ppc64_elf_finish_dynamic_sections): ..here.
+
 2014-08-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elf64-ppc.h (ppc64_elf_set_toc): Fix indentation.

@@ -3273,7 +3273,6 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	found_return = 1;
       else if (thumb_instruction_restores_sp (insn))
 	{
-	  found_stack_adjust = 1;
 	  if ((insn & 0xfe00) == 0xbd00)  /* pop <registers, PC> */
 	    found_return = 1;
 	}
@@ -3287,20 +3286,18 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 	  if (insn == 0xe8bd)  /* ldm.w sp!, <registers> */
 	    {
-	      found_stack_adjust = 1;
 	      if (insn2 & 0x8000)  /* <registers> include PC.  */
 		found_return = 1;
 	    }
 	  else if (insn == 0xf85d  /* ldr.w <Rt>, [sp], #4 */
 		   && (insn2 & 0x0fff) == 0x0b04)
 	    {
-	      found_stack_adjust = 1;
 	      if ((insn2 & 0xf000) == 0xf000) /* <Rt> is PC.  */
 		found_return = 1;
 	    }
 	  else if ((insn & 0xffbf) == 0xecbd  /* vldm sp!, <list> */
 		   && (insn2 & 0x0e00) == 0x0a00)
-	    found_stack_adjust = 1;
+	    ;
 	  else
 	    break;
 	}
@@ -3317,27 +3314,24 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
      a 32-bit instruction.  This is just a heuristic, so we do not worry
      too much about false positives.  */
 
-  if (!found_stack_adjust)
-    {
-      if (pc - 4 < func_start)
-	return 0;
-      if (target_read_memory (pc - 4, buf, 4))
-	return 0;
+  if (pc - 4 < func_start)
+    return 0;
+  if (target_read_memory (pc - 4, buf, 4))
+    return 0;
 
-      insn = extract_unsigned_integer (buf, 2, byte_order_for_code);
-      insn2 = extract_unsigned_integer (buf + 2, 2, byte_order_for_code);
+  insn = extract_unsigned_integer (buf, 2, byte_order_for_code);
+  insn2 = extract_unsigned_integer (buf + 2, 2, byte_order_for_code);
 
-      if (thumb_instruction_restores_sp (insn2))
-	found_stack_adjust = 1;
-      else if (insn == 0xe8bd)  /* ldm.w sp!, <registers> */
-	found_stack_adjust = 1;
-      else if (insn == 0xf85d  /* ldr.w <Rt>, [sp], #4 */
-	       && (insn2 & 0x0fff) == 0x0b04)
-	found_stack_adjust = 1;
-      else if ((insn & 0xffbf) == 0xecbd  /* vldm sp!, <list> */
-	       && (insn2 & 0x0e00) == 0x0a00)
-	found_stack_adjust = 1;
-    }
+  if (thumb_instruction_restores_sp (insn2))
+    found_stack_adjust = 1;
+  else if (insn == 0xe8bd)  /* ldm.w sp!, <registers> */
+    found_stack_adjust = 1;
+  else if (insn == 0xf85d  /* ldr.w <Rt>, [sp], #4 */
+	   && (insn2 & 0x0fff) == 0x0b04)
+    found_stack_adjust = 1;
+  else if ((insn & 0xffbf) == 0xecbd  /* vldm sp!, <list> */
+	   && (insn2 & 0x0e00) == 0x0a00)
+    found_stack_adjust = 1;
 
   return found_stack_adjust;
 }

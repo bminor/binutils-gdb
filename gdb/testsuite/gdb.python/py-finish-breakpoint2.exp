@@ -19,7 +19,6 @@
 load_lib gdb-python.exp
 
 standard_testfile .cc
-set pyfile  ${srcdir}/${subdir}/${testfile}.py
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1
@@ -32,6 +31,9 @@ if ![runto_main] then {
     fail "Cannot run to main."
     return 0
 }
+
+set pyfile [gdb_remote_download host \
+		${srcdir}/${subdir}/${testfile}.py]
 
 #
 # Check FinishBreakpoints against C++ exceptions

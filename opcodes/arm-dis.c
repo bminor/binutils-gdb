@@ -2583,6 +2583,8 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	      arm_decode_shift (given, func, stream, TRUE);
 	    }
 	}
+      if (NEGATIVE_BIT_SET)
+	offset = -offset;
     }
 
   return (signed long) offset;

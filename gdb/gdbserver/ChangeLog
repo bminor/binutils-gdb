@@ -1,3 +1,62 @@
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
+	* utils.h (fatal): Remove declaration.
+	* utils.c (fatal): Remove function.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
+	* tracepoint.c (gdb_agent_init): Replace fatal with
+	perror_with_name.
+	(initialize_tracepoint): Likewise.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
+	* remote-utils.c (remote_prepare): Replace fatal with error.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
+	* linux-low.c (linux_async): Replace fatal with warning.
+	Tidy up and return.
+	(linux_start_non_stop): Return -1 if linux_async failed.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
+	* linux-x86-low.c (i386_dr_low_set_addr): Replace check with
+	gdb_assert.
+	(i386_dr_low_get_addr): Remove vague comment.
+	* win32-i386-low.c (i386_dr_low_set_addr): Replace check with
+	gdb_assert.
+
+2014-08-28  Gary Benson  <gbenson@redhat.com>
+
+	* inferiors.c (get_thread_process): Replace check with gdb_assert.
+	* linux-low.c (linux_wait_for_event_filtered): Replace fatal with
+	internal_error.
+	(linux_resume_one_lwp): Likewise.
+	* linux-x86-low.c (x86_siginfo_fixup): Replace checks with
+	gdb_assert.
+	* mem-break.c (raw_bkpt_type_to_target_hw_bp_type): Replace fatal
+	with internal_error.
+	* regcache.c (get_thread_regcache): Replace check with gdb_assert.
+	(init_register_cache): Replace fatal with gdb_assert_not_reached.
+	(find_register_by_name): Replace fatal with internal_error.
+	(find_regno): Likewise.
+	* tdesc.c (init_target_desc): Replace check with gdb_assert.
+	* thread-db.c (thread_db_create_event): Likewise.
+	(thread_db_load_search): Likewise.
+	(try_thread_db_load_1): Likewise.
+	* tracepoint.c (get_jump_space_head): Replace fatal with
+	internal_error.
+	(claim_trampoline_space): Likewise.
+	(have_fast_tracepoint_trampoline_buffer): Likewise.
+	(cmd_qtstart): Likewise.
+	(stop_tracing): Likewise.
+	(fast_tracepoint_collecting): Likewise.
+	(target_malloc): Likewise.
+	(download_tracepoint): Likewise.
+	(download_trace_state_variables): Replace check with gdb_assert.
+	(upload_fast_traceframes): Replace fatal with internal_error.
+
 2014-08-19  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 

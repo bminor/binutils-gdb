@@ -1,3 +1,40 @@
+2014-08-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/arm/blx-bl-convert.d: New testcase.
+	* gas/arm/blx-bl-convert.l: Warning expectation.
+	* gas/arm/blx-bl-convert.s: Source file.
+
+2014-08-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/l_d.d: Remove ECOFF offset alternatives.
+	* gas/mips/mips1@l_d.d: Likewise.
+	* gas/mips/ld.d: Likewise.
+	* gas/mips/mips1@ld.d: Likewise.
+	* gas/mips/mips1@ld-forward.d: Likewise.
+	* gas/mips/s_d.d: Likewise.
+	* gas/mips/mips1@s_d.d: Likewise.
+	* gas/mips/sd.d: Likewise.
+
+2014-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gas/sparc/ldx_stx.s: New file.
+	* gas/sparc/ldx_stx.d: Likewise.
+
+	* gas/sparc/ldx_efsr.s: New file.
+	* gas/sparc/ldx_efsr.d: Likewise.
+
+	* gas/sparc/ld_st_fsr.s: New file.
+	* gas/sparc/ld_st_fsr.d: Likewise.
+
+	* gas/sparc/sparc.exp: Run the tests ldx_stx, ldx_efsr and
+	ld_st_fsr.
+
+2014-08-22  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/arch7a-mp.d: Adjust according to `print_arm_address'
+	offset fix.
+	* gas/arm/arch7r-mp.d: Likewise.
+
 2014-08-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/mips.exp: Correct indentation.

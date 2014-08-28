@@ -1,3 +1,8 @@
+2014-08-27  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* basics.h, device.c, device.h, hw_htab.c, hw_memory.c:
+	Correct spelling in comments.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Invoke AC_PLUGINS.

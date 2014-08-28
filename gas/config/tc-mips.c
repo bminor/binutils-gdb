@@ -12206,11 +12206,11 @@ macro (struct mips_cl_insn *ip, char *str)
 	
     case M_SAA_AB:
       s = "saa";
-      offbits = 0;
-      fmt = "t,(b)";
-      goto ld_st;
+      goto saa_saad;
     case M_SAAD_AB:
       s = "saad";
+    saa_saad:
+      gas_assert (!mips_opts.micromips);
       offbits = 0;
       fmt = "t,(b)";
       goto ld_st;

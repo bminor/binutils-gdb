@@ -1387,10 +1387,10 @@ static void add_partial_symbol (struct partial_die_info *,
 
 static void add_partial_namespace (struct partial_die_info *pdi,
 				   CORE_ADDR *lowpc, CORE_ADDR *highpc,
-				   int need_pc, struct dwarf2_cu *cu);
+				   int set_addrmap, struct dwarf2_cu *cu);
 
 static void add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
-				CORE_ADDR *highpc, int need_pc,
+				CORE_ADDR *highpc, int set_addrmap,
 				struct dwarf2_cu *cu);
 
 static void add_partial_enumeration (struct partial_die_info *enum_pdi,
@@ -1512,8 +1512,7 @@ static struct line_header *dwarf_decode_line_header (unsigned int offset,
 						     struct dwarf2_cu *cu);
 
 static void dwarf_decode_lines (struct line_header *, const char *,
-				struct dwarf2_cu *, struct partial_symtab *,
-				int);
+				struct dwarf2_cu *, struct partial_symtab *);
 
 static void dwarf2_start_subfile (const char *, const char *, const char *);
 
@@ -4449,7 +4448,7 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
     return;  /* No linetable, so no includes.  */
 
   /* NOTE: pst->dirname is DW_AT_comp_dir (if present).  */
-  dwarf_decode_lines (lh, pst->dirname, cu, pst, 1);
+  dwarf_decode_lines (lh, pst->dirname, cu, pst);
 
   free_line_header (lh);
 }
@@ -6542,15 +6541,15 @@ create_all_comp_units (struct objfile *objfile)
 }
 
 /* Process all loaded DIEs for compilation unit CU, starting at
-   FIRST_DIE.  The caller should pass NEED_PC == 1 if the compilation
+   FIRST_DIE.  The caller should pass SET_ADDRMAP == 1 if the compilation
    unit DIE did not have PC info (DW_AT_low_pc and DW_AT_high_pc, or
-   DW_AT_ranges).  If NEED_PC is set, then this function will set
-   *LOWPC and *HIGHPC to the lowest and highest PC values found in CU
-   and record the covered ranges in the addrmap.  */
+   DW_AT_ranges).  See the comments of add_partial_subprogram on how
+   SET_ADDRMAP is used and how *LOWPC and *HIGHPC are updated.  */
 
 static void
 scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
-		      CORE_ADDR *highpc, int need_pc, struct dwarf2_cu *cu)
+		      CORE_ADDR *highpc, int set_addrmap,
+		      struct dwarf2_cu *cu)
 {
   struct partial_die_info *pdi;
 
@@ -6575,7 +6574,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	  switch (pdi->tag)
 	    {
 	    case DW_TAG_subprogram:
-	      add_partial_subprogram (pdi, lowpc, highpc, need_pc, cu);
+	      add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_constant:
 	    case DW_TAG_variable:
@@ -6605,10 +6604,10 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	      add_partial_symbol (pdi, cu);
 	      break;
 	    case DW_TAG_namespace:
-	      add_partial_namespace (pdi, lowpc, highpc, need_pc, cu);
+	      add_partial_namespace (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_module:
-	      add_partial_module (pdi, lowpc, highpc, need_pc, cu);
+	      add_partial_module (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_imported_unit:
 	      {
@@ -6975,7 +6974,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 static void
 add_partial_namespace (struct partial_die_info *pdi,
 		       CORE_ADDR *lowpc, CORE_ADDR *highpc,
-		       int need_pc, struct dwarf2_cu *cu)
+		       int set_addrmap, struct dwarf2_cu *cu)
 {
   /* Add a symbol for the namespace.  */
 
@@ -6984,14 +6983,14 @@ add_partial_namespace (struct partial_die_info *pdi,
   /* Now scan partial symbols in that namespace.  */
 
   if (pdi->has_children)
-    scan_partial_symbols (pdi->die_child, lowpc, highpc, need_pc, cu);
+    scan_partial_symbols (pdi->die_child, lowpc, highpc, set_addrmap, cu);
 }
 
 /* Read a partial die corresponding to a Fortran module.  */
 
 static void
 add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
-		    CORE_ADDR *highpc, int need_pc, struct dwarf2_cu *cu)
+		    CORE_ADDR *highpc, int set_addrmap, struct dwarf2_cu *cu)
 {
   /* Add a symbol for the namespace.  */
 
@@ -7000,23 +6999,25 @@ add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
   /* Now scan partial symbols in that module.  */
 
   if (pdi->has_children)
-    scan_partial_symbols (pdi->die_child, lowpc, highpc, need_pc, cu);
+    scan_partial_symbols (pdi->die_child, lowpc, highpc, set_addrmap, cu);
 }
 
 /* Read a partial die corresponding to a subprogram and create a partial
    symbol for that subprogram.  When the CU language allows it, this
    routine also defines a partial symbol for each nested subprogram
-   that this subprogram contains.
+   that this subprogram contains.  If SET_ADDRMAP is true, record the
+   covered ranges in the addrmap.  Set *LOWPC and *HIGHPC to the lowest
+   and highest PC values found in PDI.
 
-   DIE my also be a lexical block, in which case we simply search
-   recursively for suprograms defined inside that lexical block.
+   PDI may also be a lexical block, in which case we simply search
+   recursively for subprograms defined inside that lexical block.
    Again, this is only performed when the CU language allows this
    type of definitions.  */
 
 static void
 add_partial_subprogram (struct partial_die_info *pdi,
 			CORE_ADDR *lowpc, CORE_ADDR *highpc,
-			int need_pc, struct dwarf2_cu *cu)
+			int set_addrmap, struct dwarf2_cu *cu)
 {
   if (pdi->tag == DW_TAG_subprogram)
     {
@@ -7026,7 +7027,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
             *lowpc = pdi->lowpc;
           if (pdi->highpc > *highpc)
             *highpc = pdi->highpc;
-	  if (need_pc)
+	  if (set_addrmap)
 	    {
 	      CORE_ADDR baseaddr;
 	      struct objfile *objfile = cu->objfile;
@@ -7062,7 +7063,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	  fixup_partial_die (pdi, cu);
 	  if (pdi->tag == DW_TAG_subprogram
 	      || pdi->tag == DW_TAG_lexical_block)
-	    add_partial_subprogram (pdi, lowpc, highpc, need_pc, cu);
+	    add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
 	  pdi = pdi->die_sibling;
 	}
     }
@@ -8966,8 +8967,7 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
 
 /* Handle DW_AT_stmt_list for a compilation unit.
    DIE is the DW_TAG_compile_unit die for CU.
-   COMP_DIR is the compilation directory.
-   WANT_LINE_INFO is non-zero if the pc/line-number mapping is needed.  */
+   COMP_DIR is the compilation directory.  */
 
 static void
 handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
@@ -8988,7 +8988,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
 	{
 	  cu->line_header = line_header;
 	  make_cleanup (free_cu_line_header, cu);
-	  dwarf_decode_lines (line_header, comp_dir, cu, NULL, 1);
+	  dwarf_decode_lines (line_header, comp_dir, cu, NULL);
 	}
     }
 }
@@ -17174,6 +17174,79 @@ noop_record_line (struct subfile *subfile, int line, CORE_ADDR pc)
   return;
 }
 
+/* Return non-zero if we should add LINE to the line number table.
+   LINE is the line to add, LAST_LINE is the last line that was added,
+   LAST_SUBFILE is the subfile for LAST_LINE.
+   LINE_HAS_NON_ZERO_DISCRIMINATOR is non-zero if LINE has ever
+   had a non-zero discriminator.
+
+   We have to be careful in the presence of discriminators.
+   E.g., for this line:
+
+     for (i = 0; i < 100000; i++);
+
+   clang can emit four line number entries for that one line,
+   each with a different discriminator.
+   See gdb.dwarf2/dw2-single-line-discriminators.exp for an example.
+
+   However, we want gdb to coalesce all four entries into one.
+   Otherwise the user could stepi into the middle of the line and
+   gdb would get confused about whether the pc really was in the
+   middle of the line.
+
+   Things are further complicated by the fact that two consecutive
+   line number entries for the same line is a heuristic used by gcc
+   to denote the end of the prologue.  So we can't just discard duplicate
+   entries, we have to be selective about it.  The heuristic we use is
+   that we only collapse consecutive entries for the same line if at least
+   one of those entries has a non-zero discriminator.  PR 17276.
+
+   Note: Addresses in the line number state machine can never go backwards
+   within one sequence, thus this coalescing is ok.  */
+
+static int
+dwarf_record_line_p (unsigned int line, unsigned int last_line,
+		     int line_has_non_zero_discriminator,
+		     struct subfile *last_subfile)
+{
+  if (current_subfile != last_subfile)
+    return 1;
+  if (line != last_line)
+    return 1;
+  /* Same line for the same file that we've seen already.
+     As a last check, for pr 17276, only record the line if the line
+     has never had a non-zero discriminator.  */
+  if (!line_has_non_zero_discriminator)
+    return 1;
+  return 0;
+}
+
+/* Use P_RECORD_LINE to record line number LINE beginning at address ADDRESS
+   in the line table of subfile SUBFILE.  */
+
+static void
+dwarf_record_line (struct gdbarch *gdbarch, struct subfile *subfile,
+		   unsigned int line, CORE_ADDR address,
+		   record_line_ftype p_record_line)
+{
+  CORE_ADDR addr = gdbarch_addr_bits_remove (gdbarch, address);
+
+  (*p_record_line) (subfile, line, addr);
+}
+
+/* Subroutine of dwarf_decode_lines_1 to simplify it.
+   Mark the end of a set of line number records.
+   The arguments are the same as for dwarf_record_line.
+   If SUBFILE is NULL the request is ignored.  */
+
+static void
+dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
+		   CORE_ADDR address, record_line_ftype p_record_line)
+{
+  if (subfile != NULL)
+    dwarf_record_line (gdbarch, subfile, 0, address, p_record_line);
+}
+
 /* Subroutine of dwarf_decode_lines to simplify it.
    Process the line number information in LH.  */
 
@@ -17207,8 +17280,13 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
       unsigned int line = 1;
       int is_stmt = lh->default_is_stmt;
       int end_sequence = 0;
-      CORE_ADDR addr;
       unsigned char op_index = 0;
+      unsigned int discriminator = 0;
+      /* The last line number that was recorded, used to coalesce
+	 consecutive entries for the same line.  This can happen, for
+	 example, when discriminators are present.  PR 17276.  */
+      unsigned int last_line = 0;
+      int line_has_non_zero_discriminator = 0;
 
       if (!decode_for_pst_p && lh->num_file_names >= file)
 	{
@@ -17240,6 +17318,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 	    {
 	      /* Special opcode.  */
 	      unsigned char adj_opcode;
+	      int line_delta;
 
 	      adj_opcode = op_code - lh->opcode_base;
 	      address += (((op_index + (adj_opcode / lh->line_range))
@@ -17247,7 +17326,10 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 			  * lh->minimum_instruction_length);
 	      op_index = ((op_index + (adj_opcode / lh->line_range))
 			  % lh->maximum_ops_per_instruction);
-	      line += lh->line_base + (adj_opcode % lh->line_range);
+	      line_delta = lh->line_base + (adj_opcode % lh->line_range);
+	      line += line_delta;
+	      if (line_delta != 0)
+		line_has_non_zero_discriminator = discriminator != 0;
 	      if (lh->num_file_names < file || file == 0)
 		dwarf2_debug_line_missing_file_complaint ();
 	      /* For now we ignore lines not starting on an
@@ -17259,16 +17341,21 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		    {
 		      if (last_subfile != current_subfile)
 			{
-			  addr = gdbarch_addr_bits_remove (gdbarch, address);
-			  if (last_subfile)
-			    (*p_record_line) (last_subfile, 0, addr);
-			  last_subfile = current_subfile;
+			  dwarf_finish_line (gdbarch, last_subfile,
+					     address, p_record_line);
 			}
-		      /* Append row to matrix using current values.  */
-		      addr = gdbarch_addr_bits_remove (gdbarch, address);
-		      (*p_record_line) (current_subfile, line, addr);
+		      if (dwarf_record_line_p (line, last_line,
+					       line_has_non_zero_discriminator,
+					       last_subfile))
+			{
+			  dwarf_record_line (gdbarch, current_subfile,
+					     line, address, p_record_line);
+			}
+		      last_subfile = current_subfile;
+		      last_line = line;
 		    }
 		}
+	      discriminator = 0;
 	    }
 	  else switch (op_code)
 	    {
@@ -17331,8 +17418,14 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		  break;
 		case DW_LNE_set_discriminator:
 		  /* The discriminator is not interesting to the debugger;
-		     just ignore it.  */
-		  line_ptr = extended_end;
+		     just ignore it.  We still need to check its value though:
+		     if there are consecutive entries for the same
+		     (non-prologue) line we want to coalesce them.
+		     PR 17276.  */
+		  discriminator = read_unsigned_leb128 (abfd, line_ptr,
+							&bytes_read);
+		  line_has_non_zero_discriminator |= discriminator != 0;
+		  line_ptr += bytes_read;
 		  break;
 		default:
 		  complaint (&symfile_complaints,
@@ -17359,15 +17452,21 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		    {
 		      if (last_subfile != current_subfile)
 			{
-			  addr = gdbarch_addr_bits_remove (gdbarch, address);
-			  if (last_subfile)
-			    (*p_record_line) (last_subfile, 0, addr);
-			  last_subfile = current_subfile;
+			  dwarf_finish_line (gdbarch, last_subfile,
+					     address, p_record_line);
 			}
-		      addr = gdbarch_addr_bits_remove (gdbarch, address);
-		      (*p_record_line) (current_subfile, line, addr);
+		      if (dwarf_record_line_p (line, last_line,
+					       line_has_non_zero_discriminator,
+					       last_subfile))
+			{
+			  dwarf_record_line (gdbarch, current_subfile,
+					     line, address, p_record_line);
+			}
+		      last_subfile = current_subfile;
+		      last_line = line;
 		    }
 		}
+	      discriminator = 0;
 	      break;
 	    case DW_LNS_advance_pc:
 	      {
@@ -17383,8 +17482,15 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 	      }
 	      break;
 	    case DW_LNS_advance_line:
-	      line += read_signed_leb128 (abfd, line_ptr, &bytes_read);
-	      line_ptr += bytes_read;
+	      {
+		int line_delta
+		  = read_signed_leb128 (abfd, line_ptr, &bytes_read);
+
+		line += line_delta;
+		if (line_delta != 0)
+		  line_has_non_zero_discriminator = discriminator != 0;
+		line_ptr += bytes_read;
+	      }
 	      break;
 	    case DW_LNS_set_file:
               {
@@ -17406,6 +17512,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
                     if (!decode_for_pst_p)
                       {
                         last_subfile = current_subfile;
+			line_has_non_zero_discriminator = discriminator != 0;
                         dwarf2_start_subfile (fe->name, dir, comp_dir);
                       }
                   }
@@ -17461,8 +17568,8 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
           lh->file_names[file - 1].included_p = 1;
           if (!decode_for_pst_p)
 	    {
-	      addr = gdbarch_addr_bits_remove (gdbarch, address);
-	      (*p_record_line) (current_subfile, 0, addr);
+	      dwarf_finish_line (gdbarch, current_subfile, address,
+				 p_record_line);
 	    }
         }
     }
@@ -17492,15 +17599,13 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 
 static void
 dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
-		    struct dwarf2_cu *cu, struct partial_symtab *pst,
-		    int want_line_info)
+		    struct dwarf2_cu *cu, struct partial_symtab *pst)
 {
   struct objfile *objfile = cu->objfile;
   const int decode_for_pst_p = (pst != NULL);
   struct subfile *first_subfile = current_subfile;
 
-  if (want_line_info)
-    dwarf_decode_lines_1 (lh, comp_dir, cu, decode_for_pst_p);
+  dwarf_decode_lines_1 (lh, comp_dir, cu, decode_for_pst_p);
 
   if (decode_for_pst_p)
     {
@@ -18918,7 +19023,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	  /* GCJ will output '<init>' for Java constructor names.
 	     For this special case, return the name of the parent class.  */
 
-	  /* GCJ may output suprogram DIEs with AT_specification set.
+	  /* GCJ may output subprogram DIEs with AT_specification set.
 	     If so, use the name of the specified DIE.  */
 	  spec_die = die_specification (die, &spec_cu);
 	  if (spec_die != NULL)
