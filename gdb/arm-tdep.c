@@ -12016,20 +12016,78 @@ arm_record_unsupported_insn (insn_decode_record *arm_insn_r)
   return -1;
 }
 
+/* Handling opcode 110 insns.  */
+
+static int
+arm_record_asimd_vfp_coproc (insn_decode_record *arm_insn_r)
+{
+  uint32_t op, op1, op1_sbit, op1_ebit, coproc;
+
+  coproc = bits (arm_insn_r->arm_insn, 8, 11);
+  op1 = bits (arm_insn_r->arm_insn, 20, 25);
+  op1_ebit = bit (arm_insn_r->arm_insn, 20);
+
+  if ((coproc & 0x0e) == 0x0a)
+    {
+      /* Handle extension register ld/st instructions.  */
+      if (!(op1 & 0x20))
+        return arm_record_unsupported_insn (arm_insn_r);
+
+      /* 64-bit transfers between arm core and extension registers.  */
+      if ((op1 & 0x3e) == 0x04)
+        return arm_record_unsupported_insn (arm_insn_r);
+    }
+  else
+    {
+      /* Handle coprocessor ld/st instructions.  */
+      if (!(op1 & 0x3a))
+        {
+          /* Store.  */
+          if (!op1_ebit)
+            return arm_record_unsupported_insn (arm_insn_r);
+          else
+            /* Load.  */
+            return arm_record_unsupported_insn (arm_insn_r);
+        }
+
+      /* Move to coprocessor from two arm core registers.  */
+      if (op1 == 0x4)
+        return arm_record_unsupported_insn (arm_insn_r);
+
+      /* Move to two arm core registers from coprocessor.  */
+      if (op1 == 0x5)
+        {
+          uint32_t reg_t[2];
+
+          reg_t[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          reg_t[1] = bits (arm_insn_r->arm_insn, 16, 19);
+          arm_insn_r->reg_rec_count = 2;
+
+          REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, reg_t);
+          return 0;
+       }
+    }
+  return arm_record_unsupported_insn (arm_insn_r);
+}
+
 /* Handling opcode 111 insns.  */
 
 static int
 arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
 {
+  uint32_t op, op1_sbit, op1_ebit, coproc;
   struct gdbarch_tdep *tdep = gdbarch_tdep (arm_insn_r->gdbarch);
   struct regcache *reg_cache = arm_insn_r->regcache;
-  uint32_t ret = 0; /* function return value: -1:record failure ;  0:success  */
   ULONGEST u_regval = 0;
 
   arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 24, 27);
+  coproc = bits (arm_insn_r->arm_insn, 8, 11);
+  op1_sbit = bit (arm_insn_r->arm_insn, 24);
+  op1_ebit = bit (arm_insn_r->arm_insn, 20);
+  op = bit (arm_insn_r->arm_insn, 4);
 
   /* Handle arm SWI/SVC system call instructions.  */
-  if (15 == arm_insn_r->opcode)
+  if (op1_sbit)
     {
       if (tdep->arm_syscall_record != NULL)
         {
@@ -12042,21 +12100,52 @@ arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
           else /* EABI.  */
             regcache_raw_read_unsigned (reg_cache, 7, &svc_number);
 
-          ret = tdep->arm_syscall_record (reg_cache, svc_number);
+          return tdep->arm_syscall_record (reg_cache, svc_number);
         }
       else
         {
           printf_unfiltered (_("no syscall record support\n"));
-          ret = -1;
+          return -1;
         }
+    }
+
+  if ((coproc & 0x0e) == 0x0a)
+    {
+      /* VFP data-processing instructions.  */
+      if (!op1_sbit && !op)
+        return arm_record_unsupported_insn (arm_insn_r);
+
+      /* Advanced SIMD, VFP instructions.  */
+      if (!op1_sbit && op)
+        return arm_record_unsupported_insn (arm_insn_r);
     }
   else
     {
-      arm_record_unsupported_insn (arm_insn_r);
-      ret = -1;
+      /* Coprocessor data operations.  */
+      if (!op1_sbit && !op)
+        return arm_record_unsupported_insn (arm_insn_r);
+
+      /* Move to Coprocessor from ARM core register.  */
+      if (!op1_sbit && !op1_ebit && op)
+        return arm_record_unsupported_insn (arm_insn_r);
+
+      /* Move to arm core register from coprocessor.  */
+      if (!op1_sbit && op1_ebit && op)
+        {
+          uint32_t record_buf[1];
+
+          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          if (record_buf[0] == 15)
+            record_buf[0] = ARM_PS_REGNUM;
+
+          arm_insn_r->reg_rec_count = 1;
+          REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count,
+                     record_buf);
+          return 0;
+        }
     }
 
-  return ret;
+  return arm_record_unsupported_insn (arm_insn_r);
 }
 
 /* Handling opcode 000 insns.  */
@@ -12972,6 +13061,17 @@ thumb2_record_lmul_lmla_div (insn_decode_record *thumb2_insn_r)
   return ARM_RECORD_SUCCESS;
 }
 
+/* Record handler for thumb32 coprocessor instructions.  */
+
+static int
+thumb2_record_coproc_insn (insn_decode_record *thumb2_insn_r)
+{
+  if (bit (thumb2_insn_r->arm_insn, 25))
+    return arm_record_coproc_data_proc (thumb2_insn_r);
+  else
+    return arm_record_asimd_vfp_coproc (thumb2_insn_r);
+}
+
 /* Decodes thumb2 instruction type and invokes its record handler.  */
 
 static unsigned int
@@ -13003,7 +13103,7 @@ thumb2_record_decode_insn_handler (insn_decode_record *thumb2_insn_r)
       else if (op2 & 0x40)
         {
           /* Co-processor instructions.  */
-          arm_record_unsupported_insn (thumb2_insn_r);
+          return thumb2_record_coproc_insn (thumb2_insn_r);
         }
     }
   else if (op1 == 0x02)
@@ -13069,7 +13169,7 @@ thumb2_record_decode_insn_handler (insn_decode_record *thumb2_insn_r)
       else if (op2 & 0x40)
         {
           /* Co-processor instructions.  */
-          return arm_record_unsupported_insn (thumb2_insn_r);
+          return thumb2_record_coproc_insn (thumb2_insn_r);
         }
    }
 
@@ -13113,7 +13213,7 @@ decode_insn (insn_decode_record *arm_record, record_type_t record_type,
     arm_record_ld_st_reg_offset,        /* 011.  */
     arm_record_ld_st_multiple,          /* 100.  */
     arm_record_b_bl,                    /* 101.  */
-    arm_record_unsupported_insn,        /* 110.  */
+    arm_record_asimd_vfp_coproc,        /* 110.  */
     arm_record_coproc_data_proc         /* 111.  */
   };
 

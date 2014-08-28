@@ -1,3 +1,15 @@
+2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (arm_record_coproc_data_proc): Add record handler stubs
+	for asimd, vfp and coprocessor insns.
+	(arm_record_asimd_vfp_coproc): Add record handler for asimd, vfp
+	and coprocessor insns.
+	(thumb2_record_coproc_insn): New function.
+	(thumb2_record_decode_insn_handler): Update coprocessor insns record
+	handlers.
+	(decode_insn): Install arm_record_asimd_vfp_coproc as handler for
+	opcode 110 insns.
+
 2014-09-13  Doug Evans  <xdje42@gmail.com>
 
 	* NEWS: Mention new "queue-signal" command.
