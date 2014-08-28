@@ -1,5 +1,10 @@
 2014-08-28  Doug Evans  <dje@google.com>
 
+	* symtab.c (in_prologue): Move definition to better spot.
+	(skip_prologue_using_sal): Ditto.
+
+2014-08-28  Doug Evans  <dje@google.com>
+
 	* symtab.c (find_function_start_sal): Move definition to better spot.
 
 2014-08-28  Yao Qi  <yao@codesourcery.com>
