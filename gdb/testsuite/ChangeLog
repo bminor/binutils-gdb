@@ -1,5 +1,9 @@
 2014-09-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.dwarf2/dynarr-ptr.exp: Add 'first, 'last and 'length tests.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.dwarf2/dynarr-ptr.exp: Add subscripting tests.
 
 2014-09-10  Joel Brobecker  <brobecker@adacore.com>

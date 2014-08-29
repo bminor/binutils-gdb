@@ -1,5 +1,12 @@
 2014-09-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_array_bound): If ARR is a TYPE_CODE_PTR,
+	dereference it first.  Use value_enclosing_type instead of
+	value_type.
+	(ada_array_length): Likewise.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_value_ptr_subscript): Remove parameter "type".
 	Adjust function implementation and documentation accordingly.
 	(ada_evaluate_subexp) <OP_FUNCALL>: Only assign "type" if

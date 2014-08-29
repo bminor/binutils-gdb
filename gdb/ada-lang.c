@@ -2942,7 +2942,11 @@ ada_array_bound_from_type (struct type *arr_type, int n, int which)
 static LONGEST
 ada_array_bound (struct value *arr, int n, int which)
 {
-  struct type *arr_type = value_type (arr);
+  struct type *arr_type;
+
+  if (TYPE_CODE (check_typedef (value_type (arr))) == TYPE_CODE_PTR)
+    arr = value_ind (arr);
+  arr_type = value_enclosing_type (arr);
 
   if (ada_is_constrained_packed_array_type (arr_type))
     return ada_array_bound (decode_constrained_packed_array (arr), n, which);
@@ -2961,7 +2965,11 @@ ada_array_bound (struct value *arr, int n, int which)
 static LONGEST
 ada_array_length (struct value *arr, int n)
 {
-  struct type *arr_type = ada_check_typedef (value_type (arr));
+  struct type *arr_type;
+
+  if (TYPE_CODE (check_typedef (value_type (arr))) == TYPE_CODE_PTR)
+    arr = value_ind (arr);
+  arr_type = value_enclosing_type (arr);
 
   if (ada_is_constrained_packed_array_type (arr_type))
     return ada_array_length (decode_constrained_packed_array (arr), n);

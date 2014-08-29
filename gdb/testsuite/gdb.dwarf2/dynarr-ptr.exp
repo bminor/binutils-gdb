@@ -146,6 +146,15 @@ gdb_test "print foo.three_ptr.all(2)" \
 gdb_test "print foo.three_ptr.all(3)" \
          " = 3"
 
+gdb_test "print foo.three_ptr.all'first" \
+         " = 1"
+
+gdb_test "print foo.three_ptr.all'last" \
+         " = 3"
+
+gdb_test "print foo.three_ptr.all'length" \
+         " = 3"
+
 # foo.three_ptr
 
 gdb_test "print foo.three_ptr(1)" \
@@ -155,6 +164,15 @@ gdb_test "print foo.three_ptr(2)" \
          " = 2"
 
 gdb_test "print foo.three_ptr(3)" \
+         " = 3"
+
+gdb_test "print foo.three_ptr'first" \
+         " = 1"
+
+gdb_test "print foo.three_ptr'last" \
+         " = 3"
+
+gdb_test "print foo.three_ptr'length" \
          " = 3"
 
 # foo.three_ptr_tdef.all
@@ -171,6 +189,15 @@ gdb_test "print foo.three_ptr_tdef.all(2)" \
 gdb_test "print foo.three_ptr_tdef.all(3)" \
          " = 3"
 
+gdb_test "print foo.three_ptr_tdef.all'first" \
+         " = 1"
+
+gdb_test "print foo.three_ptr_tdef.all'last" \
+         " = 3"
+
+gdb_test "print foo.three_ptr_tdef.all'length" \
+         " = 3"
+
 # foo.three_ptr_tdef
 
 gdb_test "print foo.three_ptr_tdef(1)" \
@@ -180,6 +207,15 @@ gdb_test "print foo.three_ptr_tdef(2)" \
          " = 2"
 
 gdb_test "print foo.three_ptr_tdef(3)" \
+         " = 3"
+
+gdb_test "print foo.three_ptr_tdef'first" \
+         " = 1"
+
+gdb_test "print foo.three_ptr_tdef'last" \
+         " = 3"
+
+gdb_test "print foo.three_ptr_tdef'length" \
          " = 3"
 
 # foo.five_ptr.all
@@ -202,6 +238,15 @@ gdb_test "print foo.five_ptr.all(5)" \
 gdb_test "print foo.five_ptr.all(6)" \
          " = 34"
 
+gdb_test "print foo.five_ptr.all'first" \
+         " = 2"
+
+gdb_test "print foo.five_ptr.all'last" \
+         " = 6"
+
+gdb_test "print foo.five_ptr.all'length" \
+         " = 5"
+
 # foo.five_ptr
 
 gdb_test "print foo.five_ptr(2)" \
@@ -218,6 +263,15 @@ gdb_test "print foo.five_ptr(5)" \
 
 gdb_test "print foo.five_ptr(6)" \
          " = 34"
+
+gdb_test "print foo.five_ptr'first" \
+         " = 2"
+
+gdb_test "print foo.five_ptr'last" \
+         " = 6"
+
+gdb_test "print foo.five_ptr'length" \
+         " = 5"
 
 # foo.five_ptr_tdef.all
 
@@ -239,6 +293,15 @@ gdb_test "print foo.five_ptr_tdef.all(5)" \
 gdb_test "print foo.five_ptr_tdef.all(6)" \
          " = 34"
 
+gdb_test "print foo.five_ptr_tdef.all'first" \
+         " = 2"
+
+gdb_test "print foo.five_ptr_tdef.all'last" \
+         " = 6"
+
+gdb_test "print foo.five_ptr_tdef.all'length" \
+         " = 5"
+
 # foo.five_ptr_tdef
 
 gdb_test "print foo.five_ptr_tdef(2)" \
@@ -255,3 +318,12 @@ gdb_test "print foo.five_ptr_tdef(5)" \
 
 gdb_test "print foo.five_ptr_tdef(6)" \
          " = 34"
+
+gdb_test "print foo.five_ptr_tdef'first" \
+         " = 2"
+
+gdb_test "print foo.five_ptr_tdef'last" \
+         " = 6"
+
+gdb_test "print foo.five_ptr_tdef'length" \
+         " = 5"
