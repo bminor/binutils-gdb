@@ -1,3 +1,8 @@
+2014-08-29  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (ld_simple_link_defsyms): Provide both __main
+	and ___main for windows targets.
+
 2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17306
