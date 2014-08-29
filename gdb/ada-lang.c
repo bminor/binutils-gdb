@@ -2715,15 +2715,16 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
   return elt;
 }
 
-/* Assuming ARR is a pointer to a standard GDB array of type TYPE, the
-   value of the element of *ARR at the ARITY indices given in
-   IND.  Does not read the entire array into memory.  */
+/* Assuming ARR is a pointer to a GDB array, the value of the element
+   of *ARR at the ARITY indices given in IND.
+   Does not read the entire array into memory.  */
 
 static struct value *
-ada_value_ptr_subscript (struct value *arr, struct type *type, int arity,
-                         struct value **ind)
+ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
 {
   int k;
+  struct type *type
+    = check_typedef (value_enclosing_type (ada_value_ind (arr)));
 
   for (k = 0; k < arity; k += 1)
     {
@@ -10323,9 +10324,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                           (ada_coerce_to_simple_array (argvec[0]),
                            nargs, argvec + 1));
         case TYPE_CODE_PTR:     /* Pointer to array */
-          type = to_fixed_array_type (TYPE_TARGET_TYPE (type), NULL, 1);
           if (noside == EVAL_AVOID_SIDE_EFFECTS)
             {
+	      type = to_fixed_array_type (TYPE_TARGET_TYPE (type), NULL, 1);
               type = ada_array_element_type (type, nargs);
               if (type == NULL)
                 error (_("element type of array unknown"));
@@ -10333,8 +10334,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                 return value_zero (ada_aligned_type (type), lval_memory);
             }
           return
-            unwrap_value (ada_value_ptr_subscript (argvec[0], type,
-                                                   nargs, argvec + 1));
+            unwrap_value (ada_value_ptr_subscript (argvec[0],
+						   nargs, argvec + 1));
 
         default:
           error (_("Attempt to index or call something other than an "

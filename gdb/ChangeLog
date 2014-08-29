@@ -1,5 +1,13 @@
 2014-09-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_value_ptr_subscript): Remove parameter "type".
+	Adjust function implementation and documentation accordingly.
+	(ada_evaluate_subexp) <OP_FUNCALL>: Only assign "type" if
+	NOSIDE is EVAL_AVOID_SIDE_EFFECTS.
+	Update call to ada_value_ptr_subscript.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_value_print): Use VAL's enclosing type
 	instead of VAL's type.
 
