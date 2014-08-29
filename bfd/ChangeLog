@@ -1,3 +1,8 @@
+2014-08-29  Alan Modra  <amodra@gmail.com>
+
+	* srec.c (srec_scan): Revert last change.  Report an error for
+	S-records with less than the miniumum byte count.
+
 2014-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* srec.c (srec_scan): Return error for 0 size.
