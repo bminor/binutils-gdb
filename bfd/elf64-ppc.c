@@ -13761,10 +13761,17 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	      if (!can_plt_call)
 		{
-		  info->callbacks->einfo
-		    (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
-		       "recompile with -fPIC\n"),
-		     input_bfd, input_section, rel->r_offset, sym_name);
+		  if (stub_entry->stub_type == ppc_stub_plt_call
+		      || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+		    info->callbacks->einfo
+		      (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
+			 "recompile with -fPIC\n"),
+		       input_bfd, input_section, rel->r_offset, sym_name);
+		  else
+		    info->callbacks->einfo
+		      (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
+			 "(-mcmodel=small toc adjust stub)\n"),
+		       input_bfd, input_section, rel->r_offset, sym_name);
 
 		  bfd_set_error (bfd_error_bad_value);
 		  ret = FALSE;
