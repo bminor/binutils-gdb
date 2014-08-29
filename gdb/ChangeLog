@@ -1,5 +1,10 @@
 2014-09-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_value_print): Use VAL's enclosing type
+	instead of VAL's type.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* amd64-linux-nat.c: Add <sys/uio.h> #include.
 
 2014-09-09  Doug Evans  <xdje42@gmail.com>

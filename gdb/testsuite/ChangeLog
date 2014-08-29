@@ -1,3 +1,8 @@
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dynarr-ptr.c: New file.
+	* gdb.dwarf2/dynarr-ptr.exp: New file.
+
 2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.base/watchpoint-solib.exp: Increase the timeout by a factor
