@@ -1,5 +1,10 @@
 2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* tui/tui-win.c (tui_initialize_win): Specify SA_RESTART when
+	registering the signal handler.
+
+2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* event-top.h (call_stdin_event_handler_again_p): Declare.
 	* event-top.c (call_stdin_event_handler_again_p): Define.
 	(stdin_event_handler): Use it.

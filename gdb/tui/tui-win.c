@@ -834,6 +834,9 @@ tui_initialize_win (void)
 
   memset (&old_winch, 0, sizeof (old_winch));
   old_winch.sa_handler = &tui_sigwinch_handler;
+#ifdef SA_RESTART
+  old_winch.sa_flags = SA_RESTART;
+#endif
   sigaction (SIGWINCH, &old_winch, NULL);
 #else
   signal (SIGWINCH, &tui_sigwinch_handler);
