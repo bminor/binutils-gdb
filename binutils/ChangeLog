@@ -1,3 +1,8 @@
+2014-09-01  Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* objcopy.c (is_nondebug_keep_contents_section): Change
+	'.build-id' to '.buildid'.
+
 2014-08-22  Richard Henderson  <rth@redhat.com>
 
 	* dwarf.h (init_dwarf_regnames_aarch64): Declare.

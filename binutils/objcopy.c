@@ -1148,13 +1148,13 @@ is_nondebug_keep_contents_section (bfd *ibfd, asection *isection)
   if (ibfd->xvec->flavour == bfd_target_elf_flavour)
     return (elf_section_type (isection) == SHT_NOTE);
 
-  /* Always keep the .build-id section for PE/COFF.
+  /* Always keep the .buildid section for PE/COFF.
 
      Strictly, this should be written "always keep the section storing the debug
      directory", but that may be the .text section for objects produced by some
      tools, which it is not sensible to keep.  */
   if (ibfd->xvec->flavour == bfd_target_coff_flavour)
-    return (strcmp (bfd_get_section_name (ibfd, isection), ".build-id") == 0);
+    return (strcmp (bfd_get_section_name (ibfd, isection), ".buildid") == 0);
 
   return FALSE;
 }

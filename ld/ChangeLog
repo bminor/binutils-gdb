@@ -1,3 +1,9 @@
+2014-09-01  Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* emultempl/pe.em (write_build_id, setup_build_id): Change pe/coff
+	build-id section name from '.build-id' to '.buildid'.
+	* emultempl/pep.em (write_build_id, setup_build_id): Ditto.
+
 2014-08-22  Andreas Tobler  <andreast@fgznet.ch>
 
 	* emulparams/armelf_fbsd.sh (TEXT_START_ADDR): Increase alignment to
