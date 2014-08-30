@@ -1,3 +1,26 @@
+2014-08-29 Han Shen <shenhan@google.com>
+	   Jing Yu <jingyu@google.com>
+
+	* aarch64-reloc-property.cc
+	(AArch64_reloc_property_table::reloc_name_in_error_message): Fix bug in
+	reference reloc property in the table.
+	* aarch64-reloc.def: Add TLSLE reloc types and fix some errors in
+	3 other entries.
+	* aarch64.cc: (Output_data_got_aarch64::add_static_reloc):
+	2 new overloaded methods.
+	(Output_data_got_aarch64::do_write): Add code to write out
+	static relocs.
+	(class Output_data_got_aarch64::Static_reloc): New class to wrap
+	static relocs.
+	(Output_data_got_aarch64::static_relocs): New vector to
+	hold static relocs.
+	(Target_aarch64::TCB_SIZE): New const static memeber.
+	(Target_aarch64::tcb_size): New method.
+	(Target_aarch64::Relocate::relocate): Add code handling new reloc types.
+	(Target_aarch64::Relocate::relocate_tls): New method.
+	(Target_aarch64::Scan::local): Add code handling new reloc types.
+	(Target_aarch64::Scan::global): Add code handling new reloc types.
+
 2014-08-13  Sriraman Tallam  <tmsriram@google.com>
 
 	* options.h (-no-pie): Add option.

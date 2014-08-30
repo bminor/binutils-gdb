@@ -76,6 +76,27 @@ class Output_data_got_aarch64 : public Output_data_got<size, big_endian>
       symbol_table_(symtab), layout_(layout)
   { }
 
+  // Add a static entry for the GOT entry at OFFSET.  GSYM is a global
+  // symbol and R_TYPE is the code of a dynamic relocation that needs to be
+  // applied in a static link.
+  void
+  add_static_reloc(unsigned int got_offset, unsigned int r_type, Symbol* gsym)
+  { this->static_relocs_.push_back(Static_reloc(got_offset, r_type, gsym)); }
+
+
+  // Add a static reloc for the GOT entry at OFFSET.  RELOBJ is an object
+  // defining a local symbol with INDEX.  R_TYPE is the code of a dynamic
+  // relocation that needs to be applied in a static link.
+  void
+  add_static_reloc(unsigned int got_offset, unsigned int r_type,
+		   Sized_relobj_file<size, big_endian>* relobj,
+		   unsigned int index)
+  {
+    this->static_relocs_.push_back(Static_reloc(got_offset, r_type, relobj,
+						index));
+  }
+
+
  protected:
   // Write out the GOT table.
   void
@@ -86,6 +107,104 @@ class Output_data_got_aarch64 : public Output_data_got<size, big_endian>
     Valtype dynamic_addr = dynamic == NULL ? 0 : dynamic->address();
     this->replace_constant(0, dynamic_addr);
     Output_data_got<size, big_endian>::do_write(of);
+
+    // Handling static relocs
+    if (this->static_relocs_.empty())
+      return;
+
+    typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
+
+    gold_assert(parameters->doing_static_link());
+    const off_t offset = this->offset();
+    const section_size_type oview_size =
+      convert_to_section_size_type(this->data_size());
+    unsigned char* const oview = of->get_output_view(offset, oview_size);
+
+    Output_segment* tls_segment = this->layout_->tls_segment();
+    gold_assert(tls_segment != NULL);
+
+    AArch64_address aligned_tcb_address =
+      align_address(Target_aarch64<size,big_endian>::TCB_SIZE,
+		    tls_segment->maximum_alignment());
+
+    for (size_t i = 0; i < this->static_relocs_.size(); ++i)
+      {
+	Static_reloc& reloc(this->static_relocs_[i]);
+	AArch64_address value;
+
+	if (!reloc.symbol_is_global())
+	  {
+	    Sized_relobj_file<size, big_endian>* object = reloc.relobj();
+	    const Symbol_value<size>* psymval =
+	      reloc.relobj()->local_symbol(reloc.index());
+
+	    // We are doing static linking.  Issue an error and skip this
+	    // relocation if the symbol is undefined or in a discarded_section.
+	    bool is_ordinary;
+	    unsigned int shndx = psymval->input_shndx(&is_ordinary);
+	    if ((shndx == elfcpp::SHN_UNDEF)
+		|| (is_ordinary
+		    && shndx != elfcpp::SHN_UNDEF
+		    && !object->is_section_included(shndx)
+		    && !this->symbol_table_->is_section_folded(object, shndx)))
+	      {
+		gold_error(_("undefined or discarded local symbol %u from "
+			     " object %s in GOT"),
+			   reloc.index(), reloc.relobj()->name().c_str());
+		continue;
+	      }
+	    value = psymval->value(object, 0);
+	  }
+	else
+	  {
+	    const Symbol* gsym = reloc.symbol();
+	    gold_assert(gsym != NULL);
+	    if (gsym->is_forwarder())
+	      gsym = this->symbol_table_->resolve_forwards(gsym);
+
+	    // We are doing static linking.  Issue an error and skip this
+	    // relocation if the symbol is undefined or in a discarded_section
+	    // unless it is a weakly_undefined symbol.
+	    if ((gsym->is_defined_in_discarded_section()
+		 || gsym->is_undefined())
+		&& !gsym->is_weak_undefined())
+	      {
+		gold_error(_("undefined or discarded symbol %s in GOT"),
+			   gsym->name());
+		continue;
+	      }
+
+	    if (!gsym->is_weak_undefined())
+	      {
+		const Sized_symbol<size>* sym =
+		  static_cast<const Sized_symbol<size>*>(gsym);
+		value = sym->value();
+	      }
+	    else
+	      value = 0;
+	  }
+
+	unsigned got_offset = reloc.got_offset();
+	gold_assert(got_offset < oview_size);
+
+	typedef typename elfcpp::Swap<size, big_endian>::Valtype Valtype;
+	Valtype* wv = reinterpret_cast<Valtype*>(oview + got_offset);
+	Valtype x;
+	switch (reloc.r_type())
+	  {
+	  case elfcpp::R_AARCH64_TLS_DTPREL64:
+	    x = value;
+	    break;
+	  case elfcpp::R_AARCH64_TLS_TPREL64:
+	    x = value + aligned_tcb_address;
+	    break;
+	  default:
+	    gold_unreachable();
+	  }
+	elfcpp::Swap<size, big_endian>::writeval(wv, x);
+      }
+
+    of->write_output_view(offset, oview_size, oview);
   }
 
  private:
@@ -94,6 +213,90 @@ class Output_data_got_aarch64 : public Output_data_got<size, big_endian>
   // A pointer to the Layout class, so that we can find the .dynamic
   // section when we write out the GOT section.
   Layout* layout_;
+
+
+  // This class represent dynamic relocations that need to be applied by
+  // gold because we are using TLS relocations in a static link.
+  class Static_reloc
+  {
+   public:
+    Static_reloc(unsigned int got_offset, unsigned int r_type, Symbol* gsym)
+      : got_offset_(got_offset), r_type_(r_type), symbol_is_global_(true)
+    { this->u_.global.symbol = gsym; }
+
+    Static_reloc(unsigned int got_offset, unsigned int r_type,
+	  Sized_relobj_file<size, big_endian>* relobj, unsigned int index)
+      : got_offset_(got_offset), r_type_(r_type), symbol_is_global_(false)
+    {
+      this->u_.local.relobj = relobj;
+      this->u_.local.index = index;
+    }
+
+    // Return the GOT offset.
+    unsigned int
+    got_offset() const
+    { return this->got_offset_; }
+
+    // Relocation type.
+    unsigned int
+    r_type() const
+    { return this->r_type_; }
+
+    // Whether the symbol is global or not.
+    bool
+    symbol_is_global() const
+    { return this->symbol_is_global_; }
+
+    // For a relocation against a global symbol, the global symbol.
+    Symbol*
+    symbol() const
+    {
+      gold_assert(this->symbol_is_global_);
+      return this->u_.global.symbol;
+    }
+
+    // For a relocation against a local symbol, the defining object.
+    Sized_relobj_file<size, big_endian>*
+    relobj() const
+    {
+      gold_assert(!this->symbol_is_global_);
+      return this->u_.local.relobj;
+    }
+
+    // For a relocation against a local symbol, the local symbol index.
+    unsigned int
+    index() const
+    {
+      gold_assert(!this->symbol_is_global_);
+      return this->u_.local.index;
+    }
+
+   private:
+    // GOT offset of the entry to which this relocation is applied.
+    unsigned int got_offset_;
+    // Type of relocation.
+    unsigned int r_type_;
+    // Whether this relocation is against a global symbol.
+    bool symbol_is_global_;
+    // A global or local symbol.
+    union
+    {
+      struct
+      {
+	// For a global symbol, the symbol itself.
+	Symbol* symbol;
+      } global;
+      struct
+      {
+	// For a local symbol, the object defining object.
+	Sized_relobj_file<size, big_endian>* relobj;
+	// For a local symbol, the symbol index.
+	unsigned int index;
+      } local;
+    } u_;
+  };  // End of inner class Static_reloc
+
+  std::vector<Static_reloc> static_relocs_;
 };
 
 AArch64_reloc_property_table* aarch64_reloc_property_table = NULL;
@@ -105,9 +308,11 @@ template<int size, bool big_endian>
 class Target_aarch64 : public Sized_target<size, big_endian>
 {
  public:
+  typedef Target_aarch64<size,big_endian> This;
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>
       Reloc_section;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  const static int TCB_SIZE = size / 8 * 2;
 
   Target_aarch64(const Target::Target_info* info = &aarch64_info)
     : Sized_target<size, big_endian>(info),
@@ -213,6 +418,9 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   // Return the size of each PLT entry.
   unsigned int
   plt_entry_size() const;
+
+  unsigned int
+  tcb_size() const { return This::TCB_SIZE; }
 
  protected:
   void
@@ -321,7 +529,18 @@ class Target_aarch64 : public Sized_target<size, big_endian>
 	     unsigned char*, typename elfcpp::Elf_types<size>::Elf_Addr,
 	     section_size_type);
 
-  };
+  private:
+    inline typename AArch64_relocate_functions<size,big_endian>::Status
+    relocate_tls(const Relocate_info<size,big_endian>*,
+		 Target_aarch64<size, big_endian>*,
+		 size_t,
+		 const elfcpp::Rela<size, big_endian>&,
+		 unsigned int r_type, const Sized_symbol<size>*,
+		 const Symbol_value<size>*,
+		 unsigned char*,
+		 typename elfcpp::Elf_types<size>::Elf_Addr);
+
+  };  // End of class Relocate
 
   // A class which returns the size required for a relocation type,
   // used while scanning relocs during a relocatable link.
@@ -410,7 +629,7 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   Reloc_section* rela_dyn_;
   // Relocs saved to avoid a COPY reloc.
   Copy_relocs<elfcpp::SHT_RELA, size, big_endian> copy_relocs_;
-};
+};  // End of Target_aarch64
 
 template<>
 const Target::Target_info Target_aarch64<64, false>::aarch64_info =
@@ -829,7 +1048,7 @@ void
 Output_data_plt_aarch64<size, big_endian>::set_final_data_size()
 {
   this->set_data_size(this->first_plt_entry_offset()
-                      + this->count_ * this->get_plt_entry_size());
+		      + this->count_ * this->get_plt_entry_size());
 }
 
 template<int size, bool big_endian>
@@ -1617,13 +1836,13 @@ Target_aarch64<size, big_endian>::Scan::check_non_pic(Relobj* object,
 template<int size, bool big_endian>
 inline void
 Target_aarch64<size, big_endian>::Scan::local(
-    Symbol_table* /* symtab */,
-    Layout* /* layout */,
-    Target_aarch64<size, big_endian>* /* target */,
+    Symbol_table* symtab,
+    Layout* layout,
+    Target_aarch64<size, big_endian>* target,
     Sized_relobj_file<size, big_endian>* object,
-    unsigned int /* data_shndx */,
-    Output_section* /* output_section */,
-    const elfcpp::Rela<size, big_endian>& /* reloc */,
+    unsigned int data_shndx,
+    Output_section* output_section,
+    const elfcpp::Rela<size, big_endian>& rela,
     unsigned int r_type,
     const elfcpp::Sym<size, big_endian>& /* lsym */,
     bool is_discarded)
@@ -1631,33 +1850,99 @@ Target_aarch64<size, big_endian>::Scan::local(
   if (is_discarded)
     return;
 
+  typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>
+    Reloc_section;
+
   switch (r_type)
     {
-    case elfcpp::R_AARCH64_ABS64:
     case elfcpp::R_AARCH64_ABS32:
     case elfcpp::R_AARCH64_ABS16:
-      // If building a shared library or pie, we need to mark this as a dynmic
-      // reloction, so that the dynamic loader can relocate it.
-      // Not supported yet.
       if (parameters->options().output_is_position_independent())
 	{
-	  gold_error(_("%s: unsupported ABS64 relocation type for pie or "
-		       "shared library.\n"),
-		     object->name().c_str());
+	  gold_error(_("%s: unsupported reloc %u in pos independent link."),
+		     object->name().c_str(), r_type);
 	}
       break;
 
-      // Relocations to generate 19, 21 and 33-bit PC-relative address
+    case elfcpp::R_AARCH64_ABS64:
+      // If building a shared library or pie, we need to mark this as a dynmic
+      // reloction, so that the dynamic loader can relocate it.
+      if (parameters->options().output_is_position_independent())
+	{
+	  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	  unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
+	  rela_dyn->add_local_relative(object, r_sym,
+				       elfcpp::R_AARCH64_RELATIVE,
+				       output_section,
+				       data_shndx,
+				       rela.get_r_offset(),
+				       rela.get_r_addend(),
+				       false /* is ifunc */);
+	}
+      break;
+
+    case elfcpp::R_AARCH64_PREL64:
+    case elfcpp::R_AARCH64_PREL32:
+    case elfcpp::R_AARCH64_PREL16:
+      break;
+
+    // Relocations to generate 19, 21 and 33-bit PC-relative address
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21: // 275
     case elfcpp::R_AARCH64_LDST8_ABS_LO12_NC: // 278
+    case elfcpp::R_AARCH64_LDST16_ABS_LO12_NC: // 284
+    case elfcpp::R_AARCH64_LDST32_ABS_LO12_NC: // 285
     case elfcpp::R_AARCH64_LDST64_ABS_LO12_NC: // 286
+    case elfcpp::R_AARCH64_LDST128_ABS_LO12_NC: // 299
     case elfcpp::R_AARCH64_ADD_ABS_LO12_NC: // 277
       break;
 
-      // Control flow, pc-relative. We don't need to do anything for a relative
-      // addressing relocation against a local symbol if it does not reference
-      // the GOT.
-    case elfcpp::R_AARCH64_CALL26: // 283
+    // Control flow, pc-relative. We don't need to do anything for a relative
+    // addressing relocation against a local symbol if it does not reference
+    // the GOT.
+    case elfcpp::R_AARCH64_TSTBR14:
+    case elfcpp::R_AARCH64_CONDBR19:
+    case elfcpp::R_AARCH64_JUMP26:
+    case elfcpp::R_AARCH64_CALL26:
+      break;
+
+    case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+    case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+      {
+	layout->set_has_static_tls();
+	// Create a GOT entry for the tp-relative offset.
+	Output_data_got_aarch64<size, big_endian>* got =
+	    target->got_section(symtab, layout);
+	unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+	if (!parameters->doing_static_link())
+	  {
+	    got->add_local_with_rel(object, r_sym, GOT_TYPE_TLS_OFFSET,
+				    target->rela_dyn_section(layout),
+				    elfcpp::R_AARCH64_TLS_TPREL64);
+	  }
+	else if (!object->local_has_got_offset(r_sym,
+					       GOT_TYPE_TLS_OFFSET))
+	  {
+	    got->add_local(object, r_sym, GOT_TYPE_TLS_OFFSET);
+	    unsigned int got_offset =
+		object->local_got_offset(r_sym, GOT_TYPE_TLS_OFFSET);
+	    const elfcpp::Elf_Xword addend = rela.get_r_addend();
+	    gold_assert(addend == 0);
+	    got->add_static_reloc(got_offset, elfcpp::R_AARCH64_TLS_TPREL64,
+				  object, r_sym);
+	  }
+      }
+      break;
+
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+      {
+	layout->set_has_static_tls();
+	bool output_is_shared = parameters->options().shared();
+	if (output_is_shared)
+	  gold_error(_("%s: unsupported TLSLEreloc %u in shard code."),
+		     object->name().c_str(), r_type);
+      }
       break;
 
     default:
@@ -1685,16 +1970,74 @@ Target_aarch64<size, big_endian>::Scan::global(
     Symbol_table* symtab,
     Layout* layout,
     Target_aarch64<size, big_endian>* target,
-    Sized_relobj_file<size, big_endian>* /* object */,
-    unsigned int /* data_shndx */,
-    Output_section* /* output_section */,
-    const elfcpp::Rela<size, big_endian>& /* reloc */,
+    Sized_relobj_file<size, big_endian> * object,
+    unsigned int data_shndx,
+    Output_section* output_section,
+    const elfcpp::Rela<size, big_endian>& rela,
     unsigned int r_type,
     Symbol* gsym)
 {
+  typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>
+    Reloc_section;
   switch (r_type)
     {
+    case elfcpp::R_AARCH64_ABS16:
+    case elfcpp::R_AARCH64_ABS32:
     case elfcpp::R_AARCH64_ABS64:
+      {
+	// Make a PLT entry if necessary.
+	if (gsym->needs_plt_entry())
+	  {
+	    target->make_plt_entry(symtab, layout, gsym);
+	    // Since this is not a PC-relative relocation, we may be
+	    // taking the address of a function. In that case we need to
+	    // set the entry in the dynamic symbol table to the address of
+	    // the PLT entry.
+	    if (gsym->is_from_dynobj() && !parameters->options().shared())
+	      gsym->set_needs_dynsym_value();
+	  }
+	// Make a dynamic relocation if necessary.
+	const AArch64_reloc_property* arp =
+	    aarch64_reloc_property_table->get_reloc_property(r_type);
+	gold_assert(arp != NULL);
+	if (gsym->needs_dynamic_reloc(arp->reference_flags()))
+	  {
+	    if (!parameters->options().output_is_position_independent()
+		&& gsym->may_need_copy_reloc())
+	      {
+		gold_error(
+		  _("%s: unsupported reloc %u which may need copyreloc."),
+		  object->name().c_str(), r_type);
+	      }
+	    else if (r_type == elfcpp::R_AARCH64_ABS64
+		     && gsym->can_use_relative_reloc(false))
+	      {
+		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		rela_dyn->add_global_relative(gsym,
+					      elfcpp::R_AARCH64_RELATIVE,
+					      output_section,
+					      object,
+					      data_shndx,
+					      rela.get_r_offset(),
+					      rela.get_r_addend(),
+					      false);
+	      }
+	    else
+	      {
+		check_non_pic(object, r_type);
+		Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>*
+		    rela_dyn = target->rela_dyn_section(layout);
+		rela_dyn->add_global(
+		  gsym, r_type, output_section, object,
+		  data_shndx, rela.get_r_offset(),rela.get_r_addend());
+	      }
+	  }
+      }
+      break;
+
+    case elfcpp::R_AARCH64_PREL16:
+    case elfcpp::R_AARCH64_PREL32:
+    case elfcpp::R_AARCH64_PREL64:
       // This is used to fill the GOT absolute address.
       if (gsym->needs_plt_entry())
 	{
@@ -1704,6 +2047,11 @@ Target_aarch64<size, big_endian>::Scan::global(
 
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21_NC:
+    case elfcpp::R_AARCH64_LDST8_ABS_LO12_NC: // 278
+    case elfcpp::R_AARCH64_LDST16_ABS_LO12_NC: // 284
+    case elfcpp::R_AARCH64_LDST32_ABS_LO12_NC: // 285
+    case elfcpp::R_AARCH64_LDST64_ABS_LO12_NC: // 286
+    case elfcpp::R_AARCH64_LDST128_ABS_LO12_NC: // 299
     case elfcpp::R_AARCH64_ADD_ABS_LO12_NC:
       {
 	// Do nothing here.
@@ -1741,6 +2089,8 @@ Target_aarch64<size, big_endian>::Scan::global(
 	break;
       }
 
+    case elfcpp::R_AARCH64_TSTBR14:
+    case elfcpp::R_AARCH64_CONDBR19:
     case elfcpp::R_AARCH64_JUMP26:
     case elfcpp::R_AARCH64_CALL26:
       {
@@ -1760,10 +2110,48 @@ Target_aarch64<size, big_endian>::Scan::global(
 	break;
       }
 
+    case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+    case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+      {
+	layout->set_has_static_tls();
+	// Create a GOT entry for the tp-relative offset.
+	Output_data_got_aarch64<size, big_endian>* got
+	  = target->got_section(symtab, layout);
+	if (!parameters->doing_static_link())
+	  {
+	    got->add_global_with_rel(
+	      gsym, GOT_TYPE_TLS_OFFSET,
+	      target->rela_dyn_section(layout),
+	      elfcpp::R_AARCH64_TLS_TPREL64);
+	  }
+	if (!gsym->has_got_offset(GOT_TYPE_TLS_OFFSET))
+	  {
+	    got->add_global(gsym, GOT_TYPE_TLS_OFFSET);
+	    unsigned int got_offset =
+	      gsym->got_offset(GOT_TYPE_TLS_OFFSET);
+	    const elfcpp::Elf_Xword addend = rela.get_r_addend();
+	    gold_assert(addend == 0);
+	    got->add_static_reloc(got_offset,
+				  elfcpp::R_AARCH64_TLS_TPREL64, gsym);
+	  }
+      }
+      break;
+
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+      layout->set_has_static_tls();
+      if (parameters->options().shared())
+	gold_error(_("%s: unsupported TLSLE reloc type %u in shared objects."),
+		   object->name().c_str(), r_type);
+      break;
+
     default:
-      gold_error(_("%s: unsupported reloc type"),
-		 aarch64_reloc_property_table->
-		   reloc_name_in_error_message(r_type).c_str());
+      const AArch64_reloc_property* arp =
+	  aarch64_reloc_property_table->get_reloc_property(r_type);
+      gold_assert(arp != NULL);
+      gold_error(_("%s: unsupported reloc type in global scan"),
+		 arp->name().c_str());
     }
   return;
 }  // End of Scan::global
@@ -2056,6 +2444,24 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 	}
       have_got_offset = true;
       break;
+
+    case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+    case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+      if (gsym != NULL)
+	{
+	  gold_assert(gsym->has_got_offset(GOT_TYPE_TLS_OFFSET));
+	  got_offset = gsym->got_offset(GOT_TYPE_TLS_OFFSET) - got_base;
+	}
+      else
+	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_TLS_OFFSET));
+	  got_offset = (object->local_got_offset(r_sym, GOT_TYPE_TLS_OFFSET)
+			- got_base);
+	}
+      have_got_offset = true;
+      break;
+
     default:
       break;
     }
@@ -2110,6 +2516,8 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 	view, object, psymval, addend, reloc_property);
       break;
 
+    case elfcpp::R_AARCH64_TSTBR14:
+    case elfcpp::R_AARCH64_CONDBR19:
     case elfcpp::R_AARCH64_CALL26:
     case elfcpp::R_AARCH64_JUMP26:
       reloc_status = Reloc::template pcrela_general<32>(
@@ -2127,6 +2535,19 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
       value = target->got_->address() + got_base + got_offset;
       reloc_status = Reloc::template rela_general<32>(
 	view, value, addend, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+    case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+      reloc_status = relocate_tls(relinfo, target, relnum, rela, r_type,
+				  gsym, psymval, view, address);
+      break;
+
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+      reloc_status = relocate_tls(relinfo, target, relnum, rela, r_type,
+				  gsym, psymval, view, address);
       break;
 
     default:
@@ -2160,6 +2581,98 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 
   return true;
 }
+
+template<int size, bool big_endian>
+inline
+typename AArch64_relocate_functions<size,big_endian>::Status
+Target_aarch64<size, big_endian>::Relocate::relocate_tls(
+    const Relocate_info<size,big_endian> * relinfo,
+    Target_aarch64<size, big_endian> * target,
+    size_t /* relnum */,
+    const elfcpp::Rela<size, big_endian> & rela,
+    unsigned int r_type, const Sized_symbol<size> * gsym,
+    const Symbol_value<size> * psymval,
+    unsigned char * view,
+    typename elfcpp::Elf_types<size>::Elf_Addr address)
+{
+  typedef AArch64_relocate_functions<size,big_endian> aarch64_reloc_funcs;
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_Addr;
+
+  const AArch64_reloc_property * reloc_property =
+    aarch64_reloc_property_table->get_reloc_property(r_type);
+  gold_assert(reloc_property != NULL);
+
+  Sized_relobj_file<size,big_endian> * object = relinfo->object;
+  switch (r_type)
+    {
+    case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+    case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+      {
+	// Not implemented - possible IE->LE relaxation opportunity:
+	//   adrp xd, :gottprel:var   =>   movz xd, :tprel_g1:var
+	typename elfcpp::Elf_types<size>::Elf_Addr got_entry_address;
+	if (gsym != NULL)
+	  {
+	    gold_assert(gsym->has_got_offset(GOT_TYPE_TLS_OFFSET));
+	    got_entry_address = target->got_->address() +
+	      gsym->got_offset(GOT_TYPE_TLS_OFFSET);
+	  }
+	else
+	  {
+	    unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+	    gold_assert(
+	      object->local_has_got_offset(r_sym, GOT_TYPE_TLS_OFFSET));
+	    got_entry_address = target->got_->address() +
+	      object->local_got_offset(r_sym, GOT_TYPE_TLS_OFFSET);
+	  }
+	if (r_type == elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21)
+	  {
+	    return aarch64_reloc_funcs::adrp(
+					     view, got_entry_address, address);
+	  }
+	else if (r_type == elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC)
+	  {
+	    return aarch64_reloc_funcs::template rela_general<64>(
+	      view, got_entry_address, 0, reloc_property);
+	  }
+	gold_assert(false);
+      }
+      break;
+
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+      {
+	Output_segment * tls_segment = relinfo->layout->tls_segment();
+	gold_assert(tls_segment != NULL);
+	AArch64_Addr value = psymval->value(object, 0);
+	const elfcpp::Elf_Xword addend = rela.get_r_addend();
+
+	if (!parameters->options().shared())
+	  {
+	    AArch64_Addr aligned_tcb_size =
+	      align_address(target->tcb_size(),
+			    tls_segment->maximum_alignment());
+	    return aarch64_reloc_funcs::template
+		rela_general<32>(view,
+				 value + aligned_tcb_size,
+				 addend,
+				 reloc_property);
+	  }
+	else
+	  gold_error(_("%s: unsupported reloc %u "
+		       "in non-static TLSLE mode."),
+		     object->name().c_str(), r_type);
+      }
+      break;
+
+    default:
+      gold_error(_("%s: unsupported TLS reloc %u."),
+		 object->name().c_str(), r_type);
+    }
+  return aarch64_reloc_funcs::STATUS_BAD_RELOC;
+}
+
 
 // Relocate section data.
 
@@ -2213,21 +2726,37 @@ get_size_for_reloc(
 template<int size, bool big_endian>
 void
 Target_aarch64<size, big_endian>::scan_relocatable_relocs(
-    Symbol_table* /* symtab */,
-    Layout* /* layout */,
-    Sized_relobj_file<size, big_endian>* /* object */,
-    unsigned int /* data_shndx */,
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int data_shndx,
     unsigned int sh_type,
-    const unsigned char* /* prelocs */,
-    size_t /* reloc_count */,
-    Output_section* /* output_section */,
-    bool /* needs_special_offset_handling */,
-    size_t /* local_symbol_count */,
-    const unsigned char* /* plocal_symbols */,
-    Relocatable_relocs* /* rr */)
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_symbols,
+    Relocatable_relocs* rr)
 {
-  //TODO
   gold_assert(sh_type == elfcpp::SHT_RELA);
+
+  typedef gold::Default_scan_relocatable_relocs<elfcpp::SHT_RELA,
+    Relocatable_size_for_reloc> Scan_relocatable_relocs;
+
+  gold::scan_relocatable_relocs<size, big_endian, elfcpp::SHT_RELA,
+      Scan_relocatable_relocs>(
+    symtab,
+    layout,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_symbols,
+    rr);
 }
 
 // Relocate a section during a relocatable link.
@@ -2235,21 +2764,33 @@ Target_aarch64<size, big_endian>::scan_relocatable_relocs(
 template<int size, bool big_endian>
 void
 Target_aarch64<size, big_endian>::relocate_relocs(
-    const Relocate_info<size, big_endian>* /* relinfo */,
+    const Relocate_info<size, big_endian>* relinfo,
     unsigned int sh_type,
-    const unsigned char* /* prelocs */,
-    size_t /* reloc_count */,
-    Output_section* /* output_section */,
-    typename elfcpp::Elf_types<size>::Elf_Off /* offset_in_output_section */,
-    const Relocatable_relocs* /* rr */,
-    unsigned char* /* view */,
-    typename elfcpp::Elf_types<size>::Elf_Addr /* view_address */,
-    section_size_type /* view_size */,
-    unsigned char* /* reloc_view */,
-    section_size_type /* reloc_view_size */)
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
+    const Relocatable_relocs* rr,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr view_address,
+    section_size_type view_size,
+    unsigned char* reloc_view,
+    section_size_type reloc_view_size)
 {
-  //TODO
   gold_assert(sh_type == elfcpp::SHT_RELA);
+
+  gold::relocate_relocs<size, big_endian, elfcpp::SHT_RELA>(
+    relinfo,
+    prelocs,
+    reloc_count,
+    output_section,
+    offset_in_output_section,
+    rr,
+    view,
+    view_address,
+    view_size,
+    reloc_view,
+    reloc_view_size);
 }
 
 // The selector for aarch64 object files.
