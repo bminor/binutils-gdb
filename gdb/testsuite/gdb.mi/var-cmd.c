@@ -182,6 +182,20 @@ nothing ()
 {
 }
 
+struct _struct_decl
+nothing1 (int a, char *b, long c)
+{
+  struct _struct_decl foo;
+
+  return foo;
+}
+
+struct _struct_decl *
+nothing2 (int a, char *b, long c)
+{
+  return (struct _struct_decl *) 0;
+}
+
 void
 subroutine1 (int i, long *l)
 {
@@ -253,6 +267,8 @@ do_children_tests (void)
   struct_declarations.long_array[9] = 1234;
 
   weird->func_ptr = nothing;
+  weird->func_ptr_struct = nothing1;
+  weird->func_ptr_ptr = nothing2;
 
   /* Struct/pointer/array tests */
   a0[0] = '0';

@@ -1,5 +1,21 @@
 2014-10-14  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.mi/mi-var-child.c (nothing1): New function.
+	(nothing2): New function.
+	(do_children_tests): Set function pointers by nothing1 and
+	nothing2.
+	* gdb.mi/mi-var-child.exp: Step over new added statements.
+	Update test to match the new output.
+	* gdb.mi/var-cmd.c (nothing1): New function.
+	(nothing2): New function.
+	(do_children_tests): Set function pointers by  nothing1 and
+	nothing2.
+	* gdb.mi/mi-var-display.exp: Update test to match output.
+	Step to the line specified by $line_dct_nothing.
+	Increase the number of lines to step.
+
+2014-10-14  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.mi/mi-var-child.exp: Use mi_varobj_update to simplify
 	tests.
 	* gdb.mi/mi2-var-child.exp: Likewise.

@@ -759,9 +759,8 @@ mi_varobj_update * {struct_declarations.long_array.3
 
 
 # Step over "weird->func_ptr = nothing;"
-set line_dct_a0_0 [gdb_get_line_number "a0\[0\] = '0';"]
-mi_step_to do_children_tests {} {.*var-cmd.c} \
-    $line_dct_a0_0 "step \$line_dct_a0_0"
+mi_step_to do_children_tests {} ".*${srcfile}" \
+    [expr $line_dct_nothing + 1] "step \$line_dct_nothing + 1"
 
 # Test: c_variable-5.9
 # Desc: check that func_ptr changed
@@ -782,7 +781,7 @@ mi_gdb_test "-var-delete weird->int_ptr_ptr" \
 #   psnp = &snp0;
 
 set line_dct_snp0 [gdb_get_line_number "psnp = &snp0;"]
-mi_execute_to "exec-step 43" "end-stepping-range" do_children_tests {} {.*var-cmd.c} \
+mi_execute_to "exec-step 45" "end-stepping-range" do_children_tests {} {.*var-cmd.c} \
     [expr $line_dct_snp0 + 1] {} "step \$line_dct_snp0 + 1"
 
 # Test: c_variable-5.10
