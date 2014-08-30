@@ -49,6 +49,9 @@ mi_run_cmd
 mi_expect_stop "breakpoint-hit" "do_children_tests" "" ".*var-cmd.c" \
 	$line_dct_end { "" "disp=\"keep\"" } "run to main"
 
+# Prevent symbol on the address being printed.
+mi_gdb_test "-gdb-set print symbol off"
+
 #####       #####
 #               #
 # Display tests #

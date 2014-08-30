@@ -1,3 +1,7 @@
+2014-09-09  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-var-display.exp: Set print symbol off.
+
 2014-09-07  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	PR gdb/17035
