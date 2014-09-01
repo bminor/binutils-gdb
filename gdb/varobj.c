@@ -2726,24 +2726,6 @@ all_root_varobjs (void (*func) (struct varobj *var, void *data), void *data)
       (*func) (var_root->rootvar, data);
     }
 }
-
-extern void _initialize_varobj (void);
-void
-_initialize_varobj (void)
-{
-  int sizeof_table = sizeof (struct vlist *) * VAROBJ_TABLE_SIZE;
-
-  varobj_table = xmalloc (sizeof_table);
-  memset (varobj_table, 0, sizeof_table);
-
-  add_setshow_zuinteger_cmd ("varobj", class_maintenance,
-			     &varobjdebug,
-			     _("Set varobj debugging."),
-			     _("Show varobj debugging."),
-			     _("When non-zero, varobj debugging is enabled."),
-			     NULL, show_varobjdebug,
-			     &setdebuglist, &showdebuglist);
-}
 
 /* Invalidate varobj VAR if it is tied to locals and re-create it if it is
    defined on globals.  It is a helper for varobj_invalidate.
@@ -2785,4 +2767,22 @@ void
 varobj_invalidate (void)
 {
   all_root_varobjs (varobj_invalidate_iter, NULL);
+}
+
+extern void _initialize_varobj (void);
+void
+_initialize_varobj (void)
+{
+  int sizeof_table = sizeof (struct vlist *) * VAROBJ_TABLE_SIZE;
+
+  varobj_table = xmalloc (sizeof_table);
+  memset (varobj_table, 0, sizeof_table);
+
+  add_setshow_zuinteger_cmd ("varobj", class_maintenance,
+			     &varobjdebug,
+			     _("Set varobj debugging."),
+			     _("Show varobj debugging."),
+			     _("When non-zero, varobj debugging is enabled."),
+			     NULL, show_varobjdebug,
+			     &setdebuglist, &showdebuglist);
 }
