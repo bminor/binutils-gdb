@@ -1,3 +1,8 @@
+2014-09-30  James Hogan  <james.hogan@imgtec.com>
+
+	* Makefile.in (clean): Add rm -f commands for mips-dsp-linux.c and
+	mips64-dsp-linux.c.
+
 2014-09-23  Yao Qi  <yao@codesourcery.com>
 
 	* linux-low.c (lp_status_maybe_breakpoint): New function.
