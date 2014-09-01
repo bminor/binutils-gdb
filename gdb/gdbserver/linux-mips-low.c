@@ -128,6 +128,7 @@ mips_read_description (void)
     {
       int pid = lwpid_of (current_inferior);
 
+      errno = 0;
       ptrace (PTRACE_PEEKUSER, pid, DSP_CONTROL, 0);
       switch (errno)
 	{
