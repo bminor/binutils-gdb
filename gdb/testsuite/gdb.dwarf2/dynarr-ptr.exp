@@ -155,6 +155,9 @@ gdb_test "print foo.three_ptr.all'last" \
 gdb_test "print foo.three_ptr.all'length" \
          " = 3"
 
+gdb_test "ptype foo.three_ptr.all" \
+         " = array \\(<>\\) of integer"
+
 # foo.three_ptr
 
 gdb_test "print foo.three_ptr(1)" \
@@ -174,6 +177,9 @@ gdb_test "print foo.three_ptr'last" \
 
 gdb_test "print foo.three_ptr'length" \
          " = 3"
+
+gdb_test "ptype foo.three_ptr" \
+         " = access array \\(<>\\) of integer"
 
 # foo.three_ptr_tdef.all
 
@@ -198,6 +204,9 @@ gdb_test "print foo.three_ptr_tdef.all'last" \
 gdb_test "print foo.three_ptr_tdef.all'length" \
          " = 3"
 
+gdb_test "ptype foo.three_ptr_tdef.all" \
+         " = array \\(<>\\) of integer"
+
 # foo.three_ptr_tdef
 
 gdb_test "print foo.three_ptr_tdef(1)" \
@@ -217,6 +226,9 @@ gdb_test "print foo.three_ptr_tdef'last" \
 
 gdb_test "print foo.three_ptr_tdef'length" \
          " = 3"
+
+gdb_test "ptype foo.three_ptr_tdef" \
+         " = access array \\(<>\\) of integer"
 
 # foo.five_ptr.all
 
@@ -247,6 +259,9 @@ gdb_test "print foo.five_ptr.all'last" \
 gdb_test "print foo.five_ptr.all'length" \
          " = 5"
 
+gdb_test "ptype foo.five_ptr.all" \
+         " = array \\(<>\\) of integer"
+
 # foo.five_ptr
 
 gdb_test "print foo.five_ptr(2)" \
@@ -272,6 +287,9 @@ gdb_test "print foo.five_ptr'last" \
 
 gdb_test "print foo.five_ptr'length" \
          " = 5"
+
+gdb_test "ptype foo.five_ptr" \
+         " = access array \\(<>\\) of integer"
 
 # foo.five_ptr_tdef.all
 
@@ -302,6 +320,9 @@ gdb_test "print foo.five_ptr_tdef.all'last" \
 gdb_test "print foo.five_ptr_tdef.all'length" \
          " = 5"
 
+gdb_test "ptype foo.five_ptr_tdef.all" \
+         " = array \\(<>\\) of integer"
+
 # foo.five_ptr_tdef
 
 gdb_test "print foo.five_ptr_tdef(2)" \
@@ -327,3 +348,6 @@ gdb_test "print foo.five_ptr_tdef'last" \
 
 gdb_test "print foo.five_ptr_tdef'length" \
          " = 5"
+
+gdb_test "ptype foo.five_ptr_tdef" \
+         " = access array \\(<>\\) of integer"
