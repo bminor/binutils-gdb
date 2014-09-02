@@ -1,5 +1,10 @@
 2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* gas/mips/module-defer-warn2.l: Ignore differences in output from
+	64-bit vs 32-bit targets using O32.
+
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* gas/elf/type.e: Account for new sections.
 	* gas/mips/mips16-e.d: Likewise.
 	* gas/mips/mips16-f.d: Likewise.
