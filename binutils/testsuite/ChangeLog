@@ -1,3 +1,7 @@
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* binutils-all/readelf.ss-mips: Account for new sections.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* binutils-all/readelf.s: Account for .MIPS.abiflags and

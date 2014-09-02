@@ -1,3 +1,15 @@
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/elf/type.e: Account for new sections.
+	* gas/mips/mips16-e.d: Likewise.
+	* gas/mips/mips16-f.d: Likewise.
+	* gas/mips/mipsel16-e.d: Likewise.
+	* gas/mips/mipsel16-f.d: Likewise.
+	* gas/mips/tmips16-e.d: Appropriately escape dots.
+	* gas/mips/tmips16-f.d: Likewise.
+	* gas/mips/tmipsel16-e.d: Likewise.
+	* gas/mips/tmipsel16-f.d: Likewise.
+
 2014-09-04  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/mips.exp: Add mipsisa32 and mipsisa32el to
