@@ -1,5 +1,12 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* nios2-linux-tdep.c (NIOS2_GREGS_SIZE): New macro.
+	(nios2_regset_from_core_section): Remove.
+	(nios2_iterate_over_regset_sections): New.
+	(nios2_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* mn10300-linux-tdep.c (am33_regset_from_core_section): Remove.
 	(am33_iterate_over_regset_sections): New.
 	(am33_linux_init_osabi): Adjust gdbarch initialization.
