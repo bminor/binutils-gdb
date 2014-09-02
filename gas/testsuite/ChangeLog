@@ -1,5 +1,16 @@
 2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	* gas/mips/attr-gnu-abi-fp-1.d: Relax expected output.
+	* gas/mips/elf_ase_micromips-2.d: Likewise.
+	* gas/mips/elf_ase_micromips.d: Likewise.
+	* gas/mips/elf_ase_mips16-2.d: Likewise.
+	* gas/mips/elf_ase_mips16.d: Likewise.
+	* gas/mips/module-mfp32.d: Likewise.
+	* gas/mips/module-msingle-float.d: Likewise.
+	* gas/mips/module-msoft-float.d: Likewise.
+
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
 	* gas/mips/module-defer-warn2.l: Ignore differences in output from
 	64-bit vs 32-bit targets using O32.
 

@@ -8,14 +8,14 @@ File Attributes
 
 MIPS ABI Flags Version: 0
 
-ISA: MIPS1
+ISA: MIPS.*
 GPR size: 32
 CPR1 size: 32
 CPR2 size: 0
 FP ABI: Hard float \(double precision\)
-ISA Extension: None
+ISA Extension: .*
 ASEs:
 	None
-FLAGS 1: 00000000
+FLAGS 1: 0000000.
 FLAGS 2: 00000000
 
