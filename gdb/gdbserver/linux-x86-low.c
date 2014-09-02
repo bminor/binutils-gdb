@@ -749,7 +749,7 @@ x86_stopped_data_address (void)
 static struct arch_process_info *
 x86_linux_new_process (void)
 {
-  struct arch_process_info *info = xcalloc (1, sizeof (*info));
+  struct arch_process_info *info = XCNEW (struct arch_process_info);
 
   i386_low_init_dregs (&info->debug_reg_state);
 
@@ -761,7 +761,7 @@ x86_linux_new_process (void)
 static struct arch_lwp_info *
 x86_linux_new_thread (void)
 {
-  struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
+  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
 
   info->debug_registers_changed = 1;
 
