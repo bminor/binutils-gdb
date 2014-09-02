@@ -1,12 +1,12 @@
-#source: attr-gnu-4-1.s -EB -32
-#source: attr-gnu-4-0.s -EB -32
-#ld: -r -melf32btsmip
+#source: attr-gnu-4-1.s
+#source: attr-gnu-4-0.s
+#ld: -r
 #readelf: -hA
 
 ELF Header:
-  Magic:   7f 45 4c 46 01 02 01 00 00 00 00 00 00 00 00 00.*
+  Magic:   .*
   Class:                             ELF32
-  Data:                              2's complement, big endian
+  Data:                              2's complement,.*
   Version:                           1 \(current\)
   OS/ABI:                            UNIX - System V
   ABI Version:                       0

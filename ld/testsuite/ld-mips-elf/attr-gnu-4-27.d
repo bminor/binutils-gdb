@@ -1,6 +1,6 @@
-#source: attr-gnu-4-2.s -32 -EB
-#source: attr-gnu-4-7.s -32 -EB
-#ld: -r -melf32btsmip
+#source: attr-gnu-4-2.s -mips32r2
+#source: attr-gnu-4-7.s
+#ld: -r
 #readelf: -A
 #warning: Warning: .* uses -msingle-float \(set by .*\), .* uses -mgp32 -mfp64 -mno-odd-spreg
 
