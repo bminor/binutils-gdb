@@ -286,8 +286,8 @@ find_global_typedef (const struct type_print_options *flags,
       return new_tf->name;
     }
 
-  /* Put an entry into the hash table now, in case apply_script_type_printers
-     recurses.  */
+  /* Put an entry into the hash table now, in case
+     apply_ext_lang_type_printers recurses.  */
   new_tf = XOBNEW (&flags->global_typedefs->storage, struct typedef_field);
   new_tf->name = NULL;
   new_tf->type = t;

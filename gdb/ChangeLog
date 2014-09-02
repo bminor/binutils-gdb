@@ -1,3 +1,7 @@
+2014-09-02  Doug Evans  <dje@google.com>
+
+	* typeprint.c (find_global_typedef): Fix comment.
+
 2014-09-02  Gary Benson  <gbenson@redhat.com>
 
 	* i386-nat.h: Renamed as...
