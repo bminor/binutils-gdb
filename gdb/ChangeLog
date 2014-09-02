@@ -1,5 +1,11 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* score-tdep.c (score7_linux_regset_from_core_section): Remove.
+	(score7_linux_iterate_over_regset_sections): New.
+	(score_gdbarch_init): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* configure.tgt (gdb_target_obs): Add fbsd-tdep.o for PowerPC
 	FreeBSD targets.
 	* ppcfbsd-nat.c (_initialize_ppcfbsd_nat): Do not set target

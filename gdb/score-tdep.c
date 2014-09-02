@@ -1445,21 +1445,16 @@ static const struct regset score7_linux_gregset =
     regcache_collect_regset
   };
 
-/* Return the appropriate register set from the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-score7_linux_regset_from_core_section(struct gdbarch *gdbarch,
-                    const char *sect_name, size_t sect_size)
+static void
+score7_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					   iterate_over_regset_sections_cb *cb,
+					   void *cb_data,
+					   const struct regcache *regcache)
 {
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (sect_name != NULL);
-
-  if (strcmp(sect_name, ".reg") == 0
-      && sect_size == SCORE7_LINUX_SIZEOF_GREGSET)
-    return &score7_linux_gregset;
-
-  return NULL;
+  cb (".reg", SCORE7_LINUX_SIZEOF_GREGSET, &score7_linux_gregset,
+      NULL, cb_data);
 }
 
 static struct gdbarch *
@@ -1504,8 +1499,8 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, score7_register_name);
       set_gdbarch_num_regs (gdbarch, SCORE7_NUM_REGS);
       /* Core file support.  */
-      set_gdbarch_regset_from_core_section (gdbarch,
-					    score7_linux_regset_from_core_section);
+      set_gdbarch_iterate_over_regset_sections
+	(gdbarch, score7_linux_iterate_over_regset_sections);
       break;
 
     case bfd_mach_score3:
