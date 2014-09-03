@@ -1,3 +1,12 @@
+2014-09-03  Gary Benson  <gbenson@redhat.com>
+
+	* nat/x86-dregs.h (ALL_DEBUG_REGISTERS): Renamed as...
+	(ALL_DEBUG_ADDRESS_REGISTERS): New macro.  All uses updated.
+	Loop conditions	changed to equivalent form.
+	(struct x86_debug_reg_state): Updated dr_ref_count comment.
+	* x86-linux-nat.c (x86_linux_prepare_to_resume): Use
+	ALL_DEBUG_ADDRESS_REGISTERS.
+
 2014-09-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2loc.h (dwarf2_evaluate_property): Minor function

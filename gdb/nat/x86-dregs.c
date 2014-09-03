@@ -205,7 +205,7 @@ x86_show_dr (struct x86_debug_reg_state *state,
   debug_printf ("\tCONTROL (DR7): %s          STATUS (DR6): %s\n",
 		phex (state->dr_control_mirror, 8),
 		phex (state->dr_status_mirror, 8));
-  ALL_DEBUG_REGISTERS (i)
+  ALL_DEBUG_ADDRESS_REGISTERS (i)
     {
       debug_printf ("\
 \tDR%d: addr=0x%s, ref.count=%d  DR%d: addr=0x%s, ref.count=%d\n",
@@ -291,7 +291,7 @@ x86_insert_aligned_watchpoint (struct x86_debug_reg_state *state,
   /* First, look for an occupied debug register with the same address
      and the same RW and LEN definitions.  If we find one, we can
      reuse it for this watchpoint as well (and save a register).  */
-  ALL_DEBUG_REGISTERS (i)
+  ALL_DEBUG_ADDRESS_REGISTERS (i)
     {
       if (!X86_DR_VACANT (state, i)
 	  && state->dr_mirror[i] == addr
@@ -303,7 +303,7 @@ x86_insert_aligned_watchpoint (struct x86_debug_reg_state *state,
     }
 
   /* Next, look for a vacant debug register.  */
-  ALL_DEBUG_REGISTERS (i)
+  ALL_DEBUG_ADDRESS_REGISTERS (i)
     {
       if (X86_DR_VACANT (state, i))
 	break;
@@ -346,7 +346,7 @@ x86_remove_aligned_watchpoint (struct x86_debug_reg_state *state,
   int i, retval = -1;
   int all_vacant = 1;
 
-  ALL_DEBUG_REGISTERS (i)
+  ALL_DEBUG_ADDRESS_REGISTERS (i)
     {
       if (!X86_DR_VACANT (state, i)
 	  && state->dr_mirror[i] == addr
@@ -461,7 +461,7 @@ x86_update_inferior_debug_regs (struct x86_debug_reg_state *state,
 {
   int i;
 
-  ALL_DEBUG_REGISTERS (i)
+  ALL_DEBUG_ADDRESS_REGISTERS (i)
     {
       if (X86_DR_VACANT (new_state, i) != X86_DR_VACANT (state, i))
 	x86_dr_low_set_addr (new_state, i);
@@ -620,7 +620,7 @@ x86_dr_stopped_data_address (struct x86_debug_reg_state *state,
      registers.  */
   status = x86_dr_low_get_status ();
 
-  ALL_DEBUG_REGISTERS (i)
+  ALL_DEBUG_ADDRESS_REGISTERS (i)
     {
       if (!X86_DR_WATCH_HIT (status, i))
 	continue;

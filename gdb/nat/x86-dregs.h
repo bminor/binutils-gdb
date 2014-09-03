@@ -85,12 +85,13 @@ struct x86_debug_reg_state
   CORE_ADDR dr_mirror[DR_NADDR];
   unsigned dr_status_mirror, dr_control_mirror;
 
-  /* Reference counts for each debug register.  */
+  /* Reference counts for each debug address register.  */
   int dr_ref_count[DR_NADDR];
 };
 
-/* A macro to loop over all debug registers.  */
-#define ALL_DEBUG_REGISTERS(i)	for (i = 0; i < DR_NADDR; i++)
+/* A macro to loop over all debug address registers.  */
+#define ALL_DEBUG_ADDRESS_REGISTERS(i) \
+  for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 
 /* Insert a watchpoint to watch a memory region which starts at
    address ADDR and whose length is LEN bytes.  Watch memory accesses

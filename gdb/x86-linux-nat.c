@@ -195,7 +195,7 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 	 results in EINVAL.  */
       x86_linux_dr_set (lwp->ptid, DR_CONTROL, 0);
 
-      for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+      ALL_DEBUG_ADDRESS_REGISTERS (i)
 	if (state->dr_ref_count[i] > 0)
 	  {
 	    x86_linux_dr_set (lwp->ptid, i, state->dr_mirror[i]);

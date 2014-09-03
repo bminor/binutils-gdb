@@ -28,7 +28,7 @@ x86_low_init_dregs (struct x86_debug_reg_state *state)
 {
   int i;
 
-  ALL_DEBUG_REGISTERS (i)
+  ALL_DEBUG_ADDRESS_REGISTERS (i)
     {
       state->dr_mirror[i] = 0;
       state->dr_ref_count[i] = 0;
