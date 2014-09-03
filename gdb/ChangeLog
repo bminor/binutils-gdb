@@ -1,3 +1,8 @@
+2014-09-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2loc.h (dwarf2_evaluate_property): Minor function
+	description fix.
+
 2014-09-02  Doug Evans  <dje@google.com>
 
 	* typeprint.c (find_global_typedef): Fix comment.
