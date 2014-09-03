@@ -1,3 +1,8 @@
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Recognize PAIRREG.
+	(aarch64_features): Add entry for lse extension.
+
 2014-08-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-arm.c (aeabi_set_public_attributes): Update selected_cpu

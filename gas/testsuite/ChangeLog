@@ -1,3 +1,14 @@
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/lse-atomic.d: New.
+	* gas/aarch64/lse-atomic.s: Likewise.
+	* gas/aarch64/illegal-lse.d: Likewise.
+	* gas/aarch64/illegal-lse.l: Likewise.
+	* gas/aarch64/illegal-lse.s: Likewise.
+	* gas/aarch64/diagnostic.s: Check processor feature detect for lse
+	instruction.
+	* gas/aarch64/diagnostic.l: Likewise.
+
 2014-08-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/arm/blx-bl-convert.d: New testcase.

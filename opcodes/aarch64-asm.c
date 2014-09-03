@@ -856,6 +856,14 @@ do_special_encoding (struct aarch64_inst *inst)
       if (inst->opcode->flags & F_N)
 	insert_field (FLD_N, &inst->value, value, inst->opcode->mask);
     }
+  if (inst->opcode->flags & F_LSE_SZ)
+    {
+      idx = select_operand_for_sf_field_coding (inst->opcode);
+      value = (inst->operands[idx].qualifier == AARCH64_OPND_QLF_X
+	       || inst->operands[idx].qualifier == AARCH64_OPND_QLF_SP)
+	? 1 : 0;
+      insert_field (FLD_lse_sz, &inst->value, value, 0);
+    }
   if (inst->opcode->flags & F_SIZEQ)
     encode_sizeq (inst);
   if (inst->opcode->flags & F_FPTYPE)

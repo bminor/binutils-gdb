@@ -108,3 +108,5 @@
 	clrex	kk
 	sys	#0, c0, c0, #0, kk
 	sys	#0, c0, c0, #0,
+
+	casp w0,w1,w2,w3,[x4]

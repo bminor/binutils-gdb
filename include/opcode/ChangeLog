@@ -1,3 +1,11 @@
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_LSE): New feature added.
+	(aarch64_opnd): Add AARCH64_OPND_PAIRREG.
+	(aarch64_insn_class): Add lse_atomic.
+	(F_LSE_SZ): New field added.
+	(opcode_has_special_coder): Recognize F_LSE_SZ.
+
 2014-08-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips.h: Document the move of `MICROMIPSOP_*_CODE10' from `B'

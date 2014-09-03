@@ -84,6 +84,7 @@ enum aarch64_field_kind
   FLD_index,
   FLD_index2,
   FLD_sf,
+  FLD_lse_sz,
   FLD_H,
   FLD_L,
   FLD_M,

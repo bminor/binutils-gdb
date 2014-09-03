@@ -1,3 +1,20 @@
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-tbl.h (QL_R4NIL): New qualifiers.
+	(aarch64_feature_lse): New feature added.
+	(LSE): New Added.
+	(aarch64_opcode_table): New LSE instructions added.  Improve
+	descriptions for ldarb/ldarh/ldar.
+	(aarch64_opcode_table): Describe PAIRREG.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_lse_sz.
+	* aarch64-opc.c (fields): Add entry for F_LSE_SZ.
+	(aarch64_print_operand): Recognize PAIRREG.
+	(operand_general_constraint_met_p): Check reg pair constraints for CASP
+	instructions.
+	* aarch64-dis.c (aarch64_ext_regno_pair): New extractor for paired reg.
+	(do_special_decoding): Recognize F_LSE_SZ.
+	* aarch64-asm.c (do_special_encoding): Recognize F_LSE_SZ.
+
 2014-08-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c (decode_micromips_operand): Rename `B' to `+J'.

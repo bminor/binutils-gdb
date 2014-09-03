@@ -104,3 +104,4 @@
 [^:]*:108: Error: constant expression required at operand 1 -- `clrex kk'
 [^:]*:109: Error: operand 5 should be an integer register -- `sys #0,c0,c0,#0,kk'
 [^:]*:110: Error: unexpected comma before the omitted optional operand at operand 5 -- `sys #0,c0,c0,#0,'
+[^:]*:112: Error: selected processor does not support `casp w0,w1,w2,w3,\[x4\]'
