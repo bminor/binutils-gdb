@@ -1,3 +1,9 @@
+2014-09-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR python/16699
+	* gdb.python/py-completion.exp: New file.
+	* gdb.python/py-completion.py: Likewise.
+
 2014-08-28  Doug Evans  <dje@google.com>
 
 	* gdb.arch/amd64-pseudo.c (main): Rewrite to better specify when

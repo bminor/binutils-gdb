@@ -176,6 +176,15 @@ struct cmd_list_element
        "baz/foo", return "baz/foobar".  */
     completer_ftype *completer;
 
+    /* Handle the word break characters for this completer.  Usually
+       this function need not be defined, but for some types of
+       completers (e.g., Python completers declared as methods inside
+       a class) the word break chars may need to be redefined
+       depending on the completer type (e.g., for filename
+       completers).  */
+
+    completer_ftype_void *completer_handle_brkchars;
+
     /* Destruction routine for this command.  If non-NULL, this is
        called when this command instance is destroyed.  This may be
        used to finalize the CONTEXT field, if needed.  */

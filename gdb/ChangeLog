@@ -1,3 +1,25 @@
+2014-09-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR python/16699
+	* cli/cli-decode.c (set_cmd_completer_handle_brkchars): New
+	function.
+	(add_cmd): Set "completer_handle_brkchars" to NULL.
+	* cli/cli-decode.h (struct cmd_list_element)
+	<completer_handle_brkchars>: New field.
+	* command.h (completer_ftype_void): New typedef.
+	(set_cmd_completer_handle_brkchars): New prototype.
+	* completer.c (set_gdb_completion_word_break_characters): New
+	function.
+	(complete_line_internal): Call "completer_handle_brkchars"
+	callback from command.
+	* completer.h: Include "command.h".
+	(set_gdb_completion_word_break_characters): New prototype.
+	* python/py-cmd.c (cmdpy_completer_helper): New function.
+	(cmdpy_completer_handle_brkchars): New function.
+	(cmdpy_completer): Adjust to use cmdpy_completer_helper.
+	(cmdpy_init): Set completer_handle_brkchars to
+	cmdpy_completer_handle_brkchars.
+
 2014-09-03  Gary Benson  <gbenson@redhat.com>
 
 	* nat/x86-dregs.h (ALL_DEBUG_REGISTERS): Renamed as...
