@@ -1,5 +1,10 @@
 2014-09-03  Jiong Wang  <jiong.wang@arm.com>
 
+	* aarch64-tbl.h (aarch64_opcode_table): Update encoding for mrs/msr.
+	* aarch64-dis-2.c: Update auto-generated file.
+
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
 	* aarch64-tbl.h (QL_R4NIL): New qualifiers.
 	(aarch64_feature_lse): New feature added.
 	(LSE): New Added.

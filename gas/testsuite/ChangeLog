@@ -1,5 +1,12 @@
 2014-09-03  Jiong Wang  <jiong.wang@arm.com>
 
+	* gas/aarch64/illegal.s: Update testcase.
+	* gas/aarch64/illegal.d: Likewise.
+	* gas/aarch64/sysreg-1.s: Likewise.
+	* gas/aarch64/sysreg-1.d: Likewise.
+
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
 	* gas/aarch64/lse-atomic.d: New.
 	* gas/aarch64/lse-atomic.s: Likewise.
 	* gas/aarch64/illegal-lse.d: Likewise.

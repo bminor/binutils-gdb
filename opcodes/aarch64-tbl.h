@@ -2272,9 +2272,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"dc", 0xd5080000, 0xfff80000, ic_system, 0, CORE, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS},
   {"ic", 0xd5080000, 0xfff80000, ic_system, 0, CORE, OP2 (SYSREG_IC, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)},
   {"tlbi", 0xd5080000, 0xfff80000, ic_system, 0, CORE, OP2 (SYSREG_TLBI, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)},
-  {"msr", 0xd5100000, 0xfff00000, ic_system, 0, CORE, OP2 (SYSREG, Rt), QL_SRC_X, 0},
+  {"msr", 0xd5000000, 0xffe00000, ic_system, 0, CORE, OP2 (SYSREG, Rt), QL_SRC_X, 0},
   {"sysl", 0xd5280000, 0xfff80000, ic_system, 0, CORE, OP5 (Rt, UIMM3_OP1, Cn, Cm, UIMM3_OP2), QL_SYSL, 0},
-  {"mrs", 0xd5300000, 0xfff00000, ic_system, 0, CORE, OP2 (Rt, SYSREG), QL_DST_X, 0},
+  {"mrs", 0xd5200000, 0xffe00000, ic_system, 0, CORE, OP2 (Rt, SYSREG), QL_DST_X, 0},
   /* Test & branch (immediate).  */
   {"tbz", 0x36000000, 0x7f000000, testbranch, 0, CORE, OP3 (Rt, BIT_NUM, ADDR_PCREL14), QL_PCREL_14, 0},
   {"tbnz", 0x37000000, 0x7f000000, testbranch, 0, CORE, OP3 (Rt, BIT_NUM, ADDR_PCREL14), QL_PCREL_14, 0},

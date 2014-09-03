@@ -1,5 +1,10 @@
 2014-09-03  Jiong Wang  <jiong.wang@arm.com>
 
+	* config/tc-aarch64.c (parse_sys_reg): Remove the restriction on op0
+	field.
+
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Recognize PAIRREG.
 	(aarch64_features): Add entry for lse extension.
 
