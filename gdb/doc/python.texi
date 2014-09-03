@@ -1048,11 +1048,12 @@ exception.
 
 @defun Type.template_argument (n @r{[}, block@r{]})
 If this @code{gdb.Type} is an instantiation of a template, this will
-return a new @code{gdb.Type} which represents the type of the
-@var{n}th template argument.
+return a new @code{gdb.Value} or @code{gdb.Type} which represents the
+value of the @var{n}th template argument (indexed starting at 0).
 
-If this @code{gdb.Type} is not a template type, this will throw an
-exception.  Ordinarily, only C@t{++} code will have template types.
+If this @code{gdb.Type} is not a template type, or if the type has fewer
+than @var{n} template arguments, this will throw an exception.
+Ordinarily, only C@t{++} code will have template types.
 
 If @var{block} is given, then @var{name} is looked up in that scope.
 Otherwise, it is searched for globally.
