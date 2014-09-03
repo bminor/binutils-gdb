@@ -44,6 +44,7 @@
 #include "tls.h"
 #include "errors.h"
 #include "gc.h"
+#include "nacl.h"
 
 namespace
 {
@@ -3711,7 +3712,7 @@ class Target_mips : public Sized_target<size, big_endian>
 
   // Information about this specific target which we pass to the
   // general Target structure.
-  static Target::Target_info mips_info;
+  static const Target::Target_info mips_info;
   // The GOT section.
   Mips_output_data_got<size, big_endian>* got_;
   // gp symbol.  It has the value of .got + 0x7FF0.
@@ -10462,7 +10463,7 @@ Target_mips<size, big_endian>::elf_mips_mach_name(elfcpp::Elf_Word e_flags)
 }
 
 template<int size, bool big_endian>
-Target::Target_info Target_mips<size, big_endian>::mips_info =
+const Target::Target_info Target_mips<size, big_endian>::mips_info =
 {
   size,                 // size
   big_endian,           // is_big_endian
@@ -10488,7 +10489,47 @@ Target::Target_info Target_mips<size, big_endian>::mips_info =
   "__start"		// entry_symbol_name
 };
 
-// The selector for mips object files.
+template<int size, bool big_endian>
+class Target_mips_nacl : public Target_mips<size, big_endian>
+{
+ public:
+  Target_mips_nacl()
+    : Target_mips<size, big_endian>(&mips_nacl_info)
+  { }
+
+ private:
+  static const Target::Target_info mips_nacl_info;
+};
+
+template<int size, bool big_endian>
+const Target::Target_info Target_mips_nacl<size, big_endian>::mips_nacl_info =
+{
+  size,                 // size
+  big_endian,           // is_big_endian
+  elfcpp::EM_MIPS,      // machine_code
+  true,                 // has_make_symbol
+  false,                // has_resolve
+  false,                // has_code_fill
+  true,                 // is_default_stack_executable
+  false,                // can_icf_inline_merge_sections
+  '\0',                 // wrap_char
+  "/lib/ld.so.1",       // dynamic_linker
+  0x20000,              // default_text_segment_address
+  0x10000,              // abi_pagesize (overridable by -z max-page-size)
+  0x10000,              // common_pagesize (overridable by -z common-page-size)
+  true,                 // isolate_execinstr
+  0x10000000,           // rosegment_gap
+  elfcpp::SHN_UNDEF,    // small_common_shndx
+  elfcpp::SHN_UNDEF,    // large_common_shndx
+  0,                    // small_common_section_flags
+  0,                    // large_common_section_flags
+  NULL,                 // attributes_section
+  NULL,                 // attributes_vendor
+  "_start"              // entry_symbol_name
+};
+
+// Target selector for Mips.  Note this is never instantiated directly.
+// It's only used in Target_selector_mips_nacl, below.
 
 template<int size, bool big_endian>
 class Target_selector_mips : public Target_selector
@@ -10508,10 +10549,23 @@ public:
   { return new Target_mips<size, big_endian>(); }
 };
 
-Target_selector_mips<32, true> target_selector_mips32be;
-Target_selector_mips<32, false> target_selector_mips32;
-Target_selector_mips<64, true> target_selector_mips64be;
-Target_selector_mips<64, false> target_selector_mips64;
+template<int size, bool big_endian>
+class Target_selector_mips_nacl
+  : public Target_selector_nacl<Target_selector_mips<size, big_endian>,
+                                Target_mips_nacl<size, big_endian> >
+{
+ public:
+  Target_selector_mips_nacl()
+    : Target_selector_nacl<Target_selector_mips<size, big_endian>,
+                           Target_mips_nacl<size, big_endian> >(
+        // NaCl currently supports only MIPS32 little-endian.
+        "mipsel", "elf32-tradlittlemips-nacl", "elf32-tradlittlemips-nacl")
+  { }
+};
 
+Target_selector_mips_nacl<32, true> target_selector_mips32;
+Target_selector_mips_nacl<32, false> target_selector_mips32el;
+Target_selector_mips_nacl<64, true> target_selector_mips64;
+Target_selector_mips_nacl<64, false> target_selector_mips64el;
 
 } // End anonymous namespace.

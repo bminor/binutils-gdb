@@ -1,3 +1,17 @@
+2014-09-03  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* mips.cc (Target_mips_nacl): New class.
+	(Target_selector_mips_nacl): New class.
+	(target_selector_mips32): Rename from target_selector_mips32be and use
+	Target_selector_mips_nacl instead of Target_selector_mips.
+	(target_selector_mips32el): Rename from target_selector_mips32 and use
+	Target_selector_mips_nacl instead of Target_selector_mips.
+	(target_selector_mips64): Rename from target_selector_mips64be and use
+	Target_selector_mips_nacl instead of Target_selector_mips.
+	(target_selector_mips64el): Rename from target_selector_mips64 and use
+	Target_selector_mips_nacl instead of Target_selector_mips.
+	(Target_mips::mips_info): Add const attribute.
+
 2014-09-02  Cary Coutant  <ccoutant@google.com>
 
 	* dwp.cc (Sized_relobj_dwo::do_section_name): Add const attribute.
