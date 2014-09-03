@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.8
 
+* Python Scripting
+  You can now access frame registers from Python scripts.
+
 * On resume, GDB now always passes the signal the program had stopped
   for to the thread the signal was sent to, even if the user changed
   threads before resuming.  Previously GDB would often (but not

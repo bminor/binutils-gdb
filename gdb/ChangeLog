@@ -1,3 +1,7 @@
+2014-09-03  Sasha Smundak  <asmundak@google.com>
+
+	* python/py-frame.c (frapy_read_register): New function.
+
 2014-09-03  James Hogan  <james.hogan@imgtec.com>
 
 	* mips-linux-nat.c (mips_linux_read_description): Reset errno to 0

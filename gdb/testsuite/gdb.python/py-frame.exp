@@ -94,3 +94,20 @@ gdb_test "python print ('result = %s' % f0.read_var ('variable_which_surely_does
 gdb_test "python print ('result = %s' % f0.read_var ('a'))" " = 1" "test Frame.read_var - success"
 
 gdb_test "python print ('result = %s' % (gdb.selected_frame () == f1))" " = True" "test gdb.selected_frame"
+
+# Can read SP register.
+gdb_test "python print ('result = %s' % (gdb.selected_frame ().read_register ('sp') == gdb.parse_and_eval ('\$sp')))" \
+  " = True" \
+  "test Frame.read_register(sp)"
+
+# PC value obtained via read_register is as expected.
+gdb_test "python print ('result = %s' % (f0.read_register('pc') == f0.pc()))" \
+  " = True" \
+  "test Frame.read_register(pc)"
+
+# On x86-64, PC is in $rip register.
+if {[istarget x86_64-*]} {
+    gdb_test "python print ('result = %s' % (f0.read_register('pc') == f0.read_register('rip')))" \
+	" = True" \
+	"test Frame.read_register(rip)"
+}

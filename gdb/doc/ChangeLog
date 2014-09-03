@@ -1,3 +1,7 @@
+2014-09-03  Sasha Smundak  <asmundak@google.com>
+
+	* python.texi (Frames in Python): Add read_register description.
+
 2014-08-04  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Debugging Output): Update for change to "set debug

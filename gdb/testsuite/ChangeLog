@@ -1,3 +1,7 @@
+2014-09-03  Sasha Smundak  <asmundak@google.com>
+
+	* gdb.python/py-frame.exp: Test Frame.read_register.
+
 2014-09-03  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR python/16699

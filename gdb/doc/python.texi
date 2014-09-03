@@ -3589,6 +3589,13 @@ Return the frame's symtab and line object.
 @xref{Symbol Tables In Python}.
 @end defun
 
+@defun Frame.read_register (register)
+Return the value of @var{register} in this frame.  The @var{register}
+argument must be a string (e.g., @code{'sp'} or @code{'rax'}).
+Returns a @code{Gdb.Value} object.  Throws an exception if @var{register}
+does not exist.
+@end defun
+
 @defun Frame.read_var (variable @r{[}, block@r{]})
 Return the value of @var{variable} in this frame.  If the optional
 argument @var{block} is provided, search for the variable from that
