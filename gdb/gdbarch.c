@@ -260,7 +260,7 @@ struct gdbarch
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
-  struct core_regset_section * core_regset_sections;
+  gdbarch_iterate_over_regset_sections_ftype *iterate_over_regset_sections;
   gdbarch_make_corefile_notes_ftype *make_corefile_notes;
   gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo;
   gdbarch_find_memory_regions_ftype *find_memory_regions;
@@ -571,6 +571,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_reggroup_p, invalid_p == 0 */
   /* Skip verify of fetch_pointer_argument, has predicate.  */
   /* Skip verify of regset_from_core_section, has predicate.  */
+  /* Skip verify of iterate_over_regset_sections, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
   /* Skip verify of elfcore_write_linux_prpsinfo, has predicate.  */
   /* Skip verify of find_memory_regions, has predicate.  */
@@ -767,9 +768,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: core_read_description = <%s>\n",
                       host_address_to_string (gdbarch->core_read_description));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: core_regset_sections = %s\n",
-                      host_address_to_string (gdbarch->core_regset_sections));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
                       gdbarch_core_xfer_shared_libraries_p (gdbarch));
@@ -986,6 +984,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: iterate_over_objfiles_in_search_order = <%s>\n",
                       host_address_to_string (gdbarch->iterate_over_objfiles_in_search_order));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_iterate_over_regset_sections_p() = %d\n",
+                      gdbarch_iterate_over_regset_sections_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: iterate_over_regset_sections = <%s>\n",
+                      host_address_to_string (gdbarch->iterate_over_regset_sections));
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_bit = %s\n",
                       plongest (gdbarch->long_bit));
@@ -3260,20 +3264,28 @@ set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch,
   gdbarch->regset_from_core_section = regset_from_core_section;
 }
 
-struct core_regset_section *
-gdbarch_core_regset_sections (struct gdbarch *gdbarch)
+int
+gdbarch_iterate_over_regset_sections_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_regset_sections called\n");
-  return gdbarch->core_regset_sections;
+  return gdbarch->iterate_over_regset_sections != NULL;
 }
 
 void
-set_gdbarch_core_regset_sections (struct gdbarch *gdbarch,
-                                  struct core_regset_section * core_regset_sections)
+gdbarch_iterate_over_regset_sections (struct gdbarch *gdbarch, iterate_over_regset_sections_cb *cb, void *cb_data, const struct regcache *regcache)
 {
-  gdbarch->core_regset_sections = core_regset_sections;
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->iterate_over_regset_sections != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_iterate_over_regset_sections called\n");
+  gdbarch->iterate_over_regset_sections (gdbarch, cb, cb_data, regcache);
+}
+
+void
+set_gdbarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
+                                          gdbarch_iterate_over_regset_sections_ftype iterate_over_regset_sections)
+{
+  gdbarch->iterate_over_regset_sections = iterate_over_regset_sections;
 }
 
 int

@@ -88,6 +88,10 @@ struct gdbarch_tdep
 
   const struct regset *fpregset;
   int sizeof_fpregset;
+
+  int have_linux_v1;
+  int have_linux_v2;
+  int have_tdb;
 };
 
 
@@ -532,84 +536,6 @@ const struct regset s390_tdb_regset = {
   regcache_collect_regset
 };
 
-static struct core_regset_section s390_linux32_regset_sections[] =
-{
-  { ".reg", s390_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { NULL, 0}
-};
-
-static struct core_regset_section s390_linux32v1_regset_sections[] =
-{
-  { ".reg", s390_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { ".reg-s390-last-break", 8, "s390 last-break address" },
-  { NULL, 0}
-};
-
-static struct core_regset_section s390_linux32v2_regset_sections[] =
-{
-  { ".reg", s390_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { ".reg-s390-last-break", 8, "s390 last-break address" },
-  { ".reg-s390-system-call", 4, "s390 system-call" },
-  { NULL, 0}
-};
-
-static struct core_regset_section s390_linux64_regset_sections[] =
-{
-  { ".reg", s390_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { ".reg-s390-high-gprs", 16*4, "s390 GPR upper halves" },
-  { NULL, 0}
-};
-
-static struct core_regset_section s390_linux64v1_regset_sections[] =
-{
-  { ".reg", s390_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { ".reg-s390-high-gprs", 16*4, "s390 GPR upper halves" },
-  { ".reg-s390-last-break", 8, "s930 last-break address" },
-  { NULL, 0}
-};
-
-static struct core_regset_section s390_linux64v2_regset_sections[] =
-{
-  { ".reg", s390_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { ".reg-s390-high-gprs", 16*4, "s390 GPR upper halves" },
-  { ".reg-s390-last-break", 8, "s930 last-break address" },
-  { ".reg-s390-system-call", 4, "s390 system-call" },
-  { ".reg-s390-tdb", s390_sizeof_tdbregset, "s390 TDB" },
-  { NULL, 0}
-};
-
-static struct core_regset_section s390x_linux64_regset_sections[] =
-{
-  { ".reg", s390x_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { NULL, 0}
-};
-
-static struct core_regset_section s390x_linux64v1_regset_sections[] =
-{
-  { ".reg", s390x_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { ".reg-s390-last-break", 8, "s930 last-break address" },
-  { NULL, 0}
-};
-
-static struct core_regset_section s390x_linux64v2_regset_sections[] =
-{
-  { ".reg", s390x_sizeof_gregset, "general-purpose" },
-  { ".reg2", s390_sizeof_fpregset, "floating-point" },
-  { ".reg-s390-last-break", 8, "s930 last-break address" },
-  { ".reg-s390-system-call", 4, "s390 system-call" },
-  { ".reg-s390-tdb", s390_sizeof_tdbregset, "s390 TDB" },
-  { NULL, 0}
-};
-
-
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 static const struct regset *
@@ -638,6 +564,38 @@ s390_regset_from_core_section (struct gdbarch *gdbarch,
     return &s390_tdb_regset;
 
   return NULL;
+}
+
+/* Iterate over supported core file register note sections. */
+
+static void
+s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				   iterate_over_regset_sections_cb *cb,
+				   void *cb_data,
+				   const struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  cb (".reg", tdep->sizeof_gregset, "general-purpose", cb_data);
+  cb (".reg2", s390_sizeof_fpregset, "floating-point", cb_data);
+
+  if (tdep->abi == ABI_LINUX_S390 && tdep->gpr_full_regnum != -1)
+    cb (".reg-s390-high-gprs", 16 * 4, "s390 GPR upper halves", cb_data);
+
+  if (tdep->have_linux_v1)
+    cb (".reg-s390-last-break", 8, "s930 last-break address", cb_data);
+
+  if (tdep->have_linux_v2)
+    cb (".reg-s390-system-call", 4, "s390 system-call", cb_data);
+
+  /* If regcache is set, we are in "write" (gcore) mode.  In this
+     case, don't iterate over the TDB unless its registers are
+     available.  */
+  if (tdep->have_tdb
+      && (regcache == NULL
+	  || REG_VALID == regcache_register_status (regcache,
+						    S390_TDB_DWORD0_REGNUM)))
+    cb (".reg-s390-tdb", s390_sizeof_tdbregset, "s390 TDB", cb_data);
 }
 
 static const struct target_desc *
@@ -2904,6 +2862,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int have_upper = 0;
   int have_linux_v1 = 0;
   int have_linux_v2 = 0;
+  int have_tdb = 0;
   int first_pseudo_reg, last_pseudo_reg;
   static const char *const stap_register_prefixes[] = { "%", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
@@ -3048,6 +3007,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
 						S390_TDB_DWORD0_REGNUM + i,
 						tdb_regs[i]);
+	  have_tdb = 1;
 	}
 
       if (!valid_p)
@@ -3077,6 +3037,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Otherwise create a new gdbarch for the specified machine type.  */
   tdep = XCNEW (struct gdbarch_tdep);
   tdep->abi = tdep_abi;
+  tdep->have_linux_v1 = have_linux_v1;
+  tdep->have_linux_v2 = have_linux_v2;
+  tdep->have_tdb = have_tdb;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
@@ -3107,6 +3070,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_regset_from_core_section (gdbarch,
 					s390_regset_from_core_section);
   set_gdbarch_core_read_description (gdbarch, s390_core_read_description);
+  set_gdbarch_iterate_over_regset_sections (gdbarch,
+					    s390_iterate_over_regset_sections);
   set_gdbarch_cannot_store_register (gdbarch, s390_cannot_store_register);
   set_gdbarch_write_pc (gdbarch, s390_write_pc);
   set_gdbarch_pseudo_register_read (gdbarch, s390_pseudo_register_read);
@@ -3179,31 +3144,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	(gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
       set_xml_syscall_file_name (XML_SYSCALL_FILENAME_S390);
-
-      if (have_upper)
-	{
-	  if (have_linux_v2)
-	    set_gdbarch_core_regset_sections (gdbarch,
-					      s390_linux64v2_regset_sections);
-	  else if (have_linux_v1)
-	    set_gdbarch_core_regset_sections (gdbarch,
-					      s390_linux64v1_regset_sections);
-	  else
-	    set_gdbarch_core_regset_sections (gdbarch,
-					      s390_linux64_regset_sections);
-	}
-      else
-	{
-	  if (have_linux_v2)
-	    set_gdbarch_core_regset_sections (gdbarch,
-					      s390_linux32v2_regset_sections);
-	  else if (have_linux_v1)
-	    set_gdbarch_core_regset_sections (gdbarch,
-					      s390_linux32v1_regset_sections);
-	  else
-	    set_gdbarch_core_regset_sections (gdbarch,
-					      s390_linux32_regset_sections);
-	}
       break;
 
     case ABI_LINUX_ZSERIES:
@@ -3223,18 +3163,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						    s390_address_class_type_flags_to_name);
       set_gdbarch_address_class_name_to_type_flags (gdbarch,
 						    s390_address_class_name_to_type_flags);
-
       set_xml_syscall_file_name (XML_SYSCALL_FILENAME_S390);
-
-      if (have_linux_v2)
-	set_gdbarch_core_regset_sections (gdbarch,
-					  s390x_linux64v2_regset_sections);
-      else if (have_linux_v1)
-	set_gdbarch_core_regset_sections (gdbarch,
-					  s390x_linux64v1_regset_sections);
-      else
-	set_gdbarch_core_regset_sections (gdbarch,
-					  s390x_linux64_regset_sections);
       break;
     }
 

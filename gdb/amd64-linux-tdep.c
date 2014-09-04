@@ -53,15 +53,6 @@
 #include "record-full.h"
 #include "linux-record.h"
 
-/* Supported register note sections.  */
-static struct core_regset_section amd64_linux_regset_sections[] =
-{
-  { ".reg", 27 * 8, "general-purpose" },
-  { ".reg2", 512, "floating-point" },
-  { ".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state" },
-  { NULL, 0 }
-};
-
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register cache layout.  */
 
@@ -1609,6 +1600,19 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
     }
 }
 
+/* Iterate over core file register note sections.  */
+
+static void
+amd64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					  iterate_over_regset_sections_cb *cb,
+					  void *cb_data,
+					  const struct regcache *regcache)
+{
+  cb (".reg", 27 * 8, "general-purpose", cb_data);
+  cb (".reg2", 512, "floating-point", cb_data);
+  cb (".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state", cb_data);
+}
+
 static void
 amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1643,8 +1647,9 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
-  /* Install supported register note sections.  */
-  set_gdbarch_core_regset_sections (gdbarch, amd64_linux_regset_sections);
+  /* Iterate over core file register note sections.  */
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, amd64_linux_iterate_over_regset_sections);
 
   set_gdbarch_core_read_description (gdbarch,
 				     amd64_linux_core_read_description);

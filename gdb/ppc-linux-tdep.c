@@ -257,54 +257,6 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 				      readbuf, writebuf);
 }
 
-static struct core_regset_section ppc_linux_vsx_regset_sections[] =
-{
-  { ".reg", 48 * 4, "general-purpose" },
-  { ".reg2", 264, "floating-point" },
-  { ".reg-ppc-vmx", 544, "ppc Altivec" },
-  { ".reg-ppc-vsx", 256, "POWER7 VSX" },
-  { NULL, 0}
-};
-
-static struct core_regset_section ppc_linux_vmx_regset_sections[] =
-{
-  { ".reg", 48 * 4, "general-purpose" },
-  { ".reg2", 264, "floating-point" },
-  { ".reg-ppc-vmx", 544, "ppc Altivec" },
-  { NULL, 0}
-};
-
-static struct core_regset_section ppc_linux_fp_regset_sections[] =
-{
-  { ".reg", 48 * 4, "general-purpose" },
-  { ".reg2", 264, "floating-point" },
-  { NULL, 0}
-};
-
-static struct core_regset_section ppc64_linux_vsx_regset_sections[] =
-{
-  { ".reg", 48 * 8, "general-purpose" },
-  { ".reg2", 264, "floating-point" },
-  { ".reg-ppc-vmx", 544, "ppc Altivec" },
-  { ".reg-ppc-vsx", 256, "POWER7 VSX" },
-  { NULL, 0}
-};
-
-static struct core_regset_section ppc64_linux_vmx_regset_sections[] =
-{
-  { ".reg", 48 * 8, "general-purpose" },
-  { ".reg2", 264, "floating-point" },
-  { ".reg-ppc-vmx", 544, "ppc Altivec" },
-  { NULL, 0}
-};
-
-static struct core_regset_section ppc64_linux_fp_regset_sections[] =
-{
-  { ".reg", 48 * 8, "general-purpose" },
-  { ".reg2", 264, "floating-point" },
-  { NULL, 0}
-};
-
 /* PLT stub in executable.  */
 static struct ppc_insn_pattern powerpc32_plt_stub[] =
   {
@@ -556,6 +508,28 @@ ppc_linux_regset_from_core_section (struct gdbarch *core_arch,
   if (strcmp (sect_name, ".reg-ppc-vsx") == 0)
     return &ppc32_linux_vsxregset;
   return NULL;
+}
+
+/* Iterate over supported core file register note sections. */
+
+static void
+ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					iterate_over_regset_sections_cb *cb,
+					void *cb_data,
+					const struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int have_altivec = tdep->ppc_vr0_regnum != -1;
+  int have_vsx = tdep->ppc_vsr0_upper_regnum != -1;
+
+  cb (".reg", 48 * tdep->wordsize, "general-purpose", cb_data);
+  cb (".reg2", 264, "floating-point", cb_data);
+
+  if (have_altivec)
+    cb (".reg-ppc-vmx", 544, "ppc Altivec", cb_data);
+
+  if (have_vsx)
+    cb (".reg-ppc-vsx", 256, "POWER7 VSX", cb_data);
 }
 
 static void
@@ -1352,19 +1326,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf32-powerpc");
 
-      /* Supported register sections.  */
-      if (tdesc_find_feature (info.target_desc,
-			      "org.gnu.gdb.power.vsx"))
-	set_gdbarch_core_regset_sections (gdbarch,
-					  ppc_linux_vsx_regset_sections);
-      else if (tdesc_find_feature (info.target_desc,
-			       "org.gnu.gdb.power.altivec"))
-	set_gdbarch_core_regset_sections (gdbarch,
-					  ppc_linux_vmx_regset_sections);
-      else
-	set_gdbarch_core_regset_sections (gdbarch,
-					  ppc_linux_fp_regset_sections);
-
       if (powerpc_so_ops.in_dynsym_resolve_code == NULL)
 	{
 	  powerpc_so_ops = svr4_so_ops;
@@ -1416,19 +1377,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpcle");
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
-
-      /* Supported register sections.  */
-      if (tdesc_find_feature (info.target_desc,
-			      "org.gnu.gdb.power.vsx"))
-	set_gdbarch_core_regset_sections (gdbarch,
-					  ppc64_linux_vsx_regset_sections);
-      else if (tdesc_find_feature (info.target_desc,
-			       "org.gnu.gdb.power.altivec"))
-	set_gdbarch_core_regset_sections (gdbarch,
-					  ppc64_linux_vmx_regset_sections);
-      else
-	set_gdbarch_core_regset_sections (gdbarch,
-					  ppc64_linux_fp_regset_sections);
     }
 
   /* PPC32 uses a different prpsinfo32 compared to most other Linux
@@ -1440,6 +1388,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_regset_from_core_section (gdbarch,
 					ppc_linux_regset_from_core_section);
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
+  set_gdbarch_iterate_over_regset_sections (gdbarch,
+					    ppc_linux_iterate_over_regset_sections);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

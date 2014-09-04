@@ -550,6 +550,22 @@ get_core_register_section (struct regcache *regcache,
 				  bfd_section_vma (core_bfd, section)));
 }
 
+/* Callback for get_core_registers that handles a single core file
+   register note section. */
+
+static void
+get_core_registers_cb (const char *sect_name, int size,
+		       const char *human_name, void *cb_data)
+{
+  struct regcache *regcache = (struct regcache *) cb_data;
+
+  if (strcmp (sect_name, ".reg") == 0)
+    get_core_register_section (regcache, sect_name, 0, human_name, 1);
+  else if (strcmp (sect_name, ".reg2") == 0)
+    get_core_register_section (regcache, sect_name, 2, human_name, 0);
+  else
+    get_core_register_section (regcache, sect_name, 3, human_name, 0);
+}
 
 /* Get the registers out of a core file.  This is the machine-
    independent part.  Fetch_core_registers is the machine-dependent
@@ -562,8 +578,8 @@ static void
 get_core_registers (struct target_ops *ops,
 		    struct regcache *regcache, int regno)
 {
-  struct core_regset_section *sect_list;
   int i;
+  struct gdbarch *gdbarch;
 
   if (!(core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
       && (core_vec == NULL || core_vec->core_read_registers == NULL))
@@ -573,23 +589,11 @@ get_core_registers (struct target_ops *ops,
       return;
     }
 
-  sect_list = gdbarch_core_regset_sections (get_regcache_arch (regcache));
-  if (sect_list)
-    while (sect_list->sect_name != NULL)
-      {
-        if (strcmp (sect_list->sect_name, ".reg") == 0)
-	  get_core_register_section (regcache, sect_list->sect_name,
-				     0, sect_list->human_name, 1);
-        else if (strcmp (sect_list->sect_name, ".reg2") == 0)
-	  get_core_register_section (regcache, sect_list->sect_name,
-				     2, sect_list->human_name, 0);
-	else
-	  get_core_register_section (regcache, sect_list->sect_name,
-				     3, sect_list->human_name, 0);
-
-	sect_list++;
-      }
-
+  gdbarch = get_regcache_arch (regcache);
+  if (gdbarch_iterate_over_regset_sections_p (gdbarch))
+    gdbarch_iterate_over_regset_sections (gdbarch,
+					  get_core_registers_cb,
+					  (void *) regcache, NULL);
   else
     {
       get_core_register_section (regcache,

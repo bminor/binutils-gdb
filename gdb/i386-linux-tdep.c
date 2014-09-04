@@ -52,28 +52,6 @@
 #include "features/i386/i386-avx-linux.c"
 #include "features/i386/i386-avx512-linux.c"
 
-/* Supported register note sections.  */
-static struct core_regset_section i386_linux_regset_sections[] =
-{
-  { ".reg", 68, "general-purpose" },
-  { ".reg2", 108, "floating-point" },
-  { NULL, 0 }
-};
-
-static struct core_regset_section i386_linux_sse_regset_sections[] =
-{
-  { ".reg", 68, "general-purpose" },
-  { ".reg-xfp", 512, "extended floating-point" },
-  { NULL, 0 }
-};
-
-static struct core_regset_section i386_linux_avx_regset_sections[] =
-{
-  { ".reg", 68, "general-purpose" },
-  { ".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state" },
-  { NULL, 0 }
-};
-
 /* Return non-zero, when the register is in the corresponding register
    group.  Put the LINUX_ORIG_EAX register in the system group.  */
 static int
@@ -670,6 +648,26 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
     return tdesc_i386_mmx_linux;
 }
 
+/* Iterate over core file register note sections.  */
+
+static void
+i386_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					 iterate_over_regset_sections_cb *cb,
+					 void *cb_data,
+					 const struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  cb (".reg", 68, "general-purpose", cb_data);
+
+  if (tdep->xcr0 & X86_XSTATE_AVX)
+    cb (".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state", cb_data);
+  else if (tdep->xcr0 & X86_XSTATE_SSE)
+    cb (".reg-xfp", 512, "extended floating-point", cb_data);
+  else
+    cb (".reg2", 108, "floating-point", cb_data);
+}
+
 /* Linux kernel shows PC value after the 'int $0x80' instruction even if
    inferior is still inside the syscall.  On next PTRACE_SINGLESTEP it will
    finish the syscall but PC will not change.
@@ -948,15 +946,9 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
 
-  /* Install supported register note sections.  */
-  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx512")
-      || tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx"))
-    set_gdbarch_core_regset_sections (gdbarch, i386_linux_avx_regset_sections);
-  else if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse"))
-    set_gdbarch_core_regset_sections (gdbarch, i386_linux_sse_regset_sections);
-  else
-    set_gdbarch_core_regset_sections (gdbarch, i386_linux_regset_sections);
-
+  /* Core file support.  */
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, i386_linux_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch,
 				     i386_linux_core_read_description);
 

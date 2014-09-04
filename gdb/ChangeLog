@@ -1,3 +1,55 @@
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* amd64-linux-tdep.c (amd64_linux_regset_sections): Remove.
+	(amd64_linux_iterate_over_regset_sections): New.
+	(amd64_linux_init_abi_common): Don't install the regset section
+	list, but the new iterator in gdbarch.
+	* arm-linux-tdep.c (arm_linux_fpa_regset_sections)
+	(arm_linux_vfp_regset_sections): Remove.  Move combined logic...
+	(arm_linux_iterate_over_regset_sections): ...here.  New function.
+	(arm_linux_init_abi): Set iterator instead of section list.
+	* corelow.c (get_core_registers_cb): New function, logic moved
+	from...
+	(get_core_registers): ...loop body here.  Use new iterator method
+	instead of walking through the regset section list.
+	* gdbarch.sh: Remove 'core_regset_sections'.  New method
+	'iterate_over_regset_sections'.  New typedef
+	'iterate_over_regset_sections_cb'.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* i386-linux-tdep.c (i386_linux_regset_sections)
+	(i386_linux_sse_regset_sections, i386_linux_avx_regset_sections):
+	Remove.
+	(i386_linux_iterate_over_regset_sections): New.
+	(i386_linux_init_abi): Don't choose a regset section list, but
+	install new iterator in gdbarch.
+	* linux-tdep.c (struct linux_collect_regset_section_cb_data): New.
+	(linux_collect_regset_section_cb): New function, logic moved
+	from...
+	(linux_collect_thread_registers): ...loop body here.  Use iterator
+	method instead of walking through list.
+	(linux_make_corefile_notes_1): Check for presence of iterator
+	method instead of regset section list.
+	* ppc-linux-tdep.c (ppc_linux_vsx_regset_sections)
+	(ppc_linux_vmx_regset_sections, ppc_linux_fp_regset_sections)
+	(ppc64_linux_vsx_regset_sections, ppc64_linux_vmx_regset_sections)
+	(ppc64_linux_fp_regset_sections): Remove.  Move combined logic...
+	(ppc_linux_iterate_over_regset_sections): ...here.  New function.
+	(ppc_linux_init_abi): Don't choose from above regset section
+	lists, but install new iterator in gdbarch.
+	* regset.h (struct core_regset_section): Remove.
+	* s390-linux-tdep.c (struct gdbarch_tdep): Add new fields
+	have_linux_v1, have_linux_v2, and have_tdb.
+	(s390_linux32_regset_sections, s390_linux32v1_regset_sections)
+	(s390_linux32v2_regset_sections, s390_linux64_regset_sections)
+	(s390_linux64v1_regset_sections, s390_linux64v2_regset_sections)
+	(s390x_linux64_regset_sections, s390x_linux64v1_regset_sections)
+	(s390x_linux64v2_regset_sections): Remove.  Move combined logic...
+	(s390_iterate_over_regset_sections): ...here.  New function.  Use
+	new tdep fields.
+	(s390_gdbarch_init): Set new tdep fields.  Don't choose from above
+	regset section lists, but install new iterator.
+
 2014-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* solib-svr4.c (svr4_parse_libraries): Use "library-list-svr4.dtd".

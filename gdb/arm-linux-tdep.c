@@ -753,21 +753,24 @@ arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
   return NULL;
 }
 
-/* Core file register set sections.  */
+/* Iterate over core file register note sections.  */
 
-static struct core_regset_section arm_linux_fpa_regset_sections[] =
+static void
+arm_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					iterate_over_regset_sections_cb *cb,
+					void *cb_data,
+					const struct regcache *regcache)
 {
-  { ".reg", ARM_LINUX_SIZEOF_GREGSET, "general-purpose" },
-  { ".reg2", ARM_LINUX_SIZEOF_NWFPE, "FPA floating-point" },
-  { NULL, 0}
-};
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-static struct core_regset_section arm_linux_vfp_regset_sections[] =
-{
-  { ".reg", ARM_LINUX_SIZEOF_GREGSET, "general-purpose" },
-  { ".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, "VFP floating-point" },
-  { NULL, 0}
-};
+  cb (".reg", ARM_LINUX_SIZEOF_GREGSET, "general-purpose", cb_data);
+
+  if (tdep->have_vfp_registers)
+    cb (".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, "VFP floating-point",
+	cb_data);
+  else if (tdep->have_fpa_registers)
+    cb (".reg2", ARM_LINUX_SIZEOF_NWFPE, "FPA floating-point", cb_data);
+}
 
 /* Determine target description from core file.  */
 
@@ -1456,12 +1459,9 @@ arm_linux_init_abi (struct gdbarch_info info,
   /* Core file support.  */
   set_gdbarch_regset_from_core_section (gdbarch,
 					arm_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, arm_linux_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch, arm_linux_core_read_description);
-
-  if (tdep->have_vfp_registers)
-    set_gdbarch_core_regset_sections (gdbarch, arm_linux_vfp_regset_sections);
-  else if (tdep->have_fpa_registers)
-    set_gdbarch_core_regset_sections (gdbarch, arm_linux_fpa_regset_sections);
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 

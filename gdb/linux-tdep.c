@@ -1084,6 +1084,57 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
   return note_data;
 }
 
+/* Structure for passing information from
+   linux_collect_thread_registers via an iterator to
+   linux_collect_regset_section_cb. */
+
+struct linux_collect_regset_section_cb_data
+{
+  struct gdbarch *gdbarch;
+  const struct regcache *regcache;
+  bfd *obfd;
+  char *note_data;
+  int *note_size;
+  unsigned long lwp;
+  enum gdb_signal stop_signal;
+  int abort_iteration;
+};
+
+/* Callback for iterate_over_regset_sections that records a single
+   regset in the corefile note section.  */
+
+static void
+linux_collect_regset_section_cb (const char *sect_name, int size,
+				 const char *human_name, void *cb_data)
+{
+  const struct regset *regset;
+  char *buf;
+  struct linux_collect_regset_section_cb_data *data = cb_data;
+
+  if (data->abort_iteration)
+    return;
+
+  regset = gdbarch_regset_from_core_section (data->gdbarch, sect_name, size);
+  gdb_assert (regset && regset->collect_regset);
+
+  buf = xmalloc (size);
+  regset->collect_regset (regset, data->regcache, -1, buf, size);
+
+  /* PRSTATUS still needs to be treated specially.  */
+  if (strcmp (sect_name, ".reg") == 0)
+    data->note_data = (char *) elfcore_write_prstatus
+      (data->obfd, data->note_data, data->note_size, data->lwp,
+       gdb_signal_to_host (data->stop_signal), buf);
+  else
+    data->note_data = (char *) elfcore_write_register_note
+      (data->obfd, data->note_data, data->note_size,
+       sect_name, buf, size);
+  xfree (buf);
+
+  if (data->note_data == NULL)
+    data->abort_iteration = 1;
+}
+
 /* Records the thread's register state for the corefile note
    section.  */
 
@@ -1094,47 +1145,25 @@ linux_collect_thread_registers (const struct regcache *regcache,
 				enum gdb_signal stop_signal)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  struct core_regset_section *sect_list;
-  unsigned long lwp;
+  struct linux_collect_regset_section_cb_data data;
 
-  sect_list = gdbarch_core_regset_sections (gdbarch);
-  gdb_assert (sect_list);
+  data.gdbarch = gdbarch;
+  data.regcache = regcache;
+  data.obfd = obfd;
+  data.note_data = note_data;
+  data.note_size = note_size;
+  data.stop_signal = stop_signal;
+  data.abort_iteration = 0;
 
   /* For remote targets the LWP may not be available, so use the TID.  */
-  lwp = ptid_get_lwp (ptid);
-  if (!lwp)
-    lwp = ptid_get_tid (ptid);
+  data.lwp = ptid_get_lwp (ptid);
+  if (!data.lwp)
+    data.lwp = ptid_get_tid (ptid);
 
-  while (sect_list->sect_name != NULL)
-    {
-      const struct regset *regset;
-      char *buf;
-
-      regset = gdbarch_regset_from_core_section (gdbarch,
-						 sect_list->sect_name,
-						 sect_list->size);
-      gdb_assert (regset && regset->collect_regset);
-
-      buf = xmalloc (sect_list->size);
-      regset->collect_regset (regset, regcache, -1, buf, sect_list->size);
-
-      /* PRSTATUS still needs to be treated specially.  */
-      if (strcmp (sect_list->sect_name, ".reg") == 0)
-	note_data = (char *) elfcore_write_prstatus
-			       (obfd, note_data, note_size, lwp,
-				gdb_signal_to_host (stop_signal), buf);
-      else
-	note_data = (char *) elfcore_write_register_note
-			       (obfd, note_data, note_size,
-				sect_list->sect_name, buf, sect_list->size);
-      xfree (buf);
-      sect_list++;
-
-      if (!note_data)
-	return NULL;
-    }
-
-  return note_data;
+  gdbarch_iterate_over_regset_sections (gdbarch,
+					linux_collect_regset_section_cb,
+					&data, regcache);
+  return data.note_data;
 }
 
 /* Fetch the siginfo data for the current thread, if it exists.  If
@@ -1524,7 +1553,7 @@ linux_make_corefile_notes_1 (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
      converted to gdbarch_core_regset_sections, we no longer need to fall back
      to the target method at this point.  */
 
-  if (!gdbarch_core_regset_sections (gdbarch))
+  if (!gdbarch_iterate_over_regset_sections_p (gdbarch))
     return target_make_corefile_notes (obfd, note_size);
   else
     return linux_make_corefile_notes (gdbarch, obfd, note_size,

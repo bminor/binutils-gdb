@@ -81,6 +81,9 @@ extern struct gdbarch *target_gdbarch (void);
 typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
   (struct objfile *objfile, void *cb_data);
 
+typedef void (iterate_over_regset_sections_cb)
+  (const char *sect_name, int size, const char *human_name, void *cb_data);
+
 
 /* The following are pre-initialized by GDBARCH.  */
 
@@ -741,10 +744,18 @@ typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct g
 extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
 extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
 
-/* Supported register notes in a core file. */
+/* Iterate over all supported register notes in a core file.  For each
+   supported register note section, the iterator must call CB and pass
+   CB_DATA unchanged.  If REGCACHE is not NULL, the iterator can limit
+   the supported register note sections based on the current register
+   values.  Otherwise it should enumerate all supported register note
+   sections. */
 
-extern struct core_regset_section * gdbarch_core_regset_sections (struct gdbarch *gdbarch);
-extern void set_gdbarch_core_regset_sections (struct gdbarch *gdbarch, struct core_regset_section * core_regset_sections);
+extern int gdbarch_iterate_over_regset_sections_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_iterate_over_regset_sections_ftype) (struct gdbarch *gdbarch, iterate_over_regset_sections_cb *cb, void *cb_data, const struct regcache *regcache);
+extern void gdbarch_iterate_over_regset_sections (struct gdbarch *gdbarch, iterate_over_regset_sections_cb *cb, void *cb_data, const struct regcache *regcache);
+extern void set_gdbarch_iterate_over_regset_sections (struct gdbarch *gdbarch, gdbarch_iterate_over_regset_sections_ftype *iterate_over_regset_sections);
 
 /* Create core file notes */
 
