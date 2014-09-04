@@ -1,3 +1,8 @@
+2014-09-04  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (parse_number): Skip handling base-switching prefixes if
+	the input is only one character long.
+
 2014-09-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR fortran/17237
