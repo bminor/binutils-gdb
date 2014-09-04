@@ -1,3 +1,8 @@
+2014-09-04  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/mips.exp: Add mipsisa32 and mipsisa32el to
+	the list of addr32 targets.
+
 2014-09-03  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/aarch64/illegal.s: Update testcase.
