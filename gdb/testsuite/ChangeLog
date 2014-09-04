@@ -1,3 +1,9 @@
+2014-09-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR fortran/17237
+	* gdb.fortran/print-formatted.exp: New file.
+	* gdb.fortran/print-formatted.f90: Likewise.
+
 2014-09-03  Sasha Smundak  <asmundak@google.com>
 
 	* gdb.python/py-frame.exp: Test Frame.read_register.

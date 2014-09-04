@@ -1,3 +1,9 @@
+2014-09-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR fortran/17237
+	* f-valprint.c (f_val_print): Specify the correct print option to
+	use when printing integer values.
+
 2014-09-04  Gary Benson  <gbenson@redhat.com>
 
 	* x86-linux-nat.c (x86_linux_dr_get, x86_linux_dr_set):
