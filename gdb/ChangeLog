@@ -1,3 +1,19 @@
+2014-09-04  Pedro Alves  <palves@redhat.com>
+
+	* value.c (value_ranges_copy_adjusted): New function, factored out
+	from ...
+	(value_contents_copy_raw): ... here.
+	(unpack_value_bits_as_long_1): Rename back to ...
+	(unpack_bits_as_long): ... this.  Remove 'original_value' and
+	'result' parameters.  Change return type to LONGEST.
+	(unpack_value_bits_as_long): Delete.
+	(unpack_value_field_as_long_1): Delete.
+	(unpack_value_field_as_long, unpack_field_as_long): Reimplement.
+	(unpack_value_bitfield): New function.
+	(value_field_bitfield): Reimplement using unpack_value_bitfield.
+	(value_fetch_lazy): Use unpack_value_bitfield.
+	* value.h (unpack_value_bits_as_long): Delete declaration.
+
 2014-09-03  Sasha Smundak  <asmundak@google.com>
 
 	* python/py-frame.c (frapy_read_register): New function.
