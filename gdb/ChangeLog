@@ -1,3 +1,9 @@
+2014-09-04  Gary Benson  <gbenson@redhat.com>
+
+	* x86-linux-nat.c (x86_linux_dr_get, x86_linux_dr_set):
+	Remove code to cope with LWPs wrapped as PIDs.
+	Add assertions to ensure no wrapped LWPs are passed.
+
 2014-09-04  Pedro Alves  <palves@redhat.com>
 
 	* value.c (value_ranges_copy_adjusted): New function, factored out
