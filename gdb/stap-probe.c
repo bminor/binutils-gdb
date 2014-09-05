@@ -753,9 +753,9 @@ stap_parse_single_operand (struct stap_parse_info *p)
   if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+')
     {
       char c = *p->arg;
-      int number;
       /* We use this variable to do a lookahead.  */
       const char *tmp = p->arg;
+      int has_digit = 0;
 
       /* Skipping signal.  */
       ++tmp;
@@ -772,26 +772,19 @@ stap_parse_single_operand (struct stap_parse_info *p)
       if (p->inside_paren_p)
 	tmp = skip_spaces_const (tmp);
 
-      if (isdigit (*tmp))
+      while (isdigit (*tmp))
 	{
-	  char *endp;
-
-	  number = strtol (tmp, &endp, 10);
-	  tmp = endp;
+	  /* We skip the digit here because we are only interested in
+	     knowing what kind of unary operation this is.  The digit
+	     will be handled by one of the functions that will be
+	     called below ('stap_parse_argument_conditionally' or
+	     'stap_parse_register_operand').  */
+	  ++tmp;
+	  has_digit = 1;
 	}
 
-      if (!stap_is_register_indirection_prefix (gdbarch, tmp, NULL))
-	{
-	  /* This is not a displacement.  We skip the operator, and deal
-	     with it later.  */
-	  ++p->arg;
-	  stap_parse_argument_conditionally (p);
-	  if (c == '-')
-	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
-	  else if (c == '~')
-	    write_exp_elt_opcode (&p->pstate, UNOP_COMPLEMENT);
-	}
-      else
+      if (has_digit && stap_is_register_indirection_prefix (gdbarch, tmp,
+							    NULL))
 	{
 	  /* If we are here, it means it is a displacement.  The only
 	     operations allowed here are `-' and `+'.  */
@@ -800,6 +793,17 @@ stap_parse_single_operand (struct stap_parse_info *p)
 		     "on expression `%s'."), c, p->saved_arg);
 
 	  stap_parse_register_operand (p);
+	}
+      else
+	{
+	  /* This is not a displacement.  We skip the operator, and
+	     deal with it when the recursion returns.  */
+	  ++p->arg;
+	  stap_parse_argument_conditionally (p);
+	  if (c == '-')
+	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
+	  else if (c == '~')
+	    write_exp_elt_opcode (&p->pstate, UNOP_COMPLEMENT);
 	}
     }
   else if (isdigit (*p->arg))

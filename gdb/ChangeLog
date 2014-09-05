@@ -1,3 +1,10 @@
+2014-09-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/17235
+	* stap-probe.c (stap_parse_single_operand): Delete unused variable
+	'number'.  New variable 'has_digit'.  Rewrite code to deal with
+	subexpressions on SDT probes.
+
 2014-09-04  Pedro Alves  <palves@redhat.com>
 
 	* c-exp.y (parse_number): Skip handling base-switching prefixes if
