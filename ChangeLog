@@ -1,3 +1,7 @@
+2014-09-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure: Regenerate.
+
 2014-08-27  Will Newton  <will.newton@linaro.org>
 
 	* src-release.sh: New file.
