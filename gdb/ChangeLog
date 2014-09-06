@@ -1,4 +1,5 @@
 2014-09-06  Doug Evans  <xdje42@gmail.com>
+	    Tom Tromey  <tromey@redhat.com>
 
 	PR 15276
 	* NEWS: Mention $_caller_is, $_caller_matches, $_any_caller_is,
