@@ -1,3 +1,7 @@
+2014-09-06  Doug Evans  <xdje42@gmail.com>
+
+	* infcmd.c (program_info): Fix typo.
+
 2014-09-05  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/17235
