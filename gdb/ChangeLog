@@ -1,5 +1,13 @@
 2014-09-06  Doug Evans  <xdje42@gmail.com>
 
+	PR 15276
+	* NEWS: Mention $_caller_is, $_caller_matches, $_any_caller_is,
+	$_any_caller_matches.
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Add caller_is.py.
+	* python/lib/gdb/function/caller_is.py: New file.
+
+2014-09-06  Doug Evans  <xdje42@gmail.com>
+
 	* infcmd.c (program_info): Fix typo.
 
 2014-09-05  Sergio Durigan Junior  <sergiodj@redhat.com>

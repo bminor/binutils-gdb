@@ -10098,6 +10098,70 @@ Otherwise it returns zero.
 @findex $_strlen@r{, convenience function}
 Returns the length of string @var{str}.
 
+@item $_caller_is(@var{name}@r{[}, @var{number_of_frames}@r{]})
+@findex $_caller_is@r{, convenience function}
+Returns one if the calling function's name is equal to @var{name}.
+Otherwise it returns zero.
+
+If the optional argument @var{number_of_frames} is provided,
+it is the number of frames up in the stack to look.
+The default is 1.
+
+Example:
+
+@smallexample
+(gdb) backtrace
+#0  bottom_func ()
+    at testsuite/gdb.python/py-caller-is.c:21
+#1  0x00000000004005a0 in middle_func ()
+    at testsuite/gdb.python/py-caller-is.c:27
+#2  0x00000000004005ab in top_func ()
+    at testsuite/gdb.python/py-caller-is.c:33
+#3  0x00000000004005b6 in main ()
+    at testsuite/gdb.python/py-caller-is.c:39
+(gdb) print $_caller_is ("middle_func")
+$1 = 1
+(gdb) print $_caller_is ("top_func", 2)
+$1 = 1
+@end smallexample
+
+@item $_caller_matches(@var{regexp}@r{[}, @var{number_of_frames}@r{]})
+@findex $_caller_matches@r{, convenience function}
+Returns one if the calling function's name matches the regular expression
+@var{regexp}.  Otherwise it returns zero.
+
+If the optional argument @var{number_of_frames} is provided,
+it is the number of frames up in the stack to look.
+The default is 1.
+
+@item $_any_caller_is(@var{name}@r{[}, @var{number_of_frames}@r{]})
+@findex $_any_caller_is@r{, convenience function}
+Returns one if any calling function's name is equal to @var{name}.
+Otherwise it returns zero.
+
+If the optional argument @var{number_of_frames} is provided,
+it is the number of frames up in the stack to look.
+The default is 1.
+
+This function differs from @code{$_caller_is} in that this function
+checks all stack frames from the immediate caller to the frame specified
+by @var{number_of_frames}, whereas @code{$_caller_is} only checks the
+frame specified by @var{number_of_frames}.
+
+@item $_any_caller_matches(@var{regexp}@r{[}, @var{number_of_frames}@r{]})
+@findex $_any_caller_matches@r{, convenience function}
+Returns one if any calling function's name matches the regular expression
+@var{regexp}.  Otherwise it returns zero.
+
+If the optional argument @var{number_of_frames} is provided,
+it is the number of frames up in the stack to look.
+The default is 1.
+
+This function differs from @code{$_caller_matches} in that this function
+checks all stack frames from the immediate caller to the frame specified
+by @var{number_of_frames}, whereas @code{$_caller_matches} only checks the
+frame specified by @var{number_of_frames}.
+
 @end table
 
 @value{GDBN} provides the ability to list and get help on

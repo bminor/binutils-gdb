@@ -1,3 +1,9 @@
+2014-09-06  Doug Evans  <xdje42@gmail.com>
+
+	PR 15276
+	* gdb.python/py-caller-is.c: New file.
+	* gdb.python/py-caller-is.exp: New file.
+
 2014-09-05  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/17235
