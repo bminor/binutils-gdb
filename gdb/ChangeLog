@@ -1,3 +1,9 @@
+2014-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR python/17355
+	* python/py-framefilter.c (py_print_single_arg): Handle NULL FA->VAL.
+	Fix goto out of TRY_CATCH.
+
 2014-08-30  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python/lib/gdb/command/xmethods.py (set_xm_status1): Use the

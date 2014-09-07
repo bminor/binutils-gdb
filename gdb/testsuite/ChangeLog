@@ -1,3 +1,11 @@
+2014-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR python/17355
+	* gdb.python/amd64-py-framefilter-invalidarg.S: New file.
+	* gdb.python/py-framefilter-invalidarg-gdb.py.in: New file.
+	* gdb.python/py-framefilter-invalidarg.exp: New file.
+	* gdb.python/py-framefilter-invalidarg.py: New file.
+
 2014-08-30  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/py-xmethods.py (A_getarrayind)
