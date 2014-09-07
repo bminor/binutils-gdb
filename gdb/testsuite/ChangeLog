@@ -1,3 +1,13 @@
+2014-09-07  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	PR gdb/17035
+	* gdb.base/commands.exp: Add tests to verify user-defined
+	commands with empty bodies.
+	* gdb.python/py-cmd.exp: Test that we don't show user-defined
+	python commands in `show user command`.
+	* gdb.python/scm-cmd.exp: Test that we don't show user-defined
+	scheme commands in `show user command`.
+
 2014-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR python/17355

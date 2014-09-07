@@ -1894,3 +1894,10 @@ cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
   else
     error (_("Invalid command"));
 }
+
+int
+cli_user_command_p (struct cmd_list_element *cmd)
+{
+  return (cmd->class == class_user
+	  && (cmd->func == do_cfunc || cmd->func == do_sfunc));
+}

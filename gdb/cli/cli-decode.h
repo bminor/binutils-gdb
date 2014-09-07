@@ -242,4 +242,9 @@ extern void print_doc_line (struct ui_file *, const char *);
 
 extern const char * const auto_boolean_enums[];
 
+/* Verify whether a given cmd_list_element is a user-defined command.
+   Return 1 if it is user-defined.  Return 0 otherwise.  */
+
+extern int cli_user_command_p (struct cmd_list_element *);
+
 #endif /* !defined (CLI_DECODE_H) */

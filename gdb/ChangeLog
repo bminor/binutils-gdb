@@ -1,3 +1,14 @@
+2014-09-07  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	PR gdb/17035
+	* cli/cli-cmds.c (show_user): Use cli_user_command_p to
+	decide whether we display the command on "show user".
+	* cli/cli-script.c (show_user_1): Only verify cmdlines after
+	printing command name.
+	* cli/cli-decode.h (cli_user_command_p): Declare new function.
+	* cli/cli-decode.c (cli_user_command_p): Create helper function
+	to verify whether cmd_list_element is a user-defined command.
+
 2014-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR python/17355
