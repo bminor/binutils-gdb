@@ -1,3 +1,9 @@
+2014-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR python/17355
+	* python/py-framefilter.c (py_print_single_arg): Handle NULL FA->VAL.
+	Fix goto out of TRY_CATCH.
+
 2014-09-06  Doug Evans  <xdje42@gmail.com>
 	    Tom Tromey  <tromey@redhat.com>
 
