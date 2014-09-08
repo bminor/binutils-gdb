@@ -1,3 +1,10 @@
+2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR c++/13403
+	PR c++/15154
+	* gdb.cp/non-trivial-retval.cc: New file.
+	* gdb.cp/non-trivial-retval.exp: New file.
+
 2014-10-15  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.python/py-parameter.exp: Don't match $srcdir/$subdir on
