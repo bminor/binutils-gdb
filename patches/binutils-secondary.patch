@@ -1,4 +1,4 @@
-From 2ec599e16ddc852bbedd01d9c42ffd8dccdb608b Mon Sep 17 00:00:00 2001
+From c7beb33d82923479aab9638145e23b26f4c68e2d Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 4 Nov 2013 09:35:07 -0800
 Subject: [PATCH] Add STB_SECONDARY support to gas and ld
@@ -376,7 +376,7 @@ index 40a3395..0d80fc5 100644
  				 | BSF_GNU_UNIQUE)) != 0
  		       || bfd_is_com_section (sec))
 diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index 8c77c81..f5018f2 100644
+index 27fc3fe..fdc1138 100644
 --- a/bfd/bfd-in2.h
 +++ b/bfd/bfd-in2.h
 @@ -6168,6 +6168,10 @@ typedef struct bfd_symbol
@@ -472,7 +472,7 @@ index a49a708..b09ab77 100644
  	      sym->symbol.flags |= BSF_GNU_UNIQUE;
  	      break;
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 69a87a6..275bc00 100644
+index c1e7948..984cee6 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
 @@ -885,7 +885,8 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
@@ -715,7 +715,7 @@ index 69a87a6..275bc00 100644
  	  break;
  	}
      }
-@@ -3816,6 +3849,7 @@ error_free_dyn:
+@@ -3822,6 +3855,7 @@ error_free_dyn:
        bfd_boolean common;
        unsigned int old_alignment;
        bfd *old_bfd;
@@ -723,7 +723,7 @@ index 69a87a6..275bc00 100644
  
        override = FALSE;
  
-@@ -3843,6 +3877,10 @@ error_free_dyn:
+@@ -3849,6 +3883,10 @@ error_free_dyn:
  	  flags = BSF_WEAK;
  	  break;
  
@@ -734,7 +734,7 @@ index 69a87a6..275bc00 100644
  	case STB_GNU_UNIQUE:
  	  flags = BSF_GNU_UNIQUE;
  	  break;
-@@ -4078,7 +4116,7 @@ error_free_dyn:
+@@ -4084,7 +4122,7 @@ error_free_dyn:
  			      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
  
  	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
@@ -743,7 +743,7 @@ index 69a87a6..275bc00 100644
  				      &old_alignment, &skip, &override,
  				      &type_change_ok, &size_change_ok))
  	    goto error_free_vers;
-@@ -4098,7 +4136,12 @@ error_free_dyn:
+@@ -4104,7 +4142,12 @@ error_free_dyn:
  	      && vernum > 1
  	      && definition)
  	    h->verinfo.verdef = &elf_tdata (abfd)->verdef[vernum - 1];
@@ -756,7 +756,7 @@ index 69a87a6..275bc00 100644
  
        if (! (_bfd_generic_link_add_one_symbol
  	     (info, abfd, name, flags, sec, value, NULL, FALSE, bed->collect,
-@@ -4178,10 +4221,14 @@ error_free_dyn:
+@@ -4184,10 +4227,14 @@ error_free_dyn:
  	      if (! definition)
  		{
  		  h->ref_regular = 1;
@@ -773,7 +773,7 @@ index 69a87a6..275bc00 100644
  		{
  		  h->def_regular = 1;
  		  if (h->def_dynamic)
-@@ -4210,6 +4257,13 @@ error_free_dyn:
+@@ -4216,6 +4263,13 @@ error_free_dyn:
  		{
  		  h->def_dynamic = 1;
  		  hi->def_dynamic = 1;
@@ -787,7 +787,7 @@ index 69a87a6..275bc00 100644
  		}
  
  	      /* If the indirect symbol has been forced local, don't
-@@ -4228,7 +4282,8 @@ error_free_dyn:
+@@ -4234,7 +4288,8 @@ error_free_dyn:
  	  if (definition
  	      || (!override && h->root.type == bfd_link_hash_common))
  	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
@@ -797,7 +797,7 @@ index 69a87a6..275bc00 100644
  	      goto error_free_vers;
  
  	  /* Check the alignment when a common symbol is involved. This
-@@ -5018,16 +5073,27 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
+@@ -5024,16 +5079,27 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
  		 map alone.  Instead we must read in the element's symbol
  		 table and check that to see what kind of symbol definition
  		 this is.  */
@@ -827,7 +827,7 @@ index 69a87a6..275bc00 100644
  
  	  /* We need to include this archive member.  */
  	  element = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
-@@ -8801,7 +8867,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -8807,7 +8873,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, h->type);
    else if (h->root.type == bfd_link_hash_undefweak
  	   || h->root.type == bfd_link_hash_defweak)
@@ -850,7 +850,7 @@ index 69a87a6..275bc00 100644
    else
      sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);
    sym.st_target_internal = h->target_internal;
-@@ -8932,7 +9012,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -8938,7 +9018,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
    if (sym.st_shndx == SHN_UNDEF
        && h->ref_regular
        && (ELF_ST_BIND (sym.st_info) == STB_GLOBAL
@@ -860,7 +860,7 @@ index 69a87a6..275bc00 100644
      {
        int bindtype;
        unsigned int type = ELF_ST_TYPE (sym.st_info);
-@@ -8958,10 +9039,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -8964,10 +9045,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      sym.st_size = 0;
  
    /* If a non-weak symbol with non-default visibility is not defined
@@ -891,18 +891,18 @@ index 1286cc1..b5c5fa2 100644
  	    || bfd_is_com_section (bfd_get_section (sym)));
  }
 diff --git a/bfd/linker.c b/bfd/linker.c
-index 1877e67..149ff76 100644
+index abdf5b0..9cb5cc4 100644
 --- a/bfd/linker.c
 +++ b/bfd/linker.c
 @@ -1444,6 +1444,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
-   enum link_row row;
    struct bfd_link_hash_entry *h;
+   struct bfd_link_hash_entry *inh = NULL;
    bfd_boolean cycle;
 +  unsigned int secondary;
  
    BFD_ASSERT (section != NULL);
  
-@@ -1499,15 +1500,53 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
+@@ -1508,15 +1509,53 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
  	return FALSE;
      }
  
@@ -957,7 +957,7 @@ index 1877e67..149ff76 100644
        switch (action)
  	{
  	case FAIL:
-@@ -1552,6 +1591,9 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
+@@ -1561,6 +1600,9 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
  	    h->u.def.section = section;
  	    h->u.def.value = value;
  
@@ -1403,17 +1403,17 @@ index 0000000..234330a
 +	.data
 +	.secondary secondary_object
 diff --git a/gas/testsuite/gas/elf/type.e b/gas/testsuite/gas/elf/type.e
-index fbc9aac..2968fd0 100644
+index a1159bf..d4c0548 100644
 --- a/gas/testsuite/gas/elf/type.e
 +++ b/gas/testsuite/gas/elf/type.e
 @@ -3,5 +3,7 @@
-  +.: 0+0 +1 +OBJECT +LOCAL +DEFAULT +. object
-  +.: 0+1 +1 +TLS +LOCAL +DEFAULT +. tls_object
-  +..: 0+2 +1 +NOTYPE +LOCAL +DEFAULT +. notype
-+ +.: 0+2 +1 +FUNC +SECOND +DEFAULT +. secondary_function
-  +..: 0+3 +1 +OBJECT +UNIQUE +DEFAULT +. unique_global
-+ +..: 0+4 +1 +OBJECT +SECOND +DEFAULT +. secondary_object
-  +..: 0+1 +1 +(COMMON|OBJECT) +GLOBAL +DEFAULT +COM common
+  +.+: 0+0 +1 +OBJECT +LOCAL +DEFAULT +. object
+  +.+: 0+1 +1 +TLS +LOCAL +DEFAULT +. tls_object
+  +.+: 0+2 +1 +NOTYPE +LOCAL +DEFAULT +. notype
++ +.+: 0+2 +1 +FUNC +SECOND +DEFAULT +. secondary_function
+  +.+: 0+3 +1 +OBJECT +UNIQUE +DEFAULT +. unique_global
++ +.+: 0+4 +1 +OBJECT +SECOND +DEFAULT +. secondary_object
+  +.+: 0+1 +1 +(COMMON|OBJECT) +GLOBAL +DEFAULT +COM common
 diff --git a/gas/testsuite/gas/elf/type.s b/gas/testsuite/gas/elf/type.s
 index d0a1afd..bd7df2c 100644
 --- a/gas/testsuite/gas/elf/type.s
@@ -1446,7 +1446,7 @@ index d0a1afd..bd7df2c 100644
 -	
 \ No newline at end of file
 diff --git a/include/bfdlink.h b/include/bfdlink.h
-index fc14a9f..12a5ce5 100644
+index 125683d..5565050 100644
 --- a/include/bfdlink.h
 +++ b/include/bfdlink.h
 @@ -93,6 +93,9 @@ struct bfd_link_hash_entry
@@ -1459,7 +1459,7 @@ index fc14a9f..12a5ce5 100644
    /* A union of information depending upon the type.  */
    union
      {
-@@ -352,6 +355,9 @@ struct bfd_link_info
+@@ -355,6 +358,9 @@ struct bfd_link_info
    /* TRUE if .gnu.hash section should be created.  */
    unsigned int emit_gnu_hash: 1;
  
@@ -1482,10 +1482,10 @@ index e8ae3ac..b1e66d4 100644
  #define STB_GNU_UNIQUE	10		/* Symbol is unique in namespace */
  #define STB_HIOS	12		/* OS-specific semantics */
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index 39b4ccd..d07202a 100644
+index 67c437d..d842c5d 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
-@@ -2323,6 +2323,8 @@ fragment <<EOF
+@@ -2326,6 +2326,8 @@ fragment <<EOF
  	link_info.error_textrel = FALSE;
        else if (strcmp (optarg, "textoff") == 0)
  	link_info.error_textrel = FALSE;
@@ -1494,7 +1494,7 @@ index 39b4ccd..d07202a 100644
  EOF
  fi
  
-@@ -2450,6 +2452,8 @@ fragment <<EOF
+@@ -2453,6 +2455,8 @@ fragment <<EOF
    -z relro                    Create RELRO program header\n"));
    fprintf (file, _("\
    -z stacksize=SIZE           Set size of stack segment\n"));
@@ -1504,10 +1504,10 @@ index 39b4ccd..d07202a 100644
  fi
  
 diff --git a/ld/ld.texinfo b/ld/ld.texinfo
-index 5762dc6..f411b4b 100644
+index e71be5e..30dddd4 100644
 --- a/ld/ld.texinfo
 +++ b/ld/ld.texinfo
-@@ -1093,6 +1093,10 @@ Marks the object may contain $ORIGIN.
+@@ -1121,6 +1121,10 @@ Marks the object may contain $ORIGIN.
  @item relro
  Create an ELF @code{PT_GNU_RELRO} segment header in the object.
  
@@ -1519,7 +1519,7 @@ index 5762dc6..f411b4b 100644
  Set the emulation maximum page size to @var{value}.
  
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index ea25afe..24e69dd 100644
+index 77235d5..096ce2e 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
 @@ -279,6 +279,7 @@ main (int argc, char **argv)
@@ -2192,3 +2192,6 @@ index 0000000..d86bac9
 +++ b/ld/testsuite/ld-elf/secondary7.out
 @@ -0,0 +1 @@
 +OK
+-- 
+1.9.3
+
