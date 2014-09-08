@@ -1852,7 +1852,7 @@ program_info (char *args, int from_tty)
 		       gdb_signal_to_string (tp->suspend.stop_signal));
     }
 
-  if (!from_tty)
+  if (from_tty)
     {
       printf_filtered (_("Type \"info stack\" or \"info "
 			 "registers\" for more information.\n"));

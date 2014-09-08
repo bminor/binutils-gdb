@@ -3,6 +3,16 @@
 
 *** Changes since GDB 7.8
 
+* Python Scripting
+  You can now access frame registers from Python scripts.
+
+* New Python-based convenience functions:
+
+  ** $_caller_is(name [, number_of_frames])
+  ** $_caller_matches(regexp [, number_of_frames])
+  ** $_any_caller_is(name [, number_of_frames])
+  ** $_any_caller_matches(regexp [, number_of_frames])
+
 * On resume, GDB now always passes the signal the program had stopped
   for to the thread the signal was sent to, even if the user changed
   threads before resuming.  Previously GDB would often (but not

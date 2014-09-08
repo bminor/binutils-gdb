@@ -16,11 +16,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef I386_CPUID_COMMON_H
-#define I386_CPUID_COMMON_H
+#ifndef X86_CPUID_COMMON_H
+#define X86_CPUID_COMMON_H
 
 /* Always include the header for the cpu bit defines.  */
-#include "i386-gcc-cpuid.h"
+#include "x86-gcc-cpuid.h"
 
 #if defined(__i386__) || defined(__x86_64__)
 
@@ -30,7 +30,7 @@
    unsupported cpuid level.  Pointers may be non-null.  */
 
 static __inline int
-i386_cpuid (unsigned int __level,
+x86_cpuid (unsigned int __level,
 	    unsigned int *__eax, unsigned int *__ebx,
 	    unsigned int *__ecx, unsigned int *__edx)
 {
@@ -51,7 +51,7 @@ i386_cpuid (unsigned int __level,
 #else
 
 static __inline int
-i386_cpuid (unsigned int __level,
+x86_cpuid (unsigned int __level,
 	    unsigned int *__eax, unsigned int *__ebx,
 	    unsigned int *__ecx, unsigned int *__edx)
 {
@@ -60,4 +60,4 @@ i386_cpuid (unsigned int __level,
 
 #endif /* i386 && x86_64 */
 
-#endif /* I386_CPUID_COMMON_H */
+#endif /* X86_CPUID_COMMON_H */

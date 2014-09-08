@@ -243,6 +243,28 @@ proc user_defined_command_test {} {
    gdb_test "show user mycommand" \
 	"  while \\\$arg0.*set.*    if \\\(\\\$arg0.*p/x.*    else\[^\n\].*p/x.*    end\[^\n\].*  end\[^\n\].*" \
 	   "display user command in user_defined_command_test"
+
+    # Create and test a user-defined command with an empty body.
+    gdb_test_multiple "define myemptycommand" \
+	"define myemptycommand in user_defined_command_test" {
+	    -re "End with"  {
+		pass "define myemptycommand in user_defined_command_test"
+	    }
+	}
+    gdb_test "end" \
+	"" \
+	"end definition of user-defined command with empty body"
+
+    gdb_test_no_output "myemptycommand" \
+	"execute user-defined empty command in user_defined_command_test"
+
+    gdb_test "show user" \
+	"User command \"myemptycommand.*" \
+	"display empty command in command list in user_defined_command_test"
+
+    gdb_test "show user myemptycommand" \
+	"User command \"myemptycommand.*" \
+	"display user-defined empty command in user_defined_command_test"
 }
 
 proc watchpoint_command_test {} {

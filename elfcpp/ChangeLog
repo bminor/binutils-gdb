@@ -1,3 +1,11 @@
+2014-09-02  Cary Coutant  <ccoutant@google.com>
+
+	* elfcpp_file.h (Elf_file::shnum): New const function.
+	(Elf_file::shstrndx): New const function.
+	(Elf_file::large_shndx_offset): New const function.
+	(Elf_file::section_name): Add const attribute.
+	(Elf_file::section_header_offset): Likewise.
+
 2014-08-08  Han Shen  <shenhan@google.com>
 
 	* aarch64.h (withdrawn): Replaced with R_AARCH64_withdrawn.

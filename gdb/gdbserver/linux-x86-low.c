@@ -23,8 +23,8 @@
 #include <inttypes.h>
 #include "linux-low.h"
 #include "i387-fp.h"
-#include "i386-low.h"
-#include "i386-xstate.h"
+#include "x86-low.h"
+#include "x86-xstate.h"
 
 #include "gdb_proc_service.h"
 /* Don't include elf/common.h if linux/elf.h got included by
@@ -148,7 +148,7 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 
 struct arch_process_info
 {
-  struct i386_debug_reg_state debug_reg_state;
+  struct x86_debug_reg_state debug_reg_state;
 };
 
 /* Per-thread arch-specific data we want to keep.  */
@@ -587,7 +587,7 @@ update_debug_registers_callback (struct inferior_list_entry *entry,
 /* Update the inferior's debug register REGNUM from STATE.  */
 
 static void
-i386_dr_low_set_addr (int regnum, CORE_ADDR addr)
+x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
   /* Only update the threads of this process.  */
   int pid = pid_of (current_inferior);
@@ -600,7 +600,7 @@ i386_dr_low_set_addr (int regnum, CORE_ADDR addr)
 /* Return the inferior's debug register REGNUM.  */
 
 static CORE_ADDR
-i386_dr_low_get_addr (int regnum)
+x86_dr_low_get_addr (int regnum)
 {
   ptid_t ptid = ptid_of (current_inferior);
 
@@ -612,7 +612,7 @@ i386_dr_low_get_addr (int regnum)
 /* Update the inferior's DR7 debug control register from STATE.  */
 
 static void
-i386_dr_low_set_control (unsigned long control)
+x86_dr_low_set_control (unsigned long control)
 {
   /* Only update the threads of this process.  */
   int pid = pid_of (current_inferior);
@@ -623,7 +623,7 @@ i386_dr_low_set_control (unsigned long control)
 /* Return the inferior's DR7 debug control register.  */
 
 static unsigned long
-i386_dr_low_get_control (void)
+x86_dr_low_get_control (void)
 {
   ptid_t ptid = ptid_of (current_inferior);
 
@@ -634,7 +634,7 @@ i386_dr_low_get_control (void)
    and record it in STATE.  */
 
 static unsigned long
-i386_dr_low_get_status (void)
+x86_dr_low_get_status (void)
 {
   ptid_t ptid = ptid_of (current_inferior);
 
@@ -642,13 +642,13 @@ i386_dr_low_get_status (void)
 }
 
 /* Low-level function vector.  */
-struct i386_dr_low_type i386_dr_low =
+struct x86_dr_low_type x86_dr_low =
   {
-    i386_dr_low_set_control,
-    i386_dr_low_set_addr,
-    i386_dr_low_get_addr,
-    i386_dr_low_get_status,
-    i386_dr_low_get_control,
+    x86_dr_low_set_control,
+    x86_dr_low_set_addr,
+    x86_dr_low_get_addr,
+    x86_dr_low_get_status,
+    x86_dr_low_get_control,
     sizeof (void *),
   };
 
@@ -686,10 +686,10 @@ x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
       {
 	enum target_hw_bp_type hw_type
 	  = raw_bkpt_type_to_target_hw_bp_type (type);
-	struct i386_debug_reg_state *state
+	struct x86_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
-	return i386_dr_insert_watchpoint (state, hw_type, addr, size);
+	return x86_dr_insert_watchpoint (state, hw_type, addr, size);
       }
 
     default:
@@ -715,10 +715,10 @@ x86_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
       {
 	enum target_hw_bp_type hw_type
 	  = raw_bkpt_type_to_target_hw_bp_type (type);
-	struct i386_debug_reg_state *state
+	struct x86_debug_reg_state *state
 	  = &proc->private->arch_private->debug_reg_state;
 
-	return i386_dr_remove_watchpoint (state, hw_type, addr, size);
+	return x86_dr_remove_watchpoint (state, hw_type, addr, size);
       }
     default:
       /* Unsupported.  */
@@ -730,7 +730,7 @@ static int
 x86_stopped_by_watchpoint (void)
 {
   struct process_info *proc = current_process ();
-  return i386_dr_stopped_by_watchpoint (&proc->private->arch_private->debug_reg_state);
+  return x86_dr_stopped_by_watchpoint (&proc->private->arch_private->debug_reg_state);
 }
 
 static CORE_ADDR
@@ -738,8 +738,8 @@ x86_stopped_data_address (void)
 {
   struct process_info *proc = current_process ();
   CORE_ADDR addr;
-  if (i386_dr_stopped_data_address (&proc->private->arch_private->debug_reg_state,
-				    &addr))
+  if (x86_dr_stopped_data_address (&proc->private->arch_private->debug_reg_state,
+				   &addr))
     return addr;
   return 0;
 }
@@ -749,9 +749,9 @@ x86_stopped_data_address (void)
 static struct arch_process_info *
 x86_linux_new_process (void)
 {
-  struct arch_process_info *info = xcalloc (1, sizeof (*info));
+  struct arch_process_info *info = XCNEW (struct arch_process_info);
 
-  i386_low_init_dregs (&info->debug_reg_state);
+  x86_low_init_dregs (&info->debug_reg_state);
 
   return info;
 }
@@ -761,7 +761,7 @@ x86_linux_new_process (void)
 static struct arch_lwp_info *
 x86_linux_new_thread (void)
 {
-  struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
+  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
 
   info->debug_registers_changed = 1;
 
@@ -782,19 +782,19 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       int i;
       int pid = ptid_get_pid (ptid);
       struct process_info *proc = find_process_pid (pid);
-      struct i386_debug_reg_state *state
+      struct x86_debug_reg_state *state
 	= &proc->private->arch_private->debug_reg_state;
 
       x86_linux_dr_set (ptid, DR_CONTROL, 0);
 
-      for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+      ALL_DEBUG_ADDRESS_REGISTERS (i)
 	if (state->dr_ref_count[i] > 0)
 	  {
 	    x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
 
 	    /* If we're setting a watchpoint, any change the inferior
 	       had done itself to the debug registers needs to be
-	       discarded, otherwise, i386_dr_stopped_data_address can
+	       discarded, otherwise, x86_dr_stopped_data_address can
 	       get confused.  */
 	    clear_status = 1;
 	  }
@@ -1334,7 +1334,7 @@ x86_linux_read_description (void)
 
   if (!use_xml)
     {
-      x86_xcr0 = I386_XSTATE_SSE_MASK;
+      x86_xcr0 = X86_XSTATE_SSE_MASK;
 
       /* Don't use XML.  */
 #ifdef __x86_64__
@@ -1347,7 +1347,7 @@ x86_linux_read_description (void)
 
   if (have_ptrace_getregset == -1)
     {
-      uint64_t xstateregs[(I386_XSTATE_SSE_SIZE / sizeof (uint64_t))];
+      uint64_t xstateregs[(X86_XSTATE_SSE_SIZE / sizeof (uint64_t))];
       struct iovec iov;
 
       iov.iov_base = xstateregs;
@@ -1369,7 +1369,7 @@ x86_linux_read_description (void)
 	  for (regset = x86_regsets;
 	       regset->fill_function != NULL; regset++)
 	    if (regset->get_request == PTRACE_GETREGSET)
-	      regset->size = I386_XSTATE_SIZE (xcr0);
+	      regset->size = X86_XSTATE_SIZE (xcr0);
 	    else if (regset->type != GENERAL_REGS)
 	      regset->size = 0;
 	}
@@ -1377,7 +1377,7 @@ x86_linux_read_description (void)
 
   /* Check the native XCR0 only if PTRACE_GETREGSET is available.  */
   xcr0_features = (have_ptrace_getregset
-         && (xcr0 & I386_XSTATE_ALL_MASK));
+         && (xcr0 & X86_XSTATE_ALL_MASK));
 
   if (xcr0_features)
     x86_xcr0 = xcr0;
@@ -1389,15 +1389,15 @@ x86_linux_read_description (void)
 	{
 	  if (xcr0_features)
 	    {
-	      switch (xcr0 & I386_XSTATE_ALL_MASK)
+	      switch (xcr0 & X86_XSTATE_ALL_MASK)
 	        {
-		case I386_XSTATE_AVX512_MASK:
+		case X86_XSTATE_AVX512_MASK:
 		  return tdesc_amd64_avx512_linux;
 
-		case I386_XSTATE_MPX_MASK:
+		case X86_XSTATE_MPX_MASK:
 		  return tdesc_amd64_mpx_linux;
 
-		case I386_XSTATE_AVX_MASK:
+		case X86_XSTATE_AVX_MASK:
 		  return tdesc_amd64_avx_linux;
 
 		default:
@@ -1411,13 +1411,13 @@ x86_linux_read_description (void)
 	{
 	  if (xcr0_features)
 	    {
-	      switch (xcr0 & I386_XSTATE_ALL_MASK)
+	      switch (xcr0 & X86_XSTATE_ALL_MASK)
 	        {
-		case I386_XSTATE_AVX512_MASK:
+		case X86_XSTATE_AVX512_MASK:
 		  return tdesc_x32_avx512_linux;
 
-		case I386_XSTATE_MPX_MASK: /* No MPX on x32.  */
-		case I386_XSTATE_AVX_MASK:
+		case X86_XSTATE_MPX_MASK: /* No MPX on x32.  */
+		case X86_XSTATE_AVX_MASK:
 		  return tdesc_x32_avx_linux;
 
 		default:
@@ -1433,15 +1433,15 @@ x86_linux_read_description (void)
     {
       if (xcr0_features)
 	{
-	  switch (xcr0 & I386_XSTATE_ALL_MASK)
+	  switch (xcr0 & X86_XSTATE_ALL_MASK)
 	    {
-	    case (I386_XSTATE_AVX512_MASK):
+	    case (X86_XSTATE_AVX512_MASK):
 	      return tdesc_i386_avx512_linux;
 
-	    case (I386_XSTATE_MPX_MASK):
+	    case (X86_XSTATE_MPX_MASK):
 	      return tdesc_i386_mpx_linux;
 
-	    case (I386_XSTATE_AVX_MASK):
+	    case (X86_XSTATE_AVX_MASK):
 	      return tdesc_i386_avx_linux;
 
 	    default:

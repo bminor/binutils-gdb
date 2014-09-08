@@ -7165,7 +7165,7 @@ ppc_elf_relax_section (bfd *abfd,
       bfd_vma pagesize = (bfd_vma) 1 << htab->params->pagesize_p2;
 
       addr = isec->output_section->vma + isec->output_offset;
-      end_addr = addr + trampoff - 1;
+      end_addr = addr + trampoff;
       addr &= -pagesize;
       crossings = ((end_addr & -pagesize) - addr) >> htab->params->pagesize_p2;
       if (crossings != 0)

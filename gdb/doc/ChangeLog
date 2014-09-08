@@ -1,3 +1,19 @@
+2014-09-06  Doug Evans  <xdje42@gmail.com>
+
+	PR 15276
+	* gdb.texinfo (Convenience Funs): Document $_caller_is,
+	$_caller_matches, $_any_caller_is, $_any_caller_matches.
+
+2014-09-03  Justin Lebar <jlebar@google.com>
+
+	* python.texi (Types In Python): Type.template_argument(n) returns a
+	gdb.Value or a gdb.Type and throws an exception if n is out of
+	range.
+
+2014-09-03  Sasha Smundak  <asmundak@google.com>
+
+	* python.texi (Frames in Python): Add read_register description.
+
 2014-08-04  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Debugging Output): Update for change to "set debug

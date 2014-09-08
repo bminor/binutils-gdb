@@ -244,6 +244,9 @@ extern void fputstrn_filtered (const char *str, int n, int quotr,
 extern void fputstrn_unfiltered (const char *str, int n, int quotr,
 				 struct ui_file * stream);
 
+/* Return nonzero if filtered printing is initialized.  */
+extern int filtered_printing_initialized (void);
+
 /* Display the host ADDR on STREAM formatted as ``0x%x''.  */
 extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
 
@@ -282,13 +285,6 @@ extern void (*deprecated_error_begin_hook) (void);
 extern char *warning_pre_print;
 
 extern void error_stream (struct ui_file *) ATTRIBUTE_NORETURN;
-
-extern void internal_vwarning (const char *file, int line,
-			       const char *, va_list ap)
-     ATTRIBUTE_PRINTF (3, 0);
-
-extern void internal_warning (const char *file, int line,
-			      const char *, ...) ATTRIBUTE_PRINTF (3, 4);
 
 extern void demangler_vwarning (const char *file, int line,
 			       const char *, va_list ap)

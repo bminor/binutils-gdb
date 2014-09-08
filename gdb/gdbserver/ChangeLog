@@ -1,3 +1,68 @@
+2014-09-08  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* linux-ppc-low.c (ppc_collect_ptrace_register): Adjust routine to take
+	endianness into account.
+	(ppc_supply_ptrace_register): Likewise.
+
+2014-09-03  James Hogan  <james.hogan@imgtec.com>
+
+	* linux-mips-low.c (mips_read_description): Reset errno to 0 prior
+	to reading DSP_CONTROL with PTRACE_PEEKUSER ptrace call.
+
+2014-09-03  Gary Benson  <gbenson@redhat.com>
+
+	* linux-x86-low.c (x86_linux_prepare_to_resume): Use
+	ALL_DEBUG_ADDRESS_REGISTERS.
+
+2014-09-02  Gary Benson  <gbenson@redhat.com>
+
+	* i386-low.h: Renamed as...
+	* x86-low.h: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* i386-low.c: Renamed as...
+	* x86-low.c: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+
+2014-09-02  Gary Benson  <gbenson@redhat.com>
+
+	* linux-x86-low.c (x86_linux_new_process): Use XCNEW.
+	(x86_linux_new_thread): Likewise.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* server.h (setjmp.h): Do not include.
+	(toplevel): Do not declare.
+	(common-exceptions.h): Include.
+	(cleanups.h): Likewise.
+	* server.c (toplevel): Do not define.
+	(exit_code): New static global.
+	(detach_or_kill_for_exit_cleanup): New function.
+	(main): New function.  Original main renamed to...
+	(captured_main): New function.
+	* utils.c (verror) [!IN_PROCESS_AGENT]: Use throw_verror.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* Makefile.in (SFILES): Add common/common-exceptions.c.
+	(OBS): Add common-exceptions.o.
+	(common-exceptions.o): New rule.
+	* utils.c (prepare_to_throw_exception): New function.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* config.in: Regenerate.
+	* configure: Likewise.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* Makefile.in (SFILES): Add common/cleanups.c.
+	(OBS): cleanups.o.
+	(cleanups.o): New rule.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* utils.c (internal_vwarning): New function.
+
 2014-08-28  Gary Benson  <gbenson@redhat.com>
 
 	* utils.h (fatal): Remove declaration.

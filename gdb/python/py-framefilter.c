@@ -365,9 +365,12 @@ py_print_single_arg (struct ui_out *out,
 {
   struct value *val;
   volatile struct gdb_exception except;
+  enum ext_lang_bt_status retval = EXT_LANG_BT_OK;
 
   if (fa != NULL)
     {
+      if (fa->val == NULL && fa->error == NULL)
+	return EXT_LANG_BT_OK;
       language = language_def (SYMBOL_LANGUAGE (fa->sym));
       val = fa->val;
     }
@@ -433,16 +436,18 @@ py_print_single_arg (struct ui_out *out,
       /* For MI print the type, but only for simple values.  This seems
 	 weird, but this is how MI choose to format the various output
 	 types.  */
-      if (args_type == MI_PRINT_SIMPLE_VALUES)
+      if (args_type == MI_PRINT_SIMPLE_VALUES && val != NULL)
 	{
 	  if (py_print_type (out, val) == EXT_LANG_BT_ERROR)
 	    {
+	      retval = EXT_LANG_BT_ERROR;
 	      do_cleanups (cleanups);
-	      goto error;
+	      continue;
 	    }
 	}
 
-      annotate_arg_value (value_type (val));
+      if (val != NULL)
+	annotate_arg_value (value_type (val));
 
       /* If the output is to the CLI, and the user option "set print
 	 frame-arguments" is set to none, just output "...".  */
@@ -454,27 +459,25 @@ py_print_single_arg (struct ui_out *out,
 	     for the case of MI_PRINT_NO_VALUES.  */
 	  if (args_type != NO_VALUES)
 	    {
-	      if (py_print_value (out, val, opts, 0, args_type, language)
-		  == EXT_LANG_BT_ERROR)
+	      if (val == NULL)
 		{
-		  do_cleanups (cleanups);
-		  goto error;
+		  gdb_assert (fa != NULL && fa->error != NULL);
+		  ui_out_field_fmt (out, "value",
+				    _("<error reading variable: %s>"),
+				    fa->error);
 		}
+	      else if (py_print_value (out, val, opts, 0, args_type, language)
+		       == EXT_LANG_BT_ERROR)
+		retval = EXT_LANG_BT_ERROR;
 	    }
 	}
 
       do_cleanups (cleanups);
     }
   if (except.reason < 0)
-    {
-      gdbpy_convert_exception (except);
-      goto error;
-    }
+    gdbpy_convert_exception (except);
 
-  return EXT_LANG_BT_OK;
-
- error:
-  return EXT_LANG_BT_ERROR;
+  return retval;
 }
 
 /* Helper function to loop over frame arguments provided by the

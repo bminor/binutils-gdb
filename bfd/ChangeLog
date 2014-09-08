@@ -1,3 +1,22 @@
+2014-08-30  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relax_section): Fix off by one error.
+
+2014-08-29  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Report a different
+	error for calls via a toc adjusting stub without a nop.
+
+2014-08-29  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (alpha_vma_object_p): Don't return file_truncated
+	error.  Remove redundant bfd_set_error.
+
+2014-08-29  Alan Modra  <amodra@gmail.com>
+
+	* srec.c (srec_scan): Revert last change.  Report an error for
+	S-records with less than the miniumum byte count.
+
 2014-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* srec.c (srec_scan): Return error for 0 size.

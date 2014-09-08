@@ -161,6 +161,15 @@ set_cmd_completer (struct cmd_list_element *cmd, completer_ftype *completer)
   cmd->completer = completer; /* Ok.  */
 }
 
+/* See definition in commands.h.  */
+
+void
+set_cmd_completer_handle_brkchars (struct cmd_list_element *cmd,
+			       completer_ftype_void *completer_handle_brkchars)
+{
+  cmd->completer_handle_brkchars = completer_handle_brkchars;
+}
+
 /* Add element named NAME.
    Space for NAME and DOC must be allocated by the caller.
    CLASS is the top level category into which commands are broken down
@@ -236,6 +245,7 @@ add_cmd (const char *name, enum command_class class, cmd_cfunc_ftype *fun,
   c->prefix = NULL;
   c->abbrev_flag = 0;
   set_cmd_completer (c, make_symbol_completion_list_fn);
+  c->completer_handle_brkchars = NULL;
   c->destroyer = NULL;
   c->type = not_set_cmd;
   c->var = NULL;
@@ -1883,4 +1893,11 @@ cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
     (*cmd->func) (cmd, args, from_tty);
   else
     error (_("Invalid command"));
+}
+
+int
+cli_user_command_p (struct cmd_list_element *cmd)
+{
+  return (cmd->class == class_user
+	  && (cmd->func == do_cfunc || cmd->func == do_sfunc));
 }

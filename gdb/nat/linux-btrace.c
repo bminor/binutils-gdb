@@ -29,7 +29,7 @@
 #include "regcache.h"
 #include "gdbthread.h"
 #include "gdb_wait.h"
-#include "i386-cpuid.h"
+#include "x86-cpuid.h"
 
 #ifdef HAVE_SYS_SYSCALL_H
 #include <sys/syscall.h>
@@ -348,7 +348,7 @@ intel_supports_btrace (void)
 {
   unsigned int cpuid, model, family;
 
-  if (!i386_cpuid (1, &cpuid, NULL, NULL, NULL))
+  if (!x86_cpuid (1, &cpuid, NULL, NULL, NULL))
     return 0;
 
   family = (cpuid >> 8) & 0xf;
@@ -389,7 +389,7 @@ cpu_supports_btrace (void)
 {
   unsigned int ebx, ecx, edx;
 
-  if (!i386_cpuid (0, NULL, &ebx, &ecx, &edx))
+  if (!x86_cpuid (0, NULL, &ebx, &ecx, &edx))
     return 0;
 
   if (ebx == signature_INTEL_ebx && ecx == signature_INTEL_ecx

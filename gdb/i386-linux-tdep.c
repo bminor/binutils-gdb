@@ -37,7 +37,7 @@
 #include "xml-syscall.h"
 
 #include "i387-tdep.h"
-#include "i386-xstate.h"
+#include "x86-xstate.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_I386 "syscalls/i386-linux.xml"
@@ -70,7 +70,7 @@ static struct core_regset_section i386_linux_sse_regset_sections[] =
 static struct core_regset_section i386_linux_avx_regset_sections[] =
 {
   { ".reg", 68, "general-purpose" },
-  { ".reg-xstate", I386_XSTATE_MAX_SIZE, "XSAVE extended state" },
+  { ".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state" },
   { NULL, 0 }
 };
 
@@ -613,8 +613,8 @@ i386_linux_core_read_xcr0 (bfd *abfd)
       size_t size = bfd_section_size (abfd, xstate);
 
       /* Check extended state size.  */
-      if (size < I386_XSTATE_AVX_SIZE)
-	xcr0 = I386_XSTATE_SSE_MASK;
+      if (size < X86_XSTATE_AVX_SIZE)
+	xcr0 = X86_XSTATE_SSE_MASK;
       else
 	{
 	  char contents[8];
@@ -647,18 +647,18 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
   /* Linux/i386.  */
   uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
 
-  switch ((xcr0 & I386_XSTATE_ALL_MASK))
+  switch ((xcr0 & X86_XSTATE_ALL_MASK))
     {
-    case I386_XSTATE_MPX_AVX512_MASK:
-    case I386_XSTATE_AVX512_MASK:
+    case X86_XSTATE_MPX_AVX512_MASK:
+    case X86_XSTATE_AVX512_MASK:
       return tdesc_i386_avx512_linux;
-    case I386_XSTATE_MPX_MASK:
+    case X86_XSTATE_MPX_MASK:
       return tdesc_i386_mpx_linux;
-    case I386_XSTATE_AVX_MASK:
+    case X86_XSTATE_AVX_MASK:
       return tdesc_i386_avx_linux;
-    case I386_XSTATE_SSE_MASK:
+    case X86_XSTATE_SSE_MASK:
       return tdesc_i386_linux;
-    case I386_XSTATE_X87_MASK:
+    case X86_XSTATE_X87_MASK:
       return tdesc_i386_mmx_linux;
     default:
       break;

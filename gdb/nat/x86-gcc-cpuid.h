@@ -1,6 +1,6 @@
 /*
  * Helper cpuid.h file copied from gcc-4.8.0.  Code in gdb should not
- * include this directly, but pull in i386-cpuid.h and use that func.
+ * include this directly, but pull in x86-cpuid.h and use that func.
  */
 /*
  * Copyright (C) 2007-2014 Free Software Foundation, Inc.

@@ -50,8 +50,8 @@ ARD(LDST128_ABS_LO12_NC          , STATIC ,  AARCH64    ,   Y,  -1,    0,RL_CHEC
 ARD(ADD_ABS_LO12_NC              , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,    0,11 , Symbol::ABSOLUTE_REF , ADD )
 ARD(ADR_GOT_PAGE                 , STATIC ,  AARCH64    ,   Y,  -1,   32,32               ,   12,32 , Symbol::RELATIVE_REF , ADRP )
 ARD(LD64_GOT_LO12_NC             , STATIC ,  AARCH64    ,   Y,  -1,    0,RL_CHECK_ALIGN8  ,    3,11 , Symbol::ABSOLUTE_REF , LDST )
-ARD(TSTBR14                      , STATIC ,  CFLOW      ,   N,  -1,   15,15               ,    2,15 , Symbol::ABSOLUTE_REF , TBZNZ )
-ARD(CONDBR19                     , STATIC ,  CFLOW      ,   N,  -1,   20,20               ,    2,20 , Symbol::ABSOLUTE_REF , CONDB )
+ARD(TSTBR14                      , STATIC ,  CFLOW      ,   N,  -1,   15,15               ,    2,15 , (Symbol::FUNCTION_CALL|Symbol::ABSOLUTE_REF) , TBZNZ )
+ARD(CONDBR19                     , STATIC ,  CFLOW      ,   N,  -1,   20,20               ,    2,20 , (Symbol::FUNCTION_CALL|Symbol::ABSOLUTE_REF) , CONDB )
 ARD(CALL26                       , STATIC ,  CFLOW      ,   Y,  -1,   27,27               ,    2,27 , (Symbol::FUNCTION_CALL|Symbol::RELATIVE_REF) , CALL )
 ARD(JUMP26                       , STATIC ,  CFLOW      ,   Y,  -1,   27,27               ,    2,27 , (Symbol::FUNCTION_CALL|Symbol::RELATIVE_REF) , B )
 // Above is from Table 4-10, Relocations for control-flow instructions,
@@ -60,9 +60,14 @@ ARD(JUMP26                       , STATIC ,  CFLOW      ,   Y,  -1,   27,27     
 ARD(TLSIE_MOVW_GOTTPREL_G1       , STATIC ,  AARCH64    ,   N,  -1,    0,0                ,   16,31 , Symbol::ABSOLUTE_REF , MOVW )
 ARD(TLSIE_MOVW_GOTTPREL_G0_NC    , STATIC ,  AARCH64    ,   N,  -1,    0,0                ,    0,15 , Symbol::ABSOLUTE_REF , MOVW )
 ARD(TLSIE_ADR_GOTTPREL_PAGE21    , STATIC ,  AARCH64    ,   Y,  -1,   32,32               ,   12,32 , Symbol::ABSOLUTE_REF , ADRP )
-ARD(TLSIE_LD64_GOTTPREL_LO12_NC  , STATIC ,  AARCH64    ,   N,  -1,   32,32               ,   12,32 , Symbol::ABSOLUTE_REF , LDST )
+ARD(TLSIE_LD64_GOTTPREL_LO12_NC  , STATIC ,  AARCH64    ,   Y,  -1,    0,RL_CHECK_ALIGN8  ,    3,11 , Symbol::ABSOLUTE_REF , LDST )
 ARD(TLSIE_LD_GOTTPREL_PREL19     , STATIC ,  AARCH64    ,   N,  -1,   20,20               ,    2,20 , Symbol::ABSOLUTE_REF , LD )
 // Above is from Table 4-17, Initial Exec TLS relocations, 539-543.
+
+ARD(TLSLE_ADD_TPREL_HI12         , STATIC ,  AARCH64   ,    Y,  -1,    0,24	          ,   12,23 , Symbol::ABSOLUTE_REF , ADD )
+ARD(TLSLE_ADD_TPREL_LO12         , STATIC ,  AARCH64   ,    Y,  -1,    0,12	          ,    0,11 , Symbol::ABSOLUTE_REF , ADD )
+ARD(TLSLE_ADD_TPREL_LO12_NC      , STATIC ,  AARCH64   ,    Y,  -1,    0,0	          ,    0,11 , Symbol::ABSOLUTE_REF , ADD )
+// Above is from Table 4-18, Local Exec TLS relocations, 544-571.
 
 // Note -
 // A - Checking X, (L,U), if L == 0 && U == 0, no check. Otherwise, L!=0,

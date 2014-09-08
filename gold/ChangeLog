@@ -1,3 +1,76 @@
+2014-09-03  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
+
+	* mips.cc (Target_mips_nacl): New class.
+	(Target_selector_mips_nacl): New class.
+	(target_selector_mips32): Rename from target_selector_mips32be and use
+	Target_selector_mips_nacl instead of Target_selector_mips.
+	(target_selector_mips32el): Rename from target_selector_mips32 and use
+	Target_selector_mips_nacl instead of Target_selector_mips.
+	(target_selector_mips64): Rename from target_selector_mips64be and use
+	Target_selector_mips_nacl instead of Target_selector_mips.
+	(target_selector_mips64el): Rename from target_selector_mips64 and use
+	Target_selector_mips_nacl instead of Target_selector_mips.
+	(Target_mips::mips_info): Add const attribute.
+
+2014-09-02  Cary Coutant  <ccoutant@google.com>
+
+	* dwp.cc (Sized_relobj_dwo::do_section_name): Add const attribute.
+	* dynobj.h (Sized_dynobj::do_section_name): Likewise.
+	* incremental.cc (Sized_relobj_incr::do_section_name): Likewise.
+	(Sized_incr_dynobj::do_section_name): Likewise.
+	* incremental.h (Sized_relobj_incr::do_section_name): Likewise.
+	(Sized_incr_dynobj::do_section_name): Likewise.
+	* object.h (Object::section_name): Likewise.
+	(Object::do_section_name): Likewise.
+	(Sized_relobj_file::do_section_name): Likewise.
+	* plugin.cc (Sized_pluginobj::do_section_name): Likewise.
+	* plugin.h (Sized_pluginobj::do_section_name): Likewise.
+
+2014-09-02  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17005
+	* ehframe.cc (Fde::write): Add output_offset parameter.
+	(Cie::write): Likewise.
+	(Eh_frame::set_final_data_size): Account for offset within output
+	section.
+	(Eh_frame::do_sized_write): Likewise.
+	* ehframe.h (Fde::write): Add output_offset parameter.
+	(Cie::write): Likewise.
+	* output.cc (Output_section::Input_section_sort_entry): Remove
+	section_has_name_; add output_section_name parameter. Use
+	output section name for non-input sections.
+	(Output_section::Input_section_sort_entry::section_has_name): Remove.
+	(Output_section::Input_section_sort_entry::section_has_name_): Remove.
+	(Output_section::Input_section_sort_compare): Remove logic for
+	sections without names.
+	(Output_section::Input_section_sort_init_fini_compare): Likewise.
+	(Output_section::Input_section_sort_section_prefix_special_ordering_compare):
+	Likewise.
+	(Output_section::Input_section_sort_section_name_compare): Likewise.
+
+2014-08-29 Han Shen <shenhan@google.com>
+	   Jing Yu <jingyu@google.com>
+
+	* aarch64-reloc-property.cc
+	(AArch64_reloc_property_table::reloc_name_in_error_message): Fix bug in
+	reference reloc property in the table.
+	* aarch64-reloc.def: Add TLSLE reloc types and fix some errors in
+	3 other entries.
+	* aarch64.cc: (Output_data_got_aarch64::add_static_reloc):
+	2 new overloaded methods.
+	(Output_data_got_aarch64::do_write): Add code to write out
+	static relocs.
+	(class Output_data_got_aarch64::Static_reloc): New class to wrap
+	static relocs.
+	(Output_data_got_aarch64::static_relocs): New vector to
+	hold static relocs.
+	(Target_aarch64::TCB_SIZE): New const static memeber.
+	(Target_aarch64::tcb_size): New method.
+	(Target_aarch64::Relocate::relocate): Add code handling new reloc types.
+	(Target_aarch64::Relocate::relocate_tls): New method.
+	(Target_aarch64::Scan::local): Add code handling new reloc types.
+	(Target_aarch64::Scan::global): Add code handling new reloc types.
+
 2014-08-13  Sriraman Tallam  <tmsriram@google.com>
 
 	* options.h (-no-pie): Add option.

@@ -2787,6 +2787,38 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
   return sal.symtab != 0;
 }
 
+/* Given a function symbol SYM, find the symtab and line for the start
+   of the function.
+   If the argument FUNFIRSTLINE is nonzero, we want the first line
+   of real code inside the function.  */
+
+struct symtab_and_line
+find_function_start_sal (struct symbol *sym, int funfirstline)
+{
+  struct symtab_and_line sal;
+
+  fixup_symbol_section (sym, NULL);
+  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+			   SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym), 0);
+
+  /* We always should have a line for the function start address.
+     If we don't, something is odd.  Create a plain SAL refering
+     just the PC and hope that skip_prologue_sal (if requested)
+     can find a line number for after the prologue.  */
+  if (sal.pc < BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))
+    {
+      init_sal (&sal);
+      sal.pspace = current_program_space;
+      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      sal.section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
+    }
+
+  if (funfirstline)
+    skip_prologue_sal (&sal);
+
+  return sal;
+}
+
 /* Given a function start address FUNC_ADDR and SYMTAB, find the first
    address for that function that has an entry in SYMTAB's line info
    table.  If such an entry cannot be found, return FUNC_ADDR
@@ -2825,38 +2857,6 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
     }
 
   return func_addr;
-}
-
-/* Given a function symbol SYM, find the symtab and line for the start
-   of the function.
-   If the argument FUNFIRSTLINE is nonzero, we want the first line
-   of real code inside the function.  */
-
-struct symtab_and_line
-find_function_start_sal (struct symbol *sym, int funfirstline)
-{
-  struct symtab_and_line sal;
-
-  fixup_symbol_section (sym, NULL);
-  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
-			   SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym), 0);
-
-  /* We always should have a line for the function start address.
-     If we don't, something is odd.  Create a plain SAL refering
-     just the PC and hope that skip_prologue_sal (if requested)
-     can find a line number for after the prologue.  */
-  if (sal.pc < BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))
-    {
-      init_sal (&sal);
-      sal.pspace = current_program_space;
-      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      sal.section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
-    }
-
-  if (funfirstline)
-    skip_prologue_sal (&sal);
-
-  return sal;
 }
 
 /* Adjust SAL to the first instruction past the function prologue.
@@ -3034,6 +3034,193 @@ skip_prologue_sal (struct symtab_and_line *sal)
     }
 }
 
+/* Determine if PC is in the prologue of a function.  The prologue is the area
+   between the first instruction of a function, and the first executable line.
+   Returns 1 if PC *might* be in prologue, 0 if definately *not* in prologue.
+
+   If non-zero, func_start is where we think the prologue starts, possibly
+   by previous examination of symbol table information.  */
+
+int
+in_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR func_start)
+{
+  struct symtab_and_line sal;
+  CORE_ADDR func_addr, func_end;
+
+  /* We have several sources of information we can consult to figure
+     this out.
+     - Compilers usually emit line number info that marks the prologue
+       as its own "source line".  So the ending address of that "line"
+       is the end of the prologue.  If available, this is the most
+       reliable method.
+     - The minimal symbols and partial symbols, which can usually tell
+       us the starting and ending addresses of a function.
+     - If we know the function's start address, we can call the
+       architecture-defined gdbarch_skip_prologue function to analyze the
+       instruction stream and guess where the prologue ends.
+     - Our `func_start' argument; if non-zero, this is the caller's
+       best guess as to the function's entry point.  At the time of
+       this writing, handle_inferior_event doesn't get this right, so
+       it should be our last resort.  */
+
+  /* Consult the partial symbol table, to find which function
+     the PC is in.  */
+  if (! find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      CORE_ADDR prologue_end;
+
+      /* We don't even have minsym information, so fall back to using
+         func_start, if given.  */
+      if (! func_start)
+	return 1;		/* We *might* be in a prologue.  */
+
+      prologue_end = gdbarch_skip_prologue (gdbarch, func_start);
+
+      return func_start <= pc && pc < prologue_end;
+    }
+
+  /* If we have line number information for the function, that's
+     usually pretty reliable.  */
+  sal = find_pc_line (func_addr, 0);
+
+  /* Now sal describes the source line at the function's entry point,
+     which (by convention) is the prologue.  The end of that "line",
+     sal.end, is the end of the prologue.
+
+     Note that, for functions whose source code is all on a single
+     line, the line number information doesn't always end up this way.
+     So we must verify that our purported end-of-prologue address is
+     *within* the function, not at its start or end.  */
+  if (sal.line == 0
+      || sal.end <= func_addr
+      || func_end <= sal.end)
+    {
+      /* We don't have any good line number info, so use the minsym
+	 information, together with the architecture-specific prologue
+	 scanning code.  */
+      CORE_ADDR prologue_end = gdbarch_skip_prologue (gdbarch, func_addr);
+
+      return func_addr <= pc && pc < prologue_end;
+    }
+
+  /* We have line number info, and it looks good.  */
+  return func_addr <= pc && pc < sal.end;
+}
+
+/* Given PC at the function's start address, attempt to find the
+   prologue end using SAL information.  Return zero if the skip fails.
+
+   A non-optimized prologue traditionally has one SAL for the function
+   and a second for the function body.  A single line function has
+   them both pointing at the same line.
+
+   An optimized prologue is similar but the prologue may contain
+   instructions (SALs) from the instruction body.  Need to skip those
+   while not getting into the function body.
+
+   The functions end point and an increasing SAL line are used as
+   indicators of the prologue's endpoint.
+
+   This code is based on the function refine_prologue_limit
+   (found in ia64).  */
+
+CORE_ADDR
+skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
+{
+  struct symtab_and_line prologue_sal;
+  CORE_ADDR start_pc;
+  CORE_ADDR end_pc;
+  const struct block *bl;
+
+  /* Get an initial range for the function.  */
+  find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
+  start_pc += gdbarch_deprecated_function_start_offset (gdbarch);
+
+  prologue_sal = find_pc_line (start_pc, 0);
+  if (prologue_sal.line != 0)
+    {
+      /* For languages other than assembly, treat two consecutive line
+	 entries at the same address as a zero-instruction prologue.
+	 The GNU assembler emits separate line notes for each instruction
+	 in a multi-instruction macro, but compilers generally will not
+	 do this.  */
+      if (prologue_sal.symtab->language != language_asm)
+	{
+	  struct linetable *linetable = LINETABLE (prologue_sal.symtab);
+	  int idx = 0;
+
+	  /* Skip any earlier lines, and any end-of-sequence marker
+	     from a previous function.  */
+	  while (linetable->item[idx].pc != prologue_sal.pc
+		 || linetable->item[idx].line == 0)
+	    idx++;
+
+	  if (idx+1 < linetable->nitems
+	      && linetable->item[idx+1].line != 0
+	      && linetable->item[idx+1].pc == start_pc)
+	    return start_pc;
+	}
+
+      /* If there is only one sal that covers the entire function,
+	 then it is probably a single line function, like
+	 "foo(){}".  */
+      if (prologue_sal.end >= end_pc)
+	return 0;
+
+      while (prologue_sal.end < end_pc)
+	{
+	  struct symtab_and_line sal;
+
+	  sal = find_pc_line (prologue_sal.end, 0);
+	  if (sal.line == 0)
+	    break;
+	  /* Assume that a consecutive SAL for the same (or larger)
+	     line mark the prologue -> body transition.  */
+	  if (sal.line >= prologue_sal.line)
+	    break;
+	  /* Likewise if we are in a different symtab altogether
+	     (e.g. within a file included via #include).  */
+	  if (sal.symtab != prologue_sal.symtab)
+	    break;
+
+	  /* The line number is smaller.  Check that it's from the
+	     same function, not something inlined.  If it's inlined,
+	     then there is no point comparing the line numbers.  */
+	  bl = block_for_pc (prologue_sal.end);
+	  while (bl)
+	    {
+	      if (block_inlined_p (bl))
+		break;
+	      if (BLOCK_FUNCTION (bl))
+		{
+		  bl = NULL;
+		  break;
+		}
+	      bl = BLOCK_SUPERBLOCK (bl);
+	    }
+	  if (bl != NULL)
+	    break;
+
+	  /* The case in which compiler's optimizer/scheduler has
+	     moved instructions into the prologue.  We look ahead in
+	     the function looking for address ranges whose
+	     corresponding line number is less the first one that we
+	     found for the function.  This is more conservative then
+	     refine_prologue_limit which scans a large number of SALs
+	     looking for any in the prologue.  */
+	  prologue_sal = sal;
+	}
+    }
+
+  if (prologue_sal.end < end_pc)
+    /* Return the end of this line, or zero if we could not find a
+       line.  */
+    return prologue_sal.end;
+  else
+    /* Don't return END_PC, which is past the end of the function.  */
+    return prologue_sal.pc;
+}
+
 /* If P is of the form "operator[ \t]+..." where `...' is
    some legitimate operator text, return a pointer to the
    beginning of the substring of the operator text.
@@ -4826,193 +5013,6 @@ make_source_files_completion_list (const char *text, const char *word)
   discard_cleanups (back_to);
 
   return list;
-}
-
-/* Determine if PC is in the prologue of a function.  The prologue is the area
-   between the first instruction of a function, and the first executable line.
-   Returns 1 if PC *might* be in prologue, 0 if definately *not* in prologue.
-
-   If non-zero, func_start is where we think the prologue starts, possibly
-   by previous examination of symbol table information.  */
-
-int
-in_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR func_start)
-{
-  struct symtab_and_line sal;
-  CORE_ADDR func_addr, func_end;
-
-  /* We have several sources of information we can consult to figure
-     this out.
-     - Compilers usually emit line number info that marks the prologue
-       as its own "source line".  So the ending address of that "line"
-       is the end of the prologue.  If available, this is the most
-       reliable method.
-     - The minimal symbols and partial symbols, which can usually tell
-       us the starting and ending addresses of a function.
-     - If we know the function's start address, we can call the
-       architecture-defined gdbarch_skip_prologue function to analyze the
-       instruction stream and guess where the prologue ends.
-     - Our `func_start' argument; if non-zero, this is the caller's
-       best guess as to the function's entry point.  At the time of
-       this writing, handle_inferior_event doesn't get this right, so
-       it should be our last resort.  */
-
-  /* Consult the partial symbol table, to find which function
-     the PC is in.  */
-  if (! find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    {
-      CORE_ADDR prologue_end;
-
-      /* We don't even have minsym information, so fall back to using
-         func_start, if given.  */
-      if (! func_start)
-	return 1;		/* We *might* be in a prologue.  */
-
-      prologue_end = gdbarch_skip_prologue (gdbarch, func_start);
-
-      return func_start <= pc && pc < prologue_end;
-    }
-
-  /* If we have line number information for the function, that's
-     usually pretty reliable.  */
-  sal = find_pc_line (func_addr, 0);
-
-  /* Now sal describes the source line at the function's entry point,
-     which (by convention) is the prologue.  The end of that "line",
-     sal.end, is the end of the prologue.
-
-     Note that, for functions whose source code is all on a single
-     line, the line number information doesn't always end up this way.
-     So we must verify that our purported end-of-prologue address is
-     *within* the function, not at its start or end.  */
-  if (sal.line == 0
-      || sal.end <= func_addr
-      || func_end <= sal.end)
-    {
-      /* We don't have any good line number info, so use the minsym
-	 information, together with the architecture-specific prologue
-	 scanning code.  */
-      CORE_ADDR prologue_end = gdbarch_skip_prologue (gdbarch, func_addr);
-
-      return func_addr <= pc && pc < prologue_end;
-    }
-
-  /* We have line number info, and it looks good.  */
-  return func_addr <= pc && pc < sal.end;
-}
-
-/* Given PC at the function's start address, attempt to find the
-   prologue end using SAL information.  Return zero if the skip fails.
-
-   A non-optimized prologue traditionally has one SAL for the function
-   and a second for the function body.  A single line function has
-   them both pointing at the same line.
-
-   An optimized prologue is similar but the prologue may contain
-   instructions (SALs) from the instruction body.  Need to skip those
-   while not getting into the function body.
-
-   The functions end point and an increasing SAL line are used as
-   indicators of the prologue's endpoint.
-
-   This code is based on the function refine_prologue_limit
-   (found in ia64).  */
-
-CORE_ADDR
-skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
-{
-  struct symtab_and_line prologue_sal;
-  CORE_ADDR start_pc;
-  CORE_ADDR end_pc;
-  const struct block *bl;
-
-  /* Get an initial range for the function.  */
-  find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
-  start_pc += gdbarch_deprecated_function_start_offset (gdbarch);
-
-  prologue_sal = find_pc_line (start_pc, 0);
-  if (prologue_sal.line != 0)
-    {
-      /* For languages other than assembly, treat two consecutive line
-	 entries at the same address as a zero-instruction prologue.
-	 The GNU assembler emits separate line notes for each instruction
-	 in a multi-instruction macro, but compilers generally will not
-	 do this.  */
-      if (prologue_sal.symtab->language != language_asm)
-	{
-	  struct linetable *linetable = LINETABLE (prologue_sal.symtab);
-	  int idx = 0;
-
-	  /* Skip any earlier lines, and any end-of-sequence marker
-	     from a previous function.  */
-	  while (linetable->item[idx].pc != prologue_sal.pc
-		 || linetable->item[idx].line == 0)
-	    idx++;
-
-	  if (idx+1 < linetable->nitems
-	      && linetable->item[idx+1].line != 0
-	      && linetable->item[idx+1].pc == start_pc)
-	    return start_pc;
-	}
-
-      /* If there is only one sal that covers the entire function,
-	 then it is probably a single line function, like
-	 "foo(){}".  */
-      if (prologue_sal.end >= end_pc)
-	return 0;
-
-      while (prologue_sal.end < end_pc)
-	{
-	  struct symtab_and_line sal;
-
-	  sal = find_pc_line (prologue_sal.end, 0);
-	  if (sal.line == 0)
-	    break;
-	  /* Assume that a consecutive SAL for the same (or larger)
-	     line mark the prologue -> body transition.  */
-	  if (sal.line >= prologue_sal.line)
-	    break;
-	  /* Likewise if we are in a different symtab altogether
-	     (e.g. within a file included via #include).  */
-	  if (sal.symtab != prologue_sal.symtab)
-	    break;
-
-	  /* The line number is smaller.  Check that it's from the
-	     same function, not something inlined.  If it's inlined,
-	     then there is no point comparing the line numbers.  */
-	  bl = block_for_pc (prologue_sal.end);
-	  while (bl)
-	    {
-	      if (block_inlined_p (bl))
-		break;
-	      if (BLOCK_FUNCTION (bl))
-		{
-		  bl = NULL;
-		  break;
-		}
-	      bl = BLOCK_SUPERBLOCK (bl);
-	    }
-	  if (bl != NULL)
-	    break;
-
-	  /* The case in which compiler's optimizer/scheduler has
-	     moved instructions into the prologue.  We look ahead in
-	     the function looking for address ranges whose
-	     corresponding line number is less the first one that we
-	     found for the function.  This is more conservative then
-	     refine_prologue_limit which scans a large number of SALs
-	     looking for any in the prologue.  */
-	  prologue_sal = sal;
-	}
-    }
-
-  if (prologue_sal.end < end_pc)
-    /* Return the end of this line, or zero if we could not find a
-       line.  */
-    return prologue_sal.end;
-  else
-    /* Don't return END_PC, which is past the end of the function.  */
-    return prologue_sal.pc;
 }
 
 /* Track MAIN */

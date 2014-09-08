@@ -1048,11 +1048,12 @@ exception.
 
 @defun Type.template_argument (n @r{[}, block@r{]})
 If this @code{gdb.Type} is an instantiation of a template, this will
-return a new @code{gdb.Type} which represents the type of the
-@var{n}th template argument.
+return a new @code{gdb.Value} or @code{gdb.Type} which represents the
+value of the @var{n}th template argument (indexed starting at 0).
 
-If this @code{gdb.Type} is not a template type, this will throw an
-exception.  Ordinarily, only C@t{++} code will have template types.
+If this @code{gdb.Type} is not a template type, or if the type has fewer
+than @var{n} template arguments, this will throw an exception.
+Ordinarily, only C@t{++} code will have template types.
 
 If @var{block} is given, then @var{name} is looked up in that scope.
 Otherwise, it is searched for globally.
@@ -3587,6 +3588,13 @@ Return the frame called by this frame.
 @defun Frame.find_sal ()
 Return the frame's symtab and line object.
 @xref{Symbol Tables In Python}.
+@end defun
+
+@defun Frame.read_register (register)
+Return the value of @var{register} in this frame.  The @var{register}
+argument must be a string (e.g., @code{'sp'} or @code{'rax'}).
+Returns a @code{Gdb.Value} object.  Throws an exception if @var{register}
+does not exist.
 @end defun
 
 @defun Frame.read_var (variable @r{[}, block@r{]})

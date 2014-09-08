@@ -60,6 +60,7 @@ int aarch64_extract_operand (const aarch64_operand *, aarch64_opnd_info *,
 		   const aarch64_insn, const aarch64_inst *)
 
 AARCH64_DECL_OPD_EXTRACTOR (ext_regno);
+AARCH64_DECL_OPD_EXTRACTOR (ext_regno_pair);
 AARCH64_DECL_OPD_EXTRACTOR (ext_regrt_sysins);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reglane);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reglist);

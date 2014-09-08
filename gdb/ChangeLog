@@ -1,3 +1,287 @@
+2014-09-07  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	PR gdb/17035
+	* cli/cli-cmds.c (show_user): Use cli_user_command_p to
+	decide whether we display the command on "show user".
+	* cli/cli-script.c (show_user_1): Only verify cmdlines after
+	printing command name.
+	* cli/cli-decode.h (cli_user_command_p): Declare new function.
+	* cli/cli-decode.c (cli_user_command_p): Create helper function
+	to verify whether cmd_list_element is a user-defined command.
+
+2014-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR python/17355
+	* python/py-framefilter.c (py_print_single_arg): Handle NULL FA->VAL.
+	Fix goto out of TRY_CATCH.
+
+2014-09-06  Doug Evans  <xdje42@gmail.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	PR 15276
+	* NEWS: Mention $_caller_is, $_caller_matches, $_any_caller_is,
+	$_any_caller_matches.
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Add caller_is.py.
+	* python/lib/gdb/function/caller_is.py: New file.
+
+2014-09-06  Doug Evans  <xdje42@gmail.com>
+
+	* infcmd.c (program_info): Fix typo.
+
+2014-09-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/17235
+	* stap-probe.c (stap_parse_single_operand): Delete unused variable
+	'number'.  New variable 'has_digit'.  Rewrite code to deal with
+	subexpressions on SDT probes.
+
+2014-09-04  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (parse_number): Skip handling base-switching prefixes if
+	the input is only one character long.
+
+2014-09-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR fortran/17237
+	* f-valprint.c (f_val_print): Specify the correct print option to
+	use when printing integer values.
+
+2014-09-04  Gary Benson  <gbenson@redhat.com>
+
+	* x86-linux-nat.c (x86_linux_dr_get, x86_linux_dr_set):
+	Remove code to cope with LWPs wrapped as PIDs.
+	Add assertions to ensure no wrapped LWPs are passed.
+
+2014-09-04  Pedro Alves  <palves@redhat.com>
+
+	* value.c (value_ranges_copy_adjusted): New function, factored out
+	from ...
+	(value_contents_copy_raw): ... here.
+	(unpack_value_bits_as_long_1): Rename back to ...
+	(unpack_bits_as_long): ... this.  Remove 'original_value' and
+	'result' parameters.  Change return type to LONGEST.
+	(unpack_value_bits_as_long): Delete.
+	(unpack_value_field_as_long_1): Delete.
+	(unpack_value_field_as_long, unpack_field_as_long): Reimplement.
+	(unpack_value_bitfield): New function.
+	(value_field_bitfield): Reimplement using unpack_value_bitfield.
+	(value_fetch_lazy): Use unpack_value_bitfield.
+	* value.h (unpack_value_bits_as_long): Delete declaration.
+
+2014-09-03  Sasha Smundak  <asmundak@google.com>
+
+	* python/py-frame.c (frapy_read_register): New function.
+
+2014-09-03  James Hogan  <james.hogan@imgtec.com>
+
+	* mips-linux-nat.c (mips_linux_read_description): Reset errno to 0
+	prior to reading DSP_CONTROL with PTRACE_PEEKUSER ptrace call.
+
+2014-09-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR python/16699
+	* cli/cli-decode.c (set_cmd_completer_handle_brkchars): New
+	function.
+	(add_cmd): Set "completer_handle_brkchars" to NULL.
+	* cli/cli-decode.h (struct cmd_list_element)
+	<completer_handle_brkchars>: New field.
+	* command.h (completer_ftype_void): New typedef.
+	(set_cmd_completer_handle_brkchars): New prototype.
+	* completer.c (set_gdb_completion_word_break_characters): New
+	function.
+	(complete_line_internal): Call "completer_handle_brkchars"
+	callback from command.
+	* completer.h: Include "command.h".
+	(set_gdb_completion_word_break_characters): New prototype.
+	* python/py-cmd.c (cmdpy_completer_helper): New function.
+	(cmdpy_completer_handle_brkchars): New function.
+	(cmdpy_completer): Adjust to use cmdpy_completer_helper.
+	(cmdpy_init): Set completer_handle_brkchars to
+	cmdpy_completer_handle_brkchars.
+
+2014-09-03  Gary Benson  <gbenson@redhat.com>
+
+	* nat/x86-dregs.h (ALL_DEBUG_REGISTERS): Renamed as...
+	(ALL_DEBUG_ADDRESS_REGISTERS): New macro.  All uses updated.
+	Loop conditions	changed to equivalent form.
+	(struct x86_debug_reg_state): Updated dr_ref_count comment.
+	* x86-linux-nat.c (x86_linux_prepare_to_resume): Use
+	ALL_DEBUG_ADDRESS_REGISTERS.
+
+2014-09-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2loc.h (dwarf2_evaluate_property): Minor function
+	description fix.
+
+2014-09-02  Doug Evans  <dje@google.com>
+
+	* typeprint.c (find_global_typedef): Fix comment.
+
+2014-09-02  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.h: Renamed as...
+	* x86-nat.h: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* i386-nat.c: Renamed as...
+	* x86-nat.c: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* common/i386-xstate.h: Renamed as...
+	* common/x86-xstate.h: New file.  All type, function and variable
+	name prefixes changed from "i386_" to "x86_".  All references
+	updated.
+	* nat/i386-cpuid.h: Renamed as...
+	* nat/x86-cpuid.h: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* nat/i386-gcc-cpuid.h: Renamed as...
+	* nat/x86-gcc-cpuid.h: New file.  All type, function and variable
+	name prefixes changed from "i386_" to "x86_".  All references
+	updated.
+	* nat/i386-dregs.h: Renamed as...
+	* nat/x86-dregs.h: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+	* nat/i386-dregs.c: Renamed as...
+	* nat/x86-dregs.c: New file.  All type, function and variable name
+	prefixes changed from "i386_" to "x86_".  All references updated.
+
+2014-09-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* varobj.c (_initialize_varobj): Move to the end of file.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-exceptions.h: New file.
+	* common/common-exceptions.c: Likewise.
+	* Makefile.in (SFILES): Add common/common-exceptions.c.
+	(HFILES_NO_SRCDIR): Add common/common-exceptions.h.
+	(COMMON_OBS): Add common-exceptions.o.
+	(common-exceptions.o): New rule.
+	* exceptions.h (common-exceptions.h): Include.
+	(gdb_setjmp.h): Do not include.
+	(return_reason): Moved to common-exceptions.h.
+	(enum return_reason): Likewise.
+	(RETURN_MASK): Likewise.
+	(typedef return_mask): Likewise.
+	(enum errors): Likewise.
+	(struct gdb_exception): Likewise.
+	(exceptions_state_mc_init): Likewise.
+	(exceptions_state_mc_action_iter): Likewise.
+	(exceptions_state_mc_action_iter_1): Likewise.
+	(TRY_CATCH): Likewise.
+	(throw_exception): Likewise.
+	(throw_verror): Likewise.
+	(throw_vquit): Likewise.
+	(throw_error): Likewise.
+	(throw_quit): Likewise.
+	* exceptions.c (enum catcher_state): Moved to common-exceptions.c.
+	(enum catcher_action): Likewise.
+	(struct catcher): Likewise.
+	(current_catcher): Likewise.
+	(catcher_list_size): Likewise.
+	(exceptions_state_mc_init): Likewise.
+	(catcher_pop): Likewise.
+	(exceptions_state_mc): Likewise.
+	(exceptions_state_mc_action_iter): Likewise.
+	(exceptions_state_mc_action_iter_1): Likewise.
+	(throw_exception): Likewise.
+	(exception_messages): Likewise.
+	(exception_messages_size): Likewise.
+	(throw_it): Likewise.
+	(throw_verror): Likewise.
+	(throw_vquit): Likewise.
+	(throw_error): Likewise.
+	(throw_quit): Likewise.
+	(prepare_to_throw_exception): New function.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* common/gdb_setjmp.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/gdb_setjmp.h.
+	* configure.ac: Move sigsetjmp check...
+	* common/common.m4: ...here.
+	* configure: Regenerate.
+	* cp-support.c (SIGJMP_BUF): Delete.
+	(SIGSETJMP): Likewise.
+	(SIGLONGJMP): Likewise.
+	* exceptions.h (gdb_setjmp.h): Include.
+	(setjmp.h): Do not include.
+	(EXCEPTIONS_SIGJMP_BUF): Delete.
+	(EXCEPTIONS_SIGSETJMP): Likewise.
+	(EXCEPTIONS_SIGLONGJMP): Likewise.
+	Replace all uses of EXCEPTIONS_SIG* macros with SIG* macros
+	from gdb_setjmp.h.
+	* exceptions.c: Likewise.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* cleanups.h: Moved to...
+	* common/cleanups.h: New file.
+	* cleanups.c: Moved to...
+	* common/cleanups.c: New file.  Include common-defs.h and
+	cleanups.h.  Do not include defs.h.
+	* Makefile.in (SFILES): Replace cleanups.c with common/cleanups.c.
+	(HFILES_NO_SRCDIR): Replace cleanups.h with common/cleanups.h.
+	(cleanups.o): New rule.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* common/errors.h (internal_warning): New declaration.
+	(internal_vwarning): Likewise.
+	* common/errors.c (internal_warning): New function.
+	* utils.h (internal_warning): Don't declare.
+	(internal_vwarning): Likewise.
+	* utils.c (internal_warning): Removed.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* main.c (captured_main): Use warning during startup.
+	Prefix startup warning messages with command name.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* main.c (captured_main): Handle usage errors with error.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* go32-nat.c (go32_create_inferior): Replace a fprintf/
+	exit pair with a call to error.  Wrap the message with _().
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* main.c (captured_main): Replace a fprintf/exit
+	pair with a call to error.  Wrap the message with _().
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* tui/tui-io.c (tui_initialize_io): Replace two fprintf/exit
+	pairs with calls to error.  Wrap the message with _().
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* utils.c (vwarning): Protect calls to target_terminal_ours
+	and wrap_here.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* exceptions.c (print_flush): Protect calls to
+	target_terminal_ours and wrap_here.
+
+2014-08-29  Gary Benson  <gbenson@redhat.com>
+
+	* utils.h (filtered_printing_initialized): New declaration.
+	* utils.c (abort_with_message): New function.
+	(internal_vproblem): Use abort_with_message for first level
+	recursive internal problems, and if gdb_stderr is not set up.
+	Protect calls to target_terminal_ours, begin_line and query.
+
+2014-08-28  Doug Evans  <dje@google.com>
+
+	* symtab.c (in_prologue): Move definition to better spot.
+	(skip_prologue_using_sal): Ditto.
+
+2014-08-28  Doug Evans  <dje@google.com>
+
+	* symtab.c (find_function_start_sal): Move definition to better spot.
+
 2014-08-28  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (thumb_in_function_epilogue_p): Don't set

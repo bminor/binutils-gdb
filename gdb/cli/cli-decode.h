@@ -176,6 +176,15 @@ struct cmd_list_element
        "baz/foo", return "baz/foobar".  */
     completer_ftype *completer;
 
+    /* Handle the word break characters for this completer.  Usually
+       this function need not be defined, but for some types of
+       completers (e.g., Python completers declared as methods inside
+       a class) the word break chars may need to be redefined
+       depending on the completer type (e.g., for filename
+       completers).  */
+
+    completer_ftype_void *completer_handle_brkchars;
+
     /* Destruction routine for this command.  If non-NULL, this is
        called when this command instance is destroyed.  This may be
        used to finalize the CONTEXT field, if needed.  */
@@ -232,5 +241,10 @@ extern void not_just_help_class_command (char *arg, int from_tty);
 extern void print_doc_line (struct ui_file *, const char *);
 
 extern const char * const auto_boolean_enums[];
+
+/* Verify whether a given cmd_list_element is a user-defined command.
+   Return 1 if it is user-defined.  Return 0 otherwise.  */
+
+extern int cli_user_command_p (struct cmd_list_element *);
 
 #endif /* !defined (CLI_DECODE_H) */

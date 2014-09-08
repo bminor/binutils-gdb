@@ -1,3 +1,54 @@
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/attr-gnu-abi-fp-1.d: Relax expected output.
+	* gas/mips/elf_ase_micromips-2.d: Likewise.
+	* gas/mips/elf_ase_micromips.d: Likewise.
+	* gas/mips/elf_ase_mips16-2.d: Likewise.
+	* gas/mips/elf_ase_mips16.d: Likewise.
+	* gas/mips/module-mfp32.d: Likewise.
+	* gas/mips/module-msingle-float.d: Likewise.
+	* gas/mips/module-msoft-float.d: Likewise.
+
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/module-defer-warn2.l: Ignore differences in output from
+	64-bit vs 32-bit targets using O32.
+
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/elf/type.e: Account for new sections.
+	* gas/mips/mips16-e.d: Likewise.
+	* gas/mips/mips16-f.d: Likewise.
+	* gas/mips/mipsel16-e.d: Likewise.
+	* gas/mips/mipsel16-f.d: Likewise.
+	* gas/mips/tmips16-e.d: Appropriately escape dots.
+	* gas/mips/tmips16-f.d: Likewise.
+	* gas/mips/tmipsel16-e.d: Likewise.
+	* gas/mips/tmipsel16-f.d: Likewise.
+
+2014-09-04  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/mips.exp: Add mipsisa32 and mipsisa32el to
+	the list of addr32 targets.
+
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/illegal.s: Update testcase.
+	* gas/aarch64/illegal.d: Likewise.
+	* gas/aarch64/sysreg-1.s: Likewise.
+	* gas/aarch64/sysreg-1.d: Likewise.
+
+2014-09-03  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/lse-atomic.d: New.
+	* gas/aarch64/lse-atomic.s: Likewise.
+	* gas/aarch64/illegal-lse.d: Likewise.
+	* gas/aarch64/illegal-lse.l: Likewise.
+	* gas/aarch64/illegal-lse.s: Likewise.
+	* gas/aarch64/diagnostic.s: Check processor feature detect for lse
+	instruction.
+	* gas/aarch64/diagnostic.l: Likewise.
+
 2014-08-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/arm/blx-bl-convert.d: New testcase.

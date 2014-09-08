@@ -520,8 +520,10 @@ vwarning (const char *string, va_list args)
     (*deprecated_warning_hook) (string, args);
   else
     {
-      target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output.  */
+      if (target_supports_terminal_ours ())
+	target_terminal_ours ();
+      if (filtered_printing_initialized ())
+	wrap_here ("");		/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
       if (warning_pre_print)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
@@ -547,6 +549,19 @@ error_stream (struct ui_file *stream)
 
   make_cleanup (xfree, message);
   error (("%s"), message);
+}
+
+/* Emit a message and abort.  */
+
+static void ATTRIBUTE_NORETURN
+abort_with_message (const char *msg)
+{
+  if (gdb_stderr == NULL)
+    fputs (msg, stderr);
+  else
+    fputs_unfiltered (msg, gdb_stderr);
+
+  abort ();		/* NOTE: GDB has only three calls to abort().  */
 }
 
 /* Dump core trying to increase the core soft limit to hard limit first.  */
@@ -671,8 +686,7 @@ internal_vproblem (struct internal_problem *problem,
 	break;
       case 1:
 	dejavu = 2;
-	fputs_unfiltered (msg, gdb_stderr);
-	abort ();	/* NOTE: GDB has only three calls to abort().  */
+	abort_with_message (msg);
       default:
 	dejavu = 3;
         /* Newer GLIBC versions put the warn_unused_result attribute
@@ -685,10 +699,6 @@ internal_vproblem (struct internal_problem *problem,
 	exit (1);
       }
   }
-
-  /* Try to get the message out and at the start of a new line.  */
-  target_terminal_ours ();
-  begin_line ();
 
   /* Create a string containing the full error/warning message.  Need
      to call query with this full string, as otherwize the reason
@@ -707,8 +717,23 @@ internal_vproblem (struct internal_problem *problem,
     make_cleanup (xfree, reason);
   }
 
+  /* Fall back to abort_with_message if gdb_stderr is not set up.  */
+  if (gdb_stderr == NULL)
+    {
+      fputs (reason, stderr);
+      abort_with_message ("\n");
+    }
+
+  /* Try to get the message out and at the start of a new line.  */
+  if (target_supports_terminal_ours ())
+    target_terminal_ours ();
+  if (filtered_printing_initialized ())
+    begin_line ();
+
   /* Emit the message unless query will emit it below.  */
-  if (problem->should_quit != internal_problem_ask || !confirm)
+  if (problem->should_quit != internal_problem_ask
+      || !confirm
+      || !filtered_printing_initialized ())
     fprintf_unfiltered (gdb_stderr, "%s\n", reason);
 
   if (problem->should_quit == internal_problem_ask)
@@ -716,7 +741,7 @@ internal_vproblem (struct internal_problem *problem,
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
 	 this lessens the likelihood of GDB going into an infinite
 	 loop.  */
-      if (!confirm)
+      if (!confirm || !filtered_printing_initialized ())
 	quit_p = 1;
       else
         quit_p = query (_("%s\nQuit this debugging session? "), reason);
@@ -738,6 +763,8 @@ internal_vproblem (struct internal_problem *problem,
     {
       if (!can_dump_core_warn (LIMIT_MAX, reason))
 	dump_core_p = 0;
+      else if (!filtered_printing_initialized ())
+	dump_core_p = 1;
       else
 	{
 	  /* Default (yes/batch case) is to dump core.  This leaves a GDB
@@ -794,16 +821,6 @@ void
 internal_vwarning (const char *file, int line, const char *fmt, va_list ap)
 {
   internal_vproblem (&internal_warning_problem, file, line, fmt, ap);
-}
-
-void
-internal_warning (const char *file, int line, const char *string, ...)
-{
-  va_list ap;
-
-  va_start (ap, string);
-  internal_vwarning (file, line, string, ap);
-  va_end (ap);
 }
 
 static struct internal_problem demangler_warning_problem = {
@@ -1698,6 +1715,13 @@ init_page_info (void)
 
   set_screen_size ();
   set_width ();
+}
+
+/* Return nonzero if filtered printing is initialized.  */
+int
+filtered_printing_initialized (void)
+{
+  return wrap_buffer != NULL;
 }
 
 /* Helper for make_cleanup_restore_page_info.  */

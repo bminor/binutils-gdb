@@ -1,4 +1,4 @@
-/* Native-dependent code for the i386.
+/* Native-dependent code for x86 (i386 and x86-64).
 
    Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
@@ -18,11 +18,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "i386-nat.h"
+#include "x86-nat.h"
 #include "gdbcmd.h"
 #include "inferior.h"
 
-/* Support for hardware watchpoints and breakpoints using the i386
+/* Support for hardware watchpoints and breakpoints using the x86
    debug registers.
 
    This provides several functions for inserting and removing
@@ -37,35 +37,35 @@
 int debug_hw_points;
 
 /* Low-level function vector.  */
-struct i386_dr_low_type i386_dr_low;
+struct x86_dr_low_type x86_dr_low;
 
 /* Per-process data.  We don't bind this to a per-inferior registry
    because of targets like x86 GNU/Linux that need to keep track of
    processes that aren't bound to any inferior (e.g., fork children,
    checkpoints).  */
 
-struct i386_process_info
+struct x86_process_info
 {
   /* Linked list.  */
-  struct i386_process_info *next;
+  struct x86_process_info *next;
 
   /* The process identifier.  */
   pid_t pid;
 
-  /* Copy of i386 hardware debug registers.  */
-  struct i386_debug_reg_state state;
+  /* Copy of x86 hardware debug registers.  */
+  struct x86_debug_reg_state state;
 };
 
-static struct i386_process_info *i386_process_list = NULL;
+static struct x86_process_info *x86_process_list = NULL;
 
 /* Find process data for process PID.  */
 
-static struct i386_process_info *
-i386_find_process_pid (pid_t pid)
+static struct x86_process_info *
+x86_find_process_pid (pid_t pid)
 {
-  struct i386_process_info *proc;
+  struct x86_process_info *proc;
 
-  for (proc = i386_process_list; proc; proc = proc->next)
+  for (proc = x86_process_list; proc; proc = proc->next)
     if (proc->pid == pid)
       return proc;
 
@@ -75,16 +75,16 @@ i386_find_process_pid (pid_t pid)
 /* Add process data for process PID.  Returns newly allocated info
    object.  */
 
-static struct i386_process_info *
-i386_add_process (pid_t pid)
+static struct x86_process_info *
+x86_add_process (pid_t pid)
 {
-  struct i386_process_info *proc;
+  struct x86_process_info *proc;
 
   proc = xcalloc (1, sizeof (*proc));
   proc->pid = pid;
 
-  proc->next = i386_process_list;
-  i386_process_list = proc;
+  proc->next = x86_process_list;
+  x86_process_list = proc;
 
   return proc;
 }
@@ -92,35 +92,35 @@ i386_add_process (pid_t pid)
 /* Get data specific info for process PID, creating it if necessary.
    Never returns NULL.  */
 
-static struct i386_process_info *
-i386_process_info_get (pid_t pid)
+static struct x86_process_info *
+x86_process_info_get (pid_t pid)
 {
-  struct i386_process_info *proc;
+  struct x86_process_info *proc;
 
-  proc = i386_find_process_pid (pid);
+  proc = x86_find_process_pid (pid);
   if (proc == NULL)
-    proc = i386_add_process (pid);
+    proc = x86_add_process (pid);
 
   return proc;
 }
 
 /* Get debug registers state for process PID.  */
 
-struct i386_debug_reg_state *
-i386_debug_reg_state (pid_t pid)
+struct x86_debug_reg_state *
+x86_debug_reg_state (pid_t pid)
 {
-  return &i386_process_info_get (pid)->state;
+  return &x86_process_info_get (pid)->state;
 }
 
 /* See declaration in i386-nat.h.  */
 
 void
-i386_forget_process (pid_t pid)
+x86_forget_process (pid_t pid)
 {
-  struct i386_process_info *proc, **proc_link;
+  struct x86_process_info *proc, **proc_link;
 
-  proc = i386_process_list;
-  proc_link = &i386_process_list;
+  proc = x86_process_list;
+  proc_link = &x86_process_list;
 
   while (proc != NULL)
     {
@@ -141,10 +141,10 @@ i386_forget_process (pid_t pid)
    debug registers.  */
 
 void
-i386_cleanup_dregs (void)
+x86_cleanup_dregs (void)
 {
   /* Starting from scratch has the same effect.  */
-  i386_forget_process (ptid_get_pid (inferior_ptid));
+  x86_forget_process (ptid_get_pid (inferior_ptid));
 }
 
 /* Insert a watchpoint to watch a memory region which starts at
@@ -152,41 +152,41 @@ i386_cleanup_dregs (void)
    of the type TYPE.  Return 0 on success, -1 on failure.  */
 
 static int
-i386_insert_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
-			struct expression *cond)
+x86_insert_watchpoint (struct target_ops *self,
+		       CORE_ADDR addr, int len, int type,
+		       struct expression *cond)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+  struct x86_debug_reg_state *state
+    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
 
-  return i386_dr_insert_watchpoint (state, type, addr, len);
+  return x86_dr_insert_watchpoint (state, type, addr, len);
 }
 
 /* Remove a watchpoint that watched the memory region which starts at
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
 static int
-i386_remove_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
-			struct expression *cond)
+x86_remove_watchpoint (struct target_ops *self,
+		       CORE_ADDR addr, int len, int type,
+		       struct expression *cond)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+  struct x86_debug_reg_state *state
+    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
 
-  return i386_dr_remove_watchpoint (state, type, addr, len);
+  return x86_dr_remove_watchpoint (state, type, addr, len);
 }
 
 /* Return non-zero if we can watch a memory region that starts at
    address ADDR and whose length is LEN bytes.  */
 
 static int
-i386_region_ok_for_watchpoint (struct target_ops *self,
-			       CORE_ADDR addr, int len)
+x86_region_ok_for_watchpoint (struct target_ops *self,
+			      CORE_ADDR addr, int len)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+  struct x86_debug_reg_state *state
+    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
 
-  return i386_dr_region_ok_for_watchpoint (state, addr, len);
+  return x86_dr_region_ok_for_watchpoint (state, addr, len);
 }
 
 /* If the inferior has some break/watchpoint that triggered, set the
@@ -194,52 +194,52 @@ i386_region_ok_for_watchpoint (struct target_ops *self,
    Otherwise, return zero.  */
 
 static int
-i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
+x86_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+  struct x86_debug_reg_state *state
+    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
 
-  return i386_dr_stopped_data_address (state, addr_p);
+  return x86_dr_stopped_data_address (state, addr_p);
 }
 
 /* Return non-zero if the inferior has some watchpoint that triggered.
    Otherwise return zero.  */
 
 static int
-i386_stopped_by_watchpoint (struct target_ops *ops)
+x86_stopped_by_watchpoint (struct target_ops *ops)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+  struct x86_debug_reg_state *state
+    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
 
-  return i386_dr_stopped_by_watchpoint (state);
+  return x86_dr_stopped_by_watchpoint (state);
 }
 
 /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, EBUSY on failure.  */
 
 static int
-i386_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
-			   struct bp_target_info *bp_tgt)
+x86_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+  struct x86_debug_reg_state *state
+    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
 
-  return i386_dr_insert_watchpoint (state, hw_execute,
-				    bp_tgt->placed_address, 1) ? EBUSY : 0;
+  return x86_dr_insert_watchpoint (state, hw_execute,
+				   bp_tgt->placed_address, 1) ? EBUSY : 0;
 }
 
 /* Remove a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, -1 on failure.  */
 
 static int
-i386_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
-			   struct bp_target_info *bp_tgt)
+x86_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
-  struct i386_debug_reg_state *state
-    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
+  struct x86_debug_reg_state *state
+    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
 
-  return i386_dr_remove_watchpoint (state, hw_execute,
-				    bp_tgt->placed_address, 1);
+  return x86_dr_remove_watchpoint (state, hw_execute,
+				   bp_tgt->placed_address, 1);
 }
 
 /* Returns the number of hardware watchpoints of type TYPE that we can
@@ -260,8 +260,8 @@ i386_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
    sharing implemented via reference counts in i386-nat.c.  */
 
 static int
-i386_can_use_hw_breakpoint (struct target_ops *self,
-			    int type, int cnt, int othertype)
+x86_can_use_hw_breakpoint (struct target_ops *self,
+			   int type, int cnt, int othertype)
 {
   return 1;
 }
@@ -288,29 +288,29 @@ triggers a breakpoint or watchpoint."),
 /* There are only two global functions left.  */
 
 void
-i386_use_watchpoints (struct target_ops *t)
+x86_use_watchpoints (struct target_ops *t)
 {
   /* After a watchpoint trap, the PC points to the instruction after the
      one that caused the trap.  Therefore we don't need to step over it.
      But we do need to reset the status register to avoid another trap.  */
   t->to_have_continuable_watchpoint = 1;
 
-  t->to_can_use_hw_breakpoint = i386_can_use_hw_breakpoint;
-  t->to_region_ok_for_hw_watchpoint = i386_region_ok_for_watchpoint;
-  t->to_stopped_by_watchpoint = i386_stopped_by_watchpoint;
-  t->to_stopped_data_address = i386_stopped_data_address;
-  t->to_insert_watchpoint = i386_insert_watchpoint;
-  t->to_remove_watchpoint = i386_remove_watchpoint;
-  t->to_insert_hw_breakpoint = i386_insert_hw_breakpoint;
-  t->to_remove_hw_breakpoint = i386_remove_hw_breakpoint;
+  t->to_can_use_hw_breakpoint = x86_can_use_hw_breakpoint;
+  t->to_region_ok_for_hw_watchpoint = x86_region_ok_for_watchpoint;
+  t->to_stopped_by_watchpoint = x86_stopped_by_watchpoint;
+  t->to_stopped_data_address = x86_stopped_data_address;
+  t->to_insert_watchpoint = x86_insert_watchpoint;
+  t->to_remove_watchpoint = x86_remove_watchpoint;
+  t->to_insert_hw_breakpoint = x86_insert_hw_breakpoint;
+  t->to_remove_hw_breakpoint = x86_remove_hw_breakpoint;
 }
 
 void
-i386_set_debug_register_length (int len)
+x86_set_debug_register_length (int len)
 {
   /* This function should be called only once for each native target.  */
-  gdb_assert (i386_dr_low.debug_register_length == 0);
+  gdb_assert (x86_dr_low.debug_register_length == 0);
   gdb_assert (len == 4 || len == 8);
-  i386_dr_low.debug_register_length = len;
+  x86_dr_low.debug_register_length = len;
   add_show_debug_regs_command ();
 }

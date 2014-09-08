@@ -1441,17 +1441,6 @@ if test $ac_cv_func_setpgrp_void = yes; then
 fi
 fi
 
-# Check if sigsetjmp is available.  Using AC_CHECK_FUNCS won't do
-# since sigsetjmp might only be defined as a macro.
-AC_CACHE_CHECK([for sigsetjmp], gdb_cv_func_sigsetjmp,
-[AC_TRY_COMPILE([
-#include <setjmp.h>
-], [sigjmp_buf env; while (! sigsetjmp (env, 1)) siglongjmp (env, 1);],
-gdb_cv_func_sigsetjmp=yes, gdb_cv_func_sigsetjmp=no)])
-if test $gdb_cv_func_sigsetjmp = yes; then
-  AC_DEFINE(HAVE_SIGSETJMP, 1, [Define if sigsetjmp is available. ])
-fi
-
 # Assume we'll default to using the included libiberty regex.
 gdb_use_included_regex=yes
 

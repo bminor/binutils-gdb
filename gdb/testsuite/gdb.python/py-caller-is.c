@@ -1,8 +1,6 @@
-/* Misc. low level support for i386.
+/* This testcase is part of GDB, the GNU debugger.
 
-   Copyright (C) 2009-2014 Free Software Foundation, Inc.
-
-   This file is part of GDB.
+   Copyright 2012-2014 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,8 +15,27 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+static void
+bottom_func (void)
+{
+  return; /* Break bottom_func here.  */
+}
 
-#include "nat/i386-dregs.h"
+static void
+middle_func (void)
+{
+  bottom_func ();
+}
 
-/* Initialize STATE.  */
-extern void i386_low_init_dregs (struct i386_debug_reg_state *state);
+static void
+top_func (void)
+{
+  middle_func ();
+}
+
+int
+main ()
+{
+  top_func ();
+  return 0;
+}

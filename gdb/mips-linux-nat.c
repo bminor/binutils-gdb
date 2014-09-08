@@ -439,6 +439,7 @@ mips_linux_read_description (struct target_ops *ops)
       if (tid == 0)
 	tid = ptid_get_pid (inferior_ptid);
 
+      errno = 0;
       ptrace (PTRACE_PEEKUSER, tid, DSP_CONTROL, 0);
       switch (errno)
 	{

@@ -1901,7 +1901,7 @@ class Sized_relobj_incr : public Sized_relobj<size, big_endian>
 
   // Get the name of a section.
   std::string
-  do_section_name(unsigned int shndx);
+  do_section_name(unsigned int shndx) const;
 
   // Return a view of the contents of a section.
   const unsigned char*
@@ -2112,7 +2112,7 @@ class Sized_incr_dynobj : public Dynobj
 
   // Get the name of a section.
   std::string
-  do_section_name(unsigned int shndx);
+  do_section_name(unsigned int shndx) const;
 
   // Return a view of the contents of a section.
   const unsigned char*

@@ -1,3 +1,49 @@
+2014-09-07  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	PR gdb/17035
+	* gdb.base/commands.exp: Add tests to verify user-defined
+	commands with empty bodies.
+	* gdb.python/py-cmd.exp: Test that we don't show user-defined
+	python commands in `show user command`.
+	* gdb.python/scm-cmd.exp: Test that we don't show user-defined
+	scheme commands in `show user command`.
+
+2014-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR python/17355
+	* gdb.python/amd64-py-framefilter-invalidarg.S: New file.
+	* gdb.python/py-framefilter-invalidarg-gdb.py.in: New file.
+	* gdb.python/py-framefilter-invalidarg.exp: New file.
+	* gdb.python/py-framefilter-invalidarg.py: New file.
+
+2014-09-06  Doug Evans  <xdje42@gmail.com>
+
+	PR 15276
+	* gdb.python/py-caller-is.c: New file.
+	* gdb.python/py-caller-is.exp: New file.
+
+2014-09-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/17235
+	* gdb.arch/amd64-stap-wrong-subexp.exp: New file.
+	* gdb.arch/amd64-stap-wrong-subexp.S: Likewise.
+
+2014-09-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR fortran/17237
+	* gdb.fortran/print-formatted.exp: New file.
+	* gdb.fortran/print-formatted.f90: Likewise.
+
+2014-09-03  Sasha Smundak  <asmundak@google.com>
+
+	* gdb.python/py-frame.exp: Test Frame.read_register.
+
+2014-09-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR python/16699
+	* gdb.python/py-completion.exp: New file.
+	* gdb.python/py-completion.py: Likewise.
+
 2014-08-28  Doug Evans  <dje@google.com>
 
 	* gdb.arch/amd64-pseudo.c (main): Rewrite to better specify when

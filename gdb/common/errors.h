@@ -58,6 +58,21 @@ extern void internal_error (const char *file, int line,
 extern void internal_verror (const char *file, int line,
 			     const char *fmt, va_list args)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0);
+
+/* An internal problem was detected, but the requested operation can
+   still proceed.  Internal warnings indicate programming errors as
+   opposed to more general issues beyond the application's control.
+   A warning message is constructed using a printf- or vprintf-style
+   argument list.  The function "internal_vwarning" must be provided
+   by the client.  */
+
+extern void internal_warning (const char *file, int line,
+			      const char *fmt, ...)
+     ATTRIBUTE_PRINTF (3, 4);
+
+extern void internal_vwarning (const char *file, int line,
+			       const char *fmt, va_list args)
+     ATTRIBUTE_PRINTF (3, 0);
 
 
 /* Like "error", but the error message is constructed by combining

@@ -1488,18 +1488,6 @@ cp_lookup_rtti_type (const char *name, struct block *block)
 
 static int catch_demangler_crashes = 1;
 
-/* Wrap set/long jmp so that it's more portable.  */
-
-#if defined(HAVE_SIGSETJMP)
-#define SIGJMP_BUF		sigjmp_buf
-#define SIGSETJMP(buf)		sigsetjmp((buf), 1)
-#define SIGLONGJMP(buf,val)	siglongjmp((buf), (val))
-#else
-#define SIGJMP_BUF		jmp_buf
-#define SIGSETJMP(buf)		setjmp(buf)
-#define SIGLONGJMP(buf,val)	longjmp((buf), (val))
-#endif
-
 /* Stack context and environment for demangler crash recovery.  */
 
 static SIGJMP_BUF gdb_demangle_jmp_buf;

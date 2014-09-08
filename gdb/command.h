@@ -159,7 +159,15 @@ extern void set_cmd_sfunc (struct cmd_list_element *cmd,
 typedef VEC (char_ptr) *completer_ftype (struct cmd_list_element *,
 					 const char *, const char *);
 
+typedef void completer_ftype_void (struct cmd_list_element *,
+				   const char *, const char *);
+
 extern void set_cmd_completer (struct cmd_list_element *, completer_ftype *);
+
+/* Set the completer_handle_brkchars callback.  */
+
+extern void set_cmd_completer_handle_brkchars (struct cmd_list_element *,
+					       completer_ftype_void *);
 
 /* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
    around in cmd objects to test the value of the commands sfunc().  */

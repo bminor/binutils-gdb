@@ -76,17 +76,13 @@ perror_with_name (const char *string)
 void
 verror (const char *string, va_list args)
 {
-#ifndef IN_PROCESS_AGENT
-  extern jmp_buf toplevel;
-#endif
-
+#ifdef IN_PROCESS_AGENT
   fflush (stdout);
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
-#ifndef IN_PROCESS_AGENT
-  longjmp (toplevel, 1);
-#else
   exit (1);
+#else
+  throw_verror (GENERIC_ERROR, string, args);
 #endif
 }
 
@@ -110,6 +106,17 @@ internal_verror (const char *file, int line, const char *fmt, va_list args)
   exit (1);
 }
 
+/* Report a problem internal to GDBserver.  */
+
+void
+internal_vwarning (const char *file, int line, const char *fmt, va_list args)
+{
+  fprintf (stderr,  "\
+%s:%d: A problem internal to " TOOLNAME " has been detected.\n", file, line);
+  vfprintf (stderr, fmt, args);
+  fprintf (stderr, "\n");
+}
+
 /* Convert a CORE_ADDR into a HEX string, like %lx.
    The result is stored in a circular static buffer, NUMCELLS deep.  */
 
@@ -129,4 +136,12 @@ pfildes (gdb_fildes_t fd)
 #else
   return plongest (fd);
 #endif
+}
+
+/* See common/common-exceptions.h.  */
+
+void
+prepare_to_throw_exception (void)
+{
+  /* No client-specific actions required.  */
 }

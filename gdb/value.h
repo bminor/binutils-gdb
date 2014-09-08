@@ -606,13 +606,6 @@ extern DOUBLEST unpack_double (struct type *type, const gdb_byte *valaddr,
 			       int *invp);
 extern CORE_ADDR unpack_pointer (struct type *type, const gdb_byte *valaddr);
 
-extern int unpack_value_bits_as_long (struct type *field_type,
-				      const gdb_byte *valaddr,
-				      int embedded_offset, int bitpos,
-				      int bitsize,
-				      const struct value *original_value,
-				      LONGEST *result);
-
 extern LONGEST unpack_field_as_long (struct type *type,
 				     const gdb_byte *valaddr,
 				     int fieldno);

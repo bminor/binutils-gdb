@@ -1,3 +1,77 @@
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/abiflags-strip1-ph.d: Ignore big/little endian
+	differences. Ignore program headers other than PT_MIPS_ABIFLAGS.
+	Do not force -32, -EB and ld emulation but instead rely on the
+	test driver to build for some form of O32.
+	* ld-mips-elf/abiflags-strip2-ph.d: Likewise.
+	* ld-mips-elf/abiflags-strip3-ph.d: Likewise.
+	* ld-mips-elf/abiflags-strip4-ph.d: Likewise.
+	* ld-mips-elf/abiflags-strip5-ph.d: Likewise.
+	* ld-mips-elf/abiflags-strip6-ph.d: Likewise.
+	* ld-mips-elf/abiflags-strip7-ph.d: Likewise.
+	* ld-mips-elf/abiflags-strip8-ph.d: Likewise.
+	* ld-mips-elf/abiflags-strip9-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-0-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-05.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-06.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-07.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-1-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-10.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-15.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-16.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-17.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-2-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-25.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-26.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-27.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-3-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-35.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-36.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-37.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-4-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-45.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-46.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-47.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-5-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-50.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-51.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-52.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-53.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-54.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-55.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-56.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-57.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-58.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-6-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-60.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-61.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-62.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-63.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-64.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-65.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-66.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-67.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-68.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-7-ph.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-70.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-71.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-72.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-73.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-74.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-75.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-76.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-77.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-78.d: Likewise.
+	* ld-mips-elf/mips-elf.exp: Update default abi_asflags(o32) to explicitly
+	pass -32 for the 'no abi' configurations.  Modify the way attr-gnu* tests
+	are run to use O32 flags appropriate for the current target.
+
+2014-08-29  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (ld_simple_link_defsyms): Provide both __main
+	and ___main for windows targets.
+
 2014-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17306

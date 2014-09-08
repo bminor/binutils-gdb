@@ -2474,10 +2474,7 @@ alpha_vms_object_p (bfd *abfd)
   PRIV (recrd.rec) = buf;
 
   if (bfd_bread (buf, test_len, abfd) != test_len)
-    {
-      bfd_set_error (bfd_error_file_truncated);
-      goto error_ret;
-    }
+    goto err_wrong_format;
 
   /* Is it an image?  */
   if ((bfd_getl32 (buf) == EIHD__K_MAJORID)
@@ -2502,7 +2499,6 @@ alpha_vms_object_p (bfd *abfd)
           if (buf == NULL)
             {
               PRIV (recrd.buf) = NULL;
-              bfd_set_error (bfd_error_no_memory);
               goto error_ret;
             }
           PRIV (recrd.buf) = buf;
@@ -2517,10 +2513,7 @@ alpha_vms_object_p (bfd *abfd)
       while (remaining > 0)
         {
           if (bfd_bread (buf + read_so_far, to_read, abfd) != to_read)
-            {
-              bfd_set_error (bfd_error_file_truncated);
-              goto err_wrong_format;
-            }
+	    goto err_wrong_format;
 
           read_so_far += to_read;
           remaining -= to_read;

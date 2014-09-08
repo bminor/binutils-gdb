@@ -1,6 +1,6 @@
-#source: attr-gnu-4-5.s -32 -EB
-#source: attr-gnu-4-6.s -32 -EB
-#ld: -r -melf32btsmip
+#source: attr-gnu-4-5.s
+#source: attr-gnu-4-6.s
+#ld: -r
 #readelf: -A
 
 Attribute Section: gnu

@@ -1,9 +1,9 @@
-#source: jr.s -mips32r2 -32 -mfp32 -EB RUN_OBJCOPY
+#source: jr.s -mips32r2 -mfp32 RUN_OBJCOPY
 #objcopy_objects: -R .MIPS.abiflags
-#ld: -melf32btsmip -e 0
+#ld: -e 0
 #objdump: -p
 
-[^:]*:     file format elf32-tradbigmips
+[^:]*:     file format elf32-.*
 
 Program Header:
 #...

@@ -36,11 +36,11 @@ Contents of section \.text:
 Contents of section \.reginfo:
  0000 00000100 00000000 00000000 00000000  .*
  0010 00000000 00000000                    .*
-Contents of section .MIPS.abiflags:
+Contents of section \.MIPS\.abiflags:
  .*
  .*
 Contents of section foo:
  0000 00000000 08000000 00000000 03000000  .*
  0010 00000000 08000000 00000000 00000000  .*
-Contents of section .gnu.attributes:
+Contents of section \.gnu\.attributes:
  .*

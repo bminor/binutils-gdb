@@ -18,7 +18,7 @@
 
 #include "server.h"
 #include "i387-fp.h"
-#include "i386-xstate.h"
+#include "x86-xstate.h"
 
 static const int num_mpx_bnd_registers = 4;
 static const int num_mpx_cfg_registers = 2;
@@ -288,35 +288,35 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
      zero.  */
   if (clear_bv)
     {
-      if ((clear_bv & I386_XSTATE_X87))
+      if ((clear_bv & X86_XSTATE_X87))
 	for (i = 0; i < 8; i++)
 	  memset (((char *) &fp->st_space[0]) + i * 16, 0, 10);
 
-      if ((clear_bv & I386_XSTATE_SSE))
+      if ((clear_bv & X86_XSTATE_SSE))
 	for (i = 0; i < num_xmm_registers; i++) 
 	  memset (((char *) &fp->xmm_space[0]) + i * 16, 0, 16);
 
-      if ((clear_bv & I386_XSTATE_AVX))
+      if ((clear_bv & X86_XSTATE_AVX))
 	for (i = 0; i < num_xmm_registers; i++) 
 	  memset (((char *) &fp->ymmh_space[0]) + i * 16, 0, 16);
 
-      if ((clear_bv & I386_XSTATE_BNDREGS))
+      if ((clear_bv & X86_XSTATE_BNDREGS))
 	for (i = 0; i < num_mpx_bnd_registers; i++)
 	  memset (((char *) &fp->mpx_bnd_space[0]) + i * 16, 0, 16);
 
-      if ((clear_bv & I386_XSTATE_BNDCFG))
+      if ((clear_bv & X86_XSTATE_BNDCFG))
 	for (i = 0; i < num_mpx_cfg_registers; i++)
 	  memset (((char *) &fp->mpx_cfg_space[0]) + i * 8, 0, 8);
 
-      if ((clear_bv & I386_XSTATE_K))
+      if ((clear_bv & X86_XSTATE_K))
 	for (i = 0; i < num_avx512_k_registers; i++)
 	  memset (((char *) &fp->k_space[0]) + i * 8, 0, 8);
 
-      if ((clear_bv & I386_XSTATE_ZMM_H))
+      if ((clear_bv & X86_XSTATE_ZMM_H))
 	for (i = 0; i < num_avx512_zmmh_low_registers; i++)
 	  memset (((char *) &fp->zmmh_low_space[0]) + i * 32, 0, 32);
 
-      if ((clear_bv & I386_XSTATE_ZMM))
+      if ((clear_bv & X86_XSTATE_ZMM))
 	{
 	  for (i = 0; i < num_avx512_zmmh_high_registers; i++)
 	    memset (((char *) &fp->zmmh_low_space[0]) + 32 + i * 64, 0, 32);
@@ -328,7 +328,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
     }
 
   /* Check if any x87 registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_X87))
+  if ((x86_xcr0 & X86_XSTATE_X87))
     {
       int st0_regnum = find_regno (regcache->tdesc, "st0");
 
@@ -338,14 +338,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->st_space[0]) + i * 16;
 	  if (memcmp (raw, p, 10))
 	    {
-	      xstate_bv |= I386_XSTATE_X87;
+	      xstate_bv |= X86_XSTATE_X87;
 	      memcpy (p, raw, 10);
 	    }
 	}
     }
 
   /* Check if any SSE registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_SSE))
+  if ((x86_xcr0 & X86_XSTATE_SSE))
     {
       int xmm0_regnum = find_regno (regcache->tdesc, "xmm0");
 
@@ -355,14 +355,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->xmm_space[0]) + i * 16;
 	  if (memcmp (raw, p, 16))
 	    {
-	      xstate_bv |= I386_XSTATE_SSE;
+	      xstate_bv |= X86_XSTATE_SSE;
 	      memcpy (p, raw, 16);
 	    }
 	}
     }
 
   /* Check if any AVX registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_AVX))
+  if ((x86_xcr0 & X86_XSTATE_AVX))
     {
       int ymm0h_regnum = find_regno (regcache->tdesc, "ymm0h");
 
@@ -372,14 +372,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->ymmh_space[0]) + i * 16;
 	  if (memcmp (raw, p, 16))
 	    {
-	      xstate_bv |= I386_XSTATE_AVX;
+	      xstate_bv |= X86_XSTATE_AVX;
 	      memcpy (p, raw, 16);
 	    }
 	}
     }
 
   /* Check if any bound register has changed.  */
-  if ((x86_xcr0 & I386_XSTATE_BNDREGS))
+  if ((x86_xcr0 & X86_XSTATE_BNDREGS))
     {
      int bnd0r_regnum = find_regno (regcache->tdesc, "bnd0raw");
 
@@ -389,14 +389,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->mpx_bnd_space[0]) + i * 16;
 	  if (memcmp (raw, p, 16))
 	    {
-	      xstate_bv |= I386_XSTATE_BNDREGS;
+	      xstate_bv |= X86_XSTATE_BNDREGS;
 	      memcpy (p, raw, 16);
 	    }
 	}
     }
 
   /* Check if any status register has changed.  */
-  if ((x86_xcr0 & I386_XSTATE_BNDCFG))
+  if ((x86_xcr0 & X86_XSTATE_BNDCFG))
     {
       int bndcfg_regnum = find_regno (regcache->tdesc, "bndcfgu");
 
@@ -406,14 +406,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->mpx_cfg_space[0]) + i * 8;
 	  if (memcmp (raw, p, 8))
 	    {
-	      xstate_bv |= I386_XSTATE_BNDCFG;
+	      xstate_bv |= X86_XSTATE_BNDCFG;
 	      memcpy (p, raw, 8);
 	    }
 	}
     }
 
   /* Check if any K registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_K))
+  if ((x86_xcr0 & X86_XSTATE_K))
     {
       int k0_regnum = find_regno (regcache->tdesc, "k0");
 
@@ -423,14 +423,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->k_space[0]) + i * 8;
 	  if (memcmp (raw, p, 8) != 0)
 	    {
-	      xstate_bv |= I386_XSTATE_K;
+	      xstate_bv |= X86_XSTATE_K;
 	      memcpy (p, raw, 8);
 	    }
 	}
     }
 
   /* Check if any of ZMM0H-ZMM15H registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_ZMM_H))
+  if ((x86_xcr0 & X86_XSTATE_ZMM_H))
     {
       int zmm0h_regnum = find_regno (regcache->tdesc, "zmm0h");
 
@@ -440,14 +440,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->zmmh_low_space[0]) + i * 32;
 	  if (memcmp (raw, p, 32) != 0)
 	    {
-	      xstate_bv |= I386_XSTATE_ZMM_H;
+	      xstate_bv |= X86_XSTATE_ZMM_H;
 	      memcpy (p, raw, 32);
 	    }
 	}
     }
 
   /* Check if any of ZMM16H-ZMM31H registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_ZMM))
+  if ((x86_xcr0 & X86_XSTATE_ZMM))
     {
       int zmm16h_regnum = find_regno (regcache->tdesc, "zmm16h");
 
@@ -457,14 +457,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->zmmh_low_space[0]) + 32 + i * 64;
 	  if (memcmp (raw, p, 32) != 0)
 	    {
-	      xstate_bv |= I386_XSTATE_ZMM;
+	      xstate_bv |= X86_XSTATE_ZMM;
 	      memcpy (p, raw, 32);
 	    }
 	}
     }
 
   /* Check if any XMM_AVX512 registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_ZMM))
+  if ((x86_xcr0 & X86_XSTATE_ZMM))
     {
       int xmm_avx512_regnum = find_regno (regcache->tdesc, "xmm16");
 
@@ -474,14 +474,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->zmmh_high_space[0]) + i * 64;
 	  if (memcmp (raw, p, 16) != 0)
 	    {
-	      xstate_bv |= I386_XSTATE_ZMM;
+	      xstate_bv |= X86_XSTATE_ZMM;
 	      memcpy (p, raw, 16);
 	    }
 	}
     }
 
   /* Check if any YMMH_AVX512 registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_ZMM))
+  if ((x86_xcr0 & X86_XSTATE_ZMM))
     {
       int ymmh_avx512_regnum = find_regno (regcache->tdesc, "ymm16h");
 
@@ -491,7 +491,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  p = ((char *) &fp->zmmh_high_space[0]) + 16 + i * 64;
 	  if (memcmp (raw, p, 16) != 0)
 	    {
-	      xstate_bv |= I386_XSTATE_ZMM;
+	      xstate_bv |= X86_XSTATE_ZMM;
 	      memcpy (p, raw, 16);
 	    }
 	}
@@ -653,11 +653,11 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
   clear_bv = (~fp->xstate_bv) & x86_xcr0;
 
   /* Check if any x87 registers are changed.  */
-  if ((x86_xcr0 & I386_XSTATE_X87) != 0)
+  if ((x86_xcr0 & X86_XSTATE_X87) != 0)
     {
       int st0_regnum = find_regno (regcache->tdesc, "st0");
 
-      if ((clear_bv & I386_XSTATE_X87) != 0)
+      if ((clear_bv & X86_XSTATE_X87) != 0)
 	{
 	  for (i = 0; i < 8; i++)
 	    supply_register_zeroed (regcache, i + st0_regnum);
@@ -670,11 +670,11 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
     }
 
-  if ((x86_xcr0 & I386_XSTATE_SSE) != 0)
+  if ((x86_xcr0 & X86_XSTATE_SSE) != 0)
     {
       int xmm0_regnum = find_regno (regcache->tdesc, "xmm0");
 
-      if ((clear_bv & I386_XSTATE_SSE))
+      if ((clear_bv & X86_XSTATE_SSE))
 	{
 	  for (i = 0; i < num_xmm_registers; i++)
 	    supply_register_zeroed (regcache, i + xmm0_regnum);
@@ -687,11 +687,11 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
     }
 
-  if ((x86_xcr0 & I386_XSTATE_AVX) != 0)
+  if ((x86_xcr0 & X86_XSTATE_AVX) != 0)
     {
       int ymm0h_regnum = find_regno (regcache->tdesc, "ymm0h");
 
-      if ((clear_bv & I386_XSTATE_AVX) != 0)
+      if ((clear_bv & X86_XSTATE_AVX) != 0)
 	{
 	  for (i = 0; i < num_xmm_registers; i++)
 	    supply_register_zeroed (regcache, i + ymm0h_regnum);
@@ -704,12 +704,12 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
     }
 
-  if ((x86_xcr0 & I386_XSTATE_BNDREGS))
+  if ((x86_xcr0 & X86_XSTATE_BNDREGS))
     {
       int bnd0r_regnum = find_regno (regcache->tdesc, "bnd0raw");
 
 
-      if ((clear_bv & I386_XSTATE_BNDREGS) != 0)
+      if ((clear_bv & X86_XSTATE_BNDREGS) != 0)
 	{
 	  for (i = 0; i < num_mpx_bnd_registers; i++)
 	    supply_register_zeroed (regcache, i + bnd0r_regnum);
@@ -723,11 +723,11 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 
     }
 
-  if ((x86_xcr0 & I386_XSTATE_BNDCFG))
+  if ((x86_xcr0 & X86_XSTATE_BNDCFG))
     {
       int bndcfg_regnum = find_regno (regcache->tdesc, "bndcfgu");
 
-      if ((clear_bv & I386_XSTATE_BNDCFG) != 0)
+      if ((clear_bv & X86_XSTATE_BNDCFG) != 0)
 	{
 	  for (i = 0; i < num_mpx_cfg_registers; i++)
 	    supply_register_zeroed (regcache, i + bndcfg_regnum);
@@ -740,11 +740,11 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
     }
 
-  if ((x86_xcr0 & I386_XSTATE_K) != 0)
+  if ((x86_xcr0 & X86_XSTATE_K) != 0)
     {
       int k0_regnum = find_regno (regcache->tdesc, "k0");
 
-      if ((clear_bv & I386_XSTATE_K) != 0)
+      if ((clear_bv & X86_XSTATE_K) != 0)
 	{
 	  for (i = 0; i < num_avx512_k_registers; i++)
 	    supply_register_zeroed (regcache, i + k0_regnum);
@@ -757,11 +757,11 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
     }
 
-  if ((x86_xcr0 & I386_XSTATE_ZMM_H) != 0)
+  if ((x86_xcr0 & X86_XSTATE_ZMM_H) != 0)
     {
       int zmm0h_regnum = find_regno (regcache->tdesc, "zmm0h");
 
-      if ((clear_bv & I386_XSTATE_ZMM_H) != 0)
+      if ((clear_bv & X86_XSTATE_ZMM_H) != 0)
 	{
 	  for (i = 0; i < num_avx512_zmmh_low_registers; i++)
 	    supply_register_zeroed (regcache, i + zmm0h_regnum);
@@ -774,13 +774,13 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
     }
 
-  if ((x86_xcr0 & I386_XSTATE_ZMM) != 0)
+  if ((x86_xcr0 & X86_XSTATE_ZMM) != 0)
     {
       int zmm16h_regnum = find_regno (regcache->tdesc, "zmm16h");
       int ymm16h_regnum = find_regno (regcache->tdesc, "ymm16h");
       int xmm16_regnum = find_regno (regcache->tdesc, "xmm16");
 
-      if ((clear_bv & I386_XSTATE_ZMM) != 0)
+      if ((clear_bv & X86_XSTATE_ZMM) != 0)
 	{
 	  for (i = 0; i < num_avx512_zmmh_high_registers; i++)
 	    supply_register_zeroed (regcache, i + zmm16h_regnum);
@@ -837,4 +837,4 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 }
 
 /* Default to SSE.  */
-unsigned long long x86_xcr0 = I386_XSTATE_SSE_MASK;
+unsigned long long x86_xcr0 = X86_XSTATE_SSE_MASK;

@@ -76,8 +76,6 @@ int pass_signals[GDB_SIGNAL_LAST];
 int program_signals[GDB_SIGNAL_LAST];
 int program_signals_p;
 
-jmp_buf toplevel;
-
 /* The PID of the originally created or attached inferior.  Used to
    send signals to the process when GDB sends us an asynchronous interrupt
    (user hitting Control-C in the client), and to wait for the child to exit
@@ -3013,8 +3011,34 @@ detach_or_kill_for_exit (void)
   for_each_inferior (&all_processes, detach_or_kill_inferior_callback);
 }
 
-int
-main (int argc, char *argv[])
+/* Value that will be passed to exit(3) when gdbserver exits.  */
+static int exit_code;
+
+/* Cleanup version of detach_or_kill_for_exit.  */
+
+static void
+detach_or_kill_for_exit_cleanup (void *ignore)
+{
+  volatile struct gdb_exception exception;
+
+  TRY_CATCH (exception, RETURN_MASK_ALL)
+    {
+      detach_or_kill_for_exit ();
+    }
+
+  if (exception.reason < 0)
+    {
+      fflush (stdout);
+      fprintf (stderr, "Detach or kill failed: %s\n", exception.message);
+      exit_code = 1;
+    }
+}
+
+/* Main function.  This is called by the real "main" function,
+   wrapped in a TRY_CATCH that handles any uncaught exceptions.  */
+
+static void ATTRIBUTE_NORETURN
+captured_main (int argc, char *argv[])
 {
   int bad_attach;
   int pid;
@@ -3138,12 +3162,6 @@ main (int argc, char *argv[])
       continue;
     }
 
-  if (setjmp (toplevel))
-    {
-      fprintf (stderr, "Exiting\n");
-      exit (1);
-    }
-
   port = *next_arg;
   next_arg++;
   if (port == NULL || (!attach && !multi_mode && *next_arg == NULL))
@@ -3226,6 +3244,7 @@ main (int argc, char *argv[])
       last_status.value.integer = 0;
       last_ptid = minus_one_ptid;
     }
+  make_cleanup (detach_or_kill_for_exit_cleanup, NULL);
 
   initialize_notif ();
 
@@ -3234,19 +3253,6 @@ main (int argc, char *argv[])
      shared library event" notice on gdb side.  */
   dlls_changed = 0;
 
-  if (setjmp (toplevel))
-    {
-      /* If something fails and longjmps while detaching or killing
-	 inferiors, we'd end up here again, stuck in an infinite loop
-	 trap.  Be sure that if that happens, we exit immediately
-	 instead.  */
-      if (setjmp (toplevel) == 0)
-	detach_or_kill_for_exit ();
-      else
-	fprintf (stderr, "Detach or kill failed.  Exiting\n");
-      exit (1);
-    }
-
   if (last_status.kind == TARGET_WAITKIND_EXITED
       || last_status.kind == TARGET_WAITKIND_SIGNALLED)
     was_running = 0;
@@ -3254,13 +3260,12 @@ main (int argc, char *argv[])
     was_running = 1;
 
   if (!was_running && !multi_mode)
-    {
-      fprintf (stderr, "No program to debug.  GDBserver exiting.\n");
-      exit (1);
-    }
+    error ("No program to debug");
 
   while (1)
     {
+      volatile struct gdb_exception exception;
+
       noack_mode = 0;
       multi_process = 0;
       /* Be sure we're out of tfind mode.  */
@@ -3268,80 +3273,95 @@ main (int argc, char *argv[])
 
       remote_open (port);
 
-      if (setjmp (toplevel) != 0)
+      TRY_CATCH (exception, RETURN_MASK_ERROR)
 	{
-	  /* An error occurred.  */
+	  /* Wait for events.  This will return when all event sources
+	     are removed from the event loop.  */
+	  start_event_loop ();
+
+	  /* If an exit was requested (using the "monitor exit"
+	     command), terminate now.  The only other way to get
+	     here is for getpkt to fail; close the connection
+	     and reopen it at the top of the loop.  */
+
+	  if (exit_requested || run_once)
+	    throw_quit ("Quit");
+
+	  fprintf (stderr,
+		   "Remote side has terminated connection.  "
+		   "GDBserver will reopen the connection.\n");
+
+	  /* Get rid of any pending statuses.  An eventual reconnection
+	     (by the same GDB instance or another) will refresh all its
+	     state from scratch.  */
+	  discard_queued_stop_replies (-1);
+	  for_each_inferior (&all_threads,
+			     clear_pending_status_callback);
+
+	  if (tracing)
+	    {
+	      if (disconnected_tracing)
+		{
+		  /* Try to enable non-stop/async mode, so we we can
+		     both wait for an async socket accept, and handle
+		     async target events simultaneously.  There's also
+		     no point either in having the target always stop
+		     all threads, when we're going to pass signals
+		     down without informing GDB.  */
+		  if (!non_stop)
+		    {
+		      if (start_non_stop (1))
+			non_stop = 1;
+
+		      /* Detaching implicitly resumes all threads;
+			 simply disconnecting does not.  */
+		    }
+		}
+	      else
+		{
+		  fprintf (stderr,
+			   "Disconnected tracing disabled; "
+			   "stopping trace run.\n");
+		  stop_tracing ();
+		}
+	    }
+	}
+
+      if (exception.reason == RETURN_ERROR)
+	{
 	  if (response_needed)
 	    {
 	      write_enn (own_buf);
 	      putpkt (own_buf);
 	    }
 	}
-
-      /* Wait for events.  This will return when all event sources are
-	 removed from the event loop.  */
-      start_event_loop ();
-
-      /* If an exit was requested (using the "monitor exit" command),
-	 terminate now.  The only other way to get here is for
-	 getpkt to fail; close the connection and reopen it at the
-	 top of the loop.  */
-
-      if (exit_requested || run_once)
-	{
-	  /* If something fails and longjmps while detaching or
-	     killing inferiors, we'd end up here again, stuck in an
-	     infinite loop trap.  Be sure that if that happens, we
-	     exit immediately instead.  */
-	  if (setjmp (toplevel) == 0)
-	    {
-	      detach_or_kill_for_exit ();
-	      exit (0);
-	    }
-	  else
-	    {
-	      fprintf (stderr, "Detach or kill failed.  Exiting\n");
-	      exit (1);
-	    }
-	}
-
-      fprintf (stderr,
-	       "Remote side has terminated connection.  "
-	       "GDBserver will reopen the connection.\n");
-
-      /* Get rid of any pending statuses.  An eventual reconnection
-	 (by the same GDB instance or another) will refresh all its
-	 state from scratch.  */
-      discard_queued_stop_replies (-1);
-      for_each_inferior (&all_threads, clear_pending_status_callback);
-
-      if (tracing)
-	{
-	  if (disconnected_tracing)
-	    {
-	      /* Try to enable non-stop/async mode, so we we can both
-		 wait for an async socket accept, and handle async
-		 target events simultaneously.  There's also no point
-		 either in having the target always stop all threads,
-		 when we're going to pass signals down without
-		 informing GDB.  */
-	      if (!non_stop)
-		{
-		  if (start_non_stop (1))
-		    non_stop = 1;
-
-		  /* Detaching implicitly resumes all threads; simply
-		     disconnecting does not.  */
-		}
-	    }
-	  else
-	    {
-	      fprintf (stderr,
-		       "Disconnected tracing disabled; stopping trace run.\n");
-	      stop_tracing ();
-	    }
-	}
     }
+}
+
+/* Main function.  */
+
+int
+main (int argc, char *argv[])
+{
+  volatile struct gdb_exception exception;
+
+  TRY_CATCH (exception, RETURN_MASK_ALL)
+    {
+      captured_main (argc, argv);
+    }
+
+  /* captured_main should never return.  */
+  gdb_assert (exception.reason < 0);
+
+  if (exception.reason == RETURN_ERROR)
+    {
+      fflush (stdout);
+      fprintf (stderr, "%s\n", exception.message);
+      fprintf (stderr, "Exiting\n");
+      exit_code = 1;
+    }
+
+  exit (exit_code);
 }
 
 /* Skip PACKET until the next semi-colon (or end of string).  */

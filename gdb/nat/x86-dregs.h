@@ -1,4 +1,4 @@
-/* Debug register code for the i386.
+/* Debug register code for x86 (i386 and x86-64).
 
    Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* Support for hardware watchpoints and breakpoints using the i386
+/* Support for hardware watchpoints and breakpoints using the x86
    debug registers.
 
    This provides several functions for inserting and removing
@@ -29,15 +29,15 @@
    counts, and allow to watch regions up to 16 bytes long
    (32 bytes on 64 bit hosts).  */
 
-#ifndef I386_DREGS_H
-#define I386_DREGS_H 1
+#ifndef X86_DREGS_H
+#define X86_DREGS_H 1
 
 /* Forward declaration.  */
 enum target_hw_bp_type;
 
 /* Low-level function vector.  */
 
-struct i386_dr_low_type
+struct x86_dr_low_type
   {
     /* Set the debug control (DR7) register to a given value for
        all LWPs.  May be NULL if the debug control register cannot
@@ -64,7 +64,7 @@ struct i386_dr_low_type
     int debug_register_length;
   };
 
-extern struct i386_dr_low_type i386_dr_low;
+extern struct x86_dr_low_type x86_dr_low;
 
 /* Debug registers' indices.  */
 #define DR_FIRSTADDR 0
@@ -75,7 +75,7 @@ extern struct i386_dr_low_type i386_dr_low;
 
 /* Global state needed to track h/w watchpoints.  */
 
-struct i386_debug_reg_state
+struct x86_debug_reg_state
 {
   /* Mirror the inferior's DRi registers.  We keep the status and
      control registers separated because they don't hold addresses.
@@ -85,42 +85,43 @@ struct i386_debug_reg_state
   CORE_ADDR dr_mirror[DR_NADDR];
   unsigned dr_status_mirror, dr_control_mirror;
 
-  /* Reference counts for each debug register.  */
+  /* Reference counts for each debug address register.  */
   int dr_ref_count[DR_NADDR];
 };
 
-/* A macro to loop over all debug registers.  */
-#define ALL_DEBUG_REGISTERS(i)	for (i = 0; i < DR_NADDR; i++)
+/* A macro to loop over all debug address registers.  */
+#define ALL_DEBUG_ADDRESS_REGISTERS(i) \
+  for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 
 /* Insert a watchpoint to watch a memory region which starts at
    address ADDR and whose length is LEN bytes.  Watch memory accesses
    of the type TYPE.  Return 0 on success, -1 on failure.  */
-extern int i386_dr_insert_watchpoint (struct i386_debug_reg_state *state,
-				      enum target_hw_bp_type type,
-				      CORE_ADDR addr,
-				      int len);
+extern int x86_dr_insert_watchpoint (struct x86_debug_reg_state *state,
+				     enum target_hw_bp_type type,
+				     CORE_ADDR addr,
+				     int len);
 
 /* Remove a watchpoint that watched the memory region which starts at
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
-extern int i386_dr_remove_watchpoint (struct i386_debug_reg_state *state,
-				      enum target_hw_bp_type type,
-				      CORE_ADDR addr,
-				      int len);
+extern int x86_dr_remove_watchpoint (struct x86_debug_reg_state *state,
+				     enum target_hw_bp_type type,
+				     CORE_ADDR addr,
+				     int len);
 
 /* Return non-zero if we can watch a memory region that starts at
    address ADDR and whose length is LEN bytes.  */
-extern int i386_dr_region_ok_for_watchpoint (struct i386_debug_reg_state *state,
-					     CORE_ADDR addr, int len);
+extern int x86_dr_region_ok_for_watchpoint (struct x86_debug_reg_state *state,
+					    CORE_ADDR addr, int len);
 
 /* If the inferior has some break/watchpoint that triggered, set the
    address associated with that break/watchpoint and return true.
    Otherwise, return false.  */
-extern int i386_dr_stopped_data_address (struct i386_debug_reg_state *state,
-					 CORE_ADDR *addr_p);
+extern int x86_dr_stopped_data_address (struct x86_debug_reg_state *state,
+					CORE_ADDR *addr_p);
 
 /* Return true if the inferior has some watchpoint that triggered.
    Otherwise return false.  */
-extern int i386_dr_stopped_by_watchpoint (struct i386_debug_reg_state *state);
+extern int x86_dr_stopped_by_watchpoint (struct x86_debug_reg_state *state);
 
-#endif /* I386_DREGS_H */
+#endif /* X86_DREGS_H */

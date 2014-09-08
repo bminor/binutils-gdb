@@ -1209,7 +1209,7 @@ Sized_pluginobj<size, big_endian>::do_section_size(unsigned int)
 
 template<int size, bool big_endian>
 std::string
-Sized_pluginobj<size, big_endian>::do_section_name(unsigned int)
+Sized_pluginobj<size, big_endian>::do_section_name(unsigned int) const
 {
   gold_unreachable();
   return std::string();
