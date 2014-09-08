@@ -1,3 +1,9 @@
+2014-09-08  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* linux-ppc-low.c (ppc_collect_ptrace_register): Adjust routine to take
+	endianness into account.
+	(ppc_supply_ptrace_register): Likewise.
+
 2014-09-03  James Hogan  <james.hogan@imgtec.com>
 
 	* linux-mips-low.c (mips_read_description): Reset errno to 0 prior
