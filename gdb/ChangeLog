@@ -1,3 +1,7 @@
+2014-09-09  James Hogan  <james.hogan@imgtec.com>
+
+	* trad-frame.h (trad_frame_set_reg_unknown): Remove declaration.
+
 2014-09-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* i386-linux-nat.c, x86-linux-nat.c: Add <sys/uio.h> #include.
