@@ -1,5 +1,11 @@
 2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* lib/gdb.exp (gdb_test_multiple): Remove code to select the
+	timeout, don't pass one down to gdb_expect.
+	(gdb_expect): Rework timeout selection.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* lib/gdbserver-support.exp (gdbserver_start): Throw an error
 	exception on timeout.
 	(gdbserver_run): Catch any `gdbserver_spawn' error exceptions.

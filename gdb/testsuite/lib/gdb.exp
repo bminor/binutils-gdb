@@ -792,21 +792,6 @@ proc gdb_test_multiple { command message user_code } {
 	}
     }
 
-    if [target_info exists gdb,timeout] {
-	set tmt [target_info gdb,timeout]
-    } else {
-	if [info exists timeout] {
-	    set tmt $timeout
-	} else {
-	    global timeout
-	    if [info exists timeout] {
-		set tmt $timeout
-	    } else {
-		set tmt 60
-	    }
-	}
-    }
-
     set code {
 	-re ".*A problem internal to GDB has been detected" {
 	    fail "$message (GDB internal error)"
@@ -912,7 +897,7 @@ proc gdb_test_multiple { command message user_code } {
     }
 
     set result 0
-    set code [catch {gdb_expect $tmt $code} string]
+    set code [catch {gdb_expect $code} string]
     if {$code == 1} {
 	global errorInfo errorCode
 	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
@@ -3127,35 +3112,27 @@ proc gdb_expect { args } {
 	set expcode $args
     }
 
+    # A timeout argument takes precedence, otherwise of all the timeouts
+    # select the largest.
+    upvar #0 timeout gtimeout
     upvar timeout timeout
-
-    if [target_info exists gdb,timeout] {
-	if [info exists timeout] {
-	    if { $timeout < [target_info gdb,timeout] } {
-		set gtimeout [target_info gdb,timeout]
-	    } else {
-		set gtimeout $timeout
-	    }
-	} else {
-	    set gtimeout [target_info gdb,timeout]
-	}
-    }
-
-    if ![info exists gtimeout] {
-	global timeout
-	if [info exists timeout] {
-	    set gtimeout $timeout
-	}
-    }
-
     if [info exists atimeout] {
-	if { ![info exists gtimeout] || $gtimeout < $atimeout } {
-	    set gtimeout $atimeout
-	}
+	set tmt $atimeout
     } else {
-	if ![info exists gtimeout] {
+	set tmt 0
+	if [info exists timeout] {
+	    set tmt $timeout
+	}
+	if { [info exists gtimeout] && $gtimeout > $tmt } {
+	    set tmt $gtimeout
+	}
+	if { [target_info exists gdb,timeout]
+	     && [target_info gdb,timeout] > $tmt } {
+	    set tmt [target_info gdb,timeout]
+	}
+	if { $tmt == 0 } {
 	    # Eeeeew.
-	    set gtimeout 60
+	    set tmt 60
 	}
     }
 
@@ -3170,7 +3147,7 @@ proc gdb_expect { args } {
 	}
     }
     set code [catch \
-	{uplevel remote_expect host $gtimeout $expcode} string]
+	{uplevel remote_expect host $tmt $expcode} string]
     if [info exists old_val] {
 	set remote_suppress_flag $old_val
     } else {
