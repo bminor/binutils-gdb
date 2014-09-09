@@ -275,6 +275,7 @@ proc gdbserver_start { options arguments } {
 	# Wait for the server to open its TCP socket, so that GDB can connect.
 	expect {
 	    -i $server_spawn_id
+	    -timeout 120
 	    -notransfer
 	    -re "Listening on" { }
 	    -re "Can't bind address: Address already in use\\.\r\n" {

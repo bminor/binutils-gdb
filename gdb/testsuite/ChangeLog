@@ -1,3 +1,8 @@
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdbserver-support.exp (gdbserver_start): Set timeout to
+	120 on waiting for the TCP socket to open.
+
 2014-09-09  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.base/default.exp (show_conv_list): Add _caller_is,
