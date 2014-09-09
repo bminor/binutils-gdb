@@ -1,5 +1,9 @@
 2014-09-09  James Hogan  <james.hogan@imgtec.com>
 
+	* MAINTAINERS (Write After Approval): Add "James Hogan".
+
+2014-09-09  James Hogan  <james.hogan@imgtec.com>
+
 	* trad-frame.h (trad_frame_set_reg_unknown): Remove declaration.
 
 2014-09-09  Joel Brobecker  <brobecker@adacore.com>
