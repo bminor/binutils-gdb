@@ -1,3 +1,10 @@
+2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR c++/13403
+	PR c++/15154
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Lookup copy constructors
+	with qualified args.
+
 2014-10-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp) <BINOP_ADD>: Add handling

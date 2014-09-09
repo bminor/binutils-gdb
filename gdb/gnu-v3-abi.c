@@ -1312,11 +1312,17 @@ gnuv3_pass_by_reference (struct type *type)
 
 	/* If this method takes two arguments, and the second argument is
 	   a reference to this class, then it is a copy constructor.  */
-	if (TYPE_NFIELDS (fieldtype) == 2
-	    && TYPE_CODE (TYPE_FIELD_TYPE (fieldtype, 1)) == TYPE_CODE_REF
-	    && check_typedef (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (fieldtype,
-								 1))) == type)
-	  return 1;
+	if (TYPE_NFIELDS (fieldtype) == 2)
+	  {
+	    struct type *arg_type = TYPE_FIELD_TYPE (fieldtype, 1);
+	    struct type *arg_target_type;
+
+	    arg_target_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+
+	    if (TYPE_CODE (arg_type) == TYPE_CODE_REF
+		&& class_types_same_p (arg_target_type, type))
+	      return 1;
+	  }
       }
 
   /* Even if all the constructors and destructors were artificial, one
