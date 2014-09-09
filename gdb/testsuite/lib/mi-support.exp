@@ -477,7 +477,10 @@ proc mi_gdb_target_load { } {
 
     if { [info procs gdbserver_gdb_load] != "" } {
 	mi_gdb_test "kill" ".*" ""
-	set res [gdbserver_gdb_load]
+	if { [catch gdbserver_gdb_load res] == 1 } {
+	    perror $res
+	    return -1
+	}
 	set protocol [lindex $res 0]
 	set gdbport [lindex $res 1]
 

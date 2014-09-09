@@ -287,6 +287,9 @@ proc gdbserver_start { options arguments } {
 		    continue
 		}
 	    }
+	    timeout {
+		error "Timeout waiting for gdbserver response."
+	    }
 	}
 	break
     }
@@ -326,7 +329,8 @@ proc gdbserver_spawn { child_args } {
 }
 
 # Start a gdbserver process running HOST_EXEC and pass CHILD_ARGS
-# to it.  Return 0 on success, or non-zero on failure.
+# to it.  Return 0 on success, or non-zero on failure: 2 if gdbserver
+# failed to start or 1 if we couldn't connect to it.
 
 proc gdbserver_run { child_args } {
     global gdbserver_protocol
@@ -347,7 +351,10 @@ proc gdbserver_run { child_args } {
 	}
     }
 
-    set res [gdbserver_spawn $child_args]
+    if { [catch { gdbserver_spawn $child_args } res] == 1 } {
+	perror $res
+	return 2
+    }
     set gdbserver_protocol [lindex $res 0]
     set gdbserver_gdbport [lindex $res 1]
 
@@ -377,7 +384,10 @@ proc gdbserver_start_extended { } {
     global gdbserver_gdbport
     global use_gdb_stub
 
-    set res [gdbserver_start "--multi" ""]
+    if { [catch { gdbserver_start "--multi" "" } res] == 1 } {
+	perror $res
+	return 2
+    }
     set gdbserver_protocol [lindex $res 0]
     if { [string first "extended-" $gdbserver_protocol] != 0} {
 	set gdbserver_protocol "extended-$gdbserver_protocol"
@@ -399,7 +409,10 @@ proc gdbserver_start_multi { } {
     global gdbserver_protocol
     global gdbserver_gdbport
 
-    set res [gdbserver_start "--multi" ""]
+    if { [catch { gdbserver_start "--multi" "" } res] == 1 } {
+	perror $res
+	return 2
+    }
     set gdbserver_protocol [lindex $res 0]
     set gdbserver_gdbport [lindex $res 1]
 
@@ -414,7 +427,10 @@ proc mi_gdbserver_start_multi { } {
     global gdbserver_protocol
     global gdbserver_gdbport
 
-    set res [gdbserver_start "--multi" ""]
+    if { [catch { gdbserver_start "--multi" "" } res] == 1 } {
+	perror $res
+	return 2
+    }
     set gdbserver_protocol [lindex $res 0]
     set gdbserver_gdbport [lindex $res 1]
 

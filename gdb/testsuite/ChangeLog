@@ -1,5 +1,16 @@
 2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* lib/gdbserver-support.exp (gdbserver_start): Throw an error
+	exception on timeout.
+	(gdbserver_run): Catch any `gdbserver_spawn' error exceptions.
+	(gdbserver_start_extended): Catch any `gdbserver_start' error
+	exceptions.
+	(gdbserver_start_multi, mi_gdbserver_start_multi): Likewise.
+	* lib/mi-support.exp (mi_gdb_target_load): Catch any
+	`gdbserver_gdb_load' error exceptions.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* lib/gdbserver-support.exp (gdbserver_start): Set timeout to
 	120 on waiting for the TCP socket to open.
 
