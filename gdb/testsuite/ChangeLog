@@ -1,5 +1,10 @@
 2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
 
+	* gdb.cp/non-trivial-retval.cc: Add new test cases.
+	* gdb.cp/non-trivial-retval.exp: Add new tests.
+
+2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
+
 	PR c++/13403
 	PR c++/15154
 	* gdb.cp/non-trivial-retval.cc: New file.

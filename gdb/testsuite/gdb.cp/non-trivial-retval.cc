@@ -63,6 +63,52 @@ f2 (int i1, int i2)
   return b;
 }
 
+class C
+{
+public:
+  virtual int method ();
+
+  int c;
+};
+
+int
+C::method ()
+{
+  return c;
+}
+
+C
+f3 (int i1, int i2)
+{
+  C c;
+
+  c.c = i1 + i2;
+
+  return c;
+}
+
+class D
+{
+public:
+  int d;
+};
+
+class E : public virtual D
+{
+public:
+  int e;
+};
+
+E
+f4 (int i1, int i2)
+{
+  E e;
+
+  e.e = i1 + i2;
+
+  return e;
+}
+
 int
 main (void)
 {
