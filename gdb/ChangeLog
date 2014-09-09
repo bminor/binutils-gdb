@@ -1,3 +1,9 @@
+2014-09-08  Doug Evans  <xdje42@gmail.com>
+
+	* guile/scm-cmd.c (gdbscm_parse_command_name): Replace magic number
+	with named constant.  Fix style of pointer comparison.
+	* python/py-cmd.c (gdbpy_parse_command_name): Ditto.
+
 2014-09-07  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	PR gdb/17035
