@@ -1,5 +1,15 @@
 2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gdb.reverse/sigall-reverse.exp: Increase the timeout by
+	a factor of 2 for a slow test case.  Take the `gdb,timeout'
+	target setting into account for this calculation.
+	* gdb.reverse/until-precsave.exp: Increase the timeout by
+	a factor of 15 and 3 respectively rather than adding 120
+	for a pair of slow test cases.  Take the `gdb,timeout'
+	target setting into account for this calculation.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* lib/gdb.exp (gdb_test_multiple): Remove code to select the
 	timeout, don't pass one down to gdb_expect.
 	(gdb_expect): Rework timeout selection.
