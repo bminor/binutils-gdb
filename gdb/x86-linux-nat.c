@@ -24,6 +24,7 @@
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/procfs.h>
+#include <sys/uio.h>
 
 #include "x86-nat.h"
 #include "linux-nat.h"

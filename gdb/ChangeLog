@@ -1,3 +1,7 @@
+2014-09-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* i386-linux-nat.c, x86-linux-nat.c: Add <sys/uio.h> #include.
+
 2014-09-08  Doug Evans  <xdje42@gmail.com>
 
 	PR 17247
