@@ -95,7 +95,7 @@ gdb_test_no_output "set guile print-stack full" \
     "set print-stack to full, for backtrace test"
 
 gdb_test "guile (define x (top-func 42))" \
-    "Guile Backtrace:.*top-func 42.*middle-func 42.*bottom-func 42.*" \
+    "Guile Backtrace:.*top-func (42|_).*middle-func (42|_).*bottom-func (42|_).*" \
     "backtrace printed"
 
 # Verify gdb-specific errors are printed properly.

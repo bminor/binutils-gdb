@@ -1,3 +1,7 @@
+2014-09-09  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-error.exp: Handle guile 2.2 backtrace output.
+
 2014-09-09  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-var-display.exp: Set print symbol off.
