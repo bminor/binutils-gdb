@@ -1,3 +1,7 @@
+2014-09-09  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add cortex-a17.
+
 2014-09-03  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (parse_sys_reg): Remove the restriction on op0
