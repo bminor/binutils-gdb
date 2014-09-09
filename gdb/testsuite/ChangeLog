@@ -1,5 +1,12 @@
 2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gdb.base/watchpoint-solib.exp: Increase the timeout by a factor
+	of 30 rather than hardcoding 120 for a slow test case.  Take the
+	`gdb,timeout' target setting into account for this calculation.
+	Don't extend the timeout for the test cases that don't need it.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gdb.reverse/sigall-reverse.exp: Increase the timeout by
 	a factor of 2 for a slow test case.  Take the `gdb,timeout'
 	target setting into account for this calculation.
