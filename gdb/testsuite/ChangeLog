@@ -1,5 +1,10 @@
 2014-09-09  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.base/default.exp (show_conv_list): Add _caller_is,
+	_caller_matches, _any_caller_is, _any_caller_matches.
+
+2014-09-09  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.guile/scm-error.exp: Handle guile 2.2 backtrace output.
 
 2014-09-09  Yao Qi  <yao@codesourcery.com>
