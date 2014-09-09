@@ -1,5 +1,10 @@
 2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
 
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Treat dynamic classes
+	as non-trivial.
+
+2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
+
 	PR c++/13403
 	PR c++/15154
 	* gnu-v3-abi.c (gnuv3_pass_by_reference): Lookup copy constructors

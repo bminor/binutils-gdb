@@ -1281,6 +1281,11 @@ gnuv3_pass_by_reference (struct type *type)
       && TYPE_CODE (type) != TYPE_CODE_UNION)
     return 0;
 
+  /* A dynamic class has a non-trivial copy constructor.
+     See c++98 section 12.8 Copying class objects [class.copy].  */
+  if (gnuv3_dynamic_class (type))
+    return 1;
+
   for (fieldnum = 0; fieldnum < TYPE_NFN_FIELDS (type); fieldnum++)
     for (fieldelem = 0; fieldelem < TYPE_FN_FIELDLIST_LENGTH (type, fieldnum);
 	 fieldelem++)
