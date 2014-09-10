@@ -76,8 +76,6 @@
 # define ARCH64() (register_size (target_gdbarch (), 0) == 8)
 #endif
 
-static void exec_one_dummy_insn (struct regcache *);
-
 static target_xfer_partial_ftype rs6000_xfer_shared_libraries;
 
 /* Given REGNO, a gdb register number, return the corresponding
@@ -253,14 +251,6 @@ store_register (struct regcache *regcache, int regno)
   /* Fixed-point registers.  */
   else
     {
-      if (regno == gdbarch_sp_regnum (gdbarch))
-	/* Execute one dummy instruction (which is a breakpoint) in inferior
-	   process to give kernel a chance to do internal housekeeping.
-	   Otherwise the following ptrace(2) calls will mess up user stack
-	   since kernel will get confused about the bottom of the stack
-	   (%sp).  */
-	exec_one_dummy_insn (regcache);
-
       /* The PT_WRITE_GPR operation is rather odd.  For 32-bit inferiors,
          the register's value is passed by value, but for 64-bit inferiors,
 	 the address of a buffer containing the value is passed.  */
@@ -532,53 +522,6 @@ rs6000_wait (struct target_ops *ops,
     store_waitstatus (ourstatus, status);
 
   return pid_to_ptid (pid);
-}
-
-/* Execute one dummy breakpoint instruction.  This way we give the kernel
-   a chance to do some housekeeping and update inferior's internal data,
-   including u_area.  */
-
-static void
-exec_one_dummy_insn (struct regcache *regcache)
-{
-#define	DUMMY_INSN_ADDR	AIX_TEXT_SEGMENT_BASE+0x200
-
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int ret, status, pid;
-  CORE_ADDR prev_pc;
-  void *bp;
-
-  /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address.  We
-     assume that this address will never be executed again by the real
-     code.  */
-
-  bp = deprecated_insert_raw_breakpoint (gdbarch, NULL, DUMMY_INSN_ADDR);
-
-  /* You might think this could be done with a single ptrace call, and
-     you'd be correct for just about every platform I've ever worked
-     on.  However, rs6000-ibm-aix4.1.3 seems to have screwed this up --
-     the inferior never hits the breakpoint (it's also worth noting
-     powerpc-ibm-aix4.1.3 works correctly).  */
-  prev_pc = regcache_read_pc (regcache);
-  regcache_write_pc (regcache, DUMMY_INSN_ADDR);
-  if (ARCH64 ())
-    ret = rs6000_ptrace64 (PT_CONTINUE, ptid_get_pid (inferior_ptid),
-			   1, 0, NULL);
-  else
-    ret = rs6000_ptrace32 (PT_CONTINUE, ptid_get_pid (inferior_ptid),
-			   (int *) 1, 0, NULL);
-
-  if (ret != 0)
-    perror (_("pt_continue"));
-
-  do
-    {
-      pid = waitpid (ptid_get_pid (inferior_ptid), &status, 0);
-    }
-  while (pid != ptid_get_pid (inferior_ptid));
-
-  regcache_write_pc (regcache, prev_pc);
-  deprecated_remove_raw_breakpoint (gdbarch, bp);
 }
 
 

@@ -1,3 +1,8 @@
+2014-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* rs6000-nat.c (exec_one_dummy_insn): Remove.
+	(store_register): Do not call exec_one_dummy_insn.
+
 2014-09-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_array_bound): If ARR is a TYPE_CODE_PTR,
