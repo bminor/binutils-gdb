@@ -259,7 +259,6 @@ struct gdbarch
   gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags;
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
-  gdbarch_regset_from_core_section_ftype *regset_from_core_section;
   gdbarch_iterate_over_regset_sections_ftype *iterate_over_regset_sections;
   gdbarch_make_corefile_notes_ftype *make_corefile_notes;
   gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo;
@@ -570,7 +569,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_class_name_to_type_flags, has predicate.  */
   /* Skip verify of register_reggroup_p, invalid_p == 0 */
   /* Skip verify of fetch_pointer_argument, has predicate.  */
-  /* Skip verify of regset_from_core_section, has predicate.  */
   /* Skip verify of iterate_over_regset_sections, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
   /* Skip verify of elfcore_write_linux_prpsinfo, has predicate.  */
@@ -1143,12 +1141,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_type = <%s>\n",
                       host_address_to_string (gdbarch->register_type));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_regset_from_core_section_p() = %d\n",
-                      gdbarch_regset_from_core_section_p (gdbarch));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: regset_from_core_section = <%s>\n",
-                      host_address_to_string (gdbarch->regset_from_core_section));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_relocate_instruction_p() = %d\n",
                       gdbarch_relocate_instruction_p (gdbarch));
@@ -3238,30 +3230,6 @@ set_gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch,
                                     gdbarch_fetch_pointer_argument_ftype fetch_pointer_argument)
 {
   gdbarch->fetch_pointer_argument = fetch_pointer_argument;
-}
-
-int
-gdbarch_regset_from_core_section_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->regset_from_core_section != NULL;
-}
-
-const struct regset *
-gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->regset_from_core_section != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_regset_from_core_section called\n");
-  return gdbarch->regset_from_core_section (gdbarch, sect_name, sect_size);
-}
-
-void
-set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch,
-                                      gdbarch_regset_from_core_section_ftype regset_from_core_section)
-{
-  gdbarch->regset_from_core_section = regset_from_core_section;
 }
 
 int

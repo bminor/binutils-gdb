@@ -5334,7 +5334,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   /* This part is the old method for fetching registers.
      It should be replaced by the newer one using regsets
      once it is implemented in this platform:
-     gdbarch_regset_from_core_section() and regset->collect_regset().  */
+     gdbarch_iterate_over_regset_sections().  */
 
   old_chain = save_inferior_ptid ();
   inferior_ptid = ptid;

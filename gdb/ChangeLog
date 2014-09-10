@@ -1,5 +1,17 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdbarch.sh (regset_from_core_section): Remove gdbarch method.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* corelow.c (sniff_core_bfd): Drop presence check for deleted
+	gdbarch method 'regset_from_core_section'.
+	(get_core_register_section): Remove handling for the case that
+	regset == NULL and regset_from_core_section is defined.
+	(get_core_registers): Drop check for deleted method.
+	* procfs.c (procfs_do_thread_registers): Adjust comment.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* linux-nat.c (linux_nat_collect_thread_registers): Remove.
 	(linux_nat_make_corefile_notes): Remove.
 	(linux_target_install_ops): Do not set target method

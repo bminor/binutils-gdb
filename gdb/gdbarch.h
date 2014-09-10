@@ -736,15 +736,6 @@ typedef CORE_ADDR (gdbarch_fetch_pointer_argument_ftype) (struct frame_info *fra
 extern CORE_ADDR gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, struct frame_info *frame, int argi, struct type *type);
 extern void set_gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument);
 
-/* Return the appropriate register set for a core file section with
-   name SECT_NAME and size SECT_SIZE. */
-
-extern int gdbarch_regset_from_core_section_p (struct gdbarch *gdbarch);
-
-typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
-extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
-extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
-
 /* Iterate over all supported register notes in a core file.  For each
    supported register note section, the iterator must call CB and pass
    CB_DATA unchanged.  If REGCACHE is not NULL, the iterator can limit

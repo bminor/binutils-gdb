@@ -134,9 +134,7 @@ sniff_core_bfd (bfd *abfd)
 
   /* Don't sniff if we have support for register sets in
      CORE_GDBARCH.  */
-  if (core_gdbarch
-      && (gdbarch_iterate_over_regset_sections_p (core_gdbarch)
-	  || gdbarch_regset_from_core_section_p (core_gdbarch)))
+  if (core_gdbarch && gdbarch_iterate_over_regset_sections_p (core_gdbarch))
     return NULL;
 
   for (cf = core_file_fns; cf != NULL; cf = cf->next)
@@ -536,20 +534,6 @@ get_core_register_section (struct regcache *regcache,
       return;
     }
 
-  if (regset == NULL
-      && core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
-    {
-      regset = gdbarch_regset_from_core_section (core_gdbarch,
-						 name, size);
-      if (regset == NULL)
-	{
-	  if (required)
-	    warning (_("Couldn't recognize %s registers in core file."),
-		     human_name);
-	  return;
-	}
-    }
-
   if (regset != NULL)
     {
       regset->supply_regset (regset, regcache, -1, contents, size);
@@ -605,9 +589,7 @@ get_core_registers (struct target_ops *ops,
   int i;
   struct gdbarch *gdbarch;
 
-  if (!(core_gdbarch
-	&& (gdbarch_iterate_over_regset_sections_p (core_gdbarch)
-	    || gdbarch_regset_from_core_section_p (core_gdbarch)))
+  if (!(core_gdbarch && gdbarch_iterate_over_regset_sections_p (core_gdbarch))
       && (core_vec == NULL || core_vec->core_read_registers == NULL))
     {
       fprintf_filtered (gdb_stderr,

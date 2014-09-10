@@ -651,10 +651,6 @@ m:int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup
 # Fetch the pointer to the ith function argument.
 F:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
 
-# Return the appropriate register set for a core file section with
-# name SECT_NAME and size SECT_SIZE.
-M:const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
-
 # Iterate over all supported register notes in a core file.  For each
 # supported register note section, the iterator must call CB and pass
 # CB_DATA unchanged.  If REGCACHE is not NULL, the iterator can limit
