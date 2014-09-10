@@ -1,3 +1,7 @@
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* gas/mips/mips.exp: Add mips*-img-elf* target triple.
+
 2014-09-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run suffix-intel, x86-64-suffix and

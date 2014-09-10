@@ -487,11 +487,13 @@ if { [istarget mips*-*-vxworks*] } {
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] \
 		     || [istarget mipsisa32-*-linux*] || [istarget mipsisa32el-*-linux*]]
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips*-*-linux*] \
-                         || [istarget mips*-sde-elf*] || [istarget mips*-mti-elf*]]
+                         || [istarget mips*-sde-elf*] || [istarget mips*-mti-elf*] \
+                         || [istarget mips*-img-elf*]]
 
     if { [istarget "mips*-*-*linux*"]
 	 || [istarget "mips*-sde-elf*"]
 	 || [istarget "mips*-mti-elf*"]
+	 || [istarget "mips*-img-elf*"]
 	 || [istarget "mips*-*-*bsd*"] } then {
 	set tmips "t"
     } else {

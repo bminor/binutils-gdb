@@ -1,3 +1,7 @@
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* configure.tgt: Add mips*-img-elf* target triple.
+
 2014-09-01  Jon TURNEY  <jon.turney@dronecode.org.uk>
 
 	* emultempl/pe.em (write_build_id, setup_build_id): Change pe/coff

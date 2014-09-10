@@ -1,3 +1,7 @@
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* configure.tgt: Add mips*-img-elf* target triple.
+
 2014-09-12  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-i386.c (match_template): Remove redundant "!!" testing
