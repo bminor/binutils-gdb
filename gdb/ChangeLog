@@ -1,5 +1,12 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* fbsd-nat.c (find_signalled_thread, find_stop_signal)
+	(fbsd_collect_regset_section_cb, fbsd_make_corefile_notes):
+	Remove.
+	* fbsd-nat.h (fbsd_make_corefile_notes): Remove prototype.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* xtensa-tdep.c (xtensa_regset_from_core_section): Remove.
 	(xtensa_iterate_over_regset_sections): New.
 	(xtensa_gdbarch_init): Adjust gdbarch initialization.
