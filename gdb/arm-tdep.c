@@ -13072,6 +13072,195 @@ thumb2_record_coproc_insn (insn_decode_record *thumb2_insn_r)
     return arm_record_asimd_vfp_coproc (thumb2_insn_r);
 }
 
+/* Record handler for advance SIMD structure load/store instructions.  */
+
+static int
+thumb2_record_asimd_struct_ld_st (insn_decode_record *thumb2_insn_r)
+{
+  struct regcache *reg_cache = thumb2_insn_r->regcache;
+  uint32_t l_bit, a_bit, b_bits;
+  uint32_t record_buf[128], record_buf_mem[128];
+  uint32_t reg_rn, reg_vd, address, f_esize, f_elem;
+  uint32_t index_r = 0, index_e = 0, bf_regs = 0, index_m = 0, loop_t = 0;
+  uint8_t f_ebytes;
+
+  l_bit = bit (thumb2_insn_r->arm_insn, 21);
+  a_bit = bit (thumb2_insn_r->arm_insn, 23);
+  b_bits = bits (thumb2_insn_r->arm_insn, 8, 11);
+  reg_rn = bits (thumb2_insn_r->arm_insn, 16, 19);
+  reg_vd = bits (thumb2_insn_r->arm_insn, 12, 15);
+  reg_vd = (bit (thumb2_insn_r->arm_insn, 22) << 4) | reg_vd;
+  f_ebytes = (1 << bits (thumb2_insn_r->arm_insn, 6, 7));
+  f_esize = 8 * f_ebytes;
+  f_elem = 8 / f_ebytes;
+
+  if (!l_bit)
+    {
+      ULONGEST u_regval = 0;
+      regcache_raw_read_unsigned (reg_cache, reg_rn, &u_regval);
+      address = u_regval;
+
+      if (!a_bit)
+        {
+          /* Handle VST1.  */
+          if (b_bits == 0x02 || b_bits == 0x0a || (b_bits & 0x0e) == 0x06)
+            {
+              if (b_bits == 0x07)
+                bf_regs = 1;
+              else if (b_bits == 0x0a)
+                bf_regs = 2;
+              else if (b_bits == 0x06)
+                bf_regs = 3;
+              else if (b_bits == 0x02)
+                bf_regs = 4;
+              else
+                bf_regs = 0;
+
+              for (index_r = 0; index_r < bf_regs; index_r++)
+                {
+                  for (index_e = 0; index_e < f_elem; index_e++)
+                    {
+                      record_buf_mem[index_m++] = f_ebytes;
+                      record_buf_mem[index_m++] = address;
+                      address = address + f_ebytes;
+                      thumb2_insn_r->mem_rec_count += 1;
+                    }
+                }
+            }
+          /* Handle VST2.  */
+          else if (b_bits == 0x03 || (b_bits & 0x0e) == 0x08)
+            {
+              if (b_bits == 0x09 || b_bits == 0x08)
+                bf_regs = 1;
+              else if (b_bits == 0x03)
+                bf_regs = 2;
+              else
+                bf_regs = 0;
+
+              for (index_r = 0; index_r < bf_regs; index_r++)
+                for (index_e = 0; index_e < f_elem; index_e++)
+                  {
+                    for (loop_t = 0; loop_t < 2; loop_t++)
+                      {
+                        record_buf_mem[index_m++] = f_ebytes;
+                        record_buf_mem[index_m++] = address + (loop_t * f_ebytes);
+                        thumb2_insn_r->mem_rec_count += 1;
+                      }
+                    address = address + (2 * f_ebytes);
+                  }
+            }
+          /* Handle VST3.  */
+          else if ((b_bits & 0x0e) == 0x04)
+            {
+              for (index_e = 0; index_e < f_elem; index_e++)
+                {
+                  for (loop_t = 0; loop_t < 3; loop_t++)
+                    {
+                      record_buf_mem[index_m++] = f_ebytes;
+                      record_buf_mem[index_m++] = address + (loop_t * f_ebytes);
+                      thumb2_insn_r->mem_rec_count += 1;
+                    }
+                  address = address + (3 * f_ebytes);
+                }
+            }
+          /* Handle VST4.  */
+          else if (!(b_bits & 0x0e))
+            {
+              for (index_e = 0; index_e < f_elem; index_e++)
+                {
+                  for (loop_t = 0; loop_t < 4; loop_t++)
+                    {
+                      record_buf_mem[index_m++] = f_ebytes;
+                      record_buf_mem[index_m++] = address + (loop_t * f_ebytes);
+                      thumb2_insn_r->mem_rec_count += 1;
+                    }
+                  address = address + (4 * f_ebytes);
+                }
+            }
+        }
+      else
+        {
+          uint8_t bft_size = bits (thumb2_insn_r->arm_insn, 10, 11);
+
+          if (bft_size == 0x00)
+            f_ebytes = 1;
+          else if (bft_size == 0x01)
+            f_ebytes = 2;
+          else if (bft_size == 0x02)
+            f_ebytes = 4;
+          else
+            f_ebytes = 0;
+
+          /* Handle VST1.  */
+          if (!(b_bits & 0x0b) || b_bits == 0x08)
+            thumb2_insn_r->mem_rec_count = 1;
+          /* Handle VST2.  */
+          else if ((b_bits & 0x0b) == 0x01 || b_bits == 0x09)
+            thumb2_insn_r->mem_rec_count = 2;
+          /* Handle VST3.  */
+          else if ((b_bits & 0x0b) == 0x02 || b_bits == 0x0a)
+            thumb2_insn_r->mem_rec_count = 3;
+          /* Handle VST4.  */
+          else if ((b_bits & 0x0b) == 0x03 || b_bits == 0x0b)
+            thumb2_insn_r->mem_rec_count = 4;
+
+          for (index_m = 0; index_m < thumb2_insn_r->mem_rec_count; index_m++)
+            {
+              record_buf_mem[index_m] = f_ebytes;
+              record_buf_mem[index_m] = address + (index_m * f_ebytes);
+            }
+        }
+    }
+  else
+    {
+      if (!a_bit)
+        {
+          /* Handle VLD1.  */
+          if (b_bits == 0x02 || b_bits == 0x0a || (b_bits & 0x0e) == 0x06)
+            thumb2_insn_r->reg_rec_count = 1;
+          /* Handle VLD2.  */
+          else if (b_bits == 0x03 || (b_bits & 0x0e) == 0x08)
+            thumb2_insn_r->reg_rec_count = 2;
+          /* Handle VLD3.  */
+          else if ((b_bits & 0x0e) == 0x04)
+            thumb2_insn_r->reg_rec_count = 3;
+          /* Handle VLD4.  */
+          else if (!(b_bits & 0x0e))
+            thumb2_insn_r->reg_rec_count = 4;
+        }
+      else
+        {
+          /* Handle VLD1.  */
+          if (!(b_bits & 0x0b) || b_bits == 0x08 || b_bits == 0x0c)
+            thumb2_insn_r->reg_rec_count = 1;
+          /* Handle VLD2.  */
+          else if ((b_bits & 0x0b) == 0x01 || b_bits == 0x09 || b_bits == 0x0d)
+            thumb2_insn_r->reg_rec_count = 2;
+          /* Handle VLD3.  */
+          else if ((b_bits & 0x0b) == 0x02 || b_bits == 0x0a || b_bits == 0x0e)
+            thumb2_insn_r->reg_rec_count = 3;
+          /* Handle VLD4.  */
+          else if ((b_bits & 0x0b) == 0x03 || b_bits == 0x0b || b_bits == 0x0f)
+            thumb2_insn_r->reg_rec_count = 4;
+
+          for (index_r = 0; index_r < thumb2_insn_r->reg_rec_count; index_r++)
+            record_buf[index_r] = reg_vd + ARM_D0_REGNUM + index_r;
+        }
+    }
+
+  if (bits (thumb2_insn_r->arm_insn, 0, 3) != 15)
+    {
+      record_buf[index_r] = reg_rn;
+      thumb2_insn_r->reg_rec_count += 1;
+    }
+
+  REG_ALLOC (thumb2_insn_r->arm_regs, thumb2_insn_r->reg_rec_count,
+            record_buf);
+  MEM_ALLOC (thumb2_insn_r->arm_mems, thumb2_insn_r->mem_rec_count,
+            record_buf_mem);
+  return 0;
+}
+
 /* Decodes thumb2 instruction type and invokes its record handler.  */
 
 static unsigned int
@@ -13134,7 +13323,7 @@ thumb2_record_decode_insn_handler (insn_decode_record *thumb2_insn_r)
       else if (!((op2 & 0x71) ^ 0x10))
         {
           /* Advanced SIMD or structure load/store instructions.  */
-          return arm_record_unsupported_insn (thumb2_insn_r);
+          return thumb2_record_asimd_struct_ld_st (thumb2_insn_r);
         }
       else if (!((op2 & 0x67) ^ 0x01))
         {

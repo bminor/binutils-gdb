@@ -1,5 +1,12 @@
 2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
 
+	* arm-tdep.c (thumb2_record_asimd_struct_ld_st): Add record handler
+	for advance SIMD struct ld/st insn.
+	(thumb2_record_decode_insn_handler): Replace stub handler with
+	thumb2_record_asimd_struct_ld_st.
+
+2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
+
 	* arm-tdep.c (arm_record_coproc_data_proc): Add record handler stubs
 	for asimd, vfp and coprocessor insns.
 	(arm_record_asimd_vfp_coproc): Add record handler for asimd, vfp
