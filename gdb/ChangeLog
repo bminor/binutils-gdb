@@ -1,3 +1,20 @@
+2014-09-09  Doug Evans  <xdje42@gmail.com>
+
+	PR 17247
+	* guile.c: #include <signal.h>.
+	(_initialize_guile): Block SIGCHLD while initializing Guile.
+
+	Replaces the following, which is reverted.
+
+	2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR 17185
+	* configure.ac: Add check for header gc/gc.h.
+	Add check for function setenv.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* guile/guile.c (_initialize_guile): Add workaround for libgc 7.4.0.
+
 2014-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR python/17355

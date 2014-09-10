@@ -9187,32 +9187,6 @@ else
 fi
 
 
-# PR 17185, see if we can get the libgc version to see if we need
-# to apply the workaround.
-for ac_header in gc/gc.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "gc/gc.h" "ac_cv_header_gc_gc_h" "$ac_includes_default"
-if test "x$ac_cv_header_gc_gc_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GC_GC_H 1
-_ACEOF
-
-fi
-
-done
-
-for ac_func in setenv
-do :
-  ac_fn_c_check_func "$LINENO" "setenv" "ac_cv_func_setenv"
-if test "x$ac_cv_func_setenv" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SETENV 1
-_ACEOF
-
-fi
-done
-
-
 # --------------------- #
 # Check for libmcheck.  #
 # --------------------- #

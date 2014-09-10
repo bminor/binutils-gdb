@@ -35,10 +35,8 @@
 #ifdef HAVE_GUILE
 #include "guile.h"
 #include "guile-internal.h"
-#ifdef HAVE_GC_GC_H
-#include <gc/gc.h> /* PR 17185 */
 #endif
-#endif
+#include <signal.h>
 
 /* The Guile version we're using.
    We *could* use the macros in libguile/version.h but that would preclude
@@ -834,39 +832,46 @@ extern initialize_file_ftype _initialize_guile;
 void
 _initialize_guile (void)
 {
-  char *msg;
-
   install_gdb_commands ();
 
 #if HAVE_GUILE
-  /* The Python support puts the C side in module "_gdb", leaving the Python
-     side to define module "gdb" which imports "_gdb".  There is evidently no
-     similar convention in Guile so we skip this.  */
-
-  /* PR 17185 There are problems with using libgc 7.4.0.
-     Copy over the workaround Guile uses (Guile is working around a different
-     problem, but the workaround is the same).  */
-#if (GC_VERSION_MAJOR == 7 && GC_VERSION_MINOR == 4 && GC_VERSION_MICRO == 0)
-  /* The bug is only known to appear with pthreads.  We assume any system
-     using pthreads also uses setenv (and not putenv).  That is why we don't
-     have a similar call to putenv here.  */
-#if defined (HAVE_SETENV)
-  setenv ("GC_MARKERS", "1", 1);
-#endif
+  {
+#ifdef HAVE_SIGPROCMASK
+    sigset_t sigchld_mask, prev_mask;
 #endif
 
-  /* scm_with_guile is the most portable way to initialize Guile.
-     Plus we need to initialize the Guile support while in Guile mode
-     (e.g., called from within a call to scm_with_guile).  */
-  scm_with_guile (call_initialize_gdb_module, NULL);
+    /* The Python support puts the C side in module "_gdb", leaving the Python
+       side to define module "gdb" which imports "_gdb".  There is evidently no
+       similar convention in Guile so we skip this.  */
 
-  /* Set Guile's backtrace to match the "set guile print-stack" default.
-     [N.B. The two settings are still separate.]
-     But only do this after we've initialized Guile, it's nice to see a
-     backtrace if there's an error during initialization.
-     OTOH, if the error is that gdb/init.scm wasn't found because gdb is being
-     run from the build tree, the backtrace is more noise than signal.
-     Sigh.  */
-  gdbscm_set_backtrace (0);
+#ifdef HAVE_SIGPROCMASK
+    /* Before we initialize Guile, block SIGCHLD.
+       This is done so that all threads created during Guile initialization
+       have SIGCHLD blocked.  PR 17247.
+       Really libgc and Guile should do this, but we need to work with
+       libgc 7.4.x.  */
+    sigemptyset (&sigchld_mask);
+    sigaddset (&sigchld_mask, SIGCHLD);
+    sigprocmask (SIG_BLOCK, &sigchld_mask, &prev_mask);
+#endif
+
+    /* scm_with_guile is the most portable way to initialize Guile.
+       Plus we need to initialize the Guile support while in Guile mode
+       (e.g., called from within a call to scm_with_guile).  */
+    scm_with_guile (call_initialize_gdb_module, NULL);
+
+#ifdef HAVE_SIGPROCMASK
+    sigprocmask (SIG_SETMASK, &prev_mask, NULL);
+#endif
+
+    /* Set Guile's backtrace to match the "set guile print-stack" default.
+       [N.B. The two settings are still separate.]
+       But only do this after we've initialized Guile, it's nice to see a
+       backtrace if there's an error during initialization.
+       OTOH, if the error is that gdb/init.scm wasn't found because gdb is
+       being run from the build tree, the backtrace is more noise than signal.
+       Sigh.  */
+    gdbscm_set_backtrace (0);
+  }
 #endif
 }

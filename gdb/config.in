@@ -141,9 +141,6 @@
 /* Define if <sys/procfs.h> has fpregset_t. */
 #undef HAVE_FPREGSET_T
 
-/* Define to 1 if you have the <gc/gc.h> header file. */
-#undef HAVE_GC_GC_H
-
 /* Define to 1 if you have the `getgid' function. */
 #undef HAVE_GETGID
 
@@ -347,9 +344,6 @@
 
 /* Define to 1 if you have the `scm_new_smob' function. */
 #undef HAVE_SCM_NEW_SMOB
-
-/* Define to 1 if you have the `setenv' function. */
-#undef HAVE_SETENV
 
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE
