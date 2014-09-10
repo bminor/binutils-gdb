@@ -1,5 +1,10 @@
 2014-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* findvar.c (address_from_register): Handle targets requiring
+	a special conversion routine even for plain pointer types.
+
+2014-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* rs6000-nat.c (exec_one_dummy_insn): Remove.
 	(store_register): Do not call exec_one_dummy_insn.
 
