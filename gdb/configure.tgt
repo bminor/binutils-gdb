@@ -415,7 +415,7 @@ nios2*-*-*)
 powerpc*-*-freebsd*)
 	# Target: FreeBSD/powerpc
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o ppc64-tdep.o \
-		        ppcfbsd-tdep.o solib-svr4.o \
+		        ppcfbsd-tdep.o fbsd-tdep.o solib-svr4.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
 	;;
 

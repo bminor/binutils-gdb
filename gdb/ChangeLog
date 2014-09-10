@@ -1,5 +1,26 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* configure.tgt (gdb_target_obs): Add fbsd-tdep.o for PowerPC
+	FreeBSD targets.
+	* ppcfbsd-nat.c (_initialize_ppcfbsd_nat): Do not set target
+	method 'make_corefile_notes'.
+	* ppcfbsd-tdep.c (fbsd-tdep.h): Include.
+	(ppcfbsd_regset_from_core_section): Remove.
+	(ppcfbsd_iterate_over_regset_sections): New.
+	(ppcfbsd_init_abi): Call fbsd_init_abi.  Adjust gdbarch
+	initialization.
+	* ppcnbsd-tdep.c (ppcnbsd_regset_from_core_section): Remove.
+	(ppcnbsd_iterate_over_regset_sections): New.
+	(ppcnbsd_init_abi): Adjust.
+	* ppcobsd-tdep.c (ppcobsd_regset_from_core_section): Remove.
+	(ppcobsd_iterate_over_regset_sections): New.
+	(ppcobsd_init_abi): Adjust.
+	* rs6000-aix-tdep.c (rs6000_aix_regset_from_core_section): Remove.
+	(rs6000_aix_iterate_over_regset_sections): New.
+	(rs6000_aix_init_osabi): Adjust.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* nios2-linux-tdep.c (NIOS2_GREGS_SIZE): New macro.
 	(nios2_regset_from_core_section): Remove.
 	(nios2_iterate_over_regset_sections): New.
