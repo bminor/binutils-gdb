@@ -1,3 +1,7 @@
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* amd64-linux-nat.c: Add <sys/uio.h> #include.
+
 2014-09-09  Doug Evans  <xdje42@gmail.com>
 
 	PR guile/17367
