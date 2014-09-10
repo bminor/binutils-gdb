@@ -1,3 +1,21 @@
+2014-09-16 Kuan-Lin Chen <kuanlinchentw@gmail.com>
+
+	* nds32-asm.c (nds32_opcodes, operand_fields, keyword_im5_i,
+	keyword_im5_m, keyword_accumulator, keyword_aridx, keyword_aridx2,
+	keyword_aridxi): Add audio ISA extension.
+	(keyword_gpr, keyword_usr, keyword_sr, keyword_cp, keyword_cpr,
+	keyword_fsr, keyword_fdr, keyword_abdim, keyword_abm, keyword_dpref_st,
+	keyword_cctl_lv, keyword_standby_st, keyword_msync_st): Adjust scrope
+	for nds32-dis.c using.
+	(build_opcode_syntax): Remove dead code.
+	(parse_re, parse_a30b20, parse_rt21, parse_rte_start, parse_rte_end,
+	parse_rte69_start, parse_rte69_end, parse_im5_ip, parse_im5_mr,
+	parse_im6_ip, parse_im6_iq, parse_im6_mr, parse_im6_ms): Add audio ISA
+	operand parser.
+	* nds32-asm.h: Declare.
+	* nds32-dis.c: Use array nds32_opcodes to disassemble instead of
+	decoding by switch.
+
 2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 

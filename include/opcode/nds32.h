@@ -29,6 +29,7 @@
 #define REG_R16		16
 #define REG_R20		20
 #define REG_TA		15
+#define REG_TP          27
 #define REG_FP		28
 #define REG_GP		29
 #define REG_LP		30
@@ -358,12 +359,13 @@ enum n32_opcodes
   N32_ALU2_SUB_SC,
   N32_ALU2_ADD_WC,
   N32_ALU2_SUB_WC,
-  N32_ALU2_0x14,
+  N32_ALU2_KMxy,
   N32_ALU2_0x15,
   N32_ALU2_0x16,
   N32_ALU2_FFZMISM,
-  N32_ALU2_QADD = 0x18,
-  N32_ALU2_QSUB,
+  N32_ALU2_KADD = 0x18,
+  N32_ALU2_KSUB,
+  N32_ALU2_KSLRA,
   N32_ALU2_MFUSR = 0x20,
   N32_ALU2_MTUSR,
   N32_ALU2_0x22,
@@ -459,7 +461,7 @@ enum n32_opcodes
   N32_MISC_TLBOP,
   N32_MISC_0xf,
 
-  /* bit[0;4] */
+  /* bit[0:4] */
   N32_SIMD_PBSAD = 0,
   N32_SIMD_PBSADA = 1,
 

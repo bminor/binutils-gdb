@@ -2326,7 +2326,8 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     "ABI v1", /* use r0 as return register */
     "ABI v2", /* use r0 as return register and don't reserve 24 bytes for arguments */
     "ABI v2fp", /* for FPU */
-    "AABI"
+    "AABI",
+    "ABI2 FP+"
   };
   static const char *VER_STRINGS[] =
   {
@@ -2357,6 +2358,7 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     case E_NDS_ABI_V2:
     case E_NDS_ABI_V2FP:
     case E_NDS_ABI_AABI:
+    case E_NDS_ABI_V2FP_PLUS:
       /* In case there are holes in the array.  */
       r += snprintf (buf + r, size - r, ", %s", ABI_STRINGS[abi >> EF_NDS_ABI_SHIFT]);
       break;

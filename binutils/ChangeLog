@@ -1,3 +1,7 @@
+2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* readelf.c (decode_NDS32_machine_flags): Display ABI2 FP+.
+
 2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 
