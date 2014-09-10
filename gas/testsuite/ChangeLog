@@ -1,3 +1,91 @@
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/24k-triple-stores-1.s: If testing for r6 prevent
+	non-supported instructions from being tested.
+	* gas/mips/24k-triple-stores-2.s: Likewise.
+	* gas/mips/24k-triple-stores-3.s: Likewise.
+	* gas/mips/24k-triple-stores-6.s: Likewise.
+	* gas/mips/beq.s: Likewise.
+	* gas/mips/eva.s: Likewise.
+	* gas/mips/ld-zero-3.s: Likewise.
+	* gas/mips/mips32-cp2.s: Likewise.
+	* gas/mips/mips32.s: Likewise.
+	* gas/mips/mips4.s: Likewise.
+	* gas/mips/add.s: Don't test the add instructions if r6, and
+	add padding.
+	* gas/mips/add.d: Check for a triple dot not a nop at the end of the
+	disassembly output.
+	* gas/mips/micromips@add.d: Likewise.
+	* gas/mips/mipsr6@24k-branch-delay-1.d: New file.
+	* gas/mips/mipsr6@24k-triple-stores-1.d: New file.
+	* gas/mips/mipsr6@24k-triple-stores-2-llsc.d: New file.
+	* gas/mips/mipsr6@24k-triple-stores-2.d: New file.
+	* gas/mips/mipsr6@24k-triple-stores-3.d: New file.
+	* gas/mips/mipsr6@24k-triple-stores-6.d: New file.
+	* gas/mips/mipsr6@add.d: New file.
+	* gas/mips/mipsr6@attr-gnu-4-1-msingle-float.l: New file.
+	* gas/mips/mipsr6@attr-gnu-4-1-msingle-float.s: New file.
+	* gas/mips/mipsr6@attr-gnu-4-1-msoft-float.l: New file.
+	* gas/mips/mipsr6@attr-gnu-4-1-msoft-float.s: New file.
+	* gas/mips/mipsr6@attr-gnu-4-2-mdouble-float.l: New file.
+	* gas/mips/mipsr6@attr-gnu-4-2-mdouble-float.s: New file.
+	* gas/mips/mipsr6@beq.d: New file.
+	* gas/mips/mipsr6@bge.d: New file.
+	* gas/mips/mipsr6@bgeu.d: New file.
+	* gas/mips/mipsr6@blt.d: New file.
+	* gas/mips/mipsr6@bltu.d: New file.
+	* gas/mips/mipsr6@branch-misc-1.d: New file.
+	* gas/mips/mipsr6@branch-misc-2-64.d: New file.
+	* gas/mips/mipsr6@branch-misc-2pic-64.d: New file.
+	* gas/mips/mipsr6@branch-misc-4-64.d: New file.
+	* gas/mips/mipsr6@cache.d: New file.
+	* gas/mips/mipsr6@eva.d: New file.
+	* gas/mips/mipsr6@jal-svr4pic-noreorder.d: New file.
+	* gas/mips/mipsr6@jal-svr4pic.d: New file.
+	* gas/mips/mipsr6@ld-zero-2.d: New file.
+	* gas/mips/mipsr6@ld-zero-3.d: New file.
+	* gas/mips/mipsr6@loc-swap-dis.d: New file.
+	* gas/mips/mipsr6@mips32-cp2.d: New file.
+	* gas/mips/mipsr6@mips32-imm.d: New file.
+	* gas/mips/mipsr6@mips32.d: New file.
+	* gas/mips/mipsr6@mips32r2.d: New file.
+	* gas/mips/mipsr6@mips4-fp.d: New file.
+	* gas/mips/mipsr6@mips4-fp.l: New file.
+	* gas/mips/mipsr6@mips4-fp.s: New file.
+	* gas/mips/mipsr6@mips4.d: New file.
+	* gas/mips/mipsr6@mips5-fp.d: New file.
+	* gas/mips/mipsr6@mips5-fp.l: New file.
+	* gas/mips/mipsr6@mips5-fp.s: New file.
+	* gas/mips/mipsr6@mips64.d: New file.
+	* gas/mips/mipsr6@msa-branch.d: New file.
+	* gas/mips/mipsr6@msa.d: New file.
+	* gas/mips/mipsr6@pref.d: New file.
+	* gas/mips/mipsr6@relax-swap3.d: New file.
+	* gas/mips/r6-64-n32.d: New file.
+	* gas/mips/r6-64-n64.d: New file.
+	* gas/mips/r6-64-removed.l: New file.
+	* gas/mips/r6-64-removed.s: New file.
+	* gas/mips/r6-64.s: New file.
+	* gas/mips/r6-attr-none-double.d: New file.
+	* gas/mips/r6-n32.d: New file.
+	* gas/mips/r6-n64.d: New file.
+	* gas/mips/r6-removed.l: New file.
+	* gas/mips/r6-removed.s: New file.
+	* gas/mips/r6.d: New file.
+	* gas/mips/r6.s: New file.
+	* gas/mips/mipsr6@mips32-dsp.d: New file.
+	* gas/mips/mipsr6@mips32-dspr2.d: New file.
+	* gas/mips/mipsr6@mips32r2-ill.l: New file.
+	* gas/mips/mipsr6@mips32r2-ill.s: New file.
+	* gas/mips/cache.s: Add r6 instruction varients.
+	* gas/mips/mips.exp: Add support for the mips32r6 and mips64r6
+	architectures.  Also prevent non r6 supported tests from running.
+	Finally, add in support for running the new r6 tests.
+	(run_dump_test_arch): Add support for mipsr6 tests.
+	(run_list_test_arch): Add support for using files of the
+	form arch@testname.l .
+
 2014-09-15  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/attr-gnu-4-5-msingle-float.l: New file.

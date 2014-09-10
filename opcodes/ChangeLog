@@ -1,3 +1,33 @@
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips-dis.c (mips_arch_choices): Add entries for mips32r6 and
+	mips64r6.
+	(parse_mips_dis_option): Allow MSA and virtualization support for
+	mips64r6.
+	(mips_print_arg_state): Add fields dest_regno and seen_dest.
+	(mips_seen_register): New function.
+	(print_insn_arg): Refactored code to use mips_seen_register
+	function.  Add support for OP_SAME_RS_RT, OP_CHECK_PREV and
+	OP_NON_ZERO_REG.  Changed OP_REPEAT_DEST_REG case to print out
+	the register rather than aborting.
+	(print_insn_args): Add length argument.  Add code to correctly
+	calculate the instruction address for pc relative instructions.
+	(validate_insn_args): New static function.
+	(print_insn_mips): Prevent jalx disassembling for r6.  Use
+	validate_insn_args.
+	(print_insn_micromips): Use validate_insn_args.
+	all the arguments are valid.
+	* mips-formats.h (PREV_CHECK): New define.
+	* mips-opc.c (decode_mips_operand): Add support for -a, -b, -d, -s,
+	-t, -u, -v, -w, -x, -y, -A, -B, +I, +O, +R, +:, +\, +", +;
+	(RD_pc): New define.
+	(FS): New define.
+	(I37): New define.
+	(I69): New define.
+	(mips_builtin_opcodes): Add MIPS R6 instructions.  Exclude recoded
+	MIPS R6 instructions from MIPS R2 instructions.
+
 2014-09-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (dis386): Replace "P" with "%LP" for iret and sysret.

@@ -1,3 +1,8 @@
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ldmain.c (get_emulation): Add support for -mips32r6 and -mips64r6.
+
 2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* configure.tgt: Add mips*-img-elf* target triple.

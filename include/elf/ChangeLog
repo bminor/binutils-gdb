@@ -1,3 +1,11 @@
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips.h: Add relocs: R_MIPS_PC21_S2, R_MIPS_PC26_S2, R_MIPS_PC18_S3,
+	R_MIPS_PC19_S2, R_MIPS_PCHI16 and R_MIPS_PCLO16.
+	(E_MIPS_ARCH_32R6): New define.
+	(E_MIPS_ARCH_64R6): New define.
+
 2014-08-26  DJ Delorie  <dj@redhat.com>
 
 	* rl78.h (RL78_RELAXA_MASK): New.  Relax types are enums, not bits

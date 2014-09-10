@@ -1,3 +1,9 @@
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_machine_flags): Add support for mips32r6 and
+	mips64r6.
+
 2014-09-01  Jon TURNEY  <jon.turney@dronecode.org.uk>
 
 	* objcopy.c (is_nondebug_keep_contents_section): Change

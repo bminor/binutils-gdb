@@ -1,3 +1,76 @@
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_nan2008): New static global.
+	(mips_flag_nan2008): Removed.
+	(LL_SC_FMT): New define.
+	(COP12_FMT): Updated.
+	(ISA_IS_R6): New define.
+	(ISA_HAS_64BIT_REGS): Add mips64r6.
+	(ISA_HAS_DROR): Likewise.
+	(ISA_HAS_64BIT_FPRS): Add mips32r6 and mips64r6.
+	(ISA_HAS_ROR): Likewise.
+	(ISA_HAS_ODD_SINGLE_FPR): Likewise.
+	(ISA_HAS_MXHC1): Likewise.
+	(hilo_interlocks): Likewise.
+	(md_longopts): Likewise.
+	(ISA_HAS_LEGACY_NAN): New define.
+	(options): Add OPTION_MIPS32R6 and OPTION_MIPS64R6.
+	(mips_ase): Add field rem_rev.
+	(mips_ases): Updated to add which ISA an ASE was removed in.
+	(mips_isa_rev): Add support for mips32r6 and mips64r6.
+	(mips_check_isa_supports_ase): Add support to check if an ASE
+	has been removed in the specified MIPS ISA revision.
+	(validate_mips_insn): Skip '-' character.
+	(macro_build): Likewise.
+	(mips_check_options): Prevent R6 working with fp32, mips16,
+	micromips, or branch relaxation.
+	(file_mips_check_options): Set R6 floating point registers to
+	64 bit.  Also deal with the nan2008 option.
+	(limited_pcrel_reloc_p): Add relocs: BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3,
+	BFD_RELOC_MIPS_19_PCREL_S2, BFD_RELOC_HI16_S_PCREL and
+	BFD_RELOC_LO16_PCREL.
+	(operand_reg_mask): Add support for OP_SAME_RS_RT, OP_CHECK_PREV
+	and OP_NON_ZERO_REG.
+	(match_check_prev_operand): New static function.
+	(match_same_rs_rt_operand): New static function.
+	(match_non_zero_reg_operand): New static function.
+	(match_operand): Added entries for: OP_SAME_RS_RT, OP_CHECK_PREV
+	and OP_NON_ZERO_REG.
+	(insns_between): Added case to deal with forbidden slots.
+	(append_insn): Added support for relocs: BFD_RELOC_MIPS_21_PCREL_S2
+	and BFD_RELOC_MIPS_26_PCREL_S2.
+	(match_insn): Add support for operands -A, -B, +' and +".  Also
+	skip '-' character.
+	(mips_percent_op): Add entries for %pcrel_hi and %pcrel_lo.
+	(md_parse_option): Add support for mips32r6 and mips64r6.  Also
+	update the nan option handling.
+	(md_pcrel_from): Add cases for relocs: BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2.
+	(mips_force_relocation): Prevent forced relaxation for MIPS r6.
+	(md_apply_fix): Add support for relocs: BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3,
+	BFD_RELOC_MIPS_19_PCREL_S2, BFD_RELOC_HI16_S_PCREL and
+	BFD_RELOC_LO16_PCREL.
+	(s_mipsset): Add support for mips32r6 and mips64r6.
+	(s_nan): Update to support the new nan2008 framework.
+	(tc_gen_reloc): Add relocs: BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3,
+	BFD_RELOC_MIPS_19_PCREL_S2, BFD_RELOC_HI16_S_PCREL and
+	BFD_RELOC_LO16_PCREL.
+	(mips_elf_final_processing): Updated to use the mips_nan2008.
+	(mips_cpu_info_table): Add entries for mips32r6 and mips64r6.
+	(macro): Enable ldc2, sdc2, ll, lld, swc2, sc, scd, cache, pref
+	macros for R6.
+	(mips_fix_adjustable): Make PC relative R6 relocations relative
+	to the symbol and not the section.
+	* configure.ac: Add support for mips32r6 and mips64r6.
+	* configure: Regenerate.
+	* doc/c-mips.texi: Document the -mips32r6 and -mips64r6 command line
+	options.
+	* doc/as.texinfo: Likewise.
+
 2014-09-15  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* tc-mips.c (check_fpabi): Move softfloat and singlefloat
