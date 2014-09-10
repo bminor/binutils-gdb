@@ -2397,6 +2397,9 @@ struct dis386 {
    "LS" => print "abs" in 64bit mode and behave as 'S' otherwise
    "LV" => print "abs" for 64bit operand and behave as 'S' otherwise
    "LW" => print 'd', 'q' depending on the VEX.W bit
+   "LP" => print 'w' or 'l' ('d' in Intel mode) if instruction has
+	   an operand size prefix, or suffix_always is true.  print
+	   'q' if rex prefix is present.
 
    Many of the above letters print nothing in Intel mode.  See "putop"
    for the details.
@@ -2638,7 +2641,7 @@ static const struct dis386 dis386[] = {
   { "int3",		{ XX } },
   { "int",		{ Ib } },
   { X86_64_TABLE (X86_64_CE) },
-  { "iretP",		{ XX } },
+  { "iret%LP",		{ XX } },
   /* d0 */
   { REG_TABLE (REG_D0) },
   { REG_TABLE (REG_D1) },
@@ -2704,7 +2707,7 @@ static const struct dis386 dis386_twobyte[] = {
   { Bad_Opcode },
   { "syscall",		{ XX } },
   { "clts",		{ XX } },
-  { "sysretP",		{ XX } },
+  { "sysret%LP",		{ XX } },
   /* 08 */
   { "invd",		{ XX } },
   { "wbinvd",		{ XX } },
@@ -13835,32 +13838,62 @@ case_L:
 	      break;
 	    }
 	  /* Fall through.  */
+	  goto case_P;
 	case 'P':
-	  if (intel_syntax)
+	  if (l == 0 && len == 1)
 	    {
-	      if ((rex & REX_W) == 0
-		  && (prefixes & PREFIX_DATA))
+case_P:
+	      if (intel_syntax)
 		{
-		  if ((sizeflag & DFLAG) == 0)
-		    *obufp++ = 'w';
-		   used_prefixes |= (prefixes & PREFIX_DATA);
+		  if ((rex & REX_W) == 0
+		      && (prefixes & PREFIX_DATA))
+		    {
+		      if ((sizeflag & DFLAG) == 0)
+			*obufp++ = 'w';
+		      used_prefixes |= (prefixes & PREFIX_DATA);
+		    }
+		  break;
 		}
-	      break;
-	    }
-	  if ((prefixes & PREFIX_DATA)
-	      || (rex & REX_W)
-	      || (sizeflag & SUFFIX_ALWAYS))
-	    {
-	      USED_REX (REX_W);
-	      if (rex & REX_W)
-		*obufp++ = 'q';
-	      else
+	      if ((prefixes & PREFIX_DATA)
+		  || (rex & REX_W)
+		  || (sizeflag & SUFFIX_ALWAYS))
 		{
-		   if (sizeflag & DFLAG)
-		      *obufp++ = 'l';
-		   else
-		     *obufp++ = 'w';
-		   used_prefixes |= (prefixes & PREFIX_DATA);
+		  USED_REX (REX_W);
+		  if (rex & REX_W)
+		    *obufp++ = 'q';
+		  else
+		    {
+		      if (sizeflag & DFLAG)
+			*obufp++ = 'l';
+		      else
+			*obufp++ = 'w';
+		      used_prefixes |= (prefixes & PREFIX_DATA);
+		    }
+		}
+	    }
+	  else
+	    {
+	      if (l != 1 || len != 2 || last[0] != 'L')
+		{
+		  SAVE_LAST (*p);
+		  break;
+		}
+
+	      if ((prefixes & PREFIX_DATA)
+		  || (rex & REX_W)
+		  || (sizeflag & SUFFIX_ALWAYS))
+		{
+		  USED_REX (REX_W);
+		  if (rex & REX_W)
+		    *obufp++ = 'q';
+		  else
+		    {
+		      if (sizeflag & DFLAG)
+			*obufp++ = intel_syntax ? 'd' : 'l';
+		      else
+			*obufp++ = 'w';
+		      used_prefixes |= (prefixes & PREFIX_DATA);
+		    }
 		}
 	    }
 	  break;
