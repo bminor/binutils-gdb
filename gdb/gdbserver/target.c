@@ -24,7 +24,7 @@
 struct target_ops *the_target;
 
 void
-set_desired_inferior (int use_general)
+set_desired_thread (int use_general)
 {
   struct thread_info *found;
 
@@ -34,9 +34,9 @@ set_desired_inferior (int use_general)
     found = find_thread_ptid (cont_thread);
 
   if (found == NULL)
-    current_inferior = get_first_thread ();
+    current_thread = get_first_thread ();
   else
-    current_inferior = found;
+    current_thread = found;
 }
 
 int

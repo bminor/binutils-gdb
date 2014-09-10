@@ -126,7 +126,7 @@ mips_read_description (void)
 {
   if (have_dsp < 0)
     {
-      int pid = lwpid_of (current_inferior);
+      int pid = lwpid_of (current_thread);
 
       errno = 0;
       ptrace (PTRACE_PEEKUSER, pid, DSP_CONTROL, 0);
@@ -272,7 +272,7 @@ static const unsigned int mips_breakpoint = 0x0005000d;
 static CORE_ADDR
 mips_reinsert_addr (void)
 {
-  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
+  struct regcache *regcache = get_thread_regcache (current_thread, 1);
   union mips_register ra;
   collect_register_by_name (regcache, "r31", ra.buf);
   return register_size (regcache->tdesc, 0) == 4 ? ra.reg32 : ra.reg64;
@@ -404,7 +404,7 @@ mips_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   enum target_hw_bp_type watch_type;
   uint32_t irw;
 
-  lwpid = lwpid_of (current_inferior);
+  lwpid = lwpid_of (current_thread);
   if (!mips_linux_read_watch_registers (lwpid,
 					&private->watch_readback,
 					&private->watch_readback_valid,
@@ -506,7 +506,7 @@ mips_stopped_by_watchpoint (void)
   struct arch_process_info *private = proc->private->arch_private;
   int n;
   int num_valid;
-  long lwpid = lwpid_of (current_inferior);
+  long lwpid = lwpid_of (current_thread);
 
   if (!mips_linux_read_watch_registers (lwpid,
 					&private->watch_readback,
@@ -534,7 +534,7 @@ mips_stopped_data_address (void)
   struct arch_process_info *private = proc->private->arch_private;
   int n;
   int num_valid;
-  long lwpid = lwpid_of (current_inferior);
+  long lwpid = lwpid_of (current_thread);
 
   /* On MIPS we don't know the low order 3 bits of the data address.
      GDB does not support remote targets that can't report the

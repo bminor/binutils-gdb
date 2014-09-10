@@ -111,7 +111,7 @@ static void win32_add_all_dlls (void);
 /* Get the thread ID from the current selected inferior (the current
    thread).  */
 static ptid_t
-current_inferior_ptid (void)
+current_thread_ptid (void)
 {
   return current_ptid;
 }
@@ -461,7 +461,7 @@ static void
 child_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  win32_thread_info *th = thread_rec (current_inferior_ptid (), TRUE);
+  win32_thread_info *th = thread_rec (current_thread_ptid (), TRUE);
   if (r == -1 || r > NUM_REGS)
     child_fetch_inferior_registers (regcache, NUM_REGS);
   else
@@ -475,7 +475,7 @@ static void
 child_store_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  win32_thread_info *th = thread_rec (current_inferior_ptid (), TRUE);
+  win32_thread_info *th = thread_rec (current_thread_ptid (), TRUE);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_store_inferior_registers (regcache, NUM_REGS);
   else
@@ -1461,7 +1461,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       child_delete_thread (current_event.dwProcessId,
 			   current_event.dwThreadId);
 
-      current_inferior = (struct thread_info *) all_threads.head;
+      current_thread = (struct thread_info *) all_threads.head;
       return 1;
 
     case CREATE_PROCESS_DEBUG_EVENT:
@@ -1563,7 +1563,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
     }
 
   ptid = debug_event_ptid (&current_event);
-  current_inferior =
+  current_thread =
     (struct thread_info *) find_inferior_id (&all_threads, ptid);
   return 1;
 }
@@ -1604,7 +1604,7 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
 		    ourstatus->value.sig));
 
-	  regcache = get_thread_regcache (current_inferior, 1);
+	  regcache = get_thread_regcache (current_thread, 1);
 	  child_fetch_inferior_registers (regcache, -1);
 	  return debug_event_ptid (&current_event);
 	default:

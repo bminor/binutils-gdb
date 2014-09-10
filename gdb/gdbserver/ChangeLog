@@ -1,3 +1,35 @@
+2014-09-16  Gary Benson  <gbenson@redhat.com>
+
+	* inferiors.h (current_inferior): Renamed as...
+	(current_thread): New variable.  All uses updated.
+	* linux-low.c (get_pc): Renamed saved_inferior as saved_thread.
+	(maybe_move_out_of_jump_pad): Likewise.
+	(cancel_breakpoint): Likewise.
+	(linux_low_filter_event): Likewise.
+	(wait_for_sigstop): Likewise.
+	(linux_resume_one_lwp): Likewise.
+	(need_step_over_p): Likewise.
+	(start_step_over): Likewise.
+	(linux_stabilize_threads): Renamed save_inferior as saved_thread.
+	* linux-x86-low.c (x86_linux_update_xmltarget): Likewise.
+	* proc-service.c (ps_lgetregs): Renamed reg_inferior as reg_thread
+	and save_inferior as saved_thread.
+	* regcache.c (get_thread_regcache): Renamed saved_inferior as
+	saved_thread.
+	(regcache_invalidate_thread): Likewise.
+	* remote-utils.c (prepare_resume_reply): Likewise.
+	* thread-db.c (thread_db_get_tls_address): Likewise.
+	(disable_thread_event_reporting): Likewise.
+	(remove_thread_event_breakpoints): Likewise.
+	* tracepoint.c (gdb_agent_about_to_close): Renamed save_inferior
+	as saved_thread.
+	* target.h (set_desired_inferior): Renamed as...
+	(set_desired_thread): New declaration.  All uses updated.
+	* server.c (myresume): Updated comment to reference thread instead
+	of inferior.
+	(handle_serial_event): Likewise.
+	(handle_target_event): Likewise.
+
 2014-09-12  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 

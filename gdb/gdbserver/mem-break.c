@@ -995,7 +995,7 @@ check_gdb_bp_preconditions (char z_type, int *err)
       *err = 1;
       return 0;
     }
-  else if (current_inferior == NULL)
+  else if (current_thread == NULL)
     {
       *err = -1;
       return 0;
@@ -1212,7 +1212,7 @@ gdb_condition_true_at_breakpoint_z_type (char z_type, CORE_ADDR addr)
   if (bp->cond_list == NULL)
     return 1;
 
-  ctx.regcache = get_thread_regcache (current_inferior, 1);
+  ctx.regcache = get_thread_regcache (current_thread, 1);
   ctx.tframe = NULL;
   ctx.tpoint = NULL;
 
@@ -1336,7 +1336,7 @@ run_breakpoint_commands_z_type (char z_type, CORE_ADDR addr)
   if (bp == NULL)
     return 1;
 
-  ctx.regcache = get_thread_regcache (current_inferior, 1);
+  ctx.regcache = get_thread_regcache (current_thread, 1);
   ctx.tframe = NULL;
   ctx.tpoint = NULL;
 

@@ -697,7 +697,7 @@ aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
   struct aarch64_dr_update_callback_param param;
 
   /* Only update the threads of this process.  */
-  param.pid = pid_of (current_inferior);
+  param.pid = pid_of (current_thread);
 
   param.is_watchpoint = is_watchpoint;
   param.idx = idx;
@@ -1038,7 +1038,7 @@ aarch64_stopped_data_address (void)
   int pid, i;
   struct aarch64_debug_reg_state *state;
 
-  pid = lwpid_of (current_inferior);
+  pid = lwpid_of (current_thread);
 
   /* Get the siginfo.  */
   if (ptrace (PTRACE_GETSIGINFO, pid, NULL, &siginfo) != 0)
@@ -1186,7 +1186,7 @@ aarch64_arch_setup (void)
 
   current_process ()->tdesc = tdesc_aarch64;
 
-  pid = lwpid_of (current_inferior);
+  pid = lwpid_of (current_thread);
   iov.iov_base = &dreg_state;
   iov.iov_len = sizeof (dreg_state);
 

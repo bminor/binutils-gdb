@@ -686,7 +686,7 @@ putpkt_binary_1 (char *buf, int cnt, int is_notif)
 	}
 
       /* Check for an input interrupt while we're here.  */
-      if (cc == '\003' && current_inferior != NULL)
+      if (cc == '\003' && current_thread != NULL)
 	(*the_target->request_interrupt) ();
     }
   while (cc != '+');
@@ -741,7 +741,7 @@ input_interrupt (int unused)
 
       cc = read_prim (&c, 1);
 
-      if (cc != 1 || c != '\003' || current_inferior == NULL)
+      if (cc != 1 || c != '\003' || current_thread == NULL)
 	{
 	  fprintf (stderr, "input_interrupt, count = %d c = %d ('%c')\n",
 		   cc, c, c);
@@ -1106,20 +1106,20 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     {
     case TARGET_WAITKIND_STOPPED:
       {
-	struct thread_info *saved_inferior;
+	struct thread_info *saved_thread;
 	const char **regp;
 	struct regcache *regcache;
 
 	sprintf (buf, "T%02x", status->value.sig);
 	buf += strlen (buf);
 
-	saved_inferior = current_inferior;
+	saved_thread = current_thread;
 
-	current_inferior = find_thread_ptid (ptid);
+	current_thread = find_thread_ptid (ptid);
 
 	regp = current_target_desc ()->expedite_regs;
 
-	regcache = get_thread_regcache (current_inferior, 1);
+	regcache = get_thread_regcache (current_thread, 1);
 
 	if (the_target->stopped_by_watchpoint != NULL
 	    && (*the_target->stopped_by_watchpoint) ())
@@ -1196,7 +1196,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    dlls_changed = 0;
 	  }
 
-	current_inferior = saved_inferior;
+	current_thread = saved_thread;
       }
       break;
     case TARGET_WAITKIND_EXITED:

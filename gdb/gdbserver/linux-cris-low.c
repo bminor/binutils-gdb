@@ -102,7 +102,7 @@ cris_breakpoint_at (CORE_ADDR where)
 static CORE_ADDR
 cris_reinsert_addr (void)
 {
-  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
+  struct regcache *regcache = get_thread_regcache (current_thread, 1);
   unsigned long pc;
   collect_register_by_name (regcache, "srp", &pc);
   return pc;

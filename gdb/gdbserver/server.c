@@ -268,8 +268,8 @@ start_inferior (char **argv)
 	  if (last_status.kind != TARGET_WAITKIND_STOPPED)
 	    return signal_pid;
 
-	  current_inferior->last_resume_kind = resume_stop;
-	  current_inferior->last_status = last_status;
+	  current_thread->last_resume_kind = resume_stop;
+	  current_thread->last_status = last_status;
 	}
       while (last_status.value.sig != GDB_SIGNAL_TRAP);
 
@@ -283,8 +283,8 @@ start_inferior (char **argv)
   if (last_status.kind != TARGET_WAITKIND_EXITED
       && last_status.kind != TARGET_WAITKIND_SIGNALLED)
     {
-      current_inferior->last_resume_kind = resume_stop;
-      current_inferior->last_status = last_status;
+      current_thread->last_resume_kind = resume_stop;
+      current_thread->last_status = last_status;
     }
 
   return signal_pid;
@@ -322,8 +322,8 @@ attach_inferior (int pid)
 	  && last_status.value.sig == GDB_SIGNAL_STOP)
 	last_status.value.sig = GDB_SIGNAL_TRAP;
 
-      current_inferior->last_resume_kind = resume_stop;
-      current_inferior->last_status = last_status;
+      current_thread->last_resume_kind = resume_stop;
+      current_thread->last_status = last_status;
     }
 
   return 0;
@@ -2316,7 +2316,7 @@ handle_v_cont (char *own_buf)
     cont_thread = resume_info[0].thread;
   else
     cont_thread = minus_one_ptid;
-  set_desired_inferior (0);
+  set_desired_thread (0);
 
   resume (resume_info, n);
   free (resume_info);
@@ -2370,7 +2370,7 @@ resume (struct thread_resume *actions, size_t num_actions)
       if (last_status.kind != TARGET_WAITKIND_EXITED
           && last_status.kind != TARGET_WAITKIND_SIGNALLED
 	  && last_status.kind != TARGET_WAITKIND_NO_RESUMED)
-	current_inferior->last_status = last_status;
+	current_thread->last_status = last_status;
 
       /* From the client's perspective, all-stop mode always stops all
 	 threads implicitly (and the target backend has already done
@@ -2609,7 +2609,7 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
   return;
 }
 
-/* Resume inferior and wait for another event.  In non-stop mode,
+/* Resume thread and wait for another event.  In non-stop mode,
    don't really wait here, but return immediatelly to the event
    loop.  */
 static void
@@ -2619,7 +2619,7 @@ myresume (char *own_buf, int step, int sig)
   int n = 0;
   int valid_cont_thread;
 
-  set_desired_inferior (0);
+  set_desired_thread (0);
 
   valid_cont_thread = (!ptid_equal (cont_thread, null_ptid)
 			 && !ptid_equal (cont_thread, minus_one_ptid));
@@ -2840,7 +2840,7 @@ handle_status (char *own_buf)
 	  /* GDB assumes the current thread is the thread we're
 	     reporting the status for.  */
 	  general_thread = thread->id;
-	  set_desired_inferior (1);
+	  set_desired_thread (1);
 
 	  gdb_assert (tp->last_status.kind != TARGET_WAITKIND_IGNORE);
 	  prepare_resume_reply (own_buf, tp->entry.id, &tp->last_status);
@@ -3542,7 +3542,7 @@ process_serial_event (void)
 	      last_status.value.integer = 0;
 	      last_ptid = pid_to_ptid (pid);
 
-	      current_inferior = NULL;
+	      current_thread = NULL;
 	    }
 	  else
 	    {
@@ -3623,7 +3623,7 @@ process_serial_event (void)
 		}
 
 	      general_thread = thread_id;
-	      set_desired_inferior (1);
+	      set_desired_thread (1);
 	    }
 	  else if (own_buf[1] == 'c')
 	    cont_thread = thread_id;
@@ -3655,8 +3655,8 @@ process_serial_event (void)
 	{
 	  struct regcache *regcache;
 
-	  set_desired_inferior (1);
-	  regcache = get_thread_regcache (current_inferior, 1);
+	  set_desired_thread (1);
+	  regcache = get_thread_regcache (current_thread, 1);
 	  registers_to_string (regcache, own_buf);
 	}
       break;
@@ -3668,8 +3668,8 @@ process_serial_event (void)
 	{
 	  struct regcache *regcache;
 
-	  set_desired_inferior (1);
-	  regcache = get_thread_regcache (current_inferior, 1);
+	  set_desired_thread (1);
+	  regcache = get_thread_regcache (current_thread, 1);
 	  registers_from_string (regcache, &own_buf[1]);
 	  write_ok (own_buf);
 	}
@@ -3897,9 +3897,9 @@ handle_serial_event (int err, gdb_client_data client_data)
   if (process_serial_event () < 0)
     return -1;
 
-  /* Be sure to not change the selected inferior behind GDB's back.
+  /* Be sure to not change the selected thread behind GDB's back.
      Important in the non-stop mode asynchronous protocol.  */
-  set_desired_inferior (1);
+  set_desired_thread (1);
 
   return 0;
 }
@@ -3936,8 +3936,8 @@ handle_target_event (int err, gdb_client_data client_data)
 	  /* We're reporting this thread as stopped.  Update its
 	     "want-stopped" state to what the client wants, until it
 	     gets a new resume action.  */
-	  current_inferior->last_resume_kind = resume_stop;
-	  current_inferior->last_status = last_status;
+	  current_thread->last_resume_kind = resume_stop;
+	  current_thread->last_status = last_status;
 	}
 
       if (forward_event)
@@ -3984,9 +3984,9 @@ handle_target_event (int err, gdb_client_data client_data)
 	}
     }
 
-  /* Be sure to not change the selected inferior behind GDB's back.
+  /* Be sure to not change the selected thread behind GDB's back.
      Important in the non-stop mode asynchronous protocol.  */
-  set_desired_inferior (1);
+  set_desired_thread (1);
 
   return 0;
 }

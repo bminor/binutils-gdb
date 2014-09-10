@@ -231,7 +231,7 @@ static /*const*/ int i386_regmap[] =
 static int
 is_64bit_tdesc (void)
 {
-  struct regcache *regcache = get_thread_regcache (current_inferior, 0);
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
 
   return register_size (regcache->tdesc, 0) == 8;
 }
@@ -590,7 +590,7 @@ static void
 x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
   /* Only update the threads of this process.  */
-  int pid = pid_of (current_inferior);
+  int pid = pid_of (current_thread);
 
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
@@ -602,7 +602,7 @@ x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 static CORE_ADDR
 x86_dr_low_get_addr (int regnum)
 {
-  ptid_t ptid = ptid_of (current_inferior);
+  ptid_t ptid = ptid_of (current_thread);
 
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
@@ -615,7 +615,7 @@ static void
 x86_dr_low_set_control (unsigned long control)
 {
   /* Only update the threads of this process.  */
-  int pid = pid_of (current_inferior);
+  int pid = pid_of (current_thread);
 
   find_inferior (&all_threads, update_debug_registers_callback, &pid);
 }
@@ -625,7 +625,7 @@ x86_dr_low_set_control (unsigned long control)
 static unsigned long
 x86_dr_low_get_control (void)
 {
-  ptid_t ptid = ptid_of (current_inferior);
+  ptid_t ptid = ptid_of (current_thread);
 
   return x86_linux_dr_get (ptid, DR_CONTROL);
 }
@@ -636,7 +636,7 @@ x86_dr_low_get_control (void)
 static unsigned long
 x86_dr_low_get_status (void)
 {
-  ptid_t ptid = ptid_of (current_inferior);
+  ptid_t ptid = ptid_of (current_thread);
 
   return x86_linux_dr_get (ptid, DR_STATUS);
 }
@@ -1219,7 +1219,7 @@ x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
 {
 #ifdef __x86_64__
   unsigned int machine;
-  int tid = lwpid_of (current_inferior);
+  int tid = lwpid_of (current_thread);
   int is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
@@ -1302,7 +1302,7 @@ x86_linux_read_description (void)
   static uint64_t xcr0;
   struct regset_info *regset;
 
-  tid = lwpid_of (current_inferior);
+  tid = lwpid_of (current_thread);
 
   is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
@@ -1475,7 +1475,7 @@ x86_arch_setup_process_callback (struct inferior_list_entry *entry)
   int pid = ptid_get_pid (entry->id);
 
   /* Look up any thread of this processes.  */
-  current_inferior
+  current_thread
     = (struct thread_info *) find_inferior (&all_threads,
 					    same_process_callback, &pid);
 
@@ -1488,7 +1488,7 @@ x86_arch_setup_process_callback (struct inferior_list_entry *entry)
 static void
 x86_linux_update_xmltarget (void)
 {
-  struct thread_info *save_inferior = current_inferior;
+  struct thread_info *saved_thread = current_thread;
 
   /* Before changing the register cache's internal layout, flush the
      contents of the current valid caches back to the threads, and
@@ -1497,7 +1497,7 @@ x86_linux_update_xmltarget (void)
 
   for_each_inferior (&all_processes, x86_arch_setup_process_callback);
 
-  current_inferior = save_inferior;
+  current_thread = saved_thread;
 }
 
 /* Process qSupported query, "xmlRegisters=".  Update the buffer size for
