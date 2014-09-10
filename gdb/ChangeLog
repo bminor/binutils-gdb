@@ -1,3 +1,8 @@
+2014-09-09  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* MAINTAINERS (Write After Approval): Add "Gabriel Krisman
+	Bertazi".
+
 2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-irix-tdep.c (mips_irix_elf_osabi_sniff_abi_tag_sections):
