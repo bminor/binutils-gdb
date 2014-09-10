@@ -482,14 +482,14 @@ dnl similar to Guile's 'GUILE_PROGS' macro.)
 AC_DEFUN([GDB_GUILE_PROGRAM_NAMES], [
   AC_CACHE_CHECK([for the absolute file name of the 'guild' command],
     [ac_cv_guild_program_name],
-    [ac_cv_guild_program_name="`$1 $2 --variable guild`"
+    [ac_cv_guild_program_name="`$1 --variable guild $2`"
 
      # In Guile up to 2.0.11 included, guile-2.0.pc would not define
      # the 'guild' and 'bindir' variables.  In that case, try to guess
      # what the program name is, at the risk of getting it wrong if
      # Guile was configured with '--program-suffix' or similar.
      if test "x$ac_cv_guild_program_name" = "x"; then
-       guile_exec_prefix="`$1 $2 --variable exec_prefix`"
+       guile_exec_prefix="`$1 --variable exec_prefix $2`"
        ac_cv_guild_program_name="$guile_exec_prefix/bin/guild"
      fi
   ])

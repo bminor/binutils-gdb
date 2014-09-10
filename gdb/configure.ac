@@ -1143,8 +1143,9 @@ dnl        It could be a shell script.  It is invoked as:
 dnl        pkg-config --exists $version
 dnl        pkg-config --cflags $version
 dnl        pkg-config --libs $version
-dnl        $version will be the default guile version (currently guile-2.0),
-dnl        but the program is free to ignore this.
+dnl        pkg-config --variable guild $version
+dnl        The script will be called with $version having each value in
+dnl        $try_guile_versions until --exists indicates success.
 
 AC_ARG_WITH(guile,
   AS_HELP_STRING([--with-guile@<:@=GUILE@:>@], [include guile support (auto/yes/no/<guile-version>/<pkg-config-program>)]),
@@ -1196,7 +1197,14 @@ esac
 
 if test "${have_libguile}" != no; then
   dnl Get the name of the 'guild' program.
-  GDB_GUILE_PROGRAM_NAMES(["${pkg_config_prog_path}"], ["${guile_version}"])
+  case "${with_guile}" in
+  [[\\/]]* | ?:[[\\/]]*)
+    GDB_GUILE_PROGRAM_NAMES(["${with_guile}"], ["${guile_version}"])
+    ;;
+  *)
+    GDB_GUILE_PROGRAM_NAMES(["${pkg_config_prog_path}"], ["${guile_version}"])
+    ;;
+  esac
 
   dnl Make sure guild can handle this host.
   GDB_TRY_GUILD([$srcdir/guile/lib/gdb/support.scm])

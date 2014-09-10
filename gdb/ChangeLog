@@ -1,5 +1,14 @@
 2014-09-09  Doug Evans  <xdje42@gmail.com>
 
+	PR guile/17367
+	* acinclude.m4 (GDB_GUILE_PROGRAM_NAMES): Pass guile version as
+	last parameter to pkg-config, not first.
+	* configure.ac: Pass --with-guile provided pkg-config path to
+	GDB_GUILE_PROGRAM_NAMES.
+	* configure: Regenerate.
+
+2014-09-09  Doug Evans  <xdje42@gmail.com>
+
 	PR 17247
 	* guile.c: #include <signal.h>.
 	(_initialize_guile): Block SIGCHLD while initializing Guile.

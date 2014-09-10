@@ -9082,20 +9082,22 @@ $as_echo "${found_usable_guile}" >&6; }
 esac
 
 if test "${have_libguile}" != no; then
+    case "${with_guile}" in
+  [\\/]* | ?:[\\/]*)
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the absolute file name of the 'guild' command" >&5
 $as_echo_n "checking for the absolute file name of the 'guild' command... " >&6; }
 if test "${ac_cv_guild_program_name+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_cv_guild_program_name="`"${pkg_config_prog_path}" "${guile_version}" --variable guild`"
+  ac_cv_guild_program_name="`"${with_guile}" --variable guild "${guile_version}"`"
 
      # In Guile up to 2.0.11 included, guile-2.0.pc would not define
      # the 'guild' and 'bindir' variables.  In that case, try to guess
      # what the program name is, at the risk of getting it wrong if
      # Guile was configured with '--program-suffix' or similar.
      if test "x$ac_cv_guild_program_name" = "x"; then
-       guile_exec_prefix="`"${pkg_config_prog_path}" "${guile_version}" --variable exec_prefix`"
+       guile_exec_prefix="`"${with_guile}" --variable exec_prefix "${guile_version}"`"
        ac_cv_guild_program_name="$guile_exec_prefix/bin/guild"
      fi
 
@@ -9110,6 +9112,38 @@ $as_echo "$ac_cv_guild_program_name" >&6; }
   GUILD="$ac_cv_guild_program_name"
 
 
+    ;;
+  *)
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the absolute file name of the 'guild' command" >&5
+$as_echo_n "checking for the absolute file name of the 'guild' command... " >&6; }
+if test "${ac_cv_guild_program_name+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_guild_program_name="`"${pkg_config_prog_path}" --variable guild "${guile_version}"`"
+
+     # In Guile up to 2.0.11 included, guile-2.0.pc would not define
+     # the 'guild' and 'bindir' variables.  In that case, try to guess
+     # what the program name is, at the risk of getting it wrong if
+     # Guile was configured with '--program-suffix' or similar.
+     if test "x$ac_cv_guild_program_name" = "x"; then
+       guile_exec_prefix="`"${pkg_config_prog_path}" --variable exec_prefix "${guile_version}"`"
+       ac_cv_guild_program_name="$guile_exec_prefix/bin/guild"
+     fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_guild_program_name" >&5
+$as_echo "$ac_cv_guild_program_name" >&6; }
+
+  if ! "$ac_cv_guild_program_name" --version >&5 2>&5; then
+    as_fn_error "'$ac_cv_guild_program_name' appears to be unusable" "$LINENO" 5
+  fi
+
+  GUILD="$ac_cv_guild_program_name"
+
+
+    ;;
+  esac
 
 
   if test "$cross_compiling" = no; then
