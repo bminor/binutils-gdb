@@ -1,5 +1,22 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* linux-nat.c (linux_nat_collect_thread_registers): Remove.
+	(linux_nat_make_corefile_notes): Remove.
+	(linux_target_install_ops): Do not set target method
+	'make_corefile_notes'.
+	* linux-tdep.c (struct linux_corefile_thread_data)<collect>:
+	Remove field.
+	(linux_corefile_thread_callback): Instead of args->collect, call
+	linux_collect_thread_registers.
+	(linux_make_corefile_notes): Remove 'collect' parameter.  Return
+	NULL unless there is a regset iterator.
+	(linux_make_corefile_notes_1): Remove.
+	(linux_init_abi): Replace reference to linux_make_corefile_notes_1
+	by linux_make_corefile_notes.
+	* linux-tdep.h (linux_make_corefile_notes): Remove prototype.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* fbsd-nat.c (find_signalled_thread, find_stop_signal)
 	(fbsd_collect_regset_section_cb, fbsd_make_corefile_notes):
 	Remove.

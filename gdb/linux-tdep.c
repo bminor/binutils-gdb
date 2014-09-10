@@ -1211,7 +1211,6 @@ struct linux_corefile_thread_data
   char *note_data;
   int *note_size;
   enum gdb_signal stop_signal;
-  linux_collect_thread_registers_ftype collect;
 };
 
 /* Called by gdbthread.c once per thread.  Records the thread's
@@ -1244,9 +1243,9 @@ linux_corefile_thread_callback (struct thread_info *info, void *data)
 
       old_chain = make_cleanup (xfree, siginfo_data);
 
-      args->note_data = args->collect (regcache, info->ptid, args->obfd,
-				       args->note_data, args->note_size,
-				       args->stop_signal);
+      args->note_data = linux_collect_thread_registers
+	(regcache, info->ptid, args->obfd, args->note_data,
+	 args->note_size, args->stop_signal);
 
       /* Don't return anything if we got no register information above,
          such a core file is useless.  */
@@ -1466,12 +1465,11 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   return 1;
 }
 
-/* Fills the "to_make_corefile_note" target vector.  Builds the note
-   section for a corefile, and returns it in a malloc buffer.  */
+/* Build the note section for a corefile, and return it in a malloc
+   buffer.  */
 
-char *
-linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
-			   linux_collect_thread_registers_ftype collect)
+static char *
+linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 {
   struct linux_corefile_thread_data thread_args;
   struct elf_internal_linux_prpsinfo prpsinfo;
@@ -1479,6 +1477,9 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
   gdb_byte *auxv;
   int auxv_len;
   volatile struct gdb_exception e;
+
+  if (! gdbarch_iterate_over_regset_sections_p (gdbarch))
+    return NULL;
 
   if (linux_fill_prpsinfo (&prpsinfo))
     {
@@ -1514,7 +1515,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
   thread_args.note_data = note_data;
   thread_args.note_size = note_size;
   thread_args.stop_signal = find_stop_signal ();
-  thread_args.collect = collect;
   iterate_over_threads (linux_corefile_thread_callback, &thread_args);
   note_data = thread_args.note_data;
   if (!note_data)
@@ -1543,20 +1543,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
 						  note_data, note_size);
 
   return note_data;
-}
-
-static char *
-linux_make_corefile_notes_1 (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
-{
-  /* FIXME: uweigand/2011-10-06: Once all GNU/Linux architectures have been
-     converted to gdbarch_core_regset_sections, we no longer need to fall back
-     to the target method at this point.  */
-
-  if (!gdbarch_iterate_over_regset_sections_p (gdbarch))
-    return target_make_corefile_notes (obfd, note_size);
-  else
-    return linux_make_corefile_notes (gdbarch, obfd, note_size,
-				      linux_collect_thread_registers);
 }
 
 /* Implementation of `gdbarch_gdb_signal_from_target', as defined in
@@ -1820,7 +1806,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
   set_gdbarch_core_info_proc (gdbarch, linux_core_info_proc);
   set_gdbarch_find_memory_regions (gdbarch, linux_find_memory_regions);
-  set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes_1);
+  set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes);
   set_gdbarch_has_shared_address_space (gdbarch,
 					linux_has_shared_address_space);
   set_gdbarch_gdb_signal_from_target (gdbarch,

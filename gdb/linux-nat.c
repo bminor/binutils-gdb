@@ -4070,62 +4070,6 @@ linux_child_pid_to_exec_file (struct target_ops *self, int pid)
   return buf;
 }
 
-/* Records the thread's register state for the corefile note
-   section.  */
-
-static char *
-linux_nat_collect_thread_registers (const struct regcache *regcache,
-				    ptid_t ptid, bfd *obfd,
-				    char *note_data, int *note_size,
-				    enum gdb_signal stop_signal)
-{
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  const struct regset *regset;
-  int core_regset_p;
-  gdb_gregset_t gregs;
-  gdb_fpregset_t fpregs;
-
-  core_regset_p = gdbarch_regset_from_core_section_p (gdbarch);
-
-  if (core_regset_p
-      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
-						     sizeof (gregs)))
-	 != NULL && regset->collect_regset != NULL)
-    regset->collect_regset (regset, regcache, -1, &gregs, sizeof (gregs));
-  else
-    fill_gregset (regcache, &gregs, -1);
-
-  note_data = (char *) elfcore_write_prstatus
-			 (obfd, note_data, note_size, ptid_get_lwp (ptid),
-			  gdb_signal_to_host (stop_signal), &gregs);
-
-  if (core_regset_p
-      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
-						     sizeof (fpregs)))
-	  != NULL && regset->collect_regset != NULL)
-    regset->collect_regset (regset, regcache, -1, &fpregs, sizeof (fpregs));
-  else
-    fill_fpregset (regcache, &fpregs, -1);
-
-  note_data = (char *) elfcore_write_prfpreg (obfd, note_data, note_size,
-					      &fpregs, sizeof (fpregs));
-
-  return note_data;
-}
-
-/* Fills the "to_make_corefile_note" target vector.  Builds the note
-   section for a corefile, and returns it in a malloc buffer.  */
-
-static char *
-linux_nat_make_corefile_notes (struct target_ops *self,
-			       bfd *obfd, int *note_size)
-{
-  /* FIXME: uweigand/2011-10-06: Once all GNU/Linux architectures have been
-     converted to gdbarch_core_regset_sections, this function can go away.  */
-  return linux_make_corefile_notes (target_gdbarch (), obfd, note_size,
-				    linux_nat_collect_thread_registers);
-}
-
 /* Implement the to_xfer_partial interface for memory reads using the /proc
    filesystem.  Because we can use a single read() call for /proc, this
    can be much more efficient than banging away at PTRACE_PEEKTEXT,
@@ -4522,7 +4466,6 @@ linux_target_install_ops (struct target_ops *t)
   t->to_post_startup_inferior = linux_child_post_startup_inferior;
   t->to_post_attach = linux_child_post_attach;
   t->to_follow_fork = linux_child_follow_fork;
-  t->to_make_corefile_notes = linux_nat_make_corefile_notes;
 
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = linux_xfer_partial;

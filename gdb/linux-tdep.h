@@ -29,9 +29,6 @@ typedef char *(*linux_collect_thread_registers_ftype) (const struct regcache *,
 						       bfd *, char *, int *,
 						       enum gdb_signal);
 
-char *linux_make_corefile_notes (struct gdbarch *, bfd *, int *,
-                                 linux_collect_thread_registers_ftype);
-
 struct type *linux_get_siginfo_type (struct gdbarch *);
 
 extern enum gdb_signal linux_gdb_signal_from_target (struct gdbarch *gdbarch,
