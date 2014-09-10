@@ -1,3 +1,34 @@
+2014-09-10  Alan Modra  <amodra@gmail.com>
+
+	* gas/arm/got_prel.d: Adjust for changed section header placement.
+	* gas/i386/ilp32/x86-64-size-1.d: Likewise.
+	* gas/i386/ilp32/x86-64-size-3.d: Likewise.
+	* gas/i386/ilp32/x86-64-size-5.d: Likewise.
+	* gas/i386/ilp32/x86-64-unwind.d: Likewise.
+	* gas/i386/size-1.d: Likewise.
+	* gas/i386/size-3.d: Likewise.
+	* gas/i386/x86-64-size-1.d: Likewise.
+	* gas/i386/x86-64-size-3.d: Likewise.
+	* gas/i386/x86-64-size-5.d: Likewise.
+	* gas/i386/x86-64-unwind.d: Likewise.
+	* gas/ia64/alias-ilp32.d: Likewise.
+	* gas/ia64/alias.d: Likewise.
+	* gas/ia64/group-1.d: Likewise.
+	* gas/ia64/group-2.d: Likewise.
+	* gas/ia64/secname-ilp32.d: Likewise.
+	* gas/ia64/secname.d: Likewise.
+	* gas/ia64/unwind-ilp32.d: Likewise.
+	* gas/ia64/unwind.d: Likewise.
+	* gas/mmix/bspec-1.d: Likewise.
+	* gas/mmix/bspec-2.d: Likewise.
+	* gas/mmix/byte-1.d: Likewise.
+	* gas/mmix/loc-1.d: Likewise.
+	* gas/mmix/loc-2.d: Likewise.
+	* gas/mmix/loc-3.d: Likewise.
+	* gas/mmix/loc-4.d: Likewise.
+	* gas/mmix/loc-5.d: Likewise.
+	* gas/tic6x/scomm-directive-4.d: Likewise.
+
 2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/attr-gnu-abi-fp-1.d: Relax expected output.

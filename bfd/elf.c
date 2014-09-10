@@ -5124,7 +5124,6 @@ assign_file_positions_except_relocs (bfd *abfd,
 {
   struct elf_obj_tdata *tdata = elf_tdata (abfd);
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
-  file_ptr off;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
@@ -5134,6 +5133,7 @@ assign_file_positions_except_relocs (bfd *abfd,
       unsigned int num_sec = elf_numsections (abfd);
       Elf_Internal_Shdr **hdrpp;
       unsigned int i;
+      file_ptr off;
 
       /* Start after the ELF header.  */
       off = i_ehdrp->e_ehsize;
@@ -5157,6 +5157,8 @@ assign_file_positions_except_relocs (bfd *abfd,
 	  else
 	    off = _bfd_elf_assign_file_position_for_section (hdr, off, TRUE);
 	}
+
+      elf_next_file_pos (abfd) = off;
     }
   else
     {
@@ -5203,16 +5205,7 @@ assign_file_positions_except_relocs (bfd *abfd,
       if (bfd_seek (abfd, (bfd_signed_vma) bed->s->sizeof_ehdr, SEEK_SET) != 0
 	  || bed->s->write_out_phdrs (abfd, tdata->phdr, alloc) != 0)
 	return FALSE;
-
-      off = elf_next_file_pos (abfd);
     }
-
-  /* Place the section headers.  */
-  off = align_file_position (off, 1 << bed->s->log_file_align);
-  i_ehdrp->e_shoff = off;
-  off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
-
-  elf_next_file_pos (abfd) = off;
 
   return TRUE;
 }
@@ -5306,14 +5299,16 @@ prep_headers (bfd *abfd)
 }
 
 /* Assign file positions for all the reloc sections which are not part
-   of the loadable file image.  */
+   of the loadable file image, and the file position of section headers.  */
 
-void
+static void
 _bfd_elf_assign_file_positions_for_relocs (bfd *abfd)
 {
   file_ptr off;
   unsigned int i, num_sec;
   Elf_Internal_Shdr **shdrpp;
+  Elf_Internal_Ehdr *i_ehdrp;
+  const struct elf_backend_data *bed;
 
   off = elf_next_file_pos (abfd);
 
@@ -5328,6 +5323,12 @@ _bfd_elf_assign_file_positions_for_relocs (bfd *abfd)
 	off = _bfd_elf_assign_file_position_for_section (shdrp, off, TRUE);
     }
 
+/* Place the section headers.  */
+  i_ehdrp = elf_elfheader (abfd);
+  bed = get_elf_backend_data (abfd);
+  off = align_file_position (off, 1 << bed->s->log_file_align);
+  i_ehdrp->e_shoff = off;
+  off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
   elf_next_file_pos (abfd) = off;
 }
 

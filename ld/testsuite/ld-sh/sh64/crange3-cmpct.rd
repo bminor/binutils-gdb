@@ -10,7 +10,7 @@ ELF Header:
  +Version: +0x1
  +Entry point address: +0x10c4
  +Start of program headers: +52 \(bytes into file\)
- +Start of section headers: +504 \(bytes into file\)
+ +Start of section headers: .*
  +Flags: +0xa, sh5
  +Size of this header: +52 \(bytes\)
  +Size of program headers: +32 \(bytes\)

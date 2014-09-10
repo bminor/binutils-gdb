@@ -1,3 +1,11 @@
+2014-09-10  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (assign_file_positions_except_relocs): Move section header
+	placement to..
+	(_bfd_elf_assign_file_positions_for_relocs): ..here.  Make static.
+	* elf-bfd.h (_bfd_elf_assign_file_positions_for_relocs): Delete.
+	* elflink.c (bfd_elf_final_link): Don't call above function.
+
 2014-08-30  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relax_section): Fix off by one error.

@@ -4,11 +4,11 @@
 # readelf: -x 4 -r
 # target: *-*-*eabi* *-*-symbianelf *-*-linux-* *-*-elf *-*-nacl*
 
-Relocation section '.rel.text.foo' at offset 0x3f0 contains 1 entries:
+Relocation section '.rel.text.foo' at offset .* contains 1 entries:
  Offset     Info    Type            Sym.Value  Sym. Name
 00000010  00000c60 R_ARM_GOT_PREL    00000000   i
 
-Relocation section '.rel.ARM.exidx.text.foo' at offset 0x3f8 contains 2 entries:
+Relocation section '.rel.ARM.exidx.text.foo' at offset .* contains 2 entries:
  Offset     Info    Type            Sym.Value  Sym. Name
 00000000  0000042a R_ARM_PREL31      00000000   .text.foo
 00000000  00000d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0

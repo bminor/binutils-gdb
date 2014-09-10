@@ -10691,12 +10691,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       esdo->rela.count = 0;
     }
 
-  _bfd_elf_assign_file_positions_for_relocs (abfd);
-
   /* We have now assigned file positions for all the sections except
-     .symtab and .strtab.  We start the .symtab section at the current
-     file position, and write directly to it.  We build the .strtab
-     section in memory.  */
+     .symtab, .strtab, and non-loaded reloc sections.  We start the
+     .symtab section at the current file position, and write directly
+     to it.  We build the .strtab section in memory.  */
   bfd_get_symcount (abfd) = 0;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   /* sh_name is set in prep_headers.  */

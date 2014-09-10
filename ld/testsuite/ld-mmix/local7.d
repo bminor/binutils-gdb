@@ -10,7 +10,7 @@
 # Like local1, but ext1 is here a constant, not a global register and two
 # local-register checks.
 
-There are 6 section headers, starting at offset 0xc8:
+There are 6 section headers, starting at offset .*:
 
 Section Headers:
  +\[Nr\] Name +Type +Address +Offset
