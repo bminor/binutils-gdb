@@ -12016,6 +12016,180 @@ arm_record_unsupported_insn (insn_decode_record *arm_insn_r)
   return -1;
 }
 
+/* Record handler for extension register load/store instructions.  */
+
+static int
+arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
+{
+  uint32_t opcode, single_reg;
+  uint8_t op_vldm_vstm;
+  uint32_t record_buf[8], record_buf_mem[128];
+  ULONGEST u_regval = 0;
+
+  struct regcache *reg_cache = arm_insn_r->regcache;
+  const int num_regs = gdbarch_num_regs (arm_insn_r->gdbarch);
+
+  opcode = bits (arm_insn_r->arm_insn, 20, 24);
+  single_reg = bit (arm_insn_r->arm_insn, 8);
+  op_vldm_vstm = opcode & 0x1b;
+
+  /* Handle VMOV instructions.  */
+  if ((opcode & 0x1e) == 0x04)
+    {
+      if (bit (arm_insn_r->arm_insn, 4))
+        {
+          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          record_buf[1] = bits (arm_insn_r->arm_insn, 16, 19);
+          arm_insn_r->reg_rec_count = 2;
+        }
+      else
+        {
+          uint8_t reg_m = (bits (arm_insn_r->arm_insn, 0, 3) << 1)
+                          | bit (arm_insn_r->arm_insn, 5);
+
+          if (!single_reg)
+            {
+              record_buf[0] = num_regs + reg_m;
+              record_buf[1] = num_regs + reg_m + 1;
+              arm_insn_r->reg_rec_count = 2;
+            }
+          else
+            {
+              record_buf[0] = reg_m + ARM_D0_REGNUM;
+              arm_insn_r->reg_rec_count = 1;
+            }
+        }
+    }
+  /* Handle VSTM and VPUSH instructions.  */
+  else if (op_vldm_vstm == 0x08 || op_vldm_vstm == 0x0a
+          || op_vldm_vstm == 0x12)
+    {
+      uint32_t start_address, reg_rn, imm_off32, imm_off8, memory_count;
+      uint32_t memory_index = 0;
+
+      reg_rn = bits (arm_insn_r->arm_insn, 16, 19);
+      regcache_raw_read_unsigned (reg_cache, reg_rn, &u_regval);
+      imm_off8 = bits (arm_insn_r->arm_insn, 0, 7);
+      imm_off32 = imm_off8 << 24;
+      memory_count = imm_off8;
+
+      if (bit (arm_insn_r->arm_insn, 23))
+        start_address = u_regval;
+      else
+        start_address = u_regval - imm_off32;
+
+      if (bit (arm_insn_r->arm_insn, 21))
+        {
+          record_buf[0] = reg_rn;
+          arm_insn_r->reg_rec_count = 1;
+        }
+
+      while (memory_count > 0)
+        {
+          if (!single_reg)
+            {
+              record_buf_mem[memory_index] = start_address;
+              record_buf_mem[memory_index + 1] = 4;
+              start_address = start_address + 4;
+              memory_index = memory_index + 2;
+            }
+          else
+            {
+              record_buf_mem[memory_index] = start_address;
+              record_buf_mem[memory_index + 1] = 4;
+              record_buf_mem[memory_index + 2] = start_address + 4;
+              record_buf_mem[memory_index + 3] = 4;
+              start_address = start_address + 8;
+              memory_index = memory_index + 4;
+            }
+          memory_count--;
+        }
+      arm_insn_r->mem_rec_count = (memory_index >> 1);
+    }
+  /* Handle VLDM instructions.  */
+  else if (op_vldm_vstm == 0x09 || op_vldm_vstm == 0x0b
+          || op_vldm_vstm == 0x13)
+    {
+      uint32_t reg_count, reg_vd;
+      uint32_t reg_index = 0;
+
+      reg_vd = bits (arm_insn_r->arm_insn, 12, 15);
+      reg_count = bits (arm_insn_r->arm_insn, 0, 7);
+
+      if (single_reg)
+        reg_vd = reg_vd | (bit (arm_insn_r->arm_insn, 22) << 4);
+      else
+        reg_vd = (reg_vd << 1) | bit (arm_insn_r->arm_insn, 22);
+
+      if (bit (arm_insn_r->arm_insn, 21))
+        record_buf[reg_index++] = bits (arm_insn_r->arm_insn, 16, 19);
+
+      while (reg_count > 0)
+        {
+          if (single_reg)
+              record_buf[reg_index++] = num_regs + reg_vd + reg_count - 1;
+          else
+              record_buf[reg_index++] = ARM_D0_REGNUM + reg_vd + reg_count - 1;
+
+          reg_count--;
+        }
+      arm_insn_r->reg_rec_count = reg_index;
+    }
+  /* VSTR Vector store register.  */
+  else if ((opcode & 0x13) == 0x10)
+    {
+      uint32_t start_address, reg_rn, imm_off32, imm_off8, memory_count;
+      uint32_t memory_index = 0;
+
+      reg_rn = bits (arm_insn_r->arm_insn, 16, 19);
+      regcache_raw_read_unsigned (reg_cache, reg_rn, &u_regval);
+      imm_off8 = bits (arm_insn_r->arm_insn, 0, 7);
+      imm_off32 = imm_off8 << 24;
+      memory_count = imm_off8;
+
+      if (bit (arm_insn_r->arm_insn, 23))
+        start_address = u_regval + imm_off32;
+      else
+        start_address = u_regval - imm_off32;
+
+      if (single_reg)
+        {
+          record_buf_mem[memory_index] = start_address;
+          record_buf_mem[memory_index + 1] = 4;
+          arm_insn_r->mem_rec_count = 1;
+        }
+      else
+        {
+          record_buf_mem[memory_index] = start_address;
+          record_buf_mem[memory_index + 1] = 4;
+          record_buf_mem[memory_index + 2] = start_address + 4;
+          record_buf_mem[memory_index + 3] = 4;
+          arm_insn_r->mem_rec_count = 2;
+        }
+    }
+  /* VLDR Vector load register.  */
+  else if ((opcode & 0x13) == 0x11)
+    {
+      uint32_t reg_vd = bits (arm_insn_r->arm_insn, 12, 15);
+
+      if (!single_reg)
+        {
+          reg_vd = reg_vd | (bit (arm_insn_r->arm_insn, 22) << 4);
+          record_buf[0] = ARM_D0_REGNUM + reg_vd;
+        }
+      else
+        {
+          reg_vd = (reg_vd << 1) | bit (arm_insn_r->arm_insn, 22);
+          record_buf[0] = num_regs + reg_vd;
+        }
+      arm_insn_r->reg_rec_count = 1;
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (arm_insn_r->arm_mems, arm_insn_r->mem_rec_count, record_buf_mem);
+  return 0;
+}
+
 /* Record handler for arm/thumb mode VFP data processing instructions.  */
 
 static int
@@ -12242,11 +12416,11 @@ arm_record_asimd_vfp_coproc (insn_decode_record *arm_insn_r)
     {
       /* Handle extension register ld/st instructions.  */
       if (!(op1 & 0x20))
-        return arm_record_unsupported_insn (arm_insn_r);
+        return arm_record_exreg_ld_st_insn (arm_insn_r);
 
       /* 64-bit transfers between arm core and extension registers.  */
       if ((op1 & 0x3e) == 0x04)
-        return arm_record_unsupported_insn (arm_insn_r);
+        return arm_record_exreg_ld_st_insn (arm_insn_r);
     }
   else
     {
