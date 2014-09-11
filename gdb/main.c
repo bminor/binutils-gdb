@@ -46,6 +46,7 @@
 #include "filenames.h"
 #include "filestuff.h"
 #include "event-top.h"
+#include "infrun.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -349,7 +350,11 @@ catch_command_errors (catch_command_errors_ftype *command,
 
   TRY_CATCH (e, mask)
     {
+      int was_sync = sync_execution;
+
       command (arg, from_tty);
+
+      maybe_wait_sync_command_done (was_sync);
     }
   return handle_command_errors (e);
 }
@@ -368,7 +373,11 @@ catch_command_errors_const (catch_command_errors_const_ftype *command,
 
   TRY_CATCH (e, mask)
     {
+      int was_sync = sync_execution;
+
       command (arg, from_tty);
+
+      maybe_wait_sync_command_done (was_sync);
     }
   return handle_command_errors (e);
 }

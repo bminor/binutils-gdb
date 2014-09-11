@@ -3310,6 +3310,22 @@ proc gdb_spawn { } {
     default_gdb_spawn
 }
 
+# Spawn GDB with CMDLINE_FLAGS appended to the GDBFLAGS global.
+
+proc gdb_spawn_with_cmdline_opts { cmdline_flags } {
+    global GDBFLAGS
+
+    set saved_gdbflags $GDBFLAGS
+
+    append GDBFLAGS $cmdline_flags
+
+    set res [gdb_spawn]
+
+    set GDBFLAGS $saved_gdbflags
+
+    return $res
+}
+
 # Start gdb running, wait for prompt, and disable the pagers.
 
 # Overridable function -- you can override this function in your

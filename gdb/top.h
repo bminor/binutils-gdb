@@ -42,6 +42,14 @@ extern void quit_command (char *, int);
 extern void quit_cover (void);
 extern void execute_command (char *, int);
 
+/* If the interpreter is in sync mode (we're running a user command's
+   list, running command hooks or similars), and we just ran a
+   synchronous command that started the target, wait for that command
+   to end.  WAS_SYNC indicates whether sync_execution was set before
+   the command was run.  */
+
+extern void maybe_wait_sync_command_done (int was_sync);
+
 extern void check_frame_language_change (void);
 
 /* Prepare for execution of a command.

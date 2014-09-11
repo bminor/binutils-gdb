@@ -396,6 +396,49 @@ proc do_command_attach_tests {} {
     remote_exec build "kill -9 ${testpid}"
 }
 
+# Test ' gdb --pid PID -ex "run" '.  GDB used to have a bug where
+# "run" would run before the attach finished - PR17347.
+
+proc test_command_line_attach_run {} {
+    global gdb_prompt
+    global binfile
+
+    if ![isnative] then {
+	unsupported "commandline attach run test"
+	return 0
+    }
+
+    with_test_prefix "cmdline attach run" {
+	set testpid [spawn_wait_for_attach $binfile]
+
+	set test "run to prompt"
+	gdb_exit
+
+	set res [gdb_spawn_with_cmdline_opts \
+		     "-iex \"set height 0\" -iex \"set width 0\" --pid=$testpid -ex \"start\""]
+	if { $res != 0} {
+	    fail $test
+	    return $res
+	}
+	gdb_test_multiple "" $test {
+	    -re {Attaching to.*Start it from the beginning\? \(y or n\) } {
+		pass $test
+	    }
+	}
+
+	send_gdb "y\n"
+
+	set test "run to main"
+	gdb_test_multiple "" $test {
+	    -re "Temporary breakpoint .* main .*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+
+	# Get rid of the process
+	remote_exec build "kill -9 ${testpid}"
+    }
+}
 
 # Start with a fresh gdb
 
@@ -419,5 +462,7 @@ do_call_attach_tests
 # Test "gdb --pid"
 
 do_command_attach_tests
+
+test_command_line_attach_run
 
 return 0

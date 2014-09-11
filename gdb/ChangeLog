@@ -1,3 +1,14 @@
+2014-09-11  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17347
+	* main.c: Include "infrun.h".
+	(catch_command_errors, catch_command_errors_const): Wait for the
+	foreground command to complete.
+	* top.c (maybe_wait_sync_command_done): New function, factored out
+	from ...
+	(maybe_wait_sync_command_done): ... here.
+	* top.h (maybe_wait_sync_command_done): New declaration.
+
 2014-09-09  Doug Evans  <xdje42@gmail.com>
 
 	PR guile/17367

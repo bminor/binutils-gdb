@@ -375,6 +375,23 @@ check_frame_language_change (void)
     }
 }
 
+/* See top.h.  */
+
+void
+maybe_wait_sync_command_done (int was_sync)
+{
+  /* If the interpreter is in sync mode (we're running a user
+     command's list, running command hooks or similars), and we
+     just ran a synchronous command that started the target, wait
+     for that command to end.  */
+  if (!interpreter_async && !was_sync && sync_execution)
+    {
+      while (gdb_do_one_event () >= 0)
+	if (!sync_execution)
+	  break;
+    }
+}
+
 /* Execute the line P as a command, in the current user context.
    Pass FROM_TTY as second argument to the defining function.  */
 
@@ -461,16 +478,7 @@ execute_command (char *p, int from_tty)
       else
 	cmd_func (c, arg, from_tty);
 
-      /* If the interpreter is in sync mode (we're running a user
-	 command's list, running command hooks or similars), and we
-	 just ran a synchronous command that started the target, wait
-	 for that command to end.  */
-      if (!interpreter_async && !was_sync && sync_execution)
-	{
-	  while (gdb_do_one_event () >= 0)
-	    if (!sync_execution)
-	      break;
-	}
+      maybe_wait_sync_command_done (was_sync);
 
       /* If this command has been post-hooked, run the hook last.  */
       execute_cmd_post_hook (c);
