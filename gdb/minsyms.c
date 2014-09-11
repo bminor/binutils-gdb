@@ -50,6 +50,7 @@
 #include "cp-support.h"
 #include "language.h"
 #include "cli/cli-utils.h"
+#include "symbol.h"
 
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's
@@ -297,6 +298,21 @@ struct bound_minimal_symbol
 lookup_bound_minimal_symbol (const char *name)
 {
   return lookup_minimal_symbol (name, NULL, NULL);
+}
+
+/* See common/symbol.h.  */
+
+int
+find_minimal_symbol_address (const char *name, CORE_ADDR *addr,
+			     struct objfile *objfile)
+{
+  struct bound_minimal_symbol sym
+    = lookup_minimal_symbol (name, NULL, objfile);
+
+  if (sym.minsym != NULL)
+    *addr = BMSYMBOL_VALUE_ADDRESS (sym);
+
+  return sym.minsym == NULL;
 }
 
 /* See minsyms.h.  */

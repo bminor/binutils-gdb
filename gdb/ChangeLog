@@ -1,3 +1,13 @@
+2014-09-11  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* common/symbol.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/symbol.h.
+	* minsyms.c (find_minimal_symbol_address): New function.
+	* common/agent.c: Include common/symbol.h.
+	[!GDBSERVER]: Don't include objfiles.h.
+	(agent_look_up_symbols): Use find_minimal_symbol_address.
+
 2014-09-11  Gary Benson  <gbenson@redhat.com>
 
 	* target/target.h (target_stop_ptid, target_continue_ptid):

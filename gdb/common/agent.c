@@ -21,9 +21,9 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include "objfiles.h"
 #endif
 #include "target/target.h"
+#include "common/symbol.h"
 #include <unistd.h>
 #include "agent.h"
 #include "filestuff.h"
@@ -98,18 +98,9 @@ agent_look_up_symbols (void *arg)
     {
       CORE_ADDR *addrp =
 	(CORE_ADDR *) ((char *) &ipa_sym_addrs + symbol_list[i].offset);
-#ifdef GDBSERVER
 
-      if (look_up_one_symbol (symbol_list[i].name, addrp, 1) == 0)
-#else
-      struct bound_minimal_symbol sym =
-	lookup_minimal_symbol (symbol_list[i].name, NULL,
-			       (struct objfile *) arg);
-
-      if (sym.minsym != NULL)
-	*addrp = BMSYMBOL_VALUE_ADDRESS (sym);
-      else
-#endif
+      if (find_minimal_symbol_address (symbol_list[i].name, addrp,
+				       arg) != 0)
 	{
 	  DEBUG_AGENT ("symbol `%s' not found\n", symbol_list[i].name);
 	  return -1;
