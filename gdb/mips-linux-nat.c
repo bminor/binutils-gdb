@@ -50,10 +50,6 @@
    we'll clear this and use PTRACE_PEEKUSER instead.  */
 static int have_ptrace_regsets = 1;
 
-/* Whether or not to print the mirrored debug registers.  */
-
-static int maint_show_dr;
-
 /* Saved function pointers to fetch and store a single register using
    PTRACE_PEEKUSER and PTRACE_POKEUSER.  */
 
@@ -690,7 +686,7 @@ mips_linux_insert_watchpoint (struct target_ops *self,
   watch_mirror = regs;
   retval = write_watchpoint_regs ();
 
-  if (maint_show_dr)
+  if (show_debug_regs)
     mips_show_dr ("insert_watchpoint", addr, len, type);
 
   return retval;
@@ -738,7 +734,7 @@ mips_linux_remove_watchpoint (struct target_ops *self,
 
   retval = write_watchpoint_regs ();
 
-  if (maint_show_dr)
+  if (show_debug_regs)
     mips_show_dr ("remove_watchpoint", addr, len, type);
 
   return retval;
@@ -775,7 +771,7 @@ _initialize_mips_linux_nat (void)
   struct target_ops *t;
 
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
-			   &maint_show_dr, _("\
+			   &show_debug_regs, _("\
 Set whether to show variables that mirror the mips debug registers."), _("\
 Show whether to show variables that mirror the mips debug registers."), _("\
 Use \"on\" to enable, \"off\" to disable.\n\

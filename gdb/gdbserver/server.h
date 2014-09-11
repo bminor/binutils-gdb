@@ -82,7 +82,6 @@ extern ptid_t cont_thread;
 extern ptid_t general_thread;
 
 extern int server_waiting;
-extern int debug_hw_points;
 extern int pass_signals[];
 extern int program_signals[];
 extern int program_signals_p;

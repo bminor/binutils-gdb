@@ -1,3 +1,18 @@
+2014-09-11  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-debug.h (show_debug_regs): Declare.
+	* common/common-debug.c (show_debug_regs): Define.
+	* aarch64-linux-nat.c (debug_hw_points): Don't define.  Replace
+	all uses with show_debug_regs.  Replace all uses that considered
+	debug_hw_points as a multi-value integer with straight boolean
+	uses.
+	* x86-nat.c (debug_hw_points): Don't define.  Replace all uses
+	with show_debug_regs.
+	* nat/x86-dregs.c (debug_hw_points): Don't declare.  Replace
+	all uses with show_debug_regs.
+	* mips-linux-nat.c (maint_show_dr): Don't define.  Replace all
+	uses with show_debug_regs.
+
 2014-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* findvar.c (address_from_register): Handle targets requiring

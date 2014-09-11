@@ -69,9 +69,6 @@ int disable_randomization = 1;
 
 static char **program_argv, **wrapper_argv;
 
-/* Enable debugging of h/w breakpoint/watchpoint support.  */
-int debug_hw_points;
-
 int pass_signals[GDB_SIGNAL_LAST];
 int program_signals[GDB_SIGNAL_LAST];
 int program_signals_p;
@@ -1012,12 +1009,12 @@ handle_monitor_command (char *mon, char *own_buf)
     }
   else if (strcmp (mon, "set debug-hw-points 1") == 0)
     {
-      debug_hw_points = 1;
+      show_debug_regs = 1;
       monitor_output ("H/W point debugging output enabled.\n");
     }
   else if (strcmp (mon, "set debug-hw-points 0") == 0)
     {
-      debug_hw_points = 0;
+      show_debug_regs = 0;
       monitor_output ("H/W point debugging output disabled.\n");
     }
   else if (strcmp (mon, "set remote-debug 1") == 0)

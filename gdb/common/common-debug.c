@@ -26,6 +26,10 @@
 
 /* See common/common-debug.h.  */
 
+int show_debug_regs;
+
+/* See common/common-debug.h.  */
+
 void
 debug_printf (const char *fmt, ...)
 {

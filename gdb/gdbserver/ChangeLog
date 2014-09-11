@@ -1,3 +1,11 @@
+2014-09-11  Gary Benson  <gbenson@redhat.com>
+
+	* server.h (debug_hw_points): Don't declare.
+	* server.c (debug_hw_points): Don't define.  Replace all uses
+	with show_debug_regs.
+	* linux-aarch64-low.c (debug_hw_points): Don't define.  Replace
+	all uses with show_debug_regs.
+
 2014-09-08  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* linux-ppc-low.c (ppc_collect_ptrace_register): Adjust routine to take

@@ -20,6 +20,11 @@
 #ifndef COMMON_DEBUG_H
 #define COMMON_DEBUG_H
 
+/* Set to nonzero to enable debugging of hardware breakpoint/
+   watchpoint support code.  */
+
+extern int show_debug_regs;
+
 /* Print a formatted message to the appropriate channel for
    debugging output for the client.  */
 
