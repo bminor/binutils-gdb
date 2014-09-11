@@ -134,6 +134,38 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
   return ret;
 }
 
+/* See target/target.h.  */
+
+void
+target_stop_ptid (ptid_t ptid)
+{
+  struct target_waitstatus status;
+  int was_non_stop = non_stop;
+  struct thread_resume resume_info;
+
+  resume_info.thread = ptid;
+  resume_info.kind = resume_stop;
+  resume_info.sig = GDB_SIGNAL_0;
+  (*the_target->resume) (&resume_info, 1);
+
+  non_stop = 1;
+  mywait (ptid, &status, 0, 0);
+  non_stop = was_non_stop;
+}
+
+/* See target/target.h.  */
+
+void
+target_continue_ptid (ptid_t ptid)
+{
+  struct thread_resume resume_info;
+
+  resume_info.thread = ptid;
+  resume_info.kind = resume_continue;
+  resume_info.sig = GDB_SIGNAL_0;
+  (*the_target->resume) (&resume_info, 1);
+}
+
 int
 start_non_stop (int nonstop)
 {

@@ -3027,6 +3027,31 @@ target_stop (ptid_t ptid)
   (*current_target.to_stop) (&current_target, ptid);
 }
 
+/* See target/target.h.  */
+
+void
+target_stop_ptid (ptid_t ptid)
+{
+  struct target_waitstatus status;
+  int was_non_stop = non_stop;
+
+  non_stop = 1;
+  target_stop (ptid);
+
+  memset (&status, 0, sizeof (status));
+  target_wait (ptid, &status, 0);
+
+  non_stop = was_non_stop;
+}
+
+/* See target/target.h.  */
+
+void
+target_continue_ptid (ptid_t ptid)
+{
+  target_resume (ptid, 0, GDB_SIGNAL_0);
+}
+
 /* Concatenate ELEM to LIST, a comma separate list, and return the
    result.  The LIST incoming argument is released.  */
 

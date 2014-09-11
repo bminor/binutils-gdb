@@ -1,3 +1,13 @@
+2014-09-11  Gary Benson  <gbenson@redhat.com>
+
+	* target/target.h (target_stop_ptid, target_continue_ptid):
+	Declare.
+	* target.c (target_stop_ptid, target_continue_ptid): New
+	functions.
+	* common/agent.c [!GDBSERVER]: Don't include infrun.h.
+	(agent_run_command): Always use target_stop_ptid and
+	target_continue_ptid.
+
 2014-09-11  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 

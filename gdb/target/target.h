@@ -59,4 +59,15 @@ extern int target_read_uint32 (CORE_ADDR memaddr, uint32_t *result);
 extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 				ssize_t len);
 
+/* Make target stop in a continuable fashion.  (For instance, under
+   Unix, this should act like SIGSTOP).  This function must be
+   provided by the client.  */
+
+extern void target_stop_ptid (ptid_t ptid);
+
+/* Restart a target that was previously stopped by target_stop_ptid.
+   This function must be provided by the client.  */
+
+extern void target_continue_ptid (ptid_t ptid);
+
 #endif /* TARGET_COMMON_H */
