@@ -1,5 +1,13 @@
 2014-09-11  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17347
+	* lib/gdb.exp (gdb_spawn_with_cmdline_opts): New procedure.
+	* gdb.base/attach.exp (test_command_line_attach_run): New
+	procedure.
+	(top level): Call it.
+
+2014-09-11  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb.exp (spawn_wait_for_attach): New procedure.
 	* gdb.base/attach.exp (do_attach_tests, do_call_attach_tests)
 	(do_command_attach_tests): Use spawn_wait_for_attach.
