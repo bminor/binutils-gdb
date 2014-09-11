@@ -70,13 +70,7 @@ proc do_attach_tests {} {
     # Start the program running and then wait for a bit, to be sure
     # that it can be attached to.
 
-    set testpid [eval exec $binfile &]
-    exec sleep 2
-    if { [istarget "*-*-cygwin*"] } {
-	# testpid is the Cygwin PID, GDB uses the Windows PID, which might be
-	# different due to the way fork/exec works.
-	set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
-    }
+    set testpid [spawn_wait_for_attach $binfile]
 
     # Verify that we cannot attach to nonsense.
 
@@ -279,16 +273,7 @@ proc do_attach_tests {} {
    
     remote_exec build "kill -9 ${testpid}"
 
-    # Start the program running and then wait for a bit, to be sure
-    # that it can be attached to.
-   
-    set testpid [eval exec $binfile &]
-    exec sleep 2
-    if { [istarget "*-*-cygwin*"] } {
-	# testpid is the Cygwin PID, GDB uses the Windows PID, which might be
-	# different due to the way fork/exec works.
-	set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
-    }
+    set testpid [spawn_wait_for_attach $binfile]
 
     # Verify that we can attach to the process, and find its a.out
     # when we're cd'd to some directory that doesn't contain the
@@ -335,16 +320,7 @@ proc do_call_attach_tests {} {
     global gdb_prompt
     global binfile2
     
-    # Start the program running and then wait for a bit, to be sure
-    # that it can be attached to.
-   
-    set testpid [eval exec $binfile2 &]
-    exec sleep 2
-    if { [istarget "*-*-cygwin*"] } {
-	# testpid is the Cygwin PID, GDB uses the Windows PID, which might be
-	# different due to the way fork/exec works.
-	set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
-    }
+    set testpid [spawn_wait_for_attach $binfile2]
 
     # Attach
    
@@ -397,16 +373,7 @@ proc do_command_attach_tests {} {
 	return 0
     }
 
-    # Start the program running and then wait for a bit, to be sure
-    # that it can be attached to.
-
-    set testpid [eval exec $binfile &]
-    exec sleep 2
-    if { [istarget "*-*-cygwin*"] } {
-	# testpid is the Cygwin PID, GDB uses the Windows PID, which might be
-	# different due to the way fork/exec works.
-	set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
-    }
+    set testpid [spawn_wait_for_attach $binfile]
 
     gdb_exit
     if $verbose>1 then {

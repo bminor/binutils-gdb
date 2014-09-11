@@ -3323,6 +3323,31 @@ proc gdb_exit { } {
     catch default_gdb_exit
 }
 
+# Start a set of programs running and then wait for a bit, to be sure
+# that they can be attached to.  Return a list of the processes' PIDs.
+
+proc spawn_wait_for_attach { executable_list } {
+    set pid_list {}
+
+    foreach {executable} $executable_list {
+	lappend pid_list [eval exec $executable &]
+    }
+
+    sleep 2
+
+    if { [istarget "*-*-cygwin*"] } {
+	for {set i 0} {$i < [llength $pid_list]} {incr i} {
+	    # testpid is the Cygwin PID, GDB uses the Windows PID,
+	    # which might be different due to the way fork/exec works.
+	    set testpid [lindex $pid_list $i]
+	    set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
+	    set pid_list [lreplace $pid_list $i $i $testpid]
+	}
+    }
+
+    return $pid_list
+}
+
 #
 # gdb_load_cmd -- load a file into the debugger.
 #		  ARGS - additional args to load command.
