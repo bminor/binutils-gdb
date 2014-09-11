@@ -1,3 +1,35 @@
+2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* bfd-in2.h: Regenerate.
+	* elf32-nds32.c (nds32_elf_mkobject): Hook bfd_elf32_mkobject.
+	(nds32_elf_relax_section): Code refactoring.
+	(nds32_elf_relax_longcall1, nds32_elf_relax_longcall2,
+	nds32_elf_relax_longcall3, nds32_elf_relax_longcall4,
+	nds32_elf_relax_longcall5, nds32_elf_relax_longcall6): Relax call
+	pattern. The first three is moved from nds32_elf_relax_section,
+	and the last three is new function.
+	(nds32_elf_relax_longjump1, nds32_elf_relax_longjump2,
+	nds32_elf_relax_longjump3, nds32_elf_relax_longjump4,
+	nds32_elf_relax_longjump5, nds32_elf_relax_longjump6,
+	nds32_elf_relax_longjump7): Relax condition branch pattern. The	first
+	three is moved from nds32_elf_relax_section, and the last four
+	is new function.
+	(nds32_elf_relax_loadstore, nds32_elf_relax_lo12): Relax load-store
+	pattern and address setting pattern.
+	(nds32_elf_relax_piclo12, nds32_elf_relax_ptr,
+	nds32_elf_relax_pltgot_suff, nds32_elf_relax_got_suff,
+	nds32_elf_relax_gotoff_suff): Relax pic pattern.
+	(nds32_elf_relax_letlslo12, nds32_elf_relax_letlsadd,
+	nds32_elf_relax_letlsls): Relax TLS pattern.
+	(nds32_relax_adjust_label): Adjust alignment and nop.
+	(nds32_elf_pick_relax): Choose relaxation optimization.
+	(nds32_elf_get_relocated_section_contents): New hook.
+	(nds32_elf_order_insn_times, nds32_elf_ex9_build_itable): Release ex9
+	table 234th entry.
+	* elf32-nds32.h: Declare.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add nds32 new relocations.
+
 2014-09-15  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	* dwarf2.c (find_abstract_instance_name): Use 'form' instead of

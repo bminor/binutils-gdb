@@ -1,3 +1,20 @@
+2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* config/tc-nds32.c (nds32_fsrs, nds32_fdrs, nds32_gprs): Remove.
+	(relax_table): Add new relaxation pattern.
+	(do_pseudo_la_internal, do_pseudo_ls_bhw): Expand for PIC suffix.
+	(do_pseudo_move, do_pseudo_neg, do_pseudo_pushpopm): Fix.
+	(get_range_type, nds32_elf_record_fixup_exp, nds32_get_align,
+	nds32_elf_build_relax_relation, md_assemble, invalid_prev_frag,
+	nds32_relax_frag, md_estimate_size_before_relax): Adjust relaxation.
+	(relocation_table): Remove.
+	(relax_ls_table): Load-store relaxation pattern.
+	(hint_map): Define-use chain pattern.
+	(nds32_find_reloc_table, nds32_match_hint_insn): Analysis
+	relaxation pattern.
+	(nds32_parse_name): Parse PIC suffix.
+	* config/tc-nds32.h: Declare.
+
 2014-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (OPTION_omit_lock_prefix): Renamed to ...
