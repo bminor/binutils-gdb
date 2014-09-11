@@ -21,6 +21,7 @@
 #ifndef TARGET_H
 #define TARGET_H
 
+#include "target/target.h"
 #include "target/resume.h"
 #include "target/wait.h"
 #include "target/waitstatus.h"

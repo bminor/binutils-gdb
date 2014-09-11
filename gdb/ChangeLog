@@ -1,3 +1,20 @@
+2014-09-11  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* target/target.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add target/target.h.
+	* target.h: Include target/target.h.
+	(target_read_memory, target_write_memory): Don't declare.
+	* target.c (target_read_uint32): New function.
+	* common/agent.c: Include target/target.h.
+	[!GDBSERVER]: Don't include target.h.
+	(helper_thread_id): Type changed to uint32_t.
+	(agent_get_helper_thread_id): Use target_read_uint32.
+	(agent_run_command): Always use target_read_memory and
+	target_write_memory.
+	(agent_capability): Type changed to uint32_t.
+	(agent_capability_check): Use target_read_uint32.
+
 2014-09-11  Gary Benson  <gbenson@redhat.com>
 
 	* common/common-debug.h (show_debug_regs): Declare.

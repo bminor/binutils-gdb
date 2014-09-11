@@ -1,3 +1,10 @@
+2014-09-11  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* target.h: Include target/target.h.
+	* target.c (target_read_memory, target_read_uint32)
+	(target_write_memory): New functions.
+
 2014-09-11  Gary Benson  <gbenson@redhat.com>
 
 	* server.h (debug_hw_points): Don't declare.

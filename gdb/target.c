@@ -1269,6 +1269,22 @@ target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
     return TARGET_XFER_E_IO;
 }
 
+/* See target/target.h.  */
+
+int
+target_read_uint32 (CORE_ADDR memaddr, uint32_t *result)
+{
+  gdb_byte buf[4];
+  int r;
+
+  r = target_read_memory (memaddr, buf, sizeof buf);
+  if (r != 0)
+    return r;
+  *result = extract_unsigned_integer (buf, sizeof buf,
+				      gdbarch_byte_order (target_gdbarch ()));
+  return 0;
+}
+
 /* Like target_read_memory, but specify explicitly that this is a read
    from the target's raw memory.  That is, this read bypasses the
    dcache, breakpoint shadowing, etc.  */

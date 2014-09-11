@@ -21,10 +21,10 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include "target.h"
 #include "infrun.h"
 #include "objfiles.h"
 #endif
+#include "target/target.h"
 #include <unistd.h>
 #include "agent.h"
 #include "filestuff.h"
@@ -62,7 +62,7 @@ struct ipa_sym_addresses
 
 /* Cache of the helper thread id.  FIXME: this global should be made
    per-process.  */
-static unsigned int helper_thread_id = 0;
+static uint32_t helper_thread_id = 0;
 
 static struct
 {
@@ -126,23 +126,9 @@ agent_get_helper_thread_id (void)
 {
   if  (helper_thread_id == 0)
     {
-#ifdef GDBSERVER
-      if (read_inferior_memory (ipa_sym_addrs.addr_helper_thread_id,
-				(unsigned char *) &helper_thread_id,
-				sizeof helper_thread_id))
-#else
-      enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-      gdb_byte buf[4];
-
-      if (target_read_memory (ipa_sym_addrs.addr_helper_thread_id,
-			      buf, sizeof buf) == 0)
-	helper_thread_id = extract_unsigned_integer (buf, sizeof buf,
-						     byte_order);
-      else
-#endif
-	{
-	  warning (_("Error reading helper thread's id in lib"));
-	}
+      if (target_read_uint32 (ipa_sym_addrs.addr_helper_thread_id,
+			      &helper_thread_id))
+	warning (_("Error reading helper thread's id in lib"));
     }
 
   return helper_thread_id;
@@ -220,13 +206,8 @@ agent_run_command (int pid, const char *cmd, int len)
   int tid = agent_get_helper_thread_id ();
   ptid_t ptid = ptid_build (pid, tid, 0);
 
-#ifdef GDBSERVER
-  int ret = write_inferior_memory (ipa_sym_addrs.addr_cmd_buf,
-				   (const unsigned char *) cmd, len);
-#else
   int ret = target_write_memory (ipa_sym_addrs.addr_cmd_buf,
 				 (gdb_byte *) cmd, len);
-#endif
 
   if (ret != 0)
     {
@@ -308,13 +289,8 @@ agent_run_command (int pid, const char *cmd, int len)
 
   if (fd >= 0)
     {
-#ifdef GDBSERVER
-      if (read_inferior_memory (ipa_sym_addrs.addr_cmd_buf,
-				(unsigned char *) cmd, IPA_CMD_BUF_SIZE))
-#else
       if (target_read_memory (ipa_sym_addrs.addr_cmd_buf, (gdb_byte *) cmd,
 			      IPA_CMD_BUF_SIZE))
-#endif
 	{
 	  warning (_("Error reading command response"));
 	  return -1;
@@ -325,7 +301,7 @@ agent_run_command (int pid, const char *cmd, int len)
 }
 
 /* Each bit of it stands for a capability of agent.  */
-static unsigned int agent_capability = 0;
+static uint32_t agent_capability = 0;
 
 /* Return true if agent has capability AGENT_CAP, otherwise return false.  */
 
@@ -334,20 +310,8 @@ agent_capability_check (enum agent_capa agent_capa)
 {
   if (agent_capability == 0)
     {
-#ifdef GDBSERVER
-      if (read_inferior_memory (ipa_sym_addrs.addr_capability,
-				(unsigned char *) &agent_capability,
-				sizeof agent_capability))
-#else
-      enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-      gdb_byte buf[4];
-
-      if (target_read_memory (ipa_sym_addrs.addr_capability,
-			      buf, sizeof buf) == 0)
-	agent_capability = extract_unsigned_integer (buf, sizeof buf,
-						     byte_order);
-      else
-#endif
+      if (target_read_uint32 (ipa_sym_addrs.addr_capability,
+			      &agent_capability))
 	warning (_("Error reading capability of agent"));
     }
   return agent_capability & agent_capa;

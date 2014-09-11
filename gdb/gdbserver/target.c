@@ -48,6 +48,22 @@ read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   return res;
 }
 
+/* See target/target.h.  */
+
+int
+target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
+{
+  return read_inferior_memory (memaddr, myaddr, len);
+}
+
+/* See target/target.h.  */
+
+int
+target_read_uint32 (CORE_ADDR memaddr, uint32_t *result)
+{
+  return read_inferior_memory (memaddr, (gdb_byte *) result, sizeof (*result));
+}
+
 int
 write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 		       int len)
@@ -69,6 +85,14 @@ write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
   buffer = NULL;
 
   return res;
+}
+
+/* See target/target.h.  */
+
+int
+target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
+{
+  return write_inferior_memory (memaddr, myaddr, len);
 }
 
 ptid_t
