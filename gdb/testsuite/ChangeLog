@@ -1,3 +1,8 @@
+2014-09-11  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* gdb.fortran/array-element.exp: Remove unexpected "continue"
+	command in testcase.  Simplify testcase.
+
 2014-09-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/dynarr-ptr.exp: Add a few ptype tests.
