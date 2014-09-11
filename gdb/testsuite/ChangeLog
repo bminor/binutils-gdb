@@ -1,3 +1,14 @@
+2014-09-11  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (spawn_wait_for_attach): New procedure.
+	* gdb.base/attach.exp (do_attach_tests, do_call_attach_tests)
+	(do_command_attach_tests): Use spawn_wait_for_attach.
+	* gdb.base/solib-overlap.exp: Likewise.
+	* gdb.multi/multi-attach.exp: Likewise.
+	* gdb.python/py-prompt.exp: Likewise.
+	* gdb.python/py-sync-interp.exp: Likewise.
+	* gdb.server/ext-attach.exp: Likewise.
+
 2014-09-11  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	* gdb.fortran/array-element.exp: Remove unexpected "continue"

@@ -30,15 +30,10 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug additiona
 
 # Start the programs running and then wait for a bit, to be sure that
 # they can be attached to.
-set testpid1 [eval exec $binfile &]
-set testpid2 [eval exec $binfile &]
-exec sleep 2
-if { [istarget "*-*-cygwin*"] } {
-    # testpid{1,2} are the Cygwin PID, GDB uses the Windows PID, which might be
-    # different due to the way fork/exec works.
-    set testpid1 [ exec ps -e | gawk "{ if (\$1 == $testpid1) print \$4; }" ]
-    set testpid2 [ exec ps -e | gawk "{ if (\$1 == $testpid2) print \$4; }" ]
-}
+
+set pid_list [spawn_wait_for_attach [list $binfile $binfile]]
+set testpid1 [lindex $pid_list 0]
+set testpid2 [lindex $pid_list 1]
 
 gdb_test "attach $testpid1" \
     "Attaching to program: .*, process $testpid1.*(in|at).*" \
