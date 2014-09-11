@@ -1,3 +1,7 @@
+2014-09-11  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* regcache.h (struct regset): Declare.
+
 2014-09-11  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17347

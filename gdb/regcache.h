@@ -21,6 +21,7 @@
 #define REGCACHE_H
 
 struct regcache;
+struct regset;
 struct gdbarch;
 struct address_space;
 
