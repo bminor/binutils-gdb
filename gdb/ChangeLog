@@ -1,3 +1,9 @@
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (constrained_packed_array_type): Set the length
+	of the return array as if both bounds where zero if that
+	returned array's index type is dynamic.
+
 2014-11-19  Yao Qi  <yao@codesourcery.com>
 
 	* config/i386/go32.mh (CC): Remove.

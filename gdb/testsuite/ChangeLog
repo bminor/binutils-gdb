@@ -1,3 +1,7 @@
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/pkd_arr_elem: New Testcase.
+
 2014-11-18  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.reverse/break-precsave: Expect completion message for

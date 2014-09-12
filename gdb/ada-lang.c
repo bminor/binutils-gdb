@@ -2146,7 +2146,15 @@ decode_packed_array_bitsize (struct type *type)
    but with the bit sizes of its elements (and those of any
    constituent arrays) recorded in the BITSIZE components of its
    TYPE_FIELD_BITSIZE values, and with *ELT_BITS set to its total size
-   in bits.  */
+   in bits.
+
+   Note that, for arrays whose index type has an XA encoding where
+   a bound references a record discriminant, getting that discriminant,
+   and therefore the actual value of that bound, is not possible
+   because none of the given parameters gives us access to the record.
+   This function assumes that it is OK in the context where it is being
+   used to return an array whose bounds are still dynamic and where
+   the length is arbitrary.  */
 
 static struct type *
 constrained_packed_array_type (struct type *type, long *elt_bits)
@@ -2176,7 +2184,9 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
   TYPE_FIELD_BITSIZE (new_type, 0) = *elt_bits;
   TYPE_NAME (new_type) = ada_type_name (type);
 
-  if (get_discrete_bounds (index_type, &low_bound, &high_bound) < 0)
+  if ((TYPE_CODE (check_typedef (index_type)) == TYPE_CODE_RANGE
+       && is_dynamic_type (check_typedef (index_type)))
+      || get_discrete_bounds (index_type, &low_bound, &high_bound) < 0)
     low_bound = high_bound = 0;
   if (high_bound < low_bound)
     *elt_bits = TYPE_LENGTH (new_type) = 0;
