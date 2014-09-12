@@ -1632,6 +1632,8 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      if (sizeof (address) > 4 && ptr_size == 4)
 		address &= 0xffffffff;
 	      hdr_info->array[hdr_info->array_count].initial_loc = address;
+	      hdr_info->array[hdr_info->array_count].range
+		= read_value (abfd, buf + width, width, FALSE);
 	      hdr_info->array[hdr_info->array_count++].fde
 		= (sec->output_section->vma
 		   + sec->output_offset
@@ -1805,26 +1807,55 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
       if (contents[2] != DW_EH_PE_omit)
 	{
 	  unsigned int i;
+	  bfd_boolean overlap, overflow;
 
 	  bfd_put_32 (abfd, hdr_info->fde_count, contents + EH_FRAME_HDR_SIZE);
 	  qsort (hdr_info->array, hdr_info->fde_count,
 		 sizeof (*hdr_info->array), vma_compare);
+	  overlap = FALSE;
+	  overflow = FALSE;
 	  for (i = 0; i < hdr_info->fde_count; i++)
 	    {
-	      bfd_put_32 (abfd,
-			  hdr_info->array[i].initial_loc
-			  - sec->output_section->vma,
-			  contents + EH_FRAME_HDR_SIZE + i * 8 + 4);
-	      bfd_put_32 (abfd,
-			  hdr_info->array[i].fde - sec->output_section->vma,
-			  contents + EH_FRAME_HDR_SIZE + i * 8 + 8);
+	      bfd_vma val;
+
+	      val = hdr_info->array[i].initial_loc - sec->output_section->vma;
+	      val = ((val & 0xffffffff) ^ 0x80000000) - 0x80000000;
+	      if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64
+		  && (hdr_info->array[i].initial_loc
+		      != sec->output_section->vma + val))
+		overflow = TRUE;
+	      bfd_put_32 (abfd, val, contents + EH_FRAME_HDR_SIZE + i * 8 + 4);
+	      val = hdr_info->array[i].fde - sec->output_section->vma;
+	      val = ((val & 0xffffffff) ^ 0x80000000) - 0x80000000;
+	      if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64
+		  && (hdr_info->array[i].fde
+		      != sec->output_section->vma + val))
+		overflow = TRUE;
+	      bfd_put_32 (abfd, val, contents + EH_FRAME_HDR_SIZE + i * 8 + 8);
+	      if (i != 0
+		  && (hdr_info->array[i].initial_loc
+		      < (hdr_info->array[i - 1].initial_loc
+			 + hdr_info->array[i - 1].range)))
+		overlap = TRUE;
+	    }
+	  if (overflow)
+	    (*info->callbacks->einfo)
+	      (_("%P: .eh_frame_hdr entry overflow.\n"));
+	  if (overlap)
+	    (*info->callbacks->einfo)
+	      (_("%P: .eh_frame_hdr refers to overlapping FDEs.\n"));
+	  if (overflow || overlap)
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      retval = FALSE;
 	    }
 	}
 
       /* FIXME: octets_per_byte.  */
-      retval = bfd_set_section_contents (abfd, sec->output_section, contents,
-					 (file_ptr) sec->output_offset,
-					 sec->size);
+      if (!bfd_set_section_contents (abfd, sec->output_section, contents,
+				     (file_ptr) sec->output_offset,
+				     sec->size))
+	retval = FALSE;
       free (contents);
     }
   if (hdr_info->array != NULL)

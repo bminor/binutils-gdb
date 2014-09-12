@@ -372,6 +372,7 @@ struct eh_frame_sec_info
 struct eh_frame_array_ent
 {
   bfd_vma initial_loc;
+  bfd_size_type range;
   bfd_vma fde;
 };
 
