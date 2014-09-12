@@ -237,6 +237,9 @@ struct gdbarch_tdep
   int (*i386_sysenter_record) (struct regcache *regcache);
   /* Parse syscall args.  */
   int (*i386_syscall_record) (struct regcache *regcache);
+
+  /* Regsets. */
+  const struct regset *fpregset;
 };
 
 /* Floating-point registers.  */
@@ -386,6 +389,9 @@ extern void i386_supply_gregset (const struct regset *regset,
 
 /* General-purpose register set. */
 extern const struct regset i386_gregset;
+
+/* Floating-point register set. */
+extern const struct regset i386_fpregset;
 
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */

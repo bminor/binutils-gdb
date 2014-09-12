@@ -1600,6 +1600,33 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
     }
 }
 
+/* Similar to amd64_supply_fpregset, but use XSAVE extended state.  */
+
+static void
+amd64_linux_supply_xstateregset (const struct regset *regset,
+				 struct regcache *regcache, int regnum,
+				 const void *xstateregs, size_t len)
+{
+  amd64_supply_xsave (regcache, regnum, xstateregs);
+}
+
+/* Similar to amd64_collect_fpregset, but use XSAVE extended state.  */
+
+static void
+amd64_linux_collect_xstateregset (const struct regset *regset,
+				  const struct regcache *regcache,
+				  int regnum, void *xstateregs, size_t len)
+{
+  amd64_collect_xsave (regcache, regnum, xstateregs, 1);
+}
+
+static const struct regset amd64_linux_xstateregset =
+  {
+    NULL,
+    amd64_linux_supply_xstateregset,
+    amd64_linux_collect_xstateregset
+  };
+
 /* Iterate over core file register note sections.  */
 
 static void
@@ -1608,9 +1635,12 @@ amd64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					  void *cb_data,
 					  const struct regcache *regcache)
 {
-  cb (".reg", 27 * 8, "general-purpose", cb_data);
-  cb (".reg2", 512, "floating-point", cb_data);
-  cb (".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state", cb_data);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  cb (".reg", 27 * 8, &i386_gregset, NULL, cb_data);
+  cb (".reg2", 512, &amd64_fpregset, NULL, cb_data);
+  cb (".reg-xstate",  regcache ? X86_XSTATE_MAX_SIZE : 0,
+      &amd64_linux_xstateregset, "XSAVE extended state", cb_data);
 }
 
 static void

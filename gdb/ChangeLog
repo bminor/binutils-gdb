@@ -1,5 +1,68 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdbarch.sh (iterate_over_regset_sections_cb): Add regset
+	parameter.
+	* gdbarch.h: Regenerate.
+	* corelow.c (sniff_core_bfd): Don't sniff if gdbarch has a regset
+	iterator.
+	(get_core_register_section): Add parameter 'regset' and use it, if
+	set.  Add parameter 'min_size' and verify the bfd section size
+	against it.
+	(get_core_registers_cb): Add parameter 'regset' and pass it to
+	get_core_register section.  For the "standard" register sections
+	".reg" and ".reg2", set an appropriate default for human_name.
+	(get_core_registers): Don't abort when the gdbarch has an iterator
+	but no regset_from_core_section.  Add NULL/0 for parameters
+	'regset'/'min_size' in calls to get_core_register_section.
+	* linux-tdep.c (linux_collect_regset_section_cb): Add parameter
+	'regset' and use it instead of calling the
+	regset_from_core_section gdbarch method.
+	* i386-tdep.h (struct gdbarch_tdep): Add field 'fpregset'.
+	* i386-tdep.c (i386_supply_xstateregset)
+	(i386_collect_xstateregset, i386_xstateregset): Moved to
+	i386-linux-tdep.c.
+	(i386_regset_from_core_section): Drop handling for .reg-xfp and
+	.reg-xstate.
+	(i386_gdbarch_init): Set tdep field 'fpregset'.  Enable generic
+	core file support only if the regset iterator hasn't been set.
+	* i386-linux-tdep.c (i386_linux_supply_xstateregset)
+	(i386_linux_collect_xstateregset, i386_linux_xstateregset): New.
+	Moved from i386-tdep.c and renamed to *_linux*.
+	(i386_linux_iterate_over_regset_sections): Add regset parameter to
+	each callback invocation.  Allow any .reg-xstate size when reading
+	from a core file.
+	* amd64-tdep.c (amd64_supply_xstateregset)
+	(amd64_collect_xstateregset, amd64_xstateregset): Moved to
+	amd64-linux-tdep.c.
+	(amd64_regset_from_core_section): Remove.
+	(amd64_init_abi): Set new tdep field 'fpregset'.  No longer
+	install an amd64-specific regset_from_core_section gdbarch method.
+	* amd64-linux-tdep.c (amd64_linux_supply_xstateregset)
+	(amd64_linux_collect_xstateregset, amd64_linux_xstateregset): New.
+	Moved from amd64-tdep.c and renamed to *_linux*.
+	(amd64_linux_iterate_over_regset_sections): Add regset parameter
+	to each callback invocation.  Allow any .reg-xstate size when
+	reading from a core file.
+	* arm-linux-tdep.c (arm_linux_regset_from_core_section): Remove.
+	(arm_linux_iterate_over_regset_sections): Add regset parameter to
+	each callback invocation.
+	(arm_linux_init_abi): No longer set the regset_from_core_section
+	gdbarch method.
+	* ppc-linux-tdep.c (ppc_linux_regset_from_core_section): Remove.
+	(ppc_linux_iterate_over_regset_sections): Add regset parameter to
+	each callback invocation.
+	(ppc_linux_init_abi): No longer set the regset_from_core_section
+	gdbarch method.
+	* s390-linux-tdep.c (struct gdbarch_tdep): Remove the fields
+	gregset, sizeof_gregset, fpregset, and sizeof_fpregset.
+	(s390_regset_from_core_section): Remove.
+	(s390_iterate_over_regset_sections): Add regset parameter to each
+	callback invocation.
+	(s390_gdbarch_init): No longer set the regset_from_core_section
+	gdbarch method.  Drop initialization of deleted tdep fields.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* amd64-linux-tdep.c (amd64_linux_regset_sections): Remove.
 	(amd64_linux_iterate_over_regset_sections): New.
 	(amd64_linux_init_abi_common): Don't install the regset section

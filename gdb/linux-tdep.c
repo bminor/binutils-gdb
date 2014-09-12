@@ -1105,16 +1105,15 @@ struct linux_collect_regset_section_cb_data
 
 static void
 linux_collect_regset_section_cb (const char *sect_name, int size,
+				 const struct regset *regset,
 				 const char *human_name, void *cb_data)
 {
-  const struct regset *regset;
   char *buf;
   struct linux_collect_regset_section_cb_data *data = cb_data;
 
   if (data->abort_iteration)
     return;
 
-  regset = gdbarch_regset_from_core_section (data->gdbarch, sect_name, size);
   gdb_assert (regset && regset->collect_regset);
 
   buf = xmalloc (size);

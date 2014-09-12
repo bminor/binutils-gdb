@@ -489,27 +489,6 @@ ppc_linux_fpregset (void)
   return &ppc32_linux_fpregset;
 }
 
-static const struct regset *
-ppc_linux_regset_from_core_section (struct gdbarch *core_arch,
-				    const char *sect_name, size_t sect_size)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (core_arch);
-  if (strcmp (sect_name, ".reg") == 0)
-    {
-      if (tdep->wordsize == 4)
-	return &ppc32_linux_gregset;
-      else
-	return &ppc64_linux_gregset;
-    }
-  if (strcmp (sect_name, ".reg2") == 0)
-    return &ppc32_linux_fpregset;
-  if (strcmp (sect_name, ".reg-ppc-vmx") == 0)
-    return &ppc32_linux_vrregset;
-  if (strcmp (sect_name, ".reg-ppc-vsx") == 0)
-    return &ppc32_linux_vsxregset;
-  return NULL;
-}
-
 /* Iterate over supported core file register note sections. */
 
 static void
@@ -522,14 +501,18 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
   int have_altivec = tdep->ppc_vr0_regnum != -1;
   int have_vsx = tdep->ppc_vsr0_upper_regnum != -1;
 
-  cb (".reg", 48 * tdep->wordsize, "general-purpose", cb_data);
-  cb (".reg2", 264, "floating-point", cb_data);
+  if (tdep->wordsize == 4)
+    cb (".reg", 48 * 4, &ppc32_linux_gregset, NULL, cb_data);
+  else
+    cb (".reg", 48 * 8, &ppc64_linux_gregset, NULL, cb_data);
+
+  cb (".reg2", 264, &ppc32_linux_fpregset, NULL, cb_data);
 
   if (have_altivec)
-    cb (".reg-ppc-vmx", 544, "ppc Altivec", cb_data);
+    cb (".reg-ppc-vmx", 544, &ppc32_linux_vrregset, "ppc Altivec", cb_data);
 
   if (have_vsx)
-    cb (".reg-ppc-vsx", 256, "POWER7 VSX", cb_data);
+    cb (".reg-ppc-vsx", 256, &ppc32_linux_vsxregset, "POWER7 VSX", cb_data);
 }
 
 static void
@@ -1385,8 +1368,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
     set_gdbarch_elfcore_write_linux_prpsinfo (gdbarch,
 					      elfcore_write_ppc_linux_prpsinfo32);
 
-  set_gdbarch_regset_from_core_section (gdbarch,
-					ppc_linux_regset_from_core_section);
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
   set_gdbarch_iterate_over_regset_sections (gdbarch,
 					    ppc_linux_iterate_over_regset_sections);

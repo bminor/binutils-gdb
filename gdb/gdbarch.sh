@@ -1176,7 +1176,8 @@ typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
   (struct objfile *objfile, void *cb_data);
 
 typedef void (iterate_over_regset_sections_cb)
-  (const char *sect_name, int size, const char *human_name, void *cb_data);
+  (const char *sect_name, int size, const struct regset *regset,
+   const char *human_name, void *cb_data);
 EOF
 
 # function typedef's

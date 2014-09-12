@@ -648,6 +648,35 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
     return tdesc_i386_mmx_linux;
 }
 
+/* Similar to i386_supply_fpregset, but use XSAVE extended state.  */
+
+static void
+i386_linux_supply_xstateregset (const struct regset *regset,
+				struct regcache *regcache, int regnum,
+				const void *xstateregs, size_t len)
+{
+  i387_supply_xsave (regcache, regnum, xstateregs);
+}
+
+/* Similar to i386_collect_fpregset, but use XSAVE extended state.  */
+
+static void
+i386_linux_collect_xstateregset (const struct regset *regset,
+				 const struct regcache *regcache,
+				 int regnum, void *xstateregs, size_t len)
+{
+  i387_collect_xsave (regcache, regnum, xstateregs, 1);
+}
+
+/* Register set definitions.  */
+
+static const struct regset i386_linux_xstateregset =
+  {
+    NULL,
+    i386_linux_supply_xstateregset,
+    i386_linux_collect_xstateregset
+  };
+
 /* Iterate over core file register note sections.  */
 
 static void
@@ -658,14 +687,17 @@ i386_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  cb (".reg", 68, "general-purpose", cb_data);
+  cb (".reg", 68, &i386_gregset, NULL, cb_data);
 
   if (tdep->xcr0 & X86_XSTATE_AVX)
-    cb (".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state", cb_data);
+    /* Use max size for writing, accept any size when reading.  */
+    cb (".reg-xstate", regcache ? X86_XSTATE_MAX_SIZE : 0,
+	&i386_linux_xstateregset, "XSAVE extended state", cb_data);
   else if (tdep->xcr0 & X86_XSTATE_SSE)
-    cb (".reg-xfp", 512, "extended floating-point", cb_data);
+    cb (".reg-xfp", 512, &i386_fpregset, "extended floating-point",
+	cb_data);
   else
-    cb (".reg2", 108, "floating-point", cb_data);
+    cb (".reg2", 108, &i386_fpregset, NULL, cb_data);
 }
 
 /* Linux kernel shows PC value after the 'int $0x80' instruction even if

@@ -134,7 +134,9 @@ sniff_core_bfd (bfd *abfd)
 
   /* Don't sniff if we have support for register sets in
      CORE_GDBARCH.  */
-  if (core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+  if (core_gdbarch
+      && (gdbarch_iterate_over_regset_sections_p (core_gdbarch)
+	  || gdbarch_regset_from_core_section_p (core_gdbarch)))
     return NULL;
 
   for (cf = core_file_fns; cf != NULL; cf = cf->next)
@@ -489,7 +491,9 @@ core_detach (struct target_ops *ops, const char *args, int from_tty)
 
 static void
 get_core_register_section (struct regcache *regcache,
+			   const struct regset *regset,
 			   const char *name,
+			   int min_size,
 			   int which,
 			   const char *human_name,
 			   int required)
@@ -517,6 +521,12 @@ get_core_register_section (struct regcache *regcache,
     }
 
   size = bfd_section_size (core_bfd, section);
+  if (size < min_size)
+    {
+      warning (_("Section `%s' in core file too small."), section_name);
+      return;
+    }
+
   contents = alloca (size);
   if (! bfd_get_section_contents (core_bfd, section, contents,
 				  (file_ptr) 0, size))
@@ -526,10 +536,9 @@ get_core_register_section (struct regcache *regcache,
       return;
     }
 
-  if (core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+  if (regset == NULL
+      && core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
     {
-      const struct regset *regset;
-
       regset = gdbarch_regset_from_core_section (core_gdbarch,
 						 name, size);
       if (regset == NULL)
@@ -539,7 +548,10 @@ get_core_register_section (struct regcache *regcache,
 		     human_name);
 	  return;
 	}
+    }
 
+  if (regset != NULL)
+    {
       regset->supply_regset (regset, regcache, -1, contents, size);
       return;
     }
@@ -555,16 +567,28 @@ get_core_register_section (struct regcache *regcache,
 
 static void
 get_core_registers_cb (const char *sect_name, int size,
+		       const struct regset *regset,
 		       const char *human_name, void *cb_data)
 {
   struct regcache *regcache = (struct regcache *) cb_data;
+  int required = 0;
 
   if (strcmp (sect_name, ".reg") == 0)
-    get_core_register_section (regcache, sect_name, 0, human_name, 1);
+    {
+      required = 1;
+      if (human_name == NULL)
+	human_name = "general-purpose";
+    }
   else if (strcmp (sect_name, ".reg2") == 0)
-    get_core_register_section (regcache, sect_name, 2, human_name, 0);
-  else
-    get_core_register_section (regcache, sect_name, 3, human_name, 0);
+    {
+      if (human_name == NULL)
+	human_name = "floating-point";
+    }
+
+  /* The 'which' parameter is only used when no regset is provided.
+     Thus we just set it to -1. */
+  get_core_register_section (regcache, regset, sect_name,
+			     size, -1, human_name, required);
 }
 
 /* Get the registers out of a core file.  This is the machine-
@@ -581,7 +605,9 @@ get_core_registers (struct target_ops *ops,
   int i;
   struct gdbarch *gdbarch;
 
-  if (!(core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+  if (!(core_gdbarch
+	&& (gdbarch_iterate_over_regset_sections_p (core_gdbarch)
+	    || gdbarch_regset_from_core_section_p (core_gdbarch)))
       && (core_vec == NULL || core_vec->core_read_registers == NULL))
     {
       fprintf_filtered (gdb_stderr,
@@ -596,10 +622,10 @@ get_core_registers (struct target_ops *ops,
 					  (void *) regcache, NULL);
   else
     {
-      get_core_register_section (regcache,
-				 ".reg", 0, "general-purpose", 1);
-      get_core_register_section (regcache,
-				 ".reg2", 2, "floating-point", 0);
+      get_core_register_section (regcache, NULL,
+				 ".reg", 0, 0, "general-purpose", 1);
+      get_core_register_section (regcache, NULL,
+				 ".reg2", 0, 2, "floating-point", 0);
     }
 
   /* Mark all registers not found in the core as unavailable.  */

@@ -731,28 +731,6 @@ static const struct regset arm_linux_vfpregset =
     NULL, arm_linux_supply_vfp, arm_linux_collect_vfp
   };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
-
-static const struct regset *
-arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
-				    const char *sect_name, size_t sect_size)
-{
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size == ARM_LINUX_SIZEOF_GREGSET)
-    return &arm_linux_gregset;
-
-  if (strcmp (sect_name, ".reg2") == 0
-      && sect_size == ARM_LINUX_SIZEOF_NWFPE)
-    return &arm_linux_fpregset;
-
-  if (strcmp (sect_name, ".reg-arm-vfp") == 0
-      && sect_size == ARM_LINUX_SIZEOF_VFP)
-    return &arm_linux_vfpregset;
-
-  return NULL;
-}
-
 /* Iterate over core file register note sections.  */
 
 static void
@@ -763,13 +741,14 @@ arm_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  cb (".reg", ARM_LINUX_SIZEOF_GREGSET, "general-purpose", cb_data);
+  cb (".reg", ARM_LINUX_SIZEOF_GREGSET, &arm_linux_gregset, NULL, cb_data);
 
   if (tdep->have_vfp_registers)
-    cb (".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, "VFP floating-point",
-	cb_data);
+    cb (".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, &arm_linux_vfpregset,
+	"VFP floating-point", cb_data);
   else if (tdep->have_fpa_registers)
-    cb (".reg2", ARM_LINUX_SIZEOF_NWFPE, "FPA floating-point", cb_data);
+    cb (".reg2", ARM_LINUX_SIZEOF_NWFPE, &arm_linux_fpregset,
+	"FPA floating-point", cb_data);
 }
 
 /* Determine target description from core file.  */
@@ -1457,8 +1436,6 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_kernel_linux_restart_syscall_tramp_frame);
 
   /* Core file support.  */
-  set_gdbarch_regset_from_core_section (gdbarch,
-					arm_linux_regset_from_core_section);
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, arm_linux_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch, arm_linux_core_read_description);
