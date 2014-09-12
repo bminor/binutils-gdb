@@ -983,6 +983,17 @@ inf_port_to_thread (struct inf *inf, mach_port_t port)
   return 0;
 }
 
+/* See gnu-nat.h.  */
+
+void
+inf_threads (struct inf *inf, inf_threads_ftype *f, void *arg)
+{
+  struct proc *thread;
+
+  for (thread = inf->threads; thread; thread = thread->next)
+    f (thread, arg);
+}
+
 
 /* Make INF's list of threads be consistent with reality of TASK.  */
 void

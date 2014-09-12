@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.8
 
+* GDB now supports hardware watchpoints on x86 GNU Hurd.
+
 * Python Scripting
   You can now access frame registers from Python scripts.
 

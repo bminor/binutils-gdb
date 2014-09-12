@@ -1,3 +1,21 @@
+2014-09-16  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* config/i386/i386gnu.mh (NATDEPFILES): Add x86-nat.o and
+	x86-dregs.o.
+	* gnu-nat.c (inf_threads): New function.
+	* gnu-nat.h (inf_threads_ftype): New typedef.
+	(inf_threads): New declaration.
+	* i386gnu-nat.c: Include "x86-nat.h" and "inf-child.h".
+	[i386_DEBUG_STATE] (i386_gnu_dr_get, i386_gnu_dr_set)
+	(i386_gnu_dr_set_control_one, i386_gnu_dr_set_control)
+	(i386_gnu_dr_set_addr_one, i386_gnu_dr_set_addr)
+	(i386_gnu_dr_get_reg, i386_gnu_dr_get_addr, 386_gnu_dr_get_status)
+	(i386_gnu_dr_get_control): New functions.
+	(reg_addr): New structure.
+	(_initialize_i386gnu_nat) [i386_DEBUG_STATE]: Initialize hardware
+	i386 debugging register hooks.
+	* NEWS: Mention this.
+
 2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
 
 	* arm-tdep.c (arm_record_vdata_transfer_insn): Added record handler for
