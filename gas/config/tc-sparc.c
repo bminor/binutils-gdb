@@ -916,16 +916,24 @@ md_begin (void)
       /* `max_architecture' records the requested architecture.
 	 Issue warnings if we go above it.  */
       warn_after_architecture = max_architecture;
-
-      /* Find the highest architecture level that doesn't conflict with
-	 the requested one.  */
-      for (max_architecture = SPARC_OPCODE_ARCH_MAX;
-	   max_architecture > warn_after_architecture;
-	   --max_architecture)
-	if (! SPARC_OPCODE_CONFLICT_P (max_architecture,
-				       warn_after_architecture))
-	  break;
     }
+
+  /* Find the highest architecture level that doesn't conflict with
+     the requested one.  */
+
+  if (warn_on_bump
+      || !architecture_requested)
+  {
+    enum sparc_opcode_arch_val current_max_architecture
+      = max_architecture;
+
+    for (max_architecture = SPARC_OPCODE_ARCH_MAX;
+	 max_architecture > warn_after_architecture;
+	 --max_architecture)
+      if (! SPARC_OPCODE_CONFLICT_P (max_architecture,
+				     current_max_architecture))
+	break;
+  }
 }
 
 /* Called after all assembly has been done.  */
@@ -2963,6 +2971,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  warn_after_architecture = needed_architecture;
 		}
 	      current_architecture = needed_architecture;
+	      hwcap_allowed |= hwcaps;
 	    }
 	  /* Conflict.  */
 	  /* ??? This seems to be a bit fragile.  What if the next entry in
