@@ -1,3 +1,10 @@
+2014-09-12  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	PR tdep/17379
+	* rs6000-tdep.c (rs6000_frame_cache): Use safe_read_memory_integer
+	instead of read_memory_unsigned_integer.
+
 2014-09-12  Gary Benson  <gbenson@redhat.com>
 
 	* nat/linux-waitpid.c: Include common-defs.h.

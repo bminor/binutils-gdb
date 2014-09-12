@@ -1,3 +1,9 @@
+2014-09-12  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	PR tdep/17379
+	* gdb.arch/powerpc-stackless.S: New file.
+	* gdb.arch/powerpc-stackless.exp: New file.
+
 2014-09-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/attach.c: Include unistd.h.
