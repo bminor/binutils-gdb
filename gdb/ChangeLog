@@ -1,3 +1,26 @@
+2014-09-12  Gary Benson  <gbenson@redhat.com>
+
+	* common/agent.c: Include common-defs.h.
+	Don't include defs.h or server.h.
+	* common/buffer.c: Likewise.
+	* common/common-debug.c: Likewise.
+	* common/common-utils.c: Likewise.
+	* common/errors.c: Likewise.
+	* common/filestuff.c: Likewise.
+	* common/format.c: Likewise.
+	* common/gdb_vecs.c: Likewise.
+	* common/print-utils.c: Likewise.
+	* common/ptid.c: Likewise.
+	* common/rsp-low.c: Likewise.
+	* common/signals.c: Likewise.
+	* common/vec.c: Likewise.
+	* common/xml-utils.c: Likewise.
+	* nat/linux-osdata.c: Likewise.
+	* nat/linux-procfs.c: Likewise.
+	* nat/linux-ptrace.c: Likewise.
+	* nat/mips-linux-watch.c: Likewise.
+	* target/waitstatus.c: Likewise.
+
 2014-09-12  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 
