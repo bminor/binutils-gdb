@@ -1,3 +1,27 @@
+2014-09-12  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (remove_solib_event_breakpoints_at_next_stop)
+	(create_and_insert_solib_event_breakpoint): New functions.
+	* breakpoint.h (create_and_insert_solib_event_breakpoint)
+	(remove_solib_event_breakpoints_at_next_stop): New declarations.
+	* procfs.c (dbx_link_bpt_addr, dbx_link_bpt): Delete globals.
+	(remove_dbx_link_breakpoint): Delete function.
+	(insert_dbx_link_bpt_in_file): Use
+	create_and_insert_solib_event_breakpoint instead of
+	deprecated_insert_raw_breakpoint.
+	(procfs_wait): Don't check whether we hit __dbx_link here.
+	(procfs_mourn_inferior): Don't delete the __dbx_link breakpoint
+	here.
+	* solib-irix.c (base_breakpoint): Delete global.
+	(disable_break): Delete function.
+	(enable_break): Use create_solib_event_breakpoint
+	instead of deprecated_insert_raw_breakpoint.
+	(irix_solib_handle_event): New function.
+	(irix_solib_create_inferior_hook): Don't run the target or disable
+	the mapping-complete breakpoint here.
+	(_initialize_irix_solib): Install irix_solib_handle_event as
+	so_ops->handle_event hook.
+
 2014-09-12  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 

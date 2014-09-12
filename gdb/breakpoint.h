@@ -1419,12 +1419,23 @@ extern struct breakpoint *create_jit_event_breakpoint (struct gdbarch *,
 extern struct breakpoint *create_solib_event_breakpoint (struct gdbarch *,
 							 CORE_ADDR);
 
+/* Create an solib event breakpoint at ADDRESS in the current program
+   space, and immediately try to insert it.  Returns a pointer to the
+   breakpoint on success.  Deletes the new breakpoint and returns NULL
+   if inserting the breakpoint fails.  */
+extern struct breakpoint *create_and_insert_solib_event_breakpoint
+  (struct gdbarch *gdbarch, CORE_ADDR address);
+
 extern struct breakpoint *create_thread_event_breakpoint (struct gdbarch *,
 							  CORE_ADDR);
 
 extern void remove_jit_event_breakpoints (void);
 
 extern void remove_solib_event_breakpoints (void);
+
+/* Mark solib event breakpoints of the current program space with
+   delete at next stop disposition.  */
+extern void remove_solib_event_breakpoints_at_next_stop (void);
 
 extern void remove_thread_event_breakpoints (void);
 

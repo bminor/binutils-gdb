@@ -7620,6 +7620,19 @@ remove_solib_event_breakpoints (void)
       delete_breakpoint (b);
 }
 
+/* See breakpoint.h.  */
+
+void
+remove_solib_event_breakpoints_at_next_stop (void)
+{
+  struct breakpoint *b, *b_tmp;
+
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+    if (b->type == bp_shlib_event
+	&& b->loc->pspace == current_program_space)
+      b->disposition = disp_del_at_next_stop;
+}
+
 struct breakpoint *
 create_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 {
@@ -7628,6 +7641,24 @@ create_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
   b = create_internal_breakpoint (gdbarch, address, bp_shlib_event,
 				  &internal_breakpoint_ops);
   update_global_location_list_nothrow (1);
+  return b;
+}
+
+/* See breakpoint.h.  */
+
+struct breakpoint *
+create_and_insert_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
+{
+  struct breakpoint *b;
+
+  b = create_solib_event_breakpoint (gdbarch, address);
+  if (!breakpoints_always_inserted_mode ())
+    insert_breakpoint_locations ();
+  if (!b->loc->inserted)
+    {
+      delete_breakpoint (b);
+      return NULL;
+    }
   return b;
 }
 
