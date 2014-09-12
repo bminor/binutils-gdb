@@ -40,14 +40,7 @@ proc jit_run {msg} {
     global decimal gdb_prompt
 
     gdb_run_cmd
-    gdb_expect {
-	-re "Inferior .* exited.*$gdb_prompt $" {
-	    pass $msg
-	}
-	-re ".*$gdb_prompt $" {
-	    fail $msg
-	}
-    }
+    gdb_test "" "Inferior .* exited.*" $msg
 }
 
 # Test re-running an inferior with a JIT descriptor, where the JIT

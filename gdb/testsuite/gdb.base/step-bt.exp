@@ -29,19 +29,7 @@ gdb_test "break *hello" \
          "breakpoint at first instruction of hello()"
 
 gdb_run_cmd
-gdb_expect {
-    -re ".*Breakpoint.* hello .* at .*$srcfile:.*$gdb_prompt $"  {
-	pass "run to hello()"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "run to hello()"
-	return -1
-    }
-    timeout {
-        fail "run to hello() (timeout)"
-        return -1
-    }
-}
+gdb_test "" "Breakpoint.* hello .* at .*$srcfile:.*" "run to hello()"
 
 gdb_test "stepi" \
          ".*" \

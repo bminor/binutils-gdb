@@ -1,3 +1,27 @@
+2014-09-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/gdb1558.exp: Replace uses of gdb_expect after
+	gdb_run_cmd with gdb_test_multiple or gdb_test throughout.
+	* gdb.arch/i386-size-overlap.exp: Likewise.
+	* gdb.arch/i386-size.exp: Likewise.
+	* gdb.arch/i386-unwind.exp: Likewise.
+	* gdb.base/a2-run.exp: Likewise.
+	* gdb.base/break.exp: Likewise.
+	* gdb.base/charset.exp: Likewise.
+	* gdb.base/chng-syms.exp: Likewise.
+	* gdb.base/commands.exp: Likewise.
+	* gdb.base/dbx.exp: Likewise.
+	* gdb.base/find.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/jit-simple.exp: Likewise.
+	* gdb.base/reread.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/step-bt.exp: Likewise.
+	* gdb.cp/mb-inline.exp: Likewise.
+	* gdb.cp/mb-templates.exp: Likewise.
+	* gdb.objc/basicclass.exp: Likewise.
+	* gdb.threads/killed.exp: Likewise.
+
 2014-09-12  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	PR tdep/17379

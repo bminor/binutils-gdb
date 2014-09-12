@@ -46,18 +46,7 @@ gdb_load ${binfile}
 # We use gdb_run_cmd so this stands a chance to work for remote
 # targets too.
 gdb_run_cmd
-
-gdb_expect {
-    -re "Program received signal SIGTRAP.*$gdb_prompt $" {
-	pass "run past main"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "run past main"
-    }
-    timeout {
-	fail "run past main (timeout)"
-    }
-}
+gdb_test "" "Program received signal SIGTRAP.*" "run past main"
 
 set message "backtrace shows no function"
 gdb_test_multiple "backtrace 10" $message {

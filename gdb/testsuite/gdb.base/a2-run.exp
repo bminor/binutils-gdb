@@ -34,47 +34,27 @@ if { [prepare_for_testing ${testfile}.exp $testfile $srcfile] } {
 # On VxWorks this justs make sure the program was run.
 gdb_run_cmd
 
+set test "run \"$testfile\" with no args"
+
 if [istarget "*-*-vxworks*"] then {
-    set timeout 120
-    verbose "Timeout is now $timeout seconds" 2
-    gdb_expect {
-	 "$inferior_exited_re normally" {
-	    unresolved "run \"$testfile\" with no args"
-	}
-	 -re "usage:  factorial <number>" {
-	    pass "run \"$testfile\" with no args"
-	}
-	timeout	{
-	    fail "(timeout) run \"$testfile\" with no args"
-	}
-    }
-    set timeout 10
-    verbose "Timeout is now $timeout seconds" 2
-    gdb_expect -re "$gdb_prompt $" {}
+    gdb_test "" "usage:  factorial <number>.*" $test
 } else {
-    gdb_expect {
+    gdb_test_multiple "" $test {
 	-re ".*usage:  factorial <number>.*$inferior_exited_re with code 01.\r\n$gdb_prompt $" {
-	    pass "run \"$testfile\" with no args"
+	    pass $test
 	    pass "no spurious messages at program exit"
 	}
 	-re ".*usage:  factorial <number>.*$inferior_exited_re with code 01.*$gdb_prompt $" {
-	    pass "run \"$testfile\" with no args"
+	    pass $test
 	    fail "no spurious messages at program exit"
 	}
 	-re ".*usage:  factorial <number>.* EXIT code 1.*$inferior_exited_re normally.\r\n$gdb_prompt $" {
-	    pass "run \"$testfile\" with no args (exit wrapper)"
+	    pass "$test (exit wrapper)"
 	    pass "no spurious messages at program exit"
 	}
 	-re ".*usage:  factorial <number>.* EXIT code 1.*$inferior_exited_re normally.*$gdb_prompt $" {
-	    pass "run \"$testfile\" with no args (exit wrapper)"
+	    pass "$test (exit wrapper)"
 	    fail "no spurious messages at program exit"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "run \"$testfile\" with no args"
-	    verbose "expect_out is $expect_out(buffer)" 2
-	}
-	timeout	{
-	    fail "(timeout) run \"$testfile\" no args"
 	}
     }
 }
@@ -107,14 +87,9 @@ if [istarget "*-*-vxworks*"] then {
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect -re "$gdb_prompt $" {}
 } else {
-	setup_xfail "arm-*-coff"
-	gdb_run_cmd 5
-	gdb_expect {
-	    -re ".*120.*$gdb_prompt $"\
-				{ pass "run \"$testfile\" with arg" }
-	    -re ".*$gdb_prompt $"	{ fail "run \"$testfile\" with arg" }
-	    timeout		{ fail "(timeout) run \"$testfile\" with arg" }
-	}
+    setup_xfail "arm-*-coff"
+    gdb_run_cmd 5
+    gdb_test "" "120.*" "run \"$testfile\" with arg"
 }
 
 # Run again with same arguments.
@@ -135,12 +110,7 @@ if [istarget "*-*-vxworks*"] then {
     gdb_expect -re "$gdb_prompt $" {}
 } else {
     setup_xfail "arm-*-coff"
-    gdb_expect {
-	    -re ".*120.*$gdb_prompt $"\
-				{ pass "run \"$testfile\" again with same args" }
-	    -re ".*$gdb_prompt $"	{ fail "run \"$testfile\" again with same args" }
-	    timeout		{ fail "(timeout) run \"$testfile\" again with same args" }
-	}
+    gdb_test "" "120.*" "run \"$testfile\" again with same args"
 }
 
 # Use "set args" command to specify no arguments as default and run again.
@@ -170,17 +140,7 @@ if [istarget "*-*-vxworks*"] then {
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect -re "$gdb_prompt $" {}
 } else {
-    gdb_expect {
-	-re ".*usage:  factorial <number>.*$gdb_prompt $" {
-	    pass "run after setting args to nil"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "run after setting args to nil"
-	}
-	timeout {
-	    fail "(timeout) run after setting args to nil"
-	}
-    }
+    gdb_test "" "usage:  factorial <number>.*" "run after setting args to nil"
 }
 
 # Use "set args" command to specify an argument and run again.
@@ -211,17 +171,7 @@ if [istarget "*-*-vxworks*"] then {
     gdb_expect -re "$gdb_prompt $" {}
 } else {
     setup_xfail "arm-*-coff"
-    gdb_expect {
-	    -re ".*720.*$gdb_prompt $" {
-		pass "run \"$testfile\" again after setting args"
-	    }
-	    -re ".*$gdb_prompt $" {
-		fail "run \"$testfile\" again after setting args"
-	    }
-	    timeout {
-		fail "(timeout) run \"$testfile\" again after setting args"
-	    }
-	}
+    gdb_test "" "720.*" "run \"$testfile\" again after setting args"
 }
 
 # GOAL: Test that shell is being used with "run".  For remote debugging
