@@ -1,3 +1,11 @@
+2014-09-23  Yao Qi  <yao@codesourcery.com>
+
+	* linux-low.c (lp_status_maybe_breakpoint): New function.
+	(linux_low_filter_event): Call lp_status_maybe_breakpoint.
+	(count_events_callback): Likewise.
+	(select_event_lwp_callback): Likewise.
+	(cancel_breakpoints_callback): Likewise.
+
 2014-09-19  Don Breazeal  <donb@codesourcery.com>
 
 	* linux-low.c (handle_extended_wait): Call

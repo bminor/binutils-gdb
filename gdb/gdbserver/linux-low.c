@@ -1739,6 +1739,20 @@ cancel_breakpoint (struct lwp_info *lwp)
   return 0;
 }
 
+/* Return true if the event in LP may be caused by breakpoint.  */
+
+static int
+lp_status_maybe_breakpoint (struct lwp_info *lp)
+{
+  return (lp->status_pending_p
+	  && WIFSTOPPED (lp->status_pending)
+	  && (WSTOPSIG (lp->status_pending) == SIGTRAP
+	      /* SIGILL and SIGSEGV are also treated as traps in case a
+		 breakpoint is inserted at the current PC.  */
+	      || WSTOPSIG (lp->status_pending) == SIGILL
+	      || WSTOPSIG (lp->status_pending) == SIGSEGV));
+}
+
 /* Do low-level handling of the event, and check if we should go on
    and pass it to caller code.  Return the affected lwp if we are, or
    NULL otherwise.  */
@@ -1936,7 +1950,7 @@ linux_low_filter_event (ptid_t filter_ptid, int lwpid, int wstat)
 		 the core before this one is handled.  All-stop always
 		 cancels breakpoint hits in all threads.  */
 	      if (non_stop
-		  && WSTOPSIG (wstat) == SIGTRAP
+		  && lp_status_maybe_breakpoint (child)
 		  && cancel_breakpoint (child))
 		{
 		  /* Throw away the SIGTRAP.  */
@@ -2197,9 +2211,7 @@ count_events_callback (struct inferior_list_entry *entry, void *data)
      should be reported to GDB.  */
   if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
       && thread->last_resume_kind != resume_stop
-      && lp->status_pending_p
-      && WIFSTOPPED (lp->status_pending)
-      && WSTOPSIG (lp->status_pending) == SIGTRAP
+      && lp_status_maybe_breakpoint (lp)
       && !breakpoint_inserted_here (lp->stop_pc))
     (*count)++;
 
@@ -2237,9 +2249,7 @@ select_event_lwp_callback (struct inferior_list_entry *entry, void *data)
   /* Select only resumed LWPs that have a SIGTRAP event pending. */
   if (thread->last_resume_kind != resume_stop
       && thread->last_status.kind == TARGET_WAITKIND_IGNORE
-      && lp->status_pending_p
-      && WIFSTOPPED (lp->status_pending)
-      && WSTOPSIG (lp->status_pending) == SIGTRAP
+      && lp_status_maybe_breakpoint (lp)
       && !breakpoint_inserted_here (lp->stop_pc))
     if ((*selector)-- == 0)
       return 1;
@@ -2271,9 +2281,7 @@ cancel_breakpoints_callback (struct inferior_list_entry *entry, void *data)
 
   if (thread->last_resume_kind != resume_stop
       && thread->last_status.kind == TARGET_WAITKIND_IGNORE
-      && lp->status_pending_p
-      && WIFSTOPPED (lp->status_pending)
-      && WSTOPSIG (lp->status_pending) == SIGTRAP
+      && lp_status_maybe_breakpoint (lp)
       && !lp->stepping
       && !lp->stopped_by_watchpoint
       && cancel_breakpoint (lp))
