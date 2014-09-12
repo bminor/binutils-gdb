@@ -1,3 +1,9 @@
+2014-09-12  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-i386.c (match_template): Remove redundant "!!" testing
+	single-bit bitfields.
+	(build_modrm_byte): Don't compare single-bit bitfields to "1".
+
 2014-09-09  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add cortex-a17.

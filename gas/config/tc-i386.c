@@ -4709,9 +4709,9 @@ match_template (void)
 	       && !operand_types[0].bitfield.regymm
 	       && !operand_types[0].bitfield.regzmm)
 	      || (!operand_types[t->operands > 1].bitfield.regmmx
-		  && !!operand_types[t->operands > 1].bitfield.regxmm
-		  && !!operand_types[t->operands > 1].bitfield.regymm
-		  && !!operand_types[t->operands > 1].bitfield.regzmm))
+		  && operand_types[t->operands > 1].bitfield.regxmm
+		  && operand_types[t->operands > 1].bitfield.regymm
+		  && operand_types[t->operands > 1].bitfield.regzmm))
 	  && (t->base_opcode != 0x0fc7
 	      || t->extension_opcode != 1 /* cmpxchg8b */))
 	continue;
@@ -4726,7 +4726,7 @@ match_template (void)
 	       && ((!operand_types[0].bitfield.regmmx
 		    && !operand_types[0].bitfield.regxmm)
 		   || (!operand_types[t->operands > 1].bitfield.regmmx
-		       && !!operand_types[t->operands > 1].bitfield.regxmm)))
+		       && operand_types[t->operands > 1].bitfield.regxmm)))
 	continue;
 
       /* Do not verify operands when there are none.  */
@@ -6171,8 +6171,8 @@ build_modrm_byte (void)
 	      op = i.tm.operand_types[vvvv];
 	      op.bitfield.regmem = 0;
 	      if ((dest + 1) >= i.operands
-		  || (op.bitfield.reg32 != 1
-		      && !op.bitfield.reg64 != 1
+		  || (!op.bitfield.reg32
+		      && op.bitfield.reg64
 		      && !operand_type_equal (&op, &regxmm)
 		      && !operand_type_equal (&op, &regymm)
 		      && !operand_type_equal (&op, &regzmm)
