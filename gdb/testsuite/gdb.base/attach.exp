@@ -256,11 +256,8 @@ proc do_attach_tests {} {
 
     # Verify that the modification really happened.
 
-    gdb_test "tbreak 19" "Temporary breakpoint .*at.*$srcfile, line 19.*" \
-	"after attach2, set tbreak postloop"
-
-    gdb_test "continue" "main.*at.*$srcfile:19.*" \
-	"after attach2, reach tbreak postloop"
+    gdb_breakpoint [gdb_get_line_number "postloop"] temporary
+    gdb_continue_to_breakpoint "postloop" ".* postloop .*"
 
     # Allow the test process to exit, to cleanup after ourselves.
 
@@ -418,6 +415,7 @@ proc test_command_line_attach_run {} {
 		     "-iex \"set height 0\" -iex \"set width 0\" --pid=$testpid -ex \"start\""]
 	if { $res != 0} {
 	    fail $test
+	    remote_exec build "kill -9 ${testpid}"
 	    return $res
 	}
 	gdb_test_multiple "" $test {

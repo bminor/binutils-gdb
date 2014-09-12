@@ -1,3 +1,11 @@
+2014-09-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/attach.c: Include unistd.h.
+	(main): Call alarm.  Add label postloop.
+	* gdb.base/attach.exp (do_attach_tests): Use gdb_get_line_number,
+	gdb_breakpoint, gdb_continue_to_breakpoint.
+	(test_command_line_attach_run): Kill ${testpid} in one exit path.
+
 2014-09-11  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17347
