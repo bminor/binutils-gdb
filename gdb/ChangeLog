@@ -1,5 +1,12 @@
 2014-09-12  Gary Benson  <gbenson@redhat.com>
 
+	* nat/linux-waitpid.c: Include common-defs.h.
+	[GDBSERVER]: Add FIXME comment.
+	[!GDBSERVER]: Don't include defs.h or signal.h.
+	(linux_debug) [!GDBSERVER]: Remove empty block.
+
+2014-09-12  Gary Benson  <gbenson@redhat.com>
+
 	* nat/x86-dregs.c: Include common-defs.h and break-common.h.
 	Don't include defs.h or server.h.
 
