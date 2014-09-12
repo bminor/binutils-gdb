@@ -17,13 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef GDBSERVER
-#include "server.h"
-#else
-#include "defs.h"
-#include "inferior.h"
-#endif
+#include "common-defs.h"
 #include "x86-dregs.h"
+#include "break-common.h"
 
 /* Support for hardware watchpoints and breakpoints using the x86
    debug registers.

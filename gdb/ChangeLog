@@ -1,5 +1,10 @@
 2014-09-12  Gary Benson  <gbenson@redhat.com>
 
+	* nat/x86-dregs.c: Include common-defs.h and break-common.h.
+	Don't include defs.h or server.h.
+
+2014-09-12  Gary Benson  <gbenson@redhat.com>
+
 	* nat/linux-btrace.c: Include common-defs.h.
 	Don't include defs.h, server.h or gdbthread.h.
 	* nat/linux-btrace.h (struct target_ops): New forward declaration.
