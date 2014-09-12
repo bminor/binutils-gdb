@@ -1,3 +1,10 @@
+2014-09-12  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* regcache.h: Include common-regcache.h.
+	(regcache_read_pc): Don't declare.
+	* regcache.c (get_thread_regcache_for_ptid): New function.
+
 2014-09-11  Tom Tromey  <tromey@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 

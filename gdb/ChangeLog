@@ -1,3 +1,15 @@
+2014-09-12  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* common/common-regcache.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/common-regcache.h.
+	* regcache.h: Include common-regcache.h.
+	(regcache_read_pc): Don't declare.
+	* regcache.c (get_thread_regcache_for_ptid): New function.
+	* nat/linux-btrace.c: Don't include regcache.h.
+	Include common-regcache.h.
+	(perf_event_read_bts): Use get_thread_regcache_for_ptid.
+
 2014-09-11  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* regcache.h (struct regset): Declare.

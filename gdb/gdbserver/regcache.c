@@ -60,6 +60,14 @@ get_thread_regcache (struct thread_info *thread, int fetch)
   return regcache;
 }
 
+/* See common/common-regcache.h.  */
+
+struct regcache *
+get_thread_regcache_for_ptid (ptid_t ptid)
+{
+  return get_thread_regcache (find_thread_ptid (ptid), 1);
+}
+
 void
 regcache_invalidate_thread (struct thread_info *thread)
 {

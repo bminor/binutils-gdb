@@ -20,6 +20,8 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
+#include "common-regcache.h"
+
 struct regcache;
 struct regset;
 struct gdbarch;
@@ -136,7 +138,7 @@ void regcache_cooked_write_part (struct regcache *regcache, int regnum,
 
 /* Special routines to read/write the PC.  */
 
-extern CORE_ADDR regcache_read_pc (struct regcache *regcache);
+/* For regcache_read_pc see common/common-regcache.h.  */
 extern void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
 
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
