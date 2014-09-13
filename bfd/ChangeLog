@@ -308,7 +308,7 @@
 2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	Add or reactivate or1k-*-rtems*
-	* bfd/config.bfd (or1k-*-rtems*): Reactivate.
+	* config.bfd (or1k-*-rtems*): Reactivate.
 
 2014-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -615,7 +615,7 @@
 
 	PR ld/16910
 	* linker.c (unwrap_hash_lookup): New function.
-	* elf-bfd (RELOC_FOR_GLOBAL_SYMBOL): Call unwrap_hash_lookup.
+	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): Call unwrap_hash_lookup.
 	* elf32-i370.c (i370_elf_relocate_section): Likewise.
 	* elf32-m32c.c (m32c_elf_relocate_section): Likewise.
 	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
@@ -674,7 +674,7 @@
 
 2014-05-27  DJ Delorie  <dj@redhat.com>
 
-	* bfd/elf32-rx.c (get_symbol_value_maybe): New.
+	* elf32-rx.c (get_symbol_value_maybe): New.
 	(rx_elf_relocate_section): If we find a reloc against
 	$tableentry$default$<name>, redirect it to the appropriate
 	$tableentry$<n>$.
@@ -686,7 +686,7 @@
 	(rx_table_map): New.
 	(rx_additional_link_map_text): New.  Called to dump tables to the
 	map file.
-	* bfd/elf32-rx.h: New.
+	* elf32-rx.h: New.
 
 2014-05-20  DJ Delorie  <dj@redhat.com>
 
