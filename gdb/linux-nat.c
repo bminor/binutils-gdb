@@ -2311,6 +2311,8 @@ wait_lwp (struct lwp_info *lp)
 	 again before it gets to sigsuspend so we can safely let the handlers
 	 get executed here.  */
 
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog, "WL: about to sigsuspend\n");
       sigsuspend (&suspend_mask);
     }
 
@@ -3441,6 +3443,8 @@ retry:
       gdb_assert (lp == NULL);
 
       /* Block until we get an event reported with SIGCHLD.  */
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog, "LNW: about to sigsuspend\n");
       sigsuspend (&suspend_mask);
     }
 
