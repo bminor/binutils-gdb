@@ -64,10 +64,12 @@ if ![info exists INTERNAL_GDBFLAGS] {
 }
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.
-# Set it if it is not already set.
+# Set it if it is not already set.  This is also set by default_gdb_init
+# but it's not clear what removing one of them will break.
+# See with_gdb_prompt for more details on prompt handling.
 global gdb_prompt
 if ![info exists gdb_prompt] then {
-    set gdb_prompt "\[(\]gdb\[)\]"
+    set gdb_prompt "\\(gdb\\)"
 }
 
 # A regexp that matches the pagination prompt.
@@ -1738,17 +1740,42 @@ proc with_test_prefix { prefix body } {
 # PROMPT.  When BODY is finished, restore GDB prompt and variable
 # $gdb_prompt.
 # Returns the result of BODY.
+#
+# Notes:
+#
+# 1) If you want to use, for example, "(foo)" as the prompt you must pass it
+# as "(foo)", and not the regexp form "\(foo\)" (expressed as "\\(foo\\)" in
+# TCL).  PROMPT is internally converted to a suitable regexp for matching.
+# We do the conversion from "(foo)" to "\(foo\)" here for a few reasons:
+#   a) It's more intuitive for callers to pass the plain text form.
+#   b) We need two forms of the prompt:
+#      - a regexp to use in output matching,
+#      - a value to pass to the "set prompt" command.
+#   c) It's easier to convert the plain text form to its regexp form.
+#
+# 2) Don't add a trailing space, we do that here.
 
 proc with_gdb_prompt { prompt body } {
     global gdb_prompt
 
+    # Convert "(foo)" to "\(foo\)".
+    # We don't use string_to_regexp because while it works today it's not
+    # clear it will work tomorrow: the value we need must work as both a
+    # regexp *and* as the argument to the "set prompt" command, at least until
+    # we start recording both forms separately instead of just $gdb_prompt.
+    # The testsuite is pretty-much hardwired to interpret $gdb_prompt as the
+    # regexp form.
+    regsub -all {[]*+.|()^$\[\\]} $prompt {\\&} prompt
+
     set saved $gdb_prompt
 
+    verbose -log "Setting gdb prompt to \"$prompt \"."
     set gdb_prompt $prompt
     gdb_test_no_output "set prompt $prompt " ""
 
     set code [catch {uplevel 1 $body} result]
 
+    verbose -log "Restoring gdb prompt to \"$saved \"."
     set gdb_prompt $saved
     gdb_test_no_output "set prompt $saved " ""
 

@@ -1,3 +1,11 @@
+2014-09-13  Doug Evans  <xdje42@gmail.com>
+
+	* lib/gdb.exp (gdb_prompt): Add comment and change initial value to
+	be consistent with what default_gdb_init uses.
+	(with_gdb_prompt): Change form of PROMPT argument from a regexp to
+	the plain text of the prompt.  Add some logging printfs.
+	* gdb.perf/disassemble.exp: Update call to with_gdb_prompt.
+
 2014-09-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.arch/gdb1558.exp: Replace uses of gdb_expect after
