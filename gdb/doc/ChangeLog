@@ -1,3 +1,7 @@
+2014-09-13  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Signaling): Document new queue-signal command.
+
 2014-09-06  Doug Evans  <xdje42@gmail.com>
 
 	PR 15276

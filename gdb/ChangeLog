@@ -1,5 +1,11 @@
 2014-09-13  Doug Evans  <xdje42@gmail.com>
 
+	* NEWS: Mention new "queue-signal" command.
+	* infcmd.c (queue_signal_command): New function.
+	(_initialize_infcmd): Add new queue-signal command.
+
+2014-09-13  Doug Evans  <xdje42@gmail.com>
+
 	* linux-nat.c (wait_lwp): Add debugging printf.
 	(linux_nat_wait_1): Ditto.
 

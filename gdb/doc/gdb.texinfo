@@ -16630,17 +16630,38 @@ same thread before issuing the @samp{signal 0} command.  If you issue
 the @samp{signal 0} command with another thread as the selected one,
 @value{GDBN} detects that and asks for confirmation.
 
-@code{signal} does not repeat when you press @key{RET} a second time
-after executing the command.
-@end table
-@c @end group
-
 Invoking the @code{signal} command is not the same as invoking the
 @code{kill} utility from the shell.  Sending a signal with @code{kill}
 causes @value{GDBN} to decide what to do with the signal depending on
 the signal handling tables (@pxref{Signals}).  The @code{signal} command
 passes the signal directly to your program.
 
+@code{signal} does not repeat when you press @key{RET} a second time
+after executing the command.
+
+@kindex queue-signal
+@item queue-signal @var{signal}
+Queue @var{signal} to be delivered immediately to the current thread
+when execution of the thread resumes.  The @var{signal} can be the name or
+the number of a signal.  For example, on many systems @code{signal 2} and
+@code{signal SIGINT} are both ways of sending an interrupt signal.
+The handling of the signal must be set to pass the signal to the program,
+otherwise @value{GDBN} will report an error.
+You can control the handling of signals from @value{GDBN} with the
+@code{handle} command (@pxref{Signals}).
+
+Alternatively, if @var{signal} is zero, any currently queued signal
+for the current thread is discarded and when execution resumes no signal
+will be delivered.  This is useful when your program stopped on account
+of a signal and would ordinarily see the signal when resumed with the
+@code{continue} command.
+
+This command differs from the @code{signal} command in that the signal
+is just queued, execution is not resumed.  And @code{queue-signal} cannot
+be used to pass a signal whose handling state has been set to @code{nopass}
+(@pxref{Signals}).
+@end table
+@c @end group
 
 @node Returning
 @section Returning from a Function

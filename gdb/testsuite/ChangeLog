@@ -1,5 +1,10 @@
 2014-09-13  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.threads/queue-signal.c: New file.
+	* gdb.threads/queue-signal.exp: New file.
+
+2014-09-13  Doug Evans  <xdje42@gmail.com>
+
 	* lib/gdb.exp (gdb_prompt): Add comment and change initial value to
 	be consistent with what default_gdb_init uses.
 	(with_gdb_prompt): Change form of PROMPT argument from a regexp to
