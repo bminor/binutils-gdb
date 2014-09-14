@@ -1,3 +1,9 @@
+2016-05-24  Tom Tromey  <tom@tromey.com>
+
+	PR python/17386:
+	* gdb.python/py-value.exp (test_value_numeric_ops): Add tests that
+	use value as an index.
+
 2016-05-23  Tom Tromey  <tom@tromey.com>
 
 	PR python/17981:

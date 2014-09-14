@@ -1,5 +1,11 @@
 2016-05-24  Tom Tromey  <tom@tromey.com>
 
+	PR python/17386:
+	* python/py-value.c (value_object_as_number): Add
+	nb_inplace_floor_divide, nb_inplace_true_divide, nb_index.
+
+2016-05-24  Tom Tromey  <tom@tromey.com>
+
 	* python/py-value.c (value_object_as_number): Add
 	nb_inplace_divide for Python 2.
 

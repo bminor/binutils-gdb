@@ -1838,7 +1838,13 @@ static PyNumberMethods value_object_as_number = {
   NULL,                       /* nb_inplace_xor */
   NULL,                       /* nb_inplace_or */
   NULL,                       /* nb_floor_divide */
-  valpy_divide                /* nb_true_divide */
+  valpy_divide,               /* nb_true_divide */
+  NULL,			      /* nb_inplace_floor_divide */
+  NULL,			      /* nb_inplace_true_divide */
+#ifndef HAVE_LIBPYTHON_2_4
+  /* This was added in Python 2.5.  */
+  valpy_long,		      /* nb_index */
+#endif /* HAVE_LIBPYTHON_2_4 */
 };
 
 static PyMappingMethods value_object_as_mapping = {
