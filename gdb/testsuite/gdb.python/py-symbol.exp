@@ -117,7 +117,7 @@ gdb_test "python print (t\[0\].addr_class == gdb.SYMBOL_LOC_CONST)" "True" "Test
 gdb_test "python print (t\[0\].type)" "enum tag" "Get type"
 
 # Test symtab attribute.
-gdb_test "python print (t\[0\].symtab)" "gdb.python/py-symbol.c.*" "Get symtab"
+gdb_test "python print (t\[0\].symtab)" "gdb.python/py-symbol.c" "Get symtab"
 
 # C++ tests
 # Recompile binary.

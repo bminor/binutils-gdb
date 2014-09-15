@@ -1,3 +1,11 @@
+2014-10-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.python/py-symbol.exp: Remove trailing ".*" in the
+	pattern.
+	* gdb.python/py-symtab.exp: Likewise.
+	* gdb.python/python.exp: Remove trailing ".*".  Fix typo
+	locationn.
+
 2014-10-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/addr_arith: New testcase.
