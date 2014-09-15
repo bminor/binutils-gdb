@@ -1,3 +1,9 @@
+2014-09-15  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* dwarf2.c (find_abstract_instance_name): Use 'form' instead of
+	'name' for the typo issue, which related with commit
+	60d77146a249ae9b51d7ce98930cdbedb2cfa352.
+
 2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 

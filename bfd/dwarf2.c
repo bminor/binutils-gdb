@@ -2219,7 +2219,7 @@ find_abstract_instance_name (struct comp_unit *unit,
 		case DW_AT_MIPS_linkage_name:
 		  /* PR 16949:  Corrupt debug info can place
 		     non-string forms into these attributes.  */
-		  if (is_str_attr (attr.name))
+		  if (is_str_attr (attr.form))
 		    name = attr.u.str;
 		  break;
 		default:
