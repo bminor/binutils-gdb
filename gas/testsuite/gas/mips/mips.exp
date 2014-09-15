@@ -1327,9 +1327,9 @@ if { [istarget mips*-*-vxworks*] } {
 				    [mips_arch_list_matching mips32r2]
     run_list_test_arches "attr-gnu-4-5-64" "-64 -mfp64" \
 				    [mips_arch_list_matching mips3]
-    run_list_test_arches "attr-gnu-4-5" "-32 -msingle-float" \
+    run_list_test_arches "attr-gnu-4-5-msingle-float" "-32 -msingle-float" \
 				    [mips_arch_list_matching mips1]
-    run_list_test_arches "attr-gnu-4-5" "-32 -msoft-float" \
+    run_list_test_arches "attr-gnu-4-5-msoft-float" "-32 -msoft-float" \
 				    [mips_arch_list_matching mips1]
     run_dump_test_arches "attr-gnu-4-5" \
 				    [mips_arch_list_matching mips2 !r5900]
@@ -1340,9 +1340,9 @@ if { [istarget mips*-*-vxworks*] } {
 				    [mips_arch_list_matching mips32r2]
     run_list_test_arches "attr-gnu-4-6-64" "-64 -mfp64" \
 				    [mips_arch_list_matching mips3]
-    run_list_test_arches "attr-gnu-4-6" "-32 -msingle-float" \
+    run_list_test_arches "attr-gnu-4-6-msingle-float" "-32 -msingle-float" \
 				    [mips_arch_list_matching mips1]
-    run_list_test_arches "attr-gnu-4-6" "-32 -msoft-float" \
+    run_list_test_arches "attr-gnu-4-6-msoft-float" "-32 -msoft-float" \
 				    [mips_arch_list_matching mips1]
     run_list_test_arches "attr-gnu-4-6" "-32 -mfpxx" \
 				    [mips_arch_list_matching mips2 !r5900]
@@ -1355,9 +1355,9 @@ if { [istarget mips*-*-vxworks*] } {
 				    [mips_arch_list_matching mips32r2]
     run_list_test_arches "attr-gnu-4-7-64" "-64 -mfp64" \
 				    [mips_arch_list_matching mips3]
-    run_list_test_arches "attr-gnu-4-7" "-32 -msingle-float" \
+    run_list_test_arches "attr-gnu-4-7-msingle-float" "-32 -msingle-float" \
 				    [mips_arch_list_matching mips1]
-    run_list_test_arches "attr-gnu-4-7" "-32 -msoft-float" \
+    run_list_test_arches "attr-gnu-4-7-msoft-float" "-32 -msoft-float" \
 				    [mips_arch_list_matching mips1]
     run_list_test_arches "attr-gnu-4-7" "-32 -mfpxx" \
 				    [mips_arch_list_matching mips2 !r5900]

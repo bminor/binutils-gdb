@@ -1,3 +1,15 @@
+2014-09-15  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/attr-gnu-4-5-msingle-float.l: New file.
+	* gas/mips/attr-gnu-4-5-msingle-float.s: Likewise.
+	* gas/mips/attr-gnu-4-5-msoft-float.l: Likewise.
+	* gas/mips/attr-gnu-4-5-msoft-float.s: Likewise.
+	* gas/mips/attr-gnu-4-6-msingle-float.l: Update expected output.
+	* gas/mips/attr-gnu-4-6-msoft-float.l: Likewise.
+	* gas/mips/attr-gnu-4-7-msingle-float.l: Likewise.
+	* gas/mips/attr-gnu-4-7-msoft-float.l: Likewise.
+	* gas/mips/mips.exp: Update expected output for FP ABI 5,6,7.
+
 2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* gas/mips/mips.exp: Add mips*-img-elf* target triple.

@@ -3672,39 +3672,44 @@ fpabi_requires (int fpabi, const char *what)
 static void
 check_fpabi (int fpabi)
 {
-  bfd_boolean needs_check = FALSE;
   switch (fpabi)
     {
     case Val_GNU_MIPS_ABI_FP_DOUBLE:
+      if (file_mips_opts.soft_float)
+	fpabi_incompatible_with (fpabi, "softfloat");
+      else if (file_mips_opts.single_float)
+	fpabi_incompatible_with (fpabi, "singlefloat");
       if (file_mips_opts.gp == 64 && file_mips_opts.fp == 32)
 	fpabi_incompatible_with (fpabi, "gp=64 fp=32");
       else if (file_mips_opts.gp == 32 && file_mips_opts.fp == 64)
 	fpabi_incompatible_with (fpabi, "gp=32 fp=64");
-      else
-	needs_check = TRUE;
       break;
 
     case Val_GNU_MIPS_ABI_FP_XX:
       if (mips_abi != O32_ABI)
 	fpabi_requires (fpabi, "-mabi=32");
+      else if (file_mips_opts.soft_float)
+	fpabi_incompatible_with (fpabi, "softfloat");
+      else if (file_mips_opts.single_float)
+	fpabi_incompatible_with (fpabi, "singlefloat");
       else if (file_mips_opts.fp != 0)
 	fpabi_requires (fpabi, "fp=xx");
-      else
-	needs_check = TRUE;
       break;
 
     case Val_GNU_MIPS_ABI_FP_64A:
     case Val_GNU_MIPS_ABI_FP_64:
       if (mips_abi != O32_ABI)
 	fpabi_requires (fpabi, "-mabi=32");
+      else if (file_mips_opts.soft_float)
+	fpabi_incompatible_with (fpabi, "softfloat");
+      else if (file_mips_opts.single_float)
+	fpabi_incompatible_with (fpabi, "singlefloat");
       else if (file_mips_opts.fp != 64)
 	fpabi_requires (fpabi, "fp=64");
       else if (fpabi == Val_GNU_MIPS_ABI_FP_64 && !file_mips_opts.oddspreg)
 	fpabi_incompatible_with (fpabi, "nooddspreg");
       else if (fpabi == Val_GNU_MIPS_ABI_FP_64A && file_mips_opts.oddspreg)
 	fpabi_requires (fpabi, "nooddspreg");
-      else
-	needs_check = TRUE;
       break;
 
     case Val_GNU_MIPS_ABI_FP_SINGLE:
@@ -3729,11 +3734,6 @@ check_fpabi (int fpabi)
 	         " floating-point ABI"), Tag_GNU_MIPS_ABI_FP, fpabi);
       break;
     }
-
-  if (needs_check && file_mips_opts.soft_float)
-    fpabi_incompatible_with (fpabi, "softfloat");
-  else if (needs_check && file_mips_opts.single_float)
-    fpabi_incompatible_with (fpabi, "singlefloat");
 }
 
 /* Perform consistency checks on the current options.  */
