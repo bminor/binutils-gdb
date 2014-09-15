@@ -1,5 +1,12 @@
 2014-10-15  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.python/py-symbol.exp: Match file base name if host is
+	remote, otherwise match file name with dir name.
+	* gdb.python/py-symtab.exp: Likewise.
+	* gdb.python/python.exp: Likewise.
+
+2014-10-15  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.python/py-symbol.exp: Remove trailing ".*" in the
 	pattern.
 	* gdb.python/py-symtab.exp: Likewise.
