@@ -1,3 +1,10 @@
+2014-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (OPTION_omit_lock_prefix): Renamed to ...
+	(OPTION_OMIT_LOCK_PREFIX): This.
+	(md_longopts): Updated.
+	(md_parse_option): Likewise.
+
 2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 
