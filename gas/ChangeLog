@@ -1,3 +1,13 @@
+2014-09-16  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (evexrcig): New.
+	(build_evex_prefix): Force rounding bits.
+	(OPTION_MEVEXRCIG): New.
+	(md_longopts): Add mevexrcig.
+	(md_parse_option): Handle OPTION_MEVEXRCIG.
+	(md_show_usage): Document mevexrcig.
+	* doc/c-i386.texi (mevexrcig): Document new option.
+
 2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* config/tc-nds32.c (nds32_fsrs, nds32_fdrs, nds32_gprs): Remove.

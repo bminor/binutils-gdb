@@ -620,6 +620,9 @@ static enum
     evexw1
   } evexwig;
 
+/* Value to encode in EVEX RC bits, for SAE-only instructions.  */
+static enum rc_type evexrcig = rne;
+
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
 static symbolS *GOT_symbol;
 
@@ -3345,7 +3348,7 @@ build_evex_prefix (void)
       if (i.rounding->type != saeonly)
 	i.vex.bytes[3] |= 0x10 | (i.rounding->type << 5);
       else
-	i.vex.bytes[3] |= 0x10;
+	i.vex.bytes[3] |= 0x10 | (evexrcig << 5);
     }
 
   if (i.mask && i.mask->mask)
@@ -9546,6 +9549,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MEVEXWIG (OPTION_MD_BASE + 17)
 #define OPTION_MBIG_OBJ (OPTION_MD_BASE + 18)
 #define OPTION_OMIT_LOCK_PREFIX (OPTION_MD_BASE + 19)
+#define OPTION_MEVEXRCIG (OPTION_MD_BASE + 20)
 
 struct option md_longopts[] =
 {
@@ -9576,6 +9580,7 @@ struct option md_longopts[] =
   {"mbig-obj", no_argument, NULL, OPTION_MBIG_OBJ},
 #endif
   {"momit-lock-prefix", required_argument, NULL, OPTION_OMIT_LOCK_PREFIX},
+  {"mevexrcig", required_argument, NULL, OPTION_MEVEXRCIG},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -9848,6 +9853,19 @@ md_parse_option (int c, char *arg)
 	as_fatal (_("invalid -mevexlig= option: `%s'"), arg);
       break;
 
+    case OPTION_MEVEXRCIG:
+      if (strcmp (arg, "rne") == 0)
+	evexrcig = rne;
+      else if (strcmp (arg, "rd") == 0)
+	evexrcig = rd;
+      else if (strcmp (arg, "ru") == 0)
+	evexrcig = ru;
+      else if (strcmp (arg, "rz") == 0)
+	evexrcig = rz;
+      else
+	as_fatal (_("invalid -mevexrcig= option: `%s'"), arg);
+      break;
+
     case OPTION_MEVEXWIG:
       if (strcmp (arg, "0") == 0)
 	evexwig = evexw0;
@@ -10012,6 +10030,10 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -mevexwig=[0|1]         encode EVEX instructions with specific EVEX.W value\n\
                            for EVEX.W bit ignored instructions\n"));
+  fprintf (stream, _("\
+  -mevexrcig=[rne|rd|ru|rz]\n\
+                          encode EVEX instructions with specific EVEX.RC value\n\
+                           for SAE-only ignored instructions\n"));
   fprintf (stream, _("\
   -mmnemonic=[att|intel]  use AT&T/Intel mnemonic\n"));
   fprintf (stream, _("\
