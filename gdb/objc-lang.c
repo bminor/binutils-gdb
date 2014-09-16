@@ -1472,11 +1472,6 @@ find_implementation_from_class (struct gdbarch *gdbarch,
 	      struct objc_method meth_str;
 
 	      read_objc_methlist_method (gdbarch, mlist, i, &meth_str);
-#if 0
-	      fprintf (stderr, 
-		       "checking method 0x%lx against selector 0x%lx\n", 
-		       meth_str.name, sel);
-#endif
 
 	      if (meth_str.name == sel) 
 		/* FIXME: hppa arch was doing a pointer dereference

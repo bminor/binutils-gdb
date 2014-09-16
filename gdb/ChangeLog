@@ -1,5 +1,9 @@
 2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* objc-lang.c (find_implementation_from_class): Remove dead code.
+
+2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	PR cli/7233
 	* linux-nat.c (linux_nat_wait_1): Replace "fprintf (stderr..." by
 	"fprintf_unfiltered (gdb_stdlog...)".
