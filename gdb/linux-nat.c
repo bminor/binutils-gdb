@@ -3326,9 +3326,10 @@ retry:
 	      gdb_assert (lp->resumed);
 
 	      if (debug_linux_nat)
-		fprintf (stderr,
-			 "LWP %ld got an event %06x, leaving pending.\n",
-			 ptid_get_lwp (lp->ptid), lp->status);
+		fprintf_unfiltered (gdb_stdlog,
+				    "LWP %ld got an event %06x, "
+				    "leaving pending.\n",
+				    ptid_get_lwp (lp->ptid), lp->status);
 
 	      if (WIFSTOPPED (lp->status))
 		{
@@ -3351,11 +3352,13 @@ retry:
 			  lp->status = 0;
 
 			  if (debug_linux_nat)
-			    fprintf (stderr,
-				     "LLW: LWP %ld hit a breakpoint while"
-				     " waiting for another process;"
-				     " cancelled it\n",
-				     ptid_get_lwp (lp->ptid));
+			    fprintf_unfiltered (gdb_stdlog,
+						"LLW: LWP %ld hit a "
+						"breakpoint while "
+						"waiting for another "
+						"process; "
+						"cancelled it\n",
+						ptid_get_lwp (lp->ptid));
 			}
 		    }
 		  else
@@ -3364,9 +3367,10 @@ retry:
 	      else if (WIFEXITED (lp->status) || WIFSIGNALED (lp->status))
 		{
 		  if (debug_linux_nat)
-		    fprintf (stderr,
-			     "Process %ld exited while stopping LWPs\n",
-			     ptid_get_lwp (lp->ptid));
+		    fprintf_unfiltered (gdb_stdlog,
+					"Process %ld exited while stopping "
+					"LWPs\n",
+					ptid_get_lwp (lp->ptid));
 
 		  /* This was the last lwp in the process.  Since
 		     events are serialized to GDB core, and we can't

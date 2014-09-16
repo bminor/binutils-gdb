@@ -1,3 +1,9 @@
+2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/7233
+	* linux-nat.c (linux_nat_wait_1): Replace "fprintf (stderr..." by
+	"fprintf_unfiltered (gdb_stdlog...)".
+
 2014-09-16  Patrick Palka  <patrick@parcs.ath.cx>
 
 	PR breakpoints/12526
