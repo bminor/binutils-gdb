@@ -1,3 +1,8 @@
+2014-09-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* CONTRIBUTE (Coding Standards): For internals refer to wiki,
+	not gdb/doc.
+
 2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* objc-lang.c (find_implementation_from_class): Remove dead code.
