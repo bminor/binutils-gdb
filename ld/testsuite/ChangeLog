@@ -1,3 +1,10 @@
+2014-09-16  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/attr-merge-arch-2.d: New test case.
+	* ld-arm/attr-merge-arch-2a.s: New test case source file.
+	* ld-arm/attr-merge-arch-2b.s: Likewise.
+	* ld-arm/arm-elf.exp: Run new test case.
+
 2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* ld-mips-elf/mips-elf.exp: Add support for mips*-img-elf* target

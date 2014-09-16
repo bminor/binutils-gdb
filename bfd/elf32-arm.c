@@ -11778,7 +11778,9 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  {
 	    int secondary_compat = -1, secondary_compat_out = -1;
 	    unsigned int saved_out_attr = out_attr[i].i;
-	    static const char *name_table[] = {
+	    int arch_attr;
+	    static const char *name_table[] =
+	      {
 		/* These aren't real CPU names, but we can't guess
 		   that from the architecture version alone.  */
 		"Pre v4",
@@ -11800,10 +11802,17 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    /* Merge Tag_CPU_arch and Tag_also_compatible_with.  */
 	    secondary_compat = get_secondary_compatible_arch (ibfd);
 	    secondary_compat_out = get_secondary_compatible_arch (obfd);
-	    out_attr[i].i = tag_cpu_arch_combine (ibfd, out_attr[i].i,
-						  &secondary_compat_out,
-						  in_attr[i].i,
-						  secondary_compat);
+	    arch_attr = tag_cpu_arch_combine (ibfd, out_attr[i].i,
+					      &secondary_compat_out,
+					      in_attr[i].i,
+					      secondary_compat);
+
+	    /* Return with error if failed to merge.  */
+	    if (arch_attr == -1)
+	      return FALSE;
+
+	    out_attr[i].i = arch_attr;
+
 	    set_secondary_compatible_arch (obfd, secondary_compat_out);
 
 	    /* Merge Tag_CPU_name and Tag_CPU_raw_name.  */

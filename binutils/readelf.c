@@ -11548,10 +11548,10 @@ display_tag_value (int tag,
 /* ARM EABI attributes section.  */
 typedef struct
 {
-  int tag;
+  unsigned int tag;
   const char * name;
   /* 0 = special, 1 = string, 2 = uleb123, > 0x80 == table lookup.  */
-  int type;
+  unsigned int type;
   const char ** table;
 } arm_attr_public_tag;
 
@@ -11669,12 +11669,12 @@ static unsigned char *
 display_arm_attribute (unsigned char * p,
 		       const unsigned char * const end)
 {
-  int tag;
+  unsigned int tag;
   unsigned int len;
-  int val;
+  unsigned int val;
   arm_attr_public_tag * attr;
   unsigned i;
-  int type;
+  unsigned int type;
 
   tag = read_uleb128 (p, &len, end);
   p += len;

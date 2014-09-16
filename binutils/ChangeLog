@@ -1,3 +1,8 @@
+2014-09-16  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (display_arm_attribute): Use unsigned int type for
+	tag, val and type variables.
+
 2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* readelf.c (decode_NDS32_machine_flags): Display ABI2 FP+.
