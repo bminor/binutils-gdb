@@ -168,7 +168,7 @@ proc test {always_inserted} {
 
 	set hw_watch_pc [get_pc "get hw watchpoint PC"]
 
-	gdb_assert {$sw_watch_pc == $sw_watch_pc} "hw watchpoint stops at right instruction"
+	gdb_assert {$sw_watch_pc == $hw_watch_pc} "hw watchpoint stops at right instruction"
     }
 }
 

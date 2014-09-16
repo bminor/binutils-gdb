@@ -1,5 +1,11 @@
 2014-09-16  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint-stops-at-right-insn.exp (test): Compare
+	software and hardware addresses, not software address against
+	itself.
+
+2014-09-16  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/watchpoint-stops-at-right-insn.c: New file.
 	* gdb.base/watchpoint-stops-at-right-insn.exp: New file.
 
