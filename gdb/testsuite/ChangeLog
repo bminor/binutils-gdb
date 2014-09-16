@@ -1,5 +1,10 @@
 2014-09-16  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint-stops-at-right-insn.c: New file.
+	* gdb.base/watchpoint-stops-at-right-insn.exp: New file.
+
+2014-09-16  Pedro Alves  <palves@redhat.com>
+
 	* config/vx.exp, config/vxworks.exp, config/vxworks29k.exp: Delete
 	files.
 	* gdb.base/a2-run.exp: Remove all code guarded by istarget
