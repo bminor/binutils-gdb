@@ -1703,6 +1703,29 @@ watchpoint_del_at_next_stop (struct watchpoint *w)
   b->disposition = disp_del_at_next_stop;
 }
 
+/* Extract a bitfield value from value VAL using the bit parameters contained in
+   watchpoint W.  */
+
+static struct value *
+extract_bitfield_from_watchpoint_value (struct watchpoint *w, struct value *val)
+{
+  struct value *bit_val;
+
+  if (val == NULL)
+    return NULL;
+
+  bit_val = allocate_value (value_type (val));
+
+  unpack_value_bitfield (bit_val,
+			 w->val_bitpos,
+			 w->val_bitsize,
+			 value_contents_for_printing (val),
+			 value_offset (val),
+			 val);
+
+  return bit_val;
+}
+
 /* Assuming that B is a watchpoint:
    - Reparse watchpoint expression, if REPARSE is non-zero
    - Evaluate expression and store the result in B->val
@@ -1877,6 +1900,12 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	 watchpoints.  */
       if (!b->val_valid && !is_masked_watchpoint (&b->base))
 	{
+	  if (b->val_bitsize != 0)
+	    {
+	      v = extract_bitfield_from_watchpoint_value (b, v);
+	      if (v != NULL)
+		release_value (v);
+	    }
 	  b->val = v;
 	  b->val_valid = 1;
 	}
@@ -1906,8 +1935,31 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		  CORE_ADDR addr;
 		  int type;
 		  struct bp_location *loc, **tmp;
+		  int bitpos = 0, bitsize = 0;
+
+		  if (value_bitsize (v) != 0)
+		    {
+		      /* Extract the bit parameters out from the bitfield
+			 sub-expression.  */
+		      bitpos = value_bitpos (v);
+		      bitsize = value_bitsize (v);
+		    }
+		  else if (v == result && b->val_bitsize != 0)
+		    {
+		     /* If VAL_BITSIZE != 0 then RESULT is actually a bitfield
+			lvalue whose bit parameters are saved in the fields
+			VAL_BITPOS and VAL_BITSIZE.  */
+		      bitpos = b->val_bitpos;
+		      bitsize = b->val_bitsize;
+		    }
 
 		  addr = value_address (v);
+		  if (bitsize != 0)
+		    {
+		      /* Skip the bytes that don't contain the bitfield.  */
+		      addr += bitpos / 8;
+		    }
+
 		  type = hw_write;
 		  if (b->base.type == bp_read_watchpoint)
 		    type = hw_read;
@@ -1922,7 +1974,15 @@ update_watchpoint (struct watchpoint *b, int reparse)
 
 		  loc->pspace = frame_pspace;
 		  loc->address = addr;
-		  loc->length = TYPE_LENGTH (value_type (v));
+
+		  if (bitsize != 0)
+		    {
+		      /* Just cover the bytes that make up the bitfield.  */
+		      loc->length = ((bitpos % 8) + bitsize + 7) / 8;
+		    }
+		  else
+		    loc->length = TYPE_LENGTH (value_type (v));
+
 		  loc->watchpoint_type = type;
 		}
 	    }
@@ -5038,6 +5098,9 @@ watchpoint_check (void *p)
 
       mark = value_mark ();
       fetch_subexp_value (b->exp, &pc, &new_val, NULL, NULL, 0);
+
+      if (b->val_bitsize != 0)
+	new_val = extract_bitfield_from_watchpoint_value (b, new_val);
 
       /* We use value_equal_contents instead of value_equal because
 	 the latter coerces an array to a pointer, thus comparing just
@@ -11203,6 +11266,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   struct expression *exp;
   const struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
   struct value *val, *mark, *result;
+  int saved_bitpos = 0, saved_bitsize = 0;
   struct frame_info *frame;
   const char *exp_start = NULL;
   const char *exp_end = NULL;
@@ -11335,6 +11399,12 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   exp_valid_block = innermost_block;
   mark = value_mark ();
   fetch_subexp_value (exp, &pc, &val, &result, NULL, just_location);
+
+  if (val != NULL && just_location)
+    {
+      saved_bitpos = value_bitpos (val);
+      saved_bitsize = value_bitsize (val);
+    }
 
   if (just_location)
     {
@@ -11471,6 +11541,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   else
     {
       w->val = val;
+      w->val_bitpos = saved_bitpos;
+      w->val_bitsize = saved_bitsize;
       w->val_valid = 1;
     }
 

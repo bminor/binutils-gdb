@@ -779,6 +779,11 @@ struct watchpoint
      then an error occurred reading the value.  */
   int val_valid;
 
+  /* When watching the location of a bitfield, contains the offset and size of
+     the bitfield.  Otherwise contains 0.  */
+  int val_bitpos;
+  int val_bitsize;
+
   /* Holds the frame address which identifies the frame this
      watchpoint should be evaluated in, or `null' if the watchpoint
      should be evaluated on the outermost frame.  */

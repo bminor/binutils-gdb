@@ -3231,7 +3231,7 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
    are unavailable/optimized out, DEST_VAL is correspondingly
    marked unavailable/optimized out.  */
 
-static void
+void
 unpack_value_bitfield (struct value *dest_val,
 		       int bitpos, int bitsize,
 		       const gdb_byte *valaddr, int embedded_offset,

@@ -1,3 +1,17 @@
+2014-09-16  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR breakpoints/12526
+	* breakpoint.h (struct watchpoint): New fields val_bitpos and
+	val_bitsize.
+	* breakpoint.c (watch_command_1): Use these fields to retain
+	bitfield information.
+	(extract_bitfield_from_watchpoint_value): New function.
+	(watchpoint_check): Use it.
+	(update_watchpoint): Use it.  Optimize the address and length of a
+	HW watchpoint pointing to a bitfield.
+	* value.h (unpack_value_bitfield): New prototype.
+	* value.c (unpack_value_bitfield): Make extern.
+
 2014-09-16  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
 	* config/i386/i386gnu.mh (NATDEPFILES): Add x86-nat.o and

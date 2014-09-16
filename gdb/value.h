@@ -613,6 +613,11 @@ extern int unpack_value_field_as_long (struct type *type, const gdb_byte *valadd
 				int embedded_offset, int fieldno,
 				const struct value *val, LONGEST *result);
 
+extern void unpack_value_bitfield (struct value *dest_val,
+				   int bitpos, int bitsize,
+				   const gdb_byte *valaddr, int embedded_offset,
+				   const struct value *val);
+
 extern struct value *value_field_bitfield (struct type *type, int fieldno,
 					   const gdb_byte *valaddr,
 					   int embedded_offset,

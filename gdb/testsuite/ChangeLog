@@ -1,3 +1,9 @@
+2014-09-16  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR breakpoints/12526
+	* gdb.base/watch-bitfields.exp: New file.
+	* gdb.base/watch-bitfields.c: New file.
+
 2014-09-16  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/watchpoint-stops-at-right-insn.exp (test): Compare
