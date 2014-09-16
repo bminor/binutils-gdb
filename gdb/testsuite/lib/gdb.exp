@@ -2809,10 +2809,6 @@ proc gdb_compile {source dest type options} {
     }
     set options $new_options
 
-    if [target_info exists is_vxworks] {
-	set options2 { "additional_flags=-Dvxworks" }
-	set options [concat $options2 $options]
-    }
     if [info exists GDB_TESTCASE_OPTIONS] {
 	lappend options "additional_flags=$GDB_TESTCASE_OPTIONS"
     }

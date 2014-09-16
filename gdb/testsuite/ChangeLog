@@ -1,3 +1,21 @@
+2014-09-16  Pedro Alves  <palves@redhat.com>
+
+	* config/vx.exp, config/vxworks.exp, config/vxworks29k.exp: Delete
+	files.
+	* gdb.base/a2-run.exp: Remove all code guarded by istarget
+	"*-*-vxworks*" throughout.
+	* gdb.base/break.exp: Likewise.
+	* gdb.base/default.exp: Likewise.
+	* gdb.base/scope.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/break.c: Remove all code guarded by #ifdef vxworks
+	throughout.
+	* gdb.base/run.c: Likewise.
+	* gdb.base/sepdebug.c: Likewise.
+	* gdb.hp/gdb.aCC/run.c: Likewise.
+	* gdb.reverse/until-reverse.c: Likewise.
+	* lib/gdb.exp (gdb_compile): Remove is_vxworks branch.
+
 2014-09-16  Yao Qi  <yao@codesourcery.com>
 
 	* boards/local-remote-host-native.exp: New file.

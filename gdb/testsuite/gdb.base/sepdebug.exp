@@ -713,14 +713,6 @@ proc test_different_dir {type test_different_dir xfail} {
 	    }
 	}
 
-
-	# Reset the default arguments for VxWorks
-	if [istarget "*-*-vxworks*"] {
-	    set timeout 10
-	    verbose "Timeout is now $timeout seconds" 2
-	    gdb_test_no_output "set args main"
-	}
-
 	# proc test_different_dir
     }
 }
