@@ -128,10 +128,11 @@ WARN_CFLAGS_NO_FORMAT = `echo " $(WARN_CFLAGS) " \
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS_BASE =  ${CFLAGS} ${GLOBAL_CFLAGS} \
-	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS}
+	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${CPPFLAGS}
 INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
 INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER
 
@@ -447,7 +448,7 @@ UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.
-IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
+IPAGENT_CFLAGS = $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 	-fPIC -DIN_PROCESS_AGENT \
 	-fvisibility=hidden
 
