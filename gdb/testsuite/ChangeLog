@@ -1,3 +1,14 @@
+2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watch-bitfields.exp: Pass string other than test file
+	name to prepare_for_testing.
+	(watch): New procedure.
+	(expect_watchpoint): Use with_test_prefix.
+	(top level): Factor out tests to ...
+	(test_watch_location, test_regular_watch): ... these new
+	procedures, and use with_test_prefix and gdb_continue_to_end.
+
 2014-09-16  Patrick Palka  <patrick@parcs.ath.cx>
 
 	PR breakpoints/12526
