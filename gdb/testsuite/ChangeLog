@@ -1,4 +1,11 @@
 2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/global-var-nested-by-dso-solib1.c: New file.
+	* gdb.base/global-var-nested-by-dso-solib2.c: Likewise.
+	* gdb.base/global-var-nested-by-dso.c: Likewise.
+	* gdb.base/global-var-nested-by-dso.exp: Likewise.
+
+2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/watch-bitfields.exp: Pass string other than test file
