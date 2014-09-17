@@ -290,40 +290,6 @@ read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
     memory_error (status, memaddr);
 }
 
-/* Argument / return result struct for use with
-   do_captured_read_memory_integer().  MEMADDR and LEN are filled in
-   by gdb_read_memory_integer().  RESULT is the contents that were
-   successfully read from MEMADDR of length LEN.  */
-
-struct captured_read_memory_integer_arguments
-{
-  CORE_ADDR memaddr;
-  int len;
-  enum bfd_endian byte_order;
-  LONGEST result;
-};
-
-/* Helper function for gdb_read_memory_integer().  DATA must be a
-   pointer to a captured_read_memory_integer_arguments struct.
-   Return 1 if successful.  Note that the catch_errors() interface
-   will return 0 if an error occurred while reading memory.  This
-   choice of return code is so that we can distinguish between
-   success and failure.  */
-
-static int
-do_captured_read_memory_integer (void *data)
-{
-  struct captured_read_memory_integer_arguments *args
-    = (struct captured_read_memory_integer_arguments*) data;
-  CORE_ADDR memaddr = args->memaddr;
-  int len = args->len;
-  enum bfd_endian byte_order = args->byte_order;
-
-  args->result = read_memory_integer (memaddr, len, byte_order);
-
-  return 1;
-}
-
 /* Read memory at MEMADDR of length LEN and put the contents in
    RETURN_VALUE.  Return 0 if MEMADDR couldn't be read and non-zero
    if successful.  */
@@ -333,19 +299,13 @@ safe_read_memory_integer (CORE_ADDR memaddr, int len,
 			  enum bfd_endian byte_order,
 			  LONGEST *return_value)
 {
-  int status;
-  struct captured_read_memory_integer_arguments args;
+  gdb_byte buf[sizeof (LONGEST)];
 
-  args.memaddr = memaddr;
-  args.len = len;
-  args.byte_order = byte_order;
+  if (target_read_memory (memaddr, buf, len))
+    return 0;
 
-  status = catch_errors (do_captured_read_memory_integer, &args,
-			 "", RETURN_MASK_ALL);
-  if (status)
-    *return_value = args.result;
-
-  return status;
+  *return_value = extract_signed_integer (buf, len, byte_order);
+  return 1;
 }
 
 LONGEST

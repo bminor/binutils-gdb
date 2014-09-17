@@ -1,3 +1,11 @@
+2014-09-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	PR gdb/17384
+	* corefile.c (struct captured_read_memory_integer_arguments): Remove.
+	(do_captured_read_memory_integer): Remove.
+	(safe_read_memory_integer): Use target_read_memory directly instead
+	of catching errors in do_captured_read_memory_integer.
+
 2014-09-16  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* CONTRIBUTE (Coding Standards): For internals refer to wiki,
