@@ -1,3 +1,8 @@
+2014-09-17  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-arm.c (move_or_literal_pool, add_to_lit_pool): Use
+	bfd_int64_t instead of int64_t.
+
 2014-09-16  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* config/tc-i386.c (evexrcig): New.
