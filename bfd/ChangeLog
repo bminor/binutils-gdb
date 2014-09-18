@@ -1,3 +1,8 @@
+2014-09-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/17407
+	* elfcode.h (bfd_from_remote_memory): Use SIZE for HIGH_OFFSET.
+
 2014-09-16  Terry Guo  <terry.guo@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Return false if

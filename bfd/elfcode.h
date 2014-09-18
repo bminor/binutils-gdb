@@ -1749,7 +1749,7 @@ NAME(_bfd_elf,bfd_from_remote_memory)
 	     headers.  */
 	}
       else if (size >= shdr_end)
-	high_offset = shdr_end;
+	high_offset = size;
       else
 	{
 	  bfd_vma page_size = get_elf_backend_data (templ)->minpagesize;
