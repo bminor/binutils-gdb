@@ -1,3 +1,8 @@
+2014-09-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/17407
+	* elfcode.h (bfd_from_remote_memory): Use SIZE for HIGH_OFFSET.
+
 2014-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_plt_sym_val): Match PLT entry only for
