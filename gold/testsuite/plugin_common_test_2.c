@@ -26,7 +26,7 @@
 
 #include <assert.h>
 
-int c1;
+int c1 __attribute__((aligned (8)));
 extern int c2;
 int c3;
 int c4 = 40;

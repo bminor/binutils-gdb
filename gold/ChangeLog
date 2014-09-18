@@ -1,3 +1,10 @@
+2014-09-18  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* testsuite/Makefile.am (plugin_test_10): New test.
+	* testsuite/Makefile.in: Regenerate
+	* testsuite/plugin_common_test_2.c (c1): Align to 8.
+	* testsuite/plugin_test_10.sh: New file.
+
 2014-09-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* plugin.cc (Sized_pluginobj::do_add_symbols): Ignore isym->size.
