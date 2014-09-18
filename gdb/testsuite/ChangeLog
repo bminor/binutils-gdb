@@ -1,3 +1,7 @@
+2014-09-18  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/symtab-producer.exp: New file.
+
 2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/global-var-nested-by-dso-solib1.c: New file.

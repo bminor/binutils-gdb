@@ -1,3 +1,9 @@
+2014-09-18  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention new "producer" attribute of gdb.Symtab.
+	* python/py-symtab.c (stpy_get_producer): New function.
+	(symtab_object_getset): Add "producer" attribute.
+
 2014-09-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	PR gdb/17384

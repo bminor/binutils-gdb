@@ -6,7 +6,9 @@
 * GDB now supports hardware watchpoints on x86 GNU Hurd.
 
 * Python Scripting
-  You can now access frame registers from Python scripts.
+
+  ** You can now access frame registers from Python scripts.
+  ** New attribute 'producer' for gdb.Symtab objects.
 
 * New Python-based convenience functions:
 

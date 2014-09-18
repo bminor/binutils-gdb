@@ -1,3 +1,8 @@
+2014-09-18  Doug Evans  <dje@google.com>
+
+	* python.texi (Symbol Tables In Python): Document "producer"
+	attribute of gdb.Symtab objects.
+
 2014-09-16  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Starting) <run command>: Don't mention VxWorks.

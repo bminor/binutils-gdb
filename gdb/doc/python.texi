@@ -4043,6 +4043,14 @@ The symbol table's backing object file.  @xref{Objfiles In Python}.
 This attribute is not writable.
 @end defvar
 
+@defvar Symtab.producer
+The name and possibly version number of the program that
+compiled the code in the symbol table.
+The contents of this string is up to the compiler.
+If no producer information is available then @code{None} is returned.
+This attribute is not writable.
+@end defvar
+
 A @code{gdb.Symtab} object has the following methods:
 
 @defun Symtab.is_valid ()
