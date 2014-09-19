@@ -384,6 +384,8 @@ documentation		Eli Zaretskii		eliz@gnu.org
 testsuite
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
 
+SystemTap		Sergio Durigan Junior	sergiodj@redhat.com
+
 
 UI: External (user) interfaces.
 
