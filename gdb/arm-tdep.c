@@ -3273,7 +3273,7 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	found_return = 1;
       else if (thumb_instruction_restores_sp (insn))
 	{
-	  if ((insn & 0xfe00) == 0xbd00)  /* pop <registers, PC> */
+	  if ((insn & 0xff00) == 0xbd00)  /* pop <registers, PC> */
 	    found_return = 1;
 	}
       else if (thumb_insn_size (insn) == 4)  /* 32-bit Thumb-2 instruction */

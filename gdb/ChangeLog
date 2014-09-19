@@ -1,3 +1,8 @@
+2014-09-24  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (thumb_in_function_epilogue_p): Fix typo in the
+	bitmask.
+
 2014-09-22  Gary Benson  <gbenson@redhat.com>
 
 	* target.c (target_stop): Updated comment.
