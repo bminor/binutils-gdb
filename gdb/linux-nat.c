@@ -1996,7 +1996,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 {
   int pid = ptid_get_lwp (lp->ptid);
   struct target_waitstatus *ourstatus = &lp->waitstatus;
-  int event = status >> 16;
+  int event = linux_ptrace_get_extended_event (status);
 
   if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
       || event == PTRACE_EVENT_CLONE)
@@ -2362,7 +2362,8 @@ wait_lwp (struct lwp_info *lp)
     }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP
+      && linux_is_extended_waitstatus (status))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -2921,6 +2922,7 @@ static struct lwp_info *
 linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
 {
   struct lwp_info *lp;
+  int event = linux_ptrace_get_extended_event (status);
 
   *new_pending_p = 0;
 
@@ -2940,7 +2942,7 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
      thread changes its tid to the tgid.  */
 
   if (WIFSTOPPED (status) && lp == NULL
-      && (WSTOPSIG (status) == SIGTRAP && status >> 16 == PTRACE_EVENT_EXEC))
+      && (WSTOPSIG (status) == SIGTRAP && event == PTRACE_EVENT_EXEC))
     {
       /* A multi-thread exec after we had seen the leader exiting.  */
       if (debug_linux_nat)
@@ -2984,7 +2986,8 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
     }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP
+      && linux_is_extended_waitstatus (status))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,

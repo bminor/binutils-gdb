@@ -1,3 +1,17 @@
+2014-09-19  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-nat.c (linux_handle_extended_wait): Call
+	linux_ptrace_get_extended_event.
+	(wait_lwp): Call linux_is_extended_waitstatus.
+	(linux_nat_filter_event): Call linux_ptrace_get_extended_event
+	and linux_is_extended_waitstatus.
+	* nat/linux-ptrace.c (linux_test_for_tracefork): Call
+	linux_ptrace_get_extended_event.
+	(linux_ptrace_get_extended_event): New function.
+	(linux_is_extended_waitstatus): New function.
+	* nat/linux-ptrace.h (linux_ptrace_get_extended_event)
+	(linux_is_extended_waitstatus): New declarations.
+
 2014-09-19  Yao Qi  <yao@codesourcery.com>
 
 	* dwarf2read.c (dwarf_decode_lines): Update declaration.

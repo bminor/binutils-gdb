@@ -370,7 +370,7 @@ linux_add_process (int pid, int attached)
 static void
 handle_extended_wait (struct lwp_info *event_child, int wstat)
 {
-  int event = wstat >> 16;
+  int event = linux_ptrace_get_extended_event (wstat);
   struct thread_info *event_thr = get_lwp_thread (event_child);
   struct lwp_info *new_lwp;
 
@@ -512,7 +512,7 @@ get_stop_pc (struct lwp_info *lwp)
   if (WSTOPSIG (lwp->last_status) == SIGTRAP
       && !lwp->stepping
       && !lwp->stopped_by_watchpoint
-      && lwp->last_status >> 16 == 0)
+      && !linux_is_extended_waitstatus (lwp->last_status))
     stop_pc -= the_low_target.decr_pc_after_break;
 
   if (debug_threads)
@@ -1056,7 +1056,7 @@ get_detach_signal (struct thread_info *thread)
     }
 
   /* Extended wait statuses aren't real SIGTRAPs.  */
-  if (WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+  if (WSTOPSIG (status) == SIGTRAP && linux_is_extended_waitstatus (status))
     {
       if (debug_threads)
 	debug_printf ("GPS: lwp %s had stopped with extended "
@@ -1869,7 +1869,7 @@ linux_low_filter_event (ptid_t filter_ptid, int lwpid, int wstat)
     }
 
   if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SIGTRAP
-      && wstat >> 16 != 0)
+      && linux_is_extended_waitstatus (wstat))
     {
       handle_extended_wait (child, wstat);
       return NULL;

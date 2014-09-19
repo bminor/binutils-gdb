@@ -1,3 +1,10 @@
+2014-09-19  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-low.c (handle_extended_wait): Call
+	linux_ptrace_get_extended_event.
+	(get_stop_pc, get_detach_signal, linux_low_filter_event): Call
+	linux_is_extended_waitstatus.
+
 2014-09-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (CPPFLAGS): Define.

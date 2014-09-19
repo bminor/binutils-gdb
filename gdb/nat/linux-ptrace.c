@@ -416,7 +416,7 @@ linux_test_for_tracefork (int child_pid)
 
   /* Check if we received a fork event notification.  */
   if (ret == child_pid && WIFSTOPPED (status)
-      && status >> 16 == PTRACE_EVENT_FORK)
+      && linux_ptrace_get_extended_event (status) == PTRACE_EVENT_FORK)
     {
       /* We did receive a fork event notification.  Make sure its PID
 	 is reported.  */
@@ -549,4 +549,20 @@ void
 linux_ptrace_set_additional_flags (int flags)
 {
   additional_flags = flags;
+}
+
+/* Extract extended ptrace event from wait status.  */
+
+int
+linux_ptrace_get_extended_event (int wstat)
+{
+  return (wstat >> 16);
+}
+
+/* Determine whether wait status denotes an extended event.  */
+
+int
+linux_is_extended_waitstatus (int wstat)
+{
+  return (linux_ptrace_get_extended_event (wstat) != 0);
 }
