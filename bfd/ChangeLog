@@ -1,3 +1,10 @@
+2014-09-19  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf32-s390.c: Don't replace R_390_TLS_LE32 with R_390_TLS_TPOFF
+	for PIE.
+	* elf64-s390.c: Don't replace R_390_TLS_LE64 with R_390_TLS_TPOFF
+	for PIE.
+
 2014-09-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/17407

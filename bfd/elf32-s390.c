@@ -1250,6 +1250,12 @@ elf_s390_check_relocs (bfd *abfd,
 	  /* Fall through.  */
 
 	case R_390_TLS_LE32:
+	  /* For static linking and executables this reloc will be
+	     calculated at linktime otherwise a TLS_TPOFF runtime
+	     reloc will be generated.  */
+	  if (r_type == R_390_TLS_LE32 && info->pie)
+	    break;
+
 	  if (!info->shared)
 	    break;
 	  info->flags |= DF_STATIC_TLS;
@@ -3104,7 +3110,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_390_TLS_LE32:
-	  if (info->shared)
+	  if (info->shared && !info->pie)
 	    {
 	      /* Linking a shared library with non-fpic code requires
 		 a R_390_TLS_TPOFF relocation.  */
