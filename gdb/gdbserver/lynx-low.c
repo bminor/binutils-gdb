@@ -688,11 +688,13 @@ lynx_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
       if (addr + xfer_size > memaddr + len)
         truncate = addr + xfer_size - memaddr - len;
       if (skip > 0 || truncate > 0)
-        /* We need to read the memory at this address in order to preserve
-           the data that we are not overwriting.  */
-        lynx_read_memory (addr, (unsigned char *) &buf, xfer_size);
-        if (errno)
-          return errno;
+	{
+	  /* We need to read the memory at this address in order to preserve
+	     the data that we are not overwriting.  */
+	  lynx_read_memory (addr, (unsigned char *) &buf, xfer_size);
+	  if (errno)
+	    return errno;
+	}
       memcpy ((gdb_byte *) &buf + skip, myaddr + (addr - memaddr) + skip,
               xfer_size - skip - truncate);
       errno = 0;
