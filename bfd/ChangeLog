@@ -1,3 +1,9 @@
+2014-09-22  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame_hdr): Don't return
+	false for overflow or overlapping FDEs.  Give more detail in
+	error messages.
+
 2014-09-22  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Don't sign extend

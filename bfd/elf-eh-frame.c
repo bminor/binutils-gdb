@@ -1807,13 +1807,10 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
       if (contents[2] != DW_EH_PE_omit)
 	{
 	  unsigned int i;
-	  bfd_boolean overlap, overflow;
 
 	  bfd_put_32 (abfd, hdr_info->fde_count, contents + EH_FRAME_HDR_SIZE);
 	  qsort (hdr_info->array, hdr_info->fde_count,
 		 sizeof (*hdr_info->array), vma_compare);
-	  overlap = FALSE;
-	  overflow = FALSE;
 	  for (i = 0; i < hdr_info->fde_count; i++)
 	    {
 	      bfd_vma val;
@@ -1823,31 +1820,28 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 	      if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64
 		  && (hdr_info->array[i].initial_loc
 		      != sec->output_section->vma + val))
-		overflow = TRUE;
+		(*info->callbacks->einfo)
+		  (_("%X%P: .eh_frame_hdr table[%u] pc overflow.\n"), i);
 	      bfd_put_32 (abfd, val, contents + EH_FRAME_HDR_SIZE + i * 8 + 4);
+
 	      val = hdr_info->array[i].fde - sec->output_section->vma;
 	      val = ((val & 0xffffffff) ^ 0x80000000) - 0x80000000;
 	      if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64
 		  && (hdr_info->array[i].fde
 		      != sec->output_section->vma + val))
-		overflow = TRUE;
+		(*info->callbacks->einfo)
+		  (_("%X%P: .eh_frame_hdr table[%u] fde overflow.\n"), i);
 	      bfd_put_32 (abfd, val, contents + EH_FRAME_HDR_SIZE + i * 8 + 8);
+
 	      if (i != 0
 		  && (hdr_info->array[i].initial_loc
 		      < (hdr_info->array[i - 1].initial_loc
 			 + hdr_info->array[i - 1].range)))
-		overlap = TRUE;
-	    }
-	  if (overflow)
-	    (*info->callbacks->einfo)
-	      (_("%P: .eh_frame_hdr entry overflow.\n"));
-	  if (overlap)
-	    (*info->callbacks->einfo)
-	      (_("%P: .eh_frame_hdr refers to overlapping FDEs.\n"));
-	  if (overflow || overlap)
-	    {
-	      bfd_set_error (bfd_error_bad_value);
-	      retval = FALSE;
+		(*info->callbacks->einfo)
+		  (_("%X%P: .eh_frame_hdr table[%u] FDE at %V overlaps "
+		     "table[%u] FDE at %V.\n"),
+		   i - 1, hdr_info->array[i - 1].fde,
+		   i, hdr_info->array[i].fde);
 	    }
 	}
 
