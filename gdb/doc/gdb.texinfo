@@ -3857,6 +3857,7 @@ Causes all breakpoints to be inserted in the target at all times.  If
 the user adds a new breakpoint, or changes an existing breakpoint, the
 breakpoints in the target are updated immediately.  A breakpoint is
 removed from the target only when breakpoint itself is deleted.
+@end table
 
 @value{GDBN} handles conditional breakpoints by evaluating these conditions
 when a breakpoint breaks.  If the condition is true, then the process being
