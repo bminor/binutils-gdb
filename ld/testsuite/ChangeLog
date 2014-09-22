@@ -1,3 +1,8 @@
+2014-09-22  Alan Modra  <amodra@gmail.com>
+
+	* ld-plugin/lto.exp: Use both --print-file-name and --print-prog-name
+	when looking for lto plugin.
+
 2014-09-16  Terry Guo  <terry.guo@arm.com>
 
 	* ld-arm/attr-merge-arch-2.d: New test case.
