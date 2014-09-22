@@ -1,5 +1,20 @@
 2014-09-22  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (enum ugll_insert_mode): Add UGLL_INSERT.
+	(insert_breakpoints): Don't call insert_breakpoint_locations here.
+	Instead, pass UGLL_INSERT to update_global_location_list.
+	(update_global_location_list): Change parameter type from boolean
+	to enum ugll_insert_mode.  All callers adjusted.  Adjust to use
+	breakpoints_should_be_inserted_now and handle UGLL_INSERT.
+	(create_solib_event_breakpoint_1): New, factored out from ...
+	(create_solib_event_breakpoint): ... this.
+	(create_and_insert_solib_event_breakpoint): Use
+	create_solib_event_breakpoint_1 instead of calling
+	insert_breakpoint_locations manually.
+	(update_global_location_list): Handle UGLL_INSERT.
+
+2014-09-22  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (enum ugll_insert_mode): New enum.
 	(update_global_location_list)
 	(update_global_location_list_nothrow): Change parameter type from

@@ -260,7 +260,11 @@ enum ugll_insert_mode
 
   /* May insert breakpoints if breakpoints_always_inserted_mode is
      true.  */
-  UGLL_MAY_INSERT
+  UGLL_MAY_INSERT,
+
+  /* Insert locations now, even if breakpoints_always_inserted_mode is
+     false.  */
+  UGLL_INSERT
 };
 
 static void update_global_location_list (enum ugll_insert_mode);
@@ -2954,13 +2958,10 @@ insert_breakpoints (void)
 	update_watchpoint (w, 0 /* don't reparse.  */);
       }
 
-  update_global_location_list (UGLL_MAY_INSERT);
-
-  /* update_global_location_list does not insert breakpoints when
-     always_inserted_mode is not enabled.  Explicitly insert them
-     now.  */
-  if (!breakpoints_always_inserted_mode ())
-    insert_breakpoint_locations ();
+  /* Updating watchpoints creates new locations, so update the global
+     location list.  Explicitly tell ugll to insert locations and
+     ignore breakpoints_always_inserted_mode.  */
+  update_global_location_list (UGLL_INSERT);
 }
 
 /* Invoke CALLBACK for each of bp_location.  */
@@ -7722,15 +7723,26 @@ remove_solib_event_breakpoints_at_next_stop (void)
       b->disposition = disp_del_at_next_stop;
 }
 
-struct breakpoint *
-create_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
+/* Helper for create_solib_event_breakpoint /
+   create_and_insert_solib_event_breakpoint.  Allows specifying which
+   INSERT_MODE to pass through to update_global_location_list.  */
+
+static struct breakpoint *
+create_solib_event_breakpoint_1 (struct gdbarch *gdbarch, CORE_ADDR address,
+				 enum ugll_insert_mode insert_mode)
 {
   struct breakpoint *b;
 
   b = create_internal_breakpoint (gdbarch, address, bp_shlib_event,
 				  &internal_breakpoint_ops);
-  update_global_location_list_nothrow (UGLL_MAY_INSERT);
+  update_global_location_list_nothrow (insert_mode);
   return b;
+}
+
+struct breakpoint *
+create_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
+{
+  return create_solib_event_breakpoint_1 (gdbarch, address, UGLL_MAY_INSERT);
 }
 
 /* See breakpoint.h.  */
@@ -7740,9 +7752,9 @@ create_and_insert_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR add
 {
   struct breakpoint *b;
 
-  b = create_solib_event_breakpoint (gdbarch, address);
-  if (!breakpoints_always_inserted_mode ())
-    insert_breakpoint_locations ();
+  /* Explicitly tell update_global_location_list to insert
+     locations.  */
+  b = create_solib_event_breakpoint_1 (gdbarch, address, UGLL_INSERT);
   if (!b->loc->inserted)
     {
       delete_breakpoint (b);
@@ -12578,8 +12590,9 @@ force_breakpoint_reinsertion (struct bp_location *bl)
    deleted, to update the global location list and recompute which
    locations are duplicate of which.
 
-   The INSERT_MODE flag determines whether locations may or may not be
-   inserted now.  See 'enum ugll_insert_mode' for more info.  */
+   The INSERT_MODE flag determines whether locations may not, may, or
+   shall be inserted now.  See 'enum ugll_insert_mode' for more
+   info.  */
 
 static void
 update_global_location_list (enum ugll_insert_mode insert_mode)
@@ -12917,11 +12930,12 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 			"a permanent breakpoint"));
     }
 
-  if (breakpoints_always_inserted_mode ()
-      && (have_live_inferiors ()
-	  || (gdbarch_has_global_breakpoints (target_gdbarch ()))))
+  if (insert_mode == UGLL_INSERT
+      || (breakpoints_always_inserted_mode ()
+	  && (have_live_inferiors ()
+	      || (gdbarch_has_global_breakpoints (target_gdbarch ())))))
     {
-      if (insert_mode == UGLL_MAY_INSERT)
+      if (insert_mode != UGLL_DONT_INSERT)
 	insert_breakpoint_locations ();
       else
 	{
@@ -12935,7 +12949,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 	}
     }
 
-  if (insert_mode == UGLL_MAY_INSERT)
+  if (insert_mode != UGLL_DONT_INSERT)
     download_tracepoint_locations ();
 
   do_cleanups (cleanups);
