@@ -1,3 +1,10 @@
+2014-09-22  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-m68k.c (md_assemble): Add assert to work around
+	bogus trunk gcc warning.
+	* config/tc-pj.h (md_convert_frag): Warning fix.
+	* config/tc-xtensa.c (xg_assemble_vliw_tokens): Warning fix.
+
 2014-09-17  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-arm.c (move_or_literal_pool, add_to_lit_pool): Use

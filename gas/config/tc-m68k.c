@@ -4511,7 +4511,8 @@ md_assemble (char *str)
 		       (relax_substateT) (the_ins.fragb[n].fragty),
 		       the_ins.fragb[n].fadd, the_ins.fragb[n].foff, to_beg_P);
     }
-  n = (the_ins.numo - the_ins.fragb[n - 1].fragoff);
+  gas_assert (the_ins.nfrag >= 1);
+  n = the_ins.numo - the_ins.fragb[the_ins.nfrag - 1].fragoff;
   shorts_this_frag = 0;
   if (n)
     {
