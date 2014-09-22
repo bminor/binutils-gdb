@@ -3850,22 +3850,13 @@ This behavior can be controlled with the following commands::
 @item set breakpoint always-inserted off
 All breakpoints, including newly added by the user, are inserted in
 the target only when the target is resumed.  All breakpoints are
-removed from the target when it stops.
+removed from the target when it stops.  This is the default mode.
 
 @item set breakpoint always-inserted on
 Causes all breakpoints to be inserted in the target at all times.  If
 the user adds a new breakpoint, or changes an existing breakpoint, the
 breakpoints in the target are updated immediately.  A breakpoint is
-removed from the target only when breakpoint itself is removed.
-
-@cindex non-stop mode, and @code{breakpoint always-inserted}
-@item set breakpoint always-inserted auto
-This is the default mode.  If @value{GDBN} is controlling the inferior
-in non-stop mode (@pxref{Non-Stop Mode}), gdb behaves as if
-@code{breakpoint always-inserted} mode is on.  If @value{GDBN} is
-controlling the inferior in all-stop mode, @value{GDBN} behaves as if
-@code{breakpoint always-inserted} mode is off.
-@end table
+removed from the target only when breakpoint itself is deleted.
 
 @value{GDBN} handles conditional breakpoints by evaluating these conditions
 when a breakpoint breaks.  If the condition is true, then the process being

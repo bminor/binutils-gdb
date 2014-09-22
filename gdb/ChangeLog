@@ -1,5 +1,36 @@
 2014-09-22  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention merge of "breakpoint always-inserted" modes "off"
+	and "auto" merged.
+	* breakpoint.c (enum ugll_insert_mode): New enum.
+	(always_inserted_mode): Now a plain boolean.
+	(show_always_inserted_mode): No longer handle AUTO_BOOLEAN_AUTO.
+	(breakpoints_always_inserted_mode): Delete.
+	(breakpoints_should_be_inserted_now): New function.
+	(insert_breakpoints): Pass UGLL_INSERT to
+	update_global_location_list instead of calling
+	insert_breakpoint_locations manually.
+	(create_solib_event_breakpoint_1): New, factored out from ...
+	(create_solib_event_breakpoint): ... this.
+	(create_and_insert_solib_event_breakpoint): Use
+	create_solib_event_breakpoint_1 instead of calling
+	insert_breakpoint_locations manually.
+	(update_global_location_list): Change parameter type from boolean
+	to enum ugll_insert_mode.  All callers adjusted.  Adjust to use
+	breakpoints_should_be_inserted_now and handle UGLL_INSERT.
+	(update_global_location_list_nothrow): Change parameter type from
+	boolean to enum ugll_insert_mode.
+	(_initialize_breakpoint): "breakpoint always-inserted" option is
+	now a boolean command.  Update help text.
+	* breakpoint.h (breakpoints_always_inserted_mode): Delete declaration.
+	(breakpoints_should_be_inserted_now): New declaration.
+	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_LOADED>:
+	Remove breakpoints_always_inserted_mode check.
+	(normal_stop): Adjust to use breakpoints_should_be_inserted_now.
+	* remote.c (remote_start_remote): Likewise.
+
+2014-09-22  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (enum ugll_insert_mode): Add UGLL_INSERT.
 	(insert_breakpoints): Don't call insert_breakpoint_locations here.
 	Instead, pass UGLL_INSERT to update_global_location_list.

@@ -3604,9 +3604,8 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
      up.  */
   rs->starting_up = 0;
 
-  /* If breakpoints are global, insert them now.  */
-  if (gdbarch_has_global_breakpoints (target_gdbarch ())
-      && breakpoints_always_inserted_mode ())
+  /* Maybe breakpoints are global and need to be inserted now.  */
+  if (breakpoints_should_be_inserted_now ())
     insert_breakpoints ();
 }
 

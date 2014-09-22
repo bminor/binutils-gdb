@@ -1491,7 +1491,7 @@ extern void breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 				    const gdb_byte *writebuf_org,
 				    ULONGEST memaddr, LONGEST len);
 
-extern int breakpoints_always_inserted_mode (void);
+extern int breakpoints_should_be_inserted_now (void);
 
 /* Called each time new event from target is processed.
    Retires previously deleted breakpoint locations that

@@ -33,6 +33,13 @@ queue-signal signal-name-or-number
   confirmation if the program had stopped for a signal and the user
   switched threads meanwhile.
 
+* "breakpoint always-inserted" modes "off" and "auto" merged.
+
+  Now, when 'breakpoint always-inserted mode' is set to "off", GDB
+  won't remove breakpoints from the target until all threads stop,
+  even in non-stop mode.  The "auto" mode has been removed, and "off"
+  is now the default mode.
+
 *** Changes in GDB 7.8
 
 * New command line options

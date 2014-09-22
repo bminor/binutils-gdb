@@ -258,12 +258,17 @@ enum ugll_insert_mode
      the inferior.  */
   UGLL_DONT_INSERT,
 
-  /* May insert breakpoints if breakpoints_always_inserted_mode is
-     true.  */
+  /* May insert breakpoints iff breakpoints_should_be_inserted_now
+     claims breakpoints should be inserted now.  */
   UGLL_MAY_INSERT,
 
-  /* Insert locations now, even if breakpoints_always_inserted_mode is
-     false.  */
+  /* Insert locations now, irrespective of
+     breakpoints_should_be_inserted_now.  E.g., say all threads are
+     stopped right now, and the user did "continue".  We need to
+     insert breakpoints _before_ resuming the target, but
+     UGLL_MAY_INSERT wouldn't insert them, because
+     breakpoints_should_be_inserted_now returns false at that point,
+     as no thread is running yet.  */
   UGLL_INSERT
 };
 
@@ -451,34 +456,51 @@ show_automatic_hardware_breakpoints (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* If on, gdb will keep breakpoints inserted even as inferior is
-   stopped, and immediately insert any new breakpoints.  If off, gdb
-   will insert breakpoints into inferior only when resuming it, and
-   will remove breakpoints upon stop.  If auto, GDB will behave as ON
-   if in non-stop mode, and as OFF if all-stop mode.*/
-
-static enum auto_boolean always_inserted_mode = AUTO_BOOLEAN_AUTO;
+/* If on, GDB keeps breakpoints inserted even if the inferior is
+   stopped, and immediately inserts any new breakpoints as soon as
+   they're created.  If off (default), GDB keeps breakpoints off of
+   the target as long as possible.  That is, it delays inserting
+   breakpoints until the next resume, and removes them again when the
+   target fully stops.  This is a bit safer in case GDB crashes while
+   processing user input.  */
+static int always_inserted_mode = 0;
 
 static void
 show_always_inserted_mode (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  if (always_inserted_mode == AUTO_BOOLEAN_AUTO)
-    fprintf_filtered (file,
-		      _("Always inserted breakpoint "
-			"mode is %s (currently %s).\n"),
-		      value,
-		      breakpoints_always_inserted_mode () ? "on" : "off");
-  else
-    fprintf_filtered (file, _("Always inserted breakpoint mode is %s.\n"),
-		      value);
+  fprintf_filtered (file, _("Always inserted breakpoint mode is %s.\n"),
+		    value);
 }
 
 int
-breakpoints_always_inserted_mode (void)
+breakpoints_should_be_inserted_now (void)
 {
-  return (always_inserted_mode == AUTO_BOOLEAN_TRUE
-	  || (always_inserted_mode == AUTO_BOOLEAN_AUTO && non_stop));
+  if (gdbarch_has_global_breakpoints (target_gdbarch ()))
+    {
+      /* If breakpoints are global, they should be inserted even if no
+	 thread under gdb's control is running, or even if there are
+	 no threads under GDB's control yet.  */
+      return 1;
+    }
+  else if (target_has_execution)
+    {
+      struct thread_info *tp;
+
+      if (always_inserted_mode)
+	{
+	  /* The user wants breakpoints inserted even if all threads
+	     are stopped.  */
+	  return 1;
+	}
+
+      ALL_NON_EXITED_THREADS (tp)
+        {
+	  if (tp->executing)
+	    return 1;
+	}
+    }
+  return 0;
 }
 
 static const char condition_evaluation_both[] = "host or target";
@@ -12930,10 +12952,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 			"a permanent breakpoint"));
     }
 
-  if (insert_mode == UGLL_INSERT
-      || (breakpoints_always_inserted_mode ()
-	  && (have_live_inferiors ()
-	      || (gdbarch_has_global_breakpoints (target_gdbarch ())))))
+  if (insert_mode == UGLL_INSERT || breakpoints_should_be_inserted_now ())
     {
       if (insert_mode != UGLL_DONT_INSERT)
 	insert_breakpoint_locations ();
@@ -17020,18 +17039,15 @@ a warning will be emitted for such breakpoints."),
 			   &breakpoint_set_cmdlist,
 			   &breakpoint_show_cmdlist);
 
-  add_setshow_auto_boolean_cmd ("always-inserted", class_support,
-				&always_inserted_mode, _("\
+  add_setshow_boolean_cmd ("always-inserted", class_support,
+			   &always_inserted_mode, _("\
 Set mode for inserting breakpoints."), _("\
 Show mode for inserting breakpoints."), _("\
-When this mode is off, breakpoints are inserted in inferior when it is\n\
-resumed, and removed when execution stops.  When this mode is on,\n\
-breakpoints are inserted immediately and removed only when the user\n\
-deletes the breakpoint.  When this mode is auto (which is the default),\n\
-the behaviour depends on the non-stop setting (see help set non-stop).\n\
-In this case, if gdb is controlling the inferior in non-stop mode, gdb\n\
-behaves as if always-inserted mode is on; if gdb is controlling the\n\
-inferior in all-stop mode, gdb behaves as if always-inserted mode is off."),
+When this mode is on, breakpoints are inserted immediately as soon as\n\
+they're created, kept inserted even when execution stops, and removed\n\
+only when the user deletes them.  When this mode is off (the default),\n\
+breakpoints are inserted only when execution continues, and removed\n\
+when execution stops."),
 				NULL,
 				&show_always_inserted_mode,
 				&breakpoint_set_cmdlist,
