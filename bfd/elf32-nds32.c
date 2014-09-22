@@ -14275,8 +14275,7 @@ nds32_elf_ex9_relocation_check (struct bfd_link_info *info,
 				Elf_Internal_Rela **irel,
 				Elf_Internal_Rela *irelend,
 				nds32_elf_blank_t *relax_blank_list,
-				asection *sec,
-				long unsigned int *off,
+				asection *sec,bfd_vma *off,
 				bfd_byte *contents)
 {
   /* Suppress ex9 if `.no_relax ex9' or inner loop.  */
@@ -15292,7 +15291,7 @@ nds32_elf_ex9_reloc_jmp (struct bfd_link_info *link_info)
 /* Generate ex9 hash table.  */
 
 static bfd_boolean
-nds32_elf_ex9_build_hash_table (bfd * abfd, asection * sec,
+nds32_elf_ex9_build_hash_table (bfd *abfd, asection *sec,
 				struct bfd_link_info *link_info)
 {
   Elf_Internal_Rela *internal_relocs;
@@ -15305,7 +15304,7 @@ nds32_elf_ex9_build_hash_table (bfd * abfd, asection * sec,
   asection *isec;
   struct elf_link_hash_entry **sym_hashes;
   bfd_byte *contents = NULL;
-  long unsigned int off = 0;
+  bfd_vma off = 0;
   unsigned long r_symndx;
   uint32_t insn, insn_with_reg;
   struct elf_link_hash_entry *h;

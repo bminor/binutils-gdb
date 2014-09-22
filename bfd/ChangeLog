@@ -1,3 +1,8 @@
+2014-09-22  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf32-nds32.c (nds32_elf_ex9_build_hash_table,
+	nds32_elf_ex9_relocation_check): Synchronize the argument type.
+
 2014-09-19  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* elf32-s390.c: Don't replace R_390_TLS_LE32 with R_390_TLS_TPOFF
