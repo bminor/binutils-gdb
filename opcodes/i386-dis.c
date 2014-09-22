@@ -753,10 +753,6 @@ enum
   MOD_0F1A_PREFIX_0,
   MOD_0F1B_PREFIX_0,
   MOD_0F1B_PREFIX_1,
-  MOD_0F20,
-  MOD_0F21,
-  MOD_0F22,
-  MOD_0F23,
   MOD_0F24,
   MOD_0F26,
   MOD_0F2B_PREFIX_0,
@@ -2736,10 +2732,10 @@ static const struct dis386 dis386_twobyte[] = {
   { "nopQ",		{ Ev } },
   { "nopQ",		{ Ev } },
   /* 20 */
-  { MOD_TABLE (MOD_0F20) },
-  { MOD_TABLE (MOD_0F21) },
-  { MOD_TABLE (MOD_0F22) },
-  { MOD_TABLE (MOD_0F23) },
+  { "movZ",		{ Rm, Cm } },
+  { "movZ",		{ Rm, Dm } },
+  { "movZ",		{ Cm, Rm } },
+  { "movZ",		{ Dm, Rm } },
   { MOD_TABLE (MOD_0F24) },
   { Bad_Opcode },
   { MOD_TABLE (MOD_0F26) },
@@ -11642,26 +11638,6 @@ static const struct dis386 mod_table[][2] = {
     { "nopQ",		{ Ev } },
   },
   {
-    /* MOD_0F20 */
-    { Bad_Opcode },
-    { "movZ",		{ Rm, Cm } },
-  },
-  {
-    /* MOD_0F21 */
-    { Bad_Opcode },
-    { "movZ",		{ Rm, Dm } },
-  },
-  {
-    /* MOD_0F22 */
-    { Bad_Opcode },
-    { "movZ",		{ Cm, Rm } },
-  },
-  {
-    /* MOD_0F23 */
-    { Bad_Opcode },
-    { "movZ",		{ Dm, Rm } },
-  },
-  {
     /* MOD_0F24 */
     { Bad_Opcode },
     { "movL",		{ Rd, Td } },
@@ -15892,10 +15868,10 @@ OP_T (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_R (int bytemode, int sizeflag)
 {
-  if (modrm.mod == 3)
-    OP_E (bytemode, sizeflag);
-  else
-    BadOp ();
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
+  OP_E_register (bytemode, sizeflag);
 }
 
 static void

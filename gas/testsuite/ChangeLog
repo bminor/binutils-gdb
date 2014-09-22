@@ -1,3 +1,11 @@
+2014-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/cdr.d: New file.
+	* gas/i386/cdr.s: Likewise.
+	* gas/i386/x86-64-cdr.d: Likewise.
+
+	* gas/i386/i386.exp: Run cdr and x86-64-cdr.
+
 2014-09-16  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/avx512dq-rcig.s: New.

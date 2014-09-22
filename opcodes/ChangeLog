@@ -1,3 +1,14 @@
+2014-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (MOD_0F20): Removed.
+	(MOD_0F21): Likewise.
+	(MOD_0F22): Likewise.
+	(MOD_0F23): Likewise.
+	(dis386_twobyte): Replace MOD_0F20, MOD_0F21, MOD_0F22 and
+	MOD_0F23 with "movZ".
+	(mod_table): Remove MOD_0F20, MOD_0F21, MOD_0F22 and MOD_0F23.
+	(OP_R): Check mod/rm byte and call OP_E_register.
+
 2014-09-16 Kuan-Lin Chen <kuanlinchentw@gmail.com>
 
 	* nds32-asm.c (nds32_opcodes, operand_fields, keyword_im5_i,
