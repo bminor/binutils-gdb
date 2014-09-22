@@ -1,3 +1,8 @@
+2014-09-22  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Don't sign extend
+	the addend if relocations are RELA.
+
 2014-09-22  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* elf32-nds32.c (nds32_elf_ex9_build_hash_table,
