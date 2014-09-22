@@ -1,3 +1,12 @@
+2014-09-22  Gary Benson  <gbenson@redhat.com>
+
+	* target/target.h (target_stop_ptid): Renamed as...
+	(target_stop_and_wait): New function.  Updated comment.
+	All uses updated.
+	(target_continue_ptid): Renamed as...
+	(target_continue_no_signal): New function.  Updated comment.
+	All uses updated.
+
 2014-09-22  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention merge of "breakpoint always-inserted" modes "off"

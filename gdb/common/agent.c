@@ -204,7 +204,7 @@ agent_run_command (int pid, const char *cmd, int len)
   DEBUG_AGENT ("agent: resumed helper thread\n");
 
   /* Resume helper thread.  */
-  target_continue_ptid (ptid);
+  target_continue_no_signal (ptid);
 
   fd = gdb_connect_sync_socket (pid);
   if (fd >= 0)
@@ -238,7 +238,7 @@ agent_run_command (int pid, const char *cmd, int len)
     {
       /* Stop thread PTID.  */
       DEBUG_AGENT ("agent: stop helper thread\n");
-      target_stop_ptid (ptid);
+      target_stop_and_wait (ptid);
     }
 
   if (fd >= 0)

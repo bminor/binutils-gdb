@@ -3030,7 +3030,7 @@ target_stop (ptid_t ptid)
 /* See target/target.h.  */
 
 void
-target_stop_ptid (ptid_t ptid)
+target_stop_and_wait (ptid_t ptid)
 {
   struct target_waitstatus status;
   int was_non_stop = non_stop;
@@ -3047,7 +3047,7 @@ target_stop_ptid (ptid_t ptid)
 /* See target/target.h.  */
 
 void
-target_continue_ptid (ptid_t ptid)
+target_continue_no_signal (ptid_t ptid)
 {
   target_resume (ptid, 0, GDB_SIGNAL_0);
 }
