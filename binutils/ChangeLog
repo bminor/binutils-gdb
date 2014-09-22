@@ -1,3 +1,11 @@
+2014-09-22  Alan Modra  <amodra@gmail.com>
+
+	PR 16563
+	* dwarf.c (GET): Remove semicolon.
+	(read_cie): New function, extracted from..
+	(display_debug_frames): ..here.  Correctly handle signed offset
+	from FDE to CIE in .eh_frame.  Decode forward referenced CIEs too.
+
 2014-09-16  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (display_arm_attribute): Use unsigned int type for
