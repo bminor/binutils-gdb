@@ -1,5 +1,10 @@
 2014-09-25  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (user_visible_resume_ptid): Don't check
+	singlestep_breakpoints_inserted_p.
+
+2014-09-25  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (should_be_inserted): Add debug output.
 
 2014-09-25  Pedro Alves  <palves@redhat.com>
