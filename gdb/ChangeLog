@@ -1,5 +1,9 @@
 2014-09-25  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (should_be_inserted): Add debug output.
+
+2014-09-25  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (stepping_past_instruction_at)
 	(clear_exit_convenience_vars): Point at infrun.h instead of
 	inferior.h.

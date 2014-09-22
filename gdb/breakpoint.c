@@ -2201,7 +2201,16 @@ should_be_inserted (struct bp_location *bl)
        || bl->loc_type == bp_loc_hardware_breakpoint)
       && stepping_past_instruction_at (bl->pspace->aspace,
 				       bl->address))
-    return 0;
+    {
+      if (debug_infrun)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "infrun: skipping breakpoint: "
+			      "stepping past insn at: %s\n",
+			      paddress (bl->gdbarch, bl->address));
+	}
+      return 0;
+    }
 
   return 1;
 }
