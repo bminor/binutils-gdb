@@ -1,5 +1,9 @@
 2014-09-22  Gary Benson  <gbenson@redhat.com>
 
+	* target.c (target_stop): Updated comment.
+
+2014-09-22  Gary Benson  <gbenson@redhat.com>
+
 	* target/target.h (target_stop_ptid): Renamed as...
 	(target_stop_and_wait): New function.  Updated comment.
 	All uses updated.

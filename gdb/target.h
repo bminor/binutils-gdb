@@ -1573,8 +1573,10 @@ extern int target_thread_alive (ptid_t ptid);
 extern void target_find_new_threads (void);
 
 /* Make target stop in a continuable fashion.  (For instance, under
-   Unix, this should act like SIGSTOP).  This function is normally
-   used by GUIs to implement a stop button.  */
+   Unix, this should act like SIGSTOP).  Note that this function is
+   asynchronous: it does not wait for the target to become stopped
+   before returning.  If this is the behavior you want please use
+   target_stop_and_wait.  */
 
 extern void target_stop (ptid_t ptid);
 
