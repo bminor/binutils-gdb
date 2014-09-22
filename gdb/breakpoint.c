@@ -237,9 +237,35 @@ static void decref_bp_location (struct bp_location **loc);
 
 static struct bp_location *allocate_bp_location (struct breakpoint *bpt);
 
-static void update_global_location_list (int);
+/* update_global_location_list's modes of operation wrt to whether to
+   insert locations now.  */
+enum ugll_insert_mode
+{
+  /* Don't insert any breakpoint locations into the inferior, only
+     remove already-inserted locations that no longer should be
+     inserted.  Functions that delete a breakpoint or breakpoints
+     should specify this mode, so that deleting a breakpoint doesn't
+     have the side effect of inserting the locations of other
+     breakpoints that are marked not-inserted, but should_be_inserted
+     returns true on them.
 
-static void update_global_location_list_nothrow (int);
+     This behavior is useful is situations close to tear-down -- e.g.,
+     after an exec, while the target still has execution, but
+     breakpoint shadows of the previous executable image should *NOT*
+     be restored to the new image; or before detaching, where the
+     target still has execution and wants to delete breakpoints from
+     GDB's lists, and all breakpoints had already been removed from
+     the inferior.  */
+  UGLL_DONT_INSERT,
+
+  /* May insert breakpoints if breakpoints_always_inserted_mode is
+     true.  */
+  UGLL_MAY_INSERT
+};
+
+static void update_global_location_list (enum ugll_insert_mode);
+
+static void update_global_location_list_nothrow (enum ugll_insert_mode);
 
 static int is_hardware_watchpoint (const struct breakpoint *bpt);
 
@@ -835,7 +861,7 @@ set_condition_evaluation_mode (char *args, int from_tty,
 	}
 
       /* Do the update.  */
-      update_global_location_list (1);
+      update_global_location_list (UGLL_MAY_INSERT);
     }
 
   return;
@@ -1063,7 +1089,7 @@ condition_command (char *arg, int from_tty)
 	set_breakpoint_condition (b, p, from_tty);
 
 	if (is_breakpoint (b))
-	  update_global_location_list (1);
+	  update_global_location_list (UGLL_MAY_INSERT);
 
 	return;
       }
@@ -2908,7 +2934,7 @@ breakpoint_program_space_exit (struct program_space *pspace)
 
   /* Now update the global location list to permanently delete the
      removed locations above.  */
-  update_global_location_list (0);
+  update_global_location_list (UGLL_DONT_INSERT);
 }
 
 /* Make sure all breakpoints are inserted in inferior.
@@ -2928,7 +2954,7 @@ insert_breakpoints (void)
 	update_watchpoint (w, 0 /* don't reparse.  */);
       }
 
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 
   /* update_global_location_list does not insert breakpoints when
      always_inserted_mode is not enabled.  Explicitly insert them
@@ -3391,7 +3417,7 @@ create_overlay_event_breakpoint (void)
          overlay_events_enabled = 0;
        }
     }
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 }
 
 static void
@@ -3501,7 +3527,7 @@ create_longjmp_master_breakpoint (void)
 	}
     }
   }
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 
   do_cleanups (old_chain);
 }
@@ -3557,7 +3583,7 @@ create_std_terminate_master_breakpoint (void)
     }
   }
 
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 
   do_cleanups (old_chain);
 }
@@ -3659,7 +3685,7 @@ create_exception_master_breakpoint (void)
       b->enable_state = bp_disabled;
     }
 
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 }
 
 void
@@ -5654,9 +5680,9 @@ bpstat_stop_status (struct address_space *aspace,
 	}
 
   if (need_remove_insert)
-    update_global_location_list (1);
+    update_global_location_list (UGLL_MAY_INSERT);
   else if (removed_any)
-    update_global_location_list (0);
+    update_global_location_list (UGLL_DONT_INSERT);
 
   return bs_head;
 }
@@ -7565,7 +7591,7 @@ enable_overlay_breakpoints (void)
     if (b->type == bp_overlay_event)
     {
       b->enable_state = bp_enabled;
-      update_global_location_list (1);
+      update_global_location_list (UGLL_MAY_INSERT);
       overlay_events_enabled = 1;
     }
 }
@@ -7579,7 +7605,7 @@ disable_overlay_breakpoints (void)
     if (b->type == bp_overlay_event)
     {
       b->enable_state = bp_disabled;
-      update_global_location_list (0);
+      update_global_location_list (UGLL_DONT_INSERT);
       overlay_events_enabled = 0;
     }
 }
@@ -7624,7 +7650,7 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
   b->addr_string
     = xstrprintf ("*%s", paddress (b->loc->gdbarch, b->loc->address));
 
-  update_global_location_list_nothrow (1);
+  update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
   return b;
 }
@@ -7655,7 +7681,7 @@ create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 
   b = create_internal_breakpoint (gdbarch, address, bp_jit_event,
 				  &internal_breakpoint_ops);
-  update_global_location_list_nothrow (1);
+  update_global_location_list_nothrow (UGLL_MAY_INSERT);
   return b;
 }
 
@@ -7703,7 +7729,7 @@ create_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 
   b = create_internal_breakpoint (gdbarch, address, bp_shlib_event,
 				  &internal_breakpoint_ops);
-  update_global_location_list_nothrow (1);
+  update_global_location_list_nothrow (UGLL_MAY_INSERT);
   return b;
 }
 
@@ -8838,7 +8864,7 @@ install_breakpoint (int internal, struct breakpoint *b, int update_gll)
   observer_notify_breakpoint_created (b);
 
   if (update_gll)
-    update_global_location_list (1);
+    update_global_location_list (UGLL_MAY_INSERT);
 }
 
 static void
@@ -9080,7 +9106,7 @@ disable_watchpoints_before_interactive_call_start (void)
     if (is_watchpoint (b) && breakpoint_enabled (b))
       {
 	b->enable_state = bp_call_disabled;
-	update_global_location_list (0);
+	update_global_location_list (UGLL_DONT_INSERT);
       }
   }
 }
@@ -9095,7 +9121,7 @@ enable_watchpoints_after_interactive_call_stop (void)
     if (is_watchpoint (b) && b->enable_state == bp_call_disabled)
       {
 	b->enable_state = bp_enabled;
-	update_global_location_list (1);
+	update_global_location_list (UGLL_MAY_INSERT);
       }
   }
 }
@@ -9104,7 +9130,7 @@ void
 disable_breakpoints_before_startup (void)
 {
   current_program_space->executing_startup = 1;
-  update_global_location_list (0);
+  update_global_location_list (UGLL_DONT_INSERT);
 }
 
 void
@@ -9140,7 +9166,7 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
   if (in_thread_list (inferior_ptid))
     b->thread = pid_to_thread_id (inferior_ptid);
 
-  update_global_location_list_nothrow (1);
+  update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
   return b;
 }
@@ -9178,7 +9204,7 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   copy->disposition = disp_donttouch;
   copy->number = internal_breakpoint_number--;
 
-  update_global_location_list_nothrow (0);
+  update_global_location_list_nothrow (UGLL_DONT_INSERT);
   return copy;
 }
 
@@ -10133,7 +10159,7 @@ create_breakpoint (struct gdbarch *gdbarch,
   do_cleanups (old_chain);
 
   /* error call may happen here - have BKPT_CHAIN already discarded.  */
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 
   return 1;
 }
@@ -10645,7 +10671,7 @@ break_range_command (char *arg, int from_tty)
 
   mention (b);
   observer_notify_breakpoint_created (b);
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 }
 
 /*  Return non-zero if EXP is verified as constant.  Returned zero
@@ -12548,24 +12574,15 @@ force_breakpoint_reinsertion (struct bp_location *bl)
 	}
     }
 }
+/* Called whether new breakpoints are created, or existing breakpoints
+   deleted, to update the global location list and recompute which
+   locations are duplicate of which.
 
-/* If SHOULD_INSERT is false, do not insert any breakpoint locations
-   into the inferior, only remove already-inserted locations that no
-   longer should be inserted.  Functions that delete a breakpoint or
-   breakpoints should pass false, so that deleting a breakpoint
-   doesn't have the side effect of inserting the locations of other
-   breakpoints that are marked not-inserted, but should_be_inserted
-   returns true on them.
-
-   This behaviour is useful is situations close to tear-down -- e.g.,
-   after an exec, while the target still has execution, but breakpoint
-   shadows of the previous executable image should *NOT* be restored
-   to the new image; or before detaching, where the target still has
-   execution and wants to delete breakpoints from GDB's lists, and all
-   breakpoints had already been removed from the inferior.  */
+   The INSERT_MODE flag determines whether locations may or may not be
+   inserted now.  See 'enum ugll_insert_mode' for more info.  */
 
 static void
-update_global_location_list (int should_insert)
+update_global_location_list (enum ugll_insert_mode insert_mode)
 {
   struct breakpoint *b;
   struct bp_location **locp, *loc;
@@ -12904,19 +12921,21 @@ update_global_location_list (int should_insert)
       && (have_live_inferiors ()
 	  || (gdbarch_has_global_breakpoints (target_gdbarch ()))))
     {
-      if (should_insert)
+      if (insert_mode == UGLL_MAY_INSERT)
 	insert_breakpoint_locations ();
       else
 	{
-	  /* Though should_insert is false, we may need to update conditions
-	     on the target's side if it is evaluating such conditions.  We
+	  /* Even though the caller told us to not insert new
+	     locations, we may still need to update conditions on the
+	     target's side of breakpoints that were already inserted
+	     if the target is evaluating breakpoint conditions.  We
 	     only update conditions for locations that are marked
 	     "needs_update".  */
 	  update_inserted_breakpoint_locations ();
 	}
     }
 
-  if (should_insert)
+  if (insert_mode == UGLL_MAY_INSERT)
     download_tracepoint_locations ();
 
   do_cleanups (cleanups);
@@ -12938,12 +12957,12 @@ breakpoint_retire_moribund (void)
 }
 
 static void
-update_global_location_list_nothrow (int inserting)
+update_global_location_list_nothrow (enum ugll_insert_mode insert_mode)
 {
   volatile struct gdb_exception e;
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
-    update_global_location_list (inserting);
+    update_global_location_list (insert_mode);
 }
 
 /* Clear BKP from a BPS.  */
@@ -14096,7 +14115,7 @@ delete_breakpoint (struct breakpoint *bpt)
      itself, since remove_breakpoint looks at location's owner.  It
      might be better design to have location completely
      self-contained, but it's not the case now.  */
-  update_global_location_list (0);
+  update_global_location_list (UGLL_DONT_INSERT);
 
   bpt->ops->dtor (bpt);
   /* On the chance that someone will soon try again to delete this
@@ -14425,7 +14444,7 @@ update_breakpoint_locations (struct breakpoint *b,
       /* Ranged breakpoints have only one start location and one end
 	 location.  */
       b->enable_state = bp_disabled;
-      update_global_location_list (1);
+      update_global_location_list (UGLL_MAY_INSERT);
       printf_unfiltered (_("Could not reset ranged breakpoint %d: "
 			   "multiple locations found\n"),
 			 b->number);
@@ -14528,7 +14547,7 @@ update_breakpoint_locations (struct breakpoint *b,
   if (!locations_are_equal (existing_locations, b->loc))
     observer_notify_breakpoint_modified (b);
 
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 }
 
 /* Find the SaL locations corresponding to the given ADDR_STRING.
@@ -14986,7 +15005,7 @@ disable_breakpoint (struct breakpoint *bpt)
 	target_disable_tracepoint (location);
     }
 
-  update_global_location_list (0);
+  update_global_location_list (UGLL_DONT_INSERT);
 
   observer_notify_breakpoint_modified (bpt);
 }
@@ -15041,7 +15060,7 @@ disable_command (char *args, int from_tty)
 		      && is_tracepoint (loc->owner))
 		    target_disable_tracepoint (loc);
 		}
-	      update_global_location_list (0);
+	      update_global_location_list (UGLL_DONT_INSERT);
 	    }
 	  else
 	    map_breakpoint_numbers (num, do_map_disable_breakpoint, NULL);
@@ -15111,7 +15130,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
 
   bpt->disposition = disposition;
   bpt->enable_count = count;
-  update_global_location_list (1);
+  update_global_location_list (UGLL_MAY_INSERT);
 
   observer_notify_breakpoint_modified (bpt);
 }
@@ -15175,7 +15194,7 @@ enable_command (char *args, int from_tty)
 		      && is_tracepoint (loc->owner))
 		    target_enable_tracepoint (loc);
 		}
-	      update_global_location_list (1);
+	      update_global_location_list (UGLL_MAY_INSERT);
 	    }
 	  else
 	    map_breakpoint_numbers (num, do_map_enable_breakpoint, NULL);
