@@ -3633,11 +3633,20 @@ md_assemble (char *line)
       as_warn (_("translating to `%sp'"), i.tm.name);
     }
 
-  if (i.tm.opcode_modifier.vex)
-    build_vex_prefix (t);
+  if (i.tm.opcode_modifier.vex || i.tm.opcode_modifier.evex)
+    {
+      if (flag_code == CODE_16BIT)
+	{
+	  as_bad (_("instruction `%s' isn't supported in 16-bit mode."),
+		  i.tm.name);
+	  return;
+	}
 
-  if (i.tm.opcode_modifier.evex)
-    build_evex_prefix ();
+      if (i.tm.opcode_modifier.vex)
+	build_vex_prefix (t);
+      else
+	build_evex_prefix ();
+    }
 
   /* Handle conversion of 'int $3' --> special int3 insn.  XOP or FMA4
      instructions may define INT_OPCODE as well, so avoid this corner

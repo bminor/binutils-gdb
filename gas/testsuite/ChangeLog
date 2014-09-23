@@ -1,3 +1,11 @@
+2014-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17421
+	* gas/i386/i386.exp: Run inval-16.
+
+	* gas/i386/inval-16.l: New file.
+	* gas/i386/inval-16.s: Likewise.
+
 2014-09-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/cdr.d: New file.

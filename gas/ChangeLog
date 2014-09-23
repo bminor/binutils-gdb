@@ -1,3 +1,9 @@
+2014-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17421
+	* config/tc-i386.c (md_assemble): Disallow VEX/EVEX encoded
+	instructions in 16-bit mode.
+
 2014-09-22  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-m68k.c (md_assemble): Add assert to work around
