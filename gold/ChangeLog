@@ -1,3 +1,7 @@
+2014-09-24  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2014-09-23  Taiju Tsuiki  <tzik@google.com>
             Cary Coutant  <ccoutant@google.com>
 
@@ -86,7 +90,7 @@
 	(AArch64_relocate_functions::movnz): New method.
 	(Target_aarch64::Scan::local): Correct format. Move r_sym, got to
 	before the switch. Add new cases to switch.
-	Check ie_to_le relaxation on tlsie relocations. Add code handling 
+	Check ie_to_le relaxation on tlsie relocations. Add code handling
 	tlsgd tlsdesc cases.
 	(Target_aarch64::Scan::global): Move arp to front. Do copy_reloc when
 	needed. Add new cases to switch. Insert dynamic RELATIVE relocation
