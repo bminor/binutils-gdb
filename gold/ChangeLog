@@ -1,3 +1,16 @@
+2014-09-23  Taiju Tsuiki  <tzik@google.com>
+            Cary Coutant  <ccoutant@google.com>
+
+	* gold.cc (queue_final_tasks): Add Write_sections_task as a blocker
+	on input_sections_blocker.
+	* layout.cc (Write_sections_task::locks): Unblock
+	input_sections_blocker_.
+	* layout.h (Write_sections_task::Write_sections_task): Add
+	input_sections_blocker.
+	* testsuite/Makefile.am (exception_x86_64_bnd_test): Add gcctestdir/ld
+	to DEPENDENCIES.
+	* testsuite/Makefile.in: Regenerate.
+
 2014-09-18  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* testsuite/Makefile.am (plugin_test_10): New test.

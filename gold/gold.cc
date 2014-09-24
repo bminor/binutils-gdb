@@ -808,6 +808,8 @@ queue_final_tasks(const General_options& options,
   if (!any_postprocessing_sections)
     {
       input_sections_blocker = new Task_token(true);
+      // Write_symbols_task, Relocate_tasks.
+      input_sections_blocker->add_blocker();
       input_sections_blocker->add_blockers(input_objects->number_of_relobjs());
     }
 
@@ -836,6 +838,7 @@ queue_final_tasks(const General_options& options,
 
   // Queue a task to write out the output sections.
   workqueue->queue(new Write_sections_task(layout, of, output_sections_blocker,
+					   input_sections_blocker,
 					   final_blocker));
 
   // Queue a task to write out everything else.

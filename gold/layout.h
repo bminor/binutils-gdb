@@ -1454,9 +1454,11 @@ class Write_sections_task : public Task
  public:
   Write_sections_task(const Layout* layout, Output_file* of,
 		      Task_token* output_sections_blocker,
+		      Task_token* input_sections_blocker,
 		      Task_token* final_blocker)
     : layout_(layout), of_(of),
       output_sections_blocker_(output_sections_blocker),
+      input_sections_blocker_(input_sections_blocker),
       final_blocker_(final_blocker)
   { }
 
@@ -1481,6 +1483,7 @@ class Write_sections_task : public Task
   const Layout* layout_;
   Output_file* of_;
   Task_token* output_sections_blocker_;
+  Task_token* input_sections_blocker_;
   Task_token* final_blocker_;
 };
 
