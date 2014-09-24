@@ -1,6 +1,7 @@
 2014-09-23  Taiju Tsuiki  <tzik@google.com>
             Cary Coutant  <ccoutant@google.com>
 
+	PR gold/14860
 	* gold.cc (queue_final_tasks): Add Write_sections_task as a blocker
 	on input_sections_blocker.
 	* layout.cc (Write_sections_task::locks): Unblock
