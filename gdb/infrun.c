@@ -1026,7 +1026,7 @@ clear_step_over_info (void)
   step_over_info.address = 0;
 }
 
-/* See inferior.h.  */
+/* See infrun.h.  */
 
 int
 stepping_past_instruction_at (struct address_space *aspace,
@@ -4003,7 +4003,7 @@ handle_signal_stop (struct execution_control_state *ecs)
          watchpoint expression.  We do this by single-stepping the
 	 target.
 
-	 It may not be necessary to disable the watchpoint to stop over
+	 It may not be necessary to disable the watchpoint to step over
 	 it.  For example, the PA can (with some kernel cooperation)
 	 single step over a watchpoint without disabling the watchpoint.
 
@@ -7124,7 +7124,7 @@ save_inferior_ptid (void)
   return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
 }
 
-/* See inferior.h.  */
+/* See infrun.h.  */
 
 void
 clear_exit_convenience_vars (void)

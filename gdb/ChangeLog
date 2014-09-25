@@ -1,3 +1,10 @@
+2014-09-25  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (stepping_past_instruction_at)
+	(clear_exit_convenience_vars): Point at infrun.h instead of
+	inferior.h.
+	(handle_signal_stop): Fix typo.
+
 2014-09-24  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (thumb_in_function_epilogue_p): Fix typo in the
