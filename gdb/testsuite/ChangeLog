@@ -1,3 +1,8 @@
+2014-09-30  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.threads/dlopen-libpthread.exp: Skip it if isnative is
+	false.
+
 2014-09-22  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/break-while-running.exp: New file.
