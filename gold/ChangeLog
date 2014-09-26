@@ -1,3 +1,9 @@
+2014-09-26  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/16773
+	* object.cc (Sized_relobj_file): Compute value of section symbols
+	for TLS sections the same as TLS symbols.
+
 2014-09-25  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/17432

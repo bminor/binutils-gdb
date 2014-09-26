@@ -2359,7 +2359,9 @@ Sized_relobj_file<size, big_endian>::compute_final_local_value_internal(
 	      lv_out->set_merged_symbol_value(msv);
 	    }
 	}
-      else if (lv_in->is_tls_symbol())
+      else if (lv_in->is_tls_symbol()
+               || (lv_in->is_section_symbol()
+                   && (os->flags() & elfcpp::SHF_TLS)))
 	lv_out->set_output_value(os->tls_offset()
 				 + secoffset
 				 + lv_in->input_value());
