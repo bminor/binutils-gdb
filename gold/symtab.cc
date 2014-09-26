@@ -980,7 +980,8 @@ Symbol_table::add_from_object(Object* object,
       gold_assert(ret != NULL);
 
       was_undefined = ret->is_undefined();
-      was_common = ret->is_common();
+      // Commons from plugins are just placeholders.
+      was_common = ret->is_common() && ret->object()->pluginobj() == NULL;
 
       this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
 		    version);
@@ -1003,7 +1004,8 @@ Symbol_table::add_from_object(Object* object,
 	  ret = this->get_sized_symbol<size>(insdefault.first->second);
 
 	  was_undefined = ret->is_undefined();
-	  was_common = ret->is_common();
+	  // Commons from plugins are just placeholders.
+	  was_common = ret->is_common() && ret->object()->pluginobj() == NULL;
 
 	  this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
 			version);
@@ -1066,8 +1068,10 @@ Symbol_table::add_from_object(Object* object,
     }
 
   // Keep track of common symbols, to speed up common symbol
-  // allocation.
-  if (!was_common && ret->is_common())
+  // allocation.  Don't record commons from plugin objects;
+  // we need to wait until we see the real symbol in the
+  // replacement file.
+  if (!was_common && ret->is_common() && ret->object()->pluginobj() == NULL)
     {
       if (ret->type() == elfcpp::STT_TLS)
 	this->tls_commons_.push_back(ret);
