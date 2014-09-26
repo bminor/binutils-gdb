@@ -281,10 +281,6 @@ print_program_space (struct ui_out *uiout, int requested)
   int count = 0;
   struct cleanup *old_chain;
 
-  /* Might as well prune away unneeded ones, so the user doesn't even
-     seem them.  */
-  prune_program_spaces ();
-
   /* Compute number of pspaces we will print.  */
   ALL_PSPACES (pspace)
     {

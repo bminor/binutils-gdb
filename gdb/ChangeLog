@@ -1,3 +1,8 @@
+2014-09-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* progspace.c (print_program_space): Don't prune program spaces
+	before printing them.
+
 2014-09-25  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (user_visible_resume_ptid): Don't check
