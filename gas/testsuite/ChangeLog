@@ -1,3 +1,8 @@
+2014-09-27  Alan Modra  <amodra@gmail.com>
+
+	* gas/elf/group2.d, * gas/elf/group2.s: New test.
+	* gas/elf/elf.exp: Run it.
+
 2014-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/17421

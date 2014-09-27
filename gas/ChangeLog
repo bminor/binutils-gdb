@@ -1,3 +1,10 @@
+2014-09-27  Alan Modra  <amodra@gmail.com>
+
+	* dwarf2dbg.c (all_segs_hash): Delete.
+	(get_line_subseg): Delete last_seg, last_subseg, last_line_subseg.
+	Retrieve line_seg for section via seg_info.
+	* subsegs.h (segment_info_typet): Add dwarf2_line_seg.
+
 2014-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/17421
