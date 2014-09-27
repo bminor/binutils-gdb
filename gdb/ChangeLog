@@ -1,5 +1,11 @@
 2014-11-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_is_redundant_range_encoding): New function.
+	(ada_is_redundant_index_type_desc): New function.
+	(to_fixed_array_type): Ignore parallel XA type if redundant.
+
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (constrained_packed_array_type): Set the length
 	of the return array as if both bounds where zero if that
 	returned array's index type is dynamic.

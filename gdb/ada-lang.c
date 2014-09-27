@@ -8311,6 +8311,68 @@ to_fixed_variant_branch_type (struct type *var_type0, const gdb_byte *valaddr,
     return TYPE_FIELD_TYPE (var_type, which);
 }
 
+/* Assuming RANGE_TYPE is a TYPE_CODE_RANGE, return nonzero if
+   ENCODING_TYPE, a type following the GNAT conventions for discrete
+   type encodings, only carries redundant information.  */
+
+static int
+ada_is_redundant_range_encoding (struct type *range_type,
+				 struct type *encoding_type)
+{
+  struct type *fixed_range_type;
+  char *bounds_str;
+  int n;
+  LONGEST lo, hi;
+
+  gdb_assert (TYPE_CODE (range_type) == TYPE_CODE_RANGE);
+
+  if (is_dynamic_type (range_type))
+    return 0;
+
+  if (TYPE_NAME (encoding_type) == NULL)
+    return 0;
+
+  bounds_str = strstr (TYPE_NAME (encoding_type), "___XDLU_");
+  if (bounds_str == NULL)
+    return 0;
+
+  n = 8; /* Skip "___XDLU_".  */
+  if (!ada_scan_number (bounds_str, n, &lo, &n))
+    return 0;
+  if (TYPE_LOW_BOUND (range_type) != lo)
+    return 0;
+
+  n += 2; /* Skip the "__" separator between the two bounds.  */
+  if (!ada_scan_number (bounds_str, n, &hi, &n))
+    return 0;
+  if (TYPE_HIGH_BOUND (range_type) != hi)
+    return 0;
+
+  return 1;
+}
+
+/* Given the array type ARRAY_TYPE, return nonzero if DESC_TYPE,
+   a type following the GNAT encoding for describing array type
+   indices, only carries redundant information.  */
+
+static int
+ada_is_redundant_index_type_desc (struct type *array_type,
+				  struct type *desc_type)
+{
+  struct type *this_layer = check_typedef (array_type);
+  int i;
+
+  for (i = 0; i < TYPE_NFIELDS (desc_type); i++)
+    {
+      if (!ada_is_redundant_range_encoding (TYPE_INDEX_TYPE (this_layer),
+					    TYPE_FIELD_TYPE (desc_type, i)))
+	return 0;
+      this_layer = check_typedef (TYPE_TARGET_TYPE (this_layer));
+    }
+
+  return 1;
+}
+
 /* Assuming that TYPE0 is an array type describing the type of a value
    at ADDR, and that DVAL describes a record containing any
    discriminants used in TYPE0, returns a type for the value that
@@ -8337,6 +8399,17 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 
   index_type_desc = ada_find_parallel_type (type0, "___XA");
   ada_fixup_array_indexes_type (index_type_desc);
+  if (index_type_desc != NULL
+      && ada_is_redundant_index_type_desc (type0, index_type_desc))
+    {
+      /* Ignore this ___XA parallel type, as it does not bring any
+	 useful information.  This allows us to avoid creating fixed
+	 versions of the array's index types, which would be identical
+	 to the original ones.  This, in turn, can also help avoid
+	 the creation of fixed versions of the array itself.  */
+      index_type_desc = NULL;
+    }
+
   if (index_type_desc == NULL)
     {
       struct type *elt_type0 = ada_check_typedef (TYPE_TARGET_TYPE (type0));
