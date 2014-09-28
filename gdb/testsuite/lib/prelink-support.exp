@@ -118,6 +118,10 @@ proc file_copy {src dest} {
 proc build_executable_own_libs {testname executable sources options {interp ""} {dir ""}} {
     global subdir
 
+    if { ![isnative] } {
+	error "This proc can be only used for native target."
+    }
+
     if {[build_executable $testname $executable $sources $options] == -1} {
 	return ""
     }
