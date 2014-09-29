@@ -1,3 +1,9 @@
+2014-09-29  Terry Guo  <terry.guo@arm.com>
+
+	* as.c (create_obj_attrs_section): Move it and call it from ...
+	* write.c (create_obj_attrs_section): ... here.
+	(subsegs_finish_section): Refactored.
+
 2014-09-27  Alan Modra  <amodra@gmail.com>
 
 	* dwarf2dbg.c (all_segs_hash): Delete.
