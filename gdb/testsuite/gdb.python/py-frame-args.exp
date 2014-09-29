@@ -68,5 +68,3 @@ gdb_test_no_output "set print frame-arguments all"
 gdb_test "frame" \
     ".*foo \\(x=42, ss={a = {m = 1}, b = {m = 2}}\\).*" \
     "frame raw,all"
-
-remote_file host delete ${remote_python_file}

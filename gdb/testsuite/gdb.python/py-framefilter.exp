@@ -188,8 +188,6 @@ gdb_test_multiple "bt 1" $test {
     }
 }
 
-remote_file host delete ${remote_python_file}
-
 # Test with no debuginfo
 
 # We cannot use prepare_for_testing as we have to set the safe-patch

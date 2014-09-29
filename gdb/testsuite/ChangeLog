@@ -1,3 +1,28 @@
+2014-10-20  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/checkpoint.exp: Don't remove file copied on host.
+	* gdb.base/step-line.exp: Likewise.
+	* gdb.dwarf2/dw2-anonymous-func.exp: Likewise.
+	* gdb.dwarf2/dw2-basic.exp: Likewise.
+	* gdb.dwarf2/dw2-compressed.exp: Likewise.
+	* gdb.dwarf2/dw2-filename.exp: Likewise.
+	* gdb.dwarf2/dw2-intercu.exp: Likewise.
+	* gdb.dwarf2/dw2-intermix.exp: Likewise.
+	* gdb.dwarf2/dw2-producer.exp: Likewise.
+	* gdb.dwarf2/mac-fileno.exp: Likewise.
+	* gdb.python/py-frame-args.exp: Likewise.
+	* gdb.python/py-framefilter.exp: Likewise.
+	* gdb.python/py-mi.exp: Likewise.
+	* gdb.python/py-objfile-script.exp: Likewise
+	* gdb.python/py-pp-integral.exp: Likewise.
+	* gdb.python/py-pp-re-notag.exp: Likewise.
+	* gdb.python/py-prettyprint.exp: Likewise.
+	* gdb.python/py-section-script.exp: Likewise.
+	* gdb.python/py-typeprint.exp: Likewise.
+	* gdb.python/py-xmethods.exp: Likewise.
+	* gdb.stabs/weird.exp: Likewise.
+	* gdb.xml/tdesc-regs.exp: Likewise.
+
 2014-10-18  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* gdb.dwarf2/dw2-dir-file-name.exp (addr_len): New.

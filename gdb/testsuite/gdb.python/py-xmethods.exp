@@ -149,5 +149,3 @@ gdb_test_no_output "disable xmethod progspace E_methods;method_int" \
   "disable xmethod progspace E_methods;method_int"
 gdb_test "info xmethod progspace E_methods;method_int" ".* \\\[disabled\\\]" \
   "info xmethod xmethods E_methods;method_int"
-
-remote_file host delete ${xmethods_script}

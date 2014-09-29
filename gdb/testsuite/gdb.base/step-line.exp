@@ -82,6 +82,4 @@ gdb_test "next" \
          ".*RETURN \\(j\\);.*" \
 	 "next over dummy 10"
 
-remote_file host delete ${remote_linefile}
-
 return 0
