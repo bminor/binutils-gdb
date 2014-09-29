@@ -1,3 +1,8 @@
+2014-10-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/mi-exit-code.exp: New file.
+	* gdb.mi/mi-exit-code.c: New file.
+
 2014-09-30  Yao Qi  <yao@codesourcery.com>
 
 	* lib/prelink-support.exp (build_executable_own_libs): Error if

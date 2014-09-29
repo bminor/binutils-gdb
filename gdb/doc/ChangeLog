@@ -1,3 +1,8 @@
+2014-10-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Miscellaneous gdb/mi Commands): Document new
+	exit-code field in -list-thread-groups output.
+
 2014-09-22  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* gdb.texinfo (Set Breaks): Add missing "@end table".

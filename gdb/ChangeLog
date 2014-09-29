@@ -1,3 +1,12 @@
+2014-10-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS: Announce new exit-code field in -list-thread-groups
+	output.
+	* inferior.c (exit_inferior_1): Don't clear exit code.
+	(inferior_appeared): Clear exit code.
+	* mi/mi-main.c (print_one_inferior): Add printing of the exit
+	code.
+
 2014-10-01  Pedro Alves  <palves@redhat.com>
 
 	* features/Makefile ($(outdir)/%.dat): Output "THIS FILE IS

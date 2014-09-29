@@ -40,6 +40,11 @@ queue-signal signal-name-or-number
   even in non-stop mode.  The "auto" mode has been removed, and "off"
   is now the default mode.
 
+* MI changes
+
+  ** The -list-thread-groups command outputs an exit-code field for
+     inferiors that have exited.
+
 *** Changes in GDB 7.8
 
 * New command line options

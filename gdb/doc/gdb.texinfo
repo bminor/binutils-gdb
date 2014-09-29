@@ -31152,6 +31152,11 @@ valid type.
 The target-specific process identifier.  This field is only present
 for thread groups of type @samp{process} and only if the process exists.
 
+@item exit-code
+The exit code of this group's last exited thread, formatted in octal.
+This field is only present for thread groups of type @samp{process} and
+only if the process is not running.
+
 @item num_children
 The number of children this thread group has.  This field may be
 absent for an available thread group.
