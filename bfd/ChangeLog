@@ -1,3 +1,9 @@
+2014-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17440
+	* elf32-i386.c (elf_i386_fbsd_post_process_headers): Fix build
+	for OLD_FREEBSD_ABI_LABEL.
+
 2014-09-24  Markus Trippelsdorf  <markus@trippelsdorf.de>
 
 	PR 17422

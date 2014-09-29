@@ -5120,8 +5120,11 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
   _bfd_elf_post_process_headers (abfd, info);
 
 #ifdef OLD_FREEBSD_ABI_LABEL
-  /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
-  memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
+  {
+    /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
+    Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+    memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
+  }
 #endif
 }
 
