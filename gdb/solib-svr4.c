@@ -1209,7 +1209,7 @@ svr4_parse_libraries (const char *document, struct svr4_library_list *list)
 
   memset (list, 0, sizeof (*list));
   list->tailp = &list->head;
-  if (gdb_xml_parse_quick (_("target library list"), "library-list.dtd",
+  if (gdb_xml_parse_quick (_("target library list"), "library-list-svr4.dtd",
 			   svr4_library_list_elements, document, list) == 0)
     {
       /* Parsed successfully, keep the result.  */
