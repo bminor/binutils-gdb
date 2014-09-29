@@ -1,5 +1,13 @@
 2014-10-20  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.python/py-objfile-script-gdb.py.in: Rename it to ...
+	* gdb.python/py-objfile-script-gdb.py: New file.
+	* gdb.python/py-objfile-script.exp: Update reference to
+	py-objfile-script-gdb.py.in.  Use gdb_remote_donwload instead
+	of remote_download.  Remove the dest file.
+
+2014-10-20  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/checkpoint.exp: Don't remove file copied on host.
 	* gdb.base/step-line.exp: Likewise.
 	* gdb.dwarf2/dw2-anonymous-func.exp: Likewise.
