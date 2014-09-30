@@ -1,3 +1,9 @@
+2014-09-30  Kito Cheng  <kito@0xlab.org>
+
+	PR gold/13597
+	* layout.cc (Layout::create_dynamic_symtab): Build gnu-style
+	hash table before sysv-style hash table.
+
 2014-09-29  Sriraman Tallam  <tmsriram@google.com>
 
 	* options.h (--pic-executable): Add negative to alias to -no-pie.
