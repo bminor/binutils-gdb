@@ -317,8 +317,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 	  if (to->is_common() && !is_ordinary && st_shndx == elfcpp::SHN_COMMON)
 	    {
 	      adjust_common = true;
-	      typename Sized_symbol<size>::Size_type tosize = to->symsize();
-	      typename Sized_symbol<size>::Value_type tovalue = to->value();
+	      tosize = to->symsize();
+	      tovalue = to->value();
 	    }
 	  this->override(to, sym, st_shndx, is_ordinary, object, version);
 	  if (adjust_common)

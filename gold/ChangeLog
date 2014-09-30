@@ -1,3 +1,8 @@
+2014-09-30  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/17432
+	* resolve.cc (Symbol_table::resolve): Fix local shadowing error.
+
 2014-09-30  Kito Cheng  <kito@0xlab.org>
 
 	PR gold/13597
