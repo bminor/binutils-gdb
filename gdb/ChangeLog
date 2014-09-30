@@ -1,3 +1,25 @@
+2014-09-30  Don Breazeal  <donb@codesourcery.com>
+
+	* inf-ptrace.c (inf_ptrace_follow_fork): Remove target-independent
+	code so as to work with follow_fork_inferior.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Ditto.
+	(inf_ttrace_create_inferior): Remove reference to
+	inf_ttrace_vfork_ppid.
+	(inf_ttrace_attach): Ditto.
+	(inf_ttrace_detach): Ditto.
+	(inf_ttrace_kill): Use current_inferior instead of
+	inf_ttrace_vfork_ppid.
+	(inf_ttrace_wait): Eliminate use of inf_ttrace_vfork_ppid, report
+	TARGET_WAITKIND_VFORK_DONE event, delete HACK that switched the
+	inferior away from the parent.
+	* infrun.c (follow_fork): Call follow_fork_inferior instead of
+	target_follow_fork.
+	(follow_fork_inferior): New function.
+	(follow_inferior_reset_breakpoints): Make function static.
+	* infrun.h (follow_inferior_reset_breakpoints): Remove declaration.
+	* linux-nat.c (linux_child_follow_fork): Move target-independent
+	code to infrun.c:follow_fork_inferior.
+
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdbarch.sh (regset_from_core_section): Remove gdbarch method.
