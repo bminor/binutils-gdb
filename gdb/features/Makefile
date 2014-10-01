@@ -234,7 +234,8 @@ GDB = false
 all: $(OUTPUTS)
 
 $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
-	echo "# DO NOT EDIT: generated from $<" > $(outdir)/$*.tmp
+	echo "# THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:" > $(outdir)/$*.tmp
+	echo "# Generated from: $<" >> $(outdir)/$*.tmp
 	echo "name:`echo $(notdir $*) | sed 's/-/_/g'`" >> $(outdir)/$*.tmp
 	echo "xmltarget:$(<F)" >> $(outdir)/$*.tmp
 	echo "expedite:$(if $($*-expedite),$($*-expedite),$($(firstword $(subst -, ,$(notdir $*)))-expedite))" \

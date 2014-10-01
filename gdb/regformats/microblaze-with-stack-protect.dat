@@ -1,4 +1,5 @@
-# DO NOT EDIT: generated from microblaze-with-stack-protect.xml
+# THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
+# Generated from: microblaze-with-stack-protect.xml
 name:microblaze_with_stack_protect
 xmltarget:microblaze-with-stack-protect.xml
 expedite:r1,pc

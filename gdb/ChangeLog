@@ -1,5 +1,72 @@
 2014-10-01  Pedro Alves  <palves@redhat.com>
 
+	* features/Makefile ($(outdir)/%.dat): Output "THIS FILE IS
+	GENERATED" along with emacs/vi read-only markers.
+	* regformats/aarch64.dat: Regenerate.
+	* regformats/arm-with-iwmmxt.dat: Regenerate.
+	* regformats/arm-with-neon.dat: Regenerate.
+	* regformats/arm-with-vfpv2.dat: Regenerate.
+	* regformats/arm-with-vfpv3.dat: Regenerate.
+	* regformats/i386/amd64-avx-linux.dat: Regenerate.
+	* regformats/i386/amd64-avx.dat: Regenerate.
+	* regformats/i386/amd64-avx512-linux.dat: Regenerate.
+	* regformats/i386/amd64-avx512.dat: Regenerate.
+	* regformats/i386/amd64-linux.dat: Regenerate.
+	* regformats/i386/amd64-mpx-linux.dat: Regenerate.
+	* regformats/i386/amd64-mpx.dat: Regenerate.
+	* regformats/i386/amd64.dat: Regenerate.
+	* regformats/i386/i386-avx-linux.dat: Regenerate.
+	* regformats/i386/i386-avx.dat: Regenerate.
+	* regformats/i386/i386-avx512-linux.dat: Regenerate.
+	* regformats/i386/i386-avx512.dat: Regenerate.
+	* regformats/i386/i386-linux.dat: Regenerate.
+	* regformats/i386/i386-mmx-linux.dat: Regenerate.
+	* regformats/i386/i386-mmx.dat: Regenerate.
+	* regformats/i386/i386-mpx-linux.dat: Regenerate.
+	* regformats/i386/i386-mpx.dat: Regenerate.
+	* regformats/i386/i386.dat: Regenerate.
+	* regformats/i386/x32-avx-linux.dat: Regenerate.
+	* regformats/i386/x32-avx.dat: Regenerate.
+	* regformats/i386/x32-avx512-linux.dat: Regenerate.
+	* regformats/i386/x32-avx512.dat: Regenerate.
+	* regformats/i386/x32-linux.dat: Regenerate.
+	* regformats/i386/x32.dat: Regenerate.
+	* regformats/microblaze-with-stack-protect.dat: Regenerate.
+	* regformats/mips-dsp-linux.dat: Regenerate.
+	* regformats/mips-linux.dat: Regenerate.
+	* regformats/mips64-dsp-linux.dat: Regenerate.
+	* regformats/mips64-linux.dat: Regenerate.
+	* regformats/nios2-linux.dat: Regenerate.
+	* regformats/rs6000/powerpc-32.dat: Regenerate.
+	* regformats/rs6000/powerpc-32l.dat: Regenerate.
+	* regformats/rs6000/powerpc-64l.dat: Regenerate.
+	* regformats/rs6000/powerpc-altivec32l.dat: Regenerate.
+	* regformats/rs6000/powerpc-altivec64l.dat: Regenerate.
+	* regformats/rs6000/powerpc-cell32l.dat: Regenerate.
+	* regformats/rs6000/powerpc-cell64l.dat: Regenerate.
+	* regformats/rs6000/powerpc-e500l.dat: Regenerate.
+	* regformats/rs6000/powerpc-vsx32l.dat: Regenerate.
+	* regformats/rs6000/powerpc-vsx64l.dat: Regenerate.
+	* regformats/s390-linux32.dat: Regenerate.
+	* regformats/s390-linux32v1.dat: Regenerate.
+	* regformats/s390-linux32v2.dat: Regenerate.
+	* regformats/s390-linux64.dat: Regenerate.
+	* regformats/s390-linux64v1.dat: Regenerate.
+	* regformats/s390-linux64v2.dat: Regenerate.
+	* regformats/s390-te-linux64.dat: Regenerate.
+	* regformats/s390x-linux64.dat: Regenerate.
+	* regformats/s390x-linux64v1.dat: Regenerate.
+	* regformats/s390x-linux64v2.dat: Regenerate.
+	* regformats/s390x-te-linux64.dat: Regenerate.
+	* regformats/tic6x-c62x-linux.dat: Regenerate.
+	* regformats/tic6x-c62x.dat: Regenerate.
+	* regformats/tic6x-c64x-linux.dat: Regenerate.
+	* regformats/tic6x-c64x.dat: Regenerate.
+	* regformats/tic6x-c64xp-linux.dat: Regenerate.
+	* regformats/tic6x-c64xp.dat: Regenerate.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
 	* features/Makefile: Update comments.
 	(XMLTOC): List all xml files we build C files from.
 	(clean-cfiles): New rule.
