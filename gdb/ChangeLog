@@ -1,5 +1,9 @@
 2014-10-01  Pedro Alves  <palves@redhat.com>
 
+	* features/Makefile (clean): New rule.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
 	* features/i386/64bit-avx512.xml (zmm10h, zmm11h, zmm12h, zmm13h)
 	(zmm14h): Add missing end quotes.
 

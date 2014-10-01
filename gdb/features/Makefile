@@ -185,3 +185,6 @@ $(outdir)/i386/x32-avx512.dat: i386/x32-core.xml i386/64bit-avx.xml \
 			       i386/64bit-mpx.xml i386/64bit-avx512.xml
 $(outdir)/i386/x32-avx512-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
 			       i386/64bit-mpx.xml i386/64bit-avx512.xml i386/64bit-linux.xml
+
+clean:
+	rm -f $(OUTPUTS)
