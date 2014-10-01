@@ -1,5 +1,10 @@
 2014-10-01  Pedro Alves  <palves@redhat.com>
 
+	* features/i386/64bit-avx512.xml (zmm10h, zmm11h, zmm12h, zmm13h)
+	(zmm14h): Add missing end quotes.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
 	* features/aarch64-core.xml (cpsr): Change back to 32-bit.
 	* features/aarch64.c: Regenerate.
 
