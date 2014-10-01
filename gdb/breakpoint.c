@@ -2674,10 +2674,16 @@ insert_bp_location (struct bp_location *bl,
 		    }
 		}
 	      else if (bl->loc_type == bp_loc_software_breakpoint
-		       && mr->attrib.mode != MEM_RW)	    
-		warning (_("cannot set software breakpoint "
-			   "at readonly address %s"),
-			 paddress (bl->gdbarch, bl->address));
+		       && mr->attrib.mode != MEM_RW)
+		{
+		  fprintf_unfiltered (tmp_error_stream,
+				      _("Cannot insert breakpoint %d.\n"
+					"Cannot set software breakpoint "
+					"at read-only address %s\n"),
+				      bl->owner->number,
+				      paddress (bl->gdbarch, bl->address));
+		  return 1;
+		}
 	    }
 	}
         

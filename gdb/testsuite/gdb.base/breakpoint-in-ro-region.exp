@@ -1,0 +1,142 @@
+# Copyright 2014 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the gdb testsuite
+
+standard_testfile
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+    return -1
+}
+
+if ![runto main] {
+    return -1
+}
+
+delete_breakpoints
+
+# Get the bounds of a function, and write them to FUNC_LO (inclusive),
+# FUNC_HI (exclusive).  Return true on success and false on failure.
+proc get_function_bounds {function func_lo func_hi} {
+    global gdb_prompt
+    global hex decimal
+
+    upvar $func_lo lo
+    upvar $func_hi hi
+
+    set lo ""
+    set size ""
+
+    set test "get lo address of $function"
+    gdb_test_multiple "disassemble $function" $test {
+	-re "($hex) .*$hex <\\+($decimal)>:\[^\r\n\]+\r\nEnd of assembler dump\.\r\n$gdb_prompt $" {
+	    set lo $expect_out(1,string)
+	    set size $expect_out(2,string)
+	    pass $test
+	}
+    }
+
+    if { $lo == "" || $size == "" } {
+	return false
+    }
+
+    # Account for the size of the last instruction.
+    set test "get hi address of $function"
+    gdb_test_multiple "x/2i $function+$size" $test {
+	-re ".*$hex <$function\\+$size>:\[^\r\n\]+\r\n\[ \]+($hex).*\.\r\n$gdb_prompt $" {
+	    set hi $expect_out(1,string)
+	    pass $test
+	}
+    }
+
+    if { $hi == "" } {
+	return false
+    }
+
+    # Remove unnecessary leading 0's (0x00000ADDR => 0xADDR) so we can
+    # easily do matches.  Disassemble includes leading zeros, while
+    # x/i doesn't.
+    regsub -all "0x0\+" $lo "0x" lo
+    regsub -all "0x0\+" $hi "0x" hi
+
+    return true
+}
+
+# Get the address where the thread is currently stopped.
+proc get_curr_insn {} {
+    global gdb_prompt
+    global hex
+
+    set pc ""
+    set test "get current insn"
+    gdb_test_multiple "p /x \$pc" $test {
+	-re " = ($hex)\r\n$gdb_prompt $" {
+	    set pc $expect_out(1,string)
+	    pass $test
+	}
+    }
+
+    return $pc
+}
+
+# Get the address of where a single-step should land.
+proc get_next_insn {} {
+    global gdb_prompt
+    global hex
+
+    set next ""
+    set test "get next insn"
+    gdb_test_multiple "x/2i \$pc" $test {
+	-re "$hex .*:\[^\r\n\]+\r\n\[ \]+($hex).*\.\r\n$gdb_prompt $" {
+	    set next $expect_out(1,string)
+	    pass $test
+	}
+    }
+
+    return $next
+}
+
+
+if ![get_function_bounds "main" main_lo main_hi] {
+    # Can't do the following tests if main's bounds are unknown.
+    return -1
+}
+
+# Manually create a read-only memory region that covers 'main'.
+gdb_test_no_output "mem $main_lo $main_hi ro" \
+    "create read-only mem region covering main"
+
+# So that we don't fail inserting breakpoints on addresses outside
+# main, like the internal event breakpoints.
+gdb_test_no_output "set mem inaccessible-by-default off"
+
+# So we get an immediate warning/error without needing to resume the
+# target.
+gdb_test_no_output "set breakpoint always-inserted on"
+
+# Disable the automatic fallback to HW breakpoints.  We want a
+# software breakpoint to be attempted, and to fail.
+gdb_test_no_output "set breakpoint auto-hw off"
+
+# Confirm manual writes to the read-only memory region fail.
+gdb_test "p /x *(char *) $main_lo = 1" \
+    "Cannot access memory at address $main_lo" \
+    "writing to read-only memory fails"
+
+# Ensure that inserting a software breakpoint in a known-read-only
+# region fails.
+gdb_test "break *$main_lo" \
+    "Cannot insert breakpoint .*Cannot set software breakpoint at read-only address $main_lo.*" \
+    "inserting software breakpoint in read-only memory fails"

@@ -1,3 +1,8 @@
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/breakpoint-in-ro-region.c: New file.
+	* gdb.base/breakpoint-in-ro-region.exp: New file.
+
 2014-10-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.mi/mi-exit-code.exp: New file.

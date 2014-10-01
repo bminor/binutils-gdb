@@ -1,3 +1,14 @@
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (insert_bp_location): Error out if inserting a
+	software breakpoint at a read-only address.
+	* target.c (memory_xfer_check_region): New function, factored out
+	from ...
+	(memory_xfer_partial_1): ... this.  Make the 'reg_len' local a
+	ULONGEST.
+	(target_xfer_partial) <TARGET_OBJECT_RAW_MEMORY>: Check the access
+	against the memory region attributes.
+
 2014-10-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* NEWS: Announce new exit-code field in -list-thread-groups
