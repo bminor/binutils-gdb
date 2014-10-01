@@ -32,7 +32,6 @@
 
 WHICH = aarch64 \
 	arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
-	arm-with-m arm-with-m-fpa-layout arm-with-m-vfp-d16 \
 	i386/i386 i386/i386-linux \
 	i386/i386-mmx i386/i386-mmx-linux \
 	i386/amd64 i386/amd64-linux \

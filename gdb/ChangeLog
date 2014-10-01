@@ -1,5 +1,10 @@
 2014-10-01  Pedro Alves  <palves@redhat.com>
 
+	* features/Makefile (WHICH): Remove arm-with-m,
+	arm-with-m-fpa-layout and arm-with-m-vfp-d16.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
 	* features/Makefile (clean): New rule.
 
 2014-10-01  Pedro Alves  <palves@redhat.com>
