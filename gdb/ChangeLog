@@ -1,5 +1,12 @@
 2014-10-01  Pedro Alves  <palves@redhat.com>
 
+	* features/i386/amd64-avx512-linux.c: Regenerate.
+	* features/i386/amd64-avx512.c: Regenerate.
+	* features/i386/x32-avx512-linux.c: Regenerate.
+	* features/i386/x32-avx512.c: Regenerate.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
 	* features/Makefile (WHICH): Remove arm-with-m,
 	arm-with-m-fpa-layout and arm-with-m-vfp-d16.
 
