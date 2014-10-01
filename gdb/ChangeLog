@@ -1,3 +1,8 @@
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* features/aarch64-core.xml (cpsr): Change back to 32-bit.
+	* features/aarch64.c: Regenerate.
+
 2014-09-11  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17347
