@@ -1,5 +1,11 @@
 2014-10-01  Pedro Alves  <palves@redhat.com>
 
+	* features/Makefile: Update comments.
+	(XMLTOC): List all xml files we build C files from.
+	(clean-cfiles): New rule.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
 	* features/i386/amd64-avx512-linux.c: Regenerate.
 	* features/i386/amd64-avx512.c: Regenerate.
 	* features/i386/x32-avx512-linux.c: Regenerate.
