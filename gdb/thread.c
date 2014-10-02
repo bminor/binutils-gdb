@@ -466,7 +466,13 @@ any_thread_of_process (int pid)
 {
   struct thread_info *tp;
 
-  for (tp = thread_list; tp; tp = tp->next)
+  gdb_assert (pid != 0);
+
+  /* Prefer the current thread.  */
+  if (ptid_get_pid (inferior_ptid) == pid)
+    return inferior_thread ();
+
+  ALL_NON_EXITED_THREADS (tp)
     if (ptid_get_pid (tp->ptid) == pid)
       return tp;
 
@@ -476,18 +482,40 @@ any_thread_of_process (int pid)
 struct thread_info *
 any_live_thread_of_process (int pid)
 {
+  struct thread_info *curr_tp = NULL;
   struct thread_info *tp;
   struct thread_info *tp_executing = NULL;
 
-  for (tp = thread_list; tp; tp = tp->next)
-    if (tp->state != THREAD_EXITED && ptid_get_pid (tp->ptid) == pid)
+  gdb_assert (pid != 0);
+
+  /* Prefer the current thread if it's not executing.  */
+  if (ptid_get_pid (inferior_ptid) == pid)
+    {
+      /* If the current thread is dead, forget it.  If it's not
+	 executing, use it.  Otherwise, still choose it (below), but
+	 only if no other non-executing thread is found.  */
+      curr_tp = inferior_thread ();
+      if (curr_tp->state == THREAD_EXITED)
+	curr_tp = NULL;
+      else if (!curr_tp->executing)
+	return curr_tp;
+    }
+
+  ALL_NON_EXITED_THREADS (tp)
+    if (ptid_get_pid (tp->ptid) == pid)
       {
-	if (tp->executing)
-	  tp_executing = tp;
-	else
+	if (!tp->executing)
 	  return tp;
+
+	tp_executing = tp;
       }
 
+  /* If both the current thread and all live threads are executing,
+     prefer the current thread.  */
+  if (curr_tp != NULL)
+    return curr_tp;
+
+  /* Otherwise, just return an executing thread, if any.  */
   return tp_executing;
 }
 

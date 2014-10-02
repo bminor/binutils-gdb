@@ -1,3 +1,19 @@
+2014-10-02  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (any_thread_of_process, any_live_thread_of_process):
+	Adjust comments.
+	* inferior.c (find_inferior_for_program_space): Give preference to
+	the current inferior.
+	* inferior.h (find_inferior_for_program_space): Update comment.
+	* progspace.c (switch_to_program_space_and_thread): Prefer the
+	current inferior if it's bound to the program space requested.  If
+	the inferior found doesn't have a PID yet, don't bother looking up
+	a thread.
+	* progspace.h (switch_to_program_space_and_thread): Adjust
+	comment.
+	* thread.c (any_thread_of_process, any_live_thread_of_process):
+	Give preference to the current thread.
+
 2014-10-01  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (insert_bp_location): Error out if inserting a

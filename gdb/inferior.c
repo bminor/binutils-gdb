@@ -367,12 +367,15 @@ find_inferior_pid (int pid)
   return NULL;
 }
 
-/* Find an inferior bound to PSPACE.  */
+/* See inferior.h.  */
 
 struct inferior *
 find_inferior_for_program_space (struct program_space *pspace)
 {
-  struct inferior *inf;
+  struct inferior *inf = current_inferior ();
+
+  if (inf->pspace == pspace)
+    return inf;
 
   for (inf = inferior_list; inf != NULL; inf = inf->next)
     {
