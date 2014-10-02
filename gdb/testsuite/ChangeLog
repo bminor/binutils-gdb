@@ -1,5 +1,11 @@
 2014-10-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/break-while-running.exp (test): Add new
+	'update_thread_list' argument.  Skip "info threads" if false.
+	(top level): Add new 'update_thread_list' axis.
+
+2014-10-02  Pedro Alves  <palves@redhat.com>
+
 	PR breakpoints/17431
 	* gdb.base/execl-update-breakpoints.c: New file.
 	* gdb.base/execl-update-breakpoints.exp: New file.

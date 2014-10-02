@@ -56,6 +56,13 @@ void _initialize_thread (void);
 struct thread_info *thread_list = NULL;
 static int highest_thread_num;
 
+/* True if any thread is, or may be executing.  We need to track this
+   separately because until we fully sync the thread list, we won't
+   know whether the target is fully stopped, even if we see stop
+   events for all known threads, because any of those threads may have
+   spawned new threads we haven't heard of yet.  */
+static int threads_executing;
+
 static void thread_command (char *tidstr, int from_tty);
 static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
@@ -167,6 +174,7 @@ init_thread_list (void)
     }
 
   thread_list = NULL;
+  threads_executing = 0;
 }
 
 /* Allocate a new thread with target id PTID and add it to the thread
@@ -702,6 +710,22 @@ set_executing (ptid_t ptid, int executing)
       gdb_assert (tp);
       tp->executing = executing;
     }
+
+  /* It only takes one running thread to spawn more threads.*/
+  if (executing)
+    threads_executing = 1;
+  /* Only clear the flag if the caller is telling us everything is
+     stopped.  */
+  else if (ptid_equal (minus_one_ptid, ptid))
+    threads_executing = 0;
+}
+
+/* See gdbthread.h.  */
+
+int
+threads_are_executing (void)
+{
+  return threads_executing;
 }
 
 void
@@ -1501,11 +1525,31 @@ gdb_thread_select (struct ui_out *uiout, char *tidstr, char **error_message)
   return GDB_RC_OK;
 }
 
+/* Update the 'threads_executing' global based on the threads we know
+   about right now.  */
+
+static void
+update_threads_executing (void)
+{
+  struct thread_info *tp;
+
+  threads_executing = 0;
+  ALL_NON_EXITED_THREADS (tp)
+    {
+      if (tp->executing)
+	{
+	  threads_executing = 1;
+	  break;
+	}
+    }
+}
+
 void
 update_thread_list (void)
 {
   prune_threads ();
   target_find_new_threads ();
+  update_threads_executing ();
 }
 
 /* Return a new value for the selected thread's id.  Return a value of 0 if

@@ -473,6 +473,8 @@ show_always_inserted_mode (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* See breakpoint.h.  */
+
 int
 breakpoints_should_be_inserted_now (void)
 {
@@ -485,8 +487,6 @@ breakpoints_should_be_inserted_now (void)
     }
   else if (target_has_execution)
     {
-      struct thread_info *tp;
-
       if (always_inserted_mode)
 	{
 	  /* The user wants breakpoints inserted even if all threads
@@ -494,11 +494,8 @@ breakpoints_should_be_inserted_now (void)
 	  return 1;
 	}
 
-      ALL_NON_EXITED_THREADS (tp)
-        {
-	  if (tp->executing)
-	    return 1;
-	}
+      if (threads_are_executing ())
+	return 1;
     }
   return 0;
 }

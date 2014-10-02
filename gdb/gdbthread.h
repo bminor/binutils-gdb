@@ -381,6 +381,9 @@ extern void set_executing (ptid_t ptid, int executing);
 /* Reports if thread PTID is executing.  */
 extern int is_executing (ptid_t ptid);
 
+/* True if any (known or unknown) thread is or may be executing.  */
+extern int threads_are_executing (void);
+
 /* Merge the executing property of thread PTID over to its thread
    state property (frontend running/stopped view).
 

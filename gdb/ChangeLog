@@ -1,5 +1,24 @@
 2014-10-02  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (breakpoints_should_be_inserted_now): Use
+	threads_are_executing.
+	* breakpoint.h (breakpoints_should_be_inserted_now): Add
+	describing comment.
+	* gdbthread.h (threads_are_executing): Declare.
+	(handle_signal_stop) <random signals>: Don't print about the
+	signal here if stopping.
+	(end_stepping_range): Don't notify observers here.
+	(normal_stop): Update the thread list.  If stopped by a random
+	signal or a stepping range ended, notify observers.
+	* thread.c (threads_executing): New global.
+	(init_thread_list): Clear 'threads_executing'.
+	(set_executing): Set or clear 'threads_executing'.
+	(threads_are_executing): New function.
+	(update_threads_executing): New function.
+	(update_thread_list): Use it.
+
+2014-10-02  Pedro Alves  <palves@redhat.com>
+
 	PR breakpoints/17431
 	* breakpoint.c (update_breakpoints_after_exec): Don't create
 	overlay, longjmp, std terminate nor exception breakpoints here.

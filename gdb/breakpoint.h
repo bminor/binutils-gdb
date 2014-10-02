@@ -1491,6 +1491,16 @@ extern void breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 				    const gdb_byte *writebuf_org,
 				    ULONGEST memaddr, LONGEST len);
 
+/* Return true if breakpoints should be inserted now.  That'll be the
+   case if either:
+
+    - the target has global breakpoints.
+
+    - "breakpoint always-inserted" is on, and the target has
+      execution.
+
+    - threads are executing.
+*/
 extern int breakpoints_should_be_inserted_now (void);
 
 /* Called each time new event from target is processed.

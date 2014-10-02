@@ -4436,13 +4436,6 @@ handle_signal_stop (struct execution_control_state *ecs)
 
       stopped_by_random_signal = 1;
 
-      if (signal_print[ecs->event_thread->suspend.stop_signal])
-	{
-	  /* The signal table tells us to print about this signal.  */
-	  printed = 1;
-	  target_terminal_ours_for_output ();
-	  observer_notify_signal_received (ecs->event_thread->suspend.stop_signal);
-	}
       /* Always stop on signals if we're either just gaining control
 	 of the program, or the user explicitly requested this thread
 	 to remain stopped.  */
@@ -4454,10 +4447,17 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  stop_waiting (ecs);
 	  return;
 	}
-      /* If not going to stop, give terminal back
-         if we took it away.  */
-      else if (printed)
-	target_terminal_inferior ();
+
+      /* Notify observers the signal has "handle print" set.  Note we
+	 returned early above if stopping; normal_stop handles the
+	 printing in that case.  */
+      if (signal_print[ecs->event_thread->suspend.stop_signal])
+	{
+	  /* The signal table tells us to print about this signal.  */
+	  target_terminal_ours_for_output ();
+	  observer_notify_signal_received (ecs->event_thread->suspend.stop_signal);
+	  target_terminal_inferior ();
+	}
 
       /* Clear the signal if it should not be passed.  */
       if (signal_program[ecs->event_thread->suspend.stop_signal] == 0)
@@ -6092,15 +6092,12 @@ prepare_to_wait (struct execution_control_state *ecs)
 }
 
 /* We are done with the step range of a step/next/si/ni command.
-   Called once for each n of a "step n" operation.  Notify observers
-   if not in the middle of doing a "step N" operation for N > 1.  */
+   Called once for each n of a "step n" operation.  */
 
 static void
 end_stepping_range (struct execution_control_state *ecs)
 {
   ecs->event_thread->control.stop_step = 1;
-  if (!ecs->event_thread->step_multi)
-    observer_notify_end_stepping_range ();
   stop_waiting (ecs);
 }
 
@@ -6311,6 +6308,19 @@ normal_stop (void)
 	   && last.kind != TARGET_WAITKIND_NO_RESUMED)
     make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
 
+  /* As we're presenting a stop, and potentially removing breakpoints,
+     update the thread list so we can tell whether there are threads
+     running on the target.  With target remote, for example, we can
+     only learn about new threads when we explicitly update the thread
+     list.  Do this before notifying the interpreters about signal
+     stops, end of stepping ranges, etc., so that the "new thread"
+     output is emitted before e.g., "Program received signal FOO",
+     instead of after.  */
+  update_thread_list ();
+
+  if (last.kind == TARGET_WAITKIND_STOPPED && stopped_by_random_signal)
+    observer_notify_signal_received (inferior_thread ()->suspend.stop_signal);
+
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until
      the inferior actually stops.
@@ -6349,6 +6359,7 @@ normal_stop (void)
       printf_filtered (_("No unwaited-for children left.\n"));
     }
 
+  /* Note: this depends on the update_thread_list call above.  */
   if (!breakpoints_should_be_inserted_now () && target_has_execution)
     {
       if (remove_breakpoints ())
@@ -6366,14 +6377,19 @@ normal_stop (void)
   if (stopped_by_random_signal)
     disable_current_display ();
 
-  /* Don't print a message if in the middle of doing a "step n"
-     operation for n > 1 */
+  /* Notify observers if we finished a "step"-like command, etc.  */
   if (target_has_execution
       && last.kind != TARGET_WAITKIND_SIGNALLED
       && last.kind != TARGET_WAITKIND_EXITED
-      && inferior_thread ()->step_multi
       && inferior_thread ()->control.stop_step)
-    goto done;
+    {
+      /* But not if if in the middle of doing a "step n" operation for
+	 n > 1 */
+      if (inferior_thread ()->step_multi)
+	goto done;
+
+      observer_notify_end_stepping_range ();
+    }
 
   target_terminal_ours ();
   async_enable_stdin ();
