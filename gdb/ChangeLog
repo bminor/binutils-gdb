@@ -1,3 +1,8 @@
+2014-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (create_range_type): Unset RESULT_TYPE's
+	flag_unsigned if HIGH_BOUND is constant and negative.
+
 2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/10737

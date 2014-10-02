@@ -1,3 +1,7 @@
+2014-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/n_arr_bound: New testcase.
+
 2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/10737
