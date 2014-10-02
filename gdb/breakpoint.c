@@ -3839,11 +3839,6 @@ update_breakpoints_after_exec (void)
 	continue;
       }
   }
-  /* FIXME what about longjmp breakpoints?  Re-create them here?  */
-  create_overlay_event_breakpoint ();
-  create_longjmp_master_breakpoint ();
-  create_std_terminate_master_breakpoint ();
-  create_exception_master_breakpoint ();
 }
 
 int

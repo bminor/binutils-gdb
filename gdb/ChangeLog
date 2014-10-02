@@ -1,5 +1,11 @@
 2014-10-02  Pedro Alves  <palves@redhat.com>
 
+	PR breakpoints/17431
+	* breakpoint.c (update_breakpoints_after_exec): Don't create
+	overlay, longjmp, std terminate nor exception breakpoints here.
+
+2014-10-02  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (any_thread_of_process, any_live_thread_of_process):
 	Adjust comments.
 	* inferior.c (find_inferior_for_program_space): Give preference to
