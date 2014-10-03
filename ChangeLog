@@ -1,3 +1,8 @@
+2014-10-03  Jing Yu  <jingyu@google.com>
+
+	* configure.ac: Add aarch64 to list of targets that support gold.
+	* configure: Regenerate.
+
 2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* configure.ac: Add mips*-img-elf* target triple.
