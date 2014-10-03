@@ -1,3 +1,7 @@
+2014-10-03  Pierre Muller  <muller@sourceware.org>
+
+	* dbxread.c (read_dbx_symtab): Also ignore N_BNSYM/N_ENSYM.
+
 2014-10-02  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (breakpoints_should_be_inserted_now): Use
