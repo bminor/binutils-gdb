@@ -1,3 +1,9 @@
+2014-10-03  Luis Machado  <lgustavo@codesourcery.com>
+
+	* valops.c (value_assign): Check for bit field assignments
+	before calling architecture-specific register value
+	conversion functions.
+
 2014-10-03  Pierre Muller  <muller@sourceware.org>
 
 	* dbxread.c (read_dbx_symtab): Also ignore N_BNSYM/N_ENSYM.

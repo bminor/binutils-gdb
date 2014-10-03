@@ -1112,52 +1112,54 @@ value_assign (struct value *toval, struct value *fromval)
 	  error (_("Value being assigned to is no longer active."));
 
 	gdbarch = get_frame_arch (frame);
-	if (gdbarch_convert_register_p (gdbarch, VALUE_REGNUM (toval), type))
+
+	if (value_bitsize (toval))
 	  {
-	    /* If TOVAL is a special machine register requiring
-	       conversion of program values to a special raw
-	       format.  */
-	    gdbarch_value_to_register (gdbarch, frame,
-				       VALUE_REGNUM (toval), type,
-				       value_contents (fromval));
+	    struct value *parent = value_parent (toval);
+	    int offset = value_offset (parent) + value_offset (toval);
+	    int changed_len;
+	    gdb_byte buffer[sizeof (LONGEST)];
+	    int optim, unavail;
+
+	    changed_len = (value_bitpos (toval)
+			   + value_bitsize (toval)
+			   + HOST_CHAR_BIT - 1)
+			  / HOST_CHAR_BIT;
+
+	    if (changed_len > (int) sizeof (LONGEST))
+	      error (_("Can't handle bitfields which "
+		       "don't fit in a %d bit word."),
+		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
+
+	    if (!get_frame_register_bytes (frame, value_reg, offset,
+					   changed_len, buffer,
+					   &optim, &unavail))
+	      {
+		if (optim)
+		  throw_error (OPTIMIZED_OUT_ERROR,
+			       _("value has been optimized out"));
+		if (unavail)
+		  throw_error (NOT_AVAILABLE_ERROR,
+			       _("value is not available"));
+	      }
+
+	    modify_field (type, buffer, value_as_long (fromval),
+			  value_bitpos (toval), value_bitsize (toval));
+
+	    put_frame_register_bytes (frame, value_reg, offset,
+				      changed_len, buffer);
 	  }
 	else
 	  {
-	    if (value_bitsize (toval))
+	    if (gdbarch_convert_register_p (gdbarch, VALUE_REGNUM (toval),
+					    type))
 	      {
-		struct value *parent = value_parent (toval);
-		int offset = value_offset (parent) + value_offset (toval);
-		int changed_len;
-		gdb_byte buffer[sizeof (LONGEST)];
-		int optim, unavail;
-
-		changed_len = (value_bitpos (toval)
-			       + value_bitsize (toval)
-			       + HOST_CHAR_BIT - 1)
-		  / HOST_CHAR_BIT;
-
-		if (changed_len > (int) sizeof (LONGEST))
-		  error (_("Can't handle bitfields which "
-			   "don't fit in a %d bit word."),
-			 (int) sizeof (LONGEST) * HOST_CHAR_BIT);
-
-		if (!get_frame_register_bytes (frame, value_reg, offset,
-					       changed_len, buffer,
-					       &optim, &unavail))
-		  {
-		    if (optim)
-		      throw_error (OPTIMIZED_OUT_ERROR,
-				   _("value has been optimized out"));
-		    if (unavail)
-		      throw_error (NOT_AVAILABLE_ERROR,
-				   _("value is not available"));
-		  }
-
-		modify_field (type, buffer, value_as_long (fromval),
-			      value_bitpos (toval), value_bitsize (toval));
-
-		put_frame_register_bytes (frame, value_reg, offset,
-					  changed_len, buffer);
+		/* If TOVAL is a special machine register requiring
+		   conversion of program values to a special raw
+		   format.  */
+		gdbarch_value_to_register (gdbarch, frame,
+					   VALUE_REGNUM (toval), type,
+					   value_contents (fromval));
 	      }
 	    else
 	      {
