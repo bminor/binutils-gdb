@@ -1183,7 +1183,7 @@ aarch64_handle_breakpoint (int type, CORE_ADDR addr, int len, int is_insert)
     return aarch64_dr_state_remove_one_point (state, type, addr, len);
 }
 
-/* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
+/* Insert a hardware-assisted breakpoint at BP_TGT->reqstd_address.
    Return 0 on success, -1 on failure.  */
 
 static int
@@ -1192,7 +1192,7 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
 				    struct bp_target_info *bp_tgt)
 {
   int ret;
-  CORE_ADDR addr = bp_tgt->placed_address;
+  CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
   const int len = 4;
   const int type = hw_execute;
 

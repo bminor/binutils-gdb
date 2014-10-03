@@ -1,3 +1,43 @@
+2014-10-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* breakpoint.h (bp_target_info): Add `reqstd_address' member,
+	update comments.
+	* breakpoint.c (one_breakpoint_xfer_memory): Use `reqstd_address'
+	for the breakpoint's address.  Don't preinitialize `placed_size'.
+	(insert_bp_location): Set `reqstd_address' rather than
+	`placed_address'.
+	(bp_target_info_copy_insertion_state): Also copy `placed_address'.
+	(bkpt_insert_location): Use `reqstd_address' for the breakpoint's
+	address.
+	(bkpt_remove_location): Likewise.
+	(deprecated_insert_raw_breakpoint): Likewise.
+	(deprecated_remove_raw_breakpoint): Likewise.
+	(find_single_step_breakpoint): Likewise.
+	* mem-break.c (default_memory_insert_breakpoint): Use
+	`reqstd_address' for the breakpoint's address.  Don't set
+	`placed_address' or `placed_size' if breakpoint contents couldn't
+	have been determined.
+	* remote.c (remote_insert_breakpoint): Use `reqstd_address' for
+	the breakpoint's address.
+	(remote_insert_hw_breakpoint): Likewise.  Don't set
+	`placed_address' or `placed_size' if breakpoint couldn't have been
+	set.
+	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint): Use
+	`reqstd_address' for the breakpoint's address.
+	* arm-linux-nat.c (arm_linux_hw_breakpoint_initialize): Likewise.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): Likewise.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint): Likewise.
+	* microblaze-linux-tdep.c
+	(microblaze_linux_memory_remove_breakpoint): Likewise.
+	* monitor.c (monitor_insert_breakpoint): Likewise.
+	* nto-procfs.c (procfs_insert_breakpoint): Likewise.
+	(procfs_insert_hw_breakpoint): Likewise.
+	* ppc-linux-nat.c (ppc_linux_insert_hw_breakpoint): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Likewise.
+	* remote-m32r-sdi.c (m32r_insert_breakpoint): Likewise.
+	* remote-mips.c (mips_insert_breakpoint): Likewise.
+	* x86-nat.c (x86_insert_hw_breakpoint): Likewise.
+
 2014-10-03  Luis Machado  <lgustavo@codesourcery.com>
 
 	* valops.c (value_assign): Check for bit field assignments

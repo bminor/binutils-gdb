@@ -235,12 +235,15 @@ struct bp_target_info
   /* Address space at which the breakpoint was placed.  */
   struct address_space *placed_address_space;
 
-  /* Address at which the breakpoint was placed.  This is normally the
-     same as ADDRESS from the bp_location, except when adjustment
-     happens in gdbarch_breakpoint_from_pc.  The most common form of
-     adjustment is stripping an alternate ISA marker from the PC which
-     is used to determine the type of breakpoint to insert.  */
+  /* Address at which the breakpoint was placed.  This is normally
+     the same as REQUESTED_ADDRESS, except when adjustment happens in
+     gdbarch_breakpoint_from_pc.  The most common form of adjustment
+     is stripping an alternate ISA marker from the PC which is used
+     to determine the type of breakpoint to insert.  */
   CORE_ADDR placed_address;
+
+  /* Address at which the breakpoint was requested.  */
+  CORE_ADDR reqstd_address;
 
   /* If this is a ranged breakpoint, then this field contains the
      length of the range that will be watched for execution.  */

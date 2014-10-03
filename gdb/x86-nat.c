@@ -211,7 +211,7 @@ x86_stopped_by_watchpoint (struct target_ops *ops)
   return x86_dr_stopped_by_watchpoint (state);
 }
 
-/* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
+/* Insert a hardware-assisted breakpoint at BP_TGT->reqstd_address.
    Return 0 on success, EBUSY on failure.  */
 
 static int
@@ -221,6 +221,7 @@ x86_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
   struct x86_debug_reg_state *state
     = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
 
+  bp_tgt->placed_address = bp_tgt->reqstd_address;
   return x86_dr_insert_watchpoint (state, hw_execute,
 				   bp_tgt->placed_address, 1) ? EBUSY : 0;
 }

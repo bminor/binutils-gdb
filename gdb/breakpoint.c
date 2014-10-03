@@ -1544,8 +1544,8 @@ one_breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
   else
     {
       const unsigned char *bp;
-      CORE_ADDR placed_address = target_info->placed_address;
-      int placed_size = target_info->placed_size;
+      CORE_ADDR addr = target_info->reqstd_address;
+      int placed_size;
 
       /* Update the shadow with what we want to write to memory.  */
       memcpy (target_info->shadow_contents + bptoffset,
@@ -1553,7 +1553,7 @@ one_breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 
       /* Determine appropriate breakpoint contents and size for this
 	 address.  */
-      bp = gdbarch_breakpoint_from_pc (gdbarch, &placed_address, &placed_size);
+      bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &placed_size);
 
       /* Update the final write buffer with this inserted
 	 breakpoint's INSN.  */
@@ -2601,7 +2601,7 @@ insert_bp_location (struct bp_location *bl,
      we have a breakpoint inserted at that address and thus
      read the breakpoint instead of returning the data saved in
      the breakpoint location's shadow contents.  */
-  bl->target_info.placed_address = bl->address;
+  bl->target_info.reqstd_address = bl->address;
   bl->target_info.placed_address_space = bl->pspace->aspace;
   bl->target_info.length = bl->length;
 
@@ -2642,7 +2642,7 @@ insert_bp_location (struct bp_location *bl,
 	     program, but it's not going to work anyway with current
 	     gdb.  */
 	  struct mem_region *mr 
-	    = lookup_mem_region (bl->target_info.placed_address);
+	    = lookup_mem_region (bl->target_info.reqstd_address);
 	  
 	  if (mr)
 	    {
@@ -2722,7 +2722,7 @@ insert_bp_location (struct bp_location *bl,
 							     bl->section);
 		  /* Set a software (trap) breakpoint at the LMA.  */
 		  bl->overlay_target_info = bl->target_info;
-		  bl->overlay_target_info.placed_address = addr;
+		  bl->overlay_target_info.reqstd_address = addr;
 
 		  /* No overlay handling: just set the breakpoint.  */
 		  TRY_CATCH (e, RETURN_MASK_ALL)
@@ -13301,6 +13301,7 @@ bp_target_info_copy_insertion_state (struct bp_target_info *dest,
 {
   dest->shadow_len = src->shadow_len;
   memcpy (dest->shadow_contents, src->shadow_contents, src->shadow_len);
+  dest->placed_address = src->placed_address;
   dest->placed_size = src->placed_size;
 }
 
@@ -13319,7 +13320,7 @@ bkpt_insert_location (struct bp_location *bl)
       /* There is no need to insert a breakpoint if an unconditional
 	 raw/sss breakpoint is already inserted at that location.  */
       sss_slot = find_single_step_breakpoint (bp_tgt->placed_address_space,
-					      bp_tgt->placed_address);
+					      bp_tgt->reqstd_address);
       if (sss_slot >= 0)
 	{
 	  struct bp_target_info *sss_bp_tgt = single_step_breakpoints[sss_slot];
@@ -13341,7 +13342,7 @@ bkpt_remove_location (struct bp_location *bl)
     {
       struct bp_target_info *bp_tgt = &bl->target_info;
       struct address_space *aspace = bp_tgt->placed_address_space;
-      CORE_ADDR address = bp_tgt->placed_address;
+      CORE_ADDR address = bp_tgt->reqstd_address;
 
       /* Only remove the breakpoint if there is no raw/sss breakpoint
 	 still inserted at this location.  Otherwise, we would be
@@ -15364,7 +15365,7 @@ deprecated_insert_raw_breakpoint (struct gdbarch *gdbarch,
   bp_tgt = XCNEW (struct bp_target_info);
 
   bp_tgt->placed_address_space = aspace;
-  bp_tgt->placed_address = pc;
+  bp_tgt->reqstd_address = pc;
 
   /* If an unconditional non-raw breakpoint is already inserted at
      that location, there's no need to insert another.  However, with
@@ -15401,7 +15402,7 @@ deprecated_remove_raw_breakpoint (struct gdbarch *gdbarch, void *bp)
 {
   struct bp_target_info *bp_tgt = bp;
   struct address_space *aspace = bp_tgt->placed_address_space;
-  CORE_ADDR address = bp_tgt->placed_address;
+  CORE_ADDR address = bp_tgt->reqstd_address;
   struct bp_location *bl;
   int ret;
 
@@ -15543,7 +15544,7 @@ find_single_step_breakpoint (struct address_space *aspace,
       struct bp_target_info *bp_tgt = single_step_breakpoints[i];
       if (bp_tgt
 	  && breakpoint_address_match (bp_tgt->placed_address_space,
-				       bp_tgt->placed_address,
+				       bp_tgt->reqstd_address,
 				       aspace, pc))
 	return i;
     }

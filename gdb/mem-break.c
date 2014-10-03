@@ -37,27 +37,29 @@ int
 default_memory_insert_breakpoint (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
-  int val;
+  CORE_ADDR addr = bp_tgt->reqstd_address;
   const unsigned char *bp;
   gdb_byte *readbuf;
+  int bplen;
+  int val;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
-  bp = gdbarch_breakpoint_from_pc
-       (gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
+  bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
   if (bp == NULL)
     error (_("Software breakpoints not implemented for this target."));
 
+  bp_tgt->placed_address = addr;
+  bp_tgt->placed_size = bplen;
+
   /* Save the memory contents in the shadow_contents buffer and then
      write the breakpoint instruction.  */
-  bp_tgt->shadow_len = bp_tgt->placed_size;
-  readbuf = alloca (bp_tgt->placed_size);
-  val = target_read_memory (bp_tgt->placed_address, readbuf,
-			    bp_tgt->placed_size);
+  bp_tgt->shadow_len = bplen;
+  readbuf = alloca (bplen);
+  val = target_read_memory (addr, readbuf, bplen);
   if (val == 0)
     {
-      memcpy (bp_tgt->shadow_contents, readbuf, bp_tgt->placed_size);
-      val = target_write_raw_memory (bp_tgt->placed_address, bp,
-				     bp_tgt->placed_size);
+      memcpy (bp_tgt->shadow_contents, readbuf, bplen);
+      val = target_write_raw_memory (addr, bp, bplen);
     }
 
   return val;

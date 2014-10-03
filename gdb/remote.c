@@ -8076,7 +8076,7 @@ remote_insert_breakpoint (struct target_ops *ops,
 
   if (packet_support (PACKET_Z0) != PACKET_DISABLE)
     {
-      CORE_ADDR addr = bp_tgt->placed_address;
+      CORE_ADDR addr = bp_tgt->reqstd_address;
       struct remote_state *rs;
       char *p, *endbuf;
       int bpsize;
@@ -8348,16 +8348,16 @@ static int
 remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			     struct bp_target_info *bp_tgt)
 {
-  CORE_ADDR addr;
+  CORE_ADDR addr = bp_tgt->reqstd_address;
   struct remote_state *rs;
   char *p, *endbuf;
   char *message;
+  int bpsize;
 
   /* The length field should be set to the size of a breakpoint
      instruction, even though we aren't inserting one ourselves.  */
 
-  gdbarch_remote_breakpoint_from_pc
-    (gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
+  gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
 
   if (packet_support (PACKET_Z1) == PACKET_DISABLE)
     return -1;
@@ -8375,9 +8375,9 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
   *(p++) = '1';
   *(p++) = ',';
 
-  addr = remote_address_masked (bp_tgt->placed_address);
+  addr = remote_address_masked (addr);
   p += hexnumstr (p, (ULONGEST) addr);
-  xsnprintf (p, endbuf - p, ",%x", bp_tgt->placed_size);
+  xsnprintf (p, endbuf - p, ",%x", bpsize);
 
   if (remote_supports_cond_breakpoints (self))
     remote_add_target_side_condition (gdbarch, bp_tgt, p, endbuf);
@@ -8401,6 +8401,8 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
     case PACKET_UNKNOWN:
       return -1;
     case PACKET_OK:
+      bp_tgt->placed_address = addr;
+      bp_tgt->placed_size = bpsize;
       return 0;
     }
   internal_error (__FILE__, __LINE__,

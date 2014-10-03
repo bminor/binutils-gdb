@@ -1690,7 +1690,7 @@ ppc_linux_insert_hw_breakpoint (struct target_ops *self,
   p.version = PPC_DEBUG_CURRENT_VERSION;
   p.trigger_type = PPC_BREAKPOINT_TRIGGER_EXECUTE;
   p.condition_mode = PPC_BREAKPOINT_CONDITION_NONE;
-  p.addr = (uint64_t) bp_tgt->placed_address;
+  p.addr = (uint64_t) (bp_tgt->placed_address = bp_tgt->reqstd_address);
   p.condition_value = 0;
 
   if (bp_tgt->length)

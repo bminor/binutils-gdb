@@ -211,7 +211,7 @@ static int
 ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
 				    struct bp_target_info *bp_tgt)
 {
-  CORE_ADDR addr = bp_tgt->placed_address;
+  CORE_ADDR addr = bp_tgt->reqstd_address;
   const unsigned char *bp;
   int val;
   int bplen;
