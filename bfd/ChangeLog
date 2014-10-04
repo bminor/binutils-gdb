@@ -1,3 +1,16 @@
+2014-10-04  Alan Modra  <amodra@gmail.com>
+
+	PR 17447
+	* elf-bfd.h (struct eh_cie_fde): Comment re NULL u.fde.cie_inf.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Mark zero address
+	range FDEs for discarding.
+	(vma_compare): Sort on range after address.
+	(_bfd_elf_gc_mark_fdes): Test for NULL u.fde.cie_inf.
+	(_bfd_elf_discard_section_eh_frame): Likewise.  Write "FDE" in
+	error message rather than "fde".
+	(_bfd_elf_write_section_eh_frame_hdr): Write "PC" and "FDE" in
+	error message.
+
 2014-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17440

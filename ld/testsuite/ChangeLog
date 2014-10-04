@@ -1,3 +1,13 @@
+2014-10-04  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/eh1.s: Don't create FDEs with zero address ranges.
+	* ld-elf/eh3.s: Likewise.
+	* ld-elf/eh1.d, * ld-elf/eh2.d, * ld-elf/eh3.d: Adjust.
+	* ld-mips-elf/eh-frame1-n32.d: Warning match update.
+	* ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* ld-mips-elf/eh-frame2-n32.d: Likewise.
+	* ld-mips-elf/eh-frame2-n64.d: Likewise.
+
 2014-09-22  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/lto.exp: Use both --print-file-name and --print-prog-name
@@ -534,7 +544,7 @@
 
 2014-06-09  Ryan Mansfield  <rmansfield@qnx.com>
 
-        * config/default.exp (GASP): Remove.
+	* config/default.exp (GASP): Remove.
 
 2014-06-03  Alan Modra  <amodra@gmail.com>
 
