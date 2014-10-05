@@ -60,11 +60,18 @@ static const struct objfile_data *mips_pdr_data;
 
 static struct type *mips_register_type (struct gdbarch *gdbarch, int regnum);
 
-static int mips32_instruction_has_delay_slot (struct gdbarch *, CORE_ADDR);
-static int micromips_instruction_has_delay_slot (struct gdbarch *, CORE_ADDR,
-						 int);
-static int mips16_instruction_has_delay_slot (struct gdbarch *, CORE_ADDR,
-					      int);
+static int mips32_instruction_has_delay_slot (struct gdbarch *gdbarch,
+					      ULONGEST inst);
+static int micromips_instruction_has_delay_slot (ULONGEST insn, int mustbe32);
+static int mips16_instruction_has_delay_slot (unsigned short inst,
+					      int mustbe32);
+
+static int mips32_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch,
+					     CORE_ADDR addr);
+static int micromips_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch,
+						CORE_ADDR addr, int mustbe32);
+static int mips16_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch,
+					     CORE_ADDR addr, int mustbe32);
 
 /* A useful bit in the CP0 status register (MIPS_PS_REGNUM).  */
 /* This bit is set if we are emulating 32-bit FPRs on a 64-bit chip.  */
@@ -2256,6 +2263,48 @@ mips_next_pc (struct frame_info *frame, CORE_ADDR pc)
     return mips32_next_pc (frame, pc);
 }
 
+/* Return non-zero if the MIPS16 instruction INSN is a compact branch
+   or jump.  */
+
+static int
+mips16_instruction_is_compact_branch (unsigned short insn)
+{
+  switch (insn & 0xf800)
+    {
+    case 0xe800:
+      return (insn & 0x009f) == 0x80;	/* JALRC/JRC */
+    case 0x6000:
+      return (insn & 0x0600) == 0;	/* BTNEZ/BTEQZ */
+    case 0x2800:			/* BNEZ */
+    case 0x2000:			/* BEQZ */
+    case 0x1000:			/* B */
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+/* Return non-zero if the microMIPS instruction INSN is a compact branch
+   or jump.  */
+
+static int
+micromips_instruction_is_compact_branch (unsigned short insn)
+{
+  switch (micromips_op (insn))
+    {
+    case 0x11:			/* POOL16C: bits 010001 */
+      return (b5s5_op (insn) == 0x18
+				/* JRADDIUSP: bits 010001 11000 */
+	      || b5s5_op (insn) == 0xd);
+				/* JRC: bits 010011 01101 */
+    case 0x10:			/* POOL32I: bits 010000 */
+      return (b5s5_op (insn) & 0x1d) == 0x5;
+				/* BEQZC/BNEZC: bits 010000 001x1 */
+    default:
+      return 0;
+    }
+}
+
 struct mips_frame_cache
 {
   CORE_ADDR base;
@@ -2333,6 +2382,10 @@ mips16_scan_prologue (struct gdbarch *gdbarch,
                       struct frame_info *this_frame,
                       struct mips_frame_cache *this_cache)
 {
+  int prev_non_prologue_insn = 0;
+  int this_non_prologue_insn;
+  int non_prologue_insns = 0;
+  CORE_ADDR prev_pc;
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer.  */
   CORE_ADDR sp;
@@ -2343,11 +2396,13 @@ mips16_scan_prologue (struct gdbarch *gdbarch,
   unsigned inst = 0;		/* current instruction */
   unsigned entry_inst = 0;	/* the entry instruction */
   unsigned save_inst = 0;	/* the save instruction */
+  int prev_delay_slot = 0;
+  int in_delay_slot;
   int reg, offset;
 
   int extend_bytes = 0;
-  int prev_extend_bytes;
-  CORE_ADDR end_prologue_addr = 0;
+  int prev_extend_bytes = 0;
+  CORE_ADDR end_prologue_addr;
 
   /* Can be called when there's no process, and hence when there's no
      THIS_FRAME.  */
@@ -2360,9 +2415,16 @@ mips16_scan_prologue (struct gdbarch *gdbarch,
 
   if (limit_pc > start_pc + 200)
     limit_pc = start_pc + 200;
+  prev_pc = start_pc;
 
+  /* Permit at most one non-prologue non-control-transfer instruction
+     in the middle which may have been reordered by the compiler for
+     optimisation.  */
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSN16_SIZE)
     {
+      this_non_prologue_insn = 0;
+      in_delay_slot = 0;
+
       /* Save the previous instruction.  If it's an EXTEND, we'll extract
          the immediate offset extension from it in mips16_get_imm.  */
       prev_inst = inst;
@@ -2452,21 +2514,40 @@ mips16_scan_prologue (struct gdbarch *gdbarch,
 	  if (prev_extend_bytes)		/* extend */
 	    save_inst |= prev_inst << 16;
 	}
-      else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
-	cur_pc += MIPS_INSN16_SIZE;	/* 32-bit instruction */
       else if ((inst & 0xff1c) == 0x6704)	/* move reg,$a0-$a3 */
         {
           /* This instruction is part of the prologue, but we don't
              need to do anything special to handle it.  */
         }
+      else if (mips16_instruction_has_delay_slot (inst, 0))
+						/* JAL/JALR/JALX/JR */
+	{
+	  /* The instruction in the delay slot can be a part
+	     of the prologue, so move forward once more.  */
+	  in_delay_slot = 1;
+	  if (mips16_instruction_has_delay_slot (inst, 1))
+						/* JAL/JALX */
+	    {
+	      prev_extend_bytes = MIPS_INSN16_SIZE;
+	      cur_pc += MIPS_INSN16_SIZE;	/* 32-bit instruction */
+	    }
+	}
       else
         {
-          /* This instruction is not an instruction typically found
-             in a prologue, so we must have reached the end of the
-             prologue.  */
-          if (end_prologue_addr == 0)
-            end_prologue_addr = cur_pc - prev_extend_bytes;
+	  this_non_prologue_insn = 1;
         }
+
+      non_prologue_insns += this_non_prologue_insn;
+
+      /* A jump or branch, or enough non-prologue insns seen?  If so,
+         then we must have reached the end of the prologue by now.  */
+      if (prev_delay_slot || non_prologue_insns > 1
+	  || mips16_instruction_is_compact_branch (inst))
+	break;
+
+      prev_non_prologue_insn = this_non_prologue_insn;
+      prev_delay_slot = in_delay_slot;
+      prev_pc = cur_pc - prev_extend_bytes;
     }
 
   /* The entry instruction is typically the first instruction in a function,
@@ -2619,11 +2700,12 @@ mips16_scan_prologue (struct gdbarch *gdbarch,
         = this_cache->saved_regs[gdbarch_num_regs (gdbarch) + MIPS_RA_REGNUM];
     }
 
-  /* If we didn't reach the end of the prologue when scanning the function
-     instructions, then set end_prologue_addr to the address of the
-     instruction immediately after the last one we scanned.  */
-  if (end_prologue_addr == 0)
-    end_prologue_addr = cur_pc;
+  /* Set end_prologue_addr to the address of the instruction immediately
+     after the last one we scanned.  Unless the last one looked like a
+     non-prologue instruction (and we looked ahead), in which case use
+     its address instead.  */
+  end_prologue_addr = (prev_non_prologue_insn || prev_delay_slot
+		       ? prev_pc : cur_pc - prev_extend_bytes);
 
   return end_prologue_addr;
 }
@@ -2760,7 +2842,7 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 			 struct frame_info *this_frame,
 			 struct mips_frame_cache *this_cache)
 {
-  CORE_ADDR end_prologue_addr = 0;
+  CORE_ADDR end_prologue_addr;
   int prev_non_prologue_insn = 0;
   int frame_reg = MIPS_SP_REGNUM;
   int this_non_prologue_insn;
@@ -2768,6 +2850,8 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
   long frame_offset = 0;	/* Size of stack frame.  */
   long frame_adjust = 0;	/* Offset of FP from SP.  */
   CORE_ADDR frame_addr = 0;	/* Value of $30, used as frame pointer.  */
+  int prev_delay_slot = 0;
+  int in_delay_slot;
   CORE_ADDR prev_pc;
   CORE_ADDR cur_pc;
   ULONGEST insn;		/* current instruction */
@@ -2804,6 +2888,7 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += loc)
     {
       this_non_prologue_insn = 0;
+      in_delay_slot = 0;
       sp_adj = 0;
       loc = 0;
       insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, cur_pc, NULL);
@@ -2956,9 +3041,15 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 	      break;
 
 	    default:
-	      this_non_prologue_insn = 1;
+	      /* The instruction in the delay slot can be a part
+	         of the prologue, so move forward once more.  */
+	      if (micromips_instruction_has_delay_slot (insn, 0))
+		in_delay_slot = 1;
+	      else
+		this_non_prologue_insn = 1;
 	      break;
 	    }
+	  insn >>= 16;
 	  break;
 
 	/* 16-bit instructions.  */
@@ -3013,7 +3104,12 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 	      break;
 
 	    default:
-	      this_non_prologue_insn = 1;
+	      /* The instruction in the delay slot can be a part
+	         of the prologue, so move forward once more.  */
+	      if (micromips_instruction_has_delay_slot (insn << 16, 0))
+		in_delay_slot = 1;
+	      else
+		this_non_prologue_insn = 1;
 	      break;
 	    }
 	  break;
@@ -3022,13 +3118,16 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 	frame_offset -= sp_adj;
 
       non_prologue_insns += this_non_prologue_insn;
-      /* Enough non-prologue insns seen or positive stack adjustment? */
-      if (end_prologue_addr == 0 && (non_prologue_insns > 1 || sp_adj > 0))
-	{
-	  end_prologue_addr = prev_non_prologue_insn ? prev_pc : cur_pc;
-	  break;
-	}
+
+      /* A jump or branch, enough non-prologue insns seen or positive
+         stack adjustment?  If so, then we must have reached the end
+         of the prologue by now.  */
+      if (prev_delay_slot || non_prologue_insns > 1 || sp_adj > 0
+	  || micromips_instruction_is_compact_branch (insn))
+	break;
+
       prev_non_prologue_insn = this_non_prologue_insn;
+      prev_delay_slot = in_delay_slot;
       prev_pc = cur_pc;
     }
 
@@ -3046,13 +3145,12 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 	= this_cache->saved_regs[gdbarch_num_regs (gdbarch) + MIPS_RA_REGNUM];
     }
 
-  /* If we didn't reach the end of the prologue when scanning the function
-     instructions, then set end_prologue_addr to the address of the
-     instruction immediately after the last one we scanned.  Unless the
-     last one looked like a non-prologue instruction (and we looked ahead),
-     in which case use its address instead.  */
-  if (end_prologue_addr == 0)
-    end_prologue_addr = prev_non_prologue_insn ? prev_pc : cur_pc;
+  /* Set end_prologue_addr to the address of the instruction immediately
+     after the last one we scanned.  Unless the last one looked like a
+     non-prologue instruction (and we looked ahead), in which case use
+     its address instead.  */
+  end_prologue_addr
+    = prev_non_prologue_insn || prev_delay_slot ? prev_pc : cur_pc;
 
   return end_prologue_addr;
 }
@@ -3200,17 +3298,22 @@ mips32_scan_prologue (struct gdbarch *gdbarch,
                       struct frame_info *this_frame,
                       struct mips_frame_cache *this_cache)
 {
-  CORE_ADDR cur_pc;
+  int prev_non_prologue_insn;
+  int this_non_prologue_insn;
+  int non_prologue_insns;
   CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for
 			       frame-pointer.  */
+  int prev_delay_slot;
+  CORE_ADDR prev_pc;
+  CORE_ADDR cur_pc;
   CORE_ADDR sp;
   long frame_offset;
   int  frame_reg = MIPS_SP_REGNUM;
 
-  CORE_ADDR end_prologue_addr = 0;
+  CORE_ADDR end_prologue_addr;
   int seen_sp_adjust = 0;
   int load_immediate_bytes = 0;
-  int in_delay_slot = 0;
+  int in_delay_slot;
   int regsize_is_64_bits = (mips_abi_regsize (gdbarch) == 8);
 
   /* Can be called when there's no process, and hence when there's no
@@ -3226,12 +3329,22 @@ mips32_scan_prologue (struct gdbarch *gdbarch,
     limit_pc = start_pc + 200;
 
 restart:
+  prev_non_prologue_insn = 0;
+  non_prologue_insns = 0;
+  prev_delay_slot = 0;
+  prev_pc = start_pc;
 
+  /* Permit at most one non-prologue non-control-transfer instruction
+     in the middle which may have been reordered by the compiler for
+     optimisation.  */
   frame_offset = 0;
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSN32_SIZE)
     {
       unsigned long inst, high_word, low_word;
       int reg;
+
+      this_non_prologue_insn = 0;
+      in_delay_slot = 0;
 
       /* Fetch the instruction.  */
       inst = (unsigned long) mips_fetch_instruction (gdbarch, ISA_MIPS,
@@ -3349,6 +3462,7 @@ restart:
          initialize a local variable, so we accept them only before
          a stack adjustment instruction was seen.  */
       else if (!seen_sp_adjust
+	       && !prev_delay_slot
 	       && (high_word == 0x3c01 /* lui $at,n */
 		   || high_word == 0x3c08 /* lui $t0,n */
 		   || high_word == 0x3421 /* ori $at,$at,n */
@@ -3357,31 +3471,32 @@ restart:
 		   || high_word == 0x3408 /* ori $t0,$zero,n */
 		  ))
 	{
-	  if (end_prologue_addr == 0)
-	    load_immediate_bytes += MIPS_INSN32_SIZE;		/* FIXME!  */
+	  load_immediate_bytes += MIPS_INSN32_SIZE;		/* FIXME!  */
 	}
+      /* Check for branches and jumps.  The instruction in the delay
+         slot can be a part of the prologue, so move forward once more.  */
+      else if (mips32_instruction_has_delay_slot (gdbarch, inst))
+	{
+	  in_delay_slot = 1;
+	}
+      /* This instruction is not an instruction typically found
+         in a prologue, so we must have reached the end of the
+         prologue.  */
       else
 	{
-	  /* This instruction is not an instruction typically found
-	     in a prologue, so we must have reached the end of the
-	     prologue.  */
-	  /* FIXME: brobecker/2004-10-10: Can't we just break out of this
-	     loop now?  Why would we need to continue scanning the function
-	     instructions?  */
-	  if (end_prologue_addr == 0)
-	    end_prologue_addr = cur_pc;
-
-	  /* Check for branches and jumps.  For now, only jump to
-	     register are caught (i.e. returns).  */
-	  if ((itype_op (inst) & 0x07) == 0 && rtype_funct (inst) == 8)
-	    in_delay_slot = 1;
+	  this_non_prologue_insn = 1;
 	}
 
-      /* If the previous instruction was a jump, we must have reached
-	 the end of the prologue by now.  Stop scanning so that we do
-	 not go past the function return.  */
-      if (in_delay_slot)
+      non_prologue_insns += this_non_prologue_insn;
+
+      /* A jump or branch, or enough non-prologue insns seen?  If so,
+         then we must have reached the end of the prologue by now.  */
+      if (prev_delay_slot || non_prologue_insns > 1)
 	break;
+
+      prev_non_prologue_insn = this_non_prologue_insn;
+      prev_delay_slot = in_delay_slot;
+      prev_pc = cur_pc;
     }
 
   if (this_cache != NULL)
@@ -3399,14 +3514,12 @@ restart:
 				 + MIPS_RA_REGNUM];
     }
 
-  /* If we didn't reach the end of the prologue when scanning the function
-     instructions, then set end_prologue_addr to the address of the
-     instruction immediately after the last one we scanned.  */
-  /* brobecker/2004-10-10: I don't think this would ever happen, but
-     we may as well be careful and do our best if we have a null
-     end_prologue_addr.  */
-  if (end_prologue_addr == 0)
-    end_prologue_addr = cur_pc;
+  /* Set end_prologue_addr to the address of the instruction immediately
+     after the last one we scanned.  Unless the last one looked like a
+     non-prologue instruction (and we looked ahead), in which case use
+     its address instead.  */
+  end_prologue_addr
+    = prev_non_prologue_insn || prev_delay_slot ? prev_pc : cur_pc;
      
   /* In a frameless function, we might have incorrectly
      skipped some load immediate instructions.  Undo the skipping
@@ -6370,11 +6483,11 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
   int size;
 
   if ((mips_pc_is_mips (pc)
-       && !mips32_instruction_has_delay_slot (gdbarch, pc))
+       && !mips32_insn_at_pc_has_delay_slot (gdbarch, pc))
       || (mips_pc_is_micromips (gdbarch, pc)
-	  && !micromips_instruction_has_delay_slot (gdbarch, pc, 0))
+	  && !micromips_insn_at_pc_has_delay_slot (gdbarch, pc, 0))
       || (mips_pc_is_mips16 (gdbarch, pc)
-	  && !mips16_instruction_has_delay_slot (gdbarch, pc, 0)))
+	  && !mips16_insn_at_pc_has_delay_slot (gdbarch, pc, 0)))
     return 0;
 
   isa = mips_pc_isa (gdbarch, pc);
@@ -6964,22 +7077,16 @@ mips_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
     *kindptr = 4;
 }
 
-/* Return non-zero if the ADDR instruction has a branch delay slot
-   (i.e. it is a jump or branch instruction).  This function is based
-   on mips32_next_pc.  */
+/* Return non-zero if the standard MIPS instruction INST has a branch
+   delay slot (i.e. it is a jump or branch instruction).  This function
+   is based on mips32_next_pc.  */
 
 static int
-mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr)
+mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, ULONGEST inst)
 {
-  unsigned long inst;
-  int status;
   int op;
   int rs;
   int rt;
-
-  inst = mips_fetch_instruction (gdbarch, ISA_MIPS, addr, &status);
-  if (status)
-    return 0;
 
   op = itype_op (inst);
   if ((inst & 0xe0000000) != 0)
@@ -7020,13 +7127,90 @@ mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr)
       }
 }
 
-/* Return non-zero if the ADDR instruction, which must be a 32-bit
-   instruction if MUSTBE32 is set or can be any instruction otherwise,
-   has a branch delay slot (i.e. it is a non-compact jump instruction).  */
+/* Return non-zero if a standard MIPS instruction at ADDR has a branch
+   delay slot (i.e. it is a jump or branch instruction).  */
 
 static int
-micromips_instruction_has_delay_slot (struct gdbarch *gdbarch,
-				      CORE_ADDR addr, int mustbe32)
+mips32_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  ULONGEST insn;
+  int status;
+
+  insn = mips_fetch_instruction (gdbarch, ISA_MIPS, addr, &status);
+  if (status)
+    return 0;
+
+  return mips32_instruction_has_delay_slot (gdbarch, insn);
+}
+
+/* Return non-zero if the microMIPS instruction INSN, comprising the
+   16-bit major opcode word in the high 16 bits and any second word
+   in the low 16 bits, has a branch delay slot (i.e. it is a non-compact
+   jump or branch instruction).  The instruction must be 32-bit if
+   MUSTBE32 is set or can be any instruction otherwise.  */
+
+static int
+micromips_instruction_has_delay_slot (ULONGEST insn, int mustbe32)
+{
+  ULONGEST major = insn >> 16;
+
+  switch (micromips_op (major))
+    {
+    /* 16-bit instructions.  */
+    case 0x33:			/* B16: bits 110011 */
+    case 0x2b:			/* BNEZ16: bits 101011 */
+    case 0x23:			/* BEQZ16: bits 100011 */
+      return !mustbe32;
+    case 0x11:			/* POOL16C: bits 010001 */
+      return (!mustbe32
+	      && ((b5s5_op (major) == 0xc
+				/* JR16: bits 010001 01100 */
+		  || (b5s5_op (major) & 0x1e) == 0xe)));
+				/* JALR16, JALRS16: bits 010001 0111x */
+    /* 32-bit instructions.  */
+    case 0x3d:			/* JAL: bits 111101 */
+    case 0x3c:			/* JALX: bits 111100 */
+    case 0x35:			/* J: bits 110101 */
+    case 0x2d:			/* BNE: bits 101101 */
+    case 0x25:			/* BEQ: bits 100101 */
+    case 0x1d:			/* JALS: bits 011101 */
+      return 1;
+    case 0x10:			/* POOL32I: bits 010000 */
+      return ((b5s5_op (major) & 0x1c) == 0x0
+				/* BLTZ, BLTZAL, BGEZ, BGEZAL: 010000 000xx */
+	      || (b5s5_op (major) & 0x1d) == 0x4
+				/* BLEZ, BGTZ: bits 010000 001x0 */
+	      || (b5s5_op (major) & 0x1d) == 0x11
+				/* BLTZALS, BGEZALS: bits 010000 100x1 */
+	      || ((b5s5_op (major) & 0x1e) == 0x14
+		  && (major & 0x3) == 0x0)
+				/* BC2F, BC2T: bits 010000 1010x xxx00 */
+	      || (b5s5_op (major) & 0x1e) == 0x1a
+				/* BPOSGE64, BPOSGE32: bits 010000 1101x */
+	      || ((b5s5_op (major) & 0x1e) == 0x1c
+		  && (major & 0x3) == 0x0)
+				/* BC1F, BC1T: bits 010000 1110x xxx00 */
+	      || ((b5s5_op (major) & 0x1c) == 0x1c
+		  && (major & 0x3) == 0x1));
+				/* BC1ANY*: bits 010000 111xx xxx01 */
+    case 0x0:			/* POOL32A: bits 000000 */
+      return (b0s6_op (insn) == 0x3c
+				/* POOL32Axf: bits 000000 ... 111100 */
+	      && (b6s10_ext (insn) & 0x2bf) == 0x3c);
+				/* JALR, JALR.HB: 000000 000x111100 111100 */
+				/* JALRS, JALRS.HB: 000000 010x111100 111100 */
+    default:
+      return 0;
+    }
+}
+
+/* Return non-zero if a microMIPS instruction at ADDR has a branch delay
+   slot (i.e. it is a non-compact jump instruction).  The instruction
+   must be 32-bit if MUSTBE32 is set or can be any instruction otherwise.  */
+
+static int
+micromips_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch,
+				     CORE_ADDR addr, int mustbe32)
 {
   ULONGEST insn;
   int status;
@@ -7034,62 +7218,28 @@ micromips_instruction_has_delay_slot (struct gdbarch *gdbarch,
   insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, addr, &status);
   if (status)
     return 0;
-
-				/* 16-bit instructions.  */
-  if ((micromips_op (insn) == 0x11
-				/* POOL16C: bits 010001 */
-       && (b5s5_op (insn) == 0xc
-				/* JR16: bits 010001 01100 */
-	   || (b5s5_op (insn) & 0x1e) == 0xe))
-				/* JALR16, JALRS16: bits 010001 0111x */
-      || (micromips_op (insn) & 0x37) == 0x23
-				/* BEQZ16, BNEZ16: bits 10x011 */
-      || micromips_op (insn) == 0x33)
-				/* B16: bits 110011 */
-    return !mustbe32;
-
-				/* 32-bit instructions.  */
-  if (micromips_op (insn) == 0x0)
-				/* POOL32A: bits 000000 */
+  insn <<= 16;
+  if (mips_insn_size (ISA_MICROMIPS, insn) == 2 * MIPS_INSN16_SIZE)
     {
-      insn <<= 16;
       insn |= mips_fetch_instruction (gdbarch, ISA_MICROMIPS, addr, &status);
       if (status)
 	return 0;
-      return b0s6_op (insn) == 0x3c
-				/* POOL32Axf: bits 000000 ... 111100 */
-	     && (b6s10_ext (insn) & 0x2bf) == 0x3c;
-				/* JALR, JALR.HB: 000000 000x111100 111100 */
-				/* JALRS, JALRS.HB: 000000 010x111100 111100 */
     }
 
-  return (micromips_op (insn) == 0x10
-				/* POOL32I: bits 010000 */
-	  && ((b5s5_op (insn) & 0x1c) == 0x0
-				/* BLTZ, BLTZAL, BGEZ, BGEZAL: 010000 000xx */
-	      || (b5s5_op (insn) & 0x1d) == 0x4
-				/* BLEZ, BGTZ: bits 010000 001x0 */
-	      || (b5s5_op (insn) & 0x1d) == 0x11
-				/* BLTZALS, BGEZALS: bits 010000 100x1 */
-	      || ((b5s5_op (insn) & 0x1e) == 0x14
-		  && (insn & 0x3) == 0x0)
-				/* BC2F, BC2T: bits 010000 1010x xxx00 */
-	      || (b5s5_op (insn) & 0x1e) == 0x1a
-				/* BPOSGE64, BPOSGE32: bits 010000 1101x */
-	      || ((b5s5_op (insn) & 0x1e) == 0x1c
-		  && (insn & 0x3) == 0x0)
-				/* BC1F, BC1T: bits 010000 1110x xxx00 */
-	      || ((b5s5_op (insn) & 0x1c) == 0x1c
-		  && (insn & 0x3) == 0x1)))
-				/* BC1ANY*: bits 010000 111xx xxx01 */
-	 || (micromips_op (insn) & 0x1f) == 0x1d
-				/* JALS, JAL: bits x11101 */
-	 || (micromips_op (insn) & 0x37) == 0x25
-				/* BEQ, BNE: bits 10x101 */
-	 || micromips_op (insn) == 0x35
-				/* J: bits 110101 */
-	 || micromips_op (insn) == 0x3c;
-				/* JALX: bits 111100 */
+  return micromips_instruction_has_delay_slot (insn, mustbe32);
+}
+
+/* Return non-zero if the MIPS16 instruction INST, which must be
+   a 32-bit instruction if MUSTBE32 is set or can be any instruction
+   otherwise, has a branch delay slot (i.e. it is a non-compact jump
+   instruction).  This function is based on mips16_next_pc.  */
+
+static int
+mips16_instruction_has_delay_slot (unsigned short inst, int mustbe32)
+{
+  if ((inst & 0xf89f) == 0xe800)	/* JR/JALR (16-bit instruction)  */
+    return !mustbe32;
+  return (inst & 0xf800) == 0x1800;	/* JAL/JALX (32-bit instruction)  */
 }
 
 /* Return non-zero if a MIPS16 instruction at ADDR has a branch delay
@@ -7097,19 +7247,17 @@ micromips_instruction_has_delay_slot (struct gdbarch *gdbarch,
    must be 32-bit if MUSTBE32 is set or can be any instruction otherwise.  */
 
 static int
-mips16_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr,
-				   int mustbe32)
+mips16_insn_at_pc_has_delay_slot (struct gdbarch *gdbarch,
+				  CORE_ADDR addr, int mustbe32)
 {
-  unsigned short inst;
+  unsigned short insn;
   int status;
 
-  inst = mips_fetch_instruction (gdbarch, ISA_MIPS16, addr, &status);
+  insn = mips_fetch_instruction (gdbarch, ISA_MIPS16, addr, &status);
   if (status)
     return 0;
 
-  if ((inst & 0xf89f) == 0xe800)	/* JR/JALR (16-bit instruction)  */
-    return !mustbe32;
-  return (inst & 0xf800) == 0x1800;	/* JAL/JALX (32-bit instruction)  */
+  return mips16_instruction_has_delay_slot (insn, mustbe32);
 }
 
 /* Calculate the starting address of the MIPS memory segment BPADDR is in.
@@ -7203,12 +7351,12 @@ mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
       /* If the previous instruction has a branch delay slot, we have
          to move the breakpoint to the branch instruction. */
       prev_addr = bpaddr - 4;
-      if (mips32_instruction_has_delay_slot (gdbarch, prev_addr))
+      if (mips32_insn_at_pc_has_delay_slot (gdbarch, prev_addr))
 	bpaddr = prev_addr;
     }
   else
     {
-      int (*instruction_has_delay_slot) (struct gdbarch *, CORE_ADDR, int);
+      int (*insn_at_pc_has_delay_slot) (struct gdbarch *, CORE_ADDR, int);
       CORE_ADDR addr, jmpaddr;
       int i;
 
@@ -7222,9 +7370,9 @@ mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
          2 bytes, so the idea is the same.
          FIXME: We have to assume that bpaddr is not the second half
          of an extended instruction.  */
-      instruction_has_delay_slot = (mips_pc_is_micromips (gdbarch, bpaddr)
-				     ? micromips_instruction_has_delay_slot
-				     : mips16_instruction_has_delay_slot);
+      insn_at_pc_has_delay_slot = (mips_pc_is_micromips (gdbarch, bpaddr)
+				   ? micromips_insn_at_pc_has_delay_slot
+				   : mips16_insn_at_pc_has_delay_slot);
 
       jmpaddr = 0;
       addr = bpaddr;
@@ -7233,12 +7381,12 @@ mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
 	  if (unmake_compact_addr (addr) == boundary)
 	    break;
 	  addr -= MIPS_INSN16_SIZE;
-	  if (i == 1 && instruction_has_delay_slot (gdbarch, addr, 0))
+	  if (i == 1 && insn_at_pc_has_delay_slot (gdbarch, addr, 0))
 	    /* Looks like a JR/JALR at [target-1], but it could be
 	       the second word of a previous JAL/JALX, so record it
 	       and check back one more.  */
 	    jmpaddr = addr;
-	  else if (i > 1 && instruction_has_delay_slot (gdbarch, addr, 1))
+	  else if (i > 1 && insn_at_pc_has_delay_slot (gdbarch, addr, 1))
 	    {
 	      if (i == 2)
 		/* Looks like a JAL/JALX at [target-2], but it could also

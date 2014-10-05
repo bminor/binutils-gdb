@@ -1,5 +1,28 @@
 2014-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips16_instruction_is_compact_branch): New
+	function.
+	(micromips_instruction_is_compact_branch): Likewise.
+	(mips16_scan_prologue): Terminate scanning upon seeing a branch
+	or a compact jump, reaching a jump delay slot, or seeing a
+	second non-prologue instruction.
+	(micromips_scan_prologue): Also terminate scanning upon seeing a
+	compact branch or jump, or reaching a branch or jump delay slot.
+	(mips32_scan_prologue): Terminate scanning upon reaching a branch
+	or jump delay slot, or seeing a second non-prologue instruction.
+	(mips32_instruction_has_delay_slot): Retain instruction
+	examination code only, update arguments accordingly and move
+	instruction fetch pieces to...
+	(mips32_insn_at_pc_has_delay_slot): ... this new function.
+	(micromips_instruction_has_delay_slot): Likewise and to...
+	(micromips_insn_at_pc_has_delay_slot): ... this new function.
+	(mips16_instruction_has_delay_slot): Likewise and to...
+	(mips16_insn_at_pc_has_delay_slot): ... this new function.
+	(mips_single_step_through_delay): Update accordingly.
+	(mips_adjust_breakpoint_address): Likewise.
+
+2014-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (micromips_instruction_has_delay_slot): When
 	!mustbe32 also return 1 for 32-bit instructions.
 	(mips16_instruction_has_delay_slot): Likewise.  Add an
