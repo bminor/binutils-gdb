@@ -2126,10 +2126,13 @@ unpack_mips16 (struct gdbarch *gdbarch, CORE_ADDR pc,
 }
 
 
+/* Calculate the destination of a branch whose 16-bit opcode word is at PC,
+   and having a signed 16-bit OFFSET.  */
+
 static CORE_ADDR
 add_offset_16 (CORE_ADDR pc, int offset)
 {
-  return ((offset << 2) | ((pc + 2) & (~(CORE_ADDR) 0x0fffffff)));
+  return pc + (offset << 1) + 2;
 }
 
 static CORE_ADDR
@@ -2144,7 +2147,7 @@ extended_mips16_next_pc (struct frame_info *frame, CORE_ADDR pc,
       {
 	struct upk_mips16 upk;
 	unpack_mips16 (gdbarch, pc, extension, insn, itype, &upk);
-	pc += (upk.offset << 1) + 2;
+	pc = add_offset_16 (pc, upk.offset);
 	break;
       }
     case 3:			/* JAL , JALX - Watch out, these are 32 bit
@@ -2152,7 +2155,7 @@ extended_mips16_next_pc (struct frame_info *frame, CORE_ADDR pc,
       {
 	struct upk_mips16 upk;
 	unpack_mips16 (gdbarch, pc, extension, insn, jalxtype, &upk);
-	pc = add_offset_16 (pc, upk.offset);
+	pc = ((pc + 2) & (~(CORE_ADDR) 0x0fffffff)) | (upk.offset << 2);
 	if ((insn >> 10) & 0x01)	/* Exchange mode */
 	  pc = pc & ~0x01;	/* Clear low bit, indicate 32 bit mode.  */
 	else
@@ -2166,7 +2169,7 @@ extended_mips16_next_pc (struct frame_info *frame, CORE_ADDR pc,
 	unpack_mips16 (gdbarch, pc, extension, insn, ritype, &upk);
 	reg = get_frame_register_signed (frame, mips_reg3_to_reg[upk.regx]);
 	if (reg == 0)
-	  pc += (upk.offset << 1) + 2;
+	  pc = add_offset_16 (pc, upk.offset);
 	else
 	  pc += 2;
 	break;
@@ -2178,7 +2181,7 @@ extended_mips16_next_pc (struct frame_info *frame, CORE_ADDR pc,
 	unpack_mips16 (gdbarch, pc, extension, insn, ritype, &upk);
 	reg = get_frame_register_signed (frame, mips_reg3_to_reg[upk.regx]);
 	if (reg != 0)
-	  pc += (upk.offset << 1) + 2;
+	  pc = add_offset_16 (pc, upk.offset);
 	else
 	  pc += 2;
 	break;
@@ -2192,8 +2195,7 @@ extended_mips16_next_pc (struct frame_info *frame, CORE_ADDR pc,
 	reg = get_frame_register_signed (frame, 24);  /* Test register is 24 */
 	if (((upk.regx == 0) && (reg == 0))	/* BTEZ */
 	    || ((upk.regx == 1) && (reg != 0)))	/* BTNEZ */
-	  /* pc = add_offset_16(pc,upk.offset) ; */
-	  pc += (upk.offset << 1) + 2;
+	  pc = add_offset_16 (pc, upk.offset);
 	else
 	  pc += 2;
 	break;

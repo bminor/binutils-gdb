@@ -1,5 +1,11 @@
 2014-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (add_offset_16): Rewrite to implement what the
+	name implies.
+	(extended_mips16_next_pc): Update accordingly.
+
+2014-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (mips16_instruction_is_compact_branch): New
 	function.
 	(micromips_instruction_is_compact_branch): Likewise.
