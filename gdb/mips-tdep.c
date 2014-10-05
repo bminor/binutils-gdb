@@ -7035,17 +7035,18 @@ micromips_instruction_has_delay_slot (struct gdbarch *gdbarch,
   if (status)
     return 0;
 
-  if (!mustbe32)		/* 16-bit instructions.  */
-    return (micromips_op (insn) == 0x11
+				/* 16-bit instructions.  */
+  if ((micromips_op (insn) == 0x11
 				/* POOL16C: bits 010001 */
-	    && (b5s5_op (insn) == 0xc
+       && (b5s5_op (insn) == 0xc
 				/* JR16: bits 010001 01100 */
-		|| (b5s5_op (insn) & 0x1e) == 0xe))
+	   || (b5s5_op (insn) & 0x1e) == 0xe))
 				/* JALR16, JALRS16: bits 010001 0111x */
-	   || (micromips_op (insn) & 0x37) == 0x23
+      || (micromips_op (insn) & 0x37) == 0x23
 				/* BEQZ16, BNEZ16: bits 10x011 */
-	   || micromips_op (insn) == 0x33;
+      || micromips_op (insn) == 0x33)
 				/* B16: bits 110011 */
+    return !mustbe32;
 
 				/* 32-bit instructions.  */
   if (micromips_op (insn) == 0x0)
@@ -7091,6 +7092,10 @@ micromips_instruction_has_delay_slot (struct gdbarch *gdbarch,
 				/* JALX: bits 111100 */
 }
 
+/* Return non-zero if a MIPS16 instruction at ADDR has a branch delay
+   slot (i.e. it is a non-compact jump instruction).  The instruction
+   must be 32-bit if MUSTBE32 is set or can be any instruction otherwise.  */
+
 static int
 mips16_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr,
 				   int mustbe32)
@@ -7102,8 +7107,8 @@ mips16_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr,
   if (status)
     return 0;
 
-  if (!mustbe32)
-    return (inst & 0xf89f) == 0xe800;	/* JR/JALR (16-bit instruction)  */
+  if ((inst & 0xf89f) == 0xe800)	/* JR/JALR (16-bit instruction)  */
+    return !mustbe32;
   return (inst & 0xf800) == 0x1800;	/* JAL/JALX (32-bit instruction)  */
 }
 

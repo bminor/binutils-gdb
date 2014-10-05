@@ -1,3 +1,10 @@
+2014-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (micromips_instruction_has_delay_slot): When
+	!mustbe32 also return 1 for 32-bit instructions.
+	(mips16_instruction_has_delay_slot): Likewise.  Add an
+	explanatory comment.
+
 2014-10-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfread.c (elf_symtab_read): Also mark solib trampoline minimal
