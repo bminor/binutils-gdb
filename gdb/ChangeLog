@@ -1,3 +1,8 @@
+2014-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/common-defs.h: Move <stdarg.h> #include ahead of
+	<stdio.h> #include.
+
 2014-11-14  Pedro Alves  <palves@redhat.com>
 
 	* charset.c [PHONY_ICONV && !EILSEQ] (EILSEQ): Don't define.
