@@ -523,8 +523,16 @@ ada_typedef_target_type (struct type *type)
 static const char *
 ada_unqualified_name (const char *decoded_name)
 {
-  const char *result = strrchr (decoded_name, '.');
+  const char *result;
+  
+  /* If the decoded name starts with '<', it means that the encoded
+     name does not follow standard naming conventions, and thus that
+     it is not your typical Ada symbol name.  Trying to unqualify it
+     is therefore pointless and possibly erroneous.  */
+  if (decoded_name[0] == '<')
+    return decoded_name;
 
+  result = strrchr (decoded_name, '.');
   if (result != NULL)
     result++;                   /* Skip the dot...  */
   else

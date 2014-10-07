@@ -1,5 +1,10 @@
 2014-11-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_unqualified_name): Return DECODED_NAME if
+	it starts with '<'.
+
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_is_redundant_range_encoding): New function.
 	(ada_is_redundant_index_type_desc): New function.
 	(to_fixed_array_type): Ignore parallel XA type if redundant.
