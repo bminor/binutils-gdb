@@ -46,5 +46,6 @@
 #include "print-utils.h"
 #include "common-debug.h"
 #include "cleanups.h"
+#include "common-exceptions.h"
 
 #endif /* COMMON_DEFS_H */

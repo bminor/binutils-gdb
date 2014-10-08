@@ -1,5 +1,10 @@
 2014-10-08  Gary Benson  <gbenson@redhat.com>
 
+	* common/common-defs.h: Include common-exceptions.h.
+	* exceptions.h: Do not include common-exceptions.h.
+
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
 	* common/common-defs.h: Include cleanups.h.
 	* common/common-exceptions.c: Do not include cleanups.h.
 	* utils.h: Likewise.

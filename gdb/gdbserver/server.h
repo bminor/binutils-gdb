@@ -124,6 +124,4 @@ extern int handle_target_event (int err, gdb_client_data client_data);
    as large as the largest register set supported by gdbserver.  */
 #define PBUFSIZ 16384
 
-#include "common-exceptions.h"
-
 #endif /* SERVER_H */

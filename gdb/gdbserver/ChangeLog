@@ -1,5 +1,9 @@
 2014-10-08  Gary Benson  <gbenson@redhat.com>
 
+	* server.h: Do not include common-exceptions.h.
+
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
 	* server.h: Do not include cleanups.h.
 
 2014-09-30  James Hogan  <james.hogan@imgtec.com>
