@@ -1,3 +1,11 @@
+2014-10-11  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.threads/thread-find.exp: Don't execute command
+	"info threads".
+	* gdb.threads/attach-into-signal.exp (corefunc): Likewise.
+	* gdb.threads/linux-dp.exp: Don't check the condition
+	$threads_created equals to zero.
+
 2014-10-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/bigcore.exp: Remove references to IRIX.

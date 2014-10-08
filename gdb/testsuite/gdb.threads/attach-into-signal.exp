@@ -102,15 +102,6 @@ proc corefunc { threadtype executable } {
 			# that by peeking at the thread's siginfo.
 			# SIGALRM is 14, SIGSTOP is 19.
 
-			# With remote targets, we need to pull the
-			# thread list explicitly before GDB even knows
-			# about thread 2.
-			set test2 "pull thread list"
-			gdb_test_multiple "info threads" $test2 {
-			    -re "\r\n$gdb_prompt $" {
-			    }
-			}
-
 			set test2 "thread apply 2 print \$_siginfo.si_signo"
 			gdb_test_multiple $test2 $test2 {
 			    -re " = 14\r\n$gdb_prompt $" {
