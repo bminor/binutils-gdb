@@ -125,6 +125,5 @@ extern int handle_target_event (int err, gdb_client_data client_data);
 #define PBUFSIZ 16384
 
 #include "common-exceptions.h"
-#include "cleanups.h"
 
 #endif /* SERVER_H */

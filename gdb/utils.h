@@ -21,7 +21,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "cleanups.h"
 #include "exceptions.h"
 
 extern void initialize_utils (void);

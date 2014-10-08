@@ -1,3 +1,7 @@
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include cleanups.h.
+
 2014-09-30  James Hogan  <james.hogan@imgtec.com>
 
 	* Makefile.in (clean): Add rm -f commands for mips-dsp-linux.c and

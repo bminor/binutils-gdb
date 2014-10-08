@@ -19,7 +19,6 @@
 
 #include "common-defs.h"
 #include "common-exceptions.h"
-#include "cleanups.h"
 
 /* Possible catcher states.  */
 enum catcher_state {
