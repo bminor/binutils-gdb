@@ -33,10 +33,6 @@ gdb_test "disconnect" ".*"
 
 gdbserver_run ""
 
-# Otherwise the breakpoint at 'main' would not cause insert
-# breakpoints during first step.
-delete_breakpoints
-
 set server_pid [exp_pid -i [board_info target fileid]]
 remote_exec target "kill -9 $server_pid"
 

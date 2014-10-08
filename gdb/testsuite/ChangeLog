@@ -1,5 +1,9 @@
 2014-10-11  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.server/server-kill.exp: Remove "delete_breakpoints".
+
+2014-10-11  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.threads/thread-find.exp: Don't execute command
 	"info threads".
 	* gdb.threads/attach-into-signal.exp (corefunc): Likewise.
