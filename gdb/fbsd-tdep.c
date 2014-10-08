@@ -24,9 +24,6 @@
 #include "regset.h"
 #include "gdbthread.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "elf-bfd.h"
 #include "fbsd-tdep.h"
 
