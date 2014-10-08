@@ -4425,7 +4425,6 @@ handle_signal_stop (struct execution_control_state *ecs)
   if (random_signal)
     {
       /* Signal not for debugging purposes.  */
-      int printed = 0;
       struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
       enum gdb_signal stop_signal = ecs->event_thread->suspend.stop_signal;
 
