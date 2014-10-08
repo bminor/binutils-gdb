@@ -21,7 +21,6 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "value.h"
-#include "exceptions.h"
 #include "python-internal.h"
 #include "charset.h"
 #include "gdbcmd.h"

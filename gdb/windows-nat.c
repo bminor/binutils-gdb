@@ -26,7 +26,6 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "target.h"
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "completer.h"

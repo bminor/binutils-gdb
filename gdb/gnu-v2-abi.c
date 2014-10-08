@@ -27,8 +27,6 @@
 #include "gdb-demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "exceptions.h"
-
 #include <ctype.h>
 
 struct cp_abi_ops gnu_v2_abi_ops;

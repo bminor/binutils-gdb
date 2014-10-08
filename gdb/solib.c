@@ -25,7 +25,6 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "target.h"

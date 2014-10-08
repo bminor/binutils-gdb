@@ -33,7 +33,6 @@
 #include "cp-support.h"
 #include "gdb_obstack.h"
 #include <ctype.h>
-#include "exceptions.h"
 #include "gdbcore.h"
 
 extern void _initialize_c_language (void);

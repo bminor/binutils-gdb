@@ -26,7 +26,6 @@
 #include "objfiles.h"
 #include "valprint.h"
 #include "c-lang.h"
-#include "exceptions.h"
 #include "typeprint.h"
 
 static struct cp_abi_ops gnu_v3_abi_ops;

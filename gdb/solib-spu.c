@@ -33,7 +33,6 @@
 #include "observer.h"
 #include "breakpoint.h"
 #include "gdbthread.h"
-#include "exceptions.h"
 #include "gdb_bfd.h"
 
 #include "spu-tdep.h"

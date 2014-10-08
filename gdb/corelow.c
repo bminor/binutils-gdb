@@ -38,7 +38,6 @@
 #include "symfile.h"
 #include "exec.h"
 #include "readline/readline.h"
-#include "exceptions.h"
 #include "solib.h"
 #include "filenames.h"
 #include "progspace.h"

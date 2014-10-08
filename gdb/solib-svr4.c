@@ -43,7 +43,6 @@
 #include "elf-bfd.h"
 #include "exec.h"
 #include "auxv.h"
-#include "exceptions.h"
 #include "gdb_bfd.h"
 #include "probe.h"
 

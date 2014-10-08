@@ -21,7 +21,6 @@
 #include "charset.h"
 #include "block.h"
 #include "frame.h"
-#include "exceptions.h"
 #include "symtab.h"
 #include "stack.h"
 #include "value.h"

@@ -20,7 +20,6 @@
 
 
 #include "defs.h"
-#include "exceptions.h"
 #include "python-internal.h"
 #include "breakpoint.h"
 #include "frame.h"

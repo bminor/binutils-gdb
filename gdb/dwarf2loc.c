@@ -30,7 +30,6 @@
 #include "ax-gdb.h"
 #include "regcache.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "block.h"
 #include "gdbcmd.h"
 

@@ -25,7 +25,6 @@
 #include "regcache.h"
 #include "reggroups.h"
 #include "observer.h"
-#include "exceptions.h"
 #include "remote.h"
 #include "valprint.h"
 #include "regset.h"

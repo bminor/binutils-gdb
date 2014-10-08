@@ -48,7 +48,6 @@
 #include "block.h"
 #include "source.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "user-regs.h"
 
 /* Standard set of definitions for printing, dumping, prefixifying,

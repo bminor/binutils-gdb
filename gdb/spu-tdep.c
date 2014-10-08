@@ -44,7 +44,6 @@
 #include "dwarf2.h"
 #include "dwarf2-frame.h"
 #include "ax.h"
-#include "exceptions.h"
 #include "spu-tdep.h"
 
 

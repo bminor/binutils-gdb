@@ -29,7 +29,6 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "elf/frv.h"
-#include "exceptions.h"
 #include "gdb_bfd.h"
 
 /* Flag which indicates whether internal debug messages should be printed.  */

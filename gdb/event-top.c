@@ -29,7 +29,6 @@
 #include "event-top.h"
 #include "interps.h"
 #include <signal.h>
-#include "exceptions.h"
 #include "cli/cli-script.h"     /* for reset_command_nest_depth */
 #include "main.h"
 #include "gdbthread.h"

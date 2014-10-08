@@ -23,7 +23,6 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "value.h"
-#include "exceptions.h"
 #include "gdbtypes.h"
 #include "objfiles.h"
 #include "language.h"

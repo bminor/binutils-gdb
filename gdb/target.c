@@ -33,7 +33,6 @@
 #include <signal.h>
 #include "regcache.h"
 #include "gdbcore.h"
-#include "exceptions.h"
 #include "target-descriptions.h"
 #include "gdbthread.h"
 #include "solib.h"

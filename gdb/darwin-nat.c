@@ -33,7 +33,6 @@
 #include "event-top.h"
 #include "inf-loop.h"
 #include <sys/stat.h>
-#include "exceptions.h"
 #include "inf-child.h"
 #include "value.h"
 #include "arch-utils.h"

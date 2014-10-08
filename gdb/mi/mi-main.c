@@ -24,7 +24,6 @@
 #include "target.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "exceptions.h"
 #include "top.h"
 #include "gdbthread.h"
 #include "mi-cmds.h"

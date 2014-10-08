@@ -29,7 +29,6 @@
 #include "block.h"
 #include "complaints.h"
 #include "gdbtypes.h"
-#include "exceptions.h"
 #include "expression.h"
 #include "value.h"
 #include "cp-abi.h"

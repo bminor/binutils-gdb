@@ -55,7 +55,6 @@
 #include "typeprint.h"
 #include "jv-lang.h"
 #include "psympriv.h"
-#include "exceptions.h"
 #include <sys/stat.h>
 #include "completer.h"
 #include "vec.h"

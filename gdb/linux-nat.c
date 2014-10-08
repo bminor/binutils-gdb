@@ -61,7 +61,6 @@
 #include "symfile.h"
 #include "agent.h"
 #include "tracepoint.h"
-#include "exceptions.h"
 #include "buffer.h"
 #include "target-descriptions.h"
 #include "filestuff.h"

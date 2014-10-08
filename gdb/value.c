@@ -35,7 +35,6 @@
 #include "objfiles.h"
 #include "valprint.h"
 #include "cli/cli-decode.h"
-#include "exceptions.h"
 #include "extension.h"
 #include <ctype.h>
 #include "tracepoint.h"

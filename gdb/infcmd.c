@@ -45,7 +45,6 @@
 #include "observer.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
-#include "exceptions.h"
 #include "cli/cli-decode.h"
 #include "gdbthread.h"
 #include "valprint.h"

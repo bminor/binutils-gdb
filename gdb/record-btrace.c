@@ -26,7 +26,6 @@
 #include "gdbcmd.h"
 #include "disasm.h"
 #include "observer.h"
-#include "exceptions.h"
 #include "cli/cli-utils.h"
 #include "source.h"
 #include "ui-out.h"

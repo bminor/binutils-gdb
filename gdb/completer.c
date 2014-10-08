@@ -22,7 +22,6 @@
 #include "expression.h"
 #include "filenames.h"		/* For DOSish file names.  */
 #include "language.h"
-#include "exceptions.h"
 #include "gdb_signals.h"
 
 #include "cli/cli-decode.h"

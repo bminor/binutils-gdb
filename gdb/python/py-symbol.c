@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "block.h"
-#include "exceptions.h"
 #include "frame.h"
 #include "symtab.h"
 #include "python-internal.h"

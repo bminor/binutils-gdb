@@ -45,7 +45,6 @@
 #include "block.h"
 #include "infcall.h"
 #include "dictionary.h"
-#include "exceptions.h"
 #include "annotate.h"
 #include "valprint.h"
 #include "source.h"

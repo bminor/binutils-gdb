@@ -44,7 +44,6 @@
 #include "dis-asm.h"
 #include "disasm.h"
 #include "remote.h"
-#include "exceptions.h"
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 #include "x86-xstate.h"

@@ -36,7 +36,6 @@
 #include "gdbcmd.h"
 #include "observer.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "gdbthread.h"
 #include "block.h"
 #include "inline-frame.h"

@@ -33,7 +33,6 @@
 #include "rs6000-tdep.h"
 #include "ppc-tdep.h"
 #include "rs6000-aix-tdep.h"
-#include "exceptions.h"
 #include "xcoffread.h"
 #include "solib.h"
 #include "solib-aix.h"

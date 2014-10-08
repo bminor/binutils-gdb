@@ -38,7 +38,6 @@
 #include "tracepoint.h"
 #include "observer.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "extension.h"
 
 extern unsigned int overload_debug;

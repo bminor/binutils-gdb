@@ -28,7 +28,6 @@
 #include "gdbcmd.h"
 #include "filenames.h"
 #include "value.h"
-#include "exceptions.h"
 #include "ax.h"
 #include "ax-gdb.h"
 #include "complaints.h"

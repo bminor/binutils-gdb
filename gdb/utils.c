@@ -22,7 +22,6 @@
 #include <ctype.h>
 #include "gdb_wait.h"
 #include "event-top.h"
-#include "exceptions.h"
 #include "gdbthread.h"
 #include "fnmatch.h"
 #include "gdb_bfd.h"

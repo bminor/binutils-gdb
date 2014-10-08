@@ -25,7 +25,6 @@
 #include "cp-support.h"
 #include "addrmap.h"
 #include "gdbtypes.h"
-#include "exceptions.h"
 
 /* This is used by struct block to store namespace-related info for
    C++ files, namely using declarations and the current namespace in

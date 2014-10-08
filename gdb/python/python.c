@@ -27,7 +27,6 @@
 #include "objfiles.h"
 #include "value.h"
 #include "language.h"
-#include "exceptions.h"
 #include "event-loop.h"
 #include "serial.h"
 #include "readline/tilde.h"

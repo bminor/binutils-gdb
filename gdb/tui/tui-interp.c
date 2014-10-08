@@ -29,7 +29,6 @@
 #include "tui/tui-win.h"
 #include "tui/tui.h"
 #include "tui/tui-io.h"
-#include "exceptions.h"
 #include "infrun.h"
 #include "observer.h"
 

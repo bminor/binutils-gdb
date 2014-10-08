@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "charset.h"
 #include "value.h"
-#include "exceptions.h"
 #include "language.h"
 #include "dfp.h"
 #include "valprint.h"

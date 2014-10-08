@@ -33,7 +33,6 @@
 #include "parser-defs.h"
 #include "cp-support.h"
 #include "ui-out.h"
-#include "exceptions.h"
 #include "regcache.h"
 #include "user-regs.h"
 #include "valprint.h"

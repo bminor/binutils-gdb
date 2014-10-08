@@ -24,7 +24,6 @@
 #include "frame-unwind.h"
 #include "block.h"
 #include "hashtab.h"
-#include "exceptions.h"
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "value.h"

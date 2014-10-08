@@ -34,7 +34,6 @@
 #include "gdbcmd.h"
 #include "cp-abi.h"
 #include "hashtab.h"
-#include "exceptions.h"
 #include "cp-support.h"
 #include "bcache.h"
 #include "dwarf2loc.h"

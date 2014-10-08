@@ -51,7 +51,6 @@
 #include "solib.h"
 #include "solist.h"
 #include "observer.h"
-#include "exceptions.h"
 #include "memattr.h"
 #include "ada-lang.h"
 #include "top.h"

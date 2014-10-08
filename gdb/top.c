@@ -26,7 +26,6 @@
 #include "symtab.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "exceptions.h"
 #include <signal.h>
 #include "target.h"
 #include "target-dcache.h"

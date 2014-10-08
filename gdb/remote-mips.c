@@ -29,7 +29,6 @@
 #include "gdbcore.h"
 #include "serial.h"
 #include "target.h"
-#include "exceptions.h"
 #include <sys/stat.h>
 #include "gdb_usleep.h"
 #include "regcache.h"

@@ -30,8 +30,6 @@
 #include <sys/syspage.h>
 #include <dirent.h>
 #include <sys/netmgr.h>
-
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"

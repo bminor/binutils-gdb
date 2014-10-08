@@ -45,7 +45,6 @@
 #include "auxv.h"
 #include "elf/common.h"
 #include "elf/ppc64.h"
-#include "exceptions.h"
 #include "arch-utils.h"
 #include "spu-tdep.h"
 #include "xml-syscall.h"

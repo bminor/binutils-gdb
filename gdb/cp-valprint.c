@@ -34,7 +34,6 @@
 #include "cp-support.h"
 #include "language.h"
 #include "extension.h"
-#include "exceptions.h"
 #include "typeprint.h"
 
 /* Controls printing of vtbl's.  */

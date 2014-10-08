@@ -24,7 +24,6 @@
 #include "gdb_vecs.h"
 #include "bfd.h"
 #include "command.h"
-#include "exceptions.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "inferior.h"

@@ -45,7 +45,6 @@
 #include "symtab.h"
 #include "gdbcore.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "gdbcmd.h"
 #include "target.h"
 #include "value.h"

@@ -49,7 +49,6 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "memrange.h"
-#include "exceptions.h"
 #include "cli/cli-utils.h"
 #include "probe.h"
 #include "ctf.h"

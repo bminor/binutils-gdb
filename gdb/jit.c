@@ -38,7 +38,6 @@
 #include "target.h"
 #include "gdb-dlfcn.h"
 #include <sys/stat.h>
-#include "exceptions.h"
 #include "gdb_bfd.h"
 
 static const char *jit_reader_dir = NULL;

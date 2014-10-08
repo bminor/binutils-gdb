@@ -29,7 +29,6 @@
 #include "dictionary.h"
 #include "language.h"
 #include "valprint.h"
-#include "exceptions.h"
 #include "utils.h"
 #include "mi-getopt.h"
 #include "extension.h"
