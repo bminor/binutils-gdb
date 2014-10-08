@@ -1,5 +1,10 @@
 2014-10-11  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.server/server-kill.exp: Execute command
+	"set remote trace-status-packet on" before "tstatus".
+
+2014-10-11  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.server/server-kill.c: Include sys/types.h and unistd.h.
 	(main): Call getppid.
 	* gdb.server/server-kill.exp: Set breakpoint on line "i = 0;"

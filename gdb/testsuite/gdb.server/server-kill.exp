@@ -52,6 +52,11 @@ if {$server_pid == "" } {
 
 remote_exec target "kill -9 $server_pid"
 
+# Enable trace status packet which is disabled after the connection
+# if the remote target doesn't support tracepoint at all.  Otherwise,
+# no RSP packet is sent out.
+gdb_test_no_output "set remote trace-status-packet on"
+
 # Force GDB to talk with GDBserver, so that we can get the
 # "connection closed" error.
 gdb_test "tstatus" {Remote connection closed|Remote communication error\.  Target disconnected\.: Connection reset by peer\.}
