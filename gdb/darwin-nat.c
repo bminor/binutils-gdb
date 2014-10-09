@@ -254,8 +254,8 @@ darwin_ptrace (const char *name,
   if (ret == -1 && errno == 0)
     ret = 0;
 
-  inferior_debug (4, _("ptrace (%s, %d, 0x%x, %d): %d (%s)\n"),
-                  name, pid, arg3, arg4, ret,
+  inferior_debug (4, _("ptrace (%s, %d, 0x%lx, %d): %d (%s)\n"),
+                  name, pid, (unsigned long) arg3, arg4, ret,
                   (ret != 0) ? safe_strerror (errno) : _("no error"));
   return ret;
 }
@@ -835,7 +835,7 @@ darwin_resume (ptid_t ptid, int step, enum gdb_signal signal)
   struct inferior *inf;
 
   inferior_debug
-    (2, _("darwin_resume: pid=%d, tid=0x%x, step=%d, signal=%d\n"),
+    (2, _("darwin_resume: pid=%d, tid=0x%lx, step=%d, signal=%d\n"),
      ptid_get_pid (ptid), ptid_get_tid (ptid), step, signal);
 
   if (signal == GDB_SIGNAL_0)
@@ -1061,8 +1061,8 @@ cancel_breakpoint (ptid_t ptid)
   pc = regcache_read_pc (regcache) - gdbarch_decr_pc_after_break (gdbarch);
   if (breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
     {
-      inferior_debug (4, "cancel_breakpoint for thread 0x%x\n",
-		      ptid_get_tid (ptid));
+      inferior_debug (4, "cancel_breakpoint for thread 0x%lx\n",
+		      (unsigned long) ptid_get_tid (ptid));
 
       /* Back up the PC if necessary.  */
       if (gdbarch_decr_pc_after_break (gdbarch))
@@ -1810,15 +1810,14 @@ darwin_thread_alive (struct target_ops *ops, ptid_t ptid)
    If WRADDR is not NULL, write gdb's LEN bytes from WRADDR and copy it
    to ADDR in inferior task's address space.
    Return 0 on failure; number of bytes read / writen otherwise.  */
+
 static int
 darwin_read_write_inferior (task_t task, CORE_ADDR addr,
 			    gdb_byte *rdaddr, const gdb_byte *wraddr,
 			    ULONGEST length)
 {
   kern_return_t kret;
-  mach_vm_address_t offset = addr & (mach_page_size - 1);
-  mach_vm_address_t low_address = (mach_vm_address_t) (addr - offset);
-  mach_vm_size_t aligned_length = (mach_vm_size_t) PAGE_ROUND (offset + length);
+  mach_vm_size_t res_length = 0;
   pointer_t copied;
   mach_msg_type_number_t copy_count;
   mach_vm_size_t remaining_length;
@@ -1828,38 +1827,44 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
   inferior_debug (8, _("darwin_read_write_inferior(task=0x%x, %s, len=%s)\n"),
 		  task, core_addr_to_string (addr), pulongest (length));
 
-  /* Get memory from inferior with page aligned addresses.  */
-  kret = mach_vm_read (task, low_address, aligned_length,
-		      &copied, &copy_count);
-  if (kret != KERN_SUCCESS)
+  /* First read.  */
+  if (rdaddr != NULL)
     {
-      inferior_debug
-	(1, _("darwin_read_write_inferior: mach_vm_read failed at %s: %s"),
-	 core_addr_to_string (addr), mach_error_string (kret));
-      return 0;
+      mach_vm_size_t count;
+
+      /* According to target.h(to_xfer_partial), one and only one may be
+	 non-null.  */
+      gdb_assert (wraddr == NULL);
+
+      kret = mach_vm_read_overwrite (task, addr, length,
+				     (mach_vm_address_t) rdaddr, &count);
+      if (kret != KERN_SUCCESS)
+	{
+	  inferior_debug
+	    (1, _("darwin_read_write_inferior: mach_vm_read failed at %s: %s"),
+	     core_addr_to_string (addr), mach_error_string (kret));
+	  return 0;
+	}
+      return count;
     }
 
-  if (rdaddr != NULL)
-    memcpy (rdaddr, (char *)copied + offset, length);
+  /* See above.  */
+  gdb_assert (wraddr != NULL);
 
-  if (wraddr == NULL)
-    goto out;
-
-  memcpy ((char *)copied + offset, wraddr, length);
-
-  /* Do writes atomically.
-     First check for holes and unwritable memory.  */
-  for (region_address = low_address, remaining_length = aligned_length;
-       region_address < low_address + aligned_length;
-       region_address += region_length, remaining_length -= region_length)
+  while (length != 0)
     {
+      mach_vm_address_t offset = addr & (mach_page_size - 1);
+      mach_vm_address_t region_address = (mach_vm_address_t) (addr - offset);
+      mach_vm_size_t aligned_length =
+	(mach_vm_size_t) PAGE_ROUND (offset + length);
       vm_region_submap_short_info_data_64_t info;
+      mach_msg_type_number_t count = VM_REGION_SUBMAP_SHORT_INFO_COUNT_64;
+      natural_t region_depth = 1000;
       mach_vm_address_t region_start = region_address;
-      mach_msg_type_number_t count;
-      natural_t region_depth;
+      mach_vm_size_t region_length;
+      mach_vm_size_t write_length;
 
-      region_depth = 100000;
-      count = VM_REGION_SUBMAP_SHORT_INFO_COUNT_64;
+      /* Read page protection.  */
       kret = mach_vm_region_recurse
 	(task, &region_start, &region_length, &region_depth,
 	 (vm_region_recurse_info_t) &info, &count);
@@ -1870,7 +1875,7 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
 			       "mach_vm_region_recurse failed at %s: %s\n"),
 			  core_addr_to_string (region_address),
 			  mach_error_string (kret));
-	  goto out;
+	  return res_length;
 	}
 
       inferior_debug
@@ -1887,56 +1892,76 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
 		   core_addr_to_string (region_address),
 		   core_addr_to_string (region_start),
 		   (unsigned)region_length);
-	  length = 0;
-	  goto out;
+	  return res_length;
 	}
 
       /* Adjust the length.  */
       region_length -= (region_address - region_start);
+      if (region_length > aligned_length)
+	region_length = aligned_length;
 
-      if (!(info.max_protection & VM_PROT_WRITE))
+      /* Make the pages RW.  */
+      if (!(info.protection & VM_PROT_WRITE))
 	{
-	  kret = mach_vm_protect
-	    (task, region_address, region_length,
-	     TRUE, info.max_protection | VM_PROT_WRITE | VM_PROT_COPY);
+	  vm_prot_t prot = VM_PROT_READ | VM_PROT_WRITE;
+
+	  kret = mach_vm_protect (task, region_address, region_length,
+				  FALSE, prot);
 	  if (kret != KERN_SUCCESS)
 	    {
-	      warning (_("darwin_read_write_inf: "
-			 "mach_vm_protect max failed at %s: %s"),
+	      prot |= VM_PROT_COPY;
+	      kret = mach_vm_protect (task, region_address, region_length,
+				      FALSE, prot);
+	    }
+	  if (kret != KERN_SUCCESS)
+	    {
+	      warning (_("darwin_read_write_inferior: "
+			 "mach_vm_protect failed at %s "
+			 "(len=0x%lx, prot=0x%x): %s"),
 		       core_addr_to_string (region_address),
+		       (unsigned long) region_length, (unsigned) prot,
 		       mach_error_string (kret));
-	      length = 0;
-	      goto out;
+	      return res_length;
 	    }
 	}
 
+      if (offset + length > region_length)
+	write_length = region_length - offset;
+      else
+	write_length = length;
+
+      /* Write.  */
+      kret = mach_vm_write (task, addr, (vm_offset_t) wraddr, write_length);
+      if (kret != KERN_SUCCESS)
+	{
+	  warning (_("darwin_read_write_inferior: mach_vm_write failed: %s"),
+		   mach_error_string (kret));
+	  return res_length;
+	}
+
+      /* Restore page rights.  */
       if (!(info.protection & VM_PROT_WRITE))
 	{
 	  kret = mach_vm_protect (task, region_address, region_length,
-				 FALSE, info.protection | VM_PROT_WRITE);
+				  FALSE, info.protection);
 	  if (kret != KERN_SUCCESS)
 	    {
-	      warning (_("darwin_read_write_inf: "
-			 "mach_vm_protect failed at %s (len=0x%lx): %s"),
+	      warning (_("darwin_read_write_inferior: "
+			 "mach_vm_protect restore failed at %s "
+			 "(len=0x%lx): %s"),
 		       core_addr_to_string (region_address),
-		       (unsigned long)region_length, mach_error_string (kret));
-	      length = 0;
-	      goto out;
+		       (unsigned long) region_length,
+		       mach_error_string (kret));
 	    }
 	}
+
+      addr += write_length;
+      wraddr += write_length;
+      res_length += write_length;
+      length -= write_length;
     }
 
-  kret = mach_vm_write (task, low_address, copied, aligned_length);
-
-  if (kret != KERN_SUCCESS)
-    {
-      warning (_("darwin_read_write_inferior: mach_vm_write failed: %s"),
-	       mach_error_string (kret));
-      length = 0;
-    }
-out:
-  mach_vm_deallocate (mach_task_self (), copied, copy_count);
-  return length;
+  return res_length;
 }
 
 /* Read LENGTH bytes at offset ADDR of task_dyld_info for TASK, and copy them
@@ -2170,8 +2195,8 @@ _initialize_darwin_inferior (void)
 
   add_target (darwin_ops);
 
-  inferior_debug (2, _("GDB task: 0x%lx, pid: %d\n"), mach_task_self (),
-                  getpid ());
+  inferior_debug (2, _("GDB task: 0x%lx, pid: %d\n"),
+		  (unsigned long) mach_task_self (), getpid ());
 
   add_setshow_zuinteger_cmd ("darwin", class_obscure,
 			     &darwin_debug_flag, _("\

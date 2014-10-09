@@ -1,3 +1,10 @@
+2015-11-23  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_ptrace): Add a cast to fix warning.
+	(darwin_resume, cancel_breakpoint, _initialize_darwin_inferior):
+	Likewise.
+	(darwin_read_write_inferior): Rewrite using mach_vm_read_overwrite.
+
 2015-11-19  Don Breazeal  <donb@codesourcery.com>
 
 	* target.c (read_memory_robust): Call read_whatever_is_readable
