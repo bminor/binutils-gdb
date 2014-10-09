@@ -1,3 +1,9 @@
+2014-10-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <BINOP_ADD>: Add handling
+	of the case where the second operand is a pointer.
+	<BINOP_SUB>: Likewise.
+
 2014-10-14  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* breakpoint.c (bkpt_probe_insert_location): Call set_semaphore

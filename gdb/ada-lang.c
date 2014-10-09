@@ -10004,6 +10004,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         return (value_from_longest
                  (value_type (arg1),
                   value_as_long (arg1) + value_as_long (arg2)));
+      if (TYPE_CODE (value_type (arg2)) == TYPE_CODE_PTR)
+        return (value_from_longest
+                 (value_type (arg2),
+                  value_as_long (arg1) + value_as_long (arg2)));
       if ((ada_is_fixed_point_type (value_type (arg1))
            || ada_is_fixed_point_type (value_type (arg2)))
           && value_type (arg1) != value_type (arg2))
@@ -10025,6 +10029,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (TYPE_CODE (value_type (arg1)) == TYPE_CODE_PTR)
         return (value_from_longest
                  (value_type (arg1),
+                  value_as_long (arg1) - value_as_long (arg2)));
+      if (TYPE_CODE (value_type (arg2)) == TYPE_CODE_PTR)
+        return (value_from_longest
+                 (value_type (arg2),
                   value_as_long (arg1) - value_as_long (arg2)));
       if ((ada_is_fixed_point_type (value_type (arg1))
            || ada_is_fixed_point_type (value_type (arg2)))
