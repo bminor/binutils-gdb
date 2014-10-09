@@ -1,3 +1,8 @@
+2014-10-15  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb/infrun.c (process_event_stop_test): Apply
+	gdbarch_addr_bits_remove to longjmp resume address.
+
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
 	* regformats/microblaze.dat: Delete file.

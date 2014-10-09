@@ -4596,7 +4596,10 @@ process_event_stop_test (struct execution_control_state *ecs)
 	     is the third argument to the probe.  */
 	  arg_value = probe_safe_evaluate_at_pc (frame, 2);
 	  if (arg_value)
-	    jmp_buf_pc = value_as_address (arg_value);
+	    {
+	      jmp_buf_pc = value_as_address (arg_value);
+	      jmp_buf_pc = gdbarch_addr_bits_remove (gdbarch, jmp_buf_pc);
+	    }
 	  else if (!gdbarch_get_longjmp_target_p (gdbarch)
 		   || !gdbarch_get_longjmp_target (gdbarch,
 						   frame, &jmp_buf_pc))
