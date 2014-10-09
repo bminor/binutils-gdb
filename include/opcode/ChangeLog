@@ -1,3 +1,23 @@
+2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc.h (sparc_opcode): new field `hwcaps2'.
+	(HWCAP2_FJATHPLUS): New define.
+	(HWCAP2_VIS3B): Likewise.
+	(HWCAP2_ADP): Likewise.
+	(HWCAP2_SPARC5): Likewise.
+	(HWCAP2_MWAIT): Likewise.
+	(HWCAP2_XMPMUL): Likewise.
+	(HWCAP2_XMONT): Likewise.
+	(HWCAP2_NSEC): Likewise.
+	(HWCAP2_FJATHHPC): Likewise.
+	(HWCAP2_FJDES): Likewise.
+	(HWCAP2_FJAES): Likewise.
+	Document the new operand kind `{', corresponding to the mcdper
+	ancillary state register.
+	Document the new operand kind }, which represents frsd floating
+	point registers (double precision) which must be the same than
+	frs1 in its containing instruction.
+
 2014-09-16  Kuan-Lin Chen <kuanlinchentw@gmail.com>
 
         * nds32.h: Add new opcode declaration.

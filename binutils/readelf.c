@@ -11977,22 +11977,64 @@ display_sparc_hwcaps (int mask)
   fputc('\n', stdout);
 }
 
+static void
+display_sparc_hwcaps2 (int mask)
+{
+  if (mask)
+    {
+      int first = 1;
+      if (mask & ELF_SPARC_HWCAP2_FJATHPLUS)
+	fputs ("fjathplus", stdout), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_VIS3B)
+	printf ("%svis3b", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_ADP)
+	printf ("%sadp", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_SPARC5)
+	printf ("%ssparc5", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_MWAIT)
+	printf ("%smwait", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_XMPMUL)
+	printf ("%sxmpmul", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_XMONT)
+	printf ("%sxmont2", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_NSEC)
+	printf ("%snsec", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_FJATHHPC)
+	printf ("%sfjathhpc", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_FJDES)
+	printf ("%sfjdes", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP2_FJAES)
+	printf ("%sfjaes", first ? "" : "|"), first = 0;
+    }
+  else
+    fputc('0', stdout);
+  fputc('\n', stdout);
+}
+
 static unsigned char *
 display_sparc_gnu_attribute (unsigned char * p,
 			     int tag,
 			     const unsigned char * const end)
 {
+  unsigned int len;
+  int val;
+
   if (tag == Tag_GNU_Sparc_HWCAPS)
     {
-      unsigned int len;
-      int val;
-
       val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Sparc_HWCAPS: ");
       display_sparc_hwcaps (val);
       return p;
-   }
+    }
+  if (tag == Tag_GNU_Sparc_HWCAPS2)
+    {
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_GNU_Sparc_HWCAPS2: ");
+      display_sparc_hwcaps2 (val);
+      return p;
+    }
 
   return display_tag_value (tag, p, end);
 }

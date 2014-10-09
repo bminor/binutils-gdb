@@ -106,7 +106,7 @@ static char *v9a_asr_reg_names[] =
 {
   "pcr", "pic", "dcr", "gsr", "set_softint", "clear_softint",
   "softint", "tick_cmpr", "stick", "stick_cmpr", "cfr",
-  "pause", "cps"
+  "pause", "mwait"
 };
 
 /* Macros used to extract instruction fields.  Not all fields have
@@ -656,6 +656,7 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		    break;
 		  case 'H':	/* Double/even.  */
 		  case 'J':	/* Quad/multiple of 4.  */
+		  case '}':     /* Double/even.  */
 		    fregx (X_RD (insn));
 		    break;
 #undef	freg
@@ -791,6 +792,10 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 
 		  case 's':
 		    (*info->fprintf_func) (stream, "%%fprs");
+		    break;
+
+		  case '{':
+		    (*info->fprintf_func) (stream, "%%mcdper");
 		    break;
 
 		  case 'o':

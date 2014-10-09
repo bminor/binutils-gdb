@@ -1,3 +1,18 @@
+2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc.h (Tag_GNU_Sparc_HWCAPS2): New object attribute.
+	(ELF_SPARC_HWCAP2_FJATHPLUS): New HWCAP2 bitmask value.
+	(ELF_SPARC_HWCAP2_VIS3B): Likewise.
+	(ELF_SPARC_HWCAP2_ADP): Likewise.
+	(ELF_SPARC_HWCAP2_SPARC5): Likewise.
+	(ELF_SPARC_HWCAP2_MWAIT): Likewise.
+	(ELF_SPARC_HWCAP2_XMPMUL): Likewise.
+	(ELF_SPARC_HWCAP2_XMONT): Likewise.
+	(ELF_SPARC_HWCAP2_NSEC): Likewise.
+	(ELF_SPARC_HWCAP2_FJATHHPC): Likewise.
+	(ELF_SPARC_HWCAP2_FJDES): Likewise.
+	(ELF_SPARC_HWCAP2_FJAES): Likewise.
+
 2014-10-08  Will Newton  <will.newton@linaro.org>
 
 	* aarch64.h: Sync up relocations with ABI release 1.0.

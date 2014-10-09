@@ -1,3 +1,21 @@
+2014-10-09  Jose E. Marchesi  &lt;jose.marchesi@oracle.com&gt;
+
+	* gas/sparc/hpcvis3.d: Remove tests for the `chkpt', `commit',
+	`random', `wr r,i,%cps' and `rd r,%cps' instructions.
+	* gas/sparc/hpcvis3.s: Likewise.
+	* gas/sparc/xcrypto.d: New file.
+	* gas/sparc/xcrypto.s: Likewise.
+	* gas/sparc/mwait.d: New file.
+	* gas/sparc/mwait.s: Likewise.
+	* gas/sparc/mcdper.s: New file.
+	* gas/sparc/mcdper.d: Likewise.
+	* gas/sparc/sparc5vis4.d: New file.
+	* gas/sparc/sparc5vis4.s: Likewise.
+	* gas/sparc/sparc.exp (sparc_elf_setup): Run the xcrypto test.
+	Run the mwait test.
+	Run the mcdper test.
+`	Run the sparc5vis4 test.
+
 2014-09-27  Alan Modra  <amodra@gmail.com>
 
 	* gas/elf/group2.d, * gas/elf/group2.s: New test.

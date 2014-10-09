@@ -1,3 +1,24 @@
+2014-10-09  Jose E. Marchesi  &lt;jose.marchesi@oracle.com&gt;
+
+	* sparc-opc.c (sparc-opcodes): Remove instructions `chkpt',
+	`commit', `random', `wr r,r,%cps', `wr r,i,%cps' and `rd %cps,r'.
+	Annotate table with HWCAP2 bits.
+	Add instructions xmontmul, xmontsqr, xmpmul.
+	(sparc-opcodes): Add the `mwait',  `wr r,r,%mwait', `wr
+	r,i,%mwait' and `rd %mwait,r' instructions.
+	Add rd/wr instructions for accessing the %mcdper ancillary state
+	register.
+	(sparc-opcodes): Add sparc5/vis4.0 instructions:
+	subxc, subxccc, fpadd8, fpadds8, fpaddus8, fpaddus16, fpcmple8,
+	fpcmpgt8, fpcmpule16, fpcmpugt16, fpcmpule32, fpcmpugt32, fpmax8,
+	fpmax16, fpmax32, fpmaxu8, fpmaxu16, fpmaxu32, fpmin8, fpmin16,
+	fpmin32, fpminu8, fpminu16, fpminu32, fpsub8, fpsubs8, fpsubus8,
+	fpsubus16, and faligndatai.
+	* sparc-dis.c (v9a_asr_reg_names): Add the %mwait (%asr28)
+	ancillary state register to the table.
+	(print_insn_sparc): Handle the %mcdper ancillary state register.
+	(print_insn_sparc): Handle new operand type '}'.
+
 2014-09-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (MOD_0F20): Removed.

@@ -1,3 +1,44 @@
+2014-10-09  Jose E. Marchesi  &lt;jose.marchesi@oracle.com&gt;
+
+	* config/tc-sparc.c (v9a_asr_table): Entry for %cps removed.
+	(sparc_arch_table): Remove the HWCAP_RANDOM, HWCAP_TRANS and
+	HWCAP_ASI_CACHE_SPARING from the architectures using them.
+	(HWS_V8): New define.
+	(HWS_V9): Likewise.
+	(HWS_VA): Likewise.
+	(HWS_VB): Likewise.
+	(HWS_VC): Likewise.
+	(HWS_VD): Likewise.
+	(HWS_VE): Likewise.
+	(HWS_VV): Likewise.
+	(sparc_arch): Use the HWS_* macros.  Fix the `sparc4' architecture
+	to cover the HWCAP_ASI_BLK_INIT and HWCAP_IMA capabilities.
+	(hwcap_seen): Variable widened to 64 bits.
+	(hwcap_allowed): Likewise.
+	(sparc_arch): new field `hwcap2_allowed'.
+	(sparc_arch_table): provide hwcap2_allowed values for existing
+	archs.
+	(sparc_md_end): Add a HWCAPS2 object attribute to the elf object
+	in case any of the HWCAP2_* caps are used.
+	(sparc_ip): Take into account the new hwcaps2 bitmap to build the
+	list of seen/allowed hwcaps.
+	(get_hwcap_name): Argument widened to 64 bits to handle HWCAP2
+	bits.
+	(HWS_VM): New define.
+	(HWS2_VM): Likewise.
+	(sparc_arch): New architectures `sparc5', `v9m' and `v8plusm'.
+	(v9a_asr_table): Add the %mwait (%asr28) ancillary state register
+	to the table.
+	(sparc_ip): Handle the %mcdper ancillary state register as an
+	operand.
+	(sparc_ip): Handle } arguments as fdrd floating point registers
+	(double) that are the same than frs1.
+	* doc/c-sparc.texi (Sparc-Opts): Document the -Av9e, -Av8pluse and
+	-xarch=v9e command line options.  Also fix the description of the
+	-Av9v and -Av8plusv command line options.
+	Document the -Av9m, -Av8plusm,-Asparc5, -xarch=v9m and
+	-xarch=sparc5 command line options.
+
 2014-09-29  Terry Guo  <terry.guo@arm.com>
 
 	* as.c (create_obj_attrs_section): Move it and call it from ...

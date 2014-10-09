@@ -1,3 +1,9 @@
+2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* readelf.c (display_sparc_hwcaps2): New function.
+	(display_sparc_gnu_attribute): Call `display_sparc_hwcaps2' when
+	handling `Tag_GNU_Sparc_HWCAPS2' attributes.
+
 2014-09-22  Alan Modra  <amodra@gmail.com>
 
 	PR 16563
