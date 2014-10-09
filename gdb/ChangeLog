@@ -1,3 +1,9 @@
+2014-10-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR tdep/9390
+	* xstorxstormy16-tdep.c (xstormy16_analyze_prologue): Fix possible
+	typo when using logical AND to determine instruction type.
+
 2014-10-09  Yao Qi  <yao@codesourcery.com>
 
 	* infrun.c (handle_signal_stop): Remove local variable
