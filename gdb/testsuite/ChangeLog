@@ -1,3 +1,19 @@
+2014-10-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/commands.exp (gdbvar_complex_if_while_test): Don't
+	check 'target_info exists noargs'.
+	(test_command_prompt_position): Likewise.
+	(progvar_simple_if_test): Don't check 'target_info exists noargs'.
+	Remove "set args".
+	(progvar_simple_while_test): Likewise.
+	(progvar_complex_if_while_test): Likewise.
+	(if_while_breakpoint_command_test): Likewise.
+	(infrun_breakpoint_command_test): Likewise.
+	(breakpoint_command_test): Likewise.
+	(watchpoint_command_test): Likewise.
+	(bp_deleted_in_command_test): Likewise.
+	(temporary_breakpoint_commands): Likewise.
+
 2014-10-16  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/remotetimeout.exp: Remove noargs checking.
