@@ -45,6 +45,13 @@ queue-signal signal-name-or-number
   ** The -list-thread-groups command outputs an exit-code field for
      inferiors that have exited.
 
+* Removed targets
+
+Support for these obsolete configurations has been removed.
+
+mips-sgi-irix5*
+mips-sgi-irix6*
+
 *** Changes in GDB 7.8
 
 * New command line options

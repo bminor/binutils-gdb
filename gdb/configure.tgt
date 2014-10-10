@@ -13,6 +13,7 @@
 #	in Makefile.in!
 
 case $targ in
+ *-*-irix* | \
  d10v-*-* | \
  hppa*-*-hiux* | \
  i[34567]86-ncr-* | \
@@ -350,14 +351,6 @@ microblaze*-*-*)
 	gdb_sim=../sim/microblaze/libsim.a
 	;;
 
-mips*-sgi-irix5*)
-	# Target: MIPS SGI running Irix 5
-	gdb_target_obs="mips-tdep.o mips-irix-tdep.o solib-irix.o"
-	;;
-mips*-sgi-irix6*)
-	# Target: MIPS SGI running Irix 6.x
-	gdb_target_obs="mips-tdep.o mips-irix-tdep.o solib-irix.o"
-	;;
 mips*-*-linux*)
 	# Target: Linux/MIPS
 	gdb_target_obs="mips-tdep.o mips-linux-tdep.o glibc-tdep.o \

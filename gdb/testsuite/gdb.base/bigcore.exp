@@ -39,13 +39,6 @@ if { [istarget "*-*-*bsd*"]
     return
 }
 
-# This testcase causes too much stress (in terms of memory usage)
-# on certain systems...
-if { [istarget "*-*-*irix*"] } {
-    untested "Testcase too stressful for this system"
-    return
-}
-
 standard_testfile .c
 set corefile [standard_output_file ${binfile}.corefile]
 

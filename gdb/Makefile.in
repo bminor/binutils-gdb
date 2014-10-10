@@ -644,7 +644,7 @@ ALL_TARGET_OBS = \
 	m88k-tdep.o \
 	mep-tdep.o \
 	microblaze-tdep.o microblaze-linux-tdep.o \
-	mips-irix-tdep.o mips-linux-tdep.o \
+	mips-linux-tdep.o \
 	mipsnbsd-tdep.o mips-tdep.o \
 	mn10300-linux-tdep.o mn10300-tdep.o \
 	moxie-tdep.o \
@@ -673,7 +673,7 @@ ALL_TARGET_OBS = \
 	bsd-uthread.o \
 	nbsd-tdep.o obsd-tdep.o \
 	sol2-tdep.o \
-	solib-frv.o solib-irix.o solib-svr4.o \
+	solib-frv.o solib-svr4.o \
 	solib-som.o solib-pa64.o solib-darwin.o solib-dsbt.o \
 	dbug-rom.o dink32-rom.o ppcbug-rom.o m32r-rom.o dsrec.o monitor.o \
 	remote-m32r-sdi.o remote-mips.o \
@@ -903,7 +903,7 @@ interps.h auxv.h gdbcmd.h tramp-frame.h mipsnbsd-tdep.h	\
 amd64-linux-tdep.h linespec.h i387-tdep.h mn10300-tdep.h \
 sparc64-tdep.h monitor.h ppcobsd-tdep.h srec.h solib-pa64.h \
 coff-pe-read.h parser-defs.h gdb_ptrace.h mips-linux-tdep.h \
-m68k-tdep.h spu-tdep.h jv-lang.h environ.h solib-irix.h amd64-tdep.h \
+m68k-tdep.h spu-tdep.h jv-lang.h environ.h amd64-tdep.h \
 doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h \
 rs6000-tdep.h rs6000-aix-tdep.h \
 common/gdb_locale.h arch-utils.h trad-frame.h gnu-nat.h \
@@ -1661,7 +1661,6 @@ ALLDEPFILES = \
 	microblaze-tdep.c microblaze-linux-tdep.c \
 	mingw-hdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
-	mips-irix-tdep.c \
 	mips-tdep.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	mips64obsd-nat.c mips64obsd-tdep.c \
@@ -1689,7 +1688,7 @@ ALLDEPFILES = \
 	ser-go32.c ser-pipe.c ser-tcp.c ser-mingw.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	sol2-tdep.c \
-	solib-irix.c solib-svr4.c \
+	solib-svr4.c \
 	sparc-linux-nat.c sparc-linux-tdep.c \
 	sparc-sol2-nat.c sparc-sol2-tdep.c sparc64-sol2-tdep.c \
 	sparc-nat.c sparc-tdep.c sparc64-linux-nat.c sparc64-linux-tdep.c \

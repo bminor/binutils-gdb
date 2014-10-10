@@ -19,6 +19,7 @@ case $host in
  sparc-*-netbsdelf* | \
  vax-*-netbsdelf*)
     ;;
+ *-*-irix* | \
  alpha*-*-osf1* | \
  alpha*-*-osf2* | \
  arm*-*-netbsd* | \
@@ -126,8 +127,6 @@ m68*-*-openbsd*)	gdb_host=obsd ;;
 
 m88*-*-openbsd*)	gdb_host=obsd ;;
 
-mips-sgi-irix5*)	gdb_host=irix5 ;;
-mips-sgi-irix6*)	gdb_host=irix6 ;;
 mips*-*-linux*)		gdb_host=linux ;;
 mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 			gdb_host=nbsd ;;

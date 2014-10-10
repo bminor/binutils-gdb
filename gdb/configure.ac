@@ -999,15 +999,6 @@ if test "${have_libpython}" != no; then
     AC_MSG_RESULT(${PYTHON_CFLAGS})
   fi
 
-  # On IRIX, type siginfo is not defined.  Instead, sys/siginfo.h provides:
-  #    #if _SGIAPI
-  #    #define siginfo __siginfo
-  #    #endif
-  # The problem is that including Python causes some XOPEN macros to be
-  # unilaterally defined, and that in turn causes _SGIAPI to evaluate
-  # to false.  So, we work around this issue by defining siginfo ourself
-  # though the command-line.
-  #
   # On x64 Windows, Python's include headers, and pyconfig.h in
   # particular, rely on MS_WIN64 macro to detect that it's a 64bit
   # version of Windows.  Unfortunately, MS_WIN64 is only defined if
@@ -1017,10 +1008,6 @@ if test "${have_libpython}" != no; then
   # solved as of 2012-10-02 (http://bugs.python.org/issue4709).
 
   case "$gdb_host" in
-    irix*) if test "${GCC}" = yes; then
-             CPPFLAGS="$CPPFLAGS -Dsiginfo=__siginfo"
-           fi
-           ;;
     mingw64)
            if test "${GCC}" = yes; then
              CPPFLAGS="$CPPFLAGS -DMS_WIN64"

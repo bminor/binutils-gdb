@@ -67,7 +67,6 @@ gdb_test "whatis v_char" \
     "type = (unsigned char|char)" \
     "whatis char"
 
-if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix*" }
 gdb_test "whatis v_signed_char" \
     "type = (signed char|char)" \
     "whatis signed char"

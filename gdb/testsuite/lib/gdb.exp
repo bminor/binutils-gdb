@@ -2563,8 +2563,8 @@ set hp_aCC_compiler		0
 #   if the build machine is the same as the host machine, which is
 #   usually true of the targets which are not gcc.  But this code does
 #   not figure which compiler to call, and it always ends up using the C
-#   compiler.  Not good for setting hp_aCC_compiler.  Targets
-#   hppa*-*-hpux* and mips*-*-irix* used to do this.
+#   compiler.  Not good for setting hp_aCC_compiler.  Target
+#   hppa*-*-hpux* used to do this.
 #
 # [ gdb_compile -E $ifile > $binfile.ci ]
 # source $binfile.ci
@@ -2975,10 +2975,6 @@ proc gdb_compile_shlib {sources dest options} {
                 "hppa*-hp-hpux*" {
                     lappend obj_options "additional_flags=+z"
                 }
-                "mips-sgi-irix*" {
-                    # Disable SGI compiler's implicit -Dsgi
-                    lappend obj_options "additional_flags=-Usgi"
-                } 
                 default {
                     # don't know what the compiler is...
                 }

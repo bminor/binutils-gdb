@@ -119,7 +119,6 @@ if ![file exists $binfile] then {
 		setup_xfail "vax-*-*"
 		setup_xfail "alpha-*-*"
 		setup_xfail "*-*-*bsd*"
-		setup_xfail "*-*-irix*"
 		setup_xfail "*-*-hpux*"
 		setup_xfail "*-*-*lynx*"
 		fail "call function when asleep (stays asleep)"

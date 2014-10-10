@@ -1,3 +1,13 @@
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/bigcore.exp: Remove references to IRIX.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/interrupt.exp: Likewise.
+	* gdb.base/mips_pro.exp: Likewise.
+	* gdb.base/nodebug.exp: Likewise.
+	* gdb.base/setvar.exp: Likewise.
+	* lib/gdb.exp (gdb_compile_shlib): Remove mips-sgi-irix* case.
+
 2014-10-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 

@@ -1,3 +1,17 @@
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Remove mips-irix-tdep.o and solib-irix.o.
+	(ALLDEPFILES): Remove mips-irix-tdep.c and solib-irix.c.
+	(HFILES_NO_SRCDIR): Remove solib-irix.h.
+	* NEWS: Mention that support for mips-sgi-irix5* mips-sgi-irix6*
+	and been removed.
+	* config/mips/irix5.mh, config/mips/irix6.mh: Delete files.
+	* configure.ac: Remove references to IRIX.
+	* configure.host: Add *-*-irix* to the obsolete hosts section.
+	Remove all other references to irix.
+	* irix5-nat.c, mips-irix-tdep.c, solib-irix.c, solib-irix.h:
+	Delete files.
+
 2014-10-10  Ajit Agarwal  <ajitkum@xilinx.com>
 
 	* microblaze-tdep.c (microblaze_gdbarch_init): If the description
