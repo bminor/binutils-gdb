@@ -30,8 +30,6 @@
 #include "gdbthread.h"
 #include "gdb_bfd.h"
 
-#include "gdb_assert.h"
-
 #include "solist.h"
 #include "solib.h"
 #include "solib-svr4.h"
@@ -70,7 +68,7 @@ struct gdb_dyld_all_image_infos
 
 /* Current all_image_infos version.  */
 #define DYLD_VERSION_MIN 1
-#define DYLD_VERSION_MAX 12
+#define DYLD_VERSION_MAX 14
 
 /* Per PSPACE specific data.  */
 struct darwin_info
@@ -513,7 +511,10 @@ darwin_solib_create_inferior_hook (int from_tty)
   darwin_load_image_infos (info);
 
   if (!darwin_dyld_version_ok (info))
-    return;
+    {
+      warning (_("unhandled dyld version (%d)"), info->all_image.version);
+      return;
+    }
 
   create_solib_event_breakpoint (target_gdbarch (), info->all_image.notifier);
 
@@ -521,26 +522,10 @@ darwin_solib_create_inferior_hook (int from_tty)
   load_addr = darwin_read_exec_load_addr (info);
   if (load_addr != 0 && symfile_objfile != NULL)
     {
-      CORE_ADDR vmaddr = 0;
-      struct mach_o_data_struct *md = bfd_mach_o_get_data (exec_bfd);
-      unsigned int i, num;
+      CORE_ADDR vmaddr;
 
       /* Find the base address of the executable.  */
-      for (i = 0; i < md->header.ncmds; i++)
-	{
-	  struct bfd_mach_o_load_command *cmd = &md->commands[i];
-
-	  if (cmd->type != BFD_MACH_O_LC_SEGMENT
-	      && cmd->type != BFD_MACH_O_LC_SEGMENT_64)
-	    continue;
-	  if (cmd->command.segment.fileoff == 0
-	      && cmd->command.segment.vmaddr != 0
-	      && cmd->command.segment.filesize != 0)
-	    {
-	      vmaddr = cmd->command.segment.vmaddr;
-	      break;
-	    }
-	}
+      vmaddr = bfd_mach_o_get_base_address (exec_bfd);
 
       /* Relocate.  */
       if (vmaddr != load_addr)

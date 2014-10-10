@@ -18,14 +18,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-#include <stdlib.h>
-
 #include "splay-tree.h"
 #include "gdb_obstack.h"
 #include "addrmap.h"
-#include "gdb_assert.h"
-
 
 
 /* The "abstract class".  */

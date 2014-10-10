@@ -171,6 +171,10 @@ EXTERN int context_stack_size;
 
 EXTERN int within_function;
 
+/* The type of the record_line function.  */
+typedef void (record_line_ftype) (struct subfile *subfile, int line,
+				  CORE_ADDR pc);
+
 
 
 #define next_symbol_text(objfile) (*next_symbol_text_func)(objfile)
@@ -236,7 +240,7 @@ extern struct context_stack *push_context (int desc, CORE_ADDR valu);
 
 extern struct context_stack *pop_context (void);
 
-extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
+extern record_line_ftype record_line;
 
 extern void start_symtab (const char *name, const char *dirname,
 			  CORE_ADDR start_addr);

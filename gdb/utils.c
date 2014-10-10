@@ -19,9 +19,7 @@
 
 #include "defs.h"
 #include "dyn-string.h"
-#include "gdb_assert.h"
 #include <ctype.h>
-#include <string.h>
 #include "gdb_wait.h"
 #include "event-top.h"
 #include "exceptions.h"
@@ -112,12 +110,6 @@ static int debug_timestamp = 0;
 
 int job_control;
 
-#ifndef HAVE_PYTHON
-/* Nonzero means a quit has been requested.  */
-
-int quit_flag;
-#endif /* HAVE_PYTHON */
-
 /* Nonzero means quit immediately if Control-C is typed now, rather
    than waiting until QUIT is executed.  Be careful in setting this;
    code which executes with immediate_quit set has to be very careful
@@ -130,41 +122,6 @@ int quit_flag;
    expect to block), call QUIT after setting immediate_quit.  */
 
 int immediate_quit;
-
-#ifndef HAVE_PYTHON
-
-/* Clear the quit flag.  */
-
-void
-clear_quit_flag (void)
-{
-  quit_flag = 0;
-}
-
-/* Set the quit flag.  */
-
-void
-set_quit_flag (void)
-{
-  quit_flag = 1;
-}
-
-/* Return true if the quit flag has been set, false otherwise.  */
-
-int
-check_quit_flag (void)
-{
-  /* This is written in a particular way to avoid races.  */
-  if (quit_flag)
-    {
-      quit_flag = 0;
-      return 1;
-    }
-
-  return 0;
-}
-
-#endif /* HAVE_PYTHON */
 
 /* Nonzero means that strings with character values >0x7F should be printed
    as octal escapes.  Zero means just print the value (e.g. it's an
@@ -507,6 +464,24 @@ make_cleanup_restore_current_language (void)
 		       (void *) (uintptr_t) saved_lang);
 }
 
+/* Helper function for make_cleanup_clear_parser_state.  */
+
+static void
+do_clear_parser_state (void *ptr)
+{
+  struct parser_state **p = (struct parser_state **) ptr;
+
+  *p = NULL;
+}
+
+/* Clean (i.e., set to NULL) the parser state variable P.  */
+
+struct cleanup *
+make_cleanup_clear_parser_state (struct parser_state **p)
+{
+  return make_cleanup (do_clear_parser_state, (void *) p);
+}
+
 /* This function is useful for cleanups.
    Do
 
@@ -545,31 +520,16 @@ vwarning (const char *string, va_list args)
     (*deprecated_warning_hook) (string, args);
   else
     {
-      target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output.  */
+      if (target_supports_terminal_ours ())
+	target_terminal_ours ();
+      if (filtered_printing_initialized ())
+	wrap_here ("");		/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
       if (warning_pre_print)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
       vfprintf_unfiltered (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
-      va_end (args);
     }
-}
-
-/* Print a warning message.
-   The first argument STRING is the warning message, used as a fprintf string,
-   and the remaining args are passed as arguments to it.
-   The primary difference between warnings and errors is that a warning
-   does not force the return to command level.  */
-
-void
-warning (const char *string, ...)
-{
-  va_list args;
-
-  va_start (args, string);
-  vwarning (string, args);
-  va_end (args);
 }
 
 /* Print an error message and return to command level.
@@ -583,36 +543,6 @@ verror (const char *string, va_list args)
 }
 
 void
-error (const char *string, ...)
-{
-  va_list args;
-
-  va_start (args, string);
-  throw_verror (GENERIC_ERROR, string, args);
-  va_end (args);
-}
-
-/* Print an error message and quit.
-   The first argument STRING is the error message, used as a fprintf string,
-   and the remaining args are passed as arguments to it.  */
-
-void
-vfatal (const char *string, va_list args)
-{
-  throw_vfatal (string, args);
-}
-
-void
-fatal (const char *string, ...)
-{
-  va_list args;
-
-  va_start (args, string);
-  throw_vfatal (string, args);
-  va_end (args);
-}
-
-void
 error_stream (struct ui_file *stream)
 {
   char *message = ui_file_xstrdup (stream, NULL);
@@ -621,9 +551,22 @@ error_stream (struct ui_file *stream)
   error (("%s"), message);
 }
 
+/* Emit a message and abort.  */
+
+static void ATTRIBUTE_NORETURN
+abort_with_message (const char *msg)
+{
+  if (gdb_stderr == NULL)
+    fputs (msg, stderr);
+  else
+    fputs_unfiltered (msg, gdb_stderr);
+
+  abort ();		/* NOTE: GDB has only three calls to abort().  */
+}
+
 /* Dump core trying to increase the core soft limit to hard limit first.  */
 
-static void
+void
 dump_core (void)
 {
 #ifdef HAVE_SETRLIMIT
@@ -636,10 +579,12 @@ dump_core (void)
 }
 
 /* Check whether GDB will be able to dump core using the dump_core
-   function.  */
+   function.  Returns zero if GDB cannot or should not dump core.
+   If LIMIT_KIND is LIMIT_CUR the user's soft limit will be respected.
+   If LIMIT_KIND is LIMIT_MAX only the hard limit will be respected.  */
 
-static int
-can_dump_core (const char *reason)
+int
+can_dump_core (enum resource_limit_kind limit_kind)
 {
 #ifdef HAVE_GETRLIMIT
   struct rlimit rlim;
@@ -648,17 +593,45 @@ can_dump_core (const char *reason)
   if (getrlimit (RLIMIT_CORE, &rlim) != 0)
     return 1;
 
-  if (rlim.rlim_max == 0)
+  switch (limit_kind)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("%s\nUnable to dump core, use `ulimit -c"
-			    " unlimited' before executing GDB next time.\n"),
-			  reason);
-      return 0;
+    case LIMIT_CUR:
+      if (rlim.rlim_cur == 0)
+	return 0;
+
+    case LIMIT_MAX:
+      if (rlim.rlim_max == 0)
+	return 0;
     }
 #endif /* HAVE_GETRLIMIT */
 
   return 1;
+}
+
+/* Print a warning that we cannot dump core.  */
+
+void
+warn_cant_dump_core (const char *reason)
+{
+  fprintf_unfiltered (gdb_stderr,
+		      _("%s\nUnable to dump core, use `ulimit -c"
+			" unlimited' before executing GDB next time.\n"),
+		      reason);
+}
+
+/* Check whether GDB will be able to dump core using the dump_core
+   function, and print a warning if we cannot.  */
+
+static int
+can_dump_core_warn (enum resource_limit_kind limit_kind,
+		    const char *reason)
+{
+  int core_dump_allowed = can_dump_core (limit_kind);
+
+  if (!core_dump_allowed)
+    warn_cant_dump_core (reason);
+
+  return core_dump_allowed;
 }
 
 /* Allow the user to configure the debugger behavior with respect to
@@ -682,7 +655,9 @@ static const char *const internal_problem_modes[] =
 struct internal_problem
 {
   const char *name;
+  int user_settable_should_quit;
   const char *should_quit;
+  int user_settable_should_dump_core;
   const char *should_dump_core;
 };
 
@@ -711,8 +686,7 @@ internal_vproblem (struct internal_problem *problem,
 	break;
       case 1:
 	dejavu = 2;
-	fputs_unfiltered (msg, gdb_stderr);
-	abort ();	/* NOTE: GDB has only three calls to abort().  */
+	abort_with_message (msg);
       default:
 	dejavu = 3;
         /* Newer GLIBC versions put the warn_unused_result attribute
@@ -725,10 +699,6 @@ internal_vproblem (struct internal_problem *problem,
 	exit (1);
       }
   }
-
-  /* Try to get the message out and at the start of a new line.  */
-  target_terminal_ours ();
-  begin_line ();
 
   /* Create a string containing the full error/warning message.  Need
      to call query with this full string, as otherwize the reason
@@ -747,18 +717,32 @@ internal_vproblem (struct internal_problem *problem,
     make_cleanup (xfree, reason);
   }
 
+  /* Fall back to abort_with_message if gdb_stderr is not set up.  */
+  if (gdb_stderr == NULL)
+    {
+      fputs (reason, stderr);
+      abort_with_message ("\n");
+    }
+
+  /* Try to get the message out and at the start of a new line.  */
+  if (target_supports_terminal_ours ())
+    target_terminal_ours ();
+  if (filtered_printing_initialized ())
+    begin_line ();
+
+  /* Emit the message unless query will emit it below.  */
+  if (problem->should_quit != internal_problem_ask
+      || !confirm
+      || !filtered_printing_initialized ())
+    fprintf_unfiltered (gdb_stderr, "%s\n", reason);
+
   if (problem->should_quit == internal_problem_ask)
     {
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
 	 this lessens the likelihood of GDB going into an infinite
 	 loop.  */
-      if (!confirm)
-        {
-          /* Emit the message and quit.  */
-          fputs_unfiltered (reason, gdb_stderr);
-          fputs_unfiltered ("\n", gdb_stderr);
-          quit_p = 1;
-        }
+      if (!confirm || !filtered_printing_initialized ())
+	quit_p = 1;
       else
         quit_p = query (_("%s\nQuit this debugging session? "), reason);
     }
@@ -769,10 +753,18 @@ internal_vproblem (struct internal_problem *problem,
   else
     internal_error (__FILE__, __LINE__, _("bad switch"));
 
+  fputs_unfiltered (_("\nThis is a bug, please report it."), gdb_stderr);
+  if (REPORT_BUGS_TO[0])
+    fprintf_unfiltered (gdb_stderr, _("  For instructions, see:\n%s."),
+			REPORT_BUGS_TO);
+  fputs_unfiltered ("\n\n", gdb_stderr);
+
   if (problem->should_dump_core == internal_problem_ask)
     {
-      if (!can_dump_core (reason))
+      if (!can_dump_core_warn (LIMIT_MAX, reason))
 	dump_core_p = 0;
+      else if (!filtered_printing_initialized ())
+	dump_core_p = 1;
       else
 	{
 	  /* Default (yes/batch case) is to dump core.  This leaves a GDB
@@ -782,7 +774,7 @@ internal_vproblem (struct internal_problem *problem,
 	}
     }
   else if (problem->should_dump_core == internal_problem_yes)
-    dump_core_p = can_dump_core (reason);
+    dump_core_p = can_dump_core_warn (LIMIT_MAX, reason);
   else if (problem->should_dump_core == internal_problem_no)
     dump_core_p = 0;
   else
@@ -811,28 +803,18 @@ internal_vproblem (struct internal_problem *problem,
 }
 
 static struct internal_problem internal_error_problem = {
-  "internal-error", internal_problem_ask, internal_problem_ask
+  "internal-error", 1, internal_problem_ask, 1, internal_problem_ask
 };
 
 void
 internal_verror (const char *file, int line, const char *fmt, va_list ap)
 {
   internal_vproblem (&internal_error_problem, file, line, fmt, ap);
-  fatal (_("Command aborted."));
-}
-
-void
-internal_error (const char *file, int line, const char *string, ...)
-{
-  va_list ap;
-
-  va_start (ap, string);
-  internal_verror (file, line, string, ap);
-  va_end (ap);
+  throw_quit (_("Command aborted."));
 }
 
 static struct internal_problem internal_warning_problem = {
-  "internal-warning", internal_problem_ask, internal_problem_ask
+  "internal-warning", 1, internal_problem_ask, 1, internal_problem_ask
 };
 
 void
@@ -841,13 +823,23 @@ internal_vwarning (const char *file, int line, const char *fmt, va_list ap)
   internal_vproblem (&internal_warning_problem, file, line, fmt, ap);
 }
 
+static struct internal_problem demangler_warning_problem = {
+  "demangler-warning", 1, internal_problem_ask, 0, internal_problem_no
+};
+
 void
-internal_warning (const char *file, int line, const char *string, ...)
+demangler_vwarning (const char *file, int line, const char *fmt, va_list ap)
+{
+  internal_vproblem (&demangler_warning_problem, file, line, fmt, ap);
+}
+
+void
+demangler_warning (const char *file, int line, const char *string, ...)
 {
   va_list ap;
 
   va_start (ap, string);
-  internal_vwarning (file, line, string, ap);
+  demangler_vwarning (file, line, string, ap);
   va_end (ap);
 }
 
@@ -911,45 +903,51 @@ add_internal_problem_command (struct internal_problem *problem)
 			  (char *) NULL),
 		  0/*allow-unknown*/, &maintenance_show_cmdlist);
 
-  set_doc = xstrprintf (_("Set whether GDB should quit "
-			  "when an %s is detected"),
-			problem->name);
-  show_doc = xstrprintf (_("Show whether GDB will quit "
-			   "when an %s is detected"),
-			 problem->name);
-  add_setshow_enum_cmd ("quit", class_maintenance,
-			internal_problem_modes,
-			&problem->should_quit,
-			set_doc,
-			show_doc,
-			NULL, /* help_doc */
-			NULL, /* setfunc */
-			NULL, /* showfunc */
-			set_cmd_list,
-			show_cmd_list);
+  if (problem->user_settable_should_quit)
+    {
+      set_doc = xstrprintf (_("Set whether GDB should quit "
+			      "when an %s is detected"),
+			    problem->name);
+      show_doc = xstrprintf (_("Show whether GDB will quit "
+			       "when an %s is detected"),
+			     problem->name);
+      add_setshow_enum_cmd ("quit", class_maintenance,
+			    internal_problem_modes,
+			    &problem->should_quit,
+			    set_doc,
+			    show_doc,
+			    NULL, /* help_doc */
+			    NULL, /* setfunc */
+			    NULL, /* showfunc */
+			    set_cmd_list,
+			    show_cmd_list);
 
-  xfree (set_doc);
-  xfree (show_doc);
+      xfree (set_doc);
+      xfree (show_doc);
+    }
 
-  set_doc = xstrprintf (_("Set whether GDB should create a core "
-			  "file of GDB when %s is detected"),
-			problem->name);
-  show_doc = xstrprintf (_("Show whether GDB will create a core "
-			   "file of GDB when %s is detected"),
-			 problem->name);
-  add_setshow_enum_cmd ("corefile", class_maintenance,
-			internal_problem_modes,
-			&problem->should_dump_core,
-			set_doc,
-			show_doc,
-			NULL, /* help_doc */
-			NULL, /* setfunc */
-			NULL, /* showfunc */
-			set_cmd_list,
-			show_cmd_list);
+  if (problem->user_settable_should_dump_core)
+    {
+      set_doc = xstrprintf (_("Set whether GDB should create a core "
+			      "file of GDB when %s is detected"),
+			    problem->name);
+      show_doc = xstrprintf (_("Show whether GDB will create a core "
+			       "file of GDB when %s is detected"),
+			     problem->name);
+      add_setshow_enum_cmd ("corefile", class_maintenance,
+			    internal_problem_modes,
+			    &problem->should_dump_core,
+			    set_doc,
+			    show_doc,
+			    NULL, /* help_doc */
+			    NULL, /* setfunc */
+			    NULL, /* showfunc */
+			    set_cmd_list,
+			    show_cmd_list);
 
-  xfree (set_doc);
-  xfree (show_doc);
+      xfree (set_doc);
+      xfree (show_doc);
+    }
 }
 
 /* Return a newly allocated string, containing the PREFIX followed
@@ -1040,18 +1038,24 @@ print_sys_errmsg (const char *string, int errcode)
 void
 quit (void)
 {
+  if (sync_quit_force_run)
+    {
+      sync_quit_force_run = 0;
+      quit_force (NULL, stdin == instream);
+    }
+
 #ifdef __MSDOS__
   /* No steenking SIGINT will ever be coming our way when the
      program is resumed.  Don't lie.  */
-  fatal ("Quit");
+  throw_quit ("Quit");
 #else
   if (job_control
       /* If there is no terminal switching for this target, then we can't
          possibly get screwed by the lack of job control.  */
-      || current_target.to_terminal_ours == NULL)
-    fatal ("Quit");
+      || !target_supports_terminal_ours ())
+    throw_quit ("Quit");
   else
-    fatal ("Quit (expect signal SIGINT when the program is resumed)");
+    throw_quit ("Quit (expect signal SIGINT when the program is resumed)");
 #endif
 }
 
@@ -1513,7 +1517,13 @@ parse_escape (struct gdbarch *gdbarch, const char **string_ptr)
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that this routine should only
    be call for printing things which are independent of the language
-   of the program being debugged.  */
+   of the program being debugged.
+
+   printchar will normally escape backslashes and instances of QUOTER. If
+   QUOTER is 0, printchar won't escape backslashes or any quoting character.
+   As a side effect, if you pass the backslash character as the QUOTER,
+   printchar will escape backslashes as usual, but not any other quoting
+   character. */
 
 static void
 printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
@@ -1556,7 +1566,7 @@ printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
     }
   else
     {
-      if (c == '\\' || c == quoter)
+      if (quoter != 0 && (c == '\\' || c == quoter))
 	do_fputs ("\\", stream);
       do_fprintf (stream, "%c", c);
     }
@@ -1707,6 +1717,13 @@ init_page_info (void)
   set_width ();
 }
 
+/* Return nonzero if filtered printing is initialized.  */
+int
+filtered_printing_initialized (void)
+{
+  return wrap_buffer != NULL;
+}
+
 /* Helper for make_cleanup_restore_page_info.  */
 
 static void
@@ -1824,6 +1841,10 @@ prompt_for_continue (void)
 
   immediate_quit++;
   QUIT;
+
+  /* We'll need to handle input.  */
+  target_terminal_ours ();
+
   /* On a real operating system, the user can quit with SIGINT.
      But not on GO32.
 
@@ -2748,21 +2769,6 @@ When set, debugging messages will be marked with seconds and microseconds."),
 			   &setdebuglist, &showdebuglist);
 }
 
-/* Print routines to handle variable size regs, etc.  */
-/* Temporary storage using circular buffer.  */
-#define NUMCELLS 16
-#define CELLSIZE 50
-static char *
-get_cell (void)
-{
-  static char buf[NUMCELLS][CELLSIZE];
-  static int cell = 0;
-
-  if (++cell >= NUMCELLS)
-    cell = 0;
-  return buf[cell];
-}
-
 const char *
 paddress (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
@@ -2822,278 +2828,6 @@ core_addr_eq (const void *ap, const void *bp)
   return *addr_ap == *addr_bp;
 }
 
-static char *
-decimal2str (char *sign, ULONGEST addr, int width)
-{
-  /* Steal code from valprint.c:print_decimal().  Should this worry
-     about the real size of addr as the above does?  */
-  unsigned long temp[3];
-  char *str = get_cell ();
-  int i = 0;
-
-  do
-    {
-      temp[i] = addr % (1000 * 1000 * 1000);
-      addr /= (1000 * 1000 * 1000);
-      i++;
-      width -= 9;
-    }
-  while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
-
-  width += 9;
-  if (width < 0)
-    width = 0;
-
-  switch (i)
-    {
-    case 1:
-      xsnprintf (str, CELLSIZE, "%s%0*lu", sign, width, temp[0]);
-      break;
-    case 2:
-      xsnprintf (str, CELLSIZE, "%s%0*lu%09lu", sign, width,
-		 temp[1], temp[0]);
-      break;
-    case 3:
-      xsnprintf (str, CELLSIZE, "%s%0*lu%09lu%09lu", sign, width,
-		 temp[2], temp[1], temp[0]);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
-    }
-
-  return str;
-}
-
-static char *
-octal2str (ULONGEST addr, int width)
-{
-  unsigned long temp[3];
-  char *str = get_cell ();
-  int i = 0;
-
-  do
-    {
-      temp[i] = addr % (0100000 * 0100000);
-      addr /= (0100000 * 0100000);
-      i++;
-      width -= 10;
-    }
-  while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
-
-  width += 10;
-  if (width < 0)
-    width = 0;
-
-  switch (i)
-    {
-    case 1:
-      if (temp[0] == 0)
-	xsnprintf (str, CELLSIZE, "%*o", width, 0);
-      else
-	xsnprintf (str, CELLSIZE, "0%0*lo", width, temp[0]);
-      break;
-    case 2:
-      xsnprintf (str, CELLSIZE, "0%0*lo%010lo", width, temp[1], temp[0]);
-      break;
-    case 3:
-      xsnprintf (str, CELLSIZE, "0%0*lo%010lo%010lo", width,
-		 temp[2], temp[1], temp[0]);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
-    }
-
-  return str;
-}
-
-char *
-pulongest (ULONGEST u)
-{
-  return decimal2str ("", u, 0);
-}
-
-char *
-plongest (LONGEST l)
-{
-  if (l < 0)
-    return decimal2str ("-", -l, 0);
-  else
-    return decimal2str ("", l, 0);
-}
-
-/* Eliminate warning from compiler on 32-bit systems.  */
-static int thirty_two = 32;
-
-char *
-phex (ULONGEST l, int sizeof_l)
-{
-  char *str;
-
-  switch (sizeof_l)
-    {
-    case 8:
-      str = get_cell ();
-      xsnprintf (str, CELLSIZE, "%08lx%08lx",
-		 (unsigned long) (l >> thirty_two),
-		 (unsigned long) (l & 0xffffffff));
-      break;
-    case 4:
-      str = get_cell ();
-      xsnprintf (str, CELLSIZE, "%08lx", (unsigned long) l);
-      break;
-    case 2:
-      str = get_cell ();
-      xsnprintf (str, CELLSIZE, "%04x", (unsigned short) (l & 0xffff));
-      break;
-    default:
-      str = phex (l, sizeof (l));
-      break;
-    }
-
-  return str;
-}
-
-char *
-phex_nz (ULONGEST l, int sizeof_l)
-{
-  char *str;
-
-  switch (sizeof_l)
-    {
-    case 8:
-      {
-	unsigned long high = (unsigned long) (l >> thirty_two);
-
-	str = get_cell ();
-	if (high == 0)
-	  xsnprintf (str, CELLSIZE, "%lx",
-		     (unsigned long) (l & 0xffffffff));
-	else
-	  xsnprintf (str, CELLSIZE, "%lx%08lx", high,
-		     (unsigned long) (l & 0xffffffff));
-	break;
-      }
-    case 4:
-      str = get_cell ();
-      xsnprintf (str, CELLSIZE, "%lx", (unsigned long) l);
-      break;
-    case 2:
-      str = get_cell ();
-      xsnprintf (str, CELLSIZE, "%x", (unsigned short) (l & 0xffff));
-      break;
-    default:
-      str = phex_nz (l, sizeof (l));
-      break;
-    }
-
-  return str;
-}
-
-/* Converts a LONGEST to a C-format hexadecimal literal and stores it
-   in a static string.  Returns a pointer to this string.  */
-char *
-hex_string (LONGEST num)
-{
-  char *result = get_cell ();
-
-  xsnprintf (result, CELLSIZE, "0x%s", phex_nz (num, sizeof (num)));
-  return result;
-}
-
-/* Converts a LONGEST number to a C-format hexadecimal literal and
-   stores it in a static string.  Returns a pointer to this string
-   that is valid until the next call.  The number is padded on the
-   left with 0s to at least WIDTH characters.  */
-char *
-hex_string_custom (LONGEST num, int width)
-{
-  char *result = get_cell ();
-  char *result_end = result + CELLSIZE - 1;
-  const char *hex = phex_nz (num, sizeof (num));
-  int hex_len = strlen (hex);
-
-  if (hex_len > width)
-    width = hex_len;
-  if (width + 2 >= CELLSIZE)
-    internal_error (__FILE__, __LINE__, _("\
-hex_string_custom: insufficient space to store result"));
-
-  strcpy (result_end - width - 2, "0x");
-  memset (result_end - width, '0', width);
-  strcpy (result_end - hex_len, hex);
-  return result_end - width - 2;
-}
-
-/* Convert VAL to a numeral in the given radix.  For
- * radix 10, IS_SIGNED may be true, indicating a signed quantity;
- * otherwise VAL is interpreted as unsigned.  If WIDTH is supplied, 
- * it is the minimum width (0-padded if needed).  USE_C_FORMAT means
- * to use C format in all cases.  If it is false, then 'x' 
- * and 'o' formats do not include a prefix (0x or leading 0).  */
-
-char *
-int_string (LONGEST val, int radix, int is_signed, int width, 
-	    int use_c_format)
-{
-  switch (radix) 
-    {
-    case 16:
-      {
-	char *result;
-
-	if (width == 0)
-	  result = hex_string (val);
-	else
-	  result = hex_string_custom (val, width);
-	if (! use_c_format)
-	  result += 2;
-	return result;
-      }
-    case 10:
-      {
-	if (is_signed && val < 0)
-	  return decimal2str ("-", -val, width);
-	else
-	  return decimal2str ("", val, width);
-      }
-    case 8:
-      {
-	char *result = octal2str (val, width);
-
-	if (use_c_format || val == 0)
-	  return result;
-	else
-	  return result + 1;
-      }
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
-    }
-}	
-
-/* Convert a CORE_ADDR into a string.  */
-const char *
-core_addr_to_string (const CORE_ADDR addr)
-{
-  char *str = get_cell ();
-
-  strcpy (str, "0x");
-  strcat (str, phex (addr, sizeof (addr)));
-  return str;
-}
-
-const char *
-core_addr_to_string_nz (const CORE_ADDR addr)
-{
-  char *str = get_cell ();
-
-  strcpy (str, "0x");
-  strcat (str, phex_nz (addr, sizeof (addr)));
-  return str;
-}
-
 /* Convert a string back into a CORE_ADDR.  */
 CORE_ADDR
 string_to_core_addr (const char *my_string)
@@ -3130,15 +2864,6 @@ string_to_core_addr (const char *my_string)
     }
 
   return addr;
-}
-
-const char *
-host_address_to_string (const void *addr)
-{
-  char *str = get_cell ();
-
-  xsnprintf (str, CELLSIZE, "0x%s", phex_nz ((uintptr_t) addr, sizeof (addr)));
-  return str;
 }
 
 char *
@@ -3339,7 +3064,7 @@ gdb_sign_extend (LONGEST value, int bit)
 void *
 hashtab_obstack_allocate (void *data, size_t size, size_t count)
 {
-  unsigned int total = size * count;
+  size_t total = size * count;
   void *ptr = obstack_alloc ((struct obstack *) data, total);
 
   memset (ptr, 0, total);
@@ -3562,7 +3287,7 @@ gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)
 /* Return ARGS parsed as a valid pid, or throw an error.  */
 
 int
-parse_pid_to_attach (char *args)
+parse_pid_to_attach (const char *args)
 {
   unsigned long pid;
   char *dummy;
@@ -3570,7 +3295,7 @@ parse_pid_to_attach (char *args)
   if (!args)
     error_no_arg (_("process-id to attach"));
 
-  dummy = args;
+  dummy = (char *) args;
   pid = strtoul (args, &dummy, 0);
   /* Some targets don't set errno on errors, grrr!  */
   if ((pid == 0 && dummy == args) || dummy != &args[strlen (args)])
@@ -3830,4 +3555,5 @@ _initialize_utils (void)
 {
   add_internal_problem_command (&internal_error_problem);
   add_internal_problem_command (&internal_warning_problem);
+  add_internal_problem_command (&demangler_warning_problem);
 }

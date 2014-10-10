@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -157,6 +157,10 @@
 
 /* The maximum address skip amount that can be encoded with a special op.  */
 #define MAX_SPECIAL_ADDR_DELTA		SPECIAL_ADDR(255)
+
+#ifndef TC_PARSE_CONS_RETURN_NONE
+#define TC_PARSE_CONS_RETURN_NONE BFD_RELOC_NONE
+#endif
 
 struct line_entry {
   struct line_entry *next;
@@ -1144,13 +1148,13 @@ emit_fixed_inc_line_addr (int line_delta, addressT addr_delta, fragS *frag,
       exp.X_op = O_symbol;
       exp.X_add_symbol = to_sym;
       exp.X_add_number = 0;
-      emit_expr_fix (&exp, sizeof_address, frag, p);
+      emit_expr_fix (&exp, sizeof_address, frag, p, TC_PARSE_CONS_RETURN_NONE);
       p += sizeof_address;
     }
   else
     {
       *p++ = DW_LNS_fixed_advance_pc;
-      emit_expr_fix (pexp, 2, frag, p);
+      emit_expr_fix (pexp, 2, frag, p, TC_PARSE_CONS_RETURN_NONE);
       p += 2;
     }
 
@@ -1515,7 +1519,7 @@ static void
 out_debug_line (segT line_seg)
 {
   expressionS exp;
-  symbolS *prologue_end;
+  symbolS *prologue_start, *prologue_end;
   symbolS *line_end;
   struct line_seg *s;
   int sizeof_offset;
@@ -1527,10 +1531,14 @@ out_debug_line (segT line_seg)
   out_two (DWARF2_LINE_VERSION);
 
   /* Length of the prologue following this length.  */
+  prologue_start = symbol_temp_make ();
   prologue_end = symbol_temp_make ();
+  exp.X_op = O_subtract;
   exp.X_add_symbol = prologue_end;
-  exp.X_add_number = - (4 + 2 + 4);
+  exp.X_op_symbol = prologue_start;
+  exp.X_add_number = 0;
   emit_expr (&exp, sizeof_offset);
+  symbol_set_value_now (prologue_start);
 
   /* Parameters of the state machine.  */
   out_byte (DWARF2_LINE_MIN_INSN_LENGTH);

@@ -44,14 +44,13 @@
 
 #include <sys/types.h>
 #include <signal.h>
-#include <string.h>
-
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbthread.h"
 #include "solist.h"
 #include "solib.h"
@@ -339,7 +338,7 @@ osf_solib_create_inferior_hook (int from_tty)
     return;
 
   tp = inferior_thread ();
-  clear_proceed_status ();
+  clear_proceed_status (0);
   inf->control.stop_soon = STOP_QUIETLY;
   tp->suspend.stop_signal = GDB_SIGNAL_0;
   do

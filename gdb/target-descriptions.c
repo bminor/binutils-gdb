@@ -31,7 +31,6 @@
 #include "xml-tdesc.h"
 #include "osabi.h"
 
-#include "gdb_assert.h"
 #include "gdb_obstack.h"
 #include "hashtab.h"
 #include "inferior.h"
@@ -1550,7 +1549,7 @@ static struct cmd_list_element *tdesc_unset_cmdlist;
 static void
 set_tdesc_cmd (char *args, int from_tty)
 {
-  help_list (tdesc_set_cmdlist, "set tdesc ", -1, gdb_stdout);
+  help_list (tdesc_set_cmdlist, "set tdesc ", all_commands, gdb_stdout);
 }
 
 static void
@@ -1562,7 +1561,7 @@ show_tdesc_cmd (char *args, int from_tty)
 static void
 unset_tdesc_cmd (char *args, int from_tty)
 {
-  help_list (tdesc_unset_cmdlist, "unset tdesc ", -1, gdb_stdout);
+  help_list (tdesc_unset_cmdlist, "unset tdesc ", all_commands, gdb_stdout);
 }
 
 static void

@@ -23,8 +23,6 @@
 
 #include "tui.h"
 
-#include <string.h>
-
 /* A ``struct ui_file'' that is compatible with all the legacy
    code.  */
 

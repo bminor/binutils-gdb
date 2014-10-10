@@ -1,5 +1,4 @@
-# Copyright 2012
-# Free Software Foundation, Inc.
+# Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -85,6 +84,9 @@ if [istarget sparc*-*-*] {
     run_dump_test "cfr"
     run_dump_test "ldtw_sttw"
     run_dump_test "ldd_std"
+    run_dump_test "ldx_stx"
+    run_dump_test "ldx_efsr"
+    run_dump_test "ld_st_fsr"
     run_dump_test "edge"
     run_dump_test "flush"
 

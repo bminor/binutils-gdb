@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "bfd.h"
 #include "symfile.h"
 #include "gdbcmd.h"
@@ -29,7 +30,6 @@
 #include "serial.h"
 #include "target.h"
 #include "exceptions.h"
-#include <string.h>
 #include <sys/stat.h>
 #include "gdb_usleep.h"
 #include "regcache.h"
@@ -76,15 +76,7 @@ static ULONGEST mips_request (int cmd, ULONGEST addr, ULONGEST data,
 
 static void mips_initialize (void);
 
-static void mips_open (char *name, int from_tty);
-
-static void pmon_open (char *name, int from_tty);
-
-static void ddb_open (char *name, int from_tty);
-
-static void lsi_open (char *name, int from_tty);
-
-static void mips_close (void);
+static void mips_close (struct target_ops *self);
 
 static int mips_map_regno (struct gdbarch *, int);
 
@@ -98,10 +90,11 @@ static int mips_fetch_word (CORE_ADDR addr, unsigned int *valp);
 static int mips_store_word (CORE_ADDR addr, unsigned int value,
 			    int *old_contents);
 
-static int mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
-			     int write, 
-			     struct mem_attrib *attrib,
-			     struct target_ops *target);
+static enum target_xfer_status mips_xfer_memory (gdb_byte *readbuf,
+						 const gdb_byte *writebuf,
+						 ULONGEST memaddr,
+						 ULONGEST len,
+						 ULONGEST *xfered_len);
 
 static void mips_files_info (struct target_ops *ignore);
 
@@ -126,9 +119,7 @@ static void pmon_end_download (int final, int bintotal);
 
 static void pmon_download (char *buffer, int length);
 
-static void pmon_load_fast (char *file);
-
-static void mips_load (char *file, int from_tty);
+static void mips_load (struct target_ops *self, const char *file, int from_tty);
 
 static int mips_make_srec (char *buffer, int type, CORE_ADDR memaddr,
 			   unsigned char *myaddr, int len);
@@ -1541,7 +1532,7 @@ mips_initialize (void)
 /* Open a connection to the remote board.  */
 
 static void
-common_open (struct target_ops *ops, char *name, int from_tty,
+common_open (struct target_ops *ops, const char *name, int from_tty,
 	     enum mips_monitor_type new_monitor,
 	     const char *new_monitor_prompt)
 {
@@ -1669,7 +1660,7 @@ seen from the board via TFTP, specify that name as the third parameter.\n"));
 /* Open a connection to an IDT board.  */
 
 static void
-mips_open (char *name, int from_tty)
+mips_open (const char *name, int from_tty)
 {
   const char *monitor_prompt = NULL;
   if (gdbarch_bfd_arch_info (target_gdbarch ()) != NULL
@@ -1694,7 +1685,7 @@ mips_open (char *name, int from_tty)
 /* Open a connection to a PMON board.  */
 
 static void
-pmon_open (char *name, int from_tty)
+pmon_open (const char *name, int from_tty)
 {
   common_open (&pmon_ops, name, from_tty, MON_PMON, "PMON> ");
 }
@@ -1702,7 +1693,7 @@ pmon_open (char *name, int from_tty)
 /* Open a connection to a DDB board.  */
 
 static void
-ddb_open (char *name, int from_tty)
+ddb_open (const char *name, int from_tty)
 {
   common_open (&ddb_ops, name, from_tty, MON_DDB, "NEC010>");
 }
@@ -1710,7 +1701,7 @@ ddb_open (char *name, int from_tty)
 /* Open a connection to a rockhopper board.  */
 
 static void
-rockhopper_open (char *name, int from_tty)
+rockhopper_open (const char *name, int from_tty)
 {
   common_open (&rockhopper_ops, name, from_tty, MON_ROCKHOPPER, "NEC01>");
 }
@@ -1718,7 +1709,7 @@ rockhopper_open (char *name, int from_tty)
 /* Open a connection to an LSI board.  */
 
 static void
-lsi_open (char *name, int from_tty)
+lsi_open (const char *name, int from_tty)
 {
   int i;
 
@@ -1732,7 +1723,7 @@ lsi_open (char *name, int from_tty)
 /* Close a connection to the remote board.  */
 
 static void
-mips_close (void)
+mips_close (struct target_ops *self)
 {
   if (mips_is_open)
     {
@@ -2141,18 +2132,17 @@ mips_store_word (CORE_ADDR addr, unsigned int val, int *old_contents)
   return 0;
 }
 
-/* Read or write LEN bytes from inferior memory at MEMADDR,
-   transferring to or from debugger address MYADDR.  Write to inferior
-   if SHOULD_WRITE is nonzero.  Returns length of data written or
-   read; 0 for error.  Note that protocol gives us the correct value
-   for a longword, since it transfers values in ASCII.  We want the
-   byte values, so we have to swap the longword values.  */
+/* Helper for mips_xfer_partial that handles memory transfers.
+   Arguments are like target_xfer_partial.  Note that the protocol
+   gives us the correct value for a longword, since it transfers
+   values in ASCII.  We want the byte values, so we have to swap the
+   longword values.  */
 
 static int mask_address_p = 1;
 
-static int
-mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
-		  struct mem_attrib *attrib, struct target_ops *target)
+static enum target_xfer_status
+mips_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
+		  ULONGEST memaddr, ULONGEST len, ULONGEST *xfered_len)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int i;
@@ -2173,7 +2163,7 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
   /* Allocate buffer of that many longwords.  */
   buffer = alloca (count * 4);
 
-  if (write)
+  if (writebuf != NULL)
     {
       /* Fill start and end extra bytes of buffer with existing data.  */
       if (addr != memaddr || len < 4)
@@ -2181,7 +2171,7 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 	  unsigned int val;
 
 	  if (mips_fetch_word (addr, &val))
-	    return 0;
+	    return TARGET_XFER_E_IO;
 
 	  /* Need part of initial word -- fetch it.  */
 	  store_unsigned_integer (&buffer[0], 4, byte_order, val);
@@ -2194,7 +2184,7 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 	  /* Need part of last word -- fetch it.  FIXME: we do this even
 	     if we don't need it.  */
 	  if (mips_fetch_word (addr + (count - 1) * 4, &val))
-	    return 0;
+	    return TARGET_XFER_E_IO;
 
 	  store_unsigned_integer (&buffer[(count - 1) * 4],
 				  4, byte_order, val);
@@ -2202,7 +2192,7 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 
       /* Copy data to be written over corresponding part of buffer.  */
 
-      memcpy ((char *) buffer + (memaddr & 3), myaddr, len);
+      memcpy ((char *) buffer + (memaddr & 3), writebuf, len);
 
       /* Write the entire buffer.  */
 
@@ -2219,10 +2209,7 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 	      gdb_flush (gdb_stdout);
 	    }
 	  if (status)
-	    {
-	      errno = status;
-	      return 0;
-	    }
+	    return TARGET_XFER_E_IO;
 	  /* FIXME: Do we want a QUIT here?  */
 	}
       if (count >= 256)
@@ -2236,16 +2223,37 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 	  unsigned int val;
 
 	  if (mips_fetch_word (addr, &val))
-	    return 0;
+	    return TARGET_XFER_E_IO;
 
 	  store_unsigned_integer (&buffer[i * 4], 4, byte_order, val);
 	  QUIT;
 	}
 
       /* Copy appropriate bytes out of the buffer.  */
-      memcpy (myaddr, buffer + (memaddr & 3), len);
+      memcpy (readbuf, buffer + (memaddr & 3), len);
     }
-  return len;
+  *xfered_len = len;
+  return TARGET_XFER_OK;
+}
+
+/* Target to_xfer_partial implementation.  */
+
+static enum target_xfer_status
+mips_xfer_partial (struct target_ops *ops, enum target_object object,
+		   const char *annex, gdb_byte *readbuf,
+		   const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		   ULONGEST *xfered_len)
+{
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      return mips_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
+
+    default:
+      return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					    readbuf, writebuf, offset, len,
+					    xfered_len);
+    }
 }
 
 /* Print info on this target.  */
@@ -2391,7 +2399,8 @@ mips_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
    implements the target_can_use_hardware_watchpoint macro.  */
 
 static int
-mips_can_use_watchpoint (int type, int cnt, int othertype)
+mips_can_use_watchpoint (struct target_ops *self,
+			 int type, int cnt, int othertype)
 {
   return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
 }
@@ -2425,7 +2434,8 @@ calculate_mask (CORE_ADDR addr, int len)
    watchpoint.  */
 
 static int
-mips_insert_watchpoint (CORE_ADDR addr, int len, int type,
+mips_insert_watchpoint (struct target_ops *self,
+			CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   if (mips_set_breakpoint (addr, len, type))
@@ -2437,7 +2447,8 @@ mips_insert_watchpoint (CORE_ADDR addr, int len, int type,
 /* Remove a watchpoint.  */
 
 static int
-mips_remove_watchpoint (CORE_ADDR addr, int len, int type,
+mips_remove_watchpoint (struct target_ops *self,
+			CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   if (mips_clear_breakpoint (addr, len, type))
@@ -2450,7 +2461,7 @@ mips_remove_watchpoint (CORE_ADDR addr, int len, int type,
    if not.  */
 
 static int
-mips_stopped_by_watchpoint (void)
+mips_stopped_by_watchpoint (struct target_ops *ops)
 {
   return hit_watchpoint;
 }
@@ -2783,7 +2794,7 @@ send_srec (char *srec, int len, CORE_ADDR addr)
 /*  Download a binary file by converting it to S records.  */
 
 static void
-mips_load_srec (char *args)
+mips_load_srec (const char *args)
 {
   bfd *abfd;
   asection *s;
@@ -3368,7 +3379,7 @@ pmon_download (char *buffer, int length)
    using the FastLoad format.  */
 
 static void
-pmon_load_fast (char *file)
+pmon_load_fast (const char *file)
 {
   bfd *abfd;
   asection *s;
@@ -3527,7 +3538,7 @@ pmon_load_fast (char *file)
 /* mips_load -- download a file.  */
 
 static void
-mips_load (char *file, int from_tty)
+mips_load (struct target_ops *self, const char *file, int from_tty)
 {
   struct regcache *regcache;
 
@@ -3620,7 +3631,7 @@ _initialize_remote_mips (void)
   mips_ops.to_fetch_registers = mips_fetch_registers;
   mips_ops.to_store_registers = mips_store_registers;
   mips_ops.to_prepare_to_store = mips_prepare_to_store;
-  mips_ops.deprecated_xfer_memory = mips_xfer_memory;
+  mips_ops.to_xfer_partial = mips_xfer_partial;
   mips_ops.to_files_info = mips_files_info;
   mips_ops.to_insert_breakpoint = mips_insert_breakpoint;
   mips_ops.to_remove_breakpoint = mips_remove_breakpoint;

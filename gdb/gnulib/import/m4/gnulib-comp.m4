@@ -42,6 +42,8 @@ AC_DEFUN([gl_EARLY],
   # Code from module alloca-opt:
   # Code from module configmake:
   # Code from module dirent:
+  # Code from module dirfd:
+  # Code from module errno:
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   # Code from module extern-inline:
@@ -109,6 +111,13 @@ AC_DEFUN([gl_INIT],
   gl_FUNC_ALLOCA
   gl_CONFIGMAKE_PREP
   gl_DIRENT_H
+  gl_FUNC_DIRFD
+  if test $ac_cv_func_dirfd = no && test $gl_cv_func_dirfd_macro = no; then
+    AC_LIBOBJ([dirfd])
+    gl_PREREQ_DIRFD
+  fi
+  gl_DIRENT_MODULE_INDICATOR([dirfd])
+  gl_HEADER_ERRNO_H
   AC_REQUIRE([gl_EXTERN_INLINE])
   gl_FLOAT_H
   if test $REPLACE_FLOAT_LDBL = 1; then
@@ -359,6 +368,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/alloca.in.h
   lib/config.charset
   lib/dirent.in.h
+  lib/dirfd.c
+  lib/errno.in.h
   lib/float+.h
   lib/float.c
   lib/float.in.h
@@ -413,6 +424,8 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/codeset.m4
   m4/configmake.m4
   m4/dirent_h.m4
+  m4/dirfd.m4
+  m4/errno_h.m4
   m4/exponentd.m4
   m4/exponentl.m4
   m4/extensions.m4

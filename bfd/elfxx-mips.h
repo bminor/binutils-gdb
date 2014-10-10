@@ -1,6 +1,5 @@
 /* MIPS ELF specific backend routines.
-   Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -109,6 +108,8 @@ extern bfd_boolean _bfd_mips_elf_merge_private_bfd_data
   (bfd *, bfd *);
 extern bfd_boolean _bfd_mips_elf_set_private_flags
   (bfd *, flagword);
+extern const char * _bfd_mips_fp_abi_string
+  (int);
 extern bfd_boolean _bfd_mips_elf_print_private_bfd_data
   (bfd *, void *);
 extern bfd_boolean _bfd_mips_elf_discard_info
@@ -156,6 +157,8 @@ extern bfd_vma _bfd_mips_elf_plt_sym_val
   (bfd_vma, const asection *, const arelent *rel);
 extern long _bfd_mips_elf_get_synthetic_symtab
   (bfd *, long, asymbol **, long, asymbol **, asymbol **);
+extern bfd_boolean _bfd_mips_elf_gc_mark_extra_sections
+  (struct bfd_link_info *, elf_gc_mark_hook_fn);
 extern void _bfd_mips_post_process_headers
   (bfd *abfd, struct bfd_link_info *link_info);
 

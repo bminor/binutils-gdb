@@ -47,6 +47,7 @@
 
    # 3 is done by function 'handle_notif_ack'.  */
 
+#include "server.h"
 #include "notif.h"
 
 static struct notif_server *notifs[] =

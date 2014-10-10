@@ -99,3 +99,7 @@ gdb_test "python print xtd\[x_fields\[1\]\]\['a'\]" "102" "xtd->a via field"
 gdb_test "python print len(uu_fields)" "2" "number of fields in uu"
 gdb_test "python print uu\[uu_fields\[0\]\]\['x'\]" "1000" "uu.x via field"
 gdb_test "python print uu\[uu_fields\[1\]\]\['a'\]" "1000" "uu.a via field"
+
+# Test overloaded operators.
+gdb_test_no_output "python a = gdb.parse_and_eval('a')" "init a"
+gdb_test "python print a + 5" "10" "a + 5"

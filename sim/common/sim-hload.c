@@ -27,11 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    modeling a hardware platform. */
 
 SIM_RC
-sim_load (sd, prog_name, prog_bfd, from_tty)
-     SIM_DESC sd;
-     char *prog_name;
-     struct bfd *prog_bfd;
-     int from_tty;
+sim_load (SIM_DESC sd, const char *prog_name, struct bfd *prog_bfd, int from_tty)
 {
   bfd *result_bfd;
 

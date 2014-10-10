@@ -126,6 +126,25 @@ stpy_get_objfile (PyObject *self, void *closure)
   return result;
 }
 
+/* Getter function for symtab.producer.  */
+
+static PyObject *
+stpy_get_producer (PyObject *self, void *closure)
+{
+  struct symtab *symtab = NULL;
+
+  STPY_REQUIRE_VALID (self, symtab);
+  if (symtab->producer != NULL)
+    {
+      const char *producer = symtab->producer;
+
+      return PyString_Decode (producer, strlen (producer),
+			      host_charset (), NULL);
+    }
+
+  Py_RETURN_NONE;
+}
+
 static PyObject *
 stpy_fullname (PyObject *self, PyObject *args)
 {
@@ -161,7 +180,7 @@ stpy_global_block (PyObject *self, PyObject *args)
 {
   struct symtab *symtab = NULL;
   struct block *block = NULL;
-  struct blockvector *blockvector;
+  const struct blockvector *blockvector;
 
   STPY_REQUIRE_VALID (self, symtab);
 
@@ -177,7 +196,7 @@ stpy_static_block (PyObject *self, PyObject *args)
 {
   struct symtab *symtab = NULL;
   struct block *block = NULL;
-  struct blockvector *blockvector;
+  const struct blockvector *blockvector;
 
   STPY_REQUIRE_VALID (self, symtab);
 
@@ -530,6 +549,8 @@ static PyGetSetDef symtab_object_getset[] = {
     "The symbol table's source filename.", NULL },
   { "objfile", stpy_get_objfile, NULL, "The symtab's objfile.",
     NULL },
+  { "producer", stpy_get_producer, NULL,
+    "The name/version of the program that compiled this symtab.", NULL },
   {NULL}  /* Sentinel */
 };
 

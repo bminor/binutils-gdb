@@ -23,19 +23,19 @@
 #include "target.h"
 #include "regcache.h"
 #include "inferior.h"
-#include "gdb_assert.h"
+#include "infrun.h"
 #include "block.h"
 #include "gdbcore.h"
 #include "language.h"
 #include "objfiles.h"
 #include "gdbcmd.h"
 #include "command.h"
-#include <string.h>
 #include "infcall.h"
 #include "dummy-frame.h"
 #include "ada-lang.h"
 #include "gdbthread.h"
 #include "exceptions.h"
+#include "event-top.h"
 
 /* If we can't find a function's name from its address,
    we print this instead.  */
@@ -358,7 +358,7 @@ get_function_name (CORE_ADDR funaddr, char *buf, int buf_size)
     struct bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (funaddr);
 
     if (msymbol.minsym)
-      return SYMBOL_PRINT_NAME (msymbol.minsym);
+      return MSYMBOL_PRINT_NAME (msymbol.minsym);
   }
 
   {
@@ -386,10 +386,15 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   volatile struct gdb_exception e;
   int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
+  int saved_sync_execution = sync_execution;
+
+  /* Infcalls run synchronously, in the foreground.  */
+  if (target_can_async_p ())
+    sync_execution = 1;
 
   call_thread->control.in_infcall = 1;
 
-  clear_proceed_status ();
+  clear_proceed_status (0);
 
   disable_watchpoints_before_interactive_call_start ();
 
@@ -398,15 +403,24 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 
   TRY_CATCH (e, RETURN_MASK_ALL)
     {
+      int was_sync = sync_execution;
+
       proceed (real_pc, GDB_SIGNAL_0, 0);
 
       /* Inferior function calls are always synchronous, even if the
 	 target supports asynchronous execution.  Do here what
 	 `proceed' itself does in sync mode.  */
-      if (target_can_async_p () && is_running (inferior_ptid))
+      if (target_can_async_p ())
 	{
 	  wait_for_inferior ();
 	  normal_stop ();
+	  /* If GDB was previously in sync execution mode, then ensure
+	     that it remains so.  normal_stop calls
+	     async_enable_stdin, so reset it again here.  In other
+	     cases, stdin will be re-enabled by
+	     inferior_event_handler, when an exception is thrown.  */
+	  if (was_sync)
+	    async_disable_stdin ();
 	}
     }
 
@@ -429,6 +443,8 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 
   if (call_thread != NULL)
     call_thread->control.in_infcall = saved_in_infcall;
+
+  sync_execution = saved_sync_execution;
 
   return e;
 }
@@ -815,7 +831,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* Everything's ready, push all the info needed to restore the
      caller (and identify the dummy-frame) onto the dummy-frame
      stack.  */
-  dummy_frame_push (caller_state, &dummy_id);
+  dummy_frame_push (caller_state, &dummy_id, inferior_ptid);
 
   /* Discard both inf_status and caller_state cleanups.
      From this point on we explicitly restore the associated state
@@ -941,7 +957,7 @@ When the function is done executing, GDB will silently stop."),
 
 	      /* We must get back to the frame we were before the
 		 dummy call.  */
-	      dummy_frame_pop (dummy_id);
+	      dummy_frame_pop (dummy_id, call_thread_ptid);
 
 	      /* We also need to restore inferior status to that before the
 		 dummy call.  */
@@ -982,7 +998,7 @@ When the function is done executing, GDB will silently stop."),
 	{
 	  /* We must get back to the frame we were before the dummy
 	     call.  */
-	  dummy_frame_pop (dummy_id);
+	  dummy_frame_pop (dummy_id, call_thread_ptid);
 
 	  /* We also need to restore inferior status to that before
 	     the dummy call.  */

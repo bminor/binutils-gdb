@@ -1,6 +1,5 @@
 /* Generic BFD support for file formats.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002,
-   2003, 2005, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -231,6 +230,9 @@ bfd_boolean
 bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 {
   extern const bfd_target binary_vec;
+#if BFD_SUPPORTS_PLUGINS
+  extern const bfd_target plugin_vec;
+#endif
   const bfd_target * const *target;
   const bfd_target **matching_vector = NULL;
   const bfd_target *save_targ, *right_targ, *ar_right_targ, *match_targ;
@@ -315,6 +317,13 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	  || (!abfd->target_defaulted && *target == save_targ)
 	  || (*target)->match_priority > best_match)
 	continue;
+
+#if BFD_SUPPORTS_PLUGINS
+      /* Since the plugin target is explicitly specified when a BFD file
+	 is opened,  don't check it twice.  */
+      if (*target == &plugin_vec)
+	continue;
+#endif
 
       /* If we already tried a match, the bfd is modified and may
 	 have sections attached, which will confuse the next

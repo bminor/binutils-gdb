@@ -26,8 +26,6 @@
 #include "osabi.h"
 #include "symtab.h"
 
-#include <string.h>
-
 #include "sol2-tdep.h"
 #include "amd64-tdep.h"
 #include "solib-svr4.h"

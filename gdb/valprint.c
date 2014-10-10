@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -32,13 +31,11 @@
 #include "doublest.h"
 #include "exceptions.h"
 #include "dfp.h"
-#include "python/python.h"
+#include "extension.h"
 #include "ada-lang.h"
 #include "gdb_obstack.h"
 #include "charset.h"
 #include <ctype.h>
-
-#include <errno.h>
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -311,8 +308,9 @@ valprint_check_validity (struct ui_file *stream,
       && TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_ARRAY)
     {
-      if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
-			     TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+      if (value_bits_any_optimized_out (val,
+					TARGET_CHAR_BIT * embedded_offset,
+					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
 	  val_print_optimized_out (val, stream);
 	  return 0;
@@ -597,7 +595,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_RANGE:
-      /* FIXME: create_range_type does not set the unsigned bit in a
+      /* FIXME: create_static_range_type does not set the unsigned bit in a
          range type (I think it probably should copy it from the
          target type), so we won't print values which are too large to
          fit in a signed integer correctly.  */
@@ -770,9 +768,9 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
   if (!options->raw)
     {
-      ret = apply_val_pretty_printer (type, valaddr, embedded_offset,
-				      address, stream, recurse,
-				      val, options, language);
+      ret = apply_ext_lang_val_pretty_printer (type, valaddr, embedded_offset,
+					       address, stream, recurse,
+					       val, options, language);
       if (ret)
 	return;
     }
@@ -876,12 +874,13 @@ value_print (struct value *val, struct ui_file *stream,
 
   if (!options->raw)
     {
-      int r = apply_val_pretty_printer (value_type (val),
-					value_contents_for_printing (val),
-					value_embedded_offset (val),
-					value_address (val),
-					stream, 0,
-					val, options, current_language);
+      int r
+	= apply_ext_lang_val_pretty_printer (value_type (val),
+					     value_contents_for_printing (val),
+					     value_embedded_offset (val),
+					     value_address (val),
+					     stream, 0,
+					     val, options, current_language);
 
       if (r)
 	return;
@@ -982,8 +981,9 @@ val_print_scalar_formatted (struct type *type,
 
   /* A scalar object that does not have all bits available can't be
      printed, because all bits contribute to its representation.  */
-  if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
-			      TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+  if (value_bits_any_optimized_out (val,
+				    TARGET_CHAR_BIT * embedded_offset,
+				    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
     val_print_optimized_out (val, stream);
   else if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
     val_print_unavailable (stream);
@@ -1684,12 +1684,12 @@ val_print_array_elements (struct type *type,
       if (options->repeat_count_threshold < UINT_MAX)
 	{
 	  while (rep1 < len
-		 && value_available_contents_eq (val,
-						 embedded_offset + i * eltlen,
-						 val,
-						 (embedded_offset
-						  + rep1 * eltlen),
-						 eltlen))
+		 && value_contents_eq (val,
+				       embedded_offset + i * eltlen,
+				       val,
+				       (embedded_offset
+					+ rep1 * eltlen),
+				       eltlen))
 	    {
 	      ++reps;
 	      ++rep1;
@@ -1726,7 +1726,7 @@ val_print_array_elements (struct type *type,
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Returns a count of the bytes
-   actually read, and optionally a target_xfer_error value in the
+   actually read, and optionally a target_xfer_status value in the
    location pointed to by ERRPTR if ERRPTR is non-null.  */
 
 /* FIXME: cagney/1999-10-14: Only used by val_print_string.  Can this
@@ -1770,7 +1770,7 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
    each.  Fetch at most FETCHLIMIT characters.  BUFFER will be set to a newly
    allocated buffer containing the string, which the caller is responsible to
    free, and BYTES_READ will be set to the number of bytes read.  Returns 0 on
-   success, or a target_xfer_error on failure.
+   success, or a target_xfer_status on failure.
 
    If LEN > 0, reads the lesser of LEN or FETCHLIMIT characters
    (including eventual NULs in the middle or end of the string).
@@ -1948,73 +1948,77 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
   int need_escape = *need_escapep;
 
   *need_escapep = 0;
-  if (gdb_iswprint (w) && (!need_escape || (!gdb_iswdigit (w)
-					    && w != LCST ('8')
-					    && w != LCST ('9'))))
-    {
-      gdb_wchar_t wchar = w;
 
-      if (w == gdb_btowc (quoter) || w == LCST ('\\'))
-	obstack_grow_wstr (output, LCST ("\\"));
-      obstack_grow (output, &wchar, sizeof (gdb_wchar_t));
-    }
-  else
+  /* iswprint implementation on Windows returns 1 for tab character.
+     In order to avoid different printout on this host, we explicitly
+     use wchar_printable function.  */
+  switch (w)
     {
-      switch (w)
+      case LCST ('\a'):
+	obstack_grow_wstr (output, LCST ("\\a"));
+	break;
+      case LCST ('\b'):
+	obstack_grow_wstr (output, LCST ("\\b"));
+	break;
+      case LCST ('\f'):
+	obstack_grow_wstr (output, LCST ("\\f"));
+	break;
+      case LCST ('\n'):
+	obstack_grow_wstr (output, LCST ("\\n"));
+	break;
+      case LCST ('\r'):
+	obstack_grow_wstr (output, LCST ("\\r"));
+	break;
+      case LCST ('\t'):
+	obstack_grow_wstr (output, LCST ("\\t"));
+	break;
+      case LCST ('\v'):
+	obstack_grow_wstr (output, LCST ("\\v"));
+	break;
+      default:
 	{
-	case LCST ('\a'):
-	  obstack_grow_wstr (output, LCST ("\\a"));
-	  break;
-	case LCST ('\b'):
-	  obstack_grow_wstr (output, LCST ("\\b"));
-	  break;
-	case LCST ('\f'):
-	  obstack_grow_wstr (output, LCST ("\\f"));
-	  break;
-	case LCST ('\n'):
-	  obstack_grow_wstr (output, LCST ("\\n"));
-	  break;
-	case LCST ('\r'):
-	  obstack_grow_wstr (output, LCST ("\\r"));
-	  break;
-	case LCST ('\t'):
-	  obstack_grow_wstr (output, LCST ("\\t"));
-	  break;
-	case LCST ('\v'):
-	  obstack_grow_wstr (output, LCST ("\\v"));
-	  break;
-	default:
-	  {
-	    int i;
+	  if (wchar_printable (w) && (!need_escape || (!gdb_iswdigit (w)
+						       && w != LCST ('8')
+						       && w != LCST ('9'))))
+	    {
+	      gdb_wchar_t wchar = w;
 
-	    for (i = 0; i + width <= orig_len; i += width)
-	      {
-		char octal[30];
-		ULONGEST value;
+	      if (w == gdb_btowc (quoter) || w == LCST ('\\'))
+		obstack_grow_wstr (output, LCST ("\\"));
+	      obstack_grow (output, &wchar, sizeof (gdb_wchar_t));
+	    }
+	  else
+	    {
+	      int i;
 
-		value = extract_unsigned_integer (&orig[i], width,
+	      for (i = 0; i + width <= orig_len; i += width)
+		{
+		  char octal[30];
+		  ULONGEST value;
+
+		  value = extract_unsigned_integer (&orig[i], width,
 						  byte_order);
-		/* If the value fits in 3 octal digits, print it that
-		   way.  Otherwise, print it as a hex escape.  */
-		if (value <= 0777)
-		  xsnprintf (octal, sizeof (octal), "\\%.3o",
-			     (int) (value & 0777));
-		else
-		  xsnprintf (octal, sizeof (octal), "\\x%lx", (long) value);
-		append_string_as_wide (octal, output);
-	      }
-	    /* If we somehow have extra bytes, print them now.  */
-	    while (i < orig_len)
-	      {
-		char octal[5];
+		  /* If the value fits in 3 octal digits, print it that
+		     way.  Otherwise, print it as a hex escape.  */
+		  if (value <= 0777)
+		    xsnprintf (octal, sizeof (octal), "\\%.3o",
+			       (int) (value & 0777));
+		  else
+		    xsnprintf (octal, sizeof (octal), "\\x%lx", (long) value);
+		  append_string_as_wide (octal, output);
+		}
+	      /* If we somehow have extra bytes, print them now.  */
+	      while (i < orig_len)
+		{
+		  char octal[5];
 
-		xsnprintf (octal, sizeof (octal), "\\%.3o", orig[i] & 0xff);
-		append_string_as_wide (octal, output);
-		++i;
-	      }
+		  xsnprintf (octal, sizeof (octal), "\\%.3o", orig[i] & 0xff);
+		  append_string_as_wide (octal, output);
+		  ++i;
+		}
 
-	    *need_escapep = 1;
-	  }
+	      *need_escapep = 1;
+	    }
 	  break;
 	}
     }
@@ -2508,8 +2512,10 @@ val_print_string (struct type *elttype, const char *encoding,
      LEN is -1.  */
 
   /* Determine found_nul by looking at the last character read.  */
-  found_nul = extract_unsigned_integer (buffer + bytes_read - width, width,
-					byte_order) == 0;
+  found_nul = 0;
+  if (bytes_read >= width)
+    found_nul = extract_unsigned_integer (buffer + bytes_read - width, width,
+					  byte_order) == 0;
   if (len == -1 && !found_nul)
     {
       gdb_byte *peekbuf;
@@ -2699,7 +2705,7 @@ set_print (char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print\" must be followed by the name of a print subcommand.\n");
-  help_list (setprintlist, "set print ", -1, gdb_stdout);
+  help_list (setprintlist, "set print ", all_commands, gdb_stdout);
 }
 
 static void
@@ -2713,7 +2719,7 @@ set_print_raw (char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print raw\" must be followed by the name of a \"print raw\" subcommand.\n");
-  help_list (setprintrawlist, "set print raw ", -1, gdb_stdout);
+  help_list (setprintrawlist, "set print raw ", all_commands, gdb_stdout);
 }
 
 static void

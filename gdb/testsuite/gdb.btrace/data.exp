@@ -37,9 +37,17 @@ gdb_test "next" ".*main\.3.*"
 gdb_test "reverse-step" ".*test\.4.*"
 
 # we can't read memory while we're replaying
-gdb_test "print glob" "Memory at .* unavailable\."
-gdb_test "print loc" "Memory at .* unavailable\."
+gdb_test "print glob" "unavailable\[^\\\r\\\n\]*"
+gdb_test "print loc" "unavailable\[^\\\r\\\n\]*"
+
+# we can read memory if we explicitly allow it.
+gdb_test_no_output "set record btrace replay-memory-access read-write"
+gdb_test "print glob" "1"
+
+# we can't if we don't explicitly allow it.
+gdb_test_no_output "set record btrace replay-memory-access read-only"
+gdb_test "print glob" "unavailable\[^\\\r\\\n\]*"
 
 # stop replaying and try again
-gdb_test "record goto end"
+gdb_test "record goto end" ".*main\.3.*"
 gdb_test "print glob" "1"

@@ -33,6 +33,19 @@
 /* Define as the word index where to find the exponent of 'double'. */
 #undef DBL_EXPBIT0_WORD
 
+/* the name of the file descriptor member of DIR */
+#undef DIR_FD_MEMBER_NAME
+
+#ifdef DIR_FD_MEMBER_NAME
+# define DIR_TO_FD(Dir_p) ((Dir_p)->DIR_FD_MEMBER_NAME)
+#else
+# define DIR_TO_FD(Dir_p) -1
+#endif
+
+
+/* Define to 1 when the gnulib module dirfd should be tested. */
+#undef GNULIB_TEST_DIRFD
+
 /* Define to 1 when the gnulib module frexp should be tested. */
 #undef GNULIB_TEST_FREXP
 
@@ -74,6 +87,10 @@
 /* Define to 1 if you have the `btowc' function. */
 #undef HAVE_BTOWC
 
+/* Define to 1 if you have the declaration of `dirfd', and to 0 if you don't.
+   */
+#undef HAVE_DECL_DIRFD
+
 /* Define to 1 if you have the declaration of `getc_unlocked', and to 0 if you
    don't. */
 #undef HAVE_DECL_GETC_UNLOCKED
@@ -104,6 +121,9 @@
 
 /* Define to 1 if you have the <dirent.h> header file. */
 #undef HAVE_DIRENT_H
+
+/* Define to 1 if you have the `dirfd' function. */
+#undef HAVE_DIRFD
 
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H

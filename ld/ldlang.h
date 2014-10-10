@@ -1,5 +1,5 @@
 /* ldlang.h - linker command language support
-   Copyright 1991-2013 Free Software Foundation, Inc.
+   Copyright (C) 1991-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -235,6 +235,9 @@ struct lang_input_statement_flags
   /* 1 means this file was specified in a -l option.  */
   unsigned int maybe_archive : 1;
 
+  /* 1 means this file was specified in a -l:namespec option.  */
+  unsigned int full_name_provided : 1;
+
   /* 1 means search a set of directories for this file.  */
   unsigned int search_dirs : 1;
 
@@ -269,16 +272,19 @@ struct lang_input_statement_flags
   /* Set if the file does not exist.  */
   unsigned int missing_file : 1;
 
+  /* Set if reloading an archive or --as-needed lib.  */
+  unsigned int reload : 1;
+
 #ifdef ENABLE_PLUGINS
   /* Set if the file was claimed by a plugin.  */
   unsigned int claimed : 1;
 
   /* Set if the file was claimed from an archive.  */
   unsigned int claim_archive : 1;
-
-  /* Set if reloading an --as-needed lib.  */
-  unsigned int reload : 1;
 #endif /* ENABLE_PLUGINS */
+
+  /* Head of list of pushed flags.  */
+  struct lang_input_statement_flags *pushed;
 };
 
 typedef struct lang_input_statement_struct
@@ -502,7 +508,6 @@ extern lang_output_section_statement_type *abs_output_section;
 extern lang_statement_list_type lang_output_section_statement;
 extern struct lang_input_statement_flags input_flags;
 extern bfd_boolean lang_has_input_file;
-extern etree_type *base;
 extern lang_statement_list_type *stat_ptr;
 extern bfd_boolean delete_output_file_on_failure;
 
@@ -514,6 +519,8 @@ extern lang_statement_list_type input_file_chain;
 
 extern int lang_statement_iteration;
 extern struct asneeded_minfo **asneeded_list_tail;
+
+extern void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
 
 extern void lang_init
   (bfd_boolean);
@@ -628,6 +635,8 @@ extern void lang_for_each_statement_worker
 extern void *stat_alloc
   (size_t);
 extern void strip_excluded_output_sections
+  (void);
+extern void lang_clear_os_map
   (void);
 extern void dprint_statement
   (lang_statement_union_type *, int);

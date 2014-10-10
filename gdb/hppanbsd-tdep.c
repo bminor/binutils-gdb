@@ -25,9 +25,6 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "hppa-tdep.h"
 #include "hppabsd-tdep.h"
 
@@ -181,7 +178,7 @@ hppanbsd_supply_gregset (const struct regset *regset,
 
 /* NetBSD/hppa register set.  */
 
-static struct regset hppanbsd_gregset =
+static const struct regset hppanbsd_gregset =
 {
   NULL,
   hppanbsd_supply_gregset

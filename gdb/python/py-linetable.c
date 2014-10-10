@@ -168,7 +168,7 @@ static PyObject *
 ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
 {
   struct symtab *symtab;
-  int py_line;
+  gdb_py_longest py_line;
   struct linetable_entry *best_entry = NULL;
   linetable_entry_object *result;
   VEC (CORE_ADDR) *pcs = NULL;
@@ -200,7 +200,7 @@ static PyObject *
 ltpy_has_line (PyObject *self, PyObject *args)
 {
   struct symtab *symtab;
-  int py_line;
+  gdb_py_longest py_line;
   int index;
 
   LTPY_REQUIRE_VALID (self, symtab);

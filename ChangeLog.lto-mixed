@@ -1,5 +1,10 @@
 bfd/
 
+2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* format.c (bfd_check_format_matches): Don't check the plugin
+	target twice.
+
 2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (lang_finish): Take a bfd_boolean argument to support
@@ -72,12 +77,6 @@ bfd/
 	object_only_syms.
 
 	* bfd-in2.h: Regenerated.
-
-2011-05-14  H.J. Lu  <hongjiu.lu@intel.com>
-
-	PR ld/12758
-	* elflink.c (elf_link_add_archive_symbols): Don't load the IR
-	archive member twice.
 
 2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -250,9 +249,8 @@ ld/
 
 	* ldmain.h (ld_parse_linker_script): New.
 
-	* plugin.c (plugin_opt_plugin_arg): Ignore -pass-through=.
-	(plugin_maybe_claim): Call cmdline_check_object_only_section
-	on claimed IR files.
+	* plugin.c (plugin_maybe_claim): Call
+	cmdline_check_object_only_section on claimed IR files.
 
 	* scripttempl/armbpabi.sc: Also discard .gnu_object_only
 	sections.
@@ -265,6 +263,10 @@ ld/
 	* scripttempl/pep.sc: Likewise.
 
 ld/testsuite/
+
+2014-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-plugin/lto.exp: Add test for nm on mixed LTO/non-LTO object.
 
 2012-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 

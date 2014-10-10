@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include <string.h>
-#include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
 #ifdef HAVE_SYS_FILE_H
@@ -28,6 +26,7 @@
 #endif
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
+#include "infrun.h"
 #include "symtab.h"
 #include "command.h"
 #include "bfd.h"
@@ -39,7 +38,6 @@
 #include "symfile.h"
 #include "exec.h"
 #include "readline/readline.h"
-#include "gdb_assert.h"
 #include "exceptions.h"
 #include "solib.h"
 #include "filenames.h"
@@ -83,9 +81,7 @@ static struct core_fns *sniff_core_bfd (bfd *);
 
 static int gdb_check_format (bfd *);
 
-static void core_open (char *, int);
-
-static void core_close (void);
+static void core_close (struct target_ops *self);
 
 static void core_close_cleanup (void *ignore);
 
@@ -192,7 +188,7 @@ gdb_check_format (bfd *abfd)
    stack spaces as empty.  */
 
 static void
-core_close (void)
+core_close (struct target_ops *self)
 {
   if (core_bfd)
     {
@@ -223,7 +219,7 @@ core_close (void)
 static void
 core_close_cleanup (void *ignore)
 {
-  core_close ();
+  core_close (NULL);
 }
 
 /* Look for sections whose names start with `.reg/' so that we can
@@ -274,7 +270,7 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 /* This routine opens and sets up the core file bfd.  */
 
 static void
-core_open (char *filename, int from_tty)
+core_open (const char *arg, int from_tty)
 {
   const char *p;
   int siggy;
@@ -284,9 +280,10 @@ core_open (char *filename, int from_tty)
   int scratch_chan;
   int flags;
   volatile struct gdb_exception except;
+  char *filename;
 
   target_preopen (from_tty);
-  if (!filename)
+  if (!arg)
     {
       if (core_bfd)
 	error (_("No core file specified.  (Use `detach' "
@@ -295,7 +292,7 @@ core_open (char *filename, int from_tty)
 	error (_("No core file specified."));
     }
 
-  filename = tilde_expand (filename);
+  filename = tilde_expand (arg);
   if (!IS_ABSOLUTE_PATH (filename))
     {
       temp = concat (current_directory, "/",
@@ -672,17 +669,17 @@ get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
   return len;
 }
 
-static LONGEST
+static enum target_xfer_status
 core_xfer_partial (struct target_ops *ops, enum target_object object,
 		   const char *annex, gdb_byte *readbuf,
 		   const gdb_byte *writebuf, ULONGEST offset,
-		   ULONGEST len)
+		   ULONGEST len, ULONGEST *xfered_len)
 {
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
       return section_table_xfer_memory_partial (readbuf, writebuf,
-						offset, len,
+						offset, len, xfered_len,
 						core_data->sections,
 						core_data->sections_end,
 						NULL);
@@ -698,25 +695,28 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	  section = bfd_get_section_by_name (core_bfd, ".auxv");
 	  if (section == NULL)
-	    return -1;
+	    return TARGET_XFER_E_IO;
 
 	  size = bfd_section_size (core_bfd, section);
 	  if (offset >= size)
-	    return 0;
+	    return TARGET_XFER_EOF;
 	  size -= offset;
 	  if (size > len)
 	    size = len;
-	  if (size > 0
-	      && !bfd_get_section_contents (core_bfd, section, readbuf,
-					    (file_ptr) offset, size))
+
+	  if (size == 0)
+	    return TARGET_XFER_EOF;
+	  if (!bfd_get_section_contents (core_bfd, section, readbuf,
+					 (file_ptr) offset, size))
 	    {
 	      warning (_("Couldn't read NT_AUXV note in core file."));
-	      return -1;
+	      return TARGET_XFER_E_IO;
 	    }
 
-	  return size;
+	  *xfered_len = (ULONGEST) size;
+	  return TARGET_XFER_OK;
 	}
-      return -1;
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_WCOOKIE:
       if (readbuf)
@@ -730,35 +730,47 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	  section = bfd_get_section_by_name (core_bfd, ".wcookie");
 	  if (section == NULL)
-	    return -1;
+	    return TARGET_XFER_E_IO;
 
 	  size = bfd_section_size (core_bfd, section);
 	  if (offset >= size)
-	    return 0;
+	    return TARGET_XFER_EOF;
 	  size -= offset;
 	  if (size > len)
 	    size = len;
-	  if (size > 0
-	      && !bfd_get_section_contents (core_bfd, section, readbuf,
-					    (file_ptr) offset, size))
+
+	  if (size == 0)
+	    return TARGET_XFER_EOF;
+	  if (!bfd_get_section_contents (core_bfd, section, readbuf,
+					 (file_ptr) offset, size))
 	    {
 	      warning (_("Couldn't read StackGhost cookie in core file."));
-	      return -1;
+	      return TARGET_XFER_E_IO;
 	    }
 
-	  return size;
+	  *xfered_len = (ULONGEST) size;
+	  return TARGET_XFER_OK;
+
 	}
-      return -1;
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_LIBRARIES:
       if (core_gdbarch
 	  && gdbarch_core_xfer_shared_libraries_p (core_gdbarch))
 	{
 	  if (writebuf)
-	    return -1;
-	  return
-	    gdbarch_core_xfer_shared_libraries (core_gdbarch,
-						readbuf, offset, len);
+	    return TARGET_XFER_E_IO;
+	  else
+	    {
+	      *xfered_len = gdbarch_core_xfer_shared_libraries (core_gdbarch,
+								readbuf,
+								offset, len);
+
+	      if (*xfered_len == 0)
+		return TARGET_XFER_EOF;
+	      else
+		return TARGET_XFER_OK;
+	    }
 	}
       /* FALL THROUGH */
 
@@ -767,10 +779,19 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	  && gdbarch_core_xfer_shared_libraries_aix_p (core_gdbarch))
 	{
 	  if (writebuf)
-	    return -1;
-	  return
-	    gdbarch_core_xfer_shared_libraries_aix (core_gdbarch,
-						    readbuf, offset, len);
+	    return TARGET_XFER_E_IO;
+	  else
+	    {
+	      *xfered_len
+		= gdbarch_core_xfer_shared_libraries_aix (core_gdbarch,
+							  readbuf, offset,
+							  len);
+
+	      if (*xfered_len == 0)
+		return TARGET_XFER_EOF;
+	      else
+		return TARGET_XFER_OK;
+	    }
 	}
       /* FALL THROUGH */
 
@@ -789,23 +810,26 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	  section = bfd_get_section_by_name (core_bfd, sectionstr);
 	  if (section == NULL)
-	    return -1;
+	    return TARGET_XFER_E_IO;
 
 	  size = bfd_section_size (core_bfd, section);
 	  if (offset >= size)
-	    return 0;
+	    return TARGET_XFER_EOF;
 	  size -= offset;
 	  if (size > len)
 	    size = len;
-	  if (size > 0
-	      && !bfd_get_section_contents (core_bfd, section, readbuf,
-					    (file_ptr) offset, size))
+
+	  if (size == 0)
+	    return TARGET_XFER_EOF;
+	  if (!bfd_get_section_contents (core_bfd, section, readbuf,
+					 (file_ptr) offset, size))
 	    {
 	      warning (_("Couldn't read SPU section in core file."));
-	      return -1;
+	      return TARGET_XFER_E_IO;
 	    }
 
-	  return size;
+	  *xfered_len = (ULONGEST) size;
+	  return TARGET_XFER_OK;
 	}
       else if (readbuf)
 	{
@@ -818,21 +842,35 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	  list.pos = 0;
 	  list.written = 0;
 	  bfd_map_over_sections (core_bfd, add_to_spuid_list, &list);
-	  return list.written;
+
+	  if (list.written == 0)
+	    return TARGET_XFER_EOF;
+	  else
+	    {
+	      *xfered_len = (ULONGEST) list.written;
+	      return TARGET_XFER_OK;
+	    }
 	}
-      return -1;
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_SIGNAL_INFO:
       if (readbuf)
-	return get_core_siginfo (core_bfd, readbuf, offset, len);
-      return -1;
+	{
+	  LONGEST l = get_core_siginfo (core_bfd, readbuf, offset, len);
+
+	  if (l > 0)
+	    {
+	      *xfered_len = len;
+	      return TARGET_XFER_OK;
+	    }
+	}
+      return TARGET_XFER_E_IO;
 
     default:
-      if (ops->beneath != NULL)
-	return ops->beneath->to_xfer_partial (ops->beneath, object,
-					      annex, readbuf,
-					      writebuf, offset, len);
-      return -1;
+      return ops->beneath->to_xfer_partial (ops->beneath, object,
+					    annex, readbuf,
+					    writebuf, offset, len,
+					    xfered_len);
     }
 }
 
@@ -870,10 +908,16 @@ static const struct target_desc *
 core_read_description (struct target_ops *target)
 {
   if (core_gdbarch && gdbarch_core_read_description_p (core_gdbarch))
-    return gdbarch_core_read_description (core_gdbarch, 
-					  target, core_bfd);
+    {
+      const struct target_desc *result;
 
-  return NULL;
+      result = gdbarch_core_read_description (core_gdbarch, 
+					      target, core_bfd);
+      if (result != NULL)
+	return result;
+    }
+
+  return target->beneath->to_read_description (target->beneath);
 }
 
 static char *
@@ -929,7 +973,8 @@ core_has_registers (struct target_ops *ops)
 /* Implement the to_info_proc method.  */
 
 static void
-core_info_proc (struct target_ops *ops, char *args, enum info_proc_what request)
+core_info_proc (struct target_ops *ops, const char *args,
+		enum info_proc_what request)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
@@ -950,14 +995,12 @@ init_core_ops (void)
     "Use a core file as a target.  Specify the filename of the core file.";
   core_ops.to_open = core_open;
   core_ops.to_close = core_close;
-  core_ops.to_attach = find_default_attach;
   core_ops.to_detach = core_detach;
   core_ops.to_fetch_registers = get_core_registers;
   core_ops.to_xfer_partial = core_xfer_partial;
   core_ops.to_files_info = core_files_info;
   core_ops.to_insert_breakpoint = ignore;
   core_ops.to_remove_breakpoint = ignore;
-  core_ops.to_create_inferior = find_default_create_inferior;
   core_ops.to_thread_alive = core_thread_alive;
   core_ops.to_read_description = core_read_description;
   core_ops.to_pid_to_str = core_pid_to_str;

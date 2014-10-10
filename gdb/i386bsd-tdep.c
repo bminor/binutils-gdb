@@ -24,8 +24,6 @@
 #include "regcache.h"
 #include "osabi.h"
 
-#include <string.h>
-
 #include "i386-tdep.h"
 
 /* Support for signal handlers.  */

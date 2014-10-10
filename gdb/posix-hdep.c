@@ -20,8 +20,6 @@
 #include "defs.h"
 #include "event-loop.h"
 
-#include <string.h>
-
 #include "gdb_select.h"
 
 /* The strerror() function can return NULL for errno values that are

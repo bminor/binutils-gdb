@@ -28,6 +28,10 @@ extern void mi_load_progress (const char *section_name,
 
 extern void mi_print_timing_maybe (void);
 
+/* Whether MI is in async mode.  */
+
+extern int mi_async_p (void);
+
 extern char *current_token;
 
 extern int running_result_record_printed;

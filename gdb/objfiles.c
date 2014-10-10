@@ -33,12 +33,10 @@
 #include "expression.h"
 #include "parser-defs.h"
 
-#include "gdb_assert.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "gdb_obstack.h"
-#include <string.h>
 #include "hashtab.h"
 
 #include "breakpoint.h"
@@ -294,7 +292,6 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
   /* We could use obstack_specify_allocation here instead, but
      gdb_obstack.h specifies the alloc/dealloc functions.  */
   obstack_init (&objfile->objfile_obstack);
-  terminate_minimal_symbol_table (objfile);
 
   objfile_alloc_data (objfile);
 
@@ -333,6 +330,8 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
 
   objfile->per_bfd = get_objfile_bfd_data (objfile, abfd);
   objfile->pspace = current_program_space;
+
+  terminate_minimal_symbol_table (objfile);
 
   /* Initialize the section indexes for this objfile, so that we can
      later detect if they are used w/o being properly assigned to.  */
@@ -745,7 +744,7 @@ objfile_relocate1 (struct objfile *objfile,
     ALL_OBJFILE_SYMTABS (objfile, s)
     {
       struct linetable *l;
-      struct blockvector *bv;
+      const struct blockvector *bv;
       int i;
 
       /* First the line table.  */
@@ -801,17 +800,6 @@ objfile_relocate1 (struct objfile *objfile,
     objfile->sf->qf->relocate (objfile, new_offsets, delta);
 
   {
-    struct minimal_symbol *msym;
-
-    ALL_OBJFILE_MSYMBOLS (objfile, msym)
-      if (SYMBOL_SECTION (msym) >= 0)
-      SYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta, SYMBOL_SECTION (msym));
-  }
-  /* Relocating different sections by different amounts may cause the symbols
-     to be out of order.  */
-  msymbols_sort (objfile);
-
-  {
     int i;
 
     for (i = 0; i < objfile->num_sections; ++i)
@@ -829,11 +817,6 @@ objfile_relocate1 (struct objfile *objfile,
       exec_set_section_address (bfd_get_filename (objfile->obfd), idx,
 				obj_section_addr (s));
     }
-
-  /* Relocating probes.  */
-  if (objfile->sf && objfile->sf->sym_probe_fns)
-    objfile->sf->sym_probe_fns->sym_relocate_probe (objfile,
-						    new_offsets, delta);
 
   /* Data changed.  */
   return 1;
@@ -1040,7 +1023,7 @@ have_minimal_symbols (void)
 
   ALL_OBJFILES (ofp)
   {
-    if (ofp->minimal_symbol_count > 0)
+    if (ofp->per_bfd->minimal_symbol_count > 0)
       {
 	return 1;
       }
@@ -1465,6 +1448,22 @@ is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile)
 	  && addr < obj_section_endaddr (osect))
 	return 1;
     }
+  return 0;
+}
+
+int
+shared_objfile_contains_address_p (struct program_space *pspace,
+				   CORE_ADDR address)
+{
+  struct objfile *objfile;
+
+  ALL_PSPACE_OBJFILES (pspace, objfile)
+    {
+      if ((objfile->flags & OBJF_SHARED) != 0
+	  && is_addr_in_objfile (address, objfile))
+	return 1;
+    }
+
   return 0;
 }
 

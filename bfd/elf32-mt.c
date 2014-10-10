@@ -1,6 +1,5 @@
 /* Morpho Technologies MT specific support for 32-bit ELF
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -574,7 +573,7 @@ mt_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 }
 
 
-#define TARGET_BIG_SYM	 bfd_elf32_mt_vec
+#define TARGET_BIG_SYM	 mt_elf32_vec
 #define TARGET_BIG_NAME  "elf32-mt"
 
 #define ELF_ARCH	 bfd_arch_mt

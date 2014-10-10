@@ -31,9 +31,7 @@
 #include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
 #include "linux-tdep.h"
-#include "i386-xstate.h"
-
-#include <string.h>
+#include "x86-xstate.h"
 
 #include "amd64-tdep.h"
 #include "solib-svr4.h"
@@ -43,8 +41,11 @@
 #include "features/i386/amd64-linux.c"
 #include "features/i386/amd64-avx-linux.c"
 #include "features/i386/amd64-mpx-linux.c"
+#include "features/i386/amd64-avx512-linux.c"
+
 #include "features/i386/x32-linux.c"
 #include "features/i386/x32-avx-linux.c"
+#include "features/i386/x32-avx512-linux.c"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
@@ -57,7 +58,7 @@ static struct core_regset_section amd64_linux_regset_sections[] =
 {
   { ".reg", 27 * 8, "general-purpose" },
   { ".reg2", 512, "floating-point" },
-  { ".reg-xstate", I386_XSTATE_MAX_SIZE, "XSAVE extended state" },
+  { ".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state" },
   { NULL, 0 }
 };
 
@@ -99,7 +100,16 @@ int amd64_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1,		/* MPX registers BND0 ... BND3.  */
   -1, -1,			/* MPX registers BNDCFGU and BNDSTATUS.  */
-  15 * 8			/* "orig_rax" */
+  -1, -1, -1, -1, -1, -1, -1, -1,     /* xmm16 ... xmm31 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,     /* ymm16 ... ymm31 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,     /* k0 ... k7 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1,     /* zmm0 ... zmm31 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  15 * 8			      /* "orig_rax" */
 };
 
 
@@ -1573,14 +1583,20 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
   /* Linux/x86-64.  */
   uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
 
-  switch (xcr0 & I386_XSTATE_ALL_MASK)
+  switch (xcr0 & X86_XSTATE_ALL_MASK)
     {
-    case I386_XSTATE_MPX_MASK:
+    case X86_XSTATE_MPX_AVX512_MASK:
+    case X86_XSTATE_AVX512_MASK:
+      if (gdbarch_ptr_bit (gdbarch) == 32)
+	return tdesc_x32_avx512_linux;
+      else
+	return tdesc_amd64_avx512_linux;
+    case X86_XSTATE_MPX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	return tdesc_x32_avx_linux;  /* No x32 MPX falling back to AVX.  */
       else
 	return tdesc_amd64_mpx_linux;
-    case I386_XSTATE_AVX_MASK:
+    case X86_XSTATE_AVX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	return tdesc_x32_avx_linux;
       else
@@ -2083,6 +2099,9 @@ _initialize_amd64_linux_tdep (void)
   initialize_tdesc_amd64_linux ();
   initialize_tdesc_amd64_avx_linux ();
   initialize_tdesc_amd64_mpx_linux ();
+  initialize_tdesc_amd64_avx512_linux ();
+
   initialize_tdesc_x32_linux ();
   initialize_tdesc_x32_avx_linux ();
+  initialize_tdesc_x32_avx512_linux ();
 }

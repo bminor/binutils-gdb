@@ -24,8 +24,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <ctype.h>
-#include <string.h>
-
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
@@ -948,7 +946,6 @@ record_minimal_symbol (const char *name, CORE_ADDR address,
   if (name[0] == '.')
     ++name;
 
-  address += ANOFFSET (objfile->section_offsets, section);
   prim_record_minimal_symbol_and_info (name, address, ms_type,
 				       secnum_to_section (n_scnum, objfile),
 				       objfile);

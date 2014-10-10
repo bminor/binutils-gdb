@@ -26,8 +26,6 @@
 
 #include "defs.h"
 #include "mi-console.h"
-#include <string.h>
-
 static ui_file_fputs_ftype mi_console_file_fputs;
 static ui_file_flush_ftype mi_console_file_flush;
 static ui_file_delete_ftype mi_console_file_delete;
@@ -110,15 +108,16 @@ mi_console_raw_packet (void *data, const char *buf, long length_buf)
       fputs_unfiltered (mi_console->prefix, mi_console->raw);
       if (mi_console->quote)
 	{
-	  fputs_unfiltered ("\"", mi_console->raw);
+	  fputc_unfiltered (mi_console->quote, mi_console->raw);
 	  fputstrn_unfiltered (buf, length_buf,
 			       mi_console->quote, mi_console->raw);
-	  fputs_unfiltered ("\"\n", mi_console->raw);
+	  fputc_unfiltered (mi_console->quote, mi_console->raw);
+	  fputc_unfiltered ('\n', mi_console->raw);
 	}
       else
 	{
 	  fputstrn_unfiltered (buf, length_buf, 0, mi_console->raw);
-	  fputs_unfiltered ("\n", mi_console->raw);
+	  fputc_unfiltered ('\n', mi_console->raw);
 	}
       gdb_flush (mi_console->raw);
     }

@@ -1,6 +1,6 @@
 // gdb-index.cc -- generate .gdb_index section for fast debug lookup
 
-// Copyright 2012 Free Software Foundation, Inc.
+// Copyright (C) 2012-2014 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
@@ -32,7 +32,7 @@
 namespace gold
 {
 
-const int gdb_index_version = 5;
+const int gdb_index_version = 7;
 
 // Sizes of various records in the .gdb_index section.
 const int gdb_index_offset_size = 4;
@@ -357,20 +357,6 @@ Gdb_index_info_reader::visit_top_die(Dwarf_die* die)
       case elfcpp::DW_TAG_compile_unit:
       case elfcpp::DW_TAG_type_unit:
 	this->cu_language_ = die->int_attribute(elfcpp::DW_AT_language);
-	// Check for languages that require specialized knowledge to
-	// construct fully-qualified names, that we don't yet support.
-	if (this->cu_language_ == elfcpp::DW_LANG_Ada83
-	    || this->cu_language_ == elfcpp::DW_LANG_Fortran77
-	    || this->cu_language_ == elfcpp::DW_LANG_Fortran90
-	    || this->cu_language_ == elfcpp::DW_LANG_Java
-	    || this->cu_language_ == elfcpp::DW_LANG_Ada95
-	    || this->cu_language_ == elfcpp::DW_LANG_Fortran95)
-	  {
-	    gold_warning(_("%s: --gdb-index currently supports "
-			   "only C and C++ languages"),
-			 this->object()->name().c_str());
-	    return;
-	  }
 	if (die->tag() == elfcpp::DW_TAG_compile_unit)
 	  this->record_cu_ranges(die);
 	// If there is a pubnames and/or pubtypes section for this
@@ -378,6 +364,20 @@ Gdb_index_info_reader::visit_top_die(Dwarf_die* die)
 	// info to extract the names.
 	if (!this->read_pubnames_and_pubtypes(die))
 	  {
+	    // Check for languages that require specialized knowledge to
+	    // construct fully-qualified names, that we don't yet support.
+	    if (this->cu_language_ == elfcpp::DW_LANG_Ada83
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran77
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran90
+		|| this->cu_language_ == elfcpp::DW_LANG_Java
+		|| this->cu_language_ == elfcpp::DW_LANG_Ada95
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran95)
+	      {
+		gold_warning(_("%s: --gdb-index currently supports "
+			       "only C and C++ languages"),
+			     this->object()->name().c_str());
+		return;
+	      }
 	    if (die->tag() == elfcpp::DW_TAG_compile_unit)
 	      ++Gdb_index_info_reader::dwarf_cu_nopubnames_count;
 	    else
@@ -392,7 +392,6 @@ Gdb_index_info_reader::visit_top_die(Dwarf_die* die)
 		     this->object()->name().c_str());
 	return;
     }
-
 }
 
 // Visit the children of PARENT, looking for symbols to add to the index.
@@ -436,7 +435,8 @@ Gdb_index_info_reader::visit_die(Dwarf_die* die, Dwarf_die* context)
 	    // If the DIE is not a declaration, add it to the index.
 	    std::string full_name = this->get_qualified_name(die, context);
 	    if (!full_name.empty())
-	      this->gdb_index_->add_symbol(this->cu_index_, full_name.c_str());
+	      this->gdb_index_->add_symbol(this->cu_index_,
+                                           full_name.c_str(), 0);
 	  }
 	break;
       case elfcpp::DW_TAG_typedef:
@@ -476,7 +476,7 @@ Gdb_index_info_reader::visit_die(Dwarf_die* die, Dwarf_die* context)
 		full_name = this->get_qualified_name(die, context);
 	      if (!full_name.empty())
 		this->gdb_index_->add_symbol(this->cu_index_,
-					     full_name.c_str());
+					     full_name.c_str(), 0);
 	    }
 
 	  // We're interested in the children only for namespaces and
@@ -870,11 +870,12 @@ Gdb_index_info_reader::read_pubtable(Dwarf_pubnames_table* table, off_t offset)
     return false;
   while (true)
     {
-      const char* name = table->next_name();
+      uint8_t flag_byte;
+      const char* name = table->next_name(&flag_byte);
       if (name == NULL)
         break;
 
-      this->gdb_index_->add_symbol(this->cu_index_, name);
+      this->gdb_index_->add_symbol(this->cu_index_, name, flag_byte);
     }
   return true;
 }
@@ -885,6 +886,14 @@ Gdb_index_info_reader::read_pubtable(Dwarf_pubnames_table* table, off_t offset)
 bool
 Gdb_index_info_reader::read_pubnames_and_pubtypes(Dwarf_die* die)
 {
+  // If this is a skeleton debug-type die (generated via
+  // -gsplit-dwarf), then the associated pubnames should have been
+  // read along with the corresponding CU.  In any case, there isn't
+  // enough info inside to build a gdb index entry.
+  if (die->tag() == elfcpp::DW_TAG_type_unit
+      && die->string_attribute(elfcpp::DW_AT_GNU_dwo_name))
+    return true;
+
   // We use stmt_list_off as a unique identifier for the
   // compilation unit and its associated type units.
   unsigned int shndx;
@@ -1112,7 +1121,7 @@ Gdb_index::scan_debug_info(bool is_type_unit,
 // Add a symbol.
 
 void
-Gdb_index::add_symbol(int cu_index, const char* sym_name)
+Gdb_index::add_symbol(int cu_index, const char* sym_name, uint8_t flags)
 {
   unsigned int hash = mapped_index_string_hash(
       reinterpret_cast<const unsigned char*>(sym_name));
@@ -1139,8 +1148,10 @@ Gdb_index::add_symbol(int cu_index, const char* sym_name)
   // if it's not already on the list.  We only need to
   // check the last added entry.
   Cu_vector* cu_vec = this->cu_vector_list_[found->cu_vector_index];
-  if (cu_vec->size() == 0 || cu_vec->back() != cu_index)
-    cu_vec->push_back(cu_index);
+  if (cu_vec->size() == 0
+      || cu_vec->back().first != cu_index
+      || cu_vec->back().second != flags)
+    cu_vec->push_back(std::make_pair(cu_index, flags));
 }
 
 // Return TRUE if we have already processed the pubnames associated
@@ -1317,9 +1328,11 @@ Gdb_index::do_write(Output_file* of)
       pov += 4;
       for (unsigned int j = 0; j < cu_vec->size(); ++j)
 	{
-	  int cu_index = (*cu_vec)[j];
+	  int cu_index = (*cu_vec)[j].first;
+          uint8_t flags = (*cu_vec)[j].second;
 	  if (cu_index < 0)
 	    cu_index = comp_units_count + (-1 - cu_index);
+          cu_index |= flags << 24;
 	  elfcpp::Swap<32, false>::writeval(pov, cu_index);
 	  pov += 4;
 	}

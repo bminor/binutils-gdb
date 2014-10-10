@@ -101,7 +101,7 @@ struct gdbarch_tdep
   struct sh_corefile_regmap *core_fpregmap;
 };
 
-extern struct regset sh_corefile_gregset;
+extern const struct regset sh_corefile_gregset;
 
 void sh_corefile_supply_regset (const struct regset *regset,
 				struct regcache *regcache,

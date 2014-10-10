@@ -116,7 +116,7 @@ unsigned long   gdb_c_test( unsigned long *parm )
    return ( (unsigned long) 0 );
 }
 
-static void gdb_asm_test (void)
+void gdb_asm_test (void)
 {
 }
 

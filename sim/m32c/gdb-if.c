@@ -128,7 +128,7 @@ open_objfile (const char *filename)
 
 
 SIM_RC
-sim_load (SIM_DESC sd, char *prog, struct bfd * abfd, int from_tty)
+sim_load (SIM_DESC sd, const char *prog, struct bfd * abfd, int from_tty)
 {
   check_desc (sd);
 
@@ -650,11 +650,12 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason_p, int *sigrc_p)
 }
 
 void
-sim_do_command (SIM_DESC sd, char *cmd)
+sim_do_command (SIM_DESC sd, const char *cmd)
 {
-  check_desc (sd);
+  const char *args;
+  char *p = strdup (cmd);
 
-  char *p = cmd;
+  check_desc (sd);
 
   /* Skip leading whitespace.  */
   while (isspace (*p))
@@ -667,7 +668,6 @@ sim_do_command (SIM_DESC sd, char *cmd)
 
   /* Null-terminate the command word, and record the start of any
      further arguments.  */
-  char *args;
   if (*p)
     {
       *p = '\0';
@@ -701,6 +701,8 @@ sim_do_command (SIM_DESC sd, char *cmd)
   else
     printf ("The 'sim' command expects either 'trace' or 'verbose'"
 	    " as a subcommand.\n");
+
+  free (p);
 }
 
 char **

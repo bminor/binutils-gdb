@@ -1,6 +1,6 @@
 // dwp.cc -- DWARF packaging utility
 
-// Copyright 2012 Free Software Foundation, Inc.
+// Copyright (C) 2012-2014 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of dwp, the DWARF packaging utility.
@@ -272,7 +272,7 @@ class Sized_relobj_dwo : public Sized_relobj<size, big_endian>
 
   // Get the name of a section.
   std::string
-  do_section_name(unsigned int shndx)
+  do_section_name(unsigned int shndx) const
   { return this->elf_file_.section_name(shndx); }
 
   // Get the size of a section.
@@ -970,10 +970,13 @@ Dwo_file::read(Dwp_output_file* output_file)
 	this->read_unit_index(debug_cu_index, debug_shndx, output_file, false);
       if (debug_tu_index > 0)
         {
-	  if (debug_types.size() != 1)
-	    gold_fatal(_("%s: .dwp file must have exactly one "
+	  if (debug_types.size() > 1)
+	    gold_fatal(_("%s: .dwp file must have no more than one "
 			 ".debug_types.dwo section"), this->name_);
-	  debug_shndx[elfcpp::DW_SECT_TYPES] = debug_types[0];
+          if (debug_types.size() == 1)
+            debug_shndx[elfcpp::DW_SECT_TYPES] = debug_types[0];
+          else
+            debug_shndx[elfcpp::DW_SECT_TYPES] = 0;
 	  this->read_unit_index(debug_tu_index, debug_shndx, output_file, true);
 	}
       return;
@@ -1154,7 +1157,7 @@ Dwo_file::sized_read_unit_index(unsigned int shndx,
 			       : elfcpp::DW_SECT_INFO);
   unsigned int info_shndx = debug_shndx[info_sect];
 
-  gold_assert(shndx > 0 && info_shndx > 0);
+  gold_assert(shndx > 0);
 
   section_size_type index_len;
   bool index_is_new;
@@ -1179,6 +1182,8 @@ Dwo_file::sized_read_unit_index(unsigned int shndx,
 						      + 2 * sizeof(uint32_t));
   if (ncols == 0 || nused == 0)
     return;
+
+  gold_assert(info_shndx > 0);
 
   unsigned int nslots =
       elfcpp::Swap_unaligned<32, big_endian>::readval(contents
@@ -2347,7 +2352,7 @@ print_version()
 {
   // This output is intended to follow the GNU standards.
   printf("GNU dwp %s\n", BFD_VERSION_STRING);
-  printf(_("Copyright 2012 Free Software Foundation, Inc.\n"));
+  printf(_("Copyright (C) 2014 Free Software Foundation, Inc.\n"));
   printf(_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or (at your option) any later version.\n\

@@ -1058,10 +1058,10 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 /* Returns the block to be used for symbol searches from
    the current location.  */
 
-static struct block *
+static const struct block *
 get_current_search_block (void)
 {
-  struct block *block;
+  const struct block *block;
   enum language save_language;
 
   /* get_selected_block can change the current language when there is
@@ -1665,6 +1665,10 @@ linespec_parse_basic (linespec_parser *parser)
 	      discard_cleanups (cleanup);
 	      return;
 	    }
+
+	  /* The convenience variable/history value parsed correctly.
+	     NAME is no longer needed.  */
+	  do_cleanups (cleanup);
 	}
       else
 	{
@@ -1893,7 +1897,7 @@ create_sals_line_offset (struct linespec_state *self,
     {
       struct linetable_entry *best_entry = NULL;
       int *filter;
-      struct block **blocks;
+      const struct block **blocks;
       struct cleanup *cleanup;
       struct symtabs_and_lines intermediate_results;
       int i, j;
@@ -1921,7 +1925,7 @@ create_sals_line_offset (struct linespec_state *self,
 
       filter = XNEWVEC (int, intermediate_results.nelts);
       make_cleanup (xfree, filter);
-      blocks = XNEWVEC (struct block *, intermediate_results.nelts);
+      blocks = XNEWVEC (const struct block *, intermediate_results.nelts);
       make_cleanup (xfree, blocks);
 
       for (i = 0; i < intermediate_results.nelts; ++i)
@@ -3210,7 +3214,7 @@ find_label_symbols (struct linespec_state *self,
 		    VEC (symbolp) **label_funcs_ret, const char *name)
 {
   int ix;
-  struct block *block;
+  const struct block *block;
   struct symbol *sym;
   struct symbol *fn_sym;
   VEC (symbolp) *result = NULL;
@@ -3417,9 +3421,9 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   CORE_ADDR pc;
   struct symtab_and_line sal;
 
-  sal = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
+  sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
 			   (struct obj_section *) 0, 0);
-  sal.section = SYMBOL_OBJ_SECTION (objfile, msymbol);
+  sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 
   /* The minimal symbol might point to a function descriptor;
      resolve it to the actual code address instead.  */
@@ -3431,7 +3435,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
     skip_prologue_sal (&sal);
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
-    add_sal_to_sals (self, result, &sal, SYMBOL_NATURAL_NAME (msymbol), 0);
+    add_sal_to_sals (self, result, &sal, MSYMBOL_NATURAL_NAME (msymbol), 0);
 }
 
 /* A helper struct to pass some data through
@@ -3498,6 +3502,9 @@ add_minsym (struct minimal_symbol *minsym, void *d)
   struct collect_minsyms *info = d;
   bound_minimal_symbol_d mo;
 
+  mo.minsym = minsym;
+  mo.objfile = info->objfile;
+
   /* Exclude data symbols when looking for breakpoint locations.   */
   if (!info->list_mode)
     switch (minsym->type)
@@ -3513,16 +3520,14 @@ add_minsym (struct minimal_symbol *minsym, void *d)
 	       before we decide to discard it.  */
 	    struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
 	    CORE_ADDR addr = gdbarch_convert_from_func_ptr_addr
-			       (gdbarch, SYMBOL_VALUE_ADDRESS (minsym),
+			       (gdbarch, BMSYMBOL_VALUE_ADDRESS (mo),
 				&current_target);
 
-	    if (addr == SYMBOL_VALUE_ADDRESS (minsym))
+	    if (addr == BMSYMBOL_VALUE_ADDRESS (mo))
 	      return;
 	  }
       }
 
-  mo.minsym = minsym;
-  mo.objfile = info->objfile;
   VEC_safe_push (bound_minimal_symbol_d, info->msyms, &mo);
 }
 

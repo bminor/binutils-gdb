@@ -130,10 +130,11 @@ gdb_expect  {
 # tests here!!
 gdb_test_no_output "maint check-symtabs"
 
+# Test per-command stats.
 gdb_test_no_output "maint set per-command on"
-
-gdb_test "maint set per-command off" \
+gdb_test "pwd" \
     "Command execution time: \[0-9.\]+ \\(cpu\\), \[0-9.\]+ \\(wall\\)\[\r\n\]+Space used: $decimal \\(\\+$decimal for this command\\)\[\r\n\]+#symtabs: $decimal \\(\\+$decimal\\), #primary symtabs: $decimal \\(\\+$decimal\\), #blocks: $decimal \\(\\+$decimal\\)"
+gdb_test_no_output "maint set per-command off"
 
 gdb_test "maint demangle" \
     "\"maintenance demangle\" takes an argument to demangle\\."

@@ -38,7 +38,6 @@
 #include "symfile.h"
 #include "arch-utils.h"
 #include "floatformat.h"
-#include "gdb_assert.h"
 #include "infcall.h"
 #include "regset.h"
 #include "target-descriptions.h"
@@ -1330,18 +1329,6 @@ nios2_stub_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-/* Implement the this_base, this_locals, and this_args hooks
-   for the stub unwinder.  */
-
-static CORE_ADDR
-nios2_stub_frame_base_address (struct frame_info *this_frame, void **this_cache)
-{
-  struct trad_frame_cache *this_trad_cache
-    = nios2_stub_frame_cache (this_frame, this_cache);
-
-  return trad_frame_get_this_base (this_trad_cache);
-}
-
 /* Define the data structures for the stub unwinder.  */
 
 static const struct frame_unwind nios2_stub_frame_unwind =
@@ -1352,14 +1339,6 @@ static const struct frame_unwind nios2_stub_frame_unwind =
   nios2_stub_frame_prev_register,
   NULL,
   nios2_stub_frame_sniffer
-};
-
-static const struct frame_base nios2_stub_frame_base =
-{
-  &nios2_stub_frame_unwind,
-  nios2_stub_frame_base_address,
-  nios2_stub_frame_base_address,
-  nios2_stub_frame_base_address
 };
 
 /* Helper function to read an instruction at PC.  */

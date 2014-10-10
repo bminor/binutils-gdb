@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "osabi.h"
-#include <string.h>
 #include "solib.h"
 #include "solib-irix.h"
 #include "elf-bfd.h"
@@ -39,12 +38,16 @@ mips_irix_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect,
   name = bfd_get_section_name (abfd, sect);
   sectsize = bfd_section_size (abfd, sect);
 
-  if (strncmp (name, ".MIPS.", 6) == 0 && sectsize > 0)
-    {
-      /* The presence of a section named with a ".MIPS." prefix is
-         indicative of an IRIX binary.  */
-      *os_ident_ptr = GDB_OSABI_IRIX;
-    }
+  /* The presence of a section named with a ".MIPS." prefix is usually
+     indicative of an IRIX binary, however there are exceptions that
+     are present universally, so check for those names and avoid
+     switching away from the default OS ABI in the case of a match.  */
+  if (strncmp (name, ".MIPS.", 6) == 0
+      && strcmp (name, ".MIPS.abiflags") != 0
+      && strcmp (name, ".MIPS.options") != 0
+      && strcmp (name, ".MIPS.stubs") != 0
+      && sectsize > 0)
+    *os_ident_ptr = GDB_OSABI_IRIX;
 }
 
 static enum gdb_osabi

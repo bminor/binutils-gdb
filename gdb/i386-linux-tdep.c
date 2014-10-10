@@ -27,8 +27,6 @@
 #include "osabi.h"
 #include "reggroups.h"
 #include "dwarf2-frame.h"
-#include <string.h>
-
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
 #include "linux-tdep.h"
@@ -39,7 +37,7 @@
 #include "xml-syscall.h"
 
 #include "i387-tdep.h"
-#include "i386-xstate.h"
+#include "x86-xstate.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_I386 "syscalls/i386-linux.xml"
@@ -52,6 +50,7 @@
 #include "features/i386/i386-mmx-linux.c"
 #include "features/i386/i386-mpx-linux.c"
 #include "features/i386/i386-avx-linux.c"
+#include "features/i386/i386-avx512-linux.c"
 
 /* Supported register note sections.  */
 static struct core_regset_section i386_linux_regset_sections[] =
@@ -71,7 +70,7 @@ static struct core_regset_section i386_linux_sse_regset_sections[] =
 static struct core_regset_section i386_linux_avx_regset_sections[] =
 {
   { ".reg", 68, "general-purpose" },
-  { ".reg-xstate", I386_XSTATE_MAX_SIZE, "XSAVE extended state" },
+  { ".reg-xstate", X86_XSTATE_MAX_SIZE, "XSAVE extended state" },
   { NULL, 0 }
 };
 
@@ -570,9 +569,11 @@ int i386_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1,		/* MPX registers BND0 ... BND3.  */
-  -1, -1,			/* MPX registers BNDCFGU, BNDSTATUS.  */
-  11 * 4			/* "orig_eax" */
+  -1, -1, -1, -1,		  /* MPX registers BND0 ... BND3.  */
+  -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
+  -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
+  11 * 4,			  /* "orig_eax"  */
 };
 
 /* Mapping between the general-purpose registers in `struct
@@ -612,8 +613,8 @@ i386_linux_core_read_xcr0 (bfd *abfd)
       size_t size = bfd_section_size (abfd, xstate);
 
       /* Check extended state size.  */
-      if (size < I386_XSTATE_AVX_SIZE)
-	xcr0 = I386_XSTATE_SSE_MASK;
+      if (size < X86_XSTATE_AVX_SIZE)
+	xcr0 = X86_XSTATE_SSE_MASK;
       else
 	{
 	  char contents[8];
@@ -646,15 +647,18 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
   /* Linux/i386.  */
   uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
 
-  switch ((xcr0 & I386_XSTATE_ALL_MASK))
+  switch ((xcr0 & X86_XSTATE_ALL_MASK))
     {
-    case I386_XSTATE_MPX_MASK:
+    case X86_XSTATE_MPX_AVX512_MASK:
+    case X86_XSTATE_AVX512_MASK:
+      return tdesc_i386_avx512_linux;
+    case X86_XSTATE_MPX_MASK:
       return tdesc_i386_mpx_linux;
-    case I386_XSTATE_AVX_MASK:
+    case X86_XSTATE_AVX_MASK:
       return tdesc_i386_avx_linux;
-    case I386_XSTATE_SSE_MASK:
+    case X86_XSTATE_SSE_MASK:
       return tdesc_i386_linux;
-    case I386_XSTATE_X87_MASK:
+    case X86_XSTATE_X87_MASK:
       return tdesc_i386_mmx_linux;
     default:
       break;
@@ -945,7 +949,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 
   /* Install supported register note sections.  */
-  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx"))
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx512")
+      || tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx"))
     set_gdbarch_core_regset_sections (gdbarch, i386_linux_avx_regset_sections);
   else if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse"))
     set_gdbarch_core_regset_sections (gdbarch, i386_linux_sse_regset_sections);
@@ -986,4 +991,5 @@ _initialize_i386_linux_tdep (void)
   initialize_tdesc_i386_mmx_linux ();
   initialize_tdesc_i386_avx_linux ();
   initialize_tdesc_i386_mpx_linux ();
+  initialize_tdesc_i386_avx512_linux ();
 }

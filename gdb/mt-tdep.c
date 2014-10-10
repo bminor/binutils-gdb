@@ -27,7 +27,6 @@
 #include "dis-asm.h"
 #include "arch-utils.h"
 #include "gdbtypes.h"
-#include <string.h>
 #include "regcache.h"
 #include "reggroups.h"
 #include "gdbcore.h"
@@ -35,7 +34,6 @@
 #include "inferior.h"
 #include "dwarf2-frame.h"
 #include "infcall.h"
-#include "gdb_assert.h"
 #include "language.h"
 #include "valprint.h"
 

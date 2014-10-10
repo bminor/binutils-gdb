@@ -243,6 +243,28 @@ proc user_defined_command_test {} {
    gdb_test "show user mycommand" \
 	"  while \\\$arg0.*set.*    if \\\(\\\$arg0.*p/x.*    else\[^\n\].*p/x.*    end\[^\n\].*  end\[^\n\].*" \
 	   "display user command in user_defined_command_test"
+
+    # Create and test a user-defined command with an empty body.
+    gdb_test_multiple "define myemptycommand" \
+	"define myemptycommand in user_defined_command_test" {
+	    -re "End with"  {
+		pass "define myemptycommand in user_defined_command_test"
+	    }
+	}
+    gdb_test "end" \
+	"" \
+	"end definition of user-defined command with empty body"
+
+    gdb_test_no_output "myemptycommand" \
+	"execute user-defined empty command in user_defined_command_test"
+
+    gdb_test "show user" \
+	"User command \"myemptycommand.*" \
+	"display empty command in command list in user_defined_command_test"
+
+    gdb_test "show user myemptycommand" \
+	"User command \"myemptycommand.*" \
+	"display user-defined empty command in user_defined_command_test"
 }
 
 proc watchpoint_command_test {} {
@@ -471,16 +493,7 @@ proc bp_deleted_in_command_test {} {
 	"end commands"
 
     gdb_run_cmd
-    gdb_expect {
-        -re ".*factorial command-list executed.*$gdb_prompt $" {
-	    pass "run factorial until breakpoint"
-        }
-	-re ".*$gdb_prompt $" {
-	    fail "run factorial until breakpoint"
-	}
-	default { fail "(timeout) run factorial until breakpoint" }
-	timeout { fail "(timeout) run factorial until breakpoint" }
-    }
+    gdb_test "" "factorial command-list executed.*" "run factorial until breakpoint"
 }
 
 proc temporary_breakpoint_commands {} {
@@ -529,12 +542,8 @@ proc temporary_breakpoint_commands {} {
 	"end tbreak commands"
 
     gdb_run_cmd
-    gdb_expect {
-	-re ".*factorial tbreak commands executed.*$gdb_prompt $" {
-	    pass "run factorial until temporary breakpoint"
-	}
-	timeout { fail "(timeout) run factorial until temporary breakpoint" }
-    }
+    gdb_test "" "factorial tbreak commands executed.*" \
+	"run factorial until temporary breakpoint"
 }
 
 # Test that GDB can handle $arg0 outside of user functions without

@@ -45,8 +45,6 @@
 #include "tui/tui-win.h"
 
 #include "gdb_curses.h"
-
-#include <string.h>
 #include <ctype.h>
 #include "readline/readline.h"
 
@@ -333,7 +331,7 @@ tui_command (char *args, int from_tty)
 {
   printf_unfiltered (_("\"tui\" must be followed by the name of a "
                      "tui command.\n"));
-  help_list (tuilist, "tui ", -1, gdb_stdout);
+  help_list (tuilist, "tui ", all_commands, gdb_stdout);
 }
 
 struct cmd_list_element **

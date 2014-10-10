@@ -1,5 +1,5 @@
 /* This module handles expression trees.
-   Copyright 1991-2013 Free Software Foundation, Inc.
+   Copyright (C) 1991-2014 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    This file is part of the GNU Binutils.
@@ -1001,7 +1001,10 @@ exp_fold_tree_1 (etree_type *tree)
 	      if (h == NULL
 		  || (h->type != bfd_link_hash_new
 		      && h->type != bfd_link_hash_undefined
-		      && h->type != bfd_link_hash_common))
+		      && h->type != bfd_link_hash_common
+		      && !(h->type == bfd_link_hash_defined
+			   && (h->u.def.section->flags
+			       & SEC_LINKER_CREATED) != 0)))
 		{
 		  /* Do nothing.  The symbol was never referenced, or was
 		     defined by some object.  */

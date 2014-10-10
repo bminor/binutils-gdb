@@ -25,7 +25,6 @@
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "value.h"
 #include "inferior.h"
 #include "symfile.h"
@@ -36,8 +35,7 @@
 #include "regcache.h"
 #include "trad-frame.h"
 #include "dis-asm.h"
-
-#include "gdb_assert.h"
+#include "objfiles.h"
 
 #include "m32r-tdep.h"
 
@@ -836,7 +834,7 @@ m32r_frame_this_id (struct frame_info *this_frame,
     = m32r_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR base;
   CORE_ADDR func;
-  struct minimal_symbol *msym_stack;
+  struct bound_minimal_symbol msym_stack;
   struct frame_id id;
 
   /* The FUNC is easy.  */
@@ -844,7 +842,7 @@ m32r_frame_this_id (struct frame_info *this_frame,
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);
-  if (msym_stack && info->base == SYMBOL_VALUE_ADDRESS (msym_stack))
+  if (msym_stack.minsym && info->base == BMSYMBOL_VALUE_ADDRESS (msym_stack))
     return;
 
   /* Hopefully the prologue analysis either correctly determined the

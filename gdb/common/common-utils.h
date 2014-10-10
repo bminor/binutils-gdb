@@ -20,11 +20,6 @@
 #ifndef COMMON_UTILS_H
 #define COMMON_UTILS_H
 
-#include "config.h"
-#include "ansidecl.h"
-#include <stddef.h>
-#include <stdarg.h>
-
 /* If possible, define FUNCTION_NAME, a macro containing the name of
    the function being defined.  Since this macro may not always be
    defined, all uses must be protected by appropriate macro definition
@@ -42,10 +37,6 @@
 #define FUNCTION_NAME		__func__  /* ARI: func */
 #endif
 #endif
-
-extern void malloc_failure (long size) ATTRIBUTE_NORETURN;
-extern void internal_error (const char *file, int line, const char *, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 4);
 
 /* xmalloc(), xrealloc() and xcalloc() have already been declared in
    "libiberty.h". */

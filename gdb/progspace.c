@@ -160,38 +160,13 @@ release_program_space (struct program_space *pspace)
   free_all_objfiles ();
   if (!gdbarch_has_shared_address_space (target_gdbarch ()))
     free_address_space (pspace->aspace);
-  resize_section_table (&pspace->target_sections,
-			-resize_section_table (&pspace->target_sections, 0));
+  clear_section_table (&pspace->target_sections);
   clear_program_space_solib_cache (pspace);
     /* Discard any data modules have associated with the PSPACE.  */
   program_space_free_data (pspace);
   xfree (pspace);
 
   do_cleanups (old_chain);
-}
-
-/* Unlinks PSPACE from the pspace list, and releases it.  */
-
-void
-remove_program_space (struct program_space *pspace)
-{
-  struct program_space *ss, **ss_link;
-
-  ss = program_spaces;
-  ss_link = &program_spaces;
-  while (ss)
-    {
-      if (ss != pspace)
-	{
-	  ss_link = &ss->next;
-	  ss = *ss_link;
-	  continue;
-	}
-
-      *ss_link = ss->next;
-      release_program_space (ss);
-      ss = *ss_link;
-    }
 }
 
 /* Copies program space SRC to DEST.  Copies the main executable file,

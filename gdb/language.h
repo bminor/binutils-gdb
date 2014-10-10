@@ -34,6 +34,7 @@ struct ui_file;
 struct value_print_options;
 struct type_print_options;
 struct lang_varobj_ops;
+struct parser_state;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
@@ -164,7 +165,7 @@ struct language_defn
 
     /* Parser function.  */
 
-    int (*la_parser) (void);
+    int (*la_parser) (struct parser_state *);
 
     /* Parser error function.  */
 
@@ -473,12 +474,6 @@ extern enum language set_language (enum language);
 /* Type predicates */
 
 extern int pointer_type (struct type *);
-
-/* Checks Binary and Unary operations for semantic type correctness.  */
-/* FIXME:  Does not appear to be used.  */
-#define unop_type_check(v,o) binop_type_check((v),NULL,(o))
-
-extern void binop_type_check (struct value *, struct value *, int);
 
 /* Error messages */
 

@@ -20,8 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
@@ -135,14 +133,14 @@ rs6000_aix_collect_regset (const struct regset *regset,
 
 /* AIX register set.  */
 
-static struct regset rs6000_aix32_regset =
+static const struct regset rs6000_aix32_regset =
 {
   &rs6000_aix32_reg_offsets,
   rs6000_aix_supply_regset,
   rs6000_aix_collect_regset,
 };
 
-static struct regset rs6000_aix64_regset =
+static const struct regset rs6000_aix64_regset =
 {
   &rs6000_aix64_reg_offsets,
   rs6000_aix_supply_regset,
@@ -965,14 +963,14 @@ rs6000_aix_shared_library_to_xml (struct ld_info *ldi,
    as the consumer of the XML library list might live in a different
    process.  */
 
-LONGEST
+ULONGEST
 rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
 			   gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
 			   int close_ldinfo_fd)
 {
   struct obstack obstack;
   const char *buf;
-  LONGEST len_avail;
+  ULONGEST len_avail;
 
   obstack_init (&obstack);
   obstack_grow_str (&obstack, "<library-list-aix version=\"1.0\">\n");
@@ -1009,7 +1007,7 @@ rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
 
 /* Implement the core_xfer_shared_libraries_aix gdbarch method.  */
 
-static LONGEST
+static ULONGEST
 rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 					   gdb_byte *readbuf,
 					   ULONGEST offset,

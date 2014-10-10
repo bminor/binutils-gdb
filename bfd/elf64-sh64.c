@@ -1,6 +1,5 @@
 /* SuperH SH64-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2286,8 +2285,8 @@ sh_elf64_copy_private_data_internal (bfd *ibfd, bfd *obfd)
     }
 
   /* Copy object attributes.  */
-  _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
+  _bfd_elf_copy_private_bfd_data (ibfd, obfd);
+  
   return sh_elf64_set_private_flags (obfd, elf_elfheader (ibfd)->e_flags);
 }
 
@@ -3958,9 +3957,9 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
   { NULL,                       0, 0, 0,            0 }
 };
 
-#define TARGET_BIG_SYM		bfd_elf64_sh64_vec
+#define TARGET_BIG_SYM		sh64_elf64_vec
 #define TARGET_BIG_NAME		"elf64-sh64"
-#define TARGET_LITTLE_SYM	bfd_elf64_sh64l_vec
+#define TARGET_LITTLE_SYM	sh64_elf64_le_vec
 #define TARGET_LITTLE_NAME	"elf64-sh64l"
 #define ELF_ARCH		bfd_arch_sh
 #define ELF_MACHINE_CODE	EM_SH
@@ -4030,11 +4029,11 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 
 /* NetBSD support.  */
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf64_sh64nbsd_vec
+#define	TARGET_BIG_SYM			sh64_elf64_nbsd_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf64-sh64-nbsd"
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf64_sh64lnbsd_vec
+#define	TARGET_LITTLE_SYM		sh64_elf64_nbsd_le_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf64-sh64l-nbsd"
 #undef	ELF_MAXPAGESIZE
@@ -4048,11 +4047,11 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 
 /* Linux support.  */
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf64_sh64blin_vec
+#define	TARGET_BIG_SYM			sh64_elf64_linux_be_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME			"elf64-sh64big-linux"
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf64_sh64lin_vec
+#define	TARGET_LITTLE_SYM		sh64_elf64_linux_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf64-sh64-linux"
 #undef elf64_bed

@@ -26,8 +26,6 @@
 #include "inferior.h"
 #include "regcache.h"
 
-static void dink32_open (char *args, int from_tty);
-
 static void
 dink32_supply_register (struct regcache *regcache, char *regname,
 			int regnamelen, char *val, int vallen)
@@ -123,7 +121,7 @@ static char *dink32_inits[] =
 static struct monitor_ops dink32_cmds;
 
 static void
-dink32_open (char *args, int from_tty)
+dink32_open (const char *args, int from_tty)
 {
   monitor_open (args, &dink32_cmds, from_tty);
 }

@@ -21,11 +21,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
 #include "expression.h"		/* For language.h */
 #include "language.h"
 #include "ui-out.h"
-#include "gdb_assert.h"
 
 /* table header structures */
 
@@ -102,7 +100,7 @@ struct ui_out
   {
     int flags;
     /* Specific implementation of ui-out.  */
-    struct ui_out_impl *impl;
+    const struct ui_out_impl *impl;
     void *data;
 
     /* Current level.  */
@@ -198,7 +196,7 @@ static void default_data_destroy (struct ui_out *uiout);
 
 /* This is the default ui-out implementation functions vector.  */
 
-struct ui_out_impl default_ui_out_impl =
+const struct ui_out_impl default_ui_out_impl =
 {
   default_table_begin,
   default_table_body,
@@ -807,8 +805,8 @@ uo_table_header (struct ui_out *uiout, int width, enum ui_align align,
 static void
 clear_table (struct ui_out *uiout)
 {
-  if (uiout->table.id)
-    xfree (uiout->table.id);
+  xfree (uiout->table.id);
+  uiout->table.id = NULL;
   clear_header_list (uiout);
 }
 
@@ -1095,7 +1093,7 @@ ui_out_query_field (struct ui_out *uiout, int colno,
 /* Initalize private members at startup.  */
 
 struct ui_out *
-ui_out_new (struct ui_out_impl *impl, void *data,
+ui_out_new (const struct ui_out_impl *impl, void *data,
 	    int flags)
 {
   struct ui_out *uiout = XNEW (struct ui_out);
@@ -1114,6 +1112,7 @@ ui_out_new (struct ui_out_impl *impl, void *data,
   current->field_count = 0;
   VEC_safe_push (ui_out_level_p, uiout->levels, current);
 
+  uiout->table.id = NULL;
   uiout->table.header_first = NULL;
   uiout->table.header_last = NULL;
   uiout->table.header_next = NULL;

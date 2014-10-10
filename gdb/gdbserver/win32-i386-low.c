@@ -17,7 +17,7 @@
 
 #include "server.h"
 #include "win32-low.h"
-#include "i386-low.h"
+#include "x86-low.h"
 
 #ifndef CONTEXT_EXTENDED_REGISTERS
 #define CONTEXT_EXTENDED_REGISTERS 0
@@ -38,18 +38,17 @@ void init_registers_i386 (void);
 extern const struct target_desc *tdesc_i386;
 #endif
 
-static struct i386_debug_reg_state debug_reg_state;
+static struct x86_debug_reg_state debug_reg_state;
 
 static int debug_registers_changed = 0;
 static int debug_registers_used = 0;
 
 /* Update the inferior's debug register REGNUM from STATE.  */
 
-void
-i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
+static void
+x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
-  if (! (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR))
-    fatal ("Invalid debug register %d", regnum);
+  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   /* debug_reg_state.dr_mirror is already set.
      Just notify i386_set_thread_context, i386_thread_added
@@ -58,8 +57,8 @@ i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
   debug_registers_used = 1;
 }
 
-CORE_ADDR
-i386_dr_low_get_addr (int regnum)
+static CORE_ADDR
+x86_dr_low_get_addr (int regnum)
 {
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
@@ -68,8 +67,8 @@ i386_dr_low_get_addr (int regnum)
 
 /* Update the inferior's DR7 debug control register from STATE.  */
 
-void
-i386_dr_low_set_control (const struct i386_debug_reg_state *state)
+static void
+x86_dr_low_set_control (unsigned long control)
 {
   /* debug_reg_state.dr_control_mirror is already set.
      Just notify i386_set_thread_context, i386_thread_added
@@ -78,8 +77,8 @@ i386_dr_low_set_control (const struct i386_debug_reg_state *state)
   debug_registers_used = 1;
 }
 
-unsigned
-i386_dr_low_get_control (void)
+static unsigned long
+x86_dr_low_get_control (void)
 {
   return debug_reg_state.dr_control_mirror;
 }
@@ -87,26 +86,55 @@ i386_dr_low_get_control (void)
 /* Get the value of the DR6 debug status register from the inferior
    and record it in STATE.  */
 
-unsigned
-i386_dr_low_get_status (void)
+static unsigned long
+x86_dr_low_get_status (void)
 {
   /* We don't need to do anything here, the last call to thread_rec for
      current_event.dwThreadId id has already set it.  */
   return debug_reg_state.dr_status_mirror;
 }
 
-/* Watchpoint support.  */
+/* Low-level function vector.  */
+struct x86_dr_low_type x86_dr_low =
+  {
+    x86_dr_low_set_control,
+    x86_dr_low_set_addr,
+    x86_dr_low_get_addr,
+    x86_dr_low_get_status,
+    x86_dr_low_get_control,
+    sizeof (void *),
+  };
+
+/* Breakpoint/watchpoint support.  */
 
 static int
-i386_insert_point (char type, CORE_ADDR addr, int len)
+i386_supports_z_point_type (char z_type)
+{
+  switch (z_type)
+    {
+    case Z_PACKET_WRITE_WP:
+    case Z_PACKET_ACCESS_WP:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+static int
+i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		   int size, struct raw_breakpoint *bp)
 {
   switch (type)
     {
-    case '2':
-    case '3':
-    case '4':
-      return i386_low_insert_watchpoint (&debug_reg_state,
-					 type, addr, len);
+    case raw_bkpt_type_write_wp:
+    case raw_bkpt_type_access_wp:
+      {
+	enum target_hw_bp_type hw_type
+	  = raw_bkpt_type_to_target_hw_bp_type (type);
+
+	return x86_dr_insert_watchpoint (&debug_reg_state,
+					 hw_type, addr, size);
+      }
     default:
       /* Unsupported.  */
       return 1;
@@ -114,15 +142,20 @@ i386_insert_point (char type, CORE_ADDR addr, int len)
 }
 
 static int
-i386_remove_point (char type, CORE_ADDR addr, int len)
+i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		   int size, struct raw_breakpoint *bp)
 {
   switch (type)
     {
-    case '2':
-    case '3':
-    case '4':
-      return i386_low_remove_watchpoint (&debug_reg_state,
-					 type, addr, len);
+    case raw_bkpt_type_write_wp:
+    case raw_bkpt_type_access_wp:
+      {
+	enum target_hw_bp_type hw_type
+	  = raw_bkpt_type_to_target_hw_bp_type (type);
+
+	return x86_dr_remove_watchpoint (&debug_reg_state,
+					 hw_type, addr, size);
+      }
     default:
       /* Unsupported.  */
       return 1;
@@ -130,16 +163,16 @@ i386_remove_point (char type, CORE_ADDR addr, int len)
 }
 
 static int
-i386_stopped_by_watchpoint (void)
+x86_stopped_by_watchpoint (void)
 {
-  return i386_low_stopped_by_watchpoint (&debug_reg_state);
+  return x86_dr_stopped_by_watchpoint (&debug_reg_state);
 }
 
 static CORE_ADDR
-i386_stopped_data_address (void)
+x86_stopped_data_address (void)
 {
   CORE_ADDR addr;
-  if (i386_low_stopped_data_address (&debug_reg_state, &addr))
+  if (x86_dr_stopped_data_address (&debug_reg_state, &addr))
     return addr;
   return 0;
 }
@@ -147,7 +180,7 @@ i386_stopped_data_address (void)
 static void
 i386_initial_stuff (void)
 {
-  i386_low_init_dregs (&debug_reg_state);
+  x86_low_init_dregs (&debug_reg_state);
   debug_registers_changed = 0;
   debug_registers_used = 0;
 }
@@ -183,7 +216,7 @@ i386_get_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
   if (th->tid == current_event->dwThreadId)
     {
       /* Copy dr values from the current thread.  */
-      struct i386_debug_reg_state *dr = &debug_reg_state;
+      struct x86_debug_reg_state *dr = &debug_reg_state;
       dr->dr_mirror[0] = th->context.Dr0;
       dr->dr_mirror[1] = th->context.Dr1;
       dr->dr_mirror[2] = th->context.Dr2;
@@ -198,7 +231,7 @@ i386_set_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
 {
   if (debug_registers_changed)
     {
-      struct i386_debug_reg_state *dr = &debug_reg_state;
+      struct x86_debug_reg_state *dr = &debug_reg_state;
       th->context.Dr0 = dr->dr_mirror[0];
       th->context.Dr1 = dr->dr_mirror[1];
       th->context.Dr2 = dr->dr_mirror[2];
@@ -217,7 +250,7 @@ i386_thread_added (win32_thread_info *th)
   /* Set the debug registers for the new thread if they are used.  */
   if (debug_registers_used)
     {
-      struct i386_debug_reg_state *dr = &debug_reg_state;
+      struct x86_debug_reg_state *dr = &debug_reg_state;
       th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
       GetThreadContext (th->h, &th->context);
 
@@ -424,8 +457,9 @@ struct win32_target_ops the_low_target = {
   i386_single_step,
   &i386_win32_breakpoint,
   i386_win32_breakpoint_len,
+  i386_supports_z_point_type,
   i386_insert_point,
   i386_remove_point,
-  i386_stopped_by_watchpoint,
-  i386_stopped_data_address
+  x86_stopped_by_watchpoint,
+  x86_stopped_data_address
 };

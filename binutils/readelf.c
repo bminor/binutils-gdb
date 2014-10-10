@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -133,7 +133,7 @@
 #include "elf/msp430.h"
 #include "elf/nds32.h"
 #include "elf/nios2.h"
-#include "elf/or32.h"
+#include "elf/or1k.h"
 #include "elf/pj.h"
 #include "elf/ppc.h"
 #include "elf/ppc64.h"
@@ -594,8 +594,6 @@ guess_is_rela (unsigned int e_machine)
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
     case EM_CYGNUS_M32R:
-    case EM_OPENRISC:
-    case EM_OR32:
     case EM_SCORE:
     case EM_XGATE:
       return FALSE;
@@ -643,6 +641,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_MT:
     case EM_NDS32:
     case EM_NIOS32:
+    case EM_OR1K:
     case EM_PPC64:
     case EM_PPC:
     case EM_RL78:
@@ -1200,9 +1199,8 @@ dump_relocations (FILE * file,
 	  rtype = elf_h8_reloc_type (type);
 	  break;
 
-	case EM_OPENRISC:
-	case EM_OR32:
-	  rtype = elf_or32_reloc_type (type);
+	case EM_OR1K:
+	  rtype = elf_or1k_reloc_type (type);
 	  break;
 
 	case EM_PJ:
@@ -1416,7 +1414,7 @@ dump_relocations (FILE * file,
 
 		  len = print_symbol (width, name);
 		  if (version_string)
-		    printf (sym_info == symbol_public ? "@@%s" : "@%s", 
+		    printf (sym_info == symbol_public ? "@@%s" : "@%s",
 			    version_string);
 		  printf ("()%-*s", len <= width ? (width + 1) - len : 1, " ");
 		}
@@ -1480,7 +1478,7 @@ dump_relocations (FILE * file,
 		{
 		  print_symbol (22, strtab + psym->st_name);
 		  if (version_string)
-		    printf (sym_info == symbol_public ? "@@%s" : "@%s", 
+		    printf (sym_info == symbol_public ? "@@%s" : "@%s",
 			    version_string);
 		}
 
@@ -2050,8 +2048,7 @@ get_machine_name (unsigned e_machine)
     case EM_S390:		return "IBM S/390";
     case EM_SCORE:		return "SUNPLUS S+Core";
     case EM_XSTORMY16:		return "Sanyo XStormy16 CPU core";
-    case EM_OPENRISC:
-    case EM_OR32:		return "OpenRISC";
+    case EM_OR1K:		return "OpenRISC 1000";
     case EM_ARC_A5:		return "ARC International ARCompact processor";
     case EM_CRX:		return "National Semiconductor CRX microprocessor";
     case EM_ADAPTEVA_EPIPHANY:	return "Adapteva EPIPHANY";
@@ -2365,7 +2362,8 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     "ABI v1", /* use r0 as return register */
     "ABI v2", /* use r0 as return register and don't reserve 24 bytes for arguments */
     "ABI v2fp", /* for FPU */
-    "AABI"
+    "AABI",
+    "ABI2 FP+"
   };
   static const char *VER_STRINGS[] =
   {
@@ -2396,6 +2394,7 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     case E_NDS_ABI_V2:
     case E_NDS_ABI_V2FP:
     case E_NDS_ABI_AABI:
+    case E_NDS_ABI_V2FP_PLUS:
       /* In case there are holes in the array.  */
       r += snprintf (buf + r, size - r, ", %s", ABI_STRINGS[abi >> EF_NDS_ABI_SHIFT]);
       break;
@@ -2844,6 +2843,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
   	    case E_MIPS_MACH_LS3A: strcat (buf, ", loongson-3a"); break;
 	    case E_MIPS_MACH_OCTEON: strcat (buf, ", octeon"); break;
 	    case E_MIPS_MACH_OCTEON2: strcat (buf, ", octeon2"); break;
+	    case E_MIPS_MACH_OCTEON3: strcat (buf, ", octeon3"); break;
 	    case E_MIPS_MACH_XLR:  strcat (buf, ", xlr"); break;
 	    case 0:
 	    /* We simply ignore the field in this case to avoid confusion:
@@ -2886,8 +2886,10 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_ARCH_5: strcat (buf, ", mips5"); break;
 	    case E_MIPS_ARCH_32: strcat (buf, ", mips32"); break;
 	    case E_MIPS_ARCH_32R2: strcat (buf, ", mips32r2"); break;
+	    case E_MIPS_ARCH_32R6: strcat (buf, ", mips32r6"); break;
 	    case E_MIPS_ARCH_64: strcat (buf, ", mips64"); break;
 	    case E_MIPS_ARCH_64R2: strcat (buf, ", mips64r2"); break;
+	    case E_MIPS_ARCH_64R6: strcat (buf, ", mips64r6"); break;
 	    default: strcat (buf, _(", unknown ISA")); break;
 	    }
 	  break;
@@ -2929,6 +2931,11 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if (e_flags & EF_SH_FDPIC)
 	    strcat (buf, ", fdpic");
 	  break;
+          
+        case EM_OR1K:
+          if (e_flags & EF_OR1K_NODELAY)
+            strcat (buf, ", no delay");
+          break;
 
 	case EM_SPARCV9:
 	  if (e_flags & EF_SPARC_32PLUS)
@@ -3042,6 +3049,8 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	case EM_RL78:
 	  if (e_flags & E_FLAG_RL78_G10)
 	    strcat (buf, ", G10");
+	  if (e_flags & E_FLAG_RL78_64BIT_DOUBLES)
+	    strcat (buf, ", 64-bit doubles");
 	  break;
 
 	case EM_RX:
@@ -3198,6 +3207,8 @@ get_mips_segment_type (unsigned long type)
       return "RTPROC";
     case PT_MIPS_OPTIONS:
       return "OPTIONS";
+    case PT_MIPS_ABIFLAGS:
+      return "ABIFLAGS";
     default:
       break;
     }
@@ -3398,6 +3409,7 @@ get_mips_section_type_name (unsigned int sh_type)
     case SHT_MIPS_EH_REGION:	 return "MIPS_EH_REGION";
     case SHT_MIPS_XLATE_OLD:	 return "MIPS_XLATE_OLD";
     case SHT_MIPS_PDR_EXCEPTION: return "MIPS_PDR_EXCEPTION";
+    case SHT_MIPS_ABIFLAGS:	 return "MIPS_ABIFLAGS";
     default:
       break;
     }
@@ -9011,6 +9023,12 @@ process_version_sections (FILE * file)
 		if (j < ent.vn_cnt)
 		  warn (_("Missing Version Needs auxillary information\n"));
 
+		if (ent.vn_next == 0 && cnt < section->sh_info - 1)
+		  {
+		    warn (_("Corrupt Version Needs structure - offset to next structure is zero with entries still left to be processed\n"));
+		    cnt = section->sh_info;
+		    break;
+		  }
 		idx += ent.vn_next;
 	      }
 
@@ -9328,13 +9346,8 @@ get_symbol_type (unsigned int type)
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{
-	  if (elf_header.e_machine == EM_ARM)
-	    {
-	      if (type == STT_ARM_TFUNC)
-		return "THUMB_FUNC";
-	      if (type == STT_ARM_16BIT)
-		return "THUMB_LABEL";
-	    }
+	  if (elf_header.e_machine == EM_ARM && type == STT_ARM_TFUNC)
+	    return "THUMB_FUNC";
 
 	  if (elf_header.e_machine == EM_SPARCV9 && type == STT_REGISTER)
 	    return "REGISTER";
@@ -10567,9 +10580,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 12; /* R_NIOS2_BFD_RELOC_32.  */
     case EM_NIOS32:
       return reloc_type == 1; /* R_NIOS_32.  */
-    case EM_OPENRISC:
-    case EM_OR32:
-      return reloc_type == 1; /* R_OR32_32.  */
+    case EM_OR1K:
+      return reloc_type == 1; /* R_OR1K_32.  */
     case EM_PARISC:
       return (reloc_type == 1 /* R_PARISC_DIR32.  */
 	      || reloc_type == 41); /* R_PARISC_SECREL32.  */
@@ -10657,6 +10669,8 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 3;  /* R_ARM_REL32 */
     case EM_MICROBLAZE:
       return reloc_type == 2;  /* R_MICROBLAZE_32_PCREL.  */
+    case EM_OR1K:
+      return reloc_type == 9; /* R_OR1K_32_PCREL.  */
     case EM_PARISC:
       return reloc_type == 9;  /* R_PARISC_PCREL32.  */
     case EM_PPC:
@@ -10822,6 +10836,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 13; /* R_NIOS2_BFD_RELOC_16.  */
     case EM_NIOS32:
       return reloc_type == 9; /* R_NIOS_16.  */
+    case EM_OR1K:
+      return reloc_type == 2; /* R_OR1K_16.  */
     case EM_TI_C6000:
       return reloc_type == 2; /* R_C6000_ABS16.  */
     case EM_XC16X:
@@ -10878,6 +10894,7 @@ is_none_reloc (unsigned int reloc_type)
     case EM_C166:    /* R_XC16X_NONE.  */
     case EM_ALTERA_NIOS2: /* R_NIOS2_NONE.  */
     case EM_NIOS32:  /* R_NIOS_NONE.  */
+    case EM_OR1K:    /* R_OR1K_NONE. */
       return reloc_type == 0;
     case EM_AARCH64:
       return reloc_type == 0 || reloc_type == 256;
@@ -11620,10 +11637,10 @@ display_tag_value (int tag,
 /* ARM EABI attributes section.  */
 typedef struct
 {
-  int tag;
+  unsigned int tag;
   const char * name;
   /* 0 = special, 1 = string, 2 = uleb123, > 0x80 == table lookup.  */
-  int type;
+  unsigned int type;
   const char ** table;
 } arm_attr_public_tag;
 
@@ -11741,12 +11758,12 @@ static unsigned char *
 display_arm_attribute (unsigned char * p,
 		       const unsigned char * const end)
 {
-  int tag;
+  unsigned int tag;
   unsigned int len;
-  int val;
+  unsigned int val;
   arm_attr_public_tag * attr;
   unsigned i;
-  int type;
+  unsigned int type;
 
   tag = read_uleb128 (p, &len, end);
   p += len;
@@ -12069,6 +12086,41 @@ display_sparc_gnu_attribute (unsigned char * p,
   return display_tag_value (tag, p, end);
 }
 
+static void
+print_mips_fp_abi_value (int val)
+{
+  switch (val)
+    {
+    case Val_GNU_MIPS_ABI_FP_ANY:
+      printf (_("Hard or soft float\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_DOUBLE:
+      printf (_("Hard float (double precision)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_SINGLE:
+      printf (_("Hard float (single precision)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_SOFT:
+      printf (_("Soft float\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_OLD_64:
+      printf (_("Hard float (MIPS32r2 64-bit FPU 12 callee-saved)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_XX:
+      printf (_("Hard float (32-bit CPU, Any FPU)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_64:
+      printf (_("Hard float (32-bit CPU, 64-bit FPU)\n"));
+      break;
+    case Val_GNU_MIPS_ABI_FP_64A:
+      printf (_("Hard float compat (32-bit CPU, 64-bit FPU)\n"));
+      break;
+    default:
+      printf ("??? (%d)\n", val);
+      break;
+    }
+}
+
 static unsigned char *
 display_mips_gnu_attribute (unsigned char * p,
 			    int tag,
@@ -12083,27 +12135,8 @@ display_mips_gnu_attribute (unsigned char * p,
       p += len;
       printf ("  Tag_GNU_MIPS_ABI_FP: ");
 
-      switch (val)
-	{
-	case Val_GNU_MIPS_ABI_FP_ANY:
-	  printf (_("Hard or soft float\n"));
-	  break;
-	case Val_GNU_MIPS_ABI_FP_DOUBLE:
-	  printf (_("Hard float (double precision)\n"));
-	  break;
-	case Val_GNU_MIPS_ABI_FP_SINGLE:
-	  printf (_("Hard float (single precision)\n"));
-	  break;
-	case Val_GNU_MIPS_ABI_FP_SOFT:
-	  printf (_("Soft float\n"));
-	  break;
-	case Val_GNU_MIPS_ABI_FP_64:
-	  printf (_("Hard float (MIPS32r2 64-bit FPU)\n"));
-	  break;
-	default:
-	  printf ("??? (%d)\n", val);
-	  break;
-	}
+      print_mips_fp_abi_value (val);
+
       return p;
    }
 
@@ -12508,7 +12541,7 @@ process_attributes (FILE * file,
 
 	  while (len > 0)
 	    {
-	      int namelen;
+	      unsigned int namelen;
 	      bfd_boolean public_section;
 	      bfd_boolean gnu_section;
 
@@ -12517,12 +12550,21 @@ process_attributes (FILE * file,
 
 	      if (section_len > len)
 		{
-		  printf (_("ERROR: Bad section length (%d > %d)\n"),
-			  (int) section_len, (int) len);
+		  error (_("Length of attribute (%u) greater than length of section (%u)\n"),
+			  (unsigned) section_len, (unsigned) len);
 		  section_len = len;
 		}
 
 	      len -= section_len;
+	      section_len -= 4;
+
+	      namelen = strnlen ((char *) p, section_len) + 1;
+	      if (namelen == 0 || namelen >= section_len)
+		{
+		  error (_("Corrupt attribute section name\n"));
+		  break;
+		}
+
 	      printf (_("Attribute Section: %s\n"), p);
 
 	      if (public_name && streq ((char *) p, public_name))
@@ -12535,10 +12577,8 @@ process_attributes (FILE * file,
 	      else
 		gnu_section = FALSE;
 
-	      namelen = strlen ((char *) p) + 1;
 	      p += namelen;
-	      section_len -= namelen + 4;
-
+	      section_len -= namelen;
 	      while (section_len > 0)
 		{
 		  int tag = *(p++);
@@ -12548,8 +12588,8 @@ process_attributes (FILE * file,
 		  size = byte_get (p, 4);
 		  if (size > section_len)
 		    {
-		      printf (_("ERROR: Bad subsection length (%d > %d)\n"),
-			      (int) size, (int) section_len);
+		      error (_("Bad subsection length (%u > %u)\n"),
+			      (unsigned) size, (unsigned) section_len);
 		      size = section_len;
 		    }
 
@@ -12608,7 +12648,7 @@ process_attributes (FILE * file,
 	    }
 	}
       else
-	printf (_("Unknown format '%c'\n"), *p);
+	printf (_("Unknown format '%c' (%d)\n"), *p, *p);
 
       free (contents);
     }
@@ -12699,10 +12739,121 @@ print_mips_pltgot_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr)
   return addr + (is_32bit_elf ? 4 : 8);
 }
 
+static void
+print_mips_ases (unsigned int mask)
+{
+  if (mask & AFL_ASE_DSP)
+    fputs ("\n\tDSP ASE", stdout);
+  if (mask & AFL_ASE_DSPR2)
+    fputs ("\n\tDSP R2 ASE", stdout);
+  if (mask & AFL_ASE_EVA)
+    fputs ("\n\tEnhanced VA Scheme", stdout);
+  if (mask & AFL_ASE_MCU)
+    fputs ("\n\tMCU (MicroController) ASE", stdout);
+  if (mask & AFL_ASE_MDMX)
+    fputs ("\n\tMDMX ASE", stdout);
+  if (mask & AFL_ASE_MIPS3D)
+    fputs ("\n\tMIPS-3D ASE", stdout);
+  if (mask & AFL_ASE_MT)
+    fputs ("\n\tMT ASE", stdout);
+  if (mask & AFL_ASE_SMARTMIPS)
+    fputs ("\n\tSmartMIPS ASE", stdout);
+  if (mask & AFL_ASE_VIRT)
+    fputs ("\n\tVZ ASE", stdout);
+  if (mask & AFL_ASE_MSA)
+    fputs ("\n\tMSA ASE", stdout);
+  if (mask & AFL_ASE_MIPS16)
+    fputs ("\n\tMIPS16 ASE", stdout);
+  if (mask & AFL_ASE_MICROMIPS)
+    fputs ("\n\tMICROMIPS ASE", stdout);
+  if (mask & AFL_ASE_XPA)
+    fputs ("\n\tXPA ASE", stdout);
+  if (mask == 0)
+    fprintf (stdout, "\n\t%s", _("None"));
+}
+
+static void
+print_mips_isa_ext (unsigned int isa_ext)
+{
+  switch (isa_ext)
+    {
+    case 0:
+      fputs (_("None"), stdout);
+      break;
+    case AFL_EXT_XLR:
+      fputs ("RMI XLR", stdout);
+      break;
+    case AFL_EXT_OCTEON2:
+      fputs ("Cavium Networks Octeon2", stdout);
+      break;
+    case AFL_EXT_OCTEONP:
+      fputs ("Cavium Networks OcteonP", stdout);
+      break;
+    case AFL_EXT_LOONGSON_3A:
+      fputs ("Loongson 3A", stdout);
+      break;
+    case AFL_EXT_OCTEON:
+      fputs ("Cavium Networks Octeon", stdout);
+      break;
+    case AFL_EXT_5900:
+      fputs ("Toshiba R5900", stdout);
+      break;
+    case AFL_EXT_4650:
+      fputs ("MIPS R4650", stdout);
+      break;
+    case AFL_EXT_4010:
+      fputs ("LSI R4010", stdout);
+      break;
+    case AFL_EXT_4100:
+      fputs ("NEC VR4100", stdout);
+      break;
+    case AFL_EXT_3900:
+      fputs ("Toshiba R3900", stdout);
+      break;
+    case AFL_EXT_10000:
+      fputs ("MIPS R10000", stdout);
+      break;
+    case AFL_EXT_SB1:
+      fputs ("Broadcom SB-1", stdout);
+      break;
+    case AFL_EXT_4111:
+      fputs ("NEC VR4111/VR4181", stdout);
+      break;
+    case AFL_EXT_4120:
+      fputs ("NEC VR4120", stdout);
+      break;
+    case AFL_EXT_5400:
+      fputs ("NEC VR5400", stdout);
+      break;
+    case AFL_EXT_5500:
+      fputs ("NEC VR5500", stdout);
+      break;
+    case AFL_EXT_LOONGSON_2E:
+      fputs ("ST Microelectronics Loongson 2E", stdout);
+      break;
+    case AFL_EXT_LOONGSON_2F:
+      fputs ("ST Microelectronics Loongson 2F", stdout);
+      break;
+    default:
+      fputs (_("Unknown"), stdout);
+    }
+}
+
+static int
+get_mips_reg_size (int reg_size)
+{
+  return (reg_size == AFL_REG_NONE) ? 0
+	 : (reg_size == AFL_REG_32) ? 32
+	 : (reg_size == AFL_REG_64) ? 64
+	 : (reg_size == AFL_REG_128) ? 128
+	 : -1;
+}
+
 static int
 process_mips_specific (FILE * file)
 {
   Elf_Internal_Dyn * entry;
+  Elf_Internal_Shdr *sect = NULL;
   size_t liblist_offset = 0;
   size_t liblistno = 0;
   size_t conflictsno = 0;
@@ -12719,6 +12870,57 @@ process_mips_specific (FILE * file)
 
   process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
 		      display_mips_gnu_attribute);
+
+  sect = find_section (".MIPS.abiflags");
+
+  if (sect != NULL)
+    {
+      Elf_External_ABIFlags_v0 *abiflags_ext;
+      Elf_Internal_ABIFlags_v0 abiflags_in;
+
+      if (sizeof (Elf_External_ABIFlags_v0) != sect->sh_size)
+	fputs ("\nCorrupt ABI Flags section.\n", stdout);
+      else
+	{
+	  abiflags_ext = get_data (NULL, file, sect->sh_offset, 1,
+				   sect->sh_size, _("MIPS ABI Flags section"));
+	  if (abiflags_ext)
+	    {
+	      abiflags_in.version = BYTE_GET (abiflags_ext->version);
+	      abiflags_in.isa_level = BYTE_GET (abiflags_ext->isa_level);
+	      abiflags_in.isa_rev = BYTE_GET (abiflags_ext->isa_rev);
+	      abiflags_in.gpr_size = BYTE_GET (abiflags_ext->gpr_size);
+	      abiflags_in.cpr1_size = BYTE_GET (abiflags_ext->cpr1_size);
+	      abiflags_in.cpr2_size = BYTE_GET (abiflags_ext->cpr2_size);
+	      abiflags_in.fp_abi = BYTE_GET (abiflags_ext->fp_abi);
+	      abiflags_in.isa_ext = BYTE_GET (abiflags_ext->isa_ext);
+	      abiflags_in.ases = BYTE_GET (abiflags_ext->ases);
+	      abiflags_in.flags1 = BYTE_GET (abiflags_ext->flags1);
+	      abiflags_in.flags2 = BYTE_GET (abiflags_ext->flags2);
+
+	      printf ("\nMIPS ABI Flags Version: %d\n", abiflags_in.version);
+	      printf ("\nISA: MIPS%d", abiflags_in.isa_level);
+	      if (abiflags_in.isa_rev > 1)
+		printf ("r%d", abiflags_in.isa_rev);
+	      printf ("\nGPR size: %d",
+		      get_mips_reg_size (abiflags_in.gpr_size));
+	      printf ("\nCPR1 size: %d",
+		      get_mips_reg_size (abiflags_in.cpr1_size));
+	      printf ("\nCPR2 size: %d",
+		      get_mips_reg_size (abiflags_in.cpr2_size));
+	      fputs ("\nFP ABI: ", stdout);
+	      print_mips_fp_abi_value (abiflags_in.fp_abi);
+	      fputs ("ISA Extension: ", stdout);
+	      print_mips_isa_ext (abiflags_in.isa_ext);
+	      fputs ("\nASEs:", stdout);
+	      print_mips_ases (abiflags_in.ases);
+	      printf ("\nFLAGS 1: %8.8lx", abiflags_in.flags1);
+	      printf ("\nFLAGS 2: %8.8lx", abiflags_in.flags2);
+	      fputc ('\n', stdout);
+	      free (abiflags_ext);
+	    }
+	}
+    }
 
   /* We have a lot of special sections.  Thanks SGI!  */
   if (dynamic_section == NULL)
@@ -12859,11 +13061,11 @@ process_mips_specific (FILE * file)
   if (options_offset != 0)
     {
       Elf_External_Options * eopt;
-      Elf_Internal_Shdr * sect = section_headers;
       Elf_Internal_Options * iopt;
       Elf_Internal_Options * option;
       size_t offset;
       int cnt;
+      sect = section_headers;
 
       /* Find the section header so that we get the size.  */
       while (sect->sh_type != SHT_MIPS_OPTIONS)
@@ -13665,6 +13867,17 @@ print_gnu_note (Elf_Internal_Note *pnote)
 		major, minor, subminor);
       }
       break;
+
+    case NT_GNU_GOLD_VERSION:
+      {
+	unsigned long i;
+
+	printf (_("    Version: "));
+	for (i = 0; i < pnote->descsz && pnote->descdata[i] != '\0'; ++i)
+	  printf ("%c", pnote->descdata[i]);
+	printf ("\n");
+      }
+      break;
     }
 
   return 1;
@@ -14106,15 +14319,23 @@ process_note_sections (FILE * file)
 {
   Elf_Internal_Shdr * section;
   unsigned long i;
+  int n = 0;
   int res = 1;
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum && section != NULL;
        i++, section++)
     if (section->sh_type == SHT_NOTE)
-      res &= process_corefile_note_segment (file,
-					    (bfd_vma) section->sh_offset,
-					    (bfd_vma) section->sh_size);
+      {
+	res &= process_corefile_note_segment (file,
+					      (bfd_vma) section->sh_offset,
+					      (bfd_vma) section->sh_size);
+	n++;
+      }
+
+  if (n == 0)
+    /* Try processing NOTE segments instead.  */
+    return process_corefile_note_segments (file);
 
   return res;
 }

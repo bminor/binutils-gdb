@@ -73,3 +73,7 @@ set need_a_set [regsub -all {\.} [join {xlc __xlc__} -] - compiler_info]
 #if defined (__ARMCC_VERSION)
 set compiler_info [join {armcc __ARMCC_VERSION} -]
 #endif
+
+#if defined (__clang__)
+set compiler_info [join {clang __clang_major__ __clang_minor__ __clang_patchlevel__} -]
+#endif

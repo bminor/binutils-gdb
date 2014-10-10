@@ -39,5 +39,7 @@ g (void)
 int
 main (void)
 {
-  return g ();
+  int x = g ();
+  x += f ();
+  return x;
 }

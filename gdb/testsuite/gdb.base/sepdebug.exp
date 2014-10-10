@@ -177,17 +177,9 @@ gdb_test "info break" \
 # run until the breakpoint at main is hit. For non-stubs-using targets.
 #
 gdb_run_cmd
-gdb_expect {
-    -re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*$gdb_prompt $" {
-	pass "run until function breakpoint"
-    }
-    -re "$gdb_prompt $" {
-	fail "run until function breakpoint"
-    }
-    timeout {
-	fail "run until function breakpoint (timeout)"
-    }
-}
+gdb_test "" \
+    "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*" \
+    "run until function breakpoint"
 
 #
 # run until the breakpoint at a line number
@@ -574,14 +566,7 @@ proc test_next_with_recursion {} {
     # Run until we call factorial with 6
 
     gdb_run_cmd
-    gdb_expect {
-	-re "Break.* factorial .value=6. .*$gdb_prompt $" {}
-	-re ".*$gdb_prompt $" {
-	    fail "run to factorial(6)"
-	    gdb_suppress_tests
-	}
-	timeout { fail "run to factorial(6) (timeout)" ; gdb_suppress_tests }
-    }
+    gdb_test "" "Break.* factorial .value=6. .*" "run to factorial(6)"
 
     # Continue until we call factorial recursively with 5.
 
@@ -686,18 +671,13 @@ proc test_different_dir {type test_different_dir xfail} {
 	if {$xfail} {
 	    setup_xfail "*-*-*"
 	}
-	gdb_expect {
+	set test "run until function breakpoint, optimized file"
+	gdb_test_multiple "" $test {
 	    -re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*$gdb_prompt $" {
-		pass "run until function breakpoint, optimized file"
+		pass $test
 	    }
 	    -re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$gdb_prompt $" {
-		pass "run until function breakpoint, optimized file (code motion)"
-	    }
-	    -re "$gdb_prompt $" {
-		fail "run until function breakpoint, optimized file"
-	    }
-	    timeout {
-		fail "run until function breakpoint, optimized file (timeout)"
+		pass "$test (code motion)"
 	    }
 	}
 
@@ -731,14 +711,6 @@ proc test_different_dir {type test_different_dir xfail} {
 		# marker4() is defined at line 46 when compiled with -DPROTOTYPES
 		pass "run until breakpoint set at small function, optimized file (line bp_location14)"
 	    }
-	}
-
-
-	# Reset the default arguments for VxWorks
-	if [istarget "*-*-vxworks*"] {
-	    set timeout 10
-	    verbose "Timeout is now $timeout seconds" 2
-	    gdb_test_no_output "set args main"
 	}
 
 	# proc test_different_dir

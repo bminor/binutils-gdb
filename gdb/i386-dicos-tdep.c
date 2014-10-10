@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "osabi.h"
-#include <string.h>
 #include "dicos-tdep.h"
 
 static void

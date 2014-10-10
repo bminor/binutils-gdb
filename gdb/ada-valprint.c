@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -186,9 +185,9 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 					       (i * bitsize) / HOST_CHAR_BIT,
 					       (i * bitsize) % HOST_CHAR_BIT,
 					       bitsize, elttype);
-	  if (!value_available_contents_eq (v0, value_embedded_offset (v0),
-					    v1, value_embedded_offset (v1),
-					    eltlen))
+	  if (!value_contents_eq (v0, value_embedded_offset (v0),
+				  v1, value_embedded_offset (v1),
+				  eltlen))
 	    break;
 	}
 
@@ -1172,7 +1171,7 @@ ada_value_print (struct value *val0, struct ui_file *stream,
 {
   struct value *val = ada_to_fixed_value (val0);
   CORE_ADDR address = value_address (val);
-  struct type *type = ada_check_typedef (value_type (val));
+  struct type *type = ada_check_typedef (value_enclosing_type (val));
   struct value_print_options opts;
 
   /* If it is a pointer, indicate what it points to.  */

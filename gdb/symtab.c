@@ -50,13 +50,11 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "observer.h"
-#include "gdb_assert.h"
 #include "solist.h"
 #include "macrotab.h"
 #include "macroscope.h"
@@ -993,15 +991,7 @@ symbol_search_name (const struct general_symbol_info *gsymbol)
 void
 init_sal (struct symtab_and_line *sal)
 {
-  sal->pspace = NULL;
-  sal->symtab = 0;
-  sal->section = 0;
-  sal->line = 0;
-  sal->pc = 0;
-  sal->end = 0;
-  sal->explicit_pc = 0;
-  sal->explicit_line = 0;
-  sal->probe = NULL;
+  memset (sal, 0, sizeof (*sal));
 }
 
 
@@ -1074,18 +1064,18 @@ struct symtab *
 find_pc_sect_symtab_via_partial (CORE_ADDR pc, struct obj_section *section)
 {
   struct objfile *objfile;
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
 
   /* If we know that this is not a text address, return failure.  This is
      necessary because we loop based on texthigh and textlow, which do
      not include the data ranges.  */
-  msymbol = lookup_minimal_symbol_by_pc_section (pc, section).minsym;
-  if (msymbol
-      && (MSYMBOL_TYPE (msymbol) == mst_data
-	  || MSYMBOL_TYPE (msymbol) == mst_bss
-	  || MSYMBOL_TYPE (msymbol) == mst_abs
-	  || MSYMBOL_TYPE (msymbol) == mst_file_data
-	  || MSYMBOL_TYPE (msymbol) == mst_file_bss))
+  msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
+  if (msymbol.minsym
+      && (MSYMBOL_TYPE (msymbol.minsym) == mst_data
+	  || MSYMBOL_TYPE (msymbol.minsym) == mst_bss
+	  || MSYMBOL_TYPE (msymbol.minsym) == mst_abs
+	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_data
+	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_bss))
     return NULL;
 
   ALL_OBJFILES (objfile)
@@ -1118,7 +1108,7 @@ fixup_section (struct general_symbol_info *ginfo,
      point to the actual function code.  */
   msym = lookup_minimal_symbol_by_pc_name (addr, ginfo->name, objfile);
   if (msym)
-    ginfo->section = SYMBOL_SECTION (msym);
+    ginfo->section = MSYMBOL_SECTION (msym);
   else
     {
       /* Static, function-local variables do appear in the linker
@@ -1623,7 +1613,7 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
 {
   const struct objfile *objfile;
   struct symbol *sym;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symtab *s;
 
@@ -1663,7 +1653,7 @@ lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
 			   const char *name, const domain_enum domain)
 {
   struct symbol *sym = NULL;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symtab *s;
 
@@ -1766,7 +1756,7 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
 			 const char *name, const domain_enum domain)
 {
   struct symtab *symtab;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symbol *sym;
 
@@ -1954,7 +1944,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
 				     const char *name)
 {
   struct symtab *symtab;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct block *block;
   struct symbol *sym;
 
@@ -1987,7 +1977,7 @@ basic_lookup_transparent_type (const char *name)
 {
   struct symbol *sym;
   struct symtab *s = NULL;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct objfile *objfile;
   struct block *block;
   struct type *t;
@@ -2144,25 +2134,25 @@ struct symtab *
 find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
 {
   struct block *b;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct symtab *s = NULL;
   struct symtab *best_s = NULL;
   struct objfile *objfile;
   CORE_ADDR distance = 0;
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
 
   /* If we know that this is not a text address, return failure.  This is
      necessary because we loop based on the block's high and low code
      addresses, which do not include the data ranges, and because
      we call find_pc_sect_psymtab which has a similar restriction based
      on the partial_symtab's texthigh and textlow.  */
-  msymbol = lookup_minimal_symbol_by_pc_section (pc, section).minsym;
-  if (msymbol
-      && (MSYMBOL_TYPE (msymbol) == mst_data
-	  || MSYMBOL_TYPE (msymbol) == mst_bss
-	  || MSYMBOL_TYPE (msymbol) == mst_abs
-	  || MSYMBOL_TYPE (msymbol) == mst_file_data
-	  || MSYMBOL_TYPE (msymbol) == mst_file_bss))
+  msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
+  if (msymbol.minsym
+      && (MSYMBOL_TYPE (msymbol.minsym) == mst_data
+	  || MSYMBOL_TYPE (msymbol.minsym) == mst_bss
+	  || MSYMBOL_TYPE (msymbol.minsym) == mst_abs
+	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_data
+	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_bss))
     return NULL;
 
   /* Search all symtabs for the one whose file contains our address, and which
@@ -2287,9 +2277,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   int i;
   struct linetable_entry *item;
   struct symtab_and_line val;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct bound_minimal_symbol msymbol;
-  struct minimal_symbol *mfunsym;
   struct objfile *objfile;
 
   /* Info on best line seen so far, and where it starts, and its file.  */
@@ -2377,10 +2366,11 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   if (msymbol.minsym != NULL)
     if (MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
       {
-	mfunsym
-	  = lookup_minimal_symbol_text (SYMBOL_LINKAGE_NAME (msymbol.minsym),
+	struct bound_minimal_symbol mfunsym
+	  = lookup_minimal_symbol_text (MSYMBOL_LINKAGE_NAME (msymbol.minsym),
 					NULL);
-	if (mfunsym == NULL)
+
+	if (mfunsym.minsym == NULL)
 	  /* I eliminated this warning since it is coming out
 	   * in the following situation:
 	   * gdb shmain // test program with shared libraries
@@ -2394,8 +2384,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	     SYMBOL_LINKAGE_NAME (msymbol)); */
 	  ;
 	/* fall through */
-	else if (SYMBOL_VALUE_ADDRESS (mfunsym)
-		 == SYMBOL_VALUE_ADDRESS (msymbol.minsym))
+	else if (BMSYMBOL_VALUE_ADDRESS (mfunsym)
+		 == BMSYMBOL_VALUE_ADDRESS (msymbol))
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out.  */
 	  /* warning ("In stub for %s; unable to find real function/line info",
@@ -2403,7 +2393,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  ;
 	/* fall through */
 	else
-	  return find_pc_line (SYMBOL_VALUE_ADDRESS (mfunsym), 0);
+	  return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
       }
 
 
@@ -2797,6 +2787,38 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
   return sal.symtab != 0;
 }
 
+/* Given a function symbol SYM, find the symtab and line for the start
+   of the function.
+   If the argument FUNFIRSTLINE is nonzero, we want the first line
+   of real code inside the function.  */
+
+struct symtab_and_line
+find_function_start_sal (struct symbol *sym, int funfirstline)
+{
+  struct symtab_and_line sal;
+
+  fixup_symbol_section (sym, NULL);
+  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+			   SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym), 0);
+
+  /* We always should have a line for the function start address.
+     If we don't, something is odd.  Create a plain SAL refering
+     just the PC and hope that skip_prologue_sal (if requested)
+     can find a line number for after the prologue.  */
+  if (sal.pc < BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))
+    {
+      init_sal (&sal);
+      sal.pspace = current_program_space;
+      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      sal.section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
+    }
+
+  if (funfirstline)
+    skip_prologue_sal (&sal);
+
+  return sal;
+}
+
 /* Given a function start address FUNC_ADDR and SYMTAB, find the first
    address for that function that has an entry in SYMTAB's line info
    table.  If such an entry cannot be found, return FUNC_ADDR
@@ -2837,38 +2859,6 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
   return func_addr;
 }
 
-/* Given a function symbol SYM, find the symtab and line for the start
-   of the function.
-   If the argument FUNFIRSTLINE is nonzero, we want the first line
-   of real code inside the function.  */
-
-struct symtab_and_line
-find_function_start_sal (struct symbol *sym, int funfirstline)
-{
-  struct symtab_and_line sal;
-
-  fixup_symbol_section (sym, NULL);
-  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
-			   SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym), 0);
-
-  /* We always should have a line for the function start address.
-     If we don't, something is odd.  Create a plain SAL refering
-     just the PC and hope that skip_prologue_sal (if requested)
-     can find a line number for after the prologue.  */
-  if (sal.pc < BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))
-    {
-      init_sal (&sal);
-      sal.pspace = current_program_space;
-      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      sal.section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
-    }
-
-  if (funfirstline)
-    skip_prologue_sal (&sal);
-
-  return sal;
-}
-
 /* Adjust SAL to the first instruction past the function prologue.
    If the PC was explicitly specified, the SAL is not changed.
    If the line number was explicitly specified, at most the SAL's PC
@@ -2885,7 +2875,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
   const char *name;
   struct objfile *objfile;
   struct gdbarch *gdbarch;
-  struct block *b, *function_block;
+  const struct block *b, *function_block;
   int force_skip, skip;
 
   /* Do not change the SAL if PC was specified explicitly.  */
@@ -2917,9 +2907,9 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	}
 
       objfile = msymbol.objfile;
-      pc = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
-      section = SYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
-      name = SYMBOL_LINKAGE_NAME (msymbol.minsym);
+      pc = BMSYMBOL_VALUE_ADDRESS (msymbol);
+      section = MSYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
+      name = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
     }
 
   gdbarch = get_objfile_arch (objfile);
@@ -2950,6 +2940,8 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
       /* Skip "first line" of function (which is actually its prologue).  */
       pc += gdbarch_deprecated_function_start_offset (gdbarch);
+      if (gdbarch_skip_entrypoint_p (gdbarch))
+        pc = gdbarch_skip_entrypoint (gdbarch, pc);
       if (skip)
 	pc = gdbarch_skip_prologue (gdbarch, pc);
 
@@ -3042,13 +3034,200 @@ skip_prologue_sal (struct symtab_and_line *sal)
     }
 }
 
+/* Determine if PC is in the prologue of a function.  The prologue is the area
+   between the first instruction of a function, and the first executable line.
+   Returns 1 if PC *might* be in prologue, 0 if definately *not* in prologue.
+
+   If non-zero, func_start is where we think the prologue starts, possibly
+   by previous examination of symbol table information.  */
+
+int
+in_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR func_start)
+{
+  struct symtab_and_line sal;
+  CORE_ADDR func_addr, func_end;
+
+  /* We have several sources of information we can consult to figure
+     this out.
+     - Compilers usually emit line number info that marks the prologue
+       as its own "source line".  So the ending address of that "line"
+       is the end of the prologue.  If available, this is the most
+       reliable method.
+     - The minimal symbols and partial symbols, which can usually tell
+       us the starting and ending addresses of a function.
+     - If we know the function's start address, we can call the
+       architecture-defined gdbarch_skip_prologue function to analyze the
+       instruction stream and guess where the prologue ends.
+     - Our `func_start' argument; if non-zero, this is the caller's
+       best guess as to the function's entry point.  At the time of
+       this writing, handle_inferior_event doesn't get this right, so
+       it should be our last resort.  */
+
+  /* Consult the partial symbol table, to find which function
+     the PC is in.  */
+  if (! find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      CORE_ADDR prologue_end;
+
+      /* We don't even have minsym information, so fall back to using
+         func_start, if given.  */
+      if (! func_start)
+	return 1;		/* We *might* be in a prologue.  */
+
+      prologue_end = gdbarch_skip_prologue (gdbarch, func_start);
+
+      return func_start <= pc && pc < prologue_end;
+    }
+
+  /* If we have line number information for the function, that's
+     usually pretty reliable.  */
+  sal = find_pc_line (func_addr, 0);
+
+  /* Now sal describes the source line at the function's entry point,
+     which (by convention) is the prologue.  The end of that "line",
+     sal.end, is the end of the prologue.
+
+     Note that, for functions whose source code is all on a single
+     line, the line number information doesn't always end up this way.
+     So we must verify that our purported end-of-prologue address is
+     *within* the function, not at its start or end.  */
+  if (sal.line == 0
+      || sal.end <= func_addr
+      || func_end <= sal.end)
+    {
+      /* We don't have any good line number info, so use the minsym
+	 information, together with the architecture-specific prologue
+	 scanning code.  */
+      CORE_ADDR prologue_end = gdbarch_skip_prologue (gdbarch, func_addr);
+
+      return func_addr <= pc && pc < prologue_end;
+    }
+
+  /* We have line number info, and it looks good.  */
+  return func_addr <= pc && pc < sal.end;
+}
+
+/* Given PC at the function's start address, attempt to find the
+   prologue end using SAL information.  Return zero if the skip fails.
+
+   A non-optimized prologue traditionally has one SAL for the function
+   and a second for the function body.  A single line function has
+   them both pointing at the same line.
+
+   An optimized prologue is similar but the prologue may contain
+   instructions (SALs) from the instruction body.  Need to skip those
+   while not getting into the function body.
+
+   The functions end point and an increasing SAL line are used as
+   indicators of the prologue's endpoint.
+
+   This code is based on the function refine_prologue_limit
+   (found in ia64).  */
+
+CORE_ADDR
+skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
+{
+  struct symtab_and_line prologue_sal;
+  CORE_ADDR start_pc;
+  CORE_ADDR end_pc;
+  const struct block *bl;
+
+  /* Get an initial range for the function.  */
+  find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
+  start_pc += gdbarch_deprecated_function_start_offset (gdbarch);
+
+  prologue_sal = find_pc_line (start_pc, 0);
+  if (prologue_sal.line != 0)
+    {
+      /* For languages other than assembly, treat two consecutive line
+	 entries at the same address as a zero-instruction prologue.
+	 The GNU assembler emits separate line notes for each instruction
+	 in a multi-instruction macro, but compilers generally will not
+	 do this.  */
+      if (prologue_sal.symtab->language != language_asm)
+	{
+	  struct linetable *linetable = LINETABLE (prologue_sal.symtab);
+	  int idx = 0;
+
+	  /* Skip any earlier lines, and any end-of-sequence marker
+	     from a previous function.  */
+	  while (linetable->item[idx].pc != prologue_sal.pc
+		 || linetable->item[idx].line == 0)
+	    idx++;
+
+	  if (idx+1 < linetable->nitems
+	      && linetable->item[idx+1].line != 0
+	      && linetable->item[idx+1].pc == start_pc)
+	    return start_pc;
+	}
+
+      /* If there is only one sal that covers the entire function,
+	 then it is probably a single line function, like
+	 "foo(){}".  */
+      if (prologue_sal.end >= end_pc)
+	return 0;
+
+      while (prologue_sal.end < end_pc)
+	{
+	  struct symtab_and_line sal;
+
+	  sal = find_pc_line (prologue_sal.end, 0);
+	  if (sal.line == 0)
+	    break;
+	  /* Assume that a consecutive SAL for the same (or larger)
+	     line mark the prologue -> body transition.  */
+	  if (sal.line >= prologue_sal.line)
+	    break;
+	  /* Likewise if we are in a different symtab altogether
+	     (e.g. within a file included via #include).  */
+	  if (sal.symtab != prologue_sal.symtab)
+	    break;
+
+	  /* The line number is smaller.  Check that it's from the
+	     same function, not something inlined.  If it's inlined,
+	     then there is no point comparing the line numbers.  */
+	  bl = block_for_pc (prologue_sal.end);
+	  while (bl)
+	    {
+	      if (block_inlined_p (bl))
+		break;
+	      if (BLOCK_FUNCTION (bl))
+		{
+		  bl = NULL;
+		  break;
+		}
+	      bl = BLOCK_SUPERBLOCK (bl);
+	    }
+	  if (bl != NULL)
+	    break;
+
+	  /* The case in which compiler's optimizer/scheduler has
+	     moved instructions into the prologue.  We look ahead in
+	     the function looking for address ranges whose
+	     corresponding line number is less the first one that we
+	     found for the function.  This is more conservative then
+	     refine_prologue_limit which scans a large number of SALs
+	     looking for any in the prologue.  */
+	  prologue_sal = sal;
+	}
+    }
+
+  if (prologue_sal.end < end_pc)
+    /* Return the end of this line, or zero if we could not find a
+       line.  */
+    return prologue_sal.end;
+  else
+    /* Don't return END_PC, which is past the end of the function.  */
+    return prologue_sal.pc;
+}
+
 /* If P is of the form "operator[ \t]+..." where `...' is
    some legitimate operator text, return a pointer to the
    beginning of the substring of the operator text.
    Otherwise, return "".  */
 
-static char *
-operator_chars (char *p, char **end)
+static const char *
+operator_chars (const char *p, const char **end)
 {
   *end = "";
   if (strncmp (p, "operator", 8))
@@ -3068,7 +3247,7 @@ operator_chars (char *p, char **end)
 
   if (isalpha (*p) || *p == '_' || *p == '$')
     {
-      char *q = p + 1;
+      const char *q = p + 1;
 
       while (isalnum (*q) || *q == '_' || *q == '$')
 	q++;
@@ -3347,7 +3526,7 @@ sources_info (char *ignore, int from_tty)
    non-zero compare only lbasename of FILES.  */
 
 static int
-file_matches (const char *file, char *files[], int nfiles, int basenames)
+file_matches (const char *file, const char *files[], int nfiles, int basenames)
 {
   int i;
 
@@ -3472,7 +3651,7 @@ sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
 struct search_symbols_data
 {
   int nfiles;
-  char **files;
+  const char **files;
 
   /* It is true if PREG contains valid data, false otherwise.  */
   unsigned preg_p : 1;
@@ -3517,12 +3696,12 @@ search_symbols_name_matches (const char *symname, void *user_data)
    Duplicate entries are removed.  */
 
 void
-search_symbols (char *regexp, enum search_domain kind,
-		int nfiles, char *files[],
+search_symbols (const char *regexp, enum search_domain kind,
+		int nfiles, const char *files[],
 		struct symbol_search **matches)
 {
   struct symtab *s;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct block *b;
   int i = 0;
   struct block_iterator iter;
@@ -3568,8 +3747,8 @@ search_symbols (char *regexp, enum search_domain kind,
          This is just a courtesy to make the matching less sensitive
          to how many spaces the user leaves between 'operator'
          and <TYPENAME> or <OPERATOR>.  */
-      char *opend;
-      char *opname = operator_chars (regexp, &opend);
+      const char *opend;
+      const char *opname = operator_chars (regexp, &opend);
       int errcode;
 
       if (*opname)
@@ -3656,16 +3835,17 @@ search_symbols (char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
 	    if (!datum.preg_p
-		|| regexec (&datum.preg, SYMBOL_NATURAL_NAME (msymbol), 0,
+		|| regexec (&datum.preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
 			    NULL, 0) == 0)
 	      {
 		/* Note: An important side-effect of these lookup functions
 		   is to expand the symbol table if msymbol is found, for the
 		   benefit of the next loop on ALL_PRIMARY_SYMTABS.  */
 		if (kind == FUNCTIONS_DOMAIN
-		    ? find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)) == NULL
+		    ? find_pc_symtab (MSYMBOL_VALUE_ADDRESS (objfile,
+							     msymbol)) == NULL
 		    : (lookup_symbol_in_objfile_from_linkage_name
-		       (objfile, SYMBOL_LINKAGE_NAME (msymbol), VAR_DOMAIN)
+		       (objfile, MSYMBOL_LINKAGE_NAME (msymbol), VAR_DOMAIN)
 		       == NULL))
 		  found_misc = 1;
 	      }
@@ -3759,16 +3939,17 @@ search_symbols (char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
 	    if (!datum.preg_p
-		|| regexec (&datum.preg, SYMBOL_NATURAL_NAME (msymbol), 0,
+		|| regexec (&datum.preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
 			    NULL, 0) == 0)
 	      {
 		/* For functions we can do a quick check of whether the
 		   symbol might be found via find_pc_symtab.  */
 		if (kind != FUNCTIONS_DOMAIN
-		    || find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)) == NULL)
+		    || find_pc_symtab (MSYMBOL_VALUE_ADDRESS (objfile,
+							      msymbol)) == NULL)
 		  {
 		    if (lookup_symbol_in_objfile_from_linkage_name
-			(objfile, SYMBOL_LINKAGE_NAME (msymbol), VAR_DOMAIN)
+			(objfile, MSYMBOL_LINKAGE_NAME (msymbol), VAR_DOMAIN)
 			== NULL)
 		      {
 			/* match */
@@ -3846,14 +4027,14 @@ print_msymbol_info (struct bound_minimal_symbol msymbol)
   char *tmp;
 
   if (gdbarch_addr_bit (gdbarch) <= 32)
-    tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol.minsym)
+    tmp = hex_string_custom (BMSYMBOL_VALUE_ADDRESS (msymbol)
 			     & (CORE_ADDR) 0xffffffff,
 			     8);
   else
-    tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol.minsym),
+    tmp = hex_string_custom (BMSYMBOL_VALUE_ADDRESS (msymbol),
 			     16);
   printf_filtered ("%s  %s\n",
-		   tmp, SYMBOL_PRINT_NAME (msymbol.minsym));
+		   tmp, MSYMBOL_PRINT_NAME (msymbol.minsym));
 }
 
 /* This is the guts of the commands "info functions", "info types", and
@@ -3875,7 +4056,7 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
   gdb_assert (kind <= TYPES_DOMAIN);
 
   /* Must make sure that if we're interrupted, symbols gets freed.  */
-  search_symbols (regexp, kind, 0, (char **) NULL, &symbols);
+  search_symbols (regexp, kind, 0, NULL, &symbols);
   old_chain = make_cleanup_free_search_symbols (&symbols);
 
   if (regexp != NULL)
@@ -3954,7 +4135,8 @@ rbreak_command (char *regexp, int from_tty)
   struct cleanup *old_chain;
   char *string = NULL;
   int len = 0;
-  char **files = NULL, *file_name;
+  const char **files = NULL;
+  const char *file_name;
   int nfiles = 0;
 
   if (regexp)
@@ -3964,13 +4146,15 @@ rbreak_command (char *regexp, int from_tty)
       if (colon && *(colon + 1) != ':')
 	{
 	  int colon_index;
+	  char *local_name;
 
 	  colon_index = colon - regexp;
-	  file_name = alloca (colon_index + 1);
-	  memcpy (file_name, regexp, colon_index);
-	  file_name[colon_index--] = 0;
-	  while (isspace (file_name[colon_index]))
-	    file_name[colon_index--] = 0; 
+	  local_name = alloca (colon_index + 1);
+	  memcpy (local_name, regexp, colon_index);
+	  local_name[colon_index--] = 0;
+	  while (isspace (local_name[colon_index]))
+	    local_name[colon_index--] = 0;
+	  file_name = local_name;
 	  files = &file_name;
 	  nfiles = 1;
 	  regexp = skip_spaces (colon + 1);
@@ -4011,7 +4195,7 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  int newlen = (strlen (SYMBOL_LINKAGE_NAME (p->msymbol.minsym)) + 3);
+	  int newlen = (strlen (MSYMBOL_LINKAGE_NAME (p->msymbol.minsym)) + 3);
 
 	  if (newlen > len)
 	    {
@@ -4019,12 +4203,12 @@ rbreak_command (char *regexp, int from_tty)
 	      len = newlen;
 	    }
 	  strcpy (string, "'");
-	  strcat (string, SYMBOL_LINKAGE_NAME (p->msymbol.minsym));
+	  strcat (string, MSYMBOL_LINKAGE_NAME (p->msymbol.minsym));
 	  strcat (string, "'");
 
 	  break_command (string, from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
-			   SYMBOL_PRINT_NAME (p->msymbol.minsym));
+			   MSYMBOL_PRINT_NAME (p->msymbol.minsym));
 	}
     }
 
@@ -4095,6 +4279,10 @@ static VEC (char_ptr) *return_val;
       completion_list_add_name \
 	(SYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
 
+#define MCOMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
+      completion_list_add_name \
+	(MSYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
+
 /*  Test to see if the symbol specified by SYMNAME (which is already
    demangled for C++ symbols) matches SYM_TEXT in the first SYM_TEXT_LEN
    characters.  If so, add it to the current completion list.  */
@@ -4152,7 +4340,7 @@ completion_list_objc_symbol (struct minimal_symbol *msymbol,
   const char *method, *category, *selector;
   char *tmp2 = NULL;
 
-  method = SYMBOL_NATURAL_NAME (msymbol);
+  method = MSYMBOL_NATURAL_NAME (msymbol);
 
   /* Is it a method?  */
   if ((method[0] != '-') && (method[0] != '+'))
@@ -4284,7 +4472,7 @@ add_macro_name (const char *name, const struct macro_definition *ignore,
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
 
-  completion_list_add_name ((char *) name,
+  completion_list_add_name (name,
 			    datum->sym_text, datum->sym_text_len,
 			    datum->text, datum->word);
 }
@@ -4313,7 +4501,7 @@ default_make_symbol_completion_list_break_on (const char *text,
   struct symtab *s;
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
-  struct block *b;
+  const struct block *b;
   const struct block *surrounding_static_block, *surrounding_global_block;
   struct block_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
@@ -4416,8 +4604,8 @@ default_make_symbol_completion_list_break_on (const char *text,
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  COMPLETION_LIST_ADD_SYMBOL (msymbol, sym_text, sym_text_len, text,
-				      word);
+	  MCOMPLETION_LIST_ADD_SYMBOL (msymbol, sym_text, sym_text_len, text,
+				       word);
 
 	  completion_list_objc_symbol (msymbol, sym_text, sym_text_len, text,
 				       word);
@@ -4825,193 +5013,6 @@ make_source_files_completion_list (const char *text, const char *word)
   discard_cleanups (back_to);
 
   return list;
-}
-
-/* Determine if PC is in the prologue of a function.  The prologue is the area
-   between the first instruction of a function, and the first executable line.
-   Returns 1 if PC *might* be in prologue, 0 if definately *not* in prologue.
-
-   If non-zero, func_start is where we think the prologue starts, possibly
-   by previous examination of symbol table information.  */
-
-int
-in_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR func_start)
-{
-  struct symtab_and_line sal;
-  CORE_ADDR func_addr, func_end;
-
-  /* We have several sources of information we can consult to figure
-     this out.
-     - Compilers usually emit line number info that marks the prologue
-       as its own "source line".  So the ending address of that "line"
-       is the end of the prologue.  If available, this is the most
-       reliable method.
-     - The minimal symbols and partial symbols, which can usually tell
-       us the starting and ending addresses of a function.
-     - If we know the function's start address, we can call the
-       architecture-defined gdbarch_skip_prologue function to analyze the
-       instruction stream and guess where the prologue ends.
-     - Our `func_start' argument; if non-zero, this is the caller's
-       best guess as to the function's entry point.  At the time of
-       this writing, handle_inferior_event doesn't get this right, so
-       it should be our last resort.  */
-
-  /* Consult the partial symbol table, to find which function
-     the PC is in.  */
-  if (! find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    {
-      CORE_ADDR prologue_end;
-
-      /* We don't even have minsym information, so fall back to using
-         func_start, if given.  */
-      if (! func_start)
-	return 1;		/* We *might* be in a prologue.  */
-
-      prologue_end = gdbarch_skip_prologue (gdbarch, func_start);
-
-      return func_start <= pc && pc < prologue_end;
-    }
-
-  /* If we have line number information for the function, that's
-     usually pretty reliable.  */
-  sal = find_pc_line (func_addr, 0);
-
-  /* Now sal describes the source line at the function's entry point,
-     which (by convention) is the prologue.  The end of that "line",
-     sal.end, is the end of the prologue.
-
-     Note that, for functions whose source code is all on a single
-     line, the line number information doesn't always end up this way.
-     So we must verify that our purported end-of-prologue address is
-     *within* the function, not at its start or end.  */
-  if (sal.line == 0
-      || sal.end <= func_addr
-      || func_end <= sal.end)
-    {
-      /* We don't have any good line number info, so use the minsym
-	 information, together with the architecture-specific prologue
-	 scanning code.  */
-      CORE_ADDR prologue_end = gdbarch_skip_prologue (gdbarch, func_addr);
-
-      return func_addr <= pc && pc < prologue_end;
-    }
-
-  /* We have line number info, and it looks good.  */
-  return func_addr <= pc && pc < sal.end;
-}
-
-/* Given PC at the function's start address, attempt to find the
-   prologue end using SAL information.  Return zero if the skip fails.
-
-   A non-optimized prologue traditionally has one SAL for the function
-   and a second for the function body.  A single line function has
-   them both pointing at the same line.
-
-   An optimized prologue is similar but the prologue may contain
-   instructions (SALs) from the instruction body.  Need to skip those
-   while not getting into the function body.
-
-   The functions end point and an increasing SAL line are used as
-   indicators of the prologue's endpoint.
-
-   This code is based on the function refine_prologue_limit
-   (found in ia64).  */
-
-CORE_ADDR
-skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
-{
-  struct symtab_and_line prologue_sal;
-  CORE_ADDR start_pc;
-  CORE_ADDR end_pc;
-  struct block *bl;
-
-  /* Get an initial range for the function.  */
-  find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
-  start_pc += gdbarch_deprecated_function_start_offset (gdbarch);
-
-  prologue_sal = find_pc_line (start_pc, 0);
-  if (prologue_sal.line != 0)
-    {
-      /* For languages other than assembly, treat two consecutive line
-	 entries at the same address as a zero-instruction prologue.
-	 The GNU assembler emits separate line notes for each instruction
-	 in a multi-instruction macro, but compilers generally will not
-	 do this.  */
-      if (prologue_sal.symtab->language != language_asm)
-	{
-	  struct linetable *linetable = LINETABLE (prologue_sal.symtab);
-	  int idx = 0;
-
-	  /* Skip any earlier lines, and any end-of-sequence marker
-	     from a previous function.  */
-	  while (linetable->item[idx].pc != prologue_sal.pc
-		 || linetable->item[idx].line == 0)
-	    idx++;
-
-	  if (idx+1 < linetable->nitems
-	      && linetable->item[idx+1].line != 0
-	      && linetable->item[idx+1].pc == start_pc)
-	    return start_pc;
-	}
-
-      /* If there is only one sal that covers the entire function,
-	 then it is probably a single line function, like
-	 "foo(){}".  */
-      if (prologue_sal.end >= end_pc)
-	return 0;
-
-      while (prologue_sal.end < end_pc)
-	{
-	  struct symtab_and_line sal;
-
-	  sal = find_pc_line (prologue_sal.end, 0);
-	  if (sal.line == 0)
-	    break;
-	  /* Assume that a consecutive SAL for the same (or larger)
-	     line mark the prologue -> body transition.  */
-	  if (sal.line >= prologue_sal.line)
-	    break;
-	  /* Likewise if we are in a different symtab altogether
-	     (e.g. within a file included via #include).  */
-	  if (sal.symtab != prologue_sal.symtab)
-	    break;
-
-	  /* The line number is smaller.  Check that it's from the
-	     same function, not something inlined.  If it's inlined,
-	     then there is no point comparing the line numbers.  */
-	  bl = block_for_pc (prologue_sal.end);
-	  while (bl)
-	    {
-	      if (block_inlined_p (bl))
-		break;
-	      if (BLOCK_FUNCTION (bl))
-		{
-		  bl = NULL;
-		  break;
-		}
-	      bl = BLOCK_SUPERBLOCK (bl);
-	    }
-	  if (bl != NULL)
-	    break;
-
-	  /* The case in which compiler's optimizer/scheduler has
-	     moved instructions into the prologue.  We look ahead in
-	     the function looking for address ranges whose
-	     corresponding line number is less the first one that we
-	     found for the function.  This is more conservative then
-	     refine_prologue_limit which scans a large number of SALs
-	     looking for any in the prologue.  */
-	  prologue_sal = sal;
-	}
-    }
-
-  if (prologue_sal.end < end_pc)
-    /* Return the end of this line, or zero if we could not find a
-       line.  */
-    return prologue_sal.end;
-  else
-    /* Don't return END_PC, which is past the end of the function.  */
-    return prologue_sal.pc;
 }
 
 /* Track MAIN */

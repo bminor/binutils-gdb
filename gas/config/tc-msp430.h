@@ -124,7 +124,6 @@ extern int msp430_force_relocation_local (struct fix *);
 #define tc_frob_section(sec) msp430_frob_section (sec)
 extern void msp430_frob_section (asection *);
 
-
 extern int msp430_enable_relax;
 extern int msp430_enable_polys;
 

@@ -263,7 +263,7 @@ sparc_breakpoint_at (CORE_ADDR where)
 static CORE_ADDR
 sparc_reinsert_addr (void)
 {
-  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
+  struct regcache *regcache = get_thread_regcache (current_thread, 1);
   CORE_ADDR lr;
   /* O7 is the equivalent to the 'lr' of other archs.  */
   collect_register_by_name (regcache, "o7", &lr);
@@ -328,6 +328,7 @@ struct linux_target_ops the_low_target = {
   sparc_reinsert_addr,
   0,
   sparc_breakpoint_at,
+  NULL,  /* supports_z_point_type */
   NULL, NULL, NULL, NULL,
   NULL, NULL
 };

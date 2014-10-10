@@ -1,4 +1,4 @@
-@c Copyright 1991-2013 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2014 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @c man end
@@ -188,6 +188,9 @@ accept various extension mnemonics.  For example,
 @code{svme},
 @code{abm} and
 @code{padlock}.
+@code{avx512dq},
+@code{avx512bw},
+@code{avx512vl},
 Note that rather than extending a basic instruction set, the extension
 mnemonics starting with @code{no} revoke the respective functionality.
 
@@ -282,6 +285,36 @@ The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
 @item -madd-bnd-prefix
 This option forces the assembler to add BND prefix to all branches, even
 if such prefix was not explicitly specified in the source code.
+
+@cindex @samp{-mbig-obj} option, x86-64
+@item -mbig-obj
+On x86-64 PE/COFF target this option forces the use of big object file
+format, which allows more than 32768 sections.
+
+@cindex @samp{-momit-lock-prefix=} option, i386
+@cindex @samp{-momit-lock-prefix=} option, x86-64
+@item -momit-lock-prefix=@var{no}
+@itemx -momit-lock-prefix=@var{yes}
+These options control how the assembler should encode lock prefix.
+This option is intended as a workaround for processors, that fail on
+lock prefix. This option can only be safely used with single-core,
+single-thread computers
+@option{-momit-lock-prefix=@var{yes}} will omit all lock prefixes.
+@option{-momit-lock-prefix=@var{no}} will encode lock prefix as usual,
+which is the default.
+
+@cindex @samp{-mevexrcig=} option, i386
+@cindex @samp{-mevexrcig=} option, x86-64
+@item -mevexrcig=@var{rne}
+@itemx -mevexrcig=@var{rd}
+@itemx -mevexrcig=@var{ru}
+@itemx -mevexrcig=@var{rz}
+These options control how the assembler should encode SAE-only
+EVEX instructions.  @option{-mevexrcig=@var{rne}} will encode RC bits
+of EVEX instruction with 00, which is the default.
+@option{-mevexrcig=@var{rd}}, @option{-mevexrcig=@var{ru}}
+and @option{-mevexrcig=@var{rz}} will encode SAE-only EVEX instructions
+with 01, 10 and 11 RC bits, respectively.
 
 @end table
 @c man end
@@ -1063,6 +1096,9 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.rtm} @tab @samp{.adx} @tab @samp{.rdseed} @tab @samp{.prfchw}
 @item @samp{.smap} @tab @samp{.mpx}
 @item @samp{.smap} @tab @samp{.sha}
+@item @samp{.smap} @tab @samp{.clflushopt} @tab @samp{.xsavec} @tab @samp{.xsaves}
+@item @samp{.smap} @tab @samp{.prefetchwt1}
+@item @samp{.smap} @tab @samp{.avx512vl} @tab @samp{.avx512bw} @tab @samp{.avx512dq}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}

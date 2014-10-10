@@ -1,4 +1,4 @@
-/* config.in.  Generated from configure.in by autoheader.  */
+/* config.in.  Generated from configure.ac by autoheader.  */
 
 /* Check that config.h is #included before system headers
    (this works only for glibc, but that should be enough).  */
@@ -170,6 +170,9 @@
 
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H
+
+/* Define to 1 if you have the <windows.h> header file. */
+#undef HAVE_WINDOWS_H
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H

@@ -21,7 +21,6 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
 #include "symtab.h"
 #include "bfd.h"
 #include "symfile.h"
@@ -604,8 +603,6 @@ master_so_list (void)
 int
 solib_read_symbols (struct so_list *so, int flags)
 {
-  const int from_tty = flags & SYMFILE_VERBOSE;
-
   if (so->symbols_loaded)
     {
       /* If needed, we've already warned in our caller.  */
@@ -649,11 +646,7 @@ solib_read_symbols (struct so_list *so, int flags)
 					    " library symbols for %s:\n"),
 			   so->so_name);
       else
-	{
-	  if (from_tty || info_verbose)
-	    printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
-	  so->symbols_loaded = 1;
-	}
+	so->symbols_loaded = 1;
       return 1;
     }
 
@@ -900,10 +893,21 @@ libpthread_solib_p (struct so_list *so)
    FROM_TTY and TARGET are as described for update_solib_list, above.  */
 
 void
-solib_add (char *pattern, int from_tty,
+solib_add (const char *pattern, int from_tty,
 	   struct target_ops *target, int readsyms)
 {
   struct so_list *gdb;
+
+  if (print_symbol_loading_p (from_tty, 0, 0))
+    {
+      if (pattern != NULL)
+	{
+	  printf_unfiltered (_("Loading symbols for shared libraries: %s\n"),
+			     pattern);
+	}
+      else
+	printf_unfiltered (_("Loading symbols for shared libraries.\n"));
+    }
 
   current_program_space->solib_add_generation++;
 
@@ -1276,6 +1280,9 @@ reload_shared_libraries_1 (int from_tty)
 {
   struct so_list *so;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+
+  if (print_symbol_loading_p (from_tty, 0, 0))
+    printf_unfiltered (_("Loading symbols for shared libraries.\n"));
 
   for (so = so_list_head; so != NULL; so = so->next)
     {

@@ -225,7 +225,7 @@ static pthreadDebugCallbacks_t debug_callbacks =
 static void
 enable_dec_thread (void)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   void* caller_context;
   int status;
 
@@ -234,14 +234,14 @@ enable_dec_thread (void)
     return;
 
   msym = lookup_minimal_symbol ("__pthread_dbg_symtable", NULL, NULL);
-  if (msym == NULL)
+  if (msym.minsym == NULL)
     {
       debug ("enable_dec_thread: No __pthread_dbg_symtable");
       return;
     }
 
   status = pthreadDebugContextInit (&caller_context, &debug_callbacks,
-                                    (void *) SYMBOL_VALUE_ADDRESS (msym),
+                                    (void *) SYMBOL_VALUE_ADDRESS (msym.minsym),
                                     &debug_context);
   if (status != ESUCCESS)
     {
@@ -687,19 +687,20 @@ dec_thread_new_objfile_observer (struct objfile *objfile)
 /* The "to_get_ada_task_ptid" method of the dec_thread_ops.  */
 
 static ptid_t
-dec_thread_get_ada_task_ptid (long lwp, long thread)
+dec_thread_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   int i;
   struct dec_thread_info *info;
 
-  debug ("dec_thread_get_ada_task_ptid (lwp=0x%lx, thread=0x%lx)",
+  debug ("dec_thread_get_ada_task_ptid (struct target_ops *self,"
+	 " lwp=0x%lx, thread=0x%lx)",
          lwp, thread);
 
   for (i = 0; VEC_iterate (dec_thread_info_s, dec_thread_list, i, info);
        i++)
     if (info->info.teb == (pthread_t) thread)
       return ptid_build_from_info (*info);
-  
+
   warning (_("Could not find thread id from THREAD = 0x%lx"), thread);
   return inferior_ptid;
 }

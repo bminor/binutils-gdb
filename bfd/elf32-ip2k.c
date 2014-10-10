@@ -1,6 +1,5 @@
 /* Ubicom IP2xxx specific support for 32-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1496,7 +1495,7 @@ ip2k_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-#define TARGET_BIG_SYM	 bfd_elf32_ip2k_vec
+#define TARGET_BIG_SYM	 ip2k_elf32_vec
 #define TARGET_BIG_NAME  "elf32-ip2k"
 
 #define ELF_ARCH	 bfd_arch_ip2k

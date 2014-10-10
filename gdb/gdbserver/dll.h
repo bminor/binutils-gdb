@@ -20,7 +20,10 @@
 
 struct dll_info
 {
+  /* This must appear first.  See inferiors.h.
+     The list iterator functions assume it.  */
   struct inferior_list_entry entry;
+
   char *name;
   CORE_ADDR base_addr;
 };

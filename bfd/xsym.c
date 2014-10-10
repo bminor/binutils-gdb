@@ -1,6 +1,5 @@
 /* xSYM symbol-file support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009, 2010, 2011, 2012  Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -51,7 +50,6 @@
 #define bfd_sym_section_already_linked              _bfd_generic_section_already_linked
 #define bfd_sym_bfd_define_common_symbol            bfd_generic_define_common_symbol
 #define bfd_sym_bfd_link_hash_table_create          _bfd_generic_link_hash_table_create
-#define bfd_sym_bfd_link_hash_table_free            _bfd_generic_link_hash_table_free
 #define bfd_sym_bfd_link_add_symbols                _bfd_generic_link_add_symbols
 #define bfd_sym_bfd_link_just_syms                  _bfd_generic_link_just_syms
 #define bfd_sym_bfd_copy_link_hash_symbol_type \

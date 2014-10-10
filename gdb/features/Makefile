@@ -38,11 +38,15 @@ WHICH = aarch64 \
 	i386/amd64 i386/amd64-linux \
 	i386/i386-avx i386/i386-avx-linux \
 	i386/i386-mpx i386/i386-mpx-linux \
+	i386/i386-avx512 i386/i386-avx512-linux \
 	i386/amd64-avx i386/amd64-avx-linux \
 	i386/amd64-mpx i386/amd64-mpx-linux \
+	i386/amd64-avx512 i386/amd64-avx512-linux \
 	i386/x32 i386/x32-linux \
 	i386/x32-avx i386/x32-avx-linux \
+	i386/x32-avx512 i386/x32-avx512-linux \
 	mips-linux mips-dsp-linux \
+	microblaze-with-stack-protect \
 	mips64-linux mips64-dsp-linux \
 	nios2-linux \
 	rs6000/powerpc-32 \
@@ -67,20 +71,27 @@ i386/i386-avx-expedite = ebp,esp,eip
 i386/i386-avx-linux-expedite = ebp,esp,eip
 i386/i386-mpx-expedite = ebp,esp,eip
 i386/i386-mpx-linux-expedite = ebp,esp,eip
+i386/i386-avx512-expedite = ebp,esp,eip
+i386/i386-avx512-linux-expedite = ebp,esp,eip
 i386/i386-mmx-expedite = ebp,esp,eip
 i386/i386-mmx-linux-expedite = ebp,esp,eip
 i386/amd64-avx-expedite = rbp,rsp,rip
 i386/amd64-avx-linux-expedite = rbp,rsp,rip
 i386/amd64-mpx-expedite = rbp,rsp,rip
 i386/amd64-mpx-linux-expedite = rbp,rsp,rip
+i386/amd64-avx512-expedite = rbp,rsp,rip
+i386/amd64-avx512-linux-expedite = rbp,rsp,rip
 i386/x32-expedite = rbp,rsp,rip
 i386/x32-linux-expedite = rbp,rsp,rip
 i386/x32-avx-expedite = rbp,rsp,rip
 i386/x32-avx-linux-expedite = rbp,rsp,rip
+i386/x32-avx512-expedite = rbp,rsp,rip
+i386/x32-avx512-linux-expedite = rbp,rsp,rip
 mips-expedite = r29,pc
 mips-dsp-expedite = r29,pc
 mips64-expedite = r29,pc
 mips64-dsp-expedite = r29,pc
+microblaze-expedite = r1,pc
 nios2-linux-expedite = sp,pc
 powerpc-expedite = r1,pc
 rs6000/powerpc-cell32l-expedite = r1,pc,r0,orig_r3,r4
@@ -146,6 +157,10 @@ $(outdir)/i386/i386-mpx.dat: i386/32bit-core.xml i386/32bit-avx.xml \
 			       i386/32bit-mpx.xml
 $(outdir)/i386/i386-mpx-linux.dat: i386/32bit-core.xml 	i386/32bit-avx.xml \
 			       i386/32bit-linux.xml i386/32bit-mpx.xml
+$(outdir)/i386/i386-avx512.dat: i386/32bit-core.xml i386/32bit-avx.xml \
+			       i386/32bit-mpx.xml i386/32bit-avx512.xml
+$(outdir)/i386/i386-avx512-linux.dat: i386/32bit-core.xml i386/32bit-avx.xml \
+			       i386/32bit-linux.xml i386/32bit-mpx.xml i386/32bit-avx512.xml
 $(outdir)/i386/i386-mmx.dat: i386/32bit-core.xml 
 $(outdir)/i386/i386-mmx-linux.dat: i386/32bit-core.xml i386/32bit-linux.xml
 $(outdir)/i386/amd64-avx.dat: i386/64bit-core.xml i386/64bit-avx.xml
@@ -155,9 +170,18 @@ $(outdir)/i386/amd64-mpx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-linux.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-mpx.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-mpx.xml
+$(outdir)/i386/amd64-avx512.dat: i386/64bit-core.xml i386/64bit-avx.xml \
+			       i386/64bit-mpx.xml i386/64bit-avx512.xml
+$(outdir)/i386/amd64-avx512-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
+			       i386/64bit-mpx.xml i386/64bit-avx512.xml \
+			       i386/64bit-linux.xml
 $(outdir)/i386/x32.dat: i386/x32-core.xml i386/64bit-sse.xml
 $(outdir)/i386/x32-linux.dat: i386/x32-core.xml i386/64bit-sse.xml \
 			      i386/64bit-linux.xml
 $(outdir)/i386/x32-avx.dat: i386/x32-core.xml i386/64bit-avx.xml
 $(outdir)/i386/x32-avx-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
 				  i386/64bit-linux.xml
+$(outdir)/i386/x32-avx512.dat: i386/x32-core.xml i386/64bit-avx.xml \
+			       i386/64bit-mpx.xml i386/64bit-avx512.xml
+$(outdir)/i386/x32-avx512-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
+			       i386/64bit-mpx.xml i386/64bit-avx512.xml i386/64bit-linux.xml

@@ -41,15 +41,7 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     return -1
 }
 
-# Start the program running and then wait for a bit, to be sure
-# that it can be attached to.
-set testpid [eval exec $binfile &]
-exec sleep 2
-if { [istarget "*-*-cygwin*"] } {
-    # testpid is the Cygwin PID, GDB uses the Windows PID, which might be
-    # different due to the way fork/exec works.
-    set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
-}
+set testpid [spawn_wait_for_attach $binfile]
 
 # Test command 'where' is executed when command 'attach' is done, otherwise
 # function 'sleep' may not show up in backtrace.

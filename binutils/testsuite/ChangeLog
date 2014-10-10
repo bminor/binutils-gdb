@@ -1,3 +1,62 @@
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* binutils-all/objcopy.exp: Add mips*-img-elf* target triple.
+	* binutils-all/readelf.exp: Likewise
+
+2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* binutils-all/readelf.ss-mips: Account for new sections.
+
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* binutils-all/readelf.s: Account for .MIPS.abiflags and
+	.gnu.attributes.
+	* binutils-all/readelf.ss-tmips: Likewise.
+	* binutils-all/strip-3.d: Likewise.
+
+2014-07-10  Will Newton  <will.newton@linaro.org>
+
+	* binutils-all/objcopy.exp: Disable the strip-10 test on
+	non-EABI ARM configurations.
+
+2014-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/ar.exp: Skip tests involving bfdtest1 and bfdtest2
+	if these executables are not present.
+
+2014-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/debug_str.s: New test.
+	* binutils-all/debug_str.d: New test control file.
+	* binutils-all/compress.exp: Run debug_str test.
+
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* binutils-all/objcopy.exp: Remove openrisc and or32 support.  Add
+	support for or1k.
+	* binutils-all/objdump.exp: Likewise.
+	* binutils-all/dw2-decodedline-1.S: Likewise.
+
+2014-03-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* binutils-all/aarch64/aarch64.exp: New test driver for AArch64.
+	* binutils-all/aarch64/unallocated-encoding.s: New testcase.
+	* binutils-all/aarch64/unallocated-encoding.d: Ditto.
+
+2014-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/readelf.ss: Add skip of MSP430 defined symbols.
+
+2014-01-29  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16318
+	* binutils-all/strip-10.d: Revert previous delta.
+
+2014-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16318
+	* binutils-all/strip-10.d: Allow "System V" in the osabi field.
+
 2013-12-20  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16218
@@ -301,7 +360,7 @@
 
 For older changes see ChangeLog-0411
 
-Copyright (C) 2012 Free Software Foundation, Inc.
+Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

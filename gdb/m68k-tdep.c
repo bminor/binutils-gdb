@@ -26,8 +26,6 @@
 #include "symtab.h"
 #include "gdbcore.h"
 #include "value.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "inferior.h"
 #include "regcache.h"
 #include "arch-utils.h"

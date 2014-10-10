@@ -27,9 +27,6 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"
 #include "solib-svr4.h"
@@ -42,13 +39,13 @@ struct ppc_reg_offsets ppcnbsd_reg_offsets;
 
 /* NetBSD/powerpc register sets.  */
 
-struct regset ppcnbsd_gregset =
+const struct regset ppcnbsd_gregset =
 {
   &ppcnbsd_reg_offsets,
   ppc_supply_gregset
 };
 
-struct regset ppcnbsd_fpregset =
+const struct regset ppcnbsd_fpregset =
 {
   &ppcnbsd_reg_offsets,
   ppc_supply_fpregset

@@ -1,7 +1,5 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
-   Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -831,7 +829,7 @@ struct elf_i386_link_hash_table
   == I386_ELF_DATA ? ((struct elf_i386_link_hash_table *) ((p)->hash)) : NULL)
 
 #define elf_i386_compute_jump_table_size(htab) \
-  ((htab)->next_tls_desc_index * 4)
+  ((htab)->elf.srelplt->reloc_count * 4)
 
 /* Create an entry in an i386 ELF linker hash table.  */
 
@@ -932,6 +930,21 @@ elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
   return &ret->elf;
 }
 
+/* Destroy an i386 ELF linker hash table.  */
+
+static void
+elf_i386_link_hash_table_free (bfd *obfd)
+{
+  struct elf_i386_link_hash_table *htab
+    = (struct elf_i386_link_hash_table *) obfd->link.hash;
+
+  if (htab->loc_hash_table)
+    htab_delete (htab->loc_hash_table);
+  if (htab->loc_hash_memory)
+    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
+  _bfd_elf_link_hash_table_free (obfd);
+}
+
 /* Create an i386 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -960,26 +973,12 @@ elf_i386_link_hash_table_create (bfd *abfd)
   ret->loc_hash_memory = objalloc_create ();
   if (!ret->loc_hash_table || !ret->loc_hash_memory)
     {
-      free (ret);
+      elf_i386_link_hash_table_free (abfd);
       return NULL;
     }
+  ret->elf.root.hash_table_free = elf_i386_link_hash_table_free;
 
   return &ret->elf.root;
-}
-
-/* Destroy an i386 ELF linker hash table.  */
-
-static void
-elf_i386_link_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf_i386_link_hash_table *htab
-    = (struct elf_i386_link_hash_table *) hash;
-
-  if (htab->loc_hash_table)
-    htab_delete (htab->loc_hash_table);
-  if (htab->loc_hash_memory)
-    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
-  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Create .plt, .rel.plt, .got, .got.plt, .rel.got, .dynbss, and
@@ -2552,7 +2551,7 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
   /* Nothing to do if there are no codes, no relocations or no output.  */
   if ((sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
       || sec->reloc_count == 0
-      || discarded_section (sec))
+      || bfd_is_abs_section (sec->output_section))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -2706,7 +2705,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       bfd_signed_vma *local_got;
       bfd_signed_vma *end_local_got;
@@ -5002,14 +5001,46 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
-/* Return address for Ith PLT stub in section PLT, for relocation REL
-   or (bfd_vma) -1 if it should not be included.  */
+/* Return address in section PLT for the Ith GOTPLT relocation, for
+   relocation REL or (bfd_vma) -1 if it should not be included.  */
 
 static bfd_vma
-elf_i386_plt_sym_val (bfd_vma i, const asection *plt,
-		      const arelent *rel ATTRIBUTE_UNUSED)
+elf_i386_plt_sym_val (bfd_vma i, const asection *plt, const arelent *rel)
 {
-  return plt->vma + (i + 1) * GET_PLT_ENTRY_SIZE (plt->owner);
+  bfd *abfd;
+  const struct elf_i386_backend_data *bed;
+  bfd_vma plt_offset;
+
+  /* Only match R_386_JUMP_SLOT and R_386_IRELATIVE.  */
+  if (rel->howto->type != R_386_JUMP_SLOT
+      && rel->howto->type != R_386_IRELATIVE)
+    return (bfd_vma) -1;
+
+  abfd = plt->owner;
+  bed = get_elf_i386_backend_data (abfd);
+  plt_offset = bed->plt->plt_entry_size;
+
+  if (elf_elfheader (abfd)->e_ident[EI_OSABI] != ELFOSABI_GNU)
+    return plt->vma + (i + 1) * plt_offset;
+
+  while (plt_offset < plt->size)
+    {
+      bfd_vma reloc_offset;
+      bfd_byte reloc_offset_raw[4];
+
+      if (!bfd_get_section_contents (abfd, (asection *) plt,
+				     reloc_offset_raw,
+				     plt_offset + bed->plt->plt_reloc_offset,
+				     sizeof (reloc_offset_raw)))
+	return (bfd_vma) -1;
+
+      reloc_offset = H_GET_32 (abfd, reloc_offset_raw);
+      if (reloc_offset == i * sizeof (Elf32_External_Rel))
+	return plt->vma + plt_offset;
+      plt_offset += bed->plt->plt_entry_size;
+    }
+
+  abort ();
 }
 
 /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
@@ -5046,7 +5077,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
 				       secp, valp);
 }
 
-#define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
+#define TARGET_LITTLE_SYM		i386_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
 #define ELF_TARGET_ID			I386_ELF_DATA
@@ -5069,7 +5100,6 @@ elf_i386_add_symbol_hook (bfd * abfd,
 
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create  elf_i386_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free    elf_i386_link_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
 
@@ -5113,7 +5143,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
 /* FreeBSD support.  */
 
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_i386_freebsd_vec
+#define	TARGET_LITTLE_SYM		i386_elf32_fbsd_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-freebsd"
 #undef	ELF_OSABI
@@ -5146,7 +5176,7 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 /* Solaris 2.  */
 
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_i386_sol2_vec
+#define	TARGET_LITTLE_SYM		i386_elf32_sol2_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-sol2"
 
@@ -5174,7 +5204,7 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 /* Native Client support.  */
 
 #undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_i386_nacl_vec
+#define	TARGET_LITTLE_SYM		i386_elf32_nacl_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-nacl"
 #undef	elf32_bed
@@ -5363,7 +5393,7 @@ elf32_i386_nacl_elf_object_p (bfd *abfd)
 /* VxWorks support.  */
 
 #undef	TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		bfd_elf32_i386_vxworks_vec
+#define TARGET_LITTLE_SYM		i386_elf32_vxworks_vec
 #undef	TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-i386-vxworks"
 #undef	ELF_OSABI

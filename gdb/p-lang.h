@@ -20,11 +20,12 @@
 /* This file is derived from c-lang.h */
 
 struct value;
+struct parser_state;
 
 /* Defined in p-lang.c */
 extern const char *pascal_main_name (void);
 
-extern int pascal_parse (void);	/* Defined in p-exp.y */
+extern int pascal_parse (struct parser_state *); /* Defined in p-exp.y */
 
 extern void pascal_error (char *);	/* Defined in p-exp.y */
 

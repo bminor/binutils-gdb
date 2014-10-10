@@ -23,7 +23,6 @@
 #include "gdb_obstack.h"
 #include "symtab.h"
 #include "symfile.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
@@ -669,6 +668,11 @@ lookup_symbol_file (const char *name,
 	    }
 
 	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (this)));
+	  /* If TYPE_NAME is NULL, abandon trying to find this symbol.
+	     This can happen for lambda functions compiled with clang++,
+	     which outputs no name for the container class.  */
+	  if (TYPE_NAME (type) == NULL)
+	    return NULL;
 	  klass = xstrdup (TYPE_NAME (type));
 	  nested = xstrdup (name);
 	}
@@ -812,6 +816,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_UNION:
+    case TYPE_CODE_ENUM:
     /* NOTE: Handle modules here as well, because Fortran is re-using the C++
        specific code to lookup nested symbols in modules, by calling the
        function pointer la_lookup_symbol_nonlocal, which ends up here.  */

@@ -21,13 +21,9 @@
 #include "server.h"
 
 #include "gdb_wait.h"
-#include <stdio.h>
 #include <sys/ptrace.h>
 #include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
 #include <sys/syscall.h>
 #include "filestuff.h"
 #include "hostio.h"
@@ -659,6 +655,7 @@ static struct target_ops spu_target_ops = {
   spu_look_up_symbols,
   spu_request_interrupt,
   NULL,
+  NULL,  /* supports_z_point_type */
   NULL,
   NULL,
   NULL,

@@ -283,12 +283,11 @@ debug_qf_map_matching_symbols (struct objfile *objfile,
 }
 
 static void
-debug_qf_expand_symtabs_matching (struct objfile *objfile,
-				  int (*file_matcher) (const char *, void *,
-						       int basenames),
-				  int (*name_matcher) (const char *, void *),
-				  enum search_domain kind,
-				  void *data)
+debug_qf_expand_symtabs_matching
+  (struct objfile *objfile,
+   expand_symtabs_file_matcher_ftype *file_matcher,
+   expand_symtabs_symbol_matcher_ftype *symbol_matcher,
+   enum search_domain kind, void *data)
 {
   const struct debug_sym_fns_data *debug_data =
     objfile_data (objfile, symfile_debug_objfile_data_key);
@@ -297,19 +296,19 @@ debug_qf_expand_symtabs_matching (struct objfile *objfile,
 		    "qf->expand_symtabs_matching (%s, %s, %s, %s, %s)\n",
 		    debug_objfile_name (objfile),
 		    host_address_to_string (file_matcher),
-		    host_address_to_string (name_matcher),
+		    host_address_to_string (symbol_matcher),
 		    search_domain_name (kind),
 		    host_address_to_string (data));
 
   debug_data->real_sf->qf->expand_symtabs_matching (objfile,
 						    file_matcher,
-						    name_matcher,
+						    symbol_matcher,
 						    kind, data);
 }
 
 static struct symtab *
 debug_qf_find_pc_sect_symtab (struct objfile *objfile,
-			      struct minimal_symbol *msymbol,
+			      struct bound_minimal_symbol msymbol,
 			      CORE_ADDR pc,
 			      struct obj_section *section,
 			      int warn_if_readin)
@@ -321,7 +320,7 @@ debug_qf_find_pc_sect_symtab (struct objfile *objfile,
   fprintf_filtered (gdb_stdlog,
 		    "qf->find_pc_sect_symtab (%s, %s, %s, %s, %d)\n",
 		    debug_objfile_name (objfile),
-		    host_address_to_string (msymbol),
+		    host_address_to_string (msymbol.minsym),
 		    hex_string (pc),
 		    host_address_to_string (section),
 		    warn_if_readin);
@@ -392,28 +391,9 @@ debug_sym_get_probes (struct objfile *objfile)
   return retval;
 }
 
-static void
-debug_sym_relocate_probe (struct objfile *objfile,
-			  const struct section_offsets *new_offsets,
-			  const struct section_offsets *delta)
-{
-  const struct debug_sym_fns_data *debug_data =
-    objfile_data (objfile, symfile_debug_objfile_data_key);
-
-  fprintf_filtered (gdb_stdlog,
-		    "probes->sym_relocate_probe (%s, %s, %s)\n",
-		    debug_objfile_name (objfile),
-		    host_address_to_string (new_offsets),
-		    host_address_to_string (delta));
-
-  debug_data->real_sf->sym_probe_fns->sym_relocate_probe
-    (objfile, new_offsets, delta);
-}
-
 static const struct sym_probe_fns debug_sym_probe_fns =
 {
   debug_sym_get_probes,
-  debug_sym_relocate_probe
 };
 
 /* Debugging version of struct sym_fns.  */

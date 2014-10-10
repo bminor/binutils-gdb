@@ -1,6 +1,5 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -231,6 +230,14 @@ extern int ppc_fix_adjustable (struct fix *);
 
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
+
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) \
+  ppc_elf_parse_cons (EXP, NBYTES)
+extern bfd_reloc_code_real_type ppc_elf_parse_cons (expressionS *,
+						    unsigned int);
+#define TC_CONS_FIX_CHECK(EXP, NBYTES, FIX) \
+  ppc_elf_cons_fix_check (EXP, NBYTES, FIX)
+extern void ppc_elf_cons_fix_check (expressionS *, unsigned int, struct fix *);
 
 #define tc_frob_file_before_adjust ppc_frob_file_before_adjust
 extern void ppc_frob_file_before_adjust (void);

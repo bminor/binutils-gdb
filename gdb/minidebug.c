@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "gdb_bfd.h"
-#include <string.h>
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbcore.h"

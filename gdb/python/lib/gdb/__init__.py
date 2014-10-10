@@ -67,6 +67,8 @@ pretty_printers = []
 
 # Initial type printers.
 type_printers = []
+# Initial xmethod matchers.
+xmethods = []
 # Initial frame filters.
 frame_filters = {}
 

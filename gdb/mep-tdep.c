@@ -27,7 +27,6 @@
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "value.h"
 #include "inferior.h"
 #include "dis-asm.h"
@@ -47,8 +46,6 @@
 #include "prologue-value.h"
 #include "cgen/bitset.h"
 #include "infcall.h"
-
-#include "gdb_assert.h"
 
 /* Get the user's customized MeP coprocessor register names from
    libopcodes.  */

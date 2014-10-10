@@ -1,5 +1,5 @@
 /* dwarf.c -- display DWARF contents of a BFD binary file
-   Copyright 2005-2013 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -28,10 +28,6 @@
 #include "dwarf2.h"
 #include "dwarf.h"
 #include "gdb/gdb-index.h"
-
-#if !HAVE_DECL_STRNLEN
-size_t strnlen (const char *, size_t);
-#endif
 
 static const char *regname (unsigned int regno, int row);
 
@@ -1468,7 +1464,7 @@ read_and_display_attr_value (unsigned long attribute,
   unsigned char * orig_data = data;
   unsigned int bytes_read;
 
-  if (data == end)
+  if (data == end && form != DW_FORM_flag_present)
     {
       warn (_("corrupt attribute\n"));
       return data;
@@ -5097,6 +5093,29 @@ init_dwarf_regnames_x86_64 (void)
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_x86_64);
 }
 
+static const char *const dwarf_regnames_aarch64[] =
+{
+   "x0",  "x1",  "x2",  "x3",  "x4",  "x5",  "x6",  "x7", 
+   "x8",  "x9", "x10", "x11", "x12", "x13", "x14", "x15", 
+  "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23",
+  "x24", "x25", "x26", "x27", "x28", "x29", "x30", "sp",
+   NULL, "elr",  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   "v0",  "v1",  "v2",  "v3",  "v4",  "v5",  "v6",  "v7", 
+   "v8",  "v9", "v10", "v11", "v12", "v13", "v14", "v15", 
+  "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",
+  "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31",
+};
+
+void
+init_dwarf_regnames_aarch64 (void)
+{
+  dwarf_regnames = dwarf_regnames_aarch64;
+  dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_aarch64);
+}
+
 void
 init_dwarf_regnames (unsigned int e_machine)
 {
@@ -5111,6 +5130,10 @@ init_dwarf_regnames (unsigned int e_machine)
     case EM_L1OM:
     case EM_K1OM:
       init_dwarf_regnames_x86_64 ();
+      break;
+
+    case EM_AARCH64:
+      init_dwarf_regnames_aarch64 ();
       break;
 
     default:
@@ -5209,9 +5232,96 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
   printf ("\n");
 }
 
-#define GET(VAR, N)	SAFE_BYTE_GET_AND_INC (VAR, start, N, end);
+#define GET(VAR, N)	SAFE_BYTE_GET_AND_INC (VAR, start, N, end)
 #define LEB()	read_uleb128 (start, & length_return, end); start += length_return
 #define SLEB()	read_sleb128 (start, & length_return, end); start += length_return
+
+static unsigned char *
+read_cie (unsigned char *start, unsigned char *end,
+	  Frame_Chunk **p_cie, int *p_version,
+	  unsigned long *p_aug_len, unsigned char **p_aug)
+{
+  int version;
+  Frame_Chunk *fc;
+  unsigned int length_return;
+  unsigned char *augmentation_data = NULL;
+  unsigned long augmentation_data_len = 0;
+
+  fc = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
+  memset (fc, 0, sizeof (Frame_Chunk));
+
+  fc->col_type = (short int *) xmalloc (sizeof (short int));
+  fc->col_offset = (int *) xmalloc (sizeof (int));
+
+  version = *start++;
+
+  fc->augmentation = (char *) start;
+  start = (unsigned char *) strchr ((char *) start, '\0') + 1;
+
+  if (strcmp (fc->augmentation, "eh") == 0)
+    start += eh_addr_size;
+
+  if (version >= 4)
+    {
+      GET (fc->ptr_size, 1);
+      GET (fc->segment_size, 1);
+      eh_addr_size = fc->ptr_size;
+    }
+  else
+    {
+      fc->ptr_size = eh_addr_size;
+      fc->segment_size = 0;
+    }
+  fc->code_factor = LEB ();
+  fc->data_factor = SLEB ();
+  if (version == 1)
+    {
+      GET (fc->ra, 1);
+    }
+  else
+    {
+      fc->ra = LEB ();
+    }
+
+  if (fc->augmentation[0] == 'z')
+    {
+      augmentation_data_len = LEB ();
+      augmentation_data = start;
+      start += augmentation_data_len;
+    }
+
+  if (augmentation_data_len)
+    {
+      unsigned char *p, *q;
+      p = (unsigned char *) fc->augmentation + 1;
+      q = augmentation_data;
+
+      while (1)
+	{
+	  if (*p == 'L')
+	    q++;
+	  else if (*p == 'P')
+	    q += 1 + size_of_encoded_value (*q);
+	  else if (*p == 'R')
+	    fc->fde_encoding = *q++;
+	  else if (*p == 'S')
+	    ;
+	  else
+	    break;
+	  p++;
+	}
+    }
+
+  *p_cie = fc;
+  if (p_version)
+    *p_version = version;
+  if (p_aug_len)
+    {
+      *p_aug_len = augmentation_data_len;
+      *p_aug = augmentation_data;
+    }
+  return start;
+}
 
 static int
 display_debug_frames (struct dwarf_section *section,
@@ -5220,7 +5330,7 @@ display_debug_frames (struct dwarf_section *section,
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
   unsigned char *section_start = start;
-  Frame_Chunk *chunks = 0;
+  Frame_Chunk *chunks = 0, *forward_refs = 0;
   Frame_Chunk *remembered_state = 0;
   Frame_Chunk *rs;
   int is_eh = strcmp (section->name, ".eh_frame") == 0;
@@ -5283,55 +5393,20 @@ display_debug_frames (struct dwarf_section *section,
 				   || (offset_size == 8 && cie_id == DW64_CIE_ID)))
 	{
 	  int version;
+	  int mreg;
 
-	  fc = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
-	  memset (fc, 0, sizeof (Frame_Chunk));
-
+	  start = read_cie (start, end, &cie, &version,
+			    &augmentation_data_len, &augmentation_data);
+	  fc = cie;
 	  fc->next = chunks;
 	  chunks = fc;
 	  fc->chunk_start = saved_start;
-	  fc->ncols = 0;
-	  fc->col_type = (short int *) xmalloc (sizeof (short int));
-	  fc->col_offset = (int *) xmalloc (sizeof (int));
-	  frame_need_space (fc, max_regs - 1);
-
-	  version = *start++;
-
-	  fc->augmentation = (char *) start;
-	  start = (unsigned char *) strchr ((char *) start, '\0') + 1;
-
-	  if (strcmp (fc->augmentation, "eh") == 0)
-	    start += eh_addr_size;
-
-	  if (version >= 4)
-	    {
-	      GET (fc->ptr_size, 1);
-	      GET (fc->segment_size, 1);
-	      eh_addr_size = fc->ptr_size;
-	    }
-	  else
-	    {
-	      fc->ptr_size = eh_addr_size;
-	      fc->segment_size = 0;
-	    }
-	  fc->code_factor = LEB ();
-	  fc->data_factor = SLEB ();
-	  if (version == 1)
-	    {
-	      GET (fc->ra, 1);
-	    }
-	  else
-	    {
-	      fc->ra = LEB ();
-	    }
-
-	  if (fc->augmentation[0] == 'z')
-	    {
-	      augmentation_data_len = LEB ();
-	      augmentation_data = start;
-	      start += augmentation_data_len;
-	    }
-	  cie = fc;
+	  mreg = max_regs - 1;
+	  if (mreg < fc->ra)
+	    mreg = fc->ra;
+	  frame_need_space (fc, mreg);
+	  if (fc->fde_encoding)
+	    encoded_ptr_size = size_of_encoded_value (fc->fde_encoding);
 
 	  printf ("\n%08lx ", (unsigned long) (saved_start - section_start));
 	  print_dwarf_vma (length, fc->ptr_size);
@@ -5366,33 +5441,6 @@ display_debug_frames (struct dwarf_section *section,
 		}
 	      putchar ('\n');
 	    }
-
-	  if (augmentation_data_len)
-	    {
-	      unsigned char *p, *q;
-	      p = (unsigned char *) fc->augmentation + 1;
-	      q = augmentation_data;
-
-	      while (1)
-		{
-		  if (*p == 'L')
-		    q++;
-		  else if (*p == 'P')
-		    q += 1 + size_of_encoded_value (*q);
-		  else if (*p == 'R')
-		    fc->fde_encoding = *q++;
-		  else if (*p == 'S')
-		    ;
-		  else
-		    break;
-		  p++;
-		}
-
-	      if (fc->fde_encoding)
-		encoded_ptr_size = size_of_encoded_value (fc->fde_encoding);
-	    }
-
-	  frame_need_space (fc, fc->ra);
 	}
       else
 	{
@@ -5400,14 +5448,70 @@ display_debug_frames (struct dwarf_section *section,
 	  static Frame_Chunk fde_fc;
 	  unsigned long segment_selector;
 
-	  fc = & fde_fc;
+	  if (is_eh)
+	    {
+	      dwarf_vma sign = (dwarf_vma) 1 << (offset_size * 8 - 1);
+	      look_for = start - 4 - ((cie_id ^ sign) - sign);
+	    }
+	  else
+	    look_for = section_start + cie_id;
+
+	  if (look_for <= saved_start)
+	    {
+	      for (cie = chunks; cie ; cie = cie->next)
+		if (cie->chunk_start == look_for)
+		  break;
+	    }
+	  else
+	    {
+	      for (cie = forward_refs; cie ; cie = cie->next)
+		if (cie->chunk_start == look_for)
+		  break;
+	      if (!cie)
+		{
+		  unsigned int off_size;
+		  unsigned char *cie_scan;
+
+		  cie_scan = look_for;
+		  off_size = 4;
+		  SAFE_BYTE_GET_AND_INC (length, cie_scan, 4, end);
+		  if (length == 0xffffffff)
+		    {
+		      SAFE_BYTE_GET_AND_INC (length, cie_scan, 8, end);
+		      off_size = 8;
+		    }
+		  if (length != 0)
+		    {
+		      dwarf_vma c_id;
+
+		      SAFE_BYTE_GET_AND_INC (c_id, cie_scan, off_size, end);
+		      if (is_eh
+			  ? c_id == 0
+			  : ((off_size == 4 && c_id == DW_CIE_ID)
+			     || (off_size == 8 && c_id == DW64_CIE_ID)))
+			{
+			  int version;
+			  int mreg;
+
+			  read_cie (cie_scan, end, &cie, &version,
+				    &augmentation_data_len, &augmentation_data);
+			  cie->next = forward_refs;
+			  forward_refs = cie;
+			  cie->chunk_start = look_for;
+			  mreg = max_regs - 1;
+			  if (mreg < cie->ra)
+			    mreg = cie->ra;
+			  frame_need_space (cie, mreg);
+			  if (cie->fde_encoding)
+			    encoded_ptr_size
+			      = size_of_encoded_value (cie->fde_encoding);
+			}
+		    }
+		}
+	    }
+
+	  fc = &fde_fc;
 	  memset (fc, 0, sizeof (Frame_Chunk));
-
-	  look_for = is_eh ? start - 4 - cie_id : section_start + cie_id;
-
-	  for (cie = chunks; cie ; cie = cie->next)
-	    if (cie->chunk_start == look_for)
-	      break;
 
 	  if (!cie)
 	    {
@@ -5833,12 +5937,16 @@ display_debug_frames (struct dwarf_section *section,
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_remember_state\n");
 	      rs = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
+              rs->cfa_offset = fc->cfa_offset;
+	      rs->cfa_reg = fc->cfa_reg;
+	      rs->ra = fc->ra;
+	      rs->cfa_exp = fc->cfa_exp;
 	      rs->ncols = fc->ncols;
 	      rs->col_type = (short int *) xcmalloc (rs->ncols,
-                                                     sizeof (short int));
-	      rs->col_offset = (int *) xcmalloc (rs->ncols, sizeof (int));
-	      memcpy (rs->col_type, fc->col_type, rs->ncols);
-	      memcpy (rs->col_offset, fc->col_offset, rs->ncols * sizeof (int));
+                                                     sizeof (* rs->col_type));
+	      rs->col_offset = (int *) xcmalloc (rs->ncols, sizeof (* rs->col_offset));
+	      memcpy (rs->col_type, fc->col_type, rs->ncols * sizeof (* fc->col_type));
+	      memcpy (rs->col_offset, fc->col_offset, rs->ncols * sizeof (* fc->col_offset));
 	      rs->next = remembered_state;
 	      remembered_state = rs;
 	      break;
@@ -5850,10 +5958,14 @@ display_debug_frames (struct dwarf_section *section,
 	      if (rs)
 		{
 		  remembered_state = rs->next;
+		  fc->cfa_offset = rs->cfa_offset;
+		  fc->cfa_reg = rs->cfa_reg;
+	          fc->ra = rs->ra;
+	          fc->cfa_exp = rs->cfa_exp;
 		  frame_need_space (fc, rs->ncols - 1);
-		  memcpy (fc->col_type, rs->col_type, rs->ncols);
+		  memcpy (fc->col_type, rs->col_type, rs->ncols * sizeof (* rs->col_type));
 		  memcpy (fc->col_offset, rs->col_offset,
-			  rs->ncols * sizeof (int));
+			  rs->ncols * sizeof (* rs->col_offset));
 		  free (rs->col_type);
 		  free (rs->col_offset);
 		  free (rs);

@@ -1,6 +1,5 @@
 /* Sysroff object format dumper.
-   Copyright 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007,
-   2009, 2011  Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 

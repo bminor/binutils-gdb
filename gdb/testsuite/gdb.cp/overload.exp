@@ -39,6 +39,9 @@ if ![runto 'marker1'] then {
     continue
 }
 
+# Prevent symbol on address 0x0 being printed.
+gdb_test_no_output "set print symbol off"
+
 gdb_test "up" ".*main.*" "up from marker1"
 
 # Print the monster class type.

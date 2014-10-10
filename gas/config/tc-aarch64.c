@@ -1,7 +1,6 @@
 /* tc-aarch64.c -- Assemble for the AArch64 ISA
 
-   Copyright 2009, 2010, 2011, 2012, 2013
-   Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -42,6 +41,8 @@
 #endif
 
 #define streq(a, b)	      (strcmp (a, b) == 0)
+
+#define END_OF_INSN '\0'
 
 static aarch64_feature_set cpu_variant;
 
@@ -436,9 +437,16 @@ static symbolS *last_label_seen;
    and per-sub-section basis.  */
 
 #define MAX_LITERAL_POOL_SIZE 1024
+typedef struct literal_expression
+{
+  expressionS exp;
+  /* If exp.op == O_big then this bignum holds a copy of the global bignum value.  */
+  LITTLENUM_TYPE * bignum;
+} literal_expression;
+
 typedef struct literal_pool
 {
-  expressionS literals[MAX_LITERAL_POOL_SIZE];
+  literal_expression literals[MAX_LITERAL_POOL_SIZE];
   unsigned int next_free_entry;
   unsigned int id;
   symbolS *symbol;
@@ -1617,17 +1625,19 @@ add_to_lit_pool (expressionS *exp, int size)
   /* Check if this literal value is already in the pool.  */
   for (entry = 0; entry < pool->next_free_entry; entry++)
     {
-      if ((pool->literals[entry].X_op == exp->X_op)
+      expressionS * litexp = & pool->literals[entry].exp;
+
+      if ((litexp->X_op == exp->X_op)
 	  && (exp->X_op == O_constant)
-	  && (pool->literals[entry].X_add_number == exp->X_add_number)
-	  && (pool->literals[entry].X_unsigned == exp->X_unsigned))
+	  && (litexp->X_add_number == exp->X_add_number)
+	  && (litexp->X_unsigned == exp->X_unsigned))
 	break;
 
-      if ((pool->literals[entry].X_op == exp->X_op)
+      if ((litexp->X_op == exp->X_op)
 	  && (exp->X_op == O_symbol)
-	  && (pool->literals[entry].X_add_number == exp->X_add_number)
-	  && (pool->literals[entry].X_add_symbol == exp->X_add_symbol)
-	  && (pool->literals[entry].X_op_symbol == exp->X_op_symbol))
+	  && (litexp->X_add_number == exp->X_add_number)
+	  && (litexp->X_add_symbol == exp->X_add_symbol)
+	  && (litexp->X_op_symbol == exp->X_op_symbol))
 	break;
     }
 
@@ -1640,8 +1650,18 @@ add_to_lit_pool (expressionS *exp, int size)
 	  return FALSE;
 	}
 
-      pool->literals[entry] = *exp;
+      pool->literals[entry].exp = *exp;
       pool->next_free_entry += 1;
+      if (exp->X_op == O_big)
+	{
+	  /* PR 16688: Bignums are held in a single global array.  We must
+	     copy and preserve that value now, before it is overwritten.  */
+	  pool->literals[entry].bignum = xmalloc (CHARS_PER_LITTLENUM * exp->X_add_number);
+	  memcpy (pool->literals[entry].bignum, generic_bignum,
+		  CHARS_PER_LITTLENUM * exp->X_add_number);
+	}
+      else
+	pool->literals[entry].bignum = NULL;
     }
 
   exp->X_op = O_symbol;
@@ -1661,7 +1681,7 @@ symbol_locate (symbolS * symbolP,
 	       valueT valu,	/* Symbol value.  */
 	       fragS * frag)	/* Associated fragment.  */
 {
-  unsigned int name_length;
+  size_t name_length;
   char *preserved_copy_of_name;
 
   name_length = strlen (name) + 1;	/* +1 for \0.  */
@@ -1735,8 +1755,26 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
       symbol_table_insert (pool->symbol);
 
       for (entry = 0; entry < pool->next_free_entry; entry++)
-	/* First output the expression in the instruction to the pool.  */
-	emit_expr (&(pool->literals[entry]), size);	/* .word|.xword  */
+	{
+	  expressionS * exp = & pool->literals[entry].exp;
+
+	  if (exp->X_op == O_big)
+	    {
+	      /* PR 16688: Restore the global bignum value.  */
+	      gas_assert (pool->literals[entry].bignum != NULL);
+	      memcpy (generic_bignum, pool->literals[entry].bignum,
+		      CHARS_PER_LITTLENUM * exp->X_add_number);
+	    }
+
+	  /* First output the expression in the instruction to the pool.  */
+	  emit_expr (exp, size);	/* .word|.xword  */
+
+	  if (exp->X_op == O_big)
+	    {
+	      free (pool->literals[entry].bignum);
+	      pool->literals[entry].bignum = NULL;
+	    }
+	}
 
       /* Mark the pool as empty.  */
       pool->next_free_entry = 0;
@@ -2816,7 +2854,7 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
       if (**str == '\0')
 	return TRUE;
 
-      /* Otherwise, we have a shifted reloc modifier, so rewind to 
+      /* Otherwise, we have a shifted reloc modifier, so rewind to
          recover the variable name and continue parsing for the shifter.  */
       *str = p;
       return parse_shifter_operand_imm (str, operand, mode);
@@ -3295,19 +3333,13 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
 	return PARSE_FAIL;
       else
 	{
-	  /* Parse S<op0>_<op1>_<Cn>_<Cm>_<op2>, the implementation defined
-	     registers.  */
+	  /* Parse S<op0>_<op1>_<Cn>_<Cm>_<op2>.  */
 	  unsigned int op0, op1, cn, cm, op2;
-	  if (sscanf (buf, "s%u_%u_c%u_c%u_%u", &op0, &op1, &cn, &cm, &op2) != 5)
+
+	  if (sscanf (buf, "s%u_%u_c%u_c%u_%u", &op0, &op1, &cn, &cm, &op2)
+	      != 5)
 	    return PARSE_FAIL;
-	  /* The architecture specifies the encoding space for implementation
-	     defined registers as:
-	     op0  op1  CRn   CRm   op2
-	     1x   xxx  1x11  xxxx  xxx
-	     For convenience GAS accepts a wider encoding space, as follows:
-	     op0  op1  CRn   CRm   op2
-	     1x   xxx  xxxx  xxxx  xxx  */
-	  if ((op0 != 2 && op0 != 3) || op1 > 7 || cn > 15 || cm > 15 || op2 > 7)
+	  if (op0 > 3 || op1 > 7 || cn > 15 || cm > 15 || op2 > 7)
 	    return PARSE_FAIL;
 	  value = (op0 << 14) | (op1 << 11) | (cn << 7) | (cm << 3) | op2;
 	}
@@ -3517,9 +3549,9 @@ fix_new_aarch64 (fragS * frag,
 
 /* Diagnostics on operands errors.  */
 
-/* By default, output one-line error message only.
-   Enable the verbose error message by -merror-verbose.  */
-static int verbose_error_p = 0;
+/* By default, output verbose error message.
+   Disable the verbose error message by -mno-verbose-error.  */
+static int verbose_error_p = 1;
 
 #ifdef DEBUG_AARCH64
 /* N.B. this is only for the purpose of debugging.  */
@@ -4607,6 +4639,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rs:
 	case AARCH64_OPND_Ra:
 	case AARCH64_OPND_Rt_SYS:
+	case AARCH64_OPND_PAIRREG:
 	  po_int_reg_or_fail (1, 0);
 	  break;
 
@@ -5266,6 +5299,37 @@ failure:
       if (! backtrack_pos)
 	goto parse_operands_return;
 
+      {
+	/* We reach here because this operand is marked as optional, and
+	   either no operand was supplied or the operand was supplied but it
+	   was syntactically incorrect.  In the latter case we report an
+	   error.  In the former case we perform a few more checks before
+	   dropping through to the code to insert the default operand.  */
+
+	char *tmp = backtrack_pos;
+	char endchar = END_OF_INSN;
+
+	if (i != (aarch64_num_of_operands (opcode) - 1))
+	  endchar = ',';
+	skip_past_char (&tmp, ',');
+
+	if (*tmp != endchar)
+	  /* The user has supplied an operand in the wrong format.  */
+	  goto parse_operands_return;
+
+	/* Make sure there is not a comma before the optional operand.
+	   For example the fifth operand of 'sys' is optional:
+
+	     sys #0,c0,c0,#0,  <--- wrong
+	     sys #0,c0,c0,#0   <--- correct.  */
+	if (comma_skipped_p && i && endchar == END_OF_INSN)
+	  {
+	    set_fatal_syntax_error
+	      (_("unexpected comma before the omitted optional operand"));
+	    goto parse_operands_return;
+	  }
+      }
+
       /* Reaching here means we are dealing with an optional operand that is
 	 omitted from the assembly line.  */
       gas_assert (optional_operand_p (opcode, i));
@@ -5275,15 +5339,6 @@ failure:
       /* Try again, skipping the optional operand at backtrack_pos.  */
       str = backtrack_pos;
       backtrack_pos = 0;
-
-      /* If this is the last operand that is optional and omitted, but without
-	 the presence of a comma.  */
-      if (i && comma_skipped_p && i == aarch64_num_of_operands (opcode) - 1)
-	{
-	  set_fatal_syntax_error
-	    (_("unexpected comma before the omitted optional operand"));
-	  goto parse_operands_return;
-	}
 
       /* Clear any error record after the omitted optional operand has been
 	 successfully handled.  */
@@ -5906,12 +5961,15 @@ tc_aarch64_regname_to_dw2regnum (char *regname)
     case REG_TYPE_SP_64:
     case REG_TYPE_R_32:
     case REG_TYPE_R_64:
+      return reg->number;
+
     case REG_TYPE_FP_B:
     case REG_TYPE_FP_H:
     case REG_TYPE_FP_S:
     case REG_TYPE_FP_D:
     case REG_TYPE_FP_Q:
-      return reg->number;
+      return reg->number + 64;
+
     default:
       break;
     }
@@ -6605,6 +6663,10 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
       break;
 
+    case BFD_RELOC_UNUSED:
+      /* An error will already have been reported.  */
+      break;
+
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("unexpected %s fixup"),
@@ -7119,6 +7181,8 @@ static struct aarch64_option_table aarch64_opts[] = {
 #endif /* DEBUG_AARCH64 */
   {"mverbose-error", N_("output verbose error messages"), &verbose_error_p, 1,
    NULL},
+  {"mno-verbose-error", N_("do not output verbose error messages"),
+   &verbose_error_p, 0, NULL},
   {NULL, NULL, NULL, 0, NULL}
 };
 
@@ -7173,6 +7237,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"crc",		AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0)},
   {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0)},
   {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
+  {"lse",		AARCH64_FEATURE (AARCH64_FEATURE_LSE, 0)},
   {"simd",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
   {NULL,		AARCH64_ARCH_NONE}
 };

@@ -27,9 +27,6 @@
 #include "tramp-frame.h"
 #include "gdbtypes.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "m68k-tdep.h"
 #include "solib-svr4.h"
 
@@ -105,13 +102,13 @@ m68kbsd_supply_gregset (const struct regset *regset,
 
 /* Motorola 68000 register sets.  */
 
-static struct regset m68kbsd_gregset =
+static const struct regset m68kbsd_gregset =
 {
   NULL,
   m68kbsd_supply_gregset
 };
 
-static struct regset m68kbsd_fpregset =
+static const struct regset m68kbsd_fpregset =
 {
   NULL,
   m68kbsd_supply_fpregset

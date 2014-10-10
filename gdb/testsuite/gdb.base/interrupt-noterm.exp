@@ -22,7 +22,6 @@ if [prepare_for_testing "failed to prepare for testing" \
 
 # Pretend there's no terminal.
 gdb_test_no_output "set interactive-mode off"
-gdb_test_no_output "set target-async on"
 
 if ![runto main] {
     fail "Can't run to main"

@@ -1,5 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -372,6 +372,7 @@ struct eh_frame_sec_info
 struct eh_frame_array_ent
 {
   bfd_vma initial_loc;
+  bfd_size_type range;
   bfd_vma fde;
 };
 
@@ -383,10 +384,6 @@ struct eh_frame_hdr_info
   asection *hdr_sec;
   unsigned int fde_count, array_count;
   struct eh_frame_array_ent *array;
-  /* TRUE if we should try to merge CIEs between input sections.  */
-  bfd_boolean merge_cies;
-  /* TRUE if all .eh_frames have been parsd.  */
-  bfd_boolean parsed_eh_frames;
   /* TRUE if .eh_frame_hdr should contain the sorted search table.
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
@@ -421,6 +418,7 @@ enum elf_target_id
   MN10300_ELF_DATA,
   NDS32_ELF_DATA,
   NIOS2_ELF_DATA,
+  OR1K_ELF_DATA,
   PPC32_ELF_DATA,
   PPC64_ELF_DATA,
   S390_ELF_DATA,
@@ -1191,9 +1189,9 @@ struct elf_backend_data
   /* This function implements `bfd_elf_bfd_from_remote_memory';
      see elf.c, elfcode.h.  */
   bfd *(*elf_backend_bfd_from_remote_memory)
-     (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
-      int (*target_read_memory) (bfd_vma vma, bfd_byte *myaddr,
-				 bfd_size_type len));
+    (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
+     int (*target_read_memory) (bfd_vma vma, bfd_byte *myaddr,
+				bfd_size_type len));
 
   /* This function is used by `_bfd_elf_get_synthetic_symtab';
      see elf.c.  */
@@ -1343,6 +1341,11 @@ struct elf_backend_data
      other file in the link needs to have a .note.GNU-stack section
      for a PT_GNU_STACK segment to be created.  */
   unsigned default_execstack : 1;
+
+  /* True if elf_section_data(sec)->this_hdr.contents is sec->rawsize
+     in length rather than sec->size in length, if sec->rawsize is
+     non-zero and smaller than sec->size.  */
+  unsigned caches_rawsize : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data
@@ -1813,7 +1816,7 @@ extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
   (bfd *);
 extern void _bfd_elf_link_hash_table_free
-  (struct bfd_link_hash_table *);
+  (bfd *);
 extern void _bfd_elf_link_hash_copy_indirect
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
@@ -1965,13 +1968,8 @@ extern bfd_boolean _bfd_elf_strtab_emit
 extern void _bfd_elf_strtab_finalize
   (struct elf_strtab_hash *);
 
-extern void _bfd_elf_begin_eh_frame_parsing
-  (struct bfd_link_info *info);
 extern void _bfd_elf_parse_eh_frame
   (bfd *, struct bfd_link_info *, asection *, struct elf_reloc_cookie *);
-extern void _bfd_elf_end_eh_frame_parsing
-  (struct bfd_link_info *info);
-
 extern bfd_boolean _bfd_elf_discard_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *,
    bfd_boolean (*) (bfd_vma, void *), struct elf_reloc_cookie *);
@@ -1994,8 +1992,6 @@ extern long _bfd_elf_link_lookup_local_dynindx
   (struct bfd_link_info *, bfd *, long);
 extern bfd_boolean _bfd_elf_compute_section_file_positions
   (bfd *, struct bfd_link_info *);
-extern void _bfd_elf_assign_file_positions_for_relocs
-  (bfd *);
 extern file_ptr _bfd_elf_assign_file_position_for_section
   (Elf_Internal_Shdr *, file_ptr, bfd_boolean);
 
@@ -2350,10 +2346,10 @@ extern char *elfcore_write_ppc_linux_prpsinfo32
   (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
 
 extern bfd *_bfd_elf32_bfd_from_remote_memory
-  (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+  (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type));
 extern bfd *_bfd_elf64_bfd_from_remote_memory
-  (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+  (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type));
 
 extern bfd_vma bfd_elf_obj_attr_size (bfd *);
@@ -2445,6 +2441,11 @@ extern asection _bfd_elf_large_com_section;
 	return FALSE;							\
 									\
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];			\
+									\
+      if (info->wrap_hash != NULL					\
+	  && (input_section->flags & SEC_DEBUGGING) != 0)		\
+	h = ((struct elf_link_hash_entry *)				\
+	     unwrap_hash_lookup (info, input_bfd, &h->root));		\
 									\
       while (h->root.type == bfd_link_hash_indirect			\
 	     || h->root.type == bfd_link_hash_warning)			\

@@ -31,13 +31,11 @@
 #include "language.h"
 #include "cp-abi.h"
 #include "typeprint.h"
-#include <string.h>
 #include "exceptions.h"
 #include "valprint.h"
-#include <errno.h>
 #include <ctype.h>
 #include "cli/cli-utils.h"
-#include "python/python.h"
+#include "extension.h"
 #include "completer.h"
 
 extern void _initialize_typeprint (void);
@@ -248,7 +246,7 @@ do_free_global_table (void *arg)
   struct type_print_options *flags = arg;
 
   free_typedef_hash (flags->global_typedefs);
-  free_type_printers (flags->global_printers);
+  free_ext_lang_type_printers (flags->global_printers);
 }
 
 /* Create the global typedef hash.  */
@@ -258,13 +256,13 @@ create_global_typedef_table (struct type_print_options *flags)
 {
   gdb_assert (flags->global_typedefs == NULL && flags->global_printers == NULL);
   flags->global_typedefs = create_typedef_hash ();
-  flags->global_printers = start_type_printers ();
+  flags->global_printers = start_ext_lang_type_printers ();
   return make_cleanup (do_free_global_table, flags);
 }
 
 /* Look up the type T in the global typedef hash.  If it is found,
    return the typedef name.  If it is not found, apply the
-   type-printers, if any, given by start_type_printers and return the
+   type-printers, if any, given by start_script_type_printers and return the
    result.  A NULL return means that the name was not found.  */
 
 static const char *
@@ -288,15 +286,15 @@ find_global_typedef (const struct type_print_options *flags,
       return new_tf->name;
     }
 
-  /* Put an entry into the hash table now, in case apply_type_printers
-     recurses.  */
+  /* Put an entry into the hash table now, in case
+     apply_ext_lang_type_printers recurses.  */
   new_tf = XOBNEW (&flags->global_typedefs->storage, struct typedef_field);
   new_tf->name = NULL;
   new_tf->type = t;
 
   *slot = new_tf;
 
-  applied = apply_type_printers (flags->global_printers, t);
+  applied = apply_ext_lang_type_printers (flags->global_printers, t);
 
   if (applied != NULL)
     {
@@ -636,7 +634,7 @@ set_print_type (char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print type\" must be followed by the name of a subcommand.\n");
-  help_list (setprintlist, "set print type ", -1, gdb_stdout);
+  help_list (setprintlist, "set print type ", all_commands, gdb_stdout);
 }
 
 static void

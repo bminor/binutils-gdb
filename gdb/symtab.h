@@ -114,7 +114,7 @@ struct general_symbol_info
   {
     LONGEST ivalue;
 
-    struct block *block;
+    const struct block *block;
 
     const gdb_byte *bytes;
 
@@ -122,7 +122,7 @@ struct general_symbol_info
 
     /* A common block.  Used with LOC_COMMON_BLOCK.  */
 
-    struct common_block *common_block;
+    const struct common_block *common_block;
 
     /* For opaque typedef struct chain.  */
 
@@ -180,8 +180,8 @@ extern const char *symbol_get_demangled_name
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Note that all the following SYMBOL_* macros are used with the
-   SYMBOL argument being either a partial symbol, a minimal symbol or
-   a full symbol.  All three types have a ginfo field.  In particular
+   SYMBOL argument being either a partial symbol or
+   a full symbol.  Both types have a ginfo field.  In particular
    the SYMBOL_SET_LANGUAGE, SYMBOL_DEMANGLED_NAME, etc.
    macros cannot be entirely substituted by
    functions, unless the callers are changed to pass in the ginfo
@@ -271,7 +271,7 @@ extern const char *symbol_demangled_name
 extern int demangle;
 
 /* Macro that returns the name to be used when sorting and searching symbols.
-   In  C++, Chill, and Java, we search for the demangled form of a name,
+   In  C++ and Java, we search for the demangled form of a name,
    and so sort symbols accordingly.  In Ada, however, we search by mangled
    name.  If there is no distinct demangled name, then SYMBOL_SEARCH_NAME
    returns the same value (same pointer) as SYMBOL_LINKAGE_NAME.  */
@@ -339,7 +339,7 @@ struct minimal_symbol
      The SYMBOL_VALUE_ADDRESS contains the address that this symbol
      corresponds to.  */
 
-  struct general_symbol_info ginfo;
+  struct general_symbol_info mginfo;
 
   /* Size of this symbol.  end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
@@ -389,6 +389,45 @@ struct minimal_symbol
     } while (0)
 #define MSYMBOL_HAS_SIZE(msymbol)	((msymbol)->has_size + 0)
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
+
+#define MSYMBOL_VALUE(symbol)		(symbol)->mginfo.value.ivalue
+/* The unrelocated address of the minimal symbol.  */
+#define MSYMBOL_VALUE_RAW_ADDRESS(symbol) ((symbol)->mginfo.value.address + 0)
+/* The relocated address of the minimal symbol, using the section
+   offsets from OBJFILE.  */
+#define MSYMBOL_VALUE_ADDRESS(objfile, symbol)				\
+  ((symbol)->mginfo.value.address					\
+   + ANOFFSET ((objfile)->section_offsets, ((symbol)->mginfo.section)))
+/* For a bound minsym, we can easily compute the address directly.  */
+#define BMSYMBOL_VALUE_ADDRESS(symbol) \
+  MSYMBOL_VALUE_ADDRESS ((symbol).objfile, (symbol).minsym)
+#define SET_MSYMBOL_VALUE_ADDRESS(symbol, new_value)	\
+  ((symbol)->mginfo.value.address = (new_value))
+#define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->mginfo.value.bytes
+#define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->mginfo.value.block
+#define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->mginfo.value.chain
+#define MSYMBOL_LANGUAGE(symbol)	(symbol)->mginfo.language
+#define MSYMBOL_SECTION(symbol)		(symbol)->mginfo.section
+#define MSYMBOL_OBJ_SECTION(objfile, symbol)			\
+  (((symbol)->mginfo.section >= 0)				\
+   ? (&(((objfile)->sections)[(symbol)->mginfo.section]))	\
+   : NULL)
+
+#define MSYMBOL_NATURAL_NAME(symbol) \
+  (symbol_natural_name (&(symbol)->mginfo))
+#define MSYMBOL_LINKAGE_NAME(symbol)	(symbol)->mginfo.name
+#define MSYMBOL_PRINT_NAME(symbol)					\
+  (demangle ? MSYMBOL_NATURAL_NAME (symbol) : MSYMBOL_LINKAGE_NAME (symbol))
+#define MSYMBOL_DEMANGLED_NAME(symbol) \
+  (symbol_demangled_name (&(symbol)->mginfo))
+#define MSYMBOL_SET_LANGUAGE(symbol,language,obstack)	\
+  (symbol_set_language (&(symbol)->mginfo, (language), (obstack)))
+#define MSYMBOL_SEARCH_NAME(symbol)					 \
+   (symbol_search_name (&(symbol)->mginfo))
+#define MSYMBOL_MATCHES_SEARCH_NAME(symbol, name)			\
+  (strcmp_iw (MSYMBOL_SEARCH_NAME (symbol), (name)) == 0)
+#define MSYMBOL_SET_NAMES(symbol,linkage_name,len,copy_name,objfile)	\
+  symbol_set_names (&(symbol)->mginfo, linkage_name, len, copy_name, objfile)
 
 #include "minsyms.h"
 
@@ -843,7 +882,7 @@ struct symtab
      between different symtabs (and normally is for all the symtabs
      in a given compilation unit).  */
 
-  struct blockvector *blockvector;
+  const struct blockvector *blockvector;
 
   /* Table mapping core addresses to line numbers for this file.
      Can be NULL if none.  Never shared between different symtabs.  */
@@ -1182,6 +1221,9 @@ struct symtab_and_line
 
   /* The probe associated with this symtab_and_line.  */
   struct probe *probe;
+  /* If PROBE is not NULL, then this is the objfile in which the probe
+     originated.  */
+  struct objfile *objfile;
 };
 
 extern void init_sal (struct symtab_and_line *sal);
@@ -1314,8 +1356,8 @@ struct symbol_search
   struct symbol_search *next;
 };
 
-extern void search_symbols (char *, enum search_domain, int, char **,
-			    struct symbol_search **);
+extern void search_symbols (const char *, enum search_domain, int,
+			    const char **, struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
 extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
 							 **);

@@ -18,7 +18,6 @@
 #define __DARWIN_NAT_H__
 
 #include <mach/mach.h>
-#include "common-utils.h" /* For FUNCTION_NAME.  */
 
 /* Describe the mach exception handling state for a task.  This state is saved
    before being changed and restored when a process is detached.

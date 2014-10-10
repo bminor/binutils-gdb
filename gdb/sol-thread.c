@@ -64,8 +64,10 @@
 #include "solib.h"
 #include "symfile.h"
 #include "observer.h"
-#include <string.h>
 #include "procfs.h"
+#include "symtab.h"
+#include "minsyms.h"
+#include "objfiles.h"
 
 struct target_ops sol_thread_ops;
 
@@ -542,13 +544,13 @@ sol_thread_store_registers (struct target_ops *ops,
    target_write_partial for details of each variant.  One, and only
    one, of readbuf or writebuf must be non-NULL.  */
 
-static LONGEST
+static enum target_xfer_status
 sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const char *annex, gdb_byte *readbuf,
 			  const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len)
+			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  int retval;
+  enum target_xfer_status retval;
   struct cleanup *old_chain;
   struct target_ops *beneath = find_target_beneath (ops);
 
@@ -564,8 +566,8 @@ sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
       inferior_ptid = procfs_first_available ();
     }
 
-  retval = beneath->to_xfer_partial (beneath, object, annex,
-				     readbuf, writebuf, offset, len);
+  retval = beneath->to_xfer_partial (beneath, object, annex, readbuf,
+				     writebuf, offset, len, xfered_len);
 
   do_cleanups (old_chain);
 
@@ -762,13 +764,13 @@ ps_err_e
 ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
 		   const char *ld_symbol_name, gdb_ps_addr_t *ld_symbol_addr)
 {
-  struct minimal_symbol *ms;
+  struct bound_minimal_symbol ms;
 
   ms = lookup_minimal_symbol (ld_symbol_name, NULL, NULL);
-  if (!ms)
+  if (!ms.minsym)
     return PS_NOSYM;
 
-  *ld_symbol_addr = SYMBOL_VALUE_ADDRESS (ms);
+  *ld_symbol_addr = BMSYMBOL_VALUE_ADDRESS (ms);
   return PS_OK;
 }
 
@@ -1081,8 +1083,7 @@ sol_find_new_threads (struct target_ops *ops)
   struct target_ops *beneath = find_target_beneath (ops);
 
   /* First Find any new LWP's.  */
-  if (beneath->to_find_new_threads != NULL)
-    beneath->to_find_new_threads (beneath);
+  beneath->to_find_new_threads (beneath);
 
   /* Then find any new user-level threads.  */
   p_td_ta_thr_iter (main_ta, sol_find_new_threads_callback, (void *) 0,
@@ -1140,7 +1141,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 
 	  printf_filtered ("   startfunc=%s",
 			   msym.minsym
-			   ? SYMBOL_PRINT_NAME (msym.minsym)
+			   ? MSYMBOL_PRINT_NAME (msym.minsym)
 			   : paddress (target_gdbarch (), ti.ti_startfunc));
 	}
 
@@ -1152,7 +1153,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 
 	  printf_filtered ("   sleepfunc=%s",
 			   msym.minsym
-			   ? SYMBOL_PRINT_NAME (msym.minsym)
+			   ? MSYMBOL_PRINT_NAME (msym.minsym)
 			   : paddress (target_gdbarch (), ti.ti_pc));
 	}
 
@@ -1190,7 +1191,7 @@ thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
 }
 
 static ptid_t
-sol_get_ada_task_ptid (long lwp, long thread)
+sol_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 {
   struct thread_info *thread_info =
     iterate_over_threads (thread_db_find_thread_from_tid, &thread);

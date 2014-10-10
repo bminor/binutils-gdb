@@ -1,7 +1,6 @@
 // object.cc -- support for an object file for linking in gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
-// Free Software Foundation, Inc.
+// Copyright (C) 2006-2014 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -335,7 +334,9 @@ Relobj::is_section_name_included(const char* name)
       || (is_prefix_of(".sdata", name)
 	  && strstr(name, "personality"))
       || (is_prefix_of(".gnu.linkonce.d", name)
-	  && strstr(name, "personality")))
+	  && strstr(name, "personality"))
+      || (is_prefix_of(".rodata", name)
+	  && strstr(name, "nptl_version")))
     {
       return true;
     }
@@ -755,6 +756,16 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
 template<int size, bool big_endian>
 void
 Sized_relobj_file<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
+{
+  this->base_read_symbols(sd);
+}
+
+// Read the sections and symbols from an object file.  This is common
+// code for all target-specific overrides of do_read_symbols().
+
+template<int size, bool big_endian>
+void
+Sized_relobj_file<size, big_endian>::base_read_symbols(Read_symbols_data* sd)
 {
   this->read_section_data(&this->elf_file_, sd);
 
@@ -1633,7 +1644,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 				symtab->icf()->get_folded_section(this, i);
 		    Relobj* folded_obj =
 				reinterpret_cast<Relobj*>(folded.first);
-		    gold_info(_("%s: ICF folding section '%s' in file '%s'"
+		    gold_info(_("%s: ICF folding section '%s' in file '%s' "
 				"into '%s' in file '%s'"),
 			      program_name, this->section_name(i).c_str(),
 			      this->name().c_str(),
@@ -1849,7 +1860,7 @@ Sized_relobj_file<size, big_endian>::do_layout_deferred_sections(Layout* layout)
 
 	  // Reading the symbols again here may be slow.
 	  Read_symbols_data sd;
-	  this->read_symbols(&sd);
+	  this->base_read_symbols(&sd);
 	  this->layout_eh_frame_section(layout,
 					sd.symbols->data(),
 					sd.symbols_size,

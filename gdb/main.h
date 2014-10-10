@@ -47,4 +47,6 @@ extern char *windows_get_absolute_argv0 (const char *argv0);
    parse the argv array.  */
 extern const char *get_gdb_program_name (void);
 
+extern void set_gdb_data_directory (const char *new_data_dir);
+
 #endif

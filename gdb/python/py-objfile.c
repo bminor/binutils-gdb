@@ -37,6 +37,9 @@ typedef struct
   PyObject *frame_filters;
   /* The type-printer list.  */
   PyObject *type_printers;
+
+  /* The debug method matcher list.  */
+  PyObject *xmethods;
 } objfile_object;
 
 static PyTypeObject objfile_object_type
@@ -67,6 +70,7 @@ objfpy_dealloc (PyObject *o)
   Py_XDECREF (self->printers);
   Py_XDECREF (self->frame_filters);
   Py_XDECREF (self->type_printers);
+  Py_XDECREF (self->xmethods);
   Py_TYPE (self)->tp_free (self);
 }
 
@@ -95,6 +99,13 @@ objfpy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
 
       self->type_printers = PyList_New (0);
       if (!self->type_printers)
+	{
+	  Py_DECREF (self);
+	  return NULL;
+	}
+
+      self->xmethods = PyList_New (0);
+      if (self->xmethods == NULL)
 	{
 	  Py_DECREF (self);
 	  return NULL;
@@ -191,6 +202,17 @@ objfpy_get_type_printers (PyObject *o, void *ignore)
 
   Py_INCREF (self->type_printers);
   return self->type_printers;
+}
+
+/* Get the 'xmethods' attribute.  */
+
+PyObject *
+objfpy_get_xmethods (PyObject *o, void *ignore)
+{
+  objfile_object *self = (objfile_object *) o;
+
+  Py_INCREF (self->xmethods);
+  return self->xmethods;
 }
 
 /* Set the 'type_printers' attribute.  */
@@ -292,6 +314,13 @@ objfile_to_objfile_object (struct objfile *objfile)
 	      return NULL;
 	    }
 
+	  object->xmethods = PyList_New (0);
+	  if (object->xmethods == NULL)
+	    {
+	      Py_DECREF (object);
+	      return NULL;
+	    }
+
 	  set_objfile_data (objfile, objfpy_objfile_data_key, object);
 	}
     }
@@ -333,6 +362,8 @@ static PyGetSetDef objfile_getset[] =
     objfpy_set_frame_filters, "Frame Filters.", NULL },
   { "type_printers", objfpy_get_type_printers, objfpy_set_type_printers,
     "Type printers.", NULL },
+  { "xmethods", objfpy_get_xmethods, NULL,
+    "Debug methods.", NULL },
   { NULL }
 };
 

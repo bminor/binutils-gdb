@@ -1,3 +1,9 @@
+# Copyright (C) 2014 Free Software Foundation, Inc.
+# 
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.
+
 #  This file is variant of elf.sc.  For nds32, because the data will be
 #  classified into different sections according to their size, this script
 #  describe these sections map.  The order is ".sdata_d, .sdata_w, .sdata_h,
@@ -255,7 +261,7 @@ else
   SIZEOF_HEADERS_CODE=
 fi
 
-# if this is for an embedded system, don't add SIZEOF_HEADERS.
+# If this is for an embedded system, don't add SIZEOF_HEADERS.
 if [ -z "$EMBEDDED" ]; then
    test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR}${SIZEOF_HEADERS_CODE}"
     NDS32_INIT=""
@@ -265,6 +271,12 @@ else
 fi
 
 cat <<EOF
+/* Copyright (C) 2014 Free Software Foundation, Inc.
+
+   Copying and distribution of this script, with or without modification,
+   are permitted in any medium without royalty provided the copyright
+   notice and this notice are preserved.  */
+
 OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
 	      "${LITTLE_OUTPUT_FORMAT}")
 OUTPUT_ARCH(${OUTPUT_ARCH})
@@ -361,13 +373,13 @@ cat >> ldscripts/dyntmp.$$ <<EOF
   .rel.dyn      ${RELOCATING-0} :
     {
 EOF
-sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
+sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;/__rela_iplt_/d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
 cat >> ldscripts/dyntmp.$$ <<EOF
     }
   .rela.dyn     ${RELOCATING-0} :
     {
 EOF
-sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
+sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;/__rel_iplt_/d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
 cat >> ldscripts/dyntmp.$$ <<EOF
     }
 EOF
@@ -397,10 +409,10 @@ emit_dyn()
     cat ldscripts/dyntmp.$$
   else
     if test -z "${NO_REL_RELOCS}"; then
-      sed -e '/^[ 	]*\.rela\.[^}]*$/,/}/d' -e '/^[ 	]*\.rela\./d' ldscripts/dyntmp.$$
+      sed -e '/^[ 	]*\.rela\.[^}]*$/,/}/d;/^[ 	]*\.rela\./d;/__rela_iplt_/d' ldscripts/dyntmp.$$
     fi
     if test -z "${NO_RELA_RELOCS}"; then
-      sed -e '/^[ 	]*\.rel\.[^}]*$/,/}/d' -e '/^[ 	]*\.rel\./d' ldscripts/dyntmp.$$
+      sed -e '/^[ 	]*\.rel\.[^}]*$/,/}/d;/^[ 	]*\.rel\./d;/__rel_iplt_/d' ldscripts/dyntmp.$$
     fi
   fi
   rm -f ldscripts/dyntmp.$$

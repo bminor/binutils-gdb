@@ -21,7 +21,6 @@
 /* This file implements the hostio_last_error target callback
    on top of errno.  */
 
-#include <errno.h>
 #include "server.h"
 #include "gdb/fileio.h"
 

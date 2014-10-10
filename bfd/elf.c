@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
 
-   Copyright 1993-2014 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -5247,7 +5247,6 @@ assign_file_positions_except_relocs (bfd *abfd,
 {
   struct elf_obj_tdata *tdata = elf_tdata (abfd);
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
-  file_ptr off;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
@@ -5257,6 +5256,7 @@ assign_file_positions_except_relocs (bfd *abfd,
       unsigned int num_sec = elf_numsections (abfd);
       Elf_Internal_Shdr **hdrpp;
       unsigned int i;
+      file_ptr off;
 
       /* Start after the ELF header.  */
       off = i_ehdrp->e_ehsize;
@@ -5280,6 +5280,8 @@ assign_file_positions_except_relocs (bfd *abfd,
 	  else
 	    off = _bfd_elf_assign_file_position_for_section (hdr, off, TRUE);
 	}
+
+      elf_next_file_pos (abfd) = off;
     }
   else
     {
@@ -5326,16 +5328,7 @@ assign_file_positions_except_relocs (bfd *abfd,
       if (bfd_seek (abfd, (bfd_signed_vma) bed->s->sizeof_ehdr, SEEK_SET) != 0
 	  || bed->s->write_out_phdrs (abfd, tdata->phdr, alloc) != 0)
 	return FALSE;
-
-      off = elf_next_file_pos (abfd);
     }
-
-  /* Place the section headers.  */
-  off = align_file_position (off, 1 << bed->s->log_file_align);
-  i_ehdrp->e_shoff = off;
-  off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
-
-  elf_next_file_pos (abfd) = off;
 
   return TRUE;
 }
@@ -5421,7 +5414,7 @@ prep_headers (bfd *abfd)
   elf_tdata (abfd)->shstrtab_hdr.sh_name =
     (unsigned int) _bfd_elf_strtab_add (shstrtab, ".shstrtab", FALSE);
   if (elf_tdata (abfd)->symtab_hdr.sh_name == (unsigned int) -1
-      || elf_tdata (abfd)->symtab_hdr.sh_name == (unsigned int) -1
+      || elf_tdata (abfd)->strtab_hdr.sh_name == (unsigned int) -1
       || elf_tdata (abfd)->shstrtab_hdr.sh_name == (unsigned int) -1)
     return FALSE;
 
@@ -5429,14 +5422,16 @@ prep_headers (bfd *abfd)
 }
 
 /* Assign file positions for all the reloc sections which are not part
-   of the loadable file image.  */
+   of the loadable file image, and the file position of section headers.  */
 
-void
+static void
 _bfd_elf_assign_file_positions_for_relocs (bfd *abfd)
 {
   file_ptr off;
   unsigned int i, num_sec;
   Elf_Internal_Shdr **shdrpp;
+  Elf_Internal_Ehdr *i_ehdrp;
+  const struct elf_backend_data *bed;
 
   off = elf_next_file_pos (abfd);
 
@@ -5451,6 +5446,12 @@ _bfd_elf_assign_file_positions_for_relocs (bfd *abfd)
 	off = _bfd_elf_assign_file_position_for_section (shdrp, off, TRUE);
     }
 
+/* Place the section headers.  */
+  i_ehdrp = elf_elfheader (abfd);
+  bed = get_elf_backend_data (abfd);
+  off = align_file_position (off, 1 << bed->s->log_file_align);
+  i_ehdrp->e_shoff = off;
+  off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
   elf_next_file_pos (abfd) = off;
 }
 
@@ -6382,7 +6383,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    phdr_included = TRUE;
 	}
 
-      lowest_section = first_section;
+      lowest_section = NULL;
       if (section_count != 0)
 	{
 	  unsigned int isec = 0;
@@ -6399,7 +6400,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 		    {
 		      bfd_vma seg_off;
 
-		      if (section->lma < lowest_section->lma)
+		      if (lowest_section == NULL
+			  || section->lma < lowest_section->lma)
 			lowest_section = section;
 
 		      /* Section lmas are set up from PT_LOAD header
@@ -7925,7 +7927,7 @@ _bfd_elf_set_section_contents (bfd *abfd,
 			       bfd_size_type count)
 {
   Elf_Internal_Shdr *hdr;
-  bfd_signed_vma pos;
+  file_ptr pos;
 
   if (! abfd->output_has_begun
       && ! _bfd_elf_compute_section_file_positions (abfd, NULL))
@@ -10033,11 +10035,12 @@ bfd *
 bfd_elf_bfd_from_remote_memory
   (bfd *templ,
    bfd_vma ehdr_vma,
+   bfd_size_type size,
    bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type))
 {
   return (*get_elf_backend_data (templ)->elf_backend_bfd_from_remote_memory)
-    (templ, ehdr_vma, loadbasep, target_read_memory);
+    (templ, ehdr_vma, size, loadbasep, target_read_memory);
 }
 
 long

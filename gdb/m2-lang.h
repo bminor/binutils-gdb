@@ -18,8 +18,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct type_print_options;
+struct parser_state;
 
-extern int m2_parse (void);	/* Defined in m2-exp.y */
+extern int m2_parse (struct parser_state *); /* Defined in m2-exp.y */
 
 extern void m2_error (char *);	/* Defined in m2-exp.y */
 

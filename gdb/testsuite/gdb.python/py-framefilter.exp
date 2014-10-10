@@ -237,7 +237,7 @@ gdb_test_no_output "python exec (open ('${remote_python_file}').read ())" \
 
 # Disable Reverse
 gdb_test_no_output "disable frame-filter global Reverse" \
-    "disable frame-filter gloval Reverse for no debuginfo"
+    "disable frame-filter global Reverse for no debuginfo"
 gdb_test "bt" \
     ".*#0..*in main \\(\\).*" \
     "bt for no debuginfo"

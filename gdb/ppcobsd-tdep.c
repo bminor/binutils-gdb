@@ -28,9 +28,6 @@
 #include "symtab.h"
 #include "trad-frame.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "ppc-tdep.h"
 #include "ppcobsd-tdep.h"
 #include "solib-svr4.h"
@@ -71,13 +68,13 @@ ppcobsd_collect_gregset (const struct regset *regset,
 
 /* OpenBSD/powerpc register set.  */
 
-struct regset ppcobsd_gregset =
+const struct regset ppcobsd_gregset =
 {
   &ppcobsd_reg_offsets,
   ppcobsd_supply_gregset
 };
 
-struct regset ppcobsd_fpregset =
+const struct regset ppcobsd_fpregset =
 {
   &ppcobsd_fpreg_offsets,
   ppc_supply_fpregset

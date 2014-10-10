@@ -1,7 +1,5 @@
 /* Target definitions for NN-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -108,6 +106,9 @@
 #endif
 #ifndef elf_backend_default_execstack
 #define elf_backend_default_execstack 1
+#endif
+#ifndef elf_backend_caches_rawsize
+#define elf_backend_caches_rawsize 0
 #endif
 #ifndef elf_backend_stack_align
 #define elf_backend_stack_align 16
@@ -236,9 +237,6 @@
 #ifndef bfd_elfNN_bfd_link_hash_table_create
 #define bfd_elfNN_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
 #endif
-#ifndef bfd_elfNN_bfd_link_hash_table_free
-#define bfd_elfNN_bfd_link_hash_table_free _bfd_elf_link_hash_table_free
-#endif
 #ifndef bfd_elfNN_bfd_link_add_symbols
 #define bfd_elfNN_bfd_link_add_symbols	bfd_elf_link_add_symbols
 #endif
@@ -254,9 +252,6 @@
 #ifndef bfd_elfNN_bfd_link_hash_table_create
 #define bfd_elfNN_bfd_link_hash_table_create \
   _bfd_generic_link_hash_table_create
-#endif
-#ifndef bfd_elfNN_bfd_link_hash_table_free
-#define bfd_elfNN_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #endif
 #ifndef bfd_elfNN_bfd_link_add_symbols
 #define bfd_elfNN_bfd_link_add_symbols	_bfd_generic_link_add_symbols
@@ -794,7 +789,8 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_want_got_sym,
   elf_backend_want_dynbss,
   elf_backend_want_p_paddr_set_to_zero,
-  elf_backend_default_execstack
+  elf_backend_default_execstack,
+  elf_backend_caches_rawsize
 };
 
 /* Forward declaration for use when initialising alternative_target field.  */

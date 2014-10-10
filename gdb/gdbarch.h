@@ -35,9 +35,10 @@
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
+#include "frame.h"
+
 struct floatformat;
 struct ui_file;
-struct frame_info;
 struct value;
 struct objfile;
 struct obj_section;
@@ -73,11 +74,6 @@ struct elf_internal_linux_prpsinfo;
 
 /* This is a convenience wrapper for 'current_inferior ()->gdbarch'.  */
 extern struct gdbarch *target_gdbarch (void);
-
-/* The initial, default architecture.  It uses host values (for want of a better
-   choice).  */
-extern struct gdbarch startup_gdbarch;
-
 
 /* Callback type for the 'iterate_over_objfiles_in_search_order'
    gdbarch  method.  */
@@ -427,12 +423,12 @@ extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_inf
 extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_value_to_register_ftype *value_to_register);
 
 /* Construct a value representing the contents of register REGNUM in
-   frame FRAME, interpreted as type TYPE.  The routine needs to
+   frame FRAME_ID, interpreted as type TYPE.  The routine needs to
    allocate and return a struct value with all value attributes
    (but not the value contents) filled in. */
 
-typedef struct value * (gdbarch_value_from_register_ftype) (struct type *type, int regnum, struct frame_info *frame);
-extern struct value * gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_info *frame);
+typedef struct value * (gdbarch_value_from_register_ftype) (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_id frame_id);
+extern struct value * gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_id frame_id);
 extern void set_gdbarch_value_from_register (struct gdbarch *gdbarch, gdbarch_value_from_register_ftype *value_from_register);
 
 typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
@@ -485,6 +481,24 @@ extern int gdbarch_skip_main_prologue_p (struct gdbarch *gdbarch);
 typedef CORE_ADDR (gdbarch_skip_main_prologue_ftype) (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern CORE_ADDR gdbarch_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern void set_gdbarch_skip_main_prologue (struct gdbarch *gdbarch, gdbarch_skip_main_prologue_ftype *skip_main_prologue);
+
+/* On some platforms, a single function may provide multiple entry points,
+   e.g. one that is used for function-pointer calls and a different one
+   that is used for direct function calls.
+   In order to ensure that breakpoints set on the function will trigger
+   no matter via which entry point the function is entered, a platform
+   may provide the skip_entrypoint callback.  It is called with IP set
+   to the main entry point of a function (as determined by the symbol table),
+   and should return the address of the innermost entry point, where the
+   actual breakpoint needs to be set.  Note that skip_entrypoint is used
+   by GDB common code even when debugging optimized code, where skip_prologue
+   is not used. */
+
+extern int gdbarch_skip_entrypoint_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_skip_entrypoint_ftype) (struct gdbarch *gdbarch, CORE_ADDR ip);
+extern CORE_ADDR gdbarch_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR ip);
+extern void set_gdbarch_skip_entrypoint (struct gdbarch *gdbarch, gdbarch_skip_entrypoint_ftype *skip_entrypoint);
 
 typedef int (gdbarch_inner_than_ftype) (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int gdbarch_inner_than (struct gdbarch *gdbarch, CORE_ADDR lhs, CORE_ADDR rhs);
@@ -761,21 +775,24 @@ extern int gdbarch_find_memory_regions (struct gdbarch *gdbarch, find_memory_reg
 extern void set_gdbarch_find_memory_regions (struct gdbarch *gdbarch, gdbarch_find_memory_regions_ftype *find_memory_regions);
 
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
-   core file into buffer READBUF with length LEN. */
+   core file into buffer READBUF with length LEN.  Return the number of bytes read
+   (zero indicates failure).
+   failed, otherwise, return the red length of READBUF. */
 
 extern int gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch);
 
-typedef LONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
-extern LONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+typedef ULONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern ULONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries);
 
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES_AIX formatted shared
-   libraries list from core file into buffer READBUF with length LEN. */
+   libraries list from core file into buffer READBUF with length LEN.
+   Return the number of bytes read (zero indicates failure). */
 
 extern int gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch);
 
-typedef LONGEST (gdbarch_core_xfer_shared_libraries_aix_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
-extern LONGEST gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+typedef ULONGEST (gdbarch_core_xfer_shared_libraries_aix_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern ULONGEST gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix);
 
 /* How the core target converts a PTID from a core file to a string. */
@@ -1234,8 +1251,8 @@ extern void set_gdbarch_gen_return_address (struct gdbarch *gdbarch, gdbarch_gen
 
 extern int gdbarch_info_proc_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_info_proc_ftype) (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
-extern void gdbarch_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
+typedef void (gdbarch_info_proc_ftype) (struct gdbarch *gdbarch, const char *args, enum info_proc_what what);
+extern void gdbarch_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what);
 extern void set_gdbarch_info_proc (struct gdbarch *gdbarch, gdbarch_info_proc_ftype *info_proc);
 
 /* Implement the "info proc" command for core files.  Noe that there
@@ -1244,8 +1261,8 @@ extern void set_gdbarch_info_proc (struct gdbarch *gdbarch, gdbarch_info_proc_ft
 
 extern int gdbarch_core_info_proc_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_core_info_proc_ftype) (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
-extern void gdbarch_core_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
+typedef void (gdbarch_core_info_proc_ftype) (struct gdbarch *gdbarch, const char *args, enum info_proc_what what);
+extern void gdbarch_core_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what);
 extern void set_gdbarch_core_info_proc (struct gdbarch *gdbarch, gdbarch_core_info_proc_ftype *core_info_proc);
 
 /* Iterate over all objfiles in the order that makes the most sense
@@ -1288,6 +1305,17 @@ extern void set_gdbarch_insn_is_ret (struct gdbarch *gdbarch, gdbarch_insn_is_re
 typedef int (gdbarch_insn_is_jump_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern int gdbarch_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_insn_is_jump (struct gdbarch *gdbarch, gdbarch_insn_is_jump_ftype *insn_is_jump);
+
+/* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
+   Return 0 if *READPTR is already at the end of the buffer.
+   Return -1 if there is insufficient buffer for a whole entry.
+   Return 1 if an entry was read into *TYPEP and *VALP. */
+
+extern int gdbarch_auxv_parse_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_auxv_parse_ftype) (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
+extern int gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
+extern void set_gdbarch_auxv_parse (struct gdbarch *gdbarch, gdbarch_auxv_parse_ftype *auxv_parse);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

@@ -1,7 +1,5 @@
 /* BFD back-end for s-record objects.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -455,7 +453,7 @@ srec_scan (bfd *abfd)
 	  {
 	    file_ptr pos;
 	    char hdr[3];
-	    unsigned int bytes;
+	    unsigned int bytes, min_bytes;
 	    bfd_vma address;
 	    bfd_byte *data;
 	    unsigned char check_sum;
@@ -478,6 +476,19 @@ srec_scan (bfd *abfd)
 	      }
 
 	    check_sum = bytes = HEX (hdr + 1);
+	    min_bytes = 3;
+	    if (hdr[0] == '2' || hdr[0] == '8')
+	      min_bytes = 4;
+	    else if (hdr[0] == '3' || hdr[0] == '7')
+	      min_bytes = 5;
+	    if (bytes < min_bytes)
+	      {
+		(*_bfd_error_handler) (_("%B:%d: byte count %d too small\n"),
+				       abfd, lineno, bytes);
+		bfd_set_error (bfd_error_bad_value);
+		goto error_return;
+	      }
+
 	    if (bytes * 2 > bufsize)
 	      {
 		if (buf != NULL)
@@ -1260,7 +1271,6 @@ srec_print_symbol (bfd *abfd,
 #define srec_section_already_linked               _bfd_generic_section_already_linked
 #define srec_bfd_define_common_symbol             bfd_generic_define_common_symbol
 #define srec_bfd_link_hash_table_create           _bfd_generic_link_hash_table_create
-#define srec_bfd_link_hash_table_free             _bfd_generic_link_hash_table_free
 #define srec_bfd_link_add_symbols                 _bfd_generic_link_add_symbols
 #define srec_bfd_link_just_syms                   _bfd_generic_link_just_syms
 #define srec_bfd_copy_link_hash_symbol_type \

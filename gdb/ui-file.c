@@ -22,11 +22,8 @@
 #include "defs.h"
 #include "ui-file.h"
 #include "gdb_obstack.h"
-#include <string.h>
 #include "gdb_select.h"
 #include "filestuff.h"
-
-#include <errno.h>
 
 static ui_file_isatty_ftype null_file_isatty;
 static ui_file_write_ftype null_file_write;

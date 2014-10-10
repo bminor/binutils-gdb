@@ -23,6 +23,7 @@
 #include "breakpoint.h"
 #include "gdbcmd.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "annotate.h"
 #include "valprint.h"
 #include "cli/cli-utils.h"

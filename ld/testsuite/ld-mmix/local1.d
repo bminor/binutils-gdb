@@ -10,7 +10,7 @@
 # (different meaning of "local" than for symbol), which can be seen as
 # somewhat twisted.
 
-There are 6 section headers, starting at offset 0xc8:
+There are 6 section headers, starting at offset .*:
 
 Section Headers:
  +\[Nr\] Name +Type +Address +Offset

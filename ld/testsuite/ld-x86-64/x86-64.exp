@@ -1,6 +1,5 @@
 # Expect script for ld-x86_64 tests
-#   Copyright (C) 2002, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
-#   Free Software Foundation
+#   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -137,6 +136,14 @@ set x86_64tests {
      {"build 32-bit object with 33 locals" "-melf_x86_64 -e 0" "" "--32" {32bit.s} {{ ld incompatible.l }} "dummy" }
      {"build 64-bit object" "-melf_x86_64 -e 0 --defsym foo=1" "" "--64" {64bit.s} {} "dummy" }
      {"link mixed objects"  "-melf_x86_64 -e 0 tmpdir/32bit.o tmpdir/64bit.o" "" "" {} { { ld incompatible.l } } "mixed"}
+    {"PR ld/17313 (1)" "-melf_x86_64" ""
+     "--64" {dummy.s} {} ""}
+    {"PR ld/17313 (2)" "-melf_x86_64 -shared --just-symbols=tmpdir/dummy.o" ""
+     "--64" {lea1.s} {} "libpr17313.so"}
+    {"PR ld/17306 (1)" "-melf_x86_64" ""
+     "--64" {pr17306b.s} {} ""}
+    {"PR ld/17306 (2)" "-melf_x86_64 -shared -Bsymbolic --just-symbols=tmpdir/pr17306b.o" ""
+     "--64" {pr17306a.s} {} "libpr17306.so"}
 }
 
 # So as to avoid rewriting every last test case here in a nacl variant,

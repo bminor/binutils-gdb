@@ -32,10 +32,7 @@
 #include "c-lang.h"
 #include "typeprint.h"
 #include "ada-lang.h"
-
 #include <ctype.h>
-#include <string.h>
-#include <errno.h>
 
 static int print_selected_record_field_types (struct type *, struct type *,
 					      int, int,
@@ -118,6 +115,9 @@ type_is_full_subrange_of_target_type (struct type *type)
   if (subtype == NULL)
     return 0;
 
+  if (is_dynamic_type (type))
+    return 0;
+
   if (ada_discrete_type_low_bound (type)
       != ada_discrete_type_low_bound (subtype))
     return 0;
@@ -159,15 +159,33 @@ print_range (struct type *type, struct ui_file *stream,
     case TYPE_CODE_ENUM:
       {
 	struct type *target_type;
+	volatile struct gdb_exception e;
+	LONGEST lo = 0, hi = 0; /* init for gcc -Wall */
 
 	target_type = TYPE_TARGET_TYPE (type);
 	if (target_type == NULL)
 	  target_type = type;
-	ada_print_scalar (target_type, ada_discrete_type_low_bound (type),
-			  stream);
-	fprintf_filtered (stream, " .. ");
-	ada_print_scalar (target_type, ada_discrete_type_high_bound (type),
-			  stream);
+
+	TRY_CATCH (e, RETURN_MASK_ERROR)
+	  {
+	    lo = ada_discrete_type_low_bound (type);
+	    hi = ada_discrete_type_high_bound (type);
+	  }
+	if (e.reason < 0)
+	  {
+	    /* This can happen when the range is dynamic.  Sometimes,
+	       resolving dynamic property values requires us to have
+	       access to an actual object, which is not available
+	       when the user is using the "ptype" command on a type.
+	       Print the range as an unbounded range.  */
+	    fprintf_filtered (stream, "<>");
+	  }
+	else
+	  {
+	    ada_print_scalar (target_type, lo, stream);
+	    fprintf_filtered (stream, " .. ");
+	    ada_print_scalar (target_type, hi, stream);
+	  }
       }
       break;
     default:

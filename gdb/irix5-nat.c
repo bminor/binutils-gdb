@@ -28,8 +28,6 @@
 #include "target.h"
 #include "regcache.h"
 #include "procfs.h"
-
-#include <string.h>
 #include <sys/time.h>
 #include <sys/procfs.h>
 #include <setjmp.h>		/* For JB_XXX.  */

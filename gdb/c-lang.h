@@ -24,6 +24,7 @@
 struct ui_file;
 struct language_arch_info;
 struct type_print_options;
+struct parser_state;
 
 #include "value.h"
 #include "macroexp.h"
@@ -57,7 +58,7 @@ enum c_string_type
 
 /* Defined in c-exp.y.  */
 
-extern int c_parse (void);
+extern int c_parse (struct parser_state *);
 
 extern void c_error (char *);
 

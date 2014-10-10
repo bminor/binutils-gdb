@@ -1,6 +1,6 @@
 #!/bin/sh
 # genscripts.sh - generate the ld-emulation-target specific files
-# Copyright 2004, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+# Copyright (C) 2004-2014 Free Software Foundation, Inc.
 #
 # This file is part of the Gnu Linker.
 #
@@ -33,8 +33,7 @@
 #          enable_initfini_array \
 #          this_emulation \
 # optional:
-#          tool_dir \
-#          customizer_script
+#          tool_dir
 #
 # Sample usage:
 #
@@ -93,14 +92,9 @@ use_sysroot=$1
 ENABLE_INITFINI_ARRAY=$2
 EMULATION_NAME=$3
 TOOL_LIB=$4
-CUSTOMIZER_SCRIPT=$5
-
-if [ "x${CUSTOMIZER_SCRIPT}" = "x" ] ; then
-  CUSTOMIZER_SCRIPT=${EMULATION_NAME}
-fi
-CUSTOMIZER_SCRIPT="${srcdir}/emulparams/${CUSTOMIZER_SCRIPT}.sh"
 
 # Include the emulation-specific parameters:
+CUSTOMIZER_SCRIPT="${srcdir}/emulparams/${EMULATION_NAME}.sh"
 . ${CUSTOMIZER_SCRIPT}
 
 if test -d ldscripts; then

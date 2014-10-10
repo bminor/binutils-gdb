@@ -1,6 +1,5 @@
 /* tc-tic4x.c -- Assemble for the Texas Instruments TMS320C[34]x.
-   Copyright (C) 1997,1998, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010,
-   2012 Free Software Foundation. Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
    Contributed by Michael P. Hayes (m.hayes@elec.canterbury.ac.nz)
 
@@ -44,7 +43,6 @@
 #include "safe-ctype.h"
 #include "opcode/tic4x.h"
 #include "subsegs.h"
-#include "obstack.h"
 
 /* OK, we accept a syntax similar to the other well known C30
    assembly tools.  With TIC4X_ALT_SYNTAX defined we are more

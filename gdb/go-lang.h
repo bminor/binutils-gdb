@@ -26,6 +26,8 @@ struct type_print_options;
 #include "symtab.h"
 #include "value.h"
 
+struct parser_state;
+
 struct builtin_go_type
 {
   struct type *builtin_void;
@@ -56,7 +58,7 @@ enum go_type
 
 /* Defined in go-exp.y.  */
 
-extern int go_parse (void);
+extern int go_parse (struct parser_state *);
 
 extern void go_error (char *);
 

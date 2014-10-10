@@ -222,7 +222,13 @@ proc do_steps_and_nexts {} {
 		set command "next"
 	    }
 	    -re ".*$gdb_prompt $" {
-		fail "unknown source line after $description"
+		# If $description hasn't been set yet, it's likely the file
+		# has been edited but gdb hasn't been recompiled.
+		if [info exists description] {
+		    fail "unknown source line (after $description)"
+		} else {
+		    fail "unknown source line"
+		}
 		return
 	    }
 	    default {

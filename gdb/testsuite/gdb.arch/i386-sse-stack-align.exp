@@ -22,7 +22,7 @@ set testfile "i386-sse-stack-align"
 set srcfile ${testfile}.S
 set csrcfile ${testfile}.c
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
+set binfile [standard_output_file ${executable}]
 set opts {}
 
 if [info exists COMPILE] {

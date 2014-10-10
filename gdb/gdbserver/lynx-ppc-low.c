@@ -19,7 +19,6 @@
 #include "lynx-low.h"
 
 #include <stdint.h>
-#include <stddef.h>
 #include <limits.h>
 #include <sys/ptrace.h>
 

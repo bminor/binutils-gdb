@@ -1,7 +1,5 @@
 /* write.c - emit .o file
-   Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1694,7 +1692,7 @@ set_symtab (void)
 #endif
 #endif
 
-void
+static void
 subsegs_finish (void)
 {
   struct frchain *frchainP;
@@ -1763,32 +1761,11 @@ write_object_file (void)
   fragS *fragP;			/* Track along all frags.  */
 #endif
 
+  subsegs_finish ();
+
 #ifdef md_pre_output_hook
   md_pre_output_hook;
 #endif
-
-  /* Do we really want to write it?  */
-  {
-    int n_warns, n_errs;
-    n_warns = had_warnings ();
-    n_errs = had_errors ();
-    /* The -Z flag indicates that an object file should be generated,
-       regardless of warnings and errors.  */
-    if (flag_always_generate_output)
-      {
-	if (n_warns || n_errs)
-	  as_warn (_("%d error%s, %d warning%s, generating bad object file"),
-		   n_errs, n_errs == 1 ? "" : "s",
-		   n_warns, n_warns == 1 ? "" : "s");
-      }
-    else
-      {
-	if (n_errs)
-	  as_fatal (_("%d error%s, %d warning%s, no object file generated"),
-		    n_errs, n_errs == 1 ? "" : "s",
-		    n_warns, n_warns == 1 ? "" : "s");
-      }
-  }
 
 #ifdef md_pre_relax_hook
   md_pre_relax_hook;
@@ -1885,7 +1862,7 @@ write_object_file (void)
 #ifdef TC_CONS_FIX_NEW
 	  TC_CONS_FIX_NEW (lie->frag,
 			   lie->word_goes_here - lie->frag->fr_literal,
-			   2, &exp);
+			   2, &exp, TC_PARSE_CONS_RETURN_NONE);
 #else
 	  fix_new_exp (lie->frag,
 		       lie->word_goes_here - lie->frag->fr_literal,

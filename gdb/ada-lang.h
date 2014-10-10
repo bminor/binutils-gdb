@@ -23,6 +23,7 @@
 struct frame_info;
 struct inferior;
 struct type_print_options;
+struct parser_state;
 
 #include "value.h"
 #include "gdbtypes.h"
@@ -169,7 +170,7 @@ extern int ada_get_field_index (const struct type *type,
                                 const char *field_name,
                                 int maybe_missing);
 
-extern int ada_parse (void);    /* Defined in ada-exp.y */
+extern int ada_parse (struct parser_state *);    /* Defined in ada-exp.y */
 
 extern void ada_error (char *); /* Defined in ada-exp.y */
 
@@ -235,8 +236,6 @@ extern const char *ada_decode_symbol (const struct general_symbol_info *);
 extern const char *ada_decode (const char*);
 
 extern enum language ada_update_initial_language (enum language);
-
-extern void clear_ada_sym_cache (void);
 
 extern int ada_lookup_symbol_list (const char *, const struct block *,
                                    domain_enum, struct ada_symbol_info**);

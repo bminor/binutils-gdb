@@ -193,9 +193,6 @@ struct gdbarch_tdep
   /* Convention for returning structures.  */
   enum struct_return struct_return;
 
-  /* Cached core file helpers.  */
-  struct regset *gregset, *fpregset, *vfpregset;
-
   /* ISA-specific data types.  */
   struct type *arm_ext_type;
   struct type *neon_double_type;

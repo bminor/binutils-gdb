@@ -28,8 +28,6 @@
 
 #include "filenames.h"
 
-#include "gdb_assert.h"
-
 #ifndef HAVE_LIBEXPAT
 
 /* Dummy functions to indicate that there's no support for fetching

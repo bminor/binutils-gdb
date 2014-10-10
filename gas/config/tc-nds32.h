@@ -1,5 +1,5 @@
 /* tc-nds32.h -- Header file for tc-nds32.c.
-   Copyright (C) 2012-2013 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    Contributed by Andes Technology Corporation.
 
    This file is part of GAS.
@@ -41,10 +41,6 @@
 #ifndef TARGET_BYTES_BIG_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN	1
 #endif
-
-/* This is used to construct expressions out of @GOTOFF, @PLT and @GOT
-   symbols.  The relocation type is stored in X_md.  */
-#define O_PIC_reloc O_md1
 
 /* as.c.  */
 /* Extend GAS command line option handling capability.  */
@@ -154,6 +150,12 @@ extern void nds32_do_align (int);
 #define LOCAL_LABELS_FB				1 /* Permit temporary numeric labels.  */
 
 /* frags.c.  */
+
+#define NDS32_FRAG_RELAXABLE 0x1
+#define NDS32_FRAG_RELAXED 0x2
+#define NDS32_FRAG_BRANCH 0x4
+#define NDS32_FRAG_LABEL 0x8
+
 struct nds32_frag_type
 {
   relax_substateT flag;
@@ -211,10 +213,16 @@ enum nds32_br_range
 
 enum nds32_ramp
 {
-  NDS32_CREATE_LABLE = 1,
-  NDS32_RELAX = 2,
-  NDS32_ORIGIN = 4,
-  NDS32_CONVERT = 8
+  NDS32_CREATE_LABEL = 1,
+  NDS32_RELAX = (1 << 1), /* Obsolete in the future.  */
+  NDS32_ORIGIN = (1 << 2),
+  NDS32_INSN16 = (1 << 3),
+  NDS32_PTR = (1 << 4),
+  NDS32_ABS = (1 << 5),
+  NDS32_HINT = (1 << 6),
+  NDS32_FIX = (1 << 7),
+  NDS32_ADDEND = (1 << 8),
+  NDS32_SYM = (1 << 9)
 };
 
 typedef struct nds32_relax_fixup_info
@@ -231,13 +239,15 @@ typedef struct nds32_cond_field
   int offset;
   int bitpos; /* Register position.  */
   int bitmask; /* Number of register bits.  */
+  bfd_boolean signed_extend;
 } nds32_cond_field_t;
 
 /* The max relaxation pattern is 20-bytes including the nop.  */
 #define NDS32_MAXCHAR 20
 /* In current, the max entend number of instruction for one pseudo instruction
-   is 4, but its number of relocation may be 5.  */
-#define MAX_RELAX_NUM 8
+   is 4, but its number of relocation may be 12.  */
+#define MAX_RELAX_NUM 4
+#define MAX_RELAX_FIX 12
 
 typedef struct nds32_relax_info
 {
@@ -248,17 +258,24 @@ typedef struct nds32_relax_info
   /* Code sequences for different branch range.  */
   uint32_t relax_code_seq[BR_RANGE_NUM][MAX_RELAX_NUM];
   nds32_cond_field_t relax_code_condition[BR_RANGE_NUM][MAX_RELAX_NUM];
-  int relax_code_size[BR_RANGE_NUM];
+  unsigned int relax_code_size[BR_RANGE_NUM];
   int relax_branch_isize[BR_RANGE_NUM];
-  nds32_relax_fixup_info_t relax_fixup[BR_RANGE_NUM][MAX_RELAX_NUM];
+  nds32_relax_fixup_info_t relax_fixup[BR_RANGE_NUM][MAX_RELAX_FIX];
 } relax_info_t;
 
-/* Relocation table.  */
-struct nds32_relocation_map
+enum nds32_relax_hint_type
 {
-  unsigned int main_type;
-  /* Number of instructions, {relocations type, instruction type}.  */
-  unsigned int reloc_insn[6][6][3];
+  NDS32_RELAX_HINT_NONE = 0,
+  NDS32_RELAX_HINT_LA,
+  NDS32_RELAX_HINT_LS
+};
+
+struct nds32_relax_hint_table
+{
+  enum nds32_relax_hint_type main_type;
+  unsigned int relax_code_size;
+  uint32_t relax_code_seq[MAX_RELAX_NUM];
+  nds32_relax_fixup_info_t relax_fixup[MAX_RELAX_FIX];
 };
 
 #endif /* TC_NDS32 */

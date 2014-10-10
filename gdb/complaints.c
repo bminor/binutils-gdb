@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "complaints.h"
-#include "gdb_assert.h"
 #include "command.h"
 #include "gdbcmd.h"
 

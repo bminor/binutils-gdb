@@ -29,7 +29,6 @@
 #include "inferior.h"
 #include "annotate.h"
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "dummy-frame.h"
 #include "command.h"
 #include "gdbcmd.h"
@@ -52,11 +51,11 @@
    --- hopefully pointing us at the call instruction, or its delay
    slot instruction.  */
 
-struct block *
+const struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
   CORE_ADDR pc;
-  struct block *bl;
+  const struct block *bl;
   int inline_count;
 
   if (!get_frame_address_in_block_if_available (frame, &pc))
@@ -86,7 +85,7 @@ get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 CORE_ADDR
 get_pc_function_start (CORE_ADDR pc)
 {
-  struct block *bl;
+  const struct block *bl;
   struct bound_minimal_symbol msymbol;
 
   bl = block_for_pc (pc);
@@ -104,7 +103,7 @@ get_pc_function_start (CORE_ADDR pc)
   msymbol = lookup_minimal_symbol_by_pc (pc);
   if (msymbol.minsym)
     {
-      CORE_ADDR fstart = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
+      CORE_ADDR fstart = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
       if (find_pc_section (fstart))
 	return fstart;
@@ -118,7 +117,7 @@ get_pc_function_start (CORE_ADDR pc)
 struct symbol *
 get_frame_function (struct frame_info *frame)
 {
-  struct block *bl = get_frame_block (frame, 0);
+  const struct block *bl = get_frame_block (frame, 0);
 
   if (bl == NULL)
     return NULL;
@@ -136,7 +135,7 @@ get_frame_function (struct frame_info *frame)
 struct symbol *
 find_pc_sect_function (CORE_ADDR pc, struct obj_section *section)
 {
-  struct block *b = block_for_pc_sect (pc, section);
+  const struct block *b = block_for_pc_sect (pc, section);
 
   if (b == 0)
     return 0;
@@ -195,7 +194,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 {
   struct obj_section *section;
   struct symbol *f;
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
   struct symtab *symtab = NULL;
   struct objfile *objfile;
   int i;
@@ -217,7 +216,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
       && section == cache_pc_function_section)
     goto return_cached_value;
 
-  msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section).minsym;
+  msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
   ALL_OBJFILES (objfile)
   {
     if (objfile->sf)
@@ -233,9 +232,9 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 	 "pathological" case mentioned in print_frame_info.  */
       f = find_pc_sect_function (mapped_pc, section);
       if (f != NULL
-	  && (msymbol == NULL
+	  && (msymbol.minsym == NULL
 	      || (BLOCK_START (SYMBOL_BLOCK_VALUE (f))
-		  >= SYMBOL_VALUE_ADDRESS (msymbol))))
+		  >= BMSYMBOL_VALUE_ADDRESS (msymbol))))
 	{
 	  cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
 	  cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
@@ -252,10 +251,10 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
      last function in the text segment.  */
 
   if (!section)
-    msymbol = NULL;
+    msymbol.minsym = NULL;
 
   /* Must be in the minimal symbol table.  */
-  if (msymbol == NULL)
+  if (msymbol.minsym == NULL)
     {
       /* No available symbol.  */
       if (name != NULL)
@@ -269,42 +268,12 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
       return 0;
     }
 
-  cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
-  cache_pc_function_name = SYMBOL_LINKAGE_NAME (msymbol);
+  cache_pc_function_low = BMSYMBOL_VALUE_ADDRESS (msymbol);
+  cache_pc_function_name = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
   cache_pc_function_section = section;
-  cache_pc_function_is_gnu_ifunc = MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc;
-
-  /* If the minimal symbol has a size, use it for the cache.
-     Otherwise use the lesser of the next minimal symbol in the same
-     section, or the end of the section, as the end of the
-     function.  */
-
-  if (MSYMBOL_SIZE (msymbol) != 0)
-    cache_pc_function_high = cache_pc_function_low + MSYMBOL_SIZE (msymbol);
-  else
-    {
-      /* Step over other symbols at this same address, and symbols in
-	 other sections, to find the next symbol in this section with
-	 a different address.  */
-
-      for (i = 1; SYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
-	{
-	  if (SYMBOL_VALUE_ADDRESS (msymbol + i)
-	      != SYMBOL_VALUE_ADDRESS (msymbol)
-	      && SYMBOL_SECTION (msymbol + i)
-	      == SYMBOL_SECTION (msymbol))
-	    break;
-	}
-
-      if (SYMBOL_LINKAGE_NAME (msymbol + i) != NULL
-	  && SYMBOL_VALUE_ADDRESS (msymbol + i)
-	  < obj_section_endaddr (section))
-	cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
-      else
-	/* We got the start address from the last msymbol in the objfile.
-	   So the end address is the end of the section.  */
-	cache_pc_function_high = obj_section_endaddr (section);
-    }
+  cache_pc_function_is_gnu_ifunc = (MSYMBOL_TYPE (msymbol.minsym)
+				    == mst_text_gnu_ifunc);
+  cache_pc_function_high = minimal_symbol_upper_bound (msymbol);
 
  return_cached_value:
 
@@ -368,7 +337,7 @@ block_innermost_frame (const struct block *block)
     frame = get_current_frame ();
   while (frame != NULL)
     {
-      struct block *frame_block = get_frame_block (frame, NULL);
+      const struct block *frame_block = get_frame_block (frame, NULL);
       if (frame_block != NULL && contained_in (frame_block, block))
 	return frame;
 

@@ -1,7 +1,5 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -189,7 +187,7 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
   return TRUE;
 }
 
-#define TARGET_BIG_SYM	bfd_elf32_sparc_vec
+#define TARGET_BIG_SYM	sparc_elf32_vec
 #define TARGET_BIG_NAME	"elf32-sparc"
 #define ELF_ARCH	bfd_arch_sparc
 #define ELF_TARGET_ID	SPARC_ELF_DATA
@@ -211,8 +209,6 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
   _bfd_sparc_elf_reloc_name_lookup
 #define bfd_elf32_bfd_link_hash_table_create \
 					_bfd_sparc_elf_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-					_bfd_sparc_elf_link_hash_table_free
 #define bfd_elf32_bfd_relax_section	_bfd_sparc_elf_relax_section
 #define bfd_elf32_new_section_hook	_bfd_sparc_elf_new_section_hook
 #define elf_backend_copy_indirect_symbol \
@@ -252,7 +248,7 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 /* Solaris 2.  */
 
 #undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM				bfd_elf32_sparc_sol2_vec
+#define	TARGET_BIG_SYM				sparc_elf32_sol2_vec
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME				"elf32-sparc-sol2"
 
@@ -296,7 +292,7 @@ elf32_sparc_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 }
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM	bfd_elf32_sparc_vxworks_vec
+#define TARGET_BIG_SYM	sparc_elf32_vxworks_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME	"elf32-sparc-vxworks"
 

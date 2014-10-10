@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1077,7 +1077,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 static const bfd_target *
 pe_ILF_object_p (bfd * abfd)
 {
-  bfd_byte        buffer[16];
+  bfd_byte        buffer[14];
   bfd_byte *      ptr;
   char *          symbol_name;
   char *          source_dll;
@@ -1087,16 +1087,12 @@ pe_ILF_object_p (bfd * abfd)
   unsigned int    types;
   unsigned int    magic;
 
-  /* Upon entry the first four buyes of the ILF header have
+  /* Upon entry the first six bytes of the ILF header have
       already been read.  Now read the rest of the header.  */
-  if (bfd_bread (buffer, (bfd_size_type) 16, abfd) != 16)
+  if (bfd_bread (buffer, (bfd_size_type) 14, abfd) != 14)
     return NULL;
 
   ptr = buffer;
-
-  /*  We do not bother to check the version number.
-      version = H_GET_16 (abfd, ptr);  */
-  ptr += 2;
 
   machine = H_GET_16 (abfd, ptr);
   ptr += 2;
@@ -1251,7 +1247,7 @@ pe_ILF_object_p (bfd * abfd)
 static const bfd_target *
 pe_bfd_object_p (bfd * abfd)
 {
-  bfd_byte buffer[4];
+  bfd_byte buffer[6];
   struct external_PEI_DOS_hdr dos_hdr;
   struct external_PEI_IMAGE_hdr image_hdr;
   struct internal_filehdr internal_f;
@@ -1260,15 +1256,18 @@ pe_bfd_object_p (bfd * abfd)
   file_ptr offset;
 
   /* Detect if this a Microsoft Import Library Format element.  */
+  /* First read the beginning of the header.  */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || bfd_bread (buffer, (bfd_size_type) 4, abfd) != 4)
+      || bfd_bread (buffer, (bfd_size_type) 6, abfd) != 6)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 
-  if (H_GET_32 (abfd, buffer) == 0xffff0000)
+  /* Then check the magic and the version (only 0 is supported).  */
+  if (H_GET_32 (abfd, buffer) == 0xffff0000
+      && H_GET_16 (abfd, buffer + 4) == 0)
     return pe_ILF_object_p (abfd);
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0

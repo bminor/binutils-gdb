@@ -338,9 +338,9 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
   /* The ptid might still be minus_one_ptid; this can happen between
      the moment we create the inferior or attach to a process, and
      the moment we resume its execution for the first time.  It is
-     fine to use the current_inferior's ptid in those cases.  */
+     fine to use the current_thread's ptid in those cases.  */
   if (ptid_equal (ptid, minus_one_ptid))
-    ptid = thread_to_gdb_id (current_inferior);
+    ptid = thread_to_gdb_id (current_thread);
 
   regcache_invalidate ();
 
@@ -413,7 +413,7 @@ lynx_wait_1 (ptid_t ptid, struct target_waitstatus *status, int options)
   ptid_t new_ptid;
 
   if (ptid_equal (ptid, minus_one_ptid))
-    pid = lynx_ptid_get_pid (thread_to_gdb_id (current_inferior));
+    pid = lynx_ptid_get_pid (thread_to_gdb_id (current_thread));
   else
     pid = BUILDPID (lynx_ptid_get_pid (ptid), lynx_ptid_get_tid (ptid));
 
@@ -582,7 +582,7 @@ static void
 lynx_fetch_registers (struct regcache *regcache, int regno)
 {
   struct lynx_regset_info *regset = lynx_target_regsets;
-  ptid_t inferior_ptid = thread_to_gdb_id (current_inferior);
+  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
 
   lynx_debug ("lynx_fetch_registers (regno = %d)", regno);
 
@@ -607,7 +607,7 @@ static void
 lynx_store_registers (struct regcache *regcache, int regno)
 {
   struct lynx_regset_info *regset = lynx_target_regsets;
-  ptid_t inferior_ptid = thread_to_gdb_id (current_inferior);
+  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
 
   lynx_debug ("lynx_store_registers (regno = %d)", regno);
 
@@ -643,7 +643,7 @@ lynx_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   int buf;
   const int xfer_size = sizeof (buf);
   CORE_ADDR addr = memaddr & -(CORE_ADDR) xfer_size;
-  ptid_t inferior_ptid = thread_to_gdb_id (current_inferior);
+  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
 
   while (addr < memaddr + len)
     {
@@ -676,7 +676,7 @@ lynx_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   int buf;
   const int xfer_size = sizeof (buf);
   CORE_ADDR addr = memaddr & -(CORE_ADDR) xfer_size;
-  ptid_t inferior_ptid = thread_to_gdb_id (current_inferior);
+  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
 
   while (addr < memaddr + len)
     {
@@ -710,7 +710,7 @@ lynx_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 static void
 lynx_request_interrupt (void)
 {
-  ptid_t inferior_ptid = thread_to_gdb_id (current_inferior);
+  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
 
   kill (lynx_ptid_get_pid (inferior_ptid), SIGINT);
 }
@@ -736,6 +736,7 @@ static struct target_ops lynx_target_ops = {
   NULL,  /* look_up_symbols */
   lynx_request_interrupt,
   NULL,  /* read_auxv */
+  NULL,  /* supports_z_point_type */
   NULL,  /* insert_point */
   NULL,  /* remove_point */
   NULL,  /* stopped_by_watchpoint */

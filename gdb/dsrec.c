@@ -21,8 +21,6 @@
 #include "srec.h"
 #include <sys/time.h>
 #include <time.h>
-#include "gdb_assert.h"
-#include <string.h>
 #include "gdb_bfd.h"
 
 extern int remote_debug;

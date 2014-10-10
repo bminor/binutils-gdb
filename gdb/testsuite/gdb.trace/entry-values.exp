@@ -79,6 +79,8 @@ if { [istarget "arm*-*-*"] || [istarget "aarch64*-*-*"] } {
     set call_insn "bl"
 } elseif { [istarget "s390*-*-*"] } {
     set call_insn "brasl"
+} elseif { [istarget "powerpc*-*-*"] } {
+    set call_insn "bl"
 } else {
     set call_insn "call"
 }
@@ -145,8 +147,8 @@ Dwarf::assemble $asm_file {
 	    foo_label: subprogram {
 		{name foo}
 		{decl_file 1}
-		{low_pc foo addr}
-		{high_pc "foo + $foo_length" addr}
+		{low_pc foo_start addr}
+		{high_pc "foo_start + $foo_length" addr}
 	    } {
 		formal_parameter {
 		    {type :$int_label}
@@ -163,8 +165,8 @@ Dwarf::assemble $asm_file {
 	    subprogram {
 		{name bar}
 		{decl_file 1}
-		{low_pc bar addr}
-		{high_pc "bar + $bar_length" addr}
+		{low_pc bar_start addr}
+		{high_pc "bar_start + $bar_length" addr}
 		{GNU_all_call_sites 1}
 	    } {
 		formal_parameter {
@@ -173,7 +175,7 @@ Dwarf::assemble $asm_file {
 		}
 
 		GNU_call_site {
-		    {low_pc "bar + $bar_call_foo" addr}
+		    {low_pc "bar_start + $bar_call_foo" addr}
 		    {abstract_origin :$foo_label}
 		} {
 		    # Faked entry values are reference to variables 'global1'

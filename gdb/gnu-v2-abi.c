@@ -20,7 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -246,12 +245,12 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   /* Try to find a symbol that is the vtable.  */
   minsym=lookup_minimal_symbol_by_pc(vtbl);
   if (minsym.minsym==NULL
-      || (linkage_name=SYMBOL_LINKAGE_NAME (minsym.minsym))==NULL
+      || (linkage_name=MSYMBOL_LINKAGE_NAME (minsym.minsym))==NULL
       || !is_vtable_name (linkage_name))
     return NULL;
 
   /* If we just skip the prefix, we get screwed by namespaces.  */
-  demangled_name=cplus_demangle(linkage_name,DMGL_PARAMS|DMGL_ANSI);
+  demangled_name=gdb_demangle(linkage_name,DMGL_PARAMS|DMGL_ANSI);
   p = strchr (demangled_name, ' ');
   if (p)
     *p = '\0';

@@ -28,7 +28,6 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "dis-asm.h"
-#include <string.h>
 #include "arch-utils.h"
 #include "regcache.h"
 #include "osabi.h"

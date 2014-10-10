@@ -30,9 +30,6 @@
 #include "target.h"
 #include "trad-frame.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "ppc-tdep.h"
 #include "ppc64-tdep.h"
 #include "ppcfbsd-tdep.h"
@@ -100,8 +97,7 @@ static const struct ppc_reg_offsets ppc64_fbsd_reg_offsets =
 static const struct regset ppc32_fbsd_gregset = {
   &ppc32_fbsd_reg_offsets,
   ppc_supply_gregset,
-  ppc_collect_gregset,
-  NULL
+  ppc_collect_gregset
 };
 
 /* 64-bit general-purpose register set.  */
@@ -109,13 +105,12 @@ static const struct regset ppc32_fbsd_gregset = {
 static const struct regset ppc64_fbsd_gregset = {
   &ppc64_fbsd_reg_offsets,
   ppc_supply_gregset,
-  ppc_collect_gregset,
-  NULL
+  ppc_collect_gregset
 };
 
 /* 32-/64-bit floating-point register set.  */
 
-static struct regset ppc32_fbsd_fpregset = {
+static const struct regset ppc32_fbsd_fpregset = {
   &ppc32_fbsd_reg_offsets,
   ppc_supply_fpregset,
   ppc_collect_fpregset

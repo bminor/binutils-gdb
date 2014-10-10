@@ -27,7 +27,7 @@ extern int debug_threads;
 static int thread_db_use_events;
 
 #include "gdb_proc_service.h"
-#include "gdb_thread_db.h"
+#include "nat/gdb_thread_db.h"
 #include "gdb_vecs.h"
 
 #ifndef USE_LIBTHREAD_DB_DIRECTLY
@@ -88,6 +88,9 @@ struct thread_db
   td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
 				     psaddr_t map_address,
 				     size_t offset, psaddr_t *address);
+  td_err_e (*td_thr_tlsbase_p) (const td_thrhandle_t *th,
+				unsigned long int modid,
+				psaddr_t *base);
   const char ** (*td_symbol_list_p) (void);
 };
 
@@ -190,8 +193,7 @@ thread_db_create_event (CORE_ADDR where)
   struct lwp_info *lwp;
   struct thread_db *thread_db = current_process ()->private->thread_db;
 
-  if (thread_db->td_ta_event_getmsg_p == NULL)
-    fatal ("unexpected thread_db->td_ta_event_getmsg_p == NULL");
+  gdb_assert (thread_db->td_ta_event_getmsg_p != NULL);
 
   if (debug_threads)
     debug_printf ("Thread creation event.\n");
@@ -208,9 +210,9 @@ thread_db_create_event (CORE_ADDR where)
   /* If we do not know about the main thread yet, this would be a good time to
      find it.  We need to do this to pick up the main thread before any newly
      created threads.  */
-  lwp = get_thread_lwp (current_inferior);
+  lwp = get_thread_lwp (current_thread);
   if (lwp->thread_known == 0)
-    find_one_thread (lwp->head.id);
+    find_one_thread (current_thread->entry.id);
 
   /* msg.event == TD_EVENT_CREATE */
 
@@ -323,27 +325,33 @@ find_one_thread (ptid_t ptid)
 static int
 attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 {
+  struct process_info *proc = current_process ();
+  int pid = pid_of (proc);
+  ptid_t ptid = ptid_build (pid, ti_p->ti_lid, 0);
   struct lwp_info *lwp;
+  int err;
 
   if (debug_threads)
     debug_printf ("Attaching to thread %ld (LWP %d)\n",
 		  ti_p->ti_tid, ti_p->ti_lid);
-  linux_attach_lwp (ti_p->ti_lid);
-  lwp = find_lwp_pid (pid_to_ptid (ti_p->ti_lid));
-  if (lwp == NULL)
+  err = linux_attach_lwp (ptid);
+  if (err != 0)
     {
-      warning ("Could not attach to thread %ld (LWP %d)\n",
-	       ti_p->ti_tid, ti_p->ti_lid);
+      warning ("Could not attach to thread %ld (LWP %d): %s\n",
+	       ti_p->ti_tid, ti_p->ti_lid,
+	       linux_attach_fail_reason_string (ptid, err));
       return 0;
     }
 
+  lwp = find_lwp_pid (ptid);
+  gdb_assert (lwp != NULL);
   lwp->thread_known = 1;
   lwp->th = *th_p;
 
   if (thread_db_use_events)
     {
       td_err_e err;
-      struct thread_db *thread_db = current_process ()->private->thread_db;
+      struct thread_db *thread_db = proc->private->thread_db;
 
       err = thread_db->td_thr_event_enable_p (th_p, 1);
       if (err != TD_OK)
@@ -486,7 +494,7 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   psaddr_t addr;
   td_err_e err;
   struct lwp_info *lwp;
-  struct thread_info *saved_inferior;
+  struct thread_info *saved_thread;
   struct process_info *proc;
   struct thread_db *thread_db;
 
@@ -497,24 +505,43 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   if (thread_db == NULL || !thread_db->all_symbols_looked_up)
     return TD_ERR;
 
-  if (thread_db->td_thr_tls_get_addr_p == NULL)
+  /* If td_thr_tls_get_addr is missing rather do not expect td_thr_tlsbase
+     could work.  */
+  if (thread_db->td_thr_tls_get_addr_p == NULL
+      || (load_module == 0 && thread_db->td_thr_tlsbase_p == NULL))
     return -1;
 
   lwp = get_thread_lwp (thread);
   if (!lwp->thread_known)
-    find_one_thread (lwp->head.id);
+    find_one_thread (thread->entry.id);
   if (!lwp->thread_known)
     return TD_NOTHR;
 
-  saved_inferior = current_inferior;
-  current_inferior = thread;
-  /* Note the cast through uintptr_t: this interface only works if
-     a target address fits in a psaddr_t, which is a host pointer.
-     So a 32-bit debugger can not access 64-bit TLS through this.  */
-  err = thread_db->td_thr_tls_get_addr_p (&lwp->th,
-					  (psaddr_t) (uintptr_t) load_module,
-					  offset, &addr);
-  current_inferior = saved_inferior;
+  saved_thread = current_thread;
+  current_thread = thread;
+
+  if (load_module != 0)
+    {
+      /* Note the cast through uintptr_t: this interface only works if
+	 a target address fits in a psaddr_t, which is a host pointer.
+	 So a 32-bit debugger can not access 64-bit TLS through this.  */
+      err = thread_db->td_thr_tls_get_addr_p (&lwp->th,
+					     (psaddr_t) (uintptr_t) load_module,
+					      offset, &addr);
+    }
+  else
+    {
+      /* This code path handles the case of -static -pthread executables:
+	 https://sourceware.org/ml/libc-help/2014-03/msg00024.html
+	 For older GNU libc r_debug.r_map is NULL.  For GNU libc after
+	 PR libc/16831 due to GDB PR threads/16954 LOAD_MODULE is also NULL.
+	 The constant number 1 depends on GNU __libc_setup_tls
+	 initialization of l_tls_modid to 1.  */
+      err = thread_db->td_thr_tlsbase_p (&lwp->th, 1, &addr);
+      addr = (char *) addr + offset;
+    }
+
+  current_thread = saved_thread;
   if (err == TD_OK)
     {
       *address = (CORE_ADDR) (uintptr_t) addr;
@@ -533,8 +560,7 @@ thread_db_load_search (void)
   struct thread_db *tdb;
   struct process_info *proc = current_process ();
 
-  if (proc->private->thread_db != NULL)
-    fatal ("unexpected: proc->private->thread_db != NULL");
+  gdb_assert (proc->private->thread_db == NULL);
 
   tdb = xcalloc (1, sizeof (*tdb));
   proc->private->thread_db = tdb;
@@ -565,6 +591,7 @@ thread_db_load_search (void)
   tdb->td_ta_set_event_p = &td_ta_set_event;
   tdb->td_ta_event_getmsg_p = &td_ta_event_getmsg;
   tdb->td_thr_tls_get_addr_p = &td_thr_tls_get_addr;
+  tdb->td_thr_tlsbase_p = &td_thr_tlsbase;
 
   return 1;
 }
@@ -578,8 +605,7 @@ try_thread_db_load_1 (void *handle)
   struct thread_db *tdb;
   struct process_info *proc = current_process ();
 
-  if (proc->private->thread_db != NULL)
-    fatal ("unexpected: proc->private->thread_db != NULL");
+  gdb_assert (proc->private->thread_db == NULL);
 
   tdb = xcalloc (1, sizeof (*tdb));
   proc->private->thread_db = tdb;
@@ -633,6 +659,7 @@ try_thread_db_load_1 (void *handle)
   CHK (0, tdb->td_ta_set_event_p = dlsym (handle, "td_ta_set_event"));
   CHK (0, tdb->td_ta_event_getmsg_p = dlsym (handle, "td_ta_event_getmsg"));
   CHK (0, tdb->td_thr_tls_get_addr_p = dlsym (handle, "td_thr_tls_get_addr"));
+  CHK (0, tdb->td_thr_tlsbase_p = dlsym (handle, "td_thr_tlsbase"));
 
 #undef CHK
 
@@ -842,7 +869,7 @@ switch_to_process (struct process_info *proc)
 {
   int pid = pid_of (proc);
 
-  current_inferior =
+  current_thread =
     (struct thread_info *) find_inferior (&all_threads,
 					  any_thread_of, &pid);
 }
@@ -866,7 +893,7 @@ disable_thread_event_reporting (struct process_info *proc)
 
       if (td_ta_clear_event_p != NULL)
 	{
-	  struct thread_info *saved_inferior = current_inferior;
+	  struct thread_info *saved_thread = current_thread;
 	  td_thr_events_t events;
 
 	  switch_to_process (proc);
@@ -876,7 +903,7 @@ disable_thread_event_reporting (struct process_info *proc)
 	  td_event_fillset (&events);
 	  (*td_ta_clear_event_p) (thread_db->thread_agent, &events);
 
-	  current_inferior = saved_inferior;
+	  current_thread = saved_thread;
 	}
     }
 }
@@ -888,14 +915,14 @@ remove_thread_event_breakpoints (struct process_info *proc)
 
   if (thread_db->td_create_bp != NULL)
     {
-      struct thread_info *saved_inferior = current_inferior;
+      struct thread_info *saved_thread = current_thread;
 
       switch_to_process (proc);
 
       delete_breakpoint (thread_db->td_create_bp);
       thread_db->td_create_bp = NULL;
 
-      current_inferior = saved_inferior;
+      current_thread = saved_thread;
     }
 }
 

@@ -27,14 +27,13 @@
 #include "gdbcmd.h"
 #include "demangle.h"
 #include "annotate.h"
-#include <string.h>
 #include "c-lang.h"
 #include "target.h"
 #include "cp-abi.h"
 #include "valprint.h"
 #include "cp-support.h"
 #include "language.h"
-#include "python/python.h"
+#include "extension.h"
 #include "exceptions.h"
 #include "typeprint.h"
 
@@ -208,8 +207,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      int statmem_obstack_initial_size = 0;
-      int stat_array_obstack_initial_size = 0;
+      size_t statmem_obstack_initial_size = 0;
+      size_t stat_array_obstack_initial_size = 0;
       struct type *vptr_basetype = NULL;
       int vptr_fieldno;
 
@@ -294,12 +293,6 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		{
 		  fputs_filtered (_("<synthetic pointer>"), stream);
 		}
-	      else if (!value_bits_valid (val,
-					  TYPE_FIELD_BITPOS (type, i),
-					  TYPE_FIELD_BITSIZE (type, i)))
-		{
-		  val_print_optimized_out (val, stream);
-		}
 	      else
 		{
 		  struct value_print_options opts = *options;
@@ -370,7 +363,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
       if (dont_print_statmem == 0)
 	{
-	  int obstack_final_size =
+	  size_t obstack_final_size =
            obstack_object_size (&dont_print_statmem_obstack);
 
 	  if (obstack_final_size > statmem_obstack_initial_size)
@@ -387,7 +380,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
 	  if (last_set_recurse != recurse)
 	    {
-	      int obstack_final_size =
+	      size_t obstack_final_size =
 		obstack_object_size (&dont_print_stat_array_obstack);
 	      
 	      if (obstack_final_size > stat_array_obstack_initial_size)
@@ -434,8 +427,9 @@ cp_print_value_fields_rtti (struct type *type,
 
   /* We require all bits to be valid in order to attempt a
      conversion.  */
-  if (value_bits_valid (val, TARGET_CHAR_BIT * offset,
-			TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+  if (!value_bits_any_optimized_out (val,
+				     TARGET_CHAR_BIT * offset,
+				     TARGET_CHAR_BIT * TYPE_LENGTH (type)))
     {
       struct value *value;
       int full, top, using_enc;
@@ -443,6 +437,7 @@ cp_print_value_fields_rtti (struct type *type,
       /* Ugh, we have to convert back to a value here.  */
       value = value_from_contents_and_address (type, valaddr + offset,
 					       address + offset);
+      type = value_type (value);
       /* We don't actually care about most of the result here -- just
 	 the type.  We already have the correct offset, due to how
 	 val_print was initially called.  */
@@ -545,6 +540,7 @@ cp_print_value (struct type *type, struct type *real_type,
 		  base_val = value_from_contents_and_address (baseclass,
 							      buf,
 							      address + boffset);
+		  baseclass = value_type (base_val);
 		  thisoffset = 0;
 		  boffset = 0;
 		  thistype = baseclass;
@@ -584,17 +580,17 @@ cp_print_value (struct type *type, struct type *real_type,
 	{
 	  int result = 0;
 
-	  /* Attempt to run the Python pretty-printers on the
+	  /* Attempt to run an extension language pretty-printer on the
 	     baseclass if possible.  */
 	  if (!options->raw)
-	    result = apply_val_pretty_printer (baseclass, base_valaddr,
-					       thisoffset + boffset,
-					       value_address (base_val),
-					       stream, recurse, base_val,
-					       options, current_language);
+	    result
+	      = apply_ext_lang_val_pretty_printer (baseclass, base_valaddr,
+						   thisoffset + boffset,
+						   value_address (base_val),
+						   stream, recurse,
+						   base_val, options,
+						   current_language);
 
-
-	  	  
 	  if (!result)
 	    cp_print_value_fields (baseclass, thistype, base_valaddr,
 				   thisoffset + boffset,

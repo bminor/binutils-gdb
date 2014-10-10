@@ -39,6 +39,9 @@ typedef struct
   PyObject *frame_filters;
   /* The type-printer list.  */
   PyObject *type_printers;
+
+  /* The debug method list.  */
+  PyObject *xmethods;
 } pspace_object;
 
 static PyTypeObject pspace_object_type
@@ -75,6 +78,7 @@ pspy_dealloc (PyObject *self)
   Py_XDECREF (ps_self->printers);
   Py_XDECREF (ps_self->frame_filters);
   Py_XDECREF (ps_self->type_printers);
+  Py_XDECREF (ps_self->xmethods);
   Py_TYPE (self)->tp_free (self);
 }
 
@@ -103,6 +107,13 @@ pspy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
 
       self->type_printers = PyList_New (0);
       if (!self->type_printers)
+	{
+	  Py_DECREF (self);
+	  return NULL;
+	}
+
+      self->xmethods = PyList_New (0);
+      if (self->xmethods == NULL)
 	{
 	  Py_DECREF (self);
 	  return NULL;
@@ -201,6 +212,17 @@ pspy_get_type_printers (PyObject *o, void *ignore)
   return self->type_printers;
 }
 
+/* Get the 'xmethods' attribute.  */
+
+PyObject *
+pspy_get_xmethods (PyObject *o, void *ignore)
+{
+  pspace_object *self = (pspace_object *) o;
+
+  Py_INCREF (self->xmethods);
+  return self->xmethods;
+}
+
 /* Set the 'type_printers' attribute.  */
 
 static int
@@ -241,7 +263,16 @@ py_free_pspace (struct program_space *pspace, void *datum)
 {
   struct cleanup *cleanup;
   pspace_object *object = datum;
-  struct gdbarch *arch = get_current_arch ();
+  /* This is a fiction, but we're in a nasty spot: The pspace is in the
+     process of being deleted, we can't rely on anything in it.  Plus
+     this is one time when the current program space and current inferior
+     are not in sync: All inferiors that use PSPACE may no longer exist.
+     We don't need to do much here, and since "there is always an inferior"
+     using target_gdbarch suffices.
+     Note: We cannot call get_current_arch because it may try to access
+     the target, which may involve accessing data in the pspace currently
+     being deleted.  */
+  struct gdbarch *arch = target_gdbarch ();
 
   cleanup = ensure_python_env (arch, current_language);
   object->pspace = NULL;
@@ -288,6 +319,13 @@ pspace_to_pspace_object (struct program_space *pspace)
 	      return NULL;
 	    }
 
+	  object->xmethods = PyList_New (0);
+	  if (object->xmethods == NULL)
+	    {
+	      Py_DECREF (object);
+	      return NULL;
+	    }
+
 	  set_program_space_data (pspace, pspy_pspace_data_key, object);
 	}
     }
@@ -320,6 +358,8 @@ static PyGetSetDef pspace_getset[] =
     "Frame filters.", NULL },
   { "type_printers", pspy_get_type_printers, pspy_set_type_printers,
     "Type printers.", NULL },
+  { "xmethods", pspy_get_xmethods, NULL,
+    "Debug methods.", NULL },
   { NULL }
 };
 

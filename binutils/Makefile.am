@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright 2012, 2013 Free Software Foundation
+#   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -512,9 +512,8 @@ EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 diststuff: $(EXTRA_DIST) info
 all: info
 
-# We extract version from bfd/configure.in, make sure to rerun configure
-# when BFD's version changes.
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
+# development.sh is used to determine -Werror default.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 
 DISTCLEANFILES = sysroff.c sysroff.h site.exp site.bak embedspu
 

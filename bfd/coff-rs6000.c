@@ -1,7 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright 1990-1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
    Written by Metin G. Ozisik, Mimi Phuong-Thao Vo, and John Gilmore.
    Archive support from Damon A. Permezel.
    Contributed by IBM Corporation and Cygnus Support.
@@ -116,6 +114,7 @@ extern int rs6000coff_core_file_failing_signal (bfd *abfd);
 #define bfd_pe_print_pdata	NULL
 #endif
 
+#include <stdint.h>
 #include "coffcode.h"
 
 /* The main body of code is in coffcode.h.  */
@@ -2404,7 +2403,10 @@ xcoff_write_archive_contents_big (bfd *abfd)
       PRINT20 (ahdrp->nextoff, iterator.next.offset);
 
       if (!do_pad (abfd, iterator.current.leading_padding))
-	return FALSE;
+	{
+	  free (offsets);
+	  return FALSE;
+	}
 
       BFD_ASSERT (iterator.current.offset == bfd_tell (abfd));
       namlen = iterator.current.padded_namlen;
@@ -2414,7 +2416,10 @@ xcoff_write_archive_contents_big (bfd *abfd)
 	  || bfd_seek (iterator.current.member, 0, SEEK_SET) != 0
 	  || !do_copy (abfd, iterator.current.member)
 	  || !do_pad (abfd, iterator.current.trailing_padding))
-	return FALSE;
+	{
+	  free (offsets);
+	  return FALSE;
+	}
 
       offsets[i] = iterator.current.offset;
       prevoff = iterator.current.offset;
@@ -2459,7 +2464,10 @@ xcoff_write_archive_contents_big (bfd *abfd)
   member_table_size += member_table_size & 1;
   member_table = bfd_zmalloc (member_table_size);
   if (member_table == NULL)
-    return FALSE;
+    {
+      free (offsets);
+      return FALSE;
+    }
 
   hdr = (struct xcoff_ar_hdr_big *) member_table;
 
@@ -2600,7 +2608,7 @@ _bfd_xcoff_sizeof_headers (bfd *abfd,
 	return -1;
 
       /* Sum.  */
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
 	for (s = sub->sections; s != NULL; s = s->next)
 	  {
 	    struct nbr_reloc_lineno *e = &n_rl[s->output_section->index];
@@ -4097,6 +4105,7 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
       3,			/* _bfd_coff_default_section_alignment_power */
       FALSE,			/* _bfd_coff_force_symnames_in_strings */
       2,			/* _bfd_coff_debug_string_prefix_length */
+      32768,			/* _bfd_coff_max_nscns */
       coff_swap_filehdr_in,
       coff_swap_aouthdr_in,
       coff_swap_scnhdr_in,
@@ -4168,7 +4177,7 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
   };
 
 /* The transfer vector that leads the outside world to all of the above.  */
-const bfd_target rs6000coff_vec =
+const bfd_target rs6000_xcoff_vec =
   {
     "aixcoff-rs6000",
     bfd_target_xcoff_flavour,
@@ -4277,6 +4286,7 @@ static const struct xcoff_backend_data_rec bfd_pmac_xcoff_backend_data =
       3,			/* _bfd_coff_default_section_alignment_power */
       FALSE,			/* _bfd_coff_force_symnames_in_strings */
       2,			/* _bfd_coff_debug_string_prefix_length */
+      32768,			/* _bfd_coff_max_nscns */
       coff_swap_filehdr_in,
       coff_swap_aouthdr_in,
       coff_swap_scnhdr_in,
@@ -4348,7 +4358,7 @@ static const struct xcoff_backend_data_rec bfd_pmac_xcoff_backend_data =
   };
 
 /* The transfer vector that leads the outside world to all of the above.  */
-const bfd_target pmac_xcoff_vec =
+const bfd_target powerpc_xcoff_vec =
   {
     "xcoff-powermac",
     bfd_target_xcoff_flavour,

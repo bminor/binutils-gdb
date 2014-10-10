@@ -24,7 +24,6 @@
 #include "expression.h"
 #include "target.h"
 #include "language.h"
-#include <string.h>
 #include "doublest.h"
 #include "dfp.h"
 #include <math.h>
@@ -287,7 +286,7 @@ unop_user_defined_p (enum exp_opcode op, struct value *arg1)
 
 static struct value *
 value_user_defined_cpp_op (struct value **args, int nargs, char *operator,
-                           int *static_memfuncp)
+                           int *static_memfuncp, enum noside noside)
 {
 
   struct symbol *symp = NULL;
@@ -296,7 +295,7 @@ value_user_defined_cpp_op (struct value **args, int nargs, char *operator,
   find_overload_match (args, nargs, operator, BOTH /* could be method */,
                        &args[0] /* objp */,
                        NULL /* pass NULL symbol since symbol is unknown */,
-                       &valp, &symp, static_memfuncp, 0);
+                       &valp, &symp, static_memfuncp, 0, noside);
 
   if (valp)
     return valp;
@@ -318,12 +317,15 @@ value_user_defined_cpp_op (struct value **args, int nargs, char *operator,
 
 static struct value *
 value_user_defined_op (struct value **argp, struct value **args, char *name,
-                       int *static_memfuncp, int nargs)
+                       int *static_memfuncp, int nargs, enum noside noside)
 {
   struct value *result = NULL;
 
   if (current_language->la_language == language_cplus)
-    result = value_user_defined_cpp_op (args, nargs, name, static_memfuncp);
+    {
+      result = value_user_defined_cpp_op (args, nargs, name, static_memfuncp,
+					  noside);
+    }
   else
     result = value_struct_elt (argp, args, name, static_memfuncp,
                                "structure");
@@ -472,7 +474,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
     }
 
   argvec[0] = value_user_defined_op (&arg1, argvec + 1, tstr,
-                                     &static_memfuncp, 2);
+                                     &static_memfuncp, 2, noside);
 
   if (argvec[0])
     {
@@ -489,8 +491,16 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      return call_function_by_hand (argvec[0], 2 - static_memfuncp,
-				    argvec + 1);
+
+      if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_XMETHOD)
+	{
+	  /* Static xmethods are not supported yet.  */
+	  gdb_assert (static_memfuncp == 0);
+	  return call_xmethod (argvec[0], 2, argvec + 1);
+	}
+      else
+	return call_function_by_hand (argvec[0], 2 - static_memfuncp,
+				      argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);
@@ -575,7 +585,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
     }
 
   argvec[0] = value_user_defined_op (&arg1, argvec + 1, tstr,
-                                     &static_memfuncp, nargs);
+                                     &static_memfuncp, nargs, noside);
 
   if (argvec[0])
     {
@@ -593,7 +603,14 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      return call_function_by_hand (argvec[0], nargs, argvec + 1);
+      if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_XMETHOD)
+	{
+	  /* Static xmethods are not supported yet.  */
+	  gdb_assert (static_memfuncp == 0);
+	  return call_xmethod (argvec[0], 1, argvec + 1);
+	}
+      else
+	return call_function_by_hand (argvec[0], nargs, argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);

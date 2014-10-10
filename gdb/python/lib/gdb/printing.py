@@ -200,6 +200,8 @@ class RegexpCollectionPrettyPrinter(PrettyPrinter):
         # Get the type name.
         typename = gdb.types.get_basic_type(val.type).tag
         if not typename:
+            typename = val.type.name
+        if not typename:
             return None
 
         # Iterate over table of type regexps to determine

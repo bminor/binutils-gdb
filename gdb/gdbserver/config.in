@@ -54,9 +54,6 @@
 /* Define if <sys/procfs.h> has elf_fpregset_t. */
 #undef HAVE_ELF_FPREGSET_T
 
-/* Define to 1 if you have the <errno.h> header file. */
-#undef HAVE_ERRNO_H
-
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
@@ -65,9 +62,6 @@
 
 /* Define to 1 if you have the `getrlimit' function. */
 #undef HAVE_GETRLIMIT
-
-/* Define to 1 if you have the `gettimeofday' function. */
-#undef HAVE_GETTIMEOFDAY
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -160,6 +154,9 @@
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
 
+/* Define if sigsetjmp is available. */
+#undef HAVE_SIGSETJMP
+
 /* Define to 1 if you have the `socketpair' function. */
 #undef HAVE_SOCKETPAIR
 
@@ -231,12 +228,6 @@
 
 /* Define if UST is available */
 #undef HAVE_UST
-
-/* Define to 1 if you have the `vasprintf' function. */
-#undef HAVE_VASPRINTF
-
-/* Define to 1 if you have the `vsnprintf' function. */
-#undef HAVE_VSNPRINTF
 
 /* Define to 1 if you have the <wait.h> header file. */
 #undef HAVE_WAIT_H

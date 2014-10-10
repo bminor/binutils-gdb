@@ -157,12 +157,6 @@ set_initial_gprs ()
     cpu.asregs.sregs[i] = 0;
 }
 
-static void
-interrupt ()
-{
-  cpu.asregs.exception = SIGINT;
-}
-
 /* Write a 1 byte value to memory.  */
 
 static void INLINE 
@@ -258,11 +252,9 @@ sim_resume (sd, step, siggnal)
   word pc, opc;
   unsigned long long insts;
   unsigned short inst;
-  void (* sigsave)();
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
   address_word cia = CIA_GET (scpu);
 
-  sigsave = signal (SIGINT, interrupt);
   cpu.asregs.exception = step ? SIGTRAP: 0;
   pc = cpu.asregs.regs[PC_REGNO];
   insts = cpu.asregs.insts;
@@ -594,8 +586,24 @@ sim_resume (sd, step, siggnal)
 	      break;
 	    case 0x0f: /* nop */
 	      break;
-	    case 0x10: /* bad */
-	    case 0x11: /* bad */
+	    case 0x10: /* sex.b */
+	      {
+		int a = (inst >> 4) & 0xf;
+		int b = inst & 0xf;
+		signed char bv = cpu.asregs.regs[b];
+		TRACE("sex.b");
+		cpu.asregs.regs[a] = (int) bv;
+	      }
+	      break;
+	    case 0x11: /* sex.s */
+	      {
+		int a = (inst >> 4) & 0xf;
+		int b = inst & 0xf;
+		signed short bv = cpu.asregs.regs[b];
+		TRACE("sex.s");
+		cpu.asregs.regs[a] = (int) bv;
+	      }
+	      break;
 	    case 0x12: /* bad */
 	    case 0x13: /* bad */
 	    case 0x14: /* bad */
@@ -1022,8 +1030,6 @@ sim_resume (sd, step, siggnal)
   /* Hide away the things we've cached while executing.  */
   cpu.asregs.regs[PC_REGNO] = pc;
   cpu.asregs.insts += insts;		/* instructions done ... */
-
-  signal (SIGINT, sigsave);
 }
 
 int
@@ -1240,7 +1246,7 @@ load_dtb (SIM_DESC sd, const char *filename)
 SIM_RC
 sim_load (sd, prog, abfd, from_tty)
      SIM_DESC sd;
-     char * prog;
+     const char * prog;
      bfd * abfd;
      int from_tty;
 {
@@ -1360,7 +1366,7 @@ sim_kill (sd)
 void
 sim_do_command (sd, cmd)
      SIM_DESC sd;
-     char * cmd;
+     const char *cmd;
 {
   if (sim_args_command (sd, cmd) != SIM_RC_OK)
     sim_io_printf (sd, 

@@ -1,7 +1,5 @@
 /* bfdlink.h -- header file for BFD link routines
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -172,6 +170,8 @@ struct bfd_link_hash_table
   struct bfd_link_hash_entry *undefs;
   /* Entries are added to the tail of the undefs list.  */
   struct bfd_link_hash_entry *undefs_tail;
+  /* Function to free the hash table on closing BFD.  */
+  void (*hash_table_free) (bfd *);
   /* The type of the link hash table.  */
   enum bfd_link_hash_table_type type;
 };
@@ -190,6 +190,12 @@ extern struct bfd_link_hash_entry *bfd_link_hash_lookup
 extern struct bfd_link_hash_entry *bfd_wrapped_link_hash_lookup
   (bfd *, struct bfd_link_info *, const char *, bfd_boolean,
    bfd_boolean, bfd_boolean);
+
+/* If H is a wrapped symbol, ie. the symbol name starts with "__wrap_"
+   and the remainder is found in wrap_hash, return the real symbol.  */
+
+extern struct bfd_link_hash_entry *unwrap_hash_lookup
+  (struct bfd_link_info *, bfd *, struct bfd_link_hash_entry *);
 
 /* Traverse a link hash table.  */
 extern void bfd_link_hash_traverse
@@ -288,6 +294,9 @@ struct bfd_link_info
   /* TRUE if every symbol should be reported back via the notice
      callback.  */
   unsigned int notice_all: 1;
+
+  /* TRUE if the LTO plugin is active.  */
+  unsigned int lto_plugin_active: 1;
 
   /* TRUE if we are loading LTO outputs.  */
   unsigned int loading_lto_outputs: 1;
@@ -480,7 +489,7 @@ struct bfd_link_info
   bfd *output_bfd;
 
   /* The list of input BFD's involved in the link.  These are chained
-     together via the link_next field.  */
+     together via the link.next field.  */
   bfd *input_bfds;
   bfd **input_bfds_tail;
 
@@ -646,15 +655,14 @@ struct bfd_link_callbacks
     (struct bfd_link_info *, const char *name,
      bfd *abfd, asection *section, bfd_vma address);
   /* A function which is called when a symbol in notice_hash is
-     defined or referenced.  H is the symbol.  ABFD, SECTION and
-     ADDRESS are the (new) value of the symbol.  If SECTION is
-     bfd_und_section, this is a reference.  FLAGS are the symbol
-     BSF_* flags.  STRING is the name of the symbol to indirect to if
-     the sym is indirect, or the warning string if a warning sym.  */
+     defined or referenced.  H is the symbol, INH the indirect symbol
+     if applicable.  ABFD, SECTION and ADDRESS are the (new) value of
+     the symbol.  If SECTION is bfd_und_section, this is a reference.
+     FLAGS are the symbol BSF_* flags.  */
   bfd_boolean (*notice)
     (struct bfd_link_info *, struct bfd_link_hash_entry *h,
-     bfd *abfd, asection *section, bfd_vma address, flagword flags,
-     const char *string);
+     struct bfd_link_hash_entry *inh,
+     bfd *abfd, asection *section, bfd_vma address, flagword flags);
   /* Error or warning link info message.  */
   void (*einfo)
     (const char *fmt, ...);

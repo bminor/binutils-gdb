@@ -1,6 +1,5 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
    PIC and shlib bits based primarily on elf32-m68k.c and elf32-i386.c.
@@ -4335,7 +4334,7 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #define ELF_MACHINE_CODE	EM_CRIS
 #define ELF_MAXPAGESIZE		0x2000
 
-#define TARGET_LITTLE_SYM	bfd_elf32_cris_vec
+#define TARGET_LITTLE_SYM	cris_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-cris"
 #define elf_symbol_leading_char 0
 
@@ -4404,7 +4403,7 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #undef TARGET_LITTLE_NAME
 #undef elf_symbol_leading_char
 
-#define TARGET_LITTLE_SYM bfd_elf32_us_cris_vec
+#define TARGET_LITTLE_SYM cris_elf32_us_vec
 #define TARGET_LITTLE_NAME "elf32-us-cris"
 #define elf_symbol_leading_char '_'
 #undef elf32_bed

@@ -24,6 +24,7 @@
 #include "breakpoint.h"
 #include "observer.h"
 #include "inferior.h"
+#include "infrun.h"
 
 
 /* Prototypes for local functions.  */

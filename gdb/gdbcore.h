@@ -41,12 +41,12 @@ extern int have_core_file_p (void);
 
 /* Report a memory error with error().  */
 
-extern void memory_error (enum target_xfer_error status, CORE_ADDR memaddr);
+extern void memory_error (enum target_xfer_status status, CORE_ADDR memaddr);
 
 /* The string 'memory_error' would use as exception message.  Space
    for the result is malloc'd, caller must free.  */
 
-extern char *memory_error_message (enum target_xfer_error err,
+extern char *memory_error_message (enum target_xfer_status err,
 				   struct gdbarch *gdbarch, CORE_ADDR memaddr);
 
 /* Like target_read_memory, but report an error if can't read.  */
@@ -127,14 +127,14 @@ extern void write_memory_signed_integer (CORE_ADDR addr, int len,
 
 /* Hook for `exec_file_command' command to call.  */
 
-extern void (*deprecated_exec_file_display_hook) (char *filename);
+extern void (*deprecated_exec_file_display_hook) (const char *filename);
 
 /* Hook for "file_command", which is more useful than above
    (because it is invoked AFTER symbols are read, not before).  */
 
 extern void (*deprecated_file_changed_hook) (char *filename);
 
-extern void specify_exec_file_hook (void (*hook) (char *filename));
+extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
 /* Binary File Diddler for the core file.  */
 
@@ -148,7 +148,7 @@ extern int write_files;
 
 extern void core_file_command (char *filename, int from_tty);
 
-extern void exec_file_attach (char *filename, int from_tty);
+extern void exec_file_attach (const char *filename, int from_tty);
 
 extern void exec_file_clear (int from_tty);
 

@@ -1,5 +1,5 @@
 /* vms.c -- BFD back-end for EVAX (openVMS/Alpha) files.
-   Copyright 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
    Initial version written by Klaus Kaempf (kkaempf@rmi.de)
    Major rewrite by Adacore.
@@ -2474,10 +2474,7 @@ alpha_vms_object_p (bfd *abfd)
   PRIV (recrd.rec) = buf;
 
   if (bfd_bread (buf, test_len, abfd) != test_len)
-    {
-      bfd_set_error (bfd_error_file_truncated);
-      goto error_ret;
-    }
+    goto err_wrong_format;
 
   /* Is it an image?  */
   if ((bfd_getl32 (buf) == EIHD__K_MAJORID)
@@ -2502,7 +2499,6 @@ alpha_vms_object_p (bfd *abfd)
           if (buf == NULL)
             {
               PRIV (recrd.buf) = NULL;
-              bfd_set_error (bfd_error_no_memory);
               goto error_ret;
             }
           PRIV (recrd.buf) = buf;
@@ -2517,10 +2513,7 @@ alpha_vms_object_p (bfd *abfd)
       while (remaining > 0)
         {
           if (bfd_bread (buf + read_so_far, to_read, abfd) != to_read)
-            {
-              bfd_set_error (bfd_error_file_truncated);
-              goto err_wrong_format;
-            }
+	    goto err_wrong_format;
 
           read_so_far += to_read;
           remaining -= to_read;
@@ -8652,7 +8645,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       bfd *startbfd = NULL;
 
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
         {
           /* Consider only VMS object files.  */
           if (sub->xvec != abfd->xvec)
@@ -8756,7 +8749,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     dmt = NULL;
 
   /* Read all sections from the inputs.  */
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
       if (sub->flags & DYNAMIC)
         {
@@ -8807,7 +8800,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
           unsigned int off = 0;
 
           /* For each object file (ie for each module).  */
-          for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+          for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
             {
               asection *sub_dst;
               struct vms_dmt_header *dmth = NULL;
@@ -9239,7 +9232,6 @@ bfd_vms_get_data (bfd *abfd)
   _bfd_generic_section_already_linked
 
 #define alpha_vms_bfd_define_common_symbol bfd_generic_define_common_symbol
-#define alpha_vms_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define alpha_vms_bfd_link_just_syms _bfd_generic_link_just_syms
 #define alpha_vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type
@@ -9255,7 +9247,7 @@ bfd_vms_get_data (bfd *abfd)
 #define alpha_vms_canonicalize_dynamic_reloc \
   _bfd_nodynamic_canonicalize_dynamic_reloc
 
-const bfd_target vms_alpha_vec =
+const bfd_target alpha_vms_vec =
 {
   "vms-alpha",			/* Name.  */
   bfd_target_evax_flavour,

@@ -51,12 +51,10 @@
 #include "complaints.h"
 #include "demangle.h"
 #include "gdb-demangle.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "dictionary.h"
 #include "mdebugread.h"
 #include <sys/stat.h>
-#include <string.h>
 #include "psympriv.h"
 #include "source.h"
 
@@ -248,8 +246,8 @@ static struct blockvector *new_bvect (int);
 static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
 				int, char *);
 
-static struct symbol *mylookup_symbol (char *, struct block *, domain_enum,
-				       enum address_class);
+static struct symbol *mylookup_symbol (char *, const struct block *,
+				       domain_enum, enum address_class);
 
 static void sort_blocks (struct symtab *);
 
@@ -756,7 +754,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       b = top_stack->cur_block;
       if (sh->st == stProc)
 	{
-	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
+	  const struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
 
 	  /* The next test should normally be true, but provides a
 	     hook for nested functions (which we don't want to make
@@ -1131,7 +1129,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		top_stack->blocktype == stStaticProc))
 	{
 	  /* Finished with procedure */
-	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
+	  const struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
 	  struct mdebug_extra_func_info *e;
 	  struct block *b = top_stack->cur_block;
 	  struct type *ftype = top_stack->cur_type;
@@ -1869,8 +1867,8 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
       ax++;
       rf = AUX_GET_WIDTH (bigend, ax);	/* bit size of array element */
 
-      range = create_range_type ((struct type *) NULL, indx,
-				 lower, upper);
+      range = create_static_range_type ((struct type *) NULL, indx,
+					lower, upper);
 
       t = create_array_type ((struct type *) NULL, *tpp, range);
 
@@ -1928,7 +1926,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 		 struct partial_symtab *pst)
 {
   struct symbol *s, *i;
-  struct block *b;
+  const struct block *b;
   char *sh_name;
 
   /* Simple rule to find files linked "-x".  */
@@ -2519,14 +2517,10 @@ parse_partial_symbols (struct objfile *objfile)
 	{
 	case stProc:
 	  /* Beginnning of Procedure */
-	  svalue += ANOFFSET (objfile->section_offsets,
-			      SECT_OFF_TEXT (objfile));
 	  break;
 	case stStaticProc:
 	  /* Load time only static procs */
 	  ms_type = mst_file_text;
-	  svalue += ANOFFSET (objfile->section_offsets,
-			      SECT_OFF_TEXT (objfile));
 	  break;
 	case stGlobal:
 	  /* External symbol */
@@ -2539,20 +2533,14 @@ parse_partial_symbols (struct objfile *objfile)
 	  else if (SC_IS_DATA (ext_in->asym.sc))
 	    {
 	      ms_type = mst_data;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_DATA (objfile));
 	    }
 	  else if (SC_IS_BSS (ext_in->asym.sc))
 	    {
 	      ms_type = mst_bss;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_BSS (objfile));
 	    }
           else if (SC_IS_SBSS (ext_in->asym.sc))
             {
               ms_type = mst_bss;
-              svalue += ANOFFSET (objfile->section_offsets, 
-                                  get_section_index (objfile, ".sbss"));
             }
 	  else
 	    ms_type = mst_abs;
@@ -2585,8 +2573,6 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
                 
 	      ms_type = mst_file_text;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_TEXT (objfile));
 	    }
 	  else if (SC_IS_DATA (ext_in->asym.sc))
 	    {
@@ -2594,8 +2580,6 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
 
 	      ms_type = mst_file_data;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_DATA (objfile));
 	    }
 	  else if (SC_IS_BSS (ext_in->asym.sc))
 	    {
@@ -2603,8 +2587,6 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
 
 	      ms_type = mst_file_bss;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_BSS (objfile));
 	    }
           else if (SC_IS_SBSS (ext_in->asym.sc))
             {
@@ -2614,7 +2596,6 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
 
               ms_type = mst_file_bss;
-              svalue += ANOFFSET (objfile->section_offsets, sbss_sect_index);
             }
 	  else
 	    ms_type = mst_abs;
@@ -2748,8 +2729,6 @@ parse_partial_symbols (struct objfile *objfile)
 		      CORE_ADDR procaddr;
 		      long isym;
 
-		      sh.value += ANOFFSET (objfile->section_offsets,
-					    SECT_OFF_TEXT (objfile));
 		      if (sh.st == stStaticProc)
 			{
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
@@ -2757,6 +2736,8 @@ parse_partial_symbols (struct objfile *objfile)
                                                  mst_file_text, sh.sc,
                                                  objfile);
 			}
+		      sh.value += ANOFFSET (objfile->section_offsets,
+					    SECT_OFF_TEXT (objfile));
 		      procaddr = sh.value;
 
 		      isym = AUX_GET_ISYM (fh->fBigendian,
@@ -2796,22 +2777,22 @@ parse_partial_symbols (struct objfile *objfile)
 			case scPData:
 			case scXData:
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  sh.value += ANOFFSET (objfile->section_offsets,
-						SECT_OFF_DATA (objfile));
                           record_minimal_symbol (namestring, sh.value,
                                                  mst_file_data, sh.sc,
                                                  objfile);
+			  sh.value += ANOFFSET (objfile->section_offsets,
+						SECT_OFF_DATA (objfile));
 			  break;
 
 			default:
 			  /* FIXME!  Shouldn't this use cases for bss, 
 			     then have the default be abs?  */
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  sh.value += ANOFFSET (objfile->section_offsets,
-						SECT_OFF_BSS (objfile));
                           record_minimal_symbol (namestring, sh.value,
                                                  mst_file_bss, sh.sc,
                                                  objfile);
+			  sh.value += ANOFFSET (objfile->section_offsets,
+						SECT_OFF_BSS (objfile));
 			  break;
 			}
 		    }
@@ -3435,6 +3416,7 @@ parse_partial_symbols (struct objfile *objfile)
 	    {
 	      char *name;
 	      enum address_class class;
+	      CORE_ADDR minsym_value;
 
 	      (*swap_sym_in) (cur_bfd,
 			      ((char *) debug_info->external_sym
@@ -3459,6 +3441,8 @@ parse_partial_symbols (struct objfile *objfile)
 		}
 
 	      name = debug_info->ss + fh->issBase + sh.iss;
+
+	      minsym_value = sh.value;
 
 	      switch (sh.sc)
 		{
@@ -3492,7 +3476,7 @@ parse_partial_symbols (struct objfile *objfile)
 		  int new_sdx;
 
 		case stStaticProc:
-		  prim_record_minimal_symbol_and_info (name, sh.value,
+		  prim_record_minimal_symbol_and_info (name, minsym_value,
 						       mst_file_text,
 						       SECT_OFF_TEXT (objfile),
 						       objfile);
@@ -3578,12 +3562,12 @@ parse_partial_symbols (struct objfile *objfile)
 
 		case stStatic:	/* Variable */
 		  if (SC_IS_DATA (sh.sc))
-		    prim_record_minimal_symbol_and_info (name, sh.value,
+		    prim_record_minimal_symbol_and_info (name, minsym_value,
 							 mst_file_data,
 							 SECT_OFF_DATA (objfile),
 							 objfile);
 		  else
-		    prim_record_minimal_symbol_and_info (name, sh.value,
+		    prim_record_minimal_symbol_and_info (name, minsym_value,
 							 mst_file_bss,
 							 SECT_OFF_BSS (objfile),
 							 objfile);
@@ -4584,7 +4568,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
    keeping the symtab sorted.  */
 
 static struct symbol *
-mylookup_symbol (char *name, struct block *block,
+mylookup_symbol (char *name, const struct block *block,
 		 domain_enum domain, enum address_class class)
 {
   struct block_iterator iter;
@@ -4622,7 +4606,9 @@ add_symbol (struct symbol *s, struct symtab *symtab, struct block *b)
 static void
 add_block (struct block *b, struct symtab *s)
 {
-  struct blockvector *bv = BLOCKVECTOR (s);
+  /* Cast away "const", but that's ok because we're building the
+     symtab and blockvector here.  */
+  struct blockvector *bv = (struct blockvector *) BLOCKVECTOR (s);
 
   bv = (struct blockvector *) xrealloc ((void *) bv,
 					(sizeof (struct blockvector)
@@ -4691,7 +4677,9 @@ compare_blocks (const void *arg1, const void *arg2)
 static void
 sort_blocks (struct symtab *s)
 {
-  struct blockvector *bv = BLOCKVECTOR (s);
+  /* We have to cast away const here, but this is ok because we're
+     constructing the blockvector in this code.  */
+  struct blockvector *bv = (struct blockvector *) BLOCKVECTOR (s);
 
   if (BLOCKVECTOR_NBLOCKS (bv) <= FIRST_LOCAL_BLOCK)
     {
@@ -4743,17 +4731,17 @@ static struct symtab *
 new_symtab (const char *name, int maxlines, struct objfile *objfile)
 {
   struct symtab *s = allocate_symtab (name, objfile);
+  struct blockvector *bv;
 
   LINETABLE (s) = new_linetable (maxlines);
 
   /* All symtabs must have at least two blocks.  */
-  BLOCKVECTOR (s) = new_bvect (2);
-  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK)
-    = new_block (NON_FUNCTION_BLOCK);
-  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)
-    = new_block (NON_FUNCTION_BLOCK);
-  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)) =
-    BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+  bv = new_bvect (2);
+  BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = new_block (NON_FUNCTION_BLOCK);
+  BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = new_block (NON_FUNCTION_BLOCK);
+  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
+    BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+  BLOCKVECTOR (s) = bv;
 
   s->debugformat = "ECOFF";
   return (s);

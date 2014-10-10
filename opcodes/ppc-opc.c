@@ -1,7 +1,5 @@
 /* ppc-opc.c -- PowerPC opcode list
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
    This file is part of the GNU opcodes library.
@@ -656,8 +654,11 @@ const struct powerpc_operand powerpc_operands[] =
 #define UI TO + 1
   { 0xffff, 0, NULL, NULL, 0 },
 
+#define UISIGNOPT UI + 1
+  { 0xffff, 0, NULL, NULL, PPC_OPERAND_SIGNOPT },
+
   /* The IMM field in an SE_IM5 instruction.  */
-#define UI5 UI + 1
+#define UI5 UISIGNOPT + 1
   { 0x1f, 4, NULL, NULL, 0 },
 
   /* The OIMM field in an SE_OIM5 instruction.  */
@@ -3502,10 +3503,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"dozi",	OP(9),		OP_MASK,     M601,	PPCNONE,	{RT, RA, SI}},
 
-{"cmplwi",	OPL(10,0),	OPL_MASK,    PPCCOM,	PPCNONE,	{OBF, RA, UI}},
-{"cmpldi",	OPL(10,1),	OPL_MASK,    PPC64,	PPCNONE,	{OBF, RA, UI}},
-{"cmpli",	OP(10),		OP_MASK,     PPC,	PPCNONE,	{BF, L, RA, UI}},
-{"cmpli",	OP(10),		OP_MASK,     PWRCOM,	PPC,		{BF, RA, UI}},
+{"cmplwi",	OPL(10,0),	OPL_MASK,    PPCCOM,	PPCNONE,	{OBF, RA, UISIGNOPT}},
+{"cmpldi",	OPL(10,1),	OPL_MASK,    PPC64,	PPCNONE,	{OBF, RA, UISIGNOPT}},
+{"cmpli",	OP(10),		OP_MASK,     PPC,	PPCNONE,	{BF, L, RA, UISIGNOPT}},
+{"cmpli",	OP(10),		OP_MASK,     PWRCOM,	PPC,		{BF, RA, UISIGNOPT}},
 
 {"cmpwi",	OPL(11,0),	OPL_MASK,    PPCCOM,	PPCNONE,	{OBF, RA, SI}},
 {"cmpdi",	OPL(11,1),	OPL_MASK,    PPC64,	PPCNONE,	{OBF, RA, SI}},

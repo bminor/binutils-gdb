@@ -27,8 +27,6 @@
 #include "symtab.h"
 #include "trad-frame.h"
 
-#include "gdb_assert.h"
-
 #include "obsd-tdep.h"
 #include "sparc-tdep.h"
 #include "solib-svr4.h"

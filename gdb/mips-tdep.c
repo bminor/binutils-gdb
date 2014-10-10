@@ -21,8 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
-#include "gdb_assert.h"
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"
@@ -3602,8 +3600,8 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
      stub.  The stub for foo is named ".pic.foo".  */
   msym = lookup_minimal_symbol_by_pc (pc);
   if (msym.minsym != NULL
-      && SYMBOL_LINKAGE_NAME (msym.minsym) != NULL
-      && strncmp (SYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) == 0)
+      && MSYMBOL_LINKAGE_NAME (msym.minsym) != NULL
+      && strncmp (MSYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) == 0)
     return 1;
 
   return 0;
@@ -6196,12 +6194,6 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
     }
 
   val = get_frame_register_value (frame, regnum);
-  if (value_optimized_out (val))
-    {
-      fprintf_filtered (file, "%s: [Invalid]",
-			gdbarch_register_name (gdbarch, regnum));
-      return;
-    }
 
   fputs_filtered (gdbarch_register_name (gdbarch, regnum), file);
 
@@ -7635,9 +7627,9 @@ mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
      which jumps to foo.  */
   msym = lookup_minimal_symbol_by_pc (pc);
   if (msym.minsym == NULL
-      || SYMBOL_VALUE_ADDRESS (msym.minsym) != pc
-      || SYMBOL_LINKAGE_NAME (msym.minsym) == NULL
-      || strncmp (SYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) != 0)
+      || BMSYMBOL_VALUE_ADDRESS (msym) != pc
+      || MSYMBOL_LINKAGE_NAME (msym.minsym) == NULL
+      || strncmp (MSYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) != 0)
     return 0;
 
   /* A two-instruction header.  */
@@ -8296,11 +8288,13 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      /* MIPS needs to be pedantic about which ABI the object is
-         using.  */
+      /* MIPS needs to be pedantic about which ABI and the compressed
+         ISA variation the object is using.  */
       if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
 	continue;
       if (gdbarch_tdep (arches->gdbarch)->mips_abi != mips_abi)
+	continue;
+      if (gdbarch_tdep (arches->gdbarch)->mips_isa != mips_isa)
 	continue;
       /* Need to be pedantic about which register virtual size is
          used.  */
@@ -8327,10 +8321,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->mips_fpu_type = fpu_type;
   tdep->register_size_valid_p = 0;
   tdep->register_size = 0;
-  tdep->gregset = NULL;
-  tdep->gregset64 = NULL;
-  tdep->fpregset = NULL;
-  tdep->fpregset64 = NULL;
 
   if (info.target_desc)
     {

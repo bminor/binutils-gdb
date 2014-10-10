@@ -20,8 +20,6 @@
 #ifndef PPCOBSD_TDEP_H
 #define PPCOBSD_TDEP_H
 
-#include <stddef.h>
-
 struct regset;
 struct regcache;
 
@@ -30,8 +28,8 @@ extern struct ppc_reg_offsets ppcobsd_reg_offsets;
 extern struct ppc_reg_offsets ppcobsd_fpreg_offsets;
 
 /* Register sets for OpenBSD/powerpc.  */
-extern struct regset ppcobsd_gregset;
-extern struct regset ppcobsd_fpregset;
+extern const struct regset ppcobsd_gregset;
+extern const struct regset ppcobsd_fpregset;
 
 
 /* Supply register REGNUM in the general-purpose register set REGSET

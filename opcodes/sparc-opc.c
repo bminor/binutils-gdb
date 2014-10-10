@@ -1,7 +1,5 @@
 /* Table of opcodes for the sparc.
-   Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2002, 2004, 2005, 2006, 2007, 2008, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1989-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -1799,8 +1797,8 @@ SLCBCC("cbnefr", 15),
 { "signx",	F3(2, 0x27, 0), F3(~2, ~0x27, ~0)|(1<<12)|ASI(~0)|RS2_G0, "r", F_ALIAS, 0, v9 }, /* sra rd,%g0,rd */
 { "clruw",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|(1<<12)|ASI(~0)|RS2_G0, "1,d", F_ALIAS, 0, v9 }, /* srl rs1,%g0,rd */
 { "clruw",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|(1<<12)|ASI(~0)|RS2_G0, "r", F_ALIAS, 0, v9 }, /* srl rd,%g0,rd */
-{ "cas",	F3(3, 0x3c, 0)|ASI(0x80), F3(~3, ~0x3c, ~0)|ASI(~0x80), "[1],2,d", F_ALIAS, 0, v9andleon }, /* casa [rs1]ASI_P,rs2,rd */
-{ "casl",	F3(3, 0x3c, 0)|ASI(0x88), F3(~3, ~0x3c, ~0)|ASI(~0x88), "[1],2,d", F_ALIAS, 0, v9andleon }, /* casa [rs1]ASI_P_L,rs2,rd */
+{ "cas",	F3(3, 0x3c, 0)|ASI(0x80), F3(~3, ~0x3c, ~0)|ASI(~0x80), "[1],2,d", F_ALIAS, 0, v9 }, /* casa [rs1]ASI_P,rs2,rd */
+{ "casl",	F3(3, 0x3c, 0)|ASI(0x88), F3(~3, ~0x3c, ~0)|ASI(~0x88), "[1],2,d", F_ALIAS, 0, v9 }, /* casa [rs1]ASI_P_L,rs2,rd */
 { "casx",	F3(3, 0x3e, 0)|ASI(0x80), F3(~3, ~0x3e, ~0)|ASI(~0x80), "[1],2,d", F_ALIAS, 0, v9 }, /* casxa [rs1]ASI_P,rs2,rd */
 { "casxl",	F3(3, 0x3e, 0)|ASI(0x88), F3(~3, ~0x3e, ~0)|ASI(~0x88), "[1],2,d", F_ALIAS, 0, v9 }, /* casxa [rs1]ASI_P_L,rs2,rd */
 

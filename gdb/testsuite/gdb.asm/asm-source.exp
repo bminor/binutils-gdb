@@ -97,6 +97,11 @@ switch -glob -- [istarget] {
     "mips*-*" {
         set asm-arch mips
     }
+    "powerpc64le-*" {
+        set asm-arch powerpc64le
+        set asm-flags "-a64 -I${srcdir}/${subdir} $obj_include"
+        append link-flags " -m elf64lppc"
+    }
     "powerpc*-*" {
         if { [is_lp64_target] } {
             set asm-arch powerpc64

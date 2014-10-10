@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "symtab.h"
 #include "target.h"
 #include "gdbcore.h"
@@ -48,12 +49,12 @@
 
 #include "elf-bfd.h"
 #include "elf/ppc.h"
+#include "elf/ppc64.h"
 
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
 #include "ppc-ravenscar-thread.h"
 
-#include "gdb_assert.h"
 #include "dis-asm.h"
 
 #include "trad-frame.h"
@@ -504,7 +505,7 @@ ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const struct ppc_reg_offsets *offsets = regset->descr;
+  const struct ppc_reg_offsets *offsets = regset->regmap;
   size_t offset;
   int regsize;
 
@@ -556,7 +557,7 @@ ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
     return;
 
   tdep = gdbarch_tdep (gdbarch);
-  offsets = regset->descr;
+  offsets = regset->regmap;
   if (regnum == -1)
     {
       int i;
@@ -624,7 +625,7 @@ ppc_supply_vrregset (const struct regset *regset, struct regcache *regcache,
     return;
 
   tdep = gdbarch_tdep (gdbarch);
-  offsets = regset->descr;
+  offsets = regset->regmap;
   if (regnum == -1)
     {
       int i;
@@ -663,7 +664,7 @@ ppc_collect_gregset (const struct regset *regset,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const struct ppc_reg_offsets *offsets = regset->descr;
+  const struct ppc_reg_offsets *offsets = regset->regmap;
   size_t offset;
   int regsize;
 
@@ -717,7 +718,7 @@ ppc_collect_fpregset (const struct regset *regset,
     return;
 
   tdep = gdbarch_tdep (gdbarch);
-  offsets = regset->descr;
+  offsets = regset->regmap;
   if (regnum == -1)
     {
       int i;
@@ -790,7 +791,7 @@ ppc_collect_vrregset (const struct regset *regset,
     return;
 
   tdep = gdbarch_tdep (gdbarch);
-  offsets = regset->descr;
+  offsets = regset->regmap;
   if (regnum == -1)
     {
       int i;
@@ -2168,9 +2169,9 @@ rs6000_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
          to __eabi in case the GCC option "-fleading-underscore" was
 	 used to compile the program.  */
       if (s.minsym != NULL
-          && SYMBOL_LINKAGE_NAME (s.minsym) != NULL
-	  && (strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "__eabi") == 0
-	      || strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "___eabi") == 0))
+          && MSYMBOL_LINKAGE_NAME (s.minsym) != NULL
+	  && (strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "__eabi") == 0
+	      || strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "___eabi") == 0))
 	pc += 4;
     }
   return pc;
@@ -2254,7 +2255,7 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   msymbol = lookup_minimal_symbol_by_pc (pc);
   if (msymbol.minsym
       && rs6000_in_solib_return_trampoline (gdbarch, pc,
-					    SYMBOL_LINKAGE_NAME (msymbol.minsym)))
+					    MSYMBOL_LINKAGE_NAME (msymbol.minsym)))
     {
       /* Double-check that the third instruction from PC is relative "b".  */
       op = read_memory_integer (pc + 8, 4, byte_order);
@@ -2672,10 +2673,10 @@ dfp_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   else
     {
       status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				  2 * reg_index + 1, buffer + 8);
+				  2 * reg_index + 1, buffer);
       if (status == REG_VALID)
 	status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				    2 * reg_index, buffer);
+				    2 * reg_index, buffer + 8);
     }
 
   return status;
@@ -2701,9 +2702,9 @@ dfp_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   else
     {
       regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
-			  2 * reg_index + 1, buffer + 8);
+			  2 * reg_index + 1, buffer);
       regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
-			  2 * reg_index, buffer);
+			  2 * reg_index, buffer + 8);
     }
 }
 
@@ -2779,10 +2780,12 @@ efpr_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+  int offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
   /* Read the portion that overlaps the VMX register.  */
-  return regcache_raw_read_part (regcache, tdep->ppc_vr0_regnum + reg_index, 0,
-				 register_size (gdbarch, reg_nr), buffer);
+  return regcache_raw_read_part (regcache, tdep->ppc_vr0_regnum + reg_index,
+				 offset, register_size (gdbarch, reg_nr),
+				 buffer);
 }
 
 /* Write method for POWER7 Extended FP pseudo-registers.  */
@@ -2792,10 +2795,12 @@ efpr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+  int offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
   /* Write the portion that overlaps the VMX register.  */
-  regcache_raw_write_part (regcache, tdep->ppc_vr0_regnum + reg_index, 0,
-			   register_size (gdbarch, reg_nr), buffer);
+  regcache_raw_write_part (regcache, tdep->ppc_vr0_regnum + reg_index,
+			   offset, register_size (gdbarch, reg_nr),
+			   buffer);
 }
 
 static enum register_status
@@ -3185,9 +3190,14 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
     }
 
   if (!fdata.frameless)
-    /* Frameless really means stackless.  */
-    cache->base
-      = read_memory_unsigned_integer (cache->base, wordsize, byte_order);
+    {
+      /* Frameless really means stackless.  */
+      LONGEST backchain;
+
+      if (safe_read_memory_integer (cache->base, wordsize,
+				    byte_order, &backchain))
+        cache->base = (CORE_ADDR) backchain;
+    }
 
   trad_frame_set_value (cache->saved_regs,
 			gdbarch_sp_regnum (gdbarch), cache->base);
@@ -3252,12 +3262,14 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
 	{
 	  int i;
 	  CORE_ADDR ev_addr = cache->base + fdata.ev_offset;
+	  CORE_ADDR off = (byte_order == BFD_ENDIAN_BIG ? 4 : 0);
+
 	  for (i = fdata.saved_ev; i < ppc_num_gprs; i++)
 	    {
 	      cache->saved_regs[tdep->ppc_ev0_regnum + i].addr = ev_addr;
-              cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = ev_addr + 4;
+	      cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = ev_addr + off;
 	      ev_addr += register_size (gdbarch, tdep->ppc_ev0_regnum);
-            }
+	    }
 	}
     }
 
@@ -3550,6 +3562,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum auto_boolean soft_float_flag = powerpc_soft_float_global;
   int soft_float;
   enum powerpc_vector_abi vector_abi = powerpc_vector_abi_global;
+  enum powerpc_elf_abi elf_abi = POWERPC_ELF_AUTO;
   int have_fpu = 1, have_spe = 0, have_mq = 0, have_altivec = 0, have_dfp = 0,
       have_vsx = 0;
   int tdesc_wordsize = -1;
@@ -3645,10 +3658,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	"r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
 	"r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31"
-      };
-      static const char *const segment_regs[] = {
-	"sr0", "sr1", "sr2", "sr3", "sr4", "sr5", "sr6", "sr7",
-	"sr8", "sr9", "sr10", "sr11", "sr12", "sr13", "sr14", "sr15"
       };
       const struct tdesc_feature *feature;
       int i, valid_p;
@@ -3856,6 +3865,21 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
 #ifdef HAVE_ELF
+  if (from_elf_exec)
+    {
+      switch (elf_elfheader (info.abfd)->e_flags & EF_PPC64_ABI)
+	{
+	case 1:
+	  elf_abi = POWERPC_ELF_V1;
+	  break;
+	case 2:
+	  elf_abi = POWERPC_ELF_V2;
+	  break;
+	default:
+	  break;
+	}
+    }
+
   if (soft_float_flag == AUTO_BOOLEAN_AUTO && from_elf_exec)
     {
       switch (bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
@@ -3891,6 +3915,21 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
     }
 #endif
+
+  /* At this point, the only supported ELF-based 64-bit little-endian
+     operating system is GNU/Linux, and this uses the ELFv2 ABI by
+     default.  All other supported ELF-based operating systems use the
+     ELFv1 ABI by default.  Therefore, if the ABI marker is missing,
+     e.g. because we run a legacy binary, or have attached to a process
+     and have not found any associated binary file, set the default
+     according to this heuristic.  */
+  if (elf_abi == POWERPC_ELF_AUTO)
+    {
+      if (wordsize == 8 && info.byte_order == BFD_ENDIAN_LITTLE)
+        elf_abi = POWERPC_ELF_V2;
+      else
+        elf_abi = POWERPC_ELF_V1;
+    }
 
   if (soft_float_flag == AUTO_BOOLEAN_TRUE)
     soft_float = 1;
@@ -3934,6 +3973,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
          meaningful, because 64-bit CPUs can run in 32-bit mode.  So, perform
          separate word size check.  */
       tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->elf_abi != elf_abi)
+	continue;
       if (tdep && tdep->soft_float != soft_float)
 	continue;
       if (tdep && tdep->vector_abi != vector_abi)
@@ -3956,6 +3997,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep = XCNEW (struct gdbarch_tdep);
   tdep->wordsize = wordsize;
+  tdep->elf_abi = elf_abi;
   tdep->soft_float = soft_float;
   tdep->vector_abi = vector_abi;
 

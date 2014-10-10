@@ -25,7 +25,6 @@
 #include "gdb_obstack.h"
 #include "symtab.h"
 #include "buildsym.h"
-#include "gdb_assert.h"
 #include "dictionary.h"
 
 /* This file implements dictionaries, which are tables that associate

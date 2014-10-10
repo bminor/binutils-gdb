@@ -1,5 +1,5 @@
 /*  MSP430-specific support for 32-bit ELF
-    Copyright (C) 2002-2013 Free Software Foundation, Inc.
+    Copyright (C) 2002-2014 Free Software Foundation, Inc.
     Contributed by Dmitry Diky <diwil@mail.ru>
 
     This file is part of BFD, the Binary File Descriptor library.
@@ -549,10 +549,10 @@ static const struct msp430_reloc_map msp430x_reloc_map[] =
 static inline bfd_boolean
 uses_msp430x_relocs (bfd * abfd)
 {
-  extern const bfd_target bfd_elf32_msp430_ti_vec;
+  extern const bfd_target msp430_elf32_ti_vec;
 
   return bfd_get_mach (abfd) == bfd_mach_msp430x
-    || abfd->xvec == & bfd_elf32_msp430_ti_vec;
+    || abfd->xvec == & msp430_elf32_ti_vec;
 }
 
 static reloc_howto_type *
@@ -1582,14 +1582,15 @@ msp430_elf_relax_adjust_locals (bfd * abfd, asection * sec, bfd_vma addr,
   irelend = irel + sec->reloc_count;
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
-  
+
   for (;irel < irelend; irel++)
     {
-      int sidx = ELF32_R_SYM(irel->r_info);
+      unsigned int sidx = ELF32_R_SYM(irel->r_info);
       Elf_Internal_Sym *lsym = isym + sidx;
-      
+
       /* Adjust symbols referenced by .sec+0xXX */
-      if (irel->r_addend > addr && irel->r_addend < toaddr 
+      if (irel->r_addend > addr && irel->r_addend < toaddr
+	  && sidx < symtab_hdr->sh_info
 	  && lsym->st_shndx == sec_shndx)
 	irel->r_addend -= count;
     }
@@ -2436,7 +2437,7 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 #define ELF_MAXPAGESIZE		4
 #define	ELF_OSABI		ELFOSABI_STANDALONE
 
-#define TARGET_LITTLE_SYM       bfd_elf32_msp430_vec
+#define TARGET_LITTLE_SYM       msp430_elf32_vec
 #define TARGET_LITTLE_NAME	"elf32-msp430"
 
 #define elf_info_to_howto	             msp430_info_to_howto_rela
@@ -2456,7 +2457,7 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 
 /* The TI compiler sets the OSABI field to ELFOSABI_NONE.  */
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM       bfd_elf32_msp430_ti_vec
+#define TARGET_LITTLE_SYM       msp430_elf32_ti_vec
 
 #undef  elf32_bed
 #define elf32_bed		elf32_msp430_ti_bed

@@ -15,39 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef vxworks
-
-#  include <stdio.h>
-
-/* VxWorks does not supply atoi.  */
-static int
-atoi (z)
-     char *z;
-{
-  int i = 0;
-
-  while (*z >= '0' && *z <= '9')
-    i = i * 10 + (*z++ - '0');
-  return i;
-}
-
-/* I don't know of any way to pass an array to VxWorks.  This function
-   can be called directly from gdb.  */
-
-vxmain (arg)
-char *arg;
-{
-  char *argv[2];
-
-  argv[0] = "";
-  argv[1] = arg;
-  main (2, argv, (char **) 0);
-}
-
-#else /* ! vxworks */
-#  include <stdio.h>
-#  include <stdlib.h>
-#endif /* ! vxworks */
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef PROTOTYPES
 extern int marker1 (void);

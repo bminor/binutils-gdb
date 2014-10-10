@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright 2012, 2013 Free Software Foundation
+#   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -167,8 +167,7 @@ TARGET_CPU_CFILES = \
 	config/tc-nds32.c \
 	config/tc-nios2.c \
 	config/tc-ns32k.c \
-	config/tc-openrisc.c \
-	config/tc-or32.c \
+	config/tc-or1k.c \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
@@ -239,8 +238,7 @@ TARGET_CPU_HFILES = \
 	config/tc-nds32.h \
 	config/tc-nios2.h \
 	config/tc-ns32k.h \
-	config/tc-openrisc.h \
-	config/tc-or32.h \
+	config/tc-or1k.h \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
@@ -298,6 +296,8 @@ TARG_ENV_HFILES = \
 	config/te-386bsd.h \
 	config/te-aix5.h \
 	config/te-armeabi.h \
+	config/te-armfbsdeabi.h \
+	config/te-armfbsdvfp.h \
 	config/te-armlinuxeabi.h \
 	config/te-dynix.h \
 	config/te-epoc-pe.h \
@@ -695,4 +695,6 @@ de-stage3:
 	- (cd stage3 ; rm -f as$(EXEEXT) ; mv -f * ..)
 	- rmdir stage3
 
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in $(srcdir)/configure.tgt
+# Reconfigure if configure.tgt changes.
+# development.sh is used to determine -Werror default.
+CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.tgt $(BFDDIR)/development.sh

@@ -44,15 +44,7 @@ gdbserver_start_extended
 
 gdb_test_no_output "set remote exec-file $target_exec" "set remote exec-file"
 
-# Start the program running and then wait for a bit, to be sure
-# that it can be attached to.
-set testpid [eval exec $binfile &]
-exec sleep 2
-if { [istarget "*-*-cygwin*"] } {
-    # testpid is the Cygwin PID, GDB uses the Windows PID, which might be
-    # different due to the way fork/exec works.
-    set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
-}
+set testpid [spawn_wait_for_attach $binfile]
 
 gdb_test "attach $testpid" \
     "Attaching to program: .*, process $testpid.*(in|at).*" \

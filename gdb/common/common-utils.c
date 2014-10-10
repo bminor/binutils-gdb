@@ -17,17 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef GDBSERVER
-#include "server.h"
-#else
-#include "defs.h"
-#endif
-
-#include "gdb_assert.h"
-#include <string.h>
-
-#include <stdlib.h>
-#include <stdio.h>
+#include "common-defs.h"
 
 /* The xmalloc() (libiberty.h) family of memory management routines.
 

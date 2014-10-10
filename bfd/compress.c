@@ -1,6 +1,5 @@
 /* Compressed section support (intended for debug sections).
-   Copyright 2008, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -25,6 +24,7 @@
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #endif
+#include "safe-ctype.h"
 
 #ifdef HAVE_ZLIB_H
 static bfd_boolean
@@ -303,6 +303,15 @@ bfd_is_section_compressed (bfd *abfd, sec_ptr sec)
      by the uncompressed section size, 8 bytes in big-endian order.  */
   compressed = (bfd_get_section_contents (abfd, sec, compressed_buffer, 0, 12)
 		&& CONST_STRNEQ ((char*) compressed_buffer, "ZLIB"));
+
+  /* Check for the pathalogical case of a debug string section that
+     contains the string ZLIB.... as the first entry.  We assume that
+     no uncompressed .debug_str section would ever be big enough to
+     have the first byte of its (big-endian) size be non-zero.  */
+  if (compressed
+      && strcmp (sec->name, ".debug_str") == 0
+      && ISPRINT (compressed_buffer[4]))
+    compressed = FALSE;
 
   /* Restore compress_status.  */
   sec->compress_status = saved;

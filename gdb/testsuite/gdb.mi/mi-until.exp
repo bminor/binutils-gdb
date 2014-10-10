@@ -42,11 +42,9 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
 proc test_running_to_foo {} {
-    global mi_gdb_prompt
-    global hex
-
-    mi_create_breakpoint "10" 1 "keep" foo ".*until.c" 10 ".*" \
-             "break-insert operation"
+    mi_create_breakpoint "10" \
+	"break-insert operation" \
+	-number 1 -func foo -file ".*until.c" -line 10
 
     mi_run_cmd
     mi_expect_stop "breakpoint-hit" "foo" "" ".*until.c" 10 \
@@ -57,9 +55,6 @@ proc test_running_to_foo {} {
 }
 
 proc test_until {} {
-    global mi_gdb_prompt
-    global hex fullname_syntax srcfile
-
     setup_kfail gdb/2104 "*-*-*"
     mi_execute_to "exec-until" "end-stepping-range" "foo" "" ".*until.c" "12" "" \
         "until after while loop"

@@ -82,10 +82,6 @@ struct gdbarch_tdep
   /* And the size of each entry in the buf.  */
   size_t jb_elt_size;
 
-  /* Cached core file helpers.  */
-  struct regset *gregset;
-  struct regset *fpregset;
-
   /* Types for AdvSISD registers.  */
   struct type *vnq_type;
   struct type *vnd_type;

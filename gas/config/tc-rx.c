@@ -1,5 +1,5 @@
 /* tc-rx.c -- Assembler for the Renesas RX
-   Copyright 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -20,7 +20,6 @@
 
 #include "as.h"
 #include "struc-symbol.h"
-#include "obstack.h"
 #include "safe-ctype.h"
 #include "dwarf2dbg.h"
 #include "libbfd.h"
@@ -2170,10 +2169,9 @@ void
 rx_cons_fix_new (fragS *	frag,
 		 int		where,
 		 int		size,
-		 expressionS *  exp)
+		 expressionS *  exp,
+		 bfd_reloc_code_real_type type)
 {
-  bfd_reloc_code_real_type type;
-
   switch (size)
     {
     case 1:

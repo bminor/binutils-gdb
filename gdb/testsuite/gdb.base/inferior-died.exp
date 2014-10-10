@@ -38,7 +38,6 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} ${testfile}.c] } {
 }
 
 gdb_test_no_output "set detach-on-fork off"
-gdb_test_no_output "set target-async on"
 gdb_test_no_output "set non-stop on"
 
 if ![runto_main] {

@@ -357,7 +357,8 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"jit_read_descriptor, descriptor_addr = %s\n",
-			paddress (gdbarch, SYMBOL_VALUE_ADDRESS (objf_data->descriptor)));
+			paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (ps_data->objfile,
+								  objf_data->descriptor)));
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
@@ -366,7 +367,8 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   desc_buf = alloca (desc_size);
 
   /* Read the descriptor.  */
-  err = target_read_memory (SYMBOL_VALUE_ADDRESS (objf_data->descriptor),
+  err = target_read_memory (MSYMBOL_VALUE_ADDRESS (ps_data->objfile,
+						   objf_data->descriptor),
 			    desc_buf, desc_size);
   if (err)
     {
@@ -635,8 +637,10 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   struct symtab *symtab;
   struct gdb_block *gdb_block_iter, *gdb_block_iter_tmp;
   struct block *block_iter;
-  int actual_nblocks, i, blockvector_size;
+  int actual_nblocks, i;
+  size_t blockvector_size;
   CORE_ADDR begin, end;
+  struct blockvector *bv;
 
   actual_nblocks = FIRST_LOCAL_BLOCK + stab->nblocks;
 
@@ -647,9 +651,9 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   /* Copy over the linetable entry if one was provided.  */
   if (stab->linetable)
     {
-      int size = ((stab->linetable->nitems - 1)
-                  * sizeof (struct linetable_entry)
-                  + sizeof (struct linetable));
+      size_t size = ((stab->linetable->nitems - 1)
+		     * sizeof (struct linetable_entry)
+		     + sizeof (struct linetable));
       LINETABLE (symtab) = obstack_alloc (&objfile->objfile_obstack, size);
       memcpy (LINETABLE (symtab), stab->linetable, size);
     }
@@ -660,16 +664,16 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
   blockvector_size = (sizeof (struct blockvector)
                       + (actual_nblocks - 1) * sizeof (struct block *));
-  symtab->blockvector = obstack_alloc (&objfile->objfile_obstack,
-                                       blockvector_size);
+  bv = obstack_alloc (&objfile->objfile_obstack, blockvector_size);
+  symtab->blockvector = bv;
 
   /* (begin, end) will contain the PC range this entire blockvector
      spans.  */
   set_symtab_primary (symtab, 1);
-  BLOCKVECTOR_MAP (symtab->blockvector) = NULL;
+  BLOCKVECTOR_MAP (bv) = NULL;
   begin = stab->blocks->begin;
   end = stab->blocks->end;
-  BLOCKVECTOR_NBLOCKS (symtab->blockvector) = actual_nblocks;
+  BLOCKVECTOR_NBLOCKS (bv) = actual_nblocks;
 
   /* First run over all the gdb_block objects, creating a real block
      object for each.  Simultaneously, keep setting the real_block
@@ -704,7 +708,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
       BLOCK_FUNCTION (new_block) = block_name;
 
-      BLOCKVECTOR_BLOCK (symtab->blockvector, i) = new_block;
+      BLOCKVECTOR_BLOCK (bv, i) = new_block;
       if (begin > BLOCK_START (new_block))
         begin = BLOCK_START (new_block);
       if (end < BLOCK_END (new_block))
@@ -730,7 +734,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCK_START (new_block) = (CORE_ADDR) begin;
       BLOCK_END (new_block) = (CORE_ADDR) end;
 
-      BLOCKVECTOR_BLOCK (symtab->blockvector, i) = new_block;
+      BLOCKVECTOR_BLOCK (bv, i) = new_block;
 
       if (i == GLOBAL_BLOCK)
 	set_block_symtab (new_block, symtab);
@@ -753,7 +757,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 	{
 	  /* And if not, we set a default parent block.  */
 	  BLOCK_SUPERBLOCK (gdb_block_iter->real_block) =
-	    BLOCKVECTOR_BLOCK (symtab->blockvector, STATIC_BLOCK);
+	    BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	}
     }
 
@@ -1016,7 +1020,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
 				struct jit_program_space_data *ps_data)
 {
   struct bound_minimal_symbol reg_symbol;
-  struct minimal_symbol *desc_symbol;
+  struct bound_minimal_symbol desc_symbol;
   struct jit_objfile_data *objf_data;
   CORE_ADDR addr;
 
@@ -1026,24 +1030,25 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
 	 assume we are not attached to a JIT.  */
       reg_symbol = lookup_minimal_symbol_and_objfile (jit_break_name);
       if (reg_symbol.minsym == NULL
-	  || SYMBOL_VALUE_ADDRESS (reg_symbol.minsym) == 0)
+	  || BMSYMBOL_VALUE_ADDRESS (reg_symbol) == 0)
 	return 1;
 
       desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL,
 					   reg_symbol.objfile);
-      if (desc_symbol == NULL || SYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
+      if (desc_symbol.minsym == NULL
+	  || BMSYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
 	return 1;
 
       objf_data = get_jit_objfile_data (reg_symbol.objfile);
       objf_data->register_code = reg_symbol.minsym;
-      objf_data->descriptor = desc_symbol;
+      objf_data->descriptor = desc_symbol.minsym;
 
       ps_data->objfile = reg_symbol.objfile;
     }
   else
     objf_data = get_jit_objfile_data (ps_data->objfile);
 
-  addr = SYMBOL_VALUE_ADDRESS (objf_data->register_code);
+  addr = MSYMBOL_VALUE_ADDRESS (ps_data->objfile, objf_data->register_code);
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,

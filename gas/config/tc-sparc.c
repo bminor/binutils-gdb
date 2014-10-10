@@ -1,5 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright 1989-2013 Free Software Foundation, Inc.
+   Copyright (C) 1989-2014 Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
@@ -262,7 +262,7 @@ static struct sparc_arch {
   { "v9d", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC },
   { "v9e", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC|HWCAP_AES|HWCAP_DES|HWCAP_KASUMI|HWCAP_CAMELLIA|HWCAP_MD5|HWCAP_SHA1|HWCAP_SHA256|HWCAP_SHA512|HWCAP_MPMUL|HWCAP_MONT|HWCAP_CRC32C|HWCAP_CBCOND|HWCAP_PAUSE },
   { "v9v", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC|HWCAP_RANDOM|HWCAP_TRANS|HWCAP_FJFMAU|HWCAP_IMA|HWCAP_ASI_CACHE_SPARING|HWCAP_AES|HWCAP_DES|HWCAP_KASUMI|HWCAP_CAMELLIA|HWCAP_MD5|HWCAP_SHA1|HWCAP_SHA256|HWCAP_SHA512|HWCAP_MPMUL|HWCAP_MONT|HWCAP_CRC32C|HWCAP_CBCOND|HWCAP_PAUSE },
-  /* This exists to allow configure.in/Makefile.in to pass one
+  /* This exists to allow configure.tgt to pass one
      value to specify both the default machine and default word size.  */
   { "v9-64", "v9", v9, 64, 0, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC },
   { NULL, NULL, v8, 0, 0, 0 }
@@ -787,6 +787,8 @@ struct priv_reg_entry hpriv_reg_table[] =
   {"hintp", 3},
   {"htba", 5},
   {"hver", 6},
+  {"hstick_offset", 28},
+  {"hstick_enable", 29},
   {"hstick_cmpr", 31},
   {"", -1},			/* End marker.  */
 };
@@ -914,16 +916,24 @@ md_begin (void)
       /* `max_architecture' records the requested architecture.
 	 Issue warnings if we go above it.  */
       warn_after_architecture = max_architecture;
-
-      /* Find the highest architecture level that doesn't conflict with
-	 the requested one.  */
-      for (max_architecture = SPARC_OPCODE_ARCH_MAX;
-	   max_architecture > warn_after_architecture;
-	   --max_architecture)
-	if (! SPARC_OPCODE_CONFLICT_P (max_architecture,
-				       warn_after_architecture))
-	  break;
     }
+
+  /* Find the highest architecture level that doesn't conflict with
+     the requested one.  */
+
+  if (warn_on_bump
+      || !architecture_requested)
+  {
+    enum sparc_opcode_arch_val current_max_architecture
+      = max_architecture;
+
+    for (max_architecture = SPARC_OPCODE_ARCH_MAX;
+	 max_architecture > warn_after_architecture;
+	 --max_architecture)
+      if (! SPARC_OPCODE_CONFLICT_P (max_architecture,
+				     current_max_architecture))
+	break;
+  }
 }
 
 /* Called after all assembly has been done.  */
@@ -2961,6 +2971,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  warn_after_architecture = needed_architecture;
 		}
 	      current_architecture = needed_architecture;
+	      hwcap_allowed |= hwcaps;
 	    }
 	  /* Conflict.  */
 	  /* ??? This seems to be a bit fragile.  What if the next entry in
@@ -4266,11 +4277,6 @@ s_proc (int ignore ATTRIBUTE_UNUSED)
 
 static int sparc_no_align_cons = 0;
 
-/* This static variable is set by sparc_cons to emit requested types
-   of relocations in cons_fix_new_sparc.  */
-
-static const char *sparc_cons_special_reloc;
-
 /* This handles the unaligned space allocation pseudo-ops, such as
    .uaword.  .uaword is just like .word, but the value does not need
    to be aligned.  */
@@ -4538,13 +4544,13 @@ sparc_elf_final_processing (void)
     elf_elfheader (stdoutput)->e_flags |= EF_SPARC_SUN_US1|EF_SPARC_SUN_US3;
 }
 
-void
+const char *
 sparc_cons (expressionS *exp, int size)
 {
   char *save;
+  const char *sparc_cons_special_reloc = NULL;
 
   SKIP_WHITESPACE ();
-  sparc_cons_special_reloc = NULL;
   save = input_line_pointer;
   if (input_line_pointer[0] == '%'
       && input_line_pointer[1] == 'r'
@@ -4671,6 +4677,7 @@ sparc_cons (expressionS *exp, int size)
     }
   if (sparc_cons_special_reloc == NULL)
     expression (exp);
+  return sparc_cons_special_reloc;
 }
 
 #endif
@@ -4683,7 +4690,8 @@ void
 cons_fix_new_sparc (fragS *frag,
 		    int where,
 		    unsigned int nbytes,
-		    expressionS *exp)
+		    expressionS *exp,
+		    const char *sparc_cons_special_reloc)
 {
   bfd_reloc_code_real_type r;
 
@@ -4732,7 +4740,6 @@ cons_fix_new_sparc (fragS *frag,
    }
 
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
-  sparc_cons_special_reloc = NULL;
 }
 
 void
@@ -4786,9 +4793,7 @@ sparc_regname_to_dw2regnum (char *regname)
 void
 sparc_cfi_emit_pcrel_expr (expressionS *exp, unsigned int nbytes)
 {
-  sparc_cons_special_reloc = "disp";
   sparc_no_align_cons = 1;
-  emit_expr (exp, nbytes);
+  emit_expr_with_reloc (exp, nbytes, "disp");
   sparc_no_align_cons = 0;
-  sparc_cons_special_reloc = NULL;
 }

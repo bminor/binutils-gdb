@@ -1,5 +1,5 @@
 /* AArch64-specific support for NN-bit ELF.
-   Copyright 2009-2013  Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1548,9 +1548,9 @@ elfNN_aarch64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
-#define TARGET_LITTLE_SYM               bfd_elfNN_littleaarch64_vec
+#define TARGET_LITTLE_SYM               aarch64_elfNN_le_vec
 #define TARGET_LITTLE_NAME              "elfNN-littleaarch64"
-#define TARGET_BIG_SYM                  bfd_elfNN_bigaarch64_vec
+#define TARGET_BIG_SYM                  aarch64_elfNN_be_vec
 #define TARGET_BIG_NAME                 "elfNN-bigaarch64"
 
 /* The linker script knows the section names for placement.
@@ -2055,6 +2055,23 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
+/* Destroy an AArch64 elf linker hash table.  */
+
+static void
+elfNN_aarch64_link_hash_table_free (bfd *obfd)
+{
+  struct elf_aarch64_link_hash_table *ret
+    = (struct elf_aarch64_link_hash_table *) obfd->link.hash;
+
+  if (ret->loc_hash_table)
+    htab_delete (ret->loc_hash_table);
+  if (ret->loc_hash_memory)
+    objalloc_free ((struct objalloc *) ret->loc_hash_memory);
+
+  bfd_hash_table_free (&ret->stub_hash_table);
+  _bfd_elf_link_hash_table_free (obfd);
+}
+
 /* Create an AArch64 elf linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -2083,7 +2100,7 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct elf_aarch64_stub_hash_entry)))
     {
-      free (ret);
+      _bfd_elf_link_hash_table_free (abfd);
       return NULL;
     }
 
@@ -2094,28 +2111,12 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
   ret->loc_hash_memory = objalloc_create ();
   if (!ret->loc_hash_table || !ret->loc_hash_memory)
     {
-      free (ret);
+      elfNN_aarch64_link_hash_table_free (abfd);
       return NULL;
     }
+  ret->root.root.hash_table_free = elfNN_aarch64_link_hash_table_free;
 
   return &ret->root.root;
-}
-
-/* Free the derived linker hash table.  */
-
-static void
-elfNN_aarch64_hash_table_free (struct bfd_link_hash_table *hash)
-{
-  struct elf_aarch64_link_hash_table *ret
-    = (struct elf_aarch64_link_hash_table *) hash;
-
-  if (ret->loc_hash_table)
-    htab_delete (ret->loc_hash_table);
-  if (ret->loc_hash_memory)
-    objalloc_free ((struct objalloc *) ret->loc_hash_memory);
-
-  bfd_hash_table_free (&ret->stub_hash_table);
-  _bfd_elf_link_hash_table_free (hash);
 }
 
 static bfd_boolean
@@ -2487,7 +2488,7 @@ elfNN_aarch64_setup_section_lists (bfd *output_bfd,
 
   /* Count the number of input BFDs and find the top input section id.  */
   for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
-       input_bfd != NULL; input_bfd = input_bfd->link_next)
+       input_bfd != NULL; input_bfd = input_bfd->link.next)
     {
       bfd_count += 1;
       for (section = input_bfd->sections;
@@ -2691,7 +2692,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
       asection *stub_sec;
 
       for (input_bfd = info->input_bfds, bfd_indx = 0;
-	   input_bfd != NULL; input_bfd = input_bfd->link_next, bfd_indx++)
+	   input_bfd != NULL; input_bfd = input_bfd->link.next, bfd_indx++)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
@@ -3301,8 +3302,7 @@ tpoff_base (struct bfd_link_info *info)
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   /* If tls_sec is NULL, we should have signalled an error already.  */
-  if (htab->tls_sec == NULL)
-    return 0;
+  BFD_ASSERT (htab->tls_sec != NULL);
 
   bfd_vma base = align_power ((bfd_vma) TCB_SIZE,
 			      htab->tls_sec->alignment_power);
@@ -3938,7 +3938,6 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	     or
 	     adrp x0, :tlsdesc:var   =>   adrp x0, :gottprel:var
 	   */
-	  insn = bfd_getl32 (contents + rel->r_offset);
 	  return bfd_reloc_continue;
 	}
 
@@ -3957,7 +3956,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	     ldr xd, [x0, #:tlsdesc_lo12:var] => ldr x0, [x0, #:gottprel_lo12:var]
 	   */
 	  insn = bfd_getl32 (contents + rel->r_offset);
-	  insn &= 0xfffffff0;
+	  insn &= 0xffffffe0;
 	  bfd_putl32 (insn, contents + rel->r_offset);
 	  return bfd_reloc_continue;
 	}
@@ -4159,15 +4158,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 					 rel, 1, relend, howto, 0, contents);
 
       if (info->relocatable)
-	{
-	  /* This is a relocatable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-	    rel->r_addend += sec->output_offset;
-	  continue;
-	}
+	continue;
 
       if (h != NULL)
 	name = h->root.root.string;
@@ -4775,16 +4766,6 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	    }
 	  break;
 
-	case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
-	case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
-	case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
-	  if (h != NULL && info->executable)
-	    {
-	      if (h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-	    }
-	  break;
-
 	case BFD_RELOC_AARCH64_CALL26:
 	case BFD_RELOC_AARCH64_JUMP26:
 	  /* If this is a local symbol then we resolve it
@@ -4796,6 +4777,13 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	    h->plt.refcount -= 1;
 	  break;
 
+	case BFD_RELOC_AARCH64_MOVW_G0_NC:
+	case BFD_RELOC_AARCH64_MOVW_G1_NC:
+	case BFD_RELOC_AARCH64_MOVW_G2_NC:
+	case BFD_RELOC_AARCH64_MOVW_G3:
+	case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
+	case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
+	case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
 	case BFD_RELOC_AARCH64_NN:
 	  if (h != NULL && info->executable)
 	    {
@@ -5292,6 +5280,22 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    break;
 	  }
 
+	case BFD_RELOC_AARCH64_MOVW_G0_NC:
+	case BFD_RELOC_AARCH64_MOVW_G1_NC:
+	case BFD_RELOC_AARCH64_MOVW_G2_NC:
+	case BFD_RELOC_AARCH64_MOVW_G3:
+	  if (info->shared)
+	    {
+	      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	      (*_bfd_error_handler)
+		(_("%B: relocation %s against `%s' can not be used when making "
+		   "a shared object; recompile with -fPIC"),
+		 abfd, elfNN_aarch64_howto_table[howto_index].name,
+		 (h) ? h->root.root.string : "a local symbol");
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+
 	case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
 	case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
 	case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
@@ -5497,17 +5501,6 @@ elfNN_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
     default:
       return reloc_class_normal;
     }
-}
-
-/* Set the right machine number for an AArch64 ELF file.  */
-
-static bfd_boolean
-elfNN_aarch64_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
-{
-  if (hdr->sh_type == SHT_NOTE)
-    *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;
-
-  return TRUE;
 }
 
 /* Handle an AArch64 specific section when reading an object file.  This is
@@ -6302,7 +6295,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       struct elf_aarch64_local_symbol *locals = NULL;
       Elf_Internal_Shdr *symtab_hdr;
@@ -6993,7 +6986,7 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = htab->root.srelplt->output_section;
+	      s = htab->root.srelplt;
 	      dyn.d_un.d_val = s->size;
 	      break;
 
@@ -7007,7 +7000,7 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 		 about changing the DT_RELA entry.  */
 	      if (htab->root.srelplt != NULL)
 		{
-		  s = htab->root.srelplt->output_section;
+		  s = htab->root.srelplt;
 		  dyn.d_un.d_val -= s->size;
 		}
 	      break;
@@ -7209,9 +7202,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define bfd_elfNN_bfd_link_hash_table_create    \
   elfNN_aarch64_link_hash_table_create
 
-#define bfd_elfNN_bfd_link_hash_table_free      \
-  elfNN_aarch64_hash_table_free
-
 #define bfd_elfNN_bfd_merge_private_bfd_data	\
   elfNN_aarch64_merge_private_bfd_data
 
@@ -7286,9 +7276,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_reloc_type_class		\
   elfNN_aarch64_reloc_type_class
 
-#define elf_backend_section_flags		\
-  elfNN_aarch64_section_flags
-
 #define elf_backend_section_from_shdr		\
   elfNN_aarch64_section_from_shdr
 
@@ -7306,6 +7293,7 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_may_use_rel_p      0
 #define elf_backend_may_use_rela_p     1
 #define elf_backend_default_use_rela_p 1
+#define elf_backend_rela_normal        1
 #define elf_backend_got_header_size (GOT_ENTRY_SIZE * 3)
 #define elf_backend_default_execstack  0
 

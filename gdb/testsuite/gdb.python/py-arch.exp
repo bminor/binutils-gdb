@@ -57,6 +57,8 @@ gdb_test "python print (\"addr\" in insn)" "True" "test key addr"
 gdb_test "python print (\"asm\" in insn)" "True" "test key asm"
 gdb_test "python print (\"length\" in insn)" "True" "test key length"
 
-# Negative test
-gdb_test "python arch.disassemble(0, 0)" ".*gdb\.MemoryError.*" \
-  "test bad memory access"
+if { ![is_address_zero_readable] } {
+    # Negative test
+    gdb_test "python arch.disassemble(0, 0)" ".*gdb\.MemoryError.*" \
+	"test bad memory access"
+}

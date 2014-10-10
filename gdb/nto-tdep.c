@@ -21,10 +21,10 @@
 
 #include "defs.h"
 #include <sys/stat.h>
-#include <string.h>
 #include "nto-tdep.h"
 #include "top.h"
 #include "inferior.h"
+#include "infrun.h"
 #include "gdbarch.h"
 #include "bfd.h"
 #include "elf-bfd.h"
@@ -362,7 +362,7 @@ static const char *nto_thread_state_str[] =
 };
 
 char *
-nto_extra_thread_info (struct thread_info *ti)
+nto_extra_thread_info (struct target_ops *self, struct thread_info *ti)
 {
   if (ti && ti->private
       && ti->private->state < ARRAY_SIZE (nto_thread_state_str))

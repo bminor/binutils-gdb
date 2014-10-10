@@ -1,7 +1,6 @@
 // object.h -- support for an object file for linking in gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
-// Free Software Foundation, Inc.
+// Copyright (C) 2006-2014 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -508,7 +507,7 @@ class Object
 
   // Return the name of a section given a section index.
   std::string
-  section_name(unsigned int shndx)
+  section_name(unsigned int shndx) const
   { return this->do_section_name(shndx); }
 
   // Return the section flags given a section index.
@@ -823,7 +822,7 @@ class Object
 
   // Get the name of a section--implemented by child class.
   virtual std::string
-  do_section_name(unsigned int shndx) = 0;
+  do_section_name(unsigned int shndx) const = 0;
 
   // Get section flags--implemented by child class.
   virtual uint64_t
@@ -2215,6 +2214,11 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   void
   do_read_symbols(Read_symbols_data*);
 
+  // Read the symbols.  This is common code for all target-specific
+  // overrides of do_read_symbols.
+  void
+  base_read_symbols(Read_symbols_data*);
+
   // Return the value of a local symbol.
   uint64_t
   do_local_symbol_value(unsigned int symndx, uint64_t addend) const
@@ -2311,7 +2315,7 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 
   // Get the name of a section.
   std::string
-  do_section_name(unsigned int shndx)
+  do_section_name(unsigned int shndx) const
   { return this->elf_file_.section_name(shndx); }
 
   // Return the location of the contents of a section.

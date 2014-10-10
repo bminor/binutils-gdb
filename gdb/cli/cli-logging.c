@@ -21,9 +21,6 @@
 #include "gdbcmd.h"
 #include "ui-out.h"
 #include "interps.h"
-#include "gdb_assert.h"
-
-#include <string.h>
 
 /* These hold the pushed copies of the gdb output files.
    If NULL then nothing has yet been pushed.  */
@@ -171,7 +168,7 @@ pop_output_files (void)
       gdb_stderr = saved_output.err;
       gdb_stdlog = saved_output.log;
       gdb_stdtarg = saved_output.targ;
-      gdb_stdtargerr = saved_output.targ;
+      gdb_stdtargerr = saved_output.targerr;
     }
 
   saved_output.out = NULL;

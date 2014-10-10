@@ -122,6 +122,5 @@ check_thread_specific_breakpoint "all-stop"
 clean_restart ${binfile}
 
 # Test non-stop mode.
-gdb_test_no_output "set target-async on" "set async mode"
 gdb_test_no_output "set non-stop on" "set non-stop mode"
 check_thread_specific_breakpoint "non-stop"

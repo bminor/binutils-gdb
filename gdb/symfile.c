@@ -45,7 +45,6 @@
 #include "bcache.h"
 #include "hashtab.h"
 #include "readline/readline.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "observer.h"
 #include "exec.h"
@@ -60,7 +59,6 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <time.h>
@@ -143,6 +141,20 @@ DEF_VEC_O (registered_sym_fns);
 
 static VEC (registered_sym_fns) *symtab_fns = NULL;
 
+/* Values for "set print symbol-loading".  */
+
+const char print_symbol_loading_off[] = "off";
+const char print_symbol_loading_brief[] = "brief";
+const char print_symbol_loading_full[] = "full";
+static const char *print_symbol_loading_enums[] =
+{
+  print_symbol_loading_off,
+  print_symbol_loading_brief,
+  print_symbol_loading_full,
+  NULL
+};
+static const char *print_symbol_loading = print_symbol_loading_full;
+
 /* If non-zero, shared library symbols will be added automatically
    when the inferior is created, new libraries are loaded, or when
    attaching to the inferior.  This is almost always what users will
@@ -155,6 +167,31 @@ static VEC (registered_sym_fns) *symtab_fns = NULL;
 
 int auto_solib_add = 1;
 
+
+/* Return non-zero if symbol-loading messages should be printed.
+   FROM_TTY is the standard from_tty argument to gdb commands.
+   If EXEC is non-zero the messages are for the executable.
+   Otherwise, messages are for shared libraries.
+   If FULL is non-zero then the caller is printing a detailed message.
+   E.g., the message includes the shared library name.
+   Otherwise, the caller is printing a brief "summary" message.  */
+
+int
+print_symbol_loading_p (int from_tty, int exec, int full)
+{
+  if (!from_tty && !info_verbose)
+    return 0;
+
+  if (exec)
+    {
+      /* We don't check FULL for executables, there are few such
+	 messages, therefore brief == full.  */
+      return print_symbol_loading != print_symbol_loading_off;
+    }
+  if (full)
+    return print_symbol_loading == print_symbol_loading_full;
+  return print_symbol_loading == print_symbol_loading_brief;
+}
 
 /* True if we are reading a symbol table.  */
 
@@ -836,6 +873,7 @@ static void
 read_symbols (struct objfile *objfile, int add_flags)
 {
   (*objfile->sf->sym_read) (objfile, add_flags);
+  objfile->per_bfd->minsyms_read = 1;
 
   /* find_separate_debug_file_in_section should be called only if there is
      single binary with no existing separate debug info file.  */
@@ -1111,7 +1149,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
   struct objfile *objfile;
   const int from_tty = add_flags & SYMFILE_VERBOSE;
   const int mainline = add_flags & SYMFILE_MAINLINE;
-  const int should_print = ((from_tty || info_verbose)
+  const int should_print = (print_symbol_loading_p (from_tty, mainline, 1)
 			    && (readnow_symbol_files
 				|| (add_flags & SYMFILE_NO_READ) == 0));
 
@@ -2050,7 +2088,7 @@ clear_memory_write_data (void *arg)
 }
 
 void
-generic_load (char *args, int from_tty)
+generic_load (const char *args, int from_tty)
 {
   bfd *loadfile_bfd;
   struct timeval start_time, end_time;
@@ -2222,7 +2260,7 @@ add_symbol_file_command (char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   char *filename = NULL;
-  int flags = OBJF_USERLOADED;
+  int flags = OBJF_USERLOADED | OBJF_SHARED;
   char *arg;
   int section_index = 0;
   int argcnt = 0;
@@ -2405,8 +2443,8 @@ remove_symbol_file_command (char *args, int from_tty)
 
       ALL_OBJFILES (objf)
 	{
-	  if (objf != 0
-	      && objf->flags & OBJF_USERLOADED
+	  if ((objf->flags & OBJF_USERLOADED) != 0
+	      && (objf->flags & OBJF_SHARED) != 0
 	      && objf->pspace == pspace && is_addr_in_objfile (addr, objf))
 	    break;
 	}
@@ -2424,8 +2462,8 @@ remove_symbol_file_command (char *args, int from_tty)
 
       ALL_OBJFILES (objf)
 	{
-	  if (objf != 0
-	      && objf->flags & OBJF_USERLOADED
+	  if ((objf->flags & OBJF_USERLOADED) != 0
+	      && (objf->flags & OBJF_SHARED) != 0
 	      && objf->pspace == pspace
 	      && filename_cmp (filename, objfile_name (objf)) == 0)
 	    break;
@@ -2608,12 +2646,6 @@ reread_symbols (void)
 	  objfile->psymtabs_addrmap = NULL;
 	  objfile->free_psymtabs = NULL;
 	  objfile->template_symbols = NULL;
-	  objfile->msymbols = NULL;
-	  objfile->minimal_symbol_count = 0;
-	  memset (&objfile->msymbol_hash, 0,
-		  sizeof (objfile->msymbol_hash));
-	  memset (&objfile->msymbol_demangled_hash, 0,
-		  sizeof (objfile->msymbol_demangled_hash));
 
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
@@ -3453,7 +3485,7 @@ overlay_command (char *args, int from_tty)
 {
   printf_unfiltered
     ("\"overlay\" must be followed by the name of an overlay command.\n");
-  help_list (overlaylist, "overlay ", -1, gdb_stdout);
+  help_list (overlaylist, "overlay ", all_commands, gdb_stdout);
 }
 
 /* Target Overlays for the "Simplest" overlay manager:
@@ -3532,7 +3564,7 @@ read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr,
 static int
 simple_read_overlay_table (void)
 {
-  struct minimal_symbol *novlys_msym;
+  struct bound_minimal_symbol novlys_msym;
   struct bound_minimal_symbol ovly_table_msym;
   struct gdbarch *gdbarch;
   int word_size;
@@ -3540,7 +3572,7 @@ simple_read_overlay_table (void)
 
   simple_free_overlay_table ();
   novlys_msym = lookup_minimal_symbol ("_novlys", NULL, NULL);
-  if (! novlys_msym)
+  if (! novlys_msym.minsym)
     {
       error (_("Error reading inferior's overlay table: "
              "couldn't find `_novlys' variable\n"
@@ -3561,11 +3593,11 @@ simple_read_overlay_table (void)
   word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   byte_order = gdbarch_byte_order (gdbarch);
 
-  cache_novlys = read_memory_integer (SYMBOL_VALUE_ADDRESS (novlys_msym),
+  cache_novlys = read_memory_integer (BMSYMBOL_VALUE_ADDRESS (novlys_msym),
 				      4, byte_order);
   cache_ovly_table
     = (void *) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
-  cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym.minsym);
+  cache_ovly_table_base = BMSYMBOL_VALUE_ADDRESS (ovly_table_msym);
   read_target_long_array (cache_ovly_table_base,
                           (unsigned int *) cache_ovly_table,
                           cache_novlys * 4, word_size, byte_order);
@@ -3633,15 +3665,15 @@ simple_overlay_update (struct obj_section *osect)
       {
 	/* Does its cached location match what's currently in the
 	   symtab?  */
-	struct minimal_symbol *minsym
+	struct bound_minimal_symbol minsym
 	  = lookup_minimal_symbol ("_ovly_table", NULL, NULL);
 
-	if (minsym == NULL)
+	if (minsym.minsym == NULL)
 	  error (_("Error reading inferior's overlay table: couldn't "
 		   "find `_ovly_table' array\n"
 		   "in inferior.  Use `overlay manual' mode."));
 	
-	if (cache_ovly_table_base == SYMBOL_VALUE_ADDRESS (minsym))
+	if (cache_ovly_table_base == BMSYMBOL_VALUE_ADDRESS (minsym))
 	  /* Then go ahead and try to look up this single section in
 	     the cache.  */
 	  if (simple_overlay_update_1 (osect))
@@ -3858,8 +3890,8 @@ symfile_find_segment_sections (struct objfile *objfile)
 static void
 symfile_free_objfile (struct objfile *objfile)
 {
-  /* Remove the target sections of user-added objfiles.  */
-  if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
+  /* Remove the target sections owned by this objfile.  */
+  if (objfile != NULL)
     remove_target_sections ((void *) objfile);
 }
 
@@ -3990,4 +4022,18 @@ each global debug-file-directory component prepended."),
 				     NULL,
 				     show_debug_file_directory,
 				     &setlist, &showlist);
+
+  add_setshow_enum_cmd ("symbol-loading", no_class,
+			print_symbol_loading_enums, &print_symbol_loading,
+			_("\
+Set printing of symbol loading messages."), _("\
+Show printing of symbol loading messages."), _("\
+off   == turn all messages off\n\
+brief == print messages for the executable,\n\
+         and brief messages for shared libraries\n\
+full  == print messages for the executable,\n\
+         and messages for each shared library."),
+			NULL,
+			NULL,
+			&setprintlist, &showprintlist);
 }

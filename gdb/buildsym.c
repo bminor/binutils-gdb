@@ -30,9 +30,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
-#include "gdb_assert.h"
 #include "complaints.h"
-#include <string.h>
 #include "expression.h"		/* For "enum exp_opcode" used by...  */
 #include "bcache.h"
 #include "filenames.h"		/* For DOSish file names.  */
@@ -1390,7 +1388,7 @@ set_missing_symtab (struct pending *pending_list, struct symtab *symtab)
 void
 augment_type_symtab (struct objfile *objfile, struct symtab *primary_symtab)
 {
-  struct blockvector *blockvector = primary_symtab->blockvector;
+  const struct blockvector *blockvector = primary_symtab->blockvector;
 
   if (context_stack_depth > 0)
     {

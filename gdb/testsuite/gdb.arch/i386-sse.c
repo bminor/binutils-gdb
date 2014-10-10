@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdio.h>
-#include "i386-cpuid.h"
+#include "nat/x86-cpuid.h"
 
 typedef struct {
   float f[4];
@@ -53,7 +53,7 @@ have_sse (void)
 {
   int edx;
 
-  if (!i386_cpuid (1, NULL, NULL, NULL, &edx))
+  if (!x86_cpuid (1, NULL, NULL, NULL, &edx))
     return 0;
 
   if (edx & bit_SSE)

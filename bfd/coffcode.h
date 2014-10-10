@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990-2013 Free Software Foundation, Inc.
+   Copyright (C) 1990-2014 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1393,6 +1393,7 @@ Special entry points for gdb to swap in coff symbol table parts:
 .  unsigned int _bfd_coff_default_section_alignment_power;
 .  bfd_boolean _bfd_coff_force_symnames_in_strings;
 .  unsigned int _bfd_coff_debug_string_prefix_length;
+.  unsigned int _bfd_coff_max_nscns;
 .
 .  void (*_bfd_coff_swap_filehdr_in)
 .    (bfd *, void *, void *);
@@ -1530,6 +1531,9 @@ Special entry points for gdb to swap in coff symbol table parts:
 .  ((coff_backend_info (abfd)->_bfd_coff_set_long_section_names) (abfd, enable))
 .#define bfd_coff_default_section_alignment_power(abfd) \
 .  (coff_backend_info (abfd)->_bfd_coff_default_section_alignment_power)
+.#define bfd_coff_max_nscns(abfd) \
+.  (coff_backend_info (abfd)->_bfd_coff_max_nscns)
+.
 .#define bfd_coff_swap_filehdr_in(abfd, i,o) \
 .  ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_in) (abfd, i, o))
 .
@@ -2092,12 +2096,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
   machine = 0;
   switch (internal_f->f_magic)
     {
-#ifdef OR32_MAGIC_BIG
-    case OR32_MAGIC_BIG:
-    case OR32_MAGIC_LITTLE:
-      arch = bfd_arch_or32;
-      break;
-#endif
 #ifdef PPCMAGIC
     case PPCMAGIC:
       arch = bfd_arch_powerpc;
@@ -3064,15 +3062,6 @@ coff_set_flags (bfd * abfd,
       return TRUE;
 #endif
 
-#ifdef OR32_MAGIC_BIG
-    case bfd_arch_or32:
-      if (bfd_big_endian (abfd))
-	* magicp = OR32_MAGIC_BIG;
-      else
-	* magicp = OR32_MAGIC_LITTLE;
-      return TRUE;
-#endif
-
     default:			/* Unknown architecture.  */
       /* Fall through to "return FALSE" below, to avoid
 	 "statement never reached" errors on the one below.  */
@@ -3136,7 +3125,7 @@ coff_compute_section_file_positions (bfd * abfd)
   asection *current;
   file_ptr sofar = bfd_coff_filhsz (abfd);
   bfd_boolean align_adjust;
-  int target_index;
+  unsigned int target_index;
 #ifdef ALIGN_SECTIONS_IN_FILE
   asection *previous = NULL;
   file_ptr old_sofar;
@@ -3145,7 +3134,8 @@ coff_compute_section_file_positions (bfd * abfd)
 #ifdef COFF_IMAGE_WITH_PE
   int page_size;
 
-  if (coff_data (abfd)->link_info)
+  if (coff_data (abfd)->link_info
+      || (pe_data (abfd) && pe_data (abfd)->pe_opthdr.FileAlignment))
     {
       page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
 
@@ -3304,7 +3294,7 @@ coff_compute_section_file_positions (bfd * abfd)
   }
 #endif /* ! COFF_IMAGE_WITH_PE */
 
-  if (target_index >= 32768)
+  if (target_index >= bfd_coff_max_nscns (abfd))
     {
       bfd_set_error (bfd_error_file_too_big);
       (*_bfd_error_handler)
@@ -4154,11 +4144,6 @@ coff_write_object_contents (bfd * abfd)
     internal_a.magic = MIPS_PE_MAGIC;
 #endif
 
-#ifdef OR32
-#define __A_MAGIC_SET__
-    internal_a.magic = NMAGIC; /* Assume separate i/d.  */
-#endif
-
 #ifndef __A_MAGIC_SET__
 #include "Your aouthdr magic number is not being set!"
 #else
@@ -4325,7 +4310,18 @@ coff_write_object_contents (bfd * abfd)
     }
 #endif
 
-  /* Now write them.  */
+#ifdef COFF_WITH_PE
+  {
+    /* After object contents are finalized so we can compute a reasonable hash,
+       but before header is written so we can update it to point to debug directory.  */
+    struct pe_tdata *pe = pe_data (abfd);
+
+    if (pe->build_id.after_write_object_contents != NULL)
+      (*pe->build_id.after_write_object_contents) (abfd);
+  }
+#endif
+
+  /* Now write header.  */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return FALSE;
 
@@ -5360,10 +5356,6 @@ dummy_reloc16_extra_cases (bfd *abfd ATTRIBUTE_UNUSED,
 }
 #endif
 
-#ifndef coff_bfd_link_hash_table_free
-#define coff_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
-#endif
-
 /* If coff_relocate_section is defined, we can use the optimized COFF
    backend linker.  Otherwise we must continue to use the old linker.  */
 
@@ -5497,6 +5489,7 @@ static bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
 #else
   2,
 #endif
+  32768,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
   coff_SWAP_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
@@ -5537,6 +5530,7 @@ static bfd_coff_backend_data ticoff0_swap_table =
 #else
   2,
 #endif
+  32768,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
   coff_SWAP_reloc_in, ticoff0_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
@@ -5578,6 +5572,7 @@ static bfd_coff_backend_data ticoff1_swap_table =
 #else
   2,
 #endif
+  32768,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
   coff_SWAP_reloc_in, ticoff1_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
@@ -5590,6 +5585,253 @@ static bfd_coff_backend_data ticoff1_swap_table =
   bfd_pe_print_pdata	/* huh */
 };
 #endif
+
+#ifdef COFF_WITH_PE_BIGOBJ
+/* The UUID for bigobj files.  */
+
+static const char header_bigobj_classid[16] =
+{
+  0xC7, 0xA1, 0xBA, 0xD1,
+  0xEE, 0xBA,
+  0xa9, 0x4b,
+  0xAF, 0x20,
+  0xFA, 0xF6, 0x6A, 0xA4, 0xDC, 0xB8
+};
+
+/* Swap routines.  */
+
+static void
+coff_bigobj_swap_filehdr_in (bfd * abfd, void * src, void * dst)
+{
+  struct external_ANON_OBJECT_HEADER_BIGOBJ *filehdr_src =
+    (struct external_ANON_OBJECT_HEADER_BIGOBJ *) src;
+  struct internal_filehdr *filehdr_dst = (struct internal_filehdr *) dst;
+
+  filehdr_dst->f_magic  = H_GET_16 (abfd, filehdr_src->Machine);
+  filehdr_dst->f_nscns  = H_GET_32 (abfd, filehdr_src->NumberOfSections);
+  filehdr_dst->f_timdat = H_GET_32 (abfd, filehdr_src->TimeDateStamp);
+  filehdr_dst->f_symptr =
+    GET_FILEHDR_SYMPTR (abfd, filehdr_src->PointerToSymbolTable);
+  filehdr_dst->f_nsyms  = H_GET_32 (abfd, filehdr_src->NumberOfSymbols);
+  filehdr_dst->f_opthdr = 0;
+  filehdr_dst->f_flags  = 0;
+
+  /* Check other magic numbers.  */
+  if (H_GET_16 (abfd, filehdr_src->Sig1) != IMAGE_FILE_MACHINE_UNKNOWN
+      || H_GET_16 (abfd, filehdr_src->Sig2) != 0xffff
+      || H_GET_16 (abfd, filehdr_src->Version) != 2
+      || memcmp (filehdr_src->ClassID, header_bigobj_classid, 16) != 0)
+    filehdr_dst->f_opthdr = 0xffff;
+
+  /* Note that CLR metadata are ignored.  */
+}
+
+static unsigned int
+coff_bigobj_swap_filehdr_out (bfd *abfd, void * in, void * out)
+{
+  struct internal_filehdr *filehdr_in = (struct internal_filehdr *) in;
+  struct external_ANON_OBJECT_HEADER_BIGOBJ *filehdr_out =
+    (struct external_ANON_OBJECT_HEADER_BIGOBJ *) out;
+
+  memset (filehdr_out, 0, sizeof (*filehdr_out));
+
+  H_PUT_16 (abfd, IMAGE_FILE_MACHINE_UNKNOWN, filehdr_out->Sig1);
+  H_PUT_16 (abfd, 0xffff, filehdr_out->Sig2);
+  H_PUT_16 (abfd, 2, filehdr_out->Version);
+  memcpy (filehdr_out->ClassID, header_bigobj_classid, 16);
+  H_PUT_16 (abfd, filehdr_in->f_magic, filehdr_out->Machine);
+  H_PUT_32 (abfd, filehdr_in->f_nscns, filehdr_out->NumberOfSections);
+  H_PUT_32 (abfd, filehdr_in->f_timdat, filehdr_out->TimeDateStamp);
+  PUT_FILEHDR_SYMPTR (abfd, filehdr_in->f_symptr,
+		      filehdr_out->PointerToSymbolTable);
+  H_PUT_32 (abfd, filehdr_in->f_nsyms, filehdr_out->NumberOfSymbols);
+
+  return bfd_coff_filhsz (abfd);
+}
+
+static void
+coff_bigobj_swap_sym_in (bfd * abfd, void * ext1, void * in1)
+{
+  SYMENT_BIGOBJ *ext = (SYMENT_BIGOBJ *) ext1;
+  struct internal_syment *in = (struct internal_syment *) in1;
+
+  if (ext->e.e_name[0] == 0)
+    {
+      in->_n._n_n._n_zeroes = 0;
+      in->_n._n_n._n_offset = H_GET_32 (abfd, ext->e.e.e_offset);
+    }
+  else
+    {
+#if SYMNMLEN != E_SYMNMLEN
+#error we need to cope with truncating or extending SYMNMLEN
+#else
+      memcpy (in->_n._n_name, ext->e.e_name, SYMNMLEN);
+#endif
+    }
+
+  in->n_value = H_GET_32 (abfd, ext->e_value);
+  in->n_scnum = H_GET_32 (abfd, ext->e_scnum);
+  in->n_type = H_GET_16 (abfd, ext->e_type);
+  in->n_sclass = H_GET_8 (abfd, ext->e_sclass);
+  in->n_numaux = H_GET_8 (abfd, ext->e_numaux);
+}
+
+static unsigned int
+coff_bigobj_swap_sym_out (bfd * abfd, void * inp, void * extp)
+{
+  struct internal_syment *in = (struct internal_syment *) inp;
+  SYMENT_BIGOBJ *ext = (SYMENT_BIGOBJ *) extp;
+
+  if (in->_n._n_name[0] == 0)
+    {
+      H_PUT_32 (abfd, 0, ext->e.e.e_zeroes);
+      H_PUT_32 (abfd, in->_n._n_n._n_offset, ext->e.e.e_offset);
+    }
+  else
+    {
+#if SYMNMLEN != E_SYMNMLEN
+#error we need to cope with truncating or extending SYMNMLEN
+#else
+      memcpy (ext->e.e_name, in->_n._n_name, SYMNMLEN);
+#endif
+    }
+
+  H_PUT_32 (abfd, in->n_value, ext->e_value);
+  H_PUT_32 (abfd, in->n_scnum, ext->e_scnum);
+
+  H_PUT_16 (abfd, in->n_type, ext->e_type);
+  H_PUT_8 (abfd, in->n_sclass, ext->e_sclass);
+  H_PUT_8 (abfd, in->n_numaux, ext->e_numaux);
+
+  return SYMESZ_BIGOBJ;
+}
+
+static void
+coff_bigobj_swap_aux_in (bfd *abfd,
+			 void * ext1,
+			 int type,
+			 int in_class,
+			 int indx,
+			 int numaux,
+			 void * in1)
+{
+  AUXENT_BIGOBJ *ext = (AUXENT_BIGOBJ *) ext1;
+  union internal_auxent *in = (union internal_auxent *) in1;
+
+  switch (in_class)
+    {
+    case C_FILE:
+      if (numaux > 1)
+	{
+	  if (indx == 0)
+	    memcpy (in->x_file.x_fname, ext->File.Name,
+		    numaux * sizeof (AUXENT_BIGOBJ));
+	}
+      else
+	memcpy (in->x_file.x_fname, ext->File.Name, sizeof (ext->File.Name));
+      break;
+
+    case C_STAT:
+    case C_LEAFSTAT:
+    case C_HIDDEN:
+      if (type == T_NULL)
+	{
+	  in->x_scn.x_scnlen = H_GET_32 (abfd, ext->Section.Length);
+	  in->x_scn.x_nreloc =
+	    H_GET_16 (abfd, ext->Section.NumberOfRelocations);
+	  in->x_scn.x_nlinno =
+	    H_GET_16 (abfd, ext->Section.NumberOfLinenumbers);
+	  in->x_scn.x_checksum = H_GET_32 (abfd, ext->Section.Checksum);
+	  in->x_scn.x_associated = H_GET_16 (abfd, ext->Section.Number)
+	    | (H_GET_16 (abfd, ext->Section.HighNumber) << 16);
+	  in->x_scn.x_comdat = H_GET_8 (abfd, ext->Section.Selection);
+	  return;
+	}
+      break;
+
+    default:
+      in->x_sym.x_tagndx.l = H_GET_32 (abfd, ext->Sym.WeakDefaultSymIndex);
+      /* Characteristics is ignored.  */
+      break;
+    }
+}
+
+static unsigned int
+coff_bigobj_swap_aux_out (bfd * abfd,
+			  void * inp,
+			  int type,
+			  int in_class,
+			  int indx ATTRIBUTE_UNUSED,
+			  int numaux ATTRIBUTE_UNUSED,
+			  void * extp)
+{
+  union internal_auxent * in = (union internal_auxent *) inp;
+  AUXENT_BIGOBJ *ext = (AUXENT_BIGOBJ *) extp;
+
+  memset (ext, 0, AUXESZ);
+
+  switch (in_class)
+    {
+    case C_FILE:
+      memcpy (ext->File.Name, in->x_file.x_fname, sizeof (ext->File.Name));
+
+      return AUXESZ;
+
+    case C_STAT:
+    case C_LEAFSTAT:
+    case C_HIDDEN:
+      if (type == T_NULL)
+	{
+	  H_PUT_32 (abfd, in->x_scn.x_scnlen, ext->Section.Length);
+	  H_PUT_16 (abfd, in->x_scn.x_nreloc,
+		    ext->Section.NumberOfRelocations);
+	  H_PUT_16 (abfd, in->x_scn.x_nlinno,
+		    ext->Section.NumberOfLinenumbers);
+	  H_PUT_32 (abfd, in->x_scn.x_checksum, ext->Section.Checksum);
+	  H_PUT_16 (abfd, in->x_scn.x_associated & 0xffff,
+		    ext->Section.Number);
+	  H_PUT_16 (abfd, (in->x_scn.x_associated >> 16),
+		    ext->Section.HighNumber);
+	  H_PUT_8 (abfd, in->x_scn.x_comdat, ext->Section.Selection);
+	  return AUXESZ;
+	}
+      break;
+    }
+
+  H_PUT_32 (abfd, in->x_sym.x_tagndx.l, ext->Sym.WeakDefaultSymIndex);
+  H_PUT_32 (abfd, 1, ext->Sym.WeakSearchType);
+
+  return AUXESZ;
+}
+
+static bfd_coff_backend_data bigobj_swap_table =
+{
+  coff_bigobj_swap_aux_in, coff_bigobj_swap_sym_in, coff_SWAP_lineno_in,
+  coff_bigobj_swap_aux_out, coff_bigobj_swap_sym_out,
+  coff_SWAP_lineno_out, coff_SWAP_reloc_out,
+  coff_bigobj_swap_filehdr_out, coff_SWAP_aouthdr_out,
+  coff_SWAP_scnhdr_out,
+  FILHSZ_BIGOBJ, AOUTSZ, SCNHSZ, SYMESZ_BIGOBJ, AUXESZ_BIGOBJ,
+   RELSZ, LINESZ, FILNMLEN_BIGOBJ,
+  TRUE,
+  COFF_DEFAULT_LONG_SECTION_NAMES,
+  COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
+  FALSE,
+  2,
+  1U << 31,
+  coff_bigobj_swap_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
+  coff_SWAP_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
+  coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
+  coff_slurp_symbol_table, symname_in_debug_hook, coff_pointerize_aux_hook,
+  coff_print_aux, coff_reloc16_extra_cases, coff_reloc16_estimate,
+  coff_classify_symbol, coff_compute_section_file_positions,
+  coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
+  coff_adjust_symndx, coff_link_add_one_symbol,
+  coff_link_output_has_begun, coff_final_link_postscript,
+  bfd_pe_print_pdata	/* huh */
+};
+
+#endif /* COFF_WITH_PE_BIGOBJ */
 
 #ifndef coff_close_and_cleanup
 #define coff_close_and_cleanup		    _bfd_generic_close_and_cleanup

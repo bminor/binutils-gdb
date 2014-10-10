@@ -159,6 +159,9 @@
 /* Define if <sys/procfs.h> has gregset_t. */
 #undef HAVE_GREGSET_T
 
+/* Define if Guile interpreter is being linked in. */
+#undef HAVE_GUILE
+
 /* Define if you have the iconv() function. */
 #undef HAVE_ICONV
 
@@ -339,6 +342,9 @@
 /* Define to 1 if you have the `sbrk' function. */
 #undef HAVE_SBRK
 
+/* Define to 1 if you have the `scm_new_smob' function. */
+#undef HAVE_SCM_NEW_SMOB
+
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE
 
@@ -359,6 +365,9 @@
 
 /* Define to 1 if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
+
+/* Define to 1 if you have the `sigaltstack' function. */
+#undef HAVE_SIGALTSTACK
 
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
@@ -515,6 +524,9 @@
 
 /* Define to 1 if you have the `wborder' function. */
 #undef HAVE_WBORDER
+
+/* Define to 1 if you have the <windows.h> header file. */
+#undef HAVE_WINDOWS_H
 
 /* Define to 1 if `fork' works. */
 #undef HAVE_WORKING_FORK

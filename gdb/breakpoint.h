@@ -25,10 +25,12 @@
 #include "ax.h"
 #include "command.h"
 #include "break-common.h"
+#include "probe.h"
 
 struct value;
 struct block;
 struct gdbpy_breakpoint_object;
+struct gdbscm_breakpoint_object;
 struct get_number_or_range_state;
 struct thread_info;
 struct bpstats;
@@ -436,7 +438,7 @@ struct bp_location
 
   /* If the location comes from a probe point, this is the probe associated
      with it.  */
-  struct probe *probe;
+  struct bound_probe probe;
 
   char *function_name;
 
@@ -739,6 +741,9 @@ struct breakpoint
        can sometimes be NULL for enabled GDBs as not all breakpoint
        types are tracked by the scripting language API.  */
     struct gdbpy_breakpoint_object *py_bp_object;
+
+    /* Same as py_bp_object, but for Scheme.  */
+    struct gdbscm_breakpoint_object *scm_bp_object;
   };
 
 /* An instance of this type is used to represent a watchpoint.  It
@@ -773,6 +778,11 @@ struct watchpoint
   /* Nonzero if VAL is valid.  If VAL_VALID is set but VAL is NULL,
      then an error occurred reading the value.  */
   int val_valid;
+
+  /* When watching the location of a bitfield, contains the offset and size of
+     the bitfield.  Otherwise contains 0.  */
+  int val_bitpos;
+  int val_bitsize;
 
   /* Holds the frame address which identifies the frame this
      watchpoint should be evaluated in, or `null' if the watchpoint
@@ -1121,6 +1131,9 @@ extern int regular_breakpoint_inserted_here_p (struct address_space *,
 extern int software_breakpoint_inserted_here_p (struct address_space *, 
 						CORE_ADDR);
 
+extern int single_step_breakpoint_inserted_here_p (struct address_space *,
+						   CORE_ADDR);
+
 /* Returns true if there's a hardware watchpoint or access watchpoint
    inserted in the range defined by ADDR and LEN.  */
 extern int hardware_watchpoint_inserted_in_range (struct address_space *,
@@ -1129,6 +1142,16 @@ extern int hardware_watchpoint_inserted_in_range (struct address_space *,
 
 extern int breakpoint_thread_match (struct address_space *, 
 				    CORE_ADDR, ptid_t);
+
+/* Returns true if {ASPACE1,ADDR1} and {ASPACE2,ADDR2} represent the
+   same breakpoint location.  In most targets, this can only be true
+   if ASPACE1 matches ASPACE2.  On targets that have global
+   breakpoints, the address space doesn't really matter.  */
+
+extern int breakpoint_address_match (struct address_space *aspace1,
+				     CORE_ADDR addr1,
+				     struct address_space *aspace2,
+				     CORE_ADDR addr2);
 
 extern void until_break_command (char *, int, int);
 
@@ -1203,8 +1226,7 @@ extern void initialize_breakpoint_ops (void);
 
 extern void
   add_catch_command (char *name, char *docstring,
-		     void (*sfunc) (char *args, int from_tty,
-				    struct cmd_list_element *command),
+		     cmd_sfunc_ftype *sfunc,
 		     completer_ftype *completer,
 		     void *user_data_catch,
 		     void *user_data_tcatch);
@@ -1311,7 +1333,7 @@ extern void delete_longjmp_breakpoint (int thread);
 extern void delete_longjmp_breakpoint_at_next_stop (int thread);
 
 extern struct breakpoint *set_longjmp_breakpoint_for_call_dummy (void);
-extern void check_longjmp_breakpoint_for_call_dummy (int thread);
+extern void check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp);
 
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);
@@ -1402,12 +1424,23 @@ extern struct breakpoint *create_jit_event_breakpoint (struct gdbarch *,
 extern struct breakpoint *create_solib_event_breakpoint (struct gdbarch *,
 							 CORE_ADDR);
 
+/* Create an solib event breakpoint at ADDRESS in the current program
+   space, and immediately try to insert it.  Returns a pointer to the
+   breakpoint on success.  Deletes the new breakpoint and returns NULL
+   if inserting the breakpoint fails.  */
+extern struct breakpoint *create_and_insert_solib_event_breakpoint
+  (struct gdbarch *gdbarch, CORE_ADDR address);
+
 extern struct breakpoint *create_thread_event_breakpoint (struct gdbarch *,
 							  CORE_ADDR);
 
 extern void remove_jit_event_breakpoints (void);
 
 extern void remove_solib_event_breakpoints (void);
+
+/* Mark solib event breakpoints of the current program space with
+   delete at next stop disposition.  */
+extern void remove_solib_event_breakpoints_at_next_stop (void);
 
 extern void remove_thread_event_breakpoints (void);
 
@@ -1458,7 +1491,7 @@ extern void breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 				    const gdb_byte *writebuf_org,
 				    ULONGEST memaddr, LONGEST len);
 
-extern int breakpoints_always_inserted_mode (void);
+extern int breakpoints_should_be_inserted_now (void);
 
 /* Called each time new event from target is processed.
    Retires previously deleted breakpoint locations that
@@ -1486,8 +1519,7 @@ extern struct tracepoint *get_tracepoint_by_number_on_target (int num);
 /* Find a tracepoint by parsing a number in the supplied string.  */
 extern struct tracepoint *
      get_tracepoint_by_number (char **arg, 
-			       struct get_number_or_range_state *state,
-			       int optional_p);
+			       struct get_number_or_range_state *state);
 
 /* Return a vector of all tracepoints currently defined.  The vector
    is newly allocated; the caller should free when done with it.  */

@@ -24,9 +24,6 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "serial.h"
-#include <string.h>
-
-
 /*
  * NS16550 UART registers
  */

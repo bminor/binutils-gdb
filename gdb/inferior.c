@@ -475,8 +475,8 @@ have_live_inferiors (void)
   return inf != NULL;
 }
 
-/* Prune away automatically added program spaces that aren't required
-   anymore.  */
+/* Prune away any unused inferiors, and then prune away no longer used
+   program spaces.  */
 
 void
 prune_inferiors (void)
@@ -788,6 +788,8 @@ remove_inferior_command (char *args, int from_tty)
 
       delete_inferior_1 (inf, 1);
     }
+
+  prune_program_spaces ();
 }
 
 struct inferior *

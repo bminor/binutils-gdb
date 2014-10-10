@@ -24,7 +24,6 @@
    Avoid placing any object file format specific code in this file.  */
 
 #include "defs.h"
-#include <string.h>
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"
@@ -44,8 +43,6 @@
 #include "doublest.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gdb_assert.h"
-
 #include <ctype.h>
 
 /* Ask stabsread.h to define the vars it normally declares `extern'.  */
@@ -863,9 +860,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    /* NULL terminate the string.  */
 	    string_local[ind] = 0;
 	    range_type
-	      = create_range_type (NULL,
-				   objfile_type (objfile)->builtin_int,
-				   0, ind);
+	      = create_static_range_type (NULL,
+					  objfile_type (objfile)->builtin_int,
+					  0, ind);
 	    SYMBOL_TYPE (sym) = create_array_type (NULL,
 				  objfile_type (objfile)->builtin_char,
 				  range_type);
@@ -1168,17 +1165,17 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 					    SYMBOL_LINKAGE_NAME (sym))
 	     != SYMBOL_LINKAGE_NAME (sym))
 	{
-	  struct minimal_symbol *msym;
+	  struct bound_minimal_symbol msym;
 
 	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym),
 					NULL, objfile);
-	  if (msym != NULL)
+	  if (msym.minsym != NULL)
 	    {
 	      const char *new_name = gdbarch_static_transform_name
 		(gdbarch, SYMBOL_LINKAGE_NAME (sym));
 
 	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
-	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
+	      SYMBOL_VALUE_ADDRESS (sym) = BMSYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -1360,17 +1357,17 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 					    SYMBOL_LINKAGE_NAME (sym))
 	     != SYMBOL_LINKAGE_NAME (sym))
 	{
-	  struct minimal_symbol *msym;
+	  struct bound_minimal_symbol msym;
 
 	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym), 
 					NULL, objfile);
-	  if (msym != NULL)
+	  if (msym.minsym != NULL)
 	    {
 	      const char *new_name = gdbarch_static_transform_name
 		(gdbarch, SYMBOL_LINKAGE_NAME (sym));
 
 	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
-	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
+	      SYMBOL_VALUE_ADDRESS (sym) = BMSYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -3615,7 +3612,7 @@ read_array_type (char **pp, struct type *type,
     }
 
   range_type =
-    create_range_type ((struct type *) NULL, index_type, lower, upper);
+    create_static_range_type ((struct type *) NULL, index_type, lower, upper);
   type = create_array_type (type, element_type, range_type);
 
   return type;
@@ -4245,7 +4242,8 @@ handle_true_range:
       index_type = objfile_type (objfile)->builtin_int;
     }
 
-  result_type = create_range_type ((struct type *) NULL, index_type, n2, n3);
+  result_type
+    = create_static_range_type ((struct type *) NULL, index_type, n2, n3);
   return (result_type);
 }
 
@@ -4654,11 +4652,11 @@ scan_file_globals (struct objfile *objfile)
 	  /* Get the hash index and check all the symbols
 	     under that hash index.  */
 
-	  hash = hashname (SYMBOL_LINKAGE_NAME (msymbol));
+	  hash = hashname (MSYMBOL_LINKAGE_NAME (msymbol));
 
 	  for (sym = global_sym_chain[hash]; sym;)
 	    {
-	      if (strcmp (SYMBOL_LINKAGE_NAME (msymbol),
+	      if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
 			  SYMBOL_LINKAGE_NAME (sym)) == 0)
 		{
 		  /* Splice this symbol out of the hash chain and
@@ -4680,14 +4678,15 @@ scan_file_globals (struct objfile *objfile)
 		      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
 			{
 			  fix_common_block (sym,
-					    SYMBOL_VALUE_ADDRESS (msymbol));
+					    MSYMBOL_VALUE_ADDRESS (resolve_objfile,
+								   msymbol));
 			}
 		      else
 			{
 			  SYMBOL_VALUE_ADDRESS (sym)
-			    = SYMBOL_VALUE_ADDRESS (msymbol);
+			    = MSYMBOL_VALUE_ADDRESS (resolve_objfile, msymbol);
 			}
-		      SYMBOL_SECTION (sym) = SYMBOL_SECTION (msymbol);
+		      SYMBOL_SECTION (sym) = MSYMBOL_SECTION (msymbol);
 		    }
 
 		  if (prev)

@@ -24,8 +24,6 @@
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "tui/tui-wingeneral.h"
-
-#include <string.h>
 #include "gdb_curses.h"
 
 /****************************

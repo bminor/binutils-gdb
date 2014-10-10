@@ -30,8 +30,6 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include <string.h>
-
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -50,7 +48,7 @@ extern void _initialize_language (void);
 
 static void unk_lang_error (char *);
 
-static int unk_lang_parser (void);
+static int unk_lang_parser (struct parser_state *);
 
 static void show_check (char *, int);
 
@@ -505,7 +503,7 @@ set_check (char *ignore, int from_tty)
 {
   printf_unfiltered (
      "\"set check\" must be followed by the name of a check subcommand.\n");
-  help_list (setchecklist, "set check ", -1, gdb_stdout);
+  help_list (setchecklist, "set check ", all_commands, gdb_stdout);
 }
 
 static void
@@ -694,7 +692,7 @@ default_get_string (struct value *value, gdb_byte **buffer, int *length,
 /* Define the language that is no language.  */
 
 static int
-unk_lang_parser (void)
+unk_lang_parser (struct parser_state *ps)
 {
   return 1;
 }

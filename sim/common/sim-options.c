@@ -971,7 +971,7 @@ sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 }
 
 SIM_RC
-sim_args_command (SIM_DESC sd, char *cmd)
+sim_args_command (SIM_DESC sd, const char *cmd)
 {
   /* something to do? */
   if (cmd == NULL)

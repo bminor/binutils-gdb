@@ -22,9 +22,6 @@
 #include "regcache.h"
 #include "regset.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "hppa-tdep.h"
 #include "hppabsd-tdep.h"
 
@@ -131,13 +128,13 @@ hppaobsd_supply_fpregset (const struct regset *regset,
 
 /* OpenBSD/hppa register sets.  */
 
-static struct regset hppaobsd_gregset =
+static const struct regset hppaobsd_gregset =
 {
   NULL,
   hppaobsd_supply_gregset
 };
 
-static struct regset hppaobsd_fpregset =
+static const struct regset hppaobsd_fpregset =
 {
   NULL,
   hppaobsd_supply_fpregset

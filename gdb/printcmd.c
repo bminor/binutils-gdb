@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <string.h>
 #include "frame.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -37,7 +36,6 @@
 #include "objfiles.h"		/* ditto */
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "disasm.h"
 #include "dfp.h"
@@ -631,7 +629,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 			int *line,       /* OUT */
 			int *unmapped)   /* OUT */
 {
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
   struct symbol *symbol;
   CORE_ADDR name_location = 0;
   struct obj_section *section = NULL;
@@ -661,7 +659,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
      save some memory, but for many debug format--ELF/DWARF or
      anything/stabs--it would be inconvenient to eliminate those minimal
      symbols anyway).  */
-  msymbol = lookup_minimal_symbol_by_pc_section (addr, section).minsym;
+  msymbol = lookup_minimal_symbol_by_pc_section (addr, section);
   symbol = find_pc_sect_function (addr, section);
 
   if (symbol)
@@ -680,40 +678,40 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	name_temp = SYMBOL_LINKAGE_NAME (symbol);
     }
 
-  if (msymbol != NULL
-      && MSYMBOL_HAS_SIZE (msymbol)
-      && MSYMBOL_SIZE (msymbol) == 0
-      && MSYMBOL_TYPE (msymbol) != mst_text
-      && MSYMBOL_TYPE (msymbol) != mst_text_gnu_ifunc
-      && MSYMBOL_TYPE (msymbol) != mst_file_text)
-    msymbol = NULL;
+  if (msymbol.minsym != NULL
+      && MSYMBOL_HAS_SIZE (msymbol.minsym)
+      && MSYMBOL_SIZE (msymbol.minsym) == 0
+      && MSYMBOL_TYPE (msymbol.minsym) != mst_text
+      && MSYMBOL_TYPE (msymbol.minsym) != mst_text_gnu_ifunc
+      && MSYMBOL_TYPE (msymbol.minsym) != mst_file_text)
+    msymbol.minsym = NULL;
 
-  if (msymbol != NULL)
+  if (msymbol.minsym != NULL)
     {
-      if (SYMBOL_VALUE_ADDRESS (msymbol) > name_location || symbol == NULL)
+      if (BMSYMBOL_VALUE_ADDRESS (msymbol) > name_location || symbol == NULL)
 	{
 	  /* If this is a function (i.e. a code address), strip out any
 	     non-address bits.  For instance, display a pointer to the
 	     first instruction of a Thumb function as <function>; the
 	     second instruction will be <function+2>, even though the
 	     pointer is <function+3>.  This matches the ISA behavior.  */
-	  if (MSYMBOL_TYPE (msymbol) == mst_text
-	      || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
-	      || MSYMBOL_TYPE (msymbol) == mst_file_text
-	      || MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
+	  if (MSYMBOL_TYPE (msymbol.minsym) == mst_text
+	      || MSYMBOL_TYPE (msymbol.minsym) == mst_text_gnu_ifunc
+	      || MSYMBOL_TYPE (msymbol.minsym) == mst_file_text
+	      || MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
 	    addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
 	  /* The msymbol is closer to the address than the symbol;
 	     use the msymbol instead.  */
 	  symbol = 0;
-	  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
+	  name_location = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	  if (do_demangle || asm_demangle)
-	    name_temp = SYMBOL_PRINT_NAME (msymbol);
+	    name_temp = MSYMBOL_PRINT_NAME (msymbol.minsym);
 	  else
-	    name_temp = SYMBOL_LINKAGE_NAME (msymbol);
+	    name_temp = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
 	}
     }
-  if (symbol == NULL && msymbol == NULL)
+  if (symbol == NULL && msymbol.minsym == NULL)
     return 1;
 
   /* If the nearest symbol is too far away, don't print anything symbolic.  */
@@ -985,16 +983,11 @@ print_command_1 (const char *exp, int voidprint)
       struct value_print_options opts;
       int histindex = record_latest_value (val);
 
-      if (histindex >= 0)
-	annotate_value_history_begin (histindex, value_type (val));
-      else
-	annotate_value_begin (value_type (val));
+      annotate_value_history_begin (histindex, value_type (val));
 
-      if (histindex >= 0)
-	printf_filtered ("$%d = ", histindex);
+      printf_filtered ("$%d = ", histindex);
 
-      if (histindex >= 0)
-	annotate_value_history_value ();
+      annotate_value_history_value ();
 
       get_formatted_print_options (&opts, format);
       opts.raw = fmt.raw;
@@ -1002,10 +995,7 @@ print_command_1 (const char *exp, int voidprint)
       print_formatted (val, fmt.size, &opts, gdb_stdout);
       printf_filtered ("\n");
 
-      if (histindex >= 0)
-	annotate_value_history_end ();
-      else
-	annotate_value_end ();
+      annotate_value_history_end ();
     }
 
   do_cleanups (old_chain);
@@ -1134,10 +1124,10 @@ sym_info (char *arg, int from_tty)
 	struct cleanup *old_chain;
 
 	matches = 1;
-	offset = sect_addr - SYMBOL_VALUE_ADDRESS (msymbol);
+	offset = sect_addr - MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
 	mapped = section_is_mapped (osect) ? _("mapped") : _("unmapped");
 	sec_name = osect->the_bfd_section->name;
-	msym_name = SYMBOL_PRINT_NAME (msymbol);
+	msym_name = MSYMBOL_PRINT_NAME (msymbol);
 
 	/* Don't print the offset if it is zero.
 	   We assume there's no need to handle i18n of "sym + offset".  */
@@ -1233,7 +1223,7 @@ address_info (char *exp, int from_tty)
 	  struct objfile *objfile = msymbol.objfile;
 
 	  gdbarch = get_objfile_arch (objfile);
-	  load_addr = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
+	  load_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
 	  printf_filtered ("Symbol \"");
 	  fprintf_symbol_filtered (gdb_stdout, exp,
@@ -1241,7 +1231,7 @@ address_info (char *exp, int from_tty)
 	  printf_filtered ("\" is at ");
 	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 	  printf_filtered (" in a file compiled without debugging");
-	  section = SYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
+	  section = MSYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
 	  if (section_is_overlay (section))
 	    {
 	      load_addr = overlay_unmapped_address (load_addr, section);
@@ -1374,8 +1364,8 @@ address_info (char *exp, int from_tty)
 	  printf_filtered ("unresolved");
 	else
 	  {
-	    section = SYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
-	    load_addr = SYMBOL_VALUE_ADDRESS (msym.minsym);
+	    section = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
+	    load_addr = BMSYMBOL_VALUE_ADDRESS (msym);
 
 	    if (section
 		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
@@ -1555,7 +1545,7 @@ display_command (char *arg, int from_tty)
       new->enabled_p = 1;
       display_chain = new;
 
-      if (from_tty && target_has_execution)
+      if (from_tty)
 	do_one_display (new);
 
       dont_repeat ();
@@ -1626,7 +1616,7 @@ map_display_numbers (char *args,
 
   while (!state.finished)
     {
-      char *p = state.string;
+      const char *p = state.string;
 
       num = get_number_or_range (&state);
       if (num == 0)

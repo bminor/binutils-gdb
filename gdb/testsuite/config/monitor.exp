@@ -86,7 +86,7 @@ proc gdb_target_monitor { exec_file } {
 	return -1
     }
     if [target_info exists baud] {
-	gdb_test "set remotebaud [target_info baud]" "" ""
+	gdb_test "set serial baud [target_info baud]" "" ""
     }
     if [target_info exists binarydownload] {
 	gdb_test "set remotebinarydownload [target_info binarydownload]" "" ""

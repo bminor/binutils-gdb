@@ -8,14 +8,14 @@
 Disassembly of section \.text:
 
 0+100000c0 <.*\.plt_branch\.f2>:
-.*:	(ff ff 62 3d|3d 62 ff ff) 	addis   r11,r2,-1
-.*:	(f0 7f 8b e9|e9 8b 7f f0) 	ld      r12,32752\(r11\)
+.*:	(ff ff 82 3d|3d 82 ff ff) 	addis   r12,r2,-1
+.*:	(f0 7f 8c e9|e9 8c 7f f0) 	ld      r12,32752\(r12\)
 .*:	(a6 03 89 7d|7d 89 03 a6) 	mtctr   r12
 .*:	(20 04 80 4e|4e 80 04 20) 	bctr
 
 0+100000d0 <.*\.plt_branch\.f4>:
-.*:	(ff ff 62 3d|3d 62 ff ff) 	addis   r11,r2,-1
-.*:	(f8 7f 8b e9|e9 8b 7f f8) 	ld      r12,32760\(r11\)
+.*:	(ff ff 82 3d|3d 82 ff ff) 	addis   r12,r2,-1
+.*:	(f8 7f 8c e9|e9 8c 7f f8) 	ld      r12,32760\(r12\)
 .*:	(a6 03 89 7d|7d 89 03 a6) 	mtctr   r12
 .*:	(20 04 80 4e|4e 80 04 20) 	bctr
 

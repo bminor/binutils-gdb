@@ -9,7 +9,7 @@
 
 # Like local1, but with two checks for a local register.
 
-There are 6 section headers, starting at offset 0xc8:
+There are 6 section headers, starting at offset .*:
 
 Section Headers:
  +\[Nr\] Name +Type +Address +Offset

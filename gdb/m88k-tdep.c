@@ -31,9 +31,6 @@
 #include "trad-frame.h"
 #include "value.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "m88k-tdep.h"
 
 /* Fetch the instruction at PC.  */
@@ -799,7 +796,7 @@ m88k_supply_gregset (const struct regset *regset,
 
 /* Motorola 88000 register set.  */
 
-static struct regset m88k_gregset =
+static const struct regset m88k_gregset =
 {
   NULL,
   m88k_supply_gregset

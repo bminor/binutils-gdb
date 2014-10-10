@@ -25,6 +25,11 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] 
 setenv INPUTRC $inputrc
 clean_restart ${binfile}
 
+if { ![readline_is_used] } {
+    unsupported "completion doesn't work when readline isn't used."
+    return -1
+}
+
 gdb_test_no_output "set width 50"
 gdb_test_no_output "set height 3"
 

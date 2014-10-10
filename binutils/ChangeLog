@@ -1,3 +1,337 @@
+2014-09-22  Alan Modra  <amodra@gmail.com>
+
+	PR 16563
+	* dwarf.c (GET): Remove semicolon.
+	(read_cie): New function, extracted from..
+	(display_debug_frames): ..here.  Correctly handle signed offset
+	from FDE to CIE in .eh_frame.  Decode forward referenced CIEs too.
+
+2014-09-16  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (display_arm_attribute): Use unsigned int type for
+	tag, val and type variables.
+
+2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* readelf.c (decode_NDS32_machine_flags): Display ABI2 FP+.
+
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_machine_flags): Add support for mips32r6 and
+	mips64r6.
+
+2014-09-01  Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* objcopy.c (is_nondebug_keep_contents_section): Change
+	'.build-id' to '.buildid'.
+
+2014-08-22  Richard Henderson  <rth@redhat.com>
+
+	* dwarf.h (init_dwarf_regnames_aarch64): Declare.
+	* dwarf.c (dwarf_regnames_aarch64): New.
+	(init_dwarf_regnames_aarch64): New.
+	(init_dwarf_regnames): Call it.
+	* objdump.c (dump_dwarf): Likewise.
+
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Move ACX_LARGEFILE after LT_INIT.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_mips_segment_type): Display name for PT_MIPS_ABIFLAGS.
+	(get_mips_section_type_name): Display name for SHT_MIPS_ABIFLAGS.
+	(display_mips_gnu_attribute): Abstracted fp abi printing to...
+	(print_mips_fp_abi_value): New static function. Handle new FP ABIs.
+	(print_mips_ases, print_mips_isa_ext): New static functions.
+	(get_mips_reg_size): Likewise.
+	(process_mips_specific): Display abiflags data.
+
+2014-07-28  Alan Modra  <amodra@gmail.com>
+
+	PR 13227
+	* nm.c (filter_symbols): Warn on __gnu_lto_slim.
+
+2014-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_symbol_type): Revert accidental change to
+	detection of thumb function symbols.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Rename from configure.in.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2014-07-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Include bfd/version.m4.
+	(AC_INIT, AM_INIT_AUTOMAKE): Use modern form.
+	(BFD_VERSION): Delete.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Remove bfd/configure.in.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2014-07-03  Tristan Gingold  <gingold@adacore.com>
+
+	* doc/binutils.texi: Clarify addr2line output.
+
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (dump_bfd_header): Don't print HAS_LOAD_PAGE.
+
+2014-06-26  Erik Akermann  <kurterikackermann@gmail.com>
+
+	* strings.c: Add -w/--include-all-whitespace option to include any
+	whitespace character in the displayed strings.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi (strings): Document the new command line
+	option.
+
+2014-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_note_sections): If there are no note sections
+	try processing note segments instead.
+
+2014-06-17  Anton Lavrentiwev  <lavr@ncbi.nim.nih.gov>
+
+	PR binutils/16923
+	* rcparse.y (fixedverinfo): Prevent large version numbers from
+	corrupting other values.
+
+2014-06-09  Romain Chastenet  <romain.chastenet@free.fr>
+
+	PR binutils/16252
+	* dwarf.c (display_debug_frames): Remember the state of the
+	cfa_offset, cfa_reg, ra and cfa_exp field
+
+2014-06-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Add dependency on
+	bfd's development.sh.
+	* Makefile.in, configure: Regenerate.
+
+2014-05-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* objcopy.c (is_nondebug_keep_contents_section): New function.
+	(setup_section): Use it.
+
+2014-05-16  Kaushik Phata  <Kaushik.Phatak@kpit.com>
+
+	* readelf.c (get_machine_flags): Handle RL78 64-bit doubles flag.
+
+2014-05-02  Alan Modra  <amodra@gmail.com>
+
+	* emul_aix.c: Update bfd target vector naming.
+	* testsuite/binutils-all/objcopy.exp: Likewise.
+
+2014-04-24  Christian Svensson  <blue@cmd.nu>
+
+	* MAINTAINERS: Add myself and Stefan as OR1K maintainers.
+
+2014-04-23  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* doc/binutils.texi: Document the disassemble MIPS XPA instructions
+	command line option.
+
+2014-04-22  Christian Svensson  <blue@cmd.nu>
+
+	* readelf.c: Remove openrisc and or32 support.  Add support for or1k.
+
+2014-04-18  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_section_map): Adjust as load commands
+	are now chained.
+	(dump_load_command, dump_section_content): Likewise.
+
+2014-04-16  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (OPT_DYLD_INFO): New macro.
+	(options): Add entry for dyld_info.
+	(mach_o_help): Likewise.
+	(load_and_dump, dump_dyld_info_rebase, dump_dyld_info_bind)
+	(dump_dyld_info_export_1, dump_dyld_info_export): New functions.
+	(bfd_mach_o_dyld_rebase_type_name): New array.
+	(export_info_data): New struct.
+	(dump_dyld_info): Add verbose argument.  Dump rebase, bind and
+	exports data.
+	(dump_load_command): Adjust dump_dyld_info call.
+	(mach_o_dump): Handle dyld_info.
+
+2014-04-16  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_header): Display sizeofcmds in decimal too.
+	(dump_segment): Reformat output.
+	(dump_dyld_info): Also display end offsets.
+	(dump_load_command): Add IDX argument, display commands size
+	and offset, reformat display.
+	(dump_load_commands): Adjust for added argument.
+
+2014-04-07  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/16811
+	* objcopy.c (copy_object): Error if no sections.
+
+2014-04-03  Markus Trippelsdorf  <markus@trippelsdorf.de>
+
+	PR binutils/14698
+	ar.c: Set plugin_target early if plugins are supported.
+	nm.c: Likewise.
+
+2014-04-03  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (printf_uint64): New function.
+	(dump_load_command, dump_obj_compact_unwind): Use it.
+	(dump_exe_compact_unwind): Display personality functions.
+
+2014-04-02  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (OPT_TWOLEVEL_HINTS): New macro.
+	(options): Add entry for twolevel_hints.
+	(dump_data_in_code): Fix error message.
+	(dump_twolevel_hints): New function.
+	(dump_load_command): Handle prebound dylib, prebind cksum
+	and twolevel hints.
+	(mach_o_dump): Handle twolevel hints.
+
+2014-04-01  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (OPT_DATA_IN_CODE): New macro.
+	(options): Add entry for data in code.
+	(mach_o_help): Ditto.
+	(data_in_code_kind_name): New array.
+	(dump_data_in_code): New function.
+	(dump_load_command): Handle data in code.
+	(mach_o_dump): Ditto.
+	(dump_header): Display a terminal newline.
+
+2014-03-27  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_load_command): Display value for
+	BFD_MACH_O_LC_DYLD_ENVIRONMENT.  Handle BFD_MACH_O_LC_DATA_IN_CODE
+	and BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS.
+
+2014-03-27  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (OPT_FUNCTION_STARTS): New macro.
+	(options): Add entry for function_starts.
+	(mach_o_help): Ditto.
+	(disp_segment_prot): New function.
+	(dump_section_map): Call disp_segment_prot.
+	(dump_function_starts): New function.
+	(dump_obj_compact_unwind): Fix ouput indentation.
+	(dump_exe_compact_unwind): Fix ouput indentation.
+	(mach_o_dump): Handle function_starts.
+
+2014-03-26  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (bfd_mach_o_cpu_name): Add BFD_MACH_O_CPU_TYPE_ARM64.
+
+2014-03-24  Tristan Gingold  <gingold@adacore.com>
+
+	* objdump.c (load_specific_debug_section): Set address of section.
+
+2014-03-24  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_unwind_encoding_x86): Set the factor.
+	(dump_exe_compact_unwind): Change the condition.  Improve
+	indentation.
+
+2014-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_version_sections): Fix off-by-one error in
+	previous delta.
+
+2014-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16723
+	* readelf.c (process_version_sections): Prevent an infinite loop
+	when the vn_next field is zero but there are still entries to be
+	processed.
+
+2014-03-17  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_section_header): Renames of dump_section.
+	(dump_segment): Adjust after renaming.
+	(OPT_COMPACT_UNWIND): Define.
+	(options): Add compact unwind.
+	(mach_o_help): Document compact_unwind.
+	(unwind_x86_64_regs, unwind_x86_regs): New arrays.
+	(dump_unwind_encoding_x86, dump_unwind_encoding)
+	(dump_obj_compact_unwind, dump_exe_compact_unwind)
+	(dump_section_content): New functions.
+	(mach_o_dump): Handle compact unwind.
+
+2014-03-17  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (dump_load_command): Handle lazy load dylib.
+
+2014-03-14  Anthony Green  <green@moxielogic.com>
+
+	* objcopy.c (copy_object): Check fwrite return code.
+
+2014-03-14  Meador Inge  <meadori@codesourcery.com>
+
+         * dwarf.c (strnlen): Move prototype ...
+	 * sysdep.h (strnlen): ... to here.
+
+2014-03-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16652
+	* doc/binutils.texi (ar cmdline): Move --plugin command line
+	option to after the command option.
+
+2014-03-12  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+
+	PR binutils/16567
+	* deflex.l: Add noinput and nounput options.
+
+2014-03-12  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2014-03-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16664
+	* readelf.c (process_attributes): Add checks for corrupt
+	attribute section names.
+
+2014-03-05  Alan Modra  <amodra@gmail.com>
+
+	Update copyright years.
+
+2014-03-03  Alan Modra  <amodra@gmail.com>
+
+	* README: Add "Copyright Notices" paragraph.
+
+2014-02-11  Cary Coutant  <ccoutant@google.com>
+
+	* binutils/dwarf.c (read_and_display_attr_value): Don't warn
+	for zero-length attribute value.
+
+2014-02-10  Alan Modra  <amodra@gmail.com>
+
+	* po/binutils.pot: Regenerate.
+
+2014-02-06  Andrew Pinski  <apinski@cavium.com>
+
+	* readelf.c  (get_machine_flags): Handle E_MIPS_MACH_OCTEON3 case.
+
+2014-02-06  Cary Coutant  <ccoutant@google.com>
+
+	PR binutils/16444
+	* readelf.c (print_gnu_note): Add support for NT_GNU_GOLD_VERSION.
+
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.c (print_version): Update copyright year to 2014.

@@ -56,7 +56,7 @@ worker (void *arg)
 	unslept = sleep (unslept);
 
       if (exit_first_thread && id == 0)
-	return;
+	return NULL;
 
       break_at_me (id, i);
     }

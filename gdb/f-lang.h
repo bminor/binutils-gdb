@@ -21,8 +21,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct type_print_options;
+struct parser_state;
 
-extern int f_parse (void);
+extern int f_parse (struct parser_state *);
 
 extern void f_error (char *);	/* Defined in f-exp.y */
 

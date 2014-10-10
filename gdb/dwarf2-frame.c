@@ -33,9 +33,6 @@
 #include "value.h"
 #include "record.h"
 
-#include "gdb_assert.h"
-#include <string.h>
-
 #include "complaints.h"
 #include "dwarf2-frame.h"
 #include "ax.h"
@@ -291,15 +288,9 @@ read_addr_from_reg (void *baton, int reg)
 {
   struct frame_info *this_frame = (struct frame_info *) baton;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int regnum;
-  gdb_byte *buf;
+  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
 
-  regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
-
-  buf = alloca (register_size (gdbarch, regnum));
-  get_frame_register (this_frame, regnum, buf);
-
-  return unpack_pointer (register_type (gdbarch, regnum), buf);
+  return address_from_register (regnum, this_frame);
 }
 
 /* Implement struct dwarf_expr_context_funcs' "get_reg_value" callback.  */

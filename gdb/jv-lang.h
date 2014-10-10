@@ -22,8 +22,9 @@
 
 struct value;
 struct type_print_options;
+struct parser_state;
 
-extern int java_parse (void);		/* Defined in jv-exp.y */
+extern int java_parse (struct parser_state *); /* Defined in jv-exp.y */
 
 extern void java_error (char *);	/* Defined in jv-exp.y */
 

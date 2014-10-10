@@ -1,4 +1,8 @@
-#!/bin/sh
+# Copyright (C) 2014 Free Software Foundation, Inc.
+# 
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.
 
 HEAP_SECTION_MSP430=" "
 HEAP_MEMORY_MSP430=" "
@@ -19,6 +23,12 @@ fi
 
 
 cat <<EOF
+/* Copyright (C) 2014 Free Software Foundation, Inc.
+
+   Copying and distribution of this script, with or without modification,
+   are permitted in any medium without royalty provided the copyright
+   notice and this notice are preserved.  */
+
 OUTPUT_FORMAT("${OUTPUT_FORMAT}","${OUTPUT_FORMAT}","${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 

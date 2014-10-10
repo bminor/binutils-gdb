@@ -26,7 +26,6 @@
 #include "gdbcore.h"
 #include "dwarf2.h"
 #include "dwarf2expr.h"
-#include "gdb_assert.h"
 
 /* Local prototypes.  */
 
@@ -1476,6 +1475,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		= value_from_contents (type,
 				       value_contents_all (result_val));
 	  }
+	  break;
+
+	case DW_OP_push_object_address:
+	  /* Return the address of the object we are currently observing.  */
+	  result = (ctx->funcs->get_object_address) (ctx->baton);
+	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
 	default:

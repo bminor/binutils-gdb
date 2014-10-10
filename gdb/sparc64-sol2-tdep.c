@@ -26,14 +26,12 @@
 #include "osabi.h"
 #include "trad-frame.h"
 
-#include "gdb_assert.h"
-
 #include "sol2-tdep.h"
 #include "sparc64-tdep.h"
 #include "solib-svr4.h"
 
 /* From <sys/regset.h>.  */
-const struct sparc_gregset sparc64_sol2_gregset =
+const struct sparc_gregmap sparc64_sol2_gregmap =
 {
   32 * 8,			/* "tstate" */
   33 * 8,			/* %pc */
@@ -46,7 +44,7 @@ const struct sparc_gregset sparc64_sol2_gregset =
   8				/* sizeof (%y) */
 };
 
-const struct sparc_fpregset sparc64_sol2_fpregset =
+const struct sparc_fpregmap sparc64_sol2_fpregmap =
 {
   0 * 8,			/* %f0 */
   33 * 8,			/* %fsr */

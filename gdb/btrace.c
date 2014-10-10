@@ -19,6 +19,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "defs.h"
 #include "btrace.h"
 #include "gdbthread.h"
 #include "exceptions.h"
@@ -62,7 +63,7 @@ ftrace_print_function_name (const struct btrace_function *bfun)
     return SYMBOL_PRINT_NAME (sym);
 
   if (msym != NULL)
-    return SYMBOL_PRINT_NAME (msym);
+    return MSYMBOL_PRINT_NAME (msym);
 
   return "<unknown>";
 }
@@ -138,7 +139,7 @@ ftrace_function_switched (const struct btrace_function *bfun,
 
   /* If the minimal symbol changed, we certainly switched functions.  */
   if (mfun != NULL && msym != NULL
-      && strcmp (SYMBOL_LINKAGE_NAME (mfun), SYMBOL_LINKAGE_NAME (msym)) != 0)
+      && strcmp (MSYMBOL_LINKAGE_NAME (mfun), MSYMBOL_LINKAGE_NAME (msym)) != 0)
     return 1;
 
   /* If the symbol changed, we certainly switched functions.  */
@@ -958,7 +959,7 @@ btrace_free_objfile (struct objfile *objfile)
 
   DEBUG ("free objfile");
 
-  ALL_THREADS (tp)
+  ALL_NON_EXITED_THREADS (tp)
     btrace_clear (tp);
 }
 

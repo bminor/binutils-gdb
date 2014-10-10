@@ -41,9 +41,6 @@
 #include "symcat.h"
 
 #include "floatformat.h"
-
-#include "gdb_assert.h"
-#include <string.h>
 #include "reggroups.h"
 #include "osabi.h"
 #include "gdb_obstack.h"
@@ -159,9 +156,6 @@ struct gdbarch
      gdbarch_dump(): Add a fprintf_unfiltered call so that the new
      field is dumped out
 
-     ``startup_gdbarch()'': Append an initial value to the static
-     variable (base values on the host's c-type system).
-
      get_gdbarch(): Implement the set/get functions (probably using
      the macro's as shortcuts).
 
@@ -229,6 +223,7 @@ struct gdbarch
   gdbarch_return_in_first_hidden_param_p_ftype *return_in_first_hidden_param_p;
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_skip_main_prologue_ftype *skip_main_prologue;
+  gdbarch_skip_entrypoint_ftype *skip_entrypoint;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
   gdbarch_remote_breakpoint_from_pc_ftype *remote_breakpoint_from_pc;
@@ -320,185 +315,8 @@ struct gdbarch
   gdbarch_insn_is_call_ftype *insn_is_call;
   gdbarch_insn_is_ret_ftype *insn_is_ret;
   gdbarch_insn_is_jump_ftype *insn_is_jump;
+  gdbarch_auxv_parse_ftype *auxv_parse;
 };
-
-
-/* The default architecture uses host values (for want of a better
-   choice).  */
-
-extern const struct bfd_arch_info bfd_default_arch_struct;
-
-struct gdbarch startup_gdbarch =
-{
-  1, /* Always initialized.  */
-  NULL, /* The obstack.  */
-  /* basic architecture information.  */
-  &bfd_default_arch_struct,  /* bfd_arch_info */
-  BFD_ENDIAN_BIG,  /* byte_order */
-  BFD_ENDIAN_BIG,  /* byte_order_for_code */
-  GDB_OSABI_UNKNOWN,  /* osabi */
-  0,  /* target_desc */
-  /* target specific vector and its dump routine.  */
-  NULL, NULL,
-  /*per-architecture data-pointers.  */
-  0, NULL,
-  /* Multi-arch values */
-  1,  /* bits_big_endian */
-  8 * sizeof (short),  /* short_bit */
-  8 * sizeof (int),  /* int_bit */
-  8 * sizeof (long),  /* long_bit */
-  8 * sizeof (LONGEST),  /* long_long_bit */
-  8 * sizeof (LONGEST),  /* long_long_align_bit */
-  16,  /* half_bit */
-  0,  /* half_format */
-  8 * sizeof (float),  /* float_bit */
-  0,  /* float_format */
-  8 * sizeof (double),  /* double_bit */
-  0,  /* double_format */
-  8 * sizeof (long double),  /* long_double_bit */
-  0,  /* long_double_format */
-  8 * sizeof (void*),  /* ptr_bit */
-  8 * sizeof (void*),  /* addr_bit */
-  sizeof (void*),  /* dwarf2_addr_size */
-  1,  /* char_signed */
-  0,  /* read_pc */
-  0,  /* write_pc */
-  legacy_virtual_frame_pointer,  /* virtual_frame_pointer */
-  0,  /* pseudo_register_read */
-  0,  /* pseudo_register_read_value */
-  0,  /* pseudo_register_write */
-  0,  /* num_regs */
-  0,  /* num_pseudo_regs */
-  0,  /* ax_pseudo_register_collect */
-  0,  /* ax_pseudo_register_push_stack */
-  -1,  /* sp_regnum */
-  -1,  /* pc_regnum */
-  -1,  /* ps_regnum */
-  0,  /* fp0_regnum */
-  no_op_reg_to_regnum,  /* stab_reg_to_regnum */
-  no_op_reg_to_regnum,  /* ecoff_reg_to_regnum */
-  no_op_reg_to_regnum,  /* sdb_reg_to_regnum */
-  no_op_reg_to_regnum,  /* dwarf2_reg_to_regnum */
-  0,  /* register_name */
-  0,  /* register_type */
-  0,  /* dummy_id */
-  -1,  /* deprecated_fp_regnum */
-  0,  /* push_dummy_call */
-  0,  /* call_dummy_location */
-  0,  /* push_dummy_code */
-  default_print_registers_info,  /* print_registers_info */
-  0,  /* print_float_info */
-  0,  /* print_vector_info */
-  legacy_register_sim_regno,  /* register_sim_regno */
-  cannot_register_not,  /* cannot_fetch_register */
-  cannot_register_not,  /* cannot_store_register */
-  0,  /* get_longjmp_target */
-  0,  /* believe_pcc_promotion */
-  generic_convert_register_p,  /* convert_register_p */
-  0,  /* register_to_value */
-  0,  /* value_to_register */
-  0,  /* value_from_register */
-  unsigned_pointer_to_address,  /* pointer_to_address */
-  unsigned_address_to_pointer,  /* address_to_pointer */
-  0,  /* integer_to_address */
-  0,  /* return_value */
-  default_return_in_first_hidden_param_p,  /* return_in_first_hidden_param_p */
-  0,  /* skip_prologue */
-  0,  /* skip_main_prologue */
-  0,  /* inner_than */
-  0,  /* breakpoint_from_pc */
-  default_remote_breakpoint_from_pc,  /* remote_breakpoint_from_pc */
-  0,  /* adjust_breakpoint_address */
-  default_memory_insert_breakpoint,  /* memory_insert_breakpoint */
-  default_memory_remove_breakpoint,  /* memory_remove_breakpoint */
-  0,  /* decr_pc_after_break */
-  0,  /* deprecated_function_start_offset */
-  default_remote_register_number,  /* remote_register_number */
-  0,  /* fetch_tls_load_module_address */
-  0,  /* frame_args_skip */
-  0,  /* unwind_pc */
-  0,  /* unwind_sp */
-  0,  /* frame_num_args */
-  0,  /* frame_align */
-  default_stabs_argument_has_addr,  /* stabs_argument_has_addr */
-  0,  /* frame_red_zone_size */
-  convert_from_func_ptr_addr_identity,  /* convert_from_func_ptr_addr */
-  core_addr_identity,  /* addr_bits_remove */
-  0,  /* software_single_step */
-  0,  /* single_step_through_delay */
-  0,  /* print_insn */
-  0,  /* skip_trampoline_code */
-  generic_skip_solib_resolver,  /* skip_solib_resolver */
-  generic_in_solib_return_trampoline,  /* in_solib_return_trampoline */
-  generic_in_function_epilogue_p,  /* in_function_epilogue_p */
-  0,  /* elf_make_msymbol_special */
-  0,  /* coff_make_msymbol_special */
-  0,  /* cannot_step_breakpoint */
-  0,  /* have_nonsteppable_watchpoint */
-  0,  /* address_class_type_flags */
-  0,  /* address_class_type_flags_to_name */
-  0,  /* address_class_name_to_type_flags */
-  default_register_reggroup_p,  /* register_reggroup_p */
-  0,  /* fetch_pointer_argument */
-  0,  /* regset_from_core_section */
-  0,  /* core_regset_sections */
-  0,  /* make_corefile_notes */
-  0,  /* elfcore_write_linux_prpsinfo */
-  0,  /* find_memory_regions */
-  0,  /* core_xfer_shared_libraries */
-  0,  /* core_xfer_shared_libraries_aix */
-  0,  /* core_pid_to_str */
-  0,  /* gcore_bfd_target */
-  0,  /* vtable_function_descriptors */
-  0,  /* vbit_in_delta */
-  0,  /* skip_permanent_breakpoint */
-  0,  /* max_insn_length */
-  0,  /* displaced_step_copy_insn */
-  default_displaced_step_hw_singlestep,  /* displaced_step_hw_singlestep */
-  0,  /* displaced_step_fixup */
-  NULL,  /* displaced_step_free_closure */
-  NULL,  /* displaced_step_location */
-  0,  /* relocate_instruction */
-  0,  /* overlay_update */
-  0,  /* core_read_description */
-  0,  /* static_transform_name */
-  0,  /* sofun_address_maybe_missing */
-  0,  /* process_record */
-  0,  /* process_record_signal */
-  0,  /* gdb_signal_from_target */
-  0,  /* gdb_signal_to_target */
-  0,  /* get_siginfo_type */
-  0,  /* record_special_symbol */
-  0,  /* get_syscall_number */
-  0,  /* stap_integer_prefixes */
-  0,  /* stap_integer_suffixes */
-  0,  /* stap_register_prefixes */
-  0,  /* stap_register_suffixes */
-  0,  /* stap_register_indirection_prefixes */
-  0,  /* stap_register_indirection_suffixes */
-  0,  /* stap_gdb_register_prefix */
-  0,  /* stap_gdb_register_suffix */
-  0,  /* stap_is_single_operand */
-  0,  /* stap_parse_special_token */
-  0,  /* has_global_solist */
-  0,  /* has_global_breakpoints */
-  default_has_shared_address_space,  /* has_shared_address_space */
-  default_fast_tracepoint_valid_at,  /* fast_tracepoint_valid_at */
-  default_auto_charset,  /* auto_charset */
-  default_auto_wide_charset,  /* auto_wide_charset */
-  0,  /* solib_symbols_extension */
-  0,  /* has_dos_based_file_system */
-  default_gen_return_address,  /* gen_return_address */
-  0,  /* info_proc */
-  0,  /* core_info_proc */
-  default_iterate_over_objfiles_in_search_order,  /* iterate_over_objfiles_in_search_order */
-  NULL,  /* ravenscar_ops */
-  default_insn_is_call,  /* insn_is_call */
-  default_insn_is_ret,  /* insn_is_ret */
-  default_insn_is_jump,  /* insn_is_jump */
-  /* startup_gdbarch() */
-};
-
 
 /* Create a new ``struct gdbarch'' based on information provided by
    ``struct gdbarch_info''.  */
@@ -714,6 +532,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->skip_prologue == 0)
     fprintf_unfiltered (log, "\n\tskip_prologue");
   /* Skip verify of skip_main_prologue, has predicate.  */
+  /* Skip verify of skip_entrypoint, has predicate.  */
   if (gdbarch->inner_than == 0)
     fprintf_unfiltered (log, "\n\tinner_than");
   if (gdbarch->breakpoint_from_pc == 0)
@@ -807,6 +626,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of insn_is_call, invalid_p == 0 */
   /* Skip verify of insn_is_ret, invalid_p == 0 */
   /* Skip verify of insn_is_jump, invalid_p == 0 */
+  /* Skip verify of auxv_parse, has predicate.  */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -869,6 +689,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: auto_wide_charset = <%s>\n",
                       host_address_to_string (gdbarch->auto_wide_charset));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_auxv_parse_p() = %d\n",
+                      gdbarch_auxv_parse_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: auxv_parse = <%s>\n",
+                      host_address_to_string (gdbarch->auxv_parse));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_ax_pseudo_register_collect_p() = %d\n",
                       gdbarch_ax_pseudo_register_collect_p (gdbarch));
@@ -1352,6 +1178,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: single_step_through_delay = <%s>\n",
                       host_address_to_string (gdbarch->single_step_through_delay));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_skip_entrypoint_p() = %d\n",
+                      gdbarch_skip_entrypoint_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: skip_entrypoint = <%s>\n",
+                      host_address_to_string (gdbarch->skip_entrypoint));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_skip_main_prologue_p() = %d\n",
                       gdbarch_skip_main_prologue_p (gdbarch));
@@ -2546,13 +2378,13 @@ set_gdbarch_value_to_register (struct gdbarch *gdbarch,
 }
 
 struct value *
-gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_info *frame)
+gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_id frame_id)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->value_from_register != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_value_from_register called\n");
-  return gdbarch->value_from_register (type, regnum, frame);
+  return gdbarch->value_from_register (gdbarch, type, regnum, frame_id);
 }
 
 void
@@ -2700,6 +2532,30 @@ set_gdbarch_skip_main_prologue (struct gdbarch *gdbarch,
                                 gdbarch_skip_main_prologue_ftype skip_main_prologue)
 {
   gdbarch->skip_main_prologue = skip_main_prologue;
+}
+
+int
+gdbarch_skip_entrypoint_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->skip_entrypoint != NULL;
+}
+
+CORE_ADDR
+gdbarch_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR ip)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->skip_entrypoint != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_entrypoint called\n");
+  return gdbarch->skip_entrypoint (gdbarch, ip);
+}
+
+void
+set_gdbarch_skip_entrypoint (struct gdbarch *gdbarch,
+                             gdbarch_skip_entrypoint_ftype skip_entrypoint)
+{
+  gdbarch->skip_entrypoint = skip_entrypoint;
 }
 
 int
@@ -3499,7 +3355,7 @@ gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch)
   return gdbarch->core_xfer_shared_libraries != NULL;
 }
 
-LONGEST
+ULONGEST
 gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);
@@ -3523,7 +3379,7 @@ gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch)
   return gdbarch->core_xfer_shared_libraries_aix != NULL;
 }
 
-LONGEST
+ULONGEST
 gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);
@@ -4398,7 +4254,7 @@ gdbarch_info_proc_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what)
+gdbarch_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->info_proc != NULL);
@@ -4422,7 +4278,7 @@ gdbarch_core_info_proc_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_core_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what)
+gdbarch_core_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_info_proc != NULL);
@@ -4521,6 +4377,30 @@ set_gdbarch_insn_is_jump (struct gdbarch *gdbarch,
                           gdbarch_insn_is_jump_ftype insn_is_jump)
 {
   gdbarch->insn_is_jump = insn_is_jump;
+}
+
+int
+gdbarch_auxv_parse_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->auxv_parse != NULL;
+}
+
+int
+gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->auxv_parse != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_auxv_parse called\n");
+  return gdbarch->auxv_parse (gdbarch, readptr, endptr, typep, valp);
+}
+
+void
+set_gdbarch_auxv_parse (struct gdbarch *gdbarch,
+                        gdbarch_auxv_parse_ftype auxv_parse)
+{
+  gdbarch->auxv_parse = auxv_parse;
 }
 
 

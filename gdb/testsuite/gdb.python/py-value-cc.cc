@@ -17,8 +17,17 @@
 
 class A {
  public:
+  int operator+ (const int a1);
+
+ public:
   int a;
 };
+
+int
+A::operator+ (const int a1)
+{
+  return a + a1;
+}
 
 union U {
   int a;
@@ -87,6 +96,8 @@ int
 main ()
 {
   A obj;
+
+  obj.a = 5;
 
   return func (obj);
 }

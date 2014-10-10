@@ -33,12 +33,12 @@
   <reg name="r23" bitsize="32" type="uint32"/>
   <reg name="et" bitsize="32" type="uint32"/>
   <reg name="bt" bitsize="32" type="uint32"/>
-  <reg name="gp" bitsize="32" type="uint32"/>
+  <reg name="gp" bitsize="32" type="data_ptr"/>
   <reg name="sp" bitsize="32" type="data_ptr"/>
-  <reg name="fp" bitsize="32" type="uint32"/>
-  <reg name="ea" bitsize="32" type="uint32"/>
+  <reg name="fp" bitsize="32" type="data_ptr"/>
+  <reg name="ea" bitsize="32" type="code_ptr"/>
   <reg name="sstatus" bitsize="32" type="uint32"/>
-  <reg name="ra" bitsize="32" type="uint32"/>
+  <reg name="ra" bitsize="32" type="code_ptr"/>
   <reg name="pc" bitsize="32" type="code_ptr"/>
   <reg name="status" bitsize="32" type="uint32"/>
   <reg name="estatus" bitsize="32" type="uint32"/>
