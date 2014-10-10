@@ -1,3 +1,10 @@
+2014-10-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR symtab/14466
+	* gdb.base/vdso-warning.c: New file.
+	* gdb.base/vdso-warning.exp: New file.
+
 2014-10-02  Doug Evans  <dje@google.com>
 
 	* gdb.base/structs.c (main): Don't run forever.

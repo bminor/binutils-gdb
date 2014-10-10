@@ -1,3 +1,11 @@
+2014-10-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR symtab/14466
+	* solib-svr4.c (svr4_read_so_list): Rename to ...
+	(svr4_current_sos_1): ... this and change the function comment.
+	(svr4_current_sos): New function.
+
 2014-10-10  Pedro Alves  <palves@redhat.com>
 
 	* arch-utils.c (default_vsyscall_range): New function.
