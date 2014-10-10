@@ -19,15 +19,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef GDBSERVER
-#include "server.h"
-#else
-#include "defs.h"
-#endif
-
+#include "common-defs.h"
 #include "linux-btrace.h"
-#include "regcache.h"
-#include "gdbthread.h"
+#include "common-regcache.h"
 #include "gdb_wait.h"
 #include "x86-cpuid.h"
 
@@ -180,11 +174,7 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
   gdb_assert (start <= end);
 
   /* The first block ends at the current pc.  */
-#ifdef GDBSERVER
-  regcache = get_thread_regcache (find_thread_ptid (tinfo->ptid), 1);
-#else
-  regcache = get_thread_regcache (tinfo->ptid);
-#endif
+  regcache = get_thread_regcache_for_ptid (tinfo->ptid);
   block.end = regcache_read_pc (regcache);
 
   /* The buffer may contain a partial record as its last entry (i.e. when the

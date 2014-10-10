@@ -23,6 +23,7 @@
 #include "regcache.h"
 #include "elf/common.h"
 #include <sys/ptrace.h>
+#include <sys/uio.h>
 #include "gregset.h"
 #include "gdb_proc_service.h"
 

@@ -1,3 +1,154 @@
+2014-09-23  Sterling Augustine  <augustine.sterling@gmail.com>
+
+	* elf32-xtensa.c (is_resolvable_asm_expansion): for cross-section
+	call relaxation use furthermost addresses where call source and
+	destination can be to check whether it's in the range of a direct
+	call.
+
+2014-09-22  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame_hdr): Don't return
+	false for overflow or overlapping FDEs.  Give more detail in
+	error messages.
+
+2014-09-22  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Don't sign extend
+	the addend if relocations are RELA.
+
+2014-09-22  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf32-nds32.c (nds32_elf_ex9_build_hash_table,
+	nds32_elf_ex9_relocation_check): Synchronize the argument type.
+
+2014-09-19  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf32-s390.c: Don't replace R_390_TLS_LE32 with R_390_TLS_TPOFF
+	for PIE.
+	* elf64-s390.c: Don't replace R_390_TLS_LE64 with R_390_TLS_TPOFF
+	for PIE.
+
+2014-09-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/17407
+	* elfcode.h (bfd_from_remote_memory): Use SIZE for HIGH_OFFSET.
+
+2014-09-16  Terry Guo  <terry.guo@arm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Return false if
+	failed to merge.
+
+2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* bfd-in2.h: Regenerate.
+	* elf32-nds32.c (nds32_elf_mkobject): Hook bfd_elf32_mkobject.
+	(nds32_elf_relax_section): Code refactoring.
+	(nds32_elf_relax_longcall1, nds32_elf_relax_longcall2,
+	nds32_elf_relax_longcall3, nds32_elf_relax_longcall4,
+	nds32_elf_relax_longcall5, nds32_elf_relax_longcall6): Relax call
+	pattern. The first three is moved from nds32_elf_relax_section,
+	and the last three is new function.
+	(nds32_elf_relax_longjump1, nds32_elf_relax_longjump2,
+	nds32_elf_relax_longjump3, nds32_elf_relax_longjump4,
+	nds32_elf_relax_longjump5, nds32_elf_relax_longjump6,
+	nds32_elf_relax_longjump7): Relax condition branch pattern. The	first
+	three is moved from nds32_elf_relax_section, and the last four
+	is new function.
+	(nds32_elf_relax_loadstore, nds32_elf_relax_lo12): Relax load-store
+	pattern and address setting pattern.
+	(nds32_elf_relax_piclo12, nds32_elf_relax_ptr,
+	nds32_elf_relax_pltgot_suff, nds32_elf_relax_got_suff,
+	nds32_elf_relax_gotoff_suff): Relax pic pattern.
+	(nds32_elf_relax_letlslo12, nds32_elf_relax_letlsadd,
+	nds32_elf_relax_letlsls): Relax TLS pattern.
+	(nds32_relax_adjust_label): Adjust alignment and nop.
+	(nds32_elf_pick_relax): Choose relaxation optimization.
+	(nds32_elf_get_relocated_section_contents): New hook.
+	(nds32_elf_order_insn_times, nds32_elf_ex9_build_itable): Release ex9
+	table 234th entry.
+	* elf32-nds32.h: Declare.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add nds32 new relocations.
+
+2014-09-15  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* dwarf2.c (find_abstract_instance_name): Use 'form' instead of
+	'name' for the typo issue, which related with commit
+	60d77146a249ae9b51d7ce98930cdbedb2cfa352.
+
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* aoutx.h (NAME (aout, machine_type)): Add mips32r6 and mips64r6.
+	* archures.c (bfd_architecture): Likewise.
+	* bfd-in2.h (bfd_architecture): Likewise.
+	(bfd_reloc_code_real): Add relocs BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3 and
+	BFD_RELOC_MIPS_19_PCREL_S2.
+	* cpu-mips.c (arch_info_struct): Add mips32r6 and mips64r6.
+	* elf32-mips.c: Define relocs R_MIPS_PC21_S2, R_MIPS_PC26_S2
+	R_MIPS_PC18_S3, R_MIPS_PC19_S2, R_MIPS_PCHI16 and R_MIPS_PCLO16.
+	(mips_reloc_map): Add entries for BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3,
+	BFD_RELOC_MIPS_19_PCREL_S2, BFD_RELOC_HI16_S_PCREL and
+	BFD_RELOC_LO16_PCREL.
+	* elf64-mips.c: Define REL, and RELA relocations R_MIPS_PC21_S2,
+	R_MIPS_PC26_S2, R_MIPS_PC18_S3, R_MIPS_PC19_S2, R_MIPS_PCHI16
+	and R_MIPS_PCLO16.
+	(mips_reloc_map): Add entries for BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3,
+	BFD_RELOC_MIPS_19_PCREL_S2, BFD_RELOC_HI16_S_PCREL and
+	BFD_RELOC_LO16_PCREL.
+	* elfn32-mips.c: Likewise.
+	* elfxx-mips.c (MIPSR6_P): New define.
+	(mipsr6_exec_plt_entry): New array.
+	(hi16_reloc_p): Add support for R_MIPS_PCHI16.
+	(lo16_reloc_p): Add support for R_MIPS_PCLO16.
+	(aligned_pcrel_reloc_p): New function.
+	(mips_elf_relocation_needs_la25_stub): Add support for relocs:
+	R_MIPS_PC21_S2 and R_MIPS_PC26_S2.
+	(mips_elf_calculate_relocation): Add support for relocs:
+	R_MIPS_PC21_S2, R_MIPS_PC26_S2, R_MIPS_PC18_S3, R_MIPS_PC19_S2,
+	R_MIPS_PCHI16 and R_MIPS_PCLO16.
+	(_bfd_elf_mips_mach): Add support for mips32r6 and mips64r6.
+	(mips_elf_add_lo16_rel_addend): Add support for R_MIPS_PCHI16.
+	(_bfd_mips_elf_check_relocs): Add support for relocs:
+	R_MIPS_PC21_S2 and R_MIPS_PC26_S2.
+	(_bfd_mips_elf_relocate_section): Add a check for unaligned
+	pc relative relocs.
+	(_bfd_mips_elf_finish_dynamic_symbol): Add support for MIPS r6
+	plt entry.
+	(mips_set_isa_flags): Add support for mips32r6 and mips64r6.
+	(_bfd_mips_elf_print_private_bfd_data): Likewise.
+	(mips_32bit_flags_p): Add support for mips32r6.
+	* libbfd.h (bfd_reloc_code_real_names): Add entries for
+	BFD_RELOC_MIPS_21_PCREL_S2, BFD_RELOC_MIPS_26_PCREL_S2,
+	BFD_RELOC_MIPS_18_PCREL_S3 and BFD_RELOC_MIPS_19_PCREL_S2.
+	* reloc.c: Document relocs BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3 and
+	BFD_RELOC_MIPS_19_PCREL_S2.
+	* config.bfd: Add mips*-img-elf* target triple.
+
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config.bfd: Add mips*-img-elf* target triple.
+
+2014-09-12  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct eh_frame_array_ent): Add "range".
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Stash address
+	range of FDEs to hdr_info->array.
+	(_bfd_elf_write_section_eh_frame_hdr): Report overflow in
+	.eh_frame_hdr entries, and overlapping FDEs.
+
+2014-09-10  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (assign_file_positions_except_relocs): Move section header
+	placement to..
+	(_bfd_elf_assign_file_positions_for_relocs): ..here.  Make static.
+	* elf-bfd.h (_bfd_elf_assign_file_positions_for_relocs): Delete.
+	* elflink.c (bfd_elf_final_link): Don't call above function.
+
 2014-08-30  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relax_section): Fix off by one error.
@@ -288,7 +439,7 @@
 2014-07-21  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	Add or reactivate or1k-*-rtems*
-	* bfd/config.bfd (or1k-*-rtems*): Reactivate.
+	* config.bfd (or1k-*-rtems*): Reactivate.
 
 2014-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -595,7 +746,7 @@
 
 	PR ld/16910
 	* linker.c (unwrap_hash_lookup): New function.
-	* elf-bfd (RELOC_FOR_GLOBAL_SYMBOL): Call unwrap_hash_lookup.
+	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): Call unwrap_hash_lookup.
 	* elf32-i370.c (i370_elf_relocate_section): Likewise.
 	* elf32-m32c.c (m32c_elf_relocate_section): Likewise.
 	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
@@ -654,7 +805,7 @@
 
 2014-05-27  DJ Delorie  <dj@redhat.com>
 
-	* bfd/elf32-rx.c (get_symbol_value_maybe): New.
+	* elf32-rx.c (get_symbol_value_maybe): New.
 	(rx_elf_relocate_section): If we find a reloc against
 	$tableentry$default$<name>, redirect it to the appropriate
 	$tableentry$<n>$.
@@ -666,7 +817,7 @@
 	(rx_table_map): New.
 	(rx_additional_link_map_text): New.  Called to dump tables to the
 	map file.
-	* bfd/elf32-rx.h: New.
+	* elf32-rx.h: New.
 
 2014-05-20  DJ Delorie  <dj@redhat.com>
 

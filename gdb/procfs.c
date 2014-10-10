@@ -2902,13 +2902,6 @@ static void do_detach (int signo);
 static void proc_trace_syscalls_1 (procinfo *pi, int syscallnum,
 				   int entry_or_exit, int mode, int from_tty);
 
-/* On mips-irix, we need to insert a breakpoint at __dbx_link during
-   the startup phase.  The following two variables are used to record
-   the address of the breakpoint, and the code that was replaced by
-   a breakpoint.  */
-static int dbx_link_bpt_addr = 0;
-static void *dbx_link_bpt;
-
 /* Sets up the inferior to be debugged.  Registers to trace signals,
    hardware faults, and syscalls.  Note: does not set RLC flag: caller
    may want to customize that.  Returns zero for success (note!
@@ -3380,23 +3373,6 @@ syscall_is_lwp_create (procinfo *pi, int scall)
   return 0;
 }
 
-/* Remove the breakpoint that we inserted in __dbx_link().
-   Does nothing if the breakpoint hasn't been inserted or has already
-   been removed.  */
-
-static void
-remove_dbx_link_breakpoint (void)
-{
-  if (dbx_link_bpt_addr == 0)
-    return;
-
-  if (deprecated_remove_raw_breakpoint (target_gdbarch (), dbx_link_bpt) != 0)
-    warning (_("Unable to remove __dbx_link breakpoint."));
-
-  dbx_link_bpt_addr = 0;
-  dbx_link_bpt = NULL;
-}
-
 #ifdef SYS_syssgi
 /* Return the address of the __dbx_link() function in the file
    refernced by ABFD by scanning its symbol table.  Return 0 if
@@ -3461,10 +3437,12 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
   sym_addr = dbx_link_addr (abfd);
   if (sym_addr != 0)
     {
+      struct breakpoint *dbx_link_bpt;
+
       /* Insert the breakpoint.  */
-      dbx_link_bpt_addr = sym_addr;
-      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch (), NULL,
-						       sym_addr);
+      dbx_link_bpt
+	= create_and_insert_solib_event_breakpoint (target_gdbarch (),
+						    sym_addr);
       if (dbx_link_bpt == NULL)
 	{
 	  warning (_("Failed to insert dbx_link breakpoint."));
@@ -3894,14 +3872,6 @@ wait_again:
 #if (FLTTRACE != FLTBPT)	/* Avoid "duplicate case" error.  */
 		case FLTTRACE:
 #endif
-		  /* If we hit our __dbx_link() internal breakpoint,
-		     then remove it.  See comments in procfs_init_inferior()
-		     for more details.	*/
-		  if (dbx_link_bpt_addr != 0
-		      && dbx_link_bpt_addr
-			 == regcache_read_pc (get_current_regcache ()))
-		    remove_dbx_link_breakpoint ();
-
 		  wstat = (SIGTRAP << 8) | 0177;
 		  break;
 		case FLTSTACK:
@@ -4339,13 +4309,6 @@ procfs_mourn_inferior (struct target_ops *ops)
     }
 
   generic_mourn_inferior ();
-
-  if (dbx_link_bpt != NULL)
-    {
-      deprecated_remove_raw_breakpoint (target_gdbarch (), dbx_link_bpt);
-      dbx_link_bpt_addr = 0;
-      dbx_link_bpt = NULL;
-    }
 
   inf_child_maybe_unpush_target (ops);
 }

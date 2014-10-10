@@ -1,3 +1,67 @@
+2014-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (MOD_0F20): Removed.
+	(MOD_0F21): Likewise.
+	(MOD_0F22): Likewise.
+	(MOD_0F23): Likewise.
+	(dis386_twobyte): Replace MOD_0F20, MOD_0F21, MOD_0F22 and
+	MOD_0F23 with "movZ".
+	(mod_table): Remove MOD_0F20, MOD_0F21, MOD_0F22 and MOD_0F23.
+	(OP_R): Check mod/rm byte and call OP_E_register.
+
+2014-09-16 Kuan-Lin Chen <kuanlinchentw@gmail.com>
+
+	* nds32-asm.c (nds32_opcodes, operand_fields, keyword_im5_i,
+	keyword_im5_m, keyword_accumulator, keyword_aridx, keyword_aridx2,
+	keyword_aridxi): Add audio ISA extension.
+	(keyword_gpr, keyword_usr, keyword_sr, keyword_cp, keyword_cpr,
+	keyword_fsr, keyword_fdr, keyword_abdim, keyword_abm, keyword_dpref_st,
+	keyword_cctl_lv, keyword_standby_st, keyword_msync_st): Adjust scrope
+	for nds32-dis.c using.
+	(build_opcode_syntax): Remove dead code.
+	(parse_re, parse_a30b20, parse_rt21, parse_rte_start, parse_rte_end,
+	parse_rte69_start, parse_rte69_end, parse_im5_ip, parse_im5_mr,
+	parse_im6_ip, parse_im6_iq, parse_im6_mr, parse_im6_ms): Add audio ISA
+	operand parser.
+	* nds32-asm.h: Declare.
+	* nds32-dis.c: Use array nds32_opcodes to disassemble instead of
+	decoding by switch.
+
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips-dis.c (mips_arch_choices): Add entries for mips32r6 and
+	mips64r6.
+	(parse_mips_dis_option): Allow MSA and virtualization support for
+	mips64r6.
+	(mips_print_arg_state): Add fields dest_regno and seen_dest.
+	(mips_seen_register): New function.
+	(print_insn_arg): Refactored code to use mips_seen_register
+	function.  Add support for OP_SAME_RS_RT, OP_CHECK_PREV and
+	OP_NON_ZERO_REG.  Changed OP_REPEAT_DEST_REG case to print out
+	the register rather than aborting.
+	(print_insn_args): Add length argument.  Add code to correctly
+	calculate the instruction address for pc relative instructions.
+	(validate_insn_args): New static function.
+	(print_insn_mips): Prevent jalx disassembling for r6.  Use
+	validate_insn_args.
+	(print_insn_micromips): Use validate_insn_args.
+	all the arguments are valid.
+	* mips-formats.h (PREV_CHECK): New define.
+	* mips-opc.c (decode_mips_operand): Add support for -a, -b, -d, -s,
+	-t, -u, -v, -w, -x, -y, -A, -B, +I, +O, +R, +:, +\, +", +;
+	(RD_pc): New define.
+	(FS): New define.
+	(I37): New define.
+	(I69): New define.
+	(mips_builtin_opcodes): Add MIPS R6 instructions.  Exclude recoded
+	MIPS R6 instructions from MIPS R2 instructions.
+
+2014-09-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (dis386): Replace "P" with "%LP" for iret and sysret.
+	(putop): Handle "%LP".
+
 2014-09-03  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Update encoding for mrs/msr.

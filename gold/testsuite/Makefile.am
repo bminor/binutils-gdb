@@ -1657,6 +1657,17 @@ MOSTLYCLEANFILES += two_file_test_1c.o
 two_file_test_1c.o: two_file_test_1.o
 	cp two_file_test_1.o $@
 
+check_PROGRAMS += plugin_test_10
+check_SCRIPTS += plugin_test_10.sh
+check_DATA += plugin_test_10.sections
+MOSTLYCLEANFILES += plugin_test_10.sections
+plugin_test_10: plugin_common_test_1.syms plugin_common_test_2.o  gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.syms plugin_common_test_2.o
+plugin_test_10.sections: plugin_test_10
+	$(TEST_READELF) -SW $< >$@ 2>/dev/null
+
+
+
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c

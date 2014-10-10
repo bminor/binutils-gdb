@@ -267,9 +267,6 @@ aarch64_store_fpregset (struct regcache *regcache, const void *buf)
     supply_register (regcache, AARCH64_V0_REGNO + i, &regset->vregs[i]);
 }
 
-/* Debugging of hardware breakpoint/watchpoint support.  */
-extern int debug_hw_points;
-
 /* Enable miscellaneous debugging output.  The name is historical - it
    was originally used to debug LinuxThreads support.  */
 extern int debug_threads;
@@ -626,7 +623,7 @@ debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
   dr_changed_t *dr_changed_ptr;
   dr_changed_t dr_changed;
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     {
       fprintf (stderr, "debug_reg_change_callback: \n\tOn entry:\n");
       fprintf (stderr, "\tpid%d, tid: %ld, dr_changed_bp=0x%llx, "
@@ -677,7 +674,7 @@ debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
 	linux_stop_lwp (lwp);
     }
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     {
       fprintf (stderr, "\tOn exit:\n\tpid%d, tid: %ld, dr_changed_bp=0x%llx, "
 	       "dr_changed_wp=0x%llx\n",
@@ -700,7 +697,7 @@ aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
   struct aarch64_dr_update_callback_param param;
 
   /* Only update the threads of this process.  */
-  param.pid = pid_of (current_inferior);
+  param.pid = pid_of (current_thread);
 
   param.is_watchpoint = is_watchpoint;
   param.idx = idx;
@@ -917,7 +914,7 @@ aarch64_handle_unaligned_watchpoint (enum target_hw_bp_type type,
 	ret = aarch64_dr_state_remove_one_point (state, type, aligned_addr,
 						 aligned_len);
 
-      if (debug_hw_points)
+      if (show_debug_regs)
 	fprintf (stderr,
  "handle_unaligned_watchpoint: is_insert: %d\n"
  "                             aligned_addr: 0x%s, aligned_len: %d\n"
@@ -973,7 +970,7 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   int ret;
   enum target_hw_bp_type targ_type;
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     fprintf (stderr, "insert_point on entry (addr=0x%08lx, len=%d)\n",
 	     (unsigned long) addr, len);
 
@@ -987,7 +984,7 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
     ret =
       aarch64_handle_breakpoint (targ_type, addr, len, 1 /* is_insert */);
 
-  if (debug_hw_points > 1)
+  if (show_debug_regs > 1)
     aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
 				  "insert_point", addr, len, targ_type);
 
@@ -1009,7 +1006,7 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
   int ret;
   enum target_hw_bp_type targ_type;
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     fprintf (stderr, "remove_point on entry (addr=0x%08lx, len=%d)\n",
 	     (unsigned long) addr, len);
 
@@ -1024,7 +1021,7 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
     ret =
       aarch64_handle_breakpoint (targ_type, addr, len, 0 /* is_insert */);
 
-  if (debug_hw_points > 1)
+  if (show_debug_regs > 1)
     aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
 				  "remove_point", addr, len, targ_type);
 
@@ -1041,7 +1038,7 @@ aarch64_stopped_data_address (void)
   int pid, i;
   struct aarch64_debug_reg_state *state;
 
-  pid = lwpid_of (current_inferior);
+  pid = lwpid_of (current_thread);
 
   /* Get the siginfo.  */
   if (ptrace (PTRACE_GETSIGINFO, pid, NULL, &siginfo) != 0)
@@ -1150,7 +1147,7 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
       struct aarch64_debug_reg_state *state
 	= &proc->private->arch_private->debug_reg_state;
 
-      if (debug_hw_points)
+      if (show_debug_regs)
 	fprintf (stderr, "prepare_to_resume thread %ld\n", lwpid_of (thread));
 
       /* Watchpoints.  */
@@ -1189,7 +1186,7 @@ aarch64_arch_setup (void)
 
   current_process ()->tdesc = tdesc_aarch64;
 
-  pid = lwpid_of (current_inferior);
+  pid = lwpid_of (current_thread);
   iov.iov_base = &dreg_state;
   iov.iov_len = sizeof (dreg_state);
 

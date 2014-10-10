@@ -52,7 +52,8 @@ nds32_elf_create_output_section_statements (void)
   if (strstr (bfd_get_target (link_info.output_bfd), "nds32") == NULL)
     {
       /* Check the output target is nds32.  */
-      einfo ("%F%X%P: error: Cannot change output format whilst linking NDS32 binaries.\n");
+      einfo ("%F%X%P: error: Cannot change output format whilst "
+	     "linking NDS32 binaries.\n");
       return;
     }
 
@@ -124,8 +125,9 @@ nds32_elf_after_open (void)
 	  einfo (_("%F%B: ABI version of object files mismatched\n"), abfd);
 	}
 
+#if defined NDS32_EX9_EXT
       /* Append .ex9.itable section in the last input object file.  */
-      if (!link_info.relocatable && abfd->link.next == NULL)
+      if (abfd->link_next == NULL && (target_optimize & NDS32_RELAX_EX9_ON))
 	{
 	  asection *itable;
 	  struct bfd_link_hash_entry *h;
@@ -137,17 +139,8 @@ nds32_elf_after_open (void)
 	    {
 	      itable->gc_mark = 1;
 	      itable->alignment_power = 2;
-	      if ((target_optimize & NDS32_RELAX_EX9_ON))
-		{
-		  itable->size = 0x1000;
-		  itable->contents = bfd_zalloc (abfd, itable->size);
-		}
-	      else
-		{
-		  itable->size = 0x4;
-		  itable->contents = bfd_zalloc (abfd, itable->size);
-		  bfd_putb32 (INSN_BREAK_EA,itable->contents);
-		}
+	      itable->size = 0x1000;
+	      itable->contents = bfd_zalloc (abfd, itable->size);
 
 	      /* Add a symbol in the head of ex9.itable to objdump clearly.  */
 	      h = bfd_link_hash_lookup (link_info.hash, "_EX9_BASE_",
@@ -158,6 +151,7 @@ nds32_elf_after_open (void)
 		 get_elf_backend_data (link_info.output_bfd)->collect, &h);
 	    }
 	}
+#endif
     }
 
   /* Check object files if the target is dynamic linked executable
@@ -173,12 +167,14 @@ nds32_elf_after_open (void)
 	      if (link_info.shared || link_info.pie)
 		{
 		  /* For PIE or shared object, all input must be PIC.  */
-		  einfo (_("%B: must use -fpic to compile this file for shared object or PIE\n"), abfd);
+		  einfo (_("%B: must use -fpic to compile this file "
+			   "for shared object or PIE\n"), abfd);
 		}
 	      else
 		{
 		  /* Dynamic linked executable with SDA and non-PIC.
 		     Turn off load/store relaxtion.  */
+		  /* TODO: This may support in the future.  */
 		  load_store_relax = 0 ;
 		  relax_fp_as_gp = 0;
 		}
@@ -192,108 +188,22 @@ nds32_elf_after_open (void)
   gld${EMULATION_NAME}_after_open ();
 }
 
-static void nds32_elf_relax_stub (bfd_boolean relax)
-{
-  /* Re-caculate memory map address.  */
-  lang_do_assignments (lang_assigning_phase_enum);
-  lang_reset_memory_regions ();
-  one_lang_size_sections_pass (&relax, FALSE);
-}
-
 static void
 nds32_elf_after_allocation (void)
 {
-  struct elf_nds32_link_hash_table *table;
-  table = nds32_elf_hash_table (&link_info);
+  if (target_optimize & NDS32_RELAX_EX9_ON
+      || (ex9_import_file != NULL && update_ex9_table == 1))
+    {
+      /* Initialize ex9 hash table.  */
+      if (!nds32_elf_ex9_init ())
+        return;
+    }
 
   /* Call default after allocation callback.
      1. This is where relaxation is done.
      2. It calls gld${EMULATION_NAME}_map_segments to build ELF segment table.
      3. Any relaxation requires relax being done must be called after it.  */
   gld${EMULATION_NAME}_after_allocation ();
-
-  if (!table)
-    return;
-
-  /* Use IFC */
-  if ((target_optimize & NDS32_RELAX_JUMP_IFC_ON)
-      && !(table->relax_status & NDS32_RELAX_JUMP_IFC_DONE))
-    {
-      table->relax_round = NDS32_RELAX_JUMP_IFC_ROUND;
-      /* Traverse all sections to build j and jal list.  */
-      nds32_elf_relax_stub (TRUE);
-
-      /* Replace with ifc.  */
-      if (!nds32_elf_ifc_finish (&link_info))
-	einfo (_("%F: Please report this bug. IFC error.\n"));
-      table->relax_round = NDS32_RELAX_NONE_ROUND;
-
-      /* Adjust address after ifcall.  */
-      nds32_elf_relax_stub (FALSE);
-
-      if (!nds32_elf_ifc_reloc ())
-	einfo (_("%F: Please report this bug. IFC error.\n"));
-    }
-
-  /* EX9 Instruction Table Relaxation.  */
-  if (!link_info.relocatable && !nds32_elf_ex9_itb_base (&link_info))
-    einfo (_("%F: Please report this bug. Ex9 relocation error.\n"));
-
-
-  /* Generate ex9 table.  */
-  if ((target_optimize & NDS32_RELAX_EX9_ON)
-      && !(table->relax_status & NDS32_RELAX_EX9_DONE))
-    {
-      /* Ex9 entry point.  */
-      table->relax_round = NDS32_RELAX_EX9_BUILD_ROUND;
-
-      /* Initialize ex9 hash table.  */
-      if (!nds32_elf_ex9_init ())
-	return;
-
-      /* Build ex9 instruction table.  */
-      nds32_elf_relax_stub (TRUE);
-      nds32_elf_ex9_finish (&link_info);
-      /* Replace with ex9.it.  */
-      nds32_elf_relax_stub (TRUE);
-      table->relax_round = NDS32_RELAX_NONE_ROUND;
-
-      /* Do ifc again.  */
-      if (target_optimize & NDS32_RELAX_JUMP_IFC_ON)
-	if (!nds32_elf_ifc_finish (&link_info))
-	  einfo (_("%F: Please report this bug. IFC error.\n"));
-
-      /* Re-caculate memory map address.  */
-      lang_do_assignments (lang_assigning_phase_enum);
-      /* Relocation for .ex9.itable.  */
-      nds32_elf_ex9_reloc_jmp (&link_info);
-    }
-  else if (ex9_import_file != NULL
-      && !(table->relax_status = NDS32_RELAX_EX9_DONE))
-    {
-      /* Import ex9 table.  */
-
-      if (update_ex9_table == 1)
-	{
-	  /* Build ex9 table.  */
-	  table->relax_round = NDS32_RELAX_EX9_BUILD_ROUND;
-	  /* Initialize ex9 hash table.  */
-	  if (!nds32_elf_ex9_init ())
-	    return;
-	  /* Build ex9 table.  */
-	  nds32_elf_relax_stub (TRUE);
-
-	  /* Relocation for .ex9.itable.  */
-	  lang_do_assignments (lang_assigning_phase_enum);
-	  nds32_elf_ex9_reloc_jmp (&link_info);
-	}
-      nds32_elf_ex9_import_table (&link_info);
-
-      /* Replace with ex9.it.  */
-      table->relax_round = NDS32_RELAX_EX9_REPLACE_ROUND;
-      table->relax_status |= NDS32_RELAX_EX9_DONE;
-      nds32_elf_relax_stub (TRUE);
-    }
 }
 
 EOF
@@ -332,7 +242,7 @@ PARSE_AND_LIST_PROLOGUE='
 PARSE_AND_LIST_LONGOPTS='
   { "mfp-as-gp", no_argument, NULL, OPTION_FP_AS_GP},
   { "mno-fp-as-gp", no_argument, NULL, OPTION_NO_FP_AS_GP},
-  { "mgen-symbol-ld-script", required_argument, NULL, OPTION_EXPORT_SYMBOLS},
+  { "mexport-symbols", required_argument, NULL, OPTION_EXPORT_SYMBOLS},
   /* These are deprecated options.  Remove them in the future.  */
   { "mrelax-reduce-fp-update", no_argument, NULL, OPTION_REDUCE_FP_UPDATE},
   { "mrelax-no-reduce-fp-update", no_argument, NULL, OPTION_NO_REDUCE_FP_UPDATE},
@@ -399,7 +309,7 @@ PARSE_AND_LIST_ARGS_CASES='
     break;
   case OPTION_EXPORT_SYMBOLS:
     if (!optarg)
-      einfo (_("Missing file for --mgen-symbol-ld-script.\n"), optarg);
+      einfo (_("Missing file for --mexport-symbols.\n"), optarg);
 
     if(strcmp (optarg, "-") == 0)
       sym_ld_script = stdout;
@@ -425,7 +335,7 @@ PARSE_AND_LIST_ARGS_CASES='
       ex9_export_file = stdout;
     else
       {
-	ex9_export_file = fopen (optarg, FOPEN_WT);
+	ex9_export_file = fopen (optarg, "wb");
 	if(ex9_export_file == NULL)
 	  einfo (_("ERROR %P%F: cannot open ex9 export file %s.\n"), optarg);
       }
@@ -434,7 +344,7 @@ PARSE_AND_LIST_ARGS_CASES='
     if (!optarg)
       einfo (_("Missing file for --mimport-ex9=<file>.\n"));
 
-    ex9_import_file = fopen (optarg, "r+");
+    ex9_import_file = fopen (optarg, "rb+");
     if(ex9_import_file == NULL)
       einfo (_("ERROR %P%F: cannot open ex9 import file %s.\n"), optarg);
     break;

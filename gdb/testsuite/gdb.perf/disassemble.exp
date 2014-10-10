@@ -41,7 +41,7 @@ PerfTest::assemble {
     # When GDB is debugging GDB, the prompt is changed to "(top-gdb) ".
     # In order to avoid the confusion of pattern matching, set the
     # gdb_prompt to '(top-gdb)' temporarily.
-    with_gdb_prompt "\\(top-gdb\\)" {
+    with_gdb_prompt "(top-gdb)" {
 	gdb_load ${binfile}
     }
 

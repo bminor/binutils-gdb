@@ -1,3 +1,232 @@
+2014-09-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/break-while-running.exp: New file.
+	* gdb.threads/break-while-running.c: New file.
+
+2014-09-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dw2-var-zero-addr.exp: Move test into new proc test.
+	Invoke test.  Restart GDB with --readnow and invoke test again.
+
+2014-09-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/break-on-linker-gcd-function.exp: Move test into new
+	proc set_breakpoint_on_gcd_function.  Invoke
+	set_breakpoint_on_gcd_function.  Restart GDB with --readnow and
+	invoke set_breakpoint_on_gcd_function again.
+
+2014-09-18  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/symtab-producer.exp: New file.
+
+2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/global-var-nested-by-dso-solib1.c: New file.
+	* gdb.base/global-var-nested-by-dso-solib2.c: Likewise.
+	* gdb.base/global-var-nested-by-dso.c: Likewise.
+	* gdb.base/global-var-nested-by-dso.exp: Likewise.
+
+2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watch-bitfields.exp: Pass string other than test file
+	name to prepare_for_testing.
+	(watch): New procedure.
+	(expect_watchpoint): Use with_test_prefix.
+	(top level): Factor out tests to ...
+	(test_watch_location, test_regular_watch): ... these new
+	procedures, and use with_test_prefix and gdb_continue_to_end.
+
+2014-09-16  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR breakpoints/12526
+	* gdb.base/watch-bitfields.exp: New file.
+	* gdb.base/watch-bitfields.c: New file.
+
+2014-09-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watchpoint-stops-at-right-insn.exp (test): Compare
+	software and hardware addresses, not software address against
+	itself.
+
+2014-09-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watchpoint-stops-at-right-insn.c: New file.
+	* gdb.base/watchpoint-stops-at-right-insn.exp: New file.
+
+2014-09-16  Pedro Alves  <palves@redhat.com>
+
+	* config/vx.exp, config/vxworks.exp, config/vxworks29k.exp: Delete
+	files.
+	* gdb.base/a2-run.exp: Remove all code guarded by istarget
+	"*-*-vxworks*" throughout.
+	* gdb.base/break.exp: Likewise.
+	* gdb.base/default.exp: Likewise.
+	* gdb.base/scope.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/break.c: Remove all code guarded by #ifdef vxworks
+	throughout.
+	* gdb.base/run.c: Likewise.
+	* gdb.base/sepdebug.c: Likewise.
+	* gdb.hp/gdb.aCC/run.c: Likewise.
+	* gdb.reverse/until-reverse.c: Likewise.
+	* lib/gdb.exp (gdb_compile): Remove is_vxworks branch.
+
+2014-09-16  Yao Qi  <yao@codesourcery.com>
+
+	* boards/local-remote-host-native.exp: New file.
+
+2014-09-14  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.threads/queue-signal.c (thread_count): New variable.
+	(thread_count_mutex, thread_count_condvar): New variables.
+	(incr_thread_count, wait_all_threads_running): New functions.
+	(main): Wait for all threads to be in their thread functions.
+
+2014-09-13  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.threads/queue-signal.c: New file.
+	* gdb.threads/queue-signal.exp: New file.
+
+2014-09-13  Doug Evans  <xdje42@gmail.com>
+
+	* lib/gdb.exp (gdb_prompt): Add comment and change initial value to
+	be consistent with what default_gdb_init uses.
+	(with_gdb_prompt): Change form of PROMPT argument from a regexp to
+	the plain text of the prompt.  Add some logging printfs.
+	* gdb.perf/disassemble.exp: Update call to with_gdb_prompt.
+
+2014-09-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/gdb1558.exp: Replace uses of gdb_expect after
+	gdb_run_cmd with gdb_test_multiple or gdb_test throughout.
+	* gdb.arch/i386-size-overlap.exp: Likewise.
+	* gdb.arch/i386-size.exp: Likewise.
+	* gdb.arch/i386-unwind.exp: Likewise.
+	* gdb.base/a2-run.exp: Likewise.
+	* gdb.base/break.exp: Likewise.
+	* gdb.base/charset.exp: Likewise.
+	* gdb.base/chng-syms.exp: Likewise.
+	* gdb.base/commands.exp: Likewise.
+	* gdb.base/dbx.exp: Likewise.
+	* gdb.base/find.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/jit-simple.exp: Likewise.
+	* gdb.base/reread.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/step-bt.exp: Likewise.
+	* gdb.cp/mb-inline.exp: Likewise.
+	* gdb.cp/mb-templates.exp: Likewise.
+	* gdb.objc/basicclass.exp: Likewise.
+	* gdb.threads/killed.exp: Likewise.
+
+2014-09-12  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	PR tdep/17379
+	* gdb.arch/powerpc-stackless.S: New file.
+	* gdb.arch/powerpc-stackless.exp: New file.
+
+2014-09-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/attach.c: Include unistd.h.
+	(main): Call alarm.  Add label postloop.
+	* gdb.base/attach.exp (do_attach_tests): Use gdb_get_line_number,
+	gdb_breakpoint, gdb_continue_to_breakpoint.
+	(test_command_line_attach_run): Kill ${testpid} in one exit path.
+
+2014-09-11  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17347
+	* lib/gdb.exp (gdb_spawn_with_cmdline_opts): New procedure.
+	* gdb.base/attach.exp (test_command_line_attach_run): New
+	procedure.
+	(top level): Call it.
+
+2014-09-11  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (spawn_wait_for_attach): New procedure.
+	* gdb.base/attach.exp (do_attach_tests, do_call_attach_tests)
+	(do_command_attach_tests): Use spawn_wait_for_attach.
+	* gdb.base/solib-overlap.exp: Likewise.
+	* gdb.multi/multi-attach.exp: Likewise.
+	* gdb.python/py-prompt.exp: Likewise.
+	* gdb.python/py-sync-interp.exp: Likewise.
+	* gdb.server/ext-attach.exp: Likewise.
+
+2014-09-11  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* gdb.fortran/array-element.exp: Remove unexpected "continue"
+	command in testcase.  Simplify testcase.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dynarr-ptr.exp: Add a few ptype tests.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dynarr-ptr.exp: Add 'first, 'last and 'length tests.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dynarr-ptr.exp: Add subscripting tests.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dynarr-ptr.c: New file.
+	* gdb.dwarf2/dynarr-ptr.exp: New file.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.base/watchpoint-solib.exp: Increase the timeout by a factor
+	of 30 rather than hardcoding 120 for a slow test case.  Take the
+	`gdb,timeout' target setting into account for this calculation.
+	Don't extend the timeout for the test cases that don't need it.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.reverse/sigall-reverse.exp: Increase the timeout by
+	a factor of 2 for a slow test case.  Take the `gdb,timeout'
+	target setting into account for this calculation.
+	* gdb.reverse/until-precsave.exp: Increase the timeout by
+	a factor of 15 and 3 respectively rather than adding 120
+	for a pair of slow test cases.  Take the `gdb,timeout'
+	target setting into account for this calculation.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Remove code to select the
+	timeout, don't pass one down to gdb_expect.
+	(gdb_expect): Rework timeout selection.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdbserver-support.exp (gdbserver_start): Throw an error
+	exception on timeout.
+	(gdbserver_run): Catch any `gdbserver_spawn' error exceptions.
+	(gdbserver_start_extended): Catch any `gdbserver_start' error
+	exceptions.
+	(gdbserver_start_multi, mi_gdbserver_start_multi): Likewise.
+	* lib/mi-support.exp (mi_gdb_target_load): Catch any
+	`gdbserver_gdb_load' error exceptions.
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdbserver-support.exp (gdbserver_start): Set timeout to
+	120 on waiting for the TCP socket to open.
+
+2014-09-09  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/default.exp (show_conv_list): Add _caller_is,
+	_caller_matches, _any_caller_is, _any_caller_matches.
+
+2014-09-09  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.guile/scm-error.exp: Handle guile 2.2 backtrace output.
+
+2014-09-09  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-var-display.exp: Set print symbol off.
+
 2014-09-07  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	PR gdb/17035

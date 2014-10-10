@@ -1512,7 +1512,8 @@ static struct line_header *dwarf_decode_line_header (unsigned int offset,
 						     struct dwarf2_cu *cu);
 
 static void dwarf_decode_lines (struct line_header *, const char *,
-				struct dwarf2_cu *, struct partial_symtab *);
+				struct dwarf2_cu *, struct partial_symtab *,
+				CORE_ADDR);
 
 static void dwarf2_start_subfile (const char *, const char *, const char *);
 
@@ -4448,7 +4449,7 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
     return;  /* No linetable, so no includes.  */
 
   /* NOTE: pst->dirname is DW_AT_comp_dir (if present).  */
-  dwarf_decode_lines (lh, pst->dirname, cu, pst);
+  dwarf_decode_lines (lh, pst->dirname, cu, pst, pst->textlow);
 
   free_line_header (lh);
 }
@@ -8967,11 +8968,12 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
 
 /* Handle DW_AT_stmt_list for a compilation unit.
    DIE is the DW_TAG_compile_unit die for CU.
-   COMP_DIR is the compilation directory.  */
+   COMP_DIR is the compilation directory.  LOWPC is passed to
+   dwarf_decode_lines.  See dwarf_decode_lines comments about it.  */
 
 static void
 handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
-			const char *comp_dir) /* ARI: editCase function */
+			const char *comp_dir, CORE_ADDR lowpc) /* ARI: editCase function */
 {
   struct attribute *attr;
 
@@ -8988,7 +8990,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
 	{
 	  cu->line_header = line_header;
 	  make_cleanup (free_cu_line_header, cu);
-	  dwarf_decode_lines (line_header, comp_dir, cu, NULL);
+	  dwarf_decode_lines (line_header, comp_dir, cu, NULL, lowpc);
 	}
     }
 }
@@ -9039,7 +9041,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
      for DW_AT_decl_file.  */
-  handle_DW_AT_stmt_list (die, cu, comp_dir);
+  handle_DW_AT_stmt_list (die, cu, comp_dir, lowpc);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
@@ -17252,7 +17254,8 @@ dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
 
 static void
 dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
-		      struct dwarf2_cu *cu, const int decode_for_pst_p)
+		      struct dwarf2_cu *cu, const int decode_for_pst_p,
+		      CORE_ADDR lowpc)
 {
   const gdb_byte *line_ptr, *extended_end;
   const gdb_byte *line_end;
@@ -17375,7 +17378,12 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 		case DW_LNE_set_address:
 		  address = read_address (abfd, line_ptr, cu, &bytes_read);
 
-		  if (address == 0 && !dwarf2_per_objfile->has_section_at_zero)
+		  /* If address < lowpc then it's not a usable value, it's
+		     outside the pc range of the CU.  However, we restrict
+		     the test to only address values of zero to preserve
+		     GDB's previous behaviour which is to handle the specific
+		     case of a function being GC'd by the linker.  */
+		  if (address == 0 && address < lowpc)
 		    {
 		      /* This line table is for a function which has been
 			 GCd by the linker.  Ignore it.  PR gdb/12528 */
@@ -17595,17 +17603,20 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
    as the corresponding symtab.  Since COMP_DIR is not used in the name of the
    symtab we don't use it in the name of the psymtabs we create.
    E.g. expand_line_sal requires this when finding psymtabs to expand.
-   A good testcase for this is mb-inline.exp.  */
+   A good testcase for this is mb-inline.exp.
+
+   LOWPC is the lowest address in CU (or 0 if not known).  */
 
 static void
 dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
-		    struct dwarf2_cu *cu, struct partial_symtab *pst)
+		    struct dwarf2_cu *cu, struct partial_symtab *pst,
+		    CORE_ADDR lowpc)
 {
   struct objfile *objfile = cu->objfile;
   const int decode_for_pst_p = (pst != NULL);
   struct subfile *first_subfile = current_subfile;
 
-  dwarf_decode_lines_1 (lh, comp_dir, cu, decode_for_pst_p);
+  dwarf_decode_lines_1 (lh, comp_dir, cu, decode_for_pst_p, lowpc);
 
   if (decode_for_pst_p)
     {

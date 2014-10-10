@@ -3200,7 +3200,7 @@ add_to_lit_pool (unsigned int nbytes)
       imm1 = inst.operands[1].imm;
       imm2 = (inst.operands[1].regisimm ? inst.operands[1].reg
 	       : inst.reloc.exp.X_unsigned ? 0
-	       : ((int64_t) inst.operands[1].imm) >> 32);
+	       : ((bfd_int64_t) inst.operands[1].imm) >> 32);
       if (target_big_endian)
 	{
 	  imm1 = imm2;
@@ -7812,7 +7812,7 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 			   ? inst.operands[1].reg
 			   : inst.reloc.exp.X_unsigned
 			     ? 0
-			     : ((int64_t)((int) immlo)) >> 32;
+			     : ((bfd_int64_t)((int) immlo)) >> 32;
 	  int cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
 					       &op, 64, NT_invtype);
 
@@ -24392,6 +24392,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
 								  "Cortex-A12"),
   ARM_CPU_OPT ("cortex-a15",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A15"),
+  ARM_CPU_OPT ("cortex-a17",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
+								  "Cortex-A17"),
   ARM_CPU_OPT ("cortex-a53",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A53"),
   ARM_CPU_OPT ("cortex-a57",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,

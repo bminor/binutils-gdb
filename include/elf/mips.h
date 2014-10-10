@@ -87,7 +87,14 @@ START_RELOC_NUMBERS (elf_mips_reloc_type)
   RELOC_NUMBER (R_MIPS_TLS_TPREL_HI16, 49)
   RELOC_NUMBER (R_MIPS_TLS_TPREL_LO16, 50)
   RELOC_NUMBER (R_MIPS_GLOB_DAT, 51)
-  FAKE_RELOC (R_MIPS_max, 52)
+  /* Space to grow */
+  RELOC_NUMBER (R_MIPS_PC21_S2, 60)
+  RELOC_NUMBER (R_MIPS_PC26_S2, 61)
+  RELOC_NUMBER (R_MIPS_PC18_S3, 62)
+  RELOC_NUMBER (R_MIPS_PC19_S2, 63)
+  RELOC_NUMBER (R_MIPS_PCHI16, 64)
+  RELOC_NUMBER (R_MIPS_PCLO16, 65)
+  FAKE_RELOC (R_MIPS_max, 66)
   /* These relocs are used for the mips16.  */
   FAKE_RELOC (R_MIPS16_min, 100)
   RELOC_NUMBER (R_MIPS16_26, 100)
@@ -236,6 +243,12 @@ END_RELOC_NUMBERS (R_MIPS_maxext)
 
 /* -mips64r2 code.  */
 #define E_MIPS_ARCH_64R2        0x80000000
+
+/* -mips32r6 code.  */
+#define E_MIPS_ARCH_32R6        0x90000000
+
+/* -mips64r6 code.  */
+#define E_MIPS_ARCH_64R6        0xa0000000
 
 /* The ABI of the file.  Also see EF_MIPS_ABI2 above. */
 #define EF_MIPS_ABI		0x0000F000

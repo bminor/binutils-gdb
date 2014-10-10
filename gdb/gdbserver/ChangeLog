@@ -1,3 +1,90 @@
+2014-09-23  Yao Qi  <yao@codesourcery.com>
+
+	* linux-low.c (lp_status_maybe_breakpoint): New function.
+	(linux_low_filter_event): Call lp_status_maybe_breakpoint.
+	(count_events_callback): Likewise.
+	(select_event_lwp_callback): Likewise.
+	(cancel_breakpoints_callback): Likewise.
+
+2014-09-19  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-low.c (handle_extended_wait): Call
+	linux_ptrace_get_extended_event.
+	(get_stop_pc, get_detach_signal, linux_low_filter_event): Call
+	linux_is_extended_waitstatus.
+
+2014-09-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (CPPFLAGS): Define.
+	(INTERNAL_CFLAGS_BASE): Add ${CPPFLAGS}.
+	(IPAGENT_CFLAGS): Remove ${CPPFLAGS}.
+
+2014-09-16  Gary Benson  <gbenson@redhat.com>
+
+	* inferiors.h (current_inferior): Renamed as...
+	(current_thread): New variable.  All uses updated.
+	* linux-low.c (get_pc): Renamed saved_inferior as saved_thread.
+	(maybe_move_out_of_jump_pad): Likewise.
+	(cancel_breakpoint): Likewise.
+	(linux_low_filter_event): Likewise.
+	(wait_for_sigstop): Likewise.
+	(linux_resume_one_lwp): Likewise.
+	(need_step_over_p): Likewise.
+	(start_step_over): Likewise.
+	(linux_stabilize_threads): Renamed save_inferior as saved_thread.
+	* linux-x86-low.c (x86_linux_update_xmltarget): Likewise.
+	* proc-service.c (ps_lgetregs): Renamed reg_inferior as reg_thread
+	and save_inferior as saved_thread.
+	* regcache.c (get_thread_regcache): Renamed saved_inferior as
+	saved_thread.
+	(regcache_invalidate_thread): Likewise.
+	* remote-utils.c (prepare_resume_reply): Likewise.
+	* thread-db.c (thread_db_get_tls_address): Likewise.
+	(disable_thread_event_reporting): Likewise.
+	(remove_thread_event_breakpoints): Likewise.
+	* tracepoint.c (gdb_agent_about_to_close): Renamed save_inferior
+	as saved_thread.
+	* target.h (set_desired_inferior): Renamed as...
+	(set_desired_thread): New declaration.  All uses updated.
+	* server.c (myresume): Updated comment to reference thread instead
+	of inferior.
+	(handle_serial_event): Likewise.
+	(handle_target_event): Likewise.
+
+2014-09-12  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* regcache.h: Include common-regcache.h.
+	(regcache_read_pc): Don't declare.
+	* regcache.c (get_thread_regcache_for_ptid): New function.
+
+2014-09-11  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* symbol.c: New file.
+	* Makefile.in (SFILES): Add symbol.c.
+	(OBS): Add symbol.o.
+
+2014-09-11  Gary Benson  <gbenson@redhat.com>
+
+	* target.c (target_stop_ptid, target_continue_ptid): New
+	functions.
+
+2014-09-11  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* target.h: Include target/target.h.
+	* target.c (target_read_memory, target_read_uint32)
+	(target_write_memory): New functions.
+
+2014-09-11  Gary Benson  <gbenson@redhat.com>
+
+	* server.h (debug_hw_points): Don't declare.
+	* server.c (debug_hw_points): Don't define.  Replace all uses
+	with show_debug_regs.
+	* linux-aarch64-low.c (debug_hw_points): Don't define.  Replace
+	all uses with show_debug_regs.
+
 2014-09-08  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* linux-ppc-low.c (ppc_collect_ptrace_register): Adjust routine to take

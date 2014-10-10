@@ -77,7 +77,7 @@ struct process_info
 #define lwpid_of(inf) ptid_get_lwp ((inf)->entry.id)
 
 /* Return a pointer to the process that corresponds to the current
-   thread (current_inferior).  It is an error to call this if there is
+   thread (current_thread).  It is an error to call this if there is
    no current thread selected.  */
 
 struct process_info *current_process (void);
@@ -121,7 +121,7 @@ int one_inferior_p (struct inferior_list *list);
 #define ALL_PROCESSES(cur, tmp)					\
   ALL_INFERIORS_TYPE (struct process_info, &all_processes, cur, tmp)
 
-extern struct thread_info *current_inferior;
+extern struct thread_info *current_thread;
 void remove_inferior (struct inferior_list *list,
 		      struct inferior_list_entry *entry);
 

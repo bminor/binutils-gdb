@@ -3190,9 +3190,14 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
     }
 
   if (!fdata.frameless)
-    /* Frameless really means stackless.  */
-    cache->base
-      = read_memory_unsigned_integer (cache->base, wordsize, byte_order);
+    {
+      /* Frameless really means stackless.  */
+      LONGEST backchain;
+
+      if (safe_read_memory_integer (cache->base, wordsize,
+				    byte_order, &backchain))
+        cache->base = (CORE_ADDR) backchain;
+    }
 
   trad_frame_set_value (cache->saved_regs,
 			gdbarch_sp_regnum (gdbarch), cache->base);

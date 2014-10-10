@@ -2326,7 +2326,8 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     "ABI v1", /* use r0 as return register */
     "ABI v2", /* use r0 as return register and don't reserve 24 bytes for arguments */
     "ABI v2fp", /* for FPU */
-    "AABI"
+    "AABI",
+    "ABI2 FP+"
   };
   static const char *VER_STRINGS[] =
   {
@@ -2357,6 +2358,7 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     case E_NDS_ABI_V2:
     case E_NDS_ABI_V2FP:
     case E_NDS_ABI_AABI:
+    case E_NDS_ABI_V2FP_PLUS:
       /* In case there are holes in the array.  */
       r += snprintf (buf + r, size - r, ", %s", ABI_STRINGS[abi >> EF_NDS_ABI_SHIFT]);
       break;
@@ -2848,8 +2850,10 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_ARCH_5: strcat (buf, ", mips5"); break;
 	    case E_MIPS_ARCH_32: strcat (buf, ", mips32"); break;
 	    case E_MIPS_ARCH_32R2: strcat (buf, ", mips32r2"); break;
+	    case E_MIPS_ARCH_32R6: strcat (buf, ", mips32r6"); break;
 	    case E_MIPS_ARCH_64: strcat (buf, ", mips64"); break;
 	    case E_MIPS_ARCH_64R2: strcat (buf, ", mips64r2"); break;
+	    case E_MIPS_ARCH_64R6: strcat (buf, ", mips64r6"); break;
 	    default: strcat (buf, _(", unknown ISA")); break;
 	    }
 	  break;
@@ -11544,10 +11548,10 @@ display_tag_value (int tag,
 /* ARM EABI attributes section.  */
 typedef struct
 {
-  int tag;
+  unsigned int tag;
   const char * name;
   /* 0 = special, 1 = string, 2 = uleb123, > 0x80 == table lookup.  */
-  int type;
+  unsigned int type;
   const char ** table;
 } arm_attr_public_tag;
 
@@ -11665,12 +11669,12 @@ static unsigned char *
 display_arm_attribute (unsigned char * p,
 		       const unsigned char * const end)
 {
-  int tag;
+  unsigned int tag;
   unsigned int len;
-  int val;
+  unsigned int val;
   arm_attr_public_tag * attr;
   unsigned i;
-  int type;
+  unsigned int type;
 
   tag = read_uleb128 (p, &len, end);
   p += len;

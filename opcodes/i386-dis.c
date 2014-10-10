@@ -753,10 +753,6 @@ enum
   MOD_0F1A_PREFIX_0,
   MOD_0F1B_PREFIX_0,
   MOD_0F1B_PREFIX_1,
-  MOD_0F20,
-  MOD_0F21,
-  MOD_0F22,
-  MOD_0F23,
   MOD_0F24,
   MOD_0F26,
   MOD_0F2B_PREFIX_0,
@@ -2397,6 +2393,9 @@ struct dis386 {
    "LS" => print "abs" in 64bit mode and behave as 'S' otherwise
    "LV" => print "abs" for 64bit operand and behave as 'S' otherwise
    "LW" => print 'd', 'q' depending on the VEX.W bit
+   "LP" => print 'w' or 'l' ('d' in Intel mode) if instruction has
+	   an operand size prefix, or suffix_always is true.  print
+	   'q' if rex prefix is present.
 
    Many of the above letters print nothing in Intel mode.  See "putop"
    for the details.
@@ -2638,7 +2637,7 @@ static const struct dis386 dis386[] = {
   { "int3",		{ XX } },
   { "int",		{ Ib } },
   { X86_64_TABLE (X86_64_CE) },
-  { "iretP",		{ XX } },
+  { "iret%LP",		{ XX } },
   /* d0 */
   { REG_TABLE (REG_D0) },
   { REG_TABLE (REG_D1) },
@@ -2704,7 +2703,7 @@ static const struct dis386 dis386_twobyte[] = {
   { Bad_Opcode },
   { "syscall",		{ XX } },
   { "clts",		{ XX } },
-  { "sysretP",		{ XX } },
+  { "sysret%LP",		{ XX } },
   /* 08 */
   { "invd",		{ XX } },
   { "wbinvd",		{ XX } },
@@ -2733,10 +2732,10 @@ static const struct dis386 dis386_twobyte[] = {
   { "nopQ",		{ Ev } },
   { "nopQ",		{ Ev } },
   /* 20 */
-  { MOD_TABLE (MOD_0F20) },
-  { MOD_TABLE (MOD_0F21) },
-  { MOD_TABLE (MOD_0F22) },
-  { MOD_TABLE (MOD_0F23) },
+  { "movZ",		{ Rm, Cm } },
+  { "movZ",		{ Rm, Dm } },
+  { "movZ",		{ Cm, Rm } },
+  { "movZ",		{ Dm, Rm } },
   { MOD_TABLE (MOD_0F24) },
   { Bad_Opcode },
   { MOD_TABLE (MOD_0F26) },
@@ -11639,26 +11638,6 @@ static const struct dis386 mod_table[][2] = {
     { "nopQ",		{ Ev } },
   },
   {
-    /* MOD_0F20 */
-    { Bad_Opcode },
-    { "movZ",		{ Rm, Cm } },
-  },
-  {
-    /* MOD_0F21 */
-    { Bad_Opcode },
-    { "movZ",		{ Rm, Dm } },
-  },
-  {
-    /* MOD_0F22 */
-    { Bad_Opcode },
-    { "movZ",		{ Cm, Rm } },
-  },
-  {
-    /* MOD_0F23 */
-    { Bad_Opcode },
-    { "movZ",		{ Dm, Rm } },
-  },
-  {
     /* MOD_0F24 */
     { Bad_Opcode },
     { "movL",		{ Rd, Td } },
@@ -13835,32 +13814,62 @@ case_L:
 	      break;
 	    }
 	  /* Fall through.  */
+	  goto case_P;
 	case 'P':
-	  if (intel_syntax)
+	  if (l == 0 && len == 1)
 	    {
-	      if ((rex & REX_W) == 0
-		  && (prefixes & PREFIX_DATA))
+case_P:
+	      if (intel_syntax)
 		{
-		  if ((sizeflag & DFLAG) == 0)
-		    *obufp++ = 'w';
-		   used_prefixes |= (prefixes & PREFIX_DATA);
+		  if ((rex & REX_W) == 0
+		      && (prefixes & PREFIX_DATA))
+		    {
+		      if ((sizeflag & DFLAG) == 0)
+			*obufp++ = 'w';
+		      used_prefixes |= (prefixes & PREFIX_DATA);
+		    }
+		  break;
 		}
-	      break;
-	    }
-	  if ((prefixes & PREFIX_DATA)
-	      || (rex & REX_W)
-	      || (sizeflag & SUFFIX_ALWAYS))
-	    {
-	      USED_REX (REX_W);
-	      if (rex & REX_W)
-		*obufp++ = 'q';
-	      else
+	      if ((prefixes & PREFIX_DATA)
+		  || (rex & REX_W)
+		  || (sizeflag & SUFFIX_ALWAYS))
 		{
-		   if (sizeflag & DFLAG)
-		      *obufp++ = 'l';
-		   else
-		     *obufp++ = 'w';
-		   used_prefixes |= (prefixes & PREFIX_DATA);
+		  USED_REX (REX_W);
+		  if (rex & REX_W)
+		    *obufp++ = 'q';
+		  else
+		    {
+		      if (sizeflag & DFLAG)
+			*obufp++ = 'l';
+		      else
+			*obufp++ = 'w';
+		      used_prefixes |= (prefixes & PREFIX_DATA);
+		    }
+		}
+	    }
+	  else
+	    {
+	      if (l != 1 || len != 2 || last[0] != 'L')
+		{
+		  SAVE_LAST (*p);
+		  break;
+		}
+
+	      if ((prefixes & PREFIX_DATA)
+		  || (rex & REX_W)
+		  || (sizeflag & SUFFIX_ALWAYS))
+		{
+		  USED_REX (REX_W);
+		  if (rex & REX_W)
+		    *obufp++ = 'q';
+		  else
+		    {
+		      if (sizeflag & DFLAG)
+			*obufp++ = intel_syntax ? 'd' : 'l';
+		      else
+			*obufp++ = 'w';
+		      used_prefixes |= (prefixes & PREFIX_DATA);
+		    }
 		}
 	    }
 	  break;
@@ -15859,10 +15868,10 @@ OP_T (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_R (int bytemode, int sizeflag)
 {
-  if (modrm.mod == 3)
-    OP_E (bytemode, sizeflag);
-  else
-    BadOp ();
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
+  OP_E_register (bytemode, sizeflag);
 }
 
 static void

@@ -1,3 +1,27 @@
+2014-09-16  Kuan-Lin Chen <kuanlinchentw@gmail.com>
+
+        * nds32.h: Add new opcode declaration.
+
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips.h (mips_operand_type): Add new entries: OP_SAME_RS_RT,
+	OP_CHECK_PREV and OP_NON_ZERO_REG.  Add descriptions for the MIPS R6
+	instruction arguments: -a, -b, -d, -s, -t, -u, -v, -w, -x, -y, -A, -B,
+	 +I, +O, +R, +:, +\, +", +;
+	(mips_check_prev_operand): New struct.
+	(INSN2_FORBIDDEN_SLOT): New define.
+	(INSN_ISA32R6): New define.
+	(INSN_ISA64R6): New define.
+	(INSN_UPTO32R6): New define.
+	(INSN_UPTO64R6): New define.
+	(mips_isa_table): Add INSN_UPTO32R6 and INSN_UPTO64R6.
+	(ISA_MIPS32R6): New define.
+	(ISA_MIPS64R6): New define.
+	(CPU_MIPS32R6): New define.
+	(CPU_MIPS64R6): New define.
+	(cpu_is_member): Add cases for CPU_MIPS32R6, and CPU_MIPS64R6.
+
 2014-09-03  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64.h (AARCH64_FEATURE_LSE): New feature added.

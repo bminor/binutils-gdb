@@ -384,6 +384,8 @@ documentation		Eli Zaretskii		eliz@gnu.org
 testsuite
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
 
+SystemTap		Sergio Durigan Junior	sergiodj@redhat.com
+
 
 UI: External (user) interfaces.
 
@@ -466,6 +468,7 @@ Scott Bambrough					scottb@netwinder.org
 Thiago Jung Bauermann				bauerman@br.ibm.com
 Jon Beniston					jon@beniston.com
 Gary Benson					gbenson@redhat.com
+Gabriel Krisman Bertazi				gabriel@krisman.be
 Jan Beulich					jbeulich@novell.com
 Anton Blanchard					anton@samba.org
 Jim Blandy					jimb@codesourcery.com
@@ -531,6 +534,7 @@ Aldy Hernandez					aldyh@redhat.com
 Paul Hilfinger					hilfinger@gnat.com
 Matt Hiller					hiller@redhat.com
 Kazu Hirata					kazu@cs.umass.edu
+James Hogan					james.hogan@imgtec.com
 Jeff Holcomb					jeffh@redhat.com
 Don Howard					dhoward@redhat.com
 Nick Hudson					nick.hudson@dsl.pipex.com

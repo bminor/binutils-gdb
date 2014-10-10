@@ -1,3 +1,54 @@
+2014-09-22  Alan Modra  <amodra@gmail.com>
+
+	* ld-plugin/lto.exp: Use both --print-file-name and --print-prog-name
+	when looking for lto plugin.
+
+2014-09-16  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/attr-merge-arch-2.d: New test case.
+	* ld-arm/attr-merge-arch-2a.s: New test case source file.
+	* ld-arm/attr-merge-arch-2b.s: Likewise.
+	* ld-arm/arm-elf.exp: Run new test case.
+
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* ld-mips-elf/mips-elf.exp: Add support for mips*-img-elf* target
+	triple.
+
+2014-09-10  Alan Modra  <amodra@gmail.com>
+
+	* ld-aarch64/emit-relocs-local-addend.d: Adjust for changed
+	section header placement.
+	* ld-aarch64/local-addend-r.d: Likewise.
+	* ld-mmix/bspec1.d: Likewise.
+	* ld-mmix/bspec2.d: Likewise.
+	* ld-mmix/local1.d: Likewise.
+	* ld-mmix/local3.d: Likewise.
+	* ld-mmix/local5.d: Likewise.
+	* ld-mmix/local7.d: Likewise.
+	* ld-mmix/undef-3.d: Likewise.
+	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crangerel1.rd: Likewise.
+	* ld-sh/sh64/crangerel2.rd: Likewise.
+	* ld-tic6x/common.d: Likewise.
+	* ld-tic6x/shlib-1.rd: Likewise.
+	* ld-tic6x/shlib-1b.rd: Likewise.
+	* ld-tic6x/shlib-1r.rd: Likewise.
+	* ld-tic6x/shlib-1rb.rd: Likewise.
+	* ld-tic6x/shlib-app-1.rd: Likewise.
+	* ld-tic6x/shlib-app-1b.rd: Likewise.
+	* ld-tic6x/shlib-app-1r.rd: Likewise.
+	* ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* ld-tic6x/shlib-noindex.rd: Likewise.
+	* ld-tic6x/static-app-1.rd: Likewise.
+	* ld-tic6x/static-app-1b.rd: Likewise.
+	* ld-tic6x/static-app-1r.rd: Likewise.
+	* ld-tic6x/static-app-1rb.rd: Likewise.
+	* ld-x86-64/ilp32-4.d: Likewise.
+	* ld-x86-64/split-by-file-nacl.rd: Likewise.
+	* ld-x86-64/split-by-file.rd: Likewise.
+
 2014-09-06  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* ld-mips-elf/abiflags-strip1-ph.d: Ignore big/little endian

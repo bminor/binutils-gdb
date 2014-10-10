@@ -17,13 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef GDBSERVER
-#include "server.h"
-#else
-#include "defs.h"
-#include "inferior.h"
-#endif
+#include "common-defs.h"
 #include "x86-dregs.h"
+#include "break-common.h"
 
 /* Support for hardware watchpoints and breakpoints using the x86
    debug registers.
@@ -174,11 +170,6 @@
 
 /* Types of operations supported by x86_handle_nonaligned_watchpoint.  */
 typedef enum { WP_INSERT, WP_REMOVE, WP_COUNT } x86_wp_op_t;
-
-#ifndef GDBSERVER
-/* Whether or not to print the mirrored debug registers.  */
-extern int debug_hw_points;
-#endif
 
 /* Print the values of the mirrored debug registers.  */
 
@@ -511,7 +502,7 @@ x86_dr_insert_watchpoint (struct x86_debug_reg_state *state,
   if (retval == 0)
     x86_update_inferior_debug_regs (state, &local_state);
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     x86_show_dr (state, "insert_watchpoint", addr, len, type);
 
   return retval;
@@ -550,7 +541,7 @@ x86_dr_remove_watchpoint (struct x86_debug_reg_state *state,
   if (retval == 0)
     x86_update_inferior_debug_regs (state, &local_state);
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     x86_show_dr (state, "remove_watchpoint", addr, len, type);
 
   return retval;
@@ -640,12 +631,12 @@ x86_dr_stopped_data_address (struct x86_debug_reg_state *state,
 	{
 	  addr = x86_dr_low_get_addr (i);
 	  rc = 1;
-	  if (debug_hw_points)
+	  if (show_debug_regs)
 	    x86_show_dr (state, "watchpoint_hit", addr, -1, hw_write);
 	}
     }
 
-  if (debug_hw_points && addr == 0)
+  if (show_debug_regs && addr == 0)
     x86_show_dr (state, "stopped_data_addr", 0, 0, hw_write);
 
   if (rc)

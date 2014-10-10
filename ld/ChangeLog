@@ -1,3 +1,25 @@
+2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* emultempl/nds32elf.em (nds32_elf_after_open): Do not keep
+	ex9 234th entry.
+	(nds32_elf_after_allocation): Move all optimizations into
+	nds32_elf_relax_section.
+
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ldmain.c (get_emulation): Add support for -mips32r6 and -mips64r6.
+
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* configure.tgt: Add mips*-img-elf* target triple.
+
+2014-09-01  Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* emultempl/pe.em (write_build_id, setup_build_id): Change pe/coff
+	build-id section name from '.build-id' to '.buildid'.
+	* emultempl/pep.em (write_build_id, setup_build_id): Ditto.
+
 2014-08-22  Andreas Tobler  <andreast@fgznet.ch>
 
 	* emulparams/armelf_fbsd.sh (TEXT_START_ADDR): Increase alignment to

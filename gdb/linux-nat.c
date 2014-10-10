@@ -1996,7 +1996,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 {
   int pid = ptid_get_lwp (lp->ptid);
   struct target_waitstatus *ourstatus = &lp->waitstatus;
-  int event = status >> 16;
+  int event = linux_ptrace_get_extended_event (status);
 
   if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
       || event == PTRACE_EVENT_CLONE)
@@ -2311,6 +2311,8 @@ wait_lwp (struct lwp_info *lp)
 	 again before it gets to sigsuspend so we can safely let the handlers
 	 get executed here.  */
 
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog, "WL: about to sigsuspend\n");
       sigsuspend (&suspend_mask);
     }
 
@@ -2360,7 +2362,8 @@ wait_lwp (struct lwp_info *lp)
     }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP
+      && linux_is_extended_waitstatus (status))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -2919,6 +2922,7 @@ static struct lwp_info *
 linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
 {
   struct lwp_info *lp;
+  int event = linux_ptrace_get_extended_event (status);
 
   *new_pending_p = 0;
 
@@ -2938,7 +2942,7 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
      thread changes its tid to the tgid.  */
 
   if (WIFSTOPPED (status) && lp == NULL
-      && (WSTOPSIG (status) == SIGTRAP && status >> 16 == PTRACE_EVENT_EXEC))
+      && (WSTOPSIG (status) == SIGTRAP && event == PTRACE_EVENT_EXEC))
     {
       /* A multi-thread exec after we had seen the leader exiting.  */
       if (debug_linux_nat)
@@ -2982,7 +2986,8 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
     }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP
+      && linux_is_extended_waitstatus (status))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -3324,9 +3329,10 @@ retry:
 	      gdb_assert (lp->resumed);
 
 	      if (debug_linux_nat)
-		fprintf (stderr,
-			 "LWP %ld got an event %06x, leaving pending.\n",
-			 ptid_get_lwp (lp->ptid), lp->status);
+		fprintf_unfiltered (gdb_stdlog,
+				    "LWP %ld got an event %06x, "
+				    "leaving pending.\n",
+				    ptid_get_lwp (lp->ptid), lp->status);
 
 	      if (WIFSTOPPED (lp->status))
 		{
@@ -3349,11 +3355,13 @@ retry:
 			  lp->status = 0;
 
 			  if (debug_linux_nat)
-			    fprintf (stderr,
-				     "LLW: LWP %ld hit a breakpoint while"
-				     " waiting for another process;"
-				     " cancelled it\n",
-				     ptid_get_lwp (lp->ptid));
+			    fprintf_unfiltered (gdb_stdlog,
+						"LLW: LWP %ld hit a "
+						"breakpoint while "
+						"waiting for another "
+						"process; "
+						"cancelled it\n",
+						ptid_get_lwp (lp->ptid));
 			}
 		    }
 		  else
@@ -3362,9 +3370,10 @@ retry:
 	      else if (WIFEXITED (lp->status) || WIFSIGNALED (lp->status))
 		{
 		  if (debug_linux_nat)
-		    fprintf (stderr,
-			     "Process %ld exited while stopping LWPs\n",
-			     ptid_get_lwp (lp->ptid));
+		    fprintf_unfiltered (gdb_stdlog,
+					"Process %ld exited while stopping "
+					"LWPs\n",
+					ptid_get_lwp (lp->ptid));
 
 		  /* This was the last lwp in the process.  Since
 		     events are serialized to GDB core, and we can't
@@ -3441,6 +3450,8 @@ retry:
       gdb_assert (lp == NULL);
 
       /* Block until we get an event reported with SIGCHLD.  */
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog, "LNW: about to sigsuspend\n");
       sigsuspend (&suspend_mask);
     }
 

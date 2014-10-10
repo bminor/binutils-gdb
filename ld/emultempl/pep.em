@@ -1261,7 +1261,7 @@ write_build_id (bfd *abfd)
   bfd_size_type build_id_size;
   unsigned char *build_id;
 
-  /* Find the section the .build-id output section has been merged info.  */
+  /* Find the section the .buildid output section has been merged info.  */
   for (asec = abfd->sections; asec != NULL; asec = asec->next)
     {
       struct bfd_link_order *l = NULL;
@@ -1283,7 +1283,7 @@ write_build_id (bfd *abfd)
 
   if (!link_order)
     {
-      einfo (_("%P: warning: .build-id section discarded,"
+      einfo (_("%P: warning: .buildid section discarded,"
                " --build-id ignored.\n"));
       return TRUE;
     }
@@ -1347,7 +1347,7 @@ write_build_id (bfd *abfd)
   return TRUE;
 }
 
-/* Make .build-id section, and set up coff_tdata->build_id. */
+/* Make .buildid section, and set up coff_tdata->build_id. */
 static bfd_boolean
 setup_build_id (bfd *ibfd)
 {
@@ -1362,7 +1362,7 @@ setup_build_id (bfd *ibfd)
 
   flags = (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED | SEC_READONLY | SEC_DATA);
-  s = bfd_make_section_anyway_with_flags (ibfd, ".build-id", flags);
+  s = bfd_make_section_anyway_with_flags (ibfd, ".buildid", flags);
   if (s != NULL)
     {
       struct pe_tdata *t = pe_data (link_info.output_bfd);
@@ -1380,7 +1380,7 @@ setup_build_id (bfd *ibfd)
       return TRUE;
     }
 
-  einfo ("%P: warning: Cannot create .build-id section,"
+  einfo ("%P: warning: Cannot create .buildid section,"
 	 " --build-id ignored.\n");
   return FALSE;
 }

@@ -1300,6 +1300,46 @@ signal_command (char *signum_exp, int from_tty)
   proceed ((CORE_ADDR) -1, oursig, 0);
 }
 
+/* Queue a signal to be delivered to the current thread.  */
+
+static void
+queue_signal_command (char *signum_exp, int from_tty)
+{
+  enum gdb_signal oursig;
+  struct thread_info *tp;
+
+  ERROR_NO_INFERIOR;
+  ensure_not_tfind_mode ();
+  ensure_valid_thread ();
+  ensure_not_running ();
+
+  if (signum_exp == NULL)
+    error_no_arg (_("signal number"));
+
+  /* It would be even slicker to make signal names be valid expressions,
+     (the type could be "enum $signal" or some such), then the user could
+     assign them to convenience variables.  */
+  oursig = gdb_signal_from_name (signum_exp);
+
+  if (oursig == GDB_SIGNAL_UNKNOWN)
+    {
+      /* No, try numeric.  */
+      int num = parse_and_eval_long (signum_exp);
+
+      if (num == 0)
+	oursig = GDB_SIGNAL_0;
+      else
+	oursig = gdb_signal_from_command (num);
+    }
+
+  if (oursig != GDB_SIGNAL_0
+      && !signal_pass_state (oursig))
+    error (_("Signal handling set to not pass this signal to the program."));
+
+  tp = inferior_thread ();
+  tp->suspend.stop_signal = oursig;
+}
+
 /* Continuation args to be passed to the "until" command
    continuation.  */
 struct until_next_continuation_args
@@ -3008,7 +3048,24 @@ The SIGNAL argument is processed the same as the handle command.\n\
 \n\
 An argument of \"0\" means continue the program without sending it a signal.\n\
 This is useful in cases where the program stopped because of a signal,\n\
-and you want to resume the program while discarding the signal."));
+and you want to resume the program while discarding the signal.\n\
+\n\
+In a multi-threaded program the signal is delivered to, or discarded from,\n\
+the current thread only."));
+  set_cmd_completer (c, signal_completer);
+
+  c = add_com ("queue-signal", class_run, queue_signal_command, _("\
+Queue a signal to be delivered to the current thread when it is resumed.\n\
+Usage: queue-signal SIGNAL\n\
+The SIGNAL argument is processed the same as the handle command.\n\
+It is an error if the handling state of SIGNAL is \"nopass\".\n\
+\n\
+An argument of \"0\" means remove any currently queued signal from\n\
+the current thread.  This is useful in cases where the program stopped\n\
+because of a signal, and you want to resume it while discarding the signal.\n\
+\n\
+In a multi-threaded program the signal is queued with, or discarded from,\n\
+the current thread only."));
   set_cmd_completer (c, signal_completer);
 
   add_com ("stepi", class_run, stepi_command, _("\

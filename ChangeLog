@@ -1,3 +1,12 @@
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* configure.ac: Add mips*-img-elf* target triple.
+	* configure: Regenerate.
+
+2014-09-06  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+	* configure: Disable gdb for nds32*-*-* until supported.
+	* configure.ac: Disable gdb for nds32*-*-* until supported.
+
 2014-09-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure: Regenerate.

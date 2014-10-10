@@ -1971,10 +1971,12 @@ enum bfd_architecture
 #define bfd_mach_mipsisa32r2           33
 #define bfd_mach_mipsisa32r3           34
 #define bfd_mach_mipsisa32r5           36
+#define bfd_mach_mipsisa32r6           37
 #define bfd_mach_mipsisa64             64
 #define bfd_mach_mipsisa64r2           65
 #define bfd_mach_mipsisa64r3           66
 #define bfd_mach_mipsisa64r5           68
+#define bfd_mach_mipsisa64r6           69
 #define bfd_mach_mips_micromips        96
   bfd_arch_i386,      /* Intel 386 */
 #define bfd_mach_i386_intel_syntax     (1 << 0)
@@ -2942,6 +2944,12 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MICROMIPS_7_PCREL_S1,
   BFD_RELOC_MICROMIPS_10_PCREL_S1,
   BFD_RELOC_MICROMIPS_16_PCREL_S1,
+
+/* MIPS PC-relative relocations.  */
+  BFD_RELOC_MIPS_21_PCREL_S2,
+  BFD_RELOC_MIPS_26_PCREL_S2,
+  BFD_RELOC_MIPS_18_PCREL_S3,
+  BFD_RELOC_MIPS_19_PCREL_S2,
 
 /* microMIPS versions of generic BFD relocs.  */
   BFD_RELOC_MICROMIPS_GPREL16,
@@ -3948,6 +3956,13 @@ and shift left by 0 for use in lbi.gp, sbi.gp...  */
   BFD_RELOC_NDS32_15_FIXED,
   BFD_RELOC_NDS32_17_FIXED,
   BFD_RELOC_NDS32_25_FIXED,
+  BFD_RELOC_NDS32_LONGCALL4,
+  BFD_RELOC_NDS32_LONGCALL5,
+  BFD_RELOC_NDS32_LONGCALL6,
+  BFD_RELOC_NDS32_LONGJUMP4,
+  BFD_RELOC_NDS32_LONGJUMP5,
+  BFD_RELOC_NDS32_LONGJUMP6,
+  BFD_RELOC_NDS32_LONGJUMP7,
 
 /* for PIC  */
   BFD_RELOC_NDS32_PLTREL_HI20,
@@ -4008,11 +4023,31 @@ This is a 5 bit absolute address.  */
   BFD_RELOC_NDS32_DIFF16,
   BFD_RELOC_NDS32_DIFF32,
   BFD_RELOC_NDS32_DIFF_ULEB128,
+  BFD_RELOC_NDS32_EMPTY,
+
+/* This is a 25 bit absolute address.  */
   BFD_RELOC_NDS32_25_ABS,
+
+/* For ex9 and ifc using.  */
   BFD_RELOC_NDS32_DATA,
   BFD_RELOC_NDS32_TRAN,
   BFD_RELOC_NDS32_17IFC_PCREL,
   BFD_RELOC_NDS32_10IFCU_PCREL,
+
+/* For TLS.  */
+  BFD_RELOC_NDS32_TPOFF,
+  BFD_RELOC_NDS32_TLS_LE_HI20,
+  BFD_RELOC_NDS32_TLS_LE_LO12,
+  BFD_RELOC_NDS32_TLS_LE_ADD,
+  BFD_RELOC_NDS32_TLS_LE_LS,
+  BFD_RELOC_NDS32_GOTTPOFF,
+  BFD_RELOC_NDS32_TLS_IE_HI20,
+  BFD_RELOC_NDS32_TLS_IE_LO12S2,
+  BFD_RELOC_NDS32_TLS_TPOFF,
+  BFD_RELOC_NDS32_TLS_LE_20,
+  BFD_RELOC_NDS32_TLS_LE_15S0,
+  BFD_RELOC_NDS32_TLS_LE_15S1,
+  BFD_RELOC_NDS32_TLS_LE_15S2,
 
 /* This is a 9-bit reloc  */
   BFD_RELOC_V850_9_PCREL,

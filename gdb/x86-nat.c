@@ -33,9 +33,6 @@
    The functions below implement debug registers sharing by reference
    counts, and allow to watch regions up to 16 bytes long.  */
 
-/* Whether or not to print the mirrored debug registers.  */
-int debug_hw_points;
-
 /* Low-level function vector.  */
 struct x86_dr_low_type x86_dr_low;
 
@@ -272,7 +269,7 @@ add_show_debug_regs_command (void)
   /* A maintenance command to enable printing the internal DRi mirror
      variables.  */
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
-			   &debug_hw_points, _("\
+			   &show_debug_regs, _("\
 Set whether to show variables that mirror the x86 debug registers."), _("\
 Show whether to show variables that mirror the x86 debug registers."), _("\
 Use \"on\" to enable, \"off\" to disable.\n\

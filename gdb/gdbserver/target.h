@@ -21,6 +21,7 @@
 #ifndef TARGET_H
 #define TARGET_H
 
+#include "target/target.h"
 #include "target/resume.h"
 #include "target/wait.h"
 #include "target/waitstatus.h"
@@ -543,7 +544,7 @@ int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 			   int len);
 
-void set_desired_inferior (int id);
+void set_desired_thread (int id);
 
 const char *target_pid_to_str (ptid_t);
 

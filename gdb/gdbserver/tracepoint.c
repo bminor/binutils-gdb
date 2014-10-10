@@ -3979,19 +3979,19 @@ gdb_agent_about_to_close (int pid)
 
   if (!maybe_write_ipa_not_loaded (buf))
     {
-      struct thread_info *save_inferior;
+      struct thread_info *saved_thread;
 
-      save_inferior = current_inferior;
+      saved_thread = current_thread;
 
       /* Find any thread which belongs to process PID.  */
-      current_inferior = (struct thread_info *)
+      current_thread = (struct thread_info *)
 	find_inferior (&all_threads, same_process_p, &pid);
 
       strcpy (buf, "close");
 
       run_inferior_command (buf, strlen (buf) + 1);
 
-      current_inferior = save_inferior;
+      current_thread = saved_thread;
     }
 }
 
@@ -4001,7 +4001,7 @@ gdb_agent_about_to_close (int pid)
 static void
 cmd_qtminftpilen (char *packet)
 {
-  if (current_inferior == NULL)
+  if (current_thread == NULL)
     {
       /* Indicate that the minimum length is currently unknown.  */
       strcpy (packet, "0");
@@ -7259,9 +7259,9 @@ gdb_agent_helper_thread (void *arg)
 
 	      /* Sleep endlessly to wait the whole inferior stops.  This
 		 thread can not exit because GDB or GDBserver may still need
-		 'current_inferior' (representing this thread) to access
+		 'current_thread' (representing this thread) to access
 		 inferior memory.  Otherwise, this thread exits earlier than
-		 other threads, and 'current_inferior' is set to NULL.  */
+		 other threads, and 'current_thread' is set to NULL.  */
 	      while (1)
 		sleep (10);
 	    }

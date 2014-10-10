@@ -779,6 +779,11 @@ struct watchpoint
      then an error occurred reading the value.  */
   int val_valid;
 
+  /* When watching the location of a bitfield, contains the offset and size of
+     the bitfield.  Otherwise contains 0.  */
+  int val_bitpos;
+  int val_bitsize;
+
   /* Holds the frame address which identifies the frame this
      watchpoint should be evaluated in, or `null' if the watchpoint
      should be evaluated on the outermost frame.  */
@@ -1419,12 +1424,23 @@ extern struct breakpoint *create_jit_event_breakpoint (struct gdbarch *,
 extern struct breakpoint *create_solib_event_breakpoint (struct gdbarch *,
 							 CORE_ADDR);
 
+/* Create an solib event breakpoint at ADDRESS in the current program
+   space, and immediately try to insert it.  Returns a pointer to the
+   breakpoint on success.  Deletes the new breakpoint and returns NULL
+   if inserting the breakpoint fails.  */
+extern struct breakpoint *create_and_insert_solib_event_breakpoint
+  (struct gdbarch *gdbarch, CORE_ADDR address);
+
 extern struct breakpoint *create_thread_event_breakpoint (struct gdbarch *,
 							  CORE_ADDR);
 
 extern void remove_jit_event_breakpoints (void);
 
 extern void remove_solib_event_breakpoints (void);
+
+/* Mark solib event breakpoints of the current program space with
+   delete at next stop disposition.  */
+extern void remove_solib_event_breakpoints_at_next_stop (void);
 
 extern void remove_thread_event_breakpoints (void);
 
@@ -1475,7 +1491,7 @@ extern void breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 				    const gdb_byte *writebuf_org,
 				    ULONGEST memaddr, LONGEST len);
 
-extern int breakpoints_always_inserted_mode (void);
+extern int breakpoints_should_be_inserted_now (void);
 
 /* Called each time new event from target is processed.
    Retires previously deleted breakpoint locations that

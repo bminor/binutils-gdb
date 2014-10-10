@@ -3448,8 +3448,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	{
 	  /* Loading of shared libraries might have changed breakpoint
 	     addresses.  Make sure new breakpoints are inserted.  */
-	  if (stop_soon == NO_STOP_QUIETLY
-	      && !breakpoints_always_inserted_mode ())
+	  if (stop_soon == NO_STOP_QUIETLY)
 	    insert_breakpoints ();
 	  resume (0, GDB_SIGNAL_0);
 	  prepare_to_wait (ecs);
@@ -6110,7 +6109,7 @@ normal_stop (void)
       printf_filtered (_("No unwaited-for children left.\n"));
     }
 
-  if (!breakpoints_always_inserted_mode () && target_has_execution)
+  if (!breakpoints_should_be_inserted_now () && target_has_execution)
     {
       if (remove_breakpoints ())
 	{

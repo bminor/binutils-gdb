@@ -1,3 +1,449 @@
+2014-09-22  Gary Benson  <gbenson@redhat.com>
+
+	* target.c (target_stop): Updated comment.
+
+2014-09-22  Gary Benson  <gbenson@redhat.com>
+
+	* target/target.h (target_stop_ptid): Renamed as...
+	(target_stop_and_wait): New function.  Updated comment.
+	All uses updated.
+	(target_continue_ptid): Renamed as...
+	(target_continue_no_signal): New function.  Updated comment.
+	All uses updated.
+
+2014-09-22  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention merge of "breakpoint always-inserted" modes "off"
+	and "auto" merged.
+	* breakpoint.c (enum ugll_insert_mode): New enum.
+	(always_inserted_mode): Now a plain boolean.
+	(show_always_inserted_mode): No longer handle AUTO_BOOLEAN_AUTO.
+	(breakpoints_always_inserted_mode): Delete.
+	(breakpoints_should_be_inserted_now): New function.
+	(insert_breakpoints): Pass UGLL_INSERT to
+	update_global_location_list instead of calling
+	insert_breakpoint_locations manually.
+	(create_solib_event_breakpoint_1): New, factored out from ...
+	(create_solib_event_breakpoint): ... this.
+	(create_and_insert_solib_event_breakpoint): Use
+	create_solib_event_breakpoint_1 instead of calling
+	insert_breakpoint_locations manually.
+	(update_global_location_list): Change parameter type from boolean
+	to enum ugll_insert_mode.  All callers adjusted.  Adjust to use
+	breakpoints_should_be_inserted_now and handle UGLL_INSERT.
+	(update_global_location_list_nothrow): Change parameter type from
+	boolean to enum ugll_insert_mode.
+	(_initialize_breakpoint): "breakpoint always-inserted" option is
+	now a boolean command.  Update help text.
+	* breakpoint.h (breakpoints_always_inserted_mode): Delete declaration.
+	(breakpoints_should_be_inserted_now): New declaration.
+	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_LOADED>:
+	Remove breakpoints_always_inserted_mode check.
+	(normal_stop): Adjust to use breakpoints_should_be_inserted_now.
+	* remote.c (remote_start_remote): Likewise.
+
+2014-09-22  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (enum ugll_insert_mode): Add UGLL_INSERT.
+	(insert_breakpoints): Don't call insert_breakpoint_locations here.
+	Instead, pass UGLL_INSERT to update_global_location_list.
+	(update_global_location_list): Change parameter type from boolean
+	to enum ugll_insert_mode.  All callers adjusted.  Adjust to use
+	breakpoints_should_be_inserted_now and handle UGLL_INSERT.
+	(create_solib_event_breakpoint_1): New, factored out from ...
+	(create_solib_event_breakpoint): ... this.
+	(create_and_insert_solib_event_breakpoint): Use
+	create_solib_event_breakpoint_1 instead of calling
+	insert_breakpoint_locations manually.
+	(update_global_location_list): Handle UGLL_INSERT.
+
+2014-09-22  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (enum ugll_insert_mode): New enum.
+	(update_global_location_list)
+	(update_global_location_list_nothrow): Change parameter type from
+	boolean to enum ugll_insert_mode.  All callers adjusted.
+
+2014-09-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Add Sergio Durigan Junior as maintainer of
+	SystemTap support in GDB.
+
+2014-09-19  Don Breazeal  <donb@codesourcery.com>
+
+	* linux-nat.c (linux_handle_extended_wait): Call
+	linux_ptrace_get_extended_event.
+	(wait_lwp): Call linux_is_extended_waitstatus.
+	(linux_nat_filter_event): Call linux_ptrace_get_extended_event
+	and linux_is_extended_waitstatus.
+	* nat/linux-ptrace.c (linux_test_for_tracefork): Call
+	linux_ptrace_get_extended_event.
+	(linux_ptrace_get_extended_event): New function.
+	(linux_is_extended_waitstatus): New function.
+	* nat/linux-ptrace.h (linux_ptrace_get_extended_event)
+	(linux_is_extended_waitstatus): New declarations.
+
+2014-09-19  Yao Qi  <yao@codesourcery.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Update declaration.
+	(handle_DW_AT_stmt_list): Add argument 'lowpc'.  Update
+	comments.  Callers update.
+	(dwarf_decode_lines): Likewise.
+	(dwarf_decode_lines_1): Add argument 'lowpc'.  Update
+	comments.  Skip the line table if  'lowpc' is greater than
+	'address'.  Don't check
+	dwarf2_per_objfile->has_section_at_zero.
+
+2014-09-18  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention new "producer" attribute of gdb.Symtab.
+	* python/py-symtab.c (stpy_get_producer): New function.
+	(symtab_object_getset): Add "producer" attribute.
+
+2014-09-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	PR gdb/17384
+	* corefile.c (struct captured_read_memory_integer_arguments): Remove.
+	(do_captured_read_memory_integer): Remove.
+	(safe_read_memory_integer): Use target_read_memory directly instead
+	of catching errors in do_captured_read_memory_integer.
+
+2014-09-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* CONTRIBUTE (Coding Standards): For internals refer to wiki,
+	not gdb/doc.
+
+2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* objc-lang.c (find_implementation_from_class): Remove dead code.
+
+2014-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/7233
+	* linux-nat.c (linux_nat_wait_1): Replace "fprintf (stderr..." by
+	"fprintf_unfiltered (gdb_stdlog...)".
+
+2014-09-16  Patrick Palka  <patrick@parcs.ath.cx>
+
+	PR breakpoints/12526
+	* breakpoint.h (struct watchpoint): New fields val_bitpos and
+	val_bitsize.
+	* breakpoint.c (watch_command_1): Use these fields to retain
+	bitfield information.
+	(extract_bitfield_from_watchpoint_value): New function.
+	(watchpoint_check): Use it.
+	(update_watchpoint): Use it.  Optimize the address and length of a
+	HW watchpoint pointing to a bitfield.
+	* value.h (unpack_value_bitfield): New prototype.
+	* value.c (unpack_value_bitfield): Make extern.
+
+2014-09-16  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* config/i386/i386gnu.mh (NATDEPFILES): Add x86-nat.o and
+	x86-dregs.o.
+	* gnu-nat.c (inf_threads): New function.
+	* gnu-nat.h (inf_threads_ftype): New typedef.
+	(inf_threads): New declaration.
+	* i386gnu-nat.c: Include "x86-nat.h" and "inf-child.h".
+	[i386_DEBUG_STATE] (i386_gnu_dr_get, i386_gnu_dr_set)
+	(i386_gnu_dr_set_control_one, i386_gnu_dr_set_control)
+	(i386_gnu_dr_set_addr_one, i386_gnu_dr_set_addr)
+	(i386_gnu_dr_get_reg, i386_gnu_dr_get_addr, 386_gnu_dr_get_status)
+	(i386_gnu_dr_get_control): New functions.
+	(reg_addr): New structure.
+	(_initialize_i386gnu_nat) [i386_DEBUG_STATE]: Initialize hardware
+	i386 debugging register hooks.
+	* NEWS: Mention this.
+
+2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (arm_record_vdata_transfer_insn): Added record handler for
+	vector data transfer instructions.
+	(arm_record_coproc_data_proc): Updated.
+
+2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (arm_record_asimd_vfp_coproc): Replace stub handler with
+	arm_record_exreg_ld_st_insn.
+	(arm_record_exreg_ld_st_insn): Add record handler for ex-register
+	load/store insns.
+
+2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (arm_record_coproc_data_proc): Updated.
+	(arm_record_vfp_data_proc_insn): Added record handler for VFP data
+	processing instructions.
+
+2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (thumb2_record_asimd_struct_ld_st): Add record handler
+	for advance SIMD struct ld/st insn.
+	(thumb2_record_decode_insn_handler): Replace stub handler with
+	thumb2_record_asimd_struct_ld_st.
+
+2014-08-13  Omair Javaid  <omair.javaid@linaro.org>
+
+	* arm-tdep.c (arm_record_coproc_data_proc): Add record handler stubs
+	for asimd, vfp and coprocessor insns.
+	(arm_record_asimd_vfp_coproc): Add record handler for asimd, vfp
+	and coprocessor insns.
+	(thumb2_record_coproc_insn): New function.
+	(thumb2_record_decode_insn_handler): Update coprocessor insns record
+	handlers.
+	(decode_insn): Install arm_record_asimd_vfp_coproc as handler for
+	opcode 110 insns.
+
+2014-09-13  Doug Evans  <xdje42@gmail.com>
+
+	* NEWS: Mention new "queue-signal" command.
+	* infcmd.c (queue_signal_command): New function.
+	(_initialize_infcmd): Add new queue-signal command.
+
+2014-09-13  Doug Evans  <xdje42@gmail.com>
+
+	* linux-nat.c (wait_lwp): Add debugging printf.
+	(linux_nat_wait_1): Ditto.
+
+2014-09-12  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (remove_solib_event_breakpoints_at_next_stop)
+	(create_and_insert_solib_event_breakpoint): New functions.
+	* breakpoint.h (create_and_insert_solib_event_breakpoint)
+	(remove_solib_event_breakpoints_at_next_stop): New declarations.
+	* procfs.c (dbx_link_bpt_addr, dbx_link_bpt): Delete globals.
+	(remove_dbx_link_breakpoint): Delete function.
+	(insert_dbx_link_bpt_in_file): Use
+	create_and_insert_solib_event_breakpoint instead of
+	deprecated_insert_raw_breakpoint.
+	(procfs_wait): Don't check whether we hit __dbx_link here.
+	(procfs_mourn_inferior): Don't delete the __dbx_link breakpoint
+	here.
+	* solib-irix.c (base_breakpoint): Delete global.
+	(disable_break): Delete function.
+	(enable_break): Use create_solib_event_breakpoint
+	instead of deprecated_insert_raw_breakpoint.
+	(irix_solib_handle_event): New function.
+	(irix_solib_create_inferior_hook): Don't run the target or disable
+	the mapping-complete breakpoint here.
+	(_initialize_irix_solib): Install irix_solib_handle_event as
+	so_ops->handle_event hook.
+
+2014-09-12  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	PR tdep/17379
+	* rs6000-tdep.c (rs6000_frame_cache): Use safe_read_memory_integer
+	instead of read_memory_unsigned_integer.
+
+2014-09-12  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-waitpid.c: Include common-defs.h.
+	[GDBSERVER]: Add FIXME comment.
+	[!GDBSERVER]: Don't include defs.h or signal.h.
+	(linux_debug) [!GDBSERVER]: Remove empty block.
+
+2014-09-12  Gary Benson  <gbenson@redhat.com>
+
+	* nat/x86-dregs.c: Include common-defs.h and break-common.h.
+	Don't include defs.h or server.h.
+
+2014-09-12  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-btrace.c: Include common-defs.h.
+	Don't include defs.h, server.h or gdbthread.h.
+	* nat/linux-btrace.h (struct target_ops): New forward declaration.
+
+2014-09-12  Gary Benson  <gbenson@redhat.com>
+
+	* common/agent.c: Include common-defs.h.
+	Don't include defs.h or server.h.
+	* common/buffer.c: Likewise.
+	* common/common-debug.c: Likewise.
+	* common/common-utils.c: Likewise.
+	* common/errors.c: Likewise.
+	* common/filestuff.c: Likewise.
+	* common/format.c: Likewise.
+	* common/gdb_vecs.c: Likewise.
+	* common/print-utils.c: Likewise.
+	* common/ptid.c: Likewise.
+	* common/rsp-low.c: Likewise.
+	* common/signals.c: Likewise.
+	* common/vec.c: Likewise.
+	* common/xml-utils.c: Likewise.
+	* nat/linux-osdata.c: Likewise.
+	* nat/linux-procfs.c: Likewise.
+	* nat/linux-ptrace.c: Likewise.
+	* nat/mips-linux-watch.c: Likewise.
+	* target/waitstatus.c: Likewise.
+
+2014-09-12  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* common/common-regcache.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/common-regcache.h.
+	* regcache.h: Include common-regcache.h.
+	(regcache_read_pc): Don't declare.
+	* regcache.c (get_thread_regcache_for_ptid): New function.
+	* nat/linux-btrace.c: Don't include regcache.h.
+	Include common-regcache.h.
+	(perf_event_read_bts): Use get_thread_regcache_for_ptid.
+
+2014-09-11  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* regcache.h (struct regset): Declare.
+
+2014-09-11  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17347
+	* main.c: Include "infrun.h".
+	(catch_command_errors, catch_command_errors_const): Wait for the
+	foreground command to complete.
+	* top.c (maybe_wait_sync_command_done): New function, factored out
+	from ...
+	(maybe_wait_sync_command_done): ... here.
+	* top.h (maybe_wait_sync_command_done): New declaration.
+
+2014-09-11  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* common/symbol.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/symbol.h.
+	* minsyms.c (find_minimal_symbol_address): New function.
+	* common/agent.c: Include common/symbol.h.
+	[!GDBSERVER]: Don't include objfiles.h.
+	(agent_look_up_symbols): Use find_minimal_symbol_address.
+
+2014-09-11  Gary Benson  <gbenson@redhat.com>
+
+	* target/target.h (target_stop_ptid, target_continue_ptid):
+	Declare.
+	* target.c (target_stop_ptid, target_continue_ptid): New
+	functions.
+	* common/agent.c [!GDBSERVER]: Don't include infrun.h.
+	(agent_run_command): Always use target_stop_ptid and
+	target_continue_ptid.
+
+2014-09-11  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* target/target.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add target/target.h.
+	* target.h: Include target/target.h.
+	(target_read_memory, target_write_memory): Don't declare.
+	* target.c (target_read_uint32): New function.
+	* common/agent.c: Include target/target.h.
+	[!GDBSERVER]: Don't include target.h.
+	(helper_thread_id): Type changed to uint32_t.
+	(agent_get_helper_thread_id): Use target_read_uint32.
+	(agent_run_command): Always use target_read_memory and
+	target_write_memory.
+	(agent_capability): Type changed to uint32_t.
+	(agent_capability_check): Use target_read_uint32.
+
+2014-09-11  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-debug.h (show_debug_regs): Declare.
+	* common/common-debug.c (show_debug_regs): Define.
+	* aarch64-linux-nat.c (debug_hw_points): Don't define.  Replace
+	all uses with show_debug_regs.  Replace all uses that considered
+	debug_hw_points as a multi-value integer with straight boolean
+	uses.
+	* x86-nat.c (debug_hw_points): Don't define.  Replace all uses
+	with show_debug_regs.
+	* nat/x86-dregs.c (debug_hw_points): Don't declare.  Replace
+	all uses with show_debug_regs.
+	* mips-linux-nat.c (maint_show_dr): Don't define.  Replace all
+	uses with show_debug_regs.
+
+2014-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* findvar.c (address_from_register): Handle targets requiring
+	a special conversion routine even for plain pointer types.
+
+2014-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* rs6000-nat.c (exec_one_dummy_insn): Remove.
+	(store_register): Do not call exec_one_dummy_insn.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_array_bound): If ARR is a TYPE_CODE_PTR,
+	dereference it first.  Use value_enclosing_type instead of
+	value_type.
+	(ada_array_length): Likewise.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_ptr_subscript): Remove parameter "type".
+	Adjust function implementation and documentation accordingly.
+	(ada_evaluate_subexp) <OP_FUNCALL>: Only assign "type" if
+	NOSIDE is EVAL_AVOID_SIDE_EFFECTS.
+	Update call to ada_value_ptr_subscript.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint.c (ada_value_print): Use VAL's enclosing type
+	instead of VAL's type.
+
+2014-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* amd64-linux-nat.c: Add <sys/uio.h> #include.
+
+2014-09-09  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17367
+	* acinclude.m4 (GDB_GUILE_PROGRAM_NAMES): Pass guile version as
+	last parameter to pkg-config, not first.
+	* configure.ac: Pass --with-guile provided pkg-config path to
+	GDB_GUILE_PROGRAM_NAMES.
+	* configure: Regenerate.
+
+2014-09-09  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* MAINTAINERS (Write After Approval): Add "Gabriel Krisman
+	Bertazi".
+
+2014-09-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-irix-tdep.c (mips_irix_elf_osabi_sniff_abi_tag_sections):
+	Exclude `.MIPS.abiflags', `.MIPS.options' and `.MIPS.stubs' from
+	the list of sections determining GDB_OSABI_IRIX.
+
+2014-09-09  James Hogan  <james.hogan@imgtec.com>
+
+	* MAINTAINERS (Write After Approval): Add "James Hogan".
+
+2014-09-09  James Hogan  <james.hogan@imgtec.com>
+
+	* trad-frame.h (trad_frame_set_reg_unknown): Remove declaration.
+
+2014-09-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* i386-linux-nat.c, x86-linux-nat.c: Add <sys/uio.h> #include.
+
+2014-09-08  Doug Evans  <xdje42@gmail.com>
+
+	PR 17247
+	* guile.c: #include <signal.h>.
+	(_initialize_guile): Block SIGCHLD while initializing Guile.
+
+	Replaces the following, which is reverted.
+
+	2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR 17185
+	* configure.ac: Add check for header gc/gc.h.
+	Add check for function setenv.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* guile/guile.c (_initialize_guile): Add workaround for libgc 7.4.0.
+
+2014-09-08  Doug Evans  <xdje42@gmail.com>
+
+	* guile/scm-cmd.c (gdbscm_parse_command_name): Replace magic number
+	with named constant.  Fix style of pointer comparison.
+	* python/py-cmd.c (gdbpy_parse_command_name): Ditto.
+
 2014-09-07  Gabriel Krisman Bertazi  <gabriel@krisman.be>
 
 	PR gdb/17035

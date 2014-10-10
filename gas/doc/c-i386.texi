@@ -303,6 +303,19 @@ single-thread computers
 @option{-momit-lock-prefix=@var{no}} will encode lock prefix as usual,
 which is the default.
 
+@cindex @samp{-mevexrcig=} option, i386
+@cindex @samp{-mevexrcig=} option, x86-64
+@item -mevexrcig=@var{rne}
+@itemx -mevexrcig=@var{rd}
+@itemx -mevexrcig=@var{ru}
+@itemx -mevexrcig=@var{rz}
+These options control how the assembler should encode SAE-only
+EVEX instructions.  @option{-mevexrcig=@var{rne}} will encode RC bits
+of EVEX instruction with 00, which is the default.
+@option{-mevexrcig=@var{rd}}, @option{-mevexrcig=@var{ru}}
+and @option{-mevexrcig=@var{rz}} will encode SAE-only EVEX instructions
+with 01, 10 and 11 RC bits, respectively.
+
 @end table
 @c man end
 

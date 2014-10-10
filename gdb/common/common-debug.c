@@ -17,12 +17,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef GDBSERVER
-#include "server.h"
-#else
-#include "defs.h"
-#endif
+#include "common-defs.h"
 #include "common-debug.h"
+
+/* See common/common-debug.h.  */
+
+int show_debug_regs;
 
 /* See common/common-debug.h.  */
 

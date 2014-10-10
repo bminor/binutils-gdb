@@ -1,3 +1,13 @@
+2014-09-17  Han Shen  <shenhan@google.com>
+
+	* aarch64.h (R_AARCH64_TLS_DTPREL64): Switch enum value with ...
+	(R_AARCH64_TLS_DTPMOD64): ... enum value.
+
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips.h (E_MIPS_ARCH_32R6, E_MIPS_ARCH_64R6): New enum constants.
+
 2014-09-02  Cary Coutant  <ccoutant@google.com>
 
 	* elfcpp_file.h (Elf_file::shnum): New const function.

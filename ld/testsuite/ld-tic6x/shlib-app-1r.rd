@@ -1,4 +1,4 @@
-There are 17 section headers, starting at offset 0x2158:
+There are 17 section headers, starting at offset .*:
 
 Section Headers:
   \[Nr\] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al

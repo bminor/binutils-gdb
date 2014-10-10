@@ -58,6 +58,7 @@ struct dcache_struct;
    it goes into the file stratum, which is always below the process
    stratum.  */
 
+#include "target/target.h"
 #include "target/resume.h"
 #include "target/wait.h"
 #include "target/waitstatus.h"
@@ -1292,8 +1293,7 @@ int target_supports_disable_randomization (void);
 
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
-extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
-			       ssize_t len);
+/* For target_read_memory see target/target.h.  */
 
 extern int target_read_raw_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
 				   ssize_t len);
@@ -1302,8 +1302,7 @@ extern int target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
 
 extern int target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
 
-extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
-				ssize_t len);
+/* For target_write_memory see target/target.h.  */
 
 extern int target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 				    ssize_t len);
@@ -1574,8 +1573,10 @@ extern int target_thread_alive (ptid_t ptid);
 extern void target_find_new_threads (void);
 
 /* Make target stop in a continuable fashion.  (For instance, under
-   Unix, this should act like SIGSTOP).  This function is normally
-   used by GUIs to implement a stop button.  */
+   Unix, this should act like SIGSTOP).  Note that this function is
+   asynchronous: it does not wait for the target to become stopped
+   before returning.  If this is the behavior you want please use
+   target_stop_and_wait.  */
 
 extern void target_stop (ptid_t ptid);
 

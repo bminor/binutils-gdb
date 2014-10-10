@@ -49,15 +49,23 @@ get_thread_regcache (struct thread_info *thread, int fetch)
 
   if (fetch && regcache->registers_valid == 0)
     {
-      struct thread_info *saved_inferior = current_inferior;
+      struct thread_info *saved_thread = current_thread;
 
-      current_inferior = thread;
+      current_thread = thread;
       fetch_inferior_registers (regcache, -1);
-      current_inferior = saved_inferior;
+      current_thread = saved_thread;
       regcache->registers_valid = 1;
     }
 
   return regcache;
+}
+
+/* See common/common-regcache.h.  */
+
+struct regcache *
+get_thread_regcache_for_ptid (ptid_t ptid)
+{
+  return get_thread_regcache (find_thread_ptid (ptid), 1);
 }
 
 void
@@ -72,11 +80,11 @@ regcache_invalidate_thread (struct thread_info *thread)
 
   if (regcache->registers_valid)
     {
-      struct thread_info *saved_inferior = current_inferior;
+      struct thread_info *saved_thread = current_thread;
 
-      current_inferior = thread;
+      current_thread = thread;
       store_inferior_registers (regcache, -1);
-      current_inferior = saved_inferior;
+      current_thread = saved_thread;
     }
 
   regcache->registers_valid = 0;
@@ -100,7 +108,7 @@ void
 regcache_invalidate (void)
 {
   /* Only update the threads of the current process.  */
-  int pid = ptid_get_pid (current_inferior->entry.id);
+  int pid = ptid_get_pid (current_thread->entry.id);
 
   find_inferior (&all_threads, regcache_invalidate_one, &pid);
 }

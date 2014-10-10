@@ -1269,6 +1269,22 @@ target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
     return TARGET_XFER_E_IO;
 }
 
+/* See target/target.h.  */
+
+int
+target_read_uint32 (CORE_ADDR memaddr, uint32_t *result)
+{
+  gdb_byte buf[4];
+  int r;
+
+  r = target_read_memory (memaddr, buf, sizeof buf);
+  if (r != 0)
+    return r;
+  *result = extract_unsigned_integer (buf, sizeof buf,
+				      gdbarch_byte_order (target_gdbarch ()));
+  return 0;
+}
+
 /* Like target_read_memory, but specify explicitly that this is a read
    from the target's raw memory.  That is, this read bypasses the
    dcache, breakpoint shadowing, etc.  */
@@ -3009,6 +3025,31 @@ target_stop (ptid_t ptid)
     }
 
   (*current_target.to_stop) (&current_target, ptid);
+}
+
+/* See target/target.h.  */
+
+void
+target_stop_and_wait (ptid_t ptid)
+{
+  struct target_waitstatus status;
+  int was_non_stop = non_stop;
+
+  non_stop = 1;
+  target_stop (ptid);
+
+  memset (&status, 0, sizeof (status));
+  target_wait (ptid, &status, 0);
+
+  non_stop = was_non_stop;
+}
+
+/* See target/target.h.  */
+
+void
+target_continue_no_signal (ptid_t ptid)
+{
+  target_resume (ptid, 0, GDB_SIGNAL_0);
 }
 
 /* Concatenate ELEM to LIST, a comma separate list, and return the

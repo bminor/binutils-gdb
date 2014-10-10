@@ -240,8 +240,6 @@ fetch_lm_info (CORE_ADDR addr)
 /* The symbol which starts off the list of shared libraries.  */
 #define DEBUG_BASE "__rld_obj_head"
 
-static void *base_breakpoint;
-
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures.  */
 
 /* Locate the base address of dynamic linker structs.
@@ -293,34 +291,6 @@ locate_base (void)
   return (address);
 }
 
-/* Remove the "mapping changed" breakpoint.
-
-   Removes the breakpoint that gets hit when the dynamic linker
-   completes a mapping change.  */
-
-static int
-disable_break (void)
-{
-  int status = 1;
-
-  /* Note that breakpoint address and original contents are in our address
-     space, so we just need to write the original contents back.  */
-
-  if (deprecated_remove_raw_breakpoint (target_gdbarch (), base_breakpoint) != 0)
-    {
-      status = 0;
-    }
-
-  base_breakpoint = NULL;
-
-  /* Note that it is possible that we have stopped at a location that
-     is different from the location where we inserted our breakpoint.
-     On mips-irix, we can actually land in __dbx_init(), so we should
-     not check the PC against our breakpoint address here.  See procfs.c
-     for more details.  */
-
-  return (status);
-}
 
 /* Arrange for dynamic linker to hit breakpoint.
 
@@ -332,21 +302,37 @@ enable_break (void)
 {
   if (symfile_objfile != NULL && has_stack_frames ())
     {
-      struct frame_info *frame = get_current_frame ();
-      struct address_space *aspace = get_frame_address_space (frame);
       CORE_ADDR entry_point;
 
-      if (!entry_point_address_query (&entry_point))
-	return 0;
-
-      base_breakpoint = deprecated_insert_raw_breakpoint (target_gdbarch (),
-							  aspace, entry_point);
-
-      if (base_breakpoint != NULL)
-	return 1;
+      if (entry_point_address_query (&entry_point))
+	{
+	  create_solib_event_breakpoint (target_gdbarch (), entry_point);
+	  return 1;
+	}
     }
 
   return 0;
+}
+
+/* Implement the "handle_event" target_solib_ops method.  */
+
+static void
+irix_solib_handle_event (void)
+{
+  /* We are now at the "mapping complete" breakpoint, we no longer
+     need it.  Note that it is possible that we have stopped at a
+     location that is different from the location where we inserted
+     our breakpoint: On mips-irix, we can actually land in
+     __dbx_link(), so we should not check the PC against our
+     breakpoint address here.  See procfs.c for more details.  Note
+     we're being called by the bpstat handling code, and so can't
+     delete the breakpoint immediately.  Mark it for later deletion,
+     which has the same effect (it'll be removed before we next resume
+     or if we're stopping).  */
+  remove_solib_event_breakpoints_at_next_stop ();
+
+  /* The caller calls solib_add, which will add any shared libraries
+     that were mapped in.  */
 }
 
 /* Implement the "create_inferior_hook" target_solib_ops method.
@@ -409,43 +395,10 @@ irix_solib_create_inferior_hook (int from_tty)
       return;
     }
 
-  /* Now run the target.  It will eventually hit the breakpoint, at
-     which point all of the libraries will have been mapped in and we
-     can go groveling around in the dynamic linker structures to find
-     out what we need to know about them.  */
-
-  tp = inferior_thread ();
-
-  clear_proceed_status (0);
-
-  inf->control.stop_soon = STOP_QUIETLY;
-  tp->suspend.stop_signal = GDB_SIGNAL_0;
-
-  do
-    {
-      target_resume (pid_to_ptid (-1), 0, tp->suspend.stop_signal);
-      wait_for_inferior ();
-    }
-  while (tp->suspend.stop_signal != GDB_SIGNAL_TRAP);
-
-  /* We are now either at the "mapping complete" breakpoint (or somewhere
-     else, a condition we aren't prepared to deal with anyway), so adjust
-     the PC as necessary after a breakpoint, disable the breakpoint, and
-     add any shared libraries that were mapped in.  */
-
-  if (!disable_break ())
-    {
-      warning (_("shared library handler failed to disable breakpoint"));
-    }
-
-  /* solib_add will call reinit_frame_cache.
-     But we are stopped in the startup code and we might not have symbols
-     for the startup code, so heuristic_proc_start could be called
-     and will put out an annoying warning.
-     Delaying the resetting of stop_soon until after symbol loading
-     suppresses the warning.  */
-  solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
-  inf->control.stop_soon = NO_STOP_QUIETLY;
+  /* The target will eventually hit the breakpoint, at which point all
+     of the libraries will have been mapped in and we can go groveling
+     around in the dynamic linker structures to find out what we need
+     to know about them.  */
 }
 
 /* Implement the "current_sos" target_so_ops method.  */
@@ -653,4 +606,5 @@ _initialize_irix_solib (void)
   irix_so_ops.open_symbol_file_object = irix_open_symbol_file_object;
   irix_so_ops.in_dynsym_resolve_code = irix_in_dynsym_resolve_code;
   irix_so_ops.bfd_open = solib_bfd_open;
+  irix_so_ops.handle_event = irix_solib_handle_event;
 }

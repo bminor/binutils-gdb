@@ -493,16 +493,7 @@ proc bp_deleted_in_command_test {} {
 	"end commands"
 
     gdb_run_cmd
-    gdb_expect {
-        -re ".*factorial command-list executed.*$gdb_prompt $" {
-	    pass "run factorial until breakpoint"
-        }
-	-re ".*$gdb_prompt $" {
-	    fail "run factorial until breakpoint"
-	}
-	default { fail "(timeout) run factorial until breakpoint" }
-	timeout { fail "(timeout) run factorial until breakpoint" }
-    }
+    gdb_test "" "factorial command-list executed.*" "run factorial until breakpoint"
 }
 
 proc temporary_breakpoint_commands {} {
@@ -551,12 +542,8 @@ proc temporary_breakpoint_commands {} {
 	"end tbreak commands"
 
     gdb_run_cmd
-    gdb_expect {
-	-re ".*factorial tbreak commands executed.*$gdb_prompt $" {
-	    pass "run factorial until temporary breakpoint"
-	}
-	timeout { fail "(timeout) run factorial until temporary breakpoint" }
-    }
+    gdb_test "" "factorial tbreak commands executed.*" \
+	"run factorial until temporary breakpoint"
 }
 
 # Test that GDB can handle $arg0 outside of user functions without

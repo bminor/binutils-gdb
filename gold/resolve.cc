@@ -303,11 +303,14 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 
   // If we're processing replacement files, allow new symbols to override
   // the placeholders from the plugin objects.
+  // Treat common symbols specially since it is possible that an ELF
+  // file increased the size of the alignment.
   if (to->source() == Symbol::FROM_OBJECT)
     {
       Pluginobj* obj = to->object()->pluginobj();
       if (obj != NULL
-          && parameters->options().plugins()->in_replacement_phase())
+          && parameters->options().plugins()->in_replacement_phase()
+          && !to->is_common())
         {
           this->override(to, sym, st_shndx, is_ordinary, object, version);
           return;

@@ -134,3 +134,11 @@
     static const struct mips_operand op = { OP_##TYPE, SIZE, LSB }; \
     return &op; \
   }
+
+#define PREV_CHECK(SIZE, LSB, GT_OK, LT_OK, EQ_OK, ZERO_OK) \
+  { \
+    static const struct mips_check_prev_operand op = { \
+      { OP_CHECK_PREV, SIZE, LSB }, GT_OK, LT_OK, EQ_OK, ZERO_OK \
+    }; \
+    return &op.root; \
+  }

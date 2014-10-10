@@ -1,3 +1,154 @@
+2014-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17421
+	* config/tc-i386.c (md_assemble): Disallow VEX/EVEX encoded
+	instructions in 16-bit mode.
+
+2014-09-22  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-m68k.c (md_assemble): Add assert to work around
+	bogus trunk gcc warning.
+	* config/tc-pj.h (md_convert_frag): Warning fix.
+	* config/tc-xtensa.c (xg_assemble_vliw_tokens): Warning fix.
+
+2014-09-17  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-arm.c (move_or_literal_pool, add_to_lit_pool): Use
+	bfd_int64_t instead of int64_t.
+
+2014-09-16  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (evexrcig): New.
+	(build_evex_prefix): Force rounding bits.
+	(OPTION_MEVEXRCIG): New.
+	(md_longopts): Add mevexrcig.
+	(md_parse_option): Handle OPTION_MEVEXRCIG.
+	(md_show_usage): Document mevexrcig.
+	* doc/c-i386.texi (mevexrcig): Document new option.
+
+2014-09-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* config/tc-nds32.c (nds32_fsrs, nds32_fdrs, nds32_gprs): Remove.
+	(relax_table): Add new relaxation pattern.
+	(do_pseudo_la_internal, do_pseudo_ls_bhw): Expand for PIC suffix.
+	(do_pseudo_move, do_pseudo_neg, do_pseudo_pushpopm): Fix.
+	(get_range_type, nds32_elf_record_fixup_exp, nds32_get_align,
+	nds32_elf_build_relax_relation, md_assemble, invalid_prev_frag,
+	nds32_relax_frag, md_estimate_size_before_relax): Adjust relaxation.
+	(relocation_table): Remove.
+	(relax_ls_table): Load-store relaxation pattern.
+	(hint_map): Define-use chain pattern.
+	(nds32_find_reloc_table, nds32_match_hint_insn): Analysis
+	relaxation pattern.
+	(nds32_parse_name): Parse PIC suffix.
+	* config/tc-nds32.h: Declare.
+
+2014-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (OPTION_omit_lock_prefix): Renamed to ...
+	(OPTION_OMIT_LOCK_PREFIX): This.
+	(md_longopts): Updated.
+	(md_parse_option): Likewise.
+
+2014-09-15  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_nan2008): New static global.
+	(mips_flag_nan2008): Removed.
+	(LL_SC_FMT): New define.
+	(COP12_FMT): Updated.
+	(ISA_IS_R6): New define.
+	(ISA_HAS_64BIT_REGS): Add mips64r6.
+	(ISA_HAS_DROR): Likewise.
+	(ISA_HAS_64BIT_FPRS): Add mips32r6 and mips64r6.
+	(ISA_HAS_ROR): Likewise.
+	(ISA_HAS_ODD_SINGLE_FPR): Likewise.
+	(ISA_HAS_MXHC1): Likewise.
+	(hilo_interlocks): Likewise.
+	(md_longopts): Likewise.
+	(ISA_HAS_LEGACY_NAN): New define.
+	(options): Add OPTION_MIPS32R6 and OPTION_MIPS64R6.
+	(mips_ase): Add field rem_rev.
+	(mips_ases): Updated to add which ISA an ASE was removed in.
+	(mips_isa_rev): Add support for mips32r6 and mips64r6.
+	(mips_check_isa_supports_ase): Add support to check if an ASE
+	has been removed in the specified MIPS ISA revision.
+	(validate_mips_insn): Skip '-' character.
+	(macro_build): Likewise.
+	(mips_check_options): Prevent R6 working with fp32, mips16,
+	micromips, or branch relaxation.
+	(file_mips_check_options): Set R6 floating point registers to
+	64 bit.  Also deal with the nan2008 option.
+	(limited_pcrel_reloc_p): Add relocs: BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3,
+	BFD_RELOC_MIPS_19_PCREL_S2, BFD_RELOC_HI16_S_PCREL and
+	BFD_RELOC_LO16_PCREL.
+	(operand_reg_mask): Add support for OP_SAME_RS_RT, OP_CHECK_PREV
+	and OP_NON_ZERO_REG.
+	(match_check_prev_operand): New static function.
+	(match_same_rs_rt_operand): New static function.
+	(match_non_zero_reg_operand): New static function.
+	(match_operand): Added entries for: OP_SAME_RS_RT, OP_CHECK_PREV
+	and OP_NON_ZERO_REG.
+	(insns_between): Added case to deal with forbidden slots.
+	(append_insn): Added support for relocs: BFD_RELOC_MIPS_21_PCREL_S2
+	and BFD_RELOC_MIPS_26_PCREL_S2.
+	(match_insn): Add support for operands -A, -B, +' and +".  Also
+	skip '-' character.
+	(mips_percent_op): Add entries for %pcrel_hi and %pcrel_lo.
+	(md_parse_option): Add support for mips32r6 and mips64r6.  Also
+	update the nan option handling.
+	(md_pcrel_from): Add cases for relocs: BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2.
+	(mips_force_relocation): Prevent forced relaxation for MIPS r6.
+	(md_apply_fix): Add support for relocs: BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3,
+	BFD_RELOC_MIPS_19_PCREL_S2, BFD_RELOC_HI16_S_PCREL and
+	BFD_RELOC_LO16_PCREL.
+	(s_mipsset): Add support for mips32r6 and mips64r6.
+	(s_nan): Update to support the new nan2008 framework.
+	(tc_gen_reloc): Add relocs: BFD_RELOC_MIPS_21_PCREL_S2,
+	BFD_RELOC_MIPS_26_PCREL_S2, BFD_RELOC_MIPS_18_PCREL_S3,
+	BFD_RELOC_MIPS_19_PCREL_S2, BFD_RELOC_HI16_S_PCREL and
+	BFD_RELOC_LO16_PCREL.
+	(mips_elf_final_processing): Updated to use the mips_nan2008.
+	(mips_cpu_info_table): Add entries for mips32r6 and mips64r6.
+	(macro): Enable ldc2, sdc2, ll, lld, swc2, sc, scd, cache, pref
+	macros for R6.
+	(mips_fix_adjustable): Make PC relative R6 relocations relative
+	to the symbol and not the section.
+	* configure.ac: Add support for mips32r6 and mips64r6.
+	* configure: Regenerate.
+	* doc/c-mips.texi: Document the -mips32r6 and -mips64r6 command line
+	options.
+	* doc/as.texinfo: Likewise.
+
+2014-09-15  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* tc-mips.c (check_fpabi): Move softfloat and singlefloat
+	checks higher.
+
+2014-09-12  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Update the set of allowed hwcaps
+	when bumping the current architecture.
+	(md_begin): Adjust the highetst architecture level also when a
+	specific architecture is not requested.
+
+2014-09-12  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* configure.tgt: Add mips*-img-elf* target triple.
+
+2014-09-12  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-i386.c (match_template): Remove redundant "!!" testing
+	single-bit bitfields.
+	(build_modrm_byte): Don't compare single-bit bitfields to "1".
+
+2014-09-09  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add cortex-a17.
+
 2014-09-03  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (parse_sys_reg): Remove the restriction on op0

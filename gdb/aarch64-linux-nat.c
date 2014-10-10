@@ -119,10 +119,6 @@ get_thread_id (ptid_t ptid)
 static int aarch64_num_bp_regs;
 static int aarch64_num_wp_regs;
 
-/* Debugging of hardware breakpoint/watchpoint support.  */
-
-static int debug_hw_points;
-
 /* Each bit of a variable of this type is used to indicate whether a
    hardware breakpoint or watchpoint setting has been changed since
    the last update.
@@ -363,7 +359,7 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
   if (info == NULL)
     info = lwp->arch_private = XCNEW (struct arch_lwp_info);
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "debug_reg_change_callback: \n\tOn entry:\n");
@@ -392,7 +388,7 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
   if (!lwp->stopped)
     linux_stop_lwp (lwp);
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "\tOn exit:\n\tpid%d, dr_changed_bp=0x%s, "
@@ -677,7 +673,7 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
       struct aarch64_debug_reg_state *state
 	= aarch64_get_debug_reg_state (ptid_get_pid (lwp->ptid));
 
-      if (debug_hw_points)
+      if (show_debug_regs)
 	fprintf_unfiltered (gdb_stdlog, "prepare_to_resume thread %d\n", tid);
 
       /* Watchpoints.  */
@@ -1200,7 +1196,7 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
   const int len = 4;
   const int type = hw_execute;
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     fprintf_unfiltered
       (gdb_stdlog,
        "insert_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
@@ -1208,7 +1204,7 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
 
   ret = aarch64_handle_breakpoint (type, addr, len, 1 /* is_insert */);
 
-  if (debug_hw_points > 1)
+  if (show_debug_regs)
     {
       struct aarch64_debug_reg_state *state
 	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
@@ -1233,14 +1229,14 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
   const int len = 4;
   const int type = hw_execute;
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     fprintf_unfiltered
       (gdb_stdlog, "remove_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
        (unsigned long) addr, len);
 
   ret = aarch64_handle_breakpoint (type, addr, len, 0 /* is_insert */);
 
-  if (debug_hw_points > 1)
+  if (show_debug_regs)
     {
       struct aarch64_debug_reg_state *state
 	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
@@ -1297,7 +1293,7 @@ aarch64_handle_unaligned_watchpoint (int type, CORE_ADDR addr, int len,
 	ret = aarch64_dr_state_remove_one_point (state, type, aligned_addr,
 						 aligned_len);
 
-      if (debug_hw_points)
+      if (show_debug_regs)
 	fprintf_unfiltered (gdb_stdlog,
 "handle_unaligned_watchpoint: is_insert: %d\n"
 "                             aligned_addr: 0x%08lx, aligned_len: %d\n"
@@ -1335,7 +1331,7 @@ aarch64_linux_insert_watchpoint (struct target_ops *self,
 {
   int ret;
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     fprintf_unfiltered (gdb_stdlog,
 			"insert_watchpoint on entry (addr=0x%08lx, len=%d)\n",
 			(unsigned long) addr, len);
@@ -1344,7 +1340,7 @@ aarch64_linux_insert_watchpoint (struct target_ops *self,
 
   ret = aarch64_handle_watchpoint (type, addr, len, 1 /* is_insert */);
 
-  if (debug_hw_points > 1)
+  if (show_debug_regs)
     {
       struct aarch64_debug_reg_state *state
 	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
@@ -1368,7 +1364,7 @@ aarch64_linux_remove_watchpoint (struct target_ops *self,
 {
   int ret;
 
-  if (debug_hw_points)
+  if (show_debug_regs)
     fprintf_unfiltered (gdb_stdlog,
 			"remove_watchpoint on entry (addr=0x%08lx, len=%d)\n",
 			(unsigned long) addr, len);
@@ -1377,7 +1373,7 @@ aarch64_linux_remove_watchpoint (struct target_ops *self,
 
   ret = aarch64_handle_watchpoint (type, addr, len, 0 /* is_insert */);
 
-  if (debug_hw_points > 1)
+  if (show_debug_regs)
     {
       struct aarch64_debug_reg_state *state
 	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
@@ -1496,7 +1492,7 @@ add_show_debug_regs_command (void)
   /* A maintenance command to enable printing the internal DRi mirror
      variables.  */
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
-			   &debug_hw_points, _("\
+			   &show_debug_regs, _("\
 Set whether to show variables that mirror the AArch64 debug registers."), _("\
 Show whether to show variables that mirror the AArch64 debug registers."), _("\
 Use \"on\" to enable, \"off\" to disable.\n\

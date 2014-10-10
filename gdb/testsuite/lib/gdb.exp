@@ -64,10 +64,12 @@ if ![info exists INTERNAL_GDBFLAGS] {
 }
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.
-# Set it if it is not already set.
+# Set it if it is not already set.  This is also set by default_gdb_init
+# but it's not clear what removing one of them will break.
+# See with_gdb_prompt for more details on prompt handling.
 global gdb_prompt
 if ![info exists gdb_prompt] then {
-    set gdb_prompt "\[(\]gdb\[)\]"
+    set gdb_prompt "\\(gdb\\)"
 }
 
 # A regexp that matches the pagination prompt.
@@ -792,21 +794,6 @@ proc gdb_test_multiple { command message user_code } {
 	}
     }
 
-    if [target_info exists gdb,timeout] {
-	set tmt [target_info gdb,timeout]
-    } else {
-	if [info exists timeout] {
-	    set tmt $timeout
-	} else {
-	    global timeout
-	    if [info exists timeout] {
-		set tmt $timeout
-	    } else {
-		set tmt 60
-	    }
-	}
-    }
-
     set code {
 	-re ".*A problem internal to GDB has been detected" {
 	    fail "$message (GDB internal error)"
@@ -912,7 +899,7 @@ proc gdb_test_multiple { command message user_code } {
     }
 
     set result 0
-    set code [catch {gdb_expect $tmt $code} string]
+    set code [catch {gdb_expect $code} string]
     if {$code == 1} {
 	global errorInfo errorCode
 	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
@@ -1753,17 +1740,42 @@ proc with_test_prefix { prefix body } {
 # PROMPT.  When BODY is finished, restore GDB prompt and variable
 # $gdb_prompt.
 # Returns the result of BODY.
+#
+# Notes:
+#
+# 1) If you want to use, for example, "(foo)" as the prompt you must pass it
+# as "(foo)", and not the regexp form "\(foo\)" (expressed as "\\(foo\\)" in
+# TCL).  PROMPT is internally converted to a suitable regexp for matching.
+# We do the conversion from "(foo)" to "\(foo\)" here for a few reasons:
+#   a) It's more intuitive for callers to pass the plain text form.
+#   b) We need two forms of the prompt:
+#      - a regexp to use in output matching,
+#      - a value to pass to the "set prompt" command.
+#   c) It's easier to convert the plain text form to its regexp form.
+#
+# 2) Don't add a trailing space, we do that here.
 
 proc with_gdb_prompt { prompt body } {
     global gdb_prompt
 
+    # Convert "(foo)" to "\(foo\)".
+    # We don't use string_to_regexp because while it works today it's not
+    # clear it will work tomorrow: the value we need must work as both a
+    # regexp *and* as the argument to the "set prompt" command, at least until
+    # we start recording both forms separately instead of just $gdb_prompt.
+    # The testsuite is pretty-much hardwired to interpret $gdb_prompt as the
+    # regexp form.
+    regsub -all {[]*+.|()^$\[\\]} $prompt {\\&} prompt
+
     set saved $gdb_prompt
 
+    verbose -log "Setting gdb prompt to \"$prompt \"."
     set gdb_prompt $prompt
     gdb_test_no_output "set prompt $prompt " ""
 
     set code [catch {uplevel 1 $body} result]
 
+    verbose -log "Restoring gdb prompt to \"$saved \"."
     set gdb_prompt $saved
     gdb_test_no_output "set prompt $saved " ""
 
@@ -2797,10 +2809,6 @@ proc gdb_compile {source dest type options} {
     }
     set options $new_options
 
-    if [target_info exists is_vxworks] {
-	set options2 { "additional_flags=-Dvxworks" }
-	set options [concat $options2 $options]
-    }
     if [info exists GDB_TESTCASE_OPTIONS] {
 	lappend options "additional_flags=$GDB_TESTCASE_OPTIONS"
     }
@@ -3127,35 +3135,27 @@ proc gdb_expect { args } {
 	set expcode $args
     }
 
+    # A timeout argument takes precedence, otherwise of all the timeouts
+    # select the largest.
+    upvar #0 timeout gtimeout
     upvar timeout timeout
-
-    if [target_info exists gdb,timeout] {
-	if [info exists timeout] {
-	    if { $timeout < [target_info gdb,timeout] } {
-		set gtimeout [target_info gdb,timeout]
-	    } else {
-		set gtimeout $timeout
-	    }
-	} else {
-	    set gtimeout [target_info gdb,timeout]
-	}
-    }
-
-    if ![info exists gtimeout] {
-	global timeout
-	if [info exists timeout] {
-	    set gtimeout $timeout
-	}
-    }
-
     if [info exists atimeout] {
-	if { ![info exists gtimeout] || $gtimeout < $atimeout } {
-	    set gtimeout $atimeout
-	}
+	set tmt $atimeout
     } else {
-	if ![info exists gtimeout] {
+	set tmt 0
+	if [info exists timeout] {
+	    set tmt $timeout
+	}
+	if { [info exists gtimeout] && $gtimeout > $tmt } {
+	    set tmt $gtimeout
+	}
+	if { [target_info exists gdb,timeout]
+	     && [target_info gdb,timeout] > $tmt } {
+	    set tmt [target_info gdb,timeout]
+	}
+	if { $tmt == 0 } {
 	    # Eeeeew.
-	    set gtimeout 60
+	    set tmt 60
 	}
     }
 
@@ -3170,7 +3170,7 @@ proc gdb_expect { args } {
 	}
     }
     set code [catch \
-	{uplevel remote_expect host $gtimeout $expcode} string]
+	{uplevel remote_expect host $tmt $expcode} string]
     if [info exists old_val] {
 	set remote_suppress_flag $old_val
     } else {
@@ -3334,6 +3334,22 @@ proc gdb_spawn { } {
     default_gdb_spawn
 }
 
+# Spawn GDB with CMDLINE_FLAGS appended to the GDBFLAGS global.
+
+proc gdb_spawn_with_cmdline_opts { cmdline_flags } {
+    global GDBFLAGS
+
+    set saved_gdbflags $GDBFLAGS
+
+    append GDBFLAGS $cmdline_flags
+
+    set res [gdb_spawn]
+
+    set GDBFLAGS $saved_gdbflags
+
+    return $res
+}
+
 # Start gdb running, wait for prompt, and disable the pagers.
 
 # Overridable function -- you can override this function in your
@@ -3345,6 +3361,31 @@ proc gdb_start { } {
 
 proc gdb_exit { } {
     catch default_gdb_exit
+}
+
+# Start a set of programs running and then wait for a bit, to be sure
+# that they can be attached to.  Return a list of the processes' PIDs.
+
+proc spawn_wait_for_attach { executable_list } {
+    set pid_list {}
+
+    foreach {executable} $executable_list {
+	lappend pid_list [eval exec $executable &]
+    }
+
+    sleep 2
+
+    if { [istarget "*-*-cygwin*"] } {
+	for {set i 0} {$i < [llength $pid_list]} {incr i} {
+	    # testpid is the Cygwin PID, GDB uses the Windows PID,
+	    # which might be different due to the way fork/exec works.
+	    set testpid [lindex $pid_list $i]
+	    set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
+	    set pid_list [lreplace $pid_list $i $i $testpid]
+	}
+    }
+
+    return $pid_list
 }
 
 #

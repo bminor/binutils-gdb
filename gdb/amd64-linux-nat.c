@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "elf/common.h"
+#include <sys/uio.h>
 #include <sys/ptrace.h>
 #include <asm/prctl.h>
 #include <sys/reg.h>

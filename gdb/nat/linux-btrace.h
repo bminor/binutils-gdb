@@ -30,6 +30,8 @@
 #  include <linux/perf_event.h>
 #endif
 
+struct target_ops;
+
 /* Branch trace target information per thread.  */
 struct btrace_target_info
 {

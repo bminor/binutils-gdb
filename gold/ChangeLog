@@ -1,3 +1,93 @@
+2014-09-18  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* testsuite/Makefile.am (plugin_test_10): New test.
+	* testsuite/Makefile.in: Regenerate
+	* testsuite/plugin_common_test_2.c (c1): Align to 8.
+	* testsuite/plugin_test_10.sh: New file.
+
+2014-09-17  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
+
+	* plugin.cc (Sized_pluginobj::do_add_symbols): Ignore isym->size.
+	* resolve.cc (Symbol_table::resolve): Don't override common symbols
+	during the replacement phase.
+
+2014-09-17  Han Shen  <shenhan@google.com>
+	    Jing Yu  <jingyu@google.com>
+
+	* aarch64-reloc.def: Add TLSGD_ADR_PAGE21, TLSGD_ADD_LO12_NC,
+	TLSDESC_ADR_PAGE21, TLSDESC_LD64_LO12, TLSDESC_ADD_LO12, TLSDESC_CALL.
+	* aarch64.cc (Target_aarch64): Add data members
+	got_irelative_, got_tlsdesc_, rela_irelative_, got_mod_index_offset_,
+	tlsdesc_reloc_info_, tls_base_symbol_defined_. Initialize them in
+	constructor.
+	(Target_aarch64::do_reloc_symbol_index): New method.
+	(Target_aarch64::do_reloc_addend): New method.
+	(Target_aarch64::add_tlsdesc_info): New method.
+	(Target_aarch64::do_dynsym_value): New method.
+	(Target_aarch64::do_make_data_plt): Add new parameters: got,
+	got_irelative. Pass them to Output_data_plt_aarch64_standard.
+	(Target_aarch64::make_data_plt): Add new parameters: got,
+	got_irelative. Pass them to do_make_data_plt.
+	(Target_aarch64::Relocate): Add skip_call_tls_get_addr_ variable.
+	(Target_aarch64::Relocate:tls_gd_to_le): New method.
+	(Target_aarch64::Relocate:tls_ie_to_le): New method.
+	(Target_aarch64::Relocate:tls_desc_gd_to_le): New method.
+	(Target_aarch64::Relocate:tls_desc_gd_to_ie): New method.
+	(Target_aarch64::got_tlsdesc_section): New method.
+	(Target_aarch64::make_local_ifunc_plt_entry): New method.
+	(Target_aarch64::define_tls_base_symbol): New method.
+	(Target_aarch64::reserve_tlsdesc_entries): New method.
+	(Target_aarch64::got_mod_index_entry): New method.
+	(Target_aarch64::rela_tlsdesc_section): New method.
+	(Target_aarch64::rela_irelative_section): New method.
+	(Target_aarch64::Tlsdesc_info): New struct.
+	(Target_aarch64::got_section): Create .got.plt space for IRELATIVE
+	relocations and tlsdesc relocations.
+	(Target_aarch64::optimize_tls_reloc): Implement method.
+	(Output_data_plt_aarch64): Add member variables: tlsdesc_rel_, got_,
+	got_irelative_, irelative_count_, tlsdesc_got_offset_. Initialize them
+	in constructor.
+	(Output_data_plt_aarch64::reserve_tlsdesc_entry): New method.
+	(Output_data_plt_aarch64::has_tlsdesc_entry): New method.
+	(Output_data_plt_aarch64::get_tlsdesc_got_offset): New method.
+	(Output_data_plt_aarch64::get_tlsdesc_plt_offset): New method.
+	(Output_data_plt_aarch64::rela_tlsdesc): New method.
+	(Output_data_plt_aarch64::rela_irelative): New method.
+	(Output_data_plt_aarch64::entry_count): Count IRELATIVE relocations.
+	(Output_data_plt_aarch64::first_plt_entry_offset): Add const attribute.
+	(Output_data_plt_aarch64::get_plt_tlsdesc_entry_size): New method.
+	(Output_data_plt_aarch64::fill_tlsdesc_entry): New method.
+	(Output_data_plt_aarch64::do_get_plt_tlsdesc_entry_size): New method.
+	(Output_data_plt_aarch64::do_fill_tlsdesc_entry): New method.
+	(Output_data_plt_aarch64_standard): New member variables:
+	plt_tlsdesc_entry_size, tlsdesc_plt_entry.
+	(Output_data_plt_aarch64_standard::Output_data_plt_aarch64_standard):
+	New parameter: got, got_irelative.
+	(Output_data_plt_aarch64_standard::do_get_plt_entry_size): New method.
+	(Output_data_plt_aarch64_standard::do_fill_tlsdesc_entry): New method.
+	(Output_data_plt_aarch64::do_write): Replace got_address with
+	gotplt_address. Add irelative_count_ to count. Write tlsdesc entry.
+	(AArch64_relocate_functions::update_movnz): New method.
+	(AArch64_relocate_functions): Correct format.
+	(AArch64_relocate_functions::movnz): New method.
+	(Target_aarch64::Scan::local): Correct format. Move r_sym, got to
+	before the switch. Add new cases to switch.
+	Check ie_to_le relaxation on tlsie relocations. Add code handling 
+	tlsgd tlsdesc cases.
+	(Target_aarch64::Scan::global): Move arp to front. Do copy_reloc when
+	needed. Add new cases to switch. Insert dynamic RELATIVE relocation
+	when needed. Add code handling tlsgd, tlsie, tlsdesc cases.
+	Call reloc_name_in_error_message to print unsupported reloc.
+	(Target_aarch64::make_plt_section): Pass got_ and got_irelative_ to
+	make_data_plt.
+	(Target_aarch64::do_finalize_sections): Emit relocs to save COPY
+	relocs. Fill in some more dynamic tags.
+	(Target_aarch64::Relocate::relocate): Handle tlsgd, tlsdesc relocs.
+	Skip call tls_get_addr when tlsgd is relaxed.
+	(Target_aarch64::Relocate::relocate_tls): Correct format. Add code
+	handling tlsgd, tlsdesc relocs, and tls gd->le, ie->le, tlsdesc->le,
+	tlsdesc->ie relaxation.
+
 2014-09-03  Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
 	* mips.cc (Target_mips_nacl): New class.
