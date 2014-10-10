@@ -1796,6 +1796,40 @@ linux_gdb_signal_to_target (struct gdbarch *gdbarch,
   return -1;
 }
 
+/* Rummage through mappings to find a mapping's size.  */
+
+static int
+find_mapping_size (CORE_ADDR vaddr, unsigned long size,
+		   int read, int write, int exec, int modified,
+		   void *data)
+{
+  struct mem_range *range = data;
+
+  if (vaddr == range->start)
+    {
+      range->length = size;
+      return 1;
+    }
+  return 0;
+}
+
+/* Implementation of the "vsyscall_range" gdbarch hook.  */
+
+static int
+linux_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
+{
+  if (target_auxv_search (&current_target, AT_SYSINFO_EHDR, &range->start) <= 0)
+    return 0;
+
+  /* This is installed by linux_init_abi below, so should always be
+     available.  */
+  gdb_assert (gdbarch_find_memory_regions_p (target_gdbarch ()));
+
+  range->length = 0;
+  gdbarch_find_memory_regions (gdbarch, find_mapping_size, range);
+  return 1;
+}
+
 /* To be called from the various GDB_OSABI_LINUX handlers for the
    various GNU/Linux architectures and machine types.  */
 
@@ -1813,6 +1847,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      linux_gdb_signal_from_target);
   set_gdbarch_gdb_signal_to_target (gdbarch,
 				    linux_gdb_signal_to_target);
+  set_gdbarch_vsyscall_range (gdbarch, linux_vsyscall_range);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

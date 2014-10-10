@@ -1,5 +1,19 @@
 2014-10-10  Pedro Alves  <palves@redhat.com>
 
+	* arch-utils.c (default_vsyscall_range): New function.
+	* arch-utils.h (default_vsyscall_range): New declaration.
+	* gdbarch.sh (vsyscall_range): New hook.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* linux-tdep.c (linux_vsyscall_range): New function.
+	(linux_init_abi): Install linux_vsyscall_range as
+	vsyscall_range gdbarch hook.
+	* memrange.c (address_in_mem_range): New function.
+	* memrange.h (address_in_mem_range): New declaration.
+	* symfile-mem.c (find_vdso_size): Delete function.
+	(add_vsyscall_page): Use gdbarch_vsyscall_range.
+
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (normal_stop): Fix typo in comment.
 
 2014-10-09  Sergio Durigan Junior  <sergiodj@redhat.com>

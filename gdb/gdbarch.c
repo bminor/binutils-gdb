@@ -315,6 +315,7 @@ struct gdbarch
   gdbarch_insn_is_ret_ftype *insn_is_ret;
   gdbarch_insn_is_jump_ftype *insn_is_jump;
   gdbarch_auxv_parse_ftype *auxv_parse;
+  gdbarch_vsyscall_range_ftype *vsyscall_range;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -407,6 +408,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->insn_is_call = default_insn_is_call;
   gdbarch->insn_is_ret = default_insn_is_ret;
   gdbarch->insn_is_jump = default_insn_is_jump;
+  gdbarch->vsyscall_range = default_vsyscall_range;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -626,6 +628,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of insn_is_ret, invalid_p == 0 */
   /* Skip verify of insn_is_jump, invalid_p == 0 */
   /* Skip verify of auxv_parse, has predicate.  */
+  /* Skip verify of vsyscall_range, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -1291,6 +1294,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: virtual_frame_pointer = <%s>\n",
                       host_address_to_string (gdbarch->virtual_frame_pointer));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: vsyscall_range = <%s>\n",
+                      host_address_to_string (gdbarch->vsyscall_range));
   fprintf_unfiltered (file,
                       "gdbarch_dump: vtable_function_descriptors = %s\n",
                       plongest (gdbarch->vtable_function_descriptors));
@@ -4381,6 +4387,23 @@ set_gdbarch_auxv_parse (struct gdbarch *gdbarch,
                         gdbarch_auxv_parse_ftype auxv_parse)
 {
   gdbarch->auxv_parse = auxv_parse;
+}
+
+int
+gdbarch_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->vsyscall_range != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_vsyscall_range called\n");
+  return gdbarch->vsyscall_range (gdbarch, range);
+}
+
+void
+set_gdbarch_vsyscall_range (struct gdbarch *gdbarch,
+                            gdbarch_vsyscall_range_ftype vsyscall_range)
+{
+  gdbarch->vsyscall_range = vsyscall_range;
 }
 
 

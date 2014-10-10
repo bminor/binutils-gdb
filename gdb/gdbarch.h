@@ -59,6 +59,7 @@ struct axs_value;
 struct stap_parse_info;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
+struct mem_range;
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -1319,6 +1320,15 @@ extern int gdbarch_auxv_parse_p (struct gdbarch *gdbarch);
 typedef int (gdbarch_auxv_parse_ftype) (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 extern int gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 extern void set_gdbarch_auxv_parse (struct gdbarch *gdbarch, gdbarch_auxv_parse_ftype *auxv_parse);
+
+/* Find the address range of the current inferior's vsyscall/vDSO, and
+   write it to *RANGE.  If the vsyscall's length can't be determined, a
+   range with zero length is returned.  Returns true if the vsyscall is
+   found, false otherwise. */
+
+typedef int (gdbarch_vsyscall_range_ftype) (struct gdbarch *gdbarch, struct mem_range *range);
+extern int gdbarch_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range);
+extern void set_gdbarch_vsyscall_range (struct gdbarch *gdbarch, gdbarch_vsyscall_range_ftype *vsyscall_range);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

@@ -31,6 +31,15 @@ mem_ranges_overlap (CORE_ADDR start1, int len1,
   return (l < h);
 }
 
+/* See memrange.h.  */
+
+int
+address_in_mem_range (CORE_ADDR address, const struct mem_range *r)
+{
+  return (r->start <= address
+	  && (address - r->start) < r->length);
+}
+
 /* qsort comparison function, that compares mem_ranges.  Ranges are
    sorted in ascending START order.  */
 

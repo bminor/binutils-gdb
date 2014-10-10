@@ -1030,6 +1030,12 @@ m:int:insn_is_jump:CORE_ADDR addr:addr::default_insn_is_jump::0
 # Return -1 if there is insufficient buffer for a whole entry.
 # Return 1 if an entry was read into *TYPEP and *VALP.
 M:int:auxv_parse:gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp:readptr, endptr, typep, valp
+
+# Find the address range of the current inferior's vsyscall/vDSO, and
+# write it to *RANGE.  If the vsyscall's length can't be determined, a
+# range with zero length is returned.  Returns true if the vsyscall is
+# found, false otherwise.
+m:int:vsyscall_range:struct mem_range *range:range::default_vsyscall_range::0
 EOF
 }
 
@@ -1149,6 +1155,7 @@ struct axs_value;
 struct stap_parse_info;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
+struct mem_range;
 
 /* The architecture associated with the inferior through the
    connection to the target.
