@@ -1,3 +1,16 @@
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
+	* linux-tdep.c: Include observer.h.
+	(linux_inferior_data): New global.
+	(struct linux_info): New structure.
+	(invalidate_linux_cache_inf, linux_inferior_data_cleanup)
+	(get_linux_inferior_data): New functions.
+	(linux_vsyscall_range): Rename to ...
+	(linux_vsyscall_range_raw): ... this.
+	(linux_vsyscall_range): New function; handles caching.
+	(_initialize_linux_tdep): Register linux_inferior_data.  Install
+	inferior_exit and inferior_appeared observers.
+
 2014-10-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 

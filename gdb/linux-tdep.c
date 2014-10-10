@@ -32,6 +32,7 @@
 #include "cli/cli-utils.h"
 #include "arch-utils.h"
 #include "gdb_obstack.h"
+#include "observer.h"
 
 #include <ctype.h>
 
@@ -117,6 +118,72 @@ static struct linux_gdbarch_data *
 get_linux_gdbarch_data (struct gdbarch *gdbarch)
 {
   return gdbarch_data (gdbarch, linux_gdbarch_data_handle);
+}
+
+/* Per-inferior data key.  */
+static const struct inferior_data *linux_inferior_data;
+
+/* Linux-specific cached data.  This is used by GDB for caching
+   purposes for each inferior.  This helps reduce the overhead of
+   transfering data from a remote target to the local host.  */
+struct linux_info
+{
+  /* Cache of the inferior's vsyscall/vDSO mapping range.  Only valid
+     if VSYSCALL_RANGE_P is positive.  This is cached because getting
+     at this info requires an auxv lookup (which is itself cached),
+     and looking through the inferior's mappings (which change
+     throughout execution and therefore cannot be cached).  */
+  struct mem_range vsyscall_range;
+
+  /* Zero if we haven't tried looking up the vsyscall's range before
+     yet.  Positive if we tried looking it up, and found it.  Negative
+     if we tried looking it up but failed.  */
+  int vsyscall_range_p;
+};
+
+/* Frees whatever allocated space there is to be freed and sets INF's
+   linux cache data pointer to NULL.  */
+
+static void
+invalidate_linux_cache_inf (struct inferior *inf)
+{
+  struct linux_info *info;
+
+  info = inferior_data (inf, linux_inferior_data);
+  if (info != NULL)
+    {
+      xfree (info);
+      set_inferior_data (inf, linux_inferior_data, NULL);
+    }
+}
+
+/* Handles the cleanup of the linux cache for inferior INF.  ARG is
+   ignored.  Callback for the inferior_appeared and inferior_exit
+   events.  */
+
+static void
+linux_inferior_data_cleanup (struct inferior *inf, void *arg)
+{
+  invalidate_linux_cache_inf (inf);
+}
+
+/* Fetch the linux cache info for INF.  This function always returns a
+   valid INFO pointer.  */
+
+static struct linux_info *
+get_linux_inferior_data (void)
+{
+  struct linux_info *info;
+  struct inferior *inf = current_inferior ();
+
+  info = inferior_data (inf, linux_inferior_data);
+  if (info == NULL)
+    {
+      info = XCNEW (struct linux_info);
+      set_inferior_data (inf, linux_inferior_data, info);
+    }
+
+  return info;
 }
 
 /* This function is suitable for architectures that don't
@@ -1813,10 +1880,11 @@ find_mapping_size (CORE_ADDR vaddr, unsigned long size,
   return 0;
 }
 
-/* Implementation of the "vsyscall_range" gdbarch hook.  */
+/* Helper for linux_vsyscall_range that does the real work of finding
+   the vsyscall's address range.  */
 
 static int
-linux_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
+linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
 {
   if (target_auxv_search (&current_target, AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
@@ -1827,6 +1895,29 @@ linux_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
 
   range->length = 0;
   gdbarch_find_memory_regions (gdbarch, find_mapping_size, range);
+  return 1;
+}
+
+/* Implementation of the "vsyscall_range" gdbarch hook.  Handles
+   caching, and defers the real work to linux_vsyscall_range_raw.  */
+
+static int
+linux_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
+{
+  struct linux_info *info = get_linux_inferior_data ();
+
+  if (info->vsyscall_range_p == 0)
+    {
+      if (linux_vsyscall_range_raw (gdbarch, &info->vsyscall_range))
+	info->vsyscall_range_p = 1;
+      else
+	info->vsyscall_range_p = -1;
+    }
+
+  if (info->vsyscall_range_p < 0)
+    return 0;
+
+  *range = info->vsyscall_range;
   return 1;
 }
 
@@ -1858,4 +1949,11 @@ _initialize_linux_tdep (void)
 {
   linux_gdbarch_data_handle =
     gdbarch_data_register_post_init (init_linux_gdbarch_data);
+
+  /* Set a cache per-inferior.  */
+  linux_inferior_data
+    = register_inferior_data_with_cleanup (NULL, linux_inferior_data_cleanup);
+  /* Observers used to invalidate the cache when needed.  */
+  observer_attach_inferior_exit (invalidate_linux_cache_inf);
+  observer_attach_inferior_appeared (invalidate_linux_cache_inf);
 }
