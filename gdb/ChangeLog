@@ -1,3 +1,7 @@
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (normal_stop): Fix typo in comment.
+
 2014-10-09  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR tdep/9390

@@ -6381,7 +6381,7 @@ normal_stop (void)
       && last.kind != TARGET_WAITKIND_EXITED
       && inferior_thread ()->control.stop_step)
     {
-      /* But not if if in the middle of doing a "step n" operation for
+      /* But not if in the middle of doing a "step n" operation for
 	 n > 1 */
       if (inferior_thread ()->step_multi)
 	goto done;
