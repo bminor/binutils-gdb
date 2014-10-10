@@ -1,3 +1,7 @@
+2014-10-16  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/remotetimeout.exp: Remove noargs checking.
+
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
 	PR breakpoints/9649
