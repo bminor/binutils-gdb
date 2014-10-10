@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.24.51.0.3 for Linux, which is
-based on binutils 2014 0127 master branch on sourceware.org plus
+This is the beta release of binutils 2.24.51.0.4 for Linux, which is
+based on binutils 2014 0923 master branch on sourceware.org plus
 various changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -120,12 +120,88 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.24.51.0.3 to
+Please report any bugs related to binutils 2.24.51.0.4 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.24.51.0.3:
+
+1. Update from binutils 2014 0923.
+2. Update Intel AVX-512 instruction support to July, 2014.
+3. Support Intel secure enclave instruction.
+4. Support Intel clflushopt instruction.
+5. Support Intel xsavec/xrstors instructions.
+6. Fix an x86 linker crash with --just-symbols.  PR ld/17306.
+7. Improve x86 PLT entry matching.  PR binutils/17154.
+8. Fix an x86 GNU2 TLS linker bug.  PR ld/17057.
+9. Update x86-64 linker to create alternate PLT entries for MPX.
+10. Update x86 assembler to disallow VEX/EVEX encoded instructions in
+16-bit mode.  PR gas/17421.
+11. Improve prefix handling in x86 disassembler.  PR binutils/16893.
+12. Update x86 disassembler to properly handle suffix for iret and sysret
+in Intel mode.
+13. Update x86 disassembler to properly handle prefixes before fwait.
+PR binutils/16891.
+14. Fix an AVX512 gather/scatter x86 disassembler bug.  PR
+binutils/16490.
+15. Add -momit-lock-prefix option to x86 assembler.
+16. Fix nm on mixed IR/non-IR input objects.
+17. Fix a --just-symbols linker bug.  PR ld/17313.
+18. Fix a bad .eh-frame section bug with LTO and non-LTO objects.  PR
+ld/16563.
+19. Improve linker EH frame support
+20. Fix a linker .gnu.warning bug with LTO objects.  PR ld/16746.
+21. Improve support for slim LTO objects.  PR ld/13227.
+22. Fix a linker crash when MALLOC_PERTURB_ is set.  PR ld/17047.
+23. Fix a wrapped symbol linker bug.  PR ld/16910.
+24. Fix a linker bug on object with separate debug file.  PR ld/16867.
+25. Fix an incorrect error message linker bug.  PR ld/16787.
+26. Fix an incorrect warning message linker bug.  PR ld/16756.
+27. Fix a linker bug on LTO objects with TLS.  PR ld/16846.
+28. Fix the 32-bit linker on large file (~2 Gb).  PR ld/16803.
+29. Fix a garbage collection linker bug.  PR ld/16643.
+30. Fix a garbage collection linker bug with --dynamic-list.  PR
+gold/16530.
+31. Properly handle DW_CFA_restore_state in DWARF dumper.  PR
+binutils/16252.
+32. Fix a strip bug.  PR binutils/16811.
+33. Update ar/nm to load liblto_plugin.so automatically if available.  PR
+binutils/14698.
+34. Check corrupt section names in readelf.  PR binutils/16664.a
+35. Add NT_GNU_GOLD_VERSION support to readelf.  PR binutils/16444.
+36. Update assembler to honour #line directives inside macros.  PR
+gas/16908.
+37. Improve linker supprot for --as-needed and --start-group/--end-group.
+PR ld/17068.
+38. Honor "-z noexecstack" for "ld -r".  PR ld/16744.
+39. Honor --no-demangle for "ld --cref".  PR ld/16569.
+40. Improve gold.
+41. Improve Windows support.
+42. Improve MacOS support.
+43. Improve aarch64 support.
+44. Improve alpha support.
+45. Improve arm support.
+46. Improve avr support.
+47. Improve cris support.
+48. Improve m68k support.
+49. Improve metag support.
+50. Improve mips support.
+51. Improve mmix support.
+52. Improve msp430 support.
+53. Improve nds32 support.
+54. Improve nios2 support.
+55. Improve or1k support.
+56. Improve ppc/ppc64 support.
+57. Improve rl78 support.
+58. Improve rx support.
+59. Improve s390 support.
+60. Improve sh support.
+61. Improve sparc support.
+62. Improve v850 support.
+63. Improve xtensa support.
 
 Changes from binutils 2.24.51.0.2:
 
@@ -879,15 +955,7 @@ already been defined.  PR 12001.
 16. Improve ppc support.
 17. Improve tic6x support.
 
-The file list:
-
-1. binutils-2.24.51.0.3.tar.bz2.  Source code.
-
-The primary sites for the beta Linux binutils are:
-
-1. http://www.kernel.org/pub/linux/devel/binutils/
-
-It is also available as hjl/linux/release/2.24.51.0.3 tag at
+It is available as hjl/linux/release/2.24.51.0.4 tag at
 
 https://sourceware.org/git/?p=binutils-gdb.git;a=summary
 
@@ -896,4 +964,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-01/27/2014
+10/10/2014
