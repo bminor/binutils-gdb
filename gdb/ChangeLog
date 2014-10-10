@@ -1,3 +1,8 @@
+2014-10-10  Ajit Agarwal  <ajitkum@xilinx.com>
+
+	* microblaze-tdep.c (microblaze_gdbarch_init): If the description
+	isn't valid, release the tdesc arch data and return NULL.
+
 2014-10-10  Pedro Alves  <palves@redhat.com>
 
 	* linux-tdep.c: Include observer.h.
