@@ -47,6 +47,10 @@ gdb_test "commands\nsilent\nend" "End with.*" "add breakpoint commands"
 
 gdb_test "dprintf ${srcfile}:${loc_bp5},\"At foo entry\\n\"" "Dprintf .*"
 
+set loc_bp8 [gdb_get_line_number "Return line"]
+gdb_breakpoint "${srcfile}:${loc_bp8}"
+gdb_test_no_output {disable $bpnum}
+
 # Now, save the breakpoints into a file...
 if {[is_remote host]} {
     set bps bps
@@ -71,6 +75,7 @@ gdb_test "source $bps" "" "source bps"
 
 # Now, verify that all breakpoints have been created correctly...
 set bp_row_start "\[0-9\]+ +breakpoint +keep +y +0x\[0-9a-f\]+ +in"
+set disabled_row_start "\[0-9\]+ +breakpoint +keep +n +0x\[0-9a-f\]+ +in"
 set dprintf_row_start "\[0-9\]+ +dprintf +keep +y +0x\[0-9a-f\]+ +in"
 gdb_test_sequence "info break" "info break" [list				\
   "\[\r\n\]+Num +Type +Disp +Enb +Address +What"				\
@@ -84,4 +89,5 @@ gdb_test_sequence "info break" "info break" [list				\
   "\[\r\n\]+\[ \t\]+silent"							\
   "\[\r\n\]+$dprintf_row_start main at \[^\r\n\]*$srcfile:$loc_bp5"		\
   "\[\r\n\]+\[ \t\]+printf"							\
+  "\[\r\n\]+$disabled_row_start main at \[^\r\n\]*$srcfile:$loc_bp8"		\
 ]

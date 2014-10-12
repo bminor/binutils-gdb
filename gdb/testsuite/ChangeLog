@@ -1,5 +1,11 @@
 2014-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix "save breakpoints" for "disable $bpnum" command.
+	* gdb.base/save-bp.c (main): Add label.
+	* gdb.base/save-bp.exp: Add 8th disabled breakpoint.  Match it.
+
+2014-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/save-bp.exp (info break): Use gdb_test_sequence.
 
 2014-10-11  Yao Qi  <yao@codesourcery.com>

@@ -1,3 +1,8 @@
+2014-10-12  Miroslav Franc  <mfranc@redhat.com>
+
+	Fix "save breakpoints" for "disable $bpnum" command.
+	* breakpoint.c (save_breakpoints): Add $bpnum for disable.
+
 2014-10-10  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Remove mips-irix-tdep.o and solib-irix.o.

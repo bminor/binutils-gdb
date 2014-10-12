@@ -16130,7 +16130,7 @@ save_breakpoints (char *filename, int from_tty,
       }
 
     if (tp->enable_state == bp_disabled)
-      fprintf_unfiltered (fp, "disable\n");
+      fprintf_unfiltered (fp, "disable $bpnum\n");
 
     /* If this is a multi-location breakpoint, check if the locations
        should be individually disabled.  Watchpoint locations are
