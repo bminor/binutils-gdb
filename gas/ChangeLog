@@ -1,4 +1,8 @@
-2014-10-09  Jose E. Marchesi  &lt;jose.marchesi@oracle.com&gt;
+2014-10-14  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-sparc.c (sparc_md_end): Fix unused variable warnings.
+
+2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-sparc.c (v9a_asr_table): Entry for %cps removed.
 	(sparc_arch_table): Remove the HWCAP_RANDOM, HWCAP_TRANS and

@@ -971,7 +971,9 @@ void
 sparc_md_end (void)
 {
   unsigned long mach = bfd_mach_sparc;
+#if defined(OBJ_ELF) && !defined(TE_SOLARIS)
   int hwcaps, hwcaps2;
+#endif
 
   if (sparc_arch_size == 64)
     switch (current_architecture)
