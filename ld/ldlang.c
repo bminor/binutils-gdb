@@ -2411,8 +2411,7 @@ lang_add_section (lang_statement_list_type *ptr,
 
   section->output_section = output->bfd_section;
 
-  if (!link_info.relocatable
-      && !map_head_is_link_order)
+  if (!map_head_is_link_order)
     {
       asection *s = output->bfd_section->map_tail.s;
       output->bfd_section->map_tail.s = section;

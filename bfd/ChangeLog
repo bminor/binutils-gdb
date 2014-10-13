@@ -1,3 +1,17 @@
+2014-10-13  Alan Modra  <amodra@gmail.com>
+
+	PR 17467
+	* elf-eh-frame.c (ENSURE_NO_RELOCS): Don't stop at first NONE reloc.
+	(_bfd_elf_parse_eh_frame): When relocatable output, don't set
+	flags enabling conversion of CIEs and FDEs to use relative encoding.
+	(find_merged_cie): Similarly.
+	(_bfd_elf_write_section_eh_frame): Don't edit FDEs when
+	relocatable, except for CIE pointer.
+	* elflink.c (bfd_elf_reloc_symbol_deleted_p): Return true for
+	relocs against symbols in dropped comdat group sections.
+	(bfd_elf_discard_info): Do some eh_frame optimisation when
+	relocatable.
+
 2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_merge_private_bfd_data): Handle

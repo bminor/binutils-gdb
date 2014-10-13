@@ -556,10 +556,13 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   /* FIXME: octets_per_byte.  */
 #define ENSURE_NO_RELOCS(buf)				\
-  REQUIRE (!(cookie->rel < cookie->relend		\
-	     && (cookie->rel->r_offset			\
-		 < (bfd_size_type) ((buf) - ehbuf))	\
-	     && cookie->rel->r_info != 0))
+  while (cookie->rel < cookie->relend			\
+	 && (cookie->rel->r_offset			\
+	     < (bfd_size_type) ((buf) - ehbuf)))	\
+    {							\
+      REQUIRE (cookie->rel->r_info == 0);		\
+      cookie->rel++;					\
+    }
 
   /* FIXME: octets_per_byte.  */
 #define SKIP_RELOCS(buf)				\
@@ -726,6 +729,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  /* For shared libraries, try to get rid of as many RELATIVE relocs
 	     as possible.  */
 	  if (info->shared
+	      && !info->relocatable
 	      && (get_elf_backend_data (abfd)
 		  ->elf_backend_can_make_relative_eh_frame
 		  (abfd, info, sec)))
@@ -763,10 +767,12 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  ENSURE_NO_RELOCS (buf);
 
 	  if (!info->relocatable)
-	    /* Keep info for merging cies.  */
-	    this_inf->u.cie.u.full_cie = cie;
-	  this_inf->u.cie.per_encoding_relative
-	    = (cie->per_encoding & 0x70) == DW_EH_PE_pcrel;
+	    {
+	      /* Keep info for merging cies.  */
+	      this_inf->u.cie.u.full_cie = cie;
+	      this_inf->u.cie.per_encoding_relative
+		= (cie->per_encoding & 0x70) == DW_EH_PE_pcrel;
+	    }
 	}
       else
 	{
@@ -1071,6 +1077,7 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
       if (per_binds_local
 	  && info->shared
+	  && !info->relocatable
 	  && (cie->per_encoding & 0x70) == DW_EH_PE_absptr
 	  && (get_elf_backend_data (abfd)
 	      ->elf_backend_can_make_relative_eh_frame (abfd, info, sec)))
@@ -1577,6 +1584,8 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	  value = ((ent->new_offset + sec->output_offset + 4)
 		   - (cie->new_offset + cie->u.cie.u.sec->output_offset));
 	  bfd_put_32 (abfd, value, buf);
+	  if (info->relocatable)
+	    continue;
 	  buf += 4;
 	  width = get_DW_EH_PE_width (ent->fde_encoding, ptr_size);
 	  value = read_value (abfd, buf, width,
