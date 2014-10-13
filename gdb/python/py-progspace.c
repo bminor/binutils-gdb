@@ -82,6 +82,33 @@ pspy_dealloc (PyObject *self)
   Py_TYPE (self)->tp_free (self);
 }
 
+/* Initialize a pspace_object.
+   The result is a boolean indicating success.  */
+
+static int
+pspy_initialize (pspace_object *self)
+{
+  self->pspace = NULL;
+
+  self->printers = PyList_New (0);
+  if (self->printers == NULL)
+    return 0;
+
+  self->frame_filters = PyDict_New ();
+  if (self->frame_filters == NULL)
+    return 0;
+
+  self->type_printers = PyList_New (0);
+  if (self->type_printers == NULL)
+    return 0;
+
+  self->xmethods = PyList_New (0);
+  if (self->xmethods == NULL)
+    return 0;
+
+  return 1;
+}
+
 static PyObject *
 pspy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
 {
@@ -89,36 +116,13 @@ pspy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
 
   if (self)
     {
-      self->pspace = NULL;
-
-      self->printers = PyList_New (0);
-      if (!self->printers)
-	{
-	  Py_DECREF (self);
-	  return NULL;
-	}
-
-      self->frame_filters = PyDict_New ();
-      if (!self->frame_filters)
-	{
-	  Py_DECREF (self);
-	  return NULL;
-	}
-
-      self->type_printers = PyList_New (0);
-      if (!self->type_printers)
-	{
-	  Py_DECREF (self);
-	  return NULL;
-	}
-
-      self->xmethods = PyList_New (0);
-      if (self->xmethods == NULL)
+      if (!pspy_initialize (self))
 	{
 	  Py_DECREF (self);
 	  return NULL;
 	}
     }
+
   return (PyObject *) self;
 }
 
@@ -296,36 +300,13 @@ pspace_to_pspace_object (struct program_space *pspace)
       object = PyObject_New (pspace_object, &pspace_object_type);
       if (object)
 	{
+	  if (!pspy_initialize (object))
+	    {
+	      Py_DECREF (object);
+	      return NULL;
+	    }
+
 	  object->pspace = pspace;
-
-	  object->printers = PyList_New (0);
-	  if (!object->printers)
-	    {
-	      Py_DECREF (object);
-	      return NULL;
-	    }
-
-	  object->frame_filters = PyDict_New ();
-	  if (!object->frame_filters)
-	    {
-	      Py_DECREF (object);
-	      return NULL;
-	    }
-
-	  object->type_printers = PyList_New (0);
-	  if (!object->type_printers)
-	    {
-	      Py_DECREF (object);
-	      return NULL;
-	    }
-
-	  object->xmethods = PyList_New (0);
-	  if (object->xmethods == NULL)
-	    {
-	      Py_DECREF (object);
-	      return NULL;
-	    }
-
 	  set_program_space_data (pspace, pspy_pspace_data_key, object);
 	}
     }

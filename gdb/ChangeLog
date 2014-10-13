@@ -1,3 +1,10 @@
+2014-10-13  Doug Evans  <dje@google.com>
+
+	* py-objfile.c (objfpy_initialize): New function.
+	(objfpy_new, objfile_to_objfile_object): Call it.
+	* py-progspace.c (pspy_initialize): New function.
+	(pspy_new, pspace_to_pspace_object): Call it.
+
 2014-10-13  Miroslav Franc  <mfranc@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
