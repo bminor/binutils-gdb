@@ -1,3 +1,8 @@
+2014-10-13  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-op-out-param.S: Make DW_FORM_ref4 values be the offset
+	from the start of the CU.
+
 2014-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Yao Qi  <yao@codesourcery.com>
 
