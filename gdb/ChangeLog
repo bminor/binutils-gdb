@@ -1,3 +1,10 @@
+2014-10-13  Miroslav Franc  <mfranc@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix "save breakpoints" for "catch" command.
+	* break-catch-sig.c (signal_catchpoint_print_recreate): Add trailing
+	newline.
+
 2014-10-12  Miroslav Franc  <mfranc@redhat.com>
 
 	Fix "save breakpoints" for "disable $bpnum" command.

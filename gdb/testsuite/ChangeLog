@@ -1,3 +1,10 @@
+2014-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	Fix "save breakpoints" for "catch" command.
+	* gdb.base/catch-signal.exp: Add gdb_breakpoint "main".
+	Remove -nonewline.  Match also the added "main" line.
+
 2014-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix "save breakpoints" for "disable $bpnum" command.
