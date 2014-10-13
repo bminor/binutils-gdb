@@ -1,3 +1,8 @@
+2014-10-15  Ajit Agarwal  <ajitkum@xilinx.com>
+
+	* features/Makefile (microblaze-expedite): Replace pc with rpc.
+	* regformats/microblaze-with-stack-protect.dat: Regenerate.
+
 2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gnu-v3-abi.c (gnuv3_pass_by_reference): Treat dynamic classes

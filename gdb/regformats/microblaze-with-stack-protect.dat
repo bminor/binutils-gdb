@@ -2,7 +2,7 @@
 # Generated from: microblaze-with-stack-protect.xml
 name:microblaze_with_stack_protect
 xmltarget:microblaze-with-stack-protect.xml
-expedite:r1,pc
+expedite:r1,rpc
 32:r0
 32:r1
 32:r2
