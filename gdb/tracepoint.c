@@ -1858,7 +1858,8 @@ start_tracing (char *notes)
       t->number_on_target = b->number;
 
       for (loc = b->loc; loc; loc = loc->next)
-	if (loc->probe.probe != NULL)
+	if (loc->probe.probe != NULL
+	    && loc->probe.probe->pops->set_semaphore != NULL)
 	  loc->probe.probe->pops->set_semaphore (loc->probe.probe,
 						 loc->probe.objfile,
 						 loc->gdbarch);
@@ -1957,7 +1958,8 @@ stop_tracing (char *note)
 	     but we don't really care if this semaphore goes out of sync.
 	     That's why we are decrementing it here, but not taking care
 	     in other places.  */
-	  if (loc->probe.probe != NULL)
+	  if (loc->probe.probe != NULL
+	      && loc->probe.probe->pops->clear_semaphore != NULL)
 	    loc->probe.probe->pops->clear_semaphore (loc->probe.probe,
 						     loc->probe.objfile,
 						     loc->gdbarch);

@@ -1,5 +1,16 @@
 2014-10-14  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* breakpoint.c (bkpt_probe_insert_location): Call set_semaphore
+	only if it is not NULL.
+	(bkpt_probe_remove_location): Likewise, for clear_semaphore.
+	* probe.h (struct probe_ops) <set_semaphore>: Update comment.
+	(struct probe_ops) <clear_semaphore>: Likewise.
+	* tracepoint.c (start_tracing): Call set_semaphore only if it is
+	not NULL.
+	(stop_tracing): Likewise, for clear_semaphore.
+
+2014-10-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* stap-probe.c (stap_parse_argument): Initialize expout explicitly
 	using language_c, instead of current_language.
 

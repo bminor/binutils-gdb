@@ -13696,9 +13696,10 @@ bkpt_probe_insert_location (struct bp_location *bl)
     {
       /* The insertion was successful, now let's set the probe's semaphore
 	 if needed.  */
-      bl->probe.probe->pops->set_semaphore (bl->probe.probe,
-					    bl->probe.objfile,
-					    bl->gdbarch);
+      if (bl->probe.probe->pops->set_semaphore != NULL)
+	bl->probe.probe->pops->set_semaphore (bl->probe.probe,
+					      bl->probe.objfile,
+					      bl->gdbarch);
     }
 
   return v;
@@ -13708,9 +13709,10 @@ static int
 bkpt_probe_remove_location (struct bp_location *bl)
 {
   /* Let's clear the semaphore before removing the location.  */
-  bl->probe.probe->pops->clear_semaphore (bl->probe.probe,
-					  bl->probe.objfile,
-					  bl->gdbarch);
+  if (bl->probe.probe->pops->clear_semaphore != NULL)
+    bl->probe.probe->pops->clear_semaphore (bl->probe.probe,
+					    bl->probe.objfile,
+					    bl->gdbarch);
 
   return bkpt_remove_location (bl);
 }
