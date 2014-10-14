@@ -212,7 +212,6 @@ i386_get_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
       dr->dr_mirror[2] = th->context.Dr2;
       dr->dr_mirror[3] = th->context.Dr3;
       dr->dr_status_mirror = th->context.Dr6;
-      dr->dr_control_mirror = th->context.Dr7;
     }
 }
 
