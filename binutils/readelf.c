@@ -4394,7 +4394,7 @@ process_program_headers (FILE * file)
 	  else
 	    {
 	      char fmt [32];
-	      int ret = snprintf (fmt, sizeof (fmt), "%%%ds", PATH_MAX);
+	      int ret = snprintf (fmt, sizeof (fmt), "%%%ds", PATH_MAX - 1);
 
 	      if (ret >= (int) sizeof (fmt) || ret < 0)
 		error (_("Internal error: failed to create format string to display program interpreter\n"));

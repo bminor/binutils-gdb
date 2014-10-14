@@ -1,3 +1,9 @@
+2014-10-14  Alan Modra  <amodra@gmail.com>
+
+	PR 17453
+	* readelf.c (process_program_headers): Correct fscanf format used
+	for interpreter.
+
 2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* readelf.c (display_sparc_hwcaps2): New function.
@@ -287,8 +293,8 @@
 
 2014-03-14  Meador Inge  <meadori@codesourcery.com>
 
-         * dwarf.c (strnlen): Move prototype ...
-	 * sysdep.h (strnlen): ... to here.
+	* dwarf.c (strnlen): Move prototype ...
+	* sysdep.h (strnlen): ... to here.
 
 2014-03-12  Nick Clifton  <nickc@redhat.com>
 
