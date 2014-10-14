@@ -1,3 +1,9 @@
+2014-10-28  Alan Modra  <amodra@gmail.com>
+
+	Apply trunk patches
+	2014-10-15  Chen Gang  <gang.chen.5i5j@gmail.com>
+	* config/tc-tic4x.c (md_assemble): Correct strncat size.
+
 2014-10-15  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

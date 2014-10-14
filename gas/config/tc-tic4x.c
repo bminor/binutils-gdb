@@ -2456,7 +2456,7 @@ md_assemble (char *str)
       if (*s)			/* Null terminate for hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
       strcat (insn->name, "_");
-      strncat (insn->name, str, TIC4X_NAME_MAX - strlen (insn->name));
+      strncat (insn->name, str, TIC4X_NAME_MAX - 1 - strlen (insn->name));
 
       insn->operands[insn->num_operands++].mode = M_PARALLEL;
 
