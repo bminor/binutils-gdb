@@ -1,3 +1,8 @@
+2014-10-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* stap-probe.c (stap_parse_argument): Initialize expout explicitly
+	using language_c, instead of current_language.
+
 2014-10-13  Doug Evans  <dje@google.com>
 
 	* python/py-objfile.c (objfpy_initialize): New function.

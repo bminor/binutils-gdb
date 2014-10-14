@@ -1,3 +1,9 @@
+2014-10-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.arch/stap-eval-lang-ada.S: Likewise.
+	* gdb.arch/stap-eval-lang-ada.c: Likewise.
+	* gdb.arch/stap-eval-lang-ada.exp: New file.
+
 2014-10-14  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-var-child.c (nothing1): New function.
