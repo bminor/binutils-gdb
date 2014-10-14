@@ -1,4 +1,4 @@
-2014-10-09  Jose E. Marchesi  &lt;jose.marchesi@oracle.com&gt;
+2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gas/sparc/hpcvis3.d: Remove tests for the `chkpt', `commit',
 	`random', `wr r,i,%cps' and `rd r,%cps' instructions.
