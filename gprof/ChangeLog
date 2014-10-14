@@ -1,3 +1,7 @@
+2014-10-14  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* configure: Regenerate.
+
 2014-08-19  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
