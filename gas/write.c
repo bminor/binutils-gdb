@@ -2309,7 +2309,7 @@ relax_align (register relax_addressT address,	/* Address now.  */
   relax_addressT mask;
   relax_addressT new_address;
 
-  mask = ~((~0) << alignment);
+  mask = ~((relax_addressT) ~0 << alignment);
   new_address = (address + mask) & (~mask);
 #ifdef LINKER_RELAXING_SHRINKS_ONLY
   if (linkrelax)

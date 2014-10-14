@@ -1946,47 +1946,46 @@ mode_from_disp_size (i386_operand_type t)
 }
 
 static INLINE int
-fits_in_signed_byte (offsetT num)
+fits_in_signed_byte (addressT num)
 {
-  return (num >= -128) && (num <= 127);
+  return num + 0x80 <= 0xff;
 }
 
 static INLINE int
-fits_in_unsigned_byte (offsetT num)
+fits_in_unsigned_byte (addressT num)
 {
-  return (num & 0xff) == num;
+  return num <= 0xff;
 }
 
 static INLINE int
-fits_in_unsigned_word (offsetT num)
+fits_in_unsigned_word (addressT num)
 {
-  return (num & 0xffff) == num;
+  return num <= 0xffff;
 }
 
 static INLINE int
-fits_in_signed_word (offsetT num)
+fits_in_signed_word (addressT num)
 {
-  return (-32768 <= num) && (num <= 32767);
+  return num + 0x8000 <= 0xffff;
 }
 
 static INLINE int
-fits_in_signed_long (offsetT num ATTRIBUTE_UNUSED)
+fits_in_signed_long (addressT num ATTRIBUTE_UNUSED)
 {
 #ifndef BFD64
   return 1;
 #else
-  return (!(((offsetT) -1 << 31) & num)
-	  || (((offsetT) -1 << 31) & num) == ((offsetT) -1 << 31));
+  return num + 0x80000000 <= 0xffffffff;
 #endif
 }				/* fits_in_signed_long() */
 
 static INLINE int
-fits_in_unsigned_long (offsetT num ATTRIBUTE_UNUSED)
+fits_in_unsigned_long (addressT num ATTRIBUTE_UNUSED)
 {
 #ifndef BFD64
   return 1;
 #else
-  return (num & (((offsetT) 2 << 31) - 1)) == num;
+  return num <= 0xffffffff;
 #endif
 }				/* fits_in_unsigned_long() */
 

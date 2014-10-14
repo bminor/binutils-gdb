@@ -1,5 +1,15 @@
 2014-10-14  Alan Modra  <amodra@gmail.com>
 
+	PR 17453
+	* config/tc-i386.c (fits_in_signed_long): Use unsigned param and
+	expression to avoid signed overflow.
+	(fits_in_signed_byte, fits_in_unsigned_byte, fits_in_unsigned_word,
+	fits_in_signed_word, fits_in_unsigned_long): Similarly.
+	* expr.c (operand <'-'>): Avoid signed overflow.
+	* read.c (s_comm_internal): Likewise.
+
+2014-10-14  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-sparc.c (sparc_md_end): Fix unused variable warnings.
 
 2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>

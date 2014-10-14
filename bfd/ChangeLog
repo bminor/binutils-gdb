@@ -1,3 +1,9 @@
+2014-10-14  Alan Modra  <amodra@gmail.com>
+
+	PR 17453
+	* libbfd.c (COERCE16, COERCE32, COERCE64): Use unsigned types.
+	(EIGHT_GAZILLION): Delete.
+
 2014-10-13  Alan Modra  <amodra@gmail.com>
 
 	PR 17467

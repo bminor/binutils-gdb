@@ -548,11 +548,10 @@ DESCRIPTION
 .*/
 
 /* Sign extension to bfd_signed_vma.  */
-#define COERCE16(x) (((bfd_signed_vma) (x) ^ 0x8000) - 0x8000)
-#define COERCE32(x) (((bfd_signed_vma) (x) ^ 0x80000000) - 0x80000000)
-#define EIGHT_GAZILLION ((bfd_int64_t) 1 << 63)
+#define COERCE16(x) (((bfd_vma) (x) ^ 0x8000) - 0x8000)
+#define COERCE32(x) (((bfd_vma) (x) ^ 0x80000000) - 0x80000000)
 #define COERCE64(x) \
-  (((bfd_int64_t) (x) ^ EIGHT_GAZILLION) - EIGHT_GAZILLION)
+  (((bfd_uint64_t) (x) ^ ((bfd_uint64_t) 1 << 63)) - ((bfd_uint64_t) 1 << 63))
 
 bfd_vma
 bfd_getb16 (const void *p)
