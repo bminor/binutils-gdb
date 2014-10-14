@@ -1,3 +1,14 @@
+2014-10-18  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/argv0-symlink.exp: Check argv[0] value if
+	gdb_has_argv0 return true.
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Don't
+	check [target_info exists noargs], check [gdb_has_argv0]
+	instead.
+	* gdb.python/py-value.exp (test_value_in_inferior): Likewise.
+	* lib/gdb.exp (gdb_has_argv0, gdb_has_argv0_1): New
+	procedures.
+
 2014-10-17  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-events.exp: Update expected output for clear_objfiles
