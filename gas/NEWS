@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.25:
+
 * Add support for the AVR Tiny microcontrollers.
 
 * Replace support for openrisc and or32 with support for or1k.

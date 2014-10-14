@@ -1,3 +1,7 @@
+2014-10-14  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.25.
+
 2014-10-13  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_add_section): Set up map_head.s and map_tail.s when
