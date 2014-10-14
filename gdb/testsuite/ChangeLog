@@ -1,3 +1,10 @@
+2014-10-14  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.dwarf2/dw2-case-insensitive-debug.S: Handle 64-bit pointers.
+	* gdb.dwarf2/dw2-case-insensitive.exp: Update accordingly.
+	* gdb.dwarf2/dw2-skip-prologue.S: Handle 64-bit pointers.
+	* gdb.dwarf2/dw2-skip-prologue.exp: Update accordingly.
+
 2014-10-14  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.arch/stap-eval-lang-ada.S: Likewise.
