@@ -1,3 +1,8 @@
+2014-10-15  Tristan Gingold  <gingold@adacore.com>
+
+	* version.m4: Bump version to 2.25.51
+	* configure: Regenerate.
+
 2014-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_mov_to_lea): Skip if relocation

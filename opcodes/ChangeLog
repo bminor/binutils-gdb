@@ -1,3 +1,7 @@
+2014-10-15  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2014-10-09  Jose E. Marchesi  &lt;jose.marchesi@oracle.com&gt;
 
 	* sparc-opc.c (sparc-opcodes): Remove instructions `chkpt',
