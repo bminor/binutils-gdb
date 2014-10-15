@@ -1,5 +1,17 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* dec-thread.c (dec_thread_count_gdb_threads)
+	(dec_thread_add_gdb_thread): Delete.
+	(dec_thread_update_thread_list): Delete.
+	(dec_thread_find_new_threads): Rename to ...
+	(dec_thread_update_thread_list): ... this.  Delete GDB-size
+	threads that are no longer found in dec_thread_list.
+	(resync_thread_list): Delete.
+	(dec_thread_wait): Call dec_thread_update_thread_list instead of
+	resync_thread_list.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (ALL_NON_EXITED_THREADS_SAFE): New macro.
 	* remote.c (remote_update_thread_list): Skip calling prune_threads
 	if any thread listing method is supported, and instead walk over

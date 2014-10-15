@@ -369,49 +369,6 @@ update_dec_thread_list (void)
   pthreadDebugThdSeqDestroy (debug_context);
 }
 
-/* A callback to count the number of threads known to GDB.  */
-
-static int
-dec_thread_count_gdb_threads (struct thread_info *ignored, void *context)
-{
-  int *count = (int *) context;
-
-  *count = *count + 1;
-  return 0;
-}
-
-/* A callback that saves the given thread INFO at the end of an
-   array.  The end of the array is given in the CONTEXT and is
-   incremented once the info has been added.  */
-
-static int
-dec_thread_add_gdb_thread (struct thread_info *info, void *context)
-{
-  struct thread_info ***listp = (struct thread_info ***) context;
-  
-  **listp = info;
-  *listp = *listp + 1;
-  return 0;
-}
-
-/* Find new threads.  */
-
-static void
-dec_thread_find_new_threads (struct target_ops *ops)
-{
-  int i;
-  struct dec_thread_info *info;
-
-  update_dec_thread_list ();
-  for (i = 0; VEC_iterate (dec_thread_info_s, dec_thread_list, i, info); i++)
-    {
-      ptid_t ptid = ptid_build_from_info (*info);
-
-      if (!in_thread_list (ptid))
-        add_thread (ptid);
-    }
-}
-
 /* Implement the update_thread_list target_ops method.  */
 
 static void
@@ -419,41 +376,33 @@ dec_thread_update_thread_list (struct target_ops *ops)
 {
   int i;
   struct dec_thread_info *info;
+  struct thread_info *tp, *tmp;
 
-  /* Delete dead threads.  */
-  prune_threads ();
+  update_dec_thread_list ();
 
-  /* Now find new threads.  */
-  dec_thread_find_new_threads (ops);
-}
+  /* Delete GDB-side threads no longer found in dec_thread_list.  */
+  ALL_NON_EXITED_THREADS_SAFE (tp, tmp)
+    {
+      for (i = 0; VEC_iterate (dec_thread_info_s, dec_thread_list, i, info); i++)
+	{
+	  if (ptid_equal (info->ptid, tp->ptid))
+	    break;
+	}
+      if (i == VEC_length (dec_thread_info_s, dec_thread_list))
+	{
+	  /* Not found.  */
+	  delete_thread (tp->ptid);
+	}
+    }
 
-/* Resynchronize the list of threads known by GDB with the actual
-   list of threads reported by libpthread_debug.  */
+  /* And now add new threads.  */
+  for (i = 0; VEC_iterate (dec_thread_info_s, dec_thread_list, i, info); i++)
+    {
+      ptid_t ptid = ptid_build_from_info (*info);
 
-static void
-resync_thread_list (struct target_ops *ops)
-{
-  int i;
-  int num_gdb_threads = 0;
-  struct thread_info **gdb_thread_list;
-  struct thread_info **next_thread_info;
-
-  /* Add new threads.  */
-  dec_thread_find_new_threads (ops);
-
-  /* Remove threads that no longer exist.  To help with the search,
-     we build an array of GDB threads, and then iterate over this
-     array.  */
-
-  iterate_over_threads (dec_thread_count_gdb_threads,
-                        (void *) &num_gdb_threads);
-  gdb_thread_list = alloca (num_gdb_threads * sizeof (struct thread_info *));
-  next_thread_info = gdb_thread_list;
-  iterate_over_threads (dec_thread_add_gdb_thread, (void *) &next_thread_info);
-
-  for (i = 0; i < num_gdb_threads; i++)
-    if (!dec_thread_ptid_is_alive (gdb_thread_list[i]->ptid))
-      delete_thread (gdb_thread_list[i]->ptid);
+      if (!in_thread_list (ptid))
+        add_thread (ptid);
+    }
 }
 
 /* The "to_detach" method of the dec_thread_ops.  */
@@ -502,7 +451,7 @@ dec_thread_wait (struct target_ops *ops,
 
   /* The ptid returned by the target beneath us is the ptid of the process.
      We need to find which thread is currently active and return its ptid.  */
-  resync_thread_list (ops);
+  dec_thread_update_thread_list (ops);
   active_ptid = get_active_ptid ();
   if (ptid_equal (active_ptid, null_ptid))
     return ptid;
