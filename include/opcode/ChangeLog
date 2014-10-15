@@ -1,3 +1,7 @@
+2014-10-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc.h (HWCAP2_VIS3B): Documentation improved.
+
 2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc.h (sparc_opcode): new field `hwcaps2'.

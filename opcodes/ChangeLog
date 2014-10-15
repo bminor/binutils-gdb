@@ -2,6 +2,7 @@
 
 	* sparc-opc.c (sparc-opcodes): Fix several misplaced hwcap
 	entries.
+	Annotate several instructions with the HWCAP2_VIS3B hwcap.
 
 2014-10-15  Tristan Gingold  <gingold@adacore.com>
 
