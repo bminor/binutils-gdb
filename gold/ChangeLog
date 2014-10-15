@@ -1,3 +1,30 @@
+2014-09-22  Han Shen  <shenhan@google.com>
+            Jing Yu   <jingyu@google.com>
+
+	Patch for gold aarch64 backend to support relaxation.
+	* aarch64-reloc.def: Change format.
+	* aarch64.cc (class Reloc_stub): New class.
+	(class Stub_table): New class.
+	(class AArch64_relobj): New class.
+	(class AArch64_input_section): New class.
+	(class AArch64_output_section): New class.
+	(Target_aarch64::new_stub_table): New method.
+	(Target_aarch64::new_aarch64_input_section): New method.
+	(Target_aarch64::find_aarch64_input_section): New method.
+	(Target_aarch64::scan_section_for_stubs): New method.
+	(Target_aarch64::scan_reloc_section_for_stubs): New method.
+	(Target_aarch64::relocate_stub): New method.
+	(Target_aarch64::current_target): New method.
+	(Target_aarch64::do_make_elf_object): New method.
+	(Target_aarch64::do_may_relax): New method.
+	(Target_aarch64::do_relax): New method.
+	(Target_aarch64::group_sections): New method.
+	(Target_aarch64::scan_reloc_for_stub): New method.
+	(Target_aarch64::do_make_output_section): New method.
+	(Target_aarch64::stub_tables_): New data member.
+	(Target_aarch64::aarch64_input_section_map_): New data member.
+	(AArch64_relocate_functions::maybe_apply_stub): New method.
+
 2014-09-30  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/17432

@@ -47,6 +47,7 @@
 // The first three .got.plt entries are reserved.
 const int32_t AARCH64_GOTPLT_RESERVE_COUNT = 3;
 
+
 namespace
 {
 
@@ -124,7 +125,7 @@ class Output_data_got_aarch64 : public Output_data_got<size, big_endian>
     gold_assert(tls_segment != NULL);
 
     AArch64_address aligned_tcb_address =
-      align_address(Target_aarch64<size,big_endian>::TCB_SIZE,
+      align_address(Target_aarch64<size, big_endian>::TCB_SIZE,
 		    tls_segment->maximum_alignment());
 
     for (size_t i = 0; i < this->static_relocs_.size(); ++i)
@@ -287,7 +288,7 @@ class Output_data_got_aarch64 : public Output_data_got<size, big_endian>
       } global;
       struct
       {
-	// For a local symbol, the object defining object.
+	// For a local symbol, the object defining the symbol.
 	Sized_relobj_file<size, big_endian>* relobj;
 	// For a local symbol, the symbol index.
 	unsigned int index;
@@ -297,6 +298,1323 @@ class Output_data_got_aarch64 : public Output_data_got<size, big_endian>
 
   std::vector<Static_reloc> static_relocs_;
 };  // End of Output_data_got_aarch64
+
+
+template<int size, bool big_endian>
+class AArch64_input_section;
+
+
+template<int size, bool big_endian>
+class AArch64_output_section;
+
+
+// Reloc stub class.
+
+template<int size, bool big_endian>
+class Reloc_stub
+{
+ public:
+  typedef Reloc_stub<size, big_endian> This;
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
+
+  // Do not change the value of the enums, they are used to index into
+  // stub_insns array.
+  typedef enum
+  {
+    ST_NONE = 0,
+
+    // Using adrp/add pair, 4 insns (including alignment) without mem access,
+    // the fastest stub. This has a limited jump distance, which is tested by
+    // aarch64_valid_for_adrp_p.
+    ST_ADRP_BRANCH = 1,
+
+    // Using ldr-absolute-address/br-register, 4 insns with 1 mem access,
+    // unlimited in jump distance.
+    ST_LONG_BRANCH_ABS = 2,
+
+    // Using ldr/calculate-pcrel/jump, 8 insns (including alignment) with 1 mem
+    // access, slowest one. Only used in position independent executables.
+    ST_LONG_BRANCH_PCREL = 3,
+
+  } Stub_type;
+
+  // Branch range. This is used to calculate the section group size, as well as
+  // determine whether a stub is needed.
+  static const int MAX_BRANCH_OFFSET = ((1 << 25) - 1) << 2;
+  static const int MIN_BRANCH_OFFSET = -((1 << 25) << 2);
+
+  // Constant used to determine if an offset fits in the adrp instruction
+  // encoding.
+  static const int MAX_ADRP_IMM = (1 << 20) - 1;
+  static const int MIN_ADRP_IMM = -(1 << 20);
+
+  static const int BYTES_PER_INSN = 4;
+  static const int STUB_ADDR_ALIGN = 4;
+
+  // Determine whether the offset fits in the jump/branch instruction.
+  static bool
+  aarch64_valid_branch_offset_p(int64_t offset)
+  { return offset >= MIN_BRANCH_OFFSET && offset <= MAX_BRANCH_OFFSET; }
+
+  // Determine whether the offset fits in the adrp immediate field.
+  static bool
+  aarch64_valid_for_adrp_p(AArch64_address location, AArch64_address dest)
+  {
+    typedef AArch64_relocate_functions<size, big_endian> Reloc;
+    int64_t adrp_imm = (Reloc::Page(dest) - Reloc::Page(location)) >> 12;
+    return adrp_imm >= MIN_ADRP_IMM && adrp_imm <= MAX_ADRP_IMM;
+  }
+
+  // Determine the stub type for a certain relocation or ST_NONE, if no stub is
+  // needed.
+  static Stub_type
+  stub_type_for_reloc(unsigned int r_type, AArch64_address address,
+		      AArch64_address target);
+
+  Reloc_stub(Stub_type stub_type)
+    : stub_type_(stub_type), offset_(invalid_offset),
+      destination_address_(invalid_address)
+  { }
+
+  ~Reloc_stub()
+  { }
+
+  // Return offset of code stub from beginning of its containing stub table.
+  section_offset_type
+  offset() const
+  {
+    gold_assert(this->offset_ != invalid_offset);
+    return this->offset_;
+  }
+
+  // Set offset of code stub from beginning of its containing stub table.
+  void
+  set_offset(section_offset_type offset)
+  { this->offset_ = offset; }
+
+  // Return destination address.
+  AArch64_address
+  destination_address() const
+  {
+    gold_assert(this->destination_address_ != this->invalid_address);
+    return this->destination_address_;
+  }
+
+  // Set destination address.
+  void
+  set_destination_address(AArch64_address address)
+  {
+    gold_assert(address != this->invalid_address);
+    this->destination_address_ = address;
+  }
+
+  // Reset the destination address.
+  void
+  reset_destination_address()
+  { this->destination_address_ = this->invalid_address; }
+
+  // Return the stub type.
+  Stub_type
+  stub_type() const
+  { return stub_type_; }
+
+  // Return the stub size.
+  uint32_t
+  stub_size() const
+  { return this->stub_insn_number() * BYTES_PER_INSN; }
+
+  // Return the instruction number of this stub instance.
+  int
+  stub_insn_number() const
+  { return stub_insns_[this->stub_type_][0]; }
+
+  // Note the first "insn" is the number of total insns in this array.
+  const uint32_t*
+  stub_insns() const
+  { return stub_insns_[this->stub_type_]; }
+
+  // Write stub to output file.
+  void
+  write(unsigned char* view, section_size_type view_size)
+  { this->do_write(view, view_size); }
+
+  // The key class used to index the stub instance in the stub table's stub map.
+  class Key
+  {
+   public:
+    Key(Stub_type stub_type, const Symbol* symbol, const Relobj* relobj,
+	unsigned int r_sym, int32_t addend)
+      : stub_type_(stub_type), addend_(addend)
+    {
+      if (symbol != NULL)
+	{
+	  this->r_sym_ = Reloc_stub::invalid_index;
+	  this->u_.symbol = symbol;
+	}
+      else
+	{
+	  gold_assert(relobj != NULL && r_sym != invalid_index);
+	  this->r_sym_ = r_sym;
+	  this->u_.relobj = relobj;
+	}
+    }
+
+    ~Key()
+    { }
+
+    // Return stub type.
+    Stub_type
+    stub_type() const
+    { return this->stub_type_; }
+
+    // Return the local symbol index or invalid_index.
+    unsigned int
+    r_sym() const
+    { return this->r_sym_; }
+
+    // Return the symbol if there is one.
+    const Symbol*
+    symbol() const
+    { return this->r_sym_ == invalid_index ? this->u_.symbol : NULL; }
+
+    // Return the relobj if there is one.
+    const Relobj*
+    relobj() const
+    { return this->r_sym_ != invalid_index ? this->u_.relobj : NULL; }
+
+    // Whether this equals to another key k.
+    bool
+    eq(const Key& k) const
+    {
+      return ((this->stub_type_ == k.stub_type_)
+	      && (this->r_sym_ == k.r_sym_)
+	      && ((this->r_sym_ != Reloc_stub::invalid_index)
+		  ? (this->u_.relobj == k.u_.relobj)
+		  : (this->u_.symbol == k.u_.symbol))
+	      && (this->addend_ == k.addend_));
+    }
+
+    // Return a hash value.
+    size_t
+    hash_value() const
+    {
+      size_t name_hash_value = gold::string_hash<char>(
+	  (this->r_sym_ != Reloc_stub::invalid_index)
+	  ? this->u_.relobj->name().c_str()
+	  : this->u_.symbol->name());
+      // We only have 4 stub types.
+      size_t stub_type_hash_value = 0x03 & this->stub_type_;
+      return (name_hash_value
+	      ^ stub_type_hash_value
+	      ^ ((this->r_sym_ & 0x3fff) << 2)
+	      ^ ((this->addend_ & 0xffff) << 16));
+    }
+
+    // Functors for STL associative containers.
+    struct hash
+    {
+      size_t
+      operator()(const Key& k) const
+      { return k.hash_value(); }
+    };
+
+    struct equal_to
+    {
+      bool
+      operator()(const Key& k1, const Key& k2) const
+      { return k1.eq(k2); }
+    };
+
+ private:
+    // Stub type.
+    const Stub_type stub_type_;
+    // If this is a local symbol, this is the index in the defining object.
+    // Otherwise, it is invalid_index for a global symbol.
+    unsigned int r_sym_;
+    // If r_sym_ is an invalid index, this points to a global symbol.
+    // Otherwise, it points to a relobj.  We used the unsized and target
+    // independent Symbol and Relobj classes instead of Sized_symbol<32> and
+    // Arm_relobj, in order to avoid making the stub class a template
+    // as most of the stub machinery is endianness-neutral.  However, it
+    // may require a bit of casting done by users of this class.
+    union
+    {
+      const Symbol* symbol;
+      const Relobj* relobj;
+    } u_;
+    // Addend associated with a reloc.
+    int32_t addend_;
+  };  // End of inner class Reloc_stub::Key
+
+ protected:
+  // This may be overridden in the child class.
+  virtual void
+  do_write(unsigned char*, section_size_type);
+
+ private:
+  static const section_offset_type invalid_offset =
+      static_cast<section_offset_type>(-1);
+  static const unsigned int invalid_index = static_cast<unsigned int>(-1);
+  static const AArch64_address invalid_address =
+      static_cast<AArch64_address>(-1);
+
+  static const uint32_t stub_insns_[][10];
+
+  const Stub_type stub_type_;
+  section_offset_type offset_;
+  AArch64_address destination_address_;
+};  // End of Reloc_stub
+
+
+// Write data to output file.
+
+template<int size, bool big_endian>
+void
+Reloc_stub<size, big_endian>::
+do_write(unsigned char* view, section_size_type)
+{
+  typedef typename elfcpp::Swap<32, big_endian>::Valtype Insntype;
+  const uint32_t* insns = this->stub_insns();
+  uint32_t num_insns = this->stub_insn_number();
+  Insntype* ip = reinterpret_cast<Insntype*>(view);
+  for (uint32_t i = 1; i <= num_insns; ++i)
+    elfcpp::Swap<32, big_endian>::writeval(ip + i - 1, insns[i]);
+}
+
+
+// Stubs instructions definition.
+
+template<int size, bool big_endian>
+const uint32_t
+Reloc_stub<size, big_endian>::stub_insns_[][10] =
+  {
+    // The first element of each group is the num of the insns.
+
+    // ST_NONE
+    {0, 0},
+
+    // ST_ADRP_BRANCH
+    {
+	4,
+	0x90000010,	/*	adrp	ip0, X		   */
+			/*	  ADR_PREL_PG_HI21(X)	   */
+	0x91000210,	/*	add	ip0, ip0, :lo12:X  */
+			/*	  ADD_ABS_LO12_NC(X)	   */
+	0xd61f0200,	/*	br	ip0		   */
+	0x00000000,	/*	alignment padding	   */
+    },
+
+    // ST_LONG_BRANCH_ABS
+    {
+	4,
+	0x58000050,	/*	ldr   ip0, 0x8		   */
+	0xd61f0200,	/*	br    ip0		   */
+	0x00000000,	/*	address field		   */
+	0x00000000,	/*	address fields		   */
+    },
+
+    // ST_LONG_BRANCH_PCREL
+    {
+      8,
+	0x58000090,	/*	ldr   ip0, 0x10            */
+	0x10000011,	/*	adr   ip1, #0		   */
+	0x8b110210,	/*	add   ip0, ip0, ip1	   */
+	0xd61f0200,	/*	br    ip0		   */
+	0x00000000,	/*	address field		   */
+	0x00000000,	/*	address field		   */
+	0x00000000,	/*	alignment padding	   */
+	0x00000000,	/*	alignment padding	   */
+    }
+  };
+
+
+// Determine the stub type for a certain relocation or ST_NONE, if no stub is
+// needed.
+
+template<int size, bool big_endian>
+inline
+typename Reloc_stub<size, big_endian>::Stub_type
+Reloc_stub<size, big_endian>::stub_type_for_reloc(
+    unsigned int r_type, AArch64_address location, AArch64_address dest)
+{
+  int64_t branch_offset = 0;
+  switch(r_type)
+    {
+    case elfcpp::R_AARCH64_CALL26:
+    case elfcpp::R_AARCH64_JUMP26:
+      branch_offset = dest - location;
+      break;
+    default:
+      gold_assert(false);
+    }
+
+  if (aarch64_valid_branch_offset_p(branch_offset))
+    return ST_NONE;
+
+  if (aarch64_valid_for_adrp_p(location, dest))
+    return ST_ADRP_BRANCH;
+
+  if (parameters->options().output_is_position_independent()
+      && parameters->options().output_is_executable())
+    return ST_LONG_BRANCH_PCREL;
+
+  return ST_LONG_BRANCH_ABS;
+}
+
+// A class to hold stubs for the ARM target.
+
+template<int size, bool big_endian>
+class Stub_table : public Output_data
+{
+ public:
+  typedef Target_aarch64<size, big_endian> The_target_aarch64;
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
+  typedef AArch64_input_section<size, big_endian> The_aarch64_input_section;
+  typedef Reloc_stub<size, big_endian> The_reloc_stub;
+  typedef typename The_reloc_stub::Key The_reloc_stub_key;
+  typedef typename The_reloc_stub_key::hash The_reloc_stub_key_hash;
+  typedef typename The_reloc_stub_key::equal_to The_reloc_stub_key_equal_to;
+  typedef Stub_table<size, big_endian> The_stub_table;
+  typedef Unordered_map<The_reloc_stub_key, The_reloc_stub*,
+			The_reloc_stub_key_hash, The_reloc_stub_key_equal_to>
+			Reloc_stub_map;
+  typedef typename Reloc_stub_map::const_iterator Reloc_stub_map_const_iter;
+  typedef Relocate_info<size, big_endian> The_relocate_info;
+
+  Stub_table(The_aarch64_input_section* owner)
+    : Output_data(), owner_(owner), reloc_stubs_size_(0), prev_data_size_(0)
+  { }
+
+  ~Stub_table()
+  { }
+
+  The_aarch64_input_section*
+  owner() const
+  { return owner_; }
+
+  // Whether this stub table is empty.
+  bool
+  empty() const
+  { return reloc_stubs_.empty(); }
+
+  // Return the current data size.
+  off_t
+  current_data_size() const
+  { return this->current_data_size_for_child(); }
+
+  // Add a STUB using KEY.  The caller is responsible for avoiding addition
+  // if a STUB with the same key has already been added.
+  void
+  add_reloc_stub(The_reloc_stub* stub, const The_reloc_stub_key& key);
+
+  // Finalize stubs. No-op here, just for completeness.
+  void
+  finalize_stubs()
+  { }
+
+  // Look up a relocation stub using KEY. Return NULL if there is none.
+  The_reloc_stub*
+  find_reloc_stub(The_reloc_stub_key& key)
+  {
+    Reloc_stub_map_const_iter p = this->reloc_stubs_.find(key);
+    return (p != this->reloc_stubs_.end()) ? p->second : NULL;
+  }
+
+  // Relocate stubs in this stub table.
+  void
+  relocate_stubs(const The_relocate_info*,
+		 The_target_aarch64*,
+		 Output_section*,
+		 unsigned char*,
+		 AArch64_address,
+		 section_size_type);
+
+  // Update data size at the end of a relaxation pass.  Return true if data size
+  // is different from that of the previous relaxation pass.
+  bool
+  update_data_size_changed_p()
+  {
+    // No addralign changed here.
+    off_t s = this->reloc_stubs_size_;
+    bool changed = (s != this->prev_data_size_);
+    this->prev_data_size_ = s;
+    return changed;
+  }
+
+ protected:
+  // Write out section contents.
+  void
+  do_write(Output_file*);
+
+  // Return the required alignment.
+  uint64_t
+  do_addralign() const
+  { return The_reloc_stub::STUB_ADDR_ALIGN; }
+
+  // Reset address and file offset.
+  void
+  do_reset_address_and_file_offset()
+  { this->set_current_data_size_for_child(this->prev_data_size_); }
+
+  // Set final data size.
+  void
+  set_final_data_size()
+  { this->set_data_size(this->current_data_size()); }
+
+ private:
+  // Relocate one stub.
+  void
+  relocate_stub(The_reloc_stub*,
+		const The_relocate_info*,
+		The_target_aarch64*,
+		Output_section*,
+		unsigned char*,
+		AArch64_address,
+		section_size_type);
+
+ private:
+  // Owner of this stub table.
+  The_aarch64_input_section* owner_;
+  // The relocation stubs.
+  Reloc_stub_map reloc_stubs_;
+  // Size of reloc stubs.
+  off_t reloc_stubs_size_;
+  // data size of this in the previous pass.
+  off_t prev_data_size_;
+};  // End of Stub_table
+
+
+// Add a STUB using KEY.  The caller is responsible for avoiding addition
+// if a STUB with the same key has already been added.
+
+template<int size, bool big_endian>
+void
+Stub_table<size, big_endian>::add_reloc_stub(
+    The_reloc_stub* stub, const The_reloc_stub_key& key)
+{
+  gold_assert(stub->stub_type() == key.stub_type());
+  this->reloc_stubs_[key] = stub;
+
+  // Assign stub offset early.  We can do this because we never remove
+  // reloc stubs and they are in the beginning of the stub table.
+  this->reloc_stubs_size_ = align_address(this->reloc_stubs_size_,
+					  The_reloc_stub::STUB_ADDR_ALIGN);
+  stub->set_offset(this->reloc_stubs_size_);
+  this->reloc_stubs_size_ += stub->stub_size();
+}
+
+
+// Relocate all stubs in this stub table.
+
+template<int size, bool big_endian>
+void
+Stub_table<size, big_endian>::
+relocate_stubs(const The_relocate_info* relinfo,
+	       The_target_aarch64* target_aarch64,
+	       Output_section* output_section,
+	       unsigned char* view,
+	       AArch64_address address,
+	       section_size_type view_size)
+{
+  // "view_size" is the total size of the stub_table.
+  gold_assert(address == this->address() &&
+	      view_size == static_cast<section_size_type>(this->data_size()));
+  for(Reloc_stub_map_const_iter p = this->reloc_stubs_.begin();
+      p != this->reloc_stubs_.end(); ++p)
+    relocate_stub(p->second, relinfo, target_aarch64, output_section,
+		  view, address, view_size);
+}
+
+
+// Relocate one stub.  This is a helper for Stub_table::relocate_stubs().
+
+template<int size, bool big_endian>
+void
+Stub_table<size, big_endian>::
+relocate_stub(The_reloc_stub* stub,
+	      const The_relocate_info* relinfo,
+	      The_target_aarch64* target_aarch64,
+	      Output_section* output_section,
+	      unsigned char* view,
+	      AArch64_address address,
+	      section_size_type view_size)
+{
+  // "offset" is the offset from the beginning of the stub_table.
+  section_size_type offset = stub->offset();
+  section_size_type stub_size = stub->stub_size();
+  // "view_size" is the total size of the stub_table.
+  gold_assert(offset + stub_size <= view_size);
+
+  target_aarch64->relocate_stub(stub, relinfo, output_section,
+				view + offset, address + offset, view_size);
+}
+
+
+// Write out the stubs to file.
+
+template<int size, bool big_endian>
+void
+Stub_table<size, big_endian>::do_write(Output_file* of)
+{
+  off_t offset = this->offset();
+  const section_size_type oview_size =
+    convert_to_section_size_type(this->data_size());
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
+
+  // Write relocation stubs.
+  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
+      p != this->reloc_stubs_.end(); ++p)
+    {
+      The_reloc_stub* stub = p->second;
+      AArch64_address address = this->address() + stub->offset();
+      gold_assert(address ==
+		  align_address(address, The_reloc_stub::STUB_ADDR_ALIGN));
+      stub->write(oview + stub->offset(), stub->stub_size());
+    }
+
+  of->write_output_view(this->offset(), oview_size, oview);
+}
+
+
+// AArch64_relobj class.
+
+template<int size, bool big_endian>
+class AArch64_relobj : public Sized_relobj_file<size, big_endian>
+{
+ public:
+  typedef AArch64_relobj<size, big_endian> This;
+  typedef Target_aarch64<size, big_endian> The_target_aarch64;
+  typedef AArch64_input_section<size, big_endian> The_aarch64_input_section;
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
+  typedef Stub_table<size, big_endian> The_stub_table;
+  typedef std::vector<The_stub_table*> Stub_table_list;
+  static const AArch64_address invalid_address =
+      static_cast<AArch64_address>(-1);
+
+  AArch64_relobj(const std::string& name, Input_file* input_file, off_t offset,
+		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
+    : Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr),
+      stub_tables_()
+  { }
+
+  ~AArch64_relobj()
+  { }
+
+  // Return the stub table of the SHNDX-th section if there is one.
+  The_stub_table*
+  stub_table(unsigned int shndx) const
+  {
+    gold_assert(shndx < this->stub_tables_.size());
+    return this->stub_tables_[shndx];
+  }
+
+  // Set STUB_TABLE to be the stub_table of the SHNDX-th section.
+  void
+  set_stub_table(unsigned int shndx, The_stub_table* stub_table)
+  {
+    gold_assert(shndx < this->stub_tables_.size());
+    this->stub_tables_[shndx] = stub_table;
+  }
+
+ // Scan all relocation sections for stub generation.
+  void
+  scan_sections_for_stubs(The_target_aarch64*, const Symbol_table*,
+			  const Layout*);
+
+  // Whether a section is a scannable text section.
+  bool
+  text_section_is_scannable(const elfcpp::Shdr<size, big_endian>&, unsigned int,
+			    const Output_section*, const Symbol_table*);
+
+  // Convert regular input section with index SHNDX to a relaxed section.
+  void
+  convert_input_section_to_relaxed_section(unsigned /* shndx */)
+  {
+    // The stubs have relocations and we need to process them after writing
+    // out the stubs.  So relocation now must follow section write.
+    this->set_relocs_must_follow_section_writes();
+  }
+
+ protected:
+  // Post constructor setup.
+  void
+  do_setup()
+  {
+    // Call parent's setup method.
+    Sized_relobj_file<size, big_endian>::do_setup();
+
+    // Initialize look-up tables.
+    this->stub_tables_.resize(this->shnum());
+  }
+
+  virtual void
+  do_relocate_sections(
+      const Symbol_table* symtab, const Layout* layout,
+      const unsigned char* pshdrs, Output_file* of,
+      typename Sized_relobj_file<size, big_endian>::Views* pviews);
+
+ private:
+  // Whether a section needs to be scanned for relocation stubs.
+  bool
+  section_needs_reloc_stub_scanning(const elfcpp::Shdr<size, big_endian>&,
+				    const Relobj::Output_sections&,
+				    const Symbol_table*, const unsigned char*);
+
+  // List of stub tables.
+  Stub_table_list stub_tables_;
+};  // End of AArch64_relobj
+
+
+// Relocate sections.
+
+template<int size, bool big_endian>
+void
+AArch64_relobj<size, big_endian>::do_relocate_sections(
+    const Symbol_table* symtab, const Layout* layout,
+    const unsigned char* pshdrs, Output_file* of,
+    typename Sized_relobj_file<size, big_endian>::Views* pviews)
+{
+  // Call parent to relocate sections.
+  Sized_relobj_file<size, big_endian>::do_relocate_sections(symtab, layout,
+							    pshdrs, of, pviews);
+
+  // We do not generate stubs if doing a relocatable link.
+  if (parameters->options().relocatable())
+    return;
+
+  Relocate_info<size, big_endian> relinfo;
+  relinfo.symtab = symtab;
+  relinfo.layout = layout;
+  relinfo.object = this;
+
+  // Relocate stub tables.
+  unsigned int shnum = this->shnum();
+  The_target_aarch64* target = The_target_aarch64::current_target();
+
+  for (unsigned int i = 1; i < shnum; ++i)
+    {
+      The_aarch64_input_section* aarch64_input_section =
+	  target->find_aarch64_input_section(this, i);
+      if (aarch64_input_section != NULL
+	  && aarch64_input_section->is_stub_table_owner()
+	  && !aarch64_input_section->stub_table()->empty())
+	{
+	  Output_section* os = this->output_section(i);
+	  gold_assert(os != NULL);
+
+	  relinfo.reloc_shndx = elfcpp::SHN_UNDEF;
+	  relinfo.reloc_shdr = NULL;
+	  relinfo.data_shndx = i;
+	  relinfo.data_shdr = pshdrs + i * elfcpp::Elf_sizes<size>::shdr_size;
+
+	  typename Sized_relobj_file<size, big_endian>::View_size&
+	      view_struct = (*pviews)[i];
+	  gold_assert(view_struct.view != NULL);
+
+	  The_stub_table* stub_table = aarch64_input_section->stub_table();
+	  off_t offset = stub_table->address() - view_struct.address;
+	  unsigned char* view = view_struct.view + offset;
+	  AArch64_address address = stub_table->address();
+	  section_size_type view_size = stub_table->data_size();
+	  stub_table->relocate_stubs(&relinfo, target, os, view, address,
+				     view_size);
+	}
+    }
+}
+
+
+// Determine if an input section is scannable for stub processing.  SHDR is
+// the header of the section and SHNDX is the section index.  OS is the output
+// section for the input section and SYMTAB is the global symbol table used to
+// look up ICF information.
+
+template<int size, bool big_endian>
+bool
+AArch64_relobj<size, big_endian>::text_section_is_scannable(
+    const elfcpp::Shdr<size, big_endian>& text_shdr,
+    unsigned int text_shndx,
+    const Output_section* os,
+    const Symbol_table* symtab)
+{
+  // Skip any empty sections, unallocated sections or sections whose
+  // type are not SHT_PROGBITS.
+  if (text_shdr.get_sh_size() == 0
+      || (text_shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0
+      || text_shdr.get_sh_type() != elfcpp::SHT_PROGBITS)
+    return false;
+
+  // Skip any discarded or ICF'ed sections.
+  if (os == NULL || symtab->is_section_folded(this, text_shndx))
+    return false;
+
+  // Skip exception frame.
+  if (strcmp(os->name(), ".eh_frame") == 0)
+    return false ;
+
+  gold_assert(!this->is_output_section_offset_invalid(text_shndx) ||
+	      os->find_relaxed_input_section(this, text_shndx) != NULL);
+
+  return true;
+}
+
+
+// Determine if we want to scan the SHNDX-th section for relocation stubs.
+// This is a helper for AArch64_relobj::scan_sections_for_stubs().
+
+template<int size, bool big_endian>
+bool
+AArch64_relobj<size, big_endian>::section_needs_reloc_stub_scanning(
+    const elfcpp::Shdr<size, big_endian>& shdr,
+    const Relobj::Output_sections& out_sections,
+    const Symbol_table* symtab,
+    const unsigned char* pshdrs)
+{
+  unsigned int sh_type = shdr.get_sh_type();
+  if (sh_type != elfcpp::SHT_RELA)
+    return false;
+
+  // Ignore empty section.
+  off_t sh_size = shdr.get_sh_size();
+  if (sh_size == 0)
+    return false;
+
+  // Ignore reloc section with unexpected symbol table.  The
+  // error will be reported in the final link.
+  if (this->adjust_shndx(shdr.get_sh_link()) != this->symtab_shndx())
+    return false;
+
+  gold_assert(sh_type == elfcpp::SHT_RELA);
+  unsigned int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
+
+  // Ignore reloc section with unexpected entsize or uneven size.
+  // The error will be reported in the final link.
+  if (reloc_size != shdr.get_sh_entsize() || sh_size % reloc_size != 0)
+    return false;
+
+  // Ignore reloc section with bad info.  This error will be
+  // reported in the final link.
+  unsigned int text_shndx = this->adjust_shndx(shdr.get_sh_info());
+  if (text_shndx >= this->shnum())
+    return false;
+
+  const unsigned int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+  const elfcpp::Shdr<size, big_endian> text_shdr(pshdrs +
+						 text_shndx * shdr_size);
+  return this->text_section_is_scannable(text_shdr, text_shndx,
+					 out_sections[text_shndx], symtab);
+}
+
+
+// Scan relocations for stub generation.
+
+template<int size, bool big_endian>
+void
+AArch64_relobj<size, big_endian>::scan_sections_for_stubs(
+    The_target_aarch64* target,
+    const Symbol_table* symtab,
+    const Layout* layout)
+{
+  unsigned int shnum = this->shnum();
+  const unsigned int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+
+  // Read the section headers.
+  const unsigned char* pshdrs = this->get_view(this->elf_file()->shoff(),
+					       shnum * shdr_size,
+					       true, true);
+
+  // To speed up processing, we set up hash tables for fast lookup of
+  // input offsets to output addresses.
+  this->initialize_input_to_output_maps();
+
+  const Relobj::Output_sections& out_sections(this->output_sections());
+
+  Relocate_info<size, big_endian> relinfo;
+  relinfo.symtab = symtab;
+  relinfo.layout = layout;
+  relinfo.object = this;
+
+  // Do relocation stubs scanning.
+  const unsigned char* p = pshdrs + shdr_size;
+  for (unsigned int i = 1; i < shnum; ++i, p += shdr_size)
+    {
+      const elfcpp::Shdr<size, big_endian> shdr(p);
+      if (this->section_needs_reloc_stub_scanning(shdr, out_sections, symtab,
+						  pshdrs))
+	{
+	  unsigned int index = this->adjust_shndx(shdr.get_sh_info());
+	  AArch64_address output_offset =
+	      this->get_output_section_offset(index);
+	  AArch64_address output_address;
+	  if (output_offset != invalid_address)
+	    {
+	      output_address = out_sections[index]->address() + output_offset;
+	    }
+	  else
+	    {
+	      // Currently this only happens for a relaxed section.
+	      const Output_relaxed_input_section* poris =
+		  out_sections[index]->find_relaxed_input_section(this, index);
+	      gold_assert(poris != NULL);
+	      output_address = poris->address();
+	    }
+
+	  // Get the relocations.
+	  const unsigned char* prelocs = this->get_view(shdr.get_sh_offset(),
+							shdr.get_sh_size(),
+							true, false);
+
+	  // Get the section contents.
+	  section_size_type input_view_size = 0;
+	  const unsigned char* input_view =
+	      this->section_contents(index, &input_view_size, false);
+
+	  relinfo.reloc_shndx = i;
+	  relinfo.data_shndx = index;
+	  unsigned int sh_type = shdr.get_sh_type();
+	  unsigned int reloc_size;
+	  gold_assert (sh_type == elfcpp::SHT_RELA);
+	  reloc_size = elfcpp::Elf_sizes<size>::rela_size;
+
+	  Output_section* os = out_sections[index];
+	  target->scan_section_for_stubs(&relinfo, sh_type, prelocs,
+					 shdr.get_sh_size() / reloc_size,
+					 os,
+					 output_offset == invalid_address,
+					 input_view, output_address,
+					 input_view_size);
+	}
+    }
+}
+
+
+// A class to wrap an ordinary input section containing executable code.
+
+template<int size, bool big_endian>
+class AArch64_input_section : public Output_relaxed_input_section
+{
+ public:
+  typedef Stub_table<size, big_endian> The_stub_table;
+
+  AArch64_input_section(Relobj* relobj, unsigned int shndx)
+    : Output_relaxed_input_section(relobj, shndx, 1),
+      stub_table_(NULL),
+      original_contents_(NULL), original_size_(0),
+      original_addralign_(1)
+  { }
+
+  ~AArch64_input_section()
+  { delete[] this->original_contents_; }
+
+  // Initialize.
+  void
+  init();
+
+  // Set the stub_table.
+  void
+  set_stub_table(The_stub_table* st)
+  { this->stub_table_ = st; }
+
+  // Whether this is a stub table owner.
+  bool
+  is_stub_table_owner() const
+  { return this->stub_table_ != NULL && this->stub_table_->owner() == this; }
+
+  // Return the original size of the section.
+  uint32_t
+  original_size() const
+  { return this->original_size_; }
+
+  // Return the stub table.
+  The_stub_table*
+  stub_table()
+  { return stub_table_; }
+
+ protected:
+  // Write out this input section.
+  void
+  do_write(Output_file*);
+
+  // Return required alignment of this.
+  uint64_t
+  do_addralign() const
+  {
+    if (this->is_stub_table_owner())
+      return std::max(this->stub_table_->addralign(),
+		      static_cast<uint64_t>(this->original_addralign_));
+    else
+      return this->original_addralign_;
+  }
+
+  // Finalize data size.
+  void
+  set_final_data_size();
+
+  // Reset address and file offset.
+  void
+  do_reset_address_and_file_offset();
+
+  // Output offset.
+  bool
+  do_output_offset(const Relobj* object, unsigned int shndx,
+		   section_offset_type offset,
+		   section_offset_type* poutput) const
+  {
+    if ((object == this->relobj())
+	&& (shndx == this->shndx())
+	&& (offset >= 0)
+	&& (offset <=
+	    convert_types<section_offset_type, uint32_t>(this->original_size_)))
+      {
+	*poutput = offset;
+	return true;
+      }
+    else
+      return false;
+  }
+
+ private:
+  // Copying is not allowed.
+  AArch64_input_section(const AArch64_input_section&);
+  AArch64_input_section& operator=(const AArch64_input_section&);
+
+  // The relocation stubs.
+  The_stub_table* stub_table_;
+  // Original section contents.  We have to make a copy here since the file
+  // containing the original section may not be locked when we need to access
+  // the contents.
+  unsigned char* original_contents_;
+  // Section size of the original input section.
+  uint32_t original_size_;
+  // Address alignment of the original input section.
+  uint32_t original_addralign_;
+};  // End of AArch64_input_section
+
+
+// Finalize data size.
+
+template<int size, bool big_endian>
+void
+AArch64_input_section<size, big_endian>::set_final_data_size()
+{
+  off_t off = convert_types<off_t, uint64_t>(this->original_size_);
+
+  if (this->is_stub_table_owner())
+    {
+      this->stub_table_->finalize_data_size();
+      off = align_address(off, this->stub_table_->addralign());
+      off += this->stub_table_->data_size();
+    }
+  this->set_data_size(off);
+}
+
+
+// Reset address and file offset.
+
+template<int size, bool big_endian>
+void
+AArch64_input_section<size, big_endian>::do_reset_address_and_file_offset()
+{
+  // Size of the original input section contents.
+  off_t off = convert_types<off_t, uint64_t>(this->original_size_);
+
+  // If this is a stub table owner, account for the stub table size.
+  if (this->is_stub_table_owner())
+    {
+      The_stub_table* stub_table = this->stub_table_;
+
+      // Reset the stub table's address and file offset.  The
+      // current data size for child will be updated after that.
+      stub_table_->reset_address_and_file_offset();
+      off = align_address(off, stub_table_->addralign());
+      off += stub_table->current_data_size();
+    }
+
+  this->set_current_data_size(off);
+}
+
+
+// Initialize an Arm_input_section.
+
+template<int size, bool big_endian>
+void
+AArch64_input_section<size, big_endian>::init()
+{
+  Relobj* relobj = this->relobj();
+  unsigned int shndx = this->shndx();
+
+  // We have to cache original size, alignment and contents to avoid locking
+  // the original file.
+  this->original_addralign_ =
+      convert_types<uint32_t, uint64_t>(relobj->section_addralign(shndx));
+
+  // This is not efficient but we expect only a small number of relaxed
+  // input sections for stubs.
+  section_size_type section_size;
+  const unsigned char* section_contents =
+      relobj->section_contents(shndx, &section_size, false);
+  this->original_size_ =
+      convert_types<uint32_t, uint64_t>(relobj->section_size(shndx));
+
+  gold_assert(this->original_contents_ == NULL);
+  this->original_contents_ = new unsigned char[section_size];
+  memcpy(this->original_contents_, section_contents, section_size);
+
+  // We want to make this look like the original input section after
+  // output sections are finalized.
+  Output_section* os = relobj->output_section(shndx);
+  off_t offset = relobj->output_section_offset(shndx);
+  gold_assert(os != NULL && !relobj->is_output_section_offset_invalid(shndx));
+  this->set_address(os->address() + offset);
+  this->set_file_offset(os->offset() + offset);
+  this->set_current_data_size(this->original_size_);
+  this->finalize_data_size();
+}
+
+
+// Write data to output file.
+
+template<int size, bool big_endian>
+void
+AArch64_input_section<size, big_endian>::do_write(Output_file* of)
+{
+  // We have to write out the original section content.
+  gold_assert(this->original_contents_ != NULL);
+  of->write(this->offset(), this->original_contents_,
+	    this->original_size_);
+
+  // If this owns a stub table and it is not empty, write it.
+  if (this->is_stub_table_owner() && !this->stub_table_->empty())
+    this->stub_table_->write(of);
+}
+
+
+// Arm output section class.  This is defined mainly to add a number of stub
+// generation methods.
+
+template<int size, bool big_endian>
+class AArch64_output_section : public Output_section
+{
+ public:
+  typedef Target_aarch64<size, big_endian> The_target_aarch64;
+  typedef AArch64_relobj<size, big_endian> The_aarch64_relobj;
+  typedef Stub_table<size, big_endian> The_stub_table;
+  typedef AArch64_input_section<size, big_endian> The_aarch64_input_section;
+
+ public:
+  AArch64_output_section(const char* name, elfcpp::Elf_Word type,
+			 elfcpp::Elf_Xword flags)
+    : Output_section(name, type, flags)
+  { }
+
+  ~AArch64_output_section() {}
+
+  // Group input sections for stub generation.
+  void
+  group_sections(section_size_type, bool, Target_aarch64<size, big_endian>*,
+		 const Task*);
+
+ private:
+  typedef Output_section::Input_section Input_section;
+  typedef Output_section::Input_section_list Input_section_list;
+
+  // Create a stub group.
+  void
+  create_stub_group(Input_section_list::const_iterator,
+		    Input_section_list::const_iterator,
+		    Input_section_list::const_iterator,
+		    The_target_aarch64*,
+		    std::vector<Output_relaxed_input_section*>&,
+		    const Task*);
+};  // End of AArch64_output_section
+
+
+// Create a stub group for input sections from FIRST to LAST. OWNER points to
+// the input section that will be the owner of the stub table.
+
+template<int size, bool big_endian> void
+AArch64_output_section<size, big_endian>::create_stub_group(
+    Input_section_list::const_iterator first,
+    Input_section_list::const_iterator last,
+    Input_section_list::const_iterator owner,
+    The_target_aarch64* target,
+    std::vector<Output_relaxed_input_section*>& new_relaxed_sections,
+    const Task* task)
+{
+  // Currently we convert ordinary input sections into relaxed sections only
+  // at this point.
+  The_aarch64_input_section* input_section;
+  if (owner->is_relaxed_input_section())
+    gold_unreachable();
+  else
+    {
+      gold_assert(owner->is_input_section());
+      // Create a new relaxed input section.  We need to lock the original
+      // file.
+      Task_lock_obj<Object> tl(task, owner->relobj());
+      input_section =
+	  target->new_aarch64_input_section(owner->relobj(), owner->shndx());
+      new_relaxed_sections.push_back(input_section);
+    }
+
+  // Create a stub table.
+  The_stub_table* stub_table =
+      target->new_stub_table(input_section);
+
+  input_section->set_stub_table(stub_table);
+
+  Input_section_list::const_iterator p = first;
+  // Look for input sections or relaxed input sections in [first ... last].
+  do
+    {
+      if (p->is_input_section() || p->is_relaxed_input_section())
+	{
+	  // The stub table information for input sections live
+	  // in their objects.
+	  The_aarch64_relobj* aarch64_relobj =
+	      static_cast<The_aarch64_relobj*>(p->relobj());
+	  aarch64_relobj->set_stub_table(p->shndx(), stub_table);
+	}
+    }
+  while (p++ != last);
+}
+
+
+// Group input sections for stub generation. GROUP_SIZE is roughly the limit of
+// stub groups. We grow a stub group by adding input section until the size is
+// just below GROUP_SIZE. The last input section will be converted into a stub
+// table owner. If STUB_ALWAYS_AFTER_BRANCH is false, we also add input sectiond
+// after the stub table, effectively doubling the group size.
+//
+// This is similar to the group_sections() function in elf32-arm.c but is
+// implemented differently.
+
+template<int size, bool big_endian>
+void AArch64_output_section<size, big_endian>::group_sections(
+    section_size_type group_size,
+    bool stubs_always_after_branch,
+    Target_aarch64<size, big_endian>* target,
+    const Task* task)
+{
+  typedef enum
+  {
+    NO_GROUP,
+    FINDING_STUB_SECTION,
+    HAS_STUB_SECTION
+  } State;
+
+  std::vector<Output_relaxed_input_section*> new_relaxed_sections;
+
+  State state = NO_GROUP;
+  section_size_type off = 0;
+  section_size_type group_begin_offset = 0;
+  section_size_type group_end_offset = 0;
+  section_size_type stub_table_end_offset = 0;
+  Input_section_list::const_iterator group_begin =
+      this->input_sections().end();
+  Input_section_list::const_iterator stub_table =
+      this->input_sections().end();
+  Input_section_list::const_iterator group_end = this->input_sections().end();
+  for (Input_section_list::const_iterator p = this->input_sections().begin();
+       p != this->input_sections().end();
+       ++p)
+    {
+      section_size_type section_begin_offset =
+	align_address(off, p->addralign());
+      section_size_type section_end_offset =
+	section_begin_offset + p->data_size();
+
+      // Check to see if we should group the previously seen sections.
+      switch (state)
+	{
+	case NO_GROUP:
+	  break;
+
+	case FINDING_STUB_SECTION:
+	  // Adding this section makes the group larger than GROUP_SIZE.
+	  if (section_end_offset - group_begin_offset >= group_size)
+	    {
+	      if (stubs_always_after_branch)
+		{
+		  gold_assert(group_end != this->input_sections().end());
+		  this->create_stub_group(group_begin, group_end, group_end,
+					  target, new_relaxed_sections,
+					  task);
+		  state = NO_GROUP;
+		}
+	      else
+		{
+		  // Input sections up to stub_group_size bytes after the stub
+		  // table can be handled by it too.
+		  state = HAS_STUB_SECTION;
+		  stub_table = group_end;
+		  stub_table_end_offset = group_end_offset;
+		}
+	    }
+	    break;
+
+	case HAS_STUB_SECTION:
+	  // Adding this section makes the post stub-section group larger
+	  // than GROUP_SIZE.
+	  gold_unreachable();
+	  // NOT SUPPORTED YET. For completeness only.
+	  if (section_end_offset - stub_table_end_offset >= group_size)
+	   {
+	     gold_assert(group_end != this->input_sections().end());
+	     this->create_stub_group(group_begin, group_end, stub_table,
+				     target, new_relaxed_sections, task);
+	     state = NO_GROUP;
+	   }
+	   break;
+
+	  default:
+	    gold_unreachable();
+	}
+
+      // If we see an input section and currently there is no group, start
+      // a new one.  Skip any empty sections.  We look at the data size
+      // instead of calling p->relobj()->section_size() to avoid locking.
+      if ((p->is_input_section() || p->is_relaxed_input_section())
+	  && (p->data_size() != 0))
+	{
+	  if (state == NO_GROUP)
+	    {
+	      state = FINDING_STUB_SECTION;
+	      group_begin = p;
+	      group_begin_offset = section_begin_offset;
+	    }
+
+	  // Keep track of the last input section seen.
+	  group_end = p;
+	  group_end_offset = section_end_offset;
+	}
+
+      off = section_end_offset;
+    }
+
+  // Create a stub group for any ungrouped sections.
+  if (state == FINDING_STUB_SECTION || state == HAS_STUB_SECTION)
+    {
+      gold_assert(group_end != this->input_sections().end());
+      this->create_stub_group(group_begin, group_end,
+			      (state == FINDING_STUB_SECTION
+			       ? group_end
+			       : stub_table),
+			      target, new_relaxed_sections, task);
+    }
+
+  if (!new_relaxed_sections.empty())
+    this->convert_input_sections_to_relaxed_sections(new_relaxed_sections);
+
+  // Update the section offsets
+  for (size_t i = 0; i < new_relaxed_sections.size(); ++i)
+    {
+      The_aarch64_relobj* relobj = static_cast<The_aarch64_relobj*>(
+	  new_relaxed_sections[i]->relobj());
+      unsigned int shndx = new_relaxed_sections[i]->shndx();
+      // Tell AArch64_relobj that this input section is converted.
+      relobj->convert_input_section_to_relaxed_section(shndx);
+    }
+}  // End of AArch64_output_section::group_sections
 
 
 AArch64_reloc_property_table* aarch64_reloc_property_table = NULL;
@@ -309,10 +1627,23 @@ template<int size, bool big_endian>
 class Target_aarch64 : public Sized_target<size, big_endian>
 {
  public:
-  typedef Target_aarch64<size,big_endian> This;
+  typedef Target_aarch64<size, big_endian> This;
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>
       Reloc_section;
+  typedef Relocate_info<size, big_endian> The_relocate_info;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  typedef AArch64_relobj<size, big_endian> The_aarch64_relobj;
+  typedef Reloc_stub<size, big_endian> The_reloc_stub;
+  typedef typename The_reloc_stub::Stub_type The_reloc_stub_type;
+  typedef typename Reloc_stub<size, big_endian>::Key The_reloc_stub_key;
+  typedef Stub_table<size, big_endian> The_stub_table;
+  typedef std::vector<The_stub_table*> Stub_table_list;
+  typedef typename Stub_table_list::iterator Stub_table_iterator;
+  typedef AArch64_input_section<size, big_endian> The_aarch64_input_section;
+  typedef AArch64_output_section<size, big_endian> The_aarch64_output_section;
+  typedef Unordered_map<Section_id,
+			AArch64_input_section<size, big_endian>*,
+			Section_id_hash> AArch64_input_section_map;
   const static int TCB_SIZE = size / 8 * 2;
 
   Target_aarch64(const Target::Target_info* info = &aarch64_info)
@@ -320,8 +1651,9 @@ class Target_aarch64 : public Sized_target<size, big_endian>
       got_(NULL), plt_(NULL), got_plt_(NULL), got_irelative_(NULL),
       got_tlsdesc_(NULL), global_offset_table_(NULL), rela_dyn_(NULL),
       rela_irelative_(NULL), copy_relocs_(elfcpp::R_AARCH64_COPY),
-      got_mod_index_offset_(-1U), tlsdesc_reloc_info_(),
-      tls_base_symbol_defined_(false)
+      got_mod_index_offset_(-1U),
+      tlsdesc_reloc_info_(), tls_base_symbol_defined_(false),
+      stub_tables_(), aarch64_input_section_map_()
   { }
 
   // Scan the relocations to determine unreferenced sections for
@@ -442,8 +1774,58 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   unsigned int
   plt_entry_size() const;
 
+  // Create a stub table.
+  The_stub_table*
+  new_stub_table(The_aarch64_input_section*);
+
+  // Create an aarch64 input section.
+  The_aarch64_input_section*
+  new_aarch64_input_section(Relobj*, unsigned int);
+
+  // Find an aarch64 input section instance for a given OBJ and SHNDX.
+  The_aarch64_input_section*
+  find_aarch64_input_section(Relobj*, unsigned int) const;
+
+  // Return the thread control block size.
   unsigned int
   tcb_size() const { return This::TCB_SIZE; }
+
+  // Scan a section for stub generation.
+  void
+  scan_section_for_stubs(const Relocate_info<size, big_endian>*, unsigned int,
+			 const unsigned char*, size_t, Output_section*,
+			 bool, const unsigned char*,
+			 Address,
+			 section_size_type);
+
+  // Scan a relocation section for stub.
+  template<int sh_type>
+  void
+  scan_reloc_section_for_stubs(
+      const The_relocate_info* relinfo,
+      const unsigned char* prelocs,
+      size_t reloc_count,
+      Output_section* output_section,
+      bool needs_special_offset_handling,
+      const unsigned char* view,
+      Address view_address,
+      section_size_type);
+
+  // Relocate a single stub.
+  void
+  relocate_stub(The_reloc_stub*, const Relocate_info<size, big_endian>*,
+		Output_section*, unsigned char*, Address,
+		section_size_type);
+
+  // Get the default AArch64 target.
+  static This*
+  current_target()
+  {
+    gold_assert(parameters->target().machine_code() == elfcpp::EM_AARCH64
+		&& parameters->target().get_size() == size
+		&& parameters->target().is_big_endian() == big_endian);
+    return static_cast<This*>(parameters->sized_target<size, big_endian>());
+  }
 
  protected:
   void
@@ -472,6 +1854,12 @@ class Target_aarch64 : public Sized_target<size, big_endian>
       layout, got, got_plt, got_irelative);
   }
 
+
+  // do_make_elf_object to override the same function in the base class.
+  Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		     const elfcpp::Ehdr<size, big_endian>&);
+
   Output_data_plt_aarch64<size, big_endian>*
   make_data_plt(Layout* layout,
 		Output_data_got_aarch64<size, big_endian>* got,
@@ -480,6 +1868,35 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   {
     return this->do_make_data_plt(layout, got, got_plt, got_irelative);
   }
+
+  // We only need to generate stubs, and hence perform relaxation if we are
+  // not doing relocatable linking.
+  virtual bool
+  do_may_relax() const
+  { return !parameters->options().relocatable(); }
+
+  // Relaxation hook.  This is where we do stub generation.
+  virtual bool
+  do_relax(int, const Input_objects*, Symbol_table*, Layout*, const Task*);
+
+  void
+  group_sections(Layout* layout,
+		 section_size_type group_size,
+		 bool stubs_always_after_branch,
+		 const Task* task);
+
+  void
+  scan_reloc_for_stub(const The_relocate_info*, unsigned int,
+		      const Sized_symbol<size>*, unsigned int,
+		      const Symbol_value<size>*,
+		      typename elfcpp::Elf_types<size>::Elf_Swxword,
+		      Address Elf_Addr);
+
+  // Make an output section.
+  Output_section*
+  do_make_output_section(const char* name, elfcpp::Elf_Word type,
+			 elfcpp::Elf_Xword flags)
+  { return new The_aarch64_output_section(name, type, flags); }
 
  private:
   // The class which scans relocations.
@@ -569,8 +1986,8 @@ class Target_aarch64 : public Sized_target<size, big_endian>
 	     section_size_type);
 
   private:
-    inline typename AArch64_relocate_functions<size,big_endian>::Status
-    relocate_tls(const Relocate_info<size,big_endian>*,
+    inline typename AArch64_relocate_functions<size, big_endian>::Status
+    relocate_tls(const Relocate_info<size, big_endian>*,
 		 Target_aarch64<size, big_endian>*,
 		 size_t,
 		 const elfcpp::Rela<size, big_endian>&,
@@ -579,36 +1996,36 @@ class Target_aarch64 : public Sized_target<size, big_endian>
 		 unsigned char*,
 		 typename elfcpp::Elf_types<size>::Elf_Addr);
 
-    inline typename AArch64_relocate_functions<size,big_endian>::Status
+    inline typename AArch64_relocate_functions<size, big_endian>::Status
     tls_gd_to_le(
-		 const Relocate_info<size,big_endian>*,
+		 const Relocate_info<size, big_endian>*,
 		 Target_aarch64<size, big_endian>*,
 		 const elfcpp::Rela<size, big_endian>&,
 		 unsigned int,
 		 unsigned char*,
 		 const Symbol_value<size>*);
 
-    inline typename AArch64_relocate_functions<size,big_endian>::Status
+    inline typename AArch64_relocate_functions<size, big_endian>::Status
     tls_ie_to_le(
-		 const Relocate_info<size,big_endian>*,
+		 const Relocate_info<size, big_endian>*,
 		 Target_aarch64<size, big_endian>*,
 		 const elfcpp::Rela<size, big_endian>&,
 		 unsigned int,
 		 unsigned char*,
 		 const Symbol_value<size>*);
 
-    inline typename AArch64_relocate_functions<size,big_endian>::Status
+    inline typename AArch64_relocate_functions<size, big_endian>::Status
     tls_desc_gd_to_le(
-		 const Relocate_info<size,big_endian>*,
+		 const Relocate_info<size, big_endian>*,
 		 Target_aarch64<size, big_endian>*,
 		 const elfcpp::Rela<size, big_endian>&,
 		 unsigned int,
 		 unsigned char*,
 		 const Symbol_value<size>*);
 
-    inline typename AArch64_relocate_functions<size,big_endian>::Status
+    inline typename AArch64_relocate_functions<size, big_endian>::Status
     tls_desc_gd_to_ie(
-		 const Relocate_info<size,big_endian>*,
+		 const Relocate_info<size, big_endian>*,
 		 Target_aarch64<size, big_endian>*,
 		 const elfcpp::Rela<size, big_endian>&,
 		 unsigned int,
@@ -773,6 +2190,9 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   std::vector<Tlsdesc_info> tlsdesc_reloc_info_;
   // True if the _TLS_MODULE_BASE_ symbol has been defined.
   bool tls_base_symbol_defined_;
+  // List of stub_tables
+  Stub_table_list stub_tables_;
+  AArch64_input_section_map aarch64_input_section_map_;
 };  // End of Target_aarch64
 
 
@@ -1019,6 +2439,407 @@ Target_aarch64<size, big_endian>::rela_irelative_section(Layout* layout)
 		  == this->rela_irelative_->output_section());
     }
   return this->rela_irelative_;
+}
+
+
+// do_make_elf_object to override the same function in the base class.  We need
+// to use a target-specific sub-class of Sized_relobj_file<size, big_endian> to
+// store backend specific information. Hence we need to have our own ELF object
+// creation.
+
+template<int size, bool big_endian>
+Object*
+Target_aarch64<size, big_endian>::do_make_elf_object(
+    const std::string& name,
+    Input_file* input_file,
+    off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
+{
+  int et = ehdr.get_e_type();
+  // ET_EXEC files are valid input for --just-symbols/-R,
+  // and we treat them as relocatable objects.
+  if (et == elfcpp::ET_EXEC && input_file->just_symbols())
+    return Sized_target<size, big_endian>::do_make_elf_object(
+	name, input_file, offset, ehdr);
+  else if (et == elfcpp::ET_REL)
+    {
+      AArch64_relobj<size, big_endian>* obj =
+	new AArch64_relobj<size, big_endian>(name, input_file, offset, ehdr);
+      obj->setup();
+      return obj;
+    }
+  else if (et == elfcpp::ET_DYN)
+    {
+      // Keep base implementation.
+      Sized_dynobj<size, big_endian>* obj =
+	  new Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr);
+      obj->setup();
+      return obj;
+    }
+  else
+    {
+      gold_error(_("%s: unsupported ELF file type %d"),
+		 name.c_str(), et);
+      return NULL;
+    }
+}
+
+
+// Scan a relocation for stub generation.
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::scan_reloc_for_stub(
+    const Relocate_info<size, big_endian>* relinfo,
+    unsigned int r_type,
+    const Sized_symbol<size>* gsym,
+    unsigned int r_sym,
+    const Symbol_value<size>* psymval,
+    typename elfcpp::Elf_types<size>::Elf_Swxword addend,
+    Address address)
+{
+  const AArch64_relobj<size, big_endian>* aarch64_relobj =
+      static_cast<AArch64_relobj<size, big_endian>*>(relinfo->object);
+
+  Symbol_value<size> symval;
+  if (gsym != NULL)
+    {
+      const AArch64_reloc_property* arp = aarch64_reloc_property_table->
+	get_reloc_property(r_type);
+      if (gsym->use_plt_offset(arp->reference_flags()))
+	{
+	  // This uses a PLT, change the symbol value.
+	  symval.set_output_value(this->plt_section()->address()
+				  + gsym->plt_offset());
+	  psymval = &symval;
+	}
+      else if (gsym->is_undefined())
+	// There is no need to generate a stub symbol is undefined.
+	return;
+    }
+
+  // Get the symbol value.
+  typename Symbol_value<size>::Value value = psymval->value(aarch64_relobj, 0);
+
+  // Owing to pipelining, the PC relative branches below actually skip
+  // two instructions when the branch offset is 0.
+  Address destination = static_cast<Address>(-1);
+  switch (r_type)
+    {
+    case elfcpp::R_AARCH64_CALL26:
+    case elfcpp::R_AARCH64_JUMP26:
+      destination = value + addend;
+      break;
+    default:
+      gold_assert(false);
+    }
+
+  typename The_reloc_stub::Stub_type stub_type = The_reloc_stub::
+      stub_type_for_reloc(r_type, address, destination);
+  if (stub_type == The_reloc_stub::ST_NONE)
+    return ;
+
+  The_stub_table* stub_table = aarch64_relobj->stub_table(relinfo->data_shndx);
+  gold_assert(stub_table != NULL);
+
+  The_reloc_stub_key key(stub_type, gsym, aarch64_relobj, r_sym, addend);
+  The_reloc_stub* stub = stub_table->find_reloc_stub(key);
+  if (stub == NULL)
+    {
+      stub = new The_reloc_stub(stub_type);
+      stub_table->add_reloc_stub(stub, key);
+    }
+  stub->set_destination_address(destination);
+}  // End of Target_aarch64::scan_reloc_for_stub
+
+
+// This function scans a relocation section for stub generation.
+// The template parameter Relocate must be a class type which provides
+// a single function, relocate(), which implements the machine
+// specific part of a relocation.
+
+// BIG_ENDIAN is the endianness of the data.  SH_TYPE is the section type:
+// SHT_REL or SHT_RELA.
+
+// PRELOCS points to the relocation data.  RELOC_COUNT is the number
+// of relocs.  OUTPUT_SECTION is the output section.
+// NEEDS_SPECIAL_OFFSET_HANDLING is true if input offsets need to be
+// mapped to output offsets.
+
+// VIEW is the section data, VIEW_ADDRESS is its memory address, and
+// VIEW_SIZE is the size.  These refer to the input section, unless
+// NEEDS_SPECIAL_OFFSET_HANDLING is true, in which case they refer to
+// the output section.
+
+template<int size, bool big_endian>
+template<int sh_type>
+void inline
+Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
+    const Relocate_info<size, big_endian>* relinfo,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* /*output_section*/,
+    bool /*needs_special_offset_handling*/,
+    const unsigned char* /*view*/,
+    Address view_address,
+    section_size_type)
+{
+  typedef typename Reloc_types<sh_type,size,big_endian>::Reloc Reltype;
+
+  const int reloc_size =
+      Reloc_types<sh_type,size,big_endian>::reloc_size;
+  AArch64_relobj<size, big_endian>* object =
+      static_cast<AArch64_relobj<size, big_endian>*>(relinfo->object);
+  unsigned int local_count = object->local_symbol_count();
+
+  gold::Default_comdat_behavior default_comdat_behavior;
+  Comdat_behavior comdat_behavior = CB_UNDETERMINED;
+
+  for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
+    {
+      Reltype reloc(prelocs);
+      typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
+      unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+      unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
+      if (r_type != elfcpp::R_AARCH64_CALL26
+	  && r_type != elfcpp::R_AARCH64_JUMP26)
+	continue;
+
+      section_offset_type offset =
+	  convert_to_section_size_type(reloc.get_r_offset());
+
+      // Get the addend.
+      typename elfcpp::Elf_types<size>::Elf_Swxword addend =
+	  reloc.get_r_addend();
+
+      const Sized_symbol<size>* sym;
+      Symbol_value<size> symval;
+      const Symbol_value<size> *psymval;
+      bool is_defined_in_discarded_section;
+      unsigned int shndx;
+      if (r_sym < local_count)
+	{
+	  sym = NULL;
+	  psymval = object->local_symbol(r_sym);
+
+	  // If the local symbol belongs to a section we are discarding,
+	  // and that section is a debug section, try to find the
+	  // corresponding kept section and map this symbol to its
+	  // counterpart in the kept section.  The symbol must not
+	  // correspond to a section we are folding.
+	  bool is_ordinary;
+	  shndx = psymval->input_shndx(&is_ordinary);
+	  is_defined_in_discarded_section =
+	    (is_ordinary
+	     && shndx != elfcpp::SHN_UNDEF
+	     && !object->is_section_included(shndx)
+	     && !relinfo->symtab->is_section_folded(object, shndx));
+
+	  // We need to compute the would-be final value of this local
+	  // symbol.
+	  if (!is_defined_in_discarded_section)
+	    {
+	      typedef Sized_relobj_file<size, big_endian> ObjType;
+	      typename ObjType::Compute_final_local_value_status status =
+		object->compute_final_local_value(r_sym, psymval, &symval,
+						  relinfo->symtab);
+	      if (status == ObjType::CFLV_OK)
+		{
+		  // Currently we cannot handle a branch to a target in
+		  // a merged section.  If this is the case, issue an error
+		  // and also free the merge symbol value.
+		  if (!symval.has_output_value())
+		    {
+		      const std::string& section_name =
+			object->section_name(shndx);
+		      object->error(_("cannot handle branch to local %u "
+					  "in a merged section %s"),
+					r_sym, section_name.c_str());
+		    }
+		  psymval = &symval;
+		}
+	      else
+		{
+		  // We cannot determine the final value.
+		  continue;
+		}
+	    }
+	}
+      else
+	{
+	  const Symbol* gsym;
+	  gsym = object->global_symbol(r_sym);
+	  gold_assert(gsym != NULL);
+	  if (gsym->is_forwarder())
+	    gsym = relinfo->symtab->resolve_forwards(gsym);
+
+	  sym = static_cast<const Sized_symbol<size>*>(gsym);
+	  if (sym->has_symtab_index() && sym->symtab_index() != -1U)
+	    symval.set_output_symtab_index(sym->symtab_index());
+	  else
+	    symval.set_no_output_symtab_entry();
+
+	  // We need to compute the would-be final value of this global
+	  // symbol.
+	  const Symbol_table* symtab = relinfo->symtab;
+	  const Sized_symbol<size>* sized_symbol =
+	      symtab->get_sized_symbol<size>(gsym);
+	  Symbol_table::Compute_final_value_status status;
+	  typename elfcpp::Elf_types<size>::Elf_Addr value =
+	      symtab->compute_final_value<size>(sized_symbol, &status);
+
+	  // Skip this if the symbol has not output section.
+	  if (status == Symbol_table::CFVS_NO_OUTPUT_SECTION)
+	    continue;
+	  symval.set_output_value(value);
+
+	  if (gsym->type() == elfcpp::STT_TLS)
+	    symval.set_is_tls_symbol();
+	  else if (gsym->type() == elfcpp::STT_GNU_IFUNC)
+	    symval.set_is_ifunc_symbol();
+	  psymval = &symval;
+
+	  is_defined_in_discarded_section =
+	      (gsym->is_defined_in_discarded_section()
+	       && gsym->is_undefined());
+	  shndx = 0;
+	}
+
+      Symbol_value<size> symval2;
+      if (is_defined_in_discarded_section)
+	{
+	  if (comdat_behavior == CB_UNDETERMINED)
+	    {
+	      std::string name = object->section_name(relinfo->data_shndx);
+	      comdat_behavior = default_comdat_behavior.get(name.c_str());
+	    }
+	  if (comdat_behavior == CB_PRETEND)
+	    {
+	      bool found;
+	      typename elfcpp::Elf_types<size>::Elf_Addr value =
+		object->map_to_kept_section(shndx, &found);
+	      if (found)
+		symval2.set_output_value(value + psymval->input_value());
+	      else
+		symval2.set_output_value(0);
+	    }
+	  else
+	    {
+	      if (comdat_behavior == CB_WARNING)
+		gold_warning_at_location(relinfo, i, offset,
+					 _("relocation refers to discarded "
+					   "section"));
+	      symval2.set_output_value(0);
+	    }
+	  symval2.set_no_output_symtab_entry();
+	  psymval = &symval2;
+	}
+
+      // If symbol is a section symbol, we don't know the actual type of
+      // destination.  Give up.
+      if (psymval->is_section_symbol())
+	continue;
+
+      this->scan_reloc_for_stub(relinfo, r_type, sym, r_sym, psymval,
+				addend, view_address + offset);
+    }  // End of iterating relocs in a section
+}  // End of Target_aarch64::scan_reloc_section_for_stubs
+
+
+// Scan an input section for stub generation.
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::scan_section_for_stubs(
+    const Relocate_info<size, big_endian>* relinfo,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    const unsigned char* view,
+    Address view_address,
+    section_size_type view_size)
+{
+  gold_assert(sh_type == elfcpp::SHT_RELA);
+  this->scan_reloc_section_for_stubs<elfcpp::SHT_RELA>(
+      relinfo,
+      prelocs,
+      reloc_count,
+      output_section,
+      needs_special_offset_handling,
+      view,
+      view_address,
+      view_size);
+}
+
+
+// Relocate a single stub.
+
+template<int size, bool big_endian>
+void Target_aarch64<size, big_endian>::
+relocate_stub(The_reloc_stub* stub,
+	      const The_relocate_info*,
+	      Output_section*,
+	      unsigned char* view,
+	      Address address,
+	      section_size_type)
+{
+  typedef AArch64_relocate_functions<size, big_endian> The_reloc_functions;
+  typedef typename The_reloc_functions::Status The_reloc_functions_status;
+  typedef typename elfcpp::Swap<32,big_endian>::Valtype Insntype;
+
+  Insntype* ip = reinterpret_cast<Insntype*>(view);
+  int insn_number = stub->stub_insn_number();
+  const uint32_t* insns = stub->stub_insns();
+  // Check the insns are really those stub insns.
+  for (int i = 0; i < insn_number; ++i)
+    {
+      Insntype insn = elfcpp::Swap<32,big_endian>::readval(ip + i);
+      gold_assert(((uint32_t)insn == insns[i+1]));
+    }
+
+  Address dest = stub->destination_address();
+
+  switch(stub->stub_type())
+    {
+    case The_reloc_stub::ST_ADRP_BRANCH:
+      {
+	// 1st reloc is ADR_PREL_PG_HI21
+	The_reloc_functions_status status =
+	    The_reloc_functions::adrp(view, dest, address);
+	// An error should never arise in the above step. If so, please
+	// check 'aarch64_valid_for_adrp_p'.
+	gold_assert(status == The_reloc_functions::STATUS_OKAY);
+
+	// 2nd reloc is ADD_ABS_LO12_NC
+	const AArch64_reloc_property* arp =
+	    aarch64_reloc_property_table->get_reloc_property(
+		elfcpp::R_AARCH64_ADD_ABS_LO12_NC);
+	gold_assert(arp != NULL);
+	status = The_reloc_functions::template
+	    rela_general<32>(view + 4, dest, 0, arp);
+	// An error should never arise, it is an "_NC" relocation.
+	gold_assert(status == The_reloc_functions::STATUS_OKAY);
+      }
+      break;
+
+    case The_reloc_stub::ST_LONG_BRANCH_ABS:
+      // 1st reloc is R_AARCH64_PREL64, at offset 8
+      elfcpp::Swap<64,big_endian>::writeval(view + 8, dest);
+      break;
+
+    case The_reloc_stub::ST_LONG_BRANCH_PCREL:
+      {
+	// "PC" calculation is the 2nd insn in the stub.
+	uint64_t offset = dest - (address + 4);
+	// Offset is placed at offset 4 and 5.
+	elfcpp::Swap<64,big_endian>::writeval(view + 16, offset);
+      }
+      break;
+
+    default:
+      gold_assert(false);
+    }
 }
 
 
@@ -1477,6 +3298,7 @@ Output_data_plt_aarch64_standard<32, false>::
   0xd503201f,	/* nop */
 };
 
+
 template<>
 const uint32_t
 Output_data_plt_aarch64_standard<32, true>::
@@ -1492,6 +3314,7 @@ Output_data_plt_aarch64_standard<32, true>::
   0xd503201f,	/* nop */
 };
 
+
 template<>
 const uint32_t
 Output_data_plt_aarch64_standard<64, false>::
@@ -1507,6 +3330,7 @@ Output_data_plt_aarch64_standard<64, false>::
   0xd503201f,	/* nop */
 };
 
+
 template<>
 const uint32_t
 Output_data_plt_aarch64_standard<64, true>::
@@ -1521,6 +3345,7 @@ Output_data_plt_aarch64_standard<64, true>::
   0xd503201f,	/* nop */
   0xd503201f,	/* nop */
 };
+
 
 template<>
 const uint32_t
@@ -1533,6 +3358,7 @@ Output_data_plt_aarch64_standard<32, false>::
   0xd61f0220,	/* br x17.  */
 };
 
+
 template<>
 const uint32_t
 Output_data_plt_aarch64_standard<32, true>::
@@ -1543,6 +3369,7 @@ Output_data_plt_aarch64_standard<32, true>::
   0x11000210,	/* add w16, w16, :lo12:PLTGOT + n * 4  */
   0xd61f0220,	/* br x17.  */
 };
+
 
 template<>
 const uint32_t
@@ -1555,6 +3382,7 @@ Output_data_plt_aarch64_standard<64, false>::
   0xd61f0220,	/* br x17.  */
 };
 
+
 template<>
 const uint32_t
 Output_data_plt_aarch64_standard<64, true>::
@@ -1565,6 +3393,7 @@ Output_data_plt_aarch64_standard<64, true>::
   0x91000210,	/* add x16, x16, :lo12:PLTGOT + n * 8  */
   0xd61f0220,	/* br x17.  */
 };
+
 
 template<int size, bool big_endian>
 void
@@ -1604,6 +3433,7 @@ Output_data_plt_aarch64_standard<size, big_endian>::do_fill_first_plt_entry(
       ((this->first_plt_entry[3] & 0xffc003ff)
        | ((gotplt_2nd_ent & 0xfff) << 10)));
 }
+
 
 // Subsequent entries in the PLT for an executable.
 // FIXME: This only works for 64bit
@@ -1859,9 +3689,14 @@ class AArch64_relocate_functions
     STATUS_BAD_RELOC,	// Relocation cannot be applied.
   } Status;
 
- private:
   typedef AArch64_relocate_functions<size, big_endian> This;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  typedef Relocate_info<size, big_endian> The_relocate_info;
+  typedef AArch64_relobj<size, big_endian> The_aarch64_relobj;
+  typedef Reloc_stub<size, big_endian> The_reloc_stub;
+  typedef typename The_reloc_stub::Stub_type The_reloc_stub_type;
+  typedef Stub_table<size, big_endian> The_stub_table;
+  typedef elfcpp::Rela<size, big_endian> The_rela;
 
   // Return the page address of the address.
   // Page(address) = address & ~0xFFF
@@ -1872,6 +3707,7 @@ class AArch64_relocate_functions
     return (address & (~static_cast<Address>(0xFFF)));
   }
 
+ private:
   // Update instruction (pointed by view) with selected bits (immed).
   // val = (val & ~dst_mask) | (immed << doffset)
 
@@ -2042,7 +3878,7 @@ class AArch64_relocate_functions
 	       const AArch64_reloc_property* reloc_property)
   {
     // Calculate relocation.
-    Address x =	psymval->value(object, addend);
+    Address x = psymval->value(object, addend);
 
     // Select bits from X.
     Address immed = reloc_property->select_x_value(x);
@@ -2144,9 +3980,10 @@ class AArch64_relocate_functions
     Address address)
   {
     typename elfcpp::Swap<size, big_endian>::Valtype x =
-      This::Page(sa) - This::Page(address);
+	This::Page(sa) - This::Page(address);
     update_adr(view, x, NULL);
-    return (size == 64 && Bits<32>::has_overflow(x)
+    // Check -2^32 <= X < 2^32
+    return (size == 64 && Bits<33>::has_overflow((x))
 	    ? This::STATUS_OVERFLOW
 	    : This::STATUS_OKAY);
   }
@@ -2200,7 +4037,246 @@ class AArch64_relocate_functions
 	    : This::STATUS_OVERFLOW);
   }
 
+  static inline bool
+  maybe_apply_stub(unsigned int,
+		   const The_relocate_info*,
+		   const The_rela&,
+		   unsigned char*,
+		   Address,
+		   const Sized_symbol<size>*,
+		   const Symbol_value<size>*,
+		   const Sized_relobj_file<size, big_endian>*);
+
 };  // End of AArch64_relocate_functions
+
+
+// For a certain relocation type (usually jump/branch), test to see if the
+// destination needs a stub to fulfil. If so, re-route the destination of the
+// original instruction to the stub, note, at this time, the stub has already
+// been generated.
+
+template<int size, bool big_endian>
+bool
+AArch64_relocate_functions<size, big_endian>::
+maybe_apply_stub(unsigned int r_type,
+		 const The_relocate_info* relinfo,
+		 const The_rela& rela,
+		 unsigned char* view,
+		 Address address,
+		 const Sized_symbol<size>* gsym,
+		 const Symbol_value<size>* psymval,
+		 const Sized_relobj_file<size, big_endian>* object)
+{
+  if (parameters->options().relocatable())
+    return false;
+
+  typename elfcpp::Elf_types<size>::Elf_Swxword addend = rela.get_r_addend();
+  Address branch_target = psymval->value(object, 0) + addend;
+  The_reloc_stub_type stub_type = The_reloc_stub::
+    stub_type_for_reloc(r_type, address, branch_target);
+  if (stub_type == The_reloc_stub::ST_NONE)
+    return false;
+
+  const The_aarch64_relobj* aarch64_relobj =
+      static_cast<const The_aarch64_relobj*>(object);
+  The_stub_table* stub_table = aarch64_relobj->stub_table(relinfo->data_shndx);
+  gold_assert(stub_table != NULL);
+
+  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+  typename The_reloc_stub::Key stub_key(stub_type, gsym, object, r_sym, addend);
+  The_reloc_stub* stub = stub_table->find_reloc_stub(stub_key);
+  gold_assert(stub != NULL);
+
+  Address new_branch_target = stub_table->address() + stub->offset();
+  typename elfcpp::Swap<size, big_endian>::Valtype branch_offset =
+      new_branch_target - address;
+  const AArch64_reloc_property* arp =
+      aarch64_reloc_property_table->get_reloc_property(r_type);
+  gold_assert(arp != NULL);
+  This::Status status = This::template
+      rela_general<32>(view, branch_offset, 0, arp);
+  if (status != This::STATUS_OKAY)
+    gold_error(_("Stub is too far away, try a smaller value "
+		 "for '--stub-group-size'. For example, 0x2000000."));
+  return true;
+}
+
+
+// Group input sections for stub generation.
+//
+// We group input sections in an output section so that the total size,
+// including any padding space due to alignment is smaller than GROUP_SIZE
+// unless the only input section in group is bigger than GROUP_SIZE already.
+// Then an ARM stub table is created to follow the last input section
+// in group.  For each group an ARM stub table is created an is placed
+// after the last group.  If STUB_ALWAYS_AFTER_BRANCH is false, we further
+// extend the group after the stub table.
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::group_sections(
+    Layout* layout,
+    section_size_type group_size,
+    bool stubs_always_after_branch,
+    const Task* task)
+{
+  // Group input sections and insert stub table
+  Layout::Section_list section_list;
+  layout->get_executable_sections(&section_list);
+  for (Layout::Section_list::const_iterator p = section_list.begin();
+       p != section_list.end();
+       ++p)
+    {
+      AArch64_output_section<size, big_endian>* output_section =
+	  static_cast<AArch64_output_section<size, big_endian>*>(*p);
+      output_section->group_sections(group_size, stubs_always_after_branch,
+				     this, task);
+    }
+}
+
+
+// Find the AArch64_input_section object corresponding to the SHNDX-th input
+// section of RELOBJ.
+
+template<int size, bool big_endian>
+AArch64_input_section<size, big_endian>*
+Target_aarch64<size, big_endian>::find_aarch64_input_section(
+    Relobj* relobj, unsigned int shndx) const
+{
+  Section_id sid(relobj, shndx);
+  typename AArch64_input_section_map::const_iterator p =
+    this->aarch64_input_section_map_.find(sid);
+  return (p != this->aarch64_input_section_map_.end()) ? p->second : NULL;
+}
+
+
+// Make a new AArch64_input_section object.
+
+template<int size, bool big_endian>
+AArch64_input_section<size, big_endian>*
+Target_aarch64<size, big_endian>::new_aarch64_input_section(
+    Relobj* relobj, unsigned int shndx)
+{
+  Section_id sid(relobj, shndx);
+
+  AArch64_input_section<size, big_endian>* input_section =
+      new AArch64_input_section<size, big_endian>(relobj, shndx);
+  input_section->init();
+
+  // Register new AArch64_input_section in map for look-up.
+  std::pair<typename AArch64_input_section_map::iterator,bool> ins =
+      this->aarch64_input_section_map_.insert(
+	  std::make_pair(sid, input_section));
+
+  // Make sure that it we have not created another AArch64_input_section
+  // for this input section already.
+  gold_assert(ins.second);
+
+  return input_section;
+}
+
+
+// Relaxation hook.  This is where we do stub generation.
+
+template<int size, bool big_endian>
+bool
+Target_aarch64<size, big_endian>::do_relax(
+    int pass,
+    const Input_objects* input_objects,
+    Symbol_table* symtab,
+    Layout* layout ,
+    const Task* task)
+{
+  gold_assert(!parameters->options().relocatable());
+  if (pass == 1)
+    {
+      section_size_type stub_group_size =
+	  parameters->options().stub_group_size();
+      if (stub_group_size == 1)
+	{
+	  // Leave room for 4096 4-byte stub entries. If we exceed that, then we
+	  // will fail to link.  The user will have to relink with an explicit
+	  // group size option.
+	  stub_group_size = The_reloc_stub::MAX_BRANCH_OFFSET - 4096 * 4;
+	}
+      group_sections(layout, stub_group_size, true, task);
+    }
+  else
+    {
+      // If this is not the first pass, addresses and file offsets have
+      // been reset at this point, set them here.
+      for (Stub_table_iterator sp = this->stub_tables_.begin();
+	   sp != this->stub_tables_.end(); ++sp)
+	{
+	  The_stub_table* stt = *sp;
+	  The_aarch64_input_section* owner = stt->owner();
+	  off_t off = align_address(owner->original_size(),
+				    stt->addralign());
+	  stt->set_address_and_file_offset(owner->address() + off,
+					   owner->offset() + off);
+	}
+    }
+
+  // Scan relocs for relocation stubs
+  for (Input_objects::Relobj_iterator op = input_objects->relobj_begin();
+       op != input_objects->relobj_end();
+       ++op)
+    {
+      The_aarch64_relobj* aarch64_relobj =
+	  static_cast<The_aarch64_relobj*>(*op);
+      // Lock the object so we can read from it.  This is only called
+      // single-threaded from Layout::finalize, so it is OK to lock.
+      Task_lock_obj<Object> tl(task, aarch64_relobj);
+      aarch64_relobj->scan_sections_for_stubs(this, symtab, layout);
+    }
+
+  bool any_stub_table_changed = false;
+  for (Stub_table_iterator siter = this->stub_tables_.begin();
+       siter != this->stub_tables_.end() && !any_stub_table_changed; ++siter)
+    {
+      The_stub_table* stub_table = *siter;
+      if (stub_table->update_data_size_changed_p())
+	{
+	  The_aarch64_input_section* owner = stub_table->owner();
+	  uint64_t address = owner->address();
+	  off_t offset = owner->offset();
+	  owner->reset_address_and_file_offset();
+	  owner->set_address_and_file_offset(address, offset);
+
+	  any_stub_table_changed = true;
+	}
+    }
+
+  // Do not continue relaxation.
+  bool continue_relaxation = any_stub_table_changed;
+  if (!continue_relaxation)
+    for (Stub_table_iterator sp = this->stub_tables_.begin();
+	 (sp != this->stub_tables_.end());
+	 ++sp)
+      (*sp)->finalize_stubs();
+
+  return continue_relaxation;
+}
+
+
+// Make a new Stub_table.
+
+template<int size, bool big_endian>
+Stub_table<size, big_endian>*
+Target_aarch64<size, big_endian>::new_stub_table(
+    AArch64_input_section<size, big_endian>* owner)
+{
+  Stub_table<size, big_endian>* stub_table =
+      new Stub_table<size, big_endian>(owner);
+  stub_table->set_address(align_address(
+      owner->address() + owner->data_size(), 8));
+  stub_table->set_file_offset(owner->offset() + owner->data_size());
+  stub_table->finalize_data_size();
+
+  this->stub_tables_.push_back(stub_table);
+
+  return stub_table;
+}
 
 
 template<int size, bool big_endian>
@@ -3121,13 +5197,14 @@ Target_aarch64<size, big_endian>::scan_relocs(
 // pointers across shared library boundaries, as described in the
 // processor specific ABI supplement.
 
-template<int size,bool big_endian>
+template<int size, bool big_endian>
 uint64_t
-Target_aarch64<size,big_endian>::do_dynsym_value(const Symbol* gsym) const
+Target_aarch64<size, big_endian>::do_dynsym_value(const Symbol* gsym) const
 {
   gold_assert(gsym->is_from_dynobj() && gsym->has_plt_offset());
   return this->plt_address_for_global(gsym);
 }
+
 
 // Finalize the sections.
 
@@ -3352,14 +5429,17 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_PREL64:
       reloc_status = Reloc::template pcrela_ua<64>(
 	view, object, psymval, addend, address, reloc_property);
+      break;
 
     case elfcpp::R_AARCH64_PREL32:
       reloc_status = Reloc::template pcrela_ua<32>(
 	view, object, psymval, addend, address, reloc_property);
+      break;
 
     case elfcpp::R_AARCH64_PREL16:
       reloc_status = Reloc::template pcrela_ua<16>(
 	view, object, psymval, addend, address, reloc_property);
+      break;
 
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21_NC:
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:
@@ -3391,10 +5471,14 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 	  // Return false to stop further processing this reloc.
 	  return false;
 	}
-	// Continue.
+      // Fallthrough
+    case elfcpp::R_AARCH64_JUMP26:
+      if (Reloc::maybe_apply_stub(r_type, relinfo, rela, view, address,
+				  gsym, psymval, object))
+	break;
+      // Fallthrough
     case elfcpp::R_AARCH64_TSTBR14:
     case elfcpp::R_AARCH64_CONDBR19:
-    case elfcpp::R_AARCH64_JUMP26:
       reloc_status = Reloc::template pcrela_general<32>(
 	view, object, psymval, addend, address, reloc_property);
       break;
@@ -3477,9 +5561,9 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 
 template<int size, bool big_endian>
 inline
-typename AArch64_relocate_functions<size,big_endian>::Status
+typename AArch64_relocate_functions<size, big_endian>::Status
 Target_aarch64<size, big_endian>::Relocate::relocate_tls(
-    const Relocate_info<size,big_endian>* relinfo,
+    const Relocate_info<size, big_endian>* relinfo,
     Target_aarch64<size, big_endian>* target,
     size_t relnum,
     const elfcpp::Rela<size, big_endian>& rela,
@@ -3488,7 +5572,7 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr address)
 {
-  typedef AArch64_relocate_functions<size,big_endian> aarch64_reloc_funcs;
+  typedef AArch64_relocate_functions<size, big_endian> aarch64_reloc_funcs;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
 
   Output_segment* tls_segment = relinfo->layout->tls_segment();
@@ -3503,7 +5587,7 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
   tls::Tls_optimization tlsopt = Target_aarch64<size, big_endian>::
       optimize_tls_reloc(is_final, r_type);
 
-  Sized_relobj_file<size,big_endian>* object = relinfo->object;
+  Sized_relobj_file<size, big_endian>* object = relinfo->object;
   int tls_got_offset_type;
   switch (r_type)
     {
@@ -3733,16 +5817,16 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 
 template<int size, bool big_endian>
 inline
-typename AArch64_relocate_functions<size,big_endian>::Status
+typename AArch64_relocate_functions<size, big_endian>::Status
 Target_aarch64<size, big_endian>::Relocate::tls_gd_to_le(
-	     const Relocate_info<size,big_endian>* relinfo,
+	     const Relocate_info<size, big_endian>* relinfo,
 	     Target_aarch64<size, big_endian>* target,
 	     const elfcpp::Rela<size, big_endian>& rela,
 	     unsigned int r_type,
 	     unsigned char* view,
 	     const Symbol_value<size>* psymval)
 {
-  typedef AArch64_relocate_functions<size,big_endian> aarch64_reloc_funcs;
+  typedef AArch64_relocate_functions<size, big_endian> aarch64_reloc_funcs;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insntype;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
 
@@ -3833,9 +5917,9 @@ Target_aarch64<size, big_endian>::Relocate::tls_gd_to_le(
 
 template<int size, bool big_endian>
 inline
-typename AArch64_relocate_functions<size,big_endian>::Status
+typename AArch64_relocate_functions<size, big_endian>::Status
 Target_aarch64<size, big_endian>::Relocate::tls_ie_to_le(
-	     const Relocate_info<size,big_endian>* relinfo,
+	     const Relocate_info<size, big_endian>* relinfo,
 	     Target_aarch64<size, big_endian>* target,
 	     const elfcpp::Rela<size, big_endian>& rela,
 	     unsigned int r_type,
@@ -3844,7 +5928,7 @@ Target_aarch64<size, big_endian>::Relocate::tls_ie_to_le(
 {
   typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insntype;
-  typedef AArch64_relocate_functions<size,big_endian> aarch64_reloc_funcs;
+  typedef AArch64_relocate_functions<size, big_endian> aarch64_reloc_funcs;
 
   AArch64_address value = psymval->value(relinfo->object, 0);
   Output_segment* tls_segment = relinfo->layout->tls_segment();
@@ -3888,9 +5972,9 @@ Target_aarch64<size, big_endian>::Relocate::tls_ie_to_le(
 
 template<int size, bool big_endian>
 inline
-typename AArch64_relocate_functions<size,big_endian>::Status
+typename AArch64_relocate_functions<size, big_endian>::Status
 Target_aarch64<size, big_endian>::Relocate::tls_desc_gd_to_le(
-	     const Relocate_info<size,big_endian>* relinfo,
+	     const Relocate_info<size, big_endian>* relinfo,
 	     Target_aarch64<size, big_endian>* target,
 	     const elfcpp::Rela<size, big_endian>& rela,
 	     unsigned int r_type,
@@ -3899,7 +5983,7 @@ Target_aarch64<size, big_endian>::Relocate::tls_desc_gd_to_le(
 {
   typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insntype;
-  typedef AArch64_relocate_functions<size,big_endian> aarch64_reloc_funcs;
+  typedef AArch64_relocate_functions<size, big_endian> aarch64_reloc_funcs;
 
   // TLSDESC-GD sequence is like:
   //   adrp  x0, :tlsdesc:v1
@@ -3961,9 +6045,9 @@ Target_aarch64<size, big_endian>::Relocate::tls_desc_gd_to_le(
 
 template<int size, bool big_endian>
 inline
-typename AArch64_relocate_functions<size,big_endian>::Status
+typename AArch64_relocate_functions<size, big_endian>::Status
 Target_aarch64<size, big_endian>::Relocate::tls_desc_gd_to_ie(
-	     const Relocate_info<size,big_endian>* /* relinfo */,
+	     const Relocate_info<size, big_endian>* /* relinfo */,
 	     Target_aarch64<size, big_endian>* /* target */,
 	     const elfcpp::Rela<size, big_endian>& rela,
 	     unsigned int r_type,
@@ -3973,7 +6057,7 @@ Target_aarch64<size, big_endian>::Relocate::tls_desc_gd_to_ie(
 	     typename elfcpp::Elf_types<size>::Elf_Addr address)
 {
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insntype;
-  typedef AArch64_relocate_functions<size,big_endian> aarch64_reloc_funcs;
+  typedef AArch64_relocate_functions<size, big_endian> aarch64_reloc_funcs;
 
   // TLSDESC-GD sequence is like:
   //   adrp  x0, :tlsdesc:v1
@@ -4142,6 +6226,7 @@ Target_aarch64<size, big_endian>::relocate_relocs(
     reloc_view,
     reloc_view_size);
 }
+
 
 // The selector for aarch64 object files.
 
