@@ -1,5 +1,19 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (delete_step_resume_breakpoint_callback): Delete.
+	(delete_thread_infrun_breakpoints): New function, with parts
+	salvaged from delete_step_resume_breakpoint_callback.
+	(delete_step_thread_step_resume_breakpoint): Delete.
+	(for_each_just_stopped_thread_callback_func): New typedef.
+	(for_each_just_stopped_thread): New function.
+	(delete_just_stopped_threads_infrun_breakpoints): New function.
+	(delete_step_thread_step_resume_breakpoint_cleanup): Rename to ...
+	(delete_just_stopped_threads_infrun_breakpoints_cleanup):
+	... this.  Adjust.
+	(wait_for_inferior, fetch_inferior_event): Adjust to renames.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (should_be_inserted): Don't insert watchpoints if
 	trying to step past a non-steppable watchpoint.
 	* gdbthread.h (struct thread_info) <stepping_over_watchpoint>: New

@@ -2846,54 +2846,61 @@ infrun_thread_thread_exit (struct thread_info *tp, int silent)
     nullify_last_target_wait_ptid ();
 }
 
-/* Callback for iterate_over_threads.  */
-
-static int
-delete_step_resume_breakpoint_callback (struct thread_info *info, void *data)
-{
-  if (is_exited (info->ptid))
-    return 0;
-
-  delete_step_resume_breakpoint (info);
-  delete_exception_resume_breakpoint (info);
-  return 0;
-}
-
-/* In all-stop, delete the step resume breakpoint of any thread that
-   had one.  In non-stop, delete the step resume breakpoint of the
-   thread that just stopped.  */
+/* Delete the step resume, single-step and longjmp/exception resume
+   breakpoints of TP.  */
 
 static void
-delete_step_thread_step_resume_breakpoint (void)
+delete_thread_infrun_breakpoints (struct thread_info *tp)
 {
-  if (!target_has_execution
-      || ptid_equal (inferior_ptid, null_ptid))
-    /* If the inferior has exited, we have already deleted the step
-       resume breakpoints out of GDB's lists.  */
+  delete_step_resume_breakpoint (tp);
+  delete_exception_resume_breakpoint (tp);
+}
+
+/* If the target still has execution, call FUNC for each thread that
+   just stopped.  In all-stop, that's all the non-exited threads; in
+   non-stop, that's the current thread, only.  */
+
+typedef void (*for_each_just_stopped_thread_callback_func)
+  (struct thread_info *tp);
+
+static void
+for_each_just_stopped_thread (for_each_just_stopped_thread_callback_func func)
+{
+  if (!target_has_execution || ptid_equal (inferior_ptid, null_ptid))
     return;
 
   if (non_stop)
     {
-      /* If in non-stop mode, only delete the step-resume or
-	 longjmp-resume breakpoint of the thread that just stopped
-	 stepping.  */
-      struct thread_info *tp = inferior_thread ();
-
-      delete_step_resume_breakpoint (tp);
-      delete_exception_resume_breakpoint (tp);
+      /* If in non-stop mode, only the current thread stopped.  */
+      func (inferior_thread ());
     }
   else
-    /* In all-stop mode, delete all step-resume and longjmp-resume
-       breakpoints of any thread that had them.  */
-    iterate_over_threads (delete_step_resume_breakpoint_callback, NULL);
+    {
+      struct thread_info *tp;
+
+      /* In all-stop mode, all threads have stopped.  */
+      ALL_NON_EXITED_THREADS (tp)
+        {
+	  func (tp);
+	}
+    }
+}
+
+/* Delete the step resume and longjmp/exception resume breakpoints of
+   the threads that just stopped.  */
+
+static void
+delete_just_stopped_threads_infrun_breakpoints (void)
+{
+  for_each_just_stopped_thread (delete_thread_infrun_breakpoints);
 }
 
 /* A cleanup wrapper.  */
 
 static void
-delete_step_thread_step_resume_breakpoint_cleanup (void *arg)
+delete_just_stopped_threads_infrun_breakpoints_cleanup (void *arg)
 {
-  delete_step_thread_step_resume_breakpoint ();
+  delete_just_stopped_threads_infrun_breakpoints ();
 }
 
 /* Pretty print the results of target_wait, for debugging purposes.  */
@@ -3028,8 +3035,9 @@ wait_for_inferior (void)
     fprintf_unfiltered
       (gdb_stdlog, "infrun: wait_for_inferior ()\n");
 
-  old_cleanups =
-    make_cleanup (delete_step_thread_step_resume_breakpoint_cleanup, NULL);
+  old_cleanups
+    = make_cleanup (delete_just_stopped_threads_infrun_breakpoints_cleanup,
+		    NULL);
 
   while (1)
     {
@@ -3151,7 +3159,7 @@ fetch_inferior_event (void *client_data)
     {
       struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
 
-      delete_step_thread_step_resume_breakpoint ();
+      delete_just_stopped_threads_infrun_breakpoints ();
 
       /* We may not find an inferior if this was a process exit.  */
       if (inf == NULL || inf->control.stop_soon == NO_STOP_QUIETLY)
