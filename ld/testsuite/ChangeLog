@@ -1,3 +1,7 @@
+2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lib/ld-lib.exp (check_sysroot_available): New proc.
+
 2014-10-04  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/eh1.s: Don't create FDEs with zero address ranges.
