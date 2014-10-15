@@ -1,6 +1,11 @@
 2014-10-28  Alan Modra  <amodra@gmail.com>
 
 	Apply trunk patches
+	2014-10-16  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc64_elf_before_check_relocs): Do .opd processing
+	even when output is not ppc64 ELF.  Remove redundant tests on
+	type of input bfd.
+
 	2014-10-15  Alan Modra  <amodra@gmail.com>
 	PR 17481
 	* aoutx.h (NAME (aout, find_nearest_line)): Add "discriminator_ptr"
