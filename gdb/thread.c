@@ -117,6 +117,15 @@ delete_exception_resume_breakpoint (struct thread_info *tp)
     delete_thread_breakpoint (&tp->control.exception_resume_breakpoint);
 }
 
+/* See gdbthread.h.  */
+
+void
+delete_single_step_breakpoints (struct thread_info *tp)
+{
+  if (tp != NULL)
+    delete_thread_breakpoint (&tp->control.single_step_breakpoints);
+}
+
 /* Delete the breakpoint pointed at by BP_P at the next stop, if
    there's one.  */
 
@@ -130,6 +139,27 @@ delete_at_next_stop (struct breakpoint **bp)
     }
 }
 
+/* See gdbthread.h.  */
+
+int
+thread_has_single_step_breakpoints_set (struct thread_info *tp)
+{
+  return tp->control.single_step_breakpoints != NULL;
+}
+
+/* See gdbthread.h.  */
+
+int
+thread_has_single_step_breakpoint_here (struct thread_info *tp,
+					struct address_space *aspace,
+					CORE_ADDR addr)
+{
+  struct breakpoint *ss_bps = tp->control.single_step_breakpoints;
+
+  return (ss_bps != NULL
+	  && breakpoint_has_location_inserted_here (ss_bps, aspace, addr));
+}
+
 static void
 clear_thread_inferior_resources (struct thread_info *tp)
 {
@@ -139,6 +169,7 @@ clear_thread_inferior_resources (struct thread_info *tp)
      be stopped at the moment.  */
   delete_at_next_stop (&tp->control.step_resume_breakpoint);
   delete_at_next_stop (&tp->control.exception_resume_breakpoint);
+  delete_at_next_stop (&tp->control.single_step_breakpoints);
 
   delete_longjmp_breakpoint_at_next_stop (tp->num);
 

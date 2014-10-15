@@ -325,11 +325,6 @@ static struct breakpoint_ops bkpt_probe_breakpoint_ops;
 /* Dynamic printf class type.  */
 struct breakpoint_ops dprintf_breakpoint_ops;
 
-/* One (or perhaps two) breakpoints used for software single
-   stepping.  */
-
-static struct breakpoint *single_step_breakpoints;
-
 /* The style in which to perform a dynamic printf.  This is a user
    option because different output options have different tradeoffs;
    if GDB does the printing, there is better error handling if there
@@ -15319,57 +15314,24 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
   struct symtab_and_line sal;
   CORE_ADDR pc = next_pc;
 
-  if (single_step_breakpoints == NULL)
-    single_step_breakpoints = new_single_step_breakpoint (tp->num, gdbarch);
+  if (tp->control.single_step_breakpoints == NULL)
+    {
+      tp->control.single_step_breakpoints
+	= new_single_step_breakpoint (tp->num, gdbarch);
+    }
 
   sal = find_pc_line (pc, 0);
   sal.pc = pc;
   sal.section = find_pc_overlay (pc);
   sal.explicit_pc = 1;
-  add_location_to_breakpoint (single_step_breakpoints, &sal);
+  add_location_to_breakpoint (tp->control.single_step_breakpoints, &sal);
 
   update_global_location_list (UGLL_INSERT);
 }
 
-/* Check if the breakpoints used for software single stepping
-   were inserted or not.  */
+/* See breakpoint.h.  */
 
 int
-single_step_breakpoints_inserted (void)
-{
-  return (single_step_breakpoints != NULL);
-}
-
-/* Remove and delete any breakpoints used for software single step.  */
-
-void
-remove_single_step_breakpoints (void)
-{
-  gdb_assert (single_step_breakpoints != NULL);
-
-  delete_breakpoint (single_step_breakpoints);
-
-  single_step_breakpoints = NULL;
-}
-
-/* Delete software single step breakpoints without removing them from
-   the inferior.  This is intended to be used if the inferior's address
-   space where they were inserted is already gone, e.g. after exit or
-   exec.  */
-
-void
-cancel_single_step_breakpoints (void)
-{
-  /* We don't really need to (or should) delete them here.  After an
-     exit, breakpoint_init_inferior deletes it.  After an exec,
-     update_breakpoints_after_exec does it.  Just clear our
-     reference.  */
-  single_step_breakpoints = NULL;
-}
-
-/* Check whether any location of BP is inserted at PC.  */
-
-static int
 breakpoint_has_location_inserted_here (struct breakpoint *bp,
 				       struct address_space *aspace,
 				       CORE_ADDR pc)
@@ -15391,9 +15353,15 @@ int
 single_step_breakpoint_inserted_here_p (struct address_space *aspace,
 					CORE_ADDR pc)
 {
-  return (single_step_breakpoints != NULL
-	  && breakpoint_has_location_inserted_here (single_step_breakpoints,
-						    aspace, pc));
+  struct breakpoint *bpt;
+
+  ALL_BREAKPOINTS (bpt)
+    {
+      if (bpt->type == bp_single_step
+	  && breakpoint_has_location_inserted_here (bpt, aspace, pc))
+	return 1;
+    }
+  return 0;
 }
 
 /* Returns 0 if 'bp' is NOT a syscall catchpoint,

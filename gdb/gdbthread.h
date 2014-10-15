@@ -52,6 +52,13 @@ struct thread_control_state
   /* Exception-resume breakpoint.  */
   struct breakpoint *exception_resume_breakpoint;
 
+  /* Breakpoints used for software single stepping.  Plural, because
+     it may have multiple locations.  E.g., if stepping over a
+     conditional branch instruction we can't decode the condition for,
+     we'll need to put a breakpoint at the branch destination, and
+     another at the instruction after the branch.  */
+  struct breakpoint *single_step_breakpoints;
+
   /* Range to single step within.
 
      If this is nonzero, respond to a single-step signal by continuing
@@ -284,6 +291,19 @@ extern void delete_step_resume_breakpoint (struct thread_info *);
 
 /* Delete an exception_resume_breakpoint from the thread database.  */
 extern void delete_exception_resume_breakpoint (struct thread_info *);
+
+/* Delete the single-step breakpoints of thread TP, if any.  */
+extern void delete_single_step_breakpoints (struct thread_info *tp);
+
+/* Check if the thread has software single stepping breakpoints
+   set.  */
+extern int thread_has_single_step_breakpoints_set (struct thread_info *tp);
+
+/* Check whether the thread has software single stepping breakpoints
+   set at PC.  */
+extern int thread_has_single_step_breakpoint_here (struct thread_info *tp,
+						   struct address_space *aspace,
+						   CORE_ADDR addr);
 
 /* Translate the integer thread id (GDB's homegrown id, not the system's)
    into a "pid" (which may be overloaded with extra thread information).  */

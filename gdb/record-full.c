@@ -960,7 +960,7 @@ record_full_resume (struct target_ops *ops, ptid_t ptid, int step,
           else
             {
               /* This arch support soft sigle step.  */
-              if (single_step_breakpoints_inserted ())
+              if (thread_has_single_step_breakpoints_set (inferior_thread ()))
                 {
                   /* This is a soft single step.  */
                   record_full_resume_step = 1;
@@ -1084,6 +1084,8 @@ record_full_wait_1 (struct target_ops *ops,
 
 	  while (1)
 	    {
+	      struct thread_info *tp;
+
 	      ret = ops->beneath->to_wait (ops->beneath, ptid, status, options);
 	      if (status->kind == TARGET_WAITKIND_IGNORE)
 		{
@@ -1094,8 +1096,8 @@ record_full_wait_1 (struct target_ops *ops,
 		  return ret;
 		}
 
-              if (single_step_breakpoints_inserted ())
-                remove_single_step_breakpoints ();
+	      ALL_NON_EXITED_THREADS (tp)
+                delete_single_step_breakpoints (tp);
 
 	      if (record_full_resume_step)
 		return ret;

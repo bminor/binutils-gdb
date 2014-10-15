@@ -1,5 +1,56 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (single_step_breakpoints): Delete global.
+	(insert_single_step_breakpoint): Adjust to store the breakpoint
+	pointer in the current thread.
+	(single_step_breakpoints_inserted, remove_single_step_breakpoints)
+	(cancel_single_step_breakpoints): Delete functions.
+	(breakpoint_has_location_inserted_here): Make extern.
+	(single_step_breakpoint_inserted_here_p): Adjust to walk the
+	breakpoint list.
+	* breakpoint.h (breakpoint_has_location_inserted_here): New
+	declaration.
+	(single_step_breakpoints_inserted, remove_single_step_breakpoints)
+	(cancel_single_step_breakpoints): Remove declarations.
+	* gdbthread.h (struct thread_control_state)
+	<single_step_breakpoints>: New field.
+	(delete_single_step_breakpoints)
+	(thread_has_single_step_breakpoints_set)
+	(thread_has_single_step_breakpoint_here): New declarations.
+	* infrun.c (follow_exec): Also clear the single-step breakpoints.
+	(singlestep_breakpoints_inserted_p, singlestep_ptid)
+	(singlestep_pc): Delete globals.
+	(infrun_thread_ptid_changed): Remove references to removed
+	globals.
+	(resume_cleanups): Delete the current thread's single-step
+	breakpoints.
+	(maybe_software_singlestep): Remove references to removed globals.
+	(resume): Adjust to use thread_has_single_step_breakpoints_set and
+	delete_single_step_breakpoints.
+	(init_wait_for_inferior): Remove references to removed globals.
+	(delete_thread_infrun_breakpoints): Delete the thread's
+	single-step breakpoints too.
+	(delete_just_stopped_threads_infrun_breakpoints): Don't delete
+	single-step breakpoints here.
+	(delete_stopped_threads_single_step_breakpoints): New function.
+	(adjust_pc_after_break): Adjust to use
+	thread_has_single_step_breakpoints_set.
+	(handle_inferior_event): Remove references to removed globals.
+	Use delete_stopped_threads_single_step_breakpoints.
+	(handle_signal_stop): Adjust to per-thread single-step
+	breakpoints.  Swap test order to do cheaper tests first.
+	(switch_back_to_stepped_thread): Extend debug output.  Remove
+	references to removed globals.
+	* record-full.c (record_full_wait_1): Adjust to per-thread
+	single-step breakpoints.
+	* thread.c (delete_single_step_breakpoints)
+	(thread_has_single_step_breakpoints_set)
+	(thread_has_single_step_breakpoint_here): New functions.
+	(clear_thread_inferior_resources): Also delete the thread's
+	single-step breakpoints.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* thread.c (delete_thread_breakpoint): New function.
 	(delete_step_resume_breakpoint)
 	(delete_exception_resume_breakpoint): Use it.

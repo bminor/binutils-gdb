@@ -1082,6 +1082,7 @@ follow_exec (ptid_t pid, char *execd_pathname)
      statement through an exec().  */
   th->control.step_resume_breakpoint = NULL;
   th->control.exception_resume_breakpoint = NULL;
+  th->control.single_step_breakpoints = NULL;
   th->control.step_range_start = 0;
   th->control.step_range_end = 0;
 
@@ -1194,17 +1195,6 @@ follow_exec (ptid_t pid, char *execd_pathname)
      "main" from the old (parent) process, then they'll auto-
      matically get reset there in the new process.).  */
 }
-
-/* Non-zero if we just simulating a single-step.  This is needed
-   because we cannot remove the breakpoints in the inferior process
-   until after the `wait' in `wait_for_inferior'.  */
-static int singlestep_breakpoints_inserted_p = 0;
-
-/* The thread we inserted single-step breakpoints for.  */
-static ptid_t singlestep_ptid;
-
-/* PC when we started this single-step.  */
-static CORE_ADDR singlestep_pc;
 
 /* Info about an instruction that is being stepped over.  */
 
@@ -1895,9 +1885,6 @@ infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
   if (ptid_equal (inferior_ptid, old_ptid))
     inferior_ptid = new_ptid;
 
-  if (ptid_equal (singlestep_ptid, old_ptid))
-    singlestep_ptid = new_ptid;
-
   for (displaced = displaced_step_inferior_states;
        displaced;
        displaced = displaced->next)
@@ -1918,8 +1905,8 @@ infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 static void
 resume_cleanups (void *ignore)
 {
-  if (single_step_breakpoints_inserted ())
-    remove_single_step_breakpoints ();
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    delete_single_step_breakpoints (inferior_thread ());
 
   normal_stop ();
 }
@@ -1975,11 +1962,6 @@ maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
       && gdbarch_software_single_step (gdbarch, get_current_frame ()))
     {
       hw_step = 0;
-      /* Do not pull these breakpoints until after a `wait' in
-	 `wait_for_inferior'.  */
-      singlestep_breakpoints_inserted_p = 1;
-      singlestep_ptid = inferior_ptid;
-      singlestep_pc = pc;
     }
   return hw_step;
 }
@@ -2167,7 +2149,7 @@ a command like `return' or `jump' to continue execution."));
      at the current address, deliver the signal without stepping, and
      once we arrive back at the step-resume breakpoint, actually step
      over the breakpoint we originally wanted to step over.  */
-  if (singlestep_breakpoints_inserted_p
+  if (thread_has_single_step_breakpoints_set (tp)
       && sig != GDB_SIGNAL_0
       && step_over_info_valid_p ())
     {
@@ -2182,8 +2164,7 @@ a command like `return' or `jump' to continue execution."));
 	  tp->step_after_step_resume_breakpoint = 1;
 	}
 
-      remove_single_step_breakpoints ();
-      singlestep_breakpoints_inserted_p = 0;
+      delete_single_step_breakpoints (tp);
 
       clear_step_over_info ();
       tp->control.trap_expected = 0;
@@ -2194,7 +2175,7 @@ a command like `return' or `jump' to continue execution."));
   /* If STEP is set, it's a request to use hardware stepping
      facilities.  But in that case, we should never
      use singlestep breakpoint.  */
-  gdb_assert (!(singlestep_breakpoints_inserted_p && step));
+  gdb_assert (!(thread_has_single_step_breakpoints_set (tp) && step));
 
   /* Decide the set of threads to ask the target to resume.  Start
      by assuming everything will be resumed, than narrow the set
@@ -2210,7 +2191,7 @@ a command like `return' or `jump' to continue execution."));
     set_running (resume_ptid, 1);
 
   /* Maybe resume a single thread after all.  */
-  if ((step || singlestep_breakpoints_inserted_p)
+  if ((step || thread_has_single_step_breakpoints_set (tp))
       && tp->control.trap_expected)
     {
       /* We're allowing a thread to run past a breakpoint it has
@@ -2679,9 +2660,6 @@ init_wait_for_inferior (void)
 
   /* Discard any skipped inlined frames.  */
   clear_inline_frame_state (minus_one_ptid);
-
-  singlestep_ptid = null_ptid;
-  singlestep_pc = 0;
 }
 
 
@@ -2857,6 +2835,7 @@ delete_thread_infrun_breakpoints (struct thread_info *tp)
 {
   delete_step_resume_breakpoint (tp);
   delete_exception_resume_breakpoint (tp);
+  delete_single_step_breakpoints (tp);
 }
 
 /* If the target still has execution, call FUNC for each thread that
@@ -2896,9 +2875,15 @@ static void
 delete_just_stopped_threads_infrun_breakpoints (void)
 {
   for_each_just_stopped_thread (delete_thread_infrun_breakpoints);
+}
 
-  if (single_step_breakpoints_inserted ())
-    remove_single_step_breakpoints ();
+/* Delete the single-step breakpoints of the threads that just
+   stopped.  */
+
+static void
+delete_just_stopped_threads_single_step_breakpoints (void)
+{
+  for_each_just_stopped_thread (delete_single_step_breakpoints);
 }
 
 /* A cleanup wrapper.  */
@@ -3386,7 +3371,7 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 	 software breakpoint.  In this case (prev_pc == breakpoint_pc),
 	 we also need to back up to the breakpoint address.  */
 
-      if (singlestep_breakpoints_inserted_p
+      if (thread_has_single_step_breakpoints_set (ecs->event_thread)
 	  || !ptid_equal (ecs->ptid, inferior_ptid)
 	  || !currently_stepping (ecs->event_thread)
 	  || ecs->event_thread->prev_pc == breakpoint_pc)
@@ -3772,8 +3757,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 
       gdb_flush (gdb_stdout);
       target_mourn_inferior ();
-      singlestep_breakpoints_inserted_p = 0;
-      cancel_single_step_breakpoints ();
       stop_print_frame = 0;
       stop_waiting (ecs);
       return;
@@ -3866,12 +3849,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  detach_breakpoints (ecs->ws.value.related_pid);
 	}
 
-      if (singlestep_breakpoints_inserted_p)
-	{
-	  /* Pull the single step breakpoints out of the target.  */
-	  remove_single_step_breakpoints ();
-	  singlestep_breakpoints_inserted_p = 0;
-	}
+      delete_just_stopped_threads_single_step_breakpoints ();
 
       /* In case the event is caught by a catchpoint, remember that
 	 the event is to be followed at the next resume of the thread,
@@ -3958,9 +3936,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	context_switch (ecs->ptid);
 
-      singlestep_breakpoints_inserted_p = 0;
-      cancel_single_step_breakpoints ();
-
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       /* Do whatever is necessary to the parent branch of the vfork.  */
@@ -4026,14 +4001,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_NO_HISTORY\n");
       /* Reverse execution: target ran out of history info.  */
 
-      /* Pull the single step breakpoints out of the target.  */
-      if (singlestep_breakpoints_inserted_p)
-	{
-	  if (!ptid_equal (ecs->ptid, inferior_ptid))
-	    context_switch (ecs->ptid);
-	  remove_single_step_breakpoints ();
-	  singlestep_breakpoints_inserted_p = 0;
-	}
+      delete_just_stopped_threads_single_step_breakpoints ();
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
       observer_notify_no_history ();
       stop_waiting (ecs);
@@ -4172,13 +4140,9 @@ handle_signal_stop (struct execution_control_state *ecs)
   gdbarch = get_frame_arch (frame);
 
   /* Pull the single step breakpoints out of the target.  */
-  if (singlestep_breakpoints_inserted_p)
+  if (gdbarch_software_single_step_p (gdbarch))
     {
-      /* However, before doing so, if this single-step breakpoint was
-	 actually for another thread, set this thread up for moving
-	 past it.  */
-      if (!ptid_equal (ecs->ptid, singlestep_ptid)
-	  && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
+      if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
 	{
 	  struct regcache *regcache;
 	  struct address_space *aspace;
@@ -4187,22 +4151,38 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  regcache = get_thread_regcache (ecs->ptid);
 	  aspace = get_regcache_aspace (regcache);
 	  pc = regcache_read_pc (regcache);
-	  if (single_step_breakpoint_inserted_here_p (aspace, pc))
+
+	  /* However, before doing so, if this single-step breakpoint was
+	     actually for another thread, set this thread up for moving
+	     past it.  */
+	  if (!thread_has_single_step_breakpoint_here (ecs->event_thread,
+						       aspace, pc))
+	    {
+	      if (single_step_breakpoint_inserted_here_p (aspace, pc))
+		{
+		  if (debug_infrun)
+		    {
+		      fprintf_unfiltered (gdb_stdlog,
+					  "infrun: [%s] hit another thread's "
+					  "single-step breakpoint\n",
+					  target_pid_to_str (ecs->ptid));
+		    }
+		  ecs->hit_singlestep_breakpoint = 1;
+		}
+	    }
+	  else
 	    {
 	      if (debug_infrun)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
-				      "infrun: [%s] hit step over single-step"
-				      " breakpoint of [%s]\n",
-				      target_pid_to_str (ecs->ptid),
-				      target_pid_to_str (singlestep_ptid));
+				      "infrun: [%s] hit its "
+				      "single-step breakpoint\n",
+				      target_pid_to_str (ecs->ptid));
 		}
-	      ecs->hit_singlestep_breakpoint = 1;
 	    }
 	}
 
-      remove_single_step_breakpoints ();
-      singlestep_breakpoints_inserted_p = 0;
+      delete_just_stopped_threads_single_step_breakpoints ();
     }
 
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
@@ -5544,10 +5524,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	      insert_single_step_breakpoint (get_frame_arch (frame),
 					     get_frame_address_space (frame),
 					     stop_pc);
-	      singlestep_breakpoints_inserted_p = 1;
 	      ecs->event_thread->control.trap_expected = 1;
-	      singlestep_ptid = inferior_ptid;
-	      singlestep_pc = stop_pc;
 
 	      resume (0, GDB_SIGNAL_0);
 	      prepare_to_wait (ecs);

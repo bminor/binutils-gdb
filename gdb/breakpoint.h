@@ -1129,6 +1129,12 @@ extern int regular_breakpoint_inserted_here_p (struct address_space *,
 extern int software_breakpoint_inserted_here_p (struct address_space *, 
 						CORE_ADDR);
 
+/* Check whether any location of BP is inserted at PC.  */
+
+extern int breakpoint_has_location_inserted_here (struct breakpoint *bp,
+						  struct address_space *aspace,
+						  CORE_ADDR pc);
+
 extern int single_step_breakpoint_inserted_here_p (struct address_space *,
 						   CORE_ADDR);
 
@@ -1463,10 +1469,6 @@ extern void delete_command (char *arg, int from_tty);
 extern void insert_single_step_breakpoint (struct gdbarch *,
 					   struct address_space *, 
 					   CORE_ADDR);
-extern int single_step_breakpoints_inserted (void);
-extern void remove_single_step_breakpoints (void);
-extern void cancel_single_step_breakpoints (void);
-
 /* Check if any hardware watchpoints have triggered, according to the
    target.  */
 int watchpoints_triggered (struct target_waitstatus *);
