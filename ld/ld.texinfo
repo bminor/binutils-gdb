@@ -3143,7 +3143,9 @@ with the @samp{/} character, and the script being processed was
 located inside the @dfn{sysroot prefix}, the filename will be looked
 for in the @dfn{sysroot prefix}.  Otherwise, the linker will try to
 open the file in the current directory.  If it is not found, the
-linker will search through the archive library search path.  See the
+linker will search through the archive library search path.
+The @dfn{sysroot prefix} can also be forced by specifying @code{=}
+as the first character in the filename path.  See also the
 description of @samp{-L} in @ref{Options,,Command Line Options}.
 
 If you use @samp{INPUT (-l@var{file})}, @command{ld} will transform the

@@ -2,6 +2,10 @@
 
 	* ld.texinfo (Options): When mentioning "=" and sysroot, mention
 	that --sysroot controls it, not only through the configuration.
+	(input files in linker scripts): When mentioning
+	behavior of first character "/" on scripts within sysroot, also
+	mention that effect can be forced by prefixing with "=" and
+	refer to SEARCH_DIR.
 
 2014-10-14  Tristan Gingold  <gingold@adacore.com>
 
