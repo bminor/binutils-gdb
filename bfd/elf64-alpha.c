@@ -1442,17 +1442,19 @@ elf64_alpha_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED, const char *name)
 }
 
 static bfd_boolean
-elf64_alpha_find_nearest_line (bfd *abfd, asection *section, asymbol **symbols,
-			       bfd_vma offset, const char **filename_ptr,
+elf64_alpha_find_nearest_line (bfd *abfd, asymbol **symbols,
+			       asection *section, bfd_vma offset,
+			       const char **filename_ptr,
 			       const char **functionname_ptr,
-			       unsigned int *line_ptr)
+			       unsigned int *line_ptr,
+			       unsigned int *discriminator_ptr)
 {
   asection *msec;
 
-  if (_bfd_dwarf2_find_nearest_line (abfd, dwarf_debug_sections,
-                                     section, symbols, offset,
+  if (_bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr, NULL, 0,
+				     line_ptr, discriminator_ptr,
+				     dwarf_debug_sections, 0,
 				     &elf_tdata (abfd)->dwarf2_find_line_info))
     return TRUE;
 
@@ -1532,9 +1534,9 @@ elf64_alpha_find_nearest_line (bfd *abfd, asection *section, asymbol **symbols,
 
   /* Fall back on the generic ELF find_nearest_line routine.  */
 
-  return _bfd_elf_find_nearest_line (abfd, section, symbols, offset,
+  return _bfd_elf_find_nearest_line (abfd, symbols, section, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr);
+				     line_ptr, discriminator_ptr);
 }
 
 /* Structure used to pass information to alpha_elf_output_extsym.  */

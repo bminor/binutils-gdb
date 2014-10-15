@@ -5715,17 +5715,21 @@ som_set_arch_mach (bfd *abfd,
 
 static bfd_boolean
 som_find_nearest_line (bfd *abfd,
-		       asection *section,
 		       asymbol **symbols,
+		       asection *section,
 		       bfd_vma offset,
 		       const char **filename_ptr,
 		       const char **functionname_ptr,
-		       unsigned int *line_ptr)
+		       unsigned int *line_ptr,
+		       unsigned int *discriminator_ptr)
 {
   bfd_boolean found;
   asymbol *func;
   bfd_vma low_func;
   asymbol **p;
+
+  if (discriminator_ptr)
+    *discriminator_ptr = 0;
 
   if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
                                              & found, filename_ptr,

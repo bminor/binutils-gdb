@@ -1898,17 +1898,10 @@ extern alent *_bfd_elf_get_lineno
 extern bfd_boolean _bfd_elf_set_arch_mach
   (bfd *, enum bfd_architecture, unsigned long);
 extern bfd_boolean _bfd_elf_find_nearest_line
-  (bfd *, asection *, asymbol **, bfd_vma, const char **, const char **,
-   unsigned int *);
-extern bfd_boolean _bfd_elf_find_nearest_line_discriminator
-  (bfd *, asection *, asymbol **, bfd_vma, const char **, const char **,
-   unsigned int *, unsigned int *);
+  (bfd *, asymbol **, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *);
 extern bfd_boolean _bfd_elf_find_line
   (bfd *, asymbol **, asymbol *, const char **, unsigned int *);
-extern bfd_boolean _bfd_elf_find_line_discriminator
-  (bfd *, asymbol **, asymbol *, const char **, unsigned int *, unsigned int *);
-#define _bfd_generic_find_nearest_line_discriminator \
-        _bfd_elf_find_nearest_line_discriminator
 extern bfd_boolean _bfd_elf_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *);
 #define _bfd_elf_read_minisymbols _bfd_generic_read_minisymbols

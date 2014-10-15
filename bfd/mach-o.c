@@ -5631,12 +5631,13 @@ bfd_mach_o_follow_dsym (bfd *abfd)
 
 bfd_boolean
 bfd_mach_o_find_nearest_line (bfd *abfd,
-			      asection *section,
 			      asymbol **symbols,
+			      asection *section,
 			      bfd_vma offset,
 			      const char **filename_ptr,
 			      const char **functionname_ptr,
-			      unsigned int *line_ptr)
+			      unsigned int *line_ptr,
+			      unsigned int *discriminator_ptr)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   if (mdata == NULL)
@@ -5668,13 +5669,11 @@ bfd_mach_o_find_nearest_line (bfd *abfd,
     default:
       return FALSE;
     }
-  if (_bfd_dwarf2_find_nearest_line (abfd, dwarf_debug_sections,
-				     section, symbols, offset,
-				     filename_ptr, functionname_ptr,
-				     line_ptr, NULL, 0,
-				     &mdata->dwarf2_find_line_info))
-    return TRUE;
-  return FALSE;
+  return _bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
+					filename_ptr, functionname_ptr,
+					line_ptr, discriminator_ptr,
+					dwarf_debug_sections, 0,
+					&mdata->dwarf2_find_line_info);
 }
 
 bfd_boolean

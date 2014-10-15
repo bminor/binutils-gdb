@@ -449,8 +449,8 @@ dwarf1_unit_find_nearest_line (struct dwarf1_debug* stash,
 
 bfd_boolean
 _bfd_dwarf1_find_nearest_line (bfd *abfd,
-			       asection *section,
 			       asymbol **symbols,
+			       asection *section,
 			       bfd_vma offset,
 			       const char **filename_ptr,
 			       const char **functionname_ptr,

@@ -2,6 +2,83 @@
 
 	Apply trunk patches
 	2014-10-15  Alan Modra  <amodra@gmail.com>
+	PR 17481
+	* aoutx.h (NAME (aout, find_nearest_line)): Add "discriminator_ptr"
+	param, group "section" and "offset" params.  Zero discriminator.
+	* bfd.c (bfd_find_nearest_line): Implement with new
+	_bfd_find_nearest_line.
+	(bfd_find_nearest_line_discriminator): Likewise.
+	* coff-i386.c (_bfd_generic_find_nearest_line_discriminator): Don't
+	define.
+	* coff-rs6000.c (xcoff_find_nearest_line,
+	xcoff_find_nearest_line_discriminator): Delete.
+	(_bfd_xcoff_find_nearest_line): Don't define.
+	(_bfd_xcoff_find_nearest_line): Define as coff_find_nearest_line.
+	* coff-x86_64.c (_bfd_generic_find_nearest_line_discriminator): Don't
+	define.
+	* coff64-rs6000.c (rs6000_xcoff64_vec, rs6000_xcoff64_aix_vec): Adjust.
+	* coffgen.c (coff_find_nearest_line_with_names): Reorder params,
+	adjust _bfd_dwarf2_find_nearest_line call.
+	(coff_find_nearest_line): Add "discriminator_ptr" param, reorder
+	others.  Set discriminator.  Adjust call.
+	(coff_find_nearest_line_discriminator): Delete.
+	* dwarf1.c (_bfd_dwarf1_find_nearest_line): Reorder params.
+	* dwarf2.c (find_line): Rename to..
+	(_bfd_dwarf2_find_nearest_line): ..this, reordering params.
+	Simplify setting of do_line.  Delete old function.
+	(_bfd_dwarf2_find_line): Delete.
+	* ecoff.c (_bfd_ecoff_find_nearest_line): Reorder params, add
+	discriminator_ptr and set it.
+	* elf-bfd.h (_bfd_elf_find_nearest_line): Update prototype.
+	(_bfd_elf_find_nearest_line_discriminator): Delete.
+	(_bfd_elf_find_line_discriminator): Delete.
+	(_bfd_generic_find_nearest_line_discriminator): Don't define.
+	* elf.c (elf_find_function): Reorder params.
+	(_bfd_elf_find_nearest_line): Reorder params, add discriminator_ptr.
+	Adjust calls.
+	(_bfd_elf_find_nearest_line_discriminator): Delete.
+	(_bfd_elf_find_line): Adjust call.
+	* elf32-arm.c (arm_elf_find_function): Reorder params.
+	(elf32_arm_find_nearest_line): Reorder params, add discriminator_ptr.
+	Adjust calls.
+	* elf64-alpha.c (elf64_alpha_find_nearest_line): Similarly.
+	* elfnn-aarch64.c (aarch64_elf_find_function): Reorder params.
+	(elfNN_aarch64_find_nearest_line): Reorder params, add
+	discriminator_ptr.  Adjust calls.
+	* elfxx-mips.c (_bfd_mips_elf_find_nearest_line): Similarly.
+	* elfxx-mips.h (_bfd_mips_elf_find_nearest_line): Update prototype.
+	* libaout.h (NAME (aout, find_nearest_line)): Update prototype.
+	* libbfd-in.h (_bfd_nosymbols_find_nearest_line): Update.
+	(_bfd_dwarf1_find_nearest_line): Likewise.
+	(_bfd_dwarf2_find_nearest_line): Likewise.
+	(_bfd_dwarf2_find_line): Delete.
+	(_bfd_generic_find_nearest_line_discriminator): Delete.
+	* libbfd.c (_bfd_generic_find_nearest_line_discriminator): Delete.
+	* libcoff-in.h (coff_find_nearest_line): Update prototype.
+	(coff_find_nearest_line_discriminator): Delete.
+	(coff_find_nearest_line_with_names): Update prototype.
+	* libecoff.h (_bfd_ecoff_find_nearest_line): Update prototype.
+	* mach-o.c (bfd_mach_o_find_nearest_line): Reorder params, add
+	discriminator_ptr.  Adjust calls.
+	* mach-o.h (bfd_mach_o_find_nearest_line): Update prototype.
+	* pdp11.c (NAME (aout, find_nearest_line)): Reorder params, add
+	discriminator_ptr and set.
+	* som.c (som_find_nearest_line): Similarly.
+	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Delete entry for
+	_bfd_find_nearest_line_discriminator.
+	(struct bfd_target <_bfd_find_nearest_line>): Adjust prototype.
+	(struct bfd_target <_bfd_find_nearest_line_discriminator>): Delete.
+	* vms-alpha.c (_bfd_vms_find_nearest_dst_line): Rename to..
+	(_bfd_vms_find_nearest_line): ..this.  Reorder params, add
+	"discriminator" and set.
+	(_bfd_vms_find_nearest_line_discriminator): Delete.
+	(_bfd_generic_find_nearest_line_discriminator): Don't define.
+	(alpha_vms_find_nearest_line): Update define.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+	2014-10-15  Alan Modra  <amodra@gmail.com>
 	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Use NAME##_find_line.
 	* aout-adobe.c (aout_32_find_line): Define.
 	(aout_32_bfd_make_debug_symbol, aout_32_bfd_reloc_type_lookup,
