@@ -377,8 +377,6 @@ static void context_switch (ptid_t ptid);
 
 void init_thread_stepping_state (struct thread_info *tss);
 
-static void init_infwait_state (void);
-
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 
@@ -1208,16 +1206,20 @@ static ptid_t singlestep_ptid;
 /* PC when we started this single-step.  */
 static CORE_ADDR singlestep_pc;
 
-/* Info about an instruction that is being stepped over.  Invalid if
-   ASPACE is NULL.  */
+/* Info about an instruction that is being stepped over.  */
 
 struct step_over_info
 {
-  /* The instruction's address space.  */
+  /* If we're stepping past a breakpoint, this is the address space
+     and address of the instruction the breakpoint is set at.  We'll
+     skip inserting all breakpoints here.  Valid iff ASPACE is
+     non-NULL.  */
   struct address_space *aspace;
-
-  /* The instruction's address.  */
   CORE_ADDR address;
+
+  /* The instruction being stepped over triggers a nonsteppable
+     watchpoint.  If true, we'll skip inserting watchpoints.  */
+  int nonsteppable_watchpoint_p;
 };
 
 /* The step-over info of the location that is being stepped over.
@@ -1250,10 +1252,12 @@ static struct step_over_info step_over_info;
    stepping over.  */
 
 static void
-set_step_over_info (struct address_space *aspace, CORE_ADDR address)
+set_step_over_info (struct address_space *aspace, CORE_ADDR address,
+		    int nonsteppable_watchpoint_p)
 {
   step_over_info.aspace = aspace;
   step_over_info.address = address;
+  step_over_info.nonsteppable_watchpoint_p = nonsteppable_watchpoint_p;
 }
 
 /* Called when we're not longer stepping over a breakpoint / an
@@ -1264,6 +1268,7 @@ clear_step_over_info (void)
 {
   step_over_info.aspace = NULL;
   step_over_info.address = 0;
+  step_over_info.nonsteppable_watchpoint_p = 0;
 }
 
 /* See infrun.h.  */
@@ -1278,12 +1283,21 @@ stepping_past_instruction_at (struct address_space *aspace,
 				       step_over_info.address));
 }
 
+/* See infrun.h.  */
+
+int
+stepping_past_nonsteppable_watchpoint (void)
+{
+  return step_over_info.nonsteppable_watchpoint_p;
+}
+
 /* Returns true if step-over info is valid.  */
 
 static int
 step_over_info_valid_p (void)
 {
-  return (step_over_info.aspace != NULL);
+  return (step_over_info.aspace != NULL
+	  || stepping_past_nonsteppable_watchpoint ());
 }
 
 
@@ -2555,7 +2569,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
       struct regcache *regcache = get_current_regcache ();
 
       set_step_over_info (get_regcache_aspace (regcache),
-			  regcache_read_pc (regcache));
+			  regcache_read_pc (regcache), 0);
     }
   else
     clear_step_over_info ();
@@ -2594,9 +2608,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
      can fail.  Setting the prev_pc value here ensures the value is updated
      correctly when the inferior is stopped.  */
   tp->prev_pc = regcache_read_pc (get_current_regcache ());
-
-  /* Reset to normal state.  */
-  init_infwait_state ();
 
   /* Resume inferior.  */
   resume (tp->control.trap_expected || step || bpstat_should_step (),
@@ -2662,7 +2673,6 @@ init_wait_for_inferior (void)
   target_last_wait_ptid = minus_one_ptid;
 
   previous_inferior_ptid = inferior_ptid;
-  init_infwait_state ();
 
   /* Discard any skipped inlined frames.  */
   clear_inline_frame_state (minus_one_ptid);
@@ -2683,9 +2693,6 @@ enum infwait_states
   infwait_nonstep_watch_state
 };
 
-/* The PTID we'll do a target_wait on.*/
-ptid_t waiton_ptid;
-
 /* Current inferior wait state.  */
 static enum infwait_states infwait_state;
 
@@ -2704,11 +2711,6 @@ struct execution_control_state
   CORE_ADDR stop_func_end;
   const char *stop_func_name;
   int wait_some_more;
-
-  /* We were in infwait_step_watch_state or
-     infwait_nonstep_watch_state state, and the thread reported an
-     event.  */
-  int stepped_after_stopped_by_watchpoint;
 
   /* True if the event thread hit the single-step breakpoint of
      another thread.  Thus the event doesn't cause a stop, the thread
@@ -3034,6 +3036,7 @@ wait_for_inferior (void)
       struct execution_control_state ecss;
       struct execution_control_state *ecs = &ecss;
       struct cleanup *old_chain;
+      ptid_t waiton_ptid = minus_one_ptid;
 
       memset (ecs, 0, sizeof (*ecs));
 
@@ -3089,6 +3092,7 @@ fetch_inferior_event (void *client_data)
   struct cleanup *ts_old_chain;
   int was_sync = sync_execution;
   int cmd_done = 0;
+  ptid_t waiton_ptid = minus_one_ptid;
 
   memset (ecs, 0, sizeof (*ecs));
 
@@ -3206,6 +3210,7 @@ void
 init_thread_stepping_state (struct thread_info *tss)
 {
   tss->stepping_over_breakpoint = 0;
+  tss->stepping_over_watchpoint = 0;
   tss->step_after_step_resume_breakpoint = 0;
 }
 
@@ -3373,13 +3378,6 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 
       do_cleanups (old_cleanups);
     }
-}
-
-static void
-init_infwait_state (void)
-{
-  waiton_ptid = pid_to_ptid (-1);
-  infwait_state = infwait_normal_state;
 }
 
 static int
@@ -3601,40 +3599,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   else if (ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
 	   && ecs->ws.kind != TARGET_WAITKIND_EXITED)
     set_executing (ecs->ptid, 0);
-
-  switch (infwait_state)
-    {
-    case infwait_normal_state:
-      if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog, "infrun: infwait_normal_state\n");
-      break;
-
-    case infwait_step_watch_state:
-      if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog,
-			    "infrun: infwait_step_watch_state\n");
-
-      ecs->stepped_after_stopped_by_watchpoint = 1;
-      break;
-
-    case infwait_nonstep_watch_state:
-      if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog,
-			    "infrun: infwait_nonstep_watch_state\n");
-      insert_breakpoints ();
-
-      /* FIXME-maybe: is this cleaner than setting a flag?  Does it
-         handle things like signals arriving and other things happening
-         in combination correctly?  */
-      ecs->stepped_after_stopped_by_watchpoint = 1;
-      break;
-
-    default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
-    }
-
-  infwait_state = infwait_normal_state;
-  waiton_ptid = pid_to_ptid (-1);
 
   switch (ecs->ws.kind)
     {
@@ -4225,7 +4189,9 @@ handle_signal_stop (struct execution_control_state *ecs)
       singlestep_breakpoints_inserted_p = 0;
     }
 
-  if (ecs->stepped_after_stopped_by_watchpoint)
+  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
+      && ecs->event_thread->control.trap_expected
+      && ecs->event_thread->stepping_over_watchpoint)
     stopped_by_watchpoint = 0;
   else
     stopped_by_watchpoint = watchpoints_triggered (&ecs->ws);
@@ -4255,29 +4221,21 @@ handle_signal_stop (struct execution_control_state *ecs)
 	 It is far more common to need to disable a watchpoint to step
 	 the inferior over it.  If we have non-steppable watchpoints,
 	 we must disable the current watchpoint; it's simplest to
-	 disable all watchpoints and breakpoints.  */
-      int hw_step = 1;
+	 disable all watchpoints.
 
-      if (!target_have_steppable_watchpoint)
-	{
-	  remove_breakpoints ();
-	  /* See comment in resume why we need to stop bypassing signals
-	     while breakpoints have been removed.  */
-	  target_pass_signals (0, NULL);
-	}
-	/* Single step */
-      hw_step = maybe_software_singlestep (gdbarch, stop_pc);
-      target_resume (ecs->ptid, hw_step, GDB_SIGNAL_0);
-      waiton_ptid = ecs->ptid;
-      if (target_have_steppable_watchpoint)
-	infwait_state = infwait_step_watch_state;
-      else
-	infwait_state = infwait_nonstep_watch_state;
-      prepare_to_wait (ecs);
+	 Any breakpoint at PC must also be stepped over -- if there's
+	 one, it will have already triggered before the watchpoint
+	 triggered, and we either already reported it to the user, or
+	 it didn't cause a stop and we called keep_going.  In either
+	 case, if there was a breakpoint at PC, we must be trying to
+	 step past it.  */
+      ecs->event_thread->stepping_over_watchpoint = 1;
+      keep_going (ecs);
       return;
     }
 
   ecs->event_thread->stepping_over_breakpoint = 0;
+  ecs->event_thread->stepping_over_watchpoint = 0;
   bpstat_clear (&ecs->event_thread->control.stop_bpstat);
   ecs->event_thread->control.stop_step = 0;
   stop_print_frame = 1;
@@ -6015,6 +5973,8 @@ keep_going (struct execution_control_state *ecs)
     {
       volatile struct gdb_exception e;
       struct regcache *regcache = get_current_regcache ();
+      int remove_bp;
+      int remove_wps;
 
       /* Either the trap was not expected, but we are continuing
 	 anyway (if we got a signal, the user asked it be passed to
@@ -6034,13 +5994,19 @@ keep_going (struct execution_control_state *ecs)
 	 (watchpoints, etc.) but the one we're stepping over, step one
 	 instruction, and then re-insert the breakpoint when that step
 	 is finished.  */
-      if ((ecs->hit_singlestep_breakpoint
-	   || thread_still_needs_step_over (ecs->event_thread))
-	  && !use_displaced_stepping (get_regcache_arch (regcache)))
+
+      remove_bp = (ecs->hit_singlestep_breakpoint
+		   || thread_still_needs_step_over (ecs->event_thread));
+      remove_wps = (ecs->event_thread->stepping_over_watchpoint
+		    && !target_have_steppable_watchpoint);
+
+      if (remove_bp && !use_displaced_stepping (get_regcache_arch (regcache)))
 	{
 	  set_step_over_info (get_regcache_aspace (regcache),
-			      regcache_read_pc (regcache));
+			      regcache_read_pc (regcache), remove_wps);
 	}
+      else if (remove_wps)
+	set_step_over_info (NULL, 0, remove_wps);
       else
 	clear_step_over_info ();
 
@@ -6056,9 +6022,7 @@ keep_going (struct execution_control_state *ecs)
 	  return;
 	}
 
-      ecs->event_thread->control.trap_expected
-	= (ecs->event_thread->stepping_over_breakpoint
-	   || ecs->hit_singlestep_breakpoint);
+      ecs->event_thread->control.trap_expected = (remove_bp || remove_wps);
 
       /* Do not deliver GDB_SIGNAL_TRAP (except when the user
 	 explicitly specifies that such a signal should be delivered

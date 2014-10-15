@@ -2208,6 +2208,22 @@ should_be_inserted (struct bp_location *bl)
       return 0;
     }
 
+  /* Don't insert watchpoints if we're trying to step past the
+     instruction that triggered one.  */
+  if ((bl->loc_type == bp_loc_hardware_watchpoint)
+      && stepping_past_nonsteppable_watchpoint ())
+    {
+      if (debug_infrun)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "infrun: stepping past non-steppable watchpoint. "
+			      "skipping watchpoint at %s:%d\n",
+			      paddress (bl->gdbarch, bl->address),
+			      bl->length);
+	}
+      return 0;
+    }
+
   return 1;
 }
 

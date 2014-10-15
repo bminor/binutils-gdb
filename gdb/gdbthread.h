@@ -197,6 +197,11 @@ struct thread_info
   /* Should we step over breakpoint next time keep_going is called?  */
   int stepping_over_breakpoint;
 
+  /* Should we step over a watchpoint next time keep_going is called?
+     This is needed on targets with non-continuable, non-steppable
+     watchpoints.  */
+  int stepping_over_watchpoint;
+
   /* Set to TRUE if we should finish single-stepping over a breakpoint
      after hitting the current step-resume breakpoint.  The context here
      is that GDB is to do `next' or `step' while signal arrives.

@@ -1,5 +1,40 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (should_be_inserted): Don't insert watchpoints if
+	trying to step past a non-steppable watchpoint.
+	* gdbthread.h (struct thread_info) <stepping_over_watchpoint>: New
+	field.
+	* infrun.c (struct step_over_info): Add new field
+	'nonsteppable_watchpoint_p' and adjust comments.
+	(set_step_over_info): New 'nonsteppable_watchpoint_p' parameter.
+	Adjust.
+	(clear_step_over_info): Clear nonsteppable_watchpoint_p as well.
+	(stepping_past_nonsteppable_watchpoint): New function.
+	(step_over_info_valid_p): Also return true if stepping past a
+	nonsteppable watchpoint.
+	(proceed): Adjust call to set_step_over_info.  Remove reference to
+	init_infwait_state.
+	(init_wait_for_inferior): Remove reference to init_infwait_state.
+	(waiton_ptid): Delete global.
+	(struct execution_control_state)
+	<stepped_after_stopped_by_watchpoint>: Delete field.
+	(wait_for_inferior, fetch_inferior_event): Always pass
+	minus_one_ptid to target_wait.
+	(init_thread_stepping_state): Clear 'stepping_over_watchpoint'
+	field.
+	(init_infwait_state): Delete function.
+	(handle_inferior_event): Remove infwait_state handling.
+	(handle_signal_stop) <watchpoints handling>: Adjust after
+	stepped_after_stopped_by_watchpoint removal.  Don't remove
+	breakpoints here nor set infwait_state.  Set the thread's
+	stepping_over_watchpoint flag, and call keep_going instead.
+	(keep_going): Handle stepping_over_watchpoint.  Adjust
+	set_step_over_info calls.
+	* infrun.h (stepping_past_nonsteppable_watchpoint): Declare
+	function.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (step_over_info_valid_p): New function.
 	(resume): Use step_over_info_valid_p instead of checking the
 	threads's trap_expected flag.
