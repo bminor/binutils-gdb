@@ -1,3 +1,9 @@
+2014-10-16  Alan Modra  <amodra@gmail.com>
+
+	PR 17488
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Don't attempt
+	to access ELF header e_flags when not ppc64 ELF output.
+
 2014-10-15  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

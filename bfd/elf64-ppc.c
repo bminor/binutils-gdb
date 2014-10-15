@@ -4962,6 +4962,45 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
   struct ppc_link_hash_entry **p, *eh;
+  asection *opd = bfd_get_section_by_name (ibfd, ".opd");
+
+  if (opd != NULL && opd->size != 0)
+    {
+      if (abiversion (ibfd) == 0)
+	set_abiversion (ibfd, 1);
+      else if (abiversion (ibfd) == 2)
+	{
+	  info->callbacks->einfo (_("%P: %B .opd not allowed in ABI"
+				    " version %d\n"),
+				  ibfd, abiversion (ibfd));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
+      if ((ibfd->flags & DYNAMIC) == 0
+	  && (opd->flags & SEC_RELOC) != 0
+	  && opd->reloc_count != 0
+	  && !bfd_is_abs_section (opd->output_section))
+	{
+	  /* Garbage collection needs some extra help with .opd sections.
+	     We don't want to necessarily keep everything referenced by
+	     relocs in .opd, as that would keep all functions.  Instead,
+	     if we reference an .opd symbol (a function descriptor), we
+	     want to keep the function code symbol's section.  This is
+	     easy for global symbols, but for local syms we need to keep
+	     information about the associated function section.  */
+	  bfd_size_type amt;
+	  asection **opd_sym_map;
+
+	  amt = opd->size * sizeof (*opd_sym_map) / 8;
+	  opd_sym_map = bfd_zalloc (ibfd, amt);
+	  if (opd_sym_map == NULL)
+	    return FALSE;
+	  ppc64_elf_section_data (opd)->u.opd.func_sec = opd_sym_map;
+	  BFD_ASSERT (ppc64_elf_section_data (opd)->sec_type == sec_normal);
+	  ppc64_elf_section_data (opd)->sec_type = sec_opd;
+	}
+    }
 
   if (!is_ppc64_elf (info->output_bfd))
     return TRUE;
@@ -4969,72 +5008,29 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
-  if (is_ppc64_elf (ibfd))
+  /* For input files without an explicit abiversion in e_flags
+     we should have flagged any with symbol st_other bits set
+     as ELFv1 and above flagged those with .opd as ELFv2.
+     Set the output abiversion if not yet set, and for any input
+     still ambiguous, take its abiversion from the output.
+     Differences in ABI are reported later.  */
+  if (abiversion (info->output_bfd) == 0)
+    set_abiversion (info->output_bfd, abiversion (ibfd));
+  else if (abiversion (ibfd) == 0)
+    set_abiversion (ibfd, abiversion (info->output_bfd));
+
+  p = &htab->dot_syms;
+  while ((eh = *p) != NULL)
     {
-      asection *opd = bfd_get_section_by_name (ibfd, ".opd");
-
-      if (opd != NULL && opd->size != 0)
-	{
-	  if (abiversion (ibfd) == 0)
-	    set_abiversion (ibfd, 1);
-	  else if (abiversion (ibfd) == 2)
-	    {
-	      info->callbacks->einfo (_("%P: %B .opd not allowed in ABI"
-					" version %d\n"),
-				      ibfd, abiversion (ibfd));
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
-
-	  if ((ibfd->flags & DYNAMIC) == 0
-	      && (opd->flags & SEC_RELOC) != 0
-	      && opd->reloc_count != 0
-	      && !bfd_is_abs_section (opd->output_section))
-	    {
-	      /* Garbage collection needs some extra help with .opd sections.
-		 We don't want to necessarily keep everything referenced by
-		 relocs in .opd, as that would keep all functions.  Instead,
-		 if we reference an .opd symbol (a function descriptor), we
-		 want to keep the function code symbol's section.  This is
-		 easy for global symbols, but for local syms we need to keep
-		 information about the associated function section.  */
-	      bfd_size_type amt;
-	      asection **opd_sym_map;
-
-	      amt = opd->size * sizeof (*opd_sym_map) / 8;
-	      opd_sym_map = bfd_zalloc (ibfd, amt);
-	      if (opd_sym_map == NULL)
-		return FALSE;
-	      ppc64_elf_section_data (opd)->u.opd.func_sec = opd_sym_map;
-	      BFD_ASSERT (ppc64_elf_section_data (opd)->sec_type == sec_normal);
-	      ppc64_elf_section_data (opd)->sec_type = sec_opd;
-	    }
-	}
-
-      /* For input files without an explicit abiversion in e_flags
-	 we should have flagged any with symbol st_other bits set
-	 as ELFv1 and above flagged those with .opd as ELFv2.
-	 Set the output abiversion if not yet set, and for any input
-	 still ambiguous, take its abiversion from the output.
-	 Differences in ABI are reported later.  */
-      if (abiversion (info->output_bfd) == 0)
-	set_abiversion (info->output_bfd, abiversion (ibfd));
-      else if (abiversion (ibfd) == 0)
-	set_abiversion (ibfd, abiversion (info->output_bfd));
-
-      p = &htab->dot_syms;
-      while ((eh = *p) != NULL)
-	{
-	  *p = NULL;
-	  if (&eh->elf == htab->elf.hgot)
-	    ;
-	  else if (htab->elf.hgot == NULL
-		   && strcmp (eh->elf.root.root.string, ".TOC.") == 0)
-	    htab->elf.hgot = &eh->elf;
-	  else if (!add_symbol_adjust (eh, info))
-	    return FALSE;
-	  p = &eh->u.next_dot_sym;
-	}
+      *p = NULL;
+      if (&eh->elf == htab->elf.hgot)
+	;
+      else if (htab->elf.hgot == NULL
+	       && strcmp (eh->elf.root.root.string, ".TOC.") == 0)
+	htab->elf.hgot = &eh->elf;
+      else if (!add_symbol_adjust (eh, info))
+	return FALSE;
+      p = &eh->u.next_dot_sym;
     }
 
   /* Clear the list for non-ppc64 input files.  */
