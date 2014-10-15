@@ -2089,8 +2089,7 @@ a command like `return' or `jump' to continue execution."));
      event, displaced stepping breaks the vfork child similarly as single
      step software breakpoint.  */
   if (use_displaced_stepping (gdbarch)
-      && (tp->control.trap_expected
-	  || (step && gdbarch_software_single_step_p (gdbarch)))
+      && tp->control.trap_expected
       && sig == GDB_SIGNAL_0
       && !current_inferior ()->waiting_for_vfork_done)
     {

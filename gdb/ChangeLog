@@ -1,5 +1,10 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (resume): Don't force displaced-stepping for all
+	single-steps on software single-stepping archs.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (single_step_breakpoints): Delete global.
 	(insert_single_step_breakpoint): Adjust to store the breakpoint
 	pointer in the current thread.
