@@ -1,5 +1,7 @@
 2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-scripts/sysroot-prefix.exp, ld-scripts/sysroot-prefix-x.s,
+	ld-scripts/sysroot-prefix-y.s: New files.
 	* lib/ld-lib.exp (check_sysroot_available): New proc.
 
 2014-10-04  Alan Modra  <amodra@gmail.com>
