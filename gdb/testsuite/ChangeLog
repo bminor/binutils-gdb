@@ -1,3 +1,7 @@
+2014-10-15  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: Update for demangling changes.
+
 2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.cp/non-trivial-retval.cc: Add new test cases.

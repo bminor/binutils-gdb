@@ -1,3 +1,11 @@
+2014-10-15  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* Makefile.in (SFILES): Remove d-support.c.
+	(COMMON_OBS): Remove d-support.o.
+	* d-lang.h (d_parse_symbol): Remove declaration.
+	* d-lang.c (d_demangle): Use gdb_demangle to demangle D symbols.
+	* d-support.c: Remove file.
+
 2014-10-15  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb/infrun.c (process_event_stop_test): Apply
