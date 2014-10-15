@@ -4239,14 +4239,10 @@ moribund_breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
   return 0;
 }
 
-/* Returns non-zero if there's a breakpoint inserted at PC, which is
-   inserted using regular breakpoint_chain / bp_location array
-   mechanism.  This does not check for single-step breakpoints, which
-   are inserted and removed using direct target manipulation.  */
+/* Returns non-zero iff there's a breakpoint inserted at PC.  */
 
 int
-regular_breakpoint_inserted_here_p (struct address_space *aspace, 
-				    CORE_ADDR pc)
+breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location *bl, **blp_tmp;
 
@@ -4270,27 +4266,12 @@ regular_breakpoint_inserted_here_p (struct address_space *aspace,
   return 0;
 }
 
-/* Returns non-zero iff there's either regular breakpoint
-   or a single step breakpoint inserted at PC.  */
+/* This function returns non-zero iff there is a software breakpoint
+   inserted at PC.  */
 
 int
-breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
-{
-  if (regular_breakpoint_inserted_here_p (aspace, pc))
-    return 1;
-
-  if (single_step_breakpoint_inserted_here_p (aspace, pc))
-    return 1;
-
-  return 0;
-}
-
-/* Ignoring deprecated raw breakpoints, return non-zero iff there is a
-   software breakpoint inserted at PC.  */
-
-static struct bp_location *
-find_non_raw_software_breakpoint_inserted_here (struct address_space *aspace,
-						CORE_ADDR pc)
+software_breakpoint_inserted_here_p (struct address_space *aspace,
+				     CORE_ADDR pc)
 {
   struct bp_location *bl, **blp_tmp;
 
@@ -4308,26 +4289,9 @@ find_non_raw_software_breakpoint_inserted_here (struct address_space *aspace,
 	      && !section_is_mapped (bl->section))
 	    continue;		/* unmapped overlay -- can't be a match */
 	  else
-	    return bl;
+	    return 1;
 	}
     }
-
-  return NULL;
-}
-
-/* This function returns non-zero iff there is a software breakpoint
-   inserted at PC.  */
-
-int
-software_breakpoint_inserted_here_p (struct address_space *aspace,
-				     CORE_ADDR pc)
-{
-  if (find_non_raw_software_breakpoint_inserted_here (aspace, pc) != NULL)
-    return 1;
-
-  /* Also check for software single-step breakpoints.  */
-  if (single_step_breakpoint_inserted_here_p (aspace, pc))
-    return 1;
 
   return 0;
 }
@@ -13329,20 +13293,6 @@ bkpt_re_set (struct breakpoint *b)
   breakpoint_re_set_default (b);
 }
 
-/* Copy SRC's shadow buffer and whatever else we'd set if we actually
-   inserted DEST, so we can remove it later, in case SRC is removed
-   first.  */
-
-static void
-bp_target_info_copy_insertion_state (struct bp_target_info *dest,
-				     const struct bp_target_info *src)
-{
-  dest->shadow_len = src->shadow_len;
-  memcpy (dest->shadow_contents, src->shadow_contents, src->shadow_len);
-  dest->placed_address = src->placed_address;
-  dest->placed_size = src->placed_size;
-}
-
 static int
 bkpt_insert_location (struct bp_location *bl)
 {
@@ -15356,87 +15306,6 @@ invalidate_bp_value_on_memory_change (struct inferior *inferior,
 		}
 	  }
       }
-}
-
-/* Create and insert a raw software breakpoint at PC.  Return an
-   identifier, which should be used to remove the breakpoint later.
-   In general, places which call this should be using something on the
-   breakpoint chain instead; this function should be eliminated
-   someday.  */
-
-void *
-deprecated_insert_raw_breakpoint (struct gdbarch *gdbarch,
-				  struct address_space *aspace, CORE_ADDR pc)
-{
-  struct bp_target_info *bp_tgt;
-  struct bp_location *bl;
-
-  bp_tgt = XCNEW (struct bp_target_info);
-
-  bp_tgt->placed_address_space = aspace;
-  bp_tgt->reqstd_address = pc;
-
-  /* If an unconditional non-raw breakpoint is already inserted at
-     that location, there's no need to insert another.  However, with
-     target-side evaluation of breakpoint conditions, if the
-     breakpoint that is currently inserted on the target is
-     conditional, we need to make it unconditional.  Note that a
-     breakpoint with target-side commands is not reported even if
-     unconditional, so we need to remove the commands from the target
-     as well.  */
-  bl = find_non_raw_software_breakpoint_inserted_here (aspace, pc);
-  if (bl != NULL
-      && VEC_empty (agent_expr_p, bl->target_info.conditions)
-      && VEC_empty (agent_expr_p, bl->target_info.tcommands))
-    {
-      bp_target_info_copy_insertion_state (bp_tgt, &bl->target_info);
-      return bp_tgt;
-    }
-
-  if (target_insert_breakpoint (gdbarch, bp_tgt) != 0)
-    {
-      /* Could not insert the breakpoint.  */
-      xfree (bp_tgt);
-      return NULL;
-    }
-
-  return bp_tgt;
-}
-
-/* Remove a breakpoint BP inserted by
-   deprecated_insert_raw_breakpoint.  */
-
-int
-deprecated_remove_raw_breakpoint (struct gdbarch *gdbarch, void *bp)
-{
-  struct bp_target_info *bp_tgt = bp;
-  struct address_space *aspace = bp_tgt->placed_address_space;
-  CORE_ADDR address = bp_tgt->reqstd_address;
-  struct bp_location *bl;
-  int ret;
-
-  bl = find_non_raw_software_breakpoint_inserted_here (aspace, address);
-
-  /* Only remove the raw breakpoint if there are no other non-raw
-     breakpoints still inserted at this location.  Otherwise, we would
-     be effectively disabling those breakpoints.  */
-  if (bl == NULL)
-    ret = target_remove_breakpoint (gdbarch, bp_tgt);
-  else if (!VEC_empty (agent_expr_p, bl->target_info.conditions)
-	   || !VEC_empty (agent_expr_p, bl->target_info.tcommands))
-    {
-      /* The target is evaluating conditions, and when we inserted the
-	 software single-step breakpoint, we had made the breakpoint
-	 unconditional and command-less on the target side.  Reinsert
-	 to restore the conditions/commands.  */
-      ret = target_insert_breakpoint (bl->gdbarch, &bl->target_info);
-    }
-  else
-    ret = 0;
-
-  xfree (bp_tgt);
-
-  return ret;
 }
 
 /* Create and insert a breakpoint for software single step.  */

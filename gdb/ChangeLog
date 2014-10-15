@@ -1,5 +1,19 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (regular_breakpoint_inserted_here_p): Inline ...
+	(breakpoint_inserted_here_p): ... here.  Remove special case for
+	software single-step breakpoints.
+	(find_non_raw_software_breakpoint_inserted_here): Inline ...
+	(software_breakpoint_inserted_here_p): ... here.  Remove special
+	case for software single-step breakpoints.
+	(bp_target_info_copy_insertion_state)
+	(deprecated_insert_raw_breakpoint)
+	(deprecated_remove_raw_breakpoint): Delete functions.
+	* breakpoint.h (deprecated_insert_raw_breakpoint)
+	(deprecated_remove_raw_breakpoint): Remove declarations.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	PR breakpoints/9649
 	* breakpoint.c (single_step_breakpoints, single_step_gdbarch):
 	Delete array globals.
