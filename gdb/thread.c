@@ -91,23 +91,42 @@ inferior_thread (void)
   return tp;
 }
 
+/* Delete the breakpoint pointed at by BP_P, if there's one.  */
+
+static void
+delete_thread_breakpoint (struct breakpoint **bp_p)
+{
+  if (*bp_p != NULL)
+    {
+      delete_breakpoint (*bp_p);
+      *bp_p = NULL;
+    }
+}
+
 void
 delete_step_resume_breakpoint (struct thread_info *tp)
 {
-  if (tp && tp->control.step_resume_breakpoint)
-    {
-      delete_breakpoint (tp->control.step_resume_breakpoint);
-      tp->control.step_resume_breakpoint = NULL;
-    }
+  if (tp != NULL)
+    delete_thread_breakpoint (&tp->control.step_resume_breakpoint);
 }
 
 void
 delete_exception_resume_breakpoint (struct thread_info *tp)
 {
-  if (tp && tp->control.exception_resume_breakpoint)
+  if (tp != NULL)
+    delete_thread_breakpoint (&tp->control.exception_resume_breakpoint);
+}
+
+/* Delete the breakpoint pointed at by BP_P at the next stop, if
+   there's one.  */
+
+static void
+delete_at_next_stop (struct breakpoint **bp)
+{
+  if (*bp != NULL)
     {
-      delete_breakpoint (tp->control.exception_resume_breakpoint);
-      tp->control.exception_resume_breakpoint = NULL;
+      (*bp)->disposition = disp_del_at_next_stop;
+      *bp = NULL;
     }
 }
 
@@ -118,18 +137,8 @@ clear_thread_inferior_resources (struct thread_info *tp)
      but not any user-specified thread-specific breakpoints.  We can not
      delete the breakpoint straight-off, because the inferior might not
      be stopped at the moment.  */
-  if (tp->control.step_resume_breakpoint)
-    {
-      tp->control.step_resume_breakpoint->disposition = disp_del_at_next_stop;
-      tp->control.step_resume_breakpoint = NULL;
-    }
-
-  if (tp->control.exception_resume_breakpoint)
-    {
-      tp->control.exception_resume_breakpoint->disposition
-	= disp_del_at_next_stop;
-      tp->control.exception_resume_breakpoint = NULL;
-    }
+  delete_at_next_stop (&tp->control.step_resume_breakpoint);
+  delete_at_next_stop (&tp->control.exception_resume_breakpoint);
 
   delete_longjmp_breakpoint_at_next_stop (tp->num);
 

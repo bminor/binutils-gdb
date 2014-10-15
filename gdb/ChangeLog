@@ -1,5 +1,13 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* thread.c (delete_thread_breakpoint): New function.
+	(delete_step_resume_breakpoint)
+	(delete_exception_resume_breakpoint): Use it.
+	(delete_at_next_stop): New function.
+	(clear_thread_inferior_resources): Use delete_at_next_stop.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (regular_breakpoint_inserted_here_p): Inline ...
 	(breakpoint_inserted_here_p): ... here.  Remove special case for
 	software single-step breakpoints.
