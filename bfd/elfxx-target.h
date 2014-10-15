@@ -49,6 +49,9 @@
 #ifndef bfd_elfNN_find_nearest_line
 #define bfd_elfNN_find_nearest_line	_bfd_elf_find_nearest_line
 #endif
+#ifndef bfd_elfNN_find_line
+#define bfd_elfNN_find_line		_bfd_elf_find_line
+#endif
 #ifndef bfd_elfNN_find_inliner_info
 #define bfd_elfNN_find_inliner_info	_bfd_elf_find_inliner_info
 #endif

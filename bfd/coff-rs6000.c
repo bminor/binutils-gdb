@@ -4048,6 +4048,7 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 #define _bfd_xcoff_find_nearest_line xcoff_find_nearest_line
 #define _bfd_generic_find_nearest_line_discriminator \
   xcoff_find_nearest_line_discriminator
+#define _bfd_xcoff_find_line coff_find_line
 #define _bfd_xcoff_find_inliner_info coff_find_inliner_info
 #define _bfd_xcoff_bfd_make_debug_symbol coff_bfd_make_debug_symbol
 #define _bfd_xcoff_read_minisymbols _bfd_generic_read_minisymbols

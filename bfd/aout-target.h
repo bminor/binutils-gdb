@@ -468,6 +468,9 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 #ifndef MY_find_nearest_line
 #define MY_find_nearest_line NAME (aout, find_nearest_line)
 #endif
+#ifndef MY_find_line
+#define MY_find_line _bfd_nosymbols_find_line
+#endif
 #ifndef MY_find_inliner_info
 #define MY_find_inliner_info _bfd_nosymbols_find_inliner_info
 #endif

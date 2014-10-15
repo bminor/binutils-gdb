@@ -3675,26 +3675,9 @@ ieee_openr_next_archived_file (bfd *arch, bfd *prev)
     }
 }
 
-static bfd_boolean
-ieee_find_nearest_line (bfd *abfd ATTRIBUTE_UNUSED,
-			asection *section ATTRIBUTE_UNUSED,
-			asymbol **symbols ATTRIBUTE_UNUSED,
-			bfd_vma offset ATTRIBUTE_UNUSED,
-			const char **filename_ptr ATTRIBUTE_UNUSED,
-			const char **functionname_ptr ATTRIBUTE_UNUSED,
-			unsigned int *line_ptr ATTRIBUTE_UNUSED)
-{
-  return FALSE;
-}
-
-static bfd_boolean
-ieee_find_inliner_info (bfd *abfd ATTRIBUTE_UNUSED,
-			const char **filename_ptr ATTRIBUTE_UNUSED,
-			const char **functionname_ptr ATTRIBUTE_UNUSED,
-			unsigned int *line_ptr ATTRIBUTE_UNUSED)
-{
-  return FALSE;
-}
+#define ieee_find_nearest_line _bfd_nosymbols_find_nearest_line
+#define ieee_find_line         _bfd_nosymbols_find_line
+#define ieee_find_inliner_info _bfd_nosymbols_find_inliner_info
 
 static int
 ieee_generic_stat_arch_elt (bfd *abfd, struct stat *buf)

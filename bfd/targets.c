@@ -368,7 +368,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_get_lineno, \
 .  NAME##_find_nearest_line, \
 .  _bfd_generic_find_nearest_line_discriminator, \
-.  _bfd_generic_find_line, \
+.  NAME##_find_line, \
 .  NAME##_find_inliner_info, \
 .  NAME##_bfd_make_debug_symbol, \
 .  NAME##_read_minisymbols, \
