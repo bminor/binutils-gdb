@@ -1278,6 +1278,14 @@ stepping_past_instruction_at (struct address_space *aspace,
 				       step_over_info.address));
 }
 
+/* Returns true if step-over info is valid.  */
+
+static int
+step_over_info_valid_p (void)
+{
+  return (step_over_info.aspace != NULL);
+}
+
 
 /* Displaced stepping.  */
 
@@ -2143,7 +2151,8 @@ a command like `return' or `jump' to continue execution."));
      once we arrive back at the step-resume breakpoint, actually step
      over the breakpoint we originally wanted to step over.  */
   if (singlestep_breakpoints_inserted_p
-      && tp->control.trap_expected && sig != GDB_SIGNAL_0)
+      && sig != GDB_SIGNAL_0
+      && step_over_info_valid_p ())
     {
       /* If we have nested signals or a pending signal is delivered
 	 immediately after a handler returns, might might already have
@@ -2237,13 +2246,10 @@ a command like `return' or `jump' to continue execution."));
   tp->suspend.stop_signal = GDB_SIGNAL_0;
 
   /* Advise target which signals may be handled silently.  If we have
-     removed breakpoints because we are stepping over one (which can
-     happen only if we are not using displaced stepping), we need to
-     receive all signals to avoid accidentally skipping a breakpoint
-     during execution of a signal handler.  */
-  if ((step || singlestep_breakpoints_inserted_p)
-      && tp->control.trap_expected
-      && !use_displaced_stepping (gdbarch))
+     removed breakpoints because we are stepping over one (in any
+     thread), we need to receive all signals to avoid accidentally
+     skipping a breakpoint during execution of a signal handler.  */
+  if (step_over_info_valid_p ())
     target_pass_signals (0, NULL);
   else
     target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
