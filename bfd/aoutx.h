@@ -2640,12 +2640,13 @@ NAME (aout, minisymbol_to_symbol) (bfd *abfd,
 
 bfd_boolean
 NAME (aout, find_nearest_line) (bfd *abfd,
-				asection *section,
 				asymbol **symbols,
+				asection *section,
 				bfd_vma offset,
 				const char **filename_ptr,
 				const char **functionname_ptr,
-				unsigned int *line_ptr)
+				unsigned int *line_ptr,
+				unsigned int *disriminator_ptr)
 {
   /* Run down the file looking for the filename, function and linenumber.  */
   asymbol **p;
@@ -2663,6 +2664,8 @@ NAME (aout, find_nearest_line) (bfd *abfd,
   *filename_ptr = abfd->filename;
   *functionname_ptr = 0;
   *line_ptr = 0;
+  if (disriminator_ptr)
+    *disriminator_ptr = 0;
 
   if (symbols != NULL)
     {

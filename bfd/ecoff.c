@@ -1704,12 +1704,13 @@ _bfd_ecoff_canonicalize_reloc (bfd *abfd,
 
 bfd_boolean
 _bfd_ecoff_find_nearest_line (bfd *abfd,
+			      asymbol **symbols ATTRIBUTE_UNUSED,
 			      asection *section,
-			      asymbol **ignore_symbols ATTRIBUTE_UNUSED,
 			      bfd_vma offset,
 			      const char **filename_ptr,
 			      const char **functionname_ptr,
-			      unsigned int *retline_ptr)
+			      unsigned int *retline_ptr,
+			      unsigned int *discriminator_ptr)
 {
   const struct ecoff_debug_swap * const debug_swap
     = &ecoff_backend (abfd)->debug_swap;
@@ -1730,8 +1731,10 @@ _bfd_ecoff_find_nearest_line (bfd *abfd,
       if (ecoff_data (abfd)->find_line_info == NULL)
 	return FALSE;
     }
-  line_info = ecoff_data (abfd)->find_line_info;
 
+  if (discriminator_ptr)
+    *discriminator_ptr = 0;
+  line_info = ecoff_data (abfd)->find_line_info;
   return _bfd_ecoff_locate_line (abfd, section, offset, debug_info,
 				 debug_swap, line_info, filename_ptr,
 				 functionname_ptr, retline_ptr);

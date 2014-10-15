@@ -86,8 +86,8 @@ extern bfd_boolean _bfd_mips_elf_ignore_discarded_relocs
 extern bfd_boolean _bfd_mips_elf_is_target_special_symbol
   (bfd *abfd, asymbol *sym);
 extern bfd_boolean _bfd_mips_elf_find_nearest_line
-  (bfd *, asection *, asymbol **, bfd_vma, const char **,
-   const char **, unsigned int *);
+  (bfd *, asymbol **, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *);
 extern bfd_boolean _bfd_mips_elf_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *);
 extern bfd_boolean _bfd_mips_elf_set_section_contents
