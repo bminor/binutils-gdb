@@ -1,4 +1,4 @@
-# Pretty-printer utilities.
+# Pretty-printers for bounds registers.
 # Copyright (C) 2013-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -16,8 +16,8 @@
 
 import gdb.printing
 
-class BoundPrinter:
-    """Adds size field to a _rawbound128 type."""
+class MpxBound128Printer:
+    """Adds size field to a mpx __gdb_builtin_type_bound128 type."""
 
     def __init__ (self, val):
         self.val = val
@@ -31,15 +31,6 @@ class BoundPrinter:
         result = '{lbound = %s, ubound = %s} : size %s' % (lower, upper, size)
         return result
 
-# There are two pattern matching used: first one is related to a library
-# second is related to the type. Since we are displaying a register all
-# libraries are accepted. Type to be processed is the same present
-# in the xml file.
-
-def build_pretty_printer ():
-    pp = gdb.printing.RegexpCollectionPrettyPrinter (".*")
-    pp.add_printer ('bound', '^__gdb_builtin_type_bound128', BoundPrinter)
-    return pp
-
-gdb.printing.register_pretty_printer (gdb.current_objfile (),
-                                      build_pretty_printer ())
+gdb.printing.add_builtin_pretty_printer ('mpx_bound128',
+                                         '^__gdb_builtin_type_bound128',
+                                         MpxBound128Printer)
