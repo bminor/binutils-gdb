@@ -1,3 +1,8 @@
+2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld.texinfo (Options): When mentioning "=" and sysroot, mention
+	that --sysroot controls it, not only through the configuration.
+
 2014-10-14  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.25.
