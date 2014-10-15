@@ -2762,9 +2762,7 @@ remote_update_thread_list (struct target_ops *ops)
   struct remote_state *rs = get_remote_state ();
   struct threads_listing_context context;
   struct cleanup *old_chain;
-
-  /* Delete GDB-side threads no longer found on the target.  */
-  prune_threads ();
+  int got_list = 0;
 
   context.items = NULL;
   old_chain = make_cleanup (clear_threads_listing_context, &context);
@@ -2778,8 +2776,31 @@ remote_update_thread_list (struct target_ops *ops)
     {
       int i;
       struct thread_item *item;
+      struct thread_info *tp, *tmp;
 
-      /* Now add threads we don't know about yet to our list.  */
+      got_list = 1;
+
+      /* CONTEXT now holds the current thread list on the remote
+	 target end.  Delete GDB-side threads no longer found on the
+	 target.  */
+      ALL_NON_EXITED_THREADS_SAFE (tp, tmp)
+        {
+	  for (i = 0;
+	       VEC_iterate (thread_item_t, context.items, i, item);
+	       ++i)
+	    {
+	      if (ptid_equal (item->ptid, tp->ptid))
+		break;
+	    }
+
+	  if (i == VEC_length (thread_item_t, context.items))
+	    {
+	      /* Not found.  */
+	      delete_thread (tp->ptid);
+	    }
+        }
+
+      /* And now add threads we don't know about yet to our list.  */
       for (i = 0;
 	   VEC_iterate (thread_item_t, context.items, i, item);
 	   ++i)
@@ -2801,6 +2822,15 @@ remote_update_thread_list (struct target_ops *ops)
 	      item->extra = NULL;
 	    }
 	}
+    }
+
+  if (!got_list)
+    {
+      /* If no thread listing method is supported, then query whether
+	 each known thread is alive, one by one, with the T packet.
+	 If the target doesn't support threads at all, then this is a
+	 no-op.  See remote_thread_alive.  */
+      prune_threads ();
     }
 
   do_cleanups (old_chain);

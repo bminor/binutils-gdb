@@ -354,6 +354,14 @@ extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
   for (T = thread_list; T; T = T->next) \
     if ((T)->state != THREAD_EXITED)
 
+/* Like ALL_NON_EXITED_THREADS, but allows deleting the currently
+   iterated thread.  */
+#define ALL_NON_EXITED_THREADS_SAFE(T, TMP)	\
+  for ((T) = thread_list;			\
+       (T) != NULL ? ((TMP) = (T)->next, 1): 0;	\
+       (T) = (TMP))				\
+    if ((T)->state != THREAD_EXITED)
+
 extern int thread_count (void);
 
 /* Switch from one thread to another.  */

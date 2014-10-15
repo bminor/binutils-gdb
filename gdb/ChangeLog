@@ -1,5 +1,13 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (ALL_NON_EXITED_THREADS_SAFE): New macro.
+	* remote.c (remote_update_thread_list): Skip calling prune_threads
+	if any thread listing method is supported, and instead walk over
+	the set of remote threads listed, deleting those that are not
+	found in GDB's thread list.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* ada-tasks.c (print_ada_task_info, task_command_1): Adjust.
 	* bsd-uthread.c (bsd_uthread_find_new_threads): Rename to ...
 	(bsd_uthread_update_thread_list): ... this.  Call prune_threads.
