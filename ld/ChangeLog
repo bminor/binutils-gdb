@@ -1,3 +1,7 @@
+2014-10-15  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	Backport "="-ldscript-path-prefix changes from master.
