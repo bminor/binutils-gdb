@@ -161,6 +161,7 @@ extern int yylex (void);
 extern void lex_push_file (FILE *, const char *, unsigned int);
 extern void lex_redirect (const char *, const char *, unsigned int);
 extern void ldlex_script (void);
+extern void ldlex_inputlist (void);
 extern void ldlex_mri_script (void);
 extern void ldlex_version_script (void);
 extern void ldlex_version_file (void);

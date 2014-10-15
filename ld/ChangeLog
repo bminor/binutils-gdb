@@ -1,5 +1,16 @@
 2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ldlex.l (INPUTLIST): New start condition.
+	(comment pattern, ",", "(", ")", "AS_NEEDED")
+	({FILENAMECHAR1}{FILENAMECHAR}*, "-l"{FILENAMECHAR}+)
+	(quoted string pattern, whitespace pattern): Add INPUTLIST to
+	valid start conditions.
+	(<INPUTLIST>"="{FILENAMECHAR1}{FILENAMECHAR}*): New NAME rule.
+	(ldlex_inputlist): New start-condition-setter function.
+	* ldgram.y (input_list1): Rename from input_list.  All recursive
+	use changed.
+	(input_list): New wrapper rule for input_list1, setting
+	INPUTLIST lexer state for the duration of parsing input_list1.
 	* ldlang.c (lang_add_input_file): If the first character in the
 	filename is '=', prepend the sysroot and force the context of that
 	input file to non-sysroot.
