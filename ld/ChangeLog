@@ -1,5 +1,8 @@
 2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ldlang.c (lang_add_input_file): If the first character in the
+	filename is '=', prepend the sysroot and force the context of that
+	input file to non-sysroot.
 	* ld.texinfo (Options): When mentioning "=" and sysroot, mention
 	that --sysroot controls it, not only through the configuration.
 	(input files in linker scripts): When mentioning
