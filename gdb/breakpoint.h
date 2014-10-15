@@ -47,18 +47,13 @@ struct linespec_sals;
 
 
 /* Type of breakpoint.  */
-/* FIXME In the future, we should fold all other breakpoint-like
-   things into here.  This includes:
-
-   * single-step (for machines where we have to simulate single
-   stepping) (probably, though perhaps it is better for it to look as
-   much as possible like a single-step to wait_for_inferior).  */
 
 enum bptype
   {
     bp_none = 0,		/* Eventpoint has been deleted */
     bp_breakpoint,		/* Normal breakpoint */
     bp_hardware_breakpoint,	/* Hardware assisted breakpoint */
+    bp_single_step,		/* Software single-step */
     bp_until,			/* used by until command */
     bp_finish,			/* used by finish command */
     bp_watchpoint,		/* Watchpoint */
@@ -1461,8 +1456,10 @@ extern void add_solib_catchpoint (char *arg, int is_load, int is_temp,
    deletes all breakpoints.  */
 extern void delete_command (char *arg, int from_tty);
 
-/* Manage a software single step breakpoint (or two).  Insert may be
-   called twice before remove is called.  */
+/* Create and insert a new software single step breakpoint for the
+   current thread.  May be called multiple times; each time will add a
+   new location to the set of potential addresses the next instruction
+   is at.  */
 extern void insert_single_step_breakpoint (struct gdbarch *,
 					   struct address_space *, 
 					   CORE_ADDR);

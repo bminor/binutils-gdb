@@ -1918,6 +1918,9 @@ infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 static void
 resume_cleanups (void *ignore)
 {
+  if (single_step_breakpoints_inserted ())
+    remove_single_step_breakpoints ();
+
   normal_stop ();
 }
 
@@ -2893,6 +2896,9 @@ static void
 delete_just_stopped_threads_infrun_breakpoints (void)
 {
   for_each_just_stopped_thread (delete_thread_infrun_breakpoints);
+
+  if (single_step_breakpoints_inserted ())
+    remove_single_step_breakpoints ();
 }
 
 /* A cleanup wrapper.  */
@@ -3151,6 +3157,8 @@ fetch_inferior_event (void *client_data)
   /* Get executed before make_cleanup_restore_current_thread above to apply
      still for the thread which has thrown the exception.  */
   make_bpstat_clear_actions_cleanup ();
+
+  make_cleanup (delete_just_stopped_threads_infrun_breakpoints_cleanup, NULL);
 
   /* Now figure out what to do with the result of the result.  */
   handle_inferior_event (ecs);
@@ -5524,6 +5532,14 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	      if (debug_infrun)
 		fprintf_unfiltered (gdb_stdlog,
 				    "infrun: expected thread advanced also\n");
+
+	      /* Clear the info of the previous step-over, as it's no
+		 longer valid.  It's what keep_going would do too, if
+		 we called it.  Must do this before trying to insert
+		 the sss breakpoint, otherwise if we were previously
+		 trying to step over this exact address in another
+		 thread, the breakpoint ends up not installed.  */
+	      clear_step_over_info ();
 
 	      insert_single_step_breakpoint (get_frame_arch (frame),
 					     get_frame_address_space (frame),

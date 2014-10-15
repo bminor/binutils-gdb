@@ -1,3 +1,14 @@
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/9649
+	* gdb.base/breakpoint-in-ro-region.c (main): Add more instructions.
+	* gdb.base/breakpoint-in-ro-region.exp
+	(probe_target_hardware_step): New procedure.
+	(top level): Probe hardware stepping and hardware breakpoint
+	support.  Test stepping through a read-only region, with both
+	"breakpoint auto-hw" on and off and both "always-inserted" on and
+	off.
+
 2014-10-15  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* gdb.dlang/demangle.exp: Update for demangling changes.

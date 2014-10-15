@@ -1,5 +1,43 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	PR breakpoints/9649
+	* breakpoint.c (single_step_breakpoints, single_step_gdbarch):
+	Delete array globals.
+	(single_step_breakpoints): New global.
+	(breakpoint_xfer_memory): Remove special handling for single-step
+	breakpoints.
+	(update_breakpoints_after_exec): Delete bp_single_step
+	breakpoints.
+	(detach_breakpoints): Remove special handling for single-step
+	breakpoints.
+	(breakpoint_init_inferior): Delete bp_single_step breakpoints.
+	(bpstat_stop_status): Add comment.
+	(bpstat_what, bptype_string, print_one_breakpoint_location)
+	(adjust_breakpoint_address, init_bp_location): Handle
+	bp_single_step.
+	(new_single_step_breakpoint): New function.
+	(set_momentary_breakpoint, bkpt_remove_location): Remove special
+	handling for single-step breakpoints.
+	(insert_single_step_breakpoint, single_step_breakpoints_inserted)
+	(remove_single_step_breakpoints, cancel_single_step_breakpoints):
+	Rewrite.
+	(detach_single_step_breakpoints, find_single_step_breakpoint):
+	Delete functions.
+	(breakpoint_has_location_inserted_here): New function.
+	(single_step_breakpoint_inserted_here_p): Rewrite.
+	* breakpoint.h: Remove FIXME.
+	(enum bptype) <bp_single_step>: New enum value.
+	(insert_single_step_breakpoint): Update comment.
+	* infrun.c (resume_cleanups)
+	(delete_step_thread_step_resume_breakpoint): Remove single-step
+	breakpoints.
+	(fetch_inferior_event): Install a cleanup that removes infrun
+	breakpoints.
+	(switch_back_to_stepped_thread) <expect thread advanced also>:
+	Clear step-over info.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (delete_step_resume_breakpoint_callback): Delete.
 	(delete_thread_infrun_breakpoints): New function, with parts
 	salvaged from delete_step_resume_breakpoint_callback.
