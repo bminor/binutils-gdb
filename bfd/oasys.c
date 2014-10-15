@@ -1129,26 +1129,9 @@ oasys_openr_next_archived_file (bfd *arch, bfd *prev)
   return NULL;
 }
 
-static bfd_boolean
-oasys_find_nearest_line (bfd *abfd ATTRIBUTE_UNUSED,
-			 asection *section ATTRIBUTE_UNUSED,
-			 asymbol **symbols ATTRIBUTE_UNUSED,
-			 bfd_vma offset ATTRIBUTE_UNUSED,
-			 const char **filename_ptr ATTRIBUTE_UNUSED,
-			 const char **functionname_ptr ATTRIBUTE_UNUSED,
-			 unsigned int *line_ptr ATTRIBUTE_UNUSED)
-{
-  return FALSE;
-}
-
-static bfd_boolean
-oasys_find_inliner_info (bfd *abfd ATTRIBUTE_UNUSED,
-			 const char **filename_ptr ATTRIBUTE_UNUSED,
-			 const char **functionname_ptr ATTRIBUTE_UNUSED,
-			 unsigned int *line_ptr ATTRIBUTE_UNUSED)
-{
-  return FALSE;
-}
+#define oasys_find_nearest_line _bfd_nosymbols_find_nearest_line
+#define oasys_find_line         _bfd_nosymbols_find_line
+#define oasys_find_inliner_info _bfd_nosymbols_find_inliner_info
 
 static int
 oasys_generic_stat_arch_elt (bfd *abfd, struct stat *buf)

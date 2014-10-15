@@ -360,6 +360,7 @@ extern bfd_boolean coff_find_nearest_line
 extern bfd_boolean coff_find_nearest_line_discriminator
   (bfd *, asection *, asymbol **, bfd_vma, const char **,
    const char **, unsigned int *, unsigned int *);
+#define coff_find_line _bfd_nosymbols_find_line
 struct dwarf_debug_section;
 extern bfd_boolean coff_find_nearest_line_with_names
   (bfd *, const struct dwarf_debug_section *, asection *, asymbol **,

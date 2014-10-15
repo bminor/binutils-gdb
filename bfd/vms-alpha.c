@@ -9210,6 +9210,7 @@ bfd_vms_get_data (bfd *abfd)
 #define alpha_vms_find_nearest_line        _bfd_vms_find_nearest_dst_line
 #define _bfd_generic_find_nearest_line_discriminator \
   _bfd_vms_find_nearest_line_discriminator
+#define alpha_vms_find_line                _bfd_nosymbols_find_line
 #define alpha_vms_bfd_is_local_label_name  vms_bfd_is_local_label_name
 
 /* Generic table.  */

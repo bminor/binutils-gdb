@@ -1105,16 +1105,6 @@ read_signed_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 bfd_boolean
-_bfd_generic_find_line (bfd *abfd ATTRIBUTE_UNUSED,
-		       asymbol **symbols ATTRIBUTE_UNUSED,
-		       asymbol *symbol ATTRIBUTE_UNUSED,
-		       const char **filename_ptr ATTRIBUTE_UNUSED,
-		       unsigned int *linenumber_ptr ATTRIBUTE_UNUSED)
-{
-  return FALSE;
-}
-
-bfd_boolean
 _bfd_generic_find_nearest_line_discriminator (bfd *abfd ATTRIBUTE_UNUSED,
                                               asection *section ATTRIBUTE_UNUSED,
                                               asymbol **symbols ATTRIBUTE_UNUSED,
