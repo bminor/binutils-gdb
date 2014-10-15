@@ -133,7 +133,7 @@ static target_xfer_partial_ftype procfs_xfer_partial;
 
 static int procfs_thread_alive (struct target_ops *ops, ptid_t);
 
-static void procfs_find_new_threads (struct target_ops *ops);
+static void procfs_update_thread_list (struct target_ops *ops);
 static char *procfs_pid_to_str (struct target_ops *, ptid_t);
 
 static int proc_find_memory_regions (struct target_ops *self,
@@ -196,7 +196,7 @@ procfs_target (void)
   t->to_files_info = procfs_files_info;
   t->to_stop = procfs_stop;
 
-  t->to_find_new_threads = procfs_find_new_threads;
+  t->to_update_thread_list = procfs_update_thread_list;
   t->to_thread_alive = procfs_thread_alive;
   t->to_pid_to_str = procfs_pid_to_str;
 
@@ -4646,7 +4646,7 @@ procfs_inferior_created (struct target_ops *ops, int from_tty)
 #endif
 }
 
-/* Callback for find_new_threads.  Calls "add_thread".  */
+/* Callback for update_thread_list.  Calls "add_thread".  */
 
 static int
 procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
@@ -4663,9 +4663,11 @@ procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
    back to GDB to add to its list.  */
 
 static void
-procfs_find_new_threads (struct target_ops *ops)
+procfs_update_thread_list (struct target_ops *ops)
 {
   procinfo *pi;
+
+  prune_threads ();
 
   /* Find procinfo for main process.  */
   pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);

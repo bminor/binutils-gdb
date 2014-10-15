@@ -68,7 +68,6 @@ static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
 static void thread_apply_command (char *, int);
 static void restore_current_thread (ptid_t);
-static void prune_threads (void);
 
 /* Data to cleanup thread array.  */
 
@@ -622,7 +621,9 @@ thread_alive (struct thread_info *tp)
   return 1;
 }
 
-static void
+/* See gdbthreads.h.  */
+
+void
 prune_threads (void)
 {
   struct thread_info *tp, *next;
@@ -1586,8 +1587,7 @@ update_threads_executing (void)
 void
 update_thread_list (void)
 {
-  prune_threads ();
-  target_find_new_threads ();
+  target_update_thread_list ();
   update_threads_executing ();
 }
 

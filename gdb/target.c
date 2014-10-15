@@ -3048,9 +3048,9 @@ target_thread_alive (ptid_t ptid)
 }
 
 void
-target_find_new_threads (void)
+target_update_thread_list (void)
 {
-  current_target.to_find_new_threads (&current_target);
+  current_target.to_update_thread_list (&current_target);
 }
 
 void

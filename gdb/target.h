@@ -563,7 +563,7 @@ struct target_ops
 
     int (*to_thread_alive) (struct target_ops *, ptid_t ptid)
       TARGET_DEFAULT_RETURN (0);
-    void (*to_find_new_threads) (struct target_ops *)
+    void (*to_update_thread_list) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     char *(*to_pid_to_str) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_FUNC (default_pid_to_str);
@@ -1568,9 +1568,9 @@ extern void target_program_signals (int nsig, unsigned char *program_signals);
 
 extern int target_thread_alive (ptid_t ptid);
 
-/* Query for new threads and add them to the thread list.  */
+/* Sync the target's threads with GDB's thread list.  */
 
-extern void target_find_new_threads (void);
+extern void target_update_thread_list (void);
 
 /* Make target stop in a continuable fashion.  (For instance, under
    Unix, this should act like SIGSTOP).  Note that this function is

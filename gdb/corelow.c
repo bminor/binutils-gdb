@@ -413,7 +413,7 @@ core_open (const char *arg, int from_tty)
      sections.  */
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      target_find_new_threads ();
+      target_update_thread_list ();
     }
 
   if (except.reason < 0)

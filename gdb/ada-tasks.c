@@ -1025,7 +1025,7 @@ print_ada_task_info (struct ui_out *uiout,
        take a --thread argument.  However, in order to be able to
        provide that thread ID, the thread list must be up to date
        first.  */
-    target_find_new_threads ();
+    target_update_thread_list ();
 
   data = get_ada_tasks_inferior_data (inf);
 
@@ -1291,7 +1291,7 @@ task_command_1 (char *taskno_str, int from_tty, struct inferior *inf)
      to the thread associated to our task if GDB does not know about
      that thread, we need to make sure that any new threads gets added
      to the thread list.  */
-  target_find_new_threads ();
+  target_update_thread_list ();
 
   /* Verify that the ptid of the task we want to switch to is valid
      (in other words, a ptid that GDB knows about).  Otherwise, we will

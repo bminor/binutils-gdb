@@ -2753,15 +2753,18 @@ remote_get_threads_with_qthreadinfo (struct target_ops *ops,
   return 0;
 }
 
-/* Implement the to_find_new_threads function for the remote
+/* Implement the to_update_thread_list function for the remote
    targets.  */
 
 static void
-remote_threads_info (struct target_ops *ops)
+remote_update_thread_list (struct target_ops *ops)
 {
   struct remote_state *rs = get_remote_state ();
   struct threads_listing_context context;
   struct cleanup *old_chain;
+
+  /* Delete GDB-side threads no longer found on the target.  */
+  prune_threads ();
 
   context.items = NULL;
   old_chain = make_cleanup (clear_threads_listing_context, &context);
@@ -2776,7 +2779,7 @@ remote_threads_info (struct target_ops *ops)
       int i;
       struct thread_item *item;
 
-      /* Add threads we don't know about yet to our list.  */
+      /* Now add threads we don't know about yet to our list.  */
       for (i = 0;
 	   VEC_iterate (thread_item_t, context.items, i, item);
 	   ++i)
@@ -3424,7 +3427,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	 controlling.  We default to adding them in the running state.
 	 The '?' query below will then tell us about which threads are
 	 stopped.  */
-      remote_threads_info (target);
+      remote_update_thread_list (target);
     }
   else if (packet_support (PACKET_QNonStop) == PACKET_ENABLE)
     {
@@ -3476,7 +3479,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	}
 
       /* Fetch thread list.  */
-      target_find_new_threads ();
+      target_update_thread_list ();
 
       /* Let the stub know that we want it to return the thread.  */
       set_continue_thread (minus_one_ptid);
@@ -4446,7 +4449,7 @@ extended_remote_attach_1 (struct target_ops *target, const char *args,
       struct thread_info *thread;
 
       /* Get list of threads.  */
-      remote_threads_info (target);
+      remote_update_thread_list (target);
 
       thread = first_thread_of_process (pid);
       if (thread)
@@ -11456,7 +11459,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_pass_signals = remote_pass_signals;
   remote_ops.to_program_signals = remote_program_signals;
   remote_ops.to_thread_alive = remote_thread_alive;
-  remote_ops.to_find_new_threads = remote_threads_info;
+  remote_ops.to_update_thread_list = remote_update_thread_list;
   remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_ops.to_get_ada_task_ptid = remote_get_ada_task_ptid;

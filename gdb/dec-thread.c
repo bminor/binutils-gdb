@@ -394,7 +394,7 @@ dec_thread_add_gdb_thread (struct thread_info *info, void *context)
   return 0;
 }
 
-/* Implement the find_new_thread target_ops method.  */
+/* Find new threads.  */
 
 static void
 dec_thread_find_new_threads (struct target_ops *ops)
@@ -410,6 +410,21 @@ dec_thread_find_new_threads (struct target_ops *ops)
       if (!in_thread_list (ptid))
         add_thread (ptid);
     }
+}
+
+/* Implement the update_thread_list target_ops method.  */
+
+static void
+dec_thread_update_thread_list (struct target_ops *ops)
+{
+  int i;
+  struct dec_thread_info *info;
+
+  /* Delete dead threads.  */
+  prune_threads ();
+
+  /* Now find new threads.  */
+  dec_thread_find_new_threads (ops);
 }
 
 /* Resynchronize the list of threads known by GDB with the actual
@@ -717,7 +732,7 @@ init_dec_thread_ops (void)
   dec_thread_ops.to_store_registers    = dec_thread_store_registers;
   dec_thread_ops.to_mourn_inferior     = dec_thread_mourn_inferior;
   dec_thread_ops.to_thread_alive       = dec_thread_thread_alive;
-  dec_thread_ops.to_find_new_threads   = dec_thread_find_new_threads;
+  dec_thread_ops.to_update_thread_list = dec_thread_update_thread_list;
   dec_thread_ops.to_pid_to_str         = dec_thread_pid_to_str;
   dec_thread_ops.to_stratum            = thread_stratum;
   dec_thread_ops.to_get_ada_task_ptid  = dec_thread_get_ada_task_ptid;

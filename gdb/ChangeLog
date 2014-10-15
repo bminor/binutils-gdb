@@ -1,5 +1,59 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* ada-tasks.c (print_ada_task_info, task_command_1): Adjust.
+	* bsd-uthread.c (bsd_uthread_find_new_threads): Rename to ...
+	(bsd_uthread_update_thread_list): ... this.  Call prune_threads.
+	(bsd_uthread_target): Adjust.
+	* corelow.c (core_open): Adjust.
+	* dec-thread.c (dec_thread_find_new_threads): Update comment.
+	(dec_thread_update_thread_list): New function.
+	(init_dec_thread_ops): Adjust.
+	* gdbthread.h (prune_threads): New declaration.
+	* linux-thread-db.c (thread_db_find_new_threads): Rename to ...
+	(thread_db_update_thread_list): ... this.  Call prune_threads.
+	(init_thread_db_ops): Adjust.
+	* nto-procfs.c (procfs_find_new_threads): Rename to ...
+	(procfs_update_thread_list): ... this.  Call prune_threads.
+	(procfs_attach, procfs_create_inferior, init_procfs_targets):
+	Adjust.
+	* obsd-nat.c (obsd_find_new_threads): Rename to ...
+	(obsd_update_thread_list): ... this.  Call prune_threads.
+	(obsd_add_target): Adjust.
+	* procfs.c (procfs_target): Adjust.
+	(procfs_notice_thread): Update comment.
+	(procfs_find_new_threads): Rename to ...
+	(procfs_update_thread_list): ... this.  Call prune_threads.
+	* ravenscar-thread.c (ravenscar_update_inferior_ptid): Update
+	comment.
+	(ravenscar_wait): Adjust.
+	(ravenscar_find_new_threads): Rename to ...
+	(ravenscar_update_thread_list): ... this.  Call prune_threads.
+	(init_ravenscar_thread_ops): Adjust.
+	* record-btrace.c (record_btrace_find_new_threads): Rename to ...
+	(record_btrace_update_thread_list): ... this.  Adjust comment.
+	(init_record_btrace_ops): Adjust.
+	* remote.c (remote_threads_info): Rename to ...
+	(remote_update_thread_list): ... this.  Call prune_threads.
+	(remote_start_remote, extended_remote_attach_1, init_remote_ops):
+	Adjust.
+	* sol-thread.c (check_for_thread_db): Adjust.
+	(sol_find_new_threads_callback): Rename to ...
+	(sol_update_thread_list_callback): ... this.
+	(sol_find_new_threads): Rename to ...
+	(sol_update_thread_list): ... this.  Call prune_threads.  Adjust.
+	(sol_get_ada_task_ptid, init_sol_thread_ops): Adjust.
+	* target-delegates.c: Regenerate.
+	* target.c (target_find_new_threads): Rename to ...
+	(target_update_thread_list): ... this.
+	* target.h (struct target_ops): Rename to_find_new_threads field
+	to to_update_thread_list.
+	(target_find_new_threads): Rename to ...
+	(target_update_thread_list): ... this.
+	* thread.c (prune_threads): Make extern.
+	(update_thread_list): Adjust.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_get_threadlist, remote_threadlist_iterator):
 	Add describing comment.  Return -1 if the qL packet is not
 	supported.
