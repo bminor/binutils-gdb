@@ -1,3 +1,7 @@
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* regformats/microblaze.dat: Delete file.
+
 2014-10-15  Ajit Agarwal  <ajitkum@xilinx.com>
 
 	* features/Makefile (microblaze-expedite): Replace pc with rpc.
