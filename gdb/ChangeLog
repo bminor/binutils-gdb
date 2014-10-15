@@ -1,5 +1,29 @@
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_get_threadlist, remote_threadlist_iterator):
+	Add describing comment.  Return -1 if the qL packet is not
+	supported.
+	(struct thread_item, thread_item_t): Move higher up in
+	the file.  Add comments.
+	(struct threads_parsing_context): Move higher up in
+	the file, add comments, and remote to ...
+	(struct threads_listing_context): ... this.
+	(remote_newthread_step): Don't add the thread to GDB's thread
+	database here.  Instead push it to the thread_listing_context
+	list.
+	(remote_find_new_threads): Rename to ...
+	(remote_get_threads_with_ql): ... this.  Add target_ops and
+	targets_listing_context parameters.  Pass down context.
+	(start_thread): Adjust.
+	(clear_threads_parsing_context): Rename to ...
+	(clear_threads_listing_context): ... this.
+	(remote_get_threads_with_qxfer): New, with parts salvaged from old
+	remote_threads_info.
+	(remote_get_threads_with_qthreadinfo): Ditto.
+	(remote_threads_info): Reimplement.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (resume): Don't force displaced-stepping for all
 	single-steps on software single-stepping archs.
 
