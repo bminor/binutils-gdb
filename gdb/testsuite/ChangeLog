@@ -1,3 +1,8 @@
+2014-10-24  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.cp/non-trivial-retval.cc: Add a test case.
+	* gdb.cp/non-trivial-retval.exp: Add a test.
+
 2014-10-20  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.python/py-objfile-script-gdb.py.in: Rename it to ...

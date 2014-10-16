@@ -1320,13 +1320,15 @@ gnuv3_pass_by_reference (struct type *type)
 	if (TYPE_NFIELDS (fieldtype) == 2)
 	  {
 	    struct type *arg_type = TYPE_FIELD_TYPE (fieldtype, 1);
-	    struct type *arg_target_type;
 
-	    arg_target_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+	    if (TYPE_CODE (arg_type) == TYPE_CODE_REF)
+	      {
+		struct type *arg_target_type;
 
-	    if (TYPE_CODE (arg_type) == TYPE_CODE_REF
-		&& class_types_same_p (arg_target_type, type))
-	      return 1;
+	        arg_target_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+		if (class_types_same_p (arg_target_type, type))
+		  return 1;
+	      }
 	  }
       }
 

@@ -63,6 +63,39 @@ f2 (int i1, int i2)
   return b;
 }
 
+class B1
+{
+public:
+  B1 () {}
+  /* This class exists to test that GDB does not trip on other
+     constructors (not copy constructors) which take one
+     argument.  Hence, put this decl before the copy-ctor decl.
+     If it is put after copy-ctor decl, then the decision to mark
+     this class as non-trivial will already be made and GDB will
+     not look at this constructor.  */
+  B1 (int i);
+  B1 (const B1 &obj);
+
+  int b1;
+};
+
+B1::B1 (const B1 &obj)
+{
+  b1 = obj.b1;
+}
+
+B1::B1 (int i) : b1 (i) { }
+
+B1
+f22 (int i1, int i2)
+{
+  B1 b1;
+
+  b1.b1 = i1 + i2;
+
+  return b1;
+}
+
 class C
 {
 public:
