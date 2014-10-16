@@ -2,6 +2,21 @@
 
 	Apply trunk patches
 	2014-10-16  Alan Modra  <amodra@gmail.com>
+	PR 17492
+	* elf32-arm.c (elf32_arm_add_symbol_hook): Only set has_gnu_symbols
+	on ELF output bfd.
+	* elf32-i386.c (elf_i386_add_symbol_hook): Likewise.
+	* elf32-m68k.c (elf_m68k_add_symbol_hook): Likewise.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_add_symbol_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): Likewise.
+	* elf64-sparc.c (elf64_sparc_add_symbol_hook): Likewise.
+	* elf64-x86-64.c (elf_x86_64_add_symbol_hook): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_add_symbol_hook): Likewise.
+	* elf-s390-common.c (elf_s390_add_symbol_hook): Likewise.  Handle
+	STB_GNU_UNIQUE too.
+
+	2014-10-16  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_before_check_relocs): Do .opd processing
 	even when output is not ppc64 ELF.  Remove redundant tests on
 	type of input bfd.

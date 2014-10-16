@@ -3636,9 +3636,10 @@ ppc_elf_add_symbol_hook (bfd *abfd,
       *valp = sym->st_size;
     }
 
-  if ((abfd->flags & DYNAMIC) == 0
-      && (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
+  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
+       || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE)
+      && (abfd->flags & DYNAMIC) == 0
+      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
   return TRUE;
