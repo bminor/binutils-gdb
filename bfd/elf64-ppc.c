@@ -4807,19 +4807,16 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 			   asection **sec,
 			   bfd_vma *value ATTRIBUTE_UNUSED)
 {
-  if ((ibfd->flags & DYNAMIC) == 0
-      && ELF_ST_BIND (isym->st_info) == STB_GNU_UNIQUE)
+  if ((ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
+       || ELF_ST_BIND (isym->st_info) == STB_GNU_UNIQUE)
+      && (ibfd->flags & DYNAMIC) == 0
+      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
-  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
-    {
-      if ((ibfd->flags & DYNAMIC) == 0)
-	elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
-    }
-  else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC)
-    ;
-  else if (*sec != NULL
-	   && strcmp ((*sec)->name, ".opd") == 0)
+  if (!(ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
+	|| ELF_ST_TYPE (isym->st_info) == STT_FUNC)
+      && *sec != NULL
+      && strcmp ((*sec)->name, ".opd") == 0)
     isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
 
   if ((STO_PPC64_LOCAL_MASK & isym->st_other) != 0)
