@@ -1,3 +1,9 @@
+2014-10-16  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers)
+	(i386_darwin_store_inferior_registers): Sanitize gs and fs values
+	on amd64.
+
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
 	* dec-thread.c (dec_thread_count_gdb_threads)
