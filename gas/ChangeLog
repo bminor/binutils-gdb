@@ -1,5 +1,10 @@
-2014-10-28  Alan Modra  <amodra@gmail.com>
+2014-10-28  Matthew Fortune  <matthew.fortune@imgtec.com>
 
+	Apply trunk patches
+	2014-10-17  Matthew Fortune  <matthew.fortune@imgtec.com>
+	* doc/c-mips.texi: Fix bad @value references.
+
+2014-10-28  Alan Modra  <amodra@gmail.com>
 	Apply trunk patches
 	2014-10-18  Alan Modra  <amodra@gmail.com>
 	PR 17493
