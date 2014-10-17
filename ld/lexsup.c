@@ -379,6 +379,8 @@ static const struct ld_option ld_options[] =
     EXACTLY_TWO_DASHES },
   { {"print-output-format", no_argument, NULL, OPTION_PRINT_OUTPUT_FORMAT},
     '\0', NULL, N_("Print default output format"), TWO_DASHES },
+  { {"print-sysroot", no_argument, NULL, OPTION_PRINT_SYSROOT},
+    '\0', NULL, N_("Print current sysroot"), TWO_DASHES },
   { {"qmagic", no_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for Linux compatibility"), ONE_DASH },
   { {"reduce-memory-overheads", no_argument, NULL,
@@ -959,6 +961,11 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_OFORMAT:
 	  lang_add_output_format (optarg, NULL, NULL, 0);
+	  break;
+	case OPTION_PRINT_SYSROOT:
+	  if (*ld_sysroot)
+	    puts (ld_sysroot);
+	  xexit (0);
 	  break;
 	case OPTION_PRINT_OUTPUT_FORMAT:
 	  command_line.print_output_format = TRUE;

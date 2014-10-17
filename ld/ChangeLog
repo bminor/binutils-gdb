@@ -1,3 +1,10 @@
+2014-10-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	Backport "implement --print-sysroot in ld" from master
+	* ldlex.h (enum option_values): Add entry OPTION_PRINT_SYSROOT.
+	* lexsup.c (ld_options): Add entry for --print-sysroot.
+	(parse_args) <OPTION_PRINT_SYSROOT>: Print sysroot and exit early.
+
 2014-10-15  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

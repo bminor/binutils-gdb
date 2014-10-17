@@ -1,3 +1,16 @@
+2014-10-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	Backport from master
+	* ld-scripts/sysroot-prefix.exp: Log $ld_sysroot.  Handle sysroot
+	== "/" as a separate sysroot-configuration with separable
+	test-types.
+	(sysroot_prefix_tests): Include all existing sysroot tests in
+	sysroot == "/" tests except exclude those where a --sysroot option
+	is not specified.
+	* lib/ld-lib.exp (check_sysroot_available): Rewrite to use
+	--print-sysroot instead of relying on error code from using
+	--sysroot=...  Also, set $ld_sysroot.
+
 2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	Backport "="-ldscript-path-prefix changes from master.
