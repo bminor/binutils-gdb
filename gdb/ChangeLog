@@ -1,5 +1,13 @@
 2014-10-17  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17472
+	* annotate.c (annotate_breakpoints_invalid): Use
+	target_terminal_our_for_output instead of target_terminal_ours.
+	Give back the terminal to the target.
+	(annotate_frames_invalid): Likewise.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
 	* target.c (enum terminal_state): New enum.
 	(terminal_state): New global.
 	(target_terminal_init): New function.

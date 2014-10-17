@@ -511,6 +511,14 @@ target_terminal_init (void)
 
 /* See target.h.  */
 
+int
+target_terminal_is_inferior (void)
+{
+  return (terminal_state == terminal_is_inferior);
+}
+
+/* See target.h.  */
+
 void
 target_terminal_inferior (void)
 {

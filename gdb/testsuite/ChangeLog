@@ -1,3 +1,9 @@
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17472
+	* gdb.base/annota-input-while-running.c: New file.
+	* gdb.base/annota-input-while-running.exp: New file.
+
 2014-09-11  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17347
