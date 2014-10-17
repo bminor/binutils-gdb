@@ -4093,7 +4093,7 @@ maybe_apply_stub(unsigned int r_type,
   const AArch64_reloc_property* arp =
       aarch64_reloc_property_table->get_reloc_property(r_type);
   gold_assert(arp != NULL);
-  This::Status status = This::template
+  typename This::Status status = This::template
       rela_general<32>(view, branch_offset, 0, arp);
   if (status != This::STATUS_OKAY)
     gold_error(_("Stub is too far away, try a smaller value "
