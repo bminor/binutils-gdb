@@ -1,3 +1,7 @@
+2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elf/mips.h (AFL_ASE_MASK): Define.
+
 2014-09-26  Max Ostapenko  <m.ostapenko@partner.samsung.com>
 
 	* libiberty.h (PEX_STDOUT_APPEND): New flag.
