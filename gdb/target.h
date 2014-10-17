@@ -1380,6 +1380,11 @@ extern int target_insert_breakpoint (struct gdbarch *gdbarch,
 extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt);
 
+/* Returns true if the terminal settings of the inferior are in
+   effect.  */
+
+extern int target_terminal_is_inferior (void);
+
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
 
