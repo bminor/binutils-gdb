@@ -1,5 +1,23 @@
 2014-10-17  Doug Evans  <dje@google.com>
 
+	* NEWS: Mention new event gdb.clear_objfiles.
+	* python/py-event.h (emit_clear_objfiles_event): Clear
+	* python/py-events.h (events_object): New member clear_objfiles.
+	* python/py-evts.c (gdbpy_initialize_py_events): Add clear_objfiles
+	event.
+	* python/py-inferior.c (python_new_objfile): If objfile is NULL,
+	emit clear_objfiles event.
+	* python/py-newobjfileevent.c (create_clear_objfiles_event_object): New
+	function.
+	(emit_clear_objfiles_event): New function.
+	(clear_objfiles): New event.
+	* python/python-internal.h (gdbpy_initialize_clear_objfiles_event):
+	Declare.
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_clear_objfiles_event.
+
+2014-10-17  Doug Evans  <dje@google.com>
+
 	* NEWS: Mention new gdb.Objfile.progspace attribute.
 	* python/py-objfile.c (objfpy_get_progspace): New function.
 	(objfile_getset): New entry for "progspace".

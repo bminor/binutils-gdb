@@ -1756,6 +1756,7 @@ message == an error message without a stack will be printed."),
       || gdbpy_initialize_exited_event () < 0
       || gdbpy_initialize_thread_event () < 0
       || gdbpy_initialize_new_objfile_event ()  < 0
+      || gdbpy_initialize_clear_objfiles_event ()  < 0
       || gdbpy_initialize_arch () < 0
       || gdbpy_initialize_xmethods () < 0)
     goto fail;

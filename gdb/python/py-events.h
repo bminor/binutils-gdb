@@ -46,6 +46,7 @@ typedef struct
   eventregistry_object *cont;
   eventregistry_object *exited;
   eventregistry_object *new_objfile;
+  eventregistry_object *clear_objfiles;
 
   PyObject *module;
 

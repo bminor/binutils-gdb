@@ -1,5 +1,11 @@
 2014-10-17  Doug Evans  <dje@google.com>
 
+	* gdb.python/py-events.exp: Update expected output for clear_objfiles
+	event.
+	* gdb.python/py-events.py: Add clear_objfiles event.
+
+2014-10-17  Doug Evans  <dje@google.com>
+
 	* gdb.python/py-objfile.exp: Test progspace attribute.
 
 2014-10-17  Luis Machado  <lgustavo@codesourcery.com>

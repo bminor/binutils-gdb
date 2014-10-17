@@ -2728,6 +2728,16 @@ A reference to the object file (@code{gdb.Objfile}) which has been loaded.
 @xref{Objfiles In Python}, for details of the @code{gdb.Objfile} object.
 @end defvar
 
+@item events.clear_objfiles
+Emits @code{gdb.ClearObjFilesEvent} which indicates that the list of object
+files for a program space has been reset.
+@code{gdb.ClearObjFilesEvent} has one attribute:
+
+@defvar ClearObjFilesEvent.progspace
+A reference to the program space (@code{gdb.Progspace}) whose objfile list has
+been cleared.  @xref{Progspaces In Python}.
+@end defvar
+
 @end table
 
 @node Threads In Python
