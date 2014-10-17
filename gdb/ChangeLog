@@ -1,5 +1,38 @@
 2014-10-17  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (ALL_64_TARGET_OBS): Remove alpha-osf1-tdep.o.
+	(HFILES_NO_SRCDIR): Remove config/alpha/nm-osf3.h.
+	(ALLDEPFILES): Remove alpha-nat.c, alpha-osf1-tdep.c and
+	solib-osf.c.
+	* NEWS: Mention that support for alpha*-*-osf* has been removed.
+	* ada-lang.h [__alpha__ && __osf__]
+	(ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS): Delete.
+	* alpha-nat.c, alpha-osf1-tdep.c: Delete files.
+	* alpha-tdep.c (alpha_gdbarch_init): Remove reference to
+	GDB_OSABI_OSF1.
+	* config/alpha/alpha-osf3.mh, config/alpha/nm-osf3.h: Delete
+	files.
+	* config/djgpp/fnchange.lst (config/alpha/alpha-osf1.mh)
+	(config/alpha/alpha-osf2.mh, config/alpha/alpha-osf3.mh): Delete.
+	* configure: Regenerate.
+	* configure.ac: Remove references to osf.
+	* configure.host: Handle alpha*-*-osf* in the obsolete hosts
+	section.  Remove all other references to osf.
+	* configure.tgt: Add alpha*-*-osf* to the obsolete targets section.
+	Remove all other references to osf.
+	* dec-thread.c: Delete file.
+	* defs.h (GDB_OSABI_OSF1): Delete.
+	* inferior.h (START_INFERIOR_TRAPS_EXPECTED): New unconditionally
+	defined.
+	* osabi.c (gdb_osabi_names): Delete "OSF/1".
+	* procfs.c (procfs_debug_inferior) [PROCFS_DONT_TRACE_FAULTS]:
+	Delete code.
+	(unconditionally_kill_inferior)
+	[PROCFS_NEED_CLEAR_CURSIG_FOR_KILL]: Delete code.
+	* solib-osf.c: Delete file.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (clear_threads_listing_context): Move higher up, out of
 	the HAVE_LIBEXPAT guard.
 

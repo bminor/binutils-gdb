@@ -459,15 +459,6 @@ proc test_with_self { executable } {
 	-re "#0.*(read|poll).*in main \\(.*\\) at .*gdb\\.c.*$gdb_prompt $" {
 	    pass "$description"
 	}
-	-re ".*$gdb_prompt $" {
-	    # On the alpha, we hit the infamous problem about gdb
-	    # being unable to get the frame pointer (mentioned in
-	    # gdb/README).  As it is intermittent, there is no way to
-	    # XFAIL it which will give us an XPASS if the problem goes
-	    # away.
-	    setup_xfail "alpha*-*-osf*"
-	    fail "$description"
-	}
     }
 
 

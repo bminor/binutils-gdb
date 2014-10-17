@@ -1,3 +1,16 @@
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/callfuncs.exp: emove references to osf.
+	* gdb.base/sigall.exp: Likewise.
+	* gdb.gdb/selftest.exp: Likewise.
+	* gdb.hp/gdb.base-hp/callfwmall.exp: Likewise.
+	* gdb.mi/non-stop.c: Likewise.
+	* gdb.mi/pthreads.c: Likewise.
+	* gdb.reverse/sigall-precsave.exp: Likewise.
+	* gdb.reverse/sigall-reverse.exp: Likewise.
+	* gdb.threads/pthreads.c: Likewise.
+	* gdb.threads/pthreads.exp: Likewise.
+
 2014-10-17  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/commands.exp (gdbvar_complex_if_while_test): Don't

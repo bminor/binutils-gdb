@@ -1,3 +1,8 @@
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Ada Tasks and Core Files): Delete mention of Tru64.
+	(SVR4 Process Information): Delete mention of OSF/1.
+
 2014-10-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Miscellaneous gdb/mi Commands): Document new

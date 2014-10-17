@@ -14,6 +14,7 @@
 
 case $targ in
  *-*-irix* | \
+ alpha*-*-osf* | \
  d10v-*-* | \
  hppa*-*-hiux* | \
  i[34567]86-ncr-* | \
@@ -46,10 +47,6 @@ aarch64*-*-linux*)
 	build_gdbserver=yes
 	;;
 
-alpha*-*-osf*)
-	# Target: Little-endian Alpha running OSF/1
-	gdb_target_obs="alpha-tdep.o alpha-osf1-tdep.o alpha-mdebug-tdep.o"
-	;;
 alpha*-*-linux*)
 	# Target: Little-endian Alpha running Linux
 	gdb_target_obs="alpha-tdep.o alpha-mdebug-tdep.o alpha-linux-tdep.o \

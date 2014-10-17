@@ -49,6 +49,7 @@ queue-signal signal-name-or-number
 
 Support for these obsolete configurations has been removed.
 
+alpha*-*-osf*
 mips-sgi-irix5*
 mips-sgi-irix6*
 

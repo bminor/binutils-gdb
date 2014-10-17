@@ -15725,10 +15725,9 @@ When inspecting a core file, as opposed to debugging a live program,
 tasking support may be limited or even unavailable, depending on
 the platform being used.
 For instance, on x86-linux, the list of tasks is available, but task
-switching is not supported.  On Tru64, however, task switching will work
-as usual.
+switching is not supported.
 
-On certain platforms, including Tru64, the debugger needs to perform some
+On certain platforms, the debugger needs to perform some
 memory writes in order to provide Ada tasking support.  When inspecting
 a core file, this means that the core file must be opened with read-write
 privileges, using the command @samp{"set write on"} (@pxref{Patching}).
@@ -19726,8 +19725,7 @@ If @value{GDBN} is configured for an operating system with this
 facility, the command @code{info proc} is available to report
 information about the process running your program, or about any
 process running on your system.  This includes, as of this writing,
-@sc{gnu}/Linux, OSF/1 (Digital Unix), Solaris, and Irix, but
-not HP-UX, for example.
+@sc{gnu}/Linux and Solaris, but not HP-UX, for example.
 
 This command may also work on core files that were created on a system
 that has the @samp{/proc} facility.

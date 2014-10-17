@@ -250,11 +250,9 @@ enum stop_kind
 
 /* Number of traps that happen between exec'ing the shell to run an
    inferior and when we finally get to the inferior code, not counting
-   the exec for the shell.  This is 1 on most implementations.
-   Overridden in nm.h files.  */
-#if !defined(START_INFERIOR_TRAPS_EXPECTED)
+   the exec for the shell.  This is 1 on all supported
+   implementations.  */
 #define START_INFERIOR_TRAPS_EXPECTED	1
-#endif
 
 struct private_inferior;
 

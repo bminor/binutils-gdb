@@ -2917,16 +2917,9 @@ procfs_debug_inferior (procinfo *pi)
   sysset_t *traced_syscall_exits;
   int status;
 
-#ifdef PROCFS_DONT_TRACE_FAULTS
-  /* On some systems (OSF), we don't trace hardware faults.
-     Apparently it's enough that we catch them as signals.
-     Wonder why we don't just do that in general?  */
-  premptyset (&traced_faults);		/* don't trace faults.  */
-#else
   /* Register to trace hardware faults in the child.  */
   prfillset (&traced_faults);		/* trace all faults...  */
   gdb_prdelset  (&traced_faults, FLTPAGE);	/* except page fault.  */
-#endif
   if (!proc_set_traced_faults  (pi, &traced_faults))
     return __LINE__;
 
@@ -4227,16 +4220,6 @@ unconditionally_kill_inferior (procinfo *pi)
   int parent_pid;
 
   parent_pid = proc_parent_pid (pi);
-#ifdef PROCFS_NEED_CLEAR_CURSIG_FOR_KILL
-  /* FIXME: use access functions.  */
-  /* Alpha OSF/1-3.x procfs needs a clear of the current signal
-     before the PIOCKILL, otherwise it might generate a corrupted core
-     file for the inferior.  */
-  if (ioctl (pi->ctl_fd, PIOCSSIG, NULL) < 0)
-    {
-      printf_filtered ("unconditionally_kill: SSIG failed!\n");
-    }
-#endif
 #ifdef PROCFS_NEED_PIOCSSIG_FOR_KILL
   /* Alpha OSF/1-2.x procfs needs a PIOCSSIG call with a SIGKILL signal
      to kill the inferior, otherwise it might remain stopped with a
