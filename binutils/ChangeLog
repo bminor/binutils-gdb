@@ -1,3 +1,10 @@
+2014-10-28  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	Apply trunk patches
+	2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
+	* readelf.c (print_mips_ases): Print unknown ASEs.
+	(print_mips_isa_ext): Print the value of an unknown extension.
+
 2014-10-15  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

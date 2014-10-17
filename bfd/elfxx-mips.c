@@ -15507,6 +15507,8 @@ print_mips_ases (FILE *file, unsigned int mask)
     fputs ("\n\tXPA ASE", file);
   if (mask == 0)
     fprintf (file, "\n\t%s", _("None"));
+  else if ((mask & ~AFL_ASE_MASK) != 0)
+    fprintf (stdout, "\n\t%s (%x)", _("Unknown"), mask & ~AFL_ASE_MASK);
 }
 
 static void
@@ -15572,7 +15574,7 @@ print_mips_isa_ext (FILE *file, unsigned int isa_ext)
       fputs ("ST Microelectronics Loongson 2F", file);
       break;
     default:
-      fputs (_("Unknown"), file);
+      fprintf (file, "%s (%d)", _("Unknown"), isa_ext);
       break;
     }
 }
