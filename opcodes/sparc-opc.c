@@ -920,10 +920,10 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "wr", F3(2, 0x30, 1)|RD(22),	F3(~2, ~0x30, ~1)|RD(~22),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%softint */
 { "wr", F3(2, 0x30, 0)|RD(23),	F3(~2, ~0x30, ~0)|RD(~23)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%tick_cmpr */
 { "wr", F3(2, 0x30, 1)|RD(23),	F3(~2, ~0x30, ~1)|RD(~23),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%tick_cmpr */
-{ "wr", F3(2, 0x30, 0)|RD(24),	F3(~2, ~0x30, ~0)|RD(~24)|ASI(~0),	"1,2,_", HWCAP_VIS2, 0, 0, v9b }, /* wr r,r,%sys_tick */
-{ "wr", F3(2, 0x30, 1)|RD(24),	F3(~2, ~0x30, ~1)|RD(~24),		"1,i,_", HWCAP_VIS2, 0, 0, v9b }, /* wr r,i,%sys_tick */
-{ "wr", F3(2, 0x30, 0)|RD(25),	F3(~2, ~0x30, ~0)|RD(~25)|ASI(~0),	"1,2,_", HWCAP_VIS2, 0, 0, v9b }, /* wr r,r,%sys_tick_cmpr */
-{ "wr", F3(2, 0x30, 1)|RD(25),	F3(~2, ~0x30, ~1)|RD(~25),		"1,i,_", HWCAP_VIS2, 0, 0, v9b }, /* wr r,i,%sys_tick_cmpr */
+{ "wr", F3(2, 0x30, 0)|RD(24),	F3(~2, ~0x30, ~0)|RD(~24)|ASI(~0),	"1,2,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,r,%sys_tick */
+{ "wr", F3(2, 0x30, 1)|RD(24),	F3(~2, ~0x30, ~1)|RD(~24),		"1,i,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,i,%sys_tick */
+{ "wr", F3(2, 0x30, 0)|RD(25),	F3(~2, ~0x30, ~0)|RD(~25)|ASI(~0),	"1,2,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,r,%sys_tick_cmpr */
+{ "wr", F3(2, 0x30, 1)|RD(25),	F3(~2, ~0x30, ~1)|RD(~25),		"1,i,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,i,%sys_tick_cmpr */
 { "wr", F3(2, 0x30, 0)|RD(26),	F3(~2, ~0x30, ~0)|RD(~26)|ASI(~0),	"1,2,_", 0, HWCAP_CBCOND, 0, v9b }, /* wr r,r,%cfr */
 { "wr", F3(2, 0x30, 1)|RD(26),	F3(~2, ~0x30, ~1)|RD(~26),		"1,i,_", 0, HWCAP_CBCOND, 0, v9b }, /* wr r,i,%cfr */
 { "wr", F3(2, 0x30, 0)|RD(27),	F3(~2, ~0x30, ~0)|RD(~27)|ASI(~0),	"1,2,_", 0, HWCAP_PAUSE, 0, v9b }, /* wr r,r,%pause */
@@ -1927,17 +1927,17 @@ SLCBCC("cbnefr", 15),
 { "array32",	F3F(2, 0x36, 0x014), F3F(~2, ~0x36, ~0x014), "1,2,d", 0, HWCAP_VIS, 0, v9a },
 
 /* Cheetah instructions */
-{ "edge8n",    F3F(2, 0x36, 0x001), F3F(~2, ~0x36, ~0x001), "1,2,d", HWCAP_VIS2, 0, 0, v9b },
-{ "edge8ln",   F3F(2, 0x36, 0x003), F3F(~2, ~0x36, ~0x003), "1,2,d", HWCAP_VIS2, 0, 0, v9b },
-{ "edge16n",   F3F(2, 0x36, 0x005), F3F(~2, ~0x36, ~0x005), "1,2,d", HWCAP_VIS2, 0, 0, v9b },
-{ "edge16ln",  F3F(2, 0x36, 0x007), F3F(~2, ~0x36, ~0x007), "1,2,d", HWCAP_VIS2, 0, 0, v9b },
-{ "edge32n",   F3F(2, 0x36, 0x009), F3F(~2, ~0x36, ~0x009), "1,2,d", HWCAP_VIS2, 0, 0, v9b },
-{ "edge32ln",  F3F(2, 0x36, 0x00b), F3F(~2, ~0x36, ~0x00b), "1,2,d", HWCAP_VIS2, 0, 0, v9b },
+{ "edge8n",    F3F(2, 0x36, 0x001), F3F(~2, ~0x36, ~0x001), "1,2,d", 0, HWCAP_VIS2, 0, v9b },
+{ "edge8ln",   F3F(2, 0x36, 0x003), F3F(~2, ~0x36, ~0x003), "1,2,d", 0, HWCAP_VIS2, 0, v9b },
+{ "edge16n",   F3F(2, 0x36, 0x005), F3F(~2, ~0x36, ~0x005), "1,2,d", 0, HWCAP_VIS2, 0, v9b },
+{ "edge16ln",  F3F(2, 0x36, 0x007), F3F(~2, ~0x36, ~0x007), "1,2,d", 0, HWCAP_VIS2, 0, v9b },
+{ "edge32n",   F3F(2, 0x36, 0x009), F3F(~2, ~0x36, ~0x009), "1,2,d", 0, HWCAP_VIS2, 0, v9b },
+{ "edge32ln",  F3F(2, 0x36, 0x00b), F3F(~2, ~0x36, ~0x00b), "1,2,d", 0, HWCAP_VIS2, 0, v9b },
 
-{ "bmask",     F3F(2, 0x36, 0x019), F3F(~2, ~0x36, ~0x019), "1,2,d", HWCAP_VIS2, 0, 0, v9b },
-{ "bshuffle",  F3F(2, 0x36, 0x04c), F3F(~2, ~0x36, ~0x04c), "v,B,H", HWCAP_VIS2, 0, 0, v9b },
+{ "bmask",     F3F(2, 0x36, 0x019), F3F(~2, ~0x36, ~0x019), "1,2,d", 0, HWCAP_VIS2, 0, v9b },
+{ "bshuffle",  F3F(2, 0x36, 0x04c), F3F(~2, ~0x36, ~0x04c), "v,B,H", 0, HWCAP_VIS2, 0, v9b },
 
-{ "siam",      F3F(2, 0x36, 0x081), F3F(~2, ~0x36, ~0x081)|RD_G0|RS1_G0|RS2(~7), "3", HWCAP_VIS2, 0, 0, v9b },
+{ "siam",      F3F(2, 0x36, 0x081), F3F(~2, ~0x36, ~0x081)|RD_G0|RS1_G0|RS2(~7), "3", 0, HWCAP_VIS2, 0, v9b },
 
 { "fnadds",	F3F(2, 0x34, 0x051), F3F(~2, ~0x34, ~0x051), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9b },
 { "fnaddd",	F3F(2, 0x34, 0x052), F3F(~2, ~0x34, ~0x052), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9b },
