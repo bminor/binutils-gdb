@@ -1,3 +1,9 @@
+2014-10-17  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention new gdb.Objfile.progspace attribute.
+	* python/py-objfile.c (objfpy_get_progspace): New function.
+	(objfile_getset): New entry for "progspace".
+
 2014-10-17  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17471

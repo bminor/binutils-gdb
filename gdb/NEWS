@@ -9,6 +9,8 @@
 
   ** You can now access frame registers from Python scripts.
   ** New attribute 'producer' for gdb.Symtab objects.
+  ** gdb.Objfile objects have a new attribute "progspace",
+     which is the gdb.Progspace object of the containing program space.
 
 * New Python-based convenience functions:
 

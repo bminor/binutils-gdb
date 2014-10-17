@@ -62,6 +62,24 @@ objfpy_get_filename (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* An Objfile method which returns the objfile's progspace, or None.  */
+
+static PyObject *
+objfpy_get_progspace (PyObject *self, void *closure)
+{
+  objfile_object *obj = (objfile_object *) self;
+
+  if (obj->objfile)
+    {
+      PyObject *pspace =  pspace_to_pspace_object (obj->objfile->pspace);
+
+      Py_XINCREF (pspace);
+      return pspace;
+    }
+
+  Py_RETURN_NONE;
+}
+
 static void
 objfpy_dealloc (PyObject *o)
 {
@@ -338,6 +356,8 @@ static PyGetSetDef objfile_getset[] =
 {
   { "filename", objfpy_get_filename, NULL,
     "The objfile's filename, or None.", NULL },
+  { "progspace", objfpy_get_progspace, NULL,
+    "The objfile's progspace, or None.", NULL },
   { "pretty_printers", objfpy_get_printers, objfpy_set_printers,
     "Pretty printers.", NULL },
   { "frame_filters", objfpy_get_frame_filters,

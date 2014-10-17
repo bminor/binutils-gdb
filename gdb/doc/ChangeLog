@@ -1,3 +1,7 @@
+2014-10-17  Doug Evans  <dje@google.com>
+
+	* python.texi (Objfiles In Python): Document new progspace attribute.
+
 2014-10-17  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Ada Tasks and Core Files): Delete mention of Tru64.
