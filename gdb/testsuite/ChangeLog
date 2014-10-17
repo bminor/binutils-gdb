@@ -1,3 +1,26 @@
+2014-10-17  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.guile/scm-breakpoint.exp: Do not assume any
+	directory separators when matching source file paths.
+	* gdb.python/py-breakpoint.exp: Likewise.
+	* gdb.reverse/break-precsave.exp: Likewise.
+	* gdb.reverse/break-reverse.exp: Likewise.
+	* gdb.reverse/consecutive-precsave.exp: Likewise.
+	* gdb.reverse/finish-precsave.exp: Likewise.
+	* gdb.reverse/finish-reverse-bkpt.exp: Likewise.
+	* gdb.reverse/finish-reverse.exp: Likewise.
+	* gdb.reverse/i386-precsave.exp: Likewise.
+	* gdb.reverse/i387-env-reverse.exp: Likewise.
+	* gdb.reverse/i387-stack-reverse.exp: Likewise.
+	* gdb.reverse/machinestate-precsave.exp: Likewise.
+	* gdb.reverse/machinestate.exp: Likewise.
+	* gdb.reverse/sigall-precsave.exp: Likewise.
+	* gdb.reverse/solib-precsave.exp: Likewise.
+	* gdb.reverse/step-precsave.exp: Likewise.
+	* gdb.reverse/until-precsave.exp: Likewise.
+	* gdb.reverse/watch-precsave.exp: Likewise.
+	* gdb.reverse/watch-reverse.exp: Likewise.
+
 2014-10-17  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (gdb_skip_xml_test): Copy trivial.xml to host.
