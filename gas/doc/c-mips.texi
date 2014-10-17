@@ -841,7 +841,7 @@ pass all floating-point data in general-purpose registers.
 @item 4 - Deprecated
 This variant existed as an initial attempt at supporting 64-bit wide
 floating-point registers for O32 ABI on a MIPS32r2 cpu.  This has been
-superceded by @value{5}, @value{6} and @value{7}.
+superceded by 5, 6 and 7.
 
 @item 5 - Double-precision 32-bit CPU, 32-bit or 64-bit FPU
 This variant is used by 32-bit ABIs to indicate that the floating-point
