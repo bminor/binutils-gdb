@@ -735,6 +735,24 @@ continue_1 (int all_threads)
 
       iterate_over_threads (proceed_thread_callback, NULL);
 
+      if (sync_execution)
+	{
+	  /* If all threads in the target were already running,
+	     proceed_thread_callback ends up never calling proceed,
+	     and so nothing calls this to put the inferior's terminal
+	     settings in effect and remove stdin from the event loop,
+	     which we must when running a foreground command.  E.g.:
+
+	      (gdb) c -a&
+	      Continuing.
+	      <all threads are running now>
+	      (gdb) c -a
+	      Continuing.
+	      <no thread was resumed, but the inferior now owns the terminal>
+	  */
+	  target_terminal_inferior ();
+	}
+
       /* Restore selected ptid.  */
       do_cleanups (old_chain);
     }
