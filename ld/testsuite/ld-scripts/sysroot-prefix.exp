@@ -27,14 +27,21 @@
 # present or not, with different arguments.
 
 # Find out if the linker supports sysroot; if it was configured
-# "--with-sysroot X".  We ignore that X can actually be set to
-# interfere with the tests, as that's unlikely to be useful, and
-# assume that the build-directory (aka. $base_dir) does not contain X.
+# "--with-sysroot X" where X is a non-empty string.
 set with_sysroot [check_sysroot_available]
-verbose -log "Has (non-empty) sysroot support: $with_sysroot"
+verbose -log "Has (non-empty) sysroot support: $with_sysroot; \"$ld_sysroot\""
+
+# We also need to know if the sysroot is "/" (a common use) as some of
+# the tests prepend sysroot to the current directory and on most
+# common systems "//dir/path" is handled as "/dir/path".
+if {$ld_sysroot == "/"} {
+    # Use a modified test-subset for testing.
+    set with_sysroot 3
+}
 
 # Entries in the array-tables:
-# 0: Testtype (1: only non-sysroot, 2: only sysroot, 3: either).
+# 0: Testtype; an inclusive bitmask indicating that the test should run on a
+# build configured for: 1: non-sysroot, 2: sysroot != "/", 4: sysroot == "/".
 # 1: Description, forming part of the dejagnu test-name.
 # 2: Replacement for @p@.
 # 3: Option to pass to linker (usually something with --sysroot).
@@ -47,16 +54,16 @@ verbose -log "Has (non-empty) sysroot support: $with_sysroot"
 # description contains @cwd@, that will be replaced by "<CWD>".
 
 set sysroot_prefix_tests {
-    {3 "plain -Lpath" "sysroot/" {} ""}
-    {3 "root-anchored but -Lpath" "/sysroot/" {} "cannot find"}
-    {3 "full-path" "@cwd@/sysroot/" {} ""}
-    {3 "root-anchored =-prefixed -Lpath" "=/sysroot/" {} "cannot find"}
-    {3 "full-path =-prefixed with empty" "=@cwd@/sysroot/" "--sysroot=" ""}
-    {3 "plain =-prefixed with empty" "=sysroot/" "--sysroot=" ""}
-    {2 "root-anchored but script outside sysroot" "/" "--sysroot=@cwd@/sysroot" "cannot find"}
-    {2 "root-anchored and script inside sysroot" "/sysroot/" "--sysroot=@cwd@" ""}
-    {2 "root-anchored =-prefixed script outside" "=/" "--sysroot=@cwd@/sysroot" ""}
-    {2 "root-anchored =-prefixed script inside" "=/sysroot/" "--sysroot=@cwd@" ""}
+    {7 "plain -Lpath" "sysroot/" {} ""}
+    {7 "root-anchored but -Lpath" "/sysroot/" {} "cannot find"}
+    {7 "full-path" "@cwd@/sysroot/" {} ""}
+    {7 "root-anchored =-prefixed -Lpath" "=/sysroot/" {} "cannot find"}
+    {7 "full-path =-prefixed with empty" "=@cwd@/sysroot/" "--sysroot=" ""}
+    {7 "plain =-prefixed with empty" "=sysroot/" "--sysroot=" ""}
+    {6 "root-anchored but script outside sysroot" "/" "--sysroot=@cwd@/sysroot" "cannot find"}
+    {6 "root-anchored and script inside sysroot" "/sysroot/" "--sysroot=@cwd@" ""}
+    {6 "root-anchored =-prefixed script outside" "=/" "--sysroot=@cwd@/sysroot" ""}
+    {6 "root-anchored =-prefixed script inside" "=/sysroot/" "--sysroot=@cwd@" ""}
     {2 "plain =-prefixed without but -Lpath" "=sysroot/" {} "cannot find"}
     {2 "full-path =-prefixed without" "=@cwd@/sysroot/" {} "cannot find"}
     {1 "plain =-prefixed -Lpath" "=sysroot/" {} ""}

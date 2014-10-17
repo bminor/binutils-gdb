@@ -1669,16 +1669,14 @@ proc check_plugin_api_available { } {
     return $plugin_api_available_saved
 }
 
-# Returns true if the target ld supports sysroot.
+# Sets ld_sysroot to the current sysroot (empty if not supported) and
+# returns true if the target ld supports sysroot.
 proc check_sysroot_available { } {
-    global ld_sysroot_available_saved
-    global ld
+    global ld_sysroot_available_saved ld ld_sysroot
     if {![info exists ld_sysroot_available_saved]} {
-	# Check if ld supports --sysroot *other* than empty
-	# (non-sysroot linkers don't emit errors for --sysroot="").
-	# The help-text by itself is no indication as it always lists --sysroot.
-	set status [remote_exec host $ld "--sysroot=ldxyzzy --help >/dev/null"]
-	if { [lindex $status 0] != 0 } {
+	# Check if ld supports --sysroot *other* than empty.
+	set ld_sysroot [string trimright [lindex [remote_exec host $ld "--print-sysroot"] 1]]
+	if { $ld_sysroot == "" } {
 	    set ld_sysroot_available_saved 0
 	} else {
 	    set ld_sysroot_available_saved 1
