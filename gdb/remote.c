@@ -2559,6 +2559,21 @@ struct threads_listing_context
   VEC (thread_item_t) *items;
 };
 
+/* Discard the contents of the constructed thread listing context.  */
+
+static void
+clear_threads_listing_context (void *p)
+{
+  struct threads_listing_context *context = p;
+  int i;
+  struct thread_item *item;
+
+  for (i = 0; VEC_iterate (thread_item_t, context->items, i, item); ++i)
+    xfree (item->extra);
+
+  VEC_free (thread_item_t, context->items);
+}
+
 static int
 remote_newthread_step (threadref *ref, void *data)
 {
@@ -2663,21 +2678,6 @@ const struct gdb_xml_element threads_elements[] = {
     GDB_XML_EF_NONE, NULL, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
-
-/* Discard the contents of the constructed thread info context.  */
-
-static void
-clear_threads_listing_context (void *p)
-{
-  struct threads_listing_context *context = p;
-  int i;
-  struct thread_item *item;
-
-  for (i = 0; VEC_iterate (thread_item_t, context->items, i, item); ++i)
-    xfree (item->extra);
-
-  VEC_free (thread_item_t, context->items);
-}
 
 #endif
 
