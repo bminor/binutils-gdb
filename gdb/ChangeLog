@@ -1,5 +1,22 @@
 2014-10-17  Pedro Alves  <palves@redhat.com>
 
+	* target.c (enum terminal_state): New enum.
+	(terminal_state): New global.
+	(target_terminal_init): New function.
+	(target_terminal_inferior): Skip if inferior already owns the
+	terminal.
+	(target_terminal_ours, target_terminal_ours_for_output): New
+	functions.
+	* target.h (target_terminal_init): Convert to function prototype.
+	(target_terminal_ours_for_output): Convert to function prototype
+	and tweak comment.
+	(target_terminal_ours): Convert to function prototype and tweak
+	comment.
+	* windows-nat.c (do_initial_windows_stuff): Call
+	target_terminal_init instead of child_terminal_init_with_pgrp.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (ALL_64_TARGET_OBS): Remove alpha-osf1-tdep.o.
 	(HFILES_NO_SRCDIR): Remove config/alpha/nm-osf3.h.
 	(ALLDEPFILES): Remove alpha-nat.c, alpha-osf1-tdep.c and

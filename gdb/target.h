@@ -1383,31 +1383,25 @@ extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
 
-#define target_terminal_init() \
-     (*current_target.to_terminal_init) (&current_target)
+extern void target_terminal_init (void);
 
 /* Put the inferior's terminal settings into effect.
    This is preparation for starting or resuming the inferior.  */
 
 extern void target_terminal_inferior (void);
 
-/* Put some of our terminal settings into effect,
-   enough to get proper results from our output,
-   but do not change into or out of RAW mode
-   so that no input is discarded.
+/* Put some of our terminal settings into effect, enough to get proper
+   results from our output, but do not change into or out of RAW mode
+   so that no input is discarded.  This is a no-op if terminal_ours
+   was most recently called.  */
 
-   After doing this, either terminal_ours or terminal_inferior
-   should be called to get back to a normal state of affairs.  */
-
-#define target_terminal_ours_for_output() \
-     (*current_target.to_terminal_ours_for_output) (&current_target)
+extern void target_terminal_ours_for_output (void);
 
 /* Put our terminal settings into effect.
    First record the inferior's terminal settings
    so they can be restored properly later.  */
 
-#define target_terminal_ours() \
-     (*current_target.to_terminal_ours) (&current_target)
+extern void target_terminal_ours (void);
 
 /* Return true if the target stack has a non-default
   "to_terminal_ours" method.  */
