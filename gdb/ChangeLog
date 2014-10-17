@@ -1,5 +1,15 @@
 2014-10-17  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17471
+	* infcmd.c (strip_bg_char): Change prototype and rewrite.  Now
+	returns a copy of the input.
+	(run_command_1, continue_command, step_1, jump_command)
+	(signal_command, until_command, advance_command, finish_command)
+	(attach_command): Adjust and install a cleanup to free the
+	stripped args.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/17300
 	* infcmd.c (continue_1): If continuing all threads in the
 	foreground, make sure the inferior's terminal settings are put in

@@ -1,5 +1,11 @@
 2014-10-17  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17471
+	* gdb.base/bg-execution-repeat.c: New file.
+	* gdb.base/bg-execution-repeat.exp: New file.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/17300
 	* gdb.base/continue-all-already-running.c: New file.
 	* gdb.base/continue-all-already-running.exp: New file.
