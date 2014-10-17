@@ -300,12 +300,8 @@ proc test_with_self { executable } {
 
     # We'll need this when we send a ^C to GDB.  Need to do it before we
     # run the program and gdb starts saving and restoring tty states.
-    # On Ultrix, we don't need it and it is really slow (because shell_escape
-    # doesn't use vfork).
-    if ![istarget "*-*-ultrix*"] then {
-	gdb_test "shell stty intr '^C'" ".*" \
-	    "set interrupt character in test_with_self"
-    }
+    gdb_test "shell stty intr '^C'" ".*" \
+	"set interrupt character in test_with_self"
 
     # FIXME: If we put this after the run to main, the first list
     # command doesn't print the same line as the current line where

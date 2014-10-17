@@ -130,11 +130,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 # We'll need this when we send_gdb a ^C to GDB.  Need to do it before we
 # run the program and gdb starts saving and restoring tty states.
-# On Ultrix, we don't need it and it is really slow (because shell_escape
-# doesn't use vfork).
-if ![istarget "*-*-ultrix*"] then {
-    gdb_test "shell stty intr '^C'" ".*"
-}
+gdb_test "shell stty intr '^C'" ".*"
 
 gdb_load ${binfile}
 

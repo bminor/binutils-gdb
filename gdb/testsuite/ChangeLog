@@ -1,3 +1,14 @@
+2014-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/corefile.exp: Remove references to ultrix.
+	* gdb.base/interrupt.exp: Likewise.
+	* gdb.base/whatis.exp: Likewise.
+	* gdb.gdb/selftest.exp: Likewise.
+	* gdb.threads/manythreads.exp: Likewise.
+	* gdb.threads/print-threads.exp: Likewise.
+	* gdb.threads/pthreads.exp:: Likewise.
+	* gdb.threads/schedlock.exp: Likewise.
+
 2014-10-24  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.cp/non-trivial-retval.cc: Add a test case.

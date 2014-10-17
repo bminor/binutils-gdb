@@ -1698,7 +1698,7 @@ ALLDEPFILES = \
 	spu-linux-nat.c spu-tdep.c spu-multiarch.c solib-spu.c \
 	tilegx-linux-nat.c tilegx-tdep.c tilegx-linux-tdep.c \
 	v850-tdep.c \
-	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
+	vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	windows-nat.c windows-tdep.c \
 	xcoffread.c \
 	xstormy16-tdep.c \

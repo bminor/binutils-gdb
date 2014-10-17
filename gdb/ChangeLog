@@ -1,5 +1,15 @@
 2014-10-24  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (ALLDEPFILES): Remove vax-nat.c.
+	* NEWS (Removed targets): Add VAX BSD and VAX Ultrix.
+	* config/vax/vax.mh: Delete.
+	* configure.host: Move vax-*-bsd* and vax-*-ultrix* to the
+	obsolete configurations section.
+	* configure.tgt (vax-*-*): Don't mention 4.2BSD nor Ultrix.
+	* vax-nat.c: Delete file.
+
+2014-10-24  Pedro Alves  <palves@redhat.com>
+
 	* NEWS (Removed targets): Add OS/arch column.
 
 2014-10-24  Siva Chandra Reddy  <sivachandra@google.com>

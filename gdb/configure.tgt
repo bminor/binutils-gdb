@@ -630,7 +630,7 @@ vax-*-openbsd*)
 	gdb_target_obs="vax-tdep.o vaxobsd-tdep.o"
 	;;
 vax-*-*)
-	# Target: VAX running 4.2BSD or Ultrix
+	# Target: VAX
 	gdb_target_obs="vax-tdep.o"
 	;;
 

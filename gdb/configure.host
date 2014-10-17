@@ -41,7 +41,9 @@ case $host in
  m68*-*-netbsd* | \
  sparc-*-netbsd* | \
  rs6000-*-lynxos* | \
+ vax-*-bsd* | \
  vax-*-netbsd* | \
+ vax-*-ultrix* | \
  null)
     echo "*** Configuration $host is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
@@ -168,11 +170,9 @@ sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 
 tilegx-*-linux*)	gdb_host=linux ;;
 
-vax-*-bsd*)		gdb_host=vax ;;
 vax-*-netbsdelf* | vax-*-knetbsd*-gnu)
 			gdb_host=nbsdelf ;;
 vax-*-openbsd*)		gdb_host=obsd ;;
-vax-*-ultrix*)		gdb_host=vax ;;
 
 x86_64-*-linux*)	gdb_host=linux64 ;;
 x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)

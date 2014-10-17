@@ -113,7 +113,6 @@ if ![file exists $binfile] then {
 		# other machines as well.
 
 		setup_xfail "sparc*-*-solaris2*"
-		setup_xfail "mips-*-ultrix*"
 		setup_xfail "i*86-*-solaris2*"
 		setup_xfail "*-*-sysv4*"
 		setup_xfail "vax-*-*"

@@ -56,6 +56,8 @@ Support for these obsolete configurations has been removed.
 Alpha running OSF/1 (or Tru64)		alpha*-*-osf*
 SGI Irix-5.x				mips-*-irix5*
 SGI Irix-6.x				mips-*-irix6*
+VAX running (4.2 - 4.3 Reno) BSD 	vax-*-bsd*
+VAX running Ultrix 			vax-*-ultrix*
 
 *** Changes in GDB 7.8
 
