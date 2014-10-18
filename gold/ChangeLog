@@ -1,3 +1,7 @@
+2014-10-18  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* configure.tgt (targ_extra_obj) [aarch64*-*]: Define.
+
 2014-10-17  Cary Coutant  <ccoutant@google.com>
 
 	* aarch64.cc (AArch64_relocate_functions::maybe_apply_stub):
