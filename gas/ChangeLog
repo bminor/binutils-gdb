@@ -1,3 +1,11 @@
+2014-10-18  Alan Modra  <amodra@gmail.com>
+
+	PR 17493
+	* write.c (adjust_reloc_syms): Don't allow symbols in reg_section
+	to be reduced to reg_section section symbol.
+	* gas/config/tc-i386.c (i386_finalize_immediate): Reject all
+	reg_section immediates.
+
 2014-10-17  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* doc/c-mips.texi: Fix bad @value references.

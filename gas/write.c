@@ -836,7 +836,8 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	if (symsec == NULL)
 	  abort ();
 
-	if (bfd_is_abs_section (symsec))
+	if (bfd_is_abs_section (symsec)
+	    || symsec == reg_section)
 	  {
 	    /* The fixup_segment routine normally will not use this
 	       symbol in a relocation.  */
