@@ -1,6 +1,13 @@
 2014-10-28  Alan Modra  <amodra@gmail.com>
 
 	Apply trunk patches
+	2014-10-18  Alan Modra  <amodra@gmail.com>
+	PR 17493
+	* write.c (adjust_reloc_syms): Don't allow symbols in reg_section
+	to be reduced to reg_section section symbol.
+	* gas/config/tc-i386.c (i386_finalize_immediate): Reject all
+	reg_section immediates.
+
 	2014-10-15  Chen Gang  <gang.chen.5i5j@gmail.com>
 	* config/tc-tic4x.c (md_assemble): Correct strncat size.
 

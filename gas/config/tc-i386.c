@@ -7985,7 +7985,7 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
       return 0;
     }
 #endif
-  else if (!intel_syntax && exp->X_op == O_register)
+  else if (!intel_syntax && exp_seg == reg_section)
     {
       if (imm_start)
 	as_bad (_("illegal immediate register operand %s"), imm_start);

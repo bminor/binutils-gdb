@@ -1,3 +1,9 @@
+2014-10-28  Alan Modra  <amodra@gmail.com>
+
+	Apply truck patches
+	2014-10-18  Alan Modra  <amodra@gmail.com>
+	* gas/i386/inval-equ-2.l: Adjust.
+
 2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gas/sparc/hpcvis3.d: Remove tests for the `chkpt', `commit',
