@@ -1,3 +1,11 @@
+2014-10-18  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): If function code
+	section for function symbols defined in .opd is discarded, let
+	the symbol appear to be undefined.
+	(opd_entry_value): Ensure the result section is that for the
+	function code section in the same object as the OPD entry.
+
 2014-10-16  Alan Modra  <amodra@gmail.com>
 
 	PR 17492
