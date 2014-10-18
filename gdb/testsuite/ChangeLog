@@ -1,3 +1,12 @@
+2014-10-18  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* gdb.dwarf2/dw2-dir-file-name.exp (addr_len): New.
+	(out_cu): Use addr_len for the size of addresses.
+	(out_line): Likewise.  Size DW_LNE_set_address instruction
+	according to addr_len.
+	* gdb.dwarf2/dw2-dir-file-name.c (START_INSNS): New.
+	(FUNC): Add START_INSNS to definition.
+
 2014-10-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/argv0-symlink.exp: Check argv[0] value if
