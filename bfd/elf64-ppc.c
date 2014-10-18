@@ -4805,7 +4805,7 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 			   const char **name,
 			   flagword *flags ATTRIBUTE_UNUSED,
 			   asection **sec,
-			   bfd_vma *value ATTRIBUTE_UNUSED)
+			   bfd_vma *value)
 {
   if ((ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
        || ELF_ST_BIND (isym->st_info) == STB_GNU_UNIQUE)
@@ -4813,11 +4813,27 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
       && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
-  if (!(ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
-	|| ELF_ST_TYPE (isym->st_info) == STT_FUNC)
-      && *sec != NULL
+  if (*sec != NULL
       && strcmp ((*sec)->name, ".opd") == 0)
-    isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
+    {
+      asection *code_sec;
+
+      if (!(ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
+	    || ELF_ST_TYPE (isym->st_info) == STT_FUNC))
+	isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
+
+      /* If the symbol is a function defined in .opd, and the function
+	 code is in a discarded group, let it appear to be undefined.  */
+      if (!info->relocatable
+	  && (*sec)->reloc_count != 0
+	  && opd_entry_value (*sec, *value, &code_sec, NULL,
+			      FALSE) != (bfd_vma) -1
+	  && discarded_section (code_sec))
+	{
+	  *sec = bfd_und_section_ptr;
+	  isym->st_shndx = SHN_UNDEF;
+	}
+    }
 
   if ((STO_PPC64_LOCAL_MASK & isym->st_other) != 0)
     {
@@ -5897,7 +5913,8 @@ ppc64_elf_print_private_bfd_data (bfd *abfd, void *ptr)
 }
 
 /* OFFSET in OPD_SEC specifies a function descriptor.  Return the address
-   of the code entry point, and its section.  */
+   of the code entry point, and its section, which must be in the same
+   object as OPD_SEC.  Returns (bfd_vma) -1 on error.  */
 
 static bfd_vma
 opd_entry_value (asection *opd_sec,
@@ -5980,32 +5997,10 @@ opd_entry_value (asection *opd_sec,
 	      && ELF64_R_TYPE ((look + 1)->r_info) == R_PPC64_TOC)
 	    {
 	      unsigned long symndx = ELF64_R_SYM (look->r_info);
-	      asection *sec;
+	      asection *sec = NULL;
 
-	      if (symndx < symtab_hdr->sh_info
-		  || elf_sym_hashes (opd_bfd) == NULL)
-		{
-		  Elf_Internal_Sym *sym;
-
-		  sym = (Elf_Internal_Sym *) symtab_hdr->contents;
-		  if (sym == NULL)
-		    {
-		      size_t symcnt = symtab_hdr->sh_info;
-		      if (elf_sym_hashes (opd_bfd) == NULL)
-			symcnt = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
-		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr, symcnt,
-						  0, NULL, NULL, NULL);
-		      if (sym == NULL)
-			break;
-		      symtab_hdr->contents = (bfd_byte *) sym;
-		    }
-
-		  sym += symndx;
-		  val = sym->st_value;
-		  sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
-		  BFD_ASSERT ((sec->flags & SEC_MERGE) == 0);
-		}
-	      else
+	      if (symndx >= symtab_hdr->sh_info
+		  && elf_sym_hashes (opd_bfd) != NULL)
 		{
 		  struct elf_link_hash_entry **sym_hashes;
 		  struct elf_link_hash_entry *rh;
@@ -6019,24 +6014,48 @@ opd_entry_value (asection *opd_sec,
 				  || rh->root.type == bfd_link_hash_defweak);
 		      val = rh->root.u.def.value;
 		      sec = rh->root.u.def.section;
+		      if (sec->owner != opd_bfd)
+			{
+			  sec = NULL;
+			  val = (bfd_vma) -1;
+			}
+		    }
+		}
+
+	      if (sec == NULL)
+		{
+		  Elf_Internal_Sym *sym;
+
+		  if (symndx < symtab_hdr->sh_info)
+		    {
+		      sym = (Elf_Internal_Sym *) symtab_hdr->contents;
+		      if (sym == NULL)
+			{
+			  size_t symcnt = symtab_hdr->sh_info;
+			  sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr,
+						      symcnt, 0,
+						      NULL, NULL, NULL);
+			  if (sym == NULL)
+			    break;
+			  symtab_hdr->contents = (bfd_byte *) sym;
+			}
+		      sym += symndx;
 		    }
 		  else
 		    {
-		      /* Handle the odd case where we can be called
-			 during bfd_elf_link_add_symbols before the
-			 symbol hashes have been fully populated.  */
-		      Elf_Internal_Sym *sym;
-
-		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr, 1,
-						  symndx, NULL, NULL, NULL);
+		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr,
+						  1, symndx,
+						  NULL, NULL, NULL);
 		      if (sym == NULL)
 			break;
-
-		      val = sym->st_value;
-		      sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
-		      free (sym);
 		    }
+		  sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
+		  if (sec == NULL)
+		    break;
+		  BFD_ASSERT ((sec->flags & SEC_MERGE) == 0);
+		  val = sym->st_value;
 		}
+
 	      val += look->r_addend;
 	      if (code_off != NULL)
 		*code_off = val;
@@ -6047,7 +6066,7 @@ opd_entry_value (asection *opd_sec,
 		  else
 		    *code_sec = sec;
 		}
-	      if (sec != NULL && sec->output_section != NULL)
+	      if (sec->output_section != NULL)
 		val += sec->output_section->vma + sec->output_offset;
 	    }
 	  break;
