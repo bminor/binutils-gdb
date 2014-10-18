@@ -1,3 +1,10 @@
+2014-11-03  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR c++/17494
+	* eval.c (evaluate_subexp_standard): Evaluate the "object" and
+	the method args also under EVAL_SKIP when evaluating method
+	calls under EVAL_SKIP.
+
 2014-11-02  Victor Kamensky  <victor.kamensky@linaro.org>
 
 	* dwarf2loc.c (read_pieced_value): Do big endian

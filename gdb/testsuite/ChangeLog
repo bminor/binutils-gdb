@@ -1,3 +1,9 @@
+2014-11-03  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR c++/17494
+	* gdb.cp/pr17494.cc: New file.
+	* gdb.cp/pr17494.exp: New file.
+
 2014-11-02  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.python/python.exp: Get working directory and match the
