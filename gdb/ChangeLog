@@ -1,3 +1,7 @@
+2014-10-18  Doug Evans  <xdje42@gmail.com>
+
+	* linux-nat.c (linux_nat_wait_1): Make local prev_mask non-static.
+
 2014-10-17  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention new event gdb.clear_objfiles.
