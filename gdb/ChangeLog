@@ -1,3 +1,8 @@
+2014-10-19  Doug Evans  <xdje42@gmail.com>
+
+	* gdbthread.h (set_running): Fix comment.
+	(set_executing, finish_thread_state): Fix comment.
+
 2014-10-18  Doug Evans  <xdje42@gmail.com>
 
 	* linux-nat.c (linux_nat_wait_1): Make local prev_mask non-static.
