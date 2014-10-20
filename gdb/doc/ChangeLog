@@ -1,3 +1,9 @@
+2014-10-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Breakpoints In Python): Add parenthesis after
+	Breakpoint.delete.  Clarify Breakpoint.enabled description so
+	that it contains "disable".
+
 2014-10-17  Doug Evans  <dje@google.com>
 
 	* python.texi (Events In Python): Document clear_objfiles event.
