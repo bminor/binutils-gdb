@@ -57,6 +57,7 @@ message if an attempt is made to assemble an instruction which will not execute
 on the target processor.  The following processor names are recognized:
 @code{cortex-a53},
 @code{cortex-a57},
+@code{thunderx},
 and
 @code{xgene-1}.
 The special name @code{all} may be used to allow the assembler to accept
