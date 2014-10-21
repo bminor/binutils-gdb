@@ -1,3 +1,8 @@
+2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* doc/as.texinfo: Update the MIPS FP ABI descriptions.
+	* doc/c-mips.texi: Spell check and correct throughout.
+
 2014-10-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (s_insn): Set file options.
