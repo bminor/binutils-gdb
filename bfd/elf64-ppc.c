@@ -8343,7 +8343,10 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		      else
 			value = sym->st_value;
 		      value += rel->r_addend;
-		      BFD_ASSERT (value < toc->size && value % 8 == 0);
+		      if (value % 8 != 0)
+			continue;
+		      BFD_ASSERT (value < toc->size
+				  && toc->output_offset % 8 == 0);
 		      toc_ref_index = (value + toc->output_offset) / 8;
 		      if (r_type == R_PPC64_TLS
 			  || r_type == R_PPC64_TLSGD
