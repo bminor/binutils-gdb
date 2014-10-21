@@ -1,6 +1,10 @@
 2014-10-28  Alan Modra  <amodra@gmail.com>
 
 	Apply truck patches
+	2014-10-21  Jan Beulich  <jbeulich@suse.com>
+	* gas/ppc/power8.s: Test msgclr and msgsnd.
+	* gas/ppc/power8.d: Adjust accordingly.
+
 	2014-10-18  Alan Modra  <amodra@gmail.com>
 	* gas/i386/inval-equ-2.l: Adjust.
 
