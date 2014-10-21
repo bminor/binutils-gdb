@@ -150,4 +150,6 @@ Disassembly of section \.text:
  230:	(f3 60 d5 2d|2d d5 60 f3) 	xscvspdpn vs59,vs26
  234:	(ff 0e 16 8c|8c 16 0e ff) 	fmrgow  f24,f14,f2
  238:	(fe c7 2f 8c|8c 2f c7 fe) 	fmrgew  f22,f7,f5
+ 23c:	(7c 00 71 9c|9c 71 00 7c) 	msgsnd  r14
+ 240:	(7c 00 b9 dc|dc b9 00 7c) 	msgclr  r23
 #pass
