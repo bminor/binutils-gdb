@@ -1,5 +1,11 @@
 2014-10-21  Jan Beulich  <jbeulich@suse.com>
 
+	* gas/gas/all/cond.s: Also test processing of leading double
+	quote and trailing backslash in false branch of conditional.
+	* gas/gas/all/cond.l: Adjust accordingly.
+
+2014-10-21  Jan Beulich  <jbeulich@suse.com>
+
 	* gas/ppc/power8.s: Test msgclr and msgsnd.
 	* gas/ppc/power8.d: Adjust accordingly.
 

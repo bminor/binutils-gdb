@@ -1,5 +1,13 @@
 2014-10-21  Jan Beulich  <jbeulich@suse.com>
 
+	* read.c (HANDLE_CONDITIONAL_ASSEMBLY): New parameter "num_read".
+	(read_a_source_file): Adjust HANDLE_CONDITIONAL_ASSEMBLY
+	invocations.
+	(_find_end_of_line): Don't issue "stray '\\'" warning when in
+	false branch of conditional.
+
+2014-10-21  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-aarch64.c (output_operand_error_record): Move down
 	assertion of idx being non-negative. Use local variables when
 	available.
