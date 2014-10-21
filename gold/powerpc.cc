@@ -2708,11 +2708,17 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	      /* libanl */
 	      "getaddrinfo_a",
 	      /* libgomp */
+	      "GOMP_parallel",
 	      "GOMP_parallel_start",
+	      "GOMP_parallel_loop_static",
 	      "GOMP_parallel_loop_static_start",
+	      "GOMP_parallel_loop_dynamic",
 	      "GOMP_parallel_loop_dynamic_start",
+	      "GOMP_parallel_loop_guided",
 	      "GOMP_parallel_loop_guided_start",
+	      "GOMP_parallel_loop_runtime",
 	      "GOMP_parallel_loop_runtime_start",
+	      "GOMP_parallel_sections",
 	      "GOMP_parallel_sections_start",
 	    };
 

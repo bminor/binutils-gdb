@@ -1,3 +1,10 @@
+2014-10-28  Alan Modra  <amodra@gmail.com>
+
+	Apply trunk patches
+	2014-10-22  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (do_relax): Add gcc-4.9 libgomp functions to
+	thread_starter.
+
 2014-09-30  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/17432
