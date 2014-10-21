@@ -2,6 +2,10 @@
 
 	Apply trunk patches
 	2014-10-21  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Ignore relocs against toc
+	entries that aren't a multiple of 8 rather than failing assertion.
+
+	2014-10-21  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_size_stubs): Add gcc-4.9 libgomp functions
 	to thread_starter.
 
