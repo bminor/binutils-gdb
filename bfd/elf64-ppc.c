@@ -11964,11 +11964,17 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  /* libanl */
 	  "getaddrinfo_a",
 	  /* libgomp */
+	  "GOMP_parallel",
 	  "GOMP_parallel_start",
+	  "GOMP_parallel_loop_static",
 	  "GOMP_parallel_loop_static_start",
+	  "GOMP_parallel_loop_dynamic",
 	  "GOMP_parallel_loop_dynamic_start",
+	  "GOMP_parallel_loop_guided",
 	  "GOMP_parallel_loop_guided_start",
+	  "GOMP_parallel_loop_runtime",
 	  "GOMP_parallel_loop_runtime_start",
+	  "GOMP_parallel_sections",
 	  "GOMP_parallel_sections_start",
 	};
       unsigned i;
