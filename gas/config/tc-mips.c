@@ -16344,6 +16344,10 @@ s_cpadd (int ignore ATTRIBUTE_UNUSED)
 static void
 s_insn (int ignore ATTRIBUTE_UNUSED)
 {
+  file_mips_check_options ();
+  file_ase_mips16 |= mips_opts.mips16;
+  file_ase_micromips |= mips_opts.micromips;
+
   mips_mark_labels ();
 
   demand_empty_rest_of_line ();

@@ -1,3 +1,7 @@
+2014-10-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (s_insn): Set file options.
+
 2014-10-21  Jan Beulich  <jbeulich@suse.com>
 
 	* read.c (HANDLE_CONDITIONAL_ASSEMBLY): New parameter "num_read".
