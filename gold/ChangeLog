@@ -1,3 +1,8 @@
+2014-10-22  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (do_relax): Add gcc-4.9 libgomp functions to
+	thread_starter.
+
 2014-10-18  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* configure.tgt (targ_extra_obj) [aarch64*-*]: Define.
