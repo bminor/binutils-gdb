@@ -1,3 +1,9 @@
+2014-10-21  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-aarch64.c (output_operand_error_record): Move down
+	assertion of idx being non-negative. Use local variables when
+	available.
+
 2014-10-18  Alan Modra  <amodra@gmail.com>
 
 	PR 17493
