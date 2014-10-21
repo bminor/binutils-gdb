@@ -1,6 +1,12 @@
 2014-10-28  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	Apply trunk patches
+	2014-10-21  Maciej W. Rozycki  <macro@codesourcery.com>
+	* config/tc-mips.c (s_insn): Set file options.
+
+2014-10-28  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	Apply trunk patches
 	2014-10-17  Matthew Fortune  <matthew.fortune@imgtec.com>
 	* doc/c-mips.texi: Fix bad @value references.
 
