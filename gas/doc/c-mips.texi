@@ -769,9 +769,9 @@ The @code{.global} and @code{.globl} directives supported by
 region of data not code.  This means that, for example, any
 instructions following such a symbol will not be disassembled by
 @code{objdump} as it will regard them as data.  To change this
-behaviour an optional section name can be placed after the symbol name
+behavior an optional section name can be placed after the symbol name
 in the @code{.global} directive.  If this section exists and is known
-to be a code section, then the symbol will be marked as poiting at
+to be a code section, then the symbol will be marked as pointing at
 code not data.  Ie the syntax for the directive is:
 
   @code{.global @var{symbol}[ @var{section}][, @var{symbol}[ @var{section}]] ...},
@@ -840,8 +840,8 @@ pass all floating-point data in general-purpose registers.
 
 @item 4 - Deprecated
 This variant existed as an initial attempt at supporting 64-bit wide
-floating-point registers for O32 ABI on a MIPS32r2 cpu.  This has been
-superceded by 5, 6 and 7.
+floating-point registers for O32 ABI on a MIPS32r2 CPU.  This has been
+superseded by 5, 6 and 7.
 
 @item 5 - Double-precision 32-bit CPU, 32-bit or 64-bit FPU
 This variant is used by 32-bit ABIs to indicate that the floating-point
@@ -998,7 +998,7 @@ Release 1 instructions from being accepted.
 @kindex @code{.set nodspr2}
 The directive @code{.set dspr2} makes the assembler accept instructions
 from the DSP Release 2 Application Specific Extension from that point
-on in the assembly.  This dirctive implies @code{.set dsp}.  The
+on in the assembly.  This directive implies @code{.set dsp}.  The
 @code{.set nodspr2} directive prevents DSP Release 2 instructions from
 being accepted.
 
