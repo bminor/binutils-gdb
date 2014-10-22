@@ -1,5 +1,10 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.h (enum print_stop_action): Move further up in the
+	file.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* gdbarch.sh: Include regcache.h.
 	* gdbarch.h: Regenerate.
 
