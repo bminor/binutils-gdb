@@ -1,5 +1,9 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* python/python-internal.h: Include "extension-priv.h".
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.h (enum print_stop_action): Move further up in the
 	file.
 
