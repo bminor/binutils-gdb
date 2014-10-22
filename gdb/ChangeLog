@@ -1,5 +1,10 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* x86-linux-nat.c (u_debugreg_offset): New function.
+	(x86_linux_dr_get, x86_linux_dr_set): Use it.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* nat/x86-dregs.h (enum target_hw_bp_type): Remove forward
 	declaration.
 	Include break-common.h.

@@ -1,5 +1,10 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* linux-x86-low.c (u_debugreg_offset): New function.
+	(x86_linux_dr_get, x86_linux_dr_set): Use it.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb_proc_service.h: Wrap with EXTERN_C_PUSH/EXTERN_C_POP.
 	[!HAVE_PROC_SERVICE_H] (struct ps_prochandle): Forward declare.
 	[!HAVE_PROC_SERVICE_H] (ps_pdread, ps_pdwrite, ps_ptread)

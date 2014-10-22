@@ -530,6 +530,18 @@ x86_breakpoint_at (CORE_ADDR pc)
   return 0;
 }
 
+
+/* Return the offset of REGNUM in the u_debugreg field of struct
+   user.  */
+
+static int
+u_debugreg_offset (int regnum)
+{
+  return (offsetof (struct user, u_debugreg)
+	  + sizeof (((struct user *) 0)->u_debugreg[0]) * regnum);
+}
+
+
 /* Support for debug registers.  */
 
 static unsigned long
@@ -541,8 +553,7 @@ x86_linux_dr_get (ptid_t ptid, int regnum)
   tid = ptid_get_lwp (ptid);
 
   errno = 0;
-  value = ptrace (PTRACE_PEEKUSER, tid,
-		  offsetof (struct user, u_debugreg[regnum]), 0);
+  value = ptrace (PTRACE_PEEKUSER, tid, u_debugreg_offset (regnum), 0);
   if (errno != 0)
     error ("Couldn't read debug register");
 
@@ -557,8 +568,7 @@ x86_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
   tid = ptid_get_lwp (ptid);
 
   errno = 0;
-  ptrace (PTRACE_POKEUSER, tid,
-	  offsetof (struct user, u_debugreg[regnum]), value);
+  ptrace (PTRACE_POKEUSER, tid, u_debugreg_offset (regnum), value);
   if (errno != 0)
     error ("Couldn't write debug register");
 }
