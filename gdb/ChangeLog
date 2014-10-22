@@ -1,5 +1,12 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* arm-tdep.c (decode_insn) <arm_handle_insn, thumb_handle_insn>:
+	Remove duplicate const.
+	* sparc-sol2-tdep.c (sparc_sol2_static_transform_name): Remove
+	duplicate const.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* cp-valprint.c (vtbl_ptr_name): Use EXPORTED_CONST.
 	* guile/guile.c (extension_language_guile): Use EXPORTED_CONST.
 	* features/feature_to_c.sh: Tag the generated xml_builtin array
