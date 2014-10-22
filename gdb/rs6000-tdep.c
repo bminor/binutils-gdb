@@ -6049,7 +6049,7 @@ powerpc_set_vector_abi (char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   struct gdbarch_info info;
-  enum powerpc_vector_abi vector_abi;
+  int vector_abi;
 
   for (vector_abi = POWERPC_VEC_AUTO;
        vector_abi != POWERPC_VEC_LAST;

@@ -1,3 +1,17 @@
+2015-02-27  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* arm-tdep.c (set_fp_model_sfunc, arm_set_abi): Use 'int' for
+	local used to iterate over enums.
+	* completer.c (signal_completer): Likewise.
+	* i386-tdep.c (i386_stap_parse_special_token): Likewise.
+	* rs6000-tdep.c (powerpc_set_vector_abi): Likewise.
+	* tui/tui-data.c (tui_next_win, tui_prev_win): Likewise.
+	* tui/tui-layout.c (next_layout, prev_layout): Likewise.
+	* tui/tui-win.c (tui_refresh_all_win, tui_rehighlight_all)
+	(tui_resize_all, tui_set_focus_command, tui_all_windows_info): Likewise.
+	* tui-wingeneral.c (tui_refresh_all):  Likewise.
+
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
 	* target.h: Include "infrun.h".
