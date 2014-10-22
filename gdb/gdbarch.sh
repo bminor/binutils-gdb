@@ -1234,6 +1234,8 @@ struct elf_internal_linux_prpsinfo;
 struct mem_range;
 struct syscalls_info;
 
+#include "regcache.h"
+
 /* The architecture associated with the inferior through the
    connection to the target.
 

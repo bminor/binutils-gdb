@@ -1,5 +1,10 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* gdbarch.sh: Include regcache.h.
+	* gdbarch.h: Regenerate.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* arm-tdep.c (decode_insn) <arm_handle_insn, thumb_handle_insn>:
 	Remove duplicate const.
 	* sparc-sol2-tdep.c (sparc_sol2_static_transform_name): Remove
