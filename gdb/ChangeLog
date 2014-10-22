@@ -1,5 +1,9 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* target.h: Include "infrun.h".
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb_proc_service.h: Wrap with EXTERN_C_PUSH/EXTERN_C_POP.
 
 2015-02-27  Pedro Alves  <palves@redhat.com>
