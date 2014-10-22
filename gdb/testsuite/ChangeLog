@@ -1,5 +1,12 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/break.c: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.
+	* gdb.base/break1.c: Likewise.
+	* gdb.base/break.exp: Drop references to removed code.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/solib1.c: Remove #ifdef PROTOTYPES, keep prototyped
 	variant.
 

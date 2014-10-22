@@ -18,17 +18,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef PROTOTYPES
 extern int marker1 (void);
 extern int marker2 (int a);
 extern void marker3 (char *a, char *b);
 extern void marker4 (long d);
-#else
-extern int marker1 ();
-extern int marker2 ();
-extern void marker3 ();
-extern void marker4 ();
-#endif
 
 /* We're used by a test that requires malloc, so make sure it is in
    the executable.  */
@@ -42,17 +35,10 @@ void *need_malloc ()
  *	testing stack backtraces and such.
  */
 
-#ifdef PROTOTYPES
 int factorial(int);
 
 int
 main (int argc, char **argv, char **envp)
-#else
-int
-main (argc, argv, envp)
-int argc;
-char *argv[], **envp;
-#endif
 {
     if (argc == 12345) {  /* an unlikely value < 2^16, in case uninited */ /* set breakpoint 6 here */
 	fprintf (stderr, "usage:  factorial <number>\n");
@@ -72,12 +58,7 @@ char *argv[], **envp;
     return argc;  /* set breakpoint 10 here */
 } /* set breakpoint 10a here */
 
-#ifdef PROTOTYPES
 int factorial (int value)
-#else
-int factorial (value)
-int value;
-#endif
 {
   if (value > 1) {  /* set breakpoint 7 here */
 	value *= factorial (value - 1);
@@ -85,12 +66,7 @@ int value;
     return (value); /* set breakpoint 19 here */
 }
 
-#ifdef PROTOTYPES
 int multi_line_if_conditional (int a, int b, int c)
-#else
-int multi_line_if_conditional (a, b, c)
-  int a, b, c;
-#endif
 {
   if (a    /* set breakpoint 3 here */
       && b
@@ -100,12 +76,7 @@ int multi_line_if_conditional (a, b, c)
     return 1;
 }
 
-#ifdef PROTOTYPES
 int multi_line_while_conditional (int a, int b, int c)
-#else
-int multi_line_while_conditional (a, b, c)
-  int a, b, c;
-#endif
 {
   while (a /* set breakpoint 4 here */
       && b
