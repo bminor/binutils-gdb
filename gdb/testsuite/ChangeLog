@@ -1,5 +1,15 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/callfuncs.c (t_float_many_args): Fix syntax error in
+	code guarded by #ifdef NO_PROTOTYPES.
+	(t_double_many_args): Likewise.
+	(DEF_FUNC_MANY_ARGS_1): Likewise.
+	(DEF_FUNC_VALUES_1): Likewise.
+	(t_structs_ldc): Renamed from t_structs_fc in conditional code
+	guarded by #ifdef PROTOTYPES.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.mi/mi-console.c: Add eye-catcher.
 	* gdb.mi/mi-console.exp (semihosted_string): Refer to eye-catcher
 	instead of literal line number.
