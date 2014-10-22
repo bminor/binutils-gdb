@@ -1,5 +1,11 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/list0.h: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.  Preserve original line numbering.
+	* gdb.base/list1.c: Likewise.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/break.c: Remove #ifdef PROTOTYPES, keep prototyped
 	variant.
 	* gdb.base/break1.c: Likewise.
