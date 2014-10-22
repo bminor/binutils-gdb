@@ -1,5 +1,12 @@
 2015-02-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.gdb/complaints.exp (test_initial_complaints): Also accept
+	"true" for boolean result.
+	* gdb.gdb/selftest.exp (test_with_self): Also accept full
+	prototype of main.
+
+2015-02-27  Pedro Alves  <palves@redhat.com>
+
 	* lib/unbuffer_output.c: New file.
 	* gdb.base/interrupt.c: Include "../lib/unbuffer_output.c".
 	(main): Call gdb_unbuffer_output.
