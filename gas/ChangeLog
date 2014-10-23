@@ -1,3 +1,64 @@
+2014-10-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* config/tc-nios2.c (nios2_insn_infoS): Add constant_bits field.
+	(nios2_arg_infoS, nios2_arg_hash, nios2_arg_lookup): Delete.
+	(nios2_control_register_arg_p): Delete.
+	(nios2_coproc_reg): Delete.
+	(nios2_relax_frag): Remove hard-coded instruction size.
+	(md_convert_frag): Use new insn accessor macros.
+	(nios2_diagnose_overflow): Remove hard-coded instruction size.
+	(md_apply_fix): Likewise.
+	(bad_opcode): New.
+	(nios2_parse_reg): New.
+	(nios2_assemble_expression): Remove prev_reloc parameter.  Adjust
+	uses and callers.
+	(nios2_assemble_arg_c): New.
+	(nios2_assemble_arg_d): New.
+	(nios2_assemble_arg_s): New.
+	(nios2_assemble_arg_t): New.
+	(nios2_assemble_arg_i): New.
+	(nios2_assemble_arg_u): New.
+	(nios2_assemble_arg_o): New.
+	(nios2_assemble_arg_j): New.
+	(nios2_assemble_arg_l): New.
+	(nios2_assemble_arg_m): New.
+	(nios2_assemble_args): New.
+	(nios2_assemble_args_dst): Delete.
+	(nios2_assemble_args_tsi): Delete.
+	(nios2_assemble_args_tsu): Delete.
+	(nios2_assemble_args_sto): Delete.
+	(nios2_assemble_args_o): Delete.
+	(nios2_assemble_args_is): Delete.
+	(nios2_assemble_args_m): Delete.
+	(nios2_assemble_args_s): Delete.
+	(nios2_assemble_args_tis): Delete.
+	(nios2_assemble_args_dc): Delete.
+	(nios2_assemble_args_cs): Delete.
+	(nios2_assemble_args_ds): Delete.
+	(nios2_assemble_args_ldst): Delete.
+	(nios2_assemble_args_none): Delete.
+	(nios2_assemble_args_dsj): Delete.
+	(nios2_assemble_args_d): Delete.
+	(nios2_assemble_args_b): Delete.
+	(nios2_arg_info_structs): Delete.
+	(NIOS2_NUM_ARGS): Delete.
+	(nios2_consume_arg): Remove insn parameter.  Use new macros.
+	Don't check register arguments here.  Remove 'b' case.
+	(nios2_consume_separator): Move check for missing separators to...
+	(nios2_parse_args): ...here.  Remove special case for optional
+	arguments.
+	(output_insn): Avoid using hard-coded insn size.
+	(output_ubranch): Likewise.
+	(output_cbranch): Likewise.
+	(output_call): Use new macros.
+	(output_addi): Likewise.
+	(output_ori): Likewise.
+	(output_xori): Likewise.
+	(output_movia): Likewise.
+	(md_begin): Remove nios2_arg_info_structs initialization.
+	(md_assemble): Initialize constant_bits field.  Use
+	nios2_parse_args instead of looking up parse function in hash table.  
+
 2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* doc/as.texinfo: Update the MIPS FP ABI descriptions.

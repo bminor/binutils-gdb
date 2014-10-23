@@ -1,3 +1,9 @@
+2014-10-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_analyze_prologue): Use new instruction field
+	accessors and constants from nios2 opcodes update.
+	(nios2_get_next_pc): Likewise.
+
 2014-10-19  Doug Evans  <xdje42@gmail.com>
 
 	* gdbthread.h (set_running): Fix comment.

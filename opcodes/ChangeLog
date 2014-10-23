@@ -1,3 +1,27 @@
+2014-10-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-opc.c (nios2_builtin_regs): Add regtype field initializers.
+	(nios2_builtin_opcodes): Rename to nios2_r1_opcodes.  Use new
+	MATCH_R1_<insn> and MASK_R1_<insn> macros in initializers.  Add
+	size and format initializers.  Merge 'b' arguments into 'j'.
+	(NIOS2_NUM_OPCODES): Adjust definition.
+	(bfd_nios2_num_builtin_opcodes): Rename to nios2_num_r1_opcodes.
+	(nios2_opcodes): Adjust.
+	(bfd_nios2_num_opcodes): Rename to nios2_num_opcodes.
+	* nios2-dis.c (INSNLEN): Update comment.
+	(nios2_hash_init, nios2_hash): Delete.
+	(OPCODE_HASH_SIZE): New.
+	(nios2_r1_extract_opcode): New.
+	(nios2_disassembler_state): New.
+	(nios2_r1_disassembler_state): New.
+	(nios2_init_opcode_hash): Add state parameter.  Adjust to use it.
+	(nios2_find_opcode_hash): Use state object.
+	(bad_opcode): New.
+	(nios2_print_insn_arg): Add op parameter.  Use it to access
+	format.  Remove 'b' case.
+	(nios2_disassemble): Remove special case for nop.  Remove
+	hard-coded instruction size.
+
 2014-10-21  Jan Beulich  <jbeulich@suse.com>
 
 	* ppc-opc.c (powerpc_opcodes): Enable msgclr and msgsnd on Power8.

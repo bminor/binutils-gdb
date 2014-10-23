@@ -558,13 +558,13 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 
       /* The following instructions can appear in the prologue.  */
 
-      if ((insn & 0x0001ffff) == 0x0001883a)
+      if ((insn & MASK_R1_ADD) == MATCH_R1_ADD)
 	{
 	  /* ADD   rc, ra, rb  (also used for MOV) */
 
-	  int ra = GET_IW_A (insn);
-	  int rb = GET_IW_B (insn);
-	  int rc = GET_IW_C (insn);
+	  int ra = GET_IW_R_A (insn);
+	  int rb = GET_IW_R_B (insn);
+	  int rc = GET_IW_R_C (insn);
 
 	  if (rc == NIOS2_SP_REGNUM
 	      && rb == 0
@@ -609,13 +609,13 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  prologue_insn = 1;
 	}
 
-      else if ((insn & 0x0001ffff) == 0x0001983a)
+      else if ((insn & MASK_R1_SUB) == MATCH_R1_SUB)
 	{
 	  /* SUB   rc, ra, rb */
 
-	  int ra = GET_IW_A (insn);
-	  int rb = GET_IW_B (insn);
-	  int rc = GET_IW_C (insn);
+	  int ra = GET_IW_R_A (insn);
+	  int rb = GET_IW_R_B (insn);
+	  int rc = GET_IW_R_C (insn);
 
 	  if (rc != 0)
 	    {
@@ -627,12 +627,12 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	    }
 	}
 
-      else if ((insn & 0x0000003f) == 0x00000004)
+      else if ((insn & MASK_R1_ADDI) == MATCH_R1_ADDI)
 	{
 	  /* ADDI  rb, ra, immed   (also used for MOVI) */
-	  short immed = GET_IW_IMM16 (insn);
-	  int ra = GET_IW_A (insn);
-	  int rb = GET_IW_B (insn);
+	  short immed = GET_IW_I_IMM16 (insn);
+	  int ra = GET_IW_I_A (insn);
+	  int rb = GET_IW_I_B (insn);
 
 	  /* The first stack adjustment is part of the prologue.
 	     Any subsequent stack adjustments are either down to
@@ -651,12 +651,12 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  prologue_insn = 1;
 	}
 
-      else if ((insn & 0x0000003f) == 0x00000034)
+      else if ((insn & MASK_R1_ORHI) == MATCH_R1_ORHI)
 	{
 	  /* ORHI  rb, ra, immed   (also used for MOVHI) */
-	  unsigned int immed = GET_IW_IMM16 (insn);
-	  int ra = GET_IW_A (insn);
-	  int rb = GET_IW_B (insn);
+	  unsigned int immed = GET_IW_I_IMM16 (insn);
+	  int ra = GET_IW_I_A (insn);
+	  int rb = GET_IW_I_B (insn);
 
 	  if (rb != 0)
 	    {
@@ -665,14 +665,14 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	    }
 	}
 
-      else if ((insn & IW_OP_MASK) == OP_STW
-	       || (insn & IW_OP_MASK) == OP_STWIO)
+      else if ((insn & MASK_R1_STW) == MATCH_R1_STW
+	       || (insn & MASK_R1_STWIO) == MATCH_R1_STWIO)
         {
 	  /* STW rb, immediate(ra) */
 
-	  short immed16 = GET_IW_IMM16 (insn);
-	  int ra = GET_IW_A (insn);
-	  int rb = GET_IW_B (insn);
+	  short immed16 = GET_IW_I_IMM16 (insn);
+	  int ra = GET_IW_I_A (insn);
+	  int rb = GET_IW_I_B (insn);
 
 	  /* Are we storing the original value of a register?
 	     For exception handlers the value of EA-4 (return
@@ -693,8 +693,7 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 		    {
 		      /* Save off callee saved registers.  */
 		      cache->reg_saved[orig].basereg = value[ra].reg;
-		      cache->reg_saved[orig].addr
-			= value[ra].offset + GET_IW_IMM16 (insn);
+		      cache->reg_saved[orig].addr = value[ra].offset + immed16;
 		    }
 
 		  prologue_insn = 1;
@@ -709,11 +708,11 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	    within_prologue = 0;
         }
 
-      else if ((insn & 0xffc1f83f) == 0x0001303a)
+      else if ((insn & MASK_R1_RDCTL) == MATCH_R1_RDCTL)
 	{
 	  /* RDCTL rC, ctlN */
-	  int rc = GET_IW_C (insn);
-	  int n = GET_IW_CONTROL_REGNUM (insn);
+	  int rc = GET_IW_R_C (insn);
+	  int n = GET_IW_R_A (insn);
 
 	  if (rc != 0)
 	    {
@@ -724,7 +723,7 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  prologue_insn = 1;
         }
 
-      else if ((insn & 0x0000003f) == 0
+      else if ((insn & MASK_R1_CALL) == MATCH_R1_CALL
 	       && value[8].reg == NIOS2_RA_REGNUM
 	       && value[8].offset == 0
 	       && value[NIOS2_SP_REGNUM].reg == NIOS2_SP_REGNUM
@@ -779,24 +778,24 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	 adjustment as terminating the prologue (see above).  */
       else
 	{
-	  switch (GET_IW_OP (insn))
+	  switch (GET_IW_R1_OP (insn))
 	    {
-	    case OP_BEQ:
-	    case OP_BGE:
-	    case OP_BGEU:
-	    case OP_BLT:
-	    case OP_BLTU:
-	    case OP_BNE:
-	    case OP_BR:
-	    case OP_CALL:
+	    case R1_OP_BEQ:
+	    case R1_OP_BGE:
+	    case R1_OP_BGEU:
+	    case R1_OP_BLT:
+	    case R1_OP_BLTU:
+	    case R1_OP_BNE:
+	    case R1_OP_BR:
+	    case R1_OP_CALL:
 	      within_prologue = 0;
 	      break;
-	    case OP_OPX:
-	      if (GET_IW_OPX (insn) == OPX_RET
-		  || GET_IW_OPX (insn) == OPX_ERET
-		  || GET_IW_OPX (insn) == OPX_BRET
-		  || GET_IW_OPX (insn) == OPX_CALLR
-		  || GET_IW_OPX (insn) == OPX_JMP)
+	    case R1_OP_OPX:
+	      if (GET_IW_R_OPX (insn) == R1_OPX_RET
+		  || GET_IW_R_OPX (insn) == R1_OPX_ERET
+		  || GET_IW_R_OPX (insn) == R1_OPX_BRET
+		  || GET_IW_R_OPX (insn) == R1_OPX_CALLR
+		  || GET_IW_R_OPX (insn) == R1_OPX_JMP)
 		within_prologue = 0;
 	      break;
 	    default:
@@ -1372,65 +1371,65 @@ nios2_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   inst = nios2_fetch_instruction (gdbarch, pc);
   pc += NIOS2_OPCODE_SIZE;
 
-  imm16 = (short) GET_IW_IMM16 (inst);
-  ra = GET_IW_A (inst);
-  rb = GET_IW_B (inst);
+  imm16 = (short) GET_IW_I_IMM16 (inst);
+  ra = GET_IW_I_A (inst);
+  rb = GET_IW_I_B (inst);
   ras = get_frame_register_signed (frame, ra);
   rbs = get_frame_register_signed (frame, rb);
   rau = get_frame_register_unsigned (frame, ra);
   rbu = get_frame_register_unsigned (frame, rb);
 
-  switch (GET_IW_OP (inst))
+  switch (GET_IW_R1_OP (inst))
     {
-    case OP_BEQ:
+    case R1_OP_BEQ:
       if (ras == rbs)
 	pc += imm16;
       break;
 
-    case OP_BGE:
+    case R1_OP_BGE:
       if (ras >= rbs)
         pc += imm16;
       break;
 
-    case OP_BGEU:
+    case R1_OP_BGEU:
       if (rau >= rbu)
         pc += imm16;
       break;
 
-    case OP_BLT:
+    case R1_OP_BLT:
       if (ras < rbs)
         pc += imm16;
       break;
 
-    case OP_BLTU:
+    case R1_OP_BLTU:
       if (rau < rbu)
         pc += imm16;
       break;
 
-    case OP_BNE:
+    case R1_OP_BNE:
       if (ras != rbs)
         pc += imm16;
       break;
 
-    case OP_BR:
+    case R1_OP_BR:
       pc += imm16;
       break;
 
-    case OP_JMPI:
-    case OP_CALL:
-      pc = (pc & 0xf0000000) | (GET_IW_IMM26 (inst) << 2);
+    case R1_OP_JMPI:
+    case R1_OP_CALL:
+      pc = (pc & 0xf0000000) | (GET_IW_J_IMM26 (inst) << 2);
       break;
 
-    case OP_OPX:
-      switch (GET_IW_OPX (inst))
+    case R1_OP_OPX:
+      switch (GET_IW_R_OPX (inst))
 	{
-	case OPX_JMP:
-	case OPX_CALLR:
-	case OPX_RET:
+	case R1_OPX_JMP:
+	case R1_OPX_CALLR:
+	case R1_OPX_RET:
 	  pc = ras;
 	  break;
 
-	case OPX_TRAP:
+	case R1_OPX_TRAP:
 	  if (tdep->syscall_next_pc != NULL)
 	    return tdep->syscall_next_pc (frame);
 
