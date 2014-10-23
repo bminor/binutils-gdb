@@ -1311,11 +1311,10 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
     return pc;
 
   stack_chk_guard = lookup_minimal_symbol_by_pc (addr);
-  /* If name of symbol doesn't start with '__stack_chk_guard', this
-     instruction sequence is not for stack protector.  If symbol is
-     removed, we conservatively think this sequence is for stack protector.  */
-  if (stack_chk_guard.minsym
-      && strncmp (MSYMBOL_LINKAGE_NAME (stack_chk_guard.minsym),
+  /* ADDR must correspond to a symbol whose name is __stack_chk_guard.
+     Otherwise, this sequence cannot be for stack protector.  */
+  if (stack_chk_guard.minsym == NULL
+      || strncmp (MSYMBOL_LINKAGE_NAME (stack_chk_guard.minsym),
 		  "__stack_chk_guard",
 		  strlen ("__stack_chk_guard")) != 0)
    return pc;

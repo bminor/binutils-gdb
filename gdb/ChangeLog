@@ -1,3 +1,9 @@
+2014-10-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* arm-tdep.c (arm_skip_stack_protector): Return early if
+	address loaded by first "ldr" instruction does not have
+	a corresponding minimal symbol.  Update comment.
+
 2014-10-29  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (arm_analyze_load_stack_chk_guard): Compute the
