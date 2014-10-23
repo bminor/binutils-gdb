@@ -15956,6 +15956,26 @@ const struct elf_size_info elf32_arm_size_info =
   bfd_elf32_swap_reloca_out
 };
 
+static bfd_vma
+read_code32 (const bfd *abfd, const bfd_byte *addr)
+{
+  /* V7 BE8 code is always little endian.  */
+  if ((elf_elfheader (abfd)->e_flags & EF_ARM_BE8) != 0)
+    return bfd_getl32 (addr);
+
+  return bfd_get_32 (abfd, addr);
+}
+
+static bfd_vma
+read_code16 (const bfd *abfd, const bfd_byte *addr)
+{
+  /* V7 BE8 code is always little endian.  */
+  if ((elf_elfheader (abfd)->e_flags & EF_ARM_BE8) != 0)
+    return bfd_getl16 (addr);
+
+  return bfd_get_16 (abfd, addr);
+}
+
 /* Return size of plt0 entry starting at ADDR
    or (bfd_vma) -1 if size can not be determined.  */
 
@@ -15965,7 +15985,7 @@ elf32_arm_plt0_size (const bfd *abfd, const bfd_byte *addr)
   bfd_vma first_word;
   bfd_vma plt0_size;
 
-  first_word = H_GET_32 (abfd, addr);
+  first_word = read_code32 (abfd, addr);
 
   if (first_word == elf32_arm_plt0_entry[0])
     plt0_size = 4 * ARRAY_SIZE (elf32_arm_plt0_entry);
@@ -15990,17 +16010,17 @@ elf32_arm_plt_size (const bfd *abfd, const bfd_byte *start, bfd_vma offset)
   const bfd_byte *addr = start + offset;
 
   /* PLT entry size if fixed on Thumb-only platforms.  */
-  if (H_GET_32(abfd, start) == elf32_thumb2_plt0_entry[0])
+  if (read_code32 (abfd, start) == elf32_thumb2_plt0_entry[0])
       return 4 * ARRAY_SIZE (elf32_thumb2_plt_entry);
 
   /* Respect Thumb stub if necessary.  */
-  if (H_GET_16(abfd, addr) == elf32_arm_plt_thumb_stub[0])
+  if (read_code16 (abfd, addr) == elf32_arm_plt_thumb_stub[0])
     {
       plt_size += 2 * ARRAY_SIZE(elf32_arm_plt_thumb_stub);
     }
 
   /* Strip immediate from first add.  */
-  first_insn = H_GET_32(abfd, addr + plt_size) & 0xffffff00;
+  first_insn = read_code32 (abfd, addr + plt_size) & 0xffffff00;
 
 #ifdef FOUR_WORD_PLT
   if (first_insn == elf32_arm_plt_entry[0])

@@ -1,3 +1,11 @@
+2014-10-23  Victor Kamensky  <victor.kamensky@linaro.org>
+
+	* elf32-arm.c (read_code32): New function to read 32 bit
+	arm instruction.
+	(read_code16): New function to read 16 bit thumb instrution.
+	(elf32_arm_plt0_size, elf32_arm_plt_size): Use read_code32
+	and read_code16 to read instructions.
+
 2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elfxx-mips.c (print_mips_ases): Print unknown ASEs.
