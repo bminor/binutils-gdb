@@ -1,5 +1,11 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/call-ar-st.c: Add eye-catchers.
+	* gdb.base/call-ar-st.exp: Refer to eye-catchers instead of
+	literal line numbers.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/average.c: Add eye-catchers.
 	* gdb.base/sum.c: Likewise.
 	* gdb.base/dbx.exp: Use eye-catchers to determine line numbers for

@@ -303,8 +303,8 @@ void print_all_arrays( array_i, array_c, array_f, array_d )
      double array_d[];
 #endif
 {
-  print_int_array(array_i);
-  print_char_array(array_c);
+  print_int_array(array_i);	/* -step1- */
+  print_char_array(array_c);	/* -next1- */
   print_float_array(array_f);
   print_double_array(array_d);
 }
@@ -413,7 +413,7 @@ void init_bit_flags_combo ( bit_flags_combo, a, b, ch1, g, d, ch2, e, o )
 #endif
 {
 
-   bit_flags_combo->alpha = a;
+   bit_flags_combo->alpha = a;	/* -step3- */
    bit_flags_combo->beta = b;
    bit_flags_combo->ch1 = ch1;
    bit_flags_combo->gamma = g;
@@ -989,7 +989,7 @@ f1, f2, f3 )
      struct two_floats_t      f3;
 #endif
 {
-    printf("double : %f\n", a);
+    printf("double : %f\n", a);	/* -step2- */
     printf("double : %f\n", b);
     printf("int : %d\n", c);
     printf("int : %d\n", d);
@@ -1206,18 +1206,18 @@ int main ()  {
       float_array[index] = index/7.02;
   }
 
-  for (index = 0; index < 50; index++) {
+  for (index = 0; index < 50; index++) { /* -tbreak1- */
       integer_array[index] = -index;
   }
 
   /* Print arrays
    */
   print_char_array(char_array);
-  print_double_array(double_array);
+  print_double_array(double_array); /* -tbreak2- */
   print_float_array(float_array);
   print_student_id_shirt_color(student_id, my_shirt); 
   print_int_array(integer_array);
-  print_all_arrays(integer_array, char_array, float_array, double_array);
+  print_all_arrays(integer_array, char_array, float_array, double_array); /* -tbreak3- */
 
   /* Allocate space for large structures 
    */
@@ -1233,12 +1233,12 @@ int main ()  {
   init_array_rep(list3, 5);
   init_array_rep(list4, 10);
   printf("HELLO WORLD\n");
-  printf("BYE BYE FOR NOW\n");
-  printf("VERY GREEN GRASS\n");
+  printf("BYE BYE FOR NOW\n");	/* -tbreak4- */
+  printf("VERY GREEN GRASS\n");	/* -next2- */
 
   /* Print large structures 
    */
-  sum_array_print(10, *list1, *list2, *list3, *list4);
+  sum_array_print(10, *list1, *list2, *list3, *list4); /* -tbreak5- */
   print_array_rep(*list1, *list2, *list3);
   print_one_large_struct(*list1);
 
@@ -1278,12 +1278,12 @@ int main ()  {
    */
   a = 22.25;
   b = 33.375;
-  c = 0;
+  c = 0;			/* -tbreak6- */
   d = -25;
   e = 100;
   f = 2345;
 
-  print_long_arg_list ( a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, 
+  print_long_arg_list ( a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, /* -tbreak7- */
 			*flags, *flags_combo, *three_char, *five_char, *int_char_combo,
 			*d1, *d2, *d3, *f1, *f2, *f3);
 
@@ -1297,18 +1297,18 @@ int main ()  {
   init_two_floats ( f3, -2.345, 1.0); 
   init_bit_flags(flags, (unsigned)1, (unsigned)0, (unsigned)1, 
 		 (unsigned)0, (unsigned)1, (unsigned)0 ); 
-  init_bit_flags_combo(flags_combo, (unsigned)1, (unsigned)0, 'y',
+  init_bit_flags_combo(flags_combo, (unsigned)1, (unsigned)0, 'y', /* -tbreak8- */
 				     (unsigned)1, (unsigned)0, 'n',
 				     (unsigned)1, (unsigned)0 ); 
   init_three_chars(three_char, 'x', 'y', 'z');
   init_five_chars(five_char, 'h', 'e', 'l', 'l', 'o');
-  init_int_char_combo(int_char_combo, 13, '!');
+  init_int_char_combo(int_char_combo, 13, '!'); /* -tbreak9- */
   init_struct_rep(struct1, 10);
   init_struct_rep(struct2, 20);
   init_struct_rep(struct3, 30);
   init_struct_rep(struct4, 40);
 
-  compute_with_small_structs(35);
+  compute_with_small_structs(35); /* -tbreak10- */
   loop_count();
   printf("HELLO WORLD\n");
   printf("BYE BYE FOR NOW\n");
