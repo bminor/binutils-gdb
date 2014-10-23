@@ -1,5 +1,10 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/solib1.c: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/callfuncs.exp (perform_all_tests): Re-indent.
 
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
