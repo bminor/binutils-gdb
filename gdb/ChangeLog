@@ -1,5 +1,31 @@
 2014-10-29  Pedro Alves  <palves@redhat.com>
 
+	PR python/17372
+	* event-top.c (change_line_handler): Call
+	gdb_rl_callback_handler_remove instead of
+	rl_callback_handler_remove.
+	(callback_handler_installed): New global.
+	(gdb_rl_callback_handler_remove, gdb_rl_callback_handler_install)
+	(gdb_rl_callback_handler_reinstall): New functions.
+	(display_gdb_prompt): Call gdb_rl_callback_handler_remove and
+	gdb_rl_callback_handler_install instead of
+	rl_callback_handler_remove and rl_callback_handler_install.
+	(gdb_disable_readline): Call gdb_rl_callback_handler_remove
+	instead of rl_callback_handler_remove.
+	* event-top.h (gdb_rl_callback_handler_remove)
+	(gdb_rl_callback_handler_install)
+	(gdb_rl_callback_handler_reinstall): New declarations.
+	* infrun.c (reinstall_readline_callback_handler_cleanup): New
+	cleanup function.
+	(fetch_inferior_event): Install it.
+	* top.c (gdb_readline_wrapper_line) Call
+	gdb_rl_callback_handler_remove instead of
+	rl_callback_handler_remove.
+	(gdb_readline_wrapper_cleanup): Don't call
+	rl_callback_handler_install.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (command_line_handler): Clear the first byte of
 	linebuffer, when it is first allocated.
 

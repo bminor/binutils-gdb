@@ -1,3 +1,10 @@
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
+	PR python/17372
+	* gdb.python/python.exp: Test a multi-line command that spawns
+	interactive Python.
+	* gdb.base/multi-line-starts-subshell.exp: New file.
+
 2014-10-29  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/fileio.exp: Make directories on host.
