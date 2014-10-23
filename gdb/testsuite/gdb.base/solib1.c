@@ -14,5 +14,5 @@ int  solib_main (arg)
 #endif
 #endif
 {
-  return arg*arg;
-}
+  return arg*arg;		/* HERE */
+}				/* STEP */
