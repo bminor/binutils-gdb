@@ -58,6 +58,22 @@ gdb_py_test_multiple "multi-line python command" \
   "print (23)" "" \
   "end" "23"
 
+# Spawn interactive Python help from a multi-line command, thus, after
+# a secondary prompt.
+
+with_test_prefix "python interactive help" {
+    set test "python; help(); end"
+    gdb_test_multiple "python\nhelp()\nend" $test {
+	-re "online help utility.*help> $" {
+	    pass $test
+
+	    # The "quit" must be seen on the output.  A buggy GDB
+	    # would not display it.
+	    gdb_test "quit" "^quit.*leaving help.*" "quit help"
+	}
+    }
+}
+
 gdb_py_test_multiple "show python command" \
   "define zzq" "Type commands for definition of .* just \"end\"\\.*" \
   "python" "" \

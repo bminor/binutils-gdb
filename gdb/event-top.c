@@ -206,12 +206,63 @@ change_line_handler (void)
   else
     {
       /* Turn off editing by using gdb_readline2.  */
-      rl_callback_handler_remove ();
+      gdb_rl_callback_handler_remove ();
       call_readline = gdb_readline2;
 
       /* Set up the command handler as well, in case we are called as
          first thing from .gdbinit.  */
       input_handler = command_line_handler;
+    }
+}
+
+/* The functions below are wrappers for rl_callback_handler_remove and
+   rl_callback_handler_install that keep track of whether the callback
+   handler is installed in readline.  This is necessary because after
+   handling a target event of a background execution command, we may
+   need to reinstall the callback handler if it was removed due to a
+   secondary prompt.  See gdb_readline_wrapper_line.  We don't
+   unconditionally install the handler for every target event because
+   that also clears the line buffer, thus installing it while the user
+   is typing would lose input.  */
+
+/* Whether we've registered a callback handler with readline.  */
+static int callback_handler_installed;
+
+/* See event-top.h, and above.  */
+
+void
+gdb_rl_callback_handler_remove (void)
+{
+  rl_callback_handler_remove ();
+  callback_handler_installed = 0;
+}
+
+/* See event-top.h, and above.  Note this wrapper doesn't have an
+   actual callback parameter because we always install
+   INPUT_HANDLER.  */
+
+void
+gdb_rl_callback_handler_install (const char *prompt)
+{
+  /* Calling rl_callback_handler_install resets readline's input
+     buffer.  Calling this when we were already processing input
+     therefore loses input.  */
+  gdb_assert (!callback_handler_installed);
+
+  rl_callback_handler_install (prompt, input_handler);
+  callback_handler_installed = 1;
+}
+
+/* See event-top.h, and above.  */
+
+void
+gdb_rl_callback_handler_reinstall (void)
+{
+  if (!callback_handler_installed)
+    {
+      /* Passing NULL as prompt argument tells readline to not display
+	 a prompt.  */
+      gdb_rl_callback_handler_install (NULL);
     }
 }
 
@@ -268,7 +319,7 @@ display_gdb_prompt (char *new_prompt)
 	     the above two functions.  Calling
 	     rl_callback_handler_remove(), does the job.  */
 
-	  rl_callback_handler_remove ();
+	  gdb_rl_callback_handler_remove ();
 	  do_cleanups (old_chain);
 	  return;
 	}
@@ -283,8 +334,8 @@ display_gdb_prompt (char *new_prompt)
 
   if (async_command_editing_p)
     {
-      rl_callback_handler_remove ();
-      rl_callback_handler_install (actual_gdb_prompt, input_handler);
+      gdb_rl_callback_handler_remove ();
+      gdb_rl_callback_handler_install (actual_gdb_prompt);
     }
   /* new_prompt at this point can be the top of the stack or the one
      passed in.  It can't be NULL.  */
@@ -1040,6 +1091,6 @@ gdb_disable_readline (void)
   gdb_stdtargerr = NULL;
 #endif
 
-  rl_callback_handler_remove ();
+  gdb_rl_callback_handler_remove ();
   delete_file_handler (input_fd);
 }

@@ -2848,6 +2848,23 @@ wait_for_inferior (void)
   do_cleanups (old_cleanups);
 }
 
+/* Cleanup that reinstalls the readline callback handler, if the
+   target is running in the background.  If while handling the target
+   event something triggered a secondary prompt, like e.g., a
+   pagination prompt, we'll have removed the callback handler (see
+   gdb_readline_wrapper_line).  Need to do this as we go back to the
+   event loop, ready to process further input.  Note this has no
+   effect if the handler hasn't actually been removed, because calling
+   rl_callback_handler_install resets the line buffer, thus losing
+   input.  */
+
+static void
+reinstall_readline_callback_handler_cleanup (void *arg)
+{
+  if (async_command_editing_p && !sync_execution)
+    gdb_rl_callback_handler_reinstall ();
+}
+
 /* Asynchronous version of wait_for_inferior.  It is called by the
    event loop whenever a change of state is detected on the file
    descriptor corresponding to the target.  It can be called more than
@@ -2868,6 +2885,9 @@ fetch_inferior_event (void *client_data)
   int cmd_done = 0;
 
   memset (ecs, 0, sizeof (*ecs));
+
+  /* End up with readline processing input, if necessary.  */
+  make_cleanup (reinstall_readline_callback_handler_cleanup, NULL);
 
   /* We're handling a live event, so make sure we're doing live
      debugging.  If we're looking at traceframes while the target is
