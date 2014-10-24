@@ -20,7 +20,7 @@ main (argc, argv)
      should not be able to see that other definition of local_j
      after we are exec'd.
      */
-  int  local_j = argc;
+  int  local_j = argc;		/* after-exec */
   char *  s;
 
   printf ("Hello from execd-prog...\n");

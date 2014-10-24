@@ -24,7 +24,7 @@ main ()
 
   printf ("foll-exec is about to execl(execd-prog)...\n");
 
-  execl (BASEDIR "/execd-prog",
+  execl (BASEDIR "/execd-prog",	/* tbreak-execl */
          BASEDIR "/execd-prog",
          "execl arg1 from foll-exec",
          "execl arg2 from foll-exec",
@@ -38,6 +38,6 @@ main ()
 
     printf ("foll-exec is about to execv(execd-prog)...\n");
 
-    execv (BASEDIR "/execd-prog", argv);
+    execv (BASEDIR "/execd-prog", argv); /* tbreak-execv */
   }
 }

@@ -1,5 +1,12 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/execd-prog.c: Add eye-catchers.
+	* gdb.base/foll-exec.c: Likewise.
+	* gdb.base/foll-exec.exp: Refer to eye-catchers instead of literal
+	line numbers.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/ending-run.c: Add eye-catchers.
 	* gdb.base/ending-run.exp: Refer to eye-catchers instead of
 	literal line numbers.
