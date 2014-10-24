@@ -4,7 +4,7 @@ int shr2(int x)
 int shr2(x) int x;
 #endif
 {
-  return 2*x;
+  return 2*x;			/* shr2-return */
 }
 
 #ifdef PROTOTYPES

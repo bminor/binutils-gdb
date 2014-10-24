@@ -1,5 +1,11 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/shr2.c: Add eye-catcher.
+	* gdb.base/shlib-call.exp: Refer to eye-catcher instead of literal
+	line number.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/jump.c: Add eye-catchers.
 	* gdb.base/jump.exp: Refer to eye-catchers instead of literal line
 	numbers.
