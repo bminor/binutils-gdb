@@ -458,10 +458,11 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 	  if (info_verbose || debug_infrun)
 	    {
-	      target_terminal_ours ();
+	      target_terminal_ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
-				"Detaching after fork from "
-				"child process %d.\n",
+				_("Detaching after %s from "
+				  "child process %d.\n"),
+				has_vforked ? "vfork" : "fork",
 				child_pid);
 	    }
 	}
@@ -546,17 +547,13 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
       if (info_verbose || debug_infrun)
 	{
-	  target_terminal_ours ();
-	  if (has_vforked)
-	    fprintf_filtered (gdb_stdlog,
-			      _("Attaching after process %d "
-				"vfork to child process %d.\n"),
-			      parent_pid, child_pid);
-	  else
-	    fprintf_filtered (gdb_stdlog,
-			      _("Attaching after process %d "
-				"fork to child process %d.\n"),
-			      parent_pid, child_pid);
+	  target_terminal_ours_for_output ();
+	  fprintf_filtered (gdb_stdlog,
+			    _("Attaching after process %d "
+			      "%s to child process %d.\n"),
+			    parent_pid,
+			    has_vforked ? "vfork" : "fork",
+			    child_pid);
 	}
 
       /* Add the new inferior first, so that the target_detach below
@@ -593,7 +590,18 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  parent_inf->waiting_for_vfork_done = 0;
 	}
       else if (detach_fork)
-	target_detach (NULL, 0);
+	{
+	  if (info_verbose || debug_infrun)
+	    {
+	      target_terminal_ours_for_output ();
+	      fprintf_filtered (gdb_stdlog,
+				_("Detaching after fork from "
+				  "child process %d.\n"),
+				child_pid);
+	    }
+
+	  target_detach (NULL, 0);
+	}
 
       /* Note that the detach above makes PARENT_INF dangling.  */
 
@@ -927,18 +935,22 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  if (debug_infrun || info_verbose)
 	    {
-	      target_terminal_ours ();
+	      target_terminal_ours_for_output ();
 
 	      if (exec)
-		fprintf_filtered (gdb_stdlog,
-				  "Detaching vfork parent process "
-				  "%d after child exec.\n",
-				  inf->vfork_parent->pid);
+		{
+		  fprintf_filtered (gdb_stdlog,
+				    _("Detaching vfork parent process "
+				      "%d after child exec.\n"),
+				    inf->vfork_parent->pid);
+		}
 	      else
-		fprintf_filtered (gdb_stdlog,
-				  "Detaching vfork parent process "
-				  "%d after child exit.\n",
-				  inf->vfork_parent->pid);
+		{
+		  fprintf_filtered (gdb_stdlog,
+				    _("Detaching vfork parent process "
+				      "%d after child exit.\n"),
+				    inf->vfork_parent->pid);
+		}
 	    }
 
 	  target_detach (NULL, 0);

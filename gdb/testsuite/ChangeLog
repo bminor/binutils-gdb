@@ -1,3 +1,13 @@
+2014-10-24  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-fork.exp (test_follow_fork,
+	catch_fork_child_follow): Check for updated fork messages emitted
+	from infrun.c.
+	* gdb.base/foll-vfork.exp (vfork_parent_follow_through_step,
+	vfork_parent_follow_to_bp, vfork_and_exec_child_follow_to_main_bp,
+	vfork_and_exec_child_follow_through_step): Check for updated vfork
+	messages emitted from infrun.c.
+
 2014-10-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/corefile.exp: Remove references to ultrix.

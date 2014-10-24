@@ -1,3 +1,13 @@
+2014-10-24  Don Breazeal  <donb@codesourcery.com>
+
+	* infrun.c (follow_fork_inferior): Update fork message printing
+	to use target_terminal_ours_for_output instead of
+	target_terminal_ours, to use _() for all format strings, to print
+	"vfork" instead of "fork" for vforks, and to add a detach message.
+	(handle_vfork_child_exec_or_exit): Update message printing to use
+	target_terminal_ours_for_output instead of target_terminal_ours, to
+	use _() for all format strings, and to fix some formatting.
+
 2014-10-24  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (ALLDEPFILES): Remove vax-nat.c.
