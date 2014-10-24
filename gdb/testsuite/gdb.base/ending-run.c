@@ -11,7 +11,7 @@ int callee( x )
 int x;
 #endif
 {
-    int y = x * x;
+    int y = x * x;		/* -break1- */
     return (y - 2);
 }
 
@@ -28,6 +28,6 @@ int main()
             printf( "%d ", callee( i ));
             fflush (stdout);
         }
-    printf( " Goodbye!\n" ); fflush (stdout);
+    printf( " Goodbye!\n" ); fflush (stdout); /* -break2- */
     return 0;
 }

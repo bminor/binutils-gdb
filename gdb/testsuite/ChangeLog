@@ -1,5 +1,11 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/ending-run.c: Add eye-catchers.
+	* gdb.base/ending-run.exp: Refer to eye-catchers instead of
+	literal line numbers.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/call-rt-st.c: Add eye-catchers.
 	* gdb.base/call-rt-st.exp: Refer to eye-catchers instead of
 	literal line numbers.
