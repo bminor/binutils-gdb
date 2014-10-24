@@ -9,7 +9,7 @@ static int square (x)
   int  x;
 #endif
 {
-  return x*x;
+  return x*x;			/* out-of-func */
 }
 
 
@@ -18,7 +18,7 @@ int main ()
   int i = 99;
 
   i++;
-  i = square (i);
-  i--;
+  i = square (i);		/* bp-on-call */
+  i--;				/* bp-on-non-call */
   return 0;
 }
