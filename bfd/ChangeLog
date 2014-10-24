@@ -1,3 +1,32 @@
+2014-10-24  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* bfd-in.h (bfd_elf64_aarch64_set_options): Add a parameter.
+	* bfd-in2.h (bfd_elf64_aarch64_set_options): Likewise.
+	* elfnn-aarch64.c (aarch64_erratum_835769_stub): New.
+	(elf_aarch64_stub_type): Add new type
+	aarch64_stub_erratum_835769_veneer.
+	(elf_aarch64_stub_hash_entry): New fields for erratum 835769.
+	(aarch64_erratum_835769_fix): New data struct to record erratum
+	835769.
+	(elf_aarch64_link_hash_table: Global flags for 835769.
+	(aarch64_build_one_stub): Add case for 835769.
+	(aarch64_size_one_stub): Likewise.
+	(aarch64_mem_op_p, aarch64_mlxl_p,
+	aarch64_erratum_sequence,erratum_835769_scan):
+	New. Decode and scan functions for erratum 835769.
+	(elf_aarch64_create_or_find_stub_sec): New.
+	(elfNN_aarch64_size_stubs): Look for erratum 835769 and record
+	them.
+	(bfd_elfNN_aarch64_set_options: Set global flag for 835769.
+	(erratum_835769_branch_to_stub_data,
+	make_branch_to_erratum_835769_stub):New. Connect up all the
+	erratum stubs to occurances by branches.
+	(elfNN_aarch64_write_section): New hook.
+	(aarch64_map_one_stub): Output erratum stub symbol.
+	(elfNN_aarch64_size_dynamic_sections): Init mapping symbol
+	information for erratum 835769.
+	(elf_backend_write_section): Define.
+
 2014-10-23  Victor Kamensky  <victor.kamensky@linaro.org>
 
 	* elf32-arm.c (read_code32): New function to read 32 bit
