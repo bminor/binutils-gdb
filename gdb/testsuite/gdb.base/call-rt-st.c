@@ -125,7 +125,7 @@ void loop_count () {
 
      int index;
 
-     for (index=0; index<4; index++);
+     for (index=0; index<4; index++); /* -break1- */
 }
 
 /*****************************************************************
@@ -772,9 +772,9 @@ int main ()  {
   print_int_char_combo(*int_char_combo);
   print_struct_rep(*struct1);
 
-  loop_count();
+  loop_count();			/* -finish2- */
 
-  return 0;
+  return 0;			/* -finish1- */
 }
 
 
