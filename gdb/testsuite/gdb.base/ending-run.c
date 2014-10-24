@@ -4,12 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef PROTOTYPES
 int callee (int x)
-#else
-int callee( x )
-int x;
-#endif
 {
     int y = x * x;		/* -break1- */
     return (y - 2);

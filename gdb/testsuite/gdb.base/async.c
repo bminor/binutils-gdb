@@ -1,12 +1,7 @@
 
 
-#ifdef PROTOTYPES
 int
 foo (void)
-#else
-int
-foo ()
-#endif
 {
  int y;
  volatile int x;
@@ -17,13 +12,8 @@ foo ()
  return x + y;
 }
 
-#ifdef PROTOTYPES
 int
 main (void)
-#else
-int
-main ()
-#endif
 {
  int y, z;
  
@@ -37,13 +27,8 @@ main ()
 }
 
 
-#ifdef PROTOTYPES
 int
 baz (void)
-#else
-int
-baz ()
-#endif
 { 
   return 5;
 }

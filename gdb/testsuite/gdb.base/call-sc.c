@@ -41,12 +41,7 @@ T fun()
   return foo;  
 }
 
-#ifdef PROTOTYPES
 void Fun(T foo)
-#else
-void Fun(foo)
-     T foo;
-#endif
 {
   L = foo;
 }

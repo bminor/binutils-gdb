@@ -1,5 +1,54 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/annota1.c: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.
+	* gdb.base/annota3.c: Likewise.
+	* gdb.base/async.c: Likewise.
+	* gdb.base/average.c: Likewise.
+	* gdb.base/call-ar-st.c: Likewise.
+	* gdb.base/call-rt-st.c: Likewise.
+	* gdb.base/call-sc.c: Likewise.
+	* gdb.base/call-strs.c: Likewise.
+	* gdb.base/ending-run.c: Likewise.
+	* gdb.base/execd-prog.c: Likewise.
+	* gdb.base/exprs.c: Likewise.
+	* gdb.base/foll-exec.c: Likewise.
+	* gdb.base/foll-fork.c: Likewise.
+	* gdb.base/foll-vfork.c: Likewise.
+	* gdb.base/funcargs.c: Likewise.
+	* gdb.base/gcore.c: Likewise.
+	* gdb.base/jump.c: Likewise.
+	* gdb.base/langs0.c: Likewise.
+	* gdb.base/langs1.c: Likewise.
+	* gdb.base/langs2.c: Likewise.
+	* gdb.base/mips_pro.c: Likewise.
+	* gdb.base/nodebug.c: Likewise.
+	* gdb.base/opaque0.c: Likewise.
+	* gdb.base/opaque1.c: Likewise.
+	* gdb.base/recurse.c: Likewise.
+	* gdb.base/run.c: Likewise.
+	* gdb.base/scope0.c: Likewise.
+	* gdb.base/scope1.c: Likewise.
+	* gdb.base/setshow.c: Likewise.
+	* gdb.base/setvar.c: Likewise.
+	* gdb.base/shmain.c: Likewise.
+	* gdb.base/shr1.c: Likewise.
+	* gdb.base/shr2.c: Likewise.
+	* gdb.base/sigall.c: Likewise.
+	* gdb.base/signals.c: Likewise.
+	* gdb.base/so-indr-cl.c: Likewise.
+	* gdb.base/solib2.c: Likewise.
+	* gdb.base/structs.c: Likewise.
+	* gdb.base/sum.c: Likewise.
+	* gdb.base/vforked-prog.c: Likewise.
+	* gdb.base/watchpoint.c: Likewise.
+	* gdb.reverse/shr2.c: Likewise.
+	* gdb.reverse/until-reverse.c: Likewise.
+	* gdb.reverse/ur1.c: Likewise.
+	* gdb.reverse/watch-reverse.c: Likewise.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/sepdebug.c: Remove #ifdef PROTOTYPES, keep prototyped
 	variant.
 	* gdb.base/sepdebug.exp: Drop references to removed code.

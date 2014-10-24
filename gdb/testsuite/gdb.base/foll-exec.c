@@ -6,11 +6,7 @@
 
 int  global_i = 100;
 
-#ifdef PROTOTYPES
 int main (void)
-#else
-main ()
-#endif
 {
   int  local_j = global_i+1;
   int  local_k = local_j+1;

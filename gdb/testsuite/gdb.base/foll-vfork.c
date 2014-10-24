@@ -18,11 +18,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#ifdef PROTOTYPES
 int main (void)
-#else
-main ()
-#endif
 {
   int  pid;
 
