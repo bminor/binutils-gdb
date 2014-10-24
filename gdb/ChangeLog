@@ -1,3 +1,7 @@
+2014-10-24  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (Removed targets): Add OS/arch column.
+
 2014-10-24  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gnu-v3-abi.c (gnuv3_pass_by_reference): Call TYPE_TARGET_TYPE

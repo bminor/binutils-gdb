@@ -53,9 +53,9 @@ queue-signal signal-name-or-number
 
 Support for these obsolete configurations has been removed.
 
-alpha*-*-osf*
-mips-sgi-irix5*
-mips-sgi-irix6*
+Alpha running OSF/1 (or Tru64)		alpha*-*-osf*
+SGI Irix-5.x				mips-*-irix5*
+SGI Irix-6.x				mips-*-irix6*
 
 *** Changes in GDB 7.8
 
