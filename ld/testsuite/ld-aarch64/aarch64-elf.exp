@@ -35,6 +35,14 @@ if { ![is_elf_format] || ![istarget "aarch64*-*-*"] } {
 set aarch64elftests {
     {"EH Frame merge" "-Ttext 0x8000" "" "" {eh-frame-bar.s eh-frame-foo.s}
 	{{objdump --dwarf=frames eh-frame.d}} "eh-frame"}
+    {"Erratum 835769 dump test"
+     "--fix-cortex-a53-835769" "" "" {erratum835769.s}
+     {{objdump -dr erratum835769.d}}
+     "erratum835769"}
+    {"Erratum 835769 dump test -shared"
+     "--fix-cortex-a53-835769 -shared" "" "" {erratum835769.s}
+     {{objdump -dr erratum835769.d}}
+     "erratum835769"}
 }
 
 run_ld_link_tests $aarch64elftests

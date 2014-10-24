@@ -6248,6 +6248,13 @@ The @samp{--fix-cortex-a8} switch enables a link-time workaround for an erratum 
 
 The erratum only affects Thumb-2 code.  Please contact ARM for further details.
 
+@cindex Cortex-A53 erratum 835769 workaround
+@kindex --fix-cortex-a53-835769
+@kindex --no-fix-cortex-a53-835769
+The @samp{--fix-cortex-a53-835769} switch enables a link-time workaround for erratum 835769 present on certain early revisions of Cortex-A53 processors.  The workaround is disabled by default.  It can be enabled by specifying @samp{--fix-cortex-a53-835769}, or disabled unconditionally by specifying @samp{--no-fix-cortex-a53-835769}.
+
+Please contact ARM for further details.
+
 @kindex --merge-exidx-entries
 @kindex --no-merge-exidx-entries
 The @samp{--no-merge-exidx-entries} switch disables the merging of adjacent exidx entries in debuginfo.

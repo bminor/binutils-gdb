@@ -30,6 +30,7 @@ fragment <<EOF
 static int no_enum_size_warning = 0;
 static int no_wchar_size_warning = 0;
 static int pic_veneer = 0;
+static int fix_erratum_835769 = 0;
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -297,7 +298,7 @@ aarch64_elf_create_output_section_statements (void)
   bfd_elf${ELFSIZE}_aarch64_set_options (link_info.output_bfd, &link_info,
 				 no_enum_size_warning,
 				 no_wchar_size_warning,
-				 pic_veneer);
+				 pic_veneer, fix_erratum_835769);
 
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,
@@ -346,6 +347,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_PIC_VENEER		310
 #define OPTION_STUBGROUP_SIZE           311
 #define OPTION_NO_WCHAR_SIZE_WARNING	312
+#define OPTION_FIX_ERRATUM_835769	313
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -356,6 +358,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "pic-veneer", no_argument, NULL, OPTION_PIC_VENEER},
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
   { "no-wchar-size-warning", no_argument, NULL, OPTION_NO_WCHAR_SIZE_WARNING},
+  { "fix-cortex-a53-835769", no_argument, NULL, OPTION_FIX_ERRATUM_835769},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -373,6 +376,7 @@ PARSE_AND_LIST_OPTIONS='
                            after each stub section.  Values of +/-1 indicate\n\
                            the linker should choose suitable defaults.\n"
 		   ));
+  fprintf (file, _("  --fix-cortex-a53-835769      Fix erratum 835769\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -390,6 +394,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_PIC_VENEER:
       pic_veneer = 1;
+      break;
+
+    case OPTION_FIX_ERRATUM_835769:
+      fix_erratum_835769 = 1;
       break;
 
     case OPTION_STUBGROUP_SIZE:
