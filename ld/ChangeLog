@@ -1,3 +1,10 @@
+2014-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-avr/relax-02.d: New file.
+	* testsuite/ld-avr/relax-02.s: New file.
+	* testsuite/ld-avr/relax-03.d: New file.
+	* testsuite/ld-avr/relax-03.s: New file.
+
 2014-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.

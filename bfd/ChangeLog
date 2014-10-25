@@ -1,3 +1,8 @@
+2014-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Modify symbols
+	located at the very end of the section.
+
 2014-11-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

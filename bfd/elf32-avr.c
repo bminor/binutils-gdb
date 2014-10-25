@@ -1883,7 +1883,7 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
 	{
 	  if (isym->st_shndx == sec_shndx
 	      && isym->st_value > addr
-	      && isym->st_value < toaddr)
+	      && isym->st_value <= toaddr)
 	    isym->st_value -= count;
 	}
     }
@@ -1900,7 +1900,7 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
            || sym_hash->root.type == bfd_link_hash_defweak)
           && sym_hash->root.u.def.section == sec
           && sym_hash->root.u.def.value > addr
-          && sym_hash->root.u.def.value < toaddr)
+          && sym_hash->root.u.def.value <= toaddr)
         {
           sym_hash->root.u.def.value -= count;
         }
