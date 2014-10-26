@@ -13016,7 +13016,7 @@ static void
 process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct die_info *child_die = die->child;
+  struct die_info *child_die;
   struct type *type;
 
   type = get_die_type (die, cu);
@@ -13026,7 +13026,6 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
       struct field_info fi;
-      struct die_info *child_die;
       VEC (symbolp) *template_args = NULL;
       struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
@@ -13196,6 +13195,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      nested class.  So we have to process our children even if the
      current die is a declaration.  Normally, of course, a declaration
      won't have any children at all.  */
+
+  child_die = die->child;
 
   while (child_die != NULL && child_die->tag)
     {
