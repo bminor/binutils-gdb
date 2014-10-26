@@ -1,5 +1,10 @@
 2014-10-26  Doug Evans  <xdje42@gmail.com>
 
+	* block.c (allocate_block): Use OBSTACK_ZALLOC instead of
+	obstack_alloc.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
 	* parser-defs.h (block_found): Move decl from here ...
 	* symtab.h (block_found): ... to here.
 
