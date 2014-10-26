@@ -71,7 +71,7 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 const struct block *block,
 					 const domain_enum domain,
 					 enum language language,
-					 struct field_of_this_result *is_a_field_of_this);
+					 struct field_of_this_result *);
 
 static
 struct symbol *lookup_symbol_aux_local (const char *name,
@@ -1291,16 +1291,9 @@ demangle_for_lookup (const char *name, enum language lang,
   return cleanup;
 }
 
-/* Find the definition for a specified symbol name NAME
-   in domain DOMAIN, visible from lexical block BLOCK.
-   Returns the struct symbol pointer, or zero if no symbol is found.
-   C++: if IS_A_FIELD_OF_THIS is nonzero on entry, check to see if
-   NAME is a field of the current implied argument `this'.  If so set
-   *IS_A_FIELD_OF_THIS to 1, otherwise set it to zero.
-   BLOCK_FOUND is set to the block in which NAME is found (in the case of
-   a field of `this', value_of_this sets BLOCK_FOUND to the proper value.)  */
+/* See symtab.h.
 
-/* This function (or rather its subordinates) have a bunch of loops and
+   This function (or rather its subordinates) have a bunch of loops and
    it would seem to be attractive to put in some QUIT's (though I'm not really
    sure whether it can run long enough to be really important).  But there
    are a few calls for which it would appear to be bad news to quit
@@ -1326,8 +1319,7 @@ lookup_symbol_in_language (const char *name, const struct block *block,
   return returnval;
 }
 
-/* Behave like lookup_symbol_in_language, but performed with the
-   current language.  */
+/* See symtab.h.  */
 
 struct symbol *
 lookup_symbol (const char *name, const struct block *block,
@@ -1339,8 +1331,7 @@ lookup_symbol (const char *name, const struct block *block,
 				    is_a_field_of_this);
 }
 
-/* Look up the `this' symbol for LANG in BLOCK.  Return the symbol if
-   found, or NULL if not found.  */
+/* See symtab.h.  */
 
 struct symbol *
 lookup_language_this (const struct language_defn *lang,
@@ -1483,10 +1474,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
   return lookup_static_symbol_aux (name, domain);
 }
 
-/* Search all static file-level symbols for NAME from DOMAIN.  Do the symtabs
-   first, then check the psymtabs.  If a psymtab indicates the existence of the
-   desired name as a file-level static, then do psymtab-to-symtab conversion on
-   the fly and return the found symbol.  */
+/* See symtab.h.  */
 
 struct symbol *
 lookup_static_symbol_aux (const char *name, const domain_enum domain)
@@ -1549,7 +1537,7 @@ lookup_symbol_aux_local (const char *name, const struct block *block,
   return NULL;
 }
 
-/* Look up OBJFILE to BLOCK.  */
+/* See symtab.h.  */
 
 struct objfile *
 lookup_objfile_from_block (const struct block *block)
@@ -1574,8 +1562,7 @@ lookup_objfile_from_block (const struct block *block)
   return NULL;
 }
 
-/* Look up a symbol in a block; if found, fixup the symbol, and set
-   block_found appropriately.  */
+/* See symtab.h.  */
 
 struct symbol *
 lookup_symbol_aux_block (const char *name, const struct block *block,
@@ -1593,8 +1580,7 @@ lookup_symbol_aux_block (const char *name, const struct block *block,
   return NULL;
 }
 
-/* Check all global symbols in OBJFILE in symtabs and
-   psymtabs.  */
+/* See symtab.h.  */
 
 struct symbol *
 lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
@@ -1765,9 +1751,7 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
   return fixup_symbol_section (sym, objfile);
 }
 
-/* A default version of lookup_symbol_nonlocal for use by languages
-   that can't think of anything better to do.  This implements the C
-   lookup rules.  */
+/* See symtab.h.  */
 
 struct symbol *
 basic_lookup_symbol_nonlocal (const char *name,
@@ -1811,8 +1795,7 @@ basic_lookup_symbol_nonlocal (const char *name,
   return lookup_symbol_global (name, block, domain);
 }
 
-/* Lookup a symbol in the static block associated to BLOCK, if there
-   is one; do nothing if BLOCK is NULL or a global block.  */
+/* See symtab.h.  */
 
 struct symbol *
 lookup_symbol_static (const char *name,
@@ -1867,8 +1850,7 @@ lookup_symbol_global_iterator_cb (struct objfile *objfile,
   return (data->result != NULL);
 }
 
-/* Lookup a symbol in all files' global blocks (searching psymtabs if
-   necessary).  */
+/* See symtab.h.  */
 
 struct symbol *
 lookup_symbol_global (const char *name,
@@ -1917,9 +1899,7 @@ symbol_matches_domain (enum language symbol_language,
   return (symbol_domain == domain);
 }
 
-/* Look up a type named NAME in the struct_domain.  The type returned
-   must not be opaque -- i.e., must have at least one field
-   defined.  */
+/* See symtab.h.  */
 
 struct type *
 lookup_transparent_type (const char *name)
@@ -1960,7 +1940,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
 /* The standard implementation of lookup_transparent_type.  This code
    was modeled on lookup_symbol -- the parts not relevant to looking
    up types were just left out.  In particular it's assumed here that
-   types are available in struct_domain and only at file-static or
+   types are available in STRUCT_DOMAIN and only in file-static or
    global blocks.  */
 
 struct type *
@@ -2030,7 +2010,7 @@ basic_lookup_transparent_type (const char *name)
   return (struct type *) 0;
 }
 
-/* Search BLOCK for symbol NAME in DOMAIN.
+/* See symtab.h.
 
    Note that if NAME is the demangled form of a C++ symbol, we will fail
    to find a match during the binary search of the non-encoded names, but

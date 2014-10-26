@@ -1,3 +1,28 @@
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct field_of_this_result): Fix typo in comment.
+	(lookup_symbol_in_language): Move function comment here.
+	(lookup_symbol): Improve function comment.
+	(basic_lookup_symbol_nonlocal): Ditto.
+	(lookup_symbol_static, lookup_symbol_global): Ditto.
+	(lookup_symbol_aux_block): Ditto.
+	(lookup_language_this): Add function comment.
+	(lookup_static_symbol_aux): Explicitly mark as extern.  Improve
+	function comment.
+	(lookup_block_symbol): Improve function comment.
+	(lookup_struct): Fix capitalization in function comment.
+	(lookup_transparent_type): Add function comment.
+	(lookup_global_symbol_from_objfile): Explicitly mark as extern.
+	Improve function comment.
+	(lookup_objfile_from_block): Add function comment.
+	* symtab.c (lookup_symbol_in_language): Update function comment.
+	(lookup_symbol, lookup_language_this): Ditto.
+	(lookup_static_symbol_aux, lookup_objfile_from_block): Ditto.
+	(lookup_symbol_aux_block, lookup_global_symbol_from_objfile): Ditto.
+	(basic_lookup_symbol_nonlocal): Ditto.
+	(lookup_symbol_static, lookup_symbol_global): Ditto.
+	(lookup_transparent_type, lookup_block_symbol): Ditto.
+
 2014-10-25  Doug Evans  <xdje42@gmail.com>
 
 	* symtab.c (types_info): Delete forward decl.

@@ -1043,13 +1043,22 @@ struct field_of_this_result
 
   struct field *field;
 
-  /* If the symbol was found as an function field of 'this', then this
+  /* If the symbol was found as a function field of 'this', then this
      is non-NULL and points to the particular field.  */
 
   struct fn_fieldlist *fn_field;
 };
 
-/* lookup a symbol by name (optional block) in language.  */
+/* Find the definition for a specified symbol name NAME
+   in domain DOMAIN in language LANGUAGE, visible from lexical block BLOCK
+   if non-NULL or from global/static blocks if BLOCK is NULL.
+   Returns the struct symbol pointer, or NULL if no symbol is found.
+   C++: if IS_A_FIELD_OF_THIS is non-NULL on entry, check to see if
+   NAME is a field of the current implied argument `this'.  If so fill in the
+   fields of IS_A_FIELD_OF_THIS, otherwise the fields are set to NULL.
+   BLOCK_FOUND is set to the block in which NAME is found (in the case of
+   a field of `this', value_of_this sets BLOCK_FOUND to the proper value).
+   The symbol's section is fixed up if necessary.  */
 
 extern struct symbol *lookup_symbol_in_language (const char *,
 						 const struct block *,
@@ -1057,15 +1066,15 @@ extern struct symbol *lookup_symbol_in_language (const char *,
 						 enum language,
 						 struct field_of_this_result *);
 
-/* lookup a symbol by name (optional block, optional symtab)
-   in the current language.  */
+/* Same as lookup_symbol_in_language, but using the current language.  */
 
 extern struct symbol *lookup_symbol (const char *, const struct block *,
 				     const domain_enum,
 				     struct field_of_this_result *);
 
 /* A default version of lookup_symbol_nonlocal for use by languages
-   that can't think of anything better to do.  */
+   that can't think of anything better to do.
+   This implements the C lookup rules.  */
 
 extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
 						    const struct block *,
@@ -1075,42 +1084,49 @@ extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
    lookup_symbol_nonlocal functions.  */
 
 /* Lookup a symbol in the static block associated to BLOCK, if there
-   is one; do nothing if BLOCK is NULL or a global block.  */
+   is one; do nothing if BLOCK is NULL or a global block.
+   Upon success sets BLOCK_FOUND and fixes up the symbol's section
+   if necessary.  */
 
 extern struct symbol *lookup_symbol_static (const char *name,
 					    const struct block *block,
 					    const domain_enum domain);
 
-/* Lookup a symbol in all files' global blocks (searching psymtabs if
-   necessary).  */
+/* Lookup a symbol in all files' global blocks.
+   Upon success sets BLOCK_FOUND and fixes up the symbol's section
+   if necessary.  */
 
 extern struct symbol *lookup_symbol_global (const char *name,
 					    const struct block *block,
 					    const domain_enum domain);
 
-/* Lookup a symbol within the block BLOCK.  This, unlike
-   lookup_symbol_block, will set SYMTAB and BLOCK_FOUND correctly, and
-   will fix up the symbol if necessary.  */
+/* Lookup a symbol within the block BLOCK.
+   Upon success sets BLOCK_FOUND and fixes up the symbol's section
+   if necessary.  */
 
 extern struct symbol *lookup_symbol_aux_block (const char *name,
 					       const struct block *block,
 					       const domain_enum domain);
 
+/* Look up the `this' symbol for LANG in BLOCK.  Return the symbol if
+   found, or NULL if not found.  */
+
 extern struct symbol *lookup_language_this (const struct language_defn *lang,
 					    const struct block *block);
 
-/* Lookup a symbol only in the file static scope of all the objfiles.  */
+/* Search all static file-level symbols for NAME from DOMAIN.
+   Upon success sets BLOCK_FOUND and fixes up the symbol's section
+   if necessary.  */
 
-struct symbol *lookup_static_symbol_aux (const char *name,
-					 const domain_enum domain);
+extern struct symbol *lookup_static_symbol_aux (const char *name,
+						const domain_enum domain);
 
-
-/* lookup a symbol by name, within a specified block.  */
+/* Search BLOCK for symbol NAME in DOMAIN.  */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
 					   const domain_enum);
 
-/* lookup a [struct, union, enum] by name, within a specified block.  */
+/* Lookup a [struct, union, enum] by name, within a specified block.  */
 
 extern struct type *lookup_struct (const char *, const struct block *);
 
@@ -1157,9 +1173,13 @@ extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
 extern void reread_symbols (void);
 
-extern struct type *lookup_transparent_type (const char *);
-extern struct type *basic_lookup_transparent_type (const char *);
+/* Look up a type named NAME in STRUCT_DOMAIN in the current language.
+   The type returned must not be opaque -- i.e., must have at least one field
+   defined.  */
 
+extern struct type *lookup_transparent_type (const char *);
+
+extern struct type *basic_lookup_transparent_type (const char *);
 
 /* Macro for name of symbol to indicate a file compiled with gcc.  */
 #ifndef GCC_COMPILED_FLAG_SYMBOL
@@ -1369,10 +1389,16 @@ extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
 extern /*const */ char *main_name (void);
 extern enum language main_language (void);
 
-/* Check global symbols in objfile.  */
-struct symbol *lookup_global_symbol_from_objfile (const struct objfile *,
-						  const char *name,
-						  const domain_enum domain);
+/* Lookup symbol NAME from DOMAIN in MAIN_OBJFILE's global blocks.
+   This searches MAIN_OBJFILE as well as any associated separate debug info
+   objfiles of MAIN_OBJFILE.
+   Upon success sets BLOCK_FOUND and fixes up the symbol's section
+   if necessary.  */
+
+extern struct symbol *
+  lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
+				     const char *name,
+				     const domain_enum domain);
 
 /* Return 1 if the supplied producer string matches the ARM RealView
    compiler (armcc).  */
@@ -1380,6 +1406,8 @@ int producer_is_realview (const char *producer);
 
 void fixup_section (struct general_symbol_info *ginfo,
 		    CORE_ADDR addr, struct objfile *objfile);
+
+/* Look up objfile containing BLOCK.  */
 
 struct objfile *lookup_objfile_from_block (const struct block *block);
 
