@@ -1532,7 +1532,7 @@ lookup_symbol_aux_local (const char *name, const struct block *block,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  /* We've reached the edge of the function without finding a result.  */
+  /* We've reached the end of the function without finding a result.  */
 
   return NULL;
 }
