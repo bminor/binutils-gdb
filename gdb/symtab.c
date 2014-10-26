@@ -1771,6 +1771,7 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
   sym = lookup_block_symbol (block, name, domain);
   if (!sym)
     error_in_psymtab_expansion (kind, name, symtab);
+  block_found = block;
   return fixup_symbol_section (sym, objfile);
 }
 

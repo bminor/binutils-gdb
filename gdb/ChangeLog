@@ -1,5 +1,9 @@
 2014-10-25  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (lookup_symbol_aux_quick): Set block_found upon success.
+
+2014-10-25  Doug Evans  <xdje42@gmail.com>
+
 	* dwarf2read.c (process_structure_scope): Remove second (nested) copy
 	of local var child_die.
 
