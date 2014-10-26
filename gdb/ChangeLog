@@ -1,5 +1,9 @@
 2014-10-26  Doug Evans  <xdje42@gmail.com>
 
+	* block.h (ALL_BLOCK_SYMBOLS): Fix comment.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
 	* block.c (allocate_block): Use OBSTACK_ZALLOC instead of
 	obstack_alloc.
 

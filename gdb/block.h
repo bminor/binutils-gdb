@@ -271,8 +271,8 @@ extern struct symbol *block_iter_match_next (const char *name,
 					     symbol_compare_ftype *compare,
 					     struct block_iterator *iterator);
 
-/* Macro to loop through all symbols in a block BL, in no particular
-   order.  ITER helps keep track of the iteration, and should be a
+/* Macro to loop through all symbols in BLOCK, in no particular
+   order.  ITER helps keep track of the iteration, and must be a
    struct block_iterator.  SYM points to the current symbol.  */
 
 #define ALL_BLOCK_SYMBOLS(block, iter, sym)		\
