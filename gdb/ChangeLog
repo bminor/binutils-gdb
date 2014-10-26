@@ -1,5 +1,12 @@
 2014-10-25  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (types_info): Delete forward decl.
+	(functions_info, variables_info, sources_info): Ditto.
+	(_initialize_symtab): Rewrite forward decl to use
+	initialize_file_ftype.
+
+2014-10-25  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (lookup_symbol_aux_quick): Set block_found upon success.
 
 2014-10-25  Doug Evans  <xdje42@gmail.com>

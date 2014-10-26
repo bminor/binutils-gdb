@@ -61,17 +61,9 @@
 
 #include "parser-defs.h"
 
-/* Prototypes for local functions */
+/* Forward declarations for local functions.  */
 
 static void rbreak_command (char *, int);
-
-static void types_info (char *, int);
-
-static void functions_info (char *, int);
-
-static void variables_info (char *, int);
-
-static void sources_info (char *, int);
 
 static int find_line_common (struct linetable *, int, int *, int);
 
@@ -98,9 +90,7 @@ struct symbol *lookup_symbol_aux_quick (struct objfile *objfile,
 					const char *name,
 					const domain_enum domain);
 
-void _initialize_symtab (void);
-
-/* */
+extern initialize_file_ftype _initialize_symtab;
 
 /* Program space key for finding name and language of "main".  */
 
