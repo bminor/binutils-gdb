@@ -188,7 +188,7 @@ struct quick_symbol_functions
 					void *data);
 
   /* Check to see if the symbol is defined in a "partial" symbol table
-     of OBJFILE.  KIND should be either GLOBAL_BLOCK or STATIC_BLOCK,
+     of OBJFILE.  BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
      depending on whether we want to search global symbols or static
      symbols.  NAME is the name of the symbol to look for.  DOMAIN
      indicates what sort of symbol to search for.
@@ -198,7 +198,7 @@ struct quick_symbol_functions
      contains !TYPE_OPAQUE symbol prefer its symtab.  If it contains
      only TYPE_OPAQUE symbol(s), return at least that symtab.  */
   struct symtab *(*lookup_symbol) (struct objfile *objfile,
-				   int kind, const char *name,
+				   int block_index, const char *name,
 				   domain_enum domain);
 
   /* Print statistics about any indices loaded for OBJFILE.  The

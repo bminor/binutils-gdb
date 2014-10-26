@@ -1,5 +1,13 @@
 2014-10-26  Doug Evans  <xdje42@gmail.com>
 
+	* symfile.h (struct quick_symbol_functions) <lookup_symbol>: Rename
+	parameter "kind" to "block_index".
+	* symtab.c (error_in_psymtab_expansion): Rename parameter "kind" to
+	"block_index".
+	(lookup_symbol_aux_quick, basic_lookup_transparent_type_quick): Ditto.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
 	* block.h (ALL_BLOCK_SYMBOLS): Fix comment.
 
 2014-10-26  Doug Evans  <xdje42@gmail.com>

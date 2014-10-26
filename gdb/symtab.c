@@ -1714,13 +1714,14 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
    in a psymtab but not in a symtab.  */
 
 static void ATTRIBUTE_NORETURN
-error_in_psymtab_expansion (int kind, const char *name, struct symtab *symtab)
+error_in_psymtab_expansion (int block_index, const char *name,
+			    struct symtab *symtab)
 {
   error (_("\
 Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n	 \
 (if a template, try specifying an instantiation: %s<type>)."),
-	 kind == GLOBAL_BLOCK ? "global" : "static",
+	 block_index == GLOBAL_BLOCK ? "global" : "static",
 	 name, symtab_to_filename_for_display (symtab), name, name);
 }
 
@@ -1728,7 +1729,7 @@ Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
    "quick" symbol table functions.  */
 
 static struct symbol *
-lookup_symbol_aux_quick (struct objfile *objfile, int kind,
+lookup_symbol_aux_quick (struct objfile *objfile, int block_index,
 			 const char *name, const domain_enum domain)
 {
   struct symtab *symtab;
@@ -1738,15 +1739,15 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
 
   if (!objfile->sf)
     return NULL;
-  symtab = objfile->sf->qf->lookup_symbol (objfile, kind, name, domain);
+  symtab = objfile->sf->qf->lookup_symbol (objfile, block_index, name, domain);
   if (!symtab)
     return NULL;
 
   bv = BLOCKVECTOR (symtab);
-  block = BLOCKVECTOR_BLOCK (bv, kind);
+  block = BLOCKVECTOR_BLOCK (bv, block_index);
   sym = lookup_block_symbol (block, name, domain);
   if (!sym)
-    error_in_psymtab_expansion (kind, name, symtab);
+    error_in_psymtab_expansion (block_index, name, symtab);
   block_found = block;
   return fixup_symbol_section (sym, objfile);
 }
@@ -1911,7 +1912,7 @@ lookup_transparent_type (const char *name)
    "quick" symbol table functions.  */
 
 static struct type *
-basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
+basic_lookup_transparent_type_quick (struct objfile *objfile, int block_index,
 				     const char *name)
 {
   struct symtab *symtab;
@@ -1921,15 +1922,16 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
 
   if (!objfile->sf)
     return NULL;
-  symtab = objfile->sf->qf->lookup_symbol (objfile, kind, name, STRUCT_DOMAIN);
+  symtab = objfile->sf->qf->lookup_symbol (objfile, block_index, name,
+					   STRUCT_DOMAIN);
   if (!symtab)
     return NULL;
 
   bv = BLOCKVECTOR (symtab);
-  block = BLOCKVECTOR_BLOCK (bv, kind);
+  block = BLOCKVECTOR_BLOCK (bv, block_index);
   sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
   if (!sym)
-    error_in_psymtab_expansion (kind, name, symtab);
+    error_in_psymtab_expansion (block_index, name, symtab);
 
   if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
     return SYMBOL_TYPE (sym);
