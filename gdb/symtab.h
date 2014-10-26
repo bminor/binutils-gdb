@@ -1011,6 +1011,10 @@ DEF_VEC_P (symtab_ptr);
 
 extern int currently_reading_symtab;
 
+/* The block in which the most recently looked up symbol was found.  */
+
+extern const struct block *block_found;
+
 /* symtab.c lookup functions */
 
 extern const char multiple_symbols_ask[];

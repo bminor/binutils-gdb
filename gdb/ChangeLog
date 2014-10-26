@@ -1,5 +1,10 @@
 2014-10-26  Doug Evans  <xdje42@gmail.com>
 
+	* parser-defs.h (block_found): Move decl from here ...
+	* symtab.h (block_found): ... to here.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.h (struct field_of_this_result): Fix typo in comment.
 	(lookup_symbol_in_language): Move function comment here.
 	(lookup_symbol): Improve function comment.
