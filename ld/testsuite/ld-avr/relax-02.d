@@ -9,20 +9,20 @@
 
 SYMBOL TABLE:
 #...
-00000000 l     F \.text	[0-9a-f]+ local_start
-0000000a l     F \.text	[0-9a-f]+ local_func_1
-00000014 l     F \.text	[0-9a-f]+ local_func_2
-0000001e l     F \.text	[0-9a-f]+ local_func_3
+00000000 l     F \.text	0000000a local_start
+0000000a l     F \.text	0000000a local_func_1
+00000014 l     F \.text	0000000a local_func_2
+0000001e l     F \.text	0000000a local_func_3
 00000032 l       \.text	00000000 local_end_label
 00000028 g       \.text	00000000 dest
 #...
-00000014 g     F \.text	[0-9a-f]+ func_2
+00000014 g     F \.text	0000000a func_2
 #...
-00000000 g     F \.text	[0-9a-f]+ _start
+00000000 g     F \.text	0000000a _start
 00000032 g       \.text	00000000 end_label
-0000000a g     F \.text	[0-9a-f]+ func_1
+0000000a g     F \.text	0000000a func_1
 #...
-0000001e g     F \.text	[0-9a-f]+ func_3
+0000001e g     F \.text	0000000a func_3
 
 
 

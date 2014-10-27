@@ -9,10 +9,10 @@
 
 SYMBOL TABLE:
 #...
-00000000 l     F .text	[0-9a-f]+ local_start
+00000000 l     F .text	0000000a local_start
 0000000a l       .text	00000000 local_end_label
 #...
-00000000 g     F \.text	[0-9a-f]+ _start
+00000000 g     F \.text	0000000a _start
 0000000a g       \.text	00000000 end_label
 #...
 

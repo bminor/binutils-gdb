@@ -1,5 +1,11 @@
 2014-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/ld-avr/relax-02.d: Update to check size of symbols has
+	changed.
+	* testsuite/ld-avr/relax-03.d: Likewise.
+
+2014-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/ld-avr/relax-02.d: New file.
 	* testsuite/ld-avr/relax-02.s: New file.
 	* testsuite/ld-avr/relax-03.d: New file.
