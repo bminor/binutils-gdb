@@ -1,3 +1,11 @@
+2014-10-27  Luis Machado  <lgustavo@codesourcery.com>
+
+	* arm-tdep.c (INSN_S_L_BIT_NUM): Document.
+	(arm_record_ld_st_imm_offset): Reimplement to cover all
+	load/store cases for ARM opcode 010.
+	(arm_record_ld_st_multiple): Reimplement to cover all
+	load/store cases for ARM opcode 100.
+
 2014-10-26  Doug Evans  <xdje42@gmail.com>
 
 	* symtab.c (lookup_symbol_aux_local): Fix typo in comment.
