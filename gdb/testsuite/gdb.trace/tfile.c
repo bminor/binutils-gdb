@@ -130,6 +130,9 @@ adjust_function_address (uintptr_t func_addr)
   /* Although Thumb functions are two-byte aligned, function
      pointers have the Thumb bit set.  Clear it.  */
   return func_addr & ~1;
+#elif defined __powerpc64__ && _CALL_ELF != 2
+  /* Get function address from function descriptor.  */
+  return *(uintptr_t *) func_addr;
 #else
   return func_addr;
 #endif
