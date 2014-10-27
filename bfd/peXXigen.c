@@ -1705,7 +1705,12 @@ pe_print_edata (bfd * abfd, void * vfile)
 	  _("\nExport Address Table -- Ordinal Base %ld\n"),
 	  edt.base);
 
-  for (i = 0; i < edt.num_functions; ++i)
+  /* PR 17512: Handle corrupt PE binaries.  */
+  if (edt.eat_addr + (edt.num_functions * 4) - adj >= datasize)
+    fprintf (file, _("\tInvalid Export Address Table rva (0x%lx) or entry count (0x%lx)\n"),
+	     (long) edt.eat_addr,
+	     (long) edt.num_functions);
+  else for (i = 0; i < edt.num_functions; ++i)
     {
       bfd_vma eat_member = bfd_get_32 (abfd,
 				       data + edt.eat_addr + (i * 4) - adj);
@@ -1741,7 +1746,16 @@ pe_print_edata (bfd * abfd, void * vfile)
   fprintf (file,
 	   _("\n[Ordinal/Name Pointer] Table\n"));
 
-  for (i = 0; i < edt.num_names; ++i)
+  /* PR 17512: Handle corrupt PE binaries.  */
+  if (edt.npt_addr + (edt.num_names * 4) - adj >= datasize)
+    fprintf (file, _("\tInvalid Name Pointer Table rva (0x%lx) or entry count (0x%lx)\n"),
+	     (long) edt.npt_addr,
+	     (long) edt.num_names);
+  else if (edt.ot_addr + (edt.num_names * 2) - adj >= datasize)
+    fprintf (file, _("\tInvalid Ordinal Table rva (0x%lx) or entry count (0x%lx)\n"),
+	     (long) edt.ot_addr,
+	     (long) edt.num_names);
+  else for (i = 0; i < edt.num_names; ++i)
     {
       bfd_vma name_ptr = bfd_get_32 (abfd,
 				    data +
