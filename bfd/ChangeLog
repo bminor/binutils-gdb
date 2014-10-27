@@ -1,5 +1,9 @@
 2014-10-27  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Handle corrupt binaries
+	with an invalid value for NumberOfRvaAndSizes.
+
 	PR binutils/17510
 	* elf.c (setup_group): Improve handling of corrupt group
 	sections.

@@ -504,6 +504,18 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   {
     int idx;
 
+    /* PR 17512: Corrupt PE binaries can cause seg-faults.  */
+    if (a->NumberOfRvaAndSizes > 16)
+      {
+	(*_bfd_error_handler)
+	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
+	   abfd, a->NumberOfRvaAndSizes);
+	/* Paranoia: If the number is corrupt, then assume that the
+	   actual entries themselves might be corrupt as well.  */
+	a->NumberOfRvaAndSizes = 0;
+      }
+
+
     for (idx = 0; idx < a->NumberOfRvaAndSizes; idx++)
       {
         /* If data directory is empty, rva also should be 0.  */
