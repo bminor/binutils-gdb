@@ -1,3 +1,16 @@
+2014-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-avr.c (struct avr_opt_s): Change link_relax to
+	no_link_relax, extend comment.
+	(enum options): Add new OPTION_NO_LINK_RELAX.
+	(md_longopts): Add entry for -mno-link-relax.
+	(md_parse_option): Handle OPTION_NO_LINK_RELAX, and update
+	OPTION_LINK_RELAX.
+	(md_begin): Initialise linkrelax from no_link_relax.
+	(md_show_usage): Include -mno-link-relax option.
+	(relaxable_section): Only allocatable code sections can be
+	relaxed.
+
 2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-avr.c: Add include for elf/avr.h.

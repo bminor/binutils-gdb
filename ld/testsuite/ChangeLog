@@ -1,3 +1,12 @@
+2014-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld/testsuite/ld-avr/relax-elf-flags-02.d: Add -mno-link-relax
+	option.
+	* ld/testsuite/ld-avr/relax-elf-flags-03.d: Likewise.
+	* ld/testsuite/ld-avr/relax-elf-flags-04.d: Likewise.
+	* ld/testsuite/ld-avr/relax-elf-flags-05.d: Likewise.
+	* ld/testsuite/ld-avr/relax-elf-flags-06.d: Likewise.
+
 2014-12-24  Alan Modra  <amodra@gmail.com>
 
 	* ld-scripts/defined6.s,

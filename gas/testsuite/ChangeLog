@@ -1,3 +1,10 @@
+2014-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gas/all/gas.exp: Test will not pass on AVR due to linker
+	relaxation support.
+	* gas/avr/noreloc_withoutrelax.d: Add -mno-link-relax option.
+	* gas/avr/link-relax-elf-flag-clear.d: Likewise.
+
 2014-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gas/avr/link-relax-elf-flag-clear.d: New file.
