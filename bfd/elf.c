@@ -608,9 +608,10 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  if (shdr->contents == NULL)
 		    {
 		      _bfd_error_handler
-			(_("%B: Corrupt size field in group section header: 0x%lx"), abfd, shdr->sh_size);
+			(_("%B: corrupt size field in group section header: 0x%lx"), abfd, shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
-		      return FALSE;
+		      -- num_group;
+		      continue;
 		    }
 
 		  memset (shdr->contents, 0, amt);
@@ -618,8 +619,17 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  if (bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
 		      || (bfd_bread (shdr->contents, shdr->sh_size, abfd)
 			  != shdr->sh_size))
-		    return FALSE;
-
+		    {
+		      _bfd_error_handler
+			(_("%B: invalid size field in group section header: 0x%lx"), abfd, shdr->sh_size);
+		      bfd_set_error (bfd_error_bad_value);
+		      -- num_group;
+		      /* PR 17510: If the group contents are even partially
+			 corrupt, do not allow any of the contents to be used.  */
+		      memset (shdr->contents, 0, amt);
+		      continue;
+		    }
+		  
 		  /* Translate raw contents, a flag word followed by an
 		     array of elf section indices all in target byte order,
 		     to the flag word followed by an array of elf section
@@ -649,6 +659,21 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 			}
 		      dest->shdr = elf_elfsections (abfd)[idx];
 		    }
+		}
+	    }
+
+	  /* PR 17510: Corrupt binaries might contain invalid groups.  */
+	  if (num_group != (unsigned) elf_tdata (abfd)->num_group)
+	    {
+	      elf_tdata (abfd)->num_group = num_group;
+
+	      /* If all groups are invalid then fail.  */
+	      if (num_group == 0)
+		{
+		  elf_tdata (abfd)->group_sect_ptr = NULL;
+		  elf_tdata (abfd)->num_group = num_group = -1;
+		  (*_bfd_error_handler) (_("%B: no valid group sections found"), abfd);
+		  bfd_set_error (bfd_error_bad_value);
 		}
 	    }
 	}
@@ -716,6 +741,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
     {
       (*_bfd_error_handler) (_("%B: no group info for section %A"),
 			     abfd, newsect);
+      return FALSE;
     }
   return TRUE;
 }
