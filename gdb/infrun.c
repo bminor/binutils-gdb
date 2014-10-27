@@ -4463,9 +4463,9 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  return;
 	}
 
-      if (ecs->event_thread->control.step_range_end != 0
-	  && ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_0
-	  && pc_in_thread_step_range (stop_pc, ecs->event_thread)
+      if (ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_0
+	  && (pc_in_thread_step_range (stop_pc, ecs->event_thread)
+	      || ecs->event_thread->control.step_range_end == 1)
 	  && frame_id_eq (get_stack_frame_id (frame),
 			  ecs->event_thread->control.step_stack_frame_id)
 	  && ecs->event_thread->control.step_resume_breakpoint == NULL)
@@ -4485,6 +4485,7 @@ handle_signal_stop (struct execution_control_state *ecs)
                                 "single-step range\n");
 
 	  insert_hp_step_resume_breakpoint_at_frame (frame);
+	  ecs->event_thread->step_after_step_resume_breakpoint = 1;
 	  /* Reset trap_expected to ensure breakpoints are re-inserted.  */
 	  ecs->event_thread->control.trap_expected = 0;
 	  keep_going (ecs);

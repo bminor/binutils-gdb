@@ -1,3 +1,9 @@
+2014-10-27  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_signal_stop): Also skip handlers when a random
+	signal arrives while handling a "stepi" or a "nexti".  Set the
+	thread's 'step_after_step_resume_breakpoint' flag.
+
 2014-10-27  Luis Machado  <lgustavo@codesourcery.com>
 
 	* arm-tdep.c (INSN_S_L_BIT_NUM): Document.

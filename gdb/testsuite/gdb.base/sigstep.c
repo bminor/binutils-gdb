@@ -24,6 +24,7 @@
 #include <errno.h>
 
 static volatile int done;
+static volatile int dummy;
 
 static void
 handler (int sig)
@@ -74,8 +75,10 @@ main ()
 	      return 1;
 	    }
 	}
-      /* Wait.  */
-      while (!done);
+      /* Wait.  Issue a couple writes to a dummy volatile var to be
+	 reasonably sure our simple "get-next-pc" logic doesn't
+	 stumble on branches.  */
+      dummy = 0; dummy = 0; while (!done);
       done = 0;
     }
   return 0;

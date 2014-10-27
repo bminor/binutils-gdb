@@ -269,9 +269,38 @@ proc skip_to_handler_entry { i } {
     gdb_test "clear *handler" ".*" "$prefix; clear handler"
 }
 
-skip_to_handler_entry step
-skip_to_handler_entry next
-skip_to_handler_entry continue
+foreach cmd {"stepi" "nexti" "step" "next" "continue"} {
+    skip_to_handler_entry $cmd
+}
+
+# Get the address of where a single-step should land.
+
+proc get_next_pc {test} {
+    global gdb_prompt
+    global hex
+
+    set next ""
+    gdb_test_multiple "x/2i \$pc" $test {
+	-re "$hex .*:\[^\r\n\]+\r\n\[ \]+($hex).*\.\r\n$gdb_prompt $" {
+	    set next $expect_out(1,string)
+	    pass $test
+	}
+    }
+
+    return $next
+}
+
+# Test that the command skipped over the handler.
+
+proc test_skip_handler {prefix i} {
+    if {$i == "stepi" || $i == "nexti"} {
+	set next_pc [get_next_pc "$prefix; get next PC"]
+	gdb_test "$i" "dummy = 0.*" "$prefix; performing $i"
+	gdb_test "p /x \$pc" " = $next_pc" "$prefix; advanced"
+    } else {
+	gdb_test "$i" "done = 0.*" "$prefix; performing $i"
+    }
+}
 
 # Try stepping when there's a signal pending but no breakpoints.
 # Should skip the handler advancing to the next line.
@@ -295,13 +324,13 @@ proc skip_over_handler { i } {
 
     # Make the signal pending
     sleep 1
-    
-    gdb_test "$i" "done = 0.*" "$prefix; performing $i"
+
+    test_skip_handler $prefix $i
 }
 
-skip_over_handler step
-skip_over_handler next
-skip_over_handler continue
+foreach cmd {"stepi" "nexti" "step" "next" "continue"} {
+    skip_over_handler $cmd
+}
 
 # Try stepping when there's a signal pending, a pre-existing
 # breakpoint at the current instruction, and a breakpoint in the
@@ -385,7 +414,7 @@ breakpoint_to_handler_entry continue
 
 # Try stepping when there's a signal pending, and a pre-existing
 # breakpoint at the current instruction, and no breakpoint in the
-# handler.  Should advance to the next line.
+# handler.  Should advance to the next line/instruction.
 
 proc breakpoint_over_handler { i } {
     global gdb_prompt
@@ -409,10 +438,10 @@ proc breakpoint_over_handler { i } {
     # Make the signal pending
     sleep 1
     
-    gdb_test "$i" "done = 0.*" "$prefix; performing $i"
+    test_skip_handler $prefix $i
     gdb_test "clear $infinite_loop" ".*" "$prefix; clear infinite loop"
 }
 
-breakpoint_over_handler step
-breakpoint_over_handler next
-breakpoint_over_handler continue
+foreach cmd {"stepi" "nexti" "step" "next" "continue"} {
+    breakpoint_over_handler $cmd
+}

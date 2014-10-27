@@ -1,3 +1,10 @@
+2014-10-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Continuing and Stepping): Add cross reference to
+	info on stepping and signal handlers.
+	(Signals): Explain stepping and signal handlers.  Add context
+	index entry, and cross references.
+
 2014-10-20  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python.texi (Breakpoints In Python): Add parenthesis after

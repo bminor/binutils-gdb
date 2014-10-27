@@ -1,3 +1,14 @@
+2014-10-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/sigstep.c (dummy): New global.
+	(main): Issue a couple writes to the new global.
+	* gdb.base/sigstep.exp (get_next_pc, test_skip_handler): New
+	procedures.
+	(skip_over_handler): Use test_skip_handler.
+	(top level): Call skip_over_handler for stepi and nexti too.
+	(breakpoint_over_handler): Use test_skip_handler.
+	(top level): Call breakpoint_over_handler for stepi and nexti too.
+
 2014-10-27  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/tfile.c (adjust_function_address)
