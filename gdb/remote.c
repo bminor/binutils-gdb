@@ -1842,11 +1842,11 @@ set_general_process (void)
 }
 
 
-/*  Return nonzero if the thread PTID is still alive on the remote
-    system.  */
+/* Return nonzero if this is the main thread that we made up ourselves
+   to model non-threaded targets as single-threaded.  */
 
 static int
-remote_thread_alive (struct target_ops *ops, ptid_t ptid)
+remote_thread_always_alive (struct target_ops *ops, ptid_t ptid)
 {
   struct remote_state *rs = get_remote_state ();
   char *p, *endp;
@@ -1859,6 +1859,23 @@ remote_thread_alive (struct target_ops *ops, ptid_t ptid)
     /* The main thread is always alive.  This can happen after a
        vAttach, if the remote side doesn't support
        multi-threading.  */
+    return 1;
+
+  return 0;
+}
+
+/* Return nonzero if the thread PTID is still alive on the remote
+   system.  */
+
+static int
+remote_thread_alive (struct target_ops *ops, ptid_t ptid)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p, *endp;
+
+  /* Check if this is a thread that we made up ourselves to model
+     non-threaded targets as single-threaded.  */
+  if (remote_thread_always_alive (ops, ptid))
     return 1;
 
   p = rs->buf;
@@ -2779,6 +2796,18 @@ remote_update_thread_list (struct target_ops *ops)
       struct thread_info *tp, *tmp;
 
       got_list = 1;
+
+      if (VEC_empty (thread_item_t, context.items)
+	  && remote_thread_always_alive (ops, inferior_ptid))
+	{
+	  /* Some targets don't really support threads, but still
+	     reply an (empty) thread list in response to the thread
+	     listing packets, instead of replying "packet not
+	     supported".  Exit early so we don't delete the main
+	     thread.  */
+	  do_cleanups (old_chain);
+	  return;
+	}
 
       /* CONTEXT now holds the current thread list on the remote
 	 target end.  Delete GDB-side threads no longer found on the

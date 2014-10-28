@@ -1,5 +1,13 @@
 2014-10-27  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_thread_alive): New, factored out from ...
+	(remote_thread_alive): ... this.
+	(remote_update_thread_list): Bail out before deleting threads if
+	the target returned an empty list, and, the current thread has a
+	magic/fake ptid.
+
+2014-10-27  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (handle_signal_stop): Also skip handlers when a random
 	signal arrives while handling a "stepi" or a "nexti".  Set the
 	thread's 'step_after_step_resume_breakpoint' flag.
