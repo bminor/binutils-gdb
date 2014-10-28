@@ -1,5 +1,17 @@
 2014-10-28  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17511
+	* gdb.base/sigstep.c (handler): Add a few more writes to 'done'.
+	* gdb.base/sigstep.exp (other_handler_location): New global.
+	(advance): Support stepping into the signal handler, and running
+	commands while in the handler.
+	(in_handler_map): New global.
+	(top level): In the advance test, add combinations for getting
+	into the handler with stepping commands, and for running commands
+	in the handler.  Add comment descripting the advancei tests.
+
+2014-10-28  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/sigstep.exp: Use build_executable instead of
 	prepare_for_testing.
 	(top level): Move code that starts GDB, runs to main and creates a

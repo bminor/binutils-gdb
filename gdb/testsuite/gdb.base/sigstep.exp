@@ -36,6 +36,7 @@ if {[build_executable $testfile.exp $testfile $srcfile debug]} {
 
 set clear_done [gdb_get_line_number {done = 0}]
 set infinite_loop [gdb_get_line_number {while (!done)}]
+set other_handler_location [gdb_get_line_number "other handler location"]
 
 # Restart GDB, set a display showing $PC, and run to main.
 
@@ -72,29 +73,48 @@ proc validate_backtrace {} {
 
 validate_backtrace
 
-proc advance { cmd } {
-    global gdb_prompt inferior_exited_re
+# Goes to handler using ENTER_CMD, runs IN_HANDLER while in the signal
+# hander, and then steps out of the signal handler using EXIT_CMD.
 
-    with_test_prefix "$cmd from handler" {
+proc advance { enter_cmd in_handler_prefix in_handler exit_cmd } {
+    global gdb_prompt inferior_exited_re
+    global clear_done other_handler_location
+
+    set prefix "$enter_cmd to handler, $in_handler_prefix in handler, $exit_cmd from handler"
+
+    with_test_prefix $prefix {
 	restart
 
-	gdb_test "break handler"
-
 	# Get us into the handler
-	gdb_test "continue" ".* handler .*" "continue to handler"
+	if { $enter_cmd == "continue" } {
+	    gdb_test "break handler"
+	} else {
+	    gdb_test "handle SIGALRM print pass stop"
+	    gdb_test "handle SIGVTALRM print pass stop"
+	    gdb_test "continue" "Program received signal.*" "continue to signal"
+	}
+	gdb_test "$enter_cmd" ".*handler .*" "$enter_cmd to handler"
+
+	delete_breakpoints
+
+	uplevel 1 $in_handler
+
+	if { $exit_cmd == "continue" } {
+	    gdb_test "break $clear_done" ".*" "break clear done"
+	}
 
 	set test "leave handler"
-	gdb_test_multiple "$cmd" "${test}" {
+	gdb_test_multiple "$exit_cmd" "${test}" {
 	    -re "Could not insert single-step breakpoint.*$gdb_prompt $" {
 		setup_kfail gdb/8841 "sparc*-*-openbsd*"
 		fail "$test (could not insert single-step breakpoint)"
 	    }
 	    -re "done = 1;.*${gdb_prompt} $" {
-		send_gdb "$cmd\n"
+		send_gdb "$exit_cmd\n"
 		exp_continue -continue_timer
 	    }
 	    -re "\} .. handler .*${gdb_prompt} $" {
-		send_gdb "$cmd\n"
+		send_gdb "$exit_cmd\n"
 		exp_continue -continue_timer
 	    }
 	    -re "$inferior_exited_re normally.*${gdb_prompt} $" {
@@ -110,6 +130,55 @@ proc advance { cmd } {
 		# on the first instruction of "while...".  Accept both cases.
 		pass "$test"
 	    }
+	}
+    }
+}
+
+# Map of PREFIX => "things to do within the signal handler", for the
+# advance tests.
+
+set in_handler_map {
+    "nothing" {
+    }
+    "si+advance" {
+	# Advance to the second location in handler.
+	gdb_test "si" "handler.*" "si in handler"
+
+	set test "advance in handler"
+	gdb_test_multiple "advance $other_handler_location" $test {
+	    -re "Program received signal SIGTRAP.*$gdb_prompt $" {
+		# On some versions of Linux (observed on
+		# 3.16.4-200.fc20.x86_64), using PTRACE_SINGLESTEP+sig
+		# to step into a signal handler, and then issuing
+		# another PTRACE_SINGLESTEP within the handler ends up
+		# with $eflags.TF mistakenly set, which results in
+		# subsequent PTRACE_CONTINUEs trapping after each
+		# insn.
+		if {$enter_cmd != "continue"} {
+		    setup_xfail "x86_64-*-linux*" gdb/17511
+		}
+		fail "$test (spurious SIGTRAP)"
+		return
+	    }
+	    -re "other handler location.*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+    }
+}
+
+# Check that we can step/next/continue, etc. our way in and out of a
+# signal handler.  Also test that we can step, and run to a breakpoint
+# within the handler.
+
+foreach enter_cmd { "stepi" "nexti" "step" "next" "continue" } {
+    if { $enter_cmd != "continue" && ![can_single_step_to_signal_handler] } {
+	continue
+    }
+
+    foreach exit_cmd { "step" "next" "continue" } {
+	foreach {in_handler_prefix in_handler} $in_handler_map {
+	    advance $enter_cmd $in_handler_prefix $in_handler $exit_cmd
 	}
     }
 }
@@ -199,11 +268,9 @@ proc advancei { cmd } {
     }
 }
 
-# Check that we can step/next our way out of a signal handler.
-
-foreach cmd {"step" "next"} {
-    advance $cmd
-}
+# Check that we can step our way out of a signal handler, using
+# commands that first step out to the signal trampoline, and then out
+# to the mainline code.
 
 foreach cmd {"stepi" "nexti" "finish" "return"} {
     advancei $cmd

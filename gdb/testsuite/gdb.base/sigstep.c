@@ -29,7 +29,12 @@ static volatile int dummy;
 static void
 handler (int sig)
 {
+  /* This is more than one write so that the breakpoint location below
+     is more than one instruction away.  */
   done = 1;
+  done = 1;
+  done = 1;
+  done = 1; /* other handler location */
 } /* handler */
 
 struct itimerval itime;
