@@ -156,7 +156,7 @@ proc stepi_out { name args } {
     set test "${name}; stepi out of handler"
     gdb_test_multiple "stepi" "$test" {
 	-re "Could not insert single-step breakpoint.*$gdb_prompt $" {
-	    setup_kfail gdb/1736 "sparc*-*-openbsd*"
+	    setup_kfail gdb/8841 "sparc*-*-openbsd*"
 	    fail "$test (could not insert single-step breakpoint)"
 	}
 	-re "keeper.*$gdb_prompt $" {
@@ -168,22 +168,22 @@ proc stepi_out { name args } {
 	    exp_continue
 	}
 	-re "Program received signal SIGSEGV.*$gdb_prompt $" {
-	    kfail gdb/1702 "$test (executed fault insn)"
+	    kfail gdb/8807 "$test (executed fault insn)"
 	}
 	-re "Breakpoint.*pc(\r\n| *)[at_segv] .*bowler.*$gdb_prompt $" {
 	    pass "$test (at breakpoint)"
 	}
 	-re "Breakpoint.*pc(\r\n| *)[after_segv] .*bowler.*$gdb_prompt $" {
-	    kfail gdb/1702 "$test (executed breakpoint)"
+	    kfail gdb/8807 "$test (executed breakpoint)"
 	}
 	-re "pc(\r\n| *)[at_segv] .*bowler.*$gdb_prompt $" {
 	    pass "$test"
 	}
 	-re "pc(\r\n| *)[after_segv] .*bowler.*$gdb_prompt $" {
-	    kfail gdb/1702 "$test (skipped fault insn)"
+	    kfail gdb/8807 "$test (skipped fault insn)"
 	}
 	-re "pc(\r\n| *)=> 0x\[a-z0-9\]* .*bowler.*$gdb_prompt $" {
-	    kfail gdb/1702 "$test (corrupt pc)"
+	    kfail gdb/8807 "$test (corrupt pc)"
 	}
     }
 

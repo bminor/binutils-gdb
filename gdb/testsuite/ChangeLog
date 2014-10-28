@@ -1,3 +1,11 @@
+2014-10-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/sigaltstack.exp: Update to use Bugzilla bug numbers
+	instead of GNATS numbers.
+	* gdb.base/sigbpt.exp: Likewise.
+	* gdb.base/siginfo.exp: Likewise.
+	* gdb.base/sigstep.exp: Likewise.
+
 2014-10-27  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/sigstep.c (dummy): New global.

@@ -65,7 +65,7 @@ proc advance { i } {
     set test "$prefix; leave handler"
     gdb_test_multiple "$i" "${test}" {
 	-re "Could not insert single-step breakpoint.*$gdb_prompt $" {
-	    setup_kfail gdb/1736 "sparc*-*-openbsd*"
+	    setup_kfail gdb/8841 "sparc*-*-openbsd*"
 	    fail "$test (could not insert single-step breakpoint)"
 	}
 	-re "done = 1;.*${gdb_prompt} $" {
@@ -77,7 +77,7 @@ proc advance { i } {
 	    exp_continue -continue_timer
 	}
 	-re "$inferior_exited_re normally.*${gdb_prompt} $" {
-	    setup_kfail gdb/1639 powerpc-*-*bsd*
+	    setup_kfail gdb/8744 powerpc-*-*bsd*
 	    fail "$test (program exited)"
 	}
 	-re "(while ..done|done = 0).*${gdb_prompt} $" {
@@ -106,13 +106,13 @@ proc advancei { i } {
             # Some platforms use a special read-only page for signal
             # trampolines.  We can't set a breakpoint there, and we
             # don't gracefully fall back to single-stepping.
-            setup_kfail gdb/1736 "i?86-*-linux*"
-	    setup_kfail gdb/1736 "*-*-openbsd*"
+	    setup_kfail gdb/8841 "i?86-*-linux*"
+	    setup_kfail gdb/8841 "*-*-openbsd*"
             fail "$test (could not set breakpoint)"
 	    return
         }
 	-re "Could not insert single-step breakpoint.*$gdb_prompt $" {
-	    setup_kfail gdb/1736 "sparc*-*-openbsd*"
+	    setup_kfail gdb/8841 "sparc*-*-openbsd*"
 	    fail "$test (could not insert single-step breakpoint)"
 	}
 	-re "Breakpoint \[0-9\]*, handler .*${gdb_prompt} $" {
@@ -159,7 +159,7 @@ proc advancei { i } {
 	    exp_continue -continue_timer
 	}
 	-re "$inferior_exited_re normally.*${gdb_prompt} $" {
-	    kfail gdb/1639 "$test (program exited)"
+	    kfail gdb/8744 "$test (program exited)"
 	    set program_exited 1
 	}
 	-re "The program is not being run.*${gdb_prompt} $" {
