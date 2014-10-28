@@ -1,5 +1,11 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.mi/mi-console.c: Add eye-catcher.
+	* gdb.mi/mi-console.exp (semihosted_string): Refer to eye-catcher
+	instead of literal line number.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/shr2.c: Add eye-catcher.
 	* gdb.base/shlib-call.exp: Refer to eye-catcher instead of literal
 	line number.

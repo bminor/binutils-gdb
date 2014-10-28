@@ -11,4 +11,4 @@ int
 main ()
 {
   hello ();
-}
+} /* after-hello */
