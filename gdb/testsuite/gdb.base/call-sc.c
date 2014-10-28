@@ -46,7 +46,7 @@ void Fun(T foo)
   L = foo;
 }
 
-zed ()
+void zed ()
 {
   L = 'Z';
 }

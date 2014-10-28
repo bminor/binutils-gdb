@@ -13,6 +13,12 @@ foo (void)
 }
 
 int
+baz (void)
+{
+  return 5;
+}
+
+int
 main (void)
 {
  int y, z;
@@ -24,11 +30,4 @@ main (void)
  y = y + 2; /* jump here */
  y = baz ();
  return 0; /* until here */
-}
-
-
-int
-baz (void)
-{ 
-  return 5;
 }

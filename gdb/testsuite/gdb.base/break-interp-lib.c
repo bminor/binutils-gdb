@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Force REL->RELA conversion on i386, see "Prelink", March 4, 2004.  */
 volatile int v[2];

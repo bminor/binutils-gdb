@@ -266,6 +266,7 @@ void Fun18(struct struct18 foo18)
   L18 = foo18; 
 }
 
+void
 zed ()
 {
 

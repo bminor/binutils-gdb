@@ -22,6 +22,7 @@
 
 pid_t pids[4];
 
+int
 main()
 {
   int i;
@@ -32,5 +33,5 @@ main()
   printf ("%d ready\n", getpid ());
   sleep (2);
   printf ("%d done\n", getpid ());
-  exit (0);	/* Set exit breakpoint here.  */
+  return 0;	/* Set exit breakpoint here.  */
 }

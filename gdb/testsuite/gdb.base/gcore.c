@@ -58,6 +58,7 @@ int factorial_func (int value)
   return (value);
 }
 
+int
 main()
 {
   factorial_func (6);

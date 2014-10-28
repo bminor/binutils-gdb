@@ -20,15 +20,15 @@ int my_global_symbol = 42;
 static int my_static_symbol;
 
 int
-main ()
-{
-  return my_global_func ();
-}
-
-int
 my_global_func ()
 {
   my_static_symbol = my_global_symbol;
   my_global_symbol = my_static_symbol + my_global_symbol;
   return my_global_symbol;
+}
+
+int
+main ()
+{
+  return my_global_func ();
 }

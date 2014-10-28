@@ -17,10 +17,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 long lines = 0;
 
-main()
+int main()
 {
   char linebuf[128];
   FILE *in, *out;
@@ -34,7 +35,7 @@ main()
   if (!in || !out)
     {
       fprintf (stderr, "File open failed\n");
-      exit (1);
+      return 1;
     }
 
   for (i = 0; ; i++)
@@ -55,5 +56,5 @@ main()
   fclose (out);
   printf ("Deleting copy.\n");	/* breakpoint 3 */
   unlink (COPY1_TXT);
-  exit (0);			/* breakpoint 4 */
+  return 0;			/* breakpoint 4 */
 }

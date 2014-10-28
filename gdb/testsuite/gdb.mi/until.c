@@ -1,3 +1,4 @@
+void
 foo (void)
 {
  int i, x, y, z;
@@ -17,6 +18,7 @@ foo (void)
  y = 10;
 }
 
+int
 main ()
 {
   int a = 1;
