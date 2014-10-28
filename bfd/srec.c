@@ -246,7 +246,7 @@ srec_bad_byte (bfd *abfd,
     }
   else
     {
-      char buf[10];
+      char buf[40];
 
       if (! ISPRINT (c))
 	sprintf (buf, "\\%03o", (unsigned int) c);
@@ -452,7 +452,7 @@ srec_scan (bfd *abfd)
 	case 'S':
 	  {
 	    file_ptr pos;
-	    char hdr[3];
+	    unsigned char hdr[3];
 	    unsigned int bytes, min_bytes;
 	    bfd_vma address;
 	    bfd_byte *data;

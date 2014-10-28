@@ -1,3 +1,28 @@
+2014-10-28  Nick Clifton  <nickc@redhat.com>
+
+	* Apply trunk patches:
+
+	2014-10-28  Andreas Schwab  <schwab@suse.de>
+		    Nick Clifton  <nickc@redhat.com>
+	PR binutils/17510
+	* srec.c (srec_bad_byte): Increase size of buf to allow for
+	negative values.
+	(srec_scan): Use an unsigned char buffer to hold header bytes.
+
+	2014-10-27  Nick Clifton  <nickc@redhat.com>
+	PR binutils/17512
+	* elf.c (bfd_section_from_shdr): Detect and warn about ELF
+	binaries with a group of sections linked by the string table
+	indicies.
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Handle corrupt binaries
+	with an invalid value for NumberOfRvaAndSizes.
+	(pe_print_edata): Detect out of range rvas and entry counts for
+	the Export Address table, Name Pointer table and Ordinal table.
+
+	PR binutils/17510
+	* elf.c (setup_group): Improve handling of corrupt group
+	sections.
+
 2014-10-28  Alan Modra  <amodra@gmail.com>
 
 	Apply trunk patches
