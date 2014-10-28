@@ -9,6 +9,13 @@
 
 	* Apply trunk patches:
 
+	2014-10-28  Nick Clifton  <nickc@redhat.com>
+	PR binutils/17512
+	* elf.c (bfd_section_from_shdr): Allocate and free the recursion
+	detection table on a per-bfd basis.
+	* peXXigen.c (pe_print_edata): Handle binaries with a truncated
+	export table.
+
 	2014-10-28  Andreas Schwab  <schwab@suse.de>
 		    Nick Clifton  <nickc@redhat.com>
 	PR binutils/17510
