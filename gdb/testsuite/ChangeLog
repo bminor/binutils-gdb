@@ -1,5 +1,27 @@
 2014-10-28  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/sigstep.exp: Use build_executable instead of
+	prepare_for_testing.
+	(top level): Move code that starts GDB, runs to main and creates a
+	display to ...
+	(restart): ... this new procedure.
+	(top level): Move backtrace from signal handler test to ...
+	(validate_backtrace): ... this new procedure.
+	(advance, advancei): Rename parameter from 'i' to 'cmd'.  Use
+	with_test_prefix.  Always restart GDB.
+	(skip_to_handler): Rename parameter from 'i' to 'cmd'.  Use
+	with_test_prefix.  Always restart GDB.  No need to delete
+	breakpoints after the test.
+	(test_skip_handler): Remove prefix parameter.
+	(skip_over_handler, breakpoint_to_handler)
+	(breakpoint_to_handler_entry, breakpoint_over_handler): Rename
+	parameter from 'i' to 'cmd'.  Use with_test_prefix.  Always
+	restart GDB.  No need to delete breakpoints after the test.
+	(top level): Use foreach to call the test procedures with
+	different commands.
+
+2014-10-28  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/sigaltstack.exp: Update to use Bugzilla bug numbers
 	instead of GNATS numbers.
 	* gdb.base/sigbpt.exp: Likewise.
