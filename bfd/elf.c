@@ -629,7 +629,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      memset (shdr->contents, 0, amt);
 		      continue;
 		    }
-		  
+
 		  /* Translate raw contents, a flag word followed by an
 		     array of elf section indices all in target byte order,
 		     to the flag word followed by an array of elf section

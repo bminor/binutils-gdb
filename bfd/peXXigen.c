@@ -515,7 +515,6 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
 	a->NumberOfRvaAndSizes = 0;
       }
 
-
     for (idx = 0; idx < a->NumberOfRvaAndSizes; idx++)
       {
         /* If data directory is empty, rva also should be 0.  */
