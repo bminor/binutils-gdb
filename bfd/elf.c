@@ -1580,6 +1580,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
   const char *name;
   bfd_boolean ret = TRUE;
   static bfd_boolean * sections_being_created = NULL;
+  static bfd * sections_being_created_abfd = NULL;
   static unsigned int nesting = 0;
 
   if (shindex >= elf_numsections (abfd))
@@ -1592,13 +1593,19 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	 loop.  Detect this here, by refusing to load a section that we are
 	 already in the process of loading.  We only trigger this test if
 	 we have nested at least three sections deep as normal ELF binaries
-	 can expect to recurse at least once.  */
-      
+	 can expect to recurse at least once.
+
+	 FIXME: It would be better if this array was attached to the bfd,
+	 rather than being held in a static pointer.  */
+
+      if (sections_being_created_abfd != abfd)
+	sections_being_created = NULL;
       if (sections_being_created == NULL)
 	{
 	  /* FIXME: It would be more efficient to attach this array to the bfd somehow.  */
 	  sections_being_created = (bfd_boolean *)
 	    bfd_zalloc (abfd, elf_numsections (abfd) * sizeof (bfd_boolean));
+	  sections_being_created_abfd = abfd;
 	}
       if (sections_being_created [shindex])
 	{
@@ -2102,7 +2109,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
   if (sections_being_created)
     sections_being_created [shindex] = FALSE;
   if (-- nesting == 0)
-    sections_being_created = NULL;
+    {
+      sections_being_created = NULL;
+      sections_being_created_abfd = abfd;
+    }
   return ret;
 }
 

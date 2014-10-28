@@ -1611,6 +1611,15 @@ pe_print_edata (bfd * abfd, void * vfile)
 	}
     }
 
+  /* PR 17512: Handle corrupt PE binaries.  */
+  if (datasize < 36)
+    {
+      fprintf (file,
+	       _("\nThere is an export table in %s, but it is too small (%d)\n"),
+	       section->name, (int) datasize);
+      return TRUE;
+    }
+
   fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
 	   section->name, (unsigned long) addr);
 
