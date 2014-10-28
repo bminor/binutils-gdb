@@ -1,5 +1,19 @@
 2014-10-28  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/12623
+	* gdb.base/sigstep.c (no_handler): New global.
+	(main): If 'no_handler is true, set the signal handlers to
+	SIG_IGN.
+	* gdb.base/sigstep.exp (breakpoint_over_handler): Add
+	with_sw_watch and no_handler parameters.  Handle them.
+	(top level) <stepping over handler when stopped at a breakpoint
+	test>: Add a test axis for testing with a software watchpoint, and
+	another for testing with the signal handler set to SIG_IGN.
+	* gdb.base/step-sw-breakpoint-adjust-pc.c: New file.
+	* gdb.base/step-sw-breakpoint-adjust-pc.exp: New file.
+
+2014-10-28  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/17511
 	* gdb.base/sigstep.c (handler): Add a few more writes to 'done'.
 	* gdb.base/sigstep.exp (other_handler_location): New global.

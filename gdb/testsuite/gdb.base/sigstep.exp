@@ -476,17 +476,36 @@ foreach cmd {"step" "next" "continue"} {
 
 # Try stepping when there's a signal pending, and a pre-existing
 # breakpoint at the current instruction, and no breakpoint in the
-# handler.  Should advance to the next line/instruction.
+# handler.  Should advance to the next line/instruction.  If SW_WATCH
+# is true, set a software watchpoint, which exercises stepping the
+# breakpoint instruction while delivering a signal at the same time.
+# If NO_HANDLER, arrange for the signal's handler be SIG_IGN, thus
+# when the software watchpoint is also set, testing stepping a
+# breakpoint instruction and immediately triggering the breakpoint
+# (exercises adjust_pc_after_break logic).
 
-proc breakpoint_over_handler { cmd } {
+proc breakpoint_over_handler { cmd with_sw_watch no_handler } {
     global infinite_loop
     global clear_done
 
-    with_test_prefix "$cmd on breakpoint, skip handler" {
+    set prefix "$cmd on breakpoint, skip handler"
+    if { $with_sw_watch } {
+	append prefix ", with sw-watchpoint"
+    }
+    if { $no_handler } {
+	append prefix ", no handler"
+    }
+
+    with_test_prefix "$prefix" {
 	restart
 	# Use the real-time itimer, as otherwize the process never gets
 	# enough time to expire the timer.
 	gdb_test_no_output "set itimer = itimer_real"
+
+	if {$no_handler} {
+	    gdb_test "print no_handler = 1" " = 1" \
+		"set no_handler"
+	}
 
 	gdb_test "break $infinite_loop" ".*" "break infinite loop"
 
@@ -498,10 +517,26 @@ proc breakpoint_over_handler { cmd } {
 	# Make the signal pending
 	sleep 1
 
+	if { $with_sw_watch } {
+	    # A watchpoint on a convenience variable is always a
+	    # software watchpoint.
+	    gdb_test "watch \$convenience" "Watchpoint .*: \\\$convenience"
+	}
+
+	if {$no_handler} {
+	    # With no handler, we need to set the global ourselves
+	    # manually.
+	    gdb_test "print done = 1" " = 1" "set done"
+	}
+
 	test_skip_handler $cmd
     }
 }
 
 foreach cmd {"stepi" "nexti" "step" "next" "continue"} {
-    breakpoint_over_handler $cmd
+    foreach with_sw_watch {0 1} {
+	foreach no_handler {0 1} {
+	    breakpoint_over_handler $cmd $with_sw_watch $no_handler
+	}
+    }
 }

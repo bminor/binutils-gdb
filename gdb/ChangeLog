@@ -1,3 +1,14 @@
+2014-10-28  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/12623
+	* gdbthread.h (struct thread_info) <stepped_breakpoint>: New
+	field.
+	* infrun.c (resume) <stepping breakpoint instruction>: Set the
+	thread's stepped_breakpoint field.  Skip if reverse debugging.
+	Add comment.
+	(init_thread_stepping_state, handle_signal_stop): Clear the
+	thread's stepped_breakpoint field.
+
 2014-10-27  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_thread_alive): New, factored out from ...

@@ -2213,12 +2213,35 @@ a command like `return' or `jump' to continue execution."));
       resume_ptid = inferior_ptid;
     }
 
-  if (gdbarch_cannot_step_breakpoint (gdbarch))
+  if (execution_direction != EXEC_REVERSE
+      && step && breakpoint_inserted_here_p (aspace, pc))
     {
+      /* The only case we currently need to step a breakpoint
+	 instruction is when we have a signal to deliver.  See
+	 handle_signal_stop where we handle random signals that could
+	 take out us out of the stepping range.  Normally, in that
+	 case we end up continuing (instead of stepping) over the
+	 signal handler with a breakpoint at PC, but there are cases
+	 where we should _always_ single-step, even if we have a
+	 step-resume breakpoint, like when a software watchpoint is
+	 set.  Assuming single-stepping and delivering a signal at the
+	 same time would takes us to the signal handler, then we could
+	 have removed the breakpoint at PC to step over it.  However,
+	 some hardware step targets (like e.g., Mac OS) can't step
+	 into signal handlers, and for those, we need to leave the
+	 breakpoint at PC inserted, as otherwise if the handler
+	 recurses and executes PC again, it'll miss the breakpoint.
+	 So we leave the breakpoint inserted anyway, but we need to
+	 record that we tried to step a breakpoint instruction, so
+	 that adjust_pc_after_break doesn't end up confused.  */
+      gdb_assert (sig != GDB_SIGNAL_0);
+
+      tp->stepped_breakpoint = 1;
+
       /* Most targets can step a breakpoint instruction, thus
 	 executing it normally.  But if this one cannot, just
 	 continue and we will hit it anyway.  */
-      if (step && breakpoint_inserted_here_p (aspace, pc))
+      if (gdbarch_cannot_step_breakpoint (gdbarch))
 	step = 0;
     }
 
@@ -3221,6 +3244,7 @@ set_step_info (struct frame_info *frame, struct symtab_and_line sal)
 void
 init_thread_stepping_state (struct thread_info *tss)
 {
+  tss->stepped_breakpoint = 0;
   tss->stepping_over_breakpoint = 0;
   tss->stepping_over_watchpoint = 0;
   tss->step_after_step_resume_breakpoint = 0;
@@ -3385,7 +3409,8 @@ adjust_pc_after_break (struct execution_control_state *ecs)
       if (thread_has_single_step_breakpoints_set (ecs->event_thread)
 	  || !ptid_equal (ecs->ptid, inferior_ptid)
 	  || !currently_stepping (ecs->event_thread)
-	  || ecs->event_thread->prev_pc == breakpoint_pc)
+	  || (ecs->event_thread->stepped_breakpoint
+	      && ecs->event_thread->prev_pc == breakpoint_pc))
 	regcache_write_pc (regcache, breakpoint_pc);
 
       do_cleanups (old_cleanups);
@@ -4241,6 +4266,7 @@ handle_signal_stop (struct execution_control_state *ecs)
       return;
     }
 
+  ecs->event_thread->stepped_breakpoint = 0;
   ecs->event_thread->stepping_over_breakpoint = 0;
   ecs->event_thread->stepping_over_watchpoint = 0;
   bpstat_clear (&ecs->event_thread->control.stop_bpstat);

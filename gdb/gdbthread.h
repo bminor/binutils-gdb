@@ -201,6 +201,11 @@ struct thread_info
      SIGTRAP from a breakpoint SIGTRAP.  */
   CORE_ADDR prev_pc;
 
+  /* Did we set the thread stepping a breakpoint instruction?  This is
+     used in conjunction with PREV_PC to decide whether to adjust the
+     PC.  */
+  int stepped_breakpoint;
+
   /* Should we step over breakpoint next time keep_going is called?  */
   int stepping_over_breakpoint;
 

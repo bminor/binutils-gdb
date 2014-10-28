@@ -25,6 +25,7 @@
 
 static volatile int done;
 static volatile int dummy;
+static volatile int no_handler;
 
 static void
 handler (int sig)
@@ -49,11 +50,11 @@ enum {
 int
 main ()
 {
-
   int res;
+
   /* Set up the signal handler.  */
   memset (&action, 0, sizeof (action));
-  action.sa_handler = handler;
+  action.sa_handler = no_handler ? SIG_IGN : handler;
   sigaction (SIGVTALRM, &action, NULL);
   sigaction (SIGALRM, &action, NULL);
 
