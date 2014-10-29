@@ -467,6 +467,7 @@ command_line_handler (char *rl)
     {
       linelength = 80;
       linebuffer = (char *) xmalloc (linelength);
+      linebuffer[0] = '\0';
     }
 
   p = linebuffer;

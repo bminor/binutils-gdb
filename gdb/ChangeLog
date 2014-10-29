@@ -1,5 +1,10 @@
 2014-10-29  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (command_line_handler): Clear the first byte of
+	linebuffer, when it is first allocated.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
 	* tui/tui.c (tui_rl_switch_mode): Wrap tui_enable/tui_disable in
 	TRY_CATCH.
 
