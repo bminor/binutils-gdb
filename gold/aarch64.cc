@@ -525,7 +525,7 @@ class Reloc_stub
       { return k1.eq(k2); }
     };
 
- private:
+   private:
     // Stub type.
     const Stub_type stub_type_;
     // If this is a local symbol, this is the index in the defining object.
@@ -645,7 +645,7 @@ Reloc_stub<size, big_endian>::stub_type_for_reloc(
       branch_offset = dest - location;
       break;
     default:
-      gold_assert(false);
+      gold_unreachable();
     }
 
   if (aarch64_valid_branch_offset_p(branch_offset))
@@ -1762,6 +1762,15 @@ class Target_aarch64 : public Sized_target<size, big_endian>
   do_plt_address_for_local(const Relobj* relobj, unsigned int symndx) const
   { return this->plt_section()->address_for_local(relobj, symndx); }
 
+  // This function should be defined in targets that can use relocation
+  // types to determine (implemented in local_reloc_may_be_function_pointer
+  // and global_reloc_may_be_function_pointer)
+  // if a function's pointer is taken.  ICF uses this in safe mode to only
+  // fold those functions whose pointer is defintely not taken.
+  bool
+  do_can_check_for_function_pointers() const
+  { return true; }
+
   // Return the number of entries in the PLT.
   unsigned int
   plt_entry_count() const;
@@ -1959,6 +1968,10 @@ class Target_aarch64 : public Sized_target<size, big_endian>
     void
     check_non_pic(Relobj*, unsigned int r_type);
 
+    bool
+    reloc_needs_plt_for_ifunc(Sized_relobj_file<size, big_endian>*,
+			      unsigned int r_type);
+
     // Whether we have issued an error about a non-PIC compilation.
     bool issued_non_pic_error_;
   };
@@ -1998,6 +2011,15 @@ class Target_aarch64 : public Sized_target<size, big_endian>
 
     inline typename AArch64_relocate_functions<size, big_endian>::Status
     tls_gd_to_le(
+		 const Relocate_info<size, big_endian>*,
+		 Target_aarch64<size, big_endian>*,
+		 const elfcpp::Rela<size, big_endian>&,
+		 unsigned int,
+		 unsigned char*,
+		 const Symbol_value<size>*);
+
+    inline typename AArch64_relocate_functions<size, big_endian>::Status
+    tls_ld_to_le(
 		 const Relocate_info<size, big_endian>*,
 		 Target_aarch64<size, big_endian>*,
 		 const elfcpp::Rela<size, big_endian>&,
@@ -2206,7 +2228,7 @@ const Target::Target_info Target_aarch64<64, false>::aarch64_info =
   false,		// has_resolve
   false,		// has_code_fill
   true,			// is_default_stack_executable
-  false,		// can_icf_inline_merge_sections
+  true,			// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/lib/ld.so.1",	// program interpreter
   0x400000,		// default_text_segment_address
@@ -2260,7 +2282,7 @@ const Target::Target_info Target_aarch64<64, true>::aarch64_info =
   false,		// has_resolve
   false,		// has_code_fill
   true,			// is_default_stack_executable
-  false,		// can_icf_inline_merge_sections
+  true,			// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/lib/ld.so.1",	// program interpreter
   0x400000,		// default_text_segment_address
@@ -2530,7 +2552,7 @@ Target_aarch64<size, big_endian>::scan_reloc_for_stub(
       destination = value + addend;
       break;
     default:
-      gold_assert(false);
+      gold_unreachable();
     }
 
   typename The_reloc_stub::Stub_type stub_type = The_reloc_stub::
@@ -2838,7 +2860,7 @@ relocate_stub(The_reloc_stub* stub,
       break;
 
     default:
-      gold_assert(false);
+      gold_unreachable();
     }
 }
 
@@ -2861,7 +2883,7 @@ class Output_data_plt_aarch64 : public Output_section_data
 			  Output_data_got_aarch64<size, big_endian>* got,
 			  Output_data_space* got_plt,
 			  Output_data_space* got_irelative)
-    : Output_section_data(addralign), tlsdesc_rel_(NULL),
+    : Output_section_data(addralign), tlsdesc_rel_(NULL), irelative_rel_(NULL),
       got_(got), got_plt_(got_plt), got_irelative_(got_irelative),
       count_(0), irelative_count_(0), tlsdesc_got_offset_(-1U)
   { this->init(layout); }
@@ -2872,7 +2894,18 @@ class Output_data_plt_aarch64 : public Output_section_data
 
   // Add an entry to the PLT.
   void
-  add_entry(Symbol* gsym);
+  add_entry(Symbol_table*, Layout*, Symbol* gsym);
+
+  // Add an entry to the PLT for a local STT_GNU_IFUNC symbol.
+  unsigned int
+  add_local_ifunc_entry(Symbol_table* symtab, Layout*,
+			Sized_relobj_file<size, big_endian>* relobj,
+			unsigned int local_sym_index);
+
+  // Add the relocation for a PLT entry.
+  void
+  add_relocation(Symbol_table*, Layout*, Symbol* gsym,
+		 unsigned int got_offset);
 
   // Add the reserved TLSDESC_PLT entry to the PLT.
   void
@@ -3081,30 +3114,98 @@ Output_data_plt_aarch64<size, big_endian>::do_adjust_output_section(
 
 template<int size, bool big_endian>
 void
-Output_data_plt_aarch64<size, big_endian>::add_entry(Symbol* gsym)
+Output_data_plt_aarch64<size, big_endian>::add_entry(Symbol_table* symtab,
+    Layout* layout, Symbol* gsym)
 {
   gold_assert(!gsym->has_plt_offset());
 
-  gsym->set_plt_offset((this->count_) * this->get_plt_entry_size()
-		       + this->first_plt_entry_offset());
+  unsigned int* pcount;
+  unsigned int plt_reserved;
+  Output_section_data_build* got;
 
-  ++this->count_;
+  if (gsym->type() == elfcpp::STT_GNU_IFUNC
+      && gsym->can_use_relative_reloc(false))
+    {
+      pcount = &this->irelative_count_;
+      plt_reserved = 0;
+      got = this->got_irelative_;
+    }
+  else
+    {
+      pcount = &this->count_;
+      plt_reserved = this->first_plt_entry_offset();
+      got = this->got_plt_;
+    }
 
-  section_offset_type got_offset = this->got_plt_->current_data_size();
+  gsym->set_plt_offset((*pcount) * this->get_plt_entry_size()
+		       + plt_reserved);
+
+  ++*pcount;
+
+  section_offset_type got_offset = got->current_data_size();
 
   // Every PLT entry needs a GOT entry which points back to the PLT
   // entry (this will be changed by the dynamic linker, normally
   // lazily when the function is called).
-  this->got_plt_->set_current_data_size(got_offset + size / 8);
+  got->set_current_data_size(got_offset + size / 8);
 
   // Every PLT entry needs a reloc.
-  gsym->set_needs_dynsym_entry();
-  this->rel_->add_global(gsym, elfcpp::R_AARCH64_JUMP_SLOT,
-			 this->got_plt_, got_offset, 0);
+  this->add_relocation(symtab, layout, gsym, got_offset);
 
   // Note that we don't need to save the symbol. The contents of the
   // PLT are independent of which symbols are used. The symbols only
   // appear in the relocations.
+}
+
+// Add an entry to the PLT for a local STT_GNU_IFUNC symbol.  Return
+// the PLT offset.
+
+template<int size, bool big_endian>
+unsigned int
+Output_data_plt_aarch64<size, big_endian>::add_local_ifunc_entry(
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<size, big_endian>* relobj,
+    unsigned int local_sym_index)
+{
+  unsigned int plt_offset = this->irelative_count_ * this->get_plt_entry_size();
+  ++this->irelative_count_;
+
+  section_offset_type got_offset = this->got_irelative_->current_data_size();
+
+  // Every PLT entry needs a GOT entry which points back to the PLT
+  // entry.
+  this->got_irelative_->set_current_data_size(got_offset + size / 8);
+
+  // Every PLT entry needs a reloc.
+  Reloc_section* rela = this->rela_irelative(symtab, layout);
+  rela->add_symbolless_local_addend(relobj, local_sym_index,
+				    elfcpp::R_AARCH64_IRELATIVE,
+				    this->got_irelative_, got_offset, 0);
+
+  return plt_offset;
+}
+
+// Add the relocation for a PLT entry.
+
+template<int size, bool big_endian>
+void
+Output_data_plt_aarch64<size, big_endian>::add_relocation(
+    Symbol_table* symtab, Layout* layout, Symbol* gsym, unsigned int got_offset)
+{
+  if (gsym->type() == elfcpp::STT_GNU_IFUNC
+      && gsym->can_use_relative_reloc(false))
+    {
+      Reloc_section* rela = this->rela_irelative(symtab, layout);
+      rela->add_symbolless_global_addend(gsym, elfcpp::R_AARCH64_IRELATIVE,
+					 this->got_irelative_, got_offset, 0);
+    }
+  else
+    {
+      gsym->set_needs_dynsym_entry();
+      this->rel_->add_global(gsym, elfcpp::R_AARCH64_JUMP_SLOT, this->got_plt_,
+			     got_offset, 0);
+    }
 }
 
 // Return where the TLSDESC relocations should go, creating it if
@@ -3588,8 +3689,12 @@ Output_data_plt_aarch64<size, big_endian>::do_write(Output_file* of)
   unsigned char* const oview = of->get_output_view(offset, oview_size);
 
   const off_t got_file_offset = this->got_plt_->offset();
+  gold_assert(got_file_offset + this->got_plt_->data_size()
+	      == this->got_irelative_->offset());
+
   const section_size_type got_size =
-    convert_to_section_size_type(this->got_plt_->data_size());
+      convert_to_section_size_type(this->got_plt_->data_size()
+				   + this->got_irelative_->data_size());
   unsigned char* const got_view = of->get_output_view(got_file_offset,
 						      got_size);
 
@@ -3697,11 +3802,12 @@ class AArch64_relocate_functions
   typedef typename The_reloc_stub::Stub_type The_reloc_stub_type;
   typedef Stub_table<size, big_endian> The_stub_table;
   typedef elfcpp::Rela<size, big_endian> The_rela;
+  typedef typename elfcpp::Swap<size, big_endian>::Valtype AArch64_valtype;
 
   // Return the page address of the address.
   // Page(address) = address & ~0xFFF
 
-  static inline typename elfcpp::Swap<size, big_endian>::Valtype
+  static inline AArch64_valtype
   Page(Address address)
   {
     return (address & (~static_cast<Address>(0xFFF)));
@@ -3714,7 +3820,7 @@ class AArch64_relocate_functions
   template<int valsize>
   static inline void
   update_view(unsigned char* view,
-	      typename elfcpp::Swap<size, big_endian>::Valtype immed,
+	      AArch64_valtype immed,
 	      elfcpp::Elf_Xword doffset,
 	      elfcpp::Elf_Xword dst_mask)
   {
@@ -3736,8 +3842,8 @@ class AArch64_relocate_functions
   static inline void
   update_view_two_parts(
     unsigned char* view,
-    typename elfcpp::Swap<size, big_endian>::Valtype immed1,
-    typename elfcpp::Swap<size, big_endian>::Valtype immed2,
+    AArch64_valtype immed1,
+    AArch64_valtype immed2,
     elfcpp::Elf_Xword doffset1,
     elfcpp::Elf_Xword doffset2,
     elfcpp::Elf_Xword dst_mask)
@@ -3751,17 +3857,13 @@ class AArch64_relocate_functions
 			   (immed2 << doffset2)));
   }
 
-  // Update adr or adrp instruction with [32:12] of X.
+  // Update adr or adrp instruction with immed.
   // In adr and adrp: [30:29] immlo   [23:5] immhi
 
   static inline void
-  update_adr(unsigned char* view,
-	     typename elfcpp::Swap<size, big_endian>::Valtype x,
-	     const AArch64_reloc_property* /* reloc_property */)
+  update_adr(unsigned char* view, AArch64_valtype immed)
   {
     elfcpp::Elf_Xword dst_mask = (0x3 << 29) | (0x7ffff << 5);
-    typename elfcpp::Swap<32, big_endian>::Valtype immed =
-      (x >> 12) & 0x1fffff;
     This::template update_view_two_parts<32>(
       view,
       immed & 0x3,
@@ -3774,9 +3876,10 @@ class AArch64_relocate_functions
   // Update movz/movn instruction with bits immed.
   // Set instruction to movz if is_movz is true, otherwise set instruction
   // to movn.
+
   static inline void
   update_movnz(unsigned char* view,
-	       typename elfcpp::Swap<size, big_endian>::Valtype immed,
+	       AArch64_valtype immed,
 	       bool is_movz)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
@@ -3789,15 +3892,42 @@ class AArch64_relocate_functions
 	aarch64_howto[AArch64_reloc_property::INST_MOVW].dst_mask;
 
     // Clear immediate fields and opc code.
-    val &= ~(dst_mask | (0x11 << 29));
+    val &= ~(dst_mask | (0x3 << 29));
 
     // Set instruction to movz or movn.
     // movz: [30:29] is 10   movn: [30:29] is 00
     if (is_movz)
-      val |= (0x10 << 29);
+      val |= (0x2 << 29);
 
     elfcpp::Swap<32, big_endian>::writeval(wv,
       static_cast<Valtype>(val | (immed << doffset)));
+  }
+
+  // Update selected bits in text.
+
+  template<int valsize>
+  static inline typename This::Status
+  reloc_common(unsigned char* view, Address x,
+		const AArch64_reloc_property* reloc_property)
+  {
+    // Select bits from X.
+    Address immed = reloc_property->select_x_value(x);
+
+    // Update view.
+    const AArch64_reloc_property::Reloc_inst inst =
+      reloc_property->reloc_inst();
+    // If it is a data relocation or instruction has 2 parts of immediate
+    // fields, you should not call pcrela_general.
+    gold_assert(aarch64_howto[inst].doffset2 == -1 &&
+		aarch64_howto[inst].doffset != -1);
+    This::template update_view<valsize>(view, immed,
+					aarch64_howto[inst].doffset,
+					aarch64_howto[inst].dst_mask);
+
+    // Do check overflow or alignment if needed.
+    return (reloc_property->checkup_x_value(x)
+	    ? This::STATUS_OKAY
+	    : This::STATUS_OVERFLOW);
   }
 
  public:
@@ -3809,7 +3939,7 @@ class AArch64_relocate_functions
   rela_ua(unsigned char* view,
 	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
-	  typename elfcpp::Swap<size, big_endian>::Valtype addend,
+	  AArch64_valtype addend,
 	  const AArch64_reloc_property* reloc_property)
   {
     typedef typename elfcpp::Swap_unaligned<valsize, big_endian>::Valtype
@@ -3830,7 +3960,7 @@ class AArch64_relocate_functions
   pcrela_ua(unsigned char* view,
 	    const Sized_relobj_file<size, big_endian>* object,
 	    const Symbol_value<size>* psymval,
-	    typename elfcpp::Swap<size, big_endian>::Valtype addend,
+	    AArch64_valtype addend,
 	    Address address,
 	    const AArch64_reloc_property* reloc_property)
   {
@@ -3852,15 +3982,13 @@ class AArch64_relocate_functions
     unsigned char* view,
     const Sized_relobj_file<size, big_endian>* object,
     const Symbol_value<size>* psymval,
-    typename elfcpp::Swap<size, big_endian>::Valtype addend,
+    AArch64_valtype addend,
     const AArch64_reloc_property* reloc_property)
   {
-    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype
-      Valtype;
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Address x = psymval->value(object, addend);
-    elfcpp::Swap<valsize, big_endian>::writeval(wv,
-      static_cast<Valtype>(x));
+    elfcpp::Swap<valsize, big_endian>::writeval(wv,static_cast<Valtype>(x));
     return (reloc_property->checkup_x_value(x)
 	    ? This::STATUS_OKAY
 	    : This::STATUS_OVERFLOW);
@@ -3874,30 +4002,12 @@ class AArch64_relocate_functions
   rela_general(unsigned char* view,
 	       const Sized_relobj_file<size, big_endian>* object,
 	       const Symbol_value<size>* psymval,
-	       typename elfcpp::Swap<size, big_endian>::Valtype addend,
+	       AArch64_valtype addend,
 	       const AArch64_reloc_property* reloc_property)
   {
     // Calculate relocation.
     Address x = psymval->value(object, addend);
-
-    // Select bits from X.
-    Address immed = reloc_property->select_x_value(x);
-
-    // Update view.
-    const AArch64_reloc_property::Reloc_inst inst =
-	reloc_property->reloc_inst();
-    // If it is a data relocation or instruction has 2 parts of immediate
-    // fields, you should not call rela_general.
-    gold_assert(aarch64_howto[inst].doffset2 == -1 &&
-		aarch64_howto[inst].doffset != -1);
-    This::template update_view<valsize>(view, immed,
-					aarch64_howto[inst].doffset,
-					aarch64_howto[inst].dst_mask);
-
-    // Do check overflow or alignment if needed.
-    return (reloc_property->checkup_x_value(x)
-	    ? This::STATUS_OKAY
-	    : This::STATUS_OVERFLOW);
+    return This::template reloc_common<valsize>(view, x, reloc_property);
   }
 
   // Do relocate. Update selected bits in text.
@@ -3907,31 +4017,13 @@ class AArch64_relocate_functions
   static inline typename This::Status
   rela_general(
     unsigned char* view,
-    typename elfcpp::Swap<size, big_endian>::Valtype s,
-    typename elfcpp::Swap<size, big_endian>::Valtype addend,
+    AArch64_valtype s,
+    AArch64_valtype addend,
     const AArch64_reloc_property* reloc_property)
   {
     // Calculate relocation.
     Address x = s + addend;
-
-    // Select bits from X.
-    Address immed = reloc_property->select_x_value(x);
-
-    // Update view.
-    const AArch64_reloc_property::Reloc_inst inst =
-	reloc_property->reloc_inst();
-    // If it is a data relocation or instruction has 2 parts of immediate
-    // fields, you should not call rela_general.
-    gold_assert(aarch64_howto[inst].doffset2 == -1 &&
-		aarch64_howto[inst].doffset != -1);
-    This::template update_view<valsize>(view, immed,
-					aarch64_howto[inst].doffset,
-					aarch64_howto[inst].dst_mask);
-
-    // Do check overflow or alignment if needed.
-    return (reloc_property->checkup_x_value(x)
-	    ? This::STATUS_OKAY
-	    : This::STATUS_OVERFLOW);
+    return This::template reloc_common<valsize>(view, x, reloc_property);
   }
 
   // Do address relative relocate. Update selected bits in text.
@@ -3943,31 +4035,34 @@ class AArch64_relocate_functions
     unsigned char* view,
     const Sized_relobj_file<size, big_endian>* object,
     const Symbol_value<size>* psymval,
-    typename elfcpp::Swap<size, big_endian>::Valtype addend,
+    AArch64_valtype addend,
     Address address,
     const AArch64_reloc_property* reloc_property)
   {
     // Calculate relocation.
     Address x = psymval->value(object, addend) - address;
+    return This::template reloc_common<valsize>(view, x, reloc_property);
+  }
 
-    // Select bits from X.
-    Address immed = reloc_property->select_x_value(x);
 
-    // Update view.
-    const AArch64_reloc_property::Reloc_inst inst =
-      reloc_property->reloc_inst();
-    // If it is a data relocation or instruction has 2 parts of immediate
-    // fields, you should not call pcrela_general.
-    gold_assert(aarch64_howto[inst].doffset2 == -1 &&
-		aarch64_howto[inst].doffset != -1);
-    This::template update_view<valsize>(view, immed,
-					aarch64_howto[inst].doffset,
-					aarch64_howto[inst].dst_mask);
+  // Calculate (S + A) - address, update adr instruction.
 
-    // Do check overflow or alignment if needed.
-    return (reloc_property->checkup_x_value(x)
-	    ? This::STATUS_OKAY
-	    : This::STATUS_OVERFLOW);
+  static inline typename This::Status
+  adr(unsigned char* view,
+      const Sized_relobj_file<size, big_endian>* object,
+      const Symbol_value<size>* psymval,
+      Address addend,
+      Address address,
+      const AArch64_reloc_property* /* reloc_property */)
+  {
+    AArch64_valtype x = psymval->value(object, addend) - address;
+    // Pick bits [20:0] of X.
+    AArch64_valtype immed = x & 0x1fffff;
+    update_adr(view, immed);
+    // Check -2^20 <= X < 2^20
+    return (size == 64 && Bits<21>::has_overflow((x))
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
   }
 
   // Calculate PG(S+A) - PG(address), update adrp instruction.
@@ -3979,9 +4074,10 @@ class AArch64_relocate_functions
     Address sa,
     Address address)
   {
-    typename elfcpp::Swap<size, big_endian>::Valtype x =
-	This::Page(sa) - This::Page(address);
-    update_adr(view, x, NULL);
+    AArch64_valtype x = This::Page(sa) - This::Page(address);
+    // Pick [32:12] of X.
+    AArch64_valtype immed = (x >> 12) & 0x1fffff;
+    update_adr(view, immed);
     // Check -2^32 <= X < 2^32
     return (size == 64 && Bits<33>::has_overflow((x))
 	    ? This::STATUS_OVERFLOW
@@ -4000,9 +4096,10 @@ class AArch64_relocate_functions
        const AArch64_reloc_property* reloc_property)
   {
     Address sa = psymval->value(object, addend);
-    typename elfcpp::Swap<size, big_endian>::Valtype x =
-	This::Page(sa) - This::Page(address);
-    update_adr(view, x, reloc_property);
+    AArch64_valtype x = This::Page(sa) - This::Page(address);
+    // Pick [32:12] of X.
+    AArch64_valtype immed = (x >> 12) & 0x1fffff;
+    update_adr(view, immed);
     return (reloc_property->checkup_x_value(x)
 	    ? This::STATUS_OKAY
 	    : This::STATUS_OVERFLOW);
@@ -4016,15 +4113,21 @@ class AArch64_relocate_functions
 
   static inline typename This::Status
   movnz(unsigned char* view,
-	typename elfcpp::Swap<size, big_endian>::Valtype x,
+	AArch64_valtype x,
 	const AArch64_reloc_property* reloc_property)
   {
     // Select bits from X.
-    Address immed = reloc_property->select_x_value(x);
-    bool is_movz = true;
-    if (static_cast<int64_t>(x) < 0)
+    Address immed;
+    bool is_movz;
+    typedef typename elfcpp::Elf_types<size>::Elf_Swxword SignedW;
+    if (static_cast<SignedW>(x) >= 0)
       {
-	immed = ~immed;
+	immed = reloc_property->select_x_value(x);
+        is_movz = true;
+      }
+    else
+      {
+	immed = reloc_property->select_x_value(~x);;
 	is_movz = false;
       }
 
@@ -4433,6 +4536,15 @@ Target_aarch64<size, big_endian>::optimize_tls_reloc(bool is_final,
 	return tls::TLSOPT_TO_LE;
       return tls::TLSOPT_TO_IE;
 
+    case elfcpp::R_AARCH64_TLSLD_ADR_PAGE21:
+    case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+      // These are Local-Dynamic, which refer to local symbols in the
+      // dynamic TLS block. Since we know that we generating an
+      // executable, we can switch to Local-Exec.
+      return tls::TLSOPT_TO_LE;
+
     case elfcpp::R_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
     case elfcpp::R_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
@@ -4472,8 +4584,11 @@ Target_aarch64<size, big_endian>::Scan::possible_function_pointer_reloc(
 {
   switch (r_type)
     {
-    case elfcpp::R_AARCH64_ABS64:
-    //TODO
+    case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:
+    case elfcpp::R_AARCH64_ADR_PREL_PG_HI21_NC:
+    case elfcpp::R_AARCH64_ADD_ABS_LO12_NC:
+    case elfcpp::R_AARCH64_ADR_GOT_PAGE:
+    case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
       {
 	return true;
       }
@@ -4498,9 +4613,7 @@ Target_aarch64<size, big_endian>::Scan::local_reloc_may_be_function_pointer(
   unsigned int r_type,
   const elfcpp::Sym<size, big_endian>&)
 {
-  // When building a shared library, do not fold any local symbols as it is
-  // not possible to distinguish pointer taken versus a call by looking at
-  // the relocation types.
+  // When building a shared library, do not fold any local symbols.
   return (parameters->options().shared()
 	  || possible_function_pointer_reloc(r_type));
 }
@@ -4586,6 +4699,29 @@ Target_aarch64<size, big_endian>::Scan::check_non_pic(Relobj* object,
   return;
 }
 
+// Return whether we need to make a PLT entry for a relocation of the
+// given type against a STT_GNU_IFUNC symbol.
+
+template<int size, bool big_endian>
+bool
+Target_aarch64<size, big_endian>::Scan::reloc_needs_plt_for_ifunc(
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int r_type)
+{
+  const AArch64_reloc_property* arp =
+      aarch64_reloc_property_table->get_reloc_property(r_type);
+  gold_assert(arp != NULL);
+
+  int flags = arp->reference_flags();
+  if (flags & Symbol::TLS_REF)
+    {
+      gold_error(_("%s: unsupported TLS reloc %s for IFUNC symbol"),
+		 object->name().c_str(), arp->name().c_str());
+      return false;
+    }
+  return flags != 0;
+}
+
 // Scan a relocation for a local symbol.
 
 template<int size, bool big_endian>
@@ -4599,7 +4735,7 @@ Target_aarch64<size, big_endian>::Scan::local(
     Output_section* output_section,
     const elfcpp::Rela<size, big_endian>& rela,
     unsigned int r_type,
-    const elfcpp::Sym<size, big_endian>& /* lsym */,
+    const elfcpp::Sym<size, big_endian>& lsym,
     bool is_discarded)
 {
   if (is_discarded)
@@ -4610,6 +4746,11 @@ Target_aarch64<size, big_endian>::Scan::local(
   Output_data_got_aarch64<size, big_endian>* got =
       target->got_section(symtab, layout);
   unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+
+  // A local STT_GNU_IFUNC symbol may require a PLT entry.
+  bool is_ifunc = lsym.get_st_type() == elfcpp::STT_GNU_IFUNC;
+  if (is_ifunc && this->reloc_needs_plt_for_ifunc(object, r_type))
+    target->make_local_ifunc_plt_entry(symtab, layout, object, r_sym);
 
   switch (r_type)
     {
@@ -4634,7 +4775,7 @@ Target_aarch64<size, big_endian>::Scan::local(
 				       data_shndx,
 				       rela.get_r_offset(),
 				       rela.get_r_addend(),
-				       false /* is ifunc */);
+				       is_ifunc);
 	}
       break;
 
@@ -4725,6 +4866,25 @@ Target_aarch64<size, big_endian>::Scan::local(
       }
       break;
 
+    case elfcpp::R_AARCH64_TLSLD_ADR_PAGE21:
+    case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:
+      {
+	tls::Tls_optimization tlsopt = Target_aarch64<size, big_endian>::
+	    optimize_tls_reloc(!parameters->options().shared(), r_type);
+	if (tlsopt == tls::TLSOPT_NONE)
+	  {
+	    // Create a GOT entry for the module index.
+	    target->got_mod_index_entry(symtab, layout, object);
+	  }
+	else if (tlsopt != tls::TLSOPT_TO_LE)
+	  unsupported_reloc_local(object, r_type);
+      }
+      break;
+
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+      break;
+
     case elfcpp::R_AARCH64_TLSDESC_ADR_PAGE21:
     case elfcpp::R_AARCH64_TLSDESC_LD64_LO12:
     case elfcpp::R_AARCH64_TLSDESC_ADD_LO12:
@@ -4801,6 +4961,11 @@ Target_aarch64<size, big_endian>::Scan::global(
     unsigned int r_type,
     Symbol* gsym)
 {
+  // A STT_GNU_IFUNC symbol may require a PLT entry.
+  if (gsym->type() == elfcpp::STT_GNU_IFUNC
+      && this->reloc_needs_plt_for_ifunc(object, r_type))
+    target->make_plt_entry(symtab, layout, gsym);
+
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>
     Reloc_section;
   const AArch64_reloc_property* arp =
@@ -4832,6 +4997,25 @@ Target_aarch64<size, big_endian>::Scan::global(
 	      {
 		target->copy_reloc(symtab, layout, object,
 				   data_shndx, output_section, gsym, rela);
+	      }
+	    else if (r_type == elfcpp::R_AARCH64_ABS64
+		     && gsym->type() == elfcpp::STT_GNU_IFUNC
+		     && gsym->can_use_relative_reloc(false)
+		     && !gsym->is_from_dynobj()
+		     && !gsym->is_undefined()
+		     && !gsym->is_preemptible())
+	      {
+		// Use an IRELATIVE reloc for a locally defined STT_GNU_IFUNC
+		// symbol. This makes a function address in a PIE executable
+		// match the address in a shared library that it links against.
+		Reloc_section* rela_dyn =
+		    target->rela_irelative_section(layout);
+		unsigned int r_type = elfcpp::R_AARCH64_IRELATIVE;
+		rela_dyn->add_symbolless_global_addend(gsym, r_type,
+						       output_section, object,
+						       data_shndx,
+						       rela.get_r_offset(),
+						       rela.get_r_addend());
 	      }
 	    else if (r_type == elfcpp::R_AARCH64_ABS64
 		     && gsym->can_use_relative_reloc(false))
@@ -4905,21 +5089,54 @@ Target_aarch64<size, big_endian>::Scan::global(
 	  target->got_section(symtab, layout);
 	if (gsym->final_value_is_known())
 	  {
-	    got->add_global(gsym, GOT_TYPE_STANDARD);
+	    // For a STT_GNU_IFUNC symbol we want the PLT address.
+	    if (gsym->type() == elfcpp::STT_GNU_IFUNC)
+	      got->add_global_plt(gsym, GOT_TYPE_STANDARD);
+	    else
+	      got->add_global(gsym, GOT_TYPE_STANDARD);
 	  }
 	else
 	  {
+	    // If this symbol is not fully resolved, we need to add a dynamic
+	    // relocation for it.
 	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+
+	    // Use a GLOB_DAT rather than a RELATIVE reloc if:
+	    //
+	    // 1) The symbol may be defined in some other module.
+	    // 2) We are building a shared library and this is a protected
+	    // symbol; using GLOB_DAT means that the dynamic linker can use
+	    // the address of the PLT in the main executable when appropriate
+	    // so that function address comparisons work.
+	    // 3) This is a STT_GNU_IFUNC symbol in position dependent code,
+	    // again so that function address comparisons work.
 	    if (gsym->is_from_dynobj()
 		|| gsym->is_undefined()
 		|| gsym->is_preemptible()
 		|| (gsym->visibility() == elfcpp::STV_PROTECTED
-		    && parameters->options().shared()))
+		    && parameters->options().shared())
+		|| (gsym->type() == elfcpp::STT_GNU_IFUNC
+		    && parameters->options().output_is_position_independent()))
 	      got->add_global_with_rel(gsym, GOT_TYPE_STANDARD,
 				       rela_dyn, elfcpp::R_AARCH64_GLOB_DAT);
 	    else
 	      {
-		if (got->add_global(gsym, GOT_TYPE_STANDARD))
+		// For a STT_GNU_IFUNC symbol we want to write the PLT
+		// offset into the GOT, so that function pointer
+		// comparisons work correctly.
+		bool is_new;
+		if (gsym->type() != elfcpp::STT_GNU_IFUNC)
+		  is_new = got->add_global(gsym, GOT_TYPE_STANDARD);
+		else
+		  {
+		    is_new = got->add_global_plt(gsym, GOT_TYPE_STANDARD);
+		    // Tell the dynamic linker to use the PLT address
+		    // when resolving relocations.
+		    if (gsym->is_from_dynobj()
+			&& !parameters->options().shared())
+		      gsym->set_needs_dynsym_value();
+		  }
+		if (is_new)
 		  {
 		    rela_dyn->add_global_relative(
 			gsym, elfcpp::R_AARCH64_RELATIVE,
@@ -4974,10 +5191,29 @@ Target_aarch64<size, big_endian>::Scan::global(
       }
       break;
 
+    case elfcpp::R_AARCH64_TLSLD_ADR_PAGE21:
+    case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:  // Local dynamic
+      {
+	tls::Tls_optimization tlsopt = Target_aarch64<size, big_endian>::
+	    optimize_tls_reloc(!parameters->options().shared(), r_type);
+	if (tlsopt == tls::TLSOPT_NONE)
+	  {
+	    // Create a GOT entry for the module index.
+	    target->got_mod_index_entry(symtab, layout, object);
+	  }
+	else if (tlsopt != tls::TLSOPT_TO_LE)
+	  unsupported_reloc_local(object, r_type);
+      }
+      break;
+
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:  // Other local dynamic
+      break;
+
     case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:  // Initial executable
       {
-	tls::Tls_optimization tlsopt =Target_aarch64<size, big_endian>::
+	tls::Tls_optimization tlsopt = Target_aarch64<size, big_endian>::
 	  optimize_tls_reloc(gsym->final_value_is_known(), r_type);
 	if (tlsopt == tls::TLSOPT_TO_LE)
 	  break;
@@ -5113,7 +5349,26 @@ Target_aarch64<size, big_endian>::make_plt_entry(
   if (this->plt_ == NULL)
     this->make_plt_section(symtab, layout);
 
-  this->plt_->add_entry(gsym);
+  this->plt_->add_entry(symtab, layout, gsym);
+}
+
+// Make a PLT entry for a local STT_GNU_IFUNC symbol.
+
+template<int size, bool big_endian>
+void
+Target_aarch64<size, big_endian>::make_local_ifunc_plt_entry(
+    Symbol_table* symtab, Layout* layout,
+    Sized_relobj_file<size, big_endian>* relobj,
+    unsigned int local_sym_index)
+{
+  if (relobj->local_has_plt_offset(local_sym_index))
+    return;
+  if (this->plt_ == NULL)
+    this->make_plt_section(symtab, layout);
+  unsigned int plt_offset = this->plt_->add_local_ifunc_entry(symtab, layout,
+							      relobj,
+							      local_sym_index);
+  relobj->set_local_plt_offset(local_sym_index, plt_offset);
 }
 
 template<int size, bool big_endian>
@@ -5441,6 +5696,16 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 	view, object, psymval, addend, address, reloc_property);
       break;
 
+    case elfcpp::R_AARCH64_LD_PREL_LO19:
+      reloc_status = Reloc::template pcrela_general<32>(
+	  view, object, psymval, addend, address, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_ADR_PREL_LO21:
+      reloc_status = Reloc::adr(view, object, psymval, addend,
+				address, reloc_property);
+      break;
+
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21_NC:
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:
       reloc_status = Reloc::adrp(view, object, psymval, addend, address,
@@ -5498,6 +5763,10 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 
     case elfcpp::R_AARCH64_TLSGD_ADR_PAGE21:
     case elfcpp::R_AARCH64_TLSGD_ADD_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLD_ADR_PAGE21:
+    case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case elfcpp::R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
@@ -5640,12 +5909,87 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 		break;
 
 	      default:
-		gold_assert(false);
+		gold_unreachable();
 	      }
 	  }
 	gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			       _("unsupported gd_to_ie relaxation on %u"),
 			       r_type);
+      }
+      break;
+
+    case elfcpp::R_AARCH64_TLSLD_ADR_PAGE21:
+    case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:  // Local-dynamic
+      {
+	if (tlsopt == tls::TLSOPT_TO_LE)
+	  {
+	    if (tls_segment == NULL)
+	      {
+		gold_assert(parameters->errors()->error_count() > 0
+			    || issue_undefined_symbol_error(gsym));
+		return aarch64_reloc_funcs::STATUS_BAD_RELOC;
+	      }
+	    return this->tls_ld_to_le(relinfo, target, rela, r_type, view,
+				      psymval);
+	  }
+
+	gold_assert(tlsopt == tls::TLSOPT_NONE);
+	// Relocate the field with the offset of the GOT entry for
+	// the module index.
+	typename elfcpp::Elf_types<size>::Elf_Addr got_entry_address;
+	got_entry_address = (target->got_mod_index_entry(NULL, NULL, NULL) +
+			     target->got_->address());
+
+	switch (r_type)
+	  {
+	  case elfcpp::R_AARCH64_TLSLD_ADR_PAGE21:
+	    return aarch64_reloc_funcs::adrp(
+	      view, got_entry_address + addend, address);
+	    break;
+
+	  case elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC:
+	    return aarch64_reloc_funcs::template rela_general<32>(
+	      view, got_entry_address, addend, reloc_property);
+	    break;
+
+	  default:
+	    gold_unreachable();
+	  }
+      }
+      break;
+
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:  // Other local-dynamic
+      {
+	AArch64_address value = psymval->value(object, 0);
+	if (tlsopt == tls::TLSOPT_TO_LE)
+	  {
+	    if (tls_segment == NULL)
+	      {
+		gold_assert(parameters->errors()->error_count() > 0
+			    || issue_undefined_symbol_error(gsym));
+		return aarch64_reloc_funcs::STATUS_BAD_RELOC;
+	      }
+	  // If building executable, _TLS_MODULE_BASE_ points to segment
+	  // end. Thus we must subtract it from value.
+	  value -= tls_segment->memsz();
+	  }
+	switch (r_type)
+	  {
+	  case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G1:
+	    return aarch64_reloc_funcs::movnz(view, value + addend,
+					      reloc_property);
+	    break;
+
+	  case elfcpp::R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+	    return aarch64_reloc_funcs::template rela_general<32>(
+		view, value, addend, reloc_property);
+	    break;
+
+	  default:
+	    gold_unreachable();
+	  }
+	// We should never reach here.
       }
       break;
 
@@ -5692,7 +6036,7 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 	    return aarch64_reloc_funcs::template rela_general<32>(
 	      view, got_entry_address, addend, reloc_property);
 	  default:
-	    gold_assert(false);
+	    gold_unreachable();
 	  }
       }
       // We shall never reach here.
@@ -5918,6 +6262,106 @@ Target_aarch64<size, big_endian>::Relocate::tls_gd_to_le(
 template<int size, bool big_endian>
 inline
 typename AArch64_relocate_functions<size, big_endian>::Status
+Target_aarch64<size, big_endian>::Relocate::tls_ld_to_le(
+	     const Relocate_info<size, big_endian>* relinfo,
+	     Target_aarch64<size, big_endian>* target,
+	     const elfcpp::Rela<size, big_endian>& rela,
+	     unsigned int r_type,
+	     unsigned char* view,
+	     const Symbol_value<size>* psymval)
+{
+  typedef AArch64_relocate_functions<size, big_endian> aarch64_reloc_funcs;
+  typedef typename elfcpp::Swap<32, big_endian>::Valtype Insntype;
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr AArch64_address;
+
+  Insntype* ip = reinterpret_cast<Insntype*>(view);
+  Insntype insn1 = elfcpp::Swap<32, big_endian>::readval(ip);
+  Insntype insn2 = elfcpp::Swap<32, big_endian>::readval(ip + 1);
+  Insntype insn3 = elfcpp::Swap<32, big_endian>::readval(ip + 2);
+
+  if (r_type == elfcpp::R_AARCH64_TLSLD_ADD_LO12_NC)
+    {
+      // This is the 2nd relocs, optimization should already have been
+      // done.
+      gold_assert((insn1 & 0xfff00000) == 0x91400000);
+      return aarch64_reloc_funcs::STATUS_OKAY;
+    }
+
+  // The original sequence is -
+  //   90000000        adrp    x0, 0 <main>
+  //   91000000        add     x0, x0, #0x0
+  //   94000000        bl      0 <__tls_get_addr>
+  // optimized to sequence -
+  //   d53bd040        mrs     x0, tpidr_el0
+  //   91400000        add     x0, x0, #0x0, lsl #12
+  //   91000000        add     x0, x0, #0x0
+
+  // Unlike tls_ie_to_le, we change the 3 insns in one function call when we
+  // encounter the first relocation "R_AARCH64_TLSLD_ADR_PAGE21". Because we
+  // have to change "bl tls_get_addr", which does not have a corresponding tls
+  // relocation type. So before proceeding, we need to make sure compiler
+  // does not change the sequence.
+  if(!(insn1 == 0x90000000      // adrp x0,0
+       && insn2 == 0x91000000   // add x0, x0, #0x0
+       && insn3 == 0x94000000)) // bl 0
+    {
+      // Ideally we should give up gd_to_le relaxation and do gd access.
+      // However the gd_to_le relaxation decision has been made early
+      // in the scan stage, where we did not allocate any GOT entry for
+      // this symbol. Therefore we have to exit and report error now.
+      gold_error(_("unexpected reloc insn sequence while relaxing "
+		   "tls gd to le for reloc %u."), r_type);
+      return aarch64_reloc_funcs::STATUS_BAD_RELOC;
+    }
+
+  // Write new insns.
+  insn1 = 0xd53bd040;  // mrs x0, tpidr_el0
+  insn2 = 0x91400000;  // add x0, x0, #0x0, lsl #12
+  insn3 = 0x91000000;  // add x0, x0, #0x0
+  elfcpp::Swap<32, big_endian>::writeval(ip, insn1);
+  elfcpp::Swap<32, big_endian>::writeval(ip + 1, insn2);
+  elfcpp::Swap<32, big_endian>::writeval(ip + 2, insn3);
+
+  // Calculate tprel value.
+  Output_segment* tls_segment = relinfo->layout->tls_segment();
+  gold_assert(tls_segment != NULL);
+  AArch64_address value = psymval->value(relinfo->object, 0);
+  const elfcpp::Elf_Xword addend = rela.get_r_addend();
+  AArch64_address aligned_tcb_size =
+      align_address(target->tcb_size(), tls_segment->maximum_alignment());
+  AArch64_address x = value + aligned_tcb_size;
+
+  // After new insns are written, apply TLSLE relocs.
+  const AArch64_reloc_property* rp1 =
+      aarch64_reloc_property_table->get_reloc_property(
+	  elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12);
+  const AArch64_reloc_property* rp2 =
+      aarch64_reloc_property_table->get_reloc_property(
+	  elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12);
+  gold_assert(rp1 != NULL && rp2 != NULL);
+
+  typename aarch64_reloc_funcs::Status s1 =
+      aarch64_reloc_funcs::template rela_general<32>(view + 4,
+						     x,
+						     addend,
+						     rp1);
+  if (s1 != aarch64_reloc_funcs::STATUS_OKAY)
+    return s1;
+
+  typename aarch64_reloc_funcs::Status s2 =
+      aarch64_reloc_funcs::template rela_general<32>(view + 8,
+						     x,
+						     addend,
+						     rp2);
+
+  this->skip_call_tls_get_addr_ = true;
+  return s2;
+
+}  // End of tls_ld_to_le
+
+template<int size, bool big_endian>
+inline
+typename AArch64_relocate_functions<size, big_endian>::Status
 Target_aarch64<size, big_endian>::Relocate::tls_ie_to_le(
 	     const Relocate_info<size, big_endian>* relinfo,
 	     Target_aarch64<size, big_endian>* target,
@@ -5963,7 +6407,7 @@ Target_aarch64<size, big_endian>::Relocate::tls_ie_to_le(
       newinsn = (0xf2800000 | regno) | ((x & 0xffff) << 5);
     }
   else
-    gold_assert(false);
+    gold_unreachable();
 
   elfcpp::Swap<32, big_endian>::writeval(ip, newinsn);
   return aarch64_reloc_funcs::STATUS_OKAY;

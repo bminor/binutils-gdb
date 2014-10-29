@@ -1,3 +1,63 @@
+2014-10-29  Han Shen  <shenhan@google.com>
+	    Jing Yu   <jingyu@google.com>
+
+	* aarch64-reloc.def: Add LD_PREL_LO12, ADR_PREL_LO21,
+	TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC, TLSLD_MOVW_DTPREL_G1,
+	TLSLD_MOVW_DTPREL_G0_NC. Change property of TLS relocations to
+	Symbol::TLS_REF.
+	* aarch64.cc (Target_aarch64::do_can_check_for_function_pointers): New
+	method.
+	(Target_aarch64::reloc_needs_plt_for_ifunc): New method.
+	(Target_aarch64::tls_ld_to_le): New method.
+	(Target_aarch64::aarch64_info): Enable can_icf_inline_merge_sections
+	for 64bit targets.
+	(Output_data_plt_aarch64::irelative_rel_): New data member.
+	(Output_data_plt_aarch64::add_entry): Add irelative entries to plt.
+	(Output_data_plt_aarch64::add_local_ifunc_entry): New method.
+	(Output_data_plt_aarch64::add_relocation): New method.
+	(Output_data_plt_aarch64::do_write): Add gold_assert on got_irelative
+	offset. Add got_irelative size to got size.
+	(AArch64_relocate_functions): Typedef AArch64_valtype. Replace long
+	type string with the new typename.
+	(AArch64_relocate_functions::update_adr): Replace parameter x with
+	immed.
+	(AArch64_relocate_functions::update_movnz): Correct wrong val mask.
+	(AArch64_relocate_functions::reloc_common): New method.
+	(AArch64_relocate_funcsions::rela_general): Extract common part out
+	into reloc_common method.
+	(AArch64_relocate_functions::rela_general): Likewise.
+	(AArch64_relocate_functions::pcrela_general): Likewise.
+	(AArch64_relocate_functions::adr): New method.
+	(AArch64_relocate_functions::adrp): Calculate immed before calling
+	update_adr.
+	(AArch64_relocate_functions::adrp): Likewise.
+	(AArch64_relocate_functions::movnz): Cast x to SignedW type when
+	comparing x to 0. Calculate immed from ~x when x < 0.
+	(Target_aarch64::optimize_tls_reloc): Add new cases for
+	TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC, TLSLD_MOVW_DTPREL_G1,
+	TLSLD_MOVW_DTPREL_G0_NC.
+	(Target_aarch64::possible_function_pointer_reloc): Implement this
+	method.
+	(Target_aarch64::Scan::local_reloc_may_be_function_pointer): Update
+	comment.
+	(Target_aarch64::Scan::local): Add codes to handle STT_GNU_IFUNC
+	symbol. Add cases for TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC,
+	TLSLD_MOVW_DTPREL_G1, TLSLD_MOVW_DTPREL_G0_NC.
+	(Target_aarch64::Scan::global): Add codes to handle STT_GNU_IFUNC
+	symbol. Add cases for TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC,
+	TLSLD_MOVW_DTPREL_G1, TLSLD_MOVW_DTPREL_G0_NC.
+	(Target_aarch64::make_plt_entry): Call add_entry with two more
+	parameters.
+	(Target_aarch64::make_local_ifunc_plt_entry): New method.
+	(Target_aarch64::Relocate::relocate): Add cases for LD_PREL_LO19,
+	ADR_PREL_LO21, TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC,
+	TLSLD_MOVW_DTPREL_G1, TLSLD_MOVW_DTPREL_G0_NC.
+	(Target_aarch64::Relocate::relocate_tls): Add cases for
+	TLSLD_ADR_PAGE21, TLSLD_ADD_LO12_NC, TLSLD_MOVW_DTPREL_G1,
+	TLSLD_MOVW_DTPREL_G0_NC.
+	* testsuite/icf_safe_so_test.cc: Correct test comment.
+	* testsuite/icf_safe_test.sh: Add AArch64 arch.
+
 2014-10-22  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (do_relax): Add gcc-4.9 libgomp functions to
