@@ -1,5 +1,9 @@
 2014-10-29  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.base/fileio.exp: Make directories on host.
+
+2014-10-29  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/fileio.c (test_write): Close the file.
 
 2014-10-28  Pedro Alves  <palves@redhat.com>
