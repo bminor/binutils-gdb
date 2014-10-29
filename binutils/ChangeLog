@@ -1,3 +1,9 @@
+2014-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/sr.po: New Serbian translation.
+	* po/sv.po: Updated Swedish translation.
+
 2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* readelf.c (print_mips_ases): Print unknown ASEs.
