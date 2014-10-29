@@ -1,6 +1,11 @@
+2014-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (bfd_section_from_shdr): Fix heap use after free memory
+	leak.
+
 2014-10-29  Dennis Brueni  <dbrueni@slickedit.com>
 
-	* elf.c (elfcore_write_lwpstatus): fix typo in call to memcpy
+	* elf.c (elfcore_write_lwpstatus): Fix typo in call to memcpy.
 
 2014-10-28  Nick Clifton  <nickc@redhat.com>
 
