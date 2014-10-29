@@ -3,6 +3,20 @@
 	* tui/tui.c (tui_rl_switch_mode): Wrap tui_enable/tui_disable in
 	TRY_CATCH.
 
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
+	PR tui/16138
+	PR tui/17519
+	* tui/tui-interp.c (tui_is_toplevel): Delete global.
+	(tui_allowed_p): Delete function.
+	* tui/tui.c: Include "interps.h".
+	(tui_enable): Don't use tui_allowed_p.	Error out here with
+	detailed error messages if the TUI is the top level interpreter,
+	or if output is not a terminal.	 Use newterm instead of initscr,
+	and error out if initializing the terminal fails.  Also error out if
+	the terminal doesn't support cursor addressing.
+	* tui/tui.h (tui_allowed_p): Delete declaration.
+
 2014-10-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* arm-tdep.c (arm_skip_stack_protector): Return early if
