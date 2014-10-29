@@ -9408,7 +9408,7 @@ elfcore_write_lwpstatus (bfd *abfd,
   lwpstat.pr_lwpid  = pid >> 16;
   lwpstat.pr_cursig = cursig;
 #if defined (HAVE_LWPSTATUS_T_PR_REG)
-  memcpy (lwpstat.pr_reg, gregs, sizeof (lwpstat.pr_reg));
+  memcpy (&lwpstat.pr_reg, gregs, sizeof (lwpstat.pr_reg));
 #elif defined (HAVE_LWPSTATUS_T_PR_CONTEXT)
 #if !defined(gregs)
   memcpy (lwpstat.pr_context.uc_mcontext.gregs,

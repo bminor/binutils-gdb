@@ -1,3 +1,7 @@
+2014-10-29  Dennis Brueni  <dbrueni@slickedit.com>
+
+	* elf.c (elfcore_write_lwpstatus): fix typo in call to memcpy
+
 2014-10-28  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
