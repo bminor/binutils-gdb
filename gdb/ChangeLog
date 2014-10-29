@@ -1,5 +1,12 @@
 2014-10-29  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17408
+	* infrun.c (switch_back_to_stepped_thread): Use currently_stepping
+	instead of assuming a thread with a stepping range is always
+	stepping.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
 	PR python/17372
 	* event-top.c (change_line_handler): Call
 	gdb_rl_callback_handler_remove instead of

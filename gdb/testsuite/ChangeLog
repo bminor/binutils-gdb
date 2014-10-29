@@ -1,5 +1,33 @@
 2014-10-29  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/17408
+	* gdb.threads/schedlock.c (some_function): New function.
+	(call_function): New global.
+	(MAYBE_CALL_SOME_FUNCTION): New macro.
+	(thread_function): Call it.
+	* gdb.threads/schedlock.exp (get_args): Add description parameter,
+	and use it instead of a global counter.  Adjust all callers.
+	(get_current_thread): Use "find current thread" for test message
+	here rather than having all callers pass down the same string.
+	(goto_loop): New procedure, factored out from ...
+	(my_continue): ... this.
+	(step_ten_loops): Change parameter from test message to command to
+	use.  Adjust.
+	(list_count): Delete global.
+	(check_result): New procedure, factored out from duplicate top
+	level code.
+	(continue tests): Wrap in with_test_prefix.
+	(test_step): New procedure, factored out from duplicate top level
+	code.
+	(top level): Test "step" in combination with all scheduler-locking
+	modes.  Test "next" in combination with all scheduler-locking
+	modes, and in combination with stepping over a function call or
+	not.
+	* gdb.threads/next-bp-other-thread.c: New file.
+	* gdb.threads/next-bp-other-thread.exp: New file.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
 	PR python/17372
 	* gdb.python/python.exp: Test a multi-line command that spawns
 	interactive Python.

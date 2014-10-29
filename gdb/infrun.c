@@ -5242,7 +5242,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 		 stepping, then scheduler locking can't be in effect,
 		 otherwise we wouldn't have resumed the current event
 		 thread in the first place.  */
-	      gdb_assert (!schedlock_applies (1));
+	      gdb_assert (!schedlock_applies (currently_stepping (tp)));
 
 	      stepping_thread = tp;
 	    }
