@@ -48,6 +48,7 @@
 #include <setjmp.h>
 
 #include "gdb_curses.h"
+#include "interps.h"
 
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
@@ -361,6 +362,20 @@ tui_initialize_readline (void)
   rl_bind_key_in_map ('s', tui_rl_next_keymap, tui_ctlx_keymap);
 }
 
+/* Return the TERM variable from the environment, or "<unset>"
+   if not set.  */
+
+static const char *
+gdb_getenv_term (void)
+{
+  const char *term;
+
+  term = getenv ("TERM");
+  if (term != NULL)
+    return term;
+  return "<unset>";
+}
+
 /* Enter in the tui mode (curses).
    When in normal mode, it installs the tui hooks in gdb, redirects
    the gdb output, configures the readline to work in tui mode.
@@ -368,8 +383,7 @@ tui_initialize_readline (void)
 void
 tui_enable (void)
 {
-  if (!tui_allowed_p ())
-    error (_("TUI mode not allowed"));
+  struct interp *interp;
 
   if (tui_active)
     return;
@@ -380,9 +394,40 @@ tui_enable (void)
   if (tui_finish_init)
     {
       WINDOW *w;
+      SCREEN *s;
+      const char *cap;
+      const char *interp;
 
-      w = initscr ();
-  
+      /* If the top level interpreter is not the console/tui (e.g.,
+	 MI), enabling curses will certainly lose.  */
+      interp = interp_name (top_level_interpreter ());
+      if (strcmp (interp, INTERP_TUI) != 0)
+	error (_("Cannot enable the TUI when the interpreter is '%s'"), interp);
+
+      /* Don't try to setup curses (and print funny control
+	 characters) if we're not outputting to a terminal.  */
+      if (!ui_file_isatty (gdb_stdout))
+	error (_("Cannot enable the TUI when output is not a terminal"));
+
+      s = newterm (NULL, NULL, NULL);
+      if (s == NULL)
+	{
+	  error (_("Cannot enable the TUI: error opening terminal [TERM=%s]"),
+		 gdb_getenv_term ());
+	}
+      w = stdscr;
+
+      /* Check required terminal capabilities.  */
+      cap = tigetstr ("cup");
+      if (cap == NULL || cap == (char *) -1 || *cap == '\0')
+	{
+	  endwin ();
+	  delscreen (s);
+	  error (_("Cannot enable the TUI: "
+		   "terminal doesn't support cursor addressing [TERM=%s]"),
+		 gdb_getenv_term ());
+	}
+
       cbreak ();
       noecho ();
       /* timeout (1); */
