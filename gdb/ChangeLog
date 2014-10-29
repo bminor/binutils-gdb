@@ -1,3 +1,8 @@
+2014-10-29  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_analyze_load_stack_chk_guard): Compute the
+	loaded address correctly of ldr instruction.
+
 2014-10-28  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/12623

@@ -1204,7 +1204,9 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
 	{
 	  *destreg = bits (insn1, 8, 10);
 	  *offset = 2;
-	  address = bits (insn1, 0, 7);
+	  address = (pc & 0xfffffffc) + 4 + (bits (insn1, 0, 7) << 2);
+	  address = read_memory_unsigned_integer (address, 4,
+						  byte_order_for_code);
 	}
       else if ((insn1 & 0xfbf0) == 0xf240) /* movw Rd, #const */
 	{
@@ -1233,9 +1235,12 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
       unsigned int insn
 	= read_memory_unsigned_integer (pc, 4, byte_order_for_code);
 
-      if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, #immed */
+      if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, [PC, #immed] */
 	{
-	  address = bits (insn, 0, 11);
+	  address = bits (insn, 0, 11) + pc + 8;
+	  address = read_memory_unsigned_integer (address, 4,
+						  byte_order_for_code);
+
 	  *destreg = bits (insn, 12, 15);
 	  *offset = 4;
 	}
