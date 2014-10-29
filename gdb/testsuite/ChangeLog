@@ -1,5 +1,12 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/average.c: Add eye-catchers.
+	* gdb.base/sum.c: Likewise.
+	* gdb.base/dbx.exp: Use eye-catchers to determine line numbers for
+	regexps dynamically.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/solib1.c: Add eye-catchers.
 	* gdb.base/so-impl-ld.exp: Match against eye-catchers instead of
 	literal line numbers.

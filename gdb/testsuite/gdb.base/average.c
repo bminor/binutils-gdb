@@ -35,12 +35,12 @@ main ()
 #endif
 {
     char c;
-    int first = 0, last = 0;
+    int first = 0, last = 0;	/* stop-in-main */
     last = num-1;
 
     /* Try two test cases. */
     print_average (my_list, first, last);
-    print_average (my_list, first, last - 3);
+    print_average (my_list, first, last - 3); /* stop-at-call */
 
     exit(0);
 }
