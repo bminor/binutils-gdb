@@ -1,3 +1,8 @@
+2014-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/sr.po: Updated Serbian translation.
+
 2014-10-14  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* configure: Regenerate.
