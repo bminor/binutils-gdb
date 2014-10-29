@@ -1,3 +1,8 @@
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui.c (tui_rl_switch_mode): Wrap tui_enable/tui_disable in
+	TRY_CATCH.
+
 2014-10-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* arm-tdep.c (arm_skip_stack_protector): Return early if
