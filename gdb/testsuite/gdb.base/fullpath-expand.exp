@@ -15,6 +15,11 @@
 
 standard_testfile .c fullpath-expand-func.c
 
+if [is_remote host] {
+    unsupported "Compiling on a remote host does not support a filename with directory."
+    return 0
+}
+
 if { [file pathtype $objdir] != "absolute" } {
     untested "objdir $objdir is not absolute"
     return -1
