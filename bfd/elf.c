@@ -2106,7 +2106,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
  fail:
   ret = FALSE;
  success:
-  if (sections_being_created)
+  if (sections_being_created && sections_being_created_abfd == abfd)
     sections_being_created [shindex] = FALSE;
   if (-- nesting == 0)
     {

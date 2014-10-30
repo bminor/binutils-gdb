@@ -1,13 +1,22 @@
+2014-10-30  Nick Clifton  <nickc@redhat.com>
+
+	Appy trunk patch:
+
+	2014-10-29  Nick Clifton  <nickc@redhat.com>
+	* elf.c (bfd_section_from_shdr): Fix heap use after free memory
+	leak.
+
 2014-10-28  Matthew Fortune  <matthew.fortune@imgtec.com>
 
-	Apply trunk patches
+	Apply trunk patches:
+
 	2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
 	* elfxx-mips.c (print_mips_ases): Print unknown ASEs.
 	(print_mips_isa_ext): Print the value of an unknown extension.
 
 2014-10-28  Nick Clifton  <nickc@redhat.com>
 
-	* Apply trunk patches:
+	Apply trunk patches:
 
 	2014-10-28  Nick Clifton  <nickc@redhat.com>
 	PR binutils/17512
@@ -39,7 +48,8 @@
 
 2014-10-28  Alan Modra  <amodra@gmail.com>
 
-	Apply trunk patches
+	Apply trunk patches:
+
 	2014-10-21  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_tls_optimize): Ignore relocs against toc
 	entries that aren't a multiple of 8 rather than failing assertion.
