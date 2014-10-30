@@ -5054,19 +5054,22 @@ process_section_headers (FILE * file)
       break;
     }
 
-#define CHECK_ENTSIZE_VALUES(section, i, size32, size64) \
-  do									    \
-    {									    \
-      bfd_size_type expected_entsize = is_32bit_elf ? size32 : size64;	    \
-      if (section->sh_entsize != expected_entsize)			    \
+#define CHECK_ENTSIZE_VALUES(section, i, size32, size64)		\
+  do									\
+    {									\
+      bfd_size_type expected_entsize = is_32bit_elf ? size32 : size64;	\
+      if (section->sh_entsize != expected_entsize)			\
 	{								\
-	  error (_("Section %d has invalid sh_entsize of %" BFD_VMA_FMT "x\n"), \
-		 i, section->sh_entsize);	\
-	  error (_("(Using the expected size of %d for the rest of this dump)\n"), \
-		   (int) expected_entsize); \
+	  char buf[40];							\
+	  sprintf_vma (buf, section->sh_entsize);			\
+	  /* Note: coded this way so that there is a single string for  \
+	     translation.  */ \
+	  error (_("Section %d has invalid sh_entsize of %s\n"), i, buf); \
+	  error (_("(Using the expected size of %u for the rest of this dump)\n"), \
+		   (unsigned) expected_entsize);			\
 	  section->sh_entsize = expected_entsize;			\
-	} \
-    }									    \
+	}								\
+    }									\
   while (0)
 
 #define CHECK_ENTSIZE(section, i, type)					\
@@ -7776,7 +7779,12 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
       if (VALID_DYNAMIC_NAME (entry->d_un.d_val))
 	printf (_("Interface Version: %s"), GET_DYNAMIC_NAME (entry->d_un.d_val));
       else
-	printf (_("<corrupt: %" BFD_VMA_FMT "d>"), entry->d_un.d_ptr);
+	{
+	  char buf[40];
+	  sprintf_vma (buf, entry->d_un.d_ptr);
+	  /* Note: coded this way so that there is a single string for translation.  */
+	  printf (_("<corrupt: %s>"), buf);
+	}
       break;
 
     case DT_MIPS_TIME_STAMP:

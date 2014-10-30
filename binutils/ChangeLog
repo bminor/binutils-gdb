@@ -1,3 +1,9 @@
+2014-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (CHECK_ENTSIZE_VALUES): Rewrite error message so that
+	there is a single string for translation.
+	(dynamic_section_mips_val): Likewise.
+
 2014-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.
