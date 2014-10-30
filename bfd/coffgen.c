@@ -1748,7 +1748,7 @@ coff_get_normalized_symtab (bfd *abfd)
   if (internal == NULL && size != 0)
     return NULL;
   internal_end = internal + obj_raw_syment_count (abfd);
-
+  
   if (! _bfd_coff_get_external_symbols (abfd))
     return NULL;
 
@@ -1766,8 +1766,8 @@ coff_get_normalized_symtab (bfd *abfd)
        raw_src < raw_end;
        raw_src += symesz, internal_ptr++)
     {
-
       unsigned int i;
+
       bfd_coff_swap_sym_in (abfd, (void *) raw_src,
 			    (void *) & internal_ptr->u.syment);
       symbol_ptr = internal_ptr;
@@ -1777,6 +1777,10 @@ coff_get_normalized_symtab (bfd *abfd)
 	   i++)
 	{
 	  internal_ptr++;
+	  /* PR 17512: Prevent buffer overrun.  */
+	  if (internal_ptr >= internal_end)
+	    return NULL;
+
 	  raw_src += symesz;
 	  bfd_coff_swap_aux_in (abfd, (void *) raw_src,
 				symbol_ptr->u.syment.n_type,
