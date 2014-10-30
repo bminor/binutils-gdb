@@ -1,3 +1,10 @@
+2014-10-30  Dr Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
+
+	* config/tc-aarch64.h (MAX_MEM_FOR_RS_ALIGN_CODE): Define to 7.
+	* config/tc-aarch64.c (aarch64_handle_align): Rewrite to handle
+	large alignments with a constant fragment size of
+	MAX_MEM_FOR_RS_ALIGN_CODE.
+
 2014-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: New Ukranian translation.

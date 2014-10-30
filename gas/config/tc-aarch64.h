@@ -116,8 +116,9 @@ void aarch64_copy_symbol_attributes (symbolS *, symbolS *);
 
 #define TC_CONS_FIX_NEW(f,w,s,e,r) cons_fix_new_aarch64 ((f), (w), (s), (e))
 
-/* Max code alignment is 32 bytes */
-#define MAX_MEM_FOR_RS_ALIGN_CODE 31
+/* Max space for a rs_align_code fragment is 3 unaligned bytes
+   (fr_fix) plus 4 bytes to contain the repeating NOP (fr_var).  */
+#define MAX_MEM_FOR_RS_ALIGN_CODE 7
 
 /* For frags in code sections we need to record whether they contain
    code or data.  */
@@ -141,7 +142,7 @@ struct aarch64_frag_type
 #define md_do_align(N, FILL, LEN, MAX, LABEL)					\
   if (FILL == NULL && (N) != 0 && ! need_pass_2 && subseg_text_p (now_seg))	\
     {										\
-      aarch64_frag_align_code (N, MAX);						\
+      frag_align_code (N, MAX);							\
       goto LABEL;								\
     }
 
