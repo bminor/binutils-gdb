@@ -7784,6 +7784,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 	  sprintf_vma (buf, entry->d_un.d_ptr);
 	  /* Note: coded this way so that there is a single string for translation.  */
 	  printf (_("<corrupt: %s>"), buf);
+	}
       break;
 
     case DT_MIPS_TIME_STAMP:
