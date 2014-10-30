@@ -58,8 +58,7 @@ The currently defined substitutions are:
 
     def before_prompt_hook(self, current):
         if self.value is not '':
-            newprompt = gdb.prompt.substitute_prompt(self.value)
-            return newprompt.replace('\\', '\\\\')
+            return gdb.prompt.substitute_prompt(self.value)
         else:
             return None
 

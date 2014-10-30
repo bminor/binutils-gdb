@@ -1,3 +1,8 @@
+2014-10-30  Yao Qi  <yao@codesourcery.com>
+
+	* python/lib/gdb/command/prompt.py (before_prompt_hook): Don't
+	replace '\\' with '\\\\'.
+
 2014-10-29  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.8.1 released.
