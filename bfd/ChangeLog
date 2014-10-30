@@ -1,6 +1,7 @@
 2014-10-30  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
+	* ihex.c (ihex_scan): Fix typo in invocation of ihex_bad_byte.
 	* coffgen.c (coff_get_normalized_symtab): Prevent buffer overrun.
 
 2014-10-29  Nick Clifton  <nickc@redhat.com>
