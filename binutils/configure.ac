@@ -55,6 +55,18 @@ fi], [default_ar_deterministic=0])
 AC_DEFINE_UNQUOTED(DEFAULT_AR_DETERMINISTIC, $default_ar_deterministic,
 		   [Should ar and ranlib use -D behavior by default?])
 
+AC_ARG_ENABLE(default-strings-all,
+[AS_HELP_STRING([--disable-default-strings-all],
+		[strings defaults to --data behavior])], [
+if test "${enableval}" = no; then
+  default_strings_all=0
+else
+  default_strings_all=1
+fi], [default_strings_all=1])
+
+AC_DEFINE_UNQUOTED(DEFAULT_STRINGS_ALL, $default_strings_all,
+		   [Should strings use -a behavior by default?])
+
 AM_BINUTILS_WARNINGS
 
 AC_CONFIG_HEADERS(config.h:config.in)
