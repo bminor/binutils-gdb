@@ -1,3 +1,21 @@
+2014-10-31  Nick Clifton  <nickc@redhat.com>
+
+	Apply trunk patch:
+
+	2014-10-31  Nick Clifton  <nickc@redhat.com>
+	* strings.c: Add new command line option --data to only scan the
+	initialized, loadable data secions of binaries.  Choose the
+	default behaviour of --all or --data based upon a configure
+	option.
+	* doc/binutils.texi (strings): Update documentation.  Include
+	description  of why the --data option might be unsafe.
+	* configure.ac: Add new option --disable-default-strings-all which
+	restores the old behaviour of strings using --data by default.  If
+	the option is not used make strings use --all by default.
+	* NEWS: Mention the new behaviour of strings.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2014-10-30  Nick Clifton  <nickc@redhat.com>
 
 	Apply trunk patch:
