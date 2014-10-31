@@ -30,6 +30,10 @@ typedef struct
   /* The corresponding objfile.  */
   struct objfile *objfile;
 
+  /* Dictionary holding user-added attributes.
+     This is the __dict__ attribute of the object.  */
+  PyObject *dict;
+
   /* The pretty-printer list of functions.  */
   PyObject *printers;
 
@@ -85,6 +89,7 @@ objfpy_dealloc (PyObject *o)
 {
   objfile_object *self = (objfile_object *) o;
 
+  Py_XDECREF (self->dict);
   Py_XDECREF (self->printers);
   Py_XDECREF (self->frame_filters);
   Py_XDECREF (self->type_printers);
@@ -99,6 +104,7 @@ static int
 objfpy_initialize (objfile_object *self)
 {
   self->objfile = NULL;
+  self->dict = NULL;
 
   self->printers = PyList_New (0);
   if (self->printers == NULL)
@@ -354,6 +360,8 @@ Return true if this object file is valid, false if not." },
 
 static PyGetSetDef objfile_getset[] =
 {
+  { "__dict__", gdb_py_generic_dict, NULL,
+    "The __dict__ for this objfile.", &objfile_object_type },
   { "filename", objfpy_get_filename, NULL,
     "The objfile's filename, or None.", NULL },
   { "progspace", objfpy_get_progspace, NULL,
@@ -405,7 +413,7 @@ static PyTypeObject objfile_object_type =
   0,				  /* tp_dict */
   0,				  /* tp_descr_get */
   0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
+  offsetof (objfile_object, dict), /* tp_dictoffset */
   0,				  /* tp_init */
   0,				  /* tp_alloc */
   objfpy_new,			  /* tp_new */

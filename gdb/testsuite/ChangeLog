@@ -1,3 +1,10 @@
+2014-10-30  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-objfile.exp: Add tests for setting random attributes
+	in objfiles.
+	* gdb.python/py-progspace.exp: Add tests for setting random attributes
+	in progspaces.
+
 2014-10-30  Janis Johnson  <janisjo@codesourcery.com>
 
 	* gdb.base/fullpath-expand.exp: Skip for a remote host.

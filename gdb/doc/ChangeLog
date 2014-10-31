@@ -1,3 +1,10 @@
+2014-10-30  Doug Evans  <dje@google.com>
+
+	* python.texi (Progspaces In Python): Document ability to add
+	random attributes to gdb.Progspace objects.
+	(Objfiles In Python): Document ability to add random attributes to
+	gdb.objfile objects.
+
 2014-10-27  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Continuing and Stepping): Add cross reference to

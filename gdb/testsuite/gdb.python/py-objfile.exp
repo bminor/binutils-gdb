@@ -46,3 +46,8 @@ gdb_test "python print (objfile.is_valid())" "True" \
 gdb_unload
 gdb_test "python print (objfile.is_valid())" "False" \
   "Get objfile validity after unload"
+
+gdb_py_test_silent_cmd "python objfile.random_attribute = 42" \
+    "Set random attribute in objfile" 1
+gdb_test "python print (objfile.random_attribute)" "42" \
+    "Verify set of random attribute in objfile"

@@ -1,3 +1,18 @@
+2014-10-30  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention ability add attributes to gdb.Objfile and
+	gdb.Progspace objects.
+	* python/py-objfile.c (objfile_object): New member dict.
+	(objfpy_dealloc): Py_XDECREF dict.
+	(objfpy_initialize): Initialize dict.
+	(objfile_getset): Add __dict__.
+	(objfile_object_type): Set tp_dictoffset member.
+	* python/py-progspace.c (progspace_object): New member dict.
+	(pspy_dealloc): Py_XDECREF dict.
+	(pspy_initialize): Initialize dict.
+	(pspace_getset): Add __dict__.
+	(pspace_object_type): Set tp_dictoffset member.
+
 2014-10-30  Yao Qi  <yao@codesourcery.com>
 
 	* python/lib/gdb/command/prompt.py (before_prompt_hook): Don't

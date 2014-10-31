@@ -13,6 +13,7 @@
      which is the gdb.Progspace object of the containing program space.
   ** A new event "gdb.clear_objfiles" has been added, triggered when
      selecting a new file to debug.
+  ** You can now add attributes to gdb.Objfile and gdb.Progspace objects.
 
 * New Python-based convenience functions:
 

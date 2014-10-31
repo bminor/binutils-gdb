@@ -16,6 +16,8 @@
 # This file is part of the GDB testsuite.  It tests the program space
 # support in Python.
 
+load_lib gdb-python.exp
+
 standard_testfile
 
 if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
@@ -37,5 +39,13 @@ gdb_test "python print (gdb.progspaces())" "\\\[<gdb.Progspace object at $hex>\\
 
 gdb_load ${binfile}
 
-gdb_test "python print (gdb.current_progspace().filename)" "py-progspace" \
+gdb_py_test_silent_cmd "python progspace = gdb.current_progspace()" \
+    "Get current progspace" 1
+
+gdb_test "python print (progspace.filename)" "py-progspace" \
   "current progspace filename (py-progspace)"
+
+gdb_py_test_silent_cmd "python progspace.random_attribute = 42" \
+    "Set random attribute in progspace" 1
+gdb_test "python print (progspace.random_attribute)" "42" \
+    "Verify set of random attribute in progspace"

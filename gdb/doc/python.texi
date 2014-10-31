@@ -3366,6 +3366,50 @@ The @code{frame_filters} attribute is a dictionary of frame filter
 objects.  @xref{Frame Filter API}, for more information.
 @end defvar
 
+One may add arbitrary attributes to @code{gdb.Progspace} objects
+in the usual Python way.
+This is useful if, for example, one needs to do some extra record keeping
+associated with the program space.
+
+In this contrived example, we want to perform some processing when
+an objfile with a certain symbol is loaded, but we only want to do
+this once because it is expensive.  To achieve this we record the results
+with the program space because we can't predict when the desired objfile
+will be loaded.
+
+@smallexample
+(gdb) python
+def clear_objfiles_handler(event):
+    event.progspace.expensive_computation = None
+def expensive(symbol):
+    """A mock routine to perform an "expensive" computation on symbol."""
+    print "Computing the answer to the ultimate question ..."
+    return 42
+def new_objfile_handler(event):
+    objfile = event.new_objfile
+    progspace = objfile.progspace
+    if not hasattr(progspace, 'expensive_computation') or \
+            progspace.expensive_computation is None:
+        # We use 'main' for the symbol to keep the example simple.
+        # Note: There's no current way to constrain the lookup
+        # to one objfile.
+        symbol = gdb.lookup_global_symbol('main')
+        if symbol is not None:
+            progspace.expensive_computation = expensive(symbol)
+gdb.events.clear_objfiles.connect(clear_objfiles_handler)
+gdb.events.new_objfile.connect(new_objfile_handler)
+end
+(gdb) file /tmp/hello
+Reading symbols from /tmp/hello...done.
+Computing the answer to the ultimate question ...
+(gdb) python print gdb.current_progspace().expensive_computation
+42
+(gdb) run
+Starting program: /tmp/hello
+Hello.
+[Inferior 1 (process 4242) exited normally]
+@end smallexample
+
 @node Objfiles In Python
 @subsubsection Objfiles In Python
 
@@ -3425,6 +3469,28 @@ The @code{type_printers} attribute is a list of type printer objects.
 The @code{frame_filters} attribute is a dictionary of frame filter
 objects.  @xref{Frame Filter API}, for more information.
 @end defvar
+
+One may add arbitrary attributes to @code{gdb.Objfile} objects
+in the usual Python way.
+This is useful if, for example, one needs to do some extra record keeping
+associated with the objfile.
+
+In this contrived example we record the time when @value{GDBN}
+loaded the objfile.
+
+@smallexample
+(gdb) python
+import datetime
+def new_objfile_handler(event):
+    # Set the time_loaded attribute of the new objfile.
+    event.new_objfile.time_loaded = datetime.datetime.today()
+gdb.events.new_objfile.connect(new_objfile_handler)
+end
+(gdb) file ./hello
+Reading symbols from ./hello...done.
+(gdb) python print gdb.objfiles()[0].time_loaded
+2014-10-09 11:41:36.770345
+@end smallexample
 
 A @code{gdb.Objfile} object has the following methods:
 

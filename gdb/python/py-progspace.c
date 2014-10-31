@@ -32,6 +32,10 @@ typedef struct
   /* The corresponding pspace.  */
   struct program_space *pspace;
 
+  /* Dictionary holding user-added attributes.
+     This is the __dict__ attribute of the object.  */
+  PyObject *dict;
+
   /* The pretty-printer list of functions.  */
   PyObject *printers;
 
@@ -75,6 +79,7 @@ pspy_dealloc (PyObject *self)
 {
   pspace_object *ps_self = (pspace_object *) self;
 
+  Py_XDECREF (ps_self->dict);
   Py_XDECREF (ps_self->printers);
   Py_XDECREF (ps_self->frame_filters);
   Py_XDECREF (ps_self->type_printers);
@@ -89,6 +94,7 @@ static int
 pspy_initialize (pspace_object *self)
 {
   self->pspace = NULL;
+  self->dict = NULL;
 
   self->printers = PyList_New (0);
   if (self->printers == NULL)
@@ -331,6 +337,8 @@ gdbpy_initialize_pspace (void)
 
 static PyGetSetDef pspace_getset[] =
 {
+  { "__dict__", gdb_py_generic_dict, NULL,
+    "The __dict__ for this progspace.", &pspace_object_type },
   { "filename", pspy_get_filename, NULL,
     "The progspace's main filename, or None.", NULL },
   { "pretty_printers", pspy_get_printers, pspy_set_printers,
@@ -380,7 +388,7 @@ static PyTypeObject pspace_object_type =
   0,				  /* tp_dict */
   0,				  /* tp_descr_get */
   0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
+  offsetof (pspace_object, dict), /* tp_dictoffset */
   0,				  /* tp_init */
   0,				  /* tp_alloc */
   pspy_new,			  /* tp_new */
