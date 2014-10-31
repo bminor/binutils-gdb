@@ -167,6 +167,7 @@
 char * program_name = "readelf";
 static long archive_file_offset;
 static unsigned long archive_file_size;
+static bfd_size_type current_file_size;
 static unsigned long dynamic_addr;
 static bfd_size_type dynamic_size;
 static unsigned int dynamic_nent;
@@ -4341,6 +4342,9 @@ process_program_headers (FILE * file)
 	    }
 	}
 
+      if (do_segments)
+	putc ('\n', stdout);
+
       switch (segment->p_type)
 	{
 	case PT_DYNAMIC:
@@ -4351,6 +4355,12 @@ process_program_headers (FILE * file)
 	     section in the DYNAMIC segment.  */
 	  dynamic_addr = segment->p_offset;
 	  dynamic_size = segment->p_filesz;
+	  /* PR binutils/17512: Avoid corrupt dynamic section info in the segment.  */
+	  if (dynamic_addr + dynamic_size >= current_file_size)
+	    {
+	      error (_("the dynamic segment offset + size exceeds the size of the file\n"));
+	      dynamic_addr = dynamic_size = 0;
+	    }
 
 	  /* Try to locate the .dynamic section. If there is
 	     a section header table, we can easily locate it.  */
@@ -4404,14 +4414,11 @@ process_program_headers (FILE * file)
 		error (_("Unable to read program interpreter name\n"));
 
 	      if (do_segments)
-		printf (_("\n      [Requesting program interpreter: %s]"),
+		printf (_("      [Requesting program interpreter: %s]\n"),
 		    program_interpreter);
 	    }
 	  break;
 	}
-
-      if (do_segments)
-	putc ('\n', stdout);
     }
 
   if (do_segments && section_headers != NULL && string_table != NULL)
@@ -4580,6 +4587,13 @@ get_32bit_elf_symbols (FILE * file,
       goto exit_point;
     }
 
+  if (section->sh_size > current_file_size)
+    {
+      error (_("Section %s has an invalid sh_size of 0x%lx\n"),
+	     SECTION_NAME (section), section->sh_size);
+      goto exit_point;
+    }
+
   number = section->sh_size / section->sh_entsize;
 
   if (number * sizeof (Elf32_External_Sym) > section->sh_size + 1)
@@ -4657,6 +4671,13 @@ get_64bit_elf_symbols (FILE * file,
   if (section->sh_entsize == 0)
     {
       error (_("sh_entsize is zero\n"));
+      goto exit_point;
+    }
+
+  if (section->sh_size > current_file_size)
+    {
+      error (_("Section %s has an invalid sh_size of 0x%lx\n"),
+	     SECTION_NAME (section), section->sh_size);
       goto exit_point;
     }
 
@@ -14886,6 +14907,8 @@ process_file (char * file_name)
       return 1;
     }
 
+  current_file_size = (bfd_size_type) statbuf.st_size;
+
   if (memcmp (armag, ARMAG, SARMAG) == 0)
     ret = process_archive (file_name, file, FALSE);
   else if (memcmp (armag, ARMAGT, SARMAG) == 0)
@@ -14903,6 +14926,7 @@ process_file (char * file_name)
 
   fclose (file);
 
+  current_file_size = 0;
   return ret;
 }
 

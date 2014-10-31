@@ -1616,6 +1616,11 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   if (size == 0)
     return TRUE;
 
+  /* PR binutils/17512: Do not even try to load
+     a symbol table bigger than the entire file...  */
+  if (size >= (bfd_size_type) bfd_get_size (abfd))
+    return FALSE;
+
   syms = bfd_malloc (size);
   if (syms == NULL)
     return FALSE;

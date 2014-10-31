@@ -1,5 +1,14 @@
 2014-10-31  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* readelf.c (process_program_headers): Avoid memory exhaustion due
+	to corrupt values in a dynamis segment header.
+	(get_32bit_elf_symbols): Do not attempt to read an over-large
+	section.
+	(get_64bit_elf_symbols): Likewise.
+
+2014-10-31  Nick Clifton  <nickc@redhat.com>
+
 	* strings.c: Add new command line option --data to only scan the
 	initialized, loadable data secions of binaries.  Choose the
 	default behaviour of --all or --data based upon a configure

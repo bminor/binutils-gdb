@@ -294,6 +294,11 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
       offset = i_shdrp[shindex]->sh_offset;
       shstrtabsize = i_shdrp[shindex]->sh_size;
 
+      /* PR binutils/17512: Do not even try to load
+	 a string table bigger than the entire file...  */
+      if (shstrtabsize >= (bfd_size_type) bfd_get_size (abfd))
+	return NULL;
+
       /* Allocate and clear an extra byte at the end, to prevent crashes
 	 in case the string table is not terminated.  */
       if (shstrtabsize + 1 <= 1
