@@ -1,3 +1,7 @@
+2014-10-31  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* cxxfilt.c (main): Add case for dlang_demangling style.
+
 2014-10-31  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
