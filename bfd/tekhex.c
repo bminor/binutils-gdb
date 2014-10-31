@@ -403,6 +403,9 @@ first_phase (bfd *abfd, int type, char *src)
 	      if (!getvalue (&src, &val))
 		return FALSE;
 	      section->size = val - section->vma;
+	      /* PR binutils/17512: Make sure that the size is sane.  */
+	      if (section->size > (bfd_size_type) bfd_get_size (abfd))
+		return FALSE;
 	      section->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
 	      break;
 	    case '0':

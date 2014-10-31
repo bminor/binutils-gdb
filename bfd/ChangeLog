@@ -5,6 +5,7 @@
 	symbol table bigger than the file.
 	* elf.c (bfd_elf_get_str_section): Do not try to load a string
 	table bigger than the file.
+	* tekhex.c (first_phase): Check that the section range is sane.
 
 2014-10-30  Nick Clifton  <nickc@redhat.com>
 
