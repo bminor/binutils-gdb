@@ -79,6 +79,13 @@
 
 	* config/tc-mips.c (s_insn): Set file options.
 
+2014-10-21  Andrew Pinski  <apinski@cavium.com>
+
+	* config/tc-aarch64.c (aarch64_cpus):
+	Add thunderx.
+	* doc/c-aarch64.texi: Document that thunderx
+	is a valid processor name.
+
 2014-10-21  Jan Beulich  <jbeulich@suse.com>
 
 	* read.c (HANDLE_CONDITIONAL_ASSEMBLY): New parameter "num_read".
