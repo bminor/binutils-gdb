@@ -1,3 +1,8 @@
+2014-10-31  Andrew Pinski  <apinski@cavium.com>
+            Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+
+	* readelf.c (print_mips_isa_ext): Print the value of Octeon3.
+
 2014-10-31  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* cxxfilt.c (main): Add case for dlang_demangling style.

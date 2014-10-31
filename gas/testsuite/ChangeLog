@@ -1,3 +1,11 @@
+2014-10-31  Andrew Pinski  <apinski@cavium.com>
+            Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+
+	* gas/mips/mips.exp: Add support for Octeon3 architecture.
+	Also add in support for running Octeon3 tests.
+	* gas/mips/octeon3.d: New test.
+	* gas/mips/octeon3.s: New test source.
+
 2014-10-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/insn-opts.d: New test.

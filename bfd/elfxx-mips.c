@@ -6588,6 +6588,9 @@ _bfd_elf_mips_mach (flagword flags)
     case E_MIPS_MACH_LS3A:
       return bfd_mach_mips_loongson_3a;
 
+    case E_MIPS_MACH_OCTEON3:
+      return bfd_mach_mips_octeon3;
+
     case E_MIPS_MACH_OCTEON2:
       return bfd_mach_mips_octeon2;
 
@@ -11859,6 +11862,10 @@ mips_set_isa_flags (bfd *abfd)
       val = E_MIPS_ARCH_64R2 | E_MIPS_MACH_OCTEON;
       break;
 
+    case bfd_mach_mips_octeon3:
+      val = E_MIPS_ARCH_64R2 | E_MIPS_MACH_OCTEON3;
+      break;
+
     case bfd_mach_mips_xlr:
       val = E_MIPS_ARCH_64 | E_MIPS_MACH_XLR;
       break;
@@ -13905,6 +13912,8 @@ bfd_mips_isa_ext (bfd *abfd)
       return AFL_EXT_OCTEON;
     case bfd_mach_mips_octeonp:
       return AFL_EXT_OCTEONP;
+    case bfd_mach_mips_octeon3:
+      return AFL_EXT_OCTEON3;
     case bfd_mach_mips_octeon2:
       return AFL_EXT_OCTEON2;
     case bfd_mach_mips_xlr:
@@ -14730,6 +14739,7 @@ struct mips_mach_extension
 static const struct mips_mach_extension mips_mach_extensions[] =
 {
   /* MIPS64r2 extensions.  */
+  { bfd_mach_mips_octeon3, bfd_mach_mips_octeon2 },
   { bfd_mach_mips_octeon2, bfd_mach_mips_octeonp },
   { bfd_mach_mips_octeonp, bfd_mach_mips_octeon },
   { bfd_mach_mips_octeon, bfd_mach_mipsisa64r2 },
@@ -15521,6 +15531,9 @@ print_mips_isa_ext (FILE *file, unsigned int isa_ext)
       break;
     case AFL_EXT_XLR:
       fputs ("RMI XLR", file);
+      break;
+    case AFL_EXT_OCTEON3:
+      fputs ("Cavium Networks Octeon3", file);
       break;
     case AFL_EXT_OCTEON2:
       fputs ("Cavium Networks Octeon2", file);

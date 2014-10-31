@@ -1196,6 +1196,7 @@ static const unsigned int mips_isa_table[] = {
 #define INSN_OCTEON		  0x00000800
 #define INSN_OCTEONP		  0x00000200
 #define INSN_OCTEON2		  0x00000100
+#define INSN_OCTEON3		  0x00000040
 
 /* MIPS R5900 instruction */
 #define INSN_5900                 0x00004000
@@ -1323,6 +1324,7 @@ static const unsigned int mips_isa_table[] = {
 #define CPU_OCTEON	6501
 #define CPU_OCTEONP	6601
 #define CPU_OCTEON2	6502
+#define CPU_OCTEON3	6503
 #define CPU_XLR     	887682   	/* decimal 'XLR'   */
 
 /* Return true if the given CPU is included in INSN_* mask MASK.  */
@@ -1387,6 +1389,9 @@ cpu_is_member (int cpu, unsigned int mask)
 
     case CPU_OCTEON2:
       return (mask & INSN_OCTEON2) != 0;
+
+    case CPU_OCTEON3:
+      return (mask & INSN_OCTEON3) != 0;
 
     case CPU_XLR:
       return (mask & INSN_XLR) != 0;

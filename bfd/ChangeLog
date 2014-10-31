@@ -1,3 +1,18 @@
+2014-10-31  Andrew Pinski  <apinski@cavium.com>
+            Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+
+	* archures.c: Add octeon3 for mips target.
+	* bfd-in2.h: Regenerate.
+	* bfd/cpu-mips.c: Define I_mipsocteon3.
+	nfo_struct): Add octeon3 support.
+	* bfd/elfxx-mips.c: (_bfd_elf_mips_mach): Add support for
+	octeon3.
+	(mips_set_isa_flags): Add support for octeon3.
+	(bfd_mips_isa_ext): Add bfd_mach_mips_octeon3. 
+	(mips_mach_extensions): Make bfd_mach_mips_octeon3 an
+	extension of bfd_mach_mips_octeon2.
+	(print_mips_isa_ext): Print the value of Octeon3.
+
 2014-10-31  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

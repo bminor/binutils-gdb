@@ -1,3 +1,11 @@
+2014-10-31  Andrew Pinski  <apinski@cavium.com>
+            Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+
+	* config/tc-mips.c (CPU_IS_OCTEON): Handle CPU_OCTEON3.
+	(mips_cpu_info_table): Octeon3 enables virt ase.
+	* doc/c-mips.texi: Document octeon3 as an acceptable value for
+	-march=.
+
 2014-10-30  Dr Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
 
 	* config/tc-aarch64.h (MAX_MEM_FOR_RS_ALIGN_CODE): Define to 7.

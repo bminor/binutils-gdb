@@ -12767,6 +12767,9 @@ print_mips_isa_ext (unsigned int isa_ext)
     case AFL_EXT_XLR:
       fputs ("RMI XLR", stdout);
       break;
+    case AFL_EXT_OCTEON3:
+      fputs ("Cavium Networks Octeon3", stdout);
+      break;
     case AFL_EXT_OCTEON2:
       fputs ("Cavium Networks Octeon2", stdout);
       break;

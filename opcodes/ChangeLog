@@ -1,3 +1,17 @@
+2014-10-31  Andrew Pinski  <apinski@cavium.com>
+            Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+
+	* mips-dis.c (mips_arch_choices): Add octeon3.
+	* mips-opc.c (IOCT): Include INSN_OCTEON3.
+	(IOCT2): Likewise.
+	(IOCT3): New define.
+	(IVIRT): New define.
+	(mips_builtin_opcodes): Add dmfgc0, dmtgc0, hypcall, mfgc0, mtgc0,
+	tlbinv, tlbinvf, tlbgr, tlbgwi, tlbginv, tlbginvf, tlbgwr, tlbgp, tlti
+	IVIRT instructions.
+	Extend mtm0, mtm1, mtm2, mtp0, mtp1, mtp2 instructions to take another
+	operand for IOCT3.
+
 2014-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.
