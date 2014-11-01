@@ -4590,7 +4590,7 @@ get_32bit_elf_symbols (FILE * file,
   if (section->sh_size > current_file_size)
     {
       error (_("Section %s has an invalid sh_size of 0x%lx\n"),
-	     SECTION_NAME (section), section->sh_size);
+	     SECTION_NAME (section), (unsigned long) section->sh_size);
       goto exit_point;
     }
 
@@ -4677,7 +4677,7 @@ get_64bit_elf_symbols (FILE * file,
   if (section->sh_size > current_file_size)
     {
       error (_("Section %s has an invalid sh_size of 0x%lx\n"),
-	     SECTION_NAME (section), section->sh_size);
+	     SECTION_NAME (section), (unsigned long) section->sh_size);
       goto exit_point;
     }
 

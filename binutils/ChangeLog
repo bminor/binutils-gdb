@@ -1,3 +1,9 @@
+2014-11-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	* readelf.c (get_32bit_elf_symbols): Cast error
+	parameters of bfd_size_type with the %lx format to
+	unsigned long.
+
 2014-10-31  Andrew Pinski  <apinski@cavium.com>
             Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
 
