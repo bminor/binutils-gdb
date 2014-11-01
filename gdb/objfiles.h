@@ -578,11 +578,6 @@ extern void default_iterate_over_objfiles_in_search_order
 #define ALL_PSPACE_OBJFILES(ss, obj)					\
   for ((obj) = ss->objfiles; (obj) != NULL; (obj) = (obj)->next)
 
-#define ALL_PSPACE_OBJFILES_SAFE(ss, obj, nxt)		\
-  for ((obj) = ss->objfiles;			\
-       (obj) != NULL? ((nxt)=(obj)->next,1) :0;	\
-       (obj) = (nxt))
-
 #define ALL_OBJFILES(obj)			    \
   for ((obj) = current_program_space->objfiles; \
        (obj) != NULL;				    \
@@ -618,20 +613,12 @@ extern void default_iterate_over_objfiles_in_search_order
   ALL_OBJFILES (objfile)	 \
     ALL_OBJFILE_SYMTABS (objfile, s)
 
-#define ALL_PSPACE_SYMTABS(ss, objfile, s)		\
-  ALL_PSPACE_OBJFILES (ss, objfile)			\
-    ALL_OBJFILE_SYMTABS (objfile, s)
-
 /* Traverse all symtabs in all objfiles in the current program space,
    skipping included files (which share a blockvector with their
    primary symtab).  */
 
 #define ALL_PRIMARY_SYMTABS(objfile, s) \
   ALL_OBJFILES (objfile)		\
-    ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
-
-#define ALL_PSPACE_PRIMARY_SYMTABS(pspace, objfile, s)	\
-  ALL_PSPACE_OBJFILES (ss, objfile)			\
     ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
 
 /* Traverse all minimal symbols in all objfiles in the current symbol
