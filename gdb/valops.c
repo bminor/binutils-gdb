@@ -332,7 +332,7 @@ value_cast_pointers (struct type *type, struct value *arg2,
 	  deprecated_set_value_type (v, type);
 	  return v;
 	}
-   }
+    }
 
   /* No superclass found, just change the pointer type.  */
   arg2 = value_copy (arg2);
@@ -1720,7 +1720,7 @@ typecmp (int staticp, int varargs, int nargs,
       tt2 = check_typedef (value_type (t2[i]));
 
       if (TYPE_CODE (tt1) == TYPE_CODE_REF
-      /* We should be doing hairy argument matching, as below.  */
+	  /* We should be doing hairy argument matching, as below.  */
 	  && (TYPE_CODE (check_typedef (TYPE_TARGET_TYPE (tt1)))
 	      == TYPE_CODE (tt2)))
 	{
@@ -2054,7 +2054,7 @@ search_struct_method (const char *name, struct value **arg1p,
 
 	  /* The virtual base class pointer might have been
 	     clobbered by the user program.  Make sure that it
-	    still points to a valid memory location.  */
+	     still points to a valid memory location.  */
 
 	  if (offset < 0 || offset >= TYPE_LENGTH (type))
 	    {
@@ -2184,8 +2184,8 @@ value_struct_elt (struct value **argp, struct value **args,
       return v;
     }
 
-    v = search_struct_method (name, argp, args, 0, 
-			      static_memfuncp, t);
+  v = search_struct_method (name, argp, args, 0, 
+			    static_memfuncp, t);
   
   if (v == (struct value *) - 1)
     {
@@ -3049,7 +3049,7 @@ find_oload_champ (struct value **args, int nargs,
 	    parm_types[jj] = (fns_ptr != NULL
 			      ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj].type)
 			      : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]),
-			      jj));
+						 jj));
 	}
 
       /* Compare parameter types to supplied argument types.  Skip

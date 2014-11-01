@@ -1,3 +1,9 @@
+2014-10-31  Doug Evans  <xdje42@gmail.com>
+
+	* valops.c (value_cast_pointers): Fix whitespace.
+	(typecmp, search_struct_method, value_struct_elt, find_oload_champ):
+	Ditto.
+
 2014-10-30  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention ability add attributes to gdb.Objfile and
