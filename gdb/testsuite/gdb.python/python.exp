@@ -314,6 +314,13 @@ gdb_test_multiple "set prompt $gdb_prompt " "set default prompt" {
     }
 }
 
+set working_dir ""
+gdb_test_multiple "pwd" "pwd" {
+    -re "Working directory (.*)\\.\[\r\n\]+$gdb_prompt $" {
+	set working_dir $expect_out(1,string)
+    }
+}
+
 gdb_test_multiple "python gdb.prompt_hook = program_prompt" "set the hook" {
     -re "\[\r\n\]$gdb_prompt $" {
 	pass "set programming hook"
@@ -346,7 +353,7 @@ gdb_test_multiple "set extended-prompt one two three " \
 
 gdb_test_multiple "set extended-prompt \\w " \
     "set extended prompt working directory" {
-    -re "\[\r\n\].*gdb.*testsuite.* $" {
+    -re "\[\r\n\][string_to_regexp $working_dir] $" {
 	pass "set extended prompt working directory"
     }
 }
