@@ -13811,7 +13811,7 @@ extract_arm_insn (insn_decode_record *insn_record, uint32_t insn_size)
     return 1;
   insn_record->arm_insn = (uint32_t) extract_unsigned_integer (&buf[0],
                            insn_size, 
-                           gdbarch_byte_order (insn_record->gdbarch));
+			   gdbarch_byte_order_for_code (insn_record->gdbarch));
   return 0;
 }
 
