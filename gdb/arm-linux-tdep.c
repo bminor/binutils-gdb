@@ -1361,7 +1361,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   linux_init_abi (info, gdbarch);
 
   tdep->lowest_pc = 0x8000;
-  if (info.byte_order == BFD_ENDIAN_BIG)
+  if (info.byte_order_for_code == BFD_ENDIAN_BIG)
     {
       if (tdep->arm_abi == ARM_ABI_AAPCS)
 	tdep->arm_breakpoint = eabi_linux_arm_be_breakpoint;
