@@ -5,14 +5,14 @@
 # Tommy Pettersson <ptp@lysator.liu.se>, 2001, 2002, 2004.
 # Göran Uddeborg <goeran@uddeborg.se>, 2013, 2014.
 #
-# $Revision: 1.5 $
+# $Revision: 1.6 $
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.24.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-02-10 09:42+1030\n"
-"PO-Revision-Date: 2014-10-28 21:51+0100\n"
+"PO-Revision-Date: 2014-11-02 22:54+0100\n"
 "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -59,7 +59,7 @@ msgstr ""
 "  -b --target=<bfdnamn>  Välj format på binärfilen\n"
 "  -e --exe=<körfil>      Ange infilens namn (standard är a.out)\n"
 "  -i --inlines           Red ut inline:ade funktioner\n"
-"  -j --section=<namn>    Läse sektionsrelativa avstånd istället för adresser\n"
+"  -j --section=<namn>    Läs sektionsrelativa avstånd istället för adresser\n"
 "  -p --pretty-print      Gör utdata mer lättläst för människor\n"
 "  -s --basenames         Visa inte katalognamn\n"
 "  -f --functions         Visa funktionsnamn\n"
@@ -343,7 +343,7 @@ msgid ""
 "  -h --help                    Print this help message\n"
 "  -v --version                 Print version information\n"
 msgstr ""
-"  -t                           Uppdatera tidsstämpen på arkivets symbolkarta\n"
+"  -t                           Uppdatera tidsstämpeln på arkivets symbolkarta\n"
 "  -h --help                    Visa denna hjälp\n"
 "  -V --version                 Visa versionsinformation\n"
 
@@ -397,7 +397,7 @@ msgstr "skapar %s"
 #: ar.c:945
 #, c-format
 msgid "Cannot convert existing library %s to thin format"
-msgstr "Kan inte konvertera ett befintligt bibliotek %s till tunnt format"
+msgstr "Kan inte konvertera ett befintligt bibliotek %s till tunt format"
 
 #: ar.c:951
 #, c-format
@@ -447,7 +447,7 @@ msgstr "Kan inte öppna fil %s\n"
 #: arsup.c:164
 #, c-format
 msgid "%s: Can't open output archive %s\n"
-msgstr "%s: Kan inte öppna utdataakrivet %s\n"
+msgstr "%s: Kan inte öppna utdataarkivet %s\n"
 
 #: arsup.c:181
 #, c-format
@@ -770,7 +770,7 @@ msgstr "ingen infil valdes"
 msgid "Report bugs to %s.\n"
 msgstr ""
 "Rapportera fel till %s.\n"
-"Rapportera synpunkter på översättningen till sv@li.org.\n"
+"Rapportera synpunkter på översättningen till tp-sv@listor.tp-sv.se.\n"
 
 #: debug.c:647
 msgid "debug_add_to_current_namespace: no current file"
@@ -1200,7 +1200,7 @@ msgstr "   -U --add-underscore       Lägg till understrykningstecken till alla 
 #: dlltool.c:3946
 #, c-format
 msgid "      --add-stdcall-underscore Add underscores to stdcall symbols in interface library.\n"
-msgstr "      --add-stdcall-underscore Lägg till understryckningstecken till stdcall-symboler i gränssnittsbiblioteket.\n"
+msgstr "      --add-stdcall-underscore Lägg till understrykningstecken till stdcall-symboler i gränssnittsbiblioteket.\n"
 
 #: dlltool.c:3947
 #, c-format
@@ -1371,7 +1371,7 @@ msgstr "  Generella flaggor:\n"
 #: dllwrap.c:479
 #, c-format
 msgid "   @<file>                Read options from <file>\n"
-msgstr "   @<fil>                 Läss flaggor från <fil>\n"
+msgstr "   @<fil>                 Läs flaggor från <fil>\n"
 
 #: dllwrap.c:480
 #, c-format
@@ -1628,7 +1628,7 @@ msgstr "  Post\tKatalog\tTid\tStorl.\tNamn\n"
 
 #: dwarf.c:445
 msgid "DW_LNE_define_file: Bad opcode length\n"
-msgstr "DW_LNE_define_file: Felaktig Bad opkod-längd\n"
+msgstr "DW_LNE_define_file: Felaktig opkod-längd\n"
 
 #: dwarf.c:449
 #, c-format
@@ -1806,22 +1806,22 @@ msgstr "Okänd formtyp: %lu\n"
 #: dwarf.c:1815
 #, c-format
 msgid "(not inlined)"
-msgstr "(inte inlajnad)"
+msgstr "(inte inline:ad)"
 
 #: dwarf.c:1818
 #, c-format
 msgid "(inlined)"
-msgstr "(inlajnad)"
+msgstr "(inline:ad)"
 
 #: dwarf.c:1821
 #, c-format
 msgid "(declared as inline but ignored)"
-msgstr "(deklarerad som inlajn men ignorerad)"
+msgstr "(deklarerad som inline men ignorerad)"
 
 #: dwarf.c:1824
 #, c-format
 msgid "(declared as inline and inlined)"
-msgstr "(deklarerad som inlajn och inlajnad)"
+msgstr "(deklarerad som inline och inline:ad)"
 
 #: dwarf.c:1827
 #, c-format
@@ -1911,7 +1911,7 @@ msgstr "Okänt AT-värde: %lx"
 #: dwarf.c:2171
 #, c-format
 msgid "Reserved length value (0x%s) found in section %s\n"
-msgstr "Reserverat längdvärde (0x%s) hittatt i sektionen %s\n"
+msgstr "Reserverat längdvärde (0x%s) hittat i sektionen %s\n"
 
 #: dwarf.c:2183
 #, c-format
@@ -2012,7 +2012,7 @@ msgstr "Felsökningsinfo är trasig, längden på CU vid %s överskrider gränse
 #: dwarf.c:2365
 #, c-format
 msgid "CU at offset %s contains corrupt or unsupported version number: %d.\n"
-msgstr "CU vid avstånded %s innehåller trasiga eller ej stödda versionsnummer: %d.\n"
+msgstr "CU vid avståndet %s innehåller trasiga eller ej stödda versionsnummer: %d.\n"
 
 #: dwarf.c:2375
 #, c-format
@@ -3119,7 +3119,7 @@ msgid ""
 "64 bit data type and so it cannot process 64 bit ELF files.\n"
 msgstr ""
 "Det här programmet har byggts utan stöd för någon 64-bitars\n"
-"datatype och kan därför inte behandla 64-bitars ELF-filer.\n"
+"datatyp och kan därför inte behandla 64-bitars ELF-filer.\n"
 
 #: elfedit.c:268
 #, c-format
@@ -3618,7 +3618,7 @@ msgstr ""
 "  -O --output-target=<bfdnamn>  Sätt formatet på utbinärfilen\n"
 "  -T --header-file=<fil>        Läs NLM-huvuden från <fil>\n"
 "  -l --linker=<länkare>         Använd <länkare> för att länka\n"
-"  -d --debug                    Visa länkkommandot på standard error\n"
+"  -d --debug                    Visa länkkommandot på standard fel\n"
 "  @<fil>                        Läs flaggor från <fil>.\n"
 "  -h --help                     Visa denna hjälp\n"
 "  -v --version                  Visa programmets versionsinformation\n"
@@ -3892,7 +3892,7 @@ msgstr "Endast -X 32_64 hanteras"
 
 #: nm.c:1671
 msgid "Using the --size-sort and --undefined-only options together"
-msgstr "Användning av --size-sort och --undifined-only samtidigt"
+msgstr "Användning av --size-sort och --undefined-only samtidigt"
 
 #: nm.c:1672
 msgid "will produce no output, since undefined symbols have no size."
@@ -4106,7 +4106,7 @@ msgstr ""
 "                                     <flaggor>\n"
 "     --add-section <namn>=<fil>    Lägg till sektion <namn> från <fil> i utdata\n"
 "     --dump-section <namn>=<fil>   Skriv innehållet i sektion <namn> i <fil>\n"
-"     --rename-section <gammal>=<ny>[,<flaggor>] Byt nam på sektion <gammal>\n"
+"     --rename-section <gammal>=<ny>[,<flaggor>] Byt namn på sektion <gammal>\n"
 "                                     till <ny>\n"
 "     --long-section-names {enable|disable|keep}\n"
 "                                   Hantera långa sektionsnamn i Coff-objekt.\n"
@@ -4130,7 +4130,7 @@ msgstr ""
 "     --keep-global-symbols <fil>   -G för alla symboler uppräknade i <fil>\n"
 "     --weaken-symbols <fil>        -W för alla symboler uppräknade i <fil>\n"
 "     --alt-machine-code <index>    Använd målets <index>:e alternativa maskin\n"
-"     --writable-text               Markera uttexten so skrivbar\n"
+"     --writable-text               Markera uttexten som skrivbar\n"
 "     --readonly-text               Gör uttexten skrivskyddad\n"
 "     --pure                        Markera utfilen som ”demand paged”\n"
 "     --impure                      Markera utfilen som oren\n"
@@ -4337,7 +4337,7 @@ msgstr "Känner inte igen formatet på infilen ”%s”"
 #: objcopy.c:1662
 #, c-format
 msgid "Output file cannot represent architecture `%s'"
-msgstr "Utfilen kan inte representera arkitekturern ”%s”"
+msgstr "Utfilen kan inte representera arkitekturen ”%s”"
 
 #: objcopy.c:1725
 #, c-format
@@ -4378,16 +4378,16 @@ msgstr "kunde inte hämta sektionsinnehållet"
 #: objcopy.c:1895
 #, c-format
 msgid "%s: debuglink section already exists"
-msgstr "%s: sektionen debugling finns redan"
+msgstr "%s: sektionen debuglink finns redan"
 
 #: objcopy.c:1907
 #, c-format
 msgid "cannot create debug link section `%s'"
-msgstr "kan inte skapa sektionen för felsökningslänking ”%s”"
+msgstr "kan inte skapa sektionen för felsökningslänkning ”%s”"
 
 #: objcopy.c:2001
 msgid "Can't fill gap after section"
-msgstr "Kan inte fylla luckan sektionen"
+msgstr "Kan inte fylla luckan efter sektionen"
 
 #: objcopy.c:2025
 msgid "can't add padding"
@@ -4549,7 +4549,7 @@ msgstr "Varning: ignorerar föregående --reverse-bytes-värde på %d"
 #: objcopy.c:4105
 #, c-format
 msgid "%s: invalid reserve value for --heap"
-msgstr "%s: ogiltigt resrveringsvärde till --heap"
+msgstr "%s: ogiltigt reserveringsvärde till --heap"
 
 #: objcopy.c:4111
 #, c-format
@@ -4596,7 +4596,7 @@ msgstr "varning: kunde inte hitta ”%s”.  Systemfelmeddelande: %s"
 #: objcopy.c:4262
 #, c-format
 msgid "warning: could not create temporary file whilst copying '%s', (error: %s)"
-msgstr "varning: kunde inte skapa temporerfil vid kopiering av ”%s”, (fel: %s)"
+msgstr "varning: kunde inte skapa temporärfil vid kopiering av ”%s”, (fel: %s)"
 
 #: objcopy.c:4292 objcopy.c:4306
 #, c-format
@@ -4715,7 +4715,7 @@ msgid ""
 "      --prefix=PREFIX            Add PREFIX to absolute paths for -S\n"
 "      --prefix-strip=LEVEL       Strip initial directory names for -S\n"
 msgstr ""
-"  -b, --target=BFDNAMN           Välj BFDNAMN som objektetformatet för målet\n"
+"  -b, --target=BFDNAMN           Välj BFDNAMN som objektformatet för målet\n"
 "  -m, --architecture=MASKIN      Välj MASKIN som arkitektur för målet\n"
 "  -j, --section=NAMN             Visa endast information om sektionen NAMN\n"
 "  -M, --disassembler-options=FLG Skicka vidare FLG till disassembleraren\n"
@@ -4819,7 +4819,7 @@ msgstr ""
 #: objdump.c:2171
 #, c-format
 msgid "can't use supplied machine %s"
-msgstr "kan inte använda den anvgivna maskinen %s"
+msgstr "kan inte använda den angivna maskinen %s"
 
 #: objdump.c:2190
 #, c-format
@@ -4898,7 +4898,7 @@ msgstr "  (Startar vid filavstånd: 0x%lx)"
 
 #: objdump.c:2755
 msgid "Reading section failed"
-msgstr "Lyckades inte läsa -sektionen"
+msgstr "Lyckades inte läsa sektionen"
 
 #: objdump.c:2858
 #, c-format
@@ -4982,7 +4982,7 @@ msgstr ""
 "  map            Visa sektionskartan\n"
 "  load           Visa lastkommandona\n"
 "  dysymtab       Visa tabellen över dynamiska symboler\n"
-"  codesign       Visa kodsingatur\n"
+"  codesign       Visa kodsignatur\n"
 "  seg_split_info Visa segmentsdelningsinformation\n"
 
 #: od-macho.c:265
@@ -6582,7 +6582,7 @@ msgstr "Seg-avstånd          Typ                              Symvek Datatyp\n"
 
 #: readelf.c:5755
 msgid "dynamic section image relocations"
-msgstr "omlikaliseringar för dynamisk sektion"
+msgstr "omlokaliseringar för dynamisk sektion"
 
 #: readelf.c:5759
 #, c-format
@@ -6847,7 +6847,7 @@ msgstr "INGA"
 #: readelf.c:7766
 #, c-format
 msgid "Interface Version: %s"
-msgstr "Gränssnitssversion: %s"
+msgstr "Gränssnittsversion: %s"
 
 #: readelf.c:7768
 msgid "<corrupt: %"
@@ -7044,7 +7044,7 @@ msgstr "  Versions-def aux efter slutet av sektionen\n"
 #: readelf.c:8866
 #, c-format
 msgid "  Version definition past end of section\n"
-msgstr "  Versiondefinition efter slutet av ssektionen\n"
+msgstr "  Versiondefinition efter slutet av sektionen\n"
 
 #: readelf.c:8881
 #, c-format
@@ -8102,7 +8102,7 @@ msgstr "NT_GNU_ABI_TAG (ABI-versionstagg)"
 
 #: readelf.c:13515
 msgid "NT_GNU_HWCAP (DSO-supplied software HWCAP info)"
-msgstr "NT_GNU_HWCAP (DSO-leverad programvaras HWCAP-info)"
+msgstr "NT_GNU_HWCAP (DSO-levererad programvaras HWCAP-info)"
 
 #: readelf.c:13517
 msgid "NT_GNU_BUILD_ID (unique build ID bitstring)"
@@ -8507,7 +8507,7 @@ msgstr "dialogkontroll"
 
 #: resbin.c:540
 msgid "dialogex control"
-msgstr "dioalog-ext.kontroll"
+msgstr "dialog-ext.kontroll"
 
 #: resbin.c:569
 msgid "dialog control end"
@@ -8845,7 +8845,7 @@ msgstr ""
 "  -A|-B     --format={sysv|berkeley}  Välj utdatastil (standard är %s)\n"
 "  -o|-d|-x  --radix={8|10|16}         Visa tal oktalt, decimalt eller\n"
 "                                        hexadecimalt\n"
-"  -t        --totals                  Visa samanlagd storlek (endast Berkeley)\n"
+"  -t        --totals                  Visa sammanlagd storlek (endast Berkeley)\n"
 "            --common                  Visa total storlek för *COM*-symboler\n"
 "            --target=<bfdnamn>        Välj binärfilens format\n"
 "            @<fil>                    Läs flaggor från <fil>\n"
@@ -8885,7 +8885,7 @@ msgstr ""
 "  -d --debug       Visa information om vad som händer\n"
 "  @<fil>           Läs flaggor från <fil>\n"
 "  -h --help        Visa denna information\n"
-"  -v --version     Visa programets versionsinformation\n"
+"  -v --version     Visa programmets versionsinformation\n"
 
 #: srconv.c:1881
 #, c-format
@@ -9185,11 +9185,11 @@ msgstr ""
 "  -u --unicode_in              Läs infilen som en UTF16-fil\n"
 "  -U --unicode_out             Skriv binärmeddelanden som UTF16\n"
 "  -m --maxlength=<värde>       Ange den största tillåtna meddelandelängden\n"
-"  -n --nullterminate           Lägg automatisikt till en nollavslutning till strängar\n"
+"  -n --nullterminate           Lägg automatiskt till en nollavslutning till strängar\n"
 "  -o --hresult_use             Använd HRESULT-definition istället för statuskoddefinition\n"
 "  -O --codepage_out=<värde>    Ange kodsida vid skrivning av textfiler\n"
 "  -r --rcdir=<katalog>         Ange exportkatalogen för rc-filer\n"
-"  -x --xdbg=<katalog>          Var den .dbg-C-inkludiringsfil som översätter\n"
+"  -x --xdbg=<katalog>          Var den .dbg-C-inkluderingsfil som översätter\n"
 "                               meddelande-id:n till deras symboliska namn\n"
 "                               skall skapas.\n"
 
@@ -9257,7 +9257,7 @@ msgstr ": förväntades vara ett löv\n"
 #: windres.c:405
 #, c-format
 msgid ": duplicate value\n"
-msgstr ": dublett av värdet\n"
+msgstr ": dubblett av värdet\n"
 
 #: windres.c:555
 #, c-format
@@ -9333,7 +9333,7 @@ msgid ""
 msgstr ""
 "  -r                           Ignorerad, för kompabilitet med rc\n"
 "  @<fil>                       Läs flaggor från <fil>\n"
-"  -h --help                    Visa dettaa hjälpmeddelande\n"
+"  -h --help                    Visa detta hjälpmeddelande\n"
 "  -V --version                 Visa versionsinformation\n"
 
 #: windres.c:679
