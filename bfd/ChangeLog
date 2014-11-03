@@ -1,5 +1,37 @@
 2014-11-03  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* aoutx.h (slurp_symbol_table): Check that computed table size is
+	not bigger than the file from which is it being read.
+	(slurp_reloc_table): Likewise.
+	* coffcode.h (coff_slurp_line_table): Remove unneeded local
+	'warned'.  Do not try to print the details of a symbol with an
+	invalid index.
+	* coffgen.c (make_a_sectiobn_from_file): Check computed string
+	index against length of string table.
+	(bfd_coff_internal_syment_name): Check read in string offset
+	against length of string table.
+	(build_debug_section): Return a pointer to the section used.
+	(_bfd_coff_read_string_table): Store the length of the string
+	table in the coff_tdata structure.
+	(bfd_coff_free_symbols): Set the length of the string table to
+	zero when it is freed.
+	(coff_get_normalized_symtab): Check offsets against string table
+	or data table lengths as appropriate.
+	* cofflink.c (_bfd_coff_link_input_bfd): Check offset against
+	length of string table.
+	* compress.c (bfd_get_full_section_contents): Check computed size
+	against the size of the file.
+	* libcoff-in.h (obj_coff_strings_len): Define.
+	(struct coff_tdata): Add strings_len field.
+	* libcoff.h: Regenerate.
+	* peXXigen.c (pe_print_debugdata): Do not attempt to print the
+	data if the debug section is too small.
+	* xcofflink.c (xcoff_link_input_bfd):  Check offset against
+	length of string table.
+
+2014-11-03  Nick Clifton  <nickc@redhat.com>
+
 	* po/fi.po: Updated Finnish translation.
 
 2014-10-31  Andrew Pinski  <apinski@cavium.com>

@@ -4546,21 +4546,18 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
       if (cache_ptr->line_number == 0)
 	{
-	  bfd_boolean warned;
 	  bfd_signed_vma symndx;
 	  coff_symbol_type *sym;
 
 	  nbr_func++;
-	  warned = FALSE;
 	  symndx = dst.l_addr.l_symndx;
 	  if (symndx < 0
 	      || (bfd_vma) symndx >= obj_raw_syment_count (abfd))
 	    {
 	      (*_bfd_error_handler)
-		(_("%B: warning: illegal symbol index %ld in line numbers"),
-		 abfd, (long) symndx);
-	      symndx = 0;
-	      warned = TRUE;
+		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
+		 abfd, (long) symndx, counter);
+	      continue;
 	    }
 
 	  /* FIXME: We should not be casting between ints and
@@ -4569,7 +4566,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		 ((symndx + obj_raw_syments (abfd))
 		  ->u.syment._n._n_n._n_zeroes));
 	  cache_ptr->u.sym = (asymbol *) sym;
-	  if (sym->lineno != NULL && ! warned)
+	  if (sym->lineno != NULL)
 	    (*_bfd_error_handler)
 	      (_("%B: warning: duplicate line number information for `%s'"),
 	       abfd, bfd_asymbol_name (&sym->symbol));

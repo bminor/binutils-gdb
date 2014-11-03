@@ -35,6 +35,7 @@
 #define obj_coff_external_syms(bfd)   (coff_data (bfd)->external_syms)
 #define obj_coff_keep_syms(bfd)	      (coff_data (bfd)->keep_syms)
 #define obj_coff_strings(bfd)	      (coff_data (bfd)->strings)
+#define obj_coff_strings_len(bfd)     (coff_data (bfd)->strings_len)
 #define obj_coff_keep_strings(bfd)    (coff_data (bfd)->keep_strings)
 #define obj_coff_sym_hashes(bfd)      (coff_data (bfd)->sym_hashes)
 #define obj_coff_strings_written(bfd) (coff_data (bfd)->strings_written)
@@ -75,6 +76,8 @@ typedef struct coff_tdata
   /* The string table.  May be NULL.  Read by
      _bfd_coff_read_string_table.  */
   char *strings;
+  /* The length of the strings table.  For error checking.  */
+  bfd_size_type strings_len;
   /* If this is TRUE, the strings may not be freed.  */
   bfd_boolean keep_strings;
   /* If this is TRUE, the strings have been written out already.  */

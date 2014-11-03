@@ -1,5 +1,12 @@
 2014-11-03  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* objdump.c (slurp_symtab): Fail gracefully if the table could not
+	be read.
+	(dump_relocs_in_section): Likewise.
+
+2014-11-03  Nick Clifton  <nickc@redhat.com>
+
 	* po/fi.po: Updated Finnish translation.
 	* po/sv.po: Updated Swedish translation.
 

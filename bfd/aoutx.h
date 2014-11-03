@@ -1756,6 +1756,8 @@ NAME (aout, slurp_symbol_table) (bfd *abfd)
     return TRUE;		/* Nothing to do.  */
 
   cached_size *= sizeof (aout_symbol_type);
+  if (cached_size >= (bfd_size_type) bfd_get_size (abfd))
+    return FALSE;
   cached = (aout_symbol_type *) bfd_zmalloc (cached_size);
   if (cached == NULL)
     return FALSE;
@@ -2306,6 +2308,11 @@ NAME (aout, slurp_reloc_table) (bfd *abfd, sec_ptr asect, asymbol **symbols)
 
   if (reloc_size == 0)
     return TRUE;		/* Nothing to be done.  */
+
+  /* PR binutils/17512: Do not even try to
+     load the relocs if their size is corrupt.  */
+  if (reloc_size + asect->rel_filepos >= (bfd_size_type) bfd_get_size (abfd))
+    return FALSE;
 
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
     return FALSE;

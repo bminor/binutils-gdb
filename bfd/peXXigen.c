@@ -2514,6 +2514,13 @@ pe_print_debugdata (bfd * abfd, void * vfile)
                section->name);
       return TRUE;
     }
+  else if (section->size < size)
+    {
+      fprintf (file,
+               _("\nError: section %s contains the debug data starting address but it is too small\n"),
+               section->name);
+      return FALSE;
+    }
 
   fprintf (file, _("\nThere is a debug directory in %s at 0x%lx\n\n"),
 	   section->name, (unsigned long) addr);
@@ -2523,7 +2530,7 @@ pe_print_debugdata (bfd * abfd, void * vfile)
   fprintf (file,
 	   _("Type                Size     Rva      Offset\n"));
 
-  /* Read the whole section. */
+  /* Read the whole section.  */
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
       if (data != NULL)
