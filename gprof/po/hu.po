@@ -1,64 +1,61 @@
-# Finnish messages for gprof.
-# Copyright © 2007, 2009, 2011, 2014 Free Software Foundation, Inc.
+# Hungarian translation for gprof.
+# Copyright (C) 2014 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Jorma Karvonen <karvjorm@users.sf.net>, 2007.
-# Jorma Karvonen <karvonen.jorma@gmail.com>, 2009, 2011, 2014.
 #
+# Balázs Úr <urbalazs@gmail.com>, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: gprof 2.24.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-02-10 09:42+1030\n"
-"PO-Revision-Date: 2014-11-03 09:48+0200\n"
-"Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
-"Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
-"Language: fi\n"
+"PO-Revision-Date: 2014-11-02 20:19+0100\n"
+"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
+"Language-Team: Hungarian <translation-team-hu@lists.sourceforge.net>\n"
+"Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: KBabel 1.11.2\n"
+"X-Generator: Lokalize 1.5\n"
 
 #: alpha.c:102 mips.c:54
 msgid "<indirect child>"
-msgstr "<epäsuora lapsi>"
+msgstr "<közvetett gyermek>"
 
 #: alpha.c:107 mips.c:59
 #, c-format
 msgid "[find_call] %s: 0x%lx to 0x%lx\n"
-msgstr "[etsi_kutsu] %s: 0x%lx arvoon 0x%lx\n"
+msgstr "[find_call] %s: 0x%lx - 0x%lx\n"
 
 #: alpha.c:129
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
-msgstr "[etsi_kutsu] 0x%lx: jsr%s-käsky <epäsuora_lapsi>\n"
+msgstr "[find_call] 0x%lx: jsr%s <közvetett_gyermek>\n"
 
 #: alpha.c:139
 #, c-format
 msgid "[find_call] 0x%lx: bsr"
-msgstr "[etsi_kutsu] 0x%lx: bsr-käsky"
+msgstr "[find_call] 0x%lx: bsr"
 
-#  ensimmäinen %s whoami, toinen %s filename
 #: basic_blocks.c:129 call_graph.c:89 hist.c:107
 #, c-format
 msgid "%s: %s: unexpected end of file\n"
-msgstr "%s: %s: tiedoston odottamaton loppu\n"
+msgstr "%s: %s: nem várt fájlvége\n"
 
-#  basic-block record
 #: basic_blocks.c:197
 #, c-format
 msgid "%s: warning: ignoring basic-block exec counts (use -l or --line)\n"
-msgstr "%s: varoitus: ei oteta huomioon peruslohkotietueen suorituslukumäärää (käytä -l tai --line)\n"
+msgstr "%s: figyelem: alapblokk végrehajtás számítás kihagyása (használja a -l vagy --line kapcsolót)\n"
 
 #. FIXME: This only works if bfd_vma is unsigned long.
 #: basic_blocks.c:290 basic_blocks.c:300
 #, c-format
 msgid "%s:%d: (%s:0x%lx) %lu executions\n"
-msgstr "%s:%d: (%s:0x%lx) %lu suoritusta\n"
+msgstr "%s:%d: (%s:0x%lx) %lu végrehajtás\n"
 
 #: basic_blocks.c:291 basic_blocks.c:301
 msgid "<unknown>"
-msgstr "<tuntematon>"
+msgstr "<ismeretlen>"
 
 #: basic_blocks.c:544
 #, c-format
@@ -72,9 +69,9 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Ensimmäiset %d riviä:\n"
+"Legfelső %d sor:\n"
 "\n"
-"     Rivi      Lukumäärä\n"
+"     Sor        Szám\n"
 "\n"
 
 #: basic_blocks.c:568
@@ -85,23 +82,23 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Suoritusyhteenveto:\n"
+"Végrehajtás összegzés:\n"
 "\n"
 
 #: basic_blocks.c:569
 #, c-format
 msgid "%9ld   Executable lines in this file\n"
-msgstr "%9ld   Tämän tiedoston suoritettavat rivit\n"
+msgstr "%9ld   Végrehajtható sorok ebben a fájlban\n"
 
 #: basic_blocks.c:571
 #, c-format
 msgid "%9ld   Lines executed\n"
-msgstr "%9ld   Suoritetut rivit\n"
+msgstr "%9ld   Végrehajtott sorok\n"
 
 #: basic_blocks.c:572
 #, c-format
 msgid "%9.2f   Percent of the file executed\n"
-msgstr "%9.2f   Suoritetun tiedoston prosentti\n"
+msgstr "%9.2f   A végrehajtott fájl százaléka\n"
 
 #: basic_blocks.c:576
 #, c-format
@@ -110,17 +107,17 @@ msgid ""
 "%9lu   Total number of line executions\n"
 msgstr ""
 "\n"
-"%9lu   Yhteensä suoritusrivejä\n"
+"%9lu   A sorvégrehajtások teljes száma\n"
 
 #: basic_blocks.c:578
 #, c-format
 msgid "%9.2f   Average executions per line\n"
-msgstr "%9.2f   Keskimäärin suorituksia riviä kohden\n"
+msgstr "%9.2f   Átlagos végrehajtás soronként\n"
 
 #: call_graph.c:68
 #, c-format
 msgid "[cg_tally] arc from %s to %s traversed %lu times\n"
-msgstr "[cg_tally] kaarisektori vanhempinimestä %s lapsinimeen %s käyty lävitse %lu kertaa\n"
+msgstr "[cg_tally] az ív %s - %s között %lu alkalommal haladt át\n"
 
 #: cg_print.c:75
 #, c-format
@@ -128,7 +125,7 @@ msgid ""
 "\t\t     Call graph (explanation follows)\n"
 "\n"
 msgstr ""
-"\t\t     Kutsugraafi (selitys seuraa)\n"
+"\t\t     Hívási grafikon (magyarázat következik)\n"
 "\n"
 
 #: cg_print.c:77
@@ -137,7 +134,7 @@ msgid ""
 "\t\t\tCall graph\n"
 "\n"
 msgstr ""
-"\t\t\tKutsugraafi\n"
+"\t\t\tHívási grafikon\n"
 "\n"
 
 #: cg_print.c:80 hist.c:471
@@ -147,7 +144,7 @@ msgid ""
 "granularity: each sample hit covers %ld byte(s)"
 msgstr ""
 "\n"
-"hienosyisyys: jokainen näyteosuma kattaa %ld tavua"
+"granularitás: minden egyes példa találat lefed %ld byte-ot"
 
 #: cg_print.c:84
 #, c-format
@@ -155,7 +152,7 @@ msgid ""
 " for %.2f%% of %.2f seconds\n"
 "\n"
 msgstr ""
-" aika: %.2f%% / %.2f sekuntia\n"
+" %.2f%% / %.2f másodperchez\n"
 "\n"
 
 #: cg_print.c:88
@@ -164,28 +161,25 @@ msgid ""
 " no time propagated\n"
 "\n"
 msgstr ""
-" ei aikaa kulunut\n"
+" nincs szaporított idő\n"
 "\n"
 
 #: cg_print.c:97 cg_print.c:102 cg_print.c:105
 msgid "called"
-msgstr "kutsuttu"
+msgstr "meghívott"
 
 #: cg_print.c:97 cg_print.c:105
 msgid "total"
-msgstr "yhteensä"
+msgstr "összesen"
 
 #: cg_print.c:97
 msgid "parents"
-msgstr "vanhemmat"
+msgstr "szülők"
 
 #: cg_print.c:99 cg_print.c:103
 msgid "index"
-msgstr "indeksi"
+msgstr "index"
 
-#  Tässä on ilmeisesti virhe ja prosenttimerkin pitäisi jäädä pois. Kyseinen kohta on seuraava:
-#  _("index"), _("%time"), _("self"), _("descendants"),
-#  _("called"), _("self"), _("name"), _("index"));
 #: cg_print.c:101
 #, no-c-format
 msgid "%time"
@@ -193,39 +187,39 @@ msgstr "%time"
 
 #: cg_print.c:102
 msgid "self"
-msgstr "itse"
+msgstr "saját"
 
 #: cg_print.c:102
 msgid "descendants"
-msgstr "jälkeläiset"
+msgstr "leszármazottak"
 
 #: cg_print.c:103 hist.c:497
 msgid "name"
-msgstr "nimi"
+msgstr "név"
 
 #: cg_print.c:105
 msgid "children"
-msgstr "lapset"
+msgstr "gyermekek"
 
 #: cg_print.c:110
 #, c-format
 msgid "index %% time    self  children    called     name\n"
-msgstr "indeksi %% aika    itse  lapset    kutsuttu     nimi\n"
+msgstr "index %%  time   self  gyermekek  meghívott    név\n"
 
 #: cg_print.c:133
 #, c-format
 msgid " <cycle %d as a whole> [%d]\n"
-msgstr " <jakso %d kokonaisena> [%d]\n"
+msgstr " <%d. ciklus teljes egészében> [%d]\n"
 
 #: cg_print.c:359
 #, c-format
 msgid "%6.6s %5.5s %7.7s %11.11s %7.7s %7.7s     <spontaneous>\n"
-msgstr "%6.6s %5.5s %7.7s %11.11s %7.7s %7.7s     <spontaani>\n"
+msgstr "%6.6s %5.5s %7.7s %11.11s %7.7s %7.7s     <spontán>\n"
 
 #: cg_print.c:360
 #, c-format
 msgid "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontaneous>\n"
-msgstr "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontaani>\n"
+msgstr "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontán>\n"
 
 #: cg_print.c:594
 #, c-format
@@ -233,148 +227,148 @@ msgid ""
 "Index by function name\n"
 "\n"
 msgstr ""
-"Indeksi funktionimittäin\n"
+"Indexelés függvénynév szerint\n"
 "\n"
 
 #: cg_print.c:651 cg_print.c:660
 #, c-format
 msgid "<cycle %d>"
-msgstr "<jakso %d>"
+msgstr "<%d. ciklus>"
 
 #: corefile.c:61
 #, c-format
 msgid "%s: unable to parse mapping file %s.\n"
-msgstr "%s: kuvaustiedoston %s jäsentäminen epäonnistui.\n"
+msgstr "%s: nem sikerült feldolgozni a(z) %s leképezőfájlt.\n"
 
 #: corefile.c:85 corefile.c:526
 #, c-format
 msgid "%s: could not open %s.\n"
-msgstr "%s: tiedoston %s avaaminen epäonnistui.\n"
+msgstr "%s: %s nem nyitható meg.\n"
 
 #: corefile.c:187
 #, c-format
 msgid "%s: %s: not in executable format\n"
-msgstr "%s: %s: ei ole suoritustiedostomuotoinen\n"
+msgstr "%s: %s: nincs végrehajtható formátumban\n"
 
 #: corefile.c:198
 #, c-format
 msgid "%s: can't find .text section in %s\n"
-msgstr "%s: ei löydy ”.text”-lohkoa kohteesta %s\n"
+msgstr "%s: nem található .text szakasz ebben: %s\n"
 
 #: corefile.c:273
 #, c-format
 msgid "%s: ran out room for %lu bytes of text space\n"
-msgstr "%s: ei ollut tilaa %lu tavun tekstitilalle\n"
+msgstr "%s: elfogyott a hely a szövegtér %lu byte-jaihoz\n"
 
 #: corefile.c:287
 #, c-format
 msgid "%s: can't do -c\n"
-msgstr "%s: ei voi tehdä -c\n"
+msgstr "%s: nem sikerült elvégezni a -c kapcsolót\n"
 
 #: corefile.c:330
 #, c-format
 msgid "%s: -c not supported on architecture %s\n"
-msgstr "%s: -c ei ole tuettu arkkitehtuurissa %s\n"
+msgstr "%s: a -c nem támogatott a(z) %s architektúrán\n"
 
 #: corefile.c:535 corefile.c:638
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
-msgstr "%s: tiedostossa ”%s” ei ole symboleja\n"
+msgstr "%s: a(z) „%s” fájlnak nincsenek szimbólumai\n"
 
 #: corefile.c:905
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
-msgstr "%s: joku laski väärin: ltab.len=%d eikä %ld\n"
+msgstr "%s: valaki rosszul értelmezte: ltab.len=%d a(z) %ld helyett\n"
 
 #: gmon_io.c:84
 #, c-format
 msgid "%s: address size has unexpected value of %u\n"
-msgstr "%s: osoitekoossa on odottamaton arvo %u\n"
+msgstr "%s: a cím méretének nem várt %u értéke van\n"
 
 #: gmon_io.c:319 gmon_io.c:415
 #, c-format
 msgid "%s: file too short to be a gmon file\n"
-msgstr "%s: tiedosto on liian lyhyt, jotta se olisi gmon-tiedosto\n"
+msgstr "%s: a fájl túl rövid, hogy gmon fájl legyen\n"
 
 #: gmon_io.c:329 gmon_io.c:458
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
-msgstr "%s: tiedostossa ”%s” on virheellinen maaginen pipari\n"
+msgstr "%s: a(z) „%s” fájlnak rossz varázssütije van\n"
 
 #: gmon_io.c:340
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
-msgstr "%s: tiedostossa ”%s” on tukematon versio %d\n"
+msgstr "%s: a(z) „%s” fájlnak nem támogatott %d verziója van\n"
 
 #: gmon_io.c:370
 #, c-format
 msgid "%s: %s: found bad tag %d (file corrupted?)\n"
-msgstr "%s: %s: virheellinen tunniste %d löytyi (tiedosto rikkinäinen?)\n"
+msgstr "%s: %s: rossz %d címke található (a fájl sérült?)\n"
 
 #: gmon_io.c:437
 #, c-format
 msgid "%s: profiling rate incompatible with first gmon file\n"
-msgstr "%s: profilointinopeus ei ole yhteensopiva ensimmäisen gmon-tiedoston kanssa\n"
+msgstr "%s: a profilozási arány nem kompatibilis az első gmon fájllal\n"
 
 #: gmon_io.c:488
 #, c-format
 msgid "%s: incompatible with first gmon file\n"
-msgstr "%s: ei ole yhteensopiva ensimmäisen gmon-tiedoston kanssa\n"
+msgstr "%s: nem kompatibilis az első gmon fájllal\n"
 
 #: gmon_io.c:518
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
-msgstr "%s: tiedosto ’%s’ ei vaikuta olevan ”gmon.out”-muotoinen\n"
+msgstr "%s: a(z) „%s” fájl nem tűnik úgy, hogy gmon.out formátumban lenne\n"
 
 #: gmon_io.c:531
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
-msgstr "%s: odottamaton tiedoston loppumerkki ”%d/%d bins”-lukemisen jälkeen\n"
+msgstr "%s: nem várt fájl vége %d/%d bin olvasása után\n"
 
 #: gmon_io.c:563
 #, c-format
 msgid "time is in ticks, not seconds\n"
-msgstr "aika on ticks-yksikköinä, ei sekunteina\n"
+msgstr "az idő osztásokban van, nem másodpercben\n"
 
 #: gmon_io.c:569 gmon_io.c:749
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
-msgstr "%s: ei tiedetä, kuinka tiedostomuotoa %d pitää käsitellä\n"
+msgstr "%s: nem tudni, hogyan kell kezelni a(z) %d fájlformátumot\n"
 
 #: gmon_io.c:579
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
-msgstr "Tiedosto ”%s” (versio %d) sisältää:\n"
+msgstr "A(z) „%s” fájl (%d verzió) tartalma:\n"
 
 #: gmon_io.c:582
 #, c-format
 msgid "\t%d histogram record\n"
-msgstr "\t%d histogrammitietue\n"
+msgstr "\t%d hisztogram rekord\n"
 
 #: gmon_io.c:583
 #, c-format
 msgid "\t%d histogram records\n"
-msgstr "\t%d histogrammitietueet\n"
+msgstr "\t%d hisztogram rekord\n"
 
 #: gmon_io.c:585
 #, c-format
 msgid "\t%d call-graph record\n"
-msgstr "\t%d kutsugraafitietue\n"
+msgstr "\t%d hívási grafikon rekord\n"
 
 #: gmon_io.c:586
 #, c-format
 msgid "\t%d call-graph records\n"
-msgstr "\t%d kutsugraafitietueet\n"
+msgstr "\t%d hívási grafikon rekord\n"
 
 #: gmon_io.c:588
 #, c-format
 msgid "\t%d basic-block count record\n"
-msgstr "\t%d peruslohkolukumäärätietue\n"
+msgstr "\t%d alapblokk szám rekord\n"
 
 #: gmon_io.c:589
 #, c-format
 msgid "\t%d basic-block count records\n"
-msgstr "\t%d peruslohkolukumäärätietueet\n"
+msgstr "\t%d alapblokk szám rekord\n"
 
 #: gprof.c:162
 #, c-format
@@ -393,36 +387,34 @@ msgid ""
 "\t[--demangle[=STYLE]] [--no-demangle] [--external-symbol-table=name] [@FILE]\n"
 "\t[image-file] [profile-file...]\n"
 msgstr ""
-"Käyttö: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][nimi]] [-I hakemistot]\n"
-"\t[-d[num]] [-k kohteesta/kohteeseen] [-m minimilukumäärä] [-t taulupituus]\n"
-"\t[--[no-]annotated-source[=nimi]] [--[no-]exec-counts[=nimi]]\n"
-"\t[--[no-]flat-profile[=nimi]] [--[no-]graph[=nimi]]\n"
-"\t[--[no-]time=nimi] [--all-lines] [--brief] [--debug[=taso]]\n"
+"Használat: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqSQZ][név]] [-I dirs]\n"
+"\t[-d[szám]] [-k tól/ig] [-m min-szám] [-t táblahossz]\n"
+"\t[--[no-]annotated-source[=név]] [--[no-]exec-counts[=név]]\n"
+"\t[--[no-]flat-profile[=név]] [--[no-]graph[=név]]\n"
+"\t[--[no-]time=név] [--all-lines] [--brief] [--debug[=szint]]\n"
 "\t[--function-ordering] [--file-ordering] [--inline-file-names]\n"
-"\t[--directory-path=hakemistot] [--display-unused-functions]\n"
-"\t[--file-format=nimi] [--file-info] [--help] [--line] [--min-count=n]\n"
+"\t[--directory-path=könyvtárak] [--display-unused-functions]\n"
+"\t[--file-format=név] [--file-info] [--help] [--line] [--min-count=n]\n"
 "\t[--no-static] [--print-path] [--separate-files]\n"
-"\t[--static-call-graph] [--sum] [--table-length=pituus] [--traditional]\n"
+"\t[--static-call-graph] [--sum] [--table-length=hossz] [--traditional]\n"
 "\t[--version] [--width=n] [--ignore-non-functions]\n"
-"\t[--demangle[=TYYLI]] [--no-demangle] [--external-symbol-table=nimi] [@TIEDOSTO]\n"
-"\t[vedostiedosto] [profiilitiedosto...]\n"
+"\t[--demangle[=STÍLUS]] [--no-demangle] [--external-symbol-table=név] [@FÁJL]\n"
+"\t[image-file] [profile-file…]\n"
 
 #: gprof.c:178
 #, c-format
 msgid "Report bugs to %s\n"
-msgstr ""
-"Lähetä raportit ohjelmistovioista (englanniksi) osoitteeseen %s\n"
-"Ilmoita käännösvirheistä osoitteeseen <translation-team-fi@lists.sourceforge.net>.\n"
+msgstr "A hibák itt jelenthetők: %s\n"
 
 #: gprof.c:254
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
-msgstr "%s: debuggausta ei tueta; -d:tä ei oteta huomioon\n"
+msgstr "%s: a hibakeresés nem támogatott; -d mellőzve\n"
 
 #: gprof.c:334
 #, c-format
 msgid "%s: unknown file format %s\n"
-msgstr "%s: tuntematon tiedostomuoto %s\n"
+msgstr "%s: ismeretlen %s fájlformátum\n"
 
 #. This output is intended to follow the GNU standards document.
 #: gprof.c:422
@@ -433,37 +425,37 @@ msgstr "GNU gprof %s\n"
 #: gprof.c:423
 #, c-format
 msgid "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
-msgstr "Perustuu BSD:n gprofiin, copyright 1983 Regents of the University of California.\n"
+msgstr "A BSD gprof alapján, copyright 1983, a Kaliforniai Egyetem Kormányzója.\n"
 
 #: gprof.c:424
 #, c-format
 msgid "This program is free software.  This program has absolutely no warranty.\n"
-msgstr "Tämä ohjelma on vapaa ohjelmisto. Tällä ohjelmalla ei ehdottomasti ole mitään takuuta.\n"
+msgstr "Ez a program szabad szoftver. Ennek a programnak nincs semmiféle garanciája.\n"
 
 #: gprof.c:465
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
-msgstr "%s: tuntematon eheytystyyli ”%s”\n"
+msgstr "%s: ismeretlen „%s” összerakó stílus\n"
 
 #: gprof.c:488
 #, c-format
 msgid "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
-msgstr "%s: Vain joko ”--function-ordering” tai ”--file-ordering” saadaan määritellä.\n"
+msgstr "%s: Csak a --function-ordering és a --file-ordering egyike adható meg.\n"
 
 #: gprof.c:540
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
-msgstr "%s: valitettavasti tiedostomuotoa ”prof” ei vielä tueta\n"
+msgstr "%s: elnézést, a „prof” fájlformátum még nem támogatott\n"
 
 #: gprof.c:594
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
-msgstr "%s: ”gmon.out”-tiedosto puuttuu histogrammista\n"
+msgstr "%s: a gmon.out fájlból hiányzik a hisztogram\n"
 
 #: gprof.c:601
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
-msgstr "%s: ”gmon.out”-tiedosto puuttuu kutsugraafidatasta\n"
+msgstr "%s: a gmon.out fájlból hiányzik a hívási grafikon adat\n"
 
 #: hist.c:135
 #, c-format
@@ -472,9 +464,9 @@ msgid ""
 "%s: from '%s'\n"
 "%s: to '%s'\n"
 msgstr ""
-"%s: mittasuhdeyksikkö muuttui histogrammitietueiden välillä\n"
-"%s: arvosta ’%s’\n"
-"%s: arvoon ’%s’\n"
+"%s: a dimenzió mértékegységek megváltoztak a hisztogram rekordok között\n"
+"%s: erről: „%s”\n"
+"%s: erre: „%s”\n"
 
 #: hist.c:145
 #, c-format
@@ -483,29 +475,29 @@ msgid ""
 "%s: from '%c'\n"
 "%s: to '%c'\n"
 msgstr ""
-"%s: mittasuhdelyhenne muuttui histogrammitietueiden välillä\n"
-"%s: arvosta ’%c’\n"
-"%s: arvoon ’%c’\n"
+"%s: a dimenzió rövidítések megváltoztak a hisztogram rekordok között\n"
+"%s: erről: „%c”\n"
+"%s: erre: „%c”\n"
 
 #: hist.c:159
 #, c-format
 msgid "%s: different scales in histogram records"
-msgstr "%s: histogrammitietueissa on erilaiset skaalat"
+msgstr "%s: eltérő méretezések a hisztogram rekordokban"
 
 #: hist.c:196
 #, c-format
 msgid "%s: overlapping histogram records\n"
-msgstr "%s: histogrammitietueet menevät päällekkäin\n"
+msgstr "%s: átfedő hisztogram rekordok\n"
 
 #: hist.c:230
 #, c-format
 msgid "%s: %s: unexpected EOF after reading %u of %u samples\n"
-msgstr "%s: %s: odottamaton tiedoston loppumerkki, kun oli luettu %u kaikkiaan %u näytteestä\n"
+msgstr "%s: %s: nem várt fájlvége %u / %u minta olvasása után\n"
 
 #: hist.c:467
 #, c-format
 msgid "%c%c/call"
-msgstr "%c%c/kutsu"
+msgstr "%c%c/hívás"
 
 #: hist.c:475
 #, c-format
@@ -513,7 +505,7 @@ msgid ""
 " for %.2f%% of %.2f %s\n"
 "\n"
 msgstr ""
-" kohteelle %.2f%% / %.2f %s\n"
+" ehhez: %.2f%% / %.2f %s\n"
 "\n"
 
 #: hist.c:481
@@ -523,7 +515,7 @@ msgid ""
 "Each sample counts as %g %s.\n"
 msgstr ""
 "\n"
-"Jokainen näyte lasketaan arvona %g %s.\n"
+"Minden minta így számít: %g %s.\n"
 
 #: hist.c:486
 #, c-format
@@ -531,28 +523,28 @@ msgid ""
 " no time accumulated\n"
 "\n"
 msgstr ""
-" ei kerääntynyttä aikaa\n"
+" nincs felhalmozott idő\n"
 "\n"
 
 #: hist.c:493
 msgid "cumulative"
-msgstr "kumulatiivinen"
+msgstr "felhalmozott"
 
 #: hist.c:493
 msgid "self  "
-msgstr "itse  "
+msgstr "saját  "
 
 #: hist.c:493
 msgid "total "
-msgstr "yhteensä "
+msgstr "összesen "
 
 #: hist.c:496
 msgid "time"
-msgstr "aika"
+msgstr "idő"
 
 #: hist.c:496
 msgid "calls"
-msgstr "kutsut"
+msgstr "hívások"
 
 #: hist.c:585
 #, c-format
@@ -565,39 +557,39 @@ msgstr ""
 "\n"
 "\n"
 "\n"
-"litteä profiili:\n"
+"egyszerű profil:\n"
 
 #: hist.c:591
 #, c-format
 msgid "Flat profile:\n"
-msgstr "Litteä profiili:\n"
+msgstr "Egyszerű profil:\n"
 
 #: hist.c:712
 #, c-format
 msgid "%s: found a symbol that covers several histogram records"
-msgstr "%s: löydetty symboli, joka kattaa useita histogrammitietueita"
+msgstr "%s: egy olyan szimbólum található, amely számos hisztogram rekordot lefed"
 
 #: mips.c:71
 #, c-format
 msgid "[find_call] 0x%lx: jal"
-msgstr "[etsi_kutsu] 0x%lx: jal-käsky"
+msgstr "[find_call] 0x%lx: jal"
 
 #: mips.c:99
 #, c-format
 msgid "[find_call] 0x%lx: jalr\n"
-msgstr "[etsi_kutsu] 0x%lx: jalr-käsky (epäsuora kutsu)\n"
+msgstr "[find_call] 0x%lx: jalr\n"
 
 #: source.c:162
 #, c-format
 msgid "%s: could not locate `%s'\n"
-msgstr "%s: kohteen ”%s” paikantaminen epäonnistui\n"
+msgstr "%s: nem található: „%s”\n"
 
 #: source.c:237
 #, c-format
 msgid "*** File %s:\n"
-msgstr "*** Tiedosto %s:\n"
+msgstr "*** Fájl %s:\n"
 
 #: utils.c:106
 #, c-format
 msgid " <cycle %d>"
-msgstr " <jakso %d>"
+msgstr " <%d. ciklus>"
