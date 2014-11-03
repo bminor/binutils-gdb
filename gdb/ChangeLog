@@ -1,3 +1,20 @@
+2014-11-02  Victor Kamensky  <victor.kamensky@linaro.org>
+
+	* dwarf2loc.c (read_pieced_value): Do big endian
+	processing only if gdb_regnum is not -1.
+	(write_pieced_value): Ditto.
+
+2014-11-02  Victor Kamensky  <victor.kamensky@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_init_abi): Use
+	info.byte_order_for_code to choose endianity of breakpoint
+	instructions snippets.
+
+2014-11-02  Victor Kamensky  <victor.kamensky@linaro.org>
+
+	* arm-tdep.c (extract_arm_insn): Use
+	gdbarch_byte_order_for_code to read arm instruction.
+
 2014-11-02  Doug Evans  <xdje42@gmail.com>
 
 	* mdebugread.c (parse_procedure): Delete unnecessary forward decl.
