@@ -1,3 +1,8 @@
+2014-11-02  Doug Evans  <xdje42@gmail.com>
+
+	* xcoffread.c (process_linenos): Delete unnecessary zeroing of
+	main_subfile before returning.
+
 2014-10-31  Doug Evans  <xdje42@gmail.com>
 
 	* objfiles.h (ALL_PSPACE_OBJFILES_SAFE): Delete, unused.
