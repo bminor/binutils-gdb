@@ -1,5 +1,9 @@
 2014-11-02  Doug Evans  <xdje42@gmail.com>
 
+	* mdebugread.c (parse_procedure): Delete unnecessary forward decl.
+
+2014-11-02  Doug Evans  <xdje42@gmail.com>
+
 	* xcoffread.c (process_linenos): Delete unnecessary zeroing of
 	main_subfile before returning.
 

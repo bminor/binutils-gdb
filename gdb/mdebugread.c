@@ -1919,8 +1919,6 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
    to look for the function which contains the MDEBUG_EFI_SYMBOL_NAME symbol
    in question, or NULL to use top_stack->cur_block.  */
 
-static void parse_procedure (PDR *, struct symtab *, struct partial_symtab *);
-
 static void
 parse_procedure (PDR *pr, struct symtab *search_symtab,
 		 struct partial_symtab *pst)
