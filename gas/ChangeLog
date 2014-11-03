@@ -1,3 +1,8 @@
+2014-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (msp430_srcoperand): Fix range test for
+	20-bit values.
+
 2014-10-31  Andrew Pinski  <apinski@cavium.com>
             Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
 
