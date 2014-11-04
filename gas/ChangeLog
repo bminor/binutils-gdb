@@ -1,3 +1,9 @@
+2014-11-10  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	Apply trunk patch:
+	* config/tc-mips.c (mips_elf_final_processing): Add INSN_ISA32R6
+	and INSN_ISA64R6 support.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Apply trunk patch:

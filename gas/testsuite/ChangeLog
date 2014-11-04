@@ -1,3 +1,10 @@
+2014-11-10  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	Apply trunk patch:
+	* gas/mips/elf_arch_mips32r6.d: New file.
+	* gas/mips/elf_arch_mips64r6.d: New file.
+	* gas/mips/mips.exp: Run the new tests.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Apply trunk patch:

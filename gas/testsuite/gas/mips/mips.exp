@@ -867,10 +867,12 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "elf_arch_mips32r2"
     run_dump_test "elf_arch_mips32r3"
     run_dump_test "elf_arch_mips32r5"
+    run_dump_test "elf_arch_mips32r6"
     run_dump_test "elf_arch_mips64"
     run_dump_test "elf_arch_mips64r2"
     run_dump_test "elf_arch_mips64r3"
     run_dump_test "elf_arch_mips64r5"
+    run_dump_test "elf_arch_mips64r6"
 
     # Verify that ASE markings are handled properly.
     run_dump_test "elf_ase_mips16"

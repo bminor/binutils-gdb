@@ -1,3 +1,9 @@
+2014-11-10  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	Apply trunk patch:
+	* ld-mips-elf/abiflags-strip10-ph.d: New file.
+	* ld-mips-elf/mips-eld.exp: Run the new test.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Apply trunk patch:
