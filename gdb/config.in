@@ -330,9 +330,6 @@
 /* Define if Python interpreter is being linked in. */
 #undef HAVE_PYTHON
 
-/* Define to 1 if you have the `readlink' function. */
-#undef HAVE_READLINK
-
 /* Define to 1 if you have the `realpath' function. */
 #undef HAVE_REALPATH
 

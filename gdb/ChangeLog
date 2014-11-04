@@ -1,5 +1,12 @@
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
+	* configure.ac (AC_CHECK_FUNCS): Remove readlink.
+	* config.in, configure: Re-generate.
+	* inf-child.c (inf_child_fileio_readlink): Don't check
+	HAVE_READLINK is defined.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add readlink.
 	* gnulib/aclocal.m4: Re-generated.
 	* gnulib/config.in: Likewise.
