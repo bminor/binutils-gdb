@@ -23,24 +23,6 @@ if [support_complex_tests] {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $compile_flags] != "" } {
-     untested callfuncs.exp
-     return -1
-}
-
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-
-if [get_compiler_info] {
-    return -1
-}
-
-if {$hp_aCC_compiler} {
-    set prototypes 1
-} else {
-    set prototypes 0
-}
-
 # Some targets can't do function calls, so don't even bother with this
 # test.
 if [target_info exists gdb,cannot_call_functions] {
@@ -57,7 +39,6 @@ if [target_info exists gdb,cannot_call_functions] {
 # (computed in the inferior) is 1 for true and 0 for false.
 
 proc do_function_calls {} {
-    global prototypes
     global gdb_prompt
 
     # We need to up this because this can be really slow on some boards.
@@ -117,15 +98,6 @@ proc do_function_calls {} {
 	# Test passing of arguments which might not be widened.
 	gdb_test "p t_float_values2(0.0,0.0)" " = 0"
 
-	# Although PR 5318 mentions SunOS specifically, this seems
-	# to be a generic problem on quite a few platforms.
-	if $prototypes then {
-	    setup_xfail "sparc-*-*" "mips*-*-*" 5318
-	    if { ! [test_compiler_info gcc-*-*] } then {
-		setup_xfail "i*86-*-sysv4*" 5318
-	    }
-	}
-        
 	gdb_test "p t_float_values2(3.14159,float_val2)" " = 1"
 
 	gdb_test "p t_float_many_args (float_val1, float_val2, float_val3, float_val4, float_val5, float_val6, float_val7, float_val8, float_val9, float_val10, float_val11, float_val12, float_val13, float_val14, float_val15)" " = 1" "Call function with many float arguments."
@@ -321,23 +293,18 @@ proc fetch_all_registers {test} {
 proc rerun_and_prepare {} {
     global hp_aCC_compiler
 
+    if { ![runto_main] } {
+	gdb_suppress_tests
+    }
     if { $hp_aCC_compiler } {
 	# Do not set language explicitly to 'C'.  This will cause aCC
 	# tests to fail because promotion rules are different.  Just let
 	# the language be set to the default.
-
-	if { ![runto_main] } {
-	    gdb_suppress_tests
-	}
-
 	# However, turn off overload-resolution for aCC.  Having it on causes
 	# a lot of failures.
 
 	gdb_test_no_output "set overload-resolution 0"
     } else {
-	if { ![runto_main] } {
-	    gdb_suppress_tests
-	}
 	gdb_test_no_output "set language c"
     }
 
@@ -351,14 +318,7 @@ proc rerun_and_prepare {} {
 	"next to t_structs_c"
 }
 
-
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
+proc perform_all_tests {} {
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
 gdb_test_no_output "set width 0"
@@ -538,3 +498,14 @@ gdb_test "print callfunc (Lcallfunc, 5)" " = 12"
 
 # Regression test for function pointer cast.
 gdb_test "print *((int *(*) (void)) voidfunc)()" " = 23"
+}
+
+# Perform all tests with and without function prototypes.
+
+if { ![prepare_for_testing ${testfile}.exp $testfile $srcfile "$compile_flags additional_flags=-DPROTOTYPES"] } {
+    perform_all_tests
+}
+
+if { ![prepare_for_testing ${testfile}.exp $testfile $srcfile "$compile_flags additional_flags=-DNO_PROTOTYPES"] } {
+    with_test_prefix "noproto" perform_all_tests
+}

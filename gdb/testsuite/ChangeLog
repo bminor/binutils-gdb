@@ -1,5 +1,14 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/callfuncs.exp: Remove 'prototypes' variable.  Move main
+	logic into perform_all_tests() and invoke it with and without
+	function header prototypes.
+	(do_function_calls): Remove conditional XFAIL for PR 5318.
+	(rerun_and_prepare): Remove duplicate code.
+	(perform_all_tests): New.  Main logic moved here.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/callfuncs.c (t_float_many_args): Fix syntax error in
 	code guarded by #ifdef NO_PROTOTYPES.
 	(t_double_many_args): Likewise.
