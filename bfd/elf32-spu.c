@@ -1828,6 +1828,18 @@ ovl_mgr_pread (struct bfd *abfd ATTRIBUTE_UNUSED,
   return count;
 }
 
+static int
+ovl_mgr_stat (struct bfd *abfd ATTRIBUTE_UNUSED,
+	      void *stream,
+	      struct stat *sb)
+{
+  struct _ovl_stream *os = (struct _ovl_stream *) stream;
+
+  memset (sb, 0, sizeof (*sb));
+  sb->st_size = (const char *) os->end - (const char *) os->start;
+  return 0;
+}
+
 bfd_boolean
 spu_elf_open_builtin_lib (bfd **ovl_bfd, const struct _ovl_stream *stream)
 {
@@ -1837,7 +1849,7 @@ spu_elf_open_builtin_lib (bfd **ovl_bfd, const struct _ovl_stream *stream)
 			      (void *) stream,
 			      ovl_mgr_pread,
 			      NULL,
-			      NULL);
+			      ovl_mgr_stat);
   return *ovl_bfd != NULL;
 }
 

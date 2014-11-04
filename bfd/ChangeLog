@@ -1,3 +1,8 @@
+2014-11-04  Alan Modra  <amodra@gmail.com>
+
+	* elf32-spu.c (ovl_mgr_stat): New function.
+	(spu_elf_open_builtin_lib): Pass to bfd_openr_iovec.
+
 2014-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* elf32-avr.c (elf32_avr_relax_delete_bytes): During linker
