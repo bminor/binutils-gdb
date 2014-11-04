@@ -1,3 +1,9 @@
+2014-11-05  Alan Modra  <amodra@gmail.com>
+
+	* charset.c (convert_between_encodings): Shrink obstack using
+	obstack_blank_fast.
+	* minsyms.c (install_minimal_symbols): Likewise.
+
 2014-11-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tui/tui.c (tui_enable): Pass stdout and stdin to newterm.

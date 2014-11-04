@@ -506,7 +506,7 @@ convert_between_encodings (const char *from, const char *to,
 
       /* Now make sure that the object on the obstack only includes
 	 bytes we have converted.  */
-      obstack_blank (output, - (int) outleft);
+      obstack_blank_fast (output, -outleft);
 
       if (r == (size_t) -1)
 	{
