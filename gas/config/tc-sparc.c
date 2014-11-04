@@ -863,9 +863,9 @@ cmp_reg_entry (const void *parg, const void *qarg)
 void
 md_begin (void)
 {
-  register const char *retval = NULL;
+  const char *retval = NULL;
   int lose = 0;
-  register unsigned int i = 0;
+  unsigned int i = 0;
 
   /* We don't get a chance to initialize anything before md_parse_option
      is called, and it may not be called, so handle default initialization

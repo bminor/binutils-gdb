@@ -1,5 +1,36 @@
 2014-11-04  Alan Modra  <amodra@gmail.com>
 
+	* expr.c (expr_symbol_where): Don't use register keyword.
+	* app.c (app_push, app_pop, do_scrub_chars): Likewise.
+	* ecoff.c (add_string, add_ecoff_symbol, add_aux_sym_symint,
+	add_aux_sym_rndx, add_aux_sym_tir, add_procedure, add_file,
+	ecoff_build_lineno, ecoff_setup_ext, allocate_cluster.
+	allocate_scope, allocate_vlinks, allocate_shash,
+	allocate_thash, allocate_tag, allocate_forward, allocate_thead,
+	allocate_lineno_list): Likewise.
+	* frags.c (frag_more, frag_var, frag_variant, frag_wane): Likewise.
+	* input-file.c (input_file_push, input_file_pop): Likewise.
+	* input-scrub.c (input_scrub_push, input_scrub_next_buffer): Likewise.
+	* subsegs.c (subseg_change): Likewise.
+	* symbols.c (colon, symbol_table_insert, symbol_find_or_make)
+	(dollar_label_name, fb_label_name): Likewise.
+	* write.c (relax_align): Likewise.
+	* config/tc-alpha.c (s_alpha_pdesc): Likewise.
+	* config/tc-bfin.c (bfin_s_bss): Likewise.
+	* config/tc-i860.c (md_estimate_size_before_relax): Likewise.
+	* config/tc-m68hc11.c (md_convert_frag): Likewise.
+	* config/tc-m68k.c (m68k_ip, crack_operand): Likewise.
+	(md_convert_frag_1, s_even): Likewise.
+	* config/tc-mips.c (mips_clear_insn_labels): Likewise.
+	* config/tc-mn10200.c (md_begin): Likewise.
+	* config/tc-s390.c (s390_setup_opcodes, md_begin): Likewise.
+	* config/tc-sh.c (sh_elf_cons): Likewise.
+	* config/tc-tic4x.c (tic4x_cons, tic4x_stringer): Likewise.
+	* config/m68k-parse.y (m68k_reg_parse): Likewise.  Convert from K&R.
+	(yylex, m68k_ip_op, yyerror): Convert from K&R.
+
+2014-11-04  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-d10v.c (find_opcode): Call frag_now_fix_octets rather
 	than equivalent obstack_next_free expression.
 	* config/tc-d30v.c (find_format): Likewise.

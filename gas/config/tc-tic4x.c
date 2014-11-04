@@ -831,7 +831,7 @@ tic4x_globl (int ignore ATTRIBUTE_UNUSED)
 static void 
 tic4x_cons (int bytes)
 {
-  register unsigned int c;
+  unsigned int c;
   do
     {
       SKIP_WHITESPACE ();
@@ -875,7 +875,7 @@ static void
 tic4x_stringer (int append_zero)
 {
   int bytes;
-  register unsigned int c;
+  unsigned int c;
 
   bytes = 0;
   do

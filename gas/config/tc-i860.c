@@ -1028,7 +1028,7 @@ md_number_to_chars (char *buf, valueT val, int n)
 
 /* This should never be called for i860.  */
 int
-md_estimate_size_before_relax (register fragS *fragP ATTRIBUTE_UNUSED,
+md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
 			       segT segtype ATTRIBUTE_UNUSED)
 {
   as_fatal (_("relaxation not supported\n"));

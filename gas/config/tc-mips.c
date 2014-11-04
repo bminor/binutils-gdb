@@ -1861,7 +1861,7 @@ static void mips_compressed_mark_labels (void);
 static inline void
 mips_clear_insn_labels (void)
 {
-  register struct insn_label_list **pl;
+  struct insn_label_list **pl;
   segment_info_type *si;
 
   if (now_seg)

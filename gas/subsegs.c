@@ -55,7 +55,7 @@ subsegs_begin (void)
  * segment context correct.
  */
 void
-subseg_change (register segT seg, register int subseg)
+subseg_change (segT seg, int subseg)
 {
   segment_info_type *seginfo = seg_info (seg);
   now_seg = seg;
