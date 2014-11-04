@@ -1,3 +1,7 @@
+2014-11-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tui/tui.c (tui_enable): Pass stdout and stdin to newterm.
+
 2014-11-04  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (breakpoint_thread_match): Delete function.

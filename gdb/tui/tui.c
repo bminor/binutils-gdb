@@ -424,7 +424,7 @@ tui_enable (void)
       if (!ui_file_isatty (gdb_stdout))
 	error (_("Cannot enable the TUI when output is not a terminal"));
 
-      s = newterm (NULL, NULL, NULL);
+      s = newterm (NULL, stdout, stdin);
       if (s == NULL)
 	{
 	  error (_("Cannot enable the TUI: error opening terminal [TERM=%s]"),
