@@ -179,8 +179,9 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
     case COMPRESS_SECTION_NONE:
       /* PR binutils/17512: Avoid malloc or file reading errors due to
 	 ridiculous section sizes.  But ignore linker created objects
-	 with no contents (yet).  */
+	 and bfds with no contents (yet).  */
       if (bfd_get_size (abfd) > 0
+	  && (sec->flags & SEC_LINKER_CREATED) == 0
 	  && sz > (bfd_size_type) bfd_get_size (abfd))
 	return FALSE;
 

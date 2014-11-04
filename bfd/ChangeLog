@@ -1,5 +1,9 @@
 2014-11-04  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* compress.c (bfd_get_full_section_contents): Improve test for
+	linker created objects.
+
 	PR binutils/17533
 	* archive.c (_bfd_slurp_extended_name_table): Handle archives with
 	corrupt extended name tables.
