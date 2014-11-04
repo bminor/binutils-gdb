@@ -11,6 +11,17 @@
 	(process_dynamic_section): Change an assert to an error message.
 	(process_symbol_table): Handle corrupt histograms.
 
+	(get_32bit_program_headers): Verify program header entry size
+	before reading in the program headers.
+	(get_64bit_program_headers): Likewise.
+	(get_unwind_section_word): Do nothing if no section was provided.
+	Fail if the offset is outside of the section.
+	(print_dynamic_symbol): Catch out of range symbol indicies.
+	(process_mips_specific): Likewise.
+	(process_attributes): Make sure that there is enough space left in
+	the section before attempting to read the length of the next
+	attribute.
+
 2014-11-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

@@ -4104,21 +4104,31 @@ process_file_header (void)
   return 1;
 }
 
-
-static int
+static bfd_boolean
 get_32bit_program_headers (FILE * file, Elf_Internal_Phdr * pheaders)
 {
   Elf32_External_Phdr * phdrs;
   Elf32_External_Phdr * external;
   Elf_Internal_Phdr *   internal;
   unsigned int i;
+  unsigned int size = elf_header.e_phentsize;
+  unsigned int num  = elf_header.e_phnum;
+
+  /* PR binutils/17531: Cope with unexpected section header sizes.  */
+  if (size == 0 || num == 0)
+    return FALSE;
+  if (size < sizeof * phdrs)
+    {
+      error (_("The e_phentsize field in the ELF header is less than the size of an ELF program header\n"));
+      return FALSE;
+    }
+  if (size > sizeof * phdrs)
+    warn (_("The e_phentsize field in the ELF header is larger than the size of an ELF program header\n"));
 
   phdrs = (Elf32_External_Phdr *) get_data (NULL, file, elf_header.e_phoff,
-                                            elf_header.e_phentsize,
-                                            elf_header.e_phnum,
-                                            _("program headers"));
-  if (!phdrs)
-    return 0;
+                                            size, num, _("program headers"));
+  if (phdrs == NULL)
+    return FALSE;
 
   for (i = 0, internal = pheaders, external = phdrs;
        i < elf_header.e_phnum;
@@ -4135,24 +4145,34 @@ get_32bit_program_headers (FILE * file, Elf_Internal_Phdr * pheaders)
     }
 
   free (phdrs);
-
-  return 1;
+  return TRUE;
 }
 
-static int
+static bfd_boolean
 get_64bit_program_headers (FILE * file, Elf_Internal_Phdr * pheaders)
 {
   Elf64_External_Phdr * phdrs;
   Elf64_External_Phdr * external;
   Elf_Internal_Phdr *   internal;
   unsigned int i;
+  unsigned int size = elf_header.e_phentsize;
+  unsigned int num  = elf_header.e_phnum;
+
+  /* PR binutils/17531: Cope with unexpected section header sizes.  */
+  if (size == 0 || num == 0)
+    return FALSE;
+  if (size < sizeof * phdrs)
+    {
+      error (_("The e_phentsize field in the ELF header is less than the size of an ELF program header\n"));
+      return FALSE;
+    }
+  if (size > sizeof * phdrs)
+    warn (_("The e_phentsize field in the ELF header is larger than the size of an ELF program header\n"));
 
   phdrs = (Elf64_External_Phdr *) get_data (NULL, file, elf_header.e_phoff,
-                                            elf_header.e_phentsize,
-                                            elf_header.e_phnum,
-                                            _("program headers"));
+                                            size, num, _("program headers"));
   if (!phdrs)
-    return 0;
+    return FALSE;
 
   for (i = 0, internal = pheaders, external = phdrs;
        i < elf_header.e_phnum;
@@ -4169,8 +4189,7 @@ get_64bit_program_headers (FILE * file, Elf_Internal_Phdr * pheaders)
     }
 
   free (phdrs);
-
-  return 1;
+  return TRUE;
 }
 
 /* Returns 1 if the program headers were read into `program_headers'.  */
@@ -6903,6 +6922,9 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
   unsigned int word;
   bfd_boolean wrapped;
 
+  if (sec == NULL || arm_sec == NULL)
+    return FALSE;
+
   addr->section = SHN_UNDEF;
   addr->offset = 0;
 
@@ -6956,6 +6978,10 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
 
   /* If there is no unwind data we can do nothing.  */
   if (arm_sec->data == NULL)
+    return FALSE;
+
+  /* If the offset is invalid then fail.  */
+  if (word_offset > sec->sh_size - 4)
     return FALSE;
 
   /* Get the word at the required offset.  */
@@ -9585,7 +9611,7 @@ get_symbol_index_type (unsigned int type)
       else if (type >= SHN_LORESERVE)
 	sprintf (buff, "RSV[0x%04x]", type & 0xffff);
       else if (type >= elf_header.e_shnum)
-	sprintf (buff, "bad section index[%3d]", type);
+	sprintf (buff, _("bad section index[%3d]"), type);
       else
 	sprintf (buff, "%3d", type);
       break;
@@ -9637,12 +9663,18 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
   Elf_Internal_Sym * psym;
   int n;
 
-  psym = dynamic_symbols + si;
-
   n = print_vma (si, DEC_5);
   if (n < 5)
     fputs (&"     "[n], stdout);
   printf (" %3lu: ", hn);
+
+  if (dynamic_symbols == NULL || si >= num_dynamic_syms)
+    {
+      printf (_("<No info available>\n"));
+      return;
+    }
+
+  psym = dynamic_symbols + si;
   print_vma (psym->st_value, LONG_HEX);
   putchar (' ');
   print_vma (psym->st_size, DEC_5);
@@ -10313,6 +10345,7 @@ process_syminfo (FILE * file ATTRIBUTE_UNUSED)
       unsigned short int flags = dynamic_syminfo[i].si_flags;
 
       printf ("%4d: ", i);
+      assert (i <  num_dynamic_syms);
       if (VALID_DYNAMIC_NAME (dynamic_symbols[i].st_name))
 	print_symbol (30, GET_DYNAMIC_NAME (dynamic_symbols[i].st_name));
       else
@@ -12426,6 +12459,7 @@ display_raw_attribute (unsigned char * p, unsigned char * end)
   unsigned long addr = 0;
   size_t bytes = end - p;
 
+  assert (end > p);
   while (bytes)
     {
       int j;
@@ -12577,6 +12611,11 @@ process_attributes (FILE * file,
 	      bfd_boolean public_section;
 	      bfd_boolean gnu_section;
 
+	      if (len <= 4)
+		{
+		  error (_("Tag section ends prematurely\n"));
+		  break;
+		}
 	      section_len = byte_get (p, 4);
 	      p += 4;
 
@@ -12611,18 +12650,36 @@ process_attributes (FILE * file,
 
 	      p += namelen;
 	      section_len -= namelen;
+
 	      while (section_len > 0)
 		{
-		  int tag = *(p++);
+		  int tag;
 		  int val;
 		  bfd_vma size;
 
+		  /* PR binutils/17531: Safe handling of corrupt files.  */
+		  if (section_len < 6)
+		    {
+		      error (_("Unused bytes at end of section\n"));
+		      section_len = 0;
+		      break;
+		    }
+
+		  tag = *(p++);
 		  size = byte_get (p, 4);
 		  if (size > section_len)
 		    {
 		      error (_("Bad subsection length (%u > %u)\n"),
 			      (unsigned) size, (unsigned) section_len);
 		      size = section_len;
+		    }
+		  /* PR binutils/17531: Safe handling of corrupt files.  */
+		  if (size < 6)
+		    {
+		      error (_("Bad subsection length (%u < 6)\n"),
+			      (unsigned) size);
+		      section_len = 0;
+		      break;
 		    }
 
 		  section_len -= size;
@@ -13349,15 +13406,22 @@ process_mips_specific (FILE * file)
 
       for (cnt = 0; cnt < conflictsno; ++cnt)
 	{
-	  Elf_Internal_Sym * psym = & dynamic_symbols[iconf[cnt]];
-
 	  printf ("%5lu: %8lu  ", (unsigned long) cnt, iconf[cnt]);
-	  print_vma (psym->st_value, FULL_HEX);
-	  putchar (' ');
-	  if (VALID_DYNAMIC_NAME (psym->st_name))
-	    print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
+
+	  if (iconf[cnt] >= num_dynamic_syms)
+	    printf (_("<corrupt symbol index>"));
 	  else
-	    printf (_("<corrupt: %14ld>"), psym->st_name);
+	    {
+	      Elf_Internal_Sym * psym;
+
+	      psym = & dynamic_symbols[iconf[cnt]];
+	      print_vma (psym->st_value, FULL_HEX);
+	      putchar (' ');
+	      if (VALID_DYNAMIC_NAME (psym->st_name))
+		print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
+	      else
+		printf (_("<corrupt: %14ld>"), psym->st_name);
+	    }
 	  putchar ('\n');
 	}
 
@@ -13432,21 +13496,31 @@ process_mips_specific (FILE * file)
 		  _("Ndx"), _("Name"));
 
 	  sym_width = (is_32bit_elf ? 80 : 160) - 28 - addr_size * 6 - 1;
+
 	  for (i = gotsym; i < symtabno; i++)
 	    {
-	      Elf_Internal_Sym * psym;
-
-	      psym = dynamic_symbols + i;
 	      ent = print_mips_got_entry (data, pltgot, ent);
 	      printf (" ");
-	      print_vma (psym->st_value, LONG_HEX);
-	      printf (" %-7s %3s ",
-		      get_symbol_type (ELF_ST_TYPE (psym->st_info)),
-		      get_symbol_index_type (psym->st_shndx));
-	      if (VALID_DYNAMIC_NAME (psym->st_name))
-		print_symbol (sym_width, GET_DYNAMIC_NAME (psym->st_name));
+
+	      if (dynamic_symbols == NULL)
+		printf (_("<no dynamic symbols>"));
+	      else if (i < num_dynamic_syms)
+		{
+		  Elf_Internal_Sym * psym = dynamic_symbols + i;
+
+		  print_vma (psym->st_value, LONG_HEX);
+		  printf (" %-7s %3s ",
+			  get_symbol_type (ELF_ST_TYPE (psym->st_info)),
+			  get_symbol_index_type (psym->st_shndx));
+
+		  if (VALID_DYNAMIC_NAME (psym->st_name))
+		    print_symbol (sym_width, GET_DYNAMIC_NAME (psym->st_name));
+		  else
+		    printf (_("<corrupt: %14ld>"), psym->st_name);
+		}
 	      else
-		printf (_("<corrupt: %14ld>"), psym->st_name);
+		printf (_("<symbol index %lu exceeds number of dynamic symbols>"), i);
+
 	      printf ("\n");
 	    }
 	  printf ("\n");
@@ -13505,19 +13579,26 @@ process_mips_specific (FILE * file)
       sym_width = (is_32bit_elf ? 80 : 160) - 17 - addr_size * 6 - 1;
       for (i = 0; i < count; i++)
 	{
-	  Elf_Internal_Sym * psym;
+	  unsigned long index = get_reloc_symindex (rels[i].r_info);
 
-	  psym = dynamic_symbols + get_reloc_symindex (rels[i].r_info);
 	  ent = print_mips_pltgot_entry (data, mips_pltgot, ent);
 	  printf (" ");
-	  print_vma (psym->st_value, LONG_HEX);
-	  printf (" %-7s %3s ",
-		  get_symbol_type (ELF_ST_TYPE (psym->st_info)),
-		  get_symbol_index_type (psym->st_shndx));
-	  if (VALID_DYNAMIC_NAME (psym->st_name))
-	    print_symbol (sym_width, GET_DYNAMIC_NAME (psym->st_name));
+
+	  if (index >= num_dynamic_syms)
+	    printf (_("<corrupt symbol index: %lu>"), index);
 	  else
-	    printf (_("<corrupt: %14ld>"), psym->st_name);
+	    {
+	      Elf_Internal_Sym * psym = dynamic_symbols + index;
+
+	      print_vma (psym->st_value, LONG_HEX);
+	      printf (" %-7s %3s ",
+		      get_symbol_type (ELF_ST_TYPE (psym->st_info)),
+		      get_symbol_index_type (psym->st_shndx));
+	      if (VALID_DYNAMIC_NAME (psym->st_name))
+		print_symbol (sym_width, GET_DYNAMIC_NAME (psym->st_name));
+	      else
+		printf (_("<corrupt: %14ld>"), psym->st_name);
+	    }
 	  printf ("\n");
 	}
       printf ("\n");
