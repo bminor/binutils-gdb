@@ -1,3 +1,8 @@
+2014-11-05  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/abiflags-strip10-ph.d: New file.
+	* ld-mips-elf/mips-eld.exp: Run the new test.
+
 2014-10-30  Will Newton  <will.newton@linaro.org>
 
 	* ld-unique/unique.exp: Use a wider glob for matching ARM

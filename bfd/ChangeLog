@@ -1,3 +1,8 @@
+2014-11-05  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elfxx-mips.c (update_mips_abiflags_isa): Add E_MIPS_ARCH_32R6
+	and E_MIPS_ARCH_64R6 support.
+
 2014-11-05  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

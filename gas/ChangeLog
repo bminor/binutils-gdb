@@ -1,3 +1,8 @@
+2014-11-05  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_elf_final_processing): Add INSN_ISA32R6
+	and INSN_ISA64R6 support.
+
 2014-11-04  Alan Modra  <amodra@gmail.com>
 
 	* expr.c (expr_symbol_where): Don't use register keyword.

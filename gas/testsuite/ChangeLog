@@ -1,3 +1,9 @@
+2014-05-11  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/elf_arch_mips32r6.d: New file.
+	* gas/mips/elf_arch_mips64r6.d: New file.
+	* gas/mips/mips.exp: Run the new tests.
+
 2014-10-31  Andrew Pinski  <apinski@cavium.com>
             Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
 

@@ -13959,6 +13959,10 @@ update_mips_abiflags_isa (bfd *abfd, Elf_Internal_ABIFlags_v0 *abiflags)
       if (abiflags->isa_rev < 2)
 	abiflags->isa_rev = 2;
       break;
+    case E_MIPS_ARCH_32R6:
+      abiflags->isa_level = 32;
+      abiflags->isa_rev = 6;
+      break;
     case E_MIPS_ARCH_64:
       abiflags->isa_level = 64;
       abiflags->isa_rev = 1;
@@ -13968,6 +13972,10 @@ update_mips_abiflags_isa (bfd *abfd, Elf_Internal_ABIFlags_v0 *abiflags)
       abiflags->isa_level = 64;
       if (abiflags->isa_rev < 2)
 	abiflags->isa_rev = 2;
+      break;
+    case E_MIPS_ARCH_64R6:
+      abiflags->isa_level = 64;
+      abiflags->isa_rev = 6;
       break;
     default:
       (*_bfd_error_handler)
