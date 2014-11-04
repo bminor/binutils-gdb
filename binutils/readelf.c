@@ -13579,16 +13579,16 @@ process_mips_specific (FILE * file)
       sym_width = (is_32bit_elf ? 80 : 160) - 17 - addr_size * 6 - 1;
       for (i = 0; i < count; i++)
 	{
-	  unsigned long index = get_reloc_symindex (rels[i].r_info);
+	  unsigned long idx = get_reloc_symindex (rels[i].r_info);
 
 	  ent = print_mips_pltgot_entry (data, mips_pltgot, ent);
 	  printf (" ");
 
-	  if (index >= num_dynamic_syms)
-	    printf (_("<corrupt symbol index: %lu>"), index);
+	  if (idx >= num_dynamic_syms)
+	    printf (_("<corrupt symbol index: %lu>"), idx);
 	  else
 	    {
-	      Elf_Internal_Sym * psym = dynamic_symbols + index;
+	      Elf_Internal_Sym * psym = dynamic_symbols + idx;
 
 	      print_vma (psym->st_value, LONG_HEX);
 	      printf (" %-7s %3s ",

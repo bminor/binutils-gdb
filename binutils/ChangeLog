@@ -1,3 +1,7 @@
+2014-11-04  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (process_mips_specific): Rename index to idx.
+
 2014-11-04  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17531
