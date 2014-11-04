@@ -1,3 +1,8 @@
+2014-11-04  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (breakpoint_thread_match): Delete function.
+	* breakpoint.h (breakpoint_thread_match): Delete declaration.
+
 2014-11-03  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR c++/17494

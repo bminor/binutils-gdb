@@ -1144,9 +1144,6 @@ extern int hardware_watchpoint_inserted_in_range (struct address_space *,
 						  CORE_ADDR addr,
 						  ULONGEST len);
 
-extern int breakpoint_thread_match (struct address_space *, 
-				    CORE_ADDR, ptid_t);
-
 /* Returns true if {ASPACE1,ADDR1} and {ASPACE2,ADDR2} represent the
    same breakpoint location.  In most targets, this can only be true
    if ASPACE1 matches ASPACE2.  On targets that have global
