@@ -370,7 +370,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      /* In effect, a pop of the printed-statics stack.  */
 
 	      void *free_to_ptr =
-		obstack_next_free (&dont_print_statmem_obstack) -
+		(char *) obstack_next_free (&dont_print_statmem_obstack) -
 		(obstack_final_size - statmem_obstack_initial_size);
 
 	      obstack_free (&dont_print_statmem_obstack,
@@ -385,7 +385,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      if (obstack_final_size > stat_array_obstack_initial_size)
 		{
 		  void *free_to_ptr =
-		    obstack_next_free (&dont_print_stat_array_obstack)
+		    (char *) obstack_next_free (&dont_print_stat_array_obstack)
 		    - (obstack_final_size
 		       - stat_array_obstack_initial_size);
 

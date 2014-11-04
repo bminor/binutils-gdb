@@ -3,6 +3,8 @@
 	* charset.c (convert_between_encodings): Shrink obstack using
 	obstack_blank_fast.
 	* minsyms.c (install_minimal_symbols): Likewise.
+	* cp-valprint.c (cp_print_value_fields): Cast obstack_next_free
+	to char* before doing pointer arithmetic.
 
 2014-11-04  Simon Marchi  <simon.marchi@ericsson.com>
 
