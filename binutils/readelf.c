@@ -316,8 +316,9 @@ get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
 
   if (fseek (file, archive_file_offset + offset, SEEK_SET))
     {
-      error (_("Unable to seek to 0x%lx for %s\n"),
-	     (unsigned long) archive_file_offset + offset, reason);
+      if (reason)
+	error (_("Unable to seek to 0x%lx for %s\n"),
+	       (unsigned long) archive_file_offset + offset, reason);
       return NULL;
     }
 
@@ -331,8 +332,9 @@ get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
 
       if (mvar == NULL)
 	{
-	  error (_("Out of memory allocating 0x%lx bytes for %s\n"),
-		 (unsigned long)(size * nmemb), reason);
+	  if (reason)
+	    error (_("Out of memory allocating 0x%lx bytes for %s\n"),
+		   (unsigned long)(size * nmemb), reason);
 	  return NULL;
 	}
 
@@ -341,8 +343,9 @@ get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
 
   if (fread (mvar, size, nmemb, file) != nmemb)
     {
-      error (_("Unable to read in 0x%lx bytes of %s\n"),
-	     (unsigned long)(size * nmemb), reason);
+      if (reason)
+	error (_("Unable to read in 0x%lx bytes of %s\n"),
+	       (unsigned long)(size * nmemb), reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -4482,26 +4485,46 @@ offset_from_vma (FILE * file, bfd_vma vma, bfd_size_type size)
 }
 
 
-static int
-get_32bit_section_headers (FILE * file, unsigned int num)
+/* Allocate memory and load the sections headers into the global pointer
+   SECTION_HEADERS.  If PROBE is true, this is just a probe and we do not
+   generate any error messages if the load fails.  */
+
+static bfd_boolean
+get_32bit_section_headers (FILE * file, bfd_boolean probe)
 {
   Elf32_External_Shdr * shdrs;
   Elf_Internal_Shdr *   internal;
   unsigned int i;
+  unsigned int size = elf_header.e_shentsize;
+  unsigned int num = probe ? 1 : elf_header.e_shnum;
+
+  /* PR binutils/17531: Cope with unexpected section header sizes.  */
+  if (size == 0 || num == 0)
+    return FALSE;
+  if (size < sizeof * shdrs)
+    {
+      if (! probe)
+	error (_("The e_shentsize field in the ELF header is less than the size of an ELF section header\n"));
+      return FALSE;
+    }
+  if (!probe && size > sizeof * shdrs)
+    warn (_("The e_shentsize field in the ELF header is larger than the size of an ELF section header\n"));
 
   shdrs = (Elf32_External_Shdr *) get_data (NULL, file, elf_header.e_shoff,
-                                            elf_header.e_shentsize, num,
-                                            _("section headers"));
-  if (!shdrs)
-    return 0;
+                                            size, num,
+					    probe ? NULL : _("section headers"));
+  if (shdrs == NULL)
+    return FALSE;
 
+  if (section_headers != NULL)
+    free (section_headers);
   section_headers = (Elf_Internal_Shdr *) cmalloc (num,
                                                    sizeof (Elf_Internal_Shdr));
-
   if (section_headers == NULL)
     {
-      error (_("Out of memory\n"));
-      return 0;
+      if (!probe)
+	error (_("Out of memory\n"));
+      return FALSE;
     }
 
   for (i = 0, internal = section_headers;
@@ -4521,30 +4544,45 @@ get_32bit_section_headers (FILE * file, unsigned int num)
     }
 
   free (shdrs);
-
-  return 1;
+  return TRUE;
 }
 
-static int
-get_64bit_section_headers (FILE * file, unsigned int num)
+static bfd_boolean
+get_64bit_section_headers (FILE * file, bfd_boolean probe)
 {
   Elf64_External_Shdr * shdrs;
   Elf_Internal_Shdr *   internal;
   unsigned int i;
+  unsigned int size = elf_header.e_shentsize;
+  unsigned int num = probe ? 1 : elf_header.e_shnum;
+
+  /* PR binutils/17531: Cope with unexpected section header sizes.  */
+  if (size == 0 || num == 0)
+    return FALSE;
+  if (size < sizeof * shdrs)
+    {
+      if (! probe)
+	error (_("The e_shentsize field in the ELF header is less than the size of an ELF section header\n"));
+      return FALSE;
+    }
+  if (! probe && size > sizeof * shdrs)
+    warn (_("The e_shentsize field in the ELF header is larger than the size of an ELF section header\n"));
 
   shdrs = (Elf64_External_Shdr *) get_data (NULL, file, elf_header.e_shoff,
-                                            elf_header.e_shentsize, num,
-                                            _("section headers"));
-  if (!shdrs)
-    return 0;
+                                            size, num,
+					    probe ? NULL : _("section headers"));
+  if (shdrs == NULL)
+    return FALSE;
 
+  if (section_headers != NULL)
+    free (section_headers);
   section_headers = (Elf_Internal_Shdr *) cmalloc (num,
                                                    sizeof (Elf_Internal_Shdr));
-
   if (section_headers == NULL)
     {
-      error (_("Out of memory\n"));
-      return 0;
+      if (! probe)
+	error (_("Out of memory\n"));
+      return FALSE;
     }
 
   for (i = 0, internal = section_headers;
@@ -4564,8 +4602,7 @@ get_64bit_section_headers (FILE * file, unsigned int num)
     }
 
   free (shdrs);
-
-  return 1;
+  return TRUE;
 }
 
 static Elf_Internal_Sym *
@@ -4998,10 +5035,10 @@ process_section_headers (FILE * file)
 
   if (is_32bit_elf)
     {
-      if (! get_32bit_section_headers (file, elf_header.e_shnum))
+      if (! get_32bit_section_headers (file, FALSE))
 	return 0;
     }
-  else if (! get_64bit_section_headers (file, elf_header.e_shnum))
+  else if (! get_64bit_section_headers (file, FALSE))
     return 0;
 
   /* Read in the string table, so that we have names to display.  */
@@ -8236,7 +8273,11 @@ process_dynamic_section (FILE * file)
 	    {
 	      /* Note: these braces are necessary to avoid a syntax
 		 error from the SunOS4 C compiler.  */
-	      assert (sizeof (Elf_External_Syminfo) == entry->d_un.d_val);
+	      /* PR binutils/17531: A corrupt file can trigger this test.
+		 So do not use an assert, instead generate an error message.  */
+	      if (sizeof (Elf_External_Syminfo) != entry->d_un.d_val)
+		error (_("Bad value (%d) for SYMINENT entry"),
+		       (int) entry->d_un.d_val);
 	    }
 	  else if (entry->d_tag == DT_SYMINSZ)
 	    syminsz = entry->d_un.d_val;
@@ -10133,6 +10174,15 @@ process_symbol_table (FILE * file)
 	      ++nsyms;
 	      if (maxlength < ++lengths[hn])
 		++maxlength;
+
+	      /* PR binutils/17531: A corrupt binary could contain broken
+		 histogram data.  Do not go into an infinite loop trying
+		 to process it.  */
+	      if (chains[si] == si)
+		{
+		  error (_("histogram chain links to itself\n"));
+		  break;
+		}
 	    }
 	}
 
@@ -14466,9 +14516,9 @@ get_file_header (FILE * file)
       /* There may be some extensions in the first section header.  Don't
 	 bomb if we can't read it.  */
       if (is_32bit_elf)
-	get_32bit_section_headers (file, 1);
+	get_32bit_section_headers (file, TRUE);
       else
-	get_64bit_section_headers (file, 1);
+	get_64bit_section_headers (file, TRUE);
     }
 
   return 1;
