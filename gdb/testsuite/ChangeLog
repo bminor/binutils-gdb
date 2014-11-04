@@ -1,5 +1,9 @@
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/callfuncs.exp (perform_all_tests): Re-indent.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/callfuncs.exp: Remove 'prototypes' variable.  Move main
 	logic into perform_all_tests() and invoke it with and without
 	function header prototypes.
