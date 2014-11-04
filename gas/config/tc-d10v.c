@@ -1226,9 +1226,7 @@ find_opcode (struct d10v_opcode *opcode, expressionS myops[])
 		  sym_frag = symbol_get_frag (myops[opnum].X_add_symbol);
 		  found_symbol = FALSE;
 
-		  current_position =
-		    obstack_next_free (&frchain_now->frch_obstack)
-		    - frag_now->fr_literal;
+		  current_position = frag_now_fix_octets ();
 		  symbol_position = S_GET_VALUE (myops[opnum].X_add_symbol);
 
 		  for (f = frchain_now->frch_root; f; f = f->fr_next)
