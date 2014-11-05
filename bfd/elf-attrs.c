@@ -455,6 +455,8 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 
 	  section_len = bfd_get_32 (abfd, p);
 	  p += 4;
+	  if (section_len == 0)
+	    break;
 	  if (section_len > len)
 	    section_len = len;
 	  len -= section_len;
@@ -487,6 +489,8 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	      p += n;
 	      subsection_len = bfd_get_32 (abfd, p);
 	      p += 4;
+	      if (subsection_len == 0)
+		break;
 	      if (subsection_len > section_len)
 		subsection_len = section_len;
 	      section_len -= subsection_len;
