@@ -422,6 +422,7 @@ print_symbol (int width, const char *symbol)
       width = - width;
       extra_padding = TRUE;
     }
+  assert (width != 0);
 
   if (do_wide)
     /* Set the remaining width to a very large value.
@@ -492,6 +493,66 @@ print_symbol (int width, const char *symbol)
     }
 
   return num_printed;
+}
+
+/* Returns a pointer to a static buffer containing a  printable version of
+   the given section's name.  Like print_symbol, except that it does not try
+   to print multibyte characters, it just interprets them as hex values.  */
+
+static const char *
+printable_section_name (Elf_Internal_Shdr * sec)
+{
+#define MAX_PRINT_SEC_NAME_LEN 128
+  static char  sec_name_buf [MAX_PRINT_SEC_NAME_LEN + 1];
+  const char * name = SECTION_NAME (sec);
+  char *       buf = sec_name_buf;
+  char         c;
+  unsigned int remaining = MAX_PRINT_SEC_NAME_LEN;
+
+  while ((c = * name ++) != 0)
+    {
+      if (ISCNTRL (c))
+	{
+	  if (remaining < 2)
+	    break;
+	  
+	  * buf ++ = '^';
+	  * buf ++ = c + 0x40;
+	  remaining -= 2;
+	}
+      else if (ISPRINT (c))
+	{
+	  * buf ++ = c;
+	  remaining -= 1;
+	}
+      else
+	{
+	  static char hex[17] = "0123456789ABCDEF";
+
+	  if (remaining < 4)
+	    break;
+	  * buf ++ = '<';
+	  * buf ++ = hex[(c & 0xf0) >> 4];
+	  * buf ++ = hex[c & 0x0f];
+	  * buf ++ = '>';
+	  remaining -= 4;
+	}
+
+      if (remaining == 0)
+	break;
+    }
+
+  * buf = 0;
+  return sec_name_buf;
+}
+
+static const char *
+printable_section_name_from_index (unsigned long ndx)
+{
+  if (ndx >= elf_header.e_shnum)
+    return _("<corrupt>");
+
+  return printable_section_name (section_headers + ndx);
 }
 
 /* Return a pointer to section NAME, or NULL if no such section exists.  */
@@ -1408,8 +1469,7 @@ dump_relocations (FILE * file,
 		  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION)
 		    {
 		      if (psym->st_shndx < elf_header.e_shnum)
-			sec_name
-			  = SECTION_NAME (section_headers + psym->st_shndx);
+			sec_name = SECTION_NAME (section_headers + psym->st_shndx);
 		      else if (psym->st_shndx == SHN_ABS)
 			sec_name = "ABS";
 		      else if (psym->st_shndx == SHN_COMMON)
@@ -4462,7 +4522,7 @@ process_program_headers (FILE * file)
 	    {
 	      if (!ELF_TBSS_SPECIAL (section, segment)
 		  && ELF_SECTION_IN_SEGMENT_STRICT (section, segment))
-		printf ("%s ", SECTION_NAME (section));
+		printf ("%s ", printable_section_name (section));
 	    }
 
 	  putc ('\n',stdout);
@@ -4646,7 +4706,7 @@ get_32bit_elf_symbols (FILE * file,
   if (section->sh_size > current_file_size)
     {
       error (_("Section %s has an invalid sh_size of 0x%lx\n"),
-	     SECTION_NAME (section), (unsigned long) section->sh_size);
+	     printable_section_name (section), (unsigned long) section->sh_size);
       goto exit_point;
     }
 
@@ -4733,7 +4793,7 @@ get_64bit_elf_symbols (FILE * file,
   if (section->sh_size > current_file_size)
     {
       error (_("Section %s has an invalid sh_size of 0x%lx\n"),
-	     SECTION_NAME (section), (unsigned long) section->sh_size);
+	     printable_section_name (section), (unsigned long) section->sh_size);
       goto exit_point;
     }
 
@@ -5259,7 +5319,6 @@ process_section_headers (FILE * file)
 	      )
 	    request_dump_bynumber (i, DEBUG_DUMP);
 	}
-
     }
 
   if (! do_sections)
@@ -5316,14 +5375,9 @@ process_section_headers (FILE * file)
     {
       printf ("  [%2u] ", i);
       if (do_section_details)
-	{
-	  print_symbol (INT_MAX, SECTION_NAME (section));
-	  printf ("\n      ");
-	}
+	printf ("%s\n      ", printable_section_name (section));
       else
-	{
-	  print_symbol (-17, SECTION_NAME (section));
-	}
+	print_symbol (-17, SECTION_NAME (section));
 
       printf (do_wide ? " %-15s " : " %-15.15s ",
 	      get_section_type_name (section->sh_type));
@@ -5596,8 +5650,8 @@ process_section_groups (FILE * file)
     {
       if (section->sh_type == SHT_GROUP)
 	{
-	  char * name = SECTION_NAME (section);
-	  char * group_name;
+	  const char * name = printable_section_name (section);
+	  const char * group_name;
 	  unsigned char * start;
 	  unsigned char * indices;
 	  unsigned int entry, j, size;
@@ -5741,7 +5795,7 @@ process_section_groups (FILE * file)
 	      if (do_section_groups)
 		{
 		  sec = section_headers + entry;
-		  printf ("   [%5u]   %s\n", entry, SECTION_NAME (sec));
+		  printf ("   [%5u]   %s\n", entry, printable_section_name (sec));
 		}
 
 	      g = (struct group_list *) xmalloc (sizeof (struct group_list));
@@ -6049,7 +6103,7 @@ process_relocs (FILE * file)
 	      if (string_table == NULL)
 		printf ("%d", section->sh_name);
 	      else
-		printf ("'%s'", SECTION_NAME (section));
+		printf ("'%s'", printable_section_name (section));
 
 	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		 rel_offset, (unsigned long) (rel_size / section->sh_entsize));
@@ -6466,7 +6520,7 @@ ia64_process_unwind (FILE * file)
 	  if (string_table == NULL)
 	    printf ("%d", unwsec->sh_name);
 	  else
-	    printf (_("'%s'"), SECTION_NAME (unwsec));
+	    printf ("'%s'", printable_section_name (unwsec));
 	}
       else
 	{
@@ -6481,7 +6535,7 @@ ia64_process_unwind (FILE * file)
 	  if (string_table == NULL)
 	    printf ("%d", unwsec->sh_name);
 	  else
-	    printf (_("'%s'"), SECTION_NAME (unwsec));
+	    printf ("'%s'", printable_section_name (unwsec));
 
 	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		  (unsigned long) unwsec->sh_offset,
@@ -6815,10 +6869,8 @@ hppa_process_unwind (FILE * file)
     {
       if (streq (SECTION_NAME (sec), ".PARISC.unwind"))
 	{
-	  printf (_("\nUnwind section "));
-	  printf (_("'%s'"), SECTION_NAME (sec));
-
-	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
+	  printf (_("\nUnwind section '%s' at offset 0x%lx contains %lu entries:\n"),
+		  printable_section_name (sec),
 		  (unsigned long) sec->sh_offset,
 		  (unsigned long) (sec->sh_size / (2 * eh_addr_size + 8)));
 
@@ -7011,6 +7063,10 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
       if (rp->r_offset < word_offset)
 	continue;
 
+      /* PR 17531: file: 027-161405-0.004  */
+      if (aux->symtab == NULL)
+	continue;
+
       sym = aux->symtab + ELF32_R_SYM (rp->r_info);
 
       if (arm_sec->rel_type == SHT_REL)
@@ -7022,7 +7078,11 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
       else if (arm_sec->rel_type == SHT_RELA)
 	offset = rp->r_addend;
       else
-	abort ();
+	{
+	  error (_("Unknown section relocation type %d encountered\n"),
+		 arm_sec->rel_type);
+	  break;
+	}
 
       offset += sym->st_value;
       prelval = offset - (arm_sec->sec->sh_addr + rp->r_offset);
@@ -7057,12 +7117,16 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
 	  prelval >>= 1;
 	}
       else
-	/* This function currently only supports ARM and TI unwinders.  */
-	abort ();
+	{
+	  /* This function currently only supports ARM and TI unwinders.  */
+	  warn (_("Only TI and ARM unwinders are currently supported\n"));
+	  break;
+	}
 
       word = (word & ~ (bfd_vma) 0x7fffffff) | (prelval & 0x7fffffff);
       addr->section = sym->st_shndx;
       addr->offset = offset;
+
       if (sym_name)
 	* sym_name = sym->st_name;
       break;
@@ -7629,7 +7693,7 @@ decode_arm_unwind (struct arm_unw_aux_info *  aux,
       break;
 
     default:
-      error (_("Unsupported architecture type %d encountered when decoding unwind table"),
+      error (_("Unsupported architecture type %d encountered when decoding unwind table\n"),
 	     elf_header.e_machine);
     }
 
@@ -7749,7 +7813,7 @@ arm_process_unwind (FILE *file)
       break;
 
     default:
-      error (_("Unsupported architecture type %d encountered when processing unwind table"),
+      error (_("Unsupported architecture type %d encountered when processing unwind table\n"),
 	     elf_header.e_machine);
       return;
     }
@@ -7767,7 +7831,13 @@ arm_process_unwind (FILE *file)
 	  aux.symtab = GET_ELF_SYMBOLS (file, sec, & aux.nsyms);
 
 	  strsec = section_headers + sec->sh_link;
-	  assert (aux.strtab == NULL);
+
+	  /* PR binutils/17531 file: 011-12666-0.004.  */
+	  if (aux.strtab != NULL)
+	    {
+	      warn (_("Multiple string tables found in file.\n"));
+	      free (aux.strtab);
+	    }
 	  aux.strtab = get_data (NULL, file, strsec->sh_offset,
 				 1, strsec->sh_size, _("string table"));
 	  aux.strtab_size = aux.strtab != NULL ? strsec->sh_size : 0;
@@ -7784,7 +7854,7 @@ arm_process_unwind (FILE *file)
 	if (sec->sh_type == sec_type)
 	  {
 	    printf (_("\nUnwind table index '%s' at offset 0x%lx contains %lu entries:\n"),
-		    SECTION_NAME (sec),
+		    printable_section_name (sec),
 		    (unsigned long) sec->sh_offset,
 		    (unsigned long) (sec->sh_size / (2 * eh_addr_size)));
 
@@ -8868,17 +8938,15 @@ process_version_sections (FILE * file)
 
 	    found = 1;
 
-	    printf
-	      (_("\nVersion definition section '%s' contains %u entries:\n"),
-	       SECTION_NAME (section), section->sh_info);
+	    printf (_("\nVersion definition section '%s' contains %u entries:\n"),
+		    printable_section_name (section),
+		    section->sh_info);
 
 	    printf (_("  Addr: 0x"));
 	    printf_vma (section->sh_addr);
-	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
+	    printf (_("  Offset: %#08lx  Link: %u (%s)"),
 		    (unsigned long) section->sh_offset, section->sh_link,
-		    section->sh_link < elf_header.e_shnum
-		    ? SECTION_NAME (section_headers + section->sh_link)
-		    : _("<corrupt>"));
+		    printable_section_name_from_index (section->sh_link));
 
 	    edefs = (Elf_External_Verdef *)
                 get_data (NULL, file, section->sh_offset, 1,section->sh_size,
@@ -8986,15 +9054,13 @@ process_version_sections (FILE * file)
 	    found = 1;
 
 	    printf (_("\nVersion needs section '%s' contains %u entries:\n"),
-		    SECTION_NAME (section), section->sh_info);
+		    printable_section_name (section), section->sh_info);
 
 	    printf (_(" Addr: 0x"));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
-		    section->sh_link < elf_header.e_shnum
-		    ? SECTION_NAME (section_headers + section->sh_link)
-		    : _("<corrupt>"));
+		    printable_section_name_from_index (section->sh_link));
 
 	    eneed = (Elf_External_Verneed *) get_data (NULL, file,
                                                        section->sh_offset, 1,
@@ -9134,13 +9200,13 @@ process_version_sections (FILE * file)
 	      }
 
 	    printf (_("\nVersion symbols section '%s' contains %d entries:\n"),
-		    SECTION_NAME (section), total);
+		    printable_section_name (section), total);
 
 	    printf (_(" Addr: "));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
-		    SECTION_NAME (link_section));
+		    printable_section_name (link_section));
 
 	    off = offset_from_vma (file,
 				   version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
@@ -9956,12 +10022,12 @@ process_symbol_table (FILE * file)
 	  if (section->sh_entsize == 0)
 	    {
 	      printf (_("\nSymbol table '%s' has a sh_entsize of zero!\n"),
-		      SECTION_NAME (section));
+		      printable_section_name (section));
 	      continue;
 	    }
 
 	  printf (_("\nSymbol table '%s' contains %lu entries:\n"),
-		  SECTION_NAME (section),
+		  printable_section_name (section),
 		  (unsigned long) (section->sh_size / section->sh_entsize));
 
 	  if (is_32bit_elf)
@@ -11025,7 +11091,7 @@ apply_relocations (void * file,
 	  else
 	    {
 	      warn (_("unable to apply unsupported reloc type %d to section %s\n"),
-		    reloc_type, SECTION_NAME (section));
+		    reloc_type, printable_section_name (section));
 	      continue;
 	    }
 
@@ -11034,7 +11100,7 @@ apply_relocations (void * file,
 	    {
 	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
 		    (unsigned long) rp->r_offset,
-		    SECTION_NAME (section));
+		    printable_section_name (section));
 	      continue;
 	    }
 
@@ -11042,7 +11108,7 @@ apply_relocations (void * file,
 	  if (sym_index >= num_syms)
 	    {
 	      warn (_("skipping invalid relocation symbol index 0x%lx in section %s\n"),
-		    sym_index, SECTION_NAME (section));
+		    sym_index, printable_section_name (section));
 	      continue;
 	    }
 	  sym = symtab + sym_index;
@@ -11066,7 +11132,7 @@ apply_relocations (void * file,
 	      warn (_("skipping unexpected symbol type %s in %ld'th relocation in section %s\n"),
 		    get_symbol_type (ELF_ST_TYPE (sym->st_info)),
 		    (long int)(rp - relocs),
-		    SECTION_NAME (relsec));
+		    printable_section_name (relsec));
 	      continue;
 	    }
 
@@ -11109,10 +11175,9 @@ apply_relocations (void * file,
 static int
 disassemble_section (Elf_Internal_Shdr * section, FILE * file)
 {
-  printf (_("\nAssembly dump of section %s\n"),
-	  SECTION_NAME (section));
+  printf (_("\nAssembly dump of section %s\n"), printable_section_name (section));
 
-  /* XXX -- to be done --- XXX */
+  /* FIXME: XXX -- to be done --- XXX */
 
   return 1;
 }
@@ -11131,7 +11196,7 @@ get_section_contents (Elf_Internal_Shdr * section, FILE * file)
   if (num_bytes == 0 || section->sh_type == SHT_NOBITS)
     {
       printf (_("\nSection '%s' has no data to dump.\n"),
-	      SECTION_NAME (section));
+	      printable_section_name (section));
       return NULL;
     }
 
@@ -11148,14 +11213,13 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
   char * data;
   char * end;
   char * start;
-  char * name = SECTION_NAME (section);
   bfd_boolean some_strings_shown;
 
   start = get_section_contents (section, file);
   if (start == NULL)
     return;
 
-  printf (_("\nString dump of section '%s':\n"), name);
+  printf (_("\nString dump of section '%s':\n"), printable_section_name (section));
 
   /* If the section being dumped has relocations against it the user might
      be expecting these relocations to have been applied.  Check for this
@@ -11226,7 +11290,7 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
   if (start == NULL)
     return;
 
-  printf (_("\nHex dump of section '%s':\n"), SECTION_NAME (section));
+  printf (_("\nHex dump of section '%s':\n"), printable_section_name (section));
 
   if (relocate)
     {
@@ -11457,6 +11521,7 @@ static int
 display_debug_section (int shndx, Elf_Internal_Shdr * section, FILE * file)
 {
   char * name = SECTION_NAME (section);
+  const char * print_name = printable_section_name (section);
   bfd_size_type length;
   int result = 1;
   int i;
@@ -11464,7 +11529,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, FILE * file)
   length = section->sh_size;
   if (length == 0)
     {
-      printf (_("\nSection '%s' has no debugging data.\n"), name);
+      printf (_("\nSection '%s' has no debugging data.\n"), print_name);
       return 0;
     }
   if (section->sh_type == SHT_NOBITS)
@@ -11473,7 +11538,8 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, FILE * file)
 	 which has the NOBITS type - the bits in the file will be random.
 	 This can happen when a file containing a .eh_frame section is
 	 stripped with the --only-keep-debug command line option.  */
-      printf (_("section '%s' has the NOBITS type - its contents are unreliable.\n"), name);
+      printf (_("section '%s' has the NOBITS type - its contents are unreliable.\n"),
+	      print_name);
       return 0;
     }
 
@@ -11518,7 +11584,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, FILE * file)
 
   if (i == max)
     {
-      printf (_("Unrecognized debug section: %s\n"), name);
+      printf (_("Unrecognized debug section: %s\n"), print_name);
       result = 0;
     }
 
@@ -12625,7 +12691,13 @@ process_attributes (FILE * file,
 			  (unsigned) section_len, (unsigned) len);
 		  section_len = len;
 		}
-
+	      /* PR 17531: file: 001-101425-0.004  */
+	      else if (section_len < 5)
+		{
+		  error (_("Attribute length of %u is too small\n"), (unsigned) section_len);
+		  break;
+		}
+	      
 	      len -= section_len;
 	      section_len -= 4;
 
@@ -13198,7 +13270,7 @@ process_mips_specific (FILE * file)
 	    }
 
 	  printf (_("\nSection '%s' contains %d entries:\n"),
-		  SECTION_NAME (sect), cnt);
+		  printable_section_name (sect), cnt);
 
 	  option = iopt;
 
@@ -13438,8 +13510,17 @@ process_mips_specific (FILE * file)
       ent = pltgot;
       addr_size = (is_32bit_elf ? 4 : 8);
       local_end = pltgot + local_gotno * addr_size;
-      global_end = local_end + (symtabno - gotsym) * addr_size;
 
+      /* PR binutils/17533 file: 012-111227-0.004  */
+      if (symtabno < gotsym)
+	{
+	  error (_("The GOT symbol offset (%lu) is greater than the symbol table size (%lu)\n"),
+		 (long) gotsym, (long) symtabno);
+	  return 0;
+	}
+ 
+      global_end = local_end + (symtabno - gotsym) * addr_size;
+      assert (global_end >= local_end);
       offset = offset_from_vma (file, pltgot, global_end - pltgot);
       data = (unsigned char *) get_data (NULL, file, offset,
                                          global_end - pltgot, 1,
@@ -13691,7 +13772,7 @@ process_gnu_liblist (FILE * file)
 	  strtab_size = string_sec->sh_size;
 
 	  printf (_("\nLibrary list section '%s' contains %lu entries:\n"),
-		  SECTION_NAME (section),
+		  printable_section_name (section),
 		  (unsigned long) (section->sh_size / sizeof (Elf32_External_Lib)));
 
 	  puts (_("     Library              Time Stamp          Checksum   Version Flags"));

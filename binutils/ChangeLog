@@ -1,3 +1,34 @@
+2014-11-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15731
+	* readelf.c (printable_section_name): New function.
+	(printable_section_name_from_index): New function.
+	(dump_relocations): Use new function.
+	(process_program_headers, get_32bit_elf_symbols,
+	(get_64bit_elf_symbols, process_section_headers,
+	(process_section_groups, process_relocs, ia64_process_unwind,
+	(hppa_process_unwind, get_unwind_section_word, decode_arm_unwind,
+	(arm_process_unwind, process_version_sections,
+	(process_symbol_table, apply_relocations, get_section_contents,
+	(dump_section_as_strings, dump_section_as_bytes,
+	(display_debug_section, process_attributes, process_mips_specific,
+	(process_mips_specific process_gnu_liblist): Likewise.
+	(get_unwind_section_word): Check for a missing symbol table.
+	Replace aborts with error messages.
+	(arm_process_unwind): Check for a missing string table.
+	(process_attributes): Check for an attribute length that is too
+	small.
+	(process_mips_specific): Check for a corrupt GOT symbol offset.
+
+2014-11-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15733
+	* bucomm.c (is_valid_archive_path): New function.
+	* bucomm.h (is_valid_archive_path): Prototype it.
+	* ar.c (extract_file): Call is_valid_archive_path to verify a
+	member filename before extracting it.
+	* objcopy.c (copy_archive): Likewise.
+
 2014-11-05  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* readelf.c (process_mips_specific): Fix format string warning.
