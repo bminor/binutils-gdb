@@ -1,3 +1,21 @@
+2014-11-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_set_alignment_hook): Warn if the file lies
+	about the number of relocations it contains.
+	(coff_sort_func_alent): Return 0 if the pointers are NULL.
+	(coff_slurp_line_table): Add more range checks.  Do not free new
+	tables created when sorting line numbers.
+	* peXXigen.c (pe_print_idata): Add range checks.
+	(pe_print_edata): Likewise.
+	(rsrc_print_resource_entries): Likewise.  Avoid printing control
+	characters.  Terminate priniting if corruption is detected.
+	(rsrc_print_resource_directory): Terminate printing if an unknown
+	directory type is encountered.
+	(pe_print_debugdata): Fix off-by-one error.
+	(rsrc_count_entries): Add range checking.
+	(rsrc_parse_entry): Likewise.
+
 2014-11-04  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

@@ -1920,6 +1920,15 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
       section->reloc_count = hdr->s_nreloc = n.r_vaddr - 1;
+      /* PR binutils/17512: Stop corrupt files from causing
+	 memory problems if they claim to have too many relocs.  */
+      if (section->reloc_count * relsz > (bfd_size_type) bfd_get_size (abfd))
+	{
+	  (*_bfd_error_handler)
+	    ("%s: warning: claims to have %#x relocs, but the file is not that big",
+	     bfd_get_filename (abfd), section->reloc_count);
+	  section->reloc_count = 0;
+	}
       section->rel_filepos += relsz;
     }
   else if (hdr->s_nreloc == 0xffff)
@@ -4494,6 +4503,8 @@ coff_sort_func_alent (const void * arg1, const void * arg2)
   const coff_symbol_type *s1 = (const coff_symbol_type *) (al1->u.sym);
   const coff_symbol_type *s2 = (const coff_symbol_type *) (al2->u.sym);
 
+  if (s1 == NULL || s2 == NULL)
+    return 0;
   if (s1->symbol.value < s2->symbol.value)
     return -1;
   else if (s1->symbol.value > s2->symbol.value)
@@ -4518,7 +4529,9 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   BFD_ASSERT (asect->lineno == NULL);
 
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-  lineno_cache = (alent *) bfd_alloc (abfd, amt);
+  if (amt > (bfd_size_type) bfd_get_size (abfd))
+    return FALSE;
+  lineno_cache = (alent *) bfd_zalloc (abfd, amt);
   if (lineno_cache == NULL)
     return FALSE;
 
@@ -4566,6 +4579,9 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		 ((symndx + obj_raw_syments (abfd))
 		  ->u.syment._n._n_n._n_zeroes));
 	  cache_ptr->u.sym = (asymbol *) sym;
+	  if (sym == NULL)
+	      continue;
+
 	  if (sym->lineno != NULL)
 	    (*_bfd_error_handler)
 	      (_("%B: warning: duplicate line number information for `%s'"),
@@ -4609,7 +4625,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 	  /* Create the new sorted table.  */
 	  amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-	  n_lineno_cache = (alent *) bfd_alloc (abfd, amt);
+	  n_lineno_cache = (alent *) bfd_zalloc (abfd, amt);
 	  if (n_lineno_cache != NULL)
 	    {
 	      alent *n_cache_ptr = n_lineno_cache;
@@ -4621,8 +4637,9 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 		  /* Copy the function entry and update it.  */
 		  *n_cache_ptr = *old_ptr;
-		  sym = (coff_symbol_type *)n_cache_ptr->u.sym;
-		  sym->lineno = n_cache_ptr;
+		  sym = (coff_symbol_type *) n_cache_ptr->u.sym;
+		  if (sym != NULL)
+		    sym->lineno = n_cache_ptr;
 		  n_cache_ptr++;
 		  old_ptr++;
 
@@ -4633,7 +4650,8 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      n_cache_ptr->line_number = 0;
 	      memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
-	  bfd_release (abfd, func_table);
+	  /* PR binutils/17512: Do *not* free the func table
+	     and new lineno cache - they are now being used.  */
 	}
     }
 
