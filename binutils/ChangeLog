@@ -1,3 +1,7 @@
+2014-11-05  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* readelf.c (process_mips_specific): Fix format string warning.
+
 2014-11-04  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* readelf.c (process_mips_specific): Rename index to idx.
@@ -45,7 +49,7 @@
 	unsigned long.
 
 2014-10-31  Andrew Pinski  <apinski@cavium.com>
-            Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+	    Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
 
 	* readelf.c (print_mips_isa_ext): Print the value of Octeon3.
 

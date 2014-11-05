@@ -13519,7 +13519,8 @@ process_mips_specific (FILE * file)
 		    printf (_("<corrupt: %14ld>"), psym->st_name);
 		}
 	      else
-		printf (_("<symbol index %lu exceeds number of dynamic symbols>"), i);
+		printf (_("<symbol index %lu exceeds number of dynamic symbols>"),
+			(unsigned long) i);
 
 	      printf ("\n");
 	    }
