@@ -1,3 +1,8 @@
+2014-11-05  James Cowgill  <james.cowgill@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Fix segfault
+	when creating a dso with discarded dynsym section.
+
 2014-11-05  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elfxx-mips.c (update_mips_abiflags_isa): Add E_MIPS_ARCH_32R6

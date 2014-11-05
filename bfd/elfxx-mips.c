@@ -11457,9 +11457,11 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      name = ".dynsym";
 	      elemsize = MIPS_ELF_SYM_SIZE (output_bfd);
 	      s = bfd_get_section_by_name (output_bfd, name);
-	      BFD_ASSERT (s != NULL);
 
-	      dyn.d_un.d_val = s->size / elemsize;
+	      if (s != NULL)
+		dyn.d_un.d_val = s->size / elemsize;
+	      else
+		dyn.d_un.d_val = 0;
 	      break;
 
 	    case DT_MIPS_HIPAGENO:
