@@ -1,3 +1,11 @@
+2014-11-04  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (handle_COMDAT): Replace abort with BFD_ASSERT.
+	Replace another abort with an error message.
+	(coff_slurp_line_table): Add more range checking.
+	* peXXigen.c (pe_print_debugdata): Add range checking.
+
 2014-11-05  James Cowgill  <james.cowgill@imgtec.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Fix segfault

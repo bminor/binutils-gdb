@@ -2573,6 +2573,12 @@ pe_print_debugdata (bfd * abfd, void * vfile)
 
   dataoff = addr - section->vma;
 
+  if (size > (section->size - dataoff))
+    {
+      fprintf (file, _("The debug data size field in the data directory is too big for the section"));
+      return FALSE;
+    }
+
   fprintf (file,
 	   _("Type                Size     Rva      Offset\n"));
 

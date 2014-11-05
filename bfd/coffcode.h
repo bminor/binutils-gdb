@@ -928,12 +928,7 @@ handle_COMDAT (bfd * abfd,
 
       bfd_coff_swap_sym_in (abfd, esym, & isym);
 
-      if (sizeof (internal_s->s_name) > SYMNMLEN)
-	{
-	  /* This case implies that the matching
-	     symbol name will be in the string table.  */
-	  abort ();
-	}
+      BFD_ASSERT (sizeof (internal_s->s_name) <= SYMNMLEN);
 
       if (isym.n_scnum == section->target_index)
 	{
@@ -964,8 +959,12 @@ handle_COMDAT (bfd * abfd,
 	  /* All 3 branches use this.  */
 	  symname = _bfd_coff_internal_syment_name (abfd, &isym, buf);
 
+	  /* PR 17512 file: 078-11867-0.004  */ 
 	  if (symname == NULL)
-	    abort ();
+	    {
+	      _bfd_error_handler (_("%B: unable to load COMDAT section name"), abfd);
+	      break;
+	    }
 
 	  switch (seen_state)
 	    {
@@ -4578,6 +4577,13 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  sym = ((coff_symbol_type *)
 		 ((symndx + obj_raw_syments (abfd))
 		  ->u.syment._n._n_n._n_zeroes));
+
+	  /* PR 17512 file: 078-10659-0.004  */
+	  if (sym < obj_symbols (abfd)
+	      || sym > obj_symbols (abfd)
+	      + obj_raw_syment_count (abfd) * sizeof (coff_symbol_type))
+	    sym = NULL;
+
 	  cache_ptr->u.sym = (asymbol *) sym;
 	  if (sym == NULL)
 	      continue;
@@ -4599,6 +4605,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       cache_ptr++;
       src++;
     }
+
   cache_ptr->line_number = 0;
   bfd_release (abfd, native_lineno);
 
