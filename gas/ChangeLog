@@ -1,3 +1,8 @@
+2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* config/tc-nios2.c (nios2_diagnose_overflow): Adjust call to
+	nios2_find_opcode_hash.
+
 2014-11-05  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c (mips_elf_final_processing): Add INSN_ISA32R6

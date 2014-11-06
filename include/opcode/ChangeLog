@@ -1,3 +1,8 @@
+2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2.h (nios2_find_opcode_hash): Add mach parameter to
+	declaration.  Fix obsolete comment.
+
 2014-10-23  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2.h (enum iw_format_type): New.

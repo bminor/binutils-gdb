@@ -1,3 +1,8 @@
+2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-dis.c (nios2_find_opcode_hash): Add mach parameter.
+	(nios2_disassemble): Adjust call to nios2_find_opcode_hash.
+
 2014-11-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.

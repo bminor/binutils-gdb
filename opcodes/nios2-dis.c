@@ -153,9 +153,10 @@ nios2_init_opcode_hash (nios2_disassembler_state *state)
 }
 
 /* Return a pointer to an nios2_opcode struct for a given instruction
-   opcode, or NULL if there is an error.  */
+   word OPCODE for bfd machine MACH, or NULL if there is an error.  */
 const struct nios2_opcode *
-nios2_find_opcode_hash (unsigned long opcode)
+nios2_find_opcode_hash (unsigned long opcode,
+			unsigned long mach ATTRIBUTE_UNUSED)
 {
   nios2_opcode_hash *entry;
   nios2_disassembler_state *state;
@@ -459,7 +460,7 @@ nios2_disassemble (bfd_vma address, unsigned long opcode,
 
   /* Find the major opcode and use this to disassemble
      the instruction and its arguments.  */
-  op = nios2_find_opcode_hash (opcode);
+  op = nios2_find_opcode_hash (opcode, info->mach);
 
   if (op != NULL)
     {

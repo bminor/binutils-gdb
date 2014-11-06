@@ -1033,7 +1033,7 @@ nios2_diagnose_overflow (valueT fixup, reloc_howto_type *howto,
       unsigned int range_max;
       unsigned int address;
 
-      opcode = nios2_find_opcode_hash (value);
+      opcode = nios2_find_opcode_hash (value, bfd_get_mach (stdoutput));
       gas_assert (opcode);
       gas_assert (fixP->fx_size == opcode->size);
       overflow_msg_type = opcode->overflow_msg;

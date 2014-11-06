@@ -154,8 +154,8 @@ extern struct nios2_reg *nios2_regs;
 extern const int nios2_num_builtin_regs;
 extern int nios2_num_regs;
 
-/* This is made extern so that the assembler can use it to find out
-   what instruction caused an error.  */
-extern const struct nios2_opcode *nios2_find_opcode_hash (unsigned long);
+/* Return the opcode descriptor for a single instruction.  */
+extern const struct nios2_opcode *
+nios2_find_opcode_hash (unsigned long, unsigned long);
 
 #endif /* _NIOS2_H */
