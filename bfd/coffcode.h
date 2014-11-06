@@ -1919,15 +1919,6 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
       section->reloc_count = hdr->s_nreloc = n.r_vaddr - 1;
-      /* PR binutils/17512: Stop corrupt files from causing
-	 memory problems if they claim to have too many relocs.  */
-      if (section->reloc_count * relsz > (bfd_size_type) bfd_get_size (abfd))
-	{
-	  (*_bfd_error_handler)
-	    ("%s: warning: claims to have %#x relocs, but the file is not that big",
-	     bfd_get_filename (abfd), section->reloc_count);
-	  section->reloc_count = 0;
-	}
       section->rel_filepos += relsz;
     }
   else if (hdr->s_nreloc == 0xffff)
@@ -4528,8 +4519,6 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   BFD_ASSERT (asect->lineno == NULL);
 
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-  if (amt > (bfd_size_type) bfd_get_size (abfd))
-    return FALSE;
   lineno_cache = (alent *) bfd_zalloc (abfd, amt);
   if (lineno_cache == NULL)
     return FALSE;

@@ -1293,9 +1293,6 @@ _bfd_slurp_extended_name_table (bfd *abfd)
       amt = namedata->parsed_size;
       if (amt + 1 == 0)
 	goto byebye;
-      /* PR binutils/17533: A corrupt archive can contain an invalid size.  */
-      if (amt > (bfd_size_type) bfd_get_size (abfd))
-	goto byebye;
 
       bfd_ardata (abfd)->extended_names_size = amt;
       bfd_ardata (abfd)->extended_names = (char *) bfd_zalloc (abfd, amt + 1);
