@@ -624,3 +624,29 @@ bfd_get_archive_filename (const bfd *abfd)
 	   bfd_get_filename (abfd));
   return buf;
 }
+
+/* Returns TRUE iff PATHNAME, a filename of an archive member,
+   is valid for writing.  For security reasons absolute paths
+   and paths containing /../ are not allowed.  See PR 17533.  */
+
+bfd_boolean
+is_valid_archive_path (char const * pathname)
+{
+  const char * n = pathname;
+
+  if (IS_ABSOLUTE_PATH (n))
+    return FALSE;
+
+  while (*n)
+    {
+      if (*n == '.' && *++n == '.' && ( ! *++n || IS_DIR_SEPARATOR (*n)))
+	return FALSE;
+
+      while (*n && ! IS_DIR_SEPARATOR (*n))
+	n++;
+      while (IS_DIR_SEPARATOR (*n))
+	n++;
+    }
+
+  return TRUE;
+}

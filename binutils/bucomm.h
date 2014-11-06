@@ -23,6 +23,8 @@
 #ifndef _BUCOMM_H
 #define _BUCOMM_H
 
+/* In bucomm.c.  */
+
 /* Return the filename in a static buffer.  */
 const char *bfd_get_archive_filename (const bfd *);
 
@@ -58,20 +60,22 @@ bfd_vma parse_vma (const char *, const char *);
 
 off_t get_file_size (const char *);
 
+bfd_boolean is_valid_archive_path (char const *);
+
 extern char *program_name;
 
-/* filemode.c */
+/* In filemode.c.  */
 void mode_string (unsigned long, char *);
 
-/* version.c */
+/* In version.c.  */
 extern void print_version (const char *);
 
-/* rename.c */
+/* In rename.c.  */
 extern void set_times (const char *, const struct stat *);
 
 extern int smart_rename (const char *, const char *, int);
 
-/* libiberty.  */
+/* In libiberty.  */
 void *xmalloc (size_t);
 
 void *xrealloc (void *, size_t);

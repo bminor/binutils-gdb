@@ -2206,6 +2206,12 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       bfd_boolean del = TRUE;
       bfd_boolean ok_object;
 
+      /* PR binutils/17533: Do not allow directory traversal
+	 outside of the current directory tree by archive members.  */
+      if (! is_valid_archive_path (bfd_get_filename (this_element)))
+	fatal (_("illegal pathname found in archive member: %s"),
+	       bfd_get_filename (this_element));
+
       /* Create an output file for this member.  */
       output_name = concat (dir, "/",
 			    bfd_get_filename (this_element), (char *) 0);

@@ -1031,6 +1031,15 @@ extract_file (bfd *abfd)
   bfd_size_type size;
   struct stat buf;
 
+  /* PR binutils/17533: Do not allow directory traversal
+     outside of the current directory tree.  */
+  if (! is_valid_archive_path (bfd_get_filename (abfd)))
+    {
+      non_fatal (_("illegal pathname found in archive member: %s"),
+		 bfd_get_filename (abfd));
+      return;
+    }
+
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
     /* xgettext:c-format */
     fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
