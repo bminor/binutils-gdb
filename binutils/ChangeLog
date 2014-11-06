@@ -1,6 +1,18 @@
+2014-11-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17552, binutils/17533
+	* bucomm.c (is_valid_archive_path): New function.  Returns false
+	for absolute pathnames and pathnames that include /../.
+	* bucomm.h (is_valid_archive_path): Add prototype.
+	* ar.c (extract_file): Use new function to check for valid
+	pathnames when extracting files from an archive.
+	* objcopy.c (copy_archive): Likewise.
+	* doc/binutils.texi: Update documentation to mention the
+	limitation on pathname of archive members.
+
 2014-11-05  Nick Clifton  <nickc@redhat.com>
 
-	PR binutils/15731
+	PR binutils/17531
 	* readelf.c (printable_section_name): New function.
 	(printable_section_name_from_index): New function.
 	(dump_relocations): Use new function.
@@ -22,7 +34,7 @@
 
 2014-11-05  Nick Clifton  <nickc@redhat.com>
 
-	PR binutils/15733
+	PR binutils/17533
 	* bucomm.c (is_valid_archive_path): New function.
 	* bucomm.h (is_valid_archive_path): Prototype it.
 	* ar.c (extract_file): Call is_valid_archive_path to verify a

@@ -234,7 +234,8 @@ a normal archive.  Instead the elements of the first archive are added
 individually to the second archive.
 
 The paths to the elements of the archive are stored relative to the
-archive itself.
+archive itself.  For security reasons absolute paths and paths with a
+@code{/../} component are not allowed.
 
 @cindex compatibility, @command{ar}
 @cindex @command{ar} compatibility
