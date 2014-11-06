@@ -331,58 +331,6 @@ nios2_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-/* Define some instruction patterns supporting wildcard bits via a
-   mask.  */
-
-typedef struct
-{
-  unsigned int insn;
-  unsigned int mask;
-} wild_insn;
-
-static const wild_insn profiler_insn[] =
-{
-  { 0x0010e03a, 0x00000000 }, /* nextpc r8 */
-  { 0xf813883a, 0x00000000 }, /* mov    r9,ra */
-  { 0x02800034, 0x003fffc0 }, /* movhi  r10,257 */
-  { 0x52800004, 0x003fffc0 }, /* addi   r10,r10,-31992 */
-  { 0x00000000, 0xffffffc0 }, /* call   <mcount> */
-  { 0x483f883a, 0x00000000 }  /* mov    ra,r9 */
-};
-
-static const wild_insn irqentry_insn[] =
-{
-  { 0x0031307a, 0x00000000 }, /* rdctl  et,estatus */
-  { 0xc600004c, 0x00000000 }, /* andi   et,et,1 */
-  { 0xc0000026, 0x003fffc0 }, /* beq    et,zero, <software_exception> */
-  { 0x0031313a, 0x00000000 }, /* rdctl  et,ipending */
-  { 0xc0000026, 0x003fffc0 }  /* beq    et,zero, <software_exception> */
-};
-
-
-/* Attempt to match SEQUENCE, which is COUNT insns long, at START_PC.  */
-
-static int
-nios2_match_sequence (struct gdbarch *gdbarch, CORE_ADDR start_pc,
-		      const wild_insn *sequence, int count)
-{
-  CORE_ADDR pc = start_pc;
-  int i;
-  unsigned int insn;
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-
-  for (i = 0 ; i < count ; i++)
-    {
-      insn = read_memory_unsigned_integer (pc, NIOS2_OPCODE_SIZE, byte_order);
-      if ((insn & ~sequence[i].mask) != sequence[i].insn)
-	return 0;
-
-      pc += NIOS2_OPCODE_SIZE;
-    }
-
-  return 1;
-}
-
 /* Do prologue analysis, returning the PC of the first instruction
    after the function prologue.  Assumes CACHE has already been
    initialized.  THIS_FRAME can be null, in which case we are only
@@ -390,30 +338,15 @@ nios2_match_sequence (struct gdbarch *gdbarch, CORE_ADDR start_pc,
    from the frame information.
 
    The prologue will consist of the following parts:
-     1) Optional profiling instrumentation.  The old version uses six
-        instructions.  We step over this if there is an exact match.
-	  nextpc r8
-	  mov	 r9, ra
-	  movhi	 r10, %hiadj(.LP2)
-	  addi	 r10, r10, %lo(.LP2)
-	  call	 mcount
-	  mov	 ra, r9
-	The new version uses two or three instructions (the last of
+     1) Optional profiling instrumentation.
+        This uses two or three instructions (the last of
 	these might get merged in with the STW which saves RA to the
 	stack).  We interpret these.
 	  mov	 r8, ra
 	  call	 mcount
 	  mov	 ra, r8
 
-     2) Optional interrupt entry decision.  Again, we step over
-        this if there is an exact match.
-	  rdctl  et,estatus
-	  andi   et,et,1
-	  beq    et,zero, <software_exception>
-	  rdctl  et,ipending
-	  beq    et,zero, <software_exception>
-
-     3) A stack adjustment or stack which, which will be one of:
+     2) A stack adjustment or stack which, which will be one of:
 	  addi   sp, sp, -constant
 	or:
 	  movi   r8, constant
@@ -428,7 +361,7 @@ nios2_match_sequence (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	  stw    sp, constant(rx)
 	  mov    sp, rx
 
-     4) An optional stack check, which can take either of these forms:
+     3) An optional stack check, which can take either of these forms:
 	  bgeu   sp, rx, +8
 	  break  3
 	or
@@ -437,7 +370,7 @@ nios2_match_sequence (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	.Lstack_overflow:
 	  break  3
 
-     5) Saving any registers which need to be saved.  These will
+     4) Saving any registers which need to be saved.  These will
         normally just be stored onto the stack:
 	  stw    rx, constant(sp)
 	but in the large frame case will use r8 as an offset back
@@ -449,7 +382,7 @@ nios2_match_sequence (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	  rdctl  rx, ctlN
 	  stw    rx, constant(sp)
 
-     6) An optional FP setup, either if the user has requested a
+     5) An optional FP setup, either if the user has requested a
         frame pointer or if the function calls alloca.
         This is always:
 	  mov    fp, sp
@@ -511,23 +444,6 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 
   /* Set up the default values of the registers.  */
   nios2_setup_default (cache);
-
-  /* If the first few instructions are the profile entry, then skip
-     over them.  Newer versions of the compiler use more efficient
-     profiling code.  */
-  if (nios2_match_sequence (gdbarch, pc, profiler_insn,
-			    ARRAY_SIZE (profiler_insn)))
-    pc += ARRAY_SIZE (profiler_insn) * NIOS2_OPCODE_SIZE;
-
-  /* If the first few instructions are an interrupt entry, then skip
-     over them too.  */
-  if (nios2_match_sequence (gdbarch, pc, irqentry_insn,
-			    ARRAY_SIZE (irqentry_insn)))
-    {
-      pc += ARRAY_SIZE (irqentry_insn) * NIOS2_OPCODE_SIZE;
-      exception_handler = 1;
-    }
-
   prologue_end = start_pc;
 
   /* Find the prologue instructions.  */
