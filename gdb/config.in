@@ -225,9 +225,6 @@
 /* Define to 1 if the compiler supports long double. */
 #undef HAVE_LONG_DOUBLE
 
-/* Define to 1 if you have the `lstat' function. */
-#undef HAVE_LSTAT
-
 /* Define if <sys/procfs.h> has lwpid_t. */
 #undef HAVE_LWPID_T
 

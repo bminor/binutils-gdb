@@ -1309,7 +1309,7 @@ AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid getgid \
 		sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
-		setrlimit getrlimit posix_madvise waitpid lstat \
+		setrlimit getrlimit posix_madvise waitpid \
 		ptrace64 sigaltstack])
 AM_LANGINFO_CODESET
 GDB_AC_COMMON

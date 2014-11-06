@@ -1,5 +1,12 @@
 2014-11-28  Yao Qi  <yao@codesourcery.com>
 
+	* configure.ac (AC_CHECK_FUNCS): Remove lstat.
+	* config.in, configure: Regenerate.
+	* symfile.c (find_separate_debug_file_by_debuglink): Remove
+	code checking HAVE_LSTAT is defined.
+
+2014-11-28  Yao Qi  <yao@codesourcery.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
 	lstat.
 	* gnulib/aclocal.m4: Re-generated.
