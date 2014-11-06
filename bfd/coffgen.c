@@ -1622,7 +1622,10 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   /* PR binutils/17512: Do not even try to load
      a symbol table bigger than the entire file...  */
   if (size >= (bfd_size_type) bfd_get_size (abfd))
+    {
+      fprintf (stderr, "XXX SIZE FAIL 1\n");
     return FALSE;
+    }
 
   syms = bfd_malloc (size);
   if (syms == NULL)
@@ -1757,11 +1760,12 @@ coff_get_normalized_symtab (bfd *abfd)
     return obj_raw_syments (abfd);
 
   size = obj_raw_syment_count (abfd);
-  if (size == 0)
-    return NULL;
   /* PR binutils/17512: Do not even try to load
-     a symbol table bigger than the entire file...  */
-  if (size >= (bfd_size_type) bfd_get_size (abfd))
+     a symbol table bigger than the entire file...
+     Note - we do not fail on a size of 0.  Linker created
+     bfds can have this property and they are not corrupt.  */
+  if (size >= (bfd_size_type) bfd_get_size (abfd)
+      && bfd_get_size (abfd) > 0)
     return NULL;
 
   size *= sizeof (combined_entry_type);

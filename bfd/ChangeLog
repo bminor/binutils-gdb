@@ -1,3 +1,12 @@
+2014-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* aoutx.h (slurp_symbol_table): Revert previous delta.
+	(slurp_reloc_table): Likewise.
+	* compress.c (bfd_get_full_section_contents): Remove file size
+	test.
+	* coffgen.c (coff_get_normalized_symtab): Allow zero-sized symtabs
+	and do not complain about linker generated files.
+
 2014-11-06  Will Newton  <will.newton@linaro.org>
 
 	* elf-attrs.c (_bfd_elf_parse_attributes): Handle zero
