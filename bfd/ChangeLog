@@ -1,5 +1,21 @@
 2014-11-07  Alan Modra  <amodra@gmail.com>
 
+	* tekhex.c (CHUNK_SPAN): Define.
+	(struct data_struct <chunk_init>): Use one byte per span, update
+	all code accessing this field.
+	(find_chunk): Add create param, don't create new entry unless set.
+	(insert_byte): Don't save zeros.
+	(first_phase): Set section SEC_CODE or SEC_DATA flag depending
+	on symbol type.  Create an alternate section if both types of
+	symbol are given.  Attach type '2' and '6' symbols to absolute
+	section.
+	(move_section_contents): Fix caching of chunk.  Don't create chunk
+	when reading, or for writing zeros.
+	(tekhex_set_section_contents): Don't create initial chunks.
+	(tekhex_write_object_contents): Use CHUNK_SPAN.
+
+2014-11-07  Alan Modra  <amodra@gmail.com>
+
 	* aoutx.h (aout_get_external_symbols): Tidy allocation of symbol buffer.
 
 2014-11-07  Alan Modra  <amodra@gmail.com>
