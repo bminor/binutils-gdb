@@ -1,3 +1,11 @@
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Apply trunk patch:
+	2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17482
+	* ld-x86-64/tlsie4.dd: Updated.
+
 2014-10-24  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp (aarch64elftests): Drive erratum

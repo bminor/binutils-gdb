@@ -1,3 +1,12 @@
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Apply trunk patch:
+	2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17482
+	* config/tc-i386.c (output_insn): Add a dummy REX_OPCODE prefix
+	for structions with R_X86_64_GOTTPOFF relocation for x32 if needed.
+
 2014-11-03  Nick Clifton  <nickc@redhat.com>
 
 	Apply trunk patch:
