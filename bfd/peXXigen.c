@@ -1467,7 +1467,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 			 member_high, member,
 			 WithoutHighBit (member_high), member);
 	      /* PR binutils/17512: Handle corrupt PE data.  */
-	      else if (member - adj + 2 >= datasize)
+	      else if (member - adj + 2 >= (unsigned long) datasize)
 		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
 	      else
 		{
@@ -1502,7 +1502,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 		fprintf (file, "\t%04lx\t %4lu  <none>",
 			 member, WithoutHighBit (member));
 	      /* PR binutils/17512: Handle corrupt PE data.  */
-	      else if (member - adj + 2 >= datasize)
+	      else if (member - adj + 2 >= (unsigned long) datasize)
 		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
 	      else
 		{

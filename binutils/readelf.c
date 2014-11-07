@@ -8880,7 +8880,8 @@ process_dynamic_section (FILE * file)
 	      tmp = gmtime (&atime);
 	      /* PR 17533 file: 041-1244816-0.004.  */
 	      if (tmp == NULL)
-		printf (_("<corrupt time val: %lx"), atime);
+		printf (_("<corrupt time val: %lx"),
+			(unsigned long) atime);
 	      else
 		printf ("%04u-%02u-%02uT%02u:%02u:%02u\n",
 			tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
