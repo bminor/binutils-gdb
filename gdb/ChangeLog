@@ -1,5 +1,13 @@
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (lookup_block_symbol): Moved to ...
+	* block.c (block_lookup_symbol):  ... here and renamed.
+	All callers updated.
+	* block.h (block_lookup_symbol): Declare.
+	* symtab.h (lookup_block_symbol): Delete.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
 	* ada-lang.c (ada_make_symbol_completion_list): Use
 	ALL_PRIMARY_SYMTABS instead of ALL_SYMTABS.
 	* symtab.c (lookup_objfile_from_block): Ditto.

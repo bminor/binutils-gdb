@@ -519,7 +519,7 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
 	    const struct blockvector *bv = BLOCKVECTOR (stab);
 	    struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
-	    sym = lookup_block_symbol (block, name, domain);
+	    sym = block_lookup_symbol (block, name, domain);
 	  }
 
 	if (sym && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
@@ -2038,7 +2038,7 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
     length = ps->n_static_syms;
     while (length--)
       {
-	sym = lookup_block_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
+	sym = block_lookup_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
 				   SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {
@@ -2055,7 +2055,7 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
     length = ps->n_global_syms;
     while (length--)
       {
-	sym = lookup_block_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
+	sym = block_lookup_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
 				   SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {

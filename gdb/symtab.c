@@ -1344,7 +1344,7 @@ lookup_language_this (const struct language_defn *lang,
     {
       struct symbol *sym;
 
-      sym = lookup_block_symbol (block, lang->la_name_of_this, VAR_DOMAIN);
+      sym = block_lookup_symbol (block, lang->la_name_of_this, VAR_DOMAIN);
       if (sym != NULL)
 	{
 	  block_found = block;
@@ -1572,7 +1572,7 @@ lookup_symbol_aux_block (const char *name, const struct block *block,
 {
   struct symbol *sym;
 
-  sym = lookup_block_symbol (block, name, domain);
+  sym = block_lookup_symbol (block, name, domain);
   if (sym)
     {
       block_found = block;
@@ -1604,7 +1604,7 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
 	{
 	  bv = BLOCKVECTOR (s);
 	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	  sym = lookup_block_symbol (block, name, domain);
+	  sym = block_lookup_symbol (block, name, domain);
 	  if (sym)
 	    {
 	      block_found = block;
@@ -1639,7 +1639,7 @@ lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
     {
       bv = BLOCKVECTOR (s);
       block = BLOCKVECTOR_BLOCK (bv, block_index);
-      sym = lookup_block_symbol (block, name, domain);
+      sym = block_lookup_symbol (block, name, domain);
       if (sym)
 	{
 	  block_found = block;
@@ -1747,7 +1747,7 @@ lookup_symbol_aux_quick (struct objfile *objfile, int block_index,
 
   bv = BLOCKVECTOR (symtab);
   block = BLOCKVECTOR_BLOCK (bv, block_index);
-  sym = lookup_block_symbol (block, name, domain);
+  sym = block_lookup_symbol (block, name, domain);
   if (!sym)
     error_in_psymtab_expansion (block_index, name, symtab);
   block_found = block;
@@ -1931,7 +1931,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int block_index,
 
   bv = BLOCKVECTOR (symtab);
   block = BLOCKVECTOR_BLOCK (bv, block_index);
-  sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
+  sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
   if (!sym)
     error_in_psymtab_expansion (block_index, name, symtab);
 
@@ -1968,7 +1968,7 @@ basic_lookup_transparent_type (const char *name)
       {
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
+	sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
 	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
 	  {
 	    return SYMBOL_TYPE (sym);
@@ -1996,7 +1996,7 @@ basic_lookup_transparent_type (const char *name)
       {
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
+	sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
 	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
 	  {
 	    return SYMBOL_TYPE (sym);
@@ -2012,64 +2012,6 @@ basic_lookup_transparent_type (const char *name)
   }
 
   return (struct type *) 0;
-}
-
-/* See symtab.h.
-
-   Note that if NAME is the demangled form of a C++ symbol, we will fail
-   to find a match during the binary search of the non-encoded names, but
-   for now we don't worry about the slight inefficiency of looking for
-   a match we'll never find, since it will go pretty quick.  Once the
-   binary search terminates, we drop through and do a straight linear
-   search on the symbols.  Each symbol which is marked as being a ObjC/C++
-   symbol (language_cplus or language_objc set) has both the encoded and
-   non-encoded names tested for a match.  */
-
-struct symbol *
-lookup_block_symbol (const struct block *block, const char *name,
-		     const domain_enum domain)
-{
-  struct block_iterator iter;
-  struct symbol *sym;
-
-  if (!BLOCK_FUNCTION (block))
-    {
-      for (sym = block_iter_name_first (block, name, &iter);
-	   sym != NULL;
-	   sym = block_iter_name_next (name, &iter))
-	{
-	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				     SYMBOL_DOMAIN (sym), domain))
-	    return sym;
-	}
-      return NULL;
-    }
-  else
-    {
-      /* Note that parameter symbols do not always show up last in the
-	 list; this loop makes sure to take anything else other than
-	 parameter symbols first; it only uses parameter symbols as a
-	 last resort.  Note that this only takes up extra computation
-	 time on a match.  */
-
-      struct symbol *sym_found = NULL;
-
-      for (sym = block_iter_name_first (block, name, &iter);
-	   sym != NULL;
-	   sym = block_iter_name_next (name, &iter))
-	{
-	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				     SYMBOL_DOMAIN (sym), domain))
-	    {
-	      sym_found = sym;
-	      if (!SYMBOL_IS_ARGUMENT (sym))
-		{
-		  break;
-		}
-	    }
-	}
-      return (sym_found);	/* Will be NULL if not found.  */
-    }
 }
 
 /* Iterate over the symbols named NAME, matching DOMAIN, in BLOCK.

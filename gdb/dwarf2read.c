@@ -3616,7 +3616,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	      const struct blockvector *bv = BLOCKVECTOR (stab);
 	      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
-	      sym = lookup_block_symbol (block, name, domain);
+	      sym = block_lookup_symbol (block, name, domain);
 	    }
 
 	  if (sym && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)

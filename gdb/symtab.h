@@ -1125,11 +1125,6 @@ extern struct symbol *lookup_language_this (const struct language_defn *lang,
 extern struct symbol *lookup_static_symbol_aux (const char *name,
 						const domain_enum domain);
 
-/* Search BLOCK for symbol NAME in DOMAIN.  */
-
-extern struct symbol *lookup_block_symbol (const struct block *, const char *,
-					   const domain_enum);
-
 /* Lookup a [struct, union, enum] by name, within a specified block.  */
 
 extern struct type *lookup_struct (const char *, const struct block *);
