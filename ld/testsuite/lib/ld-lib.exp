@@ -1669,6 +1669,22 @@ proc check_plugin_api_available { } {
     return $plugin_api_available_saved
 }
 
+# Sets ld_sysroot to the current sysroot (empty if not supported) and
+# returns true if the target ld supports sysroot.
+proc check_sysroot_available { } {
+    global ld_sysroot_available_saved ld ld_sysroot
+    if {![info exists ld_sysroot_available_saved]} {
+	# Check if ld supports --sysroot *other* than empty.
+	set ld_sysroot [string trimright [lindex [remote_exec host $ld "--print-sysroot"] 1]]
+	if { $ld_sysroot == "" } {
+	    set ld_sysroot_available_saved 0
+	} else {
+	    set ld_sysroot_available_saved 1
+	}
+    }
+    return $ld_sysroot_available_saved
+}
+
 # Returns true if the target compiler supports LTO
 proc check_lto_available { } {
     global lto_available_saved

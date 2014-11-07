@@ -84,9 +84,8 @@ make_a_section_from_file (bfd *abfd,
 	  strings = _bfd_coff_read_string_table (abfd);
 	  if (strings == NULL)
 	    return FALSE;
-	  /* FIXME: For extra safety, we should make sure that
-             strindex does not run us past the end, but right now we
-             don't know the length of the string table.  */
+	  if ((bfd_size_type)(strindex + 2) >= obj_coff_strings_len (abfd))
+	    return FALSE;
 	  strings += strindex;
 	  name = (char *) bfd_alloc (abfd,
                                      (bfd_size_type) strlen (strings) + 1 + 1);
@@ -464,6 +463,8 @@ _bfd_coff_internal_syment_name (bfd *abfd,
 	  if (strings == NULL)
 	    return NULL;
 	}
+      if (sym->_n._n_n._n_offset >= obj_coff_strings_len (abfd))
+	return NULL;
       return strings + sym->_n._n_n._n_offset;
     }
 }
@@ -1545,7 +1546,7 @@ coff_pointerize_aux (bfd *abfd,
    we didn't want to go to the trouble until someone needed it.  */
 
 static char *
-build_debug_section (bfd *abfd)
+build_debug_section (bfd *abfd, asection ** sect_return)
 {
   char *debug_section;
   file_ptr position;
@@ -1573,6 +1574,8 @@ build_debug_section (bfd *abfd)
       || bfd_bread (debug_section, sec_size, abfd) != sec_size
       || bfd_seek (abfd, position, SEEK_SET) != 0)
     return NULL;
+
+  * sect_return = sect;
   return debug_section;
 }
 
@@ -1635,7 +1638,9 @@ _bfd_coff_get_external_symbols (bfd *abfd)
 
 /* Read in the external strings.  The strings are not loaded until
    they are needed.  This is because we have no simple way of
-   detecting a missing string table in an archive.  */
+   detecting a missing string table in an archive.  If the strings
+   are loaded then the STRINGS and STRINGS_LEN fields in the
+   coff_tdata structure will be set.  */
 
 const char *
 _bfd_coff_read_string_table (bfd *abfd)
@@ -1697,6 +1702,7 @@ _bfd_coff_read_string_table (bfd *abfd)
     }
 
   obj_coff_strings (abfd) = strings;
+  obj_coff_strings_len (abfd) = strsize;
 
   return strings;
 }
@@ -1717,6 +1723,7 @@ _bfd_coff_free_symbols (bfd *abfd)
     {
       free (obj_coff_strings (abfd));
       obj_coff_strings (abfd) = NULL;
+      obj_coff_strings_len (abfd) = 0;
     }
   return TRUE;
 }
@@ -1737,7 +1744,8 @@ coff_get_normalized_symtab (bfd *abfd)
   char *raw_src;
   char *raw_end;
   const char *string_table = NULL;
-  char *debug_section = NULL;
+  asection * debug_sec = NULL;
+  char *debug_sec_data = NULL;
   bfd_size_type size;
 
   if (obj_raw_syments (abfd) != NULL)
@@ -1748,7 +1756,7 @@ coff_get_normalized_symtab (bfd *abfd)
   if (internal == NULL && size != 0)
     return NULL;
   internal_end = internal + obj_raw_syment_count (abfd);
-
+  
   if (! _bfd_coff_get_external_symbols (abfd))
     return NULL;
 
@@ -1766,8 +1774,8 @@ coff_get_normalized_symtab (bfd *abfd)
        raw_src < raw_end;
        raw_src += symesz, internal_ptr++)
     {
-
       unsigned int i;
+
       bfd_coff_swap_sym_in (abfd, (void *) raw_src,
 			    (void *) & internal_ptr->u.syment);
       symbol_ptr = internal_ptr;
@@ -1777,6 +1785,10 @@ coff_get_normalized_symtab (bfd *abfd)
 	   i++)
 	{
 	  internal_ptr++;
+	  /* PR 17512: Prevent buffer overrun.  */
+	  if (internal_ptr >= internal_end)
+	    return NULL;
+
 	  raw_src += symesz;
 	  bfd_coff_swap_aux_in (abfd, (void *) raw_src,
 				symbol_ptr->u.syment.n_type,
@@ -1810,11 +1822,14 @@ coff_get_normalized_symtab (bfd *abfd)
 		  if (string_table == NULL)
 		    return NULL;
 		}
-
-	      internal_ptr->u.syment._n._n_n._n_offset =
-		((bfd_hostptr_t)
-		 (string_table
-		  + (internal_ptr + 1)->u.auxent.x_file.x_n.x_offset));
+	      if ((bfd_size_type)((internal_ptr + 1)->u.auxent.x_file.x_n.x_offset)
+		  >= obj_coff_strings_len (abfd))
+		internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
+	      else
+		internal_ptr->u.syment._n._n_n._n_offset =
+		  ((bfd_hostptr_t)
+		   (string_table
+		    + (internal_ptr + 1)->u.auxent.x_file.x_n.x_offset));
 	    }
 	  else
 	    {
@@ -1869,18 +1884,31 @@ coff_get_normalized_symtab (bfd *abfd)
 		  if (string_table == NULL)
 		    return NULL;
 		}
-	      internal_ptr->u.syment._n._n_n._n_offset =
-		((bfd_hostptr_t)
-		 (string_table
-		  + internal_ptr->u.syment._n._n_n._n_offset));
+	      if (internal_ptr->u.syment._n._n_n._n_offset >= obj_coff_strings_len (abfd))
+		internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
+	      else
+		internal_ptr->u.syment._n._n_n._n_offset =
+		  ((bfd_hostptr_t)
+		   (string_table
+		    + internal_ptr->u.syment._n._n_n._n_offset));
 	    }
 	  else
 	    {
 	      /* Long name in debug section.  Very similar.  */
-	      if (debug_section == NULL)
-		debug_section = build_debug_section (abfd);
-	      internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t)
-		(debug_section + internal_ptr->u.syment._n._n_n._n_offset);
+	      if (debug_sec_data == NULL)
+		debug_sec_data = build_debug_section (abfd, & debug_sec);
+	      if (debug_sec_data != NULL)
+		{
+		  BFD_ASSERT (debug_sec != NULL);
+		  /* PR binutils/17512: Catch out of range offsets into the debug data.  */
+		  if (internal_ptr->u.syment._n._n_n._n_offset > debug_sec->size)
+		    internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
+		  else
+		    internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t)
+		      (debug_sec_data + internal_ptr->u.syment._n._n_n._n_offset);
+		}
+	      else
+		internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) "";
 	    }
 	}
       internal_ptr += internal_ptr->u.syment.n_numaux;
@@ -2191,13 +2219,13 @@ _bfd_coff_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
 
 bfd_boolean
 coff_find_nearest_line_with_names (bfd *abfd,
-                                   const struct dwarf_debug_section *debug_sections,
-                                   asection *section,
                                    asymbol **symbols,
+                                   asection *section,
                                    bfd_vma offset,
                                    const char **filename_ptr,
                                    const char **functionname_ptr,
-                                   unsigned int *line_ptr)
+                                   unsigned int *line_ptr,
+                                   const struct dwarf_debug_section *debug_sections)
 {
   bfd_boolean found;
   unsigned int i;
@@ -2222,10 +2250,9 @@ coff_find_nearest_line_with_names (bfd *abfd,
     return TRUE;
 
   /* Also try examining DWARF2 debugging information.  */
-  if (_bfd_dwarf2_find_nearest_line (abfd, debug_sections,
-                                     section, symbols, offset,
+  if (_bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr, NULL, 0,
+				     line_ptr, NULL, debug_sections, 0,
 				     &coff_data(abfd)->dwarf2_find_line_info))
     return TRUE;
 
@@ -2407,36 +2434,20 @@ coff_find_nearest_line_with_names (bfd *abfd,
 
 bfd_boolean
 coff_find_nearest_line (bfd *abfd,
-			asection *section,
 			asymbol **symbols,
+			asection *section,
 			bfd_vma offset,
 			const char **filename_ptr,
 			const char **functionname_ptr,
-			unsigned int *line_ptr)
+			unsigned int *line_ptr,
+			unsigned int *discriminator_ptr)
 {
-  return coff_find_nearest_line_with_names (abfd, dwarf_debug_sections,
-                                            section, symbols, offset,
+  if (discriminator_ptr)
+    *discriminator_ptr = 0;
+  return coff_find_nearest_line_with_names (abfd, symbols, section, offset,
                                             filename_ptr, functionname_ptr,
-                                            line_ptr);
+                                            line_ptr, dwarf_debug_sections);
 }
-
-bfd_boolean
-coff_find_nearest_line_discriminator (bfd *abfd,
-				      asection *section,
-				      asymbol **symbols,
-				      bfd_vma offset,
-				      const char **filename_ptr,
-				      const char **functionname_ptr,
-				      unsigned int *line_ptr,
-				      unsigned int *discriminator)
-{
-  *discriminator = 0;
-  return coff_find_nearest_line_with_names (abfd, dwarf_debug_sections,
-                                            section, symbols, offset,
-                                            filename_ptr, functionname_ptr,
-                                            line_ptr);
-}
-
 
 bfd_boolean
 coff_find_inliner_info (bfd *abfd,

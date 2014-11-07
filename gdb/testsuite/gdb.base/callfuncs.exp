@@ -122,7 +122,7 @@ proc do_function_calls {} {
 	if $prototypes then {
 	    setup_xfail "sparc-*-*" "mips*-*-*" 5318
 	    if { ! [test_compiler_info gcc-*-*] } then {
-		setup_xfail "alpha-dec-osf2*" "i*86-*-sysv4*" 5318
+		setup_xfail "i*86-*-sysv4*" 5318
 	    }
 	}
         

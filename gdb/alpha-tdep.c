@@ -1749,14 +1749,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
 
-  /* Try to determine the ABI of the object we are loading.  */
-  if (info.abfd != NULL && info.osabi == GDB_OSABI_UNKNOWN)
-    {
-      /* If it's an ECOFF file, assume it's OSF/1.  */
-      if (bfd_get_flavour (info.abfd) == bfd_target_ecoff_flavour)
-	info.osabi = GDB_OSABI_OSF1;
-    }
-
   /* Find a candidate among extant architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)

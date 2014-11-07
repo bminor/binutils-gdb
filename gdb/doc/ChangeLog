@@ -1,3 +1,41 @@
+2014-10-30  Doug Evans  <dje@google.com>
+
+	* python.texi (Progspaces In Python): Document ability to add
+	random attributes to gdb.Progspace objects.
+	(Objfiles In Python): Document ability to add random attributes to
+	gdb.objfile objects.
+
+2014-10-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Continuing and Stepping): Add cross reference to
+	info on stepping and signal handlers.
+	(Signals): Explain stepping and signal handlers.  Add context
+	index entry, and cross references.
+
+2014-10-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Breakpoints In Python): Add parenthesis after
+	Breakpoint.delete.  Clarify Breakpoint.enabled description so
+	that it contains "disable".
+
+2014-10-17  Doug Evans  <dje@google.com>
+
+	* python.texi (Events In Python): Document clear_objfiles event.
+
+2014-10-17  Doug Evans  <dje@google.com>
+
+	* python.texi (Objfiles In Python): Document new progspace attribute.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Ada Tasks and Core Files): Delete mention of Tru64.
+	(SVR4 Process Information): Delete mention of OSF/1.
+
+2014-10-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Miscellaneous gdb/mi Commands): Document new
+	exit-code field in -list-thread-groups output.
+
 2014-09-22  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* gdb.texinfo (Set Breaks): Add missing "@end table".

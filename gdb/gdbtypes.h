@@ -184,15 +184,6 @@ enum type_code
     TYPE_CODE_XMETHOD
   };
 
-/* * For now allow source to use TYPE_CODE_CLASS for C++ classes, as
-   an alias for TYPE_CODE_STRUCT.  This is for DWARF, which has a
-   distinct "class" attribute.  Perhaps we should actually have a
-   separate TYPE_CODE so that we can print "class" or "struct"
-   depending on what the debug info said.  It's not clear we should
-   bother.  */
-
-#define TYPE_CODE_CLASS TYPE_CODE_STRUCT
-
 /* * Some constants representing each bit field in the main_type.  See
    the bit-field-specific macros, below, for documentation of each
    constant in this enum.  These enum values are only used with

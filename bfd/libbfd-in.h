@@ -399,8 +399,13 @@ extern bfd_boolean _bfd_vms_lib_ia64_mkarchive (bfd *abfd);
 #define _bfd_nosymbols_get_lineno \
   ((alent *(*) (bfd *, asymbol *)) bfd_nullvoidptr)
 #define _bfd_nosymbols_find_nearest_line \
-  ((bfd_boolean (*) (bfd *, asection *, asymbol **, bfd_vma, const char **, \
-		     const char **, unsigned int *)) \
+  ((bfd_boolean (*) (bfd *, asymbol **, asection *, bfd_vma,		\
+		     const char **, const char **, unsigned int *,	\
+		     unsigned int *))					\
+   bfd_false)
+#define _bfd_nosymbols_find_line \
+  ((bfd_boolean (*) (bfd *, asymbol **, asymbol *,	\
+		     const char **, unsigned int *))	\
    bfd_false)
 #define _bfd_nosymbols_find_inliner_info \
   ((bfd_boolean (*) (bfd *, const char **, const char **, unsigned int *)) \
@@ -520,8 +525,8 @@ extern bfd_boolean _bfd_stab_section_find_nearest_line
 
 /* Find the nearest line using DWARF 1 debugging information.  */
 extern bfd_boolean _bfd_dwarf1_find_nearest_line
-  (bfd *, asection *, asymbol **, bfd_vma, const char **,
-   const char **, unsigned int *);
+  (bfd *, asymbol **, asection *, bfd_vma,
+   const char **, const char **, unsigned int *);
 
 struct dwarf_debug_section
 {
@@ -536,21 +541,9 @@ extern const struct dwarf_debug_section dwarf_debug_sections[];
 
 /* Find the nearest line using DWARF 2 debugging information.  */
 extern bfd_boolean _bfd_dwarf2_find_nearest_line
-  (bfd *, const struct dwarf_debug_section *, asection *, asymbol **, bfd_vma,
-   const char **, const char **, unsigned int *, unsigned int *, unsigned int,
-   void **);
-
-/* Find the line using DWARF 2 debugging information.  */
-extern bfd_boolean _bfd_dwarf2_find_line
-  (bfd *, asymbol **, asymbol *, const char **,
-   unsigned int *, unsigned int *, unsigned int, void **);
-
-bfd_boolean _bfd_generic_find_line
-  (bfd *, asymbol **, asymbol *, const char **, unsigned int *);
-
-bfd_boolean _bfd_generic_find_nearest_line_discriminator
-  (bfd *, asection *, asymbol **, bfd_vma, const char **, const char **,
-   unsigned int *, unsigned int *);
+  (bfd *, asymbol **, asymbol *, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *,
+   const struct dwarf_debug_section *, unsigned int, void **);
 
 /* Find inliner info after calling bfd_find_nearest_line. */
 extern bfd_boolean _bfd_dwarf2_find_inliner_info

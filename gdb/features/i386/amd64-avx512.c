@@ -1,4 +1,5 @@
-/* THIS FILE IS GENERATED.  Original: amd64-avx512.xml */
+/* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
+  Original: amd64-avx512.xml */
 
 #include "defs.h"
 #include "osabi.h"

@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "inferior.h"
@@ -138,23 +137,32 @@ python_inferior_exit (struct inferior *inf)
 }
 
 /* Callback used to notify Python listeners about new objfiles loaded in the
-   inferior.  */
+   inferior.  OBJFILE may be NULL which means that the objfile list has been
+   cleared (emptied).  */
 
 static void
 python_new_objfile (struct objfile *objfile)
 {
   struct cleanup *cleanup;
 
-  if (objfile == NULL)
-    return;
-
   if (!gdb_python_initialized)
     return;
 
-  cleanup = ensure_python_env (get_objfile_arch (objfile), current_language);
+  cleanup = ensure_python_env (objfile != NULL
+			       ? get_objfile_arch (objfile)
+			       : target_gdbarch (),
+			       current_language);
 
-  if (emit_new_objfile_event (objfile) < 0)
-    gdbpy_print_stack ();
+  if (objfile == NULL)
+    {
+      if (emit_clear_objfiles_event () < 0)
+	gdbpy_print_stack ();
+    }
+  else
+    {
+      if (emit_new_objfile_event (objfile) < 0)
+	gdbpy_print_stack ();
+    }
 
   do_cleanups (cleanup);
 }

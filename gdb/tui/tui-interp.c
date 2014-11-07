@@ -29,7 +29,6 @@
 #include "tui/tui-win.h"
 #include "tui/tui.h"
 #include "tui/tui-io.h"
-#include "exceptions.h"
 #include "infrun.h"
 #include "observer.h"
 
@@ -51,9 +50,6 @@ tui_exit (void)
      clean state (see endwin()).  */
   tui_disable ();
 }
-
-/* True if TUI is the top-level interpreter.  */
-static int tui_is_toplevel = 0;
 
 /* Observers for several run control events.  If the interpreter is
    quiet (i.e., another interpreter is being run with
@@ -127,8 +123,6 @@ tui_on_command_error (void)
 static void *
 tui_init (struct interp *self, int top_level)
 {
-  tui_is_toplevel = top_level;
-
   /* Install exit handler to leave the screen in a good shape.  */
   atexit (tui_exit);
 
@@ -149,18 +143,6 @@ tui_init (struct interp *self, int top_level)
   observer_attach_command_error (tui_on_command_error);
 
   return NULL;
-}
-
-/* True if enabling the TUI is allowed.  Example, if the top level
-   interpreter is MI, enabling curses will certainly lose.  */
-
-int
-tui_allowed_p (void)
-{
-  /* Only if TUI is the top level interpreter.  Also don't try to
-     setup curses (and print funny control characters) if we're not
-     outputting to a terminal.  */
-  return tui_is_toplevel && ui_file_isatty (gdb_stdout);
 }
 
 static int

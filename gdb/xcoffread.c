@@ -809,9 +809,6 @@ return_after_cleanup:
 
   /* We don't want to keep alloc/free'ing the global include file table.  */
   inclIndx = 0;
-
-  /* Start with a fresh subfile structure for the next file.  */
-  memset (&main_subfile, '\0', sizeof (struct subfile));
 }
 
 static void

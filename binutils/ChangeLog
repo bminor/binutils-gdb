@@ -1,3 +1,192 @@
+2014-11-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_data): Avoid allocating memory when we know that
+	the read will fail.
+	(find_section_by_type): New function.
+	(get_unwind_section_word): Check for invalid symbol indicies.
+	Check for invalid reloc types.
+	(get_32bit_dynamic_section): Add range checks.
+	(get_64bit_dynamic_section): Add range checks.
+	(process_dynamic_section): Check for a corrupt time value.
+	(process_symbol_table): Add range checks.
+	(dump_section_as_strings): Add string length range checks.
+	(display_tag_value): Likewise.
+	(display_arm_attribute): Likewise.
+	(display_gnu_attribute): Likewise.
+	(display_tic6x_attribute): Likewise.
+	(display_msp430x_attribute): Likewise.
+	(process_mips_specific): Add range check.
+
+2014-11-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17552, binutils/17533
+	* bucomm.c (is_valid_archive_path): New function.  Returns false
+	for absolute pathnames and pathnames that include /../.
+	* bucomm.h (is_valid_archive_path): Add prototype.
+	* ar.c (extract_file): Use new function to check for valid
+	pathnames when extracting files from an archive.
+	* objcopy.c (copy_archive): Likewise.
+	* doc/binutils.texi: Update documentation to mention the
+	limitation on pathname of archive members.
+
+2014-11-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (printable_section_name): New function.
+	(printable_section_name_from_index): New function.
+	(dump_relocations): Use new function.
+	(process_program_headers, get_32bit_elf_symbols,
+	(get_64bit_elf_symbols, process_section_headers,
+	(process_section_groups, process_relocs, ia64_process_unwind,
+	(hppa_process_unwind, get_unwind_section_word, decode_arm_unwind,
+	(arm_process_unwind, process_version_sections,
+	(process_symbol_table, apply_relocations, get_section_contents,
+	(dump_section_as_strings, dump_section_as_bytes,
+	(display_debug_section, process_attributes, process_mips_specific,
+	(process_mips_specific process_gnu_liblist): Likewise.
+	(get_unwind_section_word): Check for a missing symbol table.
+	Replace aborts with error messages.
+	(arm_process_unwind): Check for a missing string table.
+	(process_attributes): Check for an attribute length that is too
+	small.
+	(process_mips_specific): Check for a corrupt GOT symbol offset.
+
+2014-11-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17533
+	* bucomm.c (is_valid_archive_path): New function.
+	* bucomm.h (is_valid_archive_path): Prototype it.
+	* ar.c (extract_file): Call is_valid_archive_path to verify a
+	member filename before extracting it.
+	* objcopy.c (copy_archive): Likewise.
+
+2014-11-05  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* readelf.c (process_mips_specific): Fix format string warning.
+
+2014-11-04  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (process_mips_specific): Rename index to idx.
+
+2014-11-04  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_data): If the reason parameter is null, do not
+	print any error messages.
+	(get_32bit_section_headers): Verify section header entry size
+	before reading in the section headers.
+	(get_64bit_section_headers): Likewise.
+	(process_section_headers): Pass FALSE to get_section_headers.
+	(get_file_header): Pass TRUE to get_section_headers.
+	(process_dynamic_section): Change an assert to an error message.
+	(process_symbol_table): Handle corrupt histograms.
+
+	(get_32bit_program_headers): Verify program header entry size
+	before reading in the program headers.
+	(get_64bit_program_headers): Likewise.
+	(get_unwind_section_word): Do nothing if no section was provided.
+	Fail if the offset is outside of the section.
+	(print_dynamic_symbol): Catch out of range symbol indicies.
+	(process_mips_specific): Likewise.
+	(process_attributes): Make sure that there is enough space left in
+	the section before attempting to read the length of the next
+	attribute.
+
+2014-11-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* objdump.c (slurp_symtab): Fail gracefully if the table could not
+	be read.
+	(dump_relocs_in_section): Likewise.
+
+2014-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finnish translation.
+	* po/sv.po: Updated Swedish translation.
+
+2014-11-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	* readelf.c (get_32bit_elf_symbols): Cast error
+	parameters of bfd_size_type with the %lx format to
+	unsigned long.
+
+2014-10-31  Andrew Pinski  <apinski@cavium.com>
+	    Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+
+	* readelf.c (print_mips_isa_ext): Print the value of Octeon3.
+
+2014-10-31  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* cxxfilt.c (main): Add case for dlang_demangling style.
+
+2014-10-31  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* readelf.c (process_program_headers): Avoid memory exhaustion due
+	to corrupt values in a dynamis segment header.
+	(get_32bit_elf_symbols): Do not attempt to read an over-large
+	section.
+	(get_64bit_elf_symbols): Likewise.
+
+2014-10-31  Nick Clifton  <nickc@redhat.com>
+
+	* strings.c: Add new command line option --data to only scan the
+	initialized, loadable data secions of binaries.  Choose the
+	default behaviour of --all or --data based upon a configure
+	option.
+	* doc/binutils.texi (strings): Update documentation.  Include
+	description  of why the --data option might be unsafe.
+	* configure.ac: Add new option --disable-default-strings-all which
+	restores the old behaviour of strings using --data by default.  If
+	the option is not used make strings use --all by default.
+	* NEWS: Mention the new behaviour of strings.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2014-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (CHECK_ENTSIZE_VALUES): Rewrite error message so that
+	there is a single string for translation.
+	(dynamic_section_mips_val): Likewise.
+
+2014-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/sr.po: New Serbian translation.
+	* po/sv.po: Updated Swedish translation.
+
+2014-10-22  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (print_mips_ases): Print unknown ASEs.
+	(print_mips_isa_ext): Print the value of an unknown extension.
+
+2014-10-15  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2014-10-14  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.25.
+
+2014-10-14  Alan Modra  <amodra@gmail.com>
+
+	PR 17453
+	* dwarf.c (read_leb128): Avoid signed overflow.
+	(read_debug_line_header): Likewise.
+
+2014-10-14  Alan Modra  <amodra@gmail.com>
+
+	PR 17453
+	* readelf.c (process_program_headers): Correct fscanf format used
+	for interpreter.
+
+2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* readelf.c (display_sparc_hwcaps2): New function.
+	(display_sparc_gnu_attribute): Call `display_sparc_hwcaps2' when
+	handling `Tag_GNU_Sparc_HWCAPS2' attributes.
+
 2014-09-22  Alan Modra  <amodra@gmail.com>
 
 	PR 16563
@@ -281,8 +470,8 @@
 
 2014-03-14  Meador Inge  <meadori@codesourcery.com>
 
-         * dwarf.c (strnlen): Move prototype ...
-	 * sysdep.h (strnlen): ... to here.
+	* dwarf.c (strnlen): Move prototype ...
+	* sysdep.h (strnlen): ... to here.
 
 2014-03-12  Nick Clifton  <nickc@redhat.com>
 

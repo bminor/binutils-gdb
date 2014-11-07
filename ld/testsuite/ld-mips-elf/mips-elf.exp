@@ -694,6 +694,7 @@ run_dump_test "abiflags-strip6-ph" $o32flagslist
 run_dump_test "abiflags-strip7-ph" $o32flagslist
 run_dump_test "abiflags-strip8-ph" $o32flagslist
 run_dump_test "abiflags-strip9-ph" $o32flagslist
+run_dump_test "abiflags-strip10-ph" $o32flagslist
 
 run_dump_test "nan-legacy"
 run_dump_test "nan-2008"

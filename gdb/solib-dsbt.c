@@ -28,7 +28,6 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "elf-bfd.h"
-#include "exceptions.h"
 #include "gdb_bfd.h"
 
 #define GOT_MODULE_OFFSET 4

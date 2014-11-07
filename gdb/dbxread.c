@@ -2120,6 +2120,8 @@ read_dbx_symtab (struct objfile *objfile)
 	case N_SLINE:
 	case N_RSYM:
 	case N_PSYM:
+	case N_BNSYM:
+	case N_ENSYM:
 	case N_LBRAC:
 	case N_NSYMS:		/* Ultrix 4.0: symbol count */
 	case N_DEFD:		/* GNU Modula-2 */

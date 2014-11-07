@@ -23,7 +23,6 @@
 #include "defs.h"
 #include "block.h"
 #include "frame.h"
-#include "exceptions.h"
 #include "inferior.h"
 #include "objfiles.h"
 #include "symfile.h"

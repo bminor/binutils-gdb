@@ -25,7 +25,6 @@
 #include "event-top.h"
 #include "inf-loop.h"
 #include "remote.h"
-#include "exceptions.h"
 #include "language.h"
 #include "gdbthread.h"
 #include "continuations.h"

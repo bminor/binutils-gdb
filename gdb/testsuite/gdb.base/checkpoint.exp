@@ -371,5 +371,3 @@ verbose "Timeout now $timeout sec."
 #
 # Finished: cleanup
 #
-
-remote_exec host "rm -f $pi_txt"

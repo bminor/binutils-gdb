@@ -24,7 +24,6 @@
 #include "gdb_vecs.h"
 #include "bfd.h"
 #include "command.h"
-#include "exceptions.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "inferior.h"
@@ -1718,10 +1717,12 @@ update_thread_core (struct lwp_info *info, void *closure)
 }
 
 static void
-thread_db_find_new_threads (struct target_ops *ops)
+thread_db_update_thread_list (struct target_ops *ops)
 {
   struct thread_db_info *info;
   struct inferior *inf;
+
+  prune_threads ();
 
   ALL_INFERIORS (inf)
     {
@@ -2075,7 +2076,7 @@ init_thread_db_ops (void)
   thread_db_ops.to_wait = thread_db_wait;
   thread_db_ops.to_resume = thread_db_resume;
   thread_db_ops.to_mourn_inferior = thread_db_mourn_inferior;
-  thread_db_ops.to_find_new_threads = thread_db_find_new_threads;
+  thread_db_ops.to_update_thread_list = thread_db_update_thread_list;
   thread_db_ops.to_pid_to_str = thread_db_pid_to_str;
   thread_db_ops.to_stratum = thread_stratum;
   thread_db_ops.to_has_thread_control = tc_schedlock;

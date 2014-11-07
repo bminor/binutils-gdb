@@ -1300,6 +1300,8 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	{
 	byebye:
 	  free (namedata);
+	  bfd_ardata (abfd)->extended_names = NULL;
+	  bfd_ardata (abfd)->extended_names_size = 0;
 	  return FALSE;
 	}
 
@@ -1308,7 +1310,6 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_malformed_archive);
 	  bfd_release (abfd, (bfd_ardata (abfd)->extended_names));
-	  bfd_ardata (abfd)->extended_names = NULL;
 	  goto byebye;
 	}
 
@@ -1316,11 +1317,12 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	 text, the entries in the list are newline-padded, not null
 	 padded. In SVR4-style archives, the names also have a
 	 trailing '/'.  DOS/NT created archive often have \ in them
-	 We'll fix all problems here..  */
+	 We'll fix all problems here.  */
       {
 	char *ext_names = bfd_ardata (abfd)->extended_names;
 	char *temp = ext_names;
 	char *limit = temp + namedata->parsed_size;
+
 	for (; temp < limit; ++temp)
 	  {
 	    if (*temp == ARFMAG[1])

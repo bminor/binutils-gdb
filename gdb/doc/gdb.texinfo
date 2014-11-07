@@ -5079,7 +5079,9 @@ line of source code, or one machine instruction (depending on what
 particular command you use).  Either when continuing or when stepping,
 your program may stop even sooner, due to a breakpoint or a signal.  (If
 it stops due to a signal, you may want to use @code{handle}, or use
-@samp{signal 0} to resume execution.  @xref{Signals, ,Signals}.)
+@samp{signal 0} to resume execution (@pxref{Signals, ,Signals}),
+or you may step into the signal's handler (@pxref{stepping and signal
+handlers}).)
 
 @table @code
 @kindex continue
@@ -5572,6 +5574,66 @@ execution; but your program would probably terminate immediately as
 a result of the fatal signal once it saw the signal.  To prevent this,
 you can continue with @samp{signal 0}.  @xref{Signaling, ,Giving your
 Program a Signal}.
+
+@cindex stepping and signal handlers
+@anchor{stepping and signal handlers}
+
+@value{GDBN} optimizes for stepping the mainline code.  If a signal
+that has @code{handle nostop} and @code{handle pass} set arrives while
+a stepping command (e.g., @code{stepi}, @code{step}, @code{next}) is
+in progress, @value{GDBN} lets the signal handler run and then resumes
+stepping the mainline code once the signal handler returns.  In other
+words, @value{GDBN} steps over the signal handler.  This prevents
+signals that you've specified as not interesting (with @code{handle
+nostop}) from changing the focus of debugging unexpectedly.  Note that
+the signal handler itself may still hit a breakpoint, stop for another
+signal that has @code{handle stop} in effect, or for any other event
+that normally results in stopping the stepping command sooner.  Also
+note that @value{GDBN} still informs you that the program received a
+signal if @code{handle print} is set.
+
+@anchor{stepping into signal handlers}
+
+If you set @code{handle pass} for a signal, and your program sets up a
+handler for it, then issuing a stepping command, such as @code{step}
+or @code{stepi}, when your program is stopped due to the signal will
+step @emph{into} the signal handler (if the target supports that).
+
+Likewise, if you use the @code{queue-signal} command to queue a signal
+to be delivered to the current thread when execution of the thread
+resumes (@pxref{Signaling, ,Giving your Program a Signal}), then a
+stepping command will step into the signal handler.
+
+Here's an example, using @code{stepi} to step to the first instruction
+of @code{SIGUSR1}'s handler:
+
+@smallexample
+(@value{GDBP}) handle SIGUSR1
+Signal        Stop      Print   Pass to program Description
+SIGUSR1       Yes       Yes     Yes             User defined signal 1
+(@value{GDBP}) c
+Continuing.
+
+Program received signal SIGUSR1, User defined signal 1.
+main () sigusr1.c:28
+28        p = 0;
+(@value{GDBP}) si
+sigusr1_handler () at sigusr1.c:9
+9       @{
+@end smallexample
+
+The same, but using @code{queue-signal} instead of waiting for the
+program to receive the signal first:
+
+@smallexample
+(@value{GDBP}) n
+28        p = 0;
+(@value{GDBP}) queue-signal SIGUSR1
+(@value{GDBP}) si
+sigusr1_handler () at sigusr1.c:9
+9       @{
+(@value{GDBP})
+@end smallexample
 
 @cindex extra signal information
 @anchor{extra signal information}
@@ -15725,10 +15787,9 @@ When inspecting a core file, as opposed to debugging a live program,
 tasking support may be limited or even unavailable, depending on
 the platform being used.
 For instance, on x86-linux, the list of tasks is available, but task
-switching is not supported.  On Tru64, however, task switching will work
-as usual.
+switching is not supported.
 
-On certain platforms, including Tru64, the debugger needs to perform some
+On certain platforms, the debugger needs to perform some
 memory writes in order to provide Ada tasking support.  When inspecting
 a core file, this means that the core file must be opened with read-write
 privileges, using the command @samp{"set write on"} (@pxref{Patching}).
@@ -16654,6 +16715,9 @@ be used to pass a signal whose handling state has been set to @code{nopass}
 (@pxref{Signals}).
 @end table
 @c @end group
+
+@xref{stepping into signal handlers}, for information on how stepping
+commands behave when the thread has a signal queued.
 
 @node Returning
 @section Returning from a Function
@@ -19726,8 +19790,7 @@ If @value{GDBN} is configured for an operating system with this
 facility, the command @code{info proc} is available to report
 information about the process running your program, or about any
 process running on your system.  This includes, as of this writing,
-@sc{gnu}/Linux, OSF/1 (Digital Unix), Solaris, and Irix, but
-not HP-UX, for example.
+@sc{gnu}/Linux and Solaris, but not HP-UX, for example.
 
 This command may also work on core files that were created on a system
 that has the @samp{/proc} facility.
@@ -31151,6 +31214,11 @@ valid type.
 @item pid
 The target-specific process identifier.  This field is only present
 for thread groups of type @samp{process} and only if the process exists.
+
+@item exit-code
+The exit code of this group's last exited thread, formatted in octal.
+This field is only present for thread groups of type @samp{process} and
+only if the process is not running.
 
 @item num_children
 The number of children this thread group has.  This field may be

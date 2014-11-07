@@ -25,7 +25,6 @@
 #include "cp-support.h"
 #include "addrmap.h"
 #include "gdbtypes.h"
-#include "exceptions.h"
 
 /* This is used by struct block to store namespace-related info for
    C++ files, namely using declarations and the current namespace in
@@ -374,14 +373,7 @@ block_global_block (const struct block *block)
 struct block *
 allocate_block (struct obstack *obstack)
 {
-  struct block *bl = obstack_alloc (obstack, sizeof (struct block));
-
-  BLOCK_START (bl) = 0;
-  BLOCK_END (bl) = 0;
-  BLOCK_FUNCTION (bl) = NULL;
-  BLOCK_SUPERBLOCK (bl) = NULL;
-  BLOCK_DICT (bl) = NULL;
-  BLOCK_NAMESPACE (bl) = NULL;
+  struct block *bl = OBSTACK_ZALLOC (obstack, struct block);
 
   return bl;
 }
@@ -692,4 +684,58 @@ block_iter_match_next (const char *name,
     return dict_iter_match_next (name, compare, &iterator->dict_iter);
 
   return block_iter_match_step (iterator, name, compare, 0);
+}
+
+/* See block.h.
+
+   Note that if NAME is the demangled form of a C++ symbol, we will fail
+   to find a match during the binary search of the non-encoded names, but
+   for now we don't worry about the slight inefficiency of looking for
+   a match we'll never find, since it will go pretty quick.  Once the
+   binary search terminates, we drop through and do a straight linear
+   search on the symbols.  Each symbol which is marked as being a ObjC/C++
+   symbol (language_cplus or language_objc set) has both the encoded and
+   non-encoded names tested for a match.  */
+
+struct symbol *
+block_lookup_symbol (const struct block *block, const char *name,
+		     const domain_enum domain)
+{
+  struct block_iterator iter;
+  struct symbol *sym;
+
+  if (!BLOCK_FUNCTION (block))
+    {
+      ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+	{
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				     SYMBOL_DOMAIN (sym), domain))
+	    return sym;
+	}
+      return NULL;
+    }
+  else
+    {
+      /* Note that parameter symbols do not always show up last in the
+	 list; this loop makes sure to take anything else other than
+	 parameter symbols first; it only uses parameter symbols as a
+	 last resort.  Note that this only takes up extra computation
+	 time on a match.  */
+
+      struct symbol *sym_found = NULL;
+
+      ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+	{
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				     SYMBOL_DOMAIN (sym), domain))
+	    {
+	      sym_found = sym;
+	      if (!SYMBOL_IS_ARGUMENT (sym))
+		{
+		  break;
+		}
+	    }
+	}
+      return (sym_found);	/* Will be NULL if not found.  */
+    }
 }

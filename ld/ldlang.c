@@ -1118,6 +1118,26 @@ lang_add_input_file (const char *name,
 		     lang_input_file_enum_type file_type,
 		     const char *target)
 {
+  if (name != NULL && *name == '=')
+    {
+      lang_input_statement_type *ret;
+      char *sysrooted_name
+	= concat (ld_sysroot, name + 1, (const char *) NULL);
+
+      /* We've now forcibly prepended the sysroot, making the input
+	 file independent of the context.  Therefore, temporarily
+	 force a non-sysrooted context for this statement, so it won't
+	 get the sysroot prepended again when opened.  (N.B. if it's a
+	 script, any child nodes with input files starting with "/"
+	 will be handled as "sysrooted" as they'll be found to be
+	 within the sysroot subdirectory.)  */
+      unsigned int outer_sysrooted = input_flags.sysrooted;
+      input_flags.sysrooted = 0;
+      ret = new_afile (sysrooted_name, file_type, target, TRUE);
+      input_flags.sysrooted = outer_sysrooted;
+      return ret;
+    }
+
   return new_afile (name, file_type, target, TRUE);
 }
 
@@ -2411,8 +2431,7 @@ lang_add_section (lang_statement_list_type *ptr,
 
   section->output_section = output->bfd_section;
 
-  if (!link_info.relocatable
-      && !map_head_is_link_order)
+  if (!map_head_is_link_order)
     {
       asection *s = output->bfd_section->map_tail.s;
       output->bfd_section->map_tail.s = section;

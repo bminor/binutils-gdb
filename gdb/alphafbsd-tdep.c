@@ -93,6 +93,11 @@ alphafbsd_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  /* FIXME: Should activate generic FreeBSD support here with
+     fbsd_init_abi(), but this requires a valid
+     'iterate_over_regset_sections' gdbarch method and
+     'collect_regset' functions for each regset.  */
+
   /* Hook into the DWARF CFI frame unwinder.  */
   alpha_dwarf2_init_abi (info, gdbarch);
 

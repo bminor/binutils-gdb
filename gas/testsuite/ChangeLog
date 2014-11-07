@@ -1,3 +1,67 @@
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17482
+	* gas/i386/ilp32/x32-tls.d: New file.
+	* gas/i386/ilp32/x32-tls.s: Likewise.
+
+2014-05-11  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* gas/mips/elf_arch_mips32r6.d: New file.
+	* gas/mips/elf_arch_mips64r6.d: New file.
+	* gas/mips/mips.exp: Run the new tests.
+
+2014-10-31  Andrew Pinski  <apinski@cavium.com>
+            Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+
+	* gas/mips/mips.exp: Add support for Octeon3 architecture.
+	Also add in support for running Octeon3 tests.
+	* gas/mips/octeon3.d: New test.
+	* gas/mips/octeon3.s: New test source.
+
+2014-10-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/insn-opts.d: New test.
+	* gas/mips/insn-opts.s: New test source.
+	* gas/mips/mips.exp: Run the new test.
+
+2014-10-21  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/gas/all/cond.s: Also test processing of leading double
+	quote and trailing backslash in false branch of conditional.
+	* gas/gas/all/cond.l: Adjust accordingly.
+
+2014-10-21  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/ppc/power8.s: Test msgclr and msgsnd.
+	* gas/ppc/power8.d: Adjust accordingly.
+
+2014-10-18  Alan Modra  <amodra@gmail.com>
+
+	* gas/i386/inval-equ-2.l: Adjust.
+
+2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gas/sparc/hpcvis3.d: Remove tests for the `chkpt', `commit',
+	`random', `wr r,i,%cps' and `rd r,%cps' instructions.
+	* gas/sparc/hpcvis3.s: Likewise.
+	* gas/sparc/xcrypto.d: New file.
+	* gas/sparc/xcrypto.s: Likewise.
+	* gas/sparc/mwait.d: New file.
+	* gas/sparc/mwait.s: Likewise.
+	* gas/sparc/mcdper.s: New file.
+	* gas/sparc/mcdper.d: Likewise.
+	* gas/sparc/sparc5vis4.d: New file.
+	* gas/sparc/sparc5vis4.s: Likewise.
+	* gas/sparc/sparc.exp (sparc_elf_setup): Run the xcrypto test.
+	Run the mwait test.
+	Run the mcdper test.
+`	Run the sparc5vis4 test.
+
+2014-09-27  Alan Modra  <amodra@gmail.com>
+
+	* gas/elf/group2.d, * gas/elf/group2.s: New test.
+	* gas/elf/elf.exp: Run it.
+
 2014-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/17421

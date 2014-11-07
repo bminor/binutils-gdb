@@ -264,7 +264,8 @@ extern void set_current_program_space (struct program_space *pspace);
 extern struct cleanup *save_current_space_and_thread (void);
 
 /* Switches full context to program space PSPACE.  Switches to the
-   first thread found bound to PSPACE.  */
+   first thread found bound to PSPACE, giving preference to the
+   current thread, if there's one and it isn't executing.  */
 extern void switch_to_program_space_and_thread (struct program_space *pspace);
 
 /* Create a new address space object, and add it to the list.  */

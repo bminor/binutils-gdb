@@ -374,7 +374,7 @@ xstormy16_analyze_prologue (struct gdbarch *gdbarch,
       /* Probably only in optimized case but legal action for prologue.  */
       else if ((inst & 0xff00) == 0x4600	/* 46SD   mov rD, rS */
 	       && (inst & 0x00f0) >= 0x0020 && (inst & 0x00f0) <= 0x0070
-	       && (inst & 0x000f) >= 0x00a0 && (inst & 0x000f) <= 0x000d)
+	       && (inst & 0x000f) >= 0x000a && (inst & 0x000f) <= 0x000d)
 	;
 
       /* Optional copying of args in r2-r7 to stack.  */

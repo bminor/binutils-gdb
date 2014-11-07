@@ -1172,7 +1172,7 @@ m32r_insert_breakpoint (struct target_ops *ops,
 			struct gdbarch *gdbarch,
 			struct bp_target_info *bp_tgt)
 {
-  CORE_ADDR addr = bp_tgt->placed_address;
+  CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
   int ib_breakpoints;
   unsigned char buf[13];
   int i, c;

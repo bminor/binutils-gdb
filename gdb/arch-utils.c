@@ -243,6 +243,14 @@ default_remote_register_number (struct gdbarch *gdbarch,
   return regno;
 }
 
+/* See arch-utils.h.  */
+
+int
+default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
+{
+  return 0;
+}
+
 
 /* Functions to manipulate the endianness of the target.  */
 

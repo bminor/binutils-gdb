@@ -944,10 +944,10 @@ extern void bfd_elf32_aarch64_init_maps
   (bfd *);
 
 extern void bfd_elf64_aarch64_set_options
-  (bfd *, struct bfd_link_info *, int, int, int);
+  (bfd *, struct bfd_link_info *, int, int, int, int);
 
 extern void bfd_elf32_aarch64_set_options
-  (bfd *, struct bfd_link_info *, int, int, int);
+  (bfd *, struct bfd_link_info *, int, int, int, int);
 
 /* ELF AArch64 mapping symbol support.  */
 #define BFD_AARCH64_SPECIAL_SYM_TYPE_MAP	(1 << 0)
@@ -1966,6 +1966,7 @@ enum bfd_architecture
 #define bfd_mach_mips_octeon           6501
 #define bfd_mach_mips_octeonp          6601
 #define bfd_mach_mips_octeon2          6502
+#define bfd_mach_mips_octeon3          6503
 #define bfd_mach_mips_xlr              887682   /* decimal 'XLR'  */
 #define bfd_mach_mipsisa32             32
 #define bfd_mach_mipsisa32r2           33
@@ -6651,12 +6652,12 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 
 #define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
        BFD_SEND (abfd, _bfd_find_nearest_line, \
-                 (abfd, sec, syms, off, file, func, line))
+                 (abfd, syms, sec, off, file, func, line, NULL))
 
 #define bfd_find_nearest_line_discriminator(abfd, sec, syms, off, file, func, \
                                             line, disc) \
-       BFD_SEND (abfd, _bfd_find_nearest_line_discriminator, \
-                 (abfd, sec, syms, off, file, func, line, disc))
+       BFD_SEND (abfd, _bfd_find_nearest_line, \
+                 (abfd, syms, sec, off, file, func, line, disc))
 
 #define bfd_find_line(abfd, syms, sym, file, line) \
        BFD_SEND (abfd, _bfd_find_line, \
@@ -7018,8 +7019,7 @@ typedef struct bfd_target
   NAME##_bfd_is_target_special_symbol, \
   NAME##_get_lineno, \
   NAME##_find_nearest_line, \
-  _bfd_generic_find_nearest_line_discriminator, \
-  _bfd_generic_find_line, \
+  NAME##_find_line, \
   NAME##_find_inliner_info, \
   NAME##_bfd_make_debug_symbol, \
   NAME##_read_minisymbols, \
@@ -7040,10 +7040,7 @@ typedef struct bfd_target
   bfd_boolean (*_bfd_is_target_special_symbol) (bfd *, asymbol *);
   alent *     (*_get_lineno) (bfd *, struct bfd_symbol *);
   bfd_boolean (*_bfd_find_nearest_line)
-    (bfd *, struct bfd_section *, struct bfd_symbol **, bfd_vma,
-     const char **, const char **, unsigned int *);
-  bfd_boolean (*_bfd_find_nearest_line_discriminator)
-    (bfd *, struct bfd_section *, struct bfd_symbol **, bfd_vma,
+    (bfd *, struct bfd_symbol **, struct bfd_section *, bfd_vma,
      const char **, const char **, unsigned int *, unsigned int *);
   bfd_boolean (*_bfd_find_line)
     (bfd *, struct bfd_symbol **, struct bfd_symbol *,

@@ -29,7 +29,6 @@
 #include "valprint.h"
 #include "floatformat.h"
 #include "doublest.h"
-#include "exceptions.h"
 #include "dfp.h"
 #include "extension.h"
 #include "ada-lang.h"

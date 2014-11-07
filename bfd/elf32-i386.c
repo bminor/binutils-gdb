@@ -2580,6 +2580,7 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 
 	  /* STT_GNU_IFUNC must keep R_386_GOT32 relocation.  */
 	  if (ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC
+	      && irel->r_offset >= 2
 	      && bfd_get_8 (input_bfd,
 			    contents + irel->r_offset - 2) == 0x8b)
 	    {
@@ -2609,6 +2610,7 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 	  && h->type != STT_GNU_IFUNC
 	  && h != htab->elf.hdynamic
 	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
+	  && irel->r_offset >= 2
 	  && bfd_get_8 (input_bfd,
 			contents + irel->r_offset - 2) == 0x8b)
 	{
@@ -5036,16 +5038,17 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
 
 static bfd_boolean
 elf_i386_add_symbol_hook (bfd * abfd,
-			  struct bfd_link_info * info ATTRIBUTE_UNUSED,
+			  struct bfd_link_info * info,
 			  Elf_Internal_Sym * sym,
 			  const char ** namep ATTRIBUTE_UNUSED,
 			  flagword * flagsp ATTRIBUTE_UNUSED,
 			  asection ** secp ATTRIBUTE_UNUSED,
 			  bfd_vma * valp ATTRIBUTE_UNUSED)
 {
-  if ((abfd->flags & DYNAMIC) == 0
-      && (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
+  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
+       || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE)
+      && (abfd->flags & DYNAMIC) == 0
+      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
   return TRUE;
@@ -5120,8 +5123,11 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
   _bfd_elf_post_process_headers (abfd, info);
 
 #ifdef OLD_FREEBSD_ABI_LABEL
-  /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
-  memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
+  {
+    /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
+    Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+    memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
+  }
 #endif
 }
 

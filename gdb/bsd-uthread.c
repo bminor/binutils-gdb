@@ -412,11 +412,13 @@ bsd_uthread_thread_alive (struct target_ops *ops, ptid_t ptid)
 }
 
 static void
-bsd_uthread_find_new_threads (struct target_ops *ops)
+bsd_uthread_update_thread_list (struct target_ops *ops)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   int offset = bsd_uthread_thread_next_offset;
   CORE_ADDR addr;
+
+  prune_threads ();
 
   addr = bsd_uthread_read_memory_address (bsd_uthread_thread_list_addr);
   while (addr != 0)
@@ -516,7 +518,7 @@ bsd_uthread_target (void)
   t->to_wait = bsd_uthread_wait;
   t->to_resume = bsd_uthread_resume;
   t->to_thread_alive = bsd_uthread_thread_alive;
-  t->to_find_new_threads = bsd_uthread_find_new_threads;
+  t->to_update_thread_list = bsd_uthread_update_thread_list;
   t->to_extra_thread_info = bsd_uthread_extra_thread_info;
   t->to_pid_to_str = bsd_uthread_pid_to_str;
   t->to_stratum = thread_stratum;

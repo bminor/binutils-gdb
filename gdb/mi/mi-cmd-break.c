@@ -25,7 +25,6 @@
 #include "breakpoint.h"
 #include "mi-getopt.h"
 #include "gdb.h"
-#include "exceptions.h"
 #include "observer.h"
 #include "mi-main.h"
 #include "mi-cmd-break.h"

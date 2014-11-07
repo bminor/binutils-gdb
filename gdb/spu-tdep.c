@@ -44,7 +44,6 @@
 #include "dwarf2.h"
 #include "dwarf2-frame.h"
 #include "ax.h"
-#include "exceptions.h"
 #include "spu-tdep.h"
 
 
@@ -1988,7 +1987,7 @@ spu_catch_start (struct objfile *objfile)
       struct symbol *sym;
       struct symtab_and_line sal;
 
-      sym = lookup_block_symbol (block, "main", VAR_DOMAIN);
+      sym = block_lookup_symbol (block, "main", VAR_DOMAIN);
       if (sym)
 	{
 	  fixup_symbol_section (sym, objfile);

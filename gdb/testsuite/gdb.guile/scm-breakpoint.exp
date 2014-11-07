@@ -126,7 +126,7 @@ proc test_bkpt_deletion { } {
 	gdb_test "guile (print (length del-list))" \
 	    "= 3" "number of breakpoints before delete"
 	gdb_continue_to_breakpoint "Break at multiply." \
-	    ".*/$srcfile:$deltst_location.*"
+	    ".*$srcfile:$deltst_location.*"
 	gdb_scm_test_silent_cmd  "guile (delete-breakpoint! dp1)" \
 	    "delete breakpoint"
 	gdb_test "guile (print (breakpoint-number dp1))" \
@@ -136,7 +136,7 @@ proc test_bkpt_deletion { } {
 	    "get breakpoint list 5"
 	gdb_test "guile (print (length del-list))" \
 	    "= 2" "number of breakpoints after delete"
-	gdb_continue_to_breakpoint "Break at end." ".*/$srcfile:$end_location.*"
+	gdb_continue_to_breakpoint "Break at end." ".*$srcfile:$end_location.*"
     }
 }
 
@@ -372,7 +372,7 @@ proc test_bkpt_eval_funcs { } {
 	    "create also-eval-bp1 breakpoint"
 	gdb_scm_test_silent_cmd  "guile (define never-eval-bp1 (make-bp-also-eval \"$end_location\"))" \
 	    "create never-eval-bp1 breakpoint"
-	gdb_continue_to_breakpoint "Break at multiply." ".*/$srcfile:$bp_location2.*"
+	gdb_continue_to_breakpoint "Break at multiply." ".*$srcfile:$bp_location2.*"
 	gdb_test "print i" "3" "check inferior value matches guile accounting"
 	gdb_test "guile (print (bp-eval-inf-i eval-bp1))" \
 	    "= 3" "check guile accounting matches inferior"
@@ -414,7 +414,7 @@ proc test_bkpt_eval_funcs { } {
 	gdb_test "guile (print (bp-eval-count check-eval))" \
 	    "= 0" \
 	    "test that evaluate function has not been yet executed (ie count = 0)"
-	gdb_continue_to_breakpoint "Break at multiply." ".*/$srcfile:$bp_location2.*"
+	gdb_continue_to_breakpoint "Break at multiply." ".*$srcfile:$bp_location2.*"
 	gdb_test "guile (print (bp-eval-count check-eval))" \
 	    "= 1" \
 	    "test that evaluate function is run when location also has normal bp"

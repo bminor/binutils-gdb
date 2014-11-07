@@ -1,3 +1,1726 @@
+2014-11-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (process_event_stop_test) <subroutine check>: Don't
+	check if we did a "nexti" inside a prologue.
+	* symtab.c (in_prologue): Delete function.
+	* symtab.h (in_prologue): Delete declaration.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (lookup_global_symbol): Improve function comment.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_global_symbol): Renamed from lookup_symbol_global.
+	All callers updated.
+	* symtab.h (lookup_global_symbol): Update decl.
+	(lookup_static_symbol): Move decl to better location.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (basic_lookup_symbol_nonlocal): Add comment.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_local_symbol): Renamed from lookup_symbol_aux_local.
+	All callers updated.
+	(lookup_symbol_in_all_objfiles): Renamed from
+	lookup_symbol_aux_symtabs.  All callers updated.
+	(lookup_symbol_via_quick_fns): Renamed from lookup_symbol_aux_quick.
+	All callers updated.
+	(lookup_symbol_in_objfile_symtabs): Renamed from
+	lookup_symbol_aux_objfile.  All callers updated.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_symbol_in_block): Renamed from
+	lookup_symbol_aux_block.  All callers updated.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_static_symbol): Renamed from
+	lookup_static_symbol_aux.  All callers updated.
+	(lookup_symbol_in_static_block): Renamed from lookup_symbol_static.
+	All callers updated.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* block.h (ALL_BLOCK_SYMBOLS_WITH_NAME): New macro.
+	* block.c (block_lookup_symbol): Use it.
+	* cp-support.c (make_symbol_overload_list_block): Use it.
+	* symtab.c (iterate_over_symbols): Use it.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_block_symbol): Moved to ...
+	* block.c (block_lookup_symbol):  ... here and renamed.
+	All callers updated.
+	* block.h (block_lookup_symbol): Declare.
+	* symtab.h (lookup_block_symbol): Delete.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* ada-lang.c (ada_make_symbol_completion_list): Use
+	ALL_PRIMARY_SYMTABS instead of ALL_SYMTABS.
+	* symtab.c (lookup_objfile_from_block): Ditto.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.h (TYPE_CODE_CLASS): Delete.  All uses changed to use
+	TYPE_CODE_STRUCT.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* objfiles.c (get_objfile_arch): Constify.
+	* objfiles.h (get_objfile_arch): Update prototype.
+	* solib.c (solib_global_lookup): Fetch arch from objfile,
+	not target_gdbarch.
+
+2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (wild_insn): Delete.
+	(profiler_insn, irqentry_insn): Delete.
+	(nios2_match_sequence): Delete.
+	(nios2_analyze_prologue): Update comments.  Remove matching
+	of obsolete profiler_insn and irqentry_insn sequences.
+
+2014-11-05  Alan Modra  <amodra@gmail.com>
+
+	* charset.c (convert_between_encodings): Shrink obstack using
+	obstack_blank_fast.
+	* minsyms.c (install_minimal_symbols): Likewise.
+	* cp-valprint.c (cp_print_value_fields): Cast obstack_next_free
+	to char* before doing pointer arithmetic.
+
+2014-11-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tui/tui.c (tui_enable): Pass stdout and stdin to newterm.
+
+2014-11-04  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (breakpoint_thread_match): Delete function.
+	* breakpoint.h (breakpoint_thread_match): Delete declaration.
+
+2014-11-03  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR c++/17494
+	* eval.c (evaluate_subexp_standard): Evaluate the "object" and
+	the method args also under EVAL_SKIP when evaluating method
+	calls under EVAL_SKIP.
+
+2014-11-02  Victor Kamensky  <victor.kamensky@linaro.org>
+
+	* dwarf2loc.c (read_pieced_value): Do big endian
+	processing only if gdb_regnum is not -1.
+	(write_pieced_value): Ditto.
+
+2014-11-02  Victor Kamensky  <victor.kamensky@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_init_abi): Use
+	info.byte_order_for_code to choose endianity of breakpoint
+	instructions snippets.
+
+2014-11-02  Victor Kamensky  <victor.kamensky@linaro.org>
+
+	* arm-tdep.c (extract_arm_insn): Use
+	gdbarch_byte_order_for_code to read arm instruction.
+
+2014-11-02  Doug Evans  <xdje42@gmail.com>
+
+	* mdebugread.c (parse_procedure): Delete unnecessary forward decl.
+
+2014-11-02  Doug Evans  <xdje42@gmail.com>
+
+	* xcoffread.c (process_linenos): Delete unnecessary zeroing of
+	main_subfile before returning.
+
+2014-10-31  Doug Evans  <xdje42@gmail.com>
+
+	* objfiles.h (ALL_PSPACE_OBJFILES_SAFE): Delete, unused.
+	(ALL_PSPACE_SYMTABS, ALL_PSPACE_PRIMARY_SYMTABS): Ditto.
+
+2014-10-31  Doug Evans  <xdje42@gmail.com>
+
+	* valops.c (value_cast_pointers): Fix whitespace.
+	(typecmp, search_struct_method, value_struct_elt, find_oload_champ):
+	Ditto.
+
+2014-10-30  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention ability add attributes to gdb.Objfile and
+	gdb.Progspace objects.
+	* python/py-objfile.c (objfile_object): New member dict.
+	(objfpy_dealloc): Py_XDECREF dict.
+	(objfpy_initialize): Initialize dict.
+	(objfile_getset): Add __dict__.
+	(objfile_object_type): Set tp_dictoffset member.
+	* python/py-progspace.c (progspace_object): New member dict.
+	(pspy_dealloc): Py_XDECREF dict.
+	(pspy_initialize): Initialize dict.
+	(pspace_getset): Add __dict__.
+	(pspace_object_type): Set tp_dictoffset member.
+
+2014-10-30  Yao Qi  <yao@codesourcery.com>
+
+	* python/lib/gdb/command/prompt.py (before_prompt_hook): Don't
+	replace '\\' with '\\\\'.
+
+2014-10-29  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.8.1 released.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17408
+	* infrun.c (switch_back_to_stepped_thread): Use currently_stepping
+	instead of assuming a thread with a stepping range is always
+	stepping.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
+	PR python/17372
+	* event-top.c (change_line_handler): Call
+	gdb_rl_callback_handler_remove instead of
+	rl_callback_handler_remove.
+	(callback_handler_installed): New global.
+	(gdb_rl_callback_handler_remove, gdb_rl_callback_handler_install)
+	(gdb_rl_callback_handler_reinstall): New functions.
+	(display_gdb_prompt): Call gdb_rl_callback_handler_remove and
+	gdb_rl_callback_handler_install instead of
+	rl_callback_handler_remove and rl_callback_handler_install.
+	(gdb_disable_readline): Call gdb_rl_callback_handler_remove
+	instead of rl_callback_handler_remove.
+	* event-top.h (gdb_rl_callback_handler_remove)
+	(gdb_rl_callback_handler_install)
+	(gdb_rl_callback_handler_reinstall): New declarations.
+	* infrun.c (reinstall_readline_callback_handler_cleanup): New
+	cleanup function.
+	(fetch_inferior_event): Install it.
+	* top.c (gdb_readline_wrapper_line) Call
+	gdb_rl_callback_handler_remove instead of
+	rl_callback_handler_remove.
+	(gdb_readline_wrapper_cleanup): Don't call
+	rl_callback_handler_install.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (command_line_handler): Clear the first byte of
+	linebuffer, when it is first allocated.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui.c (tui_rl_switch_mode): Wrap tui_enable/tui_disable in
+	TRY_CATCH.
+
+2014-10-29  Pedro Alves  <palves@redhat.com>
+
+	PR tui/16138
+	PR tui/17519
+	* tui/tui-interp.c (tui_is_toplevel): Delete global.
+	(tui_allowed_p): Delete function.
+	* tui/tui.c: Include "interps.h".
+	(tui_enable): Don't use tui_allowed_p.	Error out here with
+	detailed error messages if the TUI is the top level interpreter,
+	or if output is not a terminal.	 Use newterm instead of initscr,
+	and error out if initializing the terminal fails.  Also error out if
+	the terminal doesn't support cursor addressing.
+	* tui/tui.h (tui_allowed_p): Delete declaration.
+
+2014-10-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* arm-tdep.c (arm_skip_stack_protector): Return early if
+	address loaded by first "ldr" instruction does not have
+	a corresponding minimal symbol.  Update comment.
+
+2014-10-29  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_analyze_load_stack_chk_guard): Compute the
+	loaded address correctly of ldr instruction.
+
+2014-10-28  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/12623
+	* gdbthread.h (struct thread_info) <stepped_breakpoint>: New
+	field.
+	* infrun.c (resume) <stepping breakpoint instruction>: Set the
+	thread's stepped_breakpoint field.  Skip if reverse debugging.
+	Add comment.
+	(init_thread_stepping_state, handle_signal_stop): Clear the
+	thread's stepped_breakpoint field.
+
+2014-10-27  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_thread_alive): New, factored out from ...
+	(remote_thread_alive): ... this.
+	(remote_update_thread_list): Bail out before deleting threads if
+	the target returned an empty list, and, the current thread has a
+	magic/fake ptid.
+
+2014-10-27  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_signal_stop): Also skip handlers when a random
+	signal arrives while handling a "stepi" or a "nexti".  Set the
+	thread's 'step_after_step_resume_breakpoint' flag.
+
+2014-10-27  Luis Machado  <lgustavo@codesourcery.com>
+
+	* arm-tdep.c (INSN_S_L_BIT_NUM): Document.
+	(arm_record_ld_st_imm_offset): Reimplement to cover all
+	load/store cases for ARM opcode 010.
+	(arm_record_ld_st_multiple): Reimplement to cover all
+	load/store cases for ARM opcode 100.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_symbol_aux_local): Fix typo in comment.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
+	* symfile.h (struct quick_symbol_functions) <lookup_symbol>: Rename
+	parameter "kind" to "block_index".
+	* symtab.c (error_in_psymtab_expansion): Rename parameter "kind" to
+	"block_index".
+	(lookup_symbol_aux_quick, basic_lookup_transparent_type_quick): Ditto.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
+	* block.h (ALL_BLOCK_SYMBOLS): Fix comment.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
+	* block.c (allocate_block): Use OBSTACK_ZALLOC instead of
+	obstack_alloc.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
+	* parser-defs.h (block_found): Move decl from here ...
+	* symtab.h (block_found): ... to here.
+
+2014-10-26  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct field_of_this_result): Fix typo in comment.
+	(lookup_symbol_in_language): Move function comment here.
+	(lookup_symbol): Improve function comment.
+	(basic_lookup_symbol_nonlocal): Ditto.
+	(lookup_symbol_static, lookup_symbol_global): Ditto.
+	(lookup_symbol_aux_block): Ditto.
+	(lookup_language_this): Add function comment.
+	(lookup_static_symbol_aux): Explicitly mark as extern.  Improve
+	function comment.
+	(lookup_block_symbol): Improve function comment.
+	(lookup_struct): Fix capitalization in function comment.
+	(lookup_transparent_type): Add function comment.
+	(lookup_global_symbol_from_objfile): Explicitly mark as extern.
+	Improve function comment.
+	(lookup_objfile_from_block): Add function comment.
+	* symtab.c (lookup_symbol_in_language): Update function comment.
+	(lookup_symbol, lookup_language_this): Ditto.
+	(lookup_static_symbol_aux, lookup_objfile_from_block): Ditto.
+	(lookup_symbol_aux_block, lookup_global_symbol_from_objfile): Ditto.
+	(basic_lookup_symbol_nonlocal): Ditto.
+	(lookup_symbol_static, lookup_symbol_global): Ditto.
+	(lookup_transparent_type, lookup_block_symbol): Ditto.
+
+2014-10-25  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (types_info): Delete forward decl.
+	(functions_info, variables_info, sources_info): Ditto.
+	(_initialize_symtab): Rewrite forward decl to use
+	initialize_file_ftype.
+
+2014-10-25  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.c (lookup_symbol_aux_quick): Set block_found upon success.
+
+2014-10-25  Doug Evans  <xdje42@gmail.com>
+
+	* dwarf2read.c (process_structure_scope): Remove second (nested) copy
+	of local var child_die.
+
+2014-10-24  Don Breazeal  <donb@codesourcery.com>
+
+	* infrun.c (follow_fork_inferior): Update fork message printing
+	to use target_terminal_ours_for_output instead of
+	target_terminal_ours, to use _() for all format strings, to print
+	"vfork" instead of "fork" for vforks, and to add a detach message.
+	(handle_vfork_child_exec_or_exit): Update message printing to use
+	target_terminal_ours_for_output instead of target_terminal_ours, to
+	use _() for all format strings, and to fix some formatting.
+
+2014-10-24  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (ALLDEPFILES): Remove vax-nat.c.
+	* NEWS (Removed targets): Add VAX BSD and VAX Ultrix.
+	* config/vax/vax.mh: Delete.
+	* configure.host: Move vax-*-bsd* and vax-*-ultrix* to the
+	obsolete configurations section.
+	* configure.tgt (vax-*-*): Don't mention 4.2BSD nor Ultrix.
+	* vax-nat.c: Delete file.
+
+2014-10-24  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (Removed targets): Add OS/arch column.
+
+2014-10-24  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Call TYPE_TARGET_TYPE
+	on the arg type of a constructor only if it is of reference type.
+
+2014-10-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_analyze_prologue): Use new instruction field
+	accessors and constants from nios2 opcodes update.
+	(nios2_get_next_pc): Likewise.
+
+2014-10-19  Doug Evans  <xdje42@gmail.com>
+
+	* gdbthread.h (set_running): Fix comment.
+	(set_executing, finish_thread_state): Fix comment.
+
+2014-10-18  Doug Evans  <xdje42@gmail.com>
+
+	* linux-nat.c (linux_nat_wait_1): Make local prev_mask non-static.
+
+2014-10-17  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention new event gdb.clear_objfiles.
+	* python/py-event.h (emit_clear_objfiles_event): Clear
+	* python/py-events.h (events_object): New member clear_objfiles.
+	* python/py-evts.c (gdbpy_initialize_py_events): Add clear_objfiles
+	event.
+	* python/py-inferior.c (python_new_objfile): If objfile is NULL,
+	emit clear_objfiles event.
+	* python/py-newobjfileevent.c (create_clear_objfiles_event_object): New
+	function.
+	(emit_clear_objfiles_event): New function.
+	(clear_objfiles): New event.
+	* python/python-internal.h (gdbpy_initialize_clear_objfiles_event):
+	Declare.
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_clear_objfiles_event.
+
+2014-10-17  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention new gdb.Objfile.progspace attribute.
+	* python/py-objfile.c (objfpy_get_progspace): New function.
+	(objfile_getset): New entry for "progspace".
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17471
+	* infcmd.c (strip_bg_char): Change prototype and rewrite.  Now
+	returns a copy of the input.
+	(run_command_1, continue_command, step_1, jump_command)
+	(signal_command, until_command, advance_command, finish_command)
+	(attach_command): Adjust and install a cleanup to free the
+	stripped args.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17300
+	* infcmd.c (continue_1): If continuing all threads in the
+	foreground, make sure the inferior's terminal settings are put in
+	effect.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17472
+	* annotate.c (annotate_breakpoints_invalid): Use
+	target_terminal_our_for_output instead of target_terminal_ours.
+	Give back the terminal to the target.
+	(annotate_frames_invalid): Likewise.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	* target.c (enum terminal_state): New enum.
+	(terminal_state): New global.
+	(target_terminal_init): New function.
+	(target_terminal_inferior): Skip if inferior already owns the
+	terminal.
+	(target_terminal_ours, target_terminal_ours_for_output): New
+	functions.
+	* target.h (target_terminal_init): Convert to function prototype.
+	(target_terminal_ours_for_output): Convert to function prototype
+	and tweak comment.
+	(target_terminal_ours): Convert to function prototype and tweak
+	comment.
+	* windows-nat.c (do_initial_windows_stuff): Call
+	target_terminal_init instead of child_terminal_init_with_pgrp.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Remove alpha-osf1-tdep.o.
+	(HFILES_NO_SRCDIR): Remove config/alpha/nm-osf3.h.
+	(ALLDEPFILES): Remove alpha-nat.c, alpha-osf1-tdep.c and
+	solib-osf.c.
+	* NEWS: Mention that support for alpha*-*-osf* has been removed.
+	* ada-lang.h [__alpha__ && __osf__]
+	(ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS): Delete.
+	* alpha-nat.c, alpha-osf1-tdep.c: Delete files.
+	* alpha-tdep.c (alpha_gdbarch_init): Remove reference to
+	GDB_OSABI_OSF1.
+	* config/alpha/alpha-osf3.mh, config/alpha/nm-osf3.h: Delete
+	files.
+	* config/djgpp/fnchange.lst (config/alpha/alpha-osf1.mh)
+	(config/alpha/alpha-osf2.mh, config/alpha/alpha-osf3.mh): Delete.
+	* configure: Regenerate.
+	* configure.ac: Remove references to osf.
+	* configure.host: Handle alpha*-*-osf* in the obsolete hosts
+	section.  Remove all other references to osf.
+	* configure.tgt: Add alpha*-*-osf* to the obsolete targets section.
+	Remove all other references to osf.
+	* dec-thread.c: Delete file.
+	* defs.h (GDB_OSABI_OSF1): Delete.
+	* inferior.h (START_INFERIOR_TRAPS_EXPECTED): New unconditionally
+	defined.
+	* osabi.c (gdb_osabi_names): Delete "OSF/1".
+	* procfs.c (procfs_debug_inferior) [PROCFS_DONT_TRACE_FAULTS]:
+	Delete code.
+	(unconditionally_kill_inferior)
+	[PROCFS_NEED_CLEAR_CURSIG_FOR_KILL]: Delete code.
+	* solib-osf.c: Delete file.
+
+2014-10-17  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (clear_threads_listing_context): Move higher up, out of
+	the HAVE_LIBEXPAT guard.
+
+2014-10-16  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers)
+	(i386_darwin_store_inferior_registers): Sanitize gs and fs values
+	on amd64.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* dec-thread.c (dec_thread_count_gdb_threads)
+	(dec_thread_add_gdb_thread): Delete.
+	(dec_thread_update_thread_list): Delete.
+	(dec_thread_find_new_threads): Rename to ...
+	(dec_thread_update_thread_list): ... this.  Delete GDB-size
+	threads that are no longer found in dec_thread_list.
+	(resync_thread_list): Delete.
+	(dec_thread_wait): Call dec_thread_update_thread_list instead of
+	resync_thread_list.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (ALL_NON_EXITED_THREADS_SAFE): New macro.
+	* remote.c (remote_update_thread_list): Skip calling prune_threads
+	if any thread listing method is supported, and instead walk over
+	the set of remote threads listed, deleting those that are not
+	found in GDB's thread list.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* ada-tasks.c (print_ada_task_info, task_command_1): Adjust.
+	* bsd-uthread.c (bsd_uthread_find_new_threads): Rename to ...
+	(bsd_uthread_update_thread_list): ... this.  Call prune_threads.
+	(bsd_uthread_target): Adjust.
+	* corelow.c (core_open): Adjust.
+	* dec-thread.c (dec_thread_find_new_threads): Update comment.
+	(dec_thread_update_thread_list): New function.
+	(init_dec_thread_ops): Adjust.
+	* gdbthread.h (prune_threads): New declaration.
+	* linux-thread-db.c (thread_db_find_new_threads): Rename to ...
+	(thread_db_update_thread_list): ... this.  Call prune_threads.
+	(init_thread_db_ops): Adjust.
+	* nto-procfs.c (procfs_find_new_threads): Rename to ...
+	(procfs_update_thread_list): ... this.  Call prune_threads.
+	(procfs_attach, procfs_create_inferior, init_procfs_targets):
+	Adjust.
+	* obsd-nat.c (obsd_find_new_threads): Rename to ...
+	(obsd_update_thread_list): ... this.  Call prune_threads.
+	(obsd_add_target): Adjust.
+	* procfs.c (procfs_target): Adjust.
+	(procfs_notice_thread): Update comment.
+	(procfs_find_new_threads): Rename to ...
+	(procfs_update_thread_list): ... this.  Call prune_threads.
+	* ravenscar-thread.c (ravenscar_update_inferior_ptid): Update
+	comment.
+	(ravenscar_wait): Adjust.
+	(ravenscar_find_new_threads): Rename to ...
+	(ravenscar_update_thread_list): ... this.  Call prune_threads.
+	(init_ravenscar_thread_ops): Adjust.
+	* record-btrace.c (record_btrace_find_new_threads): Rename to ...
+	(record_btrace_update_thread_list): ... this.  Adjust comment.
+	(init_record_btrace_ops): Adjust.
+	* remote.c (remote_threads_info): Rename to ...
+	(remote_update_thread_list): ... this.  Call prune_threads.
+	(remote_start_remote, extended_remote_attach_1, init_remote_ops):
+	Adjust.
+	* sol-thread.c (check_for_thread_db): Adjust.
+	(sol_find_new_threads_callback): Rename to ...
+	(sol_update_thread_list_callback): ... this.
+	(sol_find_new_threads): Rename to ...
+	(sol_update_thread_list): ... this.  Call prune_threads.  Adjust.
+	(sol_get_ada_task_ptid, init_sol_thread_ops): Adjust.
+	* target-delegates.c: Regenerate.
+	* target.c (target_find_new_threads): Rename to ...
+	(target_update_thread_list): ... this.
+	* target.h (struct target_ops): Rename to_find_new_threads field
+	to to_update_thread_list.
+	(target_find_new_threads): Rename to ...
+	(target_update_thread_list): ... this.
+	* thread.c (prune_threads): Make extern.
+	(update_thread_list): Adjust.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_get_threadlist, remote_threadlist_iterator):
+	Add describing comment.  Return -1 if the qL packet is not
+	supported.
+	(struct thread_item, thread_item_t): Move higher up in
+	the file.  Add comments.
+	(struct threads_parsing_context): Move higher up in
+	the file, add comments, and remote to ...
+	(struct threads_listing_context): ... this.
+	(remote_newthread_step): Don't add the thread to GDB's thread
+	database here.  Instead push it to the thread_listing_context
+	list.
+	(remote_find_new_threads): Rename to ...
+	(remote_get_threads_with_ql): ... this.  Add target_ops and
+	targets_listing_context parameters.  Pass down context.
+	(start_thread): Adjust.
+	(clear_threads_parsing_context): Rename to ...
+	(clear_threads_listing_context): ... this.
+	(remote_get_threads_with_qxfer): New, with parts salvaged from old
+	remote_threads_info.
+	(remote_get_threads_with_qthreadinfo): Ditto.
+	(remote_threads_info): Reimplement.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (resume): Don't force displaced-stepping for all
+	single-steps on software single-stepping archs.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (single_step_breakpoints): Delete global.
+	(insert_single_step_breakpoint): Adjust to store the breakpoint
+	pointer in the current thread.
+	(single_step_breakpoints_inserted, remove_single_step_breakpoints)
+	(cancel_single_step_breakpoints): Delete functions.
+	(breakpoint_has_location_inserted_here): Make extern.
+	(single_step_breakpoint_inserted_here_p): Adjust to walk the
+	breakpoint list.
+	* breakpoint.h (breakpoint_has_location_inserted_here): New
+	declaration.
+	(single_step_breakpoints_inserted, remove_single_step_breakpoints)
+	(cancel_single_step_breakpoints): Remove declarations.
+	* gdbthread.h (struct thread_control_state)
+	<single_step_breakpoints>: New field.
+	(delete_single_step_breakpoints)
+	(thread_has_single_step_breakpoints_set)
+	(thread_has_single_step_breakpoint_here): New declarations.
+	* infrun.c (follow_exec): Also clear the single-step breakpoints.
+	(singlestep_breakpoints_inserted_p, singlestep_ptid)
+	(singlestep_pc): Delete globals.
+	(infrun_thread_ptid_changed): Remove references to removed
+	globals.
+	(resume_cleanups): Delete the current thread's single-step
+	breakpoints.
+	(maybe_software_singlestep): Remove references to removed globals.
+	(resume): Adjust to use thread_has_single_step_breakpoints_set and
+	delete_single_step_breakpoints.
+	(init_wait_for_inferior): Remove references to removed globals.
+	(delete_thread_infrun_breakpoints): Delete the thread's
+	single-step breakpoints too.
+	(delete_just_stopped_threads_infrun_breakpoints): Don't delete
+	single-step breakpoints here.
+	(delete_stopped_threads_single_step_breakpoints): New function.
+	(adjust_pc_after_break): Adjust to use
+	thread_has_single_step_breakpoints_set.
+	(handle_inferior_event): Remove references to removed globals.
+	Use delete_stopped_threads_single_step_breakpoints.
+	(handle_signal_stop): Adjust to per-thread single-step
+	breakpoints.  Swap test order to do cheaper tests first.
+	(switch_back_to_stepped_thread): Extend debug output.  Remove
+	references to removed globals.
+	* record-full.c (record_full_wait_1): Adjust to per-thread
+	single-step breakpoints.
+	* thread.c (delete_single_step_breakpoints)
+	(thread_has_single_step_breakpoints_set)
+	(thread_has_single_step_breakpoint_here): New functions.
+	(clear_thread_inferior_resources): Also delete the thread's
+	single-step breakpoints.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (delete_thread_breakpoint): New function.
+	(delete_step_resume_breakpoint)
+	(delete_exception_resume_breakpoint): Use it.
+	(delete_at_next_stop): New function.
+	(clear_thread_inferior_resources): Use delete_at_next_stop.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (regular_breakpoint_inserted_here_p): Inline ...
+	(breakpoint_inserted_here_p): ... here.  Remove special case for
+	software single-step breakpoints.
+	(find_non_raw_software_breakpoint_inserted_here): Inline ...
+	(software_breakpoint_inserted_here_p): ... here.  Remove special
+	case for software single-step breakpoints.
+	(bp_target_info_copy_insertion_state)
+	(deprecated_insert_raw_breakpoint)
+	(deprecated_remove_raw_breakpoint): Delete functions.
+	* breakpoint.h (deprecated_insert_raw_breakpoint)
+	(deprecated_remove_raw_breakpoint): Remove declarations.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/9649
+	* breakpoint.c (single_step_breakpoints, single_step_gdbarch):
+	Delete array globals.
+	(single_step_breakpoints): New global.
+	(breakpoint_xfer_memory): Remove special handling for single-step
+	breakpoints.
+	(update_breakpoints_after_exec): Delete bp_single_step
+	breakpoints.
+	(detach_breakpoints): Remove special handling for single-step
+	breakpoints.
+	(breakpoint_init_inferior): Delete bp_single_step breakpoints.
+	(bpstat_stop_status): Add comment.
+	(bpstat_what, bptype_string, print_one_breakpoint_location)
+	(adjust_breakpoint_address, init_bp_location): Handle
+	bp_single_step.
+	(new_single_step_breakpoint): New function.
+	(set_momentary_breakpoint, bkpt_remove_location): Remove special
+	handling for single-step breakpoints.
+	(insert_single_step_breakpoint, single_step_breakpoints_inserted)
+	(remove_single_step_breakpoints, cancel_single_step_breakpoints):
+	Rewrite.
+	(detach_single_step_breakpoints, find_single_step_breakpoint):
+	Delete functions.
+	(breakpoint_has_location_inserted_here): New function.
+	(single_step_breakpoint_inserted_here_p): Rewrite.
+	* breakpoint.h: Remove FIXME.
+	(enum bptype) <bp_single_step>: New enum value.
+	(insert_single_step_breakpoint): Update comment.
+	* infrun.c (resume_cleanups)
+	(delete_step_thread_step_resume_breakpoint): Remove single-step
+	breakpoints.
+	(fetch_inferior_event): Install a cleanup that removes infrun
+	breakpoints.
+	(switch_back_to_stepped_thread) <expect thread advanced also>:
+	Clear step-over info.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (delete_step_resume_breakpoint_callback): Delete.
+	(delete_thread_infrun_breakpoints): New function, with parts
+	salvaged from delete_step_resume_breakpoint_callback.
+	(delete_step_thread_step_resume_breakpoint): Delete.
+	(for_each_just_stopped_thread_callback_func): New typedef.
+	(for_each_just_stopped_thread): New function.
+	(delete_just_stopped_threads_infrun_breakpoints): New function.
+	(delete_step_thread_step_resume_breakpoint_cleanup): Rename to ...
+	(delete_just_stopped_threads_infrun_breakpoints_cleanup):
+	... this.  Adjust.
+	(wait_for_inferior, fetch_inferior_event): Adjust to renames.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (should_be_inserted): Don't insert watchpoints if
+	trying to step past a non-steppable watchpoint.
+	* gdbthread.h (struct thread_info) <stepping_over_watchpoint>: New
+	field.
+	* infrun.c (struct step_over_info): Add new field
+	'nonsteppable_watchpoint_p' and adjust comments.
+	(set_step_over_info): New 'nonsteppable_watchpoint_p' parameter.
+	Adjust.
+	(clear_step_over_info): Clear nonsteppable_watchpoint_p as well.
+	(stepping_past_nonsteppable_watchpoint): New function.
+	(step_over_info_valid_p): Also return true if stepping past a
+	nonsteppable watchpoint.
+	(proceed): Adjust call to set_step_over_info.  Remove reference to
+	init_infwait_state.
+	(init_wait_for_inferior): Remove reference to init_infwait_state.
+	(waiton_ptid): Delete global.
+	(struct execution_control_state)
+	<stepped_after_stopped_by_watchpoint>: Delete field.
+	(wait_for_inferior, fetch_inferior_event): Always pass
+	minus_one_ptid to target_wait.
+	(init_thread_stepping_state): Clear 'stepping_over_watchpoint'
+	field.
+	(init_infwait_state): Delete function.
+	(handle_inferior_event): Remove infwait_state handling.
+	(handle_signal_stop) <watchpoints handling>: Adjust after
+	stepped_after_stopped_by_watchpoint removal.  Don't remove
+	breakpoints here nor set infwait_state.  Set the thread's
+	stepping_over_watchpoint flag, and call keep_going instead.
+	(keep_going): Handle stepping_over_watchpoint.  Adjust
+	set_step_over_info calls.
+	* infrun.h (stepping_past_nonsteppable_watchpoint): Declare
+	function.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (step_over_info_valid_p): New function.
+	(resume): Use step_over_info_valid_p instead of checking the
+	threads's trap_expected flag.
+
+2014-10-15  Doug Evans  <dje@google.com>
+	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	PR python/17364
+	* python/lib/gdb/__init__.py (packages): Add "printer".
+	* python/lib/gdb/command/bound_registers.py: Moved to ...
+	* python/lib/gdb/printer/bound_registers.py: ... here.
+	Add printer to global set of builtin printers.  Rename printer from
+	"bound" to "mpx_bound128".
+	* python/lib/gdb/printing.py (_builtin_pretty_printers): New global,
+	registered as global "builtin" printer.
+	(add_builtin_pretty_printer): New function.
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Update, and add
+	gdb/printer/__init__.py.
+
+2014-10-15  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* Makefile.in (SFILES): Remove d-support.c.
+	(COMMON_OBS): Remove d-support.o.
+	* d-lang.h (d_parse_symbol): Remove declaration.
+	* d-lang.c (d_demangle): Use gdb_demangle to demangle D symbols.
+	* d-support.c: Remove file.
+
+2014-10-15  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb/infrun.c (process_event_stop_test): Apply
+	gdbarch_addr_bits_remove to longjmp resume address.
+
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	* regformats/microblaze.dat: Delete file.
+
+2014-10-15  Ajit Agarwal  <ajitkum@xilinx.com>
+
+	* features/Makefile (microblaze-expedite): Replace pc with rpc.
+	* regformats/microblaze-with-stack-protect.dat: Regenerate.
+
+2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Treat dynamic classes
+	as non-trivial.
+
+2014-10-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR c++/13403
+	PR c++/15154
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Lookup copy constructors
+	with qualified args.
+
+2014-10-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <BINOP_ADD>: Add handling
+	of the case where the second operand is a pointer.
+	<BINOP_SUB>: Likewise.
+
+2014-10-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* breakpoint.c (bkpt_probe_insert_location): Call set_semaphore
+	only if it is not NULL.
+	(bkpt_probe_remove_location): Likewise, for clear_semaphore.
+	* probe.h (struct probe_ops) <set_semaphore>: Update comment.
+	(struct probe_ops) <clear_semaphore>: Likewise.
+	* tracepoint.c (start_tracing): Call set_semaphore only if it is
+	not NULL.
+	(stop_tracing): Likewise, for clear_semaphore.
+
+2014-10-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* stap-probe.c (stap_parse_argument): Initialize expout explicitly
+	using language_c, instead of current_language.
+
+2014-10-13  Doug Evans  <dje@google.com>
+
+	* python/py-objfile.c (objfpy_initialize): New function.
+	(objfpy_new, objfile_to_objfile_object): Call it.
+	* python/py-progspace.c (pspy_initialize): New function.
+	(pspy_new, pspace_to_pspace_object): Call it.
+
+2014-10-13  Miroslav Franc  <mfranc@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix "save breakpoints" for "catch" command.
+	* break-catch-sig.c (signal_catchpoint_print_recreate): Add trailing
+	newline.
+
+2014-10-12  Miroslav Franc  <mfranc@redhat.com>
+
+	Fix "save breakpoints" for "disable $bpnum" command.
+	* breakpoint.c (save_breakpoints): Add $bpnum for disable.
+
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Remove mips-irix-tdep.o and solib-irix.o.
+	(ALLDEPFILES): Remove mips-irix-tdep.c and solib-irix.c.
+	(HFILES_NO_SRCDIR): Remove solib-irix.h.
+	* NEWS: Mention that support for mips-sgi-irix5* mips-sgi-irix6*
+	and been removed.
+	* config/mips/irix5.mh, config/mips/irix6.mh: Delete files.
+	* configure.ac: Remove references to IRIX.
+	* configure.host: Add *-*-irix* to the obsolete hosts section.
+	Remove all other references to irix.
+	* irix5-nat.c, mips-irix-tdep.c, solib-irix.c, solib-irix.h:
+	Delete files.
+
+2014-10-10  Ajit Agarwal  <ajitkum@xilinx.com>
+
+	* microblaze-tdep.c (microblaze_gdbarch_init): If the description
+	isn't valid, release the tdesc arch data and return NULL.
+
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
+	* linux-tdep.c: Include observer.h.
+	(linux_inferior_data): New global.
+	(struct linux_info): New structure.
+	(invalidate_linux_cache_inf, linux_inferior_data_cleanup)
+	(get_linux_inferior_data): New functions.
+	(linux_vsyscall_range): Rename to ...
+	(linux_vsyscall_range_raw): ... this.
+	(linux_vsyscall_range): New function; handles caching.
+	(_initialize_linux_tdep): Register linux_inferior_data.  Install
+	inferior_exit and inferior_appeared observers.
+
+2014-10-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR symtab/14466
+	* solib-svr4.c (svr4_read_so_list): Rename to ...
+	(svr4_current_sos_1): ... this and change the function comment.
+	(svr4_current_sos): New function.
+
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
+	* arch-utils.c (default_vsyscall_range): New function.
+	* arch-utils.h (default_vsyscall_range): New declaration.
+	* gdbarch.sh (vsyscall_range): New hook.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* linux-tdep.c (linux_vsyscall_range): New function.
+	(linux_init_abi): Install linux_vsyscall_range as
+	vsyscall_range gdbarch hook.
+	* memrange.c (address_in_mem_range): New function.
+	* memrange.h (address_in_mem_range): New declaration.
+	* symfile-mem.c (find_vdso_size): Delete function.
+	(add_vsyscall_page): Use gdbarch_vsyscall_range.
+
+2014-10-10  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (normal_stop): Fix typo in comment.
+
+2014-10-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR tdep/9390
+	* xstorxstormy16-tdep.c (xstormy16_analyze_prologue): Fix possible
+	typo when using logical AND to determine instruction type.
+
+2014-10-09  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c (handle_signal_stop): Remove local variable
+	'printed'.
+
+2014-10-08  Stan Shebs  <stan@codesourcery.com>
+
+	* MAINTAINERS (GLOBAL MAINTAINERS): Add Yao Qi.
+
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
+	* fbsd-tdep.c: Do not include string.h or gdb_assert.h.
+
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include common-exceptions.h.
+	* exceptions.h: Do not include common-exceptions.h.
+
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
+	* common/common-defs.h: Include cleanups.h.
+	* common/common-exceptions.c: Do not include cleanups.h.
+	* utils.h: Likewise.
+
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
+	* ada-lang.c: Do not include exceptions.h.
+	* ada-valprint.c: Likewise.
+	* amd64-tdep.c: Likewise.
+	* auto-load.c: Likewise.
+	* block.c: Likewise.
+	* break-catch-throw.c: Likewise.
+	* breakpoint.c: Likewise.
+	* btrace.c: Likewise.
+	* c-lang.c: Likewise.
+	* cli/cli-cmds.c: Likewise.
+	* cli/cli-interp.c: Likewise.
+	* cli/cli-script.c: Likewise.
+	* completer.c: Likewise.
+	* corefile.c: Likewise.
+	* corelow.c: Likewise.
+	* cp-abi.c: Likewise.
+	* cp-support.c: Likewise.
+	* cp-valprint.c: Likewise.
+	* darwin-nat.c: Likewise.
+	* dwarf2-frame-tailcall.c: Likewise.
+	* dwarf2-frame.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* dwarf2read.c: Likewise.
+	* eval.c: Likewise.
+	* event-loop.c: Likewise.
+	* event-top.c: Likewise.
+	* f-valprint.c: Likewise.
+	* frame-unwind.c: Likewise.
+	* frame.c: Likewise.
+	* gdbtypes.c: Likewise.
+	* gnu-v2-abi.c: Likewise.
+	* gnu-v3-abi.c: Likewise.
+	* guile/scm-auto-load.c: Likewise.
+	* guile/scm-breakpoint.c: Likewise.
+	* guile/scm-cmd.c: Likewise.
+	* guile/scm-frame.c: Likewise.
+	* guile/scm-lazy-string.c: Likewise.
+	* guile/scm-param.c: Likewise.
+	* guile/scm-symbol.c: Likewise.
+	* guile/scm-type.c: Likewise.
+	* hppa-hpux-tdep.c: Likewise.
+	* i386-tdep.c: Likewise.
+	* inf-loop.c: Likewise.
+	* infcall.c: Likewise.
+	* infcmd.c: Likewise.
+	* infrun.c: Likewise.
+	* interps.c: Likewise.
+	* interps.h: Likewise.
+	* jit.c: Likewise.
+	* linespec.c: Likewise.
+	* linux-nat.c: Likewise.
+	* linux-thread-db.c: Likewise.
+	* m32r-rom.c: Likewise.
+	* main.c: Likewise.
+	* memory-map.c: Likewise.
+	* mi/mi-cmd-break.c: Likewise.
+	* mi/mi-cmd-stack.c: Likewise.
+	* mi/mi-interp.c: Likewise.
+	* mi/mi-main.c: Likewise.
+	* monitor.c: Likewise.
+	* nto-procfs.c: Likewise.
+	* objc-lang.c: Likewise.
+	* p-valprint.c: Likewise.
+	* parse.c: Likewise.
+	* ppc-linux-tdep.c: Likewise.
+	* printcmd.c: Likewise.
+	* probe.c: Likewise.
+	* python/py-auto-load.c: Likewise.
+	* python/py-breakpoint.c: Likewise.
+	* python/py-cmd.c: Likewise.
+	* python/py-finishbreakpoint.c: Likewise.
+	* python/py-frame.c: Likewise.
+	* python/py-framefilter.c: Likewise.
+	* python/py-function.c: Likewise.
+	* python/py-gdb-readline.c: Likewise.
+	* python/py-inferior.c: Likewise.
+	* python/py-infthread.c: Likewise.
+	* python/py-lazy-string.c: Likewise.
+	* python/py-linetable.c: Likewise.
+	* python/py-param.c: Likewise.
+	* python/py-prettyprint.c: Likewise.
+	* python/py-symbol.c: Likewise.
+	* python/py-type.c: Likewise.
+	* python/py-value.c: Likewise.
+	* python/python-internal.h: Likewise.
+	* python/python.c: Likewise.
+	* record-btrace.c: Likewise.
+	* record-full.c: Likewise.
+	* regcache.c: Likewise.
+	* remote-fileio.c: Likewise.
+	* remote-mips.c: Likewise.
+	* remote.c: Likewise.
+	* rs6000-aix-tdep.c: Likewise.
+	* rs6000-nat.c: Likewise.
+	* skip.c: Likewise.
+	* solib-darwin.c: Likewise.
+	* solib-dsbt.c: Likewise.
+	* solib-frv.c: Likewise.
+	* solib-ia64-hpux.c: Likewise.
+	* solib-spu.c: Likewise.
+	* solib-svr4.c: Likewise.
+	* solib.c: Likewise.
+	* spu-tdep.c: Likewise.
+	* stack.c: Likewise.
+	* stap-probe.c: Likewise.
+	* symfile-mem.c: Likewise.
+	* symmisc.c: Likewise.
+	* target.c: Likewise.
+	* thread.c: Likewise.
+	* top.c: Likewise.
+	* tracepoint.c: Likewise.
+	* tui/tui-interp.c: Likewise.
+	* typeprint.c: Likewise.
+	* utils.c: Likewise.
+	* valarith.c: Likewise.
+	* valops.c: Likewise.
+	* valprint.c: Likewise.
+	* value.c: Likewise.
+	* varobj.c: Likewise.
+	* windows-nat.c: Likewise.
+	* xml-support.c: Likewise.
+
+2014-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (add_offset_16): Rewrite to implement what the
+	name implies.
+	(extended_mips16_next_pc): Update accordingly.
+
+2014-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips16_instruction_is_compact_branch): New
+	function.
+	(micromips_instruction_is_compact_branch): Likewise.
+	(mips16_scan_prologue): Terminate scanning upon seeing a branch
+	or a compact jump, reaching a jump delay slot, or seeing a
+	second non-prologue instruction.
+	(micromips_scan_prologue): Also terminate scanning upon seeing a
+	compact branch or jump, or reaching a branch or jump delay slot.
+	(mips32_scan_prologue): Terminate scanning upon reaching a branch
+	or jump delay slot, or seeing a second non-prologue instruction.
+	(mips32_instruction_has_delay_slot): Retain instruction
+	examination code only, update arguments accordingly and move
+	instruction fetch pieces to...
+	(mips32_insn_at_pc_has_delay_slot): ... this new function.
+	(micromips_instruction_has_delay_slot): Likewise and to...
+	(micromips_insn_at_pc_has_delay_slot): ... this new function.
+	(mips16_instruction_has_delay_slot): Likewise and to...
+	(mips16_insn_at_pc_has_delay_slot): ... this new function.
+	(mips_single_step_through_delay): Update accordingly.
+	(mips_adjust_breakpoint_address): Likewise.
+
+2014-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (micromips_instruction_has_delay_slot): When
+	!mustbe32 also return 1 for 32-bit instructions.
+	(mips16_instruction_has_delay_slot): Likewise.  Add an
+	explanatory comment.
+
+2014-10-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfread.c (elf_symtab_read): Also mark solib trampoline minimal
+	symbols special.
+
+2014-10-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* breakpoint.h (bp_target_info): Add `reqstd_address' member,
+	update comments.
+	* breakpoint.c (one_breakpoint_xfer_memory): Use `reqstd_address'
+	for the breakpoint's address.  Don't preinitialize `placed_size'.
+	(insert_bp_location): Set `reqstd_address' rather than
+	`placed_address'.
+	(bp_target_info_copy_insertion_state): Also copy `placed_address'.
+	(bkpt_insert_location): Use `reqstd_address' for the breakpoint's
+	address.
+	(bkpt_remove_location): Likewise.
+	(deprecated_insert_raw_breakpoint): Likewise.
+	(deprecated_remove_raw_breakpoint): Likewise.
+	(find_single_step_breakpoint): Likewise.
+	* mem-break.c (default_memory_insert_breakpoint): Use
+	`reqstd_address' for the breakpoint's address.  Don't set
+	`placed_address' or `placed_size' if breakpoint contents couldn't
+	have been determined.
+	* remote.c (remote_insert_breakpoint): Use `reqstd_address' for
+	the breakpoint's address.
+	(remote_insert_hw_breakpoint): Likewise.  Don't set
+	`placed_address' or `placed_size' if breakpoint couldn't have been
+	set.
+	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint): Use
+	`reqstd_address' for the breakpoint's address.
+	* arm-linux-nat.c (arm_linux_hw_breakpoint_initialize): Likewise.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): Likewise.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint): Likewise.
+	* microblaze-linux-tdep.c
+	(microblaze_linux_memory_remove_breakpoint): Likewise.
+	* monitor.c (monitor_insert_breakpoint): Likewise.
+	* nto-procfs.c (procfs_insert_breakpoint): Likewise.
+	(procfs_insert_hw_breakpoint): Likewise.
+	* ppc-linux-nat.c (ppc_linux_insert_hw_breakpoint): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Likewise.
+	* remote-m32r-sdi.c (m32r_insert_breakpoint): Likewise.
+	* remote-mips.c (mips_insert_breakpoint): Likewise.
+	* x86-nat.c (x86_insert_hw_breakpoint): Likewise.
+
+2014-10-03  Luis Machado  <lgustavo@codesourcery.com>
+
+	* valops.c (value_assign): Check for bit field assignments
+	before calling architecture-specific register value
+	conversion functions.
+
+2014-10-03  Pierre Muller  <muller@sourceware.org>
+
+	* dbxread.c (read_dbx_symtab): Also ignore N_BNSYM/N_ENSYM.
+
+2014-10-02  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (breakpoints_should_be_inserted_now): Use
+	threads_are_executing.
+	* breakpoint.h (breakpoints_should_be_inserted_now): Add
+	describing comment.
+	* gdbthread.h (threads_are_executing): Declare.
+	(handle_signal_stop) <random signals>: Don't print about the
+	signal here if stopping.
+	(end_stepping_range): Don't notify observers here.
+	(normal_stop): Update the thread list.  If stopped by a random
+	signal or a stepping range ended, notify observers.
+	* thread.c (threads_executing): New global.
+	(init_thread_list): Clear 'threads_executing'.
+	(set_executing): Set or clear 'threads_executing'.
+	(threads_are_executing): New function.
+	(update_threads_executing): New function.
+	(update_thread_list): Use it.
+
+2014-10-02  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/17431
+	* breakpoint.c (update_breakpoints_after_exec): Don't create
+	overlay, longjmp, std terminate nor exception breakpoints here.
+
+2014-10-02  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (any_thread_of_process, any_live_thread_of_process):
+	Adjust comments.
+	* inferior.c (find_inferior_for_program_space): Give preference to
+	the current inferior.
+	* inferior.h (find_inferior_for_program_space): Update comment.
+	* progspace.c (switch_to_program_space_and_thread): Prefer the
+	current inferior if it's bound to the program space requested.  If
+	the inferior found doesn't have a PID yet, don't bother looking up
+	a thread.
+	* progspace.h (switch_to_program_space_and_thread): Adjust
+	comment.
+	* thread.c (any_thread_of_process, any_live_thread_of_process):
+	Give preference to the current thread.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (insert_bp_location): Error out if inserting a
+	software breakpoint at a read-only address.
+	* target.c (memory_xfer_check_region): New function, factored out
+	from ...
+	(memory_xfer_partial_1): ... this.  Make the 'reg_len' local a
+	ULONGEST.
+	(target_xfer_partial) <TARGET_OBJECT_RAW_MEMORY>: Check the access
+	against the memory region attributes.
+
+2014-10-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS: Announce new exit-code field in -list-thread-groups
+	output.
+	* inferior.c (exit_inferior_1): Don't clear exit code.
+	(inferior_appeared): Clear exit code.
+	* mi/mi-main.c (print_one_inferior): Add printing of the exit
+	code.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* features/Makefile ($(outdir)/%.dat): Output "THIS FILE IS
+	GENERATED" along with emacs/vi read-only markers.
+	* regformats/aarch64.dat: Regenerate.
+	* regformats/arm-with-iwmmxt.dat: Regenerate.
+	* regformats/arm-with-neon.dat: Regenerate.
+	* regformats/arm-with-vfpv2.dat: Regenerate.
+	* regformats/arm-with-vfpv3.dat: Regenerate.
+	* regformats/i386/amd64-avx-linux.dat: Regenerate.
+	* regformats/i386/amd64-avx.dat: Regenerate.
+	* regformats/i386/amd64-avx512-linux.dat: Regenerate.
+	* regformats/i386/amd64-avx512.dat: Regenerate.
+	* regformats/i386/amd64-linux.dat: Regenerate.
+	* regformats/i386/amd64-mpx-linux.dat: Regenerate.
+	* regformats/i386/amd64-mpx.dat: Regenerate.
+	* regformats/i386/amd64.dat: Regenerate.
+	* regformats/i386/i386-avx-linux.dat: Regenerate.
+	* regformats/i386/i386-avx.dat: Regenerate.
+	* regformats/i386/i386-avx512-linux.dat: Regenerate.
+	* regformats/i386/i386-avx512.dat: Regenerate.
+	* regformats/i386/i386-linux.dat: Regenerate.
+	* regformats/i386/i386-mmx-linux.dat: Regenerate.
+	* regformats/i386/i386-mmx.dat: Regenerate.
+	* regformats/i386/i386-mpx-linux.dat: Regenerate.
+	* regformats/i386/i386-mpx.dat: Regenerate.
+	* regformats/i386/i386.dat: Regenerate.
+	* regformats/i386/x32-avx-linux.dat: Regenerate.
+	* regformats/i386/x32-avx.dat: Regenerate.
+	* regformats/i386/x32-avx512-linux.dat: Regenerate.
+	* regformats/i386/x32-avx512.dat: Regenerate.
+	* regformats/i386/x32-linux.dat: Regenerate.
+	* regformats/i386/x32.dat: Regenerate.
+	* regformats/microblaze-with-stack-protect.dat: Regenerate.
+	* regformats/mips-dsp-linux.dat: Regenerate.
+	* regformats/mips-linux.dat: Regenerate.
+	* regformats/mips64-dsp-linux.dat: Regenerate.
+	* regformats/mips64-linux.dat: Regenerate.
+	* regformats/nios2-linux.dat: Regenerate.
+	* regformats/rs6000/powerpc-32.dat: Regenerate.
+	* regformats/rs6000/powerpc-32l.dat: Regenerate.
+	* regformats/rs6000/powerpc-64l.dat: Regenerate.
+	* regformats/rs6000/powerpc-altivec32l.dat: Regenerate.
+	* regformats/rs6000/powerpc-altivec64l.dat: Regenerate.
+	* regformats/rs6000/powerpc-cell32l.dat: Regenerate.
+	* regformats/rs6000/powerpc-cell64l.dat: Regenerate.
+	* regformats/rs6000/powerpc-e500l.dat: Regenerate.
+	* regformats/rs6000/powerpc-vsx32l.dat: Regenerate.
+	* regformats/rs6000/powerpc-vsx64l.dat: Regenerate.
+	* regformats/s390-linux32.dat: Regenerate.
+	* regformats/s390-linux32v1.dat: Regenerate.
+	* regformats/s390-linux32v2.dat: Regenerate.
+	* regformats/s390-linux64.dat: Regenerate.
+	* regformats/s390-linux64v1.dat: Regenerate.
+	* regformats/s390-linux64v2.dat: Regenerate.
+	* regformats/s390-te-linux64.dat: Regenerate.
+	* regformats/s390x-linux64.dat: Regenerate.
+	* regformats/s390x-linux64v1.dat: Regenerate.
+	* regformats/s390x-linux64v2.dat: Regenerate.
+	* regformats/s390x-te-linux64.dat: Regenerate.
+	* regformats/tic6x-c62x-linux.dat: Regenerate.
+	* regformats/tic6x-c62x.dat: Regenerate.
+	* regformats/tic6x-c64x-linux.dat: Regenerate.
+	* regformats/tic6x-c64x.dat: Regenerate.
+	* regformats/tic6x-c64xp-linux.dat: Regenerate.
+	* regformats/tic6x-c64xp.dat: Regenerate.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* features/Makefile: Update comments.
+	(XMLTOC): List all xml files we build C files from.
+	(clean-cfiles): New rule.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* features/i386/amd64-avx512-linux.c: Regenerate.
+	* features/i386/amd64-avx512.c: Regenerate.
+	* features/i386/x32-avx512-linux.c: Regenerate.
+	* features/i386/x32-avx512.c: Regenerate.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* features/Makefile (WHICH): Remove arm-with-m,
+	arm-with-m-fpa-layout and arm-with-m-vfp-d16.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* features/Makefile (clean): New rule.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* features/i386/64bit-avx512.xml (zmm10h, zmm11h, zmm12h, zmm13h)
+	(zmm14h): Add missing end quotes.
+
+2014-10-01  Pedro Alves  <palves@redhat.com>
+
+	* features/aarch64-core.xml (cpsr): Change back to 32-bit.
+	* features/aarch64.c: Regenerate.
+
+2014-09-30  Don Breazeal  <donb@codesourcery.com>
+
+	* inf-ptrace.c (inf_ptrace_follow_fork): Remove target-independent
+	code so as to work with follow_fork_inferior.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Ditto.
+	(inf_ttrace_create_inferior): Remove reference to
+	inf_ttrace_vfork_ppid.
+	(inf_ttrace_attach): Ditto.
+	(inf_ttrace_detach): Ditto.
+	(inf_ttrace_kill): Use current_inferior instead of
+	inf_ttrace_vfork_ppid.
+	(inf_ttrace_wait): Eliminate use of inf_ttrace_vfork_ppid, report
+	TARGET_WAITKIND_VFORK_DONE event, delete HACK that switched the
+	inferior away from the parent.
+	* infrun.c (follow_fork): Call follow_fork_inferior instead of
+	target_follow_fork.
+	(follow_fork_inferior): New function.
+	(follow_inferior_reset_breakpoints): Make function static.
+	* infrun.h (follow_inferior_reset_breakpoints): Remove declaration.
+	* linux-nat.c (linux_child_follow_fork): Move target-independent
+	code to infrun.c:follow_fork_inferior.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdbarch.sh (regset_from_core_section): Remove gdbarch method.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* corelow.c (sniff_core_bfd): Drop presence check for deleted
+	gdbarch method 'regset_from_core_section'.
+	(get_core_register_section): Remove handling for the case that
+	regset == NULL and regset_from_core_section is defined.
+	(get_core_registers): Drop check for deleted method.
+	* procfs.c (procfs_do_thread_registers): Adjust comment.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-nat.c (linux_nat_collect_thread_registers): Remove.
+	(linux_nat_make_corefile_notes): Remove.
+	(linux_target_install_ops): Do not set target method
+	'make_corefile_notes'.
+	* linux-tdep.c (struct linux_corefile_thread_data)<collect>:
+	Remove field.
+	(linux_corefile_thread_callback): Instead of args->collect, call
+	linux_collect_thread_registers.
+	(linux_make_corefile_notes): Remove 'collect' parameter.  Return
+	NULL unless there is a regset iterator.
+	(linux_make_corefile_notes_1): Remove.
+	(linux_init_abi): Replace reference to linux_make_corefile_notes_1
+	by linux_make_corefile_notes.
+	* linux-tdep.h (linux_make_corefile_notes): Remove prototype.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* fbsd-nat.c (find_signalled_thread, find_stop_signal)
+	(fbsd_collect_regset_section_cb, fbsd_make_corefile_notes):
+	Remove.
+	* fbsd-nat.h (fbsd_make_corefile_notes): Remove prototype.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* xtensa-tdep.c (xtensa_regset_from_core_section): Remove.
+	(xtensa_iterate_over_regset_sections): New.
+	(xtensa_gdbarch_init): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* vax-tdep.c (vax_regset_from_core_section): Remove.
+	(vax_iterate_over_regset_sections): New.
+	(vax_gdbarch_init): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* tilegx-linux-tdep.c (TILEGX_LINUX_SIZEOF_GREGSET): New macro.
+	(tilegx_regset_from_core_section): Remove.
+	(tilegx_iterate_over_regset_sections): New.
+	(tilegx_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* sparc-tdep.c (sparc_regset_from_core_section): Remove.
+	(sparc_iterate_over_regset_sections): New.
+	(sparc32_gdbarch_init): Adjust gdbarch initialization.
+	* configure.tgt (gdb_target_obs): Add fbsd-tdep.o for SPARC FreeBSD
+	targets.
+	* sparc64fbsd-tdep.c (fbsd-tdep.h): Include.
+	(sparc64fbsd_init_abi): Call fbsd_init_abi.
+	* sparc64fbsd-nat.c (_initialize_sparc64fbsd_nat): Do not set
+	target method 'make_corefile_notes'.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* sh-linux-tdep.c (sh_linux_init_abi): Set tdep fields
+	'sizeof_gregset' and 'sizeof_fpregset'.
+	* sh-tdep.c (sh_regset_from_core_section): Remove.
+	(sh_iterate_over_regset_sections): New.
+	(sh_gdbarch_init): Adjust gdbarch initialization.
+	* sh-tdep.h (struct gdbarch_tdep): New fields sizeof_gregset and
+	sizeof_fpregset.
+	* shnbsd-tdep.c (shnbsd_init_abi): Set tdep field
+	'sizeof_gregset'.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* score-tdep.c (score7_linux_regset_from_core_section): Remove.
+	(score7_linux_iterate_over_regset_sections): New.
+	(score_gdbarch_init): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* configure.tgt (gdb_target_obs): Add fbsd-tdep.o for PowerPC
+	FreeBSD targets.
+	* ppcfbsd-nat.c (_initialize_ppcfbsd_nat): Do not set target
+	method 'make_corefile_notes'.
+	* ppcfbsd-tdep.c (fbsd-tdep.h): Include.
+	(ppcfbsd_regset_from_core_section): Remove.
+	(ppcfbsd_iterate_over_regset_sections): New.
+	(ppcfbsd_init_abi): Call fbsd_init_abi.  Adjust gdbarch
+	initialization.
+	* ppcnbsd-tdep.c (ppcnbsd_regset_from_core_section): Remove.
+	(ppcnbsd_iterate_over_regset_sections): New.
+	(ppcnbsd_init_abi): Adjust.
+	* ppcobsd-tdep.c (ppcobsd_regset_from_core_section): Remove.
+	(ppcobsd_iterate_over_regset_sections): New.
+	(ppcobsd_init_abi): Adjust.
+	* rs6000-aix-tdep.c (rs6000_aix_regset_from_core_section): Remove.
+	(rs6000_aix_iterate_over_regset_sections): New.
+	(rs6000_aix_init_osabi): Adjust.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* nios2-linux-tdep.c (NIOS2_GREGS_SIZE): New macro.
+	(nios2_regset_from_core_section): Remove.
+	(nios2_iterate_over_regset_sections): New.
+	(nios2_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* mn10300-linux-tdep.c (am33_regset_from_core_section): Remove.
+	(am33_iterate_over_regset_sections): New.
+	(am33_linux_init_osabi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* mips-linux-tdep.c (mips_linux_regset_from_core_section): Remove.
+	(mips_linux_iterate_over_regset_sections): New.
+	(mips_linux_init_abi): Adjust gdbarch initialization.
+	* mips64obsd-tdep.c (mips64obsd_regset_from_core_section): Remove.
+	(mips64obsd_iterate_over_regset_sections): New.
+	(mips64obsd_init_abi): Adjust.
+	* mipsnbsd-tdep.c (mipsnbsd_regset_from_core_section): Remove.
+	(mipsnbsd_iterate_over_regset_sections): New.
+	(mipsnbsd_init_abi): Adjust.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* m88k-tdep.c (m88k_regset_from_core_section): Remove.
+	(m88k_iterate_over_regset_sections): New.
+	(m88k_gdbarch_init): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* ia64-linux-tdep.c (ia64_linux_regset_from_core_section): Remove.
+	(ia64_linux_iterate_over_regset_sections): New.
+	(ia64_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* m68kbsd-tdep.c (m68kbsd_regset_from_core_section): Remove.
+	(m68kbsd_iterate_over_regset_sections): New.
+	(m68kbsd_init_abi): Adjust gdbarch initialization.
+	* m68klinux-tdep.c (m68k_linux_regset_from_core_section): Remove.
+	(m68k_linux_iterate_over_regset_sections): New.
+	(m68k_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* m32r-linux-tdep.c (M32R_LINUX_GREGS_SIZE): New macro.
+	(m32r_linux_regset_from_core_section): Remove.
+	(m32r_linux_iterate_over_regset_sections): New.
+	(m32r_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* amd64obsd-tdep.c (amd64obsd_regset_from_core_section): Remove.
+	(amd64obsd_iterate_over_regset_sections): New.
+	(amd64obsd_core_init_abi): Adjust gdbarch initialization.
+	* i386-cygwin-tdep.c (i386_windows_regset_from_core_section):
+	Remove.
+	(i386_cygwin_init_abi): Clear tdep->sizeof_fpregset.  Drop
+	regset_from_core_section initialization.
+	* i386-tdep.c (i386_regset_from_core_section): Remove.
+	(i386_iterate_over_regset_sections): New.
+	(i386_gdbarch_init): Adjust gdbarch initialization.
+	* i386-tdep.h (i386_regset_from_core_section): Remove prototype.
+	(i386_iterate_over_regset_sections): New prototype.
+	* i386obsd-tdep.c (i386obsd_aout_regset_from_core_section):
+	Remove.
+	(i386obsd_aout_iterate_over_regset_sections): New.
+	(i386obsd_aout_init_abi): Adjust gdbarch initialization.
+	* configure.tgt (gdb_target_obs): Add fbsd-tdep.o for all x86 FreeBSD
+	targets.
+	* amd64fbsd-tdep.c (fbsd-tdep.h): Include.
+	(amd64fbsd_init_abi): Call fbsd_init_abi.
+	* i386fbsd-tdep.c (fbsd-tdep.h): Include.
+	(i386fbsd4_init_abi): Call fbsd_init_abi.
+	* amd64fbsd-nat.c (_initialize_amd64fbsd_nat): No longer set
+	target method 'make_corefile_notes'.
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Likewise.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* hppa-hpux-tdep.c (hppa_hpux_regset_from_core_section): Remove.
+	(hppa_hpux_iterate_over_regset_sections): New.
+	(hppa_hpux_init_abi): Adjust gdbarch initialization.
+	* hppa-linux-tdep.c (hppa_linux_regset_from_core_section): Remove.
+	(hppa_linux_iterate_over_regset_sections): New.
+	(hppa_linux_init_abi): Adjust.
+	* hppanbsd-tdep.c (hppaobsd_regset_from_core_section): Remove.
+	(hppanbsd_iterate_over_regset_sections): New.
+	(hppanbsd_init_abi): Adjust.
+	* hppaobsd-tdep.c (hppaobsd_regset_from_core_section): Remove.
+	(hppaobsd_iterate_over_regset_sections): New.
+	(hppaobsd_init_abi): Adjust.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* frv-linux-tdep.c (frv_linux_regset_from_core_section): Remove.
+	(frv_linux_iterate_over_regset_sections): New.
+	(frv_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* arm-tdep.h (armbsd_regset_from_core_section): Remove prototype.
+	(armbsd_iterate_over_regset_sections): New prototype.
+	* armbsd-tdep.c (armbsd_regset_from_core_section): Remove.
+	(armbsd_iterate_over_regset_sections): New.
+	* armobsd-tdep.c (armobsd_init_abi): Adjust gdbarch
+	initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* alpha-linux-tdep.c (alpha_linux_regset_from_core_section): Remove.
+	(alpha_linux_iterate_over_regset_sections): New.
+	(alpha_linux_init_abi): Adjust gdbarch initialization.
+	* alphabsd-tdep.h (alphanbsd_regset_from_core_section): Remove
+	prototype.
+	(alphanbsd_iterate_over_regset_sections): New prototype.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* aarch64-linux-tdep.c (aarch64_linux_regset_from_core_section):
+	Remove.
+	(aarch64_linux_iterate_over_regset_sections): New.
+	(aarch64_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* fbsd-tdep.c: New file.
+	* fbsd-tdep.h: New file.
+	* Makefile.in (ALL_TARGET_OBS): Add fbsd-tdep.o.
+	(HFILES_NO_SRCDIR): Add fbsd-tdep.h.
+	(ALLDEPFILES): Add fbsd-tdep.c.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdbarch.sh (iterate_over_regset_sections_cb): Add regset
+	parameter.
+	* gdbarch.h: Regenerate.
+	* corelow.c (sniff_core_bfd): Don't sniff if gdbarch has a regset
+	iterator.
+	(get_core_register_section): Add parameter 'regset' and use it, if
+	set.  Add parameter 'min_size' and verify the bfd section size
+	against it.
+	(get_core_registers_cb): Add parameter 'regset' and pass it to
+	get_core_register section.  For the "standard" register sections
+	".reg" and ".reg2", set an appropriate default for human_name.
+	(get_core_registers): Don't abort when the gdbarch has an iterator
+	but no regset_from_core_section.  Add NULL/0 for parameters
+	'regset'/'min_size' in calls to get_core_register_section.
+	* linux-tdep.c (linux_collect_regset_section_cb): Add parameter
+	'regset' and use it instead of calling the
+	regset_from_core_section gdbarch method.
+	* i386-tdep.h (struct gdbarch_tdep): Add field 'fpregset'.
+	* i386-tdep.c (i386_supply_xstateregset)
+	(i386_collect_xstateregset, i386_xstateregset): Moved to
+	i386-linux-tdep.c.
+	(i386_regset_from_core_section): Drop handling for .reg-xfp and
+	.reg-xstate.
+	(i386_gdbarch_init): Set tdep field 'fpregset'.  Enable generic
+	core file support only if the regset iterator hasn't been set.
+	* i386-linux-tdep.c (i386_linux_supply_xstateregset)
+	(i386_linux_collect_xstateregset, i386_linux_xstateregset): New.
+	Moved from i386-tdep.c and renamed to *_linux*.
+	(i386_linux_iterate_over_regset_sections): Add regset parameter to
+	each callback invocation.  Allow any .reg-xstate size when reading
+	from a core file.
+	* amd64-tdep.c (amd64_supply_xstateregset)
+	(amd64_collect_xstateregset, amd64_xstateregset): Moved to
+	amd64-linux-tdep.c.
+	(amd64_regset_from_core_section): Remove.
+	(amd64_init_abi): Set new tdep field 'fpregset'.  No longer
+	install an amd64-specific regset_from_core_section gdbarch method.
+	* amd64-linux-tdep.c (amd64_linux_supply_xstateregset)
+	(amd64_linux_collect_xstateregset, amd64_linux_xstateregset): New.
+	Moved from amd64-tdep.c and renamed to *_linux*.
+	(amd64_linux_iterate_over_regset_sections): Add regset parameter
+	to each callback invocation.  Allow any .reg-xstate size when
+	reading from a core file.
+	* arm-linux-tdep.c (arm_linux_regset_from_core_section): Remove.
+	(arm_linux_iterate_over_regset_sections): Add regset parameter to
+	each callback invocation.
+	(arm_linux_init_abi): No longer set the regset_from_core_section
+	gdbarch method.
+	* ppc-linux-tdep.c (ppc_linux_regset_from_core_section): Remove.
+	(ppc_linux_iterate_over_regset_sections): Add regset parameter to
+	each callback invocation.
+	(ppc_linux_init_abi): No longer set the regset_from_core_section
+	gdbarch method.
+	* s390-linux-tdep.c (struct gdbarch_tdep): Remove the fields
+	gregset, sizeof_gregset, fpregset, and sizeof_fpregset.
+	(s390_regset_from_core_section): Remove.
+	(s390_iterate_over_regset_sections): Add regset parameter to each
+	callback invocation.
+	(s390_gdbarch_init): No longer set the regset_from_core_section
+	gdbarch method.  Drop initialization of deleted tdep fields.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* amd64-linux-tdep.c (amd64_linux_regset_sections): Remove.
+	(amd64_linux_iterate_over_regset_sections): New.
+	(amd64_linux_init_abi_common): Don't install the regset section
+	list, but the new iterator in gdbarch.
+	* arm-linux-tdep.c (arm_linux_fpa_regset_sections)
+	(arm_linux_vfp_regset_sections): Remove.  Move combined logic...
+	(arm_linux_iterate_over_regset_sections): ...here.  New function.
+	(arm_linux_init_abi): Set iterator instead of section list.
+	* corelow.c (get_core_registers_cb): New function, logic moved
+	from...
+	(get_core_registers): ...loop body here.  Use new iterator method
+	instead of walking through the regset section list.
+	* gdbarch.sh: Remove 'core_regset_sections'.  New method
+	'iterate_over_regset_sections'.  New typedef
+	'iterate_over_regset_sections_cb'.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* i386-linux-tdep.c (i386_linux_regset_sections)
+	(i386_linux_sse_regset_sections, i386_linux_avx_regset_sections):
+	Remove.
+	(i386_linux_iterate_over_regset_sections): New.
+	(i386_linux_init_abi): Don't choose a regset section list, but
+	install new iterator in gdbarch.
+	* linux-tdep.c (struct linux_collect_regset_section_cb_data): New.
+	(linux_collect_regset_section_cb): New function, logic moved
+	from...
+	(linux_collect_thread_registers): ...loop body here.  Use iterator
+	method instead of walking through list.
+	(linux_make_corefile_notes_1): Check for presence of iterator
+	method instead of regset section list.
+	* ppc-linux-tdep.c (ppc_linux_vsx_regset_sections)
+	(ppc_linux_vmx_regset_sections, ppc_linux_fp_regset_sections)
+	(ppc64_linux_vsx_regset_sections, ppc64_linux_vmx_regset_sections)
+	(ppc64_linux_fp_regset_sections): Remove.  Move combined logic...
+	(ppc_linux_iterate_over_regset_sections): ...here.  New function.
+	(ppc_linux_init_abi): Don't choose from above regset section
+	lists, but install new iterator in gdbarch.
+	* regset.h (struct core_regset_section): Remove.
+	* s390-linux-tdep.c (struct gdbarch_tdep): Add new fields
+	have_linux_v1, have_linux_v2, and have_tdb.
+	(s390_linux32_regset_sections, s390_linux32v1_regset_sections)
+	(s390_linux32v2_regset_sections, s390_linux64_regset_sections)
+	(s390_linux64v1_regset_sections, s390_linux64v2_regset_sections)
+	(s390x_linux64_regset_sections, s390x_linux64v1_regset_sections)
+	(s390x_linux64v2_regset_sections): Remove.  Move combined logic...
+	(s390_iterate_over_regset_sections): ...here.  New function.  Use
+	new tdep fields.
+	(s390_gdbarch_init): Set new tdep fields.  Don't choose from above
+	regset section lists, but install new iterator.
+
+2014-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib-svr4.c (svr4_parse_libraries): Use "library-list-svr4.dtd".
+
+2014-09-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* progspace.c (print_program_space): Don't prune program spaces
+	before printing them.
+
+2014-09-25  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (user_visible_resume_ptid): Don't check
+	singlestep_breakpoints_inserted_p.
+
+2014-09-25  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (should_be_inserted): Add debug output.
+
+2014-09-25  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (stepping_past_instruction_at)
+	(clear_exit_convenience_vars): Point at infrun.h instead of
+	inferior.h.
+	(handle_signal_stop): Fix typo.
+
+2014-09-24  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (thumb_in_function_epilogue_p): Fix typo in the
+	bitmask.
+
 2014-09-22  Gary Benson  <gbenson@redhat.com>
 
 	* target.c (target_stop): Updated comment.

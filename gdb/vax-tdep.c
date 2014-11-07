@@ -89,17 +89,15 @@ static const struct regset vax_gregset =
   vax_supply_gregset
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-vax_regset_from_core_section (struct gdbarch *gdbarch,
-			      const char *sect_name, size_t sect_size)
+static void
+vax_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				  iterate_over_regset_sections_cb *cb,
+				  void *cb_data,
+				  const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= VAX_NUM_REGS * 4)
-    return &vax_gregset;
-
-  return NULL;
+  cb (".reg", VAX_NUM_REGS * 4, &vax_gregset, NULL, cb_data);
 }
 
 /* The VAX UNIX calling convention uses R1 to pass a structure return
@@ -483,8 +481,8 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, VAX_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, VAX_PS_REGNUM);
 
-  set_gdbarch_regset_from_core_section
-    (gdbarch, vax_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, vax_iterate_over_regset_sections);
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, vax_skip_prologue);

@@ -208,7 +208,7 @@ proc do_function_calls {} {
 	if $prototypes then {
 	    setup_xfail "sparc-*-*" "mips*-*-*" 5318
 	    if {!$gcc_compiled} then {
-		setup_xfail "alpha-dec-osf2*" "i*86-*-sysv4*" 5318
+		setup_xfail "i*86-*-sysv4*" 5318
 	    }
 	}
 	gdb_test "p t_float_values2(3.14159,float_val2)" " = 1"

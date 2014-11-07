@@ -275,8 +275,6 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
       inf->vfork_child = NULL;
     }
 
-  inf->has_exit_code = 0;
-  inf->exit_code = 0;
   inf->pending_detach = 0;
 }
 
@@ -322,6 +320,8 @@ void
 inferior_appeared (struct inferior *inf, int pid)
 {
   inf->pid = pid;
+  inf->has_exit_code = 0;
+  inf->exit_code = 0;
 
   observer_notify_inferior_appeared (inf);
 }
@@ -367,12 +367,15 @@ find_inferior_pid (int pid)
   return NULL;
 }
 
-/* Find an inferior bound to PSPACE.  */
+/* See inferior.h.  */
 
 struct inferior *
 find_inferior_for_program_space (struct program_space *pspace)
 {
-  struct inferior *inf;
+  struct inferior *inf = current_inferior ();
+
+  if (inf->pspace == pspace)
+    return inf;
 
   for (inf = inferior_list; inf != NULL; inf = inf->next)
     {

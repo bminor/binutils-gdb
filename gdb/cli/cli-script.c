@@ -23,7 +23,6 @@
 #include <ctype.h>
 
 #include "ui-out.h"
-#include "exceptions.h"
 #include "top.h"
 #include "breakpoint.h"
 #include "cli/cli-cmds.h"

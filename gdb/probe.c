@@ -26,7 +26,6 @@
 #include "symtab.h"
 #include "progspace.h"
 #include "filenames.h"
-#include "exceptions.h"
 #include "linespec.h"
 #include "gdb_regex.h"
 #include "frame.h"

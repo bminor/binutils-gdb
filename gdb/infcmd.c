@@ -45,7 +45,6 @@
 #include "observer.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
-#include "exceptions.h"
 #include "cli/cli-decode.h"
 #include "gdbthread.h"
 #include "valprint.h"
@@ -104,8 +103,6 @@ static void run_command (char *, int);
 static void run_no_args_command (char *args, int from_tty);
 
 static void go_command (char *line_no, int from_tty);
-
-static int strip_bg_char (char **);
 
 void _initialize_infcmd (void);
 
@@ -371,35 +368,40 @@ construct_inferior_arguments (int argc, char **argv)
 }
 
 
-/* This function detects whether or not a '&' character (indicating
-   background execution) has been added as *the last* of the arguments ARGS
-   of a command.  If it has, it removes it and returns 1.  Otherwise it
-   does nothing and returns 0.  */
+/* This function strips the '&' character (indicating background
+   execution) that is added as *the last* of the arguments ARGS of a
+   command.  A copy of the incoming ARGS without the '&' is returned,
+   unless the resulting string after stripping is empty, in which case
+   NULL is returned.  *BG_CHAR_P is an output boolean that indicates
+   whether the '&' character was found.  */
 
-static int
-strip_bg_char (char **args)
+static char *
+strip_bg_char (const char *args, int *bg_char_p)
 {
-  char *p = NULL;
+  const char *p;
 
-  p = strchr (*args, '&');
-
-  if (p)
+  if (args == NULL || *args == '\0')
     {
-      if (p == (*args + strlen (*args) - 1))
-	{
-	  if (strlen (*args) > 1)
-	    {
-	      do
-		p--;
-	      while (*p == ' ' || *p == '\t');
-	      *(p + 1) = '\0';
-	    }
-	  else
-	    *args = 0;
-	  return 1;
-	}
+      *bg_char_p = 0;
+      return NULL;
     }
-  return 0;
+
+  p = args + strlen (args);
+  if (p[-1] == '&')
+    {
+      p--;
+      while (p > args && isspace (p[-1]))
+	p--;
+
+      *bg_char_p = 1;
+      if (p != args)
+	return savestring (args, p - args);
+      else
+	return NULL;
+    }
+
+  *bg_char_p = 0;
+  return xstrdup (args);
 }
 
 /* Common actions to take after creating any sort of inferior, by any
@@ -528,7 +530,8 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   ptid_t ptid;
   struct ui_out *uiout = current_uiout;
   struct target_ops *run_target;
-  int async_exec = 0;
+  int async_exec;
+  struct cleanup *args_chain;
 
   dont_repeat ();
 
@@ -551,8 +554,8 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   reopen_exec_file ();
   reread_symbols ();
 
-  if (args != NULL)
-    async_exec = strip_bg_char (&args);
+  args = strip_bg_char (args, &async_exec);
+  args_chain = make_cleanup (xfree, args);
 
   /* Do validation and preparation before possibly changing anything
      in the inferior.  */
@@ -597,6 +600,9 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
       ui_out_text (uiout, "\n");
       ui_out_flush (uiout);
     }
+
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
 
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
@@ -736,6 +742,24 @@ continue_1 (int all_threads)
 
       iterate_over_threads (proceed_thread_callback, NULL);
 
+      if (sync_execution)
+	{
+	  /* If all threads in the target were already running,
+	     proceed_thread_callback ends up never calling proceed,
+	     and so nothing calls this to put the inferior's terminal
+	     settings in effect and remove stdin from the event loop,
+	     which we must when running a foreground command.  E.g.:
+
+	      (gdb) c -a&
+	      Continuing.
+	      <all threads are running now>
+	      (gdb) c -a
+	      Continuing.
+	      <no thread was resumed, but the inferior now owns the terminal>
+	  */
+	  target_terminal_inferior ();
+	}
+
       /* Restore selected ptid.  */
       do_cleanups (old_chain);
     }
@@ -753,13 +777,15 @@ continue_1 (int all_threads)
 static void
 continue_command (char *args, int from_tty)
 {
-  int async_exec = 0;
+  int async_exec;
   int all_threads = 0;
+  struct cleanup *args_chain;
+
   ERROR_NO_INFERIOR;
 
   /* Find out whether we must run in the background.  */
-  if (args != NULL)
-    async_exec = strip_bg_char (&args);
+  args = strip_bg_char (args, &async_exec);
+  args_chain = make_cleanup (xfree, args);
 
   prepare_execution_command (&current_target, async_exec);
 
@@ -823,6 +849,9 @@ continue_command (char *args, int from_tty)
 	}
     }
 
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
+
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
 
@@ -882,20 +911,24 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 {
   int count = 1;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
-  int async_exec = 0;
+  int async_exec;
   int thread = -1;
+  struct cleanup *args_chain;
 
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
   ensure_valid_thread ();
   ensure_not_running ();
 
-  if (count_string)
-    async_exec = strip_bg_char (&count_string);
+  count_string = strip_bg_char (count_string, &async_exec);
+  args_chain = make_cleanup (xfree, count_string);
 
   prepare_execution_command (&current_target, async_exec);
 
   count = count_string ? parse_and_eval_long (count_string) : 1;
+
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
 
   if (!single_inst || skip_subroutines)		/* Leave si command alone.  */
     {
@@ -1117,7 +1150,8 @@ jump_command (char *arg, int from_tty)
   struct symtab_and_line sal;
   struct symbol *fn;
   struct symbol *sfn;
-  int async_exec = 0;
+  int async_exec;
+  struct cleanup *args_chain;
 
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
@@ -1125,8 +1159,8 @@ jump_command (char *arg, int from_tty)
   ensure_not_running ();
 
   /* Find out whether we must run in the background.  */
-  if (arg != NULL)
-    async_exec = strip_bg_char (&arg);
+  arg = strip_bg_char (arg, &async_exec);
+  args_chain = make_cleanup (xfree, arg);
 
   prepare_execution_command (&current_target, async_exec);
 
@@ -1141,6 +1175,9 @@ jump_command (char *arg, int from_tty)
 
   sal = sals.sals[0];
   xfree (sals.sals);
+
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
 
   if (sal.symtab == 0 && sal.pc == 0)
     error (_("No source file has been specified."));
@@ -1210,7 +1247,8 @@ static void
 signal_command (char *signum_exp, int from_tty)
 {
   enum gdb_signal oursig;
-  int async_exec = 0;
+  int async_exec;
+  struct cleanup *args_chain;
 
   dont_repeat ();		/* Too dangerous.  */
   ERROR_NO_INFERIOR;
@@ -1219,8 +1257,8 @@ signal_command (char *signum_exp, int from_tty)
   ensure_not_running ();
 
   /* Find out whether we must run in the background.  */
-  if (signum_exp != NULL)
-    async_exec = strip_bg_char (&signum_exp);
+  signum_exp = strip_bg_char (signum_exp, &async_exec);
+  args_chain = make_cleanup (xfree, signum_exp);
 
   prepare_execution_command (&current_target, async_exec);
 
@@ -1436,7 +1474,8 @@ until_next_command (int from_tty)
 static void
 until_command (char *arg, int from_tty)
 {
-  int async_exec = 0;
+  int async_exec;
+  struct cleanup *args_chain;
 
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
@@ -1444,8 +1483,8 @@ until_command (char *arg, int from_tty)
   ensure_not_running ();
 
   /* Find out whether we must run in the background.  */
-  if (arg != NULL)
-    async_exec = strip_bg_char (&arg);
+  arg = strip_bg_char (arg, &async_exec);
+  args_chain = make_cleanup (xfree, arg);
 
   prepare_execution_command (&current_target, async_exec);
 
@@ -1453,12 +1492,16 @@ until_command (char *arg, int from_tty)
     until_break_command (arg, from_tty, 0);
   else
     until_next_command (from_tty);
+
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
 }
 
 static void
 advance_command (char *arg, int from_tty)
 {
-  int async_exec = 0;
+  int async_exec;
+  struct cleanup *args_chain;
 
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
@@ -1469,12 +1512,15 @@ advance_command (char *arg, int from_tty)
     error_no_arg (_("a location"));
 
   /* Find out whether we must run in the background.  */
-  if (arg != NULL)
-    async_exec = strip_bg_char (&arg);
+  arg = strip_bg_char (arg, &async_exec);
+  args_chain = make_cleanup (xfree, arg);
 
   prepare_execution_command (&current_target, async_exec);
 
   until_break_command (arg, from_tty, 1);
+
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
 }
 
 /* Return the value of the result of a function at the end of a 'finish'
@@ -1749,8 +1795,8 @@ finish_command (char *arg, int from_tty)
 {
   struct frame_info *frame;
   struct symbol *function;
-
-  int async_exec = 0;
+  int async_exec;
+  struct cleanup *args_chain;
 
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
@@ -1758,13 +1804,16 @@ finish_command (char *arg, int from_tty)
   ensure_not_running ();
 
   /* Find out whether we must run in the background.  */
-  if (arg != NULL)
-    async_exec = strip_bg_char (&arg);
+  arg = strip_bg_char (arg, &async_exec);
+  args_chain = make_cleanup (xfree, arg);
 
   prepare_execution_command (&current_target, async_exec);
 
   if (arg)
     error (_("The \"finish\" command does not take any arguments."));
+
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
 
   frame = get_prev_frame (get_selected_frame (_("No selected frame.")));
   if (frame == 0)
@@ -2529,7 +2578,8 @@ attach_command_continuation_free_args (void *args)
 void
 attach_command (char *args, int from_tty)
 {
-  int async_exec = 0;
+  int async_exec;
+  struct cleanup *args_chain;
   struct target_ops *attach_target;
 
   dont_repeat ();		/* Not for the faint of heart */
@@ -2550,8 +2600,8 @@ attach_command (char *args, int from_tty)
      this function should probably be moved into target_pre_inferior.  */
   target_pre_inferior (from_tty);
 
-  if (args != NULL)
-    async_exec = strip_bg_char (&args);
+  args = strip_bg_char (args, &async_exec);
+  args_chain = make_cleanup (xfree, args);
 
   attach_target = find_attach_target ();
 
@@ -2564,6 +2614,9 @@ attach_command (char *args, int from_tty)
   /* to_attach should push the target, so after this point we
      shouldn't refer to attach_target again.  */
   attach_target = NULL;
+
+  /* Done with ARGS.  */
+  do_cleanups (args_chain);
 
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */

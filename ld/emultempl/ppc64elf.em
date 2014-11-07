@@ -531,7 +531,8 @@ gld${EMULATION_NAME}_finish (void)
   /* e_entry on PowerPC64 points to the function descriptor for
      _start.  If _start is missing, default to the first function
      descriptor in the .opd section.  */
-  if ((elf_elfheader (link_info.output_bfd)->e_flags & EF_PPC64_ABI) == 1)
+  if (stub_file != NULL
+      && (elf_elfheader (link_info.output_bfd)->e_flags & EF_PPC64_ABI) == 1)
     entry_section = ".opd";
 
   if (params.emit_stub_syms < 0)

@@ -366,8 +366,9 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
 }
 
 /* Retrieve the gdbarch associated with OBJFILE.  */
+
 struct gdbarch *
-get_objfile_arch (struct objfile *objfile)
+get_objfile_arch (const struct objfile *objfile)
 {
   return objfile->per_bfd->gdbarch;
 }

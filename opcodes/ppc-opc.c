@@ -4653,7 +4653,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"addze.",	XO(31,202,0,1),	XORB_MASK,   PPCCOM|PPCVLE, PPCNONE,	{RT, RA}},
 {"aze.",	XO(31,202,0,1),	XORB_MASK,   PWRCOM,	PPCNONE,	{RT, RA}},
 
-{"msgsnd",	XRTRA(31,206,0,0), XRTRA_MASK, E500MC|PPCA2|PPCVLE, PPCNONE, {RB}},
+{"msgsnd",	XRTRA(31,206,0,0), XRTRA_MASK, E500MC|PPCA2|POWER8|PPCVLE, PPCNONE, {RB}},
 
 {"mtsr",	X(31,210), XRB_MASK|(1<<20), COM,	NON32,  	{SR, RS}},
 
@@ -4700,7 +4700,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"muls.",	XO(31,235,0,1),	XO_MASK,     PWRCOM,	PPCNONE,	{RT, RA, RB}},
 
 {"icblce",	X(31,238),	X_MASK,      PPCCHLK,	E500MC|PPCA2,	{CT, RA, RB}},
-{"msgclr",	XRTRA(31,238,0,0),XRTRA_MASK, E500MC|PPCA2|PPCVLE, PPCNONE, {RB}},
+{"msgclr",	XRTRA(31,238,0,0), XRTRA_MASK, E500MC|PPCA2|POWER8|PPCVLE, PPCNONE, {RB}},
 {"mtsrin",	X(31,242),	XRA_MASK,    PPC,	NON32,  	{RS, RB}},
 {"mtsri",	X(31,242),	XRA_MASK,    POWER,	NON32,		{RS, RB}},
 

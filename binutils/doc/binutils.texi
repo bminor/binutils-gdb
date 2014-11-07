@@ -234,7 +234,8 @@ a normal archive.  Instead the elements of the first archive are added
 individually to the second archive.
 
 The paths to the elements of the archive are stored relative to the
-archive itself.
+archive itself.  For security reasons absolute paths and paths with a
+@code{/../} component are not allowed.
 
 @cindex compatibility, @command{ar}
 @cindex @command{ar} compatibility
@@ -2672,15 +2673,24 @@ strings [@option{-afovV}] [@option{-}@var{min-len}]
 
 @c man begin DESCRIPTION strings
 
-For each @var{file} given, @sc{gnu} @command{strings} prints the printable
-character sequences that are at least 4 characters long (or the number
-given with the options below) and are followed by an unprintable
-character.  By default, it only prints the strings from the initialized
-and loaded sections of object files; for other types of files, it prints
-the strings from the whole file.
+For each @var{file} given, @sc{gnu} @command{strings} prints the
+printable character sequences that are at least 4 characters long (or
+the number given with the options below) and are followed by an
+unprintable character.
 
-@command{strings} is mainly useful for determining the contents of non-text
-files.
+Depending upon how the strings program was configured it will default
+to either displaying all the printable sequences that it can find in
+each file, or only those sequences that are in loadable, initialized
+data sections.  If the file type in unrecognizable, or if strings is
+reading from stdin then it will always display all of the printable
+sequences that it can find.
+
+For backwards compatibility any file that occurs after a command line
+option of just @option{-} will also be scanned in full, regardless of
+the presence of any @option{-d} option. 
+
+@command{strings} is mainly useful for determining the contents of
+non-text files.
 
 @c man end
 
@@ -2690,8 +2700,25 @@ files.
 @item -a
 @itemx --all
 @itemx -
-Do not scan only the initialized and loaded sections of object files;
-scan the whole files.
+Scan the whole file, regardless of what sections it contains or
+whether those sections are loaded or initialized.  Normally this is
+the default behaviour, but strings can be configured so that the
+@option{-d} is the default instead.
+
+The @option{-} option is position dependent and forces strings to
+perform full scans of any file that is mentioned after the @option{-}
+on the command line, even if the @option{-d} option has been
+specified.
+
+@item -d
+@itemx --data
+Only print strings from initialized, loaded data sections in the
+file.  This may reduce the amount of garbage in the output, but it
+also exposes the strings program to any security flaws that may be
+present in the BFD library used to scan and load sections.  Strings
+can be configured so that this option is the default behaviour.  In
+such cases the @option{-a} option can be used to avoid using the BFD
+library and instead just print all of the strings found in the file.
 
 @item -f
 @itemx --print-file-name

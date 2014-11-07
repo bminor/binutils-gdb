@@ -142,11 +142,11 @@ proc test_d_demangling {} {
     test_demangling "_D8demangle4testFFNbNaZaZv" "demangle.test(char() nothrow pure function)"
     test_demangling "_D8demangle4testFFNdNfNaZaZv" "demangle.test(char() @property @safe pure function)"
 
-    test_demangling "_D8demangle4test6__vtblZ" "demangle.test.vtbl$"
+    test_demangling "_D8demangle4test6__vtblZ" "vtable for demangle.test"
     test_demangling "_D8demangle4test6__initZ" "demangle.test.init$"
-    test_demangling "_D8demangle4test12__ModuleInfoZ" "demangle.test.moduleinfo$"
-    test_demangling "_D8demangle4test7__ClassZ" "demangle.test.classinfo$"
-    test_demangling "_D8demangle4test11__InterfaceZ" "demangle.test.interface$"
+    test_demangling "_D8demangle4test12__ModuleInfoZ" "ModuleInfo for demangle.test"
+    test_demangling "_D8demangle4test7__ClassZ" "ClassInfo for demangle.test"
+    test_demangling "_D8demangle4test11__InterfaceZ" "Interface for demangle.test"
 
     test_demangling "_D8demangle4test6__ctorMFZv" "demangle.test.this()"
     test_demangling "_D8demangle4test6__dtorMFZv" "demangle.test.~this()"

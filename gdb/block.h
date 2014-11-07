@@ -271,13 +271,28 @@ extern struct symbol *block_iter_match_next (const char *name,
 					     symbol_compare_ftype *compare,
 					     struct block_iterator *iterator);
 
-/* Macro to loop through all symbols in a block BL, in no particular
-   order.  ITER helps keep track of the iteration, and should be a
+/* Search BLOCK for symbol NAME in DOMAIN.  */
+
+extern struct symbol *block_lookup_symbol (const struct block *block,
+					   const char *name,
+					   const domain_enum domain);
+
+/* Macro to loop through all symbols in BLOCK, in no particular
+   order.  ITER helps keep track of the iteration, and must be a
    struct block_iterator.  SYM points to the current symbol.  */
 
 #define ALL_BLOCK_SYMBOLS(block, iter, sym)		\
   for ((sym) = block_iterator_first ((block), &(iter));	\
        (sym);						\
        (sym) = block_iterator_next (&(iter)))
+
+/* Macro to loop through all symbols with name NAME in BLOCK,
+   in no particular order.  ITER helps keep track of the iteration, and
+   must be a struct block_iterator.  SYM points to the current symbol.  */
+
+#define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)		\
+  for ((sym) = block_iter_name_first ((block), (name), &(iter));	\
+       (sym) != NULL;							\
+       (sym) = block_iter_name_next ((name), &(iter)))
 
 #endif /* BLOCK_H */

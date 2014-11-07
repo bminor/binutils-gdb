@@ -457,17 +457,18 @@ static const struct regset am33_fpregset =
     NULL, am33_supply_fpregset_method, am33_collect_fpregset_method
   };
 
-/* Create a struct regset from a corefile register section.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-am33_regset_from_core_section (struct gdbarch *gdbarch, 
-			       const char *sect_name, 
-			       size_t sect_size)
+static void
+am33_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				   iterate_over_regset_sections_cb *cb,
+				   void *cb_data,
+				   const struct regcache *regcache)
 {
-  if (sect_size == sizeof (mn10300_elf_fpregset_t))
-    return &am33_fpregset;
-  else
-    return &am33_gregset;
+  cb (".reg", sizeof (mn10300_elf_gregset_t), &am33_gregset,
+      NULL, cb_data);
+  cb (".reg2", sizeof(mn10300_elf_fpregset_t), &am33_fpregset,
+      NULL, cb_data);
 }
 
 static void
@@ -714,8 +715,8 @@ am33_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   linux_init_abi (info, gdbarch);
 
-  set_gdbarch_regset_from_core_section (gdbarch, 
-					am33_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, am33_iterate_over_regset_sections);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 

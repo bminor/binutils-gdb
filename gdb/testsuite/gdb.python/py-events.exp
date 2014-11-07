@@ -81,6 +81,7 @@ delete_breakpoints
 
 #test exited event.
 gdb_test "continue" ".*event type: continue.*
+.*clear_objfiles\[\r\n\]*progspace: .*py-events.*
 .*event type: exit.*
 .*exit code: 12.*
 .*exit inf: 1.*

@@ -30,8 +30,6 @@
 #include <sys/syspage.h>
 #include <dirent.h>
 #include <sys/netmgr.h>
-
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"
@@ -309,7 +307,7 @@ update_thread_private_data (struct thread_info *new_thread,
 }
 
 static void
-procfs_find_new_threads (struct target_ops *ops)
+procfs_update_thread_list (struct target_ops *ops)
 {
   procfs_status status;
   pid_t pid;
@@ -319,6 +317,8 @@ procfs_find_new_threads (struct target_ops *ops)
 
   if (ctl_fd == -1)
     return;
+
+  prune_threads ();
 
   pid = ptid_get_pid (inferior_ptid);
 
@@ -633,7 +633,7 @@ procfs_attach (struct target_ops *ops, const char *args, int from_tty)
   if (!target_is_pushed (ops))
     push_target (ops);
 
-  procfs_find_new_threads (ops);
+  procfs_update_thread_list (ops);
 }
 
 static void
@@ -928,6 +928,7 @@ static int
 procfs_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
+  bp_tgt->placed_address = bp_tgt->reqstd_address;
   return procfs_breakpoint (bp_tgt->placed_address, _DEBUG_BREAK_EXEC, 0);
 }
 
@@ -942,6 +943,7 @@ static int
 procfs_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			     struct bp_target_info *bp_tgt)
 {
+  bp_tgt->placed_address = bp_tgt->reqstd_address;
   return procfs_breakpoint (bp_tgt->placed_address,
 			    _DEBUG_BREAK_EXEC | _DEBUG_BREAK_HW, 0);
 }
@@ -1195,7 +1197,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
     close (fds[2]);
 
   inferior_ptid = do_attach (pid_to_ptid (pid));
-  procfs_find_new_threads (ops);
+  procfs_update_thread_list (ops);
 
   inf = current_inferior ();
   inferior_appeared (inf, pid);
@@ -1440,7 +1442,7 @@ init_procfs_targets (void)
   t->to_mourn_inferior = procfs_mourn_inferior;
   t->to_pass_signals = procfs_pass_signals;
   t->to_thread_alive = procfs_thread_alive;
-  t->to_find_new_threads = procfs_find_new_threads;
+  t->to_update_thread_list = procfs_update_thread_list;
   t->to_pid_to_str = procfs_pid_to_str;
   t->to_stop = procfs_stop;
   t->to_have_continuable_watchpoint = 1;

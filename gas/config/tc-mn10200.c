@@ -686,7 +686,7 @@ void
 md_begin (void)
 {
   char *prev_name = "";
-  register const struct mn10200_opcode *op;
+  const struct mn10200_opcode *op;
 
   mn10200_hash = hash_new ();
 

@@ -4494,7 +4494,10 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			  if (strings == NULL)
 			    return FALSE;
 			}
-		      filename = strings + aux.x_file.x_n.x_offset;
+		      if ((bfd_size_type) aux.x_file.x_n.x_offset >= obj_coff_strings_len (input_bfd))
+			filename = _("<corrupt>");
+		      else
+			filename = strings + aux.x_file.x_n.x_offset;
 		      indx = _bfd_stringtab_add (flinfo->strtab, filename,
 						 hash, copy);
 		      if (indx == (bfd_size_type) -1)

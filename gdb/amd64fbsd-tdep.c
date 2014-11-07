@@ -26,6 +26,7 @@
 
 #include "amd64-tdep.h"
 #include "bsd-uthread.h"
+#include "fbsd-tdep.h"
 #include "solib-svr4.h"
 
 /* Support for signal handlers.  */
@@ -181,6 +182,9 @@ static void
 amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* Generic FreeBSD support. */
+  fbsd_init_abi (info, gdbarch);
 
   /* Obviously FreeBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);

@@ -651,12 +651,13 @@ m:int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup
 # Fetch the pointer to the ith function argument.
 F:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
 
-# Return the appropriate register set for a core file section with
-# name SECT_NAME and size SECT_SIZE.
-M:const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
-
-# Supported register notes in a core file.
-v:struct core_regset_section *:core_regset_sections:const char *name, int len::::::host_address_to_string (gdbarch->core_regset_sections)
+# Iterate over all supported register notes in a core file.  For each
+# supported register note section, the iterator must call CB and pass
+# CB_DATA unchanged.  If REGCACHE is not NULL, the iterator can limit
+# the supported register note sections based on the current register
+# values.  Otherwise it should enumerate all supported register note
+# sections.
+M:void:iterate_over_regset_sections:iterate_over_regset_sections_cb *cb, void *cb_data, const struct regcache *regcache:cb, cb_data, regcache
 
 # Create core file notes
 M:char *:make_corefile_notes:bfd *obfd, int *note_size:obfd, note_size
@@ -1029,6 +1030,12 @@ m:int:insn_is_jump:CORE_ADDR addr:addr::default_insn_is_jump::0
 # Return -1 if there is insufficient buffer for a whole entry.
 # Return 1 if an entry was read into *TYPEP and *VALP.
 M:int:auxv_parse:gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp:readptr, endptr, typep, valp
+
+# Find the address range of the current inferior's vsyscall/vDSO, and
+# write it to *RANGE.  If the vsyscall's length can't be determined, a
+# range with zero length is returned.  Returns true if the vsyscall is
+# found, false otherwise.
+m:int:vsyscall_range:struct mem_range *range:range::default_vsyscall_range::0
 EOF
 }
 
@@ -1148,6 +1155,7 @@ struct axs_value;
 struct stap_parse_info;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
+struct mem_range;
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -1169,6 +1177,10 @@ extern struct gdbarch *target_gdbarch (void);
 
 typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
   (struct objfile *objfile, void *cb_data);
+
+typedef void (iterate_over_regset_sections_cb)
+  (const char *sect_name, int size, const struct regset *regset,
+   const char *human_name, void *cb_data);
 EOF
 
 # function typedef's

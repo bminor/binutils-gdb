@@ -186,9 +186,6 @@ struct line_seg {
 
 /* Collects data for all line table entries during assembly.  */
 static struct line_seg *all_segs;
-/* Hash used to quickly lookup a segment by name, avoiding the need to search
-   through the all_segs list.  */
-static struct hash_control *all_segs_hash;
 static struct line_seg **last_seg_ptr;
 
 struct file_entry {
@@ -248,17 +245,9 @@ generic_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 static struct line_subseg *
 get_line_subseg (segT seg, subsegT subseg, bfd_boolean create_p)
 {
-  static segT last_seg;
-  static subsegT last_subseg;
-  static struct line_subseg *last_line_subseg;
-
-  struct line_seg *s;
+  struct line_seg *s = seg_info (seg)->dwarf2_line_seg;
   struct line_subseg **pss, *lss;
 
-  if (seg == last_seg && subseg == last_subseg)
-    return last_line_subseg;
-
-  s = (struct line_seg *) hash_find (all_segs_hash, seg->name);
   if (s == NULL)
     {
       if (!create_p)
@@ -270,7 +259,7 @@ get_line_subseg (segT seg, subsegT subseg, bfd_boolean create_p)
       s->head = NULL;
       *last_seg_ptr = s;
       last_seg_ptr = &s->next;
-      hash_insert (all_segs_hash, seg->name, s);
+      seg_info (seg)->dwarf2_line_seg = s;
     }
   gas_assert (seg == s->seg);
 
@@ -291,10 +280,6 @@ get_line_subseg (segT seg, subsegT subseg, bfd_boolean create_p)
   *pss = lss;
 
  found_subseg:
-  last_seg = seg;
-  last_subseg = subseg;
-  last_line_subseg = lss;
-
   return lss;
 }
 
@@ -1847,7 +1832,6 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
 void
 dwarf2_init (void)
 {
-  all_segs_hash = hash_new ();
   last_seg_ptr = &all_segs;
 }
 

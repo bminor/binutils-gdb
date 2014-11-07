@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "btrace.h"
 #include "gdbthread.h"
-#include "exceptions.h"
 #include "inferior.h"
 #include "target.h"
 #include "record.h"

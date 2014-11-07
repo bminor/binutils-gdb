@@ -38,7 +38,6 @@
 #include "elf-bfd.h"
 #include "exec.h"
 #include "auxv.h"
-#include "exceptions.h"
 #include "mach-o.h"
 #include "mach-o/external.h"
 

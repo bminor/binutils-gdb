@@ -146,6 +146,7 @@ arm*-*-*)
  ;;
 aarch64*-*)
  targ_obj=aarch64
+ targ_extra_obj=aarch64-reloc-property
  targ_machine=EM_AARCH64
  targ_size=64
  targ_extra_size=32

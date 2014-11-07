@@ -9,6 +9,11 @@
 
   ** You can now access frame registers from Python scripts.
   ** New attribute 'producer' for gdb.Symtab objects.
+  ** gdb.Objfile objects have a new attribute "progspace",
+     which is the gdb.Progspace object of the containing program space.
+  ** A new event "gdb.clear_objfiles" has been added, triggered when
+     selecting a new file to debug.
+  ** You can now add attributes to gdb.Objfile and gdb.Progspace objects.
 
 * New Python-based convenience functions:
 
@@ -39,6 +44,21 @@ queue-signal signal-name-or-number
   won't remove breakpoints from the target until all threads stop,
   even in non-stop mode.  The "auto" mode has been removed, and "off"
   is now the default mode.
+
+* MI changes
+
+  ** The -list-thread-groups command outputs an exit-code field for
+     inferiors that have exited.
+
+* Removed targets
+
+Support for these obsolete configurations has been removed.
+
+Alpha running OSF/1 (or Tru64)		alpha*-*-osf*
+SGI Irix-5.x				mips-*-irix5*
+SGI Irix-6.x				mips-*-irix6*
+VAX running (4.2 - 4.3 Reno) BSD 	vax-*-bsd*
+VAX running Ultrix 			vax-*-ultrix*
 
 *** Changes in GDB 7.8
 

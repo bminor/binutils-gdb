@@ -111,7 +111,7 @@ bfin_pic_ptr (int nbytes)
 static void
 bfin_s_bss (int ignore ATTRIBUTE_UNUSED)
 {
-  register int temp;
+  int temp;
 
   temp = get_absolute_expression ();
   subseg_set (bss_section, (subsegT) temp);

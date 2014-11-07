@@ -29,7 +29,6 @@
 #include "varobj.h"
 #include "c-lang.h"
 #include "objc-lang.h"
-#include "exceptions.h"
 #include "complaints.h"
 #include "value.h"
 #include "symfile.h"

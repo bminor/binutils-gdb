@@ -928,12 +928,7 @@ handle_COMDAT (bfd * abfd,
 
       bfd_coff_swap_sym_in (abfd, esym, & isym);
 
-      if (sizeof (internal_s->s_name) > SYMNMLEN)
-	{
-	  /* This case implies that the matching
-	     symbol name will be in the string table.  */
-	  abort ();
-	}
+      BFD_ASSERT (sizeof (internal_s->s_name) <= SYMNMLEN);
 
       if (isym.n_scnum == section->target_index)
 	{
@@ -964,8 +959,12 @@ handle_COMDAT (bfd * abfd,
 	  /* All 3 branches use this.  */
 	  symname = _bfd_coff_internal_syment_name (abfd, &isym, buf);
 
+	  /* PR 17512 file: 078-11867-0.004  */ 
 	  if (symname == NULL)
-	    abort ();
+	    {
+	      _bfd_error_handler (_("%B: unable to load COMDAT section name"), abfd);
+	      break;
+	    }
 
 	  switch (seen_state)
 	    {
@@ -4494,6 +4493,8 @@ coff_sort_func_alent (const void * arg1, const void * arg2)
   const coff_symbol_type *s1 = (const coff_symbol_type *) (al1->u.sym);
   const coff_symbol_type *s2 = (const coff_symbol_type *) (al2->u.sym);
 
+  if (s1 == NULL || s2 == NULL)
+    return 0;
   if (s1->symbol.value < s2->symbol.value)
     return -1;
   else if (s1->symbol.value > s2->symbol.value)
@@ -4518,7 +4519,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   BFD_ASSERT (asect->lineno == NULL);
 
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-  lineno_cache = (alent *) bfd_alloc (abfd, amt);
+  lineno_cache = (alent *) bfd_zalloc (abfd, amt);
   if (lineno_cache == NULL)
     return FALSE;
 
@@ -4546,21 +4547,18 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
       if (cache_ptr->line_number == 0)
 	{
-	  bfd_boolean warned;
 	  bfd_signed_vma symndx;
 	  coff_symbol_type *sym;
 
 	  nbr_func++;
-	  warned = FALSE;
 	  symndx = dst.l_addr.l_symndx;
 	  if (symndx < 0
 	      || (bfd_vma) symndx >= obj_raw_syment_count (abfd))
 	    {
 	      (*_bfd_error_handler)
-		(_("%B: warning: illegal symbol index %ld in line numbers"),
-		 abfd, (long) symndx);
-	      symndx = 0;
-	      warned = TRUE;
+		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
+		 abfd, (long) symndx, counter);
+	      continue;
 	    }
 
 	  /* FIXME: We should not be casting between ints and
@@ -4568,8 +4566,18 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  sym = ((coff_symbol_type *)
 		 ((symndx + obj_raw_syments (abfd))
 		  ->u.syment._n._n_n._n_zeroes));
+
+	  /* PR 17512 file: 078-10659-0.004  */
+	  if (sym < obj_symbols (abfd)
+	      || sym > obj_symbols (abfd)
+	      + obj_raw_syment_count (abfd) * sizeof (coff_symbol_type))
+	    sym = NULL;
+
 	  cache_ptr->u.sym = (asymbol *) sym;
-	  if (sym->lineno != NULL && ! warned)
+	  if (sym == NULL)
+	      continue;
+
+	  if (sym->lineno != NULL)
 	    (*_bfd_error_handler)
 	      (_("%B: warning: duplicate line number information for `%s'"),
 	       abfd, bfd_asymbol_name (&sym->symbol));
@@ -4586,6 +4594,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       cache_ptr++;
       src++;
     }
+
   cache_ptr->line_number = 0;
   bfd_release (abfd, native_lineno);
 
@@ -4612,7 +4621,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 	  /* Create the new sorted table.  */
 	  amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-	  n_lineno_cache = (alent *) bfd_alloc (abfd, amt);
+	  n_lineno_cache = (alent *) bfd_zalloc (abfd, amt);
 	  if (n_lineno_cache != NULL)
 	    {
 	      alent *n_cache_ptr = n_lineno_cache;
@@ -4624,8 +4633,9 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 		  /* Copy the function entry and update it.  */
 		  *n_cache_ptr = *old_ptr;
-		  sym = (coff_symbol_type *)n_cache_ptr->u.sym;
-		  sym->lineno = n_cache_ptr;
+		  sym = (coff_symbol_type *) n_cache_ptr->u.sym;
+		  if (sym != NULL)
+		    sym->lineno = n_cache_ptr;
 		  n_cache_ptr++;
 		  old_ptr++;
 
@@ -4636,7 +4646,8 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      n_cache_ptr->line_number = 0;
 	      memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
-	  bfd_release (abfd, func_table);
+	  /* PR binutils/17512: Do *not* free the func table
+	     and new lineno cache - they are now being used.  */
 	}
     }
 

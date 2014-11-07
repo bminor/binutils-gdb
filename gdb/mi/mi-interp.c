@@ -25,7 +25,6 @@
 #include "infrun.h"
 #include "ui-out.h"
 #include "top.h"
-#include "exceptions.h"
 #include "mi-main.h"
 #include "mi-cmds.h"
 #include "mi-out.h"

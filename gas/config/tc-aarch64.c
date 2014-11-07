@@ -3939,11 +3939,11 @@ output_info (const char *format, ...)
 static void
 output_operand_error_record (const operand_error_record *record, char *str)
 {
-  int idx = record->detail.index;
-  const aarch64_opcode *opcode = record->opcode;
-  enum aarch64_opnd opd_code = (idx != -1 ? opcode->operands[idx]
-				: AARCH64_OPND_NIL);
   const aarch64_operand_error *detail = &record->detail;
+  int idx = detail->index;
+  const aarch64_opcode *opcode = record->opcode;
+  enum aarch64_opnd opd_code = (idx >= 0 ? opcode->operands[idx]
+				: AARCH64_OPND_NIL);
 
   switch (detail->kind)
     {
@@ -3955,20 +3955,22 @@ output_operand_error_record (const operand_error_record *record, char *str)
     case AARCH64_OPDE_RECOVERABLE:
     case AARCH64_OPDE_FATAL_SYNTAX_ERROR:
     case AARCH64_OPDE_OTHER_ERROR:
-      gas_assert (idx >= 0);
       /* Use the prepared error message if there is, otherwise use the
 	 operand description string to describe the error.  */
       if (detail->error != NULL)
 	{
-	  if (detail->index == -1)
+	  if (idx < 0)
 	    as_bad (_("%s -- `%s'"), detail->error, str);
 	  else
 	    as_bad (_("%s at operand %d -- `%s'"),
-		    detail->error, detail->index + 1, str);
+		    detail->error, idx + 1, str);
 	}
       else
-	as_bad (_("operand %d should be %s -- `%s'"), idx + 1,
+	{
+	  gas_assert (idx >= 0);
+	  as_bad (_("operand %d should be %s -- `%s'"), idx + 1,
 		aarch64_get_operand_desc (opd_code), str);
+	}
       break;
 
     case AARCH64_OPDE_INVALID_VARIANT:
@@ -4073,28 +4075,28 @@ output_operand_error_record (const operand_error_record *record, char *str)
       if (detail->data[0] != detail->data[1])
 	as_bad (_("%s out of range %d to %d at operand %d -- `%s'"),
 		detail->error ? detail->error : _("immediate value"),
-		detail->data[0], detail->data[1], detail->index + 1, str);
+		detail->data[0], detail->data[1], idx + 1, str);
       else
 	as_bad (_("%s expected to be %d at operand %d -- `%s'"),
 		detail->error ? detail->error : _("immediate value"),
-		detail->data[0], detail->index + 1, str);
+		detail->data[0], idx + 1, str);
       break;
 
     case AARCH64_OPDE_REG_LIST:
       if (detail->data[0] == 1)
 	as_bad (_("invalid number of registers in the list; "
 		  "only 1 register is expected at operand %d -- `%s'"),
-		detail->index + 1, str);
+		idx + 1, str);
       else
 	as_bad (_("invalid number of registers in the list; "
 		  "%d registers are expected at operand %d -- `%s'"),
-	      detail->data[0], detail->index + 1, str);
+	      detail->data[0], idx + 1, str);
       break;
 
     case AARCH64_OPDE_UNALIGNED:
       as_bad (_("immediate value should be a multiple of "
 		"%d at operand %d -- `%s'"),
-	      detail->data[0], detail->index + 1, str);
+	      detail->data[0], idx + 1, str);
       break;
 
     default:
@@ -5823,7 +5825,24 @@ md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 }
 
 /* This is called from HANDLE_ALIGN in write.c.	 Fill in the contents
-   of an rs_align_code fragment.  */
+   of an rs_align_code fragment.
+
+   Here we fill the frag with the appropriate info for padding the
+   output stream.  The resulting frag will consist of a fixed (fr_fix)
+   and of a repeating (fr_var) part.
+
+   The fixed content is always emitted before the repeating content and
+   these two parts are used as follows in constructing the output:
+   - the fixed part will be used to align to a valid instruction word
+     boundary, in case that we start at a misaligned address; as no
+     executable instruction can live at the misaligned location, we
+     simply fill with zeros;
+   - the variable part will be used to cover the remaining padding and
+     we fill using the AArch64 NOP instruction.
+
+   Note that the size of a RS_ALIGN_CODE fragment is always 7 to provide
+   enough storage space for up to 3 bytes for padding the back to a valid
+   instruction alignment and exactly 4 bytes to store the NOP pattern.  */
 
 void
 aarch64_handle_align (fragS * fragP)
@@ -5834,69 +5853,33 @@ aarch64_handle_align (fragS * fragP)
 
   int bytes, fix, noop_size;
   char *p;
-  const char *noop;
 
   if (fragP->fr_type != rs_align_code)
     return;
 
   bytes = fragP->fr_next->fr_address - fragP->fr_address - fragP->fr_fix;
   p = fragP->fr_literal + fragP->fr_fix;
-  fix = 0;
-
-  if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
-    bytes &= MAX_MEM_FOR_RS_ALIGN_CODE;
 
 #ifdef OBJ_ELF
   gas_assert (fragP->tc_frag_data.recorded);
 #endif
 
-  noop = aarch64_noop;
   noop_size = sizeof (aarch64_noop);
-  fragP->fr_var = noop_size;
 
-  if (bytes & (noop_size - 1))
+  fix = bytes & (noop_size - 1);
+  if (fix)
     {
-      fix = bytes & (noop_size - 1);
 #ifdef OBJ_ELF
       insert_data_mapping_symbol (MAP_INSN, fragP->fr_fix, fragP, fix);
 #endif
       memset (p, 0, fix);
       p += fix;
-      bytes -= fix;
+      fragP->fr_fix += fix;
     }
 
-  while (bytes >= noop_size)
-    {
-      memcpy (p, noop, noop_size);
-      p += noop_size;
-      bytes -= noop_size;
-      fix += noop_size;
-    }
-
-  fragP->fr_fix += fix;
-}
-
-/* Called from md_do_align.  Used to create an alignment
-   frag in a code section.  */
-
-void
-aarch64_frag_align_code (int n, int max)
-{
-  char *p;
-
-  /* We assume that there will never be a requirement
-     to support alignments greater than x bytes.  */
-  if (max > MAX_MEM_FOR_RS_ALIGN_CODE)
-    as_fatal (_
-	      ("alignments greater than %d bytes not supported in .text sections"),
-	      MAX_MEM_FOR_RS_ALIGN_CODE + 1);
-
-  p = frag_var (rs_align_code,
-		MAX_MEM_FOR_RS_ALIGN_CODE,
-		1,
-		(relax_substateT) max,
-		(symbolS *) NULL, (offsetT) n, (char *) NULL);
-  *p = 0;
+  if (noop_size)
+    memcpy (p, aarch64_noop, noop_size);
+  fragP->fr_var = noop_size;
 }
 
 /* Perform target specific initialisation of a frag.
@@ -7201,6 +7184,7 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"all", AARCH64_ANY, NULL},
   {"cortex-a53",	AARCH64_ARCH_V8, "Cortex-A53"},
   {"cortex-a57",	AARCH64_ARCH_V8, "Cortex-A57"},
+  {"thunderx",		AARCH64_ARCH_V8, "Cavium ThunderX"},
   {"xgene-1", AARCH64_ARCH_V8, "APM X-Gene 1"},
   {"generic", AARCH64_ARCH_V8, NULL},
 

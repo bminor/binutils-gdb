@@ -5715,17 +5715,21 @@ som_set_arch_mach (bfd *abfd,
 
 static bfd_boolean
 som_find_nearest_line (bfd *abfd,
-		       asection *section,
 		       asymbol **symbols,
+		       asection *section,
 		       bfd_vma offset,
 		       const char **filename_ptr,
 		       const char **functionname_ptr,
-		       unsigned int *line_ptr)
+		       unsigned int *line_ptr,
+		       unsigned int *discriminator_ptr)
 {
   bfd_boolean found;
   asymbol *func;
   bfd_vma low_func;
   asymbol **p;
+
+  if (discriminator_ptr)
+    *discriminator_ptr = 0;
 
   if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
                                              & found, filename_ptr,
@@ -6713,6 +6717,7 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
   return som_is_subspace (sec) && sec->size > 240000;
 }
 
+#define som_find_line			        _bfd_nosymbols_find_line
 #define	som_close_and_cleanup		        som_bfd_free_cached_info
 #define som_read_ar_hdr			        _bfd_generic_read_ar_hdr
 #define som_write_ar_hdr		        _bfd_generic_write_ar_hdr

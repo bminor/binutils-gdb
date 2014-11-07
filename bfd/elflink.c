@@ -12602,10 +12602,10 @@ bfd_elf_reloc_symbol_deleted_p (bfd_vma offset, void *cookie)
 
 	  if ((h->root.type == bfd_link_hash_defined
 	       || h->root.type == bfd_link_hash_defweak)
-	      && discarded_section (h->root.u.def.section))
+	      && (h->root.u.def.section->owner != rcookie->abfd
+		  || h->root.u.def.section->kept_section != NULL
+		  || discarded_section (h->root.u.def.section)))
 	    return TRUE;
-	  else
-	    return FALSE;
 	}
       else
 	{
@@ -12618,7 +12618,9 @@ bfd_elf_reloc_symbol_deleted_p (bfd_vma offset, void *cookie)
 	  /* Need to: get the symbol; get the section.  */
 	  isym = &rcookie->locsyms[r_symndx];
 	  isec = bfd_section_from_elf_index (rcookie->abfd, isym->st_shndx);
-	  if (isec != NULL && discarded_section (isec))
+	  if (isec != NULL
+	      && (isec->kept_section != NULL
+		  || discarded_section (isec)))
 	    return TRUE;
 	}
       return FALSE;
@@ -12672,9 +12674,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	}
     }
 
-  o = NULL;
-  if (!info->relocatable)
-    o = bfd_get_section_by_name (output_bfd, ".eh_frame");
+  o = bfd_get_section_by_name (output_bfd, ".eh_frame");
   if (o != NULL)
     {
       asection *i;

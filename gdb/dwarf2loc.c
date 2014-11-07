@@ -30,7 +30,6 @@
 #include "ax-gdb.h"
 #include "regcache.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "block.h"
 #include "gdbcmd.h"
 
@@ -1684,21 +1683,21 @@ read_pieced_value (struct value *v)
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.regno);
-	    int reg_offset = source_offset;
-
-	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& this_size < register_size (arch, gdb_regnum))
-	      {
-		/* Big-endian, and we want less than full size.  */
-		reg_offset = register_size (arch, gdb_regnum) - this_size;
-		/* We want the lower-order THIS_SIZE_BITS of the bytes
-		   we extract from the register.  */
-		source_offset_bits += 8 * this_size - this_size_bits;
-	      }
 
 	    if (gdb_regnum != -1)
 	      {
 		int optim, unavail;
+		int reg_offset = source_offset;
+
+		if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
+		    && this_size < register_size (arch, gdb_regnum))
+		  {
+		    /* Big-endian, and we want less than full size.  */
+		    reg_offset = register_size (arch, gdb_regnum) - this_size;
+		    /* We want the lower-order THIS_SIZE_BITS of the bytes
+		       we extract from the register.  */
+		    source_offset_bits += 8 * this_size - this_size_bits;
+		 }
 
 		if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
 					       this_size, buffer,
@@ -1876,15 +1875,18 @@ write_pieced_value (struct value *to, struct value *from)
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.regno);
-	    int reg_offset = dest_offset;
-
-	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& this_size <= register_size (arch, gdb_regnum))
-	      /* Big-endian, and we want less than full size.  */
-	      reg_offset = register_size (arch, gdb_regnum) - this_size;
 
 	    if (gdb_regnum != -1)
 	      {
+		int reg_offset = dest_offset;
+
+		if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
+		    && this_size <= register_size (arch, gdb_regnum))
+		  {
+		    /* Big-endian, and we want less than full size.  */
+		    reg_offset = register_size (arch, gdb_regnum) - this_size;
+		  }
+
 		if (need_bitwise)
 		  {
 		    int optim, unavail;

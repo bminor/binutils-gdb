@@ -1,4 +1,5 @@
-# DO NOT EDIT: generated from i386/amd64-avx512.xml
+# THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
+# Generated from: i386/amd64-avx512.xml
 name:amd64_avx512
 xmltarget:amd64-avx512.xml
 expedite:rbp,rsp,rip

@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "top.h"
-#include "exceptions.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "cli/cli-cmds.h"

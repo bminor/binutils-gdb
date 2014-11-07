@@ -1,3 +1,82 @@
+2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2.h (nios2_find_opcode_hash): Add mach parameter to
+	declaration.  Fix obsolete comment.
+
+2014-10-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2.h (enum iw_format_type): New.
+	(struct nios2_opcode): Update comments.  Add size and format fields.
+	(NIOS2_INSN_OPTARG): New.
+	(REG_NORMAL, REG_CONTROL, REG_COPROCESSOR): New.
+	(struct nios2_reg): Add regtype field.
+	(GET_INSN_FIELD, SET_INSN_FIELD): Delete.
+	(IW_A_LSB, IW_A_MSB, IW_A_SZ, IW_A_MASK): Delete.
+	(IW_B_LSB, IW_B_MSB, IW_B_SZ, IW_B_MASK): Delete.
+	(IW_C_LSB, IW_C_MSB, IW_C_SZ, IW_C_MASK): Delete.
+	(IW_IMM16_LSB, IW_IMM16_MSB, IW_IMM16_SZ, IW_IMM16_MASK): Delete.
+	(IW_IMM26_LSB, IW_IMM26_MSB, IW_IMM26_SZ, IW_IMM26_MASK): Delete.
+	(IW_OP_LSB, IW_OP_MSB, IW_OP_SZ, IW_OP_MASK): Delete.
+	(IW_OPX_LSB, IW_OPX_MSB, IW_OPX_SZ, IW_OPX_MASK): Delete.
+	(IW_SHIFT_IMM5_LSB, IW_SHIFT_IMM5_MSB): Delete.
+	(IW_SHIFT_IMM5_SZ, IW_SHIFT_IMM5_MASK): Delete.
+	(IW_CONTROL_REGNUM_LSB, IW_CONTROL_REGNUM_MSB): Delete.
+	(IW_CONTROL_REGNUM_SZ, IW_CONTROL_REGNUM_MASK): Delete.
+	(OP_MASK_OP, OP_SH_OP): Delete.
+	(OP_MASK_IOP, OP_SH_IOP): Delete.
+	(OP_MASK_IRD, OP_SH_IRD): Delete.
+	(OP_MASK_IRT, OP_SH_IRT): Delete.
+	(OP_MASK_IRS, OP_SH_IRS): Delete.
+	(OP_MASK_ROP, OP_SH_ROP): Delete.
+	(OP_MASK_RRD, OP_SH_RRD): Delete.
+	(OP_MASK_RRT, OP_SH_RRT): Delete.
+	(OP_MASK_RRS, OP_SH_RRS): Delete.
+	(OP_MASK_JOP, OP_SH_JOP): Delete.
+	(OP_MASK_IMM26, OP_SH_IMM26): Delete.
+	(OP_MASK_RCTL, OP_SH_RCTL): Delete.
+	(OP_MASK_IMM5, OP_SH_IMM5): Delete.
+	(OP_MASK_CACHE_OPX, OP_SH_CACHE_OPX): Delete.
+	(OP_MASK_CACHE_RRS, OP_SH_CACHE_RRS): Delete.
+	(OP_MASK_CUSTOM_A, OP_SH_CUSTOM_A): Delete.
+	(OP_MASK_CUSTOM_B, OP_SH_CUSTOM_B): Delete.
+	(OP_MASK_CUSTOM_C, OP_SH_CUSTOM_C): Delete.
+	(OP_MASK_CUSTOM_N, OP_SH_CUSTOM_N): Delete.
+	(OP_<insn>, OPX_<insn>, OP_MATCH_<insn>, OPX_MATCH_<insn>): Delete.
+	(OP_MASK_<insn>, OP_MASK): Delete.
+	(GET_IW_A, GET_IW_B, GET_IW_C, GET_IW_CONTROL_REGNUM): Delete.
+	(GET_IW_IMM16, GET_IW_IMM26, GET_IW_OP, GET_IW_OPX): Delete.
+	Include nios2r1.h to define new instruction opcode constants
+	and accessors.
+	(nios2_builtin_opcodes): Rename to nios2_r1_opcodes.
+	(bfd_nios2_num_builtin_opcodes): Rename to nios2_num_r1_opcodes.
+	(bfd_nios2_num_opcodes): Rename to nios2_num_opcodes.
+	(NUMOPCODES, NUMREGISTERS): Delete.
+	* nios2r1.h: New file.
+
+2014-10-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc.h (HWCAP2_VIS3B): Documentation improved.
+
+2014-10-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc.h (sparc_opcode): new field `hwcaps2'.
+	(HWCAP2_FJATHPLUS): New define.
+	(HWCAP2_VIS3B): Likewise.
+	(HWCAP2_ADP): Likewise.
+	(HWCAP2_SPARC5): Likewise.
+	(HWCAP2_MWAIT): Likewise.
+	(HWCAP2_XMPMUL): Likewise.
+	(HWCAP2_XMONT): Likewise.
+	(HWCAP2_NSEC): Likewise.
+	(HWCAP2_FJATHHPC): Likewise.
+	(HWCAP2_FJDES): Likewise.
+	(HWCAP2_FJAES): Likewise.
+	Document the new operand kind `{', corresponding to the mcdper
+	ancillary state register.
+	Document the new operand kind }, which represents frsd floating
+	point registers (double precision) which must be the same than
+	frs1 in its containing instruction.
+
 2014-09-16  Kuan-Lin Chen <kuanlinchentw@gmail.com>
 
         * nds32.h: Add new opcode declaration.

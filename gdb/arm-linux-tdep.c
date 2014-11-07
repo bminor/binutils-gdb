@@ -731,43 +731,25 @@ static const struct regset arm_linux_vfpregset =
     NULL, arm_linux_supply_vfp, arm_linux_collect_vfp
   };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
-				    const char *sect_name, size_t sect_size)
+static void
+arm_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					iterate_over_regset_sections_cb *cb,
+					void *cb_data,
+					const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size == ARM_LINUX_SIZEOF_GREGSET)
-    return &arm_linux_gregset;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (strcmp (sect_name, ".reg2") == 0
-      && sect_size == ARM_LINUX_SIZEOF_NWFPE)
-    return &arm_linux_fpregset;
+  cb (".reg", ARM_LINUX_SIZEOF_GREGSET, &arm_linux_gregset, NULL, cb_data);
 
-  if (strcmp (sect_name, ".reg-arm-vfp") == 0
-      && sect_size == ARM_LINUX_SIZEOF_VFP)
-    return &arm_linux_vfpregset;
-
-  return NULL;
+  if (tdep->have_vfp_registers)
+    cb (".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, &arm_linux_vfpregset,
+	"VFP floating-point", cb_data);
+  else if (tdep->have_fpa_registers)
+    cb (".reg2", ARM_LINUX_SIZEOF_NWFPE, &arm_linux_fpregset,
+	"FPA floating-point", cb_data);
 }
-
-/* Core file register set sections.  */
-
-static struct core_regset_section arm_linux_fpa_regset_sections[] =
-{
-  { ".reg", ARM_LINUX_SIZEOF_GREGSET, "general-purpose" },
-  { ".reg2", ARM_LINUX_SIZEOF_NWFPE, "FPA floating-point" },
-  { NULL, 0}
-};
-
-static struct core_regset_section arm_linux_vfp_regset_sections[] =
-{
-  { ".reg", ARM_LINUX_SIZEOF_GREGSET, "general-purpose" },
-  { ".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, "VFP floating-point" },
-  { NULL, 0}
-};
 
 /* Determine target description from core file.  */
 
@@ -1379,7 +1361,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   linux_init_abi (info, gdbarch);
 
   tdep->lowest_pc = 0x8000;
-  if (info.byte_order == BFD_ENDIAN_BIG)
+  if (info.byte_order_for_code == BFD_ENDIAN_BIG)
     {
       if (tdep->arm_abi == ARM_ABI_AAPCS)
 	tdep->arm_breakpoint = eabi_linux_arm_be_breakpoint;
@@ -1454,14 +1436,9 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_kernel_linux_restart_syscall_tramp_frame);
 
   /* Core file support.  */
-  set_gdbarch_regset_from_core_section (gdbarch,
-					arm_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, arm_linux_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch, arm_linux_core_read_description);
-
-  if (tdep->have_vfp_registers)
-    set_gdbarch_core_regset_sections (gdbarch, arm_linux_vfp_regset_sections);
-  else if (tdep->have_fpa_registers)
-    set_gdbarch_core_regset_sections (gdbarch, arm_linux_fpa_regset_sections);
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 

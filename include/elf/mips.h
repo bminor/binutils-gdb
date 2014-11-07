@@ -1224,6 +1224,7 @@ extern void bfd_mips_elf_swap_abiflags_v0_out
 #define AFL_ASE_MIPS16       0x00000400 /* MIPS16 ASE.  */
 #define AFL_ASE_MICROMIPS    0x00000800 /* MICROMIPS ASE.  */
 #define AFL_ASE_XPA          0x00001000 /* XPA ASE.  */
+#define AFL_ASE_MASK         0x00001fff /* All ASEs.  */
 
 /* Values for the isa_ext word of an ABI flags structure.  */
 
@@ -1245,6 +1246,7 @@ extern void bfd_mips_elf_swap_abiflags_v0_out
 #define AFL_EXT_5500         16  /* NEC VR5500 instruction.  */
 #define AFL_EXT_LOONGSON_2E  17  /* ST Microelectronics Loongson 2E.  */
 #define AFL_EXT_LOONGSON_2F  18  /* ST Microelectronics Loongson 2F.  */
+#define AFL_EXT_OCTEON3      19  /* Cavium Networks Octeon3.  */
 
 /* Masks for the flags1 word of an ABI flags structure.  */
 #define AFL_FLAGS1_ODDSPREG   1	 /* Uses odd single-precision registers.  */

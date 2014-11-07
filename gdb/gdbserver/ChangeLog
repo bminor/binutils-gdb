@@ -1,3 +1,57 @@
+2014-10-15  Pedro Alves  <palves@redhat.com>
+
+	PR server/17487
+	* win32-arm-low.c (arm_set_thread_context): Remove current_event
+	parameter.
+	(arm_set_thread_context): Delete.
+	(the_low_target): Adjust.
+	* win32-i386-low.c (debug_registers_changed)
+	(debug_registers_used): Delete.
+	(update_debug_registers_callback): New function.
+	(x86_dr_low_set_addr, x86_dr_low_set_control): Mark all threads as
+	needing to update their debug registers.
+	(win32_get_current_dr): New function.
+	(x86_dr_low_get_addr, x86_dr_low_get_control)
+	(x86_dr_low_get_status): Fetch the debug register from the thread
+	record's context.
+	(i386_initial_stuff): Adjust.
+	(i386_get_thread_context): Remove current_event parameter.  Don't
+	clear debug_registers_changed nor copy DR values to
+	debug_reg_state.
+	(i386_set_thread_context): Delete.
+	(i386_prepare_to_resume): New function.
+	(i386_thread_added): Mark the thread as needing to update irs
+	debug registers.
+	(the_low_target): Remove i386_set_thread_context and install
+	i386_prepare_to_resume.
+	* win32-low.c (win32_get_thread_context): Adjust.
+	(win32_set_thread_context): Use SetThreadContext
+	directly.
+	(win32_prepare_to_resume): New function.
+	(win32_require_context): New function, factored out from ...
+	(thread_rec): ... this.
+	(continue_one_thread): Call win32_prepare_to_resume on each thread
+	we're about to continue.
+	(win32_resume): Call win32_prepare_to_resume on the event thread.
+	* win32-low.h (struct win32_thread_info)
+	<debug_registers_changed>: New field.
+	(struct win32_target_ops): Change prototype of set_thread_context,
+	delete set_thread_context and add prepare_to_resume.
+	(win32_require_context): New declaration.
+
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include common-exceptions.h.
+
+2014-10-08  Gary Benson  <gbenson@redhat.com>
+
+	* server.h: Do not include cleanups.h.
+
+2014-09-30  James Hogan  <james.hogan@imgtec.com>
+
+	* Makefile.in (clean): Add rm -f commands for mips-dsp-linux.c and
+	mips64-dsp-linux.c.
+
 2014-09-23  Yao Qi  <yao@codesourcery.com>
 
 	* linux-low.c (lp_status_maybe_breakpoint): New function.

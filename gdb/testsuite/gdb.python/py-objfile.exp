@@ -38,9 +38,16 @@ gdb_py_test_silent_cmd "python objfile = sym\[0\].symtab.objfile" \
     "Get backing object file" 1
 
 gdb_test "python print (objfile.filename)" ".*py-objfile.*" \
-  "Get objfile validity"
+  "Get objfile file name"
+gdb_test "python print (objfile.progspace)" "<gdb\.Progspace object at .*>" \
+  "Get objfile program space"
 gdb_test "python print (objfile.is_valid())" "True" \
   "Get objfile validity"
 gdb_unload
 gdb_test "python print (objfile.is_valid())" "False" \
   "Get objfile validity after unload"
+
+gdb_py_test_silent_cmd "python objfile.random_attribute = 42" \
+    "Set random attribute in objfile" 1
+gdb_test "python print (objfile.random_attribute)" "42" \
+    "Verify set of random attribute in objfile"

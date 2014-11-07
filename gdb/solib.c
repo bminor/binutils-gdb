@@ -25,7 +25,6 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "target.h"
@@ -1409,7 +1408,7 @@ solib_global_lookup (const struct objfile *objfile,
 		     const char *name,
 		     const domain_enum domain)
 {
-  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (get_objfile_arch (objfile));
 
   if (ops->lookup_lib_global_symbol != NULL)
     return ops->lookup_lib_global_symbol (objfile, name, domain);

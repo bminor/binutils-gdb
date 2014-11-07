@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "value.h"
-#include "exceptions.h"
 #include "python-internal.h"
 #include "charset.h"
 #include "gdbcmd.h"

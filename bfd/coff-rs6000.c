@@ -430,39 +430,6 @@ static const struct dwarf_debug_section xcoff_debug_sections[] =
   { NULL,	NULL }, /* .debug_weaknames */
   { NULL,	NULL },
 };
-
-static bfd_boolean
-xcoff_find_nearest_line (bfd *abfd,
-                         asection *section,
-                         asymbol **symbols,
-                         bfd_vma offset,
-                         const char **filename_ptr,
-                         const char **functionname_ptr,
-                         unsigned int *line_ptr)
-{
-  return coff_find_nearest_line_with_names (abfd, xcoff_debug_sections,
-                                            section, symbols, offset,
-                                            filename_ptr, functionname_ptr,
-                                            line_ptr);
-}
-
-static bfd_boolean
-xcoff_find_nearest_line_discriminator (bfd *abfd,
-                                      asection *section,
-                                      asymbol **symbols,
-                                      bfd_vma offset,
-                                      const char **filename_ptr,
-                                      const char **functionname_ptr,
-                                      unsigned int *line_ptr,
-                                      unsigned int *discriminator)
-{
-  *discriminator = 0;
-  return coff_find_nearest_line_with_names (abfd, xcoff_debug_sections,
-                                            section, symbols, offset,
-                                            filename_ptr, functionname_ptr,
-                                            line_ptr);
-}
-
 
 void
 _bfd_xcoff_swap_sym_in (bfd *abfd, void * ext1, void * in1)
@@ -4045,9 +4012,8 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 #define _bfd_xcoff_bfd_is_target_special_symbol \
   coff_bfd_is_target_special_symbol
 #define _bfd_xcoff_get_lineno coff_get_lineno
-#define _bfd_xcoff_find_nearest_line xcoff_find_nearest_line
-#define _bfd_generic_find_nearest_line_discriminator \
-  xcoff_find_nearest_line_discriminator
+#define _bfd_xcoff_find_nearest_line coff_find_nearest_line
+#define _bfd_xcoff_find_line coff_find_line
 #define _bfd_xcoff_find_inliner_info coff_find_inliner_info
 #define _bfd_xcoff_bfd_make_debug_symbol coff_bfd_make_debug_symbol
 #define _bfd_xcoff_read_minisymbols _bfd_generic_read_minisymbols

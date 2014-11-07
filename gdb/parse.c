@@ -48,7 +48,6 @@
 #include "block.h"
 #include "source.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "user-regs.h"
 
 /* Standard set of definitions for printing, dumping, prefixifying,
@@ -584,7 +583,6 @@ mark_completion_tag (enum type_code tag, const char *ptr, int length)
 	      && expout_last_struct == -1);
   gdb_assert (tag == TYPE_CODE_UNION
 	      || tag == TYPE_CODE_STRUCT
-	      || tag == TYPE_CODE_CLASS
 	      || tag == TYPE_CODE_ENUM);
   expout_tag_completion_type = tag;
   expout_completion_name = xmalloc (length + 1);

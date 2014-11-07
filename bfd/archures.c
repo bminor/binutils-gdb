@@ -179,6 +179,7 @@ DESCRIPTION
 .#define bfd_mach_mips_octeon		6501
 .#define bfd_mach_mips_octeonp		6601
 .#define bfd_mach_mips_octeon2		6502
+.#define bfd_mach_mips_octeon3          6503
 .#define bfd_mach_mips_xlr              887682   {* decimal 'XLR'  *}
 .#define bfd_mach_mipsisa32             32
 .#define bfd_mach_mipsisa32r2           33

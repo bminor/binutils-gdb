@@ -88,20 +88,6 @@ static int i386_windows_gregset_reg_offset[] =
 
 #define I386_WINDOWS_SIZEOF_GREGSET 716
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
-
-static const struct regset *
-i386_windows_regset_from_core_section (struct gdbarch *gdbarch,
-				     const char *sect_name, size_t sect_size)
-{
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size == I386_WINDOWS_SIZEOF_GREGSET)
-    return &i386_gregset;
-
-  return NULL;
-}
-
 struct cpms_data
 {
   struct gdbarch *gdbarch;
@@ -235,9 +221,9 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (i386_windows_gregset_reg_offset);
   tdep->sizeof_gregset = I386_WINDOWS_SIZEOF_GREGSET;
 
+  tdep->sizeof_fpregset = 0;
+
   /* Core file support.  */
-  set_gdbarch_regset_from_core_section
-    (gdbarch, i386_windows_regset_from_core_section);
   set_gdbarch_core_xfer_shared_libraries
     (gdbarch, windows_core_xfer_shared_libraries);
   set_gdbarch_core_pid_to_str (gdbarch, i386_windows_core_pid_to_str);

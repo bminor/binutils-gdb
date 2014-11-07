@@ -1946,47 +1946,46 @@ mode_from_disp_size (i386_operand_type t)
 }
 
 static INLINE int
-fits_in_signed_byte (offsetT num)
+fits_in_signed_byte (addressT num)
 {
-  return (num >= -128) && (num <= 127);
+  return num + 0x80 <= 0xff;
 }
 
 static INLINE int
-fits_in_unsigned_byte (offsetT num)
+fits_in_unsigned_byte (addressT num)
 {
-  return (num & 0xff) == num;
+  return num <= 0xff;
 }
 
 static INLINE int
-fits_in_unsigned_word (offsetT num)
+fits_in_unsigned_word (addressT num)
 {
-  return (num & 0xffff) == num;
+  return num <= 0xffff;
 }
 
 static INLINE int
-fits_in_signed_word (offsetT num)
+fits_in_signed_word (addressT num)
 {
-  return (-32768 <= num) && (num <= 32767);
+  return num + 0x8000 <= 0xffff;
 }
 
 static INLINE int
-fits_in_signed_long (offsetT num ATTRIBUTE_UNUSED)
+fits_in_signed_long (addressT num ATTRIBUTE_UNUSED)
 {
 #ifndef BFD64
   return 1;
 #else
-  return (!(((offsetT) -1 << 31) & num)
-	  || (((offsetT) -1 << 31) & num) == ((offsetT) -1 << 31));
+  return num + 0x80000000 <= 0xffffffff;
 #endif
 }				/* fits_in_signed_long() */
 
 static INLINE int
-fits_in_unsigned_long (offsetT num ATTRIBUTE_UNUSED)
+fits_in_unsigned_long (addressT num ATTRIBUTE_UNUSED)
 {
 #ifndef BFD64
   return 1;
 #else
-  return (num & (((offsetT) 2 << 31) - 1)) == num;
+  return num <= 0xffffffff;
 #endif
 }				/* fits_in_unsigned_long() */
 
@@ -6998,6 +6997,15 @@ check_prefix:
 	      abort ();
 	    }
 
+	  /* For x32, add a dummy REX_OPCODE prefix for mov/add with
+	     R_X86_64_GOTTPOFF relocation so that linker can safely
+	     perform IE->LE optimization.  */
+	  if (x86_elf_abi == X86_64_X32_ABI
+	      && i.operands == 2
+	      && i.reloc[0] == BFD_RELOC_X86_64_GOTTPOFF
+	      && i.prefix[REX_PREFIX] == 0)
+	    add_prefix (REX_OPCODE);
+
 	  /* The prefix bytes.  */
 	  for (j = ARRAY_SIZE (i.prefix), q = i.prefix; j > 0; j--, q++)
 	    if (*q)
@@ -7986,7 +7994,7 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
       return 0;
     }
 #endif
-  else if (!intel_syntax && exp->X_op == O_register)
+  else if (!intel_syntax && exp_seg == reg_section)
     {
       if (imm_start)
 	as_bad (_("illegal immediate register operand %s"), imm_start);

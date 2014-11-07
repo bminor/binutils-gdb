@@ -607,7 +607,7 @@ TARGET_OBS = @TARGET_OBS@
 ALL_64_TARGET_OBS = \
 	aarch64-tdep.o aarch64-linux-tdep.o aarch64-newlib-tdep.o \
 	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
-	alphanbsd-tdep.o alphaobsd-tdep.o alpha-osf1-tdep.o alpha-tdep.o \
+	alphanbsd-tdep.o alphaobsd-tdep.o alpha-tdep.o \
 	amd64fbsd-tdep.o amd64-darwin-tdep.o amd64-dicos-tdep.o \
 	amd64-linux-tdep.o amd64nbsd-tdep.o \
 	amd64obsd-tdep.o amd64-sol2-tdep.o amd64-tdep.o amd64-windows-tdep.o \
@@ -625,6 +625,7 @@ ALL_TARGET_OBS = \
 	bfin-linux-tdep.o bfin-tdep.o \
 	cris-linux-tdep.o cris-tdep.o \
 	dicos-tdep.o \
+	fbsd-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
 	h8300-tdep.o \
 	hppabsd-tdep.o hppanbsd-tdep.o hppaobsd-tdep.o \
@@ -643,7 +644,7 @@ ALL_TARGET_OBS = \
 	m88k-tdep.o \
 	mep-tdep.o \
 	microblaze-tdep.o microblaze-linux-tdep.o \
-	mips-irix-tdep.o mips-linux-tdep.o \
+	mips-linux-tdep.o \
 	mipsnbsd-tdep.o mips-tdep.o \
 	mn10300-linux-tdep.o mn10300-tdep.o \
 	moxie-tdep.o \
@@ -672,7 +673,7 @@ ALL_TARGET_OBS = \
 	bsd-uthread.o \
 	nbsd-tdep.o obsd-tdep.o \
 	sol2-tdep.o \
-	solib-frv.o solib-irix.o solib-svr4.o \
+	solib-frv.o solib-svr4.o \
 	solib-som.o solib-pa64.o solib-darwin.o solib-dsbt.o \
 	dbug-rom.o dink32-rom.o ppcbug-rom.o m32r-rom.o dsrec.o monitor.o \
 	remote-m32r-sdi.o remote-mips.o \
@@ -797,7 +798,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	charset.c common/cleanups.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c continuations.c corefile.c corelow.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
-	d-exp.y d-lang.c d-support.c d-valprint.c \
+	d-exp.y d-lang.c d-valprint.c \
 	cp-name-parser.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
 	dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
@@ -902,14 +903,14 @@ interps.h auxv.h gdbcmd.h tramp-frame.h mipsnbsd-tdep.h	\
 amd64-linux-tdep.h linespec.h i387-tdep.h mn10300-tdep.h \
 sparc64-tdep.h monitor.h ppcobsd-tdep.h srec.h solib-pa64.h \
 coff-pe-read.h parser-defs.h gdb_ptrace.h mips-linux-tdep.h \
-m68k-tdep.h spu-tdep.h jv-lang.h environ.h solib-irix.h amd64-tdep.h \
+m68k-tdep.h spu-tdep.h jv-lang.h environ.h amd64-tdep.h \
 doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h \
 rs6000-tdep.h rs6000-aix-tdep.h \
 common/gdb_locale.h arch-utils.h trad-frame.h gnu-nat.h \
 language.h nbsd-tdep.h solib-svr4.h \
 macroexp.h ui-file.h regcache.h tracepoint.h tracefile.h i386-tdep.h \
 inf-child.h p-lang.h event-top.h gdbtypes.h user-regs.h \
-regformats/regdef.h config/alpha/nm-osf3.h  config/i386/nm-i386gnu.h \
+regformats/regdef.h config/i386/nm-i386gnu.h \
 config/i386/nm-fbsd.h \
 config/nm-nto.h config/sparc/nm-sol2.h config/nm-linux.h \
 top.h bsd-kvm.h gdb-stabs.h reggroups.h \
@@ -939,7 +940,7 @@ common/print-utils.h common/rsp-low.h nat/x86-dregs.h x86-linux-nat.h \
 i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
-common/common-regcache.h
+common/common-regcache.h fbsd-tdep.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1026,7 +1027,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	inline-frame.o \
 	gnu-v2-abi.o gnu-v3-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
-	d-support.o \
 	reggroups.o \
 	trad-frame.o \
 	tramp-frame.o \
@@ -1601,9 +1601,9 @@ ALLDEPFILES = \
 	aarch64-tdep.c aarch64-linux-tdep.c aarch64-newlib-tdep.c \
 	aarch64-linux-nat.c \
 	aix-thread.c \
-	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c \
+	alphabsd-nat.c alpha-linux-nat.c \
 	alpha-tdep.c alpha-mdebug-tdep.c \
-	alpha-linux-tdep.c alpha-osf1-tdep.c \
+	alpha-linux-tdep.c \
 	alphabsd-tdep.c alphafbsd-tdep.c alphanbsd-tdep.c alphaobsd-tdep.c \
 	amd64-nat.c amd64-tdep.c \
 	amd64bsd-nat.c amd64fbsd-nat.c amd64fbsd-tdep.c \
@@ -1622,6 +1622,7 @@ ALLDEPFILES = \
 	dcache.c dicos-tdep.c darwin-nat.c \
 	exec.c \
 	fbsd-nat.c \
+	fbsd-tdep.c \
 	fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
@@ -1659,14 +1660,12 @@ ALLDEPFILES = \
 	microblaze-tdep.c microblaze-linux-tdep.c \
 	mingw-hdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
-	mips-irix-tdep.c \
 	mips-tdep.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	mips64obsd-nat.c mips64obsd-tdep.c \
 	msp430-tdep.c \
 	nios2-tdep.c nios2-linux-tdep.c \
 	nbsd-nat.c nbsd-tdep.c obsd-nat.c obsd-tdep.c \
-	solib-osf.c \
 	somread.c solib-som.c \
 	posix-hdep.c \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c ppc64-tdep.c \
@@ -1687,7 +1686,7 @@ ALLDEPFILES = \
 	ser-go32.c ser-pipe.c ser-tcp.c ser-mingw.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	sol2-tdep.c \
-	solib-irix.c solib-svr4.c \
+	solib-svr4.c \
 	sparc-linux-nat.c sparc-linux-tdep.c \
 	sparc-sol2-nat.c sparc-sol2-tdep.c sparc64-sol2-tdep.c \
 	sparc-nat.c sparc-tdep.c sparc64-linux-nat.c sparc64-linux-tdep.c \
@@ -1699,7 +1698,7 @@ ALLDEPFILES = \
 	spu-linux-nat.c spu-tdep.c spu-multiarch.c solib-spu.c \
 	tilegx-linux-nat.c tilegx-tdep.c tilegx-linux-tdep.c \
 	v850-tdep.c \
-	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
+	vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	windows-nat.c windows-tdep.c \
 	xcoffread.c \
 	xstormy16-tdep.c \

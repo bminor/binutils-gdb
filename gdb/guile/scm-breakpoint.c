@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "value.h"
-#include "exceptions.h"
 #include "breakpoint.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"

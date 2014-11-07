@@ -265,7 +265,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
        const char *sym_name	/* Symbol name, as a cannonical string.  */
        /* We copy this string: OK to alter later.  */)
 {
-  register symbolS *symbolP;	/* Symbol we are working with.  */
+  symbolS *symbolP;	/* Symbol we are working with.  */
 
   /* Sun local labels go out of scope whenever a non-local symbol is
      defined.  */
@@ -482,7 +482,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 void
 symbol_table_insert (symbolS *symbolP)
 {
-  register const char *error_string;
+  const char *error_string;
 
   know (symbolP);
   know (S_GET_NAME (symbolP));
@@ -510,7 +510,7 @@ symbol_table_insert (symbolS *symbolP)
 symbolS *
 symbol_find_or_make (const char *name)
 {
-  register symbolS *symbolP;
+  symbolS *symbolP;
 
   symbolP = symbol_find (name);
 
@@ -1662,14 +1662,14 @@ define_dollar_label (long label)
    of ^A.  */
 
 char *				/* Return local label name.  */
-dollar_label_name (register long n,	/* we just saw "n$:" : n a number.  */
-		   register int augend	/* 0 for current instance, 1 for new instance.  */)
+dollar_label_name (long n,	/* we just saw "n$:" : n a number.  */
+		   int augend	/* 0 for current instance, 1 for new instance.  */)
 {
   long i;
   /* Returned to caller, then copied.  Used for created names ("4f").  */
   static char symbol_name_build[24];
-  register char *p;
-  register char *q;
+  char *p;
+  char *q;
   char symbol_name_temporary[20];	/* Build up a number, BACKWARDS.  */
 
   know (n >= 0);
@@ -1835,8 +1835,8 @@ fb_label_name (long n,	/* We just saw "n:", "nf" or "nb" : n a number.  */
   long i;
   /* Returned to caller, then copied.  Used for created names ("4f").  */
   static char symbol_name_build[24];
-  register char *p;
-  register char *q;
+  char *p;
+  char *q;
   char symbol_name_temporary[20];	/* Build up a number, BACKWARDS.  */
 
   know (n >= 0);

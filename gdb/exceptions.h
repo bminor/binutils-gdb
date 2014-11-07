@@ -20,7 +20,6 @@
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
-#include "common-exceptions.h"
 #include "ui-out.h"
 
 /* A pre-defined non-exception.  */

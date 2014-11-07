@@ -29,7 +29,6 @@
 #include "completer.h"
 #include "gdb_obstack.h"
 #include "mi/mi-common.h"
-#include "exceptions.h"
 #include "linespec.h"
 #include "probe.h"
 #include "objfiles.h"

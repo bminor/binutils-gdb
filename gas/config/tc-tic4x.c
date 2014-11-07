@@ -831,7 +831,7 @@ tic4x_globl (int ignore ATTRIBUTE_UNUSED)
 static void 
 tic4x_cons (int bytes)
 {
-  register unsigned int c;
+  unsigned int c;
   do
     {
       SKIP_WHITESPACE ();
@@ -875,7 +875,7 @@ static void
 tic4x_stringer (int append_zero)
 {
   int bytes;
-  register unsigned int c;
+  unsigned int c;
 
   bytes = 0;
   do
@@ -2456,7 +2456,7 @@ md_assemble (char *str)
       if (*s)			/* Null terminate for hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
       strcat (insn->name, "_");
-      strncat (insn->name, str, TIC4X_NAME_MAX - strlen (insn->name));
+      strncat (insn->name, str, TIC4X_NAME_MAX - 1 - strlen (insn->name));
 
       insn->operands[insn->num_operands++].mode = M_PARALLEL;
 

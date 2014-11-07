@@ -57,6 +57,11 @@ def new_objfile_handler (event):
     print ("event type: new_objfile")
     print ("new objfile name: %s" % (event.new_objfile.filename))
 
+def clear_objfiles_handler (event):
+    assert (isinstance (event, gdb.ClearObjFilesEvent))
+    print ("event type: clear_objfiles")
+    print ("progspace: %s" % (event.progspace.filename))
+
 class test_events (gdb.Command):
     """Test events."""
 
@@ -80,6 +85,7 @@ class test_newobj_events (gdb.Command):
 
     def invoke (self, arg, from_tty):
         gdb.events.new_objfile.connect (new_objfile_handler)
+        gdb.events.clear_objfiles.connect (clear_objfiles_handler)
         print ("Object file events registered.")
 
 test_newobj_events ()

@@ -975,7 +975,7 @@ arm_linux_hw_breakpoint_initialize (struct gdbarch *gdbarch,
 				    struct arm_linux_hw_breakpoint *p)
 {
   unsigned mask;
-  CORE_ADDR address = bp_tgt->placed_address;
+  CORE_ADDR address = bp_tgt->placed_address = bp_tgt->reqstd_address;
 
   /* We have to create a mask for the control register which says which bits
      of the word pointed to by address to break on.  */

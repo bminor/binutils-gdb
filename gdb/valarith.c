@@ -28,7 +28,6 @@
 #include "dfp.h"
 #include <math.h>
 #include "infcall.h"
-#include "exceptions.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).  */

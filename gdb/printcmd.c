@@ -39,7 +39,6 @@
 #include "block.h"
 #include "disasm.h"
 #include "dfp.h"
-#include "exceptions.h"
 #include "observer.h"
 #include "solist.h"
 #include "parser-defs.h"

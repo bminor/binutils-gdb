@@ -556,10 +556,13 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   /* FIXME: octets_per_byte.  */
 #define ENSURE_NO_RELOCS(buf)				\
-  REQUIRE (!(cookie->rel < cookie->relend		\
-	     && (cookie->rel->r_offset			\
-		 < (bfd_size_type) ((buf) - ehbuf))	\
-	     && cookie->rel->r_info != 0))
+  while (cookie->rel < cookie->relend			\
+	 && (cookie->rel->r_offset			\
+	     < (bfd_size_type) ((buf) - ehbuf)))	\
+    {							\
+      REQUIRE (cookie->rel->r_info == 0);		\
+      cookie->rel++;					\
+    }
 
   /* FIXME: octets_per_byte.  */
 #define SKIP_RELOCS(buf)				\
@@ -726,6 +729,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  /* For shared libraries, try to get rid of as many RELATIVE relocs
 	     as possible.  */
 	  if (info->shared
+	      && !info->relocatable
 	      && (get_elf_backend_data (abfd)
 		  ->elf_backend_can_make_relative_eh_frame
 		  (abfd, info, sec)))
@@ -763,10 +767,12 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  ENSURE_NO_RELOCS (buf);
 
 	  if (!info->relocatable)
-	    /* Keep info for merging cies.  */
-	    this_inf->u.cie.u.full_cie = cie;
-	  this_inf->u.cie.per_encoding_relative
-	    = (cie->per_encoding & 0x70) == DW_EH_PE_pcrel;
+	    {
+	      /* Keep info for merging cies.  */
+	      this_inf->u.cie.u.full_cie = cie;
+	      this_inf->u.cie.per_encoding_relative
+		= (cie->per_encoding & 0x70) == DW_EH_PE_pcrel;
+	    }
 	}
       else
 	{
@@ -807,6 +813,16 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  start = buf;
 	  length = get_DW_EH_PE_width (cie->fde_encoding, ptr_size);
 	  REQUIRE (skip_bytes (&buf, end, 2 * length));
+
+	  SKIP_RELOCS (buf - length);
+	  if (!GET_RELOC (buf - length)
+	      && read_value (abfd, buf - length, length, FALSE) == 0)
+	    {
+	      (*info->callbacks->minfo)
+		(_("discarding zero address range FDE in %B(%A).\n"),
+		 abfd, sec);
+	      this_inf->u.fde.cie_inf = NULL;
+	    }
 
 	  /* Skip the augmentation size, if present.  */
 	  if (cie->augmentation[0] == 'z')
@@ -959,7 +975,7 @@ _bfd_elf_gc_mark_fdes (struct bfd_link_info *info, asection *sec,
       /* At this stage, all cie_inf fields point to local CIEs, so we
 	 can use the same cookie to refer to them.  */
       cie = fde->u.fde.cie_inf;
-      if (!cie->u.cie.gc_mark)
+      if (cie != NULL && !cie->u.cie.gc_mark)
 	{
 	  cie->u.cie.gc_mark = 1;
 	  if (!mark_entry (info, eh_frame, cie, gc_mark_hook, cookie))
@@ -1061,6 +1077,7 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
       if (per_binds_local
 	  && info->shared
+	  && !info->relocatable
 	  && (cie->per_encoding & 0x70) == DW_EH_PE_absptr
 	  && (get_elf_backend_data (abfd)
 	      ->elf_backend_can_make_relative_eh_frame (abfd, info, sec)))
@@ -1137,7 +1154,7 @@ _bfd_elf_discard_section_eh_frame
       /* There should only be one zero terminator, on the last input
 	 file supplying .eh_frame (crtend.o).  Remove any others.  */
       ent->removed = sec->map_head.s != NULL;
-    else if (!ent->cie)
+    else if (!ent->cie && ent->u.fde.cie_inf != NULL)
       {
 	bfd_boolean keep;
 	if ((sec->flags & SEC_LINKER_CREATED) != 0 && cookie->rels == NULL)
@@ -1170,7 +1187,7 @@ _bfd_elf_discard_section_eh_frame
 		   since it is affected by runtime relocations.  */
 		hdr_info->table = FALSE;
 		(*info->callbacks->einfo)
-		  (_("%P: fde encoding in %B(%A) prevents .eh_frame_hdr"
+		  (_("%P: FDE encoding in %B(%A) prevents .eh_frame_hdr"
 		     " table being created.\n"), abfd, sec);
 	      }
 	    ent->removed = 0;
@@ -1567,6 +1584,8 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	  value = ((ent->new_offset + sec->output_offset + 4)
 		   - (cie->new_offset + cie->u.cie.u.sec->output_offset));
 	  bfd_put_32 (abfd, value, buf);
+	  if (info->relocatable)
+	    continue;
 	  buf += 4;
 	  width = get_DW_EH_PE_width (ent->fde_encoding, ptr_size);
 	  value = read_value (abfd, buf, width,
@@ -1725,6 +1744,10 @@ vma_compare (const void *a, const void *b)
     return 1;
   if (p->initial_loc < q->initial_loc)
     return -1;
+  if (p->range > q->range)
+    return 1;
+  if (p->range < q->range)
+    return -1;
   return 0;
 }
 
@@ -1821,7 +1844,7 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 		  && (hdr_info->array[i].initial_loc
 		      != sec->output_section->vma + val))
 		(*info->callbacks->einfo)
-		  (_("%X%P: .eh_frame_hdr table[%u] pc overflow.\n"), i);
+		  (_("%X%P: .eh_frame_hdr table[%u] PC overflow.\n"), i);
 	      bfd_put_32 (abfd, val, contents + EH_FRAME_HDR_SIZE + i * 8 + 4);
 
 	      val = hdr_info->array[i].fde - sec->output_section->vma;
@@ -1830,7 +1853,7 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 		  && (hdr_info->array[i].fde
 		      != sec->output_section->vma + val))
 		(*info->callbacks->einfo)
-		  (_("%X%P: .eh_frame_hdr table[%u] fde overflow.\n"), i);
+		  (_("%X%P: .eh_frame_hdr table[%u] FDE overflow.\n"), i);
 	      bfd_put_32 (abfd, val, contents + EH_FRAME_HDR_SIZE + i * 8 + 8);
 
 	      if (i != 0

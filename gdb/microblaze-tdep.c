@@ -722,7 +722,13 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                               MICROBLAZE_SHR_REGNUM,
                                               "rshr");
         }
-     }
+
+      if (!valid_p)
+        {
+          tdesc_data_cleanup (tdesc_data);
+          return NULL;
+        }
+    }
 
   /* Allocate space for the new architecture.  */
   tdep = XNEW (struct gdbarch_tdep);

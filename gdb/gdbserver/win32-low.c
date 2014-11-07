@@ -129,7 +129,7 @@ static void
 win32_get_thread_context (win32_thread_info *th)
 {
   memset (&th->context, 0, sizeof (CONTEXT));
-  (*the_low_target.get_thread_context) (th, &current_event);
+  (*the_low_target.get_thread_context) (th);
 #ifdef _WIN32_WCE
   memcpy (&th->base_context, &th->context, sizeof (CONTEXT));
 #endif
@@ -153,23 +153,24 @@ win32_set_thread_context (win32_thread_info *th)
      it between stopping and resuming.  */
   if (memcmp (&th->context, &th->base_context, sizeof (CONTEXT)) != 0)
 #endif
-    (*the_low_target.set_thread_context) (th, &current_event);
+    SetThreadContext (th->h, &th->context);
 }
 
-/* Find a thread record given a thread id.  If GET_CONTEXT is set then
-   also retrieve the context for this thread.  */
-static win32_thread_info *
-thread_rec (ptid_t ptid, int get_context)
+/* Set the thread context of the thread associated with TH.  */
+
+static void
+win32_prepare_to_resume (win32_thread_info *th)
 {
-  struct thread_info *thread;
-  win32_thread_info *th;
+  if (the_low_target.prepare_to_resume != NULL)
+    (*the_low_target.prepare_to_resume) (th);
+}
 
-  thread = (struct thread_info *) find_inferior_id (&all_threads, ptid);
-  if (thread == NULL)
-    return NULL;
+/* See win32-low.h.  */
 
-  th = inferior_target_data (thread);
-  if (get_context && th->context.ContextFlags == 0)
+void
+win32_require_context (win32_thread_info *th)
+{
+  if (th->context.ContextFlags == 0)
     {
       if (!th->suspended)
 	{
@@ -185,7 +186,23 @@ thread_rec (ptid_t ptid, int get_context)
 
       win32_get_thread_context (th);
     }
+}
 
+/* Find a thread record given a thread id.  If GET_CONTEXT is set then
+   also retrieve the context for this thread.  */
+static win32_thread_info *
+thread_rec (ptid_t ptid, int get_context)
+{
+  struct thread_info *thread;
+  win32_thread_info *th;
+
+  thread = (struct thread_info *) find_inferior_id (&all_threads, ptid);
+  if (thread == NULL)
+    return NULL;
+
+  th = inferior_target_data (thread);
+  if (get_context)
+    win32_require_context (th);
   return th;
 }
 
@@ -419,22 +436,26 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
   int thread_id = * (int *) id_ptr;
   win32_thread_info *th = inferior_target_data (thread);
 
-  if ((thread_id == -1 || thread_id == th->tid)
-      && th->suspended)
+  if (thread_id == -1 || thread_id == th->tid)
     {
-      if (th->context.ContextFlags)
-	{
-	  win32_set_thread_context (th);
-	  th->context.ContextFlags = 0;
-	}
+      win32_prepare_to_resume (th);
 
-      if (ResumeThread (th->h) == (DWORD) -1)
+      if (th->suspended)
 	{
-	  DWORD err = GetLastError ();
-	  OUTMSG (("warning: ResumeThread failed in continue_one_thread, "
-		   "(error %d): %s\n", (int) err, strwinerror (err)));
+	  if (th->context.ContextFlags)
+	    {
+	      win32_set_thread_context (th);
+	      th->context.ContextFlags = 0;
+	    }
+
+	  if (ResumeThread (th->h) == (DWORD) -1)
+	    {
+	      DWORD err = GetLastError ();
+	      OUTMSG (("warning: ResumeThread failed in continue_one_thread, "
+		       "(error %d): %s\n", (int) err, strwinerror (err)));
+	    }
+	  th->suspended = 0;
 	}
-      th->suspended = 0;
     }
 
   return 0;
@@ -937,6 +958,8 @@ win32_resume (struct thread_resume *resume_info, size_t n)
   th = thread_rec (ptid, FALSE);
   if (th)
     {
+      win32_prepare_to_resume (th);
+
       if (th->context.ContextFlags)
 	{
 	  /* Move register values from the inferior into the thread

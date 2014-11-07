@@ -37,7 +37,6 @@
 #include "dwarf2-frame.h"
 #include "ax.h"
 #include "dwarf2loc.h"
-#include "exceptions.h"
 #include "dwarf2-frame-tailcall.h"
 
 struct comp_unit;

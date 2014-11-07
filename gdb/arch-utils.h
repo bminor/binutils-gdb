@@ -174,4 +174,8 @@ extern int default_return_in_first_hidden_param_p (struct gdbarch *,
 extern int default_insn_is_call (struct gdbarch *, CORE_ADDR);
 extern int default_insn_is_ret (struct gdbarch *, CORE_ADDR);
 extern int default_insn_is_jump (struct gdbarch *, CORE_ADDR);
+
+/* Do-nothing version of vsyscall_range.  Returns false.  */
+
+extern int default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range);
 #endif

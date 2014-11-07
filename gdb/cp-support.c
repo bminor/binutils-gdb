@@ -29,7 +29,6 @@
 #include "block.h"
 #include "complaints.h"
 #include "gdbtypes.h"
-#include "exceptions.h"
 #include "expression.h"
 #include "value.h"
 #include "cp-abi.h"
@@ -1219,9 +1218,7 @@ make_symbol_overload_list_block (const char *name,
   struct block_iterator iter;
   struct symbol *sym;
 
-  for (sym = block_iter_name_first (block, name, &iter);
-       sym != NULL;
-       sym = block_iter_name_next (name, &iter))
+  ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
     overload_list_add_symbol (sym, name);
 }
 
@@ -1298,7 +1295,7 @@ make_symbol_overload_list_adl_namespace (struct type *type,
     }
 
   /* Check public base type */
-  if (TYPE_CODE (type) == TYPE_CODE_CLASS)
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
       {
 	if (BASETYPE_VIA_PUBLIC (type, i))
@@ -1464,7 +1461,7 @@ cp_lookup_rtti_type (const char *name, struct block *block)
 
   switch (TYPE_CODE (rtti_type))
     {
-    case TYPE_CODE_CLASS:
+    case TYPE_CODE_STRUCT:
       break;
     case TYPE_CODE_NAMESPACE:
       /* chastain/2003-11-26: the symbol tables often contain fake

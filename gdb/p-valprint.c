@@ -37,7 +37,6 @@
 #include "p-lang.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "exceptions.h"
 #include "objfiles.h"
 
 

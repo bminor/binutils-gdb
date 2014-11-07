@@ -4308,38 +4308,9 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 	}
     }
 
-  // Create the hash tables.
-
-  if (strcmp(parameters->options().hash_style(), "sysv") == 0
-      || strcmp(parameters->options().hash_style(), "both") == 0)
-    {
-      unsigned char* phash;
-      unsigned int hashlen;
-      Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
-				    &phash, &hashlen);
-
-      Output_section* hashsec =
-	this->choose_output_section(NULL, ".hash", elfcpp::SHT_HASH,
-				    elfcpp::SHF_ALLOC, false,
-				    ORDER_DYNAMIC_LINKER, false);
-
-      Output_section_data* hashdata = new Output_data_const_buffer(phash,
-								   hashlen,
-								   align,
-								   "** hash");
-      if (hashsec != NULL && hashdata != NULL)
-	hashsec->add_output_section_data(hashdata);
-
-      if (hashsec != NULL)
-	{
-	  if (dynsym != NULL)
-	    hashsec->set_link_section(dynsym);
-	  hashsec->set_entsize(4);
-	}
-
-      if (odyn != NULL)
-	odyn->add_section_address(elfcpp::DT_HASH, hashsec);
-    }
+  // Create the hash tables.  The Gnu-style hash table must be
+  // built first, because it changes the order of the symbols
+  // in the dynamic symbol table.
 
   if (strcmp(parameters->options().hash_style(), "gnu") == 0
       || strcmp(parameters->options().hash_style(), "both") == 0)
@@ -4375,6 +4346,37 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 	  if (odyn != NULL)
 	    odyn->add_section_address(elfcpp::DT_GNU_HASH, hashsec);
 	}
+    }
+
+  if (strcmp(parameters->options().hash_style(), "sysv") == 0
+      || strcmp(parameters->options().hash_style(), "both") == 0)
+    {
+      unsigned char* phash;
+      unsigned int hashlen;
+      Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
+				    &phash, &hashlen);
+
+      Output_section* hashsec =
+	this->choose_output_section(NULL, ".hash", elfcpp::SHT_HASH,
+				    elfcpp::SHF_ALLOC, false,
+				    ORDER_DYNAMIC_LINKER, false);
+
+      Output_section_data* hashdata = new Output_data_const_buffer(phash,
+								   hashlen,
+								   align,
+								   "** hash");
+      if (hashsec != NULL && hashdata != NULL)
+	hashsec->add_output_section_data(hashdata);
+
+      if (hashsec != NULL)
+	{
+	  if (dynsym != NULL)
+	    hashsec->set_link_section(dynsym);
+	  hashsec->set_entsize(4);
+	}
+
+      if (odyn != NULL)
+	odyn->add_section_address(elfcpp::DT_HASH, hashsec);
     }
 }
 
@@ -5532,6 +5534,8 @@ void
 Write_sections_task::locks(Task_locker* tl)
 {
   tl->add(this, this->output_sections_blocker_);
+  if (this->input_sections_blocker_ != NULL)
+    tl->add(this, this->input_sections_blocker_);
   tl->add(this, this->final_blocker_);
 }
 

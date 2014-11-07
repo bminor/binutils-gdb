@@ -1,4 +1,5 @@
-/* THIS FILE IS GENERATED.  Original: x32-avx512-linux.xml */
+/* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
+  Original: x32-avx512-linux.xml */
 
 #include "defs.h"
 #include "osabi.h"

@@ -33,6 +33,7 @@
 #include "ppc-tdep.h"
 #include "ppc64-tdep.h"
 #include "ppcfbsd-tdep.h"
+#include "fbsd-tdep.h"
 #include "solib-svr4.h"
 
 
@@ -128,24 +129,21 @@ ppc_fbsd_fpregset (void)
   return &ppc32_fbsd_fpregset;
 }
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-ppcfbsd_regset_from_core_section (struct gdbarch *gdbarch,
-				  const char *sect_name, size_t sect_size)
+static void
+ppcfbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				      iterate_over_regset_sections_cb *cb,
+				      void *cb_data,
+				      const struct regcache *regcache)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= 148)
-    {
-      if (tdep->wordsize == 4)
-	return &ppc32_fbsd_gregset;
-      else
-	return &ppc64_fbsd_gregset;
-    }
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= 264)
-    return &ppc32_fbsd_fpregset;
-  return NULL;
+
+  if (tdep->wordsize == 4)
+    cb (".reg", 148, &ppc32_fbsd_gregset, NULL, cb_data);
+  else
+    cb (".reg", 296, &ppc64_fbsd_gregset, NULL, cb_data);
+  cb (".reg2", 264, &ppc32_fbsd_fpregset, NULL, cb_data);
 }
 
 /* Default page size.  */
@@ -300,6 +298,9 @@ ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  /* Generic FreeBSD support. */
+  fbsd_init_abi (info, gdbarch);
+
   /* FreeBSD doesn't support the 128-bit `long double' from the psABI.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
@@ -329,8 +330,8 @@ ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
     }
 
-  set_gdbarch_regset_from_core_section
-    (gdbarch, ppcfbsd_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, ppcfbsd_iterate_over_regset_sections);
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);

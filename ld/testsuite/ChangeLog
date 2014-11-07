@@ -1,3 +1,55 @@
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17482
+	* ld-x86-64/tlsie4.dd: Updated.
+
+2014-11-05  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/abiflags-strip10-ph.d: New file.
+	* ld-mips-elf/mips-eld.exp: Run the new test.
+
+2014-10-30  Will Newton  <will.newton@linaro.org>
+
+	* ld-unique/unique.exp: Use a wider glob for matching ARM
+	targets.
+	* ld-unique/unique.s: Use % instead of @ in .type directive.
+	* ld-unique/unique_shared.s: Likewise.
+
+2014-10-24  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp (aarch64elftests): Drive erratum
+	835769 tests.
+	* ld-aarch64/erratum835769.d: New.
+	* ld-aarch64/erratum835769.s: New.
+
+2014-10-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-scripts/sysroot-prefix.exp: Log $ld_sysroot.  Handle sysroot
+	== "/" as a separate sysroot-configuration with separable
+	test-types.
+	(sysroot_prefix_tests): Include all existing sysroot tests in
+	sysroot == "/" tests except exclude those where a --sysroot option
+	is not specified.
+	* lib/ld-lib.exp (check_sysroot_available): Rewrite to use
+	--print-sysroot instead of relying on error code from using
+	--sysroot=...  Also, set $ld_sysroot.
+
+2014-10-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-scripts/sysroot-prefix.exp, ld-scripts/sysroot-prefix-x.s,
+	ld-scripts/sysroot-prefix-y.s: New files.
+	* lib/ld-lib.exp (check_sysroot_available): New proc.
+
+2014-10-04  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/eh1.s: Don't create FDEs with zero address ranges.
+	* ld-elf/eh3.s: Likewise.
+	* ld-elf/eh1.d, * ld-elf/eh2.d, * ld-elf/eh3.d: Adjust.
+	* ld-mips-elf/eh-frame1-n32.d: Warning match update.
+	* ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* ld-mips-elf/eh-frame2-n32.d: Likewise.
+	* ld-mips-elf/eh-frame2-n64.d: Likewise.
+
 2014-09-22  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/lto.exp: Use both --print-file-name and --print-prog-name
@@ -534,7 +586,7 @@
 
 2014-06-09  Ryan Mansfield  <rmansfield@qnx.com>
 
-        * config/default.exp (GASP): Remove.
+	* config/default.exp (GASP): Remove.
 
 2014-06-03  Alan Modra  <amodra@gmail.com>
 

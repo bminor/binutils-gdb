@@ -27,7 +27,6 @@
 #include "value.h"
 #include "target.h"
 #include "gdbthread.h"
-#include "exceptions.h"
 #include "command.h"
 #include "gdbcmd.h"
 #include "regcache.h"
@@ -56,13 +55,19 @@ void _initialize_thread (void);
 struct thread_info *thread_list = NULL;
 static int highest_thread_num;
 
+/* True if any thread is, or may be executing.  We need to track this
+   separately because until we fully sync the thread list, we won't
+   know whether the target is fully stopped, even if we see stop
+   events for all known threads, because any of those threads may have
+   spawned new threads we haven't heard of yet.  */
+static int threads_executing;
+
 static void thread_command (char *tidstr, int from_tty);
 static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
 static void thread_apply_command (char *, int);
 static void restore_current_thread (ptid_t);
-static void prune_threads (void);
 
 /* Data to cleanup thread array.  */
 
@@ -85,24 +90,73 @@ inferior_thread (void)
   return tp;
 }
 
+/* Delete the breakpoint pointed at by BP_P, if there's one.  */
+
+static void
+delete_thread_breakpoint (struct breakpoint **bp_p)
+{
+  if (*bp_p != NULL)
+    {
+      delete_breakpoint (*bp_p);
+      *bp_p = NULL;
+    }
+}
+
 void
 delete_step_resume_breakpoint (struct thread_info *tp)
 {
-  if (tp && tp->control.step_resume_breakpoint)
-    {
-      delete_breakpoint (tp->control.step_resume_breakpoint);
-      tp->control.step_resume_breakpoint = NULL;
-    }
+  if (tp != NULL)
+    delete_thread_breakpoint (&tp->control.step_resume_breakpoint);
 }
 
 void
 delete_exception_resume_breakpoint (struct thread_info *tp)
 {
-  if (tp && tp->control.exception_resume_breakpoint)
+  if (tp != NULL)
+    delete_thread_breakpoint (&tp->control.exception_resume_breakpoint);
+}
+
+/* See gdbthread.h.  */
+
+void
+delete_single_step_breakpoints (struct thread_info *tp)
+{
+  if (tp != NULL)
+    delete_thread_breakpoint (&tp->control.single_step_breakpoints);
+}
+
+/* Delete the breakpoint pointed at by BP_P at the next stop, if
+   there's one.  */
+
+static void
+delete_at_next_stop (struct breakpoint **bp)
+{
+  if (*bp != NULL)
     {
-      delete_breakpoint (tp->control.exception_resume_breakpoint);
-      tp->control.exception_resume_breakpoint = NULL;
+      (*bp)->disposition = disp_del_at_next_stop;
+      *bp = NULL;
     }
+}
+
+/* See gdbthread.h.  */
+
+int
+thread_has_single_step_breakpoints_set (struct thread_info *tp)
+{
+  return tp->control.single_step_breakpoints != NULL;
+}
+
+/* See gdbthread.h.  */
+
+int
+thread_has_single_step_breakpoint_here (struct thread_info *tp,
+					struct address_space *aspace,
+					CORE_ADDR addr)
+{
+  struct breakpoint *ss_bps = tp->control.single_step_breakpoints;
+
+  return (ss_bps != NULL
+	  && breakpoint_has_location_inserted_here (ss_bps, aspace, addr));
 }
 
 static void
@@ -112,18 +166,9 @@ clear_thread_inferior_resources (struct thread_info *tp)
      but not any user-specified thread-specific breakpoints.  We can not
      delete the breakpoint straight-off, because the inferior might not
      be stopped at the moment.  */
-  if (tp->control.step_resume_breakpoint)
-    {
-      tp->control.step_resume_breakpoint->disposition = disp_del_at_next_stop;
-      tp->control.step_resume_breakpoint = NULL;
-    }
-
-  if (tp->control.exception_resume_breakpoint)
-    {
-      tp->control.exception_resume_breakpoint->disposition
-	= disp_del_at_next_stop;
-      tp->control.exception_resume_breakpoint = NULL;
-    }
+  delete_at_next_stop (&tp->control.step_resume_breakpoint);
+  delete_at_next_stop (&tp->control.exception_resume_breakpoint);
+  delete_at_next_stop (&tp->control.single_step_breakpoints);
 
   delete_longjmp_breakpoint_at_next_stop (tp->num);
 
@@ -167,6 +212,7 @@ init_thread_list (void)
     }
 
   thread_list = NULL;
+  threads_executing = 0;
 }
 
 /* Allocate a new thread with target id PTID and add it to the thread
@@ -466,7 +512,13 @@ any_thread_of_process (int pid)
 {
   struct thread_info *tp;
 
-  for (tp = thread_list; tp; tp = tp->next)
+  gdb_assert (pid != 0);
+
+  /* Prefer the current thread.  */
+  if (ptid_get_pid (inferior_ptid) == pid)
+    return inferior_thread ();
+
+  ALL_NON_EXITED_THREADS (tp)
     if (ptid_get_pid (tp->ptid) == pid)
       return tp;
 
@@ -476,18 +528,40 @@ any_thread_of_process (int pid)
 struct thread_info *
 any_live_thread_of_process (int pid)
 {
+  struct thread_info *curr_tp = NULL;
   struct thread_info *tp;
   struct thread_info *tp_executing = NULL;
 
-  for (tp = thread_list; tp; tp = tp->next)
-    if (tp->state != THREAD_EXITED && ptid_get_pid (tp->ptid) == pid)
+  gdb_assert (pid != 0);
+
+  /* Prefer the current thread if it's not executing.  */
+  if (ptid_get_pid (inferior_ptid) == pid)
+    {
+      /* If the current thread is dead, forget it.  If it's not
+	 executing, use it.  Otherwise, still choose it (below), but
+	 only if no other non-executing thread is found.  */
+      curr_tp = inferior_thread ();
+      if (curr_tp->state == THREAD_EXITED)
+	curr_tp = NULL;
+      else if (!curr_tp->executing)
+	return curr_tp;
+    }
+
+  ALL_NON_EXITED_THREADS (tp)
+    if (ptid_get_pid (tp->ptid) == pid)
       {
-	if (tp->executing)
-	  tp_executing = tp;
-	else
+	if (!tp->executing)
 	  return tp;
+
+	tp_executing = tp;
       }
 
+  /* If both the current thread and all live threads are executing,
+     prefer the current thread.  */
+  if (curr_tp != NULL)
+    return curr_tp;
+
+  /* Otherwise, just return an executing thread, if any.  */
   return tp_executing;
 }
 
@@ -547,7 +621,9 @@ thread_alive (struct thread_info *tp)
   return 1;
 }
 
-static void
+/* See gdbthreads.h.  */
+
+void
 prune_threads (void)
 {
   struct thread_info *tp, *next;
@@ -674,6 +750,22 @@ set_executing (ptid_t ptid, int executing)
       gdb_assert (tp);
       tp->executing = executing;
     }
+
+  /* It only takes one running thread to spawn more threads.*/
+  if (executing)
+    threads_executing = 1;
+  /* Only clear the flag if the caller is telling us everything is
+     stopped.  */
+  else if (ptid_equal (minus_one_ptid, ptid))
+    threads_executing = 0;
+}
+
+/* See gdbthread.h.  */
+
+int
+threads_are_executing (void)
+{
+  return threads_executing;
 }
 
 void
@@ -1473,11 +1565,30 @@ gdb_thread_select (struct ui_out *uiout, char *tidstr, char **error_message)
   return GDB_RC_OK;
 }
 
+/* Update the 'threads_executing' global based on the threads we know
+   about right now.  */
+
+static void
+update_threads_executing (void)
+{
+  struct thread_info *tp;
+
+  threads_executing = 0;
+  ALL_NON_EXITED_THREADS (tp)
+    {
+      if (tp->executing)
+	{
+	  threads_executing = 1;
+	  break;
+	}
+    }
+}
+
 void
 update_thread_list (void)
 {
-  prune_threads ();
-  target_find_new_threads ();
+  target_update_thread_list ();
+  update_threads_executing ();
 }
 
 /* Return a new value for the selected thread's id.  Return a value of 0 if

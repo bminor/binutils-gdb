@@ -81,7 +81,8 @@ PYTHONDIR = os.path.dirname(os.path.dirname(__file__))
 
 packages = [
     'function',
-    'command'
+    'command',
+    'printer'
 ]
 
 # pkgutil.iter_modules is not available prior to Python 2.6.  Instead,

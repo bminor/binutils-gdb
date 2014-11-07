@@ -119,6 +119,8 @@ extern void amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 extern void amd64_collect_xsave (const struct regcache *regcache,
 				 int regnum, void *xsave, int gcore);
 
+/* Floating-point register set. */
+extern const struct regset amd64_fpregset;
 
 /* Variables exported from amd64-linux-tdep.c.  */
 extern int amd64_linux_gregset_reg_offset[];

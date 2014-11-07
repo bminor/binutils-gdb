@@ -344,7 +344,8 @@ clean:
 	rm -f reg-tilegx.c reg-tilegx32.c
 	rm -f arm-with-iwmmxt.c
 	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
-	rm -f mips-linux.c mips64-linux.c
+	rm -f mips-linux.c mips-dsp-linux.c
+	rm -f mips64-linux.c mips64-dsp-linux.c
 	rm -f nios2-linux.c
 	rm -f powerpc-32.c powerpc-32l.c powerpc-64l.c powerpc-e500l.c
 	rm -f powerpc-altivec32l.c powerpc-cell32l.c powerpc-vsx32l.c

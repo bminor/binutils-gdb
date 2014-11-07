@@ -34,7 +34,6 @@
 #include "dummy-frame.h"
 #include "ada-lang.h"
 #include "gdbthread.h"
-#include "exceptions.h"
 #include "event-top.h"
 
 /* If we can't find a function's name from its address,

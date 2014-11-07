@@ -425,12 +425,14 @@ int main()
   Fun17(foo17);
   Fun18(foo18);
 
-  /* An infinite loop that first clears all the variables and then
+  /* An (almost-)infinite loop that first clears all the variables and then
      calls each function.  This "hack" is to make testing random
      functions easier - "advance funN" is guaranteed to have always
-     been preceded by a global variable clearing zed call.  */
+     been preceded by a global variable clearing zed call.
+     We don't let this run forever in case gdb crashes while testing,
+     we don't want to be left eating all cpu on the user's system.  */
 
-  while (1)
+  for (i = 0; i < 1000000; ++i)
     {
       zed ();
       L1  = fun1();	

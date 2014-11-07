@@ -3958,7 +3958,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, asection *sec ATTRIBUTE_UNUSED,
   char *buffer_address = fragP->fr_literal;
 
   /* Address in object code of the displacement.  */
-  register int object_address = fragP->fr_fix + fragP->fr_address;
+  int object_address = fragP->fr_fix + fragP->fr_address;
 
   buffer_address += fragP->fr_fix;
 

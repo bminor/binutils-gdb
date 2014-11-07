@@ -1,3 +1,89 @@
+2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-dis.c (nios2_find_opcode_hash): Add mach parameter.
+	(nios2_disassemble): Adjust call to nios2_find_opcode_hash.
+
+2014-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finnish translation.
+
+2014-10-31  Andrew Pinski  <apinski@cavium.com>
+            Naveen H.S  <Naveen.Hurugalawadi@caviumnetworks.com>
+
+	* mips-dis.c (mips_arch_choices): Add octeon3.
+	* mips-opc.c (IOCT): Include INSN_OCTEON3.
+	(IOCT2): Likewise.
+	(IOCT3): New define.
+	(IVIRT): New define.
+	(mips_builtin_opcodes): Add dmfgc0, dmtgc0, hypcall, mfgc0, mtgc0,
+	tlbinv, tlbinvf, tlbgr, tlbgwi, tlbginv, tlbginvf, tlbgwr, tlbgp, tlti
+	IVIRT instructions.
+	Extend mtm0, mtm1, mtm2, mtp0, mtp1, mtp2 instructions to take another
+	operand for IOCT3.
+
+2014-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+
+2014-10-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-opc.c (nios2_builtin_regs): Add regtype field initializers.
+	(nios2_builtin_opcodes): Rename to nios2_r1_opcodes.  Use new
+	MATCH_R1_<insn> and MASK_R1_<insn> macros in initializers.  Add
+	size and format initializers.  Merge 'b' arguments into 'j'.
+	(NIOS2_NUM_OPCODES): Adjust definition.
+	(bfd_nios2_num_builtin_opcodes): Rename to nios2_num_r1_opcodes.
+	(nios2_opcodes): Adjust.
+	(bfd_nios2_num_opcodes): Rename to nios2_num_opcodes.
+	* nios2-dis.c (INSNLEN): Update comment.
+	(nios2_hash_init, nios2_hash): Delete.
+	(OPCODE_HASH_SIZE): New.
+	(nios2_r1_extract_opcode): New.
+	(nios2_disassembler_state): New.
+	(nios2_r1_disassembler_state): New.
+	(nios2_init_opcode_hash): Add state parameter.  Adjust to use it.
+	(nios2_find_opcode_hash): Use state object.
+	(bad_opcode): New.
+	(nios2_print_insn_arg): Add op parameter.  Use it to access
+	format.  Remove 'b' case.
+	(nios2_disassemble): Remove special case for nop.  Remove
+	hard-coded instruction size.
+
+2014-10-21  Jan Beulich  <jbeulich@suse.com>
+
+	* ppc-opc.c (powerpc_opcodes): Enable msgclr and msgsnd on Power8.
+
+2014-10-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-opc.c (sparc-opcodes): Fix several misplaced hwcap
+	entries.
+	Annotate several instructions with the HWCAP2_VIS3B hwcap.
+
+2014-10-15  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2014-10-09  Jose E. Marchesi  &lt;jose.marchesi@oracle.com&gt;
+
+	* sparc-opc.c (sparc-opcodes): Remove instructions `chkpt',
+	`commit', `random', `wr r,r,%cps', `wr r,i,%cps' and `rd %cps,r'.
+	Annotate table with HWCAP2 bits.
+	Add instructions xmontmul, xmontsqr, xmpmul.
+	(sparc-opcodes): Add the `mwait',  `wr r,r,%mwait', `wr
+	r,i,%mwait' and `rd %mwait,r' instructions.
+	Add rd/wr instructions for accessing the %mcdper ancillary state
+	register.
+	(sparc-opcodes): Add sparc5/vis4.0 instructions:
+	subxc, subxccc, fpadd8, fpadds8, fpaddus8, fpaddus16, fpcmple8,
+	fpcmpgt8, fpcmpule16, fpcmpugt16, fpcmpule32, fpcmpugt32, fpmax8,
+	fpmax16, fpmax32, fpmaxu8, fpmaxu16, fpmaxu32, fpmin8, fpmin16,
+	fpmin32, fpminu8, fpminu16, fpminu32, fpsub8, fpsubs8, fpsubus8,
+	fpsubus16, and faligndatai.
+	* sparc-dis.c (v9a_asr_reg_names): Add the %mwait (%asr28)
+	ancillary state register to the table.
+	(print_insn_sparc): Handle the %mcdper ancillary state register.
+	(print_insn_sparc): Handle new operand type '}'.
+
 2014-09-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (MOD_0F20): Removed.

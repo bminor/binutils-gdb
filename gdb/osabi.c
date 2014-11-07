@@ -50,7 +50,6 @@ static const char * const gdb_osabi_names[] =
   "SVR4",
   "GNU/Hurd",
   "Solaris",
-  "OSF/1",
   "GNU/Linux",
   "FreeBSD a.out",
   "FreeBSD ELF",

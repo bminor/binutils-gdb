@@ -26,7 +26,6 @@
 #include "command.h"
 #include "observer.h"
 #include "objfiles.h"
-#include "exceptions.h"
 #include "cli/cli-script.h"
 #include "gdbcmd.h"
 #include "cli/cli-cmds.h"

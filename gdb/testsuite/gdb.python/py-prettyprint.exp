@@ -108,8 +108,6 @@ proc run_lang_tests {exefile lang} {
 	"print nstype on one line"
 
     gdb_continue_to_end
-
-    remote_file host delete ${remote_python_file}
 }
 
 run_lang_tests "${binfile}" "c"
@@ -155,5 +153,3 @@ gdb_test_no_output "python enable_lookup_function ()"
 
 gdb_test "print ss" " = a=< a=<1> b=<$hex>> b=< a=<2> b=<$hex>>" \
     "print ss enabled #2"
-
-remote_file host delete ${remote_python_file}

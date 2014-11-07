@@ -1444,12 +1444,12 @@ DESCRIPTION
 .
 .#define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
 .       BFD_SEND (abfd, _bfd_find_nearest_line, \
-.                 (abfd, sec, syms, off, file, func, line))
+.                 (abfd, syms, sec, off, file, func, line, NULL))
 .
 .#define bfd_find_nearest_line_discriminator(abfd, sec, syms, off, file, func, \
 .                                            line, disc) \
-.       BFD_SEND (abfd, _bfd_find_nearest_line_discriminator, \
-.                 (abfd, sec, syms, off, file, func, line, disc))
+.       BFD_SEND (abfd, _bfd_find_nearest_line, \
+.                 (abfd, syms, sec, off, file, func, line, disc))
 .
 .#define bfd_find_line(abfd, syms, sym, file, line) \
 .       BFD_SEND (abfd, _bfd_find_line, \

@@ -410,8 +410,8 @@ exp	:	type '(' exp ')' %prec UNARY
 			    {
 			      /* Allow automatic dereference of classes.  */
 			      if ((TYPE_CODE (current_type) == TYPE_CODE_PTR)
-				  && (TYPE_CODE (TYPE_TARGET_TYPE (current_type)) == TYPE_CODE_CLASS)
-				  && (TYPE_CODE ($1) == TYPE_CODE_CLASS))
+				  && (TYPE_CODE (TYPE_TARGET_TYPE (current_type)) == TYPE_CODE_STRUCT)
+				  && (TYPE_CODE ($1) == TYPE_CODE_STRUCT))
 				write_exp_elt_opcode (pstate, UNOP_IND);
 			    }
 			  write_exp_elt_opcode (pstate, UNOP_CAST);

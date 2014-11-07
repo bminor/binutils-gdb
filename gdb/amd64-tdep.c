@@ -37,7 +37,6 @@
 #include "regset.h"
 #include "symfile.h"
 #include "disasm.h"
-#include "exceptions.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
 
@@ -2868,53 +2867,10 @@ amd64_collect_fpregset (const struct regset *regset,
   amd64_collect_fxsave (regcache, regnum, fpregs);
 }
 
-/* Similar to amd64_supply_fpregset, but use XSAVE extended state.  */
-
-static void
-amd64_supply_xstateregset (const struct regset *regset,
-			   struct regcache *regcache, int regnum,
-			   const void *xstateregs, size_t len)
-{
-  amd64_supply_xsave (regcache, regnum, xstateregs);
-}
-
-/* Similar to amd64_collect_fpregset, but use XSAVE extended state.  */
-
-static void
-amd64_collect_xstateregset (const struct regset *regset,
-			    const struct regcache *regcache,
-			    int regnum, void *xstateregs, size_t len)
-{
-  amd64_collect_xsave (regcache, regnum, xstateregs, 1);
-}
-
-static const struct regset amd64_fpregset =
+const struct regset amd64_fpregset =
   {
     NULL, amd64_supply_fpregset, amd64_collect_fpregset
   };
-
-static const struct regset amd64_xstateregset =
-  {
-    NULL, amd64_supply_xstateregset, amd64_collect_xstateregset
-  };
-
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
-
-static const struct regset *
-amd64_regset_from_core_section (struct gdbarch *gdbarch,
-				const char *sect_name, size_t sect_size)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
-    return &amd64_fpregset;
-
-  if (strcmp (sect_name, ".reg-xstate") == 0)
-    return &amd64_xstateregset;
-
-  return i386_regset_from_core_section (gdbarch, sect_name, sect_size);
-}
 
 
 /* Figure out where the longjmp will land.  Slurp the jmp_buf out of
@@ -2973,6 +2929,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* AMD64 generally uses `fxsave' instead of `fsave' for saving its
      floating-point registers.  */
   tdep->sizeof_fpregset = I387_SIZEOF_FXSAVE;
+  tdep->fpregset = &amd64_fpregset;
 
   if (! tdesc_has_registers (tdesc))
     tdesc = tdesc_amd64;
@@ -3085,11 +3042,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_unwinder (gdbarch, &amd64_sigtramp_frame_unwind);
   frame_unwind_append_unwinder (gdbarch, &amd64_frame_unwind);
   frame_base_set_default (gdbarch, &amd64_frame_base);
-
-  /* If we have a register mapping, enable the generic core file support.  */
-  if (tdep->gregset_reg_offset)
-    set_gdbarch_regset_from_core_section (gdbarch,
-					  amd64_regset_from_core_section);
 
   set_gdbarch_get_longjmp_target (gdbarch, amd64_get_longjmp_target);
 

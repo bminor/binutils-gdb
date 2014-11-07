@@ -239,6 +239,7 @@ main (int argc, char **argv)
     case edg_demangling:
     case gnat_demangling:
     case gnu_v3_demangling:
+    case dlang_demangling:
     case auto_demangling:
       valid_symbols = standard_symbol_characters ();
       break;

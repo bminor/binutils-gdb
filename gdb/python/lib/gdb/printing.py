@@ -263,3 +263,17 @@ class FlagEnumerationPrinter(PrettyPrinter):
             return _EnumInstance(self.enumerators, val)
         else:
             return None
+
+
+# Builtin pretty-printers.
+# The set is defined as empty, and files in printing/*.py add their printers
+# to this with add_builtin_pretty_printer.
+
+_builtin_pretty_printers = RegexpCollectionPrettyPrinter("builtin")
+
+register_pretty_printer(None, _builtin_pretty_printers)
+
+# Add a builtin pretty-printer.
+
+def add_builtin_pretty_printer(name, regexp, printer):
+    _builtin_pretty_printers.add_printer(name, regexp, printer)

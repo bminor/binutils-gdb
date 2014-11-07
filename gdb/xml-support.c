@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "gdbcmd.h"
-#include "exceptions.h"
 #include "xml-support.h"
 #include "filestuff.h"
 #include "safe-ctype.h"

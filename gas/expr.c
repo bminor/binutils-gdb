@@ -124,7 +124,7 @@ make_expr_symbol (expressionS *expressionP)
 int
 expr_symbol_where (symbolS *sym, char **pfile, unsigned int *pline)
 {
-  register struct expr_symbol_line *l;
+  struct expr_symbol_line *l;
 
   for (l = expr_symbol_lines; l != NULL; l = l->next)
     {
@@ -1021,7 +1021,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	    /* input_line_pointer -> char after operand.  */
 	    if (c == '-')
 	      {
-		expressionP->X_add_number = - expressionP->X_add_number;
+		expressionP->X_add_number
+		  = - (addressT) expressionP->X_add_number;
 		/* Notice: '-' may overflow: no warning is given.
 		   This is compatible with other people's
 		   assemblers.  Sigh.  */

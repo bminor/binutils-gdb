@@ -15,6 +15,8 @@
 
 standard_testfile
 
+set has_argv0 [gdb_has_argv0]
+
 if { [build_executable ${testfile}.exp ${testfile} ${srcfile}] == -1 } {
     return -1
 }
@@ -39,7 +41,11 @@ if ![runto_main] {
 gdb_test_no_output "set print repeats 10000"
 gdb_test_no_output "set print elements 10000"
 
-gdb_test {print argv[0]} "/$filelink\"" $test
+if { $has_argv0 } {
+    gdb_test {print argv[0]} "/$filelink\"" $test
+} else {
+    unsupported $test
+}
 
 # For a link named /PATH/TO/DIR/LINK, we want to check the output
 # against "/DIR/LINK", but computed in a way that doesn't make
@@ -73,9 +79,14 @@ if ![runto_main] {
 gdb_test_no_output "set print repeats 10000"
 gdb_test_no_output "set print elements 10000"
 
-# gdbserver does not have this issue.
-if ![is_remote target] {
-    setup_kfail "*-*-*" gdb/15934
+if { $has_argv0 } {
+    # gdbserver does not have this issue.
+    if ![is_remote target] {
+	setup_kfail "*-*-*" gdb/15934
+    }
+    gdb_test {print argv[0]} "/$dirlink/$filelink\"" $test
+} else {
+    unsupported $test
 }
-gdb_test {print argv[0]} "/$dirlink/$filelink\"" $test
+
 gdb_test "info inferiors" "/$lastdir/$filelink *" "$test for info inferiors"

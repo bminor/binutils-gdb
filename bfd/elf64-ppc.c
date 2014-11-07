@@ -4805,22 +4805,35 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 			   const char **name,
 			   flagword *flags ATTRIBUTE_UNUSED,
 			   asection **sec,
-			   bfd_vma *value ATTRIBUTE_UNUSED)
+			   bfd_vma *value)
 {
-  if ((ibfd->flags & DYNAMIC) == 0
-      && ELF_ST_BIND (isym->st_info) == STB_GNU_UNIQUE)
+  if ((ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
+       || ELF_ST_BIND (isym->st_info) == STB_GNU_UNIQUE)
+      && (ibfd->flags & DYNAMIC) == 0
+      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
-  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+  if (*sec != NULL
+      && strcmp ((*sec)->name, ".opd") == 0)
     {
-      if ((ibfd->flags & DYNAMIC) == 0)
-	elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
+      asection *code_sec;
+
+      if (!(ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
+	    || ELF_ST_TYPE (isym->st_info) == STT_FUNC))
+	isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
+
+      /* If the symbol is a function defined in .opd, and the function
+	 code is in a discarded group, let it appear to be undefined.  */
+      if (!info->relocatable
+	  && (*sec)->reloc_count != 0
+	  && opd_entry_value (*sec, *value, &code_sec, NULL,
+			      FALSE) != (bfd_vma) -1
+	  && discarded_section (code_sec))
+	{
+	  *sec = bfd_und_section_ptr;
+	  isym->st_shndx = SHN_UNDEF;
+	}
     }
-  else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC)
-    ;
-  else if (*sec != NULL
-	   && strcmp ((*sec)->name, ".opd") == 0)
-    isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
 
   if ((STO_PPC64_LOCAL_MASK & isym->st_other) != 0)
     {
@@ -4962,6 +4975,45 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
   struct ppc_link_hash_entry **p, *eh;
+  asection *opd = bfd_get_section_by_name (ibfd, ".opd");
+
+  if (opd != NULL && opd->size != 0)
+    {
+      if (abiversion (ibfd) == 0)
+	set_abiversion (ibfd, 1);
+      else if (abiversion (ibfd) == 2)
+	{
+	  info->callbacks->einfo (_("%P: %B .opd not allowed in ABI"
+				    " version %d\n"),
+				  ibfd, abiversion (ibfd));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
+      if ((ibfd->flags & DYNAMIC) == 0
+	  && (opd->flags & SEC_RELOC) != 0
+	  && opd->reloc_count != 0
+	  && !bfd_is_abs_section (opd->output_section))
+	{
+	  /* Garbage collection needs some extra help with .opd sections.
+	     We don't want to necessarily keep everything referenced by
+	     relocs in .opd, as that would keep all functions.  Instead,
+	     if we reference an .opd symbol (a function descriptor), we
+	     want to keep the function code symbol's section.  This is
+	     easy for global symbols, but for local syms we need to keep
+	     information about the associated function section.  */
+	  bfd_size_type amt;
+	  asection **opd_sym_map;
+
+	  amt = opd->size * sizeof (*opd_sym_map) / 8;
+	  opd_sym_map = bfd_zalloc (ibfd, amt);
+	  if (opd_sym_map == NULL)
+	    return FALSE;
+	  ppc64_elf_section_data (opd)->u.opd.func_sec = opd_sym_map;
+	  BFD_ASSERT (ppc64_elf_section_data (opd)->sec_type == sec_normal);
+	  ppc64_elf_section_data (opd)->sec_type = sec_opd;
+	}
+    }
 
   if (!is_ppc64_elf (info->output_bfd))
     return TRUE;
@@ -4969,72 +5021,29 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
-  if (is_ppc64_elf (ibfd))
+  /* For input files without an explicit abiversion in e_flags
+     we should have flagged any with symbol st_other bits set
+     as ELFv1 and above flagged those with .opd as ELFv2.
+     Set the output abiversion if not yet set, and for any input
+     still ambiguous, take its abiversion from the output.
+     Differences in ABI are reported later.  */
+  if (abiversion (info->output_bfd) == 0)
+    set_abiversion (info->output_bfd, abiversion (ibfd));
+  else if (abiversion (ibfd) == 0)
+    set_abiversion (ibfd, abiversion (info->output_bfd));
+
+  p = &htab->dot_syms;
+  while ((eh = *p) != NULL)
     {
-      asection *opd = bfd_get_section_by_name (ibfd, ".opd");
-
-      if (opd != NULL && opd->size != 0)
-	{
-	  if (abiversion (ibfd) == 0)
-	    set_abiversion (ibfd, 1);
-	  else if (abiversion (ibfd) == 2)
-	    {
-	      info->callbacks->einfo (_("%P: %B .opd not allowed in ABI"
-					" version %d\n"),
-				      ibfd, abiversion (ibfd));
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
-
-	  if ((ibfd->flags & DYNAMIC) == 0
-	      && (opd->flags & SEC_RELOC) != 0
-	      && opd->reloc_count != 0
-	      && !bfd_is_abs_section (opd->output_section))
-	    {
-	      /* Garbage collection needs some extra help with .opd sections.
-		 We don't want to necessarily keep everything referenced by
-		 relocs in .opd, as that would keep all functions.  Instead,
-		 if we reference an .opd symbol (a function descriptor), we
-		 want to keep the function code symbol's section.  This is
-		 easy for global symbols, but for local syms we need to keep
-		 information about the associated function section.  */
-	      bfd_size_type amt;
-	      asection **opd_sym_map;
-
-	      amt = opd->size * sizeof (*opd_sym_map) / 8;
-	      opd_sym_map = bfd_zalloc (ibfd, amt);
-	      if (opd_sym_map == NULL)
-		return FALSE;
-	      ppc64_elf_section_data (opd)->u.opd.func_sec = opd_sym_map;
-	      BFD_ASSERT (ppc64_elf_section_data (opd)->sec_type == sec_normal);
-	      ppc64_elf_section_data (opd)->sec_type = sec_opd;
-	    }
-	}
-
-      /* For input files without an explicit abiversion in e_flags
-	 we should have flagged any with symbol st_other bits set
-	 as ELFv1 and above flagged those with .opd as ELFv2.
-	 Set the output abiversion if not yet set, and for any input
-	 still ambiguous, take its abiversion from the output.
-	 Differences in ABI are reported later.  */
-      if (abiversion (info->output_bfd) == 0)
-	set_abiversion (info->output_bfd, abiversion (ibfd));
-      else if (abiversion (ibfd) == 0)
-	set_abiversion (ibfd, abiversion (info->output_bfd));
-
-      p = &htab->dot_syms;
-      while ((eh = *p) != NULL)
-	{
-	  *p = NULL;
-	  if (&eh->elf == htab->elf.hgot)
-	    ;
-	  else if (htab->elf.hgot == NULL
-		   && strcmp (eh->elf.root.root.string, ".TOC.") == 0)
-	    htab->elf.hgot = &eh->elf;
-	  else if (!add_symbol_adjust (eh, info))
-	    return FALSE;
-	  p = &eh->u.next_dot_sym;
-	}
+      *p = NULL;
+      if (&eh->elf == htab->elf.hgot)
+	;
+      else if (htab->elf.hgot == NULL
+	       && strcmp (eh->elf.root.root.string, ".TOC.") == 0)
+	htab->elf.hgot = &eh->elf;
+      else if (!add_symbol_adjust (eh, info))
+	return FALSE;
+      p = &eh->u.next_dot_sym;
     }
 
   /* Clear the list for non-ppc64 input files.  */
@@ -5904,7 +5913,8 @@ ppc64_elf_print_private_bfd_data (bfd *abfd, void *ptr)
 }
 
 /* OFFSET in OPD_SEC specifies a function descriptor.  Return the address
-   of the code entry point, and its section.  */
+   of the code entry point, and its section, which must be in the same
+   object as OPD_SEC.  Returns (bfd_vma) -1 on error.  */
 
 static bfd_vma
 opd_entry_value (asection *opd_sec,
@@ -5987,32 +5997,10 @@ opd_entry_value (asection *opd_sec,
 	      && ELF64_R_TYPE ((look + 1)->r_info) == R_PPC64_TOC)
 	    {
 	      unsigned long symndx = ELF64_R_SYM (look->r_info);
-	      asection *sec;
+	      asection *sec = NULL;
 
-	      if (symndx < symtab_hdr->sh_info
-		  || elf_sym_hashes (opd_bfd) == NULL)
-		{
-		  Elf_Internal_Sym *sym;
-
-		  sym = (Elf_Internal_Sym *) symtab_hdr->contents;
-		  if (sym == NULL)
-		    {
-		      size_t symcnt = symtab_hdr->sh_info;
-		      if (elf_sym_hashes (opd_bfd) == NULL)
-			symcnt = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
-		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr, symcnt,
-						  0, NULL, NULL, NULL);
-		      if (sym == NULL)
-			break;
-		      symtab_hdr->contents = (bfd_byte *) sym;
-		    }
-
-		  sym += symndx;
-		  val = sym->st_value;
-		  sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
-		  BFD_ASSERT ((sec->flags & SEC_MERGE) == 0);
-		}
-	      else
+	      if (symndx >= symtab_hdr->sh_info
+		  && elf_sym_hashes (opd_bfd) != NULL)
 		{
 		  struct elf_link_hash_entry **sym_hashes;
 		  struct elf_link_hash_entry *rh;
@@ -6026,24 +6014,48 @@ opd_entry_value (asection *opd_sec,
 				  || rh->root.type == bfd_link_hash_defweak);
 		      val = rh->root.u.def.value;
 		      sec = rh->root.u.def.section;
+		      if (sec->owner != opd_bfd)
+			{
+			  sec = NULL;
+			  val = (bfd_vma) -1;
+			}
+		    }
+		}
+
+	      if (sec == NULL)
+		{
+		  Elf_Internal_Sym *sym;
+
+		  if (symndx < symtab_hdr->sh_info)
+		    {
+		      sym = (Elf_Internal_Sym *) symtab_hdr->contents;
+		      if (sym == NULL)
+			{
+			  size_t symcnt = symtab_hdr->sh_info;
+			  sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr,
+						      symcnt, 0,
+						      NULL, NULL, NULL);
+			  if (sym == NULL)
+			    break;
+			  symtab_hdr->contents = (bfd_byte *) sym;
+			}
+		      sym += symndx;
 		    }
 		  else
 		    {
-		      /* Handle the odd case where we can be called
-			 during bfd_elf_link_add_symbols before the
-			 symbol hashes have been fully populated.  */
-		      Elf_Internal_Sym *sym;
-
-		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr, 1,
-						  symndx, NULL, NULL, NULL);
+		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr,
+						  1, symndx,
+						  NULL, NULL, NULL);
 		      if (sym == NULL)
 			break;
-
-		      val = sym->st_value;
-		      sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
-		      free (sym);
 		    }
+		  sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
+		  if (sec == NULL)
+		    break;
+		  BFD_ASSERT ((sec->flags & SEC_MERGE) == 0);
+		  val = sym->st_value;
 		}
+
 	      val += look->r_addend;
 	      if (code_off != NULL)
 		*code_off = val;
@@ -6054,7 +6066,7 @@ opd_entry_value (asection *opd_sec,
 		  else
 		    *code_sec = sec;
 		}
-	      if (sec != NULL && sec->output_section != NULL)
+	      if (sec->output_section != NULL)
 		val += sec->output_section->vma + sec->output_offset;
 	    }
 	  break;
@@ -8331,7 +8343,10 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		      else
 			value = sym->st_value;
 		      value += rel->r_addend;
-		      BFD_ASSERT (value < toc->size && value % 8 == 0);
+		      if (value % 8 != 0)
+			continue;
+		      BFD_ASSERT (value < toc->size
+				  && toc->output_offset % 8 == 0);
 		      toc_ref_index = (value + toc->output_offset) / 8;
 		      if (r_type == R_PPC64_TLS
 			  || r_type == R_PPC64_TLSGD
@@ -11952,11 +11967,17 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  /* libanl */
 	  "getaddrinfo_a",
 	  /* libgomp */
+	  "GOMP_parallel",
 	  "GOMP_parallel_start",
+	  "GOMP_parallel_loop_static",
 	  "GOMP_parallel_loop_static_start",
+	  "GOMP_parallel_loop_dynamic",
 	  "GOMP_parallel_loop_dynamic_start",
+	  "GOMP_parallel_loop_guided",
 	  "GOMP_parallel_loop_guided_start",
+	  "GOMP_parallel_loop_runtime",
 	  "GOMP_parallel_loop_runtime_start",
+	  "GOMP_parallel_sections",
 	  "GOMP_parallel_sections_start",
 	};
       unsigned i;

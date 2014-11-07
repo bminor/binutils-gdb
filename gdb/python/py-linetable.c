@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "python-internal.h"
-#include "exceptions.h"
 
 typedef struct {
   PyObject_HEAD

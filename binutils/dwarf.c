@@ -259,7 +259,7 @@ read_leb128 (unsigned char *data,
     *length_return = num_read;
 
   if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
-    result |= -1L << shift;
+    result |= (dwarf_vma) -1 << shift;
 
   return result;
 }
@@ -2661,13 +2661,9 @@ read_debug_line_header (struct dwarf_section * section,
     linfo->li_max_ops_per_insn = 1;
 
   SAFE_BYTE_GET_AND_INC (linfo->li_default_is_stmt, hdrptr, 1, end);
-  SAFE_BYTE_GET_AND_INC (linfo->li_line_base, hdrptr, 1, end);
+  SAFE_SIGNED_BYTE_GET_AND_INC (linfo->li_line_base, hdrptr, 1, end);
   SAFE_BYTE_GET_AND_INC (linfo->li_line_range, hdrptr, 1, end);
   SAFE_BYTE_GET_AND_INC (linfo->li_opcode_base, hdrptr, 1, end);
-
-      /* Sign extend the line base field.  */
-  linfo->li_line_base <<= 24;
-  linfo->li_line_base >>= 24;
 
   * end_of_sequence = data + linfo->li_length + initial_length_size;
   return hdrptr;

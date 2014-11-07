@@ -31,7 +31,6 @@
 #include "language.h"
 #include "cp-abi.h"
 #include "typeprint.h"
-#include "exceptions.h"
 #include "valprint.h"
 #include <ctype.h>
 #include "cli/cli-utils.h"
@@ -462,9 +461,9 @@ whatis_exp (char *exp, int show)
     {
       if (((TYPE_CODE (type) == TYPE_CODE_PTR)
 	   || (TYPE_CODE (type) == TYPE_CODE_REF))
-	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
         real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
-      else if (TYPE_CODE (type) == TYPE_CODE_CLASS)
+      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	real_type = value_rtti_type (val, &full, &top, &using_enc);
     }
 

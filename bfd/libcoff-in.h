@@ -35,6 +35,7 @@
 #define obj_coff_external_syms(bfd)   (coff_data (bfd)->external_syms)
 #define obj_coff_keep_syms(bfd)	      (coff_data (bfd)->keep_syms)
 #define obj_coff_strings(bfd)	      (coff_data (bfd)->strings)
+#define obj_coff_strings_len(bfd)     (coff_data (bfd)->strings_len)
 #define obj_coff_keep_strings(bfd)    (coff_data (bfd)->keep_strings)
 #define obj_coff_sym_hashes(bfd)      (coff_data (bfd)->sym_hashes)
 #define obj_coff_strings_written(bfd) (coff_data (bfd)->strings_written)
@@ -75,6 +76,8 @@ typedef struct coff_tdata
   /* The string table.  May be NULL.  Read by
      _bfd_coff_read_string_table.  */
   char *strings;
+  /* The length of the strings table.  For error checking.  */
+  bfd_size_type strings_len;
   /* If this is TRUE, the strings may not be freed.  */
   bfd_boolean keep_strings;
   /* If this is TRUE, the strings have been written out already.  */
@@ -355,15 +358,13 @@ extern bfd_boolean _bfd_coff_is_local_label_name
 extern asymbol *coff_bfd_make_debug_symbol
   (bfd *, void *, unsigned long);
 extern bfd_boolean coff_find_nearest_line
-  (bfd *, asection *, asymbol **, bfd_vma, const char **,
-   const char **, unsigned int *);
-extern bfd_boolean coff_find_nearest_line_discriminator
-  (bfd *, asection *, asymbol **, bfd_vma, const char **,
-   const char **, unsigned int *, unsigned int *);
+  (bfd *, asymbol **, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *);
+#define coff_find_line _bfd_nosymbols_find_line
 struct dwarf_debug_section;
 extern bfd_boolean coff_find_nearest_line_with_names
-  (bfd *, const struct dwarf_debug_section *, asection *, asymbol **,
-   bfd_vma, const char **, const char **, unsigned int *);
+  (bfd *, asymbol **, asection *, bfd_vma, const char **, const char **,
+   unsigned int *, const struct dwarf_debug_section *);
 extern bfd_boolean coff_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *);
 extern int coff_sizeof_headers

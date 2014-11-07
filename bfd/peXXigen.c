@@ -504,6 +504,17 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   {
     int idx;
 
+    /* PR 17512: Corrupt PE binaries can cause seg-faults.  */
+    if (a->NumberOfRvaAndSizes > 16)
+      {
+	(*_bfd_error_handler)
+	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
+	   abfd, a->NumberOfRvaAndSizes);
+	/* Paranoia: If the number is corrupt, then assume that the
+	   actual entries themselves might be corrupt as well.  */
+	a->NumberOfRvaAndSizes = 0;
+      }
+
     for (idx = 0; idx < a->NumberOfRvaAndSizes; idx++)
       {
         /* If data directory is empty, rva also should be 0.  */
@@ -1455,6 +1466,9 @@ pe_print_idata (bfd * abfd, void * vfile)
 		fprintf (file, "\t%lx%08lx\t %4lx%08lx  <none>",
 			 member_high, member,
 			 WithoutHighBit (member_high), member);
+	      /* PR binutils/17512: Handle corrupt PE data.  */
+	      else if (member - adj + 2 >= datasize)
+		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
 	      else
 		{
 		  int ordinal;
@@ -1487,6 +1501,9 @@ pe_print_idata (bfd * abfd, void * vfile)
 	      if (HighBitSet (member))
 		fprintf (file, "\t%04lx\t %4lu  <none>",
 			 member, WithoutHighBit (member));
+	      /* PR binutils/17512: Handle corrupt PE data.  */
+	      else if (member - adj + 2 >= datasize)
+		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
 	      else
 		{
 		  int ordinal;
@@ -1600,6 +1617,15 @@ pe_print_edata (bfd * abfd, void * vfile)
 	}
     }
 
+  /* PR 17512: Handle corrupt PE binaries.  */
+  if (datasize < 36)
+    {
+      fprintf (file,
+	       _("\nThere is an export table in %s, but it is too small (%d)\n"),
+	       section->name, (int) datasize);
+      return TRUE;
+    }
+
   fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
 	   section->name, (unsigned long) addr);
 
@@ -1693,7 +1719,12 @@ pe_print_edata (bfd * abfd, void * vfile)
 	  _("\nExport Address Table -- Ordinal Base %ld\n"),
 	  edt.base);
 
-  for (i = 0; i < edt.num_functions; ++i)
+  /* PR 17512: Handle corrupt PE binaries.  */
+  if (edt.eat_addr + (edt.num_functions * 4) - adj >= datasize)
+    fprintf (file, _("\tInvalid Export Address Table rva (0x%lx) or entry count (0x%lx)\n"),
+	     (long) edt.eat_addr,
+	     (long) edt.num_functions);
+  else for (i = 0; i < edt.num_functions; ++i)
     {
       bfd_vma eat_member = bfd_get_32 (abfd,
 				       data + edt.eat_addr + (i * 4) - adj);
@@ -1729,21 +1760,34 @@ pe_print_edata (bfd * abfd, void * vfile)
   fprintf (file,
 	   _("\n[Ordinal/Name Pointer] Table\n"));
 
-  for (i = 0; i < edt.num_names; ++i)
+  /* PR 17512: Handle corrupt PE binaries.  */
+  if (edt.npt_addr + (edt.num_names * 4) - adj >= datasize)
+    fprintf (file, _("\tInvalid Name Pointer Table rva (0x%lx) or entry count (0x%lx)\n"),
+	     (long) edt.npt_addr,
+	     (long) edt.num_names);
+  else if (edt.ot_addr + (edt.num_names * 2) - adj >= datasize)
+    fprintf (file, _("\tInvalid Ordinal Table rva (0x%lx) or entry count (0x%lx)\n"),
+	     (long) edt.ot_addr,
+	     (long) edt.num_names);
+  else for (i = 0; i < edt.num_names; ++i)
     {
-      bfd_vma name_ptr = bfd_get_32 (abfd,
-				    data +
-				    edt.npt_addr
-				    + (i*4) - adj);
+      bfd_vma  name_ptr;
+      bfd_vma  ord;
 
-      char *name = (char *) data + name_ptr - adj;
+      ord = bfd_get_16 (abfd, data + edt.ot_addr + (i * 2) - adj);
+      name_ptr = bfd_get_32 (abfd, data + edt.npt_addr + (i * 4) - adj);
 
-      bfd_vma ord = bfd_get_16 (abfd,
-				    data +
-				    edt.ot_addr
-				    + (i*2) - adj);
-      fprintf (file,
-	      "\t[%4ld] %s\n", (long) ord, name);
+      if ((name_ptr - adj) >= datasize)
+	{
+	  fprintf (file, _("\t[%4ld] <corrupt offset: %lx>\n"),
+		   (long) ord, (long) name_ptr);
+	}
+      else
+	{
+	  char * name = (char *) data + name_ptr - adj;
+
+	  fprintf (file, "\t[%4ld] %s\n", (long) ord, name);
+	}
     }
 
   free (data);
@@ -2183,6 +2227,12 @@ static bfd_byte *
 rsrc_print_resource_directory (FILE * , bfd *, unsigned int, bfd_byte *,
 			       rsrc_regions *, bfd_vma);
 
+/* Print the resource entry at DATA, with the text indented by INDENT.
+   Recusively calls rsrc_print_resource_directory to print the contents
+   of directory entries.
+   Returns the address of the end of the data associated with the entry
+   or section_end + 1 upon failure.  */
+
 static bfd_byte *
 rsrc_print_resource_entries (FILE *         file,
 			     bfd *          abfd,
@@ -2199,7 +2249,7 @@ rsrc_print_resource_entries (FILE *         file,
 
   fprintf (file, _("%03x %*.s Entry: "), (int)(data - regions->section_start), indent, " ");
 
-  entry = (long) bfd_get_32 (abfd, data);
+  entry = (unsigned long) bfd_get_32 (abfd, data);
   if (is_name)
     {
       bfd_byte * name;
@@ -2212,7 +2262,7 @@ rsrc_print_resource_entries (FILE *         file,
       else
 	name = regions->section_start + entry - rva_bias;
 
-      if (name + 2 < regions->section_end)
+      if (name + 2 < regions->section_end && name > regions->section_start)
 	{
 	  unsigned int len;
 
@@ -2222,20 +2272,38 @@ rsrc_print_resource_entries (FILE *         file,
 	  len = bfd_get_16 (abfd, name);
 
 	  fprintf (file, _("name: [val: %08lx len %d]: "), entry, len);
+
 	  if (name + 2 + len * 2 < regions->section_end)
 	    {
 	      /* This strange loop is to cope with multibyte characters.  */
 	      while (len --)
 		{
+		  char c;
+
 		  name += 2;
-		  fprintf (file, "%.1s", name);
+		  c = * name;
+		  /* Avoid printing control characters.  */
+		  if (c > 0 && c < 32)
+		    fprintf (file, "^%c", c + 64);
+		  else
+		    fprintf (file, "%.1s", name);
 		}
 	    }
 	  else
-	    fprintf (file, _("<corrupt string length: %#x>"), len);
+	    {
+	      fprintf (file, _("<corrupt string length: %#x>\n"), len);
+	      /* PR binutils/17512: Do not try to continue decoding a
+		 corrupted resource section.  It is likely to end up with
+		 reams of extraneous output.  FIXME: We could probably
+		 continue if we disable the printing of strings...  */
+	      return regions->section_end + 1;
+	    }
 	}
       else
-	fprintf (file, _("<corrupt string offset: %#lx>"), entry);
+	{
+	  fprintf (file, _("<corrupt string offset: %#lx>\n"), entry);
+	  return regions->section_end + 1;
+	}
     }
   else
     fprintf (file, _("ID: %#08lx"), entry);
@@ -2244,9 +2312,16 @@ rsrc_print_resource_entries (FILE *         file,
   fprintf (file, _(", Value: %#08lx\n"), entry);
 
   if (HighBitSet  (entry))
-    return rsrc_print_resource_directory (file, abfd, indent + 1,
-					  regions->section_start + WithoutHighBit (entry),
-					  regions, rva_bias);
+    {
+      data = regions->section_start + WithoutHighBit (entry);
+      if (data <= regions->section_start || data > regions->section_end)
+	return regions->section_end + 1;
+
+      /* FIXME: PR binutils/17512: A corrupt file could contain a loop
+	 in the resource table.  We need some way to detect this.  */
+      return rsrc_print_resource_directory (file, abfd, indent + 1, data,
+					    regions, rva_bias);
+    }
 
   if (regions->section_start + entry + 16 >= regions->section_end)
     return regions->section_end + 1;
@@ -2293,7 +2368,12 @@ rsrc_print_resource_directory (FILE *         file,
     case 0: fprintf (file, "Type"); break;
     case 2: fprintf (file, "Name"); break;
     case 4: fprintf (file, "Language"); break;
-    default: fprintf (file, "<unknown>"); break;
+    default:
+      fprintf (file, _("<unknown directory type: %d>\n"), indent);
+      /* FIXME: For now we end the printing here.  If in the
+	 future more directory types are added to the RSRC spec
+	 then we will need to change this.  */
+      return regions->section_end + 1;
     }
 
   fprintf (file, _(" Table: Char: %d, Time: %08lx, Ver: %d/%d, Num Names: %d, IDs: %d\n"),
@@ -2415,10 +2495,10 @@ rsrc_print_section (bfd * abfd, void * vfile)
     }
 
   if (regions.strings_start != NULL)
-    fprintf (file, " String table starts at %03x\n",
+    fprintf (file, " String table starts at offset: %#03x\n",
 	     (int) (regions.strings_start - regions.section_start));
   if (regions.resource_start != NULL)
-    fprintf (file, " Resources start at %03xx\n",
+    fprintf (file, " Resources start at offset: %#03x\n",
 	     (int) (regions.resource_start - regions.section_start));
   
   free (regions.section_start);
@@ -2480,16 +2560,29 @@ pe_print_debugdata (bfd * abfd, void * vfile)
                section->name);
       return TRUE;
     }
+  else if (section->size < size)
+    {
+      fprintf (file,
+               _("\nError: section %s contains the debug data starting address but it is too small\n"),
+               section->name);
+      return FALSE;
+    }
 
   fprintf (file, _("\nThere is a debug directory in %s at 0x%lx\n\n"),
 	   section->name, (unsigned long) addr);
 
   dataoff = addr - section->vma;
 
+  if (size > (section->size - dataoff))
+    {
+      fprintf (file, _("The debug data size field in the data directory is too big for the section"));
+      return FALSE;
+    }
+
   fprintf (file,
 	   _("Type                Size     Rva      Offset\n"));
 
-  /* Read the whole section. */
+  /* Read the whole section.  */
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
       if (data != NULL)
@@ -2506,7 +2599,7 @@ pe_print_debugdata (bfd * abfd, void * vfile)
 
       _bfd_XXi_swap_debugdir_in (abfd, ext, &idd);
 
-      if ((idd.Type) > IMAGE_NUMBEROF_DEBUG_TYPES)
+      if ((idd.Type) >= IMAGE_NUMBEROF_DEBUG_TYPES)
         type_name = debug_type_names[0];
       else
         type_name = debug_type_names[idd.Type];
@@ -2912,7 +3005,7 @@ rsrc_count_entries (bfd *          abfd,
       else
 	name = datastart + entry - rva_bias;
 
-      if (name + 2 >= dataend)
+      if (name + 2 >= dataend || name < datastart)
 	return dataend + 1;
 
       unsigned int len = bfd_get_16 (abfd, name);
@@ -2923,10 +3016,14 @@ rsrc_count_entries (bfd *          abfd,
   entry = (long) bfd_get_32 (abfd, data + 4);
 
   if (HighBitSet (entry))
-    return rsrc_count_directory (abfd,
-				 datastart,
-				 datastart + WithoutHighBit (entry),
-				 dataend, rva_bias);
+    {
+      data = datastart + WithoutHighBit (entry);
+
+      if (data <= datastart || data >= dataend)
+	return dataend + 1;
+
+      return rsrc_count_directory (abfd, datastart, data, dataend, rva_bias);
+    }
 
   if (datastart + entry + 16 >= dataend)
     return dataend + 1;
@@ -3048,20 +3145,24 @@ rsrc_parse_entry (bfd *            abfd,
 
   if (is_name)
     {
-      /* FIXME: Add range checking ?  */
+      bfd_byte * address;
+
       if (HighBitSet (val))
 	{
 	  val = WithoutHighBit (val);
 
-	  entry->name_id.name.len    = bfd_get_16 (abfd, datastart + val);
-	  entry->name_id.name.string = datastart + val + 2;
+	  address = datastart + val;
 	}
       else
 	{
-	  entry->name_id.name.len    = bfd_get_16 (abfd, datastart + val
-						   - rva_bias);
-	  entry->name_id.name.string = datastart + val - rva_bias + 2;
+	  address = datastart + val - rva_bias;
 	}
+
+      if (address + 3 > dataend)
+	return dataend;
+
+      entry->name_id.name.len    = bfd_get_16 (abfd, address);
+      entry->name_id.name.string = address + 2;
     }
   else
     entry->name_id.id = val;

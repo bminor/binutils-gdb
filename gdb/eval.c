@@ -33,7 +33,6 @@
 #include "parser-defs.h"
 #include "cp-support.h"
 #include "ui-out.h"
-#include "exceptions.h"
 #include "regcache.h"
 #include "user-regs.h"
 #include "valprint.h"
@@ -1333,9 +1332,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	  /* First, evaluate the structure into arg2.  */
 	  pc2 = (*pos)++;
 
-	  if (noside == EVAL_SKIP)
-	    goto nosideret;
-
 	  if (op == STRUCTOP_MEMBER)
 	    {
 	      arg2 = evaluate_subexp_for_address (exp, pos, noside);
@@ -1354,7 +1350,10 @@ evaluate_subexp_standard (struct type *expect_type,
 	  arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
 	  type = check_typedef (value_type (arg1));
-	  if (TYPE_CODE (type) == TYPE_CODE_METHODPTR)
+	  if (noside == EVAL_SKIP)
+	    tem = 1;  /* Set it to the right arg index so that all arguments
+			 can also be skipped.  */
+	  else if (TYPE_CODE (type) == TYPE_CODE_METHODPTR)
 	    {
 	      if (noside == EVAL_AVOID_SIDE_EFFECTS)
 		arg1 = value_zero (TYPE_TARGET_TYPE (type), not_lval);
@@ -1397,8 +1396,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	  pc2 = (*pos)++;
 	  tem2 = longest_to_int (exp->elts[pc2 + 1].longconst);
 	  *pos += 3 + BYTES_TO_EXP_ELEM (tem2 + 1);
-	  if (noside == EVAL_SKIP)
-	    goto nosideret;
 
 	  if (op == STRUCTOP_STRUCT)
 	    {
@@ -1546,6 +1543,9 @@ evaluate_subexp_standard (struct type *expect_type,
 
       /* Signal end of arglist.  */
       argvec[tem] = 0;
+
+      if (noside == EVAL_SKIP)
+	goto nosideret;
 
       if (op == OP_ADL_FUNC)
         {
@@ -1870,7 +1870,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	get_user_print_options (&opts);
         if (opts.objectprint && TYPE_TARGET_TYPE(type)
-            && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+            && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
           {
             real_type = value_rtti_indirect_type (arg1, &full, &top,
 						  &using_enc);

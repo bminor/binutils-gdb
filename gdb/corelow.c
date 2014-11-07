@@ -38,7 +38,6 @@
 #include "symfile.h"
 #include "exec.h"
 #include "readline/readline.h"
-#include "exceptions.h"
 #include "solib.h"
 #include "filenames.h"
 #include "progspace.h"
@@ -134,7 +133,7 @@ sniff_core_bfd (bfd *abfd)
 
   /* Don't sniff if we have support for register sets in
      CORE_GDBARCH.  */
-  if (core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+  if (core_gdbarch && gdbarch_iterate_over_regset_sections_p (core_gdbarch))
     return NULL;
 
   for (cf = core_file_fns; cf != NULL; cf = cf->next)
@@ -414,7 +413,7 @@ core_open (const char *arg, int from_tty)
      sections.  */
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      target_find_new_threads ();
+      target_update_thread_list ();
     }
 
   if (except.reason < 0)
@@ -489,7 +488,9 @@ core_detach (struct target_ops *ops, const char *args, int from_tty)
 
 static void
 get_core_register_section (struct regcache *regcache,
+			   const struct regset *regset,
 			   const char *name,
+			   int min_size,
 			   int which,
 			   const char *human_name,
 			   int required)
@@ -517,6 +518,12 @@ get_core_register_section (struct regcache *regcache,
     }
 
   size = bfd_section_size (core_bfd, section);
+  if (size < min_size)
+    {
+      warning (_("Section `%s' in core file too small."), section_name);
+      return;
+    }
+
   contents = alloca (size);
   if (! bfd_get_section_contents (core_bfd, section, contents,
 				  (file_ptr) 0, size))
@@ -526,20 +533,8 @@ get_core_register_section (struct regcache *regcache,
       return;
     }
 
-  if (core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+  if (regset != NULL)
     {
-      const struct regset *regset;
-
-      regset = gdbarch_regset_from_core_section (core_gdbarch,
-						 name, size);
-      if (regset == NULL)
-	{
-	  if (required)
-	    warning (_("Couldn't recognize %s registers in core file."),
-		     human_name);
-	  return;
-	}
-
       regset->supply_regset (regset, regcache, -1, contents, size);
       return;
     }
@@ -550,6 +545,34 @@ get_core_register_section (struct regcache *regcache,
 				  bfd_section_vma (core_bfd, section)));
 }
 
+/* Callback for get_core_registers that handles a single core file
+   register note section. */
+
+static void
+get_core_registers_cb (const char *sect_name, int size,
+		       const struct regset *regset,
+		       const char *human_name, void *cb_data)
+{
+  struct regcache *regcache = (struct regcache *) cb_data;
+  int required = 0;
+
+  if (strcmp (sect_name, ".reg") == 0)
+    {
+      required = 1;
+      if (human_name == NULL)
+	human_name = "general-purpose";
+    }
+  else if (strcmp (sect_name, ".reg2") == 0)
+    {
+      if (human_name == NULL)
+	human_name = "floating-point";
+    }
+
+  /* The 'which' parameter is only used when no regset is provided.
+     Thus we just set it to -1. */
+  get_core_register_section (regcache, regset, sect_name,
+			     size, -1, human_name, required);
+}
 
 /* Get the registers out of a core file.  This is the machine-
    independent part.  Fetch_core_registers is the machine-dependent
@@ -562,10 +585,10 @@ static void
 get_core_registers (struct target_ops *ops,
 		    struct regcache *regcache, int regno)
 {
-  struct core_regset_section *sect_list;
   int i;
+  struct gdbarch *gdbarch;
 
-  if (!(core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+  if (!(core_gdbarch && gdbarch_iterate_over_regset_sections_p (core_gdbarch))
       && (core_vec == NULL || core_vec->core_read_registers == NULL))
     {
       fprintf_filtered (gdb_stderr,
@@ -573,29 +596,17 @@ get_core_registers (struct target_ops *ops,
       return;
     }
 
-  sect_list = gdbarch_core_regset_sections (get_regcache_arch (regcache));
-  if (sect_list)
-    while (sect_list->sect_name != NULL)
-      {
-        if (strcmp (sect_list->sect_name, ".reg") == 0)
-	  get_core_register_section (regcache, sect_list->sect_name,
-				     0, sect_list->human_name, 1);
-        else if (strcmp (sect_list->sect_name, ".reg2") == 0)
-	  get_core_register_section (regcache, sect_list->sect_name,
-				     2, sect_list->human_name, 0);
-	else
-	  get_core_register_section (regcache, sect_list->sect_name,
-				     3, sect_list->human_name, 0);
-
-	sect_list++;
-      }
-
+  gdbarch = get_regcache_arch (regcache);
+  if (gdbarch_iterate_over_regset_sections_p (gdbarch))
+    gdbarch_iterate_over_regset_sections (gdbarch,
+					  get_core_registers_cb,
+					  (void *) regcache, NULL);
   else
     {
-      get_core_register_section (regcache,
-				 ".reg", 0, "general-purpose", 1);
-      get_core_register_section (regcache,
-				 ".reg2", 2, "floating-point", 0);
+      get_core_register_section (regcache, NULL,
+				 ".reg", 0, 0, "general-purpose", 1);
+      get_core_register_section (regcache, NULL,
+				 ".reg2", 0, 2, "floating-point", 0);
     }
 
   /* Mark all registers not found in the core as unavailable.  */

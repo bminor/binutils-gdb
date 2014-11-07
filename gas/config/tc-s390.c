@@ -489,7 +489,7 @@ md_show_usage (FILE *stream)
 static void
 s390_setup_opcodes (void)
 {
-  register const struct s390_opcode *op;
+  const struct s390_opcode *op;
   const struct s390_opcode *op_end;
   bfd_boolean dup_insn = FALSE;
   const char *retval;
@@ -536,7 +536,7 @@ s390_setup_opcodes (void)
 void
 md_begin (void)
 {
-  register const struct s390_opcode *op;
+  const struct s390_opcode *op;
   const struct s390_opcode *op_end;
   const char *retval;
 

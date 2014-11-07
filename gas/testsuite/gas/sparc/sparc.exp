@@ -79,6 +79,7 @@ if [istarget sparc*-*-*] {
     run_dump_test "hpcvis3"
     run_dump_test "ima"
     run_dump_test "crypto"
+    run_dump_test "xcrypto"
     run_dump_test "cbcond"
     run_dump_test "pause"
     run_dump_test "cfr"
@@ -89,6 +90,9 @@ if [istarget sparc*-*-*] {
     run_dump_test "ld_st_fsr"
     run_dump_test "edge"
     run_dump_test "flush"
+    run_dump_test "mwait"
+    run_dump_test "mcdper"
+    run_dump_test "sparc5vis4"
 
     run_list_test "pr4587" ""
 }

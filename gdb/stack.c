@@ -36,7 +36,6 @@
 #include "block.h"
 #include "stack.h"
 #include "dictionary.h"
-#include "exceptions.h"
 #include "reggroups.h"
 #include "regcache.h"
 #include "solib.h"

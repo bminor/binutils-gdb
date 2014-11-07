@@ -33,7 +33,6 @@
 #include "block.h"
 #include "objc-lang.h"
 #include "linespec.h"
-#include "exceptions.h"
 #include "language.h"
 #include "interps.h"
 #include "mi/mi-cmds.h"

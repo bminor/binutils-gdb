@@ -55,7 +55,6 @@
 #include "typeprint.h"
 #include "jv-lang.h"
 #include "psympriv.h"
-#include "exceptions.h"
 #include <sys/stat.h>
 #include "completer.h"
 #include "vec.h"
@@ -3617,7 +3616,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	      const struct blockvector *bv = BLOCKVECTOR (stab);
 	      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
-	      sym = lookup_block_symbol (block, name, domain);
+	      sym = block_lookup_symbol (block, name, domain);
 	    }
 
 	  if (sym && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
@@ -12966,7 +12965,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     }
   else
     {
-      TYPE_CODE (type) = TYPE_CODE_CLASS;
+      TYPE_CODE (type) = TYPE_CODE_STRUCT;
     }
 
   if (cu->language == language_cplus && die->tag == DW_TAG_class_type)
@@ -13017,7 +13016,7 @@ static void
 process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct die_info *child_die = die->child;
+  struct die_info *child_die;
   struct type *type;
 
   type = get_die_type (die, cu);
@@ -13027,7 +13026,6 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
       struct field_info fi;
-      struct die_info *child_die;
       VEC (symbolp) *template_args = NULL;
       struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
@@ -13197,6 +13195,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      nested class.  So we have to process our children even if the
      current die is a declaration.  Normally, of course, a declaration
      won't have any children at all.  */
+
+  child_die = die->child;
 
   while (child_die != NULL && child_die->tag)
     {

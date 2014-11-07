@@ -26,7 +26,6 @@
 #include "symtab.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "exceptions.h"
 #include <signal.h>
 #include "target.h"
 #include "target-dcache.h"
@@ -764,9 +763,14 @@ gdb_readline_wrapper_line (char *line)
 
   /* Prevent parts of the prompt from being redisplayed if annotations
      are enabled, and readline's state getting out of sync.  We'll
-     restore it in gdb_readline_wrapper_cleanup.  */
+     reinstall the callback handler, which puts the terminal in raw
+     mode (or in readline lingo, in prepped state), when we're next
+     ready to process user input, either in display_gdb_prompt, or if
+     we're handling an asynchronous target event and running in the
+     background, just before returning to the event loop to process
+     further input (or more target events).  */
   if (async_command_editing_p)
-    rl_callback_handler_remove ();
+    gdb_rl_callback_handler_remove ();
 }
 
 struct gdb_readline_wrapper_cleanup
@@ -788,10 +792,12 @@ gdb_readline_wrapper_cleanup (void *arg)
   gdb_assert (input_handler == gdb_readline_wrapper_line);
   input_handler = cleanup->handler_orig;
 
-  /* Reinstall INPUT_HANDLER in readline, without displaying a
-     prompt.  */
-  if (async_command_editing_p)
-    rl_callback_handler_install (NULL, input_handler);
+  /* Don't restore our input handler in readline yet.  That would make
+     readline prep the terminal (putting it in raw mode), while the
+     line we just read may trigger execution of a command that expects
+     the terminal in the default cooked/canonical mode, such as e.g.,
+     running Python's interactive online help utility.  See
+     gdb_readline_wrapper_line for when we'll reinstall it.  */
 
   gdb_readline_wrapper_result = NULL;
   gdb_readline_wrapper_done = 0;

@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "python-internal.h"
-#include "exceptions.h"
 #include "top.h"
 #include "cli/cli-utils.h"
 /* Readline function suitable for PyOS_ReadlineFunctionPointer, which

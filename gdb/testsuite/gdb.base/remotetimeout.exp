@@ -21,11 +21,6 @@
 
 global GDBFLAGS
 
-# Skip test if target does not support argument passing.
-if [target_info exists noargs] {
-    return
-}
-
 #
 # Test that -l is processed correctly.
 #

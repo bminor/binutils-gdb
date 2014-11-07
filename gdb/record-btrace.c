@@ -26,7 +26,6 @@
 #include "gdbcmd.h"
 #include "disasm.h"
 #include "observer.h"
-#include "exceptions.h"
 #include "cli/cli-utils.h"
 #include "source.h"
 #include "ui-out.h"
@@ -1791,18 +1790,18 @@ record_btrace_decr_pc_after_break (struct target_ops *ops,
   return ops->beneath->to_decr_pc_after_break (ops->beneath, gdbarch);
 }
 
-/* The to_find_new_threads method of target record-btrace.  */
+/* The to_update_thread_list method of target record-btrace.  */
 
 static void
-record_btrace_find_new_threads (struct target_ops *ops)
+record_btrace_update_thread_list (struct target_ops *ops)
 {
-  /* Don't expect new threads if we're replaying.  */
+  /* We don't add or remove threads during replay.  */
   if (record_btrace_is_replaying (ops))
     return;
 
   /* Forward the request.  */
   ops = ops->beneath;
-  ops->to_find_new_threads (ops);
+  ops->to_update_thread_list (ops);
 }
 
 /* The to_thread_alive method of target record-btrace.  */
@@ -1964,7 +1963,7 @@ init_record_btrace_ops (void)
   ops->to_get_tailcall_unwinder = &record_btrace_to_get_tailcall_unwinder;
   ops->to_resume = record_btrace_resume;
   ops->to_wait = record_btrace_wait;
-  ops->to_find_new_threads = record_btrace_find_new_threads;
+  ops->to_update_thread_list = record_btrace_update_thread_list;
   ops->to_thread_alive = record_btrace_thread_alive;
   ops->to_goto_record_begin = record_btrace_goto_begin;
   ops->to_goto_record_end = record_btrace_goto_end;

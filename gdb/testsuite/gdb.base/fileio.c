@@ -169,6 +169,7 @@ test_write ()
       ret = write (fd, STRING, strlen (STRING));
       printf ("write 3: ret = %d, errno = %d %s\n", ret, errno,
 	      strerrno (errno));
+      close (fd);
     }
   else
     printf ("write 3: ret = %d, errno = %d\n", ret, errno);

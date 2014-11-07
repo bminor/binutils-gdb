@@ -219,8 +219,6 @@ gdb_PyObject_HasAttrString (PyObject *obj,
 #include "command.h"
 #include "breakpoint.h"
 
-#include "exceptions.h"
-
 enum gdbpy_iter_kind { iter_keys, iter_values, iter_items };
 
 struct block;
@@ -471,6 +469,8 @@ int gdbpy_initialize_exited_event (void)
 int gdbpy_initialize_thread_event (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_new_objfile_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_clear_objfiles_event (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_arch (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;

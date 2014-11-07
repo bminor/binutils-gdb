@@ -1,5 +1,12 @@
 -*- text -*-
 
+Changes in 2.25:
+
+* Add --data option to strings to only print strings in loadable, initialized
+  data sections.  Change the default behaviour to be --all, but add a new
+  configure time option of --disable-default-strings-all to restore the old
+  default behaviour.
+
 * Add --include-all-whitespace to strings.
 
 * Add --dump-section option to objcopy.

@@ -4482,7 +4482,7 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char name_end;
-  register char *p;
+  char *p;
   expressionS exp;
   symbolS *entry_sym;
   const char *entry_sym_name;

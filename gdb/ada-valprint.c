@@ -30,7 +30,6 @@
 #include "ada-lang.h"
 #include "c-lang.h"
 #include "infcall.h"
-#include "exceptions.h"
 #include "objfiles.h"
 
 static int print_field_values (struct type *, const gdb_byte *,

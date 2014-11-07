@@ -563,7 +563,7 @@ struct target_ops
 
     int (*to_thread_alive) (struct target_ops *, ptid_t ptid)
       TARGET_DEFAULT_RETURN (0);
-    void (*to_find_new_threads) (struct target_ops *)
+    void (*to_update_thread_list) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     char *(*to_pid_to_str) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_FUNC (default_pid_to_str);
@@ -1380,34 +1380,33 @@ extern int target_insert_breakpoint (struct gdbarch *gdbarch,
 extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt);
 
+/* Returns true if the terminal settings of the inferior are in
+   effect.  */
+
+extern int target_terminal_is_inferior (void);
+
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
 
-#define target_terminal_init() \
-     (*current_target.to_terminal_init) (&current_target)
+extern void target_terminal_init (void);
 
 /* Put the inferior's terminal settings into effect.
    This is preparation for starting or resuming the inferior.  */
 
 extern void target_terminal_inferior (void);
 
-/* Put some of our terminal settings into effect,
-   enough to get proper results from our output,
-   but do not change into or out of RAW mode
-   so that no input is discarded.
+/* Put some of our terminal settings into effect, enough to get proper
+   results from our output, but do not change into or out of RAW mode
+   so that no input is discarded.  This is a no-op if terminal_ours
+   was most recently called.  */
 
-   After doing this, either terminal_ours or terminal_inferior
-   should be called to get back to a normal state of affairs.  */
-
-#define target_terminal_ours_for_output() \
-     (*current_target.to_terminal_ours_for_output) (&current_target)
+extern void target_terminal_ours_for_output (void);
 
 /* Put our terminal settings into effect.
    First record the inferior's terminal settings
    so they can be restored properly later.  */
 
-#define target_terminal_ours() \
-     (*current_target.to_terminal_ours) (&current_target)
+extern void target_terminal_ours (void);
 
 /* Return true if the target stack has a non-default
   "to_terminal_ours" method.  */
@@ -1568,9 +1567,9 @@ extern void target_program_signals (int nsig, unsigned char *program_signals);
 
 extern int target_thread_alive (ptid_t ptid);
 
-/* Query for new threads and add them to the thread list.  */
+/* Sync the target's threads with GDB's thread list.  */
 
-extern void target_find_new_threads (void);
+extern void target_update_thread_list (void);
 
 /* Make target stop in a continuable fashion.  (For instance, under
    Unix, this should act like SIGSTOP).  Note that this function is

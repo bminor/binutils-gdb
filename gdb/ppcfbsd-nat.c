@@ -214,7 +214,6 @@ _initialize_ppcfbsd_nat (void)
   t->to_store_registers = ppcfbsd_store_inferior_registers;
   t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
   t->to_find_memory_regions = fbsd_find_memory_regions;
-  t->to_make_corefile_notes = fbsd_make_corefile_notes;
   add_target (t);
 
   /* Support debugging kernel virtual memory images.  */

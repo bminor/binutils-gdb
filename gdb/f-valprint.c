@@ -33,7 +33,6 @@
 #include "command.h"
 #include "block.h"
 #include "dictionary.h"
-#include "exceptions.h"
 
 extern void _initialize_f_valprint (void);
 static void info_common_command (char *, int);

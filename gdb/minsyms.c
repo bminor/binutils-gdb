@@ -1270,7 +1270,7 @@ install_minimal_symbols (struct objfile *objfile)
 
       mcount = compact_minimal_symbols (msymbols, mcount, objfile);
 
-      obstack_blank (&objfile->per_bfd->storage_obstack,
+      obstack_blank_fast (&objfile->per_bfd->storage_obstack,
 	       (mcount + 1 - alloc_count) * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
 	obstack_finish (&objfile->per_bfd->storage_obstack);

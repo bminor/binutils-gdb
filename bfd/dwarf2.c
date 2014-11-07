@@ -3602,19 +3602,19 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
    field and in the abbreviation offset, or zero to indicate that the
    default value should be used.  */
 
-static bfd_boolean
-find_line (bfd *abfd,
-	   const struct dwarf_debug_section *debug_sections,
-	   asection *section,
-	   bfd_vma offset,
-	   asymbol *symbol,
-	   asymbol **symbols,
-	   const char **filename_ptr,
-	   const char **functionname_ptr,
-	   unsigned int *linenumber_ptr,
-	   unsigned int *discriminator_ptr,
-	   unsigned int addr_size,
-	   void **pinfo)
+bfd_boolean
+_bfd_dwarf2_find_nearest_line (bfd *abfd,
+			       asymbol **symbols,
+			       asymbol *symbol,
+			       asection *section,
+			       bfd_vma offset,
+			       const char **filename_ptr,
+			       const char **functionname_ptr,
+			       unsigned int *linenumber_ptr,
+			       unsigned int *discriminator_ptr,
+			       const struct dwarf_debug_section *debug_sections,
+			       unsigned int addr_size,
+			       void **pinfo)
 {
   /* Read each compilation unit from the section .debug_info, and check
      to see if it contains the address we are searching for.  If yes,
@@ -3645,21 +3645,18 @@ find_line (bfd *abfd,
 
   stash = (struct dwarf2_debug *) *pinfo;
 
-  do_line = (section == NULL
-	     && offset == 0
-	     && functionname_ptr == NULL
-	     && symbol != NULL);
+  do_line = symbol != NULL;
   if (do_line)
     {
-      addr = symbol->value;
+      BFD_ASSERT (section == NULL && offset == 0 && functionname_ptr == NULL);
       section = bfd_get_section (symbol);
+      addr = symbol->value;
     }
-  else if (section != NULL
-	   && functionname_ptr != NULL
-	   && symbol == NULL)
-    addr = offset;
   else
-    abort ();
+    {
+      BFD_ASSERT (section != NULL && functionname_ptr != NULL);
+      addr = offset;
+    }
 
   if (section->output_section)
     addr += section->output_section->vma + section->output_offset;
@@ -3872,45 +3869,6 @@ find_line (bfd *abfd,
     unset_sections (stash);
 
   return found;
-}
-
-/* The DWARF2 version of find_nearest_line.
-   Return TRUE if the line is found without error.  */
-
-bfd_boolean
-_bfd_dwarf2_find_nearest_line (bfd *abfd,
-			       const struct dwarf_debug_section *debug_sections,
-			       asection *section,
-			       asymbol **symbols,
-			       bfd_vma offset,
-			       const char **filename_ptr,
-			       const char **functionname_ptr,
-			       unsigned int *linenumber_ptr,
-			       unsigned int *discriminator_ptr,
-			       unsigned int addr_size,
-			       void **pinfo)
-{
-  return find_line (abfd, debug_sections, section, offset, NULL, symbols,
-		    filename_ptr, functionname_ptr, linenumber_ptr,
-		    discriminator_ptr, addr_size, pinfo);
-}
-
-/* The DWARF2 version of find_line.
-   Return TRUE if the line is found without error.  */
-
-bfd_boolean
-_bfd_dwarf2_find_line (bfd *abfd,
-		       asymbol **symbols,
-		       asymbol *symbol,
-		       const char **filename_ptr,
-		       unsigned int *linenumber_ptr,
-		       unsigned int *discriminator_ptr,
-		       unsigned int addr_size,
-		       void **pinfo)
-{
-  return find_line (abfd, dwarf_debug_sections, NULL, 0, symbol, symbols,
-		    filename_ptr, NULL, linenumber_ptr, discriminator_ptr,
-		    addr_size, pinfo);
 }
 
 bfd_boolean

@@ -2824,6 +2824,7 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 
 	  /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation.  */
 	  if (ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC
+	      && irel->r_offset >= 2
 	      && bfd_get_8 (input_bfd,
 			    contents + irel->r_offset - 2) == 0x8b)
 	    {
@@ -2854,6 +2855,7 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	  && h->type != STT_GNU_IFUNC
 	  && h != htab->elf.hdynamic
 	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
+	  && irel->r_offset >= 2
 	  && bfd_get_8 (input_bfd,
 			contents + irel->r_offset - 2) == 0x8b)
 	{
@@ -4281,17 +4283,27 @@ direct:
 	      else if (ELF32_R_TYPE (rel->r_info) == R_X86_64_GOTTPOFF)
 		{
 		  /* IE->LE transition:
-		     Originally it can be one of:
+		     For 64bit, originally it can be one of:
 		     movq foo@gottpoff(%rip), %reg
 		     addq foo@gottpoff(%rip), %reg
 		     We change it into:
 		     movq $foo, %reg
 		     leaq foo(%reg), %reg
-		     addq $foo, %reg.  */
+		     addq $foo, %reg.
+		     For 32bit, originally it can be one of:
+		     movq foo@gottpoff(%rip), %reg
+		     addl foo@gottpoff(%rip), %reg
+		     We change it into:
+		     movq $foo, %reg
+		     leal foo(%reg), %reg
+		     addl $foo, %reg. */
 
 		  unsigned int val, type, reg;
 
-		  val = bfd_get_8 (input_bfd, contents + roff - 3);
+		  if (roff >= 3)
+		    val = bfd_get_8 (input_bfd, contents + roff - 3);
+		  else
+		    val = 0;
 		  type = bfd_get_8 (input_bfd, contents + roff - 2);
 		  reg = bfd_get_8 (input_bfd, contents + roff - 1);
 		  reg >>= 3;
@@ -4311,8 +4323,8 @@ direct:
 		    }
 		  else if (reg == 4)
 		    {
-		      /* addq -> addq - addressing with %rsp/%r12 is
-			 special  */
+		      /* addq/addl -> addq/addl - addressing with %rsp/%r12
+			 is special  */
 		      if (val == 0x4c)
 			bfd_put_8 (output_bfd, 0x49,
 				   contents + roff - 3);
@@ -4326,7 +4338,7 @@ direct:
 		    }
 		  else
 		    {
-		      /* addq -> leaq */
+		      /* addq/addl -> leaq/leal */
 		      if (val == 0x4c)
 			bfd_put_8 (output_bfd, 0x4d,
 				   contents + roff - 3);
@@ -5539,9 +5551,10 @@ elf_x86_64_add_symbol_hook (bfd *abfd,
       return TRUE;
     }
 
-  if ((abfd->flags & DYNAMIC) == 0
-      && (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
+  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
+       || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE)
+      && (abfd->flags & DYNAMIC) == 0
+      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
   return TRUE;
