@@ -1,5 +1,10 @@
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
+	* gdbtypes.h (TYPE_CODE_CLASS): Delete.  All uses changed to use
+	TYPE_CODE_STRUCT.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
 	* objfiles.c (get_objfile_arch): Constify.
 	* objfiles.h (get_objfile_arch): Update prototype.
 	* solib.c (solib_global_lookup): Fetch arch from objfile,
