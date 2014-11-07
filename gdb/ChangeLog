@@ -1,5 +1,9 @@
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (basic_lookup_symbol_nonlocal): Add comment.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (lookup_local_symbol): Renamed from lookup_symbol_aux_local.
 	All callers updated.
 	(lookup_symbol_in_all_objfiles): Renamed from

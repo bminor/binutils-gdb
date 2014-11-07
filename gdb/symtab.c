@@ -1792,6 +1792,10 @@ basic_lookup_symbol_nonlocal (const char *name,
      than that one, so I don't think we should worry about that for
      now.  */
 
+  /* NOTE: dje/2014-10-26: The lookup in all objfiles search could skip
+     the current objfile.  Searching the current objfile first is useful
+     for both matching user expectations as well as performance.  */
+
   sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym != NULL)
     return sym;
