@@ -1,5 +1,16 @@
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (lookup_local_symbol): Renamed from lookup_symbol_aux_local.
+	All callers updated.
+	(lookup_symbol_in_all_objfiles): Renamed from
+	lookup_symbol_aux_symtabs.  All callers updated.
+	(lookup_symbol_via_quick_fns): Renamed from lookup_symbol_aux_quick.
+	All callers updated.
+	(lookup_symbol_in_objfile_symtabs): Renamed from
+	lookup_symbol_aux_objfile.  All callers updated.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (lookup_symbol_in_block): Renamed from
 	lookup_symbol_aux_block.  All callers updated.
 

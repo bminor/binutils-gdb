@@ -74,21 +74,21 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 struct field_of_this_result *);
 
 static
-struct symbol *lookup_symbol_aux_local (const char *name,
-					const struct block *block,
-					const domain_enum domain,
-					enum language language);
+struct symbol *lookup_local_symbol (const char *name,
+				    const struct block *block,
+				    const domain_enum domain,
+				    enum language language);
 
 static
-struct symbol *lookup_symbol_aux_symtabs (int block_index,
-					  const char *name,
-					  const domain_enum domain);
+struct symbol *lookup_symbol_in_all_objfiles (int block_index,
+					      const char *name,
+					      const domain_enum domain);
 
 static
-struct symbol *lookup_symbol_aux_quick (struct objfile *objfile,
-					int block_index,
-					const char *name,
-					const domain_enum domain);
+struct symbol *lookup_symbol_via_quick_fns (struct objfile *objfile,
+					    int block_index,
+					    const char *name,
+					    const domain_enum domain);
 
 extern initialize_file_ftype _initialize_symtab;
 
@@ -1424,7 +1424,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
-  sym = lookup_symbol_aux_local (name, block, domain, language);
+  sym = lookup_local_symbol (name, block, domain, language);
   if (sym != NULL)
     return sym;
 
@@ -1482,13 +1482,13 @@ lookup_static_symbol (const char *name, const domain_enum domain)
   struct objfile *objfile;
   struct symbol *sym;
 
-  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, domain);
+  sym = lookup_symbol_in_all_objfiles (STATIC_BLOCK, name, domain);
   if (sym != NULL)
     return sym;
 
   ALL_OBJFILES (objfile)
   {
-    sym = lookup_symbol_aux_quick (objfile, STATIC_BLOCK, name, domain);
+    sym = lookup_symbol_via_quick_fns (objfile, STATIC_BLOCK, name, domain);
     if (sym != NULL)
       return sym;
   }
@@ -1500,9 +1500,9 @@ lookup_static_symbol (const char *name, const domain_enum domain)
    Don't search STATIC_BLOCK or GLOBAL_BLOCK.  */
 
 static struct symbol *
-lookup_symbol_aux_local (const char *name, const struct block *block,
-                         const domain_enum domain,
-                         enum language language)
+lookup_local_symbol (const char *name, const struct block *block,
+		     const domain_enum domain,
+		     enum language language)
 {
   struct symbol *sym;
   const struct block *static_block = block_static_block (block);
@@ -1612,8 +1612,8 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
 	    }
 	}
 
-      sym = lookup_symbol_aux_quick ((struct objfile *) objfile, GLOBAL_BLOCK,
-				     name, domain);
+      sym = lookup_symbol_via_quick_fns ((struct objfile *) objfile,
+					 GLOBAL_BLOCK, name, domain);
       if (sym)
 	return sym;
     }
@@ -1627,8 +1627,8 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
    static symbols.  */
 
 static struct symbol *
-lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
-			   const char *name, const domain_enum domain)
+lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
+				  const char *name, const domain_enum domain)
 {
   struct symbol *sym = NULL;
   const struct blockvector *bv;
@@ -1650,19 +1650,20 @@ lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
   return NULL;
 }
 
-/* Same as lookup_symbol_aux_objfile, except that it searches all
-   objfiles.  Return the first match found.  */
+/* Wrapper around lookup_symbol_in_objfile_symtabs to search all objfiles.
+   Returns the first match found.  */
 
 static struct symbol *
-lookup_symbol_aux_symtabs (int block_index, const char *name,
-			   const domain_enum domain)
+lookup_symbol_in_all_objfiles (int block_index, const char *name,
+			       const domain_enum domain)
 {
   struct symbol *sym;
   struct objfile *objfile;
 
   ALL_OBJFILES (objfile)
   {
-    sym = lookup_symbol_aux_objfile (objfile, block_index, name, domain);
+    sym = lookup_symbol_in_objfile_symtabs (objfile, block_index, name,
+					    domain);
     if (sym)
       return sym;
   }
@@ -1670,7 +1671,7 @@ lookup_symbol_aux_symtabs (int block_index, const char *name,
   return NULL;
 }
 
-/* Wrapper around lookup_symbol_aux_objfile for search_symbols.
+/* Wrapper around lookup_symbol_in_objfile_symtabs for search_symbols.
    Look up LINKAGE_NAME in DOMAIN in the global and static blocks of OBJFILE
    and all related objfiles.  */
 
@@ -1696,11 +1697,11 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
     {
       struct symbol *sym;
 
-      sym = lookup_symbol_aux_objfile (cur_objfile, GLOBAL_BLOCK,
-				       modified_name, domain);
+      sym = lookup_symbol_in_objfile_symtabs (cur_objfile, GLOBAL_BLOCK,
+					      modified_name, domain);
       if (sym == NULL)
-	sym = lookup_symbol_aux_objfile (cur_objfile, STATIC_BLOCK,
-					 modified_name, domain);
+	sym = lookup_symbol_in_objfile_symtabs (cur_objfile, STATIC_BLOCK,
+						modified_name, domain);
       if (sym != NULL)
 	{
 	  do_cleanups (cleanup);
@@ -1727,12 +1728,12 @@ Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
 	 name, symtab_to_filename_for_display (symtab), name, name);
 }
 
-/* A helper function for lookup_symbol_aux that interfaces with the
-   "quick" symbol table functions.  */
+/* A helper function for various lookup routines that interfaces with
+   the "quick" symbol table functions.  */
 
 static struct symbol *
-lookup_symbol_aux_quick (struct objfile *objfile, int block_index,
-			 const char *name, const domain_enum domain)
+lookup_symbol_via_quick_fns (struct objfile *objfile, int block_index,
+			     const char *name, const domain_enum domain)
 {
   struct symtab *symtab;
   const struct blockvector *bv;
@@ -1773,7 +1774,7 @@ basic_lookup_symbol_nonlocal (const char *name,
      not it would be appropriate to search the current global block
      here as well.  (That's what this code used to do before the
      is_a_field_of_this check was moved up.)  On the one hand, it's
-     redundant with the lookup_symbol_aux_symtabs search that happens
+     redundant with the lookup_symbol_in_all_objfiles search that happens
      next.  On the other hand, if decode_line_1 is passed an argument
      like filename:var, then the user presumably wants 'var' to be
      searched for in filename.  On the third hand, there shouldn't be
@@ -1842,11 +1843,11 @@ lookup_symbol_global_iterator_cb (struct objfile *objfile,
 
   gdb_assert (data->result == NULL);
 
-  data->result = lookup_symbol_aux_objfile (objfile, GLOBAL_BLOCK,
-					    data->name, data->domain);
+  data->result = lookup_symbol_in_objfile_symtabs (objfile, GLOBAL_BLOCK,
+						   data->name, data->domain);
   if (data->result == NULL)
-    data->result = lookup_symbol_aux_quick (objfile, GLOBAL_BLOCK,
-					    data->name, data->domain);
+    data->result = lookup_symbol_via_quick_fns (objfile, GLOBAL_BLOCK,
+						data->name, data->domain);
 
   /* If we found a match, tell the iterator to stop.  Otherwise,
      keep going.  */
