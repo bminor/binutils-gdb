@@ -1,5 +1,12 @@
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (lookup_static_symbol): Renamed from
+	lookup_static_symbol_aux.  All callers updated.
+	(lookup_symbol_in_static_block): Renamed from lookup_symbol_static.
+	All callers updated.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
 	* block.h (ALL_BLOCK_SYMBOLS_WITH_NAME): New macro.
 	* block.c (block_lookup_symbol): Use it.
 	* cp-support.c (make_symbol_overload_list_block): Use it.

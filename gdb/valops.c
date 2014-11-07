@@ -3576,7 +3576,7 @@ value_maybe_namespace_elt (const struct type *curtype,
 					+ strlen (name) + 1);
 
       sprintf (concatenated_name, "%s::%s", namespace_name, name);
-      sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
+      sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
     }
 
   if (sym == NULL)

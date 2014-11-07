@@ -1092,9 +1092,9 @@ extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
    Upon success sets BLOCK_FOUND and fixes up the symbol's section
    if necessary.  */
 
-extern struct symbol *lookup_symbol_static (const char *name,
-					    const struct block *block,
-					    const domain_enum domain);
+extern struct symbol *lookup_symbol_in_static_block (const char *name,
+						     const struct block *block,
+						     const domain_enum domain);
 
 /* Lookup a symbol in all files' global blocks.
    Upon success sets BLOCK_FOUND and fixes up the symbol's section
@@ -1122,8 +1122,8 @@ extern struct symbol *lookup_language_this (const struct language_defn *lang,
    Upon success sets BLOCK_FOUND and fixes up the symbol's section
    if necessary.  */
 
-extern struct symbol *lookup_static_symbol_aux (const char *name,
-						const domain_enum domain);
+extern struct symbol *lookup_static_symbol (const char *name,
+					    const domain_enum domain);
 
 /* Lookup a [struct, union, enum] by name, within a specified block.  */
 

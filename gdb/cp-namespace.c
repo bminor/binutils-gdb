@@ -615,7 +615,7 @@ lookup_symbol_file (const char *name,
 {
   struct symbol *sym = NULL;
 
-  sym = lookup_symbol_static (name, block, domain);
+  sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym != NULL)
     return sym;
 
@@ -771,14 +771,15 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
       len = strlen (base_name) + 2 + strlen (name) + 1;
       concatenated_name = xrealloc (concatenated_name, len);
       xsnprintf (concatenated_name, len, "%s::%s", base_name, name);
-      sym = lookup_symbol_static (concatenated_name, block, VAR_DOMAIN);
+      sym = lookup_symbol_in_static_block (concatenated_name, block,
+					   VAR_DOMAIN);
       if (sym != NULL)
 	break;
 
       /* Nope.  We now have to search all static blocks in all objfiles,
 	 even if block != NULL, because there's no guarantees as to which
 	 symtab the symbol we want is in.  */
-      sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
+      sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
       if (sym != NULL)
 	break;
 
@@ -849,7 +850,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
 	concatenated_name = alloca (size);
 	xsnprintf (concatenated_name, size, "%s::%s",
 		 parent_name, nested_name);
-	sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
+	sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
 	if (sym != NULL)
 	  return sym;
 

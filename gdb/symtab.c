@@ -1471,13 +1471,13 @@ lookup_symbol_aux (const char *name, const struct block *block,
   /* Now search all static file-level symbols.  Not strictly correct,
      but more useful than an error.  */
 
-  return lookup_static_symbol_aux (name, domain);
+  return lookup_static_symbol (name, domain);
 }
 
 /* See symtab.h.  */
 
 struct symbol *
-lookup_static_symbol_aux (const char *name, const domain_enum domain)
+lookup_static_symbol (const char *name, const domain_enum domain)
 {
   struct objfile *objfile;
   struct symbol *sym;
@@ -1791,7 +1791,7 @@ basic_lookup_symbol_nonlocal (const char *name,
      than that one, so I don't think we should worry about that for
      now.  */
 
-  sym = lookup_symbol_static (name, block, domain);
+  sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym != NULL)
     return sym;
 
@@ -1801,9 +1801,9 @@ basic_lookup_symbol_nonlocal (const char *name,
 /* See symtab.h.  */
 
 struct symbol *
-lookup_symbol_static (const char *name,
-		      const struct block *block,
-		      const domain_enum domain)
+lookup_symbol_in_static_block (const char *name,
+			       const struct block *block,
+			       const domain_enum domain)
 {
   const struct block *static_block = block_static_block (block);
 

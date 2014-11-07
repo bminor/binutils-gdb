@@ -1179,8 +1179,8 @@ push_module_name (struct parser_state *ps, struct type *module,
       char *copy;
 
       copy = copy_name (name);
-      sym = lookup_symbol_static (copy, expression_context_block,
-				  VAR_DOMAIN);
+      sym = lookup_symbol_in_static_block (copy, expression_context_block,
+					   VAR_DOMAIN);
       if (sym != NULL)
 	sym = lookup_symbol_global (copy, expression_context_block,
 				    VAR_DOMAIN);
