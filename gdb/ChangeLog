@@ -1,5 +1,11 @@
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
+	* ada-lang.c (ada_make_symbol_completion_list): Use
+	ALL_PRIMARY_SYMTABS instead of ALL_SYMTABS.
+	* symtab.c (lookup_objfile_from_block): Ditto.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
 	* gdbtypes.h (TYPE_CODE_CLASS): Delete.  All uses changed to use
 	TYPE_CODE_STRUCT.
 

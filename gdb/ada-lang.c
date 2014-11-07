@@ -6212,9 +6212,11 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
 
   /* Go through the symtabs and check the externs and statics for
-     symbols which match.  */
+     symbols which match.
+     Non-primary symtabs share the block vector with their primary symtabs
+     so we use ALL_PRIMARY_SYMTABS here instead of ALL_SYMTABS.  */
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
@@ -6226,7 +6228,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
   }
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);

@@ -1549,8 +1549,10 @@ lookup_objfile_from_block (const struct block *block)
     return NULL;
 
   block = block_global_block (block);
-  /* Go through SYMTABS.  */
-  ALL_SYMTABS (obj, s)
+  /* Go through SYMTABS.
+     Non-primary symtabs share the block vector with their primary symtabs
+     so we use ALL_PRIMARY_SYMTABS here instead of ALL_SYMTABS.  */
+  ALL_PRIMARY_SYMTABS (obj, s)
     if (block == BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK))
       {
 	if (obj->separate_debug_objfile_backlink)
