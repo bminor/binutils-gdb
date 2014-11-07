@@ -1,5 +1,10 @@
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* peXXigen.c (pe_print_idata): Cast to unsigned long in range
+	checks.
+
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/17482
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Update comments
 	for IE->LE transition.
