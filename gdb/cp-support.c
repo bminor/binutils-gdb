@@ -1218,9 +1218,7 @@ make_symbol_overload_list_block (const char *name,
   struct block_iterator iter;
   struct symbol *sym;
 
-  for (sym = block_iter_name_first (block, name, &iter);
-       sym != NULL;
-       sym = block_iter_name_next (name, &iter))
+  ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
     overload_list_add_symbol (sym, name);
 }
 

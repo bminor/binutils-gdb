@@ -286,4 +286,13 @@ extern struct symbol *block_lookup_symbol (const struct block *block,
        (sym);						\
        (sym) = block_iterator_next (&(iter)))
 
+/* Macro to loop through all symbols with name NAME in BLOCK,
+   in no particular order.  ITER helps keep track of the iteration, and
+   must be a struct block_iterator.  SYM points to the current symbol.  */
+
+#define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)		\
+  for ((sym) = block_iter_name_first ((block), (name), &(iter));	\
+       (sym) != NULL;							\
+       (sym) = block_iter_name_next ((name), &(iter)))
+
 #endif /* BLOCK_H */

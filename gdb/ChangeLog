@@ -1,5 +1,12 @@
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
+	* block.h (ALL_BLOCK_SYMBOLS_WITH_NAME): New macro.
+	* block.c (block_lookup_symbol): Use it.
+	* cp-support.c (make_symbol_overload_list_block): Use it.
+	* symtab.c (iterate_over_symbols): Use it.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (lookup_block_symbol): Moved to ...
 	* block.c (block_lookup_symbol):  ... here and renamed.
 	All callers updated.

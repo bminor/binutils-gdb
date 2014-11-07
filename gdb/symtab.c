@@ -2031,9 +2031,7 @@ iterate_over_symbols (const struct block *block, const char *name,
   struct block_iterator iter;
   struct symbol *sym;
 
-  for (sym = block_iter_name_first (block, name, &iter);
-       sym != NULL;
-       sym = block_iter_name_next (name, &iter))
+  ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
     {
       if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				 SYMBOL_DOMAIN (sym), domain))
