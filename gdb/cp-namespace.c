@@ -628,7 +628,7 @@ lookup_symbol_file (const char *name,
       const struct block *global_block = block_global_block (block);
       
       if (global_block != NULL)
-	sym = lookup_symbol_aux_block (name, global_block, domain);
+	sym = lookup_symbol_in_block (name, global_block, domain);
     }
   else
     {

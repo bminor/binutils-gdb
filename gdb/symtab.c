@@ -1515,7 +1515,7 @@ lookup_symbol_aux_local (const char *name, const struct block *block,
 
   while (block != static_block)
     {
-      sym = lookup_symbol_aux_block (name, block, domain);
+      sym = lookup_symbol_in_block (name, block, domain);
       if (sym != NULL)
 	return sym;
 
@@ -1567,8 +1567,8 @@ lookup_objfile_from_block (const struct block *block)
 /* See symtab.h.  */
 
 struct symbol *
-lookup_symbol_aux_block (const char *name, const struct block *block,
-			 const domain_enum domain)
+lookup_symbol_in_block (const char *name, const struct block *block,
+			const domain_enum domain)
 {
   struct symbol *sym;
 
@@ -1808,7 +1808,7 @@ lookup_symbol_in_static_block (const char *name,
   const struct block *static_block = block_static_block (block);
 
   if (static_block != NULL)
-    return lookup_symbol_aux_block (name, static_block, domain);
+    return lookup_symbol_in_block (name, static_block, domain);
   else
     return NULL;
 }

@@ -1104,13 +1104,13 @@ extern struct symbol *lookup_symbol_global (const char *name,
 					    const struct block *block,
 					    const domain_enum domain);
 
-/* Lookup a symbol within the block BLOCK.
+/* Lookup a symbol in block BLOCK.
    Upon success sets BLOCK_FOUND and fixes up the symbol's section
    if necessary.  */
 
-extern struct symbol *lookup_symbol_aux_block (const char *name,
-					       const struct block *block,
-					       const domain_enum domain);
+extern struct symbol *lookup_symbol_in_block (const char *name,
+					      const struct block *block,
+					      const domain_enum domain);
 
 /* Look up the `this' symbol for LANG in BLOCK.  Return the symbol if
    found, or NULL if not found.  */
