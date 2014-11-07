@@ -1,5 +1,9 @@
 2014-11-07  Alan Modra  <amodra@gmail.com>
 
+	* aoutx.h (aout_get_external_symbols): Tidy allocation of symbol buffer.
+
+2014-11-07  Alan Modra  <amodra@gmail.com>
+
 	* archive.c (_bfd_slurp_extended_name_table): Revert bfd_get_size check.
 	* coffcode.h (coff_set_alignment_hook): Likewise.
 	(coff_slurp_line_table): Likewise.
