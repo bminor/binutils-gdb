@@ -607,7 +607,7 @@ gdbscm_lookup_global_symbol (SCM name_scm, SCM rest)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      symbol = lookup_symbol_global (name, NULL, domain);
+      symbol = lookup_global_symbol (name, NULL, domain);
     }
   do_cleanups (cleanups);
   GDBSCM_HANDLE_GDB_EXCEPTION (except);

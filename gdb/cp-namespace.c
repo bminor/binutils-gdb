@@ -632,7 +632,7 @@ lookup_symbol_file (const char *name,
     }
   else
     {
-      sym = lookup_symbol_global (name, block, domain);
+      sym = lookup_global_symbol (name, block, domain);
     }
 
   if (sym != NULL)
@@ -692,7 +692,7 @@ lookup_symbol_file (const char *name,
 
       /* Lookup a class named KLASS.  If none is found, there is nothing
 	 more that can be done.  */
-      klass_sym = lookup_symbol_global (klass, block, domain);
+      klass_sym = lookup_global_symbol (klass, block, domain);
       if (klass_sym == NULL)
 	{
 	  do_cleanups (cleanup);

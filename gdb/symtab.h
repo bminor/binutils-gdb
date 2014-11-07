@@ -1096,11 +1096,18 @@ extern struct symbol *lookup_symbol_in_static_block (const char *name,
 						     const struct block *block,
 						     const domain_enum domain);
 
+/* Search all static file-level symbols for NAME from DOMAIN.
+   Upon success sets BLOCK_FOUND and fixes up the symbol's section
+   if necessary.  */
+
+extern struct symbol *lookup_static_symbol (const char *name,
+					    const domain_enum domain);
+
 /* Lookup a symbol in all files' global blocks.
    Upon success sets BLOCK_FOUND and fixes up the symbol's section
    if necessary.  */
 
-extern struct symbol *lookup_symbol_global (const char *name,
+extern struct symbol *lookup_global_symbol (const char *name,
 					    const struct block *block,
 					    const domain_enum domain);
 
@@ -1117,13 +1124,6 @@ extern struct symbol *lookup_symbol_in_block (const char *name,
 
 extern struct symbol *lookup_language_this (const struct language_defn *lang,
 					    const struct block *block);
-
-/* Search all static file-level symbols for NAME from DOMAIN.
-   Upon success sets BLOCK_FOUND and fixes up the symbol's section
-   if necessary.  */
-
-extern struct symbol *lookup_static_symbol (const char *name,
-					    const domain_enum domain);
 
 /* Lookup a [struct, union, enum] by name, within a specified block.  */
 

@@ -1182,7 +1182,7 @@ push_module_name (struct parser_state *ps, struct type *module,
       sym = lookup_symbol_in_static_block (copy, expression_context_block,
 					   VAR_DOMAIN);
       if (sym != NULL)
-	sym = lookup_symbol_global (copy, expression_context_block,
+	sym = lookup_global_symbol (copy, expression_context_block,
 				    VAR_DOMAIN);
 
       if (sym != NULL)

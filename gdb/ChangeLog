@@ -1,5 +1,12 @@
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.c (lookup_global_symbol): Renamed from lookup_symbol_global.
+	All callers updated.
+	* symtab.h (lookup_global_symbol): Update decl.
+	(lookup_static_symbol): Move decl to better location.
+
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (basic_lookup_symbol_nonlocal): Add comment.
 
 2014-11-06  Doug Evans  <xdje42@gmail.com>

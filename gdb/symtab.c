@@ -1800,7 +1800,7 @@ basic_lookup_symbol_nonlocal (const char *name,
   if (sym != NULL)
     return sym;
 
-  return lookup_symbol_global (name, block, domain);
+  return lookup_global_symbol (name, block, domain);
 }
 
 /* See symtab.h.  */
@@ -1861,7 +1861,7 @@ lookup_symbol_global_iterator_cb (struct objfile *objfile,
 /* See symtab.h.  */
 
 struct symbol *
-lookup_symbol_global (const char *name,
+lookup_global_symbol (const char *name,
 		      const struct block *block,
 		      const domain_enum domain)
 {
