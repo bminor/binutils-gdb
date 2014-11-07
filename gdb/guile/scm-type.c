@@ -1199,7 +1199,7 @@ gdbscm_field_baseclass_p (SCM self)
   struct field *field = tyscm_field_smob_to_field (f_smob);
   struct type *type = tyscm_field_smob_containing_type (f_smob);
 
-  if (TYPE_CODE (type) == TYPE_CODE_CLASS)
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     return scm_from_bool (f_smob->field_num < TYPE_N_BASECLASSES (type));
   return SCM_BOOL_F;
 }

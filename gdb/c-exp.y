@@ -1353,12 +1353,12 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 					      expression_context_block); }
 	|	CLASS COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_CLASS, "", 0);
+			  mark_completion_tag (TYPE_CODE_STRUCT, "", 0);
 			  $$ = NULL;
 			}
 	|	CLASS name COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_CLASS, $2.ptr,
+			  mark_completion_tag (TYPE_CODE_STRUCT, $2.ptr,
 					       $2.length);
 			  $$ = NULL;
 			}

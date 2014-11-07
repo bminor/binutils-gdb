@@ -605,10 +605,10 @@ BasicType:
 		{ $$ = lookup_struct (copy_name ($2),
 				      expression_context_block); }
 |	CLASS_KEYWORD COMPLETE
-		{ mark_completion_tag (TYPE_CODE_CLASS, "", 0);
+		{ mark_completion_tag (TYPE_CODE_STRUCT, "", 0);
 		  $$ = NULL; }
 |	CLASS_KEYWORD IdentifierExp COMPLETE
-		{ mark_completion_tag (TYPE_CODE_CLASS, $2.ptr, $2.length);
+		{ mark_completion_tag (TYPE_CODE_STRUCT, $2.ptr, $2.length);
 		  $$ = NULL; }
 |	STRUCT_KEYWORD IdentifierExp
 		{ $$ = lookup_struct (copy_name ($2),

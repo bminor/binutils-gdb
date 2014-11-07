@@ -206,7 +206,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   known_type = value_type (v);
   CHECK_TYPEDEF (known_type);
   /* RTTI works only or class objects.  */
-  if (TYPE_CODE (known_type) != TYPE_CODE_CLASS)
+  if (TYPE_CODE (known_type) != TYPE_CODE_STRUCT)
     return NULL;
 
   /* Plan on this changing in the future as i get around to setting

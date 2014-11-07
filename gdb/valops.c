@@ -735,7 +735,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
       && TYPE_CODE (resolved_type) != TYPE_CODE_REF)
     error (_("Argument to dynamic_cast must be a pointer or reference type"));
   if (TYPE_CODE (TYPE_TARGET_TYPE (resolved_type)) != TYPE_CODE_VOID
-      && TYPE_CODE (TYPE_TARGET_TYPE (resolved_type)) != TYPE_CODE_CLASS)
+      && TYPE_CODE (TYPE_TARGET_TYPE (resolved_type)) != TYPE_CODE_STRUCT)
     error (_("Argument to dynamic_cast must be pointer to class or `void *'"));
 
   class_type = check_typedef (TYPE_TARGET_TYPE (resolved_type));
@@ -748,7 +748,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
       if (TYPE_CODE (arg_type) == TYPE_CODE_PTR)
 	{
 	  arg_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
-	  if (TYPE_CODE (arg_type) != TYPE_CODE_CLASS)
+	  if (TYPE_CODE (arg_type) != TYPE_CODE_STRUCT)
 	    error (_("Argument to dynamic_cast does "
 		     "not have pointer to class type"));
 	}
@@ -761,7 +761,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
     }
   else
     {
-      if (TYPE_CODE (arg_type) != TYPE_CODE_CLASS)
+      if (TYPE_CODE (arg_type) != TYPE_CODE_STRUCT)
 	error (_("Argument to dynamic_cast does not have class type"));
     }
 

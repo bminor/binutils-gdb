@@ -3414,7 +3414,6 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 	}
       break;
     case TYPE_CODE_STRUCT:
-      /* currently same as TYPE_CODE_CLASS.  */
       switch (TYPE_CODE (arg))
 	{
 	case TYPE_CODE_STRUCT:

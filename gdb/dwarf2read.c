@@ -12965,7 +12965,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     }
   else
     {
-      TYPE_CODE (type) = TYPE_CODE_CLASS;
+      TYPE_CODE (type) = TYPE_CODE_STRUCT;
     }
 
   if (cu->language == language_cplus && die->tag == DW_TAG_class_type)

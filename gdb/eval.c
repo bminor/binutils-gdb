@@ -1870,7 +1870,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	get_user_print_options (&opts);
         if (opts.objectprint && TYPE_TARGET_TYPE(type)
-            && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+            && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
           {
             real_type = value_rtti_indirect_type (arg1, &full, &top,
 						  &using_enc);

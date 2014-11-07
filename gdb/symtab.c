@@ -4720,7 +4720,6 @@ make_symbol_completion_type (const char *text, const char *word,
 {
   gdb_assert (code == TYPE_CODE_UNION
 	      || code == TYPE_CODE_STRUCT
-	      || code == TYPE_CODE_CLASS
 	      || code == TYPE_CODE_ENUM);
   return current_language->la_make_symbol_completion_list (text, word, code);
 }
