@@ -1,5 +1,9 @@
 2014-11-07  Alan Modra  <amodra@gmail.com>
 
+	* tekhex.c (tekhex_set_arch_mach): Ignore unknown arch errors.
+
+2014-11-07  Alan Modra  <amodra@gmail.com>
+
 	* tekhex.c (CHUNK_SPAN): Define.
 	(struct data_struct <chunk_init>): Use one byte per span, update
 	all code accessing this field.

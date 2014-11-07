@@ -677,7 +677,9 @@ tekhex_set_arch_mach (bfd *abfd,
 		      enum bfd_architecture arch,
 		      unsigned long machine)
 {
-  return bfd_default_set_arch_mach (abfd, arch, machine);
+  /* Ignore errors about unknown architecture.  */
+  return (bfd_default_set_arch_mach (abfd, arch, machine)
+	  || arch == bfd_arch_unknown);
 }
 
 /* We have to save up all the Tekhexords for a splurge before output.  */
