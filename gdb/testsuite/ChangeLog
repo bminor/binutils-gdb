@@ -1,3 +1,9 @@
+2014-11-07  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17511
+	* gdb.base/sigstep.exp (in_handler_map) <si+advance>: xfail
+	i?86-*-linux*.
+
 2014-11-03  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR c++/17494
