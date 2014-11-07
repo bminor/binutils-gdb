@@ -5004,17 +5004,11 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into subroutine\n");
 
-      if ((ecs->event_thread->control.step_over_calls == STEP_OVER_NONE)
-	  || ((ecs->event_thread->control.step_range_end == 1)
-	      && in_prologue (gdbarch, ecs->event_thread->prev_pc,
-			      ecs->stop_func_start)))
+      if (ecs->event_thread->control.step_over_calls == STEP_OVER_NONE)
 	{
 	  /* I presume that step_over_calls is only 0 when we're
 	     supposed to be stepping at the assembly language level
 	     ("stepi").  Just stop.  */
-	  /* Also, maybe we just did a "nexti" inside a prolog, so we
-	     thought it was a subroutine call but it was not.  Stop as
-	     well.  FENN */
 	  /* And this works the same backward as frontward.  MVS */
 	  end_stepping_range (ecs);
 	  return;

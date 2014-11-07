@@ -1,3 +1,10 @@
+2014-11-07  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (process_event_stop_test) <subroutine check>: Don't
+	check if we did a "nexti" inside a prologue.
+	* symtab.c (in_prologue): Delete function.
+	* symtab.h (in_prologue): Delete declaration.
+
 2014-11-06  Doug Evans  <xdje42@gmail.com>
 
 	* symtab.h (lookup_global_symbol): Improve function comment.
