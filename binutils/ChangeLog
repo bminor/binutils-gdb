@@ -1,3 +1,8 @@
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_dynamic_section): Cast time value to unsigned
+	long to print.
+
 2014-11-07  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17531
