@@ -6997,6 +6997,15 @@ check_prefix:
 	      abort ();
 	    }
 
+	  /* For x32, add a dummy REX_OPCODE prefix for mov/add with
+	     R_X86_64_GOTTPOFF relocation so that linker can safely
+	     perform IE->LE optimization.  */
+	  if (x86_elf_abi == X86_64_X32_ABI
+	      && i.operands == 2
+	      && i.reloc[0] == BFD_RELOC_X86_64_GOTTPOFF
+	      && i.prefix[REX_PREFIX] == 0)
+	    add_prefix (REX_OPCODE);
+
 	  /* The prefix bytes.  */
 	  for (j = ARRAY_SIZE (i.prefix), q = i.prefix; j > 0; j--, q++)
 	    if (*q)

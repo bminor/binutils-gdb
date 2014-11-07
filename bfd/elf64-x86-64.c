@@ -4283,17 +4283,27 @@ direct:
 	      else if (ELF32_R_TYPE (rel->r_info) == R_X86_64_GOTTPOFF)
 		{
 		  /* IE->LE transition:
-		     Originally it can be one of:
+		     For 64bit, originally it can be one of:
 		     movq foo@gottpoff(%rip), %reg
 		     addq foo@gottpoff(%rip), %reg
 		     We change it into:
 		     movq $foo, %reg
 		     leaq foo(%reg), %reg
-		     addq $foo, %reg.  */
+		     addq $foo, %reg.
+		     For 32bit, originally it can be one of:
+		     movq foo@gottpoff(%rip), %reg
+		     addl foo@gottpoff(%rip), %reg
+		     We change it into:
+		     movq $foo, %reg
+		     leal foo(%reg), %reg
+		     addl $foo, %reg. */
 
 		  unsigned int val, type, reg;
 
-		  val = bfd_get_8 (input_bfd, contents + roff - 3);
+		  if (roff >= 3)
+		    val = bfd_get_8 (input_bfd, contents + roff - 3);
+		  else
+		    val = 0;
 		  type = bfd_get_8 (input_bfd, contents + roff - 2);
 		  reg = bfd_get_8 (input_bfd, contents + roff - 1);
 		  reg >>= 3;
@@ -4313,8 +4323,8 @@ direct:
 		    }
 		  else if (reg == 4)
 		    {
-		      /* addq -> addq - addressing with %rsp/%r12 is
-			 special  */
+		      /* addq/addl -> addq/addl - addressing with %rsp/%r12
+			 is special  */
 		      if (val == 0x4c)
 			bfd_put_8 (output_bfd, 0x49,
 				   contents + roff - 3);
@@ -4328,7 +4338,7 @@ direct:
 		    }
 		  else
 		    {
-		      /* addq -> leaq */
+		      /* addq/addl -> leaq/leal */
 		      if (val == 0x4c)
 			bfd_put_8 (output_bfd, 0x4d,
 				   contents + roff - 3);

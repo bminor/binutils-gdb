@@ -1,3 +1,8 @@
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17482
+	* ld-x86-64/tlsie4.dd: Updated.
+
 2014-11-05  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* ld-mips-elf/abiflags-strip10-ph.d: New file.

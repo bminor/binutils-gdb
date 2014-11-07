@@ -1,3 +1,9 @@
+2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17482
+	* gas/i386/ilp32/x32-tls.d: New file.
+	* gas/i386/ilp32/x32-tls.s: Likewise.
+
 2014-05-11  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* gas/mips/elf_arch_mips32r6.d: New file.
