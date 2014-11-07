@@ -1,3 +1,10 @@
+2014-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* objfiles.c (get_objfile_arch): Constify.
+	* objfiles.h (get_objfile_arch): Update prototype.
+	* solib.c (solib_global_lookup): Fetch arch from objfile,
+	not target_gdbarch.
+
 2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-tdep.c (wild_insn): Delete.

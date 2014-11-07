@@ -465,7 +465,7 @@ struct objfile
 
 extern struct objfile *allocate_objfile (bfd *, const char *name, int);
 
-extern struct gdbarch *get_objfile_arch (struct objfile *);
+extern struct gdbarch *get_objfile_arch (const struct objfile *);
 
 extern int entry_point_address_query (CORE_ADDR *entry_p);
 
