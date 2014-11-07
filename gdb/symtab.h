@@ -1104,6 +1104,14 @@ extern struct symbol *lookup_static_symbol (const char *name,
 					    const domain_enum domain);
 
 /* Lookup a symbol in all files' global blocks.
+
+   If BLOCK is non-NULL then it is used for two things:
+   1) If a target-specific lookup routine for libraries exists, then use the
+      routine for the objfile of BLOCK, and
+   2) The objfile of BLOCK is used to assist in determining the search order
+      if the target requires it.
+      See gdbarch_iterate_over_objfiles_in_search_order.
+
    Upon success sets BLOCK_FOUND and fixes up the symbol's section
    if necessary.  */
 
