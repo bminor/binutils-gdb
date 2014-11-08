@@ -2,7 +2,8 @@
 
 	PR ld/17482
 	* config/tc-i386.c (output_insn): Add a dummy REX_OPCODE prefix
-	for structions with R_X86_64_GOTTPOFF relocation for x32 if needed.
+	for instructions with R_X86_64_GOTTPOFF relocation for x32 if
+	needed.
 
 2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
 
