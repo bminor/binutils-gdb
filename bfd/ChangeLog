@@ -1,3 +1,7 @@
+2014-11-08  Alan Modra  <amodra@gmail.com>
+
+	* peXXigen.c (pe_print_idata): Revert last patch, cast lhs instead.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* peXXigen.c (pe_print_idata): Cast to unsigned long in range
