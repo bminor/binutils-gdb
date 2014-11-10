@@ -1,3 +1,9 @@
+2014-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17552
+	* (copy_archive): Clean up temporary files even if an error
+	occurs.
+
 2014-11-06  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17552, binutils/17533
