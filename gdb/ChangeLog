@@ -1,3 +1,7 @@
+2014-11-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* eval.c (evaluate_subexp_standard): Work around GCC bug 63748.
+
 2014-11-07  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (process_event_stop_test) <subroutine check>: Don't
