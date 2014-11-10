@@ -1,3 +1,11 @@
+2014-11-10  Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/17564
+	* gdb.base/symtab-search-order.exp: New file.
+	* gdb.base/symtab-search-order.c: New file.
+	* gdb.base/symtab-search-order-1.c: New file.
+	* gdb.base/symtab-search-order-shlib-1.c: New file.
+
 2014-11-07  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17511

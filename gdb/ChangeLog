@@ -1,3 +1,11 @@
+2014-11-10  Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/17564
+	* symtab.c (lookup_symbol_in_all_objfiles): Delete.
+	(lookup_static_symbol): Move definition to new location and rewrite.
+	(lookup_symbol_in_objfile): New function.
+	(lookup_symbol_global_iterator_cb): Call it.
+
 2014-11-10  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* eval.c (evaluate_subexp_standard): Work around GCC bug 63748.

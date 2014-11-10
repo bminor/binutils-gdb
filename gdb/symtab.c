@@ -80,11 +80,6 @@ struct symbol *lookup_local_symbol (const char *name,
 				    enum language language);
 
 static
-struct symbol *lookup_symbol_in_all_objfiles (int block_index,
-					      const char *name,
-					      const domain_enum domain);
-
-static
 struct symbol *lookup_symbol_via_quick_fns (struct objfile *objfile,
 					    int block_index,
 					    const char *name,
@@ -1474,28 +1469,6 @@ lookup_symbol_aux (const char *name, const struct block *block,
   return lookup_static_symbol (name, domain);
 }
 
-/* See symtab.h.  */
-
-struct symbol *
-lookup_static_symbol (const char *name, const domain_enum domain)
-{
-  struct objfile *objfile;
-  struct symbol *sym;
-
-  sym = lookup_symbol_in_all_objfiles (STATIC_BLOCK, name, domain);
-  if (sym != NULL)
-    return sym;
-
-  ALL_OBJFILES (objfile)
-  {
-    sym = lookup_symbol_via_quick_fns (objfile, STATIC_BLOCK, name, domain);
-    if (sym != NULL)
-      return sym;
-  }
-
-  return NULL;
-}
-
 /* Check to see if the symbol is defined in BLOCK or its superiors.
    Don't search STATIC_BLOCK or GLOBAL_BLOCK.  */
 
@@ -1650,27 +1623,6 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
   return NULL;
 }
 
-/* Wrapper around lookup_symbol_in_objfile_symtabs to search all objfiles.
-   Returns the first match found.  */
-
-static struct symbol *
-lookup_symbol_in_all_objfiles (int block_index, const char *name,
-			       const domain_enum domain)
-{
-  struct symbol *sym;
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-  {
-    sym = lookup_symbol_in_objfile_symtabs (objfile, block_index, name,
-					    domain);
-    if (sym)
-      return sym;
-  }
-
-  return NULL;
-}
-
 /* Wrapper around lookup_symbol_in_objfile_symtabs for search_symbols.
    Look up LINKAGE_NAME in DOMAIN in the global and static blocks of OBJFILE
    and all related objfiles.  */
@@ -1774,7 +1726,7 @@ basic_lookup_symbol_nonlocal (const char *name,
      not it would be appropriate to search the current global block
      here as well.  (That's what this code used to do before the
      is_a_field_of_this check was moved up.)  On the one hand, it's
-     redundant with the lookup_symbol_in_all_objfiles search that happens
+     redundant with the lookup in all objfiles search that happens
      next.  On the other hand, if decode_line_1 is passed an argument
      like filename:var, then the user presumably wants 'var' to be
      searched for in filename.  On the third hand, there shouldn't be
@@ -1818,6 +1770,46 @@ lookup_symbol_in_static_block (const char *name,
     return NULL;
 }
 
+/* Perform the standard symbol lookup of NAME in OBJFILE:
+   1) First search expanded symtabs, and if not found
+   2) Search the "quick" symtabs (partial or .gdb_index).
+   BLOCK_INDEX is one of GLOBAL_BLOCK or STATIC_BLOCK.  */
+
+static struct symbol *
+lookup_symbol_in_objfile (struct objfile *objfile, int block_index,
+			  const char *name, const domain_enum domain)
+{
+  struct symbol *result;
+
+  result = lookup_symbol_in_objfile_symtabs (objfile, block_index,
+					     name, domain);
+  if (result == NULL)
+    {
+      result = lookup_symbol_via_quick_fns (objfile, block_index,
+					    name, domain);
+    }
+
+  return result;
+}
+
+/* See symtab.h.  */
+
+struct symbol *
+lookup_static_symbol (const char *name, const domain_enum domain)
+{
+  struct objfile *objfile;
+  struct symbol *result;
+
+  ALL_OBJFILES (objfile)
+    {
+      result = lookup_symbol_in_objfile (objfile, STATIC_BLOCK, name, domain);
+      if (result != NULL)
+	return result;
+    }
+
+  return NULL;
+}
+
 /* Private data to be used with lookup_symbol_global_iterator_cb.  */
 
 struct global_sym_lookup_data
@@ -1847,11 +1839,8 @@ lookup_symbol_global_iterator_cb (struct objfile *objfile,
 
   gdb_assert (data->result == NULL);
 
-  data->result = lookup_symbol_in_objfile_symtabs (objfile, GLOBAL_BLOCK,
-						   data->name, data->domain);
-  if (data->result == NULL)
-    data->result = lookup_symbol_via_quick_fns (objfile, GLOBAL_BLOCK,
-						data->name, data->domain);
+  data->result = lookup_symbol_in_objfile (objfile, GLOBAL_BLOCK,
+					   data->name, data->domain);
 
   /* If we found a match, tell the iterator to stop.  Otherwise,
      keep going.  */
