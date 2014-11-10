@@ -6467,7 +6467,11 @@ ia64_process_unwind (FILE * file)
 	  aux.symtab = GET_ELF_SYMBOLS (file, sec, & aux.nsyms);
 
 	  strsec = section_headers + sec->sh_link;
-	  assert (aux.strtab == NULL);
+	  if (aux.strtab != NULL)
+	    {
+	      error (_("Multiple auxillary string tables encountered\n"));
+	      free (aux.strtab);
+	    }
 	  aux.strtab = (char *) get_data (NULL, file, strsec->sh_offset,
                                           1, strsec->sh_size,
                                           _("string table"));
@@ -6485,13 +6489,16 @@ ia64_process_unwind (FILE * file)
       char * suffix;
       size_t len, len2;
 
-      for (i = unwstart, sec = section_headers + unwstart;
+      for (i = unwstart, sec = section_headers + unwstart, unwsec = NULL;
 	   i < elf_header.e_shnum; ++i, ++sec)
 	if (sec->sh_type == SHT_IA_64_UNWIND)
 	  {
 	    unwsec = sec;
 	    break;
 	  }
+      /* We have already counted the number of SHT_IA64_UNWIND
+	 sections so the loop above should never fail.  */
+      assert (unwsec != NULL);
 
       unwstart = i + 1;
       len = sizeof (ELF_STRING_ia64_unwind_once) - 1;
@@ -6499,18 +6506,26 @@ ia64_process_unwind (FILE * file)
       if ((unwsec->sh_flags & SHF_GROUP) != 0)
 	{
 	  /* We need to find which section group it is in.  */
-	  struct group_list * g = section_headers_groups [i]->root;
+	  struct group_list * g;
 
-	  for (; g != NULL; g = g->next)
-	    {
-	      sec = section_headers + g->section_index;
-
-	      if (streq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info))
-		break;
-	    }
-
-	  if (g == NULL)
+	  if (section_headers_groups == NULL
+	      || section_headers_groups [i] == NULL)
 	    i = elf_header.e_shnum;
+	  else
+	    {
+	      g = section_headers_groups [i]->root;
+
+	      for (; g != NULL; g = g->next)
+		{
+		  sec = section_headers + g->section_index;
+
+		  if (streq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info))
+		    break;
+		}
+
+	      if (g == NULL)
+		i = elf_header.e_shnum;
+	    }
 	}
       else if (strneq (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind_once, len))
 	{
@@ -6552,8 +6567,8 @@ ia64_process_unwind (FILE * file)
 	{
 	  aux.info_addr = sec->sh_addr;
 	  aux.info = (unsigned char *) get_data (NULL, file, sec->sh_offset, 1,
-                                                 sec->sh_size,
-                                                 _("unwind info"));
+						 sec->sh_size,
+						 _("unwind info"));
 	  aux.info_size = aux.info == NULL ? 0 : sec->sh_size;
 
 	  printf (_("\nUnwind section "));
@@ -6878,7 +6893,11 @@ hppa_process_unwind (FILE * file)
 	  aux.symtab = GET_ELF_SYMBOLS (file, sec, & aux.nsyms);
 
 	  strsec = section_headers + sec->sh_link;
-	  assert (aux.strtab == NULL);
+	  if (aux.strtab != NULL)
+	    {
+	      error (_("Multiple auxillary string tables encountered\n"));
+	      free (aux.strtab);
+	    }
 	  aux.strtab = (char *) get_data (NULL, file, strsec->sh_offset,
                                           1, strsec->sh_size,
                                           _("string table"));
@@ -7359,11 +7378,15 @@ decode_arm_unwind_bytecode (struct arm_unw_aux_info *aux,
 	      if ((buf[i] & 0x80) == 0)
 		break;
 	    }
-	  assert (i < sizeof (buf));
-	  offset = read_uleb128 (buf, &len, buf + i + 1);
-	  assert (len == i + 1);
-	  offset = offset * 4 + 0x204;
-	  printf ("vsp = vsp + %ld", offset);
+	  if (i == sizeof (buf))
+	    printf (_("corrupt change to vsp"));
+	  else
+	    {
+	      offset = read_uleb128 (buf, &len, buf + i + 1);
+	      assert (len == i + 1);
+	      offset = offset * 4 + 0x204;
+	      printf ("vsp = vsp + %ld", offset);
+	    }
 	}
       else if (op == 0xb3 || op == 0xc8 || op == 0xc9)
 	{
@@ -7880,7 +7903,7 @@ arm_process_unwind (FILE *file)
 	  /* PR binutils/17531 file: 011-12666-0.004.  */
 	  if (aux.strtab != NULL)
 	    {
-	      warn (_("Multiple string tables found in file.\n"));
+	      error (_("Multiple string tables found in file.\n"));
 	      free (aux.strtab);
 	    }
 	  aux.strtab = get_data (NULL, file, strsec->sh_offset,
@@ -10469,8 +10492,9 @@ process_syminfo (FILE * file ATTRIBUTE_UNUSED)
       unsigned short int flags = dynamic_syminfo[i].si_flags;
 
       printf ("%4d: ", i);
-      assert (i <  num_dynamic_syms);
-      if (VALID_DYNAMIC_NAME (dynamic_symbols[i].st_name))
+      if (i >= num_dynamic_syms)
+	printf (_("<corrupt index>"));
+      else if (VALID_DYNAMIC_NAME (dynamic_symbols[i].st_name))
 	print_symbol (30, GET_DYNAMIC_NAME (dynamic_symbols[i].st_name));
       else
 	printf (_("<corrupt: %19ld>"), dynamic_symbols[i].st_name);
@@ -11321,9 +11345,17 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 #else
 	  printf ("  [%6Ix]  ", (size_t) (data - start));
 #endif
-	  print_symbol ((int) maxlen, data);
-	  putchar ('\n');
-	  data += strnlen (data, maxlen);
+	  if (maxlen > 0)
+	    {
+	      print_symbol ((int) maxlen, data);
+	      putchar ('\n');
+	      data += strnlen (data, maxlen);
+	    }
+	  else
+	    {
+	      printf (_("<corrupt>\n"));
+	      data = end;
+	    }
 	  some_strings_shown = TRUE;
 	}
     }
@@ -11764,7 +11796,7 @@ display_tag_value (int tag,
 
   if (p >= end)
     {
-      warn (_("corrupt tag\n"));
+      warn (_("<corrupt tag>\n"));
     }
   else if (tag & 1)
     {
@@ -11772,9 +11804,17 @@ display_tag_value (int tag,
       size_t maxlen = (end - p) - 1;
 
       putchar ('"');
-      print_symbol ((int) maxlen, (const char *) p);
+      if (maxlen > 0)
+	{
+	  print_symbol ((int) maxlen, (const char *) p);
+	  p += strnlen ((char *) p, maxlen) + 1;
+	}
+      else
+	{
+	  printf (_("<corrupt string tag>"));
+	  p = (unsigned char *) end;
+	}
       printf ("\"\n");
-      p += strnlen ((char *) p, maxlen) + 1;
     }
   else
     {
@@ -11785,6 +11825,7 @@ display_tag_value (int tag,
       printf ("%ld (0x%lx)\n", val, val);
     }
 
+  assert (p <= end);
   return p;
 }
 
@@ -11993,15 +12034,22 @@ display_arm_attribute (unsigned char * p,
 
 	    case 32: /* Tag_compatibility.  */
 	      {
-		size_t maxlen;
-
 		val = read_uleb128 (p, &len, end);
 		p += len;
-		maxlen = (end - p) - 1;
 		printf (_("flag = %d, vendor = "), val);
-		print_symbol ((int) maxlen, (const char *) p);
+		if (p < end - 1)
+		  {
+		    size_t maxlen = (end - p) - 1;
+
+		    print_symbol ((int) maxlen, (const char *) p);
+		    p += strnlen ((char *) p, maxlen) + 1;
+		  }
+		else
+		  {
+		    printf (_("<corrupt>"));
+		    p = (unsigned char *) end;
+		  }
 		putchar ('\n');
-		p += strnlen ((char *) p, maxlen) + 1;
 	      }
 	      break;
 
@@ -12081,11 +12129,19 @@ display_gnu_attribute (unsigned char * p,
 	}
       else
 	{
-	  size_t maxlen = (end - p) - 1;
+	  if (p < end - 1)
+	    {
+	      size_t maxlen = (end - p) - 1;
 
-	  print_symbol ((int) maxlen, (const char *) p);
+	      print_symbol ((int) maxlen, (const char *) p);
+	      p += strnlen ((char *) p, maxlen) + 1;
+	    }
+	  else
+	    {
+	      printf (_("<corrupt>"));
+	      p = (unsigned char *) end;
+	    }
 	  putchar ('\n');
-	  p += strnlen ((char *) p, maxlen) + 1;
 	}
       return p;
     }
@@ -12583,29 +12639,42 @@ display_tic6x_attribute (unsigned char * p,
 
     case Tag_ABI_compatibility:
       {
-	size_t maxlen;
-
 	val = read_uleb128 (p, &len, end);
 	p += len;
 	printf ("  Tag_ABI_compatibility: ");
-	maxlen = (end - p) - 1;
 	printf (_("flag = %d, vendor = "), val);
-	print_symbol ((int) maxlen, (const char *) p);
+	if (p < end - 1)
+	  {
+	    size_t maxlen = (end - p) - 1;
+
+	    print_symbol ((int) maxlen, (const char *) p);
+	    p += strnlen ((char *) p, maxlen) + 1;
+	  }
+	else
+	  {
+	    printf (_("<corrupt>"));
+	    p = (unsigned char *) end;
+	  }
 	putchar ('\n');
-	p += strnlen ((char *) p, maxlen) + 1;
 	return p;
       }
 
     case Tag_ABI_conformance:
       {
-	size_t maxlen;
+	printf ("  Tag_ABI_conformance: \"");
+	if (p < end - 1)
+	  {
+	    size_t maxlen = (end - p) - 1;
 
-	printf ("  Tag_ABI_conformance: ");
-	maxlen = (end - p) - 1;
-	putchar ('"');
-	print_symbol ((int) maxlen, (const char *) p);
+	    print_symbol ((int) maxlen, (const char *) p);
+	    p += strnlen ((char *) p, maxlen) + 1;
+	  }
+	else
+	  {
+	    printf (_("<corrupt>"));
+	    p = (unsigned char *) end;
+	  }
 	printf ("\"\n");
-	p += strnlen ((char *) p, maxlen) + 1;
 	return p;
       }
     }
@@ -12716,13 +12785,20 @@ display_msp430x_attribute (unsigned char * p,
 
       if (tag & 1)
 	{
-	  size_t maxlen;
-
-	  maxlen = (end - p) - 1;
 	  putchar ('"');
-	  print_symbol ((int) maxlen, (const char *) p);
+	  if (p < end - 1)
+	    {
+	      size_t maxlen = (end - p) - 1;
+
+	      print_symbol ((int) maxlen, (const char *) p);
+	      p += strnlen ((char *) p, maxlen) + 1;
+	    }
+	  else
+	    {
+	      printf (_("<corrupt>"));
+	      p = (unsigned char *) end;
+	    }
 	  printf ("\"\n");
-	  p += strnlen ((char *) p, maxlen) + 1;
 	}
       else
 	{
@@ -12733,6 +12809,7 @@ display_msp430x_attribute (unsigned char * p,
       break;
    }
 
+  assert (p <= end);
   return p;
 }
 

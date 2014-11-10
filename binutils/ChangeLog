@@ -1,5 +1,20 @@
 2014-11-10  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17531
+	* (ia64_process_unwind): Replace assertion with an error message.
+	Add range checking for group section indicies.
+	(hppa_process_unwind): Replace assertion with an error message.
+	(process_syminfo): Likewise.
+	(decode_arm_unwind_bytecode): Add range checking.
+	(dump_section_as_strings): Add more string range checking.
+	(display_tag_value): Likewise.
+	(display_arm_attribute): Likewise.
+	(display_gnu_attribute): Likewise.
+	(display_tic6x_attribute): Likewise.
+	(display_msp430x_attribute): Likewise.
+
+2014-11-10  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17552
 	* (copy_archive): Clean up temporary files even if an error
 	occurs.
