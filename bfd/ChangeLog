@@ -1,3 +1,8 @@
+2014-11-10  James Cowgill  <James.Cowgill@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_section_processing): don't force small
+	data sections to be PROGBITS
+
 2014-11-10  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17521
