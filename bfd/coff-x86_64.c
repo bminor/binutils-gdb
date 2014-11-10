@@ -448,6 +448,8 @@ static reloc_howto_type howto_table[] =
 	 PCRELOFFSET)		/* pcrel_offset */
 };
 
+#define NUM_HOWTOS ARRAY_SIZE (howto_table)
+
 /* Turn a howto into a reloc  nunmber */
 
 #define SELECT_RELOC(x,howto) { x.r_type = howto->type; }
@@ -456,7 +458,7 @@ static reloc_howto_type howto_table[] =
 
 #define RTYPE2HOWTO(cache_ptr, dst)		\
   ((cache_ptr)->howto =				\
-   ((dst)->r_type < ARRAY_SIZE (howto_table))	\
+   ((dst)->r_type < NUM_HOWTOS)			\
     ? howto_table + (dst)->r_type		\
     : NULL)
 
@@ -496,7 +498,8 @@ static reloc_howto_type howto_table[] =
       cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
     else							\
       cache_ptr->addend = 0;					\
-    if (ptr && howto_table[reloc.r_type].pc_relative)		\
+    if (ptr && reloc.r_type < NUM_HOWTOS			\
+	&& howto_table[reloc.r_type].pc_relative)		\
       cache_ptr->addend += asect->vma;				\
   }
 
@@ -546,7 +549,7 @@ coff_amd64_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 {
   reloc_howto_type *howto;
 
-  if (rel->r_type >= ARRAY_SIZE (howto_table))
+  if (rel->r_type >= NUM_HOWTOS)
     {
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -689,7 +692,7 @@ coff_amd64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = 0; i < sizeof (howto_table) / sizeof (howto_table[0]); i++)
+  for (i = 0; i < NUM_HOWTOS; i++)
     if (howto_table[i].name != NULL
 	&& strcasecmp (howto_table[i].name, r_name) == 0)
       return &howto_table[i];

@@ -1,3 +1,40 @@
+2014-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17521
+	* coff-i386.c (NUM_HOWTOS): New define.
+	(RTYPE2HOWTO): Use it.
+	(coff_i386_rtype_to_howto): Likewise.
+	(coff_i386_reloc_name_lookup): Likewise.
+	(CALC_ADDEND): Check that reloc r_type field is valid.
+	* coff-x86_64.c (NUM_HOWTOS): New define.
+	(RTYPE2HOWTO): Use it.
+	(coff_amd64_rtype_to_howto): Likewise.
+	(coff_amd64_reloc_name_lookup): Likewise.
+	(CALC_ADDEND): Check that reloc r_type field is valid.
+	* coffcode.h (coff_slurp_line_table): Check for symbol table
+	indexing underflow.
+	(coff_slurp_symbol_table): Use zalloc to ensure that all table
+	entries are initialised.
+	* coffgen.c (_bfd_coff_read_string_table): Initialise unused bits
+	in the string table.  Also ensure that the table is 0 terminated.
+	(coff_get_normalized_symtab): Check for symbol table indexing
+	underflow.
+	* opncls.c (bfd_alloc): Catch the case where a small negative size
+	can result in only 1 byte being allocated.
+	(bfd_alloc2): Use bfd_alloc.
+	* pe-mips.c (NUM_HOWTOS): New define.
+	(coff_mips_reloc_name_lookup): Use it.
+	(CALC_ADDEND): Check that reloc r_type field is valid.
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Initialise unused entries
+	in the DataDirectory.
+	(pe_print_idata): Avoid reading beyond the end of the data block
+	wen printing strings.
+	(pe_print_edata): Likewise.
+	Check for table indexing underflow.
+	* peicode.h (pe_mkobject): Initialise the pe_opthdr field.
+	(pe_bfd_object_p): Allocate and initialize enough space to hold a
+	PEAOUTHDR, even if the opt_hdr field specified less.
+
 2014-11-08  Alan Modra  <amodra@gmail.com>
 
 	* peXXigen.c (pe_print_idata): Revert last patch, cast lhs instead.

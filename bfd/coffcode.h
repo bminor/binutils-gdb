@@ -4032,8 +4032,6 @@ coff_write_object_contents (bfd * abfd)
     internal_f.f_flags |= F_DYNLOAD;
 #endif
 
-  memset (&internal_a, 0, sizeof internal_a);
-
   /* Set up architecture-dependent stuff.  */
   {
     unsigned int magic = 0;
@@ -4569,8 +4567,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 	  /* PR 17512 file: 078-10659-0.004  */
 	  if (sym < obj_symbols (abfd)
-	      || sym > obj_symbols (abfd)
-	      + obj_raw_syment_count (abfd) * sizeof (coff_symbol_type))
+	      || sym > obj_symbols (abfd) + obj_raw_syment_count (abfd))
 	    sym = NULL;
 
 	  cache_ptr->u.sym = (asymbol *) sym;
@@ -4683,7 +4680,7 @@ coff_slurp_symbol_table (bfd * abfd)
 
   amt = obj_raw_syment_count (abfd);
   amt *= sizeof (unsigned int);
-  table_ptr = (unsigned int *) bfd_alloc (abfd, amt);
+  table_ptr = (unsigned int *) bfd_zalloc (abfd, amt);
 
   if (table_ptr == NULL)
     return FALSE;
@@ -4697,8 +4694,8 @@ coff_slurp_symbol_table (bfd * abfd)
 	{
 	  combined_entry_type *src = native_symbols + this_index;
 	  table_ptr[this_index] = number_of_symbols;
-	  dst->symbol.the_bfd = abfd;
 
+	  dst->symbol.the_bfd = abfd;
 	  dst->symbol.name = (char *) (src->u.syment._n._n_n._n_offset);
 	  /* We use the native name field to point to the cached field.  */
 	  src->u.syment._n._n_n._n_zeroes = (bfd_hostptr_t) dst;

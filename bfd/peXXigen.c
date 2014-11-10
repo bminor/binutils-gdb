@@ -458,6 +458,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   aouthdr_int->entry = GET_AOUTHDR_ENTRY (abfd, aouthdr_ext->entry);
   aouthdr_int->text_start =
     GET_AOUTHDR_TEXT_START (abfd, aouthdr_ext->text_start);
+
 #if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
   /* PE32+ does not have data_start member!  */
   aouthdr_int->data_start =
@@ -505,7 +506,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
     int idx;
 
     /* PR 17512: Corrupt PE binaries can cause seg-faults.  */
-    if (a->NumberOfRvaAndSizes > 16)
+    if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
       {
 	(*_bfd_error_handler)
 	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
@@ -528,6 +529,13 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
 	    H_GET_32 (abfd, src->DataDirectory[idx][0]);
 	else
 	  a->DataDirectory[idx].VirtualAddress = 0;
+      }
+
+    while (idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
+      {
+	a->DataDirectory[idx].Size = 0;
+	a->DataDirectory[idx].VirtualAddress = 0;
+	idx ++;
       }
   }
 
@@ -772,7 +780,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   {
     int idx;
 
-    for (idx = 0; idx < 16; idx++)
+    for (idx = 0; idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; idx++)
       {
 	H_PUT_32 (abfd, extra->DataDirectory[idx].VirtualAddress,
 		  aouthdr_out->DataDirectory[idx][0]);
@@ -1391,7 +1399,9 @@ pe_print_idata (bfd * abfd, void * vfile)
         break;
 
       dll = (char *) data + dll_name - adj;
-      fprintf (file, _("\n\tDLL Name: %s\n"), dll);
+      /* PR 17512 file: 078-12277-0.004.  */
+      bfd_size_type maxlen = (char *)(data + datasize) - dll - 1;
+      fprintf (file, _("\n\tDLL Name: %.*s\n"), (int) maxlen, dll);
 
       if (hint_addr != 0)
 	{
@@ -1720,7 +1730,9 @@ pe_print_edata (bfd * abfd, void * vfile)
 	  edt.base);
 
   /* PR 17512: Handle corrupt PE binaries.  */
-  if (edt.eat_addr + (edt.num_functions * 4) - adj >= datasize)
+  if (edt.eat_addr + (edt.num_functions * 4) - adj >= datasize
+      /* PR 17512 file: 140-165018-0.004.  */
+      || data + edt.eat_addr - adj < data)
     fprintf (file, _("\tInvalid Export Address Table rva (0x%lx) or entry count (0x%lx)\n"),
 	     (long) edt.eat_addr,
 	     (long) edt.num_functions);
@@ -1736,11 +1748,12 @@ pe_print_edata (bfd * abfd, void * vfile)
 	  /* This rva is to a name (forwarding function) in our section.  */
 	  /* Should locate a function descriptor.  */
 	  fprintf (file,
-		   "\t[%4ld] +base[%4ld] %04lx %s -- %s\n",
+		   "\t[%4ld] +base[%4ld] %04lx %s -- %.*s\n",
 		   (long) i,
 		   (long) (i + edt.base),
 		   (unsigned long) eat_member,
 		   _("Forwarder RVA"),
+		   (int)(datasize - (eat_member - adj)),
 		   data + eat_member - adj);
 	}
       else
@@ -1761,11 +1774,14 @@ pe_print_edata (bfd * abfd, void * vfile)
 	   _("\n[Ordinal/Name Pointer] Table\n"));
 
   /* PR 17512: Handle corrupt PE binaries.  */
-  if (edt.npt_addr + (edt.num_names * 4) - adj >= datasize)
+  if (edt.npt_addr + (edt.num_names * 4) - adj >= datasize
+      || (data + edt.npt_addr - adj) < data)
     fprintf (file, _("\tInvalid Name Pointer Table rva (0x%lx) or entry count (0x%lx)\n"),
 	     (long) edt.npt_addr,
 	     (long) edt.num_names);
-  else if (edt.ot_addr + (edt.num_names * 2) - adj >= datasize)
+  /* PR 17512: file: 140-147171-0.004.  */
+  else if (edt.ot_addr + (edt.num_names * 2) - adj >= datasize
+	   || data + edt.ot_addr - adj < data)
     fprintf (file, _("\tInvalid Ordinal Table rva (0x%lx) or entry count (0x%lx)\n"),
 	     (long) edt.ot_addr,
 	     (long) edt.num_names);
@@ -1786,7 +1802,8 @@ pe_print_edata (bfd * abfd, void * vfile)
 	{
 	  char * name = (char *) data + name_ptr - adj;
 
-	  fprintf (file, "\t[%4ld] %s\n", (long) ord, name);
+	  fprintf (file, "\t[%4ld] %.*s\n", (long) ord,
+		   (int)((char *)(data + datasize) - name), name);
 	}
     }
 

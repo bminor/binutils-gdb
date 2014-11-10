@@ -1690,7 +1690,13 @@ _bfd_coff_read_string_table (bfd *abfd)
       return NULL;
     }
 
-  strings = (char *) bfd_malloc (strsize);
+  strings = (char *) bfd_malloc (strsize + 1);
+  /* PR 17521 file: 079-54929-0.004.
+     A corrupt file could contain an index that points into the first
+     STRING_SIZE_SIZE bytes of the string table, so make sure that
+     they are zero.  */
+  memset (strings, 0, STRING_SIZE_SIZE);
+
   if (strings == NULL)
     return NULL;
 
@@ -1703,7 +1709,8 @@ _bfd_coff_read_string_table (bfd *abfd)
 
   obj_coff_strings (abfd) = strings;
   obj_coff_strings_len (abfd) = strsize;
-
+  /* Terminate the string table, just in case.  */
+  strings[strsize] = 0;
   return strings;
 }
 
@@ -1884,7 +1891,8 @@ coff_get_normalized_symtab (bfd *abfd)
 		  if (string_table == NULL)
 		    return NULL;
 		}
-	      if (internal_ptr->u.syment._n._n_n._n_offset >= obj_coff_strings_len (abfd))
+	      if (internal_ptr->u.syment._n._n_n._n_offset >= obj_coff_strings_len (abfd)
+		  || string_table + internal_ptr->u.syment._n._n_n._n_offset < string_table)
 		internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
 	      else
 		internal_ptr->u.syment._n._n_n._n_offset =
@@ -1901,7 +1909,8 @@ coff_get_normalized_symtab (bfd *abfd)
 		{
 		  BFD_ASSERT (debug_sec != NULL);
 		  /* PR binutils/17512: Catch out of range offsets into the debug data.  */
-		  if (internal_ptr->u.syment._n._n_n._n_offset > debug_sec->size)
+		  if (internal_ptr->u.syment._n._n_n._n_offset > debug_sec->size
+		      || debug_sec_data + internal_ptr->u.syment._n._n_n._n_offset < debug_sec_data)
 		    internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
 		  else
 		    internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t)

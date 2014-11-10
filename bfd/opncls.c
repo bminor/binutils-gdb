@@ -937,14 +937,19 @@ void *
 bfd_alloc (bfd *abfd, bfd_size_type size)
 {
   void *ret;
+  unsigned long ul_size = (unsigned long) size;
 
-  if (size != (unsigned long) size)
+  if (size != ul_size
+      /* A small negative size can result in objalloc_alloc allocating just
+	 1 byte of memory, but the caller will be expecting more.  So catch
+	 this case here.  */
+      || (size != 0 && (((ul_size + OBJALLOC_ALIGN - 1) &~ (OBJALLOC_ALIGN - 1)) == 0)))
     {
       bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
-
-  ret = objalloc_alloc ((struct objalloc *) abfd->memory, (unsigned long) size);
+							
+  ret = objalloc_alloc ((struct objalloc *) abfd->memory, ul_size);
   if (ret == NULL)
     bfd_set_error (bfd_error_no_memory);
   return ret;
@@ -965,8 +970,6 @@ DESCRIPTION
 void *
 bfd_alloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size)
 {
-  void *ret;
-
   if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
       && size != 0
       && nmemb > ~(bfd_size_type) 0 / size)
@@ -975,18 +978,7 @@ bfd_alloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size)
       return NULL;
     }
 
-  size *= nmemb;
-
-  if (size != (unsigned long) size)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
-  ret = objalloc_alloc ((struct objalloc *) abfd->memory, (unsigned long) size);
-  if (ret == NULL)
-    bfd_set_error (bfd_error_no_memory);
-  return ret;
+  return bfd_alloc (abfd, size * nmemb);
 }
 
 /*
