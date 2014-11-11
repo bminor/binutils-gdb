@@ -4613,7 +4613,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  alent **p = func_table;
 	  unsigned int i;
 
-	  for (i = 0; i < counter; i++)
+	  for (i = 0; i < asect->lineno_count; i++)
 	    if (lineno_cache[i].line_number == 0)
 	      *p++ = &lineno_cache[i];
 

@@ -1,6 +1,12 @@
 2014-11-11  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Use updated lineno_count
+	when building func_table.
+
+2014-11-11  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17512
 	* coffcode.h (coff_slurp_line_table): Don't bfd_zalloc, just
 	memset the particular bits we need.  Update src after hitting loop
 	"continue".  Don't count lineno omitted due to invalid symbols in
@@ -8,6 +14,7 @@
 	lineno.  Don't both allocating terminator in n_lineno_cache.
 	Redirect sym->lineno pointer to where n_lineno_cache will be
 	copied, and free n_lineno_cache.
+
 	* pe-mips.c (NUM_HOWTOS): Typo fix.
 
 2014-11-11  Alan Modra  <amodra@gmail.com>
