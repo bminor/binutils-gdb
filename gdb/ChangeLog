@@ -1,5 +1,9 @@
 2014-11-10  Doug Evans  <xdje42@gmail.com>
 
+	* source.c (select_source_symtab): Rewrite to use ALL_SYMTABS.
+
+2014-11-10  Doug Evans  <xdje42@gmail.com>
+
 	PR symtab/17564
 	* symtab.c (lookup_symbol_in_all_objfiles): Delete.
 	(lookup_static_symbol): Move definition to new location and rewrite.
