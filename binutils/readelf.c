@@ -12054,7 +12054,9 @@ display_arm_attribute (unsigned char * p,
 	      break;
 
 	    case 64: /* Tag_nodefaults.  */
-	      p++;
+	      /* PR 17531: file: 001-505008-0.01.  */
+	      if (p < end)
+		p++;
 	      printf (_("True\n"));
 	      break;
 
