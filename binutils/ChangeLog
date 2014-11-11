@@ -1,5 +1,9 @@
 2014-11-11  Nick Clifton  <nickc@redhat.com>
 
+	* po/fr.po: Updated French translation.
+
+2014-11-11  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17531
 	* readelf.c (display_arm_attribute): Avoid reading off the end of
 	the buffer when processing a Tag_nodefaults.
