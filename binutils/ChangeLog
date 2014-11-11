@@ -1,5 +1,32 @@
 2014-11-11  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17531
+	* binutils/readelf.c (dynamic_nent): Change type to size_t.
+	(slurp_rela_relocs): Use size_t type for nrelas.
+	(slurp_rel_relocs): Likewise.
+	(get_program_headers): Improve out of memory error message.
+	(get_32bit_section_headers): Likewise.
+	(get_32bit_section_headers): Likewise.
+	(get_64bit_section_headers): Likewise.
+	(get_32bit_elf_symbols): Likewise.
+	(get_64bit_elf_symbols): Likewise.
+	(process_section_groups): Likewise.
+	(get_32bit_dynamic_section): Likewise.
+	(get_64bit_dynamic_section): Likewise.
+	(process_dynamic_section): Likewise.
+	(process_version_sections): Likewise.
+	(get_symbol_index_type): Likewise.
+	(process_mips_specific): Likewise.
+	(process_corefile_note_segment): Likewise.
+	(process_version_sections): Use size_t type for total.
+	(get_dynamic_data): Change type of number parameter to size_t.
+	Improve out of memory error messages.
+	(process_symbol_table): Change type of nbuckets and nchains to
+	size_t.  Skip processing of sections headers if there are none.
+	Improve out of memory error messages.
+
+2014-11-11  Nick Clifton  <nickc@redhat.com>
+
 	* po/fr.po: Updated French translation.
 
 2014-11-11  Nick Clifton  <nickc@redhat.com>

@@ -170,7 +170,7 @@ static unsigned long archive_file_size;
 static bfd_size_type current_file_size;
 static unsigned long dynamic_addr;
 static bfd_size_type dynamic_size;
-static unsigned int dynamic_nent;
+static size_t dynamic_nent;
 static char * dynamic_strings;
 static unsigned long dynamic_strings_length;
 static char * string_table;
@@ -777,7 +777,7 @@ slurp_rela_relocs (FILE * file,
 		   unsigned long * nrelasp)
 {
   Elf_Internal_Rela * relas;
-  unsigned long nrelas;
+  size_t nrelas;
   unsigned int i;
 
   if (is_32bit_elf)
@@ -875,7 +875,7 @@ slurp_rel_relocs (FILE * file,
 		  unsigned long * nrelsp)
 {
   Elf_Internal_Rela * rels;
-  unsigned long nrels;
+  size_t nrels;
   unsigned int i;
 
   if (is_32bit_elf)
@@ -4293,7 +4293,8 @@ get_program_headers (FILE * file)
 
   if (phdrs == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory reading %u program headers\n"),
+	     elf_header.e_phnum);
       return 0;
     }
 
@@ -4627,7 +4628,7 @@ get_32bit_section_headers (FILE * file, bfd_boolean probe)
   if (section_headers == NULL)
     {
       if (!probe)
-	error (_("Out of memory\n"));
+	error (_("Out of memory reading %u section headers\n"), num);
       return FALSE;
     }
 
@@ -4685,7 +4686,7 @@ get_64bit_section_headers (FILE * file, bfd_boolean probe)
   if (section_headers == NULL)
     {
       if (! probe)
-	error (_("Out of memory\n"));
+	error (_("Out of memory reading %u section headers\n"), num);
       return FALSE;
     }
 
@@ -4765,7 +4766,8 @@ get_32bit_elf_symbols (FILE * file,
 
   if (isyms == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory reading %lu symbols\n"),
+	     (unsigned long) number);
       goto exit_point;
     }
 
@@ -4851,7 +4853,8 @@ get_64bit_elf_symbols (FILE * file,
 
   if (isyms == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory reading %lu symbols\n"),
+	     (unsigned long) number);
       goto exit_point;
     }
 
@@ -5635,7 +5638,8 @@ process_section_groups (FILE * file)
 
   if (section_headers_groups == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory reading %u section group headers\n"),
+	     elf_header.e_shnum);
       return 0;
     }
 
@@ -5659,7 +5663,8 @@ process_section_groups (FILE * file)
 
   if (section_groups == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory reading %lu groups\n"),
+	     (unsigned long) group_count);
       return 0;
     }
 
@@ -8217,7 +8222,8 @@ get_32bit_dynamic_section (FILE * file)
                                                   sizeof (* entry));
   if (dynamic_section == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory allocating space for %lu dynamic entries\n"),
+	     (unsigned long) dynamic_nent);
       free (edyn);
       return 0;
     }
@@ -8265,7 +8271,8 @@ get_64bit_dynamic_section (FILE * file)
                                                   sizeof (* entry));
   if (dynamic_section == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory allocating space for %lu dynamic entries\n"),
+	     (unsigned long) dynamic_nent);
       free (edyn);
       return 0;
     }
@@ -8470,7 +8477,8 @@ process_dynamic_section (FILE * file)
 	  dynamic_syminfo = (Elf_Internal_Syminfo *) malloc (syminsz);
 	  if (dynamic_syminfo == NULL)
 	    {
-	      error (_("Out of memory\n"));
+	      error (_("Out of memory allocating %lu byte for dynamic symbol info\n"),
+		     (unsigned long) syminsz);
 	      return 0;
 	    }
 
@@ -8488,8 +8496,8 @@ process_dynamic_section (FILE * file)
     }
 
   if (do_dynamic && dynamic_addr)
-    printf (_("\nDynamic section at offset 0x%lx contains %u entries:\n"),
-	    dynamic_addr, dynamic_nent);
+    printf (_("\nDynamic section at offset 0x%lx contains %lu entries:\n"),
+	    dynamic_addr, (unsigned long) dynamic_nent);
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
 
@@ -9240,8 +9248,8 @@ process_version_sections (FILE * file)
 	case SHT_GNU_versym:
 	  {
 	    Elf_Internal_Shdr * link_section;
-	    int total;
-	    int cnt;
+	    size_t total;
+	    unsigned int cnt;
 	    unsigned char * edata;
 	    unsigned short * data;
 	    char * strtab;
@@ -9276,8 +9284,8 @@ process_version_sections (FILE * file)
 		break;
 	      }
 
-	    printf (_("\nVersion symbols section '%s' contains %d entries:\n"),
-		    printable_section_name (section), total);
+	    printf (_("\nVersion symbols section '%s' contains %lu entries:\n"),
+		    printable_section_name (section), (unsigned long) total);
 
 	    printf (_(" Addr: "));
 	    printf_vma (section->sh_addr);
@@ -9764,16 +9772,16 @@ get_symbol_index_type (unsigned int type)
 }
 
 static bfd_vma *
-get_dynamic_data (FILE * file, unsigned int number, unsigned int ent_size)
+get_dynamic_data (FILE * file, size_t number, unsigned int ent_size)
 {
   unsigned char * e_data;
   bfd_vma * i_data;
 
   e_data = (unsigned char *) cmalloc (number, ent_size);
-
   if (e_data == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory reading %lu dynamic entries\n"),
+	     (unsigned long) number);
       return NULL;
     }
 
@@ -9784,10 +9792,10 @@ get_dynamic_data (FILE * file, unsigned int number, unsigned int ent_size)
     }
 
   i_data = (bfd_vma *) cmalloc (number, sizeof (*i_data));
-
   if (i_data == NULL)
     {
-      error (_("Out of memory\n"));
+      error (_("Out of memory allocating space for %lu dynamic entries\n"),
+	     (unsigned long) number);
       free (e_data);
       return NULL;
     }
@@ -9844,8 +9852,8 @@ static int
 process_symbol_table (FILE * file)
 {
   Elf_Internal_Shdr * section;
-  bfd_vma nbuckets = 0;
-  bfd_vma nchains = 0;
+  bfd_size_type nbuckets = 0;
+  bfd_size_type nchains = 0;
   bfd_vma * buckets = NULL;
   bfd_vma * chains = NULL;
   bfd_vma ngnubuckets = 0;
@@ -9865,7 +9873,7 @@ process_symbol_table (FILE * file)
     {
       unsigned char nb[8];
       unsigned char nc[8];
-      int hash_ent_size = 4;
+      unsigned int hash_ent_size = 4;
 
       if ((elf_header.e_machine == EM_ALPHA
 	   || elf_header.e_machine == EM_S390
@@ -10077,7 +10085,8 @@ process_symbol_table (FILE * file)
 	      }
 	}
     }
-  else if (do_dyn_syms || (do_syms && !do_using_dynamic))
+  else if ((do_dyn_syms || (do_syms && !do_using_dynamic))
+	   && section_headers != NULL)
     {
       unsigned int i;
 
@@ -10336,14 +10345,15 @@ process_symbol_table (FILE * file)
 
       printf (_("\nHistogram for bucket list length (total of %lu buckets):\n"),
 	      (unsigned long) nbuckets);
-      printf (_(" Length  Number     %% of total  Coverage\n"));
 
       lengths = (unsigned long *) calloc (nbuckets, sizeof (*lengths));
       if (lengths == NULL)
 	{
-	  error (_("Out of memory\n"));
+	  error (_("Out of memory allocating space for histogram buckets\n"));
 	  return 0;
 	}
+
+      printf (_(" Length  Number     %% of total  Coverage\n"));
       for (hn = 0; hn < nbuckets; ++hn)
 	{
 	  for (si = buckets[hn]; si > 0 && si < nchains; si = chains[si])
@@ -10367,7 +10377,7 @@ process_symbol_table (FILE * file)
       if (counts == NULL)
 	{
 	  free (lengths);
-	  error (_("Out of memory\n"));
+	  error (_("Out of memory allocating space for histogram counts\n"));
 	  return 0;
 	}
 
@@ -10407,15 +10417,16 @@ process_symbol_table (FILE * file)
       unsigned long nzero_counts = 0;
       unsigned long nsyms = 0;
 
+      printf (_("\nHistogram for `.gnu.hash' bucket list length (total of %lu buckets):\n"),
+	      (unsigned long) ngnubuckets);
+
       lengths = (unsigned long *) calloc (ngnubuckets, sizeof (*lengths));
       if (lengths == NULL)
 	{
-	  error (_("Out of memory\n"));
+	  error (_("Out of memory allocating space for gnu histogram buckets\n"));
 	  return 0;
 	}
 
-      printf (_("\nHistogram for `.gnu.hash' bucket list length (total of %lu buckets):\n"),
-	      (unsigned long) ngnubuckets);
       printf (_(" Length  Number     %% of total  Coverage\n"));
 
       for (hn = 0; hn < ngnubuckets; ++hn)
@@ -10438,7 +10449,7 @@ process_symbol_table (FILE * file)
       if (counts == NULL)
 	{
 	  free (lengths);
-	  error (_("Out of memory\n"));
+	  error (_("Out of memory allocating space for gnu histogram counts\n"));
 	  return 0;
 	}
 
@@ -13440,7 +13451,7 @@ process_mips_specific (FILE * file)
               cmalloc ((sect->sh_size / sizeof (eopt)), sizeof (* iopt));
 	  if (iopt == NULL)
 	    {
-	      error (_("Out of memory\n"));
+	      error (_("Out of memory allocatinf space for MIPS options\n"));
 	      return 0;
 	    }
 
@@ -13632,7 +13643,7 @@ process_mips_specific (FILE * file)
       iconf = (Elf32_Conflict *) cmalloc (conflictsno, sizeof (* iconf));
       if (iconf == NULL)
 	{
-	  error (_("Out of memory\n"));
+	  error (_("Out of memory allocating space for dynamic conflicts\n"));
 	  return 0;
 	}
 
@@ -14660,7 +14671,7 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 
 	  if (temp == NULL)
 	    {
-	      error (_("Out of memory\n"));
+	      error (_("Out of memory allocating space for inote name\n"));
 	      res = 0;
 	      break;
 	    }
