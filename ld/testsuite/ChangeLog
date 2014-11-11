@@ -1,3 +1,9 @@
+2014-11-11  Jiong Wang <jiong.wang@arm.com>
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Append board_cflags if gcc
+	driver used as link tool.
+	(run_cc_link_exec_tests): Likewise.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17482
