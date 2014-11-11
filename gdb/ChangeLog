@@ -1,3 +1,11 @@
+2014-11-11  Daniel Colascione  <dancol@dancol.org>
+
+	Warn about cross-PID-namespace debugging.
+	* nat/linux-procfs.h (linux_proc_pid_get_ns): New prototype.
+	* nat/linux-procfs.c (linux_proc_pid_get_ns): New function.
+	* linux-thread-db.c (check_pid_namespace_match): New function.
+	(thread_db_inferior_created): Call it.
+
 2014-11-10  Doug Evans  <xdje42@gmail.com>
 
 	* symmisc.c (print_objfile_statistics): Remove trailing whitespace.

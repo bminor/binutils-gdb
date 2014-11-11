@@ -40,4 +40,10 @@ extern int linux_proc_pid_is_stopped (pid_t pid);
 
 extern int linux_proc_pid_is_zombie (pid_t pid);
 
+/* Return an opaque string identifying PID's NS namespace or NULL if
+ * the information is unavailable.  The returned string must be
+ * released with xfree.  */
+
+extern char *linux_proc_pid_get_ns (pid_t pid, const char *ns);
+
 #endif /* COMMON_LINUX_PROCFS_H */
