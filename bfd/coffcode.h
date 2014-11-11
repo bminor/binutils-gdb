@@ -4517,7 +4517,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   BFD_ASSERT (asect->lineno == NULL);
 
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-  lineno_cache = (alent *) bfd_zalloc (abfd, amt);
+  lineno_cache = (alent *) bfd_alloc (abfd, amt);
   if (lineno_cache == NULL)
     return FALSE;
 
@@ -4536,22 +4536,24 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   src = native_lineno;
   nbr_func = 0;
 
-  for (counter = 0; counter < asect->lineno_count; counter++)
+  for (counter = 0; counter < asect->lineno_count; counter++, src++)
     {
       struct internal_lineno dst;
 
       bfd_coff_swap_lineno_in (abfd, src, &dst);
       cache_ptr->line_number = dst.l_lnno;
+      /* Appease memory checkers that get all excited about
+	 uninitialised memory when copying alents if u.offset is
+	 larger than u.sym.  (64-bit BFD on 32-bit host.)  */
+      memset (&cache_ptr->u, 0, sizeof (cache_ptr->u));
 
       if (cache_ptr->line_number == 0)
 	{
-	  bfd_signed_vma symndx;
+	  bfd_vma symndx;
 	  coff_symbol_type *sym;
 
-	  nbr_func++;
 	  symndx = dst.l_addr.l_symndx;
-	  if (symndx < 0
-	      || (bfd_vma) symndx >= obj_raw_syment_count (abfd))
+	  if (symndx >= obj_raw_syment_count (abfd))
 	    {
 	      (*_bfd_error_handler)
 		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
@@ -4567,13 +4569,16 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 	  /* PR 17512 file: 078-10659-0.004  */
 	  if (sym < obj_symbols (abfd)
-	      || sym > obj_symbols (abfd) + obj_raw_syment_count (abfd))
-	    sym = NULL;
-
-	  cache_ptr->u.sym = (asymbol *) sym;
-	  if (sym == NULL)
+	      || sym >= obj_symbols (abfd) + obj_raw_syment_count (abfd))
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: warning: illegal symbol in line number entry %d"),
+		 abfd, counter);
 	      continue;
+	    }
 
+	  nbr_func++;
+	  cache_ptr->u.sym = (asymbol *) sym;
 	  if (sym->lineno != NULL)
 	    (*_bfd_error_handler)
 	      (_("%B: warning: duplicate line number information for `%s'"),
@@ -4585,14 +4590,13 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  prev_offset = sym->symbol.value;
 	}
       else
-	cache_ptr->u.offset = dst.l_addr.l_paddr
-	  - bfd_section_vma (abfd, asect);
-
+	cache_ptr->u.offset = (dst.l_addr.l_paddr
+			       - bfd_section_vma (abfd, asect));
       cache_ptr++;
-      src++;
     }
 
-  cache_ptr->line_number = 0;
+  asect->lineno_count = cache_ptr - lineno_cache;
+  memset (cache_ptr, 0, sizeof (*cache_ptr));
   bfd_release (abfd, native_lineno);
 
   /* On some systems (eg AIX5.3) the lineno table may not be sorted.  */
@@ -4617,8 +4621,8 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  qsort (func_table, nbr_func, sizeof (alent *), coff_sort_func_alent);
 
 	  /* Create the new sorted table.  */
-	  amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-	  n_lineno_cache = (alent *) bfd_zalloc (abfd, amt);
+	  amt = (bfd_size_type) asect->lineno_count * sizeof (alent);
+	  n_lineno_cache = (alent *) bfd_alloc (abfd, amt);
 	  if (n_lineno_cache != NULL)
 	    {
 	      alent *n_cache_ptr = n_lineno_cache;
@@ -4628,23 +4632,20 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		  coff_symbol_type *sym;
 		  alent *old_ptr = func_table[i];
 
-		  /* Copy the function entry and update it.  */
-		  *n_cache_ptr = *old_ptr;
-		  sym = (coff_symbol_type *) n_cache_ptr->u.sym;
-		  if (sym != NULL)
-		    sym->lineno = n_cache_ptr;
-		  n_cache_ptr++;
-		  old_ptr++;
+		  /* Update the function entry.  */
+		  sym = (coff_symbol_type *) old_ptr->u.sym;
+		  /* PR binutils/17512: Point the lineno to where
+		     this entry will be after the memcpy below.  */
+		  sym->lineno = lineno_cache + (n_cache_ptr - n_lineno_cache);
 
-		  /* Copy the line number entries.  */
-		  while (old_ptr->line_number != 0)
+		  /* Copy the function and line number entries.  */
+		  do
 		    *n_cache_ptr++ = *old_ptr++;
+		  while (old_ptr->line_number != 0);
 		}
-	      n_cache_ptr->line_number = 0;
 	      memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
-	  /* PR binutils/17512: Do *not* free the func table
-	     and new lineno cache - they are now being used.  */
+	  bfd_release (abfd, func_table);
 	}
     }
 

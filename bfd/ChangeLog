@@ -1,5 +1,17 @@
 2014-11-11  Alan Modra  <amodra@gmail.com>
 
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Don't bfd_zalloc, just
+	memset the particular bits we need.  Update src after hitting loop
+	"continue".  Don't count lineno omitted due to invalid symbols in
+	nbr_func, and update lineno_count.  Init entire terminating
+	lineno.  Don't both allocating terminator in n_lineno_cache.
+	Redirect sym->lineno pointer to where n_lineno_cache will be
+	copied, and free n_lineno_cache.
+	* pe-mips.c (NUM_HOWTOS): Typo fix.
+
+2014-11-11  Alan Modra  <amodra@gmail.com>
+
 	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Adjust section
 	size check to account for possible zero terminator.
 

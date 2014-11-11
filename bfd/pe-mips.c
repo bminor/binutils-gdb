@@ -339,7 +339,7 @@ static reloc_howto_type howto_table[] =
 	 FALSE),                /* Pcrel_offset. */
 };
 
-#define NUM_HOWTOS ((sizeof (howto_table) / sizeof (howto_table[0]))
+#define NUM_HOWTOS (sizeof (howto_table) / sizeof (howto_table[0]))
 
 /* Turn a howto into a reloc nunmber.  */
 
