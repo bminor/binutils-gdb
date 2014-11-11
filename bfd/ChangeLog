@@ -1,3 +1,8 @@
+2014-11-11  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Adjust section
+	size check to account for possible zero terminator.
+
 2014-11-10  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	Apply trunk patch:

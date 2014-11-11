@@ -1398,6 +1398,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   struct eh_frame_hdr_info *hdr_info;
   unsigned int ptr_size;
   struct eh_cie_fde *ent;
+  bfd_size_type sec_size;
 
   if (sec->sec_info_type != SEC_INFO_TYPE_EH_FRAME)
     /* FIXME: octets_per_byte.  */
@@ -1723,7 +1724,11 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
      the pointer size. _bfd_elf_discard_section_eh_frame should
      have padded CIE/FDE records to multiple of pointer size with
      size_of_output_cie_fde.  */
-  if ((sec->size % ptr_size) != 0)
+  sec_size = sec->size;
+  if (sec_info->count != 0
+      && sec_info->entry[sec_info->count - 1].size == 4)
+    sec_size -= 4;
+  if ((sec_size % ptr_size) != 0)
     abort ();
 
   /* FIXME: octets_per_byte.  */
