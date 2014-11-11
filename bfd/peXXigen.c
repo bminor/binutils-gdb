@@ -149,8 +149,13 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 
 	  name = _bfd_coff_internal_syment_name (abfd, in, namebuf);
 	  if (name == NULL)
-	    /* FIXME: Return error.  */
-	    abort ();
+	    {
+	      _bfd_error_handler (_("%B: unable to find name for empty section"),
+				  abfd);
+	      bfd_set_error (bfd_error_invalid_target);
+	      return;
+	    }
+
 	  sec = bfd_get_section_by_name (abfd, name);
 	  if (sec != NULL)
 	    in->n_scnum = sec->target_index;
@@ -170,15 +175,22 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	    {
 	      name = (const char *) bfd_alloc (abfd, strlen (namebuf) + 1);
 	      if (name == NULL)
-		/* FIXME: Return error.  */
-		abort ();
+		{
+		  _bfd_error_handler (_("%B: out of memory creating name for empty section"),
+				      abfd);
+		  return;
+		}
 	      strcpy ((char *) name, namebuf);
 	    }
+
 	  flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD;
 	  sec = bfd_make_section_anyway_with_flags (abfd, name, flags);
 	  if (sec == NULL)
-	    /* FIXME: Return error.  */
-	    abort ();
+	    {
+	      _bfd_error_handler (_("%B: unable to create fake empty section"),
+				  abfd);
+	      return;
+	    }
 
 	  sec->vma = 0;
 	  sec->lma = 0;
@@ -283,6 +295,9 @@ _bfd_XXi_swap_aux_in (bfd *	abfd,
   AUXENT *ext = (AUXENT *) ext1;
   union internal_auxent *in = (union internal_auxent *) in1;
 
+  /* PR 17521: Make sure that all fields in the aux structure
+     are initialised.  */
+  memset (in, 0, sizeof * in);
   switch (in_class)
     {
     case C_FILE:
@@ -1681,7 +1696,9 @@ pe_print_edata (bfd * abfd, void * vfile)
   bfd_fprintf_vma (abfd, file, edt.name);
 
   if ((edt.name >= adj) && (edt.name < adj + datasize))
-    fprintf (file, " %s\n", data + edt.name - adj);
+    fprintf (file, " %.*s\n",
+	     (int) (datasize - (edt.name - adj)),
+	     data + edt.name - adj);
   else
     fprintf (file, "(outside .edata section)\n");
 

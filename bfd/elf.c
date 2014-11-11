@@ -7269,8 +7269,12 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bfd_boolean default_imported_symver)
 
       hdr = &elf_tdata (abfd)->dynverref_hdr;
 
-      elf_tdata (abfd)->verref = (Elf_Internal_Verneed *)
+      if (hdr->sh_info)
+	elf_tdata (abfd)->verref = (Elf_Internal_Verneed *)
           bfd_zalloc2 (abfd, hdr->sh_info, sizeof (Elf_Internal_Verneed));
+      else
+	elf_tdata (abfd)->verref = NULL;
+	
       if (elf_tdata (abfd)->verref == NULL)
 	goto error_return;
 
@@ -7430,8 +7434,12 @@ error_return_verref:
 	  else
 	    freeidx = ++maxidx;
 	}
-      elf_tdata (abfd)->verdef = (Elf_Internal_Verdef *)
+      if (maxidx)
+	elf_tdata (abfd)->verdef = (Elf_Internal_Verdef *)
           bfd_zalloc2 (abfd, maxidx, sizeof (Elf_Internal_Verdef));
+      else
+	elf_tdata (abfd)->verdef = NULL;
+
       if (elf_tdata (abfd)->verdef == NULL)
 	goto error_return;
 
@@ -7572,16 +7580,12 @@ asymbol *
 _bfd_elf_make_empty_symbol (bfd *abfd)
 {
   elf_symbol_type *newsym;
-  bfd_size_type amt = sizeof (elf_symbol_type);
 
-  newsym = (elf_symbol_type *) bfd_zalloc (abfd, amt);
+  newsym = (elf_symbol_type *) bfd_zalloc (abfd, sizeof * newsym);
   if (!newsym)
     return NULL;
-  else
-    {
-      newsym->symbol.the_bfd = abfd;
-      return &newsym->symbol;
-    }
+  newsym->symbol.the_bfd = abfd;
+  return &newsym->symbol;
 }
 
 void

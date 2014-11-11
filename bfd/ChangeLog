@@ -1,3 +1,22 @@
+2014-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Initialise the parts of the
+	line number cache that would not be initialised by the copy from
+	the new line number table.
+	(coff_classify_symbol): Allow for _bfd_coff_internal_syment_name
+	returning NULL.
+	* coffgen.c (coff_get_normalized_symbols): Get the external
+	symbols before allocating space for the internal symbols, in case
+	the get fails.
+	* elf.c (_bfd_elf_slurp_version_tables): Only allocate a verref
+	array if one is needed.  Likewise with the verdef array.
+	* peXXigen.c (_bfd_XXi_swap_sym_in): Replace abort()'s with error
+	messages.
+	(_bfd_XXi_swap_aux_in): Make sure that all fields of the aux
+	structure are initialised.
+	(pe_print_edata): Avoid reading off the end of the data buffer.
+
 2014-11-11  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/17512

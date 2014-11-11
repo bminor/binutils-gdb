@@ -1758,15 +1758,15 @@ coff_get_normalized_symtab (bfd *abfd)
   if (obj_raw_syments (abfd) != NULL)
     return obj_raw_syments (abfd);
 
+  if (! _bfd_coff_get_external_symbols (abfd))
+    return NULL;
+
   size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
   internal = (combined_entry_type *) bfd_zalloc (abfd, size);
   if (internal == NULL && size != 0)
     return NULL;
   internal_end = internal + obj_raw_syment_count (abfd);
   
-  if (! _bfd_coff_get_external_symbols (abfd))
-    return NULL;
-
   raw_src = (char *) obj_coff_external_syms (abfd);
 
   /* Mark the end of the symbols.  */

@@ -4453,11 +4453,11 @@ buy_and_read (bfd *abfd, file_ptr where, bfd_size_type size)
   void * area = bfd_alloc (abfd, size);
 
   if (!area)
-    return (NULL);
+    return NULL;
   if (bfd_seek (abfd, where, SEEK_SET) != 0
       || bfd_bread (area, size, abfd) != size)
-    return (NULL);
-  return (area);
+    return NULL;
+  return area;
 }
 
 /*
@@ -4637,13 +4637,20 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		  /* PR binutils/17512: Point the lineno to where
 		     this entry will be after the memcpy below.  */
 		  sym->lineno = lineno_cache + (n_cache_ptr - n_lineno_cache);
-
 		  /* Copy the function and line number entries.  */
 		  do
 		    *n_cache_ptr++ = *old_ptr++;
 		  while (old_ptr->line_number != 0);
 		}
-	      memcpy (lineno_cache, n_lineno_cache, amt);
+	      /* PR 17521: file: 078-10659-0.004.  */
+	      if (n_cache_ptr < n_lineno_cache + asect->lineno_count)
+		{
+		  amt = n_cache_ptr - n_lineno_cache;
+		  memcpy (lineno_cache, n_lineno_cache, amt * sizeof (alent));
+		  memset (lineno_cache + amt, 0, (asect->lineno_count - amt) * sizeof (alent));
+		}
+	      else
+		memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
 	  bfd_release (abfd, func_table);
 	}
@@ -5074,13 +5081,13 @@ coff_classify_symbol (bfd *abfd,
       if (syment->n_value == 0)
 	{
 	  asection *sec;
-	  char buf[SYMNMLEN + 1];
-
-	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
-	  if (sec != NULL
-	      && (strcmp (bfd_get_section_name (abfd, sec),
-			  _bfd_coff_internal_syment_name (abfd, syment, buf))
-		  == 0))
+	  char * name;
+ 	  char buf[SYMNMLEN + 1];
+ 
+	  name = _bfd_coff_internal_syment_name (abfd, syment, buf)
+ 	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
+	  if (sec != NULL && name != NULL
+	      && (strcmp (bfd_get_section_name (abfd, sec), name) == 0))
 	    return COFF_SYMBOL_PE_SECTION;
 	}
 #endif
