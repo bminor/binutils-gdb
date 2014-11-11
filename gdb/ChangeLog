@@ -1,3 +1,19 @@
+2014-12-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* nat/linux-ptrace.h (PTRACE_O_EXITKILL): Define if not
+	already defined.
+	(linux_enable_event_reporting): Add parameter "attached".
+	* nat/linux-ptrace.c (linux_test_for_exitkill): New forward
+	declaration.  New function.
+	(linux_check_ptrace_features): Add linux_test_for_exitkill call.
+	(linux_enable_event_reporting): Add new parameter "attached".
+	Do not call ptrace with the PTRACE_O_EXITKILL if ATTACHED is
+	nonzero.
+	* linux-nat.c (linux_init_ptrace): Add parameter "attached".
+	Use it.  Update function description.
+	(linux_child_post_attach, linux_child_post_startup_inferior):
+	Update call to linux_enable_event_reporting.
+
 2014-12-16  Yao Qi  <yao@codesourcery.com>
 
 	* NEWS: Move some entries to "Changes since GDB 7.8" section.

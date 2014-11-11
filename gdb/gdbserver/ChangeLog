@@ -1,3 +1,9 @@
+2014-12-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* linux-low.c (linux_low_filter_event): Update call to
+	linux_enable_event_reporting following the addition of
+	a new parameter to that function.
+
 2014-12-16  Catalin Udma  <catalin.udma@freescale.com>
 
 	PR server/17457
