@@ -1,5 +1,10 @@
 2014-11-10  Doug Evans  <xdje42@gmail.com>
 
+	* symmisc.c (print_objfile_statistics): Remove trailing whitespace.
+	(maintenance_info_symtabs, maintenance_check_symtabs): Ditto.
+
+2014-11-10  Doug Evans  <xdje42@gmail.com>
+
 	* source.c (select_source_symtab): Rewrite to use ALL_SYMTABS.
 
 2014-11-10  Doug Evans  <xdje42@gmail.com>
