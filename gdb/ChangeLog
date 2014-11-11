@@ -1,3 +1,30 @@
+2014-11-28  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* eval.c: Include gdbthread.h.
+	(evaluate_subexp): Enable thread stack temporaries before
+	evaluating a complete expression and clean them up after the
+	evaluation is complete.
+	* gdbthread.h: Include common/vec.h.
+	(value_ptr): New typedef.
+	(VEC (value_ptr)): New vector type.
+	(value_vec): New typedef.
+	(struct thread_info): Add new fields stack_temporaries_enabled
+	and stack_temporaries.
+	(enable_thread_stack_temporaries)
+	(thread_stack_temporaries_enabled_p, push_thread_stack_temporary)
+	(get_last_thread_stack_temporary)
+	(value_in_thread_stack_temporaries): Declare.
+	* gdbtypes.c (class_or_union_p): New function.
+	* gdbtypes.h (class_or_union_p): Declare.
+	* infcall.c (call_function_by_hand): Store return values of class
+	type as	temporaries on stack.
+	* thread.c (enable_thread_stack_temporaries): New function.
+	(thread_stack_temporaries_enabled_p, push_thread_stack_temporary)
+	(get_last_thread_stack_temporary): Likewise.
+	(value_in_thread_stack_temporaries): Likewise.
+	* value.c (value_force_lval): New function.
+	* value.h (value_force_lval): Declare.
+
 2014-11-28  Pierre Muller  <muller@sourceware.org>
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>.

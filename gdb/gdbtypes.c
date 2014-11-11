@@ -2508,6 +2508,15 @@ is_scalar_type_recursive (struct type *t)
   return 0;
 }
 
+/* Return true is T is a class or a union.  False otherwise.  */
+
+int
+class_or_union_p (const struct type *t)
+{
+  return (TYPE_CODE (t) == TYPE_CODE_STRUCT
+          || TYPE_CODE (t) == TYPE_CODE_UNION);
+}
+
 /* A helper function which returns true if types A and B represent the
    "same" class type.  This is true if the types have the same main
    type, or the same name.  */

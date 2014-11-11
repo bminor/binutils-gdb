@@ -1,3 +1,9 @@
+2014-11-28  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.cp/chained-calls.cc: New file.
+	* gdb.cp/chained-calls.exp: New file.
+	* gdb.cp/smartp.exp: Remove KFAIL for "p c2->inta".
+
 2014-11-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.ada/py_range.exp: Add parentheses to python calls to print.

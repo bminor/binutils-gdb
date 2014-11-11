@@ -28,6 +28,7 @@ struct symtab;
 #include "ui-out.h"
 #include "inferior.h"
 #include "btrace.h"
+#include "common/vec.h"
 
 /* Frontend view of the thread state.  Possible extensions: stepping,
    finishing, until(ling),...  */
@@ -152,6 +153,10 @@ struct thread_suspend_state
   enum gdb_signal stop_signal;
 };
 
+typedef struct value *value_ptr;
+DEF_VEC_P (value_ptr);
+typedef VEC (value_ptr) value_vec;
+
 struct thread_info
 {
   struct thread_info *next;
@@ -264,6 +269,14 @@ struct thread_info
 
   /* Branch trace information for this thread.  */
   struct btrace_thread_info btrace;
+
+  /* Flag which indicates that the stack temporaries should be stored while
+     evaluating expressions.  */
+  int stack_temporaries_enabled;
+
+  /* Values that are stored as temporaries on stack while evaluating
+     expressions.  */
+  value_vec *stack_temporaries;
 };
 
 /* Create an empty thread list, or empty the existing one.  */
@@ -464,6 +477,16 @@ extern void prune_threads (void);
 /* Return true if PC is in the stepping range of THREAD.  */
 
 int pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread);
+
+extern struct cleanup *enable_thread_stack_temporaries (ptid_t ptid);
+
+extern int thread_stack_temporaries_enabled_p (ptid_t ptid);
+
+extern void push_thread_stack_temporary (ptid_t ptid, struct value *v);
+
+extern struct value *get_last_thread_stack_temporary (ptid_t);
+
+extern int value_in_thread_stack_temporaries (struct value *, ptid_t);
 
 extern struct thread_info *thread_list;
 
