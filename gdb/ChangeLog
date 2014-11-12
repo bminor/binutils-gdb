@@ -1,5 +1,30 @@
 2014-11-12  Pedro Alves  <palves@redhat.com>
 
+	Mark locations as permanent, not the whole breakpoint.
+	* breakpoint.c (remove_breakpoint_1, remove_breakpoint): Adjust.
+	(mark_breakpoints_out): Don't mark permanent breakpoints as
+	uninserted.
+	(breakpoint_init_inferior): Use mark_breakpoints_out.
+	(breakpoint_here_p): Adjust.
+	(bpstat_stop_status, describe_other_breakpoints): Remove handling
+	of permanent breakpoints.
+	(make_breakpoint_permanent): Mark each location as permanent,
+	instead of marking the breakpoint.
+	(add_location_to_breakpoint): If the location is permanent, mark
+	it as such, and as inserted.
+	(init_breakpoint_sal): Don't make the breakpoint permanent here.
+	(bp_location_compare, update_global_location_list): Adjust.
+	(update_breakpoint_locations): Don't make the breakpoint permanent
+	here.
+	(disable_breakpoint, enable_breakpoint_disp): Don't skip permanent
+	breakpoints.
+	* breakpoint.h (enum enable_state) <bp_permanent>: Delete field.
+	(struct bp_location) <permanent>: New field.
+	* guile/scm-breakpoint.c (bpscm_enable_state_to_string): Remove
+	reference to bp_permanent.
+
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
 	* arch-utils.c (default_skip_permanent_breakpoint): New function.
 	* arch-utils.h (default_skip_permanent_breakpoint): New
 	declaration.
