@@ -1,3 +1,8 @@
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_request_interrupt): Always send a SIGINT to
+	the process group instead of to a specific LWP.
+
 2014-10-15  Pedro Alves  <palves@redhat.com>
 
 	PR server/17487

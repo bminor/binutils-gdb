@@ -4848,16 +4848,9 @@ linux_request_interrupt (void)
 {
   extern unsigned long signal_pid;
 
-  if (!ptid_equal (cont_thread, null_ptid)
-      && !ptid_equal (cont_thread, minus_one_ptid))
-    {
-      int lwpid;
-
-      lwpid = lwpid_of (current_thread);
-      kill_lwp (lwpid, SIGINT);
-    }
-  else
-    kill_lwp (signal_pid, SIGINT);
+  /* Send a SIGINT to the process group.  This acts just like the user
+     typed a ^C on the controlling terminal.  */
+  kill (-signal_pid, SIGINT);
 }
 
 /* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET
