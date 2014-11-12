@@ -1,5 +1,9 @@
 2014-11-12  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (enum infwait_states, infwait_state): Delete.
+
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (resume): Clear the thread's 'stepped_breakpoint' flag.
 	Rewrite stepping over a permanent breakpoint.
 	(thread_still_needs_step_over, proceed): Don't set

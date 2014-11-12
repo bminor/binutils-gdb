@@ -2769,20 +2769,6 @@ init_wait_for_inferior (void)
 }
 
 
-/* This enum encodes possible reasons for doing a target_wait, so that
-   wfi can call target_wait in one place.  (Ultimately the call will be
-   moved out of the infinite loop entirely.) */
-
-enum infwait_states
-{
-  infwait_normal_state,
-  infwait_step_watch_state,
-  infwait_nonstep_watch_state
-};
-
-/* Current inferior wait state.  */
-static enum infwait_states infwait_state;
-
 /* Data to be passed around while handling an event.  This data is
    discarded between events.  */
 struct execution_control_state
