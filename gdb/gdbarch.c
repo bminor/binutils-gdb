@@ -393,6 +393,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   gdbarch->register_reggroup_p = default_register_reggroup_p;
+  gdbarch->skip_permanent_breakpoint = default_skip_permanent_breakpoint;
   gdbarch->displaced_step_hw_singlestep = default_displaced_step_hw_singlestep;
   gdbarch->displaced_step_fixup = NULL;
   gdbarch->displaced_step_free_closure = NULL;
@@ -581,7 +582,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of gcore_bfd_target, has predicate.  */
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
-  /* Skip verify of skip_permanent_breakpoint, has predicate.  */
+  /* Skip verify of skip_permanent_breakpoint, invalid_p == 0 */
   /* Skip verify of max_insn_length, has predicate.  */
   /* Skip verify of displaced_step_copy_insn, has predicate.  */
   /* Skip verify of displaced_step_hw_singlestep, invalid_p == 0 */
@@ -1189,9 +1190,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: skip_main_prologue = <%s>\n",
                       host_address_to_string (gdbarch->skip_main_prologue));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_skip_permanent_breakpoint_p() = %d\n",
-                      gdbarch_skip_permanent_breakpoint_p (gdbarch));
   fprintf_unfiltered (file,
                       "gdbarch_dump: skip_permanent_breakpoint = <%s>\n",
                       host_address_to_string (gdbarch->skip_permanent_breakpoint));
@@ -3463,13 +3461,6 @@ set_gdbarch_vbit_in_delta (struct gdbarch *gdbarch,
                            int vbit_in_delta)
 {
   gdbarch->vbit_in_delta = vbit_in_delta;
-}
-
-int
-gdbarch_skip_permanent_breakpoint_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->skip_permanent_breakpoint != NULL;
 }
 
 void

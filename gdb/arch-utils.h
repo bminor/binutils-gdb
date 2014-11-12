@@ -178,4 +178,12 @@ extern int default_insn_is_jump (struct gdbarch *, CORE_ADDR);
 /* Do-nothing version of vsyscall_range.  Returns false.  */
 
 extern int default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range);
+
+/* Default way to advance the PC to the next instruction in order to
+   skip a permanent breakpoint.  Increments the PC by the size of a
+   software breakpoint instruction, as determined with
+   gdbarch_breakpoint_from_pc.  This matches how the breakpoints
+   module determines whether a breakpoint is permanent.  */
+extern void default_skip_permanent_breakpoint (struct regcache *regcache);
+
 #endif

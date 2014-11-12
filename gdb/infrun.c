@@ -2075,13 +2075,7 @@ resume (int step, enum gdb_signal sig)
      breakpoints can't be removed.  So we have to test for it here.  */
   if (breakpoint_here_p (aspace, pc) == permanent_breakpoint_here)
     {
-      if (gdbarch_skip_permanent_breakpoint_p (gdbarch))
-	gdbarch_skip_permanent_breakpoint (gdbarch, regcache);
-      else
-	error (_("\
-The program is stopped at a permanent breakpoint, but GDB does not know\n\
-how to step past a permanent breakpoint on this architecture.  Try using\n\
-a command like `return' or `jump' to continue execution."));
+      gdbarch_skip_permanent_breakpoint (gdbarch, regcache);
     }
 
   /* If we have a breakpoint to step over, make sure to do a single

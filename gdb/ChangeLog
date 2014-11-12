@@ -1,3 +1,16 @@
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
+	* arch-utils.c (default_skip_permanent_breakpoint): New function.
+	* arch-utils.h (default_skip_permanent_breakpoint): New
+	declaration.
+	* gdbarch.sh (skip_permanent_breakpoint): Now an 'f' function.
+	Install default_skip_permanent_breakpoint as default method.
+	* i386-tdep.c (i386_skip_permanent_breakpoint): Delete function.
+	(i386_gdbarch_init): Don't install it.
+	* infrun.c (resume): Assume there's always a
+	gdbarch_skip_permanent_breakpoint implementation.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2014-11-11  Daniel Colascione  <dancol@dancol.org>
 
 	Warn about cross-PID-namespace debugging.
