@@ -1,3 +1,9 @@
+2014-11-12  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Drop line number info
+	not preceded by a valid function entry.  Revert last change.
+
 2014-11-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
@@ -33,7 +39,6 @@
 	lineno.  Don't both allocating terminator in n_lineno_cache.
 	Redirect sym->lineno pointer to where n_lineno_cache will be
 	copied, and free n_lineno_cache.
-
 	* pe-mips.c (NUM_HOWTOS): Typo fix.
 
 2014-11-11  Alan Modra  <amodra@gmail.com>

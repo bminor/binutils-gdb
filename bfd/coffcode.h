@@ -4513,6 +4513,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   int ordered = 1;
   unsigned int nbr_func;
   LINENO *src;
+  bfd_boolean have_func;
 
   BFD_ASSERT (asect->lineno == NULL);
 
@@ -4535,6 +4536,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   asect->lineno = lineno_cache;
   src = native_lineno;
   nbr_func = 0;
+  have_func = FALSE;
 
   for (counter = 0; counter < asect->lineno_count; counter++, src++)
     {
@@ -4552,6 +4554,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  bfd_vma symndx;
 	  coff_symbol_type *sym;
 
+	  have_func = FALSE;
 	  symndx = dst.l_addr.l_symndx;
 	  if (symndx >= obj_raw_syment_count (abfd))
 	    {
@@ -4577,6 +4580,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      continue;
 	    }
 
+	  have_func = TRUE;
 	  nbr_func++;
 	  cache_ptr->u.sym = (asymbol *) sym;
 	  if (sym->lineno != NULL)
@@ -4589,6 +4593,10 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	    ordered = 0;
 	  prev_offset = sym->symbol.value;
 	}
+      else if (!have_func)
+	/* Drop line information that has no associated function.
+	   PR 17521: file: 078-10659-0.004.  */
+	continue;
       else
 	cache_ptr->u.offset = (dst.l_addr.l_paddr
 			       - bfd_section_vma (abfd, asect));
@@ -4642,15 +4650,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		    *n_cache_ptr++ = *old_ptr++;
 		  while (old_ptr->line_number != 0);
 		}
-	      /* PR 17521: file: 078-10659-0.004.  */
-	      if (n_cache_ptr < n_lineno_cache + asect->lineno_count)
-		{
-		  amt = n_cache_ptr - n_lineno_cache;
-		  memcpy (lineno_cache, n_lineno_cache, amt * sizeof (alent));
-		  memset (lineno_cache + amt, 0, (asect->lineno_count - amt) * sizeof (alent));
-		}
-	      else
-		memcpy (lineno_cache, n_lineno_cache, amt);
+	      memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
 	  bfd_release (abfd, func_table);
 	}
