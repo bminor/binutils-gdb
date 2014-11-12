@@ -1,3 +1,14 @@
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/i386-bp_permanent.c: New file.
+	* gdb.arch/i386-bp_permanent.exp: Don't skip on x86_64.
+	(srcfile): Set to i386-bp_permanent.c.
+	(top level): Adjust to work in both 32-bit and 64-bit modes.  Test
+	that stepi does not execute the 'leave' instruction, instead of
+	testing it does execute.
+	* gdb.base/bp-permanent.c: New file.
+	* gdb.base/bp-permanent.exp: New file.
+
 2014-11-10  Doug Evans  <xdje42@gmail.com>
 
 	PR symtab/17564

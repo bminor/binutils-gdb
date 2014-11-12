@@ -2039,6 +2039,8 @@ resume (int step, enum gdb_signal sig)
      applies, it's the callers intention that counts.  */
   const int entry_step = step;
 
+  tp->stepped_breakpoint = 0;
+
   QUIT;
 
   if (current_inferior ()->waiting_for_vfork_done)
@@ -2075,7 +2077,81 @@ resume (int step, enum gdb_signal sig)
      breakpoints can't be removed.  So we have to test for it here.  */
   if (breakpoint_here_p (aspace, pc) == permanent_breakpoint_here)
     {
-      gdbarch_skip_permanent_breakpoint (gdbarch, regcache);
+      if (sig != GDB_SIGNAL_0)
+	{
+	  /* We have a signal to pass to the inferior.  The resume
+	     may, or may not take us to the signal handler.  If this
+	     is a step, we'll need to stop in the signal handler, if
+	     there's one, (if the target supports stepping into
+	     handlers), or in the next mainline instruction, if
+	     there's no handler.  If this is a continue, we need to be
+	     sure to run the handler with all breakpoints inserted.
+	     In all cases, set a breakpoint at the current address
+	     (where the handler returns to), and once that breakpoint
+	     is hit, resume skipping the permanent breakpoint.  If
+	     that breakpoint isn't hit, then we've stepped into the
+	     signal handler (or hit some other event).  We'll delete
+	     the step-resume breakpoint then.  */
+
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: resume: skipping permanent breakpoint, "
+				"deliver signal first\n");
+
+	  clear_step_over_info ();
+	  tp->control.trap_expected = 0;
+
+	  if (tp->control.step_resume_breakpoint == NULL)
+	    {
+	      /* Set a "high-priority" step-resume, as we don't want
+		 user breakpoints at PC to trigger (again) when this
+		 hits.  */
+	      insert_hp_step_resume_breakpoint_at_frame (get_current_frame ());
+	      gdb_assert (tp->control.step_resume_breakpoint->loc->permanent);
+
+	      tp->step_after_step_resume_breakpoint = step;
+	    }
+
+	  insert_breakpoints ();
+	}
+      else
+	{
+	  /* There's no signal to pass, we can go ahead and skip the
+	     permanent breakpoint manually.  */
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: resume: skipping permanent breakpoint\n");
+	  gdbarch_skip_permanent_breakpoint (gdbarch, regcache);
+	  /* Update pc to reflect the new address from which we will
+	     execute instructions.  */
+	  pc = regcache_read_pc (regcache);
+
+	  if (step)
+	    {
+	      /* We've already advanced the PC, so the stepping part
+		 is done.  Now we need to arrange for a trap to be
+		 reported to handle_inferior_event.  Set a breakpoint
+		 at the current PC, and run to it.  Don't update
+		 prev_pc, because if we end in
+		 switch_back_to_stepping, we want the "expected thread
+		 advanced also" branch to be taken.  IOW, we don't
+		 want this thread to step further from PC
+		 (overstep).  */
+	      insert_single_step_breakpoint (gdbarch, aspace, pc);
+	      insert_breakpoints ();
+
+	      tp->suspend.stop_signal = GDB_SIGNAL_0;
+	      /* We're continuing with all breakpoints inserted.  It's
+		 safe to let the target bypass signals.  */
+	      target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
+	      /* ... and safe to let other threads run, according to
+		 schedlock.  */
+	      resume_ptid = user_visible_resume_ptid (entry_step);
+	      target_resume (resume_ptid, 0, GDB_SIGNAL_0);
+	      discard_cleanups (old_cleanups);
+	      return;
+	    }
+	}
     }
 
   /* If we have a breakpoint to step over, make sure to do a single
@@ -2382,7 +2458,8 @@ thread_still_needs_step_over (struct thread_info *tp)
       struct regcache *regcache = get_thread_regcache (tp->ptid);
 
       if (breakpoint_here_p (get_regcache_aspace (regcache),
-			     regcache_read_pc (regcache)))
+			     regcache_read_pc (regcache))
+	  == ordinary_breakpoint_here)
 	return 1;
 
       tp->stepping_over_breakpoint = 0;
@@ -2498,7 +2575,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
 
   if (addr == (CORE_ADDR) -1)
     {
-      if (pc == stop_pc && breakpoint_here_p (aspace, pc)
+      if (pc == stop_pc
+	  && breakpoint_here_p (aspace, pc) == ordinary_breakpoint_here
 	  && execution_direction != EXEC_REVERSE)
 	/* There is a breakpoint at the address we will resume at,
 	   step one instruction before inserting breakpoints so that
@@ -4190,50 +4268,46 @@ handle_signal_stop (struct execution_control_state *ecs)
   gdbarch = get_frame_arch (frame);
 
   /* Pull the single step breakpoints out of the target.  */
-  if (gdbarch_software_single_step_p (gdbarch))
+  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
     {
-      if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
+      struct regcache *regcache;
+      struct address_space *aspace;
+      CORE_ADDR pc;
+
+      regcache = get_thread_regcache (ecs->ptid);
+      aspace = get_regcache_aspace (regcache);
+      pc = regcache_read_pc (regcache);
+
+      /* However, before doing so, if this single-step breakpoint was
+	 actually for another thread, set this thread up for moving
+	 past it.  */
+      if (!thread_has_single_step_breakpoint_here (ecs->event_thread,
+						   aspace, pc))
 	{
-	  struct regcache *regcache;
-	  struct address_space *aspace;
-	  CORE_ADDR pc;
-
-	  regcache = get_thread_regcache (ecs->ptid);
-	  aspace = get_regcache_aspace (regcache);
-	  pc = regcache_read_pc (regcache);
-
-	  /* However, before doing so, if this single-step breakpoint was
-	     actually for another thread, set this thread up for moving
-	     past it.  */
-	  if (!thread_has_single_step_breakpoint_here (ecs->event_thread,
-						       aspace, pc))
-	    {
-	      if (single_step_breakpoint_inserted_here_p (aspace, pc))
-		{
-		  if (debug_infrun)
-		    {
-		      fprintf_unfiltered (gdb_stdlog,
-					  "infrun: [%s] hit another thread's "
-					  "single-step breakpoint\n",
-					  target_pid_to_str (ecs->ptid));
-		    }
-		  ecs->hit_singlestep_breakpoint = 1;
-		}
-	    }
-	  else
+	  if (single_step_breakpoint_inserted_here_p (aspace, pc))
 	    {
 	      if (debug_infrun)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
-				      "infrun: [%s] hit its "
+				      "infrun: [%s] hit another thread's "
 				      "single-step breakpoint\n",
 				      target_pid_to_str (ecs->ptid));
 		}
+	      ecs->hit_singlestep_breakpoint = 1;
 	    }
 	}
-
-      delete_just_stopped_threads_single_step_breakpoints ();
+      else
+	{
+	  if (debug_infrun)
+	    {
+	      fprintf_unfiltered (gdb_stdlog,
+				  "infrun: [%s] hit its "
+				  "single-step breakpoint\n",
+				  target_pid_to_str (ecs->ptid));
+	    }
+	}
     }
+  delete_just_stopped_threads_single_step_breakpoints ();
 
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
       && ecs->event_thread->control.trap_expected
@@ -4280,7 +4354,6 @@ handle_signal_stop (struct execution_control_state *ecs)
       return;
     }
 
-  ecs->event_thread->stepped_breakpoint = 0;
   ecs->event_thread->stepping_over_breakpoint = 0;
   ecs->event_thread->stepping_over_watchpoint = 0;
   bpstat_clear (&ecs->event_thread->control.stop_bpstat);
@@ -4786,6 +4859,30 @@ process_event_stop_test (struct execution_control_state *ecs)
 
     case BPSTAT_WHAT_KEEP_CHECKING:
       break;
+    }
+
+  /* If we stepped a permanent breakpoint and we had a high priority
+     step-resume breakpoint for the address we stepped, but we didn't
+     hit it, then we must have stepped into the signal handler.  The
+     step-resume was only necessary to catch the case of _not_
+     stepping into the handler, so delete it, and fall through to
+     checking whether the step finished.  */
+  if (ecs->event_thread->stepped_breakpoint)
+    {
+      struct breakpoint *sr_bp
+	= ecs->event_thread->control.step_resume_breakpoint;
+
+      if (sr_bp->loc->permanent
+	  && sr_bp->type == bp_hp_step_resume
+	  && sr_bp->loc->address == ecs->event_thread->prev_pc)
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepped permanent breakpoint, stopped in "
+				"handler\n");
+	  delete_step_resume_breakpoint (ecs->event_thread);
+	  ecs->event_thread->step_after_step_resume_breakpoint = 0;
+	}
     }
 
   /* We come here if we hit a breakpoint but should not stop for it.
@@ -5552,8 +5649,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	     breakpoint forward, one instruction at a time,
 	     overstepping.  */
 
-	  if (gdbarch_software_single_step_p (gdbarch)
-	      && stop_pc != tp->prev_pc)
+	  if (stop_pc != tp->prev_pc)
 	    {
 	      if (debug_infrun)
 		fprintf_unfiltered (gdb_stdlog,
@@ -5598,6 +5694,7 @@ currently_stepping (struct thread_info *tp)
   return ((tp->control.step_range_end
 	   && tp->control.step_resume_breakpoint == NULL)
 	  || tp->control.trap_expected
+	  || tp->stepped_breakpoint
 	  || bpstat_should_step ());
 }
 

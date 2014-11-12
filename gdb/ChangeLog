@@ -1,5 +1,22 @@
 2014-11-12  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (resume): Clear the thread's 'stepped_breakpoint' flag.
+	Rewrite stepping over a permanent breakpoint.
+	(thread_still_needs_step_over, proceed): Don't set
+	stepping_over_breakpoint for permanent breakpoints.
+	(handle_signal_stop): Don't clear stepped_breakpoint.  Also pull
+	single-step breakpoints out of the target on hardware step
+	targets.
+	(process_event_stop_test): If stepping a permanent breakpoint
+	doesn't hit the step-resume breakpoint, delete the step-resume
+	breakpoint.
+	(switch_back_to_stepped_thread): Also check if the stepped thread
+	has advanced already on hardware step targets.
+	(currently_stepping): Return true if the thread stepped a
+	breakpoint.
+
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
 	Mark locations as permanent, not the whole breakpoint.
 	* breakpoint.c (remove_breakpoint_1, remove_breakpoint): Adjust.
 	(mark_breakpoints_out): Don't mark permanent breakpoints as
