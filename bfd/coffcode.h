@@ -4510,7 +4510,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   unsigned int counter;
   alent *cache_ptr;
   bfd_vma prev_offset = 0;
-  int ordered = 1;
+  bfd_boolean ordered = TRUE;
   unsigned int nbr_func;
   LINENO *src;
   bfd_boolean have_func;
@@ -4561,6 +4561,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      (*_bfd_error_handler)
 		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
 		 abfd, (long) symndx, counter);
+	      cache_ptr->line_number = -1;
 	      continue;
 	    }
 
@@ -4572,11 +4573,12 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 	  /* PR 17512 file: 078-10659-0.004  */
 	  if (sym < obj_symbols (abfd)
-	      || sym >= obj_symbols (abfd) + obj_raw_syment_count (abfd))
+	      || sym >= obj_symbols (abfd) + bfd_get_symcount (abfd))
 	    {
 	      (*_bfd_error_handler)
 		(_("%B: warning: illegal symbol in line number entry %d"),
 		 abfd, counter);
+	      cache_ptr->line_number = -1;
 	      continue;
 	    }
 
@@ -4590,7 +4592,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 	  sym->lineno = cache_ptr;
 	  if (sym->symbol.value < prev_offset)
-	    ordered = 0;
+	    ordered = FALSE;
 	  prev_offset = sym->symbol.value;
 	}
       else if (!have_func)
@@ -4625,6 +4627,8 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	    if (lineno_cache[i].line_number == 0)
 	      *p++ = &lineno_cache[i];
 
+	  BFD_ASSERT ((p - func_table) == nbr_func);
+	  
 	  /* Sort by functions.  */
 	  qsort (func_table, nbr_func, sizeof (alent *), coff_sort_func_alent);
 
@@ -4650,6 +4654,8 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		    *n_cache_ptr++ = *old_ptr++;
 		  while (old_ptr->line_number != 0);
 		}
+	      BFD_ASSERT ((bfd_size_type) (n_cache_ptr - n_lineno_cache) == (amt / sizeof (alent)));
+
 	      memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
 	  bfd_release (abfd, func_table);
@@ -4710,6 +4716,8 @@ coff_slurp_symbol_table (bfd * abfd)
 	  dst->symbol.section = coff_section_from_bfd_index (abfd,
 						     src->u.syment.n_scnum);
 	  dst->symbol.flags = 0;
+	  /* PR 17512: file: 079-7098-0.001:0.1.  */
+	  dst->symbol.value = 0;
 	  dst->done_lineno = FALSE;
 
 	  switch (src->u.syment.n_sclass)

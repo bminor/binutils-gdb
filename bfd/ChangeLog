@@ -1,3 +1,16 @@
+2014-11-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Set the line number of
+	corrupt entries to -1.
+	(coff_slurp_symbol_table): Alway initialise the value of the
+	symbol.
+	* coffgen.c (coff_print_symbol): Check that the combined pointer
+	is valid.
+	(coff_print_symbol): Do not print negative line numbers.
+	* peXXigen.c (pe_print_idata): Add range checking displaying
+	member names.
+
 2014-11-12  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/17512

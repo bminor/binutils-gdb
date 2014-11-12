@@ -1481,27 +1481,31 @@ pe_print_idata (bfd * abfd, void * vfile)
 #ifdef COFF_WITH_pex64
 	  for (j = 0; idx + j + 8 <= datasize; j += 8)
 	    {
+	      bfd_size_type amt;
 	      unsigned long member = bfd_get_32 (abfd, data + idx + j);
 	      unsigned long member_high = bfd_get_32 (abfd, data + idx + j + 4);
 
 	      if (!member && !member_high)
 		break;
 
+	      amt = member - adj;
+
 	      if (HighBitSet (member_high))
 		fprintf (file, "\t%lx%08lx\t %4lx%08lx  <none>",
 			 member_high, member,
 			 WithoutHighBit (member_high), member);
 	      /* PR binutils/17512: Handle corrupt PE data.  */
-	      else if ((bfd_vma) member - adj + 2 >= datasize)
+	      else if (amt + 2 >= datasize)
 		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
 	      else
 		{
 		  int ordinal;
 		  char *member_name;
 
-		  ordinal = bfd_get_16 (abfd, data + member - adj);
-		  member_name = (char *) data + member - adj + 2;
-		  fprintf (file, "\t%04lx\t %4d  %s",member, ordinal, member_name);
+		  ordinal = bfd_get_16 (abfd, data + amt);
+		  member_name = (char *) data + amt + 2;
+		  fprintf (file, "\t%04lx\t %4d  %.*s",member, ordinal,
+			   (int) (datasize - (amt + 2)), member_name);
 		}
 
 	      /* If the time stamp is not zero, the import address
@@ -1517,27 +1521,30 @@ pe_print_idata (bfd * abfd, void * vfile)
 #else
 	  for (j = 0; idx + j + 4 <= datasize; j += 4)
 	    {
+	      bfd_size_type amt;
 	      unsigned long member = bfd_get_32 (abfd, data + idx + j);
 
 	      /* Print single IMAGE_IMPORT_BY_NAME vector.  */
 	      if (member == 0)
 		break;
 
+	      amt = member - adj;
 	      if (HighBitSet (member))
 		fprintf (file, "\t%04lx\t %4lu  <none>",
 			 member, WithoutHighBit (member));
 	      /* PR binutils/17512: Handle corrupt PE data.  */
-	      else if ((bfd_vma) member - adj + 2 >= datasize)
+	      else if (amt + 2 >= datasize)
 		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
 	      else
 		{
 		  int ordinal;
 		  char *member_name;
 
-		  ordinal = bfd_get_16 (abfd, data + member - adj);
-		  member_name = (char *) data + member - adj + 2;
-		  fprintf (file, "\t%04lx\t %4d  %s",
-			   member, ordinal, member_name);
+		  ordinal = bfd_get_16 (abfd, data + amt);
+		  member_name = (char *) data + amt + 2;
+		  fprintf (file, "\t%04lx\t %4d  %.*s",
+			   member, ordinal,
+			   (int) (datasize - (amt + 2)), member_name);
 		}
 
 	      /* If the time stamp is not zero, the import address

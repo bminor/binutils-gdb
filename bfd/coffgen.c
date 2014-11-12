@@ -2099,6 +2099,14 @@ coff_print_symbol (bfd *abfd,
 
 	  fprintf (file, "[%3ld]", (long) (combined - root));
 
+	  /* PR 17512: file: 079-33786-0.001:0.1.  */
+	  if (combined < obj_raw_syments (abfd)
+	      || combined >= obj_raw_syments (abfd) + obj_raw_syment_count (abfd))
+	    {
+	      fprintf (file, _("<corrupt info> %s"), symbol->name);
+	      break;
+	    }
+
 	  if (! combined->fix_value)
 	    val = (bfd_vma) combined->u.syment.n_value;
 	  else
@@ -2192,8 +2200,11 @@ coff_print_symbol (bfd *abfd,
 	      l++;
 	      while (l->line_number)
 		{
-		  fprintf (file, "\n%4d : ", l->line_number);
-		  bfd_fprintf_vma (abfd, file, l->u.offset + symbol->section->vma);
+		  if (l->line_number > 0)
+		    {
+		      fprintf (file, "\n%4d : ", l->line_number);
+		      bfd_fprintf_vma (abfd, file, l->u.offset + symbol->section->vma);
+		    }
 		  l++;
 		}
 	    }
