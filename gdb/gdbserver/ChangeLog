@@ -1,5 +1,12 @@
 2014-11-12  Pedro Alves  <palves@redhat.com>
 
+	* server.c (cont_thread): Update comment.
+	(start_inferior, attach_inferior): No longer clear cont_thread.
+	(handle_v_cont): No longer set cont_thread.
+	(captured_main): Clear cont_thread each time a GDB connects.
+
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (linux_wait_1): Don't force a wait for the Hc
 	thread, and don't resume all threads if the Hc thread has exited.
 

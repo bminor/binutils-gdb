@@ -41,11 +41,7 @@
    requirement, so `Hc pPID.TID' is pretty much undefined.  So
    CONT_THREAD can be null_ptid for no `Hc' thread, minus_one_ptid for
    resuming all threads of the process (again, `Hc' isn't used for
-   multi-process), or a specific thread ptid_t.
-
-   We also set this when handling a single-thread `vCont' resume, as
-   some places in the backends check it to know when (and for which
-   thread) single-thread scheduler-locking is in effect.  */
+   multi-process), or a specific thread ptid_t.  */
 ptid_t cont_thread;
 
 /* The thread set with an `Hg' packet.  */
@@ -225,10 +221,6 @@ start_inferior (char **argv)
   signal (SIGTTIN, SIG_DFL);
 #endif
 
-  /* Clear this so the backend doesn't get confused, thinking
-     CONT_THREAD died, and it needs to resume all threads.  */
-  cont_thread = null_ptid;
-
   signal_pid = create_inferior (new_argv[0], new_argv);
 
   /* FIXME: we don't actually know at this point that the create
@@ -306,10 +298,6 @@ attach_inferior (int pid)
      attach function, so that it can be the main thread instead of
      whichever we were told to attach to.  */
   signal_pid = pid;
-
-  /* Clear this so the backend doesn't get confused, thinking
-     CONT_THREAD died, and it needs to resume all threads.  */
-  cont_thread = null_ptid;
 
   if (!non_stop)
     {
@@ -2305,17 +2293,6 @@ handle_v_cont (char *own_buf)
   if (i < n)
     resume_info[i] = default_action;
 
-  /* `cont_thread' is still used in occasional places in the backend,
-     to implement single-thread scheduler-locking.  Doesn't make sense
-     to set it if we see a stop request, or a wildcard action (one
-     with '-1' (all threads), or 'pPID.-1' (all threads of PID)).  */
-  if (n == 1
-      && !(ptid_equal (resume_info[0].thread, minus_one_ptid)
-	   || ptid_get_lwp (resume_info[0].thread) == -1)
-      && resume_info[0].kind != resume_stop)
-    cont_thread = resume_info[0].thread;
-  else
-    cont_thread = minus_one_ptid;
   set_desired_thread (0);
 
   resume (resume_info, n);
@@ -3267,6 +3244,7 @@ captured_main (int argc, char *argv[])
       multi_process = 0;
       /* Be sure we're out of tfind mode.  */
       current_traceframe = -1;
+      cont_thread = null_ptid;
 
       remote_open (port);
 
