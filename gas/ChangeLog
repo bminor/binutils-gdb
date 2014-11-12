@@ -1,3 +1,9 @@
+2014-11-12  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17482
+	* config/tc-i386.c (output_insn): Don't test x86_elf_abi when
+	not ELF.
+
 2014-11-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.
