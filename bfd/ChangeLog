@@ -1,5 +1,9 @@
 2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* coffcode.h (coff_slurp_line_table): Add cast to unsigned int.
+
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* coffcode.h (coff_pointerize_aux_hook): Fix a typo.
 
 2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>

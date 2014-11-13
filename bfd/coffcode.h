@@ -4647,7 +4647,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	    if (lineno_cache[i].line_number == 0)
 	      *p++ = &lineno_cache[i];
 
-	  BFD_ASSERT ((p - func_table) == nbr_func);
+	  BFD_ASSERT ((unsigned int) (p - func_table) == nbr_func);
 	  
 	  /* Sort by functions.  */
 	  qsort (func_table, nbr_func, sizeof (alent *), coff_sort_func_alent);
