@@ -1,3 +1,8 @@
+2014-11-13  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (update_enumeration_type_from_children): Avoid
+	infinite loop.
+
 2014-11-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (maint set target-async): Fix typo.
