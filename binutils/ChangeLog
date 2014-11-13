@@ -1,3 +1,17 @@
+2014-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (process_version_sections): If the read of the version
+	def information fails, make sure that the external verdef data is
+	not used.
+	(get_dynamic_data): Do not attempt to allocate memory for more
+	dynamic data than there is in the file.  If the read fails, free
+	the allocated buffer.
+	(process_symbol_table): Do not print dynamic information if we
+	were unable to read the dynamic symbol table.
+	(print_gnu_note): Do not print the note if the descsz is too
+	small.
+
 2014-11-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

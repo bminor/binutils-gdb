@@ -9440,7 +9440,9 @@ process_version_sections (FILE * file)
 					    _("version def")) == NULL)
 				{
 				  ivd.vd_next = 0;
-				  ivd.vd_ndx  = 0;
+				  /* PR 17531: file: 046-1082287-0.004.  */ 
+				  ivd.vd_ndx  = (data[cnt + j] & VERSYM_VERSION) + 1;
+				  break;
 				}
 			      else
 				{
@@ -9777,6 +9779,15 @@ get_dynamic_data (FILE * file, size_t number, unsigned int ent_size)
   unsigned char * e_data;
   bfd_vma * i_data;
 
+  /* Be kind to memory chekers (eg valgrind, address sanitizer) by not
+     attempting to allocate memory when the read is bound to fail.  */
+  if (ent_size * number > current_file_size)
+    {
+      error (_("Invalid number of dynamic entries: %lu\n"),
+	     (unsigned long) number);
+      return NULL;
+    }
+
   e_data = (unsigned char *) cmalloc (number, ent_size);
   if (e_data == NULL)
     {
@@ -9787,7 +9798,9 @@ get_dynamic_data (FILE * file, size_t number, unsigned int ent_size)
 
   if (fread (e_data, ent_size, number, file) != number)
     {
-      error (_("Unable to read in dynamic data\n"));
+      error (_("Unable to read in %lu bytes of dynamic data\n"),
+	     (unsigned long) (number * ent_size));
+      free (e_data);
       return NULL;
     }
 
@@ -9821,7 +9834,8 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
 
   if (dynamic_symbols == NULL || si >= num_dynamic_syms)
     {
-      printf (_("<No info available>\n"));
+      printf (_("<No info available for dynamic symbol number %lu>\n"),
+	      (unsigned long) si);
       return;
     }
 
@@ -10038,7 +10052,8 @@ process_symbol_table (FILE * file)
   if ((dynamic_info[DT_HASH] || dynamic_info_DT_GNU_HASH)
       && do_syms
       && do_using_dynamic
-      && dynamic_strings != NULL)
+      && dynamic_strings != NULL
+      && dynamic_symbols != NULL)
     {
       unsigned long hn;
 
@@ -14241,6 +14256,13 @@ print_gnu_note (Elf_Internal_Note *pnote)
       {
 	unsigned long os, major, minor, subminor;
 	const char *osname;
+
+	/* PR 17531: file: 030-599401-0.004.  */
+	if (pnote->descsz < 16)
+	  {
+	    printf (_("    <corrupt GNU_ABI_TAG>\n"));
+	    break;
+	  }
 
 	os = byte_get ((unsigned char *) pnote->descdata, 4);
 	major = byte_get ((unsigned char *) pnote->descdata + 4, 4);
