@@ -1,3 +1,10 @@
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17598
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Treat
+	R_X86_64_GOTPLT64 the same as R_X86_64_GOT64.
+	(elf_x86_64_relocate_section): Likewise.
+
 2014-11-13  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

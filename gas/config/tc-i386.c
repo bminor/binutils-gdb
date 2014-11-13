@@ -2835,6 +2835,9 @@ reloc (unsigned int size,
 	  case BFD_RELOC_X86_64_GOT32:
 	    return BFD_RELOC_X86_64_GOT64;
 	    break;
+	  case BFD_RELOC_X86_64_GOTPLT64:
+	    return BFD_RELOC_X86_64_GOTPLT64;
+	    break;
 	  case BFD_RELOC_X86_64_PLTOFF64:
 	    return BFD_RELOC_X86_64_PLTOFF64;
 	    break;

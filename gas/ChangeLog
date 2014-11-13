@@ -1,3 +1,8 @@
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17598
+	* config/tc-i386.c (reloc): Support BFD_RELOC_X86_64_GOTPLT64.
+
 2014-11-13  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

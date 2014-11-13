@@ -1,3 +1,11 @@
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17598
+	* ld-x86-64/x86-64.exp: Run gotplt1.
+
+	* ld-x86-64/gotplt1.d: New file.
+	* ld-x86-64/gotplt1.s: Likewise.
+
 2014-11-11  Jiong Wang <jiong.wang@arm.com>
 
 	* lib/ld-lib.exp (run_ld_link_exec_tests): Append board_cflags if gcc
