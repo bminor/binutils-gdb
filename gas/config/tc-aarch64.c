@@ -7188,11 +7188,6 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"xgene-1", AARCH64_ARCH_V8, "APM X-Gene 1"},
   {"generic", AARCH64_ARCH_V8, NULL},
 
-  /* These two are example CPUs supported in GCC, once we have real
-     CPUs they will be removed.  */
-  {"example-1",	AARCH64_ARCH_V8, NULL},
-  {"example-2",	AARCH64_ARCH_V8, NULL},
-
   {NULL, AARCH64_ARCH_NONE, NULL}
 };
 

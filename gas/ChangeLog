@@ -1,3 +1,7 @@
+2014-11-13  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Remove example-1 and example-2.
+
 2014-11-12  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-z80.c (parse_exp_not_indexed, parse_exp): Warning fixes.
