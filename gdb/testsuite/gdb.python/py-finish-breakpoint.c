@@ -17,6 +17,7 @@
 
 #include <setjmp.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 /* Defined in py-events-shlib.h.  */

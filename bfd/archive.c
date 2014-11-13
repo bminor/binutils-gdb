@@ -1310,6 +1310,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_malformed_archive);
 	  bfd_release (abfd, (bfd_ardata (abfd)->extended_names));
+	  bfd_ardata (abfd)->extended_names = NULL;
 	  goto byebye;
 	}
 

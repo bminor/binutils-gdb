@@ -1,3 +1,95 @@
+2014-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (process_version_sections): If the read of the version
+	def information fails, make sure that the external verdef data is
+	not used.
+	(get_dynamic_data): Do not attempt to allocate memory for more
+	dynamic data than there is in the file.  If the read fails, free
+	the allocated buffer.
+	(process_symbol_table): Do not print dynamic information if we
+	were unable to read the dynamic symbol table.
+	(print_gnu_note): Do not print the note if the descsz is too
+	small.
+
+2014-11-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (read_and_display_attr_value): Check that we do not read
+	past end.
+	(display_debug_pubnames_worker): Add range checks.
+	(process_debug_info): Check for invalid pointer sizes.
+	(display_loc_list): Likewise.
+	(display_loc_list_dwo): Likewise.
+	(display_debug_ranges): Likewise.
+	(display_debug_aranges): Check for invalid address size.
+	(read_cie): Add range checks.  Replace call strchr with while loop.
+	* objdump.c (dump_dwarf): Replace abort with a warning message.
+	(print_section_stabs): Improve range checks.
+	* rdcoff.c (coff_get_slot): Use long for indx parameter type.
+	Add check for an excesively large index.
+	* rddbg.c (read_section_stabs_debugging_info): Zero terminate the
+	string table.  Avoid walking off the end of the stabs data.
+	* stabs.c (parse_stab_string): Add check for a NULL name.
+
+2014-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* binutils/readelf.c (dynamic_nent): Change type to size_t.
+	(slurp_rela_relocs): Use size_t type for nrelas.
+	(slurp_rel_relocs): Likewise.
+	(get_program_headers): Improve out of memory error message.
+	(get_32bit_section_headers): Likewise.
+	(get_32bit_section_headers): Likewise.
+	(get_64bit_section_headers): Likewise.
+	(get_32bit_elf_symbols): Likewise.
+	(get_64bit_elf_symbols): Likewise.
+	(process_section_groups): Likewise.
+	(get_32bit_dynamic_section): Likewise.
+	(get_64bit_dynamic_section): Likewise.
+	(process_dynamic_section): Likewise.
+	(process_version_sections): Likewise.
+	(get_symbol_index_type): Likewise.
+	(process_mips_specific): Likewise.
+	(process_corefile_note_segment): Likewise.
+	(process_version_sections): Use size_t type for total.
+	(get_dynamic_data): Change type of number parameter to size_t.
+	Improve out of memory error messages.
+	(process_symbol_table): Change type of nbuckets and nchains to
+	size_t.  Skip processing of sections headers if there are none.
+	Improve out of memory error messages.
+
+2014-11-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2014-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (display_arm_attribute): Avoid reading off the end of
+	the buffer when processing a Tag_nodefaults.
+
+2014-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* (ia64_process_unwind): Replace assertion with an error message.
+	Add range checking for group section indicies.
+	(hppa_process_unwind): Replace assertion with an error message.
+	(process_syminfo): Likewise.
+	(decode_arm_unwind_bytecode): Add range checking.
+	(dump_section_as_strings): Add more string range checking.
+	(display_tag_value): Likewise.
+	(display_arm_attribute): Likewise.
+	(display_gnu_attribute): Likewise.
+	(display_tic6x_attribute): Likewise.
+	(display_msp430x_attribute): Likewise.
+
+2014-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17552
+	* (copy_archive): Clean up temporary files even if an error
+	occurs.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_dynamic_section): Cast time value to unsigned

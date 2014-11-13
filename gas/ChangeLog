@@ -1,8 +1,38 @@
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17598
+	* config/tc-i386.c (reloc): Support BFD_RELOC_X86_64_GOTPLT64.
+
+2014-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* config/obj-coff.c (coff_obj_symbol_new_hook): Set the is_sym
+	field.
+
+2014-11-13  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Remove example-1 and example-2.
+
+2014-11-12  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-z80.c (parse_exp_not_indexed, parse_exp): Warning fixes.
+
+2014-11-12  Alan Modra  <amodra@gmail.com>
+
+	PR ld/17482
+	* config/tc-i386.c (output_insn): Don't test x86_elf_abi when
+	not ELF.
+
+2014-11-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: Updated Ukranian translation.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17482
 	* config/tc-i386.c (output_insn): Add a dummy REX_OPCODE prefix
-	for structions with R_X86_64_GOTTPOFF relocation for x32 if needed.
+	for instructions with R_X86_64_GOTTPOFF relocation for x32 if
+	needed.
 
 2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
 

@@ -1696,8 +1696,6 @@ evaluate_subexp_standard (struct type *expect_type,
 
     do_call_it:
 
-      if (noside == EVAL_SKIP)
-	goto nosideret;
       if (argvec[0] == NULL)
 	error (_("Cannot evaluate function -- may be inlined"));
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -1804,6 +1802,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	  for (; tem <= nargs; tem++)
 	    argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
 	  argvec[tem] = 0;	/* signal end of arglist */
+	  if (noside == EVAL_SKIP)
+	    goto nosideret;
 	  goto do_call_it;
 
 	default:

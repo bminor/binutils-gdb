@@ -699,7 +699,7 @@ v:int:vtable_function_descriptors:::0:0::0
 v:int:vbit_in_delta:::0:0::0
 
 # Advance PC to next instruction in order to skip a permanent breakpoint.
-F:void:skip_permanent_breakpoint:struct regcache *regcache:regcache
+f:void:skip_permanent_breakpoint:struct regcache *regcache:regcache:default_skip_permanent_breakpoint:default_skip_permanent_breakpoint::0
 
 # The maximum length of an instruction on this architecture in bytes.
 V:ULONGEST:max_insn_length:::0:0

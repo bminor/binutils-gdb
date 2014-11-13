@@ -1,3 +1,11 @@
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17598
+	* gas/i386/reloc64.s: Add @gotplt check.
+
+	* gas/i386/reloc64.d: Updated.
+	* gas/i386/reloc64.l: Likewise.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17482

@@ -291,19 +291,16 @@ select_source_symtab (struct symtab *s)
 
   current_source_line = 1;
 
-  ALL_OBJFILES (ofp)
+  ALL_SYMTABS (ofp, s)
     {
-      for (s = ofp->symtabs; s; s = s->next)
-	{
-	  const char *name = s->filename;
-	  int len = strlen (name);
+      const char *name = s->filename;
+      int len = strlen (name);
 
-	  if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
-	      || strcmp (name, "<<C++-namespaces>>") == 0)))
-	    {
-	      current_source_pspace = current_program_space;
-	      current_source_symtab = s;
-	    }
+      if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
+			|| strcmp (name, "<<C++-namespaces>>") == 0)))
+	{
+	  current_source_pspace = current_program_space;
+	  current_source_symtab = s;
 	}
     }
 

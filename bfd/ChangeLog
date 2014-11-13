@@ -1,3 +1,155 @@
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coffcode.h (coff_pointerize_aux_hook): Fix a typo.
+
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/17598
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Treat
+	R_X86_64_GOTPLT64 the same as R_X86_64_GOT64.
+	(elf_x86_64_relocate_section): Likewise.
+
+2014-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_ptr_struct): Add is_sym field.
+	(coff_new_section_hook): Set the is_sym field.
+	(coff_pointerize_aux_hook): Check the is_sym field.
+	(coff_print_aux): Likewise.
+	(coff_compute_section_file_positions): Likewise.
+	(coff_write_object_contents): Likewise.
+	(coff_slurp_line_table): Likewise.
+	(coff_slurp_symbol_table): Likewise.
+	(CALC_ADDEND): Likewise.
+	* coffgen.c (coff_renumber_symbols): Likewise.
+	(coff_mangle_symbols): Likewise.
+	(coff_fix_symbol_name): Likewise.
+	(coff_write_symbol): Likewise.
+	(coff_write_alien_symbol): Likewise.
+	(coff_write_native_symbol): Likewise.
+	(coff_write_symbols): Likewise.
+	(coff_write_linenumbers): Likewise.
+	(coff_pointerize_aux): Likewise.
+	(coff_get_normalized_symtab): Likewise.
+	(coff_get_symbol_info): Likewise.
+	(bfd_coff_get_syment): Likewise.
+	(bfd_coff_get_auxent): Likewise.
+	(coff_print_symbol): Likewise.
+	(coff_find_nearest_line_with_names): Likewise.
+	(bfd_coff_set_symbol_class): Likewise.
+	(coff_make_empty_symbol): Set the is_sym field.
+	(coff_bfd_make_debug_symbol): Likewise.
+	* peicode.h (pe_ILF_make_a_symbol): Likewise.
+	* libcoff.h: Regenerate.
+	* libcoff-in.h: Regenerate.
+
+2014-11-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Set the line number of
+	corrupt entries to -1.
+	(coff_slurp_symbol_table): Alway initialise the value of the
+	symbol.
+	* coffgen.c (coff_print_symbol): Check that the combined pointer
+	is valid.
+	(coff_print_symbol): Do not print negative line numbers.
+	* peXXigen.c (pe_print_idata): Add range checking displaying
+	member names.
+
+2014-11-12  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Drop line number info
+	not preceded by a valid function entry.  Revert last change.
+
+2014-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Initialise the parts of the
+	line number cache that would not be initialised by the copy from
+	the new line number table.
+	(coff_classify_symbol): Allow for _bfd_coff_internal_syment_name
+	returning NULL.
+	* coffgen.c (coff_get_normalized_symbols): Get the external
+	symbols before allocating space for the internal symbols, in case
+	the get fails.
+	* elf.c (_bfd_elf_slurp_version_tables): Only allocate a verref
+	array if one is needed.  Likewise with the verdef array.
+	* peXXigen.c (_bfd_XXi_swap_sym_in): Replace abort()'s with error
+	messages.
+	(_bfd_XXi_swap_aux_in): Make sure that all fields of the aux
+	structure are initialised.
+	(pe_print_edata): Avoid reading off the end of the data buffer.
+
+2014-11-11  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Use updated lineno_count
+	when building func_table.
+
+2014-11-11  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_slurp_line_table): Don't bfd_zalloc, just
+	memset the particular bits we need.  Update src after hitting loop
+	"continue".  Don't count lineno omitted due to invalid symbols in
+	nbr_func, and update lineno_count.  Init entire terminating
+	lineno.  Don't both allocating terminator in n_lineno_cache.
+	Redirect sym->lineno pointer to where n_lineno_cache will be
+	copied, and free n_lineno_cache.
+	* pe-mips.c (NUM_HOWTOS): Typo fix.
+
+2014-11-11  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Adjust section
+	size check to account for possible zero terminator.
+
+2014-11-10  James Cowgill  <James.Cowgill@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_section_processing): don't force small
+	data sections to be PROGBITS
+
+2014-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17521
+	* coff-i386.c (NUM_HOWTOS): New define.
+	(RTYPE2HOWTO): Use it.
+	(coff_i386_rtype_to_howto): Likewise.
+	(coff_i386_reloc_name_lookup): Likewise.
+	(CALC_ADDEND): Check that reloc r_type field is valid.
+	* coff-x86_64.c (NUM_HOWTOS): New define.
+	(RTYPE2HOWTO): Use it.
+	(coff_amd64_rtype_to_howto): Likewise.
+	(coff_amd64_reloc_name_lookup): Likewise.
+	(CALC_ADDEND): Check that reloc r_type field is valid.
+	* coffcode.h (coff_slurp_line_table): Check for symbol table
+	indexing underflow.
+	(coff_slurp_symbol_table): Use zalloc to ensure that all table
+	entries are initialised.
+	* coffgen.c (_bfd_coff_read_string_table): Initialise unused bits
+	in the string table.  Also ensure that the table is 0 terminated.
+	(coff_get_normalized_symtab): Check for symbol table indexing
+	underflow.
+	* opncls.c (bfd_alloc): Catch the case where a small negative size
+	can result in only 1 byte being allocated.
+	(bfd_alloc2): Use bfd_alloc.
+	* pe-mips.c (NUM_HOWTOS): New define.
+	(coff_mips_reloc_name_lookup): Use it.
+	(CALC_ADDEND): Check that reloc r_type field is valid.
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Initialise unused entries
+	in the DataDirectory.
+	(pe_print_idata): Avoid reading beyond the end of the data block
+	wen printing strings.
+	(pe_print_edata): Likewise.
+	Check for table indexing underflow.
+	* peicode.h (pe_mkobject): Initialise the pe_opthdr field.
+	(pe_bfd_object_p): Allocate and initialize enough space to hold a
+	PEAOUTHDR, even if the opt_hdr field specified less.
+
+2014-11-08  Alan Modra  <amodra@gmail.com>
+
+	* peXXigen.c (pe_print_idata): Revert last patch, cast lhs instead.
+
 2014-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* peXXigen.c (pe_print_idata): Cast to unsigned long in range

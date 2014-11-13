@@ -193,12 +193,6 @@ enum enable_state
 			    automatically enabled and reset when the
 			    call "lands" (either completes, or stops
 			    at another eventpoint).  */
-    bp_permanent	 /* There is a breakpoint instruction
-			    hard-wired into the target's code.  Don't
-			    try to write another breakpoint
-			    instruction on top of it, or restore its
-			    value.  Step over it using the
-			    architecture's SKIP_INSN macro.  */
   };
 
 
@@ -375,6 +369,13 @@ struct bp_location
   
   /* Nonzero if this breakpoint is now inserted.  */
   char inserted;
+
+  /* Nonzero if this is a permanent breakpoint.  There is a breakpoint
+     instruction hard-wired into the target's code.  Don't try to
+     write another breakpoint instruction on top of it, or restore its
+     value.  Step over it using the architecture's
+     gdbarch_skip_permanent_breakpoint method.  */
+  char permanent;
 
   /* Nonzero if this is not the first breakpoint in the list
      for the given address.  location of tracepoint can _never_

@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <time.h>
 /* TESTS :
  * - open(const char *pathname, int flags, mode_t mode);
 1) Attempt to create file that already exists - EEXIST

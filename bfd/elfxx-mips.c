@@ -6986,20 +6986,11 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
       if (strcmp (name, ".sdata") == 0
 	  || strcmp (name, ".lit8") == 0
 	  || strcmp (name, ".lit4") == 0)
-	{
-	  hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
-	  hdr->sh_type = SHT_PROGBITS;
-	}
+	hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
       else if (strcmp (name, ".srdata") == 0)
-	{
-	  hdr->sh_flags |= SHF_ALLOC | SHF_MIPS_GPREL;
-	  hdr->sh_type = SHT_PROGBITS;
-	}
+	hdr->sh_flags |= SHF_ALLOC | SHF_MIPS_GPREL;
       else if (strcmp (name, ".compact_rel") == 0)
-	{
-	  hdr->sh_flags = 0;
-	  hdr->sh_type = SHT_PROGBITS;
-	}
+	hdr->sh_flags = 0;
       else if (strcmp (name, ".rtproc") == 0)
 	{
 	  if (hdr->sh_addralign != 0 && hdr->sh_entsize == 0)

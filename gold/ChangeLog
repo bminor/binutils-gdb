@@ -1,3 +1,8 @@
+2014-11-06  Evgeniy Dushistov  <dushistov@mail.ru>
+
+	* plugin.cc: use lock to searialize calls of Plugin_manager::claim_file
+	* plugin.h: add lock definition
+
 2014-10-29  Han Shen  <shenhan@google.com>
 	    Jing Yu   <jingyu@google.com>
 

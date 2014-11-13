@@ -1752,14 +1752,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	    if (h != NULL)
 	      {
-		if (r_type == R_X86_64_GOTPLT64)
-		  {
-		    /* This relocation indicates that we also need
-		       a PLT entry, as this is a function.  We don't need
-		       a PLT entry for local symbols.  */
-		    h->needs_plt = 1;
-		    h->plt.refcount += 1;
-		  }
 		h->got.refcount += 1;
 		old_tls_type = elf_x86_64_hash_entry (h)->tls_type;
 	      }
@@ -2181,8 +2173,6 @@ elf_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_GOTPLT64:
 	  if (h != NULL)
 	    {
-	      if (r_type == R_X86_64_GOTPLT64 && h->plt.refcount > 0)
-		h->plt.refcount -= 1;
 	      if (h->got.refcount > 0)
 		h->got.refcount -= 1;
 	      if (h->type == STT_GNU_IFUNC)
@@ -3720,12 +3710,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	case R_X86_64_GOTPCREL64:
 	  /* Use global offset table entry as symbol value.  */
 	case R_X86_64_GOTPLT64:
-	  /* This is the same as GOT64 for relocation purposes, but
-	     indicates the existence of a PLT entry.  The difficulty is,
-	     that we must calculate the GOT slot offset from the PLT
-	     offset, if this symbol got a PLT entry (it was global).
-	     Additionally if it's computed from the PLT entry, then that
-	     GOT offset is relative to .got.plt, not to .got.  */
+	  /* This is obsolete and treated the the same as GOT64.  */
 	  base_got = htab->elf.sgot;
 
 	  if (htab->elf.sgot == NULL)

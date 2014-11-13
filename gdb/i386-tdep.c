@@ -4523,18 +4523,6 @@ i386_fetch_pointer_argument (struct frame_info *frame, int argi,
   return read_memory_unsigned_integer (sp + (4 * (argi + 1)), 4, byte_order);
 }
 
-static void
-i386_skip_permanent_breakpoint (struct regcache *regcache)
-{
-  CORE_ADDR current_pc = regcache_read_pc (regcache);
-
- /* On i386, breakpoint is exactly 1 byte long, so we just
-    adjust the PC in the regcache.  */
-  current_pc += 1;
-  regcache_write_pc (regcache, current_pc);
-}
-
-
 #define PREFIX_REPZ	0x01
 #define PREFIX_REPNZ	0x02
 #define PREFIX_LOCK	0x04
@@ -8565,9 +8553,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       && !gdbarch_iterate_over_regset_sections_p (gdbarch))
     set_gdbarch_iterate_over_regset_sections
       (gdbarch, i386_iterate_over_regset_sections);
-
-  set_gdbarch_skip_permanent_breakpoint (gdbarch,
-					 i386_skip_permanent_breakpoint);
 
   set_gdbarch_fast_tracepoint_valid_at (gdbarch,
 					i386_fast_tracepoint_valid_at);

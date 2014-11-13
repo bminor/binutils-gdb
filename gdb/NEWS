@@ -132,10 +132,10 @@ show record btrace replay-memory-access
 
 maint set target-async (on|off)
 maint show target-async
-  This controls whether GDB targets operate in syncronous or
-  asyncronous mode.  Normally the default is asyncronous, if it is
+  This controls whether GDB targets operate in synchronous or
+  asynchronous mode.  Normally the default is asynchronous, if it is
   available; but this can be changed to more easily debug problems
-  occurring only in syncronous mode.
+  occurring only in synchronous mode.
 
 set mi-async (on|off)
 show mi-async

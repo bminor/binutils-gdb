@@ -2518,34 +2518,6 @@ retry:
   in_step_range = 0;
   ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
-  /* If we were only supposed to resume one thread, only wait for
-     that thread - if it's still alive.  If it died, however - which
-     can happen if we're coming from the thread death case below -
-     then we need to make sure we restart the other threads.  We could
-     pick a thread at random or restart all; restarting all is less
-     arbitrary.  */
-  if (!non_stop
-      && !ptid_equal (cont_thread, null_ptid)
-      && !ptid_equal (cont_thread, minus_one_ptid))
-    {
-      struct thread_info *thread;
-
-      thread = (struct thread_info *) find_inferior_id (&all_threads,
-							cont_thread);
-
-      /* No stepping, no signal - unless one is pending already, of course.  */
-      if (thread == NULL)
-	{
-	  struct thread_resume resume_info;
-	  resume_info.thread = minus_one_ptid;
-	  resume_info.kind = resume_continue;
-	  resume_info.sig = 0;
-	  linux_resume (&resume_info, 1);
-	}
-      else
-	ptid = cont_thread;
-    }
-
   if (ptid_equal (step_over_bkpt, null_ptid))
     pid = linux_wait_for_event (ptid, &w, options);
   else
@@ -4848,16 +4820,9 @@ linux_request_interrupt (void)
 {
   extern unsigned long signal_pid;
 
-  if (!ptid_equal (cont_thread, null_ptid)
-      && !ptid_equal (cont_thread, minus_one_ptid))
-    {
-      int lwpid;
-
-      lwpid = lwpid_of (current_thread);
-      kill_lwp (lwpid, SIGINT);
-    }
-  else
-    kill_lwp (signal_pid, SIGINT);
+  /* Send a SIGINT to the process group.  This acts just like the user
+     typed a ^C on the controlling terminal.  */
+  kill (-signal_pid, SIGINT);
 }
 
 /* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET

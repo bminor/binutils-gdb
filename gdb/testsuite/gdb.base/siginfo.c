@@ -38,6 +38,7 @@ handler (int sig)
 } /* handler */
 #endif
 
+int
 main ()
 {
   /* Set up the signal handler.  */

@@ -1,3 +1,223 @@
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.ada/cond_lang/foo.c (callme): Add return type.
+	* gdb.base/call-sc.c (zed): Likewise.
+	* gdb.base/checkpoint.c (main): Likewise.
+	* gdb.base/dump.c (main): Likewise.
+	* gdb.base/gcore.c (main): Likewise.
+	* gdb.base/huge.c (main): Likewise.
+	* gdb.base/multi-forks.c (main): Likewise.
+	* gdb.base/pr10179-a.c (main): Likewise.
+	* gdb.base/savedregs.c (main): Likewise.
+	* gdb.base/sigaltstack.c (main): Likewise.
+	* gdb.base/siginfo.c (main): Likewise.
+	* gdb.base/structs.c (zed): Likewise.
+	* gdb.mi/mi-stack.c (callee3, callee2, callee1, main): Likewise.
+	* gdb.mi/mi-syn-frame.c (main): Likewise.
+	* gdb.mi/until.c (foo, main): Likewise.
+	* gdb.base/global-var-nested-by-dso.c (b_main, c_main): Declare.
+	* gdb.base/solib-weak.c (foo): Declare.
+	* gdb.base/attach-twice.c: Include stdio.h.
+	* gdb.base/weaklib1.c: Likewise.
+	* gdb.base/weaklib2.c: Likewise.
+	* gdb.base/catch-signal-fork.c: Include stdio.h and sys/wait.h.
+	* gdb.mi/mi-condbreak-call-thr-state-mt.c: Include stdio.h and
+	unistd.h.
+	* gdb.base/attach-pie-misread.c: Include stdlib.h.
+	* gdb.mi/mi-exit-code.c: Likewise.
+	* gdb.base/break-interp-lib.c: Include string.h.
+	* gdb.base/coremaker.c: Likewise.
+	* gdb.base/testenv.c: Likewise.
+	* gdb.python/py-finish-breakpoint.c: Likewise.
+	* gdb.base/inferior-died.c: Include sys/wait.h.
+	* gdb.base/fileio.c: Include time.h.
+	* gdb.base/async-shell.c: Include unistd.h.
+	* gdb.base/dprintf-non-stop.c: Likewise.
+	* gdb.base/info-os.c: Likewise.
+	* gdb.mi/mi-console.c: Likewise.
+	* gdb.mi/watch-nonstop.c: Likewise.
+	* gdb.python/py-events.c: Likewise.
+	* gdb.base/async.c (baz): Move up before its invocation.
+	* gdb.base/code_elim2.c (my_global_func): Likewise.
+	* gdb.base/skip-solib-lib.c (multiply): Likewise.
+	* gdb.base/advance.c (func2): Likewise.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/annota1.c: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.
+	* gdb.base/annota3.c: Likewise.
+	* gdb.base/async.c: Likewise.
+	* gdb.base/average.c: Likewise.
+	* gdb.base/call-ar-st.c: Likewise.
+	* gdb.base/call-rt-st.c: Likewise.
+	* gdb.base/call-sc.c: Likewise.
+	* gdb.base/call-strs.c: Likewise.
+	* gdb.base/ending-run.c: Likewise.
+	* gdb.base/execd-prog.c: Likewise.
+	* gdb.base/exprs.c: Likewise.
+	* gdb.base/foll-exec.c: Likewise.
+	* gdb.base/foll-fork.c: Likewise.
+	* gdb.base/foll-vfork.c: Likewise.
+	* gdb.base/funcargs.c: Likewise.
+	* gdb.base/gcore.c: Likewise.
+	* gdb.base/jump.c: Likewise.
+	* gdb.base/langs0.c: Likewise.
+	* gdb.base/langs1.c: Likewise.
+	* gdb.base/langs2.c: Likewise.
+	* gdb.base/mips_pro.c: Likewise.
+	* gdb.base/nodebug.c: Likewise.
+	* gdb.base/opaque0.c: Likewise.
+	* gdb.base/opaque1.c: Likewise.
+	* gdb.base/recurse.c: Likewise.
+	* gdb.base/run.c: Likewise.
+	* gdb.base/scope0.c: Likewise.
+	* gdb.base/scope1.c: Likewise.
+	* gdb.base/setshow.c: Likewise.
+	* gdb.base/setvar.c: Likewise.
+	* gdb.base/shmain.c: Likewise.
+	* gdb.base/shr1.c: Likewise.
+	* gdb.base/shr2.c: Likewise.
+	* gdb.base/sigall.c: Likewise.
+	* gdb.base/signals.c: Likewise.
+	* gdb.base/so-indr-cl.c: Likewise.
+	* gdb.base/solib2.c: Likewise.
+	* gdb.base/structs.c: Likewise.
+	* gdb.base/sum.c: Likewise.
+	* gdb.base/vforked-prog.c: Likewise.
+	* gdb.base/watchpoint.c: Likewise.
+	* gdb.reverse/shr2.c: Likewise.
+	* gdb.reverse/until-reverse.c: Likewise.
+	* gdb.reverse/ur1.c: Likewise.
+	* gdb.reverse/watch-reverse.c: Likewise.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/sepdebug.c: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.
+	* gdb.base/sepdebug.exp: Drop references to removed code.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/list0.h: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.  Preserve original line numbering.
+	* gdb.base/list1.c: Likewise.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/break.c: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.
+	* gdb.base/break1.c: Likewise.
+	* gdb.base/break.exp: Drop references to removed code.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/solib1.c: Remove #ifdef PROTOTYPES, keep prototyped
+	variant.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/callfuncs.exp (perform_all_tests): Re-indent.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/callfuncs.exp: Remove 'prototypes' variable.  Move main
+	logic into perform_all_tests() and invoke it with and without
+	function header prototypes.
+	(do_function_calls): Remove conditional XFAIL for PR 5318.
+	(rerun_and_prepare): Remove duplicate code.
+	(perform_all_tests): New.  Main logic moved here.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/callfuncs.c (t_float_many_args): Fix syntax error in
+	code guarded by #ifdef NO_PROTOTYPES.
+	(t_double_many_args): Likewise.
+	(DEF_FUNC_MANY_ARGS_1): Likewise.
+	(DEF_FUNC_VALUES_1): Likewise.
+	(t_structs_ldc): Renamed from t_structs_fc in conditional code
+	guarded by #ifdef PROTOTYPES.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.mi/mi-console.c: Add eye-catcher.
+	* gdb.mi/mi-console.exp (semihosted_string): Refer to eye-catcher
+	instead of literal line number.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/shr2.c: Add eye-catcher.
+	* gdb.base/shlib-call.exp: Refer to eye-catcher instead of literal
+	line number.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/jump.c: Add eye-catchers.
+	* gdb.base/jump.exp: Refer to eye-catchers instead of literal line
+	numbers.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/execd-prog.c: Add eye-catchers.
+	* gdb.base/foll-exec.c: Likewise.
+	* gdb.base/foll-exec.exp: Refer to eye-catchers instead of literal
+	line numbers.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/ending-run.c: Add eye-catchers.
+	* gdb.base/ending-run.exp: Refer to eye-catchers instead of
+	literal line numbers.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/call-rt-st.c: Add eye-catchers.
+	* gdb.base/call-rt-st.exp: Refer to eye-catchers instead of
+	literal line numbers.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/call-ar-st.c: Add eye-catchers.
+	* gdb.base/call-ar-st.exp: Refer to eye-catchers instead of
+	literal line numbers.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/average.c: Add eye-catchers.
+	* gdb.base/sum.c: Likewise.
+	* gdb.base/dbx.exp: Use eye-catchers to determine line numbers for
+	regexps dynamically.
+
+2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/solib1.c: Add eye-catchers.
+	* gdb.base/so-impl-ld.exp: Match against eye-catchers instead of
+	literal line numbers.
+
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/leader-exit.exp: Test sending ctrl-c works after the
+	leader has exited.
+
+2014-11-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/i386-bp_permanent.c: New file.
+	* gdb.arch/i386-bp_permanent.exp: Don't skip on x86_64.
+	(srcfile): Set to i386-bp_permanent.c.
+	(top level): Adjust to work in both 32-bit and 64-bit modes.  Test
+	that stepi does not execute the 'leave' instruction, instead of
+	testing it does execute.
+	* gdb.base/bp-permanent.c: New file.
+	* gdb.base/bp-permanent.exp: New file.
+
+2014-11-10  Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/17564
+	* gdb.base/symtab-search-order.exp: New file.
+	* gdb.base/symtab-search-order.c: New file.
+	* gdb.base/symtab-search-order-1.c: New file.
+	* gdb.base/symtab-search-order-shlib-1.c: New file.
+
 2014-11-07  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/17511

@@ -3883,7 +3883,7 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
   /* BL is never in moribund_locations by our callers.  */
   gdb_assert (bl->owner != NULL);
 
-  if (bl->owner->enable_state == bp_permanent)
+  if (bl->permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
     return 0;
 
@@ -4033,7 +4033,7 @@ remove_breakpoint (struct bp_location *bl, insertion_state_t is)
   /* BL is never in moribund_locations by our callers.  */
   gdb_assert (bl->owner != NULL);
 
-  if (bl->owner->enable_state == bp_permanent)
+  if (bl->permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
     return 0;
 
@@ -4059,7 +4059,8 @@ mark_breakpoints_out (void)
   struct bp_location *bl, **blp_tmp;
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
-    if (bl->pspace == current_program_space)
+    if (bl->pspace == current_program_space
+	&& !bl->permanent)
       bl->inserted = 0;
 }
 
@@ -4088,13 +4089,7 @@ breakpoint_init_inferior (enum inf_context context)
   if (gdbarch_has_global_breakpoints (target_gdbarch ()))
     return;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
-  {
-    /* ALL_BP_LOCATIONS bp_location has BL->OWNER always non-NULL.  */
-    if (bl->pspace == pspace
-	&& bl->owner->enable_state != bp_permanent)
-      bl->inserted = 0;
-  }
+  mark_breakpoints_out ();
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
@@ -4202,14 +4197,14 @@ breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 
       /* ALL_BP_LOCATIONS bp_location has BL->OWNER always non-NULL.  */
       if ((breakpoint_enabled (bl->owner)
-	   || bl->owner->enable_state == bp_permanent)
+	   || bl->permanent)
 	  && breakpoint_location_address_match (bl, aspace, pc))
 	{
 	  if (overlay_debugging 
 	      && section_is_overlay (bl->section)
 	      && !section_is_mapped (bl->section))
 	    continue;		/* unmapped overlay -- can't be a match */
-	  else if (bl->owner->enable_state == bp_permanent)
+	  else if (bl->permanent)
 	    return permanent_breakpoint_here;
 	  else
 	    any_breakpoint_here = 1;
@@ -5475,7 +5470,7 @@ bpstat_stop_status (struct address_space *aspace,
 
   ALL_BREAKPOINTS (b)
     {
-      if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
+      if (!breakpoint_enabled (b))
 	continue;
 
       for (bl = b->loc; bl != NULL; bl = bl->next)
@@ -5571,8 +5566,7 @@ bpstat_stop_status (struct address_space *aspace,
 	      if (b->disposition == disp_disable)
 		{
 		  --(b->enable_count);
-		  if (b->enable_count <= 0
-		      && b->enable_state != bp_permanent)
+		  if (b->enable_count <= 0)
 		    b->enable_state = bp_disabled;
 		  removed_any = 1;
 		}
@@ -6856,8 +6850,6 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
 			     ((b->enable_state == bp_disabled
 			       || b->enable_state == bp_call_disabled)
 			      ? " (disabled)"
-			      : b->enable_state == bp_permanent 
-			      ? " (permanent)"
 			      : ""),
 			     (others > 1) ? "," 
 			     : ((others == 1) ? " and" : ""));
@@ -7389,15 +7381,16 @@ make_breakpoint_permanent (struct breakpoint *b)
 {
   struct bp_location *bl;
 
-  b->enable_state = bp_permanent;
-
   /* By definition, permanent breakpoints are already present in the
      code.  Mark all locations as inserted.  For now,
      make_breakpoint_permanent is called in just one place, so it's
      hard to say if it's reasonable to have permanent breakpoint with
      multiple locations or not, but it's easy to implement.  */
   for (bl = b->loc; bl; bl = bl->next)
-    bl->inserted = 1;
+    {
+      bl->permanent = 1;
+      bl->inserted = 1;
+    }
 }
 
 /* Call this routine when stepping and nexting to enable a breakpoint
@@ -9227,6 +9220,8 @@ mention (struct breakpoint *b)
 }
 
 
+static int bp_loc_is_permanent (struct bp_location *loc);
+
 static struct bp_location *
 add_location_to_breakpoint (struct breakpoint *b,
 			    const struct symtab_and_line *sal)
@@ -9268,6 +9263,13 @@ add_location_to_breakpoint (struct breakpoint *b,
 
   set_breakpoint_location_function (loc,
 				    sal->explicit_pc || sal->explicit_line);
+
+  if (bp_loc_is_permanent (loc))
+    {
+      loc->inserted = 1;
+      loc->permanent = 1;
+    }
+
   return loc;
 }
 
@@ -9509,9 +9511,6 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	  if ((flags & CREATE_BREAKPOINT_FLAGS_INSERTED) != 0)
 	    loc->inserted = 1;
 	}
-
-      if (bp_loc_is_permanent (loc))
-	make_breakpoint_permanent (b);
 
       if (b->cond_string)
 	{
@@ -12352,7 +12351,7 @@ breakpoint_auto_delete (bpstat bs)
 /* A comparison function for bp_location AP and BP being interfaced to
    qsort.  Sort elements primarily by their ADDRESS (no matter what
    does breakpoint_address_is_meaningful say for its OWNER),
-   secondarily by ordering first bp_permanent OWNERed elements and
+   secondarily by ordering first permanent elements and
    terciarily just ensuring the array is sorted stable way despite
    qsort being an unstable algorithm.  */
 
@@ -12361,9 +12360,6 @@ bp_location_compare (const void *ap, const void *bp)
 {
   struct bp_location *a = *(void **) ap;
   struct bp_location *b = *(void **) bp;
-  /* A and B come from existing breakpoints having non-NULL OWNER.  */
-  int a_perm = a->owner->enable_state == bp_permanent;
-  int b_perm = b->owner->enable_state == bp_permanent;
 
   if (a->address != b->address)
     return (a->address > b->address) - (a->address < b->address);
@@ -12377,8 +12373,8 @@ bp_location_compare (const void *ap, const void *bp)
 	    - (a->pspace->num < b->pspace->num));
 
   /* Sort permanent breakpoints first.  */
-  if (a_perm != b_perm)
-    return (a_perm < b_perm) - (a_perm > b_perm);
+  if (a->permanent != b->permanent)
+    return (a->permanent < b->permanent) - (a->permanent > b->permanent);
 
   /* Make the internal GDB representation stable across GDB runs
      where A and B memory inside GDB can differ.  Breakpoint locations of
@@ -12849,7 +12845,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 	}
 
       /* Permanent breakpoint should always be inserted.  */
-      if (b->enable_state == bp_permanent && ! loc->inserted)
+      if (loc->permanent && ! loc->inserted)
 	internal_error (__FILE__, __LINE__,
 			_("allegedly permanent breakpoint is not "
 			"actually inserted"));
@@ -12890,8 +12886,8 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
       /* Clear the condition modification flag.  */
       loc->condition_changed = condition_unchanged;
 
-      if ((*loc_first_p)->owner->enable_state == bp_permanent && loc->inserted
-	  && b->enable_state != bp_permanent)
+      if (loc->inserted && !loc->permanent
+	  && (*loc_first_p)->permanent)
 	internal_error (__FILE__, __LINE__,
 			_("another breakpoint was inserted on top of "
 			"a permanent breakpoint"));
@@ -14437,10 +14433,6 @@ update_breakpoint_locations (struct breakpoint *b,
 	}
     }
 
-  /* Update locations of permanent breakpoints.  */
-  if (b->enable_state == bp_permanent)
-    make_breakpoint_permanent (b);
-
   /* If possible, carry over 'disable' status from existing
      breakpoints.  */
   {
@@ -14923,10 +14915,6 @@ disable_breakpoint (struct breakpoint *bpt)
   if (bpt->type == bp_watchpoint_scope)
     return;
 
-  /* You can't disable permanent breakpoints.  */
-  if (bpt->enable_state == bp_permanent)
-    return;
-
   bpt->enable_state = bp_disabled;
 
   /* Mark breakpoint locations modified.  */
@@ -15046,9 +15034,6 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
 	  return;
 	}
     }
-
-  if (bpt->enable_state != bp_permanent)
-    bpt->enable_state = bp_enabled;
 
   bpt->enable_state = bp_enabled;
 
