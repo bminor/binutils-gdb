@@ -1,3 +1,9 @@
+2014-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* config/obj-coff.c (coff_obj_symbol_new_hook): Set the is_sym
+	field.
+
 2014-11-13  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Remove example-1 and example-2.

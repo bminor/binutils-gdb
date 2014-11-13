@@ -568,6 +568,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   ent->u.syment.n_sclass          = sclass;
   ent->u.syment.n_scnum           = section->target_index;
   ent->u.syment._n._n_n._n_offset = (bfd_hostptr_t) sym;
+  ent->is_sym = TRUE;
 
   sym->symbol.the_bfd = vars->abfd;
   sym->symbol.name    = vars->string_ptr;

@@ -1,3 +1,37 @@
+2014-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* coffcode.h (coff_ptr_struct): Add is_sym field.
+	(coff_new_section_hook): Set the is_sym field.
+	(coff_pointerize_aux_hook): Check the is_sym field.
+	(coff_print_aux): Likewise.
+	(coff_compute_section_file_positions): Likewise.
+	(coff_write_object_contents): Likewise.
+	(coff_slurp_line_table): Likewise.
+	(coff_slurp_symbol_table): Likewise.
+	(CALC_ADDEND): Likewise.
+	* coffgen.c (coff_renumber_symbols): Likewise.
+	(coff_mangle_symbols): Likewise.
+	(coff_fix_symbol_name): Likewise.
+	(coff_write_symbol): Likewise.
+	(coff_write_alien_symbol): Likewise.
+	(coff_write_native_symbol): Likewise.
+	(coff_write_symbols): Likewise.
+	(coff_write_linenumbers): Likewise.
+	(coff_pointerize_aux): Likewise.
+	(coff_get_normalized_symtab): Likewise.
+	(coff_get_symbol_info): Likewise.
+	(bfd_coff_get_syment): Likewise.
+	(bfd_coff_get_auxent): Likewise.
+	(coff_print_symbol): Likewise.
+	(coff_find_nearest_line_with_names): Likewise.
+	(bfd_coff_set_symbol_class): Likewise.
+	(coff_make_empty_symbol): Set the is_sym field.
+	(coff_bfd_make_debug_symbol): Likewise.
+	* peicode.h (pe_ILF_make_a_symbol): Likewise.
+	* libcoff.h: Regenerate.
+	* libcoff-in.h: Regenerate.
+
 2014-11-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512
