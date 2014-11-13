@@ -1,3 +1,7 @@
+2014-11-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (maint set target-async): Fix typo.
+
 2014-11-12  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (enum infwait_states, infwait_state): Delete.
