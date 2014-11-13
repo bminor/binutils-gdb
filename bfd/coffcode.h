@@ -2540,7 +2540,7 @@ coff_pointerize_aux_hook (bfd *abfd ATTRIBUTE_UNUSED,
   /* Return TRUE if we don't want to pointerize this aux entry, which
      is the case for the lastfirst aux entry for a C_LEAFPROC symbol.  */
   return (indaux == 1
-	  && symbbol->is_sym
+	  && symbol->is_sym
 	  && (symbol->u.syment.n_sclass == C_LEAFPROC
 	      || symbol->u.syment.n_sclass == C_LEAFSTAT
 	      || symbol->u.syment.n_sclass == C_LEAFEXT));
