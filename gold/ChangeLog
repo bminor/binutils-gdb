@@ -1,3 +1,10 @@
+2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.cc (Target_x86_64<size>::Scan::global): Don't make PLT
+	entry for R_X86_64_GOTPLT64.
+	(Target_x86_64<size>::Relocate::relocate): Update comments for
+	R_X86_64_GOTPLT64.
+
 2014-11-06  Evgeniy Dushistov  <dushistov@mail.ru>
 
 	* plugin.cc: use lock to searialize calls of Plugin_manager::claim_file
