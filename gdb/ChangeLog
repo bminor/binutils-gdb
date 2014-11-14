@@ -1,3 +1,9 @@
+2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>
+	* linux-fork.c (checkpoint_command): Print index of new
+	checkpoint in response message.
+
 2014-11-23  Yao Qi  <yao@codesourcery.com>
 
 	* valprint.c (read_string): Move local variables 'found_nul',
