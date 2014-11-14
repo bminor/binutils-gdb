@@ -20,5 +20,6 @@
 int
 main()
 {
+  asm ("main_label: .globl main_label");
   return 0;
 }
