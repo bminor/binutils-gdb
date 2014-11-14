@@ -2917,7 +2917,11 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
     {
       /* NAME is already canonical.  Drop any qualifiers as .gdb_index does
 	 not contain any.  */
-      const char *paren = strchr (name, '(');
+      const char *paren = NULL;
+
+      /* Need to handle "(anonymous namespace)".  */
+      if (*name != '(')
+	paren = strchr (name, '(');
 
       if (paren)
 	{

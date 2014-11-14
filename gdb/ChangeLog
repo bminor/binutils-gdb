@@ -1,5 +1,11 @@
 2014-11-13  Doug Evans  <dje@google.com>
 
+	PR symtab/17591
+	* dwarf2read.c (find_slot_in_mapped_hash): Handle
+	"(anonymous namespace)".
+
+2014-11-13  Doug Evans  <dje@google.com>
+
 	* dwarf2read.c (update_enumeration_type_from_children): Avoid
 	infinite loop.
 
