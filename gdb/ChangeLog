@@ -1,3 +1,25 @@
+2014-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/common-defs.h: Move <stdarg.h> #include ahead of
+	<stdio.h> #include.
+
+2014-11-14  Pedro Alves  <palves@redhat.com>
+
+	* charset.c [PHONY_ICONV && !EILSEQ] (EILSEQ): Don't define.
+	[!PHONY_ICONV] (gdb_iconv): New function.
+	[!PHONY_ICONV] (iconv): Redefine to gdb_iconv.
+
+2014-11-13  Doug Evans  <dje@google.com>
+
+	PR symtab/17591
+	* dwarf2read.c (find_slot_in_mapped_hash): Handle
+	"(anonymous namespace)".
+
+2014-11-13  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (update_enumeration_type_from_children): Avoid
+	infinite loop.
+
 2014-11-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (maint set target-async): Fix typo.

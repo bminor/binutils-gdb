@@ -1,3 +1,16 @@
+2014-11-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Re-arrange avx512* and xsave*
+	items.
+
+	* doc/c-i386.texi: Re-arrange avx512* and xsave*.  Add
+	clflushopt and se1.  Remove duplicated entries.
+
+2014-11-13  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add CRC feature for
+	cortex-A53 and cortex-A57.
+
 2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/17598

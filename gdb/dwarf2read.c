@@ -2917,7 +2917,11 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
     {
       /* NAME is already canonical.  Drop any qualifiers as .gdb_index does
 	 not contain any.  */
-      const char *paren = strchr (name, '(');
+      const char *paren = NULL;
+
+      /* Need to handle "(anonymous namespace)".  */
+      if (*name != '(')
+	paren = strchr (name, '(');
 
       if (paren)
 	{
@@ -13231,7 +13235,7 @@ update_enumeration_type_from_children (struct die_info *die,
 				       struct dwarf2_cu *cu)
 {
   struct obstack obstack;
-  struct die_info *child_die = die->child;
+  struct die_info *child_die;
   int unsigned_enum = 1;
   int flag_enum = 1;
   ULONGEST mask = 0;
@@ -13240,13 +13244,16 @@ update_enumeration_type_from_children (struct die_info *die,
   obstack_init (&obstack);
   old_chain = make_cleanup_obstack_free (&obstack);
 
-  while (child_die != NULL && child_die->tag)
+  for (child_die = die->child;
+       child_die != NULL && child_die->tag;
+       child_die = sibling_die (child_die))
     {
       struct attribute *attr;
       LONGEST value;
       const gdb_byte *bytes;
       struct dwarf2_locexpr_baton *baton;
       const char *name;
+
       if (child_die->tag != DW_TAG_enumerator)
 	continue;
 
@@ -13274,7 +13281,6 @@ update_enumeration_type_from_children (struct die_info *die,
 	 a flag type, no need to look at the rest of the enumerates.  */
       if (!unsigned_enum && !flag_enum)
 	break;
-      child_die = sibling_die (child_die);
     }
 
   if (unsigned_enum)

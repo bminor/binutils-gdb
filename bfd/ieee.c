@@ -1312,7 +1312,8 @@ ieee_archive_p (bfd *abfd)
 
   /* Ignore the return value here.  It doesn't matter if we don't read
      the entire buffer.  We might have a very small ieee file.  */
-  bfd_bread ((void *) buffer, (bfd_size_type) sizeof (buffer), abfd);
+  if (bfd_bread ((void *) buffer, (bfd_size_type) sizeof (buffer), abfd) <= 0)
+    goto got_wrong_format_error;
 
   ieee->h.first_byte = buffer;
   ieee->h.input_p = buffer;
@@ -1801,7 +1802,8 @@ ieee_object_p (bfd *abfd)
     goto fail;
   /* Read the first few bytes in to see if it makes sense.  Ignore
      bfd_bread return value;  The file might be very small.  */
-  bfd_bread ((void *) buffer, (bfd_size_type) sizeof (buffer), abfd);
+  if (bfd_bread ((void *) buffer, (bfd_size_type) sizeof (buffer), abfd) <= 0)
+    goto got_wrong_format;
 
   ieee->h.input_p = buffer;
   if (this_byte_and_next (&(ieee->h)) != Module_Beginning)

@@ -1,3 +1,44 @@
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dw2-ifort-parameter.c: Remove inline asm.
+	(func): Add label func_label.
+	* gdb.dwarf2/dw2-ifort-parameter.exp (Dwarf::assemble):
+	Replace low_pc and high_pc with MACRO_AT_range.
+	Replace name, low_pc and high_pc with MACRO_AT_func.
+
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/implptr-optimized-out.exp (Dwarf::assemble):
+	Replace name, low_pc and high_pc with MACRO_AT_func.
+
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/implptr-optimized-out.exp: Use Dwarf::assemble to
+	produce debug information.
+	* gdb.dwarf2/implptr-optimized-out.S: Removed.
+
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dwz.exp: Remove the code to compile main.c to
+	object and get function length.
+	(Dwarf::assemble): Replace name, low_pc and high_pc attributes
+	with MACRO_AT_func.
+	(top-level): Replace gdb_compile and clean_restart with
+	prepare_for_testing.
+	* gdb.dwarf2/main.c (main): Add label main_label.
+
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* lib/dwarf.exp (function_range): New procedure.
+	(Dwarf::_handle_macro_at_func): New procedure.
+	(Dwarf::_handle_macro_at_range): New procedure.
+	(Dwarf): Handle MACRO_AT_func and MACRO_AT_range.
+
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* lib/dwarf.exp (_handle_DW_TAG): Move some code to ...
+	(_handle_attribute): New procedure.
+
 2014-11-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.ada/cond_lang/foo.c (callme): Add return type.
