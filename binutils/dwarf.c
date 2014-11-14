@@ -118,12 +118,21 @@ size_of_encoded_value (int encoding)
 }
 
 static dwarf_vma
-get_encoded_value (unsigned char *data,
+get_encoded_value (unsigned char **pdata,
 		   int encoding,
-		   struct dwarf_section *section)
+		   struct dwarf_section *section,
+		   unsigned char * end)
 {
+  unsigned char * data = * pdata;
   int size = size_of_encoded_value (encoding);
   dwarf_vma val;
+
+  if (data + size >= end)
+    {
+      warn (_("Encoded value extends past end of section\n"));
+      * pdata = end;
+      return 0;
+    }
 
   if (encoding & DW_EH_PE_signed)
     val = byte_get_signed (data, size);
@@ -132,6 +141,8 @@ get_encoded_value (unsigned char *data,
 
   if ((encoding & 0x70) == DW_EH_PE_pcrel)
     val += section->address + (data - section->start);
+
+  * pdata = data + size;
   return val;
 }
 
@@ -1238,8 +1249,7 @@ decode_location_expression (unsigned char * data,
 	    dwarf_vma addr;
 
 	    encoding = *data++;
-	    addr = get_encoded_value (data, encoding, section);
-	    data += size_of_encoded_value (encoding);
+	    addr = get_encoded_value (&data, encoding, section, end);
 
 	    printf ("DW_OP_GNU_encoded_addr: fmt:%02x addr:", encoding);
 	    print_dwarf_vma (addr, pointer_size);
@@ -5068,6 +5078,14 @@ frame_need_space (Frame_Chunk *fc, unsigned int reg)
   fc->col_type = (short int *) xcrealloc (fc->col_type, fc->ncols,
                                           sizeof (short int));
   fc->col_offset = (int *) xcrealloc (fc->col_offset, fc->ncols, sizeof (int));
+  /* PR 17512: file:002-10025-0.005.  */ 
+  if (fc->col_type == NULL || fc->col_offset == NULL)
+    {
+      error (_("Out of memory allocating %u columns in dwarf frame arrays\n"),
+	     fc->ncols);
+      fc->ncols = 0;
+      return -1;
+    }
 
   while (prev < fc->ncols)
     {
@@ -5302,6 +5320,7 @@ read_cie (unsigned char *start, unsigned char *end,
   unsigned char *augmentation_data = NULL;
   unsigned long augmentation_data_len = 0;
 
+  * p_cie = NULL;
   /* PR 17512: file: 001-228113-0.004.  */
   if (start >= end)
     return end;
@@ -5427,6 +5446,7 @@ display_debug_frames (struct dwarf_section *section,
       saved_start = start;
 
       SAFE_BYTE_GET_AND_INC (length, start, 4, end);
+
       if (length == 0)
 	{
 	  printf ("\n%08lx ZERO terminator\n\n",
@@ -5447,7 +5467,7 @@ display_debug_frames (struct dwarf_section *section,
 	}
 
       block_end = saved_start + length + initial_length_size;
-      if (block_end > end)
+      if (block_end > end || block_end < start)
 	{
 	  warn ("Invalid length 0x%s in FDE at %#08lx\n",
 		dwarf_vmatoa_1 (NULL, length, offset_size),
@@ -5465,6 +5485,9 @@ display_debug_frames (struct dwarf_section *section,
 
 	  start = read_cie (start, end, &cie, &version,
 			    &augmentation_data_len, &augmentation_data);
+	  /* PR 17512: file: 027-135133-0.005.  */
+	  if (cie == NULL)
+	    break;
 	  fc = cie;
 	  fc->next = chunks;
 	  chunks = fc;
@@ -5621,11 +5644,9 @@ display_debug_frames (struct dwarf_section *section,
 
 	  segment_selector = 0;
 	  if (fc->segment_size)
-	    {
-	      SAFE_BYTE_GET_AND_INC (segment_selector, start, fc->segment_size, end);
-	    }
-	  fc->pc_begin = get_encoded_value (start, fc->fde_encoding, section);
-	  start += encoded_ptr_size;
+	    SAFE_BYTE_GET_AND_INC (segment_selector, start, fc->segment_size, end);
+
+	  fc->pc_begin = get_encoded_value (&start, fc->fde_encoding, section, end);
 
 	  /* FIXME: It appears that sometimes the final pc_range value is
 	     encoded in less than encoded_ptr_size bytes.  See the x86_64
@@ -5680,8 +5701,8 @@ display_debug_frames (struct dwarf_section *section,
 
 	  while (start < block_end)
 	    {
-	      unsigned op, opa;
-	      unsigned long reg, temp;
+	      unsigned int reg, op, opa;
+	      unsigned long temp;
 
 	      op = *start++;
 	      opa = op & 0x3f;
@@ -5753,13 +5774,26 @@ display_debug_frames (struct dwarf_section *section,
 		  break;
 		case DW_CFA_def_cfa_expression:
 		  temp = LEB ();
-		  start += temp;
+		  if (start + temp < start)
+		    {
+		      warn (_("Corrupt CFA_def expression value: %lu\n"), temp);
+		      start = block_end;
+		    }
+		  else
+		    start += temp;
 		  break;
 		case DW_CFA_expression:
 		case DW_CFA_val_expression:
 		  reg = LEB ();
 		  temp = LEB ();
-		  start += temp;
+		  if (start + temp < start)
+		    {
+		      /* PR 17512: file:306-192417-0.005.  */ 
+		      warn (_("Corrupt CFA expression value: %lu\n"), temp);
+		      start = block_end;
+		    }
+		  else
+		    start += temp;
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
@@ -5859,8 +5893,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_set_loc:
-	      vma = get_encoded_value (start, fc->fde_encoding, section);
-	      start += encoded_ptr_size;
+	      vma = get_encoded_value (&start, fc->fde_encoding, section, end);
 	      if (do_debug_frames_interp)
 		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else

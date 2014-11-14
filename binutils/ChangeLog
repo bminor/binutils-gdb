@@ -1,3 +1,17 @@
+2014-11-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (get_encoded_value): Add an 'end' parameter.  Change the
+	'data' parameter to a double pointer and return the updated value.
+	(decode_location_expression): Update call to get_encoded_value.
+	(frame_need_space): Handle the case where one or both of the
+	mallocs fails.
+	(read_cie): Initialise the cie pointer, even if the read fails.
+	(display_debug_frames): Warn if the calculated block_end is before
+	the start of the block.  Break the loop if the CIE could not be
+	read.  Update call to get_encoded_value.  Warn if the read CFA
+	expressions are too big.
+
 2014-11-13  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17531

@@ -1,3 +1,10 @@
+2014-11-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* ieee.c (ieee_archive_p) Skip processing if no bytes are read at
+	all.
+	(ieee_object_p): Likewise.
+
 2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coffcode.h (coff_slurp_line_table): Add cast to unsigned int.
