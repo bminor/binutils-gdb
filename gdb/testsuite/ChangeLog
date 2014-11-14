@@ -1,5 +1,12 @@
 2014-11-14  Yao Qi  <yao@codesourcery.com>
 
+	* lib/dwarf.exp (function_range): New procedure.
+	(Dwarf::_handle_macro_at_func): New procedure.
+	(Dwarf::_handle_macro_at_range): New procedure.
+	(Dwarf): Handle MACRO_AT_func and MACRO_AT_range.
+
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
 	* lib/dwarf.exp (_handle_DW_TAG): Move some code to ...
 	(_handle_attribute): New procedure.
 
