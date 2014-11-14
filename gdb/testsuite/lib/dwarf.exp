@@ -461,6 +461,18 @@ namespace eval Dwarf {
 	return $name
     }
 
+    proc _handle_attribute { attr_name attr_value attr_form } {
+	variable _abbrev_section
+	variable _constants
+
+	_handle_DW_FORM $attr_form $attr_value
+
+	_defer_output $_abbrev_section {
+	    _op .uleb128 $_constants($attr_name) $attr_name
+	    _op .uleb128 $_constants($attr_form) $attr_form
+	}
+    }
+
     proc _handle_DW_TAG {tag_name {attrs {}} {children {}}} {
 	variable _abbrev_section
 	variable _abbrev_num
@@ -489,12 +501,7 @@ namespace eval Dwarf {
 	    }
 	    set attr_form [_map_name $attr_form _FORM]
 
-	    _handle_DW_FORM $attr_form $attr_value
-
-	    _defer_output $_abbrev_section {
-		_op .uleb128 $_constants($attr_name) $attr_name
-		_op .uleb128 $_constants($attr_form) $attr_form
-	    }
+	    _handle_attribute $attr_name $attr_value $attr_form
 	}
 
 	_defer_output $_abbrev_section {
