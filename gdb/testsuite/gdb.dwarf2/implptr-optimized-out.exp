@@ -25,6 +25,8 @@ set executable ${testfile}
 # Create the DWARF.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
+    global srcdir subdir srcfile
+
     cu { version 3 addr_size 4 } {
 	compile_unit {
 	    {producer "GNU C 4.4.3"}
@@ -51,9 +53,7 @@ Dwarf::assemble $asm_file {
 	    }
 
 	    subprogram {
-		{name main}
-		{low_pc main addr}
-		{high_pc main+0x100 addr}
+		{MACRO_AT_func { main ${srcdir}/${subdir}/${srcfile} }}
 		{type :$int_label}
 		{external 1 flag}
 	    } {

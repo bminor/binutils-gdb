@@ -1,5 +1,10 @@
 2014-11-14  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.dwarf2/implptr-optimized-out.exp (Dwarf::assemble):
+	Replace name, low_pc and high_pc with MACRO_AT_func.
+
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.dwarf2/implptr-optimized-out.exp: Use Dwarf::assemble to
 	produce debug information.
 	* gdb.dwarf2/implptr-optimized-out.S: Removed.
