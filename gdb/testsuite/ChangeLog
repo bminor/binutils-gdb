@@ -1,5 +1,12 @@
 2014-11-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.base/bp-permanent.c: Include unistd.h.
+	* gdb.python/py-framefilter-mi.c (main): Add return type.
+	* gdb.python/py-framefilter.c (main): Likewise.
+	* gdb.trace/actions-changed.c (main): Likewise.
+
+2014-11-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.mi/until.c: Add eye-catchers.
 	* gdb.mi/mi-until.exp: Refer to eye-catchers instead of literal
 	line numbers.

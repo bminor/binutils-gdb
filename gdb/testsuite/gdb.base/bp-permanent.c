@@ -18,6 +18,7 @@
 #include <string.h>
 #ifdef SIGNALS
 #include <signal.h>
+#include <unistd.h>
 #endif
 
 #define NOP asm("nop")

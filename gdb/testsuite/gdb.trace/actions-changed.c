@@ -42,6 +42,7 @@ subr (int parm)
   return busy;
 }
 
+int
 main()
 {
   subr (1);
@@ -63,4 +64,6 @@ main()
   subr (6);
   subr2 (6);
   end (6);
+
+  return 0;
 }
