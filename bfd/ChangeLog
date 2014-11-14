@@ -1,5 +1,12 @@
 2014-11-14  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17597
+	* opncls.c (bfd_get_debug_link_info): Avoid reading off the end of
+	the section.
+	(bfd_get_alt_debug_link_info): Likewise.
+
+2014-11-14  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17512
 	* ieee.c (ieee_archive_p) Skip processing if no bytes are read at
 	all.

@@ -1170,7 +1170,7 @@ bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
   asection *sect;
   unsigned long crc32;
   bfd_byte *contents;
-  int crc_offset;
+  unsigned int crc_offset;
   char *name;
 
   BFD_ASSERT (abfd);
@@ -1188,10 +1188,13 @@ bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
       return NULL;
     }
 
-  /* Crc value is stored after the filename, aligned up to 4 bytes.  */
+  /* CRC value is stored after the filename, aligned up to 4 bytes.  */
   name = (char *) contents;
-  crc_offset = strlen (name) + 1;
+  /* PR 17597: avoid reading off the end of the buffer.  */
+  crc_offset = strnlen (name, bfd_get_section_size (sect)) + 1;
   crc_offset = (crc_offset + 3) & ~3;
+  if (crc_offset >= bfd_get_section_size (sect))
+    return NULL;
 
   crc32 = bfd_get_32 (abfd, contents + crc_offset);
 
@@ -1223,7 +1226,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
 {
   asection *sect;
   bfd_byte *contents;
-  int buildid_offset;
+  unsigned int buildid_offset;
   char *name;
 
   BFD_ASSERT (abfd);
@@ -1244,7 +1247,9 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
 
   /* BuildID value is stored after the filename.  */
   name = (char *) contents;
-  buildid_offset = strlen (name) + 1;
+  buildid_offset = strnlen (name, bfd_get_section_size (sect)) + 1;
+  if (buildid_offset >= bfd_get_section_size (sect))
+    return NULL;
 
   *buildid_len = bfd_get_section_size (sect) - buildid_offset;
   *buildid_out = bfd_malloc (*buildid_len);
