@@ -1,5 +1,11 @@
 2014-11-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.mi/until.c: Add eye-catchers.
+	* gdb.mi/mi-until.exp: Refer to eye-catchers instead of literal
+	line numbers.
+
+2014-11-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.base/condbreak.exp: Drop references to removed non-prototype
 	function header variants in break1.c.
 	* gdb.base/ena-dis-br.exp: Likewise.
