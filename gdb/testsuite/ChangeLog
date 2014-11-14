@@ -1,5 +1,11 @@
 2014-11-14  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.dwarf2/implptr-optimized-out.exp: Use Dwarf::assemble to
+	produce debug information.
+	* gdb.dwarf2/implptr-optimized-out.S: Removed.
+
+2014-11-14  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.dwarf2/dwz.exp: Remove the code to compile main.c to
 	object and get function length.
 	(Dwarf::assemble): Replace name, low_pc and high_pc attributes
