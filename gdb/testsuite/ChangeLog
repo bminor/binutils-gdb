@@ -1,3 +1,13 @@
+2014-11-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/condbreak.exp: Drop references to removed non-prototype
+	function header variants in break1.c.
+	* gdb.base/ena-dis-br.exp: Likewise.
+	* gdb.base/hbreak2.exp: Likewise.
+	* gdb.reverse/until-precsave.exp: Drop references to removed
+	non-prototype function header variants in ur1.c.
+	* gdb.reverse/until-reverse.exp: Likewise.
+
 2014-11-17  Petr Machata  <pmachata@redhat.com>
 
 	* lib/dwarf.exp  (Dwarf::cu, Dwarf::tu): Emit
