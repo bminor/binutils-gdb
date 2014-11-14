@@ -1,3 +1,9 @@
+2014-11-14  Pedro Alves  <palves@redhat.com>
+
+	* charset.c [PHONY_ICONV && !EILSEQ] (EILSEQ): Don't define.
+	[!PHONY_ICONV] (gdb_iconv): New function.
+	[!PHONY_ICONV] (iconv): Redefine to gdb_iconv.
+
 2014-11-13  Doug Evans  <dje@google.com>
 
 	PR symtab/17591
