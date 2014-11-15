@@ -1,3 +1,10 @@
+2014-11-15  Doug Evans  <xdje42@gmail.com>
+
+	PR symtab/17559
+	* gdb.base/line-symtabs.exp: New file.
+	* gdb.base/line-symtabs.c: New file.
+	* gdb.base/line-symtabs.h: New file.
+
 2014-11-14  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.dwarf2/dw2-ifort-parameter.c: Remove inline asm.

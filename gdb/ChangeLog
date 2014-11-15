@@ -1,5 +1,19 @@
 2014-11-15  Doug Evans  <xdje42@gmail.com>
 
+	PR symtab/17559
+	* symtab.c (find_pc_line_symtab): New function.
+	* symtab.h (find_pc_line_symtab): Declare.
+	* disasm.c (gdb_disassembly): Call find_pc_line_symtab instead of
+	find_pc_symtab.
+	* tui/tui-disasm.c (tui_set_disassem_content): Ditto.
+	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook): Ditto.
+	* tui/tui-source.c (tui_vertical_source_scroll): Ditto.
+	* tui/tui-win.c (make_visible_with_new_height): Ditto.
+	* tui/tui-winsource.c (tui_horizontal_source_scroll): Ditto.
+	(tui_display_main): Call find_pc_line_symtab instead of find_pc_line.
+
+2014-11-15  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.c (expand_symtab_containing_pc): Renamed from
 	find_pc_sect_symtab_via_partial.  All callers updated.
 

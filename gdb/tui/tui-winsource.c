@@ -51,12 +51,12 @@ tui_display_main (void)
       tui_get_begin_asm_address (&gdbarch, &addr);
       if (addr != (CORE_ADDR) 0)
 	{
-	  struct symtab_and_line sal;
+	  struct symtab *s;
 
 	  tui_update_source_windows_with_addr (gdbarch, addr);
-	  sal = find_pc_line (addr, 0);
-          if (sal.symtab)
-             tui_update_locator_fullname (symtab_to_fullname (sal.symtab));
+	  s = find_pc_line_symtab (addr);
+          if (s != NULL)
+             tui_update_locator_fullname (symtab_to_fullname (s));
           else
              tui_update_locator_fullname ("??");
 	}
@@ -331,7 +331,7 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 	    = get_current_source_symtab_and_line ();
 
 	  if (cursal.symtab == NULL)
-	    s = find_pc_symtab (get_frame_pc (get_selected_frame (NULL)));
+	    s = find_pc_line_symtab (get_frame_pc (get_selected_frame (NULL)));
 	  else
 	    s = cursal.symtab;
 	}

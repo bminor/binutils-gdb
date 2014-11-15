@@ -2431,6 +2431,19 @@ find_pc_line (CORE_ADDR pc, int notcurrent)
     pc = overlay_mapped_address (pc, section);
   return find_pc_sect_line (pc, section, notcurrent);
 }
+
+/* See symtab.h.  */
+
+struct symtab *
+find_pc_line_symtab (CORE_ADDR pc)
+{
+  struct symtab_and_line sal;
+
+  /* This always passes zero for NOTCURRENT to find_pc_line.
+     There are currently no callers that ever pass non-zero.  */
+  sal = find_pc_line (pc, 0);
+  return sal.symtab;
+}
 
 /* Find line number LINE in any symtab whose name is the same as
    SYMTAB.

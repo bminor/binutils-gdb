@@ -275,7 +275,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
 void
 tui_show_disassem (struct gdbarch *gdbarch, CORE_ADDR start_addr)
 {
-  struct symtab *s = find_pc_symtab (start_addr);
+  struct symtab *s = find_pc_line_symtab (start_addr);
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
   struct tui_line_or_address val;
 

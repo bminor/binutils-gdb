@@ -1271,6 +1271,10 @@ extern struct symtab_and_line find_pc_line (CORE_ADDR, int);
 extern struct symtab_and_line find_pc_sect_line (CORE_ADDR,
 						 struct obj_section *, int);
 
+/* Wrapper around find_pc_line to just return the symtab.  */
+
+extern struct symtab *find_pc_line_symtab (CORE_ADDR);
+
 /* Given a symtab and line number, return the pc there.  */
 
 extern int find_line_pc (struct symtab *, int, CORE_ADDR *);

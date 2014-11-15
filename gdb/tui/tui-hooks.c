@@ -202,7 +202,7 @@ tui_selected_frame_level_changed_hook (int level)
     {
       struct symtab *s;
 
-      s = find_pc_symtab (pc);
+      s = find_pc_line_symtab (pc);
       /* elz: This if here fixes the problem with the pc not being
 	 displayed in the tui asm layout, with no debug symbols.  The
 	 value of s would be 0 here, and select_source_symtab would

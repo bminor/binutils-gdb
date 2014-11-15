@@ -1386,7 +1386,7 @@ make_visible_with_new_height (struct tui_win_info *win_info)
 	  struct frame_info *frame = deprecated_safe_get_selected_frame ();
 	  struct gdbarch *gdbarch = get_frame_arch (frame);
 
-	  s = find_pc_symtab (get_frame_pc (frame));
+	  s = find_pc_line_symtab (get_frame_pc (frame));
 	  if (win_info->generic.type == SRC_WIN)
 	    {
 	      line.loa = LOA_LINE;
