@@ -696,7 +696,7 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
   xfree (cmdline);
 
   if (result != 0)
-    error (_("Load failed for image %s", exec_file);
+    error (_("Load failed for image %s"), exec_file);
 
   edi_init (start_state);
 #if __DJGPP_MINOR__ < 3
