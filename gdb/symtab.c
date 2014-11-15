@@ -1045,8 +1045,10 @@ matching_obj_sections (struct obj_section *obj_first,
   return 0;
 }
 
-struct symtab *
-find_pc_sect_symtab_via_partial (CORE_ADDR pc, struct obj_section *section)
+/* See symtab.h.  */
+
+void
+expand_symtab_containing_pc (CORE_ADDR pc, struct obj_section *section)
 {
   struct objfile *objfile;
   struct bound_minimal_symbol msymbol;
@@ -1061,20 +1063,18 @@ find_pc_sect_symtab_via_partial (CORE_ADDR pc, struct obj_section *section)
 	  || MSYMBOL_TYPE (msymbol.minsym) == mst_abs
 	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_data
 	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_bss))
-    return NULL;
+    return;
 
   ALL_OBJFILES (objfile)
   {
-    struct symtab *result = NULL;
+    struct symtab *s = NULL;
 
     if (objfile->sf)
-      result = objfile->sf->qf->find_pc_sect_symtab (objfile, msymbol,
-						     pc, section, 0);
-    if (result)
-      return result;
+      s = objfile->sf->qf->find_pc_sect_symtab (objfile, msymbol,
+						pc, section, 0);
+    if (s != NULL)
+      return;
   }
-
-  return NULL;
 }
 
 /* Debug symbols usually don't have section information.  We need to dig that

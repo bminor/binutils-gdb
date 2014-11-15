@@ -1776,7 +1776,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
 
 	  QUIT;
 	  pc = get_frame_address_in_block (fi);
-	  find_pc_sect_symtab_via_partial (pc, find_pc_mapped_section (pc));
+	  expand_symtab_containing_pc (pc, find_pc_mapped_section (pc));
 	}
     }
 
