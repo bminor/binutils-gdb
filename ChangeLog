@@ -1,5 +1,10 @@
 2014-11-16  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
+	* config.guess: Update from upstream config repo.
+	* config.sub: Ditto.
+
+2014-11-16  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
 	* move-if-change: Update from upstream gnulib.
 
 2014-11-16  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
