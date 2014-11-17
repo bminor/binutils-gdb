@@ -237,6 +237,8 @@ static initializer cpu_flag_init[] =
     "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX|CpuAVX2|CpuAVX512F|CpuAVX512BW" },
   { "CPU_AVX512VL_FLAGS",
     "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX|CpuAVX2|CpuAVX512F|CpuAVX512VL" },
+  { "CPU_CLWB_FLAGS",
+    "CpuCLWB" },
 };
 
 static initializer operand_type_init[] =
@@ -433,6 +435,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuXSAVEC),
   BITFIELD (CpuPREFETCHWT1),
   BITFIELD (CpuSE1),
+  BITFIELD (CpuCLWB),
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
   BITFIELD (CpuMPX),

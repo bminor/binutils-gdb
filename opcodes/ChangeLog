@@ -1,3 +1,15 @@
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis.c (PREFIX enum): Add PREFIX_0FAE_REG_6.
+	(prefix_table): Add clwb.
+	* i386-gen.c (cpu_flag_init): Add CPU_CLWB_FLAGS.
+	(cpu_flags): Add CpuCLWB.
+	* i386-opc.h (enum): Add CpuCLWB.
+	(i386_cpu_flags): Add cpuclwb.
+	* i386-opc.tbl: Add clwb.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-dis.c (nios2_find_opcode_hash): Add mach parameter.

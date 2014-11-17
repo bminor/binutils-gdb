@@ -330,6 +330,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "avx512f-rcigru"
     run_dump_test "avx512f-rcigrz-intel"
     run_dump_test "avx512f-rcigrz"
+    run_dump_test "clwb"
+    run_dump_test "clwb-intel"
     run_dump_test "disassem"
 
     # These tests require support for 8 and 16 bit relocs,
@@ -681,6 +683,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-avx512f-rcigru"
     run_dump_test "x86-64-avx512f-rcigrz-intel"
     run_dump_test "x86-64-avx512f-rcigrz"
+    run_dump_test "x86-64-clwb"
+    run_dump_test "x86-64-clwb-intel"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
