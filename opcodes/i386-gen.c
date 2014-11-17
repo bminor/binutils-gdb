@@ -241,6 +241,8 @@ static initializer cpu_flag_init[] =
     "CpuCLWB" },
   { "CPU_PCOMMIT_FLAGS",
     "CpuPCOMMIT" },
+  { "CPU_AVX512IFMA_FLAGS",
+    "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX|CpuAVX2|CpuAVX512F|CpuAVX512IFMA" },
 };
 
 static initializer operand_type_init[] =
@@ -442,6 +444,7 @@ static bitfield cpu_flags[] =
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
   BITFIELD (CpuMPX),
+  BITFIELD (CpuAVX512IFMA),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif

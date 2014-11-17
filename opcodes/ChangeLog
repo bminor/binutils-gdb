@@ -1,5 +1,18 @@
 2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
 
+	* i386-dis-evex.c (evex_table): Add vpmadd52luq, vpmadd52huq.
+	* i386-dis.c (PREFIX enum): Add PREFIX_EVEX_0F38B4,
+	PREFIX_EVEX_0F38B5.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512IFMA_FLAGS.
+	(cpu_flags): Add CpuAVX512IFMA.
+	* i386-opc.h (enum): Add CpuAVX512IFMA.
+	(i386_cpu_flags): Add cpuavx512ifma.
+	* i386-opc.tbl: Add vpmadd52huq, vpmadd52luq.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
 	* i386-dis.c (PREFIX enum): Add PREFIX_RM_0_0FAE_REG_7.
 	(prefix_table): Add pcommit.
 	* i386-gen.c (cpu_flag_init): Add CPU_PCOMMIT_FLAGS.
