@@ -1,5 +1,17 @@
 2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
 
+	* i386-dis.c (PREFIX enum): Add PREFIX_RM_0_0FAE_REG_7.
+	(prefix_table): Add pcommit.
+	* i386-gen.c (cpu_flag_init): Add CPU_PCOMMIT_FLAGS.
+	(cpu_flags): Add CpuPCOMMIT.
+	* i386-opc.h (enum): Add CpuPCOMMIT.
+	(i386_cpu_flags): Add cpupcommit.
+	* i386-opc.tbl: Add pcommit.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
 	* i386-dis.c (PREFIX enum): Add PREFIX_0FAE_REG_6.
 	(prefix_table): Add clwb.
 	* i386-gen.c (cpu_flag_init): Add CPU_CLWB_FLAGS.

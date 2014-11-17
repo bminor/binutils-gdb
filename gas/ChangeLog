@@ -1,5 +1,10 @@
 2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
 
+	* config/tc-i386.c (cpu_arch): Add .pcommit.
+	* doc/c-i386.texi: Document it.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
 	* config/tc-i386.c (cpu_arch): Add .clwb.
 	* doc/c-i386.texi: Document it.
 
