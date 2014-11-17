@@ -154,6 +154,8 @@ accept various extension mnemonics.  For example,
 @code{prefetchwt1},
 @code{clflushopt},
 @code{se1},
+@code{clwb},
+@code{pcommit},
 @code{avx512f},
 @code{avx512cd},
 @code{avx512er},
@@ -161,6 +163,8 @@ accept various extension mnemonics.  For example,
 @code{avx512vl},
 @code{avx512bw},
 @code{avx512dq},
+@code{avx512ifma},
+@code{avx512vbmi},
 @code{noavx},
 @code{vmx},
 @code{vmfunc},
@@ -1102,7 +1106,8 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.smap} @tab @samp{.mpx} @tab @samp{.sha} @tab @samp{.prefetchwt1}
 @item @samp{.clflushopt} @tab @samp{.xsavec} @tab @samp{.xsaves} @tab @samp{.se1}
 @item @samp{.avx512f} @tab @samp{.avx512cd} @tab @samp{.avx512er} @tab @samp{.avx512pf}
-@item @samp{.avx512vl} @tab @samp{.avx512bw} @tab @samp{.avx512dq}
+@item @samp{.avx512vl} @tab @samp{.avx512bw} @tab @samp{.avx512dq} @tab @samp{.avx512ifma}
+@item @samp{.avx512vbmi} @tab @samp{.clwb} @tab @samp{.pcommit}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}

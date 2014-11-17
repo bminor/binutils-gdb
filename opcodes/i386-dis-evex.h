@@ -442,7 +442,7 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_EVEX_0F3883) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -497,8 +497,8 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_EVEX_0F38B4) },
+    { PREFIX_TABLE (PREFIX_EVEX_0F38B5) },
     { PREFIX_TABLE (PREFIX_EVEX_0F38B6) },
     { PREFIX_TABLE (PREFIX_EVEX_0F38B7) },
     /* B8 */
@@ -2113,6 +2113,12 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { "vpermt2p%XW",	{ XM, Vex, EXx } },
   },
+  /* PREFIX_EVEX_0F3883 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { VEX_W_TABLE (EVEX_W_0F3883_P_2) },
+  },
   /* PREFIX_EVEX_0F3888 */
   {
     { Bad_Opcode },
@@ -2310,6 +2316,18 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vfnmsub213s%XW",	{ XMScalar, VexScalar, EXxmm_mdq, EXxEVexR } },
+  },
+  /* PREFIX_EVEX_0F38B4 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vpmadd52luq",	{ XM, Vex, EXx }  },
+  },
+  /* PREFIX_EVEX_0F38B5 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vpmadd52huq",	{ XM, Vex, EXx }  },
   },
   /* PREFIX_EVEX_0F38B6 */
   {
@@ -3567,7 +3585,7 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F3875_P_2 */
   {
-    { Bad_Opcode },
+    { "vpermi2b",	{ XM, Vex, EXx } },
     { "vpermi2w",	{ XM, Vex, EXx } },
   },
   /* EVEX_W_0F3878_P_2 */
@@ -3588,12 +3606,17 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F387D_P_2 */
   {
-    { Bad_Opcode },
+    { "vpermt2b",	{ XM, Vex, EXx } },
     { "vpermt2w",	{ XM, Vex, EXx } },
+  },
+  /* EVEX_W_0F3883_P_2 */
+  {
+    { Bad_Opcode },
+    { "vpmultishiftqb",	{ XM, Vex, EXx } },
   },
   /* EVEX_W_0F388D_P_2 */
   {
-    { Bad_Opcode },
+    { "vpermb",	{ XM, Vex, EXx } },
     { "vpermw",	{ XM, Vex, EXx } },
   },
   /* EVEX_W_0F3891_P_2 */
