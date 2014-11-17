@@ -1,6 +1,22 @@
 2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/i386.exp: Run new tests.
+	* gas/i386/avx512vbmi-intel.d: New file.
+	* gas/i386/avx512vbmi.d: Likewise.
+	* gas/i386/avx512vbmi.s: Likewise.
+	* gas/i386/avx512vbmi_vl-intel.d: Likewise.
+	* gas/i386/avx512vbmi_vl.d: Likewise.
+	* gas/i386/avx512vbmi_vl.s: Likewise.
+	* gas/i386/x86-64-avx512vbmi-intel.d: Likewise.
+	* gas/i386/x86-64-avx512vbmi.d: Likewise.
+	* gas/i386/x86-64-avx512vbmi.s: Likewise.
+	* gas/i386/x86-64-avx512vbmi_vl-intel.d: Likewise.
+	* gas/i386/x86-64-avx512vbmi_vl.d: Likewise.
+	* gas/i386/x86-64-avx512vbmi_vl.s: Likewise.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/i386.exp: Run new tests.
 	* gas/i386/avx512ifma-intel.d: New file.
 	* gas/i386/avx512ifma.d: Likewise.
 	* gas/i386/avx512ifma.s: Likewise.
