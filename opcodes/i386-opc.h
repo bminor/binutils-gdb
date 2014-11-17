@@ -186,6 +186,8 @@ enum
   CpuSE1,
   /* CLWB instruction required */
   CpuCLWB,
+  /* PCOMMIT instruction required */
+  CpuPCOMMIT,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -286,6 +288,7 @@ typedef union i386_cpu_flags
       unsigned int cpuprefetchwt1:1;
       unsigned int cpuse1:1;
       unsigned int cpuclwb:1;
+      unsigned int cpupcommit:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused

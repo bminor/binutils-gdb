@@ -1,6 +1,16 @@
 2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/i386.exp: Run new tests.
+	* gas/i386/pcommit-intel.d: New file.
+	* gas/i386/pcommit.d: Likewise.
+	* gas/i386/pcommit.s: Likewise.
+	* gas/i386/x86-64-pcommit-intel.d: Likewise.
+	* gas/i386/x86-64-pcommit.d: Likewise.
+	* gas/i386/x86-64-pcommit.s: Likewise.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/i386.exp: Run new tests.
 	* gas/i386/clwb-intel.d: New file.
 	* gas/i386/clwb.d: Likewise.
 	* gas/i386/clwb.s: Likewise.
@@ -12,7 +22,6 @@
 
 	PR gas/17598
 	* gas/i386/reloc64.s: Add @gotplt check.
-
 	* gas/i386/reloc64.d: Updated.
 	* gas/i386/reloc64.l: Likewise.
 
