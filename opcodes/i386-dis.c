@@ -899,6 +899,7 @@ enum
   PREFIX_0FAE_REG_1,
   PREFIX_0FAE_REG_2,
   PREFIX_0FAE_REG_3,
+  PREFIX_0FAE_REG_6,
   PREFIX_0FAE_REG_7,
   PREFIX_0FB8,
   PREFIX_0FBC,
@@ -3980,6 +3981,13 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { "wrgsbase", { Ev } },
+  },
+
+  /* PREFIX_0FAE_REG_6 */
+  {
+    { "xsaveopt",      { FXSAVE } },
+    { Bad_Opcode },
+    { "clwb",	{ Mb } },
   },
 
   /* PREFIX_0FAE_REG_7 */
@@ -11749,7 +11757,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_6 */
-    { "xsaveopt",	{ FXSAVE } },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_6) },
     { RM_TABLE (RM_0FAE_REG_6) },
   },
   {

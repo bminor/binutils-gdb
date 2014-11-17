@@ -1,3 +1,13 @@
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/i386.exp: Run new tests.
+	* gas/i386/clwb-intel.d: New file.
+	* gas/i386/clwb.d: Likewise.
+	* gas/i386/clwb.s: Likewise.
+	* gas/i386/x86-64-clwb-intel.d: Likewise.
+	* gas/i386/x86-64-clwb.d: Likewise.
+	* gas/i386/x86-64-clwb.s: Likewise.
+
 2014-11-10  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	Apply trunk patch:
