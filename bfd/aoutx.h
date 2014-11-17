@@ -1300,14 +1300,14 @@ aout_get_external_symbols (bfd *abfd)
     {
       bfd_size_type count;
       struct external_nlist *syms;
+      bfd_size_type amt = exec_hdr (abfd)->a_syms;
 
-      count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
+      count = amt / EXTERNAL_NLIST_SIZE;
       if (count == 0)
 	return TRUE;		/* Nothing to do.  */
 
 #ifdef USE_MMAP
-      if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd),
-				 exec_hdr (abfd)->a_syms,
+      if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd), amt,
 				 &obj_aout_sym_window (abfd), TRUE))
 	return FALSE;
       syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
@@ -1315,20 +1315,16 @@ aout_get_external_symbols (bfd *abfd)
       /* We allocate using malloc to make the values easy to free
 	 later on.  If we put them on the objalloc it might not be
 	 possible to free them.  */
-      syms = (struct external_nlist *) bfd_malloc (count * EXTERNAL_NLIST_SIZE);
+      syms = (struct external_nlist *) bfd_malloc (amt);
       if (syms == NULL)
 	return FALSE;
 
-      {
-	bfd_size_type amt;
-	amt = exec_hdr (abfd)->a_syms;
-	if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-	    || bfd_bread (syms, amt, abfd) != amt)
-	  {
-	    free (syms);
-	    return FALSE;
-	  }
-      }
+      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
+	  || bfd_bread (syms, amt, abfd) != amt)
+	{
+	  free (syms);
+	  return FALSE;
+	}
 #endif
 
       obj_aout_external_syms (abfd) = syms;

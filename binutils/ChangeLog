@@ -1,3 +1,202 @@
+2014-11-17  Nick Clifton  <nickc@redhat.com>
+
+	Apply trunk patches:
+
+	2014-11-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (get_encoded_value): Add an 'end' parameter.  Change the
+	'data' parameter to a double pointer and return the updated value.
+	(decode_location_expression): Update call to get_encoded_value.
+	(frame_need_space): Handle the case where one or both of the
+	mallocs fails.
+	(read_cie): Initialise the cie pointer, even if the read fails.
+	(display_debug_frames): Warn if the calculated block_end is before
+	the start of the block.  Break the loop if the CIE could not be
+	read.  Update call to get_encoded_value.  Warn if the read CFA
+	expressions are too big.
+
+	2014-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (process_version_sections): If the read of the version
+	def information fails, make sure that the external verdef data is
+	not used.
+	(get_dynamic_data): Do not attempt to allocate memory for more
+	dynamic data than there is in the file.  If the read fails, free
+	the allocated buffer.
+	(process_symbol_table): Do not print dynamic information if we
+	were unable to read the dynamic symbol table.
+	(print_gnu_note): Do not print the note if the descsz is too
+	small.
+
+	2014-11-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* dwarf.c (read_and_display_attr_value): Check that we do not read
+	past end.
+	(display_debug_pubnames_worker): Add range checks.
+	(process_debug_info): Check for invalid pointer sizes.
+	(display_loc_list): Likewise.
+	(display_loc_list_dwo): Likewise.
+	(display_debug_ranges): Likewise.
+	(display_debug_aranges): Check for invalid address size.
+	(read_cie): Add range checks.  Replace call strchr with while loop.
+	* objdump.c (dump_dwarf): Replace abort with a warning message.
+	(print_section_stabs): Improve range checks.
+	* rdcoff.c (coff_get_slot): Use long for indx parameter type.
+	Add check for an excesively large index.
+	* rddbg.c (read_section_stabs_debugging_info): Zero terminate the
+	string table.  Avoid walking off the end of the stabs data.
+	* stabs.c (parse_stab_string): Add check for a NULL name.
+
+	2014-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* binutils/readelf.c (dynamic_nent): Change type to size_t.
+	(slurp_rela_relocs): Use size_t type for nrelas.
+	(slurp_rel_relocs): Likewise.
+	(get_program_headers): Improve out of memory error message.
+	(get_32bit_section_headers): Likewise.
+	(get_32bit_section_headers): Likewise.
+	(get_64bit_section_headers): Likewise.
+	(get_32bit_elf_symbols): Likewise.
+	(get_64bit_elf_symbols): Likewise.
+	(process_section_groups): Likewise.
+	(get_32bit_dynamic_section): Likewise.
+	(get_64bit_dynamic_section): Likewise.
+	(process_dynamic_section): Likewise.
+	(process_version_sections): Likewise.
+	(get_symbol_index_type): Likewise.
+	(process_mips_specific): Likewise.
+	(process_corefile_note_segment): Likewise.
+	(process_version_sections): Use size_t type for total.
+	(get_dynamic_data): Change type of number parameter to size_t.
+	Improve out of memory error messages.
+	(process_symbol_table): Change type of nbuckets and nchains to
+	size_t.  Skip processing of sections headers if there are none.
+	Improve out of memory error messages.
+
+	2014-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (display_arm_attribute): Avoid reading off the end of
+	the buffer when processing a Tag_nodefaults.
+
+	2014-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (ia64_process_unwind): Replace assertion with an error
+	message.  Add range checking for group section indicies.
+	(hppa_process_unwind): Replace assertion with an error message.
+	(process_syminfo): Likewise.
+	(decode_arm_unwind_bytecode): Add range checking.
+	(dump_section_as_strings): Add more string range checking.
+	(display_tag_value): Likewise.
+	(display_arm_attribute): Likewise.
+	(display_gnu_attribute): Likewise.
+	(display_tic6x_attribute): Likewise.
+	(display_msp430x_attribute): Likewise.
+
+	2014-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17552
+	* objcopy.c (copy_archive): Clean up temporary files even if an
+	error occurs.
+
+	2014-11-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_data): Avoid allocating memory when we know that
+	the read will fail.
+	(find_section_by_type): New function.
+	(get_unwind_section_word): Check for invalid symbol indicies.
+	Check for invalid reloc types.
+	(get_32bit_dynamic_section): Add range checks.
+	(get_64bit_dynamic_section): Add range checks.
+	(process_dynamic_section): Check for a corrupt time value.
+	(process_symbol_table): Add range checks.
+	(dump_section_as_strings): Add string length range checks.
+	(display_tag_value): Likewise.
+	(display_arm_attribute): Likewise.
+	(display_gnu_attribute): Likewise.
+	(display_tic6x_attribute): Likewise.
+	(display_msp430x_attribute): Likewise.
+	(process_mips_specific): Add range check.
+
+	2014-11-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17552, binutils/17533
+	* bucomm.c (is_valid_archive_path): New function.  Returns false
+	for absolute pathnames and pathnames that include /../.
+	* bucomm.h (is_valid_archive_path): Add prototype.
+	* ar.c (extract_file): Use new function to check for valid
+	pathnames when extracting files from an archive.
+	* objcopy.c (copy_archive): Likewise.
+	* doc/binutils.texi: Update documentation to mention the
+	limitation on pathname of archive members.
+
+	2014-11-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (printable_section_name): New function.
+	(printable_section_name_from_index): New function.
+	(dump_relocations): Use new function.
+	(process_program_headers, get_32bit_elf_symbols,
+	(get_64bit_elf_symbols, process_section_headers,
+	(process_section_groups, process_relocs, ia64_process_unwind,
+	(hppa_process_unwind, get_unwind_section_word, decode_arm_unwind,
+	(arm_process_unwind, process_version_sections,
+	(process_symbol_table, apply_relocations, get_section_contents,
+	(dump_section_as_strings, dump_section_as_bytes,
+	(display_debug_section, process_attributes, process_mips_specific,
+	(process_mips_specific process_gnu_liblist): Likewise.
+	(get_unwind_section_word): Check for a missing symbol table.
+	Replace aborts with error messages.
+	(arm_process_unwind): Check for a missing string table.
+	(process_attributes): Check for an attribute length that is too
+	small.
+	(process_mips_specific): Check for a corrupt GOT symbol offset.
+
+	2014-11-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17533
+	* bucomm.c (is_valid_archive_path): New function.
+	* bucomm.h (is_valid_archive_path): Prototype it.
+	* ar.c (extract_file): Call is_valid_archive_path to verify a
+	member filename before extracting it.
+	* objcopy.c (copy_archive): Likewise.
+
+	2014-11-04  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_data): If the reason parameter is null, do not
+	print any error messages.
+	(get_32bit_section_headers): Verify section header entry size
+	before reading in the section headers.
+	(get_64bit_section_headers): Likewise.
+	(process_section_headers): Pass FALSE to get_section_headers.
+	(get_file_header): Pass TRUE to get_section_headers.
+	(process_dynamic_section): Change an assert to an error message.
+	(process_symbol_table): Handle corrupt histograms.
+	(get_32bit_program_headers): Verify program header entry size
+	before reading in the program headers.
+	(get_64bit_program_headers): Likewise.
+	(get_unwind_section_word): Do nothing if no section was provided.
+	Fail if the offset is outside of the section.
+	(print_dynamic_symbol): Catch out of range symbol indicies.
+	(process_mips_specific): Likewise.
+	(process_attributes): Make sure that there is enough space left in
+	the section before attempting to read the length of the next
+	attribute.
+
+	2014-11-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17512
+	* objdump.c (slurp_symtab): Fail gracefully if the table could not
+	be read.
+	(dump_relocs_in_section): Likewise.
+
 2014-11-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

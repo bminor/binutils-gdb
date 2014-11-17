@@ -339,6 +339,8 @@ static reloc_howto_type howto_table[] =
 	 FALSE),                /* Pcrel_offset. */
 };
 
+#define NUM_HOWTOS (sizeof (howto_table) / sizeof (howto_table[0]))
+
 /* Turn a howto into a reloc nunmber.  */
 
 #define SELECT_RELOC(x, howto) { x.r_type = howto->type; }
@@ -379,7 +381,8 @@ static reloc_howto_type howto_table[] =
       cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
     else							\
       cache_ptr->addend = 0;					\
-    if (ptr && howto_table[reloc.r_type].pc_relative)		\
+    if (ptr && reloc.r_type < NUM_HOWTOS			\
+	&& howto_table[reloc.r_type].pc_relative)		\
       cache_ptr->addend += asect->vma;				\
   }
 
@@ -509,9 +512,7 @@ coff_mips_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = 0;
-       i < sizeof (howto_table) / sizeof (howto_table[0]);
-       i++)
+  for (i = 0; i < NUM_HOWTOS; i++)
     if (howto_table[i].name != NULL
 	&& strcasecmp (howto_table[i].name, r_name) == 0)
       return &howto_table[i];

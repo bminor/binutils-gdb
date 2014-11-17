@@ -562,7 +562,10 @@ slurp_symtab (bfd *abfd)
 
   storage = bfd_get_symtab_upper_bound (abfd);
   if (storage < 0)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      non_fatal (_("failed to read symbol table from: %s"), bfd_get_filename (abfd));
+      bfd_fatal (_("error message was"));
+    }
   if (storage)
     sy = (asymbol **) xmalloc (storage);
 
@@ -2385,7 +2388,12 @@ dump_dwarf (bfd *abfd)
   else if (bfd_little_endian (abfd))
     byte_get = byte_get_little_endian;
   else
-    abort ();
+    /* PR 17512: file: objdump-s-endless-loop.tekhex.  */
+    {
+      warn (_("File %s does not contain any dwarf debug information\n"),
+	    bfd_get_filename (abfd));
+      return;
+    }
 
   switch (bfd_get_arch (abfd))
     {
@@ -2493,7 +2501,7 @@ print_section_stabs (bfd *abfd,
 
      We start the index at -1 because there is a dummy symbol on
      the front of stabs-in-{coff,elf} sections that supplies sizes.  */
-  for (i = -1; stabp < stabs_end; stabp += STABSIZE, i++)
+  for (i = -1; stabp <= stabs_end - STABSIZE; stabp += STABSIZE, i++)
     {
       const char *name;
       unsigned long strx;
@@ -2531,10 +2539,13 @@ print_section_stabs (bfd *abfd,
 	}
       else
 	{
+	  bfd_size_type amt = strx + file_string_table_offset;
+
 	  /* Using the (possibly updated) string table offset, print the
 	     string (if any) associated with this symbol.  */
-	  if ((strx + file_string_table_offset) < stabstr_size)
-	    printf (" %s", &strtab[strx + file_string_table_offset]);
+	  if (amt < stabstr_size)
+	    /* PR 17512: file: 079-79389-0.001:0.1.  */
+	    printf (" %.*s", (int)(stabstr_size - amt), strtab + amt);
 	  else
 	    printf (" *");
 	}
@@ -3108,7 +3119,11 @@ dump_relocs_in_section (bfd *abfd,
   relcount = bfd_canonicalize_reloc (abfd, section, relpp, syms);
 
   if (relcount < 0)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      printf ("\n");
+      non_fatal (_("failed to read relocs in: %s"), bfd_get_filename (abfd));
+      bfd_fatal (_("error message was"));
+    }
   else if (relcount == 0)
     printf (" (none)\n\n");
   else

@@ -271,6 +271,7 @@ pe_mkobject (bfd * abfd)
   /* in_reloc_p is architecture dependent.  */
   pe->in_reloc_p = in_reloc_p;
 
+  memset (& pe->pe_opthdr, 0, sizeof pe->pe_opthdr);
   return TRUE;
 }
 
@@ -567,6 +568,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   ent->u.syment.n_sclass          = sclass;
   ent->u.syment.n_scnum           = section->target_index;
   ent->u.syment._n._n_n._n_offset = (bfd_hostptr_t) sym;
+  ent->is_sym = TRUE;
 
   sym->symbol.the_bfd = vars->abfd;
   sym->symbol.name    = vars->string_ptr;
@@ -1313,7 +1315,7 @@ pe_bfd_object_p (bfd * abfd)
 
   /* Swap file header, so that we get the location for calling
      real_object_p.  */
-  bfd_coff_swap_filehdr_in (abfd, (PTR)&image_hdr, &internal_f);
+  bfd_coff_swap_filehdr_in (abfd, &image_hdr, &internal_f);
 
   if (! bfd_coff_bad_format_hook (abfd, &internal_f)
       || internal_f.f_opthdr > bfd_coff_aoutsz (abfd))
@@ -1327,16 +1329,21 @@ pe_bfd_object_p (bfd * abfd)
 
   if (opt_hdr_size != 0)
     {
-      PTR opthdr;
+      bfd_size_type amt = opt_hdr_size;
+      void * opthdr;
 
-      opthdr = bfd_alloc (abfd, opt_hdr_size);
+      /* PR 17521 file: 230-131433-0.004.  */
+      if (amt < sizeof (PEAOUTHDR))
+	amt = sizeof (PEAOUTHDR);
+
+      opthdr = bfd_zalloc (abfd, amt);
       if (opthdr == NULL)
 	return NULL;
       if (bfd_bread (opthdr, opt_hdr_size, abfd)
 	  != (bfd_size_type) opt_hdr_size)
 	return NULL;
 
-      bfd_coff_swap_aouthdr_in (abfd, opthdr, (PTR) & internal_a);
+      bfd_coff_swap_aouthdr_in (abfd, opthdr, & internal_a);
     }
 
   return coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,
