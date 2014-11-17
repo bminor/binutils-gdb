@@ -642,7 +642,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   struct perf_event_mmap_page *header;
   struct btrace_target_info *tinfo;
   struct btrace_tinfo_bts *bts;
-  unsigned long long size, pages;
+  unsigned long long size, pages, data_offset, data_size;
   int pid, pg;
 
   tinfo = xzalloc (sizeof (*tinfo));
@@ -704,16 +704,27 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 	break;
     }
 
-  if (header == MAP_FAILED)
+  if (pages == 0)
     goto err_file;
 
+  data_offset = PAGE_SIZE;
+  data_size = size;
+
+#if defined (PERF_ATTR_SIZE_VER5)
+  if (offsetof (struct perf_event_mmap_page, data_size) <= header->size)
+    {
+      data_offset = header->data_offset;
+      data_size = header->data_size;
+    }
+#endif /* defined (PERF_ATTR_SIZE_VER5) */
+
   bts->header = header;
-  bts->bts.mem = ((const uint8_t *) header) + PAGE_SIZE;
-  bts->bts.size = size;
+  bts->bts.mem = ((const uint8_t *) header) + data_offset;
+  bts->bts.size = data_size;
   bts->bts.data_head = &header->data_head;
   bts->bts.last_head = 0;
 
-  tinfo->conf.bts.size = size;
+  tinfo->conf.bts.size = data_size;
   return tinfo;
 
  err_file:

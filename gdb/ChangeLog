@@ -1,5 +1,11 @@
 2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* nat/linux-btrace.c (linux_enable_bts): Check for
+	PERF_ATTR_SIZE_VER5.
+	Check for data_offset and data_size fields.  Use them.
+
+2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* NEWS: Announce new commands "record btrace pt" and "record pt".
 	Announce new options "set|show record btrace pt buffer-size".
 	* btrace.c: Include "rsp-low.h".
