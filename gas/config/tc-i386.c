@@ -935,6 +935,8 @@ static const arch_entry cpu_arch[] =
     CPU_PCOMMIT_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".avx512ifma"), PROCESSOR_UNKNOWN,
     CPU_AVX512IFMA_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".avx512vbmi"), PROCESSOR_UNKNOWN,
+    CPU_AVX512VBMI_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF
