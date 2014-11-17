@@ -954,7 +954,7 @@ namespace eval Dwarf {
 	}
 	define_label $start_label
 	_op .2byte $_cu_version Version
-	_op .4byte $my_abbrevs Abbrevs
+	_op .${_cu_offset_size}byte $my_abbrevs Abbrevs
 	_op .byte $_cu_addr_size "Pointer size"
 
 	_defer_output $_abbrev_section {
@@ -1047,7 +1047,7 @@ namespace eval Dwarf {
 	}
 	define_label $start_label
 	_op .2byte $_cu_version Version
-	_op .4byte $my_abbrevs Abbrevs
+	_op .${_cu_offset_size}byte $my_abbrevs Abbrevs
 	_op .byte $_cu_addr_size "Pointer size"
 	_op .8byte $signature Signature
 	if { $type_label != "" } {

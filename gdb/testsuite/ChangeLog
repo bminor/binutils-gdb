@@ -1,3 +1,8 @@
+2014-11-17  Petr Machata  <pmachata@redhat.com>
+
+	* lib/dwarf.exp  (Dwarf::cu, Dwarf::tu): Emit
+	${_cu_offset_size} bytes abbrev offset.
+
 2014-11-15  Doug Evans  <xdje42@gmail.com>
 
 	PR symtab/17559
