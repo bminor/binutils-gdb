@@ -1,3 +1,8 @@
+2014-11-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/bp-permanent.c (NOP): Define as 2-byte instead of
+	4-byte instruction on S390.
+
 2014-11-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/arr_arr: New testcase.

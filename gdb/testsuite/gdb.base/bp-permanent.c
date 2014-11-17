@@ -21,7 +21,14 @@
 #include <unistd.h>
 #endif
 
+/* NOP instruction: must have the same size as the breakpoint
+   instruction.  */
+
+#if defined(__s390__) || defined(__s390x__)
+#define NOP asm("nopr 0")
+#else
 #define NOP asm("nop")
+#endif
 
 /* Buffer holding the breakpoint instruction.  */
 unsigned char buffer[16];
