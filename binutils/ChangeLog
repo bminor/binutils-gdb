@@ -1,5 +1,21 @@
 2014-11-18  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/17512
+	* dwarf.c (get_encoded_value): Warn and return if the encoded
+	value is more than 64-bits long.
+	(SAFE_BYTE_GET): Do not attempt to read more than 64-bits.
+	(process_extended_line_op): Add more range checks.
+	(decode_location_expression): Use the return value from
+	display_block.  Add more range checks.
+	(read_debug_line_header): Add range check.
+	(display_debug_lines_raw): Add range checks.
+	(display_debug_frames): Silently skip multiple zero terminators.
+	Add range checks.
+	(process_cu_tu_index): Check for non-existant or empty sections.
+	Use SAFE_BYTE_GET instead of byte_get.
+
+2014-11-18  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/17531
 	* readelf.c (get_unwind_section_word): Skip reloc processing if
 	there are no relocs associated with the section.

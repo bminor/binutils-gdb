@@ -124,12 +124,20 @@ get_encoded_value (unsigned char **pdata,
 		   unsigned char * end)
 {
   unsigned char * data = * pdata;
-  int size = size_of_encoded_value (encoding);
+  unsigned int size = size_of_encoded_value (encoding);
   dwarf_vma val;
 
   if (data + size >= end)
     {
       warn (_("Encoded value extends past end of section\n"));
+      * pdata = end;
+      return 0;
+    }
+
+  /* PR 17512: file: 002-829853-0.004.  */
+  if (size > 8)
+    {
+      warn (_("Encoded size of %d is too large to read\n"), size);
       * pdata = end;
       return 0;
     }
@@ -304,10 +312,10 @@ read_uleb128 (unsigned char * data,
 	  else					\
 	    amount = 0;				\
 	}					\
-      if (amount)				\
-	VAL = byte_get ((PTR), amount);		\
-      else					\
+      if (amount == 0 || amount > 8)		\
 	VAL = 0;				\
+      else					\
+	VAL = byte_get ((PTR), amount);		\
     }						\
   while (0)
 
@@ -408,7 +416,7 @@ process_extended_line_op (unsigned char * data,
   len = read_uleb128 (data, & bytes_read, end);
   data += bytes_read;
 
-  if (len == 0 || data == end)
+  if (len == 0 || data == end || len > (end - data))
     {
       warn (_("Badly formed extended line op encountered!\n"));
       return bytes_read;
@@ -427,6 +435,10 @@ process_extended_line_op (unsigned char * data,
       break;
 
     case DW_LNE_set_address:
+      /* PR 17512: file: 002-100480-0.004.  */
+      if (len - bytes_read - 1 > 8)
+	warn (_("Length (%d) of DW_LNE_set_address op is too long\n"),
+	      len - bytes_read - 1);
       SAFE_BYTE_GET (adr, data, len - bytes_read - 1, end);
       printf (_("set Address to 0x%s\n"), dwarf_vmatoa ("x", adr));
       state_machine_regs.address = adr;
@@ -1231,8 +1243,7 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_implicit_value");
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
-	  display_block (data, uvalue, end);
-	  data += uvalue;
+	  data = display_block (data, uvalue, end);
 	  break;
 
 	  /* GNU extensions.  */
@@ -1245,10 +1256,11 @@ decode_location_expression (unsigned char * data,
 	  break;
 	case DW_OP_GNU_encoded_addr:
 	  {
-	    int encoding;
+	    int encoding = 0;
 	    dwarf_vma addr;
 
-	    encoding = *data++;
+	    if (data < end)
+	      encoding = *data++;
 	    addr = get_encoded_value (&data, encoding, section, end);
 
 	    printf ("DW_OP_GNU_encoded_addr: fmt:%02x addr:", encoding);
@@ -1288,6 +1300,8 @@ decode_location_expression (unsigned char * data,
 	    need_frame_base = 1;
 	  putchar (')');
 	  data += uvalue;
+	  if (data > end)
+	    data = end;
 	  break;
 	case DW_OP_GNU_const_type:
 	  uvalue = read_uleb128 (data, &bytes_read, end);
@@ -1295,8 +1309,7 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_GNU_const_type: <0x%s> ",
 		  dwarf_vmatoa ("x", cu_offset + uvalue));
 	  SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
-	  display_block (data, uvalue, end);
-	  data += uvalue;
+	  data = display_block (data, uvalue, end);
 	  break;
 	case DW_OP_GNU_regval_type:
 	  uvalue = read_uleb128 (data, &bytes_read, end);
@@ -2634,7 +2647,7 @@ read_debug_line_header (struct dwarf_section * section,
 
   /* Extract information from the Line Number Program Header.
      (section 6.2.4 in the Dwarf3 doc).  */
-      hdrptr = data;
+  hdrptr = data;
 
   /* Get and check the length of the block.  */
   SAFE_BYTE_GET_AND_INC (linfo->li_length, hdrptr, 4, end);
@@ -2703,6 +2716,14 @@ read_debug_line_header (struct dwarf_section * section,
   SAFE_BYTE_GET_AND_INC (linfo->li_opcode_base, hdrptr, 1, end);
 
   * end_of_sequence = data + linfo->li_length + initial_length_size;
+  /* PR 17512: file:002-117414-0.004.  */ 
+  if (* end_of_sequence > end)
+    {
+      warn (_("Line length %lld extends beyond end of section\n"), linfo->li_length);
+      * end_of_sequence = end;
+      return NULL;
+    }
+
   return hdrptr;
 }
 
@@ -2770,6 +2791,13 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  /* Display the contents of the Opcodes table.  */
 	  standard_opcodes = hdrptr;
 
+	  /* PR 17512: file: 002-417945-0.004.  */
+	  if (standard_opcodes + linfo.li_opcode_base >= end)
+	    {
+	      warn (_("Line Base extends beyond end of section\n"));
+	      return 0;
+	    }
+
 	  printf (_("\n Opcodes:\n"));
 
 	  for (i = 1; i < linfo.li_opcode_base; i++)
@@ -2785,12 +2813,16 @@ display_debug_lines_raw (struct dwarf_section *section,
 	      printf (_("\n The Directory Table (offset 0x%lx):\n"),
 		      (long)(data - start));
 
-	      while (*data != 0)
+	      while (data < end && *data != 0)
 		{
-		  printf ("  %d\t%s\n", ++last_dir_entry, data);
+		  printf ("  %d\t%.*s\n", ++last_dir_entry, (int) (end - data), data);
 
 		  data += strnlen ((char *) data, end - data) + 1;
 		}
+
+	      /* PR 17512: file: 002-132094-0.004.  */
+	      if (data >= end - 1)
+		break;
 	    }
 
 	  /* Skip the NUL at the end of the table.  */
@@ -2805,7 +2837,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 		      (long)(data - start));
 	      printf (_("  Entry\tDir\tTime\tSize\tName\n"));
 
-	      while (*data != 0)
+	      while (data < end && *data != 0)
 		{
 		  unsigned char *name;
 		  unsigned int bytes_read;
@@ -2823,7 +2855,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 		  printf ("%s\t",
 			  dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
 		  data += bytes_read;
-		  printf ("%s\n", name);
+		  printf ("%.*s\n", (int)(end - name), name);
 
 		  if (data == end)
 		    {
@@ -5451,6 +5483,12 @@ display_debug_frames (struct dwarf_section *section,
 	{
 	  printf ("\n%08lx ZERO terminator\n\n",
 		    (unsigned long)(saved_start - section_start));
+	  /* Skip any zero terminators that directly follow.
+	     A corrupt section size could have loaded a whole
+	     slew of zero filled memory bytes.  eg
+	     PR 17512: file: 070-19381-0.004.  */
+	  while (start < end && * start == 0)
+	    ++ start;
 	  continue;
 	}
 
@@ -5893,7 +5931,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_set_loc:
-	      vma = get_encoded_value (&start, fc->fde_encoding, section, end);
+	      vma = get_encoded_value (&start, fc->fde_encoding, section, block_end);
 	      if (do_debug_frames_interp)
 		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
@@ -5916,7 +5954,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_advance_loc2:
-	      SAFE_BYTE_GET_AND_INC (ofs, start, 2, end);
+	      SAFE_BYTE_GET_AND_INC (ofs, start, 2, block_end);
 	      if (do_debug_frames_interp)
 		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
@@ -5929,7 +5967,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_advance_loc4:
-	      SAFE_BYTE_GET_AND_INC (ofs, start, 4, end);
+	      SAFE_BYTE_GET_AND_INC (ofs, start, 4, block_end);
 	      if (do_debug_frames_interp)
 		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
@@ -6105,6 +6143,12 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_def_cfa_expression:
 	      ul = LEB ();
+	      if (start >= block_end)
+		{
+		  printf ("  DW_CFA_def_cfa_expression: <corrupt>\n");
+		  warn (_("Corrupt length field in DW_CFA_def_cfa_expression\n"));
+		  break;
+		}
 	      if (! do_debug_frames_interp)
 		{
 		  printf ("  DW_CFA_def_cfa_expression (");
@@ -6121,6 +6165,13 @@ display_debug_frames (struct dwarf_section *section,
 	      ul = LEB ();
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
+	      /* PR 17512: file: 069-133014-0.006.  */
+	      if (start >= block_end)
+		{
+		  printf ("  DW_CFA_expression: <corrupt>\n");
+		  warn (_("Corrupt length field in DW_CFA_expression\n"));
+		  break;
+		}
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		{
 		  printf ("  DW_CFA_expression: %s%s (",
@@ -6139,6 +6190,12 @@ display_debug_frames (struct dwarf_section *section,
 	      ul = LEB ();
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
+	      if (start >= block_end)
+		{
+		  printf ("  DW_CFA_val_expression: <corrupt>\n");
+		  warn (_("Corrupt length field in DW_CFA_val_expression\n"));
+		  break;
+		}
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		{
 		  printf ("  DW_CFA_val_expression: %s%s (",
@@ -6202,7 +6259,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_MIPS_advance_loc8:
-	      SAFE_BYTE_GET_AND_INC (ofs, start, 8, end);
+	      SAFE_BYTE_GET_AND_INC (ofs, start, 8, block_end);
 	      if (do_debug_frames_interp)
 		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
@@ -6520,11 +6577,26 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   dwarf_vma signature_low;
   char buf[64];
 
-  version = byte_get (phdr, 4);
+  /* PR 17512: file: 002-168123-0.004.  */
+  if (phdr == NULL)
+    {
+      warn (_("Section %s is empty\n"), section->name);
+      return 0;
+    }
+  /* PR 17512: file: 002-376-0.004.  */
+  if (section->size < 24)
+    {
+      warn (_("Section %s is too small to contain a CU/TU header"),
+	    section->name);
+      return 0;
+    }
+
+  SAFE_BYTE_GET (version, phdr, 4, limit);
   if (version >= 2)
-    ncols = byte_get (phdr + 4, 4);
-  nused = byte_get (phdr + 8, 4);
-  nslots = byte_get (phdr + 12, 4);
+    SAFE_BYTE_GET (ncols, phdr + 4, 4, limit);
+  SAFE_BYTE_GET (nused, phdr + 8, 4, limit);
+  SAFE_BYTE_GET (nslots, phdr + 12, 4, limit);
+
   phash = phdr + 16;
   pindex = phash + nslots * 8;
   ppool = pindex + nslots * 4;
@@ -6555,10 +6627,10 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	  unsigned char *shndx_list;
 	  unsigned int shndx;
 
-	  byte_get_64 (phash, &signature_high, &signature_low);
+	  SAFE_BYTE_GET64 (phash, &signature_high, &signature_low, limit);
 	  if (signature_high != 0 || signature_low != 0)
 	    {
-	      j = byte_get (pindex, 4);
+	      SAFE_BYTE_GET (j, pindex, 4, limit);
 	      shndx_list = ppool + j * 4;
 	      if (do_display)
 		printf (_("  [%3d] Signature:  0x%s  Sections: "),
@@ -6572,7 +6644,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 			    section->name);
 		      return 0;
 		    }
-		  shndx = byte_get (shndx_list, 4);
+		  SAFE_BYTE_GET (shndx, shndx_list, 4, limit);
 		  if (shndx == 0)
 		    break;
 		  if (do_display)
@@ -6634,39 +6706,45 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	      this_set = cu_sets;
 	    }
 	}
+
       if (do_display)
 	{
 	  for (j = 0; j < ncols; j++)
 	    {
-	      dw_sect = byte_get (ppool + j * 4, 4);
+	      SAFE_BYTE_GET (dw_sect, ppool + j * 4, 4, limit);
 	      printf (" %8s", get_DW_SECT_short_name (dw_sect));
 	    }
 	  printf ("\n");
 	}
+
       for (i = 0; i < nslots; i++)
 	{
-	  byte_get_64 (ph, &signature_high, &signature_low);
-	  row = byte_get (pi, 4);
+	  SAFE_BYTE_GET64 (ph, &signature_high, &signature_low, limit);
+
+	  SAFE_BYTE_GET (row, pi, 4, limit);
 	  if (row != 0)
 	    {
 	      if (!do_display)
 		memcpy (&this_set[row - 1].signature, ph, sizeof (uint64_t));
+
 	      prow = poffsets + (row - 1) * ncols * 4;
+
 	      if (do_display)
 		printf (_("  [%3d] 0x%s"),
 			i, dwarf_vmatoa64 (signature_high, signature_low,
 					   buf, sizeof (buf)));
 	      for (j = 0; j < ncols; j++)
 		{
-		  val = byte_get (prow + j * 4, 4);
+		  SAFE_BYTE_GET (val, prow + j * 4, 4, limit);
 		  if (do_display)
 		    printf (" %8d", val);
 		  else
 		    {
-		      dw_sect = byte_get (ppool + j * 4, 4);
+		      SAFE_BYTE_GET (dw_sect, ppool + j * 4, 4, limit);
 		      this_set [row - 1].section_offsets [dw_sect] = val;
 		    }
 		}
+
 	      if (do_display)
 		printf ("\n");
 	    }
@@ -6683,45 +6761,53 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	  printf ("  slot  %-16s  ",
 		 is_tu_index ? _("signature") : _("dwo_id"));
         }
+
       for (j = 0; j < ncols; j++)
 	{
-	  val = byte_get (ppool + j * 4, 4);
+	  SAFE_BYTE_GET (val, ppool + j * 4, 4, limit);
 	  if (do_display)
 	    printf (" %8s", get_DW_SECT_short_name (val));
 	}
+
       if (do_display)
 	printf ("\n");
+
       for (i = 0; i < nslots; i++)
 	{
-	  byte_get_64 (ph, &signature_high, &signature_low);
-	  row = byte_get (pi, 4);
+	  SAFE_BYTE_GET64 (ph, &signature_high, &signature_low, limit);
+
+	  SAFE_BYTE_GET (row, pi, 4, limit);
 	  if (row != 0)
 	    {
 	      prow = psizes + (row - 1) * ncols * 4;
+
 	      if (do_display)
 		printf (_("  [%3d] 0x%s"),
 			i, dwarf_vmatoa64 (signature_high, signature_low,
 					   buf, sizeof (buf)));
+
 	      for (j = 0; j < ncols; j++)
 		{
-		  val = byte_get (prow + j * 4, 4);
+		  SAFE_BYTE_GET (val, prow + j * 4, 4, limit);
 		  if (do_display)
 		    printf (" %8d", val);
 		  else
 		    {
-		      dw_sect = byte_get (ppool + j * 4, 4);
+		      SAFE_BYTE_GET (dw_sect, ppool + j * 4, 4, limit);
 		      this_set [row - 1].section_sizes [dw_sect] = val;
 		    }
 		}
+
 	      if (do_display)
 		printf ("\n");
 	    }
+
 	  ph += 8;
 	  pi += 4;
 	}
     }
   else if (do_display)
-    printf (_("  Unsupported version\n"));
+    printf (_("  Unsupported version (%d)\n"), version);
 
   if (do_display)
       printf ("\n");

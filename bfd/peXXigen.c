@@ -1890,6 +1890,14 @@ pe_print_pdata (bfd * abfd, void * vfile)
   if (datasize == 0)
     return TRUE;
 
+  /* PR 17512: file: 002-193900-0.004.  */
+  if (datasize < stop)
+    {
+      fprintf (file, _("Virtual size of .pdata section (%ld) larger than real size (%ld)\n"),
+	       (long) stop, (long) datasize);
+      return FALSE;
+    }
+
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
       if (data != NULL)
@@ -2526,7 +2534,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	      /* If the extra data is all zeros then do not complain.
 		 This is just padding so that the section meets the
 		 page size requirements.  */
-	      while (data ++ < regions.section_end)
+	      while (++ data < regions.section_end)
 		if (*data != 0)
 		  break;
 	      if (data < regions.section_end)
