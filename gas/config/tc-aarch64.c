@@ -7192,6 +7192,8 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
      tools.  */
   {"xgene-1", AARCH64_ARCH_V8, "APM X-Gene 1"},
   {"xgene1", AARCH64_ARCH_V8, "APM X-Gene 1"},
+  {"xgene2", AARCH64_FEATURE(AARCH64_ARCH_V8,
+			     AARCH64_FEATURE_CRC), "APM X-Gene 2"},
   {"generic", AARCH64_ARCH_V8, NULL},
 
   {NULL, AARCH64_ARCH_NONE, NULL}
