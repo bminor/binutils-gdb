@@ -81,7 +81,7 @@ syscm_eq_symbol_smob (const void *ap, const void *bp)
 static htab_t
 syscm_objfile_symbol_map (struct symbol *symbol)
 {
-  struct objfile *objfile = SYMBOL_SYMTAB (symbol)->objfile;
+  struct objfile *objfile = SYMBOL_OBJFILE (symbol);
   htab_t htab = objfile_data (objfile, syscm_objfile_data_key);
 
   if (htab == NULL)

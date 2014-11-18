@@ -1174,7 +1174,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   gdb_assert (objfile || SYMBOL_SYMTAB (sym));
 
   if (objfile == NULL)
-    objfile = SYMBOL_SYMTAB (sym)->objfile;
+    objfile = SYMBOL_OBJFILE (sym);
 
   if (SYMBOL_OBJ_SECTION (objfile, sym))
     return sym;
@@ -2815,7 +2815,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
       section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
       name = SYMBOL_LINKAGE_NAME (sym);
-      objfile = SYMBOL_SYMTAB (sym)->objfile;
+      objfile = SYMBOL_OBJFILE (sym);
     }
   else
     {
