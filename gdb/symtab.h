@@ -981,7 +981,7 @@ struct symtab
 };
 
 #define BLOCKVECTOR(symtab)	(symtab)->blockvector
-#define LINETABLE(symtab)	(symtab)->linetable
+#define SYMTAB_LINETABLE(symtab) ((symtab)->linetable)
 #define SYMTAB_OBJFILE(symtab)	((symtab)->objfile)
 #define SYMTAB_PSPACE(symtab)	(SYMTAB_OBJFILE (symtab)->pspace)
 #define SYMTAB_DIRNAME(symtab)	((symtab)->dirname)

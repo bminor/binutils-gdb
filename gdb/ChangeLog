@@ -1,5 +1,10 @@
 2014-11-18  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.h (SYMTAB_LINETABLE): Renamed from LINETABLE.  All uses
+	updated.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.h (SYMTAB_DIRNAME): New macro.  All uses of member
 	symtab.dirname updated to use it.
 

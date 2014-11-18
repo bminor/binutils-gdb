@@ -417,15 +417,15 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   /* Assume symtab is valid for whole PC range.  */
   symtab = find_pc_line_symtab (low);
 
-  if (symtab != NULL && symtab->linetable != NULL)
+  if (symtab != NULL && SYMTAB_LINETABLE (symtab) != NULL)
     {
       /* Convert the linetable to a bunch of my_line_entry's.  */
-      le = symtab->linetable->item;
-      nlines = symtab->linetable->nitems;
+      le = SYMTAB_LINETABLE (symtab)->item;
+      nlines = SYMTAB_LINETABLE (symtab)->nitems;
     }
 
   if (!(flags & DISASSEMBLY_SOURCE) || nlines <= 0
-      || symtab == NULL || symtab->linetable == NULL)
+      || symtab == NULL || SYMTAB_LINETABLE (symtab) == NULL)
     do_assembly_only (gdbarch, uiout, &di, low, high, how_many, flags, stb);
 
   else if (flags & DISASSEMBLY_SOURCE)

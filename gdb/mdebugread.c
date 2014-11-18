@@ -4190,7 +4190,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 
       psymtab_language = st->language;
 
-      lines = LINETABLE (st);
+      lines = SYMTAB_LINETABLE (st);
 
       /* Get a new lexical context.  */
 
@@ -4280,10 +4280,11 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       size = lines->nitems;
       if (size > 1)
 	--size;
-      LINETABLE (st) = obstack_copy (&mdebugread_objfile->objfile_obstack,
-				     lines,
-				     (sizeof (struct linetable)
-				      + size * sizeof (lines->item)));
+      SYMTAB_LINETABLE (st)
+	= obstack_copy (&mdebugread_objfile->objfile_obstack,
+			lines,
+			(sizeof (struct linetable)
+			 + size * sizeof (lines->item)));
       xfree (lines);
 
       /* .. and our share of externals.
@@ -4731,7 +4732,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   struct symtab *s = allocate_symtab (name, objfile);
   struct blockvector *bv;
 
-  LINETABLE (s) = new_linetable (maxlines);
+  SYMTAB_LINETABLE (s) = new_linetable (maxlines);
 
   /* All symtabs must have at least two blocks.  */
   bv = new_bvect (2);

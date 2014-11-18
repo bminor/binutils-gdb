@@ -126,7 +126,7 @@ print_objfile_statistics (void)
     ALL_OBJFILE_SYMTABS (objfile, s)
       {
         i++;
-        if (s->linetable != NULL)
+        if (SYMTAB_LINETABLE (s) != NULL)
           linetables++;
         if (s->primary == 1)
           blockvectors++;
@@ -308,7 +308,7 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 		    language_str (symtab->language));
 
   /* First print the line table.  */
-  l = LINETABLE (symtab);
+  l = SYMTAB_LINETABLE (symtab);
   if (l)
     {
       fprintf_filtered (outfile, "\nLine table:\n\n");
@@ -763,7 +763,8 @@ maintenance_info_symtabs (char *regexp, int from_tty)
 			       symtab->primary ? " (primary)" : "");
 	      printf_filtered ("	  "
 			       "linetable ((struct linetable *) %s)\n",
-			       host_address_to_string (symtab->linetable));
+			       host_address_to_string
+				 (SYMTAB_LINETABLE (symtab)));
 	      printf_filtered ("	  debugformat %s\n",
 			       symtab->debugformat);
 	      printf_filtered ("	}\n");

@@ -1232,13 +1232,14 @@ end_symtab_with_blockvector (struct block *static_block,
       if (subfile->line_vector)
 	{
 	  /* Reallocate the line table on the symbol obstack.  */
-	  symtab->linetable = (struct linetable *)
+	  SYMTAB_LINETABLE (symtab) = (struct linetable *)
 	    obstack_alloc (&objfile->objfile_obstack, linetablesize);
-	  memcpy (symtab->linetable, subfile->line_vector, linetablesize);
+	  memcpy (SYMTAB_LINETABLE (symtab), subfile->line_vector,
+		  linetablesize);
 	}
       else
 	{
-	  symtab->linetable = NULL;
+	  SYMTAB_LINETABLE (symtab) = NULL;
 	}
       symtab->block_line_section = section;
       if (subfile->dirname)
