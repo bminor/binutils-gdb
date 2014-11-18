@@ -1,3 +1,8 @@
+2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>
+
+	* gas/i386/x86-64-mpx-branch-1.d: Don't use *_BND relocations.
+	* gas/i386/x86-64-mpx-branch-2.d: Likewise.
+
 2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* gas/i386/i386.exp: Run new tests.

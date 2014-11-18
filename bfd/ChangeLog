@@ -1,3 +1,8 @@
+2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Enable MPX PLT only
+	for -z bndplt.
+
 2014-11-17  Nick Clifton  <nickc@redhat.com>
 
 	Apply trunk patches:

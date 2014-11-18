@@ -2277,6 +2277,14 @@ fragment <<EOF
 	  link_info.execstack = FALSE;
 	}
 EOF
+
+if test x"$BNDPLT" = xyes; then
+fragment <<EOF
+      else if (strcmp (optarg, "bndplt") == 0)
+	link_info.bndplt = TRUE;
+EOF
+fi
+
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
       else if (strcmp (optarg, "global") == 0)
@@ -2453,6 +2461,13 @@ fragment <<EOF
   -z relro                    Create RELRO program header\n"));
   fprintf (file, _("\
   -z stacksize=SIZE           Set size of stack segment\n"));
+EOF
+fi
+
+if test x"$BNDPLT" = xyes; then
+fragment <<EOF
+  fprintf (file, _("\
+  -z bndplt                   Always generate BND prefix in PLT entries\n"));
 EOF
 fi
 

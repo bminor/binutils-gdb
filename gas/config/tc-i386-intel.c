@@ -141,9 +141,7 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	      int adjust = 0;
 	      char *gotfree_input_line = lex_got (&i.reloc[this_operand],
 						  &adjust,
-						  &intel_state.reloc_types,
-						  (i.bnd_prefix != NULL
-						   || add_bnd_prefix));
+						  &intel_state.reloc_types);
 
 	      if (!gotfree_input_line)
 		break;
