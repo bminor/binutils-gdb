@@ -1,5 +1,5 @@
 #as: --64 -madd-bnd-prefix
-#ld: -shared -melf_x86_64
+#ld: -shared -melf_x86_64 -z bndplt
 #objdump: -dw
 
 #...

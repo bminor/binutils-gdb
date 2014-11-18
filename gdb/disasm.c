@@ -410,13 +410,12 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   struct ui_file *stb = mem_fileopen ();
   struct cleanup *cleanups = make_cleanup_ui_file_delete (stb);
   struct disassemble_info di = gdb_disassemble_info (gdbarch, stb);
-  /* To collect the instruction outputted from opcodes.  */
-  struct symtab *symtab = NULL;
+  struct symtab *symtab;
   struct linetable_entry *le = NULL;
   int nlines = -1;
 
   /* Assume symtab is valid for whole PC range.  */
-  symtab = find_pc_symtab (low);
+  symtab = find_pc_line_symtab (low);
 
   if (symtab != NULL && symtab->linetable != NULL)
     {

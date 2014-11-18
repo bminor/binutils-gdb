@@ -58,7 +58,7 @@ proc precsave_tests {} {
 	"Kill the program being debugged\\? \\(y or n\\) " "y"
 
     gdb_test "record restore $precsave" \
-	"Program terminated with signal .*" \
+	"Restored records from core file .*" \
 	"reload precord save file"
 
     gdb_test "break foo" \

@@ -1,3 +1,54 @@
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis-evex.c (evex_table): Add vpermi2b, vpermt2b, vpermb,
+	vpmultishiftqb.
+	* i386-dis.c (PREFIX enum): Add PREFIX_EVEX_0F3883, EVEX_W_0F3883_P_2.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512VBMI_FLAGS.
+	(cpu_flags): Add CpuAVX512VBMI.
+	* i386-opc.h (enum): Add CpuAVX512VBMI.
+	(i386_cpu_flags): Add cpuavx512vbmi.
+	* i386-opc.tbl: Add vpmadd52luq, vpmultishiftqb, vpermb, vpermi2b,
+	vpermt2b.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis-evex.c (evex_table): Add vpmadd52luq, vpmadd52huq.
+	* i386-dis.c (PREFIX enum): Add PREFIX_EVEX_0F38B4,
+	PREFIX_EVEX_0F38B5.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512IFMA_FLAGS.
+	(cpu_flags): Add CpuAVX512IFMA.
+	* i386-opc.h (enum): Add CpuAVX512IFMA.
+	(i386_cpu_flags): Add cpuavx512ifma.
+	* i386-opc.tbl: Add vpmadd52huq, vpmadd52luq.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis.c (PREFIX enum): Add PREFIX_RM_0_0FAE_REG_7.
+	(prefix_table): Add pcommit.
+	* i386-gen.c (cpu_flag_init): Add CPU_PCOMMIT_FLAGS.
+	(cpu_flags): Add CpuPCOMMIT.
+	* i386-opc.h (enum): Add CpuPCOMMIT.
+	(i386_cpu_flags): Add cpupcommit.
+	* i386-opc.tbl: Add pcommit.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis.c (PREFIX enum): Add PREFIX_0FAE_REG_6.
+	(prefix_table): Add clwb.
+	* i386-gen.c (cpu_flag_init): Add CPU_CLWB_FLAGS.
+	(cpu_flags): Add CpuCLWB.
+	* i386-opc.h (enum): Add CpuCLWB.
+	(i386_cpu_flags): Add cpuclwb.
+	* i386-opc.tbl: Add clwb.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2014-11-06  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-dis.c (nios2_find_opcode_hash): Add mach parameter.

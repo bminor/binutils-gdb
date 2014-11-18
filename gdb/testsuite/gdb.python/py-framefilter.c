@@ -146,10 +146,12 @@ int func5(int f, int d)
   return i;
 }
 
+int
 main()
 {
   int z = 32;
   int y = 44;
   const char *foo1 = "Test";
   func5(3,5);
+  return 0;
 }

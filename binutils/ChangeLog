@@ -1,3 +1,11 @@
+2014-11-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/17531
+	* readelf.c (get_unwind_section_word): Skip reloc processing if
+	there are no relocs associated with the section.
+	(decode_tic6x_unwind_bytecode): Warn and return if the stack
+	pointer adjustment falls off the end of the buffer.
+
 2014-11-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

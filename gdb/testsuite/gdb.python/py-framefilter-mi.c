@@ -132,7 +132,9 @@ int func5(int f, int d)
   return i;
 }
 
+int
 main()
 {
   func5(3,5);
+  return 0;
 }

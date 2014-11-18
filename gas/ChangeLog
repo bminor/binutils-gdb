@@ -1,3 +1,63 @@
+2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>
+
+	* config/tc-i386-intel.c (i386_operator): Remove last argument
+	from lex_got call.
+	* config/tc-i386.c (reloc): Remove bnd_prefix from parameters'
+	list.  Return always BFD_RELOC_32_PCREL.
+	* (output_branch): Remove condition for BFD_RELOC_X86_64_PC32_BND.
+	* (output_jump): Update call to reloc accordingly.
+	* (output_interseg_jump): Likewise.
+	* (output_disp): Likewise.
+	* (output_imm): Likewise.
+	* (x86_cons_fix_new): Likewise.
+	* (lex_got): Remove bnd_prefix from parameters' list in macro and
+	declarations. Don't use BFD_RELOC_X86_64_PLT32_BND.
+	* (x86_cons): Update call to lex_got accordingly.
+	* (i386_immediate): Likewise.
+	* (i386_displacement): Likewise.
+	* (md_apply_fix): Don't use BFD_RELOC_X86_64_PLT32_BND nor
+	BFD_RELOC_X86_64_PC32_BND.
+	* (tc_gen_reloc): Likewise.
+
+2014-11-18  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-aarch64.c (s_aarch64_arch_extension): New.
+	(md_pseudo_table): Add arch_extension.
+	(aarch64_parse_features): New parameter "ext_only". Handle it.
+	(aarch64_parse_cpu, aarch64_parse_arch, s_aarch64_cpu,
+	s_aarch64_arch): Pass FALSE as new third argument of
+	aarch64_parse_features().
+
+2014-11-17  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add "xgene2".
+	* doc/c-aarch64.texi: Document it.
+
+2014-11-17  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add "xgene1".
+	* doc/c-aarch64.texi: Rename xgene-1 to xgene1.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512vbmi.
+	* doc/c-i386.texi: Document it.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512ifma.
+	* doc/c-i386.texi: Document it.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .pcommit.
+	* doc/c-i386.texi: Document it.
+
+2014-11-17  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .clwb.
+	* doc/c-i386.texi: Document it.
+
 2014-11-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Re-arrange avx512* and xsave*

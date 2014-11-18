@@ -2923,11 +2923,6 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 		  }
 	      }
 	  }
-	// For GOTPLT64, we also need a PLT entry (but only if the
-	// symbol is not fully resolved).
-	if (r_type == elfcpp::R_X86_64_GOTPLT64
-	    && !gsym->final_value_is_known())
-	  target->make_plt_entry(symtab, layout, gsym);
       }
       break;
 
@@ -3454,9 +3449,9 @@ Target_x86_64<size>::Relocate::relocate(
       break;
 
     case elfcpp::R_X86_64_GOT64:
-      // The ABI doc says "Like GOT64, but indicates a PLT entry is needed."
-      // Since we always add a PLT entry, this is equivalent.
     case elfcpp::R_X86_64_GOTPLT64:
+      // R_X86_64_GOTPLT64 is obsolete and treated the the same as
+      // GOT64.
       gold_assert(have_got_offset);
       Relocate_functions<size, false>::rela64(view, got_offset, addend);
       break;

@@ -8,14 +8,14 @@ foo (void)
  i = 0;
 
  while (i < 2)
-   i++;
+   i++;				/* in-loop */
 
- x = i;
+ x = i;				/* after-loop */
  y = 2 * x;
  z = x + y;
- y = x + z;
+ y = x + z;			/* until-here */
  x = 9;
- y = 10;
+ y = 10;			/* until-there */
 }
 
 int
@@ -24,5 +24,5 @@ main ()
   int a = 1;
   foo ();
   a += 2;
-  return 0;
+  return 0;			/* at-return */
 }

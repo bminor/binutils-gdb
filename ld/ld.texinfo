@@ -1133,6 +1133,9 @@ Specify a stack size for in an ELF @code{PT_GNU_STACK} segment.
 Specifying zero will override any default non-zero sized
 @code{PT_GNU_STACK} segment creation.
 
+@item bndplt
+Always generate BND prefix in PLT entries. Supported for Linux/x86_64.
+
 @end table
 
 Other keywords are ignored for Solaris compatibility.

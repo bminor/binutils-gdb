@@ -1,3 +1,8 @@
+2014-11-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* lynx-low.c (lynx_write_memory): Put lynx_read_memory and
+	corresponding ERRNO check in same block.
+
 2014-11-12  Pedro Alves  <palves@redhat.com>
 
 	* server.c (cont_thread): Update comment.

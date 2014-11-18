@@ -899,7 +899,9 @@ enum
   PREFIX_0FAE_REG_1,
   PREFIX_0FAE_REG_2,
   PREFIX_0FAE_REG_3,
+  PREFIX_0FAE_REG_6,
   PREFIX_0FAE_REG_7,
+  PREFIX_RM_0_0FAE_REG_7,
   PREFIX_0FB8,
   PREFIX_0FBC,
   PREFIX_0FBD,
@@ -1476,6 +1478,7 @@ enum
   PREFIX_EVEX_0F387D,
   PREFIX_EVEX_0F387E,
   PREFIX_EVEX_0F387F,
+  PREFIX_EVEX_0F3883,
   PREFIX_EVEX_0F3888,
   PREFIX_EVEX_0F3889,
   PREFIX_EVEX_0F388A,
@@ -1509,6 +1512,8 @@ enum
   PREFIX_EVEX_0F38AD,
   PREFIX_EVEX_0F38AE,
   PREFIX_EVEX_0F38AF,
+  PREFIX_EVEX_0F38B4,
+  PREFIX_EVEX_0F38B5,
   PREFIX_EVEX_0F38B6,
   PREFIX_EVEX_0F38B7,
   PREFIX_EVEX_0F38B8,
@@ -2293,6 +2298,7 @@ enum
   EVEX_W_0F387A_P_2,
   EVEX_W_0F387B_P_2,
   EVEX_W_0F387D_P_2,
+  EVEX_W_0F3883_P_2,
   EVEX_W_0F388D_P_2,
   EVEX_W_0F3891_P_2,
   EVEX_W_0F3893_P_2,
@@ -3982,11 +3988,25 @@ static const struct dis386 prefix_table[][4] = {
     { "wrgsbase", { Ev } },
   },
 
+  /* PREFIX_0FAE_REG_6 */
+  {
+    { "xsaveopt",      { FXSAVE } },
+    { Bad_Opcode },
+    { "clwb",	{ Mb } },
+  },
+
   /* PREFIX_0FAE_REG_7 */
   {
     { "clflush",	{ Mb } },
     { Bad_Opcode },
     { "clflushopt",	{ Mb } },
+  },
+
+  /* PREFIX_RM_0_0FAE_REG_7 */
+  {
+    { "sfence",		{ Skip_MODRM } },
+    { Bad_Opcode },
+    { "pcommit",		{ Skip_MODRM } },
   },
 
   /* PREFIX_0FB8 */
@@ -11749,7 +11769,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_6 */
-    { "xsaveopt",	{ FXSAVE } },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_6) },
     { RM_TABLE (RM_0FAE_REG_6) },
   },
   {
@@ -12027,7 +12047,7 @@ static const struct dis386 rm_table[][8] = {
   },
   {
     /* RM_0FAE_REG_7 */
-    { "sfence",		{ Skip_MODRM } },
+    { PREFIX_TABLE (PREFIX_RM_0_0FAE_REG_7) },
   },
 };
 
