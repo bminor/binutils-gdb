@@ -333,3 +333,10 @@ if { [isnative] && [which $CC] != 0 } {
 	{dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} "x86-64-x32"}
     }
 }
+
+if { ![istarget "x86_64-*-linux*"]} {
+    return
+}
+
+# Linux only tests
+run_dump_test "pr17618"

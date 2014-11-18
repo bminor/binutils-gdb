@@ -1,5 +1,13 @@
 2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/17618
+	* ld-x86-64/x86-64.exp: Run pr17618 for Linux target.
+
+	* ld-x86-64/pr17618.d: New file.
+	* ld-x86-64/pr17618.s: Likewise.
+
+2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-x86-64/mpx.exp: Always run mpx3 and mpx4 tests in 64-bit.
 
 2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>

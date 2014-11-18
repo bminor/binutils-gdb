@@ -1,3 +1,9 @@
+2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17618
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Check
+	PC-relative offset overflow in PLT entry.
+
 2014-11-18  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/17512

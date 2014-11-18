@@ -4749,6 +4749,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       bfd_byte *loc;
       asection *plt, *gotplt, *relplt, *resolved_plt;
       const struct elf_backend_data *bed;
+      bfd_boolean gotplt_after_plt;
+      int32_t plt_got_pcrel_offset;
 
       /* When building a static executable, use .iplt, .igot.plt and
 	 .rela.iplt sections for STT_GNU_IFUNC symbols.  */
@@ -4853,14 +4855,23 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 
       /* Put offset the PC-relative instruction referring to the GOT entry,
 	 subtracting the size of that instruction.  */
-      bfd_put_32 (output_bfd,
-		  (gotplt->output_section->vma
-		   + gotplt->output_offset
-		   + got_offset
-		   - resolved_plt->output_section->vma
-		   - resolved_plt->output_offset
-		   - plt_offset
-		   - plt_got_insn_size),
+      plt_got_pcrel_offset = (gotplt->output_section->vma
+			      + gotplt->output_offset
+			      + got_offset
+			      - resolved_plt->output_section->vma
+			      - resolved_plt->output_offset
+			      - plt_offset
+			      - plt_got_insn_size);
+
+      /* Check PC-relative offset overflow in PLT entry.  */
+      gotplt_after_plt = (gotplt->output_section->vma
+			  > resolved_plt->output_section->vma);
+      if ((gotplt_after_plt && plt_got_pcrel_offset < 0)
+	  || (!gotplt_after_plt && plt_got_pcrel_offset > 0))
+	info->callbacks->einfo (_("%F%B: PC-relative offset overflow in PLT entry for `%s'\n"),
+				output_bfd, h->root.root.string);
+
+      bfd_put_32 (output_bfd, plt_got_pcrel_offset,
 		  resolved_plt->contents + plt_offset + plt_got_offset);
 
       /* Fill in the entry in the global offset table, initially this
