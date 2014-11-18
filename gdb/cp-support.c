@@ -1420,14 +1420,14 @@ make_symbol_overload_list_qualified (const char *func_name)
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+    b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), GLOBAL_BLOCK);
     make_symbol_overload_list_block (func_name, b);
   }
 
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
+    b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), STATIC_BLOCK);
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;

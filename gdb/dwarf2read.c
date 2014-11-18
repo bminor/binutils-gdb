@@ -3615,7 +3615,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	{
 	  struct symbol *sym = NULL;
 	  struct symtab *stab = dw2_instantiate_symtab (per_cu);
-	  const struct blockvector *bv = BLOCKVECTOR (stab);
+	  const struct blockvector *bv = SYMTAB_BLOCKVECTOR (stab);
 	  struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	  /* Some caution must be observed with overloaded functions
@@ -3970,8 +3970,8 @@ recursively_find_pc_sect_symtab (struct symtab *symtab, CORE_ADDR pc)
 {
   int i;
 
-  if (BLOCKVECTOR (symtab) != NULL
-      && blockvector_contains_pc (BLOCKVECTOR (symtab), pc))
+  if (SYMTAB_BLOCKVECTOR (symtab) != NULL
+      && blockvector_contains_pc (SYMTAB_BLOCKVECTOR (symtab), pc))
     return symtab;
 
   if (symtab->includes == NULL)

@@ -147,7 +147,7 @@ get_java_class_symtab (struct gdbarch *gdbarch)
 	obstack_alloc (&objfile->objfile_obstack,
 		       sizeof (struct blockvector) + sizeof (struct block *));
       BLOCKVECTOR_NBLOCKS (bv) = 1;
-      BLOCKVECTOR (class_symtab) = bv;
+      SYMTAB_BLOCKVECTOR (class_symtab) = bv;
 
       /* Allocate dummy STATIC_BLOCK.  */
       bl = allocate_block (&objfile->objfile_obstack);
@@ -173,7 +173,7 @@ add_class_symtab_symbol (struct symbol *sym)
 {
   struct symtab *symtab
     = get_java_class_symtab (get_objfile_arch (SYMBOL_OBJFILE (sym)));
-  const struct blockvector *bv = BLOCKVECTOR (symtab);
+  const struct blockvector *bv = SYMTAB_BLOCKVECTOR (symtab);
 
   dict_add_symbol (BLOCK_DICT (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)), sym);
 }

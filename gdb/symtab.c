@@ -1526,7 +1526,7 @@ lookup_objfile_from_block (const struct block *block)
      Non-primary symtabs share the block vector with their primary symtabs
      so we use ALL_PRIMARY_SYMTABS here instead of ALL_SYMTABS.  */
   ALL_PRIMARY_SYMTABS (obj, s)
-    if (block == BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK))
+    if (block == BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), GLOBAL_BLOCK))
       {
 	if (obj->separate_debug_objfile_backlink)
 	  obj = obj->separate_debug_objfile_backlink;
@@ -1575,7 +1575,7 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
       /* Go through symtabs.  */
       ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
 	{
-	  bv = BLOCKVECTOR (s);
+	  bv = SYMTAB_BLOCKVECTOR (s);
 	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	  sym = block_lookup_symbol (block, name, domain);
 	  if (sym)
@@ -1610,7 +1610,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
 
   ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
     {
-      bv = BLOCKVECTOR (s);
+      bv = SYMTAB_BLOCKVECTOR (s);
       block = BLOCKVECTOR_BLOCK (bv, block_index);
       sym = block_lookup_symbol (block, name, domain);
       if (sym)
@@ -1698,7 +1698,7 @@ lookup_symbol_via_quick_fns (struct objfile *objfile, int block_index,
   if (!symtab)
     return NULL;
 
-  bv = BLOCKVECTOR (symtab);
+  bv = SYMTAB_BLOCKVECTOR (symtab);
   block = BLOCKVECTOR_BLOCK (bv, block_index);
   sym = block_lookup_symbol (block, name, domain);
   if (!sym)
@@ -1923,7 +1923,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int block_index,
   if (!symtab)
     return NULL;
 
-  bv = BLOCKVECTOR (symtab);
+  bv = SYMTAB_BLOCKVECTOR (symtab);
   block = BLOCKVECTOR_BLOCK (bv, block_index);
   sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
   if (!sym)
@@ -1960,7 +1960,7 @@ basic_lookup_transparent_type (const char *name)
   {
     ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
       {
-	bv = BLOCKVECTOR (s);
+	bv = SYMTAB_BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
 	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
@@ -1988,7 +1988,7 @@ basic_lookup_transparent_type (const char *name)
   {
     ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
       {
-	bv = BLOCKVECTOR (s);
+	bv = SYMTAB_BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	sym = block_lookup_symbol (block, name, STRUCT_DOMAIN);
 	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
@@ -2081,7 +2081,7 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
 
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
-    bv = BLOCKVECTOR (s);
+    bv = SYMTAB_BLOCKVECTOR (s);
     b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 
     if (BLOCK_START (b) <= pc
@@ -2316,7 +2316,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       return val;
     }
 
-  bv = BLOCKVECTOR (s);
+  bv = SYMTAB_BLOCKVECTOR (s);
   objfile = SYMTAB_OBJFILE (s);
 
   /* Look at all the symtabs that share this blockvector.
@@ -2325,7 +2325,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 
   ALL_OBJFILE_SYMTABS (objfile, s)
     {
-      if (BLOCKVECTOR (s) != bv)
+      if (SYMTAB_BLOCKVECTOR (s) != bv)
 	continue;
 
       /* Find the best line in this symtab.  */
@@ -3711,7 +3711,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
-    bv = BLOCKVECTOR (s);
+    bv = SYMTAB_BLOCKVECTOR (s);
     for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
       {
 	b = BLOCKVECTOR_BLOCK (bv, i);
@@ -4518,7 +4518,7 @@ default_make_symbol_completion_list_break_on (const char *text,
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+    b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
 	if (code == TYPE_CODE_UNDEF
@@ -4531,7 +4531,7 @@ default_make_symbol_completion_list_break_on (const char *text,
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
+    b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), STATIC_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
 	if (code == TYPE_CODE_UNDEF
@@ -4695,13 +4695,13 @@ make_file_symbol_completion_list (const char *text, const char *word,
   /* Go through this symtab and check the externs and statics for
      symbols which match.  */
 
-  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+  b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), GLOBAL_BLOCK);
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
     }
 
-  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
+  b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), STATIC_BLOCK);
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);

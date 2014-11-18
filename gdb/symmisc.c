@@ -325,7 +325,7 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
   if (symtab->primary)
     {
       fprintf_filtered (outfile, "\nBlockvector:\n\n");
-      bv = BLOCKVECTOR (symtab);
+      bv = SYMTAB_BLOCKVECTOR (symtab);
       len = BLOCKVECTOR_NBLOCKS (bv);
       for (i = 0; i < len; i++)
 	{

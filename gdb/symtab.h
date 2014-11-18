@@ -980,7 +980,7 @@ struct symtab
   struct symtab *user;
 };
 
-#define BLOCKVECTOR(symtab)	(symtab)->blockvector
+#define SYMTAB_BLOCKVECTOR(symtab) ((symtab)->blockvector)
 #define SYMTAB_LINETABLE(symtab) ((symtab)->linetable)
 #define SYMTAB_OBJFILE(symtab)	((symtab)->objfile)
 #define SYMTAB_PSPACE(symtab)	(SYMTAB_OBJFILE (symtab)->pspace)

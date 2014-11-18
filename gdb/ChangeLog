@@ -1,5 +1,10 @@
 2014-11-18  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.h (SYMTAB_BLOCKVECTOR): Renamed from BLOCKVECTOR.  All uses
+	updated.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
 	* buildsym.c (buildsym_objfile): New static global.
 	(buildsym_comp_dir): New static global.
 	(finish_block_internal): Delete arg objfile.  All callers updated.

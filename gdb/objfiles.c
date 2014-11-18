@@ -760,7 +760,7 @@ objfile_relocate1 (struct objfile *objfile,
       if (!s->primary)
 	continue;
 
-      bv = BLOCKVECTOR (s);
+      bv = SYMTAB_BLOCKVECTOR (s);
       if (BLOCKVECTOR_MAP (bv))
 	addrmap_relocate (BLOCKVECTOR_MAP (bv),
 			  ANOFFSET (delta, s->block_line_section));

@@ -513,7 +513,7 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
 	/* Note: While psymtab_to_symtab can return NULL if the partial symtab
 	   is empty, we can assume it won't here because lookup_partial_symbol
 	   succeeded.  */
-	const struct blockvector *bv = BLOCKVECTOR (stab);
+	const struct blockvector *bv = SYMTAB_BLOCKVECTOR (stab);
 	struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	/* Some caution must be observed with overloaded functions
@@ -1266,7 +1266,7 @@ map_matching_symbols_psymtab (struct objfile *objfile,
 
 	  if (s == NULL)
 	    continue;
-	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), block_kind);
+	  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), block_kind);
 	  if (map_block (name, namespace, objfile, block,
 			 callback, data, match))
 	    return;
@@ -2037,7 +2037,7 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
     /* Now do checks requiring the associated symtab.  */
     if (s == NULL)
       continue;
-    bv = BLOCKVECTOR (s);
+    bv = SYMTAB_BLOCKVECTOR (s);
     b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
     psym = objfile->static_psymbols.list + ps->statics_offset;
     length = ps->n_static_syms;

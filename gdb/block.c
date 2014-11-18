@@ -169,7 +169,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
 	return 0;
     }
 
-  bl = BLOCKVECTOR (symtab);
+  bl = SYMTAB_BLOCKVECTOR (symtab);
 
   /* Then search that symtab for the smallest block that wins.  */
   b = find_block_in_blockvector (bl, pc);
@@ -504,7 +504,8 @@ block_iterator_step (struct block_iterator *iterator, int first)
 	  if (symtab == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), iterator->which);
+	  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
+				     iterator->which);
 	  sym = dict_iterator_first (BLOCK_DICT (block), &iterator->dict_iter);
 	}
       else
@@ -569,7 +570,8 @@ block_iter_name_step (struct block_iterator *iterator, const char *name,
 	  if (symtab == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), iterator->which);
+	  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
+				     iterator->which);
 	  sym = dict_iter_name_first (BLOCK_DICT (block), name,
 				      &iterator->dict_iter);
 	}
@@ -638,7 +640,8 @@ block_iter_match_step (struct block_iterator *iterator,
 	  if (symtab == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), iterator->which);
+	  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
+				     iterator->which);
 	  sym = dict_iter_match_first (BLOCK_DICT (block), name,
 				       compare, &iterator->dict_iter);
 	}

@@ -841,7 +841,7 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_primary_symtabs_ptr,
 	  if (s->primary)
 	    {
 	      ++nr_primary_symtabs;
-	      nr_blocks += BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s));
+	      nr_blocks += BLOCKVECTOR_NBLOCKS (SYMTAB_BLOCKVECTOR (s));
 	    }
 	}
     }

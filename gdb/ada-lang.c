@@ -4455,8 +4455,10 @@ cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
      the symbol is local or not, we check the block where we found it
      against the global and static blocks of its associated symtab.  */
   if (sym
-      && BLOCKVECTOR_BLOCK (BLOCKVECTOR (sym->symtab), GLOBAL_BLOCK) != block
-      && BLOCKVECTOR_BLOCK (BLOCKVECTOR (sym->symtab), STATIC_BLOCK) != block)
+      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (sym->symtab),
+			    GLOBAL_BLOCK) != block
+      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (sym->symtab),
+			    STATIC_BLOCK) != block)
     return;
 
   h = msymbol_hash (name) % HASH_SIZE;
@@ -6219,7 +6221,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+    b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
@@ -6231,7 +6233,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
+    b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), STATIC_BLOCK);
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
@@ -12846,7 +12848,7 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 
   ALL_PRIMARY_SYMTABS (objfile, s)
     {
-      const struct blockvector *bv = BLOCKVECTOR (s);
+      const struct blockvector *bv = SYMTAB_BLOCKVECTOR (s);
       int i;
 
       for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)

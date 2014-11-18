@@ -601,7 +601,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case stGlobal:		/* External symbol, goes into global block.  */
       class = LOC_STATIC;
-      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (top_stack->cur_st),
+      b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (top_stack->cur_st),
 			     GLOBAL_BLOCK);
       s = new_symbol (name);
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
@@ -754,7 +754,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       b = top_stack->cur_block;
       if (sh->st == stProc)
 	{
-	  const struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
+	  const struct blockvector *bv
+	    = SYMTAB_BLOCKVECTOR (top_stack->cur_st);
 
 	  /* The next test should normally be true, but provides a
 	     hook for nested functions (which we don't want to make
@@ -1129,7 +1130,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		top_stack->blocktype == stStaticProc))
 	{
 	  /* Finished with procedure */
-	  const struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
+	  const struct blockvector *bv
+	    = SYMTAB_BLOCKVECTOR (top_stack->cur_st);
 	  struct mdebug_extra_func_info *e;
 	  struct block *b = top_stack->cur_block;
 	  struct type *ftype = top_stack->cur_type;
@@ -1982,7 +1984,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 #else
       s = mylookup_symbol
 	(sh_name,
-	 BLOCKVECTOR_BLOCK (BLOCKVECTOR (search_symtab), STATIC_BLOCK),
+	 BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (search_symtab), STATIC_BLOCK),
 	 VAR_DOMAIN,
 	 LOC_BLOCK);
 #endif
@@ -4194,7 +4196,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 
       push_parse_stack ();
       top_stack->cur_st = st;
-      top_stack->cur_block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (st),
+      top_stack->cur_block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (st),
 						STATIC_BLOCK);
       BLOCK_START (top_stack->cur_block) = pst->textlow;
       BLOCK_END (top_stack->cur_block) = 0;
@@ -4290,7 +4292,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
          FIXME, Maybe quit once we have found the right number of ext's?  */
       top_stack->cur_st = st;
       top_stack->cur_block
-	= BLOCKVECTOR_BLOCK (BLOCKVECTOR (top_stack->cur_st),
+	= BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (top_stack->cur_st),
 			     GLOBAL_BLOCK);
       top_stack->blocktype = stFile;
 
@@ -4605,14 +4607,14 @@ add_block (struct block *b, struct symtab *s)
 {
   /* Cast away "const", but that's ok because we're building the
      symtab and blockvector here.  */
-  struct blockvector *bv = (struct blockvector *) BLOCKVECTOR (s);
+  struct blockvector *bv = (struct blockvector *) SYMTAB_BLOCKVECTOR (s);
 
   bv = (struct blockvector *) xrealloc ((void *) bv,
 					(sizeof (struct blockvector)
 					 + BLOCKVECTOR_NBLOCKS (bv)
 					 * sizeof (bv->block)));
-  if (bv != BLOCKVECTOR (s))
-    BLOCKVECTOR (s) = bv;
+  if (bv != SYMTAB_BLOCKVECTOR (s))
+    SYMTAB_BLOCKVECTOR (s) = bv;
 
   BLOCKVECTOR_BLOCK (bv, BLOCKVECTOR_NBLOCKS (bv)++) = b;
 }
@@ -4676,7 +4678,7 @@ sort_blocks (struct symtab *s)
 {
   /* We have to cast away const here, but this is ok because we're
      constructing the blockvector in this code.  */
-  struct blockvector *bv = (struct blockvector *) BLOCKVECTOR (s);
+  struct blockvector *bv = (struct blockvector *) SYMTAB_BLOCKVECTOR (s);
 
   if (BLOCKVECTOR_NBLOCKS (bv) <= FIRST_LOCAL_BLOCK)
     {
@@ -4738,7 +4740,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = new_block (NON_FUNCTION_BLOCK);
   BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
     BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-  BLOCKVECTOR (s) = bv;
+  SYMTAB_BLOCKVECTOR (s) = bv;
 
   s->debugformat = "ECOFF";
   return (s);

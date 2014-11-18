@@ -1982,7 +1982,7 @@ spu_catch_start (struct objfile *objfile)
 							 minsym.minsym));
   if (symtab != NULL)
     {
-      const struct blockvector *bv = BLOCKVECTOR (symtab);
+      const struct blockvector *bv = SYMTAB_BLOCKVECTOR (symtab);
       struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
       struct symbol *sym;
       struct symtab_and_line sal;
