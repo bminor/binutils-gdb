@@ -7089,6 +7089,13 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
   /* Get the word at the required offset.  */
   word = byte_get (arm_sec->data + word_offset, 4);
 
+  /* PR 17531: file: id:000001,src:001266+003044,op:splice,rep:128.  */
+  if (arm_sec->rela == NULL)
+    {
+      * wordp = word;
+      return TRUE;
+    }
+
   /* Look through the relocs to find the one that applies to the provided offset.  */
   wrapped = FALSE;
   for (rp = arm_sec->next_rela; rp != arm_sec->rela + arm_sec->nrelas; rp++)
@@ -7583,7 +7590,14 @@ decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *aux,
 	      if ((buf[i] & 0x80) == 0)
 		break;
 	    }
-	  assert (i < sizeof (buf));
+	  /* PR 17531: file: id:000001,src:001906+004739,op:splice,rep:2.  */
+	  if (i == sizeof (buf))
+	    {
+	      printf ("<corrupt sp adjust>\n");
+	      warn (_("Corrupt stack pointer adjustment detected\n"));
+	      return;
+	    }
+	  
 	  offset = read_uleb128 (buf, &len, buf + i + 1);
 	  assert (len == i + 1);
 	  offset = offset * 8 + 0x408;
