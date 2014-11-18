@@ -1,3 +1,8 @@
+2014-11-21  Mark Wielaard  <mjw@redhat.com>
+
+	PR debug/63239
+	* dwarf2.def (DW_AT_GNU_deleted): New attribute.
+
 2014-11-21  Terry Guo  <terry.guo@arm.com>
 
 	* opcode/arm.h (FPU_VFP_EXT_ARMV8xD): New macro.
