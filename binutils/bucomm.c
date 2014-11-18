@@ -429,8 +429,12 @@ print_arelt_descr (FILE *file, bfd *abfd, bfd_boolean verbose)
 	  const char *ctime_result = (const char *) ctime (&when);
 	  bfd_size_type size;
 
-	  /* POSIX format:  skip weekday and seconds from ctime output.  */
-	  sprintf (timebuf, "%.12s %.4s", ctime_result + 4, ctime_result + 20);
+	  /* PR binutils/17605: Check for corrupt time values.  */
+	  if (ctime_result == NULL)
+	    sprintf (timebuf, _("<time data corrupt>"));
+	  else
+	    /* POSIX format:  skip weekday and seconds from ctime output.  */
+	    sprintf (timebuf, "%.12s %.4s", ctime_result + 4, ctime_result + 20);
 
 	  mode_string (buf.st_mode, modebuf);
 	  modebuf[10] = '\0';
