@@ -101,7 +101,7 @@ gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
 gdb_test "record restore $precsave" \
-    "Program terminated with signal .*" \
+    "Restored records from core file .*" \
     "reload core file"
 
 #
