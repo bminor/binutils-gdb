@@ -59,7 +59,7 @@ on the target processor.  The following processor names are recognized:
 @code{cortex-a57},
 @code{thunderx},
 and
-@code{xgene-1}.
+@code{xgene1}.
 The special name @code{all} may be used to allow the assembler to accept
 instructions valid for any supported processor, including all optional
 extensions.
