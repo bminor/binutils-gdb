@@ -989,6 +989,8 @@ watch_main_source_file_lossage (void)
 	    subfiles = mainsub_alias->next;
 	  else
 	    prev_mainsub_alias->next = mainsub_alias->next;
+	  xfree (mainsub_alias->name);
+	  xfree (mainsub_alias->dirname);
 	  xfree (mainsub_alias);
 	}
     }
