@@ -1629,11 +1629,16 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	    case R_X86_64_PC32_BND:
 	    case R_X86_64_PLT32_BND:
+	    case R_X86_64_PC32:
+	    case R_X86_64_PLT32:
+	    case R_X86_64_32:
+	    case R_X86_64_64:
 	      /* MPX PLT is supported only if elf_x86_64_arch_bed
 		 is used in 64-bit mode.  */
 	      if (ABI_64_P (abfd)
-		  && (get_elf_x86_64_backend_data (abfd)
-		      == &elf_x86_64_arch_bed))
+		      && info->bndplt
+		      && (get_elf_x86_64_backend_data (abfd)
+			  == &elf_x86_64_arch_bed))
 		{
 		  elf_x86_64_hash_entry (h)->has_bnd_reloc = TRUE;
 
@@ -1675,11 +1680,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 
 	    case R_X86_64_32S:
-	    case R_X86_64_32:
-	    case R_X86_64_64:
-	    case R_X86_64_PC32:
 	    case R_X86_64_PC64:
-	    case R_X86_64_PLT32:
 	    case R_X86_64_GOTPCREL:
 	    case R_X86_64_GOTPCREL64:
 	      if (htab->elf.dynobj == NULL)

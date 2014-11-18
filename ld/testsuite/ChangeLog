@@ -1,3 +1,21 @@
+2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>
+
+	* testsuite/ld-x86-64/bnd-ifunc-1.d: Add bndplt option.
+	* testsuite/ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1.d: Likewise.  Update dissassembly
+	sections.
+	* testsuite/ld-x86-64/mpx.exp: Handle mpx3 and mpx4 tests.
+	* testsuite/ld-x86-64/mpx1a.rd: Remove _BND from relocation name.
+	* testsuite/ld-x86-64/mpx1c.rd: Likewise.
+	* testsuite/ld-x86-64/mpx2a.rd: Likewise.
+	* testsuite/ld-x86-64/mpx2c.rd: Likewise.
+	* testsuite/ld-x86-64/mpx3.dd: New file.
+	* testsuite/ld-x86-64/mpx3a.s: Likewise.
+	* testsuite/ld-x86-64/mpx3b.s: Likewise.
+	* testsuite/ld-x86-64/mpx4.dd: Likewise.
+	* testsuite/ld-x86-64/mpx4a.s: Likewise.
+	* testsuite/ld-x86-64/mpx4b.s: Likewise.
+
 2014-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/17598

@@ -1,3 +1,11 @@
+2014-11-18  Igor Zamyatin  <igor.zamyatin@intel.com>
+
+	* emulparams/elf_x86_64.sh (BNDPLT): Set to yes for x86_64.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Handle
+	"-z bndplt" if BNDPLT is yes.
+	(gld${EMULATION_NAME}_list_options): Add "-z bndplt" entry.
+	* ld.texinfo: Add description for bndplt.
+
 2014-10-08  Senthil Kumar Selvaraj <senthil_kumar.selvaraj@atmel.com>
 
 	* avrtiny.sc: Apply avr.sc fixes.

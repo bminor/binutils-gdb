@@ -31,7 +31,10 @@ fi
 case "$target" in
   x86_64*-linux*|i[3-7]86-*-linux-*)
     case "$EMULATION_NAME" in
-      *64*) LIBPATH_SUFFIX=64 ;;
+      *64*)
+        LIBPATH_SUFFIX=64
+        BNDPLT=yes
+        ;;
     esac
     ;;
   *-*-solaris2*)
