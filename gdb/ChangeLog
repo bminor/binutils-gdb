@@ -1,5 +1,28 @@
 2014-11-18  Doug Evans  <xdje42@gmail.com>
 
+	* buildsym.c (buildsym_objfile): New static global.
+	(buildsym_comp_dir): New static global.
+	(finish_block_internal): Delete arg objfile.  All callers updated.
+	(finish_block): Delete arg objfile.  All callers updated.
+	(start_subfile): Delete arg dirname.  All callers updated.
+	(patch_subfile_names): Update buildsym_comp_dir.
+	(get_macro_table): Delete arg objfile.  All callers updated.
+	(start_symtab): New arg objfile.  All callers updated.
+	Rename arg dirname to comp_dir.
+	(reset_symtab_globals): Initialize buildsym_objfile, buildsym_comp_dir.
+	(end_symtab_get_static_block): Delete arg objfile.  All callers
+	updated.
+	(end_symtab_without_blockvector): Ditto.
+	(end_symtab_with_blockvector): Ditto.
+	(end_symtab_from_static_block): Ditto.
+	(end_symtab): Ditto.
+	(end_expandable_symtab): Ditto.
+	(augment_type_symtab): Ditto.
+	* coffread.c (coff_start_symtab): New arg objfile.  All callers
+	updated.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.h (SYMTAB_LINETABLE): Renamed from LINETABLE.  All uses
 	updated.
 

@@ -192,15 +192,14 @@ extern struct symbol *find_symbol_in_list (struct pending *list,
 extern struct block *finish_block (struct symbol *symbol,
                                    struct pending **listhead,
                                    struct pending_block *old_blocks,
-                                   CORE_ADDR start, CORE_ADDR end,
-                                   struct objfile *objfile);
+                                   CORE_ADDR start, CORE_ADDR end);
 
 extern void record_block_range (struct block *,
                                 CORE_ADDR start, CORE_ADDR end_inclusive);
 
 extern void really_free_pendings (void *dummy);
 
-extern void start_subfile (const char *name, const char *dirname);
+extern void start_subfile (const char *name);
 
 extern void patch_subfile_names (struct subfile *subfile, char *name);
 
@@ -209,24 +208,19 @@ extern void push_subfile (void);
 extern char *pop_subfile (void);
 
 extern struct block *end_symtab_get_static_block (CORE_ADDR end_addr,
-						  struct objfile *objfile,
 						  int expandable,
 						  int required);
 
 extern struct symtab *end_symtab_from_static_block (struct block *static_block,
-						    struct objfile *objfile,
 						    int section,
 						    int expandable);
 
-extern struct symtab *end_symtab (CORE_ADDR end_addr,
-				  struct objfile *objfile, int section);
+extern struct symtab *end_symtab (CORE_ADDR end_addr, int section);
 
 extern struct symtab *end_expandable_symtab (CORE_ADDR end_addr,
-					     struct objfile *objfile,
 					     int section);
 
-extern void augment_type_symtab (struct objfile *objfile,
-				 struct symtab *primary_symtab);
+extern void augment_type_symtab (struct symtab *primary_symtab);
 
 /* Defined in stabsread.c.  */
 
@@ -242,7 +236,8 @@ extern struct context_stack *pop_context (void);
 
 extern record_line_ftype record_line;
 
-extern void start_symtab (const char *name, const char *dirname,
+extern void start_symtab (struct objfile *objfile,
+			  const char *name, const char *dirname,
 			  CORE_ADDR start_addr);
 
 extern void restart_symtab (CORE_ADDR start_addr);
@@ -277,8 +272,7 @@ extern const char *get_last_source_file (void);
 
 /* Return the macro table.  */
 
-extern struct macro_table *get_macro_table (struct objfile *objfile,
-					    const char *comp_dir);
+extern struct macro_table *get_macro_table (const char *comp_dir);
 
 #undef EXTERN
 

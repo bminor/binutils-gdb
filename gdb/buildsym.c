@@ -52,6 +52,14 @@
 
 #include "stabsread.h"
 
+/* The objfile we are currently reading debug info from.  */
+
+static struct objfile *buildsym_objfile;
+
+/* The compilation directory.  */
+
+static char *buildsym_comp_dir;
+
 /* List of subfiles.  */
 
 static struct subfile *subfiles;
@@ -254,9 +262,9 @@ static struct block *
 finish_block_internal (struct symbol *symbol, struct pending **listhead,
 		       struct pending_block *old_blocks,
 		       CORE_ADDR start, CORE_ADDR end,
-		       struct objfile *objfile,
 		       int is_global, int expandable)
 {
+  struct objfile *objfile = buildsym_objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct pending *next, *next1;
   struct block *block;
@@ -434,11 +442,10 @@ finish_block_internal (struct symbol *symbol, struct pending **listhead,
 struct block *
 finish_block (struct symbol *symbol, struct pending **listhead,
 	      struct pending_block *old_blocks,
-	      CORE_ADDR start, CORE_ADDR end,
-	      struct objfile *objfile)
+	      CORE_ADDR start, CORE_ADDR end)
 {
   return finish_block_internal (symbol, listhead, old_blocks,
-				start, end, objfile, 0, 0);
+				start, end, 0, 0);
 }
 
 /* Record BLOCK on the list of all blocks in the file.  Put it after
@@ -571,12 +578,10 @@ make_blockvector (struct objfile *objfile)
 
 /* Start recording information about source code that came from an
    included (or otherwise merged-in) source file with a different
-   name.  NAME is the name of the file (cannot be NULL), DIRNAME is
-   the directory in which the file was compiled (or NULL if not
-   known).  */
+   name.  NAME is the name of the file (cannot be NULL).  */
 
 void
-start_subfile (const char *name, const char *dirname)
+start_subfile (const char *name)
 {
   struct subfile *subfile;
 
@@ -620,7 +625,8 @@ start_subfile (const char *name, const char *dirname)
 
   /* Save its name and compilation directory name.  */
   subfile->name = xstrdup (name);
-  subfile->dirname = (dirname == NULL) ? NULL : xstrdup (dirname);
+  subfile->dirname
+    = (buildsym_comp_dir == NULL) ? NULL : xstrdup (buildsym_comp_dir);
 
   /* Initialize line-number recording for this subfile.  */
   subfile->line_vector = NULL;
@@ -714,6 +720,11 @@ patch_subfile_names (struct subfile *subfile, char *name)
   if (subfile != NULL && subfile->dirname == NULL && subfile->name != NULL
       && IS_DIR_SEPARATOR (subfile->name[strlen (subfile->name) - 1]))
     {
+      /* With correct debug info, buildsym_comp_dir should be NULL since
+	 subfile->dirname is NULL.  However, don't assume this.  */
+      xfree (buildsym_comp_dir);
+      buildsym_comp_dir = xstrdup (subfile->name);
+
       subfile->dirname = subfile->name;
       subfile->name = xstrdup (name);
       set_last_source_file (name);
@@ -861,11 +872,15 @@ compare_line_numbers (const void *ln1p, const void *ln2p)
 }
 
 /* Return the macro table.
-   Initialize it if this is the first use.  */
+   Initialize it if this is the first use.
+   It is only valid to call this between calls to start_symtab and the
+   end_symtab* functions.  */
 
 struct macro_table *
-get_macro_table (struct objfile *objfile, const char *comp_dir)
+get_macro_table (const char *comp_dir)
 {
+  struct objfile *objfile = buildsym_objfile;
+
   if (! pending_macros)
     pending_macros = new_macro_table (&objfile->per_bfd->storage_obstack,
 				      objfile->per_bfd->macro_cache,
@@ -873,21 +888,24 @@ get_macro_table (struct objfile *objfile, const char *comp_dir)
   return pending_macros;
 }
 
-/* Start a new symtab for a new source file.  Called, for example,
+/* Start a new symtab for a new source file in OBJFILE.  Called, for example,
    when a stabs symbol of type N_SO is seen, or when a DWARF
    TAG_compile_unit DIE is seen.  It indicates the start of data for
    one original source file.
 
-   NAME is the name of the file (cannot be NULL).  DIRNAME is the directory in
+   NAME is the name of the file (cannot be NULL).  COMP_DIR is the directory in
    which the file was compiled (or NULL if not known).  START_ADDR is the
    lowest address of objects in the file (or 0 if not known).  */
 
 void
-start_symtab (const char *name, const char *dirname, CORE_ADDR start_addr)
+start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
+	      CORE_ADDR start_addr)
 {
+  buildsym_objfile = objfile;
+  buildsym_comp_dir = comp_dir != NULL ? xstrdup (comp_dir) : NULL;
   restart_symtab (start_addr);
   set_last_source_file (name);
-  start_subfile (name, dirname);
+  start_subfile (name);
   /* Save this so that we don't have to go looking for it at the end
      of the subfiles list.  */
   main_subfile = current_subfile;
@@ -1014,6 +1032,9 @@ block_compar (const void *ap, const void *bp)
 static void
 reset_symtab_globals (void)
 {
+  buildsym_objfile = NULL;
+  xfree (buildsym_comp_dir);
+  buildsym_comp_dir = NULL;
   set_last_source_file (NULL);
   free_subfiles_list ();
   pending_macros = NULL;
@@ -1039,9 +1060,10 @@ reset_symtab_globals (void)
    not contain any symbols.  */
 
 struct block *
-end_symtab_get_static_block (CORE_ADDR end_addr, struct objfile *objfile,
-			     int expandable, int required)
+end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
 {
+  struct objfile *objfile = buildsym_objfile;
+
   /* Finish the lexical context of the last function in the file; pop
      the context stack.  */
 
@@ -1051,7 +1073,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, struct objfile *objfile,
 
       /* Make a block for the local symbols within.  */
       finish_block (cstk->name, &local_symbols, cstk->old_blocks,
-		    cstk->start_addr, end_addr, objfile);
+		    cstk->start_addr, end_addr);
 
       if (context_stack_depth > 0)
 	{
@@ -1122,7 +1144,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, struct objfile *objfile,
     {
       /* Define the STATIC_BLOCK.  */
       return finish_block_internal (NULL, &file_symbols, NULL,
-				    last_source_start_addr, end_addr, objfile,
+				    last_source_start_addr, end_addr,
 				    0, expandable);
     }
 }
@@ -1133,8 +1155,9 @@ end_symtab_get_static_block (CORE_ADDR end_addr, struct objfile *objfile,
    any memory we allocated while reading debug info.  */
 
 static void
-end_symtab_without_blockvector (struct objfile *objfile)
+end_symtab_without_blockvector (void)
 {
+  struct objfile *objfile = buildsym_objfile;
   struct subfile *subfile;
 
   /* Since we are ignoring these subfiles, we also need
@@ -1172,9 +1195,9 @@ end_symtab_without_blockvector (struct objfile *objfile)
 
 static struct symtab *
 end_symtab_with_blockvector (struct block *static_block,
-			     struct objfile *objfile, int section,
-			     int expandable)
+			     int section, int expandable)
 {
+  struct objfile *objfile = buildsym_objfile;
   struct symtab *symtab;
   struct blockvector *blockvector;
   struct subfile *subfile;
@@ -1187,7 +1210,7 @@ end_symtab_with_blockvector (struct block *static_block,
 
   /* Create the GLOBAL_BLOCK and build the blockvector.  */
   finish_block_internal (NULL, &global_symbols, NULL,
-			 last_source_start_addr, end_addr, objfile,
+			 last_source_start_addr, end_addr,
 			 1, expandable);
   blockvector = make_blockvector (objfile);
 
@@ -1324,21 +1347,17 @@ end_symtab_with_blockvector (struct block *static_block,
 
 struct symtab *
 end_symtab_from_static_block (struct block *static_block,
-			      struct objfile *objfile, int section,
-			      int expandable)
+			      int section, int expandable)
 {
   struct symtab *s;
 
   if (static_block == NULL)
     {
-      end_symtab_without_blockvector (objfile);
+      end_symtab_without_blockvector ();
       s = NULL;
     }
   else
-    {
-      s = end_symtab_with_blockvector (static_block, objfile, section,
-				       expandable);
-    }
+    s = end_symtab_with_blockvector (static_block, section, expandable);
 
   reset_symtab_globals ();
 
@@ -1367,24 +1386,23 @@ end_symtab_from_static_block (struct block *static_block,
    yourself.  */
 
 struct symtab *
-end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
+end_symtab (CORE_ADDR end_addr, int section)
 {
   struct block *static_block;
 
-  static_block = end_symtab_get_static_block (end_addr, objfile, 0, 0);
-  return end_symtab_from_static_block (static_block, objfile, section, 0);
+  static_block = end_symtab_get_static_block (end_addr, 0, 0);
+  return end_symtab_from_static_block (static_block, section, 0);
 }
 
 /* Same as end_symtab except create a symtab that can be later added to.  */
 
 struct symtab *
-end_expandable_symtab (CORE_ADDR end_addr, struct objfile *objfile,
-		       int section)
+end_expandable_symtab (CORE_ADDR end_addr, int section)
 {
   struct block *static_block;
 
-  static_block = end_symtab_get_static_block (end_addr, objfile, 1, 0);
-  return end_symtab_from_static_block (static_block, objfile, section, 1);
+  static_block = end_symtab_get_static_block (end_addr, 1, 0);
+  return end_symtab_from_static_block (static_block, section, 1);
 }
 
 /* Subroutine of augment_type_symtab to simplify it.
@@ -1411,7 +1429,7 @@ set_missing_symtab (struct pending *pending_list, struct symtab *symtab)
    This is the case for DWARF4 Type Units.  */
 
 void
-augment_type_symtab (struct objfile *objfile, struct symtab *primary_symtab)
+augment_type_symtab (struct symtab *primary_symtab)
 {
   const struct blockvector *blockvector = primary_symtab->blockvector;
 

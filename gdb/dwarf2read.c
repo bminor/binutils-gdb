@@ -1514,7 +1514,7 @@ static void dwarf_decode_lines (struct line_header *, const char *,
 				struct dwarf2_cu *, struct partial_symtab *,
 				CORE_ADDR);
 
-static void dwarf2_start_subfile (const char *, const char *, const char *);
+static void dwarf2_start_subfile (const char *, const char *);
 
 static void dwarf2_start_symtab (struct dwarf2_cu *,
 				 const char *, const char *, CORE_ADDR);
@@ -7960,7 +7960,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   get_scope_pc_bounds (cu->dies, &lowpc, &highpc, cu);
 
   static_block
-    = end_symtab_get_static_block (highpc + baseaddr, objfile, 0, 1);
+    = end_symtab_get_static_block (highpc + baseaddr, 0, 1);
 
   /* If the comp unit has DW_AT_ranges, it may have discontiguous ranges.
      Also, DW_AT_ranges may record ranges not belonging to any child DIEs
@@ -7969,7 +7969,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
      this comp unit.  */
   dwarf2_record_block_ranges (cu->dies, static_block, baseaddr, cu);
 
-  symtab = end_symtab_from_static_block (static_block, objfile,
+  symtab = end_symtab_from_static_block (static_block,
 					 SECT_OFF_TEXT (objfile), 0);
 
   if (symtab != NULL)
@@ -8062,7 +8062,7 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
      this TU's symbols to the existing symtab.  */
   if (sig_type->type_unit_group->primary_symtab == NULL)
     {
-      symtab = end_expandable_symtab (0, objfile, SECT_OFF_TEXT (objfile));
+      symtab = end_expandable_symtab (0, SECT_OFF_TEXT (objfile));
       sig_type->type_unit_group->primary_symtab = symtab;
 
       if (symtab != NULL)
@@ -8077,8 +8077,7 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
     }
   else
     {
-      augment_type_symtab (objfile,
-			   sig_type->type_unit_group->primary_symtab);
+      augment_type_symtab (sig_type->type_unit_group->primary_symtab);
       symtab = sig_type->type_unit_group->primary_symtab;
     }
 
@@ -9157,7 +9156,7 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 
 	  if (fe->dir_index)
 	    dir = lh->include_dirs[fe->dir_index - 1];
-	  dwarf2_start_subfile (fe->name, dir, NULL);
+	  dwarf2_start_subfile (fe->name, dir);
 
 	  /* Note: We don't have to watch for the main subfile here, type units
 	     don't have DW_AT_name.  */
@@ -11263,7 +11262,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   new = pop_context ();
   /* Make a block for the local symbols within.  */
   block = finish_block (new->name, &local_symbols, new->old_blocks,
-                        lowpc, highpc, objfile);
+                        lowpc, highpc);
 
   /* For C++, set the block's scope.  */
   if ((cu->language == language_cplus || cu->language == language_fortran)
@@ -11343,7 +11342,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct block *block
         = finish_block (0, &local_symbols, new->old_blocks, new->start_addr,
-                        highpc, objfile);
+                        highpc);
 
       /* Note that recording ranges after traversing children, as we
          do here, means that recording a parent's ranges entails
@@ -17309,7 +17308,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
           if (fe->dir_index)
             dir = lh->include_dirs[fe->dir_index - 1];
 
-	  dwarf2_start_subfile (fe->name, dir, comp_dir);
+	  dwarf2_start_subfile (fe->name, dir);
 	}
 
       /* Decode the table.  */
@@ -17527,7 +17526,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
                       {
                         last_subfile = current_subfile;
 			line_has_non_zero_discriminator = discriminator != 0;
-                        dwarf2_start_subfile (fe->name, dir, comp_dir);
+                        dwarf2_start_subfile (fe->name, dir);
                       }
                   }
               }
@@ -17654,7 +17653,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 	  fe = &lh->file_names[i];
 	  if (fe->dir_index)
 	    dir = lh->include_dirs[fe->dir_index - 1];
-	  dwarf2_start_subfile (fe->name, dir, comp_dir);
+	  dwarf2_start_subfile (fe->name, dir);
 
 	  /* Skip the main file; we don't need it, and it must be
 	     allocated last, so that it will show up before the
@@ -17672,8 +17671,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 
 /* Start a subfile for DWARF.  FILENAME is the name of the file and
    DIRNAME the name of the source directory which contains FILENAME
-   or NULL if not known.  COMP_DIR is the compilation directory for the
-   linetable's compilation unit or NULL if not known.
+   or NULL if not known.
    This routine tries to keep line numbers from identical absolute and
    relative file names in a common subfile.
 
@@ -17682,7 +17680,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
    of /srcdir/list0.c yields the following debugging information for list0.c:
 
    DW_AT_name:          /srcdir/list0.c
-   DW_AT_comp_dir:              /compdir
+   DW_AT_comp_dir:      /compdir
    files.files[0].name: list0.h
    files.files[0].dir:  /srcdir
    files.files[1].name: list0.c
@@ -17695,15 +17693,11 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
    subfile's name.  */
 
 static void
-dwarf2_start_subfile (const char *filename, const char *dirname,
-		      const char *comp_dir)
+dwarf2_start_subfile (const char *filename, const char *dirname)
 {
   char *copy = NULL;
 
-  /* While reading the DIEs, we call start_symtab(DW_AT_name, DW_AT_comp_dir).
-     `start_symtab' will always pass the contents of DW_AT_comp_dir as
-     second argument to start_subfile.  To be consistent, we do the
-     same here.  In order not to lose the line information directory,
+  /* In order not to lose the line information directory,
      we concatenate it to the filename when it makes sense.
      Note that the Dwarf3 standard says (speaking of filenames in line
      information): ``The directory index is ignored for file names
@@ -17716,7 +17710,7 @@ dwarf2_start_subfile (const char *filename, const char *dirname,
       filename = copy;
     }
 
-  start_subfile (filename, comp_dir);
+  start_subfile (filename);
 
   if (copy != NULL)
     xfree (copy);
@@ -17729,7 +17723,7 @@ static void
 dwarf2_start_symtab (struct dwarf2_cu *cu,
 		     const char *name, const char *comp_dir, CORE_ADDR low_pc)
 {
-  start_symtab (name, comp_dir, low_pc);
+  start_symtab (dwarf2_per_objfile->objfile, name, comp_dir, low_pc);
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
 
@@ -20372,7 +20366,7 @@ static struct macro_source_file *
 macro_start_file (int file, int line,
                   struct macro_source_file *current_file,
                   const char *comp_dir,
-                  struct line_header *lh, struct objfile *objfile)
+		  struct line_header *lh)
 {
   /* File name relative to the compilation directory of this source file.  */
   char *file_name = file_file_name (file, lh);
@@ -20381,7 +20375,7 @@ macro_start_file (int file, int line,
     {
       /* Note: We don't create a macro table for this compilation unit
 	 at all until we actually get a filename.  */
-      struct macro_table *macro_table = get_macro_table (objfile, comp_dir);
+      struct macro_table *macro_table = get_macro_table (comp_dir);
 
       /* If we have no current file, then this must be the start_file
 	 directive for the compilation unit's main source file.  */
@@ -20763,9 +20757,9 @@ dwarf_decode_macro_bytes (bfd *abfd,
 			  struct dwarf2_section_info *section,
 			  int section_is_gnu, int section_is_dwz,
 			  unsigned int offset_size,
-			  struct objfile *objfile,
 			  htab_t include_hash)
 {
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
   enum dwarf_macro_record_type macinfo_type;
   int at_commandline;
   const gdb_byte *opcode_definitions[256];
@@ -20906,9 +20900,8 @@ dwarf_decode_macro_bytes (bfd *abfd,
 		at_commandline = 0;
 	      }
 	    else
-	      current_file = macro_start_file (file, line,
-					       current_file, comp_dir,
-					       lh, objfile);
+	      current_file = macro_start_file (file, line, current_file,
+					       comp_dir, lh);
           }
           break;
 
@@ -20968,8 +20961,7 @@ dwarf_decode_macro_bytes (bfd *abfd,
 	      {
 		struct dwz_file *dwz = dwarf2_get_dwz_file ();
 
-		dwarf2_read_section (dwarf2_per_objfile->objfile,
-				     &dwz->macro);
+		dwarf2_read_section (objfile, &dwz->macro);
 
 		include_section = &dwz->macro;
 		include_bfd = get_section_bfd_owner (include_section);
@@ -20996,7 +20988,7 @@ dwarf_decode_macro_bytes (bfd *abfd,
 					  include_mac_end, current_file,
 					  lh, comp_dir,
 					  section, section_is_gnu, is_dwz,
-					  offset_size, objfile, include_hash);
+					  offset_size, include_hash);
 
 		htab_remove_elt (include_hash, (void *) new_mac_ptr);
 	      }
@@ -21152,7 +21144,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 	    mac_ptr += bytes_read;
 
 	    current_file = macro_start_file (file, line, current_file,
-					     comp_dir, lh, objfile);
+					     comp_dir, lh);
 	  }
 	  break;
 
@@ -21218,8 +21210,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
   *slot = (void *) mac_ptr;
   dwarf_decode_macro_bytes (abfd, mac_ptr, mac_end,
 			    current_file, lh, comp_dir, section,
-			    section_is_gnu, 0,
-			    offset_size, objfile, include_hash);
+			    section_is_gnu, 0, offset_size, include_hash);
   do_cleanups (cleanup);
 }
 

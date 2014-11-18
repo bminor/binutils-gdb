@@ -2644,7 +2644,7 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
   if (last_source_start_addr > text_offset)
     last_source_start_addr = text_offset;
 
-  pst->symtab = end_symtab (text_offset + text_size, objfile,
+  pst->symtab = end_symtab (text_offset + text_size,
 			    SECT_OFF_TEXT (objfile));
 
   end_stabs ();
@@ -2783,8 +2783,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
 	  /* Make a block for the local symbols within.  */
 	  block = finish_block (new->name, &local_symbols, new->old_blocks,
-				new->start_addr, new->start_addr + valu,
-				objfile);
+				new->start_addr, new->start_addr + valu);
 
 	  /* For C++, set the block's scope.  */
 	  if (SYMBOL_LANGUAGE (new->name) == language_cplus)
@@ -2885,7 +2884,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		}
 	      /* Make a block for the local symbols within.  */
 	      finish_block (0, &local_symbols, new->old_blocks,
-			    new->start_addr, valu, objfile);
+			    new->start_addr, valu);
 	    }
 	}
       else
@@ -2926,7 +2925,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	      patch_subfile_names (current_subfile, name);
 	      break;		/* Ignore repeated SOs.  */
 	    }
-	  end_symtab (valu, objfile, SECT_OFF_TEXT (objfile));
+	  end_symtab (valu, SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 	}
 
@@ -2939,7 +2938,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	function_start_offset = 0;
 
       start_stabs ();
-      start_symtab (name, NULL, valu);
+      start_symtab (objfile, name, NULL, valu);
       record_debugformat ("stabs");
       break;
 
@@ -2949,17 +2948,17 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
          in the compilation of the main source file (whose name was
          given in the N_SO symbol).  Relocate for dynamic loading.  */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-      start_subfile (name, current_subfile->dirname);
+      start_subfile (name);
       break;
 
     case N_BINCL:
       push_subfile ();
       add_new_header_file (name, valu);
-      start_subfile (name, current_subfile->dirname);
+      start_subfile (name);
       break;
 
     case N_EINCL:
-      start_subfile (pop_subfile (), current_subfile->dirname);
+      start_subfile (pop_subfile ());
       break;
 
     case N_EXCL:
@@ -3188,7 +3187,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  /* Make a block for the local symbols within.  */
 		  block = finish_block (new->name, &local_symbols,
 					new->old_blocks, new->start_addr,
-					valu, objfile);
+					valu);
 
 		  /* For C++, set the block's scope.  */
 		  if (SYMBOL_LANGUAGE (new->name) == language_cplus)
