@@ -1,5 +1,19 @@
 2014-11-18  Doug Evans  <xdje42@gmail.com>
 
+	* buildsym.c (main_subfile): New static global.
+	(free_subfiles_list): New function.
+	(start_symtab): Set main_subfile.
+	(restart_symtab): Replace init of subfiles, current_subfile with
+	call to free_subfiles_list.
+	(watch_main_source_file_lossage): Use main_subfile.
+	(reset_symtab_globals): Replace init of current_subfile with call
+	to free_subfiles_list.
+	(end_symtab_without_blockvector, end_symtab_with_blockvector): New
+	functions, split out from ...
+	(end_symtab_from_static_block): ... here.  Rewrite to call them.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
 	The result of symtab expansion is always a primary symtab.
 	* dwarf2read.c (dw2_instantiate_symtab): Add assert.
 	(dw2_lookup_symbol): Remove unnecessary test for primary symbol table.
