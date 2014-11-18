@@ -21,6 +21,10 @@
 
 
 	.text
+	.ifdef DIRECTIVE
+	.arch_extension crc
+	.endif
+
 	crc32b	w3, w7, w15
 	crc32h	w7, w15, w3
 	crc32w	w15, w3, w7
@@ -29,3 +33,5 @@
 	crc32ch	w7, w15, w3
 	crc32cw	w15, w3, w7
 	crc32cx	w3, w7, x15
+
+	.arch_extension nocrc

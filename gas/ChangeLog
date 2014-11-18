@@ -1,3 +1,12 @@
+2014-11-18  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-aarch64.c (s_aarch64_arch_extension): New.
+	(md_pseudo_table): Add arch_extension.
+	(aarch64_parse_features): New parameter "ext_only". Handle it.
+	(aarch64_parse_cpu, aarch64_parse_arch, s_aarch64_cpu,
+	s_aarch64_arch): Pass FALSE as new third argument of
+	aarch64_parse_features().
+
 2015-01-07  Jan Beulich <jbeulich@suse.com>
 
 	* config/tc-arm.c (struct arm_option_extension_value_table):

@@ -1,3 +1,10 @@
+2014-11-18  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/aarch64/crc32-directive.d: New.
+	* gas/aarch64/crypto-directive.d: New.
+	* gas/aarch64/crc32.s: Adjust to allow for directive use.
+	* gas/aarch64/crypto.s: Likewise.
+
 2015-03-10  Renlin Li  <renlin.li@arm.com>
 
 	* gas/aarch64/ldst-reg-uns-imm.d: Adjust expected output.

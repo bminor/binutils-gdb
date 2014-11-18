@@ -1917,6 +1917,7 @@ s_tlsdesccall (int ignored ATTRIBUTE_UNUSED)
 
 static void s_aarch64_arch (int);
 static void s_aarch64_cpu (int);
+static void s_aarch64_arch_extension (int);
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -1934,6 +1935,7 @@ const pseudo_typeS md_pseudo_table[] = {
   {"pool", s_ltorg, 0},
   {"cpu", s_aarch64_cpu, 0},
   {"arch", s_aarch64_arch, 0},
+  {"arch_extension", s_aarch64_arch_extension, 0},
   {"inst", s_aarch64_inst, 0},
 #ifdef OBJ_ELF
   {"tlsdesccall", s_tlsdesccall, 0},
@@ -7240,7 +7242,8 @@ struct aarch64_long_option_table
 };
 
 static int
-aarch64_parse_features (char *str, const aarch64_feature_set **opt_p)
+aarch64_parse_features (char *str, const aarch64_feature_set **opt_p,
+			bfd_boolean ext_only)
 {
   /* We insist on extensions being added before being removed.  We achieve
      this by using the ADDING_VALUE variable to indicate whether we are
@@ -7256,17 +7259,19 @@ aarch64_parse_features (char *str, const aarch64_feature_set **opt_p)
   while (str != NULL && *str != 0)
     {
       const struct aarch64_option_cpu_value_table *opt;
-      char *ext;
+      char *ext = NULL;
       int optlen;
 
-      if (*str != '+')
+      if (!ext_only)
 	{
-	  as_bad (_("invalid architectural extension"));
-	  return 0;
-	}
+	  if (*str != '+')
+	    {
+	      as_bad (_("invalid architectural extension"));
+	      return 0;
+	    }
 
-      str++;
-      ext = strchr (str, '+');
+	  ext = strchr (++str, '+');
+	}
 
       if (ext != NULL)
 	optlen = ext - str;
@@ -7346,7 +7351,7 @@ aarch64_parse_cpu (char *str)
       {
 	mcpu_cpu_opt = &opt->value;
 	if (ext != NULL)
-	  return aarch64_parse_features (ext, &mcpu_cpu_opt);
+	  return aarch64_parse_features (ext, &mcpu_cpu_opt, FALSE);
 
 	return 1;
       }
@@ -7378,7 +7383,7 @@ aarch64_parse_arch (char *str)
       {
 	march_cpu_opt = &opt->value;
 	if (ext != NULL)
-	  return aarch64_parse_features (ext, &march_cpu_opt);
+	  return aarch64_parse_features (ext, &march_cpu_opt, FALSE);
 
 	return 1;
       }
@@ -7561,7 +7566,7 @@ s_aarch64_cpu (int ignored ATTRIBUTE_UNUSED)
       {
 	mcpu_cpu_opt = &opt->value;
 	if (ext != NULL)
-	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt))
+	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, FALSE))
 	    return;
 
 	cpu_variant = *mcpu_cpu_opt;
@@ -7607,7 +7612,7 @@ s_aarch64_arch (int ignored ATTRIBUTE_UNUSED)
       {
 	mcpu_cpu_opt = &opt->value;
 	if (ext != NULL)
-	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt))
+	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, FALSE))
 	    return;
 
 	cpu_variant = *mcpu_cpu_opt;
@@ -7620,6 +7625,28 @@ s_aarch64_arch (int ignored ATTRIBUTE_UNUSED)
   as_bad (_("unknown architecture `%s'\n"), name);
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
+}
+
+/* Parse a .arch_extension directive.  */
+
+static void
+s_aarch64_arch_extension (int ignored ATTRIBUTE_UNUSED)
+{
+  char saved_char;
+  char *ext = input_line_pointer;;
+
+  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
+    input_line_pointer++;
+  saved_char = *input_line_pointer;
+  *input_line_pointer = 0;
+
+  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, TRUE))
+    return;
+
+  cpu_variant = *mcpu_cpu_opt;
+
+  *input_line_pointer = saved_char;
+  demand_empty_rest_of_line ();
 }
 
 /* Copy symbol information.  */
