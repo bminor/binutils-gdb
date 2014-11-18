@@ -1,3 +1,9 @@
+2014-11-18  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	Apply trunk patch:
+	* config/tc-aarch64.c (aarch64_cpus): Add CRC feature for
+	cortex-A53 and cortex-A57.
+
 2014-11-17  Nick Clifton  <nickc@redhat.com>
 
 	Apply trunk patches:
