@@ -1189,8 +1189,8 @@ find_source_lines (struct symtab *s, int desc)
   if (fstat (desc, &st) < 0)
     perror_with_name (symtab_to_filename_for_display (s));
 
-  if (s->objfile && s->objfile->obfd)
-    mtime = s->objfile->mtime;
+  if (SYMTAB_OBJFILE (s) != NULL && SYMTAB_OBJFILE (s)->obfd != NULL)
+    mtime = SYMTAB_OBJFILE (s)->mtime;
   else if (exec_bfd)
     mtime = exec_bfd_mtime;
 
@@ -1294,7 +1294,7 @@ identify_source_line (struct symtab *s, int line, int mid_statement,
     /* Don't index off the end of the line_charpos array.  */
     return 0;
   annotate_source (s->fullname, line, s->line_charpos[line - 1],
-		   mid_statement, get_objfile_arch (s->objfile), pc);
+		   mid_statement, get_objfile_arch (SYMTAB_OBJFILE (s)), pc);
 
   current_source_line = line;
   current_source_symtab = s;
@@ -1538,7 +1538,8 @@ line_info (char *arg, int from_tty)
       else if (sal.line > 0
 	       && find_line_pc_range (sal, &start_pc, &end_pc))
 	{
-	  struct gdbarch *gdbarch = get_objfile_arch (sal.symtab->objfile);
+	  struct gdbarch *gdbarch
+	    = get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
 
 	  if (start_pc == end_pc)
 	    {

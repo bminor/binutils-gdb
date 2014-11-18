@@ -774,7 +774,7 @@ extern const struct symbol_impl *symbol_impls;
 #define SYMBOL_BLOCK_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_block)
 #define SYMBOL_REGISTER_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_register)
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
-#define SYMBOL_OBJFILE(symbol) 		(SYMBOL_SYMTAB (symbol)->objfile)
+#define SYMBOL_OBJFILE(symbol)		SYMTAB_OBJFILE (SYMBOL_SYMTAB (symbol))
 
 extern int register_symbol_computed_impl (enum address_class,
 					  const struct symbol_computed_ops *);
@@ -982,7 +982,8 @@ struct symtab
 
 #define BLOCKVECTOR(symtab)	(symtab)->blockvector
 #define LINETABLE(symtab)	(symtab)->linetable
-#define SYMTAB_PSPACE(symtab)	(symtab)->objfile->pspace
+#define SYMTAB_OBJFILE(symtab)	((symtab)->objfile)
+#define SYMTAB_PSPACE(symtab)	(SYMTAB_OBJFILE (symtab)->pspace)
 
 /* Call this to set the "primary" field in struct symtab.  */
 extern void set_symtab_primary (struct symtab *, int primary);

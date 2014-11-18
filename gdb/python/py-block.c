@@ -384,12 +384,12 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
       section = find_pc_mapped_section (pc);
       symtab = find_pc_sect_symtab (pc, section);
 
-      if (symtab != NULL && symtab->objfile != NULL)
+      if (symtab != NULL && SYMTAB_OBJFILE (symtab) != NULL)
 	block = block_for_pc (pc);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  if (!symtab || symtab->objfile == NULL)
+  if (!symtab || SYMTAB_OBJFILE (symtab) == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Cannot locate object file for block."));
@@ -397,7 +397,7 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
     }
 
   if (block)
-    return block_to_block_object (block, symtab->objfile);
+    return block_to_block_object (block, SYMTAB_OBJFILE (symtab));
 
   Py_RETURN_NONE;
 }

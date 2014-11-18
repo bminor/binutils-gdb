@@ -2317,7 +2317,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
     }
 
   bv = BLOCKVECTOR (s);
-  objfile = s->objfile;
+  objfile = SYMTAB_OBJFILE (s);
 
   /* Look at all the symtabs that share this blockvector.
      They all have the same apriori range, that we found was right;

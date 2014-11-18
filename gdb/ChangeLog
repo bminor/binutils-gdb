@@ -1,5 +1,10 @@
 2014-11-18  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.h (SYMTAB_OBJFILE): New macro.  All uses of member
+	symtab.objfile updated to use it.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
 	* buildsym.c (watch_main_source_file_lossage): Fix memory leak.
 
 2014-11-18  Doug Evans  <xdje42@gmail.com>

@@ -686,19 +686,19 @@ gdbscm_lookup_block (SCM pc_scm)
       section = find_pc_mapped_section (pc);
       symtab = find_pc_sect_symtab (pc, section);
 
-      if (symtab != NULL && symtab->objfile != NULL)
+      if (symtab != NULL && SYMTAB_OBJFILE (symtab) != NULL)
 	block = block_for_pc (pc);
     }
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
 
-  if (symtab == NULL || symtab->objfile == NULL)
+  if (symtab == NULL || SYMTAB_OBJFILE (symtab) == NULL)
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, pc_scm,
 				 _("cannot locate object file for block"));
     }
 
   if (block != NULL)
-    return bkscm_scm_from_block (block, symtab->objfile);
+    return bkscm_scm_from_block (block, SYMTAB_OBJFILE (symtab));
   return SCM_BOOL_F;
 }
 

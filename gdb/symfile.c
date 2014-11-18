@@ -2947,7 +2947,7 @@ allocate_symtab (const char *filename, struct objfile *objfile)
 
   /* Hook it to the objfile it comes from.  */
 
-  symtab->objfile = objfile;
+  SYMTAB_OBJFILE (symtab) = objfile;
   symtab->next = objfile->symtabs;
   objfile->symtabs = symtab;
 

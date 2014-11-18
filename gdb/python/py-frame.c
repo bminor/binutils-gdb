@@ -303,7 +303,7 @@ frapy_block (PyObject *self, PyObject *args)
       struct symtab *symt;
 
       symt = SYMBOL_SYMTAB (BLOCK_FUNCTION (fn_block));
-      return block_to_block_object (block, symt->objfile);
+      return block_to_block_object (block, SYMTAB_OBJFILE (symt));
     }
 
   Py_RETURN_NONE;

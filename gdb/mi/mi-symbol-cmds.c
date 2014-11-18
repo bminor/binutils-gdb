@@ -49,7 +49,7 @@ mi_cmd_symbol_list_lines (char *command, char **argv, int argc)
      already sorted by increasing values in the symbol table, so no
      need to perform any other sorting.  */
 
-  gdbarch = get_objfile_arch (s->objfile);
+  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
   cleanup_stack = make_cleanup_ui_out_list_begin_end (uiout, "lines");
 
   if (LINETABLE (s) != NULL && LINETABLE (s)->nitems > 0)

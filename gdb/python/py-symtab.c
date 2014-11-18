@@ -121,7 +121,7 @@ stpy_get_objfile (PyObject *self, void *closure)
 
   STPY_REQUIRE_VALID (self, symtab);
 
-  result = objfile_to_objfile_object (symtab->objfile);
+  result = objfile_to_objfile_object (SYMTAB_OBJFILE (symtab));
   Py_XINCREF (result);
   return result;
 }
@@ -186,7 +186,7 @@ stpy_global_block (PyObject *self, PyObject *args)
 
   blockvector = BLOCKVECTOR (symtab);
   block = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
-  return block_to_block_object (block, symtab->objfile);
+  return block_to_block_object (block, SYMTAB_OBJFILE (symtab));
 }
 
 /* Return the STATIC_BLOCK of the underlying symtab.  */
@@ -202,7 +202,7 @@ stpy_static_block (PyObject *self, PyObject *args)
 
   blockvector = BLOCKVECTOR (symtab);
   block = BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK);
-  return block_to_block_object (block, symtab->objfile);
+  return block_to_block_object (block, SYMTAB_OBJFILE (symtab));
 }
 
 /* Implementation of gdb.Symtab.linetable (self) -> gdb.Linetable.
@@ -252,7 +252,7 @@ stpy_dealloc (PyObject *obj)
     symtab->prev->next = symtab->next;
   else if (symtab->symtab)
     {
-      set_objfile_data (symtab->symtab->objfile,
+      set_objfile_data (SYMTAB_OBJFILE (symtab->symtab),
 			stpy_objfile_data_key, symtab->next);
     }
   if (symtab->next)
@@ -333,7 +333,7 @@ salpy_dealloc (PyObject *self)
   if (self_sal->prev)
     self_sal->prev->next = self_sal->next;
   else if (self_sal->symtab != (symtab_object * ) Py_None)
-    set_objfile_data (self_sal->symtab->symtab->objfile,
+    set_objfile_data (SYMTAB_OBJFILE (self_sal->symtab->symtab),
 		      salpy_objfile_data_key, self_sal->next);
 
   if (self_sal->next)
@@ -377,12 +377,12 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
      objfile cleanup observer linked list.  */
   if (sal_obj->symtab != (symtab_object *)Py_None)
     {
-      sal_obj->next = objfile_data (sal_obj->symtab->symtab->objfile,
+      sal_obj->next = objfile_data (SYMTAB_OBJFILE (sal_obj->symtab->symtab),
 				    salpy_objfile_data_key);
       if (sal_obj->next)
 	sal_obj->next->prev = sal_obj;
 
-      set_objfile_data (sal_obj->symtab->symtab->objfile,
+      set_objfile_data (SYMTAB_OBJFILE (sal_obj->symtab->symtab),
 			salpy_objfile_data_key, sal_obj);
     }
   else
@@ -403,10 +403,11 @@ set_symtab (symtab_object *obj, struct symtab *symtab)
   obj->prev = NULL;
   if (symtab)
     {
-      obj->next = objfile_data (symtab->objfile, stpy_objfile_data_key);
+      obj->next = objfile_data (SYMTAB_OBJFILE (symtab),
+				stpy_objfile_data_key);
       if (obj->next)
 	obj->next->prev = obj;
-      set_objfile_data (symtab->objfile, stpy_objfile_data_key, obj);
+      set_objfile_data (SYMTAB_OBJFILE (symtab), stpy_objfile_data_key, obj);
     }
   else
     obj->next = NULL;

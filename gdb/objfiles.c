@@ -641,7 +641,7 @@ free_objfile (struct objfile *objfile)
   {
     struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-    if (cursal.symtab && cursal.symtab->objfile == objfile)
+    if (cursal.symtab && SYMTAB_OBJFILE (cursal.symtab) == objfile)
       clear_current_source_symtab_and_line ();
   }
 
