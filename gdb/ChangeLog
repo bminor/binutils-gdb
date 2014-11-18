@@ -1,3 +1,13 @@
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	The result of symtab expansion is always a primary symtab.
+	* dwarf2read.c (dw2_instantiate_symtab): Add assert.
+	(dw2_lookup_symbol): Remove unnecessary test for primary symbol table.
+	* psymtab.c (lookup_symbol_aux_psymtabs): Ditto.
+	(psymtab_to_symtab): Add comment and assert.
+	(map_matching_symbols_psymtab): Remove unnecessary test for
+	non-primary symtab.
+
 2014-11-15  Doug Evans  <xdje42@gmail.com>
 
 	PR symtab/17559

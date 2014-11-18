@@ -2660,6 +2660,10 @@ dw2_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
       process_cu_includes ();
       do_cleanups (back_to);
     }
+
+  /* The result of symtab expansion is always the primary symtab.  */
+  gdb_assert (per_cu->v.quick->symtab->primary);
+
   return per_cu->v.quick->symtab;
 }
 
@@ -3611,17 +3615,13 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	{
 	  struct symbol *sym = NULL;
 	  struct symtab *stab = dw2_instantiate_symtab (per_cu);
+	  const struct blockvector *bv = BLOCKVECTOR (stab);
+	  struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	  /* Some caution must be observed with overloaded functions
 	     and methods, since the index will not contain any overload
 	     information (but NAME might contain it).  */
-	  if (stab->primary)
-	    {
-	      const struct blockvector *bv = BLOCKVECTOR (stab);
-	      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
-
-	      sym = block_lookup_symbol (block, name, domain);
-	    }
+	  sym = block_lookup_symbol (block, name, domain);
 
 	  if (sym && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
 	    {
