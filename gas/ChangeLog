@@ -1,5 +1,10 @@
 2014-11-17  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
 
+	* config/tc-aarch64.c (aarch64_cpus): Add "xgene2".
+	* doc/c-aarch64.texi: Document it.
+
+2014-11-17  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
+
 	* config/tc-aarch64.c (aarch64_cpus): Add "xgene1".
 	* doc/c-aarch64.texi: Rename xgene-1 to xgene1.
 
