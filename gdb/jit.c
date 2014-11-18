@@ -645,7 +645,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
   symtab = allocate_symtab (stab->file_name, objfile);
   /* JIT compilers compile in memory.  */
-  symtab->dirname = NULL;
+  SYMTAB_DIRNAME (symtab) = NULL;
 
   /* Copy over the linetable entry if one was provided.  */
   if (stab->linetable)

@@ -1244,14 +1244,14 @@ end_symtab_with_blockvector (struct block *static_block,
       if (subfile->dirname)
 	{
 	  /* Reallocate the dirname on the symbol obstack.  */
-	  symtab->dirname =
+	  SYMTAB_DIRNAME (symtab) =
 	    obstack_copy0 (&objfile->objfile_obstack,
 			   subfile->dirname,
 			   strlen (subfile->dirname));
 	}
       else
 	{
-	  symtab->dirname = NULL;
+	  SYMTAB_DIRNAME (symtab) = NULL;
 	}
 
       /* Use whatever language we have been using for this

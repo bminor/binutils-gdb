@@ -297,9 +297,9 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 
   fprintf_filtered (outfile, "\nSymtab for file %s\n",
 		    symtab_to_filename_for_display (symtab));
-  if (symtab->dirname)
+  if (SYMTAB_DIRNAME (symtab) != NULL)
     fprintf_filtered (outfile, "Compilation directory is %s\n",
-		      symtab->dirname);
+		      SYMTAB_DIRNAME (symtab));
   fprintf_filtered (outfile, "Read from object file %s (",
 		    objfile_name (objfile));
   gdb_print_host_address (objfile, outfile);
@@ -753,7 +753,8 @@ maintenance_info_symtabs (char *regexp, int from_tty)
 	      printf_filtered ("((struct symtab *) %s)\n",
 			       host_address_to_string (symtab));
 	      printf_filtered ("	  dirname %s\n",
-			       symtab->dirname ? symtab->dirname : "(null)");
+			       SYMTAB_DIRNAME (symtab) != NULL
+			       ? SYMTAB_DIRNAME (symtab) : "(null)");
 	      printf_filtered ("	  fullname %s\n",
 			       symtab->fullname ? symtab->fullname : "(null)");
 	      printf_filtered ("	  "

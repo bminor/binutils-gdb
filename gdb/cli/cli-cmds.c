@@ -1486,21 +1486,23 @@ compare_symtabs (const void *a, const void *b)
 {
   const struct symtab_and_line *sala = a;
   const struct symtab_and_line *salb = b;
+  const char *dira = SYMTAB_DIRNAME (sala->symtab);
+  const char *dirb = SYMTAB_DIRNAME (salb->symtab);
   int r;
 
-  if (!sala->symtab->dirname)
+  if (dira == NULL)
     {
-      if (salb->symtab->dirname)
+      if (dirb != NULL)
 	return -1;
     }
-  else if (!salb->symtab->dirname)
+  else if (dirb == NULL)
     {
-      if (sala->symtab->dirname)
+      if (dira != NULL)
 	return 1;
     }
   else
     {
-      r = filename_cmp (sala->symtab->dirname, salb->symtab->dirname);
+      r = filename_cmp (dira, dirb);
       if (r)
 	return r;
     }

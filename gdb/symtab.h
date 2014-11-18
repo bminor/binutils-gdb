@@ -984,6 +984,7 @@ struct symtab
 #define LINETABLE(symtab)	(symtab)->linetable
 #define SYMTAB_OBJFILE(symtab)	((symtab)->objfile)
 #define SYMTAB_PSPACE(symtab)	(SYMTAB_OBJFILE (symtab)->pspace)
+#define SYMTAB_DIRNAME(symtab)	((symtab)->dirname)
 
 /* Call this to set the "primary" field in struct symtab.  */
 extern void set_symtab_primary (struct symtab *, int primary);
