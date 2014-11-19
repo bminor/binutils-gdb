@@ -110,3 +110,16 @@
 	sys	#0, c0, c0, #0,
 
 	casp w0,w1,w2,w3,[x4]
+
+	# test warning of unpredictable load pairs
+	ldp     x0, x0, [sp]
+	ldp     d0, d0, [sp]
+	ldp     x0, x0, [sp], #16
+	ldnp    x0, x0, [sp]
+
+	# test warning of unpredictable writeback
+	ldr	x0, [x0, #8]!
+	str	x0, [x0, #8]!
+	str	x1, [x1], #8
+	stp	x0, x1, [x0, #16]!
+	ldp	x0, x1, [x1], #16

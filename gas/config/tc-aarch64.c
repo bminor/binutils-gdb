@@ -5490,6 +5490,40 @@ programmer_friendly_fixup (aarch64_instruction *instr)
   return TRUE;
 }
 
+/* Check for loads and stores that will cause unpredictable behavior */
+
+static void
+warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
+{
+  aarch64_inst *base = &instr->base;
+  const aarch64_opcode *opcode = base->opcode;
+  const aarch64_opnd_info *opnds = base->operands;
+  switch (opcode->iclass)
+    {
+    case ldst_pos:
+    case ldst_imm9:
+    case ldst_unscaled:
+    case ldst_unpriv:
+      if (opnds[0].reg.regno == opnds[1].reg.regno
+	  && opnds[1].addr.writeback)
+	as_warn (_("unpredictable register after writeback -- `%s'"), str);
+      break;
+    case ldstpair_off:
+    case ldstnapair_offs:
+    case ldstpair_indexed:
+      if ((opnds[0].reg.regno == opnds[2].reg.regno
+	    || opnds[1].reg.regno == opnds[2].reg.regno)
+	  && opnds[2].addr.writeback)
+	    as_warn (_("unpredictable register after writeback -- `%s'"), str);
+      if ((opcode->opcode & (1 << 22))
+	  && opnds[0].reg.regno == opnds[1].reg.regno)
+	    as_warn (_("unpredictable load of register pair -- `%s'"), str);
+      break;
+    default:
+      break;
+    }
+}
+
 /* A wrapper function to interface with libopcodes on encoding and
    record the error message if there is any.
 
@@ -5621,6 +5655,8 @@ md_assemble (char *str)
 	      as_bad (_("selected processor does not support `%s'"), str);
 	      return;
 	    }
+
+	  warn_unpredictable_ldst (&inst, str);
 
 	  if (inst.reloc.type == BFD_RELOC_UNUSED
 	      || !inst.reloc.need_libopcodes_p)
