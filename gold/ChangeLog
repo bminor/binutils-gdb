@@ -1,3 +1,7 @@
+2014-11-20  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::do_relax): Add __go_go to thread_starters.
+
 2014-10-28  Alan Modra  <amodra@gmail.com>
 
 	Apply trunk patches
