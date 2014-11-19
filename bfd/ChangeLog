@@ -1,3 +1,9 @@
+2014-11-26  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_slurp_version_tables): Delay allocation of
+	internal verref buffer.  Error for zero sh_info.  Print errors.
+	Check for zero vd_ndx.  Use bfd_zalloc for vd_auxptr buffer.
+
 2014-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Use
