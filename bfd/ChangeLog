@@ -1,3 +1,7 @@
+2014-11-20  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Add __go_go to thread_starters.
+
 2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/17618

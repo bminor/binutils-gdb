@@ -11979,6 +11979,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  "GOMP_parallel_loop_runtime_start",
 	  "GOMP_parallel_sections",
 	  "GOMP_parallel_sections_start",
+	  /* libgo */
+	  "__go_go",
 	};
       unsigned i;
 
