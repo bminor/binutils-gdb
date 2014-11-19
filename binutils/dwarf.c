@@ -416,7 +416,7 @@ process_extended_line_op (unsigned char * data,
   len = read_uleb128 (data, & bytes_read, end);
   data += bytes_read;
 
-  if (len == 0 || data == end || len > (end - data))
+  if (len == 0 || data == end || len > (uintptr_t) (end - data))
     {
       warn (_("Badly formed extended line op encountered!\n"));
       return bytes_read;
