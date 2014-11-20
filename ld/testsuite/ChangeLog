@@ -1,5 +1,16 @@
 2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-x86-64/pr17618.d: Don't run on x32.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/plt-main1.rd: Updated for x32.
+	* ld-x86-64/plt-main2.rd: Likewise.
+	* ld-x86-64/plt-main3.rd: Likewise.
+	* ld-x86-64/plt-main4.rd: Likewise.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-x86-64/plt-lib.c: New file.
 	* ld-x86-64/plt-main.out: Likewise.
 	* ld-x86-64/plt-main1.c: Likewise.
