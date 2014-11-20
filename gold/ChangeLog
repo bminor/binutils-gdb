@@ -1,5 +1,16 @@
 2014-11-20  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Stub_control::Stub_control): Init stub14_group_size_
+	from --stub-group-size parameter divided by 1024.
+	(Powerpc_relocate_functions::rela, rela_ua): Add fieldsize
+	template parameter.  Update all uses.
+	(Target_powerpc::Relocate::relocate): Rename has_plt_value to
+	has_stub_value.  Set for long branches.  Don't report overflow for
+	branch to undefined weak symbols.  Print info message on
+	overflowing branch to stub.
+
+2014-11-20  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::do_relax): Add __go_go to thread_starters.
 
 2014-10-28  Alan Modra  <amodra@gmail.com>
