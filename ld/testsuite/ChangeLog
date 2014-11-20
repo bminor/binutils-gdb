@@ -1,5 +1,21 @@
 2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-x86-64/plt-lib.c: New file.
+	* ld-x86-64/plt-main.out: Likewise.
+	* ld-x86-64/plt-main1.c: Likewise.
+	* ld-x86-64/plt-main1.rd: Likewise.
+	* ld-x86-64/plt-main2.c: Likewise.
+	* ld-x86-64/plt-main2.rd: Likewise.
+	* ld-x86-64/plt-main3.c: Likewise.
+	* ld-x86-64/plt-main3.rd: Likewise.
+	* ld-x86-64/plt-main4.c: Likewise.
+	* ld-x86-64/plt-main4.rd: Likewise.
+	* ld-x86-64/plt-main5.c: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run plt-main tests.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-ifunc/ifunc-main.c (get_bar): New function.
 	(main): Use it.
 
