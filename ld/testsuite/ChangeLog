@@ -1,5 +1,12 @@
 2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-ifunc/ifunc.exp: Run ifunc-main.
+	* ld-ifunc/ifunc-lib.c: New file.
+	* ld-ifunc/ifunc-main.c: Likewise.
+	* ld-ifunc/ifunc-main.out: Likewise.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* lib/ld-lib.exp (check_ifunc_available): New.
 	* ld-ifunc/ifunc.exp: Run IFUNC run-time tests only if IFUNC
 	is supported.

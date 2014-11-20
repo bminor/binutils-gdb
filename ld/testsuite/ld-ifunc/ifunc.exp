@@ -418,6 +418,17 @@ if { ![check_ifunc_available] } {
     return
 }
 
+run_cc_link_tests [list \
+    [list \
+	"Build ifunc-lib.so" \
+	"-shared" \
+	"-fPIC" \
+	{ ifunc-lib.c } \
+	{} \
+	"libifunc-lib.so" \
+    ] \
+]
+
 run_ld_link_exec_tests [] [list \
     [list \
 	"Run pr16467" \
@@ -427,5 +438,22 @@ run_ld_link_exec_tests [] [list \
 	"pr16467" \
 	"pr16467.out" \
 	"" \
+    ] \
+    [list \
+	"Run ifunc-main" \
+	"tmpdir/libifunc-lib.so" \
+	"" \
+	{ ifunc-main.c } \
+	"ifunc-main" \
+	"ifunc-main.out" \
+    ] \
+    [list \
+	"Run ifunc-main with -fpic" \
+	"tmpdir/libifunc-lib.so" \
+	"" \
+	{ ifunc-main.c } \
+	"ifunc-main" \
+	"ifunc-main.out" \
+	"-fpic" \
     ] \
 ]
