@@ -1,3 +1,8 @@
+2014-11-20  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relax_section): Correct ppc476 workaround
+	alignment calculation.
+
 2014-11-20  Terry Guo  <terry.guo@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Skip if input bfd
