@@ -22,6 +22,7 @@
 
 struct obstack;
 struct bcache;
+struct compunit_symtab;
 
 /* How do we represent a source location?  I mean, how should we
    represent them within GDB; the user wants to use all sorts of
@@ -154,8 +155,8 @@ struct macro_source_file
    xmalloc if OBSTACK is zero.  Use BCACHE to store all macro names,
    arguments, definitions, and anything else that might be the same
    amongst compilation units in an executable file; if BCACHE is zero,
-   don't cache these things.  COMP_DIR optionally contains the compilation
-   directory of all files for this macro table.
+   don't cache these things.  CUST is a pointer to the containing
+   compilation unit, or NULL if there isn't one.
 
    Note that, if either OBSTACK or BCACHE are non-zero, then removing
    information from the table may leak memory.  Neither obstacks nor
@@ -168,7 +169,7 @@ struct macro_source_file
    do that in GCC 4.1.2.).  */
 struct macro_table *new_macro_table (struct obstack *obstack,
                                      struct bcache *bcache,
-				     const char *comp_dir);
+				     struct compunit_symtab *cust);
 
 
 /* Free TABLE, and any macro definitions, source file structures,

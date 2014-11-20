@@ -193,13 +193,13 @@ struct quick_symbol_functions
      symbols.  NAME is the name of the symbol to look for.  DOMAIN
      indicates what sort of symbol to search for.
 
-     Returns the newly-expanded symbol table in which the symbol is
+     Returns the newly-expanded compunit in which the symbol is
      defined, or NULL if no such symbol table exists.  If OBJFILE
-     contains !TYPE_OPAQUE symbol prefer its symtab.  If it contains
-     only TYPE_OPAQUE symbol(s), return at least that symtab.  */
-  struct symtab *(*lookup_symbol) (struct objfile *objfile,
-				   int block_index, const char *name,
-				   domain_enum domain);
+     contains !TYPE_OPAQUE symbol prefer its compunit.  If it contains
+     only TYPE_OPAQUE symbol(s), return at least that compunit.  */
+  struct compunit_symtab *(*lookup_symbol) (struct objfile *objfile,
+					    int block_index, const char *name,
+					    domain_enum domain);
 
   /* Print statistics about any indices loaded for OBJFILE.  The
      statistics should be printed to gdb_stdout.  This is used for
@@ -285,17 +285,15 @@ struct quick_symbol_functions
      enum search_domain kind,
      void *data);
 
-  /* Return the symbol table from OBJFILE that contains PC and
-     SECTION.  Return NULL if there is no such symbol table.  This
-     should return the symbol table that contains a symbol whose
+  /* Return the comp unit from OBJFILE that contains PC and
+     SECTION.  Return NULL if there is no such compunit.  This
+     should return the compunit that contains a symbol whose
      address exactly matches PC, or, if there is no exact match, the
-     symbol table that contains a symbol whose address is closest to
+     compunit that contains a symbol whose address is closest to
      PC.  */
-  struct symtab *(*find_pc_sect_symtab) (struct objfile *objfile,
-					 struct bound_minimal_symbol msymbol,
-					 CORE_ADDR pc,
-					 struct obj_section *section,
-					 int warn_if_readin);
+  struct compunit_symtab *(*find_pc_sect_compunit_symtab)
+    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin);
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
      not already read in.  FUN is the callback.  It is passed the file's
@@ -418,8 +416,14 @@ extern struct symfile_segment_data *default_symfile_segments (bfd *abfd);
 extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
                                            asection *sectp, bfd_byte *buf);
 
-extern struct symtab *allocate_symtab (const char *, struct objfile *)
+extern struct symtab *allocate_symtab (struct compunit_symtab *, const char *)
   ATTRIBUTE_NONNULL (1);
+
+extern struct compunit_symtab *allocate_compunit_symtab (struct objfile *,
+							 const char *)
+  ATTRIBUTE_NONNULL (1);
+
+extern void add_compunit_symtab_to_objfile (struct compunit_symtab *cu);
 
 extern void add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *);
 

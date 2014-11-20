@@ -404,6 +404,32 @@ run_ld_link_exec_tests [] [list \
 	"ifunc-common-1.out" \
 	"-g" \
     ] \
+]
+
+set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
+foreach t $test_list {
+    # We need to strip the ".d", but can leave the dirname.
+    verbose [file rootname $t]
+    run_dump_test [file rootname $t]
+}
+
+# Run-time tests which require working IFUNC support.
+if { ![check_ifunc_available] } {
+    return
+}
+
+run_cc_link_tests [list \
+    [list \
+	"Build ifunc-lib.so" \
+	"-shared" \
+	"-fPIC" \
+	{ ifunc-lib.c } \
+	{} \
+	"libifunc-lib.so" \
+    ] \
+]
+
+run_ld_link_exec_tests [] [list \
     [list \
 	"Run pr16467" \
 	"tmpdir/pr16467c.o tmpdir/libpr16467b.so tmpdir/libpr16467a.so" \
@@ -413,11 +439,21 @@ run_ld_link_exec_tests [] [list \
 	"pr16467.out" \
 	"" \
     ] \
+    [list \
+	"Run ifunc-main" \
+	"tmpdir/libifunc-lib.so" \
+	"" \
+	{ ifunc-main.c } \
+	"ifunc-main" \
+	"ifunc-main.out" \
+    ] \
+    [list \
+	"Run ifunc-main with -fpic" \
+	"tmpdir/libifunc-lib.so" \
+	"" \
+	{ ifunc-main.c } \
+	"ifunc-main" \
+	"ifunc-main.out" \
+	"-fpic" \
+    ] \
 ]
-
-set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
-foreach t $test_list {
-    # We need to strip the ".d", but can leave the dirname.
-    verbose [file rootname $t]
-    run_dump_test [file rootname $t]
-}

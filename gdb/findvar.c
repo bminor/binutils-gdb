@@ -573,9 +573,9 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	lookup_data.name = SYMBOL_LINKAGE_NAME (var);
 
 	gdbarch_iterate_over_objfiles_in_search_order
-	  (get_objfile_arch (SYMBOL_SYMTAB (var)->objfile),
+	  (get_objfile_arch (SYMBOL_OBJFILE (var)),
 	   minsym_lookup_iterator_cb, &lookup_data,
-	   SYMBOL_SYMTAB (var)->objfile);
+	   SYMBOL_OBJFILE (var));
 	msym = lookup_data.result.minsym;
 
 	if (msym == NULL)

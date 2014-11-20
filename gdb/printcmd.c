@@ -1252,7 +1252,7 @@ address_info (char *exp, int from_tty)
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
   section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
-  gdbarch = get_objfile_arch (SYMBOL_SYMTAB (sym)->objfile);
+  gdbarch = get_objfile_arch (SYMBOL_OBJFILE (sym));
 
   if (SYMBOL_COMPUTED_OPS (sym) != NULL)
     {

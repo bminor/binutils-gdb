@@ -464,6 +464,12 @@ pex64_bfd_print_pdata (bfd *abfd, void *vfile)
     return TRUE;
 
   stop = pei_section_data (abfd, pdata_section)->virt_size;
+  /* PR 17512: file: 005-181405-0.004.  */
+  if (stop == 0 || pdata_section->size == 0)
+    {
+      fprintf (file, _("No unwind data in .pdata section\n"));
+      return TRUE;
+    }
   if ((stop % onaline) != 0)
     fprintf (file,
 	     _("warning: .pdata section size (%ld) is not a multiple of %d\n"),
@@ -490,6 +496,7 @@ pex64_bfd_print_pdata (bfd *abfd, void *vfile)
 
       if (i + PDATA_ROW_SIZE > stop)
 	break;
+
       pex64_get_runtime_function (abfd, &rf, &pdata[i]);
 
       if (rf.rva_BeginAddress == 0 && rf.rva_EndAddress == 0

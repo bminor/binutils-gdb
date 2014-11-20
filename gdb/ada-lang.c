@@ -523,8 +523,16 @@ ada_typedef_target_type (struct type *type)
 static const char *
 ada_unqualified_name (const char *decoded_name)
 {
-  const char *result = strrchr (decoded_name, '.');
+  const char *result;
+  
+  /* If the decoded name starts with '<', it means that the encoded
+     name does not follow standard naming conventions, and thus that
+     it is not your typical Ada symbol name.  Trying to unqualify it
+     is therefore pointless and possibly erroneous.  */
+  if (decoded_name[0] == '<')
+    return decoded_name;
 
+  result = strrchr (decoded_name, '.');
   if (result != NULL)
     result++;                   /* Skip the dot...  */
   else
@@ -2146,7 +2154,15 @@ decode_packed_array_bitsize (struct type *type)
    but with the bit sizes of its elements (and those of any
    constituent arrays) recorded in the BITSIZE components of its
    TYPE_FIELD_BITSIZE values, and with *ELT_BITS set to its total size
-   in bits.  */
+   in bits.
+
+   Note that, for arrays whose index type has an XA encoding where
+   a bound references a record discriminant, getting that discriminant,
+   and therefore the actual value of that bound, is not possible
+   because none of the given parameters gives us access to the record.
+   This function assumes that it is OK in the context where it is being
+   used to return an array whose bounds are still dynamic and where
+   the length is arbitrary.  */
 
 static struct type *
 constrained_packed_array_type (struct type *type, long *elt_bits)
@@ -2176,7 +2192,9 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
   TYPE_FIELD_BITSIZE (new_type, 0) = *elt_bits;
   TYPE_NAME (new_type) = ada_type_name (type);
 
-  if (get_discrete_bounds (index_type, &low_bound, &high_bound) < 0)
+  if ((TYPE_CODE (check_typedef (index_type)) == TYPE_CODE_RANGE
+       && is_dynamic_type (check_typedef (index_type)))
+      || get_discrete_bounds (index_type, &low_bound, &high_bound) < 0)
     low_bound = high_bound = 0;
   if (high_bound < low_bound)
     *elt_bits = TYPE_LENGTH (new_type) = 0;
@@ -4455,8 +4473,10 @@ cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
      the symbol is local or not, we check the block where we found it
      against the global and static blocks of its associated symtab.  */
   if (sym
-      && BLOCKVECTOR_BLOCK (BLOCKVECTOR (sym->symtab), GLOBAL_BLOCK) != block
-      && BLOCKVECTOR_BLOCK (BLOCKVECTOR (sym->symtab), STATIC_BLOCK) != block)
+      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (sym->symtab),
+			    GLOBAL_BLOCK) != block
+      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (sym->symtab),
+			    STATIC_BLOCK) != block)
     return;
 
   h = msymbol_hash (name) % HASH_SIZE;
@@ -6133,7 +6153,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   int encoded_p;
   VEC(char_ptr) *completions = VEC_alloc (char_ptr, 128);
   struct symbol *sym;
-  struct symtab *s;
+  struct compunit_symtab *s;
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
   const struct block *b, *surrounding_static_block = 0;
@@ -6212,14 +6232,12 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
 
   /* Go through the symtabs and check the externs and statics for
-     symbols which match.
-     Non-primary symtabs share the block vector with their primary symtabs
-     so we use ALL_PRIMARY_SYMTABS here instead of ALL_SYMTABS.  */
+     symbols which match.  */
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_COMPUNITS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
@@ -6228,10 +6246,10 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
   }
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_COMPUNITS (objfile, s)
   {
     QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
+    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
@@ -8299,6 +8317,79 @@ to_fixed_variant_branch_type (struct type *var_type0, const gdb_byte *valaddr,
     return TYPE_FIELD_TYPE (var_type, which);
 }
 
+/* Assuming RANGE_TYPE is a TYPE_CODE_RANGE, return nonzero if
+   ENCODING_TYPE, a type following the GNAT conventions for discrete
+   type encodings, only carries redundant information.  */
+
+static int
+ada_is_redundant_range_encoding (struct type *range_type,
+				 struct type *encoding_type)
+{
+  struct type *fixed_range_type;
+  char *bounds_str;
+  int n;
+  LONGEST lo, hi;
+
+  gdb_assert (TYPE_CODE (range_type) == TYPE_CODE_RANGE);
+
+  if (TYPE_CODE (get_base_type (range_type))
+      != TYPE_CODE (get_base_type (encoding_type)))
+    {
+      /* The compiler probably used a simple base type to describe
+	 the range type instead of the range's actual base type,
+	 expecting us to get the real base type from the encoding
+	 anyway.  In this situation, the encoding cannot be ignored
+	 as redundant.  */
+      return 0;
+    }
+
+  if (is_dynamic_type (range_type))
+    return 0;
+
+  if (TYPE_NAME (encoding_type) == NULL)
+    return 0;
+
+  bounds_str = strstr (TYPE_NAME (encoding_type), "___XDLU_");
+  if (bounds_str == NULL)
+    return 0;
+
+  n = 8; /* Skip "___XDLU_".  */
+  if (!ada_scan_number (bounds_str, n, &lo, &n))
+    return 0;
+  if (TYPE_LOW_BOUND (range_type) != lo)
+    return 0;
+
+  n += 2; /* Skip the "__" separator between the two bounds.  */
+  if (!ada_scan_number (bounds_str, n, &hi, &n))
+    return 0;
+  if (TYPE_HIGH_BOUND (range_type) != hi)
+    return 0;
+
+  return 1;
+}
+
+/* Given the array type ARRAY_TYPE, return nonzero if DESC_TYPE,
+   a type following the GNAT encoding for describing array type
+   indices, only carries redundant information.  */
+
+static int
+ada_is_redundant_index_type_desc (struct type *array_type,
+				  struct type *desc_type)
+{
+  struct type *this_layer = check_typedef (array_type);
+  int i;
+
+  for (i = 0; i < TYPE_NFIELDS (desc_type); i++)
+    {
+      if (!ada_is_redundant_range_encoding (TYPE_INDEX_TYPE (this_layer),
+					    TYPE_FIELD_TYPE (desc_type, i)))
+	return 0;
+      this_layer = check_typedef (TYPE_TARGET_TYPE (this_layer));
+    }
+
+  return 1;
+}
+
 /* Assuming that TYPE0 is an array type describing the type of a value
    at ADDR, and that DVAL describes a record containing any
    discriminants used in TYPE0, returns a type for the value that
@@ -8325,6 +8416,17 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 
   index_type_desc = ada_find_parallel_type (type0, "___XA");
   ada_fixup_array_indexes_type (index_type_desc);
+  if (index_type_desc != NULL
+      && ada_is_redundant_index_type_desc (type0, index_type_desc))
+    {
+      /* Ignore this ___XA parallel type, as it does not bring any
+	 useful information.  This allows us to avoid creating fixed
+	 versions of the array's index types, which would be identical
+	 to the original ones.  This, in turn, can also help avoid
+	 the creation of fixed versions of the array itself.  */
+      index_type_desc = NULL;
+    }
+
   if (index_type_desc == NULL)
     {
       struct type *elt_type0 = ada_check_typedef (TYPE_TARGET_TYPE (type0));
@@ -11524,8 +11626,8 @@ is_known_support_routine (struct frame_info *frame)
       re_comp (known_runtime_file_name_patterns[i]);
       if (re_exec (lbasename (sal.symtab->filename)))
         return 1;
-      if (sal.symtab->objfile != NULL
-          && re_exec (objfile_name (sal.symtab->objfile)))
+      if (SYMTAB_OBJFILE (sal.symtab) != NULL
+          && re_exec (objfile_name (SYMTAB_OBJFILE (sal.symtab))))
         return 1;
     }
 
@@ -12839,14 +12941,14 @@ static void
 ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 {
   struct objfile *objfile;
-  struct symtab *s;
+  struct compunit_symtab *s;
 
   expand_symtabs_matching (NULL, ada_exc_search_name_matches,
 			   VARIABLES_DOMAIN, preg);
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_COMPUNITS (objfile, s)
     {
-      const struct blockvector *bv = BLOCKVECTOR (s);
+      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (s);
       int i;
 
       for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)

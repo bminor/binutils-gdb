@@ -1558,7 +1558,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_rt_sigframe);
-	set_xml_syscall_file_name ("syscalls/mips-o32-linux.xml");
+	set_xml_syscall_file_name (gdbarch, "syscalls/mips-o32-linux.xml");
 	break;
       case MIPS_ABI_N32:
 	set_gdbarch_get_longjmp_target (gdbarch,
@@ -1572,7 +1572,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	   does not distinguish between quiet and signalling NaNs).  */
 	set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n32_rt_sigframe);
-	set_xml_syscall_file_name ("syscalls/mips-n32-linux.xml");
+	set_xml_syscall_file_name (gdbarch, "syscalls/mips-n32-linux.xml");
 	break;
       case MIPS_ABI_N64:
 	set_gdbarch_get_longjmp_target (gdbarch,
@@ -1586,7 +1586,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	   does not distinguish between quiet and signalling NaNs).  */
 	set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n64_rt_sigframe);
-	set_xml_syscall_file_name ("syscalls/mips-n64-linux.xml");
+	set_xml_syscall_file_name (gdbarch, "syscalls/mips-n64-linux.xml");
 	break;
       default:
 	break;

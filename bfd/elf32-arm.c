@@ -11700,11 +11700,18 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   static const int order_021[3] = {0, 2, 1};
   int i;
   bfd_boolean result = TRUE;
+  const char *sec_name = get_elf_backend_data (ibfd)->obj_attrs_section;
 
   /* Skip the linker stubs file.  This preserves previous behavior
      of accepting unknown attributes in the first input file - but
      is that a bug?  */
   if (ibfd->flags & BFD_LINKER_CREATED)
+    return TRUE;
+
+  /* Skip any input that hasn't attribute section.
+     This enables to link object files without attribute section with
+     any others.  */
+  if (bfd_get_section_by_name (ibfd, sec_name) == NULL)
     return TRUE;
 
   if (!elf_known_obj_attributes_proc (obfd)[0].i)

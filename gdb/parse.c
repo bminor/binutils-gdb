@@ -1174,7 +1174,8 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
       if (cursal.symtab)
 	expression_context_block
-	  = BLOCKVECTOR_BLOCK (BLOCKVECTOR (cursal.symtab), STATIC_BLOCK);
+	  = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (cursal.symtab),
+			       STATIC_BLOCK);
       if (expression_context_block)
 	expression_context_pc = BLOCK_START (expression_context_block);
     }
@@ -1809,7 +1810,7 @@ operator_check_standard (struct expression *exp, int pos,
 
 	/* Check objfile where the variable itself is placed.
 	   SYMBOL_OBJ_SECTION (symbol) may be NULL.  */
-	if ((*objfile_func) (SYMBOL_SYMTAB (symbol)->objfile, data))
+	if ((*objfile_func) (SYMBOL_OBJFILE (symbol), data))
 	  return 1;
 
 	/* Check objfile where is placed the code touching the variable.  */

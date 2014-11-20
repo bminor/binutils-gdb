@@ -1023,7 +1023,7 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 
     ALL_OBJFILES (objfile)
     {
-      struct symtab *symtab;
+      struct compunit_symtab *cu;
 
       if (objfile->sf)
 	objfile->sf->qf->expand_symtabs_matching (objfile, NULL,
@@ -1031,8 +1031,10 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 						  ALL_DOMAIN,
 						  &matcher_data);
 
-      ALL_OBJFILE_PRIMARY_SYMTABS (objfile, symtab)
+      ALL_OBJFILE_COMPUNITS (objfile, cu)
 	{
+	  struct symtab *symtab = COMPUNIT_FILETABS (cu);
+
 	  iterate_over_file_blocks (symtab, name, domain, callback, data);
 
 	  if (include_inline)
@@ -1042,9 +1044,10 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 	      int i;
 
 	      for (i = FIRST_LOCAL_BLOCK;
-		   i < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (symtab)); i++)
+		   i < BLOCKVECTOR_NBLOCKS (SYMTAB_BLOCKVECTOR (symtab));
+		   i++)
 		{
-		  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), i);
+		  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), i);
 		  state->language->la_iterate_over_symbols
 		    (block, name, domain, iterate_inline_only, &cad);
 		}
@@ -1081,7 +1084,7 @@ iterate_over_file_blocks (struct symtab *symtab,
 {
   struct block *block;
 
-  for (block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
+  for (block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
        block != NULL;
        block = BLOCK_SUPERBLOCK (block))
     LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback, data);

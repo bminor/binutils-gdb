@@ -288,6 +288,8 @@ struct gdbarch
   gdbarch_get_siginfo_type_ftype *get_siginfo_type;
   gdbarch_record_special_symbol_ftype *record_special_symbol;
   gdbarch_get_syscall_number_ftype *get_syscall_number;
+  const char * xml_syscall_file;
+  struct syscalls_info * syscalls_info;
   const char *const * stap_integer_prefixes;
   const char *const * stap_integer_suffixes;
   const char *const * stap_register_prefixes;
@@ -603,6 +605,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of get_siginfo_type, has predicate.  */
   /* Skip verify of record_special_symbol, has predicate.  */
   /* Skip verify of get_syscall_number, has predicate.  */
+  /* Skip verify of xml_syscall_file, invalid_p == 0 */
+  /* Skip verify of syscalls_info, invalid_p == 0 */
   /* Skip verify of stap_integer_prefixes, invalid_p == 0 */
   /* Skip verify of stap_integer_suffixes, invalid_p == 0 */
   /* Skip verify of stap_register_prefixes, invalid_p == 0 */
@@ -1266,6 +1270,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: static_transform_name = <%s>\n",
                       host_address_to_string (gdbarch->static_transform_name));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: syscalls_info = %s\n",
+                      host_address_to_string (gdbarch->syscalls_info));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: target_desc = %s\n",
                       host_address_to_string (gdbarch->target_desc));
   fprintf_unfiltered (file,
@@ -1304,6 +1311,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: write_pc = <%s>\n",
                       host_address_to_string (gdbarch->write_pc));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: xml_syscall_file = %s\n",
+                      pstring (gdbarch->xml_syscall_file));
   if (gdbarch->dump_tdep != NULL)
     gdbarch->dump_tdep (gdbarch, file);
 }
@@ -3885,6 +3895,40 @@ set_gdbarch_get_syscall_number (struct gdbarch *gdbarch,
                                 gdbarch_get_syscall_number_ftype get_syscall_number)
 {
   gdbarch->get_syscall_number = get_syscall_number;
+}
+
+const char *
+gdbarch_xml_syscall_file (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of xml_syscall_file, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_xml_syscall_file called\n");
+  return gdbarch->xml_syscall_file;
+}
+
+void
+set_gdbarch_xml_syscall_file (struct gdbarch *gdbarch,
+                              const char * xml_syscall_file)
+{
+  gdbarch->xml_syscall_file = xml_syscall_file;
+}
+
+struct syscalls_info *
+gdbarch_syscalls_info (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of syscalls_info, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_syscalls_info called\n");
+  return gdbarch->syscalls_info;
+}
+
+void
+set_gdbarch_syscalls_info (struct gdbarch *gdbarch,
+                           struct syscalls_info * syscalls_info)
+{
+  gdbarch->syscalls_info = syscalls_info;
 }
 
 const char *const *

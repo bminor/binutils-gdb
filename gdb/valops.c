@@ -139,7 +139,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
 	}
 
       if (objf_p)
-	*objf_p = SYMBOL_SYMTAB (sym)->objfile;
+	*objf_p = SYMBOL_OBJFILE (sym);
 
       return value_of_variable (sym, NULL);
     }

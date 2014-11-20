@@ -612,7 +612,7 @@ gdbscm_frame_block (SCM self)
       SCM block_scm;
 
       st = SYMBOL_SYMTAB (BLOCK_FUNCTION (fn_block));
-      return bkscm_scm_from_block (block, st->objfile);
+      return bkscm_scm_from_block (block, SYMTAB_OBJFILE (st));
     }
 
   return SCM_BOOL_F;

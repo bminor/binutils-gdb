@@ -115,7 +115,7 @@ tui_update_source_window_as_is (struct tui_win_info *win_info,
 	  sal.line = line_or_addr.u.line_no +
 	    (win_info->generic.content_size - 2);
 	  sal.symtab = s;
-	  sal.pspace = s->objfile->pspace;
+	  sal.pspace = SYMTAB_PSPACE (s);
 	  set_current_source_symtab_and_line (&sal);
 	  /* If the focus was in the asm win, put it in the src win if
 	     we don't have a split layout.  */
@@ -183,7 +183,7 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
   if (!s)
     return;
 
-  gdbarch = get_objfile_arch (s->objfile);
+  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
 
   switch (tui_current_layout ())
     {

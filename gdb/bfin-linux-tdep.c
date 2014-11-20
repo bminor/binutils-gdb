@@ -157,7 +157,7 @@ bfin_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &bfin_linux_sigframe);
 
   /* Functions for 'catch syscall'.  */
-  set_xml_syscall_file_name ("syscalls/bfin-linux.xml");
+  set_xml_syscall_file_name (gdbarch, "syscalls/bfin-linux.xml");
   set_gdbarch_get_syscall_number (gdbarch,
                                   bfin_linux_get_syscall_number);
 }

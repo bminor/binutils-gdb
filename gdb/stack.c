@@ -2569,7 +2569,6 @@ get_frame_language (void)
     {
       volatile struct gdb_exception ex;
       CORE_ADDR pc = 0;
-      struct symtab *s;
 
       /* We determine the current frame language by looking up its
          associated symtab.  To retrieve this symtab, we use the frame
@@ -2591,9 +2590,10 @@ get_frame_language (void)
 	}
       else
 	{
-	  s = find_pc_symtab (pc);
-	  if (s != NULL)
-	    return s->language;
+	  struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
+
+	  if (cust != NULL)
+	    return compunit_language (cust);
 	}
     }
 

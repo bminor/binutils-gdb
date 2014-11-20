@@ -11805,7 +11805,7 @@ group_sections (struct ppc_link_hash_table *htab,
   bfd_boolean suppress_size_errors;
 
   suppress_size_errors = FALSE;
-  stub14_group_size = stub_group_size;
+  stub14_group_size = stub_group_size >> 10;
   if (stub_group_size == 1)
     {
       /* Default values.  */
@@ -11979,6 +11979,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  "GOMP_parallel_loop_runtime_start",
 	  "GOMP_parallel_sections",
 	  "GOMP_parallel_sections_start",
+	  /* libgo */
+	  "__go_go",
 	};
       unsigned i;
 

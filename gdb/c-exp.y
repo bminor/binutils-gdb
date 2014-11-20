@@ -2928,7 +2928,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  symtab = lookup_symtab (copy);
 	  if (symtab)
 	    {
-	      yylval.bval = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab),
+	      yylval.bval = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
 					       STATIC_BLOCK);
 	      return FILENAME;
 	    }

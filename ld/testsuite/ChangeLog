@@ -1,3 +1,52 @@
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/plt-lib.c: New file.
+	* ld-x86-64/plt-main.out: Likewise.
+	* ld-x86-64/plt-main1.c: Likewise.
+	* ld-x86-64/plt-main1.rd: Likewise.
+	* ld-x86-64/plt-main2.c: Likewise.
+	* ld-x86-64/plt-main2.rd: Likewise.
+	* ld-x86-64/plt-main3.c: Likewise.
+	* ld-x86-64/plt-main3.rd: Likewise.
+	* ld-x86-64/plt-main4.c: Likewise.
+	* ld-x86-64/plt-main4.rd: Likewise.
+	* ld-x86-64/plt-main5.c: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run plt-main tests.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc-main.c (get_bar): New function.
+	(main): Use it.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc.exp: Run ifunc-main.
+	* ld-ifunc/ifunc-lib.c: New file.
+	* ld-ifunc/ifunc-main.c: Likewise.
+	* ld-ifunc/ifunc-main.out: Likewise.
+
+2014-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/ld-lib.exp (check_ifunc_available): New.
+	* ld-ifunc/ifunc.exp: Run IFUNC run-time tests only if IFUNC
+	is supported.
+
+2014-11-20  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/attr-merge-nosection-1.d: New file.
+	* ld-arm/attr-merge-nosection-1a.s: Likewise.
+	* ld-arm/attr-merge-nosection-1b.s: Likewise.
+	* ld-arm/arm-elf.exp: Include the new test.
+
+2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/17618
+	* ld-x86-64/x86-64.exp: Run pr17618 for Linux target.
+
+	* ld-x86-64/pr17618.d: New file.
+	* ld-x86-64/pr17618.s: Likewise.
+
 2014-11-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/mpx.exp: Always run mpx3 and mpx4 tests in 64-bit.

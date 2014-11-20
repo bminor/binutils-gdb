@@ -5692,13 +5692,13 @@ static void
 handle_step_into_function (struct gdbarch *gdbarch,
 			   struct execution_control_state *ecs)
 {
-  struct symtab *s;
+  struct compunit_symtab *cust;
   struct symtab_and_line stop_func_sal, sr_sal;
 
   fill_in_stop_func (gdbarch, ecs);
 
-  s = find_pc_symtab (stop_pc);
-  if (s && s->language != language_asm)
+  cust = find_pc_compunit_symtab (stop_pc);
+  if (cust != NULL && compunit_language (cust) != language_asm)
     ecs->stop_func_start = gdbarch_skip_prologue (gdbarch,
 						  ecs->stop_func_start);
 
@@ -5771,13 +5771,13 @@ static void
 handle_step_into_function_backward (struct gdbarch *gdbarch,
 				    struct execution_control_state *ecs)
 {
-  struct symtab *s;
+  struct compunit_symtab *cust;
   struct symtab_and_line stop_func_sal;
 
   fill_in_stop_func (gdbarch, ecs);
 
-  s = find_pc_symtab (stop_pc);
-  if (s && s->language != language_asm)
+  cust = find_pc_compunit_symtab (stop_pc);
+  if (cust != NULL && compunit_language (cust) != language_asm)
     ecs->stop_func_start = gdbarch_skip_prologue (gdbarch,
 						  ecs->stop_func_start);
 

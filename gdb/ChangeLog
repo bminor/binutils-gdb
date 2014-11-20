@@ -1,3 +1,391 @@
+2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/10737
+	* xml-syscall.c (set_xml_syscall_file_name): Remove "const"
+	modifier from "struct gdbarch" when compiling without Expat (XML)
+	support.
+	(get_syscall_by_number): Likewise.
+	(get_syscall_by_name): Likewise.
+	(get_syscall_names): Likewise.
+
+2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/10737
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Adjust call to
+	set_xml_syscall_file_name to provide gdbarch.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* bfin-linux-tdep.c (bfin_linux_init_abi): Likewise.
+	* breakpoint.c (print_it_catch_syscall): Adjust call to
+	get_syscall_by_number to provide gdbarch.
+	(print_one_catch_syscall): Likewise.
+	(print_mention_catch_syscall): Likewise.
+	(print_recreate_catch_syscall): Likewise.
+	(catch_syscall_split_args): Adjust calls to get_syscall_by_number
+	and get_syscall_by_name to provide gdbarch.
+	(catch_syscall_completer): Adjust call to get_syscall_names to
+	provide gdbarch.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* gdbarch.sh: Forward declare "struct syscalls_info".
+	(xml_syscall_file): New variable.
+	(syscalls_info): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Adjust call to
+	set_xml_syscall_file_name to provide gdbarch.
+	* mips-linux-tdep.c (mips_linux_init_abi): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Likewise.
+	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Likewise.
+	* xml-syscall.c: Include gdbarch.h.
+	(set_xml_syscall_file_name): Accept gdbarch parameter.
+	(get_syscall_by_number): Likewise.
+	(get_syscall_by_name): Likewise.
+	(get_syscall_names): Likewise.
+	(my_gdb_datadir): Delete global variable.
+	(struct syscalls_info) <my_gdb_datadir>: New variable.
+	(struct syscalls_info) <sysinfo>: Rename variable to
+	"syscalls_info".
+	(sysinfo): Delete global variable.
+	(have_initialized_sysinfo): Likewise.
+	(xml_syscall_file): Likewise.
+	(sysinfo_free_syscalls_desc): Rename to...
+	(syscalls_info_free_syscalls_desc): ... this.
+	(free_syscalls_info): Rename "sysinfo" to "syscalls_info".  Adjust
+	code to the new layout of "struct syscalls_info".
+	(make_cleanup_free_syscalls_info): Rename parameter "sysinfo" to
+	"syscalls_info".
+	(syscall_create_syscall_desc): Likewise.
+	(syscall_start_syscall): Likewise.
+	(syscall_parse_xml): Likewise.
+	(xml_init_syscalls_info): Likewise.  Drop "const" from return value.
+	(init_sysinfo): Rename to...
+	(init_syscalls_info): ...this.  Add gdbarch as a parameter.
+	Adjust function to deal with gdbarch.
+	(xml_get_syscall_number): Delete parameter sysinfo.  Accept
+	gdbarch as a parameter.  Adjust code.
+	(xml_get_syscall_name): Likewise.
+	(xml_list_of_syscalls): Likewise.
+	(set_xml_syscall_file_name): Accept gdbarch as parameter.
+	(get_syscall_by_number): Likewise.
+	(get_syscall_by_name): Likewise.
+	(get_syscall_names): Likewise.
+	* xml-syscall.h (set_xml_syscall_file_name): Likewise.
+	(get_syscall_by_number): Likewise.
+	(get_syscall_by_name): Likewise.
+	(get_syscall_names): Likewise.
+
+2014-11-20  Doug Evans  <xdje42@gmail.com>
+
+	Split struct symtab into two: struct symtab and compunit_symtab.
+	* amd64-tdep.c (amd64_skip_xmm_prologue): Fetch producer from compunit.
+	* block.c (blockvector_for_pc_sect): Change "struct symtab *" argument
+	to "struct compunit_symtab *".  All callers updated.
+	(set_block_compunit_symtab): Renamed from set_block_symtab.  Change
+	"struct symtab *" argument to "struct compunit_symtab *".
+	All callers updated.
+	(get_block_compunit_symtab): Renamed from get_block_symtab.  Change
+	result to "struct compunit_symtab *".  All callers updated.
+	(find_iterator_compunit_symtab): Renamed from find_iterator_symtab.
+	Change result to "struct compunit_symtab *".  All callers updated.
+	* block.h (struct global_block) <compunit_symtab>: Renamed from symtab.
+	hange type to "struct compunit_symtab *".  All uses updated.
+	(struct block_iterator) <d.compunit_symtab>: Renamed from "d.symtab".
+	Change type to "struct compunit_symtab *".  All uses updated.
+	* buildsym.c (struct buildsym_compunit): New struct.
+	(subfiles, buildsym_compdir, buildsym_objfile, main_subfile): Delete.
+	(buildsym_compunit): New static global.
+	(finish_block_internal): Update to fetch objfile from
+	buildsym_compunit.
+	(make_blockvector): Delete objfile argument.
+	(start_subfile): Rewrite to use buildsym_compunit.  Don't initialize
+	debugformat, producer.
+	(start_buildsym_compunit): New function.
+	(free_buildsym_compunit): Renamed from free_subfiles_list.
+	All callers updated.
+	(patch_subfile_names): Rewrite to use buildsym_compunit.
+	(get_compunit_symtab): New function.
+	(get_macro_table): Delete argument comp_dir.  All callers updated.
+	(start_symtab): Change result to "struct compunit_symtab *".
+	All callers updated.  Create the subfile of the main source file.
+	(watch_main_source_file_lossage): Rewrite to use buildsym_compunit.
+	(reset_symtab_globals): Update.
+	(end_symtab_get_static_block): Update to use buildsym_compunit.
+	(end_symtab_without_blockvector): Rewrite.
+	(end_symtab_with_blockvector): Change result to
+	"struct compunit_symtab *".  All callers updated.
+	Update to use buildsym_compunit.  Don't set symtab->dirname,
+	instead set it in the compunit.
+	Explicitly make sure main symtab is first in its list.
+	Set debugformat, producer, blockvector, block_line_section, and
+	macrotable in the compunit.
+	(end_symtab_from_static_block): Change result to
+	"struct compunit_symtab *".  All callers updated.
+	(end_symtab, end_expandable_symtab): Ditto.
+	(set_missing_symtab): Change symtab argument to
+	"struct compunit_symtab *".  All callers updated.
+	(augment_type_symtab): Ditto.
+	(record_debugformat): Update to use buildsym_compunit.
+	(record_producer): Update to use buildsym_compunit.
+	* buildsym.h (struct subfile) <dirname>: Delete.
+	<producer, debugformat>: Delete.
+	<buildsym_compunit>: New member.
+	(get_compunit_symtab): Declare.
+	* dwarf2read.c (struct type_unit_group) <compunit_symtab>: Renamed
+	from primary_symtab.  Change type to "struct compunit_symtab *".
+	All uses updated.
+	(dwarf2_start_symtab): Change result to "struct compunit_symtab *".
+	All callers updated.
+	(dwarf_decode_macros): Delete comp_dir argument.  All callers updated.
+	(struct dwarf2_per_cu_quick_data) <compunit_symtab>: Renamed from
+	symtab.  Change type to "struct compunit_symtab *".  All uses updated.
+	(dw2_instantiate_symtab): Change result to "struct compunit_symtab *".
+	All callers updated.
+	(dw2_find_last_source_symtab): Ditto.
+	(dw2_lookup_symbol): Ditto.
+	(recursively_find_pc_sect_compunit_symtab): Renamed from
+	recursively_find_pc_sect_symtab.  Change result to
+	"struct compunit_symtab *".  All callers updated.
+	(dw2_find_pc_sect_compunit_symtab): Renamed from
+	dw2_find_pc_sect_symtab.  Change result to
+	"struct compunit_symtab *".  All callers updated.
+	(get_compunit_symtab): Renamed from get_symtab.  Change result to
+	"struct compunit_symtab *".  All callers updated.
+	(recursively_compute_inclusions): Change type of immediate_parent
+	argument to "struct compunit_symtab *".  All callers updated.
+	(compute_compunit_symtab_includes): Renamed from
+	compute_symtab_includes.  All callers updated.  Rewrite to compute
+	includes of compunit_symtabs and not symtabs.
+	(process_full_comp_unit): Update to work with struct compunit_symtab.
+	(process_full_type_unit): Ditto.
+	(dwarf_decode_lines_1): Delete argument comp_dir.  All callers updated.
+	(dwarf_decode_lines): Remove special case handling of main subfile.
+	(macro_start_file): Delete argument comp_dir.  All callers updated.
+	(dwarf_decode_macro_bytes): Ditto.
+	* guile/scm-block.c (bkscm_print_block_syms_progress_smob): Update to
+	use struct compunit_symtab.
+	* i386-tdep.c (i386_skip_prologue): Fetch producer from compunit.
+	* jit.c (finalize_symtab): Build compunit_symtab.
+	* jv-lang.c (get_java_class_symtab): Change result to
+	"struct compunit_symtab *".  All callers updated.
+	* macroscope.c (sal_macro_scope): Fetch macro table from compunit.
+	* macrotab.c (struct macro_table) <compunit_symtab>: Renamed from
+	comp_dir.  Change type to "struct compunit_symtab *".
+	All uses updated.
+	(new_macro_table): Change comp_dir argument to cust,
+	"struct compunit_symtab *".  All callers updated.
+	* maint.c (struct cmd_stats) <nr_compunit_symtabs>: Renamed from
+	nr_primary_symtabs.  All uses updated.
+	(count_symtabs_and_blocks): Update to handle compunits.
+	(report_command_stats): Update output, "primary symtabs" renamed to
+	"compunits".
+	* mdebugread.c (new_symtab): Change result to
+	"struct compunit_symtab *".  All callers updated.
+	(parse_procedure): Change type of search_symtab argument to
+	"struct compunit_symtab *".  All callers updated.
+	* objfiles.c (objfile_relocate1): Loop over blockvectors in a
+	separate loop.
+	* objfiles.h (struct objfile) <compunit_symtabs>: Renamed from
+	symtabs.  Change type to "struct compunit_symtab *".  All uses updated.
+	(ALL_OBJFILE_FILETABS): Renamed from ALL_OBJFILE_SYMTABS.
+	All uses updated.
+	(ALL_OBJFILE_COMPUNITS): Renamed from ALL_OBJFILE_PRIMARY_SYMTABS.
+	All uses updated.
+	(ALL_FILETABS): Renamed from ALL_SYMTABS.  All uses updated.
+	(ALL_COMPUNITS): Renamed from ALL_PRIMARY_SYMTABS.  All uses updated.
+	* psympriv.h (struct partial_symtab) <compunit_symtab>: Renamed from
+	symtab.  Change type to "struct compunit_symtab *".  All uses updated.
+	* psymtab.c (psymtab_to_symtab): Change result type to
+	"struct compunit_symtab *".  All callers updated.
+	(find_pc_sect_compunit_symtab_from_partial): Renamed from
+	find_pc_sect_symtab_from_partial.  Change result type to
+	"struct compunit_symtab *".  All callers updated.
+	(lookup_symbol_aux_psymtabs): Change result type to
+	"struct compunit_symtab *".  All callers updated.
+	(find_last_source_symtab_from_partial): Ditto.
+	* python/py-symtab.c (stpy_get_producer): Fetch producer from compunit.
+	* source.c (forget_cached_source_info_for_objfile): Fetch debugformat
+	and macro_table from compunit.
+	* symfile-debug.c (debug_qf_find_last_source_symtab): Change result
+	type to "struct compunit_symtab *".  All callers updated.
+	(debug_qf_lookup_symbol): Ditto.
+	(debug_qf_find_pc_sect_compunit_symtab): Renamed from
+	debug_qf_find_pc_sect_symtab, change result type to
+	"struct compunit_symtab *".  All callers updated.
+	* symfile.c (allocate_symtab): Delete objfile argument.
+	New argument cust.
+	(allocate_compunit_symtab): New function.
+	(add_compunit_symtab_to_objfile): New function.
+	* symfile.h (struct quick_symbol_functions) <lookup_symbol>:
+	Change result type to "struct compunit_symtab *".  All uses updated.
+	<find_pc_sect_compunit_symtab>: Renamed from find_pc_sect_symtab.
+	Change result type to "struct compunit_symtab *".  All uses updated.
+	* symmisc.c (print_objfile_statistics): Compute blockvector count in
+	separate loop.
+	(dump_symtab_1): Update test for primary source symtab.
+	(maintenance_info_symtabs): Update to handle compunit symtabs.
+	(maintenance_check_symtabs): Ditto.
+	* symtab.c (set_primary_symtab): Delete.
+	(compunit_primary_filetab): New function.
+	(compunit_language): New function.
+	(iterate_over_some_symtabs): Change type of arguments "first",
+	"after_last" to "struct compunit_symtab *".  All callers updated.
+	Update to loop over symtabs in each compunit.
+	(error_in_psymtab_expansion): Rename symtab argument to cust,
+	and change type to "struct compunit_symtab *".  All callers updated.
+	(find_pc_sect_compunit_symtab): Renamed from find_pc_sect_symtab.
+	Change result type to "struct compunit_symtab *".  All callers updated.
+	(find_pc_compunit_symtab): Renamed from find_pc_symtab.
+	Change result type to "struct compunit_symtab *".  All callers updated.
+	(find_pc_sect_line): Only loop over symtabs within selected compunit
+	instead of all symtabs in the objfile.
+	* symtab.h (struct symtab) <blockvector>: Moved to compunit_symtab.
+	<compunit_symtab> New member.
+	<block_line_section>: Moved to compunit_symtab.
+	<locations_valid>: Ditto.
+	<epilogue_unwind_valid>: Ditto.
+	<macro_table>: Ditto.
+	<dirname>: Ditto.
+	<debugformat>: Ditto.
+	<producer>: Ditto.
+	<objfile>: Ditto.
+	<call_site_htab>: Ditto.
+	<includes>: Ditto.
+	<user>: Ditto.
+	<primary>: Delete
+	(SYMTAB_COMPUNIT): New macro.
+	(SYMTAB_BLOCKVECTOR): Update definition.
+	(SYMTAB_OBJFILE): Update definition.
+	(SYMTAB_DIRNAME): Update definition.
+	(struct compunit_symtab): New type.  Common members among all source
+	symtabs within a compilation unit moved here.  All uses updated.
+	(COMPUNIT_OBJFILE): New macro.
+	(COMPUNIT_FILETABS): New macro.
+	(COMPUNIT_DEBUGFORMAT): New macro.
+	(COMPUNIT_PRODUCER): New macro.
+	(COMPUNIT_DIRNAME): New macro.
+	(COMPUNIT_BLOCKVECTOR): New macro.
+	(COMPUNIT_BLOCK_LINE_SECTION): New macro.
+	(COMPUNIT_LOCATIONS_VALID): New macro.
+	(COMPUNIT_EPILOGUE_UNWIND_VALID): New macro.
+	(COMPUNIT_CALL_SITE_HTAB): New macro.
+	(COMPUNIT_MACRO_TABLE): New macro.
+	(ALL_COMPUNIT_FILETABS): New macro.
+	(compunit_symtab_ptr): New typedef.
+	(DEF_VEC_P (compunit_symtab_ptr)): New vector type.
+
+2014-11-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_is_redundant_range_encoding): Return 0
+	if the TYPE_CODE of range_type's base type does not match
+	the TYPE_CODE of encoding_type's base type.
+
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_unqualified_name): Return DECODED_NAME if
+	it starts with '<'.
+
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_is_redundant_range_encoding): New function.
+	(ada_is_redundant_index_type_desc): New function.
+	(to_fixed_array_type): Ignore parallel XA type if redundant.
+
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (constrained_packed_array_type): Set the length
+	of the return array as if both bounds where zero if that
+	returned array's index type is dynamic.
+
+2014-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* config/i386/go32.mh (CC): Remove.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (SYMTAB_BLOCKVECTOR): Renamed from BLOCKVECTOR.  All uses
+	updated.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	* buildsym.c (buildsym_objfile): New static global.
+	(buildsym_comp_dir): New static global.
+	(finish_block_internal): Delete arg objfile.  All callers updated.
+	(finish_block): Delete arg objfile.  All callers updated.
+	(start_subfile): Delete arg dirname.  All callers updated.
+	(patch_subfile_names): Update buildsym_comp_dir.
+	(get_macro_table): Delete arg objfile.  All callers updated.
+	(start_symtab): New arg objfile.  All callers updated.
+	Rename arg dirname to comp_dir.
+	(reset_symtab_globals): Initialize buildsym_objfile, buildsym_comp_dir.
+	(end_symtab_get_static_block): Delete arg objfile.  All callers
+	updated.
+	(end_symtab_without_blockvector): Ditto.
+	(end_symtab_with_blockvector): Ditto.
+	(end_symtab_from_static_block): Ditto.
+	(end_symtab): Ditto.
+	(end_expandable_symtab): Ditto.
+	(augment_type_symtab): Ditto.
+	* coffread.c (coff_start_symtab): New arg objfile.  All callers
+	updated.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (SYMTAB_LINETABLE): Renamed from LINETABLE.  All uses
+	updated.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (SYMTAB_DIRNAME): New macro.  All uses of member
+	symtab.dirname updated to use it.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (SYMTAB_OBJFILE): New macro.  All uses of member
+	symtab.objfile updated to use it.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	* buildsym.c (watch_main_source_file_lossage): Fix memory leak.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Use
+	SYMBOL_OBJFILE.
+	* findvar.c (default_read_var_value): Ditto.
+	* jv-lang.c (add_class_symtab_symbol): Ditto.
+	* parse.c (operator_check_standard): Ditto.
+	* printcmd.c (address_info): Ditto.
+	* symtab.c (fixup_symbol_section): Ditto.
+	(skip_prologue_sal): Ditto.
+	* tracepoint.c (scope_info): Ditto.
+	* valops.c (find_function_in_inferior): Ditto.
+	* guile/scm-symbol.c (syscm_eq_symbol_smob): Ditto.
+	* python/py-symbol.c (set_symbol): Ditto.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	* buildsym.c (main_subfile): New static global.
+	(free_subfiles_list): New function.
+	(start_symtab): Set main_subfile.
+	(restart_symtab): Replace init of subfiles, current_subfile with
+	call to free_subfiles_list.
+	(watch_main_source_file_lossage): Use main_subfile.
+	(reset_symtab_globals): Replace init of current_subfile with call
+	to free_subfiles_list.
+	(end_symtab_without_blockvector, end_symtab_with_blockvector): New
+	functions, split out from ...
+	(end_symtab_from_static_block): ... here.  Rewrite to call them.
+
+2014-11-18  Doug Evans  <xdje42@gmail.com>
+
+	The result of symtab expansion is always a primary symtab.
+	* dwarf2read.c (dw2_instantiate_symtab): Add assert.
+	(dw2_lookup_symbol): Remove unnecessary test for primary symbol table.
+	* psymtab.c (lookup_symbol_aux_psymtabs): Ditto.
+	(psymtab_to_symtab): Add comment and assert.
+	(map_matching_symbols_psymtab): Remove unnecessary test for
+	non-primary symtab.
+
 2014-11-15  Doug Evans  <xdje42@gmail.com>
 
 	PR symtab/17559

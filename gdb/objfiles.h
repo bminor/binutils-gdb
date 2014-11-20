@@ -28,7 +28,6 @@
 
 struct bcache;
 struct htab;
-struct symtab;
 struct objfile_data;
 
 /* This structure maintains information on a per-objfile basis about the
@@ -286,11 +285,10 @@ struct objfile
 
     struct program_space *pspace;
 
-    /* Each objfile points to a linked list of symtabs derived from this file,
-       one symtab structure for each compilation unit (source file).  Each link
-       in the symtab list contains a backpointer to this objfile.  */
+    /* List of compunits.
+       These are used to do symbol lookups and file/line-number lookups.  */
 
-    struct symtab *symtabs;
+    struct compunit_symtab *compunit_symtabs;
 
     /* Each objfile points to a linked list of partial symtabs derived from
        this file, one partial symtab structure for each compilation unit
@@ -590,14 +588,14 @@ extern void default_iterate_over_objfiles_in_search_order
 
 /* Traverse all symtabs in one objfile.  */
 
-#define	ALL_OBJFILE_SYMTABS(objfile, s) \
-    for ((s) = (objfile) -> symtabs; (s) != NULL; (s) = (s) -> next)
+#define ALL_OBJFILE_FILETABS(objfile, cu, s) \
+  ALL_OBJFILE_COMPUNITS (objfile, cu) \
+    ALL_COMPUNIT_FILETABS (cu, s)
 
-/* Traverse all primary symtabs in one objfile.  */
+/* Traverse all compunits in one objfile.  */
 
-#define ALL_OBJFILE_PRIMARY_SYMTABS(objfile, s) \
-  ALL_OBJFILE_SYMTABS ((objfile), (s)) \
-    if ((s)->primary)
+#define ALL_OBJFILE_COMPUNITS(objfile, cu) \
+  for ((cu) = (objfile) -> compunit_symtabs; (cu) != NULL; (cu) = (cu) -> next)
 
 /* Traverse all minimal symbols in one objfile.  */
 
@@ -609,17 +607,15 @@ extern void default_iterate_over_objfiles_in_search_order
 /* Traverse all symtabs in all objfiles in the current symbol
    space.  */
 
-#define	ALL_SYMTABS(objfile, s) \
-  ALL_OBJFILES (objfile)	 \
-    ALL_OBJFILE_SYMTABS (objfile, s)
+#define ALL_FILETABS(objfile, ps, s)		\
+  ALL_OBJFILES (objfile)			\
+    ALL_OBJFILE_FILETABS (objfile, ps, s)
 
-/* Traverse all symtabs in all objfiles in the current program space,
-   skipping included files (which share a blockvector with their
-   primary symtab).  */
+/* Traverse all compunits in all objfiles in the current program space.  */
 
-#define ALL_PRIMARY_SYMTABS(objfile, s) \
+#define ALL_COMPUNITS(objfile, cu)	\
   ALL_OBJFILES (objfile)		\
-    ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
+    ALL_OBJFILE_COMPUNITS (objfile, cu)
 
 /* Traverse all minimal symbols in all objfiles in the current symbol
    space.  */

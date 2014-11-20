@@ -1294,7 +1294,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
         (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
-      set_xml_syscall_file_name (XML_SYSCALL_FILENAME_PPC);
+      set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC);
 
       /* Trampolines.  */
       tramp_frame_prepend_unwinder (gdbarch,
@@ -1346,7 +1346,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
         (gdbarch, svr4_lp64_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
-      set_xml_syscall_file_name (XML_SYSCALL_FILENAME_PPC64);
+      set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC64);
 
       /* Trampolines.  */
       tramp_frame_prepend_unwinder (gdbarch,

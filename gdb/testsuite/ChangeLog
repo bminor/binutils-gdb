@@ -1,3 +1,27 @@
+2014-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/10737
+	* gdb.base/catch-syscall.exp (do_syscall_tests): Call
+	test_catch_syscall_multi_arch.
+	(test_catch_syscall_multi_arch): New function.
+
+2014-11-20  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/maint.exp: Update expected output.
+
+2014-11-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/bp-permanent.c (NOP): Define as 2-byte instead of
+	4-byte instruction on S390.
+
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/arr_arr: New testcase.
+
+2014-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/pkd_arr_elem: New Testcase.
+
 2014-11-18  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.reverse/break-precsave: Expect completion message for

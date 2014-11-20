@@ -852,13 +852,13 @@ static void
 dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
 			  struct dwarf2_fde *fde)
 {
-  struct symtab *s;
+  struct compunit_symtab *cust;
 
-  s = find_pc_symtab (fs->pc);
-  if (s == NULL)
+  cust = find_pc_compunit_symtab (fs->pc);
+  if (cust == NULL)
     return;
 
-  if (producer_is_realview (s->producer))
+  if (producer_is_realview (COMPUNIT_PRODUCER (cust)))
     {
       if (fde->cie->version == 1)
 	fs->armcc_cfa_offsets_sf = 1;

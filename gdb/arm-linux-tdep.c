@@ -1468,7 +1468,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->syscall_next_pc = arm_linux_syscall_next_pc;
 
   /* `catch syscall' */
-  set_xml_syscall_file_name ("syscalls/arm-linux.xml");
+  set_xml_syscall_file_name (gdbarch, "syscalls/arm-linux.xml");
   set_gdbarch_get_syscall_number (gdbarch, arm_linux_get_syscall_number);
 
   /* Syscall record.  */

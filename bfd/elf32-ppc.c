@@ -7174,7 +7174,7 @@ ppc_elf_relax_section (bfd *abfd,
 	  /* Keep space aligned, to ensure the patch code itself does
 	     not cross a page.  Don't decrease size calculated on a
 	     previous pass as otherwise we might never settle on a layout.  */
-	  newsize = 15 - (end_addr & 15);
+	  newsize = 15 - ((end_addr - 1) & 15);
 	  newsize += crossings * 16;
 	  if (relax_info->workaround_size < newsize)
 	    {
