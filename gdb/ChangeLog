@@ -1,3 +1,9 @@
+2014-11-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_is_redundant_range_encoding): Return 0
+	if the TYPE_CODE of range_type's base type does not match
+	the TYPE_CODE of encoding_type's base type.
+
 2014-11-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_unqualified_name): Return DECODED_NAME if

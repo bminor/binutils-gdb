@@ -8334,6 +8334,17 @@ ada_is_redundant_range_encoding (struct type *range_type,
 
   gdb_assert (TYPE_CODE (range_type) == TYPE_CODE_RANGE);
 
+  if (TYPE_CODE (get_base_type (range_type))
+      != TYPE_CODE (get_base_type (encoding_type)))
+    {
+      /* The compiler probably used a simple base type to describe
+	 the range type instead of the range's actual base type,
+	 expecting us to get the real base type from the encoding
+	 anyway.  In this situation, the encoding cannot be ignored
+	 as redundant.  */
+      return 0;
+    }
+
   if (is_dynamic_type (range_type))
     return 0;
 
