@@ -1,3 +1,8 @@
+2014-11-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (bp_loc_is_permanent): Return 0 if LOC corresponds
+	to a bp_call_dummy breakpoint type.
+
 2014-11-23  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-win.c (tui_initialize_win): Specify SA_RESTART when
